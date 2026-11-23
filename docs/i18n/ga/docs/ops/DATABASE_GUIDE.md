@@ -532,21 +532,24 @@ mv recovered.db ~/.omniroute/storage.sqlite
 Athchóirigh ó chúltaca:
 
 ```bash
-omniroute sync pull --merge   # nó: omniroute backup restore <backup-id>
+omniroute backup restore <backup-id>
 ```
+
+Ní dhéanann `omniroute sync pull [outPath]` ach cartlann iomlán `.tar.gz` a íoslódáil ó fhreastalaí atá ag rith
+(`GET /api/db-backups/exportAll`, dintiúr oibreora de dhíth); ní dhéanann sé aon rud a athchóiriú.
 
 ### Cás 3: Eochair Chriptithe Caillte
 
-**Ní féidir athshlánú a dhéanamh** gan an eochair. Ní féidir na réimsí criptithe a léamh. Cuir na soláthraithe uile leis arís de láimh le dintiúir nua.
+**Ní féidir athshlánú a dhéanamh** gan an eochair. Ní féidir na réimsí criptithe a léamh. Cuir gach soláthraí leis arís de láimh le dintiúir nua.
 
 > **Maolú**: Déan cúltaca den eochair chriptithe ar leithligh i gcónaí, i mbainisteoir focal faire nó in KMS más féidir.
 
 ### Cás 4: Diosca Lán
 
-Seolfaidh SQLite earráidí `SQLITE_FULL` ar ais. Saor spás diosca, agus ansin:
+Tabharfaidh SQLite earráidí `SQLITE_FULL` ar ais. Saor spás diosca, ansin:
 
 ```bash
-# Cruthaigh seicphointe WAL chun spás a shaoradh
+# Déan seicphointe ar WAL chun spás a shaoradh
 sqlite3 ~/.omniroute/storage.sqlite "PRAGMA wal_checkpoint(TRUNCATE);"
 ```
 

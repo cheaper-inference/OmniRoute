@@ -44,6 +44,15 @@ export interface SearchProviderConfig {
    * tests/unit/search-baseurl-client-override-3f8g.test.ts.
    */
   allowClientBaseUrlOverride?: boolean;
+  /**
+   * Per-call price by request mode (the `mode` field of the built request body),
+   * for providers whose price depends on it. Unlisted modes use `costPerQuery`.
+   * See computeSearchCostUsd() in open-sse/handlers/search/reportedCost.ts.
+   */
+  costByMode?: Record<string, number>;
+  /** Results included in the per-call price; each one above it adds `extraResultCost`. */
+  includedResults?: number;
+  extraResultCost?: number;
 }
 
 export const SEARCH_PROVIDERS: Record<string, SearchProviderConfig> = {
@@ -120,7 +129,7 @@ export const SEARCH_PROVIDERS: Record<string, SearchProviderConfig> = {
     authHeader: "bearer",
     costPerQuery: 0.008,
     freeMonthlyQuota: 1000,
-    searchTypes: ["web", "news"],
+    searchTypes: ["web", "news", "finance"],
     defaultMaxResults: 5,
     maxMaxResults: 20,
     timeoutMs: 10_000,
@@ -406,6 +415,30 @@ export const SEARCH_PROVIDERS: Record<string, SearchProviderConfig> = {
     cacheTTLMs: 5 * 60 * 1000,
     fallbackOnly: true,
   },
+
+  // Parallel (https://parallel.ai): the same API key also serves POST /v1/web/fetch
+  // through the Extract API — see open-sse/executors/parallel-fetch.ts. The key is
+  // only ever sent to this fixed host (the builder ignores base URL overrides and
+  // refuses redirects). Price depends on the processor mode, plus a per-result
+  // charge above 10 results.
+  "parallel-search": {
+    id: "parallel-search",
+    name: "Parallel Search",
+    baseUrl: "https://api.parallel.ai/v1/search",
+    method: "POST",
+    authType: "apikey",
+    authHeader: "x-api-key",
+    costPerQuery: 0.001,
+    freeMonthlyQuota: 0,
+    searchTypes: ["web"],
+    defaultMaxResults: 5,
+    maxMaxResults: 20,
+    timeoutMs: 10_000,
+    cacheTTLMs: 5 * 60 * 1000,
+    costByMode: { turbo: 0.001, fast: 0.001, basic: 0.005, advanced: 0.005 },
+    includedResults: 10,
+    extraResultCost: 0.001,
+  },
 };
 
 /**
@@ -457,6 +490,7 @@ export const SEARCH_PROVIDER_ALIASES: Record<string, string> = {
   xquik_search: "xquik-search",
   anysearch: "anysearch-search",
   anysearch_search: "anysearch-search",
+  parallel: "parallel-search",
 };
 
 export function resolveSearchProviderId(providerId: string): string {

@@ -10,6 +10,10 @@
 
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
 
 import {
   asRecord,
@@ -17,6 +21,7 @@ import {
   toBoolean,
   normalizeProviderBreakerProfile,
   normalizeWaitForCooldownSettings,
+  pruneResilienceSettingsToProvided,
 } from "../../src/lib/resilience/settings/normalize.ts";
 
 import {
@@ -105,6 +110,10 @@ describe("resilience/settings normalize split-guard", () => {
       "quotaShareConcurrencyLimit",
       "requestQueue",
       "streamRecovery",
+      // Whether a stream content stall cools down the account (default off).
+      "streamStallCooldown",
+      // Token-refresh breaker scope + thresholds (per-connection isolation opt-in).
+      "tokenRefreshBreaker",
       "waitForCooldown",
     ]);
   });
@@ -128,6 +137,157 @@ describe("resilience/settings normalize split-guard", () => {
     });
     assert.equal(merged.requestQueue.concurrentRequests, 7);
     assert.equal(merged.requestQueue.requestsPerMinute, base.requestQueue.requestsPerMinute);
+  });
+
+  it("pruneResilienceSettingsToProvided keeps only values that differ from fresh defaults", () => {
+    const fresh = resolveResilienceSettings(null);
+    const merged = mergeResilienceSettings(fresh, {
+      requestQueue: { concurrentRequests: 7 },
+    });
+    const sparse = pruneResilienceSettingsToProvided(merged, fresh);
+    assert.deepEqual(sparse, { requestQueue: { concurrentRequests: 7 } });
+  });
+
+  it("pruneResilienceSettingsToProvided drops a value equal to the fresh default", () => {
+    const fresh = resolveResilienceSettings(null);
+    const sparse = pruneResilienceSettingsToProvided(
+      { requestQueue: { maxWaitMs: fresh.requestQueue.maxWaitMs } },
+      fresh
+    );
+    assert.deepEqual(sparse, {});
+  });
+
+  it("stored sparse object resolves to the same effective values as the full merge", () => {
+    const stored: Record<string, unknown> = {};
+    const sparseBase = resolveResilienceSettings({ resilienceSettings: stored });
+    const mergedFull: ResilienceSettings = mergeResilienceSettings(sparseBase, {
+      requestQueue: { maxWaitMs: 2000 },
+    });
+    const sparse = pruneResilienceSettingsToProvided(
+      mergedFull as Record<string, unknown>,
+      resolveResilienceSettings(null) as unknown as Record<string, unknown>
+    );
+    assert.deepEqual(sparse, { requestQueue: { maxWaitMs: 2000 } });
+    const effective = resolveResilienceSettings({ resilienceSettings: sparse });
+    assert.equal(effective.requestQueue.maxWaitMs, 2000);
+    assert.equal(
+      effective.requestQueue.requestsPerMinute,
+      resolveResilienceSettings(null).requestQueue.requestsPerMinute
+    );
+  });
+
+  it("an operator value different from the default survives while the default is pruned", () => {
+    const fresh = resolveResilienceSettings(null);
+    const sparse = pruneResilienceSettingsToProvided(
+      {
+        requestQueue: { maxWaitMs: 2000, requestsPerMinute: fresh.requestQueue.requestsPerMinute },
+      },
+      fresh as unknown as Record<string, unknown>
+    );
+    assert.deepEqual(sparse, { requestQueue: { maxWaitMs: 2000 } });
+    const effective = resolveResilienceSettings({ resilienceSettings: sparse });
+    assert.equal(effective.requestQueue.maxWaitMs, 2000);
+    assert.equal(effective.requestQueue.requestsPerMinute, fresh.requestQueue.requestsPerMinute);
+  });
+
+  it("a full previously stored object resolves identically before and after pruning", () => {
+    const legacyStored = resolveResilienceSettings(null);
+    const before = resolveResilienceSettings({ resilienceSettings: legacyStored });
+    const sparse = pruneResilienceSettingsToProvided(
+      legacyStored as unknown as Record<string, unknown>,
+      resolveResilienceSettings(null) as unknown as Record<string, unknown>
+    );
+    const after = resolveResilienceSettings({ resilienceSettings: sparse });
+    assert.deepEqual(after, before);
+  });
+
+  it("top-level legacy retry keys survive the stored-partial resolve plus prune", () => {
+    const currentSettings = {
+      requestRetry: 1,
+      maxRetryIntervalSec: 10,
+      resilienceSettings: {},
+    };
+    const sparseBase = resolveResilienceSettings({
+      ...currentSettings,
+      resilienceSettings: {},
+    });
+    assert.equal(sparseBase.waitForCooldown.maxRetries, 1);
+    assert.equal(sparseBase.waitForCooldown.maxRetryWaitSec, 10);
+    const merged = mergeResilienceSettings(sparseBase, {
+      requestQueue: { maxWaitMs: 2000 },
+    });
+    const sparse = pruneResilienceSettingsToProvided(merged, resolveResilienceSettings(null));
+    const effective = resolveResilienceSettings({
+      ...currentSettings,
+      resilienceSettings: sparse,
+    });
+    assert.equal(effective.waitForCooldown.maxRetries, 1);
+    assert.equal(effective.waitForCooldown.maxRetryWaitSec, 10);
+    assert.equal(effective.requestQueue.maxWaitMs, 2000);
+  });
+
+  it("an unset flag leaf stays absent and follows the flag when set at import", () => {
+    const script = [
+      "import('./src/lib/resilience/settings.ts').then((m) => {",
+      "  const fresh = m.resolveResilienceSettings(null);",
+      "  const merged = m.mergeResilienceSettings(fresh, { requestQueue: { maxWaitMs: 2000 } });",
+      "  const sparse = m.pruneResilienceSettingsToProvided(merged, fresh);",
+      "  const effective = m.resolveResilienceSettings({ resilienceSettings: sparse });",
+      "  process.stdout.write('SPARSE:' + JSON.stringify(sparse.streamRecovery ?? null) + '\\n');",
+      "  process.stdout.write('EFFECTIVE:' + String(effective.streamRecovery.continueMidStream) + '\\n');",
+      "});",
+    ].join("\n");
+    const run = (env: NodeJS.ProcessEnv) => {
+      const dir = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-sparse-check-"));
+      try {
+        return execFileSync(process.execPath, ["--import", "tsx/esm", "--eval", script], {
+          cwd: process.cwd(),
+          env: { ...env, DATA_DIR: dir },
+          encoding: "utf8",
+          timeout: 120000,
+        });
+      } finally {
+        fs.rmSync(dir, { recursive: true, force: true });
+      }
+    };
+    const baseEnv = { ...process.env };
+    delete baseEnv.STREAM_RECOVERY_MIDSTREAM_ENABLED;
+    const unsetOut = run(baseEnv);
+    assert.match(unsetOut, /^SPARSE:\s*(\{\}|null)\s*$/m);
+    assert.match(unsetOut, /^EFFECTIVE:false\s*$/m);
+    const setOut = run({ ...baseEnv, STREAM_RECOVERY_MIDSTREAM_ENABLED: "true" });
+    assert.match(setOut, /^EFFECTIVE:true\s*$/m);
+  });
+
+  it("pruning an empty merge result stores an empty object", () => {
+    const fresh = resolveResilienceSettings(null);
+    const sparse = pruneResilienceSettingsToProvided(fresh, fresh);
+    assert.deepEqual(sparse, {});
+  });
+
+  it("host stores only operator-provided values after pruning defaults", () => {
+    const routePath = path.resolve(process.cwd(), "src/app/api/resilience/route.ts");
+    const source = fs.readFileSync(routePath, "utf8");
+    assert.match(
+      source,
+      /resilienceSettings:\s*nextSparse\b/,
+      "PATCH should store the pruned sparse object, not the full resolved one"
+    );
+    assert.match(
+      source,
+      /pruneResilienceSettingsToProvided/,
+      "PATCH should prune merged values against fresh defaults before storing"
+    );
+    assert.match(
+      source,
+      /resolveResilienceSettings\(\{\s*\.\.\.currentSettings,\s*resilienceSettings:\s*storedResilience\s*,?\s*\}\)/,
+      "PATCH should keep top-level legacy keys when resolving the stored partial"
+    );
+    assert.match(
+      source,
+      /resolveResilienceSettings\(\{\s*\.\.\.currentSettings,\s*resilienceSettings:\s*nextSparse\s*,?\s*\}\)/,
+      "PATCH should keep top-level legacy keys when resolving the pruned patch"
+    );
   });
 
   it("host buildLegacyResilienceCompat round-trips connection cooldown into profiles", () => {

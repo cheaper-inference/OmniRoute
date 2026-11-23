@@ -22,6 +22,7 @@ import {
   TIMELINE_LIST_POLL_STORAGE_KEY,
   FOLLOW_LINE_X,
   LIVE_LINE_FRACTION,
+  DRAG_THRESHOLD_PX,
   computeBarRange,
   MODE_META,
   formatTimeAxis,
@@ -58,8 +59,6 @@ export default function RequestTimeline({
   const [panFrozenMs, setPanFrozenMs] = useState(0);
   const [liveBaseMs, setLiveBaseMs] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
-  const [dragStartX, setDragStartX] = useState(0);
-  const [dragStartOffset, setDragStartOffset] = useState(0);
   const { emailsVisible } = useEmailPrivacyStore();
   const [selectedLog, setSelectedLog] = useState<TimelineLog | null>(null);
   const [detailData, setDetailData] = useState<any>(null);
@@ -440,29 +439,44 @@ export default function RequestTimeline({
     [nowMs]
   );
 
+  // Mouse panning mirrors the touch path below: a plain click must NOT steal the
+  // user out of "follow" into "pan" — only a deliberate drag switches mode. A
+  // click with no movement falls through to the bar's onClick (detail modal).
+  const mouseDragRef = useRef<{ x: number; offset: number; moved: boolean } | null>(null);
+
   const handleMouseDown = (e: React.MouseEvent) => {
     if (e.button !== 0) return;
-    if (mode !== "pan") {
-      setMode("pan");
-      setPanFrozenMs(nowMs);
-      setLiveBaseMs(nowMs);
-    }
+    mouseDragRef.current = {
+      x: e.clientX,
+      offset: mode === "pan" ? panOffsetMs : 0,
+      // Already panning: any movement pans. From follow/live: wait for the threshold.
+      moved: mode === "pan",
+    };
     setIsDragging(true);
-    setDragStartX(e.clientX);
-    setDragStartOffset(mode === "pan" ? panOffsetMs : 0);
   };
 
   const handleMouseMove = useCallback(
     (e: React.MouseEvent) => {
-      if (!isDragging) return;
-      const dx = e.clientX - dragStartX;
+      const start = mouseDragRef.current;
+      if (!start) return;
+      const dx = e.clientX - start.x;
+      if (!start.moved && Math.abs(dx) < DRAG_THRESHOLD_PX) return;
+      if (!start.moved) {
+        start.moved = true;
+        if (mode !== "pan") {
+          setMode("pan");
+          setPanFrozenMs(nowMs);
+          setLiveBaseMs(nowMs);
+        }
+      }
       const msPerPx = windowMs / canvasWidth;
-      setPanOffsetMs(dragStartOffset - dx * msPerPx);
+      setPanOffsetMs(start.offset - dx * msPerPx);
     },
-    [isDragging, dragStartX, dragStartOffset, windowMs, canvasWidth]
+    [mode, nowMs, windowMs, canvasWidth]
   );
 
   const handleMouseUp = useCallback(() => {
+    mouseDragRef.current = null;
     setIsDragging(false);
   }, []);
 
@@ -562,6 +576,7 @@ export default function RequestTimeline({
             {(["follow", "live", "pan"] as ViewMode[]).map((m) => (
               <button
                 key={m}
+                data-testid={`timeline-mode-${m}`}
                 onClick={() => handleModeChange(m)}
                 title={t(`modes.${MODE_META[m].descriptionKey}`)}
                 className={`px-2.5 py-1 text-[11px] font-medium transition-colors ${
@@ -667,6 +682,7 @@ export default function RequestTimeline({
       {/* Canvas */}
       <div
         ref={canvasRef}
+        data-testid="timeline-canvas"
         className={`flex-1 min-h-0 overflow-hidden relative bg-surface ${
           isDragging ? "cursor-grabbing" : mode === "pan" ? "cursor-grab" : ""
         }`}
@@ -900,7 +916,8 @@ export default function RequestTimeline({
                 <div className="flex justify-between gap-4">
                   <span>{t("tokens")}</span>
                   <span>
-                    {hoveredLog.tokens.in.toLocaleString()} / {hoveredLog.tokens.out.toLocaleString()}
+                    {hoveredLog.tokens.in.toLocaleString()} /{" "}
+                    {hoveredLog.tokens.out.toLocaleString()}
                   </span>
                 </div>
               </>

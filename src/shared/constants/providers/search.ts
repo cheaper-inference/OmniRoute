@@ -114,6 +114,17 @@ export const SEARCH_PROVIDERS = {
     authHint: "Bearer API key from the Nimble dashboard",
     serviceKinds: ["webSearch", "webFetch"],
   },
+  "parallel-search": {
+    id: "parallel-search",
+    alias: "parallel",
+    name: "Parallel Search",
+    icon: "travel_explore",
+    color: "#0F172A",
+    textIcon: "PA",
+    website: "https://parallel.ai",
+    authHint: "API key from platform.parallel.ai (sent as x-api-key)",
+    serviceKinds: ["webSearch", "webFetch"],
+  },
   "linkup-search": {
     id: "linkup-search",
     serviceKinds: ["webSearch"],

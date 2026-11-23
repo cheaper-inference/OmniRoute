@@ -25,13 +25,18 @@ test.describe("Dashboard Navigation", () => {
       if (isRscPrefetch) speculativeRequests.push(request.url());
     });
 
+    // Home activation closes unpinned sections; keep the navigation target mounted.
+    await page.addInitScript(() => {
+      localStorage.setItem("sidebar-pinned-sections", JSON.stringify(["omni-proxy"]));
+    });
     await gotoDashboardRoute(page, "/home");
-    await expect(page.getByRole("link", { name: /providers/i }).first()).toBeVisible();
+    const providersLink = page.locator('a[href="/dashboard/providers"]').first();
+    await expect(providersLink).toBeVisible();
     await page.waitForTimeout(500);
 
     expect(speculativeRequests).toEqual([]);
 
-    await page.getByRole("link", { name: /providers/i }).first().click();
+    await providersLink.click();
     await expect(page).toHaveURL(/\/dashboard\/providers/);
   });
 

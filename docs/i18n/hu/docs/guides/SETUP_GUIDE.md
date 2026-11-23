@@ -140,24 +140,24 @@ omniroute providers validate
 
 ### 1) Szolgáltatók csatlakoztatása és API-kulcs létrehozása
 
-1. Nyissa meg a Vezérlőpult → `Providers` oldalt, és csatlakoztasson legalább egy szolgáltatót (OAuth vagy API-kulcs használatával).
-2. Nyissa meg a Vezérlőpult → `Endpoints` oldalt, és hozzon létre egy API-kulcsot.
-3. (Opcionális) Nyissa meg a Vezérlőpult → `Combos` oldalt, és állítsa be a tartalék láncot.
+1. Nyissa meg az Irányítópult → `Providers` oldalt, és csatlakoztasson legalább egy szolgáltatót (OAuth vagy API-kulcs használatával).
+2. Nyissa meg az Irányítópult → `Endpoints` oldalt, és hozzon létre egy API-kulcsot.
+3. (Nem kötelező) Nyissa meg az Irányítópult → `Combos` oldalt, és állítsa be a tartalék láncot.
 
 ### 2) A kódolási eszköz beállítása
 
 ```txt
-Alap URL: http://localhost:20128/v1
-API-kulcs:  [másolja ki az Endpoint oldalról]
-Modell:    if/qwen3.8-max-preview (vagy bármely szolgáltató/modell előtag)
+Alap URL:  http://localhost:20128/v1
+API-kulcs: [másolja ki az Endpoint oldalról]
+Modell:    if/qwen3.8-max-preview (vagy bármilyen szolgáltató-/modell-előtag)
 ```
 
-Ha a szerkesztője nem tud `Authorization: Bearer ...` fejlécet küldeni, használja helyette a tokenizált kompatibilitási alapcímet:
+Ha a szerkesztője nem tudja elküldeni az `Authorization: Bearer ...` fejlécet, használja helyette a tokent tartalmazó kompatibilitási alap-URL-t:
 
 ```txt
-Alap URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/
-Modellek URL-je: http://localhost:20128/api/v1/vscode/YOUR_KEY/models
-Csevegés URL-je: http://localhost:20128/api/v1/vscode/YOUR_KEY/chat/completions
+Alap URL:          http://localhost:20128/api/v1/vscode/YOUR_KEY/
+Modellek URL-je:   http://localhost:20128/api/v1/vscode/YOUR_KEY/models
+Csevegés URL-je:   http://localhost:20128/api/v1/vscode/YOUR_KEY/chat/completions
 Ollama-címkék URL-je: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
 ```
 
@@ -165,8 +165,8 @@ Működik a Claude Code, Codex CLI, Cursor, Cline, OpenClaw, OpenCode és az Ope
 
 #### Automatikus konfigurálás a `setup-*` parancsokkal
 
-Az alap URL és a kulcs kézi beillesztése helyett hagyja, hogy az OmniRoute az élő modellkatalógusból írja be az egyes eszközök
-saját konfigurációját. Eszközönként egy parancs:
+Az alap-URL és a kulcs kézi beillesztése helyett hagyja, hogy az OmniRoute az élő modellkatalógus alapján létrehozza az egyes eszközök
+saját konfigurációját. Eszközönként egy parancs szükséges:
 
 ```bash
 omniroute setup-codex        # ~/.codex/<name>.config.toml profilok
@@ -178,22 +178,23 @@ omniroute setup-continue     # ~/.continue/config.yaml (Continue / cn)
 omniroute setup-cursor       # kiírja a Cursor alkalmazáson belüli lépéseit
 omniroute setup-roo          # Roo Code-importálás + autoImport-mutató
 omniroute setup-crush        # ~/.config/crush/crush.json
+omniroute setup-zed          # ~/.config/zed/settings.json (openai_compatible)
 omniroute setup-goose        # ~/.config/goose/config.yaml
 omniroute setup-aider        # ~/.aider.conf.yml
 omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 ```
 
-Mindegyik támogatja a `--remote <url> --api-key <key>` kapcsolókat, amelyekkel egy helyi eszköz konfigurálható egy
-**távoli** OmniRoute használatára, valamint a `--dry-run` kapcsolót az előnézethez. Ha egy CLI-t a megfelelő
-környezeti változók átadásával, konfiguráció írása nélkül szeretne elindítani, használja az általános
+Mindegyik támogatja a `--remote <url> --api-key <key>` kapcsolókat, amelyekkel egy helyi eszköz egy
+**távoli** OmniRoute használatára konfigurálható, valamint az előnézethez a `--dry-run` kapcsolót. Ha egy CLI-t a megfelelő
+beillesztett környezeti változókkal, konfigurációs fájl írása nélkül szeretne elindítani, használja az általános
 `omniroute run <target>` indítót (claude, codex, aider, goose, opencode, qwen, gemini);
 a korábbi, eszközspecifikus `omniroute launch` (Claude Code) és
 `omniroute launch-codex` (Codex) indítók továbbra is elérhetők.
 
-A teljes táblázatért (az egyes parancsok által írt fájlok, minden kapcsoló, helyi és távoli használat, valamint az alap URL
-`/v1` konvenciói) tekintse meg a **[CLI-integrációk](./CLI-INTEGRATIONS.md)** dokumentumot.
+A teljes táblázatért (az egyes parancsok által írt fájlok, minden kapcsoló, helyi és távoli használat, valamint az alap-URL
+`/v1` konvenciói) tekintse meg a **[CLI-integrációk](./CLI-INTEGRATIONS.md)** című dokumentumot.
 
-Az eszközönkénti részletes konfigurációért (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot és továbbiak) tekintse meg a különálló **[CLI-eszközök útmutatóját](../reference/CLI-TOOLS.md)**.
+Az egyes eszközök részletes konfigurációjáért (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot és továbbiak) tekintse meg a különálló **[CLI-eszközök útmutatóját](../reference/CLI-TOOLS.md)**.
 
 ---
 
@@ -324,7 +325,7 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ## Void Linux (xbps-src) sablon
 
-A Void Linux felhasználói az `xbps-src` használatával natív csomagot készíthetnek. Mentse ezt a blokkot `srcpkgs/omniroute/template` néven:
+A Void Linux felhasználói natív csomagot készíthetnek az `xbps-src` használatával. Mentse ezt a blokkot `srcpkgs/omniroute/template` néven:
 
 ```bash
 # Sablonfájl az „omniroute” csomaghoz
@@ -338,7 +339,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# Minden kiadáshoz generálja újra az ellenőrző összeget a következő paranccsal:
+# Minden kiadáshoz hozza létre újra az ellenőrző összeget a következő paranccsal:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

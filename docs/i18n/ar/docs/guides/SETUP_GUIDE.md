@@ -136,23 +136,23 @@ omniroute providers validate
 
 ---
 
-## تهيئة أداة سطر الأوامر
+## تهيئة أداة CLI
 
 ### 1) ربط المزوّدين وإنشاء مفتاح API
 
-1. افتح لوحة المعلومات ← `Providers` واربط مزوّدًا واحدًا على الأقل (عبر OAuth أو مفتاح API).
-2. افتح لوحة المعلومات ← `Endpoints` وأنشئ مفتاح API.
-3. (اختياري) افتح لوحة المعلومات ← `Combos` واضبط سلسلة الرجوع الاحتياطية.
+1. افتح لوحة التحكم ← `Providers` واربط مزوّدًا واحدًا على الأقل (عبر OAuth أو مفتاح API).
+2. افتح لوحة التحكم ← `Endpoints` وأنشئ مفتاح API.
+3. (اختياري) افتح لوحة التحكم ← `Combos` واضبط سلسلة الخيارات الاحتياطية.
 
-### 2) توجيه أداة البرمجة الخاصة بك
+### 2) توجيه أداة البرمجة
 
 ```txt
 عنوان URL الأساسي: http://localhost:20128/v1
-مفتاح API:         [انسخه من صفحة Endpoint]
-النموذج:           if/qwen3.8-max-preview (أو أي بادئة مزوّد/نموذج)
+مفتاح API:  [انسخه من صفحة Endpoint]
+النموذج:    if/qwen3.8-max-preview (أو أي بادئة مزوّد/نموذج)
 ```
 
-إذا لم يتمكن محررك من إرسال `Authorization: Bearer ...`، فاستخدم بدلًا من ذلك العنوان الأساسي المتوافق والمضمَّن فيه الرمز:
+إذا تعذّر على محرّرك إرسال `Authorization: Bearer ...`، فاستخدم بدلًا من ذلك العنوان الأساسي المتوافق والمضمَّن فيه الرمز:
 
 ```txt
 عنوان URL الأساسي: http://localhost:20128/api/v1/vscode/YOUR_KEY/
@@ -165,35 +165,36 @@ omniroute providers validate
 
 #### التهيئة التلقائية باستخدام `setup-*`
 
-بدلًا من لصق عنوان URL الأساسي والمفتاح يدويًا، دع OmniRoute يكتب إعدادات كل أداة
-من كتالوج النماذج المباشر. أمر واحد لكل أداة:
+بدلًا من لصق عنوان URL الأساسي والمفتاح يدويًا، دع OmniRoute يكتب ملف التهيئة الخاص بكل أداة
+استنادًا إلى كتالوج النماذج المباشر. أمر واحد لكل أداة:
 
 ```bash
 omniroute setup-codex        # ملفات تعريف ~/.codex/<name>.config.toml
 omniroute setup-claude       # ~/.claude/profiles/<name>/settings.json
-omniroute setup-opencode     # ~/.config/opencode/opencode.json (متوافق مع openai)
+omniroute setup-opencode     # ~/.config/opencode/opencode.json (متوافق مع OpenAI)
 omniroute setup-cline        # إعدادات Cline CLI وامتداد VS Code
 omniroute setup-kilo         # Kilo Code
 omniroute setup-continue     # ~/.continue/config.yaml (Continue / cn)
-omniroute setup-cursor       # يطبع خطوات Cursor داخل التطبيق
+omniroute setup-cursor       # يطبع خطوات الإعداد داخل تطبيق Cursor
 omniroute setup-roo          # استيراد Roo Code ومؤشر autoImport
 omniroute setup-crush        # ~/.config/crush/crush.json
+omniroute setup-zed          # ~/.config/zed/settings.json (openai_compatible)
 omniroute setup-goose        # ~/.config/goose/config.yaml
 omniroute setup-aider        # ~/.aider.conf.yml
-omniroute setup-qwen         # ~/.qwen/settings.json و~/.qwen/.env
+omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 ```
 
-يقبل كل منها `--remote <url> --api-key <key>` لتهيئة أداة محلية للعمل مع
-OmniRoute **بعيد**، بالإضافة إلى `--dry-run` للمعاينة. لتشغيل أداة CLI مع حقن
-متغيرات البيئة الصحيحة من دون كتابة أي إعدادات إطلاقًا، استخدم المشغّل العام
-`omniroute run <target>` ‏(claude وcodex وaider وgoose وopencode وqwen وgemini)؛
-وتظل مشغّلات الأدوات القديمة `omniroute launch` ‏(Claude Code) و
-`omniroute launch-codex` ‏(Codex) متاحة.
+يقبل كل أمر الخيارين `--remote <url> --api-key <key>` لتهيئة أداة محلية للعمل مع OmniRoute
+**بعيد**، بالإضافة إلى `--dry-run` للمعاينة. لتشغيل CLI مع حقن متغيرات البيئة الصحيحة
+من دون كتابة أي ملف تهيئة على الإطلاق، استخدم المشغّل العام
+`omniroute run <target>` (claude، codex، aider، goose، opencode، qwen، gemini)؛
+وتظل مشغّلات الأدوات الفردية القديمة `omniroute launch` (Claude Code) و
+`omniroute launch-codex` (Codex) متاحة.
 
-للاطلاع على الجدول الكامل (ما يكتبه كل أمر، وجميع العلامات، والوضع المحلي مقابل البعيد، واصطلاحات
-عنوان URL الأساسي `/v1`)، راجع **[تكاملات CLI](./CLI-INTEGRATIONS.md)**.
+للاطلاع على الجدول الكامل (ما يكتبه كل أمر، وجميع الخيارات، والمحلي مقابل البعيد، واصطلاحات عنوان URL
+الأساسي `/v1`)، راجع **[تكاملات CLI](./CLI-INTEGRATIONS.md)**.
 
-للحصول على تفاصيل تهيئة كل أداة (Claude Code وCodex CLI وCursor وCline وOpenClaw وKilo Code وCopilot والمزيد)، راجع **[دليل أدوات CLI](../reference/CLI-TOOLS.md)** المخصص.
+للحصول على تهيئة مفصّلة لكل أداة (Claude Code وCodex CLI وCursor وCline وOpenClaw وKilo Code وCopilot وغيرها)، راجع **[دليل أدوات CLI](../reference/CLI-TOOLS.md)** المخصّص.
 
 ---
 
@@ -322,12 +323,12 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## قالب Void Linux ‏(xbps-src)
+## قالب Void Linux‏ (`xbps-src`)
 
-يمكن لمستخدمي Void Linux إنشاء حزمة أصلية باستخدام `xbps-src`. احفظ هذه الكتلة باسم `srcpkgs/omniroute/template`:
+لمستخدمي Void Linux، يمكنك بناء حزمة أصلية باستخدام `xbps-src`. احفظ هذه الكتلة باسم `srcpkgs/omniroute/template`:
 
 ```bash
-# ملف قالب لـ 'omniroute'
+# ملف القالب لـ 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -338,7 +339,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# أعد إنشاء المجموع الاختباري لكل إصدار باستخدام:
+# أعِد إنشاء المجموع الاختباري لكل إصدار باستخدام:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

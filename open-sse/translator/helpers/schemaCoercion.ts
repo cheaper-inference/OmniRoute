@@ -32,8 +32,17 @@ const NUMERIC_SCHEMA_FIELDS = [
 // before the schema reaches the Codex/OpenAI upstream.
 const REGEX_LOOKAROUND_PATTERN = /\(\?<?[=!]/;
 
-function hasUnsupportedRegexLookaround(pattern: unknown): boolean {
-  return typeof pattern === "string" && REGEX_LOOKAROUND_PATTERN.test(pattern);
+// Fix (9router#3922): the Codex backend also rejects Unicode property escapes
+// (`\p{...}` / `\P{...}`, e.g. `^\p{Cc}$` from the Codex CLI `Artifact` tool) with
+// "'^\\p{Cc}$' is not a 'regex'.". Match only an unescaped backslash (odd run).
+const REGEX_UNICODE_PROPERTY_ESCAPE = /(?<!\\)(?:\\\\)*\\[pP]\{/;
+
+const UNSUPPORTED_REGEX_SYNTAX = [REGEX_LOOKAROUND_PATTERN, REGEX_UNICODE_PROPERTY_ESCAPE];
+
+function hasUnsupportedRegexSyntax(pattern: unknown): boolean {
+  return (
+    typeof pattern === "string" && UNSUPPORTED_REGEX_SYNTAX.some((regex) => regex.test(pattern))
+  );
 }
 
 function isPlainObject(value: unknown): value is JsonRecord {
@@ -93,8 +102,8 @@ export function coerceSchemaNumericFields(schema: unknown): unknown {
     delete result.default;
   }
 
-  // Fix (9router#1556): drop unsupported regex lookaround from `pattern`.
-  if (hasUnsupportedRegexLookaround(result.pattern)) {
+  // Fix (9router#1556, #3922): drop unsupported regex syntax from `pattern`.
+  if (hasUnsupportedRegexSyntax(result.pattern)) {
     delete result.pattern;
   }
 
@@ -170,10 +179,15 @@ const REGEX_STRIP_OBJECT_MAP_FIELDS = [
 // Sub-schema lists (each entry is itself walked recursively).
 const REGEX_STRIP_ARRAY_MAP_FIELDS = ["prefixItems", "anyOf", "oneOf", "allOf"] as const;
 
-/** Recursively strips unsupported regex lookaround from every value of an object map field. */
-function stripRegexFromObjectMap(record: JsonRecord): JsonRecord {
+type RegexPatternPredicate = (pattern: unknown) => boolean;
+
+/** Recursively strips matching regex patterns from every value of an object map field. */
+function stripRegexFromObjectMap(
+  record: JsonRecord,
+  shouldStrip: RegexPatternPredicate
+): JsonRecord {
   return Object.fromEntries(
-    Object.entries(record).map(([key, value]) => [key, stripUnsupportedRegexPatterns(value)])
+    Object.entries(record).map(([key, value]) => [key, stripRegexPatternsWhere(value, shouldStrip)])
   );
 }
 
@@ -185,39 +199,75 @@ function stripRegexFromObjectMap(record: JsonRecord): JsonRecord {
  * anyOf/oneOf/allOf, $defs/definitions, etc). See 9router#1556.
  */
 export function stripUnsupportedRegexPatterns(schema: unknown): unknown {
+  return stripRegexPatternsWhere(schema, hasUnsupportedRegexSyntax);
+}
+
+// Upper bound on a `pattern` we are willing to compile for validation. The
+// value comes from the client's tool schema; only the syntax is checked (the
+// compiled regex is never executed against input), and an oversized value is
+// left untouched rather than judged.
+const MAX_VALIDATED_PATTERN_LENGTH = 4096;
+
+function isMalformedRegex(pattern: unknown): boolean {
+  if (typeof pattern !== "string" || pattern.length > MAX_VALIDATED_PATTERN_LENGTH) return false;
+  try {
+    // Syntax check only — the compiled RegExp is discarded, never run.
+    void new RegExp(pattern);
+    return false;
+  } catch {
+    return true;
+  }
+}
+
+/**
+ * Strip `pattern` constraints that are not valid regexes at all (e.g. `"["`).
+ * OpenRouter-routed upstreams (Cohere) reject the whole request with
+ * "pattern must be a valid regex" when any tool carries one. Walks the same
+ * schema shape as `stripUnsupportedRegexPatterns`; `stats.removed` counts the
+ * dropped constraints. Never mutates the input.
+ */
+export function stripInvalidRegexPatterns(schema: unknown, stats?: { removed: number }): unknown {
+  return stripRegexPatternsWhere(schema, (pattern) => {
+    if (!isMalformedRegex(pattern)) return false;
+    if (stats) stats.removed += 1;
+    return true;
+  });
+}
+
+function stripRegexPatternsWhere(schema: unknown, shouldStrip: RegexPatternPredicate): unknown {
   if (Array.isArray(schema)) {
-    return schema.map((entry) => stripUnsupportedRegexPatterns(entry));
+    return schema.map((entry) => stripRegexPatternsWhere(entry, shouldStrip));
   }
   if (!isPlainObject(schema)) return schema;
 
   const result: JsonRecord = { ...schema };
 
-  if (hasUnsupportedRegexLookaround(result.pattern)) {
+  if (shouldStrip(result.pattern)) {
     delete result.pattern;
   }
 
   for (const field of REGEX_STRIP_OBJECT_MAP_FIELDS) {
     if (isPlainObject(result[field])) {
-      result[field] = stripRegexFromObjectMap(result[field]);
+      result[field] = stripRegexFromObjectMap(result[field], shouldStrip);
     }
   }
 
   for (const field of REGEX_STRIP_ARRAY_MAP_FIELDS) {
     if (Array.isArray(result[field])) {
       result[field] = (result[field] as unknown[]).map((entry) =>
-        stripUnsupportedRegexPatterns(entry)
+        stripRegexPatternsWhere(entry, shouldStrip)
       );
     }
   }
 
   if (result.items !== undefined) {
-    result.items = stripUnsupportedRegexPatterns(result.items);
+    result.items = stripRegexPatternsWhere(result.items, shouldStrip);
   }
   if (result.additionalProperties && typeof result.additionalProperties === "object") {
-    result.additionalProperties = stripUnsupportedRegexPatterns(result.additionalProperties);
+    result.additionalProperties = stripRegexPatternsWhere(result.additionalProperties, shouldStrip);
   }
   if (isPlainObject(result.not)) {
-    result.not = stripUnsupportedRegexPatterns(result.not);
+    result.not = stripRegexPatternsWhere(result.not, shouldStrip);
   }
 
   return result;

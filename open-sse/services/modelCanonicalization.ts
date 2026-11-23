@@ -37,6 +37,17 @@ const PROVIDER_MODEL_ALIASES: ProviderModelAliasMap = {
     "syn:nemotron-3-super": "hf:nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-NVFP4",
   },
   antigravity: {},
+  // The first-party Anthropic registry lists dotted ids (and /v1/models exposes them), but the
+  // Messages API only accepts the dashed form; a dotted id 404s upstream (#16406).
+  anthropic: {
+    "claude-opus-4.8": "claude-opus-4-8",
+    "claude-opus-4.7": "claude-opus-4-7",
+    "claude-opus-4.6": "claude-opus-4-6",
+    "claude-opus-4.5": "claude-opus-4-5",
+    "claude-sonnet-4.6": "claude-sonnet-4-6",
+    "claude-sonnet-4.5": "claude-sonnet-4-5",
+    "claude-haiku-4.5": "claude-haiku-4-5",
+  },
   kiro: {
     "claude-opus-4-7": "claude-opus-4.7",
     "claude-opus-4-6": "claude-opus-4.6",

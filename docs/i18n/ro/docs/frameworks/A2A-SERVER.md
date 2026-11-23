@@ -146,29 +146,29 @@ curl -X POST http://localhost:20128/a2a \
 
 ---
 
-## Abilități disponibile
+## Competențe disponibile
 
-OmniRoute expune 6 abilități A2A conectate în `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Fiecare modul de abilitate se află în `src/lib/a2a/skills/`.
+OmniRoute expune 6 competențe A2A conectate în `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Fiecare modul de competență se află în `src/lib/a2a/skills/`.
 
-| Abilitate                   | ID                   | Descriere                                                                                                                                                                            | Etichete                        | Exemple                                              |
-| :-------------------------- | :------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------ | :--------------------------------------------------- |
-| Rutare inteligentă          | `smart-routing`      | Rutează un prompt prin furnizorul/combinația optimă, folosind motorul de combinații și sistemul de evaluare OmniRoute                                                                | rutare, furnizori               | „Rutează acest prompt prin cel mai bun model”        |
-| Gestionarea cotelor         | `quota-management`   | Raportează starea cotei pentru fiecare furnizor și ajută apelanții să decidă când să limiteze traficul/schimbe furnizorul                                                            | cote, furnizori                 | „Verifică cota pentru anthropic”                     |
-| Descoperirea furnizorilor   | `provider-discovery` | Listează furnizorii instalați, împreună cu funcționalitățile, opțiunile de nivel gratuit și starea OAuth                                                                             | furnizori, descoperire          | „Ce furnizori sunt disponibili?”                     |
-| Analiza costurilor          | `cost-analysis`      | Estimează costul unei solicitări/conversații pe baza catalogului și a utilizării recente                                                                                             | cost, utilizare                 | „Estimează costul acestei conversații”               |
-| Raport de sănătate          | `health-report`      | Agregă starea întrerupătorului de circuit, a perioadei de așteptare și a blocării pentru fiecare furnizor                                                                            | sănătate, reziliență            | „Afișează starea de sănătate a tuturor furnizorilor” |
-| Listarea funcționalităților | `list-capabilities`  | Returnează catalogul complet cu 45 de intrări Agent Skills (23 API + 21 CLI + 1 configurație) sub forma unui tabel markdown, cu URL-uri SKILL.md brute pentru injectarea contextului | catalog, descoperire, abilități | „Listează toate funcționalitățile OmniRoute”         |
+| Competență                | ID                   | Descriere                                                                                                                                                                            | Etichete                         | Exemple                                           |
+| :------------------------ | :------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------- | :------------------------------------------------ |
+| Rutare inteligentă        | `smart-routing`      | Direcționează un prompt prin furnizorul/combinația optimă, utilizând motorul de combinații și sistemul de evaluare OmniRoute                                                         | rutare, furnizori                | „Rutează acest prompt prin cel mai bun model”     |
+| Gestionarea cotelor       | `quota-management`   | Raportează starea cotei pentru fiecare furnizor și ajută apelanții să decidă când să limiteze traficul/schimbe furnizorul                                                            | cotă, furnizori                  | „Verifică cota pentru anthropic”                  |
+| Descoperirea furnizorilor | `provider-discovery` | Listează furnizorii instalați, împreună cu capabilitățile, indicatorii pentru nivelul gratuit și starea OAuth                                                                        | furnizori, descoperire           | „Ce furnizori sunt disponibili?”                  |
+| Analiza costurilor        | `cost-analysis`      | Estimează costul unei solicitări/conversații pe baza catalogului și a utilizării recente                                                                                             | cost, utilizare                  | „Estimează costul acestei conversații”            |
+| Raport de sănătate        | `health-report`      | Agregă starea mecanismului circuit breaker, perioada de așteptare și blocarea pentru fiecare furnizor                                                                                | sănătate, reziliență             | „Arată starea de sănătate a tuturor furnizorilor” |
+| Listarea capabilităților  | `list-capabilities`  | Returnează catalogul complet Agent Skills, cu 45 de intrări (23 API + 21 CLI + 1 configurare), sub forma unui tabel markdown cu URL-uri SKILL.md brute pentru injectarea contextului | catalog, descoperire, competențe | „Listează toate capabilitățile OmniRoute”         |
 
-> Agent Card trebuie menținut aliniat cu catalogul activ de 352 de furnizori; numărul furnizorilor și metadatele privind accesul gratuit/fără autentificare provin din registrul de execuție.
+> Fișa agentului trebuie menținută sincronizată cu catalogul activ de 374 de furnizori; numărul furnizorilor și metadatele privind accesul gratuit/fără autentificare provin din registrul de execuție.
 
-### Detalii despre abilitatea `list-capabilities`
+### Detalii despre competența `list-capabilities`
 
-Abilitatea `list-capabilities` este deosebit de utilă pentru agenții externi care trebuie să descopere ce expune OmniRoute înainte de a trimite apeluri API. Aceasta returnează un artefact structurat sub forma unui tabel markdown:
+Competența `list-capabilities` este deosebit de utilă pentru agenții externi care trebuie să descopere ce expune OmniRoute înainte de a trimite apeluri API. Aceasta returnează un artefact structurat sub forma unui tabel markdown:
 
 ```
-| ID | Nume | Categorie | Zonă | Puncte finale/Comenzi | URL brut |
+| ID | Nume | Categorie | Zonă | Endpoint-uri/Comenzi | URL brut |
 | --- | --- | --- | --- | --- | --- |
-| omni-auth | Autentificare și sesiuni | api | autentificare | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
+| omni-auth | Autentificare și sesiuni | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
 ...
 ```
 

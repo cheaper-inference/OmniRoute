@@ -12,6 +12,7 @@
  */
 
 import { sanitizeErrorMessage } from "../../utils/error.ts";
+import { fetchWithConnectionProxy } from "../connectionProxyFetch.ts";
 import { toNumber, toRecord } from "./scalars.ts";
 import { createQuotaFromUsage, parseResetTime, type UsageQuota } from "./quota.ts";
 
@@ -59,12 +60,13 @@ function orgQuery(orgId: string | null | undefined): string {
 
 async function fetchJson(
   path: string,
-  apiKey: string
+  apiKey: string,
+  connectionId?: string
 ): Promise<{ ok: boolean; status: number; body: JsonRecord | null }> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
   try {
-    const response = await fetch(`${COMMAND_CODE_API_BASE}${path}`, {
+    const commandInit: RequestInit = {
       method: "GET",
       headers: {
         Authorization: `Bearer ${apiKey}`,
@@ -72,7 +74,11 @@ async function fetchJson(
         "Content-Type": "application/json",
       },
       signal: controller.signal,
-    });
+    };
+    const response = connectionId
+      ? await fetchWithConnectionProxy(connectionId, `${COMMAND_CODE_API_BASE}${path}`, commandInit)
+      : await globalThis.fetch(`${COMMAND_CODE_API_BASE}${path}`, commandInit);
+    if (!response) return { ok: false, status: 0, body: null };
     const text = await response.text();
     let body: JsonRecord | null = null;
     if (text) {
@@ -107,7 +113,7 @@ function windowQuota(window: unknown, displayName: string): UsageQuota | null {
 /**
  * Command Code Usage — monthly credit pool + 5h/weekly rolling windows.
  */
-export async function getCommandCodeUsage(apiKey: string) {
+export async function getCommandCodeUsage(apiKey: string, connectionId?: string) {
   if (!apiKey) {
     return { message: "Command Code API key not available. Add a key to view usage." };
   }
@@ -115,7 +121,7 @@ export async function getCommandCodeUsage(apiKey: string) {
   try {
     let orgId: string | null = null;
     try {
-      const whoami = await fetchJson("/alpha/whoami", apiKey);
+      const whoami = await fetchJson("/alpha/whoami", apiKey, connectionId);
       if (whoami.status === 401 || whoami.status === 403) {
         return {
           message:
@@ -132,7 +138,7 @@ export async function getCommandCodeUsage(apiKey: string) {
     }
 
     const q = orgQuery(orgId);
-    const creditsRes = await fetchJson(`/alpha/billing/credits${q}`, apiKey);
+    const creditsRes = await fetchJson(`/alpha/billing/credits${q}`, apiKey, connectionId);
 
     if (creditsRes.status === 401 || creditsRes.status === 403) {
       return {
@@ -154,7 +160,7 @@ export async function getCommandCodeUsage(apiKey: string) {
     let periodEnd: string | null = null;
 
     try {
-      const subRes = await fetchJson(`/alpha/billing/subscriptions${q}`, apiKey);
+      const subRes = await fetchJson(`/alpha/billing/subscriptions${q}`, apiKey, connectionId);
       if (subRes.ok && subRes.body) {
         const data = toRecord(subRes.body.data);
         if (typeof data.planId === "string" && data.planId.trim()) {
@@ -173,7 +179,7 @@ export async function getCommandCodeUsage(apiKey: string) {
     try {
       const sinceQ =
         periodStart != null ? `${q ? `${q}&` : "?"}since=${encodeURIComponent(periodStart)}` : q;
-      const summaryRes = await fetchJson(`/alpha/usage/summary${sinceQ}`, apiKey);
+      const summaryRes = await fetchJson(`/alpha/usage/summary${sinceQ}`, apiKey, connectionId);
       if (summaryRes.ok && summaryRes.body) {
         const cost = toNumber(summaryRes.body.totalCost, Number.NaN);
         if (Number.isFinite(cost) && cost >= 0) {

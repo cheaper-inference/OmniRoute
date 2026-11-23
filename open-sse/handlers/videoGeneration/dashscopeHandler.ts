@@ -3,6 +3,10 @@ import { saveCallLog } from "@/lib/usageDb";
 import { resolveAlibabaProviderMediaBaseUrl } from "@/shared/constants/alibabaProviderRegions";
 import { sanitizeErrorMessage } from "../../utils/error.ts";
 
+// Shared with the DashScope TTS executor so the engine keeps a single import of this app
+// module (open-sse → src boundary ratchet).
+export { resolveAlibabaProviderMediaBaseUrl };
+
 /**
  * Alibaba-family video generation: create async task → poll → MP4.
  *

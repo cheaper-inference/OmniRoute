@@ -6,188 +6,234 @@
 
 Ilisasishwa mwisho: 2026-08-23
 
-OmniRoute inaunganishwa na aina tatu za zana za CLI zilizosambazwa katika kurasa tatu mahususi za dashibodi:
+OmniRoute huunganishwa na makundi matatu ya zana za CLI yaliyosambazwa katika kurasa tatu mahususi za dashibodi:
 
-| Ukurasa        | Njia                    | Dhana                                                                                         | Idadi          |
-| -------------- | ----------------------- | --------------------------------------------------------------------------------------------- | -------------- |
-| **CLI Code's** | `/dashboard/cli-code`   | Zana za uandishi wa msimbo unazoelekeza kwa OmniRoute (Mteja → CLI → OmniRoute → Mtoa huduma) | 26             |
-| **CLI Agents** | `/dashboard/cli-agents` | Mawakala wanaojitegemea unaowaelekeza kwa OmniRoute (mtiririko sawa, wigo mpana zaidi)        | 10             |
-| **ACP Agents** | `/dashboard/acp-agents` | CLI ambazo OmniRoute huanzisha kama backend kupitia stdio/ACP (mtiririko wa kinyume)          | angalia sajili |
+| Ukurasa             | Njia                    | Dhana                                                                                           | Idadi          |
+| ------------------- | ----------------------- | ----------------------------------------------------------------------------------------------- | -------------- |
+| **Misimbo ya CLI**  | `/dashboard/cli-code`   | Zana za uandishi wa msimbo unazozielekeza kwa OmniRoute (Mteja → CLI → OmniRoute → Mtoa huduma) | 26             |
+| **Mawakala wa CLI** | `/dashboard/cli-agents` | Mawakala wanaojiendesha unaowaelekeza kwa OmniRoute (mtiririko uleule, wigo mpana zaidi)        | 10             |
+| **Mawakala wa ACP** | `/dashboard/acp-agents` | CLI ambazo OmniRoute huanzisha kama backend kupitia stdio/ACP (mtiririko wa kinyume)            | angalia sajili |
 
-Njia za zamani huelekezwa kwingine kupitia 308: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
+Njia za zamani huelekeza kwingine kupitia 308: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
 
 ---
 
 ## Jinsi Inavyofanya Kazi
 
 ```
-CLI Code's / CLI Agents (mchakato wa matumizi):
+Misimbo ya CLI / Mawakala wa CLI (mtiririko wa matumizi):
 Claude / Codex / OpenCode / Cline / KiloCode / Continue / Hermes Agent / Goose / ...
            │
-           ▼  (zote zinaelekeza kwa OmniRoute)
+           ▼  (zote zinaelekezwa kwa OmniRoute)
     http://YOUR_SERVER:20128/v1
            │
-           ▼  (OmniRoute inaelekeza kwa mtoa huduma sahihi)
+           ▼  (OmniRoute huelekeza kwa mtoa huduma anayefaa)
     Anthropic / OpenAI / Gemini / DeepSeek / Groq / Mistral / ...
 
-ACP Agents (mchakato wa kuzalisha kinyume):
-    Ombi la Mteja → OmniRoute → inazalisha CLI kupitia stdio/ACP → jibu
+Mawakala wa ACP (mtiririko wa uanzishaji wa kinyume):
+    Ombi la mteja → OmniRoute → huanzisha CLI kupitia stdio/ACP → jibu
 ```
 
-**Manufaa:**
+**Faida:**
 
-- Funguo moja ya API kusimamia zana zote
-- Ufuatiliaji wa gharama katika CLIs zote kwenye dashibodi
-- Kubadilisha mifano bila kuunda upya kila zana
-- Inafanya kazi kwa ndani na kwenye seva za mbali (VPS, Docker, Akamai, Cloudflare Tunnel)
+- Ufunguo mmoja wa API wa kudhibiti zana zote
+- Ufuatiliaji wa gharama katika CLI zote kwenye dashibodi
+- Kubadilisha modeli bila kusanidi upya kila zana
+- Hufanya kazi ndani ya mashine na kwenye seva za mbali (VPS, Docker, Akamai, Cloudflare Tunnel)
 
 ---
 
-## Kusanidi Kiotomatiki kwa `setup-*`
+## Sanidi kiotomatiki kwa `setup-*`
 
-Sio lazima kuandika usanidi wa kila zana kwa mkono. OmniRoute inajumuisha amri ya `setup-*` kwa kila CLI inayotumika ambayo husoma katalogi ya modeli **hai** kutoka kwa OmniRoute inayoendesha (ya ndani au ya mbali) na kuandika usanidi wa zana hiyo kwenye mashine yako:
+Huhitaji kuandika usanidi wa kila zana wewe mwenyewe. OmniRoute huja na amri ya `setup-*`
+kwa kila CLI inayotumika, ambayo husoma katalogi **inayotumika sasa** ya modeli kutoka
+OmniRoute inayoendeshwa (ya ndani au ya mbali) na kuandika usanidi wa zana hiyo kwenye mashine yako:
 
 ```bash
 omniroute setup-codex        omniroute setup-claude       omniroute setup-opencode
 omniroute setup-cline        omniroute setup-kilo         omniroute setup-continue
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
-omniroute setup-5dive
+omniroute setup-5dive        omniroute setup-zed
 ```
 
-Kila moja inakubali `--remote <url> --api-key <key>` (sanidi zana ya ndani dhidi ya OmniRoute ya mbali), `--dry-run` (hakiki bila kuandika), na `--port`. Zana zisizo na ugunduzi wa kiotomatiki wa modeli (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) huchukua `--model <id>` (na `--yes` kwa uendeshaji usioingiliana). `setup-5dive` ndiyo njia pekee ambayo haiandiki chini ya `$HOME`: inasanidi kundi la mawakala wa 5dive kwa kuandika wasifu wa uthibitishaji unaomilikiwa na root kwenye seva pangishi ya kundi, hivyo inatekeleza tena kupitia `sudo` na haina hali yake ya mbali. Ili kuzindua CLI na mazingira sahihi yaliyowekwa na bila usanidi wowote kuandikwa, tumia kizindua cha jumla cha `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini — malengo na majina mbadala hutoka `bin/cli/cli-manifest.mjs`); vizindua vya zamani vya kila zana `omniroute launch` (Claude Code) na `omniroute launch-codex` (Codex) vinabaki kupatikana. Gemini CLI ni ya kuzindua tu: ni lengo la `omniroute run` lakini haina njia ya `setup-*`/`configure`.
+Kila moja hukubali `--remote <url> --api-key <key>` (kusandi zana ya ndani dhidi ya
+OmniRoute ya mbali), `--dry-run` (kuhakiki bila kuandika), na `--port`. Zana
+zisizo na ugunduzi wa modeli kiotomatiki (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) hutumia
+`--model <id>` (na `--yes` kwa utekelezaji usiohitaji mwingiliano). `setup-5dive` ndiyo
+utaratibu pekee ambao hauandiki chini ya `$HOME`: husanidi kundi la mawakala wa 5dive kwa
+kuandika wasifu wa uthibitishaji unaomilikiwa na root kwenye seva ya kundi, kwa hivyo hujitekeleza upya kupitia `sudo`
+na haina hali yake yenyewe ya mbali. Ili kuzindua CLI huku
+vigezo sahihi vya mazingira vikiingizwa na bila kuandika usanidi wowote, tumia kizinduzi cha jumla
+`omniroute run <target>` (claude, codex, aider, goose, opencode, qwen,
+gemini — shabaha na lakabu hutoka `bin/cli/cli-manifest.mjs`); vizinduzi vya zamani
+vya kila zana `omniroute launch` (Claude Code) na `omniroute launch-codex`
+(Codex) bado vinapatikana. Gemini CLI ni ya kuzindua pekee: ni shabaha ya `omniroute run`
+lakini haina utaratibu wa `setup-*`/`configure`.
 
-> **Marejeleo Kamili:** jedwali kuu — kile kila amri inaandika, kila bendera, ya ndani dhidi ya ya mbali, na ni zana gani zinazohitaji kiambishi tamati cha `/v1` — kinapatikana katika **[Ujumuishaji wa CLI](../guides/CLI-INTEGRATIONS.md)**.
+> **Rejeleo kamili:** jedwali kuu — kile ambacho kila amri huandika, kila bendera,
+> hali ya ndani dhidi ya mbali, na zana zipi zinahitaji kiambishi cha `/v1` — linapatikana katika
+> **[Miunganisho ya CLI](../guides/CLI-INTEGRATIONS.md)**.
 
 ### Kuendesha hizi ndani ya kontena
 
-Amri ya `setup-*` inayotekelezwa ndani ya kontena la OmniRoute huandika kwenye saraka ya nyumbani ya kontena yenyewe, ambayo hakuna CLI ya seva pangishi inayosoma na ambayo hupotea na kontena. OmniRoute hugundua hilo na huondoka `2` na maelekezo badala ya kuandika. Njia mbili zinazotumika mbele — sakinisha CLI kwenye seva pangishi na `omniroute connect` kwenye kontena, au funga saraka za usanidi na uweke `CLI_CONFIG_HOME` (wasifu wa `host` wa compose). Kila amri ya `setup-*`, pamoja na `omniroute configure` na `omniroute config set`, inakubali `--allow-container-write` wakati kusanidi CLIs za kontena ndicho ulichomaanisha; `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` hufanya vivyo hivyo kwa seva. Tazama [Mwongozo wa Docker → Kusanidi zana za CLI za seva pangishi](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
+Amri ya `setup-*` inayotekelezwa ndani ya kontena la OmniRoute huandika kwenye
+saraka ya nyumbani ya kontena lenyewe, ambayo haisomwi na CLI yoyote ya seva mwenyeji na ambayo hupotea pamoja na
+kontena. OmniRoute hutambua hilo na hutoka kwa msimbo `2` ikiwa na maagizo badala ya
+kuandika. Kuna njia mbili zinazotumika za kuendelea — sakinisha CLI kwenye seva mwenyeji na
+utumie `omniroute connect` kuunganisha kwenye kontena, au unganisha saraka za usanidi kwa bind-mount na uweke
+`CLI_CONFIG_HOME` (wasifu wa compose wa `host`). Kila amri ya `setup-*`, pamoja na
+`omniroute configure` na `omniroute config set`, hukubali
+`--allow-container-write` ikiwa kusanidi CLI za kontena lenyewe ndicho
+ulichokusudia; `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` hufanya vivyo hivyo kwa
+seva. Tazama
+[Mwongozo wa Docker → Kusanidi zana za CLI za seva mwenyeji](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
 
-Sehemu ya mwisho ya **apply** ya dashibodi (`POST /api/cli-tools/apply`) inatekeleza ulinzi huo huo: ndani ya kontena, uandishi ambao lengo lake halijafungwa kutoka kwa seva pangishi hujibu **`422`** na `containerEphemeralTarget: true`, maandishi salama ya hitilafu na — kwa zana zilizo na njia ya seva pangishi (claude, codex, opencode, cline, kilo, continue) — `hostSetupCommand` (k.m. `omniroute setup-opencode`) ya kuendesha kwenye seva pangishi badala yake; hakuna kinachoandikwa. `dryRun: true` inaendelea kufanya kazi katika hali ya kontena na inarudisha hakiki iliyofichwa + njia lengwa bila kugusa diski. Maudhui ya hakiki si usanidi unaobeba vitambulisho vya kunakili au kuingiza. Tumia zana asili/URL ya msingi/ufunguo wa API/pembejeo za modeli kwenye seva pangishi, au tumia amri ya usanidi iliyoonyeshwa upande wa seva pangishi. Tazama [usalama wa usanidi wa CLI](../security/CLI-CONFIGURATION.md) kwa kichwa cha hakiki na mkataba wa ombi. Tabia hii imekusudiwa na inalindwa dhidi ya kurudi nyuma na `tests/unit/api/cli-tools/apply-container-guard.test.ts` — kamwe "usirekebishe" 422 kwa kuondoa ulinzi.
-
----
-
-## Chanzo cha Ukweli
-
-Katalogi iliyounganishwa inapatikana katika `src/shared/constants/cliTools.ts` kama `CLI_TOOLS: Record<string, CliCatalogEntry>`.
-
-Kila kipengele kina hizi nyanja (zilizoainishwa katika `src/shared/schemas/cliCatalog.ts`):
-
-| Nyanja                                          | Aina                                                         | Maelezo                                                          |
-| ----------------------------------------------- | ------------------------------------------------------------ | ---------------------------------------------------------------- |
-| `category`                                      | `"code" \| "agent"`                                          | Ambapo zana inaonekana kwenye ukurasa                            |
-| `vendor`                                        | `string`                                                     | Chanzo cha zana ("Anthropic", "OSS (P. Gauthier)")               |
-| `acpSpawnable`                                  | `boolean`                                                    | Pia inaweza kutumika kama ACP Agent (alama inaonyeshwa)          |
-| `baseUrlSupport`                                | `"full" \| "partial" \| "none"`                              | Kiwango cha msaada wa mwisho wa kawaida. `"none"` = MITM backlog |
-| `configType`                                    | `"env" \| "custom" \| "guide" \| "custom-builder" \| "mitm"` | Mekanismu ya usanidi                                             |
-| `id`, `name`, `color`, `description`, `docsUrl` | kawaida                                                      | Nyanja za msingi za kuonyesha                                    |
-
-Kipengele chenye `baseUrlSupport: "none"` **hakionekani** kwenye kurasa za dashibodi — kimeandikishwa katika MITM backlog kwa mpango wa 11 (tazama `_tasks/features-v3.8.6/refactorpages/_orchestration/_plan11-mitm-backlog.md`).
-
-### Ngazi za Uwezo (katalogi × inayoonekana × inayoweza kusanidiwa × inayoweza kuzinduliwa)
-
-Sio kila zana iliyoorodheshwa inaweza kuonekana, kusanidiwa au kuzinduliwa. Kila ngazi ina chanzo kimoja kinachotangaza, na mtihani wa mabadiliko unashikilia usawa wao:
-
-| Ngazi                     | Maana                                                                          | Imetangazwa katika                                                |
-| ------------------------- | ------------------------------------------------------------------------------ | ----------------------------------------------------------------- |
-| **Katalogi**              | Inaonekana katika katalogi ya dashibodi (jina, muuzaji, hati, aina ya usanidi) | `src/shared/constants/cliTools.ts` (`CLI_TOOLS`)                  |
-| **Inayoonekana**          | Ugunduzi wa binary/usanidi, ukaguzi wa afya, njia za usanidi                   | `src/shared/services/cliRuntime.ts` (`CLI_TOOLS` runtime catalog) |
-| **Inayoweza kusanidiwa**  | Inasaidiwa na `omniroute configure <cli>` (mapishi ya usanidi yapo)            | `bin/cli/cli-manifest.mjs` (`configure: true`)                    |
-| **Inayoweza kuzinduliwa** | Inasaidiwa na `omniroute run <target>` (injection ya env/args imeainishwa)     | `bin/cli/cli-manifest.mjs` (`run: true`)                          |
-
-`bin/cli/cli-manifest.mjs` ni hati ya kutekeleza ya kawaida kwa amri za CLI
-zinazoonekana: `run`, `configure` na jenereta za kukamilisha shell zote zinapata orodha zao za
-malengo, ufumbuzi wa alias (kwa mfano `kilocode`/`kilo-code`/`kilo_cli` → `kilo`)
-na uunganisho wa lipo `--model` kutoka kwake. Mlinzi wa mabadiliko
-`tests/unit/cli/cli-manifest-drift.test.ts` unathibitisha kwamba hati, katalogi ya wakati wa kutekeleza,
-katalogi ya UI na kila uso wa watumiaji unabaki katika usawa — lengo lililoongezwa
-katika uso mmoja bila wengine linashindwa katika suite badala ya kuhamasika kimya.
-
-## 1. Katalogi ya Msimbo wa CLI (26 zana)
-
-Zana zote zinazojitokeza katika `/dashboard/cli-code`. Zile zenye `baseUrlSupport: none` zimeunganishwa kupitia MITM au mwongozo wa mkono badala ya URL ya msingi ya kawaida:
-
-| id           | jina                              | muuzaji             | baseUrlSupport | aina ya usanidi   | acpSpawnable |
-| ------------ | --------------------------------- | ------------------- | -------------- | ----------------- | ------------ |
-| claude       | Claude Code                       | Anthropic           | kamili         | env               | kweli        |
-| codex        | OpenAI Codex CLI                  | OpenAI              | kamili         | kawaida           | kweli        |
-| zcode        | ZCode (Mpango wa Uandishi wa GLM) | Z.ai                | hakuna         | kawaida           | si kweli     |
-| cline        | Cline                             | OSS (ex-Claude Dev) | kamili         | kawaida           | kweli        |
-| kilo         | Kilo Code                         | Kilo-Org            | kamili         | kawaida           | si kweli     |
-| roo          | Roo Code                          | Roo (OSS)           | kamili         | mwongozo          | si kweli     |
-| continue     | Continue                          | continue.dev        | kamili         | mwongozo          | si kweli     |
-| aider        | Aider                             | OSS (P. Gauthier)   | kamili         | mwongozo          | kweli        |
-| forge        | ForgeCode                         | Antinomy HQ         | kamili         | kawaida           | kweli        |
-| jcode        | jcode                             | 1jehuang (OSS)      | kamili         | kawaida           | si kweli     |
-| deepseek-tui | DeepSeek TUI                      | Hunter Bown (OSS)   | kamili         | kawaida           | si kweli     |
-| codewhale    | CodeWhale                         | Hmbown (OSS)        | kamili         | kawaida           | si kweli     |
-| opencode     | OpenCode                          | Anomaly (ex-SST)    | kamili         | mwongozo          | kweli        |
-| droid        | Factory Droid                     | Factory AI          | sehemu         | mwongozo          | si kweli     |
-| copilot      | GitHub Copilot CLI                | GitHub/MS           | kamili         | kawaida           | si kweli     |
-| cursor-cli   | Cursor CLI                        | Anysphere           | sehemu         | mwongozo          | kweli        |
-| smelt        | Smelt                             | leonardcser (OSS)   | kamili         | kawaida           | si kweli     |
-| pi           | Pi (wakala wa coding wa pi)       | M. Zechner (OSS)    | kamili         | kawaida           | si kweli     |
-| grok-build   | Grok Build                        | xAI                 | kamili         | kawaida           | si kweli     |
-| crush        | Crush                             | OSS (Charm)         | kamili         | kawaida           | si kweli     |
-| qwen         | Qwen Code                         | Alibaba             | kamili         | mwongozo          | kweli        |
-| cursor       | Cursor                            | Anysphere           | hakuna         | mwongozo          | si kweli     |
-| antigravity  | Antigravity                       | Google              | hakuna         | mitm              | si kweli     |
-| hermes       | Hermes                            | Nous Research       | hakuna         | mwongozo          | si kweli     |
-| kiro         | Kiro AI                           | Amazon              | hakuna         | mitm              | si kweli     |
-| custom       | Custom CLI                        | —                   | kamili         | mjenzi wa kawaida | si kweli     |
-
-Zana zenye `baseUrlSupport: "partial"` zinaonyesha alama "⚠ Base URL parcial" katika kadi ya dashibodi.
-
-## 2. Katalogi ya Wakala wa CLI (8 zana)
-
-Wakala huru wanaoonekana katika `/dashboard/cli-agents`:
-
-| id           | jina             | muuzaji                  | msaadaBaseUrl | acpSpawnable |
-| ------------ | ---------------- | ------------------------ | ------------- | ------------ |
-| hermes-agent | Wakala wa Hermes | Nous Research            | kamili        | false        |
-| openclaw     | OpenClaw         | OSS (P. Steinberger)     | kamili        | true         |
-| goose        | Goose            | Block / Linux Foundation | kamili        | true         |
-| interpreter  | Mfasiri wa Open  | OSS                      | kamili        | true         |
-| warp         | Warp AI          | Warp Inc.                | sehemu        | true         |
-| agent-deck   | Deck ya Wakala   | asheshgoplani (OSS)      | kamili        | false        |
-| omp          | Oh My Pi         | OSS                      | kamili        | true         |
-| letta        | Letta CLI        | Letta                    | kamili        | false        |
+**Endpoint ya utekelezaji** ya dashibodi (`POST /api/cli-tools/apply`) hutekeleza
+ulinzi huohuo: ndani ya kontena, jaribio la kuandika ambalo shabaha yake haijaunganishwa kwa bind-mount kutoka
+kwa seva mwenyeji hujibu kwa **`422`** ikiwa na `containerEphemeralTarget: true`, maandishi salama ya
+hitilafu na — kwa zana zenye utaratibu wa seva mwenyeji (claude, codex, opencode, cline,
+kilo, continue) — `hostSetupCommand` (kwa mfano `omniroute setup-opencode`) ya kutekelezwa
+kwenye seva mwenyeji badala yake; hakuna kinachoandikwa. `dryRun: true` huendelea kufanya kazi katika hali ya kontena
+na hurudisha hakikisho lililofichwa taarifa nyeti + njia ya shabaha bila kugusa diski. Maudhui ya
+hakikisho si usanidi wenye taarifa za uthibitishaji wa kunakili au kuingiza. Tekeleza kwa kutumia
+zana/URL msingi/ufunguo wa API/modeli za awali kwenye seva mwenyeji, au tumia amri iliyoonyeshwa
+ya usanidi kwenye seva mwenyeji. Tazama [Usalama wa usanidi wa CLI](../security/CLI-CONFIGURATION.md)
+kwa kichwa cha hakikisho na mkataba wa ombi. Tabia hii
+imekusudiwa na inalindwa dhidi ya hitilafu za kurudia na
+`tests/unit/api/cli-tools/apply-container-guard.test.ts` — kamwe “usirekebishe” 422
+kwa kuondoa ulinzi.
 
 ---
 
-## 3. Wakala wa ACP (/dashboard/acp-agents)
+## Chanzo Rasmi cha Taarifa
 
-Ukurasa huu (uliobadilishwa kutoka `/dashboard/agents`) unaonyesha CLIs ambazo OmniRoute inaweza **kuanzisha** kama injini za utekelezaji wa nyuma kupitia stdio/ACP protokali. Katalogi inashughulikiwa tofauti katika `src/lib/acp/registry.ts` na **siyo** sawa na `CLI_TOOLS`.
+Katalogi iliyounganishwa ipo katika `src/shared/constants/cliTools.ts` kama `CLI_TOOLS: Record<string, CliCatalogEntry>`.
+
+Kila ingizo lina sehemu hizi (zilizofafanuliwa katika `src/shared/schemas/cliCatalog.ts`):
+
+| Sehemu                                          | Aina                                                         | Maelezo                                                            |
+| ----------------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------ |
+| `category`                                      | `"code" \| "agent"`                                          | Ukurasa ambao zana inaonekana                                      |
+| `vendor`                                        | `string`                                                     | Asili ya zana ("Anthropic", "OSS (P. Gauthier)")                   |
+| `acpSpawnable`                                  | `boolean`                                                    | Pia inaweza kutumika kama ACP Agent (beji inaonyeshwa)             |
+| `baseUrlSupport`                                | `"full" \| "partial" \| "none"`                              | Kiwango cha usaidizi wa endpoint maalum. `"none"` = foleni ya MITM |
+| `configType`                                    | `"env" \| "custom" \| "guide" \| "custom-builder" \| "mitm"` | Utaratibu wa usanidi                                               |
+| `id`, `name`, `color`, `description`, `docsUrl` | kawaida                                                      | Sehemu kuu za uonyeshaji                                           |
+
+Maingizo yenye `baseUrlSupport: "none"` **hayaonyeshwi** katika kurasa za dashibodi — yamesajiliwa kwenye foleni ya MITM kwa mpango wa 11 (angalia `_tasks/features-v3.8.6/refactorpages/_orchestration/_plan11-mitm-backlog.md`).
+
+### Viwango vya uwezo (vilivyoorodheshwa × vinavyotambulika × vinavyosanidika × vinavyoweza kuzinduliwa)
+
+Si kila zana iliyoorodheshwa inaweza kutambuliwa, kusanidiwa au kuzinduliwa. Kila kiwango kina
+chanzo kimoja cha utangazaji, na jaribio la mkengeuko huviweka katika uwiano:
+
+| Kiwango                 | Maana                                                                               | Kimetangazwa katika                                                          |
+| ----------------------- | ----------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| **Imeorodheshwa**       | Huonekana katika katalogi ya dashibodi (jina, msambazaji, nyaraka, aina ya usanidi) | `src/shared/constants/cliTools.ts` (`CLI_TOOLS`)                             |
+| **Inatambulika**        | Utambuzi wa binary/usanidi, ukaguzi wa afya, njia za usanidi                        | `src/shared/services/cliRuntime.ts` (katalogi ya utekelezaji ya `CLI_TOOLS`) |
+| **Inasanidika**         | Inatumika na `omniroute configure <cli>` (kichocheo cha usanidi kipo)               | `bin/cli/cli-manifest.mjs` (`configure: true`)                               |
+| **Inaweza kuzinduliwa** | Inatumika na `omniroute run <target>` (uingizaji wa env/args umefafanuliwa)         | `bin/cli/cli-manifest.mjs` (`run: true`)                                     |
+
+`bin/cli/cli-manifest.mjs` ndiyo manifesti tekelezi rasmi kwa sehemu za amri za CLI:
+`run`, `configure` na vizalishaji vya ukamilishaji wa shell vyote hupata orodha zao
+za malengo, utatuzi wa majina mbadala (kwa mfano `kilocode`/`kilo-code`/`kilo_cli` → `kilo`)
+na uunganishaji wa bendera ya `--model` kutoka humo. Kilinzi cha mkengeuko
+`tests/unit/cli/cli-manifest-drift.test.ts` huthibitisha kwamba manifesti, katalogi ya utekelezaji,
+katalogi ya UI na kila sehemu inayotumia hubaki katika uwiano — lengo lililoongezwa kwenye
+sehemu moja bila nyingine husababisha mkusanyiko wa majaribio kushindwa badala ya kukengeuka kimyakimya.
 
 ---
 
-## 4. Orodha ya MITM (haionekani kwenye dashibodi)
+## 1. Katalogi ya Msimbo wa CLI (zana 27)
 
-CLIs zifuatazo hazisaidii URL ya msingi maalum kiasili na **hazijatajwa** katika kurasa za Kodi ya CLI au Wakala wa CLI. Ni wagombea wa kukamatwa kwa MITM katika mpango wa 11:
+Zana zote zinazoonekana katika `/dashboard/cli-code`. Zile zenye `baseUrlSupport: none` zimeunganishwa kupitia MITM au mwongozo wa usanidi wa mikono badala ya URL maalum ya msingi:
 
-| CLI                 | Sababu                                                          |
-| ------------------- | --------------------------------------------------------------- |
-| windsurf            | BYOK imepunguzia mifano maalum ya Claude + URL/token ya kampuni |
-| amp                 | Mfumo uliofungwa (Sourcegraph)                                  |
-| amazon-q / kiro-cli | AWS SSO uthibitisho, hakuna URL maalum                          |
-| cowork              | Anthropic Desktop, hakuna mwisho unaoweza kubadilishwa          |
+| id           | name                    | vendor              | baseUrlSupport | configType     | acpSpawnable |
+| ------------ | ----------------------- | ------------------- | -------------- | -------------- | ------------ |
+| claude       | Claude Code             | Anthropic           | full           | env            | true         |
+| codex        | OpenAI Codex CLI        | OpenAI              | full           | custom         | true         |
+| zcode        | ZCode (GLM Coding Plan) | Z.ai                | none           | custom         | false        |
+| cline        | Cline                   | OSS (ex-Claude Dev) | full           | custom         | true         |
+| kilo         | Kilo Code               | Kilo-Org            | full           | custom         | false        |
+| roo          | Roo Code                | Roo (OSS)           | full           | guide          | false        |
+| continue     | Continue                | continue.dev        | full           | guide          | false        |
+| aider        | Aider                   | OSS (P. Gauthier)   | full           | guide          | true         |
+| forge        | ForgeCode               | Antinomy HQ         | full           | custom         | true         |
+| jcode        | jcode                   | 1jehuang (OSS)      | full           | custom         | false        |
+| deepseek-tui | DeepSeek TUI            | Hunter Bown (OSS)   | full           | custom         | false        |
+| codewhale    | CodeWhale               | Hmbown (OSS)        | full           | custom         | false        |
+| opencode     | OpenCode                | Anomaly (ex-SST)    | full           | guide          | true         |
+| droid        | Factory Droid           | Factory AI          | partial        | guide          | false        |
+| copilot      | GitHub Copilot CLI      | GitHub/MS           | full           | custom         | false        |
+| cursor-cli   | Cursor CLI              | Anysphere           | partial        | guide          | true         |
+| smelt        | Smelt                   | leonardcser (OSS)   | full           | custom         | false        |
+| pi           | Pi (pi-coding-agent)    | M. Zechner (OSS)    | full           | custom         | false        |
+| grok-build   | Grok Build              | xAI                 | full           | custom         | false        |
+| crush        | Crush                   | OSS (Charm)         | full           | custom         | false        |
+| qwen         | Qwen Code               | Alibaba             | full           | guide          | true         |
+| zed          | Zed                     | Zed Industries      | full           | guide          | false        |
+| cursor       | Cursor                  | Anysphere           | none           | guide          | false        |
+| antigravity  | Antigravity             | Google              | none           | mitm           | false        |
+| hermes       | Hermes                  | Nous Research       | none           | guide          | false        |
+| kiro         | Kiro AI                 | Amazon              | none           | mitm           | false        |
+| custom       | Custom CLI              | —                   | full           | custom-builder | false        |
 
-Tazama `_tasks/features-v3.8.6/refactorpages/_orchestration/_plan11-mitm-backlog.md` kwa rejeleo kamili.
+Zana zenye `baseUrlSupport: "partial"` huonyesha beji ya "⚠ URL ya Msingi kiasi" kwenye kadi ya dashibodi.
+---
+
+## 2. Katalogi ya Mawakala wa CLI (zana 10)
+
+Mawakala huru wanaoonekana katika `/dashboard/cli-agents`:
+
+| id           | name             | vendor                   | baseUrlSupport | acpSpawnable |
+| ------------ | ---------------- | ------------------------ | -------------- | ------------ |
+| hermes-agent | Hermes Agent     | Nous Research            | full           | false        |
+| openclaw     | OpenClaw         | OSS (P. Steinberger)     | full           | true         |
+| goose        | Goose            | Block / Linux Foundation | full           | true         |
+| interpreter  | Open Interpreter | OSS                      | full           | true         |
+| warp         | Warp AI          | Warp Inc.                | partial        | true         |
+| agent-deck   | Agent Deck       | asheshgoplani (OSS)      | full           | false        |
+| omp          | Oh My Pi         | OSS                      | full           | true         |
+| letta        | Letta CLI        | Letta                    | full           | false        |
+| prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full           | false        |
+| 5dive        | 5dive            | OSS (5dive-ai)           | full           | false        |
+
+---
+
+## 3. Mawakala wa ACP (/dashboard/acp-agents)
+
+Ukurasa huu (uliobadilishwa jina kutoka `/dashboard/agents`) unaonyesha CLI ambazo OmniRoute inaweza **kuanzisha** kama injini za utekelezaji za upande wa nyuma kupitia itifaki ya stdio/ACP. Katalogi inadumishwa kando katika `src/lib/acp/registry.ts` na **si** sawa na `CLI_TOOLS`.
+
+---
+
+## 4. Orodha ya Kazi Zinazosubiri za MITM (haionyeshwi kwenye dashibodi)
+
+CLI zifuatazo hazitumii URL maalum ya msingi moja kwa moja na **hazijaorodheshwa** katika kurasa za CLI Code au CLI Agents. Ni wagombea wa kunaswa na MITM katika mpango wa 11:
+
+| CLI                 | Sababu                                                                   |
+| ------------------- | ------------------------------------------------------------------------ |
+| windsurf            | BYOK imewekewa mipaka kwa miundo teule ya Claude + URL/tokeni ya shirika |
+| amp                 | Mfumo funge (Sourcegraph)                                                |
+| amazon-q / kiro-cli | Uthibitishaji wa AWS SSO, hakuna URL maalum                              |
+| cowork              | Anthropic Desktop, hakuna endpoint inayoweza kusanidiwa                  |
+
+Tazama `_tasks/features-v3.8.6/refactorpages/_orchestration/_plan11-mitm-backlog.md` kwa marejeleo mtambuka kamili.
 
 ---
 
 ## 5. API ya Ugunduzi wa Kundi
 
-Ugunduzi wa zana zote unakusanywa kupitia mwisho mmoja:
+Ugunduzi wote wa zana unakusanywa kupitia endpoint moja:
 
 **`GET /api/cli-tools/all-statuses`**
 
-- Auth: `requireCliToolsAuth(request)` (sawa na njia nyingine za `/api/cli-tools/`)
-- Inarudisha: `Record<toolId, ToolBatchStatus>` (aina: `src/shared/types/cliBatchStatus.ts`)
-- Mkakati: `Promise.all` juu ya zana zote, muda wa mwisho wa sekunde 5 kwa zana
-- Kumbukumbu: katika-mkondo LRU iliyoorodheshwa na faili ya usanidi `mtime`. Kumbukumbu inabatilishwa wakati mtime inabadilika. Inarejeshwa wakati wa kuanzisha seva.
+- Uthibitishaji: `requireCliToolsAuth(request)` (sawa na njia nyingine za `/api/cli-tools/`)
+- Hurejesha: `Record<toolId, ToolBatchStatus>` (aina: `src/shared/types/cliBatchStatus.ts`)
+- Mkakati: `Promise.all` kwenye zana zote, muda wa kuisha wa sekunde 5 kwa kila zana
+- Akiba: LRU ya ndani ya kumbukumbu iliyoorodheshwa kwa `mtime` ya faili ya usanidi. Akiba hubatilishwa `mtime` inapobadilika. Huwekwa upya seva inapoanzishwa upya.
 
-Muundo wa majibu kwa kila zana:
+Muundo wa jibu kwa kila zana:
 
 ```ts
 interface ToolBatchStatus {
@@ -204,89 +250,93 @@ interface ToolBatchStatus {
     endpoint?: string | null;
     lastConfiguredAt?: string | null;
   };
-  error?: string; // sanitized, no stack traces
+  error?: string; // imesafishwa, hakuna ufuatiliaji wa mrundikano
 }
 ```
 
-## 6. Wasilisho la Mipangilio kwa Zana Mpya
+---
 
-Zana mpya zenye `configType: "custom"` zina njia maalum za API za mipangilio:
+## 6. Vishughulikiaji vya Mipangilio kwa Zana Mpya
 
-| Njia                                        | Zana                                                             |
-| ------------------------------------------- | ---------------------------------------------------------------- |
-| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                          |
-| `POST /api/cli-tools/jcode-settings`        | jcode (--base-url flag)                                          |
-| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, legacy)                           |
-| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, primary + legacy `~/.deepseek` sync) |
-| `POST /api/cli-tools/smelt-settings`        | Smelt                                                            |
-| `POST /api/cli-tools/pi-settings`           | Pi coding agent                                                  |
-| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)            |
-| `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + dedicated `.env` key)       |
+Zana mpya zenye `configType: "custom"` zina njia mahususi za API ya mipangilio:
 
-Njia zote zinatumia `sanitizeErrorMessage()` kwa majibu ya makosa (Sheria Kali #12).
+| Njia                                        | Zana                                                                          |
+| ------------------------------------------- | ----------------------------------------------------------------------------- |
+| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                                       |
+| `POST /api/cli-tools/jcode-settings`        | jcode (alama ya --base-url)                                                   |
+| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, ya zamani)                                     |
+| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, ya msingi + usawazishaji wa zamani `~/.deepseek`) |
+| `POST /api/cli-tools/smelt-settings`        | Smelt                                                                         |
+| `POST /api/cli-tools/pi-settings`           | Ajenti wa uandishi wa msimbo wa Pi                                            |
+| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                         |
+| `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + ufunguo mahususi wa `.env`)              |
+
+Njia zote hutumia `sanitizeErrorMessage()` kwa majibu ya hitilafu (Kanuni Isiyobadilika #12).
 
 ---
 
-## 7. Muktadha wa Kurasa za Dashibodi
+## 7. Muundo wa Kurasa za Dashibodi
 
-### Kode ya CLI (`/dashboard/cli-code`)
+### Misimbo ya CLI (`/dashboard/cli-code`)
 
-- `src/app/(dashboard)/dashboard/cli-code/page.tsx` — kipengele cha seva
+- `src/app/(dashboard)/dashboard/cli-code/page.tsx` — kijenzi cha seva
 - `src/app/(dashboard)/dashboard/cli-code/CliCodePageClient.tsx` — gridi ya mteja
 - `src/app/(dashboard)/dashboard/cli-code/[id]/page.tsx` — ukurasa wa maelezo ya zana
-- `src/app/(dashboard)/dashboard/cli-code/components/` — kadi 12 maalum za zana + `ToolDetailClient.tsx`
+- `src/app/(dashboard)/dashboard/cli-code/components/` — kadi 12 maalumu za zana + `ToolDetailClient.tsx`
 
-### Wakala wa CLI (`/dashboard/cli-agents`)
+### Ajenti za CLI (`/dashboard/cli-agents`)
 
-- `src/app/(dashboard)/dashboard/cli-agents/page.tsx` — kipengele cha seva
+- `src/app/(dashboard)/dashboard/cli-agents/page.tsx` — kijenzi cha seva
 - `src/app/(dashboard)/dashboard/cli-agents/CliAgentsPageClient.tsx` — gridi ya mteja
-- `src/app/(dashboard)/dashboard/cli-agents/[id]/page.tsx` — inatumia tena `ToolDetailClient`
+- `src/app/(dashboard)/dashboard/cli-agents/[id]/page.tsx` — hutumia tena `ToolDetailClient`
 
-### Wakala wa ACP (`/dashboard/acp-agents`)
+### Ajenti za ACP (`/dashboard/acp-agents`)
 
-- `src/app/(dashboard)/dashboard/acp-agents/page.tsx` — kipengele cha seva (kilihamishwa kutoka `agents/`)
+- `src/app/(dashboard)/dashboard/acp-agents/page.tsx` — kijenzi cha seva (kimehamishwa kutoka `agents/`)
 
-### Vipengele vya UI Vilivyoshirikiwa (`src/shared/components/cli/`)
+### Vijenzi vya UI Vinavyoshirikiwa (`src/shared/components/cli/`)
 
-| Faili                   | Kusudi                                                 |
-| ----------------------- | ------------------------------------------------------ |
-| `CliToolCard.tsx`       | Kadi ya hali ya akili (ugunduzi + mipangilio + mwisho) |
-| `CliConceptCard.tsx`    | Kadi ya maelezo ya dhana kwa ukurasa                   |
-| `CliComparisonCard.tsx` | Ulinganisho wa safu tatu kati ya aina za CLI           |
-| `BaseUrlSelect.tsx`     | Orodha ya mwisho (Mitaa/Cloud/Custom)                  |
-| `ApiKeySelect.tsx`      | Mchaguo wa funguo za API                               |
-| `ManualConfigModal.tsx` | Kidirisha cha nakala ya mipangilio                     |
+| Faili                   | Kusudi                                                      |
+| ----------------------- | ----------------------------------------------------------- |
+| `CliToolCard.tsx`       | Kadi mahiri ya hali (utambuzi + usanidi + sehemu ya mwisho) |
+| `CliConceptCard.tsx`    | Kadi ya ufafanuzi wa dhana kwa kila ukurasa                 |
+| `CliComparisonCard.tsx` | Ulinganisho wa safu tatu kati ya aina za CLI                |
+| `BaseUrlSelect.tsx`     | Orodha kunjuzi ya sehemu ya mwisho (Ya Ndani/Wingu/Maalumu) |
+| `ApiKeySelect.tsx`      | Kiteuzi cha ufunguo wa API                                  |
+| `ManualConfigModal.tsx` | Dirisha la msimbo wa usanidi unaoweza kunakiliwa            |
 
-### Kichaka Kilichoshirikiwa (`src/shared/hooks/cli/`)
+### Hook Inayoshirikiwa (`src/shared/hooks/cli/`)
 
-| Faili                     | Kusudi                                                                          |
-| ------------------------- | ------------------------------------------------------------------------------- |
-| `useToolBatchStatuses.ts` | Inapata `/api/cli-tools/all-statuses`, inasimamia hali ya kupakia/kuongeza mpya |
+| Faili                     | Kusudi                                                                           |
+| ------------------------- | -------------------------------------------------------------------------------- |
+| `useToolBatchStatuses.ts` | Huleta `/api/cli-tools/all-statuses`, hudhibiti hali ya upakiaji/uonyeshaji upya |
+
+---
 
 ## 8. i18n
 
-Majina mapya yameongezwa katika mpango 14 F9:
+Nafasi mpya za majina zilizoongezwa katika mpango 14 F9:
 
-| Namespace   | Kusudi                                                                                      |
-| ----------- | ------------------------------------------------------------------------------------------- |
-| `cliCommon` | Nyimbo za pamoja (lebo za kadi, maandiko ya dhana/kulinganisha, lebo za ukurasa wa maelezo) |
-| `cliCode`   | Nyimbo za ukurasa wa CLI Code                                                               |
-| `cliAgents` | Nyimbo za ukurasa wa CLI Agents                                                             |
-| `acpAgents` | Nyimbo za ukurasa wa ACP Agents                                                             |
+| Nafasi ya majina | Kusudi                                                                                              |
+| ---------------- | --------------------------------------------------------------------------------------------------- |
+| `cliCommon`      | Mifuatano inayoshirikiwa (lebo za kadi, maandishi ya dhana/ulinganisho, lebo za ukurasa wa maelezo) |
+| `cliCode`        | Mifuatano ya ukurasa wa CLI Code                                                                    |
+| `cliAgents`      | Mifuatano ya ukurasa wa CLI Agents                                                                  |
+| `acpAgents`      | Mifuatano ya ukurasa wa ACP Agents                                                                  |
 
-Tafsiri kamili za PT-BR na EN zinapatikana. Lugha 39 nyingine zinarudi kwa EN moja kwa moja kupitia muunganiko wa kiwango cha namespace katika `src/i18n/request.ts`.
+Tafsiri kamili za PT-BR na EN zimetolewa. Lugha nyingine 39 hutumia EN kiotomatiki kupitia uunganishaji katika kiwango cha nafasi ya majina ndani ya `src/i18n/request.ts`.
 
 ---
 
-## 9. Kuanzia Haraka
+## 9. Kuanza Haraka
 
-### Hatua ya 1 — Pata Funguo ya API ya OmniRoute
+### Hatua ya 1 — Pata Ufunguo wa API wa OmniRoute
 
-1. Fungua `/dashboard/api-manager` → **Unda Funguo ya API**
-2. Mpe jina (mfano `cli-tools`) na chagua ruhusa zote
-3. Nakili funguo hiyo — utahitaji hiyo kwa kila CLI hapa chini
+1. Fungua `/dashboard/api-manager` → **Unda Ufunguo wa API**
+2. Upe jina (k.m. `cli-tools`) na uchague ruhusa zote
+3. Nakili ufunguo — utauhitaji kwa kila CLI hapa chini
 
-> Funguo yako inaonekana kama: `sk-xxxxxxxxxxxxxxxx-xxxxxxxxx`
+> Ufunguo wako unaonekana hivi: `sk-xxxxxxxxxxxxxxxx-xxxxxxxxx`
 
 ---
 
@@ -313,7 +363,7 @@ npm install -g kilocode
 # Qwen Code
 npm install -g @qwen-code/qwen-code
 
-# Google Gemini CLI (inaweza kuzinduliwa kupitia `omniroute run gemini` → /v1beta surface)
+# Google Gemini CLI (inaweza kuzinduliwa kupitia `omniroute run gemini` → kiolesura cha /v1beta)
 npm install -g @google/gemini-cli
 
 # Aider
@@ -322,40 +372,40 @@ pip install aider-chat
 # Smelt
 cargo install smelt  # Inategemea Rust
 
-# Pi coding agent
-# angalia https://github.com/zechnerj/pi-coding-agent kwa usakinishaji
+# Ajenti wa uwekaji msimbo wa Pi
+# tazama https://github.com/zechnerj/pi-coding-agent kwa maelekezo ya usakinishaji
 
 # jcode
-# angalia https://github.com/1jehuang/jcode kwa usakinishaji
+# tazama https://github.com/1jehuang/jcode kwa maelekezo ya usakinishaji
 ```
 
 ---
 
 ### Hatua ya 3 — Sanidi kupitia Dashibodi
 
-1. Nenda kwa `http://localhost:20128/dashboard/cli-code`
+1. Nenda kwenye `http://localhost:20128/dashboard/cli-code`
 2. Tafuta zana yako kwenye gridi
-3. Bonyeza kadi ili kufungua ukurasa wa maelezo ya zana
-4. Chagua funguo yako ya API na URL ya msingi
-5. Bonyeza **Tumia Mipangilio** au nakili kipande cha mipangilio ya mwongozo
+3. Bofya kadi ili kufungua ukurasa wa maelezo ya zana
+4. Chagua ufunguo wako wa API na URL ya msingi
+5. Bofya **Tekeleza Usanidi** au nakili kijisehemu cha usanidi wa moja kwa moja
 
 ---
 
-### Hatua ya 4 — Weka Mabadiliko ya Mazingira ya Ulimwengu
+### Hatua ya 4 — Weka Vigeu vya Mazingira vya Jumla
 
 ```bash
-# OmniRoute Universal Endpoint
+# Kiunganishi cha Jumla cha OmniRoute
 export OPENAI_BASE_URL="http://localhost:20128/v1"
 export OPENAI_API_KEY="sk-your-omniroute-key"
 export ANTHROPIC_BASE_URL="http://localhost:20128"
 export ANTHROPIC_AUTH_TOKEN="sk-your-omniroute-key"
-# Gemini CLI inasoma GOOGLE_GEMINI_BASE_URL kwenye ROOT (SDK yake inaongeza /v1beta/... yenyewe)
+# Gemini CLI husoma GOOGLE_GEMINI_BASE_URL kwenye ROOT (SDK yake huongeza /v1beta/... yenyewe)
 export GOOGLE_GEMINI_BASE_URL="http://localhost:20128"
 export GEMINI_API_KEY="sk-your-omniroute-key"
 ```
 
-> Kwa **seva ya mbali** badilisha `localhost:20128` na IP ya seva au jina la kikoa,
-> mfano `http://<your-server-ip>:20128`.
+> Kwa **seva ya mbali** badilisha `localhost:20128` na IP au kikoa cha seva,
+> k.m. `http://<your-server-ip>:20128`.
 
 ---
 
@@ -375,18 +425,18 @@ mkdir -p ~/.claude && cat > ~/.claude/settings.json << EOF
 EOF
 ```
 
-Tumia lango la pamoja la Anthropic kama mzizi kwa Claude Code. Usiongeze `/v1` hapa.
+Tumia mzizi uliounganishwa wa lango la Anthropic kwa Claude Code. Usiongeze `/v1` hapa.
 
-**Jaribu:** `claude "say hello"`
+**Jaribio:** `claude "say hello"`
 
 ---
 
 #### OpenAI Codex
 
-Codex ya kisasa (v0.137+) inasoma `~/.codex/config.toml` pekee — ya zamani
-`config.yaml` inahusiana na CLI ya zamani ya npm na inapuuziliwa mbali kimya. Funguo ya API
-inasalia katika mabadiliko ya mazingira ya `OMNIROUTE_API_KEY` (`env_key`), kamwe
-ndani ya faili:
+Codex ya kisasa (v0.137+) husoma `~/.codex/config.toml` pekee — faili ya zamani ya
+`config.yaml` ni ya CLI ya zamani ya npm na hupuuzwa kimya kimya. Ufunguo wa API
+hubaki katika kigeu cha mazingira cha `OMNIROUTE_API_KEY` (`env_key`), kamwe
+usiwekwe ndani ya faili:
 
 ```bash
 mkdir -p ~/.codex && cat > ~/.codex/config.toml << EOF
@@ -401,9 +451,9 @@ EOF
 export OMNIROUTE_API_KEY="sk-your-omniroute-key"
 ```
 
-Marejeo kamili (profaili, `wire_api`, madirisha ya muktadha): [CODEX-CLI-CONFIGURATION.md](../guides/CODEX-CLI-CONFIGURATION.md).
+Marejeleo kamili (wasifu, `wire_api`, madirisha ya muktadha): [CODEX-CLI-CONFIGURATION.md](../guides/CODEX-CLI-CONFIGURATION.md).
 
-**Jaribu:** `codex "what is 2+2?"`
+**Jaribio:** `codex "what is 2+2?"`
 
 ---
 
@@ -432,10 +482,10 @@ mkdir -p ~/.config/opencode && cat > ~/.config/opencode/opencode.json << EOF
 EOF
 ```
 
-**Jaribu:** `opencode`
+**Jaribio:** `opencode`
 
 > Tumia `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`
-> kutuma toleo la kufikiri.
+> kutuma vibadala vya kufikiri.
 
 ---
 
@@ -456,7 +506,7 @@ EOF
 **Hali ya VS Code:**
 Mipangilio ya kiendelezi cha Cline → Mtoa API: `OpenAI Compatible` → URL ya Msingi: `http://localhost:20128/v1`
 
-Au tumia dashibodi ya OmniRoute → **Zana za CLI → Cline → Tumia Mipangilio**.
+Au tumia dashibodi ya OmniRoute → **Zana za CLI → Cline → Tekeleza Usanidi**.
 
 ---
 
@@ -477,7 +527,7 @@ kilocode --api-base http://localhost:20128/v1 --api-key sk-your-omniroute-key
 }
 ```
 
-Au tumia dashibodi ya OmniRoute → **Zana za CLI → KiloCode → Tumia Mipangilio**.
+Au tumia dashibodi ya OmniRoute → **Zana za CLI → KiloCode → Tekeleza Usanidi**.
 
 ---
 
@@ -495,20 +545,20 @@ models:
     default: true
 ```
 
-Restart VS Code baada ya kuhariri.
+Anzisha upya VS Code baada ya kuhariri.
 
 ---
 
 #### VS Code Insiders (`chatLanguageModels.json`)
 
-Tumia hii wakati VS Code Insiders imewekwa kwa mifano ya mwisho ya mwisho na unataka OmniRoute ifanye kazi bila uwanja wa kichwa maalum.
+Tumia hii wakati VS Code Insiders imesanidiwa kwa miundo ya kiunganishi maalum na unataka OmniRoute ifanye kazi bila uga maalum wa kichwa.
 
-**Mahali panap推荐:**
+**Eneo linalopendekezwa:**
 
 - Linux: `~/.config/Code - Insiders/User/chatLanguageModels.json`
 - Windows: `%APPDATA%/Code - Insiders/User/chatLanguageModels.json`
 
-**Mfano ukitumia jina la OmniRoute lililotolewa tokeni:**
+**Mfano unaotumia lakabu ya OmniRoute yenye tokeni:**
 
 ```json
 [
@@ -530,46 +580,46 @@ Tumia hii wakati VS Code Insiders imewekwa kwa mifano ya mwisho ya mwisho na una
 ]
 ```
 
-**Maelezo:**
+**Vidokezo:**
 
-- Badilisha `sk-your-omniroute-key` na funguo ya API iliyoundwa katika OmniRoute.
+- Badilisha `sk-your-omniroute-key` na ufunguo wa API ulioundwa katika OmniRoute.
 - Sehemu ya `url` inapaswa kuelekeza kwenye `/api/v1/vscode/{token}/chat/completions`.
 - Sehemu ya `modelsUrl` inapaswa kuelekeza kwenye `/api/v1/vscode/{token}/models`.
-- Prefer njia ya kawaida ya `/v1` + kichwa cha Bearer wakati mteja unasaidia vichwa maalum.
-- Tokeni zilizowekwa kwenye URL ni kurudi nyuma ya ulinganifu na zinaweza kuonekana kwenye kumbukumbu za mhariri au historia ya proxy.
+- Pendelea mtiririko wa kawaida wa `/v1` pamoja na kichwa cha Bearer wakati kiteja kinaauni vichwa maalum.
+- Tokeni zilizopachikwa kwenye URL ni njia mbadala ya uoanifu na zinaweza kuonekana katika kumbukumbu za kihariri au historia ya proksi.
 
 ---
 
 #### Kiro CLI (Amazon)
 
 ```bash
-# Ingia kwenye akaunti yako ya AWS/Kiro:
+# Ingia katika akaunti yako ya AWS/Kiro:
 kiro-cli login
 
-# CLI inatumia uthibitisho wake mwenyewe — OmniRoute haitahitajika kama nyuma kwa Kiro CLI yenyewe.
+# CLI hutumia uthibitishaji wake wenyewe — OmniRoute haihitajiki kama mfumo wa nyuma wa Kiro CLI yenyewe.
 # Tumia kiro-cli pamoja na OmniRoute kwa zana nyingine.
 kiro-cli status
 ```
 
-Kwa programu ya desktop ya **Kiro IDE**, tumia mwisho wa MITM ulioonyeshwa na OmniRoute
+Kwa programu ya eneo-kazi ya **Kiro IDE**, tumia endpoint ya MITM inayotolewa na OmniRoute
 chini ya `/dashboard/cli-tools → Kiro`.
 
 ---
 
 ## 10. CLI ya Ndani ya OmniRoute
 
-Faili tekelezi ya `omniroute` hutoa amri za mzunguko wa maisha ya seva, usanidi, uchunguzi na usimamizi wa watoa huduma. Sehemu ya kuanzia: `bin/omniroute.mjs`.
+Faili tekelezi ya `omniroute` hutoa amri za mzunguko wa maisha wa seva, usanidi, uchunguzi, na usimamizi wa watoa huduma. Sehemu ya kuanzia: `bin/omniroute.mjs`.
 
 ```bash
-omniroute                              # Anzisha seva (port chaguomsingi 20128)
+omniroute                              # Anzisha seva (mlango chaguo-msingi 20128)
 omniroute setup                        # Msaidizi shirikishi wa usanidi
-omniroute doctor                       # Kagua usanidi, DB, port na mazingira ya utekelezaji
+omniroute doctor                       # Kagua usanidi, DB, milango, mazingira ya utekelezaji
 omniroute providers list               # Miunganisho ya watoa huduma iliyosanidiwa
 omniroute providers test-all           # Jaribu kila muunganisho unaotumika
 omniroute reset-password               # Weka upya nenosiri la msimamizi
 omniroute logs                         # Tiririsha kumbukumbu za maombi
 omniroute health                       # Hali ya kina (vikatiza mzunguko, akiba, kumbukumbu)
-omniroute --version                    # Onyesha toleo
+omniroute --version                    # Chapisha toleo
 omniroute --help                       # Onyesha amri zote
 ```
 
@@ -577,7 +627,7 @@ omniroute --help                       # Onyesha amri zote
 
 ```bash
 omniroute setup                        # Msaidizi shirikishi wa usanidi
-omniroute setup --non-interactive      # Hali ya CI/otomatiki (husoma vigeu vya mazingira + bendera)
+omniroute setup --non-interactive      # Hali ya CI/otomatiki (husoma vigezo vya mazingira + bendera)
 omniroute setup --password '<value>'   # Weka nenosiri la msimamizi moja kwa moja
 omniroute setup --add-provider \
   --provider openai \
@@ -585,38 +635,38 @@ omniroute setup --add-provider \
   --test-provider                      # Ongeza na ujaribu mtoa huduma kwa hatua moja
 ```
 
-Vigeu vya mazingira vinavyotambuliwa kwa usanidi usio shirikishi:
+Vigezo vya mazingira vinavyotambuliwa kwa usanidi usio shirikishi:
 
-| Kigeu               | Madhumuni                                                                               |
+| Kigezo              | Kusudi                                                                                  |
 | ------------------- | --------------------------------------------------------------------------------------- |
 | `OMNIROUTE_API_KEY` | Ufunguo wa API wa mtoa huduma (umeunganishwa na `--api-key` kupitia Commander `.env()`) |
 | `DATA_DIR`          | Batilisha saraka ya data ya OmniRoute                                                   |
 
-Ingizo nyingine zote zisizo shirikishi hupitishwa kama bendera, si vigeu vya mazingira:
+Ingizo lingine lote lisilo shirikishi hupitishwa kama bendera, si vigezo vya mazingira:
 `--password`, `--provider`, `--provider-name`, `--provider-base-url`, `--default-model`
-(angalia chaguo za `omniroute setup` hapo juu).
+(tazama chaguo za `omniroute setup` hapo juu).
 
 ### Uchunguzi
 
 ```bash
-omniroute doctor                       # Kagua usanidi, DB, port, mazingira ya utekelezaji, kumbukumbu na uhai
-omniroute doctor --json                # JSON inayosomeka na mashine
+omniroute doctor                       # Kagua usanidi, DB, milango, mazingira ya utekelezaji, kumbukumbu, na uhai
+omniroute doctor --json                # JSON inayoweza kusomwa na mashine
 omniroute doctor --no-liveness         # Ruka uchunguzi wa afya wa HTTP
-omniroute doctor --host 0.0.0.0        # Batilisha host ya uchunguzi wa uhai
-omniroute doctor --liveness-url <url>  # Batilisha URL kamili ya endpoint ya afya
+omniroute doctor --host 0.0.0.0        # Batilisha hosti ya ukaguzi wa uhai
+omniroute doctor --liveness-url <url>  # Batilisha URL kamili ya ncha-tumizi ya afya
 ```
 
-Amri ya doctor hufanya ukaguzi huu: `Config`, `Database`, `Storage/encryption`,
+Amri ya doctor huendesha ukaguzi huu: `Config`, `Database`, `Storage/encryption`,
 `Port availability`, `Node runtime`, `Native binary` (better-sqlite3),
-`Memory`, na `Server liveness`. Hutoka kwa msimbo usio sifuri ikiwa ukaguzi wowote una hali ya `fail`.
+`Memory`, na `Server liveness`. Hutoka kwa msimbo usio sifuri ikiwa ukaguzi wowote ni `fail`.
 
 ### Usimamizi wa Watoa Huduma
 
 ```bash
 omniroute providers available                       # Katalogi ya watoa huduma ya OmniRoute
-omniroute providers available --search openai       # Chuja katalogi kwa id/jina/jina mbadala/kategoria
+omniroute providers available --search openai       # Chuja katalogi kwa kitambulisho/jina/ibadala/kategoria
 omniroute providers available --category api-key    # Chuja kwa kategoria (api-key, oauth, free, ...)
-omniroute providers available --json                # JSON inayosomeka na mashine
+omniroute providers available --json                # JSON inayoweza kusomwa na mashine
 
 omniroute providers list                            # Miunganisho ya watoa huduma iliyosanidiwa
 omniroute providers list --json
@@ -634,41 +684,53 @@ omniroute providers remove <id|name> --yes
 `providers add/import/auth/edit/remove` hutanguliza API na kwa hiyo hufanya kazi dhidi ya
 muktadha amilifu wa ndani au wa mbali. Ingizo la kitambulisho linapaswa kutumia
 `--credential-stdin` au `--credential-env`; `--dry-run --json` huripoti tu
-uwepo/umbo lililofichwa. `providers available` husoma katalogi ya OmniRoute;
+uwepo/muundo uliofichwa. `providers available` husoma katalogi ya OmniRoute;
 `providers list/test/test-all/validate` hudumisha tabia yake ya ndani ya SQLite na
-haihitaji seva iwe inaendesha.
+haihitaji seva iwe inaendeshwa.
+
+Kwa nodi maalum inayooana na OpenAI au Anthropic, ambatisha vitambulisho kwenye
+kitambulisho cha nodi kilichorejeshwa na `omniroute nodes add`, ukitumia `omniroute keys add "$NODE_ID" --stdin`.
+Hili linahitaji seva inayoendeshwa na uthibitishaji wa usimamizi kwa muktadha amilifu.
+CLI hutumia `POST /api/providers`, ambayo huthibitisha nodi na kunakili mipangilio ya
+ncha-tumizi yake kwenye muunganisho. Nodi inayokosekana, hitilafu ya uidhinishaji, au seva
+isiyopatikana hurejesha hitilafu bila kuunda kitambulisho mbadala cha ndani.
+
+`nodes add --base-url` huweka ncha-tumizi ya nodi; ni tofauti na anwani ya seva
+katika `OMNIROUTE_BASE_URL`. Kwa faili za OpenAPI, tumia
+`omniroute openapi dump --format json --out ./openapi.json`; `--output` ya kimataifa
+huchagua uumbizaji wa onyesho la CLI, si jina la faili lengwa.
 
 ### Urejeshaji na Uwekaji Upya
 
 ```bash
 omniroute reset-password                # Weka upya nenosiri la msimamizi (pia: omniroute-reset-password)
-omniroute reset-encrypted-columns       # Onyesha onyo + utekelezaji wa majaribio kwa uwekaji upya wa vitambulisho vilivyosimbwa
+omniroute reset-encrypted-columns       # Onyesha onyo + jaribio kavu la kuweka upya vitambulisho vilivyosimbwa
 omniroute reset-encrypted-columns --force  # Kwa hakika, weka vitambulisho vilivyosimbwa kuwa null katika SQLite
 ```
 
 ### Uhamishaji wa Vitambulisho (⚠ shughulikia kwa uangalifu)
 
 ```bash
-omniroute auth export                                 # Onyesha onyo + hatua ya uthibitishaji — hakuna ufikiaji wa DB
-omniroute auth export --force                          # Hamisha vitambulisho VILIVYOSIMBULIWA vya miunganisho YOTE kwenda stdout kama JSON
+omniroute auth export                                 # Onyesha onyo + hatua ya uthibitisho — hakuna ufikiaji wa DB
+omniroute auth export --force                          # Hamisha vitambulisho VYOTE VILIVYOSIMBULIWA vya miunganisho kwenda stdout kama JSON
 omniroute auth export --force --id <id>                 # Hamisha muunganisho unaolingana pekee
 omniroute auth export --force --format env               # Toa mistari ya OMNIROUTE_<PROVIDER>_<FIELD>=<value>
 omniroute auth export --force --out creds.json           # Andika kwenye faili (iliyoundwa kwa ruhusa za 0600)
 ```
 
-`auth export` ni ya **ndani pekee** (usomaji wa moja kwa moja wa SQLite, hakuna route ya HTTP) na kwa makusudi huchapisha/huandika
-thamani za **maandishi wazi** za `apiKey`/`accessToken`/`refreshToken`/`idToken` — hiyo ni sifa, si
-hitilafu. Hakuna kinachosomwa kutoka kwenye hifadhidata, wala hakuna kinachosimbuliwa, bila `--force`. Bango la
-onyo huchapishwa kila wakati kwenye stderr kabla ya maandishi yoyote wazi kutolewa. Inahitaji `STORAGE_ENCRYPTION_KEY`
-iwe imewekwa. Sehemu ambayo imeshindwa kusimbuliwa (ufunguo wa zamani, maandishi yaliyosimbwa yaliyoharibika) huripotiwa kama
+`auth export` ni ya **ndani ya mashine pekee** (husoma SQLite moja kwa moja, bila njia ya HTTP) na kwa makusudi huchapisha/huandika
+thamani za **maandishi wazi** za `apiKey`/`accessToken`/`refreshToken`/`idToken` — hicho ndicho kipengele, si
+hitilafu. Hakuna chochote kinachosomwa kutoka kwenye hifadhidata, wala kusimbuliwa, bila `--force`. Bango la onyo kwenye stderr
+huchapishwa kila mara kabla ya maandishi yoyote wazi kutolewa. Inahitaji `STORAGE_ENCRYPTION_KEY`
+iwe imewekwa. Sehemu ambayo imeshindikana kusimbuliwa (ufunguo wa zamani, maandishi yaliyosimbwa yaliyoharibika) huripotiwa kama
 `<field>DecryptFailed: true` badala ya kusitisha uhamishaji wote au kufichua hitilafu ya msingi.
 
-### Amri Ndogo Nyingine
+### Amri nyingine ndogo
 
-Hizi hudhani kuwa seva ya OmniRoute inaendesha, isipokuwa pale ilipoelezwa vinginevyo:
+Hizi huchukulia kuwa seva ya OmniRoute inaendeshwa, isipokuwa pale ilipoelezwa vinginevyo:
 
 ```bash
-omniroute status                       # Hali kamili ya wakati wa utekelezaji
+omniroute status                       # Hali ya kina ya wakati wa utekelezaji
 omniroute logs                         # Tiririsha kumbukumbu za maombi (--json, --search, --follow)
 omniroute config list                  # Onyesha zana za CLI zilizosanidiwa
 
@@ -678,74 +740,106 @@ omniroute keys add | list | remove     # Dhibiti funguo za API
 omniroute models [provider]            # Orodhesha modeli (--json, --search)
 omniroute combo list | switch | create | delete
 
-omniroute backup                       # Hifadhi nakala ya usanidi + DB
-omniroute restore                      # Rejesha kutoka kwenye nakala ya awali
+omniroute backup                       # Tengeneza taswira ya usanidi + DB
+omniroute restore                      # Rejesha kutoka kwenye taswira ya awali
 
-omniroute health                       # Hali ya kina (vikatiza, akiba, kumbukumbu)
+omniroute health                       # Hali ya kina ya afya (vikatiza, akiba, kumbukumbu)
 omniroute quota                        # Matumizi ya mgao wa mtoa huduma
 omniroute cache                        # Hali ya akiba
-omniroute cache clear                  # Futa akiba za kisemantiki + saini
+omniroute cache clear                  # Futa akiba za kisemantiki + sahihi
 
-omniroute mcp status | restart         # Hali ya seva ya MCP / iwashwe upya
+omniroute mcp status | restart         # Hali / uanzishaji upya wa seva ya MCP
 omniroute a2a status | card            # Hali ya seva ya A2A / kadi ya wakala
 
 omniroute tunnel list | create | stop  # Dhibiti vichuguu (cloudflare/tailscale/ngrok)
-omniroute env show | get <k> | set <k> <v>  # Kagua / weka vigezo vya mazingira (kwa muda)
+omniroute env show | get <k> | set <k> <v>  # Kagua / weka vigeu vya mazingira (kwa muda)
 
-omniroute test                         # Jaribio la msingi la muunganisho wa mtoa huduma
+omniroute test                         # Jaribio la haraka la muunganisho wa mtoa huduma
 omniroute update                       # Angalia masasisho
 omniroute completion                   # Tengeneza ukamilishaji wa shell
 ```
 
-### Vigezo vya kawaida
+### Bendera za kawaida
 
-| Kigezo              | Maelezo                                                         |
-| ------------------- | --------------------------------------------------------------- |
-| `--no-open`         | Usifungue kivinjari kiotomatiki wakati wa kuanza                |
-| `--port <n>`        | Batilisha porti ya API (chaguomsingi 20128)                     |
-| `--mcp`             | Endesha kama seva ya MCP kupitia stdio (kwa IDE)                |
-| `--non-interactive` | Hali ya CI (hakuna vidokezo; husoma kutoka env/vigezo)          |
-| `--json`            | Toleo la JSON linalosomeka na mashine (doctor, providers, n.k.) |
-| `--help`, `-h`      | Onyesha usaidizi mahususi wa amri                               |
-| `--version`, `-v`   | Chapisha toleo lililosakinishwa                                 |
+| Bendera             | Maelezo                                                        |
+| ------------------- | -------------------------------------------------------------- |
+| `--no-open`         | Usifungue kivinjari kiotomatiki wakati wa kuanza               |
+| `--port <n>`        | Badilisha port ya API (chaguo-msingi 20128)                    |
+| `--mcp`             | Endesha kama seva ya MCP kupitia stdio (kwa IDE)               |
+| `--non-interactive` | Hali ya CI (hakuna vidokezo; husoma kutoka env/bendera)        |
+| `--json`            | Towe la JSON linalosomeka na mashine (doctor, providers, n.k.) |
+| `--help`, `-h`      | Onyesha msaada mahususi wa amri                                |
+| `--version`, `-v`   | Chapisha toleo lililosakinishwa                                |
 
 ---
 
-## Mipangilio ya API Inayopatikana
+## Endpointi za API Zinazopatikana
 
-| Mipangilio                 | Maelezo                                   | Tumia Kwa                            |
-| -------------------------- | ----------------------------------------- | ------------------------------------ |
-| `/v1/chat/completions`     | Mazungumzo ya kawaida (watoa huduma wote) | Zana zote za kisasa                  |
-| `/v1/responses`            | API za majibu (muundo wa OpenAI)          | Codex, michakato ya agentic          |
-| `/v1/completions`          | Kukamilisha maandiko ya zamani            | Zana za zamani zinazotumia `prompt:` |
-| `/v1/embeddings`           | Uwekaji maandiko                          | RAG, utafutaji                       |
-| `/v1/images/generations`   | Uundaji picha                             | GPT-Picha, Flux, nk.                 |
-| `/v1/audio/speech`         | Maandishi hadi sauti                      | ElevenLabs, OpenAI TTS               |
-| `/v1/audio/transcriptions` | Sauti hadi maandiko                       | Deepgram, AssemblyAI                 |
+| Endpointi                  | Maelezo                              | Tumia Kwa                             |
+| -------------------------- | ------------------------------------ | ------------------------------------- |
+| `/v1/chat/completions`     | Gumzo la kawaida (watoa huduma wote) | Zana zote za kisasa                   |
+| `/v1/responses`            | API ya majibu (muundo wa OpenAI)     | Codex, mitiririko ya kazi ya mawakala |
+| `/v1/completions`          | Ukamilishaji wa maandishi wa zamani  | Zana za zamani zinazotumia `prompt:`  |
+| `/v1/embeddings`           | Upachikaji wa maandishi              | RAG, utafutaji                        |
+| `/v1/images/generations`   | Uundaji wa picha                     | GPT-Image, Flux, n.k.                 |
+| `/v1/audio/speech`         | Maandishi-kuwa-matamshi              | ElevenLabs, OpenAI TTS                |
+| `/v1/audio/transcriptions` | Matamshi-kuwa-maandishi              | Deepgram, AssemblyAI                  |
 
-Mifano ya kuandika kwa urahisi yenye URL ya OmniRoute iliyotolewa:
+Mifano iliyo tayari kubandikwa yenye URL ya OmniRoute iliyowekewa tokeni:
 
 ```txt
-Mfano wa token: sk-a3ab3c080beaee3a-69f4a4-070d71af
+Mfano wa tokeni: sk-a3ab3c080beaee3a-69f4a4-070d71af
 
 Msingi wa kawaida wa OpenAI: http://localhost:20128/v1
-Mifano ya VS Code: http://localhost:20128/api/v1/vscode/sk-a3ab3c080beaee3a-69f4a4-070d71af/models
-Mazungumzo ya VS Code: http://localhost:20128/api/v1/vscode/sk-a3ab3c080beaee3a-69f4a4-070d71af/chat/completions
+Miundo ya VS Code: http://localhost:20128/api/v1/vscode/sk-a3ab3c080beaee3a-69f4a4-070d71af/models
+Gumzo la VS Code: http://localhost:20128/api/v1/vscode/sk-a3ab3c080beaee3a-69f4a4-070d71af/chat/completions
 Majibu ya VS Code: http://localhost:20128/api/v1/vscode/sk-a3ab3c080beaee3a-69f4a4-070d71af/responses
-Lehemu za Ollama: http://localhost:20128/api/v1/vscode/sk-a3ab3c080beaee3a-69f4a4-070d71af/api/tags
-Mazungumzo ya Ollama: http://localhost:20128/api/v1/vscode/sk-a3ab3c080beaee3a-69f4a4-070d71af/api/chat
+Lebo za Ollama: http://localhost:20128/api/v1/vscode/sk-a3ab3c080beaee3a-69f4a4-070d71af/api/tags
+Gumzo la Ollama: http://localhost:20128/api/v1/vscode/sk-a3ab3c080beaee3a-69f4a4-070d71af/api/chat
 ```
 
 ---
 
-## Kutatua Matatizo
+## Utatuzi wa Matatizo
 
-| Kosa                                                       | Sababu                                  | Suluhisho                                                 |
-| ---------------------------------------------------------- | --------------------------------------- | --------------------------------------------------------- |
-| `Connection refused`                                       | OmniRoute haifanyi kazi                 | `omniroute serve`                                         |
-| `401 Unauthorized`                                         | Funguo ya API si sahihi                 | Angalia katika `/dashboard/api-manager`                   |
-| `No combo configured`                                      | Hakuna combo ya routing inayofanya kazi | Weka katika `/dashboard/combos`                           |
-| CLI inaonyesha "haijasanidi"                               | Binary haipo katika PATH                | Angalia `which <command>`                                 |
-| Dashibodi inaonyesha "haikugundulika" baada ya kusakinisha | Kumbukumbu ya zamani                    | Bonyeza "⟳ Refresh detection" katika dashibodi            |
-| Kiungo cha zamani `/dashboard/cli-tools`                   | Alama ya kabla ya v3.8.6                | Imeelekezwa kiotomatiki kwa `/dashboard/cli-code` (308)   |
-| Kiungo cha zamani `/dashboard/agents`                      | Alama ya kabla ya v3.8.6                | Imeelekezwa kiotomatiki kwa `/dashboard/acp-agents` (308) |
+| Hitilafu                                                    | Sababu                                    | Suluhisho                                                   |
+| ----------------------------------------------------------- | ----------------------------------------- | ----------------------------------------------------------- |
+| `Connection refused`                                        | OmniRoute haifanyi kazi                   | `omniroute serve`                                           |
+| `401 Unauthorized`                                          | Ufunguo wa API si sahihi                  | Angalia katika `/dashboard/api-manager`                     |
+| `No combo configured`                                       | Hakuna mchanganyiko amilifu wa uelekezaji | Sanidi katika `/dashboard/combos`                           |
+| CLI inaonyesha "haijasakinishwa"                            | Faili tekelezi haipo katika PATH          | Angalia `which <command>`                                   |
+| Dashibodi inaonyesha "haijatambuliwa" baada ya usakinishaji | Akiba imepitwa na wakati                  | Bofya "⟳ Onyesha upya utambuzi" katika dashibodi            |
+| Kiungo cha zamani `/dashboard/cli-tools`                    | Alamisho la kabla ya v3.8.6               | Huelekezwa kiotomatiki kwenye `/dashboard/cli-code` (308)   |
+| Kiungo cha zamani `/dashboard/agents`                       | Alamisho la kabla ya v3.8.6               | Huelekezwa kiotomatiki kwenye `/dashboard/acp-agents` (308) |
+
+## Dhibiti sera ya ufunguo wa inferensi kwa kutumia OmniRoute CLI
+
+Tumia muktadha wa usimamizi uliothibitishwa (tazama [Hali ya Mbali](../guides/REMOTE-MODE.md))
+kukagua au kusasisha ufunguo uliopo wa inferensi kwa kutumia ID yake:
+
+```bash
+omniroute --output json keys policy show KEY_ID
+omniroute keys policy set KEY_ID --unrestricted
+omniroute --output json keys policy show KEY_ID
+```
+
+`--unrestricted` ni jina mbadala la `--model-access-mode all`. Sasisho huondoa
+orodha ya miundo inayoruhusiwa. Huhifadhi mawanda, sheria za muunganisho, miundo iliyozuiwa, vikomo vya kasi
+na vikomo vya gharama, kwa hivyo vidhibiti hivyo vingine bado vinaweza kukataa ombi. Thamani bayana ya
+`--allowed-models ""` pia huchagua `all`; iunganishe na
+`--model-access-mode restricted` ili kudumisha ufunguo uliozuiliwa bila miundo yoyote inayoruhusiwa.
+Orodha isiyo tupu iliyotenganishwa kwa koma huchagua `restricted` isipokuwa ikiwa imebainishwa vinginevyo.
+Mchanganyiko kinzani wa `all` pamoja na orodha isiyo tupu ya ruhusa hukataliwa kabla ya kutuma ombi.
+
+`--rate-limit 30` huweka idadi ya maombi kwa dakika na huhifadhi sheria za vipindi vingine
+vya muda. `--max-cost 5` huwezesha kikomo cha kila siku cha USD bila kubadilisha kikomo cha kila wiki;
+`--max-cost 0` huondoa kikomo cha kila siku na huhifadhi kibadilishaji kilichopo cha kikomo cha matumizi
+na kikomo cha kila wiki. Sehemu za sera zilizoachwa hubaki bila kubadilishwa. Mabadiliko ya kasi husoma
+sera ya sasa kwanza; epuka kufanya mabadiliko ya wakati mmoja kwenye safu ya vikomo vya kasi ya ufunguo huo huo.
+
+Amri za sera hutumia `GET`/`PATCH /api/keys/{id}` iliyothibitishwa na huheshimu
+muktadha amilifu na chaguo la jumla la `--api-key`. Towe la JSON lina sehemu za sera pekee,
+bila ufunguo uliohifadhiwa au uwakilishi wake uliofichwa. Kitambulisho cha inferensi pekee
+hakiwezi kuidhinisha mabadiliko ya usimamizi. 401/403 inahitaji kukagua kitambulisho cha
+usimamizi na muktadha; haithibitishi hitilafu ya tokeni ya ndani ya CLI au chumvi.
+Tazama [Tokeni ya CLI](../security/CLI_TOKEN.md) kwa mkataba tofauti wa uthibitishaji wa ndani.

@@ -251,9 +251,18 @@ function parseCodex(data: any) {
   return quotas;
 }
 
+// #15635: extra_usage amounts arrive in minor units; decimal_places gives the exponent.
+function claudeExtraUsageScale(extraUsage: any): number {
+  const decimalPlaces = Number(extraUsage?.decimal_places);
+  return Number.isInteger(decimalPlaces) && decimalPlaces > 0 && decimalPlaces <= 6
+    ? 10 ** decimalPlaces
+    : 1;
+}
+
 function buildClaudeExtraUsageQuota(extraUsage: any) {
-  const monthlyLimit = Number(extraUsage?.monthly_limit ?? 0);
-  const usedCredits = Number(extraUsage?.used_credits ?? 0);
+  const scale = claudeExtraUsageScale(extraUsage);
+  const monthlyLimit = Number(extraUsage?.monthly_limit ?? 0) / scale;
+  const usedCredits = Number(extraUsage?.used_credits ?? 0) / scale;
   const utilization = Number(extraUsage?.utilization ?? 0);
   const remainingPercentage = Number.isFinite(utilization)
     ? Math.max(0, 100 - utilization)
@@ -325,6 +334,24 @@ function parseAgentrouterQuota(quotaKey: string, quota: any) {
 
 function parseAgentrouter(data: any) {
   return quotaEntries(data).map(([quotaKey, quota]) => parseAgentrouterQuota(quotaKey, quota));
+}
+
+// Ollama Cloud `/api/balance` (open-sse/services/ollamaCloudBalance.ts) reports purchased
+// credits as a `credits` USD balance next to the monthly/session/weekly percent windows. Route
+// that row through buildCreditsQuota() so it renders as "$X.XX", not as a percentage bar.
+function normalizeOllamaWindow(name: string, quota: any) {
+  if (quota?.ollamaApiBalance !== true) return normalizeQuotaEntry(name, quota);
+  // A fresh API balance is authoritative even when the reported period end is in the past.
+  return normalizeQuotaEntry(name, { ...quota, resetAt: null }, { resetAt: quota.resetAt });
+}
+
+function parseOllamaCloud(data: any) {
+  return quotaEntries(data).map(([quotaKey, quota]) => {
+    if (quotaKey !== "credits") return normalizeOllamaWindow(quotaKey, quota);
+    const remaining = Math.max(0, Number(quota?.remaining ?? 0) || 0);
+    const currency = quota?.currency || "USD";
+    return buildCreditsQuota("credits", remaining, remaining > 0 ? 100 : 0, { currency });
+  });
 }
 
 // OpenRouter is credit-based, not subscription-based: the `credits` quota entry
@@ -501,11 +528,15 @@ function parseProviderQuotas(providerId: string, data: any) {
   if (providerId === "deepseek") return parseDeepseek(data);
   if (providerId === "kilocode") return parseKilocode(data);
   if (providerId === "agentrouter") return parseAgentrouter(data);
+  if (providerId === "ollama-cloud") return parseOllamaCloud(data);
   if (providerId === "openrouter") return parseOpenrouter(data);
   return parseGeneric(data);
 }
 
 function sortProviderModelOrder(provider: string, quotas: any[]) {
+  // Antigravity/AGY model IDs are discovered live. Static ordering would rank a model
+  // Google ships tomorrow at 999 and bury it below the collapsed three-row cutoff.
+  if (provider === "antigravity" || provider === "agy") return;
   const modelOrder = getModelsByProviderId(provider);
   if (modelOrder.length === 0) return;
   const orderMap = new Map(modelOrder.map((m, i) => [m.id, i]));

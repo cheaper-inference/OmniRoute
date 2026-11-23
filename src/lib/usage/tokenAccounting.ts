@@ -103,14 +103,19 @@ export function getLoggedOutputTokens(tokens: unknown): number {
  * Return the reasoning/thinking output token count.
  * Checks multiple field locations used by different providers:
  *   - completion_tokens_details.reasoning_tokens (OpenAI, OpenRouter)
+ *   - output_tokens_details.reasoning_tokens (OpenAI Responses API, Codex)
  *   - reasoning_tokens (GitHub — top-level)
  *   - reasoning (usage_history DB format)
  */
 export function getReasoningTokens(tokens: unknown): number {
   const tokenRecord = asRecord(tokens);
   const completionDetails = asRecord(tokenRecord.completion_tokens_details);
+  const outputDetails = asRecord(tokenRecord.output_tokens_details);
   return toFiniteNumber(
-    tokenRecord.reasoning ?? tokenRecord.reasoning_tokens ?? completionDetails.reasoning_tokens
+    tokenRecord.reasoning ??
+      tokenRecord.reasoning_tokens ??
+      completionDetails.reasoning_tokens ??
+      outputDetails.reasoning_tokens
   );
 }
 

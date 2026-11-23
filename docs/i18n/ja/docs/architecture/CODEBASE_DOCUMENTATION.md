@@ -435,7 +435,7 @@ server/
 
 ## 4. `open-sse/` — ストリーミングエンジンワークスペース
 
-`@omniroute/open-sse` として公開される独立した npm ワークスペースです。リクエスト処理、エグゼキューター、トランスレーター、サービス、トランスフォーマー、および MCP サーバーを管理します。
+`@omniroute/open-sse` として公開される独立した npm ワークスペース。リクエスト処理、エグゼキューター、トランスレーター、サービス、トランスフォーマー、および MCP サーバーを管理します。
 
 ```
 open-sse/
@@ -443,13 +443,13 @@ open-sse/
 ├── package.json            ワークスペースマニフェスト
 ├── tsconfig.json
 ├── types.d.ts
-├── config/                 プロバイダーレジストリ、ヘッダープロファイル、アイデンティティ、…
-├── handlers/               リクエストハンドラー（チャット、埋め込み、音声、画像、…）
-├── executors/              プロバイダー固有の HTTP エグゼキューター 108 個
+├── config/                 プロバイダーレジストリ、ヘッダープロファイル、ID など
+├── handlers/               リクエストハンドラー（チャット、埋め込み、音声、画像など）
+├── executors/              150 個のプロバイダーエグゼキューターモジュール（エグゼキュータークラス + プロバイダーごとのヘルパー）
 ├── translator/             形式変換（OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro）
 ├── transformer/            Responses API ↔ Chat Completions ストリームトランスフォーマー
-├── services/               80 以上のサービスモジュール（コンボ、フォールバック、クォータ、アイデンティティ、…）
-├── utils/                  ストリーミングヘルパー、TLS クライアント、AWS SigV4、プロキシフェッチ、…
+├── services/               80 以上のサービスモジュール（コンボ、フォールバック、クォータ、ID など）
+├── utils/                  ストリーミングヘルパー、TLS クライアント、AWS SigV4、プロキシフェッチなど
 └── mcp-server/             MCP サーバー（3 つのトランスポート、33 のスコープ、110 のツール）
 ```
 
@@ -457,7 +457,7 @@ open-sse/
 
 | ハンドラー              | 目的                                                                                                       |
 | ----------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `chatCore.ts`           | メインのチャットパイプライン（キャッシュ、レート制限、コンボルーティング、エグゼキューターのディスパッチ） |
+| `chatCore.ts`           | メインチャットパイプライン（キャッシュ、レート制限、コンボルーティング、エグゼキューターへのディスパッチ） |
 | `responsesHandler.ts`   | OpenAI Responses API のエントリーポイント                                                                  |
 | `embeddings.ts`         | 埋め込み                                                                                                   |
 | `imageGeneration.ts`    | 画像生成                                                                                                   |
@@ -469,42 +469,42 @@ open-sse/
 | `moderations.ts`        | モデレーション                                                                                             |
 | `search.ts`             | Web 検索                                                                                                   |
 | `sseParser.ts`          | SSE イベントパーサー                                                                                       |
-| `usageExtractor.ts`     | アップストリームからのストリームからトークン数を抽出                                                       |
+| `usageExtractor.ts`     | アップストリームからトークン数を抽出                                                                       |
 | `responseSanitizer.ts`  | プロバイダー固有のノイズを除去                                                                             |
 | `responseTranslator.ts` | プロバイダーのレスポンスとトランスレーター層を接続                                                         |
 
 ### 4.2 `open-sse/executors/`
 
-108 個のプロバイダーエグゼキューターがあり、それぞれ `BaseExecutor`（`base.ts`）を継承します。
+トップレベルのエグゼキューターモジュールは 150 個です（`*.ts` から `base.ts`、`index.ts`、およびテストを除外した数であり、`npm run check:docs-counts` で計測されます）。各エグゼキュータークラスは、直接、または `DefaultExecutor` や別のエグゼキューターを介して `BaseExecutor`（`base.ts`）を継承します。残りのモジュールは、プロバイダーごとのヘルパー（ツールスキーマ、フェッチ/TTS アダプター、特殊挙動のハンドラー）です。エグゼキューターには以下が含まれます。
 
-`antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`,
-`chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`,
-`muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`,
-`pollinations`, `qoder`, `vertex`, `devin-desktop`、さらに `claudeIdentity.ts`
-（共有アイデンティティヘルパー）と `index.ts`（レジストリ）。
+`antigravity`、`azure-openai`、`blackbox-web`、`cliproxyapi`、
+`chatgpt-web-codex`、`cloudflare-ai`、`codex`、`commandCode`、`cursor`、`default`、`devin-cli`、
+`muse-spark-web`、`nlpcloud`、`opencode`、`perplexity-web`、`petals`、
+`pollinations`、`qoder`、`vertex`、`devin-desktop`、さらに `claudeIdentity.ts`
+（共有 ID ヘルパー）と `index.ts`（レジストリ）。
 
-> 注：ここに記載されていないプロバイダーは、汎用の
-> OpenAI 互換エグゼキューターを使用する `default.ts` によって処理されます。プロバイダーの完全なカタログ（355 プロバイダー）は
+> 注: ここに記載されていないプロバイダーは、汎用の OpenAI 互換エグゼキューターを使用する `default.ts` によって処理されます。
+> 完全なプロバイダーカタログ（375 プロバイダー）は
 > `src/shared/constants/providers.ts` にあります。
 
 ### 4.3 `open-sse/translator/`
 
-ハブアンドスポーク方式の変換（OpenAI がハブ）。
+ハブ・アンド・スポーク方式の変換（OpenAI がハブ）。
 
-- **9 個のリクエストトランスレーター**（`translator/request/`）：
-  `antigravity-to-openai`, `claude-to-gemini`, `claude-to-openai`,
-  `gemini-to-openai`, `openai-responses`, `openai-to-claude`,
-  `openai-to-cursor`, `openai-to-gemini`, `openai-to-kiro`。
-- **9 個のレスポンストランスレーター**（`translator/response/`）：
-  `claude-to-openai`, `cursor-to-openai`, `gemini-to-claude`, `gemini-to-openai`,
-  `kiro-to-openai`, `openai-responses`, `openai-to-antigravity`,
+- **9 個のリクエストトランスレーター**（`translator/request/`）:
+  `antigravity-to-openai`、`claude-to-gemini`、`claude-to-openai`、
+  `gemini-to-openai`、`openai-responses`、`openai-to-claude`、
+  `openai-to-cursor`、`openai-to-gemini`、`openai-to-kiro`。
+- **9 個のレスポンストランスレーター**（`translator/response/`）:
+  `claude-to-openai`、`cursor-to-openai`、`gemini-to-claude`、`gemini-to-openai`、
+  `kiro-to-openai`、`openai-responses`、`openai-to-antigravity`、
   `openai-to-claude`。
-- **9 個のヘルパー**（`translator/helpers/`）：
-  `claudeHelper`, `geminiHelper`, `geminiToolsSanitizer`, `maxTokensHelper`,
-  `openaiHelper`, `responsesApiHelper`, `schemaCoercion`, `toolCallHelper`、および
-  ヘルパーのテスト。
+- **9 個のヘルパー**（`translator/helpers/`）:
+  `claudeHelper`、`geminiHelper`、`geminiToolsSanitizer`、`maxTokensHelper`、
+  `openaiHelper`、`responsesApiHelper`、`schemaCoercion`、`toolCallHelper`、および
+  ヘルパーテスト。
 - **画像ヘルパー**（`translator/image/sizeMapper.ts`）。
-- トップレベル：`bootstrap.ts`、`formats.ts`、`registry.ts`、`index.ts`。
+- トップレベル: `bootstrap.ts`、`formats.ts`、`registry.ts`、`index.ts`。
 
 ### 4.4 `open-sse/transformer/`
 
@@ -513,18 +513,18 @@ open-sse/
 
 ### 4.5 `open-sse/services/`
 
-主な項目（完全な一覧は `open-sse/services/` 以下）：
+主なもの（完全な一覧は `open-sse/services/` 以下）:
 
 | 関心領域                     | ファイル                                                                                                                                                                                                                                                 |
 | ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| コンボルーティング           | `combo.ts`（19 の戦略）、`comboConfig.ts`、`comboMetrics.ts`、`comboManifestMetrics.ts`、`comboAgentMiddleware.ts`                                                                                                                                       |
+| コンボルーティング           | `combo.ts`（20種類の戦略）、`comboConfig.ts`、`comboMetrics.ts`、`comboManifestMetrics.ts`、`comboAgentMiddleware.ts`                                                                                                                                    |
 | Auto Combo エンジン          | `autoCombo/` — `engine.ts`、`scoring.ts`、`taskFitness.ts`、`virtualFactory.ts`、`modePacks.ts`、`autoPrefix.ts`、`persistence.ts`、`providerDiversity.ts`、`providerRegistryAccessor.ts`、`routerStrategy.ts`、`selfHealing.ts`、`index.ts`             |
-| レジリエンス                 | `accountFallback.ts`（クールダウン + ロックアウト）、`errorClassifier.ts`、`requestRejectedStreak.ts`、`emergencyFallback.ts`、`rateLimitManager.ts`、`rateLimitSemaphore.ts`、`accountSemaphore.ts`、`accountSelector.ts`                               |
+| 耐障害性                     | `accountFallback.ts`（クールダウン + ロックアウト）、`errorClassifier.ts`、`requestRejectedStreak.ts`、`emergencyFallback.ts`、`rateLimitManager.ts`、`rateLimitSemaphore.ts`、`accountSemaphore.ts`、`accountSelector.ts`                               |
 | クォータ                     | `quotaMonitor.ts`、`quotaPreflight.ts`、`bailianQuotaFetcher.ts`、`codexQuotaFetcher.ts`、`deepseekQuotaFetcher.ts`、`openrouterQuotaFetcher.ts`、`openrouterFreeWindow.ts`、`llmgatewayQuotaFetcher.ts`、`crofUsageFetcher.ts`、`antigravityCredits.ts` |
 | キャッシュ                   | `reasoningCache.ts`、`searchCache.ts`、`signatureCache.ts`、`requestDedup.ts`                                                                                                                                                                            |
 | ルーティングインテリジェンス | `intentClassifier.ts`、`taskAwareRouter.ts`、`backgroundTaskDetector.ts`、`volumeDetector.ts`、`wildcardRouter.ts`、`workflowFSM.ts`、`specificityDetector.ts`、`specificityRules.ts`、`specificityTypes.ts`                                             |
 | モデル処理                   | `modelCapabilities.ts`、`modelDeprecation.ts`、`modelFamilyFallback.ts`、`modelStrip.ts`、`model.ts`、`provider.ts`、`providerRequestDefaults.ts`、`providerCostData.ts`、`payloadRules.ts`                                                              |
-| 圧縮                         | `compression/` — 完全な圧縮エンジンの配線                                                                                                                                                                                                                |
+| 圧縮                         | `compression/` — 圧縮エンジンの完全な配線                                                                                                                                                                                                                |
 | トークン + セッション        | `tokenRefresh.ts`、`sessionManager.ts`、`apiKeyRotator.ts`、`contextManager.ts`、`contextHandoff.ts`、`systemPrompt.ts`、`roleNormalizer.ts`、`responsesInputSanitizer.ts`、`toolSchemaSanitizer.ts`、`toolLimitDetector.ts`、`thinkingBudget.ts`        |
 | ティア / マニフェスト        | `tierResolver.ts`、`tierConfig.ts`、`tierDefaults.json`、`tierTypes.ts`、`manifestAdapter.ts`                                                                                                                                                            |
 | IP / ネットワーク            | `ipFilter.ts`、`webSearchFallback.ts`                                                                                                                                                                                                                    |
@@ -533,17 +533,17 @@ open-sse/
 
 ### 4.6 `open-sse/mcp-server/`
 
-- `server.ts` に接続された **110 個の一意なツール**（`schemas/tools.ts` 内の 45 個の標準ツール +
+- `server.ts` で接続された**一意なツール110個**（`schemas/tools.ts` 内の標準ツール45個 +
   メモリ、スキル、GitHub スキル、プール、ゲーミフィケーション、プラグイン、Notion、Obsidian、
   ローカルコーパス、圧縮モジュール — `countUniqueMcpTools` により和集合を集計）。
-- **3 つのトランスポート**：stdio、HTTP Streamable、SSE。
-- ランタイムで適用される **33 個のスコープ** — 基本リストは `src/shared/constants/mcpScopes.ts` にあり、完全なセットは各ツールモジュールで宣言されたスコープの和集合です。
-- 監査テーブル：`mcp_tool_audit`（`audit.ts` によりデータが投入されます）。
+- **3つのトランスポート**：stdio、HTTP Streamable、SSE。
+- 実行時に適用される**33個のスコープ** — 基本リストは `src/shared/constants/mcpScopes.ts` にあり、完全なセットは各ツールモジュールで宣言されたスコープの和集合です。
+- 監査テーブル：`mcp_tool_audit`（`audit.ts` によってデータが投入されます）。
 - ファイル：`server.ts`、`index.ts`、`httpTransport.ts`、`audit.ts`、`scopeEnforcement.ts`、
   `runtimeHeartbeat.ts`、`descriptionCompressor.ts`、`schemas/{tools, a2a, audit, index}.ts`、
   `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`、
   および `__tests__/` 配下のテスト。
-- 完全なツールカタログについては、[MCP-SERVER.md](../frameworks/MCP-SERVER.md) を参照してください。
+- ツールカタログの全一覧については、[MCP-SERVER.md](../frameworks/MCP-SERVER.md)を参照してください。
 
 ### 4.7 `open-sse/config/`
 
@@ -551,7 +551,7 @@ open-sse/
 `providerHeaderProfiles.ts`）、形式別モデルレジストリ（`audioRegistry.ts`、
 `embeddingRegistry.ts`、`imageRegistry.ts`、`moderationRegistry.ts`、
 `musicRegistry.ts`、`rerankRegistry.ts`、`searchRegistry.ts`、`videoRegistry.ts`）、
-アイデンティティヘルパー（`codexIdentity.ts`、`codexInstructions.ts`、
+識別情報ヘルパー（`codexIdentity.ts`、`codexInstructions.ts`、
 `anthropicHeaders.ts`、`antigravityUpstream.ts`、`antigravityModelAliases.ts`、
 `cliFingerprints.ts`、`toolCloaking.ts`、`defaultThinkingSignature.ts`）、
 認証情報ヘルパー（`credentialLoader.ts`、`codexClient.ts`）、およびクラウド
@@ -561,7 +561,7 @@ open-sse/
 
 ### 4.8 `open-sse/utils/`
 
-ストリーミングのプリミティブとプロバイダーヘルパー：`stream.ts`、`streamHandler.ts`、
+ストリーミングプリミティブおよびプロバイダーヘルパー: `stream.ts`、`streamHandler.ts`、
 `streamHelpers.ts`、`streamPayloadCollector.ts`、`streamReadiness.ts`、
 `sseHeartbeat.ts`、`proxyFetch.ts`、`proxyDispatcher.ts`、`tlsClient.ts`、
 `networkProxy.ts`、`awsSigV4.ts`、`cacheControlPolicy.ts`、
@@ -656,29 +656,33 @@ bin/
 
 目的別に6つのサブフォルダーに整理されています。
 
-- **`scripts/build/`** — `build-next-isolated.mjs`, `prepublish.ts`,
-  `prepare-electron-standalone.mjs`, `pack-artifact-policy.ts`,
-  `validate-pack-artifact.ts`, `postinstall.mjs`, `postinstallSupport.mjs`,
-  `uninstall.mjs`, `bootstrap-env.mjs`, `runtime-env.mjs`,
+- **`scripts/build/`** — `build-next-isolated.mjs`、`prepublish.ts`、
+  `prepare-electron-standalone.mjs`、`pack-artifact-policy.ts`、
+  `validate-pack-artifact.ts`、`postinstall.mjs`、`postinstallSupport.mjs`、
+  `uninstall.mjs`、`bootstrap-env.mjs`、`runtime-env.mjs`、
   `native-binary-compat.mjs`。
-- **`scripts/dev/`** — `run-next.mjs`, `run-next-playwright.mjs`,
-  `run-standalone.mjs`, `standalone-server-ws.mjs`, `responses-ws-proxy.mjs`,
-  `v1-ws-bridge.mjs`, `smoke-electron-packaged.mjs`,
-  `run-playwright-tests.mjs`, `run-ecosystem-tests.mjs`,
-  `run-protocol-clients-tests.mjs`, `sync-env.mjs`, `healthcheck.mjs`,
-  `system-info.mjs`。
-- **`scripts/check/`** — `check-cycles.mjs`, `check-docs-sync.mjs`,
-  `check-docs-counts-sync.mjs`, `check-env-doc-sync.mjs`,
-  `check-deprecated-versions.mjs`, `check-route-validation.mjs`,
-  `check-t11-any-budget.mjs`, `check-pr-test-policy.mjs`,
-  `check-supported-node-runtime.ts`, `test-report-summary.mjs`。
-- **`scripts/docs/`** — `generate-docs-index.mjs`, `gen-provider-reference.ts`。
-- **`scripts/i18n/`** — `generate-multilang.mjs`, `run-visual-qa.mjs`,
-  `generate-qa-checklist.mjs`, `apply-priority-overrides.mjs`,
-  `validate_translation.py`, `check_translations.py`, `i18n_autotranslate.py`,
+- **`scripts/dev/`** — `run-next.mjs`、`run-next-playwright.mjs`、
+  `run-standalone.mjs`、`standalone-server-ws.mjs`、`responses-ws-proxy.mjs`、
+  `v1-ws-bridge.mjs`、`smoke-electron-packaged.mjs`、
+  `run-playwright-tests.mjs`、`run-ecosystem-tests.mjs`、
+  `run-protocol-clients-tests.mjs`、`sync-env.mjs`、`healthcheck.mjs`、
+  `system-info.mjs`に加え、読み取り専用のPR監視用ヘルパーである
+  `ci-discriminate.sh`（PRで失敗したチェックのシグネチャを、参照PRまたはbase-red issueと比較して、
+  自身に起因するもの／継承されたもの／不明なものに分類）と`audit-worktree.sh`
+  （ワーカーのPRを受け入れる前に、変更のあるファイル、保護対象領域、削除されたassert、
+  抑制の数、残存する一時tsconfig、PRのheadとローカルHEADを確認）。
+- **`scripts/check/`** — `check-cycles.mjs`、`check-docs-sync.mjs`、
+  `check-docs-counts-sync.mjs`、`check-env-doc-sync.mjs`、
+  `check-deprecated-versions.mjs`、`check-route-validation.mjs`、
+  `check-t11-any-budget.mjs`、`check-pr-test-policy.mjs`、
+  `check-supported-node-runtime.ts`、`test-report-summary.mjs`。
+- **`scripts/docs/`** — `generate-docs-index.mjs`、`gen-provider-reference.ts`。
+- **`scripts/i18n/`** — `generate-multilang.mjs`、`run-visual-qa.mjs`、
+  `generate-qa-checklist.mjs`、`apply-priority-overrides.mjs`、
+  `validate_translation.py`、`check_translations.py`、`i18n_autotranslate.py`、
   `untranslatable-keys.json`。
-- **`scripts/ad-hoc/`** — `cursor-tap.cjs`, `sync-cursor-models.mjs`,
-  `migrate-env.mjs`, `dbsetup.js`。
+- **`scripts/ad-hoc/`** — `cursor-tap.cjs`、`sync-cursor-models.mjs`、
+  `migrate-env.mjs`、`dbsetup.js`。
 
 ---
 

@@ -93,43 +93,57 @@ numai modelele Kimi.
 
 ---
 
-## Blocul de inițiere de pe panoul de control
+## Bloc de integrare pe panoul de control
 
-Cardul instrumentului Claude (**Panou de control → Cod CLI**) afișează fragmentul exact din `settings.json`
+Cardul instrumentului Claude (**Panou de control → Cod CLI**) afișează fragmentul `settings.json` exact
 pentru această instanță, lângă butonul de informații despre aliasul de descoperire, împreună cu un buton de copiere:
 
 ```jsonc
 {
   "env": {
     "ANTHROPIC_BASE_URL": "http://<OmniRoute-ul dvs.>:20128",
-    "ANTHROPIC_AUTH_TOKEN": "<cheia API OmniRoute a dvs.>",
+    "ANTHROPIC_AUTH_TOKEN": "<cheia API OmniRoute>",
     "CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY": "1",
   },
 }
 ```
 
-URL-ul de bază este cel determinat de card (inclusiv o suprascriere personalizată introdusă de dvs.), deja
-normalizat — fără sufixul `/v1` și fără bară oblică la final. **Cheia nu este afișată niciodată**: blocul conține un
-substituent, astfel încât o captură de ecran sau un fragment lipit nu poate divulga cheia. Înlocuiți-l cu cheia dvs.
+URL-ul de bază este cel determinat de card (inclusiv o suprascriere personalizată pe care ați introdus-o), deja
+normalizat — fără sufixul `/v1` și fără bară oblică la final. **Cheia nu este afișată niciodată**: blocul include un
+substitut, astfel încât o captură de ecran sau un fragment lipit să nu poată divulga cheia. Înlocuiți-l cu cheia dvs.
 
 Adăugați `CLAUDE_CODE_AUTO_COMPACT_WINDOW` în același bloc `env` pentru orice model a cărui
-fereastră reală de context nu este de 200K — Claude Code presupune 200K pentru fiecare ID pe care nu îl recunoaște, astfel încât
-compactarea automată este declanșată altfel la momentul greșit (consultați avertismentul din secțiunea anterioară).
-Generatorul de fragmente acceptă și această valoare, astfel încât un apelant care cunoaște dimensiunea ferestrei modelului țintă
+fereastră de context reală nu este de 200K — Claude Code presupune 200K pentru fiecare id pe care nu îl recunoaște, astfel încât
+compactarea automată este declanșată altfel într-un moment greșit (consultați avertismentul din secțiunea precedentă).
+Constructorul fragmentului acceptă și această valoare, astfel încât un apelant care cunoaște dimensiunea ferestrei modelului țintă
 o poate emite direct.
 
-Sursă: `src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet` (generator
+Sursă: `src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet` (constructor
 pur, testat unitar), afișat de `ClaudeGatewayOnboardingBlock`.
+
+### Fixați un cont (opțional)
+
+Pentru a trimite fiecare solicitare Claude Code printr-un anumit cont de furnizor, adăugați antetul
+`x-omniroute-connection` prin `ANTHROPIC_CUSTOM_HEADERS` în același bloc `env`:
+
+```jsonc
+"ANTHROPIC_CUSTOM_HEADERS": "x-omniroute-connection: <connection id>"
+```
+
+Copiați id-ul din cipul `xxxxxxxx…` de pe rândul conexiunii din pagina furnizorului. Fixarea se
+aplică numai id-urilor de model unic (`provider/model`), nu combinațiilor. Consultați
+[Fixarea contului pentru fiecare solicitare](../reference/API_REFERENCE.md#account-pinning-per-request) pentru
+comportamentul exact de rezervă.
 
 ---
 
 ## Profiluri (`CLAUDE_CONFIG_DIR`)
 
 Claude Code **nu are fișiere de profil native** (spre deosebire de `~/.codex/<name>.config.toml` din Codex).
-Mecanismul uzual este `CLAUDE_CONFIG_DIR` — un director de configurare separat pentru fiecare
-profil, fiecare având propriile fișiere `settings.json`, acreditări, istoric și cache.
+Mecanismul idiomatic este `CLAUDE_CONFIG_DIR` — un director de configurare separat pentru fiecare
+profil, fiecare având propriile setări `settings.json`, credențiale, istoric și cache.
 
-`omniroute setup-claude` preia catalogul `/v1/models` activ și scrie câte un
+`omniroute setup-claude` preia catalogul activ `/v1/models` și scrie câte un
 profil pentru fiecare model în `~/.claude/profiles/<name>/settings.json`, reutilizând
 **aceleași nume ca `setup-codex`** (`glm52`, `kimi-k27`, `deepseek-pro`, …):
 
@@ -150,16 +164,16 @@ profil pentru fiecare model în `~/.claude/profiles/<name>/settings.json`, reuti
 
 > **Tokenul de autentificare nu este scris niciodată în profil.** Lansați cu
 > `omniroute launch --profile <name>` (acesta injectează `ANTHROPIC_AUTH_TOKEN` din
-> contextul activ) sau exportați dvs. `ANTHROPIC_AUTH_TOKEN` și rulați
+> contextul activ) sau exportați personal `ANTHROPIC_AUTH_TOKEN` și rulați
 > `CLAUDE_CONFIG_DIR=~/.claude/profiles/<name> claude`.
 
 **Sincronizare automată după descoperirea modelelor (opțională).** OmniRoute poate regenera automat aceleași
 fișiere `~/.claude/profiles/<name>/settings.json` ori de câte ori sincronizarea modelelor unui furnizor
-modifică catalogul activ — astfel, modelele noi sau redenumite primesc profiluri fără a rula din nou
-comanda. Este **dezactivată implicit**: activați-o din **panoul de control Cod CLI** („Sincronizare
+modifică catalogul activ — astfel încât modelele noi/redenumite să primească profiluri fără a rula din nou
+comanda. Aceasta este **dezactivată implicit**: activați-o din **panoul de control CLI Code** („Sincronizare
 automată a profilurilor CLI” → Claude Code) sau setați `OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES=true` (respectă și
-`CLI_ALLOW_CONFIG_WRITES`, activată implicit). Când este activată, scrie numai fișierele de profil; nu
-modifică niciodată configurația Claude activă/implicită, autentificarea sau `~/.claude/settings.json`.
+`CLI_ALLOW_CONFIG_WRITES`, activată implicit). Când este activată, scrie doar fișierele de profil; nu modifică
+niciodată configurația Claude activă/implicită, autentificarea sau `~/.claude/settings.json`.
 
 ### Generarea și utilizarea profilurilor
 
@@ -173,10 +187,14 @@ omniroute setup-claude --remote http://192.168.0.15:20128 --api-key oma_live_xxx
 # Doar anumiți furnizori
 omniroute setup-claude --only glm,kimi
 
+# Scrie și profiluri pentru furnizorii CLI locali (zcode, auggie, devin-cli-agentic,
+# codex-app-server) care nu sunt detectați pe această gazdă (omiși implicit pentru o țintă locală)
+omniroute setup-claude --include-local
+
 # Previzualizare fără scriere
 omniroute setup-claude --dry-run
 
-# Lansați un profil
+# Lansarea unui profil
 omniroute launch --profile kimi-k27
 ```
 

@@ -3,24 +3,25 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/shared/utils/cn";
+import {
+  buildHttpProxySnippets,
+  HTTP_PROXY_SNIPPET_LANGS,
+  type HttpProxySnippetLang,
+} from "./httpProxySnippets";
 
 interface HttpProxySnippetCardProps {
   port: number;
   onClose: () => void;
 }
 
-type Lang = "bash" | "python" | "node";
+type Lang = HttpProxySnippetLang;
 
 export function HttpProxySnippetCard({ port, onClose }: HttpProxySnippetCardProps) {
   const t = useTranslations("trafficInspector");
   const [lang, setLang] = useState<Lang>("bash");
   const [copied, setCopied] = useState(false);
 
-  const snippets: Record<Lang, string> = {
-    bash: `export HTTP_PROXY=http://127.0.0.1:${port}\nexport HTTPS_PROXY=http://127.0.0.1:${port}\nexport NODE_TLS_REJECT_UNAUTHORIZED=0\n# then run your command:\ncurl https://api.openai.com/v1/models`,
-    python: `import os\nos.environ["HTTP_PROXY"] = "http://127.0.0.1:${port}"\nos.environ["HTTPS_PROXY"] = "http://127.0.0.1:${port}"\nos.environ["NODE_TLS_REJECT_UNAUTHORIZED"] = "0"\n# then use requests or httpx as usual`,
-    node: `process.env.HTTP_PROXY = "http://127.0.0.1:${port}";\nprocess.env.HTTPS_PROXY = "http://127.0.0.1:${port}";\nprocess.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";\n// then use fetch / axios / undici as usual`,
-  };
+  const snippets = buildHttpProxySnippets(port);
 
   const copy = async () => {
     await navigator.clipboard.writeText(snippets[lang]);
@@ -48,7 +49,7 @@ export function HttpProxySnippetCard({ port, onClose }: HttpProxySnippetCardProp
         </div>
 
         <div className="flex gap-1 mb-3">
-          {(["bash", "python", "node"] as Lang[]).map((l) => (
+          {HTTP_PROXY_SNIPPET_LANGS.map((l) => (
             <button
               key={l}
               type="button"

@@ -36,35 +36,35 @@ Studio mit drei Tabs, das Websuche, Web-Scraping und den direkten Anbietervergle
 
 ## Tabs
 
-### Tab „Suche“
+### Such-Tab
 
-Entwickelt die bestehende Kombination aus `SearchForm` + `ResultsPanel` + `RerankPanel` zu einem Tab weiter:
+Entwickelt das bestehende `SearchForm` + `ResultsPanel` + `RerankPanel` zu einem Tab weiter:
 
-- Suchanfrage → Ergebnisse (Titel, URL, Ausschnitt, Relevanzbewertung).
+- Abfrage → Ergebnisse (Titel, URL, Ausschnitt, Relevanzbewertung).
 - Anbieter-Metadaten im Konfigurationsbereich (Kosten, Kontingent, Status).
-- Rerank-Bereich: Rerank-Modell auswählen, Ergebnisse neu anordnen, `positionDelta` anzeigen.
-- Leerer Zustand mit Handlungsaufforderung, wenn keine Suchanbieter konfiguriert sind.
+- Rerank-Bereich: Rerank-Modell auswählen, Ergebnisse neu sortieren, `positionDelta` anzeigen.
+- Leerer Zustand mit CTA, wenn keine Suchanbieter konfiguriert sind.
 - Suchverlauf über `SearchHistory.tsx`.
 - Ruft `POST /v1/search` auf (bestehender Endpunkt, keine Änderungen).
 
-### Tab „Scraping“
+### Scrape-Tab
 
 Neuer Tab zum Extrahieren von Inhalten aus einer URL über `POST /v1/web/fetch` (erstellt in Plan 05):
 
-- Eingabe: URL + Umschalter für die gesamte Seite + Formatauswahl (Markdown / Text / HTML).
+- Eingabe: URL + Umschalter für vollständige Seite + Formatauswahl (Markdown / Text / HTML).
 - Absenden → abrufen → `ScrapeResult.tsx` rendern.
-- `ScrapeResult` rendert eine Markdown-Vorschau und einen Umschalter zur Rohansicht.
+- `ScrapeResult` rendert eine Markdown-Vorschau + Umschalter für Rohdaten.
 - Begrenzung: Wenn der Antworttext größer als **256 KB** ist, zeigt die Benutzeroberfläche `(gekürzt, Rohdaten anzeigen)` an und öffnet die Rohdaten in einem Monaco-Modal (D21).
-- Metadatenbereich: Anbieter (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search), Latenz, Kosten, Antwortgröße, Anzahl der Links.
+- Metadatenbereich: Anbieter (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), Latenz, Kosten, Antwortgröße, Anzahl der Links.
 - Verwendet den Hook `useScrapeFetch.ts`.
 
-### Tab „Vergleich“
+### Vergleichs-Tab
 
-Führt dieselbe Suchanfrage/URL bei bis zu **4 Anbietern parallel** aus (D22):
+Führt dieselbe Abfrage/URL bei bis zu **4 Anbietern parallel** aus (D22):
 
 - Nebeneinander angeordnete Spalten pro Anbieter.
 - Metriken: Latenz, Kosten, Anzahl der Ergebnisse, Antwortgröße.
-- Berechnung der URL-Überschneidung für die Suche (Anzahl gemeinsamer URLs im Vergleich zum ursprünglichen Ergebnis).
+- Berechnung der URL-Überschneidung für die Suche (Anzahl gemeinsam vorkommender URLs im Vergleich zum ursprünglichen Ergebnis).
 - Ruft pro Anbieter `POST /v1/search` (Suche) oder `POST /v1/web/fetch` (Scraping) auf.
 
 ---
@@ -98,15 +98,15 @@ Führt dieselbe Suchanfrage/URL bei bis zu **4 Anbietern parallel** aus (D22):
 
 ---
 
-## Anbieterkatalog
+## Anbieter-Katalog
 
 `ProviderCatalog.tsx` stellt die vollständige Anbieterliste aus `GET /api/search/providers` bereit
 (in F4 um Abrufanbieter erweitert):
 
-| `kind` | `"search"` (20 Anbieter) oder `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search) |
+| `kind` | `"search"` (20 Anbieter) oder `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
 Der Status wird **zum Zeitpunkt der Anfrage abgeleitet**, indem geprüft wird, ob Anmeldedaten vorhanden sind und ob
-sich derzeit alle Schlüssel in einer Abklingzeit befinden.
+sich derzeit alle Schlüssel in der Abklingzeit befinden.
 
 ---
 
@@ -120,16 +120,16 @@ Der Platzhalter für den API-Schlüssel ist immer `$OMNIROUTE_API_KEY` (D11, gem
 
 ## Backend-Änderungen
 
-Für diese Funktion war nur eine Backend-Änderung erforderlich:
+Für dieses Feature war nur eine Backend-Änderung erforderlich:
 
 ### Erweitertes `GET /api/search/providers`
 
-`src/app/api/search/providers/route.ts` wurde wie folgt erweitert:
+`src/app/api/search/providers/route.ts` wurde erweitert, um:
 
-- Alle 6 Abrufanbieter (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`) wurden dem Array hinzugefügt.
-- Jedem Element wurde `kind: "search" | "fetch"` hinzugefügt.
-- `status: "configured" | "missing" | "rate_limited"` wurde hinzugefügt und wird aus dem aktuellen Status der Anmeldedaten abgeleitet.
-- Die Abwärtskompatibilität bleibt erhalten — vorhandene Felder (`id`, `name` usw.) sind unverändert.
+- Jeden Fetch-Provider (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`, `parallel-search`) in das Array aufzunehmen.
+- Jedem Element `kind: "search" | "fetch"` hinzuzufügen.
+- `status: "configured" | "missing" | "rate_limited"` hinzuzufügen, abgeleitet aus dem aktuellen Status der Anmeldedaten.
+- Die Abwärtskompatibilität zu wahren — bestehende Felder (`id`, `name` usw.) bleiben unverändert.
 
 ---
 

@@ -519,7 +519,7 @@ Brakuje pliku `-wal`, ale plik `-shm` i główna baza danych są nienaruszone:
 omniroute
 ```
 
-Jeśli SQLite nie może przeprowadzić automatycznego odzyskiwania:
+Jeśli SQLite nie może automatycznie odzyskać danych:
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite ".recover" > recovered.sql
@@ -527,23 +527,26 @@ sqlite3 recovered.db < recovered.sql
 mv recovered.db ~/.omniroute/storage.sqlite
 ```
 
-### Scenariusz 2: Uszkodzenie głównego pliku bazy danych
+### Scenariusz 2: Uszkodzenie pliku głównej bazy danych
 
-Przywróć dane z kopii zapasowej:
+Przywróć z kopii zapasowej:
 
 ```bash
-omniroute sync pull --merge   # lub: omniroute backup restore <backup-id>
+omniroute backup restore <backup-id>
 ```
+
+`omniroute sync pull [outPath]` jedynie pobiera pełne archiwum `.tar.gz` z działającego serwera
+(`GET /api/db-backups/exportAll`, wymagane poświadczenia operatora); nie przywraca żadnych danych.
 
 ### Scenariusz 3: Utrata klucza szyfrowania
 
-Bez klucza **odzyskanie danych nie jest możliwe**. Zaszyfrowanych pól nie można odczytać. Ponownie dodaj ręcznie wszystkich dostawców, używając nowych danych uwierzytelniających.
+**Odzyskanie danych bez klucza nie jest możliwe**. Zaszyfrowane pola są nieczytelne. Dodaj ponownie ręcznie wszystkich dostawców, używając nowych poświadczeń.
 
-> **Środek zaradczy**: Zawsze przechowuj oddzielną kopię zapasową klucza szyfrowania, najlepiej w menedżerze haseł lub systemie KMS.
+> **Ograniczenie ryzyka**: Zawsze twórz osobną kopię zapasową klucza szyfrowania, najlepiej w menedżerze haseł lub systemie KMS.
 
-### Scenariusz 4: Brak miejsca na dysku
+### Scenariusz 4: Zapełnienie dysku
 
-SQLite zwróci błędy `SQLITE_FULL`. Zwolnij miejsce na dysku, a następnie wykonaj:
+SQLite będzie zwracać błędy `SQLITE_FULL`. Zwolnij miejsce na dysku, a następnie wykonaj:
 
 ```bash
 # Wykonaj punkt kontrolny WAL, aby zwolnić miejsce

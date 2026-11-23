@@ -84,6 +84,47 @@ test.after(async () => {
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
+test("hidden Codex models survive live sync and cached routing while picker filtering stays separate", async () => {
+  const connection = await seedCodexConnection({
+    accessToken: "test-token",
+    providerSpecificData: { codexDiscoveryMode: "safe" },
+  });
+  globalThis.fetch = async (url) =>
+    new URL(String(url)).hostname === "raw.githubusercontent.com"
+      ? Response.json({ models: [] })
+      : Response.json({
+          models: [
+            {
+              slug: "codex-auto-review",
+              visibility: "hide",
+              supported_in_api: true,
+              minimal_client_version: "0.98.0",
+            },
+            { slug: "visible-model", visibility: "list", supported_in_api: true },
+          ],
+        });
+  const fresh = await callRoute(connection.id, "?refresh=true");
+  assert.equal(fresh.status, 200);
+  const synced = await modelsDb.getSyncedAvailableModelsForConnection("codex", connection.id);
+  assert.equal(synced.find((model) => model.id === "codex-auto-review")?.visibility, "hide");
+  const { getModelInfo } = await import("../../src/sse/services/model.ts");
+  const resolved = await getModelInfo("codex/codex-auto-review");
+  assert.equal(resolved.provider, "codex");
+  assert.equal(resolved.model, "codex-auto-review");
+  assert.equal(resolved.error, undefined);
+  const cached = await callRoute(connection.id);
+  assert.ok(
+    ((await cached.json()) as RouteBody).models?.some((model) => model.id === "codex-auto-review")
+  );
+  const picker = await callRoute(connection.id, "?excludeHidden=true");
+  assert.equal(
+    ((await picker.json()) as RouteBody).models?.some((model) => model.id === "codex-auto-review"),
+    false
+  );
+  const stillSynced = await modelsDb.getSyncedAvailableModelsForConnection("codex", connection.id);
+  assert.ok(stillSynced.some((model) => model.id === "codex-auto-review"));
+});
+
 test("provider models route merges live Codex models with the local catalog then filters denylist", async () => {
   const connection = await seedCodexConnection({
     accessToken: "codex-access-token",
@@ -176,10 +217,12 @@ test("provider models route merges live Codex models with the local catalog then
     },
   ]);
   assert.ok(modelIds.has("gpt-5.6-sol"));
-  assert.ok(modelIds.has("gpt-5.6-sol-ultra"));
-  assert.ok(modelIds.has("gpt-5.6-sol-max"));
-  // Live payload wins on overlapping fields; local catalog supplies local-only
-  // variants. EXCEPTION: capacity limits (inputTokenLimit/outputTokenLimit)
+  // The live inventory is authoritative: static effort aliases the account does
+  // not advertise are no longer appended to it.
+  assert.equal(modelIds.has("gpt-5.6-sol-ultra"), false);
+  assert.equal(modelIds.has("gpt-5.6-sol-max"), false);
+  // Live payload wins on overlapping fields; the local catalog only enriches
+  // ids the live payload already lists. EXCEPTION: capacity limits (inputTokenLimit/outputTokenLimit)
   // merge conservatively — the smaller of live vs. pinned wins, never the
   // larger, so a stale/inflated live number can never make OmniRoute promise
   // more context than the account can actually serve (#7012). Here the pinned
@@ -193,13 +236,13 @@ test("provider models route merges live Codex models with the local catalog then
   assert.deepEqual(liveModel?.supportedEndpoints, ["responses"]);
   assert.equal(liveModel?.supportsThinking, true);
   assert.equal(liveModel?.supportsVision, true);
-  assert.ok(modelIds.has("gpt-5.5-low"));
+  assert.equal(modelIds.has("gpt-5.5-low"), false);
   assert.equal(
     [...modelIds].some((id) => String(id).startsWith("gpt-5.4")),
     false
   );
   assert.ok(syncedIds.has("gpt-5.6-sol"));
-  assert.ok(syncedIds.has("gpt-5.5-low"));
+  assert.equal(syncedIds.has("gpt-5.5-low"), false);
   assert.equal(
     [...syncedIds].some((id) => String(id).startsWith("gpt-5.4")),
     false
@@ -290,7 +333,8 @@ test("provider models route uses the GitHub Codex catalog when live discovery fa
   assert.ok(seenUrls.some((url) => url.includes("backend-api/codex/models")));
   assert.ok(seenUrls.some((url) => url.includes("raw.githubusercontent.com/openai/codex")));
   assert.ok(modelIds.has("gpt-5.6-sol"));
-  assert.ok(modelIds.has("gpt-5.5-low"));
+  // GitHub manifest ids only: static effort aliases are not appended to it.
+  assert.equal(modelIds.has("gpt-5.5-low"), false);
   assert.equal(
     [...modelIds].some((id) => String(id).startsWith("gpt-5.4")),
     false
@@ -330,14 +374,16 @@ test("provider models route returns cached Codex models when refresh discovery f
   assert.equal(body.discoveredCandidateCount, undefined);
   const modelIds = new Set((body.models || []).map((model) => model.id));
   assert.ok(modelIds.has("gpt-5.6-sol"));
-  assert.ok(modelIds.has("gpt-5.6-sol-ultra"));
+  // The account's cached inventory is authoritative: no static effort aliases.
+  assert.equal(modelIds.has("gpt-5.6-sol-ultra"), false);
   assert.equal(
     [...modelIds].some((id) => String(id).startsWith("gpt-5.4")),
     false
   );
   const syncedModels = await modelsDb.getSyncedAvailableModelsForConnection("codex", connection.id);
   const syncedIds = new Set(syncedModels.map((model) => model.id));
-  assert.ok(syncedIds.has("gpt-5.6-sol-ultra"));
+  assert.ok(syncedIds.has("gpt-5.6-sol"));
+  assert.equal(syncedIds.has("gpt-5.6-sol-ultra"), false);
   assert.equal(syncedIds.has("gpt-5.4"), false);
 });
 

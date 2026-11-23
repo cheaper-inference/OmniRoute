@@ -75,6 +75,28 @@ function applyKimiExecutionMetadata(
   );
 }
 
+/** Catalog reasoning metadata for the Codex executor (discovered tiers + the caller's raw effort). */
+function buildCodexThinkingMetadata(
+  provider: string | null | undefined,
+  modelInfo: Record<string, unknown> | null | undefined,
+  requestBody: Record<string, unknown> | undefined
+): Record<string, unknown> | null {
+  if (provider !== "codex" || !Array.isArray(modelInfo?.supportedThinkingEfforts)) return null;
+  return {
+    model: modelInfo.model,
+    supportedThinkingEfforts: modelInfo.supportedThinkingEfforts,
+    defaultThinkingEffort: modelInfo.defaultThinkingEffort,
+    resolvedThinkingEffort: modelInfo.resolvedThinkingEffort,
+    ...(requestBody
+      ? {
+          requestedThinkingEffort:
+            (requestBody.reasoning as Record<string, unknown> | undefined)?.effort ??
+            requestBody.reasoning_effort,
+        }
+      : {}),
+  };
+}
+
 export function resolveExecutionCredentials(opts: {
   credentials: CredentialsLike;
   nativeCodexPassthrough: boolean;
@@ -83,6 +105,7 @@ export function resolveExecutionCredentials(opts: {
   provider: string | null | undefined;
   ccSessionId: string | null;
   modelInfo?: Record<string, unknown> | null;
+  requestBody?: Record<string, unknown>;
 }): ResolvedExecutionCredentials {
   const {
     credentials,
@@ -92,6 +115,7 @@ export function resolveExecutionCredentials(opts: {
     provider,
     ccSessionId,
     modelInfo,
+    requestBody,
   } = opts;
 
   const nextCredentials = nativeCodexPassthrough
@@ -161,11 +185,17 @@ export function resolveExecutionCredentials(opts: {
   // PROVIDER_MODELS registry via getModelTargetFormat() and has no other way
   // to see a custom model's override — mirrors the zai/glm-coding-apikey fix
   // (#7364) for the same class of bug.
-  if (targetFormat === FORMATS.OPENAI_RESPONSES && provider === "github") {
+  if (
+    targetFormat === FORMATS.OPENAI_RESPONSES &&
+    (provider === "github" || provider === "ghe-copilot")
+  ) {
     providerSpecificData.targetFormat = targetFormat;
   }
 
   applyKimiExecutionMetadata(providerSpecificData, provider, targetFormat, modelInfo);
+  // Request-local resolved catalog metadata; never persist this on the connection.
+  const codexThinking = buildCodexThinkingMetadata(provider, modelInfo, requestBody);
+  if (codexThinking) providerSpecificData._omnirouteCodexThinking = codexThinking;
   const withApiType = {
     ...nextCredentials,
     providerSpecificData,

@@ -125,6 +125,60 @@ describe("KiroAuthModal", () => {
     }
   });
 
+  it("offers Auto / US East / Frankfurt for API keys and sends auto by default", async () => {
+    const { default: KiroAuthModal } = await import("@/shared/components/KiroAuthModal");
+    const container = makeContainer();
+    const root = createRoot(container);
+    const originalFetch = globalThis.fetch;
+    const fetchMock = vi.fn(async () => {
+      return new Response(JSON.stringify({ success: true, connection: { id: "conn-1" } }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    });
+    globalThis.fetch = fetchMock as typeof fetch;
+
+    try {
+      await act(async () => {
+        root.render(withIntl(<KiroAuthModal isOpen onClose={vi.fn()} onMethodSelect={vi.fn()} />));
+      });
+
+      const apiKeyButton = Array.from(container.querySelectorAll("button")).find(
+        (button) => button.querySelector("h3")?.textContent === "API Key"
+      );
+      await act(async () => {
+        apiKeyButton?.click();
+      });
+
+      const regionSelect = container.querySelector("select") as HTMLSelectElement;
+      expect(regionSelect).toBeTruthy();
+      expect(Array.from(regionSelect.options).map((option) => option.value)).toEqual([
+        "auto",
+        "us-east-1",
+        "eu-central-1",
+      ]);
+      expect(regionSelect.value).toBe("auto");
+
+      const apiKeyInput = container.querySelector("input") as HTMLInputElement;
+      await act(async () => {
+        setInputValue(apiKeyInput, "ksk_test_key");
+      });
+      const saveButton = Array.from(container.querySelectorAll("button")).find((button) =>
+        button.textContent?.includes("Validate and Save API Key")
+      );
+      await act(async () => {
+        saveButton?.click();
+      });
+
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      const [, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
+      expect(JSON.parse(String(init.body))).toEqual({ apiKey: "ksk_test_key", region: "auto" });
+    } finally {
+      await act(async () => root.unmount());
+      globalThis.fetch = originalFetch;
+    }
+  });
+
   it("treats successful auto-import as completed instead of importing twice", async () => {
     const { default: KiroAuthModal } = await import("@/shared/components/KiroAuthModal");
     const container = makeContainer();

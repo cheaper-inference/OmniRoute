@@ -93,10 +93,10 @@ for eksempel bare Kimis modeller.
 
 ---
 
-## Introduksjonsblokk på kontrollpanelet
+## Onboarding-blokk på instrumentpanelet
 
-Claude-verktøykortet (**Kontrollpanel → CLI-kode**) viser det nøyaktige `settings.json`-fragmentet
-for denne instansen, ved siden av infoknappen for oppdagelsesaliaset, med en kopieringsknapp:
+Claude-verktøykortet (**Instrumentpanel → CLI Code**) viser det nøyaktige `settings.json`-fragmentet
+for denne instansen, ved siden av informasjonsknappen for discovery-aliaset, med en kopieringsknapp:
 
 ```jsonc
 {
@@ -108,26 +108,40 @@ for denne instansen, ved siden av infoknappen for oppdagelsesaliaset, med en kop
 }
 ```
 
-Basis-URL-en er den kortet finner (inkludert en egendefinert overstyring du skrev inn), allerede
-normalisert — uten `/v1`-suffiks og uten avsluttende skråstrek. **Nøkkelen vises aldri**: blokken leveres med en
-plassholder, slik at et skjermbilde eller en innlimt kodesnutt ikke kan lekke den. Lim inn nøkkelen din over den.
+Basis-URL-en er den som kortet har funnet (inkludert en egendefinert overstyring du skrev inn), og er allerede
+normalisert — uten `/v1`-suffiks og uten avsluttende skråstrek. **Nøkkelen vises aldri**: blokken inneholder en
+plassholder, slik at et skjermbilde eller et innlimt utdrag ikke kan lekke nøkkelen. Lim inn nøkkelen din over plassholderen.
 
 Legg til `CLAUDE_CODE_AUTO_COMPACT_WINDOW` under den samme `env`-blokken for alle modeller der det reelle
 kontekstvinduet ikke er 200K — Claude Code antar 200K for hver id den ikke gjenkjenner, så
 automatisk komprimering utløses ellers på feil tidspunkt (se advarselen i forrige avsnitt).
-Kodesnuttbyggeren godtar også denne verdien, slik at en klient som kjenner målmodellens vindu,
-kan inkludere den direkte.
+Utdragsbyggeren godtar også denne verdien, slik at en anroper som kjenner målmodellens kontekstvindu,
+kan generere den direkte.
 
 Kilde: `src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet` (ren
 bygger, enhetstestet), gjengitt av `ClaudeGatewayOnboardingBlock`.
+
+### Fest én konto (valgfritt)
+
+For å sende hver Claude Code-forespørsel gjennom én bestemt leverandørkonto legger du til
+`x-omniroute-connection`-headeren via `ANTHROPIC_CUSTOM_HEADERS` i den samme `env`-blokken:
+
+```jsonc
+"ANTHROPIC_CUSTOM_HEADERS": "x-omniroute-connection: <connection id>"
+```
+
+Kopier id-en fra `xxxxxxxx…`-brikken på tilkoblingsraden på leverandørsiden. Festingen
+gjelder bare enkeltmodell-id-er (`provider/model`), ikke kombinasjoner. Se
+[Kontofesting per forespørsel](../reference/API_REFERENCE.md#account-pinning-per-request) for
+nøyaktig reserveatferd.
 
 ---
 
 ## Profiler (`CLAUDE_CONFIG_DIR`)
 
-Claude Code har **ingen innebygde profilfiler** (i motsetning til Codex sin `~/.codex/<name>.config.toml`).
-Den anbefalte mekanismen er `CLAUDE_CONFIG_DIR` — en separat konfigurasjonsmappe per
-profil, hver med sin egen `settings.json`, påloggingsinformasjon, historikk og hurtigbuffer.
+Claude Code har **ingen innebygde profilfiler** (i motsetning til Codex' `~/.codex/<name>.config.toml`).
+Den idiomatiske mekanismen er `CLAUDE_CONFIG_DIR` — en separat konfigurasjonskatalog per
+profil, hver med sine egne `settings.json`, legitimasjonsopplysninger, historikk og hurtigbuffer.
 
 `omniroute setup-claude` henter den aktive `/v1/models`-katalogen og skriver én
 profil per modell til `~/.claude/profiles/<name>/settings.json`, med de
@@ -153,13 +167,13 @@ profil per modell til `~/.claude/profiles/<name>/settings.json`, med de
 > aktive konteksten), eller eksporter `ANTHROPIC_AUTH_TOKEN` selv og kjør
 > `CLAUDE_CONFIG_DIR=~/.claude/profiles/<name> claude`.
 
-**Automatisk synkronisering etter modelloppdagelse (valgfritt).** OmniRoute kan generere disse
-`~/.claude/profiles/<name>/settings.json`-filene på nytt automatisk hver gang en synkronisering av leverandørmodeller
-endrer den aktive katalogen — slik at nye modeller og modeller med endrede navn får profiler uten at kommandoen må
-kjøres på nytt. Dette er **slått av som standard**: aktiver det fra **CLI-kodekontrollpanelet** («Automatisk synkronisering av
-CLI-profiler» → Claude Code), eller angi `OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES=true` (det respekterer også
-`CLI_ALLOW_CONFIG_WRITES`, som er aktivert som standard). Når dette er aktivert, skrives bare profilfiler; det endrer aldri
-den aktive eller standard Claude-konfigurasjonen, autentiseringen eller `~/.claude/settings.json`.
+**Automatisk synkronisering etter modelloppdagelse (valgfritt).** OmniRoute kan automatisk generere disse
+`~/.claude/profiles/<name>/settings.json`-filene på nytt hver gang en synkronisering av leverandørmodeller
+endrer den aktive katalogen — slik at nye modeller eller modeller med endrede navn får profiler uten at kommandoen må
+kjøres på nytt. Dette er **slått av som standard**: slå det på fra **CLI Code-kontrollpanelet** («Automatisk synkronisering
+av CLI-profiler» → Claude Code), eller angi `OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES=true` (det respekterer også
+`CLI_ALLOW_CONFIG_WRITES`, som er slått på som standard). Når dette er aktivert, skriver det bare profilfiler; det endrer aldri
+den aktive Claude-standardkonfigurasjonen, autentiseringen eller `~/.claude/settings.json`.
 
 ### Generere og bruke profiler
 
@@ -167,13 +181,17 @@ den aktive eller standard Claude-konfigurasjonen, autentiseringen eller `~/.clau
 # Lokal OmniRoute
 omniroute setup-claude
 
-# Ekstern VPS (legger VPS-URL-en inn i hver profil)
+# Ekstern VPS (bygger inn VPS-URL-en i hver profil)
 omniroute setup-claude --remote http://192.168.0.15:20128 --api-key oma_live_xxx
 
 # Bare enkelte leverandører
 omniroute setup-claude --only glm,kimi
 
-# Forhåndsvisning uten å skrive
+# Skriv også profiler for lokale CLI-leverandører (zcode, auggie, devin-cli-agentic,
+# codex-app-server) som ikke oppdages på denne verten (hoppes over som standard for et lokalt mål)
+omniroute setup-claude --include-local
+
+# Forhåndsvis uten å skrive
 omniroute setup-claude --dry-run
 
 # Start en profil

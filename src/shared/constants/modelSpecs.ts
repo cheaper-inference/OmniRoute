@@ -105,6 +105,23 @@ const AUTHORITATIVE_PROVIDER_CONTEXT_WINDOWS = new Map<string, number>([
   ["opencode-go/glm-5.2", 1000000],
   ["zenmux/z-ai/glm-5.2", 1000000],
   ["zenmux/z-ai/glm-5.2-free", 1000000],
+  // models.dev under-reports Opencode's free Xiaomi MiMo rows at 200000 while
+  // its own non-free siblings (mimo-v2.5, mimo-v2.6-flash) and its other free
+  // row (mimo-v2-pro-free) all declare 1048576. The upstream serves the full
+  // 1M window (sessions observed running past 718K), so the stale sync row
+  // must not cap the advertised context at 200K.
+  ["opencode/mimo-v2.5-free", 1048576],
+  ["opencode-zen/mimo-v2.5-free", 1048576],
+  ["opencode/mimo-v2.6-flash-free", 1048576],
+  ["opencode-zen/mimo-v2.6-flash-free", 1048576],
+  ["opencode-go/mimo-v2.6-flash-free", 1048576],
+  // #16579: imported Go rows may already contain the provider's 200K
+  // placeholder when the catalog enricher runs. Only authoritative windows
+  // replace a non-empty context_length there. These exact Go routes have
+  // upstream-confirmed limits; keep manual operator overrides highest priority.
+  ["opencode-go/deepseek-v4.1-flash", 1000000],
+  ["opencode-go/deepseek-flash", 1000000],
+  ["opencode-go/minimax-m2.5", 204800],
 ]);
 
 const GPT_5_6_MODEL_SPEC = {
@@ -128,11 +145,28 @@ const GEMINI_36_FLASH_MODEL_SPEC = {
 } satisfies ModelSpec;
 
 export const MODEL_SPECS: Record<string, ModelSpec> = {
+  // Public API limits; Codex's smaller window lives in its provider registry.
+  "gpt-6.1-sol": {
+    ...GPT_5_6_MODEL_SPEC,
+    aliases: ["openai/gpt-6.1-sol"],
+  },
   // Public model limits; the Codex registry supplies its smaller OAuth window.
   // https://developers.openai.com/api/docs/models/gpt-6-astra
   "gpt-6-astra": {
     ...GPT_5_6_MODEL_SPEC,
     aliases: ["openai/gpt-6-astra"],
+  },
+  // #15023: Sol and Luna were missing from the spec map; the public API context
+  // window is 1,050,000 (same as Astra). Without an entry, getModelSpec() returned
+  // undefined and any spec-aware path (capability filter, compaction guard) fell
+  // back to 128k, the same wrong value advertised by the importer.
+  "gpt-6-sol": {
+    ...GPT_5_6_MODEL_SPEC,
+    aliases: ["openai/gpt-6-sol"],
+  },
+  "gpt-6-luna": {
+    ...GPT_5_6_MODEL_SPEC,
+    aliases: ["openai/gpt-6-luna"],
   },
   "gpt-5.6": {
     ...GPT_5_6_MODEL_SPEC,
@@ -293,6 +327,18 @@ export const MODEL_SPECS: Record<string, ModelSpec> = {
     supportsVision: true,
   },
 
+  // ── Gemini 4 Argon ──────────────────────────────────────────────
+  "gemini-4-argon": {
+    maxOutputTokens: 65536,
+    contextWindow: 1048576,
+    defaultThinkingBudget: 8192,
+    thinkingBudgetCap: 24576,
+    supportsThinking: true,
+    supportsTools: true,
+    supportsVision: true,
+    aliases: ["gemini-4"],
+  },
+
   // Provider-neutral compatibility for providers that still serve Gemini 3.6.
   // Antigravity/AGY availability is governed by their own provider catalogs and
   // retirement filters; these shared specs must not be treated as an allowlist.
@@ -404,6 +450,38 @@ export const MODEL_SPECS: Record<string, ModelSpec> = {
     aliases: BEDROCK_CLAUDE_ALIASES("claude-sonnet-5"),
   },
 
+  // ── Claude Haiku 5.5 ────────────────────────────────────────────
+  // Adaptive-thinking-only, like Sonnet 5.5: `thinking.type:"enabled"` returns
+  // 400 ("use thinking.type.adaptive and output_config.effort"). Haiku 4.5 and
+  // earlier still accept manual budgets, so this spec must NOT be widened to
+  // the /haiku/ family. Limits from the gateway catalog (context 1M, output 128K).
+  "claude-haiku-5-5": {
+    maxOutputTokens: 128000,
+    contextWindow: 1000000,
+    supportsThinking: true,
+    supportsTools: true,
+    supportsVision: true,
+    adaptiveThinkingOnly: true,
+    aliases: BEDROCK_CLAUDE_ALIASES("claude-haiku-5-5"),
+  },
+
+  // ── Claude Sonnet 5.5 ───────────────────────────────────────────
+  "claude-sonnet-5-5": {
+    // Same shape as Sonnet 5, but it rejects thinking.type:"disabled"
+    // (use between_tools) and forced tool_choice (any/tool).
+    maxOutputTokens: 128000,
+    contextWindow: 1000000,
+    defaultThinkingBudget: 32000,
+    thinkingBudgetCap: 120000,
+    supportsThinking: true,
+    supportsTools: true,
+    supportsVision: true,
+    adaptiveThinkingOnly: true,
+    rejectsThinkingDisabled: true,
+    rejectsForcedToolChoice: true,
+    aliases: BEDROCK_CLAUDE_ALIASES("claude-sonnet-5-5"),
+  },
+
   // ── Claude Opus 4.6 ─────────────────────────────────────────────
   "claude-opus-4-6": {
     maxOutputTokens: 128000,
@@ -466,6 +544,22 @@ export const MODEL_SPECS: Record<string, ModelSpec> = {
     // …and, like Opus 4.7+, rejects manual budgets/`type:"enabled"` (adaptive-only).
     adaptiveThinkingOnly: true,
     aliases: BEDROCK_CLAUDE_ALIASES("claude-fable-5"),
+  },
+
+  // ── Claude Opus 5.5 ─────────────────────────────────────────────
+  "claude-opus-5-5": {
+    maxOutputTokens: 128000,
+    contextWindow: 1000000,
+    defaultThinkingBudget: 32000,
+    thinkingBudgetCap: 120000,
+    supportsThinking: true,
+    supportsTools: true,
+    supportsVision: true,
+    rejectsThinkingDisabled: true,
+    adaptiveThinkingOnly: true,
+    rejectsForcedToolChoice: true,
+    defaultReasoningEffort: "medium",
+    aliases: BEDROCK_CLAUDE_ALIASES("claude-opus-5-5", "claude-opus-5.5"),
   },
 
   // ── Claude Opus 5 ───────────────────────────────────────────────
@@ -683,6 +777,7 @@ export const MODEL_SPECS: Record<string, ModelSpec> = {
     thinkingBudgetCap: 38912,
     supportsThinking: true,
     supportsTools: true,
+    supportsVision: false,
   },
   "glm-5.3-high": {
     maxOutputTokens: 131072,
@@ -690,6 +785,7 @@ export const MODEL_SPECS: Record<string, ModelSpec> = {
     thinkingBudgetCap: 38912,
     supportsThinking: true,
     supportsTools: true,
+    supportsVision: false,
   },
   "glm-5.3-low": {
     maxOutputTokens: 131072,
@@ -697,6 +793,7 @@ export const MODEL_SPECS: Record<string, ModelSpec> = {
     thinkingBudgetCap: 38912,
     supportsThinking: true,
     supportsTools: true,
+    supportsVision: false,
   },
   "glm-5.3-max": {
     maxOutputTokens: 131072,
@@ -704,6 +801,7 @@ export const MODEL_SPECS: Record<string, ModelSpec> = {
     thinkingBudgetCap: 38912,
     supportsThinking: true,
     supportsTools: true,
+    supportsVision: false,
   },
   "glm-5.3-flash-high": {
     maxOutputTokens: 131072,
@@ -796,7 +894,7 @@ export const MODEL_SPECS: Record<string, ModelSpec> = {
   },
   "minimax-m2.5": {
     maxOutputTokens: 131072,
-    contextWindow: 200000,
+    contextWindow: 204800,
     thinkingBudgetCap: 32768,
     supportsThinking: true,
     supportsTools: true,
@@ -882,7 +980,16 @@ function getModelSpecIndex() {
  * getCanonicalModelSpecId() below) — callers that need prefix matching should use
  * that function instead.
  */
-export function findModelSpecIdByExactOrAlias(modelId: string): string | null {
+export function findModelSpecIdByExactOrAlias(
+  modelId: string,
+  options?: { stripNamespace?: boolean }
+): string | null {
+  const slash = modelId.indexOf("/");
+  if (options?.stripNamespace !== false && slash > 0 && slash < modelId.length - 1) {
+    const unnamespaced = modelId.slice(slash + 1);
+    const hit = findModelSpecIdByExactOrAlias(unnamespaced);
+    if (hit) return hit;
+  }
   const lower = modelId.toLowerCase();
   const index = getModelSpecIndex();
   const exactHit = index.exactCi.get(lower);
@@ -892,8 +999,20 @@ export function findModelSpecIdByExactOrAlias(modelId: string): string | null {
   return null;
 }
 
-export function getCanonicalModelSpecId(modelId: string): string | null {
+export function getCanonicalModelSpecId(
+  modelId: string,
+  options?: { stripNamespace?: boolean }
+): string | null {
   if (MODEL_SPECS[modelId]) return modelId;
+
+  // Strip provider/prefix namespace if present (e.g. "vertex/gemini-4-argon" -> "gemini-4-argon",
+  // "agy/gemini-3.8-flash-high" -> "gemini-3.8-flash-high") so provider-qualified IDs match canonical specs.
+  const slash = modelId.indexOf("/");
+  if (options?.stripNamespace !== false && slash > 0 && slash < modelId.length - 1) {
+    const unnamespaced = modelId.slice(slash + 1);
+    const unnamespacedHit = getCanonicalModelSpecId(unnamespaced);
+    if (unnamespacedHit) return unnamespacedHit;
+  }
 
   // Case-insensitive lookups: upstream model ids are often capitalized
   // (e.g. "MiniMax-M2.7") while specs/aliases use lowercase ids (#3141).
@@ -917,8 +1036,11 @@ export function getCanonicalModelSpecId(modelId: string): string | null {
   return null;
 }
 
-export function getModelSpec(modelId: string): ModelSpec | undefined {
-  const canonical = getCanonicalModelSpecId(modelId);
+export function getModelSpec(
+  modelId: string,
+  options?: { stripNamespace?: boolean }
+): ModelSpec | undefined {
+  const canonical = getCanonicalModelSpecId(modelId, options);
   return canonical ? MODEL_SPECS[canonical] : undefined;
 }
 

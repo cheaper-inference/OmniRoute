@@ -437,7 +437,7 @@ In zweckgebundene Unterverzeichnisse aufgeteilt:
 
 ## 4. `open-sse/` — Workspace für die Streaming-Engine
 
-Separater npm-Workspace, der als `@omniroute/open-sse` veröffentlicht wird. Zuständig für die Verarbeitung von Anfragen, Executoren, Übersetzer, Dienste, den Transformer und den MCP-Server.
+Separater npm-Workspace, der als `@omniroute/open-sse` veröffentlicht wird. Zuständig für die Verarbeitung von Anfragen, Executors, Übersetzer, Services, den Transformer und den MCP-Server.
 
 ```
 open-sse/
@@ -445,48 +445,48 @@ open-sse/
 ├── package.json            Workspace-Manifest
 ├── tsconfig.json
 ├── types.d.ts
-├── config/                 Anbieterregister, Header-Profile, Identität, …
+├── config/                 Provider-Registrys, Header-Profile, Identität, …
 ├── handlers/               Anfrage-Handler (Chat, Embeddings, Audio, Bilder, …)
-├── executors/              108 anbieterspezifische HTTP-Executoren
+├── executors/              150 Provider-Executor-Module (Executor-Klassen + providerspezifische Hilfsfunktionen)
 ├── translator/             Formatkonvertierung (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
-├── transformer/            Stream-Transformer für Responses API ↔ Chat Completions
-├── services/               Über 80 Dienstmodule (Kombinationen, Fallback, Kontingente, Identität, …)
+├── transformer/            Responses API ↔ Chat Completions-Stream-Transformer
+├── services/               Mehr als 80 Service-Module (Kombinationen, Fallback, Kontingente, Identität, …)
 ├── utils/                  Streaming-Hilfsfunktionen, TLS-Client, AWS SigV4, Proxy-Fetch, …
-└── mcp-server/             MCP-Server (3 Transportarten, 33 Bereiche, 110 Tools)
+└── mcp-server/             MCP-Server (3 Transporte, 33 Geltungsbereiche, 110 Tools)
 ```
 
 ### 4.1 `open-sse/handlers/`
 
-| Handler                 | Zweck                                                                                   |
-| ----------------------- | --------------------------------------------------------------------------------------- |
-| `chatCore.ts`           | Zentrale Chat-Pipeline (Cache, Ratenbegrenzung, Kombinationsrouting, Executor-Dispatch) |
-| `responsesHandler.ts`   | Einstiegspunkt der OpenAI Responses API                                                 |
-| `embeddings.ts`         | Embeddings                                                                              |
-| `imageGeneration.ts`    | Bilderzeugung                                                                           |
-| `audioSpeech.ts`        | Text-zu-Sprache                                                                         |
-| `audioTranscription.ts` | Sprache-zu-Text                                                                         |
-| `videoGeneration.ts`    | Videoerzeugung                                                                          |
-| `musicGeneration.ts`    | Musikerzeugung                                                                          |
-| `rerank.ts`             | Neusortierung                                                                           |
-| `moderations.ts`        | Moderation                                                                              |
-| `search.ts`             | Websuche                                                                                |
-| `sseParser.ts`          | SSE-Ereignisparser                                                                      |
-| `usageExtractor.ts`     | Extrahiert Token-Anzahlen aus Upstream-Streams                                          |
-| `responseSanitizer.ts`  | Entfernt anbieterspezifisches Rauschen                                                  |
-| `responseTranslator.ts` | Bindeglied zwischen Anbieterantwort und Übersetzungsschicht                             |
+| Handler                 | Zweck                                                                                 |
+| ----------------------- | ------------------------------------------------------------------------------------- |
+| `chatCore.ts`           | Haupt-Chat-Pipeline (Cache, Ratenbegrenzung, Kombinations-Routing, Executor-Dispatch) |
+| `responsesHandler.ts`   | Einstiegspunkt der OpenAI Responses API                                               |
+| `embeddings.ts`         | Embeddings                                                                            |
+| `imageGeneration.ts`    | Bilderzeugung                                                                         |
+| `audioSpeech.ts`        | Text-zu-Sprache                                                                       |
+| `audioTranscription.ts` | Sprache-zu-Text                                                                       |
+| `videoGeneration.ts`    | Videoerzeugung                                                                        |
+| `musicGeneration.ts`    | Musikerzeugung                                                                        |
+| `rerank.ts`             | Neusortierung                                                                         |
+| `moderations.ts`        | Moderation                                                                            |
+| `search.ts`             | Websuche                                                                              |
+| `sseParser.ts`          | SSE-Ereignisparser                                                                    |
+| `usageExtractor.ts`     | Extrahiert Token-Anzahlen aus Upstream-Streams                                        |
+| `responseSanitizer.ts`  | Entfernt providerspezifisches Rauschen                                                |
+| `responseTranslator.ts` | Bindeglied zwischen Provider-Antwort und Übersetzungsschicht                          |
 
 ### 4.2 `open-sse/executors/`
 
-108 Anbieter-Executoren, die jeweils `BaseExecutor` (`base.ts`) erweitern:
+150 Executor-Module auf oberster Ebene (`*.ts` abzüglich `base.ts`, `index.ts` und Tests — die Anzahl wird von `npm run check:docs-counts` ermittelt). Jede Executor-Klasse erweitert `BaseExecutor` (`base.ts`), direkt oder über `DefaultExecutor` beziehungsweise einen anderen Executor; die übrigen Module sind providerspezifische Hilfsfunktionen (Tool-Schemas, Fetch-/TTS-Adapter, Handler für Besonderheiten). Zu den Executors gehören:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`,
 `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`,
 `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`,
 `pollinations`, `qoder`, `vertex`, `devin-desktop` sowie `claudeIdentity.ts`
-(gemeinsame Identitäts-Hilfsfunktion) und `index.ts` (Register).
+(gemeinsame Identitäts-Hilfsfunktion) und `index.ts` (Registry).
 
-> Hinweis: Hier nicht aufgeführte Anbieter werden von `default.ts` über den generischen
-> OpenAI-kompatiblen Executor bedient. Der vollständige Anbieterkatalog (355 Anbieter) befindet sich in
+> Hinweis: Hier nicht aufgeführte Provider werden von `default.ts` mithilfe des generischen
+> OpenAI-kompatiblen Executors bedient. Der vollständige Provider-Katalog (375 Provider) befindet sich in
 > `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`
@@ -510,16 +510,16 @@ Hub-and-Spoke-Übersetzung (OpenAI ist der Hub).
 
 ### 4.4 `open-sse/transformer/`
 
-- `responsesTransformer.ts` — Auf `TransformStream` basierender Konverter für Responses API ↔ Chat
-  Completions (wird von der Catch-all-Route `responses/` verwendet).
+- `responsesTransformer.ts` — auf `TransformStream` basierender Responses API ↔ Chat
+  Completions-Konverter (wird vom Catch-all der Route `responses/` verwendet).
 
 ### 4.5 `open-sse/services/`
 
 Highlights (vollständige Liste unter `open-sse/services/`):
 
-| Aspekt              | Dateien                                                                                                                                                                                                                                                  |
+| Bereich             | Dateien                                                                                                                                                                                                                                                  |
 | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Combo-Routing       | `combo.ts` (19 Strategien), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                    |
+| Combo-Routing       | `combo.ts` (20 Strategien), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                    |
 | Auto-Combo-Engine   | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`             |
 | Ausfallsicherheit   | `accountFallback.ts` (Abklingzeit + Sperrung), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                                     |
 | Kontingente         | `quotaMonitor.ts`, `quotaPreflight.ts`, `bailianQuotaFetcher.ts`, `codexQuotaFetcher.ts`, `deepseekQuotaFetcher.ts`, `openrouterQuotaFetcher.ts`, `openrouterFreeWindow.ts`, `llmgatewayQuotaFetcher.ts`, `crofUsageFetcher.ts`, `antigravityCredits.ts` |
@@ -530,17 +530,17 @@ Highlights (vollständige Liste unter `open-sse/services/`):
 | Token + Sitzung     | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
 | Stufe / Manifest    | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
 | IP / Netzwerk       | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
-| Batches             | `batchProcessor.ts`                                                                                                                                                                                                                                      |
+| Stapelverarbeitung  | `batchProcessor.ts`                                                                                                                                                                                                                                      |
 | Nutzung             | `usage.ts`                                                                                                                                                                                                                                               |
 
 ### 4.6 `open-sse/mcp-server/`
 
 - **110 eindeutige Tools**, verdrahtet in `server.ts` (45 kanonische in `schemas/tools.ts` +
-  Speicher-, Skills-, GitHub-Skills-, Pool-, Gamification-, Plugin-, Notion-, Obsidian-,
+  Speicher-, Skill-, GitHub-Skill-, Pool-, Gamification-, Plugin-, Notion-, Obsidian-,
   lokale Korpus- und Komprimierungsmodule — die Vereinigungsmenge wird von `countUniqueMcpTools` gezählt).
 - **3 Transporte**: stdio, HTTP Streamable, SSE.
-- **33 Scopes**, die zur Laufzeit erzwungen werden — die Basisliste befindet sich in `src/shared/constants/mcpScopes.ts`; der vollständige Satz ist die Vereinigungsmenge der von jedem Tool-Modul deklarierten Scopes.
-- Audit-Tabelle: `mcp_tool_audit` (befüllt durch `audit.ts`).
+- **33 Scopes**, die zur Laufzeit durchgesetzt werden — die Basisliste befindet sich in `src/shared/constants/mcpScopes.ts`; die vollständige Menge ist die Vereinigungsmenge der von jedem Tool-Modul deklarierten Scopes.
+- Audit-Tabelle: `mcp_tool_audit` (gefüllt durch `audit.ts`).
 - Dateien: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`,
   `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`,
   `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`,
@@ -550,20 +550,20 @@ Highlights (vollständige Liste unter `open-sse/services/`):
 ### 4.7 `open-sse/config/`
 
 Provider-Registrierungen (`providerRegistry.ts`, `providerModels.ts`,
-`providerHeaderProfiles.ts`), modellspezifische Registrierungen je Format (`audioRegistry.ts`,
+`providerHeaderProfiles.ts`), formatspezifische Modellregistrierungen (`audioRegistry.ts`,
 `embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`,
 `musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`),
-Identitäts-Hilfsfunktionen (`codexIdentity.ts`, `codexInstructions.ts`,
+Identitätshelfer (`codexIdentity.ts`, `codexInstructions.ts`,
 `anthropicHeaders.ts`, `antigravityUpstream.ts`, `antigravityModelAliases.ts`,
 `cliFingerprints.ts`, `toolCloaking.ts`, `defaultThinkingSignature.ts`),
-Anmeldedaten-Hilfsfunktionen (`credentialLoader.ts`, `codexClient.ts`) und Cloud-
+Anmeldedatenhelfer (`credentialLoader.ts`, `codexClient.ts`) und Cloud-
 Adapter (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`,
 `maritalk.ts`, `oci.ts`, `petals.ts`, `runway.ts`, `sap.ts`, `watsonx.ts`,
 `ollamaModels.ts`, `errorConfig.ts`, `constants.ts`, `registryUtils.ts`).
 
 ### 4.8 `open-sse/utils/`
 
-Streaming-Grundelemente und Anbieter-Hilfsfunktionen: `stream.ts`, `streamHandler.ts`,
+Streaming-Grundelemente und Provider-Hilfsfunktionen: `stream.ts`, `streamHandler.ts`,
 `streamHelpers.ts`, `streamPayloadCollector.ts`, `streamReadiness.ts`,
 `sseHeartbeat.ts`, `proxyFetch.ts`, `proxyDispatcher.ts`, `tlsClient.ts`,
 `networkProxy.ts`, `awsSigV4.ts`, `cacheControlPolicy.ts`,
@@ -668,7 +668,13 @@ Nach Zweck in 6 Unterordner gegliedert.
   `v1-ws-bridge.mjs`, `smoke-electron-packaged.mjs`,
   `run-playwright-tests.mjs`, `run-ecosystem-tests.mjs`,
   `run-protocol-clients-tests.mjs`, `sync-env.mjs`, `healthcheck.mjs`,
-  `system-info.mjs`.
+  `system-info.mjs` sowie die schreibgeschützten Hilfsprogramme zur PR-Überwachung
+  `ci-discriminate.sh` (ordnet die Signaturen fehlgeschlagener Prüfungen eines PRs
+  anhand eines Referenz-PRs oder des Issues für Fehler im Basis-Branch in eigene /
+  übernommene / unbekannte ein) und `audit-worktree.sh`
+  (geänderte Dateien, geschützte Bereiche, entfernte Assertions, Anzahl der
+  Unterdrückungen, verbliebene temporäre tsconfigs, PR-Head im Vergleich zum lokalen
+  HEAD — bevor der PR eines Workers akzeptiert wird).
 - **`scripts/check/`** — `check-cycles.mjs`, `check-docs-sync.mjs`,
   `check-docs-counts-sync.mjs`, `check-env-doc-sync.mjs`,
   `check-deprecated-versions.mjs`, `check-route-validation.mjs`,

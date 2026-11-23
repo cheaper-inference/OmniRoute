@@ -79,6 +79,23 @@ export type TailscaleCheckStatus = {
   brewAvailable: boolean;
   lastError: string | null;
   pid: number | null;
+  /**
+   * Present (and `false`) only when the host-side probes were skipped for a remote
+   * caller: no PATH lookup, no `tailscale status/funnel --json`, no `which brew`.
+   * Install/login/funnel fields then come from persisted state, not a live check.
+   * A probed status omits the field so the local response shape is unchanged.
+   */
+  probed?: false;
+};
+
+/**
+ * Whether the caller may spawn the host-side probes. Route handlers pass the trusted
+ * peer-locality verdict (loopback/LAN only); status routes stay remote-reachable for
+ * the dashboard, so the spawn is gated here at its call site (GHSA-35fw-cv32-2373
+ * class, GHSA-jmq6-8j86-8xqj pattern). Defaults to true for in-process callers.
+ */
+export type TailscaleStatusOptions = {
+  allowLocalProbe?: boolean;
 };
 
 export type TailscaleTunnelStatus = TailscaleCheckStatus & {
@@ -232,7 +249,9 @@ async function resolvePathCommand(command: string) {
   }
 }
 
-async function resolveBinary(): Promise<BinaryResolution> {
+async function resolveBinary({
+  allowPathLookup = true,
+}: { allowPathLookup?: boolean } = {}): Promise<BinaryResolution> {
   const envPath = toNonEmptyString(process.env.TAILSCALE_BIN);
   if (envPath && fs.existsSync(envPath)) {
     return { binaryPath: envPath, installSource: "env", managedInstall: false };
@@ -243,7 +262,8 @@ async function resolveBinary(): Promise<BinaryResolution> {
     return { binaryPath: managedPath, installSource: "managed", managedInstall: true };
   }
 
-  const pathBinary = await resolvePathCommand("tailscale");
+  // The PATH lookup spawns `which`/`where`; the other candidates are plain fs checks.
+  const pathBinary = allowPathLookup ? await resolvePathCommand("tailscale") : null;
   if (pathBinary) {
     return { binaryPath: pathBinary, installSource: "path", managedInstall: false };
   }
@@ -467,7 +487,41 @@ async function getLiveTunnelUrl(binaryPath: string | null) {
   return getTailscaleUrlFromStatusPayload(payload);
 }
 
-export async function getTailscaleCheckStatus(): Promise<TailscaleCheckStatus> {
+/**
+ * Status without any child process (remote callers): binary from the fs-only
+ * candidates, tunnel URL / pid / last error from the persisted state. Login and
+ * funnel state are not checked, so they report false here.
+ */
+async function getUnprobedTailscaleCheckStatus(): Promise<TailscaleCheckStatus> {
+  const resolution = await resolveBinary({ allowPathLookup: false });
+  const state = await readStateFile();
+  const tunnelUrl = toNonEmptyString(state.tunnelUrl);
+  const pid = await readPidFile();
+
+  return {
+    supported: isSupportedPlatform(),
+    installed: Boolean(resolution.binaryPath),
+    managedInstall: resolution.managedInstall,
+    installSource: resolution.installSource,
+    binaryPath: resolution.binaryPath,
+    loggedIn: false,
+    daemonRunning: isProcessAlive(pid || null),
+    running: false,
+    tunnelUrl,
+    apiUrl: getTailscaleApiUrl(tunnelUrl),
+    platform: os.platform(),
+    brewAvailable: false,
+    lastError: getLastError(state),
+    pid,
+    probed: false,
+  };
+}
+
+export async function getTailscaleCheckStatus({
+  allowLocalProbe = true,
+}: TailscaleStatusOptions = {}): Promise<TailscaleCheckStatus> {
+  if (!allowLocalProbe) return getUnprobedTailscaleCheckStatus();
+
   const resolution = await resolveBinary();
   const [state, statusPayload, funnelPayload, brewAvailable] = await Promise.all([
     readStateFile(),
@@ -500,13 +554,41 @@ export async function getTailscaleCheckStatus(): Promise<TailscaleCheckStatus> {
   };
 }
 
-export async function getTailscaleTunnelStatus(): Promise<TailscaleTunnelStatus> {
-  const [check, settings] = await Promise.all([getTailscaleCheckStatus(), getSettings()]);
+export async function getTailscaleTunnelStatus({
+  allowLocalProbe = true,
+}: TailscaleStatusOptions = {}): Promise<TailscaleTunnelStatus> {
+  const [check, settings] = await Promise.all([
+    getTailscaleCheckStatus({ allowLocalProbe }),
+    getSettings(),
+  ]);
   const storedSettingUrl =
     typeof settings.tailscaleUrl === "string" && settings.tailscaleUrl.trim()
       ? settings.tailscaleUrl
       : null;
   const tunnelUrl = check.tunnelUrl || storedSettingUrl;
+
+  if (!allowLocalProbe) {
+    // Nothing was checked live, so the funnel state is the operator's persisted intent
+    // (enableTailscaleTunnel sets tailscaleEnabled + the URL; disable clears them) —
+    // the same source the probed path already falls back to. The phase never claims
+    // not_installed / needs_login, which would require a probe to know.
+    const running = settings.tailscaleEnabled === true && Boolean(tunnelUrl);
+    let phase: TailscaleTunnelPhase = "stopped";
+    if (!check.supported) phase = "unsupported";
+    else if (running) phase = "running";
+    else if (check.lastError) phase = "error";
+
+    return {
+      ...check,
+      loggedIn: running,
+      running,
+      enabled: running,
+      tunnelUrl,
+      apiUrl: getTailscaleApiUrl(tunnelUrl),
+      phase,
+    };
+  }
+
   // If live funnel detection fails (e.g. older CLI or socket permission), fall back to
   // settings.tailscaleEnabled as the authoritative source (set by enableTailscaleTunnel).
   const funnelActive = check.running || (settings.tailscaleEnabled === true && check.loggedIn);

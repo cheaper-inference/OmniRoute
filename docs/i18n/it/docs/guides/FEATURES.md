@@ -298,13 +298,13 @@ Comportamenti principali:
 
 ## 🔑 Token di sincronizzazione e bundle di configurazione _(v3.6.6+)_
 
-L'accesso da più dispositivi e da parte di operatori esterni è ora possibile tramite **token di sincronizzazione con ambito definito**:
+L'accesso da più dispositivi e da parte di operatori esterni è ora possibile tramite **token di sincronizzazione con ambiti definiti**:
 
-- **`POST /api/sync/tokens`** — Emette un nuovo token di sincronizzazione (con ambito definito e scadenza opzionale)
+- **`POST /api/sync/tokens`** — Emette un nuovo token di sincronizzazione (con ambiti definiti e scadenza facoltativa)
 - **`DELETE /api/sync/tokens/:id`** — Revoca un token
-- **`GET /api/sync/bundle`** — Scarica uno snapshot JSON con versione e identificato tramite ETag di tutte le impostazioni non sensibili (password oscurate)
+- **`GET /api/sync/bundle`** — Scarica uno snapshot JSON della configurazione, dotato di versione e identificato tramite ETag (autenticato esclusivamente con un token di sincronizzazione). Le impostazioni di autenticazione, come la password della dashboard, vengono rimosse, ma le credenziali dei provider e le chiavi API sono incluse; pertanto, il file deve essere trattato come un segreto
 
-Il bundle di configurazione viene generato da `src/lib/sync/bundle.ts`. I client confrontano l'header di risposta `ETag` per rilevare le modifiche senza scaricare nuovamente l'intero payload.
+Il bundle di configurazione viene generato da `src/lib/sync/bundle.ts`. I client confrontano l'header di risposta `ETag` per rilevare le modifiche senza scaricare nuovamente l'intero payload. Dalla CLI, `omniroute sync bundle <outPath> --token <syncToken>` (oppure `OMNIROUTE_SYNC_TOKEN`) lo salva in un file accessibile esclusivamente al proprietario.
 
 ---
 
@@ -316,14 +316,14 @@ Con la v3.6.6 arriva anche il **conteggio ibrido dei token**: quando un provider
 
 ---
 
-## 🛡️ Recupero sicuro in uscita e protezione SSRF _(v3.6.6+)_
+## 🛡️ Fetch in uscita sicuro e protezione SSRF _(v3.6.6+)_
 
-Tutte le chiamate di convalida dei provider e di individuazione dei modelli passano ora attraverso una protezione in uscita a due livelli:
+Tutte le chiamate di convalida dei provider e di rilevamento dei modelli passano ora attraverso una protezione in uscita a due livelli:
 
-1. **Protezione URL** (`src/shared/network/outboundUrlGuard.ts`) — Blocca gli intervalli di indirizzi IP privati, di loopback e link-local prima dell'apertura del socket.
-2. **Wrapper per il recupero sicuro** (`src/shared/network/safeOutboundFetch.ts`) — Applica la protezione URL, normalizza i timeout e ritenta gli errori transitori con backoff esponenziale.
+1. **Protezione URL** (`src/shared/network/outboundUrlGuard.ts`) — Controlla innanzitutto il nome host o l'indirizzo IP letterale della destinazione così come è scritto; in modalità solo pubblica, il wrapper di fetch sicuro risolve anche il nome e rifiuta gli indirizzi privati risultanti. Per impostazione predefinita, blocca gli endpoint dei metadati cloud, ossia l'intero intervallo 169.254.0.0/16 più i nomi host noti dei metadati; `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` blocca anche gli host privati e di loopback; `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS=true` (o la variabile legacy `OUTBOUND_SSRF_GUARD_ENABLED=false`) disattiva i controlli. Un valore salvato tramite l'interruttore di un flag nella dashboard ha la precedenza sulla relativa variabile, mentre i provider locali integrati ignorano la protezione durante la convalida della chiave. Consulta `docs/reference/ENVIRONMENT.md`.
+2. **Wrapper di fetch sicuro** (`src/shared/network/safeOutboundFetch.ts`) — Applica la protezione URL, normalizza i timeout e riprova in caso di errori transitori con backoff esponenziale.
 
-Le violazioni della protezione vengono segnalate come HTTP 422 (`URL_GUARD_BLOCKED`) e registrate nel log di audit della conformità tramite `providerAudit.ts`.
+Le violazioni della protezione vengono segnalate come `URL_GUARD_BLOCKED` — HTTP 503 tramite `getSafeOutboundFetchErrorStatus` (400 sulla route di rilevamento dei modelli) — e i blocchi SSRF effettivi durante la convalida vengono registrati nel log di audit come eventi `provider.validation.ssrf_blocked`.
 
 ---
 

@@ -39,11 +39,11 @@ Objektīvs funkciju salīdzinājums ar populāriem atvērtā pirmkoda MI maršru
 
 ## Kad izvēlēties OmniRoute
 
-- Jūs veicat pašmitināšanu un vēlaties **maksimālu pakalpojumu sniedzēju pārklājumu** (329 pakalpojumu sniedzēji, 155 bezmaksas/bezautentifikācijas kataloga ieraksti)
-- Jums nepieciešams **iebūvēts MCP serveris** (LLM rīki, atmiņa un prasmes, kas pieejamas kā rīki)
-- Jums nepieciešams **A2A protokols** aģentu savstarpējām darbplūsmām
-- Jūs vēlaties **digitālā nospieduma maskēšanu** (JA3/JA4), lai izvairītos no augšupējo CAPTCHA sistēmu veiktas noteikšanas
-- Jums nepieciešamas **uzņēmumu līmeņa funkcijas** (aizsargmehānismi, novērtēšana, audita žurnāls) bez SaaS rēķina
+- Jūs pats mitināt risinājumu un vēlaties **maksimālu pakalpojumu sniedzēju pārklājumu** (374 pakalpojumu sniedzēji, 155 bezmaksas/kataloga ieraksti bez autentifikācijas)
+- Jums ir nepieciešams **iebūvēts MCP serveris** (LLM rīki, atmiņa un prasmes, kas pieejamas kā rīki)
+- Jums ir nepieciešams **A2A protokols** aģentu savstarpējām darbplūsmām
+- Jūs vēlaties **digitālā pirkstu nospieduma maskēšanu** (JA3/JA4), lai izvairītos no augšupējo CAPTCHA sistēmu konstatēšanas
+- Jums ir nepieciešami **uzņēmuma līmeņa līdzekļi** (aizsargmehānismi, novērtēšana, audita žurnāls) bez SaaS abonēšanas izmaksām
 
 ## Kad izvēlēties LiteLLM
 

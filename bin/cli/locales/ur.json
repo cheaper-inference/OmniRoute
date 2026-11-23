@@ -123,7 +123,9 @@
       "maxCostOpt": "فی دن زیادہ سے زیادہ لاگت (USD)",
       "allowedModelsOpt": "اجازت یافتہ ماڈلز کی کاما سے جدا فہرست",
       "nothingToSet": "پالیسی کا کوئی فیلڈ فراہم نہیں کیا گیا۔ --rate-limit، --max-cost، یا --allowed-models استعمال کریں۔",
-      "updated": "پالیسی اپ ڈیٹ کر دی گئی۔"
+      "updated": "پالیسی اپ ڈیٹ کر دی گئی۔",
+      "modelAccessModeOpt": "ماڈل تک رسائی کا طریقہ (all | restricted)",
+      "unrestrictedOpt": "تمام ماڈلز کی اجازت دیں (--model-access-mode all)"
     },
     "expiration": {
       "title": "کلید کی میعاد",
@@ -254,6 +256,7 @@
     "log": "سرور لاگز inline دکھائیں",
     "no_recovery": "کریش ہونے پر خودکار دوبارہ آغاز غیر فعال کریں (debugging موڈ)",
     "max_restarts": "ہار ماننے سے پہلے 30s کے اندر کریش کے بعد دوبارہ آغاز کی زیادہ سے زیادہ تعداد (ڈیفالٹ: 2)",
+    "headless": "صرف پراکسی انجن چلائیں: ڈیش بورڈ غیر فعال (404)، اختیاری ذیلی نظام چھوڑ دیے جاتے ہیں (OMNIROUTE_HEADLESS=1 سیٹ کرتا ہے)",
     "tray": "سسٹم ٹرے میں شروع کریں (صرف ڈیسک ٹاپ، اختیاری)",
     "no_tray": "سسٹم ٹرے آئیکن غیر فعال کریں",
     "ready_timeout": "ریڈینس پروب کا ٹائم آؤٹ ملی سیکنڈ میں (OMNIROUTE_READY_TIMEOUT_MS بھی، ڈیفالٹ 60000)",
@@ -1168,32 +1171,18 @@
   "sync": {
     "description": "OmniRoute انسٹینسز کے درمیان کنفیگریشن ہم وقت کریں",
     "push": {
-      "description": "کنفیگریشن کو کلاؤڈ یا ریموٹ انسٹینس پر پُش کریں",
-      "target": "ہدف (cloud یا context:name)",
-      "bundle": "ہم وقت کرنے کے لیے بنڈل کے حصے",
-      "dryRun": "لاگو کیے بغیر پیش منظر دیکھیں"
+      "description": "کنفیگریشن کو کلاؤڈ یا ریموٹ انسٹینس پر پُش کریں"
     },
     "pull": {
-      "description": "کلاؤڈ یا ریموٹ سے کنفیگ حاصل کریں",
-      "source": "ماخذ (cloud یا context:name)",
-      "merge": "موجودہ کنفیگ کے ساتھ ضم کریں",
-      "replace": "موجودہ کنفیگ تبدیل کریں",
-      "dryRun": "لاگو کیے بغیر پیش منظر دیکھیں"
-    },
-    "diff": {
-      "source": "ماخذ کا سیاق",
-      "target": "ہدف کا سیاق"
+      "description": "کلاؤڈ یا ریموٹ سے کنفیگ حاصل کریں"
     },
     "bundle": {
       "description": "کنفیگ کو بنڈل فائل کے طور پر برآمد کریں",
-      "include": "شامل کیے جانے والے حصے (کاما سے علیحدہ)"
+      "token": "Sync token (from `sync tokens create`); defaults to OMNIROUTE_SYNC_TOKEN"
     },
     "import": {
       "description": "بنڈل فائل درآمد کریں",
       "dryRun": "لاگو کیے بغیر توثیق کریں"
-    },
-    "initialize": {
-      "fromCloud": "کلاؤڈ بیک اپ سے ابتدائی ترتیب بنائیں"
     },
     "tokens": {
       "description": "ہم وقتی ٹوکنز کا نظم کریں",
@@ -1205,9 +1194,6 @@
       "revoke": {
         "yes": "تصدیق چھوڑ دیں"
       }
-    },
-    "resolve": {
-      "description": "ہم وقتی تنازعات کو متعامل طور پر حل کریں"
     }
   },
   "config": {

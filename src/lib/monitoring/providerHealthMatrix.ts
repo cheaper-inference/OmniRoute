@@ -1,3 +1,4 @@
+import { registerDbStateResetter } from "@/lib/db/stateReset";
 import { getSyncedAvailableModelsByConnection } from "@/lib/db/models";
 import { getProviderConnections } from "@/lib/db/providers";
 import { getDbInstance } from "@/lib/db/core";
@@ -5,6 +6,7 @@ import { getAllCircuitBreakerStatuses } from "@/shared/utils/circuitBreaker";
 import { getAllModelLockouts } from "@omniroute/open-sse/services/accountFallback";
 import { resolveProviderAlias } from "@omniroute/open-sse/services/model";
 import { getWebSessionPoolHealth } from "@omniroute/open-sse/services/webSessionPoolHealth";
+import { createHealthSnapshotCache } from "./healthSnapshotCache";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -16,6 +18,7 @@ export interface ProviderHealthMatrixOptions {
   provider?: string | null;
   range?: ProviderHealthMatrixRange | string | null;
   includeHealthy?: boolean;
+  includeIdleModels?: boolean;
 }
 
 export interface ProviderHealthMatrixModel {
@@ -47,6 +50,7 @@ export interface ProviderHealthMatrixAccount {
   errorCode: string | null;
   backoffLevel: number;
   modelCount: number;
+  omittedIdleModelCount: number;
   issueCount: number;
   models: ProviderHealthMatrixModel[];
 }
@@ -120,6 +124,9 @@ interface CallLogTargetStats {
   lastStatus: number | null;
   lastErrorStatus: number | null;
 }
+
+const statsCache = createHealthSnapshotCache<{ rows: CallLogTargetStats[]; cutoff: string }>();
+registerDbStateResetter(() => statsCache.clear());
 
 /** Exported so other surfaces reporting over a window use the same scale. */
 export const RANGE_MS: Record<ProviderHealthMatrixRange, number> = {
@@ -358,11 +365,11 @@ export async function buildProviderHealthMatrix(
   // Connections use canonical ids while circuit breakers, lockouts, and historical
   // call logs can retain the alias used at dispatch time. Normalize all sources here
   // so a provider has one health row with every related signal attached.
-  const [connections, breakers, lockouts, rawStats] = await Promise.all([
+  const [connections, breakers, lockouts, statsSnapshot] = await Promise.all([
     getProviderConnections({}),
     getAllCircuitBreakerStatuses(),
     getAllModelLockouts(),
-    Promise.resolve(queryCallLogTargetStats(cutoff, null)),
+    statsCache.get(range, () => ({ rows: queryCallLogTargetStats(cutoff, null), cutoff })),
   ]);
 
   const connectionRows = (connections as unknown as JsonRecord[]).filter((connection) => {
@@ -377,7 +384,7 @@ export async function buildProviderHealthMatrix(
     const provider = canonicalProviderId(lockout.provider);
     return provider && (!providerFilter || provider === providerFilter);
   });
-  const stats = rawStats
+  const stats = statsSnapshot.rows
     .map((row) => ({ ...row, provider: canonicalProviderId(row.provider) ?? row.provider }))
     .filter((row) => !providerFilter || row.provider === providerFilter);
 
@@ -487,7 +494,11 @@ export async function buildProviderHealthMatrix(
         if (model) modelIds.add(model);
       }
 
-      const models = [...modelIds].sort().map((model): ProviderHealthMatrixModel => {
+      // Idle lines (no traffic in the window and no live lockout) stay out of the
+      // default payload but remain counted, so large catalogs transfer only
+      // the models with activity.
+      const includeIdleModels = options.includeIdleModels === true;
+      const builtModels = [...modelIds].sort().map((model): ProviderHealthMatrixModel => {
         const stat = statsByTarget.get(statsKey(provider, connectionId, model)) ?? null;
         const lockout = lockoutsByTarget.get(modelLockKey(provider, connectionId, model)) ?? null;
         const isLockedOut = Boolean(lockout);
@@ -508,6 +519,10 @@ export async function buildProviderHealthMatrix(
           lastErrorAt: stat?.lastErrorAt ?? null,
         };
       });
+      const models = includeIdleModels
+        ? builtModels
+        : builtModels.filter((model) => model.status !== "idle");
+      const omittedIdleModelCount = includeIdleModels ? 0 : modelIds.size - models.length;
 
       const cooldownUntil = connection ? parseTimeMs(connection.rateLimitedUntil) : null;
       const cooldownRemainingMs = cooldownUntil ? Math.max(0, cooldownUntil - now) : 0;
@@ -529,7 +544,8 @@ export async function buildProviderHealthMatrix(
         lastErrorType: connection ? toString(connection.lastErrorType) : null,
         errorCode: connection ? toString(connection.errorCode) : null,
         backoffLevel: connection ? toNumber(connection.backoffLevel) : 0,
-        modelCount: models.length,
+        modelCount: modelIds.size,
+        omittedIdleModelCount,
         issueCount,
         models,
       });
@@ -602,7 +618,7 @@ export async function buildProviderHealthMatrix(
   return {
     checkedAt,
     range,
-    cutoff,
+    cutoff: statsSnapshot.cutoff,
     summary: {
       providerCount: providers.length,
       connectionCount: providers.reduce((sum, provider) => sum + provider.connections.total, 0),

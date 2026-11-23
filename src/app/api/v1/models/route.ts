@@ -1,6 +1,8 @@
 import { after } from "next/server";
 
 import { getUnifiedModelsResponse } from "./catalog";
+import { getFilteredCatalogResponse } from "./catalogDiscovery";
+import { hasCatalogDiscoveryParams } from "./catalogFilters";
 
 /**
  * Handle CORS preflight
@@ -31,8 +33,20 @@ export async function HEAD() {
 
 /**
  * GET /v1/models - OpenAI compatible models list
+ *
+ * Optional discovery filters: `capability` (repeatable / comma-separated),
+ * `min_context`, `kind`, `q`. Without any of them the response is untouched.
  */
 export async function GET(request: Request) {
+  if (hasCatalogDiscoveryParams(new URL(request.url).searchParams)) {
+    return getFilteredCatalogResponse(request, (catalogRequest) =>
+      getUnifiedModelsResponse(
+        catalogRequest,
+        {},
+        { scheduleBackgroundRefresh: (task) => after(task) }
+      )
+    );
+  }
   return getUnifiedModelsResponse(
     request,
     {},

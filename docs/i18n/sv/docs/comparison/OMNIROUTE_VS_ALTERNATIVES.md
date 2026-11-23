@@ -39,11 +39,11 @@ Objektiv funktionsjämförelse med populära AI-routrar med öppen källkod.
 
 ## När du bör välja OmniRoute
 
-- Du driftar själv och vill ha **maximal leverantörstäckning** (329 leverantörer, 155 katalogposter utan kostnad/autentisering)
+- Du driftar själv och vill ha **maximal leverantörstäckning** (374 leverantörer, 155 kostnadsfria katalogposter utan autentisering)
 - Du behöver en **inbyggd MCP-server** (LLM-verktyg, minne och färdigheter som exponeras som verktyg)
 - Du behöver **A2A-protokollet** för arbetsflöden mellan agenter
-- Du vill ha **dolda fingeravtryck** (JA3/JA4) för att undvika upptäckt av uppströms CAPTCHA-system
-- Du behöver **företagsfunktioner** (skyddsräcken, utvärderingar, granskningslogg) utan en SaaS-faktura
+- Du vill ha **fingeravtrycksmaskering** (JA3/JA4) för att undvika upptäckt av CAPTCHAs hos uppströmsleverantörer
+- Du behöver **företagsfunktioner** (skyddsräcken, utvärderingar och revisionsspår) utan kostnaden för en SaaS-tjänst
 
 ## När du bör välja LiteLLM
 

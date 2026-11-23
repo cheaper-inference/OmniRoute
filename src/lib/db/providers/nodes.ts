@@ -8,6 +8,7 @@ import { selectProviderNodeForConnection } from "../providerNodeSelect";
 import { backupDbFile } from "../backup";
 import { invalidateDbCache } from "../readCache";
 import { toRecord, type JsonRecord } from "./columns";
+import { resetProviderNodePrefixCache } from "./nodePrefix";
 
 function normalizeDailyQuotaResetHour(value: unknown): number | null {
   return value === 0 || value ? Number(value) : null;
@@ -89,6 +90,33 @@ export async function resolveProviderNodeForConnection(idOrType: string) {
   return selectProviderNodeForConnection(idOrType, all);
 }
 
+export const PROVIDER_NODE_ID_CONFLICT = "PROVIDER_NODE_ID_CONFLICT";
+
+/** Thrown by createProviderNode when a node with the same id already exists. */
+export class ProviderNodeIdConflictError extends Error {
+  readonly code = PROVIDER_NODE_ID_CONFLICT;
+  readonly nodeId: string;
+
+  constructor(nodeId: string) {
+    super(`Provider node ID "${nodeId}" already exists`);
+    this.name = "ProviderNodeIdConflictError";
+    this.nodeId = nodeId;
+  }
+}
+
+// Matched by `code` (not only `instanceof`) so the guard survives duplicated module
+// instances across bundles/realms.
+export function isProviderNodeIdConflictError(
+  error: unknown
+): error is ProviderNodeIdConflictError {
+  return (
+    error instanceof ProviderNodeIdConflictError ||
+    (typeof error === "object" &&
+      error !== null &&
+      (error as { code?: unknown }).code === PROVIDER_NODE_ID_CONFLICT)
+  );
+}
+
 export async function createProviderNode(data: JsonRecord) {
   const db = getDbInstance() as unknown as DbLike;
   const now = new Date().toISOString();
@@ -113,15 +141,22 @@ export async function createProviderNode(data: JsonRecord) {
     updatedAt: now,
   };
 
-  db.prepare(
-    `
+  const result = db
+    .prepare(
+      `
     INSERT INTO provider_nodes (id, type, name, prefix, api_type, base_url, chat_path, models_path, icon_url, custom_headers_json, daily_quota_reset_timezone, daily_quota_reset_hour, created_at, updated_at)
     VALUES (@id, @type, @name, @prefix, @apiType, @baseUrl, @chatPath, @modelsPath, @iconUrl, @customHeadersJson, @dailyQuotaResetTimezone, @dailyQuotaResetHour, @createdAt, @updatedAt)
+    ON CONFLICT(id) DO NOTHING
   `
-  ).run(node);
+    )
+    .run(node);
+  // Ids can be operator-chosen (custom suffix), so a collision is a caller error,
+  // never a silent overwrite nor an unhandled constraint failure.
+  if ((result?.changes ?? 0) === 0) throw new ProviderNodeIdConflictError(String(node.id));
 
   backupDbFile("pre-write");
   invalidateDbCache("nodes");
+  resetProviderNodePrefixCache();
 
   return withParsedCustomHeaders({ ...node }, customHeadersJson);
 }
@@ -180,6 +215,7 @@ export async function updateProviderNode(id: string, data: JsonRecord) {
 
   backupDbFile("pre-write");
   invalidateDbCache("nodes");
+  resetProviderNodePrefixCache();
 
   return withParsedCustomHeaders(merged, (merged["customHeadersJson"] as string | null) ?? null);
 }
@@ -192,5 +228,6 @@ export async function deleteProviderNode(id: string) {
   db.prepare("DELETE FROM provider_nodes WHERE id = ?").run(id);
   backupDbFile("pre-write");
   invalidateDbCache("nodes");
+  resetProviderNodePrefixCache();
   return rowToCamel(existing);
 }

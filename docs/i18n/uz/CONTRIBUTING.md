@@ -17,13 +17,13 @@ qamrovi va muvofiqlashtirish bosqichlari bilan bogʻlangan.
 
 ### Dastlabki talablar
 
-- **Node.js** `>=22.22.3 <23` yoki `>=24.0.0 <27` (tavsiya etiladi: 24 LTS)
+- **Node.js** `>=22.22.2 <23` yoki `>=24.0.0 <27` (tavsiya etiladi: 24 LTS)
 - **npm** 10+
 
-> **npm v11+ foydalanuvchilari (Node 24+):** `npm install` dan soʻng mahalliy modullar oʻrnatilganini tekshiring:
+> **npm v11+ foydalanuvchilari (Node 24+):** `npm install` buyrugʻidan soʻng mahalliy modullar oʻrnatilganini tekshiring:
 > `node -e "require('better-sqlite3')"`. Agar u `MODULE_NOT_FOUND` xatosi bilan bajarilmasa,
-> `npm approve-scripts better-sqlite3 && npm install` buyrugʻini ishga tushiring. Quyidagiga qarang:
-> [Muammolarni bartaraf etish](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
+> `npm approve-scripts better-sqlite3 && npm install` buyrugʻini ishga tushiring. Batafsil:
+> [Nosozliklarni bartaraf etish](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
 - **Git**
 
@@ -48,13 +48,13 @@ echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 
 Ishlab chiqish uchun asosiy oʻzgaruvchilar:
 
-| Oʻzgaruvchi            | Ishlab chiqishdagi standart qiymat | Tavsif                       |
-| ---------------------- | ---------------------------------- | ---------------------------- |
-| `PORT`                 | `20128`                            | Server porti                 |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`           | Frontend uchun asosiy URL    |
-| `JWT_SECRET`           | (yuqorida yarating)                | JWT imzolash maxfiy kaliti   |
-| `INITIAL_PASSWORD`     | `CHANGEME`                         | Birinchi kirish paroli       |
-| `APP_LOG_LEVEL`        | `info`                             | Jurnal tafsilotlari darajasi |
+| Oʻzgaruvchi            | Ishlab chiqishdagi standart qiymat | Tavsif                          |
+| ---------------------- | ---------------------------------- | ------------------------------- |
+| `PORT`                 | `20128`                            | Server porti                    |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`           | Frontend uchun asosiy URL       |
+| `JWT_SECRET`           | (yuqorida yarating)                | JWT imzolash uchun maxfiy kalit |
+| `INITIAL_PASSWORD`     | `CHANGEME`                         | Birinchi kirish uchun parol     |
+| `APP_LOG_LEVEL`        | `info`                             | Jurnal tafsilotlari darajasi    |
 
 ### Boshqaruv paneli sozlamalari
 
@@ -65,7 +65,7 @@ Boshqaruv paneli muhit oʻzgaruvchilari orqali ham sozlanishi mumkin boʻlgan fu
 | Sozlamalar → Kengaytirilgan | Nosozliklarni tuzatish rejimi | Nosozliklarni tuzatish soʻrov jurnallarini yoqish (UI) |
 | Sozlamalar → Umumiy         | Yon panel koʻrinishi          | Yon panel boʻlimlarini koʻrsatish/yashirish            |
 
-Bu sozlamalar maʼlumotlar bazasida saqlanadi va qayta ishga tushirishlar davomida saqlanib qoladi; ular oʻrnatilganda muhit oʻzgaruvchilarining standart qiymatlarini bekor qiladi.
+Bu sozlamalar maʼlumotlar bazasida saqlanadi va qayta ishga tushirishlar orasida saqlanib qoladi; oʻrnatilganda ular muhit oʻzgaruvchilarining standart qiymatlarini bekor qiladi.
 
 ### Mahalliy muhitda ishga tushirish
 
@@ -73,54 +73,48 @@ Bu sozlamalar maʼlumotlar bazasida saqlanadi va qayta ishga tushirishlar davomi
 # Ishlab chiqish rejimi (avtomatik qayta yuklash)
 npm run dev
 
-# Ishlab chiqarish uchun build
-npm run build    # next build → .build/next/, soʻng assembleStandalone → dist/
+# Ishlab chiqarish uchun yigʻish
+npm run build    # next build → .build/next/, keyin assembleStandalone → dist/
 npm run start
 
-# Hissa qoʻshuvchilar oʻzgarishlari uchun faqat backend/API ni tezkor kompilyatsiya qilish
+# Hissa qoʻshuvchilar oʻzgarishlari uchun faqat backend/API’ni tezkor kompilyatsiya qilish
 npm run build:contributor
 
-# Reliz buildi (toza qayta build + HEAD sentinel — deploy uchun talab qilinadi)
+# Reliz yigʻilishi (toza qayta yigʻish + HEAD nazorat belgisi — joylashtirish uchun talab qilinadi)
 npm run build:release   # rm -rf .build dist && build + dist/BUILD_SHA fayliga yozadi
 
-# Keng tarqalgan port konfiguratsiyasi
+# Keng tarqalgan port sozlamasi
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Hissa qoʻshuvchi buildi faqat kompilyatsiya tekshiruvini bajaradi: u mustaqil
-tarqatma toʻplamini yigʻmaydi yoki ixtiyoriy mahalliy paketlash resurslarini build qilmaydi. Yetkazib beriladigan
-toʻplamni tekshirishingiz kerak boʻlganda odatiy ishlab chiqarish buildidan foydalaning.
+Hissa qoʻshuvchilar yigʻilishi faqat kompilyatsiya tekshiruvini bajaradi: u mustaqil distributivni yigʻmaydi yoki ixtiyoriy mahalliy paketlash resurslarini yaratmaydi. Yetkazib beriladigan toʻplamni tekshirish kerak boʻlganda, odatiy ishlab chiqarish yigʻilishidan foydalaning.
 
-### Build natijasi tuzilishi
+### Yigʻish natijasi tuzilishi
 
-| Katalog   | Tarkibi                                                                              | Kuzatiladi |
-| --------- | ------------------------------------------------------------------------------------ | ---------- |
-| `src/`    | Ilova manba kodi (TypeScript / TSX)                                                  | Ha         |
-| `.build/` | Oraliq fayllar — `next build` natijasi (gitignored, `distDir = .build/next`)         | Yoʻq       |
-| `dist/`   | Yetkazib beriladigan toʻplam — `assembleStandalone` tomonidan yigʻiladi (gitignored) | Yoʻq       |
+| Katalog   | Tarkibi                                                                                                        | Kuzatiladimi |
+| --------- | -------------------------------------------------------------------------------------------------------------- | ------------ |
+| `src/`    | Ilova manba kodi (TypeScript / TSX)                                                                            | Ha           |
+| `.build/` | Oraliq fayllar — `next build` natijasi (git tomonidan eʼtiborsiz qoldiriladi, `distDir = .build/next`)         | Yoʻq         |
+| `dist/`   | Yetkazib beriladigan toʻplam — `assembleStandalone` tomonidan yigʻiladi (git tomonidan eʼtiborsiz qoldiriladi) | Yoʻq         |
 
-Build jarayoni bitta oʻtishda bajariladi:
+Yigʻish jarayoni bir bosqichda amalga oshiriladi:
 
 ```
 npm run build
   └─ next build → .build/next/standalone  (Next.js natijasi)
-  └─ assembleStandalone()                 (mustaqil toʻplam + statik fayllar + public + mahalliy resurslarni nusxalaydi)
-       └─ natija: dist/                    (server.js, .next/static/, public/, node_modules/)
+  └─ assembleStandalone()                 (mustaqil fayllar + statik fayllar + ommaviy fayllar + mahalliy resurslarni nusxalaydi)
+       └─ natija: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` bundan tashqari avval ikkala katalogni ham tozalaydi va deploy yaxlitligini tekshiruvchi sentinel sifatida
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) fayliga yozadi.
+`npm run build:release` qoʻshimcha ravishda avval har ikkala katalogni tozalaydi va joylashtirish yaxlitligini tekshirish belgisi sifatida `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) faylini yozadi.
 
-`npm run build:contributor` faqat backend uchun moʻljallangan build profilidan foydalanadi. Build davomida u
-boshqaruv paneli UI fayllarini vaqtincha stub fayllar bilan almashtiradi, API marshrut ishlov beruvchilarini saqlab qoladi va builddan
-soʻng asl fayllarni tiklaydi. Boshqaruv paneli UI qismiga taʼsir qiladigan oʻzgarishlar yoki relizni toʻliq
-tekshirish uchun `npm run build` dan foydalaning; hissa qoʻshuvchi profili reliz buildining oʻrnini bosa olmaydi.
+`npm run build:contributor` faqat backend uchun moʻljallangan yigʻish profilidan foydalanadi. Yigʻish vaqtida u boshqaruv paneli UI fayllarini vaqtincha almashtiradi, API marshrut ishlov beruvchilarini saqlab qoladi va yigʻishdan soʻng asl fayllarni tiklaydi. Boshqaruv paneli UI’iga taʼsir qiladigan oʻzgarishlar yoki toʻliq reliz tekshiruvi uchun `npm run build` buyrugʻidan foydalaning; hissa qoʻshuvchi profili reliz yigʻilishini almashtirmaydi.
 
-> **VPS deploy eslatmasi:** masofaviy image katalogi `/usr/lib/node_modules/omniroute/app/`
-> oʻzgarmagan. Deploy vositalari `dist/` tarkibini unga rsync orqali koʻchiradi.
-> Faqat repozitoriy ichidagi build natijasi yoʻli oʻzgardi (`app/` → `dist/`).
+> **VPS’ga joylashtirish eslatmasi:** masofaviy obraz katalogi `/usr/lib/node_modules/omniroute/app/`
+> oʻzgarishsiz qoladi. Joylashtirish vositalari `dist/` tarkibini unga rsync orqali nusxalaydi.
+> Faqat repozitoriy ichidagi yigʻish natijasi yoʻli oʻzgardi (`app/` → `dist/`).
 
-Standart URL manzillar:
+Standart URL’lar:
 
 - **Boshqaruv paneli**: `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
@@ -293,12 +287,12 @@ Amalda qoʻllangan misollar uchun `open-sse/utils/stream.ts` va `open-sse/utils/
 
 ---
 
-## Loyiha tuzilishi
+## Loyiha tuzilmasi
 
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # Boshqaruv paneli sahifalari (23 ta boʻlim)
+│   ├── (dashboard)/        # Boshqaruv paneli sahifalari (23 ta bo‘lim)
 │   ├── api/                # API marshrutlari (51 ta katalog)
 │   └── login/              # Autentifikatsiya sahifalari (.tsx)
 ├── domain/                 # Siyosat mexanizmi (policyEngine, comboResolver, costRules va boshqalar)
@@ -309,28 +303,28 @@ src/                        # TypeScript (.ts / .tsx)
 │   ├── db/                 # SQLite domen modullari + 130 ta migratsiya
 │   ├── memory/             # Doimiy suhbat xotirasi
 │   ├── oauth/              # OAuth provayderlari, xizmatlari va yordamchi vositalari
-│   ├── skills/             # Kengaytiriladigan koʻnikmalar freymvorki
-│   ├── usage/              # Foydalanishni kuzatish va xarajatni hisoblash
-│   └── localDb.ts          # Faqat qayta eksport qilish qatlami — bu yerga hech qachon mantiq qoʻshmang
-├── middleware/              # Soʻrov vositachi dasturi (promptInjectionGuard)
-├── mitm/                   # MITM proksi (sertifikat, DNS, maqsadni marshrutlash)
+│   ├── skills/             # Kengaytiriladigan ko‘nikmalar freymvorki
+│   ├── usage/              # Foydalanishni kuzatish va xarajatlarni hisoblash
+│   └── localDb.ts          # Faqat qayta eksport qilish qatlami — bu yerga hech qachon mantiq qo‘shmang
+├── middleware/              # So‘rov oraliq dasturi (promptInjectionGuard)
+├── mitm/                   # MITM proksi (sertifikat, DNS, maqsadli marshrutlash)
 ├── shared/
 │   ├── components/         # React komponentlari (.tsx)
-│   ├── constants/          # Provayder taʼriflari (329 ta), MCP doiralari, 19 ta marshrutlash strategiyasi
-│   ├── utils/              # Avtomatik uzgich, sanitayzer, autentifikatsiya yordamchilari
+│   ├── constants/          # Provayder ta’riflari (329 ta), MCP qamrovlari, 20 ta marshrutlash strategiyasi
+│   ├── utils/              # O‘chirgich, tozalovchi, autentifikatsiya yordamchilari
 │   └── validation/         # Zod v4 sxemalari
 └── sse/                    # SSE proksi konveyeri
 
 open-sse/                   # @omniroute/open-sse ish maydoni
-├── executors/              # 89 ta ijrochi amalga oshirish moduli
-├── handlers/               # 11 ta soʻrov ishlovchisi (chat, javoblar, embeddinglar, tasvirlar va boshqalar)
-├── mcp-server/             # MCP serveri (110 ta noyob vosita, 3 ta transport, 33 ta doira)
+├── executors/              # 150 ta ijrochi modul (ijrochi sinflar + har bir provayder uchun yordamchilar)
+├── handlers/               # 11 ta so‘rov ishlovchisi (chat, javoblar, embeddinglar, tasvirlar va boshqalar)
+├── mcp-server/             # MCP serveri (110 ta noyob vosita, 3 ta transport, 33 ta qamrov)
 ├── services/               # 178 ta yuqori darajadagi xizmat (combo, autoCombo, rateLimitManager va boshqalar)
 ├── translator/             # Format tarjimonlari (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
 ├── transformer/            # Responses API transformeri
-└── utils/                  # 22 ta yordamchi modul (oqim, TLS, proksi, jurnalga yozish)
+└── utils/                  # 22 ta yordamchi modul (oqim, TLS, proksi, jurnallash)
 
-electron/                   # Electron ish stoli ilovasi (turli platformalar uchun)
+electron/                   # Electron ish stoli ilovasi (ko‘p platformali)
 
 tests/
 ├── unit/                   # Node.js test bajaruvchisi (1 574 ta test fayli)
@@ -341,21 +335,21 @@ tests/
 └── load/                   # Yuklama testlari
 
 docs/
-├── adr/                     # Arxitektura qarorlari yozuvlari
-├── architecture/            # Tizim arxitekturasi va bardoshlilik
-├── comparison/              # OmniRoute va muqobil yechimlar taqqoslanishi
-├── compression/             # Siqish boʻyicha qoʻllanmalar va qoidalar
-├── dev/                     # Ishlab chiqish boʻyicha qoʻllanmalar
+├── adr/                     # Arxitektura qarorlari qaydlari
+├── architecture/            # Tizim arxitekturasi va barqarorligi
+├── comparison/              # OmniRoute va muqobillar taqqoslanishi
+├── compression/             # Siqish bo‘yicha qo‘llanmalar va qoidalar
+├── dev/                     # Ishlab chiqish bo‘yicha qo‘llanmalar
 ├── diagrams/                # Arxitektura diagrammalari
 ├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
-├── guides/                  # Foydalanuvchi qoʻllanmasi, Docker, sozlash, muammolarni bartaraf etish
+├── guides/                  # Foydalanuvchi qo‘llanmasi, Docker, sozlash, muammolarni bartaraf etish
 ├── i18n/                    # Xalqarolashtirilgan README tarjimalari
 ├── marketing/               # Marketing materiallari
 ├── ops/                     # Joylashtirish, proksi, qamrov, relizlar
-├── providers/               # Provayderlarga xos hujjatlar
-├── reference/               # API maʼlumotnomasi, muhit oʻzgaruvchilari, CLI vositalari, bepul tariflar
+├── providers/               # Provayderga xos hujjatlar
+├── reference/               # API ma’lumotnomasi, muhit o‘zgaruvchilari, CLI vositalari, bepul tariflar
 ├── releases/                # Reliz qaydlari
-├── routing/                 # Avtomatik kombinatsiya mexanizmi, mulohazalarni qayta ijro etish
+├── routing/                 # Avtomatik kombinatsiya mexanizmi, mulohazalarni takrorlash
 ├── screenshots/             # Boshqaruv paneli skrinshotlari
 ├── security/                # Himoya cheklovlari, muvofiqlik, yashirinlik, tokenlar
 └── specs/                   # Dizayn spetsifikatsiyalari
@@ -399,22 +393,22 @@ Model taʼriflarini `open-sse/config/providerRegistry.ts` fayliga qoʻshing.
 
 ---
 
-## Pull Request nazorat roʻyxati
+## Pull Request tekshiruv roʻyxati
 
 - [ ] Testlar muvaffaqiyatli oʻtadi (`npm test`)
-- [ ] Lint tekshiruvi muvaffaqiyatli oʻtadi (`npm run lint`)
-- [ ] Yigʻish muvaffaqiyatli yakunlanadi (`npm run build`)
+- [ ] Linting tekshiruvi muvaffaqiyatli oʻtadi (`npm run lint`)
+- [ ] Build muvaffaqiyatli yakunlanadi (`npm run build`)
 - [ ] Yangi ommaviy funksiyalar va interfeyslar uchun TypeScript turlari qoʻshilgan
-- [ ] Qattiq kodlangan maxfiy maʼlumotlar yoki zaxira qiymatlar mavjud emas
-- [ ] Ommaviy yuqori oqim hisob maʼlumotlari `resolvePublicCred()` orqali joylashtirilgan ([`docs/security/PUBLIC_CREDS.md`](./docs/security/PUBLIC_CREDS.md) hujjatiga qarang), hech qachon literal sifatida emas
-- [ ] Xato javoblari `buildErrorBody()` / `sanitizeErrorMessage()` orqali oʻtadi — javob tanalarida xom stek treyslari mavjud emas ([`docs/security/ERROR_SANITIZATION.md`](./docs/security/ERROR_SANITIZATION.md) hujjatiga qarang)
+- [ ] Hardkodlangan maxfiy maʼlumotlar yoki zaxira qiymatlar mavjud emas
+- [ ] Ommaviy upstream hisob maʼlumotlari literal qiymatlar sifatida emas, `resolvePublicCred()` orqali kiritilgan ([`docs/security/PUBLIC_CREDS.md`](./docs/security/PUBLIC_CREDS.md) ga qarang)
+- [ ] Xato javoblari `buildErrorBody()` / `sanitizeErrorMessage()` orqali yoʻnaltirilgan — javob tanalarida xom stack trace mavjud emas ([`docs/security/ERROR_SANITIZATION.md`](./docs/security/ERROR_SANITIZATION.md) ga qarang)
 - [ ] Shell buyruqlari (`exec` / `spawn`) bajarilish vaqtidagi qiymatlarni satr interpolyatsiyasi orqali emas, `env` orqali uzatadi
-- [ ] Barcha kiruvchi maʼlumotlar Zod sxemalari yordamida tekshirilgan
-- [ ] Foydalanuvchiga taʼsir qiladigan oʻzgarishlar uchun `changelog.d/{features|fixes|maintenance}/<PR>-<slug>.md` ostiga oʻzgarishlar jurnali **fragmenti** qoʻshilgan ([`changelog.d/README.md`](./changelog.d/README.md) hujjatiga qarang) — `CHANGELOG.md` faylini bevosita tahrirlamang; fragmentlar reliz vaqtida birlashtiriladi va PRlar oʻrtasida hech qachon ziddiyat keltirib chiqarmaydi
+- [ ] Barcha kirish maʼlumotlari Zod sxemalari bilan tekshirilgan
+- [ ] Foydalanuvchiga taʼsir qiluvchi oʻzgarishlar uchun `changelog.d/{features|fixes|maintenance}/<PR>-<slug>.md` ostiga changelog **fragmenti** qoʻshilgan ([`changelog.d/README.md`](./changelog.d/README.md) ga qarang) — `CHANGELOG.md` faylini toʻgʻridan-toʻgʻri tahrirlamang; fragmentlar reliz vaqtida birlashtiriladi va PRlar oʻrtasida hech qachon ziddiyatga olib kelmaydi
 - [ ] Hujjatlar yangilangan (agar tegishli boʻlsa)
-- [ ] Yangi CodeQL / Secret-Scanning ogohlantirishlari ochilmagan yoki ularning har biri tegishli `docs/security/` hujjatiga havola qiluvchi texnik asos bilan rad etilgan
-- [ ] Ichki jarayonlarni ishga tushiradigan marshrutlar (`/api/mcp/`, `/api/cli-tools/runtime/`) `src/server/authz/routeGuard.ts` faylida `isLocalOnlyPath()` sifatida tasniflangan — [15-qatʼiy qoida](docs/security/ROUTE_GUARD_TIERS.md)ga qarang
-- [ ] Commit xabarlarida `Co-Authored-By` yakuniy satrlari mavjud emas — commitlar faqat repozitoriy egasining Git identifikatori ostida koʻrinishi kerak (16-qatʼiy qoida)
+- [ ] Yangi CodeQL / Secret-Scanning ogohlantirishlari yaratilmagan yoki ularning har biri tegishli `docs/security/` hujjatiga havola qilingan texnik asos bilan rad etilgan
+- [ ] Quyi jarayonlarni ishga tushiradigan marshrutlar (`/api/mcp/`, `/api/cli-tools/runtime/`) `src/server/authz/routeGuard.ts` ichida `isLocalOnlyPath()` sifatida tasniflangan — [Qatʼiy qoida #15](docs/security/ROUTE_GUARD_TIERS.md) ga qarang
+- [ ] Commit xabarlarida AI/botga tegishli `Co-authored-by` treylerlari mavjud emas (Qatʼiy qoida #16) — ishidan qayta foydalanilgan inson hamkorlar standart `Co-authored-by: Name <email>` treylerlari bilan eʼtirof etiladi
 
 ---
 

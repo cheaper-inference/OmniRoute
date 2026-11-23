@@ -1,4 +1,5 @@
 import { handleAudioSpeech } from "@omniroute/open-sse/handlers/audioSpeech.ts";
+import { getRequestedModelEndpointMismatch } from "@/lib/providerModels/modelEndpointGuard";
 import { withInjectionGuard } from "@/middleware/promptInjectionGuard";
 import {
   getProviderCredentialsWithQuotaPreflight,
@@ -9,6 +10,13 @@ import { resolveDynamicAudioProviders } from "@/app/api/v1/_shared/audioProvider
 import { errorResponse } from "@omniroute/open-sse/utils/error.ts";
 import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
 import { enforceApiKeyPolicy } from "@/shared/utils/apiKeyPolicy";
+import {
+  createComboTargetKeyGate,
+  isKeyScopeBlockedCredentials,
+  keyScopeBlockedResponse,
+  keylessProviderRejection,
+  resolveKeyConnectionScope,
+} from "@/sse/services/keyConnectionScope";
 import { v1AudioSpeechSchema } from "@/shared/validation/schemas";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
 import {
@@ -54,6 +62,14 @@ async function postHandler(request, context) {
   // Enforce API key policies (model restrictions + budget limits)
   const policy = await enforceApiKeyPolicy(request, body.model);
   if (policy.rejection) return policy.rejection;
+  // GHSA-3w2r: credential selection (direct and per combo target) stays inside
+  // the key's connection scope, the same scope chat applies.
+  const scope = await resolveKeyConnectionScope(policy.apiKeyInfo);
+  if (scope.rejection) return scope.rejection;
+  // Respect the authenticated API key's credential scope before checking model capabilities.
+  const endpointMismatch = await getRequestedModelEndpointMismatch(body.model, "audio-speech");
+  if (endpointMismatch) return errorResponse(HTTP_STATUS.BAD_REQUEST, endpointMismatch);
+  const { allowedConnections } = scope;
 
   // Detect a combo name and divert to full speech combo execution, mirroring
   // the images route. Checks before parseSpeechModel so a combo name is never
@@ -64,7 +80,10 @@ async function postHandler(request, context) {
     const combo = await getComboByName(body.model);
     if (combo) {
       const { executeSpeechCombo } = await import("@omniroute/open-sse/services/speechCombo");
-      return executeSpeechCombo(body.model, body, startTime);
+      return executeSpeechCombo(body.model, body, startTime, {
+        allowedConnections,
+        isTargetAllowed: createComboTargetKeyGate(policy, body.model),
+      });
     }
   }
 
@@ -88,13 +107,29 @@ async function postHandler(request, context) {
   let credentials = null;
   if (providerConfig && providerConfig.authType !== "none") {
     const credentialKey = providerConfig.credentialProviderId || provider;
-    credentials = await getProviderCredentialsWithQuotaPreflight(credentialKey);
+    credentials = await getProviderCredentialsWithQuotaPreflight(
+      credentialKey,
+      null,
+      allowedConnections
+    );
     if (!credentials) {
       return errorResponse(HTTP_STATUS.BAD_REQUEST, `No credentials for provider: ${provider}`);
+    }
+    if (isKeyScopeBlockedCredentials(credentials)) {
+      return keyScopeBlockedResponse(provider, credentials);
     }
     if (isAllRateLimitedCredentials(credentials)) {
       return rateLimitedProviderResponse(provider, credentials);
     }
+  } else if (providerConfig) {
+    // GHSA-3w2r: a keyless provider (local default or a keyless remote) is
+    // reachable by a connection-scoped key only when its allowlist admits
+    // keyless providers or an in-scope connection serves it (chat's #9057).
+    const keylessCredentialKey = providerConfig.credentialProviderId || provider;
+    const keylessRejection = await keylessProviderRejection(provider, allowedConnections, () =>
+      getProviderCredentialsWithQuotaPreflight(keylessCredentialKey, null, allowedConnections)
+    );
+    if (keylessRejection) return keylessRejection;
   }
 
   let response = await handleAudioSpeech({

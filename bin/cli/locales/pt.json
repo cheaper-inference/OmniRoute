@@ -123,7 +123,9 @@
       "maxCostOpt": "Custo máximo por dia (USD)",
       "allowedModelsOpt": "Lista de modelos permitidos, separados por vírgulas",
       "nothingToSet": "Não foram fornecidos campos da política. Utilize --rate-limit, --max-cost ou --allowed-models.",
-      "updated": "Política atualizada."
+      "updated": "Política atualizada.",
+      "modelAccessModeOpt": "Modo de acesso aos modelos (all | restricted)",
+      "unrestrictedOpt": "Permitir todos os modelos (--model-access-mode all)"
     },
     "expiration": {
       "title": "Expiração da chave",
@@ -254,6 +256,7 @@
     "log": "Mostrar os registos do servidor em linha",
     "no_recovery": "Desativar o reinício automático em caso de falha (modo de depuração)",
     "max_restarts": "Número máximo de reinícios após falha num período de 30 s antes de desistir (predefinição: 2)",
+    "headless": "Executa apenas o motor de proxy: painel desativado (404), subsistemas opcionais ignorados (define OMNIROUTE_HEADLESS=1)",
     "tray": "Iniciar na área de notificação do sistema (apenas no ambiente de trabalho, opção facultativa)",
     "no_tray": "Desativar o ícone da área de notificação do sistema",
     "ready_timeout": "Tempo limite da verificação de disponibilidade em ms (também OMNIROUTE_READY_TIMEOUT_MS, predefinição: 60000)",
@@ -1168,32 +1171,18 @@
   "sync": {
     "description": "Sincronizar a configuração entre instâncias do OmniRoute",
     "push": {
-      "description": "Enviar a configuração para a cloud ou para uma instância remota",
-      "target": "Destino (cloud ou context:name)",
-      "bundle": "Componentes do pacote a sincronizar",
-      "dryRun": "Pré-visualizar sem aplicar"
+      "description": "Enviar a configuração para a cloud ou para uma instância remota"
     },
     "pull": {
-      "description": "Obter a configuração a partir da cloud ou de uma instância remota",
-      "source": "Origem (cloud ou context:name)",
-      "merge": "Intercalar com a configuração existente",
-      "replace": "Substituir a configuração existente",
-      "dryRun": "Pré-visualizar sem aplicar"
-    },
-    "diff": {
-      "source": "Contexto de origem",
-      "target": "Contexto de destino"
+      "description": "Obter a configuração a partir da cloud ou de uma instância remota"
     },
     "bundle": {
       "description": "Exportar a configuração como ficheiro de pacote",
-      "include": "Componentes a incluir (separados por vírgulas)"
+      "token": "Sync token (from `sync tokens create`); defaults to OMNIROUTE_SYNC_TOKEN"
     },
     "import": {
       "description": "Importar um ficheiro de pacote",
       "dryRun": "Validar sem aplicar"
-    },
-    "initialize": {
-      "fromCloud": "Inicializar a partir de uma cópia de segurança na cloud"
     },
     "tokens": {
       "description": "Gerir tokens de sincronização",
@@ -1205,9 +1194,6 @@
       "revoke": {
         "yes": "Ignorar confirmação"
       }
-    },
-    "resolve": {
-      "description": "Resolver conflitos de sincronização interativamente"
     }
   },
   "config": {

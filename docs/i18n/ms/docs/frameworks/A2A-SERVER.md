@@ -150,18 +150,18 @@ curl -X POST http://localhost:20128/a2a \
 
 OmniRoute menyediakan 6 kemahiran A2A yang disambungkan dalam `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Setiap modul kemahiran terletak dalam `src/lib/a2a/skills/`.
 
-| Kemahiran            | ID                   | Penerangan                                                                                                                                                         | Tag                          | Contoh                                      |
-| :------------------- | :------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------- | :------------------------------------------ |
-| Penghalaan Pintar    | `smart-routing`      | Menghalakan prom melalui penyedia/gabungan optimum menggunakan enjin gabungan + pemarkahan OmniRoute                                                               | penghalaan, penyedia         | "Halakan prom ini melalui model terbaik"    |
-| Pengurusan Kuota     | `quota-management`   | Melaporkan keadaan kuota bagi setiap penyedia, membantu pemanggil menentukan masa untuk mengehadkan kadar/bertukar                                                 | kuota, penyedia              | "Semak kuota untuk anthropic"               |
-| Penemuan Penyedia    | `provider-discovery` | Menyenaraikan penyedia yang dipasang berserta keupayaan, penanda peringkat percuma dan status OAuth                                                                | penyedia, penemuan           | "Apakah penyedia yang tersedia?"            |
-| Analisis Kos         | `cost-analysis`      | Menganggarkan kos permintaan/perbualan berdasarkan katalog + penggunaan terkini                                                                                    | kos, penggunaan              | "Anggarkan kos untuk perbualan ini"         |
-| Laporan Kesihatan    | `health-report`      | Mengagregatkan keadaan pemutus litar, tempoh bertenang dan penguncian bagi setiap penyedia                                                                         | kesihatan, daya tahan        | "Tunjukkan status kesihatan semua penyedia" |
-| Senaraikan Keupayaan | `list-capabilities`  | Mengembalikan katalog penuh 45 entri Kemahiran Ejen (23 API + 21 CLI + 1 konfigurasi) sebagai jadual markdown dengan URL mentah SKILL.md untuk penyuntikan konteks | katalog, penemuan, kemahiran | "Senaraikan semua keupayaan OmniRoute"      |
+| Kemahiran            | ID                   | Penerangan                                                                                                                                                        | Tag                          | Contoh                                      |
+| :------------------- | :------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------- | :------------------------------------------ |
+| Penghalaan Pintar    | `smart-routing`      | Menghalakan gesaan melalui penyedia/gabungan optimum menggunakan enjin gabungan + pemarkahan OmniRoute                                                            | penghalaan, penyedia         | "Halakan gesaan ini melalui model terbaik"  |
+| Pengurusan Kuota     | `quota-management`   | Melaporkan keadaan kuota bagi setiap penyedia, membantu pemanggil menentukan masa untuk mendikit/bertukar                                                         | kuota, penyedia              | "Semak kuota untuk anthropic"               |
+| Penemuan Penyedia    | `provider-discovery` | Menyenaraikan penyedia yang dipasang berserta keupayaan, penanda peringkat percuma dan status OAuth                                                               | penyedia, penemuan           | "Apakah penyedia yang tersedia?"            |
+| Analisis Kos         | `cost-analysis`      | Menganggarkan kos permintaan/perbualan berdasarkan katalog + penggunaan terkini                                                                                   | kos, penggunaan              | "Anggarkan kos untuk perbualan ini"         |
+| Laporan Kesihatan    | `health-report`      | Mengagregatkan keadaan pemutus litar, tempoh bertenang dan sekatan bagi setiap penyedia                                                                           | kesihatan, daya tahan        | "Tunjukkan status kesihatan semua penyedia" |
+| Senaraikan Keupayaan | `list-capabilities`  | Mengembalikan katalog lengkap 45 entri Kemahiran Ejen (23 API + 21 CLI + 1 konfigurasi) sebagai jadual markdown dengan URL SKILL.md mentah untuk suntikan konteks | katalog, penemuan, kemahiran | "Senaraikan semua keupayaan OmniRoute"      |
 
-> Kad Ejen hendaklah sentiasa diselaraskan dengan katalog langsung yang mengandungi 352 penyedia; bilangan penyedia serta metadata percuma/tanpa pengesahan diperoleh daripada pendaftar masa jalan.
+> Kad Ejen hendaklah sentiasa diselaraskan dengan katalog langsung yang mengandungi 374 penyedia; bilangan penyedia dan metadata percuma/tanpa pengesahan diperoleh daripada daftar masa jalan.
 
-### Butiran Kemahiran `list-capabilities`
+### Perincian Kemahiran `list-capabilities`
 
 Kemahiran `list-capabilities` amat berguna untuk ejen luaran yang perlu mengetahui perkara yang disediakan oleh OmniRoute sebelum menghantar panggilan API. Ia mengembalikan artifak jadual markdown berstruktur:
 
@@ -172,7 +172,7 @@ Kemahiran `list-capabilities` amat berguna untuk ejen luaran yang perlu mengetah
 ...
 ```
 
-Setiap baris menyertakan lajur `rawUrl` supaya ejen boleh mendapatkan SKILL.md penuh dengan serta-merta. Medan `metadata.totalSkills` mencerminkan saiz katalog (45 pada masa ini). Pelaksanaan: `src/lib/a2a/skills/listCapabilities.ts`. Lihat juga [AGENT-SKILLS.md](./AGENT-SKILLS.md).
+Setiap baris merangkumi lajur `rawUrl` supaya ejen boleh mendapatkan SKILL.md penuh dengan serta-merta. Medan `metadata.totalSkills` mencerminkan saiz katalog (45 pada masa ini). Pelaksanaan: `src/lib/a2a/skills/listCapabilities.ts`. Lihat juga [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 
@@ -262,7 +262,7 @@ diserahkan → sedang diproses → selesai
 
 ---
 
-## Contoh Penyepaduan
+## Contoh Integrasi
 
 ### Python (requests)
 

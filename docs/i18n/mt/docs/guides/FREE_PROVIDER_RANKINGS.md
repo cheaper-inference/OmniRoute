@@ -11,32 +11,32 @@
 
 ---
 
-## X’Inhu
+## X'Inhu
 
-OmniRoute jirreġistra 329 fornitur, inklużi 155 entrata fil-katalgu mmarkati bħala **bla ħlas/ebda awtentikazzjoni**
-(ebda awtentikazzjoni,
-OAuth b’livell bla ħlas, jew API key b’livell bla ħlas — ara l-
+OmniRoute jirreġistra 374 fornitur, inklużi 155 entrata fil-katalgu mmarkati bħala **b'xejn/mingħajr awtentikazzjoni**
+(mingħajr awtentikazzjoni,
+OAuth b'livell bla ħlas, jew API key b'livell bla ħlas — ara l-
 [Gwida għal-Livelli Bla Ħlas](../getting-started/FREE-TIERS-GUIDE.md) u d-
-[Direttorju tal-Livelli Bla Ħlas](../reference/FREE_TIERS.md) sħiħ). Il-problema hi li l-fornituri bla ħlas ivarjaw
-ħafna fil-kwalità tal-mudelli. Fornitur mingħajr awtentikazzjoni li joffri mudell avvanzat nett huwa ferm aktar utli
-minn wieħed li joffri mudell antik u żgħir.
+[Direttorju sħiħ tal-Livelli Bla Ħlas](../reference/FREE_TIERS.md)). Il-problema hi li l-fornituri bla ħlas ivarjaw
+ħafna fil-kwalità tal-mudelli. Fornitur mingħajr awtentikazzjoni li joffri mudell mill-aktar avvanzat huwa ferm aktar utli
+minn wieħed li joffri mudell żgħir u antik.
 
 **Klassifikazzjonijiet tal-Fornituri Bla Ħlas** iwieġeb il-mistoqsija "**liema fornitur bla ħlas jagħtini l-aħjar mudell?**" billi
-jgħaqqad il-katalgu ta’ kull fornitur bla ħlas ma’ **punteġġi tal-kwalità miksuba mill-pubbliku** mil-
-**leaderboard ta’ Arena AI** (ELO tal-preferenzi umani, l-istess idea wara l-arena taċ-chatbots ta’ LMArena).
-Il-fornituri mbagħad jiġu kklassifikati skont is-saħħa tal-**aħjar mudell bla ħlas** tagħhom.
+jgħaqqad il-katalgu ta' kull fornitur bla ħlas ma' **punteġġi tal-kwalità miġbura mill-komunità** mil-
+**leaderboard ta' Arena AI** (ELO tal-preferenzi umani, l-istess idea wara l-arena taċ-chatbots
+LMArena). Imbagħad il-fornituri jiġu kklassifikati skont il-kapaċità tal-**aqwa mudell bla ħlas** tagħhom.
 
 Il-klassifikazzjoni tiġi kkalkolata minn tliet sorsi reali:
 
-1. Il-listi tal-fornituri bla ħlas — `NOAUTH_PROVIDERS`, flimkien mal-entrati `OAUTH_PROVIDERS` /
-   `APIKEY_PROVIDERS` immarkati b’`hasFree`
+1. Il-listi tal-fornituri bla ħlas — `NOAUTH_PROVIDERS`, flimkien ma' entrati ta' `OAUTH_PROVIDERS` /
+   `APIKEY_PROVIDERS` immarkati b'`hasFree`
    (`src/shared/constants/providers.ts`).
-2. Il-katalgu tal-mudelli ta’ kull fornitur mir-reġistru tal-fornituri
+2. Il-katalgu tal-mudelli ta' kull fornitur mir-reġistru tal-fornituri
    (`open-sse/config/providerRegistry.ts`).
-3. Punteġġi tal-adegwatezza għall-kompitu derivati mill-ELO u maħżuna fit-tabella `model_intelligence` tad-DB mill-
-   magna tas-sinkronizzazzjoni tal-ELO ta’ Arena (`src/lib/arenaEloSync.ts`).
+3. Punteġġi tal-adegwatezza għall-kompiti derivati mill-ELO, maħżuna fit-tabella `model_intelligence` tad-DB mill-
+   magna tas-sinkronizzazzjoni tal-ELO ta' Arena (`src/lib/arenaEloSync.ts`).
 
-Il-loġika tal-għaqda tinsab f’`src/lib/freeProviderRankings.ts`.
+Il-loġika tal-join tinsab f'`src/lib/freeProviderRankings.ts`.
 
 ---
 

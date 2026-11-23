@@ -296,15 +296,15 @@ OmniRoute 現在可透過 `/v1/ws` 升級端點支援**與 OpenAI 相容的 WebS
 
 ---
 
-## 🔑 同步權杖與設定組合包 _(v3.6.6+)_
+## 🔑 同步權杖與設定套件 _(v3.6.6+)_
 
-現在可透過**具範圍限制的同步權杖**，支援多裝置與外部操作人員存取：
+現在可透過**限定範圍的同步權杖**，從多部裝置及外部操作程式存取：
 
-- **`POST /api/sync/tokens`** — 核發新的同步權杖（具範圍限制，可選擇設定到期時間）
+- **`POST /api/sync/tokens`** — 核發新的同步權杖（限定範圍，並可選擇設定到期時間）
 - **`DELETE /api/sync/tokens/:id`** — 撤銷權杖
-- **`GET /api/sync/bundle`** — 下載具版本資訊、以 ETag 為鍵值且包含所有非敏感設定的 JSON 快照（密碼已遮蔽）
+- **`GET /api/sync/bundle`** — 下載具版本資訊、以 ETag 為鍵的設定 JSON 快照（僅能使用同步權杖驗證）。儀表板密碼等驗證設定會被移除，但會包含提供者憑證和 API 金鑰，因此請將此檔案視為機密資料
 
-設定組合包由 `src/lib/sync/bundle.ts` 建立。使用端可比較 `ETag` 回應標頭，在不重新下載完整酬載的情況下偵測變更。
+設定套件由 `src/lib/sync/bundle.ts` 建立。取用端會比較 `ETag` 回應標頭，以偵測變更，無須重新下載完整酬載。使用 CLI 時，`omniroute sync bundle <outPath> --token <syncToken>`（或 `OMNIROUTE_SYNC_TOKEN`）會將其儲存為僅限擁有者存取的檔案。
 
 ---
 

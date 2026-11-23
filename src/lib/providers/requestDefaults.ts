@@ -6,6 +6,12 @@ import { normalizeRoutingTags } from "@/domain/tagRouter";
 import { normalizeOpenRouterPreset } from "@/shared/constants/openRouterPreset";
 import { isForbiddenCustomHeaderName } from "@/shared/constants/upstreamHeaders";
 import { normalizePeakHourProtection } from "@/lib/providers/peakHourProtection";
+import { normalizeDetectedReasoningControl } from "@/shared/reasoning/reasoningControl";
+import {
+  PROVIDER_SPECIFIC_RESPONSE_ONLY_FIELDS,
+  PROVIDER_SPECIFIC_SECRET_FIELDS,
+} from "@/lib/db/providers/providerSpecificDataSecrets";
+import { maskStoredApiKey } from "@/shared/utils/apiKeyMask";
 
 export const CODEX_REASONING_EFFORT_VALUES = [
   "none",
@@ -190,6 +196,24 @@ export function normalizeProviderSpecificData(
 
   normalizeNestedSubObjects(provider, normalized);
 
+  if (
+    normalized.reasoningControl !== undefined &&
+    normalized.reasoningControl !== null &&
+    normalized.reasoningControl !== "chat-template" &&
+    normalized.reasoningControl !== "openai"
+  ) {
+    delete normalized.reasoningControl;
+  }
+  const hasExplicitReasoningControl =
+    normalized.reasoningControl === "chat-template" || normalized.reasoningControl === "openai";
+  if (hasExplicitReasoningControl) {
+    delete normalized.detectedReasoningControl;
+  } else if ("detectedReasoningControl" in normalized) {
+    const detected = normalizeDetectedReasoningControl(normalized.detectedReasoningControl);
+    if (detected) normalized.detectedReasoningControl = detected;
+    else delete normalized.detectedReasoningControl;
+  }
+
   if ("openaiStoreEnabled" in normalized && typeof normalized.openaiStoreEnabled !== "boolean") {
     delete normalized.openaiStoreEnabled;
   }
@@ -197,6 +221,19 @@ export function normalizeProviderSpecificData(
   if (provider === "codex") {
     if (normalized.codexFingerprintMode === null) delete normalized.codexFingerprintMode;
     if (normalized.codex_fingerprint_mode === null) delete normalized.codex_fingerprint_mode;
+    if (normalized.codexPromptCacheKeyScope === null) delete normalized.codexPromptCacheKeyScope;
+  }
+
+  // Hugging Face Bill-To account (X-HF-Bill-To header source): the edit modal
+  // sends explicit `null` to clear a previously-saved value (the PUT route
+  // merges { ...existing, ...incoming }, so omitting the key would keep it).
+  // Only a non-empty string survives normalization.
+  if ("billTo" in normalized) {
+    if (typeof normalized.billTo === "string" && normalized.billTo.trim()) {
+      normalized.billTo = normalized.billTo.trim();
+    } else {
+      delete normalized.billTo;
+    }
   }
 
   if (
@@ -208,6 +245,9 @@ export function normalizeProviderSpecificData(
 
   if ("blockExtraUsage" in normalized && typeof normalized.blockExtraUsage !== "boolean") {
     delete normalized.blockExtraUsage;
+  }
+  if ("allowPaidCredits" in normalized && typeof normalized.allowPaidCredits !== "boolean") {
+    delete normalized.allowPaidCredits;
   }
 
   // #2997: per-connection transient-cooldown opt-out — only persist a real boolean.
@@ -324,48 +364,53 @@ export function normalizeProviderSpecificData(
   return Object.keys(normalized).length > 0 ? normalized : undefined;
 }
 
-export function sanitizeProviderSpecificDataForResponse(value: unknown): JsonRecord | undefined {
+/**
+ * Declared secret fields (PROVIDER_SPECIFIC_SECRET_FIELDS) the dashboard still shows and
+ * edits: the key-rotation pool. Each entry is returned masked exactly like `apiKey`
+ * (`revealKeys` mirrors the apiKey reveal switch) and the update route maps the echoed
+ * placeholders back to the stored tokens (reconcileMaskedExtraApiKeys).
+ */
+export const PROVIDER_SPECIFIC_DATA_MASKED_LIST_FIELDS = ["extraApiKeys"] as const;
+
+const MASKED_LIST_FIELD_SET: ReadonlySet<string> = new Set(
+  PROVIDER_SPECIFIC_DATA_MASKED_LIST_FIELDS
+);
+
+/**
+ * Strip credential-bearing providerSpecificData fields from an API response.
+ *
+ * The denylist is the shared PROVIDER_SPECIFIC_SECRET_FIELDS — the very list the DB layer
+ * encrypts at rest, so the two cannot drift — plus the response-only Codex handles.
+ * Stripped keys are safe to drop because the edit modal spreads the response back into
+ * its PUT and the server-side merge preserves keys the client did not send. The masked
+ * list fields are the exception: the dashboard shows and edits the rotation pool, so each
+ * entry comes back masked like `apiKey`.
+ */
+export function sanitizeProviderSpecificDataForResponse(
+  value: unknown,
+  options: { revealKeys?: boolean } = {}
+): JsonRecord | undefined {
   const record = asRecord(value);
   if (Object.keys(record).length === 0) return undefined;
 
   const sanitized: JsonRecord = { ...record };
-  delete sanitized.accessToken;
-  delete sanitized.refreshToken;
-  delete sanitized.idToken;
-  delete sanitized.apiKey;
-  delete sanitized.consoleApiKey;
-  delete sanitized.secretAccessKey;
-  delete sanitized.awsSecretAccessKey;
-  delete sanitized.sessionToken;
-  delete sanitized.awsSessionToken;
-  delete sanitized.openCodeGoAuthCookie;
-  delete sanitized.opencodeGoAuthCookie;
-  delete sanitized.authCookie;
-  delete sanitized.ollamaUsageCookie;
-  delete sanitized.ollamaCloudUsageCookie;
-  delete sanitized.ollamaCloudCookie;
-  delete sanitized.usageCookie;
-  // Qwen/Alibaba Token Plan console session — a browser credential for the operator's
-  // cloud-console account, same class as the ollama/opencode cookies above. The edit
-  // modal initializes these fields empty and the PUT merge preserves unsent keys, so
-  // stripping them here cannot clobber the stored values.
-  delete sanitized.qwenCloudCookie;
-  delete sanitized.qwenCloudSecToken;
-  delete sanitized.alibabaConsoleCookie;
-  delete sanitized.alibabaConsoleSecToken;
-  delete sanitized.runtimeKey;
-  delete sanitized.validationId;
-  delete sanitized.volcConsoleCookie;
-  delete sanitized.volcCsrfToken;
-  // System-managed Codex fingerprint seed: never exposed through the API
-  // (mirrors sub2api stripping `codex_fingerprint_seed`); the server-side
-  // partial-update merge keeps it alive without the client round-tripping it.
-  delete sanitized.codexFingerprintSeed;
-  // Runtime-only Codex identity carriers (in-memory per request, never
-  // persisted) — strip defensively if they ever leak into a response payload.
-  delete sanitized.codexClientIdentity;
-  delete sanitized.codexOriginalIdentityHeaders;
-  delete sanitized.codexTurnStateEcho;
+  for (const key of PROVIDER_SPECIFIC_SECRET_FIELDS) {
+    if (!MASKED_LIST_FIELD_SET.has(key)) delete sanitized[key];
+  }
+  for (const key of PROVIDER_SPECIFIC_RESPONSE_ONLY_FIELDS) {
+    delete sanitized[key];
+  }
+  for (const key of PROVIDER_SPECIFIC_DATA_MASKED_LIST_FIELDS) {
+    if (!(key in sanitized)) continue;
+    const list = sanitized[key];
+    if (!Array.isArray(list)) {
+      delete sanitized[key];
+      continue;
+    }
+    sanitized[key] = list
+      .filter((entry): entry is string => typeof entry === "string")
+      .map((entry) => (options.revealKeys ? entry : maskStoredApiKey(entry)));
+  }
   if (sanitized.browserCdpEndpoint) sanitized.browserCdpEndpoint = "configured";
   return sanitized;
 }

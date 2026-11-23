@@ -36,6 +36,7 @@ import {
   PEER_IP_HEADER,
   VIA_PROXY_HEADER,
   CLIENT_IP_HEADER,
+  AUTHZ_HEADER_TRUSTED_CLIENT_IP,
 } from "./headers";
 import type { AuthSubject, RouteClass, RouteClassification } from "./types";
 import type { AuthOutcome, RoutePolicy } from "./context";
@@ -342,6 +343,18 @@ export async function runAuthzPipeline(
   if (trustedPeerIp) {
     requestHeaders.set(AUTHZ_HEADER_TRUSTED_PEER_IP, trustedPeerIp);
   }
+  // The server stamps the client address to judge (the peer, or what a trusted proxy
+  // reported for it). Forward it too, so route handlers that key a per-client control on
+  // "who is calling" (e.g. the relay throttle) read the same resolution as the IP filter
+  // below — a direct caller cannot move it with X-Forwarded-For, and clients behind one
+  // reverse proxy are still told apart. Requests without that stamp get no header.
+  const stampedClientIp = resolveStampedPeer(
+    request.headers.get(CLIENT_IP_HEADER),
+    process.env.OMNIROUTE_PEER_STAMP_TOKEN
+  );
+  if (stampedClientIp) {
+    requestHeaders.set(AUTHZ_HEADER_TRUSTED_CLIENT_IP, stampedClientIp);
+  }
   // Local CLI-token auth is decided centrally above. Preserve that trusted
   // decision for route-level requireManagementAuth without forwarding the
   // machine token itself: custom client auth headers are stripped before the
@@ -384,12 +397,8 @@ export async function runAuthzPipeline(
       request.headers.get(VIA_PROXY_HEADER),
       process.env.OMNIROUTE_PEER_STAMP_TOKEN
     );
-    // The server stamps the client address to judge (the peer, or what a trusted proxy
-    // reported for it). Requests without that stamp keep the earlier rule.
-    const stampedClientIp = resolveStampedPeer(
-      request.headers.get(CLIENT_IP_HEADER),
-      process.env.OMNIROUTE_PEER_STAMP_TOKEN
-    );
+    // The stamped client address (resolved above) is judged; requests without that stamp
+    // keep the earlier rule.
     const ipVerdict = checkRequestIP(request, stampedClientIp ?? (viaProxy ? null : trustedPeerIp));
     if (!ipVerdict.allowed) {
       const blocked = NextResponse.json(

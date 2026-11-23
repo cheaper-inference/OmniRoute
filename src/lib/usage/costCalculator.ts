@@ -7,6 +7,9 @@
  * @module lib/usage/costCalculator
  */
 
+import { toNumber } from "@/shared/utils/numeric";
+import { splitCodexReasoningSuffix } from "@omniroute/open-sse/executors/codex/reasoningSuffix.ts";
+import { isCreditMeteredProvider } from "./creditMeteredProviders";
 import { isFlatRateProvider } from "./flatRateProviders";
 
 /**
@@ -50,28 +53,52 @@ export type CostCalculationOptions = {
  */
 const USD_TICKS_PER_DOLLAR = 10_000_000_000;
 
+type CostTokenDetails = {
+  cached_tokens?: number;
+  cache_creation_tokens?: number;
+  cache_write_tokens?: number;
+  cache_creation_in_prompt?: boolean;
+  reasoning_tokens?: number;
+};
+
+/** Numeric aliases and nested details accepted from normalized or raw usage. */
+interface CostTokenUsage extends Record<string, unknown> {
+  input?: number;
+  prompt_tokens?: number;
+  input_tokens?: number;
+  cacheRead?: number;
+  cached_tokens?: number;
+  cache_read_input_tokens?: number;
+  cacheCreation?: number;
+  cache_creation_input_tokens?: number;
+  output?: number;
+  completion_tokens?: number;
+  output_tokens?: number;
+  reasoning?: number;
+  reasoning_tokens?: number;
+  cost_in_usd_ticks?: number;
+  prompt_tokens_details?: CostTokenDetails;
+  input_tokens_details?: CostTokenDetails;
+  completion_tokens_details?: CostTokenDetails;
+  output_tokens_details?: CostTokenDetails;
+}
+
 /**
  * Extract an exact, provider-reported USD cost from a token/usage record when one
- * is present, so callers can trust it over the token × pricing estimate. Currently
- * only xAI's `cost_in_usd_ticks` field is handled — see comment above.
+ * is present, so callers can trust it over the token × pricing estimate. Handles
+ * xAI's `cost_in_usd_ticks` (see comment above) first, then the normalized
+ * `cost_usd` carried from OpenRouter's `usage.cost` (bare USD number).
  */
-function extractExactCostUsd(
-  tokens: Record<string, number | undefined> | null | undefined
-): number | null {
+function extractExactCostUsd(tokens: CostTokenUsage | null | undefined): number | null {
   const ticks = tokens?.cost_in_usd_ticks;
   if (typeof ticks === "number" && Number.isFinite(ticks) && ticks >= 0) {
     return ticks / USD_TICKS_PER_DOLLAR;
   }
-  return null;
-}
-
-function toNumber(value: unknown, fallback = 0): number {
-  if (typeof value === "number" && Number.isFinite(value)) return value;
-  if (typeof value === "string" && value.trim().length > 0) {
-    const parsed = Number(value);
-    return Number.isFinite(parsed) ? parsed : fallback;
+  const costUsd = tokens?.cost_usd;
+  if (typeof costUsd === "number" && Number.isFinite(costUsd) && costUsd >= 0) {
+    return costUsd;
   }
-  return fallback;
+  return null;
 }
 
 function normalizeServiceTier(value: unknown): string {
@@ -80,6 +107,49 @@ function normalizeServiceTier(value: unknown): string {
 
 function stripCodexEffortSuffix(model: string): string {
   return model.replace(/-(?:ultra|max|xhigh|high|medium|low|none)$/i, "");
+}
+
+/**
+ * Effort-free pricing keys for a Codex model id, most specific first. The Codex
+ * executor also accepts a parenthesized override (`gpt-6-luna(max)`), which the
+ * pricing tables only list in its hyphen form (`gpt-6-luna-max`), so try that tier
+ * key before the bare base model.
+ */
+function getCodexEffortlessPricingKeys(model: string): string[] {
+  const lowered = model.toLowerCase();
+  const { baseModel, effort } = splitCodexReasoningSuffix(lowered);
+  if (effort && lowered === `${baseModel}(${effort})`) {
+    return [`${baseModel}-${effort}`, baseModel];
+  }
+  const stripped = stripCodexEffortSuffix(model);
+  return stripped !== model ? [stripped] : [];
+}
+
+function isCodexProvider(provider: string | null | undefined): boolean {
+  const providerKey = normalizeServiceTier(provider);
+  return providerKey === "codex" || providerKey === "cx";
+}
+
+/**
+ * Pricing row for (provider, model): exact id first (so a user override on an
+ * annotated id wins), then the prefix-free id, then — for Codex — the id with its
+ * reasoning-effort suffix removed.
+ */
+async function resolvePricingRow(provider: string, model: string) {
+  const { getPricingForModel } = await import("@/lib/db/settings");
+  const exact = await getPricingForModel(provider, model);
+  if (exact) return exact;
+  const normalized = normalizeModelName(model);
+  if (normalized !== model) {
+    const pricing = await getPricingForModel(provider, normalized);
+    if (pricing) return pricing;
+  }
+  if (!isCodexProvider(provider)) return null;
+  for (const key of getCodexEffortlessPricingKeys(normalized)) {
+    const pricing = await getPricingForModel(provider, key);
+    if (pricing) return pricing;
+  }
+  return null;
 }
 
 export function getCodexFastCostMultiplier(
@@ -99,12 +169,14 @@ export function getCodexFastCostMultiplier(
 
   if (tier !== "priority" && tier !== "fast") return 1;
 
-  const modelKey = stripCodexEffortSuffix(normalizeModelName(String(model || "")).toLowerCase());
+  const modelKey = stripCodexEffortSuffix(
+    splitCodexReasoningSuffix(normalizeModelName(String(model || "")).toLowerCase()).baseModel
+  );
   const compactModelKey = modelKey.replace(/-/g, "");
   // Codex GPT-6 Fast is 2.5x Standard (https://developers.openai.com/codex/pricing).
   if (
-    /^gpt-6-(?:astra|sol|luna)$/.test(modelKey) ||
-    /^gpt6(?:astra|sol|luna)$/.test(compactModelKey)
+    /^gpt-6(?:\.1)?-(?:astra|sol|luna)$/.test(modelKey) ||
+    /^gpt6(?:\.1)?(?:astra|sol|luna)$/.test(compactModelKey)
   ) {
     return 2.5;
   }
@@ -117,6 +189,26 @@ export function getCodexFastCostMultiplier(
   if (modelKey === "gpt-5.5" || compactModelKey === "gpt5.5") return 2.5;
   if (modelKey === "gpt-5.4" || compactModelKey === "gpt5.4") return 2;
   return 1;
+}
+
+/**
+ * Long-context pricing tier: a row may carry `long_context: { threshold, inclusive?, ...rates }`
+ * (e.g. OpenAI bills prompts above 272K input tokens at 2x input / 1.5x output for the whole
+ * request; xAI switches at >= 200K). The threshold compares the total, cache-inclusive prompt
+ * size. When it is crossed, the tier's rates replace the flat ones for the whole request; any
+ * rate the tier omits keeps its flat value. Malformed tiers are ignored.
+ */
+function applyLongContextTier(
+  pricing: Record<string, unknown>,
+  inputTokens: number
+): Record<string, unknown> {
+  const tier = pricing.long_context;
+  if (!tier || typeof tier !== "object" || Array.isArray(tier)) return pricing;
+  const { threshold, inclusive, ...tierRates } = tier as Record<string, unknown>;
+  const limit = toNumber(threshold, Number.NaN);
+  if (!Number.isFinite(limit) || limit <= 0) return pricing;
+  const crossed = inclusive === true ? inputTokens >= limit : inputTokens > limit;
+  return crossed ? { ...pricing, ...tierRates } : pricing;
 }
 
 /**
@@ -133,7 +225,7 @@ export function getCodexFastCostMultiplier(
  */
 export function computeCostFromPricing(
   pricing: Record<string, unknown> | null | undefined,
-  tokens: Record<string, number | undefined> | null | undefined,
+  tokens: CostTokenUsage | null | undefined,
   options: CostCalculationOptions = {}
 ): number {
   if (!tokens) return 0;
@@ -146,22 +238,45 @@ export function computeCostFromPricing(
   // per-token pricing rows exist only for estimation, so display surfaces opt in
   // to show $0 instead of an inflated estimate (#5552).
   if (options.flatRateAsZero && isFlatRateProvider(options.provider)) return 0;
-  const inputPrice = toNumber(pricing.input, 0);
-  const cachedPrice = toNumber(pricing.cached, inputPrice);
-  const outputPrice = toNumber(pricing.output, 0);
-  const reasoningPrice = toNumber(pricing.reasoning, outputPrice);
-  const cacheCreationPrice = toNumber(pricing.cache_creation, inputPrice);
+  // A credit-metered provider bills in credits, reported per request as the exact
+  // cost handled above. Its per-token rows describe no real tariff, so they are
+  // never a cost basis: pricing them would bill the request a second time.
+  if (isCreditMeteredProvider(options.provider)) return 0;
+  const inputTokens = tokens.input ?? tokens.prompt_tokens ?? tokens.input_tokens ?? 0;
+  const rates = applyLongContextTier(pricing, inputTokens);
+  const inputPrice = toNumber(rates.input, 0);
+  const cachedPrice = toNumber(rates.cached, inputPrice);
+  const outputPrice = toNumber(rates.output, 0);
+  const reasoningPrice = toNumber(rates.reasoning, outputPrice);
+  const cacheCreationPrice = toNumber(rates.cache_creation, inputPrice);
 
   let cost = 0;
-  const inputTokens = tokens.input ?? tokens.prompt_tokens ?? tokens.input_tokens ?? 0;
+  const promptDetails = tokens.prompt_tokens_details;
+  const inputDetails = tokens.input_tokens_details;
   const cachedTokens =
-    tokens.cacheRead ?? tokens.cached_tokens ?? tokens.cache_read_input_tokens ?? 0;
-  const cacheCreationTokens = tokens.cacheCreation ?? tokens.cache_creation_input_tokens ?? 0;
+    tokens.cacheRead ??
+    tokens.cached_tokens ??
+    tokens.cache_read_input_tokens ??
+    promptDetails?.cached_tokens ??
+    inputDetails?.cached_tokens ??
+    0;
+  const cacheCreationTokens =
+    tokens.cacheCreation ??
+    tokens.cache_creation_input_tokens ??
+    promptDetails?.cache_creation_tokens ??
+    inputDetails?.cache_creation_tokens ??
+    promptDetails?.cache_write_tokens ??
+    inputDetails?.cache_write_tokens ??
+    0;
+  const cacheCreationInPrompt =
+    inputDetails?.cache_creation_in_prompt ?? promptDetails?.cache_creation_in_prompt;
 
   // prompt_tokens from extractors already includes cache_read + cache_creation,
   // so we must subtract BOTH cache types to avoid pricing cache at the full
   // input rate in addition to their dedicated cache_* rates below.
-  const nonCachedInput = Math.max(0, inputTokens - cachedTokens - cacheCreationTokens);
+  // Translated usage can explicitly keep cache creation outside that total.
+  const includedCacheCreation = cacheCreationInPrompt === false ? 0 : cacheCreationTokens;
+  const nonCachedInput = Math.max(0, inputTokens - cachedTokens - includedCacheCreation);
   cost += nonCachedInput * (inputPrice / 1_000_000);
   if (cachedTokens > 0) cost += cachedTokens * (cachedPrice / 1_000_000);
 
@@ -170,10 +285,20 @@ export function computeCostFromPricing(
 
   // completion_tokens is reasoning-inclusive. Reasoning is already billed at
   // the output rate above, so a dedicated price contributes only its premium.
-  const reasoningTokens = tokens.reasoning ?? tokens.reasoning_tokens ?? 0;
-  if (reasoningTokens > 0 && pricing.reasoning !== undefined && pricing.reasoning !== null) {
+  const reasoningTokens =
+    tokens.reasoning ??
+    tokens.reasoning_tokens ??
+    tokens.completion_tokens_details?.reasoning_tokens ??
+    tokens.output_tokens_details?.reasoning_tokens ??
+    0;
+  if (reasoningTokens > outputTokens) {
+    // Reasoning exceeding completion is impossible when completion is inclusive,
+    // so the provider reports separate buckets (#15496): bill reasoning on top.
+    cost += reasoningTokens * (reasoningPrice / 1_000_000);
+  } else if (reasoningTokens > 0 && rates.reasoning !== undefined && rates.reasoning !== null) {
     cost += reasoningTokens * ((reasoningPrice - outputPrice) / 1_000_000);
   }
+  cost = Math.max(0, cost);
 
   if (cacheCreationTokens > 0) cost += cacheCreationTokens * (cacheCreationPrice / 1_000_000);
 
@@ -191,39 +316,25 @@ export interface CostCalculationResult {
   costUsd: number;
   /** false when no pricing row (direct, normalized, or codex-effortless) was found. */
   priced: boolean;
+  /** A lookup error is not evidence that the model lacks a price. */
+  failed?: boolean;
 }
 
 export async function calculateCostDetailed(
   provider: string,
   model: string,
-  tokens: Record<string, number | undefined> | null | undefined,
+  tokens: CostTokenUsage | null | undefined,
   options: CostCalculationOptions = {}
 ): Promise<CostCalculationResult> {
   if (!tokens || !provider || !model) return { costUsd: 0, priced: true };
 
   // Short-circuit before any pricing DB lookup when an exact, provider-reported
-  // cost is present (currently xAI's `cost_in_usd_ticks` — see extractExactCostUsd).
+  // cost is present (xAI ticks or OpenRouter's USD cost — see extractExactCostUsd).
   const exactCostUsd = extractExactCostUsd(tokens);
   if (exactCostUsd !== null) return { costUsd: exactCostUsd, priced: true };
 
   try {
-    const { getPricingForModel } = await import("@/lib/db/settings");
-
-    // Try exact match first, then normalized model name
-    let pricing = await getPricingForModel(provider, model);
-    if (!pricing) {
-      const normalized = normalizeModelName(model);
-      if (normalized !== model) {
-        pricing = await getPricingForModel(provider, normalized);
-      }
-      const providerKey = normalizeServiceTier(provider);
-      if (!pricing && (providerKey === "codex" || providerKey === "cx")) {
-        const effortlessModel = stripCodexEffortSuffix(normalized);
-        if (effortlessModel !== normalized) {
-          pricing = await getPricingForModel(provider, effortlessModel);
-        }
-      }
-    }
+    const pricing = await resolvePricingRow(provider, model);
     // No pricing row anywhere — this is the #12341 case (e.g. a provider's own
     // routing alias such as "auto" that has no catalog price). Report it as
     // unpriced rather than a bare $0 so budget enforcement can fail closed.
@@ -241,14 +352,14 @@ export async function calculateCostDetailed(
     return { costUsd, priced: true };
   } catch (error) {
     console.error("Error calculating cost:", error);
-    return { costUsd: 0, priced: false };
+    return { costUsd: 0, priced: false, failed: true };
   }
 }
 
 export async function calculateCost(
   provider: string,
   model: string,
-  tokens: Record<string, number | undefined> | null | undefined,
+  tokens: CostTokenUsage | null | undefined,
   options: CostCalculationOptions = {}
 ): Promise<number> {
   const result = await calculateCostDetailed(provider, model, tokens, options);
@@ -337,12 +448,7 @@ export async function calculateModalCost(
 ): Promise<number> {
   if (!provider || !model) return 0;
   try {
-    const { getPricingForModel } = await import("@/lib/db/settings");
-    let pricing = await getPricingForModel(provider, model);
-    if (!pricing) {
-      const normalized = normalizeModelName(model);
-      if (normalized !== model) pricing = await getPricingForModel(provider, normalized);
-    }
+    const pricing = await resolvePricingRow(provider, model);
     if (!pricing) return 0;
     const rec = pricing as Record<string, unknown>;
     switch (modality) {

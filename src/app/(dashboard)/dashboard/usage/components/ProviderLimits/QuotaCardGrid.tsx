@@ -4,7 +4,12 @@ import type { ReactNode } from "react";
 import { useState } from "react";
 import { PROVIDER_ORDER } from "./constants";
 import QuotaCard from "./QuotaCard";
-import { worstStatus, type CardStatus, compareProviderGroups } from "./utils";
+import {
+  worstStatus,
+  type CardStatus,
+  compareProviderGroups,
+  type QuotaVisibilityScope,
+} from "./utils";
 import { compareTr } from "@/shared/utils/turkishText";
 
 interface Props {
@@ -25,8 +30,8 @@ interface Props {
   loadingResetCreditsId?: string | null;
   /** Per-operator quota row visibility (upstream 9router#2371 port). */
   quotaVisibility?: Record<string, { hidden?: string[] }>;
-  onHideQuota?: (provider: string, quota: any) => void;
-  onShowQuota?: (provider: string, quota: any) => void;
+  onHideQuota?: (scope: QuotaVisibilityScope, quota: any) => void;
+  onShowQuota?: (scope: QuotaVisibilityScope, quota: any) => void;
   compact?: boolean;
 }
 
@@ -205,8 +210,16 @@ function ProviderQuotaSection({
               redeemingResetCredit={redeemingResetCreditId === conn.id}
               loadingResetCredits={loadingResetCreditsId === conn.id}
               quotaVisibility={quotaVisibility}
-              onHideQuota={onHideQuota ? (q) => onHideQuota(conn.provider, q) : undefined}
-              onShowQuota={onShowQuota ? (q) => onShowQuota(conn.provider, q) : undefined}
+              onHideQuota={
+                onHideQuota
+                  ? (q) => onHideQuota({ connectionId: conn.id, provider: conn.provider }, q)
+                  : undefined
+              }
+              onShowQuota={
+                onShowQuota
+                  ? (q) => onShowQuota({ connectionId: conn.id, provider: conn.provider }, q)
+                  : undefined
+              }
             />
           ))}
         </div>
@@ -256,8 +269,16 @@ export default function QuotaCardGrid({
       redeemingResetCredit={redeemingResetCreditId === conn.id}
       loadingResetCredits={loadingResetCreditsId === conn.id}
       quotaVisibility={quotaVisibility}
-      onHideQuota={onHideQuota ? (q) => onHideQuota(conn.provider, q) : undefined}
-      onShowQuota={onShowQuota ? (q) => onShowQuota(conn.provider, q) : undefined}
+      onHideQuota={
+        onHideQuota
+          ? (q) => onHideQuota({ connectionId: conn.id, provider: conn.provider }, q)
+          : undefined
+      }
+      onShowQuota={
+        onShowQuota
+          ? (q) => onShowQuota({ connectionId: conn.id, provider: conn.provider }, q)
+          : undefined
+      }
     />
   );
 

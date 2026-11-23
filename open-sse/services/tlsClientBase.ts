@@ -11,6 +11,7 @@
  */
 
 import { resolveProxyForRequest } from "../utils/proxyFetch.ts";
+import { Buffer } from "node:buffer";
 import {
   createWreqTransportClient,
   WreqRuntimeUnavailableError,
@@ -151,15 +152,105 @@ function concatChunks(chunks: Uint8Array[]): Uint8Array {
   return combined;
 }
 
+const MAX_NON_STREAMING_RESPONSE_BYTES = 10 * 1024 * 1024;
+
+class TlsResponseTooLargeError extends Error {
+  readonly bytesSeen: number;
+  readonly maxBytes: number;
+  constructor(bytesSeen: number, maxBytes: number) {
+    super(`Upstream non-streaming response exceeded the ${maxBytes}-byte cap`);
+    this.name = "TlsResponseTooLargeError";
+    this.bytesSeen = bytesSeen;
+    this.maxBytes = maxBytes;
+  }
+}
+
+function boundedHeaders(headers: Headers): Headers {
+  const bounded = new Headers(headers);
+  bounded.set("Content-Type", "application/json");
+  bounded.delete("content-length");
+  return bounded;
+}
+
+function boundedResult(status: number, headers: Headers): TlsFetchResult {
+  const boundedStatus = status >= 200 && status < 300 ? 502 : status;
+  return {
+    status: boundedStatus,
+    headers: boundedHeaders(headers),
+    text: '{"error":{"message":"Response too large","type":"upstream_error"}}',
+    body: null,
+  };
+}
+
+function declaredContentLength(headers: Headers): number {
+  const declared = Number.parseInt(headers.get("content-length") ?? "", 10);
+  return Number.isFinite(declared) ? declared : Number.NaN;
+}
+
+function isNonStreamingContent(headers: Headers): boolean {
+  const contentType = (headers.get("content-type") ?? "").toLowerCase();
+  return (
+    !contentType.includes("text/event-stream") && !contentType.includes("application/x-ndjson")
+  );
+}
+
+async function cancelOversizeBody(body: TlsResponseLike["body"], bytesSeen: number): Promise<void> {
+  if (!isReadableBody(body)) return;
+  try {
+    if (typeof body.cancel === "function") {
+      await body.cancel(new TlsResponseTooLargeError(bytesSeen, MAX_NON_STREAMING_RESPONSE_BYTES));
+    } else {
+      await body
+        .getReader()
+        .cancel(new TlsResponseTooLargeError(bytesSeen, MAX_NON_STREAMING_RESPONSE_BYTES));
+    }
+  } catch {
+    // Reader cancellation is best-effort cleanup; the size error stays authoritative.
+  }
+}
+
+function convertTooLarge(
+  signal: AbortSignal | null | undefined,
+  error: unknown,
+  status: number,
+  headers: Headers
+): TlsFetchResult {
+  if (signal?.aborted && signal) throw makeAbortError(signal);
+  if (error instanceof TlsResponseTooLargeError) return boundedResult(status, headers);
+  throw error;
+}
+
 async function readAllChunks(
   reader: ReadableStreamDefaultReader<Uint8Array>,
   initialChunks: Uint8Array[] = [],
   readNext: () => Promise<ReadableStreamReadResult<Uint8Array>> = () => reader.read()
 ): Promise<Uint8Array> {
   const chunks = [...initialChunks];
+  let bytesSeen = initialChunks.reduce((total, chunk) => total + chunk.byteLength, 0);
+  if (bytesSeen > MAX_NON_STREAMING_RESPONSE_BYTES) {
+    try {
+      await reader.cancel(
+        new TlsResponseTooLargeError(bytesSeen, MAX_NON_STREAMING_RESPONSE_BYTES)
+      );
+    } catch {
+      // Reader cancellation is best-effort cleanup; the size error stays authoritative.
+    }
+    throw new TlsResponseTooLargeError(bytesSeen, MAX_NON_STREAMING_RESPONSE_BYTES);
+  }
   while (true) {
     const next = await readNext();
     if (next.done) return concatChunks(chunks);
+    bytesSeen += next.value.byteLength;
+    if (bytesSeen > MAX_NON_STREAMING_RESPONSE_BYTES) {
+      try {
+        await reader.cancel(
+          new TlsResponseTooLargeError(bytesSeen, MAX_NON_STREAMING_RESPONSE_BYTES)
+        );
+      } catch {
+        // Reader cancellation is best-effort cleanup; the size error stays authoritative.
+      }
+      throw new TlsResponseTooLargeError(bytesSeen, MAX_NON_STREAMING_RESPONSE_BYTES);
+    }
     chunks.push(next.value);
   }
 }
@@ -587,6 +678,130 @@ export function createTlsClientModule(config: TlsClientConfig): TlsClientModule 
     hardTimeoutMs: number,
     firstByteMs: number = firstByteTimeoutMs
   ): Promise<TlsFetchResult> {
+    return readFirstResponse(
+      client,
+      url,
+      requestOptions,
+      eofSymbol,
+      signal,
+      hardTimeoutMs,
+      firstByteMs
+    );
+  }
+
+  async function checkDeclaredLength(
+    response: TlsResponseLike,
+    headers: Headers,
+    signal: AbortSignal | null
+  ): Promise<TlsFetchResult | null> {
+    if (signal?.aborted) throw makeAbortError(signal);
+    const declared = declaredContentLength(headers);
+    if (!Number.isFinite(declared) || declared <= MAX_NON_STREAMING_RESPONSE_BYTES) {
+      return null;
+    }
+    if (!isNonStreamingContent(headers)) return null;
+    await cancelOversizeBody(response.body, declared);
+    if (response instanceof Response) {
+      try {
+        await response.body?.cancel(
+          new TlsResponseTooLargeError(declared, MAX_NON_STREAMING_RESPONSE_BYTES)
+        );
+      } catch {
+        // Reader cancellation is best-effort cleanup; the size error stays authoritative.
+      }
+    }
+    return boundedResult(response.status, headers);
+  }
+
+  async function readBufferedBody(
+    activeReader: ReadableStreamDefaultReader<Uint8Array>,
+    initialChunks: Uint8Array[],
+    readNext: () => Promise<ReadableStreamReadResult<Uint8Array>>,
+    status: number,
+    headers: Headers,
+    signal: AbortSignal | null,
+    onTooLarge: () => void
+  ): Promise<TlsFetchResult> {
+    try {
+      const bytes = await readAllChunks(activeReader, initialChunks, readNext);
+      return {
+        status,
+        headers,
+        text: new TextDecoder().decode(bytes),
+        body: null,
+      };
+    } catch (error) {
+      if (error instanceof TlsResponseTooLargeError) {
+        onTooLarge();
+      }
+      return convertTooLarge(signal, error, status, headers);
+    }
+  }
+
+  async function readByteBody(
+    response: TlsResponseLike,
+    headers: Headers,
+    remainingHardTimeoutMs: () => number,
+    signal: AbortSignal | null | undefined,
+    onReader: (reader: ReadableStreamDefaultReader<Uint8Array>) => void,
+    onTooLarge: () => void
+  ): Promise<TlsFetchResult> {
+    try {
+      const bytes = await raceWithTimeout(
+        readTlsResponseBytes(response, onReader),
+        remainingHardTimeoutMs(),
+        signal ?? null
+      );
+      if (bytes.byteLength > MAX_NON_STREAMING_RESPONSE_BYTES) {
+        onTooLarge();
+        return boundedResult(response.status, headers);
+      }
+      const mime =
+        headers.get("content-type")?.split(";", 1)[0]?.trim() || "application/octet-stream";
+      return {
+        status: response.status,
+        headers,
+        text: `data:${mime};base64,${Buffer.from(bytes).toString("base64")}`,
+        body: null,
+      };
+    } catch (error) {
+      return convertTooLarge(signal, error, response.status, headers);
+    }
+  }
+
+  async function readTextBody(
+    response: TlsResponseLike,
+    headers: Headers,
+    remainingHardTimeoutMs: () => number,
+    signal: AbortSignal | null | undefined,
+    onReader: (reader: ReadableStreamDefaultReader<Uint8Array>) => void,
+    onTooLarge: () => void
+  ): Promise<TlsFetchResult> {
+    try {
+      const text = await raceWithTimeout(
+        readTlsResponseText(response, onReader),
+        remainingHardTimeoutMs(),
+        signal ?? null
+      );
+      if (Buffer.byteLength(text) > MAX_NON_STREAMING_RESPONSE_BYTES) {
+        onTooLarge();
+        return boundedResult(response.status, headers);
+      }
+      return { status: response.status, headers, text, body: null };
+    } catch (error) {
+      return convertTooLarge(signal, error, response.status, headers);
+    }
+  }
+
+  async function readFirstResponse(
+    client: TlsRequestClient,
+    url: string,
+    requestOptions: Record<string, unknown>,
+    eofSymbol: string,
+    signal: AbortSignal | null,
+    hardTimeoutMs: number,
+    firstByteMs: number = firstByteTimeoutMs
+  ): Promise<TlsFetchResult> {
     const startedAt = Date.now();
     const hardDeadlineAt = startedAt + hardTimeoutMs;
     const firstByteDeadlineAt = Number.isFinite(firstByteMs)
@@ -600,13 +815,26 @@ export function createTlsClientModule(config: TlsClientConfig): TlsClientModule 
     try {
       request = client.request(url, requestOptions);
       const response = await raceWithTimeout(request, remainingHardTimeoutMs(), signal);
+      const headers = toHeaders(response.headers);
       if (!isReadableBody(response.body)) {
+        const early = await checkDeclaredLength(response, headers, signal);
+        if (early) return early;
         const text = await raceWithTimeout(
           readTlsResponseText(response),
           remainingHardTimeoutMs(),
           signal
         );
-        return { status: response.status, headers: toHeaders(response.headers), text, body: null };
+        if (Buffer.byteLength(text) > MAX_NON_STREAMING_RESPONSE_BYTES) {
+          return boundedResult(response.status, headers);
+        }
+        return { status: response.status, headers, text, body: null };
+      }
+      {
+        const early = await checkDeclaredLength(response, headers, signal);
+        if (early) {
+          reader = null;
+          return early;
+        }
       }
 
       reader = response.body.getReader();
@@ -651,13 +879,17 @@ export function createTlsClientModule(config: TlsClientConfig): TlsClientModule 
 
       if (!firstResult.done) initialChunks.push(firstResult.value);
       if (firstByteTimedOut) {
-        const bytes = await readAllChunks(activeReader, initialChunks, readBeforeHardDeadline);
-        return {
-          status: response.status,
-          headers: toHeaders(response.headers),
-          text: new TextDecoder().decode(bytes),
-          body: null,
-        };
+        return await readBufferedBody(
+          activeReader,
+          initialChunks,
+          readBeforeHardDeadline,
+          response.status,
+          toHeaders(response.headers),
+          signal,
+          () => {
+            reader = null;
+          }
+        );
       }
 
       let previewBytes = concatChunks(initialChunks).subarray(0, 256);
@@ -713,31 +945,39 @@ export function createTlsClientModule(config: TlsClientConfig): TlsClientModule 
       }
 
       if (response.status < 200 || response.status >= 300) {
-        const bytes = await readAllChunks(activeReader, initialChunks, readBeforeHardDeadline);
-        return {
-          status: response.status,
-          headers: toHeaders(response.headers),
-          text: new TextDecoder().decode(bytes),
-          body: null,
-        };
+        return await readBufferedBody(
+          activeReader,
+          initialChunks,
+          readBeforeHardDeadline,
+          response.status,
+          toHeaders(response.headers),
+          signal,
+          () => {
+            reader = null;
+          }
+        );
       }
 
       if (responseValidation === "sse" && !looksLikeSse(preview)) {
-        const bytes = await readAllChunks(activeReader, initialChunks, readBeforeHardDeadline);
-        return {
-          status: response.status,
-          headers: toHeaders(response.headers),
-          text: new TextDecoder().decode(bytes),
-          body: null,
-        };
+        return await readBufferedBody(
+          activeReader,
+          initialChunks,
+          readBeforeHardDeadline,
+          response.status,
+          toHeaders(response.headers),
+          signal,
+          () => {
+            reader = null;
+          }
+        );
       }
 
-      const headers = toHeaders(response.headers);
-      headers.set(
+      const streamHeaders = toHeaders(response.headers);
+      streamHeaders.set(
         "Content-Type",
         responseValidation === "cf" ? "application/x-ndjson" : "text/event-stream"
       );
-      headers.set("Cache-Control", "no-cache");
+      streamHeaders.set("Cache-Control", "no-cache");
       const stream = createEofFilteredStream(
         activeReader,
         initialChunks,
@@ -751,7 +991,7 @@ export function createTlsClientModule(config: TlsClientConfig): TlsClientModule 
       );
       leaseTransferredToStream = true;
       reader = null;
-      return { status: 200, headers, text: null, body: stream };
+      return { status: 200, headers: streamHeaders, text: null, body: stream };
     } catch (error) {
       invalidateOnHang(client, requestOptions, error, request);
       if (reader) await cancelResponseBody(reader, error);
@@ -801,33 +1041,39 @@ export function createTlsClientModule(config: TlsClientConfig): TlsClientModule 
       response = await raceWithTimeout(request, remainingHardTimeoutMs(), options.signal ?? null);
       if (options.signal?.aborted) throw makeAbortError(options.signal);
       const headers = toHeaders(response.headers);
-      if (options.byteResponse) {
-        const bytes = await raceWithTimeout(
-          readTlsResponseBytes(response, (reader) => {
-            bodyReader = reader;
-          }),
-          remainingHardTimeoutMs(),
-          options.signal ?? null
-        );
-        bodyReader = null;
-        const mime =
-          headers.get("content-type")?.split(";", 1)[0]?.trim() || "application/octet-stream";
-        return {
-          status: response.status,
-          headers,
-          text: `data:${mime};base64,${Buffer.from(bytes).toString("base64")}`,
-          body: null,
-        };
+      const early = await checkDeclaredLength(response, headers, options.signal ?? null);
+      if (early) {
+        if (isReadableBody(response.body) && typeof response.body.cancel !== "function") {
+          bodyReader = null;
+        }
+        return early;
       }
-      const text = await raceWithTimeout(
-        readTlsResponseText(response, (reader) => {
+      if (options.byteResponse) {
+        return await readByteBody(
+          response,
+          headers,
+          remainingHardTimeoutMs,
+          options.signal,
+          (reader) => {
+            bodyReader = reader;
+          },
+          () => {
+            bodyReader = null;
+          }
+        );
+      }
+      return await readTextBody(
+        response,
+        headers,
+        remainingHardTimeoutMs,
+        options.signal,
+        (reader) => {
           bodyReader = reader;
-        }),
-        remainingHardTimeoutMs(),
-        options.signal ?? null
+        },
+        () => {
+          bodyReader = null;
+        }
       );
-      bodyReader = null;
-      return { status: response.status, headers, text, body: null };
     } catch (error) {
       invalidateOnHang(client, requestOptions, error, request);
       if (bodyReader) {

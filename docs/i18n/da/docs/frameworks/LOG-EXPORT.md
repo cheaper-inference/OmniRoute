@@ -16,82 +16,162 @@ pipelinen er et register, så flere destinationer kan tilføjes.
 ## 1. Sådan fungerer det
 
 ```
-call_logs (SQLite)
-  → callLogExportSource.getCallLogsForExport(cursor, batchSize)
-    → LogExportRecord[]  (feltsættet fra fanen Logs)
-      → destinationsklient.send(batch)
-        → advanceLogExportCursor(id, lastRowId, count)
+server (dekryptér + validér konfiguration, afstem markør)
+  → start IPC → isoleret exportChild-OS-proces
+    → skrivebeskyttet storage.sqlite → fælles forespørgsel/tilknytning for opkaldslog
+      → asynkron indlæsning af artefakter → destinationens prepare()/send()
+        → batch-IPC → serveren gemmer markøren → ack-IPC
+          → næste batch; done-IPC → serveren registrerer succes
 ```
 
-- **Tidsplan** — ét `JobRegistry`-cronjob, `log_export`, som som standard er indstillet til `0 * * * *` (hver time,
-  UTC). Registreret i `src/lib/initCloudSync.ts`; kan tilsidesættes med `OMNIROUTE_LOG_EXPORT_CRON`.
-  Hver kørsel tømmer alle **aktiverede** destinationer sekventielt.
-- **Markør** — SQLites implicitte `call_logs.rowid`, gemt pr. destination i
+- **Planlægning** — ét `JobRegistry`-cronjob, `log_export`, som som standard er indstillet til
+  `0 * * * *` (hver time, UTC). Registreres i `src/lib/initCloudSync.ts`; kan tilsidesættes med
+  `OMNIROUTE_LOG_EXPORT_CRON`. Hvert tidspunkt tømmer alle **aktiverede** destinationer sekventielt.
+- **Markør** — SQLites implicitte `call_logs.rowid`, som gemmes pr. destination i
   `log_export_destinations.cursor_row_id`. `timestamp` bruges bevidst ikke som markør: klienter
-  kan angive deres egen værdi, så en langsom anmodning kan blive skrevet efter en hurtigere anmodning, der startede
-  senere, og en tidsstempelmarkør ville springe den over.
-- **Batchbehandling** — `batch_size` rækker pr. anmodning (standard 500), `max_rows_per_run` rækker pr. kørsel
-  (standard 10000), så et stort efterslæb behandles over flere kørsler i stedet for at blokere én.
-- **Levering** — markøren flyttes kun frem, efter at `send()` er fuldført. En mislykket batch efterlader
-  markøren, hvor den var, så de samme rækker forsøges igen ved næste kørsel. Garantien er
-  mindst én levering plus deduplikering på destinationssiden, ikke ægte præcis én levering: BigQuery identificerer hver
-  række med opkaldslog-id'et, som tjenesten anvender efter bedste evne inden for sit eget deduplikeringsvindue.
-- **Beskyttelse mod overlap** — cron-kørslen og `POST .../run` kan blive udløst samtidig. En destination,
-  der allerede tømmes, springes over i stedet for at blive tømt to gange (`skipped: true` i kørselsresultatet),
-  så en samtidig kørsel ikke kan gensende en batch eller flytte markøren baglæns.
-- **Genoprettelse efter sletning** — hvis `cursor_row_id` ender over `MAX(rowid)` (hele tabellen blev
-  ryddet, og række-id'erne startede forfra), nulstiller runneren markøren til 0 i stedet for permanent at miste data af syne.
+  kan angive deres egen værdi, så en langsom anmodning kan blive skrevet efter en hurtigere, der
+  startede senere, og en tidsstempelmarkør ville springe den over.
+- **Batchbehandling** — `batch_size` rækker pr. anmodning (standard 500) og
+  `max_rows_per_run` rækker pr. kørsel (standard 10000), så et stort efterslæb tømmes over flere
+  tidspunkter i stedet for at blokere ét.
+- **Levering** — markøren flyttes kun frem, efter at `send()` er fuldført. En mislykket batch
+  efterlader markøren, hvor den var, så de samme rækker forsøges igen ved næste kørsel. Garantien
+  er mindst én levering plus deduplikering på destinationssiden, ikke ægte præcis én levering:
+  BigQuery identificerer hver række ved hjælp af opkaldslog-id'et, som respekteres efter bedste
+  evne inden for BigQuerys eget deduplikeringsvindue.
+- **Beskyttelse mod overlap** — cron-tidspunktet og `POST .../run` kan udløses samtidig. En
+  destination, der allerede tømmes, springes over i stedet for at blive tømt to gange
+  (`skipped: true` i kørselsresultatet), så en samtidig kørsel ikke kan sende en batch igen eller
+  skrive markøren baglæns.
+- **Genoprettelse efter sletning** — hvis `cursor_row_id` ender over `MAX(rowid)` (hele tabellen
+  blev tømt, og række-id'erne startede forfra), spoler runneren tilbage til 0 i stedet for at
+  forblive permanent blind.
+
+### Isoleret runner og grænser
+
+Hver destinationskørsel på Node starter en separat, kortlivet underproces i operativsystemet
+(`child_process` med IPC, ikke `worker_threads`). Læsning af indhold, parsing/serialisering af
+payload-JSON, destinationens `prepare()` og destinationens netværks-I/O foregår alt sammen dér,
+ikke i serverens event loop. Kun konfiguration og små statusmeddelelser sendes via IPC;
+eksporterede poster returneres aldrig til serveren. Cronjobbet og Kør nu-ruten beholder det samme
+offentlige resultat og den samme beskyttelse mod overlap.
+
+Underprocessen åbner serverens fortolkede `DATA_DIR/storage.sqlite` skrivebeskyttet ved hjælp af
+`node:sqlite` med `busy_timeout=5000` og `query_only=ON`. Den importerer ingen DB-singleton og
+udfører ingen migreringer, sikkerhedskopieringer eller SQLite-opdateringer. Bogføring af
+manglende/beskadigede artefakter (herunder UPDATE af beskadigede artefakter) forbliver kun i
+dashboardets detaljesti. Begge stier deler en ren detaljeopløser; eksport bruger asynkrone
+filsystemlæsninger og den samme opløsningsrækkefølge: artefakt → ældre inline-data → ældre
+diskdata → ingen. En kørsel tager et snapshot af det maksimale indsættelses-rowid, når
+underprocessen åbner sin læser; senere indsættelser venter til næste kørsel. Dette er en
+indsættelsesgrænse, ikke en langvarig SQLite-transaktion: WAL-writere og checkpoints forbliver
+frie under netværksventetid. Opdateringer/sletninger af eksisterende rækker fastfryses ikke af
+denne grænse.
+
+Efter hver accepteret batch venter underprocessen på en kvittering. Serveren gemmer først markøren
+med `advanceLogExportCursor` og sender derefter `ack`; ingen ny batch starter før det.
+En afsendelsesfejl, et nedbrud eller timeout registrerer en fejl uden at flytte markøren frem for
+den pågældende batch. Tidligere kvitterede batches forbliver gemt; højst den ene ikke-kvitterede
+batch kan blive sendt igen. Succes registreres først efter `done` og en korrekt afslutning af
+underprocessen. Ved fejl afsluttes underprocessen med SIGTERM, som eskaleres til SIGKILL efter
+500 ms, og runneren venter på, at processen lukkes.
+
+| Miljøvariabel                                 | Standard | Formål                                       |
+| --------------------------------------------- | -------- | -------------------------------------------- |
+| `OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS`         | 900000   | Tidsgrænse pr. destination                   |
+| `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` | 1024     | Grænse for underprocessens V8 old space i MB |
+
+Ugyldige/ikke-positive/ikke-heltallige værdier bruger standardværdierne. Heap-indstillingen er
+ikke en grænse for samlet RSS; meget store batches kan stadig opbruge underprocessens hukommelse
+og få kørslen til at mislykkes på sikker vis. Standardværdien på 1024 MB giver plads til en
+standardbatch på 500 rækker med artefakter på 512 KiB og indhold inkluderet, herunder BigQuerys
+byteopdelte JSON-serialisering. Den gør ikke en batch på 10000 rækker med indhold sikker.
+Opbrug af V8-heap registrerer en fejl, der kan handles på: sænk batchstørrelsen, eller hæv
+`OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB`; markøren forbliver ved den senest kvitterede
+batch. Historisk inline-/diskindhold er ikke omfattet af den moderne artefaktgrænse.
+Operatører skal budgettere RSS separat, især i hukommelsesbegrænsede containere.
+
+Underprocessen arver kun den fortolkede `DATA_DIR`, `NODE_ENV`, en eksplicit `TZ` (til fortolkning
+af ældre filnavne i lokal tid), `ELECTRON_RUN_AS_NODE`, når den findes, samt følgende input til
+udgående forbindelser: `HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY` (og deres varianter
+med små bogstaver), `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`, `NODE_EXTRA_CA_CERTS`,
+`SSL_CERT_FILE`, `SSL_CERT_DIR`. En global Undici-dispatcher deler serverens rene fortolkning af
+miljøproxyer og regler for omgåelse ved lokale værter, herunder `NO_PROXY`; den importerer ikke
+`proxyFetch.ts` eller dens DB-/funktionsflag. Proxy-legitimationsoplysninger maskeres i
+videresendt output og registrerede fejl. Destinationslegitimationsoplysninger sendes kun i én
+start-IPC-meddelelse, aldrig via argv eller miljøet; videresendelse af output/fejl får et præfiks
+og renses. Kun `ExperimentalWarning` deaktiveres i underprocessens exec-argumenter for at undgå
+at gentage Nodes SQLite-advarsel ved hver cron-kørsel; andre advarselstyper forbliver synlige.
+
+Destinationsmoduler skal kunne importeres uden Next.js-afhængigheder eller afhængigheder, der kun er til serverbrug. Den eksisterende
+BigQuery-implementering opfylder allerede denne kontrakt. Cachelagre for adgangstokens varer kun under den enkelte
+underproceskørsel, ikke på tværs af kørsler. Node er den understøttede runtime (`package.json` engines), men README'ens
+Bun-installationsafsnit og `Dockerfile.bun` beskriver også en produktionskompatibel løsning, der bruger
+`bun:sqlite` (`src/lib/db/core.ts` / adaptere). Under Bun bevarer eksporter derfor den tidligere
+procesinterne løsning og udsender en engangsadvarsel: isolering af underprocessens heap og timeout er ikke tilgængelig. Brug
+Node til isolering af event loop og OOM; Bun betragtes ikke som kun beregnet til udvikling her.
+
+Når `includeBodies` er aktiveret, bør du foretrække en kadence på minutniveau, såsom
+`OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"`, frem for at akkumulere en timebaseret efterslæb af payloads.
+Grænser for batches og rækker begrænser stadig hver kørsel. Procesopstart betales pr. destination pr. kørsel;
+dette bytter en lille opstartsomkostning for isolering af serverens event loop, ikke et reduceret samlet CPU-forbrug.
 
 ### Payloads (prompter og fuldførelser)
 
-Som standard indeholder eksporten kun de oversigtsfelter, som **listevisningen** i Logs viser. Aktivering af
-**Eksportér prompter og svar** (`includeBodies`) medtager desuden det, som **detaljeruden** i Logs
-viser for hvert opkald:
+Som standard indeholder eksporten kun de oversigtsfelter, som **listen** over logfiler viser. Aktivering af
+**Eksportér prompter og svar** (`includeBodies`) medsender desuden det, som **detaljevisningen** for
+logfiler viser for hvert kald:
 
-| Felt                             | Hvad det indeholder                                       |
-| -------------------------------- | --------------------------------------------------------- |
-| `request_body` / `response_body` | Opkaldets payloads, som dashboardet gengiver dem          |
-| `pipeline_route_decision`        | Hvilket mål og hvilken model routeren valgte              |
-| `pipeline_client_request`        | Den rå anmodning, præcis som klienten sendte den          |
-| `pipeline_openai_request`        | Efter oversættelse til det interne OpenAI-format          |
-| `pipeline_provider_request`      | Som den faktisk blev sendt upstream, i udbyderens dialekt |
-| `pipeline_provider_response`     | Det rå upstream-svar                                      |
-| `pipeline_client_response`       | Det, der blev returneret til klienten                     |
-| `pipeline_error`                 | Fejldetaljer på pipeline-niveau for et mislykket opkald   |
-| `bodies_truncated`               | Sand, når et af felterne ovenfor nåede `maxBodyBytes`     |
+| Felt                             | Hvad det indeholder                                      |
+| -------------------------------- | -------------------------------------------------------- |
+| `request_body` / `response_body` | Kaldets payloads, som dashboardet gengiver dem           |
+| `pipeline_route_decision`        | Hvilket mål og hvilken model routeren valgte             |
+| `pipeline_client_request`        | Den rå anmodning, præcis som klienten sendte den         |
+| `pipeline_openai_request`        | Efter oversættelse til det interne OpenAI-format         |
+| `pipeline_provider_request`      | Som den faktisk blev sendt upstream i udbyderens dialekt |
+| `pipeline_provider_response`     | Det rå upstream-svar                                     |
+| `pipeline_client_response`       | Det, der blev returneret til kalderen                    |
+| `pipeline_error`                 | Fejldetaljer på pipeline-niveau for et mislykket kald    |
+| `bodies_truncated`               | Sand, når et af ovenstående felter nåede `maxBodyBytes`  |
 
 Dette er promptindhold, så det er **deaktiveret som standard** og er bevidst et valg pr. destination.
-Det, der sendes, er det, som dashboardet viser, fordi begge læser via `getCallLogById`: payloads bliver
-allerede renset for PII og hemmeligheder, når de skrives, og et opkald foretaget med en
-`noLog`-API-nøgle gemmer slet ingen payload, så der er intet at eksportere.
+Det, der medsendes, er det, som dashboardet viser, fordi eksporten og `getCallLogById` bruger samme
+detaljeopløsning: Payloads er allerede PII-sanitiserede og har fået hemmeligheder maskeret, når de
+skrives, og et kald foretaget med en `noLog` API-nøgle gemmer slet ingen payload, så der er intet
+at eksportere.
 
-Payloads læses pr. række fra filsystemartefaktet, så hydrering kun udføres for destinationer,
-der har anmodet om det. En række, hvis artefakt mangler eller er beskadiget, eksporteres med sin oversigt og null-
-payloads i stedet for at få batchen til at mislykkes og blokere markøren.
+Payloads læses pr. række fra filsystemartefaktet, så indlæsning udføres kun for destinationer,
+der har anmodet om det. Et manglende eller beskadiget artefakt eksporterer sin oversigt med null-payloads
+i stedet for at få batchen til at mislykkes og efterlade markøren fastlåst.
 
-`maxBodyBytes` (standard 262144) begrænser hvert felt. Længere payloads bliver **afkortet i stedet for
+`maxBodyBytes` (standardværdi 262144) begrænser hvert felt. Længere payloads bliver **afkortet frem for
 udeladt** — en afkortet prompt besvarer stadig spørgsmålet "hvad blev der spurgt om" — og rækken markeres med
-`bodies_truncated`. Streamede deltas opdelt i bidder eksporteres ikke; det samlede svar findes
+`bodies_truncated`. Streamede deltaer sendt stykke for stykke eksporteres ikke; det samlede svar findes
 allerede i `pipeline_provider_response` og `pipeline_client_response`.
 
 ---
 
 ## 2. Filer
 
-| Del                    | Placering                                    |
-| ---------------------- | -------------------------------------------- |
-| Destinationskontrakt   | `src/lib/logExport/types.ts`                 |
-| Register               | `src/lib/logExport/registry.ts`              |
-| Hemmelighedshåndtering | `src/lib/logExport/secrets.ts`               |
-| Kørsel (cursor-løkke)  | `src/lib/logExport/runner.ts`                |
-| API-projektion         | `src/lib/logExport/presenter.ts`             |
-| BigQuery-destination   | `src/lib/logExport/destinations/bigquery.ts` |
-| Google SA-godkendelse  | `src/lib/logExport/googleServiceAccount.ts`  |
-| Kilde til kaldslog     | `src/lib/usage/callLogExportSource.ts`       |
-| Persistens             | `src/lib/db/logExportDestinations.ts`        |
-| Cron-job               | `src/lib/jobs/logExportJob.ts`               |
-| REST-lag               | `src/app/api/log-export/`                    |
-| Dashboard-side         | `src/app/(dashboard)/dashboard/log-export/`  |
+| Del                       | Placering                                    |
+| ------------------------- | -------------------------------------------- |
+| Destinationskontrakt      | `src/lib/logExport/types.ts`                 |
+| Register                  | `src/lib/logExport/registry.ts`              |
+| Hemmelighedshåndtering    | `src/lib/logExport/secrets.ts`               |
+| Kørsel (overordnet IPC)   | `src/lib/logExport/runner.ts`                |
+| Proceslivscyklus          | `src/lib/logExport/childRunner.ts`           |
+| Underprocesindgangspunkt  | `src/lib/logExport/exportChild.ts`           |
+| Skrivebeskyttet åbner     | `src/lib/db/logExportReadOnly.ts`            |
+| Delt forespørgsel/mapping | `src/lib/usage/callLogExportQueries.ts`      |
+| Detaljeopløser            | `src/lib/usage/callLogDetailResolver.ts`     |
+| API-projektion            | `src/lib/logExport/presenter.ts`             |
+| BigQuery-destination      | `src/lib/logExport/destinations/bigquery.ts` |
+| Google SA-godkendelse     | `src/lib/logExport/googleServiceAccount.ts`  |
+| Kilde til opkaldslog      | `src/lib/usage/callLogExportSource.ts`       |
+| Persistens                | `src/lib/db/logExportDestinations.ts`        |
+| Cron-job                  | `src/lib/jobs/logExportJob.ts`               |
+| REST-lag                  | `src/app/api/log-export/`                    |
+| Dashboardside             | `src/app/(dashboard)/dashboard/log-export/`  |
 
 Skema: `src/lib/db/migrations/170_log_export_destinations.sql`.
 

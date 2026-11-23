@@ -32,6 +32,7 @@ import {
   restoreGrokBuildNamespaceToolCalls,
 } from "./grokCliNamespaceTools.ts";
 import { stripForeignGrokBuildReasoning } from "./grokCliReasoningReplay.ts";
+import { capGrokBuildTools } from "./grokCliToolCap.ts";
 import { normalizeGrokBuildToolSchemas } from "./grokCliToolSchema.ts";
 
 const GROK_BUILD_MAX_TOOLS = 200;
@@ -386,9 +387,26 @@ export class GrokCliExecutor extends BaseExecutor {
       transformed.tools = stripUnsupportedGrokBuildWebSearchArgs(transformed.tools);
     }
 
-    // xAI's cli-chat-proxy rejects requests containing more than 200 tools.
-    if (Array.isArray(transformed.tools) && transformed.tools.length > GROK_BUILD_MAX_TOOLS) {
-      transformed.tools = transformed.tools.slice(0, GROK_BUILD_MAX_TOOLS);
+    // Grok Build rejects the Responses named native-tool choice (ModelToolChoice).
+    // "required" is equivalent only when every offered tool is native web search;
+    // with mixed tools it could force an unrelated function instead.
+    if (
+      asRequestRecord(transformed.tool_choice).type === "web_search" &&
+      Array.isArray(transformed.tools) &&
+      transformed.tools.length > 0 &&
+      transformed.tools.every((tool) => asRequestRecord(tool).type === "web_search")
+    ) {
+      transformed.tool_choice = "required";
+    }
+
+    // xAI's cli-chat-proxy rejects requests containing more than 200 tools. The cap keeps
+    // hosted web_search/x_search tools and the function tool_choice forces.
+    if (Array.isArray(transformed.tools)) {
+      transformed.tools = capGrokBuildTools(
+        transformed.tools,
+        transformed.tool_choice,
+        GROK_BUILD_MAX_TOOLS
+      );
     }
     // Grok Build refuses a root anyOf/oneOf with a `$ref` or non-object branch
     // (`invalid_client_tool_schema`), e.g. Codex desktop's `automation_update`.

@@ -33,6 +33,8 @@ export default function CodexToolCard({
   const [modelMappings, setModelMappings] = useState<Record<string, string>>({});
   const [reasoningEffort, setReasoningEffort] = useState("xhigh");
   const [wireApi, setWireApi] = useState("responses");
+  // Opt-in: the catalog file is ~60 KB per model (MBs with a large catalog) in ~/.codex.
+  const [writeModelCatalog, setWriteModelCatalog] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalTarget, setModalTarget] = useState<string | null>(null); // null = default model, string = mapping key
   const [modelAliases, setModelAliases] = useState({});
@@ -190,11 +192,16 @@ export default function CodexToolCard({
           reasoningEffort,
           wireApi,
           modelMappings,
+          modelCatalog: writeModelCatalog,
         }),
       });
       const data = await res.json();
       if (res.ok) {
-        setMessage({ type: "success", text: t("settingsApplied") });
+        setMessage(
+          data.catalogWarning
+            ? { type: "warning", text: `${t("settingsApplied")} ${t("codexCatalogWarning")}` }
+            : { type: "success", text: t("settingsApplied") }
+        );
         checkCodexStatus();
       } else {
         setMessage({
@@ -652,6 +659,19 @@ openai_base_url = "${getEffectiveBaseUrl()}"
                   </select>
                 </div>
 
+                <label
+                  className="flex items-center gap-2 cursor-pointer pl-[8.5rem]"
+                  title={t("codexModelCatalogHint")}
+                >
+                  <input
+                    type="checkbox"
+                    checked={writeModelCatalog}
+                    onChange={(e) => setWriteModelCatalog(e.target.checked)}
+                    className="rounded border-border accent-primary"
+                  />
+                  <span className="text-xs text-text-main">{t("codexModelCatalog")}</span>
+                </label>
+
                 <div className="h-px bg-border/50 my-2"></div>
 
                 <div className="text-[11px] text-text-muted mb-2 font-medium uppercase tracking-wider text-right">
@@ -703,10 +723,14 @@ openai_base_url = "${getEffectiveBaseUrl()}"
 
               {message && (
                 <div
-                  className={`flex items-center gap-2 px-2 py-1.5 rounded text-xs ${message.type === "success" ? "bg-green-500/10 text-green-600" : "bg-red-500/10 text-red-600"}`}
+                  className={`flex items-center gap-2 px-2 py-1.5 rounded text-xs ${message.type === "success" ? "bg-green-500/10 text-green-600" : message.type === "warning" ? "bg-amber-500/10 text-amber-600" : "bg-red-500/10 text-red-600"}`}
                 >
                   <span className="material-symbols-outlined text-[14px]">
-                    {message.type === "success" ? "check_circle" : "error"}
+                    {message.type === "success"
+                      ? "check_circle"
+                      : message.type === "warning"
+                        ? "warning"
+                        : "error"}
                   </span>
                   <span>{message.text}</span>
                 </div>

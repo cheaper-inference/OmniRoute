@@ -5,6 +5,7 @@ import { initTranslators } from "@omniroute/open-sse/translator/index.ts";
 import { withInjectionGuard } from "@/middleware/promptInjectionGuard";
 import { withChatAdmission } from "@/shared/middleware/withChatAdmission";
 import { requireJsonContentType } from "@/shared/middleware/requireJsonContentType";
+import { enforceClientApiRouteAuth } from "@/shared/utils/clientApiRouteAuth";
 import {
   withEarlyStreamKeepalive,
   ANTHROPIC_PING_FRAME,
@@ -45,6 +46,12 @@ export async function OPTIONS() {
  * parsed at most once per request.
  */
 async function postHandler(request: any, context: any, preParsedBody: any = null) {
+  // Defense-in-depth: the authz proxy (src/proxy.ts) is the primary gate, but
+  // its matcher can miss path variants (e.g. uppercase /V1/ aliases), so the
+  // handler enforces authentication independently.
+  const authRejection = await enforceClientApiRouteAuth(request);
+  if (authRejection) return authRejection;
+
   // Reject non-JSON Content-Type with 415 before touching the body — mirrors OpenAI's
   // reference API and matches /v1/chat/completions (#6414).
   const ctRejection = requireJsonContentType(request);

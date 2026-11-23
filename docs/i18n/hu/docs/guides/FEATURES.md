@@ -298,13 +298,13 @@ Főbb működési jellemzők:
 
 ## 🔑 Szinkronizálási tokenek és konfigurációs csomag _(v3.6.6+)_
 
-A többeszközös és külső operátori hozzáférés mostantól **hatókörrel rendelkező szinkronizálási tokeneken** keresztül lehetséges:
+A többeszközös és külső üzemeltetői hozzáférés mostantól **hatókörrel rendelkező szinkronizálási tokeneken** keresztül lehetséges:
 
-- **`POST /api/sync/tokens`** — Új szinkronizálási token kibocsátása (meghatározott hatókörrel és opcionális lejárattal)
+- **`POST /api/sync/tokens`** — Új szinkronizálási token kiadása (meghatározott hatókörrel és opcionális lejárattal)
 - **`DELETE /api/sync/tokens/:id`** — Token visszavonása
-- **`GET /api/sync/bundle`** — Az összes nem érzékeny beállítás verziózott, ETag-kulcsú JSON-pillanatképének letöltése (a jelszavak kitakarásával)
+- **`GET /api/sync/bundle`** — A konfiguráció verziózott, ETag-kulcsú JSON-pillanatképének letöltése (kizárólag szinkronizálási tokennel hitelesítve). A hitelesítési beállítások, például az irányítópult jelszava, el vannak távolítva, a szolgáltatói hitelesítő adatok és az API-kulcsok azonban szerepelnek benne, ezért a fájlt bizalmas adatként kell kezelni
 
-A konfigurációs csomagot a `src/lib/sync/bundle.ts` állítja elő. A felhasználó rendszerek az `ETag` válaszfejléc összehasonlításával észlelhetik a változásokat a teljes tartalom újbóli letöltése nélkül.
+A konfigurációs csomagot a `src/lib/sync/bundle.ts` állítja elő. A fogyasztók az `ETag` válaszfejléc összehasonlításával észlelhetik a változásokat a teljes tartalom ismételt letöltése nélkül. A CLI használatával az `omniroute sync bundle <outPath> --token <syncToken>` (vagy az `OMNIROUTE_SYNC_TOKEN`) egy kizárólag a tulajdonos által hozzáférhető fájlba menti azt.
 
 ---
 
@@ -316,14 +316,14 @@ A **hibrid tokenszámlálás** szintén a v3.6.6 verzióban érkezik: amikor egy
 
 ---
 
-## 🛡️ Biztonságos kimenő lekérés és SSRF-védelem _(v3.6.6+)_
+## 🛡️ Biztonságos kimenő lekérések és SSRF-védelem _(v3.6.6+)_
 
 Mostantól minden szolgáltató-ellenőrzési és modellfelderítési hívás egy kétrétegű kimenő forgalmi védelmen halad át:
 
-1. **URL-védelem** (`src/shared/network/outboundUrlGuard.ts`) — A socket megnyitása előtt blokkolja a privát, visszacsatolási és helyi kapcsolati IP-tartományokat.
-2. **Biztonságos lekérési burkoló** (`src/shared/network/safeOutboundFetch.ts`) — Alkalmazza az URL-védelmet, egységesíti az időtúllépéseket, és exponenciális késleltetéssel újrapróbálkozik átmeneti hibák esetén.
+1. **URL-védelem** (`src/shared/network/outboundUrlGuard.ts`) — Először a cél megadott állomásnevét vagy IP-literálját ellenőrzi; kizárólag nyilvános címeket engedélyező módban a biztonságos lekérési burkoló a nevet is feloldja, és elutasítja a privát címeket. Alapértelmezés szerint blokkolja a felhőalapú metaadat-végpontokat — a teljes 169.254.0.0/16 tartományt, valamint az ismert metaadat-állomásneveket; az `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` a privát és visszacsatolási állomásokat is blokkolja; az `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS=true` (vagy a korábbi `OUTBOUND_SSRF_GUARD_ENABLED=false`) kikapcsolja az ellenőrzéseket. Egy jelző irányítópulti kapcsolójával mentett érték elsőbbséget élvez a változójával szemben, a beépített helyi szolgáltatók pedig a kulcsellenőrzés során kihagyják a védelmet. Lásd: `docs/reference/ENVIRONMENT.md`.
+2. **Biztonságos lekérési burkoló** (`src/shared/network/safeOutboundFetch.ts`) — Alkalmazza az URL-védelmet, normalizálja az időkorlátokat, és exponenciális késleltetéssel újrapróbálkozik átmeneti hibák esetén.
 
-A védelem megsértése HTTP 422 (`URL_GUARD_BLOCKED`) hibaként jelenik meg, és a `providerAudit.ts` segítségével bekerül a megfelelőségi auditnaplóba.
+A védelem megsértése `URL_GUARD_BLOCKED` hibaként jelenik meg — HTTP 503 a `getSafeOutboundFetchErrorStatus` használatával (400 a modellfelderítési útvonalon) —, az ellenőrzés során észlelt tényleges SSRF-blokkolásokat pedig `provider.validation.ssrf_blocked` eseményként rögzíti a naplózási rendszer.
 
 ---
 

@@ -148,31 +148,33 @@ curl -X POST http://localhost:20128/a2a \
 
 ## Saadaolevad oskused
 
-OmniRoute paljastab 6 A2A oskust, mis on ühendatud `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Iga oskuste moodul asub `src/lib/a2a/skills/`.
+OmniRoute pakub 6 A2A oskust, mis on ühendatud failis `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Iga oskuse moodul asub kataloogis `src/lib/a2a/skills/`.
 
-| Oskus                     | ID                   | Kirjeldus                                                                                                                                            | Sildid                         | Näited                                              |
-| :------------------------ | :------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------- | :-------------------------------------------------- |
-| Nutikas marsruutimine     | `smart-routing`      | Marsruutib prompti optimaalse teenusepakkuja/kombinatsiooni kaudu, kasutades OmniRoute'i kombinatsioonimootorit + skoorimist                         | marsruutimine, teenusepakkujad | "Marsruuta see prompt parima mudeli kaudu"          |
-| Kvoodihaldus              | `quota-management`   | Annab teada teenusepakkujate kohta kvoodi olekust, aitab vastajatel otsustada, millal kiirust piirata/vahetada                                       | kvoot, teenusepakkujad         | "Kontrolli AnthroPici kvooti"                       |
-| Teenusepakkuja avastamine | `provider-discovery` | Loetleb installitud teenusepakkujad koos võimalustega, tasuta tsoonide lippudega, OAuthi olekuga                                                     | teenusepakkujad, avastamine    | "Millised teenusepakkujad on saadaval?"             |
-| Kuluanalüüs               | `cost-analysis`      | Hindab päringu/vestluse kulu, võttes arvesse kataloogi ja hiljutist kasutust                                                                         | kulu, kasutus                  | "Hinda selle vestluse kulu"                         |
-| Tervisaruanne             | `health-report`      | Koondab iga teenusepakkuja vooluringi katkestaja, jahtumisaja, lukustamise oleku                                                                     | tervis, vastupidavus           | "Näita kõigi teenusepakkujate tervislikkuse olekut" |
-| Võimaluste loendamine     | `list-capabilities`  | Tagastab täieliku 45-kande kataloogi (23 API-d + 21 CLI-d + 1 konfiguratsiooni) markdown-tabelina koos SKILL.md toor-URL-idega konteksti süstimiseks | kataloog, avastamine, oskused  | "Loetle kõik OmniRoute'i võimalused"                |
+| Oskus                       | ID                   | Kirjeldus                                                                                                                                                      | Sildid                         | Näited                                   |
+| :-------------------------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------- | :--------------------------------------- |
+| Nutikas marsruutimine       | `smart-routing`      | Marsruudib viiba optimaalse teenusepakkuja või kombinatsiooni kaudu, kasutades OmniRoute'i kombinatsioonimootorit ja hindamist                                 | marsruutimine, teenusepakkujad | "Marsruudi see viip parima mudeli kaudu" |
+| Kvoodihaldus                | `quota-management`   | Esitab iga teenusepakkuja kvoodi oleku ja aitab kutsujatel otsustada, millal päringuid piirata või teenusepakkujat vahetada                                    | kvoot, teenusepakkujad         | "Kontrolli anthropic kvooti"             |
+| Teenusepakkujate avastamine | `provider-discovery` | Loetleb installitud teenusepakkujad koos võimekuste, tasuta taseme tähiste ja OAuthi olekuga                                                                   | teenusepakkujad, avastamine    | "Millised teenusepakkujad on saadaval?"  |
+| Kulude analüüs              | `cost-analysis`      | Hindab päringu või vestluse maksumust kataloogi ja hiljutise kasutuse põhjal                                                                                   | kulu, kasutus                  | "Hinda selle vestluse maksumust"         |
+| Tervisearuanne              | `health-report`      | Koondab iga teenusepakkuja kaitselüliti, ooteaja ja lukustuse oleku                                                                                            | seisund, töökindlus            | "Kuva kõigi teenusepakkujate seisund"    |
+| Võimekuste loend            | `list-capabilities`  | Tagastab täieliku 45 kirjega Agent Skillsi kataloogi (23 API + 21 CLI + 1 konfiguratsioon) markdown-tabelina koos SKILL.md toor-URL-idega konteksti lisamiseks | kataloog, avastamine, oskused  | "Loetle kõik OmniRoute'i võimekused"     |
 
-> Agent Card peaks olema kooskõlas reaalse 352-teenusepakkuja kataloogiga; teenusepakkujate arv ja tasuta/autentimisvaba metaandmed pärinevad tööaegsest registrile.
+> Agent Cardi tuleks hoida kooskõlas aktiivse 374 teenusepakkuja kataloogiga; teenusepakkujate arv ning tasuta/autentimiseta kasutamise metaandmed pärinevad käitusaegsest registrist.
 
-### `list-capabilities` oskuse üksikasjad
+### Oskuse `list-capabilities` üksikasjad
 
-Oskus `list-capabilities` on eriti kasulik välistele agentidele, kes peavad enne API-käskude saatmist avastama, mida OmniRoute pakub. See tagastab struktureeritud markdown-tabeli objekti:
+Oskus `list-capabilities` on eriti kasulik välistele agentidele, kes peavad enne API-kutsete saatmist avastama, mida OmniRoute pakub. See tagastab struktureeritud markdown-tabeli artefakti:
 
 ```
-| ID | Name | Category | Area | Endpoints/Commands | Raw URL |
+| ID | Nimi | Kategooria | Valdkond | Lõpp-punktid/käsud | Toor-URL |
 | --- | --- | --- | --- | --- | --- |
-| omni-auth | Auth & Sessions | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
+| omni-auth | Autentimine ja seansid | api | autentimine | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
 ...
 ```
 
-Iga rida sisaldab `rawUrl` veergu, et agendid saaksid koheldata täieliku SKILL.md. Väli `metadata.totalSkills` peegeldab kataloogi suurust (tänapäeval 45). Rakendus: `src/lib/a2a/skills/listCapabilities.ts`. Vaata ka [AGENT-SKILLS.md](./AGENT-SKILLS.md).
+Iga rida sisaldab veergu `rawUrl`, et agendid saaksid kohe täieliku SKILL.md-faili hankida. Väli `metadata.totalSkills` kajastab kataloogi suurust (praegu 45). Teostus: `src/lib/a2a/skills/listCapabilities.ts`. Vaata ka dokumenti [AGENT-SKILLS.md](./AGENT-SKILLS.md).
+
+---
 
 ## REST API (abiseadmed)
 
@@ -260,7 +262,7 @@ esitatud → töös → valmis
 
 ---
 
-## Integratsiooni näited
+## Integratsiooninäited
 
 ### Python (requests)
 
@@ -272,7 +274,7 @@ resp = requests.post("http://localhost:20128/a2a", json={
     "method": "message/send",
     "params": {
         "skill": "smart-routing",
-        "messages": [{"role": "user", "content": "Hello"}]
+        "messages": [{"role": "user", "content": "Tere"}]
     }
 }, headers={"Authorization": "Bearer YOUR_KEY"})
 
@@ -296,7 +298,7 @@ const resp = await fetch("http://localhost:20128/a2a", {
     method: "message/send",
     params: {
       skill: "smart-routing",
-      messages: [{ role: "user", content: "Hello" }],
+      messages: [{ role: "user", content: "Tere" }],
     },
   }),
 });

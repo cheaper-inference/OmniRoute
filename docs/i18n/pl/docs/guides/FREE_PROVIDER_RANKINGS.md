@@ -1,4 +1,9 @@
+# Free Provider Rankings (Arena ELO) (Polski)
+
+🌐 **Languages:** 🇺🇸 [English](../../../../guides/FREE_PROVIDER_RANKINGS.md) · 🇪🇹 [am](../../../am/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇸🇦 [ar](../../../ar/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇦🇿 [az](../../../az/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇧🇬 [bg](../../../bg/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇧🇩 [bn](../../../bn/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇧🇦 [bs](../../../bs/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇨🇿 [cs](../../../cs/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇩🇰 [da](../../../da/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇩🇪 [de](../../../de/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇬🇷 [el](../../../el/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇪🇸 [es](../../../es/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇪🇪 [et](../../../et/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇷 [fa](../../../fa/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇫🇮 [fi](../../../fi/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇫🇷 [fr](../../../fr/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇪 [ga](../../../ga/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [gu](../../../gu/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇬 [ha](../../../ha/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇱 [he](../../../he/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [hi](../../../hi/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇭🇷 [hr](../../../hr/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇭🇺 [hu](../../../hu/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇦🇲 [hy](../../../hy/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇩 [id](../../../id/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇬 [ig](../../../ig/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇹 [it](../../../it/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇯🇵 [ja](../../../ja/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇬🇪 [ka](../../../ka/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇰🇭 [km](../../../km/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [kn](../../../kn/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇰🇷 [ko](../../../ko/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇱🇹 [lt](../../../lt/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇱🇻 [lv](../../../lv/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [ml](../../../ml/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [mr](../../../mr/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇲🇾 [ms](../../../ms/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇲🇹 [mt](../../../mt/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇲🇲 [my](../../../my/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇵 [ne](../../../ne/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇱 [nl](../../../nl/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇴 [no](../../../no/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [or](../../../or/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [pa](../../../pa/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇵🇭 [phi](../../../phi/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇵🇹 [pt](../../../pt/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇷🇴 [ro](../../../ro/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇷🇺 [ru](../../../ru/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇱🇰 [si](../../../si/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇸🇰 [sk](../../../sk/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇸🇮 [sl](../../../sl/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇷🇸 [sr](../../../sr/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇸🇪 [sv](../../../sv/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇰🇪 [sw](../../../sw/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [ta](../../../ta/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [te](../../../te/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇹🇭 [th](../../../th/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇹🇷 [tr](../../../tr/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇵🇰 [ur](../../../ur/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇺🇿 [uz](../../../uz/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇻🇳 [vi](../../../vi/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇬 [yo](../../../yo/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/guides/FREE_PROVIDER_RANKINGS.md)
+
 ---
+
 title: "Rankingi darmowych providerów (Arena ELO)"
 version: 3.8.40
 lastUpdated: 2026-06-28
@@ -13,31 +18,32 @@ lastUpdated: 2026-06-28
 
 ---
 
-## Czym to jest
+## Czym jest
 
-OmniRoute agreguje 329 wpisów katalogu providerów, z których wiele udostępnia **darmowy tier** (no-auth,
-darmowy OAuth albo darmowy klucz API — zobacz
-[Przewodnik Free Tiers](../getting-started/FREE-TIERS-GUIDE.md) oraz pełny
-[katalog Free Tiers](../reference/FREE_TIERS.md)). Haczyk: darmowi providerzy różnią się
-jakością modeli diametralnie. Provider no-auth z modelem frontierowym jest znacznie bardziej użyteczny
-niż taki z małym, legacy modelem.
+OmniRoute rejestruje 374 dostawców, w tym 155 wpisów katalogowych oznaczonych jako **bezpłatne/bez uwierzytelniania**
+(bez uwierzytelniania,
+OAuth w warstwie bezpłatnej lub klucz API w warstwie bezpłatnej — zobacz
+[Przewodnik po warstwach bezpłatnych](../getting-started/FREE-TIERS-GUIDE.md) oraz pełny
+[Katalog warstw bezpłatnych](../reference/FREE_TIERS.md)). Problem polega na tym, że jakość modeli
+u bezpłatnych dostawców jest bardzo zróżnicowana. Dostawca niewymagający uwierzytelniania, który udostępnia model czołowej generacji, jest znacznie bardziej użyteczny
+niż dostawca oferujący niewielki, starszy model.
 
-**Free Provider Rankings** odpowiada na pytanie „**który darmowy provider daje mi najlepszy model?**”,
-łącząc katalog każdego darmowego providera z **crowd-sourcingowymi ocenami jakości** z
-**rankingu Arena AI** (ELO oparte na preferencjach ludzi — ta sama idea co arena chatbotów
-LMArena). Providery są następnie rankingowane według siły ich **najlepszego darmowego modelu**.
+**Ranking bezpłatnych dostawców** odpowiada na pytanie „**który bezpłatny dostawca oferuje mi najlepszy model?**” poprzez
+łączenie katalogu każdego bezpłatnego dostawcy z **wynikami jakości opartymi na ocenach społeczności** z
+**rankingu Arena AI** (ELO oparte na preferencjach ludzi — ta sama koncepcja, która stoi za areną chatbotów
+LMArena). Następnie dostawcy są klasyfikowani według możliwości ich **najlepszego bezpłatnego modelu**.
 
-Ranking jest wyliczany z trzech rzeczywistych źródeł:
+Ranking jest obliczany na podstawie trzech rzeczywistych źródeł:
 
-1. Listy darmowych providerów — `NOAUTH_PROVIDERS` oraz wpisy `OAUTH_PROVIDERS` /
-   `APIKEY_PROVIDERS` z flagą `hasFree`
+1. Listy bezpłatnych dostawców — `NOAUTH_PROVIDERS` oraz wpisy `OAUTH_PROVIDERS` /
+   `APIKEY_PROVIDERS` oznaczone flagą `hasFree`
    (`src/shared/constants/providers.ts`).
-2. Katalog modeli każdego providera z rejestru providerów
+2. Katalog modeli każdego dostawcy z rejestru dostawców
    (`open-sse/config/providerRegistry.ts`).
-3. Wyniki task-fit pochodzące z ELO, przechowywane w tabeli DB `model_intelligence` przez
-   silnik synchronizacji Arena ELO (`src/lib/arenaEloSync.ts`).
+3. Wyniki dopasowania do zadań wyprowadzone z ELO, przechowywane w tabeli bazy danych `model_intelligence` przez
+   mechanizm synchronizacji Arena ELO (`src/lib/arenaEloSync.ts`).
 
-Logika join żyje w `src/lib/freeProviderRankings.ts`.
+Logika łączenia danych znajduje się w `src/lib/freeProviderRankings.ts`.
 
 ---
 

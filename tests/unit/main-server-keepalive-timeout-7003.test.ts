@@ -26,6 +26,7 @@ describe("#7003 getMainServerTimeoutConfig", () => {
     const config = getMainServerTimeoutConfig({});
     assert.equal(config.keepAliveTimeoutMs, 65_000);
     assert.equal(config.headersTimeoutMs, 66_000);
+    assert.equal(config.tcpKeepAliveInitialDelayMs, 30_000);
     assert.ok(config.keepAliveTimeoutMs > 5_000, "must exceed Node's unconfigured default");
     assert.ok(
       config.headersTimeoutMs > config.keepAliveTimeoutMs,

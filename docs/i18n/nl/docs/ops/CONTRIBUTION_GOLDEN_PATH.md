@@ -4,38 +4,35 @@
 
 ---
 
-Gebruik deze handleiding om de kleinste betrouwbare ontwikkelcyclus voor een pull request te kiezen. Deze
-vervangt niet de hieronder gekoppelde architectuur- en beveiligingsdocumenten voor specifieke gebieden;
-de handleiding koppelt elk veelvoorkomend wijzigingstype aan de bijbehorende contracten, gerichte controles
-en CI-dekking.
+Gebruik deze handleiding om de kleinst mogelijke betrouwbare ontwikkelcyclus voor een pull request te kiezen. Deze
+vervangt niet de hieronder gekoppelde architectuur- en beveiligingsdocumenten voor specifieke gebieden; de handleiding koppelt elk veelvoorkomend
+wijzigingstype aan de bijbehorende contracten, gerichte controles en CI-dekking.
 
-## Het traject dat elke wijziging volgt
+## Het pad dat elke wijziging volgt
 
-1. **Kies de basis voordat je wijzigingen aanbrengt.** Zoek de hoogste actieve `release/v*`-branch en maak
-   een branch vanaf de tip daarvan. Richt je op die branch, niet op `main`. Als er een releasefreeze actief
-   is, richt je dan niet op de bevroren branch; gebruik de volgende actieve cyclus die wordt beschreven in
+1. **Kies de basis voordat je wijzigingen aanbrengt.** Zoek de hoogste actieve `release/v*`-branch en maak een branch vanaf
+   de tip daarvan. Richt de PR op die branch, niet op `main`. Als er een release freeze actief is, richt de PR dan niet op de bevroren
+   branch; gebruik de volgende actieve cyclus die wordt beschreven in
    [Branching & Release Model](BRANCHING_MODEL.md).
-2. **Benoem de contracten.** Identificeer elke catalogus, elk schema, elk gegenereerd artefact, elke openbare
-   API en elke gebruikersinterface waarop de wijziging van invloed is. De onderstaande tabel geeft de
-   minimale uitgangsset.
-3. **Schrijf gerichte tests of werk ze bij.** Productiewijzigingen in `src/`, `open-sse/`, `electron/` of
-   `bin/` vereisen een geautomatiseerde test in dezelfde PR. Voer de kleinst mogelijke testbestanden uit
-   die het gedrag aantonen en voer vervolgens de vermelde gerichte controles uit.
-4. **Laat CI de brede matrix uitvoeren.** De volledige unitshards, Vitest, de dekkingsdrempel en de
-   productiebuild worden voor de PR uitgevoerd. Voer lokaal alleen een brede testsuite uit wanneer een
-   gerichte fout op een bredere impact wijst of wanneer de wijziging meerdere subsystemen omvat.
-5. **Breng alles vóór de review in overeenstemming.** Haal de actieve basis op, inspecteer de nieuwe commits
-   en jouw diff ten opzichte daarvan en voer vervolgens een rebase uit of merge de basis volgens de
-   workflow voor bijdragers. Los conflicten in gegenereerde bestanden en catalogi op vanuit hun bron,
-   genereer ze opnieuw, voer de gerichte cyclus opnieuw uit en bevestig dat de PR nog steeds op de actieve
-   releasebranch is gericht.
-6. **Leg bewijs vast.** Vermeld in het PR-sjabloon de uitgevoerde commando's, elk toegevoegd of gewijzigd
-   testbestand, migraties of featureflags en alle validatie die nog uitsluitend in CI moet worden uitgevoerd.
+2. **Benoem de contracten.** Identificeer elke catalogus, elk schema, elk gegenereerd artefact, elke openbare API en elke
+   gebruikersinterface waarop de wijziging invloed heeft. De onderstaande tabel bevat de minimale uitgangsset.
+3. **Schrijf gerichte tests of werk deze bij.** Productiewijzigingen in `src/`, `open-sse/`, `electron/` of
+   `bin/` vereisen een geautomatiseerde test in dezelfde PR. Voer de kleinst mogelijke testbestanden uit die het
+   gedrag aantonen en voer daarna de vermelde gerichte controles uit.
+4. **Laat CI de brede matrix uitvoeren.** De volledige eenheidstestshards, Vitest, de dekkingsratel en
+   productiebuild worden voor de PR uitgevoerd. Voer lokaal alleen een brede testsuite uit wanneer een gerichte fout wijst op
+   bredere gevolgen of wanneer de wijziging meerdere subsystemen omvat.
+5. **Stem alles vóór de review af.** Haal de actieve basis op, inspecteer de nieuwe commits en je diff ten opzichte
+   daarvan en voer vervolgens een rebase uit of merge de basis volgens de workflow voor bijdragers. Los conflicten in gegenereerde bestanden
+   en catalogi vanuit hun bron op, genereer ze opnieuw, voer de gerichte cyclus opnieuw uit en bevestig dat de
+   PR nog steeds op de actieve releasebranch is gericht.
+6. **Leg bewijs vast.** Vermeld in het PR-sjabloon de uitgevoerde opdrachten, elk toegevoegd of gewijzigd testbestand,
+   migraties of feature flags en eventuele validatie die alleen in CI wordt uitgevoerd en nog in behandeling is.
 
-## Standaardtrajecten per wijzigingstype
+## Standaardpaden per wijzigingstype
 
-De onderstaande commando's zijn de minimale gerichte controles en geven geen toestemming om een test over
-te slaan die het door jou gewijzigde gedrag rechtstreeks afdekt.
+De onderstaande opdrachten zijn minimale gerichte controles en geven geen toestemming om een test over te slaan die rechtstreeks betrekking heeft op het
+gedrag dat je hebt gewijzigd.
 
 ### Provider
 
@@ -43,13 +40,12 @@ te slaan die het door jou gewijzigde gedrag rechtstreeks afdekt.
 
 - Providerdefinitie in `src/shared/constants/providers/` en de samenstelling ervan in
   `src/shared/constants/providers.ts`.
-- Modellen en mogelijkheden in `open-sse/config/providerRegistry.ts` of de daarvan afgesplitste
-  registerbestanden.
-- Selectie van executor/translator, OAuth- of API-sleutelconfiguratie, dashboardassets en de gegenereerde
+- Modellen en mogelijkheden in `open-sse/config/providerRegistry.ts` of de daaruit geëxtraheerde registerbestanden.
+- Selectie van executor/translator, configuratie van OAuth of API-sleutels, dashboardassets en gegenereerde
   providerreferentie, indien van toepassing.
-- Openbare inloggegevens moeten `resolvePublicCred()` gebruiken; foutreacties moeten de gedeelde helpers
-  voor gesaniteerde fouten gebruiken. Zie `docs/security/PUBLIC_CREDS.md` (git; niet gecompileerd naar
-  `/docs`) en [Error Sanitization](../security/ERROR_SANITIZATION.md).
+- Openbare inloggegevens moeten `resolvePublicCred()` gebruiken; foutreacties moeten de gedeelde helpers voor
+  opgeschoonde fouten gebruiken. Zie `docs/security/PUBLIC_CREDS.md` (git; niet gecompileerd naar `/docs`) en
+  [Error Sanitization](../security/ERROR_SANITIZATION.md).
 
 **Gerichte cyclus**
 
@@ -63,7 +59,7 @@ npm run lint
 ```
 
 Test ook elke betrokken aanvraagfamilie: chat, Responses, afbeeldingen, embeddings, audio of video.
-Beoordeel gegenereerde catalogus- en golden-diffs als contractwijzigingen; accepteer ze niet blindelings.
+Beoordeel gegenereerde catalogus- en golden diffs als contractwijzigingen; accepteer ze niet klakkeloos.
 
 ### Routering
 
@@ -83,8 +79,8 @@ npm run check:known-symbols      # wijzigingen in strategieregistratie
 npm run lint
 ```
 
-Gebruik lokaal deterministische tests met gemockte upstreams. Live combo-rooktests vereisen inloggegevens
-en zijn handmatig; ze zijn geen vervanging voor CI.
+Gebruik lokaal deterministische tests met nagebootste upstreams. Live rooktests voor combo's vereisen inloggegevens en zijn
+handmatig; ze zijn geen vervanging voor CI.
 
 ### UI / UX
 
@@ -92,9 +88,9 @@ en zijn handmatig; ze zijn geen vervanging voor CI.
 
 - Grenzen van Next.js-routes/-pagina's en gedeelde componenten onder `src/app/` en
   `src/shared/components/`.
-- API-responsstructuren, laad-/lege/foutstatussen, gedrag voor toetsenbord- en schermlezers,
-  responsieve lay-out, thematisering en locale-uitbreiding.
-- Engelse UI-bronteksten in `src/i18n/messages/en.json`; codeer geen nieuwe gebruikersgerichte teksten hard.
+- API-responsstructuren, laad-/lege-/fouttoestanden, gedrag voor toetsenbord- en schermlezers,
+  responsieve lay-out, thema's en uitbreiding van locales.
+- Engelse UI-bronteksten in `src/i18n/messages/en.json`; codeer nieuwe gebruikersgerichte tekst niet hard.
 
 **Gerichte cyclus**
 
@@ -105,18 +101,18 @@ npm run check:dashboard-typecheck
 npm run lint
 ```
 
-Voer de app uit voor interactie- of visuele wijzigingen en controleer zowel smalle als brede viewports.
-CI voert de productiebuild en bredere suites uit; visueel gedrag vereist nog steeds een gerichte
-componenttest, Playwright-test of gedocumenteerde handmatige controle die bij de wijziging past.
+Voer de app uit voor interactieve of visuele wijzigingen en controleer zowel smalle als brede viewports. CI voert de
+productiebuild en bredere suites uit; visueel gedrag vereist nog steeds een gerichte componenttest, Playwright-test
+of gedocumenteerde handmatige controle die bij de wijziging past.
 
 ### i18n
 
 **Contracten**
 
-- `src/i18n/messages/en.json` is de UI-bron; `config/i18n.json` is de localebron.
-- CLI-catalogi bevinden zich afzonderlijk onder `bin/cli/locales/`.
-- Behoud ICU-placeholders en tags exact. Vertaal geen product-/provider-/modelnamen,
-  protocol- en headernamen, commando's, code-/JSON-identifiers, URL's, omgevingsvariabelen of
+- `src/i18n/messages/en.json` is de UI-bron; `config/i18n.json` is de bron voor locales.
+- CLI-catalogi staan afzonderlijk onder `bin/cli/locales/`.
+- Behoud ICU-placeholders en -tags exact. Vertaal geen product-/provider-/modelnamen,
+  protocol- en headernamen, opdrachten, code-/JSON-identifiers, URL's, omgevingsvariabelen of
   beschermde termen zoals `OmniRoute`, `OAuth`, `MCP` en `A2A`. De huidige bronlijst is
   `scripts/i18n/glossary/protected-terms.json`.
 
@@ -131,19 +127,19 @@ npm run check:cli-i18n          # wanneer CLI-teksten/-catalogi veranderen
 npm run lint
 ```
 
-Dit is richtlijn voor het bestaande systeem, geen uitnodiging om de tooling of het sleutelmodel ervan
-uit te breiden. Houd i18n-patches beperkt en doelgericht terwijl het vervangende systeem wordt ontworpen.
-Voer geen vertaalcommando's uit die externe services aanroepen, tenzij de taak expliciet gegenereerde
-vertalingen vereist en je de resulterende diff hebt beoordeeld.
+Dit is begeleiding voor het bestaande systeem, geen uitnodiging om de tooling of het sleutelmodel ervan uit te breiden.
+Houd i18n-patches chirurgisch terwijl het vervangende systeem wordt ontworpen. Voer geen vertaalopdrachten uit
+die externe services aanroepen, tenzij de taak expliciet gegenereerde vertalingen vereist en
+je de resulterende diff hebt beoordeeld.
 
 ### CLI
 
 **Contracten**
 
-- Openbare commando's en flags in `bin/cli/`, gegenereerde API-commando's, exitcodes, stdout/stderr en
-  structuren van JSON-uitvoer, configuratie-/omgevingsgedrag en verpakte bestanden.
-- Gebruikersgerichte CLI-teksten moeten de i18n-laag van de CLI gebruiken en de catalogi `en`/`pt-BR` synchroon houden.
-- Behoud Node als de ondersteunde runtime en het gepubliceerde binaire contract.
+- Openbare opdrachten en vlaggen in `bin/cli/`, gegenereerde API-opdrachten, afsluitcodes, stdout/stderr en
+  JSON-uitvoerstructuren, configuratie-/omgevingsgedrag en verpakte bestanden.
+- Gebruikersgerichte CLI-teksten moeten de CLI-i18n-laag gebruiken en de `en`-/`pt-BR`-catalogi synchroon houden.
+- Behoud Node als de ondersteunde runtime en handhaaf het contract van de gepubliceerde binary.
 
 **Gerichte cyclus**
 
@@ -155,8 +151,8 @@ npm run check:pack-policy     # wijzigingen aan het pakketoppervlak
 npm run lint
 ```
 
-Gebruik het exacte commando in een tijdelijke gegevensmap wanneer het gedrag afhangt van parsing, bestanden of de
-exitstatus. CI voert de bredere controles van pakketartefacten en het ecosysteem uit.
+Gebruik de exacte opdracht in een tijdelijke gegevensmap wanneer het gedrag afhankelijk is van parsering, bestanden of de
+afsluitstatus. CI voert de bredere controles van pakketartefacten en het ecosysteem uit.
 
 ### Database
 
@@ -179,55 +175,119 @@ npm run lint
 
 Test bij het toevoegen van een migratie zowel een nieuwe database als een upgrade vanaf het vorige schema. Databasetests
 moeten handles sluiten en tijdens het opschonen `resetDbInstance()` aanroepen. Voer `npm run test:bun:db` alleen uit wanneer
-het best-effort-adapterpad voor Bun verandert; Node blijft leidend.
+het best-effortpad van de Bun-adapter verandert; Node blijft leidend.
 
 ### Build / implementatie
 
 **Contracten**
 
-- Hoofd- en workspacemanifesten/lockfile, `scripts/build/`, zelfstandige Next.js-assemblage, pakketinhoud van `dist/`,
+- Root- en workspace-manifesten/lockfile, `scripts/build/`, zelfstandige Next.js-assemblage, pakketinhoud van `dist/`,
   Electron-platformmetadata, CI-workflows en implementatiesentinels.
-- Ondersteunde Node-versiebereiken en het gebruik van Bun op de toegestane lijst in `CLAUDE.md` moeten intact blijven.
-- Buildartefacten blijven niet-getrackt; beleidsregels voor afhankelijkheden, licenties, workflows en pakketten zijn van toepassing.
+- Ondersteunde Node-versiebereiken en het expliciet toegestane gebruik van Bun in `CLAUDE.md` moeten intact blijven.
+- Buildartefacten blijven onvermeld in versiebeheer; beleid voor afhankelijkheden, licenties, workflows en pakketten is van toepassing.
 
 **Gerichte cyclus**
 
 ```bash
 node --import tsx/esm --test tests/unit/build/<behavior>.test.ts
 npm run check:build-scope
-npm run check:lockfile         # wijzigingen aan afhankelijkheden of lockfile
+npm run check:lockfile         # wijzigingen aan afhankelijkheden of het lockfile
 npm run check:pack-policy      # wijzigingen aan het gepubliceerde pakketoppervlak
 npm run lint
 ```
 
 Gebruik `npm run build` lokaal alleen wanneer de wijziging invloed heeft op compilatie, zelfstandige assemblage, assets
 of runtimebundeling. Gebruik `npm run build:release` alleen voor release-/implementatievalidatie. De build van CI is
-het definitieve platformoverschrijdende signaal; platformspecifieke Electron-wijzigingen vereisen de bijbehorende gerichte build
-of aantoonbaar resultaat van een smoketest.
+het definitieve platformoverstijgende signaal; platformspecifieke Electron-wijzigingen vereisen de bijbehorende gerichte build
+of bewijs van een rooktest.
+
+## Ontwikkelaarsscripts voor een gedeelde machine
+
+Twee helpers in `scripts/dev/` implementeren de lokale cyclus op een devbox waarop andere sessies actief zijn:
+
+```bash
+scripts/dev/typecheck-touched.sh --base release/vX.Y.Z   # bestanden van merge-base(HEAD, base)..HEAD
+scripts/dev/typecheck-touched.sh src/a.ts tests/unit/b.test.ts   # exact deze bestanden
+scripts/dev/new-worktree.sh fix/1234-slug release/vX.Y.Z  # geïsoleerde worktree, veilig voor parallel gebruik
+```
+
+- `typecheck-touched.sh` voert typecontrole alleen uit op de gewijzigde `.ts/.tsx`-bestanden via een tijdelijk
+  `tsconfig.touched.tmp.json` (`extends ./tsconfig.json`, `types: ["node"]`, `noEmit`,
+  `incremental: false`) met een heap van 6 GB, en vervangt zo de projectbrede `tsc -p tsconfig.json`
+  die op een zwaarbelaste machine door onvoldoende geheugen vastloopt. Het script toont de fouten in gewijzigde bestanden plus één samenvattingsregel en sluit af
+  met `1` voor fouten in gewijzigde bestanden, `2` wanneer de enige fouten zich in geïmporteerde bestanden bevinden of tsc is gestopt
+  zonder diagnostiek (lees het genoemde logbestand onder `_artifacts/typecheck-touched/`), en `0` wanneer
+  alles in orde is. De tijdelijke tsconfig wordt altijd verwijderd; commit deze nooit.
+- `new-worktree.sh` voert gelijktijdige uitvoeringen na elkaar uit met behulp van `<git-common-dir>/omniroute-new-worktree.lock`
+  (wacht standaard maximaal 600 s, met een zichtbare melding; de header van het script documenteert hoe dit
+  kan worden aangepast) en draait
+  het aanmaken van de branch terug wanneer `git worktree add` mislukt voordat de worktree bestaat, zodat voor een nieuwe poging
+  geen handmatige `git branch -D` nodig is. De hard-linked `node_modules` en de kopie van `.husky/_` blijven ongewijzigd.
+
+## Lokale kandidaatcyclus
+
+Tests van de broncode kunnen niet bewijzen dat het verpakte artefact opstart: fouten in packaginglijsten, opgeschoonde afhankelijkheden
+en native binaries treden pas op wanneer de tarball wordt geïnstalleerd en gestart. `npm run dev:candidate`
+(`scripts/dev/candidate.mjs`) is de lokale kant van de eenmalig bouwen / valideren / promoveren-stroom uit
+RFC #8084: het bouwt één kandidaat, valideert exact dat artefact, promoveert het via het hernoemen van
+directories en draait de promotie terug wanneer het gepromoveerde slot niet door de statuscontrole komt.
+
+```bash
+npm run dev:candidate -- run --dry-run --json  # toon het plan, wijzig niets
+npm run dev:candidate -- run                   # bouwen + valideren + promoveren, automatisch terugdraaien
+npm run dev:candidate -- build                 # npm pack + installeren in _artifacts/candidate/<id>/
+npm run dev:candidate -- validate --id <id>    # opstarten op een vrije poort, /api/health + /v1/models
+npm run dev:candidate -- promote --id <id>     # <id> → current, current → previous
+npm run dev:candidate -- rollback              # current en previous verwisselen
+npm run dev:candidate -- run --from-tarball <file.tgz>  # een elders gebouwde tarball hergebruiken (CI)
+```
+
+- **Bouw één keer.** `build` verpakt de huidige tree (hiervoor is `dist/server.js` nodig, dus voer eerst
+  `npm run build:release` uit) of kopieert `--from-tarball`, en installeert de tarball vervolgens in een
+  geïsoleerde npm-prefix, omdat de tarball geen `node_modules` bevat. De id is de korte `HEAD`-sha
+  (`-dirty` wanneer de tree lokale wijzigingen bevat) of `tgz-<sha256>` voor een tarball. Een schone id die
+  al is gebouwd, wordt hergebruikt in plaats van opnieuw gebouwd; geef `--force` door om deze opnieuw te bouwen.
+- **Valideer het pakket, niet de broncode.** `validate` start de geïnstalleerde CLI
+  (`serve --port <free port>`) met een nieuwe `DATA_DIR=<candidate>/data`, nepgeheimen, en waarbij
+  `OMNIROUTE_API_KEY`, `STORAGE_ENCRYPTION_KEY` en `INITIAL_PASSWORD` van de beheerder uit de
+  omgeving zijn verwijderd, zodat de sleutelloze loopbackconfiguratie van een nieuwe installatie wordt gecontroleerd. Het wacht totdat
+  `GET /api/health` 200 retourneert, vereist dat `GET /v1/models` 200 retourneert, stopt de procesgroep
+  en slaat het resultaat samen met de hash van de tarball op in `validation.json`.
+- **Promoveer hetzelfde artefact.** `promote` weigert een kandidaat zonder geslaagde validatie voor de
+  huidige hash van de tarball. Het standaard actieve slot is `_artifacts/candidate/current`; `--target <dir>`
+  selecteert een andere directory op hetzelfde bestandssysteem, en het vorige slot daarvan is `<dir>.previous`.
+  Elke hernoeming is atomair, en bij een fout halverwege worden de reeds uitgevoerde hernoemingen teruggedraaid.
+- **Draai terug.** `run` valideert het gepromoveerde slot opnieuw en verwisselt `current` en `previous` weer wanneer
+  die controle mislukt. Een kandidaat die niet door de eerste validatie komt, wordt nooit gepromoveerd.
+
+Alles wordt opgeslagen onder het door git genegeerde `_artifacts/candidate/`; een bestaande OmniRoute-installatie
+en de bijbehorende datadirectory worden nooit gewijzigd. De gepromoveerde CLI is
+`_artifacts/candidate/current/prefix/bin/omniroute`; start deze met uw eigen `DATA_DIR` wanneer u deze gebruikt.
+Afsluitcodes: `0` geslaagd, `1` validatie of promotie mislukt, `2` gebruiksfout of ontbrekende build.
 
 ## Lokale cyclus versus CI
 
-| Voer lokaal uit voor elke patch                                                                 | CI levert het brede signaal                                                            |
-| ----------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| Directe gedragstests en bovenstaande categoriecontroles                                         | Opgesplitste volledige unit-testsuite en seriële tests                                 |
-| `npm run lint`                                                                                  | Vitest-suites en stapsgewijs aangescherpte dekkings-/kwaliteitsdrempels                |
-| Typecontrole of build alleen wanneer het betreffende contract dit vereist                       | Productiebuild, beveiligings-, documentatie-, afhankelijkheids- en PR-beleidscontroles |
-| Handmatige interactie-/livecontroles alleen wanneer automatisering het gedrag niet kan aantonen | Cross-job-integratie- en platformcontroles die door de workflow zijn geconfigureerd    |
+| Lokaal uitvoeren voor elke patch                                                               | CI levert het brede signaal                                                                   |
+| ---------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| Directe gedragstests en bovenstaande categoriegates                                            | Volledige, gesharde unit-testsuite en seriële tests                                           |
+| `npm run lint`                                                                                 | Vitest-suites en stapsgewijs aangescherpte dekkings-/kwaliteitsdrempels                       |
+| Typecheck of build alleen wanneer het betreffende contract dit vereist                         | Productiebuild, beveiliging, documentatie, afhankelijkheden en PR-beleidsgates                |
+| Handmatige interactie/livecontroles alleen wanneer automatisering het gedrag niet kan aantonen | Taakoverschrijdende integratie- en platformcontroles die door de workflow zijn geconfigureerd |
 
-Een geslaagde gerichte cyclus is bewijs voor het gewijzigde contract, maar geen bewijs dat niet-gerelateerde CI-controles
-zullen slagen. Laat omgekeerd niet elke lokale wijziging wachten op de volledige repositorymatrix.
+Een geslaagde gerichte cyclus levert bewijs voor het gewijzigde contract, maar bewijst niet dat niet-gerelateerde CI-controles
+zullen slagen. Laat omgekeerd ook niet elke lokale wijziging wachten op de volledige repositorymatrix.
 
-## Checklist voor afstemming
+## Reconciliatiechecklist
 
-Voordat je om een review vraagt:
+Voordat je een review aanvraagt:
 
-- Bevestig dat de PR-basis nog steeds de hoogste actieve `release/v*`-branch is.
-- Haal die basis op en controleer de commits die zijn toegevoegd sinds je je branch hebt aangemaakt.
+- Controleer of de basisbranch van de PR nog steeds de hoogste actieve `release/v*`-branch is.
+- Fetch die basisbranch en bekijk de commits die zijn geland sinds je je branch hebt gemaakt.
 - Controleer `git diff <active-base>...HEAD` op onbedoelde of gegenereerde wijzigingen.
 - Los conflicten in catalogi en gegenereerde documenten op door de bron bij te werken en de uitvoer opnieuw te genereren.
-- Voer na de afstemming elke gerichte test/controle die in de PR-beschrijving wordt vermeld opnieuw uit.
-- Verzwak nooit assertions en verwijder geen vereiste tests enkel om aan te sluiten op een verschoven basis.
+- Voer na de reconciliatie elke gerichte test/gate uit die in de PR-beschrijving staat vermeld.
+- Verzwak nooit assertions en verwijder geen vereiste tests enkel om aan te sluiten op een verschoven basisbranch.
 
-Gebruik voor regels omtrent releasebevriezing en retargeting
-[Branch- & releasemodel](BRANCHING_MODEL.md). Gebruik voor het volledige CI-overzicht
-[Referentie voor kwaliteitscontroles](../architecture/QUALITY_GATES.md).
+Gebruik voor regels omtrent release-freezes en retargeting
+[Branch- en releasemodel](BRANCHING_MODEL.md). Gebruik voor de volledige CI-inventaris
+[Referentie voor kwaliteitsgates](../architecture/QUALITY_GATES.md).

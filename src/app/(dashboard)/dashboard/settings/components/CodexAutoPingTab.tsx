@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Card, Toggle, InfoTooltip } from "@/shared/components";
 import { useTranslations } from "next-intl";
+import CodexWakeupsSection from "./CodexWakeupsSection";
 
 type CodexConnection = {
   id: string;
@@ -96,8 +97,7 @@ function CodexAutoPingHeader({ status }: { status: "" | "saved" | "error" }) {
       </div>
       {status === "saved" && (
         <span className="text-xs font-medium text-emerald-500 flex items-center gap-1">
-          <span className="material-symbols-outlined text-[14px]">check_circle</span>{" "}
-          {t("saved")}
+          <span className="material-symbols-outlined text-[14px]">check_circle</span> {t("saved")}
         </span>
       )}
       {status === "error" && (
@@ -152,12 +152,17 @@ export default function CodexAutoPingTab() {
       {loading ? (
         <p className="text-sm text-text-muted">{t("loading")}</p>
       ) : (
-        <CodexAutoPingConnectionList
-          connections={connections}
-          enabledMap={enabledMap}
-          savingId={savingId}
-          onToggle={toggleConnection}
-        />
+        <>
+          <CodexAutoPingConnectionList
+            connections={connections}
+            enabledMap={enabledMap}
+            savingId={savingId}
+            onToggle={toggleConnection}
+          />
+          <CodexWakeupsSection
+            accounts={connections.map((conn) => ({ id: conn.id, label: connectionLabel(conn) }))}
+          />
+        </>
       )}
     </Card>
   );

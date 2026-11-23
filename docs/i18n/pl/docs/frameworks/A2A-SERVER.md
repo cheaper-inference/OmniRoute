@@ -148,22 +148,22 @@ curl -X POST http://localhost:20128/a2a \
 
 ## Dostępne umiejętności
 
-OmniRoute udostępnia 6 umiejętności A2A podłączonych w `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Każdy moduł umiejętności znajduje się w `src/lib/a2a/skills/`.
+OmniRoute udostępnia 6 umiejętności A2A powiązanych w `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Każdy moduł umiejętności znajduje się w `src/lib/a2a/skills/`.
 
-| Umiejętność             | ID                   | Opis                                                                                                                                                                        | Tagi                              | Przykłady                                  |
-| :---------------------- | :------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------- | :----------------------------------------- |
-| Inteligentne trasowanie | `smart-routing`      | Kieruje prompt do optymalnego dostawcy lub zestawu dostawców przy użyciu silnika kombinacji i systemu oceny OmniRoute                                                       | trasowanie, dostawcy              | „Skieruj ten prompt do najlepszego modelu” |
-| Zarządzanie limitami    | `quota-management`   | Raportuje stan limitów poszczególnych dostawców i pomaga wywołującym zdecydować, kiedy ograniczyć ruch lub zmienić dostawcę                                                 | limity, dostawcy                  | „Sprawdź limit dla anthropic”              |
-| Wykrywanie dostawców    | `provider-discovery` | Wyświetla zainstalowanych dostawców wraz z ich możliwościami, informacjami o darmowych planach i stanem OAuth                                                               | dostawcy, wykrywanie              | „Jacy dostawcy są dostępni?”               |
-| Analiza kosztów         | `cost-analysis`      | Szacuje koszt żądania lub konwersacji na podstawie katalogu i ostatniego użycia                                                                                             | koszt, użycie                     | „Oszacuj koszt tej konwersacji”            |
-| Raport o kondycji       | `health-report`      | Agreguje stan mechanizmu circuit breaker, okresu wyciszenia i blokady dla każdego dostawcy                                                                                  | kondycja, odporność               | „Pokaż stan kondycji wszystkich dostawców” |
-| Lista możliwości        | `list-capabilities`  | Zwraca pełny, 45-elementowy katalog Agent Skills (23 API + 21 CLI + 1 konfiguracja) jako tabelę markdown z surowymi adresami URL plików SKILL.md do wstrzykiwania kontekstu | katalog, wykrywanie, umiejętności | „Wyświetl wszystkie możliwości OmniRoute”  |
+| Umiejętność             | ID                   | Opis                                                                                                                                                                 | Tagi                              | Przykłady                                  |
+| :---------------------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------- | :----------------------------------------- |
+| Inteligentne trasowanie | `smart-routing`      | Kieruje prompt do optymalnego dostawcy/zestawu przy użyciu silnika zestawów i mechanizmu oceny OmniRoute                                                             | trasowanie, dostawcy              | „Skieruj ten prompt do najlepszego modelu” |
+| Zarządzanie limitami    | `quota-management`   | Raportuje stan limitów poszczególnych dostawców i pomaga wywołującym zdecydować, kiedy ograniczyć ruch lub zmienić dostawcę                                          | limity, dostawcy                  | „Sprawdź limit dla anthropic”              |
+| Wykrywanie dostawców    | `provider-discovery` | Wyświetla zainstalowanych dostawców wraz z możliwościami, oznaczeniami bezpłatnych planów i stanem OAuth                                                             | dostawcy, wykrywanie              | „Jacy dostawcy są dostępni?”               |
+| Analiza kosztów         | `cost-analysis`      | Szacuje koszt żądania/konwersacji na podstawie katalogu i ostatniego użycia                                                                                          | koszt, użycie                     | „Oszacuj koszt tej konwersacji”            |
+| Raport kondycji         | `health-report`      | Agreguje stan bezpiecznika, okresu wyciszenia i blokady dla poszczególnych dostawców                                                                                 | kondycja, odporność               | „Pokaż stan kondycji wszystkich dostawców” |
+| Lista możliwości        | `list-capabilities`  | Zwraca pełny, 45-elementowy katalog Agent Skills (23 API + 21 CLI + 1 konfiguracja) jako tabelę markdown z surowymi adresami URL SKILL.md do wstrzykiwania kontekstu | katalog, wykrywanie, umiejętności | „Wyświetl wszystkie możliwości OmniRoute”  |
 
-> Agent Card należy utrzymywać w zgodności z aktualnym katalogiem 352 dostawców; liczba dostawców oraz metadane dotyczące bezpłatnego dostępu i braku wymogu uwierzytelnienia pochodzą z rejestru środowiska uruchomieniowego.
+> Karta agenta powinna być zgodna z aktualnym katalogiem 374 dostawców; liczba dostawców oraz metadane dotyczące dostępu bezpłatnego/niewymagającego uwierzytelniania pochodzą z rejestru środowiska uruchomieniowego.
 
 ### Szczegóły umiejętności `list-capabilities`
 
-Umiejętność `list-capabilities` jest szczególnie przydatna dla agentów zewnętrznych, które muszą sprawdzić, co udostępnia OmniRoute, przed wysłaniem wywołań API. Zwraca artefakt w postaci ustrukturyzowanej tabeli markdown:
+Umiejętność `list-capabilities` jest szczególnie przydatna dla zewnętrznych agentów, które muszą ustalić, co udostępnia OmniRoute, zanim wyślą wywołania API. Zwraca ona artefakt w postaci ustrukturyzowanej tabeli markdown:
 
 ```
 | ID | Nazwa | Kategoria | Obszar | Endpointy/polecenia | Surowy URL |

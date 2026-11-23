@@ -108,7 +108,7 @@ describe("Sidebar pinned items shortcut (#pinned-items)", () => {
     });
 
     // Expand ANALYTICS if not expanded
-    const analyticsHeader = Array.from(container.querySelectorAll('div[role="button"]')).find(
+    const analyticsHeader = Array.from(container.querySelectorAll("button[aria-expanded]")).find(
       (el) => el.textContent?.includes("analyticsSection")
     );
     if (analyticsHeader) {
@@ -178,8 +178,8 @@ describe("Sidebar pinned items shortcut (#pinned-items)", () => {
     });
 
     // Find the Pinned section header button
-    const pinnedHeader = Array.from(container.querySelectorAll('div[role="button"]')).find((el) =>
-      el.textContent?.includes("Pinned")
+    const pinnedHeader = Array.from(container.querySelectorAll("button[aria-expanded]")).find(
+      (el) => el.textContent?.includes("Pinned")
     );
     expect(pinnedHeader).toBeDefined();
 
@@ -221,8 +221,8 @@ describe("Sidebar pinned items shortcut (#pinned-items)", () => {
     expect((navPinIcon as HTMLElement)?.style.fontSize).toBe("13px");
 
     // Section header PINNED should be clean text without redundant leading icon, consistent with other category headers
-    const pinnedHeader = Array.from(container.querySelectorAll('div[role="button"]')).find((el) =>
-      el.textContent?.includes("Pinned")
+    const pinnedHeader = Array.from(container.querySelectorAll("button[aria-expanded]")).find(
+      (el) => el.textContent?.includes("Pinned")
     );
     expect(pinnedHeader).toBeDefined();
     const headerPinIcon = pinnedHeader?.querySelector(

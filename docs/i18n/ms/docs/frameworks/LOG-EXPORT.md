@@ -16,82 +16,152 @@ pertama; saluran paip ini merupakan sebuah registri, jadi lebih banyak destinasi
 ## 1. Cara ia berfungsi
 
 ```
-call_logs (SQLite)
-  → callLogExportSource.getCallLogsForExport(cursor, batchSize)
-    → LogExportRecord[]  (set medan tab Logs)
-      → destination client.send(batch)
-        → advanceLogExportCursor(id, lastRowId, count)
+pelayan (nyahsulit + sahkan konfigurasi, selaraskan kursor)
+  → mulakan IPC → proses OS exportChild terpencil
+    → storage.sqlite baca sahaja → pertanyaan/pemetaan log panggilan dikongsi
+      → hidrasi artifak tak segerak → prepare()/send() destinasi
+        → IPC kelompok → pelayan menyimpan kursor → IPC pengakuan
+          → kelompok seterusnya; IPC selesai → pelayan merekodkan kejayaan
 ```
 
 - **Jadual** — satu tugas cron `JobRegistry`, `log_export`, dengan nilai lalai `0 * * * *` (setiap jam,
   UTC). Didaftarkan dalam `src/lib/initCloudSync.ts`; boleh ditindih dengan `OMNIROUTE_LOG_EXPORT_CRON`.
-  Setiap detik menjalankan eksport bagi setiap destinasi yang **didayakan**, secara berurutan.
-- **Kursor** — `call_logs.rowid` tersirat SQLite, dikekalkan bagi setiap destinasi dalam
+  Setiap detik memproses semua destinasi yang **didayakan** sehingga selesai, secara berurutan.
+- **Kursor** — `call_logs.rowid` tersirat SQLite, disimpan bagi setiap destinasi dalam
   `log_export_destinations.cursor_row_id`. `timestamp` sengaja tidak digunakan sebagai kursor: pemanggil
-  boleh membekalkan nilainya sendiri, maka permintaan yang perlahan boleh ditulis selepas permintaan lebih pantas
-  yang bermula kemudian, dan kursor cap masa akan melangkaunya.
+  boleh membekalkan nilai mereka sendiri, jadi permintaan yang perlahan boleh ditulis selepas permintaan lebih pantas yang bermula
+  kemudian, dan kursor cap masa akan melangkaunya.
 - **Pengelompokan** — `batch_size` baris bagi setiap permintaan (lalai 500), `max_rows_per_run` baris bagi setiap pelaksanaan
-  (lalai 10000) supaya tunggakan besar diproses sepanjang beberapa detik dan bukannya menyekat satu pelaksanaan.
-- **Penghantaran** — kursor hanya bergerak ke hadapan selepas `send()` selesai. Kelompok yang gagal menyebabkan
-  kursor kekal pada kedudukan asal, maka baris yang sama dicuba semula pada pelaksanaan seterusnya. Jaminannya ialah
-  sekurang-kurangnya-sekali serta penyahduplikasian pada pihak destinasi, bukannya tepat-sekali sebenar: BigQuery menggunakan id log
-  panggilan sebagai kunci bagi setiap baris, yang dipatuhinya berdasarkan usaha terbaik dalam tempoh penyahduplikasiannya sendiri.
-- **Pelindung pertindihan** — detik cron dan `POST .../run` boleh berlaku serentak. Destinasi
-  yang sedang diproses akan dilangkau dan bukannya diproses dua kali (`skipped: true` dalam hasil pelaksanaan),
-  supaya pelaksanaan serentak tidak boleh menghantar semula sesuatu kelompok atau mengundurkan kursor.
-- **Pemulihan pengosongan** — jika `cursor_row_id` akhirnya melebihi `MAX(rowid)` (keseluruhan jadual telah
-  dikosongkan dan rowid dimulakan semula), pelaksana mengundurkan kursor kepada 0 agar tidak terus gagal mengesan rekod baharu.
+  (lalai 10000) supaya tunggakan besar diproses sepanjang beberapa detik dan bukannya menyekat satu detik.
+- **Penghantaran** — kursor bergerak ke hadapan hanya selepas `send()` selesai. Kelompok yang gagal membiarkan
+  kursor kekal pada kedudukannya, jadi baris yang sama dicuba semula pada pelaksanaan seterusnya. Jaminannya ialah
+  sekurang-kurangnya-sekali berserta penyahduplikasian di pihak destinasi, bukannya tepat-sekali yang sebenar: BigQuery menetapkan kunci setiap
+  baris berdasarkan id log panggilan, yang dipatuhinya atas dasar usaha terbaik dalam tetingkap penyahduplikasiannya sendiri.
+- **Pengadang pertindihan** — detik cron dan `POST .../run` boleh dicetuskan serentak. Destinasi yang
+  sedang diproses dilangkau dan bukannya diproses dua kali (`skipped: true` dalam hasil pelaksanaan),
+  maka pelaksanaan serentak tidak boleh menghantar semula kelompok atau menulis kursor secara mengundur.
+- **Pemulihan pengosongan** — jika `cursor_row_id` menjadi lebih tinggi daripada `MAX(rowid)` (seluruh jadual telah
+  dikosongkan dan rowid dimulakan semula), pelaksana mengundurkannya kepada 0 dan bukannya menjadi tidak dapat mengesan data secara kekal.
 
-### Muatan (gesaan dan pelengkapan)
+### Pelaksana terpencil dan had
 
-Secara lalai, eksport hanya membawa medan ringkasan yang ditunjukkan oleh **senarai** Logs. Menghidupkan
-**Eksport gesaan dan respons** (`includeBodies`) akan turut menghantar perkara yang ditunjukkan oleh anak tetingkap **butiran**
-Logs bagi setiap panggilan:
+Setiap pelaksanaan destinasi pada Node memulakan proses anak OS berasingan yang berjangka hayat pendek (`child_process`
+dengan IPC, bukan `worker_threads`). Pembacaan isi, penghuraian/pensirian JSON muatan, `prepare()` destinasi
+dan I/O rangkaian destinasi semuanya berjalan di situ, bukan pada gelung peristiwa pelayan.
+Hanya konfigurasi dan mesej kemajuan kecil merentasi IPC; rekod yang dieksport tidak pernah kembali kepada
+pelayan. Tugas cron dan laluan Jalankan sekarang mengekalkan hasil awam dan pengadang pertindihan yang sama.
 
-| Medan                            | Kandungannya                                                  |
-| -------------------------------- | ------------------------------------------------------------- |
-| `request_body` / `response_body` | Muatan panggilan sebagaimana dipaparkan oleh papan pemuka     |
-| `pipeline_route_decision`        | Sasaran dan model yang dipilih oleh penghala                  |
-| `pipeline_client_request`        | Permintaan mentah tepat sebagaimana dihantar oleh klien       |
-| `pipeline_openai_request`        | Selepas diterjemahkan kepada bentuk OpenAI dalaman            |
-| `pipeline_provider_request`      | Sebagaimana dihantar ke huluan, dalam dialek penyedia         |
-| `pipeline_provider_response`     | Respons huluan mentah                                         |
-| `pipeline_client_response`       | Perkara yang dikembalikan kepada pemanggil                    |
-| `pipeline_error`                 | Butiran ralat peringkat saluran paip bagi panggilan gagal     |
-| `bodies_truncated`               | Benar apabila mana-mana medan di atas mencapai `maxBodyBytes` |
+Proses anak membuka `DATA_DIR/storage.sqlite` yang telah diselesaikan oleh pelayan sebagai baca sahaja menggunakan `node:sqlite`,
+dengan `busy_timeout=5000` dan `query_only=ON`. Ia tidak mengimport sebarang tika tunggal DB dan tidak melakukan
+migrasi, sandaran atau kemas kini SQLite. Penyimpanan rekod artifak yang hilang/rosak (termasuk
+UPDATE artifak rosak) kekal hanya dalam laluan butiran papan pemuka. Kedua-dua laluan berkongsi penyelesai
+butiran tulen; eksport menggunakan pembacaan sistem fail tak segerak dan tertib penyelesaian artifak → sebaris
+legasi → cakera legasi → tiada yang sama. Sesuatu pelaksanaan mengambil petikan rowid sisipan maksimum
+apabila proses anak membuka pembacanya; sisipan kemudian menunggu sehingga pelaksanaan seterusnya. Ini ialah sempadan
+sisipan, bukan transaksi SQLite berjangka panjang: penulis dan titik semak WAL kekal bebas semasa
+menunggu rangkaian. Kemas kini/pemadaman baris sedia ada tidak dibekukan oleh sempadan ini.
 
-Ini ialah kandungan gesaan, maka ia **dimatikan secara lalai** dan sengaja dijadikan pilihan bagi setiap destinasi.
-Perkara yang dihantar ialah perkara yang ditunjukkan oleh papan pemuka kerana kedua-duanya membaca melalui `getCallLogById`: muatan telah
-dinyahkenal pasti daripada PII dan rahsia disunting ketika ia ditulis, manakala panggilan yang dibuat dengan
-kunci API `noLog` langsung tidak menyimpan muatan, maka tiada apa-apa untuk dieksport.
+Selepas setiap kelompok diterima, proses anak menunggu pengakuan. Pelayan terlebih dahulu menyimpan
+kursor dengan `advanceLogExportCursor`, kemudian menghantar `ack`; tiada kelompok seterusnya bermula sebelum itu.
+Kegagalan penghantaran, ranap atau tamat masa merekodkan kegagalan tanpa memajukan kelompok tersebut. Kelompok yang
+telah diakui sebelum ini kekal dikomit; paling banyak hanya satu kelompok yang belum diakui boleh dihantar semula.
+Kejayaan direkodkan hanya selepas `done` dan proses anak keluar dengan bersih. Kegagalan menamatkan proses anak
+dengan SIGTERM, yang ditingkatkan kepada SIGKILL selepas 500 ms, dan pelaksana menunggu proses ditutup.
+
+| Pemboleh ubah persekitaran                    | Lalai  | Tujuan                                 |
+| --------------------------------------------- | ------ | -------------------------------------- |
+| `OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS`         | 900000 | Had masa sebenar bagi setiap destinasi |
+| `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` | 1024   | Had ruang lama V8 proses anak dalam MB |
+
+Nilai tidak sah/bukan positif/bukan integer menggunakan nilai lalai. Tetapan timbunan bukanlah had keseluruhan
+RSS; kelompok yang sangat besar masih boleh menghabiskan memori proses anak dan menggagalkan pelaksanaan dengan selamat.
+Nilai lalai 1024 MB menyediakan ruang lebihan untuk kelompok lalai 500 baris bagi artifak 512 KiB dengan
+isi didayakan, termasuk pensirian JSON berketul bait BigQuery. Ia tidak menjadikan kelompok isi
+10000 baris selamat. Kehabisan timbunan V8 merekodkan kegagalan yang boleh diambil tindakan: kurangkan saiz kelompok
+atau tingkatkan `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB`; kursor kekal pada kelompok terakhir yang
+diakui. Isi sebaris/cakera sejarah tidak dilindungi oleh had artifak moden.
+Pengendali mesti memperuntukkan RSS secara berasingan, terutamanya di dalam bekas dengan had memori.
+
+Proses anak hanya mewarisi `DATA_DIR` yang telah diselesaikan, `NODE_ENV`, `TZ` eksplisit (penyelesaian waktu tempatan
+nama fail legasi), `ELECTRON_RUN_AS_NODE` apabila tersedia, dan input keluar berikut:
+`HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY` (serta bentuk huruf kecilnya),
+`OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`, `NODE_EXTRA_CA_CERTS`, `SSL_CERT_FILE`, `SSL_CERT_DIR`.
+Penghantar Undici global berkongsi penyelesaian proksi persekitaran tulen pelayan dan peraturan pintasan hos tempatan,
+termasuk `NO_PROXY`; ia tidak mengimport `proxyFetch.ts` atau bendera DB/cirinya.
+Kelayakan proksi disunting daripada output yang dimajukan dan ralat yang direkodkan. Kelayakan destinasi
+bergerak hanya dalam satu mesej IPC permulaan, tidak sekali-kali melalui argv atau persekitaran; pemajuan output/ralat
+diberi awalan dan disanitasi. Hanya `ExperimentalWarning` dilumpuhkan dalam argumen pelaksanaan proses anak untuk mengelakkan
+amaran SQLite Node diulang pada setiap pelaksanaan cron; jenis amaran lain kekal kelihatan.
+
+Modul destinasi mestilah boleh diimport tanpa kebergantungan Next.js/khusus pelayan. Pelaksanaan
+BigQuery sedia ada telah pun memenuhi kontrak tersebut. Cache token akses hanya bertahan sepanjang
+pelaksanaan proses anak, bukan merentas pelaksanaan. Node ialah masa jalan yang disokong (`package.json` engines), tetapi bahagian
+pemasangan Bun dalam README dan `Dockerfile.bun` turut mengiklankan laluan keserasian pengeluaran yang menggunakan
+`bun:sqlite` (`src/lib/db/core.ts` / penyesuai). Oleh itu, di bawah Bun, eksport mengekalkan laluan
+dalam proses yang terdahulu dan mengeluarkan amaran sekali sahaja: pengasingan heap/masa tamat proses anak tidak tersedia. Gunakan
+Node untuk pengasingan gelung peristiwa dan OOM; Bun tidak dianggap sebagai untuk pembangunan sahaja di sini.
+
+Apabila `includeBodies` didayakan, utamakan kekerapan peringkat minit seperti
+`OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"` dan bukannya mengumpulkan tunggakan muatan setiap jam.
+Had kelompok dan baris masih mengehadkan setiap pelaksanaan. Kos permulaan proses dikenakan bagi setiap destinasi untuk setiap pelaksanaan;
+ini menukar sedikit kos permulaan dengan pengasingan gelung peristiwa pelayan, bukan mengurangkan jumlah penggunaan CPU.
+
+### Muatan (prom dan pelengkapan)
+
+Secara lalai, eksport hanya membawa medan ringkasan yang ditunjukkan oleh **senarai** Log. Menghidupkan
+**Eksport prom dan respons** (`includeBodies`) turut menghantar kandungan yang ditunjukkan oleh anak tetingkap
+**butiran** Log bagi setiap panggilan:
+
+| Medan                            | Kandungannya                                                    |
+| -------------------------------- | --------------------------------------------------------------- |
+| `request_body` / `response_body` | Muatan panggilan sebagaimana dipaparkan oleh papan pemuka       |
+| `pipeline_route_decision`        | Sasaran dan model yang dipilih oleh penghala                    |
+| `pipeline_client_request`        | Permintaan mentah tepat seperti yang dihantar oleh klien        |
+| `pipeline_openai_request`        | Selepas diterjemahkan kepada bentuk OpenAI dalaman              |
+| `pipeline_provider_request`      | Seperti yang sebenarnya dihantar ke hulu, dalam dialek penyedia |
+| `pipeline_provider_response`     | Respons hulu mentah                                             |
+| `pipeline_client_response`       | Kandungan yang dikembalikan kepada pemanggil                    |
+| `pipeline_error`                 | Butiran ralat peringkat saluran paip bagi panggilan yang gagal  |
+| `bodies_truncated`               | Benar apabila mana-mana medan di atas mencapai `maxBodyBytes`   |
+
+Ini ialah kandungan prom, maka ia **dimatikan secara lalai** dan sengaja dijadikan pilihan bagi setiap destinasi.
+Kandungan yang dihantar ialah kandungan yang dipaparkan oleh papan pemuka kerana eksport dan `getCallLogById` berkongsi penyelesaian
+butiran: muatan telah pun
+dinyahkenal pasti daripada PII dan disunting untuk membuang rahsia apabila ditulis, dan panggilan yang dibuat menggunakan
+kunci API `noLog` tidak menyimpan sebarang muatan, maka tiada apa-apa untuk dieksport.
 
 Muatan dibaca bagi setiap baris daripada artifak sistem fail, maka penghidratan hanya berjalan untuk destinasi
-yang memintanya. Baris yang artifaknya hilang atau rosak akan mengeksport ringkasannya dengan muatan
-null dan bukannya menggagalkan kelompok serta menyebabkan kursor tersekat.
+yang memintanya. Artifak yang hilang atau rosak akan mengeksport ringkasannya dengan muatan nol dan bukannya
+menggagalkan kelompok serta menyebabkan kursor terkandas.
 
-`maxBodyBytes` (lalai 262144) mengehadkan setiap medan. Muatan yang lebih panjang **dipenggal dan bukannya
-digugurkan** — gesaan yang dipotong masih menjawab "apa yang ditanyakan" — dan baris tersebut ditandakan dengan
-`bodies_truncated`. Delta yang distrim ketulan demi ketulan tidak dieksport; respons yang telah dihimpunkan
-sudah tersedia dalam `pipeline_provider_response` dan `pipeline_client_response`.
+`maxBodyBytes` (lalai 262144) mengehadkan setiap medan. Muatan yang lebih panjang akan **dipangkas dan bukannya
+digugurkan** — prom yang dipotong masih menjawab "apa yang ditanyakan" — dan baris tersebut ditandai dengan
+`bodies_truncated`. Delta yang distrim ketul demi ketul tidak dieksport; respons yang telah dihimpunkan sudah pun
+terkandung dalam `pipeline_provider_response` dan `pipeline_client_response`.
 
 ---
 
 ## 2. Fail
 
-| Komponen                  | Lokasi                                       |
-| ------------------------- | -------------------------------------------- |
-| Kontrak destinasi         | `src/lib/logExport/types.ts`                 |
-| Daftar                    | `src/lib/logExport/registry.ts`              |
-| Pengendalian rahsia       | `src/lib/logExport/secrets.ts`               |
-| Pelaksana (gelung kursor) | `src/lib/logExport/runner.ts`                |
-| Unjuran API               | `src/lib/logExport/presenter.ts`             |
-| Destinasi BigQuery        | `src/lib/logExport/destinations/bigquery.ts` |
-| Pengesahan Google SA      | `src/lib/logExport/googleServiceAccount.ts`  |
-| Sumber log panggilan      | `src/lib/usage/callLogExportSource.ts`       |
-| Penyimpanan berterusan    | `src/lib/db/logExportDestinations.ts`        |
-| Tugas cron                | `src/lib/jobs/logExportJob.ts`               |
-| Lapisan REST              | `src/app/api/log-export/`                    |
-| Halaman papan pemuka      | `src/app/(dashboard)/dashboard/log-export/`  |
+| Komponen                   | Lokasi                                       |
+| -------------------------- | -------------------------------------------- |
+| Kontrak destinasi          | `src/lib/logExport/types.ts`                 |
+| Pendaftaran                | `src/lib/logExport/registry.ts`              |
+| Pengendalian rahsia        | `src/lib/logExport/secrets.ts`               |
+| Pelaksana (IPC induk)      | `src/lib/logExport/runner.ts`                |
+| Kitar hayat proses         | `src/lib/logExport/childRunner.ts`           |
+| Titik masuk anak           | `src/lib/logExport/exportChild.ts`           |
+| Pembuka baca sahaja        | `src/lib/db/logExportReadOnly.ts`            |
+| Pertanyaan/pemetaan kongsi | `src/lib/usage/callLogExportQueries.ts`      |
+| Penyelesai butiran         | `src/lib/usage/callLogDetailResolver.ts`     |
+| Unjuran API                | `src/lib/logExport/presenter.ts`             |
+| Destinasi BigQuery         | `src/lib/logExport/destinations/bigquery.ts` |
+| Pengesahan SA Google       | `src/lib/logExport/googleServiceAccount.ts`  |
+| Sumber log panggilan       | `src/lib/usage/callLogExportSource.ts`       |
+| Pengekalan data            | `src/lib/db/logExportDestinations.ts`        |
+| Tugas cron                 | `src/lib/jobs/logExportJob.ts`               |
+| Lapisan REST               | `src/app/api/log-export/`                    |
+| Halaman papan pemuka       | `src/app/(dashboard)/dashboard/log-export/`  |
 
 Skema: `src/lib/db/migrations/170_log_export_destinations.sql`.
 

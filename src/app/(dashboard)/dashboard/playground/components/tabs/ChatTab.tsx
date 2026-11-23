@@ -6,15 +6,25 @@ import { useState, useRef, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import MarkdownMessage from "../MarkdownMessage";
 import TokenCostCounter from "../TokenCostCounter";
+import ImageResultsInline, {
+  extractPlaygroundImageResults,
+  type PlaygroundImageResult,
+} from "../ImageResultsInline";
 import { useStreamMetrics } from "../../hooks/useStreamMetrics";
 import { getModelPricing } from "@/lib/playground/types";
 import type { ConfigState } from "../StudioConfigPane";
+import {
+  PLAYGROUND_IMAGE_STREAM_HEADER,
+  restorePlaygroundImageResponse,
+} from "@/shared/utils/playgroundImageStream";
 import type { StreamMetrics } from "@/shared/schemas/playground";
 import { buildReasoningRequestFields } from "../reasoningControlUtils";
 import {
+  buildNativeCodexPlaygroundRequest,
   buildNonChatRequestBody,
   formatNonChatResponse,
   isChatCompletionsEndpoint,
+  isNativeCodexPlaygroundModel,
   lastUserContent,
   resolveChatTabRequestPath,
 } from "./chatTabEndpointRequest";
@@ -22,6 +32,7 @@ import {
 interface Message {
   role: "system" | "user" | "assistant";
   content: string;
+  images?: PlaygroundImageResult[];
   metrics?: StreamMetrics;
 }
 
@@ -50,6 +61,7 @@ export default function ChatTab({ configState, onMetricsUpdate }: ChatTabProps) 
   const [responseDuration, setResponseDuration] = useState<number | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const nativeCodexThreadRef = useRef<string>(crypto.randomUUID());
 
   // Scroll to bottom on new messages
   useEffect(() => {
@@ -57,14 +69,20 @@ export default function ChatTab({ configState, onMetricsUpdate }: ChatTabProps) 
   }, [messages]);
 
   // Build the messages array for the API, prepending system prompt
-  function buildApiMessages(chatMessages: Message[]): Array<{ role: string; content: string }> {
-    const out: Array<{ role: string; content: string }> = [];
+  function buildApiMessages(
+    chatMessages: Message[]
+  ): Array<{ role: Message["role"]; content: string }> {
+    const out: Array<{ role: Message["role"]; content: string }> = [];
     if (configState.systemPrompt.trim()) {
       out.push({ role: "system", content: configState.systemPrompt });
     }
     out.push(
       ...chatMessages
-        .filter((m) => m.role !== "system")
+        .filter(
+          (m) =>
+            m.role !== "system" &&
+            !(m.role === "assistant" && m.images?.length && !m.content.trim())
+        )
         .map((m) => ({
           role: m.role,
           content: m.content,
@@ -135,20 +153,39 @@ export default function ChatTab({ configState, onMetricsUpdate }: ChatTabProps) 
     try {
       const fetchHeaders: Record<string, string> = { "Content-Type": "application/json" };
       const chatEndpoint = isChatCompletionsEndpoint(configState.endpoint);
-      const requestBody = chatEndpoint
-        ? buildRequestBody(chatMessages)
-        : buildNonChatRequestBody(
-            configState.endpoint,
-            lastUserContent(chatMessages),
-            configState.model
-          );
+      const nativeCodex = isNativeCodexPlaygroundModel(configState.model);
+      const imageEndpoint = configState.endpoint === "images" && !nativeCodex;
+      const nativeCodexTurnId = nativeCodex ? crypto.randomUUID() : "";
+      if (nativeCodex) fetchHeaders.Originator = "codex_omniroute_playground";
+      if (imageEndpoint) fetchHeaders[PLAYGROUND_IMAGE_STREAM_HEADER] = "1";
+      const requestBody = nativeCodex
+        ? buildNativeCodexPlaygroundRequest({
+            model: configState.model,
+            messages: buildApiMessages(chatMessages),
+            threadId: nativeCodexThreadRef.current,
+            turnId: nativeCodexTurnId,
+            maxOutputTokens: configState.params.max_tokens,
+          })
+        : chatEndpoint
+          ? buildRequestBody(chatMessages)
+          : buildNonChatRequestBody(
+              configState.endpoint,
+              lastUserContent(chatMessages),
+              configState.model
+            );
 
-      const res = await fetch(resolveChatTabRequestPath(configState.endpoint), {
-        method: "POST",
-        headers: fetchHeaders,
-        body: JSON.stringify(requestBody),
-        signal: controller.signal,
-      });
+      let res = await fetch(
+        nativeCodex ? "/api/v1/responses" : resolveChatTabRequestPath(configState.endpoint),
+        {
+          method: "POST",
+          headers: fetchHeaders,
+          body: JSON.stringify(requestBody),
+          signal: controller.signal,
+        }
+      );
+      if (imageEndpoint) {
+        res = await restorePlaygroundImageResponse(res, controller.signal);
+      }
 
       setResponseStatus(res.status);
 
@@ -165,12 +202,24 @@ export default function ChatTab({ configState, onMetricsUpdate }: ChatTabProps) 
         return;
       }
 
-      if (!chatEndpoint) {
+      if (!chatEndpoint && !nativeCodex) {
         const rawText = await res.text();
+        let images: PlaygroundImageResult[] = [];
+        if (configState.endpoint === "images") {
+          try {
+            images = extractPlaygroundImageResults(JSON.parse(rawText));
+          } catch {
+            // Preserve the raw response below when the image payload is not valid JSON.
+          }
+        }
         setMessages((prev) => {
           const next = [...prev];
           const idx = appendIndex !== undefined ? appendIndex : next.length - 1;
-          next[idx] = { ...next[idx], content: formatNonChatResponse(rawText) };
+          next[idx] = {
+            ...next[idx],
+            content: images.length > 0 ? "" : formatNonChatResponse(rawText),
+            images: images.length > 0 ? images : undefined,
+          };
           return next;
         });
         setResponseDuration(Date.now() - startTime);
@@ -203,10 +252,19 @@ export default function ChatTab({ configState, onMetricsUpdate }: ChatTabProps) 
             if (line.startsWith("data: ")) {
               try {
                 const parsed = JSON.parse(line.slice(6)) as {
+                  type?: string;
+                  delta?: string;
                   choices?: Array<{ delta?: { content?: string } }>;
                   usage?: { prompt_tokens?: number; completion_tokens?: number };
+                  response?: {
+                    usage?: { input_tokens?: number; output_tokens?: number };
+                  };
                 };
-                const delta = parsed.choices?.[0]?.delta?.content ?? "";
+                const delta = nativeCodex
+                  ? parsed.type === "response.output_text.delta"
+                    ? (parsed.delta ?? "")
+                    : ""
+                  : (parsed.choices?.[0]?.delta?.content ?? "");
                 if (delta) {
                   assistantResponse += delta;
                   streamMetrics.onChunk(1);
@@ -219,6 +277,11 @@ export default function ChatTab({ configState, onMetricsUpdate }: ChatTabProps) 
                 }
                 if (parsed.usage) {
                   usageData = parsed.usage;
+                } else if (nativeCodex && parsed.response?.usage) {
+                  usageData = {
+                    prompt_tokens: parsed.response.usage.input_tokens,
+                    completion_tokens: parsed.response.usage.output_tokens,
+                  };
                 }
               } catch {
                 // ignore parse errors for partial chunks
@@ -286,6 +349,7 @@ export default function ChatTab({ configState, onMetricsUpdate }: ChatTabProps) 
   };
 
   const handleClear = () => {
+    nativeCodexThreadRef.current = crypto.randomUUID();
     setMessages([]);
     setError(null);
     setResponseStatus(null);
@@ -376,7 +440,9 @@ export default function ChatTab({ configState, onMetricsUpdate }: ChatTabProps) 
                     : "bg-bg-alt border border-border text-text-main rounded-tl-sm"
                 }`}
               >
-                {msg.role === "assistant" ? (
+                {msg.images?.length ? (
+                  <ImageResultsInline images={msg.images} />
+                ) : msg.role === "assistant" ? (
                   <MarkdownMessage content={msg.content} />
                 ) : (
                   <span className="whitespace-pre-wrap">{msg.content}</span>

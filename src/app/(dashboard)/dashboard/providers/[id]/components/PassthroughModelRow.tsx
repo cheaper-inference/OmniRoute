@@ -9,9 +9,11 @@
  * Never imports from ProviderDetailPageClient.
  */
 import React, { useState, useRef, useEffect } from "react";
-import { Badge } from "@/shared/components";
+import { Badge, CapabilityBadge } from "@/shared/components";
 import { parseContextWindowOverrideInput, providerText } from "../providerPageHelpers";
 import ModelCompatPopover from "./ModelCompatPopover";
+import ModelEndpointTagsEditor, { type ModelEndpointEditorInfo } from "./ModelEndpointTagsEditor";
+import ModelOutputTokenEditor from "./ModelOutputTokenEditor";
 import { ModelSourceBadge, type ModelCompatSavePatch } from "./ModelRow";
 
 // ---------------------------------------------------------------------------
@@ -50,9 +52,14 @@ export interface PassthroughModelRowProps {
   // context-window override that #4125 added for custom models — and that the
   // PUT compatOnly branch has always accepted for these rows — was unreachable
   // from the UI. Absent handler keeps the row exactly as it was.
+  supportsVision?: boolean;
+  maxOutputTokenOverride?: number | null;
+  onSaveMaxOutputTokenOverride?: (modelId: string, value: number | null) => Promise<boolean>;
+  savingOutputOverride?: boolean;
   contextWindowOverride?: number | null;
   onSaveContextWindowOverride?: (modelId: string, value: number | null) => Promise<void>;
   savingContextOverride?: boolean;
+  endpointInfo?: ModelEndpointEditorInfo;
 }
 
 // ---------------------------------------------------------------------------
@@ -84,9 +91,14 @@ export default function PassthroughModelRow({
   onTestModel,
   testStatus,
   testingModel,
+  supportsVision,
+  maxOutputTokenOverride,
+  onSaveMaxOutputTokenOverride,
+  savingOutputOverride,
   contextWindowOverride,
   onSaveContextWindowOverride,
   savingContextOverride,
+  endpointInfo,
 }: PassthroughModelRowProps) {
   const [editing, setEditing] = useState(false);
   const [aliasValue, setAliasValue] = useState(alias || "");
@@ -223,20 +235,41 @@ export default function PassthroughModelRow({
       <div className="flex min-w-0 items-center justify-between gap-2">
         <div className="flex min-w-0 flex-wrap items-center gap-1.5">
           <ModelSourceBadge source={source} />
+          {endpointInfo && (
+            <ModelEndpointTagsEditor
+              provider={provider}
+              modelId={modelId}
+              t={t}
+              {...endpointInfo}
+            />
+          )}
+          {supportsVision === true && (
+            <Badge variant="success" className="shrink-0 px-1.5 py-0 text-[10px]">
+              {t("visionCapableLabel")}
+            </Badge>
+          )}
+          <ModelOutputTokenEditor
+            modelId={modelId}
+            value={maxOutputTokenOverride}
+            onSave={onSaveMaxOutputTokenOverride}
+            saving={savingOutputOverride}
+            t={t}
+          />
           {isFree && (
             <Badge variant="success" className="shrink-0 px-1.5 py-0 text-[10px]">
               {providerText(t, "freeBadge", "Free")}
             </Badge>
           )}
-          {/* #14337: the same 🪟 badge custom rows carry, so an override set here
-              is visible after reload instead of being write-only. */}
+          {/* #14337: the same context-window badge custom rows carry, so an override set
+              here is visible after reload instead of being write-only. */}
           {typeof contextWindowOverride === "number" && !editingContext && (
-            <span
-              className="shrink-0 rounded-full bg-orange-500/15 px-1.5 py-0.5 text-[10px] font-medium text-orange-400"
+            <CapabilityBadge
+              icon="width_normal"
+              className="shrink-0 bg-orange-500/15 text-orange-400"
               title={t("contextWindowOverrideHint")}
             >
-              {`🪟 ${contextWindowOverride.toLocaleString()}`}
-            </span>
+              {contextWindowOverride.toLocaleString()}
+            </CapabilityBadge>
           )}
           {editingContext && (
             <span className="flex items-center gap-1">
@@ -273,6 +306,23 @@ export default function PassthroughModelRow({
           )}
         </div>
         <div className="flex shrink-0 items-center gap-1">
+          {onToggleHidden && testStatus === "error" && (
+            <button
+              onClick={() => onToggleHidden(modelId, true)}
+              disabled={togglingHidden}
+              className={`flex items-center gap-1 rounded p-0.5 text-[11px] text-red-500 hover:bg-sidebar transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${togglingHidden ? "animate-pulse" : ""}`}
+              title={providerText(
+                t,
+                "blacklistModelTooltip",
+                "Blacklist this model — hide it from the catalog"
+              )}
+            >
+              <span className="material-symbols-outlined text-sm">
+                {togglingHidden ? "progress_activity" : "block"}
+              </span>
+              <span>{providerText(t, "blacklistModel", "Blacklist")}</span>
+            </button>
+          )}
           {/* #14337: the affordance itself. Rendered only when the section
               supplies a handler, so rows that cannot take an override are
               unchanged. */}

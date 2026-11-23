@@ -68,185 +68,215 @@ OmniRoute میں لچک پذیری کے تین الگ مگر باہم متعلق
 
 ## 2. کنکشن کول ڈاؤن
 
-**دائرۂ کار:** ایک فراہم کنندہ کا واحد کنکشن/اکاؤنٹ/key۔
+**دائرۂ کار:** ایک واحد فراہم کنندہ کنکشن/اکاؤنٹ/کلید۔
 
-**مقصد:** ایک خراب key کو نظر انداز کرنا، جبکہ اسی فراہم کنندہ کے دوسرے کنکشن سروس فراہم کرتے رہیں۔
+**مقصد:** ایک خراب کلید کو نظر انداز کرنا، جبکہ اسی فراہم کنندہ کے دیگر کنکشن سروس فراہم کرتے رہیں۔
 
-**عمل درآمد:**
+**نفاذ:**
 
-- غیر دستیاب کے طور پر نشان زد کرنا: `src/sse/services/auth.ts::markAccountUnavailable()`
+- غیر دستیاب نشان زد کرنا: `src/sse/services/auth.ts::markAccountUnavailable()`
 - انتخاب: اسی فائل میں `getProviderCredentials*`
 - کول ڈاؤن کا حساب: `open-sse/services/accountFallback.ts::checkFallbackError()`
 - ترتیبات: `src/lib/resilience/settings.ts`
 
 **ہر کنکشن کے فیلڈز:**
 
-- `rateLimitedUntil` — وہ timestamp جس تک کول ڈاؤن ختم ہو جائے گا
+- `rateLimitedUntil` — وہ ٹائم اسٹیمپ جس تک کول ڈاؤن ختم ہوتا ہے
 - `testStatus: "unavailable"`
 - `lastError`, `lastErrorType`, `errorCode`
-- `backoffLevel` — exponential backoff کاؤنٹر
+- `backoffLevel` — ایکسپونینشل بیک آف کاؤنٹر
 
 **ڈیفالٹ کول ڈاؤنز:**
 
 - OAuth کی بنیادی مدت: 5s
 - API-key کی بنیادی مدت: 3s
-- API-key 429: upstream کے `Retry-After`/reset headers/قابلِ تجزیہ reset متن کو ترجیح دیتا ہے
-- Backoff: `baseCooldownMs * 2 ** failureIndex`
+- API-key کا 429: اپ اسٹریم `Retry-After`/ری سیٹ ہیڈرز/قابلِ تجزیہ ری سیٹ متن کو ترجیح دیتا ہے
+- بیک آف: `baseCooldownMs * 2 ** failureIndex`
 
-**Anti-thundering-herd حفاظتی بندوبست:** بیک وقت ہونے والی ناکامیوں کو کول ڈاؤن ضرورت سے زیادہ بڑھانے یا `backoffLevel` کو دو بار بڑھانے سے روکتا ہے۔
+**اینٹی تھنڈرنگ ہرڈ حفاظتی بندوبست:** ہم وقت ناکامیوں کو کول ڈاؤن حد سے زیادہ بڑھانے یا `backoffLevel` کو دو مرتبہ بڑھانے سے روکتا ہے۔
 
-**اختتامی حالتیں (کول ڈاؤن نہیں):**
+**کنکرنسی حد والے 429 بیک آف کی سیڑھی نہیں چڑھتے۔** ایسا `429` جس کی باڈی کنکرنسی حد ("too many concurrent requests"، "concurrency limit"، "parallel request
+limit"، GLM `并发数过高`) کی اطلاع دے، اس کا مطلب ہے کہ اکاؤنٹ صحت مند مگر مصروف ہے۔
+`checkFallbackError()` وجہ `concurrency_limited` واپس کرتا ہے: فوراً اگلے
+کنکشن پر فیل اوور کریں، اس کنکشن کو مقررہ `CONCURRENCY_LIMIT_COOLDOWN_MS` (1s) یا
+اپ اسٹریم دوبارہ کوشش کے اشارے کے مطابق کول ڈاؤن کریں، `backoffLevel` کو غیر تبدیل شدہ رکھیں، اور `skipProviderBreaker` سیٹ کریں۔
+کوٹے کی واضح باڈی پھر بھی مقدم رہتی ہے، لہٰذا ایسی باڈی جو کوٹے کے پیٹرن سے بھی مطابقت رکھتی ہو، کوٹے کا
+فیصلہ ہی رہتی ہے۔ شناخت: `src/shared/utils/classify429.ts` میں `looksLikeConcurrencyLimit()`؛
+فیصلہ: `open-sse/services/accountFallback/concurrencyLimit429.ts`۔ `classify429()` (بریکر کا
+`FailureKind`) غیر تبدیل شدہ ہے اور ان باڈیز کے لیے اب بھی `rate_limit` پڑھتا ہے۔
 
-- `banned` — ممنوعہ کلیدی لفظ / اکاؤنٹ پابندی کی شناخت کے ذریعے مقرر ہوتا ہے (دیکھیے [BAN_DETECTION](../security/BAN_DETECTION.md))، نیز مسلسل تین upstream فی-request انکار (`request_rejected`، مثلاً Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`) کے بعد؛ ایک انفرادی انکار صرف کنکشن کو کول ڈاؤن میں ڈالتا ہے
-- `expired` (محدود retries کے بعد اختتامی حالت میں منتقل ہوتا ہے — exponential backoff کے ساتھ `EXPIRED_RETRY_MAX = 3` — تاکہ عارضی OAuth خرابیاں اکاؤنٹ کے مستقل طور پر غیر فعال ہونے سے پہلے خود درست ہو سکیں)
+**اسٹریم مواد کا رک جانا اکاؤنٹ کو کول ڈاؤن نہیں کرتا۔** جب مواد کے رک جانے کا واچ ڈاگ
+(`open-sse/utils/streamHandler.ts`) ایسی اسٹریم سے دست بردار ہو جائے جس نے مقررہ
+وقت میں ماڈل آؤٹ پٹ نہ بھیجی ہو، تو `markAccountUnavailable()` کنکشن پر خرابی درج کرتا ہے مگر کوئی
+کول ڈاؤن سیٹ نہیں کرتا: رکنا اسی درخواست سے متعلق ہوتا ہے، جو اکثر ایک طویل استدلالی مرحلہ ہوتا ہے جس نے ابھی
+کوئی آؤٹ پٹ نہیں دی۔ آپریٹرز `resilienceSettings.streamStallCooldown.enabled`
+(ڈیفالٹ `false`) کے ذریعے اسے دوبارہ فعال کر سکتے ہیں۔
+
+**استدلالی فریم مواد کے رکنے کا بجٹ دوبارہ شروع کرتے ہیں۔** ایک استدلالی ماڈل اپنی پہلی
+مرئی ٹوکن سے پہلے کئی منٹ تک سوچ سکتا ہے: Claude ایسے `thinking_delta` فریمز اسٹریم کرتا ہے جن کا
+سوچنے کا متن خالی ہو سکتا ہے، اور Responses API یکے بعد دیگرے استدلالی آئٹمز اسٹریم کرتی ہے۔
+`isReasoningProgressFrame()` (`open-sse/utils/streamReadiness.ts`) ان
+فریمز کو پہچانتا ہے، اور واچ ڈاگ مرحلہ منسوخ کرنے کے بجائے ہر فریم پر اپنا بجٹ دوبارہ شروع کرتا ہے۔
+یہ پھر بھی ماڈل آؤٹ پٹ نہیں ہیں، اس لیے صرف استدلال کے ساتھ ختم ہونے والے مرحلے کو اب بھی
+خالی رپورٹ کیا جاتا ہے، اور ایسا مرحلہ جو استدلال روک کر صرف ہارٹ بیٹس بھیجتا رہے، اب بھی
+واچ ڈاگ کو متحرک کر دیتا ہے۔
+
+Kiro کے بائنری `reasoningContentEvent` فریمز جن میں غیر خالی دستخط ہوں، اس
+استدلالی سرگرمی کو ایگزیکیوٹر کے ذریعے ایک خالی `reasoning_content` ڈیلٹا کی صورت میں محفوظ رکھتے ہیں۔ دستخط
+آگے نہیں بھیجا جاتا۔ میٹا ڈیٹا، نامکمل فریمز اور خالی دستخط مواد کے
+بجٹ کو دوبارہ شروع نہیں کرتے؛ آزاد فعال-اسٹریم ٹائم آؤٹ اور کلائنٹ کی منسوخی پھر بھی
+لاگو ہوتے ہیں (`open-sse/executors/kiro/reasoning.ts`)۔
+
+**حتمی حالتیں (کول ڈاؤن نہیں):**
+
+- `banned` — ممنوعہ کلیدی لفظ / اکاؤنٹ پابندی کی شناخت سے سیٹ ہوتا ہے ([BAN_DETECTION](../security/BAN_DETECTION.md) دیکھیں)، اور اپ اسٹریم کی فی درخواست مسلسل تین مستردیوں (`request_rejected`، مثلاً Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`) سے بھی؛ ایک واحد مستردی صرف کنکشن کو کول ڈاؤن کرتی ہے
+- `expired` (محدود دوبارہ کوششوں کے بعد حتمی حالت میں منتقل ہوتا ہے — ایکسپونینشل بیک آف کے ساتھ `EXPIRED_RETRY_MAX = 3` — تاکہ عارضی OAuth خرابیاں اکاؤنٹ کے مستقل طور پر غیر فعال ہونے سے پہلے خود بخود درست ہو سکیں)
 - `credits_exhausted`
 
-یہ حالتیں اس وقت تک برقرار رہتی ہیں جب تک اسناد تبدیل نہ ہوں یا کوئی آپریٹر انہیں reset نہ کرے۔ اختتامی حالتوں کو عارضی کول ڈاؤن حالت سے overwrite نہ کریں۔
+یہ حالتیں اس وقت تک برقرار رہتی ہیں جب تک اسناد تبدیل نہ ہوں یا کوئی آپریٹر انہیں ری سیٹ نہ کرے۔ حتمی حالتوں کو عارضی کول ڈاؤن حالت سے اوور رائٹ نہ کریں۔
 
-**سست بحالی:** جب `rateLimitedUntil` گزر جائے تو کنکشن دوبارہ اہل ہو جاتا ہے۔ کامیاب استعمال پر `clearAccountError()` تمام error فیلڈز صاف کر دیتا ہے۔
+**سست بحالی:** جب `rateLimitedUntil` گزر جائے تو کنکشن دوبارہ اہل ہو جاتا ہے۔ کامیاب استعمال پر، `clearAccountError()` تمام خرابی والے فیلڈز صاف کر دیتا ہے۔
 
-### Claude OAuth استعمال کی حد: کم ترجیحی لین + session-limit reset
+### Claude OAuth استعمال کی حد: کم ترجیحی لین + سیشن حد ری سیٹ
 
-**دائرۂ کار:** Claude subscription (OAuth) کا ایک کنکشن۔ دونوں خصوصیات **ہر کنکشن کے لیے اختیاری
-طور پر فعال** ہیں (کنکشن میں ترمیم کریں → Claude سیکشن → `lowPriorityMode` / `autoLimitReset`
-`providerSpecificData` میں، دونوں ڈیفالٹ طور پر بند) اور Claude Code کی `/low-priority` اور
-`/limit-reset` کمانڈز کی عکاسی کرتی ہیں (wire contract، Claude Code 2.1.263 سے حاصل کیا گیا ہے)۔
+**دائرۂ کار:** ایک Claude سبسکرپشن (OAuth) کنکشن۔ دونوں خصوصیات **فی
+کنکشن اختیاری** ہیں (کنکشن میں ترمیم کریں → Claude سیکشن → `providerSpecificData` میں `lowPriorityMode` / `autoLimitReset`،
+دونوں ڈیفالٹ طور پر آف) اور Claude Code کی `/low-priority` اور
+`/limit-reset` کمانڈز کی عکاسی کرتی ہیں (وائر کنٹریکٹ Claude Code 2.1.263 سے حاصل کیا گیا ہے)۔
 
-**عمل درآمد:**
+**نفاذ:**
 
-- State machine + response کی درجہ بندی: `open-sse/services/claudeLowPriority.ts`
-- Reset status/claim client: `open-sse/services/claudeLimitReset.ts`
-- Executor hook (header کا اضافہ + اسی اکاؤنٹ پر retry): `open-sse/executors/base.ts::execute()`
-- اختیاری فعالیت کو محفوظ رکھنا: `src/lib/providers/requestDefaults.ts::normalizeProviderSpecificData()`
+- اسٹیٹ مشین + جواب کی درجہ بندی: `open-sse/services/claudeLowPriority.ts`
+- ری سیٹ اسٹیٹس/کلیم کلائنٹ: `open-sse/services/claudeLimitReset.ts`
+- ایگزیکیوٹر ہُک (ہیڈر کا اضافہ + اسی اکاؤنٹ سے دوبارہ کوشش): `open-sse/executors/base.ts::execute()`
+- اختیاری ترتیب کی مستقل محفوظ کاری: `src/lib/providers/requestDefaults.ts::normalizeProviderSpecificData()`
 
-**محرک:** 5 گھنٹے کی استعمال کی حد — ایسا `429` جس کے headers میں
-`anthropic-ratelimit-unified-status: rejected` ہو اور، جب اکاؤنٹ اہل ہو،
-`anthropic-ratelimit-unified-slow-offer: treatment` ہو۔ اس پہلی حد والے
-429 سے پہلے کچھ نہیں بھیجا جاتا؛ unified headers کے بغیر اچانک آنے والا 429 معمول کے کول ڈاؤن راستے سے گزرتا ہے۔
+**محرک:** 5 گھنٹے کی استعمال کی حد — ایسا `429` جس کے ہیڈرز میں
+`anthropic-ratelimit-unified-status: rejected` موجود ہو اور، جب اکاؤنٹ اہل ہو،
+`anthropic-ratelimit-unified-slow-offer: treatment` بھی ہو۔ اس پہلی حد والے
+429 سے پہلے کچھ نہیں بھیجا جاتا؛ یکجا ہیڈرز کے بغیر برسٹ 429 معمول کے کول ڈاؤن راستے سے گزرتا ہے۔
 
 **کم ترجیحی لین** (`lowPriorityMode`):
 
-- حد والے 429 پر executor پیشکش قبول کرتا ہے اور فوراً **اسی**
-  اکاؤنٹ کو `anthropic-usage-limit: slow` کے ساتھ retry کرتا ہے؛ اعلان کردہ
-  `anthropic-ratelimit-unified-reset` (+60s اضافی مہلت) تک لین فعال رہتی ہے اور اس وقفے میں ہر request کے ساتھ
-  یہ header شامل ہوتا ہے۔ روکا گیا 429 کبھی `handleChatCore` تک نہیں پہنچتا، اس لیے کنکشن کو
-  کول ڈاؤن میں **نہیں** ڈالا جاتا اور نہ ہی اسے تبدیل کر کے دوسرا کنکشن استعمال کیا جاتا ہے۔
-- بعد کے responses میں `anthropic-ratelimit-unified-slow-status`: `active` / `not_needed`
-  لین کو برقرار رکھتے ہیں؛ `slot_busy` (429) یا `529`، server کے
-  `anthropic-ratelimit-unified-slow-retry-after` کا انتظار کرتے ہیں (ڈیفالٹ 20s، حد 5–600s، ±30% jitter)
-  اور retry کرتے ہیں، جس کی حد `anthropic-ratelimit-unified-slow-max-wait` ہے (ڈیفالٹ 20 منٹ، حد
-  1 منٹ–6 گھنٹے) — اس سے آگے لین ختم ہو جاتی ہے اور 10 منٹ کا cool-off دوبارہ قبول کرنے کو روکتا ہے۔ انتظار
-  کی مدت کو مزید request کے اپنے upstream-start timeout میں بچ جانے والے وقت
-  (`resolveFetchStartTimeout`، ڈیفالٹ 10 منٹ) منفی 5 s کی مہلت تک محدود کیا جاتا ہے: اس حد کے بغیر
-  20 منٹ کا ڈیفالٹ max-wait خود request سے زیادہ دیر تک جاری رہتا اور sleep
-  انتظار کے درمیان منسوخ ہو جاتی، جس سے مناسب `max_wait` اختتام + cool-off کے بجائے
-  `TimeoutError` ظاہر ہوتا۔
+- وال 429 پر executor پیشکش قبول کرتا ہے اور فوراً **اسی**
+  اکاؤنٹ کو `anthropic-usage-limit: slow` کے ساتھ دوبارہ آزماتا ہے؛ lane اعلان کردہ
+  `anthropic-ratelimit-unified-reset` (+60s رعایتی مہلت) تک فعال رہتی ہے اور اس وقفے کی ہر درخواست
+  یہ header رکھتی ہے۔ intercept کیا گیا 429 کبھی `handleChatCore` تک نہیں پہنچتا، اس لیے connection کو
+  cooldown میں **نہیں** ڈالا جاتا اور نہ ہی اسے rotate کر کے ہٹایا جاتا ہے۔
+- بعد کے responses پر `anthropic-ratelimit-unified-slow-status`: `active` / `not_needed`
+  lane کو برقرار رکھتے ہیں؛ `slot_busy` (429) یا `529`، server کے
+  `anthropic-ratelimit-unified-slow-retry-after` کا انتظار کرتے ہیں (default 20s، 5–600s تک clamp، ±30% jitter)
+  اور دوبارہ کوشش کرتے ہیں، جسے `anthropic-ratelimit-unified-slow-max-wait` محدود کرتا ہے (default 20 min، clamp
+  1 min–6 h) — اس سے آگے lane ختم ہو جاتی ہے اور 10 منٹ کا cool-off دوبارہ قبولیت کو روکتا ہے۔ انتظار کو
+  مزید request کے اپنے upstream-start timeout میں باقی وقت
+  (`resolveFetchStartTimeout`، default طور پر 10 min) منفی 5 s margin تک محدود کیا جاتا ہے: اس حد کے بغیر
+  20 منٹ کا default max-wait request کی عمر سے زیادہ ہو جاتا اور sleep دورانِ انتظار منسوخ ہو جاتی،
+  جس سے خوش اسلوب `max_wait` اختتام + cool-off کے بجائے `TimeoutError` سامنے آتا۔
 - `weekly_limit` / `budget_exhausted` / `off` / `ineligible`، 5h-window rollover، یا
   `ineligible` + `anthropic-ratelimit-unified-overage-in-use: true` (جو کسی بھی status پر اسے
-  `extra_usage` کے طور پر ختم کر دیتا ہے، کیونکہ ادائیگی شدہ اضافی استعمال اب حد کو پورا کرتا ہے) لین کو ختم کر دیتے ہیں؛ پھر
-  response معمول کے کول ڈاؤن راستے سے گزرتا ہے۔ `budget_exhausted` اعلان کردہ
-  budget reset (≤ 8 دن) تک یاد رکھا جاتا ہے۔
-- حد کی جانچ executor کی اپنی 400 سے متحرک ہونے والی intra-attempt retries (context
-  editing، thinking/effort clamps، param auto-learn) کے بعد چلتی ہے، لہٰذا حد والا 429 جو صرف
-  ان retries میں سے کسی ایک پر ظاہر ہو، وہ بھی کول ڈاؤن راستے تک پہنچنے کے بجائے روک لیا جاتا ہے۔
-- State ہر کنکشن کے لیے in-memory ہوتا ہے (restart کی صورت میں دوبارہ قبول کرنے کے لیے ایک اضافی حد والا 429 درکار ہوتا ہے)۔
+  `extra_usage` کے طور پر ختم کرتا ہے، کیونکہ اب paid overage وال کو cover کرتا ہے) lane کو ختم کر دیتے ہیں؛ پھر
+  response معمول کے cooldown path میں چلا جاتا ہے۔ `budget_exhausted` کو اعلان کردہ budget reset تک
+  یاد رکھا جاتا ہے (≤ 8 days)۔
+- وال check، executor کی اپنی 400-driven intra-attempt retries (context
+  editing، thinking/effort clamps، param auto-learn) کے بعد چلتا ہے، اس لیے ایسا وال 429 جو صرف
+  ان retries میں سے کسی ایک پر ظاہر ہو، cooldown path تک پہنچنے کے بجائے پھر بھی intercept ہو جاتا ہے۔
+- state فی connection in-memory ہے (restart کی صورت میں دوبارہ قبول کرنے کے لیے ایک اضافی وال 429 درکار ہوتا ہے)۔
 
-**Session-limit reset** (`autoLimitReset`، دونوں فعال ہونے پر لین سے پہلے آزمایا جاتا ہے):
+**Session-limit reset** (`autoLimitReset`، دونوں فعال ہوں تو lane سے پہلے آزمایا جاتا ہے):
 
 - `GET https://api.anthropic.com/api/oauth/usage?at_wall=1&skip_spend=1` → `juniper_tide`
-  بلاک؛ جب `arm: "reset"` اور `available: true` ہوں،
-  `POST https://api.anthropic.com/api/organizations/{orgUUID}/reset_rate_limits` کو
-  `{ "program": "juniper_tide" }` کے ساتھ استعمال کیا جاتا ہے (organization UUID،
+  block؛ جب `arm: "reset"` اور `available: true` ہوں،
+  `POST https://api.anthropic.com/api/organizations/{orgUUID}/reset_rate_limits` کے ساتھ
+  `{ "program": "juniper_tide" }` (organization UUID،
   `providerSpecificData.organizationUUID` سے، bootstrap fallback)۔
-- `result: reset|not_limited` → request کو پوری رفتار سے retry کیا جاتا ہے (slow header کے بغیر)۔
-  `already_used` / `not_offered`، `next_available_at` کو یاد رکھتے ہیں (ڈیفالٹ ایک ہفتہ)؛ کسی بھی
-  ناکامی پر 15 منٹ کا backoff ہوتا ہے۔ Reset ہفتے میں ایک بار ہوتا ہے اور پھر بھی
-  ہفتہ وار حد میں شمار ہوتا ہے۔
+- `result: reset|not_limited` → request کو پوری رفتار سے دوبارہ آزمایا جاتا ہے (کوئی slow header نہیں)۔
+  `already_used` / `not_offered`، `next_available_at` کو memoise کرتے ہیں (default ایک ہفتہ)؛ کسی بھی
+  failure پر 15 منٹ کا backoff ہوتا ہے۔ reset ہفتے میں ایک بار ہوتا ہے اور پھر بھی
+  weekly limit میں شمار ہوتا ہے۔
 
-Regression حفاظتی جانچیں: `tests/unit/claude-low-priority-mode.test.ts`،
+Regression guards: `tests/unit/claude-low-priority-mode.test.ts`،
 `tests/unit/claude-limit-reset.test.ts`، `tests/unit/claude-low-priority-executor.test.ts`۔
 
 ### Session affinity (#7274)
 
-**دائرۂ کار:** ایک client session (`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session` header) کو **کسی بھی** فراہم کنندہ کے ایک کنکشن کے ساتھ منسلک رکھا جاتا ہے۔
+**دائرۂ کار:** ایک client session (`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session` header) کو **کسی بھی** provider کے لیے ایک connection سے pin کیا جاتا ہے۔
 
-**مقصد:** متعدد باری ایجنٹ (Claude Code، aider، کسٹم ایجنٹس) کو درخواستوں کے دوران ایک ہی اکاؤنٹ پر برقرار رکھنا، تاکہ فی اکاؤنٹ سیشن اسٹیٹ رکھنے والے فراہم کنندگان پر اکاؤنٹس کے درمیان سیاق و سباق کے ضیاع اور بار بار ہونے والی کولڈ اسٹارٹ 429 خرابیوں کو کم کیا جا سکے۔
+**مقصد:** ایک multi-turn agent (Claude Code، aider، custom agents) کو requests کے دوران اسی account پر برقرار رکھنا، تاکہ cross-account context loss اور per-account session state رکھنے والے providers پر بار بار ہونے والے cold-start 429s کم ہوں۔
 
 **نفاذ:**
 
-- TTL کا تعین: `src/sse/services/sessionAffinityPin.ts::resolveSessionAffinityTtlMs()`
-- پن کا انتخاب/تخلیق: `src/sse/services/sessionAffinityPin.ts::selectSessionAffinityConnection()`
-- ہیڈر اخذ کرنا (عمومی، کسی بھی فراہم کنندہ کے لیے): `src/sse/services/auth.ts::extractSessionAffinityKey()`
-- مستقل طور پر محفوظ پن ٹیبل: `sessionAccountAffinity` (`src/lib/db/sessionAccountAffinity.ts`)
-- ترتیب: `sessionAffinityTtlMs` (ملی سیکنڈ میں عالمی TTL، `0` اسے غیر فعال کرتا ہے) — `src/lib/db/settings.ts`۔ اسے صرف Codex کے لیے مخصوص `codexSessionAffinityTtlMs` سے مائیگریشن `124_generic_session_affinity_ttl.sql` کے ذریعے نیا نام دیا گیا، جو پہلے سے ترتیب دی گئی کسی بھی Codex TTL کو نئے ڈیفالٹ کے طور پر منتقل کرتی ہے۔
+- TTL resolution: `src/sse/services/sessionAffinityPin.ts::resolveSessionAffinityTtlMs()`
+- Pin selection/creation: `src/sse/services/sessionAffinityPin.ts::selectSessionAffinityConnection()`
+- Header extraction (generic، کوئی بھی provider): `src/sse/services/auth.ts::extractSessionAffinityKey()`
+- Persisted pin table: `sessionAccountAffinity` (`src/lib/db/sessionAccountAffinity.ts`)
+- Setting: `sessionAffinityTtlMs` (عالمی TTL، ms میں، `0` اسے غیر فعال کرتا ہے) — `src/lib/db/settings.ts`۔ اسے Codex-only `codexSessionAffinityTtlMs` سے migration `124_generic_session_affinity_ttl.sql` کے ذریعے rename کیا گیا، جو پہلے سے configure شدہ کسی بھی Codex TTL کو نئے default کے طور پر منتقل کرتا ہے۔
 
-#7274 سے پہلے، `resolveSessionAffinityTtlMs()`، `codex` کے علاوہ ہر فراہم کنندہ کے لیے فوراً `0` واپس کر دیتا تھا، اس لیے TTL ترتیب (اور سیشن ہیڈرز) کا کہیں اور کوئی اثر نہیں ہوتا تھا، حالانکہ پننگ کا طریقۂ کار اور ہیڈر اخذ کرنا پہلے ہی فراہم کنندہ سے غیر وابستہ تھے۔ اصلاح میں وہ قبل از وقت واپسی ہٹا دی گئی؛ اب TTL کو عالمی طور پر `0` سے زیادہ مقرر کیے جانے کے بعد یہ ہر فراہم کنندہ پر یکساں طور پر لاگو ہوتا ہے۔
+#7274 سے پہلے، `resolveSessionAffinityTtlMs()`، `codex` کے علاوہ ہر provider کے لیے فوراً `0` واپس کر دیتا تھا، اس لیے TTL setting (اور session headers) کا کہیں اور کوئی اثر نہیں ہوتا تھا، حالانکہ pinning mechanism اور header extraction پہلے ہی provider-agnostic تھے۔ fix نے وہ early-return ہٹا دیا؛ اب TTL، عالمی طور پر `0` سے اوپر set کیے جانے کے بعد، ہر provider پر یکساں طور پر لاگو ہوتا ہے۔
 
-تینوں سیشن-افی نیٹی ہیڈرز کبھی بھی اپ اسٹریم فارورڈ نہیں کیے جاتے — ایگزیکیوٹرز کلائنٹ ہیڈرز کو آگے بھیجنے کے بجائے اپنے اپ اسٹریم ہیڈرز ازسرِنو بناتے ہیں، اس لیے یہ صرف ایک داخلی ارتباطی ID رہتا ہے۔
+تینوں session-affinity headers کبھی upstream forward نہیں کیے جاتے — executors، client headers کو آگے pass کرنے کے بجائے اپنے upstream headers ازسرِنو بناتے ہیں، اس لیے یہ صرف ایک داخلی correlation id رہتا ہے۔
 
-### خصوصی منظم سیشن کنکشن لیزز
+### خصوصی managed session connection leases
 
-**دائرۂ کار:** ایک فعال منظم HTTP کلائنٹ/سیشن ایک اہل OmniRoute کنکشن کا مالک ہوتا ہے۔
+**دائرۂ کار:** ایک فعال managed HTTP client/session ایک اہل OmniRoute connection کی ملکیت رکھتا ہے۔
 
-**مقصد:** ان کلائنٹس کے لیے پائیدار خصوصی کنکشن ملکیت فراہم کرنا جنہیں درخواستوں کے دوران سخت روٹنگ
-حد بندی درکار ہو۔ یہ سیشن افی نیٹی سے مختلف ہے، جو تسلسل کی ایک نرم ترجیح ہے:
-ایک خصوصی لیز SQLite میں لائف سائیکل اسٹیٹ کو برقرار رکھتی ہے، عالمی سطح پر فعال مالک اور
-فعال کنکشن کی یکتائی نافذ کرتی ہے، اور فراہم کنندہ کو ڈسپیچ کرنے سے پہلے ایک فرسودہ جنریشن کو مسترد کرتی ہے۔
+**مقصد:** ان clients کے لیے پائیدار خصوصی connection ownership فراہم کرنا جنہیں requests کے دوران ایک سخت routing
+fence درکار ہو۔ یہ session affinity سے مختلف ہے، جو continuity کی ایک نرم ترجیح ہے:
+ایک exclusive lease lifecycle state کو SQLite میں برقرار رکھتا ہے، عالمی active-owner اور
+active-connection uniqueness نافذ کرتا ہے، اور provider dispatch سے پہلے stale generation کو مسترد کرتا ہے۔
 
-یہ خصوصیت ہر API کلید کے لیے اختیاری طور پر فعال کی جاتی ہے۔ ایک منظم کلید کے پاس `lease:exclusive` اسکوپ اور
-ایک واضح غیر خالی `allowedConnections` فہرست ہونی چاہیے۔ کوئی بھی HTTP کلائنٹ لائف سائیکل اینڈ پوائنٹ استعمال کر سکتا ہے؛
-کسی کلائنٹ نام، یوزر ایجنٹ، فراہم کنندہ، OAuth طریقے، یا ماڈل کی ضرورت نہیں۔ لیز کسی کنکشن کی مالک ہوتی ہے،
-ماڈل کی نہیں، اس لیے ماڈل تبدیل ہونے پر بھی بائنڈنگ برقرار رہتی ہے، بشرطیکہ کنکشن معمول کے مطابق
-اہل رہے۔ ماڈل، کوٹا، صحت، کول ڈاؤن، اور الاؤ لسٹ کے عمومی قواعد بدستور حتمی اختیار رکھتے ہیں اور
-اسی جنریشن کو کسی دوسرے آزاد اہل کنکشن پر منتقل کر سکتے ہیں۔
+یہ feature فی API key اختیاری طور پر فعال کیا جاتا ہے۔ managed key کے پاس `lease:exclusive` scope اور ایک
+واضح non-empty `allowedConnections` list ہونی چاہیے۔ کوئی بھی HTTP client lifecycle endpoint استعمال کر سکتا ہے؛ کسی
+client name، user-agent، provider، OAuth method، یا model کی ضرورت نہیں۔ lease ایک connection کی ملکیت رکھتا ہے،
+model کی نہیں، اس لیے model میں تبدیلی binding برقرار رکھتی ہے جب تک connection معمول کے مطابق
+اہل رہے۔ معمول کے model، quota، health، cooldown، اور allowlist rules بدستور حتمی اختیار رکھتے ہیں اور
+اسی generation کو کسی دوسرے آزاد اہل connection پر منتقل کر سکتے ہیں۔
 
-لائف سائیکل `POST /api/v1/session-leases` ہے، جس میں JSON ایکشنز `acquire`، `renew`، اور `release` شامل ہیں۔
-منظم انفرنس درخواستیں مبہم `X-OmniRoute-Lease-Owner` قدر اور عین مطابق
-`X-OmniRoute-Lease-Generation` پیش کرتی ہیں۔ مالک `vlo_` کے بعد 43 base64url حروف استعمال کرتا ہے؛ صرف
-اس کا SHA-256 ہیش محفوظ کیا جاتا ہے۔ ہر حتمی ڈسپیچ حد بندی مصدقہ API کلید ID اور
-فعال کنکشن ID کو بھی بائنڈ کرتی ہے۔ لیز کنٹرول ہیڈرز کو لاگز، محفوظ کردہ درخواست اسنیپ شاٹس، اور
-اپ اسٹریم ایگزیکیوٹر ہیڈرز سے ہٹا دیا جاتا ہے۔
+لائف سائیکل JSON کارروائیوں `acquire`، `renew`، اور `release` کے ساتھ `POST /api/v1/session-leases` ہے۔
+منظم inference درخواستیں مبہم `X-OmniRoute-Lease-Owner` قدر اور عین
+`X-OmniRoute-Lease-Generation` پیش کرتی ہیں۔ مالک میں `vlo_` کے بعد 43 base64url حروف ہوتے ہیں؛ صرف
+اس کا SHA-256 ہیش محفوظ کیا جاتا ہے۔ ہر حتمی dispatch fence توثیق شدہ API کلید ID اور
+فعال connection ID کو بھی منسلک کرتا ہے۔ Lease control headers کو logs، محفوظ کردہ request snapshots، اور
+upstream executor headers سے ہٹا دیا جاتا ہے۔
 
-اگر معمول کی روٹنگ میں اہل منظم امیدوار موجود ہوں، لیکن ہر آزاد امیدوار پر کسی
-دوسرے فعال لیز کا قبضہ ہو، تو OmniRoute HTTP `429`، lease-capacity-unavailable کوڈ،
-گنجائش کے انتظار کی حالت، اور قریب ترین متعلقہ میعاد ختم ہونے کے وقت سے اخذ کردہ محدود `Retry-After` واپس کرتا ہے۔
-اہلیت کا معمول کے مطابق خالی ہونا لیز تنازع نہیں ہے اور اپنی موجودہ روٹنگ خرابی کی معنویت برقرار رکھتا ہے۔
+اگر معمول کی routing میں اہل منظم candidates موجود ہوں لیکن ہر دستیاب candidate پر کسی
+غیر متعلقہ فعال lease کا قبضہ ہو، تو OmniRoute HTTP `429`، lease-capacity-unavailable code،
+صلاحیت کے انتظار کی حالت، اور قریب ترین متعلقہ expiry سے اخذ کردہ ایک محدود `Retry-After` واپس کرتا ہے۔
+اہلیت کا معمول کے مطابق خالی ہونا lease contention نہیں ہے اور اپنی موجودہ routing error semantics برقرار رکھتا ہے۔
 
 متعلقہ طریقۂ کار الگ رہتے ہیں:
 
-- OAuth سیشن آکیوپنسی، OAuth اکاؤنٹس کے لیے پروسیس تک محدود نرم تقسیم ہے۔
-- اکاؤنٹ سیمی فورز درخواست کی ہم وقتی کارروائی کے اجازت نامے دیتے ہیں اور درخواست مکمل ہونے پر ختم ہو جاتے ہیں۔
-- خصوصی منظم سیشن لیزز جنریشن حد بندی کے ساتھ پائیدار لائف سائیکل ملکیت فراہم کرتی ہیں۔
+- OAuth session occupancy، OAuth accounts کے لیے process-local soft distribution ہے۔
+- Account semaphores، request-concurrency permits دیتے ہیں اور درخواست مکمل ہونے پر ختم ہو جاتے ہیں۔
+- Exclusive managed session leases، generation fence کے ساتھ پائیدار lifecycle ownership ہیں۔
 
 ---
 
 ## 3. ماڈل لاک آؤٹ
 
-**دائرۂ کار:** پرووائیڈر + کنکشن + ماڈل کی تکڑی۔
+**دائرۂ کار:** provider + connection + model کا مجموعہ۔
 
-**اسٹیٹس کے لحاظ سے کلید کا دائرۂ کار:** ناکام ہونے والا اسٹیٹس طے کرتا ہے کہ لاک آؤٹ کس کلید میں لکھا جائے
+**اسٹیٹس کے لحاظ سے کلید کا دائرۂ کار:** ناکام ہونے والا اسٹیٹس طے کرتا ہے کہ لاک آؤٹ کس کلید پر لکھا جائے
 (`open-sse/services/accountFallback/exactModelLock.ts` میں `resolveLockoutScope()`):
 
-- `429` / `403` / `402` — کوٹہ یا استحقاق کا اشارہ — **کوٹہ فیملی** کو لاک کریں:
-  codex کے لیے پورا `codex` / `spark` دائرۂ کار (کنکشن کا ہر `gpt-5*` ماڈل)،
-  دیگر پرووائیڈرز کے لیے `getQuotaScopedModelForProvider()`۔
-- `404` بنیادی ماڈل کو لاک کرتا ہے (`getModelLockKey()`، `not_found` کو محدود کرتا ہے)۔
-- کوئی بھی دوسرا اسٹیٹس — `5xx` ٹرانسپورٹ/سرور کی ناکامیاں اور معیار کی توثیق سے
-  OmniRoute کا اپنا تیار کردہ `502` — صرف **عین**
-  پرووائیڈر/کنکشن/ماڈل تکڑی کو لاک کرتا ہے۔ ایک ماڈل پر خراب اسٹریم اکاؤنٹ کے
-  کوٹے کے بارے میں ثبوت نہیں ہے؛ اس اصول سے پہلے
-  `codex/gpt-5.6-luna` پر ایک خالی جواب اس کنکشن کے ہر `gpt-5*` ماڈل کو
-  2–30 منٹ (بتدریج بڑھتے ہوئے) کے لیے روٹنگ سے ہٹا دیتا تھا، جبکہ اس کا کوٹہ
-  غیر متاثر رہتا تھا۔
-- کالر کا واضح `scope` آپشن ہمیشہ غالب رہتا ہے (Antigravity، `"exact"` پاس کرتا ہے)۔
+- `429` / `403` / `402` — quota یا entitlement کا اشارہ — **quota family** کو لاک کرتے ہیں:
+  codex کے لیے مکمل `codex` / `spark` دائرۂ کار (connection کا ہر `gpt-5*` ماڈل)،
+  دیگر providers کے لیے `getQuotaScopedModelForProvider()`۔
+- `404` صرف بنیادی ماڈل کو لاک کرتا ہے (`getModelLockKey()`، `not_found` کا دائرہ محدود کرتا ہے)۔
+- کوئی بھی دوسرا اسٹیٹس — `5xx` transport/server ناکامیاں اور quality validation سے پیدا کردہ
+  OmniRoute کا اپنا `502` — صرف **عین**
+  provider/connection/model مجموعے کو لاک کرتا ہے۔ کسی ایک ماڈل پر خراب stream اکاؤنٹ کے
+  quota کے بارے میں ثبوت نہیں ہے؛ اس اصول سے پہلے
+  `codex/gpt-5.6-luna` پر ایک خالی response، اس connection کے ہر `gpt-5*` ماڈل کو
+  2–30 منٹ (بتدریج بڑھتے ہوئے) کے لیے routing سے ہٹا دیتا تھا، حالانکہ اس کا quota متاثر نہیں ہوا ہوتا تھا۔
+- caller کا واضح `scope` آپشن ہمیشہ ترجیح رکھتا ہے (Antigravity `"exact"` پاس کرتا ہے)۔
 
-**مقصد:** جب صرف ایک ماڈل غیر دستیاب ہو یا اس کا کوٹہ محدود ہو تو پورے کنکشن کو غیر فعال کرنے سے بچنا۔
+**مقصد:** جب صرف ایک ماڈل دستیاب نہ ہو یا quota کی حد کا شکار ہو تو مکمل connection کو غیر فعال کرنے سے بچنا۔
 
 **مثالیں:**
 
-- فی ماڈل کوٹہ رکھنے والے پرووائیڈرز کا 429 واپس کرنا
-- مقامی پرووائیڈرز کا ایک گمشدہ ماڈل کے لیے 404 واپس کرنا
-- پرووائیڈر سے مخصوص موڈ/ماڈل اجازت کی ناکامیاں (مثلاً Grok موڈز)
+- فی ماڈل quota والے providers جو 429 واپس کرتے ہیں
+- Local providers جو کسی ایک غیر موجود ماڈل کے لیے 404 واپس کرتے ہیں
+- Provider-specific mode/model permission کی ناکامیاں (مثلاً Grok modes)
 
 **نفاذ:** `open-sse/services/accountFallback.ts` — `lockModel()`، `clearModelLock()`، `getAllModelLockouts()`۔
 
@@ -254,96 +284,181 @@ Regression حفاظتی جانچیں: `tests/unit/claude-low-priority-mode.test.
 
 UI: Settings → Model Cooldowns (`src/app/(dashboard)/dashboard/settings/components/ModelCooldownsCard.tsx`)
 
-فعال لاک آؤٹس کو ان معلومات کے ساتھ فہرست کرتا ہے: پرووائیڈر، کنکشن، ماڈل، وجہ، expiresAt۔ آپریٹرز کارڈ سے کسی ماڈل کو دستی طور پر دوبارہ فعال کر سکتے ہیں۔
+فعال lockouts کو ان معلومات کے ساتھ درج کرتا ہے: provider، connection، model، reason، expiresAt۔ Operators کارڈ سے کسی ماڈل کو دستی طور پر دوبارہ فعال کر سکتے ہیں۔
 
 **REST API:**
 
-- `GET /api/resilience/model-cooldowns` — فعال لاک آؤٹس کی فہرست
-- `DELETE /api/resilience/model-cooldowns` — دستی طور پر دوبارہ فعال کرنا۔ باڈی: `{provider, connection, model}`۔ توثیق: انتظامی۔
+- `GET /api/resilience/model-cooldowns` — فعال lockouts کی فہرست
+- `DELETE /api/resilience/model-cooldowns` — دستی طور پر دوبارہ فعال کرنا۔ Body: `{provider, connection, model}`۔ Auth: management۔
 
-### لاک آؤٹ سیٹنگز UI + کامیابی کی تنزلی کے ذریعے بحالی (v3.8.23)
+### کول ڈاؤن مینیجر
 
-ماڈل لاک آؤٹ ہمیشہ فعال، ہارڈ کوڈ شدہ رویے سے بدل کر مکمل طور پر قابل ترتیب،
-اختیاری فیچر بن گیا ہے، جس کا اپنا سیٹنگز کارڈ اور خودکار بحالی کا راستہ ہے۔
+UI: Monitoring → Cooldown Manager (`src/app/(dashboard)/dashboard/resilience/cooldowns/`)۔
+
+ہر اس connection کے لیے ایک ہی صفحہ جو کسی عارضی وجہ سے routing سے باہر ہو، بجائے اس کے کہ
+ہر provider کا صفحہ الگ کھولا جائے۔ یہ connection cooldowns، model lockouts اور terminal
+states درج کرتا ہے، انہیں فی connection، کسی selection، یا کسی provider کے تمام connections کے لیے
+صاف کرتا ہے، اور سب سے زیادہ استعمال ہونے والے cooldown rules میں ترمیم کرتا ہے: `streamStallCooldown.enabled` اور OAuth / API-key
+`connectionCooldown` کا بنیادی cooldown اور زیادہ سے زیادہ backoff steps (جنہیں
+`PATCH /api/resilience` کے ذریعے محفوظ کیا جاتا ہے)۔ Terminal states (`banned`، `expired`، `credits_exhausted`) یہاں
+درج کیے جاتے ہیں مگر کبھی صاف نہیں کیے جاتے۔
+
+**REST API** (`src/lib/resilience/cooldownManager.ts`، auth: management):
+
+- `GET /api/resilience/cooldowns[?provider=]` — status، باقی cooldown،
+  backoff level، آخری error type اور model lockouts کے ساتھ connections (کوئی credentials نہیں)
+- `POST /api/resilience/cooldowns` — body `{connectionIds: string[]}` یا
+  `{all: true, provider?}`؛ `{cleared, unchanged, skippedTerminal, lockoutsCleared}` واپس کرتا ہے
+
+### لاک آؤٹ سیٹنگز UI + کامیابی پر بتدریج بحالی (v3.8.23)
+
+Model lockout ہمیشہ فعال رہنے والے hardcoded رویے سے بدل کر مکمل طور پر قابلِ ترتیب،
+اختیاری feature بن گیا ہے، جس کا اپنا settings card اور خودکار بحالی کا راستہ ہے۔
 
 **سیٹنگز کارڈ:** Settings → Model Lockout
 (`src/app/(dashboard)/dashboard/settings/components/ModelLockoutCard.tsx`)۔
-یہ اوپر موجود صرف پڑھنے کے قابل `ModelCooldownsCard` سے **الگ** ہے (جو صرف
-فعال لاک آؤٹس کو _فہرست_ کرتا ہے) — نیا کارڈ _پیرامیٹرز کو ترتیب دیتا ہے_۔ ڈیفالٹس
+یہ اوپر موجود صرف پڑھنے کے قابل `ModelCooldownsCard` (جو صرف فعال lockouts کی
+_فہرست_ دکھاتا ہے) سے **الگ** ہے — نیا کارڈ _parameters کو ترتیب دیتا ہے_۔ Defaults
 `DEFAULT_MODEL_LOCKOUT_SETTINGS`
 (`src/lib/resilience/modelLockoutSettings.ts`) میں موجود ہیں:
 
-| سیٹنگ                   | ڈیفالٹ                           | مطلب                                                             |
-| ----------------------- | -------------------------------- | ---------------------------------------------------------------- |
-| `enabled`               | `false`                          | بنیادی ٹوگل — ماڈل لاک آؤٹ **ڈیفالٹ طور پر بند** ہے۔             |
-| `errorCodes`            | `[403, 404, 429, 502, 503, 504]` | اپ اسٹریم اسٹیٹسز جو ماڈل کے دائرۂ کار کی ناکامی شمار ہوتے ہیں۔  |
-| `baseCooldownMs`        | `120_000` (120 سیکنڈ)            | پہلی ناکامی کے لیے لاک آؤٹ کا ابتدائی دورانیہ۔                   |
-| `maxCooldownMs`         | `1_800_000` (30 منٹ)             | بتدریج بڑھے ہوئے کول ڈاؤن کی بالائی حد۔                          |
-| `maxBackoffSteps`       | `10`                             | ایکسپونینشل بیک آف میں اضافے کے زیادہ سے زیادہ مراحل۔            |
-| `useExponentialBackoff` | `true`                           | آیا بار بار ہونے والی ناکامیاں کول ڈاؤن کو ایکسپونینشلی بڑھائیں۔ |
+| سیٹنگ                   | ڈیفالٹ                           | مطلب                                                              |
+| ----------------------- | -------------------------------- | ----------------------------------------------------------------- |
+| `enabled`               | `false`                          | بنیادی toggle — model lockout **بطور ڈیفالٹ بند** ہے۔             |
+| `errorCodes`            | `[403, 404, 429, 502, 503, 504]` | وہ upstream statuses جو model-scoped failure شمار ہوتے ہیں۔       |
+| `baseCooldownMs`        | `120_000` (120 سیکنڈ)            | پہلی ناکامی کے لیے ابتدائی lockout کا دورانیہ۔                    |
+| `maxCooldownMs`         | `1_800_000` (30 منٹ)             | بتدریج بڑھے ہوئے cooldown کی بالائی حد۔                           |
+| `maxBackoffSteps`       | `10`                             | exponential-backoff میں اضافے کے زیادہ سے زیادہ مراحل۔            |
+| `useExponentialBackoff` | `true`                           | آیا بار بار ہونے والی ناکامیاں cooldown کو exponentially بڑھائیں۔ |
 
-سیٹنگز معمول کے سیٹنگز اسٹور کے ذریعے برقرار رہتی ہیں اور resilience سیٹنگز
-اسکیما کے ذریعے توثیق ہوتی ہیں؛ کارڈ `baseCooldownMs`/`maxCooldownMs`
-(`maxCooldownMs ≥ baseCooldownMs` کے ساتھ) اور `maxBackoffSteps` کو حدود میں رکھتا ہے۔
+Settings معمول کے settings store کے ذریعے برقرار رہتی ہیں اور resilience settings schema کے ذریعے
+validate ہوتی ہیں؛ کارڈ `baseCooldownMs`/`maxCooldownMs`
+(`maxCooldownMs ≥ baseCooldownMs` کے ساتھ) اور `maxBackoffSteps` کو حدود کے اندر رکھتا ہے۔
 
-**کامیابی کی تنزلی کے ذریعے بحالی:** بحالی محض ٹائمر ختم ہونے پر منحصر **نہیں** ہے۔ ایک صحت مند
-جواب ماڈل کی ناکامیوں کی تعداد کو بتدریج کم کرتا ہے، تاکہ دورانِ وقفہ بحال ہونے والا ماڈل
-اپنے ٹائمر کے ختم ہونے سے پہلے مزید اضافہ روک دے (اور صاف ہو جائے)۔ ایک کامیاب
-کومبو ہدف پر، `open-sse/services/combo.ts`، `decayModelFailureCount()`
-(`open-sse/services/accountFallback.ts`) کو کال کرتا ہے، جو محفوظ شدہ
-`failureCount` کو **نصف** (`Math.floor(failureCount / 2)`) کر دیتا ہے؛ جب یہ `0`
-تک پہنچتا ہے تو لاک آؤٹ اندراج مکمل طور پر حذف ہو جاتا ہے۔ اس کا متقابل
-`recordModelLockoutFailure()`، اضافے کی ونڈو کے اندر ہونے والی ناکامیوں پر تعداد
-بڑھاتا ہے (اور کول ڈاؤن میں اضافہ کرتا ہے)۔ کامیابی کی یہ تنزلی عام ٹائمر کے اختتام
-کے علاوہ ہے — دونوں میں سے کوئی بھی راستہ ماڈل کو دوبارہ فعال کر سکتا ہے۔
+**کامیابی پر بتدریج بحالی:** بحالی **صرف** timer ختم ہونے پر منحصر نہیں ہے۔ ایک صحت مند
+response ماڈل کی failure count کو بتدریج کم کرتا ہے، تاکہ دورانِ مدت بحال ہونے والا ماڈل
+اپنا timer ختم ہونے سے پہلے مزید escalation روک دے (اور lockout صاف کر دے)۔ کسی کامیاب
+combo target پر، `open-sse/services/combo.ts`، `decayModelFailureCount()`
+(`open-sse/services/accountFallback.ts`) کو call کرتا ہے، جو محفوظ شدہ
+`failureCount` کو **نصف** کر دیتا ہے (`Math.floor(failureCount / 2)`)؛ جب یہ `0` تک پہنچتا ہے تو lockout
+entry مکمل طور پر delete کر دی جاتی ہے۔ اس کا counterpart `recordModelLockoutFailure()`
+escalation window کے اندر ہونے والی ناکامیوں پر count بڑھاتا ہے (اور cooldown میں اضافہ کرتا ہے)۔
+کامیابی پر ہونے والی یہ تدریجی کمی، timer کے معمول کے expiry کے علاوہ ہے —
+دونوں میں سے کوئی بھی راستہ ماڈل کو دوبارہ فعال کر سکتا ہے۔
 
-**حالت:** لاک آؤٹس **اِن میموری** رکھے جاتے ہیں (ہر پراسیس کے `Map`s میں
-`ModelLockoutEntry`، جن کی کلید `provider:connectionId:model` ہے، جبکہ عین دائرۂ کار
-کے لاکس کی کلید `provider:connectionId:exact:model` ہے)، اور
-DB میں برقرار نہیں رکھے جاتے — ری اسٹارٹ ہونے پر یہ ضائع ہو جاتے ہیں۔ _سیٹنگز_
-برقرار رکھی جاتی ہیں؛ فعال لاک آؤٹ کی _حالت_ عارضی ہوتی ہے۔
+**اسٹیٹ:** lockouts **in-memory** رکھے جاتے ہیں (ہر process کے `Map`s، جن میں
+`ModelLockoutEntry` کی کلید `provider:connectionId:model` ہوتی ہے، جبکہ exact-scope locks کی کلید
+`provider:connectionId:exact:model` ہوتی ہے)، اور DB میں persist نہیں کیے جاتے —
+restart پر یہ ضائع ہو جاتے ہیں۔ _settings_ persist ہوتی ہیں؛ فعال
+lockout _state_ عارضی ہے۔
 
 ---
 
 ## 4. کوٹا-شیئر کنکرنسی کنٹرول (v3.8.36)
 
-سبسکرپشن اکاؤنٹس (GLM، MiniMax، وغیرہ) عموماً صرف ~1–3 بیک وقت
-درخواستیں قبول کرتے ہیں؛ اس حد سے تجاوز 429s اور کول ڈاؤنز کو متحرک کرتا ہے۔ یہ مسئلہ
-**quota-share** (`qtSd/…`) کومبوز میں شدید ہوتا ہے، جہاں متعدد API کلیدیں ایک ہی اپ اسٹریم
-اکاؤنٹ شیئر کرتی ہیں۔ تین تہیں مشترکہ اکاؤنٹ کو درخواستوں سے بھر جانے سے بچاتی ہیں۔
+سبسکرپشن اکاؤنٹس (GLM، MiniMax، وغیرہ) اکثر صرف تقریباً 1–3 ہم وقت
+درخواستیں قبول کرتے ہیں؛ اس حد سے تجاوز کرنے پر 429s اور کول ڈاؤنز متحرک ہو جاتے ہیں۔ یہ مسئلہ
+**quota-share** (`qtSd/…`) کومبوز کے تحت زیادہ شدید ہوتا ہے، جہاں متعدد API کلیدیں ایک ہی اپ اسٹریم
+اکاؤنٹ کا اشتراک کرتی ہیں۔ تین پرتیں مشترکہ اکاؤنٹ کو درخواستوں سے بھر جانے سے بچاتی ہیں۔
 
 ### فی کنکشن کنکرنسی کی حد (`max_concurrent`)
 
-ہر پرووائیڈر کنکشن ایک `max_concurrent` بالائی حد مقرر کر سکتا ہے
+ہر پرووائیڈر کنکشن `max_concurrent` کی زیادہ سے زیادہ حد متعین کر سکتا ہے
 (`provider_connections.max_concurrent`، جسے کنکشن موڈل / API / DB میں سیٹ کیا جاتا ہے)۔
 کوئی حد نہ رکھنے کے لیے اسے خالی چھوڑ دیں۔ یہی واحد سیٹنگ ذیل کی سیریلائزیشن
-تہہ کو چلاتی ہے — اسے اکاؤنٹ کی حقیقی کنکرنسی کے مطابق سیٹ کریں (مثلاً GLM ~1، MiniMax ~2)۔
+پرت کو چلاتی ہے — اسے اکاؤنٹ کی حقیقی کنکرنسی کے مطابق سیٹ کریں (مثلاً GLM تقریباً 1، MiniMax تقریباً 2)۔
+
+### فی ماڈل کنکرنسی کی حدیں (`modelConcurrency`)
+
+ایک کنکشن اپنے `rateLimitOverrides` میپ کے اندر ہر ماڈل کے لیے عین کنکرنسی
+حدیں بھی متعین کر سکتا ہے:
+
+```json
+{
+  "rateLimitOverrides": {
+    "maxConcurrent": 4,
+    "modelConcurrency": { "glm-5": 1, "glm-4.7": 3 }
+  }
+}
+```
+
+اسے کنکشن موڈل میں (**Rate limit overrides → Per-model
+concurrency caps**، ہر سطر میں ایک `model=cap`) یا اسی JSON ساخت کے ساتھ
+`PATCH /api/providers/[id]` کے ذریعے سیٹ کریں۔ کلیدی مفاہیم:
+
+- **پورے کنکشن کی حد بمقابلہ ماڈل کی مخصوص حد:** `maxConcurrent` مشترکہ
+  پورے کنکشن کی حد برقرار رکھتا ہے۔ جب دونوں لاگو ہوں، تو دونوں گیٹس ایک ہی مرکب گیٹ میں
+  ایٹمی انداز میں حاصل کیے جاتے ہیں
+  (`global → provider → account → model`)؛ مؤثر طرزِ عمل زیادہ سخت قابلِ اطلاق حد کے
+  مطابق ہوتا ہے۔
+- **عین ماڈل کلید کی مماثلت:** کلید وہ ماڈل اسٹرنگ ہے جو روٹنگ ریزولیوشن کے
+  بعد ایگزیکیوٹر کو دی جاتی ہے — عموماً سادہ اپ اسٹریم ماڈل id
+  (`glm-5`)، نہ کہ کلائنٹ سائیڈ `provider/model` عرف (`zai/glm-5` کی
+  `glm-5` سے مماثلت نہیں ہوتی)۔ قدریں مثبت صحیح عدد پر مبنی ہم وقت درخواستوں کی حدیں ہیں۔
+- **مقامی قطاربندی، کوئی خودکار دریافت نہیں:** اضافی درخواستیں موجودہ
+  قطار/ٹائم آؤٹ مفاہیم کے ساتھ مقامی طور پر قطار میں لگتی ہیں (ٹائپ شدہ `SEMAPHORE_TIMEOUT` /
+  `SEMAPHORE_QUEUE_FULL` داخلہ غلطیاں)۔ OmniRoute اپ اسٹریم پالیسی دریافت یا
+  اخذ نہیں کرتا — یہ آپریٹر کی ترتیب کردہ عین حدیں نافذ کرتا ہے۔
+  مکمل طور پر مصروف ماڈل گیٹ کبھی پرووائیڈر کو غیر فعال نہیں کرتا اور نہ ہی مستقل
+  ماڈل لاک آؤٹ بناتا ہے؛ اپ اسٹریم 429/کول ڈاؤن/فال بیک کا طرزِ عمل بدستور
+  غلطی سے بچاؤ کا آخری سہارا رہتا ہے۔
+- **فی کنکشن، فی پراسیس دائرۂ کار:** حدیں ہر ڈیٹابیس کنکشن کے لیے الگ ہیں
+  اور میموری میں رکھی جاتی ہیں، اس لیے ایک ہی اپ اسٹریم API کلید دوبارہ استعمال کرنے والے
+  دو کنکشن باہم ہم آہنگی نہیں کرتے۔
+- **غیر ترتیب شدہ کا مطلب عدم تبدیلی ہے:** میپ کو چھوڑ دینے (یا
+  ڈیش بورڈ فیلڈ خالی رکھنے) سے کوئی ماڈل گیٹ شامل نہیں ہوتا۔ کسی عمومی پرووائیڈر
+  حد کا دعویٰ کیے بغیر مثالی ترتیب:
+
+```text
+glm-5=1
+glm-4.7=3
+```
 
 ### کوٹا-شیئر درخواستوں کی سیریلائزیشن
 
-جب کوئی کوٹا-شیئر ڈسپیچ ایسے کنکشن کو ہدف بناتا ہے جو مثبت
-`max_concurrent` مقرر کرتا ہے، تو اس **اکاؤنٹ** کے لیے بیک وقت درخواستیں ایک
-فی کنکشن سیمی فور (کلید `qsconn:<connectionId>`) کے ذریعے سلسلہ وار کی جاتی ہیں: اضافی درخواستیں
-اکاؤنٹ کو بھر دینے کے بجائے **قطار میں انتظار کرتی ہیں**۔ یہ **fail-open** ہے — بھری ہوئی
+جب کوٹا-شیئر ڈسپیچ کسی ایسے کنکشن کو ہدف بناتا ہے جو مثبت
+`max_concurrent` متعین کرتا ہے، تو اس **اکاؤنٹ** کے لیے ہم وقت درخواستوں کو
+فی کنکشن سیمیفور (کلید `qsconn:<connectionId>`) کے ذریعے سلسلہ وار کیا جاتا ہے: اضافی درخواستیں
+اکاؤنٹ پر بوجھ ڈالنے کے بجائے **قطار میں انتظار کرتی ہیں**۔ یہ **fail-open** ہے — مکمل
 قطار یا ٹائم آؤٹ کی صورت میں درخواست کسی سلاٹ کے بغیر آگے بڑھتی ہے، بجائے اس کے کہ قابلِ ڈسپیچ
-درخواست کو کبھی مسترد کیا جائے۔ اسے **Settings → Resilience → Quota-share per-connection
+درخواست کبھی مسترد ہو۔ اسے **Settings → Resilience → Quota-share per-connection
 concurrency** (`resilienceSettings.quotaShareConcurrencyLimit.enabled`، بطور ڈیفالٹ
-فعال) میں ٹوگل کریں۔ `max_concurrent` کی حد کے بغیر رویہ تبدیل نہیں ہوتا۔
+فعال) میں ٹوگل کریں۔ `max_concurrent` کی حد کے بغیر طرزِ عمل تبدیل نہیں ہوتا۔
 
-> کوٹا-شیئر روٹنگ گیٹ (`selectQuotaShareTarget`، DRR + P2C) بذاتِ خود
-> fail-open ہے اور حد تک پہنچے ہوئے کنکشن کو صرف _کم ترجیح_ دیتا ہے — ایک
-> سنگل کنکشن پول کے ساتھ یہ سخت حد نافذ نہیں کر سکتا، لہٰذا یہی سیمی فور درحقیقت
+> کوٹا-شیئر روٹنگ گیٹ (`selectQuotaShareTarget`, DRR + P2C) بذاتِ خود
+> fail-open ہے اور حد تک پہنچے ہوئے کنکشن کی ترجیح صرف _کم_ کرتا ہے — ایک
+> واحد کنکشن والے پول میں یہ سخت حد نافذ نہیں کر سکتا، اس لیے یہی سیمیفور دراصل
 > درخواستوں کے سیلاب کو قابو میں رکھتا ہے۔
 
 ### کومبو کول ڈاؤن سے آگاہ دوبارہ کوشش
 
-ہر کومبو حکمتِ عملی کے لیے (فعال ہونے کی صورت میں)، ایسی درخواست جو مختصر عارضی کول ڈاؤن کے سبب
-429 کو حتمی بنا دیتی، انتظار کرتی ہے اور 429 واپس کرنے کے بجائے دوبارہ
-ڈسپیچ ہوتی ہے — یہ متعدد ماڈل کومبوز پر Gemini طرز کی TPM/RPM ونڈوز
-(~60s retry-after) کا احاطہ کرتا ہے، مثلاً 2 ماڈل والے کومبو کے دونوں اہداف کا فی ماڈل
-شرح کی حد سے ٹکرانا۔ یہ **Settings → Resilience** میں `comboCooldownWait`
-(`enabled`، `maxWaitMs`، `maxAttempts`، `budgetMs`) کے ذریعے محدود ہے۔ یہ کبھی بھی
-`quota_exhausted` (نصف شب تک مقفل) یا تصدیق/نہ ملنے کی وجوہات پر انتظار نہیں کرتا۔
+ہر کومبو حکمتِ عملی کے لیے (فعال ہونے کی صورت میں)، ایسی درخواست جو مختصر
+عارضی کول ڈاؤن کے لیے 429 کو حتمی بنا دیتی، کول ڈاؤن ختم ہونے کا انتظار کرتی ہے اور
+429 واپس کرنے کے بجائے دوبارہ ڈسپیچ ہوتی ہے — یہ متعدد ماڈلز والے کومبوز پر Gemini درجے کی
+TPM/RPM ونڈوز (تقریباً 60s retry-after) کا احاطہ کرتا ہے، مثلاً 2-ماڈل کومبو کے دونوں اہداف
+کا فی ماڈل شرح حد سے ٹکرا جانا۔ **Settings → Resilience** میں `comboCooldownWait`
+(`enabled`، `maxWaitMs`، `maxAttempts`، `budgetMs`) کے ذریعے محدود ہے۔ یہ
+`quota_exhausted` (نصف شب تک مقفل) یا auth/not-found وجوہات پر کبھی انتظار نہیں کرتا۔
+
+یہی گیٹ پری ڈسپیچ صورت (#16319) کا بھی احاطہ کرتا ہے: جب کسی
+کومبو کے ہر ہدف کو کوئی بھی کوشش کرنے سے پہلے اس لیے چھوڑ دیا جائے کہ اس کا ماڈل مختصر
+عارضی لاک آؤٹ میں ہے، تو صفر-کوشش راستہ انہی حدود کے تحت لاک ختم ہونے کا انتظار کرتا ہے
+اور اشارے کے بغیر `503 ALL_TARGETS_SKIPPED` کا جواب دینے کے بجائے دوبارہ ڈسپیچ کرتا ہے۔
+جب انتظار کی اجازت نہ ہو (حد، کوشش یا بجٹ ختم ہو چکا ہو، یا خصوصیت بند ہو)، تو حتمی جواب
+ابتدائی ترین عارضی لاک کے خاتمے سے `retry_after` / `reset_at` رکھنے والے
+`429 rate_limit_error` میں اپ گریڈ ہو جاتا ہے؛ کوٹا، auth اور not-found لاکس
+اشارے کے بغیر 503 برقرار رکھتے ہیں۔
+
+```text
+#16319 · comboCooldownWait · pre-dispatch (attempts = 0)
+all targets skipped + transient model lockout:
+  enabled ∧ 0 < waitMs ≤ maxWaitMs ∧ attempt < maxAttempts ∧ budgetLeftMs ≥ waitMs
+    → wait → re-dispatch
+  wait = false → HTTP 429 rate_limit_error
+  retry_after / reset_at ← earliest transient lock expiry
+quota_exhausted / auth_error / not_found / not_found_local:
+  no transient hint → HTTP 503 ALL_TARGETS_SKIPPED
+```
 
 ---
 

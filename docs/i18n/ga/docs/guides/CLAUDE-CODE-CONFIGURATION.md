@@ -98,45 +98,59 @@ thaispeántar ach samhlacha Kimi.
 
 ---
 
-## Bloc ionduchtaithe ar an deais
+## Bloc ionduchtúcháin ar an deais
 
-Taispeánann cárta uirlisí Claude (**Deais → Cód CLI**) an mhír bheacht `settings.json`
-don ásc seo, in aice leis an gcnaipe faisnéise faoin ailias fionnachtana, mar aon le cnaipe cóipeála:
+Taispeánann cárta uirlisí Claude (**Deais → Cód CLI**) an blúire beacht `settings.json`
+don ásc seo, in aice leis an gcnaipe faisnéise faoin ailias fionnachtana, agus cnaipe cóipeála leis:
 
 ```jsonc
 {
   "env": {
-    "ANTHROPIC_BASE_URL": "http://<your OmniRoute>:20128",
-    "ANTHROPIC_AUTH_TOKEN": "<your OmniRoute API key>",
+    "ANTHROPIC_BASE_URL": "http://<do OmniRoute>:20128",
+    "ANTHROPIC_AUTH_TOKEN": "<d'eochair API OmniRoute>",
     "CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY": "1",
   },
 }
 ```
 
-Is é an bun-URL an ceann a réitigh an cárta (lena n-áirítear sárú saincheaptha a chlóscríobh tú), agus é
-normalaithe cheana féin — gan iarmhír `/v1` ná slais deiridh. **Ní thaispeántar an eochair riamh**: cuirtear
-ionadchoinneálaí sa bhloc, mar sin ní féidir le gabháil scáileáin ná mír ghreamaithe í a sceitheadh. Greamaigh d'eochair ina háit.
+Is é an bun-URL an ceann a réitíonn an cárta (lena n-áirítear sárú saincheaptha a chlóscríobh tú), agus é
+normalaithe cheana féin — gan iarmhír `/v1`, gan slais deiridh. **Ní thaispeántar an eochair riamh**: cuirtear
+ionadchoinneálaí sa bhloc, mar sin ní féidir le gabháil scáileáin ná le blúire greamaithe í a sceitheadh. Greamaigh d'eochair ina áit.
 
-Cuir `CLAUDE_CODE_AUTO_COMPACT_WINDOW` faoin mbloc `env` céanna le haghaidh aon mhúnla nach ionann
-a fhíorfhuinneog chomhthéacs agus 200K — glacann Claude Code leis gur 200K atá ann do gach id nach n-aithníonn sé, mar sin
-tarlaíonn an dlúthú uathoibríoch ag an bpointe mícheart murach sin (féach an rabhadh sa rannán roimhe seo).
-Glacann tógálaí na míre leis an luach sin freisin, ionas gur féidir le glaoiteoir a bhfuil fuinneog an spriocmhúnla ar eolas aige
+Cuir `CLAUDE_CODE_AUTO_COMPACT_WINDOW` faoin mbloc `env` céanna le haghaidh aon samhail nach 200K
+a fíorfhuinneog comhthéacs — glacann Claude Code leis gur 200K atá i gceist do gach id nach n-aithníonn sé, mar sin
+murach sin cuirtear an t-uath-chomhbhrú i ngníomh ag an bpointe mícheart (féach an rabhadh sa roinn roimhe seo).
+Glacann tógálaí na mblúirí leis an luach sin freisin, ionas gur féidir le glaoiteoir a bhfuil fuinneog na sprice-shamhla ar eolas aige
 é a aschur go díreach.
 
-Foinse: `src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet` (tógálaí
-íon, tástáilte le tástálacha aonaid) arna thaispeáint ag `ClaudeGatewayOnboardingBlock`.
+Foinse: `src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet` (tógálaí íon,
+aonadthástáilte) arna thaispeáint ag `ClaudeGatewayOnboardingBlock`.
+
+### Cuir cuntas amháin in airde (roghnach)
+
+Chun gach iarratas Claude Code a sheoladh trí chuntas soláthraí sonrach amháin, cuir an ceanntásc
+`x-omniroute-connection` leis trí `ANTHROPIC_CUSTOM_HEADERS` sa bhloc `env` céanna:
+
+```jsonc
+"ANTHROPIC_CUSTOM_HEADERS": "x-omniroute-connection: <connection id>"
+```
+
+Cóipeáil an id ón tslis `xxxxxxxx…` ar ró an cheangail ar leathanach an tsoláthraí. Ní bhaineann an socrú seasta
+ach le hidanna aon-samhla (`provider/model`), agus ní bhaineann sé le teaglamaí. Féach
+[Ceangal cuntais de réir iarratais](../reference/API_REFERENCE.md#account-pinning-per-request) chun an
+t-iompar cúltaca beacht a fháil.
 
 ---
 
 ## Próifílí (`CLAUDE_CONFIG_DIR`)
 
-Níl **aon chomhaid phróifíle dhúchasacha** ag Claude Code (murab ionann agus `~/.codex/<name>.config.toml` Codex).
-Is é `CLAUDE_CONFIG_DIR` an mheicníocht ghnáthúil — eolaire cumraíochta ar leith do gach
-próifíl, agus a `settings.json`, dintiúir, stair agus taisce féin ag gach ceann acu.
+Níl **aon chomhad próifíle dúchasach** ag Claude Code (murab ionann agus `~/.codex/<name>.config.toml` Codex).
+Is é `CLAUDE_CONFIG_DIR` an mheicníocht ghnásúil — comhadlann chumraíochta ar leith do gach
+próifíl, agus a `settings.json`, a dintiúir, a stair agus a taisce féin ag gach ceann acu.
 
 Faigheann `omniroute setup-claude` catalóg bheo `/v1/models` agus scríobhann sé
-próifíl amháin in aghaidh an mhúnla ag `~/.claude/profiles/<name>/settings.json`, agus athúsáideann sé
-**na hainmneacha céanna le `setup-codex`** (`glm52`, `kimi-k27`, `deepseek-pro`, …):
+próifíl amháin do gach samhail ag `~/.claude/profiles/<name>/settings.json`, ag athúsáid na
+**n-ainmneacha céanna le `setup-codex`** (`glm52`, `kimi-k27`, `deepseek-pro`, …):
 
 ```jsonc
 // ~/.claude/profiles/glm52/settings.json
@@ -153,20 +167,22 @@ próifíl amháin in aghaidh an mhúnla ag `~/.claude/profiles/<name>/settings.j
 }
 ```
 
-> **Ní scríobhtar an comhartha fíordheimhnithe sa phróifíl riamh.** Seol le
+> **Ní scríobhtar an ceadchomhartha fíordheimhnithe sa phróifíl riamh.** Seol é le
 > `omniroute launch --profile <name>` (insteallann sé `ANTHROPIC_AUTH_TOKEN` ón
 > gcomhthéacs gníomhach), nó easpórtáil `ANTHROPIC_AUTH_TOKEN` tú féin agus rith
 > `CLAUDE_CONFIG_DIR=~/.claude/profiles/<name> claude`.
 
-**Sioncronú uathoibríoch tar éis fionnachtain samhlacha (roghnach).** Is féidir le OmniRoute na comhaid chéanna
+**Uathshioncronú tar éis aimsiú samhlacha (roghnach).** Is féidir le OmniRoute na comhaid chéanna
 `~/.claude/profiles/<name>/settings.json` a athghiniúint go huathoibríoch aon uair a athraíonn
-sioncronú samhlacha soláthraí an chatalóg bheo — ionas go bhfaighidh samhlacha nua nó athainmnithe próifílí gan an
-t-ordú a rith arís. Tá sé **díchumasaithe de réir réamhshocraithe**: scoránaigh é ón **deais Chód CLI** ("Sioncronú
-uathoibríoch próifílí CLI" → Claude Code), nó socraigh `OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES=true` (cloíonn sé freisin le
-`CLI_ALLOW_CONFIG_WRITES`, atá cumasaithe de réir réamhshocraithe). Nuair a bhíonn sé cumasaithe, ní scríobhann sé ach comhaid phróifíle; ní athraíonn sé
-do chumraíocht ghníomhach/réamhshocraithe Claude, d'fhíordheimhniú ná `~/.claude/settings.json` riamh.
+sioncronú samhlacha soláthraí an chatalóg bheo — mar sin faigheann samhlacha nua nó athainmnithe
+próifílí gan an t-ordú a rith arís. Tá sé **múchta de réir réamhshocraithe**: scoránaigh é ón
+**deais CLI Code** ("Uathshioncronú próifílí CLI" → Claude Code), nó socraigh
+`OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES=true` (urramaíonn sé `CLI_ALLOW_CONFIG_WRITES` freisin,
+atá casta air de réir réamhshocraithe). Nuair atá sé cumasaithe, ní scríobhann sé ach comhaid
+phróifíle; ní athraíonn sé do chumraíocht ghníomhach/réamhshocraithe Claude, an fíordheimhniú,
+ná `~/.claude/settings.json` riamh.
 
-### Próifílí a ghiniúint agus a úsáid
+### Próifílí a ghiniúint + a úsáid
 
 ```bash
 # OmniRoute áitiúil
@@ -177,6 +193,10 @@ omniroute setup-claude --remote http://192.168.0.15:20128 --api-key oma_live_xxx
 
 # Roinnt soláthraithe amháin
 omniroute setup-claude --only glm,kimi
+
+# Scríobh próifílí freisin do sholáthraithe CLI áitiúla (zcode, auggie, devin-cli-agentic,
+# codex-app-server) nach mbraitear ar an óstríomhaire seo (fágtar ar lár iad de réir réamhshocraithe do sprioc áitiúil)
+omniroute setup-claude --include-local
 
 # Réamhamharc gan scríobh
 omniroute setup-claude --dry-run

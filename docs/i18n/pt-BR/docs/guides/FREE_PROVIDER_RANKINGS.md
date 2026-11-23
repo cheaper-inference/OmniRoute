@@ -13,18 +13,18 @@
 
 ## O que é
 
-O OmniRoute registra 329 provedores, incluindo 155 entradas de catálogo marcadas como **gratuitas/sem autenticação**
+O OmniRoute registra 374 provedores, incluindo 155 entradas de catálogo marcadas como **gratuitas/sem autenticação**
 (sem autenticação,
 OAuth de nível gratuito ou chave de API de nível gratuito — consulte o
-[Guia de Níveis Gratuitos](../getting-started/FREE-TIERS-GUIDE.md) e o
-[Diretório de Níveis Gratuitos](../reference/FREE_TIERS.md) completo). O problema: os provedores gratuitos variam
-muito em termos de qualidade dos modelos. Um provedor sem autenticação que disponibiliza um modelo de última geração é muito mais útil
-do que um que disponibiliza um pequeno modelo legado.
+[Guia de níveis gratuitos](../getting-started/FREE-TIERS-GUIDE.md) e o
+[Diretório completo de níveis gratuitos](../reference/FREE_TIERS.md)). O porém: os provedores gratuitos variam
+muito em termos de qualidade dos modelos. Um provedor sem autenticação que oferece um modelo de ponta é muito mais útil
+do que um que oferece um modelo legado pequeno.
 
-A **Classificação de Provedores Gratuitos** responde à pergunta "**qual provedor gratuito oferece o melhor modelo?**" ao
-combinar o catálogo de cada provedor gratuito com **pontuações de qualidade obtidas por colaboração coletiva** do
-**ranking do Arena AI** (ELO baseado em preferências humanas, a mesma ideia por trás da arena de
-chatbots LMArena). Em seguida, os provedores são classificados pela qualidade de seu **melhor modelo gratuito**.
+**Classificações de provedores gratuitos** responde à pergunta "**qual provedor gratuito me oferece o melhor modelo?**" ao
+combinar o catálogo de cada provedor gratuito com **pontuações de qualidade colaborativas** do
+**ranking Arena AI** (ELO de preferência humana, a mesma ideia por trás da arena de
+chatbots LMArena). Em seguida, os provedores são classificados com base na capacidade de seu **melhor modelo gratuito**.
 
 A classificação é calculada com base em três fontes reais:
 
@@ -33,10 +33,10 @@ A classificação é calculada com base em três fontes reais:
    (`src/shared/constants/providers.ts`).
 2. O catálogo de modelos de cada provedor no registro de provedores
    (`open-sse/config/providerRegistry.ts`).
-3. Pontuações de adequação à tarefa derivadas do ELO, armazenadas na tabela `model_intelligence` do banco de dados pelo
-   mecanismo de sincronização do ELO do Arena (`src/lib/arenaEloSync.ts`).
+3. Pontuações de adequação a tarefas derivadas do ELO armazenadas na tabela `model_intelligence` do banco de dados pelo
+   mecanismo de sincronização ELO do Arena (`src/lib/arenaEloSync.ts`).
 
-A lógica de combinação está em `src/lib/freeProviderRankings.ts`.
+A lógica de combinação está localizada em `src/lib/freeProviderRankings.ts`.
 
 ---
 

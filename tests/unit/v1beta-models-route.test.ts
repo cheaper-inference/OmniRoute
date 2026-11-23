@@ -86,3 +86,52 @@ test("v1beta models route excludes providers without an active connection (#2483
     "configured anthropic must be present"
   );
 });
+
+test("v1beta models route names compatible-node models under the configured prefix, not the node UUID (#16207)", async () => {
+  // #16207: openai-compatible/anthropic-compatible provider nodes have internal UUID
+  // ids; the Gemini catalog must publish them under the operator-configured prefix,
+  // the same public identity /v1/models has used since #8327.
+  const UUID_SHAPE_RE = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
+  const NODE_ID = "openai-compatible-chat-550e8400-e29b-41d4-a716-446655440000";
+  const CONFIGURED_PREFIX = "pix4k-talk";
+
+  await providersDb.createProviderNode({
+    id: NODE_ID,
+    type: "openai-compatible",
+    name: "pix4k talk (probe)",
+    prefix: CONFIGURED_PREFIX,
+    baseUrl: "https://proxy.example.com",
+    chatPath: "/v1/chat/completions",
+    modelsPath: "/v1/models",
+  });
+  const connection = await providersDb.createProviderConnection({
+    provider: NODE_ID,
+    authType: "apikey",
+    apiKey: "sk-test",
+    isActive: true,
+    testStatus: "active",
+  });
+  await modelsDb.replaceSyncedAvailableModelsForConnection(
+    NODE_ID,
+    (connection as { id: string }).id,
+    [{ id: "glm-5.2", name: "GLM 5.2", source: "imported" }]
+  );
+  await modelsDb.addCustomModel(NODE_ID, "custom-extra", "Custom Extra");
+
+  const response = await v1betaModelsRoute.GET();
+  const body = (await response.json()) as { models: Array<{ name: string }> };
+  assert.equal(response.status, 200);
+  const names = body.models.map((m) => m.name);
+
+  assert.ok(
+    names.includes(`models/${CONFIGURED_PREFIX}/glm-5.2`),
+    `synced model must be named under the prefix, got: ${JSON.stringify(names)}`
+  );
+  assert.ok(
+    names.includes(`models/${CONFIGURED_PREFIX}/custom-extra`),
+    `custom model must be named under the prefix, got: ${JSON.stringify(names)}`
+  );
+  for (const name of names) {
+    assert.equal(UUID_SHAPE_RE.test(name), false, `raw UUID leaked in /v1beta/models: ${name}`);
+  }
+});

@@ -37,14 +37,14 @@ Search Tools Studio 將 `/dashboard/search-tools` 從基本搜尋測試介面轉
 
 ### 搜尋分頁
 
-將現有的 `SearchForm` + `ResultsPanel` + `RerankPanel` 改造為一個分頁：
+將現有的 `SearchForm` + `ResultsPanel` + `RerankPanel` 改造為分頁：
 
 - 查詢 → 結果（標題、URL、摘要、相關性分數）。
 - 設定窗格中的提供者中繼資料（成本、配額、狀態）。
-- 重新排序區段：選擇重新排序模型、重新排列結果並顯示 `positionDelta`。
+- 重新排序區段：選擇重新排序模型、重新排列結果、顯示 `positionDelta`。
 - 未設定搜尋提供者時，顯示包含行動呼籲的空白狀態。
-- 透過 `SearchHistory.tsx` 提供搜尋歷程。
-- 呼叫 `POST /v1/search`（現有端點，不做變更）。
+- 透過 `SearchHistory.tsx` 提供搜尋記錄。
+- 呼叫 `POST /v1/search`（現有端點，無需變更）。
 
 ### 擷取分頁
 
@@ -52,18 +52,18 @@ Search Tools Studio 將 `/dashboard/search-tools` 從基本搜尋測試介面轉
 
 - 輸入：URL + 完整頁面切換開關 + 格式選擇器（markdown / 文字 / HTML）。
 - 提交 → 擷取 → 轉譯 `ScrapeResult.tsx`。
-- `ScrapeResult` 會轉譯 markdown 預覽與原始內容切換開關。
-- 上限：若回應主體超過 **256 KB**，UI 會顯示「（已截斷，檢視原始內容）」，並在 Monaco 模態視窗中開啟原始內容（D21）。
-- 中繼資料面板：提供者（firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search）、延遲、成本、回應大小、連結數量。
+- `ScrapeResult` 轉譯 markdown 預覽 + 原始內容切換開關。
+- 上限：若回應本文大於 **256 KB**，UI 會顯示「（已截斷，檢視原始內容）」，並在 Monaco 模態視窗中開啟原始內容（D21）。
+- 中繼資料面板：提供者（firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search）、延遲、成本、回應大小、連結數量。
 - 使用 `useScrapeFetch.ts` hook。
 
 ### 比較分頁
 
-在最多 **4 個提供者之間並行**執行相同的查詢或 URL（D22）：
+針對最多 **4 個提供者並行**執行相同的查詢/URL（D22）：
 
-- 每個提供者各有一個並排欄位。
+- 每個提供者各有並排欄位。
 - 指標：延遲、成本、結果數量、回應大小。
-- 搜尋的 URL 重疊計算（共用 URL 數量與初始結果的比較）。
+- 搜尋的 URL 重疊度計算（共用 URL 數量與初始結果的比較）。
 - 針對每個提供者呼叫 `POST /v1/search`（搜尋）或 `POST /v1/web/fetch`（擷取）。
 
 ---
@@ -100,12 +100,12 @@ Search Tools Studio 將 `/dashboard/search-tools` 從基本搜尋測試介面轉
 ## 提供者目錄
 
 `ProviderCatalog.tsx` 會公開來自 `GET /api/search/providers` 的完整提供者清單
-（在 F4 中擴充以納入擷取提供者）：
+（在 F4 中擴充以包含擷取提供者）：
 
-| `kind` | `"search"`（20 個提供者）或 `"fetch"`（firecrawl、jina-reader、tavily-search、tinyfish、nimble-search、anysearch-search） |
+| `kind` | `"search"`（20 個提供者）或 `"fetch"`（firecrawl、jina-reader、tavily-search、tinyfish、nimble-search、anysearch-search、parallel-search） |
 
-狀態會在**提出請求時動態推導**，方式是檢查認證資訊是否存在，以及
-目前是否所有金鑰都處於冷卻狀態。
+狀態會在**請求時動態判定**，方式是檢查認證資訊是否存在，以及
+所有金鑰目前是否都處於冷卻期間。
 
 ---
 
@@ -119,16 +119,16 @@ API 金鑰預留位置一律為 `$OMNIROUTE_API_KEY`（D11，與 Playground Stud
 
 ## 後端變更
 
-此功能只需要一項後端變更：
+此功能僅需要一項後端變更：
 
 ### 擴充 `GET /api/search/providers`
 
-`src/app/api/search/providers/route.ts` 已擴充為：
+已擴充 `src/app/api/search/providers/route.ts`，以：
 
-- 在陣列中納入全部 6 個擷取提供者（`firecrawl`、`jina-reader`、`tavily-search`、`tinyfish`、`nimble-search`、`anysearch-search`）。
+- 在陣列中包含所有擷取提供者（`firecrawl`、`jina-reader`、`tavily-search`、`tinyfish`、`nimble-search`、`anysearch-search`、`parallel-search`）。
 - 為每個項目新增 `kind: "search" | "fetch"`。
-- 新增根據即時認證狀態推導的 `status: "configured" | "missing" | "rate_limited"`。
-- 維持向後相容性 — 現有欄位（`id`、`name` 等）保持不變。
+- 新增根據即時憑證狀態得出的 `status: "configured" | "missing" | "rate_limited"`。
+- 維持向後相容性——現有欄位（`id`、`name` 等）維持不變。
 
 ---
 

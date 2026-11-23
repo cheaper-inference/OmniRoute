@@ -16,16 +16,16 @@ AgentBridge on OmniRouten MITM (Man-in-the-Middle) -välityspalvelin, joka siepp
 
 ### Mikä AgentBridge on?
 
-Kun IDE-agentti (esim. GitHub Copilot, Cursor tai Claude Code) tekee API-kutsun, se muodostaa yhteyden suoraan ylävirran tekoälypalveluntarjoajaan (OpenAI, Anthropic jne.). AgentBridge sieppaa tämän yhteyden läpinäkyvästi TLS-tasolla — ilman muutoksia agentin määrityksiin — ja ohjaa pyynnön uudelleen OmniRouten kautta.
+Kun IDE-agentti (esim. GitHub Copilot, Cursor tai Claude Code) tekee API-kutsun, se muodostaa yhteyden suoraan alkuperäiseen tekoälypalveluntarjoajaan (OpenAI, Anthropic jne.). AgentBridge sieppaa tämän yhteyden läpinäkyvästi TLS-tasolla — ilman agentin määritysten muuttamista — ja ohjaa pyynnön uudelleen OmniRouten kautta.
 
-Tämän ansiosta voit:
+Tämä mahdollistaa seuraavat asiat:
 
-- **Reitittää minkä tahansa agentin mille tahansa palveluntarjoajalle**: Keskusteleeko Copilot OpenAI:n kanssa? Ohjaa se Anthropic Claudelle, Geminille tai mille tahansa OmniRouten 352 palveluntarjoajasta.
-- **Käyttää mallimäärityksiä**: `gemini-3-flash` → `claude-sonnet-4.7` läpinäkyvästi käsittelijätasolla.
-- **Tarkkailla kaikkea agenttiliikennettä**: jokainen siepattu pyyntö julkaistaan [Traffic Inspectorissa](./TRAFFIC_INSPECTOR.md).
-- **Hyödyntää OmniRouten vikasietoisuutta**: yhdistelmäreititys, katkaisijat, varareitit ja kustannusseuranta toimivat myös IDE-agenttien liikenteelle.
+- **Ohjaa mikä tahansa agentti mille tahansa palveluntarjoajalle**: Keskusteleeko Copilot OpenAI:n kanssa? Ohjaa se Anthropic Claudeen, Geminiin tai mille tahansa OmniRouten 374 palveluntarjoajasta.
+- **Käytä mallimäärityksiä**: `gemini-3-flash` → `claude-sonnet-4.7` läpinäkyvästi käsittelijätasolla.
+- **Tarkkaile kaikkea agenttiliikennettä**: jokainen siepattu pyyntö julkaistaan [liikennetarkastelussa](./TRAFFIC_INSPECTOR.md).
+- **Hyödynnä OmniRouten vikasietoisuutta**: yhdistelmäreititys, katkaisijat, varajärjestelyt ja kustannusten seuranta toimivat myös IDE-agenttiliikenteessä.
 
-### Asemoituminen markkinoilla
+### Asema markkinoihin verrattuna
 
 | Ominaisuus                      | 9router | anti-api | llm-interceptor | **OmniRoute AgentBridge** |
 | ------------------------------- | :-----: | :------: | :-------------: | :-----------------------: |
@@ -37,13 +37,13 @@ Tämän ansiosta voit:
 | Zed Industries                  |    —    |    ✓     |        —        |             ✓             |
 | Claude Code                     |    —    |    —     |        ✓        |             ✓             |
 | Open Code                       |    —    |    —     |        ✓        |             ✓             |
-| Trae                            |    —    |    —     |        —        |      🔍 Tutkittavana      |
+| Trae                            |    —    |    —     |        —        |      🔍 Tutkinnassa       |
 | Hallintapaneelin käyttöliittymä |    ✓    |    ✗     |        ✗        |             ✓             |
-| Traffic Inspector               |    ✗    |    ✗     |        ✓        |             ✓             |
+| Liikennetarkastelu              |    ✗    |    ✗     |        ✓        |             ✓             |
 | OmniRoute-reititys              |    ✗    |    ✗     |        ✗        |             ✓             |
 | Mallimääritysten käyttöliittymä |    ✗    |    ✗     |        ✗        |             ✓             |
 | Ohitusluettelo                  |    ✗    |    ✗     |        ✓        |             ✓             |
-| Ylävirran CA-varmenne           |    ✗    |    ✗     |        ✓        |             ✓             |
+| Alkuperäpalvelimen CA-varmenne  |    ✗    |    ✗     |        ✓        |             ✓             |
 
 ---
 
@@ -189,18 +189,18 @@ jaetun hyppykohtaisia otsakkeita ja kehystystä koskevan estoluettelon mukaiset 
 
 Käytä AgentBridge-palvelinkorttia osoitteessa `/dashboard/tools/agent-bridge`:
 
-| Toiminto               | Kuvaus                                                                                   |
-| ---------------------- | ---------------------------------------------------------------------------------------- |
-| Käynnistä palvelin     | Käynnistää tiedoston `src/mitm/server.cjs` portissa 443                                  |
-| Pysäytä palvelin       | Sammuttaa aliprosessin hallitusti                                                        |
-| Käynnistä uudelleen    | Pysäyttää ja käynnistää uudelleen (ottaa kohteiden muutokset käyttöön)                   |
-| Luota varmenteeseen    | Asentaa varmenteen `DATA_DIR/mitm/ca.crt` käyttöjärjestelmän luottamussäilöön            |
-| Lataa varmenne         | Lataa tiedoston `ca.crt` manuaalista asennusta varten                                    |
-| Luo varmenne uudelleen | Luo uuden CA-avainparin (kaikki olemassa olevat agenttikohtaiset varmenteet mitätöidään) |
+| Toiminto                     | Kuvaus                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Käynnistä palvelin           | Käynnistää tiedoston `src/mitm/server.cjs` portissa 443. Juurivarmennemallissa se luo tiedoston `ca.crt` ensimmäisen käynnistyksen yhteydessä ja lisää aktiivisen varmenteen luotetuksi, kun sudo-salasana on käytettävissä                                                                                                                                                                                                                 |
+| Pysäytä palvelin             | Sammuttaa aliprosessin hallitusti                                                                                                                                                                                                                                                                                                                                                                                                           |
+| Käynnistä palvelin uudelleen | Pysäyttää ja käynnistää palvelimen (ottaa kohdemuutokset ja uudelleen luodun varmenteen käyttöön)                                                                                                                                                                                                                                                                                                                                           |
+| Luota varmenteeseen          | Asentaa aktiivisen varmenteen käyttöjärjestelmän luotettujen varmenteiden säilöön: juurivarmennemallissa `DATA_DIR/mitm/ca.crt`, vanhassa lehtivarmenneasennuksessa `DATA_DIR/mitm/server.crt`                                                                                                                                                                                                                                              |
+| Lataa varmenne               | Lataa aktiivisen varmenteen manuaalista asennusta varten (`omniroute-mitm-ca.crt` = `ca.crt` tai vanhassa lehtivarmenneasennuksessa `omniroute-mitm.crt` = `server.crt`)                                                                                                                                                                                                                                                                    |
+| Luo varmenne uudelleen       | Ei koskaan muuta varmennemallia. Vanha lehtivarmenneasennus: luo uuden `server.crt`/`server.key`-parin (käynnistä palvelin uudelleen, jotta se käyttää sitä). Juurivarmennemalli: vaihtaa tiedostot `ca.crt`/`ca.key`; toimintoa ei sallita palvelimen ollessa käynnissä. Vanhan luotetun CA:n luottamus poistetaan ensin (vaatii sudo-salasanan), tai vaihto keskeytetään. Asiakkaiden on tämän jälkeen luotettava uuteen CA:han uudelleen |
 
 ### 3.2 Varmenteeseen luottaminen
 
-Käyttöjärjestelmän on luotettava AgentBridge-CA-varmenteeseen, ennen kuin IDEt hyväksyvät MITM-yhteyden.
+Käyttöjärjestelmän on luotettava AgentBridge-CA-varmenteeseen, ennen kuin IDE:t hyväksyvät MITM-yhteyden.
 
 **Linux (NSS — Chrome/Firefox):**
 
@@ -221,34 +221,34 @@ sudo security add-trusted-cert -d -r trustRoot \
 certutil -addstore -f Root $env:USERPROFILE\.omniroute\mitm\ca.crt
 ```
 
-Voit myös käyttää hallintapaneelin Luota varmenteeseen -painiketta (se suorittaa käyttöjärjestelmällesi sopivan komennon ja pyytää tarvittaessa sudo-oikeuksia).
+Voit myös käyttää hallintapaneelin Luota varmenteeseen -painiketta (se suorittaa käyttöjärjestelmällesi sopivan komennon ja pyytää tarvittaessa sudo-salasanan).
 
-#### Electron-pohjaiset IDEt ohittavat käyttöjärjestelmän luottamussäilön (`NODE_EXTRA_CA_CERTS`)
+#### Electron-pohjaiset IDE:t ohittavat käyttöjärjestelmän luotettujen varmenteiden säilön (`NODE_EXTRA_CA_CERTS`)
 
-Jotkin IDEt — erityisesti **Antigravity IDE** sekä muut Electron- tai VS Code -pohjaiset sovellukset — sisältävät
-oman Node.js-ajoaikansa, joka **ei käytä käyttöjärjestelmän luottamussäilöä** lähteville
-`fetch`/HTTPS-yhteyksille. CA-varmenteeseen luottaminen käyttöjärjestelmän/NSS:n tasolla riittää IDE:n natiiville **taustajärjestelmälle**
+Jotkin IDE:t — erityisesti **Antigravity IDE** sekä muut Electron- tai VS Code -pohjaiset sovellukset — sisältävät
+oman Node.js-suoritusympäristönsä, joka **ei käytä käyttöjärjestelmän luotettujen varmenteiden säilöä** lähteville
+`fetch`/HTTPS-yhteyksille. CA:han luottaminen käyttöjärjestelmä-/NSS-tasolla riittää IDE:n natiiville **taustajärjestelmälle**
 (esimerkiksi Go-kielipalvelimelle, joka käyttää käyttöjärjestelmän CA-varmennepakettia), mutta **Electron-käyttöliittymän**
-TLS-yhteys epäonnistuu silti — sovellus näyttää tällöin käyttäjän olevan _kirjautuneena ulos_ tai näyttää _"yhteysvirheen"_,
-vaikka MITM-loki osoittaa taustajärjestelmän käynnistyskutsujen palauttavan tilakoodin `200`. Kaksi vaihetta
-vaaditaan, ja molemmat ovat olennaisia:
+TLS-yhteys epäonnistuu edelleen — tämä ilmenee sovelluksen _uloskirjautuneena_ tilana tai _"yhteysvirheenä"_,
+vaikka MITM-loki osoittaisi taustajärjestelmän alustuspyyntöjen palauttavan tilakoodin `200`. Tarvitaan kaksi vaihetta,
+ja molemmat ovat välttämättömiä:
 
-1. Osoita CA-varmenne ajoajalle erikseen:
+1. Osoita suoritusympäristö käyttämään CA:ta eksplisiittisesti:
    ```bash
    export NODE_EXTRA_CA_CERTS=/path/to/omniroute-agentbridge-ca.crt
    ```
-2. **Käynnistä IDE kyseisestä komentotulkista.** Käynnistäminen työpöytäkuvakkeesta / Dockista / Käynnistä-valikosta
-   **ei** peri komentotulkin vientimuuttujia, ja `~/.config/environment.d/*.conf` otetaan käyttöön vasta
+2. **Käynnistä IDE kyseisestä komentotulkista.** Sen käynnistäminen työpöytäkuvakkeesta / Dockista / Käynnistä-valikosta
+   **ei** peri komentotulkin vientimäärityksiä, ja `~/.config/environment.d/*.conf` otetaan käyttöön vasta
    uuden graafisen kirjautumisen jälkeen. Sulje IDE ensin kokonaan — Electronin yhden ilmentymän lukitus tarkoittaa, että toinen
-   käynnistys vain aktivoi olemassa olevan prosessin ja uusi ympäristö ohitetaan.
+   käynnistys vain aktivoi olemassa olevan prosessin, jolloin uusi ympäristö ohitetaan.
 
-Edellä kuvattu käyttöjärjestelmätason luottamus- ja NSS-vaihe on edelleen tarpeen (joidenkin todennusprosessien käyttämä Chromiumin
-verkkopino lukee käyttäjäkohtaisen NSS-säilön, ja sillä on omat staattiset varmenneneulonnat osoitteille `*.googleapis.com`, jotka
-paikallisesti luotettu CA-varmenne ohittaa). `NODE_EXTRA_CA_CERTS` kattaa lisäksi Node-ympäristön `fetch`-polun.
+Edellä kuvattu käyttöjärjestelmäluottamuksen ja NSS:n määritys on edelleen tarpeen (joidenkin todennusprosessien käyttämä Chromiumin
+verkkopino lukee käyttäjäkohtaisen NSS-säilön ja sisältää omat staattiset varmennesidoksensa `*.googleapis.com`-osoitteille, jotka
+paikallisesti luotettu CA ohittaa). `NODE_EXTRA_CA_CERTS` kattaa lisäksi Node-ympäristön `fetch`-polun.
 
 ### 3.3 DNS-reititys
 
-Jokaisen siepattavan agentin API-palvelinnimien on ratkettava osoitteeseen `127.0.0.1`. AgentBridge hallitsee `/etc/hosts`-merkintöjä automaattisesti, kun otat agentin DNS:n käyttöön tai poistat sen käytöstä ohjatussa määrityksessä.
+Jokaisen siepattavan agentin API-isäntänimien on osoitettava osoitteeseen `127.0.0.1`. AgentBridge hallitsee `/etc/hosts`-merkintöjä automaattisesti, kun otat agentin DNS-reitityksen käyttöön tai poistat sen käytöstä ohjatussa määrityksessä.
 
 Esimerkkejä GitHub Copilotin `/etc/hosts`-merkinnöistä:
 
@@ -257,68 +257,68 @@ Esimerkkejä GitHub Copilotin `/etc/hosts`-merkinnöistä:
 127.0.0.1 copilot-proxy.githubusercontent.com
 ```
 
-### 3.4 Mallien yhdistäminen
+### 3.4 Mallimääritykset
 
-Määritä lähde → kohde -yhdistämiset kunkin agenttikortin mallien yhdistämistaulukossa:
+Määritä lähde → kohde -määritykset kunkin agenttikortin mallimääritystaulukossa:
 
-| Lähdemalli (agentin natiivi) | Kohdemalli (OmniRoute) |
-| ---------------------------- | ---------------------- |
-| `gpt-4o`                     | `claude-sonnet-4.7`    |
-| `*` (jokerimerkki)           | `claude-haiku-4.7`     |
+| Lähdemalli (agentin natiivi malli) | Kohdemalli (OmniRoute) |
+| ---------------------------------- | ---------------------- |
+| `gpt-4o`                           | `claude-sonnet-4.7`    |
+| `*` (jokerimerkki)                 | `claude-haiku-4.7`     |
 
-Jokerimerkki `*` yhdistää minkä tahansa tunnistamattoman mallin määritettyyn kohteeseen. Tiedot säilytetään `agent_bridge_mappings`-taulussa.
+Jokerimerkki `*` yhdistää kaikki tunnistamattomat mallit määritettyyn kohteeseen. Määritykset tallennetaan `agent_bridge_mappings`-tauluun.
 
-> **Vinkki — selvitä agentin todelliset mallitunnukset.** IDE saattaa lähettää mallien nimiä, jotka poikkeavat
+> **Vinkki — selvitä agentin todelliset mallitunnukset.** IDE voi lähettää mallinimiä, jotka poikkeavat
 > sen käyttöliittymän nimikkeistä ja muuttuvat pääversioiden välillä. Esimerkiksi **Antigravity 2** lähettää
-> verkossa arvot `gemini-3.1-pro-low`, `gemini-pro-agent` ja `gemini-3.1-flash-lite` — ei vanhemmissa
-> ohjeissa näkyvää arvoa `gemini-2.5-pro`. Lähetä yksi keskustelu ilman vastaavaa yhdistämistä: MITM
-> kirjaa lokiin täsmällisen saapuvan `model:`-arvon ja välittää pyynnön eteenpäin. Yhdistä kyseinen kirjaimellinen arvo, jolloin
+> verkon kautta arvot `gemini-3.1-pro-low`, `gemini-pro-agent` ja `gemini-3.1-flash-lite` — ei
+> vanhemmissa ohjeissa näkyvää arvoa `gemini-2.5-pro`. Lähetä yksi keskustelu ilman vastaavaa määritystä: MITM
+> kirjaa tarkan saapuvan `model:`-arvon lokiin ja välittää pyynnön eteenpäin. Määritä tämä täsmällinen arvo, jolloin
 > seuraava pyyntö siepataan ja reititetään kohteeseesi.
 
 ### 3.5 Riski-ilmoitus
 
-AgentBridge sieppaa tunnistetiedot (OAuth-tunnukset, API-avaimet), joilla IDE tunnistautuu ylävirran palveluntarjoajille. Ne **peitetään ennen lokiin kirjaamista** (katso §2.7), mutta ne näkyvät OmniRouten MITM-kerrokselle. Kunkin agentin ensimmäisen aktivoinnin yhteydessä näytetään kuitattava riski-ilmoitusikkuna.
+AgentBridge sieppaa tunnistetiedot (OAuth-tunnukset, API-avaimet), joita IDE käyttää todentautuessaan palveluntarjoajien taustapalveluihin. Ne **peitetään ennen lokiin kirjaamista** (katso §2.7), mutta ne näkyvät OmniRouten MITM-kerrokselle. Kunkin agentin ensimmäisen aktivoinnin yhteydessä näytetään suljettava riski-ilmoitusikkuna.
 
 ### 3.6 Ylläpito ja diagnostiikka
 
-Hallintapaneelissa on **Ylläpito ja diagnostiikka** -kortti (`AgentBridgeMaintenanceCard`, hakemistossa `src/app/(dashboard)/dashboard/tools/agent-bridge/components/`), joka tuo näkyviin operatiiviset MITM-reitit, joilla ei aiemmin ollut käyttöliittymää. Sen alaotsikko on: _"Testaa sieppausputki, kumoa järjestelmään jääneet muutokset ja siirrä määrityksesi koneesta toiseen."_ Kortin asiakasohjelman apufunktiot sijaitsevat tiedostossa `src/lib/inspector/agentBridgeMaintenanceApi.ts`.
+Hallintapaneelissa on **Ylläpito ja diagnostiikka** -kortti (`AgentBridgeMaintenanceCard`, hakemistossa `src/app/(dashboard)/dashboard/tools/agent-bridge/components/`), joka tuo näkyviin MITM:n operatiiviset reitit, joilla ei aiemmin ollut käyttöliittymää. Sen alaotsikko on: _"Testaa sieppausputki, kumoa järjestelmään jääneet muutokset ja siirrä määrityksesi koneiden välillä."_ Kortin asiakassovelluksen apufunktiot sijaitsevat tiedostossa `src/lib/inspector/agentBridgeMaintenanceApi.ts`.
 
-| Painike             | Reitti                                 | Toiminto                                                                                                                                                                                                                                   |
-| ------------------- | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Diagnosoi**       | `GET /api/tools/agent-bridge/diagnose` | Suorittaa kaappausputken itsetestin ja näyttää tarkistuskohtaisen raportin (✓/✗ + korjausehdotus).                                                                                                                                         |
-| **Korjaa**          | `POST /api/tools/agent-bridge/repair`  | Kumoaa kaatumisen tai SIGKILL-signaalin jäljiltä jääneen orvon MITM-järjestelmätilan (DNS-huijausmerkinnät, juurivarmentaja, järjestelmän välityspalvelin). Idempotentti — ilmoittaa "Ei korjattavaa", kun tila on puhdas.                 |
-| **Poista CA**       | `DELETE /api/tools/agent-bridge/cert`  | Poistaa MITM-juurivarmentajan luottamuksen ja itse varmenteen käyttöjärjestelmän luottamussäilöstä (eksplisiittinen, idempotentti). Näytetään vain, kun CA on parhaillaan luotettu; vaatii rivinsisäisen "Poistetaanko CA?" -vahvistuksen. |
-| **Vie määritykset** | `GET /api/tools/agent-bridge/config`   | Lataa siirrettävän JSON-määrityksen (katso §3.7).                                                                                                                                                                                          |
-| **Tuo määritykset** | `POST /api/tools/agent-bridge/config`  | Lähettää aiemmin viedyn JSON-määrityksen (katso §3.7).                                                                                                                                                                                     |
+| Painike             | Reitti                                 | Toiminto                                                                                                                                                                                                                                                |
+| ------------------- | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Diagnosoi**       | `GET /api/tools/agent-bridge/diagnose` | Suorittaa sieppausputken itsetestin ja näyttää tarkistuskohtaisen raportin (✓/✗ + korjausvihje).                                                                                                                                                        |
+| **Korjaa**          | `POST /api/tools/agent-bridge/repair`  | Kumoaa kaatumisen tai SIGKILL-signaalin jäljiltä jääneen irrallisen MITM-järjestelmätilan (DNS-väärennösmerkinnät, juurivarmenteen myöntäjä, järjestelmän välityspalvelin). Idempotentti — ilmoittaa "Ei korjattavaa", kun tila on puhdas.              |
+| **Poista CA**       | `DELETE /api/tools/agent-bridge/cert`  | Poistaa MITM-juurivarmenteen myöntäjän luottamuksen ja poistaa sen käyttöjärjestelmän luottamussäilöstä (eksplisiittinen, idempotentti). Näytetään vain, kun varmenteen myöntäjään luotetaan; edellyttää rivinsisäistä "Poistetaanko CA?" -vahvistusta. |
+| **Vie määritykset** | `GET /api/tools/agent-bridge/config`   | Lataa siirrettävän JSON-määrityksen (katso §3.7).                                                                                                                                                                                                       |
+| **Tuo määritykset** | `POST /api/tools/agent-bridge/config`  | Lähettää aiemmin viedyn JSON-määrityksen palvelimelle (katso §3.7).                                                                                                                                                                                     |
 
-Jokaisessa agenttikortissa on myös oma **Palauta oletusasetukset** -painikkeensa (`POST
-/api/tools/agent-bridge/agents/{id}/reset`) — yhden napsautuksen agenttikohtainen kumoamistoiminto, joka poistaa
-vain kyseisen agentin isäntien huijauksen, tyhjentää sen tallennetut mallimääritykset ja palauttaa sen `dns_enabled`/`setup_completed`-
-tilan, jotta IDE ottaa täydellisen uudelleenkäynnistyksen jälkeen jälleen yhteyden oikeaan ylävirran palveluun. Se **ei** koske
-jaettua MITM-palvelinta tai juurivarmentajaa (muut agentit voivat yhä olla niistä riippuvaisia) — ne pysyvät käytettävissä
-palvelinkortin ja yllä olevan **Poista CA** -toiminnon kautta. Windowsissa se suorittaa lisäksi mahdollisuuksien mukaan komennon
-`ipconfig /flushdns`, koska Windowsin DNS-asiakas tallentaa hosts-tiedoston merkinnät välimuistiin eikä muutoin poista
-juuri poistettua huijausmerkintää.
+Jokaisella agenttikortilla on myös oma **Palauta oletusasetukset** -painikkeensa (`POST
+/api/tools/agent-bridge/agents/{id}/reset`) — yhden napsautuksen agenttikohtainen kumoamistoiminto, joka poistaa väärennöksen vain kyseisen
+agentin isäntänimistä, tyhjentää sen tallennetut mallimääritykset ja nollaa sen `dns_enabled`/`setup_completed`-
+tilan, jotta IDE muodostaa täydellisen uudelleenkäynnistyksen jälkeen jälleen yhteyden todelliseen taustapalveluun. Se **ei** vaikuta
+jaettuun MITM-palvelimeen tai juurivarmenteen myöntäjään (muut agentit saattavat edelleen olla niistä riippuvaisia) — ne ovat edelleen käytettävissä
+Palvelinkortin ja yllä olevan **Poista CA** -toiminnon kautta. Windowsissa se suorittaa lisäksi mahdollisuuksien mukaan
+komennon `ipconfig /flushdns`, sillä Windowsin DNS Client tallentaa hosts-tiedoston merkinnät välimuistiin eikä muuten poista
+juuri poistettua väärennöstä.
 
-**Diagnostiikkatarkistukset** (`summarizeDiagnostics()` tiedostossa `src/mitm/inspector/diagnostics.ts`). Reitti suorittaa vaikutuksia aiheuttavan testin kullekin tarkistukselle ja syöttää totuusarvot puhtaalle koostetoiminnolle; vastauksena palautetaan yksi `healthy`-tulos sekä tarkistuskohtainen korjausehdotus:
+**Diagnostiikkatarkistukset** (`summarizeDiagnostics()` tiedostossa `src/mitm/inspector/diagnostics.ts`). Reitti suorittaa kullekin tarkistukselle sivuvaikutuksellisen koetuksen ja syöttää totuusarvot puhtaalle yhteenvetofunktiolle; vastauksena palautetaan yksi `healthy`-arvio sekä vihje kutakin epäonnistumista varten:
 
-| Tarkistuksen nimi  | Mitä se varmistaa                                            | Vihje epäonnistumisen yhteydessä                                                                                                                                               |
-| ------------------ | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `server-running`   | MITM-palvelinprosessi on aktiivinen                          | "MITM-palvelin ei ole käynnissä. Käynnistä se AgentBridge-välilehdeltä."                                                                                                       |
-| `server-reachable` | MITM-palvelin hyväksyy yhteyksiä portissaan (TCP-testi)      | "MITM-palvelin ei hyväksy yhteyksiä portissaan. Tarkista, että portti on vapaa ja että sinulla on oikeudet sitoa se."                                                          |
-| `cert-exists`      | MITM-varmenne on luotu levylle                               | "MITM-varmennetta ei ole vielä luotu. Luo se AgentBridge-välilehdeltä."                                                                                                        |
-| `cert-trusted`     | MITM-juurivarmentaja on käyttöjärjestelmän luottamussäilössä | "Käyttöjärjestelmän varmennevarasto ei luota MITM-juurivarmentajaan, joten TLS-sieppaus epäonnistuu. Luota varmenteeseen AgentBridge-välilehdellä."                            |
-| `dns-configured`   | Kohdeisäntänimet on huijattu tiedostossa `/etc/hosts`        | "Kohdeisäntänimiä ei ole huijattu tiedostossa /etc/hosts, joten liikenne ei koskaan saavuta välityspalvelinta. Ota DNS käyttöön agenteille, joiden liikenteen haluat kaapata." |
+| Tarkistuksen nimi  | Mitä se tarkistaa                                                     | Vihje epäonnistumistilanteessa                                                                                                                                                    |
+| ------------------ | --------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `server-running`   | MITM-palvelinprosessi on käynnissä                                    | "MITM-palvelin ei ole käynnissä. Käynnistä se AgentBridge-välilehdeltä."                                                                                                          |
+| `server-reachable` | MITM-palvelin hyväksyy yhteyksiä portissaan (TCP-koetus)              | "MITM-palvelin ei hyväksy yhteyksiä portissaan. Tarkista, että portti on vapaa ja että sinulla on oikeudet sitoutua siihen."                                                      |
+| `cert-exists`      | MITM-varmenne on luotu levylle                                        | "MITM-varmennetta ei ole vielä luotu. Luo se AgentBridge-välilehdeltä."                                                                                                           |
+| `cert-trusted`     | MITM-juurivarmenteen myöntäjä on käyttöjärjestelmän luottamussäilössä | "Käyttöjärjestelmän varmennesäilö ei luota MITM-juurivarmenteen myöntäjään, joten TLS-sieppaus epäonnistuu. Luota varmenteeseen AgentBridge-välilehdeltä."                        |
+| `dns-configured`   | Kohdeisäntänimet on väärennetty tiedostossa `/etc/hosts`              | "Kohdeisäntänimiä ei ole väärennetty tiedostossa /etc/hosts, joten liikenne ei koskaan saavuta välityspalvelinta. Ota DNS käyttöön agenteille, joiden liikenteen haluat siepata." |
 
-**Orvoksi jääneen tilan ilmoituspalkki:** kun sivu havaitsee kaatumisen jäljiltä jääneen tilan (DNS-huijaus / CA / järjestelmän välityspalvelin), kortti näyttää meripihkanvärisen ilmoituspalkin — _"Edellinen istunto jätti jälkeensä järjestelmätilaa (DNS-huijauksen, CA:n tai järjestelmän välityspalvelimen). Puhdista se suorittamalla Korjaa."_ — ja korostaa **Korjaa**-painiketta. `Repair` on sovelluskerroksen vastine ProxyBridgen `--cleanup`-valitsimelle (se delegoi toiminnon `repairMitm()`-funktiolle tiedostossa `src/mitm/manager.ts`).
+**Irrallisen tilan banneri:** kun sivu havaitsee kaatumisen jäljiltä jäänyttä tilaa (DNS-väärennös / CA / järjestelmän välityspalvelin), kortissa näytetään meripihkanvärinen banneri — _"Edellisestä istunnosta jäi järjestelmätilaa (DNS-väärennös, CA tai järjestelmän välityspalvelin). Siivoa se suorittamalla Korjaa."_ — ja **Korjaa**-painike korostetaan. `Repair` on ProxyBridgen `--cleanup`-valitsimen sovelluskerroksen vastine (se delegoi toiminnon tiedoston `src/mitm/manager.ts` funktiolle `repairMitm()`).
 
-> MITM-juurivarmentaja pidetään asennettuna pysäytysten ja käynnistysten välillä toistuvien sudo-
-> kehotteiden välttämiseksi (sama toimintatapa kuin mitmproxyssa/Charlesissa), joten sen poistaminen on eksplisiittinen
-> **Poista CA** -toiminto eikä jotakin, joka tapahtuisi automaattisesti pysäytyksen yhteydessä.
+> MITM-juurivarmenteen asennus säilytetään pysäytyksen ja käynnistyksen välillä toistuvien sudo-
+> kehotteiden välttämiseksi (sama toimintatapa kuin mitmproxyssa/Charlesissa), joten sen poistaminen on erillinen
+> **Poista CA** -toiminto eikä jotain, mikä tapahtuu automaattisesti pysäytyksen yhteydessä.
 
 ### 3.7 Siirrettävien määritysten tuonti/vienti
 
-AgentBridge voi sarjallistaa **ylläpitäjän säädettävissä olevan** tilan versioituun JSON-objektiin, jotta asetukset voidaan kopioida koneiden välillä. Sarjallistaja on `src/lib/inspector/configPortability.ts` (`exportConfig()` / `importConfig()`), ja sen validoi `AgentBridgeConfigSchema`.
+AgentBridge voi sarjoittaa **operaattorin säädettävissä olevan** tilan versioiduksi JSON-objektiksi, jotta määritykset voidaan kopioida koneelta toiselle. Sarjoitin on `src/lib/inspector/configPortability.ts` (`exportConfig()` / `importConfig()`), ja sen validoinnista vastaa `AgentBridgeConfigSchema`.
 
 Vienti sisältää täsmälleen kolme osaa (sisäänrakennettuja oletusarvoja **EI** tarkoituksella viedä, joten tuonti ei koskaan monista niitä tai aiheuta ristiriitoja niiden kanssa):
 
@@ -346,7 +346,7 @@ Vienti sisältää täsmälleen kolme osaa (sisäänrakennettuja oletusarvoja **
 { "ok": true, "bypassPatterns": 1, "customHosts": 1, "agents": 1 }
 ```
 
-Mitä määritykseen **EI** sisälly: palvelimen ajonaikainen tila, varmenteiden polut, agenttikohtainen DNS-tila, ylävirran varmentajan polku ja TPROXY-asetukset — nämä ovat isäntä- tai ajoympäristökohtaista tilaa, eivät siirrettäviä asetuksia.
+Mitä määritykset **EIVÄT** sisällä: palvelimen käyntitila, varmenteiden polut, agenttikohtainen DNS-tila, ylävirran CA-polku ja TPROXY-asetukset — ne ovat isäntä- tai suorituksenaikaista tilaa, eivät siirrettäviä asetuksia.
 
 ---
 
@@ -506,38 +506,38 @@ Jos AgentBridge sieppaa pyynnöt, mutta kaikki pyynnöt epäonnistuvat:
 
 ## §7 API-viite
 
-Kaikki reitit ovat `LOCAL_ONLY` (vain loopback, pakotetaan ennen todennusta) ja `SPAWN_CAPABLE`. Katso `src/server/authz/routeGuard.ts`.
+Kaikki reitit ovat `LOCAL_ONLY` (vain loopback-yhteydet, valvotaan ennen todennusta) ja `SPAWN_CAPABLE`. Katso `src/server/authz/routeGuard.ts`.
 
 Peruspolku: `/api/tools/agent-bridge/`
 
-| Menetelmä           | Polku                                          | Kuvaus                                                                                                                                            |
-| ------------------- | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET                 | `/api/tools/agent-bridge/state`                | Palvelimen yleinen tila sekä agenttikohtainen tunnistus/tila                                                                                      |
-| GET                 | `/api/tools/agent-bridge/agents`               | Luettele rekisteröidyt agentit (tunniste, nimi, isännät, käyttökelpoisuus, tila)                                                                  |
-| GET                 | `/api/tools/agent-bridge/agents/{id}`          | Yhden agentin tila (kohdemääritys + tunnistus + tallennettu tila)                                                                                 |
-| PATCH               | `/api/tools/agent-bridge/agents/{id}`          | Päivitä agentin `setup_completed`                                                                                                                 |
-| GET                 | `/api/tools/agent-bridge/agents/{id}/detect`   | Suorita agentin tunnistustarkistus (`installed`, `version?`, `path?`)                                                                             |
-| POST                | `/api/tools/agent-bridge/agents/{id}/dns`      | Ota agentin DNS käyttöön tai poista se käytöstä (`{enabled: boolean}`)                                                                            |
-| GET                 | `/api/tools/agent-bridge/agents/{id}/mappings` | Agentin mallimääritykset                                                                                                                          |
-| PUT                 | `/api/tools/agent-bridge/agents/{id}/mappings` | Korvaa mallimääritykset                                                                                                                           |
-| POST                | `/api/tools/agent-bridge/agents/{id}/reset`    | Palauta oletustila: kumoa tämän agentin DNS-väärennös, tyhjennä sen määritykset ja nollaa sen tila (katso §3.6)                                   |
-| POST                | `/api/tools/agent-bridge/server`               | Käynnistä/pysäytä/uudelleenkäynnistä palvelin (`action: "start"\|"stop"\|"restart"\|"trust-cert"\|"regenerate-cert"`)                             |
-| GET                 | `/api/tools/agent-bridge/cert`                 | Varmenteen tila (`exists`, `trusted`, `path`)                                                                                                     |
-| POST                | `/api/tools/agent-bridge/cert`                 | Luota MITM-juurivarmenteeseen (asenna se)                                                                                                         |
-| DELETE              | `/api/tools/agent-bridge/cert`                 | Poista MITM-juurivarmenteen luottamus (poista se) — idempotentti (katso §3.6)                                                                     |
-| POST                | `/api/tools/agent-bridge/cert/regenerate`      | Luo itse allekirjoitettu MITM-varmenne uudelleen                                                                                                  |
-| GET                 | `/api/tools/agent-bridge/cert/download`        | Suoratoista PEM-varmenne ladattavaksi                                                                                                             |
-| GET                 | `/api/tools/agent-bridge/bypass`               | Luettele ohitusmallit (`default` + `user`)                                                                                                        |
-| POST                | `/api/tools/agent-bridge/bypass`               | Korvaa kaikki käyttäjän määrittämät ohitusmallit                                                                                                  |
-| DELETE              | `/api/tools/agent-bridge/bypass?pattern=...`   | Poista yksi käyttäjän määrittämä ohitusmalli                                                                                                      |
-| GET                 | `/api/tools/agent-bridge/diagnose`             | Kaappaustyönkulun itsetesti (katso §3.6)                                                                                                          |
-| POST                | `/api/tools/agent-bridge/repair`               | Kumoa orvoksi jäänyt järjestelmän MITM-tila (katso §3.6)                                                                                          |
-| GET                 | `/api/tools/agent-bridge/config`               | Vie siirrettävä JSON-määritys (katso §3.7)                                                                                                        |
-| POST                | `/api/tools/agent-bridge/config`               | Tuo siirrettävä JSON-määritys (katso §3.7)                                                                                                        |
-| GET                 | `/api/tools/agent-bridge/upstream-ca`          | Hae määritetty ylemmän tason varmentajan polku                                                                                                    |
-| POST                | `/api/tools/agent-bridge/upstream-ca`          | Vahvista ja tallenna ylemmän tason varmentajan polku                                                                                              |
-| POST                | `/api/tools/agent-bridge/upstream-ca/test`     | Vahvista ylemmän tason varmentajan polku ilman muutoksia (dry-run) — ei tallenna                                                                  |
-| GET / POST / DELETE | `/api/tools/agent-bridge/tproxy`               | Läpinäkyvän salauksenpurkukaappauksen TPROXY-tila — katso `docs/security/MITM-TPROXY-DECRYPT.md` (git; ei sisälly käännettynä kohteeseen `/docs`) |
+| Menetelmä           | Polku                                          | Kuvaus                                                                                                                                                 |
+| ------------------- | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| GET                 | `/api/tools/agent-bridge/state`                | Palvelimen yleinen tila sekä agenttikohtainen tunnistus/tila                                                                                           |
+| GET                 | `/api/tools/agent-bridge/agents`               | Luettele rekisteröidyt agentit (tunniste, nimi, isännät, käyttökelpoisuus, tila)                                                                       |
+| GET                 | `/api/tools/agent-bridge/agents/{id}`          | Yhden agentin tila (kohdemääritys + tunnistus + tallennettu tila)                                                                                      |
+| PATCH               | `/api/tools/agent-bridge/agents/{id}`          | Päivitä agentin `setup_completed`                                                                                                                      |
+| GET                 | `/api/tools/agent-bridge/agents/{id}/detect`   | Suorita agentin tunnistustarkistus (`installed`, `version?`, `path?`)                                                                                  |
+| POST                | `/api/tools/agent-bridge/agents/{id}/dns`      | Ota agentin DNS käyttöön tai poista se käytöstä (`{enabled: boolean}`)                                                                                 |
+| GET                 | `/api/tools/agent-bridge/agents/{id}/mappings` | Agentin mallimääritykset                                                                                                                               |
+| PUT                 | `/api/tools/agent-bridge/agents/{id}/mappings` | Korvaa mallimääritykset                                                                                                                                |
+| POST                | `/api/tools/agent-bridge/agents/{id}/reset`    | Palauta oletustila: poista tämän agentin DNS-huijaus, tyhjennä sen määritykset ja nollaa sen tila (katso §3.6)                                         |
+| POST                | `/api/tools/agent-bridge/server`               | Käynnistä/pysäytä/uudelleenkäynnistä palvelin (`action: "start"\|"stop"\|"restart"\|"trust-cert"\|"regenerate-cert"`)                                  |
+| GET                 | `/api/tools/agent-bridge/cert`                 | Varmenteen tila (`exists`, `trusted`, `path`)                                                                                                          |
+| POST                | `/api/tools/agent-bridge/cert`                 | Luota MITM-juurivarmenteeseen (asenna se)                                                                                                              |
+| DELETE              | `/api/tools/agent-bridge/cert`                 | Poista MITM-juurivarmenteen luottamus (poista se) — idempotentti (katso §3.6)                                                                          |
+| POST                | `/api/tools/agent-bridge/cert/regenerate`      | Luo aktiivinen varmenne uudelleen muuttamatta varmennemallia (vanha lehtivarmenne tai juurivarmenteen vaihto — katso §3.1)                             |
+| GET                 | `/api/tools/agent-bridge/cert/download`        | Suoratoista aktiivinen PEM-varmenne ladattavaksi (`ca.crt` juurivarmennemallissa, `server.crt` vanhassa lehtivarmenneasennuksessa)                     |
+| GET                 | `/api/tools/agent-bridge/bypass`               | Luettele ohitusmallit (`default` + `user`)                                                                                                             |
+| POST                | `/api/tools/agent-bridge/bypass`               | Korvaa kaikki käyttäjän määrittämät ohitusmallit                                                                                                       |
+| DELETE              | `/api/tools/agent-bridge/bypass?pattern=...`   | Poista yksittäinen käyttäjän määrittämä ohitusmalli                                                                                                    |
+| GET                 | `/api/tools/agent-bridge/diagnose`             | Kaappaamisketjun itsetesti (katso §3.6)                                                                                                                |
+| POST                | `/api/tools/agent-bridge/repair`               | Kumoa orvoksi jäänyt järjestelmän MITM-tila (katso §3.6)                                                                                               |
+| GET                 | `/api/tools/agent-bridge/config`               | Vie siirrettävä määritys JSON-muodossa (katso §3.7)                                                                                                    |
+| POST                | `/api/tools/agent-bridge/config`               | Tuo siirrettävä määritys JSON-muodossa (katso §3.7)                                                                                                    |
+| GET                 | `/api/tools/agent-bridge/upstream-ca`          | Hae määritetty ylävirran CA-polku                                                                                                                      |
+| POST                | `/api/tools/agent-bridge/upstream-ca`          | Vahvista ja tallenna ylävirran CA-polku                                                                                                                |
+| POST                | `/api/tools/agent-bridge/upstream-ca/test`     | Vahvista ylävirran CA-polku vain kokeiluna (dry-run) — ei tallenna sitä                                                                                |
+| GET / POST / DELETE | `/api/tools/agent-bridge/tproxy`               | Läpinäkyvän salauksenpurkukaappauksen TPROXY-tila — katso `docs/security/MITM-TPROXY-DECRYPT.md` (gitissä; ei käännetä osaksi `/docs`-dokumentaatiota) |
 
 Täydelliset OpenAPI-skeemat: `docs/openapi.yaml` → tunniste `AgentBridge`.
 

@@ -515,7 +515,7 @@ Om något annat än `ok` returneras ska du **omedelbart sluta använda databasen
 Filen `-wal` saknas, men `-shm` och huvuddatabasen är intakta:
 
 ```bash
-# Återställs automatiskt nästa gång programmet öppnas
+# Återställs automatiskt nästa gång den öppnas
 omniroute
 ```
 
@@ -529,11 +529,14 @@ mv recovered.db ~/.omniroute/storage.sqlite
 
 ### Scenario 2: Huvuddatabasfilen är skadad
 
-Återställ från en säkerhetskopia:
+Återställ från säkerhetskopia:
 
 ```bash
-omniroute sync pull --merge   # eller: omniroute backup restore <backup-id>
+omniroute backup restore <backup-id>
 ```
+
+`omniroute sync pull [outPath]` hämtar endast ett fullständigt `.tar.gz`-arkiv från en server som körs
+(`GET /api/db-backups/exportAll`, operatörsuppgifter krävs); kommandot återställer ingenting.
 
 ### Scenario 3: Krypteringsnyckeln har gått förlorad
 

@@ -40,31 +40,31 @@ Search Tools Studio `/dashboard/search-tools` səhifəsini sadə axtarış sına
 Mövcud `SearchForm` + `ResultsPanel` + `RerankPanel` komponentlərini taba çevirir:
 
 - Sorğu → nəticələr (başlıq, URL, fraqment, uyğunluq xalı).
-- Konfiqurasiya panelində provayder metadatası (xərc, kvota, status).
-- Yenidən sıralama bölməsi: yenidən sıralama modelini seçir, nəticələri yenidən sıralayır və `positionDelta` dəyərini göstərir.
-- Heç bir axtarış provayderi konfiqurasiya edilmədikdə fəaliyyətə çağırış düyməsi olan boş vəziyyət.
+- Config panelində provayder metadatası (xərc, kvota, status).
+- Yenidən sıralama bölməsi: yenidən sıralama modeli seçin, nəticələri yenidən sıralayın, `positionDelta` dəyərini göstərin.
+- Heç bir axtarış provayderi konfiqurasiya edilmədikdə CTA ilə boş vəziyyət.
 - `SearchHistory.tsx` vasitəsilə axtarış tarixçəsi.
-- `POST /v1/search` çağırır (mövcud son nöqtə, dəyişiklik yoxdur).
+- `POST /v1/search` çağırır (mövcud endpoint, dəyişiklik yoxdur).
 
-### Məlumat Çıxarma Tabı
+### Məzmun Çıxarma Tabı
 
-`POST /v1/web/fetch` vasitəsilə URL-dən məzmun çıxarmaq üçün yeni tab (05-ci planda yaradılıb):
+`POST /v1/web/fetch` vasitəsilə URL-dən məzmun çıxarmaq üçün yeni tab (plan 05-də yaradılıb):
 
-- Daxiletmə: URL + tam səhifə keçidi + format seçicisi (markdown / mətn / HTML).
-- Göndər → gətir → `ScrapeResult.tsx` komponentində göstər.
+- Giriş: URL + tam səhifə keçidi + format seçicisi (markdown / mətn / HTML).
+- Göndər → əldə et → `ScrapeResult.tsx` komponentində göstər.
 - `ScrapeResult` markdown önizləməsini və xam görünüş keçidini göstərir.
-- Limit: cavab gövdəsi **256 KB**-dan böyükdürsə, istifadəçi interfeysi `(qısaldılıb, xam məzmuna bax)` göstərir və xam məzmunu Monaco modalında açır (D21).
-- Metadata paneli: provayder (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search), gecikmə, xərc, cavab ölçüsü, keçidlərin sayı.
-- `useScrapeFetch.ts` hukundan istifadə edir.
+- Məhdudiyyət: cavab gövdəsi **256 KB**-dan böyükdürsə, UI `(qısaldılıb, xam versiyaya baxın)` göstərir və xam məzmunu Monaco modal pəncərəsində açır (D21).
+- Metadata paneli: provayder (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), gecikmə, xərc, cavab ölçüsü, keçid sayı.
+- `useScrapeFetch.ts` hook-undan istifadə edir.
 
 ### Müqayisə Tabı
 
-Eyni sorğunu/URL-i paralel olaraq ən çoxu **4 provayderdə** icra edir (D22):
+Eyni sorğunu/URL-i paralel olaraq maksimum **4 provayder** üzrə icra edir (D22):
 
 - Hər provayder üçün yanaşı sütunlar.
-- Göstəricilər: gecikmə, xərc, nəticələrin sayı, cavab ölçüsü.
-- Axtarış üçün URL üst-üstə düşməsinin hesablanması (ilkin nəticə ilə ortaq URL-lərin sayı).
-- Hər provayder üçün `POST /v1/search` (axtarış) və ya `POST /v1/web/fetch` (məlumat çıxarma) çağırır.
+- Metrikalar: gecikmə, xərc, nəticə sayı, cavab ölçüsü.
+- Axtarış üçün URL üst-üstə düşməsinin hesablanması (ortaq URL-lərin ilkin nəticəyə nisbətdə sayı).
+- Hər provayder üçün `POST /v1/search` (axtarış) və ya `POST /v1/web/fetch` (məzmun çıxarma) çağırır.
 
 ---
 
@@ -97,12 +97,12 @@ Eyni sorğunu/URL-i paralel olaraq ən çoxu **4 provayderdə** icra edir (D22):
 
 ---
 
-## Provayder kataloqu
+## Provayder Kataloqu
 
-`ProviderCatalog.tsx`, `GET /api/search/providers`-dən tam provayder siyahısını təqdim edir
+`ProviderCatalog.tsx`, `GET /api/search/providers` vasitəsilə tam provayder siyahısını təqdim edir
 (F4-də fetch provayderlərini daxil etmək üçün genişləndirilib):
 
-| `kind` | `"search"` (20 provayder) və ya `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search) |
+| `kind` | `"search"` (20 provayder) və ya `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
 Status sorğu zamanı etimadnamələrin mövcud olub-olmadığı və bütün
 açarların hazırda gözləmə müddətində olub-olmadığı yoxlanılaraq **müəyyən edilir**.
@@ -117,17 +117,17 @@ API açarı üçün yer tutucu həmişə `$OMNIROUTE_API_KEY`-dir (D11, Playgrou
 
 ---
 
-## Backend dəyişiklikləri
+## Backend Dəyişiklikləri
 
-Bu funksiya üçün yalnız bir backend dəyişikliyinə ehtiyac oldu:
+Bu funksiya üçün yalnız bir backend dəyişikliyi tələb olundu:
 
 ### Genişləndirilmiş `GET /api/search/providers`
 
-`src/app/api/search/providers/route.ts` aşağıdakı məqsədlərlə genişləndirildi:
+`src/app/api/search/providers/route.ts` aşağıdakılar üçün genişləndirildi:
 
-- Bütün 6 fetch provayderini (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`) massiva daxil etmək.
+- Bütün məlumat əldə etmə provayderlərini (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`, `parallel-search`) massivə daxil etmək.
 - Hər elementə `kind: "search" | "fetch"` əlavə etmək.
-- Cari etimadnamə vəziyyətindən müəyyən edilən `status: "configured" | "missing" | "rate_limited"` əlavə etmək.
+- Aktiv autentifikasiya məlumatlarının vəziyyətindən əldə edilən `status: "configured" | "missing" | "rate_limited"` əlavə etmək.
 - Geriyə uyğunluğu qorumaq — mövcud sahələr (`id`, `name` və s.) dəyişdirilməyib.
 
 ---

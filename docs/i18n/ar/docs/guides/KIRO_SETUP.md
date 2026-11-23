@@ -116,31 +116,40 @@ curl -X POST http://localhost:20128/api/oauth/kiro/import \
 
 ---
 
-## مسار استيراد مفتاح API
+## تدفق استيراد مفتاح API
 
-مصادقة مفتاح API مخصّصة لبيانات اعتماد Kiro / AWS CodeWhisperer من نوع bearer طويلة الأجل. وهي
-لا تستخدم تحديث OAuth، لذا تتجنب إبطال جلسة OIDC المشتركة.
+تُستخدم مصادقة مفتاح API لبيانات اعتماد Kiro / AWS CodeWhisperer طويلة الأجل من نوع bearer. وهي لا
+تستخدم تحديث OAuth، لذا تتجنب إبطال جلسة OIDC المشتركة.
 
-### لوحة التحكم
+### لوحة المعلومات
 
-1. افتح **لوحة التحكم -> المزوّدون -> Kiro**.
+1. افتح **لوحة المعلومات -> المزوّدون -> Kiro**.
 2. اختر **مفتاح API**.
-3. الصق مفتاح API ومنطقة AWS الاختيارية (`us-east-1` افتراضيًا).
-4. يتحقق OmniRoute من المفتاح ويحفظ الاتصال.
+3. الصق مفتاح API واختر منطقة AWS: **الاكتشاف التلقائي** (الافتراضي)، أو **شرق الولايات المتحدة
+   (شمال فرجينيا)**، أو **أوروبا (فرانكفورت)**.
+4. يتحقق OmniRoute من صحة المفتاح ويحفظ الاتصال مثبتًا بالمنطقة التي يعمل فيها
+   المفتاح.
 
 ### واجهة API
 
 ```bash
 curl -X POST http://localhost:20128/api/oauth/kiro/api-key \
   -H "Content-Type: application/json" \
-  -d '{"apiKey": "kiro_or_codewhisperer_key", "region": "us-east-1"}'
+  -d '{"apiKey": "kiro_or_codewhisperer_key", "region": "auto"}'
 ```
+
+يقبل `region` القيم `auto` (الافتراضية) أو `us-east-1` أو `eu-central-1`؛ وتُرفض أي قيمة أخرى
+باستخدام HTTP 400.
 
 ### العقد الداخلي
 
-يتحقق مسار API من المفتاح باستدعاء `KiroService.validateApiKey()`، الذي
-يستخدم `ListAvailableProfiles` مع نقطة نهاية CodeWhisperer/Amazon Q المطابقة
-للمنطقة ويستخرج `profileArn`.
+يتحقق مسار API من صحة المفتاح عبر استدعاء `KiroService.validateApiKey()`، الذي
+يستدعي `GET https://q.<region>.amazonaws.com/ListAvailableModels?origin=AI_EDITOR`
+(وهي واجهة Amazon Q التي يستخدمها الاستدلال بمفتاح API) بمهلة قدرها 10 ثوانٍ لكل منطقة. في
+وضع `auto`، يجرّب `us-east-1` ثم `eu-central-1`، ويخزّن أول منطقة
+تقبل المفتاح. إذا رُفض المفتاح في جميع المناطق المرشحة، تفشل عملية الاستيراد باستخدام
+HTTP 400. بعد ذلك، يُستدعى `ListAvailableProfiles` وفق مبدأ أفضل جهد لاكتشاف
+`profileArn` اختياري (ترفض AWS ذلك لمعظم مفاتيح API).
 
 يستخدم الاتصال المحفوظ ما يلي:
 
@@ -155,10 +164,13 @@ curl -X POST http://localhost:20128/api/oauth/kiro/api-key \
 }
 ```
 
-في وقت التشغيل، ترسل `KiroExecutor.buildHeaders()` المفتاح بصيغة
-`Authorization: Bearer <key>` وتضيف `tokentype: API_KEY`. تستخدم استدعاءات الحصة/الملف الشخصي
-العلامة نفسها لكي تتعامل AWS مع بيانات اعتماد bearer باعتبارها مفتاح API طويل الأجل بدلًا من
-رمز وصول OIDC أو رمز وصول اجتماعي.
+في وقت التشغيل، يرسل `KiroExecutor.buildHeaders()` المفتاح بصيغة
+`Authorization: Bearer <key>` ويضيف `tokentype: API_KEY`. تستخدم استدعاءات الحصة/الملف الشخصي
+العلامة نفسها كي تتعامل AWS مع رمز bearer على أنه مفتاح API طويل الأجل بدلًا من
+رمز وصول OIDC أو اجتماعي. يرسل `KiroExecutor.execute()` استدلال مفتاح API فقط
+إلى `https://q.<region>.amazonaws.com/generateAssistantResponse` — بما في ذلك `us-east-1`
+— لأن بوابة Kiro IDE ترفض `TokenType=API_KEY`، كما أن
+`codewhisperer.us-east-1` يرفض حمولات مفتاح API باعتبارها نص طلب غير صالح (HTTP 400).
 
 ---
 

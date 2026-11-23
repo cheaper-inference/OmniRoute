@@ -201,6 +201,70 @@ or runtime bundling. Use `npm run build:release` only for release/deploy validat
 the final cross-platform signal; platform-specific Electron changes need the matching focused build
 or smoke evidence.
 
+## Developer scripts for a shared machine
+
+Two `scripts/dev/` helpers encode the local loop on a devbox where other sessions are active:
+
+```bash
+scripts/dev/typecheck-touched.sh --base release/vX.Y.Z   # files from merge-base(HEAD, base)..HEAD
+scripts/dev/typecheck-touched.sh src/a.ts tests/unit/b.test.ts   # exactly these files
+scripts/dev/new-worktree.sh fix/1234-slug release/vX.Y.Z  # isolated worktree, safe in parallel
+```
+
+- `typecheck-touched.sh` typechecks only the touched `.ts/.tsx` files through a temporary
+  `tsconfig.touched.tmp.json` (`extends ./tsconfig.json`, `types: ["node"]`, `noEmit`,
+  `incremental: false`) under a 6 GB heap, so it replaces the project-wide `tsc -p tsconfig.json`
+  that OOMs a loaded machine. It prints the errors in touched files plus one summary line and exits
+  `1` for errors in touched files, `2` when the only errors are in imported files or tsc died
+  without diagnostics (read the log it names under `_artifacts/typecheck-touched/`), `0` when
+  clean. The temp tsconfig is always removed; never commit one.
+- `new-worktree.sh` serialises concurrent runs on `<git-common-dir>/omniroute-new-worktree.lock`
+  (waits up to 600 s by default, with a visible message; the script header documents the
+  override) and rolls
+  back the branch it created when `git worktree add` fails before the worktree exists, so a retry
+  needs no manual `git branch -D`. The hard-linked `node_modules` and `.husky/_` copy are unchanged.
+
+## Local candidate loop
+
+Source tests cannot prove that the packaged artifact boots: packaging lists, pruned dependencies,
+and native binaries only fail once the tarball is installed and started. `npm run dev:candidate`
+(`scripts/dev/candidate.mjs`) is the local side of the build-once / validate / promote flow from
+RFC #8084: it builds one candidate, validates that exact artifact, promotes it with directory
+renames, and rolls it back when the promoted slot fails its health check.
+
+```bash
+npm run dev:candidate -- run --dry-run --json  # print the plan, change nothing
+npm run dev:candidate -- run                   # build + validate + promote, auto-rollback
+npm run dev:candidate -- build                 # npm pack + install into _artifacts/candidate/<id>/
+npm run dev:candidate -- validate --id <id>    # boot on a free port, /api/health + /v1/models
+npm run dev:candidate -- promote --id <id>     # <id> → current, current → previous
+npm run dev:candidate -- rollback              # swap current and previous
+npm run dev:candidate -- run --from-tarball <file.tgz>  # reuse a tarball built elsewhere (CI)
+```
+
+- **Build once.** `build` packs the current tree (it needs `dist/server.js`, so run
+  `npm run build:release` first) or copies `--from-tarball`, then installs the tarball into an
+  isolated npm prefix, because the tarball carries no `node_modules`. The id is the short `HEAD`
+  sha (`-dirty` when the tree has local changes) or `tgz-<sha256>` for a tarball. A clean id that
+  is already built is reused instead of rebuilt; pass `--force` to rebuild it.
+- **Validate the package, not the source.** `validate` starts the installed CLI
+  (`serve --port <free port>`) with a fresh `DATA_DIR=<candidate>/data`, fake secrets, and the
+  operator's `OMNIROUTE_API_KEY`, `STORAGE_ENCRYPTION_KEY` and `INITIAL_PASSWORD` removed from the
+  environment, so it checks the keyless loopback posture of a fresh install. It waits for
+  `GET /api/health` to return 200, requires `GET /v1/models` to return 200, stops the process group,
+  and records the verdict in `validation.json` together with the tarball hash.
+- **Promote the same artifact.** `promote` refuses a candidate without a passing validation for its
+  current tarball hash. The default active slot is `_artifacts/candidate/current`; `--target <dir>`
+  selects another directory on the same filesystem, and its previous slot is `<dir>.previous`.
+  Each rename is atomic, and a failure partway through reverses the renames that already ran.
+- **Roll back.** `run` validates the promoted slot again and swaps `current` and `previous` back when
+  that check fails. A candidate that fails the first validation is never promoted.
+
+Everything is written under the gitignored `_artifacts/candidate/`; an existing OmniRoute
+installation and its data directory are never touched. The promoted CLI is
+`_artifacts/candidate/current/prefix/bin/omniroute`; start it with your own `DATA_DIR` when you use
+it. Exit codes: `0` success, `1` failed validation or promotion, `2` usage error or missing build.
+
 ## Local loop versus CI
 
 | Run locally for each patch                                                    | CI supplies the broad signal                                      |

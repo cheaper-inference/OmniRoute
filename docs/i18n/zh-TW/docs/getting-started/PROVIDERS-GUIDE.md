@@ -10,50 +10,43 @@
 
 ## 什麼是提供者？
 
-可以將提供者想像成**電信業者**。就像你需要電信業者才能撥打電話一樣，你需要 AI 提供者才能使用 AI 模型。OmniRoute 就像一支支援**所有電信業者**的手機——你可以在提供者之間自動切換。
+可以將提供者想像成**電信業者**。就像您需要電信業者才能撥打電話一樣，您需要 AI 提供者才能使用 AI 模型。OmniRoute 就像一支適用於**所有電信業者**的手機——您可以在它們之間自動切換。
 
 ### 提供者類型
 
-| 類型            | 說明                   | 範例                              | 費用               |
-| --------------- | ---------------------- | --------------------------------- | ------------------ |
-| **免費**        | 無須付款               | Kiro、OpenCode Free、Pollinations | $0                 |
-| **API 金鑰**    | 需要 API 金鑰          | OpenAI、Anthropic、Google         | 按使用量付費       |
-| **OAuth**       | 使用你的帳戶登入       | Claude Code、GitHub Copilot       | 訂閱制             |
-| **網頁 Cookie** | 使用你的瀏覽器工作階段 | ChatGPT Web (Codex)、Gemini Web   | $0（使用你的帳戶） |
+| 類型           | 說明                   | 範例                            | 費用               |
+| -------------- | ---------------------- | ------------------------------- | ------------------ |
+| **免費**       | 無須付款               | Kiro, Pollinations              | $0                 |
+| **API 金鑰**   | 您需要 API 金鑰        | OpenAI, Anthropic, Google       | 按用量付費         |
+| **OAuth**      | 使用您的帳戶登入       | Claude Code, GitHub Copilot     | 訂閱制             |
+| **Web Cookie** | 使用您的瀏覽器工作階段 | ChatGPT Web (Codex), Gemini Web | $0（使用您的帳戶） |
 
-### 網頁 Cookie 提供者
+### Web Cookie 提供者
 
-如需一般設定說明、限制、疑難排解，以及各提供者專屬的驗證指引，請參閱 **[WEB-COOKIE-GUIDE.md](./WEB-COOKIE-GUIDE.md)**。
+如需一般設定指示、限制、疑難排解及提供者專屬的驗證指南，請參閱 **[WEB-COOKIE-GUIDE.md](./WEB-COOKIE-GUIDE.md)**。
 ---
 
-## 快速開始：連線你的第一個提供者
+## 快速開始：連接您的第一個提供者
 
 ### 可選的首次執行免費提供者設定
 
-首次執行精靈會提供明確的**設定免費提供者**卡片。它會根據 OmniRoute 的免驗證提供者登錄資料取得目前
-符合條件的清單，接著讓你在確認前檢視並取消選取個別
-提供者。OmniRoute 會顯示提供者的注意事項與其網站連結，
-讓你能先檢視第三方條款、隱私權、可用性及速率限制。
+首次執行精靈會提供一張明確的 **設定免費提供者** 卡片。它會根據 OmniRoute 的免驗證提供者登錄檔產生目前符合資格的清單，然後讓您在確認前檢視並取消選取各個提供者。OmniRoute 會顯示提供者的注意事項及其網站連結，讓您可以先查看第三方條款、隱私權、可用性和速率限制。
 
-此操作為選用：完成精靈時，絕不會在未告知的情況下建立免費提供者連線。
-它只會建立仍缺少的提供者，不會變更現有的自訂連線，
-並會個別回報已建立、已設定及失敗的提供者。若只完成部分設定，你可以
-放心地僅重試失敗的項目。
+此操作為可選：完成精靈絕不會在未告知您的情況下建立免費提供者連線。它只會建立仍未設定的提供者，保留現有的自訂連線不變，並個別回報已建立、已設定及失敗的提供者。若只完成部分操作，您可以安全地只重試失敗的項目。
 
-### 選項 A：免費提供者（不需要信用卡）
+### 選項 A：免費提供者（不需信用卡）
 
 1. 在 `http://localhost:20128` 開啟儀表板
-2. 前往**提供者** → **新增提供者**
-3. 選取下列其中一個免費提供者：
-   - **Kiro AI** — 免費 Claude 模型（無須驗證）
-   - **OpenCode Free** — 免費 GPT 模型（無須驗證）
-   - **Pollinations** — 免費 GPT-5、Claude、Gemini（無須金鑰）
-   - **LongCat** — 免費 10M 個權杖（一次性額度，需要帳戶及 KYC）
-   - **Cloudflare AI** — 50+ 個模型，每日 10K 個神經元
-   - **MLX Gemma 26B** — 本機 Apple Silicon 模型（約 38.5 tok/s，約 15.9GB RAM）
-   - **MLX Qwen 3.8 27B** — 本機 Apple Silicon 模型（約 9.1 tok/s，約 13.1GB RAM）
-4. 按一下**連線**
-5. 完成！你現在可以免費使用 AI。
+2. 前往 **提供者** → **新增提供者**
+3. 選取以下其中一個免費提供者：
+   - **Kiro AI** — 免費 Claude 模型（不需驗證）
+   - **Pollinations** — 免費 GPT-5、Claude、Gemini（不需金鑰）
+   - **LongCat** — 免費 1,000 萬個權杖（一次性額度，需要帳戶與 KYC）
+   - **Cloudflare AI** — 50 多個模型，每日 10K 個神經元
+   - **MLX Gemma 26B** — 本機 Apple Silicon 模型（約 38.5 tok/s、約 15.9GB RAM）
+   - **MLX Qwen 3.8 27B** — 本機 Apple Silicon 模型（約 9.1 tok/s、約 13.1GB RAM）
+4. 按一下 **連接**
+5. 完成！您現在可以免費使用 AI。
 
 ### 選項 B：API 金鑰提供者（付費）
 
@@ -64,28 +57,28 @@
    - **DeepSeek**: https://platform.deepseek.com/
    - **Groq**: https://console.groq.com/
 2. 在 `http://localhost:20128` 開啟儀表板
-3. 前往**提供者** → **新增提供者**
-4. 選取你的提供者
-5. 貼上你的 API 金鑰
-6. 按一下**連線**
-7. 完成！你現在可以使用該提供者的模型。
+3. 前往 **提供者** → **新增提供者**
+4. 選取您的提供者
+5. 貼上您的 API 金鑰
+6. 按一下 **連接**
+7. 完成！您現在可以使用該提供者的模型。
 
-### 選項 C：OAuth 提供者（訂閱制）
+### 選項 C：OAuth 提供者（訂閱）
 
 1. 在 `http://localhost:20128` 開啟儀表板
-2. 前往**提供者** → **新增提供者**
-3. 選取你的提供者（例如 Claude Code、GitHub Copilot）
-4. 按一下**使用 OAuth 連線**
-5. 使用你的帳戶登入
-6. 完成！你現在可以使用訂閱方案中的模型。
+2. 前往 **提供者** → **新增提供者**
+3. 選取您的提供者（例如 Claude Code、GitHub Copilot）
+4. 按一下 **使用 OAuth 連接**
+5. 使用您的帳戶登入
+6. 完成！您現在可以使用訂閱方案中的模型。
 
 ### 選項 D：本機 MLX 模型（Apple Silicon）
 
-對於配備統一記憶體的 Apple Silicon Mac，OmniRoute 支援將透過 `mlx-lm.server` 執行的本機 MLX 模型連線為一般的 OpenAI 相容本機提供者。
+對於配備統一記憶體的 Apple Silicon Mac，OmniRoute 支援將透過 `mlx-lm.server` 執行的本機 MLX 模型，連接為一般與 OpenAI 相容的本機提供者。
 
-#### 先決條件
+#### 必要條件
 
-- **Apple Silicon Mac**（M1/M2/M3/M4），建議配備 24GB+ 統一記憶體
+- **Apple Silicon Mac**（M1/M2/M3/M4），建議配備 24GB 以上統一記憶體
 - **uv** 套件管理器：`curl -LsSf https://astral.sh/uv/install.sh | sh`
 - **mlx-lm**：`uv pip install mlx-lm`
 
@@ -94,7 +87,7 @@
 1. **安裝相依套件**：
 
    ```bash
-   # 若尚未安裝 uv，請先安裝
+   # 如果尚未安裝 uv，請先安裝
    curl -LsSf https://astral.sh/uv/install.sh | sh
 
    # 安裝 mlx-lm
@@ -111,10 +104,10 @@
    uv run mlx_lm.server --model maglun/Qwen3.8-27B-MLX-Mixed-3.80bpw --port 11436 --host 127.0.0.1
    ```
 
-3. **在 OmniRoute 儀表板中連線**：
-   - 前往**提供者** → **新增提供者**
+3. **在 OmniRoute 儀表板中連接**：
+   - 前往 **提供者** → **新增提供者**
    - 選取 **MLX Gemma 26B** 或 **MLX Qwen 3.8 27B**
-   - 按一下**連線**（無須 API 金鑰）
+   - 按一下 **連接**（不需 API 金鑰）
 
 4. **搭配 OpenCode 使用**：
    ```bash
@@ -129,22 +122,22 @@
 
 #### 記憶體管理
 
-**重要**：使用 24GB 統一記憶體時，一次只能執行**一個大型 MLX 模型**。
+**重要**：若使用 24GB 統一記憶體，同一時間只能執行 **一個大型 MLX 模型**。
 
 - Gemma 26B：約 15.9GB 峰值記憶體
 - Qwen 3.8 27B：約 13.1GB 峰值記憶體
 
-你必須手動管理：
+您必須手動管理：
 
-- 一次僅執行一個 MLX 伺服器，或
-- 在不同的機器上分別執行兩者，或
-- 啟動其中一個之前，先停止另一個
+- 同一時間只執行一個 MLX 伺服器，或
+- 在不同電腦上分別執行兩者，或
+- 在啟動另一個之前先停止其中一個
 
-OmniRoute 不會自動管理 MLX 伺服器處理程序——它只會將請求路由至你設定的 OpenAI 相容端點。
+OmniRoute 不會自動管理 MLX 伺服器處理程序，而只會將請求路由至您設定的 OpenAI 相容端點。
 
 #### 工具呼叫支援
 
-這兩個模型皆支援 OpenAI 相容的工具呼叫。可使用以下方式測試：
+兩個模型都支援與 OpenAI 相容的工具呼叫。使用以下內容測試：
 
 ```bash
 curl -X POST http://localhost:20128/v1/chat/completions \
@@ -152,39 +145,37 @@ curl -X POST http://localhost:20128/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{
     "model": "mlx-gemma/gemma-4-26b",
-    "messages": [{"role": "user", "content": "2+2 是多少？請使用計算機工具。"}],
-    "tools": [{"type": "function", "function": {"name": "calculator", "description": "計算", "parameters": {"type": "object", "properties": {"expression": {"type": "string"}}, "required": ["expression"]}}}]
+    "messages": [{"role": "user", "content": "What is 2+2? Use the calculator tool."}],
+    "tools": [{"type": "function", "function": {"name": "calculator", "description": "Calculate", "parameters": {"type": "object", "properties": {"expression": {"type": "string"}}, "required": ["expression"]}}}]
   }'
 ```
 
 #### 疑難排解
 
-| 問題           | 解決方案                                                    |
-| -------------- | ----------------------------------------------------------- |
-| 伺服器無法啟動 | 檢查 `uv run mlx_lm.server --help` 並確認模型 ID            |
-| 記憶體不足     | 確保僅執行一個模型；關閉其他應用程式；檢查「活動監視器」    |
-| 連線遭拒       | 確認伺服器正在正確的連接埠（11435/11436）上執行             |
-| 回應緩慢       | 第一次請求會將模型載入記憶體（約 30–60 秒）；後續請求會很快 |
-| 工具呼叫失敗   | 確認模型支援工具；檢查 OmniRoute 日誌中是否有轉譯錯誤       |
+| 問題           | 解決方案                                                       |
+| -------------- | -------------------------------------------------------------- |
+| 伺服器無法啟動 | 檢查 `uv run mlx_lm.server --help` 並驗證模型 ID               |
+| 記憶體不足     | 確認只有一個模型正在執行；關閉其他應用程式；檢查「活動監視器」 |
+| 連線遭拒       | 確認伺服器正在正確的連接埠（11435/11436）上執行                |
+| 回應速度緩慢   | 第一次請求會將模型載入記憶體（約 30-60 秒）；後續請求會很快    |
+| 工具呼叫失敗   | 確認模型支援工具；檢查 OmniRoute 記錄中的轉譯錯誤              |
 
 ---
 
 ## 最佳免費提供者
 
-這些提供者提供**免費存取**，無須信用卡：
+這些提供者提供**免費存取**，無需信用卡：
 
-| 提供者            | 免費額度          | 模型                                     | 連線方式          |
-| ----------------- | ----------------- | ---------------------------------------- | ----------------- |
-| **Kiro AI**       | 每月 50 點額度    | Claude Sonnet 4.5, Haiku 4.5, Opus 4.6   | 無須驗證          |
-| **OpenCode Free** | 無限              | GPT-4o, Claude, Gemini                   | 無須驗證          |
-| **Pollinations**  | 無須金鑰          | GPT-5, Claude, Gemini, DeepSeek, Llama 4 | 無須驗證          |
-| **LongCat**       | 一次性 10M        | LongCat-2.0                              | API 金鑰 + KYC    |
-| **Cloudflare AI** | 每日 10K 個神經元 | 50+ 個模型                               | 無須驗證          |
-| **NVIDIA NIM**    | 約 40 RPM         | 129 個模型                               | 需要 API 金鑰     |
-| **Cerebras**      | 註冊贈送 $5 額度  | GLM 4.7, GPT-OSS 120B                    | API 金鑰 + 信用卡 |
-| **Qoder**         | 無限              | Kimi-K2, DeepSeek-R1, Qwen3-coder        | 無須驗證          |
+| 提供者            | 免費額度         | 模型                                     | 連線方式          |
+| ----------------- | ---------------- | ---------------------------------------- | ----------------- |
+| **Kiro AI**       | 每月 50 點數     | Claude Sonnet 4.5、Haiku 4.5、Opus 4.6   | 無需驗證          |
+| **Pollinations**  | 無需金鑰         | GPT-5、Claude、Gemini、DeepSeek、Llama 4 | 無需驗證          |
+| **LongCat**       | 一次性 10M       | LongCat-2.0                              | API 金鑰 + KYC    |
+| **Cloudflare AI** | 每日 10K 神經元  | 50 多個模型                              | 無需驗證          |
+| **NVIDIA NIM**    | 約 40 RPM        | 129 個模型                               | 需要 API 金鑰     |
+| **Cerebras**      | 註冊贈送 $5 額度 | GLM 4.7、GPT-OSS 120B                    | API 金鑰 + 信用卡 |
 
-**提示**：連接多個免費提供者，即可透過自動容錯移轉享有**無限免費 AI**！
+**提示**：連接多個免費提供者，即可透過自動容錯移轉享受**無限免費 AI**！
 
 ---
 
@@ -239,26 +230,26 @@ curl -X POST http://localhost:20128/v1/chat/completions \
 
 ## 使用多個提供者
 
-搭配**多個提供者**時，OmniRoute 的運作效果最佳。這能為您提供：
+OmniRoute 搭配**多個提供者**時效果最佳。這能為您提供：
 
-- **自動容錯移轉** — 如果某個提供者失敗，OmniRoute 會嘗試下一個
-- **成本最佳化** — OmniRoute 會為每個請求選擇最便宜的提供者
-- **速度最佳化** — OmniRoute 會為每個請求選擇最快的提供者
-- **品質最佳化** — OmniRoute 會為每項工作選擇最佳提供者
+- **自動容錯切換** — 如果某個提供者失敗，OmniRoute 會嘗試下一個
+- **成本最佳化** — OmniRoute 會為每個請求選擇成本最低的提供者
+- **速度最佳化** — OmniRoute 會為每個請求選擇速度最快的提供者
+- **品質最佳化** — OmniRoute 會為每項工作選擇最佳的提供者
 
 ### 建議設定
 
-請至少連接 **3 個提供者**，以獲得最佳體驗：
+請連接至少 **3 個提供者**，以獲得最佳體驗：
 
-1. **一個免費提供者**（Kiro、OpenCode Free 或 Pollinations）— 隨時可用
+1. **一個免費提供者**（Kiro 或 Pollinations）— 隨時可用
 2. **一個快速提供者**（Groq、Cerebras）— 用於快速回應
 3. **一個高品質提供者**（OpenAI、Anthropic、Google）— 用於複雜工作
 
-接著使用 `model: "auto"`，OmniRoute 就會自動為每個請求選擇最佳提供者。
+接著使用 `model: "auto"`，OmniRoute 就會自動為每個請求選擇最合適的提供者。
 
 ---
 
-## 特定提供者設定
+## 提供者特定設定
 
 ### OpenAI
 
@@ -284,6 +275,27 @@ curl -X POST http://localhost:20128/v1/chat/completions \
 2. 在 OmniRoute 中：提供者 → 新增提供者 → DeepSeek
 3. 貼上 API 金鑰 → 連線
 
+### Qoder：選擇憑證傳輸方式
+
+Qoder 需要憑證。其兩種傳輸方式具備不同的功能；僅憑模型名稱，無法判斷特定連線能執行哪些操作。
+
+| 憑證                       | OmniRoute 傳輸方式                     | 呼叫端工具呼叫                 | 串流                                      |
+| -------------------------- | -------------------------------------- | ------------------------------ | ----------------------------------------- |
+| 以 `pt-` 開頭的 PAT        | OmniRoute 主機上的本機 `qodercli` 程序 | 不支援                         | 緩衝：僅在 CLI 傳回完整回覆後才會發出 SSE |
+| 非 PAT 存取權杖或 API 金鑰 | 與 DashScope OpenAI 相容的 HTTP 端點   | 直接傳遞，取決於上游模型／金鑰 | 上游 HTTP/SSE 路徑                        |
+
+若使用 PAT，請在與 OmniRoute 相同的主機或容器上安裝 Qoder CLI。系統必須能以 `qodercli` 找到該執行檔，否則請將 `CLI_QODER_BIN` 設為其執行檔路徑。僅安裝在 Docker 主機上的 CLI 不會自動出現在容器中。若缺少二進位檔，系統會產生明確錯誤，引導您進行安裝或設定路徑。
+
+PAT 聊天路徑的程序逾時時間為 45 秒。它會將對話扁平化為提示詞，並以非串流列印模式叫用 CLI。要求 `stream: true` 會將回應封裝格式變更為 SSE；這不會提供上游權杖的增量傳遞。CLI 驗證／模型清單使用獨立的 20 秒逾時。這些是目前的程式碼預設值，無法在儀表板中設定。
+
+請將 PAT 連線用於一般聊天。攜帶 `tools` 或舊版 `functions` 的代理程式請求，會在選取憑證時排除 PAT 帳戶，包括已固定的組合目標。混合式 Qoder 集區仍可選取其 HTTP 帳戶。直接呼叫 PAT 執行器時，也會在啟動 CLI 前明確失敗，而不是默默捨棄工具定義。此限制針對 API 呼叫端提供的工具，而不是 Qoder CLI 本身可能使用的任何內部工具。HTTP 金鑰無法保證每個模型都支援工具；一般的模型功能檢查仍然適用。
+
+只有當管理員設定全部五項設定時，才能使用瀏覽器 OAuth：`QODER_OAUTH_AUTHORIZE_URL`、`QODER_OAUTH_TOKEN_URL`、`QODER_OAUTH_USERINFO_URL`、`QODER_OAUTH_CLIENT_ID` 和 `QODER_OAUTH_CLIENT_SECRET`。這些設定預設為空；未設定的安裝環境應使用受支援的憑證匯入方式，而不應假設瀏覽器登入流程已準備就緒。
+
+實作參考：[Qoder 執行器](../../open-sse/executors/qoder.ts)、
+[CLI 執行階段](../../open-sse/services/qoderCli.ts)和
+[OAuth 設定](../../src/lib/oauth/constants/oauth.ts)。增量 PAT 串流和可設定的逾時屬於個別的增強功能；此行為並不承諾提供這些功能。
+
 ### Groq
 
 1. 取得 API 金鑰：https://console.groq.com/
@@ -296,27 +308,27 @@ curl -X POST http://localhost:20128/v1/chat/completions \
 
 ### 「我需要付費才能使用 OmniRoute 嗎？」
 
-**不需要！** OmniRoute 是免費且開放原始碼的。你可以使用免費提供者（Kiro、OpenCode Free、Pollinations），完全無須付費。只有在你選擇使用付費提供者時才需要付費。
+**不需要！** OmniRoute 是免費且開放原始碼的。你可以免費使用免費的提供者（Kiro、Pollinations），無須支付任何費用。只有當你選擇使用付費提供者時，才需要付費。
 
 ### 「我應該從哪個提供者開始？」
 
-從 **Kiro AI** 開始——它免費、不需要 API 金鑰，並且讓你可以使用 Claude 模型。之後再視需要新增更多提供者。
+建議從 **Kiro AI** 開始——它可免費使用、不需要 API 金鑰，並且能讓你存取 Claude 模型。之後再視需要新增更多提供者。
 
 ### 「我可以同時使用多個提供者嗎？」
 
-**可以！** 這正是 OmniRoute 的核心用途。連接多個提供者，並使用 `model: "auto"`，讓 OmniRoute 為每個請求選擇最佳提供者。
+**可以！** 這正是 OmniRoute 的核心功能。連接多個提供者，並使用 `model: "auto"`，讓 OmniRoute 為每個請求選擇最合適的提供者。
 
-### 「如果提供者發生故障怎麼辦？」
+### 「如果提供者停止服務，該怎麼辦？」
 
-OmniRoute 會自動略過失敗的提供者，並嘗試下一個。你不需要執行任何操作。
+OmniRoute 會自動跳過發生故障的提供者，並嘗試下一個。你無須進行任何操作。
 
-### 「如何中斷提供者的連線？」
+### 「如何中斷與提供者的連線？」
 
-前往提供者 → 點擊該提供者 → 點擊 **中斷連線**。
+前往「提供者」→ 點選該提供者 → 點選 **中斷連線**。
 
 ### 「我可以使用現有的 API 金鑰嗎？」
 
-**可以！** 如果你已經擁有 OpenAI、Anthropic、Google 等服務的 API 金鑰，即可在 OmniRoute 中使用。連接提供者時，只需貼上金鑰即可。
+**可以！** 如果你已經擁有 OpenAI、Anthropic、Google 等服務的 API 金鑰，就可以在 OmniRoute 中使用。連接提供者時貼上金鑰即可。
 
 ---
 

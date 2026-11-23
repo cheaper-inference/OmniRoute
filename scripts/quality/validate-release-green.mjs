@@ -17,6 +17,7 @@
 //     a real defect; exit 1.
 //   • DRIFT checks (eslint WARNINGS, cognitive-complexity, file-size, cyclomatic
 //     complexity, dead-code, type-coverage, compression-budget, openapi-coverage,
+//     pricing-freshness,
 //     workflow-lint/zizmor, codeql-ratchet) → ratchet drift accrued across the
 //     cycle is NOT a contributor's fault; it is reported and rebaselined by the
 //     maintainer at release. Drift NEVER changes the exit code, so wiring this as
@@ -50,6 +51,7 @@
 import { execFileSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { availableParallelism } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { load as parseYaml } from "js-yaml";
@@ -254,6 +256,59 @@ export function parseCognitiveCount(out) {
   return m ? Number(m[1]) : null;
 }
 
+/** Translate the shared complexity walk into the two metric records. */
+export function evaluateComplexityRun({ code, out }, cogBase) {
+  // The shared walk emits both machine counts followed by both ratchet verdicts.
+  // Do not use the legacy generic "N violações" fallback here: a partial walk
+  // containing only the cyclomatic summary would masquerade as cognitive data.
+  const cogMatch = /^cognitiveComplexity=(\d+)\r?$/m.exec(out);
+  const cycMatch = /^complexity=(\d+)\r?$/m.exec(out);
+  const cogSummary = /^\[cognitive-complexity\] (OK|REGRESSÃO) — (\d+) violações /m.exec(out);
+  const cycSummary = /^\[complexity\] (OK|REGRESSÃO) — (\d+) violações /m.exec(out);
+  const cogCurrent = cogMatch ? Number(cogMatch[1]) : null;
+  const cycCurrent = cycMatch ? Number(cycMatch[1]) : null;
+  const cogOver = isDrift(cogCurrent, cogBase);
+  const cycRegressed = cycSummary?.[1] === "REGRESSÃO";
+  const measured =
+    [cogCurrent, cycCurrent, cogBase].every((count) => Number.isSafeInteger(count) && count >= 0) &&
+    Number(cogSummary?.[2]) === cogCurrent &&
+    Number(cycSummary?.[2]) === cycCurrent &&
+    (cogSummary?.[1] === "REGRESSÃO") === cogOver;
+  // Exit 1 is expected only for a complete, measured ratchet regression. A
+  // cancelled/crashed tool or missing metrics is execution failure, not drift.
+  const measuredDrift = code === 1 && measured && (cogOver || cycRegressed);
+  if (!measured || (code !== 0 && !measuredDrift)) {
+    return [
+      {
+        id: "complexity",
+        label: "Complexity measurement",
+        kind: "hard",
+        ok: false,
+        detail:
+          code !== 0
+            ? `Complexity process exited ${code}: ${firstFailureLine(out)}`
+            : "Complexity process did not report complete finite metrics and baseline",
+      },
+    ];
+  }
+  return [
+    {
+      id: "cognitive-complexity",
+      label: "Cognitive complexity (ratchet)",
+      kind: "drift",
+      ok: !cogOver,
+      detail: `${cogCurrent} vs baseline ${cogBase}${cogOver ? ` (+${cogCurrent - cogBase} drift → rebaseline at release)` : ""}`,
+    },
+    {
+      id: "complexity",
+      label: "Cyclomatic complexity (ratchet)",
+      kind: "drift",
+      ok: !cycRegressed,
+      detail: `complexity=${cycCurrent} (shared walk with cognitive)${cycRegressed ? " REGRESSED" : ""}`,
+    },
+  ];
+}
+
 /**
  * Drift verdict for a ratchet: a metric that grew past its committed baseline is
  * "drift" (reported, never blocking). `direction:"down"` metrics (warnings,
@@ -387,6 +442,79 @@ export function extractCiGates(
   return gates;
 }
 
+// ─── Unit shards (2026-10-19 full sweep) ─────────────────────────────────────
+
+/**
+ * ci.yml's unit shard count, read from its `test-unit` job: the matrix must be 1..N and the
+ * step's TEST_SHARD must be `${{ matrix.shard }}/N`, so this validator runs exactly the shards a
+ * PR's "Unit Tests (i/N)" jobs run. Anything it cannot reproduce exactly (no matrix, a gap, a
+ * different denominator, unparsable YAML) returns null: the caller then runs the unsharded suite.
+ */
+export function unitShardCountFromCi(yamlText) {
+  let doc;
+  try {
+    doc = parseYaml(yamlText);
+  } catch {
+    return null;
+  }
+  const job = doc?.jobs?.["test-unit"];
+  const matrix = job?.strategy?.matrix?.shard;
+  if (!Array.isArray(matrix) || matrix.length < 2) return null;
+  if (!matrix.every((value, index) => value === index + 1)) return null;
+  const denominators = (Array.isArray(job.steps) ? job.steps : [])
+    .map((step) =>
+      /^\$\{\{\s*matrix\.shard\s*\}\}\/(\d+)$/.exec(String(step?.env?.TEST_SHARD ?? ""))
+    )
+    .filter(Boolean)
+    .map((match) => Number(match[1]));
+  if (denominators.length === 0 || denominators.some((n) => n !== matrix.length)) return null;
+  return matrix.length;
+}
+
+/**
+ * Unit shards running at once: one per four cores (each shard runs --test-concurrency=4),
+ * capped at the shard count. `cpus` is availableParallelism(), which honours the runner's
+ * cgroup cpu.max: the omni-release slot (CPUQuota=800% on the 32-core .113) reports 8, so 2
+ * shards run at once there; a hosted 4-vCPU runner runs them one at a time.
+ */
+export function unitShardPool(shards, cpus) {
+  return Math.max(1, Math.min(shards, Math.floor(cpus / 4)));
+}
+
+/** Runs `worker` over `items` with at most `limit` in flight; results keep the input order. */
+export async function runPool(items, limit, worker) {
+  const results = new Array(items.length);
+  let next = 0;
+  const lanes = Array.from({ length: Math.max(1, Math.min(limit, items.length)) }, async () => {
+    while (next < items.length) {
+      const index = next++;
+      results[index] = await worker(items[index], index);
+    }
+  });
+  await Promise.all(lanes);
+  return results;
+}
+
+/**
+ * Folds the per-shard results into the single `unit` gate: exit 0 only when every shard passed,
+ * otherwise the first failing shard's code. `out` keeps each shard's output under a header;
+ * `detail` names the failing shards plus the first failure line of the first shard that failed
+ * on a test. A shard killed at its ceiling contributes no line of its own: its log is full of
+ * deliberate fixture errors (the batch route's SQLITE_CANTOPEN headed the 2026-10-19 report).
+ */
+export function mergeUnitShardResults(shardResults) {
+  const status = (r) => (r.code === 0 ? "PASS" : r.code === 124 ? "TIMEOUT" : `exit ${r.code}`);
+  const out = shardResults
+    .map((r) => `──── unit shard ${r.shard}/${r.total}: ${status(r)} ────\n${r.out ?? ""}`)
+    .join("\n");
+  const failed = shardResults.filter((r) => r.code !== 0);
+  if (failed.length === 0) return { code: 0, out, detail: "pass" };
+  const named = failed.map((r) => `${r.shard}/${r.total} ${status(r)}`).join(", ");
+  const testFailure = failed.find((r) => r.code !== 124);
+  const line = testFailure ? ` — ${firstFailureLine(testFailure.out)}` : "";
+  return { code: failed[0].code, out, detail: `unit shard ${named}${line}` };
+}
+
 // ─── Orchestration (only when run directly) ─────────────────────────────────
 
 /**
@@ -441,7 +569,7 @@ const commandReceipts = [];
 const cancellation = new AbortController();
 
 async function run(cmd, cmdArgs, opts = {}) {
-  const label = `${cmd} ${cmdArgs.join(" ")}`;
+  const label = opts.label || `${cmd} ${cmdArgs.join(" ")}`;
   const logPath = join(LOG_DIR, "commands", `${randomUUID()}.log`);
   const result = await runGateProcess(cmd, cmdArgs, {
     cwd: ROOT,
@@ -489,6 +617,23 @@ async function runPackArtifactGate(timeoutMs) {
     if (result.code !== 0) return { code: result.code, out };
   }
   return { code: 0, out };
+}
+
+/**
+ * The unit lane: ci.yml's own shards (`npm run test:unit:ci:shard` with TEST_SHARD=i/N, the
+ * command each "Unit Tests (i/N)" job runs), `pool` at a time, each under its own ceiling.
+ */
+async function runUnitShards(total, pool, timeout) {
+  const shards = Array.from({ length: total }, (_, index) => index + 1);
+  const results = await runPool(shards, pool, async (shard) => {
+    const { code, out } = await runAsync(npmCmd, ["run", "test:unit:ci:shard"], {
+      timeout,
+      env: { TEST_SHARD: `${shard}/${total}` },
+      label: `${npmCmd} run test:unit:ci:shard (TEST_SHARD=${shard}/${total})`,
+    });
+    return { shard, total, code, out };
+  });
+  return mergeUnitShardResults(results);
 }
 
 async function main() {
@@ -592,42 +737,11 @@ async function main() {
   // Complexity + cognitive (one ESLint walk; both still recorded as drift)
   {
     announce("Complexity + cognitive ratchets (shared ESLint walk)");
-    const { out } = await run(npmCmd, ["run", "check:complexity-ratchets"]);
-    saveGateLog("complexity-ratchets", out);
-    const cogCurrent = parseCognitiveCount(out);
-    const cogBase = baselineValue("cognitiveComplexity");
-    const cogOver = isDrift(cogCurrent, cogBase);
-    const cycMatch = /(?:^|\n)complexity=(\d+)/.exec(out);
-    const cycOkMatch = /\[complexity\] OK — (\d+)/.exec(out);
-    const cycRegMatch = /\[complexity\] REGRESSÃO — (\d+)/.exec(out);
-    const cycCurrent = cycMatch
-      ? Number(cycMatch[1])
-      : cycOkMatch
-        ? Number(cycOkMatch[1])
-        : cycRegMatch
-          ? Number(cycRegMatch[1])
-          : null;
-    const cycRegressed = /\[complexity\] REGRESSÃO/.test(out);
-    record({
-      id: "cognitive-complexity",
-      label: "Cognitive complexity (ratchet)",
-      kind: "drift",
-      ok: !cogOver,
-      detail:
-        cogCurrent == null
-          ? "could not parse count"
-          : `${cogCurrent} vs baseline ${cogBase}${cogOver ? ` (+${cogCurrent - cogBase} drift → rebaseline at release)` : ""}`,
-    });
-    record({
-      id: "complexity",
-      label: "Cyclomatic complexity (ratchet)",
-      kind: "drift",
-      ok: !cycRegressed,
-      detail:
-        cycCurrent == null
-          ? firstFailureLine(out) || "measured via check:complexity-ratchets"
-          : `complexity=${cycCurrent} (shared walk with cognitive)${cycRegressed ? " REGRESSED" : ""}`,
-    });
+    const result = await run(npmCmd, ["run", "check:complexity-ratchets"]);
+    saveGateLog("complexity-ratchets", result.out);
+    for (const metric of evaluateComplexityRun(result, baselineValue("cognitiveComplexity"))) {
+      record(metric);
+    }
   }
 
   // file-size (drift)
@@ -694,6 +808,15 @@ async function main() {
     "run",
     "check:codeql-ratchet",
   ]);
+  // Pricing data untouched for 90 days: a clock, not a regression, so it can't belong to a
+  // PR gate (it would red every PR at once). Reported here, refreshed at release.
+  await driftCmd(
+    "pricing-freshness",
+    "Pricing freshness (90 days)",
+    npmCmd,
+    ["run", "check:pricing-freshness"],
+    "touched within 90 days"
+  );
 
   // Docs sync + fabricated-docs (strict) is a real-defect gate (invented env vars /
   // routes, i18n mirror drift) — HARD.
@@ -703,42 +826,50 @@ async function main() {
   ]);
 
   if (!QUICK) {
-    // These are the gates that catch inherited base-red tests from cycle PRs (the fast-path
-    // PR→release does NOT run unit/vitest/integration per-PR — the v3.8.42 release PR exploded
-    // with 15 such reds). They run SILENTLY for many minutes; the announce line above + these
+    // These are the gates that catch inherited base-red tests from cycle PRs (the v3.8.42
+    // release PR exploded with 15 such reds). Non-draft code PRs into release/** run the unit
+    // suite and test:vitest per PR (quality.yml fast-unit, fast-vitest); only integration is
+    // absent. These gates run SILENTLY for many minutes; the announce line above + these
     // hard ceilings keep a long-but-healthy run from being mistaken for a hang (the ceiling also
     // converts a genuine DB-handle hang into a visible failure instead of an infinite block).
-    // The slow suites are INDEPENDENT processes (each self-isolates DATA_DIR) with
-    // no shared state, so they run CONCURRENTLY — the pre-flight wall time becomes
-    // ~the slowest single suite instead of their sum (unit ~25-35min + vitest
-    // ~3-8min + integration ~3-10min + pack-artifact ~15min was ~1h serial in the
-    // v3.8.45 run). pack-artifact (--with-build) joins the same wave. Integration
-    // runs ONLY on the release PR full CI, so a regression here is invisible until
-    // release — that is why it is a HARD pre-flight gate.
+    // Integration runs ONLY on the release PR full CI, so a regression there is invisible
+    // until release — that is why it is a HARD pre-flight gate.
+    //
+    // The lanes run ONE AT A TIME (they ran as one Promise.all wave from v3.8.45 until
+    // 2026-10-19). The 2026-10-18 sweep (omni-build, 56 GB, no CPU quota yet) and the 10-19
+    // one (omni-release: 8 cores by CPUQuota, 20 GB memory.high) both killed unit, integration
+    // and the package build at their ceilings inside that wave, where four suites and a webpack
+    // build (14-16 GB) shared one slot. On 10-19 the cgroup also passed memory.high, the kernel
+    // throttled every lane, and the app's own resourcePressure guard read that cgroup and
+    // answered 503 inside unit tests (3 false reds). Both days the single unit process
+    // (--test-concurrency=4) had run ~29k of its ~32k tests when its 80 min ceiling hit, while
+    // ci.yml spreads the same suite over 8 shard jobs of 11-18 min. So unit runs as ci.yml's
+    // shards, as many at once as the slot has cores for, and each lane has the slot to itself.
+    let unitShards = null;
+    try {
+      unitShards = unitShardCountFromCi(
+        readFileSync(join(ROOT, ".github/workflows/ci.yml"), "utf8")
+      );
+    } catch {
+      unitShards = null; // unreadable ci.yml: the unsharded suite below still runs
+    }
+    const unitPool = unitShards ? unitShardPool(unitShards, availableParallelism()) : 1;
     const slow = [
-      {
-        // Raised 45→100min 2026-08-05: a hermetic-env run on the loaded devbox
-        // (load 7-26) was still inside invocation 1 of 3 at 76min when killed;
-        // contention factor 2-3× was measured against idle windows, and no idle
-        // measurement exists yet. The pre-flight's REAL condition is exactly
-        // this contended one (unit runs in Promise.all with integration+vitest
-        // plus whatever else the devbox carries), and there 45min provably
-        // killed a healthy suite and fabricated a false base-red. The ceiling's
-        // purpose — turning a genuine hang (stuck SQLite handle = zero progress
-        // forever) into a visible failure — survives at 100min.
-        // Measured on idle .113: unavailable (checkout not found). Tightened to 80min from 100min as a conservative step. TODO: re-measure on idle .113 and tighten to ~1.8× measured.
-        id: "unit",
-        label:
-          "Unit tests (full suite, CI concurrency — ~30-50min idle, up to ~80min under load (awaiting idle .113 measurement, #9532))",
-        args: ["run", "test:unit:ci"],
-        timeout: 80 * 60 * 1000,
-      },
-      {
-        id: "vitest",
-        label: "Vitest (MCP / autoCombo / cache — ~3-8min)",
-        args: ["run", "test:vitest"],
-        timeout: 15 * 60 * 1000,
-      },
+      unitShards
+        ? {
+            id: "unit",
+            label: `Unit tests (ci.yml's ${unitShards} shards, ${unitPool} at a time — ~13min per shard on a hosted runner)`,
+            run: (timeout) => runUnitShards(unitShards, unitPool, timeout),
+            // Per shard. ci.yml gives a shard 25 min including setup; 40 min still turns a
+            // stuck SQLite handle (zero progress forever) into a visible failure.
+            timeout: 40 * 60 * 1000,
+          }
+        : {
+            id: "unit",
+            label: "Unit tests (full suite unsharded — ci.yml's unit matrix was not readable)",
+            args: ["run", "test:unit:ci"],
+            timeout: 120 * 60 * 1000,
+          },
       {
         // Measured 2026-08-05 on an idle 16-core box: 22m08s hermetic (935 tests,
         // 112 files at --test-concurrency=1, i.e. strictly serial because ~16 of
@@ -751,8 +882,15 @@ async function main() {
         args: ["run", "test:integration"],
         timeout: 40 * 60 * 1000,
       },
+      {
+        id: "vitest",
+        label: "Vitest (MCP / autoCombo / cache — ~3-8min)",
+        args: ["run", "test:vitest"],
+        timeout: 15 * 60 * 1000,
+      },
     ];
     if (WITH_BUILD) {
+      // Last, alone: ci.yml's unit and integration jobs never see a built tree either.
       slow.push({
         id: "pack-artifact",
         label: "Package artifact (npm pack policy)",
@@ -760,29 +898,28 @@ async function main() {
         timeout: 20 * 60 * 1000,
       });
     }
-    slow.forEach((g) => announce(`${g.label} [parallel]`));
-    const slowResults = await Promise.all(
-      slow.map((g) =>
-        g.run ? g.run(g.timeout) : runAsync(npmCmd, g.args, { timeout: g.timeout, env: g.env })
-      )
-    );
-    slow.forEach((g, i) => {
-      const { code, out } = slowResults[i];
-      saveGateLog(g.id, out);
+    const slowResults = [];
+    for (const g of slow) {
+      announce(g.label);
+      const result = await (g.run
+        ? g.run(g.timeout)
+        : runAsync(npmCmd, g.args, { timeout: g.timeout, env: g.env }));
+      slowResults.push(result);
+      saveGateLog(g.id, result.out);
       record({
         id: g.id,
         label: g.label,
         kind: "hard",
-        ok: code === 0,
-        detail: code === 0 ? "pass" : firstFailureLine(out),
+        ok: result.code === 0,
+        detail: result.code === 0 ? "pass" : result.detail || firstFailureLine(result.out),
       });
-    });
+    }
 
     if (WITH_BUILD) {
       // WS1.2 (#7065 class): boot the REAL packed tarball from a clean install.
       // check:pack-artifact is the builder for dist/ when staging is absent, so the
-      // boot smoke MUST run after it completes. Running both in the parallel wave
-      // races check:pack-boot against dist/server.js creation on clean worktrees.
+      // boot smoke MUST run after it completes, never alongside it: it would race
+      // check:pack-boot against dist/server.js creation on clean worktrees.
       const packArtifactIndex = slow.findIndex((g) => g.id === "pack-artifact");
       const packArtifactResult = slowResults[packArtifactIndex];
       const bootLabel = "Tarball boot-smoke (installed CLI serves /health)";

@@ -20,6 +20,11 @@ const {
   resetEmergencyFallbackEnvCache,
   setEmergencyFallbackFeatureFlagResolverForTest,
 } = await import("../../../open-sse/services/emergencyFallback.ts");
+const { resolveEmergencyFallbackDecision, resetEmergencyFallbackWarnForTest } =
+  await import("../../../src/sse/handlers/emergencyFallbackHeader.ts");
+const { getActiveSyncedCatalog } =
+  await import("../../../src/lib/db/models/activeSyncedCatalog.ts");
+const { replaceSyncedAvailableModelsForConnection } = await import("../../../src/lib/db/models.ts");
 
 function restoreEnv(name: string, value: string | undefined) {
   if (value === undefined) {
@@ -36,6 +41,30 @@ function resetTestState() {
   delete process.env.OMNIROUTE_EMERGENCY_FALLBACK;
   resetEmergencyFallbackEnvCache();
   setEmergencyFallbackFeatureFlagResolverForTest(null);
+  resetEmergencyFallbackWarnForTest();
+}
+
+const FALLBACK_PROVIDER = EMERGENCY_FALLBACK_CONFIG.provider;
+const FALLBACK_MODEL = EMERGENCY_FALLBACK_CONFIG.model;
+const FALLBACK_CONNECTION = "emergency-fallback-live-catalog";
+
+async function seedLiveCatalog(modelIds: string[]) {
+  const db = core.getDbInstance();
+  const now = new Date().toISOString();
+  db.prepare(
+    `INSERT OR REPLACE INTO provider_connections
+       (id, provider, is_active, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?)`
+  ).run(FALLBACK_CONNECTION, FALLBACK_PROVIDER, 1, now, now);
+  await replaceSyncedAvailableModelsForConnection(
+    FALLBACK_PROVIDER,
+    FALLBACK_CONNECTION,
+    modelIds.map((id) => ({ id, name: id, source: "imported" as const }))
+  );
+}
+
+function freshScope(): object {
+  return {};
 }
 
 test.beforeEach(() => {
@@ -45,6 +74,7 @@ test.beforeEach(() => {
 test.afterEach(() => {
   resetEmergencyFallbackEnvCache();
   setEmergencyFallbackFeatureFlagResolverForTest(null);
+  resetEmergencyFallbackWarnForTest();
   delete process.env.OMNIROUTE_EMERGENCY_FALLBACK;
 });
 
@@ -186,4 +216,137 @@ test("tool-bearing requests are still skipped regardless of env switch", () => {
     assert.equal(decision.shouldFallback, false);
     assert.match(decision.reason, /tools/);
   });
+});
+
+test("402 with the target in the live catalog keeps the redirect", async () => {
+  await seedLiveCatalog([FALLBACK_MODEL]);
+  const catalog = await getActiveSyncedCatalog(FALLBACK_PROVIDER);
+  assert.equal(catalog.authoritative, true);
+  const decision = await resolveEmergencyFallbackDecision(402, "", false, freshScope());
+  assert.equal(decision.shouldFallback, true);
+});
+
+test("402 with the target missing from the live catalog keeps original routing", async () => {
+  await seedLiveCatalog(["openai/gpt-oss-20b"]);
+  const catalog = await getActiveSyncedCatalog(FALLBACK_PROVIDER);
+  assert.equal(catalog.authoritative, true);
+  const decision = await resolveEmergencyFallbackDecision(402, "", false, freshScope());
+  assert.equal(decision.shouldFallback, false);
+  assert.match(decision.reason, /not in the live catalog; keeping original routing/);
+});
+
+test("second 402 with the target still missing logs no new warning", async () => {
+  await seedLiveCatalog(["openai/gpt-oss-20b"]);
+  const { logger: rootLogger } = await import("../../../src/shared/utils/logger.ts");
+  const warnCalls: unknown[][] = [];
+  const debugCalls: unknown[][] = [];
+  const previousWarn = rootLogger.warn.bind(rootLogger);
+  const previousDebug = rootLogger.debug.bind(rootLogger);
+  rootLogger.warn = ((...args: unknown[]) => {
+    warnCalls.push(args);
+    return rootLogger;
+  }) as typeof rootLogger.warn;
+  rootLogger.debug = ((...args: unknown[]) => {
+    debugCalls.push(args);
+    return rootLogger;
+  }) as typeof rootLogger.debug;
+  try {
+    const first = await resolveEmergencyFallbackDecision(402, "", false, freshScope());
+    assert.equal(first.shouldFallback, false);
+    const second = await resolveEmergencyFallbackDecision(402, "", false, freshScope());
+    assert.equal(second.shouldFallback, false);
+    const fallbackWarns = warnCalls.filter((args) =>
+      args.some(
+        (arg) =>
+          (typeof arg === "string" && arg.includes("EMERGENCY_FALLBACK")) ||
+          (typeof arg === "object" &&
+            arg !== null &&
+            (arg as Record<string, unknown>).tag === "EMERGENCY_FALLBACK")
+      )
+    );
+    assert.equal(fallbackWarns.length, 1);
+    assert.ok(debugCalls.length >= 1);
+  } finally {
+    rootLogger.warn = previousWarn;
+    rootLogger.debug = previousDebug;
+  }
+});
+
+test("disabled switch keeps original routing without reading the catalog", async () => {
+  await seedLiveCatalog([FALLBACK_MODEL]);
+  let reads = 0;
+  const countingLoad = async (providerId: string) => {
+    reads += 1;
+    return getActiveSyncedCatalog(providerId);
+  };
+  const previousEnabled = EMERGENCY_FALLBACK_CONFIG.enabled;
+  EMERGENCY_FALLBACK_CONFIG.enabled = false;
+  try {
+    const decision = await resolveEmergencyFallbackDecision(
+      402,
+      "",
+      false,
+      freshScope(),
+      countingLoad
+    );
+    assert.equal(decision.shouldFallback, false);
+    assert.match(decision.reason, /emergency fallback disabled/);
+    assert.equal(reads, 0);
+  } finally {
+    EMERGENCY_FALLBACK_CONFIG.enabled = previousEnabled;
+    resetEmergencyFallbackWarnForTest();
+  }
+});
+
+test("unknown catalog keeps the redirect and warns once per process", async () => {
+  const { logger: rootLogger } = await import("../../../src/shared/utils/logger.ts");
+  const warnCalls: unknown[][] = [];
+  const previousWarn = rootLogger.warn.bind(rootLogger);
+  rootLogger.warn = ((...args: unknown[]) => {
+    warnCalls.push(args);
+    return rootLogger;
+  }) as typeof rootLogger.warn;
+  try {
+    const unknownLoad = async () => ({ authoritative: false, models: [] });
+    const first = await resolveEmergencyFallbackDecision(402, "", false, freshScope(), unknownLoad);
+    assert.equal(first.shouldFallback, true);
+    const second = await resolveEmergencyFallbackDecision(
+      402,
+      "",
+      false,
+      freshScope(),
+      unknownLoad
+    );
+    assert.equal(second.shouldFallback, true);
+    const fallbackWarns = warnCalls.filter((args) =>
+      args.some(
+        (arg) =>
+          (typeof arg === "string" && arg.includes("EMERGENCY_FALLBACK")) ||
+          (typeof arg === "object" &&
+            arg !== null &&
+            (arg as Record<string, unknown>).tag === "EMERGENCY_FALLBACK")
+      )
+    );
+    assert.equal(fallbackWarns.length, 1);
+  } finally {
+    rootLogger.warn = previousWarn;
+  }
+});
+
+test("non-budget failures never read the catalog", async () => {
+  let reads = 0;
+  const countingLoad = async (providerId: string) => {
+    reads += 1;
+    return getActiveSyncedCatalog(providerId);
+  };
+  const scope = freshScope();
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const decision = await resolveEmergencyFallbackDecision(500, "", false, scope, countingLoad);
+    assert.equal(decision.shouldFallback, false);
+    assert.match(decision.reason, /no budget error detected/);
+  }
+  assert.equal(reads, 0);
+  const triggered = await resolveEmergencyFallbackDecision(402, "", false, scope, countingLoad);
+  assert.equal(triggered.shouldFallback, true);
+  assert.equal(reads, 1);
 });

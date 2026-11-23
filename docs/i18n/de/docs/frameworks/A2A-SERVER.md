@@ -148,25 +148,25 @@ curl -X POST http://localhost:20128/a2a \
 
 ## Verfügbare Skills
 
-OmniRoute stellt 6 A2A-Skills bereit, die in `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` eingebunden sind. Jedes Skill-Modul befindet sich in `src/lib/a2a/skills/`.
+OmniRoute stellt 6 A2A-Skills bereit, die in `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` verdrahtet sind. Jedes Skill-Modul befindet sich in `src/lib/a2a/skills/`.
 
-| Skill                 | ID                   | Beschreibung                                                                                                                                                             | Tags                       | Beispiele                                    |
-| :-------------------- | :------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------- | :------------------------------------------- |
-| Intelligentes Routing | `smart-routing`      | Leitet einen Prompt mithilfe der Combo-Engine und Bewertung von OmniRoute über den optimalen Anbieter bzw. die optimale Kombination weiter                               | Routing, Anbieter          | „Diesen Prompt über das beste Modell leiten“ |
-| Kontingentverwaltung  | `quota-management`   | Meldet den Kontingentstatus je Anbieter und hilft Aufrufern bei der Entscheidung, wann sie drosseln bzw. wechseln sollten                                                | Kontingent, Anbieter       | „Kontingent für anthropic prüfen“            |
-| Anbietererkennung     | `provider-discovery` | Listet installierte Anbieter mit Funktionen, Angaben zu kostenlosen Tarifen und OAuth-Status auf                                                                         | Anbieter, Erkennung        | „Welche Anbieter sind verfügbar?“            |
-| Kostenanalyse         | `cost-analysis`      | Schätzt die Kosten einer Anfrage bzw. Unterhaltung anhand des Katalogs und der jüngsten Nutzung                                                                          | Kosten, Nutzung            | „Kosten für diese Unterhaltung schätzen“     |
-| Zustandsbericht       | `health-report`      | Aggregiert den Status von Leistungsschutzschaltern, Abklingzeiten und Sperren je Anbieter                                                                                | Zustand, Resilienz         | „Zustand aller Anbieter anzeigen“            |
-| Funktionen auflisten  | `list-capabilities`  | Gibt den vollständigen Katalog mit 45 Agent Skills (23 API + 21 CLI + 1 Konfiguration) als Markdown-Tabelle mit direkten SKILL.md-URLs für die Kontexteinspeisung zurück | Katalog, Erkennung, Skills | „Alle Funktionen von OmniRoute auflisten“    |
+| Skill                 | ID                   | Beschreibung                                                                                                                                                               | Tags                       | Beispiele                                          |
+| :-------------------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------- | :------------------------------------------------- |
+| Intelligentes Routing | `smart-routing`      | Leitet einen Prompt mithilfe der Combo-Engine und der Bewertung von OmniRoute über den optimalen Anbieter bzw. die optimale Kombination weiter                             | Routing, Anbieter          | „Diesen Prompt über das beste Modell weiterleiten“ |
+| Kontingentverwaltung  | `quota-management`   | Meldet den Kontingentstatus pro Anbieter und hilft Aufrufern bei der Entscheidung, wann gedrosselt oder gewechselt werden sollte                                           | Kontingent, Anbieter       | „Kontingent für anthropic prüfen“                  |
+| Anbietererkennung     | `provider-discovery` | Listet installierte Anbieter mit Funktionen, Angaben zu kostenlosen Tarifen und OAuth-Status auf                                                                           | Anbieter, Erkennung        | „Welche Anbieter sind verfügbar?“                  |
+| Kostenanalyse         | `cost-analysis`      | Schätzt anhand des Katalogs und der jüngsten Nutzung die Kosten einer Anfrage bzw. Unterhaltung                                                                            | Kosten, Nutzung            | „Kosten für diese Unterhaltung schätzen“           |
+| Zustandsbericht       | `health-report`      | Aggregiert den Status von Leistungsschaltern, Abkühlphasen und Sperren pro Anbieter                                                                                        | Zustand, Resilienz         | „Zustand aller Anbieter anzeigen“                  |
+| Funktionen auflisten  | `list-capabilities`  | Gibt den vollständigen Katalog mit 45 Agent Skills (23 API + 21 CLI + 1 Konfiguration) als Markdown-Tabelle mit unverarbeiteten SKILL.md-URLs zur Kontexteinbindung zurück | Katalog, Erkennung, Skills | „Alle OmniRoute-Funktionen auflisten“              |
 
-> Die Agent Card sollte mit dem aktuellen Katalog von 352 Anbietern synchron gehalten werden; Anbieterzahlen und Metadaten zu kostenlosen bzw. authentifizierungsfreien Angeboten stammen aus der Laufzeitregistrierung.
+> Die Agent Card sollte mit dem aktuellen Katalog von 374 Anbietern synchron gehalten werden; Anbieterzahlen und Metadaten zu kostenlosen bzw. ohne Authentifizierung nutzbaren Angeboten stammen aus der Laufzeitregistrierung.
 
 ### Details zum Skill `list-capabilities`
 
-Der Skill `list-capabilities` ist besonders nützlich für externe Agenten, die vor dem Senden von API-Aufrufen ermitteln müssen, welche Funktionen OmniRoute bereitstellt. Er gibt ein strukturiertes Markdown-Tabellenartefakt zurück:
+Der Skill `list-capabilities` ist besonders nützlich für externe Agenten, die ermitteln müssen, was OmniRoute bereitstellt, bevor sie API-Aufrufe senden. Er gibt ein strukturiertes Markdown-Tabellenartefakt zurück:
 
 ```
-| ID | Name | Kategorie | Bereich | Endpunkte/Befehle | Direkte URL |
+| ID | Name | Kategorie | Bereich | Endpunkte/Befehle | Unverarbeitete URL |
 | --- | --- | --- | --- | --- | --- |
 | omni-auth | Authentifizierung und Sitzungen | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
 ...

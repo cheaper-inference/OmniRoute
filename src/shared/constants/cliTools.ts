@@ -242,9 +242,9 @@ export const CLI_TOOLS: Record<string, CliCatalogEntry> = {
     acpSpawnable: false,
     baseUrlSupport: "none",
     modelAliases: [
-      "gemini-3.7-flash-high",
-      "gemini-3.7-flash-medium",
-      "gemini-3.7-flash-low",
+      "gemini-3.8-flash-high",
+      "gemini-3.8-flash-medium",
+      "gemini-3.8-flash-low",
       "claude-opus-4-6-thinking",
       "claude-sonnet-4-6",
       "gemini-pro-agent",
@@ -252,9 +252,9 @@ export const CLI_TOOLS: Record<string, CliCatalogEntry> = {
       "gpt-oss-120b-medium",
     ],
     defaultModels: [
-      createCliModel("gemini-3.7-flash-high", "Gemini 3.7 Flash High"),
-      createCliModel("gemini-3.7-flash-medium", "Gemini 3.7 Flash Medium"),
-      createCliModel("gemini-3.7-flash-low", "Gemini 3.7 Flash Low"),
+      createCliModel("gemini-3.8-flash-high", "Gemini 3.8 Flash High"),
+      createCliModel("gemini-3.8-flash-medium", "Gemini 3.8 Flash Medium"),
+      createCliModel("gemini-3.8-flash-low", "Gemini 3.8 Flash Low"),
       createCliModel("gemini-pro-agent", "Gemini 3.1 Pro High"),
       createCliModel("gemini-3.1-pro-low", "Gemini 3.1 Pro Low"),
       createCliModel("claude-sonnet-4-6", "Claude Sonnet 4.6"),
@@ -708,6 +708,49 @@ aider --openai-api-base "{{baseUrl}}" --model "{{model}}"`,
     acpSpawnable: false,
     baseUrlSupport: "full",
     defaultCommand: "crush",
+  },
+
+  /** Zed editor's built-in agent via an OpenAI-compatible provider (`omniroute setup-zed`). */
+  zed: {
+    id: "zed",
+    name: "Zed",
+    image: "/providers/zed-hosted.svg",
+    color: "#084CCF",
+    description: "Zed code editor — built-in agent through an OpenAI-compatible provider",
+    docsUrl: "https://zed.dev/docs/ai/llm-providers#openai-api-compatible",
+    configType: "guide",
+    category: "code",
+    vendor: "Zed Industries",
+    acpSpawnable: false,
+    baseUrlSupport: "full",
+    guideSteps: [
+      { step: 1, title: "Install Zed", desc: "Download Zed from zed.dev" },
+      { step: 2, title: "API Key", type: "apiKeySelector" },
+      { step: 3, title: "Base URL", value: "{{baseUrl}}", copyable: true },
+      { step: 4, title: "Select Model", type: "modelSelector" },
+    ],
+    codeBlock: {
+      language: "json",
+      code: `// ~/.config/zed/settings.json — or run: omniroute setup-zed
+{
+  "language_models": {
+    "openai_compatible": {
+      "omniroute": {
+        "api_url": "{{baseUrl}}",
+        "available_models": [
+          { "name": "{{model}}", "display_name": "{{model}}", "max_tokens": 200000 }
+        ]
+      }
+    }
+  }
+}`,
+    },
+    notes: [
+      {
+        type: "info",
+        text: "Zed reads the key from the OMNIROUTE_API_KEY environment variable and never stores it in settings.json. Export it, then start Zed from that shell.",
+      },
+    ],
   },
 
   // ── Agent entries ─────────────────────────────────────────────────────────

@@ -26,34 +26,34 @@
 
 ---
 
-## Estrutura de nível superior
+## Estrutura de Nível Superior
 
 ```
 open-sse/
 ├── index.ts              # Ponto de entrada público
 ├── types.d.ts            # Exportações públicas de tipos
 ├── package.json          # @omniroute/open-sse
-├── config/               # Configurações de provedores, constantes e registros
-├── executors/            # Executores HTTP por provedor (67 + base.ts/index.ts)
-├── handlers/             # Manipuladores de solicitações (chatCore, responses etc.)
+├── config/               # Configurações de provedores, constantes, registros
+├── executors/            # Executores HTTP por provedor (150 módulos + base.ts/index.ts)
+├── handlers/             # Manipuladores de requisições (chatCore, responses etc.)
 ├── lib/                  # Utilitários internos
-├── mcp-server/           # Servidor Model Context Protocol
-├── services/             # Cerca de 298 módulos de serviço
+├── mcp-server/           # Servidor do Model Context Protocol
+├── services/             # ~298 módulos de serviço
 ├── transformer/          # Transformador de formato da Responses API
 ├── translator/           # Tradução de formatos (OpenAI ↔ Claude ↔ Gemini)
 └── utils/                # Utilitários compartilhados (logs, erros, streams etc.)
 ```
 
-### Quantidade de módulos
+### Contagem de Módulos
 
 | Diretório | Arquivos | Finalidade |
-| `executors/` | 167 | Executores HTTP por provedor (unificados por meio da factory DefaultExecutor) |
-| `handlers/` | 157 | Pontos de entrada de solicitações (chatCore, responses, embeddings) |
+| `executors/` | 167 | Executores HTTP por provedor (unificados por meio da fábrica DefaultExecutor) |
+| `handlers/` | 157 | Pontos de entrada de requisições (chatCore, responses, embeddings) |
 | `services/` | ~536 | Roteamento, cache, limitação de taxa, atualização etc. |
 | `translator/` | 56 | Conversão de formatos (OpenAI ↔ Claude ↔ Gemini) |
 | `mcp-server/` | 44 | Ferramentas e transportes MCP |
 | `utils/` | ~108 | Utilitários transversais (logs, erros, streams) |
-| `config/` | ~339 | Configurações de provedores, constantes e registros |
+| `config/` | ~339 | Configurações de provedores, constantes, registros |
 
 ---
 
@@ -165,11 +165,11 @@ Os artefatos de log das chamadas (se habilitados) são gravados em `${DATA_DIR}/
 
 ---
 
-## Análise Detalhada dos Principais Arquivos
+## Análise Aprofundada dos Principais Arquivos
 
 ### chatCore.ts (5977 linhas)
 
-O **principal manipulador de requisições**. Apesar de seu tamanho, ele tem uma estrutura clara:
+O **principal manipulador de requisições**. Apesar do tamanho, ele tem uma estrutura clara:
 
 ```ts
 // Pseudoestrutura de chatCore.ts
@@ -196,7 +196,7 @@ export async function handleChat(request: NextRequest) {
       await recordUsage(result);
       return result;
     } catch (err) {
-      // Continuar para o próximo destino
+      // Continua para o próximo destino
     }
   }
 
@@ -205,9 +205,9 @@ export async function handleChat(request: NextRequest) {
 }
 ```
 
-Apesar de ser uma única função gigantesca, ela está organizada em **seções comentadas** que correspondem ao pipeline de 5 etapas.
+Apesar de ser uma única função enorme, ela está organizada em **seções comentadas** que correspondem ao pipeline de 5 etapas.
 
-### combo.ts (4456 linhas de código)
+### combo.ts (4456 LOC)
 
 O **mecanismo de roteamento** que resolve um combo em destinos ordenados.
 
@@ -228,34 +228,34 @@ export async function handleComboChat(body, comboId): Promise<ChatResult> {
 
 Oferece suporte a **19 estratégias de roteamento** (consulte `src/shared/constants/routingStrategies.ts`):
 
-| Estratégia          | Comportamento                                                                  |
-| ------------------- | ------------------------------------------------------------------------------ |
-| `priority`          | Lista ordenada com o primeiro destino em primeiro lugar                        |
-| `weighted`          | Probabilístico por peso de cada destino                                        |
-| `round-robin`       | Percorre os destinos em ordem                                                  |
-| `context-relay`     | Transfere o contexto entre os destinos                                         |
-| `fill-first`        | Preenche a cota antes de passar para o próximo                                 |
-| `p2c`               | Poder de duas escolhas                                                         |
-| `random`            | Aleatório uniforme                                                             |
-| `least-used`        | Escolhe aquele com menos usos recentes                                         |
-| `cost-optimized`    | Destino íntegro mais barato primeiro                                           |
-| `reset-aware`       | Considera as janelas de redefinição do provedor                                |
-| `reset-window`      | Roteamento baseado na janela de redefinição                                    |
-| `headroom`          | Maior margem de cota restante primeiro                                         |
-| `strict-random`     | Verdadeiramente uniforme (sem ponderação por qualidade)                        |
-| `auto`              | Usa pontuação de 16 fatores (`autoCombo/`)                                     |
-| `lkgp`              | Último provedor conhecido como funcional primeiro                              |
-| `context-optimized` | Melhor para requisições de contexto longo                                      |
-| `fusion`            | Distribui para um painel em paralelo e depois sintetiza via juiz (`fusion.ts`) |
+| Estratégia          | Comportamento                                                                                        |
+| ------------------- | ---------------------------------------------------------------------------------------------------- |
+| `priority`          | Lista ordenada priorizando o primeiro destino                                                        |
+| `weighted`          | Seleção probabilística pelo peso de cada destino                                                     |
+| `round-robin`       | Percorre os destinos em ordem                                                                        |
+| `context-relay`     | Repassa o contexto entre os destinos                                                                 |
+| `fill-first`        | Preenche a cota antes de passar para o próximo                                                       |
+| `p2c`               | Poder de duas escolhas                                                                               |
+| `random`            | Seleção aleatória uniforme                                                                           |
+| `least-used`        | Escolhe o que teve menos usos recentes                                                               |
+| `cost-optimized`    | Destino íntegro mais barato primeiro                                                                 |
+| `reset-aware`       | Considera as janelas de redefinição do provedor                                                      |
+| `reset-window`      | Roteamento baseado na janela de redefinição                                                          |
+| `headroom`          | Maior margem de cota restante primeiro                                                               |
+| `strict-random`     | Verdadeiramente uniforme (sem ponderação por qualidade)                                              |
+| `auto`              | Usa pontuação de 16 fatores (`autoCombo/`)                                                           |
+| `lkgp`              | Último provedor reconhecidamente funcional primeiro                                                  |
+| `context-optimized` | Melhor para requisições de contexto longo                                                            |
+| `fusion`            | Distribui em paralelo para um painel e, em seguida, sintetiza por meio de um avaliador (`fusion.ts`) |
 
-### base.ts (1170 linhas de código)
+### base.ts (1170 LOC)
 
-O **executor abstrato** que todos os 107 executores estendem. Ele contém:
+O **executor abstrato** que toda classe executora estende (diretamente ou por meio de `DefaultExecutor` e outras subclasses). Ele contém:
 
-- `buildUrl()` — construção padrão da URL (as subclasses a substituem para personalização)
+- `buildUrl()` — construção padrão da URL (as subclasses a sobrescrevem para personalizá-la)
 - `buildHeaders()` — cabeçalhos padrão (autenticação, tipo de conteúdo)
 - `transformRequest()` — passagem direta por padrão
-- `execute()` — o loop HTTP principal com nova tentativa/recuo/disjuntor
+- `execute()` — o loop HTTP principal com novas tentativas/backoff/disjuntor
 
 ```ts
 // open-sse/executors/default.ts
@@ -265,7 +265,7 @@ export class DefaultExecutor extends BaseExecutor {
 }
 ```
 
-O comportamento específico de cada provedor (cabeçalhos de autenticação, URL base, cabeçalhos de versão) é configurado por meio do registro de provedores, não por classes de executor separadas.
+O comportamento específico de cada provedor (cabeçalhos de autenticação, URL base, cabeçalhos de versão) é configurado por meio do registro de provedores, e não por classes executoras separadas.
 
 ````
 
@@ -273,24 +273,24 @@ O comportamento específico de cada provedor (cabeçalhos de autenticação, URL
 
 ## Serviços (117 módulos)
 
-Os serviços são **módulos focados e de propósito único** que os handlers compõem. As principais categorias:
+Os serviços são **módulos focados e de propósito único** que os manipuladores combinam. As principais categorias:
 
-### Roteamento e Combinação
+### Roteamento e combinação
 
 - `combo.ts` — ponto de entrada para solicitações roteadas por combinação
 - `services/autoCombo/` — pontuação de 16 fatores, 8 estratégias de roteamento automático
 - `wildcardRouter.ts` — corresponde a rotas com curingas (`gpt-*`)
 - `modelFamilyFallback.ts` — fallback intrafamília T5
 
-### Limitação de Taxa e Cota
+### Limitação de taxa e cota
 
-- `rateLimitManager.ts` — bucket de tokens por chave+provedor
+- `rateLimitManager.ts` — balde de tokens por chave+provedor
 - `usage.ts` — registro de uso
 - `quotaCache.ts` — snapshots de cota em memória
 
-### Conta e Token
+### Conta e token
 
-- `tokenRefresh.ts` — renovação OAuth em respostas 401
+- `tokenRefresh.ts` — renovação OAuth em caso de 401
 - `accountFallback.ts` — alterna para uma conta alternativa
 - `sessionManager.ts` — estado de sessão com múltiplos turnos
 
@@ -303,38 +303,38 @@ Os serviços são **módulos focados e de propósito único** que os handlers co
 
 ### Resiliência
 
-- `resilience.ts` — orquestração de repetição, backoff e circuit breaker
+- `resilience.ts` — orquestração de novas tentativas, backoff e circuit breaker
 - `emergencyFallback.ts` — fallback de último recurso
 - `modelDeprecation.ts` — roteamento automático para modelos sucessores
 
 ### Estado
 
-- `signatureCache.ts` — desduplicação pela assinatura da solicitação
+- `signatureCache.ts` — desduplicação por assinatura da solicitação
 - `volumeDetector.ts` — redução de carga
-- `contextHandoff.ts` — serialização da sessão
+- `contextHandoff.ts` — serialização de sessão
 
-### Compressão
+### Compactação
 
-- `compression/` (subdiretório) — pipeline completo de compressão
+- `compression/` (subdiretório) — pipeline completo de compactação
 - 39 arquivos abrangendo mecanismos, pacotes de regras e adaptadores
 
 ### Habilidades
 
-- (abordado em [SKILLS.md](./SKILLS.md))
+- (abordadas em [SKILLS.md](./SKILLS.md))
 
 ### Memória
 
-- (abordado em [MEMORY.md](./MEMORY.md))
+- (abordada em [MEMORY.md](./MEMORY.md))
 
 ---
 
-## Executores (mais de 75 arquivos)
+## Executores (150 módulos)
 
-Um arquivo por provedor. Todos estendem `BaseExecutor` e sobrescrevem o que for diferente.
+Principalmente um arquivo por provedor. Todas as classes de executor estendem `BaseExecutor` e sobrescrevem o que é diferente; os outros módulos são auxiliares específicos de cada provedor (esquemas de ferramentas, adaptadores de fetch/TTS e manipuladores de particularidades).
 
-### Padrões Comuns
+### Padrões comuns
 
-Os provedores são resolvidos por meio de `getExecutor(providerId)`, que retorna o executor configurado. Provedores compatíveis com OpenAI/Anthropic usam `DefaultExecutor` (`executors/default.ts`). O comportamento específico de cada provedor (URL base, cabeçalhos de autenticação, versão da API) é configurado em `open-sse/config/providers/`, enquanto as transformações do corpo da solicitação são processadas em `open-sse/translator/`.
+Os provedores são resolvidos por meio de `getExecutor(providerId)`, que retorna o executor configurado. Provedores compatíveis com OpenAI/Anthropic usam `DefaultExecutor` (`executors/default.ts`). O comportamento específico do provedor (URL base, cabeçalhos de autenticação, versão da API) é configurado em `open-sse/config/providers/`, enquanto as transformações do corpo da solicitação são tratadas em `open-sse/translator/`.
 
 A **URL personalizada** é definida por meio da configuração do provedor:
 
@@ -346,13 +346,13 @@ export default {
 }
 ````
 
-A **autenticação personalizada** é processada por meio da configuração de autenticação do registro de provedores (chave de API, OAuth, perfis de cabeçalho).
+A **autenticação personalizada** é tratada pela configuração de autenticação do registro de provedores (chave de API, OAuth, perfis de cabeçalhos).
 
-As transformações **personalizadas do corpo da solicitação** (por exemplo, a separação de `system` de `messages` pela Anthropic) são registradas por provedor em `open-sse/translator/`.
+As transformações **personalizadas do corpo da solicitação** (por exemplo, a separação de `system` e `messages` pela Anthropic) são registradas por provedor em `open-sse/translator/`.
 
 ````
 
-### A Fábrica de Executores
+### A fábrica de executores
 
 `executors/index.ts` exporta `getExecutor(providerId)`:
 
@@ -366,7 +366,7 @@ const result = await executor.execute({
 });
 ````
 
-A resolução passa pelo `ExecutorRegistry` (`executors/registry.ts`): cada executor especializado é declarado na tabela integrada de `executors/index.ts` e registrado por meio de `registerExecutor(alias, instance)` no carregamento do módulo; `getExecutor()` consulta o registro e recorre a um `DefaultExecutor` memoizado para qualquer provedor sem uma entrada especializada. O mapeamento completo de alias → executor é caracterizado pelo teste golden `tests/unit/executor-map-golden.test.ts`.
+A resolução passa pelo `ExecutorRegistry` (`executors/registry.ts`): cada executor especializado é declarado na tabela integrada de `executors/index.ts` e registrado por meio de `registerExecutor(alias, instance)` durante o carregamento do módulo; `getExecutor()` consulta o registro e recorre a um `DefaultExecutor` memoizado para qualquer provedor sem uma entrada especializada. O mapeamento completo de alias → executor é caracterizado pelo teste golden `tests/unit/executor-map-golden.test.ts`.
 
 ---
 
@@ -483,15 +483,15 @@ Isso processa:
 
 `open-sse/config/` contém a camada de configuração:
 
-| Arquivo                       | Finalidade                                                |
-| ----------------------------- | --------------------------------------------------------- |
-| `providerRegistry.ts`         | Registro de modelos de chat no catálogo de 352 provedores |
-| `providerModels.ts`           | Aliases de modelos, mapeamento de formatos                |
-| `constants.ts`                | Tempos limite, limites, códigos de status                 |
-| `defaultThinkingSignature.ts` | Assinatura de raciocínio padrão do Claude                 |
-| `modelStrip.ts` (em services) | Remoção de campos por provedor                            |
+| Arquivo                       | Finalidade                                                     |
+| ----------------------------- | -------------------------------------------------------------- |
+| `providerRegistry.ts`         | Registro de modelos de chat sobre o catálogo de 374 provedores |
+| `providerModels.ts`           | Aliases de modelos, mapeamento de formatos                     |
+| `constants.ts`                | Tempos limite, limites, códigos de status                      |
+| `defaultThinkingSignature.ts` | Assinatura de raciocínio padrão do Claude                      |
+| `modelStrip.ts` (em services) | Remoção de campos por provedor                                 |
 
-### Esquema do registro de provedores
+### Esquema do Registro de Provedores
 
 ```ts
 interface ProviderConfig {

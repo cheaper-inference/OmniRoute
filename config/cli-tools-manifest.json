@@ -696,6 +696,18 @@
         "generate": false
       }
     },
+    "zed": {
+      "displayName": "Zed",
+      "aliases": [],
+      "binaries": ["zed", "zeditor"],
+      "surfaces": {
+        "catalog": true,
+        "detect": false,
+        "run": false,
+        "configure": false,
+        "generate": false
+      }
+    },
     "5dive": {
       "displayName": "5dive (agent fleet)",
       "aliases": ["fivedive", "5dive-cli"],

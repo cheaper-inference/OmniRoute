@@ -1,16 +1,16 @@
 import { NextResponse } from "next/server";
-import { isAuthenticated } from "@/shared/utils/apiAuth";
+import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 import { revokeRegisteredKey } from "@/lib/db/registeredKeys";
 
 /**
  * POST /api/v1/registered-keys/[id]/revoke
  *
  * Explicit revoke endpoint (supports clients that cannot issue DELETE requests).
+ * Management-only like /api/keys — see ../../route.ts for why the guard is explicit here.
  */
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  if (!(await isAuthenticated(request))) {
-    return NextResponse.json({ error: { message: "Authentication required" } }, { status: 401 });
-  }
+  const authError = await requireManagementAuth(request);
+  if (authError) return authError;
 
   const resolvedParams = await params;
   const revoked = revokeRegisteredKey(resolvedParams.id);

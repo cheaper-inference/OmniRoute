@@ -68,143 +68,167 @@ eksponentni zamik `minRetryCooldownMs → maxRetryCooldownMs`. Preglasitve:
 `OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`.
 Varovalo pred regresijami: `tests/unit/provider-cooldown-window-gate.test.ts`.
 
-## 2. Ohlajanje povezave
+## 2. Obdobje mirovanja povezave
 
 **Obseg:** posamezna povezava/račun/ključ ponudnika.
 
-**Namen:** preskoči en neustrezen ključ, medtem ko druge povezave istega ponudnika še naprej obravnavajo zahteve.
+**Namen:** preskočiti en neveljaven ključ, medtem ko druge povezave istega ponudnika še naprej obravnavajo zahteve.
 
 **Implementacija:**
 
-- Označevanje kot nedosegljivo: `src/sse/services/auth.ts::markAccountUnavailable()`
+- Označitev kot nerazpoložljivo: `src/sse/services/auth.ts::markAccountUnavailable()`
 - Izbira: `getProviderCredentials*` v isti datoteki
-- Izračun ohlajanja: `open-sse/services/accountFallback.ts::checkFallbackError()`
+- Izračun obdobja mirovanja: `open-sse/services/accountFallback.ts::checkFallbackError()`
 - Nastavitve: `src/lib/resilience/settings.ts`
 
 **Polja za posamezno povezavo:**
 
-- `rateLimitedUntil` — časovni žig, do katerega traja ohlajanje
+- `rateLimitedUntil` — časovni žig poteka obdobja mirovanja
 - `testStatus: "unavailable"`
 - `lastError`, `lastErrorType`, `errorCode`
 - `backoffLevel` — števec eksponentnega podaljševanja čakanja
 
-**Privzeta obdobja ohlajanja:**
+**Privzeta obdobja mirovanja:**
 
-- Osnova za OAuth: 5 s
-- Osnova za ključ API: 3 s
-- 429 za ključ API: prednostno uporabi podatke nadrejenega strežnika iz `Retry-After`/glav ponastavitve/razčlenljivega besedila o ponastavitvi
+- Osnovno obdobje za OAuth: 5s
+- Osnovno obdobje za ključ API: 3s
+- 429 za ključ API: prednost imajo podatki `Retry-After`/glave za ponastavitev iz nadrejene storitve/besedilo ponastavitve, ki ga je mogoče razčleniti
 - Podaljševanje čakanja: `baseCooldownMs * 2 ** failureIndex`
 
-**Zaščita pred stampedom zahtev:** preprečuje, da bi sočasne napake čezmerno podaljšale ohlajanje ali dvakrat povečale `backoffLevel`.
+**Zaščita pred stampedom zahtev:** preprečuje, da bi sočasne napake čezmerno podaljšale obdobje mirovanja ali dvakrat povečale `backoffLevel`.
 
-**Končna stanja (NISO ohlajanja):**
+**Napake 429 zaradi omejitve sočasnosti ne zvišujejo stopnje podaljševanja čakanja.** Odgovor `429`, katerega telo sporoča omejitev sočasnosti ("too many concurrent requests", "concurrency limit", "parallel request limit", GLM `并发数过高`), pomeni, da je račun brezhiben, vendar zaseden.
+`checkFallbackError()` vrne razlog `concurrency_limited`: takoj preklopi na naslednjo povezavo, za to povezavo nastavi fiksno obdobje mirovanja `CONCURRENCY_LIMIT_COOLDOWN_MS` (1s) ali čas, ki ga predlaga nadrejena storitev, pusti `backoffLevel` nespremenjen in nastavi `skipProviderBreaker`.
+Izrecno sporočilo o kvoti ima še vedno prednost, zato telo, ki se ujema tudi z vzorcem za kvoto, ostane razvrščeno kot kvota.
+Zaznavanje: `looksLikeConcurrencyLimit()` v `src/shared/utils/classify429.ts`; odločitev: `open-sse/services/accountFallback/concurrencyLimit429.ts`. `classify429()` (`FailureKind` odklopnika) ostane nespremenjen in za ta telesa še vedno vrne `rate_limit`.
 
-- `banned` — nastavi se ob zaznavi prepovedane ključne besede/prepovedi računa (glejte [BAN_DETECTION](../security/BAN_DETECTION.md)) in ob treh zaporednih zavrnitvah posamezne zahteve s strani nadrejenega strežnika (`request_rejected`, npr. Anthropic OAuth 403 »Request not allowed« — `open-sse/services/requestRejectedStreak.ts`); posamezna zavrnitev povezavo le začasno ohladi
-- `expired` (po omejenem številu ponovnih poskusov preide v končno stanje — `EXPIRED_RETRY_MAX = 3` z eksponentnim podaljševanjem čakanja — tako da se lahko prehodne napake OAuth samodejno odpravijo, preden je račun trajno deaktiviran)
+**Zastoji vsebine toka ne sprožijo obdobja mirovanja računa.** Ko nadzornik zastoja vsebine (`open-sse/utils/streamHandler.ts`) opusti tok, ki ni pravočasno poslal nobenega izhoda modela, `markAccountUnavailable()` zabeleži napako povezave, vendar ne nastavi obdobja mirovanja: zastoj pripada tej zahtevi in je najpogosteje posledica dolgega koraka sklepanja, ki še ni ustvaril izhoda. Upravljavci lahko to znova omogočijo z `resilienceSettings.streamStallCooldown.enabled` (privzeto `false`).
+
+**Okvirji sklepanja znova zaženejo časovni proračun zastoja vsebine.** Model za sklepanje lahko razmišlja več minut, preden ustvari prvi vidni žeton: Claude pretaka okvirje `thinking_delta`, katerih besedilo razmišljanja je lahko prazno, API Responses pa pretaka en element sklepanja za drugim. `isReasoningProgressFrame()` (`open-sse/utils/streamReadiness.ts`) prepozna te okvirje, nadzornik pa ob vsakem od njih znova zažene svoj časovni proračun, namesto da bi preklical izvajanje. Ti okvirji še vedno niso izhod modela, zato se izvajanje, ki se konča samo s sklepanjem, še vedno sporoči kot prazno, izvajanje, ki preneha sklepati in pošilja samo še signale o aktivnosti, pa še vedno sproži nadzornika.
+
+Kirovi binarni okvirji `reasoningContentEvent` z nepraznim podpisom ohranijo to dejavnost sklepanja skozi izvajalnik kot prazno spremembo `reasoning_content`. Podpis se ne posreduje naprej. Metapodatki, nepopolni okvirji in prazni podpisi ne zaženejo znova časovnega proračuna vsebine; neodvisna časovna omejitev aktivnega toka in preklic odjemalca še vedno veljata (`open-sse/executors/kiro/reasoning.ts`).
+
+**Končna stanja (NISO obdobja mirovanja):**
+
+- `banned` — nastavi se ob zaznavi prepovedane ključne besede/prepovedi računa (glejte [BAN_DETECTION](../security/BAN_DETECTION.md)) in po treh zaporednih zavrnitvah posamezne zahteve v nadrejeni storitvi (`request_rejected`, npr. Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`); posamezna zavrnitev povezavo le začasno postavi v mirovanje
+- `expired` (po omejenem številu ponovitev preide v končno stanje — `EXPIRED_RETRY_MAX = 3` z eksponentnim podaljševanjem čakanja — zato se lahko prehodne napake OAuth samodejno odpravijo, preden je račun trajno deaktiviran)
 - `credits_exhausted`
 
-Ta stanja ostanejo, dokler se poverilnice ne spremenijo ali jih skrbnik ne ponastavi. Končnih stanj ne prepišite s prehodnim stanjem ohlajanja.
+Ta stanja se ohranijo, dokler se poverilnice ne spremenijo ali jih upravljavec ne ponastavi. Končnih stanj ne prepišite s prehodnim stanjem mirovanja.
 
-**Lena obnovitev:** ko je `rateLimitedUntil` v preteklosti, povezava znova postane primerna za uporabo. Ob uspešni uporabi `clearAccountError()` počisti vsa polja z napakami.
+**Leno obnavljanje:** ko je `rateLimitedUntil` v preteklosti, povezava znova postane primerna za uporabo. Po uspešni uporabi `clearAccountError()` počisti vsa polja napak.
 
 ### Omejitev uporabe Claude OAuth: pas z nižjo prioriteto + ponastavitev omejitve seje
 
-**Obseg:** ena naročniška povezava Claude (OAuth). Obe funkciji sta **izbirni za vsako
-povezavo posebej** (Uredi povezavo → razdelek Claude → `lowPriorityMode` / `autoLimitReset` v
-`providerSpecificData`; obe sta privzeto izklopljeni) in posnemata ukaza `/low-priority` in
-`/limit-reset` orodja Claude Code (protokol na žici je zajet iz Claude Code 2.1.263).
+**Obseg:** ena povezava z naročnino Claude (OAuth). Obe funkciji je treba **izrecno omogočiti za posamezno povezavo** (Uredi povezavo → razdelek Claude → `lowPriorityMode` / `autoLimitReset` v `providerSpecificData`; obe sta privzeto izklopljeni) in posnemata ukaza `/low-priority` ter `/limit-reset` orodja Claude Code (žični protokol je zajet iz Claude Code 2.1.263).
 
 **Implementacija:**
 
-- Avtomat stanj + razvrščanje odzivov: `open-sse/services/claudeLowPriority.ts`
-- Odjemalec za stanje/uveljavljanje ponastavitve: `open-sse/services/claudeLimitReset.ts`
-- Kavelj izvajalnika (vstavljanje glave + ponovni poskus z istim računom): `open-sse/executors/base.ts::execute()`
-- Shranjevanje izbirne nastavitve: `src/lib/providers/requestDefaults.ts::normalizeProviderSpecificData()`
+- Avtomat stanj + razvrščanje odgovorov: `open-sse/services/claudeLowPriority.ts`
+- Odjemalec za stanje/prevzem ponastavitve: `open-sse/services/claudeLimitReset.ts`
+- Kavelj izvajalnika (vstavljanje glave + ponovitev z istim računom): `open-sse/executors/base.ts::execute()`
+- Shranjevanje izrecne omogočitve: `src/lib/providers/requestDefaults.ts::normalizeProviderSpecificData()`
 
-**Sprožilec:** 5-urna omejitev uporabe — odziv `429`, katerega glave vsebujejo
-`anthropic-ratelimit-unified-status: rejected` in, kadar je račun primeren,
-`anthropic-ratelimit-unified-slow-offer: treatment`. Pred prvim odzivom 429 zaradi te omejitve
-se ne pošlje nič; množica odzivov 429 brez poenotenih glav gre po običajni poti ohlajanja.
+**Sprožilec:** 5-urna omejitev uporabe — odgovor `429`, katerega glave vsebujejo `anthropic-ratelimit-unified-status: rejected` in, kadar je račun upravičen, `anthropic-ratelimit-unified-slow-offer: treatment`. Pred prvim odgovorom 429 zaradi te omejitve se ne pošlje nič; nenadni odgovor 429 brez poenotenih glav se obravnava po običajni poti obdobja mirovanja.
 
 **Pas z nižjo prioriteto** (`lowPriorityMode`):
 
-- Ob odzivu 429 zaradi omejitve izvajalnik sprejme ponudbo in takoj znova poskusi z **istim**
-  računom ter glavo `anthropic-usage-limit: slow`; pas ostane aktiven do napovedanega časa
-  `anthropic-ratelimit-unified-reset` (+60 s dodatnega časa), vsaka zahteva v tem obdobju pa
-  vsebuje to glavo. Prestrezani odziv 429 nikoli ne doseže `handleChatCore`, zato povezava
-  **ni** prestavljena v ohlajanje in ni zamenjana.
-- `anthropic-ratelimit-unified-slow-status` v poznejših odzivih: `active` / `not_needed`
-  ohranita pas; pri `slot_busy` (429) ali `529` se počaka toliko, kot določa strežnikova glava
-  `anthropic-ratelimit-unified-slow-retry-after` (privzeto 20 s, omejeno na 5–600 s, ±30 % naključnega odklona),
-  nato pa se zahteva ponovi, pri čemer je čakanje omejeno z `anthropic-ratelimit-unified-slow-max-wait`
-  (privzeto 20 min, omejeno na 1 min–6 h) — po prekoračitvi se pas konča, 10-minutno obdobje
-  mirovanja pa prepreči ponovni sprejem. Čakanje je dodatno omejeno s preostankom časovne omejitve
-  za začetek nadrejene zahteve (`resolveFetchStartTimeout`, privzeto 10 min) minus 5 s rezerve:
-  brez te omejitve bi privzeto 20-minutno najdaljše čakanje preseglo življenjsko dobo zahteve,
-  mirovanje bi bilo prekinjeno sredi čakanja, posledično pa bi se namesto nadzorovanega konca
-  `max_wait` in obdobja mirovanja prikazala napaka `TimeoutError`.
-- `weekly_limit` / `budget_exhausted` / `off` / `ineligible`, prehod v novo 5-urno obdobje ali
-  `ineligible` + `anthropic-ratelimit-unified-overage-in-use: true` (kar pas pri katerem koli
-  stanju konča kot `extra_usage`, saj plačana presežna uporaba zdaj pokrije omejitev) končajo pas;
-  odziv nato nadaljuje po običajni poti ohlajanja. `budget_exhausted` se pomni do napovedane
+- Ob omejitvi 429 izvajalnik sprejme ponudbo in takoj znova poskusi z **istim**
+  računom z `anthropic-usage-limit: slow`; pas ostane aktiven do napovedanega časa
+  `anthropic-ratelimit-unified-reset` (+60 s dodatnega časa), vsaka zahteva v tem oknu pa vsebuje
+  to glavo. Prestrezena napaka 429 nikoli ne doseže `handleChatCore`, zato povezava
+  **ni** prestavljena v obdobje ohlajanja in ni zamenjana.
+- `anthropic-ratelimit-unified-slow-status` pri poznejših odgovorih: `active` / `not_needed`
+  ohranita pas; `slot_busy` (429) ali `529` počakata čas
+  `anthropic-ratelimit-unified-slow-retry-after`, ki ga določi strežnik (privzeto 20 s, omejeno
+  na 5–600 s, ±30 % naključnega odklona), in poskusita znova, v mejah
+  `anthropic-ratelimit-unified-slow-max-wait` (privzeto 20 min, omejeno
+  na 1 min–6 h) — po tem se pas konča, 10-minutno obdobje ohlajanja pa prepreči ponovni sprejem.
+  Čakanje je dodatno omejeno s preostankom lastne časovne omejitve zahteve za začetek komunikacije
+  z nadrejenim strežnikom (`resolveFetchStartTimeout`, privzeto 10 min), zmanjšanim za 5 s: brez te
+  omejitve bi privzeto 20-minutno najdaljše čakanje preseglo življenjsko dobo zahteve, mirovanje pa
+  bi bilo prekinjeno sredi čakanja, kar bi namesto urejenega zaključka `max_wait` in ohlajanja
+  povzročilo `TimeoutError`.
+- `weekly_limit` / `budget_exhausted` / `off` / `ineligible`, ponastavitev 5-urnega okna ali
+  `ineligible` + `anthropic-ratelimit-unified-overage-in-use: true` (kar ga pri katerem koli
+  stanju konča kot `extra_usage`, saj plačana prekoračitev zdaj pokrije omejitev) končajo pas;
+  odgovor nato nadaljuje po običajni poti ohlajanja. `budget_exhausted` se pomni do napovedane
   ponastavitve proračuna (≤ 8 dni).
-- Preverjanje omejitve se izvede po izvajalnikovih lastnih ponovnih poskusih znotraj istega
-  poskusa, ki jih sproži odziv 400 (urejanje konteksta, omejevanje razmišljanja/napora,
-  samodejno učenje parametrov), zato je odziv 429 zaradi omejitve, ki se pojavi šele pri
-  enem od teh ponovnih poskusov, še vedno prestrežen, namesto da bi dosegel pot ohlajanja.
-- Stanje se hrani v pomnilniku za vsako povezavo posebej (ponovni zagon povzroči en dodaten
-  odziv 429 zaradi omejitve, preden je ponudba znova sprejeta).
+- Preverjanje omejitve se izvede po lastnih ponovnih poskusih izvajalnika znotraj posameznega
+  poskusa, ki jih sproži napaka 400 (urejanje konteksta, omejitve razmišljanja/napora, samodejno
+  učenje parametrov), zato je napaka 429 zaradi omejitve, ki se pojavi šele pri enem od teh
+  ponovnih poskusov, še vedno prestrežena, namesto da bi dosegla pot ohlajanja.
+- Stanje se hrani v pomnilniku za vsako povezavo posebej (ponovni zagon zahteva eno dodatno
+  napako 429 zaradi omejitve za ponovni sprejem).
 
-**Ponastavitev omejitve seje** (`autoLimitReset`, izvede se pred pasom, kadar sta omogočena oba):
+**Ponastavitev omejitve seje** (`autoLimitReset`, poskus se izvede pred pasom, kadar sta oba vklopljena):
 
 - `GET https://api.anthropic.com/api/oauth/usage?at_wall=1&skip_spend=1` → blok `juniper_tide`;
   kadar sta `arm: "reset"` in `available: true`,
   `POST https://api.anthropic.com/api/organizations/{orgUUID}/reset_rate_limits` z
   `{ "program": "juniper_tide" }` (UUID organizacije iz
-  `providerSpecificData.organizationUUID`, z rezervnim pridobivanjem ob inicializaciji).
-- `result: reset|not_limited` → zahteva se znova poskusi s polno hitrostjo (brez glave za počasni način).
-  `already_used` / `not_offered` si zapomnita `next_available_at` (privzeto en teden); ob
-  kateri koli napaki se uporabi 15-minutno podaljšano čakanje. Ponastavitev je mogoča enkrat
-  tedensko in se še vedno všteva v tedensko omejitev.
+  `providerSpecificData.organizationUUID`, z rezervno uporabo začetnih podatkov).
+- `result: reset|not_limited` → zahteva se znova poskusi s polno hitrostjo (brez glave za
+  počasni način). `already_used` / `not_offered` si zapomnita `next_available_at` (privzeto en
+  teden); vsaka napaka povzroči 15-minutni odmik. Ponastavitev je mogoča enkrat tedensko in še
+  vedno šteje v tedensko omejitev.
 
 Varovala pred regresijami: `tests/unit/claude-low-priority-mode.test.ts`,
 `tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
 
 ### Afiniteta seje (#7274)
 
-**Obseg:** ena seja odjemalca (glava `X-Session-Id` / `x-codex-session-id` / `x-omniroute-session`), pripeta na eno povezavo za **katerega koli** ponudnika.
+**Obseg:** ena seja odjemalca (glava `X-Session-Id` / `x-codex-session-id` / `x-omniroute-session`), pripeta na eno povezavo, za **katerega koli** ponudnika.
 
-**Namen:** ohraniti večobratnega agenta (Claude Code, aider, prilagojene agente) na istem računu med zahtevami ter tako zmanjšati izgubo konteksta zaradi prehajanja med računi in ponavljajoče se napake 429 ob hladnem zagonu pri ponudnikih s stanjem seje na ravni računa.
+**Namen:** ohraniti večkrožnega agenta (Claude Code, aider, agenti po meri) na istem računu med zahtevami, s čimer se zmanjšajo izguba konteksta med računi in ponavljajoče se napake 429 pri hladnem zagonu pri ponudnikih s stanjem seje na ravni računa.
 
-**Implementacija:**
+**Izvedba:**
 
 - Razreševanje TTL-ja: `src/sse/services/sessionAffinityPin.ts::resolveSessionAffinityTtlMs()`
-- Izbira/ustvarjanje pripenjanja: `src/sse/services/sessionAffinityPin.ts::selectSessionAffinityConnection()`
+- Izbira/ustvarjanje pripetja: `src/sse/services/sessionAffinityPin.ts::selectSessionAffinityConnection()`
 - Pridobivanje glave (splošno, za katerega koli ponudnika): `src/sse/services/auth.ts::extractSessionAffinityKey()`
-- Tabela trajno shranjenih pripenjanj: `sessionAccountAffinity` (`src/lib/db/sessionAccountAffinity.ts`)
-- Nastavitev: `sessionAffinityTtlMs` (globalni TTL v ms, `0` ga onemogoči) — `src/lib/db/settings.ts`. Z migracijo `124_generic_session_affinity_ttl.sql` je bila preimenovana iz nastavitve `codexSessionAffinityTtlMs`, namenjene samo Codexu; migracija morebitni predhodno konfigurirani TTL za Codex prenese kot novo privzeto vrednost.
+- Trajno shranjena tabela pripetij: `sessionAccountAffinity` (`src/lib/db/sessionAccountAffinity.ts`)
+- Nastavitev: `sessionAffinityTtlMs` (globalni TTL v ms, `0` ga onemogoči) — `src/lib/db/settings.ts`. Preimenovano iz nastavitve `codexSessionAffinityTtlMs`, namenjene samo Codexu, z migracijo `124_generic_session_affinity_ttl.sql`, ki vse predhodno nastavljene vrednosti TTL-ja za Codex prenese kot novo privzeto vrednost.
 
-Pred #7274 je `resolveSessionAffinityTtlMs()` za vse ponudnike razen `codex` takoj vrnil `0`, zato nastavitev TTL-ja (in glave seje) nikjer drugje niso imele učinka, čeprav sta bila mehanizem pripenjanja in pridobivanje glav že neodvisna od ponudnika. Popravek je odstranil to predčasno vračanje; ko je TTL globalno nastavljen nad `0`, se zdaj enotno uporablja za vse ponudnike.
+Pred #7274 je `resolveSessionAffinityTtlMs()` za vsakega ponudnika razen `codex` takoj vrnil `0`, zato nastavitev TTL-ja (in glave seje) drugje ni imela učinka, čeprav sta bila mehanizem pripenjanja in pridobivanje glav že neodvisna od ponudnika. Popravek je odstranil to predčasno vrnitev; TTL se zdaj, ko je globalno nastavljen nad `0`, enotno uporablja za vse ponudnike.
 
-Tri glave za afiniteto seje se nikoli ne posredujejo navzgor — izvajalniki lastne glave za nadrejeno storitev sestavijo od začetka, namesto da bi posredovali glave odjemalca, zato te glave ostanejo zgolj notranji korelacijski identifikator.
+Tri glave afinitete seje se nikoli ne posredujejo nadrejenemu strežniku — izvajalniki lastne glave za nadrejeni strežnik ustvarijo od začetka, namesto da bi neposredno posredovali glave odjemalca, zato to ostane zgolj interni korelacijski ID.
 
-### Ekskluzivni zakupi povezav za upravljane seje
+### Ekskluzivni zakupi povezav upravljanih sej
 
-**Obseg:** en aktiven upravljani odjemalec HTTP oziroma seja ima v lasti eno primerno povezavo OmniRoute.
+**Obseg:** en aktiven upravljani odjemalec/seja HTTP ima v lasti eno primerno povezavo OmniRoute.
 
-**Namen:** zagotoviti trajno ekskluzivno lastništvo povezave za odjemalce, ki med zahtevami potrebujejo strogo omejitev usmerjanja. To se razlikuje od afinitete seje, ki predstavlja mehko prednost za ohranjanje kontinuitete: ekskluzivni zakup trajno hrani stanje življenjskega cikla v SQLite, uveljavlja globalno enoličnost aktivnega lastnika in aktivne povezave ter pred posredovanjem ponudniku zavrne zastarelo generacijo.
+**Namen:** zagotoviti trajno ekskluzivno lastništvo povezave za odjemalce, ki med zahtevami
+potrebujejo strogo mejo usmerjanja. To se razlikuje od afinitete seje, ki je mehka prednostna
+nastavitev neprekinjenosti: ekskluzivni zakup trajno hrani stanje življenjskega cikla v SQLite,
+uveljavlja globalno enoličnost aktivnega lastnika in aktivne povezave ter zavrne zastarelo
+generacijo pred posredovanjem ponudniku.
 
-Funkcija se za vsak ključ API vključi izrecno. Upravljani ključ mora imeti obseg `lease:exclusive` in izrecen neprazen seznam `allowedConnections`. Končno točko življenjskega cikla lahko uporablja kateri koli odjemalec HTTP; ime odjemalca, uporabniški agent, ponudnik, metoda OAuth ali model niso zahtevani. Zakup je lastnik povezave, ne modela, zato sprememba modela ohrani vezavo, dokler povezava ostaja običajno primerna. Običajna pravila glede modela, kvote, stanja, obdobja ohlajanja in seznama dovoljenih povezav ostajajo odločilna ter lahko isto generacijo preusmerijo na drugo prosto primerno povezavo.
+Funkcija se za vsak ključ API vključi izrecno. Upravljani ključ mora imeti obseg `lease:exclusive`
+in izrecen neprazen seznam `allowedConnections`. Končno točko življenjskega cikla lahko uporablja
+kateri koli odjemalec HTTP; ime odjemalca, uporabniški agent, ponudnik, metoda OAuth ali model niso
+zahtevani. Zakup je vezan na povezavo, ne na model, zato se vezava ob spremembi modela ohrani,
+dokler je povezava običajno primerna. Običajna pravila za model, kvoto, stanje, ohlajanje in seznam
+dovoljenih povezav ostajajo merodajna ter lahko isto generacijo preusmerijo na drugo prosto
+primerno povezavo.
 
-Življenjski cikel uporablja `POST /api/v1/session-leases` z dejanji JSON `acquire`, `renew` in `release`. Upravljane zahteve za inferenco posredujejo neprosojno vrednost `X-OmniRoute-Lease-Owner` in natančno vrednost `X-OmniRoute-Lease-Generation`. Identifikator lastnika uporablja predpono `vlo_`, ki ji sledi 43 znakov base64url; shranjen je samo njegov zgoščeni izvleček SHA-256. Vsaka končna omejitev posredovanja je vezana tudi na ID overjenega ključa API in ID aktivne povezave. Nadzorne glave zakupa so odstranjene iz dnevnikov, ohranjenih posnetkov zahtev in glav izvajalnika za nadrejeno storitev.
+Življenjski cikel uporablja `POST /api/v1/session-leases` z dejanji JSON `acquire`, `renew` in `release`.
+Upravljane zahteve za sklepanje vsebujejo neprosojno vrednost `X-OmniRoute-Lease-Owner` in natančno
+vrednost `X-OmniRoute-Lease-Generation`. Identifikator lastnika uporablja predpono `vlo_`, ki ji sledi 43 znakov base64url; shranjena
+je samo njegova zgoščena vrednost SHA-256. Vsaka končna varovalka odpreme je vezana tudi na ID overjenega ključa API in
+ID aktivne povezave. Glave za nadzor najema so odstranjene iz dnevnikov, ohranjenih posnetkov zahtev in
+glav nadrejenega izvajalnika.
 
-Če ima običajno usmerjanje primerne upravljane kandidate, vendar je vsak prosti kandidat zaseden s tujim aktivnim zakupom, OmniRoute vrne HTTP `429`, kodo za nerazpoložljivost zmogljivosti zakupa, stanje čakanja na zmogljivost in omejeno vrednost `Retry-After`, izračunano iz najzgodnejšega ustreznega poteka. Običajna odsotnost primernih kandidatov ne pomeni spora zaradi zakupa in ohrani obstoječo semantiko napak usmerjanja.
+Če ima običajno usmerjanje primerne upravljane kandidate, vendar je vsak prosti kandidat zaseden z
+aktivnim tujim najemom, OmniRoute vrne HTTP `429`, kodo lease-capacity-unavailable,
+stanje čakanja na razpoložljivo zmogljivost in omejeno vrednost `Retry-After`, izpeljano iz najzgodnejšega ustreznega poteka veljavnosti.
+Običajna prazna množica primernih kandidatov ni spor glede najema in ohrani obstoječo semantiko napak usmerjanja.
 
-Sorodni mehanizmi ostajajo ločeni:
+Povezani mehanizmi ostajajo ločeni:
 
-- Zasedenost seje OAuth je mehka porazdelitev računov OAuth, lokalna za proces.
-- Semaforji računov dodeljujejo dovoljenja za sočasno izvajanje zahtev in se končajo, ko se zahteva zaključi.
-- Ekskluzivni zakupi upravljanih sej zagotavljajo trajno lastništvo skozi življenjski cikel z omejitvijo generacije.
+- Zasedenost seje OAuth je mehko porazdeljevanje za račune OAuth, lokalno za proces.
+- Semaforji računov dodeljujejo dovoljenja za sočasne zahteve in se zaključijo, ko je zahteva dokončana.
+- Izključni upravljani najemi sej zagotavljajo trajno lastništvo življenjskega cikla z generacijsko varovalko.
 
 ---
 
@@ -215,26 +239,25 @@ Sorodni mehanizmi ostajajo ločeni:
 **Obseg ključa glede na stanje:** stanje napake določa, v kateri ključ se zapiše zaklep
 (`resolveLockoutScope()` v `open-sse/services/accountFallback/exactModelLock.ts`):
 
-- `429` / `403` / `402` — signal o kvoti ali upravičenosti — zaklene **družino kvot**:
-  pri codex celoten obseg `codex` / `spark` (vsak model `gpt-5*` povezave),
-  pri drugih ponudnikih pa `getQuotaScopedModelForProvider()`.
+- `429` / `403` / `402` — signal kvote ali upravičenosti — zaklene **družino kvot**:
+  za codex celoten obseg `codex` / `spark` (vsak model `gpt-5*` v
+  povezavi), za druge ponudnike pa `getQuotaScopedModelForProvider()`.
 - `404` zaklene osnovni model (`getModelLockKey()` zoži `not_found`).
-- Katero koli drugo stanje — transportne/strežniške napake `5xx` in OmniRoutov
-  lastni sintetizirani odgovor `502` zaradi preverjanja kakovosti — zaklene samo
-  **točno določeno** trojico ponudnik/povezava/model. Slab tok pri enem modelu ni
-  dokaz za težavo s kvoto računa; pred uvedbo tega pravila je en prazen odgovor
-  modela `codex/gpt-5.6-luna` iz usmerjanja odstranil vse modele `gpt-5*` te
-  povezave za 2–30 min (z naraščajočim trajanjem), čeprav je njena kvota ostala
-  nedotaknjena.
-- Izrecna možnost `scope`, ki jo določi klicatelj, ima vedno prednost (Antigravity posreduje `"exact"`).
+- Vsako drugo stanje — napake prenosa/strežnika `5xx` in lastni
+  sintetizirani `502` storitve OmniRoute zaradi preverjanja kakovosti — zaklene samo **natančno**
+  trojico ponudnik/povezava/model. Slab tok pri enem modelu ni dokaz
+  o kvoti računa; pred uvedbo tega pravila je en prazen odgovor modela
+  `codex/gpt-5.6-luna` za 2–30 min (s stopnjevanjem) odstranil vse modele `gpt-5*`
+  te povezave iz usmerjanja, čeprav se njena kvota ni spremenila.
+- Izrecna možnost `scope`, ki jo poda klicatelj, ima vedno prednost (Antigravity poda `"exact"`).
 
-**Namen:** preprečiti onemogočanje celotne povezave, kadar je nedostopen ali omejen s kvoto samo en model.
+**Namen:** preprečiti onemogočanje celotne povezave, kadar ni na voljo ali je omejen s kvoto samo en model.
 
 **Primeri:**
 
-- Ponudniki s kvoto na posamezen model, ki vračajo 429
-- Lokalni ponudniki, ki za en manjkajoči model vračajo 404
-- Napake dovoljenj za način/model, specifične za ponudnika (npr. načini Grok)
+- Ponudniki s kvotami za posamezne modele, ki vračajo 429
+- Lokalni ponudniki, ki vrnejo 404 za en manjkajoči model
+- Napake dovoljenj, specifične za način/model ponudnika (npr. načini Grok)
 
 **Implementacija:** `open-sse/services/accountFallback.ts` — `lockModel()`, `clearModelLock()`, `getAllModelLockouts()`.
 
@@ -242,97 +265,183 @@ Sorodni mehanizmi ostajajo ločeni:
 
 Uporabniški vmesnik: Nastavitve → Časovne omejitve modelov (`src/app/(dashboard)/dashboard/settings/components/ModelCooldownsCard.tsx`)
 
-Prikazuje aktivne zaklepe s podatki: ponudnik, povezava, model, razlog, expiresAt. Operaterji lahko model na kartici ročno znova omogočijo.
+Prikazuje aktivne zaklepe z naslednjimi podatki: ponudnik, povezava, model, razlog, expiresAt. Operaterji lahko na kartici ročno znova omogočijo model.
 
 **REST API:**
 
 - `GET /api/resilience/model-cooldowns` — prikaže aktivne zaklepe
-- `DELETE /api/resilience/model-cooldowns` — ročna ponovna omogočitev. Telo: `{provider, connection, model}`. Preverjanje pristnosti: upravljavsko.
+- `DELETE /api/resilience/model-cooldowns` — ročna ponovna omogočitev. Telo: `{provider, connection, model}`. Preverjanje pristnosti: upravljanje.
 
-### Uporabniški vmesnik za nastavitve zaklepa + obnovitev z zmanjševanjem ob uspehu (v3.8.23)
+### Upravljalnik časovnih omejitev
 
-Zaklep modela se je iz vedno omogočenega, fiksno določenega vedenja spremenil v povsem nastavljivo
+Uporabniški vmesnik: Nadzor → Upravljalnik časovnih omejitev (`src/app/(dashboard)/dashboard/resilience/cooldowns/`).
+
+Ena stran za vse povezave, ki so zaradi prehodnega razloga izločene iz usmerjanja, namesto
+odpiranja strani vsakega ponudnika posebej. Prikazuje časovne omejitve povezav, zaklepe modelov in končna
+stanja ter jih počisti za posamezno povezavo, za izbor ali za vse povezave ponudnika.
+Omogoča tudi urejanje najpogosteje prilagajanih pravil časovnih omejitev: `streamStallCooldown.enabled` ter osnovne
+časovne omejitve `connectionCooldown` za OAuth / ključ API in največjega števila korakov podaljševanja (shranjeno prek
+`PATCH /api/resilience`). Končna stanja (`banned`, `expired`, `credits_exhausted`) so
+prikazana, vendar se tukaj nikoli ne počistijo.
+
+**REST API** (`src/lib/resilience/cooldownManager.ts`, preverjanje pristnosti: upravljanje):
+
+- `GET /api/resilience/cooldowns[?provider=]` — povezave s stanjem, preostalo časovno omejitvijo,
+  ravnjo podaljševanja, vrsto zadnje napake in zaklepi modelov (brez poverilnic)
+- `POST /api/resilience/cooldowns` — telo `{connectionIds: string[]}` ali
+  `{all: true, provider?}`; vrne `{cleared, unchanged, skippedTerminal, lockoutsCleared}`
+
+### Uporabniški vmesnik nastavitev zaklepa + obnovitev z zmanjševanjem ob uspehu (v3.8.23)
+
+Zaklep modela se je iz vedno vklopljenega, trdo kodiranega vedenja spremenil v popolnoma nastavljivo
 izbirno funkcijo z lastno kartico nastavitev in samodejno obnovitveno potjo.
 
-**Kartica z nastavitvami:** Nastavitve → Zaklep modela
+**Kartica nastavitev:** Nastavitve → Zaklep modela
 (`src/app/(dashboard)/dashboard/settings/components/ModelLockoutCard.tsx`).
-Ta se **razlikuje** od zgornje kartice `ModelCooldownsCard`, ki je samo za branje
-(in zgolj _prikazuje_ aktivne zaklepe) — nova kartica _nastavlja parametre_. Privzete
-vrednosti so določene v `DEFAULT_MODEL_LOCKOUT_SETTINGS`
+Ta se **razlikuje** od zgornje kartice `ModelCooldownsCard`, namenjene samo za branje (ki zgolj
+_prikazuje_ aktivne zaklepe) — nova kartica _nastavlja parametre_. Privzete vrednosti
+so v `DEFAULT_MODEL_LOCKOUT_SETTINGS`
 (`src/lib/resilience/modelLockoutSettings.ts`):
 
-| Nastavitev              | Privzeto                         | Pomen                                                                  |
-| ----------------------- | -------------------------------- | ---------------------------------------------------------------------- |
-| `enabled`               | `false`                          | Glavno stikalo — zaklep modela je **privzeto izklopljen**.             |
-| `errorCodes`            | `[403, 404, 429, 502, 503, 504]` | Stanja nadrejenega sistema, ki štejejo kot napaka na ravni modela.     |
-| `baseCooldownMs`        | `120_000` (120 s)                | Začetno trajanje zaklepa ob prvi napaki.                               |
-| `maxCooldownMs`         | `1_800_000` (30 min)             | Zgornja meja stopnjevano podaljšanega obdobja mirovanja.               |
-| `maxBackoffSteps`       | `10`                             | Največje število korakov stopnjevanja eksponentnega odmika.            |
-| `useExponentialBackoff` | `true`                           | Ali ponavljajoče se napake eksponentno podaljšujejo obdobje mirovanja. |
+| Nastavitev              | Privzeto                         | Pomen                                                                 |
+| ----------------------- | -------------------------------- | --------------------------------------------------------------------- |
+| `enabled`               | `false`                          | Glavno stikalo — zaklep modela je **privzeto izklopljen**.            |
+| `errorCodes`            | `[403, 404, 429, 502, 503, 504]` | Stanja nadrejene storitve, ki štejejo kot napaka na ravni modela.     |
+| `baseCooldownMs`        | `120_000` (120 s)                | Začetno trajanje zaklepa ob prvi napaki.                              |
+| `maxCooldownMs`         | `1_800_000` (30 min)             | Zgornja meja stopnjevane časovne omejitve.                            |
+| `maxBackoffSteps`       | `10`                             | Največje število korakov eksponentnega podaljševanja.                 |
+| `useExponentialBackoff` | `true`                           | Ali ponavljajoče se napake eksponentno podaljšujejo časovno omejitev. |
 
-Nastavitve se shranjujejo prek običajne shrambe nastavitev in preverjajo s
-shemo nastavitev odpornosti; kartica omejuje `baseCooldownMs`/`maxCooldownMs`
+Nastavitve se ohranijo prek običajne shrambe nastavitev in preverijo glede na
+shemo nastavitev odpornosti; kartica omeji `baseCooldownMs`/`maxCooldownMs`
 (pri čemer velja `maxCooldownMs ≥ baseCooldownMs`) in `maxBackoffSteps`.
 
 **Obnovitev z zmanjševanjem ob uspehu:** obnovitev **ne** temelji zgolj na poteku časovnika. Zdrav
-odziv zmanjša število napak modela, tako da se stopnjevanje za model, ki si opomore
-sredi časovnega okna, ustavi (zaklep pa odstrani), še preden bi njegov časovnik potekel. Ob uspešnem
+odgovor postopoma zmanjša število napak modela, tako da se stopnjevanje modela, ki si je opomogel
+sredi časovnega okna, ustavi (zaklep pa počisti), še preden bi potekel časovnik. Ob uspešnem
 kombiniranem cilju `open-sse/services/combo.ts` pokliče `decayModelFailureCount()`
-(`open-sse/services/accountFallback.ts`), ki shranjeni `failureCount` **razpolovi**
-(`Math.floor(failureCount / 2)`); ko ta doseže `0`, se vnos zaklepa
-v celoti izbriše. Ustrezna funkcija `recordModelLockoutFailure()`
-ob napakah znotraj okna stopnjevanja poveča števec (in podaljša obdobje mirovanja).
-To zmanjševanje ob uspehu dopolnjuje običajen potek časovnika —
-model je mogoče znova omogočiti po kateri koli od teh poti.
+(`open-sse/services/accountFallback.ts`), ki **prepolovi** shranjeno vrednost
+`failureCount` (`Math.floor(failureCount / 2)`); ko doseže `0`, se vnos zaklepa
+v celoti izbriše. Nasprotna funkcija `recordModelLockoutFailure()`
+ob napakah znotraj okna stopnjevanja poveča števec (in podaljša časovno omejitev).
+To zmanjševanje ob uspehu deluje poleg običajnega poteka časovnika —
+model lahko znova omogoči katera koli od teh poti.
 
 **Stanje:** zaklepi se hranijo **v pomnilniku** (`Map` za posamezen proces z vnosi
-`ModelLockoutEntry`, indeksiranimi po `provider:connectionId:model`, zaklepi točnega obsega pa po
+`ModelLockoutEntry`, indeksiranimi po `provider:connectionId:model`, zaklepi natančnega obsega pa po
 `provider:connectionId:exact:model`) in se ne shranjujejo v
 podatkovno zbirko — ob ponovnem zagonu se izgubijo. _Nastavitve_ se shranjujejo; aktivno
 _stanje_ zaklepa je začasno.
 
 ---
 
-## 4. Nadzor sočasnosti pri deljenju kvote (v3.8.36)
+## 4. Nadzor sočasnosti quota-share (v3.8.36)
 
 Naročniški računi (GLM, MiniMax itd.) pogosto sprejmejo le približno 1–3 sočasne
-zahteve; prekoračitev te omejitve sproži napake 429 in obdobja ohlajanja. To je posebej izrazito pri
-kombinacijah z **deljenjem kvote** (`qtSd/…`), kjer si več ključev API deli en
-nadrejeni račun. Tri ravni preprečujejo preobremenitev računa v skupni rabi.
+zahteve; prekoračitev sproži napake 429 in obdobja ohlajanja. To je še posebej izrazito pri
+kombinacijah **quota-share** (`qtSd/…`), kjer si več ključev API deli en račun pri
+ponudniku. Tri plasti preprečujejo preobremenitev skupnega računa.
 
 ### Omejitev sočasnosti na povezavo (`max_concurrent`)
 
 Vsaka povezava ponudnika lahko določi zgornjo mejo `max_concurrent`
-(`provider_connections.max_concurrent`, nastavljeno v pogovornem oknu povezave / API-ju / zbirki podatkov).
+(`provider_connections.max_concurrent`, nastavljeno v modalnem oknu povezave / prek API-ja / v zbirki podatkov).
 Če omejitve ne želite, pustite polje prazno. To je edina nastavitev, ki upravlja spodnjo
 plast serializacije — nastavite jo na dejansko sočasnost računa (npr. GLM ~1, MiniMax ~2).
 
-### Serializacija zahtev pri deljenju kvote
+### Omejitve sočasnosti na model (`modelConcurrency`)
 
-Ko je zahteva z deljenjem kvote usmerjena v povezavo, ki določa pozitivno vrednost
+Povezava lahko dodatno določi natančne zgornje meje sočasnosti za posamezne modele
+v svojem zemljevidu `rateLimitOverrides`:
+
+```json
+{
+  "rateLimitOverrides": {
+    "maxConcurrent": 4,
+    "modelConcurrency": { "glm-5": 1, "glm-4.7": 3 }
+  }
+}
+```
+
+Nastavite jih v modalnem oknu povezave (**Preglasitve omejitve hitrosti → Omejitve
+sočasnosti na model**, en vnos `model=cap` na vrstico) ali prek
+`PATCH /api/providers/[id]` z enako obliko JSON. Semantika ključev:
+
+- **Za celotno povezavo v primerjavi s posameznim modelom:** `maxConcurrent` ostaja skupna
+  zgornja meja za celotno povezavo. Kadar veljata obe omejitvi, se obe zapori pridobita
+  atomsko v isti sestavljeni zapori
+  (`global → provider → account → model`); dejansko vedenje določa
+  strožja veljavna omejitev.
+- **Natančno ujemanje ključa modela:** ključ je niz modela, posredovan
+  izvajalniku po razrešitvi usmerjanja — običajno goli ID modela pri ponudniku
+  (`glm-5`), ne vzdevek `provider/model` na strani odjemalca (`zai/glm-5` se ne
+  ujema z `glm-5`). Vrednosti so pozitivna celoštevilska števila sočasnih zahtev.
+- **Lokalno čakanje v vrsti, brez odkrivanja:** presežne zahteve čakajo lokalno ob uporabi
+  obstoječe semantike čakalne vrste/časovne omejitve (tipsko določene napake pri sprejemu
+  `SEMAPHORE_TIMEOUT` / `SEMAPHORE_QUEUE_FULL`). OmniRoute ne odkriva ali
+  sklepa o pravilniku ponudnika — uveljavlja natančne omejitve, ki jih je
+  nastavil upravljavec. Zasičena zapora modela nikoli ne onemogoči ponudnika in nikoli
+  ne ustvari trajne blokade modela; vedenje ob napaki 429/ohlajanju/preklopu
+  pri ponudniku ostaja končni varnostni mehanizem za napake.
+- **Obseg na povezavo in proces:** omejitve veljajo na povezavo zbirke podatkov
+  in se hranijo v pomnilniku, zato se dve povezavi, ki ponovno uporabljata isti ključ API
+  ponudnika, medsebojno ne usklajujeta.
+- **Nenastavljeno pomeni nespremenjeno:** če zemljevid izpustite (ali pustite
+  polje na nadzorni plošči prazno), se zapora modela ne doda. Primer konfiguracije brez
+  zatrjevanja kakršne koli univerzalne omejitve ponudnika:
+
+```text
+glm-5=1
+glm-4.7=3
+```
+
+### Serializacija zahtev quota-share
+
+Ko je odprema quota-share usmerjena na povezavo, ki določa pozitivno vrednost
 `max_concurrent`, se sočasne zahteve za ta **račun** serializirajo prek
-semaforja za posamezno povezavo (ključ `qsconn:<connectionId>`): presežne zahteve **čakajo v
-čakalni vrsti**, namesto da bi preobremenile račun. Mehanizem je zasnovan kot **fail-open** — ob nasičeni
-čakalni vrsti ali časovni omejitvi se obdelava nadaljuje brez reže, namesto da bi bila zahteva,
-ki jo je mogoče odposlati, kadar koli zavrnjena. Preklopite ga v **Nastavitve → Odpornost → Sočasnost
-na povezavo pri deljenju kvote** (`resilienceSettings.quotaShareConcurrencyLimit.enabled`, privzeto
-vklopljeno). Brez omejitve `max_concurrent` ostane vedenje nespremenjeno.
+semaforja na povezavo (ključ `qsconn:<connectionId>`): presežne zahteve **čakajo v
+vrsti**, namesto da bi preobremenile račun. Mehanizem je **fail-open** — ob zasičeni
+vrsti ali časovni omejitvi se izvajanje nadaljuje brez mesta, namesto da bi bila zahteva,
+ki jo je mogoče odpremiti, kadar koli zavrnjena. Preklopite ga v **Nastavitve → Odpornost → Sočasnost
+quota-share na povezavo** (`resilienceSettings.quotaShareConcurrencyLimit.enabled`, privzeto
+vklopljeno). Brez omejitve `max_concurrent` vedenje ostane nespremenjeno.
 
-> Usmerjevalni prehod za deljenje kvote (`selectQuotaShareTarget`, DRR + P2C) je tudi sam
-> zasnovan kot fail-open in povezavi, ki je dosegla omejitev, le _zniža prednost_ — pri
-> naboru z eno samo povezavo ne more uveljaviti trde omejitve, zato poplavo dejansko
-> zadrži ta semafor.
+> Usmerjevalna zapora quota-share (`selectQuotaShareTarget`, DRR + P2C) je sama po sebi
+> fail-open in povezavi, ki je dosegla omejitev, le _zniža prednost_ — pri
+> skladu z eno samo povezavo ne more uveljaviti stroge omejitve, zato je ta semafor tisti,
+> ki dejansko zajezi poplavo zahtev.
 
-### Ponovni poskus ob upoštevanju ohlajanja kombinacije
+### Ponovni poskus kombinacije z upoštevanjem ohlajanja
 
-Pri vsaki strategiji kombiniranja (če je omogočena) zahteva, ki bi dokončno povzročila napako 429
-zaradi KRATKEGA prehodnega ohlajanja, počaka, da se to obdobje izteče, in se znova odpošlje,
-namesto da bi vrnila napako 429 — to pokriva okna TPM/RPM razreda Gemini (približno 60-sekundni
-`retry-after`) pri kombinacijah več modelov, na primer ko oba cilja kombinacije dveh modelov
-dosežeta omejitev hitrosti za posamezni model. Omejitve določa `comboCooldownWait`
+Pri vsaki strategiji kombinacije (ko je omogočena) zahteva, ki bi dokončno povzročila napako 429
+zaradi KRATKEGA prehodnega ohlajanja, počaka na njegov iztek in se znova odpremi, namesto
+da bi vrnila napako 429 — to pokriva okna TPM/RPM razreda Gemini (čas `retry-after`
+približno 60 s) pri kombinacijah več modelov, npr. ko oba cilja kombinacije dveh modelov
+dosežeta omejitev hitrosti za posamezni model. Omejeno je z `comboCooldownWait`
 (`enabled`, `maxWaitMs`, `maxAttempts`, `budgetMs`) v **Nastavitve → Odpornost**.
-Mehanizem nikoli ne čaka pri razlogu `quota_exhausted` (zaklenjeno do polnoči) ali pri razlogih,
-povezanih z avtentikacijo oziroma neobstoječim virom.
+Nikoli ne čaka pri razlogu `quota_exhausted` (zaklenjeno do polnoči) ali razlogih,
+povezanih s preverjanjem pristnosti oziroma z neobstoječim virom.
+
+Ista zapora pokriva primer pred odpremo (#16319): ko je vsak cilj
+kombinacije preskočen, preden je izveden kakršen koli poskus, ker je njegov model v kratki
+prehodni blokadi, pot brez poskusov v okviru istih omejitev počaka na iztek blokade
+in zahtevo znova odpremi, namesto da bi vrnila odgovor brez namiga
+`503 ALL_TARGETS_SKIPPED`. Kadar čakanje ni dovoljeno (prekoračena omejitev,
+število poskusov ali proračun oziroma izklopljena funkcija), se končni odgovor nadgradi v
+`429 rate_limit_error` ter vsebuje `retry_after` / `reset_at` najzgodnejšega
+izteka prehodne blokade; blokade zaradi kvote, preverjanja pristnosti in neobstoječega vira
+še naprej vrnejo odgovor 503 brez namiga.
+
+```text
+#16319 · comboCooldownWait · pre-dispatch (attempts = 0)
+all targets skipped + transient model lockout:
+  enabled ∧ 0 < waitMs ≤ maxWaitMs ∧ attempt < maxAttempts ∧ budgetLeftMs ≥ waitMs
+    → wait → re-dispatch
+  wait = false → HTTP 429 rate_limit_error
+  retry_after / reset_at ← earliest transient lock expiry
+quota_exhausted / auth_error / not_found / not_found_local:
+  no transient hint → HTTP 503 ALL_TARGETS_SKIPPED
+```
 
 ---
 

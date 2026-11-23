@@ -74,7 +74,7 @@ export function checkKeyQuota(
 ): KeyQuotaVerdict {
   if (!apiKeyId) return { allowed: true, reason: null, dimension: null };
   try {
-    const status = getKeyQuotaStatus(apiKeyId, deps);
+    const status = getKeyQuotaStatus(apiKeyId, { ...deps, enforcementOnly: true });
     if (!status.enabled) return { allowed: true, reason: null, dimension: null, status };
     if (status.tpmExceeded) return verdict(false, "tpm", status);
     if (status.rpmExceeded) return verdict(false, "rpm", status);

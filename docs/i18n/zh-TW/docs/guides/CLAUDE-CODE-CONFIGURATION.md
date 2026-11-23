@@ -90,33 +90,47 @@ Claude Code 的用戶端連接一般 OmniRoute 時，模型目錄不會增加一
 
 ---
 
-## 儀表板上的入門設定區塊
+## 儀表板上的新手設定區塊
 
-Claude 工具卡片（**儀表板 → CLI Code**）會在探索別名資訊按鈕旁顯示此執行個體的確切 `settings.json` 片段，並附有複製按鈕：
+Claude 工具卡片（**儀表板 → CLI Code**）會在探索別名資訊按鈕旁，呈現此執行個體的確切 `settings.json` 片段，並附有複製按鈕：
 
 ```jsonc
 {
   "env": {
-    "ANTHROPIC_BASE_URL": "http://<your OmniRoute>:20128",
+    "ANTHROPIC_BASE_URL": "http://<您的 OmniRoute>:20128",
     "ANTHROPIC_AUTH_TOKEN": "<您的 OmniRoute API 金鑰>",
     "CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY": "1",
   },
 }
 ```
 
-基礎 URL 是卡片解析出的 URL（包括您輸入的自訂覆寫值），並且已正規化——沒有 `/v1` 後綴，也沒有尾端斜線。**絕不會顯示金鑰**：此區塊提供的是預留位置，因此螢幕截圖或貼上的片段不會洩漏金鑰。請將您的金鑰貼到該位置。
+基礎 URL 是卡片解析出的 URL（包括您輸入的自訂覆寫值），且已經正規化——沒有 `/v1` 後綴，也沒有結尾斜線。**絕不會呈現金鑰**：此區塊使用預留位置，因此螢幕截圖或貼上的片段都不會洩漏金鑰。請以您的金鑰取代該預留位置。
 
-對於實際上下文視窗不是 200K 的任何模型，請在同一個 `env` 區塊下新增 `CLAUDE_CODE_AUTO_COMPACT_WINDOW`——Claude Code 會假設所有無法辨識的 id 都具有 200K 的上下文視窗，因此自動壓縮會在錯誤的時間點觸發（請參閱上一節的警告）。片段建構器也接受此值，因此知道目標模型視窗大小的呼叫端可以直接輸出該值。
+若任何模型的實際上下文視窗並非 200K，請在相同的 `env` 區塊下新增 `CLAUDE_CODE_AUTO_COMPACT_WINDOW`——Claude Code 會假設每個無法辨識的 id 都具有 200K 的上下文視窗，因此若未設定，自動壓縮便會在錯誤的時機觸發（請參閱上一節的警告）。片段建構器也接受此值，因此知道目標模型視窗大小的呼叫端可直接將其輸出。
 
-來源：`src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet`（純建構器，已通過單元測試），由 `ClaudeGatewayOnboardingBlock` 轉譯。
+來源：`src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet`（純建構器，已通過單元測試），由 `ClaudeGatewayOnboardingBlock` 呈現。
+
+### 鎖定一個帳戶（選用）
+
+若要透過某個特定提供者帳戶傳送每個 Claude Code 請求，請在相同的 `env` 區塊中，透過 `ANTHROPIC_CUSTOM_HEADERS` 新增 `x-omniroute-connection` 標頭：
+
+```jsonc
+"ANTHROPIC_CUSTOM_HEADERS": "x-omniroute-connection: <connection id>"
+```
+
+請從提供者頁面連線列上的 `xxxxxxxx…` 標籤複製 id。鎖定僅適用於單一模型 id（`provider/model`），不適用於組合。確切的後援行為請參閱[依請求鎖定帳戶](../reference/API_REFERENCE.md#account-pinning-per-request)。
 
 ---
 
 ## 設定檔（`CLAUDE_CONFIG_DIR`）
 
-Claude Code **沒有原生設定檔檔案**（不同於 Codex 的 `~/.codex/<name>.config.toml`）。慣用機制是 `CLAUDE_CONFIG_DIR`——每個設定檔使用獨立的設定目錄，各自擁有自己的 `settings.json`、憑證、歷史記錄與快取。
+Claude Code **沒有原生的設定檔檔案**（不同於 Codex 的 `~/.codex/<name>.config.toml`）。
+慣用的機制是 `CLAUDE_CONFIG_DIR`——每個設定檔使用獨立的設定目錄，
+各自擁有自己的 `settings.json`、憑證、歷史記錄與快取。
 
-`omniroute setup-claude` 會擷取即時 `/v1/models` 目錄，並在 `~/.claude/profiles/<name>/settings.json` 中為每個模型寫入一個設定檔，重複使用與 `setup-codex` **相同的名稱**（`glm52`、`kimi-k27`、`deepseek-pro`、…）：
+`omniroute setup-claude` 會擷取即時的 `/v1/models` 目錄，並在
+`~/.claude/profiles/<name>/settings.json` 為每個模型寫入一個設定檔，重複使用
+**與 `setup-codex` 相同的名稱**（`glm52`、`kimi-k27`、`deepseek-pro`、…）：
 
 ```jsonc
 // ~/.claude/profiles/glm52/settings.json
@@ -134,12 +148,18 @@ Claude Code **沒有原生設定檔檔案**（不同於 Codex 的 `~/.codex/<nam
 ```
 
 > **驗證權杖絕不會寫入設定檔。** 請使用
-> `omniroute launch --profile <name>` 啟動（它會從作用中的上下文注入 `ANTHROPIC_AUTH_TOKEN`），或自行匯出 `ANTHROPIC_AUTH_TOKEN`，然後執行
+> `omniroute launch --profile <name>` 啟動（它會從目前使用中的環境注入 `ANTHROPIC_AUTH_TOKEN`），
+> 或自行匯出 `ANTHROPIC_AUTH_TOKEN`，然後執行
 > `CLAUDE_CONFIG_DIR=~/.claude/profiles/<name> claude`。
 
-**模型探索後自動同步（選用）。** 每當提供者模型同步變更即時目錄時，OmniRoute 可以自動重新產生相同的 `~/.claude/profiles/<name>/settings.json` 檔案——因此新增或重新命名的模型不需重新執行命令即可取得設定檔。此功能**預設為關閉**：請從 **CLI Code 儀表板**切換此設定（「CLI 設定檔自動同步」→ Claude Code），或設定 `OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES=true`（它也會遵循 `CLI_ALLOW_CONFIG_WRITES`，此設定預設為開啟）。啟用後，它只會寫入設定檔檔案；絕不會變更作用中／預設的 Claude 設定、驗證資訊或 `~/.claude/settings.json`。
+**模型探索後自動同步（選用）。** 每當提供者模型同步變更即時目錄時，OmniRoute 可自動重新產生這些相同的
+`~/.claude/profiles/<name>/settings.json` 檔案——如此一來，新增或重新命名的模型便能取得設定檔，而無須重新執行
+命令。此功能**預設為關閉**：可從 **CLI Code 儀表板**切換（「CLI 設定檔
+自動同步」→ Claude Code），或設定 `OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES=true`（它也會遵循
+`CLI_ALLOW_CONFIG_WRITES`，預設為啟用）。啟用後，它只會寫入設定檔檔案；絕不會
+變更目前使用中或預設的 Claude 設定、驗證資訊，或 `~/.claude/settings.json`。
 
-### 產生及使用設定檔
+### 產生並使用設定檔
 
 ```bash
 # 本機 OmniRoute
@@ -150,6 +170,10 @@ omniroute setup-claude --remote http://192.168.0.15:20128 --api-key oma_live_xxx
 
 # 僅限部分提供者
 omniroute setup-claude --only glm,kimi
+
+# 也為此主機上未偵測到的本機 CLI 提供者（zcode、auggie、devin-cli-agentic、
+# codex-app-server）寫入設定檔（以本機為目標時，預設會略過）
+omniroute setup-claude --include-local
 
 # 預覽但不寫入
 omniroute setup-claude --dry-run

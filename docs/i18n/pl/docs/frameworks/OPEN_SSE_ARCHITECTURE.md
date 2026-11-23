@@ -37,30 +37,30 @@ lastUpdated: 2026-06-28
 
 ```
 open-sse/
-├── index.ts              # Public entry point
-├── types.d.ts            # Public type exports
+├── index.ts              # Publiczny punkt wejścia
+├── types.d.ts            # Publiczne eksporty typów
 ├── package.json          # @omniroute/open-sse
-├── config/               # Provider configs, constants, registries
-├── executors/            # Per-provider HTTP executors (67 + base.ts/index.ts)
-├── handlers/             # Request handlers (chatCore, responses, etc.)
-├── lib/                  # Internal utilities
-├── mcp-server/           # Model Context Protocol server
-├── services/             # ~298 service modules
-├── transformer/          # Responses API format transformer
-├── translator/           # Format translation (OpenAI ↔ Claude ↔ Gemini)
-└── utils/                # Shared utilities (logging, error, stream, etc.)
+├── config/               # Konfiguracje dostawców, stałe, rejestry
+├── executors/            # Moduły wykonawcze HTTP dla poszczególnych dostawców (150 modułów + base.ts/index.ts)
+├── handlers/             # Procedury obsługi żądań (chatCore, responses itp.)
+├── lib/                  # Narzędzia wewnętrzne
+├── mcp-server/           # Serwer Model Context Protocol
+├── services/             # Około 298 modułów usług
+├── transformer/          # Transformator formatu Responses API
+├── translator/           # Translacja formatów (OpenAI ↔ Claude ↔ Gemini)
+└── utils/                # Współdzielone narzędzia (rejestrowanie, błędy, strumienie itp.)
 ```
 
-### Liczby modułów
+### Liczba modułów
 
 | Katalog | Pliki | Przeznaczenie |
-| `executors/` | 68 | Executory HTTP per-provider (ujednolicone przez fabrykę DefaultExecutor) |
-| `handlers/` | 16 | Punkty wejścia żądań (chatCore, responses, embeddings) |
-| `services/` | ~298 | Routing, caching, rate limiting, refresh itd. |
-| `translator/` | ~27 | Konwersja formatów (OpenAI ↔ Claude ↔ Gemini) |
-| `mcp-server/` | 32 | Narzędzia i transporty MCP |
-| `utils/` | ~65 | Narzędzia przekrojowe (logging, error, stream) |
-| `config/` | ~10 | Konfiguracje providerów, stałe, rejestry |
+| `executors/` | 167 | Moduły wykonawcze HTTP dla poszczególnych dostawców (ujednolicone za pomocą fabryki DefaultExecutor) |
+| `handlers/` | 157 | Punkty wejścia żądań (chatCore, responses, embeddings) |
+| `services/` | ~536 | Routing, buforowanie, ograniczanie częstotliwości, odświeżanie itp. |
+| `translator/` | 56 | Konwersja formatów (OpenAI ↔ Claude ↔ Gemini) |
+| `mcp-server/` | 44 | Narzędzia i transporty MCP |
+| `utils/` | ~108 | Narzędzia przekrojowe (rejestrowanie, błędy, strumienie) |
+| `config/` | ~339 | Konfiguracje dostawców, stałe, rejestry |
 
 ---
 
@@ -174,28 +174,28 @@ Artefakty call log (jeśli włączone) trafiają do `${DATA_DIR}/call_logs/`.
 
 ## Szczegółowa analiza kluczowych plików
 
-### chatCore.ts (5977 wierszy)
+### chatCore.ts (5977 linii)
 
-**Główny moduł obsługi żądań**. Pomimo swoich rozmiarów ma przejrzystą strukturę:
+**Główny handler żądań**. Pomimo dużego rozmiaru ma przejrzystą strukturę:
 
 ```ts
 // Pseudostruktura pliku chatCore.ts
 export async function handleChat(request: NextRequest) {
-  // 1. Uwierzytelnianie i CORS
+  // 1. Uwierzytelnianie + CORS
   await authenticateRequest(request);
   applyCorsHeaders(response);
 
-  // 2. Walidacja treści
+  // 2. Walidacja treści żądania
   const body = await parseRequestBody(request);
 
-  // 3. Wykrywanie i konwersja formatu
+  // 3. Wykrywanie formatu + translacja
   const sourceFormat = detectFormat(request);
   const targetFormat = getTargetFormat(providerId);
   if (needsTranslation(sourceFormat, targetFormat)) {
     body = translateRequest(body, sourceFormat, targetFormat);
   }
 
-  // 4. Routing kombinacji
+  // 4. Routing combo
   const targets = await resolveComboTargets(comboId, body);
   for (const target of targets) {
     try {
@@ -203,20 +203,20 @@ export async function handleChat(request: NextRequest) {
       await recordUsage(result);
       return result;
     } catch (err) {
-      // Przejdź do następowego celu
+      // Przejdź do następnego celu
     }
   }
 
-  // 5. Awaryjny mechanizm rezerwowy
+  // 5. Awaryjny fallback
   return await emergencyFallback(body);
 }
 ```
 
-Pomimo tego, że jest jedną ogromną funkcją, kod podzielono na **opisane komentarzami sekcje**, które odpowiadają pięcioetapowemu potokowi.
+Pomimo że jest to jedna ogromna funkcja, została podzielona na **opisane komentarzami sekcje**, które odpowiadają 5-etapowemu potokowi.
 
-### combo.ts (4456 wierszy kodu)
+### combo.ts (4456 LOC)
 
-**Silnik routingu**, który przekształca kombinację w uporządkowaną listę celów.
+**Silnik routingu**, który przekształca combo w uporządkowaną listę celów.
 
 ```ts
 // services/combo.ts
@@ -226,53 +226,53 @@ export async function handleComboChat(body, comboId): Promise<ChatResult> {
     try {
       return await handleSingleModel(target, body);
     } catch (err) {
-      log.warn("target failed, trying next", { target, err });
+      log.warn("cel nie powiódł się, próba następnego", { target, err });
     }
   }
-  throw new ComboExhaustedError("All targets failed");
+  throw new ComboExhaustedError("Wszystkie cele zawiodły");
 }
 ```
 
 Obsługuje **19 strategii routingu** (zobacz `src/shared/constants/routingStrategies.ts`):
 
-| Strategia           | Działanie                                                                         |
-| ------------------- | --------------------------------------------------------------------------------- |
-| `priority`          | Uporządkowana lista, w której pierwszy cel ma pierwszeństwo                       |
-| `weighted`          | Wybór probabilistyczny na podstawie wagi każdego celu                             |
-| `round-robin`       | Cykliczne przechodzenie przez cele w ustalonej kolejności                         |
-| `context-relay`     | Przekazywanie kontekstu pomiędzy celami                                           |
-| `fill-first`        | Wypełnienie limitu przed przejściem do następnego celu                            |
-| `p2c`               | Wybór spośród dwóch możliwości                                                    |
-| `random`            | Jednostajny wybór losowy                                                          |
-| `least-used`        | Wybór celu używanego ostatnio najrzadziej                                         |
-| `cost-optimized`    | Najpierw najtańszy prawidłowo działający cel                                      |
-| `reset-aware`       | Uwzględnianie okien resetowania dostawcy                                          |
-| `reset-window`      | Routing oparty na oknach resetowania                                              |
-| `headroom`          | Najpierw cel z największym pozostałym zapasem limitu                              |
-| `strict-random`     | Rzeczywiście jednostajny wybór losowy (bez ważenia według jakości)                |
-| `auto`              | Użycie oceny opartej na 16 czynnikach (`autoCombo/`)                              |
-| `lkgp`              | Najpierw ostatni znany prawidłowo działający dostawca                             |
-| `context-optimized` | Najlepszy wybór dla żądań z długim kontekstem                                     |
-| `fusion`            | Równoległe rozesłanie do panelu, a następnie synteza przez sędziego (`fusion.ts`) |
+| Strategia           | Zachowanie                                                                      |
+| ------------------- | ------------------------------------------------------------------------------- |
+| `priority`          | Uporządkowana lista, zaczynająca od pierwszego celu                             |
+| `weighted`          | Wybór probabilistyczny według wagi poszczególnych celów                         |
+| `round-robin`       | Cykliczne przechodzenie przez cele w ustalonej kolejności                       |
+| `context-relay`     | Przekazywanie kontekstu pomiędzy celami                                         |
+| `fill-first`        | Wypełnienie limitu przed przejściem do następnego celu                          |
+| `p2c`               | Wybór lepszego z dwóch celów                                                    |
+| `random`            | Jednostajny wybór losowy                                                        |
+| `least-used`        | Wybór celu z najmniejszą liczbą ostatnich użyć                                  |
+| `cost-optimized`    | Najpierw najtańszy prawidłowo działający cel                                    |
+| `reset-aware`       | Uwzględnianie okien resetowania dostawcy                                        |
+| `reset-window`      | Routing oparty na oknach resetowania                                            |
+| `headroom`          | Najpierw cel z największym pozostałym zapasem limitu                            |
+| `strict-random`     | Rzeczywiście jednostajny wybór losowy (bez ważenia według jakości)              |
+| `auto`              | Wykorzystanie oceny opartej na 16 czynnikach (`autoCombo/`)                     |
+| `lkgp`              | Najpierw ostatni znany prawidłowo działający dostawca                           |
+| `context-optimized` | Najlepszy wybór dla żądań z długim kontekstem                                   |
+| `fusion`            | Równoległe wysłanie do panelu, a następnie synteza przez sędziego (`fusion.ts`) |
 
-### base.ts (1170 wierszy kodu)
+### base.ts (1170 LOC)
 
-**Abstrakcyjny moduł wykonawczy**, po którym dziedziczy wszystkich 107 modułów wykonawczych. Zawiera:
+**Abstrakcyjny executor**, po którym dziedziczy każda klasa executora — bezpośrednio albo za pośrednictwem `DefaultExecutor` i innych podklas. Zawiera:
 
-- `buildUrl()` — domyślne konstruowanie adresu URL (podklasy nadpisują tę metodę w przypadku niestandardowej obsługi)
+- `buildUrl()` — domyślne konstruowanie adresu URL (podklasy mogą je nadpisać w celu dostosowania)
 - `buildHeaders()` — domyślne nagłówki (uwierzytelnianie, typ zawartości)
-- `transformRequest()` — domyślnie przekazuje dane bez zmian
-- `execute()` — główna pętla HTTP z ponawianiem prób, opóźnieniami i wyłącznikiem awaryjnym
+- `transformRequest()` — domyślnie przekazywanie bez zmian
+- `execute()` — główna pętla HTTP z ponawianiem prób, mechanizmem backoff i wyłącznikiem awaryjnym
 
 ```ts
 // open-sse/executors/default.ts
 export class DefaultExecutor extends BaseExecutor {
   // Obsługuje wszystkich dostawców zgodnych z OpenAI/Anthropic
-  // Dostawcy rejestrują konfiguracje (adres URL, uwierzytelnianie, nagłówki), ale współdzielą logikę modułu wykonawczego
+  // Dostawcy rejestrują konfiguracje (URL, uwierzytelnianie, nagłówki), ale współdzielą logikę executora
 }
 ```
 
-Zachowanie specyficzne dla dostawcy (nagłówki uwierzytelniania, bazowy adres URL, nagłówki wersji) jest konfigurowane za pomocą rejestru dostawców, a nie oddzielnych klas modułów wykonawczych.
+Zachowanie specyficzne dla dostawcy (nagłówki uwierzytelniania, bazowy adres URL, nagłówki wersji) jest konfigurowane za pośrednictwem rejestru dostawców, a nie oddzielnych klas executorów.
 
 ````
 
@@ -280,44 +280,44 @@ Zachowanie specyficzne dla dostawcy (nagłówki uwierzytelniania, bazowy adres U
 
 ## Usługi (117 modułów)
 
-Usługi to **wyspecjalizowane moduły o pojedynczym przeznaczeniu**, które są łączone przez handlery. Główne kategorie:
+Usługi to **wyspecjalizowane, jednozadaniowe moduły**, które są łączone przez handlery. Główne kategorie:
 
 ### Routing i Combo
 
 - `combo.ts` — punkt wejścia dla żądań kierowanych przez combo
-- `services/autoCombo/` — ocenianie na podstawie 16 czynników, 8 automatycznych strategii routingu
+- `services/autoCombo/` — 16-czynnikowa punktacja, 8 strategii automatycznego routingu
 - `wildcardRouter.ts` — dopasowuje trasy z symbolami wieloznacznymi (`gpt-*`)
 - `modelFamilyFallback.ts` — mechanizm awaryjny T5 w obrębie rodziny
 
-### Ograniczanie częstotliwości i limity
+### Ograniczanie szybkości i limity
 
-- `rateLimitManager.ts` — kubełek tokenów dla każdej pary klucz+dostawca
+- `rateLimitManager.ts` — algorytm token bucket dla każdej pary klucz+dostawca
 - `usage.ts` — rejestrowanie użycia
 - `quotaCache.ts` — przechowywane w pamięci migawki limitów
 
 ### Konta i tokeny
 
 - `tokenRefresh.ts` — odświeżanie OAuth po błędzie 401
-- `accountFallback.ts` — przełączanie na konto alternatywne
-- `sessionManager.ts` — stan sesji obejmującej wiele tur
+- `accountFallback.ts` — przełączanie na alternatywne konto
+- `sessionManager.ts` — stan sesji wieloturowej
 
 ### Inteligencja
 
-- `intentClassifier.ts` — klasyfikuje intencję żądania
-- `taskAwareRouter.ts` — kieruje według typu zadania
-- `thinkingBudget.ts` — przydziela tokeny rozumowania
-- `contextManager.ts` — wstrzykuje kontekst routingu
+- `intentClassifier.ts` — klasyfikowanie intencji żądania
+- `taskAwareRouter.ts` — routing według typu zadania
+- `thinkingBudget.ts` — przydzielanie tokenów rozumowania
+- `contextManager.ts` — wstrzykiwanie kontekstu routingu
 
 ### Odporność
 
-- `resilience.ts` — koordynacja ponownych prób, opóźnień i bezpiecznika
-- `emergencyFallback.ts` — awaryjny mechanizm ostatniej szansy
-- `modelDeprecation.ts` — automatyczne kierowanie do modeli następczych
+- `resilience.ts` — orkiestracja ponowień, opóźnień i bezpieczników
+- `emergencyFallback.ts` — mechanizm awaryjny ostatniej szansy
+- `modelDeprecation.ts` — automatyczny routing do modeli następczych
 
 ### Stan
 
 - `signatureCache.ts` — deduplikacja według sygnatury żądania
-- `volumeDetector.ts` — ograniczanie obciążenia
+- `volumeDetector.ts` — redukcja obciążenia
 - `contextHandoff.ts` — serializacja sesji
 
 ### Kompresja
@@ -335,13 +335,13 @@ Usługi to **wyspecjalizowane moduły o pojedynczym przeznaczeniu**, które są 
 
 ---
 
-## Executory (ponad 75 plików)
+## Moduły wykonawcze (150 modułów)
 
-Jeden plik na dostawcę. Wszystkie rozszerzają `BaseExecutor` i nadpisują różniące się elementy.
+Przeważnie jeden plik na dostawcę. Wszystkie klasy modułów wykonawczych rozszerzają `BaseExecutor` i nadpisują elementy, które się różnią; pozostałe moduły zawierają narzędzia pomocnicze specyficzne dla poszczególnych dostawców (schematy narzędzi, adaptery fetch/TTS, handlery obsługujące niestandardowe zachowania).
 
 ### Typowe wzorce
 
-Dostawcy są rozpoznawani za pomocą `getExecutor(providerId)`, która zwraca skonfigurowany executor. Dostawcy zgodni z OpenAI/Anthropic używają `DefaultExecutor` (`executors/default.ts`). Zachowanie specyficzne dla dostawcy (bazowy adres URL, nagłówki uwierzytelniania, wersja API) jest konfigurowane w `open-sse/config/providers/`, natomiast przekształcenia treści żądania są obsługiwane w `open-sse/translator/`.
+Dostawcy są rozpoznawani za pomocą `getExecutor(providerId)`, która zwraca skonfigurowany moduł wykonawczy. Dostawcy zgodni z OpenAI/Anthropic używają `DefaultExecutor` (`executors/default.ts`). Zachowanie specyficzne dla dostawcy (bazowy adres URL, nagłówki uwierzytelniania, wersja API) jest konfigurowane w `open-sse/config/providers/`, natomiast transformacje treści żądań są obsługiwane w `open-sse/translator/`.
 
 **Niestandardowy adres URL** jest ustawiany za pomocą konfiguracji dostawcy:
 
@@ -353,13 +353,13 @@ export default {
 }
 ````
 
-**Niestandardowe uwierzytelnianie** jest obsługiwane przez konfigurację uwierzytelniania rejestru dostawców (klucz API, OAuth, profile nagłówków).
+**Niestandardowe uwierzytelnianie** jest obsługiwane przez konfigurację uwierzytelniania w rejestrze dostawców (klucz API, OAuth, profile nagłówków).
 
-**Niestandardowe przekształcenia treści żądania** (np. oddzielanie `system` od `messages` przez Anthropic) są rejestrowane osobno dla każdego dostawcy w `open-sse/translator/`.
+Transformacje **niestandardowej treści żądania** (np. oddzielanie `system` od `messages` przez Anthropic) są rejestrowane osobno dla każdego dostawcy w `open-sse/translator/`.
 
 ````
 
-### Fabryka executorów
+### Fabryka modułów wykonawczych
 
 `executors/index.ts` eksportuje `getExecutor(providerId)`:
 
@@ -373,7 +373,7 @@ const result = await executor.execute({
 });
 ````
 
-Rozpoznawanie odbywa się za pośrednictwem `ExecutorRegistry` (`executors/registry.ts`): każdy wyspecjalizowany executor jest zadeklarowany we wbudowanej tabeli w `executors/index.ts` i rejestrowany za pomocą `registerExecutor(alias, instance)` podczas ładowania modułu; `getExecutor()` sprawdza rejestr i w przypadku każdego dostawcy bez wyspecjalizowanego wpisu używa zapamiętanej instancji `DefaultExecutor`. Pełne mapowanie alias → executor jest określone przez test referencyjny `tests/unit/executor-map-golden.test.ts`.
+Rozpoznawanie odbywa się za pośrednictwem `ExecutorRegistry` (`executors/registry.ts`): każdy wyspecjalizowany moduł wykonawczy jest zadeklarowany we wbudowanej tabeli w `executors/index.ts` i rejestrowany za pomocą `registerExecutor(alias, instance)` podczas ładowania modułu; `getExecutor()` sprawdza rejestr i, w przypadku każdego dostawcy bez wyspecjalizowanego wpisu, używa awaryjnie zapamiętanej instancji `DefaultExecutor`. Pełne mapowanie alias → moduł wykonawczy jest określone przez test wzorcowy `tests/unit/executor-map-golden.test.ts`.
 
 ---
 
@@ -488,17 +488,17 @@ Obsługuje:
 
 ## Konfiguracja
 
-`open-sse/config/` to warstwa konfiguracji:
+`open-sse/config/` zawiera warstwę konfiguracji:
 
-| Plik                          | Przeznaczenie                            |
-| ----------------------------- | ---------------------------------------- |
-| `providerRegistry.ts`         | Wspólna konfiguracja rejestru providerów |
-| `providerModels.ts`           | Aliasy modeli, mapowanie formatów        |
-| `constants.ts`                | Timeouty, limity, kody statusu           |
-| `defaultThinkingSignature.ts` | Domyślna sygnatura thinking Claude       |
-| `modelStrip.ts` (w services)  | Stripowanie pól per-provider             |
+| Plik                          | Przeznaczenie                                         |
+| ----------------------------- | ----------------------------------------------------- |
+| `providerRegistry.ts`         | Rejestr modeli czatu oparty na katalogu 374 dostawców |
+| `providerModels.ts`           | Aliasy modeli, mapowanie formatów                     |
+| `constants.ts`                | Limity czasu, ograniczenia, kody stanu                |
+| `defaultThinkingSignature.ts` | Domyślna sygnatura rozumowania Claude                 |
+| `modelStrip.ts` (w services)  | Usuwanie pól właściwe dla poszczególnych dostawców    |
 
-### Schemat Provider Registry
+### Schemat rejestru dostawców
 
 ```ts
 interface ProviderConfig {
@@ -513,7 +513,7 @@ interface ProviderConfig {
 }
 ```
 
-Walidacja Zod przy ładowaniu modułu zapewnia, że wszystkie konfiguracje providerów są poprawne.
+Walidacja Zod podczas ładowania modułu zapewnia poprawność wszystkich konfiguracji dostawców.
 
 ---
 

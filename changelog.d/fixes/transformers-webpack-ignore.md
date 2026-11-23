@@ -1,1 +1,0 @@
-- **fix(memory):** assemble the optional `@huggingface/transformers` specifier at runtime with `webpackIgnore`, so Next does not fail `/health` when the optional package is absent.

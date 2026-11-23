@@ -38,34 +38,34 @@ kolmen välilehden Studioksi, joka yhdistää verkkohaun, verkkosisällön poimi
 
 ### Haku-välilehti
 
-Kehittää nykyisistä `SearchForm` + `ResultsPanel` + `RerankPanel` -komponenteista välilehden:
+Kehittää nykyisestä `SearchForm` + `ResultsPanel` + `RerankPanel` -kokonaisuudesta välilehden:
 
-- Kysely → tulokset (otsikko, URL-osoite, katkelma, relevanssipisteet).
-- Palveluntarjoajan metatiedot Määritykset-ruudussa (kustannus, kiintiö, tila).
-- Uudelleenjärjestelyosio: valitse uudelleenjärjestelymalli, järjestä tulokset uudelleen ja näytä `positionDelta`.
-- Tyhjän tilan toimintakehote, kun hakupalveluntarjoajia ei ole määritetty.
+- Kysely → tulokset (otsikko, URL, katkelma, relevanssipisteet).
+- Palveluntarjoajan metatiedot Config-paneelissa (kustannus, kiintiö, tila).
+- Uudelleenjärjestelyosio: valitse uudelleenjärjestelymalli, järjestä tulokset uudelleen, näytä `positionDelta`.
+- Tyhjä tila ja toimintakehote, kun hakupalveluntarjoajia ei ole määritetty.
 - Hakuhistoria `SearchHistory.tsx`-komponentin kautta.
-- Kutsuu `POST /v1/search` -päätepistettä (nykyinen päätepiste, ei muutoksia).
+- Kutsuu `POST /v1/search` -rajapintaa (nykyinen päätepiste, ei muutoksia).
 
-### Poiminta-välilehti
+### Sivun poiminta -välilehti
 
-Uusi välilehti sisällön poimimiseen URL-osoitteesta `POST /v1/web/fetch` -päätepisteen kautta (luotu suunnitelmassa 05):
+Uusi välilehti sisällön poimimiseen URL-osoitteesta `POST /v1/web/fetch` -rajapinnan kautta (luotu suunnitelmassa 05):
 
-- Syöte: URL-osoite + koko sivun valitsin + muodon valitsin (markdown / teksti / HTML).
-- Lähetys → nouto → `ScrapeResult.tsx`-komponentin renderöinti.
-- `ScrapeResult` renderöi markdown-esikatselun ja raakasisällön valitsimen.
-- Raja: jos vastauksen runko on yli **256 KB**, käyttöliittymä näyttää tekstin `(katkaistu, näytä raakana)` ja avaa raakasisällön Monaco-modaali-ikkunassa (D21).
-- Metatietopaneeli: palveluntarjoaja (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search), viive, kustannus, vastauksen koko, linkkien määrä.
+- Syöte: URL + koko sivun valintakytkin + muodon valitsin (markdown / teksti / HTML).
+- Lähetä → nouda → hahmonna `ScrapeResult.tsx`.
+- `ScrapeResult` näyttää markdown-esikatselun ja raakamuodon valintakytkimen.
+- Rajoitus: jos vastauksen runko on yli **256 KB**, käyttöliittymä näyttää tekstin `(katkaistu, näytä raakamuoto)` ja avaa raakamuodon Monaco-modaali-ikkunassa (D21).
+- Metatietopaneeli: palveluntarjoaja (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), viive, kustannus, vastauksen koko, linkkien määrä.
 - Käyttää `useScrapeFetch.ts`-hookia.
 
 ### Vertailu-välilehti
 
-Suorittaa saman kyselyn tai URL-osoitteen enintään **4 palveluntarjoajalla rinnakkain** (D22):
+Suorittaa saman kyselyn/URL-osoitteen enintään **4 palveluntarjoajalla rinnakkain** (D22):
 
-- Rinnakkaiset sarakkeet kullekin palveluntarjoajalle.
+- Rinnakkaiset sarakkeet palveluntarjoajittain.
 - Mittarit: viive, kustannus, tulosten määrä, vastauksen koko.
-- URL-osoitteiden päällekkäisyyden laskenta haulle (jaettujen URL-osoitteiden määrä suhteessa alkuperäiseen tulokseen).
-- Kutsuu palveluntarjoajakohtaisesti `POST /v1/search`-päätepistettä (haku) tai `POST /v1/web/fetch` -päätepistettä (poiminta).
+- URL-päällekkäisyyden laskenta haulle (jaettujen URL-osoitteiden määrä suhteessa alkuperäiseen tulokseen).
+- Kutsuu palveluntarjoajakohtaisesti `POST /v1/search` -rajapintaa (haku) tai `POST /v1/web/fetch` -rajapintaa (sivun poiminta).
 
 ---
 
@@ -100,13 +100,13 @@ Suorittaa saman kyselyn tai URL-osoitteen enintään **4 palveluntarjoajalla rin
 
 ## Palveluntarjoajaluettelo
 
-`ProviderCatalog.tsx` tuo näkyviin täydellisen palveluntarjoajaluettelon reitistä `GET /api/search/providers`
-(laajennettu F4:ssä sisältämään sisällönhakupalveluntarjoajat):
+`ProviderCatalog.tsx` näyttää täydellisen palveluntarjoajaluettelon rajapinnasta `GET /api/search/providers`
+(laajennettu F4:ssä sisältämään noutopalveluntarjoajat):
 
-| `kind` | `"search"` (20 palveluntarjoajaa) tai `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search) |
+| `kind` | `"search"` (20 palveluntarjoajaa) tai `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
-Tila **johdetaan pyyntöhetkellä** tarkistamalla, ovatko tunnistetiedot olemassa ja ovatko
-kaikki avaimet parhaillaan jäähyllä.
+Tila **määritetään pyyntöhetkellä** tarkistamalla, ovatko tunnistetiedot olemassa ja ovatko
+kaikki avaimet parhaillaan jäähdytysajalla.
 
 ---
 
@@ -126,9 +126,9 @@ Tätä ominaisuutta varten tarvittiin vain yksi taustajärjestelmän muutos:
 
 Tiedostoa `src/app/api/search/providers/route.ts` laajennettiin seuraavasti:
 
-- Lisättiin kaikki 6 sisällönhakupalveluntarjoajaa (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`) taulukkoon.
-- Lisättiin `kind: "search" | "fetch"` jokaiseen kohteeseen.
-- Lisättiin `status: "configured" | "missing" | "rate_limited"`, joka johdetaan tunnistetietojen reaaliaikaisesta tilasta.
+- Taulukkoon sisällytettiin kaikki noutopalveluntarjoajat (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`, `parallel-search`).
+- Jokaiseen kohteeseen lisättiin `kind: "search" | "fetch"`.
+- Lisättiin `status: "configured" | "missing" | "rate_limited"`, joka johdetaan tunnistetietojen ajantasaisesta tilasta.
 - Säilytettiin taaksepäin yhteensopivuus — nykyiset kentät (`id`, `name` jne.) pysyivät muuttumattomina.
 
 ---

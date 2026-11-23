@@ -36,35 +36,35 @@ Studio se třemi kartami, které sjednocuje webové vyhledávání, extrakci web
 
 ## Karty
 
-### Karta vyhledávání
+### Karta Vyhledávání
 
 Rozšiřuje stávající `SearchForm` + `ResultsPanel` + `RerankPanel` do podoby karty:
 
 - Dotaz → výsledky (název, URL, úryvek, skóre relevance).
 - Metadata poskytovatele v panelu Konfigurace (náklady, kvóta, stav).
-- Sekce přerazení: výběr modelu pro přerazení, změna pořadí výsledků, zobrazení `positionDelta`.
+- Sekce pro změnu pořadí: výběr modelu pro změnu pořadí, přeuspořádání výsledků, zobrazení `positionDelta`.
 - Prázdný stav s výzvou k akci, pokud nejsou nakonfigurováni žádní poskytovatelé vyhledávání.
 - Historie vyhledávání prostřednictvím `SearchHistory.tsx`.
 - Volá `POST /v1/search` (stávající koncový bod, beze změn).
 
-### Karta extrakce
+### Karta Extrakce
 
-Nová karta pro extrakci obsahu z URL prostřednictvím `POST /v1/web/fetch` (vytvořeného v plánu 05):
+Nová karta pro extrakci obsahu z URL prostřednictvím `POST /v1/web/fetch` (vytvořeno v plánu 05):
 
 - Vstup: URL + přepínač celé stránky + výběr formátu (markdown / text / HTML).
 - Odeslání → načtení → vykreslení `ScrapeResult.tsx`.
 - `ScrapeResult` vykresluje náhled markdownu + přepínač nezpracovaného obsahu.
-- Limit: pokud je tělo odpovědi větší než **256 KB**, uživatelské rozhraní zobrazí `(zkráceno, zobrazit nezpracované)` a otevře nezpracovaný obsah v modálním okně Monaco (D21).
-- Panel metadat: poskytovatel (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search), latence, náklady, velikost odpovědi, počet odkazů.
+- Limit: pokud tělo odpovědi přesáhne **256 KB**, uživatelské rozhraní zobrazí `(zkráceno, zobrazit nezpracovaný obsah)` a otevře nezpracovaný obsah v modálním okně Monaco (D21).
+- Panel metadat: poskytovatel (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), latence, náklady, velikost odpovědi, počet odkazů.
 - Používá hook `useScrapeFetch.ts`.
 
-### Karta porovnání
+### Karta Porovnání
 
 Spouští stejný dotaz/URL paralelně až u **4 poskytovatelů** (D22):
 
 - Sloupce vedle sebe pro jednotlivé poskytovatele.
 - Metriky: latence, náklady, počet výsledků, velikost odpovědi.
-- Výpočet překryvu URL pro vyhledávání (počet sdílených URL oproti původnímu výsledku).
+- Výpočet překryvu URL pro vyhledávání (počet sdílených URL oproti počátečnímu výsledku).
 - Volá `POST /v1/search` (vyhledávání) nebo `POST /v1/web/fetch` (extrakce) pro každého poskytovatele.
 
 ---
@@ -103,10 +103,10 @@ Spouští stejný dotaz/URL paralelně až u **4 poskytovatelů** (D22):
 `ProviderCatalog.tsx` zpřístupňuje úplný seznam poskytovatelů z `GET /api/search/providers`
 (rozšířený ve F4 o poskytovatele načítání):
 
-| `kind` | `"search"` (20 poskytovatelů) nebo `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search) |
+| `kind` | `"search"` (20 poskytovatelů) nebo `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
-Stav je **odvozen v okamžiku požadavku** na základě kontroly, zda existují přihlašovací údaje a zda
-jsou všechny klíče právě ve fázi cooldownu.
+Stav je **odvozen v okamžiku požadavku** na základě kontroly, zda přihlašovací údaje existují a zda
+jsou všechny klíče aktuálně v režimu cooldown.
 
 ---
 
@@ -122,14 +122,14 @@ Zástupný symbol klíče API je vždy `$OMNIROUTE_API_KEY` (D11, sdílený s Pl
 
 Pro tuto funkci byla potřeba pouze jedna změna backendu:
 
-### Rozšířený endpoint `GET /api/search/providers`
+### Rozšíření `GET /api/search/providers`
 
 Soubor `src/app/api/search/providers/route.ts` byl rozšířen tak, aby:
 
-- Zahrnoval do pole všech 6 poskytovatelů načítání (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`).
-- Přidal `kind: "search" | "fetch"` ke každé položce.
-- Přidal `status: "configured" | "missing" | "rate_limited"` odvozený z aktuálního stavu přihlašovacích údajů.
-- Zachoval zpětnou kompatibilitu — stávající pole (`id`, `name` atd.) zůstávají beze změny.
+- Zahrnoval v poli všechny poskytovatele načítání (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`, `parallel-search`).
+- Přidával ke každé položce `kind: "search" | "fetch"`.
+- Přidával `status: "configured" | "missing" | "rate_limited"` odvozený z aktuálního stavu přihlašovacích údajů.
+- Zachovával zpětnou kompatibilitu — stávající pole (`id`, `name` atd.) zůstávají beze změny.
 
 ---
 

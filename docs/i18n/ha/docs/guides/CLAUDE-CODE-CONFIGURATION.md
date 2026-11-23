@@ -93,44 +93,58 @@ samfuran Kimi kawai za a nuna.
 
 ---
 
-## Sashen fara amfani a dashboard
+## Sashen farawa a dashboard
 
 Katin kayan aikin Claude (**Dashboard → CLI Code**) yana nuna ainihin ɓangaren `settings.json`
-na wannan instance ɗin, kusa da maɓallin bayanin discovery-alias, tare da maɓallin kwafi:
+na wannan instance, kusa da maɓallin bayani na discovery-alias, tare da maɓallin kwafi:
 
 ```jsonc
 {
   "env": {
     "ANTHROPIC_BASE_URL": "http://<OmniRoute ɗinka>:20128",
-    "ANTHROPIC_AUTH_TOKEN": "<mabuɗin API na OmniRoute ɗinka>",
+    "ANTHROPIC_AUTH_TOKEN": "<mabuɗin OmniRoute API ɗinka>",
     "CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY": "1",
   },
 }
 ```
 
-Base URL ɗin shi ne wanda katin ya warware (har da custom override da ka shigar), kuma an riga an
-daidaita shi — babu ƙarin `/v1`, babu alamar slash a ƙarshe. **Ba a taɓa nuna mabuɗin ba**: sashen yana zuwa da
-placeholder, don haka screenshot ko snippet da aka liƙa ba zai iya fallasa shi ba. Liƙa mabuɗinka a madadinsa.
+Base URL ɗin shi ne wanda katin ya tantance (har da custom override da ka shigar), kuma an riga
+an daidaita shi — babu ƙarin `/v1`, babu slash a ƙarshensa. **Ba a taɓa nuna mabuɗin ba**: sashen yana zuwa da
+placeholder, don haka screenshot ko snippet da aka manna ba zai iya fallasa shi ba. Manna mabuɗinka a madadinsa.
 
-Ƙara `CLAUDE_CODE_AUTO_COMPACT_WINDOW` ƙarƙashin wannan `env` block ɗin ga duk wani model wanda ainihin
+Ƙara `CLAUDE_CODE_AUTO_COMPACT_WINDOW` a ƙarƙashin wannan sashen `env` ga duk wani model wanda ainihin
 context window ɗinsa ba 200K ba ne — Claude Code yana ɗauka cewa kowane id da bai gane ba yana da 200K, don haka
-auto-compaction zai faru a wurin da bai dace ba idan ba haka ba (duba gargaɗin da ke sashen da ya gabata).
-Snippet builder ɗin ma yana karɓar wannan ƙimar, don haka mai kira da ya san window na target model
+auto-compaction zai fara aiki a lokacin da bai dace ba idan ba a yi haka ba (duba gargaɗin da ke sashen da ya gabata).
+Snippet builder ɗin yana karɓar wannan ƙimar ma, don haka caller da ya san girman window na model ɗin da ake nufi
 zai iya fitar da ita kai tsaye.
 
 Tushe: `src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet` (pure
 builder, wanda aka yi wa unit test) wanda `ClaudeGatewayOnboardingBlock` ke nunawa.
 
+### Ƙayyade account ɗaya (na zaɓi)
+
+Don aika kowace buƙatar Claude Code ta takamaiman provider account guda ɗaya, ƙara
+header na `x-omniroute-connection` ta hanyar `ANTHROPIC_CUSTOM_HEADERS` a cikin wannan sashen `env`:
+
+```jsonc
+"ANTHROPIC_CUSTOM_HEADERS": "x-omniroute-connection: <connection id>"
+```
+
+Kwafi id ɗin daga chip na `xxxxxxxx…` da ke kan layin connection a shafin provider. Ƙayyadewar tana
+aiki ne kawai ga single-model ids (`provider/model`), ba ga combos ba. Duba
+[Ƙayyade account ga kowace buƙata](../reference/API_REFERENCE.md#account-pinning-per-request) don sanin
+ainihin yadda fallback yake aiki.
+
 ---
 
-## Profiles (`CLAUDE_CONFIG_DIR`)
+## Bayanan martaba (`CLAUDE_CONFIG_DIR`)
 
-Claude Code **ba shi da native profile files** (saɓanin `~/.codex/<name>.config.toml` na Codex).
-Hanyar da aka saba amfani da ita ita ce `CLAUDE_CONFIG_DIR` — keɓantaccen config directory ga kowane
-profile, inda kowannensu yake da nasa `settings.json`, credentials, history da cache.
+Claude Code **ba shi da fayilolin bayanan martaba na asali** (saɓanin `~/.codex/<name>.config.toml` na Codex).
+Hanyar da aka saba amfani da ita ita ce `CLAUDE_CONFIG_DIR` — kundin tsarin saiti daban ga kowane
+bayanin martaba, inda kowannensu ke da nasa `settings.json`, bayanan shiga, tarihin aiki da ma'ajiyar wucin gadi.
 
-`omniroute setup-claude` yana ɗauko catalog na `/v1/models` kai tsaye sannan ya rubuta
-profile guda ɗaya ga kowane model a `~/.claude/profiles/<name>/settings.json`, yana sake amfani da
+`omniroute setup-claude` yana ɗauko kundin `/v1/models` na yanzu sannan ya rubuta
+bayanin martaba ɗaya ga kowane samfurin a `~/.claude/profiles/<name>/settings.json`, yana sake amfani da
 **sunaye iri ɗaya da na `setup-codex`** (`glm52`, `kimi-k27`, `deepseek-pro`, …):
 
 ```jsonc
@@ -148,35 +162,39 @@ profile guda ɗaya ga kowane model a `~/.claude/profiles/<name>/settings.json`, 
 }
 ```
 
-> **Ba a taɓa rubuta auth token a cikin profile ba.** Ƙaddamar da shi ta hanyar
-> `omniroute launch --profile <name>` (yana saka `ANTHROPIC_AUTH_TOKEN` daga
-> active context), ko kuma ka export `ANTHROPIC_AUTH_TOKEN` da kanka sannan ka gudanar da
+> **Ba a taɓa rubuta alamar tantancewa a cikin bayanin martaba.** Ƙaddamar da shi ta hanyar
+> `omniroute launch --profile <name>` (yana saka `ANTHROPIC_AUTH_TOKEN` daga mahallin
+> da ke aiki), ko kuma ka fitar da `ANTHROPIC_AUTH_TOKEN` da kanka sannan ka gudanar da
 > `CLAUDE_CONFIG_DIR=~/.claude/profiles/<name> claude`.
 
-**Auto-sync bayan gano model (na zaɓi).** OmniRoute na iya sake samar da waɗannan
-fayilolin `~/.claude/profiles/<name>/settings.json` iri ɗaya ta atomatik duk lokacin da sync na model
-na provider ya canza catalog ɗin da ake amfani da shi — don haka sabbin models ko waɗanda aka sauya wa suna za su samu profiles ba tare da sake gudanar da
-command ɗin ba. Wannan **a kashe yake ta tsohuwa**: kunna shi daga **CLI Code dashboard** ("CLI profile
-auto-sync" → Claude Code), ko saita `OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES=true` (yana kuma bin
-`CLI_ALLOW_CONFIG_WRITES`, wanda yake kunne ta tsohuwa). Idan an kunna shi, fayilolin profile kawai yake rubutawa; ba ya taɓa
-canza active/default Claude config, auth, ko `~/.claude/settings.json` naka.
+**Daidaitawa ta atomatik bayan gano samfura (na zaɓi).** OmniRoute na iya sake samar da waɗannan
+fayilolin `~/.claude/profiles/<name>/settings.json` iri ɗaya ta atomatik a duk lokacin da daidaita samfuran
+mai samarwa ya sauya kundin da ke aiki — ta yadda sabbin samfura ko waɗanda aka sauya wa suna za su samu bayanan martaba ba tare da sake gudanar da
+umarnin ba. An **kashe shi ta tsohuwa**: kunna shi daga **allon sarrafa CLI Code** ("Daidaita bayanan martabar
+CLI ta atomatik" → Claude Code), ko saita `OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES=true` (yana kuma mutunta
+`CLI_ALLOW_CONFIG_WRITES`, wanda ake kunnawa ta tsohuwa). Idan an kunna shi, fayilolin bayanan martaba kawai yake rubutawa; ba ya taɓa
+sauya saitin Claude mai aiki/na tsohuwa, bayanan tantancewa, ko `~/.claude/settings.json`.
 
-### Samarwa + amfani da profiles
+### Samarwa + amfani da bayanan martaba
 
 ```bash
 # OmniRoute na cikin gida
 omniroute setup-claude
 
-# VPS na nesa (yana saka URL na VPS a cikin kowane profile)
+# VPS na nesa (yana saka URL na VPS a cikin kowane bayanin martaba)
 omniroute setup-claude --remote http://192.168.0.15:20128 --api-key oma_live_xxx
 
-# Wasu providers kawai
+# Wasu masu samarwa kawai
 omniroute setup-claude --only glm,kimi
 
-# Duba samfoti ba tare da rubutawa ba
+# Haka kuma a rubuta bayanan martaba ga masu samarwar CLI na cikin gida (zcode, auggie, devin-cli-agentic,
+# codex-app-server) waɗanda ba a gano su a wannan na'ura ba (ana tsallake su ta tsohuwa don manufa ta cikin gida)
+omniroute setup-claude --include-local
+
+# Nuna samfoti ba tare da rubutawa ba
 omniroute setup-claude --dry-run
 
-# Ƙaddamar da profile
+# Ƙaddamar da bayanin martaba
 omniroute launch --profile kimi-k27
 ```
 

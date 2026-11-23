@@ -23,6 +23,7 @@ export const cloudflarePlaygroundProvider: RegistryEntry = {
   baseUrl: "https://playground.ai.cloudflare.com",
   authType: "none",
   authHeader: "none",
+  toolCalling: "emulated",
   models: [
     // Frontier/open-weight flagships first.
     { id: "zai-org/glm-5.2", name: "GLM 5.2 (Z.ai)", supportsReasoning: true },

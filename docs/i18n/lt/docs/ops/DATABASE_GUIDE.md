@@ -532,14 +532,17 @@ mv recovered.db ~/.omniroute/storage.sqlite
 Atkurkite iš atsarginės kopijos:
 
 ```bash
-omniroute sync pull --merge   # arba: omniroute backup restore <backup-id>
+omniroute backup restore <backup-id>
 ```
+
+`omniroute sync pull [outPath]` tik atsisiunčia visą `.tar.gz` archyvą iš veikiančio serverio
+(`GET /api/db-backups/exportAll`, reikalingi operatoriaus prisijungimo duomenys); ši komanda nieko neatkuria.
 
 ### 3 scenarijus: prarastas šifravimo raktas
 
-Be rakto **atkurti neįmanoma**. Užšifruotų laukų perskaityti negalima. Rankiniu būdu iš naujo pridėkite visus teikėjus, naudodami naujus prisijungimo duomenis.
+Be rakto **atkurti neįmanoma**. Užšifruotų laukų perskaityti negalima. Rankiniu būdu iš naujo pridėkite visus teikėjus naudodami naujus prisijungimo duomenis.
 
-> **Rizikos mažinimas**: visada atskirai kurkite atsarginę šifravimo rakto kopiją, geriausia slaptažodžių tvarkytuvėje arba KMS.
+> **Rizikos mažinimas**: visada atskirai kurkite atsarginę šifravimo rakto kopiją, geriausia – slaptažodžių tvarkytuvėje arba KMS.
 
 ### 4 scenarijus: pilnas diskas
 

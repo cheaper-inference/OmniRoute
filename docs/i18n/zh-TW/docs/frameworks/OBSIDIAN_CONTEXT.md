@@ -32,27 +32,26 @@ OmniRoute 將 **Obsidian** 儲存庫連接為**上下文來源**——這是一�
 ## 設定
 
 Obsidian 權杖或基礎 URL **沒有對應的環境變數**——兩者皆透過
-`src/lib/db/obsidian.ts` 儲存在 SQLite `key_value` 資料表中（命名空間為 `obsidian`）。
-權杖會**以加密形式靜態儲存**（AES-256-GCM，並提供純文字向後相容備援）。
-可從 Endpoint 儀表板的 **Context Sources** 分頁（`ObsidianSourceCard`）進行設定，
-或透過設定 REST API 完成設定。
+`src/lib/db/obsidian.ts` 儲存在 SQLite 的 `key_value` 資料表中（命名空間為 `obsidian`）。
+權杖會**以加密形式靜態儲存**（AES-256-GCM，並提供明文向後相容備援）。請從 Endpoint
+儀表板的 **Context Sources** 分頁（`ObsidianSourceCard`）進行設定，或透過設定 REST API 設定。
 
 > [!IMPORTANT]
 > 必須安裝並執行 **Obsidian Local REST API** 外掛程式。其 REST
-> 介面會監聽 **HTTP `127.0.0.1:27123`**（預設基礎 URL）。連接埠 `27124`
-> 是一個_獨立的_ MCP/HTTPS 端點，設定路由會明確拒絕該連接埠。
+> 介面會在 **HTTP `127.0.0.1:27123`**（預設基礎 URL）上監聽。連接埠 `27124`
+> 是另一個獨立的 MCP/HTTPS 端點，設定路由會明確拒絕該端點。
 > 若要從其他裝置連線，請使用 `http://<tailscale-ip>:27123`。
 
-### 設定鍵（SQLite `key_value`，命名空間為 `obsidian`）
+### 設定鍵值（SQLite `key_value`，命名空間為 `obsidian`）
 
-| 鍵                | 用途                                             | 已加密 |
-| ----------------- | ------------------------------------------------ | ------ |
-| `api_key`         | Local REST API bearer 權杖                       | 是     |
-| `base_url`        | REST 基礎 URL（預設為 `http://127.0.0.1:27123`） | 否     |
-| `vault_path`      | 儲存庫目錄的絕對路徑（用於同步）                 | 否     |
-| `webdav_username` | 產生的 WebDAV 使用者名稱（儲存庫同步）           | 否     |
-| `webdav_password` | 產生的 WebDAV 密碼（儲存庫同步）                 | 是     |
-| `webdav_enabled`  | 是否啟用 WebDAV 儲存庫同步                       | 否     |
+| 鍵值              | 用途                                             | 是否加密 |
+| ----------------- | ------------------------------------------------ | -------- |
+| `api_key`         | Local REST API bearer 權杖                       | 是       |
+| `base_url`        | REST 基礎 URL（預設為 `http://127.0.0.1:27123`） | 否       |
+| `vault_path`      | vault 目錄的絕對路徑（用於同步）                 | 否       |
+| `webdav_username` | 產生的 WebDAV 使用者名稱（vault 同步）           | 否       |
+| `webdav_password` | 產生的 WebDAV 密碼（vault 同步）                 | 是       |
+| `webdav_enabled`  | 是否啟用 WebDAV vault 同步                       | 否       |
 
 ### 透過 REST 設定
 
@@ -69,34 +68,43 @@ curl http://localhost:20128/api/settings/obsidian
 curl -X DELETE http://localhost:20128/api/settings/obsidian
 ```
 
-所有方法都需要儀表板驗證。`POST` 會拒絕任何使用連接埠 `27124` 的 URL，
-並在持久化之前，透過呼叫 Local REST API 狀態端點驗證權杖。
+所有方法都需要儀表板驗證。`POST` 會拒絕連接埠 `27124` 上的任何 URL，
+並在持久化儲存前，透過呼叫 Local REST API 狀態端點來驗證權杖。
 
-### WebDAV 儲存庫同步
+### WebDAV vault 同步
 
-`src/app/api/settings/obsidian/webdav/route.ts` 管理可選的 WebDAV 後端
-儲存庫同步（由 `src/lib/obsidianSync.ts` 驅動）。啟用此功能後，OmniRoute
-會指向本機儲存庫目錄，並產生一組隨機的 WebDAV 使用者名稱/密碼：
+`src/app/api/settings/obsidian/webdav/route.ts` 管理選用的 WebDAV 後端
+vault 同步（由 `src/lib/obsidianSync.ts` 驅動）。啟用後，會將 OmniRoute 指向
+本機 vault 目錄，並產生一組隨機的 WebDAV 使用者名稱與密碼：
 
 ```bash
-# 為儲存庫目錄啟用 WebDAV 同步（產生使用者名稱/密碼）
+# 為 vault 目錄啟用 WebDAV 同步（產生使用者名稱與密碼）
 curl -X POST http://localhost:20128/api/settings/obsidian/webdav \
   -H "Content-Type: application/json" \
   -d '{"vaultPath":"/home/me/MyVault"}'
 
-# 取得 WebDAV 同步狀態（僅在啟用時傳回認證資訊）
+# 取得 WebDAV 同步狀態（僅在啟用時傳回憑證）
 curl http://localhost:20128/api/settings/obsidian/webdav
 
-# 停用 WebDAV 同步（清除認證資訊及受管理的 .stignore）
+# 停用 WebDAV 同步（清除憑證與受管理的 .stignore）
 curl -X DELETE http://localhost:20128/api/settings/obsidian/webdav
 ```
 
-### 每個 API 金鑰的上下文來源（可選）
+### 個別 API 金鑰的內容來源（選用）
 
-Obsidian 設定可透過 `api_key_context_sources` 資料表，**依每個 API 金鑰**
-設定作用域（`src/lib/db/apiKeyContextSources.ts`）。當 MCP 呼叫攜帶已驗證的 API
-金鑰 ID 時，`getObsidianConfigForApiKey()` 會優先使用該金鑰本身的權杖/基礎 URL/儲存庫路徑
-（`source: "api_key"`）；若無，則退回使用全域設定（`source: "global"`）。
+Obsidian 設定可透過 `api_key_context_sources` 資料表，將範圍限定為**個別 API 金鑰**
+（`src/lib/db/apiKeyContextSources.ts`）。當 MCP 呼叫帶有已驗證的 API
+金鑰 ID 時，`getObsidianConfigForApiKey()` 會優先使用該金鑰自身的權杖、基礎 URL 與 vault 路徑
+（`source: "api_key"`），否則會退回使用全域設定（`source: "global"`）。
+
+非同步 MCP 工具在讀取此設定前，需要先解析呼叫者身分。
+沒有身分的呼叫者會收到 `Obsidian API token not configured`，且不會送出任何 vault
+請求。HTTP 呼叫者透過其請求憑證進行解析；stdio 呼叫者可透過
+`OMNIROUTE_API_KEY` 或 `ROUTER_API_KEY` 進行解析。無法解析的 HTTP 呼叫者
+不能繼承伺服器的環境身分。僅有預留位置 ID 並不會授權存取；
+能解析為 `env-key` 的有效環境憑證仍受支援。
+沒有個別 Obsidian 設定的已驗證金鑰仍會保留全域備援。
+四個 `obsidian_sync_*` 工具會維持其獨立的同步權杖行為。
 
 ## MCP 工具（22 個）
 

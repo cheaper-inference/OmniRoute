@@ -44,6 +44,9 @@ export const DEFAULT_LIST_POLL_SECONDS = 2;
 export const TIMELINE_LIST_POLL_STORAGE_KEY = "timelineListPollSeconds";
 export const FOLLOW_LINE_X = 0.75;
 export const LIVE_LINE_FRACTION = 0.9;
+/** Pointer travel (px) before a press counts as a drag. Below this it stays a
+ *  click/tap, so selecting a bar never flips the view out of follow mode. */
+export const DRAG_THRESHOLD_PX = 4;
 
 export function computeBarRange(
   log: TimelineLog,
@@ -250,10 +253,7 @@ export function nextTimelineLogs(
   const currentMcp = current.filter((row) => row.kind === "mcp");
   const freshLlm = result.logs.filter((row) => row.kind !== "mcp");
   const freshMcp = result.logs.filter((row) => row.kind === "mcp");
-  return [
-    ...(result.llmOk ? freshLlm : currentLlm),
-    ...(result.mcpOk ? freshMcp : currentMcp),
-  ];
+  return [...(result.llmOk ? freshLlm : currentLlm), ...(result.mcpOk ? freshMcp : currentMcp)];
 }
 
 export async function loadTimelineLogs(

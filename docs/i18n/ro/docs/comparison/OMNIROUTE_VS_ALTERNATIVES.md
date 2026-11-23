@@ -39,11 +39,11 @@ Comparație obiectivă a funcționalităților cu rutere AI open-source populare
 
 ## Când să alegeți OmniRoute
 
-- Găzduiți local și doriți **acoperire maximă a furnizorilor** (329 de furnizori, 155 de intrări în catalog gratuite/fără autentificare)
-- Aveți nevoie de un **server MCP încorporat** (instrumente LLM, memorie și competențe expuse ca instrumente)
+- Găzduiți soluția pe propria infrastructură și doriți **acoperire maximă a furnizorilor** (374 de furnizori, 155 de intrări gratuite/fără autentificare în catalog)
+- Aveți nevoie de un **server MCP încorporat** (instrumente LLM, memorie și abilități expuse ca instrumente)
 - Aveți nevoie de **protocolul A2A** pentru fluxuri de lucru între agenți
-- Doriți **mascarea amprentei** (JA3/JA4) pentru a evita detectarea de către sistemele CAPTCHA din amonte
-- Aveți nevoie de **funcționalități pentru întreprinderi** (măsuri de protecție, evaluări, pistă de audit) fără o factură SaaS
+- Doriți **disimularea amprentei digitale** (JA3/JA4) pentru a evita detectarea de către sistemele CAPTCHA din amonte
+- Aveți nevoie de **funcționalități pentru companii** (măsuri de protecție, evaluări, jurnal de audit) fără costurile unei soluții SaaS
 
 ## Când să alegeți LiteLLM
 

@@ -94,34 +94,47 @@ Claude Code-இல் இவற்றில் ஒன்றைத் தேர�
 
 ---
 
-## டாஷ்போர்டில் உள்ள ஆரம்ப அமைப்புத் தொகுதி
+## டாஷ்போர்டில் அறிமுக அமைப்புத் தொகுதி
 
-Claude கருவி அட்டை (**டாஷ்போர்டு → CLI குறியீடு**) இந்த instance-க்கான துல்லியமான `settings.json` பகுதியை, discovery-alias தகவல் பொத்தானுக்கு அருகில், நகலெடுக்கும் பொத்தானுடன் காண்பிக்கிறது:
+Claude கருவி அட்டை (**டாஷ்போர்டு → CLI Code**), கண்டறிதல் மாற்றுப்பெயர் தகவல் பொத்தானுக்கு அருகில் நகலெடுக்கும் பொத்தானுடன், இந்த instance-க்கான துல்லியமான `settings.json` பகுதியைக் காட்டுகிறது:
 
 ```jsonc
 {
   "env": {
-    "ANTHROPIC_BASE_URL": "http://<உங்கள் OmniRoute>:20128",
-    "ANTHROPIC_AUTH_TOKEN": "<உங்கள் OmniRoute API key>",
+    "ANTHROPIC_BASE_URL": "http://<your OmniRoute>:20128",
+    "ANTHROPIC_AUTH_TOKEN": "<your OmniRoute API key>",
     "CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY": "1",
   },
 }
 ```
 
-அடிப்படை URL என்பது அட்டையால் தீர்மானிக்கப்பட்ட URL ஆகும் (நீங்கள் உள்ளிட்ட தனிப்பயன் override உட்பட), மேலும் அது ஏற்கனவே இயல்பாக்கப்பட்டுள்ளது — `/v1` பின்னொட்டு இல்லை, இறுதியில் slash இல்லை. **Key ஒருபோதும் காண்பிக்கப்படாது**: இந்தத் தொகுதியில் placeholder மட்டுமே இடம்பெறும்; எனவே screenshot அல்லது ஒட்டப்பட்ட snippet மூலம் key கசிய முடியாது. அதன் மீது உங்கள் key-ஐ ஒட்டவும்.
+அடிப்படை URL என்பது அட்டை தீர்மானித்த ஒன்றாகும் (நீங்கள் உள்ளிட்ட தனிப்பயன் மேலெழுதுதலும் இதில் அடங்கும்); அது ஏற்கனவே இயல்பாக்கப்பட்டுள்ளது — `/v1` பின்னொட்டு இல்லை, இறுதி சாய்வுக்கோடு இல்லை. **விசை ஒருபோதும் காட்டப்படாது**: இந்தத் தொகுதியில் ஒரு இடநிரப்பியே வழங்கப்படுவதால், திரைப்பிடிப்போ ஒட்டப்பட்ட துணுக்கோ விசையைக் கசியவிட முடியாது. அதன் மீது உங்கள் விசையை ஒட்டவும்.
 
-உண்மையான context window 200K அல்லாத எந்த model-க்கும், அதே `env` தொகுதியின் கீழ் `CLAUDE_CODE_AUTO_COMPACT_WINDOW`-ஐச் சேர்க்கவும் — Claude Code தனக்குத் தெரியாத ஒவ்வொரு id-க்கும் 200K எனக் கருதுகிறது; எனவே இதைச் செய்யாவிட்டால் auto-compaction தவறான இடத்தில் செயல்படும் (முந்தைய பிரிவிலுள்ள எச்சரிக்கையைப் பார்க்கவும்). Snippet builder இந்த மதிப்பையும் ஏற்றுக்கொள்கிறது; எனவே இலக்கு model-இன் window அளவை அறிந்த caller அதை நேரடியாக வெளியிட முடியும்.
+உண்மையான சூழல் சாளரம் 200K ஆக இல்லாத எந்த மாதிரிக்கும், அதே `env` தொகுதியின் கீழ் `CLAUDE_CODE_AUTO_COMPACT_WINDOW`-ஐச் சேர்க்கவும் — Claude Code தனக்குத் தெரியாத ஒவ்வொரு id-க்கும் 200K எனக் கருதுவதால், இல்லையெனில் தானியங்கு சுருக்கம் தவறான கட்டத்தில் செயல்படும் (முந்தைய பிரிவில் உள்ள எச்சரிக்கையைப் பார்க்கவும்). துணுக்கு உருவாக்கியும் அந்த மதிப்பை ஏற்கிறது; எனவே இலக்கு மாதிரியின் சாளர அளவை அறிந்த அழைப்பாளர் அதை நேரடியாக வெளியிடலாம்.
 
-மூலம்: `src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet` (`ClaudeGatewayOnboardingBlock` மூலம் காண்பிக்கப்படும், unit-test செய்யப்பட்ட pure builder).
+மூலம்: `src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet` (`ClaudeGatewayOnboardingBlock` மூலம் காட்டப்படும் தூய உருவாக்கி, அலகுச் சோதனை செய்யப்பட்டவை).
+
+### ஒரு கணக்கைப் பொருத்தவும் (விருப்பத்தேர்வு)
+
+ஒவ்வொரு Claude Code கோரிக்கையையும் ஒரு குறிப்பிட்ட வழங்குநர் கணக்கின் வழியாக அனுப்ப, அதே `env` தொகுதியில் `ANTHROPIC_CUSTOM_HEADERS` மூலம் `x-omniroute-connection` தலைப்பைச் சேர்க்கவும்:
+
+```jsonc
+"ANTHROPIC_CUSTOM_HEADERS": "x-omniroute-connection: <connection id>"
+```
+
+வழங்குநர் பக்கத்தில் உள்ள இணைப்பு வரிசையின் `xxxxxxxx…` சிப்பிலிருந்து id-ஐ நகலெடுக்கவும். இந்தப் பொருத்தம் ஒற்றை-மாதிரி id-களுக்கு (`provider/model`) மட்டுமே பொருந்தும்; சேர்க்கைகளுக்குப் பொருந்தாது. துல்லியமான மாற்றுவழி நடத்தைக்காக [ஒவ்வொரு கோரிக்கைக்கும் கணக்கைப் பொருத்துதல்](../reference/API_REFERENCE.md#account-pinning-per-request) என்பதைப் பார்க்கவும்.
 
 ---
 
-## Profiles (`CLAUDE_CONFIG_DIR`)
+## சுயவிவரங்கள் (`CLAUDE_CONFIG_DIR`)
 
-Claude Code-இல் **சொந்த profile கோப்புகள் இல்லை** (Codex-இன் `~/.codex/<name>.config.toml` போலல்லாமல்).
-வழக்கமான முறை `CLAUDE_CONFIG_DIR` ஆகும் — ஒவ்வொரு profile-க்கும் தனித்தனி config அடைவு; ஒவ்வொன்றிலும் அதற்குரிய `settings.json`, credentials, history மற்றும் cache இருக்கும்.
+Claude Code-இல் **உள்ளமைந்த சுயவிவரக் கோப்புகள் இல்லை** (Codex-இன் `~/.codex/<name>.config.toml` போலல்லாமல்).
+வழக்கமான செயல்முறை `CLAUDE_CONFIG_DIR` ஆகும் — ஒவ்வொரு
+சுயவிவரத்திற்கும் தனித்தனி கட்டமைப்பு அடைவு; ஒவ்வொன்றிலும் அதற்கான `settings.json`, நற்சான்றுகள், வரலாறு மற்றும் தற்காலிகச் சேமிப்பு இருக்கும்.
 
-`omniroute setup-claude`, நேரடி `/v1/models` பட்டியலைப் பெற்று, ஒவ்வொரு model-க்கும் ஒரு profile-ஐ `~/.claude/profiles/<name>/settings.json` இல் எழுதுகிறது; இதில் **`setup-codex` பயன்படுத்தும் அதே பெயர்கள்** (`glm52`, `kimi-k27`, `deepseek-pro`, …) மீண்டும் பயன்படுத்தப்படுகின்றன:
+`omniroute setup-claude`, நேரடி `/v1/models` பட்டியலைப் பெற்று, ஒவ்வொரு மாதிரிக்கும் ஒரு
+சுயவிவரத்தை `~/.claude/profiles/<name>/settings.json` இல் எழுதுகிறது; இதற்கு
+**`setup-codex` பயன்படுத்தும் அதே பெயர்களையே** (`glm52`, `kimi-k27`, `deepseek-pro`, …) மீண்டும் பயன்படுத்துகிறது:
 
 ```jsonc
 // ~/.claude/profiles/glm52/settings.json
@@ -138,27 +151,41 @@ Claude Code-இல் **சொந்த profile கோப்புகள் இ�
 }
 ```
 
-> **Auth token ஒருபோதும் profile-இல் எழுதப்படாது.** `omniroute launch --profile <name>` மூலம் தொடங்கவும் (இது செயலில் உள்ள context-இலிருந்து `ANTHROPIC_AUTH_TOKEN`-ஐச் செலுத்துகிறது), அல்லது `ANTHROPIC_AUTH_TOKEN`-ஐ நீங்களே export செய்துவிட்டு
+> **அங்கீகார டோக்கன் ஒருபோதும் சுயவிவரத்தில் எழுதப்படாது.** இதைக் கொண்டு தொடங்கவும்:
+> `omniroute launch --profile <name>` (இது செயலில் உள்ள சூழலிலிருந்து `ANTHROPIC_AUTH_TOKEN`-ஐ
+> உட்செலுத்தும்), அல்லது `ANTHROPIC_AUTH_TOKEN`-ஐ நீங்களே ஏற்றுமதி செய்து,
 > `CLAUDE_CONFIG_DIR=~/.claude/profiles/<name> claude`-ஐ இயக்கவும்.
 
-**Model discovery-க்குப் பிறகான auto-sync (விருப்பத் தேர்வு).** Provider model sync ஒன்று நேரடி catalog-ஐ மாற்றும் ஒவ்வொரு முறையும், இதே `~/.claude/profiles/<name>/settings.json` கோப்புகளை OmniRoute தானாக மீண்டும் உருவாக்க முடியும் — இதனால் command-ஐ மீண்டும் இயக்காமலேயே புதிய/மறுபெயரிடப்பட்ட model-களுக்கான profile-கள் கிடைக்கும். இது **இயல்பாக முடக்கப்பட்டிருக்கும்**: **CLI Code டாஷ்போர்டில்** இருந்து இதை மாற்றவும் ("CLI profile auto-sync" → Claude Code), அல்லது `OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES=true` என அமைக்கவும் (இது இயல்பாக இயக்கப்பட்டிருக்கும் `CLI_ALLOW_CONFIG_WRITES`-ஐயும் மதிக்கிறது). இயக்கப்பட்டிருக்கும்போது இது profile கோப்புகளை மட்டுமே எழுதும்; உங்கள் செயலில் உள்ள/இயல்புநிலை Claude config, auth அல்லது `~/.claude/settings.json`-ஐ ஒருபோதும் மாற்றாது.
+**மாதிரி கண்டறிதலுக்குப் பிந்தைய தானியங்கு ஒத்திசைவு (விருப்பத் தேர்வு).** வழங்குநரின் மாதிரி
+ஒத்திசைவு நேரடிப் பட்டியலை மாற்றும்போதெல்லாம், இதே `~/.claude/profiles/<name>/settings.json`
+கோப்புகளை OmniRoute தானாகவே மீண்டும் உருவாக்க முடியும் — இதனால் கட்டளையை மீண்டும் இயக்காமலேயே
+புதிய/மறுபெயரிடப்பட்ட மாதிரிகளுக்கான சுயவிவரங்கள் கிடைக்கும். இது **இயல்பாக முடக்கப்பட்டிருக்கும்**:
+**CLI Code dashboard**-இலிருந்து இதை மாற்றவும் ("CLI profile auto-sync" → Claude Code), அல்லது
+`OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES=true` என அமைக்கவும் (இயல்பாக இயக்கப்பட்டிருக்கும்
+`CLI_ALLOW_CONFIG_WRITES`-ஐயும் இது மதிக்கும்). இயக்கப்பட்டிருக்கும்போது, இது சுயவிவரக் கோப்புகளை
+மட்டுமே எழுதும்; உங்கள் செயலில் உள்ள/இயல்புநிலை Claude கட்டமைப்பு, அங்கீகாரம் அல்லது
+`~/.claude/settings.json`-ஐ ஒருபோதும் மாற்றாது.
 
-### Profile-களை உருவாக்குதல் + பயன்படுத்துதல்
+### சுயவிவரங்களை உருவாக்குதல் + பயன்படுத்துதல்
 
 ```bash
 # உள்ளூர் OmniRoute
 omniroute setup-claude
 
-# தொலைநிலை VPS (ஒவ்வொரு profile-லும் VPS URL-ஐப் பதிக்கிறது)
+# தொலைநிலை VPS (ஒவ்வொரு சுயவிவரத்திலும் VPS URL-ஐப் பதிக்கிறது)
 omniroute setup-claude --remote http://192.168.0.15:20128 --api-key oma_live_xxx
 
-# சில provider-கள் மட்டும்
+# சில வழங்குநர்கள் மட்டும்
 omniroute setup-claude --only glm,kimi
 
-# எழுதாமல் முன்னோட்டமிடுதல்
+# இந்த ஹோஸ்டில் கண்டறியப்படாத உள்ளூர்-CLI வழங்குநர்களுக்கும் (zcode, auggie, devin-cli-agentic,
+# codex-app-server) சுயவிவரங்களை எழுதவும் (உள்ளூர் இலக்கிற்கு இயல்பாகத் தவிர்க்கப்படும்)
+omniroute setup-claude --include-local
+
+# எழுதாமல் முன்னோட்டமிடவும்
 omniroute setup-claude --dry-run
 
-# ஒரு profile-ஐத் தொடங்குதல்
+# ஒரு சுயவிவரத்தைத் தொடங்கவும்
 omniroute launch --profile kimi-k27
 ```
 

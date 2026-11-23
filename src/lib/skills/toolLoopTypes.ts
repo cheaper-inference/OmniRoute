@@ -68,6 +68,7 @@ export type NonStreamingProviderLegResult =
   | {
       kind: "error";
       result: ChatCoreErrorResult;
+      upstreamDiagnostic?: Record<string, unknown>;
       receipt: ProviderLegReceipt;
       usage: ProviderLegUsage | null;
     };
@@ -182,6 +183,13 @@ export interface NonStreamingClientTranslateInput {
   provider: string;
   model: string;
   requestBody: Record<string, unknown>;
+  /**
+   * The ORIGINAL client request body (before translation to the provider format).
+   * Used to honor client intent that translation drops — e.g. `response_format`
+   * is turned into a system instruction for Claude targets, so only the client
+   * body still says JSON mode was requested. Falls back to `requestBody`.
+   */
+  clientRequestBody?: Record<string, unknown> | null;
   /**
    * Transcript used for no-tool_calls reasoning replay (#1628).
    * Must be the client-translated Chat `messages` (parent: `translatedBody.messages`),

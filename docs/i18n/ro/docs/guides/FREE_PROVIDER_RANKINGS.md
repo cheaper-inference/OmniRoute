@@ -13,27 +13,27 @@
 
 ## Ce este
 
-OmniRoute înregistrează 329 de furnizori, inclusiv 155 de intrări în catalog marcate drept **gratuite/fără autentificare**
+OmniRoute înregistrează 374 de furnizori, inclusiv 155 de intrări în catalog marcate ca **gratuite/fără autentificare**
 (fără autentificare,
 OAuth cu nivel gratuit sau cheie API cu nivel gratuit — consultați
 [Ghidul nivelurilor gratuite](../getting-started/FREE-TIERS-GUIDE.md) și
-[directorul complet al nivelurilor gratuite](../reference/FREE_TIERS.md)). Problema: furnizorii gratuiți diferă
+[directorul complet al nivelurilor gratuite](../reference/FREE_TIERS.md)). Problema: furnizorii gratuiți variază
 foarte mult în ceea ce privește calitatea modelelor. Un furnizor fără autentificare care oferă un model de ultimă generație este mult mai util
-decât unul care oferă un model vechi și de mici dimensiuni.
+decât unul care oferă un model vechi de mici dimensiuni.
 
 **Clasamentul furnizorilor gratuiți** răspunde la întrebarea „**care furnizor gratuit îmi oferă cel mai bun model?**” prin
-corelarea catalogului fiecărui furnizor gratuit cu **scorurile de calitate obținute prin contribuția comunității** din
-**clasamentul Arena AI** (ELO bazat pe preferințele umane, aceeași idee care stă la baza arenei de
+corelarea catalogului fiecărui furnizor gratuit cu **scoruri de calitate obținute prin crowdsourcing** din
+**clasamentul Arena AI** (ELO bazat pe preferințe umane, aceeași idee care stă la baza arenei de
 chatboți LMArena). Furnizorii sunt apoi clasificați în funcție de performanța **celui mai bun model gratuit** al lor.
 
 Clasamentul este calculat pe baza a trei surse reale:
 
-1. Listele furnizorilor gratuiți — `NOAUTH_PROVIDERS`, plus intrările `OAUTH_PROVIDERS` /
+1. Listele de furnizori gratuiți — `NOAUTH_PROVIDERS`, plus intrările `OAUTH_PROVIDERS` /
    `APIKEY_PROVIDERS` marcate cu `hasFree`
    (`src/shared/constants/providers.ts`).
 2. Catalogul de modele al fiecărui furnizor din registrul furnizorilor
    (`open-sse/config/providerRegistry.ts`).
-3. Scorurile de adecvare pentru sarcini derivate din ELO, stocate în tabelul DB `model_intelligence` de către
+3. Scorurile de adecvare la sarcini derivate din ELO, stocate în tabelul DB `model_intelligence` de către
    motorul de sincronizare Arena ELO (`src/lib/arenaEloSync.ts`).
 
 Logica de corelare se află în `src/lib/freeProviderRankings.ts`.

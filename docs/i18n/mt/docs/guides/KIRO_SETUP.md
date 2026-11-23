@@ -118,31 +118,32 @@ Meta jitħalla barra, il-field `region` jieħu `us-east-1` bħala valur predefin
 
 ---
 
-## Fluss tal-Importazzjoni b’API Key
+## Fluss tal-Importazzjoni tal-API Key
 
-L-awtentikazzjoni b’API key hija għal kredenzjali bearer fit-tul ta’ Kiro / AWS CodeWhisperer. Din
-ma tużax it-tiġdid ta’ OAuth, u għalhekk tevita l-invalidazzjoni ta’ sessjonijiet OIDC kondiviżi.
+L-awtentikazzjoni bl-API key hija għal kredenzjali bearer ta’ Kiro / AWS CodeWhisperer b’ħajja twila. Din ma tużax it-tiġdid ta’ OAuth, u għalhekk tevita l-invalidazzjoni ta’ sessjonijiet OIDC kondiviżi.
 
 ### Dashboard
 
-1. Iftaħ **Dashboard -> Fornituri -> Kiro**.
+1. Iftaħ **Dashboard -> Providers -> Kiro**.
 2. Agħżel **API Key**.
-3. Waħħal l-API key u, jekk tixtieq, ir-reġjun AWS (`us-east-1` bħala valur predefinit).
-4. OmniRoute jivvalida l-key u jsalva l-konnessjoni.
+3. Waħħal l-API key u agħżel ir-reġjun AWS: **Sejbien awtomatiku** (default), **Lvant tal-Istati Uniti
+   (N. Virginia)** jew **Ewropa (Frankfurt)**.
+4. OmniRoute jivvalida l-key u jsalva l-konnessjoni marbuta mar-reġjun fejn taħdem il-key.
 
 ### API
 
 ```bash
 curl -X POST http://localhost:20128/api/oauth/kiro/api-key \
   -H "Content-Type: application/json" \
-  -d '{"apiKey": "kiro_or_codewhisperer_key", "region": "us-east-1"}'
+  -d '{"apiKey": "kiro_or_codewhisperer_key", "region": "auto"}'
 ```
+
+`region` jaċċetta `auto` (default), `us-east-1` jew `eu-central-1`; kwalunkwe valur ieħor jiġi rrifjutat b’HTTP 400.
 
 ### Kuntratt Intern
 
-Ir-route tal-API jivvalida l-key billi jsejjaħ `KiroService.validateApiKey()`, li
-juża `ListAvailableProfiles` mal-endpoint ta’ CodeWhisperer/Amazon Q li jaqbel mar-reġjun
-u jiddetermina `profileArn`.
+Ir-rotta tal-API tivvalida l-key billi ssejjaħ `KiroService.validateApiKey()`, li ssejjaħ `GET https://q.<region>.amazonaws.com/ListAvailableModels?origin=AI_EDITOR`
+(l-API tal-wiċċ li tuża l-inferenza bl-API key ta’ Amazon Q) b’limitu ta’ żmien ta’ 10 s għal kull reġjun. Fil-modalità `auto`, tipprova `us-east-1`, imbagħad `eu-central-1`, u taħżen l-ewwel reġjun li jaċċetta l-key. Jekk key tiġi rrifjutata f’kull reġjun kandidat, l-importazzjoni tfalli b’HTTP 400. Imbagħad `ListAvailableProfiles` tissejjaħ fuq bażi tal-aħjar sforz biex jinstab `profileArn` fakultattiv (AWS jirrifjutah għall-biċċa l-kbira tal-API keys).
 
 Il-konnessjoni ssejvjata tuża:
 
@@ -157,10 +158,7 @@ Il-konnessjoni ssejvjata tuża:
 }
 ```
 
-Waqt l-eżekuzzjoni, `KiroExecutor.buildHeaders()` jibgħat il-key bħala
-`Authorization: Bearer <key>` u jżid `tokentype: API_KEY`. Is-sejħiet għall-kwota/profil
-jużaw l-istess indikatur sabiex AWS jittratta l-bearer bħala API key fit-tul minflok
-bħala token ta’ aċċess OIDC jew soċjali.
+Waqt l-eżekuzzjoni, `KiroExecutor.buildHeaders()` jibgħat il-key bħala `Authorization: Bearer <key>` u jżid `tokentype: API_KEY`. Is-sejħiet għall-kwota/profil jużaw l-istess markatur sabiex AWS jittratta l-bearer bħala API key b’ħajja twila minflok bħala token ta’ aċċess OIDC jew soċjali. `KiroExecutor.execute()` jibgħat l-inferenza bl-API key biss lil `https://q.<region>.amazonaws.com/generateAssistantResponse` — inkluż `us-east-1` — minħabba li l-gateway tal-IDE Kiro jirrifjuta `TokenType=API_KEY` u `codewhisperer.us-east-1` jirrifjuta l-payloads tal-API key bħala korp ta’ talba invalidu (HTTP 400).
 
 ---
 

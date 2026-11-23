@@ -49,7 +49,20 @@ services:
       - "${APP_BIND_HOST:-127.0.0.1}:${API_PORT:-20129}:${API_PORT:-20129}"
       - "${APP_BIND_HOST:-127.0.0.1}:${LIVE_WS_PORT:-20132}:${LIVE_WS_PORT:-20132}"
     volumes:
+      # Default: bind-mount ./data on the host (what bin/snapshot-data.sh and
+      # bin/restore-data.sh back up and restore). Keep this line active so an
+      # existing install keeps reading the same data after pulling this file.
       - ./data:/app/data
+      # EACCES on the first write to /app/data? Some managed-deploy platforms
+      # run the Docker daemon as root while the container runs as the
+      # unprivileged `node` user (UID 1000), so a root-owned ./data is not
+      # writable. Either `chown -R 1000:1000 ./data` on the host, or opt into
+      # a Docker-managed named volume: comment the bind mount above, uncomment
+      # the line below AND the `omniroute-data:` entry under `volumes:` at the
+      # bottom. A named volume starts EMPTY and is not seen by the ./data
+      # backup scripts — see docs/getting-started/SELF_HOST_GUIDE.md
+      # ("Common issues") before switching an existing install.
+      # - omniroute-data:/app/data
     depends_on:
       redis:
         condition: service_healthy
@@ -62,3 +75,5 @@ services:
 
 volumes:
   redis-data:
+  # Only needed if you opted into the named-volume alternative above.
+  # omniroute-data:

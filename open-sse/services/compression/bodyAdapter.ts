@@ -2,6 +2,7 @@ type MessageLike = {
   role?: unknown;
   content?: unknown;
   [COMPRESSION_INPUT_INDEX]?: number;
+  [DEVELOPER_ROLE_NORMALIZED]?: boolean;
   [KIRO_TOOL_RESULT_PATH]?: KiroToolResultPath;
   [key: string]: unknown;
 };
@@ -33,6 +34,9 @@ const RESPONSES_MESSAGE_TYPES = new Set([
   "apply_patch_call_output",
 ]);
 const COMPRESSION_INPUT_INDEX = Symbol("compressionInputIndex");
+// Set on a chat-shape message whose `developer` role was relabeled to `system` for the
+// engines, so `restore` can hand the original role back to the provider payload.
+const DEVELOPER_ROLE_NORMALIZED = Symbol("compressionDeveloperRoleNormalized");
 
 // Kiro envelope path back to the original tool-result text inside
 // `conversationState.{history|currentMessage}[].userInputMessage.userInputMessageContext.toolResults[N].content[M].text`.
@@ -56,7 +60,12 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function normalizeRole(role: unknown, fallback: string): string {
-  return typeof role === "string" && role.length > 0 ? role : fallback;
+  if (typeof role !== "string" || role.length === 0) return fallback;
+  // OpenAI's `developer` role is the modern spelling of `system` (Responses API, and newer
+  // chat completions). Every engine role gate keys off `system` — and the rest of the
+  // pipeline already folds the two together (translator/helpers/openaiHelper.ts) — so fold
+  // them here, at the single boundary both wire shapes cross, instead of at every gate.
+  return role === "developer" ? "system" : role;
 }
 
 function toChatContent(content: unknown, fallbackOutput?: unknown): unknown {
@@ -284,16 +293,46 @@ export type CompressionBodyAdapter = {
   ): Record<string, unknown>;
 };
 
+/**
+ * Chat-shape bodies reach the engines as-is, so a `developer` role never matched an engine
+ * role gate — the same gap the Responses `input[]` mapping has. Relabel only when such a
+ * message exists (every other request keeps the zero-copy pass-through), and hand the
+ * original role back on restore, so the payload that leaves for the provider is unchanged.
+ */
+function adaptChatBodyForCompression(body: Record<string, unknown>): CompressionBodyAdapter {
+  const messages = body.messages as MessageLike[];
+  if (!messages.some((message) => isRecord(message) && message.role === "developer")) {
+    return { body, adapted: false, restore: (compressedBody) => compressedBody };
+  }
+  const normalized = messages.map((message) =>
+    isRecord(message) && message.role === "developer"
+      ? { ...message, role: "system", [DEVELOPER_ROLE_NORMALIZED]: true }
+      : message
+  );
+  return {
+    body: { ...body, messages: normalized },
+    adapted: true,
+    restore: (compressedBody) => {
+      const compressedMessages = compressedBody.messages;
+      if (!Array.isArray(compressedMessages)) return compressedBody;
+      return {
+        ...compressedBody,
+        messages: compressedMessages.map((message) =>
+          isRecord(message) && (message as MessageLike)[DEVELOPER_ROLE_NORMALIZED]
+            ? { ...message, role: "developer" }
+            : message
+        ),
+      };
+    },
+  };
+}
+
 export function adaptBodyForCompression(
   body: Record<string, unknown>,
   preserveToolNames: string[] = []
 ): CompressionBodyAdapter {
   if (Array.isArray(body.messages)) {
-    return {
-      body,
-      adapted: false,
-      restore: (compressedBody) => compressedBody,
-    };
+    return adaptChatBodyForCompression(body);
   }
 
   // Kiro / AWS CodeWhisperer envelope: tool results live deep inside

@@ -1,4 +1,5 @@
 import { sanitizeErrorMessage } from "./error.ts";
+import { classifyProviderSafetyError } from "./providerSafety.ts";
 
 export const CODEX_PUBLIC_ERROR_MESSAGE = sanitizeErrorMessage("Codex provider request failed");
 
@@ -12,6 +13,7 @@ interface CodexPublicErrorInput {
   status?: number | null;
   type?: unknown;
   code?: unknown;
+  message?: unknown;
 }
 
 interface CodexPublicErrorRule {
@@ -99,6 +101,14 @@ function defaultPublicClassification(status: number): Pick<CodexPublicError, "ty
  * OmniRoute. Everything else falls back to the HTTP status classification.
  */
 export function projectCodexPublicError(input: CodexPublicErrorInput): CodexPublicError {
+  const safety = classifyProviderSafetyError(input);
+  if (safety) {
+    return {
+      message: CODEX_PUBLIC_ERROR_MESSAGE,
+      type: "invalid_request_error",
+      code: safety.code,
+    };
+  }
   const status =
     typeof input.status === "number" && Number.isInteger(input.status) ? input.status : 502;
   const fallback = defaultPublicClassification(status);

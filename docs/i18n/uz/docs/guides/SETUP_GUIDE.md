@@ -140,9 +140,9 @@ omniroute providers validate
 
 ### 1) Provayderlarni ulang va API kalitini yarating
 
-1. Dashboard → `Providers` bo‘limini oching va kamida bitta provayderni ulang (OAuth yoki API kaliti).
-2. Dashboard → `Endpoints` bo‘limini oching va API kalitini yarating.
-3. (Ixtiyoriy) Dashboard → `Combos` bo‘limini oching va zaxira zanjiringizni sozlang.
+1. Boshqaruv paneli → `Providers` bo‘limini oching va kamida bitta provayderni ulang (OAuth yoki API kaliti orqali).
+2. Boshqaruv paneli → `Endpoints` bo‘limini oching va API kalitini yarating.
+3. (Ixtiyoriy) Boshqaruv paneli → `Combos` bo‘limini oching va zaxira zanjiringizni sozlang.
 
 ### 2) Dasturlash vositangizni yo‘naltiring
 
@@ -152,7 +152,7 @@ API kaliti: [Endpoint sahifasidan nusxalang]
 Model:      if/qwen3.8-max-preview (yoki istalgan provayder/model prefiksi)
 ```
 
-Agar muharriringiz `Authorization: Bearer ...` sarlavhasini yubora olmasa, uning o‘rniga token kiritilgan moslik uchun asosiy URL manzilidan foydalaning:
+Agar muharriringiz `Authorization: Bearer ...` yubora olmasa, uning o‘rniga token qo‘shilgan moslik asosiy URL manzilidan foydalaning:
 
 ```txt
 Asosiy URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/
@@ -161,38 +161,39 @@ Chat URL manzili: http://localhost:20128/api/v1/vscode/YOUR_KEY/chat/completions
 Ollama teglari URL manzili: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
 ```
 
-Claude Code, Codex CLI, Cursor, Cline, OpenClaw, OpenCode va OpenAI bilan mos SDKlar bilan ishlaydi.
+Claude Code, Codex CLI, Cursor, Cline, OpenClaw, OpenCode va OpenAI bilan mos SDK’lar bilan ishlaydi.
 
 #### `setup-*` yordamida avtomatik sozlash
 
 Asosiy URL va kalitni qo‘lda kiritish o‘rniga, OmniRoute har bir vositaning
-o‘z konfiguratsiyasini joriy modellar katalogi asosida yozishiga ruxsat bering. Har bir vosita uchun bittadan buyruq:
+o‘z konfiguratsiyasini amaldagi modellar katalogi asosida yozishiga ruxsat bering. Har bir vosita uchun bitta buyruq:
 
 ```bash
 omniroute setup-codex        # ~/.codex/<name>.config.toml profillari
 omniroute setup-claude       # ~/.claude/profiles/<name>/settings.json
-omniroute setup-opencode     # ~/.config/opencode/opencode.json (OpenAI bilan mos)
+omniroute setup-opencode     # ~/.config/opencode/opencode.json (openai bilan mos)
 omniroute setup-cline        # Cline CLI + VS Code kengaytmasi sozlamalari
 omniroute setup-kilo         # Kilo Code
 omniroute setup-continue     # ~/.continue/config.yaml (Continue / cn)
-omniroute setup-cursor       # Cursor ilovasidagi bajariladigan qadamlarni chiqaradi
+omniroute setup-cursor       # Cursor ilovasidagi amallarni ko‘rsatadi
 omniroute setup-roo          # Roo Code importi + autoImport ko‘rsatkichi
 omniroute setup-crush        # ~/.config/crush/crush.json
+omniroute setup-zed          # ~/.config/zed/settings.json (openai_compatible)
 omniroute setup-goose        # ~/.config/goose/config.yaml
 omniroute setup-aider        # ~/.aider.conf.yml
 omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 ```
 
-Har biri mahalliy vositani **masofaviy** OmniRoute bilan ishlash uchun sozlash maqsadida `--remote <url> --api-key <key>` parametrlarini, shuningdek, natijani oldindan ko‘rish uchun `--dry-run` parametrini qabul qiladi. To‘g‘ri
-muhit o‘zgaruvchilari kiritilgan va umuman hech qanday konfiguratsiya yozilmagan holda CLI vositasini ishga tushirish uchun umumiy
-`omniroute run <target>` ishga tushirgichidan foydalaning (claude, codex, aider, goose, opencode, qwen, gemini);
+Har bir buyruq mahalliy vositani **masofaviy** OmniRoute bilan ishlashga sozlash uchun `--remote <url> --api-key <key>` parametrlarini, shuningdek, oldindan ko‘rish uchun `--dry-run` parametrini qabul qiladi. CLI’ni to‘g‘ri
+muhit o‘zgaruvchilari kiritilgan holda va hech qanday konfiguratsiyani yozmasdan ishga tushirish uchun
+umumiy `omniroute run <target>` ishga tushirgichidan foydalaning (claude, codex, aider, goose, opencode, qwen, gemini);
 har bir vosita uchun eski `omniroute launch` (Claude Code) va
-`omniroute launch-codex` (Codex) ishga tushirgichlaridan ham foydalanish mumkin.
+`omniroute launch-codex` (Codex) ishga tushirgichlari hamon mavjud.
 
 To‘liq jadvalni (har bir buyruq nimalarni yozishi, barcha parametrlar, mahalliy va masofaviy rejimlar, asosiy URL
-`/v1` qoidalari) ko‘rish uchun **[CLI integratsiyalari](./CLI-INTEGRATIONS.md)** sahifasiga qarang.
+uchun `/v1` qoidalari) ko‘rish uchun **[CLI integratsiyalari](./CLI-INTEGRATIONS.md)** sahifasiga qarang.
 
-Har bir vosita uchun batafsil konfiguratsiyani (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot va boshqalar) ko‘rish uchun maxsus **[CLI vositalari bo‘yicha qo‘llanma](../reference/CLI-TOOLS.md)** sahifasiga qarang.
+Har bir vosita uchun batafsil konfiguratsiya (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot va boshqalar) bilan tanishish uchun maxsus **[CLI vositalari qo‘llanmasi](../reference/CLI-TOOLS.md)** sahifasiga qarang.
 
 ---
 
@@ -321,7 +322,7 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Void Linux (xbps-src) shabloni
+## Void Linux (`xbps-src`) shabloni
 
 Void Linux foydalanuvchilari `xbps-src` yordamida mahalliy paket yaratishlari mumkin. Ushbu blokni `srcpkgs/omniroute/template` sifatida saqlang:
 
@@ -337,7 +338,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# Har bir reliz uchun nazorat summasini quyidagicha qayta yarating:
+# Har bir reliz uchun nazorat yigʻindisini quyidagicha qayta yarating:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

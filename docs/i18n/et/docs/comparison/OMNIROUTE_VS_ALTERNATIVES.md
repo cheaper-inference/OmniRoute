@@ -39,11 +39,11 @@ Objektiivne funktsioonide võrdlus populaarsete avatud lähtekoodiga AI-marsruut
 
 ## Millal valida OmniRoute
 
-- Majutate lahendust ise ja soovite **maksimaalset teenusepakkujate katvust** (329 teenusepakkujat, 155 tasuta/autentimiseta kataloogikirjet)
-- Vajate **sisseehitatud MCP-serverit** (LLM-i tööriistad, mälu ja oskused on saadaval tööriistadena)
-- Vajate agentidevaheliste töövoogude jaoks **A2A-protokolli**
-- Soovite **sõrmejälje varjamist** (JA3/JA4), et vältida ülesvoolu CAPTCHA-de tuvastust
-- Vajate **ettevõttefunktsioone** (kaitsemeetmed, hindamised, auditijälg) ilma SaaS-i arveteta
+- Majutad lahendust ise ja soovid **maksimaalset teenusepakkujate katvust** (374 teenusepakkujat, 155 tasuta/autentimiseta kataloogikirjet)
+- Vajad **sisseehitatud MCP-serverit** (LLM-i tööriistad, mälu ja oskused on avaldatud tööriistadena)
+- Vajad agentidevaheliste töövoogude jaoks **A2A-protokolli**
+- Soovid **sõrmejälje varjamist** (JA3/JA4), et vältida ülesvoolu CAPTCHA-de tuvastust
+- Vajad **ettevõttetaseme funktsioone** (kaitsepiirded, hindamised, auditijälg) ilma SaaS-i arveteta
 
 ## Millal valida LiteLLM
 

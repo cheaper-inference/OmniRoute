@@ -12,6 +12,7 @@ import {
 import {
   persistOAuthConnection,
   buildOAuthConnectionCreatePayload,
+  buildOAuthTokenUpdate,
   findExistingOAuthConnectionMatch,
 } from "@/lib/oauth/connectionPersistence";
 import { createDeviceFlowTicket, getDeviceFlowTicketStatus } from "@/lib/oauth/deviceFlowTickets";
@@ -67,6 +68,8 @@ const NO_PKCE_DEVICE_CODE_PROVIDERS = new Set([
   "kimi-coding",
   "kilocode",
   "codebuddy-cn",
+  "codebuddy-intl",
+  "workbuddy",
   "grok-cli",
   "ghe-copilot",
   "muse-code",
@@ -81,7 +84,20 @@ const NO_PKCE_DEVICE_CODE_PROVIDERS = new Set([
 const RETIRED_PKCE_PROVIDERS = new Set(["devin-desktop", "devin-cli"]);
 
 /** Providers that allow direct import of a raw API token (no OAuth exchange). */
-const IMPORT_TOKEN_PROVIDERS = new Set(["devin-desktop", "devin-cli", "grok-cli"]);
+const IMPORT_TOKEN_PROVIDERS = new Set(["devin-desktop", "devin-cli", "grok-cli", "claude"]);
+
+/**
+ * #10143: re-importing a token onto an existing connection must keep its persisted
+ * device identity, or the account presents to the upstream as a new device.
+ */
+function keepDeviceIdentity<T extends { providerSpecificData?: Record<string, unknown> }>(
+  tokenData: T,
+  existing: { providerSpecificData?: Record<string, unknown> | null } | undefined
+): T {
+  const cliUserID = existing?.providerSpecificData?.cliUserID;
+  if (typeof cliUserID !== "string" || !tokenData.providerSpecificData) return tokenData;
+  return { ...tokenData, providerSpecificData: { ...tokenData.providerSpecificData, cliUserID } };
+}
 
 /**
  * Constant-time string comparison to prevent timing-oracle attacks (CWE-208).
@@ -545,7 +561,11 @@ export async function POST(
         : null;
 
       let connection: any;
-      if (tokenData.email) {
+      // Update-in-place when we can identify the account: by email, or by an
+      // explicit connectionId from a re-auth (providers whose token response
+      // has no email — kimi-coding — would otherwise DUPLICATE the connection
+      // on every re-auth; #16984).
+      if (tokenData.email || connectionId) {
         const existing = await getProviderConnections({ provider });
         // Codex accounts sharing an email require workspaceId/chatgptUserId
         // agreement to be treated as the same account (#7737).
@@ -553,8 +573,7 @@ export async function POST(
         const matchId = typeof match?.id === "string" ? match.id : null;
         if (matchId) {
           connection = await updateProviderConnection(matchId, {
-            ...tokenData,
-            expiresAt,
+            ...buildOAuthTokenUpdate(tokenData, expiresAt),
             ...antigravityPersistStatus(degradedProject),
             isActive: true,
           });
@@ -631,7 +650,9 @@ export async function POST(
           : null;
 
         let connection: any;
-        if (result.tokens.email) {
+        // Email-less providers: honor an explicit connectionId re-auth signal
+        // (#16984) — see the exchange branch comment above.
+        if (result.tokens.email || connectionId) {
           const existing = await getProviderConnections({ provider });
           // Codex accounts sharing an email require workspaceId/chatgptUserId
           // agreement to be treated as the same account (#7737).
@@ -644,8 +665,7 @@ export async function POST(
           const matchId = typeof match?.id === "string" ? match.id : null;
           if (matchId) {
             connection = await updateProviderConnection(matchId, {
-              ...result.tokens,
-              expiresAt,
+              ...buildOAuthTokenUpdate(result.tokens, expiresAt),
               testStatus: "active",
               isActive: true,
             });
@@ -768,7 +788,9 @@ export async function POST(
           : null;
 
         let connection: any;
-        if (tokenData.email) {
+        // Email-less providers: honor an explicit connectionId re-auth signal
+        // (#16984) — see the exchange branch comment above.
+        if (tokenData.email || connectionId) {
           const existing = await getProviderConnections({ provider });
           // Codex accounts sharing an email require workspaceId/chatgptUserId
           // agreement to be treated as the same account (#7737).
@@ -781,8 +803,7 @@ export async function POST(
           const matchId = typeof match?.id === "string" ? match.id : null;
           if (matchId) {
             connection = await updateProviderConnection(matchId, {
-              ...tokenData,
-              expiresAt,
+              ...buildOAuthTokenUpdate(tokenData, expiresAt),
               ...antigravityPersistStatus(degradedProject),
               isActive: true,
             });
@@ -808,8 +829,11 @@ export async function POST(
         });
       } catch (exchangeErr: any) {
         console.error("OAuth exchange error:", exchangeErr);
+        const detail = sanitizeErrorMessage(
+          exchangeErr instanceof Error ? exchangeErr.message : String(exchangeErr)
+        );
         return NextResponse.json(
-          { success: false, error: "Internal server error" },
+          { success: false, error: detail || "Internal server error" },
           { status: 500 }
         );
       }
@@ -829,8 +853,11 @@ export async function POST(
 
       try {
         // Map the raw token via the provider's mapTokens() — skips the HTTP exchange entirely.
+        // Providers that must verify the token upstream first expose an async importToken().
         const providerData = getProvider(provider);
-        const tokenData = providerData.mapTokens({ accessToken: token });
+        const tokenData = providerData.importToken
+          ? await providerData.importToken(token)
+          : providerData.mapTokens({ accessToken: token });
 
         // Normalize: if name is missing, use email as fallback display label
         if (!tokenData.name && (tokenData.email || tokenData.displayName)) {
@@ -841,23 +868,24 @@ export async function POST(
           ? new Date(Date.now() + tokenData.expiresIn * 1000).toISOString()
           : null;
 
+        // Tokens without an identity (e.g. a Claude setup-token) match on the token itself,
+        // so re-pasting the same token updates its connection instead of duplicating it.
         let connection: any;
-        if (tokenData.email) {
-          const existing = await getProviderConnections({ provider });
-          const match = existing.find((c: any) => {
-            if (c.id && safeEqual(connectionId, c.id)) return true;
-            if (!safeEqual(c.email, tokenData.email) || c.authType !== "oauth") return false;
-            return true;
+        const existing = await getProviderConnections({ provider });
+        const match = existing.find((c: any) => {
+          if (c.id && safeEqual(connectionId, c.id)) return true;
+          if (c.authType !== "oauth") return false;
+          return tokenData.email
+            ? safeEqual(c.email, tokenData.email)
+            : safeEqual(c.accessToken, tokenData.accessToken);
+        });
+        const matchId = typeof match?.id === "string" ? match.id : null;
+        if (matchId) {
+          connection = await updateProviderConnection(matchId, {
+            ...buildOAuthTokenUpdate(keepDeviceIdentity(tokenData, match), expiresAt),
+            testStatus: "active",
+            isActive: true,
           });
-          const matchId = typeof match?.id === "string" ? match.id : null;
-          if (matchId) {
-            connection = await updateProviderConnection(matchId, {
-              ...tokenData,
-              expiresAt,
-              testStatus: "active",
-              isActive: true,
-            });
-          }
         }
         if (!connection) {
           connection = await createProviderConnection(
@@ -879,7 +907,7 @@ export async function POST(
       } catch (importErr: any) {
         return NextResponse.json(
           { success: false, error: sanitizeErrorMessage(importErr.message) || "Import failed" },
-          { status: 500 }
+          { status: Number.isInteger(importErr?.status) ? importErr.status : 500 }
         );
       }
     }
@@ -963,7 +991,8 @@ export async function POST(
     return NextResponse.json({ error: "Unknown action" }, { status: 400 });
   } catch (error) {
     console.error("OAuth POST error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    const detail = sanitizeErrorMessage(error instanceof Error ? error.message : String(error));
+    return NextResponse.json({ error: detail || "Internal server error" }, { status: 500 });
   }
 }
 

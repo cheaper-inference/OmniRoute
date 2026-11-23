@@ -2,6 +2,10 @@ import { getAllCustomModels } from "@/lib/db/models";
 import { parseVideoModel } from "@omniroute/open-sse/config/videoRegistry.ts";
 import { getProviderCredentialsWithQuotaPreflight } from "@/sse/services/auth";
 import { isAllRateLimitedCredentials } from "@/app/api/v1/_shared/rateLimit";
+import {
+  keylessProviderRejection,
+  withoutKeyScopeBlocked,
+} from "@/sse/services/keyConnectionScope";
 
 export type VideoModelTarget = {
   provider: string | null;
@@ -73,9 +77,26 @@ export function isVideoPromptOptional(parsed: { provider: string | null; model: 
  * by the direct route and the combo executor so a configured ComfyUI base URL
  * is honored the same way regardless of which path dispatched the request.
  */
-export async function resolveLocalOverrideCredentials(provider: string) {
-  const localCredentials = await getProviderCredentialsWithQuotaPreflight(provider);
-  return localCredentials && !isAllRateLimitedCredentials(localCredentials)
-    ? localCredentials
-    : null;
+export async function resolveLocalOverrideCredentials(
+  provider: string,
+  allowedConnections: string[] | null = null
+): Promise<{ credentials: Record<string, unknown> | null; rejection: Response | null }> {
+  // GHSA-3w2r: a connection outside the caller key's scope is never used for
+  // the override, and a connection-scoped key reaches the zero-configuration
+  // default only when its allowlist admits keyless providers (chat's #9057).
+  const lookup = await getProviderCredentialsWithQuotaPreflight(provider, null, allowedConnections);
+  const rejection = await keylessProviderRejection(
+    provider,
+    allowedConnections,
+    async () => lookup
+  );
+  if (rejection) return { credentials: null, rejection };
+  const localCredentials = withoutKeyScopeBlocked(lookup);
+  return {
+    credentials:
+      localCredentials && !isAllRateLimitedCredentials(localCredentials)
+        ? (localCredentials as Record<string, unknown>)
+        : null,
+    rejection: null,
+  };
 }

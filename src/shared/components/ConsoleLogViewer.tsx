@@ -12,6 +12,7 @@ import { useLocale, useTranslations } from "next-intl";
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { copyToClipboard } from "@/shared/utils/clipboard";
+import { isPinnedToBottom } from "@/shared/utils/scrollFollow";
 
 interface LogEntry {
   timestamp: string;
@@ -58,6 +59,10 @@ export default function ConsoleLogViewer() {
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [copiedIdx, setCopiedIdx] = useState<number | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  // Whether the reader is at the tail. Recorded on scroll rather than read in the effect: by the
+  // time the effect runs the new lines are laid out, so the box no longer reports where the
+  // reader was before they arrived.
+  const followTailRef = useRef(true);
   const copyFeedbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const fetchLogs = useCallback(async () => {
@@ -97,9 +102,9 @@ export default function ConsoleLogViewer() {
     []
   );
 
-  // Auto-scroll to bottom on new logs
+  // Auto-scroll to bottom on new logs, but only while the reader is already at the bottom
   useEffect(() => {
-    if (autoScroll && scrollRef.current) {
+    if (autoScroll && followTailRef.current && scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [logs, autoScroll]);
@@ -192,7 +197,11 @@ export default function ConsoleLogViewer() {
 
         {/* Auto-scroll toggle */}
         <button
-          onClick={() => setAutoScroll(!autoScroll)}
+          onClick={() => {
+            // Switching auto-scroll back on is an explicit "take me to the newest line".
+            if (!autoScroll) followTailRef.current = true;
+            setAutoScroll(!autoScroll);
+          }}
           title={autoScroll ? tv("disableAutoScroll") : tv("enableAutoScroll")}
           className={`px-3 py-2 rounded-lg text-sm font-medium border transition-colors ${
             autoScroll
@@ -248,6 +257,9 @@ export default function ConsoleLogViewer() {
       {/* Console output */}
       <div
         ref={scrollRef}
+        onScroll={() => {
+          followTailRef.current = isPinnedToBottom(scrollRef.current);
+        }}
         className="rounded-xl border border-[var(--color-border)] bg-[#0d1117] overflow-auto font-mono text-xs leading-relaxed"
         style={{ maxHeight: "calc(100vh - 340px)", minHeight: "400px" }}
         role="log"

@@ -17,82 +17,153 @@ registru, todėl galima papildomai pridėti daugiau paskirties vietų.
 ## 1. Kaip tai veikia
 
 ```
-call_logs (SQLite)
-  → callLogExportSource.getCallLogsForExport(cursor, batchSize)
-    → LogExportRecord[]  (Žurnalų skirtuko laukų rinkinys)
-      → paskirties vietos client.send(batch)
-        → advanceLogExportCursor(id, lastRowId, count)
+serveris (iššifruoja + patikrina konfigūraciją, suderina žymeklį)
+  → paleidžia IPC → izoliuotas exportChild OS procesas
+    → tik skaitoma storage.sqlite → bendra skambučių žurnalo užklausa / susiejimas
+      → asinchroninis artefaktų įkėlimas → paskirties prepare()/send()
+        → paketo IPC → serveris išsaugo žymeklį → patvirtinimo IPC
+          → kitas paketas; užbaigimo IPC → serveris įrašo sėkmę
 ```
 
 - **Tvarkaraštis** — viena `JobRegistry` cron užduotis `log_export`, kurios numatytoji reikšmė yra `0 * * * *` (kas valandą,
-  UTC). Ji registruojama faile `src/lib/initCloudSync.ts`; jos reikšmę galima pakeisti naudojant `OMNIROUTE_LOG_EXPORT_CRON`.
-  Kiekvieno vykdymo metu nuosekliai apdorojama kiekviena **įjungta** paskirties vieta.
-- **Žymeklis** — numanomas SQLite `call_logs.rowid`, saugomas atskirai kiekvienai paskirties vietai lauke
-  `log_export_destinations.cursor_row_id`. `timestamp` sąmoningai nenaudojamas kaip žymeklis: iškviečiantieji
-  gali pateikti savo reikšmę, todėl lėta užklausa gali būti įrašyta po greitesnės užklausos, kuri buvo pradėta
-  vėliau, o naudojant laiko žymos žymeklį ji būtų praleista.
-- **Paketinis apdorojimas** — `batch_size` eilučių vienai užklausai (numatytoji reikšmė 500), `max_rows_per_run` eilučių vienam vykdymui
-  (numatytoji reikšmė 10000), kad didelė sankaupa būtų apdorojama per kelis vykdymus, o ne blokuotų vieną vykdymą.
-- **Pristatymas** — žymeklis perkeliamas pirmyn tik sėkmingai užbaigus `send()`. Jei paketo išsiųsti nepavyksta,
-  žymeklis lieka ankstesnėje vietoje, todėl tos pačios eilutės pakartotinai bandomos išsiųsti kito vykdymo metu. Užtikrinamas
-  bent vienas pristatymas ir dublikatų šalinimas paskirties vietoje, o ne tikras tiksliai vienkartinis pristatymas: BigQuery kiekvienai
-  eilutei kaip raktą naudoja skambučių žurnalo ID ir, kiek įmanoma, į jį atsižvelgia savo dublikatų šalinimo laikotarpio ribose.
-- **Persidengimo apsauga** — cron vykdymas ir `POST .../run` gali įvykti vienu metu. Jau apdorojama paskirties vieta
-  praleidžiama, užuot apdorojus ją du kartus (`skipped: true` vykdymo rezultate),
+  UTC). Registruojama faile `src/lib/initCloudSync.ts`; ją galima pakeisti naudojant `OMNIROUTE_LOG_EXPORT_CRON`.
+  Kiekvieno vykdymo metu nuosekliai apdorojamos visos **įjungtos** paskirties vietos.
+- **Žymeklis** — numanomas SQLite `call_logs.rowid`, kiekvienai paskirties vietai saugomas
+  `log_export_destinations.cursor_row_id`. `timestamp` sąmoningai nenaudojamas kaip žymeklis: iškvietėjai
+  gali pateikti savo reikšmę, todėl lėta užklausa gali būti įrašyta po greitesnės, kuri buvo pradėta
+  vėliau, o laiko žymos žymeklis ją praleistų.
+- **Paketavimas** — `batch_size` eilučių vienai užklausai (numatytoji reikšmė 500), `max_rows_per_run` eilučių vienam vykdymui
+  (numatytoji reikšmė 10000), kad didelė sankaupa būtų apdorojama per kelis vykdymus, užuot blokavusi vieną.
+- **Pristatymas** — žymeklis perkeliamas tik sėkmingai pasibaigus `send()`. Nepavykusio paketo atveju
+  žymeklis lieka ankstesnėje vietoje, todėl tos pačios eilutės pakartotinai apdorojamos kito vykdymo metu. Užtikrinamas
+  pristatymas bent kartą ir dublikatų šalinimas paskirties pusėje, o ne tikras pristatymas tiksliai vieną kartą: BigQuery kiekvienos
+  eilutės raktu laiko skambučių žurnalo id, kurį savo dublikatų šalinimo laikotarpiu geriausiomis pastangomis
+  naudoja dublikatams aptikti.
+- **Persidengimo apsauga** — cron vykdymas ir `POST .../run` gali būti paleisti vienu metu. Jau
+  apdorojama paskirties vieta praleidžiama, užuot apdorojus ją du kartus (`skipped: true` vykdymo rezultate),
   todėl lygiagretus vykdymas negali pakartotinai išsiųsti paketo ar perkelti žymeklio atgal.
 - **Atkūrimas po išvalymo** — jei `cursor_row_id` tampa didesnis už `MAX(rowid)` (visa lentelė buvo
-  išvalyta, o eilučių ID pradėti skaičiuoti iš naujo), vykdymo priemonė grąžina žymeklį į 0, užuot visam laikui nustojusi aptikti įrašus.
+  išvalyta, o eilučių id pradėti iš naujo), vykdyklė grąžina jį į 0, užuot visam laikui nebemačiusi duomenų.
 
-### Naudingieji duomenys (užklausos ir atsakymai)
+### Izoliuota vykdyklė ir apribojimai
 
-Pagal numatytąsias nuostatas eksportuojami tik suvestinės laukai, rodomi Žurnalų **sąraše**. Įjungus
-**Eksportuoti užklausas ir atsakymus** (`includeBodies`), papildomai siunčiama tai, ką Žurnalų **išsamios informacijos**
-sritis rodo apie kiekvieną skambutį:
+Kiekvienam paskirties vietos vykdymui Node paleidžia atskirą, trumpai veikiantį antrinį OS procesą (`child_process`
+su IPC, o ne `worker_threads`). Turiniai skaitomi, naudingosios apkrovos JSON analizuojamas ir serializuojamas, paskirties
+`prepare()` vykdomas bei tinklo I/O atliekamas jame, o ne serverio įvykių cikle.
+Per IPC perduodama tik konfigūracija ir nedideli eigos pranešimai; eksportuoti įrašai niekada negrąžinami į
+serverį. Cron užduotis ir maršrutas „Vykdyti dabar“ išlaiko tą patį viešą rezultatą ir persidengimo apsaugą.
 
-| Laukas                           | Kas jame saugoma                                                                  |
-| -------------------------------- | --------------------------------------------------------------------------------- |
-| `request_body` / `response_body` | Skambučio naudingieji duomenys, kaip juos pateikia valdymo skydelis               |
-| `pipeline_route_decision`        | Kurį tikslą ir modelį parinko maršruto parinkimo priemonė                         |
-| `pipeline_client_request`        | Neapdorota užklausa, tiksliai tokia, kokią ją išsiuntė klientas                   |
-| `pipeline_openai_request`        | Užklausa po konvertavimo į vidinį OpenAI formatą                                  |
-| `pipeline_provider_request`      | Faktiškai aukštesnio lygmens paslaugai išsiųsta užklausa teikėjo dialektu         |
-| `pipeline_provider_response`     | Neapdorotas aukštesnio lygmens paslaugos atsakymas                                |
-| `pipeline_client_response`       | Kas buvo grąžinta iškvietusiajam                                                  |
-| `pipeline_error`                 | Duomenų perdavimo kanalo lygmens klaidos informacija apie nepavykusį skambutį     |
-| `bodies_truncated`               | Teigiama reikšmė, kai kuris nors anksčiau nurodytas laukas pasiekė `maxBodyBytes` |
+Antrinis procesas tik skaitymo režimu atidaro serverio išspręstą `DATA_DIR/storage.sqlite`, naudodamas `node:sqlite`,
+su `busy_timeout=5000` ir `query_only=ON`. Jis neimportuoja jokio bendro DB egzemplioriaus ir nevykdo
+migracijų, atsarginių kopijų kūrimo ar SQLite naujinimų. Trūkstamų ar sugadintų artefaktų apskaita (įskaitant
+sugadinto artefakto UPDATE) paliekama tik ataskaitų skydelio išsamios informacijos kelyje. Abu keliai naudoja bendrą grynąją
+išsamios informacijos sprendimo funkciją; eksportuojant naudojamas asinchroninis failų sistemos skaitymas ir ta pati artefaktas →
+senasis įterptasis turinys → senasis disko turinys → nieko sprendimo tvarka. Atidaręs skaitymo jungtį, antrinis procesas užfiksuoja didžiausią įterpimo rowid;
+vėliau įterpti įrašai paliekami kitam vykdymui. Tai įterpimo riba, o ne ilgai veikianti SQLite transakcija:
+WAL rašymo operacijos ir kontroliniai taškai gali laisvai vykti laukiant tinklo operacijų.
+Ši riba neužfiksuoja esamų eilučių atnaujinimų ar ištrynimų.
 
-Tai yra užklausų turinys, todėl ši funkcija pagal numatytąsias nuostatas yra **išjungta** ir sąmoningai pasirenkama atskirai kiekvienai paskirties vietai.
-Išsiunčiama tai, ką rodo valdymo skydelis, nes abu duomenis gauna per `getCallLogById`: naudingieji duomenys
-jau būna nuasmeninti pašalinant asmenį identifikuojančią informaciją ir paslaptys būna paslėptos juos įrašant, o skambučio, atlikto naudojant
-`noLog` API raktą, naudingieji duomenys visai nesaugomi, todėl nėra ko eksportuoti.
+Po kiekvieno priimto paketo antrinis procesas laukia patvirtinimo. Serveris pirmiausia išsaugo
+žymeklį naudodamas `advanceLogExportCursor`, tada išsiunčia `ack`; prieš tai nepradedamas joks kitas paketas.
+Siuntimo klaida, strigtis ar skirtajam laikui pasibaigus užregistruojama nesėkmė, neperkeliant to paketo žymeklio. Anksčiau
+patvirtinti paketai lieka įrašyti; pakartotinai gali būti išsiųstas ne daugiau kaip vienas nepatvirtintas paketas.
+Sėkmė įrašoma tik gavus `done` ir antriniam procesui tvarkingai pasibaigus. Nesėkmės atveju antrinis procesas
+nutraukiamas naudojant SIGTERM, po 500 ms pereinant prie SIGKILL, o vykdyklė laukia, kol procesas bus uždarytas.
 
-Kiekvienos eilutės naudingieji duomenys skaitomi iš failų sistemos artefakto, todėl jų užpildymas atliekamas tik toms paskirties vietoms,
-kurioms jų reikia. Jei eilutės artefakto nėra arba jis sugadintas, eksportuojama jos suvestinė su nuliniais
-naudingaisiais duomenimis, užuot nutraukus paketo apdorojimą ir užblokavus žymeklį.
+| Aplinkos kintamasis                           | Numatytoji reikšmė | Paskirtis                                |
+| --------------------------------------------- | ------------------ | ---------------------------------------- |
+| `OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS`         | 900000             | Vienos paskirties vykdymo trukmės riba   |
+| `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` | 1024               | Antrinio V8 old-space riba, išreikšta MB |
 
-`maxBodyBytes` (numatytoji reikšmė 262144) riboja kiekvieno lauko dydį. Ilgesni naudingieji duomenys **sutrumpinami, o ne
-atmetami** — apkarpyta užklausa vis tiek atsako į klausimą „ko buvo klausiama“ — ir eilutė pažymima
-`bodies_truncated`. Dalimis srautiniu būdu perduodami pokyčiai neeksportuojami; surinktas atsakymas
-jau yra laukuose `pipeline_provider_response` ir `pipeline_client_response`.
+Netinkamoms, neteigiamoms ar nesveikosioms reikšmėms naudojamos numatytosios reikšmės. Krūvos nustatymas nėra bendras
+RSS apribojimas; labai dideli paketai vis tiek gali išeikvoti antrinio proceso atmintį ir saugiai nutraukti vykdymą.
+Numatytoji 1024 MB reikšmė palieka pakankamai laisvos vietos numatytajam 500 eilučių paketui su 512 KiB artefaktais ir
+įjungtais turiniais, įskaitant BigQuery JSON serializavimą baitų dalimis. Dėl jos
+10000 eilučių paketas su turiniais netampa saugus. Išsekus V8 krūvai užregistruojama klaida su aiškiais tolesniais veiksmais: sumažinti paketo
+dydį arba padidinti `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB`; žymeklis lieka ties paskutiniu
+patvirtintu paketu. Istoriniams įterptiesiems ar disko turiniams šiuolaikinė artefaktų riba netaikoma.
+Operatoriai turi atskirai planuoti RSS, ypač ribotos atminties konteineriuose.
+
+Antrinis procesas paveldi tik išspręstą `DATA_DIR`, `NODE_ENV`, aiškiai nurodytą `TZ` (senųjų failų pavadinimų
+vietinio laiko nustatymui), `ELECTRON_RUN_AS_NODE`, jei jis yra, ir šiuos siunčiamųjų ryšių įvesties parametrus:
+`HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY` (ir jų formas mažosiomis raidėmis),
+`OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`, `NODE_EXTRA_CA_CERTS`, `SSL_CERT_FILE`, `SSL_CERT_DIR`.
+Visuotinis Undici dispečeris naudoja tą pačią kaip serverio grynąją tarpinio serverio nustatymo iš aplinkos logiką ir vietinių prieglobos serverių
+apėjimo taisykles, įskaitant `NO_PROXY`; jis neimportuoja `proxyFetch.ts` ar jo DB / funkcijų vėliavėlių.
+Tarpinio serverio prisijungimo duomenys pašalinami iš persiunčiamos išvesties ir įrašomų klaidų. Paskirties vietos prisijungimo duomenys
+perduodami tik viename paleidimo IPC pranešime, niekada per argv ar aplinką; išvesties ir klaidų persiuntimas
+pažymimas prefiksu ir išvalomas. Antrinio proceso vykdymo argumentuose išjungtas tik `ExperimentalWarning`, kad
+per kiekvieną cron vykdymą nebūtų kartojamas Node SQLite įspėjimas; kitų tipų įspėjimai lieka matomi.
+
+Paskirties moduliai turi būti importuojami be Next.js ar tik serveriui skirtų priklausomybių. Esamas
+BigQuery įgyvendinimas jau atitinka šią sąlygą. Prieigos raktų podėliai išlieka tik antrinio proceso
+vykdymo metu, o ne tarp vykdymų. Node yra palaikoma vykdymo aplinka (`package.json` engines), tačiau README
+Bun diegimo skiltis ir `Dockerfile.bun` taip pat nurodo gamybinės aplinkos suderinamumo kelią, kuriame naudojama
+`bun:sqlite` (`src/lib/db/core.ts` / adapteriai). Todėl naudojant Bun eksportavimas išlaiko ankstesnį
+vykdymo tame pačiame procese būdą ir vieną kartą pateikia įspėjimą: antrinio proceso atminties ir skirtojo laiko izoliavimas nepasiekiamas. Naudokite
+Node įvykių ciklo ir OOM izoliavimui; Bun čia nėra laikomas skirtu tik kūrimui.
+
+Kai įjungta `includeBodies`, rinkitės vykdymą kas kelias minutes, pvz.,
+`OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"`, užuot kaupę valandinę duomenų apkrovą.
+Paketų ir eilučių apribojimai vis tiek riboja kiekvieną vykdymą. Proceso paleidimo sąnaudos patiriamos kiekvienai paskirčiai per kiekvieną vykdymą;
+taip nedidelės paleidimo sąnaudos iškeičiamos į serverio įvykių ciklo izoliavimą, o ne į mažesnį bendrą procesoriaus naudojimą.
+
+### Duomenų turinys (užklausos ir užbaigimai)
+
+Pagal numatytuosius nustatymus eksportuojami tik suvestinės laukai, rodomi žurnalų **sąraše**. Įjungus
+**Užklausų ir atsakymų eksportavimą** (`includeBodies`), papildomai siunčiama tai, kas rodoma kiekvieno iškvietimo žurnalų **išsamios informacijos**
+srityje:
+
+| Laukas                           | Jo turinys                                                          |
+| -------------------------------- | ------------------------------------------------------------------- |
+| `request_body` / `response_body` | Iškvietimo duomenys tokie, kokius juos pateikia skydelis            |
+| `pipeline_route_decision`        | Maršrutizatoriaus pasirinkta paskirtis ir modelis                   |
+| `pipeline_client_request`        | Neapdorota užklausa, tiksliai tokia, kokią išsiuntė klientas        |
+| `pipeline_openai_request`        | Užklausa, išversta į vidinį OpenAI formatą                          |
+| `pipeline_provider_request`      | Užklausa, faktiškai išsiųsta išoriniam teikėjui jo dialektu         |
+| `pipeline_provider_response`     | Neapdorotas išorinio teikėjo atsakymas                              |
+| `pipeline_client_response`       | Atsakymas, grąžintas iškvietusiajam                                 |
+| `pipeline_error`                 | Konvejerio lygmens klaidos informacija nepavykusiam iškvietimui     |
+| `bodies_truncated`               | True, kai bet kuris pirmiau nurodytas laukas pasiekė `maxBodyBytes` |
+
+Tai yra užklausų turinys, todėl ši funkcija pagal numatytuosius nustatymus yra **išjungta** ir sąmoningai pasirenkama atskirai kiekvienai paskirčiai.
+Siunčiama tai, ką rodo skydelis, nes eksportavimas ir `getCallLogById` naudoja tą patį išsamios informacijos
+nustatymo mechanizmą: duomenų turinys
+jau būna išvalytas nuo PII ir jame užmaskuotos paslaptys, kai jis įrašomas, o iškvietimo, atlikto naudojant
+`noLog` API raktą, duomenų turinys apskritai nesaugomas, todėl nėra ko eksportuoti.
+
+Kiekvienos eilutės duomenų turinys skaitomas iš failų sistemos artefakto, todėl papildymas vykdomas tik toms paskirtims,
+kurios jo paprašė. Jei artefakto nėra arba jis sugadintas, eksportuojama jo suvestinė su null duomenų turiniu,
+užuot nutraukus paketą ir palikus žymeklį įstrigusį.
+
+`maxBodyBytes` (numatytoji reikšmė 262144) apriboja kiekvieną lauką. Ilgesnis duomenų turinys yra **sutrumpinamas, o ne
+pašalinamas** — apkarpyta užklausa vis tiek atsako į klausimą „ko buvo klausiama“ — o eilutė pažymima
+`bodies_truncated`. Srautu siunčiami atskirų dalių pokyčiai neeksportuojami; surinktas atsakymas
+jau yra `pipeline_provider_response` ir `pipeline_client_response`.
 
 ---
 
 ## 2. Failai
 
-| Dalis                      | Vieta                                        |
-| -------------------------- | -------------------------------------------- |
-| Paskirties vietos sutartis | `src/lib/logExport/types.ts`                 |
-| Registras                  | `src/lib/logExport/registry.ts`              |
-| Paslapčių tvarkymas        | `src/lib/logExport/secrets.ts`               |
-| Vykdyklė (žymeklio ciklas) | `src/lib/logExport/runner.ts`                |
-| API projekcija             | `src/lib/logExport/presenter.ts`             |
-| BigQuery paskirties vieta  | `src/lib/logExport/destinations/bigquery.ts` |
-| Google SA autentifikavimas | `src/lib/logExport/googleServiceAccount.ts`  |
-| Skambučių žurnalo šaltinis | `src/lib/usage/callLogExportSource.ts`       |
-| Nuolatinis saugojimas      | `src/lib/db/logExportDestinations.ts`        |
-| Cron užduotis              | `src/lib/jobs/logExportJob.ts`               |
-| REST sluoksnis             | `src/app/api/log-export/`                    |
-| Valdymo skydelio puslapis  | `src/app/(dashboard)/dashboard/log-export/`  |
+| Dalis                          | Vieta                                        |
+| ------------------------------ | -------------------------------------------- |
+| Paskirties vietos sutartis     | `src/lib/logExport/types.ts`                 |
+| Registras                      | `src/lib/logExport/registry.ts`              |
+| Paslapčių tvarkymas            | `src/lib/logExport/secrets.ts`               |
+| Vykdyklė (pirminis IPC)        | `src/lib/logExport/runner.ts`                |
+| Proceso gyvavimo ciklas        | `src/lib/logExport/childRunner.ts`           |
+| Antrinio proceso įėjimas       | `src/lib/logExport/exportChild.ts`           |
+| Atidarymas tik skaitymui       | `src/lib/db/logExportReadOnly.ts`            |
+| Bendra užklausa / susiejimas   | `src/lib/usage/callLogExportQueries.ts`      |
+| Išsamios informacijos gaviklis | `src/lib/usage/callLogDetailResolver.ts`     |
+| API projekcija                 | `src/lib/logExport/presenter.ts`             |
+| BigQuery paskirties vieta      | `src/lib/logExport/destinations/bigquery.ts` |
+| Google SA autentifikavimas     | `src/lib/logExport/googleServiceAccount.ts`  |
+| Skambučių žurnalo šaltinis     | `src/lib/usage/callLogExportSource.ts`       |
+| Išsaugojimas                   | `src/lib/db/logExportDestinations.ts`        |
+| Cron užduotis                  | `src/lib/jobs/logExportJob.ts`               |
+| REST sluoksnis                 | `src/app/api/log-export/`                    |
+| Valdymo skydelio puslapis      | `src/app/(dashboard)/dashboard/log-export/`  |
 
 Schema: `src/lib/db/migrations/170_log_export_destinations.sql`.
 

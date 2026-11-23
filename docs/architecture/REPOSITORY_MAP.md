@@ -121,7 +121,7 @@ src/
 ├── domain/              # Pure domain logic (policy engine, fallback, cost, lockout, comboResolver, assessment)
 ├── server/              # Server-only modules (authz pipeline, cors, auth middleware) — cannot import from client
 ├── shared/              # Shared between server and client where safe (constants, types, validation, contracts, utils)
-├── i18n/                # next-intl config + per-locale message JSON (42 locales)
+├── i18n/                # next-intl config + per-locale message JSON (67 locales)
 ├── middleware/          # Next.js middleware (request enrichment, locale detection)
 ├── mitm/                # MITM proxy core: cert gen/install, handlers, targets, inspector, masks, passthrough
 │   ├── handlers/        # 9 IDE-agent handler classes extending MitmHandlerBase (antigravity, kiro, copilot, codex, cursor, zed, claudeCode, openCode, trae)
@@ -206,7 +206,7 @@ src/
 | `cacheLayer.ts`, `idempotencyLayer.ts`   | Request caching + idempotency                                                                                                                                                                                                                                                                                           |
 | (~30 more top-level files)               | Specialized helpers (logEnv, modelsDevSync, piiSanitizer, etc.)                                                                                                                                                                                                                                                         |
 
-### `src/lib/db/` — Database (137 modules + 193 migrations)
+### `src/lib/db/` — Database (147 modules + 208 migrations)
 
 | Subdir                    | Purpose                                                                                                                                                                    |
 | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -241,9 +241,9 @@ src/
 
 | Module                           | Purpose                                                                |
 | -------------------------------- | ---------------------------------------------------------------------- |
-| `constants/providers.ts`         | **355 providers** with Zod validation (source of truth)                |
+| `constants/providers.ts`         | **375 providers** with Zod validation (source of truth)                |
 | `constants/cliTools.ts`          | External CLI tool registry                                             |
-| `constants/routingStrategies.ts` | **19 routing strategies** with priorities                              |
+| `constants/routingStrategies.ts` | **20 routing strategies** with priorities                              |
 | `constants/publicApiRoutes.ts`   | Routes that require Bearer (vs management) auth                        |
 | `constants/upstreamHeaders.ts`   | Header denylist for upstream requests                                  |
 | `validation/schemas.ts`          | ~80 Zod schemas (single source of truth for API contracts)             |
@@ -264,7 +264,7 @@ Separate npm workspace (`@omniroute/open-sse`). Handles request processing + pro
 ```
 open-sse/
 ├── handlers/            # 16 files (12 handlers + 4 helpers): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, etc.
-├── executors/           # 67 provider-specific executors (extend BaseExecutor)
+├── executors/           # 150 executor modules (classes extending BaseExecutor + per-provider helpers)
 ├── translator/          # Format converters (9 request, 9 response, 9 helpers)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
 ├── services/            # ~80+ service modules (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, etc.)
@@ -396,9 +396,9 @@ open-sse/
 | `COVERAGE_PLAN.md`          | Coverage goals and current state                                                      |
 | `FREE_TIERS.md`             | Curated free-tier providers (48+ free + 11 OAuth)                                     |
 | `CLI-TOOLS.md`              | External CLI integrations + Internal OmniRoute CLI                                    |
-| `I18N.md`                   | i18n architecture, adding a language, 42 locales                                      |
+| `I18N.md`                   | i18n architecture, adding a language, 67 locales                                      |
 | `UNINSTALL.md`              | Clean uninstall steps                                                                 |
-| `PROVIDER_REFERENCE.md`     | **Auto-generated** catalog of 355 providers (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Auto-generated** catalog of 375 providers (regen: `npm run gen:provider-reference`) |
 
 ### Subsystem deep-dives
 

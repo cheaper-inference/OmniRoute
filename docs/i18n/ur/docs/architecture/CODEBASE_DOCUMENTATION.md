@@ -437,7 +437,7 @@ server/
 ## 4. `open-sse/` — اسٹریمنگ انجن ورک اسپیس
 
 علیحدہ npm ورک اسپیس جو `@omniroute/open-sse` کے نام سے شائع کی گئی ہے۔ یہ درخواستوں کی
-پروسیسنگ، executors، translators، services، transformer، اور MCP server کی ذمہ دار ہے۔
+پروسیسنگ، executors، translators، services، transformer، اور MCP سرور کی ذمہ دار ہے۔
 
 ```
 open-sse/
@@ -446,67 +446,70 @@ open-sse/
 ├── tsconfig.json
 ├── types.d.ts
 ├── config/                 فراہم کنندہ registries، header profiles، identity، …
-├── handlers/               درخواست handlers (chat، embeddings، audio، image، …)
-├── executors/              108 فراہم کنندہ مخصوص HTTP executors
+├── handlers/               درخواست handlers (چیٹ، embeddings، آڈیو، تصویر، …)
+├── executors/              فراہم کنندگان کے 150 executor modules (executor classes + ہر فراہم کنندہ کے helpers)
 ├── translator/             فارمیٹ کی تبدیلی (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions اسٹریم transformer
 ├── services/               80+ service modules (combos، fallback، quotas، identity، …)
-├── utils/                  اسٹریمنگ helpers، TLS client، AWS SigV4، proxy fetch، …
-└── mcp-server/             MCP server (3 transports، 33 scopes، 110 tools)
+├── utils/                  اسٹریمنگ helpers، TLS کلائنٹ، AWS SigV4، proxy fetch، …
+└── mcp-server/             MCP سرور (3 transports، 33 scopes، 110 tools)
 ```
 
 ### 4.1 `open-sse/handlers/`
 
-| Handler                 | مقصد                                                                      |
-| ----------------------- | ------------------------------------------------------------------------- |
-| `chatCore.ts`           | مرکزی chat pipeline (cache، rate limit، combo routing، executor dispatch) |
-| `responsesHandler.ts`   | OpenAI Responses API کا entry point                                       |
-| `embeddings.ts`         | Embeddings                                                                |
-| `imageGeneration.ts`    | تصویر بنانا                                                               |
-| `audioSpeech.ts`        | متن سے آواز                                                               |
-| `audioTranscription.ts` | آواز سے متن                                                               |
-| `videoGeneration.ts`    | ویڈیو بنانا                                                               |
-| `musicGeneration.ts`    | موسیقی بنانا                                                              |
-| `rerank.ts`             | دوبارہ درجہ بندی کرنا                                                     |
-| `moderations.ts`        | مواد کی نگرانی                                                            |
-| `search.ts`             | ویب تلاش                                                                  |
-| `sseParser.ts`          | SSE event parser                                                          |
-| `usageExtractor.ts`     | upstream streams سے token counts اخذ کرنا                                 |
-| `responseSanitizer.ts`  | فراہم کنندہ سے مخصوص غیر ضروری مواد ہٹانا                                 |
-| `responseTranslator.ts` | فراہم کنندہ کے response اور translator layer کے درمیان رابطہ              |
+| Handler                 | مقصد                                                                     |
+| ----------------------- | ------------------------------------------------------------------------ |
+| `chatCore.ts`           | مرکزی چیٹ pipeline (cache، rate limit، combo routing، executor dispatch) |
+| `responsesHandler.ts`   | OpenAI Responses API کا entry point                                      |
+| `embeddings.ts`         | Embeddings                                                               |
+| `imageGeneration.ts`    | تصویر بنانا                                                              |
+| `audioSpeech.ts`        | متن سے آواز                                                              |
+| `audioTranscription.ts` | آواز سے متن                                                              |
+| `videoGeneration.ts`    | ویڈیو بنانا                                                              |
+| `musicGeneration.ts`    | موسیقی بنانا                                                             |
+| `rerank.ts`             | دوبارہ درجہ بندی                                                         |
+| `moderations.ts`        | مواد کی نگرانی                                                           |
+| `search.ts`             | ویب تلاش                                                                 |
+| `sseParser.ts`          | SSE event parser                                                         |
+| `usageExtractor.ts`     | upstream streams سے token counts نکالنا                                  |
+| `responseSanitizer.ts`  | فراہم کنندہ سے مخصوص غیر ضروری مواد ہٹانا                                |
+| `responseTranslator.ts` | فراہم کنندہ کے response اور translator layer کے درمیان رابطہ             |
 
 ### 4.2 `open-sse/executors/`
 
-108 فراہم کنندہ executors، جن میں سے ہر ایک `BaseExecutor` (`base.ts`) کو extend کرتا ہے:
+150 اعلیٰ سطحی executor modules (`*.ts` میں سے `base.ts`، `index.ts` اور tests کے علاوہ — یہ تعداد
+`npm run check:docs-counts` ناپتا ہے)۔ ہر executor class، براہ راست یا `DefaultExecutor` یا کسی دوسرے
+executor کے ذریعے، `BaseExecutor` (`base.ts`) کو extend کرتی ہے؛ باقی modules ہر فراہم کنندہ کے
+لیے مخصوص helpers ہیں (tool schemas، fetch/TTS adapters، quirk handlers)۔ Executors میں شامل ہیں:
 
-`antigravity`، `azure-openai`، `blackbox-web`، `cliproxyapi`،
-`chatgpt-web-codex`، `cloudflare-ai`، `codex`، `commandCode`، `cursor`، `default`، `devin-cli`،
-`muse-spark-web`، `nlpcloud`، `opencode`، `perplexity-web`، `petals`،
-`pollinations`، `qoder`، `vertex`، `devin-desktop`، نیز `claudeIdentity.ts`
+`antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`,
+`chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`,
+`muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`,
+`pollinations`, `qoder`, `vertex`, `devin-desktop`، نیز `claudeIdentity.ts`
 (مشترکہ identity helper) اور `index.ts` (registry)۔
 
 > نوٹ: یہاں درج نہ کیے گئے فراہم کنندگان کو `default.ts` عمومی
-> OpenAI-compatible executor کے ذریعے پیش کرتا ہے۔ فراہم کنندگان کی مکمل فہرست (355 فراہم کنندگان)
+> OpenAI-compatible executor استعمال کرتے ہوئے فراہم کرتا ہے۔ فراہم کنندگان کا مکمل کیٹلاگ (375 فراہم کنندگان)
 > `src/shared/constants/providers.ts` میں موجود ہے۔
 
 ### 4.3 `open-sse/translator/`
 
 Hub-and-spoke ترجمہ (OpenAI مرکز ہے)۔
 
-- **9 درخواست translators** (`translator/request/`):
-  `antigravity-to-openai`، `claude-to-gemini`، `claude-to-openai`،
-  `gemini-to-openai`، `openai-responses`، `openai-to-claude`،
-  `openai-to-cursor`، `openai-to-gemini`، `openai-to-kiro`۔
+- **9 request translators** (`translator/request/`):
+  `antigravity-to-openai`, `claude-to-gemini`, `claude-to-openai`,
+  `gemini-to-openai`, `openai-responses`, `openai-to-claude`,
+  `openai-to-cursor`, `openai-to-gemini`, `openai-to-kiro`۔
 - **9 response translators** (`translator/response/`):
-  `claude-to-openai`، `cursor-to-openai`، `gemini-to-claude`، `gemini-to-openai`،
-  `kiro-to-openai`، `openai-responses`، `openai-to-antigravity`،
+  `claude-to-openai`, `cursor-to-openai`, `gemini-to-claude`, `gemini-to-openai`,
+  `kiro-to-openai`, `openai-responses`, `openai-to-antigravity`,
   `openai-to-claude`۔
 - **9 helpers** (`translator/helpers/`):
-  `claudeHelper`، `geminiHelper`، `geminiToolsSanitizer`، `maxTokensHelper`،
-  `openaiHelper`، `responsesApiHelper`، `schemaCoercion`، `toolCallHelper`، نیز
+  `claudeHelper`, `geminiHelper`, `geminiToolsSanitizer`, `maxTokensHelper`,
+  `openaiHelper`, `responsesApiHelper`, `schemaCoercion`, `toolCallHelper`، نیز
   helper tests۔
 - **تصویری helpers** (`translator/image/sizeMapper.ts`)۔
-- بالائی سطح: `bootstrap.ts`، `formats.ts`، `registry.ts`، `index.ts`۔
+- اعلیٰ سطح پر: `bootstrap.ts`, `formats.ts`, `registry.ts`, `index.ts`۔
 
 ### 4.4 `open-sse/transformer/`
 
@@ -515,14 +518,14 @@ Hub-and-spoke ترجمہ (OpenAI مرکز ہے)۔
 
 ### 4.5 `open-sse/services/`
 
-اہم حصے (مکمل فہرست `open-sse/services/` کے تحت موجود ہے):
+نمایاں حصے (مکمل فہرست `open-sse/services/` کے تحت ہے):
 
 | موضوع            | فائلیں                                                                                                                                                                                                                                                   |
 | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| کومبو روٹنگ      | `combo.ts` (19 حکمتِ عملیاں)، `comboConfig.ts`، `comboMetrics.ts`، `comboManifestMetrics.ts`، `comboAgentMiddleware.ts`                                                                                                                                  |
+| کومبو روٹنگ      | `combo.ts` (20 حکمتِ عملیاں)، `comboConfig.ts`، `comboMetrics.ts`، `comboManifestMetrics.ts`، `comboAgentMiddleware.ts`                                                                                                                                  |
 | آٹو کومبو انجن   | `autoCombo/` — `engine.ts`، `scoring.ts`، `taskFitness.ts`، `virtualFactory.ts`، `modePacks.ts`، `autoPrefix.ts`، `persistence.ts`، `providerDiversity.ts`، `providerRegistryAccessor.ts`، `routerStrategy.ts`، `selfHealing.ts`، `index.ts`             |
 | لچک پذیری        | `accountFallback.ts` (کول ڈاؤن + لاک آؤٹ)، `errorClassifier.ts`، `requestRejectedStreak.ts`، `emergencyFallback.ts`، `rateLimitManager.ts`، `rateLimitSemaphore.ts`، `accountSemaphore.ts`، `accountSelector.ts`                                         |
-| کوٹے             | `quotaMonitor.ts`، `quotaPreflight.ts`، `bailianQuotaFetcher.ts`، `codexQuotaFetcher.ts`، `deepseekQuotaFetcher.ts`، `openrouterQuotaFetcher.ts`، `openrouterFreeWindow.ts`، `llmgatewayQuotaFetcher.ts`، `crofUsageFetcher.ts`، `antigravityCredits.ts` |
+| کوٹاز            | `quotaMonitor.ts`، `quotaPreflight.ts`، `bailianQuotaFetcher.ts`، `codexQuotaFetcher.ts`، `deepseekQuotaFetcher.ts`، `openrouterQuotaFetcher.ts`، `openrouterFreeWindow.ts`، `llmgatewayQuotaFetcher.ts`، `crofUsageFetcher.ts`، `antigravityCredits.ts` |
 | کیشنگ            | `reasoningCache.ts`، `searchCache.ts`، `signatureCache.ts`، `requestDedup.ts`                                                                                                                                                                            |
 | روٹنگ انٹیلیجنس  | `intentClassifier.ts`، `taskAwareRouter.ts`، `backgroundTaskDetector.ts`، `volumeDetector.ts`، `wildcardRouter.ts`، `workflowFSM.ts`، `specificityDetector.ts`، `specificityRules.ts`، `specificityTypes.ts`                                             |
 | ماڈل ہینڈلنگ     | `modelCapabilities.ts`، `modelDeprecation.ts`، `modelFamilyFallback.ts`، `modelStrip.ts`، `model.ts`، `provider.ts`، `providerRequestDefaults.ts`، `providerCostData.ts`، `payloadRules.ts`                                                              |
@@ -535,12 +538,12 @@ Hub-and-spoke ترجمہ (OpenAI مرکز ہے)۔
 
 ### 4.6 `open-sse/mcp-server/`
 
-- **110 منفرد ٹولز** `server.ts` میں مربوط ہیں (`schemas/tools.ts` میں 45 کینونیکل +
-  میموری، اسکلز، GitHub-skills، پول، گیمیفیکیشن، پلگ اِن، Notion، Obsidian،
-  لوکل کارپس اور کمپریشن ماڈیولز — یونین کو `countUniqueMcpTools` کے ذریعے شمار کیا جاتا ہے)۔
+- `server.ts` میں **110 منفرد ٹولز** وائر کیے گئے ہیں (`schemas/tools.ts` میں 45 کینونیکل +
+  میموری، اسکلز، GitHub-اسکلز، پول، گیمیفیکیشن، پلگ اِن، Notion، Obsidian،
+  لوکل-کارپس اور کمپریشن ماڈیولز — یونین کو `countUniqueMcpTools` کے ذریعے شمار کیا گیا ہے)۔
 - **3 ٹرانسپورٹس**: stdio، HTTP Streamable، SSE۔
 - رن ٹائم پر **33 اسکوپس** نافذ کیے جاتے ہیں — بنیادی فہرست `src/shared/constants/mcpScopes.ts` میں ہے، جبکہ مکمل سیٹ ہر ٹول ماڈیول کی جانب سے اعلان کردہ اسکوپس کا یونین ہے۔
-- آڈٹ ٹیبل: `mcp_tool_audit` (جسے `audit.ts` پُر کرتا ہے)۔
+- آڈٹ ٹیبل: `mcp_tool_audit` (جسے `audit.ts` آباد کرتا ہے)۔
 - فائلیں: `server.ts`، `index.ts`، `httpTransport.ts`، `audit.ts`، `scopeEnforcement.ts`،
   `runtimeHeartbeat.ts`، `descriptionCompressor.ts`، `schemas/{tools, a2a, audit, index}.ts`،
   `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`،
@@ -553,17 +556,17 @@ Hub-and-spoke ترجمہ (OpenAI مرکز ہے)۔
 `providerHeaderProfiles.ts`)، ہر فارمیٹ کے لیے ماڈل رجسٹریاں (`audioRegistry.ts`،
 `embeddingRegistry.ts`، `imageRegistry.ts`، `moderationRegistry.ts`،
 `musicRegistry.ts`، `rerankRegistry.ts`، `searchRegistry.ts`، `videoRegistry.ts`)،
-شناختی ہیلپرز (`codexIdentity.ts`، `codexInstructions.ts`،
+شناختی معاونین (`codexIdentity.ts`، `codexInstructions.ts`،
 `anthropicHeaders.ts`، `antigravityUpstream.ts`، `antigravityModelAliases.ts`،
 `cliFingerprints.ts`، `toolCloaking.ts`، `defaultThinkingSignature.ts`)،
-کریڈینشل ہیلپرز (`credentialLoader.ts`، `codexClient.ts`)، اور کلاؤڈ
+کریڈینشل معاونین (`credentialLoader.ts`، `codexClient.ts`)، اور کلاؤڈ
 اڈاپٹرز (`azureAi.ts`، `bedrock.ts`، `datarobot.ts`، `glmProvider.ts`،
 `maritalk.ts`، `oci.ts`، `petals.ts`، `runway.ts`، `sap.ts`، `watsonx.ts`،
 `ollamaModels.ts`، `errorConfig.ts`، `constants.ts`، `registryUtils.ts`)۔
 
 ### 4.8 `open-sse/utils/`
 
-اسٹریمنگ پرِمِٹوز اور پرووائیڈر ہیلپرز: `stream.ts`، `streamHandler.ts`،
+اسٹریمنگ کے بنیادی اجزا اور پرووائیڈر معاونین: `stream.ts`، `streamHandler.ts`،
 `streamHelpers.ts`، `streamPayloadCollector.ts`، `streamReadiness.ts`،
 `sseHeartbeat.ts`، `proxyFetch.ts`، `proxyDispatcher.ts`، `tlsClient.ts`،
 `networkProxy.ts`، `awsSigV4.ts`، `cacheControlPolicy.ts`،
@@ -668,7 +671,11 @@ bin/
   `v1-ws-bridge.mjs`, `smoke-electron-packaged.mjs`,
   `run-playwright-tests.mjs`, `run-ecosystem-tests.mjs`,
   `run-protocol-clients-tests.mjs`, `sync-env.mjs`, `healthcheck.mjs`,
-  `system-info.mjs`۔
+  `system-info.mjs`، نیز صرف پڑھنے کے لیے PR کی نگرانی کرنے والے معاون
+  `ci-discriminate.sh` (کسی PR کی ناکام جانچوں کے سگنیچرز کو ایک حوالہ جاتی PR یا base-red مسئلے کے مقابلے میں اپنے / وراثت میں ملے /
+  نامعلوم زمروں میں تقسیم کرتا ہے) اور `audit-worktree.sh`
+  (گندی فائلیں، محفوظ سطحیں، ہٹائے گئے asserts، suppression کی تعداد، باقی رہ جانے والی
+  عارضی tsconfigs، PR head بمقابلہ مقامی HEAD — کسی کارکن کا PR قبول کیے جانے سے پہلے)۔
 - **`scripts/check/`** — `check-cycles.mjs`, `check-docs-sync.mjs`,
   `check-docs-counts-sync.mjs`, `check-env-doc-sync.mjs`,
   `check-deprecated-versions.mjs`, `check-route-validation.mjs`,

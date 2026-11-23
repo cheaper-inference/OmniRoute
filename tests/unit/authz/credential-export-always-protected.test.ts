@@ -72,11 +72,49 @@ const HARD_GATED_INVENTORY: ReadonlyArray<{ path: string; why: string }> = [
     path: "/api/settings/obsidian",
     why: "POST stores the Obsidian Local REST API token; same credential surface as its /webdav child (GHSA-7pq4-8pvv-rx7r)",
   },
+  // ── Reported in GHSA-qxg2-rm3h-4cxp ──────────────────────────────────────
+  // GET spreads every provider_connections row verbatim — the lazy-decrypt
+  // proxy hands out apiKey / accessToken / refreshToken / idToken in plaintext
+  // — and the route makes no auth call of its own.
+  {
+    path: "/api/providers/client",
+    why: "returns every connection's decrypted apiKey/accessToken/refreshToken/idToken (GHSA-qxg2-rm3h-4cxp)",
+  },
+  // ── Relay token issuance ─────────────────────────────────────────────────
+  // POST mints a reusable inference credential and returns it in clear once,
+  // GET lists every token's id/prefix/limits, and the [id] child edits, toggles
+  // or deletes one. Credential issuance stays authenticated in open mode, like
+  // the WebDAV credentials above — "anonymous" is never the right audience for
+  // "mint me a token".
+  {
+    path: "/api/relay/tokens",
+    why: "POST mints and returns a reusable relay token; GET lists the inventory",
+  },
+  {
+    path: "/api/relay/tokens/6f3c1b7e-0000-4000-8000-000000000000",
+    why: "PATCH re-scopes/toggles and DELETE revokes a relay token",
+  },
+  // Sync token management. POST mints a token that opens GET /api/sync/bundle —
+  // decrypted provider credentials and plaintext API keys, the same material
+  // export-json hands out — GET lists them and the [id] child revokes one.
+  {
+    path: "/api/sync/tokens",
+    why: "POST mints a sync token that opens the decrypted config bundle; GET lists them",
+  },
+  {
+    path: "/api/sync/tokens/6f3c1b7e-0000-4000-8000-000000000000",
+    why: "DELETE revokes a sync token",
+  },
   // ── Already fixed; pinned so a refactor cannot silently drop them ────────
   { path: "/api/db-backups/export", why: "GHSA-mghq-58h3-qcqj" },
   { path: "/api/db-backups/exportAll", why: "GHSA-mghq-58h3-qcqj" },
   { path: "/api/settings/export-json", why: "GHSA-v7g9-7f55-5g46" },
   { path: "/api/settings/import-json", why: "GHSA-v7g9-7f55-5g46" },
+  {
+    path: "/api/settings/transfer/export",
+    why: "returns the selected accounts' credentials (passphrase-sealed)",
+  },
+  { path: "/api/settings/transfer/import", why: "writes provider connections and credentials" },
   { path: "/api/settings/database", why: "irreversible database replace" },
   { path: "/api/shutdown", why: "stops the server" },
   // ── Hard-gated by the LOCAL_ONLY tier instead ────────────────────────────
@@ -106,6 +144,9 @@ test("the trailing-slash spelling is gated too", () => {
     "/api/providers/abc/codex-auth/export/",
     "/api/logs/export/",
     "/api/cli-tools/codex-profiles/",
+    "/api/providers/client/",
+    "/api/relay/tokens/",
+    "/api/sync/tokens/",
   ]) {
     assert.ok(isAlwaysProtectedPath(path) || isLocalOnlyPath(path), path);
   }
@@ -145,6 +186,7 @@ test("the plain-path allowlist keeps its existing entries", () => {
     "/api/settings/database",
     "/api/db-backups",
     "/api/settings/obsidian",
+    "/api/relay/tokens",
   ]) {
     assert.ok(ALWAYS_PROTECTED_API_PATHS.includes(p), p);
   }
@@ -154,6 +196,35 @@ test("the obsidian entry does not over-protect its /api/settings neighbours", ()
   // `/api/settings/obsidian` is a plain prefix; the sibling settings routes must
   // stay on the MANAGEMENT tier for keyless local-first installs.
   for (const path of ["/api/settings", "/api/settings/notion", "/api/settings/require-login"]) {
+    assert.equal(isAlwaysProtectedPath(path), false, path);
+  }
+});
+
+test("the relay-tokens entry is a prefix: it covers the [id] child without widening /api/relay", () => {
+  // isAlwaysProtectedPath() matches plain entries with `path === p || path.startsWith(p)`,
+  // so the single "/api/relay/tokens" entry must reach the dynamic child routes
+  // (PATCH/DELETE of one token) — proven here rather than assumed.
+  for (const path of [
+    "/api/relay/tokens",
+    "/api/relay/tokens/",
+    "/api/relay/tokens/abc",
+    "/api/relay/tokens/6f3c1b7e-0000-4000-8000-000000000000",
+  ]) {
+    assert.equal(isAlwaysProtectedPath(path), true, path);
+  }
+  // The parent and unrelated siblings are not hard-gated by this entry.
+  for (const path of ["/api/relay", "/api/relay/", "/api/relay/other"]) {
+    assert.equal(isAlwaysProtectedPath(path), false, path);
+  }
+});
+
+test("the sync-tokens entry covers the [id] child but leaves the token-authenticated bundle open", () => {
+  // GET /api/sync/bundle authenticates with the sync token itself (a public API route), so the
+  // hard gate must stop at /api/sync/tokens — gating the bundle would break every sync client.
+  for (const path of ["/api/sync/tokens", "/api/sync/tokens/", "/api/sync/tokens/abc"]) {
+    assert.equal(isAlwaysProtectedPath(path), true, path);
+  }
+  for (const path of ["/api/sync", "/api/sync/bundle", "/api/sync/cloud", "/api/sync/initialize"]) {
     assert.equal(isAlwaysProtectedPath(path), false, path);
   }
 });

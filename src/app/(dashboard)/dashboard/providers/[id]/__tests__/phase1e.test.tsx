@@ -21,6 +21,7 @@ import {
   anyNormalizeCompatBadge,
   anyNoPreserveCompatBadge,
   formatProviderModelsErrorResponse,
+  endpointsForApiFormatChange,
 } from "../providerPageHelpers";
 
 // ---------------------------------------------------------------------------
@@ -143,6 +144,23 @@ describe("providerPageHelpers — model-compat pure functions", () => {
 // ---------------------------------------------------------------------------
 // Component render smoke tests
 // ---------------------------------------------------------------------------
+
+describe("endpointsForApiFormatChange (#17071)", () => {
+  it("replaces the endpoint ticks with the generation format's endpoint", () => {
+    expect(endpointsForApiFormatChange("chat-completions", "images-generations")).toEqual([
+      "images",
+    ]);
+    expect(endpointsForApiFormatChange("chat-completions", "video")).toEqual(["videos"]);
+  });
+
+  it("restores the chat default when leaving a generation format", () => {
+    expect(endpointsForApiFormatChange("images-generations", "chat-completions")).toEqual(["chat"]);
+  });
+
+  it("keeps the ticks between non-generation formats", () => {
+    expect(endpointsForApiFormatChange("chat-completions", "embeddings")).toBeNull();
+  });
+});
 
 describe("ModelRow — render smoke test", () => {
   let container: HTMLElement;

@@ -17,448 +17,681 @@ Tsarin **fail-open** ne: idan wani guardrail ya fadi yayin aiwatarwa, tsarin
 rajista (registry) yana rubuta kuskuren kuma ya ci gaba da sauran guardrail maimakon ya sa buƙatar ta fadi.
 Tabbatar da block yanke shawara ce ta zahiri (`block: true`), ba ta faru ta kuskure ba.
 
-## Guardrails masu zuwa tare da tsarin (Built-in Guardrails)
+## Ginannun Matakan Kariya
 
-Tsarin rajista yana loda guardrails guda shida ta atomatik cikin tsarin fifiko yayin shigo da su
+Rajistar tana loda matakan kariya guda shida ta atomatik bisa jerin fifiko yayin import
 (duba `registry.ts` → `registerDefaultGuardrails()`):
 
-| Fifiko (Priority) | Suna (Name)         | Mataki (Stage(s)) | Fayil (File)          |
-| ----------------- | ------------------- | ----------------- | --------------------- |
-| `5`               | `vision-bridge`     | `preCall`         | `visionBridge.ts`     |
-| `6`               | `audio-bridge`      | `preCall`         | `audioBridge.ts`      |
-| `7`               | `video-bridge`      | `preCall`         | `videoBridge.ts`      |
-| `10`              | `pii-masker`        | `pre` + `post`    | `piiMasker.ts`        |
-| `20`              | `prompt-injection`  | `preCall`         | `promptInjection.ts`  |
-| `95`              | `credential-masker` | `pre` + `post`    | `credentialMasker.ts` |
+| Fifiko | Suna                | Mataki/matakai | Fayil                 |
+| ------ | ------------------- | -------------- | --------------------- |
+| `5`    | `vision-bridge`     | `preCall`      | `visionBridge.ts`     |
+| `6`    | `audio-bridge`      | `preCall`      | `audioBridge.ts`      |
+| `7`    | `video-bridge`      | `preCall`      | `videoBridge.ts`      |
+| `10`   | `pii-masker`        | `pre` + `post` | `piiMasker.ts`        |
+| `20`   | `prompt-injection`  | `preCall`      | `promptInjection.ts`  |
+| `95`   | `credential-masker` | `pre` + `post` | `credentialMasker.ts` |
 
-Ƙananan lambobin fifiko suna gudana **da farko**.
+Ƙananan lambobin fifiko sukan fara aiki **da farko**.
 
-### Vision Bridge (`visionBridge.ts`) — Modality Bridge PR-1
+### Gadar Hoto (`visionBridge.ts`) — Gadar Nau'in Bayanai PR-1
 
-Yana tsoma baki a cikin buƙatun da ke dauke da hotuna da aka nufa ga **samfuran da ba su da ikon gani (non-vision models)** kuma ko dai
-ya sauya dukkan buƙatar zuwa samfurin da ke da ikon gani ko kuma ya maye gurbin sassan hoton
-da bayanin rubutu wanda wani samfurin gani da aka saita zai samar kafin
-kiran sama. Wannan yana ba da damar masu ba da sabis na rubutu kawai su sarrafa
-kayan aiki masu yawa (multimodal payloads) ba tare da matsala ba.
+Tana katse buƙatun da ke ɗauke da hotuna waɗanda aka nufa da su zuwa **samfurorin da ba sa sarrafa hoto**, sannan ko dai ta sake tura buƙatar gaba ɗaya zuwa samfurin da ke iya sarrafa hoto, ko ta maye gurbin sassan hoton da bayanan rubutu da wani samfurin hoto mai daidaitawa ya samar kafin kiran upstream. Wannan yana ba masu samar da sabis na rubutu kaɗai damar sarrafa payload masu nau'o'in bayanai da yawa ba tare da bayyanar wannan tsari ba.
 
-Kogi (Flow):
+Gudana:
 
-1. Tsallake idan samfurin da ake nufafi riga ya goyi bayan gani (sai dai idan ya bayyana a cikin
-   jerin tilasta gadojo `isVisionBridgeForcedModel`).
+1. Tsallake idan samfurin da aka nufa ya riga ya goyi bayan hoto (sai dai idan ya bayyana a jerin tilasta amfani da gada `isVisionBridgeForcedModel`).
 2. Ciro sassan hoto ta hanyar `extractImageParts(messages)`
-   (`visionBridgeHelpers.ts`), wanda ke mika aiki ga **hadadden mai gano kafofin watsa labarai**
-   `detectMediaParts()` a cikin `open-sse/utils/mediaParts.ts` — tushen gaskiya guda ɗaya
-   da aka raba tare da tace jituwa ta haɗin gwiwa (combo compatibility filter).
-   An iyakance cirewa zuwa manyan sassan siffofi
-   wadanda `replaceImageParts` za su iya dawo da su (kwangilar ciro ↔ maye gurbawa): OpenAI
+   (`visionBridgeHelpers.ts`), wanda ke miƙa aikin zuwa ga **haɗaɗɗen mai gano kafofin watsa labarai**
+   `detectMediaParts()` a cikin `open-sse/utils/mediaParts.ts` — tushen gaskiya guda ɗaya da ake rabawa tare da matatar dacewar combo.
+   An iyakance cirewar ga sassan matakin sama masu siffofin da
+   `replaceImageParts` zai iya sake saka wa (yarjejeniyar cirewa↔maye gurbi): OpenAI
    `image_url`, Anthropic base64 `source.type:"base64"`, Anthropic URL
-   `source.type:"url"`, da Responses API `input_image`. Abubuwan da ke cikin gida da
-   siffofin da ke nuni kawai kayan aiki ne na tace haɗin gwiwa kuma ba a taba ciro su ba.
-   Tsallake idan ba a sami kowa ba.
-3. Warware saitin lokacin gudu (runtime config) ta hanyar `resolveVisionBridgeRuntimeSettings()`
-   (`src/shared/constants/modalityBridgeDefaults.ts`): sabbin maɓallan saitin `modalityBridge*`
-   suna nasara; tsoffin maɓallan `visionBridge*` sun kasance **madadin zagaye ɗaya**
-   (taga mai komawa baya). Tsallake kafin kowane ratsawar kafofin watsa labarai lokacin da
-   gadojo (bridge) ya kasance a kashe.
-4. Zaɓin yanayi (Mode selector) (`modalityBridgeVisionMode`, duba teburin da ke kasa) yana yanke shawara
-   tsakanin sauya hanya (reroute) vs bayyanawa (describe). Sauya hanya yana dawo da `modifiedPayload` tare da sauya `model`
-   kadai, tare da meta `{ rerouted, fromModel, toModel, imagesKept }`.
-5. Hanyar bayyanawa (Describe path): iyakance hotuna a `maxImages`, haɗa saƙon da ya dace da aiki,
-   bincika taskar bayyanawa (describe cache), kira samfurin gani **a lokaci guda**
-   (`Promise.allSettled`), da kuma sanya sassan rubutu na `[Image N]: <description>`
-   a wurinsu. Bayanin da bai yi nasara ba yana samar da `null` kuma an
-   **ajiye** asalin sassan hoton (#4012) — sai dai a kan hanyar bayyanawa ta haɗin gwiwa lokacin da duk wani bayani ya gaza,
-   inda aka tabbatar da samfurin sama da ba shi da ikon gani ya sami
-   `(unavailable — no vision-capable provider connected)` stub maimakon haka (#8430).
+   `source.type:"url"`, da Responses API `input_image`. Abubuwan da aka samu a ciki da siffofin alamomi kawai kayan matatar combo ne kuma ba a taɓa cire su.
+   Tsallake idan ba a sami komai ba.
+3. Warware saitunan lokacin aiki ta hanyar `resolveVisionBridgeRuntimeSettings()`
+   (`src/shared/constants/modalityBridgeDefaults.ts`): sababbin maɓallan saitunan `modalityBridge*`
+   su ne ke da rinjaye; tsoffin maɓallan `visionBridge*` suna ci gaba da zama **madadin zagaye guda**
+   (tagar komawa baya). Tsallake kafin duk wani binciken kafofin watsa labarai idan an kashe gadar.
+4. Mai zaɓin yanayi (`modalityBridgeVisionMode`, duba jadawalin da ke ƙasa) yana yanke shawarar
+   sake turawa ko bayyanawa. Sake turawa yana dawo da `modifiedPayload` inda aka musanya `model`
+   kawai, tare da meta `{ rerouted, fromModel, toModel, imagesKept }`.
+5. Hanyar bayyanawa: taƙaita hotuna zuwa `maxImages`, haɗa prompt mai la'akari da aikin,
+   duba cache na bayyanawa, kira samfurin hoto **a layi ɗaya**
+   (`Promise.allSettled`), sannan saka sassan rubutun `[Image N]: <description>` a
+   wurarensu. Bayyanawar da ta gaza tana samar da `null`, kuma ana **adana** asalin sashen hoton
+   (#4012) — sai dai a hanyar bayyanawa ta combo idan duk
+   bayanan sun gaza, inda upstream da aka tabbatar ba ya sarrafa hoto zai sami
+   stub na `(ba ya samuwa — babu mai samar da sabis mai iya sarrafa hoto da aka haɗa)` maimakon haka (#8430).
 6. Dawo da `modifiedPayload` + meta (`imagesProcessed`, `descriptions`,
    `processingTimeMs`, `visionModel`).
 
-#### Zaɓin yanayi (`modalityBridgeVisionMode`)
+#### Mai zaɓin yanayi (`modalityBridgeVisionMode`)
 
-| Yanayi (Mode) | Tsohuwa (Default) | Halayyar (Behavior)                                                                                                                                                                                                                                                                                                                          |
-| ------------- | ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `auto`        | ✔                 | Tsohon tsari, ba a taba shi ba (#6640/#7204): samfuran da ba na haɗin gwiwa ba/`auto/` suna komawa zuwa mafi kyawun samfurin gani sai dai idan asalin samfurin riga yana da takardun shaida masu amfani (sannan bayyana); abubuwan da aka nufa na haɗin gwiwa koyaushe suna bayyanawa.                                                       |
-| `describe`    |                   | Koyaushe bayyana — an tsallake sashen sauya hanya gaba ɗaya; samfurin da mai amfani ya zaba koyaushe yana amsawa.                                                                                                                                                                                                                            |
-| `reroute`     |                   | Tilasta sauya hanya: an wuce masu tsaron samfurin da ke da takardun shaida. Masu tsaron takardun shaida na **wurin da ake nufi** na sauya hanya Har yanzu suna aiki — lokacin da babu wurin da ake nufi na gani mai amfani, buƙatar tana fadowa zuwa bayyanawa ta yadda hotuna na asali ba za su isa ga backend mai rubutu kawai ba (#8430). |
+| Yanayi     | Na asali | Halayya                                                                                                                                                                                                                                                                                             |
+| ---------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `auto`     | ✔        | Tsohuwar dabarar kimantawa, ba a taɓa ta ba (#6640/#7204): samfurorin da ba combo ba/`auto/` suna sake turawa zuwa mafi kyawun samfurin hoto sai dai idan asalin samfurin yana da bayanan shaida masu aiki (sannan ya bayyana); wuraren combo koyaushe suna bayyana.                                |
+| `describe` |          | Koyaushe a bayyana — ana tsallake tubalin sake turawa gaba ɗaya; samfurin da mai amfani ya zaɓa ne koyaushe yake ba da amsa.                                                                                                                                                                        |
+| `reroute`  |          | Tilasta sake turawa: ana ƙetare kariyar riƙe samfurin da ke da bayanan shaida. Kariyar bayanan shaidar **wurin da za a sake tura zuwa** har yanzu tana aiki — idan babu wurin hoto mai aiki, buƙatar tana wucewa zuwa bayyanawa domin kada ɗanyen hoto ya taɓa isa backend na rubutu kaɗai (#8430). |
 
-Yanayin da aka tilasta suna gajerun hanyoyi **kafin** tsarin auto ya fara aiki; halayyar
-`auto` tana daidai da byte tare da guardrail kafin PR-1.
+Yanayin da aka tilasta suna dakatar da aiki **kafin** dabarar `auto` ta fara; halayyar `auto`
+tana daidai byte-da-byte da matakin kariyar da ke kafin PR-1.
 
-#### Saƙon bayyanawa mai dacewa da aiki (`modalityBridgeVisionTaskAware`)
+#### Iyakokin API-key (`visionBridgeKeyScope.ts`)
 
-Tsohuwa **gaskiya (true)**. `composeVisionPrompt()` (`visionBridgeHelpers.ts`) yana ƙara
-rubutun **saƙon mai amfani na ƙarshe** (wanda aka taƙaita zuwa haruffa 500) zuwa tushen
-saƙon bayyanawa, yana jagorantar bayanin zuwa abin da mai amfani ya tambaya gaske
-(samfurin codex-vision-proxy) kuma yana roƙon samfurin gani ya rubuta rubutun da ake gani. Tare da tutar a kashe — ko babu rubutun mai amfani — ana amfani da tushen saƙon ba tare da an canza shi ba.
+Lokacin da API key na mai kira ya ƙuntata `allowedConnections`, rumbunan quota
+(`allowedQuotas`) ko samfura (`allowedModels` / `blockedModels` /
+`modelAccessMode: "restricted"` / `disableNonPublicModels`), gadar tana zaɓar
+samfurorin sake turawa da bayyanawa waɗanda maɓallin ke da izinin amfani da su kawai, a kan hanyoyin haɗin da maɓallin ke da izinin amfani da su.
+Daga nan kiran bayyanawa koyaushe yana bi ta self-loop na OmniRoute tare da
+header na `x-omniroute-self-loop-key-id`, don haka buƙatar chat da ke karɓa
+tana sake tilasta manufofin haɗi da samfurin wannan maɓalli. `enforceApiKeyPolicy()`
+yana girmama wannan header ne kawai tare da self-loop bearer, saboda haka zai iya
+ƙara taƙaita damar shiga kawai, kuma ana ƙin id da ba a iya warwarewa.
 
-Kiran kai-tsaye na cikin gida na describe mai dacewa da OpenAI (`callVisionModelSingle()` a cikin `visionBridgeHelpers.ts`) koyaushe yana neman `image_url.detail: "high"` — ba tare da wani sharadi ba, ga kowane mai kira/mai samarwa, ba tare da an danganta shi da wata sigina daga abokin ciniki ba. Samfurin mai ƙarancin bayani yana rage ingancin OCR don ainihin aikin rubuta bayanan rubutu da wannan prompt ɗin ke nema, don haka kiran describe ɗin kansa koyaushe yana neman babban bayani ba tare da la'akari da matakin bayanin da asalin bukatar da ke shigowa ta yi amfani da shi ba. Wannan yana shafar jikin bukatar describe na cikin gida kawai; baya canza yadda OmniRoute ke tura `image_url.detail` na mai kiran kansa akan babban bukatar — ana amfani da wannan tsoho daban, kuma ga abokan ciniki na OpenCode kawai da aka gano, a cikin `defaultImageDetail()` (`open-sse/handlers/chatCore/upstreamBody.ts`). Reshen tsarin Anthropic wire-format na describe self-loop ba shi da fannin `detail` kuma tsoho ɗaya bai shafe shi ba.
+Idan babu samfurin hoto da aka ba maɓallin izinin amfani da shi, hanyar bayyanawa tana kaucewa sannan
+buƙatar ta wuce ba tare da canji ba, daidai da halayyar fail-open ta matakin kariya da aka kashe
+(meta `{ skipped: true, reason: "no_permitted_vision_model" }`).
+Buƙatun da ba su da maɓalli, da maɓallan da ba su da waɗannan ƙuntatawa, suna aiki daidai kamar
+da.
 
-#### Iyakar fitarwa na Describe (`modalityBridgeVisionMaxChars`)
+#### Prompt na bayyanawa mai la'akari da aiki (`modalityBridgeVisionTaskAware`)
 
-| Key                            | Tsoho | Kewayo           |
+Tsoho shi ne **true**. `composeVisionPrompt()` (`visionBridgeHelpers.ts`) yana liƙa
+rubutun **saƙon mai amfani na ƙarshe** (an taƙaita shi zuwa haruffa 500) zuwa ainihin
+umarnin bayani, yana karkatar da bayanin zuwa ga abin da mai amfani ya tambaya a zahiri
+(tsarin codex-vision-proxy), tare da umartar samfurin gani ya kwafe rubutun da ake iya
+gani. Idan an kashe tutar — ko kuma babu rubutun mai amfani — ana amfani da ainihin umarnin
+ba tare da wani canji ba.
+
+Buƙatar da ta dace da OpenAI ta describe self-loop ɗin (`callVisionModelSingle()`
+a cikin `visionBridgeHelpers.ts`) koyaushe tana neman `image_url.detail: "high"` —
+ba tare da wani sharaɗi ba, ga kowane mai kira/mai samarwa, kuma ba ta dogara da kowace alamar
+abokin ciniki. Samfurin ƙananan bayanai yana rage daidaiton OCR musamman ga aikin
+kwafe rubutu da wannan umarnin yake nema, don haka kiran describe ɗin da kansa koyaushe
+yana neman cikakken bayani ko da kuwa wane matakin bayani ne buƙatar asali mai shigowa ta
+yi amfani da shi. Wannan yana shafar jikin buƙatar describe na ciki ne kawai; ba ya canja yadda
+OmniRoute ke tura `image_url.detail` na mai kira a cikin babbar buƙatar —
+ana amfani da wannan tsohon ƙimar dabam, kuma ga abokan cinikin OpenCode da aka gano kawai, a cikin
+`defaultImageDetail()` (`open-sse/handlers/chatCore/upstreamBody.ts`). Reshen
+tsarin-waya na Anthropic na describe self-loop ba shi da filin `detail`
+kuma ɗayan tsoffin ƙimomin biyu ba ya shafarsa.
+
+#### Iyakar fitowar describe (`modalityBridgeVisionMaxChars`)
+
+| Maɓalli                        | Tsoho | Kewayo           |
 | ------------------------------ | ----- | ---------------- |
 | `modalityBridgeVisionMaxChars` | `0`   | `0` ko 100–50000 |
 
-`0` (tsoho) yana nufin **babu iyaka** — bayanin da `callVisionModel()` ya dawo da shi ana wuce da shi ba tare da canji ba, ana kiyaye halayyar da ake da ita. Duk wani ƙima a cikin kewayon 100–50000 yana gajerta bayanin tare da kari na `…` kafin a mayar da shi azaman `[Image N]: <description>` (`VisionBridgeGuardrail.preCall()` a cikin `src/lib/guardrails/visionBridge.ts`). Haɓaka wannan don ayyukan OCR masu yawan bayanai inda samfurin da ke biye yake buƙatar cikakken rubutu; rage shi don takaita amfani da token akan samfuran gani masu yawan magana. Fannin dashboard yana nan akan rukunin Advanced na Vision tab (`modality-bridge-max-chars` a cikin `ModalityBridgeVisionTab.tsx`) kuma yana takaita duk wani ƙima tsakanin 1 zuwa 99 har zuwa mafi ƙanƙanta na 100 yayin da yake barin takamaiman `0` ba tare da taɓawa ba — `0` ƙima ce ta Zod mai inganci a kashin kanta (`z.union([z.literal(0), z.number().int().min(100).max(50000)])`), ba kawai tsoho na "ba a saita ba" ba.
+`0` (tsoho) yana nufin **babu iyaka** — ana wuce bayanin da
+`callVisionModel()` ya dawo da shi ba tare da canji ba, domin kiyaye halin da ake
+da shi. Duk wata ƙima cikin kewayon 100–50000 tana taƙaita bayanin tare da
+ƙarin `…` a ƙarshensa kafin a sake saka shi a matsayin `[Image N]: <description>`
+(`VisionBridgeGuardrail.preCall()` a cikin `src/lib/guardrails/visionBridge.ts`).
+Ƙara wannan don ayyukan OCR masu yawan bayanai inda samfurin da ke ƙasa yake buƙatar
+cikakken rubutun da aka kwafe; rage shi don iyakance amfani da token a samfuran gani masu
+yawan magana. Filin dashboard yana cikin sashen Advanced na shafin Vision
+(`modality-bridge-max-chars` a cikin `ModalityBridgeVisionTab.tsx`) kuma yana ɗaga kowace
+ƙima tsakanin 1 da 99 zuwa mafi ƙarancin 100, yayin da yake barin `0` da aka sa a fili
+ba tare da canji ba — `0` halattacciyar ƙimar Zod ce da kanta
+(`z.union([z.literal(0), z.number().int().min(100).max(50000)])`), ba kawai
+tsohuwar ƙimar “ba a saita ba” ba.
 
-#### Ma'ajiyar sirri ta Describe (`modalityBridge/bridgeCache.ts`)
+#### Ma'ajiyar describe (`modalityBridge/bridgeCache.ts`)
 
-Ma'ajiyar sirri ta LRU + TTL a cikin ƙwaƙwalwar ajiya don fitarwar describe, da ake rabawa a duk faɗin tsarin. Key = `sha256(imageRef + composedPrompt + configuredBridgeModel)` tare da tsarin prefix na tsayi (babu karon iyakar fanni). Sashen samfurin shine samfurin bridge **da aka tsara**, ba samfurin da ya ba da amsa ba — `callVisionModel` na iya komawa baya a cikin gida, kuma sanya key ga kowane ƙoƙari zai rarraba ma'ajiyar sirrin. Ba a taɓa adana describe ɗin da suka gaza ba. Saituna:
+Ma'ajiyar LRU + TTL ce a cikin ƙwaƙwalwar ajiya don fitowar describe, wadda duk tsarin
+aiki ke rabawa. Maɓalli = `sha256(imageRef + composedPrompt + configuredBridgeModel)` tare da
+tsarin prefix na tsayi (babu karo a iyakokin filaye). Bangaren samfurin shi ne
+samfurin bridge da **aka saita**, ba samfurin da ya bayar da amsa a zahiri ba —
+`callVisionModel` na iya komawa ga wani a ciki, kuma yin maɓalli bisa kowane yunƙuri zai
+rarraba ma'ajiyar. Ba a taɓa adana describe da suka gaza ba. Saituna:
 
-| Key                             | Tsoho  | Kewayo  |
+| Maɓalli                         | Tsoho  | Kewayo  |
 | ------------------------------- | ------ | ------- |
 | `modalityBridgeCacheEnabled`    | `true` | —       |
 | `modalityBridgeCacheTtlMinutes` | `60`   | 1–1440  |
 | `modalityBridgeCacheMaxEntries` | `200`  | 10–5000 |
 
-#### Daidaitawar hoto na nesa (self-loop describe/base64 fetch)
+#### Daidaita hoton nesa (describe na self-loop/ɗauko base64)
 
-Lokacin da bridge ɗin ya ɗauko hoton **nesa** da kansa — kiran kai na Anthropic describe da canjin base64 na claude-wire-format (`ensureBase64ImagesForClaudeWire`), duka ta hanyar `fetchRemoteImageAsDataUri()` a cikin `visionBridgeHelpers.ts` — sakamakon data URI ana wuce da shi ta hanyar `normalizeDataUri()` (`open-sse/utils/imageNormalize.ts`) kafin a saka shi a cikin bukatar vision-model. Hotuna masu girman gaske ana rage girman su zuwa **gefe mafi tsawo na 2048px** (daidai da iyakar sake girman da OpenAI/Anthropic ke amfani da shi a gefen uwar garken), wanda ke rage bytes na lodawa/jinkiri ba tare da canza abin da samfurin gani ke gani ba. Sake girman yana amfani da `sharp`, wanda aka loda ta hanyar dynamic import: akan dandamali inda binary ɗinsa na asali ya gaza lodawa, `normalizeDataUri()` **ba ya taɓa yin kuskure** — yana komawa zuwa wucewa kai tsaye na asalin bytes, don haka hanyar describe/base64-conversion koyaushe tana ci gaba da aiki. Bytes waɗanda ba na hoto ba (ɗauko hoto wanda bai dawo da hoton da za a iya fassara shi ba) suma ana wuce da su ba tare da taɓawa ba. Wannan daidaitawar an keɓe ta ne ga hotunan da bridge ɗin ke ɗauko don kiran kansa — ba a taɓa amfani da ita ga asalin payload na mai kiran ba, daidai da ka'idar canji ta hanyar zaɓi kawai (Dokar Guda #20).
+Lokacin da bridge ya ɗauko hoton **nesa** da kansa — self-call na describe na Anthropic
+da kuma juyawar base64 ta tsarin-waya na claude
+(`ensureBase64ImagesForClaudeWire`), dukansu ta hanyar
+`fetchRemoteImageAsDataUri()` a cikin `visionBridgeHelpers.ts` — ana miƙa data
+URI ɗin da aka samu ta cikin `normalizeDataUri()`
+(`open-sse/utils/imageNormalize.ts`) kafin a saka shi cikin buƙatar samfurin gani.
+Ana rage girman hotuna masu girma fiye da kima zuwa **2048px a gefen mafi tsawo** (daidai da
+iyakar sake-girma da OpenAI/Anthropic suka riga suka yi a ɓangaren uwar garke), wanda ke rage
+bytes/latency na lodawa ba tare da canja abin da samfurin gani yake gani ba. Sake-girman
+yana amfani da `sharp`, wanda ake lodawa ta dynamic import: a dandamalin da binary na asali
+ya kasa loduwa, `normalizeDataUri()` **ba ya taɓa jefa kuskure** — yana komawa
+ga wucewar bytes na asali kai tsaye, don haka hanyar describe/juyawar-base64
+koyaushe tana ci gaba da aiki. Haka kuma ana wuce bytes waɗanda ba hoto ba ne (ɗauko bayanai
+wanda bai dawo da hoton da za a iya decode ba) ba tare da canji ba. Wannan daidaitawa
+ta taƙaitu ga hotunan da bridge ya ɗauko don self-call nasa — ba a taɓa amfani da ita
+ga ɗanyen payload na mai kira da ake wucewa kai tsaye ba, daidai da ƙa'idar
+sauyi sai da izini kawai (Doka Mai Tsauri #20).
 
-#### Tsarin saituna + hijira (migration)
+#### Tsarin saituna + ƙaura
 
-Sabuwar `modalityBridge*` keys ana tantance su ta Zod a cikin `updateSettingsSchema` (`src/shared/validation/settingsSchemas.ts`): `modalityBridgeVisionEnabled`, `modalityBridgeVisionMode`, `modalityBridgeVisionModel`, `modalityBridgeVisionTaskAware`, `modalityBridgeVisionPrompt`, `modalityBridgeVisionTimeout`, `modalityBridgeVisionMaxImages`, `modalityBridgeVisionMaxChars`, rukunin `modalityBridgeCache*` guda uku, da rukunin `modalityBridgeAudio*` da Audio Bridge ke amfani da su. Hijira `141_modality_bridge_settings.sql` tana kwafi ƙimar `visionBridge*` na gado da ke akwai zuwa sabbin keys masu dacewa (idempotent, ba ya taɓa sake rubuta ƙimar `modalityBridge*` da mai gudanarwa ya saita); ana ci gaba da karɓar keys na gado azaman madadin karantawa na tsawon zagayen fitarwa ɗaya.
+Ana tabbatar da ingancin sabbin maɓallan `modalityBridge*` ta Zod a cikin `updateSettingsSchema`
+(`src/shared/validation/settingsSchemas.ts`): `modalityBridgeVisionEnabled`,
+`modalityBridgeVisionMode`, `modalityBridgeVisionModel`,
+`modalityBridgeVisionTaskAware`, `modalityBridgeVisionPrompt`,
+`modalityBridgeVisionTimeout`, `modalityBridgeVisionMaxImages`,
+`modalityBridgeVisionMaxChars`, rukuni ukun `modalityBridgeCache*`, da kuma
+rukunin `modalityBridgeAudio*` da Audio Bridge ke amfani da shi. Ƙaura
+`141_modality_bridge_settings.sql` tana kwafe ƙimomin tsoffin
+`visionBridge*` da ake da su zuwa sabbin maɓallan da suka dace (idempotent ce, kuma ba ta taɓa
+sake rubuta ƙimar `modalityBridge*` da mai gudanarwa ya sa); tsoffin maɓallan suna ci gaba
+da karɓuwa a matsayin madadin karantawa na zagayen sigar guda ɗaya.
 
-#### Header na nuna gaskiya + kididdiga
+#### Kanun nuna gaskiya + ƙididdiga
 
-Amsoshin da aka canza ta hanyar Describe suna ɗauke da `x-omniroute-modality-bridge: image->text;model=<visionModel>;parts=<n>` (wanda `buildModalityBridgeHeader()` ya gina a cikin `modalityBridge/bridgeStats.ts`, kuma `withModalityBridgeHeader()` ya sanya a cikin `src/sse/handlers/chatHelpers.ts`). Bukatun da aka sake tura su ba sa samun **header** — payload ɗin ba a taɓa shi ba kuma canjin samfurin ya riga ya bayyana a cikin fannin `model` na jikin amsar.
+Amsoshin da describe ya sauya suna ɗauke da
+`x-omniroute-modality-bridge: image->text;model=<visionModel>;parts=<n>`
+(wanda `buildModalityBridgeHeader()` ya gina a cikin `modalityBridge/bridgeStats.ts`,
+kuma `withModalityBridgeHeader()` ya saka a cikin `src/sse/handlers/chatHelpers.ts`).
+Buƙatun da aka sake tura wa wata hanya ba sa samun **wani** kanun — ba a taɓa payload ɗin ba,
+kuma sauyin samfurin ya riga ya bayyana a filin `model` na jikin amsar.
 
-`GET /api/modality-bridge/stats` (management auth, mataki ɗaya da `GET /api/settings`) yana dawo da counters na kowane yanayi a cikin ƙwaƙwalwar ajiya `{ attempts, successes, bridged, cacheHits, failures, totalLatencyMs, latencySamples, averageLatencyMs, lastUsedAt }` don `vision`, `audio`, da `video`. `averageLatencyMs` yana amfani da `latencySamples`, ba dukkan ƙoƙarin ba, azaman mai raba lamba; aikin da ba shi da lokaci ba ya ƙirƙirar samfurin zero-millisecond. `bridged` ya kasance sunan barkwanci mai dacewa da baya don canje-canje masu nasara; ƙoƙarin da ya gaza ba ya ƙara shi. Counters suna sake saitawa lokacin sake kunna tsarin ta hanyar tsari (telemetry, ba lissafi ba).
+`GET /api/modality-bridge/stats` (tabbatarwar gudanarwa, mataki ɗaya da
+`GET /api/settings`) yana dawo da ƙididdigun kowane nau'in bayanai da ke cikin ƙwaƙwalwa
+`{ attempts, successes, bridged, cacheHits, failures, totalLatencyMs,
+latencySamples, averageLatencyMs, lastUsedAt }` don `vision`, `audio`, da
+`video`. `averageLatencyMs` yana amfani da `latencySamples`, ba duk attempts ba, a
+matsayin maƙalarsa; aiki da ba shi da auna lokaci ba ya ƙirƙirar samfurin sifili
+millisecond na bogi. `bridged` yana ci gaba da kasancewa laƙabin da ya dace da tsoffin
+sigogi don sauye-sauyen da suka yi nasara; attempts da suka gaza ba sa ƙara shi.
+An tsara ƙididdigun su sake farawa idan an sake kunna process
+(telemetry ne, ba lissafin kuɗi ba).
 
-#### Tsarin Dashboard
+#### Tsarin dashboard
 
-Shafin dashboard ɗin da aka keɓe shine
-`/dashboard/settings/modality-bridge`. Shafukan sa na `Vision`, `Audio`,
-da `Video` masu iya amfani da URL suna kiyaye sigogin tambaya yayin canza ƙimar `tab`.
-Shafin Vision yana bayyana kunna, yanayi, zaɓin samfuri (ciki har da tsoho na atomatik),
-saƙon da ya dace da aiki, iyakokin lokaci na ci gaba/hoto/tsawon bayanin/cache,
-masu ƙidaya lokacin aiki, da kuma buƙatar samfurin da aka kiyaye. Shafin Audio shima yana raye:
-yana bayyana kunna, mai zaɓin samfurin STT-kawai tare da Auto, iyakokin lokaci/max-clip,
-masu ƙidaya sauti, da kuma gwajin samfurin `input_audio`. Shafin Video yana aiki:
-yana ba da rahoton yanayin aiki na FFmpeg/ffprobe — ɗaya daga cikin jihohin UI guda huɗu
-(`unknown` yayin da binciken ke gudana ko bai iya kammalawa ba, `restricted` akan
-mai masaukin dashboard mara-loopback inda aka tsallake binciken a gefen abokin ciniki,
-`unavailable` da zarar an bincika kuma an tabbatar da cewa babu, ko `available` tare da
-nau'ikan FFmpeg/ffprobe) — yana ci gaba da kunna/samfuri/firikwensi/bidiyo/iyakokin lokaci,
-yana tace mai zaɓin samfurin zuwa samfuran da ke iya gani, kuma yana bayyana masu ƙidaya bidiyo.
+Shafin dashboard na musamman shi ne
+`/dashboard/settings/modality-bridge`. Shafukansa na `Vision`, `Audio`,
+da `Video` waɗanda ake iya buɗewa ta URL suna kiyaye query parameters yayin sauya
+ƙimar `tab`. Shafin Vision yana nuna kunnawa, mode, zaɓin model (har da tsohon
+zaɓi na atomatik), prompting mai la'akari da task, iyakokin timeout/image/description-length/cache
+na ci-gaba, ƙididdigun lokacin aiki, da sample request mai kariya. Shafin Audio
+ma yana aiki kai-tsaye: yana nuna kunnawa, mai zaɓen model na STT kawai tare da
+Auto, iyakokin timeout/max-clip, ƙididdigun audio, da gwajin samfurin
+`input_audio`. Shafin Video yana aiki: yana bayar da rahoton yanayin lokacin aiki
+na FFmpeg/ffprobe — ɗaya daga cikin yanayin UI guda huɗu da aka bayyana sarai
+(`unknown` yayin da probe ke gudana ko bai iya kammalawa ba, `restricted` a kan
+dashboard host da ba loopback ba inda ake tsallake probe a ɓangaren client,
+`unavailable` bayan an yi probe kuma an tabbatar ba ya nan, ko `available` tare
+da sigogin FFmpeg/ffprobe) — yana adana iyakokin enable/model/frame/video/timeout,
+yana tace mai zaɓen model zuwa models masu iya vision, kuma yana nuna ƙididdigun
+video.
 
-Tsohon katin Vision Bridge a ƙarƙashin saitunan AI haɗin haɗin kai ne zuwa
-sabon shafin; baya mallakar kwafin fom na biyu. Masu samar da Media kuma
-suna haɗa ayyukan Image-to-Text da Speech-to-Text zuwa shafukan Modality
-Bridge masu dacewa ba tare da cire filin wasan Speech-to-Text da ke akwai ba.
+Tsohon katin Vision Bridge da ke ƙarƙashin saitunan AI yanzu hanyar haɗin dacewa
+ce zuwa sabon shafin; ba ya ƙara riƙe wani kwafi na biyu na form ɗin. Media
+Providers kuma yana haɗa hanyoyin aiki na Image-to-Text da Speech-to-Text zuwa
+shafukan Modality Bridge da suka dace ba tare da cire playground na Speech-to-Text
+da ke akwai ba.
 
-**Kewaye shigar da kai-tsaye:** lokacin da kiran bayanin ya ratsa ta hanyar
-OmniRoute na kansa `/v1` kai-tsaye (samfurin mai samar da sabon abu), buƙatar
-ƙasa tana aika `x-omniroute-admission-bypass: internal` kuma an tabbatar da ita
-tare da takardar shaidar kai-tsaye da aka warware — mai kula da `sk_omniroute`
-na gida a yanayin gida, ko kuma ma'aikacin da aka saita `OMNIROUTE_API_KEY` /
-`ROUTER_API_KEY` maɓallin muhalli (#1350) don haka `REQUIRE_API_KEY=true`
-deploys har yanzu zai iya gudanar da kiran bayanin. Ana girmama kewaye ne kawai
-don waɗannan takardun shaidar, don haka abokan ciniki na waje ba za su iya amfani
-da kanun labarai don tsallake shigarwa ba.
+**Tsallake tantance self-loop:** lokacin da kiran describe ya bi ta self-loop na
+OmniRoute na `/v1` (model na provider marar daidaitaccen tsari), sub-request ɗin
+yana aika `x-omniroute-admission-bypass: internal` kuma ana tabbatar da shi da
+credential na self-loop da aka warware — sentinel na gida `sk_omniroute` a local
+mode, ko env key na `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` da operator ya saita
+(#1350), domin deployments masu `REQUIRE_API_KEY=true` su ci gaba da gudanar da
+kiran describe. Ana amincewa da bypass ɗin ne kawai ga waɗannan takamaiman
+credentials, don haka clients na waje ba za su iya amfani da header ɗin don
+tsallake admission ba.
 
-Tsoffin saitunan gado suna cikin `src/shared/constants/visionBridgeDefaults.ts`;
-sabon yanayi/saitunan da suka dace da aiki/cache da mai warware saitunan suna cikin
-`src/shared/constants/modalityBridgeDefaults.ts`. Mai gadi yana bayyana zaɓin
-mai ginawa `deps` don haka gwaje-gwaje zasu iya allura na karya `getSettings` da
-`callVisionModel` aiwatarwa.
+Tsoffin defaults suna cikin `src/shared/constants/visionBridgeDefaults.ts`;
+sabbin defaults na mode/task-aware/cache da settings resolver suna cikin
+`src/shared/constants/modalityBridgeDefaults.ts`. Guardrail ɗin yana samar da
+zaɓin constructor na `deps` domin tests su iya shigar da implementations na bogi
+na `getSettings` da `callVisionModel`.
 
 ### Audio Bridge (`audioBridge.ts`) — Modality Bridge PR-3
 
-Yana katse buƙatun hira masu ɗauke da sauti kafin su isa wata manufa da ba a sani ba
-cewa tana karɓar shigarwar sauti. Ba ta taɓa sake tura buƙatar hira ba: ana fassara
-sassan sauti ta hanyar daidaitaccen ƙarshen OpenAI mai yawa kuma zaɓaɓɓen samfurin
-hira yana ci gaba da rubutun rubutu.
+Yana katse chat requests masu ɗauke da audio kafin su isa target da ba a san yana
+karɓar shigarwar audio ba. Ba ya taɓa sake karkatar da chat request: ana mayar da
+sassan audio zuwa rubutu ta multipart endpoint mai dacewa da OpenAI da ke akwai,
+sannan chat model da aka zaɓa ya ci gaba da transcripts na rubutu.
 
 Gudana:
 
-1. Warware `supportsAudio` ta hanyar `getResolvedModelCapabilities()`. Bayanan
-   rajistar mai samarwa na bayyane sun yi nasara, sannan bayanan samfurin tsaye,
-   sannan `modalities_input` da aka daidaita. Jerin shigarwa da aka bayyana ba tare
-   da `audio` ba shine `false`; babu shaidar iyawa da ta rage `null`. Dukansu `false`
-   da `null` suna kunna gada mai ra'ayin mazan jiya, yayin da `true` ke kewaye da ita.
-2. Warware saitunan `modalityBridgeAudio*` kuma cire sassan sauti na matakin sama
-   masu iya haɗawa daga kowane saƙo ta hanyar mai gano `detectMediaParts()` da aka raba.
-   Siffofin waya da aka goyan baya sune OpenAI `input_audio`, `audio_url`, da
-   `source.media_type: "audio/*"`. Ana gano sauti mai gida don kewayawa amma ba a
-   cire shi ta hanyar hanyar haɗawa ba. Aiki yana iyakance ta `modalityBridgeAudioMaxClips`;
-   sassan baya suna kasancewa ba a taɓa su ba.
-3. Girmama `provider/model` da aka saita, ko bari `selectAudioBridgeModel()` ya bi
-   `AUDIO_TRANSCRIPTION_PROVIDERS` a cikin tsarin kasida mai tsayayye kuma ya zaɓi
-   samfurin farko tare da takardar shaidar mai samarwa mai aiki.
-4. `callAudioTranscription()` yana canza sauti na base64/data-URI zuwa `file` mai yawa,
-   ko kuma yana sauke `audio_url` mai nisa ta hanyar mai gadi na waje kawai tare da
-   pinning na DNS da iyaka 25 MB. Sannan yana POST fayil ɗin da samfurin da aka zaɓa
-   zuwa `/v1/audio/transcriptions` kai-tsaye na gida, an tabbatar da shi tare da
-   `resolveSelfLoopBearer()`. Hanyar fassarar da ke akwai tana yin binciken takardar
-   shaidar al'ada, sarrafa sanyaya/iyakokin ƙimar, da kuma aika mai samarwa.
-5. Kira masu nasara suna maye gurbin sassan su da `[Audio N]: <transcript>`. Kira
-   suna gudana tare da `Promise.allSettled`: gazawar mutum ɗaya tana kiyaye wannan
-   sashin sauti na asali (kwangilar #4012). Idan kowane kira ya gaza kuma an tabbatar
-   da manufa `supportsAudio === false`, sassan sun zama
-   `[Audio N]: (unavailable — no STT provider connected)` (kwangilar #8430). Don
-   manufa da ba a sani ba (`null`), sakamakon gazawar gaba ɗaya yana kasancewa ba a
-   taɓa shi ba. Manufa mai rubutu kawai da aka tabbatar ba tare da takardar shaidar
-   STT mai amfani ba tana karɓar daidai wannan stub ɗin bayyane ba tare da fitar da
-   kiran cibiyar sadarwa ba.
+1. Warware `supportsAudio` ta hanyar `getResolvedModelCapabilities()`. Bayanin
+   provider-registry da aka bayyana sarai ya fi fifiko, sai static model
+   metadata, sannan `modalities_input` da aka daidaita. Jerin input da aka
+   bayyana amma ba shi da `audio` yana zama `false`; idan babu wata shaidar
+   capability yana zama `null`. Duk `false` da `null` suna kunna bridge mai
+   taka-tsantsan, yayin da `true` yake tsallake shi.
+2. Warware saitunan `modalityBridgeAudio*` sannan a ciro sassan audio na matakin
+   sama waɗanda za a iya splice daga kowane message ta hanyar detector ɗin
+   `detectMediaParts()` na bai-ɗaya. Wire shapes da ake tallafawa su ne
+   `input_audio`, `audio_url` na OpenAI, da `source.media_type: "audio/*"`.
+   Ana gano audio da ke nested don routing amma hanyar splice ba ta cire shi.
+   Ana iyakance aikin da `modalityBridgeAudioMaxClips`; sassan da suka biyo baya
+   suna nan ba tare da an taɓa su ba.
+3. Bi `provider/model` da aka saita, ko bar `selectAudioBridgeModel()` ya bi
+   `AUDIO_TRANSCRIPTION_PROVIDERS` bisa tsayayyen tsarin catalog ya zaɓi model
+   na farko da ke da provider credential mai aiki kuma mai amfani.
+4. `callAudioTranscription()` yana sauya base64/data-URI audio zuwa multipart
+   `file`, ko ya sauke `audio_url` na nesa ta public-only outbound guard tare da
+   DNS pinning da iyakar 25 MB. Sannan yana POST na file ɗin da model da aka zaɓa
+   zuwa self-loop na gida `/v1/audio/transcriptions`, tare da tabbatarwa ta
+   `resolveSelfLoopBearer()`. Route na transcription da ke akwai yana gudanar da
+   binciken credential na yau da kullum, sarrafa cooldown/rate-limit, da tura
+   aiki zuwa provider.
+5. Calls da suka yi nasara suna maye gurbin sassansu da
+   `[Audio N]: <transcript>`. Calls suna gudana da `Promise.allSettled`: gazawar
+   ɗaya tana kiyaye ainihin ɓangaren audio ɗin (#4012 contract). Idan duk calls
+   suka gaza kuma an tabbatar target ɗin `supportsAudio === false`, sassan suna
+   zama `[Audio N]: (babu shi — babu STT provider da aka haɗa)` (#8430 contract).
+   Ga target da ba a san halinsa ba (`null`), sakamakon gazawar duka yana nan ba
+   tare da an taɓa shi ba. Target da aka tabbatar yana karɓar rubutu kawai kuma
+   ba shi da STT credential mai amfani yana samun wannan explicit stub ɗin ba
+   tare da yin network call ba.
 
-Rubutun nasara suna amfani da cache na Modality Bridge LRU/TTL na tsarin. Maɓallin
-yana haɗa bayanin sauti, alamar aikin `audio-transcription` mai tsayayye, da kuma
-samfurin STT da aka zaɓa; gazawar ba a taɓa adana su ba. Ƙoƙarin sauti suna sabunta
-masu ƙidaya `bridged`, `cacheHits`, `failures`, da `lastUsedAt` da aka raba.
-Amsoshin da aka canza suna ɗauke da
-`x-omniroute-modality-bridge: audio->text;model=<sttModel>;parts=<n>`; buƙatun
-da ba a taɓa su ba ba sa karɓar sashin Audio Bridge.
+Transcripts da suka yi nasara suna amfani da cache na LRU/TTL na Modality Bridge
+na gaba ɗaya process. Key ɗin yana haɗa audio reference, tsayayyen operation label
+na `audio-transcription`, da STT model da aka zaɓa; ba a taɓa adana failures a
+cache. Audio attempts suna sabunta ƙididdigun bai-ɗaya na `bridged`, `cacheHits`,
+`failures`, da `lastUsedAt`. Responses da aka sauya suna ɗauke da
+`x-omniroute-modality-bridge: audio->text;model=<sttModel>;parts=<n>`; requests
+da ba a taɓa su ba ba sa samun segment na Audio Bridge.
 
-Saitunan lokacin aiki suna goyan bayan DB kuma Zod-validated:
+Saitunan lokacin aiki suna samun tallafin DB kuma an inganta su da Zod:
 
-| Maɓalli                       | Tsoho   | Range          |
-| ----------------------------- | ------- | -------------- |
-| `modalityBridgeAudioEnabled`  | `true`  | —              |
-| `modalityBridgeAudioModel`    | `""`    | Auto ko STT ID |
-| `modalityBridgeAudioTimeout`  | `60000` | 1000–300000    |
-| `modalityBridgeAudioMaxClips` | `3`     | 1–10           |
+| Maɓalli                       | Tsoho   | Iyaka                    |
+| ----------------------------- | ------- | ------------------------ |
+| `modalityBridgeAudioEnabled`  | `true`  | —                        |
+| `modalityBridgeAudioModel`    | `""`    | Na atomatik ko ID na STT |
+| `modalityBridgeAudioTimeout`  | `60000` | 1000–300000              |
+| `modalityBridgeAudioMaxClips` | `3`     | 1–10                     |
 
-Cache ɗin da aka raba yana ci gaba da sarrafa shi ta `modalityBridgeCacheEnabled`,
+Har yanzu ana sarrafa ma'ajiyar gama-gari ta `modalityBridgeCacheEnabled`,
 `modalityBridgeCacheTtlMinutes`, da `modalityBridgeCacheMaxEntries`.
 
-### Video Bridge (`videoBridge.ts`, `videoBridgePipeline.ts`)
+### Gadar Bidiyo (`videoBridge.ts`, `videoBridgePipeline.ts`)
 
-Yana katse manyan sassan bidiyo a cikin Chat Completions `messages` da Responses
-API `input` kafin a kira wata manufa ba tare da sanin tallafin bidiyo na asali ba.
-Siffofin da aka tallafa sune `input_video`, `video_url`, `video_source`, HTTPS URLs,
-da `data:video/*;base64,...` data URIs. Ba a ɗaukar sunayen fayiloli a cikin rubutu
-a matsayin bidiyo.
+Tana katse sassan bidiyo na babban mataki a cikin `messages` na Chat Completions da
+`input` na Responses API kafin a kira wata manufa wadda ba a san tana da tallafin
+bidiyo na asali ba. Tsarukan da ake tallafawa su ne `input_video`, `video_url`,
+`video_source`, URLs na HTTPS, da URI na bayanai na `data:video/*;base64,...`.
+Ba a ɗaukar sunayen fayil kawai da ke cikin rubutu a matsayin bidiyo.
 
-`VideoBridgeGuardrail.preCall` (`videoBridge.ts`) yana da mallakar tafiyar buƙata,
-binciken iyawa/manufa, haɗin gwiwa na kowane buƙata, da kuma amsar amsa.
-Aikin kowane bidiyo — samu, cache na dukkan sakamako, bayyana jerin firam
-(wanda ke haɗa kowane rubutun sauti da mai kira ya bayyana), da kuma ma'auni/soke/tsaftacewa
-na kowane yunƙuri — an ɓoye shi a bayan `processVideoPart` a cikin
-`videoBridgePipeline.ts`, wanda ake kira sau ɗaya ga kowane sashi na bidiyo a cikin madaukin `preCall`.
-Wannan module kuma yana bayyana iyakokin tashar jiragen ruwa `VideoMediaBrokerPort`
-(samun bytes da cire firam ɗin da aka zaɓa), `VideoAudioTranscriptionPort`
-(haɗa rubutun sauti da mai kira ya bayyana tare da rubutun da aka zaɓa), da
-`VideoDrilldownPort` (iyakar ci gaba na firam ɗin; ba a haɗa shi cikin `processVideoPart` ba tukuna —
-kawai hanyar `/api/modality-bridge/video/drilldown` ce ke rubuta shigarwar drill-down a yau).
+`VideoBridgeGuardrail.preCall` (`videoBridge.ts`) ne ke da alhakin bi ta cikin
+buƙata, binciken iyawa/manufa, tattarawa na kowace buƙata, da bayanan amsa.
+Aikin kowanne bidiyo — samu, ma'ajiyar cikakken sakamako, bayyana jerin firam
+(wanda ke haɗa duk wani rubutaccen sautin da mai kira ya ayyana), da
+ma'aunai/sokewa/tsabtacewa na kowace yunƙuri — an ɓoye shi a bayan
+`processVideoPart` a cikin `videoBridgePipeline.ts`, wanda ake kira sau ɗaya ga
+kowane ɓangaren bidiyo a cikin madauwar `preCall`. Wannan kundin kuma yana
+ayyana iyakokin tashoshi a sarari: `VideoMediaBrokerPort` (samun bytes da fitar
+da firam-firam da aka ɗauki samfurinsu), `VideoAudioTranscriptionPort` (haɗa
+rubutaccen sautin da mai kira ya ayyana da taken firam-firam ɗin da aka ɗauki
+samfurinsu), da `VideoDrilldownPort` (iyakar adana bayanan zurfafawa cikin
+firam; har yanzu ba a haɗa shi da `processVideoPart` ba — hanya ta daban kawai
+ta `/api/modality-bridge/video/drilldown` ce ke rubuta bayanan zurfafawa a yau).
 
-Hanyar buƙatar jama'a `/v1` ba ta taɓa shigo da ko kiran wani tsari ba. Ana sauke bidiyo na nesa
-ƙarƙashin iyakar 50 MiB; bidiyo na base64 na cikin layi suna da iyakar 36 MiB da aka yanke
-ga kowane bidiyo don haka samfurin/saƙonni/firam ɗin zai iya kasancewa a cikin iyakar shigar da buƙatar JSON na jama'a na 50 MiB.
-Ana bincika tsawon cikin layi da ƙididdigar girman da aka yanke kafin rarrabawa. Ana buƙatar HTTPS
-a kan URL na nesa na farko da kowane sake turawa, ta amfani da tsarin kariya na waje na jama'a kawai
-tare da DNS pinning. Daga nan sai bytes su ketare ainihin iyakar broker na ciki
-`POST /api/modality-bridge/video/extract`. Wannan hanya tana da `LOCAL_ONLY` da `SPAWN_CAPABLE`,
-tana karɓar buƙatar da aka tabbatar da ita kawai, amintacciyar buƙatar madauki, kuma ba ta taɓa karɓar URL,
-hanyar fayil, mai aiwatarwa, ko jerin gardama ba. Bututun girman jiki na API da mai karanta jiki na mai sarrafawa
-suna aiwatar da iyakar shigar da broker na 50 MiB. Jerin sa na iyakance yana gudanar da cirewa ɗaya a lokaci guda,
-yana ba da damar ayyuka huɗu masu jiran gado, kuma yana iyakance shigarwar da ke jiran gado zuwa 100 MiB.
+Hanyar buƙata ta jama'a ta `/v1` ba ta taɓa shigo da ko kiran ƙaramin tsari.
+Ana sauke bidiyoyin nesa a ƙarƙashin iyakar 50 MiB; bidiyoyin base64 na cikin
+layi suna da iyakar 36 MiB da aka warware ga kowane bidiyo a matsayin taka-tsantsan,
+domin kundin model/messages/framing ya iya kasancewa cikin iyakar karɓar buƙatar
+JSON ta jama'a ta 50 MiB. Ana bincika tsawon bayanan cikin layi da ƙiyasin
+girman da aka warware kafin ware ƙwaƙwalwa. Ana buƙatar HTTPS a URL na nesa na
+farko da kowace turawa, ta amfani da kariyar fitarwa ta jama'a-kawai da ake da
+ita tare da ɗaure DNS. Daga nan bytes ɗin sukan ƙetare takamaiman iyakar
+dillali ta ciki ta `POST /api/modality-bridge/video/extract`. Wannan hanyar
+`LOCAL_ONLY` ce kuma `SPAWN_CAPABLE`, tana karɓar buƙata kawai da aka tantance
+ta kowane tsari kuma aka amince da ita daga loopback, kuma ba ta taɓa karɓar
+URL, hanyar tsarin fayil, fayil mai aiwatarwa, ko jerin hujjoji ba. Tsarin
+iyakance girman jikin API da mai karanta jiki na ƙaruwa a cikin mai sarrafawa
+kowannensu yana tilasta iyakar shigarwar dillali ta 50 MiB da kansa. Layinsa
+mai iyaka yana gudanar da fitarwa guda ɗaya a lokaci, yana ba da damar ayyuka
+huɗu masu jira, kuma yana iyakance jimillar shigarwar da ke jira zuwa 100 MiB.
 
-A cikin broker, `ffprobe` yana karanta fayil na gida mai zaman kansa; jerin fayilolin da aka yarda da su
-sun cire jerin waƙoƙi da tsarin manifest. Ga kwantena na MOV-family da aka yarda da su,
-bayanan MOV na waje sun kasance a kashe ta tsohuwa, kuma umarnin da aka gyara baya zaɓar su.
-Dukansu `ffprobe` da `ffmpeg` suna amfani da jerin fayilolin `file`-kawai, zaren ɗaya,
-jerin gardama da aka gyara, babu harsashi, da kuma masu aiwatarwa da aka warware daga `PATH`.
-Ba a ɗaukar rafi na murfin hoto da aka haɗa a matsayin masu iya kunnawa.
-Duk rafi masu iya kunnawa dole ne su cika iyakoki, kuma ana fifita rafi na tsoho
-kafin faɗuwar ƙasa mafi ƙarancin index. An iyakance bidiyo zuwa daƙiƙa 600,
-pixels 8,192 a kowane girma, da pixels 33,554,432 na asali. FFmpeg yana samfurin
-firam ɗin JPEG na tsakiya 1–16, yana rage gefen dogon zuwa pixels 1,024 ba tare da haɓaka
-ƙananan shigarwa ba, kuma baya taɓa karɓar URL. Samfurin yana `uniform` ta tsohuwa.
-Manufofin `scene_aware` na zaɓi da `segment_aware` na gwaji suna yin ƙarin
-wucewa ta FFmpeg da aka gyara a kan rafi na gida da aka riga aka tabbatar,
-zaɓi lokutan al'amuran `showinfo` da aka iyakance, kuma suna faɗuwa zuwa
-tsakiyar tsakiyar daidai a kan gazawar mai gano, ƙarewar lokaci, fitarwa mara kyau,
-ko saitin ɗan takara mara komai. Yanayin sanin sashi yana rarraba samfurori na tsakiya
-daidai gwargwado zuwa lokutan al'amuran da aka tabbatar; shaidar sanin sashi da halayen faɗuwa
-an bayyana su a ƙasa. An yi amfani da iyakar firam 16 mai tsauri
-bayan zaɓi a kowane manufa. Lokacin da buƙatar sanin al'amari tana da kasafin kuɗi na firam ɗaya kawai,
-tana amfani da tsakiyar tsakiyar daidai na cikakken bidiyo mai aiki ko taga mai mai da hankali
-kuma tana ba da rahoton `policyEffective: uniform`: firam ɗin al'amari ɗaya da aka zaɓa
-ba zai iya kiyaye duka ƙarshen lokaci ba. Mai kira na iya ba da taga mai mai da hankali
-(`start`/`end` seconds); an iyakance iyakoki zuwa tsawon kafofin watsa labarai,
-an ƙi tagogi masu juyawa ko marasa iyaka, kuma duk manufofin samfurin
-ana yin su ne kawai a cikin tazara da aka daidaita. An haɗa taga da aka samu
-a cikin metadata na samfurin da kuma a cikin prefix ɗin bayanin da ba a amince da shi ba
-don haka samfurori na gaba zasu iya bambanta wani yanki mai mai da hankali daga cikakken lokaci.
+A cikin dillalin, `ffprobe` yana karanta fayil na gida mai zaman kansa; tabbataccen
+jerin tsare-tsaren da aka yarda da su yana ware tsare-tsaren jerin kunnawa da
+manifest. Ga kwantena na dangin MOV da aka yarda da su, manazartar bayanan MOV
+na waje suna ci gaba da zama a kashe bisa tsohuwa, kuma tabbataccen umarnin ba
+ya kunna su. Duka `ffprobe` da `ffmpeg` suna amfani da jerin ladubban da aka
+yarda da su na `file`-kawai, thread guda ɗaya, tabbatattun jeren hujjoji, babu
+shell, tare da gano fayilolin aiwatarwa daga `PATH`. Rafin hoton murfi da aka
+maƙala ba su cikin zaɓuɓɓukan da za a iya kunnawa. Duk rafukan da za a iya
+kunna dole ne su cika iyakokin, kuma ana fifita rafin tsoho da aka ayyana kafin
+madadin mafi ƙarancin index mai tabbataccen sakamako. Ana iyakance bidiyoyi
+zuwa daƙiƙa 600, pixels 8,192 a kowace fuska, da pixels na tushe 33,554,432.
+FFmpeg yana ɗaukar samfuran firam-firam JPEG 1–16 daga tsakiya, yana rage doguwar
+gefe zuwa pixels 1,024 aƙalla ba tare da faɗaɗa ƙananan bayanai ba, kuma ba ya
+taɓa karɓar URL. Ɗaukar samfurin `uniform` ce bisa tsohuwa. Manufofin
+`scene_aware` na zaɓi da `segment_aware` na gwaji suna yin ƙarin zagaye guda
+ɗaya na FFmpeg mai tabbataccen tsari a kan rafin gida da aka riga aka tabbatar,
+suna zaɓar lokutan fage na `showinfo` masu iyaka, sannan su koma ta hanyar da
+za a iya maimaitawa zuwa maki-tsakiyar uniform iri ɗaya idan mai ganowa ya
+kasa, lokaci ya ƙare, fitarwa ta lalace, ko babu wani zaɓi. Yanayin segment-aware
+yana rarraba samfuran maki-tsakiya gwargwadon tazarorin fage da aka tabbatar;
+an yi cikakken bayani a ƙasa game da shaidar segment-aware da halayen komawa
+madadin. Ana amfani da tsayayyar iyakar firam 16 bayan zaɓe a kowace manufa.
+Lokacin da buƙatar scene-aware take da kasafin firam guda ɗaya kawai, tana
+amfani da maki-tsakiyar uniform na cikakken bidiyo mai aiki ko tagar mayar da
+hankali, sannan ta bayar da rahoton `policyEffective: uniform`: firam guda ɗaya
+da aka zaɓa daga fage ba zai iya adana duka ƙarshen lokaci biyu ba. Mai kira na
+iya bayar da taga mai iyaka ta mayar da hankali (`start`/`end` na daƙiƙoƙi);
+ana daidaita iyakokin zuwa tsawon kafofin watsa labarai, ana ƙin tagogin da aka
+juya ko marasa iyaka, kuma ana aiwatar da duk manufofin ɗaukar samfuri ne kawai
+a cikin tazarar da aka daidaita. Ana haɗa tagar da aka samu a metadata na
+ɗaukar samfuri da kuma a gabatarwar bayani marar aminci, domin model na ƙasa
+su iya bambance wani yanki da aka mayar da hankali da cikakken layin lokaci.
 
-Mai da hankali kan rubutun ma'ana wani saiti ne daban, bayyananne. Yanayin bincike na `full`
-yana kiyaye firam ɗin da ake da shi kuma baya taɓa tura rubutun buƙata zuwa samfurin rubutun.
-A cikin yanayin `focused`, gada tana karanta kawai sabon `text`/`input_text`
-da mai amfani ya rubuta daga wannan Chat ko Responses container, tana daidaita shi zuwa NFC,
-tana haɗa haruffa masu sarrafawa da fararen sarari, kuma tana iyakance shi zuwa
-haruffa Unicode 500. Sakamako mara komai yana faɗuwa zuwa ainihin `full` prompt.
-Ana sanya alamar amfani a matsayin JSON a cikin wani toshe na musamman na mahallin mai amfani
-da ba a amince da shi ba kuma yana iya ba da fifiko ga cikakkun bayanai masu lura kawai;
-ba zai iya soke gargadin daban game da bin umarnin da ake gani
-ko ji a cikin kafofin watsa labarai ba. Mai da hankali kan rubutu baya taɓa gano `start`/`end`
-ko canza mai samfurin lokaci.
+Mayar da hankalin taken ma'ana wani saitin daban ne, bayyananne. Yanayin bincike
+na tsoho `full` yana kiyaye umarnin firam da ake da shi kuma ba ya taɓa tura
+rubutun buƙata zuwa model na taken bayani. A yanayin `focused`, gadar tana
+karanta kawai sabon `text`/`input_text` marar komai da mai amfani ya rubuta daga
+cikin kwantenan Chat ko Responses iri ɗaya, tana daidaita shi zuwa NFC, tana
+haɗe haruffan sarrafawa da fararen sarari, sannan ta iyakance shi zuwa code
+points na Unicode 500. Sakamako marar komai yana komawa ga ainihin umarnin
+`full`. Ana serializing alama mai amfani a matsayin JSON a cikin wani keɓaɓɓen
+toshe na mahallin mai amfani marar aminci, kuma tana iya fifita bayanan da ake
+iya gani kawai; ba za ta iya soke gargaɗi na daban game da rashin bin umarnin
+da ake gani ko ji a cikin kafofin watsa labarai ba. Mayar da hankalin rubutu ba
+ya taɓa ƙiyasta `start`/`end` ko canza mai ɗaukar samfurin lokaci.
 
-#### FU-07 shaidar sashi na tsari
+#### Shaidar sashe mai tsari ta FU-07
 
-`segment_aware` yana amfani da wucewa ta pre-analysis da aka iyakance a kan rafi na bidiyo na gida
-da aka riga aka tabbatar. Jerin tacewa da aka gyara yana fara ragewa zuwa pixels 320 a faɗi,
-yana gano canje-canjen al'amuran da lokutan daskarewa, sannan yana samfurin firam 1 a kowane daƙiƙa
-don blur, matsakaicin luma, da bayanan sarari/lokaci. An iyakance wucewa zuwa samfurori 600 na tsari,
-zaren FFmpeg/tacewa ɗaya, ka'idar `file`-kawai da jerin kwantena da aka yarda da su,
-iyakar fitarwa na tsari na 1 MiB, kuma aƙalla daƙiƙa 30 a cikin soke/ƙarewar lokaci na broker.
-Baya taɓa karɓar umarni, tacewa, hanya, ko URL daga buƙatar.
+`segment_aware` yana amfani da zagayen nazari na farko guda ɗaya mai iyaka a kan rafin bidiyon cikin gida da aka riga aka tabbatar. Da farko, jerin matattara tabbatacce yana daidaita faɗin zuwa mafi yawan pixels 320, yana gano sauye-sauyen fage da lokutan daskarewa, sannan yana ɗaukar samfuri a frame 1 a kowace daƙiƙa domin auna dusashewa, matsakaicin luma, da bayanan sarari/lokaci. An iyakance zagayen zuwa samfuran tsari 600, thread guda ɗaya na FFmpeg/matattara, jerin izini iri ɗaya na ka'idar `file` kaɗai da kwantena, iyakar fitowar tsari ta 1 MiB, da aƙalla daƙiƙa 30 a cikin soke aiki/wa'adin gama aiki na haɗin gwiwa na dillalin. Ba ya taɓa karɓar umarni, matattara, path, ko URL daga buƙatar.
 
-Ƙimar tsarin sune shaidar samfurin ƙaddara, ba fahimtar bidiyo na ma'ana ba. Ba sa gano batutuwa, ayyuka, taken, magana, ko niyyar mai amfani. Iyakokin fage da daskarewa suna samar da sassa; ɗaukar daskarewa, blur, fallasa, dalla-dalla na sararin samaniya, da canjin lokaci suna tasiri ne kawai yadda aka raba kasafin kuɗin firam 1-16 da ke akwai. An iyakance wani yanki da aka daskare gabaɗaya zuwa firam ɗaya, yayin da sassan da ba a daskare ba suna gasa don sauran kasafin kuɗin. Lokacin da iyakoki suka fi firam yawa, ana riƙe da ɗaukar lokaci guda don haka saurin yanke farko ba zai iya ɓoye dogon yanki mai bi ba. Iyakokin fage a cikin ƙudurin bincike na daƙiƙa 1 na iyakar daskarewa an haɗa su.
+Ƙimomin tsarin shaidar samfurin da za a iya maimaitawa ne, ba fahimtar ma'anar bidiyo ba. Ba sa tantance batutuwa, ayyuka, rubutun bayani, magana, ko niyyar mai amfani. Iyakokin fage da daskarewa suna samar da sassa; yawan ɗaukar daskarewa, dusashewa, haske, cikakken bayanin sarari, da sauyin lokaci kawai suke tasiri yadda ake rarraba kasafin frame 1–16 da ake da shi. Ana iyakance sashe da ya daskare gaba ɗaya zuwa frame guda ɗaya, yayin da sassan da ba su daskare ba suke fafatawa don sauran kasafin. Idan iyakoki sun fi frames yawa, ana riƙe da ɗaukar lokaci gaba ɗaya daidai-da-daidai domin saurin sauye-sauyen farko kada su ɓoye dogon sashe na ƙarshe. Ana haɗe iyakokin fage da ke cikin ƙudurin nazari na daƙiƙa 1 daga iyakar daskarewa.
 
-Filtoci da suka ɓace, shaidar da ba ta dace ba/mara komai, kuskuren mai gano, ko ƙayyadaddun lokacin ƙarewar bincike na farko suna buɗewa zuwa ainihin manufar tsakiyar wuri guda. Katsewar mai kira ko ƙarshen mai shiga ba ya buɗewa: yana kawo ƙarshen aikin da ke gudana, yana hana cire firam na gaba, kuma an cire bishiyar wucin gadi mai zaman kanta a cikin `finally`.
+Rashin matattara, shaida marar tsari/mara komai, kuskuren mai ganowa, ko ƙarewar lokacin nazari na farko mai iyaka suna komawa kai tsaye ga ainihin manufar tsakiyar lokaci mai daidaito. Soke aiki daga mai kira ko wa'adin dillali ba ya yin wannan komawar: yana dakatar da subprocess da ke gudana, yana hana cire frames daga baya, kuma ana cire bishiyar wucin-gadi ta sirri a cikin `finally`.
 
-`scripts/perf/video-bridge-fu07-eval.ts` yana samar da ainihin kayan aikin FFmpeg don adana kuɗin kiran taken bayan cirewa, rarraba kasafin kuɗin motsi mai yawa, shaidar blur/fallasa/SI-TI, saurin yanke tare da dogon wutsiya, da kuma ƙarya masu laushi. Yana yin rikodin lokacin bango na bincike na farko kuma, inda `/usr/bin/time` ke samuwa, CPU na yaro da mafi girman RSS. Binciken ingancinsa sune oracles na tsari kawai. Ingancin samfurin taken na gaske ya kasance `HOLD` saboda wannan kayan aikin ba shi da wani wuri mai izini ko alkali mai daskarewa. Adana kuɗi kuma ya kasance `HOLD` sai dai idan `--caption-cost-per-call-usd` ya samar da ƙididdigar kiran da aka bayyana a fili; rubutun ba ya taɓa ƙirƙira ko ɗaya daga cikin sakamakon.
+`scripts/perf/video-bridge-fu07-eval.ts` yana samar da kayan gwaji na FFmpeg na gaske da za a iya maimaitawa domin auna raguwar kiran samar da rubutun bayani bayan cire maimaituwa, rarraba kasafin motsi mai yawa, shaidar dusashewa/haske/SI-TI, saurin sauye-sauyen fage tare da dogon ɓangaren ƙarshe, da sakamakon ƙarya na shuɗewar hoto a hankali. Yana yin rikodin lokacin ainihi na nazarin farko kuma, idan `/usr/bin/time` yana samuwa, CPU na child da mafi girman RSS. Binciken ingancinsa ma’aunan tsari ne kawai. Ingancin samfurin samar da rubutun bayani na gaske yana ci gaba da kasancewa `HOLD` saboda wannan kayan gwajin ba shi da endpoint mai izini ko alkali tabbatacce. Haka kuma tanadin kuɗi yana ci gaba da kasancewa `HOLD` sai idan `--caption-cost-per-call-usd` ya bayar da bayyanannen ƙimar kuɗi mai kyau ga kowane kira; script ɗin ba ya ƙirƙirar ɗayan waɗannan sakamakon na ƙarya.
 
-Kowane firam yana iyakance zuwa 4 MiB, duk firam ɗin da ba a sarrafa ba tare zuwa 23 MiB, kuma martanin mai shiga da aka tsara zuwa 32 MiB. An cire babban fayil na wucin gadi mai zaman kansa a cikin `finally`. OmniRoute baya haɗa FFmpeg kuma baya karɓar hanyar aiwatarwa ta musamman. Kafin taken, gadar tana amfani da wucewar cirewa ta gani mai ra'ayin mazan jiya: kowane JPEG an rage shi zuwa buffer mai launin toka 16x16 kuma ana kwatanta shi ne kawai da firam ɗin ƙarshe da aka riƙe. Don kasafin kuɗin taken da aka nema sama da firam ɗaya, cirewa yana samar da ƙayyadaddun rukunin 'yan takara har sau biyu na wannan kasafin kuɗin kuma ba fiye da firam 16 ba. Ana amfani da iyakar da aka nema ne kawai bayan cirewa, tare da zaɓaɓɓun 'yan takara na farko da na ƙarshe da aka adana yayin ragewa na ƙarshe lokacin da kasafin kuɗin ya kai aƙalla biyu. Manufar `grayscale-16x16-mean-cells-v2` mai sigar tana amfani da mafi girman matsakaicin luma delta da kuma rabon sel ɗin thumbnail waɗanda aka daidaita delta ɗinsu ya kai aƙalla 0.05. Matsakaicin kwafi shine ma'auni 0.04, wanda aka zaɓa don tsinkaya maimakon a bayyana shi azaman saitin lokacin gudu. Wannan siginar babban bambanci na biyu yana adana ƙananan motsi da canje-canjen rubutu da ake gani waɗanda kwatancen matsakaici kawai zai iya ɓoyewa. Kuskuren kwatantawa ko mai yanke hukunci suna buɗewa kuma suna riƙe da ɗaukar hoto. Metadata na fitarwa yana raba 'yan takara da aka ciro, firam ɗin da aka yi amfani da su cikin nasara, da kuma kwafin gani da aka jefar.
+An iyakance kowane frame zuwa 4 MiB, dukkan raw frames tare zuwa 23 MiB, sannan amsar dillali da aka serialized zuwa 32 MiB. Ana cire kundin wucin-gadi na sirri a cikin `finally`. OmniRoute ba ya haɗa FFmpeg kuma ba ya karɓar path na executable na musamman. Kafin samar da rubutun bayani, bridge ɗin yana aiwatar da matakin cire maimaituwar gani cikin taka-tsantsan: ana rage kowane JPEG zuwa buffer na grayscale mai 16×16, sannan a kwatanta shi kawai da frame na ƙarshe da aka riƙe. Idan kasafin rubutun bayani da aka nema ya fi frame guda ɗaya, cirewar tana samar da tarin candidates mai iyaka wanda bai wuce ninki biyu na kasafin ba kuma bai taɓa wuce frames 16 ba. Ana amfani da iyakar da aka nema ne kawai bayan cire maimaituwa, tare da kiyaye candidates na farko da na ƙarshe da aka zaɓa yayin rage adadin ƙarshe idan kasafin ya kai aƙalla biyu. Manufar mai siga
+`grayscale-16x16-mean-cells-v2` tana amfani da mafi girma tsakanin bambancin matsakaicin luma da rabon cells na thumbnail waɗanda normalized delta ɗinsu ya kai aƙalla 0.05. Iyakar ɗaukar abu a matsayin maimaitacce ita ce ƙimar dindindin 0.04, wadda aka zaɓa domin sauƙin hasashen aiki maimakon a bayyana ta a matsayin saitin lokacin gudana. Wannan sigina na biyu mai babban bambancin haske yana kiyaye ƙananan motsi da sauye-sauyen rubutu da ake iya gani waɗanda kwatanci mai amfani da matsakaici kaɗai zai iya ɓoyewa. Kurakuran comparator ko decoder suna komawa ga barin bayanai su wuce kuma suna kiyaye ɗaukar lokaci gaba ɗaya. Metadata na fitarwa yana ware candidates da aka cire, frames da aka yi amfani da su cikin nasara, da maimaituwar gani da aka yar.
 
-Wani ɓangaren bidiyo da aka yiwa alama a fili na iya neman takardar tuntuɓar da aka yiwa alama da lokaci. Gadar tana gina grid JPEG mai ginshiƙai 4, firam 16 a mafi yawa. Kowane sel mai pixels 512 yana ƙona lokacin tushensa zuwa wani yanki mai ƙarfi a ƙasa, yayin da waɗannan lokutan suka kasance a cikin metadata na rubutu don haɗin gwiwa da bincike na gaba. Cikakken JPEG ya kasance iyakance zuwa 32 MiB. Idan `sharp` ba zai iya yanke ko haɗa grid ba, gadar tana komawa ga firam ɗin JPEG ɗaya; katsewar abokin ciniki har yanzu yana yaduwa ta hanyar aikin takardar.
+Sashen bidiyo da aka yi wa alama a bayyane yana iya neman contact sheet mai timestamp. Bridge ɗin yana gina grid na JPEG mai ginshiƙai har 4 da frames har 16. Kowane cell mai pixels 512 yana saka timestamp na tushensa a cikin band na ƙasa mai babban bambancin haske, yayin da timestamps iri ɗaya suke ci gaba da kasancewa cikin metadata na rubutu domin haɗawa da binciken da za a yi daga baya. Cikakken JPEG yana ci gaba da kasancewa ƙarƙashin iyakar 32 MiB. Idan `sharp` ba zai iya decode ko haɗa grid ɗin ba, bridge ɗin yana komawa ga frames na JPEG ɗaiɗaiku; soke aiki daga client har yanzu yana yaɗuwa ta cikin aikin sheet ɗin.
 
-Shaidar haɓakawa ta bambanta da gangan daga microbenchmark na haɗin gwiwar roba. `scripts/perf/video-bridge-contact-sheet-eval.ts` yana bayyana tsarin A/B mai sigar schema don ainihin samfuran hangen nesa masu dacewa da OpenAI. Yana auna alamomin da mai bayarwa ya ruwaito, jinkirin bango na ƙarshe zuwa ƙarshe (ciki har da haɗin takardar), adadin kiran samfurin, da riƙe gaskiyar da aka bayyana a cikin bayanan. Ba a rubuta martanin samfurin da ba a sarrafa ba zuwa rahoton; kawai SHA-256 digests da ID ɗin gaskiyar da aka daidaita an riƙe su. Kayan aikin baya yin kiran cibiyar sadarwa ko kiran samfurin da aka biya sai dai idan an wuce `--execute-real` kuma an saita `--model`, `OMNIROUTE_BASE_URL`, da `OMNIROUTE_API_KEY`. Ba tare da wannan ainihin gudu na musamman ba, hukuncin da za a iya karantawa na inji ya kasance `HOLD`; ma'aunin biyan kuɗi/adadin kira na roba kawai ba shaidar haɓakawa ba ne.
+An ware shaidar ɗaukaka mataki da gangan daga microbenchmark na haɗin roba. `scripts/perf/video-bridge-contact-sheet-eval.ts` yana ayyana kayan gwajin A/B mai schema mai siga domin samfuran gani na gaske masu dacewa da OpenAI. Yana auna tokens da provider ya bayar da rahotonsu, jinkirin lokaci daga farko zuwa ƙarshe (ciki har da haɗa sheet), adadin kiran samfuri, da riƙe hujjojin da manifest ya ayyana. Ba a rubuta raw amsoshin samfuri cikin rahoton; ana riƙe SHA-256 digests da matched fact IDs kawai. Kayan gwajin ba ya yin kiran network ko samfurin biyan kuɗi sai idan an bayar da `--execute-real` kuma an saita `--model`, `OMNIROUTE_BASE_URL`, da `OMNIROUTE_API_KEY`. Idan ba a yi wannan bayyanannen gwajin na gaske ba, hukuncinsa mai sauƙin karantawa ta na’ura yana ci gaba da kasancewa `HOLD`; ma’aunin payload/adadin kira na roba kaɗai ba shaidar ɗaukaka mataki ba ce.
 
-Masu kira na iya haɗa zaɓi na `transcript.cues` zuwa wani ɓangaren bidiyo da aka tallafa lokacin da suka riga sun mallaki rubutu da aka daidaita. Kowane cue dole ne ya ɗauki `text`, ƙayyadaddun lokaci `start`/`end` a cikin tsawon da aka bincika, da kuma `source` da aka ba da izini (`client`, `embedded`, ko `audio-bridge`); `confidence` yana da tsoho zuwa `1` kuma dole ne ya kasance tsakanin `0` da `1`. An haɗa ainihin cues masu kwafi. OmniRoute baya taɓa fara rubutawa daga wannan metadata: an kwafi cues da aka tabbatar a cikin sakamakon da aka bayyana tare da tushe, amincewa, da lokaci, kuma ana nuna su azaman lura da ba a amince da su ba tare da taken firam. Rubutun da ba daidai ba, wanda ba a cikin kewayon ba, ko wanda ba shi da tushe an ƙi shi maimakon a haɗa shi cikin rafin taken. Filin `source` a halin yanzu mai kira ne ya bayyana shi, ba mai sabar ya tabbatar ba: OmniRoute yana tabbatar da cewa ƙimar tana ɗaya daga cikin igiyoyi uku da aka yarda, amma har yanzu baya tabbatar da cewa alamar `embedded` ko `audio-bridge` ta fito daga cirewar da sabar ke mallaka. Bi da `source` azaman alamar da ba a amince da ita ba har sai an tabbatar da hakan; kada ku gina shawarwarin izini a kansa.
+Masu kira za su iya haɗa array na `transcript.cues` na zaɓi zuwa sashen bidiyo mai goyon baya idan suna da rubutun da aka riga aka daidaita. Dole kowane cue ya ƙunshi `text`, tazarar `start`/`end` mai iyaka da ke cikin tsawon lokacin da aka bincika, da `source` da ke cikin jerin izini (`client`, `embedded`, ko `audio-bridge`); ƙimar asali ta `confidence` ita ce `1` kuma dole ta kasance tsakanin `0` da `1`. Ana haɗa cues masu cikakken maimaituwa. OmniRoute ba ya taɓa fara transcription daga wannan metadata: ana kwafe cues da aka tabbatar zuwa sakamakon da aka bayyana tare da source, confidence, da interval, sannan a nuna su a matsayin bayanan lura marasa aminci tare da rubutun bayanin frames. Ana ƙin rubutu marar inganci, wanda ya fita daga iyaka, ko marar tushen asali maimakon a gauraya shi cikin rafin rubutun bayani. Duk hanyoyin transcript biyu na request-body suna daidaita provenance da aka bayar zuwa `client`, ciki har da labels na `embedded` ko `audio-bridge` da aka ayyana da kai. Adapter mallakin uwar garke ne kawai zai iya sanya waɗannan amintattun labels ta hanyar argument na cikin code kaɗai mai suna `trustedSource`; field na JSON na buƙata ba zai iya isa ga wannan argument ba. Rubutun transcript yana ci gaba da kasancewa abun ciki marar aminci da aka samo daga media, ba tare da la’akari da provenance ɗinsa ba, kuma kada ya taɓa ƙayyade izini.
 
-Mai kiran waya na gaba zai iya samar da wata hanyar `audioTranscript` da aka riga aka ba izini don bidiyo ɗaya. Haɗin gwiwar yana gudanar da lura da gani da sauti a ƙarƙashin lokaci ɗaya da siginar soke, yana tsara su a kan lokaci ɗaya, yana haɗa kwafin daidai, kuma yana ba da rahoton sakamako na ɓangare idan gefe ɗaya kawai ya yi nasara. Wani `audioTranscript` mara inganci yana komawa ga wannan sakamako na ɓangare — ana kiyaye bayanin gani kuma reshen sauti yana rubuta lambar gazawa mai tsabta — maimakon soke dukkan bidiyon. Ana kiyaye samuwa ga kowane reshe, alamar ɓangare, da lambobin gazawa masu tsabta a cikin sakamakon da aka bayyana, a cikin metadata na guardrail (`audioFusionRuns`/`audioFusionPartials`/`audioFusionFailureCodes`), a cikin metadata na cache na sakamako, da kuma a cikin masu ƙidaya haɗin gwiwar gada. Hanyar Video Bridge ta asali ba ta kiran magana-zuwa-rubutu ko zazzage kwafin kafofin watsa labarai na biyu; ba tare da wannan hanyar bayyananne ba, yana kasancewa bidiyo-kawai.
+Mai kira na ci-gaba na iya samar da waƙar `audioTranscript` don bidiyo ɗaya;
+ana ɗaukar ta a matsayin rubutun da abokin ciniki ya samar, ba hujjar cewa sabar ta yi kwafin magana zuwa rubutu ba.
+Mahadar haɗawa tana gudanar da abubuwan lura na gani da na sauti a ƙarƙashin
+wa’adi guda da siginar dakatarwa guda, tana jera su a kan tsarin lokaci na bai ɗaya, tana haɗe
+kwafi iri ɗaya kacokan, sannan tana bayar da sakamako na ɓangare idan gefe ɗaya kawai ya yi nasara.
+`audioTranscript` marar inganci yana sauya zuwa wannan sakamakon na ɓangare — ana
+riƙe bayanin gani, yayin da reshen sauti ke rubuta lambar gazawa da aka tsaftace —
+maimakon a gaza bidiyon gaba ɗaya. Samuwar kowane reshe, tutar ɓangare,
+da lambobin gazawa da aka tsaftace ana kiyaye su a cikin sakamakon da aka bayyana, a cikin
+metadata na kariya (`audioFusionRuns`/`audioFusionPartials`/
+`audioFusionFailureCodes`), a cikin metadata na ma’ajiyar-cache ta sakamako, da kuma a cikin
+ƙididdigogin haɗawa na bridge. Tsohuwar hanyar Video Bridge ba ta kiran speech-to-text
+ko sauke kwafin media na biyu; ba tare da wannan waƙar da aka bayar a sarari ba, tana ci gaba
+da zama ta bidiyo kawai.
 
-**Rike rubutun (#12150 P1).** Wannan yana aiki kai tsaye duk lokacin da Video Bridge (wanda shi kansa zaɓi ne) ya nuna alamar rubutun — babu wata alamar riƙewa ta daban. Lokacin da buƙata ta nuna kowace alamar rubutun (wani `transcript` da mai kira ya bayyana ko wani `audioTranscript` da aka haɗa), guardrail yana yi masa alama `videoBridgeObserved` kuma yana samar da inuwar bayanin bidiyo da aka gyara — wani nuni iri ɗaya inda aka maye gurbin jikin rubutu na kowace alama da `[redacted-video-transcript]`, wanda aka gina ta hanyar maye gurbin filin alamar da aka tsara kafin a haɗa zaren (ba ta hanyar nazarin rubutun da aka daidaita ba, don haka babu abun ciki na alama — na gaba ko na yau da kullun, gami da jikin da ke ɗauke da `]` kamar `[inaudible]`/`[music]` — da zai iya rayuwa). Jikin buƙatar log na kira da aka adana yana musanya kowane ɓangaren rubutu da aka samo daga bidiyo da wannan inuwar da aka gyara, wanda aka daidaita ta daidaiton abun ciki; ana sake karanta anka na `fullText` daga nauyin guardrail na pre-call da aka gama, don haka daidaitawar har yanzu yana nasara bayan guardrails na sarkar na gaba (masu rufe PII da takardun shaida, fifiko 10/95) sun sake rubuta rubutun bayanin a wurin kuma bayan allurar tsarin-gaggawa/mika/ƙwaƙwalwa ta sake tsara jerin saƙonni. Jikin da aka aika sama zuwa samfurin ba a canza shi ba. Buƙatar da aka lura da ita kuma ba ta cika Memory mai ɗorewa ba (an tsallake duka cirewa da aka samo daga buƙata da kuma daga amsa), don haka amsar samfurin da kansa ba zai iya maimaita rubutun rubutun zuwa Memory ba.
+**Riƙe kwafin magana (#12150 P1).** Wannan yana aiki ta atomatik a duk lokacin da
+Video Bridge (wanda shi kansa sai an zaɓi amfani da shi) ya nuna alamar kwafin magana — babu wata
+tutar riƙewa ta daban. Lokacin da buƙata ta nuna kowace alamar kwafin magana (wani `transcript`
+da mai kira ya ayyana ko wani `audioTranscript` da aka haɗa), kariyar tana yi masa alamar
+`videoBridgeObserved` sannan ta samar da inuwa da aka ɓoye bayanai daga bayanin bidiyon —
+nuni iri ɗaya wanda aka maye gurbin jikin rubutu marar tsari na kowace alama da
+`[redacted-video-transcript]`, ta hanyar maye gurbin filin alama mai tsari
+kafin a haɗa zaren rubutu (ba ta hanyar nazarin shimfiɗaɗɗen rubutu ba, don haka babu wani abun cikin alama
+— na ƙeta ko na yau da kullum, har da jikin da ke ɗauke da `]` kamar
+`[inaudible]`/`[music]` — da zai tsira). Jikin buƙatar rajistar-kira da ake adanawa yana musanya
+kowane ɓangaren rubutu da aka samo daga bidiyo da wannan inuwar da aka ɓoye bayanai, ta hanyar daidaita
+abun ciki; ana sake karanta maƙalar `fullText` daga cikakken payload na kariyar kafin-kira,
+saboda haka daidaitawar har yanzu tana yin nasara bayan kariyoyin sarkar da ke biyo baya (masu ɓoye PII da
+bayanan shaida, fifiko 10/95) sun sake rubuta bayanin a wurinsa da kuma
+bayan shigar da system-prompt/handoff/memory ta sake fasalin jerin saƙonni. Jikin
+da ake aikawa zuwa sama ga model bai canza ba. Buƙatar da aka lura da ita kuma ba ta cika
+Memory mai ɗorewa ba (ana tsallake fitar da bayanai daga buƙata da kuma daga amsa),
+don haka amsar model ɗin kanta ba za ta iya maimaita rubutun kwafin magana zuwa Memory ba.
 
-Ƙarin kwafin da aka riƙe suna amfani da siginar buƙatar da aka lura da ita ɗaya. Hoton buƙatar abokin ciniki na pre-guardrail, buƙatar da ke jiran aiki a cikin ƙwaƙwalwa, da log na buƙatar da aka ƙi da wuri suna maye gurbin filayen rubutun a cikin sassan bidiyo; ana gyara umarnin zaren da matakan bututun mai suka haɗa da kuma mika mahallin a wurin da aka adana jikin buƙatar. Alamar `video_content_removed` da aka adana tana sa ci gaba na `previous_response_id` ya gaza rufewa maimakon sake gina rubutun da aka jefar da gangan. Idan buƙatar da aka lura da ita ta rasa inuwar gyarawa ta kowane ɓangare kafin yin log, ko ma ɗaya daga cikin inuwar bidiyo da yawa ta kasa daidaitawa bayan canje-canje na buƙata na gaba, an cire jikin buƙatar da aka riƙe gaba ɗaya maimakon riƙe rubutun da aka gyara a ɓangare.
+**Filayen bidiyo na asali (#12430).** Lokacin da aka kunna bridge kuma ba a san ko akwai tallafin bidiyo na native ba, ko kuma babu shi, filayen `transcript`/`audioTranscript` da aka ayyana su ma suna kunna `videoBridgeObserved`, ko da bayan gazawar bayanin ko iyakar `maxVideos`. `null` da zaruruwan rubutu marasa komai suna ƙirguwa; filayen da ba su nan da metadata marar alaƙa da bidiyo ba sa ƙirguwa. Kwafin da aka riƙe suna ɓoye waɗannan filayen ko su bar buƙatar gaba ɗaya, sannan ana kewaye caches/Memory.
 
-Don buƙatar da aka lura da ita, amsar samfurin na iya faɗar kowane ɓangare na rubutun ba tare da iyakar alamar da aka tsara ba. Saboda haka an maye gurbin `responseBody` na log ɗin kira da aka adana da alamar cirewa; ba a riƙe cikakken kayan aikin bututun mai (wanda zai iya haɗawa da jikin sama/abokin ciniki da guntun rafi). Cache na ma'ana, idempotency, da sake kunna tunani suna tsallake karatu da rubutu don wannan buƙatar. Buƙatar mai bayarwa da amsar da abokin ciniki ke gani sun kasance ba a canza su ba. An cire bayanan keepalive na farko daga buffer na wucin gadi lokacin da aka cire cikakken kayan aikin. Gargadin EventStream mara kyau na Kiro yana ba da rahoton adadin baiti na nauyi kawai, ba abun ciki ko kuskuren JSON parser ba. Wannan baya nufin cewa an bincika kowane bincike na mai bayarwa/plugin da ba shi da alaƙa; ana bin diddigin babban tsabtace ramin da aka riƙe a #11658.
+A waɗannan hanyoyin fallback, ingantattun alamomin mai kira suna zama ɓangarorin `text`/`input_text`
+da ake tallafawa maimakon filayen provider marasa ma’auni. Duk waƙoƙin biyu da aka samar
+a buƙata suna ci gaba da kasancewa abubuwan lura na `client` marasa amana, tare da gargaɗi a sarari cewa ba a
+bayyana bidiyon ba kuma ba a tabbatar da timestamps da media ba. Kasafin alamomi 256/64-KiB na jimilla
+da na kowace alama da ake da su yanzu suna aiki a kan waƙoƙin biyu tare;
+timestamps dole ne su dace da iyakar broker ta daƙiƙa 600 da duk wata taga ta mayar da hankali
+da aka bayar. Ana watsar da waƙoƙi marasa inganci, ba a tura su a matsayin rubutu na son rai ba; har yanzu ana iya
+amfani da ingantacciyar waƙar ’yar’uwa sai dai idan kasafin haɗinsu ya wuce kima. Filayen null/marasa komai
+ba sa ƙara rubutu. Wannan fallback ba ya ƙara ɗauko media ko yin transcription.
+Ana cire filayen faɗaɗa kwafin magana daga maɗaukin bidiyo na fallback da abubuwan
+`video_url`/`source` nasa. Allowlist na wire na OpenAI yana ci gaba da kasancewa tsaurara; maɗaukan bidiyo
+da ba a san tallafin native ɗinsu ba suna ci gaba da kasancewa, kuma targets da aka sani na rubutu-kawai suna riƙe alamomi masu aminci.
+Inuwoyin ɓoye bayanai masu tsari suna kare rubutun kwafin magana da aka ƙara, yayin da
+asalin buƙatar mallakar mai kira ba ta canza ba. Targets masu tallafin native da
+bridges da aka kashe suna riƙe halin kewaye da suke da shi yanzu.
 
-Rayuwar ciki ta `/api/modality-bridge/video/drilldown` wani yanki ne na cache daban, mai amfani da loopback/token-authenticated. Kowace aiki kuma tana buƙatar ID na babban mai amfani mai ɓoye. Kafin a kunna mai kiran samarwa, dole ne ya samo wannan ID daga mai haya da aka tabbatar kuma kada ya taɓa tura ƙimar da abokin ciniki ya zaɓa. Maɓallan cache suna haɗa wannan babban mai amfani zuwa ID na zama na asali da na bidiyo, suna adana maɓallan su da aka samo daga SHA-256 kawai, kuma suna iyakance duka karatu da sharewa ga babban mai amfani ɗaya. Cache yana adana mafi yawan firam 16 na JPEG da aka samo a kowane shigarwa, yana soke su bayan mintuna goma, kuma yana goyan bayan karatu na `start`/`end` mai iyaka ko sharewar zama bayyananne.
+Ƙarin kwafin da aka riƙe suna amfani da siginar buƙatar da aka lura da ita iri ɗaya. Snapshot na asalin
+buƙatar abokin ciniki kafin-kariya, buƙatar da ke jiran aiki a cikin ƙwaƙwalwa, da rajistar
+buƙatar da aka ƙi da wuri suna maye gurbin filayen kwafin magana a cikin ɓangarorin bidiyo bisa tsari;
+string prompts da matakan pipeline da context handoff suka samar ana ɓoye bayanansu
+a maɓuɓɓugar adana-jikin-buƙata. Alamar `video_content_removed` da aka adana
+tana sa ci-gaban `previous_response_id` ya gaza cikin aminci maimakon sake gina
+rubutun da aka watsar da gangan. Idan buƙatar da aka lura da ita ta rasa
+inuwa ta ɓoye bayanai ta kowane ɓangare kafin yin rajista, ko ma ɗaya daga cikin inuwoyin bidiyo da dama
+ya kasa daidaituwa bayan sauye-sauyen buƙata na baya, ana barin jikin buƙatar da za a riƙe
+gaba ɗaya maimakon riƙe kwafin magana da aka ɓoye bayanai a wani ɓangare kawai.
 
-Kowane babban mai amfani yana iyakance ga shigarwa 16 da 64 MiB na bayanan JPEG na asali. Waɗannan iyakokin sun bambanta da iyakar duniya na shigarwa 64/256 MiB: matsin lamba na kason babban mai amfani yana fitar da shigarwar da ba a yi amfani da su ba kwanan nan na wannan babban mai amfani kafin a yi la'akari da fitarwa na LRU na duniya. Ana share shigarwar da suka ƙare daga duka lissafin babban mai amfani da na duniya akan aikin cache, yayin da soke da gazawar tabbatarwa ba sa yin wani maye gurbin ɓangare.
+Ga buƙatar da aka lura da ita, amsar model na iya kawo kowane sashe na
+kwafin magana ba tare da iyakar alama mai tsari ba. Saboda haka ana maye gurbin
+`responseBody` na rajistar-kira da ake adanawa da alamar barin abu; ba a riƙe
+cikakken artifact na pipeline (wanda zai iya haɗawa da jikin upstream/client da stream chunks) ba.
+Caches na semantic, idempotency, da reasoning-replay suna kewaye karantawa da rubutawa
+ga wannan buƙatar. Buƙatar provider da amsar da abokin ciniki ke gani ba su canza ba.
+Ana zubar da bytes na keepalive na farko daga buffer na wucin gadi lokacin da aka bar cikakken artifact.
+Gargaɗin EventStream marar tsari na Kiro yana bayar da rahoton adadin bytes na payload kawai, ba abun cikinsa ko
+asalin kuskuren JSON parser ba.
+Wannan ba ikirarin cewa an duba duk wani diagnostic na provider/plugin marar alaƙa ba ne;
+ana bibiyar faɗaɗa binciken maɓuɓɓugan riƙewa a #11658.
 
-Cache yana ƙin Base64 mara asali, ƙarin padding, kafofin watsa labarai marasa JPEG, JPEGs marasa kyau ko guntaye, da JPEGs da ke samar da gargadi yayin da aka iyakance cikakken hoton `sharp` decode. Yana sake canza kowane hoton da aka karɓa zuwa JPEG na asali, yana samo faɗi da tsayi daga baiti da aka yanke maimakon amincewa da filayen mai kira, kuma yana jefar da duk wani baiti na polyglot da ke biyo baya maimakon riƙe su. Kawai buffer da aka matsa na asali mai iyaka ne ake caji ga duka kason. Iyakar waya ta JSON ta haɗa da ƙarin farashin Base64 don iyakar shigarwa da aka yanke na 32 MiB. Kowace derivation da aka adana tana rubuta ingantaccen tsarin/ƙudurin JPEG, manufar samfur, sigar derivation, lokacin ƙirƙira, hash na abun ciki da sabar ta lissafta, da kuma hash na iyaye da aka haɗa tare da hash na abun ciki na iyaye na mai kiran da aka amince da shi. Ana duba soke tsakanin matakan decode/hash na asynchronous kafin a yi atomic cache commit.
+Tsarin rayuwar cikin gida na `/api/modality-bridge/video/drilldown` wani keɓantaccen tushen cache ne da ake samun damar sa ta loopback/tantancewar token. Kowace aiki kuma tana buƙatar ingantaccen ID na principal wanda ba ya bayyana ma’anarsa. Kafin a ba wani mai kira na production damar amfani da shi, dole ne ya samo wannan ID daga tenant ɗin da aka tantance, kuma kada ya taɓa tura ƙimar da client ya zaɓa. Maɓallan cache suna haɗa wannan principal da ingantattun ID na session da video-reference, suna adana maɓallan da aka samo daga SHA-256 kawai, sannan suna iyakance karatu da gogewa ga principal ɗin guda. Cache ɗin yana adana aƙalla firamomin JPEG 16 da aka samar ga kowace entry, yana sa su ƙare bayan mintuna goma, kuma yana goyon bayan karatu mai iyaka ta `start`/`end` ko gogewar session kai tsaye.
 
-Wannan yanki bai riga ya haɗa mai samarwa zuwa hanyar ba kuma baya
-bayar da zaɓin bambance-bambancen da yawa. Buƙatar gadar Bidiyo mai bayyane
-saboda haka baya haifar da ƙarin aiki, yayin da tushen mai haya da
-cikakken tsarin rayuwar FU-08 mai yawa ya kasance aiki mai biyo baya
-maimakon a rubuta shi azaman cikakken hali.
+Kowane principal yana da iyaka ta entries 16 da MiB 64 na ingantattun bayanan JPEG. Waɗannan iyakoki sun bambanta da iyakar duniya ta entries 64/MiB 256: matsin quota na principal yana fitar da entries na wannan principal kaɗai waɗanda aka fi daɗewa ba a yi amfani da su ba, kafin a yi la’akari da fitarwa ta LRU ta duniya. Ana cire entries da suka ƙare daga lissafin principal da na duniya yayin ayyukan cache, yayin da sokewa da gazawar validation ba sa commit ɗin wani partial replacement.
 
-An rubuta firam ɗin a jere tare da samfurin Bidiyo da aka saita. Bidiyo mara komai
-override yana gadar saitin Vision; idan duka biyun ba komai bane, Vision
-auto-router yana zaɓar samfurin da ke iya gani. Rubutun da suka yi nasara
-suna maye gurbin ainihin ɓangaren tare da tsayayyen `[Video description:` prefix wanda kuma
-yana nuna rubutun a matsayin lura da aka samo daga kafofin watsa labarai mara amfani kuma yana gaya wa samfuran
-na gaba kada su bi umarnin da aka samu a cikin kafofin watsa labarai. Maɓallan cache na firam-rubutu
-sun haɗa da baitocin JPEG, umarni, lokaci, da samfurin da ya dace; kawai rubutun da suka yi nasara
-ana adana su. Abubuwan cache suna riƙe da ainihin samfurin mai samarwa mai nasara,
-ciki har da samfurin koma baya; gadar tana ba da rahoton `mixed` lokacin da firam daban-daban
-aka samar da su ta samfuran daban-daban. Cache hit yana sake amfani da wannan asalin mai samarwa
-maimakon sake sanya masa suna azaman tsarin hanyar da aka nema. Sakamakon bidiyo gabaɗaya
-cache yana da maɓalli akan kowane shigarwa da ke canza fitarwa — umarni, samfurin da ya dace,
-ka'idar samfuri, adadin firam, yanayin nazarin ma'ana, SHA-256
-sawun yatsa na alamar mai da hankali, taga mai da hankali, `transcript`,
-`audioTranscript`, da alamar takardar tuntuɓar — don haka canza kowane ɗayan waɗannan
-girman shine cache miss, ba sake amfani da tsohon ba. Sigar ka'idar dedup na gani,
-ƙofar, da adadin firam ɗin da aka iyakance suma suna bayyane a cikin maɓallin cache na sakamako
-da metadata; canjin ka'ida saboda haka ba zai iya sake amfani da tsohon
-bayanin bidiyo gabaɗaya ba. Metadata na sakamako-cache v4 yana riƙe da yanayin da sawun yatsa,
-ba ainihin aikin mai amfani ba. Metadata na Guardrail yana ba da rahoton duka
-yanayin nazarin da aka nema da kuma wanda ya dace; yanayin `focused` da aka nema ba tare da
-rubutun mai amfani mai amfani ba ana ba da rahoton shi azaman `full`.
+Cache ɗin yana ƙin Base64 wanda ba canonical ba, padding mai yawa, media wanda ba JPEG ba, JPEG marar tsari ko wanda aka yanke, da JPEG da ke haifar da gargaɗi yayin cikakken decode na hoto mai iyaka ta `sharp`. Yana sake encode kowane hoto da aka karɓa zuwa canonical JPEG, yana samo faɗi da tsawo daga bytes da aka decode maimakon amincewa da fields na mai kira, sannan yana watsar da duk trailing polyglot bytes maimakon riƙe su. Bounded canonical compressed buffer kaɗai ake ƙididdigawa a cikin quota biyun. Iyakar JSON ta wire tana haɗa da ƙarin nauyin Base64 don decoded-input ceiling na MiB 32. Kowace
+derivation da aka adana tana rubuta JPEG format/resolution da aka validate, sampling policy,
+derivation version, lokacin ƙirƙira, content hash da server ya ƙididdiga, da hashed parent
+reference tare da parent-content hash na amintaccen mai kira. Ana duba sokewa
+tsakanin matakan decode/hash na asynchronous kafin atomic cache commit.
 
-Guardrail yana fitar da kowane ɓangaren bidiyo da aka tallafa amma baya bayyana fiye da
-`modalityBridgeVideoMaxVideos`. Don manufa da aka tabbatar tana da
-`supportsVideo === false`, bidiyo da suka gaza da waɗanda suka wuce iyaka suna zama alamun rubutu
-mai aminci don haka babu bidiyo mara kyau da ya tsira. Lokacin da ba a san iyawa ba, waɗannan
-ɓangarorin suna kasancewa ba a taɓa su ba. Manufofin da ke da `supportsVideo === true` suna wucewa
-gadar. Siginar soke buƙatar abokin ciniki tana yaɗuwa ta hanyar saukewa, jerin broker,
-ƙananan matakai, da kiran rubutu; sokewa suna tsayawa tsakanin bidiyo kuma ba sa taɓa
-faduwa zuwa kafofin watsa labarai mara kyau.
+Wannan tranche bai haɗa production producer da route ɗin ba tukuna, kuma ba ya
+samar da zaɓin variant na multi-resolution. Saboda haka hanyar request ta Video Bridge
+mai bayyana ba ta jawo wani ƙarin aiki, yayin da tenant-bound principal derivation da
+cikakken lifecycle na multi-resolution na FU-08 suke ci gaba da kasancewa ayyukan bin-baya a sarari
+maimakon a rubuta su a matsayin halayen da aka kammala.
 
-Saitunan lokacin aiki suna da goyan bayan DB kuma an tabbatar da Zod:
+Ana yi wa firamomi caption bi da bi ta amfani da Video model da aka saita. Video
+override marar komai yana gaji saitin Vision; idan dukansu babu komai, Vision
+auto-router yana zaɓar vision-capable model mai aiki. Captions da suka yi nasara
+suna maye gurbin original part da tsayayyen prefix na `[Video description:` wanda kuma
+ke nuna rubutun a matsayin observation marar aminci da aka samo daga media, kuma yana
+faɗa wa downstream models kada su bi umarnin da aka samu a cikin media. Maɓallan
+frame-caption cache suna haɗa JPEG bytes, prompt, timestamp, da effective model; captions
+da suka yi nasara kaɗai ake adanawa a cache. Cache entries suna riƙe ainihin producer model
+da ya yi nasara, ciki har da fallback model; bridge ɗin yana bayar da rahoton `mixed` idan
+models daban-daban ne suka samar da firamomi daban-daban. Cache hit yana sake amfani da
+wannan producer identity maimakon sake masa lakabi da requested routing plan. Cache na
+whole-video result yana amfani da kowane input da ke canza output a matsayin key — prompt,
+effective model, sampling policy, frame count, semantic analysis mode, SHA-256
+fingerprint na normalized focus hint, focus window, `transcript`,
+`audioTranscript`, da contact-sheet flag — saboda haka canza kowane ɗaya daga cikin waɗannan
+dimensions cache miss ne, ba sake amfani da stale data ba. Visual dedup policy
+version, threshold, da bounded candidate-frame count suma suna bayyane a cikin
+result-cache key da metadata; don haka canjin policy ba zai iya sake amfani da stale
+whole-video description ba. Result-cache v4 metadata yana riƙe mode da
+fingerprint, ba ya taɓa riƙe raw user task. Guardrail metadata yana bayar da rahoton
+requested da effective analysis modes duka; requested `focused` mode ba tare da
+usable user text ba ana bayar da rahotonsa a matsayin `full` a aikace.
 
-| Maɓalli                             | Tsoho       | Range / hali                                                                                                              |
-| :---------------------------------- | :---------- | :------------------------------------------------------------------------------------------------------------------------ |
-| `modalityBridgeVideoEnabled`        | `false`     | Zaɓi lokacin aiki, zaɓi-shiga                                                                                             |
-| `modalityBridgeVideoAnalysisMode`   | `"full"`    | `full` yana kiyaye rubutun gabaɗaya; `focused` yana amfani da iyakance, mahallin mai amfani na baya-bayan nan mara amfani |
-| `modalityBridgeVideoModel`          | `""`        | Gadar samfurin Vision                                                                                                     |
-| `modalityBridgeVideoFrameCount`     | `8`         | 1–16                                                                                                                      |
-| `modalityBridgeVideoSamplingPolicy` | `"uniform"` | `uniform`, `scene_aware`, ko daidaitaccen `segment_aware`; gazawar mai gano yana komawa zuwa `uniform`                    |
-| `modalityBridgeVideoMaxVideos`      | `1`         | 1–4                                                                                                                       |
-| `modalityBridgeVideoTimeout`        | `120000`    | 1000–120000 ms                                                                                                            |
+Guardrail ɗin yana fitar da kowane supported video part amma ba ya bayyana fiye da
+`modalityBridgeVideoMaxVideos`. Ga target da aka tabbatar yana da
+`supportsVideo === false`, videos da suka gaza da waɗanda suka wuce iyaka suna zama
+explicit safe text markers domin kada wani raw video ya tsira. Idan capability ba a sani ba,
+waɗannan parts suna riƙe video carrier ɗinsu; duk wani fallback transcript yana bin bounded
+text conversion da ke sama. Targets masu `supportsVideo === true` suna tsallake bridge ɗin.
+Client request abort signal yana wucewa ta download, broker queue,
+subprocesses, da caption calls; aborts suna dakatarwa tsakanin videos kuma ba sa taɓa fail open
+zuwa raw media.
 
-Tsoffin ƙimar lokacin bidiyo da aka ci gaba sama da daƙiƙa 120 ana iyakance su zuwa
-lokacin ƙarshe na broker; sabbin rubuce-rubucen saiti sama da wannan iyaka ana ƙi su.
-`GET /api/modality-bridge/video/runtime` yana buƙatar amintaccen wurin da aka buga
-kafin tantancewa ko binciken lokacin aiki, sannan yana buƙatar tantancewar gudanarwa.
-Yana dawo da `available` kawai, sigogin FFmpeg/ffprobe da aka tsabtace, da kuma
-dalili mai tsayayye lokacin da lokacin aiki bai samu ba. Maɓallin cirewa na ciki
-ba API ne na loda jama'a ba: cikar jerin gwano yana dawo da `503` tare da `Retry-After`,
-katsewar mai kira yana dawo da `499`, kuma lokacin ƙarshe na broker yana dawo da `504`.
-Amsoshin da aka canza suna ƙara `video->text;model=<visionModel>;parts=<videos>` zuwa
-babban `x-omniroute-modality-bridge` header ba tare da cire Vision ko Audio segments ba.
+Runtime settings suna samun goyon bayan DB kuma Zod ne ke validate su:
 
-### PII Masker (`piiMasker.ts`)
+| Maɓalli                             | Na asali    | Iyaka / ɗabi'a                                                                                                              |
+| ----------------------------------- | ----------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `modalityBridgeVideoEnabled`        | `false`     | Runtime na zaɓi, sai an amince a kunna shi                                                                                  |
+| `modalityBridgeVideoAnalysisMode`   | `"full"`    | `full` yana kiyaye taken bayani na gama-gari; `focused` yana amfani da mahallin sabon mai amfani mai iyaka kuma marar amana |
+| `modalityBridgeVideoModel`          | `""`        | Yana gado samfurin Vision Bridge                                                                                            |
+| `modalityBridgeVideoFrameCount`     | `8`         | 1–16                                                                                                                        |
+| `modalityBridgeVideoSamplingPolicy` | `"uniform"` | `uniform`, `scene_aware`, ko `segment_aware` mai daidaiton kaso; gazawar mai ganowa tana komawa zuwa `uniform`              |
+| `modalityBridgeVideoMaxVideos`      | `1`         | 1–4                                                                                                                         |
+| `modalityBridgeVideoTimeout`        | `120000`    | 1000–120000 ms                                                                                                              |
 
-Yana gudana akan **duka** matakai.
+Tsofaffin ƙimomin lokacin jira na Video da aka adana waɗanda suka wuce daƙiƙa 120 ana rage su zuwa
+wa'adin broker; ana ƙin sabbin rubuce-rubucen saituna da suka wuce wannan iyaka.
+`GET /api/modality-bridge/video/runtime` yana buƙatar amintaccen wurin loopback
+na gida mai hatimi kafin tantancewa ko binciken runtime, sannan yana buƙatar
+izinin gudanarwa. Yana mayar da `available` kawai, tsabtattun sigogin FFmpeg/ffprobe, da tabbataccen
+dalili idan runtime ba ya samuwa. Wurin ƙarshen fitarwa na ciki ba
+API na loda fayil na jama'a ba ne: cikar jerin jira yana mayar da `503` tare da `Retry-After`, yankewar
+haɗin mai kira tana mayar da `499`, kuma tabbataccen wa'adin broker yana mayar da `504`. Amsoshin da aka sauya suna ƙara
+`video->text;model=<visionModel>;parts=<videos>` zuwa taken tsakiya na
+`x-omniroute-modality-bridge` ba tare da cire sassan Vision ko Audio ba.
 
-- **`preCall`** yana kwaikwayi nauyin, yana tafiya `system`, `messages`, `input`, da
-  `prompt` (ciki har da abubuwan zaren fili), kuma yana amfani da `processPII()` (daga
-  `@/shared/utils/inputSanitizer`) zuwa filayen zaren `content`/`text`. Lokacin
-  `PII_REDACTION_ENABLED=true`, PII da aka gano ana cire shi a cikin nauyin da za a fitar.
-  Wannan yana zaman kansa daga `INPUT_SANITIZER_MODE` (wanda kawai ke sarrafa
-  ka'idar allurar umarni). Lokacin da aka kashe cirewa, kiran yana rubuta ƙididdigar ganowa
-  ba tare da sake rubuta abun ciki ba.
-- **`postCall`** yana kwaikwayi amsar sosai, yana gudanar da `sanitizePIIResponse()` tare da
-  masker na siffar API na Amsoshi (`maskResponsesOutput` — yana rufe
-  `output_text` da `output[].content[].text`). Idan wani cirewa ya faru,
-  amsar da aka gyara tana maye gurbin ainihin.
+### Mai Ɓoye PII (`piiMasker.ts`)
 
-Guardrail baya taɓa toshewa; yana kawai bayyanawa (`meta.detections`,
-`meta.redacted`) ko sake rubutawa.
+Yana aiki a matakai **biyu**.
 
-### Allurar Umarni (`promptInjection.ts`)
+- **`preCall`** yana kwafe payload, yana bi ta `system`, `messages`, `input`, da
+  `prompt` (har da abubuwan da suke zaren rubutu kai tsaye), sannan yana amfani da `processPII()` (daga
+  `@/shared/utils/inputSanitizer`) a kan filayen `content`/`text` masu nau'in zare. Lokacin da
+  `PII_REDACTION_ENABLED=true`, ana ɓoye PII da aka gano a cikin
+  payload mai fita. Wannan ba ya dogara da `INPUT_SANITIZER_MODE` (wanda ke sarrafa
+  manufofin shigar da umarnin yaudara kawai). Lokacin da aka kashe ɓoyewa, kiran yana adana
+  adadin abubuwan da aka gano ba tare da sake rubuta abun ciki ba.
+- **`postCall`** yana yin kwafi mai zurfi na amsar, yana gudanar da `sanitizePIIResponse()` tare da
+  mai ɓoyewar tsarin Responses-API (`maskResponsesOutput` — yana rufe
+  `output_text` da `output[].content[].text`). Idan wani ɓoyewa ya faru,
+  amsar da aka gyara tana maye gurbin ta asali.
 
-Yana gano tsarin adawa a cikin abun ciki da mai amfani ya bayar kuma yana aiwatar da
-ka'idar da aka saita. Halin yana motsawa ta hanyar masu canjin muhalli da zaɓuɓɓukan mai ginawa:
+Matakin kariyar ba ya taɓa toshewa; yana yin alama (`meta.detections`,
+`meta.redacted`) ko sake rubutawa kawai.
 
-| Saiti         | Env var                                                                                               | Tsoho  | Tasiri                                                                                                                                                                               |
-| ------------- | ----------------------------------------------------------------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| An kunna      | `INPUT_SANITIZER_ENABLED`                                                                             | `true` | Idan `false`, mai gadin zai yi gajeren zango.                                                                                                                                        |
-| Yanayi        | `INJECTION_GUARD_MODE` / `INPUT_SANITIZER_MODE`                                                       | `warn` | Manufar allura: `block`, `warn`, ko `log`. (`redact` an karɓa don dacewa da baya amma **baya** cire rubutun allura; buƙatar sake rubuta PII ana sarrafa ta `PII_REDACTION_ENABLED`.) |
-| Ƙofar toshewa | `blockThreshold` option / `INPUT_SANITIZER_BLOCK_THRESHOLD` (alias `INJECTION_GUARD_BLOCK_THRESHOLD`) | `high` | Mafi ƙarancin tsanani da ake buƙata don toshewa. Matsakaici yana kallon-kawai a tsoho.                                                                                               |
+#### Zaɓi bisa nau'i, keɓaɓɓun alamu da ƙididdigar ganowa
 
-**Fifikon yanayi** (`getMode`): mai kira `options.mode` →
-`INJECTION_GUARD_MODE` **DB fasalin-tutar wucewa** (Dashboard → Saituna →
-Fasalin Tuta) → `INJECTION_GUARD_MODE` env → `INPUT_SANITIZER_MODE` env →
-`warn`. Don haka, wucewar dashboard tana cin nasara akan env vars, don haka UI na Fasalin Tuta yana sarrafa mai gadin da ke gudana kai tsaye (babu sake farawa). Karatun DB yana da aminci-kuskure: idan ya yi kuskure, mai gadin zai koma ga halayen da suka dogara da env, kuma idan babu wani wucewa da aka saita, halayen yana kama da warwarewar env-kawai.
+**Dashboard → Settings → Security → PII masking** yana zaɓar _abin_ da za a ɓoye. Ba ya
+kunna ɓoyewar: har yanzu `PII_REDACTION_ENABLED` (buƙata) da
+`PII_RESPONSE_SANITIZATION` (amsa + SSE) ne ke yin hakan, kuma dukansu a kashe suke ta tsohuwa.
+
+- **Zaɓi bisa nau'i** — an jera ginannun ids a
+  `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). Rashin saiti yana nufin kowane
+  nau'i (ɗabi'ar da ake da ita kafin samuwar wannan saitin). Alamar
+  `ssn_us` ta injin buƙata tana daidaita zuwa `ssn`. Samfuran shiri (Minimal, Standard, Financial,
+  Brazilian, USA, Full) suna cike akwatunan zaɓi ne kawai a UI.
+- **Keɓaɓɓun alamu** — har zuwa alamun regex ko wildcard guda 20 (`*` = har zuwa haruffa 64
+  marasa farin sarari, `?` = ɗaya). Daidaitattun sakamako suna zama `[CUSTOM_REDACTED]`.
+  Kowane alama yana wucewa ta `compilePiiCustomPattern()`
+  (`src/shared/utils/piiCustomPatterns.ts`): bai wuce haruffa 500 ba, flags sun taƙaita
+  zuwa `g i m s u`, dole ne ya compile, dole ne ya tsallake `safe-regex` (mummunan
+  komawa-baya), kuma kada ya dace da zaren da babu komai ko alamar madadin ɓoyewa.
+  Ana ƙin alamar da ta gaza lokacin adanawa da gwadawa, sannan layin da aka adana
+  wanda ya gaza ana tsallake shi a runtime maimakon a compile shi. Keɓaɓɓun alamu suna
+  aiki ne kawai yayin da aka kunna ɓoyewa.
+- **Ƙididdigar ganowa** — adadi bisa kowane nau'i (ba a taɓa adana ƙimomin da suka dace ba), ana riƙe su a
+  ƙwaƙwalwa kuma ana sake saita su bayan sake farawa (`src/lib/pii/piiDetectionStats.ts`). Suna
+  ƙaruwa ne kawai yayin da aka kunna ɓoyewa.
+
+Saitunan suna cikin teburin `key_value` (namespace `pii_settings`,
+`src/lib/db/piiSettings.ts`) kuma ana karanta su ta cache na 1 s. API:
+
+| Hanya  | Path                     | Manufa                                                                              |
+| ------ | ------------------------ | ----------------------------------------------------------------------------------- |
+| `GET`  | `/api/settings/pii`      | Yanayin flag, `enabledTypes`, `customPatterns`, ƙididdigar ganowa                   |
+| `PUT`  | `/api/settings/pii`      | Maye gurbin `enabledTypes` (`null` = duka) da/ko `customPatterns`                   |
+| `POST` | `/api/settings/pii/test` | Gwajin kwaikwayo na alama ɗaya a kan samfurin da bai wuce 8 KB ba; ba a adana komai |
+
+Duk ukun suna buƙatar izinin gudanarwa kuma suna tantance body da Zod
+(`src/shared/validation/schemas/piiSettings.ts`).
+
+### Shigar da Umarnin Yaudara (`promptInjection.ts`)
+
+Yana gano tsarin cutarwa a cikin abun ciki da mai amfani ya samar, kuma yana aiwatar da
+manufofin da aka saita. Ɗabi'ar tana gudana ne bisa environment variables da zaɓuɓɓukan constructor:
+
+| Saiti          | Canjin muhalli                                                                                        | Tsoho  | Tasiri                                                                                                                                                                                                   |
+| -------------- | ----------------------------------------------------------------------------------------------------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| An kunna       | `INPUT_SANITIZER_ENABLED`                                                                             | `true` | Idan `false`, guardrail ɗin zai dakatar da aiki nan take.                                                                                                                                                |
+| Yanayi         | `INJECTION_GUARD_MODE` / `INPUT_SANITIZER_MODE`                                                       | `warn` | Manufar injection: `block`, `warn`, ko `log`. (Ana karɓar `redact` don dacewa da tsoffin sigogi amma **ba ya** cire rubutun injection; `PII_REDACTION_ENABLED` ne ke sarrafa sake rubuta PII na buƙata.) |
+| Iyakar toshewa | zaɓin `blockThreshold` / `INPUT_SANITIZER_BLOCK_THRESHOLD` (laƙabi `INJECTION_GUARD_BLOCK_THRESHOLD`) | `high` | Mafi ƙarancin matakin tsanani da ake buƙata don toshewa. Matsakaici na sa-ido kawai ne a saitin tsoho.                                                                                                   |
+
+**Fifikon yanayi** (`getMode`): `options.mode` na mai kira →
+sake-rubutawar **DB feature-flag** ta `INJECTION_GUARD_MODE` (Dashboard → Settings →
+Feature Flags) → env na `INJECTION_GUARD_MODE` → env na `INPUT_SANITIZER_MODE` →
+`warn`. Saboda haka, sake-rubutawa daga dashboard tana rinjayar env vars, don haka
+UI na Feature Flags yana sarrafa guard mai aiki kai tsaye (ba tare da sake farawa ba).
+Karatu daga DB yana da kariyar gazawa: idan kuskure ya faru, guard ɗin zai koma ga
+halayyar da env ke ƙayyadewa, kuma idan ba a saita sake-rubutawa ba halayyar za ta
+kasance daidai da warwarewa ta env kaɗai.
 
 Tushen ganowa:
 
-1.  `sanitizeRequest()` daga `@/shared/utils/inputSanitizer` (saitin mai gano abubuwan da aka raba da ake amfani da su a wani wuri a cikin bututun).
-2.  Gina-ciki `DEFAULT_GUARD_PATTERNS` (a halin yanzu `system_override_inline` da
-    `markdown_system_block`, duka biyun tsanani `high`).
-3.  Zaɓi `customPatterns` da aka wuce ta zaɓuɓɓukan mai ginawa (strings, regex,
-    ko `{ name, pattern, severity }` records).
+1. `sanitizeRequest()` daga `@/shared/utils/inputSanitizer` (saitin detector na
+   bai ɗaya da ake amfani da shi a wasu wurare cikin pipeline).
+2. `DEFAULT_GUARD_PATTERNS` da aka gina ciki (a halin yanzu `system_override_inline`
+   da `markdown_system_block`, dukkansu suna da tsananin `high`).
+3. `customPatterns` na zaɓi da ake miƙawa ta zaɓuɓɓukan constructor (strings, regex,
+   ko records na `{ name, pattern, severity }`).
 
-Lokacin da `mode === "block"` **kuma** aƙalla gano ɗaya ya cika ƙofar tsanani, `preCall` yana dawo da `{ block: true, message: "Request rejected:
-suspicious content detected" }`. A cikin yanayin `warn`/`log`, mai gadin yana yin log amma yana ba da izinin kiran. Mai taimako na gama gari `evaluatePromptInjection()` an kuma fitar da shi don masu kira waɗanda ke buƙatar tantance umarni ba tare da wucewa ta rajista ba.
+Lokacin da `mode === "block"` **kuma** aƙalla ganowa ɗaya ta kai iyakar
+tsanani, `preCall` zai dawo da `{ block: true, message: "Request rejected:
+suspicious content detected" }`. A yanayoyin `warn`/`log`, guardrail ɗin yana
+rubuta log amma yana ƙyale kiran. Haka kuma ana export na shared helper
+`evaluatePromptInjection()` don masu kira da ke buƙatar tantance prompts ba tare
+da bi ta registry ba.
 
-**Iyakokin bincike (v3.8.20):** mai gano abubuwan yana bincika **kawai 16 KB na farko** na rubutun umarni da aka haɗa — `MAX_INJECTION_SCAN_BYTES = 16 * 1024` (bytes 16 384) a cikin `src/shared/utils/inputSanitizer.ts`. Duk `detectInjection()` da `evaluatePromptInjection()` `slice(0, MAX_INJECTION_SCAN_BYTES)` kafin gudanar da madaukin tsari. Umarnin allura suna kusa da saman shigarwa, don haka wannan yana iyakance regex CPU/GC akan nauyin multi-ɗari-KB ba tare da raunana ganowa ba (duba #3932, #4041).
+**Iyakar dubawa (v3.8.20):** detector ɗin yana bincika **16 KB na farko kawai**
+na haɗaɗɗen rubutun prompt — `MAX_INJECTION_SCAN_BYTES = 16 * 1024` (16 384 bytes)
+a cikin `src/shared/utils/inputSanitizer.ts`. Dukansu `detectInjection()` da
+`evaluatePromptInjection()` suna yin `slice(0, MAX_INJECTION_SCAN_BYTES)` kafin
+gudanar da pattern loop. Umarnin injection suna kusa da farkon input, don haka
+wannan yana iyakance CPU/GC na regex kan payloads masu ɗaruruwan KB ba tare da
+raunana ganowa ba (duba #3932, #4041).
 
-### Mai Rufe Bayanan Sirri (`credentialMasker.ts`)
+### Mai Rufe Bayanai na Shaida (`credentialMasker.ts`)
 
-Yana gudana a kan matakai **duka biyu**, na ƙarshe a cikin jerin tsoho (fifiko `95`). Yana ɓoye sanannun maɓallan API / tsarin sirri daga nauyin da aka aika (abun ciki na saƙo, muhawarar kiran kayan aiki, sakamakon kayan aiki) **kuma** martanin mai bayarwa, don haka bayanan sirri da aka liƙa a cikin umarni (ko aka dawo da su ta hanyar sakamakon kayan aiki) ba za a fallasa su ga mai bayarwa na sama ko kuma ga abokin ciniki ba.
+Yana aiki a **dukkan** matakai, kuma shi ne na ƙarshe a default chain (priority
+`95`). Yana ɓoye sanannun patterns na API-key / secret-token daga outbound
+payload (abubuwan saƙo, arguments na tool-call, sakamakon tools) **da kuma**
+amsar provider, don kada credential da aka liƙa cikin prompt (ko wanda sakamakon
+tool ya maimaita) ya zube zuwa upstream provider ko ya koma ga client.
 
-- **Zaɓi-shiga kawai**, tsari ɗaya kamar ɓoye PII (Dokar Mai Tsanani #20-kusa): an kashe shi sai dai idan `settings.credentialRedactionEnabled === true` **ko**
-  `CREDENTIAL_REDACTION_ENABLED=true`. Idan an kashe shi, mai gadin ba ya aiki — baya taɓa toshewa kuma baya taɓa sake rubutawa.
-- `redactCredentials()` yana tafiya cikakken itacen nauyi/martani (`walkValue()`, mai aminci daga gurɓata prototype, mai aminci daga zagaye ta hanyar `WeakSet`) kuma yana maye gurbin abubuwan da suka dace da mai riƙe wuri `[REDACTED:<type>]`, yana kwafi kawai rassan da suka canza da gaske.
-- `CREDENTIAL_PATTERNS` yana rufe maɓallan masu bayar da LLM (OpenAI, OpenAI-proj,
-  Anthropic, Google, Hugging Face, Replicate), alamun VCS/SaaS (GitHub, Slack,
-  Linear, Notion, npm, Postman, Discord), maɓallan biyan kuɗi (Stripe, Square),
-  maɓallan girgije (maɓallin shiga AWS, Twilio, SendGrid, Mailgun), maɓallan sirri / JWTs,
-  igiyoyin haɗin kai masu ɗauke da bayanan sirri (`mongodb://user:pass@...`, da sauransu), da kuma tsarin ƙimar kai na gama gari `Authorization`/`x-api-key`/`api-key`/`apikey`. Maɓallan da ke da siffar kai (`authorization`, `x-api-key`, `api-key`, `apikey`) ana ɓoye su ta tsari (ƙima kawai, an adana prefix na tsari kamar `Bearer `/`Basic `) maimakon ta hanyar regex na rubutu na gama gari.
-- Mai gadin baya taɓa toshewa; yana sake rubutawa kawai (`modifiedPayload` /
-  `modifiedResponse`) kuma yana yin bayani (`meta.credentialsRedacted`, `meta.count`).
+- **Sai an kunna da gangan kawai**, bisa ƙa'ida iri ɗaya da PII redaction
+  (kusa da Hard Rule #20): yana a kashe sai dai idan
+  `settings.credentialRedactionEnabled === true` **ko**
+  `CREDENTIAL_REDACTION_ENABLED=true`. Idan yana a kashe, guardrail ɗin ba ya yin
+  komai — ba ya taɓa toshewa kuma ba ya taɓa sake rubutawa.
+- `redactCredentials()` yana bi ta cikakken payload/response tree (`walkValue()`,
+  mai kariya daga prototype-pollution, mai kariya daga cycles ta `WeakSet`) kuma
+  yana maye gurbin matches da placeholder na `[REDACTED:<type>]`, yana cloning
+  rassan da suka canza kawai.
+- `CREDENTIAL_PATTERNS` yana rufe keys na LLM providers (OpenAI, OpenAI-proj,
+  Anthropic, Google, Hugging Face, Replicate), tokens na VCS/SaaS (GitHub, Slack,
+  Linear, Notion, npm, Postman, Discord), payment keys (Stripe, Square), cloud
+  keys (AWS access key, Twilio, SendGrid, Mailgun), private keys / JWTs,
+  connection strings masu ɗauke da credentials (`mongodb://user:pass@...`, da
+  sauransu), da kuma generic pattern na darajar header
+  `Authorization`/`x-api-key`/`api-key`/`apikey`. Ana ɓoye keys masu siffar header
+  (`authorization`, `x-api-key`, `api-key`, `apikey`) bisa tsari (darajar kawai,
+  ana kiyaye scheme prefix kamar `Bearer `/`Basic `) maimakon amfani da generic
+  text regex.
+- Guardrail ɗin ba ya taɓa toshewa; sake rubutawa kawai yake yi
+  (`modifiedPayload` / `modifiedResponse`) kuma yana ƙara annotations
+  (`meta.credentialsRedacted`, `meta.count`).
 
-Mai gadin koma baya: `tests/unit/credential-masker-guardrail.test.ts`.
+Kariyar regression: `tests/unit/credential-masker-guardrail.test.ts`.
 
-## Babban Kwangila (`base.ts`)
+## Kwangilar Tushe (`base.ts`)
 
 ```typescript
 class BaseGuardrail {
@@ -474,11 +707,11 @@ class BaseGuardrail {
 }
 
 interface GuardrailResult<TValue = unknown> {
-  block?: boolean; // true short-circuits the chain
-  message?: string; // surfaced when blocking
+  block?: boolean; // true yana dakatar da sarkar nan take
+  message?: string; // ana nuna shi lokacin da aka toshe
   meta?: Record<string, unknown> | null;
-  modifiedPayload?: TValue; // returned by preCall to rewrite the request
-  modifiedResponse?: TValue; // returned by postCall to rewrite the response
+  modifiedPayload?: TValue; // preCall ne ke mayar da shi don sake fasalin buƙatar
+  modifiedResponse?: TValue; // postCall ne ke mayar da shi don sake fasalin amsar
 }
 
 interface GuardrailContext {
@@ -497,10 +730,10 @@ interface GuardrailContext {
 }
 ```
 
-Guardrail yana nuna 'babu canji' ta hanyar dawo da ko dai `void`, `{}`, ko
+Guardrail yana nuna cewa “babu canji” ta hanyar mayar da ko dai `void`, `{}`, ko
 `{ block: false }`. Mayar da `modifiedPayload`/`modifiedResponse` yana maye gurbin
-ƙimar da ke gudana ta cikin sarkar don guardrails na gaba.
-`signal?: AbortSignal` yana ɗaukar rayuwar mai kira zuwa cikin guardrails. Soke buƙata shine keɓantaccen kuskure na buɗe-kuskure: gadajen kafofin watsa labarai suna dakatar da aiki da tsaftacewa ba tare da dawo da kafofin watsa labarai na asali zuwa wata manufa da aka sani ba ta goyi bayansa ba.
+ƙimar da ke gudana cikin sarkar zuwa guardrails na gaba.
+`signal?: AbortSignal` yana isar da zagayowar rayuwar mai kira zuwa guardrails. Soke buƙata shi ne keɓantaccen yanayin fail-open da aka yi da gangan: gadajen kafofin watsa bayanai suna dakatar da aiki kuma su share abubuwan wucin gadi ba tare da dawo da ɗanyen kafofin watsa bayanai zuwa manufa da aka san ba ta goyon bayansu ba.
 
 ## Rajista (`registry.ts`)
 

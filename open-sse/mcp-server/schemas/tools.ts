@@ -533,6 +533,7 @@ export const webFetchInput = z.object({
       "context7",
       "nimble-search",
       "anysearch-search",
+      "parallel-search",
     ])
     .optional()
     .describe(

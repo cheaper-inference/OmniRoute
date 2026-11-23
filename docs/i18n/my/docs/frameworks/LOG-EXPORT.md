@@ -16,64 +16,141 @@ pipeline သည် registry တစ်ခုဖြစ်သောကြောင�
 ## 1. အလုပ်လုပ်ပုံ
 
 ```
-call_logs (SQLite)
-  → callLogExportSource.getCallLogsForExport(cursor, batchSize)
-    → LogExportRecord[]  (Logs tab ၏ field အစု)
-      → destination client.send(batch)
-        → advanceLogExportCursor(id, lastRowId, count)
+ဆာဗာ (config ကို decrypt လုပ်ပြီး validate လုပ်ခြင်း၊ cursor ကို reconcile လုပ်ခြင်း)
+  → IPC ကို စတင်ခြင်း → သီးခြားခွဲထားသော exportChild OS process
+    → ဖတ်ရန်သီးသန့် storage.sqlite → မျှဝေထားသော call-log query/mapping
+      → artifact များကို asynchronous hydrate လုပ်ခြင်း → destination prepare()/send()
+        → batch IPC → ဆာဗာက cursor ကို သိမ်းဆည်းခြင်း → ack IPC
+          → နောက် batch; done IPC → ဆာဗာက အောင်မြင်မှုကို မှတ်တမ်းတင်ခြင်း
 ```
 
-- **အချိန်ဇယား** — `JobRegistry` cron job တစ်ခုဖြစ်သည့် `log_export` ကို အသုံးပြုပြီး၊ ပုံသေအားဖြင့် `0 * * * *` (နာရီတိုင်း၊
-  UTC) သတ်မှတ်ထားသည်။ `src/lib/initCloudSync.ts` တွင် register လုပ်ထားပြီး `OMNIROUTE_LOG_EXPORT_CRON` ဖြင့် ပြောင်းလဲသတ်မှတ်နိုင်သည်။
-  tick တစ်ကြိမ်စီတွင် **ဖွင့်ထားသော** destination အားလုံးကို တစ်ခုပြီးတစ်ခု အစဉ်လိုက် အပြည့်အဝ ပို့ဆောင်သည်။
-- **Cursor** — SQLite ၏ အလိုအလျောက်ပါရှိသည့် `call_logs.rowid` ကို အသုံးပြုပြီး destination တစ်ခုစီအလိုက်
-  `log_export_destinations.cursor_row_id` တွင် သိမ်းဆည်းထားသည်။ `timestamp` ကို cursor အဖြစ် တမင်အသုံးမပြုထားပါ။ အကြောင်းမှာ caller များက
-  ၎င်းတို့၏ ကိုယ်ပိုင်တန်ဖိုးကို ပေးနိုင်သောကြောင့် နောက်မှစတင်သော်လည်း ပိုမြန်သည့် request ပြီးနောက် နှေးကွေးသည့် request ကို ရေးသွင်းနိုင်ပြီး၊
-  timestamp cursor အသုံးပြုပါက ထို request ကို ကျော်သွားမည်ဖြစ်သည်။
-- **Batching** — request တစ်ခုလျှင် `batch_size` row (ပုံသေ 500)၊ run တစ်ကြိမ်လျှင်
-  `max_rows_per_run` row (ပုံသေ 10000) ကို အသုံးပြုသည်။ ထို့ကြောင့် ကြီးမားသော backlog ကို run တစ်ကြိမ်တည်းတွင် ပိတ်ဆို့မနေစေဘဲ
-  tick အကြိမ်များစွာအတွင်း တဖြည်းဖြည်း ပို့ဆောင်နိုင်သည်။
-- **ပို့ဆောင်ခြင်း** — `send()` အောင်မြင်စွာ ပြီးဆုံးပြီးမှသာ cursor ကို ရှေ့တိုးသည်။ batch တစ်ခု မအောင်မြင်ပါက
-  cursor သည် မူလနေရာတွင်သာ ကျန်ရှိသဖြင့် နောက် run တွင် တူညီသော row များကို ထပ်မံကြိုးစားပို့ဆောင်မည်။ အာမခံချက်မှာ
-  အနည်းဆုံးတစ်ကြိမ် ပို့ဆောင်ခြင်းနှင့် destination ဘက်မှ de-duplication ပြုလုပ်ခြင်းဖြစ်ပြီး၊ စစ်မှန်သော exactly-once မဟုတ်ပါ။ BigQuery သည် row တစ်ခုစီကို
-  call-log id ဖြင့် key သတ်မှတ်ပြီး ၎င်း၏ dedup window အတွင်း best-effort အနေဖြင့်သာ ထို key ကို အသုံးပြုသည်။
-- **Overlap ကာကွယ်မှု** — cron tick နှင့် `POST .../run` သည် တစ်ချိန်တည်းတွင် လုပ်ဆောင်နိုင်သည်။ ပို့ဆောင်နေပြီးဖြစ်သော destination ကို
-  နှစ်ကြိမ်ပို့ဆောင်မည့်အစား ကျော်သွားမည် (`skipped: true` ကို run result တွင် ဖော်ပြသည်)။
-  ထို့ကြောင့် တစ်ပြိုင်နက်တည်း run များက batch တစ်ခုကို ပြန်လည်ပို့ခြင်း သို့မဟုတ် cursor ကို နောက်ပြန်ရေးခြင်း မပြုနိုင်ပါ။
-- **Purge ပြီးနောက် ပြန်လည်ရယူခြင်း** — `cursor_row_id` သည် `MAX(rowid)` ထက် မြင့်သွားပါက (table တစ်ခုလုံးကို
-  purge လုပ်ထားပြီး rowid များ ပြန်လည်စတင်သည့်အခါ) runner သည် အပြီးအပိုင် record မတွေ့တော့ခြင်းကို ရှောင်ရှားရန် 0 သို့ ပြန်လည်ရွှေ့ပေးသည်။
+- **အချိန်ဇယား** — `JobRegistry` cron job တစ်ခုဖြစ်သော `log_export` ကို ပုံမှန်အားဖြင့် `0 * * * *` (နာရီတိုင်း၊
+  UTC) ဟု သတ်မှတ်ထားသည်။ `src/lib/initCloudSync.ts` တွင် register လုပ်ထားပြီး `OMNIROUTE_LOG_EXPORT_CRON` ဖြင့်
+  ပြောင်းလဲသတ်မှတ်နိုင်သည်။ Tick တစ်ကြိမ်စီတွင် **ဖွင့်ထားသော** destination အားလုံးကို အစဉ်လိုက် အပြီးသတ်ပို့ဆောင်သည်။
+- **Cursor** — SQLite ၏ implicit `call_logs.rowid` ကို destination တစ်ခုစီအလိုက်
+  `log_export_destinations.cursor_row_id` တွင် သိမ်းဆည်းထားသည်။ `timestamp` ကို cursor အဖြစ် ရည်ရွယ်ချက်ရှိရှိ
+  အသုံးမပြုပါ။ အကြောင်းမှာ caller များက ၎င်းတို့၏ကိုယ်ပိုင်တန်ဖိုးကို ထည့်သွင်းနိုင်သောကြောင့် နောက်မှစတင်ခဲ့သော
+  ပိုမြန်သည့် request တစ်ခုအပြီးတွင် ပိုနှေးသည့် request ကို ရေးသားနိုင်ပြီး timestamp cursor က ၎င်းကို
+  ကျော်သွားနိုင်သောကြောင့်ဖြစ်သည်။
+- **Batch ခွဲခြင်း** — request တစ်ခုလျှင် `batch_size` row များ (ပုံမှန် 500)၊ run တစ်ကြိမ်လျှင်
+  `max_rows_per_run` row များ (ပုံမှန် 10000) သတ်မှတ်ထားသဖြင့် များပြားသော backlog ကို run တစ်ခုတည်းတွင်
+  ပိတ်ဆို့နေစေမည့်အစား tick အကြိမ်များစွာဖြင့် အပြီးသတ်ပို့ဆောင်သည်။
+- **ပေးပို့ခြင်း** — `send()` ပြီးဆုံးမှသာ cursor ကို ရှေ့တိုးသည်။ မအောင်မြင်သော batch တစ်ခုသည်
+  cursor ကို မူလနေရာတွင်ပင် ထားရှိသဖြင့် နောက် run တွင် အဆိုပါ row များကို ထပ်မံကြိုးစားသည်။ အာမခံချက်မှာ
+  အမှန်တကယ် exactly-once မဟုတ်ဘဲ at-least-once နှင့် destination ဘက်မှ de-duplication ဖြစ်သည်။ BigQuery သည်
+  row တစ်ခုစီကို call-log id ဖြင့် key သတ်မှတ်ပြီး ၎င်း၏ကိုယ်ပိုင် dedup window အတွင်း best-effort အခြေခံဖြင့်
+  ယင်းကို လိုက်နာသည်။
+- **ထပ်နေမှု ကာကွယ်ချက်** — cron tick နှင့် `POST .../run` သည် တစ်ချိန်တည်းတွင် ဖြစ်ပေါ်နိုင်သည်။
+  ပို့ဆောင်နေပြီးသား destination ကို နှစ်ကြိမ်ပို့ဆောင်မည့်အစား ကျော်သွားသည် (run ရလဒ်တွင် `skipped: true`)၊
+  ထို့ကြောင့် တစ်ပြိုင်တည်း run တစ်ခုက batch တစ်ခုကို ထပ်မံပို့ခြင်း သို့မဟုတ် cursor ကို နောက်ပြန်ရေးခြင်း
+  မပြုနိုင်ပါ။
+- **Purge ပြန်လည်ရယူခြင်း** — `cursor_row_id` သည် `MAX(rowid)` ထက် မြင့်သွားပါက (table တစ်ခုလုံးကို
+  purge လုပ်ပြီး rowid များ ပြန်လည်စတင်ထားပါက) runner သည် အမြဲတမ်း data မတွေ့တော့မည့်အစား 0 သို့
+  ပြန်လှည့်သည်။
+
+### သီးခြားခွဲထားသော runner နှင့် ကန့်သတ်ချက်များ
+
+Node ပေါ်ရှိ destination run တစ်ခုစီသည် သီးခြားဖြစ်ပြီး သက်တမ်းတိုသော OS child process
+(`worker_threads` မဟုတ်ဘဲ IPC ပါသည့် `child_process`) တစ်ခုကို စတင်သည်။ Body ဖတ်ခြင်း၊ payload JSON
+parse/serialize လုပ်ခြင်း၊ destination `prepare()` နှင့် destination network I/O အားလုံးသည် ဆာဗာ၏
+event loop ပေါ်တွင်မဟုတ်ဘဲ ထို process အတွင်း လုပ်ဆောင်သည်။ Configuration နှင့် သေးငယ်သော progress
+message များသာ IPC ကို ဖြတ်သန်းသည်။ Export လုပ်ထားသော record များသည် ဆာဗာထံ လုံးဝပြန်မလာပါ။
+cron job နှင့် Run now route တို့သည် တူညီသော public result နှင့် overlap guard ကို ဆက်လက်ထိန်းသိမ်းထားသည်။
+
+Child သည် ဆာဗာက resolve လုပ်ထားသော `DATA_DIR/storage.sqlite` ကို `node:sqlite` အသုံးပြု၍ read-only
+အနေဖြင့် ဖွင့်ပြီး `busy_timeout=5000` နှင့် `query_only=ON` ကို အသုံးပြုသည်။ ၎င်းသည် DB singleton ကို
+import မလုပ်သလို migration၊ backup သို့မဟုတ် SQLite update များလည်း မလုပ်ပါ။ ပျောက်ဆုံးနေသော/ပျက်စီးနေသော
+artifact bookkeeping (`corrupt-artifact UPDATE` အပါအဝင်) သည် dashboard detail path တွင်သာ ဆက်လက်ရှိသည်။
+Path နှစ်ခုစလုံးသည် side effect မရှိသော detail resolver တစ်ခုကို မျှဝေသည်။ Export သည် asynchronous
+filesystem read များနှင့် တူညီသော artifact → legacy inline → legacy disk → none resolution အစဉ်ကို
+အသုံးပြုသည်။ Child သည် reader ကို ဖွင့်ချိန်တွင် run တစ်ခုက အမြင့်ဆုံး insertion rowid ကို snapshot
+ရယူသည်။ နောက်ပိုင်းမှ ထည့်သွင်းမှုများသည် နောက် run ကို စောင့်ရသည်။ ၎င်းသည် သက်တမ်းရှည် SQLite
+transaction မဟုတ်ဘဲ insertion boundary တစ်ခုဖြစ်သည်။ Network ကို စောင့်ဆိုင်းနေစဉ် WAL writer များနှင့်
+checkpoint များသည် လွတ်လပ်စွာ ဆက်လက်လုပ်ဆောင်နိုင်သည်။ ရှိပြီးသား row များ၏ update/delete များကို
+ဤ boundary က freeze မလုပ်ပါ။
+
+လက်ခံပြီးသော batch တစ်ခုစီနောက်တွင် child သည် acknowledgement တစ်ခုကို စောင့်သည်။ ဆာဗာသည် ဦးစွာ
+`advanceLogExportCursor` ဖြင့် cursor ကို သိမ်းဆည်းပြီးနောက် `ack` ကို ပို့သည်။ ထိုသို့မပြုမီ နောက် batch
+မစတင်ပါ။ ပို့ဆောင်မှုမအောင်မြင်ခြင်း၊ crash ဖြစ်ခြင်း သို့မဟုတ် timeout ဖြစ်ခြင်းသည် ထို batch ၏ cursor ကို
+ရှေ့မတိုးဘဲ failure ကို မှတ်တမ်းတင်သည်။ ယခင်က acknowledge လုပ်ပြီးသော batch များသည် commit ဖြစ်ပြီးသားအဖြစ်
+ဆက်လက်ရှိသည်။ Acknowledge မလုပ်ရသေးသော batch တစ်ခုကိုသာ အများဆုံး ပြန်ပို့နိုင်သည်။ `done` ရရှိပြီး
+child က error မရှိဘဲ exit လုပ်ပြီးမှသာ အောင်မြင်မှုကို မှတ်တမ်းတင်သည်။ Failure ဖြစ်ပါက child ကို SIGTERM ဖြင့်
+ရပ်တန့်စေပြီး 500 ms ကြာပြီးနောက် SIGKILL သို့ အဆင့်မြှင့်ကာ runner သည် process ပိတ်သွားသည်အထိ စောင့်သည်။
+
+| Environment variable                          | ပုံမှန်တန်ဖိုး | ရည်ရွယ်ချက်                                 |
+| --------------------------------------------- | -------------- | ------------------------------------------- |
+| `OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS`         | 900000         | Destination တစ်ခုစီ၏ wall-clock ကန့်သတ်ချက် |
+| `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` | 1024           | Child V8 old-space ကန့်သတ်ချက် (MB)         |
+
+မမှန်ကန်သော/သုည သို့မဟုတ် အနုတ်တန်ဖိုးဖြစ်သော/ကိန်းပြည့်မဟုတ်သော တန်ဖိုးများအတွက် ပုံမှန်တန်ဖိုးများကို
+အသုံးပြုသည်။ Heap setting သည် စုစုပေါင်း RSS ကန့်သတ်ချက်မဟုတ်ပါ။ အလွန်ကြီးမားသော batch များသည် child
+memory ကို ကုန်ဆုံးစေနိုင်သေးပြီး run ကို ဘေးကင်းစွာ မအောင်မြင်စေနိုင်သည်။ ပုံမှန် 1024 MB သည် body များ
+ဖွင့်ထားချိန်တွင် 512 KiB artifact 500-row ပါသည့် ပုံမှန် batch အတွက် BigQuery ၏ byte-chunked JSON
+serialization အပါအဝင် အပိုနေရာချန်ထားပေးသည်။ သို့သော် ၎င်းက 10000-row body batch တစ်ခုကို ဘေးကင်းစေမည်
+မဟုတ်ပါ။ V8 heap ကုန်ဆုံးခြင်းဖြစ်ပါက လက်တွေ့ဖြေရှင်းနိုင်သော failure တစ်ခုကို မှတ်တမ်းတင်သည်။ Batch size ကို
+လျှော့ချပါ သို့မဟုတ် `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` ကို မြှင့်ပါ။ Cursor သည် နောက်ဆုံး
+acknowledge လုပ်ထားသော batch တွင်ပင် ရှိနေမည်။ ယခင် inline/disk body များသည် ခေတ်မီ artifact cap ဖြင့်
+အကျုံးမဝင်ပါ။ အထူးသဖြင့် memory ကန့်သတ်ထားသော container များအတွင်း operator များသည် RSS ကို သီးခြားစီ
+တွက်ချက်စီမံရမည်။
+
+Child သည် resolve လုပ်ထားသော `DATA_DIR`၊ `NODE_ENV`၊ အတိအလင်းသတ်မှတ်ထားသော `TZ` (legacy filename
+၏ local-time resolution)၊ ရှိပါက `ELECTRON_RUN_AS_NODE` နှင့် အောက်ပါ outbound input များကိုသာ
+inherit လုပ်သည်။ `HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY` (နှင့် ၎င်းတို့၏ lowercase
+ပုံစံများ), `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`, `NODE_EXTRA_CA_CERTS`, `SSL_CERT_FILE`,
+`SSL_CERT_DIR`။ Global Undici dispatcher တစ်ခုသည် `NO_PROXY` အပါအဝင် ဆာဗာ၏ side effect မရှိသော
+environment-proxy resolution နှင့် local-host bypass rule များကို မျှဝေသည်။ ၎င်းသည် `proxyFetch.ts`
+သို့မဟုတ် ထိုဖိုင်၏ DB/feature flag များကို import မလုပ်ပါ။ Forward လုပ်ထားသော output နှင့် မှတ်တမ်းတင်ထားသော
+error များမှ proxy credential များကို ဖုံးကွယ်ထားသည်။ Destination credential များသည် start IPC message
+တစ်ခုတည်းမှသာ သွားလာပြီး argv သို့မဟုတ် environment မှ မသွားပါ။ Output/error forwarding တွင် prefix
+ထည့်ပြီး အရေးကြီးအချက်အလက်များကို ဖယ်ရှားသန့်စင်ထားသည်။ Cron run တစ်ကြိမ်စီတွင် Node ၏ SQLite warning
+ထပ်မံပေါ်လာခြင်းကို ရှောင်ရှားရန် child exec argument များတွင် `ExperimentalWarning` ကိုသာ ပိတ်ထားသည်။
+အခြား warning အမျိုးအစားများကို ဆက်လက်မြင်တွေ့နိုင်သည်။
+
+Destination module များကို Next.js/server-only dependency များမပါဘဲ import လုပ်နိုင်ရမည်။ လက်ရှိ
+BigQuery implementation သည် ထို contract ကို ဖြည့်ဆည်းပြီးဖြစ်သည်။ Access-token cache များသည် child
+run တစ်ခုအတွင်းသာ တည်ရှိပြီး run များအကြား မတည်ရှိပါ။ Node သည် ပံ့ပိုးထားသော runtime ဖြစ်သည် (`package.json` engines)၊ သို့သော် README ၏ Bun
+ထည့်သွင်းခြင်းအပိုင်းနှင့် `Dockerfile.bun` တို့ကလည်း
+`bun:sqlite` (`src/lib/db/core.ts` / adapter များ) ကို အသုံးပြုသည့် production compatibility လမ်းကြောင်းကို ဖော်ပြထားသည်။ ထို့ကြောင့် Bun အောက်တွင် export များသည် ယခင်
+in-process လမ်းကြောင်းကို ဆက်လက်ထိန်းသိမ်းထားပြီး တစ်ကြိမ်သာ warning ထုတ်ပေးသည်- child heap/timeout isolation ကို အသုံးမပြုနိုင်ပါ။ Event-loop နှင့် OOM isolation အတွက်
+Node ကို အသုံးပြုပါ၊ ဤနေရာတွင် Bun ကို dev-only အဖြစ် မသတ်မှတ်ထားပါ။
+
+`includeBodies` ကို ဖွင့်ထားသည့်အခါ တစ်နာရီစာ payload backlog စုပုံစေမည့်အစား
+`OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"` ကဲ့သို့ မိနစ်အလိုက် cadence ကို ဦးစားပေးပါ။
+Batch နှင့် row limit များက run တစ်ခုချင်းစီကို ဆက်လက်ကန့်သတ်ထားသည်။ Process startup ကုန်ကျစရိတ်ကို run တစ်ခုစီရှိ destination တစ်ခုချင်းစီအတွက် ပေးရသည်၊
+ဤနည်းလမ်းသည် စုစုပေါင်း CPU အသုံးပြုမှုကို လျှော့ချခြင်းမဟုတ်ဘဲ server event-loop isolation အတွက် startup ကုန်ကျစရိတ်အနည်းငယ်နှင့် ဖလှယ်ခြင်းဖြစ်သည်။
 
 ### Payload များ (prompt များနှင့် completion များ)
 
-ပုံသေအားဖြင့် export တွင် Logs **list** က ပြသသည့် summary field များသာ ပါဝင်သည်။
-**Export prompts and responses** (`includeBodies`) ကို ဖွင့်ခြင်းဖြင့် Logs **detail**
-pane က ခေါ်ဆိုမှုတစ်ခုစီအတွက် ပြသသည့် အောက်ပါအချက်အလက်များကိုလည်း ပို့ဆောင်ပေးသည်။
+မူလသတ်မှတ်ချက်အရ export တွင် Logs **စာရင်း** က ပြသသော summary field များသာ ပါဝင်သည်။ **Prompt များနှင့် response များကို export လုပ်ရန်** (`includeBodies`) ကို ဖွင့်လိုက်ပါက
+call တစ်ခုချင်းစီအတွက် Logs **အသေးစိတ်**
+pane က ပြသသည့်အရာများကိုလည်း ထပ်မံပို့ပေးသည်-
 
-| Field                            | ပါဝင်သည့်အကြောင်းအရာ                                                  |
-| -------------------------------- | --------------------------------------------------------------------- |
-| `request_body` / `response_body` | dashboard က render လုပ်ပြသသည့် ခေါ်ဆိုမှု payload များ                |
-| `pipeline_route_decision`        | router က ရွေးချယ်ခဲ့သည့် target နှင့် model                           |
-| `pipeline_client_request`        | client က ပို့ခဲ့သည့်အတိုင်း အတိအကျဖြစ်သော raw request                 |
-| `pipeline_openai_request`        | internal OpenAI ပုံစံသို့ ပြောင်းလဲပြီးနောက် ရရှိသည့် request         |
-| `pipeline_provider_request`      | provider dialect ဖြင့် upstream သို့ အမှန်တကယ် ပို့ခဲ့သည့် request    |
-| `pipeline_provider_response`     | raw upstream response                                                 |
-| `pipeline_client_response`       | caller ထံ ပြန်ပေးခဲ့သည့် response                                     |
-| `pipeline_error`                 | မအောင်မြင်သော ခေါ်ဆိုမှုအတွက် pipeline-level error အသေးစိတ်           |
-| `bodies_truncated`               | အထက်ပါ field တစ်ခုခုသည် `maxBodyBytes` အကန့်အသတ်သို့ ရောက်ခဲ့ပါက True |
+| Field                            | ပါဝင်သည့်အကြောင်းအရာ                                                 |
+| -------------------------------- | -------------------------------------------------------------------- |
+| `request_body` / `response_body` | Dashboard က render လုပ်ပြသသည့် call payload များ                     |
+| `pipeline_route_decision`        | Router က ရွေးချယ်ခဲ့သည့် target နှင့် model                          |
+| `pipeline_client_request`        | Client က ပေးပို့ခဲ့သည့်အတိုင်း အတိအကျဖြစ်သော raw request             |
+| `pipeline_openai_request`        | Internal OpenAI ပုံစံသို့ ပြောင်းလဲပြီးနောက်                         |
+| `pipeline_provider_request`      | Provider dialect ဖြင့် upstream သို့ အမှန်တကယ် ပေးပို့ခဲ့သည့်အတိုင်း |
+| `pipeline_provider_response`     | Raw upstream response                                                |
+| `pipeline_client_response`       | Caller ထံ ပြန်လည်ပေးအပ်ခဲ့သည့်အရာ                                    |
+| `pipeline_error`                 | မအောင်မြင်သော call အတွက် pipeline-level error အသေးစိတ်               |
+| `bodies_truncated`               | အထက်ပါ field တစ်ခုခုက `maxBodyBytes` ကို ထိသည့်အခါ True              |
 
-ဤအချက်အလက်များသည် prompt content ဖြစ်သောကြောင့် ပုံသေအားဖြင့် **ပိတ်ထားပြီး** destination တစ်ခုစီအလိုက် ရွေးချယ်နိုင်ရန် တမင်ဒီဇိုင်းပြုလုပ်ထားသည်။
-ပို့ဆောင်သည့်အရာသည် dashboard တွင် ပြသသည့်အရာနှင့် တူညီသည်။ အကြောင်းမှာ နှစ်ခုစလုံးသည် `getCallLogById` မှတစ်ဆင့် ဖတ်ရှုသောကြောင့်ဖြစ်သည်။ payload များကို
-ရေးသွင်းသည့်အချိန်တွင် PII-sanitised နှင့် secret-redacted လုပ်ထားပြီးဖြစ်ကာ၊ `noLog` API key ဖြင့် ပြုလုပ်သည့် ခေါ်ဆိုမှုတွင်
-payload လုံးဝမသိမ်းဆည်းသောကြောင့် export လုပ်ရန် အချက်အလက် မရှိပါ။
+၎င်းသည် prompt အကြောင်းအရာဖြစ်သောကြောင့် **မူလအတိုင်း ပိတ်ထားပြီး** destination တစ်ခုချင်းစီအလိုက် ရည်ရွယ်ချက်ရှိရှိ ရွေးချယ်နိုင်စေထားသည်။
+ပို့လိုက်သည့်အရာသည် dashboard က ပြသသည့်အရာနှင့် တူညီသည်၊ အကြောင်းမှာ export နှင့် `getCallLogById` တို့သည် detail
+resolution ကို မျှဝေအသုံးပြုသောကြောင့်ဖြစ်သည်- payload များကို
+ရေးသားသိမ်းဆည်းသည့်အချိန်တွင် PII-sanitise နှင့် secret-redact လုပ်ပြီးဖြစ်ကာ
+`noLog` API key ဖြင့် ပြုလုပ်သော call တစ်ခုသည် မည်သည့် payload ကိုမျှ သိမ်းဆည်းခြင်းမရှိသဖြင့် export လုပ်ရန် ဘာမျှမရှိပါ။
 
-Payload များကို filesystem artifact မှ row တစ်ခုချင်းစီအလိုက် ဖတ်ရှုသောကြောင့် ၎င်းတို့ကို တောင်းဆိုထားသည့် destination များအတွက်သာ
-hydration ကို လုပ်ဆောင်သည်။ artifact ပျောက်ဆုံးနေသော သို့မဟုတ် ပျက်စီးနေသော row သည် batch ကို မအောင်မြင်စေဘဲ cursor ကို ရပ်တန့်မထားစေရန်
+Payload များကို filesystem artifact မှ row တစ်ခုချင်းစီအလိုက် ဖတ်ယူသောကြောင့် ၎င်းတို့ကို တောင်းဆိုထားသည့် destination များအတွက်သာ
+hydration ကို လုပ်ဆောင်သည်။ Artifact ပျောက်ဆုံးနေခြင်း သို့မဟုတ် ပျက်စီးနေခြင်းရှိပါက batch ကို မအောင်မြင်စေဘဲ cursor ကို ပိတ်မိစေခြင်းမှ ရှောင်ရှားရန်
 ၎င်း၏ summary ကို null payload များဖြင့် export လုပ်သည်။
 
-`maxBodyBytes` (ပုံသေ 262144) သည် field တစ်ခုစီ၏ အရွယ်အစားကို ကန့်သတ်သည်။ ပိုရှည်သော payload များကို
-**ဖယ်ရှားမည့်အစား ဖြတ်တောက်သည်** — ဖြတ်တောက်ထားသည့် prompt တစ်ခုသည်ပင် "ဘာမေးခဲ့သလဲ" ဆိုသည်ကို ဖြေဆိုနိုင်ဆဲဖြစ်သည် — ထို့နောက် row ကို
-`bodies_truncated` ဖြင့် အမှတ်အသားပြုသည်။ Stream လုပ်ထားသည့် chunk-by-chunk delta များကို export မလုပ်ပါ။ စုစည်းပြီးသား response သည်
-`pipeline_provider_response` နှင့် `pipeline_client_response` တွင် ပါဝင်ပြီးဖြစ်သည်။
+`maxBodyBytes` (မူလတန်ဖိုး 262144) သည် field တစ်ခုချင်းစီကို ကန့်သတ်သည်။ ပိုရှည်သော payload များကို **ဖယ်ရှားပစ်မည့်အစား
+ဖြတ်တောက်သည်** — ဖြတ်တောက်ထားသော prompt တစ်ခုသည်ပင် "ဘာကို မေးခဲ့သလဲ" ဆိုသည်ကို ဖြေဆိုနိုင်ဆဲဖြစ်သည် — ထို့အပြင် row ကို
+`bodies_truncated` ဖြင့် အမှတ်အသားပြုသည်။ Stream လုပ်ထားသော chunk-by-chunk delta များကို export မလုပ်ပါ၊ စုစည်းပြီးသား response သည်
+`pipeline_provider_response` နှင့် `pipeline_client_response` ထဲတွင် ရှိပြီးဖြစ်သည်။
 
 ---
 
@@ -84,17 +161,22 @@ hydration ကို လုပ်ဆောင်သည်။ artifact ပျေ�
 | Destination contract | `src/lib/logExport/types.ts`                 |
 | Registry             | `src/lib/logExport/registry.ts`              |
 | Secret ကိုင်တွယ်မှု  | `src/lib/logExport/secrets.ts`               |
-| Runner (cursor loop) | `src/lib/logExport/runner.ts`                |
+| Runner (parent IPC)  | `src/lib/logExport/runner.ts`                |
+| Process lifecycle    | `src/lib/logExport/childRunner.ts`           |
+| Child entry          | `src/lib/logExport/exportChild.ts`           |
+| Read-only opener     | `src/lib/db/logExportReadOnly.ts`            |
+| Shared query/mapping | `src/lib/usage/callLogExportQueries.ts`      |
+| Detail resolver      | `src/lib/usage/callLogDetailResolver.ts`     |
 | API projection       | `src/lib/logExport/presenter.ts`             |
 | BigQuery destination | `src/lib/logExport/destinations/bigquery.ts` |
 | Google SA auth       | `src/lib/logExport/googleServiceAccount.ts`  |
 | Call-log source      | `src/lib/usage/callLogExportSource.ts`       |
-| ဒေတာသိမ်းဆည်းမှု     | `src/lib/db/logExportDestinations.ts`        |
+| Persistence          | `src/lib/db/logExportDestinations.ts`        |
 | Cron job             | `src/lib/jobs/logExportJob.ts`               |
 | REST layer           | `src/app/api/log-export/`                    |
 | Dashboard စာမျက်နှာ  | `src/app/(dashboard)/dashboard/log-export/`  |
 
-Schema: `src/lib/db/migrations/170_log_export_destinations.sql`။
+Schema: `src/lib/db/migrations/170_log_export_destinations.sql`.
 
 ---
 

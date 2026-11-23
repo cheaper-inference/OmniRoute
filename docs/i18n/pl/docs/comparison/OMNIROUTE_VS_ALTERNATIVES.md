@@ -39,11 +39,11 @@ Obiektywne porównanie funkcji z popularnymi routerami AI typu open source.
 
 ## Kiedy wybrać OmniRoute
 
-- Self-hostujesz i chcesz **maksymalnego pokrycia dostawców** (329 wpisów katalogu, 155 oznaczone free/no-auth)
-- Potrzebujesz **wbudowanego serwera MCP** (narzędzia LLM, pamięć, skills wystawione jako tools)
-- Potrzebujesz **protokołu A2A** do workflow agent-to-agent
-- Chcesz **fingerprint stealth** (JA3/JA4), by unikać wykrycia przez upstream CAPTCHA
-- Potrzebujesz **funkcji enterprise** (guardrails, evals, audit trail) bez rachunku SaaS
+- Samodzielnie hostujesz rozwiązanie i zależy Ci na **maksymalnym pokryciu dostawców** (374 dostawców, 155 bezpłatnych pozycji w katalogu, niewymagających uwierzytelniania)
+- Potrzebujesz **wbudowanego serwera MCP** (narzędzia LLM, pamięć i umiejętności udostępniane jako narzędzia)
+- Potrzebujesz **protokołu A2A** do przepływów pracy między agentami
+- Zależy Ci na **maskowaniu odcisku palca** (JA3/JA4), aby uniknąć wykrycia przez systemy CAPTCHA dostawców nadrzędnych
+- Potrzebujesz **funkcji klasy korporacyjnej** (mechanizmy zabezpieczające, ewaluacje, ścieżka audytu) bez opłat za SaaS
 
 ## Kiedy wybrać LiteLLM
 

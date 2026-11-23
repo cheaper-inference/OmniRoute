@@ -39,10 +39,10 @@ Perbandingan fitur objektif dengan router AI sumber terbuka populer.
 
 ## Kapan memilih OmniRoute
 
-- Anda melakukan hosting sendiri dan menginginkan **cakupan penyedia maksimum** (329 penyedia, 155 entri katalog gratis/tanpa autentikasi)
+- Anda melakukan self-hosting dan menginginkan **cakupan penyedia maksimum** (374 penyedia, 155 entri katalog gratis/tanpa autentikasi)
 - Anda memerlukan **server MCP bawaan** (alat LLM, memori, dan keterampilan yang diekspos sebagai alat)
 - Anda memerlukan **protokol A2A** untuk alur kerja antaragen
-- Anda menginginkan **penyamaran sidik jari** (JA3/JA4) untuk menghindari deteksi oleh CAPTCHA upstream
+- Anda menginginkan **penyamaran sidik jari** (JA3/JA4) agar tidak terdeteksi oleh CAPTCHA upstream
 - Anda memerlukan **fitur perusahaan** (guardrail, evaluasi, jejak audit) tanpa tagihan SaaS
 
 ## Kapan memilih LiteLLM

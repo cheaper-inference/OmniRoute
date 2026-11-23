@@ -96,42 +96,44 @@ Kimi pakkuja sees kuvab ainult Kimi mudelid.
 
 ## Sisseelamisplokk töölaual
 
-Claude’i tööriistakaart (**Töölaud → CLI-kood**) kuvab selle eksemplari täpse `settings.json`-i fragmendi
-tuvastusaliase teabenupu kõrval koos kopeerimisnupuga:
+Claude'i tööriistakaart (**Töölaud → CLI-kood**) kuvab selle eksemplari täpse `settings.json` fragmendi avastamisaliase teabenupu kõrval koos kopeerimisnupuga:
 
 ```jsonc
 {
   "env": {
-    "ANTHROPIC_BASE_URL": "http://<your OmniRoute>:20128",
-    "ANTHROPIC_AUTH_TOKEN": "<your OmniRoute API key>",
+    "ANTHROPIC_BASE_URL": "http://<teie OmniRoute>:20128",
+    "ANTHROPIC_AUTH_TOKEN": "<teie OmniRoute'i API-võti>",
     "CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY": "1",
   },
 }
 ```
 
-Baas-URL on kaardi tuvastatud aadress (sealhulgas teie sisestatud kohandatud väärtus), mis on juba
-normaliseeritud — ilma `/v1` järelliite ja lõpetava kaldkriipsuta. **Võtit ei kuvata kunagi**: plokk sisaldab
-kohatäitjat, mistõttu ekraanipilt ega kleebitud koodilõik ei saa võtit lekitada. Asendage see oma võtmega.
+Baas-URL on kaardi lahendatud aadress (sealhulgas teie sisestatud kohandatud alistus), mis on juba normaliseeritud — ilma `/v1` järelliiteta ja lõpetava kaldkriipsuta. **Võtit ei kuvata kunagi**: plokk sisaldab kohatäidet, mistõttu ei saa kuvatõmmis ega kleebitud koodilõik võtit lekitada. Asendage kohatäide oma võtmega.
 
-Lisage `CLAUDE_CODE_AUTO_COMPACT_WINDOW` sama `env` ploki alla iga mudeli puhul, mille tegelik
-kontekstiaken ei ole 200K — Claude Code eeldab 200K iga ID puhul, mida see ei tunne, mistõttu
-automaatne tihendamine käivitub muidu valel hetkel (vt eelmise jaotise hoiatust).
-Koodilõigu koostaja aktsepteerib ka seda väärtust, seega saab sihtmudeli akna suurust teadev kutsuja
-selle otse väljastada.
+Lisage `CLAUDE_CODE_AUTO_COMPACT_WINDOW` samasse `env` plokki iga mudeli puhul, mille tegelik kontekstiaken ei ole 200K — Claude Code eeldab 200K iga tundmatu ID puhul, mistõttu käivitub automaatne tihendamine muidu valel hetkel (vt eelmise jaotise hoiatust). Koodilõigu koostaja aktsepteerib ka seda väärtust, nii et sihtmudeli akna suurust teadev kutsuja saab selle otse väljastada.
 
-Allikas: `src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet` (puhas,
-ühiktestidega kaetud koostaja), mida renderdab `ClaudeGatewayOnboardingBlock`.
+Allikas: `src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet` (puhas koostaja, ühiktestitud), mida renderdab `ClaudeGatewayOnboardingBlock`.
+
+### Ühe konto kinnistamine (valikuline)
+
+Kõigi Claude Code'i päringute saatmiseks ühe kindla teenusepakkuja konto kaudu lisage samasse `env` plokki `x-omniroute-connection` päis muutuja `ANTHROPIC_CUSTOM_HEADERS` kaudu:
+
+```jsonc
+"ANTHROPIC_CUSTOM_HEADERS": "x-omniroute-connection: <connection id>"
+```
+
+Kopeerige ID teenusepakkuja lehel oleva ühendusrea `xxxxxxxx…` kiibilt. Kinnistamine rakendub ainult ühe mudeli ID-dele (`provider/model`), mitte kombinatsioonidele. Täpse varukäitumise kirjelduse leiate jaotisest [Konto kinnistamine päringu kaupa](../reference/API_REFERENCE.md#account-pinning-per-request).
 
 ---
 
 ## Profiilid (`CLAUDE_CONFIG_DIR`)
 
-Claude Code’il **puuduvad sisseehitatud profiilifailid** (erinevalt Codexi failist `~/.codex/<name>.config.toml`).
+Claude Code'il **puuduvad sisseehitatud profiilifailid** (erinevalt Codexi failist `~/.codex/<name>.config.toml`).
 Tavapärane mehhanism on `CLAUDE_CONFIG_DIR` — iga profiili jaoks eraldi konfiguratsioonikataloog,
 millest igaühel on oma `settings.json`, identimisteave, ajalugu ja vahemälu.
 
-`omniroute setup-claude` hangib aktiivse `/v1/models` kataloogi ja kirjutab iga
-mudeli kohta profiili asukohta `~/.claude/profiles/<name>/settings.json`, kasutades uuesti
+`omniroute setup-claude` hangib reaalajas `/v1/models` kataloogi ja kirjutab iga
+mudeli kohta ühe profiili asukohta `~/.claude/profiles/<name>/settings.json`, kasutades
 **samu nimesid nagu `setup-codex`** (`glm52`, `kimi-k27`, `deepseek-pro`, …):
 
 ```jsonc
@@ -149,18 +151,18 @@ mudeli kohta profiili asukohta `~/.claude/profiles/<name>/settings.json`, kasuta
 }
 ```
 
-> **Autentimistunnust ei kirjutata kunagi profiili.** Käivitage käsuga
-> `omniroute launch --profile <name>` (see sisestab `ANTHROPIC_AUTH_TOKEN` aktiivsest
-> kontekstist) või eksportige `ANTHROPIC_AUTH_TOKEN` ise ja käivitage
+> **Autentimistõendit ei kirjutata kunagi profiili.** Käivitage käsuga
+> `omniroute launch --profile <name>` (see sisestab aktiivsest kontekstist muutuja `ANTHROPIC_AUTH_TOKEN`)
+> või eksportige `ANTHROPIC_AUTH_TOKEN` ise ja käivitage
 > `CLAUDE_CONFIG_DIR=~/.claude/profiles/<name> claude`.
 
 **Automaatne sünkroonimine pärast mudelite tuvastamist (valikuline).** OmniRoute saab need samad
-`~/.claude/profiles/<name>/settings.json` failid automaatselt uuesti genereerida iga kord, kui teenusepakkuja mudelite
-sünkroonimine muudab aktiivset kataloogi — nii saavad uued või ümbernimetatud mudelid profiilid ilma käsku uuesti
-käivitamata. See on **vaikimisi välja lülitatud**: lülitage see sisse **CLI-koodi töölaualt** („CLI-profiilide
-automaatne sünkroonimine“ → Claude Code) või määrake `OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES=true` (see arvestab ka
-muutujaga `CLI_ALLOW_CONFIG_WRITES`, mis on vaikimisi sisse lülitatud). Kui see on lubatud, kirjutatakse ainult profiilifaile; see ei
-muuda kunagi teie aktiivset/vaikimisi Claude’i konfiguratsiooni, autentimist ega faili `~/.claude/settings.json`.
+`~/.claude/profiles/<name>/settings.json` failid automaatselt uuesti genereerida, kui teenusepakkuja mudelite
+sünkroonimine muudab reaalajas kataloogi — nii saavad uued või ümbernimetatud mudelid profiilid ilma käsku
+uuesti käivitamata. See on **vaikimisi välja lülitatud**: lülitage see sisse **CLI Code'i töölaual** („CLI profiilide
+automaatne sünkroonimine” → Claude Code) või määrake `OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES=true` (see arvestab ka
+muutujaga `CLI_ALLOW_CONFIG_WRITES`, mis on vaikimisi sisse lülitatud). Kui see on lubatud, kirjutatakse ainult profiilifaile;
+aktiivset/vaikimisi Claude'i konfiguratsiooni, autentimist ega faili `~/.claude/settings.json` ei muudeta kunagi.
 
 ### Profiilide genereerimine ja kasutamine
 
@@ -174,10 +176,14 @@ omniroute setup-claude --remote http://192.168.0.15:20128 --api-key oma_live_xxx
 # Ainult mõned teenusepakkujad
 omniroute setup-claude --only glm,kimi
 
+# Kirjuta profiilid ka kohaliku CLI teenusepakkujatele (zcode, auggie, devin-cli-agentic,
+# codex-app-server), mida selles hostis ei tuvastatud (kohaliku sihtmärgi puhul jäetakse vaikimisi vahele)
+omniroute setup-claude --include-local
+
 # Eelvaade ilma kirjutamata
 omniroute setup-claude --dry-run
 
-# Profiili käivitamine
+# Käivita profiil
 omniroute launch --profile kimi-k27
 ```
 

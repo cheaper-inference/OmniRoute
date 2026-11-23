@@ -47,6 +47,7 @@ import {
   validateDevinCloudAgentProvider,
   validateInnerAiProvider,
   validateNotionWebProvider,
+  validateSyntxProvider,
 } from "./validation/webProvidersB";
 import {
   validateHerokuProvider,
@@ -79,7 +80,7 @@ import {
   validateNousResearchProvider,
   validatePoeProvider,
 } from "./validation/audioMiscProviders";
-import { validateChatGptWebCodexProvider } from "./validation/chatgptWebCodex";
+import { validateTypesafeProvider } from "./validation/typesafe";
 import { validateZaiWebProvider } from "./validation/zaiWeb";
 import { validateSearchProvider, SEARCH_VALIDATOR_CONFIGS } from "./validation/searchProviders";
 import {
@@ -109,6 +110,7 @@ import {
 import { validateAiHordeProvider } from "./validation/aihorde";
 import { validateDifyProvider } from "./validation/dify";
 import { validateZyloApiProvider } from "./validation/zylo";
+import { validateInceptionProvider } from "./validation/inception";
 import { validateAdobeFireflyProvider } from "./validation/adobeFirefly";
 import {
   validateV0VercelProvider,
@@ -177,7 +179,16 @@ export async function validateFreebuffProvider({ apiKey }: { apiKey: string }) {
   }
 }
 
-export async function validateProviderApiKey({ provider, apiKey, providerSpecificData = {} }: any) {
+export async function validateProviderApiKey({
+  provider,
+  apiKey,
+  providerSpecificData = {},
+  // S-01 (#15159): forwarded to specialty validators that can reach a local spawn
+  // (currently only the devin cloud-agent CLI fallback). Remote-reachable routes
+  // pass `false` for non-loopback callers; direct/internal callers keep the
+  // permissive default. See validateDevinCloudAgentProvider for the rationale.
+  allowLocalSpawn = true,
+}: any) {
   provider = typeof provider === "string" ? resolveProviderId(provider) : provider;
   const requiresApiKey = !providerAllowsOptionalApiKey(provider);
   const isLocal = isLocalProvider(provider);
@@ -222,7 +233,10 @@ export async function validateProviderApiKey({ provider, apiKey, providerSpecifi
     // "devin" is the Cognition cloud-agent provider (distinct from the "devin-cli"
     // LLM/ACP provider, which is already registered in providerRegistry). Wired here
     // for parity with the "jules" cloud-agent entry above — see #6142.
-    devin: validateDevinCloudAgentProvider,
+    // S-01 (#15159): wrapped so the local CLI-spawn fallback receives allowLocalSpawn;
+    // a bare reference would silently drop the flag and let a remote caller spawn.
+    devin: ({ apiKey, allowLocalSpawn }: any) =>
+      validateDevinCloudAgentProvider({ apiKey, allowLocalSpawn }),
     auggie: validateAuggieProvider,
     "cursor-api": validateCursorApiProvider,
     aihorde: validateAiHordeProvider,
@@ -253,6 +267,9 @@ export async function validateProviderApiKey({ provider, apiKey, providerSpecifi
     // the zylo/<model> routing ids), and the alias must not fall back to the open-catalog probe.
     // Same shape as the adobe-firefly/firefly pair above.
     zylo: validateZyloApiProvider,
+    // Inception Labs serves GET /v1/models without authentication (200 for any key), so the
+    // generic OpenAI-like probe greened bogus keys. Probe the authenticated chat route instead.
+    inception: validateInceptionProvider,
     deepgram: validateDeepgramProvider,
     assemblyai: validateAssemblyAIProvider,
     "rev-ai": validateRevAiProvider,
@@ -314,13 +331,20 @@ export async function validateProviderApiKey({ provider, apiKey, providerSpecifi
     nlpcloud: validateNlpCloudProvider,
     oneminai: validateOneMinAiProvider,
     runwayml: validateRunwayProvider,
+    typesafe: ({ apiKey }: any) => validateTypesafeProvider({ apiKey }),
     snowflake: validateSnowflakeProvider,
     gigachat: validateGigachatProvider,
     "deepseek-web": validateDeepSeekWebProvider,
     "zai-web": validateZaiWebProvider,
     "grok-web": validateGrokWebProvider,
     "kimi-web": validateKimiWebProvider,
-    "chatgpt-web-codex": validateChatGptWebCodexProvider,
+    "chatgpt-web-codex": (input: {
+      apiKey?: string;
+      providerSpecificData?: Record<string, unknown>;
+    }) =>
+      import("./validation/chatgptWebCodex").then((mod) =>
+        mod.validateChatGptWebCodexProvider(input)
+      ),
     "perplexity-web": validatePerplexityWebProvider,
     "blackbox-web": validateBlackboxWebProvider,
     "muse-spark-web": validateMuseSparkWebProvider,
@@ -333,6 +357,8 @@ export async function validateProviderApiKey({ provider, apiKey, providerSpecifi
     "copilot-m365-web": validateCopilotM365WebProvider,
     "copilot-web": validateCopilotWebProvider,
     "t3-web": validateT3WebProvider,
+    syntx: validateSyntxProvider,
+    stx: validateSyntxProvider,
     "azure-openai": validateAzureOpenAIProvider,
     "azure-ai": validateAzureAiProvider,
     "voyage-ai": ({ apiKey, providerSpecificData }: any) => {
@@ -374,7 +400,7 @@ export async function validateProviderApiKey({ provider, apiKey, providerSpecifi
         id,
         ({ apiKey, providerSpecificData }: any) => {
           const { url, init } = configFn(apiKey, providerSpecificData);
-          return validateSearchProvider(url, init, providerSpecificData, isLocal);
+          return validateSearchProvider(url, init, providerSpecificData, isLocal, id);
         },
       ])
     ),
@@ -382,7 +408,11 @@ export async function validateProviderApiKey({ provider, apiKey, providerSpecifi
 
   if (SPECIALTY_VALIDATORS[provider]) {
     try {
-      return await SPECIALTY_VALIDATORS[provider]({ apiKey, providerSpecificData });
+      return await SPECIALTY_VALIDATORS[provider]({
+        apiKey,
+        providerSpecificData,
+        allowLocalSpawn,
+      });
     } catch (error: any) {
       return toValidationErrorResult(error);
     }

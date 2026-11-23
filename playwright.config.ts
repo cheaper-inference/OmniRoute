@@ -58,5 +58,8 @@ export default defineConfig({
     url: webServerReadyUrl,
     reuseExistingServer: !process.env.CI,
     timeout: Number.isFinite(playwrightWebServerTimeout) ? playwrightWebServerTimeout : 900_000,
+    // Opt-in: Playwright discards the webServer's stdout by default, which hides both the build
+    // and the server's own logs when the readiness wait times out (nightly a11y, #16853).
+    stdout: process.env.OMNIROUTE_PLAYWRIGHT_WEB_SERVER_STDOUT === "pipe" ? "pipe" : "ignore",
   },
 });

@@ -10,6 +10,7 @@
 import { v7 as uuidv7 } from "uuid";
 import { BaseExecutor, type ExecuteInput } from "./base.ts";
 import { tlsFetchLMArena, TlsClientUnavailableError } from "../services/lmarenaTlsClient.ts";
+import { currentAppliedProxySink } from "../utils/proxyFetch.ts";
 import { readLMArenaCookie, reconstructLMArenaCookie } from "./lmarena/cookie.ts";
 import { sanitizeLMArenaError } from "./lmarena/error.ts";
 import {
@@ -24,6 +25,7 @@ import {
   type LMArenaModelMetadata,
 } from "./lmarena/models.ts";
 import { formatArenaPrompt, parseArenaSSE } from "./lmarena/stream.ts";
+import { resolveLMArenaClientInteraction } from "./lmarena/clientInteraction.ts";
 import {
   buildArenaUpstreamHttpResponse,
   createOpenAIArenaStream,
@@ -78,6 +80,12 @@ function readRecaptchaToken(credentials: unknown, body: unknown): string | null 
   return fromObj(credentials) ?? fromObj(body);
 }
 
+// Publish the received status so proxy health counts it as upstream.
+function recordLMArenaUpstreamStatus(status: number): void {
+  const sink = currentAppliedProxySink();
+  if (sink && status >= 400) sink.upstreamStatus = status;
+}
+
 export class LMArenaExecutor extends BaseExecutor {
   constructor(providerConfig = {}) {
     super("lmarena", { format: "openai", ...providerConfig });
@@ -108,6 +116,9 @@ export class LMArenaExecutor extends BaseExecutor {
     const messages = Array.isArray(openaiBody.messages)
       ? (openaiBody.messages as OpenAIMessage[])
       : [];
+    // `cx` only when the operator supplied providerSpecificData.cx, or the synthesised
+    // blob behind the default-off LMARENA_SYNTHESIZED_CX_ENABLED flag (#16895).
+    const cx = resolveLMArenaClientInteraction(credentials);
     return {
       id: uuidv7(),
       mode: "direct-battle",
@@ -121,6 +132,7 @@ export class LMArenaExecutor extends BaseExecutor {
       },
       modality: "chat",
       recaptchaV3Token: readRecaptchaToken(credentials, body),
+      ...(cx ? { cx } : {}),
     };
   }
 
@@ -185,6 +197,7 @@ export class LMArenaExecutor extends BaseExecutor {
       signal: ctx.signal,
       stream: ctx.stream,
     });
+    recordLMArenaUpstreamStatus(tlsResult.status);
 
     const failed = mapFailedTlsResult({
       status: tlsResult.status,

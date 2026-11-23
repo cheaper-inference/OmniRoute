@@ -421,8 +421,7 @@ export function countAuditLog(filter: AuditLogFilter = {}) {
   ensureAuditLogSchema(db);
   const { where, params } = buildAuditLogQuery(filter);
   const row = db.prepare(`SELECT COUNT(*) as count FROM audit_log ${where}`).get(...params) as
-    | { count?: number }
-    | undefined;
+    { count?: number } | undefined;
   return Number(row?.count || 0);
 }
 
@@ -493,6 +492,12 @@ export async function cleanupExpiredLogs() {
   // usage_history before the dashboard-based runAutoCleanup() could run. We now honor the
   // dashboard retention per table when the operator did not set the env var, while still
   // letting an explicit env var win (and falling back to env for non-DB deployments).
+  // NOTE (#16302): this startup pass reads the MERGED settings (DEFAULT_DATABASE_SETTINGS
+  // fills in unsaved keys), whereas the periodic request-log rotation resolves through
+  // resolveCallLogRetentionDays() (src/lib/usage/callLogRetention.ts), which honors only
+  // the dashboard keys the operator actually persisted and otherwise falls back to the env
+  // variable / 7 days. Both share the env-override-first precedence; they differ only when
+  // nothing was saved in the dashboard. Keep this in mind before tightening either side.
   const callOverride = getCallLogRetentionDaysOverride();
   const appOverride = getAppLogRetentionDaysOverride();
   let dbRetention: { usageHistory: number; callLogs: number; mcpAudit: number } | null = null;

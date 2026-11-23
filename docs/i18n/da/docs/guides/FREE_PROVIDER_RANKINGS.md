@@ -13,20 +13,20 @@
 
 ## Hvad det er
 
-OmniRoute registrerer 329 udbydere, herunder 155 katalogposter markeret som **gratis/uden godkendelse**
+OmniRoute registrerer 374 udbydere, herunder 155 katalogposter markeret som **gratis/uden godkendelse**
 (uden godkendelse,
-OAuth på gratisniveau eller API-nøgle på gratisniveau — se
-[Vejledning til gratisniveauer](../getting-started/FREE-TIERS-GUIDE.md) og den komplette
-[mappe over gratisniveauer](../reference/FREE_TIERS.md)). Udfordringen er, at gratis udbyderes
-modelkvalitet varierer meget. En udbyder uden godkendelse, der tilbyder en banebrydende model, er langt mere nyttig
+gratis OAuth-niveau eller gratis API-nøgleniveau — se
+[Guiden til gratis niveauer](../getting-started/FREE-TIERS-GUIDE.md) og den komplette
+[oversigt over gratis niveauer](../reference/FREE_TIERS.md)). Udfordringen er, at gratis udbydere varierer
+markant i modelkvalitet. En udbyder uden godkendelse, der tilbyder en frontlinjemodel, er langt mere nyttig
 end en, der tilbyder en lille ældre model.
 
-**Rangering af gratis udbydere** besvarer spørgsmålet "**hvilken gratis udbyder giver mig den bedste model?**" ved at
-sammenkoble hver gratis udbyders katalog med **crowdsourcede kvalitetsscorer** fra
-**Arena AI-resultatlisten** (ELO baseret på menneskelige præferencer, samme idé som bag LMArena-
+**Rangeringer af gratis udbydere** besvarer spørgsmålet "**hvilken gratis udbyder giver mig den bedste model?**" ved at
+sammenkæde hver gratis udbyders katalog med **crowdsourcede kvalitetsscorer** fra
+**Arena AI-resultattavlen** (ELO baseret på menneskelige præferencer, samme idé som ligger bag LMArena-
 chatbotarenaen). Udbyderne rangeres derefter efter styrken af deres **bedste gratis model**.
 
-Rangeringen beregnes ud fra tre reelle kilder:
+Rangeringen beregnes ud fra tre faktiske kilder:
 
 1. Listerne over gratis udbydere — `NOAUTH_PROVIDERS` samt poster i `OAUTH_PROVIDERS` /
    `APIKEY_PROVIDERS`, der er markeret med `hasFree`
@@ -36,7 +36,7 @@ Rangeringen beregnes ud fra tre reelle kilder:
 3. ELO-afledte scorer for opgaveegnethed, som gemmes i DB-tabellen `model_intelligence` af
    Arena ELO-synkroniseringsmotoren (`src/lib/arenaEloSync.ts`).
 
-Sammenkoblingslogikken findes i `src/lib/freeProviderRankings.ts`.
+Sammenkædningslogikken findes i `src/lib/freeProviderRankings.ts`.
 
 ---
 

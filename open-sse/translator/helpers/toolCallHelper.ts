@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { coerceToolCallArguments } from "./toolArguments.ts";
 
 // Tool call helper functions for translator
 
@@ -196,8 +197,11 @@ export function ensureToolCallIds<T extends ToolCallBody>(
       if (!tc.type) {
         tc.type = "function";
       }
-      if (tc.function?.arguments && typeof tc.function.arguments !== "string") {
-        tc.function.arguments = JSON.stringify(tc.function.arguments);
+      // Strict upstreams require a valid JSON string even for zero-argument calls
+      // (missing/null/"" → "{}") and reject replayed partial/freeform fragments.
+      // Never fabricate a missing `function` object.
+      if (tc.function && typeof tc.function === "object") {
+        tc.function.arguments = coerceToolCallArguments(tc.function.arguments);
       }
       if (use9CharId) {
         let newId: string;

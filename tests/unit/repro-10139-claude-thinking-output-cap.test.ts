@@ -35,13 +35,25 @@ const { setModelCapabilityOverride, removeModelCapabilityOverride } =
   await import("../../src/lib/db/modelCapabilityOverrides.ts");
 const { fitThinkingToMaxTokens } =
   await import("../../open-sse/translator/request/openai-to-claude/thinkingBudget.ts");
+const { capMaxOutputTokens } = await import("../../src/lib/modelCapabilities.ts");
 
-const PROVIDER = "opencode-go";
-const MODEL = "qwen3.7-plus";
+// Override-only regression fixtures must not acquire a cap when a real provider's
+// catalog is updated. Keep the reported model's catalog behavior in its own tests.
+const PROVIDER = "fixture-provider-10139";
+const MODEL = "fixture-output-model-10139";
 const TARGET = `${PROVIDER}/${MODEL}`;
 const REAL_UPSTREAM_OUTPUT_CAP = 131072; // per reporter's boundary test (131072 -> 200, 131073 -> 400)
 const CALLER_MAX_TOKENS = 64000; // DEFAULT_MAX_TOKENS when the client sends none
 const THINKING_BUDGET = 131072; // effortBudgetMap.high
+
+test.beforeEach(() => {
+  assert.equal(capMaxOutputTokens(MODEL), null, "fixture has no model-only catalog cap");
+  assert.equal(
+    capMaxOutputTokens({ provider: PROVIDER, model: MODEL }),
+    null,
+    "fixture has no provider catalog cap or leftover override"
+  );
+});
 
 test.after(() => {
   core.resetDbInstance();
@@ -95,7 +107,7 @@ test("#10139: passing the routed provider resolves the override and clamps max_t
   }
 });
 
-test("#10139: no override present, provider argument is a no-op (unchanged behavior)", () => {
+test("#10139: without an override or catalog cap, provider argument is a no-op", () => {
   const withoutProvider = fitThinkingToMaxTokens(MODEL, CALLER_MAX_TOKENS, {
     type: "enabled",
     budget_tokens: THINKING_BUDGET,
@@ -107,4 +119,43 @@ test("#10139: no override present, provider argument is a no-op (unchanged behav
     PROVIDER
   );
   assert.deepEqual(withProvider, withoutProvider);
+  assert.equal(withProvider.maxTokens, CALLER_MAX_TOKENS + THINKING_BUDGET);
+  assert.equal(withProvider.thinking?.budget_tokens, THINKING_BUDGET);
+});
+
+test("#10139: the reported model's provider catalog cap applies without an override", () => {
+  assert.equal(capMaxOutputTokens({ provider: "opencode-go", model: "qwen3.7-plus" }), 65536);
+  const result = fitThinkingToMaxTokens(
+    "qwen3.7-plus",
+    CALLER_MAX_TOKENS,
+    { type: "enabled", budget_tokens: THINKING_BUDGET },
+    "opencode-go"
+  );
+  assert.deepEqual(result, {
+    maxTokens: 65536,
+    thinking: { type: "enabled", budget_tokens: 65536 - CALLER_MAX_TOKENS },
+  });
+});
+
+test("#10139: a provider override supersedes the catalog cap and cleanup restores it", () => {
+  const target = "opencode-go/qwen3.7-plus";
+  assert.ok(setModelCapabilityOverride(target, "max_output_tokens", REAL_UPSTREAM_OUTPUT_CAP));
+  try {
+    const result = fitThinkingToMaxTokens(
+      "qwen3.7-plus",
+      CALLER_MAX_TOKENS,
+      { type: "enabled", budget_tokens: THINKING_BUDGET },
+      "opencode-go"
+    );
+    assert.deepEqual(result, {
+      maxTokens: REAL_UPSTREAM_OUTPUT_CAP,
+      thinking: {
+        type: "enabled",
+        budget_tokens: REAL_UPSTREAM_OUTPUT_CAP - CALLER_MAX_TOKENS,
+      },
+    });
+  } finally {
+    removeModelCapabilityOverride(target, "max_output_tokens");
+  }
+  assert.equal(capMaxOutputTokens({ provider: "opencode-go", model: "qwen3.7-plus" }), 65536);
 });

@@ -24,6 +24,10 @@ export const CREDENTIAL_PATTERNS: CredentialPattern[] = [
   // look-alike costs nothing; one that under-redacts leaks a credential.
   { name: "groq", regex: /\bgsk_[A-Za-z0-9]{20,}/g, replacement: "[REDACTED:groq]" },
   { name: "xai", regex: /\bxai-[A-Za-z0-9]{20,}/g, replacement: "[REDACTED:xai]" },
+  // Same family: house access tokens (`oma_live_` + base64url, 43 chars in
+  // production) had no entry either. `{20,}` spares the short placeholders
+  // quoted in setup guides (`oma_live_xxx`) and short test fixtures.
+  { name: "oma_live", regex: /\boma_live_[A-Za-z0-9_-]{20,}/g, replacement: "[REDACTED:oma]" },
   // {20,} rather than the exact {35} of a standard 39-char Google API key. #12506 added
   // this pattern with the exact length; #12620 landed the anti-drift test that asserts
   // /\bAIza[A-Za-z0-9_-]{20,}/ must not survive. Anything shorter or longer than 39 was

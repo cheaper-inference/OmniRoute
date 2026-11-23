@@ -37,13 +37,13 @@ Objektív funkció-összehasonlítás népszerű, nyílt forráskódú AI-router
 | **Alagúttámogatás (Cloudflared, Tailscale, Ngrok)**            |                      ✅                       |       ❌       |        n/a        |     n/a      |
 | **Licenc**                                                     |                      MIT                      |      MIT       |   zárt forrású    | zárt forrású |
 
-## Mikor válaszd az OmniRoute-ot?
+## Mikor válassza az OmniRoute-ot
 
-- Saját infrastruktúrán üzemeltetsz, és **maximális szolgáltatói lefedettséget** szeretnél (329 szolgáltató, 155 ingyenes/hitelesítést nem igénylő katalógusbejegyzés)
-- **Beépített MCP-szerverre** van szükséged (LLM-eszközök, memória és képességek eszközökként elérhetővé téve)
-- **A2A protokollra** van szükséged az ügynökök közötti munkafolyamatokhoz
-- **Ujjlenyomat-elrejtést** (JA3/JA4) szeretnél, hogy elkerüld a felsőbb szintű CAPTCHA-rendszerek általi észlelést
-- **Nagyvállalati funkciókra** (védőkorlátok, kiértékelések, auditnapló) van szükséged SaaS-számla nélkül
+- Saját infrastruktúrán üzemelteti, és **maximális szolgáltatói lefedettséget** szeretne (374 szolgáltató, 155 ingyenes/hitelesítés nélküli katalógusbejegyzés)
+- **Beépített MCP-kiszolgálóra** van szüksége (LLM-eszközök, memória és eszközként elérhetővé tett készségek)
+- Az ügynökök közötti munkafolyamatokhoz **A2A protokollra** van szüksége
+- **Ujjlenyomat-alapú rejtőzködést** (JA3/JA4) szeretne a felsőbb szintű CAPTCHA-rendszerek általi észlelés elkerülésére
+- **Vállalati funkciókra** (védőkorlátok, kiértékelések, auditnapló) van szüksége SaaS-előfizetési díj nélkül
 
 ## Mikor válaszd a LiteLLM-et?
 

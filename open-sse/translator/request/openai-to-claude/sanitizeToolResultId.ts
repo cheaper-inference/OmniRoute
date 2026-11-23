@@ -11,3 +11,18 @@ export function sanitizeToolResultId(rawId: unknown): string | null {
   // and throw. Coerce instead so a numeric id (some clients send one) sanitizes normally.
   return sanitizeToolId(typeof rawId === "string" ? rawId : String(rawId));
 }
+
+// Resolve the tool_use_id for a tool result against the preceding assistant turn's
+// still-unanswered tool_use ids (already sanitized, in emission order; mutated in place).
+// A present id is sanitized as above and marked answered. A missing id is paired with the
+// oldest unanswered call (FIFO) so the real tool output is kept instead of dropped; null
+// only when nothing is pending, which keeps the "skip orphan tool_result" guard.
+export function resolveToolResultId(rawId: unknown, pendingToolUseIds: string[]): string | null {
+  const sanitized = sanitizeToolResultId(rawId);
+  if (sanitized) {
+    const index = pendingToolUseIds.indexOf(sanitized);
+    if (index !== -1) pendingToolUseIds.splice(index, 1);
+    return sanitized;
+  }
+  return pendingToolUseIds.shift() ?? null;
+}

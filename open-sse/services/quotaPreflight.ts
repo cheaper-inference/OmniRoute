@@ -21,11 +21,20 @@
 import { isCompatibleProviderConnectionId } from "@/shared/utils/compatibleProviderId";
 import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
 import { isClaudeExtraUsageAllowed } from "@/lib/providers/claudeExtraUsage";
+import { isCodexQuotaFilteringDisabled } from "@/lib/providers/codexQuotaFiltering";
 // #14359 — import the leaf, NOT "@/domain/quotaCache": quotaCache → usage.ts → usage/openrouter.ts →
 // openrouterQuotaFetcher.ts → this file, so importing quotaCache here closes an ESM init cycle
 // that deadlocks the esbuild MCP bundle (tests/unit/build/mcp-bundle-startup.test.ts).
 import { isQuotaHealthy } from "@/domain/quotaCacheState";
-import { fetchNewApiAggregatorQuota } from "./newApiAggregatorQuotaFetcher.ts";
+import {
+  hasCodexPaidCredits,
+  isCodexPaidCreditsEnabled,
+  type CodexPaidCredits,
+} from "@/lib/providers/codexPaidCredits";
+import {
+  fetchNewApiAggregatorQuota,
+  invalidateNewApiAggregatorQuotaCache,
+} from "./newApiAggregatorQuotaFetcher.ts";
 import {
   isAntigravityQuotaProvider,
   selectAntigravityQuotaWindowNames,
@@ -78,6 +87,15 @@ export interface QuotaInfo {
   windowMonthly?: QuotaWindowInfo;
   /** True when the upstream usage endpoint explicitly reports exhausted quota. */
   limitReached?: boolean;
+  /** Separate from subscription percentages and banked quota-reset coupons. */
+  paidCredits?: CodexPaidCredits;
+  /**
+   * True when the provider reports NO cap at all (every reported window is unlimited). It is
+   * a real, known reading of full headroom, not a failed one: `null` from a quota fetcher
+   * means "could not read it", so unlimited plans are marked here instead of returning null
+   * (#15347). `percentUsed` is 0 on such a snapshot.
+   */
+  unlimited?: boolean;
 }
 
 export type QuotaFetcher = (
@@ -123,6 +141,42 @@ export function registerQuotaFetcher(provider: string, fetcher: QuotaFetcher): v
 
 export function getQuotaFetcher(provider: string): QuotaFetcher | undefined {
   return quotaFetcherRegistry.get(provider) || quotaFetcherRegistry.get(provider.toLowerCase());
+}
+
+/**
+ * Per-provider cache invalidators used by the upstream-429 path. Each bespoke
+ * quota fetcher registers here how to drop its cached snapshot for one
+ * connection, under the same provider ids (aliases included) it passes to
+ * `registerQuotaFetcher`. `invalidateQuotaCacheOnStatus` resolves the
+ * invalidator per request; the generic quota cache stays the fallback for
+ * providers without one.
+ */
+type QuotaCacheInvalidator = (connectionId: string) => void;
+
+const quotaCacheInvalidatorRegistry = new Map<string, QuotaCacheInvalidator>();
+
+export function registerQuotaCacheInvalidator(
+  provider: string,
+  invalidator: QuotaCacheInvalidator
+): void {
+  quotaCacheInvalidatorRegistry.set(provider, invalidator);
+}
+
+export function getQuotaCacheInvalidator(provider: string): QuotaCacheInvalidator | undefined {
+  return (
+    quotaCacheInvalidatorRegistry.get(provider) ||
+    quotaCacheInvalidatorRegistry.get(provider.toLowerCase())
+  );
+}
+
+/** Test-only: drop every entry so a suite cannot leak registrations. */
+export function __resetQuotaCacheInvalidatorsForTests(): void {
+  quotaCacheInvalidatorRegistry.clear();
+}
+
+/** Test-only: entry count, so a storage-size test can assert no growth. */
+export function __quotaCacheInvalidatorCountForTests(): number {
+  return quotaCacheInvalidatorRegistry.size;
 }
 
 export function isQuotaPreflightEnabled(connection: Record<string, unknown>): boolean {
@@ -314,6 +368,52 @@ function quotaPercentCutoffResult(
 }
 
 /**
+ * Opt-in paid-credits short-circuit for evaluateQuotaCutoff, isolated so the
+ * caller's cyclomatic/cognitive complexity stays under the ratchet limit.
+ * Returns null when the gate does not apply (caller falls through to the
+ * normal subscription-quota evaluation).
+ */
+function resolveCodexPaidCreditsGate(
+  quota: QuotaInfo | null | undefined,
+  scope?: QuotaCutoffScope
+): PreflightQuotaResult | null {
+  const paidCreditsEnabled = isCodexPaidCreditsEnabled(
+    scope?.provider,
+    scope?.providerSpecificData,
+    scope?.requestedModel
+  );
+  if (!paidCreditsEnabled) return null;
+  if (!quota) return { proceed: false, reason: "quota_unavailable" };
+  if (hasCodexPaidCredits(quota.paidCredits)) {
+    return { proceed: true, quotaPercent: quota.percentUsed };
+  }
+  return null;
+}
+
+/**
+ * Per-window cutoff branch of evaluateQuotaCutoff, isolated so the caller's
+ * cyclomatic complexity stays under the ratchet limit. Returns null when the
+ * quota has no per-window data (caller falls through to the legacy path).
+ */
+function windowedQuotaCutoffResult(
+  quota: QuotaInfo,
+  thresholds: PreflightQuotaThresholds | undefined,
+  scope: QuotaCutoffScope | undefined
+): PreflightQuotaResult | null {
+  const windows = quota.windows;
+  if (!windows || Object.keys(windows).length === 0) return null;
+
+  const scopedWindows = windowsForScope(windows, scope);
+  const cutoff = quotaWindowCutoffResult(scopedWindows, thresholds);
+  if (cutoff) return cutoff;
+  if (isAntigravityQuotaProvider(scope?.provider ?? null) && scope?.requestedModel) {
+    return { proceed: true, quotaPercent: quota.percentUsed };
+  }
+  if (quota.limitReached === true) return limitReachedResult(quota);
+  return { proceed: true, quotaPercent: quota.percentUsed };
+}
+
+/**
  * Pure cutoff evaluator used by routing paths that already fetched quota.
  * Mirrors preflightQuota threshold semantics without performing I/O or logging.
  */
@@ -322,11 +422,14 @@ export function evaluateQuotaCutoff(
   thresholds?: PreflightQuotaThresholds,
   scope?: QuotaCutoffScope
 ): PreflightQuotaResult {
+  const paidCreditsGate = resolveCodexPaidCreditsGate(quota, scope);
+  if (paidCreditsGate) return paidCreditsGate;
   if (!quota) return { proceed: true };
-  // Operator-enabled Claude extra usage is billed after the 5h session quota
-  // is gone. Pre-dispatch must not skip the account before Anthropic sees the
-  // request; blockExtraUsage=false is the only opt-in.
-  if (isClaudeExtraUsageAllowed(scope?.provider, scope?.providerSpecificData)) {
+  // Explicit local quota opt-outs leave billing eligibility to the upstream service.
+  if (
+    isClaudeExtraUsageAllowed(scope?.provider, scope?.providerSpecificData) ||
+    isCodexQuotaFilteringDisabled(scope?.provider, scope?.providerSpecificData)
+  ) {
     return { proceed: true, quotaPercent: quota.percentUsed };
   }
   // #14359 — same escape as the dispatch-time predicates: a recent success is not exhaustion.
@@ -334,20 +437,8 @@ export function evaluateQuotaCutoff(
     return { proceed: true, quotaPercent: quota.percentUsed };
   }
 
-  const windows = quota.windows;
-  if (windows && Object.keys(windows).length > 0) {
-    const scopedWindows = windowsForScope(windows, scope);
-    const cutoff = quotaWindowCutoffResult(scopedWindows, thresholds);
-    if (cutoff) return cutoff;
-    if (isAntigravityQuotaProvider(scope?.provider ?? null) && scope?.requestedModel) {
-      return { proceed: true, quotaPercent: quota.percentUsed };
-    }
-    if (quota.limitReached === true) return limitReachedResult(quota);
-    return {
-      proceed: true,
-      quotaPercent: quota.percentUsed,
-    };
-  }
+  const windowedResult = windowedQuotaCutoffResult(quota, thresholds, scope);
+  if (windowedResult) return windowedResult;
 
   if (quota.limitReached === true) return limitReachedResult(quota);
   return quotaPercentCutoffResult(quota, thresholds);
@@ -373,6 +464,10 @@ export function resolveDynamicQuotaFetcher(
   // Feature flag must be enabled
   if (!isFeatureFlagEnabled("NEWAPI_AGGREGATOR_BALANCE")) return undefined;
 
+  // The aggregator fetcher has no static registrar, so its invalidator is
+  // registered on the first dynamic resolution — the same moment the fetcher's
+  // cache can first be populated. Re-registering the same key is an overwrite.
+  registerQuotaCacheInvalidator(provider, invalidateNewApiAggregatorQuotaCache);
   return fetchNewApiAggregatorQuota;
 }
 
@@ -382,29 +477,6 @@ export async function preflightQuota(
   connection: Record<string, unknown>,
   thresholds?: PreflightQuotaThresholds
 ): Promise<PreflightQuotaResult> {
-  // No legacy enable-flag gate here — the caller decides when to invoke us
-  // (see file-level docstring). When there's no fetcher we proceed silently.
-  let fetcher = getQuotaFetcher(provider);
-  if (!fetcher) {
-    // Dynamic fallback: for compatible-provider connections with the
-    // aggregator flag + feature flag, use the generalized New-API fetcher.
-    fetcher = resolveDynamicQuotaFetcher(provider, connection);
-    if (!fetcher) {
-      return { proceed: true };
-    }
-  }
-
-  let quota: QuotaInfo | null = null;
-  try {
-    quota = await fetcher(connectionId, connection);
-  } catch {
-    return { proceed: true };
-  }
-
-  if (!quota) {
-    return { proceed: true };
-  }
-
   const requestedModel =
     typeof connection.requestedModel === "string" ? connection.requestedModel : null;
   const scope: QuotaCutoffScope = {
@@ -413,6 +485,29 @@ export async function preflightQuota(
     providerSpecificData: connection.providerSpecificData,
     connectionId,
   };
+  // No legacy enable-flag gate here — the caller decides when to invoke us
+  // (see file-level docstring). When there's no fetcher we proceed silently.
+  let fetcher = getQuotaFetcher(provider);
+  if (!fetcher) {
+    // Dynamic fallback: for compatible-provider connections with the
+    // aggregator flag + feature flag, use the generalized New-API fetcher.
+    fetcher = resolveDynamicQuotaFetcher(provider, connection);
+    if (!fetcher) {
+      return evaluateQuotaCutoff(null, thresholds, scope);
+    }
+  }
+
+  let quota: QuotaInfo | null = null;
+  try {
+    quota = await fetcher(connectionId, connection);
+  } catch {
+    return evaluateQuotaCutoff(null, thresholds, scope);
+  }
+
+  if (!quota) {
+    return evaluateQuotaCutoff(null, thresholds, scope);
+  }
+
   const windows = quota.windows;
   if (windows && Object.keys(windows).length > 0) {
     const scopedWindows = windowsForScope(windows, scope);
@@ -442,7 +537,11 @@ export async function preflightQuota(
     );
     return decision;
   }
-  if (windows && Object.keys(windows).length > 0) {
+  if (
+    (windows && Object.keys(windows).length > 0) ||
+    (isCodexPaidCreditsEnabled(provider, connection.providerSpecificData, requestedModel) &&
+      hasCodexPaidCredits(quota.paidCredits))
+  ) {
     return decision;
   }
 

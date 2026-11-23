@@ -71,219 +71,286 @@ Regression guard: `tests/unit/provider-cooldown-window-gate.test.ts`.
 
 **Saklaw:** iisang koneksyon/account/key ng provider.
 
-**Layunin:** laktawan ang isang sirang key habang patuloy na nagseserbisyo ang ibang mga koneksyon para sa parehong provider.
+**Layunin:** laktawan ang isang hindi gumaganang key habang patuloy na nagsisilbi ang ibang koneksyon para sa parehong provider.
 
 **Implementasyon:**
 
-- Markahan bilang hindi available: `src/sse/services/auth.ts::markAccountUnavailable()`
+- Markahang hindi available: `src/sse/services/auth.ts::markAccountUnavailable()`
 - Pagpili: `getProviderCredentials*` sa parehong file
 - Pagkalkula ng cooldown: `open-sse/services/accountFallback.ts::checkFallbackError()`
 - Mga setting: `src/lib/resilience/settings.ts`
 
 **Mga field sa bawat koneksyon:**
 
-- `rateLimitedUntil` — timestamp hanggang sa matapos ang cooldown
+- `rateLimitedUntil` — timestamp kung kailan matatapos ang cooldown
 - `testStatus: "unavailable"`
 - `lastError`, `lastErrorType`, `errorCode`
 - `backoffLevel` — counter ng exponential backoff
 
 **Mga default na cooldown:**
 
-- OAuth base: 5s
-- API-key base: 3s
-- API-key 429: inuuna ang upstream na `Retry-After`/mga reset header/napa-parse na reset text
+- Batayan ng OAuth: 5s
+- Batayan ng API key: 3s
+- API-key 429: inuuna ang upstream na `Retry-After`/mga reset header/naipa-parse na reset text
 - Backoff: `baseCooldownMs * 2 ** failureIndex`
 
-**Pananggalang laban sa thundering herd:** pinipigilan ang magkakasabay na failure na labis na magpahaba ng cooldown o magdoble ng increment sa `backoffLevel`.
+**Proteksyon laban sa thundering herd:** pinipigilan ang magkakasabay na failure na labis na pahabain ang cooldown o dalawang beses na dagdagan ang `backoffLevel`.
+
+**Ang mga 429 dahil sa concurrency limit ay hindi umaakyat sa antas ng backoff.** Ang `429` na ang body ay nag-uulat ng
+concurrency limit ("too many concurrent requests", "concurrency limit", "parallel request
+limit", GLM `并发数过高`) ay nangangahulugang maayos ang account ngunit abala.
+Ibinabalik ng `checkFallbackError()` ang dahilang `concurrency_limited`: lumipat agad sa susunod na
+koneksyon, ilagay ang kasalukuyan sa nakapirming `CONCURRENCY_LIMIT_COOLDOWN_MS` (1s) na cooldown o sa
+upstream na mungkahi sa muling pagsubok, panatilihing hindi nagbabago ang `backoffLevel`, at itakda ang `skipProviderBreaker`.
+Nangingibabaw pa rin ang tahasang quota body, kaya ang body na tumutugma rin sa pattern ng quota ay nananatiling
+hatol na quota. Pagtukoy: `looksLikeConcurrencyLimit()` sa `src/shared/utils/classify429.ts`;
+hatol: `open-sse/services/accountFallback/concurrencyLimit429.ts`. Hindi nagbabago ang `classify429()` (ang
+`FailureKind` ng breaker) at binabasa pa rin nito ang `rate_limit` para sa mga body na ito.
+
+**Hindi inilalagay ng mga pagkaantala sa content ng stream ang account sa cooldown.** Kapag sumuko ang watchdog para sa pagkaantala ng content
+(`open-sse/utils/streamHandler.ts`) sa isang stream na hindi nagpadala ng output ng modelo sa loob ng
+itinakdang oras, itinatala ng `markAccountUnavailable()` ang error sa koneksyon ngunit hindi nagtatakda ng
+cooldown: nauugnay ang pagkaantala sa request na iyon, na kadalasan ay isang mahabang yugto ng pangangatwiran na wala pang
+output. Maaaring muli itong paganahin ng mga operator gamit ang `resilienceSettings.streamStallCooldown.enabled`
+(default na `false`).
+
+**Nire-restart ng mga reasoning frame ang nakalaang oras para sa pagkaantala ng content.** Maaaring mag-isip ang isang reasoning model nang
+ilang minuto bago ang una nitong nakikitang token: nagsi-stream ang Claude ng mga `thinking_delta` frame na ang
+thinking text ay maaaring walang laman, at nagsi-stream ang Responses API ng magkakasunod na reasoning item.
+Kinikilala ng `isReasoningProgressFrame()` (`open-sse/utils/streamReadiness.ts`) ang
+mga frame na ito, at nire-restart ng watchdog ang nakalaang oras nito sa bawat isa sa halip na kanselahin ang
+turn. Hindi pa rin output ng modelo ang mga ito, kaya ang turn na nagtatapos na reasoning lamang ang nilalaman ay iuulat pa rin
+bilang walang laman, at ang turn na huminto sa pangangatwiran at mga heartbeat na lamang ang ipinapadala ay magti-trigger pa rin sa
+watchdog.
+
+Pinapanatili ng mga binary na `reasoningContentEvent` frame ng Kiro na may signature na hindi walang laman ang
+aktibidad ng pangangatwirang ito sa executor bilang isang walang-lamang `reasoning_content` delta. Hindi
+ipinapasa ang signature. Hindi nire-restart ng metadata, mga hindi kumpletong frame, at mga walang-lamang signature ang
+nakalaang oras para sa content; nalalapat pa rin ang hiwalay na timeout ng aktibong stream at pagkansela ng client
+(`open-sse/executors/kiro/reasoning.ts`).
 
 **Mga terminal state (HINDI mga cooldown):**
 
-- `banned` — itinatakda ng pagtukoy sa banned-keyword / account-ban (tingnan ang [BAN_DETECTION](../security/BAN_DETECTION.md)), at ng tatlong magkakasunod na upstream na pagtanggi sa bawat request (`request_rejected`, hal. Anthropic OAuth 403 "Hindi pinapayagan ang request" — `open-sse/services/requestRejectedStreak.ts`); ang isang pagtanggi lamang ay naglalagay lang sa koneksyon sa cooldown
-- `expired` (lumilipat sa terminal pagkatapos ng limitadong bilang ng retry — `EXPIRED_RETRY_MAX = 3` na may exponential backoff — upang kusang makabawi ang mga pansamantalang OAuth error bago permanenteng i-deactivate ang account)
+- `banned` — itinatakda ng pagtukoy sa ipinagbabawal na keyword / pag-ban sa account (tingnan ang [BAN_DETECTION](../security/BAN_DETECTION.md)), at ng tatlong sunod-sunod na upstream na pagtanggi sa bawat request (`request_rejected`, hal. Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`); inilalagay lamang ng isang pagtanggi ang koneksyon sa cooldown
+- `expired` (lumilipat sa terminal pagkatapos ng limitadong bilang ng muling pagsubok — `EXPIRED_RETRY_MAX = 3` na may exponential backoff — upang kusang makabawi ang mga pansamantalang OAuth error bago permanenteng ma-deactivate ang account)
 - `credits_exhausted`
 
-Nananatili ang mga ito hanggang sa mabago ang mga credential o i-reset ng operator ang mga ito. Huwag patungan ang mga terminal state ng pansamantalang cooldown state.
+Nananatili ang mga ito hanggang sa magbago ang mga credential o i-reset sila ng isang operator. Huwag patungan ang mga terminal state ng pansamantalang cooldown state.
 
-**Lazy recovery:** kapag lumipas na ang `rateLimitedUntil`, nagiging eligible muli ang koneksyon. Kapag matagumpay na nagamit, nililinis ng `clearAccountError()` ang lahat ng error field.
+**Lazy recovery:** kapag lumipas na ang `rateLimitedUntil`, muling magiging kwalipikado ang koneksyon. Sa matagumpay na paggamit, nililinis ng `clearAccountError()` ang lahat ng field ng error.
 
-### Usage wall ng Claude OAuth: lane na may mas mababang priyoridad + pag-reset ng session limit
+### Claude OAuth usage wall: lane na may mas mababang priyoridad + pag-reset ng session limit
 
-**Saklaw:** isang koneksyon ng Claude subscription (OAuth). Ang parehong feature ay kailangang **i-opt in sa bawat
+**Saklaw:** isang koneksyon ng Claude subscription (OAuth). Ang parehong feature ay **kailangang tahasang paganahin sa bawat
 koneksyon** (I-edit ang koneksyon → seksyong Claude → `lowPriorityMode` / `autoLimitReset` sa
-`providerSpecificData`, parehong naka-off bilang default) at ginagaya ang mga command na `/low-priority` at
+`providerSpecificData`, parehong naka-off bilang default) at katumbas ng mga command na `/low-priority` at
 `/limit-reset` ng Claude Code (wire contract na nakuha mula sa Claude Code 2.1.263).
 
 **Implementasyon:**
 
 - State machine + pag-uuri ng response: `open-sse/services/claudeLowPriority.ts`
-- Client para sa reset status/claim: `open-sse/services/claudeLimitReset.ts`
-- Executor hook (pag-inject ng header + retry sa parehong account): `open-sse/executors/base.ts::execute()`
+- Client para sa status/claim ng reset: `open-sse/services/claudeLimitReset.ts`
+- Hook ng executor (pag-inject ng header + muling pagsubok sa parehong account): `open-sse/executors/base.ts::execute()`
 - Pagpapanatili ng opt-in: `src/lib/providers/requestDefaults.ts::normalizeProviderSpecificData()`
 
 **Trigger:** ang 5-oras na usage wall — isang `429` na ang mga header ay may
-`anthropic-ratelimit-unified-status: rejected` at, kapag eligible ang account,
+`anthropic-ratelimit-unified-status: rejected` at, kapag kwalipikado ang account,
 `anthropic-ratelimit-unified-slow-offer: treatment`. Walang ipinapadala bago ang unang wall
-429 na iyon; ang burst 429 na walang unified header ay dumadaan sa normal na cooldown path.
+429 na iyon; ang burst 429 na walang unified header ay dumadaan sa normal na landas ng cooldown.
 
 **Lane na may mas mababang priyoridad** (`lowPriorityMode`):
 
-- Sa wall 429, tinatanggap ng executor ang offer at agad na inuulit ang request gamit ang **parehong**
-  account na may `anthropic-usage-limit: slow`; nananatiling aktibo ang lane hanggang sa inanunsyong
-  `anthropic-ratelimit-unified-reset` (+60s na palugit) at taglay ng bawat request sa window na iyon
-  ang header. Hindi kailanman umaabot sa `handleChatCore` ang na-intercept na 429, kaya **hindi**
-  inilalagay sa cooldown ang koneksyon at hindi inililipat sa iba.
+- Sa wall 429, tinatanggap ng executor ang alok at agad na muling sinusubukan ang **parehong**
+  account gamit ang `anthropic-usage-limit: slow`; nananatiling aktibo ang lane hanggang sa inanunsyong
+  `anthropic-ratelimit-unified-reset` (+60s na palugit), at dala ng bawat request sa window na iyon
+  ang header. Hindi kailanman nakararating sa `handleChatCore` ang naharang na 429, kaya ang connection ay
+  **hindi** inilalagay sa cooldown at hindi inililipat sa iba.
 - `anthropic-ratelimit-unified-slow-status` sa mga susunod na response: pinananatili ng `active` / `not_needed`
-  ang lane; hinihintay ng `slot_busy` (429) o ng `529` ang
+  ang lane; ang `slot_busy` (429) o isang `529` ay naghihintay ayon sa
   `anthropic-ratelimit-unified-slow-retry-after` ng server (default na 20s, nililimitahan sa 5–600s, ±30% jitter)
-  at inuulit ang request, na nililimitahan ng `anthropic-ratelimit-unified-slow-max-wait` (default na 20 min, nililimitahan
-  sa 1 min–6 h) — kapag lumampas doon, matatapos ang lane at haharangin ng 10-minutong cool-off ang muling pagtanggap. Ang
-  paghihintay ay nililimitahan din ng natitirang oras sa sariling upstream-start timeout ng request
-  (`resolveFetchStartTimeout`, 10 min bilang default) nang binawasan ng 5 s na palugit: kung wala ang limitasyong iyon,
-  lalampas ang default na 20-minutong max-wait sa buhay ng request at makakansela ang sleep
-  habang naghihintay, na maglalabas ng `TimeoutError` sa halip na maayos na pagtatapos na `max_wait` + cool-off.
-- Ang `weekly_limit` / `budget_exhausted` / `off` / `ineligible`, rollover ng 5h window, o
-  `ineligible` + `anthropic-ratelimit-unified-overage-in-use: true` (na nagtatapos dito bilang
-  `extra_usage` sa anumang status, dahil sinasaklaw na ngayon ng bayad na overage ang wall) ay nagtatapos sa lane; pagkatapos ay
-  dumadaloy ang response sa normal na cooldown path. Tinatandaan ang `budget_exhausted` hanggang
-  sa inanunsyong budget reset (≤ 8 araw).
-- Isinasagawa ang wall check pagkatapos ng sariling 400-driven na mga intra-attempt retry ng executor (pag-edit ng context,
-  mga clamp sa thinking/effort, awtomatikong pagkatuto sa param), kaya nai-intercept pa rin ang wall 429 na lumilitaw lamang sa
-  isa sa mga retry na iyon sa halip na umabot sa cooldown path.
-- Nasa memory ang state sa bawat koneksyon (nagdudulot ang restart ng isang dagdag na wall 429 upang muling tumanggap).
+  at muling sumusubok, na nililimitahan ng `anthropic-ratelimit-unified-slow-max-wait` (default na 20 min, nililimitahan
+  sa 1 min–6 h) — kapag lumampas dito, magwawakas ang lane at haharangin ng 10 minutong cool-off ang muling pagtanggap. Ang
+  paghihintay ay nililimitahan din ayon sa natitirang oras sa sariling upstream-start timeout ng request
+  (`resolveFetchStartTimeout`, default na 10 min) na binawasan ng 5 s na palugit: kung wala ang limitasyong iyon, ang
+  default na 20 minutong max-wait ay lalampas sa buhay ng request at maa-abort ang sleep
+  habang naghihintay, na maglalabas ng `TimeoutError` sa halip na maayos na pagwawakas na `max_wait` + cool-off.
+- Ang `weekly_limit` / `budget_exhausted` / `off` / `ineligible`, isang rollover ng 5h-window, o
+  `ineligible` + `anthropic-ratelimit-unified-overage-in-use: true` (na nagwawakas dito bilang
+  `extra_usage` sa anumang status, dahil sakop na ngayon ng bayad na overage ang wall) ay nagwawakas sa lane; ang
+  response ay pagkatapos na dumadaloy sa normal na cooldown path. Tinatandaan ang `budget_exhausted` hanggang
+  sa inanunsyong pag-reset ng budget (≤ 8 araw).
+- Tumatakbo ang wall check pagkatapos ng sariling 400-driven intra-attempt retries ng executor (pag-edit ng context,
+  mga clamp ng thinking/effort, awtomatikong pagkatuto ng param), kaya nahaharang pa rin ang wall 429 na lumilitaw lamang sa
+  isa sa mga retry na iyon sa halip na makarating sa cooldown path.
+- Ang state ay nasa memory bawat connection (nagdudulot ang restart ng isang dagdag na wall 429 upang muling tanggapin).
 
 **Pag-reset ng session limit** (`autoLimitReset`, sinusubukan bago ang lane kapag parehong naka-on):
 
 - `GET https://api.anthropic.com/api/oauth/usage?at_wall=1&skip_spend=1` → `juniper_tide`
   block; kapag `arm: "reset"` at `available: true`,
-  `POST https://api.anthropic.com/api/organizations/{orgUUID}/reset_rate_limits` na may
+  `POST https://api.anthropic.com/api/organizations/{orgUUID}/reset_rate_limits` gamit ang
   `{ "program": "juniper_tide" }` (organization UUID mula sa
-  `providerSpecificData.organizationUUID`, bootstrap fallback).
-- `result: reset|not_limited` → inuulit ang request sa buong bilis (walang slow header).
-  Minememoize ng `already_used` / `not_offered` ang `next_available_at` (default na isang linggo); ang anumang
-  failure ay gumagamit ng 15-minutong backoff. Isinasagawa ang reset nang isang beses kada linggo at ibinibilang pa rin sa
+  `providerSpecificData.organizationUUID`, na may bootstrap fallback).
+- `result: reset|not_limited` → muling sinusubukan ang request sa buong bilis (walang slow header).
+  Isinasaulo ng `already_used` / `not_offered` ang `next_available_at` (default na isang linggo); ang anumang
+  pagkabigo ay nagba-back off nang 15 minuto. Isang beses bawat linggo ang reset at ibinibilang pa rin ito sa
   lingguhang limitasyon.
 
-Mga pananggalang sa regression: `tests/unit/claude-low-priority-mode.test.ts`,
+Mga regression guard: `tests/unit/claude-low-priority-mode.test.ts`,
 `tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
 
 ### Session affinity (#7274)
 
-**Saklaw:** isang client session (`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session` header) na naka-pin sa isang koneksyon, para sa **anumang** provider.
+**Saklaw:** isang client session (`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session` header) na naka-pin sa isang connection, para sa **anumang** provider.
 
-**Layunin:** panatilihin ang isang multi-turn agent (Claude Code, aider, mga custom agent) sa iisang account sa lahat ng request, upang mabawasan ang pagkawala ng context dahil sa paglipat-lipat ng account at ang paulit-ulit na cold-start 429 sa mga provider na may per-account na session state.
+**Layunin:** panatilihin ang isang multi-turn agent (Claude Code, aider, mga custom agent) sa parehong account sa iba't ibang request, upang mabawasan ang pagkawala ng context sa pagitan ng mga account at ang paulit-ulit na cold-start 429 sa mga provider na may per-account session state.
 
 **Implementasyon:**
 
 - Pagresolba ng TTL: `src/sse/services/sessionAffinityPin.ts::resolveSessionAffinityTtlMs()`
 - Pagpili/paggawa ng pin: `src/sse/services/sessionAffinityPin.ts::selectSessionAffinityConnection()`
-- Pagkuha ng header (generic, anumang provider): `src/sse/services/auth.ts::extractSessionAffinityKey()`
-- Naka-persist na talahanayan ng pin: `sessionAccountAffinity` (`src/lib/db/sessionAccountAffinity.ts`)
-- Setting: `sessionAffinityTtlMs` (global na TTL sa ms, idi-disable ito ng `0`) — `src/lib/db/settings.ts`. Pinalitan ang pangalan mula sa Codex-only na `codexSessionAffinityTtlMs` sa pamamagitan ng migration na `124_generic_session_affinity_ttl.sql`, na inililipat ang anumang dating na-configure na Codex TTL bilang bagong default.
+- Pag-extract ng header (generic, anumang provider): `src/sse/services/auth.ts::extractSessionAffinityKey()`
+- Naka-persist na pin table: `sessionAccountAffinity` (`src/lib/db/sessionAccountAffinity.ts`)
+- Setting: `sessionAffinityTtlMs` (pandaigdigang TTL sa ms, hindi pinapagana ng `0`) — `src/lib/db/settings.ts`. Pinalitan ang pangalan mula sa Codex-only na `codexSessionAffinityTtlMs` sa pamamagitan ng migration na `124_generic_session_affinity_ttl.sql`, na inililipat ang anumang dating naka-configure na Codex TTL bilang bagong default.
 
-Bago ang #7274, agarang nagbabalik ang `resolveSessionAffinityTtlMs()` ng `0` para sa bawat provider maliban sa `codex`, kaya walang epekto ang setting ng TTL (at ang mga session header) sa iba pang provider kahit na provider-agnostic na ang mekanismo ng pag-pin at pagkuha ng header. Inalis ng pag-aayos ang maagang pagbabalik na iyon; pantay-pantay nang nalalapat ang TTL sa bawat provider kapag naitakda ito nang global sa halagang mas mataas sa `0`.
+Bago ang #7274, agad na nagbabalik ang `resolveSessionAffinityTtlMs()` ng `0` para sa bawat provider maliban sa `codex`, kaya walang epekto ang TTL setting (at ang mga session header) saanman kahit provider-agnostic na ang mekanismo ng pag-pin at pag-extract ng header. Inalis ng pag-aayos ang early-return na iyon; pantay na ngayong nalalapat ang TTL sa bawat provider kapag naitakda ito nang pandaigdigan sa higit sa `0`.
 
-Hindi kailanman ipinapasa upstream ang tatlong session-affinity header — bumubuo ang mga executor ng sarili nilang mga upstream header mula sa simula sa halip na direktang ipasa ang mga client header, kaya nananatili lamang itong panloob na correlation id.
+Hindi kailanman ipinapasa upstream ang tatlong session-affinity header — gumagawa ang mga executor ng sarili nilang upstream header mula sa simula sa halip na direktang ipasa ang mga client header, kaya nananatili lamang itong panloob na correlation id.
 
-### Mga eksklusibong lease ng koneksyon para sa managed session
+### Mga eksklusibong lease ng managed session connection
 
-**Saklaw:** isang aktibong managed HTTP client/session ang nagmamay-ari ng isang kwalipikadong koneksyon sa OmniRoute.
+**Saklaw:** isang aktibong managed HTTP client/session ang nagmamay-ari ng isang kwalipikadong OmniRoute connection.
 
-**Layunin:** magbigay ng matibay at eksklusibong pagmamay-ari ng koneksyon para sa mga client na nangangailangan ng mahigpit na hangganan sa routing sa lahat ng request. Naiiba ito sa session affinity, na isang maluwag na kagustuhan para sa pagpapatuloy: pinapanatili ng isang eksklusibong lease ang lifecycle state sa SQLite, ipinapatupad ang pandaigdigang pagiging natatangi ng aktibong may-ari at aktibong koneksyon, at tinatanggihan ang isang lipas na generation bago ang pagpapadala sa provider.
+**Layunin:** magbigay ng matibay at eksklusibong pagmamay-ari ng connection para sa mga client na nangangailangan ng mahigpit na routing
+fence sa iba't ibang request. Naiiba ito sa session affinity, na isang maluwag na kagustuhan para sa continuity:
+pinananatili ng eksklusibong lease ang lifecycle state sa SQLite, ipinapatupad ang pandaigdigang uniqueness ng active-owner at
+active-connection, at tinatanggihan ang isang stale generation bago ang provider dispatch.
 
-Opt-in ang feature na ito para sa bawat API key. Dapat magkaroon ang isang managed key ng scope na `lease:exclusive` at tahasang hindi bakanteng listahan ng `allowedConnections`. Maaaring gamitin ng anumang HTTP client ang lifecycle endpoint; walang kinakailangang pangalan ng client, user-agent, provider, paraan ng OAuth, o model. Koneksyon ang pagmamay-ari ng lease, hindi model, kaya napapanatili ng pagbabago ng model ang binding habang nananatiling karaniwang kwalipikado ang koneksyon. Nananatiling may awtoridad ang mga normal na panuntunan para sa model, quota, kalagayan, cooldown, at allowlist, at maaaring ilipat ng mga ito ang parehong generation sa isa pang libre at kwalipikadong koneksyon.
+Opt-in ang feature para sa bawat API key. Dapat taglay ng isang managed key ang scope na `lease:exclusive` at ang isang
+hayagang hindi bakanteng listahan ng `allowedConnections`. Maaaring gamitin ng anumang HTTP client ang lifecycle endpoint; walang
+kinakailangang client name, user-agent, provider, OAuth method, o model. Isang connection ang pagmamay-ari ng lease,
+hindi isang model, kaya napapanatili ng pagbabago ng model ang binding habang nananatiling karaniwang
+kwalipikado ang connection. Nananatiling awtoritatibo ang mga normal na panuntunan sa model, quota, health, cooldown, at allowlist at maaaring
+ilipat ang parehong generation sa isa pang libre at kwalipikadong connection.
 
-Ang lifecycle ay `POST /api/v1/session-leases` na may mga JSON action na `acquire`, `renew`, at `release`. Ipinapadala ng mga managed inference request ang opaque na value ng `X-OmniRoute-Lease-Owner` at ang eksaktong `X-OmniRoute-Lease-Generation`. Gumagamit ang owner ng `vlo_` na sinusundan ng 43 base64url character; ang SHA-256 hash lamang nito ang iniimbak. Itinatali rin ng bawat panghuling dispatch fence ang ID ng napatotohanang API key at ang ID ng aktibong koneksyon. Inaalis ang mga lease control header mula sa mga log, naka-retain na snapshot ng request, at mga header ng upstream executor.
+Ang lifecycle ay `POST /api/v1/session-leases` na may mga JSON action na `acquire`, `renew`, at `release`.
+Inilalahad ng mga pinamamahalaang inference request ang opaque na value ng `X-OmniRoute-Lease-Owner` at ang eksaktong
+`X-OmniRoute-Lease-Generation`. Gumagamit ang owner ng `vlo_` na sinusundan ng 43 base64url character; ang
+SHA-256 hash lamang nito ang iniimbak. Itinatali rin ng bawat panghuling dispatch fence ang ID ng napatunayang API key at
+ang ID ng aktibong koneksyon. Inaalis ang mga lease control header mula sa mga log, pinananatiling request snapshot, at
+mga header ng upstream executor.
 
-Kung may mga kwalipikadong managed candidate ang karaniwang routing ngunit ang bawat libreng candidate ay inookupahan ng aktibong lease ng ibang may-ari, nagbabalik ang OmniRoute ng HTTP `429`, code na `lease-capacity-unavailable`, state na naghihintay ng kapasidad, at may hangganang `Retry-After` na hinango mula sa pinakamalapit na nauugnay na expiry. Ang karaniwang kawalan ng kwalipikadong candidate ay hindi lease contention at pinananatili nito ang kasalukuyang routing error semantics.
+Kung may mga karapat-dapat na pinamamahalaang candidate ang karaniwang routing ngunit ang bawat libreng candidate ay ginagamit ng isang
+dayuhang aktibong lease, nagbabalik ang OmniRoute ng HTTP `429`, `lease-capacity-unavailable` code, isang
+`waiting-for-capacity` state, at may limitasyong `Retry-After` na hinango mula sa pinakamaagang nauugnay na expiration.
+Ang karaniwang kawalan ng eligibility ay hindi lease contention at pinananatili nito ang umiiral na semantics ng routing error.
 
 Nananatiling magkakahiwalay ang mga kaugnay na mekanismo:
 
-- Ang OAuth session occupancy ay process-local na maluwag na distribusyon para sa mga OAuth account.
+- Ang occupancy ng OAuth session ay isang process-local na soft distribution para sa mga OAuth account.
 - Nagbibigay ang mga account semaphore ng mga permit para sa request concurrency at nagtatapos kapag nakumpleto ang isang request.
-- Ang mga eksklusibong lease ng koneksyon para sa managed session ay matibay na lifecycle ownership na may generation fence.
+- Ang mga eksklusibong pinamamahalaang session lease ay matibay na lifecycle ownership na may generation fence.
 
 ---
 
 ## 3. Pag-lockout ng Modelo
 
-**Saklaw:** provider + koneksyon + modelo na triple.
+**Saklaw:** kombinasyon ng provider + koneksyon + modelo.
 
-**Saklaw ng key ayon sa status:** ang bumabagsak na status ang nagpapasya kung saang key
-magsusulat ang lockout (`resolveLockoutScope()` sa `open-sse/services/accountFallback/exactModelLock.ts`):
+**Saklaw ng key ayon sa status:** ang status na nabigo ang nagpapasya kung saang key magsusulat ang lockout
+(`resolveLockoutScope()` sa `open-sse/services/accountFallback/exactModelLock.ts`):
 
-- `429` / `403` / `402` — isang senyales ng quota o karapatan — i-lock ang **pamilya ng quota**:
-  para sa codex, ang buong saklaw na `codex` / `spark` (bawat `gpt-5*` na modelo ng
-  koneksyon), para sa ibang provider, `getQuotaScopedModelForProvider()`.
-- Ini-lock ng `404` ang mismong modelo (`getModelLockKey()` ang nagpapakitid sa `not_found`).
-- Anumang ibang status — mga kabiguan sa transport/server na `5xx` at ang sariling
-  binuong `502` ng OmniRoute mula sa pagpapatunay ng kalidad — ay nagla-lock lamang sa
-  **eksaktong** tuple ng provider/koneksyon/modelo. Ang sirang stream sa isang modelo ay hindi ebidensya
-  tungkol sa quota ng account; bago ang panuntunang ito, isang walang-lamang tugon sa
-  `codex/gpt-5.6-luna` ang nag-aalis sa bawat `gpt-5*` na modelo ng koneksyong iyon mula sa
-  pagruruta sa loob ng 2–30 min (na tumitindi) kahit hindi nagalaw ang quota nito.
-- Palaging nangingibabaw ang tahasang `scope` na opsyon ng tumatawag (ipinapasa ng Antigravity ang `"exact"`).
+- `429` / `403` / `402` — isang signal ng quota o entitlement — ila-lock ang **pamilya ng quota**:
+  para sa codex, ang buong saklaw na `codex` / `spark` (bawat modelong `gpt-5*` ng
+  koneksyon), at para sa ibang provider, `getQuotaScopedModelForProvider()`.
+- Ila-lock ng `404` ang mismong modelo (`getModelLockKey()` ang nagpapakitid sa `not_found`).
+- Anumang ibang status — mga `5xx` na kabiguan sa transport/server at ang sariling
+  na-synthesize na `502` ng OmniRoute mula sa quality validation — ang nagla-lock lamang sa **eksaktong**
+  kombinasyon ng provider/koneksyon/modelo. Ang masamang stream sa isang modelo ay hindi ebidensya
+  tungkol sa quota ng account; bago ang panuntunang ito, inaalis ng isang walang-lamang tugon sa
+  `codex/gpt-5.6-luna` ang bawat modelong `gpt-5*` ng koneksyong iyon mula sa
+  routing nang 2–30 min (na tumitindi) kahit hindi naman nagalaw ang quota nito.
+- Palaging nangingibabaw ang tahasang opsyong `scope` ng tumatawag (ipinapasa ng Antigravity ang `"exact"`).
 
 **Layunin:** iwasang i-disable ang isang buong koneksyon kapag isang modelo lamang ang hindi available o nalilimitahan ng quota.
 
-**Mga halimbawa:**
+**Mga Halimbawa:**
 
-- Mga provider na may quota bawat modelo na nagbabalik ng 429
+- Mga provider na may quota kada modelo na nagbabalik ng 429
 - Mga lokal na provider na nagbabalik ng 404 para sa isang nawawalang modelo
 - Mga kabiguan sa pahintulot para sa mode/modelo na partikular sa provider (hal., mga mode ng Grok)
 
-**Implementasyon:** `open-sse/services/accountFallback.ts` — `lockModel()`, `clearModelLock()`, `getAllModelLockouts()`.
+**Pagpapatupad:** `open-sse/services/accountFallback.ts` — `lockModel()`, `clearModelLock()`, `getAllModelLockouts()`.
 
 ### Dashboard ng mga Cooldown ng Modelo (v3.8.0)
 
-UI: Mga Setting → Mga Cooldown ng Modelo (`src/app/(dashboard)/dashboard/settings/components/ModelCooldownsCard.tsx`)
+UI: Settings → Model Cooldowns (`src/app/(dashboard)/dashboard/settings/components/ModelCooldownsCard.tsx`)
 
 Inililista ang mga aktibong lockout kasama ang: provider, koneksyon, modelo, dahilan, expiresAt. Maaaring manual na muling i-enable ng mga operator ang isang modelo mula sa card.
 
 **REST API:**
 
 - `GET /api/resilience/model-cooldowns` — ilista ang mga aktibong lockout
-- `DELETE /api/resilience/model-cooldowns` — manual na muling pag-enable. Body: `{provider, connection, model}`. Auth: pamamahala.
+- `DELETE /api/resilience/model-cooldowns` — manual na muling pag-enable. Body: `{provider, connection, model}`. Auth: management.
 
-### UI ng mga setting ng lockout + pagbawi sa pamamagitan ng success-decay (v3.8.23)
+### Tagapamahala ng Cooldown
 
-Mula sa palaging naka-enable at hardcoded na gawi, naging ganap na nako-configure
-at opt-in na feature ang pag-lockout ng modelo, na may sarili nitong settings card at landas ng pagbawi na kusang nag-aayos.
+UI: Monitoring → Cooldown Manager (`src/app/(dashboard)/dashboard/resilience/cooldowns/`).
 
-**Settings card:** Mga Setting → Pag-lockout ng Modelo
+Isang page para sa bawat koneksyong wala sa routing dahil sa pansamantalang dahilan, sa halip na
+buksan ang page ng bawat provider. Inililista nito ang mga cooldown ng koneksyon, mga lockout ng modelo, at mga terminal
+state; nililinis ang mga ito kada koneksyon, para sa isang seleksyon, o para sa lahat ng koneksyon ng isang provider;
+at ine-edit ang mga pinakapinong-na-tune na panuntunan ng cooldown: `streamStallCooldown.enabled` at ang batayang cooldown
+at maximum na bilang ng backoff step ng OAuth / API-key na `connectionCooldown` (sine-save sa pamamagitan ng
+`PATCH /api/resilience`). Inililista ang mga terminal state (`banned`, `expired`, `credits_exhausted`) ngunit
+hindi kailanman nililinis dito.
+
+**REST API** (`src/lib/resilience/cooldownManager.ts`, auth: management):
+
+- `GET /api/resilience/cooldowns[?provider=]` — mga koneksyon na may status, natitirang cooldown,
+  antas ng backoff, huling uri ng error, at mga lockout ng modelo (walang credentials)
+- `POST /api/resilience/cooldowns` — body na `{connectionIds: string[]}` o
+  `{all: true, provider?}`; nagbabalik ng `{cleared, unchanged, skippedTerminal, lockoutsCleared}`
+
+### UI ng mga setting ng lockout + pag-recover sa pamamagitan ng success-decay (v3.8.23)
+
+Mula sa palaging naka-enable at hardcoded na behavior, naging ganap na nako-configure at
+opt-in na feature ang model lockout, na may sarili nitong settings card at self-healing na landas ng recovery.
+
+**Settings card:** Settings → Model Lockout
 (`src/app/(dashboard)/dashboard/settings/components/ModelLockoutCard.tsx`).
-**Hiwalay** ito sa read-only na `ModelCooldownsCard` sa itaas (na
-_naglilista_ lamang ng mga aktibong lockout) — _kino-configure ng mga parameter_ ng bagong card. Ang mga default
-ay nasa `DEFAULT_MODEL_LOCKOUT_SETTINGS`
+Ito ay **naiiba** sa read-only na `ModelCooldownsCard` sa itaas (na
+_naglilista_ lamang ng mga aktibong lockout) — ang bagong card ang _nagko-configure sa mga parameter_. Makikita ang mga default
+sa `DEFAULT_MODEL_LOCKOUT_SETTINGS`
 (`src/lib/resilience/modelLockoutSettings.ts`):
 
 | Setting                 | Default                          | Kahulugan                                                                       |
 | ----------------------- | -------------------------------- | ------------------------------------------------------------------------------- |
-| `enabled`               | `false`                          | Pangunahing toggle — **naka-off bilang default** ang pag-lockout ng modelo.     |
-| `errorCodes`            | `[403, 404, 429, 502, 503, 504]` | Mga upstream status na itinuturing na kabiguang saklaw sa modelo.               |
+| `enabled`               | `false`                          | Master toggle — **naka-off bilang default** ang model lockout.                  |
+| `errorCodes`            | `[403, 404, 429, 502, 503, 504]` | Mga upstream status na itinuturing na kabiguang nakasaklaw sa modelo.           |
 | `baseCooldownMs`        | `120_000` (120 s)                | Paunang tagal ng lockout para sa unang kabiguan.                                |
-| `maxCooldownMs`         | `1_800_000` (30 min)             | Pinakamataas na limitasyon ng tumitinding cooldown.                             |
-| `maxBackoffSteps`       | `10`                             | Pinakamaraming hakbang sa pagtaas ng exponential backoff.                       |
+| `maxCooldownMs`         | `1_800_000` (30 min)             | Limitasyon sa tumitinding cooldown.                                             |
+| `maxBackoffSteps`       | `10`                             | Maximum na bilang ng mga hakbang sa exponential-backoff escalation.             |
 | `useExponentialBackoff` | `true`                           | Kung patitindihin nang exponential ng mga paulit-ulit na kabiguan ang cooldown. |
 
-Pinapanatili ang mga setting sa pamamagitan ng karaniwang settings store at pinapatunayan gamit ang
-schema ng mga setting ng resilience; nililimitahan ng card ang `baseCooldownMs`/`maxCooldownMs`
+Nananatili ang mga setting sa pamamagitan ng karaniwang settings store at bina-validate gamit ang
+schema ng resilience settings; nililimitahan ng card ang `baseCooldownMs`/`maxCooldownMs`
 (na may `maxCooldownMs ≥ baseCooldownMs`) at `maxBackoffSteps`.
 
-**Pagbawi sa pamamagitan ng success-decay:** ang pagbawi ay **hindi** lang simpleng pag-expire ng timer. Ang isang maayos
-na tugon ay unti-unting nagpapababa sa bilang ng kabiguan ng modelo upang ang modelong nakabawi
-sa kalagitnaan ng window ay tumigil sa pagtindi (at ma-clear) bago pa ang timer nito. Sa isang matagumpay
+**Pag-recover sa pamamagitan ng success-decay:** ang recovery ay **hindi** lamang pag-expire ng timer. Unti-unting
+binabawasan ng isang maayos na tugon ang bilang ng kabiguan ng modelo upang ang modelong naka-recover
+sa kalagitnaan ng window ay tumigil sa pagtindi (at ma-clear) bago pa mag-expire ang timer nito. Sa isang matagumpay
 na combo target, tinatawag ng `open-sse/services/combo.ts` ang `decayModelFailureCount()`
-(`open-sse/services/accountFallback.ts`), na **hinahati sa dalawa** ang nakaimbak na
-`failureCount` (`Math.floor(failureCount / 2)`); kapag umabot ito sa `0`, ganap na
-binubura ang entry ng lockout. Ang katapat na `recordModelLockoutFailure()`
-ay nagdaragdag sa bilang (at nagpapatindi sa cooldown) kapag may mga kabiguan sa loob ng
-escalation window. Karagdagan ang success-decay na ito sa karaniwang pag-expire ng timer —
-maaaring muling i-enable ng alinmang landas ang isang modelo.
+(`open-sse/services/accountFallback.ts`), na **hinahati sa dalawa** ang naka-store na
+`failureCount` (`Math.floor(failureCount / 2)`); kapag umabot ito sa `0`, ganap na dine-delete ang lockout
+entry. Ang katapat nitong `recordModelLockoutFailure()` ay nagdaragdag sa bilang (at nagpapatindi sa cooldown)
+kapag may mga kabiguan sa loob ng escalation window. Karagdagan ang success-decay na ito sa simpleng pag-expire
+ng timer — maaaring muling i-enable ng alinmang landas ang isang modelo.
 
-**State:** pinananatili ang mga lockout **sa memory** (mga `Map` bawat proseso ng
+**State:** pinananatili ang mga lockout **sa memory** (mga `Map` kada proseso ng
 `ModelLockoutEntry` na may key na `provider:connectionId:model`, at mga exact-scope lock na may key na
-`provider:connectionId:exact:model`), at hindi pinapanatili sa
-DB — nawawala ang mga ito kapag nag-restart. Pinapanatili ang mga _setting_; pansamantala ang aktibong
+`provider:connectionId:exact:model`), at hindi pine-persist sa
+DB — nawawala ang mga ito sa pag-restart. Pine-persist ang mga _setting_; pansamantala lamang ang aktibong
 _state_ ng lockout.
 
 ---
@@ -291,42 +358,108 @@ _state_ ng lockout.
 ## 4. Pagkontrol sa Concurrency ng Quota-Share (v3.8.36)
 
 Ang mga subscription account (GLM, MiniMax, atbp.) ay kadalasang tumatanggap lamang ng ~1–3 sabay-sabay na
-request; kapag lumampas dito, nagti-trigger ito ng mga 429 at cooldown. Mas matindi ito sa ilalim ng
-mga **quota-share** (`qtSd/…`) combo, kung saan maraming API key ang nagbabahagi ng iisang upstream
-account. Tatlong layer ang pumipigil sa pagdagsa ng mga request sa isang nakabahaging account.
+request; kapag lumampas dito, nagti-trigger ito ng mga 429 at cooldown. Malubha ito sa ilalim ng
+mga combo na **quota-share** (`qtSd/…`), kung saan maraming API key ang nagbabahagi ng iisang upstream
+account. Pinipigilan ng tatlong layer na mabaha ng mga request ang isang nakabahaging account.
 
 ### Limitasyon sa concurrency bawat koneksyon (`max_concurrent`)
 
-Maaaring magtakda ang bawat koneksyon ng provider ng maximum na `max_concurrent`
-(`provider_connections.max_concurrent`, itinatakda sa modal ng koneksyon / API / DB).
-Iwanan itong walang laman kung walang limitasyon. Ito ang nag-iisang setting na kumokontrol sa serialization
+Maaaring magtakda ang bawat provider connection ng pinakamataas na `max_concurrent`
+(`provider_connections.max_concurrent`, itinatakda sa connection modal / API / DB).
+Iwanan itong walang laman kung walang limitasyon. Ito ang nag-iisang setting na nagpapatakbo sa serialization
 layer sa ibaba — itakda ito sa aktuwal na concurrency ng account (hal. GLM ~1, MiniMax ~2).
+
+### Mga limitasyon sa concurrency bawat modelo (`modelConcurrency`)
+
+Maaari ring magtakda ang isang koneksyon ng eksaktong pinakamataas na concurrency bawat modelo
+sa loob ng `rateLimitOverrides` map nito:
+
+```json
+{
+  "rateLimitOverrides": {
+    "maxConcurrent": 4,
+    "modelConcurrency": { "glm-5": 1, "glm-4.7": 3 }
+  }
+}
+```
+
+Itakda ito sa connection modal (**Mga override sa rate limit → Mga limitasyon sa
+concurrency bawat modelo**, isang `model=cap` bawat linya) o sa pamamagitan ng
+`PATCH /api/providers/[id]` gamit ang parehong anyong JSON. Mga semantika ng key:
+
+- **Saklaw ng buong koneksyon kumpara sa partikular na modelo:** Nananatiling nakabahaging
+  limitasyon sa buong koneksyon ang `maxConcurrent`. Kapag parehong nalalapat, parehong kinukuha
+  nang atomiko ang mga gate sa iisang composite gate
+  (`global → provider → account → model`); ang aktuwal na gawi ay sumusunod sa
+  mas mahigpit na naaangkop na limitasyon.
+- **Eksaktong pagtutugma ng model key:** ang key ay ang model string na ipinapasa sa
+  executor pagkatapos maresolba ang routing — karaniwan ay ang payak na upstream model id
+  (`glm-5`), hindi isang client-side na `provider/model` alias (hindi tumutugma ang `zai/glm-5`
+  sa `glm-5`). Ang mga value ay mga positibong integer na limitasyon sa magkakasabay na request.
+- **Lokal na pagpila, walang discovery:** lokal na pumipila ang mga sobrang request gamit ang
+  umiiral na semantika ng queue/timeout (mga typed na `SEMAPHORE_TIMEOUT` /
+  `SEMAPHORE_QUEUE_FULL` admission error). Hindi dini-discover o
+  hinihinuha ng OmniRoute ang upstream policy — ipinapatupad nito ang eksaktong mga limitasyong
+  isinaayos ng operator. Hindi kailanman dini-disable ng saturated na model gate ang provider at hindi rin
+  ito lumilikha ng permanenteng model lockout; nananatiling panghuling pananggalang sa error ang upstream
+  na 429/cooldown/fallback na gawi.
+- **Saklaw na bawat koneksyon, bawat proseso:** ang mga limitasyon ay para sa bawat database connection
+  at pinananatili sa memory, kaya hindi nakikipag-coordinate sa isa't isa ang dalawang koneksyong muling
+  gumagamit ng parehong upstream API key.
+- **Walang configuration ay nangangahulugang walang pagbabago:** ang pag-omit sa map (o pag-iwang blangko sa
+  dashboard field) ay hindi nagdaragdag ng model gate. Halimbawang configuration na hindi
+  nagtatakda ng anumang pangkalahatang limitasyon ng provider:
+
+```text
+glm-5=1
+glm-4.7=3
+```
 
 ### Serialization ng mga quota-share request
 
-Kapag ang isang quota-share dispatch ay nakatuon sa koneksyong nagdedeklara ng positibong
-`max_concurrent`, ang mga sabay-sabay na request sa **account** na iyon ay ise-serialize sa pamamagitan ng
-isang semaphore bawat koneksyon (key na `qsconn:<connectionId>`): ang mga labis na request ay **maghihintay sa
-queue** sa halip na dagsain ang account. Ito ay **fail-open** — kapag puno ang
-queue o nag-timeout, magpapatuloy ito nang walang slot sa halip na tanggihan ang isang request na
-maaaring i-dispatch. I-toggle ito sa **Settings → Resilience → Quota-share per-connection
+Kapag ang isang quota-share dispatch ay nakaturo sa koneksyong nagtatakda ng positibong
+`max_concurrent`, ang mga sabay-sabay na request sa **account** na iyon ay isinasailalim sa serialization sa pamamagitan ng
+isang semaphore para sa bawat koneksyon (key `qsconn:<connectionId>`): ang mga sobrang request ay **naghihintay sa
+queue** sa halip na bahain ang account. Ito ay **fail-open** — kapag saturated
+ang queue o nag-timeout, nagpapatuloy ito nang walang slot sa halip na tanggihan ang isang request na maaari namang
+i-dispatch. I-toggle sa **Settings → Resilience → Quota-share per-connection
 concurrency** (`resilienceSettings.quotaShareConcurrencyLimit.enabled`, naka-on bilang default).
-Kung walang limitasyong `max_concurrent`, hindi nagbabago ang gawi.
+Kung walang `max_concurrent` na limitasyon, hindi nagbabago ang gawi.
 
-> Ang quota-share routing gate (`selectQuotaShareTarget`, DRR + P2C) ay
-> fail-open din at _binabawasan lamang ang priyoridad_ ng isang koneksyong umabot na sa limitasyon — sa
-> isang pool na may iisang koneksyon, hindi ito makapagpapatupad ng mahigpit na limitasyon, kaya ang semaphore na ito ang aktuwal na
-> kumokontrol sa pagdagsa.
+> Ang quota-share routing gate (`selectQuotaShareTarget`, DRR + P2C) mismo ay
+> fail-open at _binabawasan lamang ang priyoridad_ ng koneksyong nasa limitasyon na — sa isang
+> single-connection pool, hindi ito makakapagpatupad ng mahigpit na limitasyon, kaya ang semaphore na ito ang aktuwal na
+> pumipigil sa pagbaha.
 
 ### Retry na isinasaalang-alang ang cooldown ng combo
 
-Para sa bawat diskarte ng combo (kapag naka-enable), ang isang request na magreresulta sana sa isang 429
-dahil sa MAIKLING pansamantalang cooldown ay maghihintay hanggang matapos ito at muling idi-dispatch sa halip na
+Para sa bawat combo strategy (kapag naka-enable), ang request na magreresulta sana sa isang 429
+para sa isang MAIKLING pansamantalang cooldown ay naghihintay na matapos ito at muling nagdi-dispatch sa halip na
 ibalik ang 429 — saklaw nito ang mga TPM/RPM window na tulad ng sa Gemini (~60s retry-after)
-sa mga multi-model combo, hal. kapag ang parehong target ng isang 2-model combo ay tumama sa rate limit
-ng bawat modelo. Nililimitahan ito ng `comboCooldownWait` (`enabled`, `maxWaitMs`, `maxAttempts`,
+sa mga multi-model combo, hal. kapag parehong tinamaan ng per-model
+rate limit ang mga target ng isang 2-model combo. Nililimitahan ito ng `comboCooldownWait` (`enabled`, `maxWaitMs`, `maxAttempts`,
 `budgetMs`) sa **Settings → Resilience**. Hindi ito kailanman naghihintay para sa `quota_exhausted`
-(naka-lock hanggang hatinggabi) o sa mga dahilang nauugnay sa auth/not-found.
+(naka-lock hanggang hatinggabi) o sa mga dahilang auth/not-found.
+
+Saklaw rin ng parehong gate ang pre-dispatch case (#16319): kapag nilaktawan ang bawat target ng isang
+combo bago pa magsagawa ng anumang attempt dahil ang modelo nito ay nasa maikling
+pansamantalang lockout, hinihintay ng zero-attempt path na matapos ang lockout sa ilalim ng parehong
+mga limitasyon at muling nagdi-dispatch, sa halip na sumagot ng
+`503 ALL_TARGETS_SKIPPED` na walang hint. Kapag hindi pinapayagan ang paghihintay (naabot na ang limitasyon, attempt, o budget,
+o naka-off ang feature), ina-upgrade ang terminal response sa
+`429 rate_limit_error` na naglalaman ng `retry_after` / `reset_at` mula sa pinakamaagang
+pag-expire ng pansamantalang lock; pinananatili ng mga quota, auth, at not-found lock ang 503 na walang hint.
+
+```text
+#16319 · comboCooldownWait · pre-dispatch (attempts = 0)
+all targets skipped + transient model lockout:
+  enabled ∧ 0 < waitMs ≤ maxWaitMs ∧ attempt < maxAttempts ∧ budgetLeftMs ≥ waitMs
+    → wait → re-dispatch
+  wait = false → HTTP 429 rate_limit_error
+  retry_after / reset_at ← earliest transient lock expiry
+quota_exhausted / auth_error / not_found / not_found_local:
+  no transient hint → HTTP 503 ALL_TARGETS_SKIPPED
+```
 
 ---
 

@@ -28,7 +28,7 @@ export function setHttpProxyHandle(handle: HttpProxyServerHandle | null): void {
 interface SystemProxyState {
   applied: boolean;
   port: number | null;
-  guardUntil: string | null;  // ISO 8601
+  guardUntil: string | null; // ISO 8601
   previousState: PreviousState | null;
 }
 
@@ -55,18 +55,22 @@ export function setSystemProxyApplied(
   const guardUntil = new Date(Date.now() + guardMinutes * 60_000).toISOString();
   systemProxyState = { applied: true, port, guardUntil, previousState };
 
-  guardTimer = setTimeout(
-    () => {
-      // Auto-revert after guard period — fire-and-forget.
-      // Import lazily to avoid circular deps at module load.
-      import("@/mitm/inspector/systemProxyConfig").then(({ revert }) => {
+  guardTimer = setTimeout(() => {
+    // Auto-revert after guard period — fire-and-forget.
+    // Import lazily to avoid circular deps at module load.
+    import("@/mitm/inspector/systemProxyConfig")
+      .then(({ revert }) => {
         const ps = systemProxyState.previousState;
         systemProxyState = { applied: false, port: null, guardUntil: null, previousState: null };
-        if (ps) revert(ps).catch(() => {/* best-effort */});
-      }).catch(() => {/* best-effort */});
-    },
-    guardMinutes * 60_000
-  );
+        if (ps)
+          revert(ps).catch(() => {
+            /* best-effort */
+          });
+      })
+      .catch(() => {
+        /* best-effort */
+      });
+  }, guardMinutes * 60_000);
 }
 
 export function clearSystemProxy(): void {
@@ -75,16 +79,4 @@ export function clearSystemProxy(): void {
     guardTimer = null;
   }
   systemProxyState = { applied: false, port: null, guardUntil: null, previousState: null };
-}
-
-// ── TLS Intercept ───────────────────────────────────────────────────────────
-
-let tlsInterceptEnabled = process.env.INSPECTOR_TLS_INTERCEPT === "true";
-
-export function isTlsInterceptEnabled(): boolean {
-  return tlsInterceptEnabled;
-}
-
-export function setTlsIntercept(enabled: boolean): void {
-  tlsInterceptEnabled = enabled;
 }

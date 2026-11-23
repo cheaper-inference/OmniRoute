@@ -67,7 +67,7 @@ i stället den exponentiella backoffen `minRetryCooldownMs → maxRetryCooldownM
 `OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`.
 Regressionsskydd: `tests/unit/provider-cooldown-window-gate.test.ts`.
 
-## 2. Anslutningens väntetid
+## 2. Anslutningskarens
 
 **Omfattning:** en enskild leverantörsanslutning/ett enskilt konto/en enskild nyckel.
 
@@ -77,90 +77,123 @@ Regressionsskydd: `tests/unit/provider-cooldown-window-gate.test.ts`.
 
 - Markera som otillgänglig: `src/sse/services/auth.ts::markAccountUnavailable()`
 - Val: `getProviderCredentials*` i samma fil
-- Beräkning av väntetid: `open-sse/services/accountFallback.ts::checkFallbackError()`
+- Beräkning av karenstid: `open-sse/services/accountFallback.ts::checkFallbackError()`
 - Inställningar: `src/lib/resilience/settings.ts`
 
 **Fält per anslutning:**
 
-- `rateLimitedUntil` — tidsstämpel för när väntetiden löper ut
+- `rateLimitedUntil` — tidsstämpel för när karenstiden löper ut
 - `testStatus: "unavailable"`
 - `lastError`, `lastErrorType`, `errorCode`
 - `backoffLevel` — räknare för exponentiell backoff
 
-**Standardväntetider:**
+**Standardvärden för karenstid:**
 
-- OAuth-bas: 5s
-- API-nyckelbas: 3s
-- API-nyckel 429: föredrar uppströms `Retry-After`-/återställningshuvuden/tolkningsbar återställningstext
+- OAuth-bas: 5 s
+- API-nyckelbas: 3 s
+- API-nyckel, 429: föredrar uppströms `Retry-After`-/återställningshuvuden eller tolkningsbar återställningstext
 - Backoff: `baseCooldownMs * 2 ** failureIndex`
 
-**Skydd mot stampede-effekt:** förhindrar att samtidiga fel förlänger väntetiden för mycket eller ökar `backoffLevel` dubbelt.
+**Skydd mot anhopningseffekt:** förhindrar att samtidiga fel förlänger karenstiden för mycket eller ökar `backoffLevel` dubbelt.
 
-**Sluttillstånd (INTE väntetider):**
+**429-svar för samtidighetsgränser klättrar inte uppför backoff-stegen.** Ett `429` vars brödtext rapporterar en
+samtidighetsgräns ("too many concurrent requests", "concurrency limit", "parallel request
+limit", GLM `并发数过高`) innebär att kontot fungerar men är upptaget.
+`checkFallbackError()` returnerar orsaken `concurrency_limited`: växla över till nästa
+anslutning nu, sätt denna i karens under ett fast `CONCURRENCY_LIMIT_COOLDOWN_MS` (1 s) eller enligt
+uppströmsförsökstipset, lämna `backoffLevel` oförändrat och ange `skipProviderBreaker`.
+En uttrycklig kvotbrödtext har fortfarande företräde, så en brödtext som även matchar ett kvotmönster behåller bedömningen
+kvot. Identifiering: `looksLikeConcurrencyLimit()` i `src/shared/utils/classify429.ts`;
+bedömning: `open-sse/services/accountFallback/concurrencyLimit429.ts`. `classify429()` (kretsbrytarens
+`FailureKind`) är oförändrad och ger fortfarande `rate_limit` för dessa brödtexter.
 
-- `banned` — anges vid identifiering av förbjudna nyckelord/kontoblockering (se [BAN_DETECTION](../security/BAN_DETECTION.md)) och vid tre på varandra följande avvisningar per begäran från uppströmstjänsten (`request_rejected`, t.ex. Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`); en enskild avvisning försätter endast anslutningen i vänteläge
-- `expired` (övergår till ett sluttillstånd efter ett begränsat antal återförsök — `EXPIRED_RETRY_MAX = 3` med exponentiell backoff — så att tillfälliga OAuth-fel kan självläka innan kontot avaktiveras permanent)
+**Stopp i ströminnehållet sätter inte kontot i karens.** När vakthunden för stopp i innehåll
+(`open-sse/utils/streamHandler.ts`) ger upp på en ström som inte skickade några modellutdata i
+tid registrerar `markAccountUnavailable()` felet för anslutningen men anger ingen
+karenstid: stoppet hör till den aktuella förfrågan och beror oftast på en lång resonemangsomgång utan
+utdata ännu. Operatörer kan återaktivera detta med `resilienceSettings.streamStallCooldown.enabled`
+(standardvärde `false`).
+
+**Resonemangsramar startar om budgeten för innehållsstopp.** En resonemangsmodell kan tänka i
+flera minuter före sin första synliga token: Claude strömmar `thinking_delta`-ramar vars
+resonemangstext kan vara tom, och Responses API strömmar det ena resonemangsobjektet efter
+det andra. `isReasoningProgressFrame()` (`open-sse/utils/streamReadiness.ts`) identifierar
+dessa ramar, och vakthunden startar om sin budget för varje sådan i stället för att avbryta
+omgången. De är fortfarande inte modellutdata, så en omgång som avslutas med enbart resonemang rapporteras fortfarande
+som tom, och en omgång som slutar resonera och bara skickar livstecken utlöser fortfarande
+vakthunden.
+
+Kiros binära `reasoningContentEvent`-ramar med en icke-tom signatur bevarar denna
+resonemangsaktivitet genom exekveraren som en tom `reasoning_content`-delta. Signaturen
+vidarebefordras inte. Metadata, ofullständiga ramar och tomma signaturer startar inte om
+innehållsbudgeten; den oberoende tidsgränsen för aktiva strömmar och klientavbrott gäller fortfarande
+(`open-sse/executors/kiro/reasoning.ts`).
+
+**Terminaltillstånd (INTE karenstider):**
+
+- `banned` — anges vid identifiering av förbjudna nyckelord/kontospärrar (se [BAN_DETECTION](../security/BAN_DETECTION.md)) och efter tre på varandra följande uppströmsavslag per förfrågan (`request_rejected`, t.ex. Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`); ett enstaka avslag sätter endast anslutningen i karens
+- `expired` (övergår till terminalt tillstånd efter ett begränsat antal omförsök — `EXPIRED_RETRY_MAX = 3` med exponentiell backoff — så att tillfälliga OAuth-fel kan åtgärdas automatiskt innan kontot inaktiveras permanent)
 - `credits_exhausted`
 
-Dessa kvarstår tills autentiseringsuppgifterna ändras eller en operatör återställer dem. Skriv inte över sluttillstånd med ett tillfälligt väntetillstånd.
+Dessa kvarstår tills autentiseringsuppgifterna ändras eller en operatör återställer dem. Skriv inte över terminaltillstånd med tillfälliga karenstillstånd.
 
-**Lat återställning:** när `rateLimitedUntil` har passerat blir anslutningen valbar igen. Vid framgångsrik användning rensar `clearAccountError()` alla felfält.
+**Lat återhämtning:** när `rateLimitedUntil` har passerats blir anslutningen tillgänglig igen. Efter lyckad användning rensar `clearAccountError()` alla felfält.
 
 ### Claudes OAuth-användningsgräns: fil med lägre prioritet + återställning av sessionsgräns
 
-**Omfattning:** en Claude-prenumerationsanslutning (OAuth). Båda funktionerna är **valfria per
-anslutning** (Redigera anslutning → Claude-avsnittet → `lowPriorityMode` / `autoLimitReset` i
-`providerSpecificData`, båda är avstängda som standard) och motsvarar Claude Codes kommandon `/low-priority` och
-`/limit-reset` (protokollkontraktet hämtat från Claude Code 2.1.263).
+**Omfattning:** en Claude-prenumerationsanslutning (OAuth). Båda funktionerna är **frivilliga per
+anslutning** (Redigera anslutning → Claude-sektionen → `lowPriorityMode`/`autoLimitReset` i
+`providerSpecificData`, båda inaktiverade som standard) och motsvarar Claude Codes kommandon `/low-priority` och
+`/limit-reset` (protokollkontrakt hämtat från Claude Code 2.1.263).
 
 **Implementering:**
 
 - Tillståndsmaskin + svarsklassificering: `open-sse/services/claudeLowPriority.ts`
 - Klient för återställningsstatus/anspråk: `open-sse/services/claudeLimitReset.ts`
-- Exekveringskrok (huvudinjektion + återförsök med samma konto): `open-sse/executors/base.ts::execute()`
+- Exekverarkrok (huvudinjektion + nytt försök med samma konto): `open-sse/executors/base.ts::execute()`
 - Beständig lagring av aktivering: `src/lib/providers/requestDefaults.ts::normalizeProviderSpecificData()`
 
-**Utlösare:** 5-timmarsgränsen för användning — ett `429` vars huvuden innehåller
+**Utlösare:** användningsgränsen på 5 timmar — ett `429` vars huvuden innehåller
 `anthropic-ratelimit-unified-status: rejected` och, när kontot är berättigat,
 `anthropic-ratelimit-unified-slow-offer: treatment`. Inget skickas före detta första
-429-svar för gränsen; ett plötsligt 429-svar utan unified-huvuden går genom den normala väntetidsvägen.
+429-svar för gränsen; ett plötsligt 429-svar utan enhetliga huvuden går via den normala karensvägen.
 
 **Fil med lägre prioritet** (`lowPriorityMode`):
 
-- Vid 429-svaret för gränsen accepterar exekveraren erbjudandet och försöker omedelbart igen med **samma**
-  konto och `anthropic-usage-limit: slow`; filen förblir aktiv fram till den tillkännagivna
-  `anthropic-ratelimit-unified-reset` (+60s respitperiod), och varje begäran inom det tidsfönstret innehåller
-  huvudet. Det uppfångade 429-svaret når aldrig `handleChatCore`, så anslutningen
-  försätts **inte** i vänteläge och byts inte ut.
+- Vid väggens 429 accepterar exekveraren erbjudandet och försöker omedelbart igen med **samma**
+  konto med `anthropic-usage-limit: slow`; körfältet förblir aktivt till det annonserade
+  `anthropic-ratelimit-unified-reset` (+60 s respit), och varje begäran inom det fönstret innehåller
+  headern. Den uppfångade 429 når aldrig `handleChatCore`, så anslutningen förs
+  **inte** in i nedkylning och roteras inte bort.
 - `anthropic-ratelimit-unified-slow-status` i senare svar: `active` / `not_needed`
-  behåller filen; `slot_busy` (429) eller ett `529` inväntar serverns
-  `anthropic-ratelimit-unified-slow-retry-after` (standard 20s, begränsat till 5–600s, ±30% jitter)
+  behåller körfältet; `slot_busy` (429) eller en `529` väntar enligt serverns
+  `anthropic-ratelimit-unified-slow-retry-after` (standard 20 s, begränsat till 5–600 s, ±30 % jitter)
   och försöker igen, begränsat av `anthropic-ratelimit-unified-slow-max-wait` (standard 20 min, begränsat
-  till 1 min–6 h) — därefter avslutas filen och en 10 minuter lång avsvalningsperiod blockerar nytt accepterande. Väntetiden
-  begränsas dessutom av den återstående tiden för begärans egen tidsgräns för uppströmsstart
-  (`resolveFetchStartTimeout`, 10 min som standard) minus en marginal på 5 s: utan denna begränsning skulle
-  den maximala standardväntetiden på 20 minuter överleva begäran och vilan skulle avbrytas
-  mitt under väntan, vilket skulle exponera ett `TimeoutError` i stället för det kontrollerade `max_wait`-avslutet + avsvalningsperioden.
-- `weekly_limit` / `budget_exhausted` / `off` / `ineligible`, övergången till ett nytt 5-timmarsfönster eller
-  `ineligible` + `anthropic-ratelimit-unified-overage-in-use: true` (vilket avslutar filen som
-  `extra_usage` oavsett status, eftersom betald överförbrukning nu täcker gränsen) avslutar filen;
-  svaret går därefter vidare till den normala väntetidsvägen. `budget_exhausted` koms ihåg fram till
-  den tillkännagivna budgetåterställningen (≤ 8 dagar).
-- Gränskontrollen körs efter exekverarens egna 400-utlösta återförsök inom försöket (kontextredigering,
-  begränsning av tänkande/ansträngning, automatisk parameterinlärning), så att ett 429-svar för gränsen som endast uppstår vid
-  ett av dessa återförsök fortfarande fångas upp i stället för att nå väntetidsvägen.
-- Tillståndet lagras i minnet per anslutning (en omstart medför ett extra 429-svar för gränsen innan erbjudandet accepteras igen).
+  till 1 min–6 h) — därefter avslutas körfältet och en 10 minuter lång avsvalningsperiod blockerar nytt godkännande. Väntetiden
+  begränsas dessutom av den tid som återstår av begärans egen tidsgräns för uppströmsstart
+  (`resolveFetchStartTimeout`, 10 min som standard) minus en marginal på 5 s: utan den begränsningen skulle
+  den maximala standardväntetiden på 20 minuter överleva begäran, och vänteläget skulle avbrytas
+  mitt under väntan, vilket skulle exponera ett `TimeoutError` i stället för det kontrollerade avslutet `max_wait` + avsvalning.
+- `weekly_limit` / `budget_exhausted` / `off` / `ineligible`, en övergång till ett nytt 5-timmarsfönster eller
+  `ineligible` + `anthropic-ratelimit-unified-overage-in-use: true` (vilket avslutar det som
+  `extra_usage` oavsett status, eftersom betald överförbrukning nu täcker väggen) avslutar körfältet;
+  svaret går sedan vidare till den normala nedkylningsvägen. `budget_exhausted` sparas till
+  den annonserade budgetåterställningen (≤ 8 dagar).
+- Väggkontrollen körs efter exekverarens egna 400-utlösta försök inom samma körning (kontextredigering,
+  begränsningar av tänkande/ansträngning, automatisk parameterinlärning), så en vägg-429 som bara visas vid
+  ett av dessa nya försök fångas fortfarande upp i stället för att nå nedkylningsvägen.
+- Tillståndet lagras i minnet per anslutning (en omstart kostar en extra vägg-429 för att acceptera igen).
 
-**Återställning av sessionsgräns** (`autoLimitReset`, provas före filen när båda är aktiverade):
+**Återställning av sessionsgräns** (`autoLimitReset`, provas före körfältet när båda är aktiverade):
 
 - `GET https://api.anthropic.com/api/oauth/usage?at_wall=1&skip_spend=1` → `juniper_tide`-
   block; när `arm: "reset"` och `available: true`,
   `POST https://api.anthropic.com/api/organizations/{orgUUID}/reset_rate_limits` med
   `{ "program": "juniper_tide" }` (organisationens UUID från
-  `providerSpecificData.organizationUUID`, reservvärde från bootstrap).
-- `result: reset|not_limited` → begäran görs om med full hastighet (inget slow-huvud).
+  `providerSpecificData.organizationUUID`, bootstrap som reserv).
+- `result: reset|not_limited` → begäran provas igen med full hastighet (ingen slow-header).
   `already_used` / `not_offered` memorerar `next_available_at` (standard en vecka); alla
-  fel ger 15 minuters backoff. Återställningen kan göras en gång i veckan och räknas fortfarande mot
+  fel medför en backoff på 15 minuter. Återställningen kan göras en gång i veckan och räknas fortfarande mot
   veckogränsen.
 
 Regressionsskydd: `tests/unit/claude-low-priority-mode.test.ts`,
@@ -168,39 +201,55 @@ Regressionsskydd: `tests/unit/claude-low-priority-mode.test.ts`,
 
 ### Sessionsaffinitet (#7274)
 
-**Omfattning:** en klientsession (`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session`-huvud) som är fäst vid en anslutning, för **alla** leverantörer.
+**Omfattning:** en klientsession (`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session`-header) fästs vid en anslutning, för **vilken** leverantör som helst.
 
-**Syfte:** behålla en agent med flera interaktioner (Claude Code, aider, anpassade agenter) på samma konto mellan förfrågningar, vilket minskar kontextförlust mellan konton och upprepade 429-fel vid kallstart hos leverantörer med sessionsstatus per konto.
+**Syfte:** hålla en agent med flera turer (Claude Code, aider, anpassade agenter) på samma konto mellan begäranden, vilket minskar kontextförlust mellan konton och upprepade 429 vid kallstart hos leverantörer med sessionsstatus per konto.
 
 **Implementering:**
 
 - TTL-upplösning: `src/sse/services/sessionAffinityPin.ts::resolveSessionAffinityTtlMs()`
-- Val/skapande av bindning: `src/sse/services/sessionAffinityPin.ts::selectSessionAffinityConnection()`
-- Extrahering av headers (generiskt, valfri leverantör): `src/sse/services/auth.ts::extractSessionAffinityKey()`
-- Beständig bindningstabell: `sessionAccountAffinity` (`src/lib/db/sessionAccountAffinity.ts`)
-- Inställning: `sessionAffinityTtlMs` (global TTL i ms, `0` inaktiverar) — `src/lib/db/settings.ts`. Bytte namn från den Codex-specifika `codexSessionAffinityTtlMs` genom migreringen `124_generic_session_affinity_ttl.sql`, som överför en eventuell tidigare konfigurerad Codex-TTL som det nya standardvärdet.
+- Val/skapande av fästning: `src/sse/services/sessionAffinityPin.ts::selectSessionAffinityConnection()`
+- Extrahering av header (generisk, valfri leverantör): `src/sse/services/auth.ts::extractSessionAffinityKey()`
+- Beständig fästningstabell: `sessionAccountAffinity` (`src/lib/db/sessionAccountAffinity.ts`)
+- Inställning: `sessionAffinityTtlMs` (global TTL i ms, `0` inaktiverar) — `src/lib/db/settings.ts`. Namnet ändrades från den Codex-specifika `codexSessionAffinityTtlMs` genom migreringen `124_generic_session_affinity_ttl.sql`, som överför en eventuell tidigare konfigurerad Codex-TTL som det nya standardvärdet.
 
-Före #7274 avbröt `resolveSessionAffinityTtlMs()` direkt med `0` för alla leverantörer utom `codex`, så TTL-inställningen (och sessionsheaders) hade ingen effekt någon annanstans, trots att bindningsmekanismen och extraheringen av headers redan var leverantörsagnostiska. Korrigeringen tog bort denna tidiga retur; TTL-värdet gäller nu enhetligt för alla leverantörer när det globala värdet har angetts till mer än `0`.
+Före #7274 avslutades `resolveSessionAffinityTtlMs()` omedelbart med `0` för alla leverantörer utom `codex`, så TTL-inställningen (och sessionsheaderna) hade ingen effekt någon annanstans, trots att fästningsmekanismen och headerextraheringen redan var leverantörsoberoende. Korrigeringen tog bort denna tidiga retur; TTL gäller nu enhetligt för alla leverantörer när den globala inställningen har satts till ett värde över `0`.
 
-De tre headers som används för sessionsaffinitet vidarebefordras aldrig uppströms — exekverare bygger sina egna uppströmsheaders från grunden i stället för att vidarebefordra klientheaders, så detta förblir endast ett internt korrelations-id.
+De tre headerna för sessionsaffinitet vidarebefordras aldrig uppströms — exekverarna bygger sina egna uppströmsheader från grunden i stället för att vidarebefordra klientheader, så detta förblir endast ett internt korrelations-id.
 
-### Exklusiva hanterade anslutningsleasingar för sessioner
+### Exklusiva anslutningslån för hanterade sessioner
 
-**Omfattning:** en aktiv hanterad HTTP-klient/session äger en berättigad OmniRoute-anslutning.
+**Omfattning:** en aktiv hanterad HTTP-klient/session äger en behörig OmniRoute-anslutning.
 
-**Syfte:** tillhandahålla ett beständigt exklusivt ägarskap av anslutningar för klienter som behöver en strikt routningsbarriär mellan förfrågningar. Detta skiljer sig från sessionsaffinitet, som är en mjuk preferens för kontinuitet: en exklusiv leasing lagrar livscykelstatus i SQLite, framtvingar global unikhet för aktiva ägare och aktiva anslutningar samt avvisar en inaktuell generation före leverantörsdispatch.
+**Syfte:** tillhandahålla varaktigt, exklusivt ägarskap över anslutningar för klienter som behöver en strikt
+routningsbarriär mellan begäranden. Detta skiljer sig från sessionsaffinitet, som är en mjuk kontinuitetspreferens:
+ett exklusivt lån bevarar livscykeltillståndet i SQLite, upprätthåller global unikhet för aktiva ägare och
+aktiva anslutningar samt avvisar en inaktuell generation före leverantörsdispatch.
 
-Funktionen är valfri per API-nyckel. En hanterad nyckel måste ha omfånget `lease:exclusive` och en explicit lista `allowedConnections` som inte är tom. Alla HTTP-klienter kan använda livscykelslutpunkten; inget klientnamn, ingen user-agent, leverantör, OAuth-metod eller modell krävs. Leasingen äger en anslutning, inte en modell, så ett modellbyte behåller bindningen så länge anslutningen fortfarande är berättigad enligt de vanliga reglerna. Normala regler för modell, kvot, hälsa, nedkylning och tillåtelselista är fortsatt styrande och kan flytta samma generation till en annan ledig berättigad anslutning.
+Funktionen aktiveras per API-nyckel. En hanterad nyckel måste ha omfånget `lease:exclusive` och en
+explicit lista `allowedConnections` som inte är tom. Alla HTTP-klienter kan använda livscykelslutpunkten; inget
+klientnamn, ingen user-agent, leverantör, OAuth-metod eller modell krävs. Lånet äger en anslutning,
+inte en modell, så ett modellbyte behåller bindningen så länge anslutningen förblir normalt
+behörig. Normala regler för modell, kvot, hälsa, nedkylning och tillåtelselista förblir styrande och kan
+flytta samma generation till en annan ledig, behörig anslutning.
 
-Livscykeln är `POST /api/v1/session-leases` med JSON-åtgärderna `acquire`, `renew` och `release`. Hanterade inferensförfrågningar skickar det ogenomskinliga värdet `X-OmniRoute-Lease-Owner` och det exakta värdet `X-OmniRoute-Lease-Generation`. Ägarvärdet använder `vlo_` följt av 43 base64url-tecken; endast dess SHA-256-hash lagras. Varje slutlig dispatchbarriär binder även det autentiserade API-nyckel-ID:t och det aktiva anslutnings-ID:t. Kontrollheaders för leasing tas bort från loggar, sparade ögonblicksbilder av förfrågningar och uppströmsheaders för exekverare.
+Livscykeln är `POST /api/v1/session-leases` med JSON-åtgärderna `acquire`, `renew` och `release`.
+Hanterade inferensförfrågningar innehåller det ogenomskinliga värdet `X-OmniRoute-Lease-Owner` och exakt
+`X-OmniRoute-Lease-Generation`. Ägarvärdet består av `vlo_` följt av 43 base64url-tecken; endast
+dess SHA-256-hash lagras. Varje slutlig dispatch-spärr binder även det autentiserade API-nyckel-ID:t och
+det aktiva anslutnings-ID:t. Styrhuvuden för leasingen tas bort från loggar, sparade ögonblicksbilder av förfrågningar och
+huvuden till exekverare uppströms.
 
-Om vanlig routning har berättigade hanterade kandidater men varje ledig kandidat är upptagen av en främmande aktiv leasing returnerar OmniRoute HTTP `429`, koden lease-capacity-unavailable, statusen waiting-for-capacity och ett begränsat `Retry-After` som härleds från den tidigaste relevanta utgångstiden. Vanlig tom berättigandemängd är inte leasingkonkurrens och behåller sin befintliga felhantering för routning.
+Om den ordinarie routningen har kvalificerade hanterade kandidater men varje ledig kandidat är upptagen av en
+främmande aktiv lease returnerar OmniRoute HTTP `429`, koden lease-capacity-unavailable, tillståndet
+waiting-for-capacity och ett begränsat `Retry-After` som härleds från den tidigaste relevanta utgångstiden.
+Att inga kandidater kvalificerar sig vid ordinarie routning beror inte på lease-konkurrens och behåller den befintliga routningens felsemantik.
 
 Relaterade mekanismer förblir separata:
 
-- OAuth-sessionsbeläggning är processlokal mjuk fördelning för OAuth-konton.
-- Kontosemaforer beviljar tillstånd för samtidiga förfrågningar och upphör när en förfrågan slutförs.
-- Exklusiva hanterade sessionleasingar är beständigt livscykelägarskap med en generationsbarriär.
+- OAuth-sessionsbeläggning är processlokal, mjuk distribution för OAuth-konton.
+- Kontosemaforer beviljar samtidighetstillstånd för förfrågningar och upphör när en förfrågan slutförs.
+- Exklusiva hanterade sessionsleasar är beständigt livscykelägarskap med en generationsspärr.
 
 ---
 
@@ -208,125 +257,212 @@ Relaterade mekanismer förblir separata:
 
 **Omfattning:** kombinationen leverantör + anslutning + modell.
 
-**Nyckelomfattning efter status:** den felande statusen avgör vilken nyckel en spärr skrivs
+**Nyckelomfattning efter status:** statusen för felet avgör vilken nyckel en spärr skrivs
 till (`resolveLockoutScope()` i `open-sse/services/accountFallback/exactModelLock.ts`):
 
 - `429` / `403` / `402` — en kvot- eller behörighetssignal — spärrar **kvotfamiljen**:
-  för codex hela omfattningen `codex` / `spark` (varje `gpt-5*`-modell för
+  för codex hela omfattningen `codex` / `spark` (alla `gpt-5*`-modeller för
   anslutningen), för andra leverantörer `getQuotaScopedModelForProvider()`.
-- `404` spärrar enbart modellen (`getModelLockKey()` avgränsar `not_found`).
-- Alla andra statuskoder — `5xx`-transport-/serverfel och OmniRoutes egen
-  syntetiserade `502` från kvalitetsvalidering — spärrar endast den **exakta**
+- `404` spärrar den rena modellen (`getModelLockKey()` begränsar `not_found`).
+- Alla andra statuskoder — transport-/serverfel av typen `5xx` och OmniRoutes egen
+  syntetiserade `502` från kvalitetsvalideringen — spärrar endast den **exakta**
   kombinationen av leverantör/anslutning/modell. En felaktig ström för en modell är inte belägg
-  för något om kontots kvot; före den här regeln tog ett tomt svar från
-  `codex/gpt-5.6-luna` bort varje `gpt-5*`-modell för den anslutningen från
-  routningen i 2–30 min (med eskalering), trots att dess kvot var orörd.
-- Ett explicit `scope`-alternativ från anroparen har alltid företräde (Antigravity skickar `"exact"`).
+  för något om kontots kvot. Före denna regel gjorde ett tomt svar från
+  `codex/gpt-5.6-luna` att alla `gpt-5*`-modeller för den anslutningen togs bort från
+  routningen i 2–30 min (med eskalering), trots att dess kvot var opåverkad.
+- Ett uttryckligt `scope`-alternativ från anroparen har alltid företräde (Antigravity skickar `"exact"`).
 
 **Syfte:** undvika att inaktivera en hel anslutning när endast en modell är otillgänglig eller kvotbegränsad.
 
 **Exempel:**
 
 - Leverantörer med kvot per modell som returnerar 429
-- Lokala leverantörer som returnerar 404 för en enskild modell som saknas
+- Lokala leverantörer som returnerar 404 för en saknad modell
 - Leverantörsspecifika behörighetsfel för lägen/modeller (t.ex. Grok-lägen)
 
 **Implementering:** `open-sse/services/accountFallback.ts` — `lockModel()`, `clearModelLock()`, `getAllModelLockouts()`.
 
-### Instrumentpanel för modellnedkylningar (v3.8.0)
+### Kontrollpanel för modellvänteperioder (v3.8.0)
 
-Gränssnitt: Inställningar → Modellnedkylningar (`src/app/(dashboard)/dashboard/settings/components/ModelCooldownsCard.tsx`)
+Gränssnitt: Inställningar → Modellvänteperioder (`src/app/(dashboard)/dashboard/settings/components/ModelCooldownsCard.tsx`)
 
-Visar aktiva spärrar med: leverantör, anslutning, modell, orsak, expiresAt. Operatörer kan återaktivera en modell manuellt från kortet.
+Visar aktiva spärrar med: leverantör, anslutning, modell, orsak, expiresAt. Operatörer kan manuellt återaktivera en modell från kortet.
 
 **REST-API:**
 
-- `GET /api/resilience/model-cooldowns` — lista aktiva spärrar
+- `GET /api/resilience/model-cooldowns` — visa aktiva spärrar
 - `DELETE /api/resilience/model-cooldowns` — manuell återaktivering. Brödtext: `{provider, connection, model}`. Autentisering: hantering.
 
-### Gränssnitt för spärrinställningar + återställning genom avklingning vid framgång (v3.8.23)
+### Hanterare för vänteperioder
 
-Modellspärren gick från ett alltid aktivt, hårdkodat beteende till en helt konfigurerbar
-funktion som måste aktiveras explicit, med ett eget inställningskort och en självläkande återställningsväg.
+Gränssnitt: Övervakning → Hanterare för vänteperioder (`src/app/(dashboard)/dashboard/resilience/cooldowns/`).
+
+En sida för varje anslutning som har tagits ur routningen av en tillfällig orsak, i stället för
+att öppna varje leverantörssida. Den visar anslutningars vänteperioder, modellspärrar och terminala
+tillstånd, rensar dem per anslutning, för ett urval eller för alla anslutningar hos en leverantör,
+och redigerar de mest finjusterade reglerna för vänteperioder: `streamStallCooldown.enabled` samt basvänteperioden och det maximala antalet backoff-steg för OAuth-/API-nycklars
+`connectionCooldown` (sparas via
+`PATCH /api/resilience`). Terminala tillstånd (`banned`, `expired`, `credits_exhausted`) visas
+men rensas aldrig här.
+
+**REST-API** (`src/lib/resilience/cooldownManager.ts`, autentisering: hantering):
+
+- `GET /api/resilience/cooldowns[?provider=]` — anslutningar med status, återstående vänteperiod,
+  backoff-nivå, senaste feltyp och modellspärrar (inga autentiseringsuppgifter)
+- `POST /api/resilience/cooldowns` — brödtext `{connectionIds: string[]}` eller
+  `{all: true, provider?}`; returnerar `{cleared, unchanged, skippedTerminal, lockoutsCleared}`
+
+### Gränssnitt för spärrinställningar + återhämtning genom nedtrappning vid framgång (v3.8.23)
+
+Modellspärren gick från ett alltid aktiverat, hårdkodat beteende till en helt konfigurerbar
+funktion som måste aktiveras uttryckligen, med ett eget inställningskort och en självläkande återhämtningsväg.
 
 **Inställningskort:** Inställningar → Modellspärr
 (`src/app/(dashboard)/dashboard/settings/components/ModelLockoutCard.tsx`).
 Detta är **skilt** från det skrivskyddade `ModelCooldownsCard` ovan (som endast
-_listar_ aktiva spärrar) — det nya kortet _konfigurerar parametrarna_. Standardvärden
+_visar_ aktiva spärrar) — det nya kortet _konfigurerar parametrarna_. Standardvärden
 finns i `DEFAULT_MODEL_LOCKOUT_SETTINGS`
 (`src/lib/resilience/modelLockoutSettings.ts`):
 
-| Inställning             | Standard                         | Betydelse                                                                |
-| ----------------------- | -------------------------------- | ------------------------------------------------------------------------ |
-| `enabled`               | `false`                          | Huvudreglage — modellspärr är **avstängd som standard**.                 |
-| `errorCodes`            | `[403, 404, 429, 502, 503, 504]` | Statuskoder från uppströmskällan som räknas som ett modellspecifikt fel. |
-| `baseCooldownMs`        | `120_000` (120 s)                | Initial spärrtid för det första felet.                                   |
-| `maxCooldownMs`         | `1_800_000` (30 min)             | Övre gräns för den eskalerade nedkylningen.                              |
-| `maxBackoffSteps`       | `10`                             | Maximalt antal eskaleringssteg för exponentiell backoff.                 |
-| `useExponentialBackoff` | `true`                           | Om upprepade fel ska eskalera nedkylningen exponentiellt.                |
+| Inställning             | Standardvärde                    | Betydelse                                                  |
+| ----------------------- | -------------------------------- | ---------------------------------------------------------- |
+| `enabled`               | `false`                          | Huvudreglage — modellspärren är **av som standard**.       |
+| `errorCodes`            | `[403, 404, 429, 502, 503, 504]` | Uppströmsstatusar som räknas som ett modellspecifikt fel.  |
+| `baseCooldownMs`        | `120_000` (120 s)                | Inledande spärrtid för det första felet.                   |
+| `maxCooldownMs`         | `1_800_000` (30 min)             | Övre gräns för den eskalerade vänteperioden.               |
+| `maxBackoffSteps`       | `10`                             | Maximalt antal eskaleringssteg för exponentiell backoff.   |
+| `useExponentialBackoff` | `true`                           | Om upprepade fel ska eskalera vänteperioden exponentiellt. |
 
 Inställningarna sparas via det vanliga inställningslagret och valideras genom
-schemat för resiliensinställningar; kortet begränsar `baseCooldownMs`/`maxCooldownMs`
+schemat för motståndskraftsinställningar. Kortet begränsar `baseCooldownMs`/`maxCooldownMs`
 (med `maxCooldownMs ≥ baseCooldownMs`) och `maxBackoffSteps`.
 
-**Återställning genom avklingning vid framgång:** återställning sker **inte** enbart genom att en timer löper ut. Ett felfritt
-svar minskar modellens felantal, så att en modell som återhämtar sig
-mitt i tidsfönstret slutar eskalera (och spärren tas bort) innan timern skulle ha löpt ut. För ett lyckat
-kombinationsmål anropar `open-sse/services/combo.ts` `decayModelFailureCount()`
-(`open-sse/services/accountFallback.ts`), vilket **halverar** det lagrade
-`failureCount` (`Math.floor(failureCount / 2)`); när det når `0` tas spärrposten
+**Återhämtning genom nedtrappning vid framgång:** återhämtning sker **inte** enbart när timern löper ut. Ett felfritt
+svar minskar modellens felantal så att en modell som återhämtar sig
+mitt i tidsfönstret slutar eskalera (och rensas) innan dess timer annars skulle ha gjort det. När ett kombinationsmål
+lyckas anropar `open-sse/services/combo.ts` funktionen `decayModelFailureCount()`
+(`open-sse/services/accountFallback.ts`), som **halverar** det lagrade
+`failureCount` (`Math.floor(failureCount / 2)`). När det når `0` tas spärrposten
 bort helt. Motsvarande `recordModelLockoutFailure()`
-ökar antalet (och eskalerar nedkylningen) vid fel inom
-eskaleringsfönstret. Denna avklingning vid framgång sker utöver vanligt timerförlopp —
+ökar antalet (och eskalerar vänteperioden) vid fel inom
+eskaleringsfönstret. Denna nedtrappning vid framgång kompletterar vanligt timerutlopp —
 båda vägarna kan återaktivera en modell.
 
-**Tillstånd:** spärrarna lagras **i minnet** (`Map`-objekt per process med
-`ModelLockoutEntry` som indexeras efter `provider:connectionId:model`, medan spärrar med exakt omfattning indexeras efter
-`provider:connectionId:exact:model`), och sparas inte i
-databasen — de försvinner vid omstart. _Inställningarna_ sparas permanent; det aktiva
+**Tillstånd:** spärrar lagras **i minnet** (`Map`-objekt per process med
+`ModelLockoutEntry`, nycklade efter `provider:connectionId:model`, spärrar med exakt omfattning efter
+`provider:connectionId:exact:model`) och sparas inte i
+databasen — de försvinner vid omstart. _Inställningarna_ sparas; det aktiva
 _spärrtillståndet_ är tillfälligt.
 
 ---
 
-## 4. Samtidighetskontroll för kvotdelning (v3.8.36)
+## 4. Samtidighetskontroll för quota-share (v3.8.36)
 
 Prenumerationskonton (GLM, MiniMax osv.) accepterar ofta endast ~1–3 samtidiga
-förfrågningar. Om den gränsen överskrids utlöses 429-svar och nedkylningsperioder. Detta är särskilt påtagligt för
-kombinationer med **kvotdelning** (`qtSd/…`), där flera API-nycklar delar ett uppströmskonto.
-Tre lager förhindrar att ett delat konto överbelastas.
+förfrågningar; om detta överskrids utlöses 429-fel och spärrtider. Detta är särskilt påtagligt för
+**quota-share**-kombinationer (`qtSd/…`), där flera API-nycklar delar på ett
+överordnat konto. Tre lager förhindrar att ett delat konto överbelastas.
 
 ### Samtidighetstak per anslutning (`max_concurrent`)
 
-Varje leverantörsanslutning kan ange ett tak för `max_concurrent`
-(`provider_connections.max_concurrent`, som anges i anslutningsdialogrutan/API:et/databasen).
-Lämna det tomt för obegränsad samtidighet. Detta är den enda inställningen som styr serialiseringslagret
-nedan — ange kontots faktiska samtidighetskapacitet (t.ex. GLM ~1, MiniMax ~2).
+Varje leverantörsanslutning kan ange ett `max_concurrent`-tak
+(`provider_connections.max_concurrent`, som ställs in i anslutningsdialogen/API:t/databasen).
+Lämna det tomt för obegränsad samtidighet. Detta är den enda inställning som styr serialiseringslagret
+nedan — ställ in det på kontots faktiska samtidighet (t.ex. GLM ~1, MiniMax ~2).
 
-### Serialisering av förfrågningar vid kvotdelning
+### Samtidighetstak per modell (`modelConcurrency`)
 
-När en kvotdelningsdirigering riktas mot en anslutning som anger ett positivt
-`max_concurrent`, serialiseras samtidiga förfrågningar till det **kontot** via en
+En anslutning kan dessutom ange exakta samtidighetstak per modell
+i sin `rateLimitOverrides`-mappning:
+
+```json
+{
+  "rateLimitOverrides": {
+    "maxConcurrent": 4,
+    "modelConcurrency": { "glm-5": 1, "glm-4.7": 3 }
+  }
+}
+```
+
+Ställ in detta i anslutningsdialogen (**Rate limit overrides → Samtidighetstak
+per modell**, ett `model=cap` per rad) eller via
+`PATCH /api/providers/[id]` med samma JSON-struktur. Nyckelsemantik:
+
+- **Anslutningsomfattande kontra modellspecifikt:** `maxConcurrent` förblir det delade,
+  anslutningsomfattande taket. När båda gäller förvärvas båda spärrarna
+  atomärt i samma sammansatta spärr
+  (`global → provider → account → model`); det faktiska beteendet styrs av den
+  striktare tillämpliga gränsen.
+- **Exakt matchning av modellnyckeln:** nyckeln är modellsträngen som skickas till
+  exekveraren efter att routningen har lösts — normalt det rena överordnade modell-id:t
+  (`glm-5`), inte ett alias på klientsidan i formatet `provider/model` (`zai/glm-5` matchar
+  inte `glm-5`). Värdena är positiva heltalstak för samtidiga förfrågningar.
+- **Lokal köhantering, ingen identifiering:** överskjutande förfrågningar köas lokalt med den
+  befintliga kö-/timeoutsemantiken (typade antagningsfel av typen `SEMAPHORE_TIMEOUT` /
+  `SEMAPHORE_QUEUE_FULL`). OmniRoute identifierar eller härleder inte den överordnade
+  policyn — det tillämpar exakt de tak som operatören har konfigurerat. En mättad
+  modellspärr inaktiverar aldrig leverantören och skapar aldrig en permanent modellblockering;
+  det överordnade beteendet för 429-fel, spärrtid och reservväxling kvarstår som sista
+  felhanteringsmekanism.
+- **Omfattning per anslutning och process:** taken gäller per databasanslutning
+  och lagras i minnet, så två anslutningar som återanvänder samma överordnade API-nyckel
+  samordnas inte med varandra.
+- **Okonfigurerat innebär oförändrat:** att utelämna mappningen (eller lämna
+  fältet i kontrollpanelen tomt) lägger inte till någon modellspärr. Exempelkonfiguration utan
+  att ange någon universell leverantörsgräns:
+
+```text
+glm-5=1
+glm-4.7=3
+```
+
+### Serialisering av quota-share-förfrågningar
+
+När en quota-share-dispatch riktas mot en anslutning som anger ett positivt
+`max_concurrent`, serialiseras samtidiga förfrågningar till det **kontot** genom en
 semafor per anslutning (nyckel `qsconn:<connectionId>`): överskjutande förfrågningar **väntar i
-kön** i stället för att överbelasta kontot. Funktionen är **fail-open** — om kön är full
-eller en tidsgräns överskrids fortsätter förfrågan utan en plats, i stället för att en dirigeringsbar
-förfrågan någonsin avvisas. Växla funktionen under **Inställningar → Feltolerans → Samtidighet
-per anslutning för kvotdelning** (`resilienceSettings.quotaShareConcurrencyLimit.enabled`, aktiverad
-som standard). Utan ett `max_concurrent`-tak är beteendet oförändrat.
+kön** i stället för att överbelasta kontot. Den är **fail-open** — en mättad
+kö eller timeout fortsätter utan en plats i stället för att någonsin avvisa en
+förfrågan som kan dispatchas. Växla detta i **Settings → Resilience → Quota-share per-connection
+concurrency** (`resilienceSettings.quotaShareConcurrencyLimit.enabled`, aktiverat som
+standard). Utan ett `max_concurrent`-tak är beteendet oförändrat.
 
-> Dirigeringsgrinden för kvotdelning (`selectQuotaShareTarget`, DRR + P2C) är i sig
-> fail-open och _nedprioriterar_ endast en anslutning som nått sitt tak — med en
-> pool som endast innehåller en anslutning kan den inte införa en hård gräns, så det är denna semafor som faktiskt
+> Routningsspärren för quota-share (`selectQuotaShareTarget`, DRR + P2C) är i sig
+> fail-open och _nedprioriterar_ endast en anslutning som har nått sitt tak — med en
+> pool med en enda anslutning kan den inte införa en hård gräns, så det är denna semafor som faktiskt
 > begränsar överbelastningen.
 
-### Nedkylningsmedvetna återförsök för kombinationer
+### Spärrtidsmedvetna återförsök för kombinationer
 
-För varje kombinationsstrategi (när funktionen är aktiverad) väntar en förfrågan, som annars skulle resultera i ett 429-svar
-på grund av en KORT tillfällig nedkylning, tills nedkylningen är över och dirigeras sedan på nytt i stället för
-att returnera 429-svaret — detta omfattar TPM-/RPM-fönster av Gemini-typ (~60 s `retry-after`)
-för kombinationer med flera modeller, t.ex. när båda målen i en kombination med två modeller når en hastighetsgräns
-per modell. Begränsas av `comboCooldownWait` (`enabled`, `maxWaitMs`, `maxAttempts`,
-`budgetMs`) under **Inställningar → Feltolerans**. Den väntar aldrig vid `quota_exhausted`
-(låst till midnatt) eller orsaker relaterade till autentisering/resurs som inte hittats.
+För varje kombinationsstrategi (när funktionen är aktiverad) väntar en förfrågan, som annars skulle
+resultera i ett 429-fel på grund av en KORT tillfällig spärrtid, tills spärrtiden löpt ut och
+dispatchas på nytt i stället för att returnera 429-felet — detta omfattar TPM-/RPM-fönster
+av Gemini-typ (~60s retry-after) för kombinationer med flera modeller, t.ex. när båda målen
+i en kombination med två modeller träffar en hastighetsgräns per modell. Begränsas av
+`comboCooldownWait` (`enabled`, `maxWaitMs`, `maxAttempts`,
+`budgetMs`) i **Settings → Resilience**. Den väntar aldrig vid `quota_exhausted`
+(låst till midnatt) eller vid orsaker relaterade till autentisering eller att resursen inte hittades.
+
+Samma spärr omfattar fallet före dispatch (#16319): när varje mål i en
+kombination hoppas över innan något försök har gjorts eftersom dess modell befinner sig i en kort,
+tillfällig blockering, väntar sökvägen med noll försök tills blockeringen upphör inom samma
+gränser och dispatchar på nytt, i stället för att svara med ett tipslöst
+`503 ALL_TARGETS_SKIPPED`. När ingen väntan tillåts (taket, antalet försök eller budgeten
+är förbrukad, eller funktionen är avstängd) uppgraderas slutsvaret till
+`429 rate_limit_error` med `retry_after` / `reset_at` från den tidigaste
+tillfälliga blockeringens utgångstid; blockeringar på grund av kvot, autentisering eller att resursen
+inte hittades behåller det tipslösa 503-svaret.
+
+```text
+#16319 · comboCooldownWait · pre-dispatch (attempts = 0)
+all targets skipped + transient model lockout:
+  enabled ∧ 0 < waitMs ≤ maxWaitMs ∧ attempt < maxAttempts ∧ budgetLeftMs ≥ waitMs
+    → wait → re-dispatch
+  wait = false → HTTP 429 rate_limit_error
+  retry_after / reset_at ← earliest transient lock expiry
+quota_exhausted / auth_error / not_found / not_found_local:
+  no transient hint → HTTP 503 ALL_TARGETS_SKIPPED
+```
 
 ---
 

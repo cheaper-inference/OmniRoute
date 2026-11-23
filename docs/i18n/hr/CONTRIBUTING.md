@@ -17,11 +17,11 @@ pokrivenost i korake usklađivanja.
 
 ### Preduvjeti
 
-- **Node.js** `>=22.22.3 <23`, ili `>=24.0.0 <27` (preporučeno: 24 LTS)
+- **Node.js** `>=22.22.2 <23` ili `>=24.0.0 <27` (preporučeno: 24 LTS)
 - **npm** 10+
 
-> **Korisnici npm v11+ (Node 24+):** Nakon `npm install`, provjerite jesu li izvorni moduli instalirani:
-> `node -e "require('better-sqlite3')"`. Ako ne uspije s greškom `MODULE_NOT_FOUND`,
+> **Korisnici verzije npm v11+ (Node 24+):** Nakon naredbe `npm install` provjerite jesu li nativni moduli instalirani:
+> `node -e "require('better-sqlite3')"`. Ako naredba ne uspije uz pogrešku `MODULE_NOT_FOUND`,
 > pokrenite `npm approve-scripts better-sqlite3 && npm install`. Pogledajte
 > [Rješavanje problema](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
@@ -35,10 +35,10 @@ cd OmniRoute
 npm install
 ```
 
-### Varijable okoline
+### Varijable okruženja
 
 ```bash
-# Stvorite svoju .env datoteku iz predloška
+# Izradite svoj .env prema predlošku
 cp .env.example .env
 
 # Generirajte potrebne tajne ključeve
@@ -48,77 +48,77 @@ echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 
 Ključne varijable za razvoj:
 
-| Varijabla              | Zadana vrijednost za razvoj | Opis                            |
-| ---------------------- | --------------------------- | ------------------------------- |
-| `PORT`                 | `20128`                     | Poslužiteljski port             |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`    | Osnovni URL za sučelje          |
-| `JWT_SECRET`           | (generirajte gore)          | Tajni ključ za JWT potpisivanje |
-| `INITIAL_PASSWORD`     | `CHANGEME`                  | Lozinka za prvu prijavu         |
-| `APP_LOG_LEVEL`        | `info`                      | Razina detaljnosti zapisnika    |
+| Varijabla              | Zadana razvojna vrijednost | Opis                              |
+| ---------------------- | -------------------------- | --------------------------------- |
+| `PORT`                 | `20128`                    | Port poslužitelja                 |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`   | Osnovni URL za sučelje            |
+| `JWT_SECRET`           | (generirajte iznad)        | Tajni ključ za potpisivanje JWT-a |
+| `INITIAL_PASSWORD`     | `CHANGEME`                 | Lozinka za prvu prijavu           |
+| `APP_LOG_LEVEL`        | `info`                     | Razina opširnosti zapisnika       |
 
 ### Postavke nadzorne ploče
 
-Nadzorna ploča pruža UI prekidače za značajke koje se također mogu konfigurirati putem varijabli okoline:
+Nadzorna ploča pruža kontrole korisničkog sučelja za značajke koje se također mogu konfigurirati putem varijabli okruženja:
 
-| Lokacija postavke   | Prekidač                    | Opis                                                     |
-| ------------------- | --------------------------- | -------------------------------------------------------- |
-| Postavke → Napredno | Način otklanjanja pogrešaka | Omogući zapisnike zahtjeva za otklanjanje pogrešaka (UI) |
-| Postavke → Općenito | Vidljivost bočne trake      | Prikaži/sakrij sekcije bočne trake                       |
+| Lokacija postavke   | Kontrola                            | Opis                                                       |
+| ------------------- | ----------------------------------- | ---------------------------------------------------------- |
+| Postavke → Napredno | Način rada za otklanjanje pogrešaka | Omogućuje zapisnike zahtjeva za otklanjanje pogrešaka (UI) |
+| Postavke → Općenito | Vidljivost bočne trake              | Prikazuje/skriva odjeljke bočne trake                      |
 
-Ove postavke pohranjuju se u bazu podataka i zadržavaju se nakon ponovnog pokretanja, nadjačavajući zadane vrijednosti varijabli okoline kada su postavljene.
+Te se postavke pohranjuju u bazu podataka i zadržavaju nakon ponovnih pokretanja, pri čemu, ako su postavljene, nadjačavaju zadane vrijednosti varijabli okruženja.
 
-### Pokretanje lokalno
+### Lokalno pokretanje
 
 ```bash
-# Razvojni način rada (vruće ponovno učitavanje)
+# Razvojni način rada (automatsko ponovno učitavanje)
 npm run dev
 
 # Produkcijska izgradnja
-npm run build    # next build → .build/next/ zatim assembleStandalone → dist/
+npm run build    # next build → .build/next/, zatim assembleStandalone → dist/
 npm run start
 
-# Brzo kompajliranje samo pozadinskog dijela/API-ja za promjene suradnika
+# Brzo kompajliranje samo pozadinskog sustava/API-ja za izmjene suradnika
 npm run build:contributor
 
-# Izgradnja za objavu (čista ponovna izgradnja + HEAD sentinel — obavezno za postavljanje)
-npm run build:release   # rm -rf .build dist && izgradnja + upisuje dist/BUILD_SHA
+# Izgradnja izdanja (čista ponovna izgradnja + kontrolna oznaka HEAD — obavezno za implementaciju)
+npm run build:release   # rm -rf .build dist && izgradnja + zapisuje dist/BUILD_SHA
 
 # Uobičajena konfiguracija porta
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Izgradnja za suradnike izvodi samo provjeru kompajliranja: ne sastavlja samostalnu
-distribuciju niti gradi neobavezne izvorne pakete. Koristite regularnu produkcijsku izgradnju kada
+Izgradnja za suradnike provodi samo provjeru kompajliranjem: ne sastavlja samostalnu
+distribuciju niti izrađuje dodatne nativne resurse za pakiranje. Upotrijebite uobičajenu produkcijsku izgradnju kada
 trebate provjeriti paket spreman za isporuku.
 
-### Raspored izlaznih direktorija izgradnje
+### Raspored izlaznih datoteka izgradnje
 
-| Direktorij | Sadržaj                                                                  | Praćen |
-| ---------- | ------------------------------------------------------------------------ | ------ |
-| `src/`     | Izvorni kod aplikacije (TypeScript / TSX)                                | Da     |
-| `.build/`  | Međuproizvodi — izlaz `next build` (gitignored, `distDir = .build/next`) | Ne     |
-| `dist/`    | Paket spreman za isporuku — sastavlja `assembleStandalone` (gitignored)  | Ne     |
+| Direktorij | Sadržaj                                                                                | Prati se |
+| ---------- | -------------------------------------------------------------------------------------- | -------- |
+| `src/`     | Izvorni kod aplikacije (TypeScript / TSX)                                              | Da       |
+| `.build/`  | Međurezultati — izlaz naredbe `next build` (zanemaren u Gitu, `distDir = .build/next`) | Ne       |
+| `dist/`    | Paket spreman za isporuku — sastavlja ga `assembleStandalone` (zanemaren u Gitu)       | Ne       |
 
-Cjevovod izgradnje je jedan prolaz:
+Proces izgradnje odvija se u jednom prolazu:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (Next.js izlaz)
-  └─ assembleStandalone()                 (kopira standalone + static + public + izvorne resurse)
+  └─ next build → .build/next/standalone  (izlaz alata Next.js)
+  └─ assembleStandalone()                 (kopira samostalnu verziju + statičke + javne + nativne resurse)
        └─ izlaz: dist/                    (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` dodatno čisti oba direktorija prije toga i upisuje
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) kao sentinel za integritet postavljanja.
+`npm run build:release` dodatno najprije čisti oba direktorija i zapisuje
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) kao kontrolnu oznaku integriteta implementacije.
 
-`npm run build:contributor` koristi profil izgradnje samo za pozadinski dio. Privremeno zamjenjuje
-datoteke UI nadzorne ploče stub datotekama tijekom izgradnje, zadržava upravljače API ruta i vraća izvorne datoteke
-nakon izgradnje. Koristite `npm run build` za promjene koje utječu na UI nadzorne ploče ili za potpunu
-provjeru objave; profil za suradnike nije zamjena za izgradnju objave.
+`npm run build:contributor` koristi profil izgradnje samo za pozadinski sustav. Tijekom izgradnje privremeno zamjenjuje
+datoteke korisničkog sučelja nadzorne ploče pomoćnim datotekama, zadržava rukovatelje API ruta i vraća izvorne datoteke
+nakon izgradnje. Upotrijebite `npm run build` za izmjene koje utječu na korisničko sučelje nadzorne ploče ili za potpunu
+provjeru izdanja; profil za suradnike nije zamjena za izgradnju izdanja.
 
-> **Napomena za postavljanje na VPS:** udaljeni direktorij slike `/usr/lib/node_modules/omniroute/app/`
-> ostaje nepromijenjen. Vještine postavljanja sinkroniziraju sadržaj `dist/` u njega.
-> Samo je putanja izlaza izgradnje u repozitoriju premještena (`app/` → `dist/`).
+> **Napomena o implementaciji na VPS-u:** udaljeni direktorij slike `/usr/lib/node_modules/omniroute/app/`
+> ostaje nepromijenjen. Postupci implementacije pomoću alata rsync sinkroniziraju sadržaj direktorija `dist/` s njim.
+> Promijenjena je samo putanja izlaza izgradnje unutar repozitorija (`app/` → `dist/`).
 
 Zadani URL-ovi:
 
@@ -296,67 +296,67 @@ Pogledajte `open-sse/utils/stream.ts` i `open-sse/utils/streamHandler.ts` za pri
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # Stranice nadzorne ploče (23 sekcije)
+│   ├── (dashboard)/        # Stranice nadzorne ploče (23 odjeljka)
 │   ├── api/                # API rute (51 direktorij)
-│   └── login/              # Stranice autentikacije (.tsx)
-├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, itd.)
-├── lib/                    # Osnovna poslovna logika (.ts)
-│   ├── a2a/                # Agent-to-Agent v0.3 protokol server
-│   ├── acp/                # Agent Communication Protocol registar
-│   ├── compliance/         # Engine politike usklađenosti
-│   ├── db/                 # SQLite domenske module + 130 migracija
-│   ├── memory/             # Trajno konverzacijsko pamćenje
-│   ├── oauth/              # OAuth pružatelji, servisi i uslužni programi
+│   └── login/              # Stranice za autentifikaciju (.tsx)
+├── domain/                 # Mehanizam pravila (policyEngine, comboResolver, costRules itd.)
+├── lib/                    # Temeljna poslovna logika (.ts)
+│   ├── a2a/                # Poslužitelj protokola Agent-to-Agent v0.3
+│   ├── acp/                # Registar protokola Agent Communication Protocol
+│   ├── compliance/         # Mehanizam pravila usklađenosti
+│   ├── db/                 # SQLite domenski moduli + 130 migracija
+│   ├── memory/             # Trajna konverzacijska memorija
+│   ├── oauth/              # OAuth pružatelji, servisi i pomoćni alati
 │   ├── skills/             # Proširivi okvir vještina
-│   ├── usage/              # Praćenje korištenja i izračun troškova
-│   └── localDb.ts          # Samo sloj ponovnog izvoza — nikada ne dodavajte logiku ovdje
-├── middleware/              # Međusloj zahtjeva (promptInjectionGuard)
-├── mitm/                   # MITM proxy (certifikat, DNS, usmjeravanje cilja)
+│   ├── usage/              # Praćenje upotrebe i izračun troškova
+│   └── localDb.ts          # Samo sloj za ponovni izvoz — ovdje nikada nemojte dodavati logiku
+├── middleware/              # Posrednički softver zahtjeva (promptInjectionGuard)
+├── mitm/                   # MITM proxy (certifikat, DNS, usmjeravanje prema odredištu)
 ├── shared/
 │   ├── components/         # React komponente (.tsx)
-│   ├── constants/          # Definicije pružatelja (329), MCP opsezi, 19 strategija usmjeravanja
-│   ├── utils/              # Circuit breaker, sanitizer, pomoćni programi za autentikaciju
+│   ├── constants/          # Definicije pružatelja (329), MCP opsezi, 20 strategija usmjeravanja
+│   ├── utils/              # Prekidač strujnog kruga, alat za sanitizaciju, pomoćni alati za autentifikaciju
 │   └── validation/         # Zod v4 sheme
 └── sse/                    # SSE proxy cjevovod
 
 open-sse/                   # @omniroute/open-sse radni prostor
-├── executors/              # 89 modula implementacije executora
-├── handlers/               # 11 rukovatelja zahtjevima (chat, responses, embeddings, images, itd.)
-├── mcp-server/             # MCP server (110 jedinstvenih alata, 3 transporta, 33 opsega)
-├── services/               # 178 servisa najviše razine (combo, autoCombo, rateLimitManager, itd.)
+├── executors/              # 150 modula izvršitelja (klase izvršitelja + pomoćni alati po pružatelju)
+├── handlers/               # 11 rukovatelja zahtjevima (razgovor, odgovori, ugradnje, slike itd.)
+├── mcp-server/             # MCP poslužitelj (110 jedinstvenih alata, 3 transporta, 33 opsega)
+├── services/               # 178 servisa najviše razine (combo, autoCombo, rateLimitManager itd.)
 ├── translator/             # Prevoditelji formata (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Responses API transformer
-└── utils/                  # 22 modula uslužnih programa (stream, TLS, proxy, logiranje)
+├── transformer/            # Transformator Responses API-ja
+└── utils/                  # 22 pomoćna modula (tok, TLS, proxy, zapisivanje)
 
-electron/                   # Electron desktop aplikacija (višeplatformska)
+electron/                   # Electron aplikacija za stolna računala (višeplatformska)
 
 tests/
-├── unit/                   # Node.js test runner (1.574 testnih datoteka)
+├── unit/                   # Node.js pokretač testova (1.574 datoteke testova)
 ├── integration/            # Integracijski testovi
 ├── e2e/                    # Playwright testovi
 ├── security/               # Sigurnosni testovi
-├── translator/             # Testovi specifični za prevoditelje
+├── translator/             # Testovi specifični za prevoditelj
 └── load/                   # Testovi opterećenja
 
 docs/
 ├── adr/                     # Zapisi o arhitektonskim odlukama
 ├── architecture/            # Arhitektura sustava i otpornost
-├── comparison/              # OmniRoute vs alternative
-├── compression/             # Vodiči i pravila kompresije
+├── comparison/              # OmniRoute u usporedbi s alternativama
+├── compression/             # Vodiči i pravila za kompresiju
 ├── dev/                     # Vodiči za razvoj
-├── diagrams/                # Dijagrami arhitekture
+├── diagrams/                # Arhitektonski dijagrami
 ├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
 ├── guides/                  # Korisnički vodič, Docker, postavljanje, rješavanje problema
 ├── i18n/                    # Internacionalizirani prijevodi README-a
 ├── marketing/               # Marketinški materijali
 ├── ops/                     # Implementacija, proxy, pokrivenost, izdanja
 ├── providers/               # Dokumentacija specifična za pružatelje
-├── reference/               # API referenca, env varijable, CLI alati, besplatni planovi
-├── releases/                # Bilješke o izdanjima
-├── routing/                 # Auto-combo engine, ponavljanje zaključivanja
+├── reference/               # Referenca API-ja, varijable okruženja, CLI alati, besplatne razine
+├── releases/                # Napomene uz izdanja
+├── routing/                 # Mehanizam automatskog kombiniranja, ponovna reprodukcija zaključivanja
 ├── screenshots/             # Snimke zaslona nadzorne ploče
-├── security/                # Zaštitne mjere, usklađenost, stealth, tokeni
-└── specs/                   # Dizajnerske specifikacije
+├── security/                # Zaštitne mjere, usklađenost, prikrivanje, tokeni
+└── specs/                   # Specifikacije dizajna
 ```
 
 ---
@@ -397,22 +397,24 @@ Napišite jedinične testove u `tests/unit/` koji pokrivaju minimalno:
 
 ---
 
-## Kontrolni Popis za Pull Request
+## Kontrolni popis za Pull Request
 
 - [ ] Testovi prolaze (`npm test`)
-- [ ] Lintanje prolazi (`npm run lint`)
-- [ ] Izgradnja uspijeva (`npm run build`)
-- [ ] TypeScript tipovi dodani za nove javne funkcije i sučelja
-- [ ] Nema hardkodiranih tajni niti rezervnih vrijednosti
-- [ ] Javne uzvodne vjerodajnice ugrađene putem `resolvePublicCred()` (pogledajte [`docs/security/PUBLIC_CREDS.md`](./docs/security/PUBLIC_CREDS.md)), nikada kao literali
-- [ ] Odgovori na pogreške prolaze kroz `buildErrorBody()` / `sanitizeErrorMessage()` — nema sirovih tragova stoga u tijelima odgovora (pogledajte [`docs/security/ERROR_SANITIZATION.md`](./docs/security/ERROR_SANITIZATION.md))
-- [ ] Naredbe ljuske (`exec` / `spawn`) prosljeđuju vrijednosti za izvođenje putem `env`, ne putem string interpolacije
-- [ ] Svi ulazni podaci validirani Zod shemama
-- [ ] Fragment zapisa promjena dodan pod `changelog.d/{features|fixes|maintenance}/<PR>-<slug>.md` za promjene vidljive korisniku (pogledajte [`changelog.d/README.md`](./changelog.d/README.md)) — **nemojte** izravno uređivati `CHANGELOG.md`; fragmenti se agregiraju pri izdavanju verzije i nikada ne dolaze u konflikt između pull requestova
-- [ ] Dokumentacija ažurirana (ako je primjenjivo)
-- [ ] Nema novih CodeQL / Secret-Scanning upozorenja, ili je svako odbačeno s tehničkim obrazloženjem koje upućuje na odgovarajući dokument iz `docs/security/`
-- [ ] Rute koje pokreću podprocese (`/api/mcp/`, `/api/cli-tools/runtime/`) klasificirane su kao `isLocalOnlyPath()` u `src/server/authz/routeGuard.ts` — pogledajte [Strogo Pravilo #15](docs/security/ROUTE_GUARD_TIERS.md)
-- [ ] Nema `Co-Authored-By` oznaka u porukama commita — commiti moraju biti isključivo pod Git identitetom vlasnika repozitorija (Strogo Pravilo #16)
+- [ ] Linting prolazi (`npm run lint`)
+- [ ] Izgradnja je uspješna (`npm run build`)
+- [ ] Dodani su TypeScript tipovi za nove javne funkcije i sučelja
+- [ ] Nema tvrdo kodiranih tajni ni pričuvnih vrijednosti
+- [ ] Javne vjerodajnice uzvodnih sustava ugrađene su putem `resolvePublicCred()` (pogledajte [`docs/security/PUBLIC_CREDS.md`](./docs/security/PUBLIC_CREDS.md)), nikada kao literali
+- [ ] Odgovori o pogreškama prolaze kroz `buildErrorBody()` / `sanitizeErrorMessage()` — nema neobrađenih tragova stoga u tijelima odgovora (pogledajte [`docs/security/ERROR_SANITIZATION.md`](./docs/security/ERROR_SANITIZATION.md))
+- [ ] Naredbe ljuske (`exec` / `spawn`) prosljeđuju vrijednosti tijekom izvođenja putem `env`, a ne interpolacijom niza
+- [ ] Svi su ulazni podaci validirani Zod shemama
+- [ ] **Fragment** dnevnika promjena dodan je u `changelog.d/{features|fixes|maintenance}/<PR>-<slug>.md` za promjene vidljive korisnicima (pogledajte [`changelog.d/README.md`](./changelog.d/README.md)) — **nemojte** izravno uređivati `CHANGELOG.md`; fragmenti se objedinjuju pri objavi izdanja i nikada ne uzrokuju sukobe među PR-ovima
+- [ ] Dokumentacija je ažurirana (ako je primjenjivo)
+- [ ] Nisu otvorena nova upozorenja alata CodeQL / Secret-Scanning ili je svako odbačeno uz tehničko obrazloženje koje upućuje na relevantni dokument u `docs/security/`
+- [ ] Rute koje pokreću podređene procese (`/api/mcp/`, `/api/cli-tools/runtime/`) klasificirane su kao `isLocalOnlyPath()` u `src/server/authz/routeGuard.ts` — pogledajte [Strogo pravilo #15](docs/security/ROUTE_GUARD_TIERS.md)
+- [ ] Nema AI/bot najavnih redaka `Co-authored-by` u porukama predaje (Strogo pravilo #16) — ljudskim suradnicima čiji se rad ponovno koristi odaje se priznanje standardnim najavnim redcima `Co-authored-by: Name <email>`
+
+---
 
 ## Objavljivanje
 

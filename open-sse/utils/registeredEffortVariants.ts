@@ -1,6 +1,17 @@
 import { getProviderModels } from "../config/providerModels.ts";
 
-const REGISTERED_EFFORT_SUFFIXES = ["none", "low", "medium", "high", "max", "xhigh"] as const;
+// `ultra` is the Codex Astra/Sol/Terra alias tier (`gpt-6.1-sol-ultra`). A suffix only counts
+// when both the variant and its base are registry ids of the same provider, so a non-Codex id
+// such as `nemotron-ultra` is never collapsed (#16027).
+const REGISTERED_EFFORT_SUFFIXES = [
+  "none",
+  "low",
+  "medium",
+  "high",
+  "max",
+  "xhigh",
+  "ultra",
+] as const;
 
 /**
  * Return the registered base model for an explicit effort variant.

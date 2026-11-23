@@ -13,30 +13,30 @@
 
 ## Ni Nini
 
-OmniRoute husajili watoa huduma 329, ikijumuisha maingizo 155 ya katalogi yaliyowekwa alama ya **bila malipo/bila uthibitishaji**
-(bila uthibitishaji,
+OmniRoute inasajili watoa huduma 374, ikiwemo maingizo 155 ya katalogi yaliyowekwa alama **bila malipo/hayahitaji uthibitishaji**
+(hayahitaji uthibitishaji,
 OAuth ya kiwango cha bila malipo, au ufunguo wa API wa kiwango cha bila malipo — angalia
 [Mwongozo wa Viwango vya Bila Malipo](../getting-started/FREE-TIERS-GUIDE.md) na
-[orodha kamili ya Viwango vya Bila Malipo](../reference/FREE_TIERS.md)). Changamoto ni kwamba: watoa huduma bila malipo hutofautiana
-sana katika ubora wa modeli. Mtoa huduma asiyehitaji uthibitishaji anayetoa modeli ya kisasa zaidi ni muhimu zaidi
-kuliko anayetoa modeli ndogo ya zamani.
+[Orodha kamili ya Viwango vya Bila Malipo](../reference/FREE_TIERS.md)). Changamoto ni kwamba: watoa huduma wa bila malipo hutofautiana
+sana katika ubora wa modeli. Mtoa huduma asiyehitaji uthibitishaji anayetoa modeli ya kiwango cha juu kabisa ni muhimu zaidi
+kuliko yule anayetoa modeli ndogo ya zamani.
 
-**Upangaji wa Watoa Huduma Bila Malipo** hujibu swali "**ni mtoa huduma gani bila malipo anayenipa modeli bora zaidi?**" kwa
-kuunganisha katalogi ya kila mtoa huduma bila malipo na **alama za ubora zilizokusanywa kutoka kwa umma** kutoka kwenye
-**orodha ya viongozi ya Arena AI** (ELO ya mapendeleo ya binadamu, dhana ileile inayotumiwa na
-uwanja wa chatiboti wa LMArena). Kisha watoa huduma hupangwa kulingana na uwezo wa **modeli yao bora zaidi ya bila malipo**.
+**Viwango vya Watoa Huduma wa Bila Malipo** hujibu "**ni mtoa huduma gani wa bila malipo anayenipa modeli bora zaidi?**" kwa
+kuunganisha katalogi ya kila mtoa huduma wa bila malipo na **alama za ubora zilizokusanywa kutoka kwa watumiaji wengi** kutoka
+**jedwali la viwango la Arena AI** (ELO ya mapendeleo ya binadamu, wazo lilelile linalotumiwa katika arena ya
+chatiboti ya LMArena). Kisha watoa huduma hupangwa kulingana na ubora wa **modeli yao bora zaidi ya bila malipo**.
 
-Upangaji huhesabiwa kutoka kwenye vyanzo vitatu halisi:
+Mpangilio huo hukokotolewa kutoka vyanzo vitatu halisi:
 
-1. Orodha za watoa huduma bila malipo — `NOAUTH_PROVIDERS`, pamoja na maingizo ya `OAUTH_PROVIDERS` /
-   `APIKEY_PROVIDERS` yaliyowekwa alama ya `hasFree`
+1. Orodha za watoa huduma wa bila malipo — `NOAUTH_PROVIDERS`, pamoja na maingizo ya `OAUTH_PROVIDERS` /
+   `APIKEY_PROVIDERS` yaliyowekwa alama `hasFree`
    (`src/shared/constants/providers.ts`).
 2. Katalogi ya modeli za kila mtoa huduma kutoka kwenye sajili ya watoa huduma
    (`open-sse/config/providerRegistry.ts`).
-3. Alama za kufaa kwa kazi zinazotokana na ELO zilizohifadhiwa kwenye jedwali la DB la `model_intelligence` na
-   injini ya usawazishaji ya Arena ELO (`src/lib/arenaEloSync.ts`).
+3. Alama za kufaa kwa kazi zinazotokana na ELO zilizohifadhiwa katika jedwali la hifadhidata la `model_intelligence` na
+   injini ya ulandanishi ya Arena ELO (`src/lib/arenaEloSync.ts`).
 
-Mantiki ya uunganishaji ipo kwenye `src/lib/freeProviderRankings.ts`.
+Mantiki ya kuunganisha iko katika `src/lib/freeProviderRankings.ts`.
 
 ---
 

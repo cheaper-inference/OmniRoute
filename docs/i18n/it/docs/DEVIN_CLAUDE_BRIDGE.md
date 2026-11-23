@@ -5,121 +5,124 @@
 ---
 
 `devin-cli-agentic` consente al runtime reale di Claude Code di utilizzare l'endpoint locale
-Anthropic Messages di OmniRoute, mentre la CLI ufficiale di Devin fornisce le risposte del
-modello tramite ACP stdio. Non modifica i provider Anthropic, Claude OAuth, Claude Web o
-`devin-cli` esistenti.
+Anthropic Messages di OmniRoute, mentre la CLI ufficiale di Devin fornisce le risposte del modello tramite ACP stdio. Non
+modifica i provider Anthropic, Claude OAuth, Claude Web o `devin-cli` esistenti.
 
-> **Stato attuale: Claude Code bloccato alla versione `2.1.258`; l'ultima validazione offline
-> e live registrata risale alla versione `2.1.220`.** Con il blocco alla versione `2.1.220`
-> sono stati completati tre scenari isolati tramite Devin CLI `3000.2.17` e il modello
-> `swe-1-7-lightning`; l'esecuzione live finale ha dimostrato turni `Read`, `Edit` e `Bash`
-> gestiti dal client, risultati positivi di `npm test`, il rilevamento dei comandi e delle
-> skill del progetto, il routing esclusivo tramite Devin e zero traffico in uscita verso
-> Claude. Il blocco è stato quindi aggiornato alla versione `2.1.258` (la generazione della
-> CLI che l'identità Claude di OmniRoute impersona e la prima linea che include nativamente
-> il livello Fable 5.1). Con il nuovo blocco, il livello di installazione e
-> `claude --version` sono stati verificati sull'immagine di base bloccata, mentre la suite di
-> unit test del bridge, `compose config` e la verifica statica dell'isolamento hanno esito
-> positivo; tuttavia, lo scenario mock offline e la suite live dei tre scenari non sono
-> ancora stati rieseguiti. Rieseguirli (vedere "Aggiornamento degli strumenti bloccati") prima
-> di fare affidamento sul bridge con questa versione bloccata.
+Per le chiamate agli strumenti gestite dal client, instradare tramite `devin-cli-agentic` (alias `dva`), il
+provider compatibile con gli strumenti e in formato Claude. L'esecutore ACP legacy `devin-cli` (`dv`) è
+solo testuale: esegue il riepilogatore senza strumenti di Devin e non può restituire chiamate agli strumenti. I metadati
+del modello sono contrassegnati di conseguenza, così il routing combinato che richiede strumenti lo eviterà.
+
+> **Stato attuale: Claude Code fissato alla versione `2.1.258`; ultima convalida offline e live registrata
+> sulla versione `2.1.220`.** Il pin `2.1.220` ha completato tre scenari isolati tramite Devin CLI
+> `3000.2.17` e il modello `swe-1-7-lightning`; l'esecuzione live finale ha dimostrato turni `Read`,
+> `Edit` e `Bash` gestiti dal client, risultati di `npm test` riusciti, rilevamento dei comandi e delle skill
+> del progetto, routing esclusivamente tramite Devin e nessun traffico in uscita verso Claude. Il pin è stato quindi aggiornato a `2.1.258`
+> (la generazione della CLI che l'identità Claude di OmniRoute impersona e la prima linea che include
+> nativamente il livello Fable 5.1). Con il nuovo pin, il livello di installazione e `claude --version` sono stati
+> verificati sull'immagine di base fissata, e la suite di unit test del bridge, `compose config` e la
+> prova statica di isolamento vengono completate correttamente, ma lo scenario mock offline e la suite live a tre scenari
+> non sono ancora stati rieseguiti. Rieseguirli (vedere "Aggiornamento degli strumenti fissati") prima di fare affidamento sul
+> bridge con questo pin.
 
 ## Architettura
 
 ```text
-Claude Code 2.1.258 (container Linux isolato non root)
+Claude Code 2.1.258 (container Linux isolato non-root)
   -> http://omniroute:20128/v1/messages
   -> devin-cli-agentic (provider in formato Claude, senza autenticazione)
   -> devin acp --agent-type summarizer (ACP stdio ufficiale, senza strumenti Devin)
-  -> Account Devin nel volume dedicato devin-auth
+  -> account Devin nel volume devin-auth dedicato
 ```
 
-L'agente ACP predefinito della CLI ufficiale può eseguire i propri strumenti, quindi questo
-bridge non lo utilizza. Avvia l'agente ACP fisso `summarizer`, la cui modalità CLI ufficiale
-non dispone di strumenti, e struttura la richiesta Anthropic serializzata come una traccia di
-esecuzione. Quando è necessaria un'altra azione gestita da Claude, la risposta deve contenere
-esattamente un envelope dello strumento client. Qualsiasi `tool_call` o `tool_call_update`
-ACP viene rifiutata prima che una risposta possa essere dichiarata riuscita.
+L'agente ACP predefinito della CLI ufficiale può eseguire i propri strumenti, quindi questo bridge non lo
+utilizza. Avvia l'agente ACP fisso `summarizer`, la cui modalità CLI ufficiale non dispone di strumenti, e
+inquadra la richiesta Anthropic serializzata come una traccia di esecuzione. Quando è necessaria un'altra
+azione gestita da Claude, la risposta deve contenere esattamente un envelope dello strumento client. Qualsiasi
+`tool_call` o `tool_call_update` ACP viene rifiutato prima che una risposta possa essere segnalata come
+riuscita.
 
 Il serializzatore in `open-sse/executors/devin-agentic/serializer.ts` preserva `system`,
 `text`, `tool_use`, `tool_result`, `thinking`, `redacted_thinking`, `tool_choice` e gli
-strumenti forniti da Claude Code. Le immagini e i blocchi sconosciuti causano un errore
-esplicito. I risultati degli strumenti di grandi dimensioni utilizzano un indicatore di
-troncamento visibile.
+strumenti forniti da Claude Code. Le immagini e i blocchi sconosciuti generano esplicitamente un errore. I risultati degli strumenti
+di grandi dimensioni utilizzano un indicatore visibile di troncamento.
 
-Il parser accetta un singolo envelope `<tool>{...}</tool>` autonomo per ogni turno del
-modello. Verifica il nome rispetto all'elenco degli strumenti della richiesta, convalida gli
-argomenti rispetto al JSON Schema dello strumento, rifiuta risposte miste contenenti testo
-narrativo e azioni e consente un solo tentativo di correzione con limiti definiti. Claude Code
-esegue quindi localmente il `tool_use` Anthropic risultante e invia il `tool_result` a
-OmniRoute.
+Il parser accetta un solo envelope `<tool>{...}</tool>` autonomo per ciascun turno del modello. Verifica
+il nome rispetto all'elenco degli strumenti della richiesta, convalida gli argomenti rispetto al JSON Schema dello strumento,
+rifiuta combinazioni di testo narrativo e azioni e consente un solo tentativo di correzione limitato. Claude Code esegue quindi
+localmente il `tool_use` Anthropic risultante e invia il `tool_result` a OmniRoute.
+
+## Routing automatico
+
+Il provider è idoneo per i pool di candidati `auto/*` di OmniRoute quando non è bloccato.
+L'idoneità come candidato non ne garantisce la selezione: la strategia di routing della combinazione (ad esempio,
+l'ultima configurazione nota come funzionante) potrebbe preferire un altro provider. Utilizzare `dva/<model>` o una combinazione che dia priorità a Devin quando
+è necessario che ogni richiesta venga instradata tramite Devin.
 
 ## Isolamento e modello delle minacce
 
-L'installazione, l'account e la configurazione di Claude sull'host non rientrano nell'ambito
-e sono considerati vietati. I servizi Compose:
+L'installazione, l'account e la configurazione di Claude sull'host non rientrano nell'ambito e sono considerati
+inaccessibili. I servizi Compose:
 
-- vengono eseguiti con UID/GID `10001:10001`, con un filesystem root di sola lettura,
-  capability rimosse e `no-new-privileges`;
-- utilizzano una directory `/home/bridge` privata, un volume dedicato per la configurazione
-  di Claude, dati OmniRoute isolati e un volume `devin-auth` separato;
-- montano esclusivamente workspace/evidenze `.sandbox` eliminabili;
-- non montano la home dell'host, Keychain, le credenziali SSH o cloud, né il socket Docker;
+- vengono eseguiti con UID/GID `10001:10001`, con un file system radice di sola lettura, capability rimosse e
+  `no-new-privileges`;
+- utilizzano una directory `/home/bridge` privata, un volume dedicato per la configurazione di Claude, dati OmniRoute isolati
+  e un volume `devin-auth` separato;
+- montano esclusivamente workspace/prove `.sandbox` usa e getta;
+- non montano la home dell'host, Keychain, credenziali SSH o cloud, né il socket Docker;
 - costruiscono ambienti espliciti e rimuovono le variabili API/OAuth/di routing di Anthropic;
-- indirizzano l'inferenza di Claude Code esclusivamente a `http://omniroute:20128` con una
-  chiave valida solo localmente.
+- indirizzano l'inferenza di Claude Code esclusivamente a `http://omniroute:20128` con una chiave solo locale.
 
 Il profilo offline utilizza una rete interna. Nel profilo live, OmniRoute raggiunge gli
-endpoint ufficiali di Devin esclusivamente tramite `network-guard`; le destinazioni non
-correlate vengono negate. Claude Code dispone di una protezione in uscita separata che nega
-tutto e può raggiungere esclusivamente il servizio OmniRoute locale tramite `NO_PROXY`. I
-file di audit delle protezioni sono montati esclusivamente dal rispettivo processo di
-protezione. Gli script verificano proprietà, modalità, numero di collegamenti e ogni
-decisione prima di esportare evidenze prive di token.
+endpoint ufficiali di Devin esclusivamente tramite `network-guard`; le destinazioni non correlate vengono bloccate.
+Claude Code dispone di una protezione in uscita separata che blocca tutto e può raggiungere esclusivamente il servizio OmniRoute
+locale tramite `NO_PROXY`. I file di audit delle protezioni vengono montati esclusivamente dal rispettivo processo di protezione. Gli
+script verificano proprietà, modalità, conteggio dei collegamenti e ogni decisione prima di esportare
+prove prive di token.
 
-Eseguire in modo indipendente la verifica dell'isolamento:
+Esegui in modo indipendente la verifica dell'isolamento:
 
 ```bash
 ./scripts/devin-bridge/verify-anthropic-isolation
 ```
 
-Convalida la topologia, i mount denominati, le impostazioni non root/di sola lettura, il
-routing locale esplicito, l'assenza di variabili d'ambiente sensibili, l'assenza del socket
-Docker, il blocco dell'accesso ad `api.anthropic.com` e `claude.ai`, la selezione esclusiva
-del provider Devin e l'errore esplicito quando il backend ACP non è disponibile.
+Questa verifica convalida la topologia, i mount denominati, le impostazioni non-root/di sola lettura, il routing locale esplicito,
+l'assenza di variabili d'ambiente sensibili, l'assenza del socket Docker, l'accesso bloccato a
+`api.anthropic.com` e `claude.ai`, la selezione esclusiva del provider Devin e l'errore esplicito quando
+il backend ACP non è disponibile.
 
 ## Configurazione iniziale e utilizzo normale
 
-Crea l'immagine con le versioni bloccate:
+Crea l'immagine con versioni bloccate:
 
 ```bash
 ./scripts/devin-bridge/build
 ```
 
-Autentica solo il volume Devin isolato:
+Autentica esclusivamente il volume Devin isolato:
 
 ```bash
 ENABLE_LIVE_DEVIN_TESTS=1 ./scripts/devin-bridge/login-devin
 ```
 
-Il comando di accesso utilizza il flusso ufficiale con token manuale, pensato per ambienti
-remoti/container. Il valore viene inserito direttamente nel prompt della CLI; non viene passato come
-argomento di processo, scritto in Git o copiato dall'host.
+Il comando di accesso utilizza il flusso ufficiale con token manuale, destinato agli ambienti
+remoti/containerizzati. Il valore viene immesso direttamente nel prompt della CLI; non viene passato come
+argomento di processo, scritto su Git o copiato dall'host.
 
-Avvia il runtime Claude Code isolato:
+Avvia il runtime isolato di Claude Code:
 
 ```bash
 ./scripts/devin-bridge/launch
 ```
 
-`launch` verifica nuovamente l'isolamento, l'autenticazione Devin e il rilevamento dei modelli prima di avviare
-Claude Code in container. Non esegue mai l'eseguibile Claude dell'host. Gli alias dei modelli possono essere
+`launch` ricontrolla l'isolamento, l'autenticazione Devin e l'individuazione dei modelli prima di avviare
+Claude Code nel container. Non esegue mai l'eseguibile Claude dell'host. Gli alias dei modelli possono essere
 impostati in `.env.devin-bridge`; ogni valore configurato deve mantenere il prefisso
 `devin-cli-agentic/`.
 
 ## Comandi di convalida
 
-Il percorso offline riproducibile non richiede alcun account Devin e non ha accesso a Internet durante l'esecuzione:
+Il percorso offline riproducibile non richiede alcun account Devin e non dispone di Internet durante l'esecuzione:
 
 ```bash
 ./scripts/devin-bridge/test-unit
@@ -128,35 +131,35 @@ Il percorso offline riproducibile non richiede alcun account Devin e non ha acce
 ./scripts/devin-bridge/verify-anthropic-isolation
 ```
 
-Il percorso live autenticato con adesione esplicita è:
+Il percorso live autenticato e facoltativo è:
 
 ```bash
 ENABLE_LIVE_DEVIN_TESTS=1 ./scripts/devin-bridge/test-live-devin
 ```
 
 Il runner live attende tra gli scenari per evitare di aprire sessioni ACP in rapida successione e
-convalida gli eventi strutturati del flusso Claude anziché fidarsi di dichiarazioni testuali. I suoi tre
-scenari verificano:
+convalida gli eventi strutturati del flusso di Claude anziché fidarsi di dichiarazioni testuali. I suoi tre
+scenari dimostrano:
 
 1. letture dirette del progetto e analisi dei difetti;
-2. una vera operazione `Edit`, un comando `Bash` `npm test` gestito dal client e un risultato finale;
-3. il rilevamento di `/bridge-check` e `bridge-proof`, letture del progetto, un altro
-   `npm test` gestito dal client completato correttamente e il completamento senza attività in sospeso.
+2. un vero `Edit`, un `Bash` `npm test` gestito dal client e un risultato terminale;
+3. `/bridge-check` insieme all'individuazione di `bridge-proof`, letture del progetto, un altro
+   `npm test` gestito dal client completato con successo e il completamento senza attività in sospeso.
 
-Il controllo finale verifica anche l'audit di rete di Devin e richiede che l'audit del traffico in uscita di Claude
+Il controllo finale verifica inoltre l'audit di rete di Devin e richiede che l'audit del traffico in uscita di Claude
 rimanga vuoto.
 
-## Aggiornamento degli strumenti con versioni bloccate
+## Aggiornamento degli strumenti con versione fissata
 
-L'immagine blocca le versioni di Node, Claude Code e Devin CLI in
+L'immagine fissa le versioni di Node, Claude Code e Devin CLI in
 `docker/devin-bridge/Dockerfile`. Per aggiornarle:
 
-1. modifica le versioni esplicite;
-2. sostituisci entrambi i checksum degli archivi Devin specifici per architettura con i valori dell'artefatto
+1. modificare le versioni esplicite;
+2. sostituire entrambi i checksum degli archivi Devin specifici per architettura con i valori dell'artefatto
    ufficiale;
-3. ricrea l'immagine ed esegui tutti i comandi di convalida offline;
-4. conferma le versioni all'interno dell'immagine;
-5. esegui nuovamente la suite live autenticata composta da tre scenari.
+3. ricostruire ed eseguire tutti i comandi di convalida offline;
+4. confermare le versioni all'interno dell'immagine;
+5. rieseguire la suite live autenticata con tre scenari.
 
 Non installare globalmente nessuna delle due CLI sull'host e non sostituire la verifica del checksum con un
 download non verificato.
@@ -164,20 +167,20 @@ download non verificato.
 ## Diagnosi e pulizia
 
 - `docker compose -f docker/devin-bridge/compose.yml --profile offline logs omniroute`
-  mostra il routing locale e gli errori sanificati dell'esecutore.
-- `.sandbox/evidence/mock-acp.jsonl` registra le azioni ACP simulate deterministiche.
+  mostra il routing locale e gli errori sanitizzati dell'esecutore.
+- `.sandbox/evidence/mock-acp.jsonl` registra le azioni ACP simulate e deterministiche.
 - `.sandbox/evidence/claude-stream.jsonl` registra l'esecuzione offline reale di Claude Code.
 - `.sandbox/evidence/live-*.jsonl` registra i tre flussi live convalidati.
 - `.sandbox/evidence/egress.jsonl` e `.sandbox/evidence/claude-egress.jsonl` sono copie convalidate,
-  prive di token, degli audit di controllo.
+  prive di token, degli audit del sistema di protezione.
 
-Arresta i container e le reti gestiti preservando i volumi di accesso/configurazione:
+Arrestare i container e le reti di proprietà del bridge, preservando i volumi di accesso/configurazione:
 
 ```bash
 ./scripts/devin-bridge/clean
 ```
 
-Rimuovi l'intero ambiente gestito dal bridge, inclusi i volumi denominati:
+Rimuovere l'intero ambiente di proprietà del bridge, inclusi i volumi denominati:
 
 ```bash
 ./scripts/devin-bridge/clean --all
@@ -187,13 +190,12 @@ Rimuovi l'intero ambiente gestito dal bridge, inclusi i volumi denominati:
 
 - Il bridge si basa sul ruolo fisso senza strumenti `summarizer` perché Devin CLI `3000.2.17`
   non espone un agente ACP neutro senza strumenti. L'adattatore compensa le risposte intermedie
-  strutturate come riepiloghi, ma un singolo tentativo di correzione limitato può comunque fallire esplicitamente.
-- Le chiamate ACP in tempo reale possono restituire risposte transitorie `502`/`504`. L'harness distanzia gli scenari;
-  un errore persistente mantiene un comportamento fail-closed e non seleziona mai un altro provider.
-- Il contesto ACP viene ricostruito da ogni richiesta Anthropic; non vi è alcuna affinità
-  con il processo o la sessione.
-- È supportata una sola chiamata a uno strumento per ogni risposta del modello; le chiamate parallele vengono rifiutate.
-- Le immagini non sono esplicitamente supportate. Visione, output del ragionamento, controlli dell'effort e una finestra di
-  contesto da 1M non vengono dichiarati.
-- SSE utilizza eventi del ciclo di vita Anthropic validi, ma viene emesso dopo la raccolta del turno ACP
-  limitato; i chunk ACP non vengono inoltrati in modo incrementale.
+  in forma di riepilogo, ma un singolo tentativo di correzione limitato può comunque fallire esplicitamente.
+- Le chiamate ACP live possono restituire risposte transitorie `502`/`504`. L'harness distanzia gli scenari;
+  un errore persistente mantiene il comportamento fail-closed e non seleziona mai un altro provider.
+- Il contesto ACP viene ricostruito da ogni richiesta Anthropic; non esiste affinità di processo/sessione.
+- È supportata una chiamata a uno strumento per ogni risposta del modello; le chiamate parallele vengono rifiutate.
+- Le immagini non sono esplicitamente supportate. La visione, l'output di ragionamento, i controlli dello sforzo e una
+  finestra di contesto da 1M non vengono dichiarati.
+- SSE utilizza eventi validi del ciclo di vita Anthropic, ma viene emesso dopo la raccolta del turno ACP limitato;
+  i blocchi ACP non vengono inoltrati in modo incrementale.

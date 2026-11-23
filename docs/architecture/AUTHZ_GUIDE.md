@@ -66,14 +66,47 @@ supplemented:
 - `GET /api/auth/oidc/callback` validates `state`, exchanges the authorization
   code, and verifies the ID token's signature via the issuer's JWKS
   (`jose`'s `createRemoteJWKSet`, cached per JWKS URI) with `issuer`/`audience`
-  checks. An optional `oidcAllowedSubjects` allowlist matches the token's
-  `sub` claim or its `email` claim — the email claim is only honored when
-  `email_verified === true`, so an unverified email at the IdP can never pass
-  the gate.
+  checks. The `oidcAllowedSubjects` allowlist is required: it matches the
+  token's `sub` claim or its `email` claim — the email claim is only honored
+  when `email_verified === true`, so an unverified email at the IdP can never
+  pass the gate — and with no entries the callback refuses every login
+  (`not_configured`).
 - On success it mints the **exact same** 30-day `auth_token` JWT the password
   login issues (`src/app/api/auth/login/route.ts`), so the rest of the
   dashboard session pipeline (auto-refresh, cookie flags) is unchanged —
   OIDC only replaces how the cookie gets minted, not what it grants.
+- Every `oidc*` setting (`oidcEnabled`, `oidcDisablePasswordLogin`,
+  `oidcIssuer`, `oidcClientId`, `oidcClientSecret`, `oidcAllowedSubjects`,
+  `oidcRedirectPath`, `oidcScopes`) is in `SECURITY_IMPACTING_SETTINGS_KEYS`
+  (`src/shared/constants/securityImpactingSettings.ts`): `PATCH /api/settings`
+  answers `400 PASSWORD_REQUIRED` unless the body carries the management
+  password as `currentPassword` (`401 PASSWORD_MISMATCH` when it is wrong).
+  `oidcDisablePasswordLogin` refuses password _login_ (`POST /api/auth/login`)
+  but keeps the stored password hash, and re-auth still checks
+  `currentPassword` against it.
+- `corsOrigins` and `bruteForceProtection` are in `SECURITY_IMPACTING_SETTINGS_KEYS`
+  too: loosening either weakens the login defenses, so they take the same
+  `currentPassword` re-auth (the Security tab asks for it) and the JSON import
+  drops them.
+- Every security-policy key — the `SECURITY_IMPACTING_SETTINGS_KEYS` entries,
+  every `oidc*` key and the dashboard session state — is **operator-only** on
+  `PATCH /api/settings`: a manage-scoped API key or an `oma_` access token is
+  refused with `403` even when it sends the right `currentPassword`, and the
+  refusal is audited as `settings.update_failed` with `reason: OPERATOR_REQUIRED`
+  (`requireOperatorCredential()` in `src/lib/api/operatorCredential.ts`).
+  Ordinary settings (theme, display preferences) stay writable for a `manage` key
+  or an `admin` access token. Every mutation of `/api/settings` itself (and of
+  `/api/settings/require-login`) also needs the `admin` access-token scope
+  (`ADMIN_MUTATION_EXACT_PATHS` in `src/server/authz/accessScopes.ts`, exact-path
+  match); `GET` stays `read`, and the other `/api/settings/*` sub-routes (proxies,
+  combo defaults, model aliases, compression, purges…) keep the method-inferred
+  `write` scope.
+- `POST /api/settings/import-json` skips that re-auth, so it drops every key in
+  `IMPORT_STRIPPED_SETTINGS_KEYS` (same file) before writing: the password and
+  `currentPassword`, every `SECURITY_IMPACTING_SETTINGS_KEYS` entry, and the
+  dashboard session state (`sessionsValidAfter`, `revokedDashboardSessions`).
+  Importing an older backup therefore cannot revive a session that a password
+  change or a sign-out already ended.
 
 ## Route Classes
 
@@ -84,6 +117,26 @@ supplemented:
 | `PUBLIC`     | Explicitly safe routes — login, logout, status, init, health, onboarding bootstrap.                                                                  | None                                                                    |
 | `CLIENT_API` | Model-serving endpoints — `/api/v1/*`, `/api/v1beta/*`, plus aliases `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Bearer key when the effective `REQUIRE_API_KEY` feature flag is enabled |
 | `MANAGEMENT` | Dashboard pages, settings, providers, keys, admin and diagnostics endpoints.                                                                         | Dashboard session OR Bearer with `manage` scope                         |
+
+A few `MANAGEMENT` actions are **operator-only**: a `manage` key is not enough. Exporting stored
+credentials (`GET /api/settings/export-json`, `GET /api/db-backups/export`,
+`GET /api/db-backups/exportAll`), restoring a backup over the live data
+(`POST /api/db-backups/import` including `dryRun=true`, `POST /api/db-backups` restore by id,
+`POST /api/settings/import-json`), destroying restore points (`DELETE /api/db-backups` cleanup,
+and `PATCH /api/db-backups` because the retention it persists drives the automatic pruning after
+every backup) require a dashboard session, the local CLI subject, or login disabled. Issuing a
+sync token (`POST /api/sync/tokens`) and minting an `admin` CLI access token
+(`POST /api/cli/tokens`) require a dashboard session or the local CLI subject in every login mode.
+API keys of any scope and `oma_` access tokens are not operator credentials: they get `403`
+whenever one is required. The check
+lives in `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` /
+`requireOperatorCredential()`). Changing the login settings is operator-only too:
+`POST /api/settings/require-login` (set the management password / toggle `requireLogin`) accepts
+only those credentials once a password exists — the first-run bootstrap window (no password yet)
+is unchanged — and a dashboard session must send `currentPassword` to replace the password
+(`403` when it is missing or wrong, audited as `settings.update_failed`). The local CLI and an
+instance with login disabled keep the recovery path and may set a password without it, since both
+are bound to the host that owns the data directory.
 
 ## Pipeline
 
@@ -241,7 +294,13 @@ credential only. See [Management Authentication](../guides/MANAGEMENT-AUTH.md).
 
 `isAuthRequired()` in `src/shared/utils/apiAuth.ts` decides whether **any** auth is enforced for a request:
 
-- `settings.requireLogin === false` → auth is globally disabled.
+- `settings.requireLogin === false` → auth is globally disabled, except for the always-protected
+  tier (see [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) and the calls that hand out a
+  credential it accepts, which need the same credential as with login on: issuing sync tokens,
+  minting CLI access tokens at any scope, and creating an API key with the `manage`/`admin` scope,
+  granting that scope to a key, or regenerating or revealing such a key
+  (`requireCredentialForManagementScopedKey()` in `src/lib/api/requireManagementAuth.ts`).
+  Inference-only keys stay open.
 - No password configured **and** no `INITIAL_PASSWORD` env var → bootstrap mode allows the onboarding wizard and loopback requests, but exposed network requests still need credentials.
 - Any DB error → fails closed (secure-by-default).
 

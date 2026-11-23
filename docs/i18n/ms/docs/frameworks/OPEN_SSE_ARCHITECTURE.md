@@ -33,15 +33,15 @@ open-sse/
 ├── index.ts              # Titik masuk awam
 ├── types.d.ts            # Eksport jenis awam
 ├── package.json          # @omniroute/open-sse
-├── config/               # Konfigurasi penyedia, pemalar, pendaftar
-├── executors/            # Pelaksana HTTP bagi setiap penyedia (67 + base.ts/index.ts)
-├── handlers/             # Pengendali permintaan (chatCore, responses dan sebagainya)
+├── config/               # Konfigurasi penyedia, pemalar, pendaftaran
+├── executors/            # Pelaksana HTTP bagi setiap penyedia (150 modul + base.ts/index.ts)
+├── handlers/             # Pengendali permintaan (chatCore, responses, dll.)
 ├── lib/                  # Utiliti dalaman
 ├── mcp-server/           # Pelayan Model Context Protocol
 ├── services/             # ~298 modul perkhidmatan
 ├── transformer/          # Pengubah format Responses API
-├── translator/           # Penterjemahan format (OpenAI ↔ Claude ↔ Gemini)
-└── utils/                # Utiliti dikongsi (pengelogan, ralat, strim dan sebagainya)
+├── translator/           # Terjemahan format (OpenAI ↔ Claude ↔ Gemini)
+└── utils/                # Utiliti dikongsi (pengelogan, ralat, strim, dll.)
 ```
 
 ### Bilangan Modul
@@ -49,11 +49,11 @@ open-sse/
 | Direktori | Fail | Tujuan |
 | `executors/` | 167 | Pelaksana HTTP bagi setiap penyedia (disatukan melalui kilang DefaultExecutor) |
 | `handlers/` | 157 | Titik masuk permintaan (chatCore, responses, embeddings) |
-| `services/` | ~536 | Penghalaan, caching, pengehadaran kadar, penyegaran dan sebagainya |
+| `services/` | ~536 | Penghalaan, pencachean, pengehadan kadar, penyegaran, dll. |
 | `translator/` | 56 | Penukaran format (OpenAI ↔ Claude ↔ Gemini) |
 | `mcp-server/` | 44 | Alat dan pengangkutan MCP |
-| `utils/` | ~108 | Utiliti rentas fungsi (pengelogan, ralat, strim) |
-| `config/` | ~339 | Konfigurasi penyedia, pemalar, pendaftar |
+| `utils/` | ~108 | Utiliti merentas fungsi (pengelogan, ralat, strim) |
+| `config/` | ~339 | Konfigurasi penyedia, pemalar, pendaftaran |
 
 ---
 
@@ -205,11 +205,11 @@ export async function handleChat(request: NextRequest) {
 }
 ```
 
-Walaupun merupakan satu fungsi yang sangat besar, ia disusun kepada **bahagian berulasan** yang sepadan dengan saluran paip 5 peringkat.
+Walaupun merupakan satu fungsi yang sangat besar, ia disusun kepada **bahagian beranotasi** yang sepadan dengan saluran pemprosesan 5 peringkat.
 
 ### combo.ts (4456 LOC)
 
-**Enjin penghalaan** yang menyelesaikan kombo kepada sasaran tersusun.
+**Enjin penghalaan** yang memadankan kombo kepada sasaran tersusun.
 
 ```ts
 // services/combo.ts
@@ -228,34 +228,34 @@ export async function handleComboChat(body, comboId): Promise<ChatResult> {
 
 Menyokong **19 strategi penghalaan** (lihat `src/shared/constants/routingStrategies.ts`):
 
-| Strategi            | Tingkah laku                                                                               |
-| ------------------- | ------------------------------------------------------------------------------------------ |
-| `priority`          | Senarai tersusun dengan sasaran pertama diutamakan                                         |
-| `weighted`          | Kebarangkalian berdasarkan pemberat setiap sasaran                                         |
-| `round-robin`       | Mengitar sasaran mengikut turutan                                                          |
-| `context-relay`     | Menyerahkan konteks merentas sasaran                                                       |
-| `fill-first`        | Memenuhi kuota sebelum beralih ke sasaran seterusnya                                       |
-| `p2c`               | Kuasa dua pilihan                                                                          |
-| `random`            | Rawak seragam                                                                              |
-| `least-used`        | Memilih sasaran dengan penggunaan terkini paling sedikit                                   |
-| `cost-optimized`    | Sasaran sihat paling murah didahulukan                                                     |
-| `reset-aware`       | Mengambil kira tetingkap tetapan semula penyedia                                           |
-| `reset-window`      | Penghalaan berdasarkan tetingkap tetapan semula                                            |
-| `headroom`          | Baki ruang kuota terbesar didahulukan                                                      |
-| `strict-random`     | Benar-benar seragam (tanpa pemberatan kualiti)                                             |
-| `auto`              | Menggunakan pemarkahan 16 faktor (`autoCombo/`)                                            |
-| `lkgp`              | Penyedia baik terakhir yang diketahui didahulukan                                          |
-| `context-optimized` | Terbaik untuk permintaan berkonteks panjang                                                |
-| `fusion`            | Mengedarkan kepada panel secara selari, kemudian mensintesis melalui penilai (`fusion.ts`) |
+| Strategi            | Tingkah laku                                                                              |
+| ------------------- | ----------------------------------------------------------------------------------------- |
+| `priority`          | Senarai tersusun dengan sasaran pertama diutamakan                                        |
+| `weighted`          | Kebarangkalian berdasarkan pemberat setiap sasaran                                        |
+| `round-robin`       | Mengitar sasaran mengikut turutan                                                         |
+| `context-relay`     | Menyerahkan konteks merentasi sasaran                                                     |
+| `fill-first`        | Memenuhi kuota sebelum beralih kepada sasaran seterusnya                                  |
+| `p2c`               | Kuasa dua pilihan                                                                         |
+| `random`            | Rawak seragam                                                                             |
+| `least-used`        | Memilih sasaran dengan penggunaan terkini paling sedikit                                  |
+| `cost-optimized`    | Sasaran sihat termurah terlebih dahulu                                                    |
+| `reset-aware`       | Mengambil kira tetingkap tetapan semula penyedia                                          |
+| `reset-window`      | Penghalaan berdasarkan tetingkap tetapan semula                                           |
+| `headroom`          | Baki ruang kuota terbanyak terlebih dahulu                                                |
+| `strict-random`     | Benar-benar seragam (tanpa pemberat kualiti)                                              |
+| `auto`              | Menggunakan pemarkahan 16 faktor (`autoCombo/`)                                           |
+| `lkgp`              | Penyedia terakhir yang diketahui berfungsi diutamakan                                     |
+| `context-optimized` | Terbaik untuk permintaan berkonteks panjang                                               |
+| `fusion`            | Menghantar kepada panel secara selari, kemudian mensintesis melalui penilai (`fusion.ts`) |
 
 ### base.ts (1170 LOC)
 
-**Pelaksana abstrak** yang dilanjutkan oleh kesemua 107 pelaksana. Ia mengandungi:
+**Pelaksana abstrak** yang dilanjutkan oleh setiap kelas pelaksana (secara langsung atau melalui `DefaultExecutor` dan subkelas lain). Ia mengandungi:
 
-- `buildUrl()` — pembinaan URL lalai (subkelas mengatasi untuk penyesuaian)
+- `buildUrl()` — pembinaan URL lalai (subkelas mengatasi pelaksanaan untuk penyesuaian)
 - `buildHeaders()` — pengepala lalai (pengesahan, jenis kandungan)
-- `transformRequest()` — laluan terus secara lalai
-- `execute()` — gelung HTTP utama dengan percubaan semula/undur/pemutus
+- `transformRequest()` — diteruskan tanpa perubahan secara lalai
+- `execute()` — gelung HTTP utama dengan percubaan semula/lengah balik/pemutus
 
 ```ts
 // open-sse/executors/default.ts
@@ -265,7 +265,7 @@ export class DefaultExecutor extends BaseExecutor {
 }
 ```
 
-Tingkah laku khusus penyedia (pengepala pengesahan, URL asas, pengepala versi) dikonfigurasikan melalui daftar penyedia, bukannya kelas pelaksana yang berasingan.
+Tingkah laku khusus penyedia (pengepala pengesahan, URL asas, pengepala versi) dikonfigurasikan melalui daftaran penyedia, bukannya kelas pelaksana yang berasingan.
 
 ````
 
@@ -275,9 +275,9 @@ Tingkah laku khusus penyedia (pengepala pengesahan, URL asas, pengepala versi) d
 
 Perkhidmatan ialah **modul berfokus dengan satu tujuan** yang digabungkan oleh pengendali. Kategori utamanya:
 
-### Penghalaan & Kombo
+### Penghalaan & Combo
 
-- `combo.ts` — titik masuk untuk permintaan yang dihalakan melalui kombo
+- `combo.ts` — titik masuk untuk permintaan yang dihalakan melalui combo
 - `services/autoCombo/` — pemarkahan 16 faktor, 8 strategi penghalaan automatik
 - `wildcardRouter.ts` — memadankan laluan kad bebas (`gpt-*`)
 - `modelFamilyFallback.ts` — sandaran dalam keluarga T5
@@ -286,7 +286,7 @@ Perkhidmatan ialah **modul berfokus dengan satu tujuan** yang digabungkan oleh p
 
 - `rateLimitManager.ts` — baldi token bagi setiap kunci+penyedia
 - `usage.ts` — perekodan penggunaan
-- `quotaCache.ts` — petikan kuota dalam memori
+- `quotaCache.ts` — syot kilat kuota dalam memori
 
 ### Akaun & Token
 
@@ -297,44 +297,44 @@ Perkhidmatan ialah **modul berfokus dengan satu tujuan** yang digabungkan oleh p
 ### Kecerdasan
 
 - `intentClassifier.ts` — mengelaskan niat permintaan
-- `taskAwareRouter.ts` — menghalakan mengikut jenis tugas
+- `taskAwareRouter.ts` — menghalakan berdasarkan jenis tugas
 - `thinkingBudget.ts` — memperuntukkan token pemikiran
 - `contextManager.ts` — menyuntik konteks penghalaan
 
-### Ketahanan
+### Daya Tahan
 
-- `resilience.ts` — pengorkestraan percubaan semula, sela balik dan pemutus litar
+- `resilience.ts` — pengaturan percubaan semula, sela balik dan pemutus
 - `emergencyFallback.ts` — sandaran pilihan terakhir
 - `modelDeprecation.ts` — menghalakan secara automatik kepada model pengganti
 
 ### Keadaan
 
-- `signatureCache.ts` — menyahduplikasi mengikut tandatangan permintaan
-- `volumeDetector.ts` — pelepasan beban
+- `signatureCache.ts` — menyahpendua berdasarkan tandatangan permintaan
+- `volumeDetector.ts` — pengurangan beban
 - `contextHandoff.ts` — pensirian sesi
 
 ### Pemampatan
 
-- `compression/` (subdirektori) — saluran paip pemampatan penuh
+- `compression/` (subdirektori) — perancangan pemampatan lengkap
 - 39 fail yang merangkumi enjin, pek peraturan dan penyesuai
 
 ### Kemahiran
 
-- (dibincangkan dalam [SKILLS.md](./SKILLS.md))
+- (diterangkan dalam [SKILLS.md](./SKILLS.md))
 
 ### Memori
 
-- (dibincangkan dalam [MEMORY.md](./MEMORY.md))
+- (diterangkan dalam [MEMORY.md](./MEMORY.md))
 
 ---
 
-## Pelaksana (75+ fail)
+## Pelaksana (150 modul)
 
-Satu fail bagi setiap penyedia. Kesemuanya melanjutkan `BaseExecutor` dan mengatasi bahagian yang berbeza.
+Kebanyakannya satu fail bagi setiap penyedia. Semua kelas pelaksana melanjutkan `BaseExecutor` dan mengatasi perkara yang berbeza; modul lain ialah pembantu khusus penyedia (skema alat, penyesuai pengambilan/TTS, pengendali kekhususan).
 
 ### Corak Lazim
 
-Penyedia diselesaikan melalui `getExecutor(providerId)`, yang mengembalikan pelaksana yang dikonfigurasikan. Penyedia yang serasi dengan OpenAI/Anthropic menggunakan `DefaultExecutor` (`executors/default.ts`). Tingkah laku khusus penyedia (URL asas, pengepala pengesahan, versi API) dikonfigurasikan dalam `open-sse/config/providers/`, manakala transformasi isi permintaan dikendalikan dalam `open-sse/translator/`.
+Penyedia ditentukan melalui `getExecutor(providerId)`, yang mengembalikan pelaksana yang dikonfigurasikan. Penyedia yang serasi dengan OpenAI/Anthropic menggunakan `DefaultExecutor` (`executors/default.ts`). Tingkah laku khusus penyedia (URL asas, pengepala pengesahan, versi API) dikonfigurasikan dalam `open-sse/config/providers/`, manakala transformasi isi permintaan dikendalikan dalam `open-sse/translator/`.
 
 **URL tersuai** ditetapkan melalui konfigurasi penyedia:
 
@@ -346,9 +346,9 @@ export default {
 }
 ````
 
-**Pengesahan tersuai** dikendalikan melalui konfigurasi pengesahan pendaftaran penyedia (kunci API, OAuth, profil pengepala).
+**Pengesahan tersuai** dikendalikan melalui konfigurasi pengesahan pendaftar penyedia (kunci API, OAuth, profil pengepala).
 
-Transformasi **isi permintaan tersuai** (contohnya, Anthropic memisahkan `system` daripada `messages`) didaftarkan bagi setiap penyedia dalam `open-sse/translator/`.
+Transformasi **isi permintaan tersuai** (contohnya, Anthropic mengasingkan `system` daripada `messages`) didaftarkan bagi setiap penyedia dalam `open-sse/translator/`.
 
 ````
 
@@ -366,7 +366,7 @@ const result = await executor.execute({
 });
 ````
 
-Penyelesaian dilakukan melalui `ExecutorRegistry` (`executors/registry.ts`): setiap pelaksana khusus diisytiharkan dalam jadual terbina dalam `executors/index.ts` dan didaftarkan melalui `registerExecutor(alias, instance)` semasa modul dimuatkan; `getExecutor()` merujuk pendaftaran tersebut dan kembali kepada `DefaultExecutor` yang dimemo untuk mana-mana penyedia tanpa entri khusus. Pemetaan penuh alias → pelaksana dicirikan oleh ujian piawai emas `tests/unit/executor-map-golden.test.ts`.
+Penentuan dibuat melalui `ExecutorRegistry` (`executors/registry.ts`): setiap pelaksana khusus diisytiharkan dalam jadual terbina dalam `executors/index.ts` dan didaftarkan melalui `registerExecutor(alias, instance)` ketika modul dimuatkan; `getExecutor()` merujuk pendaftar tersebut dan menggunakan `DefaultExecutor` yang dimemoisasikan sebagai sandaran bagi mana-mana penyedia tanpa entri khusus. Pemetaan penuh alias → pelaksana dicirikan oleh ujian rujukan `tests/unit/executor-map-golden.test.ts`.
 
 ---
 
@@ -483,13 +483,13 @@ Ini mengendalikan:
 
 `open-sse/config/` mengandungi lapisan konfigurasi:
 
-| Fail                                 | Tujuan                                         |
-| ------------------------------------ | ---------------------------------------------- |
-| `providerRegistry.ts`                | Daftar model sembang bagi katalog 352 penyedia |
-| `providerModels.ts`                  | Alias model, pemetaan format                   |
-| `constants.ts`                       | Tamat masa, had, kod status                    |
-| `defaultThinkingSignature.ts`        | Tandatangan penaakulan Claude lalai            |
-| `modelStrip.ts` (dalam perkhidmatan) | Pembuangan medan bagi setiap penyedia          |
+| Fail                             | Tujuan                                              |
+| -------------------------------- | --------------------------------------------------- |
+| `providerRegistry.ts`            | Daftar model sembang merentasi katalog 374 penyedia |
+| `providerModels.ts`              | Alias model, pemetaan format                        |
+| `constants.ts`                   | Tamat masa, had, kod status                         |
+| `defaultThinkingSignature.ts`    | Tandatangan pemikiran lalai Claude                  |
+| `modelStrip.ts` (dalam services) | Penyingkiran medan mengikut penyedia                |
 
 ### Skema Daftar Penyedia
 

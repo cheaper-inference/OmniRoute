@@ -4,4 +4,5 @@
  * browser document in the signed-in account, so unbounded fan-out would create account-level
  * traffic that is indistinguishable from spam.
  */
-export const MAX_CHATGPT_BROWSER_TABS = 5;
+export const MAX_CHATGPT_BROWSER_TABS =
+  process.env.CHATGPT_WEB_CODEX_USE_CDP_PROFILE === "1" ? 1 : 5;

@@ -4,82 +4,160 @@
 
 ---
 
-# Operacije na Self-Hosted Runner mašini (.113 pool)
+Samostalno hostovani skup izvršava se na serveru **.113** (`tomni-proxmox-113`). Od 2026-10-18 svaki
+OmniRoute runner ima **jednu ulogu**, jednu oznaku i memorijski/CPU budžet prilagođen izmjerenom
+radnom opterećenju. Turbopack slot dobija resurse potrebne za build; ostali slotovi dimenzionirani su prema
+izmjerenim vršnim vrijednostima. Server prekoračuje raspoložive resurse samo kada se Turbopack build poklopi s Release-Green
+webpack buildom i lint zadatkom; swap hosta (16 GB) to apsorbuje, a pošto se buildovi za pull requestove
+izvršavaju na hostovanim runnerima, Turbopack slot je većinu vremena neaktivan:
 
-Self-hosted pool (`self-hosted, omni-release` na svih osam runnera; `omni-build` na dva) radi na **.113** mašini.
-Izmjereno 28.08.2026. (v3.8.50 postmortem, Parte III):
+| runner               | oznaka                 | uloga                                                                                                                                            | `MemoryHigh` / `MemoryMax` | `CPUQuota`     |
+| -------------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------- | -------------- |
+| `omniroute-113-5`    | `omni-build`           | Turbopack buildovi: `ci.yml` `Build` (samo push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, noćni a11y build | 56 GB / 60 GB (swap 0)     | 1600 %         |
+| `omniroute-113-6`    | `omni-release`         | Release-Green (`release-green` + `main-green`), webpack build                                                                                    | 20 GB / 24 GB (swap 4 GB)  | 800 %          |
+| `omniroute-113-2`    | `omni-light`           | noćni zadaci (Schemathesis, promptfoo, garak, k6) i `quality.yml` `lint-guard`                                                                   | 12 GB / 16 GB (swap 4 GB)  | 600 %          |
+| `omniroute-113`      | `omni-light`           | isti skup kao iznad                                                                                                                              | 8 GB / 12 GB               | 400 %          |
+| OmniHeuris, OmniMind | (njihovi repozitoriji) | samo Dependabot (vršna vrijednost 155 MB za svaki, 2026-10-18)                                                                                   | 4 GB / 6 GB                | 200 % za svaki |
 
-| resurs    | vrijednost                                                                                                     | šta to znači za zakazivanje                                                                                                                                            |
-| --------- | -------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| RAM / CPU | **31 GB / 32 jezgre** (bilo je 16 GB kada je ovaj dokument prvi put napisan)                                   | jedan `next-build` dostiže vrhunac na **~14 GB** → 2 istovremena teška builda zasićuju mašinu, 3 je obaraju (28.08.2026. 06:42Z: opterećenje 56, dva posla izgubljena) |
-| swap      | 15 GB                                                                                                          | koristio je swap tokom objavljivanja v3.8.50; pritisak se vidi u `/proc/pressure/memory`                                                                               |
-| `/tmp`    | **12 GB tmpfs = RAM**                                                                                          | sve što je tu smješteno je u memoriji; ostaci se čiste nakon 3 h                                                                                                       |
-| disk      | 188 GB                                                                                                         | `_work` checkoutovi 8 runnera dostižu ~70 GB bez ograničenja                                                                                                           |
-| runneri   | **6 listenera**: 4 OmniRoute (1 `omni-build` + 1 `omni-release`-only + 2 `omni-light`) + OmniHeuris + OmniMind | svi dijele gore navedenu memoriju; `omniroute-113-3/-4/-7/-8` su onemogućeni (`systemctl enable --now` vraća jedan u rad)                                              |
+Izmjereno 2026-10-18:
 
-## Instalacija janitora (jednokratno, na mašini)
+| resurs    | vrijednost                              | šta to znači za raspoređivanje                                                                                                                                                                                                                                                                                                                                                                |
+| --------- | --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| RAM / CPU | **78 GB / 32 jezgre**                   | Turbopack produkcijski build dostigao je vršnih 49 GB bez ograničenja (`tests/unit/ci-build-bundler-webpack.test.ts`); na Next 16.3.8 sama faza kompajliranja zauzima ~40 GB (36 GB RSS u `next-build` plus 17 loader workera po 3 GB, izmjereno 2026-10-18); webpack build zauzima ~14–16 GB. Jedan Turbopack + jedan webpack build mogu se zajedno izvršavati; dva Turbopack builda ne mogu |
+| swap      | 16 GB                                   | `omniroute-113-5` radi s isključenim swapom (`MemorySwapMax=0`), tako da se nekontrolisani build prekida kada dostigne svoje ograničenje umjesto da prebaci server na swap                                                                                                                                                                                                                    |
+| `/tmp`    | **12 GB tmpfs = RAM**                   | sve što se tamo smjesti zauzima memoriju; preostale datoteke uklanjaju se nakon 3 h                                                                                                                                                                                                                                                                                                           |
+| CPU       | zabilježeno opterećenje 60 na 32 jezgre | prije uvođenja kvota, jedan Turbopack build (~1166 % CPU) zajedno s paketom testova pokrivenosti na istom serveru blokirao je heartbeat signale ostalih listenera (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                       |
+| runneri   | **6 listenera**                         | 4 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-3/-4/-7/-8` su onemogućeni (`systemctl enable --now` ponovo aktivira jedan)                                                                                                                                                                                                                                                               |
+
+Ograničenja se nalaze u `/etc/systemd/system/actions.runner.<…>.service.d/override.conf` svake jedinice
+(prethodne vrijednosti sačuvane su kao `override.conf.bak-20261018`) i primijenjena su uživo pomoću
+`systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` — bez ponovnog pokretanja, tako da nijedan
+aktivni zadatak nije bio pogođen. Oznake se mijenjaju putem runners API-ja
+(`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
+`gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`), također uživo.
+
+## Instalirajte janitor (jednokratno, na serveru)
 
 ```bash
 scp scripts/ops/runner-janitor.sh root@192.168.0.113:/opt/omniroute-ops/runner-janitor.sh
 ssh root@192.168.0.113 'chmod +x /opt/omniroute-ops/runner-janitor.sh; apt-get install -y lsof'
-# cron (root): svakih 30 min, loguj u /var/log/runner-janitor.log
+# cron (root): svakih 30 min, zapis u /var/log/runner-janitor.log
 */30 * * * * MAX_ACTIVE_RUNNERS=6 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
 ```
 
-`lsof` je neophodan: janitor dokazuje da je putanja neaktivna pomoću jednog snimka otvorenih datoteka prije nego što je ukloni, a bez ovog alata ne uklanja ništa i to prijavljuje (exit 1). Isprobajte bilo kakvu izmjenu prvo sa `--dry-run` — ispisuje tačno šta bi uradio i ne dira ništa.
+`lsof` je obavezan: janitor pomoću jednog snimka otvorenih datoteka potvrđuje da
+putanja nije aktivna prije nego što je ukloni, a bez tog alata ne uklanja ništa i
+to prijavljuje (izlazni kod 1). Svaku promjenu prvo isprobajte s `--dry-run` — ispisuje
+tačno šta bi uradio i ne mijenja ništa.
 
-Šta radi pri svakom pokretanju: čisti naše vlastite ostatke (`runner-*`, `omniroute-*`, `next-build*`, `e2e-build.tar.gz`) nakon **3 h na tmpfs** i 24 h na disku `_work/_temp`; ubija `next-build` stariji od 75 min (nijedan posao ne traje toliko dugo — 27.08.2026. jedan je radio 70 min nakon što je GitHub proglasio posao izgubljenim); uklanja 48 sati stare checkoutove runnera čija je jedinica **zaustavljena**; upozorava na disk ≥ 85 %, memorijski PSI `full/avg60` ≥ 10 %, i više listenera nego `MAX_ACTIVE_RUNNERS` (sa pregledom omniroute/ostalo). Exit 1 = potrebna pažnja; pročitajte log.
+Šta radi pri svakom pokretanju: čisti naše vlastite ostatke (`runner-*`, `omniroute-*`,
+`next-build*`, `e2e-build.tar.gz`) nakon **3 h na tmpfs-u** i 24 h na disku u
+`_work/_temp`; prekida `next-build` stariji od 75 min (nijedan posao ne traje toliko —
+2026-08-27 jedan je radio 70 min nakon što je GitHub proglasio njegov posao izgubljenim);
+uklanja checkout direktorije starije od 48 h za runnere čija je jedinica **zaustavljena**;
+upozorava kada je disk popunjen ≥ 85 %, memorijski PSI `full/avg60` ≥ 10 % i kada ima
+više listenera nego što određuje `MAX_ACTIVE_RUNNERS` (s podjelom na omniroute/ostale).
+Izlazni kod 1 = potrebna je pažnja; pročitajte zapisnik.
+
+Pravilo od 75 minuta ne otkriva build od čijeg je posla GitHub već odustao. Kada
+`Runner.Listener` ne može obnoviti svoj posao, `_diag/Runner_*.log` prikazuje
+`POST request to …/renewjob timed out after 100 seconds`, API prijavljuje posao kao `completed`
+(neuspješan) otprilike deset minuta nakon posljednje uspješne obnove, a `next-build` nastavlja raditi
+bez povezanog posla (2026-10-18: build za #17066 označen je neuspješnim u 19:43, a njegov build je
+pet minuta kasnije još uvijek zauzimao 40 GB). Potvrdite ref u najnovijem `_diag/Worker_*.log`, zatim
+pošaljite SIGTERM samo stablu build procesa prema PID-u — `next-build`, `npm run build`, `build-next-isolated.mjs` i
+`_work` workerima. Nikada ne dirajte `Runner.Listener`, `RunnerService.js` ili `Runner.Worker`: worker
+prijavljuje posao kao otkazan, a listener se sam vraća online.
 
 ## Runner jedinice: KillMode
 
-Podrazumevani `KillMode=process` za runner ostavlja `Runner.Worker → npm → next-build`
-aktivnim kada se jedinica zaustavi ili ponovo pokrene — proces izgradnje (build) ostaje siroče i
-nastavlja da troši RAM i CPU bez dodeljenog posla. Svaka OmniRoute jedinica sadrži drop-in
+Zadani `KillMode=process` runnera ostavlja `Runner.Worker → npm → next-build`
+aktivnim kada se jedinica zaustavi ili ponovo pokrene — napušteni build nastavlja trošiti RAM i
+CPU bez povezanog posla. Svaka OmniRoute jedinica ima drop-in konfiguraciju
 (`/etc/systemd/system/actions.runner.diegosouzapw-OmniRoute.<name>.service.d/10-killmode.conf`)
-sa `KillMode=mixed`: prvo SIGTERM za listener, a zatim SIGKILL za celu cgroup grupu pri
-`TimeoutStop`. Ovo stupa na snagu pri sledećem ponovnom pokretanju jedinice — ponovo pokrenite
-**jedan po jedan runner, samo kada su neaktivni (idle)**, uz proveru neaktivnosti i ponovno
-pokretanje u istoj komandi.
+s `KillMode=mixed`: prvo šalje SIGTERM listeneru, a zatim SIGKILL cijeloj cgroup grupi pri
+`TimeoutStop`. Stupa na snagu pri sljedećem ponovnom pokretanju jedinice — ponovo pokrećite **jedan runner
+odjednom, samo kada nije aktivan**, pri čemu provjera neaktivnosti i ponovno pokretanje moraju biti u istoj naredbi.
 
-## Pravila rada
+## Operativna pravila
 
-- **Ograničenje za teške buildove: JEDAN po jedan — primenjuje se putem oznake (od 29.08.2026.).** Svaki posao
-  koji pokreće puni `next build` cilja `[self-hosted, omni-build]`, i samo
-  **`omniroute-113-5`** nosi tu oznaku (dodato putem runners API-ja — bez ponovne registracije):
-  `ci.yml` `Build`, `npm-publish.yml` `publish`, obe `nightly-release-green`
-  validacije, i `docker-publish.yml` **amd64** (hosted 7 GB ResourceExhausted na ovom stablu — #11976).
-  Arm64 Docker deo ostaje na `ubuntu-24.04-arm` (nema ARM mašine) sa webpack-om. Docker amd64
-  takođe koristi webpack: Turbopack na ovom stablu je izazvao paniku unutar BuildKit-a
-  (`TurbopackInternalError: there must be a path to a root`, run 33253576569) čak i sa 31 GB;
-  isti arm64 webpack build na hosted ARM-u je uspeo. `docker-publish` amd64
-  deli `heavy-build-main` grupu konkurentnosti sa `ci.yml` `Build`
-  (`cancel-in-progress: false`), tako da se postavlja u red na taj jedan slot. Docker Engine
-  mora biti na `omniroute-113-5` (`docker info` je prvi korak publish posla).
-  Dva je bilo prethodno ograničenje i bilo je pogrešno za 31 GB: 29.08.2026. u 17:26 UTC dva istovremena
-  `next-build`-a (15.4 GB + 17.2 GB RSS) dovela su mašinu na 5 GB slobodnog prostora sa 4 GB swap-a
-  u upotrebi i kernel je ubio jedan od njih (OOM-killed) — systemd je zabeležio ubijanje na jedinici
-  _drugog_ runnera, `runsvc.sh` je poslao SIGKILL tom listeneru, a posao na njemu je umro sa porukom
-  "The runner has received a shutdown signal" (isti tekst kao kod hosted-runner OOM-a).
-  `omniroute-113-6` zadržava samo `omni-release`. Teški buildovi iz `main` merge-ova, PR-ova i
-  nightly verzija se sada serijalizuju na jednom slotu; red čekanja je cena.
-  Drugi slot se vraća onog dana kada Proxmox VM dobije više RAM-a (48–64 GB):
-  `gh api -X POST repos/<repo>/actions/runners/<id of omniroute-113-6>/labels -f 'labels[]=omni-build'`.
-- **Light pool: `omni-light` (29.08.2026., #11965).** `omniroute-113` i `omniroute-113-2` nose
-  `omni-light` za poslove kojima je potreban samo backend `next build` (~5–6 GB), ali ne i puni:
-  nightly Schemathesis, promptfoo, garak i axe-a11y poslovi. Oni su radili na hosted 7 GB runneru i
-  umirali na `release/v3.8.51` bez nadzora. Najgori slučaj na mašini je 2 teška + 2 laka ≈
-  30 + 12 GB — preko 31 GB RAM-a, unutar 16 GB swap-a; pravo rešenje za prostor je više RAM-a
-  na Proxmox VM-u (`tomni-proxmox-113`), što pretvara ograničenja oznaka u 3 teška + 2 laka.
-- **Namerno manje listenera.** Četiri OmniRoute jedinice su onemogućene 29.08.2026. — sa samo
-  `ci.yml` `Build` i nightly poslovima koji koriste mašinu, 8 listenera je bilo neaktivno, a svaki
-  dodatni je potencijalni zakupac od 14 GB. Ograničenje za janitora je 6 (`MAX_ACTIVE_RUNNERS=6` u cron-u):
-  on broji svaki `Runner.Listener` na mašini, a OmniHeuris + OmniMind dodaju dva na naša četiri.
-- **Nikada ne čistite `/tmp` ili `_work` ručno dok je bilo koji runner zauzet.** Provera-pa-brisanje
-  sa razmakom između to dvoje je način na koji je Build posao uživo izgubio svoj
-  `_work` 27.08.2026. Janitor obavlja proveru i uklanjanje u jednom koraku; pustite ga.
-- Zaustavljanje runnera usred posla otkazuje posao (primećeno uživo): `systemctl stop` koristite
-  samo kada njegov listener nema `Runner.Worker` dete — i uradite to u jednoj komandi.
-- Workflow-ovi ne smeju parkirati artefakte u `/tmp` (to je RAM). Preuzmite u
-  `$RUNNER_TEMP` (na disku, po runneru) — artefaktu `next-build` od 1.3 GB je trebalo 27–32
-  minuta da sleti na tmpfs i 2 minuta za upload sa diska.
-- `.15` VPS je samo za homologaciju — nikada ne pokreće CI runnere.
+- **Jedan Turbopack build istovremeno — nametnuto oznakom.** Svaki posao koji pokreće puni Turbopack
+  `next build` cilja `[self-hosted, omni-build]`, a samo **`omniroute-113-5`** ima tu
+  oznaku: `ci.yml` `Build`, `npm-publish.yml` `publish`, `nightly-v4-build`, `preview-artifact`,
+  noćni a11y build (#16853) i `docker-publish.yml` **amd64** (webpack unutar BuildKita —
+  Turbopack je tamo panično prekinuo rad, pokretanje 33253576569). Dockerova arm64 grana ostaje na `ubuntu-24.04-arm`.
+  `docker-publish` amd64 dijeli konkurentnu grupu `heavy-build-main` s `ci.yml` `Build`
+  (`cancel-in-progress: false`). Docker Engine mora biti na `omniroute-113-5`. Drugi Turbopack
+  slot ne stane u 78 GB (2 × 33–37 GB plus ostatak sistema); drugi slot siguran je samo za
+  webpack buildove.
+- **Buildovi zahtjeva za spajanje pokreću se na hostovanoj infrastrukturi (2026-10-18).** `ci.yml` `Build` doseže `omni-build` samo za
+  `push` i `workflow_dispatch`; svaki `pull_request` (iz vlastitog izvora ili forka) i `merge_group` Build
+  pokreće se na `ubuntu-latest` s webpackom. Kada je svaki PR iz vlastitog izvora bio usmjeren na taj slot, Turbopack
+  Build ga je zauzimao 29–58 min, 18 Buildova čekalo je u redu do 18 h, a vlastiti push Build
+  linije izdanja dobio je slot jednom u 40 poslova. Na hostovanoj infrastrukturi isti PR Build traje 8–12 min uz ostale
+  poslove tog PR-a. Turbopack, bundler koji `npm-publish` isporučuje, nastavlja se testirati na liniji izdanja kroz
+  noćni a11y build zadane grane (04:41 UTC), kroz svaki push ili dispatch Build koji
+  dosegne slot i kroz sam `npm-publish`. `tests/unit/build/heavy-build-queue.test.ts`
+  fiksira uslov s četiri klauzule.
+- **Nikada ne dimenzionirajte Turbopack slot ispod njegove izmjerene potrebe.** Dana 2026-10-18 u 18:06 slot je
+  smanjen s 56G/60G na 40G/44G kako bi se napravilo mjesta za `omni-release`. Faza kompajliranja bila je na
+  `MemoryHigh` tokom cijelog pokretanja (memorijski PSI `full` 30–43 %), a `Runner.Listener`, koji
+  dijeli cgroup, nije mogao obnoviti svoj posao. Vlasnikove vrijednosti 56G/60G od 2026-10-17 vraćene su
+  istog dana. Ispod te vrijednosti build ne pada; počinje intenzivno koristiti resurse, a posao se gubi.
+- **Release-Green ima vlastiti slot (2026-10-18).** Do tada su se obje Release-Green validacije
+  pokretale na `omni-build`: pri svakom pushu (~10/sat, 97 od 100 push pokretanja otkazano je usred rada u jednom danu)
+  i tri potpuna prolaza od ~2 h dnevno (prolaz u 05:29 čekao je 6 h na slot) — jedini build
+  slot bio je višestruko preopterećen, a PR Buildovi iz vlastitog izvora čekali su satima.
+  `release-green` i `main-green` sada ciljaju `omni-release` (samo `omniroute-113-6`) uz
+  `OMNIROUTE_USE_TURBOPACK=0`, a započeto pokretanje više se ne otkazuje zbog novijeg pusha (
+  slot na čekanju i dalje sažima navalu). `tests/unit/build/runner-capacity-routing.test.ts`
+  fiksira usmjeravanje, prebacivanje na webpack i činjenicu da ništa na `omni-release` ne gradi pomoću Turbopacka.
+- **Laki skup: `omni-light`.** `omniroute-113` i `omniroute-113-2` pokreću noćne poslove kojima je
+  potreban samo backend `next build` (~5–6 GB; webpack) i `quality.yml` `lint-guard`. `omniroute-113`
+  je imao `MemoryHigh=4G` do 2026-10-18 — promptfoo build se tamo 54 minute probijao kroz povrat memorije;
+  8 GB uklanja ograničavanje.
+- **Namjerno manje listenera.** Četiri OmniRoute jedinice onemogućene su 2026-08-29 — svaki dodatni
+  listener još je jedan korisnik prethodno navedenog memorijskog budžeta. Gornja granica janitora je 6 (`MAX_ACTIVE_RUNNERS=6` u cronu): on broji
+  svaki `Runner.Listener` na sistemu, a OmniHeuris + OmniMind dodaju dva na naša četiri.
+- **Nikada nemojte ručno čistiti `/tmp` ili `_work` dok je bilo koji runner zauzet.**
+  Provjera pa brisanje s razmakom između ta dva koraka razlog je zbog kojeg je aktivni Build posao izgubio svoj
+  `_work` 2026-08-27. Janitor obavlja provjeru i uklanjanje u jednom koraku;
+  prepustite to njemu.
+- Zaustavljanje runnera usred posla otkazuje posao (opaženo uživo): `systemctl stop` koristite samo
+  kada njegov listener nema podređeni proces `Runner.Worker` — i uradite to jednom naredbom.
+- Tokovi rada ne smiju smještati artefakte u `/tmp` (on je u RAM-u). Preuzimajte u
+  `$RUNNER_TEMP` (na disku, zasebno za svaki runner) — artefaktu `next-build` od 1.3 GB trebalo je 27–32
+  minute da se smjesti na tmpfs i 2 minute da se otpremi s diska.
+- VPS `.15` namijenjen je samo homologaciji — na njemu se nikada ne pokreću CI runneri.
+
+## Hostovana traka (izvršioci koje hostuje GitHub)
+
+Račun je na **Pro** planu: **40 istovremenih hostovanih poslova**, koje dijele sve PR provjere,
+svi radni tokovi pokrenuti slanjem izmjena i zadana postavka za CodeQL. Izmjereno 2026-10-18 tokom
+kampanje spajanja (~10 spajanja/sat na `release/v3.8.52`): **2.500 izvršavanja radnih tokova kreirano je
+za 24 h**, 44 slanja izmjena na granu za 6 h, **106 hostovanih poslova na čekanju**, dok su PR provjere čekale
+satima, a PR-ovi su spajani bez njih. Devet radnih tokova pokretalo se pri svakom slanju izmjena na granu:
+
+| po slanju izmjena na `release/v*`           | hostovani poslovi | ishod tokom navale                                                      | od 2026-10-18                                                                        |
+| ------------------------------------------- | ----------------: | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| `ci.yml` (puna matrica)                     |             do 30 | otkazano sljedećim slanjem izmjena, 24 od 24 u jednom danu              | ne pokreće se pri slanjima na `release/**` (PR izvršavanje + Release-Green)          |
+| `quality.yml`                               |                ~6 | otkazano, 23 od 23                                                      | ne pokreće se pri slanjima na `release/**`                                           |
+| `Release-Green` `--quick`                   |                 0 | izvršeno na `omni-build`, otkazano 97 od 100                            | `omni-release` mjesto, nikad se ne otkazuje, objedinjuje izvršavanja na čekanju      |
+| `Lock released branch`, `OpenSSF Scorecard` |                 2 | jedno izvršavanje na čekanju po slanju izmjena                          | jedno izvršavanje po ref-u (`tests/unit/build/hosted-lane-concurrency.test.ts`)      |
+| `Release acceptance` (izvještaj u sjeni)    |                 1 | jedan hostovani `npm ci` po slanju izmjena, nikad se ne otkazuje        | nepromijenjeno — kandidat za `paths:` filter                                         |
+| `Publish to Docker Hub` → `Deploy to VPS`   |                 2 | otkazano po slanju izmjena; amd64 dio se nadmeće na `omni-build`        | nepromijenjeno — vlasnikov kanal za implementaciju                                   |
+| Zadana postavka za CodeQL (`dynamic`)       |                 4 | `javascript-typescript`, `actions`, `c-cpp`, `python` po slanju izmjena | nepromijenjeno — Settings → Code security; `c-cpp`/`python` ovdje ništa ne skeniraju |
+
+`tests/unit/build/push-storm-diet.test.ts` učvršćuje okidač za slanje izmjena samo na `main` za `ci.yml` i
+`quality.yml`. Nuspojava: Codecov više ne prima osnovno otpremanje pri svakom slanju izmjena za izdanje (taj
+korak je informativan i koristi `continue-on-error`); provjera pokrivenosti unutar repozitorija i PR komentar
+nisu pogođeni.
+
+**Dodatni samostalno hostovani kapacitet ne rješava red čekanja hostovane trake.** Razvojni računar
+(`devbox-vm-06-dev002`, 24 vCPU / 54 GB) mogao bi hostovati izvršioca, ali sesije agenata već
+održavaju njegovo opterećenje na 20–26, kontejner agenta nema Docker demon, a zasićena je
+hostovana traka. `.113` računar je u istom trenutku imao 71 GB slobodnog prostora i opterećenje 5–8; njegovo
+ograničenje je prethodno navedeni memorijski budžet po slušaocu (najviše 6 slušalaca), a ne CPU. Preostale
+mogućnosti su procesne: spojiti PR-ove kampanje putem Mergify reda (`label=queue`, grupe dijele
+jedno `merge_group` CI izvršavanje umjesto jednog izvršavanja po PR-u plus jednog po slanju izmjena), smanjiti broj jezika
+u zadanoj postavci za CodeQL i filtrirati `release-acceptance.yml` prema datotekama koje čita.

@@ -40,6 +40,7 @@ type HealthMatrixAccount = {
   errorCode: string | null;
   backoffLevel: number;
   modelCount: number;
+  omittedIdleModelCount: number;
   issueCount: number;
   models: HealthMatrixModel[];
 };
@@ -200,7 +201,8 @@ function ModelPill({ model }: { model: HealthMatrixModel }) {
 function AccountRow({ account }: { account: HealthMatrixAccount }) {
   const t = useTranslations("health");
   const visibleModels = account.models.slice(0, 8);
-  const hiddenCount = Math.max(0, account.models.length - visibleModels.length);
+  const omittedIdleModels = account.omittedIdleModelCount ?? 0;
+  const hiddenCount = omittedIdleModels + Math.max(0, account.models.length - visibleModels.length);
   const additionalModelsLabel = t.has("additionalModels")
     ? t("additionalModels", { count: hiddenCount })
     : `+${hiddenCount} more models`;
@@ -246,7 +248,7 @@ function AccountRow({ account }: { account: HealthMatrixAccount }) {
           {account.state}
         </Badge>
       </div>
-      {visibleModels.length > 0 ? (
+      {visibleModels.length > 0 || omittedIdleModels > 0 ? (
         <div className="mt-3 grid gap-2 lg:grid-cols-2">
           {visibleModels.map((model) => (
             <ModelPill key={`${account.connectionId || "none"}-${model.model}`} model={model} />

@@ -140,7 +140,7 @@ omniroute providers validate
 
 ### 1) Povežite pružatelje usluga i izradite API ključ
 
-1. Otvorite nadzornu ploču → `Providers` i povežite barem jednog pružatelja usluga (OAuth ili API ključ).
+1. Otvorite nadzornu ploču → `Providers` i povežite najmanje jednog pružatelja usluga (OAuth ili API ključ).
 2. Otvorite nadzornu ploču → `Endpoints` i izradite API ključ.
 3. (Neobavezno) Otvorite nadzornu ploču → `Combos` i postavite svoj pričuvni lanac.
 
@@ -155,38 +155,39 @@ Model:       if/qwen3.8-max-preview (ili bilo koji prefiks pružatelja usluga/mo
 Ako vaš uređivač ne može poslati `Authorization: Bearer ...`, umjesto toga upotrijebite tokeniziranu kompatibilnu osnovnu adresu:
 
 ```txt
-Osnovni URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/
-URL modela: http://localhost:20128/api/v1/vscode/YOUR_KEY/models
-URL razgovora: http://localhost:20128/api/v1/vscode/YOUR_KEY/chat/completions
-URL Ollama oznaka: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
+Osnovni URL:         http://localhost:20128/api/v1/vscode/YOUR_KEY/
+URL modela:          http://localhost:20128/api/v1/vscode/YOUR_KEY/models
+URL razgovora:       http://localhost:20128/api/v1/vscode/YOUR_KEY/chat/completions
+URL Ollama oznaka:   http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
 ```
 
 Radi s alatima Claude Code, Codex CLI, Cursor, Cline, OpenClaw, OpenCode i SDK-ovima kompatibilnima s OpenAI-jem.
 
-#### Automatski konfigurirajte pomoću `setup-*`
+#### Automatska konfiguracija pomoću `setup-*`
 
-Umjesto ručnog lijepljenja osnovnog URL-a i ključa, dopustite alatu OmniRoute da zapiše vlastitu konfiguraciju svakog alata iz aktivnog kataloga modela. Jedna naredba po alatu:
+Umjesto ručnog lijepljenja osnovnog URL-a i ključa, dopustite OmniRouteu da zapiše vlastitu konfiguraciju svakog alata iz aktualnog kataloga modela. Jedna naredba po alatu:
 
 ```bash
-omniroute setup-codex        # profili ~/.codex/<name>.config.toml
+omniroute setup-codex        # profili u ~/.codex/<name>.config.toml
 omniroute setup-claude       # ~/.claude/profiles/<name>/settings.json
 omniroute setup-opencode     # ~/.config/opencode/opencode.json (kompatibilno s OpenAI-jem)
-omniroute setup-cline        # postavke za Cline CLI + proširenje za VS Code
+omniroute setup-cline        # postavke za Cline CLI i proširenje za VS Code
 omniroute setup-kilo         # Kilo Code
 omniroute setup-continue     # ~/.continue/config.yaml (Continue / cn)
 omniroute setup-cursor       # ispisuje korake unutar aplikacije Cursor
-omniroute setup-roo          # uvoz za Roo Code + pokazivač autoImport
+omniroute setup-roo          # uvoz u Roo Code i pokazivač autoImport
 omniroute setup-crush        # ~/.config/crush/crush.json
+omniroute setup-zed          # ~/.config/zed/settings.json (openai_compatible)
 omniroute setup-goose        # ~/.config/goose/config.yaml
 omniroute setup-aider        # ~/.aider.conf.yml
 omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 ```
 
-Svaka prihvaća `--remote <url> --api-key <key>` za konfiguriranje lokalnog alata prema **udaljenom** OmniRouteu, kao i `--dry-run` za pretpregled. Za pokretanje CLI-ja s umetnutim odgovarajućim varijablama okruženja, bez ikakvog zapisivanja konfiguracije, upotrijebite generički pokretač `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini); naslijeđeni pokretači za pojedinačne alate `omniroute launch` (Claude Code) i `omniroute launch-codex` (Codex) i dalje su dostupni.
+Svaka naredba prihvaća `--remote <url> --api-key <key>` za konfiguriranje lokalnog alata za rad s **udaljenim** OmniRouteom, kao i `--dry-run` za pregled. Za pokretanje CLI-ja s umetnutim odgovarajućim varijablama okruženja bez zapisivanja konfiguracije upotrijebite generički pokretač `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini); stariji pokretači za pojedinačne alate `omniroute launch` (Claude Code) i `omniroute launch-codex` (Codex) i dalje su dostupni.
 
-Za cijelu tablicu (što svaka naredba zapisuje, sve zastavice, lokalno u odnosu na udaljeno, konvencije osnovnog URL-a `/v1`) pogledajte **[CLI integracije](./CLI-INTEGRATIONS.md)**.
+Za potpunu tablicu (što svaka naredba zapisuje, sve zastavice, lokalno u odnosu na udaljeno, konvencije osnovnog URL-a `/v1`) pogledajte **[CLI integracije](./CLI-INTEGRATIONS.md)**.
 
-Za detaljnu konfiguraciju pojedinačnih alata (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot i drugih) pogledajte namjenski **[Vodič za CLI alate](../reference/CLI-TOOLS.md)**.
+Za detaljnu konfiguraciju pojedinačnih alata (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot i drugi) pogledajte namjenski **[vodič za CLI alate](../reference/CLI-TOOLS.md)**.
 
 ---
 
@@ -317,7 +318,7 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ## Predložak za Void Linux (xbps-src)
 
-Korisnici sustava Void Linux mogu izraditi izvorni paket pomoću alata `xbps-src`. Spremite ovaj blok kao `srcpkgs/omniroute/template`:
+Korisnici Void Linuxa mogu izraditi izvorni paket koristeći `xbps-src`. Spremite ovaj blok kao `srcpkgs/omniroute/template`:
 
 ```bash
 # Datoteka predloška za 'omniroute'
@@ -326,7 +327,7 @@ version=3.8.0
 revision=1
 hostmakedepends="nodejs python3 make"
 depends="openssl"
-short_desc="Universal AI gateway with smart routing for multiple LLM providers"
+short_desc="Univerzalni AI pristupnik s pametnim usmjeravanjem za više pružatelja LLM-a"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"

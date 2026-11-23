@@ -73,24 +73,32 @@ atunci când se întâmplă acest lucru, indicând endpointul și ceea ce s-a pi
 
 ## Opțiuni
 
-| Cheie                            | Valoare implicită                               | Note                                                                                                                                  |
-| -------------------------------- | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| `providerId`                     | `"omniroute"`                                   | Id-ul furnizorului, id-ul integrării și prefixul sub care apar modelele                                                               |
-| `baseURL`                        | obligatoriu                                     | Rădăcina gateway-ului, numai `http(s)`; sufixul `/v1` este adăugat acolo unde este necesar                                            |
-| `apiKey`                         | acreditarea conectată, apoi `OMNIROUTE_API_KEY` | Cheie de chat pentru `/v1/*`                                                                                                          |
-| `managementReadToken`            | revine la `apiKey`                              | Cheie pentru `/api/*` — de obicei **nu** este aceeași                                                                                 |
-| `displayName`                    | `"OmniRoute"`                                   | Numele furnizorului în selector                                                                                                       |
-| `timeoutMs`                      | `10000`                                         | Timpul-limită pentru preluare per endpoint (combinațiile automate folosesc 5 s)                                                       |
-| `modelCacheTtlMs`                | `300000`                                        | TTL-ul cache-ului catalogului; un instantaneu pe disc accelerează pornirile la rece                                                   |
-| `timeouts`                       | revine la `timeoutMs`                           | Limite per endpoint în ms: `models`, `combos`, `autoCombos`, `enrichment`                                                             |
-| `enrichment`                     | `true`                                          | Preia denumirile, prețurile și limitele nivelului gratuit                                                                             |
-| `providerTag`                    | `true`                                          | Prefixează denumirea afișată cu furnizorul din amonte către care direcționează                                                        |
-| `usableOnly`                     | `false`                                         | Păstrează numai furnizorii pe care gateway-ul îi raportează ca fiind configurați                                                      |
-| `visibleModels` / `hiddenModels` | `[]`                                            | Liste de permisiuni cu potrivire exactă sau după sufix; interdicția are prioritate                                                    |
-| `geminiSanitization`             | `true`                                          | Elimină din schemele instrumentelor cuvintele-cheie JSON-Schema respinse de Gemini (instrumentele `$ref` sunt transmise nemodificate) |
-| `apiFormat.allowAnthropic`       | `false`                                         | Direcționează id-urile din lista de permisiuni prin blocul API Anthropic                                                              |
-| `apiFormat.anthropicModels`      | `[]`                                            | Id-urile complete ale modelelor direcționate către Anthropic                                                                          |
-| `logLevel` / `startupDebug`      | `warn` / `false`                                | Nivelul de detaliere al jurnalizării                                                                                                  |
+| Cheie                            | Valoare implicită                               | Observații                                                                                                                                              |
+| -------------------------------- | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `providerId`                     | `"omniroute"`                                   | ID-ul furnizorului, ID-ul integrării și prefixul sub care apar modelele                                                                                 |
+| `baseURL`                        | obligatoriu                                     | Rădăcina gateway-ului, doar `http(s)`; sufixul `/v1` este adăugat acolo unde este necesar                                                               |
+| `apiKey`                         | acreditarea conectată, apoi `OMNIROUTE_API_KEY` | Cheia pentru chat pentru `/v1/*`                                                                                                                        |
+| `managementReadToken`            | revine la `apiKey`                              | Cheia pentru `/api/*` — de obicei **nu** este aceeași                                                                                                   |
+| `displayName`                    | `"OmniRoute"`                                   | Numele furnizorului în selector                                                                                                                         |
+| `timeoutMs`                      | `10000`                                         | Timpul-limită de preluare pentru fiecare endpoint (combinațiile automate folosesc 5 s)                                                                  |
+| `modelCacheTtlMs`                | `300000`                                        | TTL-ul cache-ului catalogului; un instantaneu de pe disc accelerează pornirile la rece                                                                  |
+| `timeouts`                       | revine la `timeoutMs`                           | Limite de timp per endpoint, în ms: `models`, `combos`, `autoCombos`, `enrichment`                                                                      |
+| `enrichment`                     | `true`                                          | Preia numele, prețurile și limitele nivelului gratuit                                                                                                   |
+| `providerTag`                    | `true`                                          | Prefixează numele afișat cu furnizorul din amonte către care direcționează                                                                              |
+| `usableOnly`                     | `false`                                         | Păstrează doar furnizorii pe care gateway-ul îi raportează ca fiind configurați                                                                         |
+| `combosSource`                   | `"api"`                                         | `"models"` omite `/api/combos` și publică rândurile de combinații din `/v1/models`; filtrele la nivel de membru păstrează `"api"`                       |
+| `showcasePerOwner`               | `10`                                            | Intrări din vizualizarea implicită păstrate pentru fiecare furnizor                                                                                     |
+| `freshPerOwner`                  | `10`                                            | Intrări recente din vizualizarea implicită păstrate pentru fiecare furnizor                                                                             |
+| `freshWindowDays`                | `90`                                            | Intervalul de prospețime, în zile, pentru ramura cu intrări recente                                                                                     |
+| `usageMemory`                    | `true`                                          | Restaurează intrările eliminate static și identificate de analizele de utilizare pe 30 de zile (necesită un token de administrare)                      |
+| `visibleModels` / `hiddenModels` | `[]`                                            | Liste de permisiuni cu potrivire exactă sau după sufix; interdicția prevalează; `*` publică întregul catalog (celelalte filtre se aplică în continuare) |
+| `geminiSanitization`             | `true`                                          | Elimină din schemele instrumentelor cuvintele-cheie JSON-Schema respinse de Gemini (instrumentele `$ref` sunt transmise nemodificate)                   |
+| `apiFormat.allowAnthropic`       | `false`                                         | Direcționează ID-urile din lista de permisiuni prin blocul API Anthropic                                                                                |
+| `apiFormat.anthropicModels`      | `[]`                                            | ID-urile complete ale modelelor direcționate către Anthropic                                                                                            |
+| `logLevel` / `startupDebug`      | `warn` / `false`                                | Nivelul de detaliere al jurnalizării                                                                                                                    |
+
+Memoria utilizării este activată în mod implicit. Fără un token de administrare, aceasta rămâne inactivă
+(la pornire este înregistrată o notificare) și nu se restaurează nimic.
 
 ## Cum rămâne actualizat catalogul
 
@@ -105,13 +113,18 @@ Nu există nicio comandă de reîmprospătare manuală: comenzile OpenCode v2 su
 Gemini respinge în întregime o solicitare ale cărei declarații de instrumente conțin `$schema` sau `additionalProperties`, răspunzând cu `400 INVALID_ARGUMENT`. Pluginul elimină acele cuvinte-cheie din schemele instrumentelor destinate unui model Gemini al acestui furnizor și lasă neschimbate toate celelalte solicitări. Un instrument care conține un `$ref` este transmis fără modificări, în loc să fie eliminat, deoarece eliminarea referinței ar extinde schema pentru a „accepta orice”.
 Setați `"geminiSanitization": false` pentru a dezactiva această funcționalitate.
 
-## Depanare
+## Depanarea problemelor
 
-| Simptom                                                 | Cauză                                                                                                           |
-| ------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| Selectorul nu afișează niciun model OmniRoute           | Nu a fost găsită nicio cheie (verificați avertismentul de la pornire) sau gateway-ul este inaccesibil           |
-| ID-uri brute de modele, fără combinații și fără prețuri | Endpoint-urile de administrare au refuzat tokenul — setați `managementReadToken`                                |
-| O sesiune fixată la `opencode-<id>/…`                   | Pluginul v1 a publicat `opencode-<id>`; v2 publică direct `<id>`, așadar selectați din nou modelul sub `<id>/…` |
+| Simptom                                                   | Cauză                                                                                                                                                            |
+| --------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Selectorul nu afișează niciun model OmniRoute             | Nu a fost identificată nicio cheie (verificați avertismentul de la pornire) sau gateway-ul nu este accesibil                                                     |
+| ID-uri brute ale modelelor, fără combinații, fără prețuri | Endpoint-urile de administrare au refuzat tokenul — setați `managementReadToken`                                                                                 |
+| Catalog `freeOnly` scurt sau gol                          | Nu există niciun token de administrare sau tokenul a fost refuzat — consultați linia cu rezumatul reîmprospătării (numărul `unmatched-free`) din jurnalul gazdei |
+| O sesiune fixată la `opencode-<id>/…`                     | Pluginul v1 a publicat `opencode-<id>`; v2 publică doar `<id>`, așadar selectați din nou modelul din `<id>/…`                                                    |
+
+Variabilele de mediu trebuie să ajungă la procesul serverului opencode: atunci când gazda
+rulează ca serviciu, shell-ul care execută `opencode models` și mediul serverului
+sunt diferite, așadar exportați cheia în locul din care o citește serverul.
 
 ## Consultați și
 

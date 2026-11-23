@@ -145,12 +145,16 @@ export function processAntigravitySSEPayload(
     if (parsed?.response?.usageMetadata) {
       const um = parsed.response.usageMetadata;
       const thoughtsTokens = typeof um.thoughtsTokenCount === "number" ? um.thoughtsTokenCount : 0;
+      const cachedTokens = typeof um.cachedContentTokenCount === "number" ? um.cachedContentTokenCount : 0;
       collected.usage = {
         prompt_tokens: um.promptTokenCount || 0,
         completion_tokens: (um.candidatesTokenCount || 0) + thoughtsTokens,
         total_tokens: um.totalTokenCount || 0,
         ...(thoughtsTokens > 0
           ? { completion_tokens_details: { reasoning_tokens: thoughtsTokens } }
+          : {}),
+        ...(cachedTokens > 0
+          ? { prompt_tokens_details: { cached_tokens: cachedTokens } }
           : {}),
       };
     }

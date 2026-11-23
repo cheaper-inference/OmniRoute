@@ -60,3 +60,46 @@ test("grok-cli transformRequest leaves tools without web_search untouched", () =
 
   assert.deepEqual(out.tools, tools);
 });
+
+// A translated Anthropic forced server search becomes { type: "web_search" }.
+// Grok Build rejects that object as ModelToolChoice, but accepts "required".
+test("grok-cli requires the native search when it is the only available tool", () => {
+  const body = {
+    input: "Search Python history",
+    tools: [{ type: "web_search" }],
+    tool_choice: { type: "web_search" },
+    reasoning: { effort: "medium" },
+  };
+  const out = transform(body);
+  assert.equal(out.tool_choice, "required");
+  assert.deepEqual(out.tools, body.tools);
+  assert.equal((out.reasoning as Record<string, unknown>).effort, "medium");
+  assert.deepEqual(body.tool_choice, { type: "web_search" });
+});
+
+test("grok-cli does not broaden a forced search to unrelated tools", () => {
+  const choice = { type: "web_search" };
+  for (const tools of [
+    undefined,
+    [],
+    [{ type: "function", name: "shell", parameters: { type: "object" } }],
+    [{ type: "web_search" }, { type: "function", name: "shell", parameters: { type: "object" } }],
+  ]) {
+    assert.deepEqual(transform({ input: "hi", tools, tool_choice: choice }).tool_choice, choice);
+  }
+});
+
+test("grok-cli preserves automatic, disabled and explicit function choices", () => {
+  for (const choice of [
+    undefined,
+    "auto",
+    "none",
+    "required",
+    { type: "function", name: "web_search" },
+  ]) {
+    assert.deepEqual(
+      transform({ input: "hi", tools: [{ type: "web_search" }], tool_choice: choice }).tool_choice,
+      choice
+    );
+  }
+});

@@ -12,161 +12,181 @@ Todas as rotas da API de gestão do OmniRoute estão classificadas num de três 
 
 ### Nível 1 — LOCAL_ONLY
 
-**Imposto por:** `isLocalOnlyPath(path)` → verificação do anfitrião de loopback
-**Contorno:** Nenhum por predefinição. Exceção restrita para caminhos em
-`LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` quando o pedido contém uma chave de
-API válida com o âmbito `manage` (consulte [Exceção do âmbito manage](#manage-scope-carve-out)).
+**Imposto por:** `isLocalOnlyPath(path)` → verificação do anfitrião de loopback  
+**Contorno:** Nenhum por predefinição. Exceção limitada para caminhos em
+`LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` quando o pedido inclui uma chave de
+API válida com o âmbito `manage` (consulte [Exceção para o âmbito manage](#manage-scope-carve-out)).
 
 Estas rotas iniciam processos subordinados ou executam código em tempo de execução. Expô-las a
-tráfego não proveniente de loopback permitiria que um atacante que tivesse obtido um JWT válido (por exemplo,
+tráfego que não seja de loopback permitiria que um atacante que obtivesse um JWT válido (por exemplo,
 através de um túnel Cloudflared/Ngrok) desencadeasse a criação de processos — uma classe
-de CVE conhecida ([GHSA-fhh6-4qxv-rpqj](https://github.com/advisories/GHSA-fhh6-4qxv-rpqj)).
+conhecida de CVE
+([GHSA-fhh6-4qxv-rpqj](https://github.com/advisories/GHSA-fhh6-4qxv-rpqj)).
 
 **O que é o GHSA-fhh6-4qxv-rpqj (a classe de ataque):** um servidor de gestão/agente
 expõe um endpoint que inicia um subprocesso (`npm install`, `node`, um navegador,
 um proxy, `git`, `tar`, …). Se esse endpoint estiver acessível a partir do exterior do anfitrião — porque
-o operador colocou o OmniRoute atrás de um túnel nginx/Cloudflare/Tailscale e ocorreu uma fuga
-de um JWT, ou a autenticação foi configurada incorretamente — o atacante transforma «chamar uma API» em «executar um
+o operador colocou o OmniRoute atrás de um túnel nginx/Cloudflare/Tailscale e houve uma fuga de um JWT,
+ou a autenticação foi configurada incorretamente — o atacante transforma «chamar uma API» em «executar um
 comando no anfitrião» (execução remota de código). O OmniRoute impede isto ao impor uma
 **verificação do anfitrião de loopback incondicionalmente, antes de qualquer verificação de autenticação**, em todas as
-rotas capazes de iniciar processos: um token exposto através de um túnel continua sem conseguir aceder ao mecanismo de criação de processos.
+rotas capazes de iniciar processos: um token comprometido através de um túnel continua sem conseguir aceder ao mecanismo de criação de processos.
 
-**O conjunto LOCAL_ONLY completo.** A fonte fidedigna é
+**O conjunto LOCAL_ONLY completo.** A fonte oficial é
 `LOCAL_ONLY_API_PREFIXES` / `LOCAL_ONLY_API_PATTERNS` em
 `src/server/authz/routeGuard.ts`; a tabela abaixo reflete o estado atual. A
 verificação `check-route-guard-membership` enumera todos os ficheiros `route.ts` sob os
 prefixos capazes de iniciar processos e faz com que a CI falhe se algum deles não estiver classificado como apenas local.
 
-| Prefixo / padrão                                                                                         | Por que motivo é apenas local                                                                                               |
+| Prefixo / padrão                                                                                         | Porque é apenas local                                                                                                       |
 | -------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `/api/mcp/`                                                                                              | Servidor MCP — inicia pontes stdio + processadores SSE                                                                      |
-| `/api/cli-tools/runtime/`                                                                                | Runtime de ferramentas CLI — executa código arbitrário de plugins                                                           |
-| `/api/cli-tools/{omp,letta,grok-build,forge,jcode,qwen}-settings`                                        | Gravadores de definições por ferramenta que podem aceder aos binários/configuração da ferramenta no anfitrião               |
+| `/api/mcp/`                                                                                              | Servidor MCP — inicia bridges stdio + processadores SSE                                                                     |
+| `/api/cli-tools/runtime/`                                                                                | Ambiente de execução de ferramentas CLI — executa código arbitrário de plugins                                              |
+| `/api/cli-tools/{omp,letta,grok-build,forge,jcode,qwen}-settings`                                        | Gravadores de definições por ferramenta que podem modificar binários/configurações da ferramenta no anfitrião               |
 | `/api/cli-tools/{claude,cline,codewhale,codex,crush,deepseek-tui,droid,kilo,openclaw,pi,smelt}-settings` | A mesma execução de `getCliRuntimeStatus()` que os seis equivalentes acima (GHSA-35fw-cv32-2373)                            |
 | `/api/cli-tools/{all-statuses,status,detect}`                                                            | Sondas de inventário CLI — executam `command -v` / `--version` por ferramenta (GHSA-35fw-cv32-2373)                         |
 | `/api/cli-tools/antigravity-mitm`                                                                        | Controlo do proxy MITM Antigravity (inicia/aponta o proxy do sistema)                                                       |
-| `/api/modality-bridge/video/`                                                                            | Sonda de runtime estritamente em loopback fidedigno da Video Bridge e ponte de extração interna                             |
-| `/api/services/`                                                                                         | Serviços incorporados (9Router / CLIProxy / Bifrost / Mux / Dario) — `npm install` + iniciação                              |
-| `/dashboard/providers/services/`                                                                         | Proxy inverso para as interfaces dos serviços incorporados                                                                  |
+| `/api/modality-bridge/video/`                                                                            | Sonda de ambiente de execução do Video Bridge estritamente limitada ao loopback fidedigno e bridge de extração interna      |
+| `/api/services/`                                                                                         | Serviços incorporados (9Router / CLIProxy / Bifrost / Mux / Dario) — `npm install` + execução                               |
+| `/dashboard/providers/services/`                                                                         | Proxy inverso para as IU dos serviços incorporados                                                                          |
 | `/api/tunnels/cloudflared`                                                                               | Instala/inicia o binário cloudflared                                                                                        |
 | `/api/tunnels/tailscale/{install,enable,disable,login,start-daemon}`                                     | Instala/controla o tailscaled no anfitrião                                                                                  |
 | `/api/copilot/`                                                                                          | Controlador LLM não autenticado — apenas CLI por predefinição                                                               |
-| `/api/tools/agent-bridge/`                                                                               | AgentBridge — inicia um servidor MITM + edições de DNS                                                                      |
-| `/api/tools/traffic-inspector/`                                                                          | Traffic Inspector — listener http-proxy + proxy do sistema                                                                  |
+| `/api/tools/agent-bridge/`                                                                               | AgentBridge — inicia o servidor MITM + alterações de DNS                                                                    |
+| `/api/tools/traffic-inspector/`                                                                          | Traffic Inspector — serviço de escuta http-proxy + proxy do sistema                                                         |
 | `/api/settings/mitm`                                                                                     | Ativa a interceção MITM (estado do proxy ao nível do sistema)                                                               |
 | `/api/issue-agent/`                                                                                      | Agente de problemas — inicia ferramentas locais no repositório                                                              |
 | `/api/plugins/`, `/api/plugins`                                                                          | Plugins — carregados/executados através de `worker_threads` + `child_process`                                               |
 | `/api/middleware/`                                                                                       | Middleware do utilizador — carrega/executa código do operador no processo                                                   |
 | `/api/system/version`                                                                                    | Atualização automática (apenas POST; GET/HEAD/OPTIONS isentos) — executa `git checkout` + `npm install`                     |
 | `/api/db-backups/exportAll`                                                                              | Executa `tar` para o arquivo de exportação                                                                                  |
-| `/api/local/`                                                                                            | Iniciadores locais de 1 clique (atualmente Redis) — iniciam podman/docker                                                   |
-| `/api/headroom/start`, `/api/headroom/stop`                                                              | Ciclo de vida do proxy Headroom — inicia a CLI python / envia sinais ao PID                                                 |
+| `/api/local/`                                                                                            | Iniciadores locais com 1 clique (atualmente Redis) — iniciam podman/docker                                                  |
+| `/api/headroom/start`, `/api/headroom/stop`                                                              | Ciclo de vida do proxy Headroom — inicia a CLI de python / envia sinais ao PID                                              |
 | `/api/jobs`, `/api/jobs/`                                                                                | Controlo do executor de tarefas — executa trabalho agendado no anfitrião                                                    |
 | `/api/oauth/cursor/auto-import`                                                                          | `execFile("which", ["cursor"])` antes de importar credenciais                                                               |
 | `/api/oauth/kiro/auto-import`                                                                            | Lê ficheiros de credenciais da CLI Kiro no anfitrião                                                                        |
 | `/api/skills/collect/`                                                                                   | Recolha de competências — deteta/instala ferramentas locais                                                                 |
-| `/api/skills/install`, `/api/skills/executions`                                                          | Registo + execução de processadores de competências — alcançam a iniciação do contentor sandbox (GHSA-jx89)                 |
-| `/api/discovery/`                                                                                        | Sondas de descoberta da rede local/de fornecedores                                                                          |
+| `/api/skills/install`, `/api/skills/executions`                                                          | Registo + execução do processador de competências — permite chegar à criação do contentor sandbox (GHSA-jx89)               |
+| `/api/discovery/`                                                                                        | Sondas de descoberta da rede local/do fornecedor                                                                            |
 | `/api/vnc-session` (`VNC_ROUTE_PREFIX`)                                                                  | Inicia um navegador com interface gráfica + uma sessão VNC para inícios de sessão interativos                               |
-| `/api/acp/agents`                                                                                        | ACP — deteta e inicia binários locais de agentes CLI                                                                        |
+| `/api/acp/agents`                                                                                        | ACP — descobre e inicia binários locais de agentes CLI                                                                      |
 | `/api/resilience/connections`                                                                            | JSON de resiliência por conta (período de espera, disjuntor, bloqueio). O HTML do painel não está limitado ao acesso local. |
 | `/api/providers/cursor/agent-availability`                                                               | Verificação do painel que sugere a instalação — inicia `cursor-agent status --format json`                                  |
-| `/api/providers/{id}/login` (regex)                                                                      | Inicia um Chromium do Playwright com interface gráfica para autenticação através de cookies Web                             |
-| `/api/providers/volcengine-plan/connect` (regex)                                                         | Fluxo manual com interface gráfica + início de sessão automático por telefone/SMS baseado na sessão (inicia o Playwright)   |
-| `/api/providers/{id}/refresh-cursor` (regex)                                                             | Renovação manual da sessão do Cursor — aciona o `cursor-agent`                                                              |
-| `/api/providers/{id}/chatgpt-web-codex-doctor` (regex)                                                   | Diagnostica a instalação local da CLI do Codex (inicia o binário)                                                           |
+| `/api/providers/{id}/login` (expressão regular)                                                          | Inicia um Chromium do Playwright com interface gráfica para início de sessão através de cookies da Web                      |
+| `/api/providers/volcengine-plan/connect` (expressão regular)                                             | Fluxo manual com interface gráfica + início de sessão automático por telefone/SMS baseado na sessão (inicia o Playwright)   |
+| `/api/providers/{id}/refresh-cursor` (expressão regular)                                                 | Renovação manual da sessão do Cursor — aciona `cursor-agent`                                                                |
+| `/api/providers/{id}/chatgpt-web-codex-doctor` (expressão regular)                                       | Diagnostica a instalação local da CLI do Codex (inicia o binário)                                                           |
 
 **Resposta em caso de violação:** `403 LOCAL_ONLY`
 
 #### Exceção para o âmbito de gestão
 
-Um subconjunto dos caminhos LOCAL_ONLY TAMBÉM PODE ser acedido a partir de
-endereços que não sejam de loopback se, e apenas se, o pedido incluir um
-`Authorization: Bearer <api-key>` cujos metadados incluam o âmbito `manage`
-(ou `admin`). A exceção é ativada explicitamente por caminho através de
-`LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES`, para que a predefinição de qualquer
-novo caminho LOCAL_ONLY continue a exigir estritamente loopback. Os pedidos
-não autenticados e os pedidos com chaves sem o âmbito de gestão continuam a
-ser rejeitados com `403 LOCAL_ONLY`.
+Um subconjunto de caminhos LOCAL_ONLY TAMBÉM PODE ser acedido a partir de endereços que não sejam de loopback se, e
+apenas se, o pedido incluir um `Authorization: Bearer <api-key>` cujos
+metadados incluam o âmbito `manage` (ou `admin`). A exceção é controlada
+explicitamente por caminho através de `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES`, para que a
+predefinição de qualquer novo caminho LOCAL_ONLY continue a exigir estritamente loopback. Os pedidos não autenticados
+e os pedidos com chaves sem o âmbito de gestão continuam a ser rejeitados com
+`403 LOCAL_ONLY`.
 
-Atualmente, o único prefixo que permite a exceção é `/api/mcp/`.
-`/api/cli-tools/runtime/` e `/api/services/` são intencionalmente excluídos,
-pois podem iniciar subprocessos arbitrários (`npm install`, `node`), que
-correspondem precisamente à classe de CVE que o nível LOCAL_ONLY existe para
-impedir.
+Atualmente, o único prefixo que pode beneficiar da exceção é `/api/mcp/`. `/api/cli-tools/runtime/` e
+`/api/services/` são intencionalmente excluídos porque podem iniciar
+subprocessos arbitrários (`npm install`, `node`), que correspondem precisamente à classe de CVE que o
+nível LOCAL_ONLY se destina a impedir.
 
-**#7895 — âmbito restrito `mcp:connect`:** a exceção de `/api/mcp/` TAMBÉM
-aceita uma chave Bearer com o âmbito restrito `mcp:connect`
-(`src/shared/constants/managementScopes.ts::MCP_CONNECT_SCOPE`), verificado
-através de `hasMcpConnectOrManageScope()` em
-`src/server/authz/policies/management.ts`. Isto aplica-se APENAS a `/api/mcp/`
-— `mcp:connect` não concede qualquer permissão em nenhuma outra rota de gestão
-(incluindo qualquer outro prefixo de exceção LOCAL_ONLY que possa vir a ser
-adicionado) e está deliberadamente excluído de `MANAGEMENT_API_KEY_SCOPES`.
-Uma chave com `manage`/`admin` continua a passar pela exceção exatamente como
-antes; `mcp:connect` é uma alternativa com privilégios mais reduzidos para
-clientes remotos exclusivos de MCP que não devam necessitar de acesso amplo
-de gestão.
+**#7895 — âmbito restrito `mcp:connect`:** a exceção de `/api/mcp/` TAMBÉM aceita
+uma chave Bearer que tenha o âmbito restrito `mcp:connect`
+(`src/shared/constants/managementScopes.ts::MCP_CONNECT_SCOPE`), verificado através de
+`hasMcpConnectOrManageScope()` em `src/server/authz/policies/management.ts`.
+Isto está limitado EXCLUSIVAMENTE a `/api/mcp/` — `mcp:connect` não concede nada em qualquer outra
+rota de gestão (incluindo todos os outros prefixos de exceção LOCAL_ONLY, caso algum
+venha a ser adicionado) e é deliberadamente excluído de
+`MANAGEMENT_API_KEY_SCOPES`. Uma chave com `manage`/`admin` continua a passar pela
+exceção exatamente como antes; `mcp:connect` é uma alternativa com menos privilégios
+para clientes MCP exclusivamente remotos que não devam necessitar de acesso de gestão abrangente.
 
-| Pedido                                          | Caminho                    | Resultado                    |
-| ----------------------------------------------- | -------------------------- | ---------------------------- |
-| Sem loopback, sem Bearer                        | `/api/mcp/*`               | 403 LOCAL_ONLY               |
-| Sem loopback, Bearer com o âmbito `manage`      | `/api/mcp/*`               | Permitido                    |
-| Sem loopback, Bearer com o âmbito `mcp:connect` | `/api/mcp/*`               | Permitido                    |
-| Sem loopback, Bearer sem `manage`/`mcp:connect` | `/api/mcp/*`               | 403 LOCAL_ONLY               |
-| Sem loopback, Bearer com o âmbito `mcp:connect` | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY               |
-| Sem loopback, Bearer com o âmbito `manage`      | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY               |
-| Loopback, com qualquer Bearer ou sem Bearer     | qualquer LOCAL_ONLY        | Permitido (passa a barreira) |
+| Pedido                                          | Caminho                    | Resultado                            |
+| ----------------------------------------------- | -------------------------- | ------------------------------------ |
+| Sem loopback, sem Bearer                        | `/api/mcp/*`               | 403 LOCAL_ONLY                       |
+| Sem loopback, Bearer com o âmbito `manage`      | `/api/mcp/*`               | Permitir                             |
+| Sem loopback, Bearer com o âmbito `mcp:connect` | `/api/mcp/*`               | Permitir                             |
+| Sem loopback, Bearer sem `manage`/`mcp:connect` | `/api/mcp/*`               | 403 LOCAL_ONLY                       |
+| Sem loopback, Bearer com o âmbito `mcp:connect` | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY                       |
+| Sem loopback, Bearer com o âmbito `manage`      | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY                       |
+| Loopback, com qualquer Bearer/sem Bearer        | qualquer LOCAL_ONLY        | Permitir (a barreira é ultrapassada) |
 
 #### Orientações para operadores e auditoria
 
-Se executar o OmniRoute por trás de um proxy inverso ou túnel (nginx, Caddy,
-Cloudflare Tunnel, Tailscale, Ngrok), a verificação de loopback continua a
-proteger as rotas acima com capacidade de iniciar processos — um pedido cujo
-endereço de cliente não seja de loopback é rejeitado com `403 LOCAL_ONLY`
-**antes de a autenticação ser executada**, pelo que um JWT divulgado não
-consegue iniciar um processo. Permanecem duas responsabilidades para os
-operadores:
+Se executar o OmniRoute atrás de um proxy inverso ou túnel (nginx, Caddy, Cloudflare
+Tunnel, Tailscale, Ngrok), a verificação de loopback continua a proteger as
+rotas acima com capacidade para iniciar processos — um pedido cujo endereço de cliente não seja de loopback é rejeitado com
+`403 LOCAL_ONLY` **antes da execução da autenticação**, pelo que um JWT exposto não consegue iniciar um processo. Continuam a existir duas
+responsabilidades do operador:
 
-- **Não «corrija» um erro 403 falsificando o IP do cliente como loopback.**
-  Definir `X-Forwarded-For: 127.0.0.1`, ou utilizar um proxy que reescreva o
-  endereço de origem como loopback, volta a abrir precisamente a classe de RCE
-  que este nível bloqueia. Exponha o painel/API através do proxy — nunca as
-  rotas com capacidade de iniciar processos.
-- **Mantenha a exceção do âmbito de gestão num nível mínimo.** Apenas
-  `/api/mcp/` permite a exceção, e apenas com uma chave de API com o âmbito
-  `manage`. Os `SPAWN_CAPABLE_PREFIXES` nunca podem ser adicionados à lista de
-  exceções — o esquema zod rejeita-os e
-  `isLocalOnlyBypassableByManageScope` recusa-os em tempo de execução (defesa
-  em profundidade), que é o que o painel quer dizer com «não pode permitir
-  exceções». As rotas com capacidade de iniciar processos que tenham segmentos
-  dinâmicos e caminhos estáticos em `/api/providers/` (por exemplo, `/login`,
-  `/refresh-cursor`) são abrangidas pelo mecanismo complementar baseado em
-  expressões regulares `SPAWN_CAPABLE_PATTERNS` /
+- **Não «corrija» um erro 403 falsificando o IP do cliente como loopback.** Definir
+  `X-Forwarded-For: 127.0.0.1`, ou utilizar um proxy que reescreva o endereço de origem
+  como loopback, reabre exatamente a classe de RCE que este nível impede. Exponha o
+  dashboard/API através do proxy — nunca as rotas com capacidade de spawn.
+- **Mantenha mínimo o bypass do âmbito manage.** Apenas `/api/mcp/` permite bypass, e
+  apenas com uma chave de API com o âmbito `manage`. Os `SPAWN_CAPABLE_PREFIXES` nunca
+  podem ser adicionados à lista de bypass — o esquema zod rejeita-os e
+  `isLocalOnlyBypassableByManageScope` recusa-os em runtime (defesa em profundidade),
+  que é o que o dashboard quer dizer com «não pode permitir bypass». A mesma
+  lista de bloqueio também contém algumas rotas LOCAL_ONLY que não fazem spawn, mas que
+  também nunca devem estar remotamente acessíveis — `/api/oauth/kiro/auto-import` (lê
+  ficheiros de credenciais do Kiro locais ao host), `/api/discovery/` e
+  `/api/issue-agent/`. O carregador de snapshots em runtime também remove essas entradas
+  de uma linha de definições armazenada, e a importação de JSON legada
+  (`/api/settings/import-json`) nunca escreve as chaves de bypass.
+  Cada entrada de `LOCAL_ONLY_API_PREFIXES` tem de estar na lista de bloqueio ou
+  ser revista como elegível para bypass (`tests/unit/authz/local-only-bypass-spawn-denylist.test.ts`). As rotas
+  com capacidade de spawn com segmentos dinâmicos e caminhos estáticos em `/api/providers/`
+  (por exemplo, `/login`, `/refresh-cursor`) são abrangidas pelos elementos complementares
+  baseados em expressões regulares `SPAWN_CAPABLE_PATTERNS` /
   `SPAWN_CAPABLE_PATTERN_ANCESTORS` em
   `src/shared/constants/spawnCapablePrefixes.ts`, e não pelo array simples
-  `SPAWN_CAPABLE_PREFIXES` — o array simples teria de abranger todo o prefixo
-  `/api/providers/` para as detetar, o que alargaria excessivamente uma árvore
-  de rotas que os painéis remotos utilizam legitimamente para operações CRUD
-  de fornecedores.
+  `SPAWN_CAPABLE_PREFIXES` — o array simples teria de abranger todo o
+  prefixo `/api/providers/` para as detetar, alargando excessivamente uma árvore de rotas
+  que os dashboards remotos utilizam legitimamente para operações CRUD sobre fornecedores.
 
-**Auditar o acesso** — para verificar que nenhum acesso externo ao anfitrião está a chegar a estas rotas:
+**Auditoria do acesso** — para verificar que nada externo ao host está a aceder a estas rotas:
 
-- Abra o **Inventário de Autorizações** em `/dashboard/settings/security`: este apresenta a
-  lista ativa de prefixos LOCAL_ONLY, quais os prefixos que podem ser contornados e o conjunto
-  com capacidade de criação de processos definido em tempo de compilação ("não pode ser tornado contornável").
+- Abra o **Inventário de Autorização** em `/dashboard/settings/security`: apresenta a
+  lista ativa de prefixos LOCAL_ONLY, quais os prefixos que permitem bypass e o conjunto
+  de elementos com capacidade de spawn definido em tempo de compilação («não pode permitir bypass»).
 - Pesquise nos registos do proxy inverso / de acesso os prefixos acima associados a um
-  endereço de cliente que não seja de loopback. Qualquer ocorrência que tenha devolvido `200` em vez de
-  `403 LOCAL_ONLY` significa que o proxy está a ocultar o IP real do cliente — corrija o proxy.
+  endereço de cliente que não seja loopback. Qualquer acesso desse tipo que tenha devolvido
+  `200` em vez de `403 LOCAL_ONLY` significa que o proxy está a ocultar o IP real do cliente —
+  corrija o proxy.
 - Um `403 LOCAL_ONLY` nos registos do OmniRoute para um destes caminhos significa que a proteção
-  está a funcionar como previsto, não sendo um erro a suprimir.
+  está a funcionar conforme previsto, e não que existe um erro a suprimir.
+
+#### Rotas remotamente acessíveis com uma proteção de sondagem no ponto de chamada
+
+Algumas rotas têm de permanecer acessíveis a partir de um dashboard remoto, mas executam uma
+sondagem no host (`which <binary>`, `<binary> --version`, `tailscale status --json`) para
+chamadores locais. Não são LOCAL_ONLY para `GET`; em vez disso, o handler lê o veredicto
+fidedigno sobre o peer com `getRequestPeerLocality()` (`src/shared/utils/apiAuth.ts`) e apenas
+executa a sondagem para chamadores `loopback` / `lan`. Um chamador `remote` obtém uma resposta
+com a mesma estrutura, criada a partir de fontes que não fazem spawn (estado persistido,
+definições, verificações do fs), assinalada com `probed: false`.
+
+| Rota                                                             | Sondagem ignorada para chamadores remotos                                      |
+| ---------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| `POST /api/providers/{id}/test`, `/api/providers/test-batch`     | Sondagem do runtime da CLI (`allowLocalRuntimeProbe`) e spawn de recurso à CLI |
+| `GET /api/headroom/status`                                       | `which headroom` e as sondagens `--version` do python                          |
+| `GET /api/tunnels/tailscale`, `GET /api/tunnels/tailscale/check` | `which tailscale`, `tailscale status/funnel --json`, `which brew`              |
+| `GET /api/tunnels/cloudflared` (GET isento de LOCAL_ONLY)        | Pesquisa de `which cloudflared` no PATH                                        |
+
+Uma nova rota de leitura que sonde o host segue o mesmo padrão ou é diretamente
+classificada como LOCAL_ONLY.
 
 ### Nível 2 — ALWAYS_PROTECTED
 
-**Imposto por:** `isAlwaysProtectedPath(path)` → ignora o contorno `requireLogin=false`
-**Contorno:** Nenhum quando `requireLogin=false`; JWT é sempre obrigatório
+**Imposto por:** `isAlwaysProtectedPath(path)` → ignora o bypass `requireLogin=false`
+**Bypass:** Nenhum quando `requireLogin=false`; é sempre necessário um JWT
 
-Estas rotas são destrutivas ou irreversíveis. Permiti-las numa instalação "sem palavra-passe"
+Estas rotas são destrutivas ou irreversíveis. Permiti-las numa instalação «sem palavra-passe»
 significaria que qualquer pessoa na mesma LAN poderia apagar a base de dados ou terminar o
 processo do servidor.
 
@@ -175,39 +195,67 @@ processo do servidor.
 | `/api/shutdown`                           | Termina o processo do servidor                                     |
 | `/api/settings/database`                  | Exportação, importação e eliminação da base de dados               |
 | `/api/db-backups`                         | Acesso ao arquivo completo de cópia de segurança da base de dados  |
-| `/api/settings/export-json`               | Exporta o bloco completo de definições (incl. segredos)            |
-| `/api/settings/import-json`               | Substitui o bloco completo de definições                           |
-| `/api/providers/health-autopilot/actions` | Executa ações de remediação do piloto automático                   |
+| `/api/settings/export-json`               | Exporta o blob completo de definições (incluindo segredos)         |
+| `/api/settings/import-json`               | Substitui o blob completo de definições                            |
+| `/api/providers/health-autopilot/actions` | Executa ações de remediação do autopilot                           |
 | `/api/settings/obsidian`                  | Emite credenciais WebDAV reutilizáveis para qualquer raiz de cofre |
+| `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens                       |
 
 **Resposta em caso de violação:** `401 Authentication required`
 
-`/api/settings/obsidian` abrange o respetivo elemento subordinado `/webdav`: `POST` configura o serviço de ficheiros WebDAV —
-servido pela camada Node personalizada antes do Next.js, fora deste pipeline — para usar uma raiz
-escolhida pelo autor do pedido e devolve credenciais Basic recém-emitidas, `DELETE` roda essas
-credenciais e o `POST` principal armazena o token da API REST do Obsidian. O GHSA-62vw apenas ocultou
-a revelação da palavra-passe por `GET`; a emissão continuava no nível permissivo em caso de falha
-(GHSA-7pq4-8pvv-rx7r). `enableObsidianVaultSync()` recusa adicionalmente um cofre que seja o diretório
-de dados, esteja contido nele ou o contenha.
+`/api/settings/obsidian` abrange o seu caminho subordinado `/webdav`: `POST` direciona o serviço
+de ficheiros WebDAV — fornecido pela camada Node personalizada antes do Next.js, fora deste
+pipeline — para uma raiz escolhida pelo chamador e devolve credenciais Basic recém-emitidas,
+`DELETE` roda-as, e o `POST` do caminho principal armazena o token da API REST do Obsidian.
+O GHSA-62vw apenas ocultou a revelação da palavra-passe por `GET`; a emissão continuava no nível
+fail-open (GHSA-7pq4-8pvv-rx7r). `enableObsidianVaultSync()` recusa adicionalmente um cofre que
+seja o diretório de dados, esteja no seu interior ou o contenha.
 
-### O arranque de uma instalação nova está limitado ao loopback — pelo par real, não por `Host`
+#### As exportações de credenciais destinam-se apenas ao operador
+
+O nível acima apenas decide se é necessária _alguma_ credencial. As rotas que transferem
+credenciais armazenadas adicionam uma segunda verificação no processador: `GET /api/settings/export-json` (ligações
+a fornecedores desencriptadas e chaves de API em bruto), `GET /api/db-backups/export` (o ficheiro SQLite) e
+`GET /api/db-backups/exportAll` (o arquivo completo) invocam `requireOperatorCredential()`
+(`src/lib/api/operatorCredential.ts`). Esta função aceita uma sessão do painel, a identidade da CLI local ou
+uma instância com o início de sessão desativado, e responde com `403` a chaves de API de qualquer âmbito (incluindo `manage`
+e `admin`) e a tokens de acesso `oma_`. A emissão de tokens de sincronização (`POST /api/sync/tokens`) utiliza a
+mesma função auxiliar, além do token de serviço interno de loopback fidedigno.
+
+#### Credential exports and restores are operator-only
+
+The tier above only decides whether _some_ credential is required. The routes that download
+stored credentials add a second check in the handler: `GET /api/settings/export-json` (decrypted
+provider connections and raw API keys), `GET /api/db-backups/export` (the SQLite file) and
+`GET /api/db-backups/exportAll` (the full archive) call `requireOperatorCredential()`
+(`src/lib/api/operatorCredential.ts`). It accepts a dashboard session, the local CLI subject, or
+an instance with login disabled, and answers `403` to API keys of any scope (including `manage`
+and `admin`) and to `oma_` access tokens. The destructive counterparts hold the same boundary:
+`POST /api/db-backups/import` (uploaded `.sqlite`, `dryRun=true` included), `POST /api/db-backups`
+(restore a stored backup by id) and `POST /api/settings/import-json` (legacy JSON restore)
+replace the live database or the whole settings/connections/API-key set, so a machine credential
+cannot trigger them either. Listing, creating, retention and cleanup of backups
+(`GET`/`PUT`/`PATCH`/`DELETE /api/db-backups`) keep ordinary management auth. Sync token
+issuance (`POST /api/sync/tokens`) uses the same helper, plus the trusted loopback
+internal-service token.
+
+### O bootstrap de uma instalação nova está limitado ao loopback — pelo par real, não por `Host`
 
 Sem uma palavra-passe de gestão configurada (e sem `INITIAL_PASSWORD`), `isAuthRequired()` em
-`src/shared/utils/apiAuth.ts` mantém o arranque anónimo disponível **apenas para pares de loopback**.
-O loopback é determinado a partir dos sinais de par fidedignos, por esta ordem: o par TCP real
-marcado com token (`PEER_IP_HEADER` + `VIA_PROXY_HEADER`, aquilo que a política vê), o veredito
-`AUTHZ_HEADER_PEER_LOCALITY` do próprio pipeline (aquilo que os processadores de rotas veem, considerado
-fidedigno apenas enquanto `OMNIROUTE_PEER_STAMP_TOKEN` estiver definido) ou um par de socket real para
-clientes diretos. `Host` / `nextUrl.hostname` nunca são consultados, e a primeira escrita da
-palavra-passe (`POST /api/settings/require-login`) está sujeita à mesma restrição, em vez de estar
-disponível para todos os pares da rede (GHSA-7pq4-8pvv-rx7r). `managementPolicy` transmite
-explicitamente o seu próprio veredito `peerContext`, pelo que os cabeçalhos do pedido ORIGINAL
-(antes da remoção) nunca o determinam.
+`src/shared/utils/apiAuth.ts` mantém o bootstrap anónimo aberto **apenas para pares de loopback**.
+O loopback é determinado a partir dos sinais fidedignos do par, pela seguinte ordem: o par TCP real identificado pelo token
+(`PEER_IP_HEADER` + `VIA_PROXY_HEADER`, o que a política vê), o veredito
+`AUTHZ_HEADER_PEER_LOCALITY` do próprio pipeline (o que os processadores de rotas veem, considerado fidedigno apenas enquanto
+`OMNIROUTE_PEER_STAMP_TOKEN` estiver definido) ou um par de socket real para chamadores diretos. `Host` /
+`nextUrl.hostname` nunca são consultados, e a primeira escrita da palavra-passe
+(`POST /api/settings/require-login`) está sujeita à mesma restrição, em vez de estar aberta a todos os
+pares de rede (GHSA-7pq4-8pvv-rx7r). `managementPolicy` transmite explicitamente o seu próprio veredito `peerContext`,
+pelo que os cabeçalhos do pedido ORIGINAL (antes da remoção) nunca o determinam.
 
-### Nível 3 — MANAGEMENT (predefinição)
+### Nível 3 — GESTÃO (predefinição)
 
-Todas as restantes rotas de gestão. A autenticação é obrigatória, exceto se
-`requireLogin=false` estiver configurado. Os tokens da CLI podem autenticar estas rotas (loopback + HMAC válido).
+Todas as restantes rotas de gestão. A autenticação é obrigatória, exceto se `requireLogin=false` estiver
+configurado. Os tokens da CLI podem autenticar estas rotas (loopback + HMAC válido).
 
 ## Ordem de avaliação
 

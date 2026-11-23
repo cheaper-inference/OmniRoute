@@ -6,28 +6,32 @@
 
 <div align="center">
 
-<img src="./docs/screenshots/MainOmniRoute.png" alt="OmniRoute დაფა" width="820"/>
+<img src="./docs/screenshots/MainOmniRoute.png" alt="OmniRoute მართვის პანელი" width="820"/>
 
 <br/>
 <br/>
 
 # 🚀 OmniRoute — უფასო AI კარიბჭე
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — არასოდეს შეწყვიტო კოდირება. ყველა AI ინსტრუმენტი → 358 პროვაიდერი — 150+ უფასო — ერთი ენდპოინტის გავლით. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity უფასო Claude / GPT / Gemini-ში ავტომატური უკუსვლით. RTK + Caveman დაწყობილი შეკუმშვა ზოგავს 15–95% ტოკენს (~89% საშუალოდ) — არასოდეს გადააჭარბოთ ლიმიტებს. 358 AI პროვაიდერი · 150+ უფასო დონე · ~1.62 მილიარდი უფასო ტოკენი/თვეში · 19 მარშრუტიზაციის სტრატეგია · დასაწყებად $0."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — არასდროს შეწყვიტოთ კოდის წერა. ყველა AI ინსტრუმენტი → 375 პროვაიდერი — 150+ უფასო — ერთი საბოლოო წერტილის მეშვეობით. Claude Code, Codex, Cursor, Cline, Copilot და Antigravity უფასო Claude / GPT / Gemini-სთან ავტომატური სარეზერვო გადართვით. RTK + Caveman-ის კომბინირებული შეკუმშვა ზოგავს ტოკენების 15–95%-ს (საშუალოდ ~89%) — აღარასდროს გადააჭარბოთ ლიმიტებს. 375 AI პროვაიდერი · 150+ უფასო ტარიფი · თვეში ~1.62 მლრდ უფასო ტოკენი · მარშრუტიზაციის 20 სტრატეგია · დასაწყებად $0."/>
 
 </div>
 
-## 💰 ~1.62 მლრდ უფასო ტოკენი / თვეში
+<div align="center">
+
+## 💰 ~1.62 მლრდ ტოკენი / თვეში მესამე მხარის უფასო ტარიფებიდან
 
 </div>
 
-> უფასო ტარიფების ხელით გაერთიანება რთულია — ათობით SDK, ათობით სიხშირის ლიმიტი და არავითარი წარმოდგენა, რეალურად რამდენი რესურსი გაქვთ. OmniRoute-ის კატალოგში არის **489 უფასო ტარიფის ჩანაწერი 35 განმეორებადი პულის გასაღებისთვის** და ტოკენების ჯამურ მაჩვენებელს ითვლის **გამოქვეყნებული დადებითი ყოველთვიური ბიუჯეტის მქონე 17 პულისა და Groq-ის თითო მოდელზე დაწესებული ხუთი ლიმიტისგან**, საერთო პულების დუბლირების გარეშე. კვოტები, რომლებიც მხოლოდ რეგიონული იდენტობის შემოწმების შემდეგ იხსნება (ამჟამად: ModelScope), ცალკეა ნაჩვენები — რეგიონული იდენტობის დადასტურების მიღმა +~6M — და არასოდეს ემატება მთავარ ჯამურ მაჩვენებელს. შედეგი მუდმივად ჩანს მართვის პანელზე (`/dashboard/free-tiers`).
-
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute-ის უფასო ტარიფების ბიუჯეტის ბარათი: სტაბილურად ~1.62 მლრდ უფასო ტოკენი თვეში, ხოლო რეგისტრაციის კრედიტებით პირველ თვეში — ~2.22 მლრდ-მდე, 35 დოკუმენტირებული განმეორებადი პულის გასაღებიდან, რომლებიც ერთი საბოლოო წერტილის მიღმა კატალოგში შეტანილ 489 უფასო ტარიფის ჩანაწერს მოიცავს. გამჭვირვალე მათემატიკა პულების დუბლირების გარეშე — თითოეული საერთო პული მხოლოდ ერთხელ ითვლება, მათ შორის გამოქვეყნებული დადებითი ყოველთვიური ტოკენების ბიუჯეტის მქონე 17 განმეორებადი პული და Groq-ის თითო მოდელზე დაწესებული ხუთი ლიმიტი; პირობებთან დაკავშირებული რისკების კატალოგში 13 პროვაიდერი მონიშნულია, როგორც ასარიდებელი, რათა გადაწყვეტილება თავად მიიღოთ. ბიუჯეტის ზოლი მოიცავს Mistral 1B-ს, Nara 210M-ს, LLM7 150M-ს, xKiro 150M-ს, Groq 30M-ს (ხუთი ლიმიტი თითო მოდელზე) და უფრო მცირე პულებს; ასევე, პირველი თვის რეგისტრაციის კრედიტები და მუდმივად უფასო პროვაიდერები ტოკენების ლიმიტის გარეშე ცალკეა წარმოდგენილი, რათა მათ არასოდეს გაზარდონ ხელოვნურად მთავარი ჯამური მაჩვენებელი. გამოყენებული/დარჩენილი რესურსების მიმდინარე მონაცემები ხელმისაწვდომია /dashboard/free-tiers-ზე."/>
-
-> მოქმედი `/dashboard/free-tiers` გვერდის ანიმაციური შეჯამება. სრული მეთოდოლოგია (პულების დუბლირების გამორიცხვა, კრედიტების დონეები, პროვაიდერების პირობები): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
+> **გამოიყენეთ თქვენი პროვაიდერების ანგარიშები.** ეს არის ცალ-ცალკე ხელმისაწვდომი მესამე მხარის უფასო ტარიფების სავარაუდო ჯამური მოცულობა და არა OmniRoute-ის მიერ გამოყოფილი ტოკენები. დარეგისტრირდით, საჭიროების შემთხვევაში მიიღეთ ავტორიზაციის მონაცემები და დააკავშირეთ თქვენთვის ხელმისაწვდომი პროვაიდერები; თითოეული პროვაიდერი თავად განსაზღვრავს საკუთარ ლიმიტებს, ხელმისაწვდომობასა და პირობებს.
 >
-> <sub>ეს მაჩვენებლები ყოველ ორ კვირაში ერთხელ ხელახლა მოწმდება მოქმედ კატალოგთან და **ორივე მიმართულებით იცვლება** — თუ პროვაიდერი უფასო ტარიფს აუქმებს, რიცხვი მცირდება; თუ ახალი ემატება, იზრდება. ჩვენ ვაქვეყნებთ იმას, რასაც კატალოგი რეალურად ითვლის და არა დამრგვალებულ საუკეთესო შესაძლო შედეგს.</sub>
+> უფასო ტარიფების ხელით გაერთიანება რთულია — ათობით SDK, ათობით სიხშირის ლიმიტი და არავითარი წარმოდგენა, რეალურად რამდენი რესურსი გაქვთ. OmniRoute-ის კატალოგი მოიცავს **467 უფასო ტარიფის ჩანაწერს 34 განმეორებადი პულის გასაღებში** და ტოკენების მთავარ მაჩვენებელს ითვლის **17 პულიდან, რომლებსაც გამოქვეყნებული დადებითი თვიური ბიუჯეტი აქვთ, დამატებული Groq-ის ხუთი თითო-მოდელური ლიმიტი**, საერთო პულების დუბლირების გამორიცხვით. კვოტები, რომლებიც მხოლოდ რეგიონული იდენტობის შემოწმების შემდეგ იხსნება (ამჟამად: ModelScope), ცალკეა ნაჩვენები — რეგიონული იდენტობის დადასტურების შემდეგ +~6M — და მთავარ მაჩვენებელში არასოდეს ჯამდება. შედეგი მუდმივად ჩანს მართვის პანელზე (`/dashboard/free-tiers`).
+
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute-ის უფასო ტარიფების ბიუჯეტის ბარათი: სტაბილურად ~1.62 მლრდ უფასო ტოკენი თვეში, ხოლო რეგისტრაციის კრედიტებით პირველ თვეში — ~2.22 მლრდ-მდე, 34 დოკუმენტირებული განმეორებადი პულის გასაღებიდან, რომლებიც ერთი საბოლოო წერტილის მიღმა კატალოგში შეტანილ 467 უფასო ტარიფის ჩანაწერს მოიცავს. გამჭვირვალე მათემატიკა პულების დუბლირების გამორიცხვით — თითოეული საერთო პული მხოლოდ ერთხელ ითვლება, მათ შორის 17 განმეორებადი პული გამოქვეყნებული დადებითი თვიური ტოკენების ბიუჯეტით, დამატებული Groq-ის ხუთი თითო-მოდელური ლიმიტი; პირობებთან დაკავშირებული რისკების კატალოგში 12 პროვაიდერს მონიშნული აქვს „თავიდან აცილება“, რათა გადაწყვეტილება თავად მიიღოთ. ბიუჯეტის ზოლი მოიცავს Mistral 1B-ს, Nara 210M-ს, LLM7 150M-ს, xKiro 150M-ს, Groq 30M-ს (ხუთი თითო-მოდელური ლიმიტი) და უფრო მცირე პულებს, ასევე პირველი თვის სარეგისტრაციო კრედიტებსა და მუდმივად უფასო, ტოკენების ლიმიტის არმქონე პროვაიდერებს, რომლებიც ცალკეა ნაჩვენები, რათა მთავარი მაჩვენებელი არასოდეს გაზარდონ. გამოყენებული/დარჩენილი რესურსების მიმდინარე მონაცემები: /dashboard/free-tiers."/>
+
+> მოქმედი `/dashboard/free-tiers` გვერდის ანიმაციური შეჯამება. სრული მეთოდოლოგია (პულების დუბლირების გამორიცხვა, საკრედიტო დონეები, პროვაიდერების პირობები): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
+>
+> <sub>ეს მაჩვენებლები ყოველ ორ კვირაში ერთხელ ხელახლა მოწმდება მოქმედ კატალოგთან შედარებით და **ორივე მიმართულებით იცვლება** — თუ პროვაიდერი უფასო ტარიფს აუქმებს, რიცხვი მცირდება; თუ ახალი ემატება, იზრდება. ჩვენ ვაქვეყნებთ იმას, რასაც კატალოგი რეალურად ითვლის და არა საუკეთესო სცენარის სასარგებლოდ დამრგვალებულ რიცხვს.</sub>
 
 <br/>
 
@@ -35,7 +39,7 @@
 
 <h3>
 
-⭐ მონიშნეთ რეპოზიტორია ვარსკვლავით, თუ OMNIROUTE დაგეხმარათ თანხის დაზოგვასა და მუშაობის გამარტივებაში.
+⭐ მონიშნეთ რეპოზიტორია ვარსკვლავით, თუ OMNIROUTE დაგეხმარათ თანხის დაზოგვასა და სამუშაოს გამარტივებაში.
 
 </h3>
 
@@ -46,7 +50,7 @@
 
 ### 💬 შეუერთდით საზოგადოებას
 
-**👋 გამოიწერეთ პროექტის ხელმძღვანელი — პირველებმა მიიღეთ ინფორმაცია ახალი პროვაიდერების, გამოშვებებისა და რჩევების შესახებ:**
+**👋 გამოიწერეთ პროექტის მომვლელი — პირველებმა მიიღეთ ინფორმაცია ახალი პროვაიდერების, გამოშვებებისა და რჩევების შესახებ:**
 
 [![გამოიწერეთ Diego LinkedIn-ზე](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/diegosouzapw/)
 [![გამოიწერეთ @diegosouzapw GitHub-ზე](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717)](https://github.com/diegosouzapw)
@@ -57,24 +61,27 @@
 [![WhatsApp ბრაზილია](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)
 [![ვებსაიტი](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white)](https://omniroute.online)
 
-**კითხვები, რჩევები პროვაიდერების შესახებ, სამოქმედო გეგმა და მხარდაჭერა → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 გლობალური](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 ბრაზილია](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [პორტალი](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
+**კითხვები, რჩევები პროვაიდერების შესახებ, განვითარების გეგმა და მხარდაჭერა → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 გლობალური](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 ბრაზილია](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [პორტალი](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
 
 <br/>
 
-## 📈 კარიბჭე განაგრძობს ზრდას
+## 📈 Gateway განაგრძობს ზრდას
 
 <div align="center">
 
-|                                     | v3.8.49 |        **v3.8.50**         | `v3.8.51+`  |
-| ----------------------------------- | :-----: | :------------------------: | :---------: |
-| 🌐 პროვაიდერები                     |   290   |          **357**           | მეტი რიგშია |
-| 🧠 ჩატის მოდელების უნიკალური ID-ები |  1185   |          **1312**          |      —      |
-| 🖼️ მოდალობების ხიდი                 |    —    |  🆕 ხედვა + აუდიო + ვიდეო  |      —      |
-| 📡 Radar-ის უფასო კატალოგი          |    —    | 🆕 სურვილისამებრ ჩასართავი |      —      |
-| ⚖️ კვოტის გათვალისწინებით დაგეგმვა  |    —    |       🆕 Quota-Share       |      —      |
-| 📊 კვოტის ტელემეტრია                |    —    |      🆕 რეალურ დროში       |      —      |
+|                                     |         v3.8.50          | **v3.8.51** |      `v3.8.52+`       |
+| ----------------------------------- | :----------------------: | :---------: | :-------------------: |
+| 🌐 პროვაიდერები                     |           352            |   **358**   |          375          |
+| 🧠 ჩატის მოდელების უნიკალური ID-ები |           1320           |  **1374**   |         1475          |
+| 🖼️ მოდალობების ხიდი                 | 🆕 ხედვა + აუდიო + ვიდეო |      ✓      |           ✓           |
+| 📡 Radar-ის უფასო კატალოგი          | 🆕 ნებაყოფლობითი ჩართვა  |      ✓      |           ✓           |
+| ⚖️ კვოტის გათვალისწინებით დაგეგმვა  |      🆕 Quota-Share      |      ✓      |           ✓           |
+| 📊 კვოტის ტელემეტრია                |     🆕 რეალურ დროში      |      ✓      |           ✓           |
+| 🧰 Headless რეჟიმი                  |            —             |      —      | 🆕 `serve --headless` |
+| 🛤️ LTS არხის ინფრასტრუქტურა         |            —             |      —      | 🆕 გამოშვების არხები  |
+| 🔎 მოდელების აღმოჩენის API          |            —             |      —      | 🆕 `/v1/models/query` |
 
-**→ [საგზაო რუკა](ROADMAP.md) — `v3.9.0 LTS`-ისკენ მიმავალ რელსებზე**
+**→ [სამოქმედო გეგმა](ROADMAP.md) — `v3.9.0 LTS`-ისკენ მიმავალ გზაზე**
 
 </div>
 
@@ -82,30 +89,30 @@
 
 ## 🧩 ხელმისაწვდომია
 
-[![npm-ის ვერსია](https://img.shields.io/npm/v/omniroute?color=cb3837&logo=npm)](https://www.npmjs.com/package/omniroute)
-![NPM-ის ყოველთვიური ჩამოტვირთვები](https://img.shields.io/npm/dm/omniroute?label=npm/month&color=cb3837&logo=npm)
+[![npm ვერსია](https://img.shields.io/npm/v/omniroute?color=cb3837&logo=npm)](https://www.npmjs.com/package/omniroute)
+![NPM ყოველთვიურად](https://img.shields.io/npm/dm/omniroute?label=npm/month&color=cb3837&logo=npm)
 [![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/diegosouzapw/omniroute)
 [![ლიცენზია: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
-![Docker-ის ჩამოტვირთვები](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
-![Electron-ის ჩამოტვირთვები](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
+![Docker ჩამოტვირთვები](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
+![Electron ჩამოტვირთვები](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
 
 <table>
   <tr>
     <td align="right"><b>🚀 დაწყება</b></td>
     <td align="center"><a href="#-quick-start">🚀 სწრაფი დაწყება</a></td>
     <td align="center"><a href="#-more-install-methods--docker-source-pnpm-arch">📦 ინსტალაცია</a></td>
-    <td align="center"><a href="#-works-the-second-you-install-it--no-keys-no-config">🆓 კონფიგურაციის გარეშე</a></td>
+    <td align="center"><a href="#first-run">🆓 პროვაიდერის დაკავშირება</a></td>
   </tr>
   <tr>
     <td align="right"><b>💡 გაცნობა</b></td>
     <td align="center"><a href="#-the-promise">💥 დაპირება</a></td>
     <td align="center"><a href="#-why-omniroute">🤔 რატომ OmniRoute</a></td>
-    <td align="center"><a href="#-what-sets-omniroute-apart">🏆 რით გამოირჩევა</a></td>
+    <td align="center"><a href="#-what-sets-omniroute-apart">🏆 რა გამოარჩევს</a></td>
   </tr>
   <tr>
     <td align="right"><b>⚙️ ფუნქციები</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 კომბინაციები</a></td>
-    <td align="center"><a href="#-357-ai-providers--152-catalog-marked-free">🌐 პროვაიდერები</a></td>
+    <td align="center"><a href="#-375-ai-providers--153-catalog-marked-free">🌐 პროვაიდერები</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI და MCP</a></td>
   </tr>
   <tr>
@@ -115,7 +122,7 @@
     <td align="center"><a href="#-private--local-first">🔒 კონფიდენციალური</a></td>
   </tr>
   <tr>
-    <td align="right"><b>👀 ნახვა</b></td>
+    <td align="right"><b>👀 იხილეთ</b></td>
     <td align="center"><a href="#-omniroute-in-action">🎬 მოქმედებაში</a></td>
     <td align="center"><a href="#-whats-new">✨ სიახლეები</a></td>
     <td align="center"><a href="#-compatible-clis--coding-agents">🤖 თავსებადი CLI-ები</a></td>
@@ -130,14 +137,14 @@
     <td align="right"><b>📦 პროექტი</b></td>
     <td align="center"><a href="#%EF%B8%8F-tech-stack">🛠️ ტექნოლოგიური სტეკი</a></td>
     <td align="center"><a href="#-documentation">📖 დოკუმენტაცია</a></td>
-    <td align="center"><a href="#-600-contributors">👥 კონტრიბუტორები</a></td>
+    <td align="center"><a href="#-900-contributors">👥 კონტრიბუტორები</a></td>
   </tr>
 </table>
 
 </div>
 
 <div align="center">
-  <b>🌐 66 ენაზე</b>
+  <b>🌐 67 ენაზე</b>
   <br/><br/>
   <a href="README.md"><img src="docs/assets/flags/us.svg" width="30" alt="ინგლისური (en)" title="ინგლისური (en)"></a>
   <a href="docs/i18n/pt-BR/README.md"><img src="docs/assets/flags/br.svg" width="30" alt="პორტუგალიური — ბრაზილია (pt-BR)" title="პორტუგალიური — ბრაზილია (pt-BR)"></a>
@@ -191,13 +198,13 @@
   <a href="docs/i18n/mt/README.md"><img src="docs/assets/flags/mt.svg" width="30" alt="მალტური (mt)" title="მალტური (mt)"></a>
   <a href="docs/i18n/ga/README.md"><img src="docs/assets/flags/ie.svg" width="30" alt="ირლანდიური (ga)" title="ირლანდიური (ga)"></a>
   <a href="docs/i18n/kn/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="კანადა (kn)" title="კანადა (kn)"></a>
-  <a href="docs/i18n/ml/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="მალაიალამური (ml)" title="მალაიალამური (ml)"></a>
+  <a href="docs/i18n/ml/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="მალაიალამი (ml)" title="მალაიალამი (ml)"></a>
   <a href="docs/i18n/or/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ორია (or)" title="ორია (or)"></a>
   <a href="docs/i18n/pa/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="პენჯაბური (pa)" title="პენჯაბური (pa)"></a>
   <a href="docs/i18n/ne/README.md"><img src="docs/assets/flags/np.svg" width="30" alt="ნეპალური (ne)" title="ნეპალური (ne)"></a>
   <a href="docs/i18n/si/README.md"><img src="docs/assets/flags/lk.svg" width="30" alt="სინჰალური (si)" title="სინჰალური (si)"></a>
   <a href="docs/i18n/my/README.md"><img src="docs/assets/flags/mm.svg" width="30" alt="ბირმული (my)" title="ბირმული (my)"></a>
-  <a href="docs/i18n/km/README.md"><img src="docs/assets/flags/kh.svg" width="30" alt="ქხმერული (km)" title="ქხმერული (km)"></a>
+  <a href="docs/i18n/km/README.md"><img src="docs/assets/flags/kh.svg" width="30" alt="ქმერული (km)" title="ქმერული (km)"></a>
   <a href="docs/i18n/ha/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="ჰაუსა (ha)" title="ჰაუსა (ha)"></a>
   <a href="docs/i18n/yo/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="იორუბა (yo)" title="იორუბა (yo)"></a>
   <a href="docs/i18n/ig/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="იგბო (ig)" title="იგბო (ig)"></a>
@@ -205,6 +212,7 @@
   <a href="docs/i18n/uz/README.md"><img src="docs/assets/flags/uz.svg" width="30" alt="უზბეკური (uz)" title="უზბეკური (uz)"></a>
   <a href="docs/i18n/ka/README.md"><img src="docs/assets/flags/ge.svg" width="30" alt="ქართული (ka)" title="ქართული (ka)"></a>
   <a href="docs/i18n/hy/README.md"><img src="docs/assets/flags/am.svg" width="30" alt="სომხური (hy)" title="სომხური (hy)"></a>
+  <a href="docs/i18n/bs/README.md"><img src="docs/assets/flags/ba.svg" width="30" alt="ბოსნიური (bs)" title="ბოსნიური (bs)"></a>
 </div>
 
 <br/>
@@ -212,22 +220,25 @@
 
 <div align="center">
 
-## 🆓 მუშაობს ინსტალაციისთანავე — არანაირი გასაღები, არანაირი კონფიგურაცია
+<a id="first-run"></a>
+
+## 🆓 დააინსტალირეთ, დააკავშირეთ პროვაიდერი და შემდეგ მოთხოვნები ერთი საბოლოო წერტილის გავლით გაატარეთ
 
 </div>
 
-<img src="./docs/diagrams/works-zero-config.svg" width="100%" alt="მუშაობს ინსტალაციისთანავე — ნულოვანი კონფიგურაცია. სამი ნაბიჯი: 1. ინსტალაცია — npm i -g omniroute, სერვერი ირთვება localhost:20128-ზე. 2. მიმართეთ თქვენი ხელსაწყო http://localhost:20128/v1-ზე — ნებისმიერი OpenAI-თან თავსებადი ხელსაწყო (Claude Code, Cursor, Cline). 3. ის პასუხობს — გამოიძახეთ model auto მყისიერი პასუხისთვის, API გასაღების, რეგისტრაციის, კონფიგურაციის გარეშე. Keyless პროვაიდერი OpenCode Free წინასწარ არის ჩართული auto კომბინაციაში, ასე რომ ახალი ინსტალაცია მუშაობს ყუთიდანვე."/>
+<img src="./docs/diagrams/works-zero-config.svg" width="100%" alt="სამი ნაბიჯი: დააინსტალირეთ და გაუშვით OmniRoute, თქვენი ანგარიშით ან API გასაღებით დააკავშირეთ შესაბამისი პროვაიდერი, შემდეგ კი OmniRoute-ის API გასაღებისა და auto მოდელის გამოყენებით თქვენი ხელსაწყო მიმართეთ localhost:20128/v1 მისამართზე. მარშრუტიზაცია დამოკიდებულია ხელმისაწვდომ შესაბამის კავშირებსა და პროვაიდერის ლიმიტებზე."/>
 
 ```bash
-# Fresh install, zero credentials — `auto` already works:
+# პროვაიდერის დაკავშირების შემდეგ, დააკოპირეთ თქვენი OmniRoute გასაღები Dashboard → Endpoints-დან:
 curl http://localhost:20128/v1/chat/completions \
+  -H "Authorization: Bearer YOUR_OMNIROUTE_KEY" \
   -H "Content-Type: application/json" \
   -d '{"model":"auto","messages":[{"role":"user","content":"Hello!"}]}'
 ```
 
-<sub>გირჩევნიათ კონკრეტული უფასო ბექენდი? გამოიძახეთ `oc/…` (OpenCode Free) პირდაპირ. შემდეგ გადადით `auto`-ზე და მიეცით OmniRoute-ს არჩევის საშუალება.</sub>
+<sub>`auto`-ს შესაბამისი მარშრუტი სჭირდება. ახალ ინსტალაციას შეიძლება არ ჰქონდეს შესაბამისი, გასაღების არმომთხოვნი სამიზნეები, ხოლო გასაღების არმომთხოვნმა პროვაიდერმა შეიძლება მესამე მხარის კლიენტები უარყოს. `tos: avoid` ნიშნით მონიშნული პროვაიდერები, მათ შორის Kiro, ნაგულისხმევად გამორიცხულია ავტომატური მარშრუტიზაციიდან; ანგარიშის დაკავშირება ამ პარამეტრს არ ცვლის. პროვაიდერის არჩევამდე იხილეთ [უფასო ტარიფების სახელმძღვანელო](docs/getting-started/FREE-TIERS-GUIDE.md).</sub>
 
-<sub>📦 დააკოპირეთ და ჩასვით სწრაფი დაწყების სკრიპტები **Python-ისთვის, Node.js-ისთვის, PHP-სთვის და cURL-ისთვის** → [`examples/quickstart/`](examples/quickstart/)</sub>
+<sub>📦 დასაკოპირებელი და პირდაპირ ჩასასმელი სწრაფი დაწყების სკრიპტები **Python, Node.js, PHP და cURL**-ისთვის → [`examples/quickstart/`](examples/quickstart/)</sub>
 
 <br/>
 
@@ -237,7 +248,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="დაპირება — ერთი ენდპოინტი და 358 პროვაიდერი. ავტომატური უკუსვლა აგრძელებს მარშრუტიზაციას, სანამ ხელმისაწვდომია სხვა ჯანსაღი სამიზნე. ექვსი საყრდენი: მდგრადი უკუსვლა 358 პროვაიდერზე · 95%-მდე ტოკენის დაზოგვა შესაბამის სამუშაო დატვირთვებზე · $0 დასაწყებად 150+ უფასო დონით და 54 განმეორებადი/გასაღების გარეშე სამუდამოდ უფასო პროვაიდერით · 36 CLI/აგენტის ინტეგრაცია ერთი კონფიგურაციით · OpenAI, Claude, Gemini და Responses API თავსებადობა /v1-ზე · წარმოების კონტროლი, მათ შორის circuit breakers, TLS stealth, MCP 110 ხელსაწყოები, A2A, მეხსიერება, დამცავი ზოლები, შეფასებები და 39,000+ სტატიკური ტესტის დეკლარაცია 5,100+ თვალყურის დევნებულ სატესტო ფაილში."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="დაპირება — ერთი საბოლოო წერტილი და 375 პროვაიდერი. ავტომატური სარეზერვო გადართვა მარშრუტიზაციას აგრძელებს, სანამ სხვა გამართული სამიზნე ხელმისაწვდომია. ექვსი საყრდენი: მდგრადი სარეზერვო გადართვა 375 პროვაიდერს შორის · შესაბამის სამუშაო დატვირთვებზე ტოკენების 95%-მდე დაზოგვა · დასაწყებად $0 — 150+-ზე მეტი უფასო ტარიფითა და 52 პერიოდული/გასაღების არმომთხოვნი, სამუდამოდ უფასო პროვაიდერით · 37 CLI/აგენტის ინტეგრაცია ერთი კონფიგურაციით · OpenAI, Claude, Gemini და Responses API თავსებადობა /v1-ზე · საწარმოო კონტროლის მექანიზმები, მათ შორის ავტომატური ამომრთველები, TLS შენიღბვა, MCP-ის 110 ხელსაწყო, A2A, მეხსიერება, დამცავი შეზღუდვები, შეფასებები და 56,000+-ზე მეტი სტატიკური სატესტო დეკლარაცია 7,800+-ზე მეტ აღრიცხულ სატესტო ფაილში."/>
 
 <br/>
 <br/>
@@ -248,11 +259,11 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/why-pain-fix.svg" width="100%" alt="რატომ OmniRoute — შეწყვიტეთ 10 დაფის, მკვდარი API გასაღებების და მოულოდნელი გადასახადების მართვა. ათი ყოველდღიური პრობლემა vs გადაწყვეტა: გამოუყენებელი კვოტა იწურება → მაქსიმალურად გაზარდეთ გამოწერები; კოდირების შუა პერიოდში ლიმიტები → 4-დონიანი ავტომატური უკუსვლა (გამოწერა → API → იაფი → უფასო); ხელსაწყოს გამომავალი წვავს ტოკენებს → RTK + Caveman შეკუმშვა (15–95%); ძვირი API-ები → ხარჯების ოპტიმიზებული მარშრუტიზაცია; ყოველ ხელსაწყოს თავისი დაყენება → ერთი ენდპოინტი, ერთი დაფა; AI დაბლოკილია → 3-დონიანი პროქსი + TLS stealth; მკვდარი გასაღებები → 3-დონიანი მდგრადობა (circuit breakers, გასაღების გაგრილება, მოდელის დაბლოკვა); გუნდი იზიარებს ერთ გამოწერას → გასაღებების პულები სამართლიანი კვოტებით; მოთხოვნები ვიღაცის ღრუბლის გავლით → ლოკალური პირველ რიგში AES-256-GCM დაშიფრული გასაღებებით; ხარჯების ხილვადობის არარსებობა → ცოცხალი ანალიტიკა (გამოყენება, კვოტა, დაზოგვა, p95 ლატენტურობა)."/>
+<img src="./docs/diagrams/why-pain-fix.svg" width="100%" alt="რატომ OmniRoute — შეწყვიტეთ 10 მართვის პანელს, გაუქმებულ API გასაღებებსა და მოულოდნელ ანგარიშებს შორის ქაოსური გადართვა. ათი ყოველდღიური პრობლემა და მათი გადაწყვეტა: კვოტის გამოუყენებლად ვადის გასვლა → გამოწერების მაქსიმალურად გამოყენება; პროგრამირებისას ლიმიტების მიღწევა → 4-დონიანი ავტომატური სარეზერვო გადართვა (გამოწერა → API → იაფი → უფასო); ხელსაწყოების შედეგები ტოკენებს ხარჯავს → RTK + Caveman შეკუმშვა (15–95%); ძვირადღირებული API-ები → ღირებულებაზე ოპტიმიზებული მარშრუტიზაცია; ყველა ხელსაწყოს საკუთარი გამართვა სჭირდება → ერთი საბოლოო წერტილი, ერთი მართვის პანელი; AI დაბლოკილია → 3-დონიანი პროქსი + TLS შენიღბვა; გაუქმებული გასაღებები → 3-შრიანი მდგრადობა (ავტომატური ამომრთველები, გასაღების შეყოვნების პერიოდი, მოდელის ბლოკირება); გუნდი ერთ გამოწერას იყენებს → გასაღებების პულები სამართლიანი განაწილების კვოტებით; მოთხოვნები სხვისი ღრუბლოვანი სერვისის გავლით გადის → უპირატესად ლოკალური მუშაობა AES-256-GCM-ით დაშიფრული გასაღებებით; ხარჯების ხილვადობის არარსებობა → რეალურ დროში ანალიტიკა (გამოყენება, კვოტა, დანაზოგი, p95 დაყოვნება)."/>
 
 <div align="center">
 
-<img src="./docs/diagrams/tier-cascade.svg" width="100%" alt="OmniRoute მოთხოვნის ნაკადი: თქვენი IDE ან CLI (Claude Code, Cursor, Cline…) იძახებს ერთ ლოკალურ ენდპოინტს (http://localhost:20128/v1); OmniRoute Smart Router (RTK + Caveman შეკუმშვა, 19 მარშრუტიზაციის სტრატეგია, circuit breakers, TLS stealth, MCP, A2A, დამცავი ზოლები) შეუძლია უკან დაიხიოს 4 პროვაიდერის დონეზე, სანამ ხელმისაწვდომია შესაბამისი ჯანსაღი სამიზნე — დონე 1 გამოწერა, დონე 2 API გასაღები, დონე 3 იაფი და დონე 4 უფასო."/>
+<img src="./docs/diagrams/tier-cascade.svg" width="100%" alt="OmniRoute-ის მოთხოვნის ნაკადი: თქვენი IDE ან CLI (Claude Code, Cursor, Cline…) ერთ ლოკალურ საბოლოო წერტილს (http://localhost:20128/v1) მიმართავს; OmniRoute Smart Router-ს (RTK + Caveman შეკუმშვა, მარშრუტიზაციის 20 სტრატეგია, ავტომატური ამომრთველები, TLS შენიღბვა, MCP, A2A, დამცავი შეზღუდვები) შეუძლია 4 პროვაიდერის დონეს შორის სარეზერვო გადართვა, სანამ შესაბამისი და გამართული სამიზნე ხელმისაწვდომია — დონე 1: გამოწერა, დონე 2: API გასაღები, დონე 3: იაფი და დონე 4: უფასო."/>
 
 </div>
 
@@ -343,31 +354,33 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="19-ვე კომბოს მარშრუტიზაციის სტრატეგია ანიმირებულად — თითო სტრატეგია თითო ფილაზე: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, cache-optimized, lkgp, auto, fusion, pipeline. თითოეულის დანიშნულებისთვის იხილეთ ზემოთ მოცემული ცხრილი."/>
+<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="20 კომბო-მარშრუტიზაციის სტრატეგიიდან 18-ის ანიმაციური მაგალითები — თითო სტრატეგიაზე თითო ფილა: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. cache-optimized და quota-weighted ანიმირებული არ არის; ქვემოთ მოცემულ ცხრილში აღწერილია ოცივე."/>
 
-> **კომბო** არის მოდელების ჯაჭვი, რომელთა შორისაც OmniRoute მარშრუტიზაციას **ავტომატურად** ახორციელებს. თუ კვოტა ამოიწურება, პროვაიდერი მწყობრიდან გამოვა ან ხარჯები მკვეთრად გაიზრდება, კომბოს შეუძლია შემდეგ ხელმისაწვდომ და გამართულ მოდელზე გადასვლა. 🛡️
+> **კომბო** არის მოდელების ჯაჭვი, რომელთა შორისაც OmniRoute მოთხოვნებს **ავტომატურად** მარშრუტიზებს. თუ კვოტა ამოიწურება, პროვაიდერი შეფერხდება ან ხარჯები მკვეთრად გაიზრდება, კომბოს შეუძლია შემდეგ შესაბამის და გამართულ მოდელზე გადასვლა. 🛡️
 
 ### ⚡ ნულოვანი კონფიგურაცია — უბრალოდ გამოიყენეთ `auto`
 
-კომბოს შექმნა საჭირო არ არის. მოდელად მიუთითეთ `auto` (ან მისი ვარიანტი) და OmniRoute თქვენი დაკავშირებული პროვაიდერებისგან ვირტუალურ კომბოს შექმნის, რომელსაც რეალურ დროში შეაფასებს:
+კომბოს შექმნა არ გჭირდებათ. თქვენს მოდელად მიუთითეთ `auto` (ან მისი ვარიანტი) და OmniRoute თქვენი დაკავშირებული პროვაიდერებისგან ვირტუალურ კომბოს შექმნის, რომელსაც რეალურ დროში შეაფასებს:
 
 <table>
   <tr><th align="left">მოდელის ID</th><th align="left">რის ოპტიმიზაციას ახდენს</th></tr>
-  <tr><td align="left" nowrap><code>auto</code></td><td align="left">🎯 დაბალანსებული ნაგულისხმევი ვარიანტი (LKGP — თქვენს ბოლო გამართულ პროვაიდერს ინარჩუნებს)</td></tr>
+  <tr><td align="left" nowrap><code>auto</code></td><td align="left">🎯 დაბალანსებული ნაგულისხმევი ვარიანტი (LKGP — რჩება თქვენს ბოლო გამართულ პროვაიდერთან)</td></tr>
   <tr><td align="left" nowrap><code>auto/coding</code></td><td align="left">🧑💻 კოდის გენერაციისთვის ხარისხზე ორიენტირებული წონები</td></tr>
-  <tr><td align="left" nowrap><code>auto/fast</code></td><td align="left">⚡ უპირველესად ყველაზე დაბალი დაყოვნება</td></tr>
-  <tr><td align="left" nowrap><code>auto/cheap</code></td><td align="left">💰 უპირველესად ყველაზე იაფი ფასი თითო ტოკენზე</td></tr>
-  <tr><td align="left" nowrap><code>auto/offline</code></td><td align="left">🔋 უპირველესად კვოტის / სიხშირის ლიმიტის ყველაზე დიდი მარაგი</td></tr>
-  <tr><td align="left" nowrap><code>auto/smart</code></td><td align="left">🔭 ხარისხი უპირველესად + 10% კვლევა უკეთესი მოდელების აღმოსაჩენად</td></tr>
-  <tr><td align="left" nowrap><code>auto/lkgp</code></td><td align="left">📌 ბოლო ცნობილი გამართული პროვაიდერის აშკარად განსაზღვრული შენარჩუნება</td></tr>
-  <tr><td align="left" nowrap><code>auto/chaos</code></td><td align="left">🧪 პარალელური განაწილება მოდელების პანელზე (თითო პროვაიდერზე ერთი, ნაგულისხმევად 5), აბრუნებს ერთ პასუხს; თითო ზედა დონის გამოძახება პანელის თითო მოდელზე — და არა ხარვეზების ხელოვნური შეტანა</td></tr>
+  <tr><td align="left" nowrap><code>auto/fast</code></td><td align="left">⚡ პირველ რიგში ყველაზე დაბალი დაყოვნება</td></tr>
+  <tr><td align="left" nowrap><code>auto/cheap</code></td><td align="left">💰 პირველ რიგში ყველაზე იაფი თითო ტოკენზე</td></tr>
+  <tr><td align="left" nowrap><code>auto/subscription</code></td><td align="left">🎟️ მხოლოდ ის სააბონენტო კვოტა, რომლის საფასურსაც უკვე იხდით — მიუწვდომლობისას იხურება და არასოდეს გადადის ფასიან სარეზერვო ვარიანტზე (<a href="./docs/routing/SUBSCRIPTION_LADDER.md">სახელმძღვანელო</a>)</td></tr>
+  <tr><td align="left" nowrap><code>auto/thrifty</code></td><td align="left">🪜 ჯერ გეგმის კვოტა, შემდეგ კი თითო საფეხურით ყველაზე იაფ ფასიან ვარიანტებზე გადასვლა — განულების შემდეგ კვლავ გეგმაზე დაბრუნება (<a href="./docs/routing/SUBSCRIPTION_LADDER.md">სახელმძღვანელო</a>)</td></tr>
+  <tr><td align="left" nowrap><code>auto/offline</code></td><td align="left">🔋 პირველ რიგში კვოტის / სიხშირის ლიმიტის ყველაზე დიდი მარაგი</td></tr>
+  <tr><td align="left" nowrap><code>auto/smart</code></td><td align="left">🔭 ხარისხი პრიორიტეტულია + 10% კვლევა უკეთესი მოდელების აღმოსაჩენად</td></tr>
+  <tr><td align="left" nowrap><code>auto/lkgp</code></td><td align="left">📌 ბოლო ცნობილი გამართული პროვაიდერის აშკარა უპირატესობა</td></tr>
+  <tr><td align="left" nowrap><code>auto/chaos</code></td><td align="left">🧪 პარალელური განაწილება მოდელების პანელზე (თითო პროვაიდერზე ერთი, ნაგულისხმევად 5), აბრუნებს ერთ პასუხს; თითო აღმავალ მოდელზე ერთი გამოძახება და არა შეფერხებების ხელოვნური შეტანა</td></tr>
 </table>
 
 ##
 
-### 🔀 ან შექმენით საკუთარი — მარშრუტიზაციის 19 სტრატეგია
+### 🔀 ან შექმენით საკუთარი — მარშრუტიზაციის 20 სტრატეგია
 
-**19-ვე** სტრატეგია — შეურიეთ და შეუხამეთ კომბოს თითოეულ ნაბიჯზე:
+**ოცივე** სტრატეგია — შეურიეთ და შეუხამეთ კომბოს თითოეულ ნაბიჯზე:
 
 <table>
   <tr>
@@ -383,7 +396,7 @@ curl http://localhost:20128/v1/chat/completions \
   <tr>
     <td align="center">2</td>
     <td nowrap><code>fill-first</code></td>
-    <td>თითოეული სამიზნის კვოტა სრულად შეივსება შემდეგზე გადასვლამდე</td>
+    <td>თითოეული სამიზნის კვოტის სრულად შევსება შემდეგზე გადასვლამდე</td>
   </tr>
   <tr>
     <td align="center">3</td>
@@ -393,12 +406,12 @@ curl http://localhost:20128/v1/chat/completions \
   <tr>
     <td align="center">4</td>
     <td nowrap><code>round-robin</code></td>
-    <td>სამიზნეების თანმიმდევრული ციკლური გადარჩევა</td>
+    <td>სამიზნეების თანმიმდევრული ციკლური მონაცვლეობა</td>
   </tr>
   <tr>
     <td align="center">5</td>
     <td nowrap><code>p2c</code></td>
-    <td>ორი არჩევანის პრინციპზე დაფუძნებული შემთხვევითი დატვირთვის დაბალანსება</td>
+    <td>დატვირთვის შემთხვევითი დაბალანსება ორი ვარიანტიდან არჩევის მეთოდით</td>
   </tr>
   <tr>
     <td align="center">6</td>
@@ -408,17 +421,17 @@ curl http://localhost:20128/v1/chat/completions \
   <tr>
     <td align="center">7</td>
     <td nowrap><code>random</code></td>
-    <td>თანაბარი ალბათობით შემთხვევითი არჩევა (დუბლიკატების გარეშე)</td>
+    <td>თანაბარი ალბათობით შემთხვევითი არჩევა (დუბლიკატების მოცილებით)</td>
   </tr>
   <tr>
     <td align="center">8</td>
     <td nowrap><code>strict-random</code></td>
-    <td>შემთხვევითი არჩევა გამეორებების დუბლიკატების მოცილების გარეშე 🎲</td>
+    <td>შემთხვევითი არჩევა გამეორებების მოცილების გარეშე 🎲</td>
   </tr>
   <tr>
     <td align="center">9</td>
     <td nowrap><code>cost-optimized</code></td>
-    <td>ცოცხალი კატალოგის ფასების მიხედვით თითო მოთხოვნაზე $-ის მინიმიზაცია 💸</td>
+    <td>თითო მოთხოვნის $-ხარჯის მინიმიზაცია კატალოგის მიმდინარე ფასების მიხედვით 💸</td>
   </tr>
   <tr>
     <td align="center">10</td>
@@ -427,48 +440,53 @@ curl http://localhost:20128/v1/chat/completions \
   </tr>
   <tr>
     <td align="center">11</td>
+    <td nowrap><code>quota-weighted</code></td>
+    <td>ამოწურული ანგარიშების გამოტოვება, შემდეგ კი არჩევა დარჩენილი კვოტის ÷ მიმდინარე დატვირთვის პროპორციულად — არსებული საუბრები მიმაგრებული რჩება ⚖️</td>
+  </tr>
+  <tr>
+    <td align="center">12</td>
     <td nowrap><code>reset-window</code></td>
     <td>უპირატესობა ენიჭება სამიზნეს, რომლის კვოტის ფანჯარაც ყველაზე მალე განულდება</td>
   </tr>
   <tr>
-    <td align="center">12</td>
+    <td align="center">13</td>
     <td nowrap><code>reset-aware</code></td>
     <td>რანჟირება კვოტის განულების დროის მიხედვით — ჯერ მოკლე ფანჯრები 📊</td>
   </tr>
   <tr>
-    <td align="center">13</td>
+    <td align="center">14</td>
     <td nowrap><code>context-relay</code></td>
     <td>ხანგრძლივი საუბრებისთვის კონტექსტის სამიზნეებს შორის გადაცემა 🧠</td>
   </tr>
   <tr>
-    <td align="center">14</td>
-    <td nowrap><code>context-optimized</code></td>
-    <td>მიმდინარე კონტექსტის ზომისთვის ყველაზე შესაფერისი ვარიანტის არჩევა</td>
-  </tr>
-  <tr>
     <td align="center">15</td>
-    <td nowrap><code>cache-optimized</code></td>
-    <td>თითოეული ხელახლა გამოყენებადი პრომპტის პრეფიქსის ერთსა და იმავე ანგარიშზე მიბმა — პრომპტის კეშის დამთხვევების მაქსიმიზაცია 🎯</td>
+    <td nowrap><code>context-optimized</code></td>
+    <td>მიმდინარე კონტექსტის ზომისთვის საუკეთესოდ შესაფერისი ვარიანტის არჩევა</td>
   </tr>
   <tr>
     <td align="center">16</td>
-    <td nowrap><code>lkgp</code></td>
-    <td>ბოლო ცნობილი გამართული გზა — ინარჩუნებს ბოლო წარმატებულ პროვაიდერს, შემდეგ კი სარეზერვო წესებზე გადადის</td>
+    <td nowrap><code>cache-optimized</code></td>
+    <td>თითოეული მრავალჯერადი გამოყენების მოთხოვნის პრეფიქსის იმავე ანგარიშზე მიმაგრება — მოთხოვნის კეშის დამთხვევების მაქსიმიზაცია 🎯</td>
   </tr>
   <tr>
     <td align="center">17</td>
-    <td nowrap><code>auto</code></td>
-    <td>16-ფაქტორიანი შეფასება რეალურ დროში ყველა კავშირზე 🤖</td>
+    <td nowrap><code>lkgp</code></td>
+    <td>ბოლო ცნობილი გამართული გზა — ამაგრებს ბოლო წარმატებულ პროვაიდერზე, შემდეგ კი სარეზერვოდ წესებზე გადადის</td>
   </tr>
   <tr>
     <td align="center">18</td>
-    <td nowrap><code>fusion</code></td>
-    <td>მოთხოვნის მოდელების პანელზე განაწილება + მსაჯი აერთიანებს შედეგებს ერთ პასუხად 🧬</td>
+    <td nowrap><code>auto</code></td>
+    <td>16-ფაქტორიანი შეფასება რეალურ დროში ყველა კავშირის მასშტაბით 🤖</td>
   </tr>
   <tr>
     <td align="center">19</td>
+    <td nowrap><code>fusion</code></td>
+    <td>მოდელების პანელზე განაწილება + მსაჯი აერთიანებს ერთ პასუხად 🧬</td>
+  </tr>
+  <tr>
+    <td align="center">20</td>
     <td nowrap><code>pipeline</code></td>
-    <td>ნაბიჯების ჯაჭვი — თითოეული სამიზნის გამომავალი მონაცემები შემდეგს მიეწოდება 🔗</td>
+    <td>ნაბიჯების ჯაჭვი — თითოეული სამიზნის შედეგი შემდეგს გადაეცემა 🔗</td>
   </tr>
 </table>
 
@@ -476,11 +494,11 @@ curl http://localhost:20128/v1/chat/completions \
 
 ##
 
-### 🧱 მდგრადობა ჩაშენებულია (3 დამოუკიდებელი შრე)
+### 🧱 მდგრადობა ჩაშენებულია (3 დამოუკიდებელი ფენა)
 
-<img src="./docs/diagrams/resilience-layers.svg" width="100%" alt="OmniRoute-ის მდგრადობა — თვითაღდგენის 3 დამოუკიდებელი ფენა, შესაბამისი ფენა შესაბამისი შეფერხებისთვის. ფენა 1 — პროვაიდერის circuit breaker (მთლიანი პროვაიდერი): აქტიურდება მხოლოდ 408/5xx-ზე; ზღვრული მნიშვნელობებია OAuth 8× / API-key 12× / local 2×; 60s/30s/15s-ის შემდეგ გადადის HALF-OPEN საცდელ მოთხოვნაზე, აღდგენა ხდება საჭიროებისას; OPEN მდგომარეობაში combo მარშრუტს შემდეგ პროვაიდერზე გადართავს. ფენა 2 — კავშირის cooldown (ერთი გასაღები/ანგარიში): საბაზისო დროა 5s OAuth-ისთვის / 3s API-key-ისთვის; ექსპონენციალური ×2 backoff ერთდროული მოთხოვნების მოზღვავებისგან დაცვის მექანიზმით; 429 ითვალისწინებს Retry-After-ს; წარმატებული მოთხოვნა შეცდომის მთელ მდგომარეობას ასუფთავებს; cooldown-ში მყოფი ერთი გასაღები გამოტოვებულია, ხოლო დანარჩენი გასაღებები მომსახურებას აგრძელებენ. ფენა 3 — მოდელის lockout (ერთი მოდელი): თითოეულ მოდელზე მიღებული 429, ლოკალური 404 ან რეჟიმის აკრძალვები მხოლოდ ამ მოდელს ბლოკავს — და არა მთელ კავშირს. საბოლოო მდგომარეობები (დაბლოკილი, ვადაგასული, კრედიტები ამოწურულია) ოპერატორის ჩარევას მოითხოვს და cooldown-ები არ არის."/>
+<img src="./docs/diagrams/resilience-layers.svg" width="100%" alt="OmniRoute-ის მდგრადობა — თვითაღდგენის 3 დამოუკიდებელი ფენა, შესაბამისი ფენა შესაბამისი შეფერხებისთვის. ფენა 1 — პროვაიდერის ამომრთველი (მთლიანი პროვაიდერი): ირთვება მხოლოდ 408/5xx-ზე, ზღვრებია OAuth 8× / API-key 12× / ლოკალური 2×, 60s/30s/15s-ის შემდეგ გადადის HALF-OPEN საცდელ რეჟიმში, ზარმაცი აღდგენა; OPEN მდგომარეობაში კომბინაცია მოთხოვნას შემდეგ პროვაიდერზე გადაამისამართებს. ფენა 2 — კავშირის დაყოვნება (ერთი გასაღები/ანგარიში): საწყისი 5s OAuth-ისთვის / 3s API-key-ისთვის, ექსპონენციური ×2 უკუდახევა ერთდროული მასობრივი მოთხოვნებისგან დაცვის მექანიზმით, 429 ითვალისწინებს Retry-After-ს, წარმატება შეცდომის მთელ მდგომარეობას ასუფთავებს; დაყოვნების რეჟიმში მყოფი ერთი გასაღები გამოტოვებულია, ხოლო დანარჩენი გასაღებები მომსახურებას განაგრძობენ. ფენა 3 — მოდელის ბლოკირება (ერთი მოდელი): თითოეული მოდელის 429, ლოკალური 404 ან რეჟიმის აკრძალვები მხოლოდ ამ მოდელს ბლოკავს — არასოდეს მთელ კავშირს. საბოლოო მდგომარეობები (დაბლოკილი, ვადაგასული, კრედიტები ამოწურულია) ოპერატორისთვისაა განკუთვნილი და არა დაყოვნების რეჟიმებისთვის."/>
 
-<sub>📖 [Auto-Combo მექანიზმი](docs/routing/AUTO-COMBO.md) · [მდგრადობის სახელმძღვანელო](docs/architecture/RESILIENCE_GUIDE.md)</sub>
+<sub>📖 [Auto-Combo ძრავა](docs/routing/AUTO-COMBO.md) · [მდგრადობის სახელმძღვანელო](docs/architecture/RESILIENCE_GUIDE.md)</sub>
 
 <br/>
 
@@ -490,9 +508,9 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="რით გამოირჩევა OmniRoute — მოძველებული ფუნქციების მიმოხილვა 9router-ის, OpenRouter-ის, CLIProxyAPI-ის და LiteLLM-ის წინააღმდეგ 13 შესაძლებლობის მიხედვით. OmniRoute: 358 პროვაიდერი, 150+ ჩაშენებული უფასო დონე, 19 მარშრუტიზაციის სტრატეგია, 12-ძრავიანი ტოკენის კომპრესია, ჩაშენებული MCP სერვერი 110 ხელსაწყოთი, A2A აგენტის პროტოკოლი, მუდმივი მეხსიერება, დამცავი მექანიზმები, ღრუბლოვანი აგენტები, TLS თითის ანაბეჭდის სტელსი, Desktop/Termux/PWA და 42 i18n UI ლოკალი. OmniRoute არის MIT ლიცენზირებული და თვით-ჰოსტინგის მხარდაჭერით. კონკურენტების შესაძლებლობები და რაოდენობა შეიძლება შეიცვალოს; იხილეთ დაკავშირებული მეთოდოლოგია."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="რით გამოირჩევა OmniRoute — 13 შესაძლებლობის მიხედვით 9router-თან, OpenRouter-თან, CLIProxyAPI-სა და LiteLLM-თან შედარებული ფუნქციების დროით დათარიღებული სურათი. OmniRoute: 375 პროვაიდერი, ჩაშენებული 150-ზე მეტი უფასო ტარიფი, მარშრუტიზაციის 20 სტრატეგია, ტოკენების შეკუმშვის 12 ძრავა, ჩაშენებული MCP სერვერი 110 ხელსაწყოთი, A2A აგენტების პროტოკოლი, მუდმივი მეხსიერება, დამცავი მექანიზმები, ღრუბლოვანი აგენტები, TLS ანაბეჭდის შენიღბვა, Desktop/Termux/PWA და ინტერფეისის 67 ლოკალიზაცია. OmniRoute ვრცელდება MIT ლიცენზიით და შესაძლებელია მისი საკუთარ სერვერზე განთავსება. კონკურენტების შესაძლებლობები და რაოდენობრივი მაჩვენებლები შესაძლოა შეიცვალოს; იხილეთ ბმულზე მოცემული მეთოდოლოგია."/>
 
-<sub>📊 სრული მეთოდოლოგია &amp; ფუნქციების დეტალური აღწერა 9router-ის, OpenRouter-ის, CLIProxyAPI-ის &amp; LiteLLM-ის წინააღმდეგ → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
+<sub>📊 სრული მეთოდოლოგია და თითოეული ფუნქციის დეტალური შედარება 9router-თან, OpenRouter-თან, CLIProxyAPI-სა და LiteLLM-თან → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
 <br/>
 
@@ -560,29 +578,35 @@ Radar-ში მონაწილეობა ნებაყოფლობი
 
 </div>
 
-> **v3.8.20 → v3.8.50** ვერსიების ბოლოდროინდელი მნიშვნელოვანი სიახლეები. სრული ისტორია იხილეთ [`CHANGELOG.md`](CHANGELOG.md)-ში.
+> **v3.8.20 → v3.8.52** ვერსიების ბოლოდროინდელი მნიშვნელოვანი სიახლეები. სრული ისტორია იხილეთ [`CHANGELOG.md`](CHANGELOG.md)-ში.
 
-- **🎛️ OmniConductor** — შემომავალი A2A დელეგირება თქვენი აგენტების ჯგუფისთვის, Conductor-ის უნარები Agent Card-ზე და საინფორმაციო პანელი Faro-ს push-to-talk ხმოვანი ჩატით. → [A2A სერვერი](docs/frameworks/A2A-SERVER.md)
-- **🛂 ადაპტიური დაშვება და გადატვირთვისგან დაცვა** — რესურსტევადი ჩატის მოთხოვნები 503 შეცდომის დაბრუნების ნაცვლად რიგში დგება, თითოეული კავშირისთვის ატომური RPM მოძრავი იჯარებით. → [მდგრადობის სახელმძღვანელო](docs/architecture/RESILIENCE_GUIDE.md)
-- **🗂️ `/v1/models`-ის კანონიკური დალაგება** — თითოეული პროვაიდერისთვის ერთი უწყვეტი, პროვაიდერის მიხედვით დაჯგუფებული ბლოკი (კომბინაციები პირველ ადგილზეა დამაგრებული), რომელიც სტაბილურია კატალოგის ყველა წყაროში. → [API-ის ცნობარი](docs/reference/API_REFERENCE.md)
-- **🗜️ შეკუმშვის გამყარება** — ნაგულისხმევად ჩართული გაშლისგან დამცავი მექანიზმი, Caveman-ის პაკეტები DE / FR / JA + ჩინურისთვის (wényán), RTK ფილტრები Gradle-ისა და .NET-ისთვის. → [შეკუმშვა](docs/compression/COMPRESSION_ENGINES.md)
-- **💸 გამჭვირვალე ფიქსირებული ტარიფის ღირებულება** — გამოწერის / კოდირების გეგმის პროვაიდერებისთვის ღირებულების ანალიტიკაში ნაჩვენებია **$0**; ბიუჯეტის, კვოტისა და მარშრუტიზაციის შეფასებები კვლავ გრძელდება. → [API-ის ცნობარი](docs/reference/API_REFERENCE.md)
-- **⚖️ კვოტის გაზიარებაზე დაფუძნებული მარშრუტიზაცია** — საერთო ანგარიშის კვოტა სამართლიანად ნაწილდება გაერთიანებულ გასაღებებს შორის, ხოლო რესურსის ეფექტიანი გამოყენებისთვის უმოქმედო წილები დროებით სხვებს გადაეცემა. → [მდგრადობის სახელმძღვანელო](docs/architecture/RESILIENCE_GUIDE.md)
-- **🤖 CLI-ის/აგენტის გამართვა ერთი ბრძანებით** — 13 რეგისტრირებული `setup-*` ბრძანება; `omniroute run` უშვებს 7 CLI-ს (Claude Code, Codex, Aider, Goose, OpenCode, Qwen Code, Gemini CLI); `omniroute configure` მხარს უჭერს 10 სამიზნეს, ინტერაქციული პროვაიდერისა და მოდელის ამრჩევით და თითოეული კონტექსტის რჩეულებით. → [CLI ინტეგრაციები](docs/guides/CLI-INTEGRATIONS.md)
-- **🛰️ დისტანციური რეჟიმი** — მართეთ დისტანციური OmniRoute შეზღუდული უფლებების მქონე ტოკენებით (`connect` / `contexts` / `tokens`) და VPS ინსტალაციებისთვის განკუთვნილი `antigravity` OAuth დამხმარით. → [დისტანციური რეჟიმი](docs/guides/REMOTE-MODE.md)
-- **🧭 უფრო გონიერი ავტომარშრუტიზაცია** — `auto/<category>:<tier>` კომბინაციები, **Fusion** (მოდელების პანელი + მსაჯი), ამოცანაზე მორგებული მარშრუტიზაცია, თითოეული მოთხოვნისთვის მოდელის / რეჟიმის / USD ბიუჯეტის გადაფარვა. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
-- **🗜️ მოდულური შეკუმშვა** — 12 კომბინირებადი ძრავა + Compression Studios: LLMLingua-2, ორდონიანი Ultra, omniglyph, თითოეული ნაბიჯის სიზუსტის კარიბჭე, GCF v3.2, გადათრევით გადალაგების რედაქტორი. → [შეკუმშვა](docs/compression/COMPRESSION_ENGINES.md)
-- **🕵️ გამჭვირვალე MITM გაშიფვრა (TPROXY)** — იმ CLI-ების ტრაფიკის ჩაჭერა, რომლებიც პროქსის გარემოს ცვლადებს უგულებელყოფენ, თითოეული SNI-სთვის განკუთვნილი CA-ითა და სანდო სერტიფიკატების საცავში ინსტალატორით. → [MITM/TPROXY](docs/security/MITM-TPROXY-DECRYPT.md)
-- **💸 ღირებულების ტელემეტრია ყველგან** — `X-OmniRoute-*` ღირებულების/გამოყენების სათაურები ყველა საბოლოო წერტილზე, ქეშში მოხვედრით დაზოგილი თანხის სათაური და თითოეული გასაღების USD ხარჯვის კვოტები. → [API-ის ცნობარი](docs/reference/API_REFERENCE.md)
-- **🧠 მეხსიერება, რომელსაც თქვენ აკონტროლებთ** — ნაგულისხმევად გამორთული, სურვილისამებრ ჩასართავი int8 ვექტორული კვანტიზაცია + ტიპიზებული დაქვეითება, თითოეული მოთხოვნისთვის `x-omniroute-no-memory`. → [მეხსიერება](docs/frameworks/MEMORY.md)
-- **🛡️ უსაფრთხოება** — prompt injection-ისგან დამცავი მექანიზმი ყველა LLM მარშრუტზე (red-team ტესტების ნაკრები), სურვილისამებრ ჩასართავი ავტორიზაციის მონაცემების შენიღბვის დამცავი ზღუდე (ორივე მიმართულებით ფარავს გაჟონილ API გასაღებებს/საიდუმლოებებს), უფასო DuckDuckGo ვებძიება უკანასკნელი გამოსავლის სახით და საინფორმაციო პანელისთვის სურვილისამებრ ჩასართავი OIDC შესვლის კარიბჭე (პაროლით შესვლა ყოველთვის ხელმისაწვდომია). → [დამცავი ზღუდეები](docs/security/GUARDRAILS.md)
-- **🖼️ ახალი საბოლოო წერტილები** — `/v1/ocr` (Mistral OCR) და `/v1/audio/translations` (Whisper-ის სტილში) ავსებს მედიაფუნქციების სპექტრს. → [API-ის ცნობარი](docs/reference/API_REFERENCE.md)
-- **🎨 გამოსახულების / ვიდეოს / აუდიოს გენერაცია** — ერთი API მედიაკონტენტისთვის: xAI Grok Imagine და Novita AI-ის ვიდეო, ComfyUI, Magnific, Adobe Firefly, Segmind და მეტყველების პროვაიდერები, როგორიცაა ElevenLabs. → [API-ის ცნობარი](docs/reference/API_REFERENCE.md)
-- **🌍 განთავსება და ოპერაციები** — უკუპროქსის `basePath`, ბრაუზერის ენის ავტომატური ამოცნობა, მოწყობილობების თვალყურის დევნება თითოეული გასაღებისთვის, root-ის გარეშე MITM ნდობა, zh-TW ლოკალიზაცია. → [გარემო](docs/reference/ENVIRONMENT.md)
-- **🤝 მეტი პროვაიდერი და აგენტი** — ღრუბლოვანი აგენტები (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) ბრაუზერითა და OAuth შესვლით, Ollama-ს სრულფასოვანი ბარათი, Claude Opus 5 და Sonnet 5, ოფიციალური პარტნიორობა Kimi-სთან (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… და განახლებული **352-პროვაიდერიანი კატალოგი**. → [პროვაიდერები](docs/reference/PROVIDER_REFERENCE.md)
-- **📡 მარშრუტიზაციის გამჭვირვალობა** — ყველა პასუხს მოჰყვება `X-OmniRoute-Decision` სათაური, რომელიც ასახელებს გამოყენებულ სტრატეგიას/პროვაიდერს/დაყოვნებას; ახალი `cache-optimized` კომბინირებული სტრატეგია და Auto-Combo-ს `cacheAffinity` ფაქტორი განმეორებით მოთხოვნებს აბრუნებს იმ კავშირზე, რომელსაც დაქეშილი პრეფიქსი აქვს, ხოლო მხოლოდ წაკითხვისთვის განკუთვნილი `/v1/auto-combo/{channel}/candidates` საბოლოო წერტილი აჩვენებს `auto/*` არხის კანდიდატთა აქტიურ ნაკრებს. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
-- **⚡ ლოკალური წარმადობა და ინფრასტრუქტურა** — ერთი დაწკაპუნებით გასაშვები ლოკალური Redis, Cloudflare Workers / Deno Deploy-ის რელეების განმთავსებლები, Bifrost და Mux ზედამხედველობის ქვეშ მყოფ ჩაშენებულ სერვისებად. → [ჩაშენებული სერვისები](docs/frameworks/EMBEDDED-SERVICES.md)
-- **🧩 კომპლექტში ასევე შედის** — პლაგინების ფრეიმვორკი + მარკეტპლეისი, Omni/Agent/GitHub უნარების ფრეიმვორკები, Obsidian საცავის ინტეგრაცია (22 MCP ხელსაწყო), OpenAI-სთან თავსებადი Batch და Files API-ები, პასუხების სემანტიკური ქეში, გეიმიფიკაცია ლიდერბორდებით, ACP აგენტების აღმოჩენა (15 ჩაშენებული აგენტი), ჟურნალების BigQuery-ში გეგმური ექსპორტი, `auto/chaos`-ის პარალელური მრავალმოდელიანი განშტოება, Telegram ბოტის ხიდი, აპში ჩაშენებული ვერსიების მენეჯერი და უფასო პროვაიდერების LMArena-ELO რეიტინგები. → [დოკუმენტაცია](docs/README.md)
+- **⚖️ `quota-weighted` მარშრუტიზაცია** — კომბინირებული მარშრუტიზაციის მე-20 სტრატეგია გამოტოვებს ამოწურული კვოტის მქონე ანგარიშებს, შემდეგ კი დარჩენილებიდან ირჩევს დარჩენილი კვოტისა და მიმდინარე დატვირთვის შეფარდების პროპორციულად, ამასთან არსებულ საუბრებს არჩეულ მარშრუტზე ტოვებს. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
+- **🧰 Headless რეჟიმი** — `omniroute serve --headless` (ან `OMNIROUTE_HEADLESS=1`) მხოლოდ `/v1/*` პროქსი ძრავას უშვებს, ხოლო მართვის პანელი და მხოლოდ მასთან დაკავშირებული ქვესისტემები გამორთულია. → [Headless რეჟიმი](docs/guides/HEADLESS.md)
+- **🔎 მოდელების აღმოჩენა** — `/v1/models` მოდელებს შესაძლებლობის, კონტექსტის, ტიპისა და ტექსტის მიხედვით ფილტრავს, ხოლო `POST /v1/models/query` იმავე თითოეული გასაღებისთვის განსაზღვრული ხილვადობით მოკლე, დეტერმინისტულ სიას აბრუნებს. → [API ცნობარი](docs/reference/API_REFERENCE.md)
+- **🔑 მარშრუტიზაციის კონტროლი თითოეული გასაღებისთვის** — `forcedModel`-ის გამოყენებით API გასაღები ერთ მოდელს ან კომბინაციას მიამაგრეთ და გასაღების მოდელები და კომბინაციები ატომარულად დაამატეთ ან წაშალეთ (`/api/keys/{id}/access`). → [API ცნობარი](docs/reference/API_REFERENCE.md) · [OpenAPI](docs/openapi.yaml)
+- **🛡️ PII-ის უფრო ზუსტი კონტროლი** — შერჩევა თითოეული ტიპის მიხედვით, მაქსიმუმ 20 ვალიდირებული მორგებული შენიღბვის შაბლონი და აღმოჩენის მთვლელები თითოეული ტიპისთვის; თავად შენიღბვა კვლავ მხოლოდ სურვილისამებრ ირთვება. → [დამცავი მექანიზმები](docs/security/GUARDRAILS.md)
+- **🌍 67 ენა** — მართვის პანელი, დოკუმენტაციის ასლები და CLI, ხოლო `npm run i18n:add-locale` ერთი ბრძანებით ენას ყველგან ამატებს. → [i18n სახელმძღვანელო](docs/guides/I18N.md)
+- **🎛️ OmniConductor** — შემომავალი A2A დელეგირება თქვენს აგენტთა ფლოტზე, Conductor-ის უნარები Agent Card-ზე და მართვის პანელი Faro-ს საუბრის ღილაკიანი ხმოვანი ჩატით. → [A2A სერვერი](docs/frameworks/A2A-SERVER.md)
+- **🛂 ადაპტიური დაშვება და გადატვირთვისგან დაცვა** — რესურსტევადი ჩატის მოთხოვნები 503 შეცდომის დაბრუნების ნაცვლად რიგში დგება, თითოეული კავშირისთვის ატომარული RPM მცოცავი იჯარებით. → [მდგრადობის სახელმძღვანელო](docs/architecture/RESILIENCE_GUIDE.md)
+- **🗂️ `/v1/models`-ის კანონიკური დალაგება** — თითოეული პროვაიდერისთვის ერთი უწყვეტი, პროვაიდერის მიხედვით დაჯგუფებული ბლოკი (თავიდან მიმაგრებული კომბინაციებით), რომელიც ყველა კატალოგის წყაროში სტაბილურია. → [API ცნობარი](docs/reference/API_REFERENCE.md)
+- **🗜️ შეკუმშვის გაძლიერება** — ნაგულისხმევად ჩართული გაშლისგან დამცავი მექანიზმი, Caveman პაკეტები DE / FR / JA + ჩინურისთვის (wényán), RTK ფილტრები Gradle-ისა და .NET-ისთვის. → [შეკუმშვა](docs/compression/COMPRESSION_ENGINES.md)
+- **💸 გამჭვირვალე ფიქსირებული ტარიფის ღირებულება** — გამოწერის / პროგრამირების გეგმის პროვაიდერების ღირებულების ანალიტიკაში ნაჩვენებია **$0**; ბიუჯეტის, კვოტისა და მარშრუტიზაციის შეფასება გრძელდება. → [API ცნობარი](docs/reference/API_REFERENCE.md)
+- **⚖️ Quota-Share მარშრუტიზაცია** — საზიარო ანგარიშის კვოტა გაერთიანებულ გასაღებებს შორის სამართლიანად ნაწილდება, ხოლო დატვირთვის შენარჩუნების მიზნით გამოუყენებელი წილები დროებით სხვებს გადაეცემა. → [მდგრადობის სახელმძღვანელო](docs/architecture/RESILIENCE_GUIDE.md)
+- **🤖 CLI-ის/აგენტის გამართვა ერთი ბრძანებით** — რეგისტრირებულია 15 `setup-*` ბრძანება; `omniroute run` უშვებს 7 CLI-ს (Claude Code, Codex, Aider, Goose, OpenCode, Qwen Code, Gemini CLI); `omniroute configure` მხარს უჭერს 11 სამიზნეს პროვაიდერისა და მოდელის ინტერაქციული ამრჩევით და თითოეული კონტექსტისთვის რჩეულებით. → [CLI ინტეგრაციები](docs/guides/CLI-INTEGRATIONS.md)
+- **🛰️ დისტანციური რეჟიმი** — მართეთ დისტანციური OmniRoute შეზღუდული მოქმედების ტოკენებით (`connect` / `contexts` / `tokens`) და VPS ინსტალაციებისთვის განკუთვნილი `antigravity` OAuth დამხმარით. → [დისტანციური რეჟიმი](docs/guides/REMOTE-MODE.md)
+- **🧭 უფრო ჭკვიანი ავტომატური მარშრუტიზაცია** — `auto/<category>:<tier>` კომბინაციები, **Fusion** (მოდელების პანელი + მსაჯი), დავალების მცოდნე მარშრუტიზაცია, თითოეული მოთხოვნისთვის მოდელის / რეჟიმის / USD ბიუჯეტის უპირატესი პარამეტრები. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
+- **🗜️ გაფართოებადი შეკუმშვა** — 12 კომბინირებადი ძრავა + Compression Studios: LLMLingua-2, ორდონიანი Ultra, omniglyph, თითოეული ნაბიჯის სიზუსტის კარიბჭე, GCF v3.2, გადათრევით დალაგების რედაქტორი. → [შეკუმშვა](docs/compression/COMPRESSION_ENGINES.md)
+- **🕵️ გამჭვირვალე MITM გაშიფვრა (TPROXY)** — ჩაიჭირეთ CLI-ები, რომლებიც პროქსის გარემოს ცვლადებს უგულებელყოფენ, თითოეული SNI-ისთვის განკუთვნილი CA-ითა და სანდო საცავის ინსტალატორით. → [MITM/TPROXY](docs/security/MITM-TPROXY-DECRYPT.md)
+- **💸 ღირებულების ტელემეტრია ყველგან** — `X-OmniRoute-*` ღირებულების/გამოყენების სათაურები ყველა საბოლოო წერტილში, cache-HIT ეკონომიის სათაური და თითოეული გასაღებისთვის USD ხარჯვის კვოტები. → [API ცნობარი](docs/reference/API_REFERENCE.md)
+- **🧠 თქვენ მიერ კონტროლირებადი მეხსიერება** — ნაგულისხმევად გამორთულია, სურვილისამებრ ჩასართავი int8 ვექტორული კვანტიზაცია + ტიპიზებული დაქვეითება, თითოეული მოთხოვნისთვის `x-omniroute-no-memory`. → [მეხსიერება](docs/frameworks/MEMORY.md)
+- **🛡️ უსაფრთხოება** — prompt-injection-ისგან დაცვა ყველა LLM მარშრუტზე (red-team ნაკრები), სურვილისამებრ ჩასართავი ავტორიზაციის მონაცემების შენიღბვის დამცავი მექანიზმი (გაჟონილ API გასაღებებს/საიდუმლოებებს ორივე მიმართულებით შლის), უფასო DuckDuckGo ვებ-ძიება უკიდურესი შემთხვევებისთვის და მართვის პანელისთვის სურვილისამებრ ჩასართავი OIDC შესვლის კარიბჭე (პაროლით შესვლა ყოველთვის ხელმისაწვდომი რჩება). → [დამცავი მექანიზმები](docs/security/GUARDRAILS.md)
+- **🖼️ ახალი საბოლოო წერტილები** — `/v1/ocr` (Mistral OCR) და `/v1/audio/translations` (Whisper-ის სტილში) მედიის შესაძლებლობებს ავსებს. → [API ცნობარი](docs/reference/API_REFERENCE.md)
+- **🎨 სურათის / ვიდეოს / აუდიოს გენერირება** — ერთი API მედიისთვის: xAI Grok Imagine და Novita AI ვიდეო, ComfyUI, Magnific, Adobe Firefly, Segmind და მეტყველების პროვაიდერები, როგორიცაა ElevenLabs. → [API ცნობარი](docs/reference/API_REFERENCE.md)
+- **🌍 განთავსება და ოპერირება** — უკუპროქსის `basePath`, ბრაუზერის ენის ავტომატური ამოცნობა, მოწყობილობების აღრიცხვა თითოეული გასაღებისთვის, root-ის გარეშე MITM ნდობა, zh-TW ლოკალიზაცია. → [გარემო](docs/reference/ENVIRONMENT.md)
+- **🤝 მეტი პროვაიდერი და აგენტი** — ღრუბლოვანი აგენტები (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) ბრაუზერით + OAuth შესვლით, Ollama-ს სრულფასოვანი ბარათი, Claude Opus 5 და Sonnet 5, Kimi-ს ოფიციალური პარტნიორობა (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… და განახლებული **375-პროვაიდერიანი კატალოგი**. → [პროვაიდერები](docs/reference/PROVIDER_REFERENCE.md)
+- **📡 მარშრუტიზაციის გამჭვირვალობა** — ყველა პასუხს ახლავს `X-OmniRoute-Decision` სათაური, რომელიც მიუთითებს მის მომსახურე სტრატეგიას/პროვაიდერს/დაყოვნებას; ახალი `cache-optimized` კომბინაციის სტრატეგია და Auto-Combo-ს `cacheAffinity` ფაქტორი განმეორებით მოთხოვნებს იმ კავშირზე აბრუნებს, სადაც ქეშირებული პრეფიქსია შენახული, ხოლო მხოლოდ წაკითხვისთვის განკუთვნილი `/v1/auto-combo/{channel}/candidates` საბოლოო წერტილი `auto/*` არხის მიმდინარე კანდიდატთა ერთობლიობას აჩვენებს. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
+- **⚡ ლოკალური წარმადობა და ინფრასტრუქტურა** — ერთი დაწკაპუნებით გასაშვები ლოკალური Redis, Cloudflare Workers / Deno Deploy-ის რელეების განმთავსებლები, Bifrost და Mux — ზედამხედველობით მართვადი ჩაშენებული სერვისების სახით. → [ჩაშენებული სერვისები](docs/frameworks/EMBEDDED-SERVICES.md)
+- **🧩 ასევე მოყვება** — პლაგინების ფრეიმვორკი + მარკეტპლეისი, Omni/Agent/GitHub უნარების ფრეიმვორკები, Obsidian საცავთან ინტეგრაცია (22 MCP ინსტრუმენტი), OpenAI-თან თავსებადი Batch და Files API-ები, პასუხების სემანტიკური კეში, ლიდერბორდებიანი გეიმიფიკაცია, ACP აგენტების აღმოჩენა (15 ჩაშენებული აგენტი), ჟურნალების BigQuery-ში დაგეგმილი ექსპორტი, `auto/chaos` პარალელური მრავალმოდელიანი განშტოება, Telegram ბოტის ხიდი, აპში ჩაშენებული ვერსიების მენეჯერი და LMArena-ELO-ს უფასო პროვაიდერების რეიტინგები. → [დოკუმენტაცია](docs/README.md)
 
 <br/>
 
@@ -630,17 +654,17 @@ Radar-ში მონაწილეობა ნებაყოფლობი
 </div>
 
 <div align="center">
-<b>＋ ასევე მუშაობს შემდეგებთან</b> · Agent Deck · Kiro · Command Code · Antigravity · Windsurf · AMP · <b>OpenAI-სთან თავსებადი ნებისმიერი ხელსაწყო</b>
+<b>＋ ასევე მუშაობს შემდეგებთან</b> · Agent Deck · Kiro · Command Code · Antigravity · Windsurf · AMP · <b>OpenAI-სთან თავსებადი ნებისმიერი ინსტრუმენტი</b>
 </div>
 
-<sub>📖 თითოეული ხელსაწყოს კონფიგურაცია 36-ვე ხელსაწყოსთვის (26 CLI Code + 10 CLI Agent) → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 OpenCode-ის პლაგინი → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
+<sub>📖 თითოეული ხელსაწყოს დაყენება 37-ვე ხელსაწყოსთვის (27 CLI Code + 10 CLI Agent) → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 OpenCode-ის მოდული → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
 
 </div>
 
 <br/>
 
 **გაუშვით ნებისმიერი მხარდაჭერილი CLI OmniRoute-ის მეშვეობით ერთი ბრძანებით** — კონფიგურაციის ფაილების ჩაწერის გარეშე,
-ავტორიზაციის მონაცემები თითოეული პროცესისთვის მიეწოდება, ხოლო Qwen/Gemini ერთჯერად იზოლირებულ home-ს იღებს:
+ავტორიზაციის მონაცემები თითოეული პროცესისთვის ცალ-ცალკე გადაეცემა, ხოლო Qwen/Gemini დროებით იზოლირებულ home-ს იღებს:
 
 ```bash
 omniroute run claude   --model openai/gpt-5.4          # Claude Code
@@ -651,23 +675,23 @@ omniroute run opencode --model glm/glm-5.2 -- run "reply OK"
 omniroute run qwen     --model glm/glm-5.2 -- -p "reply OK"
 omniroute run gemini   --model glm/glm-5.2 -- --skip-trust -p "reply OK"
 
-# ან ინტერაქტიულად აირჩიეთ პროვაიდერი და მოდელი და ჩაწერეთ თავად ხელსაწყოს კონფიგურაცია:
-omniroute configure codex          # ასევე: claude opencode qwen aider goose gemini cline continue kilo
+# ან ინტერაქტიულად აირჩიეთ პროვაიდერი+მოდელი და ჩაწერეთ ხელსაწყოს საკუთარი კონფიგურაცია:
+omniroute configure codex          # ასევე: claude opencode qwen aider goose gemini cline continue kilo 5dive
 ```
 
 ყველა ბრძანება ითვალისწინებს აქტიურ დისტანციურ კონტექსტს (`omniroute connect <host>`), `--dry-run`
-შესრულების გარეშე წინასწარ აჩვენებს ზუსტ გარემოს ცვლადებსა და არგუმენტებს, ხოლო `--api-key-env NAME` საიდუმლო მონაცემებს
+შესრულების გარეშე წინასწარ აჩვენებს ზუსტ გარემოს ცვლადებს/არგუმენტებს, ხოლო `--api-key-env NAME` საიდუმლო მონაცემებს
 თქვენი shell-ის ისტორიაში მოხვედრისგან იცავს. → [CLI ინტეგრაციები](docs/guides/CLI-INTEGRATIONS.md)
 
 <br/>
 
 <div align="center">
 
-## 🌐 357 AI-პროვაიდერი — 152 კატალოგში მონიშნული უფასო
+## 🌐 375 AI პროვაიდერი — 153 კატალოგში მონიშნული როგორც უფასო
 
 </div>
 
-> **357 რეგისტრირებული პროვაიდერი** კანონიკურ ჩატის, მედიის, ძიების, ლოკალური, ღრუბლოვანი აგენტებისა და სისტემურ კოლექციებში, მათ შორის **152-ს აქვს `hasFree: true` აღმოჩენის მეტამონაცემი**. ჩატის მოდელების რეესტრი მოიცავს **229 პროვაიდერს / პროვაიდერ-მოდელის 2,554 უნიკალურ წყვილს / 1,283 დაუმუშავებელ მოდელის ID-ს**; უფასო ბიუჯეტების ცალკე კატალოგში არის **491 ჩანაწერი ცალკეული მოდელებისთვის**, **35 განმეორებადი პული** და **54 განმეორებადი/გასაღების არმომთხოვნი, მუდმივად უფასო პროვაიდერი**. ეს მნიშვნელები განზრახ განსხვავდება ერთმანეთისგან; განმარტებები და პულების დუბლიკატების გამორიცხვით შესრულებული გამოთვლები იხილეთ [პროვაიდერების ცნობარში](docs/reference/PROVIDER_REFERENCE.md) და [უფასო ტარიფებში](docs/reference/FREE_TIERS.md).
+> **375 რეგისტრირებული პროვაიდერი** ჩატის, მედიის, ძიების, ლოკალური, ღრუბლოვანი აგენტებისა და სისტემის კანონიკურ კოლექციებში, მათ შორის **153, რომლებსაც აღმოჩენის მეტამონაცემებში მითითებული აქვთ `hasFree: true`**. ჩატის მოდელების რეესტრი მოიცავს **239 პროვაიდერს / პროვაიდერ-მოდელის 3,059 უნიკალურ წყვილს / 1,475 დაუმუშავებელ მოდელის ID-ს**; უფასო ბიუჯეტების ცალკე კატალოგში არის **467 თითო-მოდელური ჩანაწერი**, **34 პერიოდულად განახლებადი პული** და **52 პერიოდულად განახლებადი/გასაღების არმომთხოვნი, სამუდამოდ უფასო პროვაიდერი**. ეს მნიშვნელები განზრახ განსხვავდება; განმარტებები და პულების დუბლირების აღმოფხვრით შესრულებული გამოთვლები მოცემულია [პროვაიდერების ცნობარში](docs/reference/PROVIDER_REFERENCE.md) და [უფასო ტარიფებში](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -700,11 +724,11 @@ omniroute configure codex          # ასევე: claude opencode qwen aider
   </tr>
 </table>
 
-<sub>…და კიდევ 330+ — ყველა ხატულა პირდაპირ იტვირთება დაფის პროვაიდერების კატალოგიდან. 📖 [პროვაიდერების ცნობარი](docs/reference/PROVIDER_REFERENCE.md)</sub>
+<sub>…და კიდევ 350-ზე მეტი — თითოეული ხატულა პირდაპირ იტვირთება საინფორმაციო დაფის პროვაიდერთა კატალოგიდან. 📖 [პროვაიდერების ცნობარი](docs/reference/PROVIDER_REFERENCE.md)</sub>
 
 <br/>
 
-### 🆓 სამუდამოდ უფასო — $0, ბარათის გარეშე
+### 🆓 სამუდამოდ უფასო — $0, ბარათი არ არის საჭირო
 
 <table>
   <tr>
@@ -718,9 +742,9 @@ omniroute configure codex          # ასევე: claude opencode qwen aider
   <tr>
     <td align="center" width="150"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/qoder-color.svg" width="42" alt="Qoder AI"/><br/><b>Qoder AI</b><br/><sub>Qwen3-Max, Kimi-K2<br/>შეუზღუდავად უფასო</sub></td>
     <td align="center" width="150"><img src="./public/providers/pollinations.svg" width="42" alt="Pollinations"/><br/><b>Pollinations</b><br/><sub>GPT, Llama, Claude<br/>გასაღები არ არის საჭირო</sub></td>
-    <td align="center" width="150"><img src="./public/providers/cloudflare.svg" width="42" alt="Cloudflare AI"/><br/><b>Cloudflare AI</b><br/><sub>50+ მოდელი<br/>10K ნეირონი/დღე</sub></td>
+    <td align="center" width="150"><img src="./public/providers/cloudflare.svg" width="42" alt="Cloudflare AI"/><br/><b>Cloudflare AI</b><br/><sub>50+-ზე მეტი მოდელი<br/>10K ნეირონი/დღეში</sub></td>
     <td align="center" width="150"><img src="./public/providers/nvidia.svg" width="42" alt="NVIDIA NIM"/><br/><b>NVIDIA NIM</b><br/><sub>GLM, MiniMax<br/>~40 RPM უფასოდ</sub></td>
-    <td align="center" width="150"><img src="./public/providers/cerebras.svg" width="42" alt="Cerebras"/><br/><b>Cerebras</b><br/><sub>GLM 4.7, GPT-OSS<br/>1M ტოკენი/დღე</sub></td>
+    <td align="center" width="150"><img src="./public/providers/cerebras.svg" width="42" alt="Cerebras"/><br/><b>Cerebras</b><br/><sub>GLM 4.7, GPT-OSS<br/>ერთჯერადი $5 კრედიტი; საჭიროა ბარათი</sub></td>
     <td align="center" width="150"><img src="./public/providers/openrouter.svg" width="42" alt="OpenRouter"/><br/><b>OpenRouter</b><br/><sub>:free მოდელები<br/>+$10 → უფრო მაღალი RPM</sub></td>
   </tr>
 </table>
@@ -839,52 +863,52 @@ brew install --cask zoispag/tap/omniroute-tray
 
 </div>
 
-> სერვერის გარდა, OmniRoute არის **სრულფასოვანი ბრძანების სტრიქონის მართვის პულტი**, რომელსაც აქვს **80-ზე მეტი ბრძანება** და აგენტების ღია პროტოკოლები, რათა AI აგენტმა მისი მართვა **დამოუკიდებლად** შეძლოს.
+> სერვერის გარდა, OmniRoute არის **სრულფასოვანი ბრძანების სტრიქონის მართვის პანელი**, რომელსაც აქვს **80-ზე მეტი ბრძანება** და აგენტების ღია პროტოკოლები, რათა AI აგენტმა მისი მართვა **დამოუკიდებლად** შეძლოს.
 
-### ⌨️ ნამდვილი CLI (და არა მხოლოდ `start`)
+### ⌨️ ნამდვილი CLI (არა მხოლოდ `start`)
 
 ```bash
 omniroute               # კარიბჭისა და მართვის პანელის გაშვება (პორტი 20128)
-omniroute chat          # ინტერაქციული TUI ჩეთის კლიენტი (სლეშ-ბრძანებები: /model /combo /skill /memory)
-omniroute setup         # პირველი გაშვების ინტერაქციული ოსტატი
+omniroute chat          # ინტერაქტიული TUI ჩატის კლიენტი (სლეშ-ბრძანებები: /model /combo /skill /memory)
+omniroute setup         # პირველი გაშვების ეტაპობრივი ოსტატი
 omniroute doctor        # პროვაიდერების, პორტებისა და ნატიური დამოკიდებულებების დიაგნოსტიკა
 ```
 
 ### 🛰️ დისტანციური რეჟიმი — გაუშვით CLI აქ, ხოლო OmniRoute — VPS-ზე
 
 OmniRoute სერვერზე გაქვთ? მართეთ ის თქვენი ლეპტოპიდან **იმავე CLI-ით**. ერთხელ გაიარეთ ავტორიზაცია
-შეზღუდული მოქმედების სფეროს მქონე წვდომის ტოკენით; ამის შემდეგ ყველა ბრძანება დისტანციურ სერვერზე შესრულდება.
+შეზღუდული წვდომის ტოკენით; ამის შემდეგ ყველა ბრძანება დისტანციურ სერვერზე შესრულდება.
 
 ```bash
-omniroute connect 192.168.0.15            # პაროლი → შეზღუდული მოქმედების სფეროს მქონე ტოკენი, შენახული კონტექსტის სახით
-omniroute models list                     # ← სრულდება დისტანციურ სერვერზე
-omniroute configure codex                 # ← ირჩევს დისტანციურ მოდელს და ქმნის ლოკალურ Codex პროფილს
-omniroute tokens create --name ci --scope read   # სხვა კომპიუტერებისთვის უფრო შეზღუდული ტოკენების შექმნა
-omniroute contexts use default            # ← ლოკალურ სერვერზე დაბრუნება
+omniroute connect 192.168.0.15            # პაროლი → შეზღუდული ტოკენი, შენახული კონტექსტის სახით
+omniroute models                         # ← სრულდება დისტანციურ სერვერზე
+omniroute configure codex                 # ← ირჩევს დისტანციურ მოდელს და წერს ლოკალურ Codex პროფილს
+omniroute tokens create --name ci --scope read   # ქმნის უფრო შეზღუდულ ტოკენებს სხვა მოწყობილობებისთვის
+omniroute contexts use default            # ← ადგილობრივ სერვერზე დაბრუნება
 ```
 
-ტოკენების მოქმედების სფეროებია `read` / `write` / `admin`; პროცესების გამშვები მარშრუტები მხოლოდ loopback-ზე რჩება.
+ტოკენების წვდომის დონეებია `read` / `write` / `admin`; პროცესების გამშვები მარშრუტები მხოლოდ loopback-ზე რჩება ხელმისაწვდომი.
 <sub>📖 [დისტანციური რეჟიმი](docs/guides/REMOTE-MODE.md)</sub>
 
 <div align="left">
 
-<img src="./docs/diagrams/cli-terminal.svg" width="50%" alt="OmniRoute CLI-ის ანიმაციური ტერმინალის დემონსტრაცია — omniroute providers list, omniroute combo list და omniroute health — ზედა დონის 86-ბრძანებიანი შესაძლებლობების ციკლური ჩვენებით: providers · oauth · keys · combo · nodes · models · cache · compression · cost · usage · quota · health · resilience · telemetry · logs · audit · mcp · a2a · cloud · memory · skills · eval · tunnel · backup · sync · webhooks · policy · pricing · translator · simulate …"/>
+<img src="./docs/diagrams/cli-terminal.svg" width="50%" alt="OmniRoute CLI-ის ანიმაციური ტერმინალური დემო — omniroute providers list, omniroute combo list და omniroute health — 89-ბრძანებიანი უმაღლესი დონის შესაძლებლობების ციკლური ჩვენებით: providers · oauth · keys · combo · nodes · models · cache · compression · cost · usage · quota · health · resilience · telemetry · logs · audit · mcp · a2a · cloud · memory · skills · eval · tunnel · backup · sync · webhooks · policy · pricing · translator · simulate …"/>
 
 </div>
 
 ### 🤝 დააკავშირეთ აგენტი — და ის თავად მართავს OmniRoute-ს
 
-გახადეთ OmniRoute ხელმისაწვდომი **MCP-ის**, **A2A-ის**, **REST API-ის**, **ვებჰუკების** ან **დისტანციური CLI-ის** საშუალებით — ნებისმიერი შესაძლებლობების მქონე აგენტი (ან თქვენი საკუთარი კოდი) მიიღებს მთელი კარიბჭის მართვის გასაღებებს: მარშრუტიზაცია, პროვაიდერები, კომბინაციები, კეში, შეკუმშვა, მეხსიერება — ავტონომიურად. ქვემოთ მოცემული HTTP საბოლოო წერტილები ხელმისაწვდომია მისამართზე `http://localhost:20128`.
+გახადეთ OmniRoute ხელმისაწვდომი **MCP-ის**, **A2A-ის**, **REST API-ის**, **ვებჰუკების** ან **დისტანციური CLI-ის** მეშვეობით — ნებისმიერი შესაბამისი შესაძლებლობის მქონე აგენტი (ან თქვენი საკუთარი კოდი) მიიღებს მთელი კარიბჭის მართვის გასაღებებს: მარშრუტიზაცია, პროვაიდერები, კომბინაციები, კეში, შეკუმშვა, მეხსიერება — ავტონომიურად. ქვემოთ მოცემული HTTP ბოლო წერტილები ხელმისაწვდომია მისამართზე `http://localhost:20128`.
 
 <table>
-  <tr><th align="left">ინტერფეისი</th><th align="left">საბოლოო წერტილი / ბრძანება</th><th align="left">გამოიყენეთ შემდეგისთვის</th></tr>
-  <tr><td align="left" nowrap>🧰 <b>MCP (stdio)</b></td><td align="left" nowrap><code>omniroute --mcp</code></td><td align="left">დააკავშირეთ Claude Desktop-თან, Cursor-თან ან ნებისმიერ MCP კლიენტთან</td></tr>
-  <tr><td align="left" nowrap>🌊 <b>MCP (HTTP)</b></td><td align="left" nowrap><code>/api/mcp/stream</code></td><td align="left">დისტანციური MCP — <b>110 ინსტრუმენტი</b>, 33 მოქმედების სფერო (აღსრულება არჩევითია), სრული აუდიტის ჟურნალი</td></tr>
+  <tr><th align="left">ინტერფეისი</th><th align="left">ბოლო წერტილი / ბრძანება</th><th align="left">გამოიყენეთ შემდეგისთვის</th></tr>
+  <tr><td align="left" nowrap>🧰 <b>MCP (stdio)</b></td><td align="left" nowrap><code>omniroute --mcp</code></td><td align="left">Claude Desktop-თან, Cursor-თან ან ნებისმიერ MCP კლიენტთან დაკავშირება</td></tr>
+  <tr><td align="left" nowrap>🌊 <b>MCP (HTTP)</b></td><td align="left" nowrap><code>/api/mcp/stream</code></td><td align="left">დისტანციური MCP — <b>110 ინსტრუმენტი</b>, 33 წვდომის სფერო (აღსრულება სურვილისამებრ), სრული აუდიტის ჟურნალი</td></tr>
   <tr><td align="left" nowrap>📡 <b>MCP (SSE)</b></td><td align="left" nowrap><code>/api/mcp/sse</code></td><td align="left">MCP-ის ნაკადური ტრანსპორტი</td></tr>
   <tr><td align="left" nowrap>🤝 <b>A2A</b></td><td align="left" nowrap><code>/.well-known/agent.json</code></td><td align="left">აგენტებს შორის კომუნიკაცია, <b>JSON-RPC 2.0</b> + SSE, 6 უნარი</td></tr>
-  <tr><td align="left" nowrap>🌐 <b>REST API</b></td><td align="left" nowrap><code>/v1/*</code></td><td align="left">OpenAI-სთან თავსებადი — ჩეთი, ემბედინგები, სურათები, აუდიო, OCR</td></tr>
-  <tr><td align="left" nowrap>🔔 <b>ვებჰუკები</b></td><td align="left" nowrap><code>/api/webhooks</code></td><td align="left">მოთხოვნის / კვოტის მოვლენების გაგზავნა Slack-ში, Discord-ში, Telegram-ში ან ნებისმიერ URL-ზე</td></tr>
-  <tr><td align="left" nowrap>🛰️ <b>დისტანციური CLI</b></td><td align="left" nowrap><code>omniroute connect <host></code></td><td align="left">მართეთ დისტანციური ინსტანცია შეზღუდული მოქმედების სფეროს მქონე წვდომის ტოკენებით</td></tr>
+  <tr><td align="left" nowrap>🌐 <b>REST API</b></td><td align="left" nowrap><code>/v1/*</code></td><td align="left">OpenAI-სთან თავსებადი — ჩატი, ვექტორული წარმოდგენები, სურათები, აუდიო, OCR</td></tr>
+  <tr><td align="left" nowrap>🔔 <b>ვებჰუკები</b></td><td align="left" nowrap><code>/api/webhooks</code></td><td align="left">მოთხოვნების / კვოტის მოვლენების გაგზავნა Slack-ში, Discord-ში, Telegram-ში ან ნებისმიერ URL-ზე</td></tr>
+  <tr><td align="left" nowrap>🛰️ <b>დისტანციური CLI</b></td><td align="left" nowrap><code>omniroute connect <host></code></td><td align="left">დისტანციური ინსტანციის მართვა შეზღუდული წვდომის ტოკენებით</td></tr>
 </table>
 
 ```bash
@@ -902,11 +926,11 @@ claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp
 
 </div>
 
-### 📖 როგორ მუშაობს — კონვეიერი, არქიტექტურა და დანაზოგის გამოთვლა
+### 📖 როგორ მუშაობს — კონვეიერი, არქიტექტურა და დაზოგვის გამოთვლა
 
-<img src="./docs/diagrams/compression-pipeline.svg" width="100%" alt="OmniRoute-ის შეკუმშვის კონვეიერი: საილუსტრაციოდ, კლიენტის 10,000-ტოკენიანი მოთხოვნა გადის 12 ურთიერთთავსებად ძრავში — Session-Dedup, CCR, Lite, RTK, Responses Tool Output, Headroom, Relevance, Caveman, Aggressive, LLMLingua-2, Ultra და OmniGlyph — და დოკუმენტირებულ კომბინირებულ მაგალითში პროვაიდერამდე დაახლოებით 1,080 ტოკენით აღწევს. სტრუქტურირებული შიგთავსი დაცულია შენარჩუნების მექანიზმებითა და თითოეული ეტაპის სიზუსტის კონტროლით; აშკარად დანაკარგიანი ან ექსპერიმენტული რეჟიმები შეიძლება შესაბამის შიგთავსს გარდაქმნიდეს."/>
+<img src="./docs/diagrams/compression-pipeline.svg" width="100%" alt="OmniRoute-ის შეკუმშვის კონვეიერი: საილუსტრაციო 10,000-ტოკენიანი კლიენტის მოთხოვნა გაივლის 12 კომბინირებად ძრავას — Session-Dedup, CCR, Lite, RTK, Responses Tool Output, Headroom, Relevance, Caveman, Aggressive, LLMLingua-2, Ultra და OmniGlyph — და დოკუმენტირებულ კომბინირებულ მაგალითში პროვაიდერამდე დაახლოებით 1,080 ტოკენით შეიძლება მივიდეს. სტრუქტურირებული შიგთავსი დაცულია შენარჩუნების მექანიზმებითა და თითოეული ნაბიჯის სიზუსტის შემოწმებით; აშკარად დანაკარგიანი ან ექსპერიმენტული რეჟიმები შეიძლება შესაბამის შიგთავსს გარდაქმნიდეს."/>
 
-ნაგულისხმევი კომბინაცია თანმიმდევრობით უშვებს `RTK → Caveman`. როდესაც ორივე ერთსა და იმავე ხელსაწყოს/კონტექსტის მონაცემებზე მოქმედებს, დანაზოგი მრავლდება:
+ნაგულისხმევი კომბინაცია ასრულებს `RTK → Caveman` მიმდევრობას. როდესაც ორივე ერთსა და იმავე ხელსაწყოს/კონტექსტის მონაცემებზე მოქმედებს, დაზოგვა მრავლდება:
 
 ```txt
 combined = 1 − (1 − RTK) × (1 − Caveman_input)
@@ -916,72 +940,72 @@ range    = 78.4 – 94.6%
 
 კოდის ბლოკები, URL-ები, JSON და სტრუქტურირებული მონაცემები შენარჩუნების ძრავით **ყოველთვის დაცულია**.
 
-> **რატომ უნდა გამოიყენოთ ბევრი ტოკენი, როცა ცოტაც საკმარისია?** თითოეული მოთხოვნა OmniRoute-ის შეკუმშვის კონვეიერს **გამჭვირვალედ** გადის — კლიენტის შეცვლა საჭირო არ არის. ახლა ეს არის **12 ურთიერთთავსებადი ძრავის ნაკრები**, რომლებიც თანმიმდევრობით მუშაობს და მარშრუტიზაციის თითოეულ კომბინაციაში თავისუფლად ერთიანდება — [RTK](https://github.com/rtk-ai/rtk)-ის, [Caveman](https://github.com/JuliusBrussee/caveman)-ის (⭐ 90K+), [LLMLingua-2](https://github.com/microsoft/LLMLingua)-ისა და [Troglodita](https://github.com/leninejunior/troglodita)-ს (PT-BR) იდეებზე დაყრდნობით.
+> **რატომ გამოვიყენოთ ბევრი ტოკენი, როცა ცოტაც საკმარისია?** ყოველი მოთხოვნა OmniRoute-ის შეკუმშვის კონვეიერს **გამჭვირვალედ** გაივლის — კლიენტის ცვლილება საჭირო არ არის. ახლა ეს არის **12 კომბინირებადი ძრავისგან შემდგარი სტეკი**, რომლებიც თანმიმდევრულად მუშაობენ და მარშრუტიზაციის თითოეული კომბინაციისთვის სხვადასხვა სახით ერთიანდებიან — [RTK](https://github.com/rtk-ai/rtk)-ის, [Caveman](https://github.com/JuliusBrussee/caveman)-ის (⭐ 90K+), [LLMLingua-2](https://github.com/microsoft/LLMLingua)-ისა და [Troglodita](https://github.com/leninejunior/troglodita)-ის (PT-BR) იდეებზე დაყრდნობით.
 
-### 🧱 12-ძრავიანი ნაკრები
+### 🧱 12-ძრავიანი სტეკი
 
-ძრავები კონვეიერის თანმიმდევრობით მუშაობს; თითოეულის ჩართვა ან გამორთვა დამოუკიდებლად შეიძლება და თითოეული კომბინაციისთვის ცალკე კონფიგურირდება:
+ძრავები კონვეიერის თანმიმდევრობით მუშაობს; თითოეულის ჩართვა/გამორთვა და კონფიგურირება ყოველი კომბინაციისთვის დამოუკიდებლად შეიძლება:
 
 <table>
   <tr><th align="center">#</th><th align="left">ძრავა</th><th align="left">რას აკეთებს</th></tr>
-  <tr><td align="center" nowrap>1</td><td align="left" nowrap><b>Session-Dedup</b></td><td align="left">შლის სვლებს შორის გამეორებულ შიგთავსს (შიგთავსის მისამართებით, სვლებს შორის)</td></tr>
-  <tr><td align="center" nowrap>2</td><td align="left" nowrap><b>CCR</b></td><td align="left">დიდ ბლოკებს მოთხოვნისამებრ მისაღები ნიშნულების უკან აარქივებს</td></tr>
-  <tr><td align="center" nowrap>3</td><td align="left" nowrap><b>Lite</b></td><td align="left">ცარიელი სივრცეებისა და სურათების URL-ების შემოკლება (დაბალი დაყოვნების საბაზისო რეჟიმი)</td></tr>
-  <tr><td align="center" nowrap>4</td><td align="left" nowrap><b>RTK</b></td><td align="left">ხელსაწყოს შედეგების გონივრული გაფილტვრა, დუბლიკატების მოცილება და შემოკლება (ბრძანებების გათვალისწინებით)</td></tr>
+  <tr><td align="center" nowrap>1</td><td align="left" nowrap><b>Session-Dedup</b></td><td align="left">გამოტოვებს სვლებს შორის გამეორებულ შიგთავსს (შიგთავსის მისამართებით იდენტიფიცირებული, სვლებს შორის)</td></tr>
+  <tr><td align="center" nowrap>2</td><td align="left" nowrap><b>CCR</b></td><td align="left">დიდ ბლოკებს მოთხოვნისამებრ მისაღები აღდგენის მარკერების მიღმა დაარქივებს</td></tr>
+  <tr><td align="center" nowrap>3</td><td align="left" nowrap><b>Lite</b></td><td align="left">ცარიელი სივრცისა და სურათების URL-ების შემოკლება (დაბალი დაყოვნების საბაზისო რეჟიმი)</td></tr>
+  <tr><td align="center" nowrap>4</td><td align="left" nowrap><b>RTK</b></td><td align="left">ხელსაწყოს შედეგების ჭკვიანური გაფილტვრა, დუბლიკატების მოცილება და შემოკლება (ბრძანებების გათვალისწინებით)</td></tr>
   <tr><td align="center" nowrap>5</td><td align="left" nowrap><b>Responses Tool Output</b></td><td align="left">უპირველესად უდანაკარგო JSON და შეზღუდული დიაგნოსტიკური შეკუმშვა shell/patch/search/build შედეგებისთვის (Responses API)</td></tr>
-  <tr><td align="center" nowrap>6</td><td align="left" nowrap><b>Headroom</b></td><td align="left">JSON მასივების უდანაკარგო ტაბულარული შეკუმშვა (~30%) ჩაშენებული <b>GCF</b> კოდეკის მეშვეობით</td></tr>
-  <tr><td align="center" nowrap>7</td><td align="left" nowrap><b>Relevance</b></td><td align="left">ბოლო მომხმარებლის მოთხოვნასთან მიმართებით წინადადებების ექსტრაქციული შეფასება</td></tr>
-  <tr><td align="center" nowrap>8</td><td align="left" nowrap><b>Caveman</b></td><td align="left">წესებზე დაფუძნებული პროზის შეკუმშვა (შედეგში ~65–75%)</td></tr>
+  <tr><td align="center" nowrap>6</td><td align="left" nowrap><b>Headroom</b></td><td align="left">JSON მასივების უდანაკარგო ცხრილური კომპაქტიზაცია (~30%) ჩაშენებული <b>GCF</b> კოდეკის მეშვეობით</td></tr>
+  <tr><td align="center" nowrap>7</td><td align="left" nowrap><b>Relevance</b></td><td align="left">ბოლო მომხმარებლის მოთხოვნასთან მიმართებით წინადადებების ამონარჩევითი შეფასება</td></tr>
+  <tr><td align="center" nowrap>8</td><td align="left" nowrap><b>Caveman</b></td><td align="left">წესებზე დაფუძნებული პროზის შეკუმშვა (გამომავალზე ~65–75%)</td></tr>
   <tr><td align="center" nowrap>9</td><td align="left" nowrap><b>Aggressive</b></td><td align="left">შეჯამება და ძველი სვლების პროგრესული დაძველება</td></tr>
-  <tr><td align="center" nowrap>10</td><td align="left" nowrap><b>LLMLingua-2</b></td><td align="left">ML-ზე დაფუძნებული სემანტიკური შეკვეცა MobileBERT ONNX-ის მეშვეობით — კოდისთვის უსაფრთხო, ასინქრონული</td></tr>
-  <tr><td align="center" nowrap>11</td><td align="left" nowrap><b>Ultra</b></td><td align="left">ტოკენების ევრისტიკული შეკვეცა მცირე მოდელის (SLM) არასავალდებულო დონით</td></tr>
-  <tr><td align="center" nowrap>12</td><td align="left" nowrap><b>OmniGlyph</b></td><td align="left">კონტექსტის სურათად კოდირების ექსპერიმენტული მეთოდი გაზომილი Claude Fable 5-ისთვის, უშუალოდ Anthropic-ის არხზე; GPT 5.6-ის ტრანსფორმერები პროვაიდერის დასტურების მიღებამდე უსაფრთხოების მიზნით გამორთული რჩება. შეკუმშვის ოთხი პროფილი (ნაგულისხმევად აგრესიული, დაბალანსებული, კოდირებისთვის უსაფრთხო, უცვლელად გამტარი) (ყველაზე აგრესიული; საჭიროებს ხელით ჩართვას)</td></tr>
+  <tr><td align="center" nowrap>10</td><td align="left" nowrap><b>LLMLingua-2</b></td><td align="left">ML-ზე დაფუძნებული სემანტიკური შემცირება MobileBERT ONNX-ის მეშვეობით — უსაფრთხოა კოდისთვის, ასინქრონული</td></tr>
+  <tr><td align="center" nowrap>11</td><td align="left" nowrap><b>Ultra</b></td><td align="left">ტოკენების ევრისტიკული შემცირება სურვილისამებრ მცირე მოდელის (SLM) დონით</td></tr>
+  <tr><td align="center" nowrap>12</td><td align="left" nowrap><b>OmniGlyph</b></td><td align="left">ექსპერიმენტული კონტექსტის-სურათად კოდირება გაზომილი Claude Fable 5-ისთვის პირდაპირ Anthropic არხზე; GPT 5.6 ტრანსფორმერები პროვაიდერის დასტურების მიღებამდე დახურულად რჩება. შეკუმშვის ოთხი პროფილი (ნაგულისხმევად აგრესიული, დაბალანსებული, კოდისთვის უსაფრთხო, უცვლელად გატარება) (ყველაზე აგრესიული; საჭიროებს ცალკე ჩართვას)</td></tr>
 </table>
 
-კოდის ბლოკები, URL-ები და სტრუქტურირებული მონაცემები **ყოველთვის შენარჩუნებულია** ბაიტების სრული სიზუსტით. **ერთი დაწკაპუნებით ასარჩევი წინასწარი პარამეტრები** ძრავებს აერთიანებს:
+კოდის ბლოკები, URL-ები და სტრუქტურირებული მონაცემები **ყოველთვის ინახება** ბაიტების სრული სიზუსტით. **ერთი დაწკაპუნებით ასარჩევი წინასწარი პარამეტრები** ძრავებს აერთიანებს:
 
 <table>
-  <tr><th align="left">რეჟიმი</th><th align="left">დანაზოგი</th><th align="left">საუკეთესოა</th></tr>
+  <tr><th align="left">რეჟიმი</th><th align="left">დაზოგვა</th><th align="left">საუკეთესოა</th></tr>
   <tr><td align="left" nowrap>🪶 <b>Lite</b></td><td align="left" nowrap>~15%</td><td align="left">ყოველთვის ჩართული უსაფრთხო ნაგულისხმევი რეჟიმისთვის</td></tr>
-  <tr><td align="left" nowrap>🪨 <b>Standard (Caveman)</b></td><td align="left" nowrap>~30%</td><td align="left">ყოველდღიური კოდირებისთვის</td></tr>
-  <tr><td align="left" nowrap>⚡ <b>Aggressive</b></td><td align="left" nowrap>~50%</td><td align="left">ხანგრძლივი, ხელსაწყოებით დატვირთული სესიებისთვის</td></tr>
-  <tr><td align="left" nowrap>🔥 <b>Ultra</b></td><td align="left" nowrap>~75%</td><td align="left">მაქსიმალური დანაზოგისთვის</td></tr>
+  <tr><td align="left" nowrap>🪨 <b>სტანდარტული (Caveman)</b></td><td align="left" nowrap>~30%</td><td align="left">ყოველდღიური პროგრამირებისთვის</td></tr>
+  <tr><td align="left" nowrap>⚡ <b>აგრესიული</b></td><td align="left" nowrap>~50%</td><td align="left">ხელსაწყოებით დატვირთული ხანგრძლივი სესიებისთვის</td></tr>
+  <tr><td align="left" nowrap>🔥 <b>Ultra</b></td><td align="left" nowrap>~75%</td><td align="left">მაქსიმალური დაზოგვისთვის</td></tr>
   <tr><td align="left" nowrap>🧰 <b>RTK</b></td><td align="left" nowrap>60–90%</td><td align="left">shell/test/build/git შედეგებისთვის</td></tr>
-  <tr><td align="left" nowrap>🔗 <b>Stacked (RTK → Caveman)</b></td><td align="left" nowrap><b>78–95%</b></td><td align="left">შერეული მოთხოვნებისა და ხელსაწყოების ჟურნალებისთვის</td></tr>
+  <tr><td align="left" nowrap>🔗 <b>კომბინირებული (RTK → Caveman)</b></td><td align="left" nowrap><b>78–95%</b></td><td align="left">შერეული მოთხოვნებისა და ხელსაწყოების ჟურნალებისთვის</td></tr>
 </table>
 
-**რეალური მაგალითი — Standard რეჟიმი:**
+**რეალური მაგალითი — სტანდარტული რეჟიმი:**
 
-> **მანამდე (69 ტოკენი):** _"თქვენი React კომპონენტის ხელახლა რენდერის მიზეზი, სავარაუდოდ, ისაა, რომ რენდერის ყოველ ციკლში ობიექტის ახალ ბმულს ქმნით. როდესაც inline ობიექტს prop-ის სახით გადასცემთ, React-ის ზედაპირული შედარება მას ყოველ ჯერზე განსხვავებულ ობიექტად აღიქვამს, რაც ხელახლა რენდერს იწვევს. ობიექტის დასამახსოვრებლად გირჩევდით useMemo-ს გამოყენებას."_
+> **მანამდე (69 ტოკენი):** _"თქვენი React კომპონენტის ხელახლა რენდერის სავარაუდო მიზეზი ისაა, რომ რენდერის თითოეულ ციკლში ობიექტის ახალ ბმულს ქმნით. როდესაც inline ობიექტს prop-ის სახით გადასცემთ, React-ის ზედაპირული შედარება მას ყოველ ჯერზე განსხვავებულ ობიექტად აღიქვამს, რაც ხელახლა რენდერს იწვევს. გირჩევდით, ობიექტის დასამახსოვრებლად useMemo გამოიყენოთ."_
 >
-> **შემდეგ (19 ტოკენი):** _"ყოველ რენდერზე ობიექტის ახალი ბმული. Inline ობიექტის prop = ახალი ბმული = ხელახალი რენდერი. გამოიყენეთ useMemo."_
+> **შემდეგ (19 ტოკენი):** _"ყოველ რენდერზე ობიექტის ახალი ბმული. Inline ობიექტი prop-ში = ახალი ბმული = ხელახალი რენდერი. გამოიყენეთ useMemo."_
 >
 > **იგივე პასუხი. 72%-ით ნაკლები ტოკენი. სიზუსტის ნულოვანი დანაკარგი.** ✅
 
 **PT-BR მაგალითი — [Troglodita](https://github.com/leninejunior/troglodita) რეჟიმი:**
 
-> **მანამდე (42 ტოკენი):** _„პრობლემა ისაა, რომ კომპონენტი ხელახლა რენდერდება, რადგან ყოველ რენდერის ციკლში ობიექტის ახალი ბმული იქმნება. გირჩევდით useMemo-ს გამოყენებას.“_
+> **მანამდე (42 ტოკენი):** _"პრობლემა ისაა, რომ კომპონენტი ხელახლა რენდერდება, რადგან რენდერის ყოველ ციკლში ობიექტის ახალი ბმული იქმნება. გირჩევდით useMemo-ს გამოყენებას."_
 >
-> **შემდეგ (12 ტოკენი):** _„ხელახალი რენდერი: ახალი ბმული ყოველ ციკლში (inline ობიექტი თავიდან იქმნება). გამოიყენეთ `useMemo`.“_
+> **შემდეგ (12 ტოკენი):** _"ხელახალი რენდერი: ახალი ბმული ყოველ ციკლში (inline ობიექტი ხელახლა იქმნება). გამოიყენეთ `useMemo`."_
 >
 > **იგივე პასუხი. ~70%-ით ნაკლები ტოკენი. ტექნიკური სიზუსტე უცვლელია.** ✅
 
 <br/>
 
-### 🎚️ ძრავებს მიღმა — გამოტანის სტილები, ადაპტიური რეგულატორი და თითოეული მოთხოვნის მართვა
+### 🎚️ ძრავების მიღმა — გამომავალი სტილები, ადაპტური მარეგულირებელი და თითოეულ მოთხოვნაზე მართვა
 
-ზემოთ მოცემული 12 ძრავა ამცირებს იმას, რაც **შედის**. კიდევ სამი შრე განსაზღვრავს, **როგორ**, **როდის** და რა **გამოდის**:
+ზემოთ ჩამოთვლილი 12 ძრავა ამცირებს იმას, რაც **შედის**. კიდევ სამი შრე განსაზღვრავს, **როგორ**, **როდის** და რა **გამოდის**:
 
-- **🪄 გამოტანის სტილები** _(გამოტანის ღერძის მართვა)_ — ამატებს დეტერმინისტულ, ქეშთან თავსებად ინსტრუქციებს პასუხის ფორმის განსაზღვრისთვის; შესაძლებელია მათი კომბინირება, თითოეული `lite` / `full` / `ultra` ინტენსივობით. სტილის დამატებას რეესტრში ერთი ხაზის ჩანაწერი სჭირდება:
-  - **ლაკონიური პროზა** — მოაშორეთ შემავსებელი სიტყვები / არტიკლები / ზედმეტი სიფრთხილის გამომხატველი ფრაზები; ტექნიკური შინაარსი ზუსტად შეინარჩუნეთ.
+- **🪄 გამომავალი სტილები** _(გამომავალი ღერძის მართვა)_ — ამატებს დეტერმინისტულ, ქეშისთვის უსაფრთხო ინსტრუქციებს პასუხის ფორმის სამართავად; შესაძლებელია მათი კომბინირება, თითოეულის `lite` / `full` / `ultra` ინტენსივობით. სტილის დამატებას რეესტრში ერთი სტრიქონი სჭირდება:
+  - **ლაკონიური პროზა** — ამოიღეთ ზედმეტი სიტყვები / არტიკლები / თავის დაზღვევის ფრაზები; ტექნიკური არსი ზუსტად შეინარჩუნეთ.
   - **ნაკლები კოდი** — „ზარმაცი უფროსი დეველოპერის“ YAGNI: უმცირესი მუშა ცვლილება, მოუთხოვნელი დამხმარე სტრუქტურის გარეშე.
-  - **Ponytail (ზარმაცი უფროსი დეველოპერი)** — აუყევით YAGNI-ის კიბეს, აღმოფხვერით ძირეული მიზეზი, გამოიყენეთ უმცირესი მუშა diff.
+  - **Ponytail (ზარმაცი უფროსი დეველოპერი)** — აუყევით YAGNI-ის კიბეს, გამოასწორეთ ძირეული მიზეზი, გამოიყენეთ უმცირესი მუშა diff.
   - **მე მაქვს ADHD (ჯერ მოქმედება)** — დაიწყეთ შემდეგი მოქმედებით, დანომრეთ ნაბიჯები, მიუთითეთ ერთი კონკრეტული მომდევნო ნაბიჯი, შესავლის გარეშე.
-  - **ლაკონიური CJK (文言)** — კლასიკური ჩინურის ულტრალაკონიური სტილი (ლოკალით შეზღუდული `zh`-ზე).
-- **🎯 ადაპტიური კონტექსტის ბიუჯეტი** _(რეგულატორი)_ — ერთი ჩართვა/გამორთვის ტოკენური ზღვრის ნაცვლად, ეტაპობრივად რთავს ყველაზე იაფ და ინფორმაციის ყველაზე ნაკლებად დამკარგავ ძრავებს მხოლოდ იმდენად, რამდენადაც საჭიროა **მოდელის კონტექსტურ ფანჯარაში ჩასატევად**. პოლიტიკა: `reserve-output` (ნაგულისხმევი, მოდელის გათვალისწინებით) · `percentage` · `absolute`. რეჟიმი: `floor` (ჩატევადობის გარანტია) · `replace-autotrigger` (თქვენი აშკარა არჩევანი იმარჯვებს) · `off` (ძველი ზღვარი).
-- **🎛️ სად წყდება შეკუმშვა** _(პრიორიტეტი, მაღლიდან დაბლისკენ)_ — თითოეული მოთხოვნის `x-omniroute-compression` სათაური › მარშრუტიზაციის კომბინაციის ჩანაცვლება › აქტიური სახელდებული პროფილი › ადაპტიური / ავტომატური გააქტიურება › პანელის ნაგულისხმევი პარამეტრი › გამორთული. გამოყენებული გეგმა პასუხად აისახება `X-OmniRoute-Compression: <mode>; source=<source>` სათაურში.
+  - **ლაკონიური CJK (文言)** — კლასიკურ ჩინურზე დაფუძნებული ულტრალაკონიური სტილი (ლოკალით შეზღუდული `zh`-ზე).
+- **🎯 ადაპტური კონტექსტის ბიუჯეტი** _(მარეგულირებელი)_ — ჩართვა/გამორთვის ერთი ტოკენური ზღვრის ნაცვლად, საჭიროებისამებრ ააქტიურებს მხოლოდ ყველაზე იაფ და დანაკარგის არმქონე ძრავებს იმდენად, რამდენადაც საჭიროა **მოდელის კონტექსტურ ფანჯარაში ჩასატევად**. პოლიტიკა: `reserve-output` (ნაგულისხმევი, მოდელის გათვალისწინებით) · `percentage` · `absolute`. რეჟიმი: `floor` (ჩატევის გარანტია) · `replace-autotrigger` (თქვენი აშკარა არჩევანი პრიორიტეტულია) · `off` (ძველი ზღვარი).
+- **🎛️ სად წყდება შეკუმშვის საკითხი** _(პრიორიტეტი, მაღლიდან დაბლისკენ)_ — თითოეული მოთხოვნის `x-omniroute-compression` სათაური › მარშრუტიზაციის კომბინაციის გადაფარვა › აქტიური სახელდებული პროფილი › ადაპტური / ავტომატური გააქტიურება › პანელის ნაგულისხმევი პარამეტრი › გამორთული. გამოყენებული გეგმა პასუხად ბრუნდება `X-OmniRoute-Compression: <mode>; source=<source>` სათაურში.
 
-დააყენეთ ავტომატური გააქტიურება ტოკენების ზღვრის მიხედვით, ჩართეთ ადაპტიური რეგულატორი, მიამაგრეთ სახელდებული პროფილი, მიუთითეთ ერთჯერადი პარამეტრი თითოეული მოთხოვნისთვის ან მიანიჭეთ pipeline მარშრუტიზაციის თითოეულ კომბინაციას — აირჩიეთ ის, რაც სამუშაო დატვირთვას შეესაბამება. სურვილისამებრ ჩასართავი, ოფლაინ **შეფასების ინსტრუმენტი** (`npm run eval:compression`) ცვლილების დანერგვამდე ფიქსირებულ კორპუსზე აფასებს სიზუსტესა და დანაზოგს.
+გამოიყენეთ ავტომატური გააქტიურება ტოკენების ზღვრის მიხედვით, ჩართეთ ადაპტური მარეგულირებელი, დაამაგრეთ სახელდებული პროფილი, ერთჯერადად მიუთითეთ პარამეტრი თითოეულ მოთხოვნაზე ან მარშრუტიზაციის თითოეულ კომბინაციას მიანიჭეთ pipeline — აირჩიეთ ის, რაც დატვირთვას შეესაბამება. სურვილისამებრ ჩასართავი, ოფლაინ **შეფასების სისტემა** (`npm run eval:compression`) ცვლილების დანერგვამდე აფასებს სიზუსტესა და ეკონომიას ფიქსირებულ კორპუსზე.
 
 📖 [`COMPRESSION_GUIDE.md`](docs/compression/COMPRESSION_GUIDE.md) · [`RTK_COMPRESSION.md`](docs/compression/RTK_COMPRESSION.md) · [`COMPRESSION_ENGINES.md`](docs/compression/COMPRESSION_ENGINES.md)
 
@@ -1001,41 +1025,59 @@ omniroute
 ```
 
 > 💡 ხედავთ `npm warn ERESOLVE`-ს ან peer-dep გაფრთხილებებს? [ისინი უვნებელია](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated).
+> **იყენებთ npm 11-ს ან უფრო ახალ ვერსიას?** npm-მა შესაძლოა დაბლოკოს პაკეტის სასიცოცხლო ციკლის სკრიპტები, თუ ისინი ნებადართული არ არის. OmniRoute-ის `postinstall` (`node scripts/build/postinstall.mjs`) საჭიროა მისი ნატიური გაშვების გარემოს ფაილების მოსამზადებლად. გლობალური ინსტალაციისას დაუშვით npm-ის გაფრთხილებაში ჩამოთვლილი პაკეტები. OmniRoute 3.8.51-ის მიერ მითითებული პაკეტების ნაკრებისთვის:
+>
+> ```bash
+> npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
+> ```
+>
+> მომავალი გლობალური ინსტალაციებისთვის ამ ნებადართული სიის ხელახლა გამოსაყენებლად ერთხელ გამართეთ იგი, შემდეგ კი ჩვეულებრივ დააინსტალირეთ:
+>
+> ```bash
+> npm config set allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild --location=user
+> npm install -g omniroute
+> ```
+>
+> დამოკიდებულებების სია რელიზებს შორის შეიძლება შეიცვალოს; თუ npm სხვა სიას აჩვენებს, გამოიყენეთ იმ გაფრთხილებაში მითითებული პაკეტების სახელები. პაკეტის დაშვება მის საინსტალაციო სკრიპტებს გაშვების უფლებას აძლევს.
+> **იყენებთ Gemini Web-ს ან ვებ-cookie-ზე დაფუძნებულ სხვა პროვაიდერს?** npm პაკეტი შეიცავს
+> Playwright-ს, მაგრამ არა მის Chromium-ის ბინარულ ფაილს. ვებ-პროვაიდერისთვის პირველი მოთხოვნის გაგზავნამდე გაეცანით
+> [Playwright Chromium-ის გამართვის](docs/guides/TROUBLESHOOTING.md#gemini-web-and-playwright-chromium)
+> შენიშვნას.
 
 მართვის პანელი ხელმისაწვდომია მისამართზე `http://localhost:20128` · API — მისამართზე `http://localhost:20128/v1`.
 
-**2) დააკავშირეთ უფასო პროვაიდერი (რეგისტრაციის გარეშე)**
+**2) დააკავშირეთ შესაბამისი პროვაიდერი საკუთარი ანგარიშით**
 
-მართვის პანელი → **პროვაიდერები** → დააკავშირეთ **Kiro AI** (უფასო Claude, ~50 კრედიტი თვეში თითო ანგარიშზე) ან **OpenCode Free** (ავტორიზაციის გარეშე) → მზადაა.
+მართვის პანელი → **პროვაიდერები** → აირჩიეთ პროვაიდერი, რომლის მიმდინარე პირობები და კვოტა თქვენს გამოყენების შემთხვევას შეესაბამება → დაამატეთ მისი API გასაღები ან გაიარეთ ანგარიშის დაკავშირების პროცესი. უფასო ტარიფებმა შეიძლება მოითხოვოს რეგისტრაცია, დამტკიცება ან გადახდის მეთოდი. გაეცანით [უფასო ტარიფების სახელმძღვანელოს](docs/getting-started/FREE-TIERS-GUIDE.md); გასაღების გარეშე ხელმისაწვდომობა გარანტირებული არ არის, ხოლო `tos: avoid` ნიშნით მონიშნული პროვაიდერები ნაგულისხმევად გამორიცხულია `auto`-დან.
 
 **3) მიუთითეთ მისამართი თქვენს პროგრამირების ხელსაწყოში**
 
 ```txt
 საბაზისო URL: http://localhost:20128/v1
 API გასაღები: [დააკოპირეთ მართვის პანელიდან → Endpoints]
-მოდელი:       auto            (ჭკვიანი მარშრუტიზაცია კონფიგურაციის გარეშე — ან ნებისმიერი პროვაიდერი/მოდელი)
+მოდელი:       auto            (ანაწილებს შესაბამის კავშირებს შორის — ან აირჩიეთ პროვაიდერი/მოდელი)
 ```
 
-**4) გადაამოწმეთ, რომ მუშაობს**
+**4) შეამოწმეთ, რომ მუშაობს**
 
 ```bash
 curl http://localhost:20128/v1/models -H "Authorization: Bearer YOUR_KEY"
 ```
 
-სიაში თქვენი დაკავშირებული მოდელები უნდა გამოჩნდეს. 🎉 სულ ესაა — დაიწყეთ კოდის წერა, OmniRoute კი ავტომატურად შეარჩევს მარშრუტს და საჭიროებისას სათადარიგო ვარიანტზე გადაერთვება.
+სიაში თქვენი დაკავშირებული მოდელები უნდა გამოჩნდეს. 🎉 სულ ესაა — დაიწყეთ კოდის წერა, OmniRoute კი ავტომატურად შეარჩევს მარშრუტს და საჭიროებისას სარეზერვო ვარიანტზე გადავა.
 
 თუ თქვენს კლიენტს მორგებული სათაურების გაგზავნა არ შეუძლია, OmniRoute ასევე გთავაზობთ ტოკენიზებულ თავსებადობის ფსევდონიმებს:
 
 ```txt
-OpenAI კატალოგი:  http://localhost:20128/vscode/YOUR_KEY/
-OpenAI მოდელები: http://localhost:20128/vscode/YOUR_KEY/models
-OpenAI ჩატი:     http://localhost:20128/vscode/YOUR_KEY/chat/completions
-OpenAI პასუხები: http://localhost:20128/vscode/YOUR_KEY/responses
-Ollama ჩატი:     http://localhost:20128/vscode/YOUR_KEY/api/chat
-Ollama ტეგები:   http://localhost:20128/vscode/YOUR_KEY/api/tags
+OpenAI კატალოგი:   http://localhost:20128/vscode/YOUR_KEY/
+OpenAI მოდელები:   http://localhost:20128/vscode/YOUR_KEY/models
+OpenAI ჩატი:       http://localhost:20128/vscode/YOUR_KEY/chat/completions
+OpenAI პასუხები:   http://localhost:20128/vscode/YOUR_KEY/responses
+Ollama ჩატი:       http://localhost:20128/vscode/YOUR_KEY/api/chat
+Ollama ტეგები:     http://localhost:20128/vscode/YOUR_KEY/api/tags
 ```
 
-გამოიყენეთ ისინი მხოლოდ იმ კლიენტებისთვის, რომლებსაც `Authorization: Bearer ...`-ის დამატება არ შეუძლიათ. სათაურით ავტორიზაცია კვლავ სასურველ რეჟიმად რჩება.
+ეს მისამართები გამოიყენეთ მხოლოდ იმ კლიენტებისთვის, რომლებსაც `Authorization: Bearer ...`-ის დამატება არ შეუძლიათ. სათაურით ავთენტიფიკაცია კვლავ სასურველ რეჟიმად რჩება.
 
 <br/>
 
@@ -1166,63 +1208,63 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1-იც გამ�
 
 <div align="center">
 
-<sub>პანელის მდგომარეობა 2026-08-24-ისთვის · დაუმუშავებელი კატალოგი: YT 809 | TT 137 | IG 124 · განახლების სიხალე (დღეები): YT 1 | TT 21 | IG 22</sub>
+<sub>მართვის პანელის სნეპშოტი 2026-10-18 მდგომარეობით · დაუმუშავებელი კატალოგი: YT 1.352 | TT 334 | IG 290 · განახლების სიხშირე (დღეები): YT 5 | TT 48 | IG 49</sub>
 
 <table>
   <tr>
     <td align="center" width="320">
       <a href="https://www.instagram.com/reel/Da8ZthUPK98/">
-        <img src="https://placehold.co/320x180/111827/FFFFFF?text=Instagram+Reel+%7C+nick_saraev&font=montserrat&bold=true" alt="Instagram ვიდეორგოლი" width="300"/>
+        <img src="https://placehold.co/320x180/111827/FFFFFF?text=Instagram+Reel+%7C+nick_saraev&font=montserrat&bold=true" alt="Instagram Reel — nick_saraev" width="300"/>
       </a><br/>
       <b>🎬 #1 — Instagram</b><br/>
       <sub>nick_saraev — 3,042,474 ნახვა</sub>
     </td>
     <td align="center" width="320">
-      <a href="https://www.instagram.com/reel/DaSs65mMrHk/">
-        <img src="https://placehold.co/320x180/111827/FFFFFF?text=Instagram+Reel+%7C+theopenstack&font=montserrat&bold=true" alt="Instagram ვიდეორგოლი — theopenstack" width="300"/>
+      <a href="https://www.instagram.com/reel/Dbp7wv_CIO0/">
+        <img src="https://placehold.co/320x180/111827/FFFFFF?text=Instagram+Reel+%7C+nnapier7&font=montserrat&bold=true" alt="Instagram Reel — nnapier7" width="300"/>
       </a><br/>
       <b>🎬 #2 — Instagram</b><br/>
+      <sub>nnapier7 — 1,454,535 ნახვა</sub>
+    </td>
+    <td align="center" width="320">
+      <a href="https://www.youtube.com/watch?v=NJ0TQ-pyMDY">
+        <img src="https://img.youtube.com/vi/NJ0TQ-pyMDY/maxresdefault.jpg" alt="YouTube — Amidia AI & Tech" width="300"/>
+      </a><br/>
+      <b>🎬 #3 — YouTube</b><br/>
+      <sub>Amidia AI & Tech — 794,974 ნახვა</sub>
+    </td>
+    <td align="center" width="320">
+      <a href="https://www.instagram.com/reel/DaSs65mMrHk/">
+        <img src="https://placehold.co/320x180/111827/FFFFFF?text=Instagram+Reel+%7C+theopenstack&font=montserrat&bold=true" alt="Instagram Reel — theopenstack" width="300"/>
+      </a><br/>
+      <b>🎬 #4 — Instagram</b><br/>
       <sub>theopenstack — 692,419 ნახვა</sub>
     </td>
     <td align="center" width="320">
-      <a href="https://www.tiktok.com/@milesreevesai/video/7667980059189366019">
-        <img src="https://placehold.co/320x180/111827/FFFFFF?text=TikTok+%7C+milesreevesai&font=montserrat&bold=true" alt="TikTok — milesreevesai" width="300"/>
+      <a href="https://www.tiktok.com/@migue.baena/video/7670919268216622358">
+        <img src="https://placehold.co/320x180/111827/FFFFFF?text=TikTok+%7C+migue.baena&font=montserrat&bold=true" alt="TikTok — migue.baena" width="300"/>
       </a><br/>
-      <b>🎬 #3 — TikTok</b><br/>
-      <sub>milesreevesai — 620,400 ნახვა</sub>
-    </td>
-    <td align="center" width="320">
-      <a href="https://www.youtube.com/watch?v=QucgvbO5gsM">
-        <img src="https://img.youtube.com/vi/QucgvbO5gsM/maxresdefault.jpg" alt="YouTube — Vaibhav Sisinty" width="300"/>
-      </a><br/>
-      <b>🎬 #4 — YouTube</b><br/>
-      <sub>Vaibhav Sisinty — 391,109 ნახვა</sub>
-    </td>
-    <td align="center" width="320">
-      <a href="https://www.instagram.com/reel/DbIt9AjK7-U/">
-        <img src="https://placehold.co/320x180/111827/FFFFFF?text=Instagram+Reel+%7C+buildwithai.club&font=montserrat&bold=true" alt="Instagram ვიდეორგოლი — buildwithai.club" width="300"/>
-      </a><br/>
-      <b>🎬 #5 — Instagram</b><br/>
-      <sub>buildwithai.club — 347,652 ნახვა</sub>
+      <b>🎬 #5 — TikTok</b><br/>
+      <sub>migue.baena — 685,788 ნახვა</sub>
     </td>
   </tr>
 </table>
 
 </div>
 
-**სრული რეიტინგი (დუბლიკატებისგან გასუფთავებული კანონიკური URL-ები, `v > 0`, უდიდესი წვდომა):**
+**სრული რეიტინგი (დედუბლირებული კანონიკური URL-ები, `v > 0`, უდიდესი მოცვა):**
 
-| #1                                                                                     | #2                                                                                    | #3                                                                                                      | #4                                                                                     | #5                                                                                        |
-| -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| [nick_saraev — Instagram](https://www.instagram.com/reel/Da8ZthUPK98/) — **3,042,474** | [theopenstack — Instagram](https://www.instagram.com/reel/DaSs65mMrHk/) — **692,419** | [milesreevesai — TikTok](https://www.tiktok.com/@milesreevesai/video/7667980059189366019) — **620,400** | [Vaibhav Sisinty — YouTube](https://www.youtube.com/watch?v=QucgvbO5gsM) — **391,109** | [buildwithai.club — Instagram](https://www.instagram.com/reel/DbIt9AjK7-U/) — **347,652** |
+| #1                                                                                     | #2                                                                                  | #3                                                                                      | #4                                                                                    | #5                                                                                                  |
+| -------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| [nick_saraev — Instagram](https://www.instagram.com/reel/Da8ZthUPK98/) — **3,042,474** | [nnapier7 — Instagram](https://www.instagram.com/reel/Dbp7wv_CIO0/) — **1,454,535** | [Amidia AI & Tech — YouTube](https://www.youtube.com/watch?v=NJ0TQ-pyMDY) — **794,974** | [theopenstack — Instagram](https://www.instagram.com/reel/DaSs65mMrHk/) — **692,419** | [migue.baena — TikTok](https://www.tiktok.com/@migue.baena/video/7670919268216622358) — **685,788** |
 
-| #6                                                                                  | #7                                                                                      | #8                                                                                          | #9                                                                                        | #10                                                                                         |
-| ----------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| [nivedan.ai — Instagram](https://www.instagram.com/reel/DbIrCksJiqq/) — **331,973** | [vaibhavsisinty — Instagram](https://www.instagram.com/reel/Dae05TSAK1l/) — **263,744** | [Nick Automates — YouTube Shorts](https://www.youtube.com/shorts/fZIBK_4fKq8) — **218,174** | [theroshankrishna — Instagram](https://www.instagram.com/reel/Dapjs58z0P0/) — **186,786** | [midudev — TikTok](https://www.tiktok.com/@midudev/video/7664636453544152342) — **177,800** |
+| #6                                                                                                      | #7                                                                                                  | #8                                                                                     | #9                                                                                        | #10                                                                                 |
+| ------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| [milesreevesai — TikTok](https://www.tiktok.com/@milesreevesai/video/7667980059189366019) — **620,400** | [nikothetech — TikTok](https://www.tiktok.com/@nikothetech/video/7671890769665477918) — **610,803** | [Vaibhav Sisinty — YouTube](https://www.youtube.com/watch?v=QucgvbO5gsM) — **509,281** | [buildwithai.club — Instagram](https://www.instagram.com/reel/DbIt9AjK7-U/) — **347,652** | [nivedan.ai — Instagram](https://www.instagram.com/reel/DbIrCksJiqq/) — **331,973** |
 
-კანონიკური მეტრიკები 2026-08-24-ისთვის: **1.029 უნიკალური ვიდეო** · **11.132.922 ცნობილი ნახვა** (`v > 0`) · **639 არხი/პროფილი ქსელების მიხედვით**. დაუმუშავებელი პანელი შეიცავს 1.070 სტრიქონს; Instagram-ის 41 დუბლიკატი კანონიკური URL-ის მიხედვით ნორმალიზდა, თითოეული ვიდეოსთვის ნახვების უდიდესი რაოდენობის შენარჩუნებით.
+კანონიკური მეტრიკები 2026-10-18 მდგომარეობით: **1.976 უნიკალური ვიდეო** · **20.220.289 ცნობილი ნახვა** (`v > 0`) · **1.210 არხი/პროფილი ქსელების მიხედვით**. დაუმუშავებელი მართვის პანელი შეიცავს 1.976 სტრიქონს (YouTube 1.352 = 740 გრძელი ვიდეო + 612 Shorts · TikTok 334 · Instagram 290); კანონიკური URL-ის მიხედვით ნორმალიზაციის შემდეგ დუბლიკატები აღარ დარჩა — თითოეული ვიდეოსთვის შენარჩუნებულია ნახვების უდიდესი რაოდენობა. YouTube-ის მონაცემთა შეგროვება გაყინულია 2026-10-13 მდგომარეობით (API-ის კვოტა ამოიწურა 14-დან 18/10-მდე), ხოლო TikTok/Instagram-ის — 2026-09-02-დან (მონაცემთა შეგროვების კრედიტების არარსებობის გამო); 76 ვიდეოს ჯერ კიდევ არ აქვს ნახვების რაოდენობა.
 
-> 🎬 **გადაიღეთ ვიდეო OmniRoute-ის შესახებ?** ბმულით გახსენით [საკითხი](https://github.com/diegosouzapw/OmniRoute/issues/new) ან [დისკუსია](https://github.com/diegosouzapw/OmniRoute/discussions) — მას აქ გამოვაჩენთ.
+> 🎬 **გადაიღეთ ვიდეო OmniRoute-ის შესახებ?** გახსენით [საკითხი](https://github.com/diegosouzapw/OmniRoute/issues/new) ან [დისკუსია](https://github.com/diegosouzapw/OmniRoute/discussions) ბმულის მითითებით — და ჩვენ მას აქ გამოვაჩენთ.
 
 <br/>
 
@@ -1230,22 +1272,22 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1-იც გამ�
 
 # 📧 საზოგადოება და დახმარება
 
-> ყველაფერი ერთ სივრცეშია — გამოიწერეთ პროექტის ხელმძღვანელი, ესაუბრეთ საზოგადოებას ან გახსენით საკითხი.
+> ყველაფერი ერთ ადგილას — გამოიწერეთ პროექტის მომვლელი, ესაუბრეთ საზოგადოებას ან გახსენით საკითხი.
 
-| არხი                                                   | სად / როგორ                                                                                                                        |
-| ------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------- |
-| 💼 **LinkedIn** — მიჰყევით პროექტის ხელმძღვანელს       | [linkedin.com/in/diegosouzapw](https://www.linkedin.com/in/diegosouzapw/)                                                          |
-| 🐙 **GitHub** — მიჰყევით განახლებებისა და რჩევებისთვის | [@diegosouzapw](https://github.com/diegosouzapw)                                                                                   |
-| 💬 **Discord**                                         | [discord.gg/U47eFqAXCn](https://discord.gg/U47eFqAXCn)                                                                             |
-| ✈️ **Telegram**                                        | [t.me/omnirouteOficial](https://t.me/omnirouteOficial)                                                                             |
-| 🟢 **WhatsApp — 🌍 გლობალური**                         | [შეუერთდით ჯგუფს](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4)                                                 |
-| 🟢 **WhatsApp — 🇧🇷 ბრაზილია**                          | [შეუერთდით ჯგუფს](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)                                                 |
-| 🌍 **ვებსაიტი**                                        | [omniroute.online](https://omniroute.online)                                                                                       |
-| 🌍 **🌍StHub OmniRoute-ის საზოგადოება (უფასო)**        | [StHub-ის პორტალი](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)                          |
-| 📦 **საწყისი კოდი**                                    | [github.com/diegosouzapw/OmniRoute](https://github.com/diegosouzapw/OmniRoute)                                                     |
-| 🐛 **შეცდომის შეტყობინება**                            | [გახსენით საკითხი](https://github.com/diegosouzapw/OmniRoute/issues) — დაურთეთ `npm run system-info`-ის შედეგი                     |
-| 🤝 **წვლილის შეტანა**                                  | [CONTRIBUTING.md](CONTRIBUTING.md) · [ბრენჩებისა და გამოშვებების მოდელი](docs/ops/BRANCHING_MODEL.md) · აირჩიეთ `good first issue` |
-| 💚 **პროექტის მხარდაჭერა**                             | [მხარდაჭერის გზები ↑](#-support-omniroute) · [GitHub Sponsors](https://github.com/sponsors/diegosouzapw)                           |
+| არხი                                                     | სად / როგორ                                                                                                                       |
+| -------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| 💼 **LinkedIn** — გამოიწერეთ პროექტის მომვლელი           | [linkedin.com/in/diegosouzapw](https://www.linkedin.com/in/diegosouzapw/)                                                         |
+| 🐙 **GitHub** — გამოიწერეთ განახლებებისა და რჩევებისთვის | [@diegosouzapw](https://github.com/diegosouzapw)                                                                                  |
+| 💬 **Discord**                                           | [discord.gg/U47eFqAXCn](https://discord.gg/U47eFqAXCn)                                                                            |
+| ✈️ **Telegram**                                          | [t.me/omnirouteOficial](https://t.me/omnirouteOficial)                                                                            |
+| 🟢 **WhatsApp — 🌍 გლობალური**                           | [შეუერთდით ჯგუფს](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4)                                                |
+| 🟢 **WhatsApp — 🇧🇷 ბრაზილია**                            | [შეუერთდით ჯგუფს](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)                                                |
+| 🌍 **ვებსაიტი**                                          | [omniroute.online](https://omniroute.online)                                                                                      |
+| 🌍 **🌍StHub OmniRoute-ის საზოგადოება (უფასო)**          | [StHub-ის პორტალი](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)                         |
+| 📦 **საწყისი კოდი**                                      | [github.com/diegosouzapw/OmniRoute](https://github.com/diegosouzapw/OmniRoute)                                                    |
+| 🐛 **შეცდომის შეტყობინება**                              | [გახსენით საკითხი](https://github.com/diegosouzapw/OmniRoute/issues) — დაურთეთ `npm run system-info`-ის შედეგი                    |
+| 🤝 **წვლილის შეტანა**                                    | [CONTRIBUTING.md](CONTRIBUTING.md) · [განშტოებისა და გამოშვების მოდელი](docs/ops/BRANCHING_MODEL.md) · აირჩიეთ `good first issue` |
+| 💚 **პროექტის მხარდაჭერა**                               | [მხარდაჭერის გზები ↑](#-support-omniroute) · [GitHub Sponsors](https://github.com/sponsors/diegosouzapw)                          |
 
 </div>
 
@@ -1261,21 +1303,21 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1-იც გამ�
 <table>
   <tr><th align="left">ფენა</th><th align="left">ტექნოლოგია</th></tr>
   <tr><td nowrap><b>შესრულების გარემო</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>ენა</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> <code>src/</code>-სა და <code>open-sse/</code>-ში (ბირთვში არცერთი <code>any</code> v2.0-ის შემდეგ)</td></tr>
+  <tr><td nowrap><b>ენა</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> <code>src/</code>-სა და <code>open-sse/</code>-ში (ბირთვში არცერთი <code>any</code> v2.0-დან მოყოლებული)</td></tr>
   <tr><td nowrap><b>ფრეიმვორკი</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>მონაცემთა ბაზა</b></td><td>better-sqlite3 (SQLite, WAL-ჟურნალირება) + LowDB (მემკვიდრეობითი JSON) — 137 დომენური მოდული, 193 მიგრაცია</td></tr>
-  <tr><td nowrap><b>მეხსიერება</b></td><td>SQLite FTS5 სრული ტექსტით ძიება + int8-კვანტიზებული ვექტორული ჩადგმები, ტიპიზებული დაღმავალი წონადობა</td></tr>
+  <tr><td nowrap><b>მონაცემთა ბაზა</b></td><td>better-sqlite3 (SQLite, WAL-ჟურნალირება) + LowDB (მემკვიდრეობითი JSON) — 147 დომენური მოდული, 209 მიგრაცია</td></tr>
+  <tr><td nowrap><b>მეხსიერება</b></td><td>SQLite FTS5 სრულტექსტიანი ძიება + int8-კვანტიზებული ვექტორული ჩაშენებები, ტიპიზებული დაქვეითება</td></tr>
   <tr><td nowrap><b>სქემები</b></td><td>Zod 4 — MCP ხელსაწყოების I/O ვალიდაცია + API კონტრაქტები</td></tr>
   <tr><td nowrap><b>პროტოკოლები</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
   <tr><td nowrap><b>ნაკადური გადაცემა</b></td><td>Server-Sent Events (SSE) + WebSocket ხიდი (<code>/v1/ws</code>)</td></tr>
   <tr><td nowrap><b>შეკუმშვა</b></td><td>12-ძრავიანი კონვეიერი — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>ავთენტიფიკაცია და უსაფრთხოება</b></td><td>OAuth 2.0 (PKCE) + JWT + API გასაღებები + MCP-ის არეალებით შეზღუდული ავთენტიფიკაცია · AES-256-GCM შენახულ მონაცემებზე · DOMPurify</td></tr>
-  <tr><td nowrap><b>შენიღბვა</b></td><td>wreq-js — JA3 / JA4 TLS თითის ანაბეჭდის იმიტაცია, 3-დონიანი პროქსი</td></tr>
-  <tr><td nowrap><b>მდგრადობა</b></td><td>ავარიული ამომრთველი, ექსპონენციალური დაყოვნება, ერთდროული მოთხოვნების მოზღვავებისგან დაცვა, ავტოკომბინაციის თვითაღდგენა</td></tr>
+  <tr><td nowrap><b>ავთენტიფიკაცია &amp; უსაფრთხოება</b></td><td>OAuth 2.0 (PKCE) + JWT + API გასაღებები + MCP-ის სფეროებით შეზღუდული ავთენტიფიკაცია · AES-256-GCM შენახულ მონაცემებზე · DOMPurify</td></tr>
+  <tr><td nowrap><b>შეუმჩნევლობა</b></td><td>wreq-js — JA3 / JA4 TLS ანაბეჭდის იმიტაცია, 3-დონიანი პროქსი</td></tr>
+  <tr><td nowrap><b>მედეგობა</b></td><td>ამომრთველი, ექსპონენციალური დაყოვნება, მოთხოვნების მასობრივი მოზღვავებისგან დაცვა, ავტომატური კომბინაციების თვითაღდგენა</td></tr>
   <tr><td nowrap><b>ჟურნალირება</b></td><td>pino — სტრუქტურირებული JSON ჟურნალები მოთხოვნის კონტექსტით</td></tr>
-  <tr><td nowrap><b>ტესტირება</b></td><td>Node.js ტესტების გამშვები + Vitest — <b>39,000+ სტატიკური ტესტის დეკლარაცია</b> 5,100+ აღრიცხულ სატესტო ფაილში (მოდულური, ინტეგრაციული, E2E, უსაფრთხოების, ეკოსისტემის)</td></tr>
+  <tr><td nowrap><b>ტესტირება</b></td><td>Node.js ტესტების გამშვები + Vitest — <b>56,000+ სტატიკური სატესტო დეკლარაცია</b> 7,800+ თვალყურისდევნებულ სატესტო ფაილში (მოდულური, ინტეგრაციული, E2E, უსაფრთხოების, ეკოსისტემის)</td></tr>
   <tr><td nowrap><b>პლატფორმები</b></td><td>დესკტოპი (Electron) · Android (Termux) · PWA (ნებისმიერი ბრაუზერი)</td></tr>
-  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — რელიზისას npm-ზე ავტომატური გამოქვეყნება + Docker Hub</td></tr>
+  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — რელიზისას ავტომატური npm გამოქვეყნება + Docker Hub</td></tr>
   <tr><td nowrap><b>ბმულები</b></td><td><a href="https://omniroute.online">ვებსაიტი</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 
@@ -1287,15 +1329,15 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1-იც გამ�
 
 </div>
 
-### 📘 მუშაობის დაწყება
+### 📘 საწყისი ნაბიჯები
 
 <table>
   <tr><th align="left">დოკუმენტი</th><th align="left">აღწერა</th></tr>
   <tr><td nowrap><b><a href="docs/guides/USER_GUIDE.md">მომხმარებლის სახელმძღვანელო</a></b></td><td>პროვაიდერები, კომბინაციები, CLI-სთან ინტეგრაცია, განთავსება</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/SETUP_GUIDE.md">დაყენების სახელმძღვანელო</a></b></td><td>ინსტალაციის ყველა მეთოდი, CLI ხელსაწყოების კონფიგურაციები, პროტოკოლის გამართვა, მოლოდინის დროის ოპტიმიზაცია</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/CLI-TOOLS.md">CLI ხელსაწყოების სახელმძღვანელო</a></b></td><td>ცალკეული ხელსაწყოების გამართვა Claude Code-ისთვის, Codex-ისთვის, Cursor-ისთვის, Cline-ისთვის, OpenClaw-ისთვის, Kilo-სა და Copilot-ისთვის</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/SETUP_GUIDE.md">გამართვის სახელმძღვანელო</a></b></td><td>ინსტალაციის სრული მეთოდები, CLI ხელსაწყოების კონფიგურაციები, პროტოკოლის გამართვა, მოლოდინის დროის მორგება</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/CLI-TOOLS.md">CLI ხელსაწყოების სახელმძღვანელო</a></b></td><td>ინდივიდუალური გამართვა Claude Code-ისთვის, Codex-ისთვის, Cursor-ისთვის, Cline-ისთვის, OpenClaw-ისთვის, Kilo-სთვის და Copilot-ისთვის</td></tr>
   <tr><td nowrap><b><a href="docs/guides/REMOTE-MODE.md">დისტანციური რეჟიმი</a></b></td><td>მართეთ დისტანციური OmniRoute (VPS) თქვენი ლეპტოპის CLI-დან შეზღუდული წვდომის ტოკენების მეშვეობით</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/CLAUDE-CODE-CONFIGURATION.md">Claude Code-ის კონფიგურაცია</a></b></td><td>დააკავშირეთ Claude Code OmniRoute-თან (ლოკალურთან/დისტანციურთან) <code>launch</code>-ისა და თითოეული მოდელის პროფილების გამოყენებით</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/CLAUDE-CODE-CONFIGURATION.md">Claude Code-ის კონფიგურაცია</a></b></td><td>დააკავშირეთ Claude Code OmniRoute-თან (ლოკალური/დისტანციური) <code>launch</code>-ისა და თითოეული მოდელის პროფილების გამოყენებით</td></tr>
   <tr><td nowrap><b><a href="README.md#-quick-start">სწრაფი დაწყება</a></b></td><td>3 ნაბიჯი: ინსტალაცია → დაკავშირება → კონფიგურაცია</td></tr>
 </table>
 
@@ -1308,7 +1350,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1-იც გამ�
   <tr><td nowrap><b><a href="docs/ops/VM_DEPLOYMENT_GUIDE.md">VM-ზე განთავსება</a></b></td><td>სრული სახელმძღვანელო: VM + nginx + Cloudflare-ის გამართვა</td></tr>
   <tr><td nowrap><b><a href="docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md">Fly.io-ზე განთავსება</a></b></td><td>განათავსეთ Fly.io-ზე მუდმივი საცავის გამოყენებით</td></tr>
   <tr><td nowrap><b><a href="docs/guides/TERMUX_GUIDE.md">Termux-ის სახელმძღვანელო</a></b></td><td>გაუშვით OmniRoute Android-ზე Termux-ის მეშვეობით</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/PWA_GUIDE.md">PWA-ს სახელმძღვანელო</a></b></td><td>პროგრესული ვებაპლიკაციის ინსტალაცია, კეშირება, არქიტექტურა</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/PWA_GUIDE.md">PWA-ს სახელმძღვანელო</a></b></td><td>პროგრესული ვებაპლიკაციის ინსტალაცია, ქეშირება, არქიტექტურა</td></tr>
   <tr><td nowrap><b><a href="docs/guides/UNINSTALL.md">დეინსტალაციის სახელმძღვანელო</a></b></td><td>სრული წაშლა ინსტალაციის ყველა მეთოდისთვის</td></tr>
   <tr><td nowrap><b><a href="docs/reference/ENVIRONMENT.md">გარემოს კონფიგურაცია</a></b></td><td><code>.env</code>-ის ცვლადებისა და ცნობარების სრული სია</td></tr>
 </table>
@@ -1318,17 +1360,17 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1-იც გამ�
 <table>
   <tr><th align="left">დოკუმენტი</th><th align="left">აღწერა</th></tr>
   <tr><td nowrap><b><a href="docs/architecture/ARCHITECTURE.md">არქიტექტურა</a></b></td><td>სისტემის არქიტექტურა, მონაცემთა ნაკადი და შიდა მექანიზმები</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_GUIDE.md">შეკუმშვის სახელმძღვანელო</a></b></td><td>7-ვარიანტიანი კონვეიერი: გამორთული / მსუბუქი / სტანდარტული / აგრესიული / ულტრა / RTK / კომბინირებული</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/RTK_COMPRESSION.md">RTK შეკუმშვა</a></b></td><td>ბრძანებების გამოტანილი მონაცემების შეკუმშვა, ფილტრები, ნდობა, შემოწმება, დაუმუშავებელი გამოტანილი მონაცემების აღდგენა</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_ENGINES.md">შეკუმშვის ძრავები</a></b></td><td>Caveman, RTK, კომბინირებული კონვეიერები, მართვის პანელის/API/MCP ინტერფეისები</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_GUIDE.md">შეკუმშვის სახელმძღვანელო</a></b></td><td>7-ვარიანტიანი კონვეიერი: გამორთული / მსუბუქი / სტანდარტული / აგრესიული / ულტრა / RTK / დაწყობილი</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/RTK_COMPRESSION.md">RTK შეკუმშვა</a></b></td><td>ბრძანების გამომავალი მონაცემების შეკუმშვა, ფილტრები, ნდობა, შემოწმება, დაუმუშავებელი გამომავალი მონაცემების აღდგენა</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_ENGINES.md">შეკუმშვის ძრავები</a></b></td><td>Caveman, RTK, დაწყობილი კონვეიერები, მართვის პანელის/API/MCP ინტერფეისები</td></tr>
   <tr><td nowrap><b><a href="docs/compression/COMPRESSION_RULES_FORMAT.md">შეკუმშვის წესების ფორმატი</a></b></td><td>JSON წესების პაკეტების სქემები Caveman-ისა და RTK-ის ფილტრებისთვის</td></tr>
   <tr><td nowrap><b><a href="docs/compression/COMPRESSION_LANGUAGE_PACKS.md">შეკუმშვის ენობრივი პაკეტები</a></b></td><td>ენის ამოცნობა და Caveman-ის წესების პაკეტების შექმნა</td></tr>
-  <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">მდგრადობის სახელმძღვანელო</a></b></td><td>ავარიული ამომრთველები, დაყოვნების პერიოდები, რიგი, ერთდროული მოთხოვნების მოზღვავების პრევენცია, TLS-ის გაყალბება</td></tr>
+  <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">მდგრადობის სახელმძღვანელო</a></b></td><td>ავარიული ამომრთველები, დაყოვნების პერიოდები, რიგი, მოთხოვნების ერთდროული მოზღვავების საწინააღმდეგო მექანიზმი, TLS-ის იმიტაცია</td></tr>
   <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">ავტომატური კომბინაციების ძრავა</a></b></td><td>16-ფაქტორიანი შეფასება, რეჟიმების პაკეტები, თვითაღდგენა</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">პროქსის სახელმძღვანელო</a></b></td><td>3-დონიანი პროქსი-სისტემა, 1proxy-ის მარკეტპლეისი, რეესტრის CRUD ოპერაციები</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">უფასო დონეები</a></b></td><td>გაერთიანებული კატალოგი: 35 დოკუმენტირებული განმეორებადი პული / უფასო დონის 489 კატალოგიზებული ჩანაწერი</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">პროქსის სახელმძღვანელო</a></b></td><td>3-დონიანი პროქსი-სისტემა, 1proxy-ის მარკეტპლეისი, რეესტრის CRUD</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">უფასო დონეები</a></b></td><td>გაერთიანებული კატალოგი: 34 დოკუმენტირებული განმეორებადი პული / უფასო დონის 467 კატალოგიზებული ჩანაწერი</td></tr>
   <tr><td nowrap><b><a href="docs/guides/FEATURES.md">ფუნქციების გალერეა</a></b></td><td>მართვის პანელის ვიზუალური მიმოხილვა ეკრანის ანაბეჭდებით</td></tr>
-  <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">კოდის ბაზის დოკუმენტაცია</a></b></td><td>დამწყებებისთვის გასაგები კოდის ბაზის მიმოხილვა</td></tr>
+  <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">კოდური ბაზის დოკუმენტაცია</a></b></td><td>დამწყებთათვის გასაგები კოდური ბაზის მიმოხილვა</td></tr>
 </table>
 
 ### 🤖 პროტოკოლები და API-ები
@@ -1337,7 +1379,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1-იც გამ�
   <tr><th align="left">დოკუმენტი</th><th align="left">აღწერა</th></tr>
   <tr><td nowrap><b><a href="docs/reference/API_REFERENCE.md">API ცნობარი</a></b></td><td>ყველა საბოლოო წერტილი მაგალითებით</td></tr>
   <tr><td nowrap><b><a href="docs/openapi.yaml">OpenAPI სპეციფიკაცია</a></b></td><td>OpenAPI 3.0 სპეციფიკაცია</td></tr>
-  <tr><td nowrap><b><a href="open-sse/mcp-server/README.md">MCP სერვერი</a></b></td><td>110 MCP ხელსაწყო, IDE კონფიგურაციები, Python/TS/Go კლიენტები</td></tr>
+  <tr><td nowrap><b><a href="open-sse/mcp-server/README.md">MCP სერვერი</a></b></td><td>110 MCP ხელსაწყო, IDE-ს კონფიგურაციები, Python/TS/Go კლიენტები</td></tr>
   <tr><td nowrap><b><a href="docs/frameworks/MCP-SERVER.md">MCP სერვერის სახელმძღვანელო</a></b></td><td>MCP-ის ინსტალაცია, ტრანსპორტები და ხელსაწყოების ცნობარი</td></tr>
   <tr><td nowrap><b><a href="src/lib/a2a/README.md">A2A სერვერი</a></b></td><td>JSON-RPC 2.0 პროტოკოლი, უნარები, ნაკადური გადაცემა, ამოცანების მართვა</td></tr>
   <tr><td nowrap><b><a href="docs/frameworks/A2A-SERVER.md">A2A სერვერის სახელმძღვანელო</a></b></td><td>A2A აგენტის ბარათი, ამოცანები, უნარები და ნაკადური გადაცემა</td></tr>
@@ -1347,13 +1389,13 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1-იც გამ�
 
 <table>
   <tr><th align="left">დოკუმენტი</th><th align="left">აღწერა</th></tr>
-  <tr><td nowrap><b><a href="CONTRIBUTING.md">წვლილის შეტანა</a></b></td><td>დეველოპმენტის გარემოს გამართვა და სახელმძღვანელო მითითებები</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/BRANCHING_MODEL.md">ბრენჩებისა და რელიზების მოდელი</a></b></td><td>რომელი ბრენჩებისკენაა მიმართული PR-ები (<code>release/*</code>) და რას ნიშნავს <code>main</code> და ტეგები</td></tr>
-  <tr><td nowrap><b><a href="CHANGELOG.md">ცვლილებების ჟურნალი</a></b></td><td>რელიზების სრული ისტორია თითოეული ვერსიისთვის</td></tr>
-  <tr><td nowrap><b><a href="SECURITY.md">უსაფრთხოების პოლიტიკა</a></b></td><td>მოწყვლადობების შეტყობინება და უსაფრთხოების პრაქტიკები</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/I18N.md">i18n-ის სახელმძღვანელო</a></b></td><td>42 ენის მხარდაჭერა, თარგმნის სამუშაო პროცესი, RTL</td></tr>
+  <tr><td nowrap><b><a href="CONTRIBUTING.md">წვლილის შეტანა</a></b></td><td>დეველოპმენტის გარემოს გამართვა და სახელმძღვანელო პრინციპები</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/BRANCHING_MODEL.md">ბრენჩებისა და რელიზების მოდელი</a></b></td><td>სად მიემართება PR-ები (<code>release/*</code>) და რას ნიშნავს <code>main</code> და ტეგები</td></tr>
+  <tr><td nowrap><b><a href="CHANGELOG.md">ცვლილებების ჟურნალი</a></b></td><td>რელიზების სრული ისტორია თითოეული ვერსიის მიხედვით</td></tr>
+  <tr><td nowrap><b><a href="SECURITY.md">უსაფრთხოების პოლიტიკა</a></b></td><td>მოწყვლადობების შესახებ შეტყობინება და უსაფრთხოების პრაქტიკა</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/I18N.md">i18n-ის სახელმძღვანელო</a></b></td><td>67 ენის მხარდაჭერა, თარგმნის სამუშაო პროცესი, RTL</td></tr>
   <tr><td nowrap><b><a href="docs/ops/RELEASE_CHECKLIST.md">რელიზის საკონტროლო სია</a></b></td><td>რელიზამდე ვალიდაციის ეტაპები</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">დაფარვის გეგმა</a></b></td><td>ტესტებით დაფარვის სტრატეგია 5,100-ზე მეტ აღრიცხულ სატესტო ფაილში არსებული 39,000-ზე მეტი სტატიკური ტესტის დეკლარაციისთვის</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">დაფარვის გეგმა</a></b></td><td>ტესტებით დაფარვის სტრატეგია 56,000-ზე მეტი სტატიკური ტესტის დეკლარაციისთვის, 7,800-ზე მეტ თვალყურისდევნებულ სატესტო ფაილში</td></tr>
 </table>
 
 <br/>
@@ -1362,68 +1404,104 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1-იც გამ�
 
 # ⭐ მთავარი კონტრიბუტორები
 
-> OmniRoute ენთუზიაზმით სავსე ღია კოდის საზოგადოების მიერ ვითარდება. ამ ადამიანებმა განსაკუთრებული წვლილი შეიტანეს, რაც უშუალოდ აისახება პროექტის ხარისხზე, სტაბილურობასა და გავრცელებაზე. **გმადლობთ.**
+> OmniRoute-ს ენთუზიაზმით სავსე ღია კოდის საზოგადოება აყალიბებს. ამ ადამიანებმა განსაკუთრებული წვლილი შეიტანეს, რაც პირდაპირ აისახება პროექტის ხარისხზე, სტაბილურობასა და გავრცელებაზე. **გმადლობთ.**
 
-### გარე კონტრიბუტორები გაერთიანებული pull request-ების რაოდენობის მიხედვით
+### გარე კონტრიბუტორები გაერთიანებული pull request-ების მიხედვით
 
 <table>
   <tr><th align="center">ადგილი</th><th align="left">კონტრიბუტორი</th><th align="center">გაერთიანებული PR-ები</th><th align="right">~შეცვლილი ხაზები</th></tr>
-  <tr><td align="center">1</td><td align="left"><a href="https://github.com/backryun"><b>backryun</b></a></td><td align="center">190</td><td align="right">227,977</td></tr>
-  <tr><td align="center">2</td><td align="left"><a href="https://github.com/oyi77"><b>oyi77</b></a></td><td align="center">180</td><td align="right">407,678</td></tr>
-  <tr><td align="center">3</td><td align="left"><a href="https://github.com/rdself"><b>rdself</b></a></td><td align="center">145</td><td align="right">80,663</td></tr>
-  <tr><td align="center">4</td><td align="left"><a href="https://github.com/JxnLexn"><b>JxnLexn</b></a></td><td align="center">128</td><td align="right">387,049</td></tr>
-  <tr><td align="center">5</td><td align="left"><a href="https://github.com/KooshaPari"><b>KooshaPari</b></a></td><td align="center">101</td><td align="right">125,747</td></tr>
-  <tr><td align="center">6</td><td align="left"><a href="https://github.com/herjarsa"><b>herjarsa</b></a></td><td align="center">88</td><td align="right">230,872</td></tr>
-  <tr><td align="center">7</td><td align="left"><a href="https://github.com/RaviTharuma"><b>RaviTharuma</b></a></td><td align="center">79</td><td align="right">55,106</td></tr>
-  <tr><td align="center">8</td><td align="left"><a href="https://github.com/maxmad64bis"><b>maxmad64bis</b></a></td><td align="center">69</td><td align="right">394,715</td></tr>
-  <tr><td align="center">9</td><td align="left"><a href="https://github.com/artickc"><b>artickc</b></a></td><td align="center">59</td><td align="right">33,260</td></tr>
-  <tr><td align="center">10</td><td align="left"><a href="https://github.com/HouMinXi"><b>HouMinXi</b></a></td><td align="center">51</td><td align="right">47,334</td></tr>
-  <tr><td align="center">10</td><td align="left"><a href="https://github.com/chirag127"><b>chirag127</b></a></td><td align="center">51</td><td align="right">5,153</td></tr>
-  <tr><td align="center">12</td><td align="left"><a href="https://github.com/xz-dev"><b>xz-dev</b></a></td><td align="center">50</td><td align="right">245,976</td></tr>
-  <tr><td align="center">13</td><td align="left"><a href="https://github.com/hartmark"><b>hartmark</b></a></td><td align="center">47</td><td align="right">52,185</td></tr>
-  <tr><td align="center">14</td><td align="left"><a href="https://github.com/rqzbeh"><b>rqzbeh</b></a></td><td align="center">39</td><td align="right">143,181</td></tr>
-  <tr><td align="center">15</td><td align="left"><a href="https://github.com/dhaern"><b>dhaern</b></a></td><td align="center">34</td><td align="right">19,559</td></tr>
-  <tr><td align="center">16</td><td align="left"><a href="https://github.com/Dingding-leo"><b>Dingding-leo</b></a></td><td align="center">33</td><td align="right">1,986</td></tr>
-  <tr><td align="center">17</td><td align="left"><a href="https://github.com/NomenAK"><b>NomenAK</b></a></td><td align="center">32</td><td align="right">13,854</td></tr>
-  <tr><td align="center">18</td><td align="left"><a href="https://github.com/MumuTW"><b>MumuTW</b></a></td><td align="center">30</td><td align="right">16,953</td></tr>
-  <tr><td align="center">19</td><td align="left"><a href="https://github.com/benzntech"><b>benzntech</b></a></td><td align="center">29</td><td align="right">11,641</td></tr>
-  <tr><td align="center">20</td><td align="left"><a href="https://github.com/pacocartones"><b>pacocartones</b></a></td><td align="center">24</td><td align="right">9,331</td></tr>
-  <tr><td align="center">20</td><td align="left"><a href="https://github.com/Prudhvivuda"><b>Prudhvivuda</b></a></td><td align="center">24</td><td align="right">6,312</td></tr>
+  <tr><td align="center">1</td><td align="left"><a href="https://github.com/maxmad64bis"><b>maxmad64bis</b></a></td><td align="center">371</td><td align="right">25,326,561</td></tr>
+  <tr><td align="center">2</td><td align="left"><a href="https://github.com/HouMinXi"><b>HouMinXi</b></a></td><td align="center">269</td><td align="right">13,456,272</td></tr>
+  <tr><td align="center">3</td><td align="left"><a href="https://github.com/backryun"><b>backryun</b></a></td><td align="center">210</td><td align="right">270,562</td></tr>
+  <tr><td align="center">4</td><td align="left"><a href="https://github.com/oyi77"><b>oyi77</b></a></td><td align="center">190</td><td align="right">411,243</td></tr>
+  <tr><td align="center">5</td><td align="left"><a href="https://github.com/pacocartones"><b>pacocartones</b></a></td><td align="center">174</td><td align="right">78,276</td></tr>
+  <tr><td align="center">6</td><td align="left"><a href="https://github.com/JxnLexn"><b>JxnLexn</b></a></td><td align="center">151</td><td align="right">3,562,936</td></tr>
+  <tr><td align="center">6</td><td align="left"><a href="https://github.com/KooshaPari"><b>KooshaPari</b></a></td><td align="center">151</td><td align="right">5,972,314</td></tr>
+  <tr><td align="center">8</td><td align="left"><a href="https://github.com/rdself"><b>rdself</b></a></td><td align="center">145</td><td align="right">80,663</td></tr>
+  <tr><td align="center">9</td><td align="left"><a href="https://github.com/RaviTharuma"><b>RaviTharuma</b></a></td><td align="center">123</td><td align="right">500,065</td></tr>
+  <tr><td align="center">10</td><td align="left"><a href="https://github.com/herjarsa"><b>herjarsa</b></a></td><td align="center">88</td><td align="right">230,872</td></tr>
+  <tr><td align="center">11</td><td align="left"><a href="https://github.com/hartmark"><b>hartmark</b></a></td><td align="center">84</td><td align="right">2,849,554</td></tr>
+  <tr><td align="center">12</td><td align="left"><a href="https://github.com/jonlwheat2-gif"><b>jonlwheat2-gif</b></a></td><td align="center">67</td><td align="right">68,548</td></tr>
+  <tr><td align="center">13</td><td align="left"><a href="https://github.com/artickc"><b>artickc</b></a></td><td align="center">62</td><td align="right">43,502</td></tr>
+  <tr><td align="center">14</td><td align="left"><a href="https://github.com/chirag127"><b>chirag127</b></a></td><td align="center">52</td><td align="right">6,661</td></tr>
+  <tr><td align="center">15</td><td align="left"><a href="https://github.com/xz-dev"><b>xz-dev</b></a></td><td align="center">50</td><td align="right">245,976</td></tr>
+  <tr><td align="center">16</td><td align="left"><a href="https://github.com/xiaoyaner0201"><b>xiaoyaner0201</b></a></td><td align="center">47</td><td align="right">33,626</td></tr>
+  <tr><td align="center">17</td><td align="left"><a href="https://github.com/woodsonl"><b>woodsonl</b></a></td><td align="center">46</td><td align="right">809,391</td></tr>
+  <tr><td align="center">18</td><td align="left"><a href="https://github.com/rqzbeh"><b>rqzbeh</b></a></td><td align="center">44</td><td align="right">147,896</td></tr>
+  <tr><td align="center">19</td><td align="left"><a href="https://github.com/QuangBlue"><b>QuangBlue</b></a></td><td align="center">43</td><td align="right">13,112</td></tr>
+  <tr><td align="center">20</td><td align="left"><a href="https://github.com/MumuTW"><b>MumuTW</b></a></td><td align="center">40</td><td align="right">26,093</td></tr>
 </table>
 
-<sub>მონაცემები დაფიქსირებულია აქტიური <code>release/v3.8.50</code> ბრენჩის ბოლო კომიტზე <code>dafb4ae808</code>, 2026-08-24 05:26:03 UTC-მდე შესრულებული გაერთიანებების ჩათვლით. გვერდებად დაყოფილი GitHub GraphQL აღწერა მოიცავს 5,911 გაერთიანებულ PR-ს: 2,707 — რეპოზიტორიის მფლობელისგან, 179 — Dependabot-ისგან და <b>3,025 გარე PR-ს 535 სხვადასხვა კონტრიბუტორისგან</b>. „შეცვლილი ხაზები“ არის GitHub-ში დამატებული და წაშლილი ხაზების ჯამი და მოიცავს გენერირებულ ფაილებს, lockfile-ებს, კატალოგებს, თარგმანებსა და დოკუმენტაციას; ეს ცვლილებების მოცულობაა და არა ავტორის მიერ დაწერილი კოდის ხაზების რაოდენობა. ზღვარზე თანაბარი შედეგები შენარჩუნებულია.</sub>
+<sub>აღწერა შეგროვდა 2026-10-18 15:09:09 UTC-ზე, <code>release/v3.8.52</code>-ის აქტიური წვერით <code>656f01cb43</code>. გვერდებად დაყოფილი GitHub GraphQL აღწერა მოიცავს 9,191 გაერთიანებულ PR-ს: 3,834 — რეპოზიტორიის მფლობელისგან, 229 — Dependabot-ისგან, 6 — სხვა ბოტებისგან/აპებისგან და <b>5,122 გარე PR-ს 835 განსხვავებული კონტრიბუტორისგან</b>. „შეცვლილი ხაზები“ არის GitHub-ის დამატებებისა და წაშლების ჯამი და მოიცავს გენერირებულ ფაილებს, lockfile-ებს, კატალოგებს, თარგმანებსა და დოკუმენტაციას; ეს ცვლილებების მოცულობაა და არა ავტორის მიერ დაწერილი კოდის ხაზების რაოდენობა. 49 PR-ისთვის GitHub-ის მიერ ნაჩვენები სხვაობა 500,000 ხაზს აღემატება (მაგალითად, #13399 — ერთი პროვაიდერის დამატება — 2,347 შეცვლილ ფაილს აჩვენებს), რაც ზემოთ მოცემულ რამდენიმე ჯამურ მაჩვენებელს ხელოვნურად ზრდის. თანაბარი შედეგები ერთსა და იმავე ადგილზეა.</sub>
 
 ### GitHub-ის მიერ მიკუთვნებული კომიტები
 
 <table>
   <tr>
     <td align="center" width="160">
-      <a href="https://github.com/backryun">
-        <img src="https://github.com/backryun.png" width="40" style="border-radius:50%" alt="backryun"/><br/>
-        <b>backryun</b>
+      <a href="https://github.com/maxmad64bis">
+        <img src="https://github.com/maxmad64bis.png" width="40" style="border-radius:50%" alt="Dizzle"/><br/>
+        <b>Dizzle</b>
       </a><br/>
-      <sub>🥇 GitHub-ზე მიკუთვნებული 220 კომიტი</sub>
+      <sub>🥇 GitHub-ზე მიკუთვნებული 367 კომიტი</sub>
+    </td>
+    <td align="center" width="160">
+      <a href="https://github.com/HouMinXi">
+        <img src="https://github.com/HouMinXi.png" width="40" style="border-radius:50%" alt="Bob.Hou"/><br/>
+        <b>Bob.Hou</b>
+      </a><br/>
+      <sub>🥈 GitHub-ზე მიკუთვნებული 269 კომიტი</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/oyi77">
         <img src="https://github.com/oyi77.png" width="40" style="border-radius:50%" alt="Paijo"/><br/>
         <b>Paijo</b>
       </a><br/>
-      <sub>🥈 GitHub-ზე მიკუთვნებული 219 კომიტი</sub>
+      <sub>🥉 GitHub-ზე მიკუთვნებული 229 კომიტი</sub>
     </td>
     <td align="center" width="160">
-      <a href="https://github.com/rdself">
-        <img src="https://github.com/rdself.png" width="40" style="border-radius:50%" alt="Randi"/><br/>
-        <b>Randi</b>
+      <a href="https://github.com/backryun">
+        <img src="https://github.com/backryun.png" width="40" style="border-radius:50%" alt="backryun"/><br/>
+        <b>backryun</b>
       </a><br/>
-      <sub>🥉 GitHub-ზე მიკუთვნებული 108 კომიტი</sub>
+      <sub>🏅 GitHub-ზე მიკუთვნებული 202 კომიტი</sub>
+    </td>
+    <td align="center" width="160">
+      <a href="https://github.com/pacocartones">
+        <img src="https://github.com/pacocartones.png" width="40" style="border-radius:50%" alt="Paco Cartones"/><br/>
+        <b>Paco Cartones</b>
+      </a><br/>
+      <sub>🏅 GitHub-ზე მიკუთვნებული 174 კომიტი</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/RaviTharuma">
         <img src="https://github.com/RaviTharuma.png" width="40" style="border-radius:50%" alt="Ravi Tharuma"/><br/>
         <b>Ravi Tharuma</b>
       </a><br/>
-      <sub>🏅 GitHub-ზე მიკუთვნებული 81 კომიტი</sub>
+      <sub>🏅 GitHub-ზე მიკუთვნებული 126 კომიტი</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="160">
+      <a href="https://github.com/hartmark">
+        <img src="https://github.com/hartmark.png" width="40" style="border-radius:50%" alt="Markus Hartung"/><br/>
+        <b>Markus Hartung</b>
+      </a><br/>
+      <sub>🏅 GitHub-ზე მიკუთვნებული 114 კომიტი</sub>
+    </td>
+    <td align="center" width="160">
+      <a href="https://github.com/rdself">
+        <img src="https://github.com/rdself.png" width="40" style="border-radius:50%" alt="Randi"/><br/>
+        <b>Randi</b>
+      </a><br/>
+      <sub>🏅 GitHub-ზე მიკუთვნებული 108 კომიტი</sub>
+    </td>
+    <td align="center" width="160">
+      <a href="https://github.com/JxnLexn">
+        <img src="https://github.com/JxnLexn.png" width="40" style="border-radius:50%" alt="Jan Leon"/><br/>
+        <b>Jan Leon</b>
+      </a><br/>
+      <sub>🏅 GitHub-ზე მიკუთვნებული 87 კომიტი</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/christopher-s">
@@ -1433,55 +1511,18 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1-იც გამ�
       <sub>🏅 GitHub-ზე მიკუთვნებული 70 კომიტი</sub>
     </td>
     <td align="center" width="160">
-      <a href="https://github.com/hartmark">
-        <img src="https://github.com/hartmark.png" width="40" style="border-radius:50%" alt="Markus Hartung"/><br/>
-        <b>Markus Hartung</b>
+      <a href="https://github.com/KooshaPari">
+        <img src="https://github.com/KooshaPari.png" width="40" style="border-radius:50%" alt="Koosha Paridehpour"/><br/>
+        <b>Koosha Paridehpour</b>
       </a><br/>
-      <sub>🏅 GitHub-ზე მიკუთვნებული 69 კომიტი · თანაბრად #6 ადგილზე</sub>
-    </td>
-  </tr>
-  <tr>
-    <td align="center" width="160">
-      <a href="https://github.com/maxmad64bis">
-        <img src="https://github.com/maxmad64bis.png" width="40" style="border-radius:50%" alt="Dizzle"/><br/>
-        <b>Dizzle</b>
-      </a><br/>
-      <sub>🏅 GitHub-ზე მიკუთვნებული 69 კომიტი · თანაბრად #6 ადგილზე</sub>
-    </td>
-    <td align="center" width="160">
-      <a href="https://github.com/JxnLexn">
-        <img src="https://github.com/JxnLexn.png" width="40" style="border-radius:50%" alt="Jan Leon"/><br/>
-        <b>Jan Leon</b>
-      </a><br/>
-      <sub>🏅 GitHub-ზე მიკუთვნებული 64 კომიტი</sub>
-    </td>
-    <td align="center" width="160">
-      <a href="https://github.com/zen0bit">
-        <img src="https://github.com/zen0bit.png" width="40" style="border-radius:50%" alt="zenobit"/><br/>
-        <b>zenobit</b>
-      </a><br/>
-      <sub>🏅 GitHub-ზე მიკუთვნებული 62 კომიტი</sub>
-    </td>
-    <td align="center" width="160">
-      <a href="https://github.com/HouMinXi">
-        <img src="https://github.com/HouMinXi.png" width="40" style="border-radius:50%" alt="Bob.Hou"/><br/>
-        <b>Bob.Hou</b>
-      </a><br/>
-      <sub>🏅 GitHub-ზე მიკუთვნებული 51 კომიტი · თანაბრად #10 ადგილზე</sub>
-    </td>
-    <td align="center" width="160">
-      <a href="https://github.com/xz-dev">
-        <img src="https://github.com/xz-dev.png" width="40" style="border-radius:50%" alt="Xiangzhe"/><br/>
-        <b>Xiangzhe</b>
-      </a><br/>
-      <sub>🏅 GitHub-ზე მიკუთვნებული 51 კომიტი · თანაბრად #10 ადგილზე</sub>
+      <sub>🏅 GitHub-ზე მიკუთვნებული 68 კომიტი</sub>
     </td>
   </tr>
 </table>
 
-<sub>ხელახლა შემოწმდა 2026-08-24 06:14:31 UTC-ზე: რეპოზიტორიის Contributors API-ის მიერ <code>release/v3.8.50</code> ნაგულისხმევი ბრენჩისთვის მოხსენებული GitHub-ზე მიკუთვნებული კომიტები. API-მ დააბრუნა 525 იდენტობა (415 მომხმარებელი, 2 ბოტი, 108 ანონიმური); ეს ცხრილი გამორიცხავს პროექტის მმართველს, ბოტებსა და ანონიმურ იდენტობებს და ინარჩუნებს თანაბარ პოზიციებს. ის განსხვავდება როგორც ზემოთ მოცემული გაერთიანებული PR-ების რეიტინგისგან, ისე ქვემოთ მოცემული Git-ის მეტამონაცემებზე დაფუძნებული 639-პირიანი აღწერისგან.</sub>
+<sub>ხელახლა შემოწმდა 2026-10-18 14:44:45 UTC-ზე: GitHub-ზე მიკუთვნებული კომიტები, რომლებიც რეპოზიტორიის Contributors API-მ ნაგულისხმევი <code>release/v3.8.52</code> ბრენჩისთვის დააფიქსირა. API-მ დააბრუნა 849 იდენტობა (429 მომხმარებელი, 2 ბოტი, 418 ანონიმური); ეს ცხრილი არ მოიცავს პასუხისმგებელ პირს, ბოტებსა და ანონიმურ იდენტობებს და ინარჩუნებს თანაბარ შედეგებს. იგი განსხვავდება როგორც ზემოთ მოცემული გაერთიანებული PR-ების რეიტინგისგან, ისე ქვემოთ მოცემული Git-მეტამონაცემების აღწერისგან.</sub>
 
-> 🙏 ამ კონტრიბუტორების ფუნქციები, შეცდომების გამოსწორებები და ინფრასტრუქტურის გაუმჯობესებები არის იმის **უმნიშვნელოვანესი ნაწილი**, რაც OmniRoute-ს საიმედოსა და ფუნქციებით მდიდარს ხდის. მნიშვნელოვანია ყოველი pull request, ყოველი სატესტო შემთხვევა და ყოველი i18n თარგმანის ფაილი. ღია კოდს მათნაირი ადამიანები ქმნიან.
+> 🙏 ამ კონტრიბუტორების ფუნქციები, შეცდომების გამოსწორებები და ინფრასტრუქტურის გაუმჯობესებები არის იმის **ძირითადი ნაწილი**, რაც OmniRoute-ს საიმედოსა და ფუნქციებით მდიდარს ხდის. თითოეულ pull request-ს, თითოეულ სატესტო შემთხვევასა და თითოეულ i18n თარგმანის ფაილს მნიშვნელობა აქვს. ღია კოდს სწორედ მათნაირი ადამიანები ქმნიან.
 
 </div>
 
@@ -1497,35 +1538,79 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1-იც გამ�
 
 <table>
   <tr>
-    <td align="center" width="180">
+    <td align="center" width="160">
       <a href="https://github.com/drewbitt">
         <img src="https://github.com/drewbitt.png?size=140" width="72" style="border-radius:50%" alt="Andrew"/><br/>
         <b>Andrew</b>
       </a><br/>
       <sub>💛 აქტიური ყოველთვიური სპონსორი</sub>
     </td>
-    <td align="center" width="180">
+    <td align="center" width="160">
       <a href="https://github.com/psylligent">
         <img src="https://github.com/psylligent.png?size=140" width="72" style="border-radius:50%" alt="Vlad I"/><br/>
         <b>Vlad I</b>
       </a><br/>
       <sub>💛 აქტიური ყოველთვიური სპონსორი</sub>
     </td>
-    <td align="center" width="180">
-      <a href="https://github.com/pacocartones">
-        <img src="https://github.com/pacocartones.png?size=140" width="72" style="border-radius:50%" alt="Paco Cartones"/><br/>
-        <b>Paco Cartones</b>
+    <td align="center" width="160">
+      <a href="https://github.com/xiaoyaner0201">
+        <img src="https://github.com/xiaoyaner0201.png?size=140" width="72" style="border-radius:50%" alt="小妍儿"/><br/>
+        <b>小妍儿</b>
+      </a><br/>
+      <sub>💛 აქტიური ყოველთვიური სპონსორი</sub>
+    </td>
+    <td align="center" width="160">
+      <a href="https://github.com/Guilsc">
+        <img src="https://github.com/Guilsc.png?size=140" width="72" style="border-radius:50%" alt="Guilherme Costa"/><br/>
+        <b>Guilherme Costa</b>
       </a><br/>
       <sub>💛 აქტიური ერთჯერადი სპონსორი</sub>
     </td>
-    <td align="center" width="180">
+    <td align="center" width="160">
+      <a href="https://github.com/TheVingance">
+        <img src="https://github.com/TheVingance.png?size=140" width="72" style="border-radius:50%" alt="Henrique Triches Iurkiv"/><br/>
+        <b>Henrique Iurkiv</b>
+      </a><br/>
+      <sub>💛 აქტიური ერთჯერადი სპონსორი</sub>
+    </td>
+    <td align="center" width="160">
+      <a href="https://github.com/somesh-ghaturle">
+        <img src="https://github.com/somesh-ghaturle.png?size=140" width="72" style="border-radius:50%" alt="Somesh Ghaturle"/><br/>
+        <b>Somesh Ghaturle</b>
+      </a><br/>
+      <sub>💛 აქტიური ერთჯერადი სპონსორი</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="160">
+      <a href="https://github.com/Kolonie-AI">
+        <img src="https://github.com/Kolonie-AI.png?size=140" width="72" style="border-radius:50%" alt="Kolonie AI"/><br/>
+        <b>Kolonie AI</b>
+      </a><br/>
+      <sub>💛 ყოფილი ერთჯერადი მხარდამჭერი</sub>
+    </td>
+    <td align="center" width="160">
       <a href="https://github.com/igormorais123">
         <img src="https://github.com/igormorais123.png?size=140" width="72" style="border-radius:50%" alt="Professor Igor Morais Vasconcelos"/><br/>
         <b>Prof. Igor Morais</b>
       </a><br/>
       <sub>💛 ყოფილი ერთჯერადი მხარდამჭერი</sub>
     </td>
-    <td align="center" width="180">
+    <td align="center" width="160">
+      <a href="https://github.com/PixmaNts">
+        <img src="https://github.com/PixmaNts.png?size=140" width="72" style="border-radius:50%" alt="Pixma"/><br/>
+        <b>Pixma</b>
+      </a><br/>
+      <sub>💛 ყოფილი ერთჯერადი მხარდამჭერი</sub>
+    </td>
+    <td align="center" width="160">
+      <a href="https://github.com/pacocartones">
+        <img src="https://github.com/pacocartones.png?size=140" width="72" style="border-radius:50%" alt="Paco Cartones"/><br/>
+        <b>Paco Cartones</b>
+      </a><br/>
+      <sub>💛 ყოფილი ერთჯერადი მხარდამჭერი</sub>
+    </td>
+    <td align="center" width="160">
       <a href="https://github.com/longtao77">
         <img src="https://github.com/longtao77.png?size=140" width="72" style="border-radius:50%" alt="longtao"/><br/>
         <b>longtao</b>
@@ -1535,9 +1620,9 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1-იც გამ�
   </tr>
 </table>
 
-<sub>… და სხვები, რომლებიც ანონიმურობას ამჯობინებენ 💛</sub>
+<sub>… და სხვები, რომლებიც ანონიმურად დარჩენას ამჯობინებენ 💛</sub>
 
-<sub>GitHub-ის საჯარო სპონსორები ხელახლა გადამოწმდა 2026-08-24-ს. GitHub-ის <code>activeOnly</code> სტატუსი განსაზღვრავს ზემოთ მოცემულ აქტიურობის აღნიშვნებს; ადრე გასაჯაროებული ერთჯერადი საჯარო მხარდამჭერები კვლავ მადლიერებით არიან მოხსენიებული, ხოლო კერძო სპონსორები ანონიმურებად რჩებიან.</sub>
+<sub>საჯარო GitHub Sponsors-ის მონაცემები ხელახლა გადამოწმდა 2026-10-18-ს GitHub Sponsors GraphQL API-ის მეშვეობით: სულ 14 სპონსორობიდან 11 საჯაროა (6 აქტიური, 5 ყოფილი). GitHub-ის <code>isActive</code> სტატუსი განსაზღვრავს ზემოთ მოცემულ აქტიურობის აღნიშვნებს; ყოფილ საჯარო ერთჯერად მხარდამჭერებს კვლავ მადლობას ვუხდით, ხოლო კერძო სპონსორები ანონიმურად რჩებიან. Ko-fi-ის, Buy Me a Coffee-ის, Liberapay-ის, PIX-ისა და კრიპტოვალუტით შემოწირულობები ჩამონათვალში არ შედის, რადგან მათ შესახებ საჯარო სპონსორული ჩანაწერი არ არსებობს.</sub>
 
 <b><a href="https://github.com/sponsors/diegosouzapw">💖 გახდით სპონსორი →</a></b> — თითოეული დოლარი OmniRoute-ს უფასოსა და დამოუკიდებელს უნარჩუნებს.
 
@@ -1547,22 +1632,22 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1-იც გამ�
 
 <div align="center">
 
-## 👥 600+-ზე მეტი კონტრიბუტორი
+## 👥 900+ კონტრიბუტორი
 
 </div>
 
-[![კონტრიბუტორები](https://contrib.rocks/image?repo=diegosouzapw/OmniRoute&max=639&columns=20&anon=1)](https://github.com/diegosouzapw/OmniRoute/graphs/contributors)
+[![კონტრიბუტორები](https://contrib.rocks/image?repo=diegosouzapw/OmniRoute&max=993&columns=20&anon=1)](https://github.com/diegosouzapw/OmniRoute/graphs/contributors)
 
-<sub>აუდიტი ჩატარდა 2026-08-24-ს გაყინულ საბაზისო <code>ac02c5b42f</code> ვერსიაზე და ხელახლა შემოწმდა აქტიური <code>release/v3.8.50</code> შტოს ბოლო <code>dafb4ae808</code> ვერსიაზე: <b>639 ნორმალიზებული ადამიანის Git-იდენტობა</b> — 407 მათგანი ჩანს კომიტების ავტორად (მათ შორის პროექტის მომვლელიც), ხოლო 232 — მხოლოდ აშკარა <code>Co-authored-by</code> ტრეილერებში. აღრიცხვისას ნორმალიზებულია GitHub-ის noreply სახელები, გამორიცხულია 26 ბოტის/აგენტის/სერვისის/შემავსებელი იდენტობა და ჩვეულებრივი ელფოსტის მისამართები არ არის გაერთიანებული მხოლოდ იმიტომ, რომ მათი საჩვენებელი სახელები ემთხვევა.</sub>
+<sub>აუდიტი ჩატარდა 2026-10-18-ს, მოქმედი <code>release/v3.8.52</code> ვერსიის ბოლო <code>ad160ab2d1</code> კომიტზე (6,826 კომიტი): <b>993 ნორმალიზებული, ადამიანის კუთვნილი Git-იდენტობა</b> — 707 წარმოდგენილია კომიტის ავტორად (მათ შორის, პროექტის შემნახველი), ხოლო 286 — მხოლოდ აშკარა <code>Co-authored-by</code> ჩანაწერებში. აღწერისას გამოიყენება <code>.mailmap</code>, ელფოსტის მისამართები შედარებულია რეგისტრის გაუთვალისწინებლად, GitHub-ის რიცხვითი და ჩვეულებრივი noreply მისამართები ერთიანდება მხოლოდ მაშინ, როდესაც ისინი იმავე მომხმარებლის სახელს შეიცავს, გამორიცხულია ბოტის/აგენტის/სერვისის/ადგილმჭერის 26 იდენტობა და ჩვეულებრივი ელფოსტის მისამართები არ ერთიანდება მხოლოდ იმიტომ, რომ მათი საჩვენებელი სახელები ემთხვევა. 2026-08-24-ის აუდიტში გამოქვეყნებული იყო 639; ამ მეთოდის ხელახლა გამოყენება იმ აუდიტის საბაზისო <code>ac02c5b42f</code> კომიტზე იძლევა 619-ს, ამიტომ ზრდა ახალი კონტრიბუტორების დამსახურებაა და არა ნაკლებად მკაცრი მეთოდის.</sub>
 
 ### როგორ შეიტანოთ წვლილი
 
-1. შექმენით რეპოზიტორიის fork
-2. შექმენით შტო **აქტიური** `release/vX.Y.Z` შტოს ბოლო ვერსიიდან (არა `main`-იდან) — იხილეთ [შტოებისა და რელიზების მოდელი](docs/ops/BRANCHING_MODEL.md)
-3. შექმენით თქვენი ფუნქციონალის შტო (`git checkout -b feat/amazing-feature`)
+1. შექმენით რეპოზიტორიის ფორკი
+2. შექმენით განშტოება **აქტიური** `release/vX.Y.Z` განშტოების ბოლო მდგომარეობიდან (არა `main`-იდან) — იხილეთ [განშტოებებისა და გამოშვების მოდელი](docs/ops/BRANCHING_MODEL.md)
+3. შექმენით თქვენი ფუნქციონალის განშტოება (`git checkout -b feat/amazing-feature`)
 4. დააკომიტეთ თქვენი ცვლილებები (`git commit -m 'feat: add amazing feature'`)
-5. ატვირთეთ შტოში (`git push origin feat/amazing-feature`)
-6. გახსენით Pull Request, სადაც **base = შესაბამისი `release/vX.Y.Z` შტო**
+5. ატვირთეთ ცვლილებები განშტოებაში (`git push origin feat/amazing-feature`)
+6. გახსენით Pull Request, სადაც **base = შესაბამისი `release/vX.Y.Z` განშტოება**
 
 დეტალური მითითებებისთვის იხილეთ [CONTRIBUTING.md](CONTRIBUTING.md).
 
@@ -1611,110 +1696,109 @@ gh release create "v${VERSION}" --title "v${VERSION}" --generate-notes
 
 </div>
 
-OmniRoute გიგანტების მხრებზე დგას. ის დაიწყო, როგორც **[9router](https://github.com/decolua/9router)**-ის fork და Go პროექტის — **[CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)** — TypeScript-ზე პორტირებული ვერსია; ამის შემდეგ კი ქვემოთ ჩამოთვლილი თითოეული ქვესისტემა შთაგონებული იყო ღია კოდის პროექტით, რომელმაც ეს პირველად გააკეთა. თითოეულმა მათგანმა OmniRoute-ის კონკრეტული ნაწილის ჩამოყალიბებაში შეიტანა წვლილი. ამით ყველა მათგანს მადლობას ვუხდით. 🙏
+OmniRoute გიგანტების მხრებზე დგას. ის დაიწყო, როგორც **[9router](https://github.com/decolua/9router)**-ის ფორკი და Go პროექტის, **[CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)**-ის, TypeScript-ზე პორტი — შემდგომ კი ქვემოთ ჩამოთვლილი თითოეული ქვესისტემა შთაგონებული იყო ღია კოდის პროექტით, რომელმაც ეს მანამდე გააკეთა. თითოეულმა მათგანმა OmniRoute-ის კონკრეტული ნაწილი ჩამოაყალიბა. ამით ყველა მათგანს მადლობას ვუხდით. 🙏
 
-> ⭐ ვარსკვლავების რაოდენობა გადამოწმებულია GitHub-ის REST API-ის მეშვეობით 2026 წლის 24 აგვისტოს — აუცილებლად მიანიჭეთ ამ პროექტებს ვარსკვლავი. ეს რაოდენობები კონკრეტული თარიღისთვის შექმნილი ზუსტი სურათია და დროთა განმავლობაში, ბუნებრივია, შეიცვლება.
+> ⭐ ვარსკვლავების რაოდენობა გადამოწმებულია GitHub-ის REST API-ის მეშვეობით 2026 წლის 18 ოქტომბერს — დაუჭირეთ მხარი ამ პროექტებს ვარსკვლავით. რაოდენობები კონკრეტული თარიღისთვის დაფიქსირებული ზუსტი მონაცემებია და, ბუნებრივია, შეიცვლება.
 
-### 🧬 წარმოშობა და gateway
+### 🧬 წარმომავლობა და კარიბჭე
 
 <table>
   <tr><th align="left">პროექტი</th><th align="center">⭐</th><th align="left">როგორ შთააგონა მან OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/decolua/9router">9router</a></b></td><td align="center">26,161</td><td>საწყისი პროექტი, რომელზეც ეს fork არის აგებული — აქ გაფართოებულია მულტიმოდალური API-ებით და სრულად გადაწერილია TypeScript-ზე.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/router-for-me/CLIProxyAPI">CLIProxyAPI</a></b></td><td align="center">48,497</td><td>Go-ზე შექმნილი იმპლემენტაცია, რომელმაც JavaScript / TypeScript-ზე ამ პორტის შექმნა შთააგონა.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/BerriAI/litellm">LiteLLM</a></b></td><td align="center">57,100</td><td>AI-კარიბჭე, რომლის ფასების საჯარო მონაცემთა ნაკრები ჩვენი ხარჯების აღრიცხვის სინქრონიზაციას ამარაგებს, ხოლო პროვაიდერების ნორმალიზაციის მოდელმა ჩვენს მარშრუტიზაციაზე იქონია გავლენა.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/miuuyy/codex-chatgpt-web">codex-chatgpt-web</a></b></td><td align="center">1,410</td><td>MIT-ის საწყისი კოდი, რომელიც ადაპტირებულია პროექტში ჩაშენებულ ChatGPT Web → Codex Responses ხიდში, მათ შორის ბრაუზერის სესიის, პასუხის ჩარჩოების, გამოყენებისა და ვებ-ძიების ადაპტერები.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/Alishahryar1/free-claude-code">free-claude-code</a></b></td><td align="center">48,112</td><td>ნიმუშები, რომლებიც გადატანილია ნაკადის აღდგენაში, აზროვნების გარეშე მეტსახელებში, სარეზერვო ვებ-ძიებაში, მცოცავი ფანჯრის შეზღუდვებში, ჟურნალის მონაცემების დაფარვასა და გაძლიერებულ გამშვებ პროცესებში.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/standardagents/composer-api">composer-api</a></b></td><td align="center">322</td><td>Cursor Composer-ის ხელსაწყოს არჩევის, გამომავალი მონაცემების შეზღუდვისა და ხელსაწყოს დაფიქსირების ნიმუშები, რომლებიც ადაპტირებულია Cursor-ის მშობლიურ შემსრულებელში.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ndycode/codex-multi-auth">codex-multi-auth</a></b></td><td align="center">457</td><td>ახალი ავტორიზაციისა და refresh-token-ის როტაციის ნიმუშები, რომლებიც გადატანილია Codex OAuth-ის ხელახალ ავთენტიფიკაციაში.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ex-machina-co/opencode-anthropic-auth">opencode-anthropic-auth</a></b></td><td align="center">510</td><td>Claude Code-თან თავსებადი გარდაქმნის ნაგულისხმევი პარამეტრები და ბილინგის სათაურის ქცევა, რომლებიც განზოგადებულია OmniRoute-ის კონფიგურაციით მართვად ხიდში.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/520mmxx/grok2api-merged">grok2api-merged</a></b></td><td align="center">2</td><td>მისი Grok მოდელების შესაბამისობები, ყალბი TypeError-ის მქონე Statsig გენერატორი, მოთხოვნისა და მოწყობილობის ნაგულისხმევი პარამეტრები და NDJSON პასუხების დამმუშავებელი არსებითად ადაპტირდა OmniRoute-ის Grok Web შემსრულებელში.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/TQZHR/grok2api">TQZHR/grok2api</a></b></td><td align="center">705</td><td>grok2api-merged-ის მთავარი ტრანზიტიული კოდის წყარო; მისი მოდელის, სათაურის, სასარგებლო დატვირთვის, Statsig-ისა და დამმუშავებლის იმპლემენტაციები შენარჩუნებულია Grok Web-ის წარმოშობის ხაზში.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/chenyme/grok2api">chenyme/grok2api</a></b></td><td align="center">7,520</td><td>Grok-ის სასარგებლო დატვირთვისა და მოწყობილობის ნაგულისხმევი პარამეტრების, Statsig გენერატორისა და <code>result.response</code> დამმუშავებლის საფუძვლად არსებული MIT-ის საწყისი კოდი, რომელიც გადმოტანილია TQZHR-ისა და grok2api-merged-ის გავლით.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/miuzhaii/grok2api-pro">grok2api-pro</a></b></td><td align="center">27</td><td>ტრანზიტიული წყარო, რომელსაც grok2api-merged თავის proxy-pool ფენასთან დაკავშირებით უთითებს; OmniRoute ინარჩუნებს წარმოშობის ამ მითითებას, თუმცა არ აცხადებს proxy-pool-ის პორტირებას თავის შეზღუდულ Grok Web შემსრულებელში.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/CNFlyCat/GrokProxy">GrokProxy</a></b></td><td align="center">50</td><td>მისმა cookie-თი ავთენტიფიცირებულმა Grok პროქსიმ და <code>result.response.token</code> ნაკადის ნიმუშმა OmniRoute-ის Grok Web ტრანსპორტის შექმნაზე იქონია გავლენა.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/lianying1716/GrokBridge">GrokBridge</a></b></td><td align="center">5</td><td>Grok Web-ის თავდაპირველი იმპლემენტაციისთვის შესწავლილ იქნა მისი HTTP/ბრაუზერის აღმავალი სერვერის დიზაინი; მისი პირდაპირი HTTP გზა GrokProxy-დან მომდინარეობს, ამიტომ დამოუკიდებელი კოდის პორტირება არ ივარაუდება.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/imjustprism/grok-web-api">grok-web-api</a></b></td><td align="center">14</td><td>მისმა Rust-ის <code>ChatOptions</code> და პასუხის კონვერტის სქემებმა OmniRoute-ის TypeScript-ზე შექმნილი Grok მოთხოვნისა და ნაკადური პასუხის ტიპებზე იქონია გავლენა.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/decolua/9router">9router</a></b></td><td align="center">31,004</td><td>საწყისი პროექტი, რომელზეც ეს ფორკია აგებული — აქ გაფართოებულია მრავალმოდალური API-ებით და სრულად გადაწერილია TypeScript-ზე.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/router-for-me/CLIProxyAPI">CLIProxyAPI</a></b></td><td align="center">55,591</td><td>Go-ზე შექმნილი იმპლემენტაცია, რომელმაც JavaScript / TypeScript-ზე ამ პორტის შექმნა შთააგონა.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/BerriAI/litellm">LiteLLM</a></b></td><td align="center">61,482</td><td>AI-კარიბჭე, რომლის საჯარო ფასების მონაცემთა ნაკრები ჩვენი ხარჯების აღრიცხვის სინქრონიზაციას ამარაგებს, ხოლო პროვაიდერების ნორმალიზაციის მოდელმა ჩვენი მარშრუტიზაცია განსაზღვრა.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/miuuyy/codex-chatgpt-web">codex-chatgpt-web</a></b></td><td align="center">14,526</td><td>MIT-ლიცენზირებული საწყისი კოდი, რომელიც ადაპტირდა ჩაშენებულ ChatGPT Web → Codex Responses ხიდში, მათ შორის ბრაუზერის სესიის, პასუხის ჩარჩოების ფორმირების, გამოყენების აღრიცხვისა და ვებძიების ადაპტერები.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/Alishahryar1/free-claude-code">free-claude-code</a></b></td><td align="center">61,430</td><td>ნიმუშები, რომლებიც პორტირდა ნაკადის აღდგენაში, აზროვნების გარეშე მოქმედ ფსევდონიმებში, სარეზერვო ვებძიებაში, მცოცავი ფანჯრის ლიმიტებში, ჟურნალების მონაცემთა დაფარვასა და გაძლიერებულ გამშვებ პროცესებში.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/standardagents/composer-api">composer-api</a></b></td><td align="center">346</td><td>Cursor Composer-ის ხელსაწყოს არჩევის, გამომავალი მონაცემების შეზღუდვისა და ხელსაწყოს დაფიქსირების ნიმუშები, რომლებიც ადაპტირდა Cursor-ის ნატიურ შემსრულებელში.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ndycode/codex-multi-auth">codex-multi-auth</a></b></td><td align="center">553</td><td>ახალი შესვლისა და განახლების ტოკენის როტაციის ნიმუშები, რომლებიც პორტირდა Codex OAuth-ის ხელახალ ავთენტიფიკაციაში.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ex-machina-co/opencode-anthropic-auth">opencode-anthropic-auth</a></b></td><td align="center">558</td><td>Claude Code-თან თავსებადი გარდაქმნის ნაგულისხმევი პარამეტრები და ბილინგის სათაურების ქცევა, რომლებიც განზოგადდა OmniRoute-ის კონფიგურაციით მართვად ხიდში.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/520mmxx/grok2api-merged">grok2api-merged</a></b></td><td align="center">2</td><td>მისი Grok მოდელების შესაბამისობები, ყალბი TypeError-ის Statsig-გენერატორი, მოთხოვნისა და მოწყობილობის ნაგულისხმევი პარამეტრები და NDJSON პასუხების დამმუშავებელი მნიშვნელოვნად ადაპტირდა OmniRoute-ის Grok Web შემსრულებელში.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/TQZHR/grok2api">TQZHR/grok2api</a></b></td><td align="center">706</td><td>grok2api-merged-ის უკან მდგომი მთავარი ტრანზიტული კოდის წყარო; მისი მოდელის, სათაურის, დატვირთვის, Statsig-ისა და დამმუშავებლის იმპლემენტაციები შენარჩუნებულია Grok Web-ის წარმომავლობაში.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/chenyme/grok2api">chenyme/grok2api</a></b></td><td align="center">7,819</td><td>MIT-ლიცენზირებული საბაზისო წყარო Grok-ის დატვირთვისა და მოწყობილობის ნაგულისხმევი პარამეტრებისთვის, Statsig-გენერატორისა და <code>result.response</code> დამმუშავებლისთვის, რომლებიც TQZHR-ისა და grok2api-merged-ის გავლით გადმოვიდა.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/miuzhaii/grok2api-pro">grok2api-pro</a></b></td><td align="center">27</td><td>grok2api-merged-ის მიერ მისი პროქსი-პულის შრის წყაროდ მითითებული ტრანზიტული წყარო; OmniRoute ინარჩუნებს წარმომავლობის ამ მითითებას, თუმცა თავის შეზღუდული შესაძლებლობების Grok Web შემსრულებელში პროქსი-პულის პორტზე პრეტენზიას არ აცხადებს.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/CNFlyCat/GrokProxy">GrokProxy</a></b></td><td align="center">51</td><td>მისმა ქუქით ავთენტიფიცირებულმა Grok პროქსიმ და <code>result.response.token</code> ნაკადური გადაცემის ნიმუშმა OmniRoute-ის Grok Web ტრანსპორტის შექმნაზე მოახდინა გავლენა.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/lianying1716/GrokBridge">GrokBridge</a></b></td><td align="center">5</td><td>Grok Web-ის საწყისი იმპლემენტაციის შექმნისას გათვალისწინებული იყო მისი HTTP/ბრაუზერის ზედა დონის სერვისის დიზაინი; მისი პირდაპირი HTTP გზა GrokProxy-დან მომდინარეობს, ამიტომ დამოუკიდებელი კოდის პორტზე პრეტენზია არ არის გაცხადებული.</td></tr>
 </table>
 
 ### 🗜️ კონტექსტისა და ტოკენების შეკუმშვა — ძრავები
 
 <table>
   <tr><th align="left">პროექტი</th><th align="center">⭐</th><th align="left">როგორ შთააგონა მან OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/JuliusBrussee/caveman">Caveman</a></b></td><td align="center">100,538</td><td>ვირუსული პროექტი „რატომ გამოიყენო ბევრი ტოკენი, როცა ცოტაც საქმეს აკეთებს“ — მისი გამოქვაბულის ადამიანის მეტყველების ფილოსოფია საფუძვლად უდევს ჩვენს სტანდარტულ შეკუმშვის რეჟიმსა და შემავსებელი სიტყვების მოცილების/კონდენსაციის 30-ზე მეტ წესს.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/rtk-ai/rtk">RTK – Rust Token Killer</a></b></td><td align="center">77,185</td><td>ბრძანებების გამომავალი მონაცემების მაღალი წარმადობის შეკუმშვა — შთააგონა ჩვენი RTK ძრავა, JSON ფილტრების DSL, დაუმუშავებელი გამომავალი მონაცემების აღდგენა და კომბინირებული RTK → Caveman კონვეიერი.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/headroomlabs-ai/headroom">headroom</a></b></td><td align="center">67,310</td><td>შექცევადი კონტექსტის შეკუმშვა (SmartCrusher) — შთააგონა ჩვენი <code>headroom</code> ძრავა და <code>ccr</code> აღდგენის მარკერის შაბლონი.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/microsoft/LLMLingua">LLMLingua</a></b></td><td align="center">6,598</td><td>მინიშნებების შეკუმშვის კვლევა (LLMLingua / LLMLingua-2) — შთააგონა ჩვენი ასინქრონული, კოდისთვის უსაფრთხო და შეცდომისას ღია <code>llmlingua</code> ძრავა.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/atjsh/llmlingua-2-js">llmlingua-2-js</a></b></td><td align="center">31</td><td>JS/ONNX პორტი (MobileBERT / XLM-RoBERTa), რომელიც ჩვენი LLMLingua ძრავისთვის სამუშაო ნაკადის ბექენდად გამოიყენება.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/leninejunior/troglodita">Troglodita</a></b></td><td align="center">40</td><td>PT-BR ტოკენების შეკუმშვა — უზრუნველყოფს ჩვენი pt-BR ენის პაკეტის მუშაობას: პლეონაზმების შემცირებასა და ბრაზილიურ-პორტუგალიურ გრამატიკაზე მორგებულ შემავსებელი სიტყვების მოცილებას.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/DietrichGebert/ponytail">ponytail</a></b></td><td align="center">108,957</td><td>ვირუსული „ზარმაცი უფროსი დეველოპერის“ YAGNI-კოდირების უნარი — შთააგონა ჩვენი <b>less-code</b> გამომავალი სტილი: მინიმალური მუშა ცვლილებისკენ მიმართვა, რომელიც ამცირებს _გენერირებულ_ კოდს (Caveman-ის ლაკონიური პროზის გამომავალზე ორიენტირებული ანალოგი).</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ayghri/i-have-adhd">i-have-adhd</a></b></td><td align="center">23,526</td><td>მისი მოქმედებაზე ორიენტირებული, ADHD-მეგობრული პასუხის სტილი ადაპტირდა OmniRoute-ის ლაკონიურ გამომავალ სტილად ხუთ ენაზე.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/JuliusBrussee/caveman">Caveman</a></b></td><td align="center">113,396</td><td>ვირუსული პროექტი „რატომ გამოიყენო ბევრი ტოკენი, როცა ცოტაც აკეთებს საქმეს“ — მისი გამოქვაბულის კაცის მეტყველების ფილოსოფია საფუძვლად უდევს ჩვენს სტანდარტულ შეკუმშვის რეჟიმსა და შემავსებელი სიტყვების მოცილების/კონდენსაციის 30-ზე მეტ წესს.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/rtk-ai/rtk">RTK – Rust Token Killer</a></b></td><td align="center">83,835</td><td>ბრძანებების გამოტანილი მონაცემების მაღალწარმადობრივი შეკუმშვა — შთააგონა ჩვენი RTK ძრავა, JSON ფილტრების DSL, დაუმუშავებელი გამოტანილი მონაცემების აღდგენა და კასკადური RTK → Caveman კონვეიერი.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/headroomlabs-ai/headroom">headroom</a></b></td><td align="center">75,741</td><td>კონტექსტის შექცევადი შეკუმშვა (SmartCrusher) — შთააგონა ჩვენი <code>headroom</code> ძრავა და <code>ccr</code> აღდგენის მარკერის შაბლონი.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/microsoft/LLMLingua">LLMLingua</a></b></td><td align="center">6,757</td><td>პრომპტების შეკუმშვის კვლევა (LLMLingua / LLMLingua-2) — შთააგონა ჩვენი ასინქრონული, კოდისთვის უსაფრთხო და შეცდომისას საწყის მონაცემებზე დაბრუნებადი <code>llmlingua</code> ძრავა.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/atjsh/llmlingua-2-js">llmlingua-2-js</a></b></td><td align="center">32</td><td>JS/ONNX პორტი (MobileBERT / XLM-RoBERTa), რომელიც ჩვენი LLMLingua ძრავის მუშა ნაკადის ბექენდად გამოიყენება.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/leninejunior/troglodita">Troglodita</a></b></td><td align="center">50</td><td>pt-BR ტოკენების შეკუმშვა — უზრუნველყოფს ჩვენს pt-BR ენობრივ პაკეტს: ბრაზილიურ-პორტუგალიურ გრამატიკაზე მორგებულ პლეონაზმების შემცირებასა და შემავსებელი სიტყვების მოცილებას.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/DietrichGebert/ponytail">ponytail</a></b></td><td align="center">166,731</td><td>ვირუსული „ზარმაცი უფროსი დეველოპერის“ YAGNI-კოდერის უნარი — შთააგონა ჩვენი <b>less-code</b> გამოტანის სტილი: უმცირეს მუშა ცვლილებაზე ორიენტირება, რომელიც ამცირებს _გენერირებულ_ კოდს (Caveman-ის ლაკონიური პროზის ანალოგი გამოტანის ღერძზე).</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ayghri/i-have-adhd">i-have-adhd</a></b></td><td align="center">57,628</td><td>მისი მოქმედებაზე ორიენტირებული, ADHD-ის მქონე ადამიანებისთვის მოსახერხებელი პასუხის სტილი ადაპტირდა OmniRoute-ის ლაკონიურ გამოტანის სტილად ხუთ ენაზე.</td></tr>
 </table>
 
-### 🧩 კომპაქტური ფორმატები, ტოკენების კვლევა და კოდის კონტექსტის გამთვალისწინებელი ხელსაწყოები
+### 🧩 კომპაქტური ფორმატები, ტოკენების კვლევა და კოდის მცოდნე ხელსაწყოები
 
 <table>
   <tr><th align="left">პროექტი</th><th align="center">⭐</th><th align="left">როგორ შთააგონა მან OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/toon-format/toon">TOON</a></b></td><td align="center">25,233</td><td>ტოკენებზე ორიენტირებული ობიექტური ნოტაცია — მისმა სვეტურმა, სათაურისა და მწკრივების მოდელმა განსაზღვრა ჩვენი ცხრილური კომპაქტიზაციის ეტაპი.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/blackwell-systems/gcf">GCF – Graph Compact Format</a></b></td><td align="center">41</td><td>მისმა კომპაქტურმა გრაფის ფორმატმა და ზოგადი პროფილის დიზაინმა გავლენა მოახდინა OmniRoute-ის ცხრილურ კომპაქტიზაციასა და Headroom კოდეკის ფორმატზე.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/blackwell-systems/gcf-typescript">gcf-typescript</a></b></td><td align="center">4</td><td>MIT TypeScript იმპლემენტაცია, რომელიც პირდაპირ ჩაირთო პროექტში და გაფართოვდა Headroom-ის ზოგადი პროფილის კოდეკის სახით.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ooples/token-optimizer-mcp">token-optimizer-mcp</a></b></td><td align="center">494</td><td>Brotli/SQLite კეში + სესიაზე მორგებული კონტექსტის სხვაობა — შთააგონა ჩვენი <code>session-dedup</code> ძრავა.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/Mibayy/token-savior">token-savior</a></b></td><td align="center">1,122</td><td>Bash გამომავალი მონაცემების კომპაქტიზაცია + MCP პროფილები — შთააგონა შეკუმშვის შეწყვეტის ჩვენი დისციპლინა და MCP ხელსაწყოების მანიფესტის შემცირება.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ppgranger/token-saver">token-saver</a></b></td><td align="center">138</td><td>შიგთავსის გამთვალისწინებელი, ფაილის ტიპზე მორგებული გამომავალი მონაცემების შეკუმშვა, შეცდომების გამთვალისწინებელი შეწყვეტით — დაადასტურა ჩვენი ტიპზე მორგებული გადანაწილებისა და მინიმალური სარგებლისას გამოტოვების მიდგომა.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/alexgreensh/token-optimizer">token-optimizer</a></b></td><td align="center">1,951</td><td>„იპოვე მოჩვენება-ტოკენები“ — მისმა გატანისა და აღდგენადი სახელურის შაბლონმა გავლენა მოახდინა CCR გატანის შესახებ ჩვენს ხედვაზე.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/Shweta-Mishra-ai/tokenmizer">TokenMizer</a></b></td><td align="center">28</td><td>სესიის გრაფისა და სხვადასხვა ნაბიჯს შორის სტრიქონების დუბლიკატების მოცილების სქემა, რომელმაც გავლენა მოახდინა ჩვენს session-dedup დიზაინზე.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/jessefreitas/OmniCompress">OmniCompress</a></b></td><td align="center">3</td><td>Rust სვეტური JSON + შიგთავსზე მისამართებული აღდგენა + შეტყობინებებს შორის დუბლიკატების მოცილება — დაადასტურა ჩვენი <code>headroom</code>/<code>ccr</code>/<code>session-dedup</code> ძრავების დიზაინი და კეშისთვის სტაბილური უცვლელი წესი: „შეკუმშული ფორმა პოზიციისგან დამოუკიდებელია“.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/atlassian-labs/mcp-compressor">mcp-compressor</a></b></td><td align="center">113</td><td>MCP ხელსაწყოების სქემის/აღწერის შეკუმშვა — გავლენა მოახდინა MCP ხელსაწყოების მანიფესტის კარდინალურობის შემცირების ჩვენს მიდგომაზე.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/pdavis68/RepoMapper">RepoMapper</a></b></td><td align="center">197</td><td>Aider-ის სტილის რეპოზიტორიის რუკის რანჟირება — გავლენა მოახდინა რეპოზიტორიის რუკისა და მოძიების რანჟირების ჩვენს კვლევაზე.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/mrsimpson/quiet-shell-mcp">quiet-shell-mcp</a></b></td><td align="center">4</td><td>დეკლარაციული shell გამომავალი მონაცემების შემცირება MCP-ის მეშვეობით — დაადასტურა Bash გამომავალი მონაცემების დეკლარაციული კომპაქტიზაციის ჩვენი მიდგომა.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/dsherret/ts-morph">ts-morph</a></b></td><td align="center">6,162</td><td>TypeScript Compiler API ხელსაწყოთა ნაკრები — შთააგონა პარსერზე დაფუძნებული კომენტარების მოცილების ჩვენი მიდგომა, რომელიც ინარჩუნებს სტრიქონულ, შაბლონურ და რეგულარული გამოსახულებების ლიტერალებს.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/toon-format/toon">TOON</a></b></td><td align="center">25,509</td><td>ტოკენებზე ორიენტირებული ობიექტების ნოტაცია — მისმა სვეტოვანმა, სათაურისა და სტრიქონების მოდელმა ჩამოაყალიბა ჩვენი ცხრილური კომპაქტირების ეტაპი.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/blackwell-systems/gcf">GCF – Graph Compact Format</a></b></td><td align="center">59</td><td>მისმა კომპაქტურმა გრაფის ფორმატმა და ზოგადი პროფილის დიზაინმა გავლენა მოახდინა OmniRoute-ის ცხრილურ კომპაქტირებასა და Headroom კოდეკის ფორმატზე.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/blackwell-systems/gcf-typescript">gcf-typescript</a></b></td><td align="center">4</td><td>MIT TypeScript იმპლემენტაცია, რომელიც უშუალოდ ჩავაშენეთ და გავაფართოეთ, როგორც Headroom-ის ზოგადი პროფილის კოდეკი.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ooples/token-optimizer-mcp">token-optimizer-mcp</a></b></td><td align="center">551</td><td>Brotli/SQLite ქეში + თითოეული სესიის კონტექსტის დელტა — შთააგონა ჩვენი <code>session-dedup</code> ძრავა.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/Mibayy/token-savior">token-savior</a></b></td><td align="center">1,182</td><td>Bash-ის გამოტანილი მონაცემების კომპაქტირება + MCP პროფილები — შთააგონა შეკუმშვის შეწყვეტის ჩვენი დისციპლინა და MCP ხელსაწყოების მანიფესტის შემცირება.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ppgranger/token-saver">token-saver</a></b></td><td align="center">154</td><td>შიგთავსის გათვალისწინებით, ფაილის თითოეული ტიპისთვის გამოტანილი მონაცემების შეკუმშვა და წარუმატებლობის გათვალისწინებით პროცესის შეწყვეტა — დაადასტურა ჩვენი ტიპების მიხედვით გადანაწილება და მინიმალური მოგებისას გამოტოვება.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/alexgreensh/token-optimizer">token-optimizer</a></b></td><td align="center">2,595</td><td>„იპოვე მოჩვენებითი ტოკენები“ — მისმა გატანისა და აღდგენადი მაჩვენებლის შაბლონმა გავლენა მოახდინა CCR-ის გატანის ჩვენს მიდგომაზე.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/Shweta-Mishra-ai/tokenmizer">TokenMizer</a></b></td><td align="center">33</td><td>სესიის გრაფისა და სხვადასხვა ბიჯს შორის სტრიქონების დუბლიკატების მოცილების გეგმა, რომელმაც გავლენა მოახდინა ჩვენს session-dedup დიზაინზე.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/jessefreitas/OmniCompress">OmniCompress</a></b></td><td align="center">3</td><td>Rust-ის სვეტოვანი JSON + შიგთავსის მისამართით აღდგენა + შეტყობინებებს შორის დუბლიკატების მოცილება — დაადასტურა ჩვენი <code>headroom</code>/<code>ccr</code>/<code>session-dedup</code> ძრავების დიზაინი და ქეშისადმი სტაბილური ინვარიანტი „შეკუმშული ფორმა პოზიციისგან დამოუკიდებელია“.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/atlassian-labs/mcp-compressor">mcp-compressor</a></b></td><td align="center">133</td><td>MCP ხელსაწყოების სქემების/აღწერების შეკუმშვა — გავლენა მოახდინა MCP ხელსაწყოების მანიფესტის კარდინალურობის შემცირებაზე.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/pdavis68/RepoMapper">RepoMapper</a></b></td><td align="center">217</td><td>Aider-ის სტილის რეპოზიტორიის რუკის რანჟირება — გავლენა მოახდინა რეპოზიტორიის რუკის / მოძიების რანჟირების ჩვენს კვლევაზე.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/mrsimpson/quiet-shell-mcp">quiet-shell-mcp</a></b></td><td align="center">4</td><td>Shell-ის გამოტანილი მონაცემების დეკლარაციული შემცირება MCP-ის მეშვეობით — დაადასტურა Bash-ის გამოტანილი მონაცემების ჩვენი დეკლარაციული კომპაქტირება.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/dsherret/ts-morph">ts-morph</a></b></td><td align="center">6,205</td><td>TypeScript Compiler API-ის ხელსაწყოთა ნაკრები — შთააგონა პარსერზე დაფუძნებული კომენტარების მოცილება, რომელიც ინარჩუნებს სტრიქონულ, შაბლონურ და რეგულარული გამოსახულებების ლიტერალებს.</td></tr>
 </table>
 
 ### 🧠 მეხსიერება და RAG
 
 <table>
   <tr><th align="left">პროექტი</th><th align="center">⭐</th><th align="left">როგორ შთააგონა მან OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/mem0ai/mem0">Mem0</a></b></td><td align="center">63,902</td><td>უნივერსალური მეხსიერების შრე — მისმა proxy-as-write/read-boundary მოდელმა განსაზღვრა ჩვენი მეხსიერების არქიტექტურა.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/letta-ai/letta">Letta (MemGPT)</a></b></td><td align="center">24,382</td><td>მდგომარეობის მქონე აგენტები დონეებად დაყოფილი მეხსიერებით — შთააგონა ჩვენი Context Control & Recovery (CCR)-ის დონეებად დაყოფილი მოდელი.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/onestardao/WFGY">WFGY</a></b></td><td align="center">1,781</td><td>16 განმეორებადი RAG/LLM-ის მარცხის რეჟიმის ProblemMap ტაქსონომია — საერთო ლექსიკა ჩვენს პრობლემების აღმოფხვრის სახელმძღვანელოში.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/mem0ai/mem0">Mem0</a></b></td><td align="center">67,385</td><td>უნივერსალური მეხსიერების შრე — მისმა პროქსიზე, როგორც ჩაწერა/წაკითხვის საზღვარზე დაფუძნებულმა მოდელმა, ჩვენი მეხსიერების არქიტექტურა ჩამოაყალიბა.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/letta-ai/letta">Letta (MemGPT)</a></b></td><td align="center">25,179</td><td>მდგომარეობის მქონე აგენტები დონეებად დაყოფილი მეხსიერებით — ჩვენი დონეებად დაყოფილი Context Control & Recovery (CCR) მოდელის შთაგონების წყარო.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/onestardao/WFGY">WFGY</a></b></td><td align="center">1,800</td><td>ProblemMap-ის ტაქსონომია, რომელიც RAG/LLM-ის 16 განმეორებად შეფერხების რეჟიმს მოიცავს — საერთო ტერმინოლოგია ჩვენს პრობლემების აღმოფხვრის სახელმძღვანელოში.</td></tr>
 </table>
 
 ### 🛰️ ტრაფიკის შემოწმება, MITM და გამჭვირვალე პროქსი
 
 <table>
   <tr><th align="left">პროექტი</th><th align="center">⭐</th><th align="left">როგორ შთააგონა მან OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/chouzz/llm-interceptor">llm-interceptor</a></b></td><td align="center">66</td><td>კოდირების ასისტენტსა ↔ LLM-ს შორის ტრაფიკის MITM-გადაჭერამ/ანალიზმა გავლენა მოახდინა Traffic Inspector-ის ადრეულ მოთხოვნებზე. მანამდე მის საფუძველზე შექმნილი ოთხი მოდული — SSE-ის გაერთიანება, საუბრის ნორმალიზაცია, საიდუმლო მონაცემების შენიღბვა და სათაურების სანიტიზაცია — ჩანაცვლდა საჯარო პროტოკოლის სტანდარტებზე დაფუძნებული დამოუკიდებელი clean-room რეალიზაციებით. ჰოსტის გამჭოლი გადაცემის ორი ზედაპირი (<code>passthrough.ts</code> და <code>_internal/bypass.cjs</code>) კვლავ OmniRoute-ის შიდა რეალიზაციებად რჩება და დამოუკიდებლად არის კლასიფიცირებული; ისინი ამ ჩანაცვლების ფარგლებში ხელახლა არ დაწერილა.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/InterceptSuite/ProxyBridge">ProxyBridge</a></b></td><td align="center">5,995</td><td>გამჭვირვალე, თითოეული პროცესისთვის განკუთვნილი პროქსი-მარშრუტიზაცია — შთააგონა ჩვენი ავარიაგამძლე MITM-გათიშვა, სოკეტის უმოქმედობის ტაიმაუტები, <code>/proc</code>-ის მეშვეობით პროცესის მიკუთვნება და TPROXY-გადაჭერა.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/chouzz/llm-interceptor">llm-interceptor</a></b></td><td align="center">79</td><td>კოდირების ასისტენტსა და LLM-ს შორის ტრაფიკის MITM-ჩაჭრამ/ანალიზმა Traffic Inspector-ის ადრეული მოთხოვნების ჩამოყალიბებაზე იმოქმედა. ადრე მის საფუძველზე შექმნილი ოთხი მოდული — SSE-ის გაერთიანება, საუბრების ნორმალიზაცია, საიდუმლო მონაცემების შენიღბვა და სათაურების გასუფთავება — ჩანაცვლდა საჯარო პროტოკოლის სტანდარტებზე დაფუძნებული, დამოუკიდებელი clean-room რეალიზაციებით. ჰოსტის პირდაპირი გატარების ორი ზედაპირი (<code>passthrough.ts</code> და <code>_internal/bypass.cjs</code>) კვლავ OmniRoute-ის შიდა, დამოუკიდებლად კლასიფიცირებულ რეალიზაციებად რჩება; ისინი ამ ჩანაცვლების ფარგლებში თავიდან არ დაწერილა.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/InterceptSuite/ProxyBridge">ProxyBridge</a></b></td><td align="center">6,814</td><td>გამჭვირვალე პროქსი-მარშრუტიზაცია თითოეული პროცესისთვის — შთააგონა ჩვენი ავარიისადმი მდგრადი MITM-ის გათიშვა, სოკეტების უმოქმედობის დროის ამოწურვები, პროცესების მიკუთვნება <code>/proc</code>-ის მეშვეობით და TPROXY-ჩაჭერა.</td></tr>
 </table>
 
 ### 📚 მოდელების მონაცემები, დაკვირვებადობა და UI
 
 <table>
   <tr><th align="left">პროექტი</th><th align="center">⭐</th><th align="left">როგორ შთააგონა მან OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/anomalyco/models.dev">models.dev</a></b></td><td align="center">6,555</td><td>AI-მოდელების სპეციფიკაციების, ფასებისა და შესაძლებლობების ღია მონაცემთა ბაზა — ნატიურად სინქრონიზდება ჩვენი მოდელების კატალოგში.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/xyflow/xyflow">React Flow / xyflow</a></b></td><td align="center">38,108</td><td>კვანძებზე დაფუძნებული გრაფების ბიბლიოთეკა, რომელიც უზრუნველყოფს ჩვენი რეალურ დროში მომუშავე Compression Studio-სა და Combo/Routing Studio-ს მუშაობას.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/langchain-ai/langgraph">LangGraph</a></b></td><td align="center">40,314</td><td>LangGraph Studio-ს სამუშაო პროცესის გრაფის ცოცხალმა ვიზუალიზაციამ შთააგონა ჩვენი Studios-ის რეალურ დროში კასკადური ხედი.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/langfuse/langfuse">Langfuse</a></b></td><td align="center">33,592</td><td>მისმა trace → span → generation დაკვირვებადობის მოდელმა განსაზღვრა ჩვენი Compression Studio-ს ჩანჩქერული ხედი.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/kiali/kiali">Kiali</a></b></td><td align="center">3,631</td><td>Istio-ს სერვისული ბადის დაკვირვებადობა — შთააგონა ჩვენი circuit-breaker ნიშნები და შეცდომის წიბოების ვიზუალები Routing/Combo Studio-ში.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/lobehub/lobe-icons">lobe-icons</a></b></td><td align="center">2,428</td><td>AI/LLM-ბრენდების ლოგოები, რომლებიც ჩვენს მართვის პანელზე პროვაიდერების ხატულებს ასახავს.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/lipis/flag-icons">flag-icons</a></b></td><td align="center">12,354</td><td>უზრუნველყოფს MIT-ლიცენზირებულ SVG-დროშებს, რომლებსაც README-ის ენის ამომრჩევი იყენებს.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/anomalyco/models.dev">models.dev</a></b></td><td align="center">7,286</td><td>AI-მოდელების სპეციფიკაციების, ფასებისა და შესაძლებლობების ღია მონაცემთა ბაზა — ბუნებრივად სინქრონიზებულია ჩვენი მოდელების კატალოგთან.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/xyflow/xyflow">React Flow / xyflow</a></b></td><td align="center">38,705</td><td>კვანძებზე დაფუძნებული გრაფების ბიბლიოთეკა, რომელიც საფუძვლად უდევს ჩვენს რეალურ დროში მომუშავე Compression Studio-სა და Combo/Routing Studio-ს.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/langchain-ai/langgraph">LangGraph</a></b></td><td align="center">43,443</td><td>LangGraph Studio-ს სამუშაო პროცესის გრაფის ცოცხალმა ვიზუალიზაციამ შთააგონა ჩვენი Studio-ების რეალურ დროში კასკადური ხედი.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/langfuse/langfuse">Langfuse</a></b></td><td align="center">35,990</td><td>მისმა დაკვირვებადობის მოდელმა „ტრასა → შუალედი → გენერაცია“ ჩვენი Compression Studio-ს ჩანჩქერული წარმოდგენა ჩამოაყალიბა.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/kiali/kiali">Kiali</a></b></td><td align="center">3,645</td><td>Istio-ს სერვისების ბადის დაკვირვებადობა — შთააგონა ჩვენი ავტომატური ამომრთველის ნიშნები და შეცდომის წიბოების ვიზუალიზაცია Routing/Combo Studio-ში.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/lobehub/lobe-icons">lobe-icons</a></b></td><td align="center">2,615</td><td>AI/LLM ბრენდების ლოგოები, რომლებიც ჩვენი მართვის პანელის მასშტაბით პროვაიდერების ხატულებს ასახავს.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/lipis/flag-icons">flag-icons</a></b></td><td align="center">12,473</td><td>უზრუნველყოფს MIT-ლიცენზირებულ SVG დროშებს, რომლებსაც README-ის ენის ამომრჩევი იყენებს.</td></tr>
 </table>
 
 ### 🛡️ უსაფრთხოება
 
 <table>
   <tr><th align="left">პროექტი</th><th align="center">⭐</th><th align="left">როგორ შთააგონა მან OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/tldrsec/awesome-secure-defaults">awesome-secure-defaults</a></b></td><td align="center">721</td><td>ნაგულისხმევად უსაფრთხო ბიბლიოთეკების კურირებული სია, რომელიც განსაზღვრავს ჩვენს არჩევანს უსაფრთხოების კუთხით (Helmet.js, DOMPurify, ssrf-req-filter, safe-regex, Google Tink).</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/tldrsec/awesome-secure-defaults">awesome-secure-defaults</a></b></td><td align="center">722</td><td>ნაგულისხმევად უსაფრთხო ბიბლიოთეკების კურირებული სია, რომელიც უსაფრთხოებასთან დაკავშირებულ ჩვენს არჩევანს წარმართავს (Helmet.js, DOMPurify, ssrf-req-filter, safe-regex, Google Tink).</td></tr>
 </table>
 
-### 🧭 დამატებითი ხელსაწყოები
+### 🧭 დამატებითი ინსტრუმენტები
 
 <table>
   <tr><th align="left">პროექტი</th><th align="center">⭐</th><th align="left">როგორ შთააგონა მან OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/BlockRunAI/ClawRouter">ClawRouter</a></b></td><td align="center">6,564</td><td>შთააგონა მოთხოვნების დუბლირების აღმოფხვრა, საგანგებო ნულოვანი ღირებულების სარეზერვო ვარიანტი, ჩანაცვლებადი Auto-Combo სტრატეგიები და მრავალენოვანი განზრახვის კლასიფიკაცია.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/lbjlaq/Antigravity-Manager">Antigravity-Manager</a></b></td><td align="center">30,652</td><td>მისმა ანგარიშის გათვალისწინებით მოდელების ხელახალმა მიბმამ, შესრულებადი ფაილის ბილიკის ვალიდაციამ და გეგმის ჭდის ქცევამ გავლენა მოახდინა OmniRoute-ის Antigravity-ის გაშვების გარემოზე.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/jlcodes99/vscode-antigravity-cockpit">vscode-antigravity-cockpit</a></b></td><td align="center">4,817</td><td>მისმა კვოტის განულებამდე დარჩენილი დროის კომპაქტურმა ფორმატმა შთააგონა OmniRoute-ში პროვაიდერის შესაბამისი ლიმიტის ჩვენება.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/iOfficeAI/AionUi">AionUi</a></b></td><td align="center">32,230</td><td>მისმა ACP-ინტეგრაციებმა შთააგონა OmniRoute-ის მიერ დაინსტალირებული CLI-აგენტების ავტომატური აღმოჩენა.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/steipete/CodexBar">CodexBar</a></b></td><td align="center">20,507</td><td>გამოავლინა Grok Build-ის კვოტის ზედაპირი; შემდეგ OmniRoute-მა დამოუკიდებლად გადაამოწმა და შეასწორა აქტიური სადენური ფორმატი.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/BlockRunAI/ClawRouter">ClawRouter</a></b></td><td align="center">6,628</td><td>შთააგონა მოთხოვნების დუბლირების აღმოფხვრა, საგანგებო უფასო სარეზერვო ვარიანტი, ჩასანაცვლებელი Auto-Combo სტრატეგიები და განზრახვის მრავალენოვანი კლასიფიკაცია.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/lbjlaq/Antigravity-Manager">Antigravity-Manager</a></b></td><td align="center">32,333</td><td>მისმა ანგარიშის გათვალისწინებით მოდელების ხელახალმა ასახვამ, შესრულებადი ფაილის გზის ვალიდაციამ და გეგმის ნიშნულების ქცევამ OmniRoute-ის Antigravity-ის შესრულების გარემოს ჩამოყალიბებაზე იმოქმედა.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/jlcodes99/vscode-antigravity-cockpit">vscode-antigravity-cockpit</a></b></td><td align="center">4,850</td><td>მისმა კვოტის განულებამდე დარჩენილი დროის კომპაქტურმა ფორმატმა შთააგონა OmniRoute-ში პროვაიდერის ლიმიტის შესაბამისი ჩვენება.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/iOfficeAI/AionUi">AionUi</a></b></td><td align="center">33,611</td><td>მისმა ACP ინტეგრაციებმა შთააგონა OmniRoute-ის მიერ დაყენებული CLI აგენტების ავტომატური აღმოჩენა.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/steipete/CodexBar">CodexBar</a></b></td><td align="center">22,616</td><td>გამოავლინა Grok Build-ის კვოტის ინტერფეისი; შემდეგ OmniRoute-მა დამოუკიდებლად გადაამოწმა და შეასწორა აქტიური სადენზე გადაცემის ფორმატი.</td></tr>
 </table>
 
 ## 📄 ლიცენზია

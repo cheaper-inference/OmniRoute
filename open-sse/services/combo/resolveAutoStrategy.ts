@@ -10,7 +10,7 @@ import {
   parseRequestBudgetCap,
   parseRequestBudgetFallback,
 } from "../autoCombo/requestControls.ts";
-import { selectWithStrategy } from "../autoCombo/routerStrategy.ts";
+import { selectWithStrategyAsync } from "../autoCombo/routerStrategy.ts";
 import { buildComplexityRoutingHint } from "../autoCombo/complexityRouter";
 import { getModePack } from "../autoCombo/modePacks.ts";
 import { recordComboIntent } from "../comboMetrics.ts";
@@ -21,7 +21,9 @@ import { parseModel } from "../model.ts";
 import { supportsToolCalling } from "../modelCapabilities.ts";
 import type { ResilienceSettings } from "../../../src/lib/resilience/settings";
 import { parseAutoConfig } from "./autoConfig.ts";
+import { isComboEmptyPoolNoEligibleTargetsEnabled } from "./protectedPriorityStopStatus.ts";
 import { dedupeTargetsByExecutionKey } from "./comboData.ts";
+import { restoreIncomingOrder } from "./rungOrder.ts";
 import {
   getModelContextLimitForModelString,
   providerSupportsEmulatedToolCalling,
@@ -64,7 +66,11 @@ export interface ResolveAutoStrategyDeps {
   body: Record<string, unknown>;
   combo: ComboLike;
   settings: Record<string, unknown> | null | undefined;
-  config: { complexityAwareRouting?: boolean; compatFilterFailOpen?: boolean };
+  // Index signature keeps this structurally assignable from the caller's much
+  // wider `resolveComboSetupConfig()` return type — without it, TS2559 ("no
+  // properties in common") fires now that `complexityAwareRouting` (the one
+  // property the two types used to share) is gone (#13386).
+  config: { compatFilterFailOpen?: boolean } & Record<string, unknown>;
   relayOptions?: {
     bypassProviderQuotaPolicy?: boolean;
     sessionId?: string | null;
@@ -132,9 +138,35 @@ export async function evaluateAutoCandidates(options: EvaluateAutoCandidatesOpti
 }
 
 /**
+ * #14313 — an auto combo whose candidate pool is already EMPTY (every target skipped by
+ * cooldowns, lockouts or exhaustion before the tool pre-filter ran) used to fall into the
+ * tool pre-filter and answer 400 "No target in combo X supports tool calling", a
+ * capability_mismatch that describes a filter rejecting a populated pool. With the
+ * COMBO_EMPTY_POOL_NO_ELIGIBLE_TARGETS_ENABLED flag on, the empty pool answers a truthful,
+ * retryable 503 `no_eligible_targets` instead. Off by default (client-visible status and
+ * body change); `null` keeps the legacy path.
+ */
+function emptyCandidatePoolResponse(poolSize: number, comboName: string): Response | null {
+  if (poolSize !== 0 || !isComboEmptyPoolNoEligibleTargetsEnabled()) return null;
+  return errorResponseWithComboDiagnostics(
+    503,
+    `No eligible targets in combo ${comboName}; the candidate pool is empty`,
+    {
+      poolSize: 0,
+      attempted: 0,
+      excluded: [],
+      attemptOrder: [],
+      terminalReason: "no_eligible_targets",
+    },
+    { code: "no_eligible_targets", type: "api_error" }
+  );
+}
+
+/**
  * Resolve target ordering for the `auto` combo strategy.
  *
- * Extracted verbatim from `handleComboChat`'s `if (strategy === "auto")` branch:
+ * Extracted verbatim from `handleComboChat`'s auto-strategy branch (now selected by the
+ * `ordering: "auto"` trait in strategyRegistry.ts):
  * tool-calling + context-window pre-filters, intent classification, candidate
  * building (quota cutoff), explicit-router vs rules selection, complexity-aware
  * scoring and final dedup ordering. Behavior is byte-identical to the previous
@@ -166,6 +198,11 @@ export async function resolveAutoStrategyOrder(
       true;
 
   if (requestHasTools) {
+    // #14313 (opt-in, COMBO_EMPTY_POOL_NO_ELIGIBLE_TARGETS_ENABLED): an empty pool is
+    // not a tool-calling mismatch. Off by default: the pool falls into the pre-filter
+    // below and answers the legacy 400 capability_mismatch exactly as before.
+    const emptyPoolResponse = emptyCandidatePoolResponse(eligibleTargets.length, combo.name);
+    if (emptyPoolResponse) return { earlyResponse: emptyPoolResponse };
     // Keep #5240 prompt-emulation providers (toolCalling:"emulated") even when
     // registry/capability rows honestly report toolCalling:false.
     const filtered = eligibleTargets.filter(
@@ -254,6 +291,7 @@ export async function resolveAutoStrategyOrder(
     modePack: configModePack,
     resetWindowConfig,
     slaPolicy,
+    nadirConfig,
   } = parseAutoConfig(combo, eligibleTargets);
 
   // Per-request overrides (#6023 / #6024 / #6025 / #3470): X-OmniRoute-Budget,
@@ -310,17 +348,18 @@ export async function resolveAutoStrategyOrder(
           },
         }
       : resilienceSettings;
-  // Complexity-aware routing (2026, opt-in): classify the request's
-  // difficulty and feed a tier hint into scoring so tierAffinity /
-  // specificityMatch favor candidates whose tier matches the request.
-  const autoManifestHint: RoutingHint | null =
-    config.complexityAwareRouting === true
-      ? await buildComplexityRoutingHint(
-          eligibleTargets.filter((t) => t.kind === "model"),
-          body,
-          log
-        )
-      : null;
+  // Complexity-aware routing: classify the request's difficulty and feed a
+  // tier hint into scoring so tierAffinity / specificityMatch favor
+  // candidates whose tier matches the request.  Always-on since #13386 — the
+  // former opt-in gate (config.complexityAwareRouting) was orphaned by
+  // migration 103 which stripped it as a legacy key, leaving the feature
+  // permanently disabled.  The classification is lightweight (regex-only, no
+  // LLM call) so always running it has negligible cost.
+  const autoManifestHint: RoutingHint | null = await buildComplexityRoutingHint(
+    eligibleTargets.filter((t) => t.kind === "model"),
+    body,
+    log
+  );
 
   const { sourceCandidates, candidates, routableCandidates, scoredTargets } =
     await evaluateAutoCandidates({
@@ -363,7 +402,7 @@ export async function resolveAutoStrategyOrder(
 
     if (routingStrategy !== "rules") {
       try {
-        const decision = selectWithStrategy(
+        const decision = await selectWithStrategyAsync(
           routableCandidates,
           {
             taskType,
@@ -379,6 +418,8 @@ export async function resolveAutoStrategyOrder(
             sla: slaPolicy,
             weights,
             explorationRate,
+            messages: body.messages,
+            nadir: nadirConfig,
           },
           routingStrategy
         );
@@ -455,8 +496,14 @@ export async function resolveAutoStrategyOrder(
     // routable ranked ones (and, when the cutoff is OFF, makes this identical to
     // the pre-cutoff behavior), but a quota-blocked target still survives as a
     // final fallback instead of vanishing — the hard cutoff only de-prioritizes.
+    const preserveRungOrder =
+      (combo as { autoConfig?: { preserveRungOrder?: unknown } })?.autoConfig?.preserveRungOrder ===
+      true;
+    const headTargets = preserveRungOrder
+      ? restoreIncomingOrder(rankedTargets, eligibleTargets)
+      : [selectedTarget, ...rankedTargets];
     orderedTargets = dedupeTargetsByExecutionKey(
-      [selectedTarget, ...rankedTargets, ...eligibleTargets].filter(
+      [...headTargets, ...eligibleTargets].filter(
         (entry): entry is ResolvedComboTarget => entry !== undefined && entry !== null
       )
     );

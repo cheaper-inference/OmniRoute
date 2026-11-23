@@ -111,6 +111,70 @@ test("combo loop does NOT stop on 502 (transient) — tries more than one model"
   assert.equal(result.status, 502, "should still return 502 if all models fail");
 });
 
+async function runRoundRobinEmptyContentAbort(flag: "true" | "false") {
+  const previous = process.env.EMPTY_STREAM_SIBLING_RECOVERY_ENABLED;
+  process.env.EMPTY_STREAM_SIBLING_RECOVERY_ENABLED = flag;
+  const controller = new AbortController();
+  const dispatchedModels: string[] = [];
+  let abortTimer: ReturnType<typeof setTimeout> | undefined;
+  const retryLog = {
+    ...log,
+    info: (_tag: string, message: string) => {
+      if (message.startsWith("Retrying ")) {
+        abortTimer = setTimeout(() => controller.abort(), 1);
+      }
+    },
+  };
+  try {
+    const response = await handleComboChat({
+      body: { model: "test", messages: [{ role: "user", content: "hi" }] },
+      combo: {
+        ...makeCombo("round-robin", ["a/m1", "b/m2"]),
+        config: { maxRetries: 1, retryDelayMs: 100, maxGlobalAttempts: 3 },
+      },
+      handleSingleModel: async (_body, modelStr) => {
+        dispatchedModels.push(modelStr);
+        return new Response(
+          JSON.stringify({
+            error: { code: "empty_content", message: "Provider returned empty content" },
+          }),
+          { status: 502, headers: { "Content-Type": "application/json" } }
+        );
+      },
+      log: retryLog,
+      settings: {},
+      allCombos: [],
+      signal: controller.signal,
+    });
+    await response.body?.cancel().catch(() => {});
+    return { status: response.status, dispatchedModels, aborted: controller.signal.aborted };
+  } finally {
+    clearTimeout(abortTimer);
+    if (previous === undefined) delete process.env.EMPTY_STREAM_SIBLING_RECOVERY_ENABLED;
+    else process.env.EMPTY_STREAM_SIBLING_RECOVERY_ENABLED = previous;
+  }
+}
+
+test("#16438 flag on: round-robin empty-content recovery stops when the client cancels during retry delay", async () => {
+  const result = await runRoundRobinEmptyContentAbort("true");
+  assert.equal(result.aborted, true);
+  assert.equal(
+    result.dispatchedModels.length,
+    1,
+    "cancellation must prevent retry and sibling dispatch"
+  );
+  assert.equal(result.status, 499);
+});
+
+test("#16438 flag off: round-robin keeps the release retry-delay behavior on cancellation", async () => {
+  const result = await runRoundRobinEmptyContentAbort("false");
+  // Release behavior: the fixed retry delay is not abort-aware, so the loop keeps
+  // dispatching until the shared attempt budget (3) runs out and answers 503.
+  assert.equal(result.aborted, true);
+  assert.equal(result.dispatchedModels.length, 3);
+  assert.equal(result.status, 503);
+});
+
 test("signal abort during fallback wait interrupts immediately", async () => {
   const ac = new AbortController();
   let callCount = 0;

@@ -37,13 +37,13 @@ Objectieve functievergelijking met populaire opensource-AI-routers.
 | **Tunnelondersteuning (Cloudflared, Tailscale, Ngrok)** |                     ✅                      |           ❌            |        n.v.t.        |   n.v.t.    |
 | **Licentie**                                            |                     MIT                     |           MIT           |     propriëtair      | propriëtair |
 
-## Wanneer kies je voor OmniRoute?
+## Wanneer u voor OmniRoute kiest
 
-- Je host zelf en wilt **maximale providerdekking** (329 providers, 155 gratis catalogusitems/zonder authenticatie)
-- Je hebt een **ingebouwde MCP-server** nodig (LLM-tools, geheugen en vaardigheden beschikbaar als tools)
-- Je hebt het **A2A-protocol** nodig voor agent-naar-agent-workflows
-- Je wilt **fingerprintverhulling** (JA3/JA4) om detectie door upstream-CAPTCHA's te voorkomen
-- Je hebt **bedrijfsfuncties** nodig (beveiligingsrails, evaluaties, audittrail) zonder een SaaS-rekening
+- U host zelf en wilt **maximale providerdekking** (374 providers, 155 gratis catalogusitems zonder authenticatie)
+- U hebt een **ingebouwde MCP-server** nodig (LLM-tools, geheugen en vaardigheden beschikbaar als tools)
+- U hebt het **A2A-protocol** nodig voor workflows tussen agents
+- U wilt **vingerafdrukverberging** (JA3/JA4) om detectie door CAPTCHA's van upstreamproviders te voorkomen
+- U hebt **bedrijfsfuncties** nodig (vangrails, evaluaties, audittrail) zonder kosten voor een SaaS-abonnement
 
 ## Wanneer kies je voor LiteLLM?
 

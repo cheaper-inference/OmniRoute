@@ -123,26 +123,34 @@ OAuth නැවුම් කිරීම භාවිත නොකරන බැ�
 
 ### උපකරණ පුවරුව
 
-1. **Dashboard -> Providers -> Kiro** විවෘත කරන්න.
-2. **API Key** තෝරන්න.
-3. API යතුර සහ විකල්ප AWS කලාපය අලවන්න (පෙරනිමියෙන් `us-east-1`).
-4. OmniRoute යතුර වලංගු කර සම්බන්ධතාව සුරකියි.
+1. **උපකරණ පුවරුව -> සපයන්නන් -> Kiro** විවෘත කරන්න.
+2. **API යතුර** තෝරන්න.
+3. API යතුර අලවා AWS කලාපය තෝරන්න: **ස්වයංක්රීයව හඳුනාගන්න** (පෙරනිමි), **US East
+   (N. Virginia)** හෝ **Europe (Frankfurt)**.
+4. OmniRoute යතුර වලංගු කර, යතුර ක්රියා කරන කලාපයට සම්බන්ධතාව ස්ථාවර කර සුරකියි.
 
 ### API
 
 ```bash
 curl -X POST http://localhost:20128/api/oauth/kiro/api-key \
   -H "Content-Type: application/json" \
-  -d '{"apiKey": "kiro_or_codewhisperer_key", "region": "us-east-1"}'
+  -d '{"apiKey": "kiro_or_codewhisperer_key", "region": "auto"}'
 ```
+
+`region` සඳහා `auto` (පෙරනිමි), `us-east-1` හෝ `eu-central-1` පිළිගනී; වෙනත් ඕනෑම අගයක්
+HTTP 400 සමඟ ප්රතික්ෂේප කෙරේ.
 
 ### අභ්යන්තර ගිවිසුම
 
-API මාර්ගය, `KiroService.validateApiKey()` ඇමතීමෙන් යතුර වලංගු කරයි. එය
-කලාපයට ගැළපෙන CodeWhisperer/Amazon Q අන්ත ලක්ෂ්යයට එරෙහිව `ListAvailableProfiles` භාවිත කර
-`profileArn` එකක් නිරාකරණය කරයි.
+API මාර්ගය `KiroService.validateApiKey()` ඇමතීමෙන් යතුර වලංගු කරයි. එය සෑම කලාපයකටම
+තත්පර 10ක කාල සීමාවක් සහිතව `GET https://q.<region>.amazonaws.com/ListAvailableModels?origin=AI_EDITOR`
+(Amazon Q මතුපිට API යතුරු අනුමානය සඳහා භාවිත කරන) අමතයි. `auto` ප්රකාරයේදී එය පළමුව
+`us-east-1` ද, පසුව `eu-central-1` ද උත්සාහ කර, යතුර පිළිගන්නා පළමු කලාපය ගබඩා කරයි.
+සියලු අපේක්ෂිත කලාපවලදී ප්රතික්ෂේප වන යතුරක් සඳහා ආයාත කිරීම HTTP 400 සමඟ අසාර්ථක වේ.
+ඉන්පසු විකල්ප `profileArn` එකක් සොයාගැනීම සඳහා හැකි උපරිම උත්සාහයක් ලෙස
+`ListAvailableProfiles` අමතනු ලැබේ (බොහෝ API යතුරු සඳහා AWS එය ප්රතික්ෂේප කරයි).
 
-සුරකින ලද සම්බන්ධතාව භාවිත කරන්නේ:
+සුරැකි සම්බන්ධතාව භාවිත කරන්නේ:
 
 ```json
 {
@@ -155,10 +163,14 @@ API මාර්ගය, `KiroService.validateApiKey()` ඇමතීමෙන් 
 }
 ```
 
-ධාවන වේලාවේදී, `KiroExecutor.buildHeaders()` යතුර
-`Authorization: Bearer <key>` ලෙස යවා `tokentype: API_KEY` එක් කරයි. කෝටා/පැතිකඩ ඇමතුම්
-ද එම සලකුණම භාවිත කරන බැවින්, AWS විසින් bearer අගය OIDC හෝ සමාජ ප්රවේශ ටෝකනයක් ලෙස නොව
-දිගුකාලීන API යතුරක් ලෙස සලකයි.
+ධාවන වේලාවේදී, `KiroExecutor.buildHeaders()` යතුර `Authorization: Bearer <key>` ලෙස
+යවන අතර `tokentype: API_KEY` එක් කරයි. කෝටා/පැතිකඩ ඇමතුම් ද එම සලකුණම භාවිත කරන බැවින්,
+AWS විසින් bearer එක OIDC හෝ සමාජ ප්රවේශ ටෝකනයක් ලෙස නොව දිගුකාලීන API යතුරක් ලෙස
+සලකයි. `KiroExecutor.execute()` API යතුරු අනුමාන ඉල්ලීම් යවන්නේ
+`https://q.<region>.amazonaws.com/generateAssistantResponse` වෙත පමණි — `us-east-1`
+ද ඇතුළුව — මන්ද Kiro IDE ද්වාරය `TokenType=API_KEY` ප්රතික්ෂේප කරන අතර
+`codewhisperer.us-east-1` API යතුරු payload වලංගු නොවන ඉල්ලීම් body එකක් ලෙස සලකා
+ප්රතික්ෂේප කරයි (HTTP 400).
 
 ---
 

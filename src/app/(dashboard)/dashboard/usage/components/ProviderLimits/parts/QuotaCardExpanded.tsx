@@ -27,6 +27,9 @@ import {
   sortQuotasByWindow,
 } from "../quotaParsing";
 import KiloPassMeter from "./KiloPassMeter";
+import QuotaCardSpeed from "./QuotaCardSpeed";
+import { hasCodexPaidCredits, type CodexPaidCredits } from "@/lib/providers/codexPaidCredits";
+import AntigravityQuotaGroups, { resolveAntigravityQuotaGroups } from "../AntigravityQuotaGroups";
 
 const CURRENCY_SYMBOLS: Record<string, string> = {
   USD: "$",
@@ -136,11 +139,13 @@ export function shouldShowLoadingPlaceholder(
 
 interface Props {
   quotas: any[];
+  quotaGroups?: Array<Record<string, unknown>>;
   providerId?: string;
   loading: boolean;
   error: string | null;
   message?: string | null;
   billing?: ProviderBillingStatus | null;
+  paidCredits?: CodexPaidCredits;
   refreshedAt?: string;
   hasStaleData: boolean;
   onRefresh: () => void;
@@ -156,6 +161,8 @@ interface Props {
   hiddenQuotaRows?: any[];
   onHideQuota?: (quota: any) => void;
   onShowQuota?: (quota: any) => void;
+  /** Read-time decode-speed stats from the usage API (`speed` payload). */
+  speed?: unknown;
 }
 
 function QuotaDetailRow({
@@ -321,11 +328,13 @@ function QuotaDetailRow({
 
 export default function QuotaCardExpanded({
   quotas,
+  quotaGroups = [],
   providerId,
   loading,
   error,
   message,
   billing,
+  paidCredits,
   refreshedAt,
   hasStaleData,
   onRefresh,
@@ -340,12 +349,20 @@ export default function QuotaCardExpanded({
   hiddenQuotaRows = [],
   onHideQuota,
   onShowQuota,
+  speed,
 }: Props) {
   const t = useTranslations("usage");
   const tr = (key: string, fallback: string, values?: UsageTranslationValues) =>
     translateUsageOrFallback(t, key, fallback, values);
 
   const [expanded, setExpanded] = useState(false);
+  const resolvedAntigravityGroups = useMemo(
+    () =>
+      providerId === "antigravity" || providerId === "agy"
+        ? resolveAntigravityQuotaGroups(quotaGroups, quotas)
+        : [],
+    [providerId, quotaGroups, quotas]
+  );
   const sortedQuotas = useMemo(
     () => resolveQuotaDisplayOrder(providerId, quotas),
     [quotas, providerId]
@@ -383,6 +400,9 @@ export default function QuotaCardExpanded({
           <span className="material-symbols-outlined text-[13px]">error</span>
           <span>{error}</span>
         </div>
+      ) : (providerId === "antigravity" || providerId === "agy") &&
+        resolvedAntigravityGroups.length > 0 ? (
+        <AntigravityQuotaGroups groups={resolvedAntigravityGroups} />
       ) : quotas.length === 0 && message ? (
         <div className="text-[11px] text-text-muted italic" title={message}>
           {message}
@@ -407,6 +427,22 @@ export default function QuotaCardExpanded({
       {isProviderBillingProvider(providerId) && billing && (
         <ProviderBillingDetails billing={billing} />
       )}
+      {providerId === "codex" && paidCredits && (
+        <div className="flex justify-between gap-2 border-t border-border/40 pt-2 text-[11px] text-text-main">
+          <span>{t("codexPaidCreditsLabel")}</span>
+          <span className="font-semibold">
+            {paidCredits.overageLimitReached || !hasCodexPaidCredits(paidCredits)
+              ? t("codexPaidCreditsUnavailable")
+              : paidCredits.unlimited
+                ? t("codexPaidCreditsUnlimited")
+                : paidCredits.balance === null
+                  ? t("codexPaidCreditsAvailable")
+                  : paidCredits.balance.toLocaleString()}
+          </span>
+        </div>
+      )}
+
+      {!error && <QuotaCardSpeed speed={speed} />}
 
       {hiddenQuotaRows.length > 0 && (
         <div className="flex flex-wrap items-center gap-1 border-t border-border/40 pt-1.5 text-[10px] text-text-muted">
@@ -447,22 +483,41 @@ export default function QuotaCardExpanded({
         </button>
       )}
 
-      <div className="flex flex-wrap items-center justify-between gap-1.5 pt-1.5 border-t border-border/40">
-        {refreshedLabel && (
-          <span
-            className={`text-[10px] tabular-nums shrink-0 ${
-              hasStaleData ? "text-amber-500" : "text-text-muted"
-            }`}
-            title={
-              hasStaleData
-                ? t("staleQuotaTooltip")
-                : `${tr("lastRefreshed", "Last refreshed")}: ${refreshedLabel}`
-            }
+      <div className="min-w-0 space-y-1.5 pt-1.5 border-t border-border/40">
+        <div className="flex min-w-0 items-center justify-between gap-2">
+          {refreshedLabel && (
+            <span
+              className={`text-[10px] tabular-nums ${
+                hasStaleData ? "text-amber-500" : "text-text-muted"
+              }`}
+              title={
+                hasStaleData
+                  ? t("staleQuotaTooltip")
+                  : `${tr("lastRefreshed", "Last refreshed")}: ${refreshedLabel}`
+              }
+            >
+              {tr("updatedShort", "Updated")} {refreshedLabel}
+            </span>
+          )}
+          <button
+            type="button"
+            disabled={loading}
+            title={tr("forceRefresh", "Refresh now")}
+            aria-label={tr("forceRefresh", "Refresh now")}
+            onClick={(e) => {
+              e.stopPropagation();
+              onRefresh();
+            }}
+            className="ml-auto inline-flex size-7 shrink-0 items-center justify-center rounded-md border border-border bg-bg-subtle hover:bg-black/[0.04] dark:hover:bg-white/[0.04] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
           >
-            {tr("updatedShort", "Updated")} {refreshedLabel}
-          </span>
-        )}
-        <div className="flex flex-wrap items-center justify-end gap-1.5 ml-auto">
+            <span
+              className={`material-symbols-outlined text-[12px] ${loading ? "animate-spin" : ""}`}
+            >
+              refresh
+            </span>
+          </button>
+        </div>
+        <div className="grid min-w-0 grid-cols-[repeat(auto-fit,minmax(min(100%,5rem),1fr))] gap-1.5">
           {canRedeemResetCredit && (
             <button
               type="button"
@@ -471,7 +526,7 @@ export default function QuotaCardExpanded({
                 e.stopPropagation();
                 onOpenResetCredits?.();
               }}
-              className="inline-flex shrink-0 items-center gap-1 text-[11px] font-medium px-2 py-1 rounded-md border border-primary/40 text-primary bg-bg-subtle hover:bg-black/[0.04] dark:hover:bg-white/[0.04] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+              className="inline-flex min-w-0 items-center justify-center gap-1 break-words text-[11px] font-medium px-1.5 py-1.5 rounded-md border border-primary/40 text-primary bg-bg-subtle hover:bg-black/[0.04] dark:hover:bg-white/[0.04] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
             >
               <span
                 className={`material-symbols-outlined text-[12px] ${
@@ -480,7 +535,7 @@ export default function QuotaCardExpanded({
               >
                 {redeemingResetCredit || loadingResetCredits ? "progress_activity" : "restart_alt"}
               </span>
-              {tr("manageResetCredits", "View credits")}
+              <span className="min-w-0">{tr("manageResetCredits", "View credits")}</span>
             </button>
           )}
           <button
@@ -490,12 +545,12 @@ export default function QuotaCardExpanded({
               e.stopPropagation();
               onOpenCutoff();
             }}
-            className={`inline-flex shrink-0 items-center gap-1 text-[11px] font-medium px-2 py-1 rounded-md border bg-bg-subtle hover:bg-black/[0.04] dark:hover:bg-white/[0.04] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer ${
+            className={`inline-flex min-w-0 items-center justify-center gap-1 break-words text-[11px] font-medium px-1.5 py-1.5 rounded-md border bg-bg-subtle hover:bg-black/[0.04] dark:hover:bg-white/[0.04] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer ${
               hasCutoffOverrides ? "border-primary/40 text-primary" : "border-border"
             }`}
           >
             <span className="material-symbols-outlined text-[12px]">tune</span>
-            {tr("editCutoffs", "Edit cutoffs")}
+            <span className="min-w-0">{tr("editCutoffs", "Edit cutoffs")}</span>
           </button>
           <button
             type="button"
@@ -503,26 +558,10 @@ export default function QuotaCardExpanded({
               e.stopPropagation();
               onOpenCost();
             }}
-            className="inline-flex shrink-0 items-center gap-1 text-[11px] font-medium px-2 py-1 rounded-md border border-border bg-bg-subtle hover:bg-black/[0.04] dark:hover:bg-white/[0.04] cursor-pointer"
+            className="inline-flex min-w-0 items-center justify-center gap-1 break-words text-[11px] font-medium px-1.5 py-1.5 rounded-md border border-border bg-bg-subtle hover:bg-black/[0.04] dark:hover:bg-white/[0.04] cursor-pointer"
           >
             <span className="material-symbols-outlined text-[12px]">bar_chart</span>
-            {t("usdCost")}
-          </button>
-          <button
-            type="button"
-            disabled={loading}
-            onClick={(e) => {
-              e.stopPropagation();
-              onRefresh();
-            }}
-            className="inline-flex shrink-0 items-center gap-1 text-[11px] font-medium px-2 py-1 rounded-md border border-border bg-bg-subtle hover:bg-black/[0.04] dark:hover:bg-white/[0.04] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
-          >
-            <span
-              className={`material-symbols-outlined text-[12px] ${loading ? "animate-spin" : ""}`}
-            >
-              refresh
-            </span>
-            {tr("forceRefresh", "Refresh now")}
+            <span className="min-w-0">{t("usdCost")}</span>
           </button>
         </div>
       </div>

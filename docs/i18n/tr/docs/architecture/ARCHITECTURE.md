@@ -10,20 +10,20 @@ _Son güncelleme: 2026-06-28_
 
 ## Yönetici Özeti
 
-OmniRoute, Next.js üzerine kurulmuş yerel bir yapay zekâ yönlendirme ağ geçidi ve kontrol panelidir.
-Tek bir OpenAI uyumlu uç nokta (`/v1/*`) sağlar ve trafiği çeviri, yedek modele geçiş, token yenileme ve kullanım takibi özellikleriyle birden fazla üst sağlayıcı arasında yönlendirir.
+OmniRoute, Next.js üzerine inşa edilmiş yerel bir yapay zekâ yönlendirme ağ geçidi ve kontrol panelidir.
+Tek bir OpenAI uyumlu uç nokta (`/v1/*`) sağlar ve trafiği çeviri, yedek devreye alma, token yenileme ve kullanım takibi özellikleriyle birden fazla üst sağlayıcı arasında yönlendirir.
 
 Temel yetenekler:
 
-- CLI/araçlar için OpenAI uyumlu API yüzeyi (355 sağlayıcı, 108 yürütücü)
+- CLI/araçlar için OpenAI uyumlu API yüzeyi (375 sağlayıcı, 154 yürütücü modül)
 - Sağlayıcı biçimleri arasında istek/yanıt çevirisi
 - Model kombinasyonu yedekleme mekanizması (çok modelli sıra)
 - `compositeTiers` tarafından çalışma zamanında sıralanan yapılandırılmış kombinasyon adımları (`provider + model + connection`)
 - Hesap düzeyinde yedekleme mekanizması (sağlayıcı başına birden fazla hesap)
 - Ana sohbet akışında kota ön kontrolü ve kotayı dikkate alan P2C hesap seçimi
-- OAuth + API anahtarı tabanlı sağlayıcı bağlantı yönetimi (22 OAuth sağlayıcı modülü)
+- OAuth + API anahtarı tabanlı sağlayıcı bağlantısı yönetimi (27 OAuth sağlayıcı modülü)
 - `/v1/embeddings` üzerinden gömme oluşturma (18 sağlayıcı)
-- `/v1/images/generations` üzerinden görsel oluşturma (10+ sağlayıcı, 20+ model)
+- `/v1/images/generations` üzerinden görüntü oluşturma (10+ sağlayıcı, 20+ model)
 - `/v1/audio/transcriptions` üzerinden ses transkripsiyonu (18 sağlayıcı)
 - `/v1/audio/speech` üzerinden metinden konuşmaya dönüştürme (24 yerleşik sağlayıcı)
 - `/v1/videos/generations` üzerinden video oluşturma (ComfyUI + SD WebUI)
@@ -31,55 +31,55 @@ Temel yetenekler:
 - `/v1/search` üzerinden web araması (20 sağlayıcı)
 - `/v1/moderations` üzerinden moderasyon
 - `/v1/rerank` üzerinden yeniden sıralama
-- Akıl yürütme modelleri için düşünme etiketi ayrıştırma (`<think>...</think>`)
+- Akıl yürütme modelleri için düşünme etiketi ayrıştırma (``)
 - Katı OpenAI SDK uyumluluğu için yanıt temizleme
 - Sağlayıcılar arası uyumluluk için rol normalleştirme (developer→system, system→user)
 - Yapılandırılmış çıktı dönüştürme (json_schema → Gemini responseSchema)
 - Sağlayıcılar, anahtarlar, takma adlar, kombinasyonlar, ayarlar ve fiyatlandırma için yerel kalıcılık (122 DB modülü)
-- Kullanım/maliyet takibi ve istek günlükleme
+- Kullanım/maliyet takibi ve istek günlüğü
 - Çoklu cihaz/durum senkronizasyonu için isteğe bağlı bulut senkronizasyonu
 - API erişim denetimi için IP izin listesi/engelleme listesi
-- Düşünme bütçesi yönetimi (doğrudan geçiş/otomatik/özel/uyarlanabilir)
-- Genel sistem istemi ekleme
+- Düşünme bütçesi yönetimi (doğrudan aktarma/otomatik/özel/uyarlanabilir)
+- Global sistem istemi ekleme
 - Oturum takibi ve parmak izi oluşturma
 - Sağlayıcıya özgü profillerle hesap başına gelişmiş hız sınırlama
-- Sağlayıcı dayanıklılığı için devre kesici kalıbı
-- Mutex kilitleme ile ani yoğun istek yığılmasına karşı koruma
+- Sağlayıcı dayanıklılığı için devre kesici deseni
+- Mutex kilitleme ile ani istek yığılmasına karşı koruma
 - İmza tabanlı istek tekilleştirme önbelleği
 - Etki alanı katmanı: maliyet kuralları, yedekleme politikası, kilitleme politikası
-- Context Relay: hesap rotasyonu sürekliliği için oturum devretme özetleri
+- Bağlam Aktarımı: hesap rotasyonu sürekliliği için oturum devretme özetleri
 - Etki alanı durumu kalıcılığı (yedeklemeler, bütçeler, kilitlemeler ve devre kesiciler için SQLite eşzamanlı yazma önbelleği)
 - Merkezi istek değerlendirmesi için politika motoru (kilitleme → bütçe → yedekleme)
-- p50/p95/p99 gecikme toplamasıyla istek telemetrisi
-- `combo_execution_key` / `combo_step_id` üzerinden kombinasyon hedefi telemetrisi ve geçmiş kombinasyon hedefi durumu
+- p50/p95/p99 gecikme süresi toplamasıyla istek telemetrisi
+- `combo_execution_key` / `combo_step_id` aracılığıyla kombinasyon hedefi telemetrisi ve geçmiş kombinasyon hedefi sağlığı
 - Uçtan uca izleme için korelasyon kimliği (X-Request-Id)
-- API anahtarı başına kapsam dışında kalma seçeneği sunan uyumluluk denetimi günlüklemesi
+- API anahtarı başına devre dışı bırakma seçeneği sunan uyumluluk denetim günlüğü
 - LLM kalite güvencesi için değerlendirme çerçevesi
-- Gerçek zamanlı sağlayıcı devre kesici durumunu gösteren sistem sağlığı kontrol paneli
-- 3 aktarım yöntemine (stdio/SSE/Streamable HTTP) sahip MCP Server (110 araç)
-- Beceriler ve görev yaşam döngüsü içeren A2A Server (JSON-RPC 2.0 + SSE)
+- Gerçek zamanlı sağlayıcı devre kesici durumunu gösteren sağlık kontrol paneli
+- 3 aktarım yöntemine (stdio/SSE/Streamable HTTP) sahip MCP Sunucusu (110 araç)
+- Beceriler ve görev yaşam döngüsü içeren A2A Sunucusu (JSON-RPC 2.0 + SSE)
 - Bellek sistemi (çıkarma, ekleme, erişim, özetleme)
 - Beceri sistemi (kayıt defteri, yürütücü, korumalı alan, yerleşik beceriler)
-- Sertifika yönetimi ve DNS işleme özelliklerine sahip MITM proxy
-- İstem enjeksiyonu koruma ara yazılımı
-- Caveman, RTK, yığınlanmış işlem hatları, sıkıştırma kombinasyonları, dil paketleri ve analitik içeren istem sıkıştırma işlem hattı
+- Sertifika yönetimi ve DNS işleme özellikli MITM proxy
+- İstem enjeksiyonuna karşı koruma ara yazılımı
+- Caveman, RTK, yığınlanmış işlem hatları, sıkıştırma kombinasyonları, dil paketleri ve analiz özellikleri içeren istem sıkıştırma işlem hattı
 - ACP (Agent Communication Protocol) kayıt defteri
 - Modüler OAuth sağlayıcıları (`src/lib/oauth/providers/` altında 22 ayrı modül)
 - Kaldırma/tam kaldırma betikleri
 - OAuth ortamı onarma eylemi
 - OpenAI uyumlu WS istemcileri için WebSocket köprüsü (`/v1/ws`)
-- Senkronizasyon token'ı yönetimi (oluşturma/iptal etme, ETag sürümlü yapılandırma paketi indirme)
+- Senkronizasyon token'ı yönetimi (oluşturma/iptal etme, ETag ile sürümlendirilmiş yapılandırma paketi indirme)
 - Birinci sınıf sağlayıcı ön ayarı olarak GLM Thinking (`glmt`)
 - Hibrit token sayımı (tahmin yedeklemesiyle sağlayıcı taraflı `/messages/count_tokens`)
-- Model takma adı otomatik başlangıç verisi oluşturma (başlangıçta 30+ proxy'ler arası lehçe normalleştirmesi)
-- SSRF koruması, özel URL engelleme ve yapılandırılabilir yeniden deneme özellikleriyle güvenli giden istek
+- Model takma adlarını otomatik başlangıç verileriyle doldurma (başlangıçta 30+ proxy'ler arası lehçe normalleştirmesi)
+- SSRF koruması, özel URL engelleme ve yapılandırılabilir yeniden deneme özellikli güvenli giden istek
 - Yapılandırılabilir `requestRetry` ve `maxRetryIntervalSec` ile bekleme süresini dikkate alan sohbet yeniden denemeleri
-- Başlangıçta Zod ile çalışma zamanı ortam doğrulaması
-- Sayfalama, sağlayıcı CRUD olayları ve SSRF tarafından engellenen doğrulama günlüklemesi içeren uyumluluk denetimi v2
+- Başlangıçta Zod ile çalışma zamanı ortamı doğrulaması
+- Sayfalandırma, sağlayıcı CRUD olayları ve SSRF tarafından engellenen doğrulama günlüğü içeren uyumluluk denetimi v2
 
 Birincil çalışma zamanı modeli:
 
-- `src/app/api/*` altındaki Next.js uygulama rotaları hem kontrol paneli API'lerini hem de uyumluluk API'lerini uygular
+- `src/app/api/*` altındaki Next.js uygulama rotaları, hem kontrol paneli API'lerini hem de uyumluluk API'lerini uygular
 - `src/sse/*` + `open-sse/*` içindeki paylaşılan SSE/yönlendirme çekirdeği; sağlayıcı yürütme, çeviri, akış, yedekleme ve kullanım işlemlerini yönetir
 
 ## Referans Diyagramları
@@ -264,7 +264,7 @@ Ana akış modülleri:
 
 - Giriş: `src/sse/handlers/chat.ts`
 - Çekirdek orkestrasyon: `open-sse/handlers/chatCore.ts`
-- Sağlayıcı yürütme adaptörleri: `open-sse/executors/*`
+- Sağlayıcı yürütme bağdaştırıcıları: `open-sse/executors/*`
 - Biçim algılama/sağlayıcı yapılandırması: `open-sse/services/provider.ts`
 - Model ayrıştırma/çözümleme: `src/sse/services/model.ts`, `open-sse/services/model.ts`
 - Hesap geri dönüş mantığı: `open-sse/services/accountFallback.ts`
@@ -279,12 +279,12 @@ Ana akış modülleri:
 - Yanıt temizleme: `open-sse/handlers/responseSanitizer.ts`
 - Rol normalleştirme: `open-sse/services/roleNormalizer.ts`
 
-Hizmetler (iş mantığı):
+Servisler (iş mantığı):
 
-- Hesap seçimi/puanlaması: `open-sse/services/accountSelector.ts`
+- Hesap seçimi/puanlama: `open-sse/services/accountSelector.ts`
 - Bağlam yaşam döngüsü yönetimi: `open-sse/services/contextManager.ts`
-- IP filtresi uygulaması: `open-sse/services/ipFilter.ts`
-- Oturum takibi: `open-sse/services/sessionManager.ts`
+- IP filtresi uygulama: `open-sse/services/ipFilter.ts`
+- Oturum izleme: `open-sse/services/sessionManager.ts`
 - İstek tekilleştirme: `open-sse/services/signatureCache.ts`
 - Sistem istemi ekleme: `open-sse/services/systemPrompt.ts`
 - Düşünme bütçesi yönetimi: `open-sse/services/thinkingBudget.ts`
@@ -293,16 +293,16 @@ Hizmetler (iş mantığı):
 - Devre kesici: `src/shared/utils/circuitBreaker.ts`
 - Bağlam devri: `open-sse/services/contextHandoff.ts` — bağlam aktarma stratejisi için devir özeti oluşturma ve ekleme
 - Sıkıştırma: `open-sse/services/compression/*` — sağlayıcı çevirisinden önce proaktif sıkıştırma;
-  Caveman kurallarını, RTK filtrelerini, yığınlanmış işlem hatlarını, sıkıştırma kombinasyonlarını, istatistikleri ve doğrulamayı içerir
+  Caveman kurallarını, RTK filtrelerini, yığınlı işlem hatlarını, sıkıştırma kombinasyonlarını, istatistikleri ve doğrulamayı içerir
 - Codex kota getiricisi: `open-sse/services/codexQuotaFetcher.ts` — bağlam aktarma devri kararları için Codex kotasını getirir
 - Bekleme süresini dikkate alan yeniden deneme: `src/sse/services/cooldownAwareRetry.ts` — yapılandırılabilir `requestRetry` / `maxRetryIntervalSec` ile model başına bekleme süreli yeniden denemeler
 - Güvenli giden getirme: `src/shared/network/safeOutboundFetch.ts` — SSRF koruması, özel URL engelleme, yeniden deneme ve zaman aşımı özellikli korumalı sağlayıcı/model getirme
-- Giden URL koruması: `src/shared/network/outboundUrlGuard.ts` — sağlayıcı URL'lerini özel/localhost CIDR aralıklarına karşı doğrular
+- Giden URL koruması: `src/shared/network/outboundUrlGuard.ts` — sağlayıcı URL'lerinde ana makine denetimleri; `src/shared/network/outboundUrlGuardPolicy.ts`, modu `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS` ve bunların kontrol paneli anahtarlarından seçer (bkz. `docs/reference/ENVIRONMENT.md`)
 - Sağlayıcı istek varsayılanları: `open-sse/services/providerRequestDefaults.ts` — sağlayıcı düzeyinde `maxTokens`, `temperature`, `thinkingBudgetTokens` varsayılanları
 - GLM sağlayıcı sabitleri: `open-sse/config/glmProvider.ts` — paylaşılan GLM modelleri, kota URL'leri, GLMT zaman aşımı/varsayılanları
 - Antigravity üst akışı: `open-sse/config/antigravityUpstream.ts` — temel URL ve keşif yolu sabitleri
 - Codex istemci sabitleri: `open-sse/config/codexClient.ts` — sürümlendirilmiş kullanıcı aracısı ve istemci sürümü değerleri
-- Model diğer ad başlangıç verileri: `src/lib/modelAliasSeed.ts` — başlangıçta 30'dan fazla çapraz proxy lehçesi diğer adını ekler
+- Model takma adı başlangıç verileri: `src/lib/modelAliasSeed.ts` — başlangıçta 30'dan fazla çapraz proxy lehçesi takma adını yükler
 
 Etki alanı katmanı modülleri:
 
@@ -310,7 +310,7 @@ Etki alanı katmanı modülleri:
 - Geri dönüş politikası: `src/domain/fallbackPolicy.ts`
 - Kombinasyon çözümleyicisi: `src/domain/comboResolver.ts`
 - Kilitleme politikası: `src/domain/lockoutPolicy.ts`
-- Politika motoru: `src/domain/policyEngine.ts` — merkezi kilitleme → bütçe → geri dönüş değerlendirmesi
+- Politika motoru: `src/domain/policyEngine.ts` — merkezî kilitleme → bütçe → geri dönüş değerlendirmesi
 - Hata kodları kataloğu: `src/shared/constants/errorCodes.ts`
 - İstek kimliği: `src/shared/utils/requestId.ts`
 - Getirme zaman aşımı: `src/shared/utils/fetchTimeout.ts`
@@ -319,10 +319,11 @@ Etki alanı katmanı modülleri:
 - Değerlendirme çalıştırıcısı: `src/lib/evals/evalRunner.ts`
 - Etki alanı durumu kalıcılığı: `src/lib/db/domainState.ts` — geri dönüş zincirleri, bütçeler, maliyet geçmişi, kilitleme durumu ve devre kesiciler için SQLite CRUD işlemleri
 
-OAuth sağlayıcı modülleri (`src/lib/oauth/providers/` altında 22 ayrı dosya):
+OAuth sağlayıcı modülleri (`src/lib/oauth/providers/` altında 27 ayrı dosya):
 
 - Kayıt defteri dizini: `src/lib/oauth/providers/index.ts`
-- Ayrı sağlayıcılar: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
+- Ayrı sağlayıcılar: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
+- Paylaşılan yardımcılar: `codebuddyDeviceAuth.ts` (CodeBuddy CN/intl cihaz akışı), `museCodeDeviceResponse.ts`
 - İnce sarmalayıcı: `src/lib/oauth/providers.ts` — ayrı modüllerden yeniden dışa aktarır
 
 ## 5) Gömülü Hizmetler (v3.8.4)
@@ -350,86 +351,79 @@ Ayrıntılı inceleme: `docs/frameworks/EMBEDDED-SERVICES.md`
 
 ## Başlıca Alt Sistemler (v3.8.0)
 
-### A. Auto Combo Motoru
+### A. Otomatik Kombinasyon Motoru
 
-Auto Combo, statik bir combo tanımına güvenmek yerine istek zamanında yönlendirme hedeflerini
-dinamik olarak puanlar ve seçer. `auto/*` model öneki ailesini destekler.
+Otomatik Kombinasyon, statik bir kombinasyon tanımına bağlı kalmak yerine istek zamanında yönlendirme hedeflerini dinamik olarak puanlar ve seçer. `auto/*` model ön eki ailesine güç sağlar.
 
 - Motor giriş noktası: `open-sse/services/autoCombo/` (`autoComboEngine.ts`,
   `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
-- Çözümleyici: `src/domain/comboResolver.ts` (`auto/` önekinin otomatik algılanması)
+- Çözümleyici: `src/domain/comboResolver.ts` (`auto/` ön ekinin otomatik algılanması)
 - Kontrol paneli: `/dashboard/auto-combo`
 - Telemetri: `auto_combo_decisions` SQLite tablosu
 
 Temel yetenekler:
 
-- **19 yönlendirme stratejisi** (öncelik, ağırlıklı, önce doldurma, döngüsel, P2C, rastgele,
-  en az kullanılan, maliyet optimizasyonlu, sıfırlama duyarlı, sıfırlama penceresi, kullanılabilir kapasite, katı rastgele,
-  **auto**, lkgp, bağlam optimizasyonlu, bağlam aktarımlı, **fusion** ve ayrıca bir geri dönüş yolu) —
-  auto, v3.8.0 sürümünün öne çıkan yeniliğidir; `fusion` (panel dağıtımı + hakem sentezi,
+- **20 yönlendirme stratejisi** (öncelik, ağırlıklı, önce doldurma, sıralı döngü, P2C, rastgele,
+  en az kullanılan, maliyet optimizasyonlu, sıfırlama duyarlı, sıfırlama penceresi, kapasite payı, kota ağırlıklı,
+  katı rastgele, **otomatik**, lkgp, bağlam optimizasyonlu, önbellek optimizasyonlu, bağlam aktarma, **füzyon**,
+  işlem hattı) —
+  otomatik, v3.8.0 sürümünün öne çıkan yeniliğidir; `fusion` (panel dağıtımı + değerlendirici sentezi,
   `open-sse/services/fusion.ts`) ise v3.8.36 sürümünde yenidir.
-- **16 faktörlü puanlama**: kota, sistem durumu, ters maliyet, ters gecikme, göreve uygunluk ve
-  on faktör daha. Faktörlerin ve varsayılan ağırlıklarının standart tablosu
-  [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) içinde bulunur — burada tekrar belirtilmesi,
+- **16 faktörlü puanlama**: kota, durum, ters maliyet, ters gecikme, göreve uygunluk ve
+  on faktör daha. Faktörlerin ve varsayılan ağırlıklarının referans tablosu
+  [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) içinde yer alır — burada yeniden belirtilmesi,
   güncelliğini yitirebileceği ikinci bir yer oluşturur.
-- **Sanal fabrika**, eşleşen adlandırılmış bir combo olmadığında geçici combo'lar oluşturur
-  ve adayları sistem durumu sağlıklı olan etkin sağlayıcı bağlantılarından alır.
-- **Auto önekleri**: `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`,
+- **Sanal fabrika**, eşleşen adlandırılmış bir kombinasyon bulunmadığında, adayları sağlıklı ve etkin sağlayıcı bağlantılarından alarak geçici kombinasyonlar oluşturur.
+- **Otomatik ön ekler**: `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`,
   `auto/smart`, `auto/lkgp` — her biri ayarlanmış bir ağırlık profiliyle desteklenir.
 - **6 mod paketi**: `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`,
-  `reliability-first` ve `chaos-mode` — kontrol panelinden çağrılabilen önceden ayarlanmış ağırlık
-  yapılandırmalarıdır. (Yukarıdaki, istek zamanı varyantları olan `auto/*` önekleriyle
-  karıştırılmamalıdır.)
+  `reliability-first` ve `chaos-mode` — kontrol panelinden çağrılabilen önceden ayarlanmış ağırlık yapılandırmalarıdır.
+  (Bunlar, yukarıdaki istek zamanı varyantları olan `auto/*` ön ekleriyle karıştırılmamalıdır.)
 
 Algoritmaya ilişkin tüm ayrıntılar (faktör formülleri, ağırlık ayarlama) için
 [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) belgesine bakın.
 
-### B. Bulut Ajanları
+### B. Bulut Aracıları
 
-Cloud Agents, üçüncü taraf barındırılan kod ajanı platformlarını (Codex Cloud, Devin,
-Jules) tek tip ve DB destekli bir görev yaşam döngüsünün arkasında sarmalar. Tüm görev oluşturma/inceleme
+Bulut Aracıları, üçüncü taraf barındırılan kod aracısı platformlarını (Codex Cloud, Devin,
+Jules) tek tip, veritabanı destekli bir görev yaşam döngüsünün arkasında birleştirir. Tüm görev oluşturma/inceleme
 uç noktaları yönetim kimlik doğrulaması gerektirir.
 
 - Modül kökü: `src/lib/cloudAgent/` (`baseAgent.ts`, `registry.ts`, `api.ts`,
-  `types.ts`, `db.ts` ve `agents/` altındaki ajan başına alt dizinler)
-- Ajan başına uygulamalar: `agents/codex/`, `agents/devin/`, `agents/jules/`
-- Genel uç noktalar: `/api/v1/agents/tasks/*` (listeleme/oluşturma/alma/iptal etme)
-- Yönetim uç noktaları: `/api/cloud/*` (hazırlama, durum, toplu işlem)
+  `types.ts`, `db.ts` ve `agents/` altındaki aracı başına alt dizinler)
+- Aracı başına uygulamalar: `agents/codex/`, `agents/devin/`, `agents/jules/`
+- Genel uç noktalar: `/api/v1/agents/tasks/*` (listeleme/oluşturma/getirme/iptal etme)
+- Yönetim uç noktaları: `/api/cloud/*` (kaynak sağlama, durum, toplu işlemler)
 - Kontrol paneli: `/dashboard/cloud-agents`
 - Depolama: `cloud_agent_tasks` tablosu
 
-Ajan başına hazırlama ve OAuth ayrıntıları için
+Aracı başına kaynak sağlama ve OAuth ayrıntıları için
 [`docs/frameworks/CLOUD_AGENT.md`](../frameworks/CLOUD_AGENT.md) belgesine bakın.
 
-### C. Koruma Mekanizmaları
+### C. Koruma Önlemleri
 
-Koruma mekanizmaları modülü; PII, istem enjeksiyonu ve güvenli olmayan görsel içerik açısından istekleri
-ve yanıtları inceleyen, çalışırken yeniden yüklenebilir bir ara yazılım katmanıdır. İhlaller,
-isteği HTTP **503** ve yapılandırılmış bir hata koduyla kısa devreye alarak
-aşağı akıştaki çağıranların yeniden denemesine veya dallanmasına olanak tanır.
+Koruma önlemleri modülü; istekleri ve yanıtları kişisel olarak tanımlanabilir bilgiler (PII), istem enjeksiyonu ve güvenli olmayan görsel içerik açısından inceleyen, çalışırken yeniden yüklenebilir bir ara yazılım katmanıdır. İhlaller, isteği HTTP **503** ve yapılandırılmış bir hata koduyla erken sonlandırarak sonraki çağıranların yeniden denemesine veya farklı bir dala yönelmesine olanak tanır.
 
 - Modül kökü: `src/lib/guardrails/` (`base.ts`, `registry.ts`, `piiMasker.ts`,
   `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`)
-- Çalışırken yeniden yükleme: kayıt defteri yapılandırma değişikliklerini izler ve zinciri yerinde yeniden oluşturur
+- Çalışırken yeniden yükleme: kayıt defteri, yapılandırma değişikliklerini izler ve zinciri yerinde yeniden oluşturur
 - Bağlantı noktaları: sohbet işleyicisi girişi, görüntü oluşturma işleyicisi, yanıt temizleyicisi
-- HTTP sözleşmesi: ihlaller, `error.code = "GUARDRAIL_VIOLATION"` ile birlikte `503` olarak gösterilir
+- HTTP sözleşmesi: ihlaller, `error.code = "GUARDRAIL_VIOLATION"` ile `503` olarak bildirilir
 
 Kural kümesi oluşturma ve eşik ayarlama için
 [`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md) belgesine bakın.
 
 ### D. Etki Alanı Katmanı
 
-`src/domain/` ad alanı, rota işleyicilerinin kilitleme/bütçe/geri dönüş mantığını
-kendilerinin bir araya getirmek zorunda kalmaması için ilke kararlarını merkezileştirir.
+`src/domain/` ad alanı, rota işleyicilerinin kilitleme/bütçe/geri dönüş mantığını kendilerinin bir araya getirmesine gerek kalmaması için politika kararlarını merkezileştirir.
 
-- İlke motoru: `src/domain/policyEngine.ts` — yürütme öncesi
-  değerlendirme için tek giriş noktası (kilitleme → bütçe → geri dönüş sıralaması)
+- Politika motoru: `src/domain/policyEngine.ts` — yürütme öncesi değerlendirme için tek giriş noktası (kilitleme → bütçe → geri dönüş sıralaması)
 - Maliyet kuralları: `src/domain/costRules.ts`
-- Geri dönüş ilkesi: `src/domain/fallbackPolicy.ts`
-- Kilitleme ilkesi: `src/domain/lockoutPolicy.ts`
+- Geri dönüş politikası: `src/domain/fallbackPolicy.ts`
+- Kilitleme politikası: `src/domain/lockoutPolicy.ts`
 - Etiket tabanlı yönlendirme: `src/domain/tagRouter.ts`
-- Combo çözümleyici: `src/domain/comboResolver.ts` — combo adlarını, auto/\*
-  öneklerini ve joker karakterli model hedeflerini somut yürütme planlarına çözümler
+- Kombinasyon çözümleyici: `src/domain/comboResolver.ts` — kombinasyon adlarını, auto/\*
+  ön eklerini ve joker karakterli model hedeflerini somut yürütme planlarına dönüştürür
 - Bağlantı/model kuralı birleştiricisi: `src/domain/connectionModelRules.ts`
 - Model kullanılabilirliği anlık görüntüleri: `src/domain/modelAvailability.ts`
 - Sağlayıcı süre sonu takibi: `src/domain/providerExpiration.ts`
@@ -441,21 +435,18 @@ kendilerinin bir araya getirmek zorunda kalmaması için ilke kararlarını merk
 
 ### E. Yetkilendirme İşlem Hattı
 
-Yetkilendirme işlem hattı, gelen her isteği sınıflandırır ve yönlendirmeden önce
-uygun politika zincirini uygular.
+Yetkilendirme işlem hattı, gelen her isteği sınıflandırır ve dağıtımdan önce uygun politika zincirini uygular.
 
 - İşlem hattı giriş noktası: `src/server/authz/pipeline.ts`
-- İstek sınıflandırıcısı: `src/server/authz/classify.ts` — herkese açık
-  uyumluluk rotalarını yönetim rotalarından ayırır
-- Herkese açık rota envanteri: `src/shared/constants/publicApiRoutes.ts`
+- İstek sınıflandırıcısı: `src/server/authz/classify.ts` — genel uyumluluk rotalarını yönetim rotalarından ayırır
+- Genel rota envanteri: `src/shared/constants/publicApiRoutes.ts`
 - Politikalar: `src/server/authz/policies/` — birleştirilebilir koşullar
   (`requireApiKey`, `requireManagement`, `requireFreshAuth` vb.)
-- Başlık yardımcı araçları: `src/server/authz/headers.ts`
-- Doğrulama yardımcı işlevi: `src/server/authz/assertAuth.ts`
+- Üst bilgi yardımcı araçları: `src/server/authz/headers.ts`
+- Doğrulama yardımcısı: `src/server/authz/assertAuth.ts`
 - İstek bağlamı: `src/server/authz/context.ts`
 
-Herkese açık rotalar ile yönetim rotaları arasında kesin bir sınır vardır: agent/cooldown API'leri ve
-sağlayıcı değişiklikleri yönetim yetkilendirmesi gerektirir (eksikse HTTP 401).
+Genel ve yönetim rotaları arasında kesin bir sınır vardır: aracı/bekleme süresi API'leri ve sağlayıcı değişiklikleri yönetim kimlik doğrulaması gerektirir (eksikse HTTP 401).
 
 Rota sınıflandırma kurallarının tamamı için
 [`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md) belgesine bakın.
@@ -463,52 +454,51 @@ Rota sınıflandırma kurallarının tamamı için
 ### F. İş Akışı FSM'si ve Görev Duyarlı Yönlendirici
 
 Algılanan iş akışı aşamasına (planlama, yürütme,
-inceleme) ve arka plan görevi yakınlığına göre trafiği yönlendirmek için
-kombinasyon seçiminin üzerinde katmanlanan sonlu durum makinesi tabanlı bir yönlendirici.
+inceleme) ve arka plan görevi yakınlığına göre trafiği yönlendirmek için kombinasyon seçiminin üzerinde katmanlanan, sonlu durum makinesi tarafından yönetilen bir yönlendiricidir.
 
-- İş akışı FSM'si: `open-sse/services/workflowFSM.ts`
+- İş Akışı FSM'si: `open-sse/services/workflowFSM.ts`
 - Görev duyarlı yönlendirici: `open-sse/services/taskAwareRouter.ts`
 - Arka plan görevi algılayıcısı: `open-sse/services/backgroundTaskDetector.ts`
-- Niyet sınıflandırıcısı: `open-sse/services/intentClassifier.ts`
+- Niyet sınıflandırıcı: `open-sse/services/intentClassifier.ts`
 
-FSM geçişleri Auto Combo'nun puanlamasına aktarılır; arka plan/otomasyon görevlerinde
-daha ekonomik modellere, etkileşimli planlama/inceleme adımlarında ise daha güçlü
+FSM geçişleri Auto Combo'nun puanlamasına girdi sağlayarak arka plan/otomasyon görevlerinde
+daha ekonomik modellere, etkileşimli planlama/inceleme turlarında ise daha güçlü
 modellere öncelik verilmesini sağlar.
 
-### G. Sağlayıcıya Özgü Dayanıklılık
+### G. Sağlayıcıya Özel Dayanıklılık
 
-Bazı sağlayıcılar, genel devre kesici / bağlantı bekleme süresi / model kilitleme katmanlarından
-yararlanan özel dayanıklılık ve gizlilik modülleri sunar:
+Bazı sağlayıcılar, genel devre kesici / bağlantı bekleme süresi / model kilitleme
+katmanlarını kullanan özel dayanıklılık ve gizlilik modülleri sunar:
 
 - Antigravity 429 motoru: `open-sse/services/antigravity429Engine.ts` (kimliği
-  dönüşümlü olarak değiştirir, yanıt başlıklarını temizler; kredi/sürüm takibini
+  dönüşümlü kullanır, yanıt başlıklarını temizler, kredi/sürüm takibini
   `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`,
   `antigravityIdentity.ts`, `antigravityVersion.ts` aracılığıyla yürütür)
 - ModelScope kota politikası: `open-sse/services/modelscopePolicy.ts`
 - Claude Code CCH (Uyumluluk Kanalı El Sıkışması): `open-sse/services/claudeCodeCCH.ts`,
   ayrıca `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`,
   `claudeCodeToolRemapper.ts`
-- Claude Code parmak izi biçimlendirmesi: `open-sse/services/claudeCodeFingerprint.ts`
+- Claude Code parmak izi şekillendirme: `open-sse/services/claudeCodeFingerprint.ts`
 - Claude Code gizleme: `open-sse/services/claudeCodeObfuscation.ts`
 
-Gizlilik stratejisinin tamamı ve operasyonel yönergeler için
-`docs/security/STEALTH_GUIDE.md` belgesine bakın (git'te bulunur; `/docs` içine derlenmez).
+Eksiksiz gizlilik uygulama kılavuzu ve operasyonel yönlendirmeler için
+`docs/security/STEALTH_GUIDE.md` dosyasına bakın (git; `/docs` içinde derlenmez).
 
 ### H. Webhook'lar, Akıl Yürütme Önbelleği, Okuma Önbelleği
 
-- **Webhook'lar** — sağlayıcı/hesap/görev olayları için dışa yönelik gönderim.
+- **Webhook'lar** — sağlayıcı/hesap/görev olayları için giden gönderim.
   - Dağıtıcı: `src/lib/webhookDispatcher.ts`
-  - Depolama: `webhooks` SQLite tablosu (`src/lib/db/webhooks.ts` üzerinden)
+  - Depolama: `webhooks` SQLite tablosu (`src/lib/db/webhooks.ts` aracılığıyla)
   - Kontrol paneli: `/dashboard/webhooks` (abonelikler, gizli anahtarlar, yeniden deneme geçmişi)
   - Olay sınıflandırması ve yeniden deneme semantiği için [`docs/frameworks/WEBHOOKS.md`](../frameworks/WEBHOOKS.md) belgesine bakın.
-- **Akıl Yürütme Önbelleği** — düşünme token'ları üreten sağlayıcılar
-  (Claude, GLMT vb.) için yeniden oynatılabilir akıl yürütme blokları; böylece ardışık adımlarda yeniden düşünme atlanabilir.
-  - DB katmanı: `src/lib/db/reasoningCache.ts`
+- **Akıl Yürütme Önbelleği** — düşünme belirteçleri üreten sağlayıcılar
+  (Claude, GLMT vb.) için yeniden oynatılabilir akıl yürütme blokları; böylece ardışık turlarda yeniden düşünme atlanabilir.
+  - Veritabanı katmanı: `src/lib/db/reasoningCache.ts`
   - Hizmet katmanı: `open-sse/services/reasoningCache.ts`
   - Yeniden oynatma semantiği için [`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md) belgesine bakın.
 - **Okuma Önbelleği** — imzaya göre anahtarlanan ve bozuk yukarı akış SDK'larından gelen
-  aynı yeniden denemeleri birleştirmek için kullanılan kısa ömürlü yanıt önbelleği.
-  - DB katmanı: `src/lib/db/readCache.ts`
+  özdeş yeniden denemeleri birleştirmek için kullanılan kısa ömürlü yanıt önbelleği.
+  - Veritabanı katmanı: `src/lib/db/readCache.ts`
   - İstatistik uç noktası: `GET /api/cache/stats`, kontrol paneli: `/dashboard/cache`
 
 ## 3) Kalıcılık Katmanı
@@ -535,14 +525,15 @@ Etki Alanı Durum Veritabanı (SQLite):
 
 ## 4) Kimlik Doğrulama + Güvenlik Yüzeyleri
 
-- Kontrol paneli çerez kimlik doğrulaması: `src/proxy.ts`, `src/app/api/auth/login/route.ts`
+- Dashboard çerez kimlik doğrulaması: `src/proxy.ts`, `src/app/api/auth/login/route.ts`
 - API anahtarı oluşturma/doğrulama: `src/shared/utils/apiKey.ts`
-- Sağlayıcı gizli bilgileri `providerConnections` girdilerinde saklanır
-- `open-sse/utils/proxyFetch.ts` (ortam değişkenleri) ve `open-sse/utils/networkProxy.ts` (sağlayıcı başına veya genel olarak yapılandırılabilir) üzerinden giden proxy desteği
-- SSRF / giden URL koruması: `src/shared/network/outboundUrlGuard.ts` — tüm sağlayıcı çağrılarında özel/geri döngü/yerel bağlantı aralıklarını engeller
-- Çalışma zamanı ortam doğrulaması: `src/lib/env/runtimeEnv.ts` — tüm ortam değişkenleri için Zod şeması; başlangıç hataları/uyarıları olarak gösterilir
-- Eşzamanlama belirteçleri: `src/lib/db/syncTokens.ts` — yapılandırma paketi indirme uç noktaları için kapsamlı belirteçler; `sync_tokens` SQLite tablosu tarafından desteklenir (`024_create_sync_tokens.sql` migrasyonu)
+- `providerConnections` girdilerinde kalıcı olarak saklanan sağlayıcı gizli bilgileri
+- `open-sse/utils/proxyFetch.ts` (ortam değişkenleri) ve `open-sse/utils/networkProxy.ts` (sağlayıcı bazında veya genel olarak yapılandırılabilir) üzerinden giden proxy desteği
+- SSRF / giden URL koruması: `src/shared/network/outboundUrlGuard.ts` — sağlayıcı çağrılarında ve webhook hedeflerinde ana makine denetimleri; mod, `src/shared/network/outboundUrlGuardPolicy.ts` dosyasından alınır (`docs/reference/ENVIRONMENT.md` içindeki bayraklar)
+- Çalışma zamanı ortamı doğrulaması: `src/lib/env/runtimeEnv.ts` — tüm ortam değişkenleri için Zod şeması; başlangıç hataları/uyarıları olarak gösterilir
+- Senkronizasyon token'ları: `src/lib/db/syncTokens.ts` — yapılandırma paketi indirme uç noktaları için kapsamlı token'lar; `sync_tokens` SQLite tablosu tarafından desteklenir (`024_create_sync_tokens.sql` geçişi)
 - WebSocket el sıkışması kimlik doğrulaması: `src/lib/ws/handshake.ts` — WS yükseltme isteklerini API anahtarı veya oturum çerezi aracılığıyla doğrular
+- Canlı dashboard WebSocket kimlik doğrulaması: `src/server/ws/liveServer.ts` — yardımcı işlem (`LIVE_WS_PORT` portu), bir dashboard oturum çerezini veya yönetim kapsamına (`manage`/`admin`) sahip bir Bearer API anahtarını kabul eder; yalnızca çıkarım amaçlı anahtarlar reddedilir. Dahili `POST /__omniroute_event` yayıncı uç noktası, yalnızca proxy geçişi üstbilgisi (`x-forwarded-*`, `x-real-ip`, `forwarded`, `via`) mevcut olmadığında geri döngü eşlerini kabul eder
 
 ## 5) Bulut Eşzamanlama
 
@@ -808,21 +799,21 @@ Fiziksel depolama dosyaları:
 
 ```mermaid
 flowchart LR
-    subgraph LocalHost[Developer Host]
-        CLI[CLI Tools]
-        Browser[Dashboard Browser]
+    subgraph LocalHost[Geliştirici Ana Makinesi]
+        CLI[CLI Araçları]
+        Browser[Gösterge Paneli Tarayıcısı]
     end
 
-    subgraph ContainerOrProcess[OmniRoute Runtime]
-        Next[Next.js Server\nPORT=20128]
-        Core[SSE Core + Executors]
+    subgraph ContainerOrProcess[OmniRoute Çalışma Ortamı]
+        Next[Next.js Sunucusu\nPORT=20128]
+        Core[SSE Çekirdeği + Yürütücüler]
         MainDB[(storage.sqlite)]
-        UsageDB[(usage tables + log artifacts)]
+        UsageDB[(kullanım tabloları + günlük yapıtları)]
     end
 
-    subgraph External[External Services]
-        Providers[AI Providers]
-        SyncCloud[Cloud Sync Service]
+    subgraph External[Harici Hizmetler]
+        Providers[AI Sağlayıcıları]
+        SyncCloud[Bulut Senkronizasyon Hizmeti]
     end
 
     CLI --> Next

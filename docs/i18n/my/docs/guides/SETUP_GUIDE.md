@@ -144,49 +144,56 @@ omniroute providers validate
 2. Dashboard → `Endpoints` ကိုဖွင့်ပြီး API key တစ်ခု ဖန်တီးပါ။
 3. (ရွေးချယ်နိုင်သည်) Dashboard → `Combos` ကိုဖွင့်ပြီး သင်၏ fallback chain ကို သတ်မှတ်ပါ။
 
-### 2) သင်၏ Coding Tool ကို ချိတ်ဆက်သတ်မှတ်ခြင်း
+### 2) သင်၏ Coding Tool ကို ချိတ်ဆက်ခြင်း
 
 ```txt
-Base URL: http://localhost:20128/v1
-API Key:  [copy from Endpoint page]
-Model:    if/qwen3.8-max-preview (or any provider/model prefix)
+အခြေခံ URL: http://localhost:20128/v1
+API Key:    [Endpoint စာမျက်နှာမှ ကူးယူပါ]
+Model:      if/qwen3.8-max-preview (သို့မဟုတ် မည်သည့် provider/model prefix မဆို)
 ```
 
-သင်၏ editor က `Authorization: Bearer ...` ကို မပို့နိုင်ပါက၊ token ထည့်သွင်းထားသော compatibility base ကို အစားထိုးအသုံးပြုပါ-
+သင်၏ editor သည် `Authorization: Bearer ...` ကို မပို့နိုင်ပါက token ထည့်သွင်းထားသော compatibility base ကို အစားထိုးအသုံးပြုပါ-
 
 ```txt
-Base URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/
+အခြေခံ URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/
 Models URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/models
 Chat URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/chat/completions
 Ollama Tags URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
 ```
 
-Claude Code၊ Codex CLI၊ Cursor၊ Cline၊ OpenClaw၊ OpenCode နှင့် OpenAI-compatible SDK များတွင် အသုံးပြုနိုင်သည်။
+Claude Code၊ Codex CLI၊ Cursor၊ Cline၊ OpenClaw၊ OpenCode နှင့် OpenAI-compatible SDK များဖြင့် အသုံးပြုနိုင်သည်။
 
 #### `setup-*` ဖြင့် အလိုအလျောက် ဖွဲ့စည်းသတ်မှတ်ခြင်း
 
-Base URL နှင့် key ကို ကိုယ်တိုင်ထည့်သွင်းမည့်အစား၊ လက်ရှိ model catalog မှ tool တစ်ခုစီ၏ ကိုယ်ပိုင် config ကို OmniRoute အား ရေးသားခိုင်းနိုင်သည်။ Tool တစ်ခုစီအတွက် command တစ်ခုစီဖြစ်သည်-
+Base URL နှင့် key ကို ကိုယ်တိုင်ကူးထည့်မည့်အစား OmniRoute က live model catalog မှတစ်ဆင့် tool တစ်ခုချင်းစီ၏
+ကိုယ်ပိုင် config ကို ရေးသားပေးပါစေ။ Tool တစ်ခုလျှင် command တစ်ခုစီ အသုံးပြုပါ-
 
 ```bash
 omniroute setup-codex        # ~/.codex/<name>.config.toml ပရိုဖိုင်များ
 omniroute setup-claude       # ~/.claude/profiles/<name>/settings.json
-omniroute setup-opencode     # ~/.config/opencode/opencode.json (OpenAI နှင့် တွဲဖက်အသုံးပြုနိုင်သော)
+omniroute setup-opencode     # ~/.config/opencode/opencode.json (openai-compatible)
 omniroute setup-cline        # Cline CLI + VS Code extension ဆက်တင်များ
 omniroute setup-kilo         # Kilo Code
 omniroute setup-continue     # ~/.continue/config.yaml (Continue / cn)
-omniroute setup-cursor       # Cursor အက်ပ်အတွင်း လုပ်ဆောင်ရမည့် အဆင့်များကို ပြသသည်
-omniroute setup-roo          # Roo Code တင်သွင်းမှု + autoImport ညွှန်တံ
+omniroute setup-cursor       # Cursor ၏ app အတွင်း လုပ်ဆောင်ရမည့် အဆင့်များကို ပြသသည်
+omniroute setup-roo          # Roo Code import + autoImport ညွှန်ပြချက်
 omniroute setup-crush        # ~/.config/crush/crush.json
+omniroute setup-zed          # ~/.config/zed/settings.json (openai_compatible)
 omniroute setup-goose        # ~/.config/goose/config.yaml
 omniroute setup-aider        # ~/.aider.conf.yml
 omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 ```
 
-တစ်ခုစီသည် local tool တစ်ခုကို **remote** OmniRoute နှင့် ချိတ်ဆက်ဖွဲ့စည်းရန် `--remote <url> --api-key <key>` ကို လက်ခံသကဲ့သို့၊ ကြိုတင်ကြည့်ရှုရန် `--dry-run` ကိုလည်း လက်ခံသည်။ မှန်ကန်သော env ကို ထည့်သွင်းပေးပြီး config တစ်စုံတစ်ရာ လုံးဝမရေးဘဲ CLI တစ်ခုကို စတင်ရန် ယေဘုယျ launcher ဖြစ်သော `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini) ကို အသုံးပြုပါ။ ယခင် tool တစ်ခုချင်းစီအလိုက် launcher များဖြစ်သော `omniroute launch` (Claude Code) နှင့် `omniroute launch-codex` (Codex) တို့ကိုလည်း ဆက်လက်အသုံးပြုနိုင်သည်။
+တစ်ခုချင်းစီတွင် local tool တစ်ခုကို **remote** OmniRoute နှင့် အသုံးပြုနိုင်ရန် ဖွဲ့စည်းသတ်မှတ်ဖို့ `--remote <url> --api-key <key>` ကို လက်ခံပြီး အကြိုကြည့်ရှုရန် `--dry-run` ကိုလည်း လက်ခံသည်။ မှန်ကန်သော
+env ကို ထည့်သွင်းပေးထားပြီး မည်သည့် config ကိုမျှ ရေးသားခြင်းမရှိဘဲ CLI တစ်ခုကို စတင်ရန် generic launcher
+`omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini) ကို အသုံးပြုပါ။
+ယခင် tool အလိုက် launcher များဖြစ်သော `omniroute launch` (Claude Code) နှင့်
+`omniroute launch-codex` (Codex) တို့ကိုလည်း ဆက်လက်အသုံးပြုနိုင်သည်။
 
-ဇယားအပြည့်အစုံ (command တစ်ခုစီက ရေးသားသည့်အရာ၊ flag အားလုံး၊ local နှင့် remote ကွာခြားချက်၊ base-URL `/v1` စံသတ်မှတ်ချက်များ) ကို **[CLI ပေါင်းစည်းအသုံးပြုမှုများ](./CLI-INTEGRATIONS.md)** တွင် ကြည့်ပါ။
+ဇယားအပြည့်အစုံ (command တစ်ခုချင်းစီက ရေးသားသည့်အရာ၊ flag အားလုံး၊ local နှင့် remote ကွာခြားချက်၊ base-URL
+`/v1` သတ်မှတ်ပုံများ) ကို သိရှိရန် **[CLI ပေါင်းစည်းအသုံးပြုမှုများ](./CLI-INTEGRATIONS.md)** ကို ကြည့်ပါ။
 
-Tool တစ်ခုချင်းစီအတွက် အသေးစိတ်ဖွဲ့စည်းသတ်မှတ်မှု (Claude Code၊ Codex CLI၊ Cursor၊ Cline၊ OpenClaw၊ Kilo Code၊ Copilot နှင့် အခြားအရာများ) ကို သီးခြား **[CLI Tools လမ်းညွှန်](../reference/CLI-TOOLS.md)** တွင် ကြည့်ပါ။
+Tool တစ်ခုချင်းစီအတွက် အသေးစိတ်ဖွဲ့စည်းသတ်မှတ်ပုံ (Claude Code၊ Codex CLI၊ Cursor၊ Cline၊ OpenClaw၊ Kilo Code၊ Copilot နှင့် အခြားအရာများ) ကို သိရှိရန် သီးသန့် **[CLI Tools လမ်းညွှန်](../reference/CLI-TOOLS.md)** ကို ကြည့်ပါ။
 
 ---
 
@@ -315,12 +322,12 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Void Linux (xbps-src) Template
+## Void Linux (xbps-src) တမ်းပလိတ်
 
-Void Linux အသုံးပြုသူများသည် `xbps-src` ကို အသုံးပြု၍ native package တစ်ခု တည်ဆောက်နိုင်ပါသည်။ ဤ block ကို `srcpkgs/omniroute/template` အဖြစ် သိမ်းဆည်းပါ-
+Void Linux အသုံးပြုသူများသည် `xbps-src` ကို အသုံးပြု၍ မူရင်းပက်ကေ့ချ်တစ်ခုကို တည်ဆောက်နိုင်ပါသည်။ ဤဘလောက်ကို `srcpkgs/omniroute/template` အဖြစ် သိမ်းဆည်းပါ။
 
 ```bash
-# 'omniroute' အတွက် Template ဖိုင်
+# 'omniroute' အတွက် တမ်းပလိတ်ဖိုင်
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -331,7 +338,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# Release တစ်ခုစီအတွက် checksum ကို အောက်ပါအတိုင်း ပြန်လည်ဖန်တီးပါ-
+# ထုတ်ဝေမှုတစ်ခုစီအတွက် checksum ကို အောက်ပါအတိုင်း ပြန်လည်ထုတ်လုပ်ပါ။
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

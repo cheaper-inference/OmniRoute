@@ -36,6 +36,8 @@ import type { DashboardEventName, DashboardEventMap, DashboardChannel } from "@/
 import { CHANNEL_EVENTS, getChannelForEvent } from "@/lib/events/types";
 import { isAutomatedTestProcess, isBuildProcess } from "@/shared/utils/testProcess";
 import { hasProxyHopHeader } from "@/server/authz/proxyHeaders";
+// Pure constant module (no DB / Next.js imports) — safe to load statically here.
+import { hasManageScope } from "@/shared/constants/managementScopes";
 import { warnIfNonLoopbackWithoutApiKey } from "@/lib/startup/nonLoopbackApiKeyGuard";
 
 import {
@@ -132,6 +134,18 @@ function loadAuthModule(): Promise<typeof import("../../sse/services/auth.ts")> 
   return authModulePromise;
 }
 
+// Same treatment for the API-key store: the scope lookup after validation needs
+// `getApiKeyMetadata`, and the auth graph above already pulls this module in, so
+// warming both together costs nothing extra while keeping the sidecar free of a
+// static dependency on the DB layer.
+let apiKeysModulePromise: Promise<typeof import("@/lib/db/apiKeys")> | null = null;
+function loadApiKeysModule(): Promise<typeof import("@/lib/db/apiKeys")> {
+  if (!apiKeysModulePromise) {
+    apiKeysModulePromise = import("@/lib/db/apiKeys");
+  }
+  return apiKeysModulePromise;
+}
+
 /**
  * True when the upgrade's real TCP peer is this machine. Forwarding headers
  * (x-forwarded-*, x-real-ip, forwarded, via) mark a reverse-proxy or tunnel hop: the socket
@@ -222,6 +236,16 @@ async function authorizeConnection(request: import("http").IncomingMessage): Pro
 
     if (!apiKey || !(await isValidApiKey(apiKey))) {
       return { authorized: false, sessionId, error: "Invalid API key" };
+    }
+
+    // The live channels carry operator telemetry for every tenant of the instance
+    // (requests, combo routing, credential health, …), so a bearer key must hold a
+    // management scope — an inference-only key is not an operator credential. The
+    // env master key is materialised with `manage`, so it keeps working.
+    const { getApiKeyMetadata } = await loadApiKeysModule();
+    const metadata = await getApiKeyMetadata(apiKey);
+    if (!metadata || !hasManageScope(metadata.scopes ?? [])) {
+      return { authorized: false, sessionId, error: "API key lacks management scope" };
     }
 
     return { authorized: true, sessionId };
@@ -379,6 +403,10 @@ function subscribeToEventBus(): () => void {
 }
 
 function isLoopbackRequest(req: IncomingMessage): boolean {
+  // A same-host reverse proxy also connects from loopback; its forwarding headers are
+  // what tells its remote callers apart from the local publisher — same discipline as
+  // isLocalWsPeer() on the upgrade path. The publisher posts without such headers.
+  if (hasProxyHopHeader(req.headers)) return false;
   const addr = req.socket.remoteAddress;
   return addr === "127.0.0.1" || addr === "::1" || addr === "::ffff:127.0.0.1";
 }
@@ -557,6 +585,7 @@ export async function startLiveDashboardServer(
   // WebSocket handshakes (see loadAuthModule). A failed warm is non-fatal: the
   // handler retries the import lazily.
   await loadAuthModule().catch(() => {});
+  await loadApiKeysModule().catch(() => {});
 
   wss.on("connection", async (ws, request) => {
     const pendingMessages: string[] = [];

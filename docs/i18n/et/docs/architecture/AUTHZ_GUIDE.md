@@ -17,70 +17,54 @@ OmniRoute'il on marsruuditundlik autoriseerimistorustik, mis valvab iga API pär
 
 ### 1. API-võti (Bearer)
 
-Kasutatakse OpenAI/Anthropicu/Gemini-ühilduvate kliendi-API-de ja mõne haldusmarsruudi jaoks, kui võtmel on `manage`-ulatus.
+Kasutatakse OpenAI/Anthropic/Gemini-ga ühilduvate kliendi-API-de ja mõnede haldusmarsruutide jaoks, kui võtmel on `manage`-ulatus.
 
 ```
 Authorization: Bearer <api-key>
 ```
 
-Seda valideerivad `isValidApiKey()` / `extractApiKey()` failis `src/sse/services/auth.ts` ning see reeksporditakse faili `src/shared/utils/apiAuth.ts` kaudu. Valideerija aktsepteerib püsivate läbivate võtmetena ka keskkonnamuutujaid `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` (probleem #1350).
+Valideerib `isValidApiKey()` / `extractApiKey()` failis `src/sse/services/auth.ts` ning see eksporditakse uuesti failis `src/shared/utils/apiAuth.ts`. Valideerija aktsepteerib ka keskkonnamuutujaid `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` püsivate läbipääsuvõtmetena (issue #1350).
 
-### 2. Töölaua seanss (auth_token-küpsis)
+### 2. Armatuurlaua seanss (auth_token-küpsis)
 
-Töölaua lehtede ja administraatoritoimingute jaoks.
+Armatuurlaua lehtedele ja administratiivsetele toimingutele.
 
 ```
 Cookie: auth_token=<JWT signed with JWT_SECRET>
 ```
 
-Küpsis on seanss ainult siis, kui JWT valideerimine õnnestub **ja** see sisaldab välja `authenticated: true`
-(`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`). Iga
-küpsise kasutaja (töölaua marsruudivalvur (`isDashboardSessionAuthenticated()`), autoriseerimiskonveieri värskendamine, WebSocketi käepigistus, reaalajas
-server, `/api/settings/require-login`, `/api/auth/status`) kasutab seda abifunktsiooni.
-Eksisteerib ka teisi võtmega `JWT_SECRET` allkirjastatud JWT-sid — Cursor CLI läbiv edastus väljastab
-võtmeomanikele tokeneid väljadega `iss "omniroute" / aud "cursor-cli"` — ja need ei ole kunagi seansid
-(#13298).
+Küpsis on seanss ainult siis, kui JWT on kontrollitud **ja** sisaldab väidet `authenticated: true` (`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`). Iga küpsise tarbija (armatuurlaua marsruudikaitse (`isDashboardSessionAuthenticated()`), autoriseerimisahela värskendus, WebSocketi käepigistus, reaalajaserver, `/api/settings/require-login`, `/api/auth/status`) läbib selle abifunktsiooni. Eksisteerivad ka teised `JWT_SECRET`-iga allkirjastatud JWT-d: Cursor CLI läbipääs väljastab võtmete omanikele tokeneid `iss "omniroute" / aud "cursor-cli"`, need ei ole kunagi seansid (#13298).
 
-Seda kontrollib `isDashboardSessionAuthenticated()` failis `src/shared/utils/apiAuth.ts`. Konveier värskendab JWT-d automaatselt, kui selle 30-päevasest kehtivusajast on jäänud vähem kui 7 päeva.
+Kontrollib `isDashboardSessionAuthenticated()` failis `src/shared/utils/apiAuth.ts`. Ahel värskendab JWT-d automaatselt, kui sellel on 30-päevasest elueast alles vähem kui 7 päeva.
 
-Seanss võib lõppeda ka enne 30 päeva möödumist, sest iga väljastaja kasutab funktsiooni `mintDashboardSessionToken` (väljastamisaeg `iat` ja ID `jti`) ning valideerija kontrollib kahte sätet: `sessionsValidAfter`, mis määratakse parooli muutmisel, et kõik enne seda väljastatud seansid lõpetaksid valideerimise (parooli muutnud brauser saab uue küpsise), ja `revokedDashboardSessions`, kuhu `POST /api/auth/logout` lisab välja logitud seansi `jti`. Vanema versiooniga väljastatud seansid ei sisalda kumbagi väidet ja jäävad kehtima kuni esimese paroolimuudatuseni. Kui sätteid ei saa lugeda, ei peeta seanssi usaldusväärseks.
+Seanss võib lõppeda enne 30 päeva möödumist, sest iga väljastaja läbib `mintDashboardSessionToken` (väljastamisaeg `iat` ja ID `jti`) ja kontrollija vaatab üle kaks seadet: `sessionsValidAfter`, mille parooli muutmine seab, nii et kõik enne seda väljastatud seansid lakkavad kehtimast (parooli muutnud brauser saab uue küpsise), ning `revokedDashboardSessions`, millele `POST /api/auth/logout` lisab välja logitud seansi `jti`. Varasema väljaande väljastatud seanssidel puudub mõlemad väited ja need jäävad kehtima kuni esimese parooli muutmiseni. Kui seadeid ei saa lugeda, ei usaldata seanssi.
 
-Mõned haldusmarsruudid aktsepteerivad **kumbagi** režiimi: küpsist VÕI `Bearer <key>`, kui API-võtmel on `manage`- (või `admin`-) ulatus. See võimaldab versioonis v3.8 lisatud töövoogu „API-kutsete kaudu seadistatav“.
+Mõned haldusmarsruudid aktsepteerivad **kumbagi** režiimi: küpsise VÕI `Bearer <key>`, kui API-võtmel on `manage`- (või `admin`-) ulatus. Just see võimaldab v3.8-s lisatud töövoogu "konfigureeritav API-kutsetega".
 
 #### Valikuline OIDC-sisselogimisvärav (#6973)
 
-Töölaua administraatori sisselogimine toetab vaikimisi parooliga sisselogimise kõrval ka **vabatahtlikult kasutatavat** OIDC (OpenID Connecti) voogu — parooliga sisselogimist ei eemaldata kunagi, seda üksnes
-täiendatakse:
+Armatuurlaua administraatori sisselogimine toetab lisaks vaikimisi paroolisisselogimisele ka **valikulist** OIDC-voogu (OpenID Connect). Paroolisisselogimist ei eemaldata kunagi, see ainult täiendatakse:
 
-- See on keelatud, kui `settings.oidcEnabled === true` **ja** `oidcIssuer` /
-  `oidcClientId` / `oidcClientSecret` pole kõik seadistatud (Sätted → Autentimine).
-  Vastasel juhul tagastab `GET /api/auth/oidc/login` vastuse `400`.
-- `GET /api/auth/oidc/login` tuvastab väljaandja
-  `/.well-known/openid-configuration` kaudu `authorization_endpoint`-i (varuvariandina kasutatakse
-  `<issuer>/authorize`), koostab ümbersuunamise URI sissetuleva päringu põhjal
-  (arvestades päist `x-forwarded-proto`) ja suunab kasutaja IdP-sse juhusliku `state`-väärtusega,
-  mis salvestatakse `httpOnly`-küpsisesse `oidc_state`.
-- `GET /api/auth/oidc/callback` valideerib `state`-väärtuse, vahetab autoriseerimis-
-  koodi ning kontrollib ID-tokeni allkirja väljaandja JWKS-i kaudu
-  (`jose`-i `createRemoteJWKSet`, puhverdatud iga JWKS-i URI kohta), kontrollides `issuer`- ja `audience`-väärtusi.
-  Valikuline lubatud väärtuste loend `oidcAllowedSubjects` võrdleb tokeni
-  `sub`-väidet või selle `email`-väidet — e-posti aadressi väidet arvestatakse ainult siis, kui
-  `email_verified === true`, mistõttu ei saa IdP-s kinnitamata e-posti aadress kunagi
-  väravat läbida.
-- Õnnestumise korral väljastatakse **täpselt sama** 30-päevane `auth_token`-JWT, mille väljastab parooliga
-  sisselogimine (`src/app/api/auth/login/route.ts`), nii et ülejäänud
-  töölaua seansikonveier (automaatne värskendamine, küpsise lipud) jääb muutumatuks —
-  OIDC asendab ainult küpsise väljastamise viisi, mitte selle antavaid õigusi.
+- Keelatud, välja arvatud juhul, kui `settings.oidcEnabled === true` **ja** `oidcIssuer` / `oidcClientId` / `oidcClientSecret` on kõik seadistatud (Seaded → Autentimine). Vastasel juhul tagastab `GET /api/auth/oidc/login` vastuse `400`.
+- `GET /api/auth/oidc/login` leiab `authorization_endpoint` väljastaja `/.well-known/openid-configuration` alt (tagasilangemine on `<issuer>/authorize`), koostab sissetulevast päringust suunamis-URI (arvestab `x-forwarded-proto`) ja suunab IdP-sse juhusliku `state`-väärtusega, mis salvestatakse `httpOnly`-küpsisesse `oidc_state`.
+- `GET /api/auth/oidc/callback` kontrollib `state`-i, vahetab authorization code välja ja kontrollib ID-tokeni allkirja väljastaja JWKS-i kaudu (`jose`i `createRemoteJWKSet`, vahemällu JWKS-URI kaupa), kontrollides `issuer`/`audience`. Lubatud subjektide loend `oidcAllowedSubjects` on nõutav: see vastab tokeni väitele `sub` või väitele `email`. E-posti väidet aktsepteeritakse ainult siis, kui `email_verified === true`, nii et IdP-s kinnitamata e-post ei pääse kunagi väravast läbi. Ilma kirjeteta lükkab callback tagasi kõik sisselogimised (`not_configured`).
+- Edukuse korral väljastab see **täpselt sama** 30-päevase `auth_token` JWT-i, mida väljastab paroolisisselogimine (`src/app/api/auth/login/route.ts`), seega ei muutu armatuurlaua ülejäänud seansiahel (automaatne värskendus, küpsise lipud). OIDC asendab ainult selle, kuidas küpsis väljastatakse, mitte seda, mida see annab.
+- Iga `oidc*`-seade (`oidcEnabled`, `oidcDisablePasswordLogin`, `oidcIssuer`, `oidcClientId`, `oidcClientSecret`, `oidcAllowedSubjects`, `oidcRedirectPath`, `oidcScopes`) on failis `SECURITY_IMPACTING_SETTINGS_KEYS` (`src/shared/constants/securityImpactingSettings.ts`): `PATCH /api/settings` vastab `400 PASSWORD_REQUIRED`, kui päringukehas ei ole haldusparooli väljal `currentPassword` (`401 PASSWORD_MISMATCH`, kui see on vale). `oidcDisablePasswordLogin` keelab paroolisisselogimise (`POST /api/auth/login`), kuid säilitab salvestatud parooli räsi ning uuesti autentimine kontrollib endiselt selle vastu `currentPassword`-i.
+- Ka `corsOrigins` ja `bruteForceProtection` on failis `SECURITY_IMPACTING_SETTINGS_KEYS`: nende lõdvendamine nõrgendab sisselogimiskaitset, seetõttu nõuavad need sama uuesti autentimist väljal `currentPassword` (turvalisuse vahekaart küsib seda) ning JSON-import eemaldab need.
+- Iga turvapoliitika võti (`SECURITY_IMPACTING_SETTINGS_KEYS` kirjed, iga `oidc*`-võti ja armatuurlaua seansiolek) on `PATCH /api/settings`-is **ainult operaatorile**: `manage`-ulatusega API-võti või `oma_`-juurdepääsutoken lükatakse tagasi vastusega `403`, isegi kui see saadab õige `currentPassword`-i, ja tagasilükkamine logitakse kui `settings.update_failed` põhjusega `reason: OPERATOR_REQUIRED` (`requireOperatorCredential()` failis `src/lib/api/operatorCredential.ts`). Tavalised seaded (teema, kuvaeelistused) jäävad kirjutatavaks `manage`-võtmega või `admin`-juurdepääsutokeniga. Iga muudatus `/api/settings` endas (ja `/api/settings/require-login`) nõuab lisaks ka juurdepääsutokeni ulatust `admin` (`ADMIN_MUTATION_EXACT_PATHS` failis `src/server/authz/accessScopes.ts`, täpne teevaste). `GET` jääb ulatuseks `read`, ning ülejäänud `/api/settings/*` alamarsruudid (puhverserverid, combo-vaikeseaded, mudelialiased, tihendus, puhastused …) säilitavad meetodist tuletatud ulatuse `write`.
+- `POST /api/settings/import-json` jätab selle uuesti autentimise vahele, seega eemaldab see enne kirjutamist kõik võtmed failis `IMPORT_STRIPPED_SETTINGS_KEYS` (sama fail): parooli ja `currentPassword`-i, iga `SECURITY_IMPACTING_SETTINGS_KEYS` kirje ja armatuurlaua seansioleku (`sessionsValidAfter`, `revokedDashboardSessions`). Seetõttu ei saa vanema varukoopia importimine äratada seanssi, mille parooli muutmine või väljalogimine on juba lõpetanud.
 
 ## Marsruudiklassid
 
-`src/server/authz/types.ts` määratleb kolm klassi; iga marsruut, mida ei saa deterministlikult klassifitseerida, liigitatakse vaikimisi klassi `MANAGEMENT`.
+`src/server/authz/types.ts` määratleb kolm klassi. Iga marsruut, mida ei saa deterministlikult klassifitseerida, langeb vaikimisi klassi `MANAGEMENT`.
 
-| Klass        | Kirjeldus                                                                                                                                                      | Nõutav autentimine                                                   |
-| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
-| `PUBLIC`     | Selgesõnaliselt turvalised marsruudid — sisselogimine, väljalogimine, olek, lähtestamine, tervisekontroll, kasutuselevõtu alglaadimine.                        | Puudub                                                               |
-| `CLIENT_API` | Mudelite teenindamise lõpp-punktid — `/api/v1/*`, `/api/v1beta/*` ning aliased `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Bearer-võti, kui kehtiv funktsioonilipp `REQUIRE_API_KEY` on lubatud |
-| `MANAGEMENT` | Töölaua lehed, sätted, pakkujad, võtmed ning administraatori- ja diagnostikalõpp-punktid.                                                                      | Töölaua seanss VÕI `manage`-ulatusega Bearer                         |
+| Klass        | Kirjeldus                                                                                                                                             | Nõutav autentimine                                            |
+| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| `PUBLIC`     | Selgesõnaliselt ohutud marsruudid: sisselogimine, väljalogimine, olek, lähtestamine, tervisekontroll ja onboarding-bootstrap.                         | Puudub                                                        |
+| `CLIENT_API` | Mudeliteenuse lõpp-punktid: `/api/v1/*`, `/api/v1beta/*` ning aliased `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Bearer-võti, kui funktsioonilipp `REQUIRE_API_KEY` on lubatud |
+| `MANAGEMENT` | Armatuurlaua lehed, seaded, pakkujad, võtmed, admin- ja diagnostikalõpp-punktid.                                                                      | Armatuurlaua seanss VÕI Bearer `manage`-ulatusega             |
+
+Mõned `MANAGEMENT` toimingud on **ainult operaatorile**: `manage`-võti ei ole piisav. Salvestatud mandaatide eksportimine (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), varukoopia taastamine praegusete andmete peale (`POST /api/db-backups/import`, sh `dryRun=true`, `POST /api/db-backups` taastamine ID järgi, `POST /api/settings/import-json`) ning taastepunktide hävitamine (`DELETE /api/db-backups` puhastus ja `PATCH /api/db-backups`, sest salvestatud säilitusaeg juhib automaatset puhastamist iga varukoopia järel) nõuavad armatuurlaua seanssi, kohalikku CLI-identiteeti või seda, et sisselogimine on keelatud. Sünkroonimistokeni väljastamine (`POST /api/sync/tokens`) ja `admin`-ulatusega CLI juurdepääsutokeni loomine (`POST /api/cli/tokens`) nõuavad armatuurlaua seanssi või kohalikku CLI-identiteeti igas sisselogimisrežiimis. API-võtmed igas ulatuses ja `oma_` juurdepääsutokenid ei ole operaatori mandaadid: need saavad vastuseks `403`, kui see on nõutav. Kontroll asub failis `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). Sisselogimisseadete muutmine on samuti ainult operaatorile: `POST /api/settings/require-login` (haldusparooli määramine / `requireLogin` lülitamine) aktsepteerib neid mandaate pärast seda, kui parool on olemas. Esmase käivituse bootstrap-aken (parooli veel pole) on muutumatu ning armatuurlaua seanss peab parooli asendamiseks saatma `currentPassword`-i (`403`, kui see puudub või on vale, logitud kui `settings.update_failed`). Kohalik CLI ja instants, kus sisselogimine on keelatud, säilitavad taastamistee ning võivad parooli seada ilma selleta, sest mõlemad on seotud andmekataloogi omava hostiga.
 
 ## Töötluskonveier
 
@@ -232,15 +216,15 @@ See jääb välja lülitatuks, välja arvatud juhul, kui `OMNIROUTE_MCP_ENFORCE_
 järgi (`src/lib/accessTokens/scopes.ts`). See järjestus kehtib ainult
 ligipääsutokeni mandaadile. Vt [Halduse autentimine](../guides/MANAGEMENT-AUTH.md).
 
-## Autentimisnõude lüliti
+## Autentimise nõudmise lüliti
 
-Funktsioon `isAuthRequired()` failis `src/shared/utils/apiAuth.ts` otsustab, kas päringu puhul jõustatakse **mingisugune** autentimine:
+`isAuthRequired()` failis `src/shared/utils/apiAuth.ts` otsustab, kas päringu puhul rakendatakse **üldse** mingit autentimist:
 
-- `settings.requireLogin === false` → autentimine on globaalselt keelatud.
-- Parooli pole seadistatud **ja** keskkonnamuutuja `INITIAL_PASSWORD` puudub → algseadistusrežiim lubab esmase seadistamise viisardi ja loopback-päringud, kuid võrku avatud päringud vajavad endiselt autentimisandmeid.
-- Mis tahes andmebaasiviga → juurdepääs keelatakse (vaikimisi turvaline).
+- `settings.requireLogin === false` → autentimine on globaalselt välja lülitatud, välja arvatud alati kaitstud tase (vt [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) ja kutsed, mis väljastavad mandaadi, mida see aktsepteerib. Need nõuavad sama mandaati, mis sisselogimise sisselülitamisel: sünkroonimistokenite väljastamine, CLI juurdepääsutokenite väljastamine mis tahes ulatuses ning `manage`/`admin`-ulatusega API-võtme loomine, selle ulatuse andmine võtmele või sellise võtme taasgenereerimine või kuvamine (`requireCredentialForManagementScopedKey()` failis `src/lib/api/requireManagementAuth.ts`). Ainult järeldamise võtmed jäävad avatuks.
+- Parooli pole seadistatud **ja** keskkonnamuutujat `INITIAL_PASSWORD` pole → bootstrap-režiim lubab seadistusviisardi ja loopback-päringud, kuid avalikud võrgupäringud nõuavad endiselt mandaate.
+- Mis tahes andmebaasi viga → keeldub ligipääsust (vaikimisi turvaline).
 
-Kliendi API-võtme nõude jõustamine kasutab funktsiooni `isRequireApiKeyEnabled()` failis `src/shared/utils/featureFlags.ts`, mitte `process.env.REQUIRE_API_KEY` otselugemist. See on juurutatud eksemplaride puhul oluline: sätte `REQUIRE_API_KEY` muutmine jaotises Dashboard → Feature Flags salvestab andmebaasi alistuse ja mõjutab kohe marsruute `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` ning muid kliendi API autentimiskontrolle, mis kasutavad sama abifunktsiooni. Kui funktsioonilippude hoidlat ei saa lugeda, keelatakse kliendi API autentimise puhul vaikimisi juurdepääs ja nõutakse võtit.
+Kliendi API-võtme jõustamine kasutab funktsiooni `isRequireApiKeyEnabled()` failis `src/shared/utils/featureFlags.ts`, mitte otsest lugemist `process.env.REQUIRE_API_KEY`-st. See on juurutatud instantsside puhul oluline: `REQUIRE_API_KEY` lülitamine menüüs Dashboard → Feature Flags salvestab andmebaasi alistuse ning mõjutab kohe marsruute `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` ja teisi kliendi API autentimiskontrolle, mis jagavad seda abifunktsiooni. Kui funktsioonilippude salvestust ei saa lugeda, keeldub kliendi API autentimine ligipääsust ja nõuab võtit.
 
 ## Ühilduvust katkestav muudatus — v3.8.0
 

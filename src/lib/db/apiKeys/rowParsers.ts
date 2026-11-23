@@ -74,6 +74,13 @@ export function parseCatalogScope(value: unknown): CatalogScope {
   return value === "combos" || value === "models" ? value : "all";
 }
 
+/** Per-key enforced routing target: a trimmed non-empty string, else null (not pinned). */
+export function parseForcedModel(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : null;
+}
+
 export function parseAccessSchedule(value: unknown): AccessSchedule | null {
   if (!value || typeof value !== "string" || value.trim() === "") return null;
   try {

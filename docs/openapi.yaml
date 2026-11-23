@@ -1417,8 +1417,9 @@ paths:
                   default: 5
                 search_type:
                   type: string
-                  enum: [web, news, x]
+                  enum: [web, news, x, finance]
                   default: web
+                  description: "`finance` is supported by tavily-search only."
                 offset:
                   type: integer
                   minimum: 0
@@ -1455,6 +1456,11 @@ paths:
                 provider_options:
                   type: object
                   additionalProperties: true
+                  description: >-
+                    Provider-specific passthrough. Exa and Tavily read an allow-listed,
+                    type-checked bag under `exa` / `exa-search` and `tavily` / `tavily-search`;
+                    unknown keys and wrongly typed values are dropped. See
+                    docs/reference/API_REFERENCE.md (Search API).
                 strict_filters:
                   type: boolean
                   default: false
@@ -2069,9 +2075,71 @@ paths:
     get:
       tags: [Models]
       summary: List available models
-      description: Returns all models available across configured providers.
+      description: >-
+        Returns all models available across configured providers. The discovery
+        filters (`capability`, `min_context`, `kind`, `q`) are opt-in: without them
+        the response is unchanged. They narrow the caller's own (key-filtered)
+        catalog and run before `limit`/`after` paging.
       security:
         - BearerAuth: []
+      parameters:
+        - in: query
+          name: capability
+          required: false
+          description: >-
+            Keep models whose `capabilities.<name>` is `true`. Repeatable or
+            comma-separated; every listed capability must match.
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                [
+                  attachment,
+                  reasoning,
+                  structured_output,
+                  temperature,
+                  thinking,
+                  tool_calling,
+                  vision,
+                ]
+          style: form
+          explode: true
+        - in: query
+          name: min_context
+          required: false
+          description: Keep models whose `context_length` is at least this value.
+          schema:
+            type: integer
+            minimum: 0
+        - in: query
+          name: kind
+          required: false
+          description: Catalog surface (`type`); models without a `type` are `chat`.
+          schema:
+            type: string
+            enum: [chat, audio, embedding, image, moderation, music, rerank, video]
+        - in: query
+          name: q
+          required: false
+          description: Case-insensitive substring match on the model `id` or `name`.
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 200
+        - in: query
+          name: limit
+          required: false
+          description: OpenAI-style page size (applied after the discovery filters).
+          schema:
+            type: integer
+            minimum: 1
+        - in: query
+          name: after
+          required: false
+          description: OpenAI-style cursor — return models after this id.
+          schema:
+            type: string
       responses:
         "200":
           description: Model list
@@ -2087,6 +2155,97 @@ paths:
                     type: array
                     items:
                       $ref: "#/components/schemas/Model"
+        "400":
+          description: Invalid discovery filter value
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/v1/models/query:
+    post:
+      tags: [Models]
+      summary: Query a model shortlist
+      description: >-
+        Filtered shortlist over the same catalog as `GET /v1/models` (same auth and
+        per-key visibility). Results are ordered by `owned_by`, then `id`, and capped
+        by `limit` (default 20, maximum 100).
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                capabilities:
+                  description: Array or comma-separated string; every capability must be `true`.
+                  oneOf:
+                    - type: array
+                      items:
+                        type: string
+                        enum:
+                          [
+                            attachment,
+                            reasoning,
+                            structured_output,
+                            temperature,
+                            thinking,
+                            tool_calling,
+                            vision,
+                          ]
+                    - type: string
+                min_context:
+                  type: integer
+                  minimum: 0
+                max_output:
+                  type: integer
+                  minimum: 0
+                  description: Keep models whose `max_output_tokens` is at least this value.
+                kind:
+                  type: string
+                  enum: [chat, audio, embedding, image, moderation, music, rerank, video]
+                q:
+                  type: string
+                  minLength: 1
+                  maxLength: 200
+                owned_by:
+                  type: string
+                exclude:
+                  description: Model ids to leave out (array or comma-separated string).
+                  oneOf:
+                    - type: array
+                      items:
+                        type: string
+                    - type: string
+                limit:
+                  type: integer
+                  minimum: 1
+                  default: 20
+                  description: Values above 100 are capped at 100.
+      responses:
+        "200":
+          description: Model shortlist
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  object:
+                    type: string
+                    example: list
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Model"
+        "400":
+          description: Invalid JSON, unknown field or invalid filter value
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
   /api/v1/providers/{provider}/models:
     get:
@@ -2225,6 +2384,70 @@ paths:
         "200":
           description: Test result
 
+  /api/providers/{id}/test-message:
+    get:
+      tags: [Providers]
+      summary: Read an account's saved test model and the global test message
+      description: Requires management authentication. Returns modelId and prompt without credentials.
+      parameters:
+        - $ref: "#/components/parameters/ResourceId"
+      responses:
+        "200":
+          description: Saved modelId and effective prompt
+        "404":
+          description: Connection not found
+    put:
+      tags: [Providers]
+      summary: Save the chat model used by this account's test-message button
+      description: Requires management authentication. Saving never sends an inference request.
+      parameters:
+        - $ref: "#/components/parameters/ResourceId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [modelId]
+              additionalProperties: false
+              properties:
+                modelId:
+                  type: string
+                  minLength: 1
+                  maxLength: 256
+      responses:
+        "200":
+          description: Saved modelId
+        "400":
+          description: Invalid model selection
+        "404":
+          description: Connection not found
+    post:
+      tags: [Providers]
+      summary: Send one real test message through the selected account
+      description: >-
+        Requires management authentication. Uses the account's saved model and the global
+        connectionTestPrompt setting (default: What is 1 + 1? Reply with only the number.).
+        The prompt is configurable through PATCH /api/settings and limited to 500 characters.
+        This manual request bypasses the response cache, uses only this connection and
+        never falls back to another account. It consumes quota; usage-window behavior
+        is determined by the provider. Saving settings does not schedule requests.
+      parameters:
+        - $ref: "#/components/parameters/ResourceId"
+      responses:
+        "200":
+          description: modelId, prompt, responseText and latencyMs
+        "400":
+          description: Missing model selection or invalid chat model
+        "403":
+          description: Paid model blocked by settings
+        "404":
+          description: Connection not found
+        "409":
+          description: Account inactive or a test message is already running
+        "504":
+          description: No completed response within the test deadline
+
   /api/providers/{id}/models:
     get:
       tags: [Providers]
@@ -2257,8 +2480,7 @@ paths:
     post:
       tags: [Providers]
       summary: Validate provider credentials
-      description: "Spawns a fixed ACP summarizer binary to validate credentials — loopback-only (Hard Rules #15/#17, audit #15159 S-01)."
-      x-loopback-only: true
+      description: "Validates provider credentials over HTTP. The devin CLI-spawn fallback is call-site gated on the trusted peer-locality header (loopback/LAN only, Hard Rules #15/#17, audit #15159 S-01, #15766 shape); the route itself is management-auth remote-reachable."
       responses:
         "200":
           description: Validation result
@@ -2316,9 +2538,18 @@ paths:
     post:
       tags: [Provider Nodes]
       summary: Create provider node
+      description: >-
+        Optional `providerIdSuffix` (letters, digits, `-`, `_`, `.`; max 64; must start with a
+        letter or digit) replaces the random UUID in the generated node id
+        (`openai-compatible-<apiType>-<suffix>`, `anthropic-compatible-<suffix>`,
+        `anthropic-compatible-cc-<suffix>`). Blank keeps the UUID.
       responses:
         "201":
           description: Created node
+        "400":
+          description: Validation failure (including an invalid providerIdSuffix)
+        "409":
+          description: A provider node with the resulting id already exists
 
   /api/provider-nodes/{id}:
     patch:
@@ -2350,9 +2581,41 @@ paths:
     get:
       tags: [Provider Nodes]
       summary: List provider models
+      description: >-
+        With a provider query parameter, includes modelOutputOverrides for manual
+        output-token caps, including synced models without a custom-model row.
       responses:
         "200":
           description: Provider model list
+    put:
+      tags: [Provider Nodes]
+      summary: Update model metadata or per-model overrides
+      description: >-
+        Requires management authentication. maxOutputTokenOverride sets a manual
+        max_output_tokens capability without creating a custom-model row when it
+        is the only change. A null value clears that override. Existing metadata
+        fields remain available on this operation.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [provider, modelId]
+              properties:
+                provider:
+                  type: string
+                modelId:
+                  type: string
+                maxOutputTokenOverride:
+                  type: integer
+                  minimum: 1
+                  nullable: true
+      responses:
+        "200":
+          description: Model settings saved
+        "400":
+          description: Invalid model target or override value
 
   /api/provider-models/validate-and-add:
     post:
@@ -2563,6 +2826,122 @@ paths:
         "404":
           description: Key not found
 
+  /api/keys/{id}/access:
+    post:
+      tags: [API Keys]
+      summary: Add or remove allowed models and combos on an API key atomically
+      description: |
+        Adds or removes allowed models and combos on an API key without lost updates.
+        Serialized per key ID using an in-process async lock.
+        Keys allowing all models (modelAccessMode: all) or all combos (allowedCombos containing 'combo/*')
+        require switchToRestricted: true when adding new models or combos, otherwise returning a 409 Conflict.
+        When switching to restricted mode, the allowlist becomes exactly the net added items (at least one required).
+        Direct concurrent PATCH calls to /api/keys/{id} completely overwrite the policy outside this lock.
+      parameters:
+        - $ref: "#/components/parameters/ResourceId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                add:
+                  type: object
+                  properties:
+                    models:
+                      type: array
+                      minItems: 1
+                      maxItems: 1000
+                      items:
+                        type: string
+                        minLength: 1
+                    combos:
+                      type: array
+                      minItems: 1
+                      maxItems: 500
+                      items:
+                        type: string
+                        minLength: 1
+                remove:
+                  type: object
+                  properties:
+                    models:
+                      type: array
+                      minItems: 1
+                      maxItems: 1000
+                      items:
+                        type: string
+                        minLength: 1
+                    combos:
+                      type: array
+                      minItems: 1
+                      maxItems: 500
+                      items:
+                        type: string
+                        minLength: 1
+                switchToRestricted:
+                  type: boolean
+      responses:
+        "200":
+          description: API key access updated
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - id
+                  - modelAccessMode
+                  - allowedModels
+                  - allowedCombos
+                  - changed
+                properties:
+                  id:
+                    type: string
+                  modelAccessMode:
+                    type: string
+                    enum: [all, restricted]
+                  allowedModels:
+                    type: array
+                    items:
+                      type: string
+                  allowedCombos:
+                    type: array
+                    items:
+                      type: string
+                  changed:
+                    type: boolean
+        "400":
+          description: Invalid request, caps exceeded, or empty restricted list
+        "401":
+          description: Authentication required
+        "403":
+          description: API key lacks 'manage' scope
+        "404":
+          description: Key not found
+        "409":
+          description: Key allows all models or all combos and switchToRestricted was not set
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - error
+                properties:
+                  error:
+                    type: object
+                    required:
+                      - code
+                      - message
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                          - key_allows_all_models
+                          - key_allows_all_combos
+                      message:
+                        type: string
+
   /api/combos:
     get:
       tags: [Combos]
@@ -2690,6 +3069,13 @@ paths:
     patch:
       tags: [Settings]
       summary: Update settings
+      description: >-
+        Security-policy keys (`requireLogin`, `newPassword`, every `oidc*` key, `corsOrigins`,
+        `bruteForceProtection`, the LOCAL_ONLY bypass list) need `currentPassword` and an
+        operator credential (dashboard session, local CLI, or login disabled); API keys of any
+        scope and `oma_` access tokens get 403 on them. Ordinary settings stay writable for a
+        manage-scoped key or an `admin` access token. Every mutation needs the `admin`
+        access-token scope.
       requestBody:
         required: true
         content:
@@ -2699,6 +3085,14 @@ paths:
       responses:
         "200":
           description: Updated settings
+        "400":
+          description: Validation failed, or `PASSWORD_REQUIRED` for a security-policy key
+        "401":
+          description: Unauthenticated, or `PASSWORD_MISMATCH`
+        "403":
+          description: >-
+            Machine credential (API key of any scope, `oma_` access token) on a security-policy
+            key, or an access token below the `admin` scope
 
   /api/settings/purge-request-history:
     post:
@@ -2755,6 +3149,11 @@ paths:
     put:
       tags: [Compression]
       summary: Update global compression settings
+      description: >-
+        Partial update: only the sent top-level keys change. `engines` merges by engine id —
+        an entry overwrites only the fields it sends, engines left out are kept as-is, and
+        until an engines row is stored the merge base is the map derived from the legacy
+        per-engine settings.
       security:
         - ManagementSessionAuth: []
       requestBody:
@@ -2775,6 +3174,19 @@ paths:
                 autoTriggerTokens:
                   type: integer
                   minimum: 0
+                engines:
+                  type: object
+                  description: >-
+                    Per-engine toggles, merged by engine id into the stored map. Each entry
+                    needs `enabled`; `level` survives an entry that omits it.
+                  additionalProperties:
+                    type: object
+                    properties:
+                      enabled:
+                        type: boolean
+                      level:
+                        type: string
+                    required: [enabled]
                 rtkConfig:
                   type: object
                   additionalProperties: true
@@ -3112,10 +3524,39 @@ paths:
   /api/settings/require-login:
     post:
       tags: [Settings]
-      summary: Toggle login requirement
+      summary: Set the management password and/or toggle the login requirement
+      description: >-
+        Open without a credential only during the first-run bootstrap window (no password
+        configured yet). Afterwards the write is operator-only: a dashboard session, the local
+        CLI, or an instance with login disabled. API keys of any scope and `oma_` access tokens
+        are refused with 403. A dashboard session must send `currentPassword` to replace an
+        existing password; the local CLI may reset it without one (recovery path).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                requireLogin:
+                  type: boolean
+                password:
+                  type: string
+                  minLength: 4
+                currentPassword:
+                  type: string
+                  description: Current password; required when a dashboard session changes `password`.
       responses:
         "200":
           description: Updated
+        "400":
+          description: Invalid body or no field to update
+        "401":
+          description: No credential outside the bootstrap window
+        "403":
+          description: >-
+            Machine credential (API key of any scope, `oma_` access token), or a dashboard
+            session changing the password without the correct `currentPassword`
 
   /api/settings/ip-filter:
     get:
@@ -3172,6 +3613,92 @@ paths:
       responses:
         "200":
           description: Updated IP filter configuration
+
+  /api/settings/pii:
+    get:
+      tags: [Settings]
+      summary: Get PII masking settings
+      description: |
+        Returns the opt-in flag state (`PII_REDACTION_ENABLED`, `PII_RESPONSE_SANITIZATION`),
+        the per-type selection (`enabledTypes`, `null` = all built-in types), the custom
+        patterns and in-memory detection counters (counts only, never matched values).
+      responses:
+        "200":
+          description: PII masking settings
+    put:
+      tags: [Settings]
+      summary: Update PII masking settings
+      description: |
+        Replaces the per-type selection and/or the custom pattern list. Custom regex patterns
+        that fail the safe-regex (catastrophic backtracking) check, do not compile, or match an
+        empty string are refused with 400. Does not turn masking on.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                enabledTypes:
+                  type: array
+                  nullable: true
+                  items:
+                    type: string
+                customPatterns:
+                  type: array
+                  maxItems: 20
+                  items:
+                    type: object
+                    required: [id, name, type, pattern]
+                    properties:
+                      id:
+                        type: string
+                      name:
+                        type: string
+                      type:
+                        type: string
+                        enum: [regex, wildcard]
+                      pattern:
+                        type: string
+                        maxLength: 500
+                      flags:
+                        type: string
+                      enabled:
+                        type: boolean
+      responses:
+        "200":
+          description: Updated PII masking settings
+        "400":
+          description: Validation failed (including an unsafe pattern)
+
+  /api/settings/pii/test:
+    post:
+      tags: [Settings]
+      summary: Test a custom PII pattern
+      description: Dry-runs one pattern against a sample of at most 8 KB. Nothing is stored.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [pattern, sampleText]
+              properties:
+                type:
+                  type: string
+                  enum: [regex, wildcard]
+                pattern:
+                  type: string
+                flags:
+                  type: string
+                sampleText:
+                  type: string
+      responses:
+        "200":
+          description: Matches and a redacted preview
+        "400":
+          description: Invalid body, oversized sample or unsafe pattern
 
   /api/settings/system-prompt:
     get:
@@ -3323,6 +3850,20 @@ paths:
                 localCoreEndpoint:
                   type: string
                   nullable: true
+                coreConfigPath:
+                  type: string
+                  nullable: true
+                  description: >-
+                    Absolute adopted sing-box config path (lowercase .json).
+                    Empty means no generation; each sync writes
+                    `<path>.generated` beside it, never into it.
+                coreBinaryPath:
+                  type: string
+                  nullable: true
+                  description: >-
+                    Absolute path of the core binary used to verify the
+                    generated file before replacing the adopted file.
+                    Empty means write beside it only.
                 updateIntervalMinutes:
                   type: integer
                   default: 60
@@ -3369,7 +3910,7 @@ paths:
       summary: Update a proxy subscription
       description: >-
         Partial update — only fields present in the body are changed
-        (name/url/mode/ruleProviders/localCoreEndpoint/updateIntervalMinutes/enabled).
+        (name/url/mode/ruleProviders/localCoreEndpoint/coreConfigPath/coreBinaryPath/updateIntervalMinutes/enabled).
       security:
         - ManagementSessionAuth: []
       parameters:
@@ -3393,6 +3934,12 @@ paths:
                   items:
                     type: string
                 localCoreEndpoint:
+                  type: string
+                  nullable: true
+                coreConfigPath:
+                  type: string
+                  nullable: true
+                coreBinaryPath:
                   type: string
                   nullable: true
                 updateIntervalMinutes:
@@ -3540,6 +4087,14 @@ paths:
             type: string
             enum: [day, week, month]
             default: day
+        - name: view
+          in: query
+          description: >-
+            `apiKeys` returns only `byApiKey`: lifetime requests, cost and last use for each
+            configured API key, from one grouped query. The API Manager key list uses it.
+          schema:
+            type: string
+            enum: [apiKeys]
       responses:
         "200":
           description: Usage analytics data
@@ -4024,7 +4579,10 @@ paths:
         "200":
           description: Token created (token returned once)
         "403":
-          description: Insufficient scope
+          description: >-
+            Insufficient scope, or an `admin` token was requested by a machine credential
+            (API key or access token). Admin tokens require the dashboard session or the
+            local CLI; machine credentials can mint `write`/`read` only.
 
   /api/cli/tokens/{id}:
     delete:
@@ -4037,11 +4595,13 @@ paths:
           schema: { type: string }
       responses:
         "200":
-          description: Token revoked
+          description: Token revoked (alreadyRevoked is true when it was already revoked)
         "403":
           description: Insufficient scope
         "404":
-          description: Token not found or already revoked
+          description: Token not found
+        "409":
+          description: Prefix matches more than one live token; nothing revoked
 
   # ─── CLI Tools ─────────────────────────────────────────────────
 
@@ -5710,6 +6270,145 @@ paths:
         "500":
           description: Import failed
 
+  /api/services/llmlingua/install:
+    post:
+      tags: [Embedded Services]
+      summary: Install LLMLingua
+      description: >-
+        Installs `@atjsh/llmlingua-2` (real LLMLingua-2 ONNX prompt-compression
+        package) plus its `@huggingface/transformers`/`js-tiktoken` peers under
+        DATA_DIR/services/llmlingua/, and writes the sidecar server script.
+        Accepts an optional `version` field (semver or `latest`).
+        **LOCAL_ONLY** — loopback only.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                version:
+                  type: string
+                  default: latest
+      responses:
+        "200":
+          description: Installation result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                  installedVersion:
+                    type: string
+                  installPath:
+                    type: string
+                  durationMs:
+                    type: number
+
+  /api/services/llmlingua/start:
+    post:
+      tags: [Embedded Services]
+      summary: Start LLMLingua
+      description: Starts the supervised LLMLingua sidecar process. **LOCAL_ONLY** — loopback only.
+      responses:
+        "200":
+          description: Service status after start
+        "409":
+          description: LLMLingua is not installed
+
+  /api/services/llmlingua/stop:
+    post:
+      tags: [Embedded Services]
+      summary: Stop LLMLingua
+      description: Stops the supervised LLMLingua sidecar process. **LOCAL_ONLY** — loopback only.
+      responses:
+        "200":
+          description: Service status after stop
+
+  /api/services/llmlingua/restart:
+    post:
+      tags: [Embedded Services]
+      summary: Restart LLMLingua
+      description: Restarts the supervised LLMLingua sidecar process. **LOCAL_ONLY** — loopback only.
+      responses:
+        "200":
+          description: Service status after restart
+        "409":
+          description: LLMLingua is not installed
+
+  /api/services/llmlingua/update:
+    post:
+      tags: [Embedded Services]
+      summary: Update LLMLingua
+      description: >-
+        Updates LLMLingua to the latest npm version. Stops the running process,
+        installs the new version, and restarts if it was previously running.
+        **LOCAL_ONLY** — loopback only.
+      responses:
+        "200":
+          description: Update result
+
+  /api/services/llmlingua/status:
+    get:
+      tags: [Embedded Services]
+      summary: Get LLMLingua status
+      description: Returns live and DB status for the supervised LLMLingua service. **LOCAL_ONLY** — loopback only.
+      responses:
+        "200":
+          description: LLMLingua service status
+
+  /api/services/llmlingua/auto-start:
+    post:
+      tags: [Embedded Services]
+      summary: Toggle LLMLingua auto-start
+      description: >-
+        When enabled, LLMLingua starts automatically on the next OmniRoute boot.
+        **LOCAL_ONLY** — loopback only.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [enabled]
+              properties:
+                enabled:
+                  type: boolean
+      responses:
+        "204":
+          description: Auto-start flag updated
+        "400":
+          description: Invalid request body
+
+  /api/services/llmlingua/auto-restart-adopted:
+    post:
+      tags: [Embedded Services]
+      summary: Toggle LLMLingua auto-restart-when-adopted
+      description: >-
+        When enabled, an externally-adopted (not OmniRoute-spawned) LLMLingua
+        process is restarted under OmniRoute's own supervisor on the next
+        health-check cycle instead of being left as adopted-only.
+        **LOCAL_ONLY** — loopback only.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [enabled]
+              properties:
+                enabled:
+                  type: boolean
+      responses:
+        "204":
+          description: Flag updated
+        "400":
+          description: Invalid request body
+        "500":
+          description: Update failed
+
   /api/services/{name}/logs:
     get:
       tags: [Embedded Services]
@@ -5725,7 +6424,7 @@ paths:
           required: true
           schema:
             type: string
-            enum: [9router, cliproxy]
+            enum: [9router, cliproxy, mux, bifrost, dario, openwa, llmlingua]
         - name: tail
           in: query
           schema:
@@ -6041,9 +6740,9 @@ paths:
       summary: Complete OIDC login for the dashboard admin gate
       description: |
         Validates the `state` cookie, exchanges the authorization `code` for tokens,
-        verifies the ID token against the issuer's JWKS (audience = client id), and —
-        if `oidcAllowedSubjects` is configured — checks the token's `sub`/`email` against
-        that allowlist. On success it mints the same 30-day `auth_token` dashboard-session
+        verifies the ID token against the issuer's JWKS (audience = client id), and
+        checks the token's `sub`/`email` against `oidcAllowedSubjects`, which must hold at
+        least one entry (an empty list ends in `not_configured`). On success it mints the same 30-day `auth_token` dashboard-session
         JWT used by password login and redirects to `/dashboard`.
       parameters:
         - name: code
@@ -6097,13 +6796,24 @@ paths:
           description: Backup list
     post:
       tags: [System]
-      summary: Create database backup
+      summary: Restore a database backup by id
+      description: >-
+        Replaces the live database with the stored backup named in `backupId`. Operator-only:
+        dashboard session, local CLI, or login disabled.
       responses:
         "200":
-          description: Backup created
+          description: Backup restored
+        "403":
+          description: >-
+            Machine credential refused. Restoring replaces the live database, so it requires
+            the dashboard session or the local CLI (or login disabled); API keys of any scope
+            and `oma_` access tokens get 403.
     patch:
       tags: [System]
       summary: Save database backup retention settings
+      description: >-
+        Persists `keepLatest` / `retentionDays`. Operator-only: dashboard session, local CLI, or
+        login disabled — the persisted values drive the automatic pruning after every backup.
       requestBody:
         required: true
         content:
@@ -6122,6 +6832,11 @@ paths:
       responses:
         "200":
           description: Backup retention settings saved
+        "403":
+          description: >-
+            Machine credential refused. The saved retention is what automatic pruning applies
+            after every backup, so it requires the dashboard session or the local CLI (or login
+            disabled); API keys of any scope and `oma_` access tokens get 403.
 
   /api/storage/health:
     get:
@@ -6580,6 +7295,42 @@ paths:
       responses:
         "200":
           description: Rate limit status by account
+    post:
+      tags: [System]
+      summary: Toggle rate limit protection for a connection
+      description: Supported write path to toggle rateLimitProtection for a connection (PUT /api/providers/[id] deliberately does not modify this field). Setting enabled to false disables explicit protection, but does not opt an active API-key connection out of the global auto-enable safety net.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [connectionId, enabled]
+              properties:
+                connectionId:
+                  type: string
+                  description: Provider connection ID
+                enabled:
+                  type: boolean
+                  description: Whether explicit rate limit protection is enabled
+      responses:
+        "200":
+          description: Rate limit protection updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  connectionId:
+                    type: string
+                  enabled:
+                    type: boolean
+        "400":
+          description: Invalid request body
+        "500":
+          description: Failed to toggle rate limit
 
   /api/sessions:
     get:
@@ -7766,20 +8517,6 @@ paths:
           description: System proxy updated
         "500":
           description: OS command failed (permission error)
-
-  /api/tools/traffic-inspector/capture-modes/tls-intercept:
-    post:
-      tags: [Traffic Inspector]
-      summary: Toggle TLS body decryption in HTTP_PROXY mode
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/InspectorTlsInterceptToggle"
-      responses:
-        "200":
-          description: TLS intercept mode updated
 
   /api/tools/traffic-inspector/sessions:
     get:
@@ -9559,6 +10296,11 @@ paths:
       responses:
         "200":
           description: OK
+        "403":
+          description: >-
+            Machine credential refused. Exports carry every stored credential, so they require
+            the dashboard session or the local CLI (or login disabled); API keys of any scope
+            and `oma_` access tokens get 403.
   /api/db-backups/exportAll:
     get:
       tags:
@@ -9568,14 +10310,53 @@ paths:
       responses:
         "200":
           description: OK
+        "403":
+          description: >-
+            Machine credential refused. Exports carry every stored credential, so they require
+            the dashboard session or the local CLI (or login disabled); API keys of any scope
+            and `oma_` access tokens get 403.
   /api/db-backups/import:
     post:
       tags:
         - Db backups
       summary: "POST db backups › import"
+      description: >-
+        Replaces the live database with an uploaded `.sqlite` backup (multipart `file` field,
+        or the raw bytes with `?filename=`). The upload is checked for SQLite integrity and the
+        required OmniRoute tables first. Operator-only: accepts the dashboard session, the
+        local CLI credential, or login disabled; API keys of any scope and `oma_` access tokens
+        are refused (403), for the dry run as well.
+      parameters:
+        - name: dryRun
+          in: query
+          description: >-
+            `true` validates the upload and returns what would be imported (row counts, schema
+            version) without the pre-import backup and without touching the live database. A
+            multipart `dryRun` form field is honoured too.
+          required: false
+          schema:
+            type: string
+            enum: ["true", "false", "1", "0"]
+        - name: filename
+          in: query
+          description: Name of the uploaded file for raw-byte uploads; must end in `.sqlite`.
+          required: false
+          schema:
+            type: string
       responses:
         "200":
-          description: OK
+          description: >-
+            Imported (`imported: true`), or, for a dry run, validated (`dryRun: true,
+            valid: true, imported: false`) with the counts the upload would load.
+        "400":
+          description: Not a valid OmniRoute SQLite backup (type, size, integrity or tables).
+        "401":
+          description: No accepted credential.
+        "403":
+          description: >-
+            Machine credential refused. Importing replaces the live database, so it requires
+            the dashboard session or the local CLI (or login disabled); API keys of any scope
+            and `oma_` access tokens get 403.
   /api/db/health:
     get:
       tags:
@@ -10046,6 +10827,12 @@ paths:
       tags:
         - Keys
       summary: "PUT keys › groups › <id>"
+      description: >-
+        Updates the group. Setting isActive to false pauses its allow rules while
+        preserving membership restrictions and deny rules. Other active groups may
+        still grant access unless a deny matches. Keys belonging only to inactive
+        groups have no group grants. Keys without groups remain unrestricted by
+        group policy; per-key restrictions still apply.
       responses:
         "200":
           description: OK
@@ -10156,6 +10943,16 @@ paths:
       tags:
         - Logs
       summary: "GET logs › export"
+      description: >-
+        Streams a JSON log export. The initial estimatedCount and the
+        X-OmniRoute-Export-Count header are preflight estimates;
+        X-OmniRoute-Export-Count-Kind is estimate. The final count is the number
+        of rows actually emitted in logs, including on mid-stream failure.
+        Failures also append emitted and a sanitized error. Cap metadata is
+        available before row iteration. This is a live, best-effort export:
+        concurrent changes may remove call-log IDs before hydration, and proxy-log
+        LIMIT/OFFSET pages may repeat or omit rows when inserts/deletes shift pages.
+        Neither the export nor totalAvailable represents a transactional snapshot.
       x-always-protected: true
       responses:
         "200":
@@ -10766,8 +11563,7 @@ paths:
       tags:
         - Providers
       summary: "POST providers › bulk"
-      description: "Reaches the same spawn as /api/providers/validate (webProvidersB.ts) — loopback-only (Hard Rules #15/#17, audit #15159 S-01)."
-      x-loopback-only: true
+      description: "The devin CLI-spawn fallback (webProvidersB.ts) is call-site gated on the trusted peer-locality header — loopback/LAN only (Hard Rules #15/#17, audit #15159 S-01, #15766 shape); the route is management-auth remote-reachable."
       responses:
         "200":
           description: OK
@@ -10919,8 +11715,7 @@ paths:
       tags:
         - Providers
       summary: "POST providers › import"
-      description: "Reaches the same spawn as /api/providers/validate (webProvidersB.ts) — loopback-only (Hard Rules #15/#17, audit #15159 S-01)."
-      x-loopback-only: true
+      description: "The devin CLI-spawn fallback (webProvidersB.ts) is call-site gated on the trusted peer-locality header — loopback/LAN only (Hard Rules #15/#17, audit #15159 S-01, #15766 shape); the route is management-auth remote-reachable."
       responses:
         "200":
           description: OK
@@ -11201,6 +11996,7 @@ paths:
       tags:
         - Relay
       summary: "GET relay › tokens"
+      x-always-protected: true
       responses:
         "200":
           description: OK
@@ -11208,6 +12004,7 @@ paths:
       tags:
         - Relay
       summary: "POST relay › tokens"
+      x-always-protected: true
       responses:
         "200":
           description: OK
@@ -11216,6 +12013,7 @@ paths:
       tags:
         - Relay
       summary: "DELETE relay › tokens › <id>"
+      x-always-protected: true
       responses:
         "200":
           description: OK
@@ -11223,6 +12021,7 @@ paths:
       tags:
         - Relay
       summary: "GET relay › tokens › <id>"
+      x-always-protected: true
       responses:
         "200":
           description: OK
@@ -11230,6 +12029,7 @@ paths:
       tags:
         - Relay
       summary: "PATCH relay › tokens › <id>"
+      x-always-protected: true
       responses:
         "200":
           description: OK
@@ -11248,6 +12048,30 @@ paths:
       responses:
         "200":
           description: OK
+  /api/resilience/cooldowns:
+    get:
+      tags:
+        - Resilience
+      summary: "GET resilience › cooldowns"
+      description: >-
+        Every connection with its cooldown, model lockouts and terminal state, for the
+        Cooldown Manager page. Never includes credentials. Optional `provider` query filter.
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - Resilience
+      summary: "POST resilience › cooldowns"
+      description: >-
+        Clears connection cooldowns and model lockouts for `connectionIds`, or for every
+        connection when `all` is true (optionally within `provider`). Terminal states
+        (banned, expired, credits_exhausted) are skipped.
+      responses:
+        "200":
+          description: "`{ ok, cleared, unchanged, skippedTerminal, lockoutsCleared }`"
+        "400":
+          description: Neither connectionIds nor all was provided
   /api/routing/decisions/{requestId}:
     get:
       tags:
@@ -11448,6 +12272,34 @@ paths:
       responses:
         "200":
           description: OK
+  /api/settings/database/integrity-check:
+    post:
+      tags:
+        - Settings
+      summary: "POST settings › database › integrity check"
+      description: >-
+        Runs SQLite `PRAGMA quick_check` on demand and stores the result. Reading the storage
+        settings (GET /api/settings/database) only returns the last stored result and never
+        runs the scan.
+      x-always-protected: true
+      responses:
+        "200":
+          description: Scan finished; returns the stored result.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  integrityCheck:
+                    type: string
+                    enum: [ok, error]
+                  lastIntegrityCheckAt:
+                    type: string
+                    format: date-time
+        "401":
+          description: Unauthorized
+        "500":
+          description: Failed to run integrity check
   /api/settings/database/refresh-stats:
     post:
       tags:
@@ -11480,6 +12332,11 @@ paths:
       responses:
         "200":
           description: OK
+        "403":
+          description: >-
+            Machine credential refused. Exports carry every stored credential, so they require
+            the dashboard session or the local CLI (or login disabled); API keys of any scope
+            and `oma_` access tokens get 403.
   /api/settings/favicon:
     get:
       tags:
@@ -11566,6 +12423,11 @@ paths:
       responses:
         "200":
           description: OK
+        "403":
+          description: >-
+            Machine credential refused. The import replaces settings, connections and API keys,
+            so it requires the dashboard session or the local CLI (or login disabled); API keys
+            of any scope and `oma_` access tokens get 403.
   /api/settings/lkgp-cache:
     delete:
       tags:
@@ -12139,6 +13001,133 @@ paths:
       responses:
         "200":
           description: OK
+  /api/settings/transfer/catalog:
+    get:
+      tags:
+        - Settings
+      summary: "GET settings › transfer › catalog"
+      description: >-
+        Provider accounts selectable for a selective transfer (id, provider, auth type, name,
+        email, group). Never returns a credential.
+      x-always-protected: true
+      responses:
+        "200":
+          description: OK
+        "403":
+          description: >-
+            Machine credential refused. Selective transfer requires the dashboard session or
+            the local CLI (or login disabled); API keys of any scope and `oma_` access tokens
+            get 403.
+  /api/settings/transfer/export:
+    post:
+      tags:
+        - Settings
+      summary: "POST settings › transfer › export"
+      description: >-
+        Seals the selected provider accounts, plus the custom provider nodes they use, under
+        the caller's passphrase (scrypt + AES-256-GCM) and returns the file as an attachment.
+        Credentials are never written in plaintext; the cleartext header carries counts only.
+      x-always-protected: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [connectionIds, passphrase, acknowledgeCredentialExport]
+              properties:
+                connectionIds:
+                  type: array
+                  minItems: 1
+                  maxItems: 1000
+                  items:
+                    type: string
+                passphrase:
+                  type: string
+                  minLength: 12
+                acknowledgeCredentialExport:
+                  type: boolean
+                  enum: [true]
+      responses:
+        "200":
+          description: Transfer file (`format` omniroute-provider-transfer, `version` 1).
+        "400":
+          description: Invalid body, missing acknowledgment, or an account that no longer exists.
+        "403":
+          description: >-
+            Machine credential refused. Selective transfer requires the dashboard session or
+            the local CLI (or login disabled); API keys of any scope and `oma_` access tokens
+            get 403.
+  /api/settings/transfer/preview:
+    post:
+      tags:
+        - Settings
+      summary: "POST settings › transfer › preview"
+      description: >-
+        Opens a transfer file with its passphrase and reports, per account and provider node,
+        whether it is new, identical, in conflict or unsupported on this install, with the
+        allowed actions (add, skip, replace). Writes nothing and never returns a credential.
+      x-always-protected: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [bundle, passphrase]
+              properties:
+                bundle:
+                  type: object
+                passphrase:
+                  type: string
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Invalid file, or a wrong passphrase / modified file.
+        "403":
+          description: >-
+            Machine credential refused. Selective transfer requires the dashboard session or
+            the local CLI (or login disabled); API keys of any scope and `oma_` access tokens
+            get 403.
+  /api/settings/transfer/import:
+    post:
+      tags:
+        - Settings
+      summary: "POST settings › transfer › import"
+      description: >-
+        Applies a transfer file with per-item decisions keyed `connection:<id>` / `node:<id>`
+        (add, skip, replace; omitted keys use the recommended action). Every decision is
+        validated before the first write, a pre-import database backup is taken, nothing is
+        deleted, and destination priority, active flag and proxy settings are kept.
+      x-always-protected: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [bundle, passphrase]
+              properties:
+                bundle:
+                  type: object
+                passphrase:
+                  type: string
+                decisions:
+                  type: object
+                  additionalProperties:
+                    type: string
+                    enum: [add, skip, replace]
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Invalid file, wrong passphrase, or a decision not allowed for an item.
+        "403":
+          description: >-
+            Machine credential refused. Selective transfer requires the dashboard session or
+            the local CLI (or login disabled); API keys of any scope and `oma_` access tokens
+            get 403.
   /api/skills:
     get:
       tags:
@@ -12260,6 +13249,7 @@ paths:
       tags:
         - Sync
       summary: "GET sync › tokens"
+      x-always-protected: true
       responses:
         "200":
           description: OK
@@ -12267,6 +13257,7 @@ paths:
       tags:
         - Sync
       summary: "POST sync › tokens"
+      x-always-protected: true
       responses:
         "200":
           description: OK
@@ -12275,6 +13266,7 @@ paths:
       tags:
         - Sync
       summary: "DELETE sync › tokens › <id>"
+      x-always-protected: true
       responses:
         "200":
           description: OK
@@ -12306,10 +13298,55 @@ paths:
       tags:
         - System
       summary: "GET system › version"
+      description: >-
+        Running version, latest published version, auto-update status and npm release channel.
+        `releaseChannel` and `channels` are additive (rail 3.8.54); `channel` keeps meaning the
+        deployment mode used by the dashboard updater.
       x-loopback-only: true
       responses:
         "200":
           description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [current, latest, updateAvailable, channel, releaseChannel, channels]
+                properties:
+                  current: { type: string, description: Running OmniRoute version. }
+                  latest:
+                    type: string
+                    description: Latest published version, or "unavailable" when every lookup failed.
+                  updateAvailable: { type: boolean }
+                  channel:
+                    type: string
+                    enum: [npm, source, docker-compose]
+                    description: Deployment mode the auto-updater uses (not the npm release channel).
+                  autoUpdateSupported: { type: boolean }
+                  autoUpdateError: { type: [string, "null"] }
+                  news: { description: Active release-news payload, or null. }
+                  releaseChannel:
+                    type: string
+                    enum: [latest, next, nightly, lts]
+                    description: >-
+                      npm channel of the running build — `nightly` for `-nightly.*`, `next` for other
+                      pre-releases, `lts` for a stable of an older major than `channels.latest`,
+                      otherwise `latest` (same rules as scripts/release/dist-tag.mjs).
+                  channels:
+                    type: object
+                    description: >-
+                      Published head of each npm dist-tag (`npm view omniroute dist-tags`, cached
+                      10 minutes). `latest` is always present; the others only when the dist-tag
+                      exists.
+                    required: [latest]
+                    properties:
+                      latest: { type: string }
+                      next: { type: string }
+                      nightly: { type: string }
+                      lts: { type: string }
+        "304":
+          description: Not modified (If-None-Match matched the ETag).
+        "401":
+          description: Unauthorized
     post:
       tags:
         - System
@@ -12931,7 +13968,10 @@ paths:
       summary: "GET combos"
       responses:
         "200":
-          description: OK
+          description: >-
+            OK. When capabilities are included, each `model` step in `models[]` carries
+            `supportsVision` (`true`, `false`, or `null` when no capability source knows),
+            and `capabilities.multimodal` is true exactly when every member reports `true`.
   /api/v1/completions:
     post:
       tags:
@@ -13001,6 +14041,31 @@ paths:
       responses:
         "200":
           description: OK
+  /api/v1/media/{id}:
+    get:
+      tags:
+        - V1 Media
+      summary: "GET media › <id>"
+      description: >-
+        Serves media that a video job stored on this gateway because the provider's own result URL
+        is auth-gated (OpenRouter `unsigned_urls`). The id is returned in the `url` of a
+        `/api/v1/videos/generations` response. Readable by the API key that generated it, a
+        manage-scope key or the dashboard session (same ownership rule as `/api/v1/files/{id}/content`);
+        anything else, an unknown id or an expired file (call-log retention window) answers 404.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: "^([a-f0-9]{16}|none)__[a-f0-9]{32}\\.[a-z0-9]{2,5}$"
+      responses:
+        "200":
+          description: The stored media bytes (e.g. `video/mp4`), served inline.
+        "401":
+          description: Invalid API key.
+        "404":
+          description: Media not found, expired or not owned by the caller.
   /api/v1/issues/report:
     post:
       tags:
@@ -13136,39 +14201,89 @@ paths:
       tags:
         - V1 Registered-keys
       summary: "GET registered keys"
+      description: >
+        Management-only, like `/api/keys`: a dashboard session, the local CLI token, or an
+        API key with `manage`/`admin` scope. Inference-only API keys get 403.
+      security:
+        - BearerAuth: []
+        - ManagementSessionAuth: []
       responses:
         "200":
           description: OK
+        "401":
+          $ref: "#/components/responses/ManagementAuthenticationRequired"
+        "403":
+          $ref: "#/components/responses/ManagementInvalidToken"
     post:
       tags:
         - V1 Registered-keys
       summary: "POST registered keys"
+      description: >
+        Management-only, like `/api/keys`: a dashboard session, the local CLI token, or an
+        API key with `manage`/`admin` scope. Inference-only API keys get 403.
+      security:
+        - BearerAuth: []
+        - ManagementSessionAuth: []
       responses:
         "200":
           description: OK
+        "401":
+          $ref: "#/components/responses/ManagementAuthenticationRequired"
+        "403":
+          $ref: "#/components/responses/ManagementInvalidToken"
   /api/v1/registered-keys/{id}:
     delete:
       tags:
         - V1 Registered-keys
       summary: "DELETE registered keys › <id>"
+      description: >
+        Management-only, like `/api/keys`: a dashboard session, the local CLI token, or an
+        API key with `manage`/`admin` scope. Inference-only API keys get 403.
+      security:
+        - BearerAuth: []
+        - ManagementSessionAuth: []
       responses:
         "200":
           description: OK
+        "401":
+          $ref: "#/components/responses/ManagementAuthenticationRequired"
+        "403":
+          $ref: "#/components/responses/ManagementInvalidToken"
     get:
       tags:
         - V1 Registered-keys
       summary: "GET registered keys › <id>"
+      description: >
+        Management-only, like `/api/keys`: a dashboard session, the local CLI token, or an
+        API key with `manage`/`admin` scope. Inference-only API keys get 403.
+      security:
+        - BearerAuth: []
+        - ManagementSessionAuth: []
       responses:
         "200":
           description: OK
+        "401":
+          $ref: "#/components/responses/ManagementAuthenticationRequired"
+        "403":
+          $ref: "#/components/responses/ManagementInvalidToken"
   /api/v1/registered-keys/{id}/revoke:
     post:
       tags:
         - V1 Registered-keys
       summary: "POST registered keys › <id> › revoke"
+      description: >
+        Management-only, like `/api/keys`: a dashboard session, the local CLI token, or an
+        API key with `manage`/`admin` scope. Inference-only API keys get 403.
+      security:
+        - BearerAuth: []
+        - ManagementSessionAuth: []
       responses:
         "200":
           description: OK
+        "401":
+          $ref: "#/components/responses/ManagementAuthenticationRequired"
+        "403":
+          $ref: "#/components/responses/ManagementInvalidToken"
   /api/v1/relay/chat/completions:
     post:
       tags:
@@ -14422,13 +15537,6 @@ components:
           minimum: 1
           example: 30
 
-    InspectorTlsInterceptToggle:
-      type: object
-      required: [enabled]
-      properties:
-        enabled:
-          type: boolean
-
     InspectorAnnotationPut:
       type: object
       required: [annotation]
@@ -15033,6 +16141,19 @@ components:
         localCoreEndpoint:
           type: string
           nullable: true
+        coreConfigPath:
+          type: string
+          nullable: true
+          description: >-
+            Absolute adopted sing-box config path (lowercase .json).
+            Empty means no generation.
+        coreBinaryPath:
+          type: string
+          nullable: true
+          description: >-
+            Absolute path of the core binary used to verify the generated
+            file before replacing the adopted file. Null means write
+            beside it only.
         updateIntervalMinutes:
           type: integer
         lastFetchedAt:
@@ -15162,3 +16283,20 @@ components:
             - context-optimized
             - fusion
           default: priority
+        universal_handoff:
+          type: object
+          nullable: true
+          description: >-
+            Per-combo universal handoff config (the runtime also accepts the camelCase
+            `universalHandoff` alias). Omit to fall back to the global/default config;
+            `enabled: false` stops session-model history writes for this combo.
+          additionalProperties: false
+          properties:
+            enabled: { type: boolean }
+            trigger: { type: string, enum: [on-switch, always, on-error] }
+            providerAllowlist: { type: array, items: { type: string } }
+            maxMessagesForSummary: { type: integer, minimum: 5, maximum: 100 }
+            handoffModel: { type: string }
+            ttlMinutes: { type: integer, minimum: 1, maximum: 10080 }
+            preserveSystemPrompt: { type: boolean }
+            relayMode: { type: string, enum: [schema-locked, standard] }

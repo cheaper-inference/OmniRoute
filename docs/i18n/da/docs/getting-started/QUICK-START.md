@@ -4,7 +4,7 @@
 
 ---
 
-> **Kort fortalt**: Installer → Tilslut en gratis udbyder → Peg dit IDE på OmniRoute. Færdig.
+> **Kort fortalt**: Installér → Tilslut en kvalificeret udbyder → Peg din IDE på OmniRoute. Færdig.
 
 ---
 
@@ -47,33 +47,11 @@ OmniRoute starter på `http://localhost:20128`. Dashboardet åbnes automatisk.
 
 ---
 
-## Trin 3: Tilslut en gratis udbyder
+## Trin 3: Tilslut en kvalificeret udbyder
 
-Du kan bruge OmniRoute **helt gratis** ved at tilslutte en gratis udbyder.
+Vælg en udbyder, hvis vilkår og kvote passer til dine behov. I **Dashboard → Providers** skal du tilslutte din egen konto eller API-nøgle og derefter teste forbindelsen. Gratis adgang og adgang uden nøgle er ikke garanteret.
 
-### Mulighed A: Kiro (gratis Claude — intet kreditkort)
-
-1. Åbn dashboardet på `http://localhost:20128`
-2. Gå til **Udbydere** → **Tilføj udbyder**
-3. Vælg **Kiro AI**
-4. Klik på **Tilslut** (ingen API-nøgle nødvendig!)
-5. Færdig! Du har nu gratis adgang til Claude-modeller.
-
-### Mulighed B: OpenCode Free (ingen godkendelse)
-
-1. Åbn dashboardet på `http://localhost:20128`
-2. Gå til **Udbydere** → **Tilføj udbyder**
-3. Vælg **OpenCode Free**
-4. Klik på **Tilslut** (ingen API-nøgle nødvendig!)
-5. Færdig! Du har nu gratis adgang til flere modeller.
-
-### Mulighed C: Pollinations (ingen nøgle nødvendig)
-
-1. Åbn dashboardet på `http://localhost:20128`
-2. Gå til **Udbydere** → **Tilføj udbyder**
-3. Vælg **Pollinations**
-4. Klik på **Tilslut** (ingen API-nøgle nødvendig!)
-5. Færdig! Du har nu gratis adgang til GPT-5, Claude, Gemini og flere andre.
+`auto` udelukker som standard udbydere, der er markeret med `tos: avoid`, herunder Kiro. Tilslutning af en konto ændrer ikke denne politik. Tilvalget i **Dashboard → Combos** gælder for alle automatiske kombinationer. Gennemgå [vejledningen til gratis niveauer](./FREE-TIERS-GUIDE.md), før du vælger en udbyder.
 
 ---
 
@@ -150,11 +128,11 @@ Du kan se oplysningerne om anmodningen ved at klikke på [Overvågning/logfiler]
 
 ---
 
-## Hvad er næste skridt?
+## Hvad er det næste?
 
-- **[Guide til Auto-Combo](./AUTO-COMBO-GUIDE.md)** — Lad OmniRoute vælge den bedste AI for dig
+- **[Guide til automatisk kombination](./AUTO-COMBO-GUIDE.md)** — Lad OmniRoute vælge den bedste AI for dig
 - **[Guide til udbydere](./PROVIDERS-GUIDE.md)** — Tilslut flere udbydere (gratis og betalte)
-- **[Guide til gratis niveauer](./FREE-TIERS-GUIDE.md)** — Få gratis AI uden kreditkort
+- **[Guide til gratis niveauer](./FREE-TIERS-GUIDE.md)** — Gennemgå udbydernes vilkår og grænser for gratis niveauer
 - **[Fejlfinding](../guides/TROUBLESHOOTING.md)** — Løs almindelige problemer
 
 ---
@@ -163,23 +141,23 @@ Du kan se oplysningerne om anmodningen ved at klikke på [Overvågning/logfiler]
 
 ### "Har jeg brug for en API-nøgle?"
 
-**Nej!** Du kan bruge gratis udbydere (Kiro, OpenCode Free, Pollinations) uden en API-nøgle. Du skal blot tilslutte dem i dashboardet.
+OmniRoute API-nøglen godkender dine værktøjer. Legitimationsoplysninger til upstream-tjenester afhænger af udbyderen: Nogle kræver en API-nøgle eller login til en konto. Gratis adgang er ikke garanteret.
 
 ### "Hvad er `auto`?"
 
-`auto` fortæller OmniRoute, at den automatisk skal vælge den bedste udbyder til hver anmodning. Den tager højde for hastighed, pris, kvalitet og tilgængelighed. Se [guiden til Auto-Combo](./AUTO-COMBO-GUIDE.md) for nærmere oplysninger.
+`auto` får OmniRoute til automatisk at vælge den bedste udbyder for hver anmodning. Den tager højde for hastighed, pris, kvalitet og tilgængelighed. Se [vejledningen til Auto-Combo](./AUTO-COMBO-GUIDE.md) for nærmere oplysninger.
 
 ### "Hvad koster det?"
 
-OmniRoute er i sig selv **gratis og open source**. Du betaler kun for de udbydere, du bruger. Mange udbydere har gratis niveauer — se [guiden til gratis niveauer](./FREE-TIERS-GUIDE.md).
+OmniRoute er **gratis og open source**. Du betaler kun for de udbydere, du bruger. Mange udbydere har gratis abonnementer – se [vejledningen til gratis abonnementer](./FREE-TIERS-GUIDE.md).
 
 ### "Kan jeg bruge det med Claude Code / Cursor / Copilot?"
 
-**Ja!** OmniRoute fungerer med alle værktøjer, der understøtter OpenAI-formatet. Du skal blot angive basis-URL'en som `http://localhost:20128/v1`. Se [guiden til CLI-værktøjer](../reference/CLI-TOOLS.md) for specifikke konfigurationsinstruktioner.
+**Ja!** OmniRoute fungerer med alle værktøjer, der understøtter OpenAI-formatet. Du skal blot angive basis-URL'en som `http://localhost:20128/v1`. Se [vejledningen til CLI-værktøjer](../reference/CLI-TOOLS.md) for specifikke opsætningsinstruktioner.
 
 ### "Hvad sker der, hvis en udbyder går ned?"
 
-OmniRoute springer automatisk over udbydere, der fejler, og prøver den næste. Du behøver ikke at gøre noget. Se [guiden til Auto-Combo](./AUTO-COMBO-GUIDE.md) for nærmere oplysninger.
+OmniRoute springer automatisk over udbydere, der fejler, og prøver den næste. Du behøver ikke at gøre noget. Se [vejledningen til Auto-Combo](./AUTO-COMBO-GUIDE.md) for nærmere oplysninger.
 
 ---
 

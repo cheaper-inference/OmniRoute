@@ -13,30 +13,30 @@
 
 ## Vad det är
 
-OmniRoute registrerar 329 leverantörer, inklusive 155 katalogposter som är markerade som **kostnadsfria/utan autentisering**
+OmniRoute registrerar 374 leverantörer, inklusive 155 katalogposter markerade som **gratis/utan autentisering**
 (utan autentisering,
-kostnadsfri OAuth-nivå eller kostnadsfri API-nyckel — se
-[Guiden till kostnadsfria nivåer](../getting-started/FREE-TIERS-GUIDE.md) och den fullständiga
-[katalogen över kostnadsfria nivåer](../reference/FREE_TIERS.md)). Haken är att kostnadsfria leverantörer varierar
-kraftigt i modellkvalitet. En leverantör utan autentisering som erbjuder en spjutspetsmodell är betydligt mer användbar
+OAuth med gratisnivå eller API-nyckel med gratisnivå — se
+[Guiden till gratisnivåer](../getting-started/FREE-TIERS-GUIDE.md) och den fullständiga
+[katalogen över gratisnivåer](../reference/FREE_TIERS.md)). Haken är att gratisleverantörer varierar
+kraftigt i modellkvalitet. En leverantör utan autentisering som erbjuder en banbrytande modell är mycket mer användbar
 än en som erbjuder en liten äldre modell.
 
-**Rankning av kostnadsfria leverantörer** besvarar frågan ”**vilken kostnadsfri leverantör ger mig den bästa modellen?**” genom att
-sammanföra varje kostnadsfri leverantörs katalog med **kollektivt insamlade kvalitetspoäng** från
-**Arena AI:s topplista** (ELO baserad på mänskliga preferenser, samma idé som ligger bakom LMArena-
-chatbotarenan). Leverantörerna rankas sedan efter styrkan hos deras **bästa kostnadsfria modell**.
+**Rankning av gratisleverantörer** besvarar frågan "**vilken gratisleverantör ger mig den bästa modellen?**" genom att
+samköra varje gratisleverantörs katalog med **kollektivt insamlade kvalitetspoäng** från
+**Arena AI:s topplista** (ELO baserat på mänskliga preferenser, samma idé som ligger bakom LMArena-
+chatbotarenan). Leverantörerna rankas sedan efter prestandan hos deras **bästa kostnadsfria modell**.
 
-Rankningen beräknas från tre verkliga källor:
+Rankningen beräknas utifrån tre verkliga källor:
 
-1. Listorna över kostnadsfria leverantörer — `NOAUTH_PROVIDERS` samt poster i `OAUTH_PROVIDERS` /
-   `APIKEY_PROVIDERS` som är flaggade med `hasFree`
+1. Listorna över gratisleverantörer — `NOAUTH_PROVIDERS` samt poster i `OAUTH_PROVIDERS` /
+   `APIKEY_PROVIDERS` som är markerade med `hasFree`
    (`src/shared/constants/providers.ts`).
 2. Varje leverantörs modellkatalog från leverantörsregistret
    (`open-sse/config/providerRegistry.ts`).
-3. ELO-härledda poäng för uppgiftslämplighet som lagras i DB-tabellen `model_intelligence` av
+3. ELO-baserade poäng för uppgiftslämplighet som lagras i databastabellen `model_intelligence` av
    synkroniseringsmotorn för Arena ELO (`src/lib/arenaEloSync.ts`).
 
-Sammanfogningslogiken finns i `src/lib/freeProviderRankings.ts`.
+Samkörningslogiken finns i `src/lib/freeProviderRankings.ts`.
 
 ---
 

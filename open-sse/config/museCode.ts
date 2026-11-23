@@ -7,6 +7,8 @@
  * api.meta.ai/muse-code/key. The Muse CLI User-Agent is required by Meta.
  */
 
+import { stripTrailingSlashes } from "../utils/urlSanitize.ts";
+
 export const MUSE_CODE_USER_AGENT = "muse-code/1.0.2";
 /** Inference UA used by CLIProxyAPI's MetaExecutor (auth still uses muse-code/1.0.2). */
 export const MUSE_CODE_INFERENCE_USER_AGENT =
@@ -17,6 +19,9 @@ export const MUSE_CODE_TOKEN_URL = `${MUSE_CODE_AUTH_HOST}/oidc/device/token/`;
 export const MUSE_CODE_MINT_URL = "https://api.meta.ai/muse-code/key";
 export const MUSE_CODE_API_BASE_URL = "https://api.meta.ai/v1";
 export const MUSE_CODE_RESPONSES_URL = `${MUSE_CODE_API_BASE_URL}/responses`;
+/** Muse Image (OpenAI-compatible): JSON generations + multipart edits on the same key. */
+export const MUSE_CODE_IMAGES_GENERATIONS_URL = `${MUSE_CODE_API_BASE_URL}/images/generations`;
+export const MUSE_CODE_IMAGES_EDITS_URL = `${MUSE_CODE_API_BASE_URL}/images/edits`;
 export const MUSE_CODE_DEVICE_GRANT = "urn:ietf:params:oauth:grant-type:device_code";
 export const MUSE_CODE_DEFAULT_POLL_INTERVAL_SEC = 5;
 export const MUSE_CODE_MAX_POLL_MS = 15 * 60 * 1000;
@@ -36,5 +41,5 @@ export function isMuseDcaToken(token: string | null | undefined): boolean {
 export function normalizeMuseBaseUrl(raw: string | null | undefined): string {
   const trimmed = typeof raw === "string" ? raw.trim() : "";
   if (!trimmed) return MUSE_CODE_API_BASE_URL;
-  return trimmed.replace(/\/+$/, "");
+  return stripTrailingSlashes(trimmed);
 }

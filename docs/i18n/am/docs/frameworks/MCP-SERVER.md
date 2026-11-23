@@ -291,107 +291,110 @@ MCP አገልጋዩ በቅንብሮች (`mcpEnabled`) ውስጥ እስኪነቃ 
 ## ማረጋገጫ እና የፈቃድ ወሰኖች
 
 የMCP መሣሪያ ጥሪዎች የፈቃድ ወሰን ሕብረቁምፊዎችን ከጠሪው ያነባሉ። ይህ ማረጋገጫ ከሦስት
-እርስ በርሳቸው ነጻ ከሆኑ የስም ክልሎች አንዱ ነው። ከአንዱ አረጋጋጭ የተገኘ ማለፍ ከሌሎቹ ማለፍ አይደለም።
-ደንቦቹ [ሦስት የፈቃድ ወሰን ስም ክልሎች](#three-scope-namespaces) ላይ ይገኛሉ።
-የመሣሪያዎቹ ማውጫ [የMCP መሣሪያ የፈቃድ ወሰኖች](#mcp-tool-scopes) ነው።
+እርስ በርሳቸው ነጻ ከሆኑ የስያሜ ክልሎች አንዱ ነው። በአንዱ ፈታሽ ማለፍ በሌሎቹ ማለፍ አይደለም።
+ደንቦቹ [ሦስት የፈቃድ ወሰን ስያሜ ክልሎች](#three-scope-namespaces) ውስጥ ይገኛሉ።
+የመሣሪያዎቹ ካታሎግ [የMCP መሣሪያ ፈቃድ ወሰኖች](#mcp-tool-scopes) ነው።
 
-### ሦስት የፈቃድ ወሰን ስም ክልሎች
+### ሦስት የፈቃድ ወሰን ስያሜ ክልሎች
 
-በAPI ቁልፍ ላይ ያለው `manage`፣ በMCP መሣሪያ ላይ ያለው `read:compression`፣ እና በ
+በAPI ቁልፍ ላይ ያለው `manage`፣ በMCP መሣሪያ ላይ ያለው `read:compression` እና በ
 `oma_live_…` የመዳረሻ ቶከን ላይ ያለው `read` ሦስት የተለያዩ ፈቃዶች ናቸው። `read`
 የመዳረሻ ቶከንን ወደ ለውጥ የሚያደርግ የአስተዳደር መስመር የሚልኩ ጠሪዎች HTTP 403
 `Access token scope 'read' is insufficient; 'write' required.` ያገኛሉ።
-ያ የደረጃ አሰጣጥ `scopeSatisfies` ነው። የMCP ሰንጠረዡን አያማክርም፣ እንዲሁም የMCP
-አዛማጁ እሱን አያማክርም።
+ያ ደረጃ `scopeSatisfies` ነው። የMCP ሰንጠረዡን አያጣቅስም፣ እንዲሁም የMCP
+አዛማጁ ያንን አያጣቅስም።
 
-| የስም ክልል             | ማረጋገጫ                                                     | አረጋጋጭ            | ማለፍ የሚፈቅደው                            |
-| :------------------ | :-------------------------------------------------------- | :--------------- | :------------------------------------ |
-| የAPI ቁልፍ አስተዳደር     | `api_keys.scopes`                                         | `hasManageScope` | ለዚያ Bearer ቁልፍ የአስተዳደር REST           |
-| የAPI ቁልፍ ተጨማሪ       | ተመሳሳዩ ድርድር፣ አንድ ትክክለኛ ሕብረቁምፊ                              | ከታች የተሰየመው አጋዥ   | ያንን አንድ ችሎታ ብቻ                        |
-| የMCP መሣሪያ የፈቃድ ወሰኖች | ተመሳሳዩ ድርድር፣ ካልሆነ MCP `_meta`፣ ካልሆነ `OMNIROUTE_MCP_SCOPES` | `scopeMatches`   | ማስፈጸሙ ከነቃ በኋላ ያንን መሣሪያ                |
-| የመዳረሻ ቶከን           | `oma_live_…`                                              | `scopeSatisfies` | ዘዴውና ዱካው ያንን ደረጃ የሚጠይቁበት የአስተዳደር መስመር |
+| የስያሜ ክልል           | ማረጋገጫ                                                     | ፈታሽ              | ማለፍ የሚፈቅደው                                       |
+| :----------------- | :-------------------------------------------------------- | :--------------- | :----------------------------------------------- |
+| የAPI ቁልፍ አስተዳደር    | `api_keys.scopes`                                         | `hasManageScope` | ለዚያ Bearer ቁልፍ የአስተዳደር REST                      |
+| ተጨማሪ የAPI ቁልፍ ፈቃድ  | ተመሳሳዩ ድርድር፣ አንድ ትክክለኛ ሕብረቁምፊ                              | ከታች የተሰየመው ረዳት   | ያንን አንድ ችሎታ ብቻ                                   |
+| የMCP መሣሪያ ፈቃድ ወሰኖች | ተመሳሳዩ ድርድር፣ ካልሆነ MCP `_meta`፣ ካልሆነ `OMNIROUTE_MCP_SCOPES` | `scopeMatches`   | አስገዳጅነቱ ከነቃ በኋላ ያንን መሣሪያ                         |
+| የመዳረሻ ቶከን          | `oma_live_…`                                              | `scopeSatisfies` | የስልቱ እና የዱካው መስፈርት ያንን ደረጃ የሚፈልግበትን የአስተዳደር መስመር |
 
-እያንዳንዱን ማረጋገጫ ስለመፍጠር
-[የአስተዳደር ማረጋገጫ](../guides/MANAGEMENT-AUTH.md) ላይ ተብራርቷል።
+እያንዳንዱን ማረጋገጫ ስለማመንጨት
+[የአስተዳደር ማረጋገጫ](../guides/MANAGEMENT-AUTH.md) ውስጥ ተብራርቷል።
 
-#### የAPI ቁልፍ የፈቃድ ወሰኖች
+#### የAPI ቁልፍ ፈቃድ ወሰኖች
 
-አንድ `api_keys.scopes` ድርድር ለሁለት ሥራዎች ያገለግላል። የተለያዩ ተግባሮችን ይጠቀማሉ።
+አንድ `api_keys.scopes` ድርድር ሁለት ተግባራትን ያገለግላል። የተለያዩ ፈንክሽኖችን ይጠቀማሉ።
 
 **የአስተዳደር REST።** `manage` እና `admin` የ
 `MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`) አባላት ናቸው።
-`hasManageScope` ለዚያ ቁልፍ የአስተዳደር መስመሮችን የሚፈቅደው ነው። `admin` በእነዚያ
-መስመሮች ላይ የአስተዳደር ችሎታ አለው። እዚህ ያለው `admin` የመዳረሻ ቶከን
-ደረጃ አይደለም፣ እንዲሁም ወደ MCP መሣሪያ የፈቃድ ወሰኖች አይስፋፋም።
+`hasManageScope` ለዚያ ቁልፍ የአስተዳደር መስመሮችን ፈቃድ የሚሰጠው ነው። `admin`
+በእነዚያ መስመሮች ላይ የአስተዳደር ችሎታ አለው። እዚህ ላይ `admin` የሚለው ቃል
+የመዳረሻ ቶከን ደረጃ አይደለም፣ እንዲሁም ወደ MCP መሣሪያ ፈቃድ ወሰኖች አይስፋፋም።
 
-**ተጨማሪ ሕብረቁምፊዎች።** እያንዳንዱ ትክክለኛ የአባልነት ፍተሻ ነው፣ እና እያንዳንዱ ከ
-`MANAGEMENT_API_KEY_SCOPES` ውጭ ይቆያል።
+**ተጨማሪ ሕብረቁምፊዎች።** እያንዳንዱ ትክክለኛ የአባልነት ፍተሻ ሲሆን፣ እያንዳንዱም
+ከ`MANAGEMENT_API_KEY_SCOPES` ውጭ ይቆያል።
 
-| የፈቃድ ወሰን                       | ማለፍ የሚፈቅደው                                                                                                                                               |
-| :----------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `mcp:connect`                  | loopback ላልሆነው `/api/mcp/` የLOCAL_ONLY ልዩ ሁኔታ ብቻ (`hasMcpConnectOrManageScope`)። `manage` ወይም `admin` ያለው ቁልፍ አሁንም ያንን ልዩ ሁኔታ ያልፋል።                      |
-| `self:usage`                   | ለዚህ ቁልፍ `GET /api/v1/me/status` (`src/app/api/v1/me/status/route.ts`)። `POST /api/keys` ሲፈጥር ይህን የፈቃድ ወሰን ይጨምራል (`normalizeSelfServiceScopesForCreate`)። |
-| `self:account-quota`           | በዚያ የሁኔታ ውሂብ ውስጥ ያሉ የወደላይ አቅራቢ መለያ ኮታዎች (`src/lib/usage/apiKeySelfService.ts`)። የሁኔታ መስመሩ አሁንም `self:usage` ይጠይቃል።                                       |
-| `policy:bypass-provider-quota` | የዚህ ቁልፍ የግምት ጥሪዎች የአቅራቢ-ኮታ መመሪያን ይዘሉታል (`hasProviderQuotaBypassScope` በ`src/sse/handlers/chat.ts`)።                                                      |
+| የፈቃድ ወሰን                       | ማለፍ የሚፈቅደው                                                                                                                                                   |
+| :----------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mcp:connect`                  | ለnon-loopback `/api/mcp/` LOCAL_ONLY ልዩ ሁኔታ ብቻ (`hasMcpConnectOrManageScope`)። `manage` ወይም `admin` ያለው ቁልፍ አሁንም ያንን ልዩ ሁኔታ ያልፋል።                            |
+| `self:usage`                   | ለዚህ ቁልፍ `GET /api/v1/me/status` (`src/app/api/v1/me/status/route.ts`)። `POST /api/keys` በመፍጠር ጊዜ ይህን የፈቃድ ወሰን ይጨምራል (`normalizeSelfServiceScopesForCreate`)። |
+| `self:account-quota`           | በዚያ የሁኔታ ጭነት ውስጥ ያሉ የላይኛው ምንጭ መለያ ኮታዎች (`src/lib/usage/apiKeySelfService.ts`)። የሁኔታ መስመሩ አሁንም `self:usage` ይፈልጋል።                                            |
+| `policy:bypass-provider-quota` | የዚህ ቁልፍ የኢንፈረንስ ጥሪዎች የአቅራቢ ኮታ ፖሊሲውን ያልፋሉ (`hasProviderQuotaBypassScope` በ`src/sse/handlers/chat.ts` ውስጥ)።                                                    |
 
 #### ማዛመድ
 
-ማውጫው [የMCP መሣሪያ የፈቃድ ወሰኖች](#mcp-tool-scopes) ስር ያለው ሰንጠረዥ ነው።
-በ`src/shared/constants/mcpScopes.ts` ውስጥ ያለውን `MCP_SCOPE_LIST` እንደዚያ ማውጫ
-አትቁጠሩት፤ እሱ የመጀመሪያው ዓይነት-የተወሰነ ንዑስ ስብስብ ነው። በኋላ የተጨመሩ መሣሪያዎች ተጨማሪ የፈቃድ ወሰኖችን
-ከእሱ ጎን ያውጃሉ (`read:notion`፣ `read:skills`፣ `read:local-corpus`፣ እና የተቀረውን ሰንጠረዥ)።
+ካታሎጉ [የMCP መሣሪያ ፈቃድ ወሰኖች](#mcp-tool-scopes) ስር ያለው ሰንጠረዥ ነው። በ
+`src/shared/constants/mcpScopes.ts` ውስጥ ያለውን `MCP_SCOPE_LIST` እንደዚያ ካታሎግ
+አይቁጠሩት፤ እሱ የመጀመሪያው አይነት-የተወሰነ ንዑስ ስብስብ ነው። በኋላ የተጨመሩ መሣሪያዎች ከእሱ ጎን ተጨማሪ የፈቃድ ወሰኖችን
+ያውጃሉ (`read:notion`፣ `read:skills`፣ `read:local-corpus` እና የቀረውን ሰንጠረዥ)።
 
-በ`open-sse/mcp-server/scopeEnforcement.ts` ውስጥ ያለው `evaluateToolScopes`፣
-እያንዳንዱ አስፈላጊ የፈቃድ ወሰን ከተሰጡት የፈቃድ ወሰኖች በአንዱ ሲዛመድ ጥሪውን ይፈቅዳል፦
+በ`open-sse/mcp-server/scopeEnforcement.ts` ውስጥ ያለው `evaluateToolScopes` እያንዳንዱ
+የሚፈለግ የፈቃድ ወሰን ከተሰጠ የፈቃድ ወሰን ጋር ሲዛመድ ጥሪውን ይፈቅዳል፦
 
-- `*` ከእያንዳንዱ አስፈላጊ የፈቃድ ወሰን ጋር ይዛመዳል።
-- በ`*` የሚያበቃ የተሰጠ የፈቃድ ወሰን፣ ከኮከቢቱ በፊት ባለው ቅድመ ቅጥያ
-  ከሚጀምር አስፈላጊ የፈቃድ ወሰን ጋር ይዛመዳል። `read:*` ከ`read:compression` ጋር ይዛመዳል።
-- ማንኛውም ሌላ የተሰጠ የፈቃድ ወሰን የሚዛመደው ሙሉ በሙሉ ከተመሳሳዩ አስፈላጊ ሕብረቁምፊ ጋር ብቻ ነው።
+- `*` ከእያንዳንዱ የሚፈለግ የፈቃድ ወሰን ጋር ይዛመዳል።
+- በ`*` የሚያበቃ የተሰጠ የፈቃድ ወሰን፣ ከኮከቢቱ በፊት ባለው
+  ቅድመ ቅጥያ የሚጀምር የሚፈለግ የፈቃድ ወሰንን ያዛምዳል። `read:*` ከ`read:compression` ጋር ይዛመዳል።
+- ሌላ ማንኛውም የተሰጠ የፈቃድ ወሰን የሚዛመደው ከእሱ ጋር ፍጹም ተመሳሳይ ከሆነው የሚፈለግ ሕብረቁምፊ ጋር ብቻ ነው።
 
-የፈቃድ ወሰኖቹ `["manage"]` የሆኑ ቁልፍ ለ`read:compression` በ`scopeMatches` ፍተሻ ይወድቃል።
-እነዚህ ብቻ የተሰጡ ሕብረቁምፊዎች ሲሆኑ፣ ተመሳሳዩ ጥሪ ለ`admin`፣ `mcp:connect`፣ `read`፣ እና `write`
-ይወድቃል። ከመጨረሻው `*` በስተቀር በMCP መሣሪያ የፈቃድ ወሰኖች መካከል
-የደረጃ ተዋረድ የለም።
+የፈቃድ ወሰኖቹ `["manage"]` የሆኑ ቁልፍ ለ`read:compression` የ`scopeMatches` ፍተሻን ይወድቃል።
+እነዚህ ብቻ የተሰጡ ሕብረቁምፊዎች ሲሆኑ፣ ተመሳሳዩ ጥሪ ለ`admin`፣ `mcp:connect`፣ `read` እና `write`
+ይወድቃል። ከመጨረሻው `*` በስተቀር በMCP መሣሪያ ፈቃድ ወሰኖች መካከል ደረጃ ተዋረድ የለም።
 
-`OMNIROUTE_MCP_ENFORCE_SCOPES=true` ካልሆነ በስተቀር ማስፈጸሙ ጠፍቷል (ነባሪው
-`false`)። ጠፍቶ ባለበት ጊዜ፣ `evaluateToolScopes` ጥሪውን ይፈቅዳል እና
-ማውጫውን ይዘላል። በርቶ ባለበት ጊዜ፣ HTTP የBearer ቁልፉን `api_keys.scopes` እንደ
-`authInfo` ይጠቀማል ([በየቁልፉ የHTTP የፈቃድ ወሰን ማሰር](#per-key-http-scope-binding-7895) ይመልከቱ)።
-ምንም የቁልፍ የፈቃድ ወሰኖች ካልተገኙ፣ የተሰጠው ስብስብ ወደ MCP `_meta`፣ ከዚያም
-ወደ `OMNIROUTE_MCP_SCOPES` ያልፋል።
+`OMNIROUTE_MCP_ENFORCE_SCOPES=true` ካልሆነ በቀር አስገዳጅነቱ ጠፍቷል (ነባሪው
+`false`)። ጠፍቶ ሳለ፣ `evaluateToolScopes` ጥሪውን ይፈቅዳል እና
+ካታሎጉን ይዘላል። ነቅቶ ሳለ፣ HTTP የBearer ቁልፉን `api_keys.scopes` እንደ
+`authInfo` ይጠቀማል ([ለእያንዳንዱ ቁልፍ የHTTP ፈቃድ ወሰን ማስተሳሰር](#per-key-http-scope-binding-7895)ን ይመልከቱ)።
+ምንም የቁልፍ ፈቃድ ወሰኖች ካልተፈቱ፣ የተሰጠው ስብስብ ወደ MCP `_meta`፣ ከዚያም
+ወደ `OMNIROUTE_MCP_SCOPES` ይተላለፋል።
 
-#### የመዳረሻ ቶከን የፈቃድ ወሰኖች
+#### የመዳረሻ ቶከን ፈቃድ ወሰኖች
 
-`oma_live_…` ቶከኖች (`src/lib/accessTokens/scopes.ts`) `read`፣ `write`፣
-ወይም `admin` ይይዛሉ። `scopeSatisfies` የደረጃ አሰጣጥ ነው፦ `admin` `write`ን እና `read`ን ይሸፍናል፣ እና
+`oma_live_…` ቶከኖች (`src/lib/accessTokens/scopes.ts`) `read`፣ `write`
+ወይም `admin` ይይዛሉ። `scopeSatisfies` ደረጃ ነው፦ `admin` `write`ን እና `read`ን ይሸፍናል፣ እና
 `write` `read`ን ይሸፍናል። ያልታወቁ የፈቃድ ወሰኖች ምንም አይሸፍኑም።
 
 `evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) ያንን
-ደረጃ ከ`inferRequiredScope` (`src/server/authz/accessScopes.ts`) ጋር ያወዳድራል፦
+ደረጃ ከ`inferRequiredScope` (`src/server/authz/accessScopes.ts`) ጋር ያነጻጽራል፦
 
-- `GET`፣ `HEAD`፣ እና `OPTIONS` `read` ይጠይቃሉ።
-- ሌሎች ዘዴዎች በሙሉ `write` ይጠይቃሉ።
-- በ`ADMIN_SCOPE_PREFIXES` ውስጥ ያሉ ዱካዎች ለእያንዳንዱ ዘዴ `admin` ይጠይቃሉ። `/api/mcp`
-  በዚያ ዝርዝር ላይ ስለሆነ፣ `write` የመዳረሻ ቶከን እንኳ የMCP HTTP
-  ገጽታን መጥራት አይችልም።
-- በ`ADMIN_MUTATION_PREFIXES` ውስጥ ያሉ ዱካዎች `admin`ን የሚጠይቁት ለለውጥ ሥራዎች ብቻ ነው።
+- `GET`፣ `HEAD` እና `OPTIONS` `read` ይፈልጋሉ።
+- ሌሎች ሁሉም ስልቶች `write` ይፈልጋሉ።
+- በ`ADMIN_SCOPE_PREFIXES` ውስጥ ያሉ ዱካዎች ለእያንዳንዱ ስልት `admin` ይፈልጋሉ። `/api/mcp`
+  በዚያ ዝርዝር ላይ ስላለ፣ `write` የመዳረሻ ቶከን አሁንም የMCP HTTP
+  በይነገጽን መጥራት አይችልም።
+- በ`ADMIN_MUTATION_PREFIXES` ውስጥ ያሉ ዱካዎች `admin` የሚፈልጉት ለለውጦች ብቻ ነው።
+- በ`ADMIN_MUTATION_EXACT_PATHS` (`/api/settings`,
+  `/api/settings/require-login`) ውስጥ ያሉ ዱካዎች `admin` የሚፈልጉት ለለውጦች ብቻ እና በዚያ
+  ትክክለኛ ዱካ ላይ ብቻ ነው — ሌሎች የ`/api/settings/*` ንዑስ መስመሮች `write`ን እንደያዙ ይቆያሉ።
 
-`PATCH /api/keys/{id}` ማሻሻያ የሚያደርግ ክዋኔ ሲሆን በእነዚያ የአስተዳዳሪ ዝርዝሮች ውስጥ አይገኝም፤ ስለዚህ
-የ`read` ቶከን 403 ምላሽ ይቀበላል፦
+`PATCH /api/keys/{id}` ለውጥ የሚያደርግ ክዋኔ ሲሆን በእነዚያ የአስተዳዳሪ ዝርዝሮች ውስጥ የለም፤ ስለዚህ
+የ`read` ቶከን 403 ይቀበላል፦
 `Access token scope 'read' is insufficient; 'write' required.`
-የ`write` ወይም `admin` መዳረሻ ቶከን የዚያን route መስፈርት ያሟላል። የdashboard JWT፣
-የloopback CLI machine-id ቶከን እና `manage` ወይም `admin` ያለው API key
-ሌሎች branch-ዎችን ይከተላሉ፣ እና በዚህ rank አይገደቡም።
+የ`write` ወይም `admin` መዳረሻ ቶከን የዚያን ራውት መስፈርት ያሟላል። የዳሽቦርድ JWT፣
+የloopback CLI machine-id ቶከን እና `manage` ወይም `admin` ያለው API ቁልፍ
+በሌሎች ቅርንጫፎች ያልፋሉ፣ እና በዚህ ደረጃ አይገደቡም።
 
-ለ`/api/mcp` የ`scopeSatisfies` ማረጋገጫን ያለፈ መዳረሻ ቶከን ያለፈው
-የአስተዳደር gate-ን ብቻ ነው። የtool ጥሪዎች አሁንም `scopeMatches`ን ከAPI-key
-scope-ዎች ጋር ያስኬዳሉ። የመዳረሻ ቶከኑ rank ለ`scopeMatches` ግብዓት አይደለም።
+ለ`/api/mcp` የ`scopeSatisfies` ማረጋገጫን ያለፈ መዳረሻ ቶከን
+የአስተዳደር መግቢያ ገደቡን ብቻ ነው ያለፈው። የመሳሪያ ጥሪዎች አሁንም የAPI ቁልፍ
+ስኮፖችን በ`scopeMatches` ያረጋግጣሉ። የመዳረሻ ቶከኑ ደረጃ ለ`scopeMatches` ግብዓት
+አይደለም።
 
-### የMCP tool scope-ዎች
+### የMCP መሳሪያ ስኮፖች
 
-የscope ማስፈጸሚያው በ`open-sse/mcp-server/scopeEnforcement.ts` ውስጥ የተማከለ ነው።
-እያንዳንዱ tool የተወሰኑ scope-ዎችን ይፈልጋል፦
+የስኮፕ ማስፈጸሚያ በ`open-sse/mcp-server/scopeEnforcement.ts` ውስጥ የተማከለ ነው።
+እያንዳንዱ መሳሪያ የተወሰኑ ስኮፖችን ይፈልጋል፦
 
 | ወሰን                   | መሣሪያዎች                                                                                                                                                                          |
 | :-------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -429,55 +432,64 @@ scope-ዎች ጋር ያስኬዳሉ። የመዳረሻ ቶከኑ rank ለ`scopeM
 | `write:obsidian`      | 9 የመጻፊያ መሣሪያዎች — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …                 |
 | `read:local-corpus`   | `local_corpus_search`, `local_corpus_read`, `local_corpus_status`                                                                                                               |
 
-Wildcard scopes ይደገፋሉ፦ `read:*` ሁሉንም የማንበብ scopes ይፈቅዳል፣ `*` ደግሞ ሙሉ መዳረሻ ይፈቅዳል።
+Wildcard ወሰኖች ይደገፋሉ፦ `read:*` ሁሉንም የማንበብ ወሰኖች ይፈቅዳል፣ `*` ደግሞ ሙሉ መዳረሻ ይፈቅዳል።
 
-### `mcp:connect` — የተገደበ የroute ብቃት (#7895)
+### `mcp:connect` — የተገደበ የመስመር ችሎታ (#7895)
 
-ከnon-loopback ወደ HTTP/SSE MCP transport (`/api/mcp/*`) ለመድረስ
-የ`/api/mcp/` LOCAL_ONLY ማስቀረት ያስፈልጋል (`docs/security/ROUTE_GUARD_TIERS.md`ን ይመልከቱ)። ከዚህ በፊት
-ይህ ማስቀረት ሙሉ `manage`/`admin`-scope ያለውን API key ብቻ ይቀበል ነበር — MCPን ብቻ
-ማነጋገር ለሚፈልግ caller ይህ ከልክ በላይ ሰፊ ነው። `src/shared/constants/managementScopes.ts` አሁን
-`MCP_CONNECT_SCOPE = "mcp:connect"`ን export ያደርጋል፦ ተጨማሪ፣ የተገደበ scope (`SELF_USAGE_SCOPE`ን
-እንደ ቀዳሚ ምሳሌ የሚከተል)፣ በ`src/server/authz/policies/management.ts` ውስጥ የ`/api/mcp/`
-bypassን ብቻ የሚፈቅድ — ሌላ ምንም የmanagement-route መዳረሻ አይሰጥም፣ እና ሆን ተብሎ
-ከ`MANAGEMENT_API_KEY_SCOPES` ውጭ ተደርጓል። `manage`/`admin` ያለው key አሁንም ማስቀረቱን
-ሳይቀየር ያልፋል፤ `mcp:connect` በ`hasMcpConnectOrManageScope()` የሚፈተሽ፣
-ለርቀት MCP-ብቻ callers ዝቅተኛ ፈቃድ ያለው አማራጭ ነው።
+ከ loopback ውጭ ወደ HTTP/SSE MCP ማጓጓዣ (`/api/mcp/*`) ለመድረስ
+የ`/api/mcp/` LOCAL_ONLY ልዩ ፈቃድ ያስፈልጋል (`docs/security/ROUTE_GUARD_TIERS.md`ን ይመልከቱ)። ከዚህ በፊት
+ይህ ልዩ ፈቃድ ሙሉ `manage`/`admin`-scope API key ብቻ ይቀበል ነበር — MCPን ብቻ
+ማግኘት ለሚፈልግ ጠሪ ይህ ከሚያስፈልገው በላይ ሰፊ ነበር። `src/shared/constants/managementScopes.ts` አሁን
+`MCP_CONNECT_SCOPE = "mcp:connect"`ን ወደ ውጭ ያቀርባል፦ ይህ ተጨማሪ እና የተገደበ ወሰን (`SELF_USAGE_SCOPE`ን እንደ ቀዳሚ ምሳሌ የሚከተል)
+በ`src/server/authz/policies/management.ts` ውስጥ ያለውን የ`/api/mcp/` ማለፊያ ብቻ ይፈቅዳል — ሌላ
+ምንም የአስተዳደር መስመር መዳረሻ አይሰጥም፣ እና ሆን ተብሎ ከ`MANAGEMENT_API_KEY_SCOPES` ውጭ ተደርጓል። `manage`/`admin`
+ያለው ቁልፍ አሁንም ልዩ ፈቃዱን ምንም ሳይቀየር ያልፋል፤ `mcp:connect` ለርቀት MCP-ብቻ ጠሪዎች
+ዝቅተኛ መብት ያለው አማራጭ ሲሆን፣ በ`hasMcpConnectOrManageScope()` በኩል ይፈተሻል።
 
-### በእያንዳንዱ key ላይ የHTTP scope ማሰር (#7895)
+### በየቁልፉ የHTTP ወሰን ማስተሳሰር (#7895)
 
-በHTTP/SSE በኩል፣ `open-sse/mcp-server/httpTransport.ts` አሁን የcallerን እውነተኛ
-`api_keys.scopes` በ`resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`)
-በኩል ይፈታና ወደ MCP SDK `transport.handleRequest(req, { authInfo })` ያስተላልፈዋል፤ ስለዚህ
-ወደ እያንዳንዱ የመሣሪያ ጥሪ የሚደርሰው `extra.authInfo.scopes` የBearer keyን የራሱን scopes
-ያንጸባርቃል። የ`scopeEnforcement.ts` `resolveCallerScopeContext()` `authInfo`ን
-ከ`_meta` እና `OMNIROUTE_MCP_SCOPES` env fallback በላይ አስቀድሞ ይመርጥ ነበር — ይህ ለውጥ
-ከዚህ በፊት በHTTP ላይ ያልተሞላውን የመጀመሪያውንና ከፍተኛ ቅድሚያ ያለውን source ብቻ ይሞላል።
-ምንም API key ሳይፈታ (header ከሌለ፣ keyው ልክ ካልሆነ)፣ `authInfo` `undefined` ሆኖ
-ይቆያል፣ እና resolution ወደ ነባሩ `meta`/env ሰንሰለት ሳይቀየር ይወርዳል። ይህ
-የ`OMNIROUTE_MCP_ENFORCE_SCOPES`ን default አይቀይርም — enforcement አሁንም በግልጽ
-መንቃት አለበት፤ ይህ ለውጥ የሚያደርገው አንዴ ከነቃ በኋላ በእያንዳንዱ key ላይ ያለው path
-ቅድሚያ እንዲወስድ ማድረግ ብቻ ነው። stdio በእያንዳንዱ caller ደረጃ ማንነት የለውም
-(`mcpCallerIdentity.ts`ን ይመልከቱ) እና አይነካም — በ`_meta`/env fallback ሰንሰለት ላይ
-እንዳለ ይቆያል።
+በHTTP/SSE ላይ፣ `open-sse/mcp-server/httpTransport.ts` አሁን የጠሪውን እውነተኛ
+`api_keys.scopes` በ`resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`) በኩል ይፈታል፣
+እና ወደ MCP SDK `transport.handleRequest(req, { authInfo })` ያስተላልፈዋል፤ ስለዚህ
+ወደ እያንዳንዱ የመሣሪያ ጥሪ የሚደርሰው `extra.authInfo.scopes` የBearer ቁልፉን የራሱን ወሰኖች ያንጸባርቃል።
+በ`scopeEnforcement.ts` ውስጥ ያለው `resolveCallerScopeContext()` ቀድሞውኑ `authInfo`ን ከ
+`_meta` እና `OMNIROUTE_MCP_SCOPES` env የመጠባበቂያ አማራጭ በላይ ቅድሚያ ይሰጥ ነበር — ይህ ለውጥ ከዚህ ቀደም
+በHTTP ላይ ውሂብ ያልተሰጠውን የመጀመሪያና ከፍተኛ ቅድሚያ ያለውን ምንጭ ብቻ ይሞላል። ምንም API key በማይፈታበት ጊዜ
+(ራስጌ ከሌለ፣ ቁልፉ ልክ ካልሆነ)፣ `authInfo` `undefined` ሆኖ ይቆያል፣ እና መፍታቱ ወደ
+ነባሩ `meta`/env ተከታታይ የመጠባበቂያ አማራጭ ምንም ሳይቀየር ይወርዳል። stdio በየጠሪው የተለየ ማንነት የለውም
+(`mcpCallerIdentity.ts`ን ይመልከቱ) እና አይነካም — በ`_meta`/env የመጠባበቂያ አማራጭ ተከታታይ ላይ ይቆያል።
+
+**የ`OMNIROUTE_MCP_ENFORCE_SCOPES` ዋጋ ምንም ይሁን ምን፣ በጠባብ ወሰን ላላቸው የHTTP/SSE ጠሪዎች ማስፈጸሙ በግድ ይነቃል።**
+`OMNIROUTE_MCP_ENFORCE_SCOPES` በነባሪነት `false` መሆኑ ደህንነቱ የተጠበቀው
+የሚገደብበት የተለየ የጠሪ ማንነት ለሌለበት የአካባቢ/stdio ነጠላ-ኦፕሬተር ፍሰት ብቻ ነው።
+`open-sse/mcp-server/server.ts::withScopeEnforcement()` በ`scopeEnforcement.ts` ውስጥ ባለው
+`shouldForceScopeEnforcement()` አማካኝነት የእያንዳንዱን መሣሪያ ወሰን ማስፈጸም
+ያለምንም ቅድመ ሁኔታ ያነቃል፤ ይህም `resolveCallerScopeContext()`
+`source === "authInfo"`ን በፈታ ቁጥር (ማለትም እውነተኛ በየቁልፉ የHTTP Authorization ራስጌ፣ HTTP/SSE-ብቻ) እና ያ
+ቁልፍ ሙሉ `manage`/`admin` ወሰን በሌለው ጊዜ ነው። ይህ፣ አንድ ኦፕሬተር
+የርቀት/non-loopback MCP መዳረሻን ካነቃ በኋላ፣ `OMNIROUTE_MCP_ENFORCE_SCOPES` በነባሪነት
+`false` ሆኖ ስለሚቀርብ ብቻ፣ ከላይ ከ`/api/mcp/` LOCAL_ONLY ልዩ ፈቃድ በቀር ምንም እንደማይፈቅድ
+የተመዘገበውን ጠባብ የ`mcp:connect` ማለፊያ ወሰን ብቻ የያዘ ቁልፍ ሁሉንም MCP መሣሪያዎች
+ሊጠራ ይችል የነበረበትን ክፍተት ይዘጋል። በHTTP ላይ ሙሉ `manage`/`admin` ቁልፍ፣ እና እያንዳንዱ
+የstdio/አካባቢ ጠሪ፣ በ`OMNIROUTE_MCP_ENFORCE_SCOPES` የሚቆጣጠረውን ነባር ባህሪ ሳይቀየር ይይዛሉ።
 
 ---
 
 ## የአካባቢ ተለዋዋጮች
 
-| ተለዋዋጭ                                   | ነባሪ                         | ዓላማ                                                                                         |
-| :-------------------------------------- | :-------------------------- | :------------------------------------------------------------------------------------------ |
-| `OMNIROUTE_BASE_URL`                    | `http://localhost:20128`    | MCP አገልጋዩ የOmniRoute ውስጣዊ APIዎችን ሲጠራ የሚጠቀምበት መሠረታዊ URL                                      |
-| `OMNIROUTE_API_KEY`                     | (ባዶ)                        | ለውስጣዊ API ጥሪዎች እንደ `Authorization: Bearer` የሚተላለፍ API ቁልፍ                                   |
-| `OMNIROUTE_MCP_ENFORCE_SCOPES`          | `false` (`"true"` ብቻ ያነቃዋል) | ሲነቃ፣ የጎደሉ ወሰኖች የመሣሪያ ጥሪዎችን ይከለክላሉ፣ እንዲሁም `scope_denied:<reason>`ን በኦዲት ምዝግብ ውስጥ ይመዘግባሉ      |
-| `OMNIROUTE_MCP_SCOPES`                  | (ባዶ)                        | በነባሪነት "የሚገኙ" ተደርገው የሚቆጠሩ፣ በኮማ የተለዩ የወሰኖች የፈቃድ ዝርዝር (ጠሪው የራሱን ወሰኖች በማያቀርብበት ጊዜ ጥቅም ላይ ይውላል) |
-| `OMNIROUTE_MCP_COMPRESS_DESCRIPTIONS`   | (ካልተዋቀረ = እንደበራ ነው)         | `0/false/off/no` ተብሎ ሲዋቀር፣ በምዝገባ ጊዜ የMCP መግለጫ መጨመቅን ያሰናክላል                                  |
-| `OMNIROUTE_MCP_DESCRIPTION_COMPRESSION` | (ካልተዋቀረ = እንደበራ ነው)         | ከላይ ላለው ተመሳሳይ መቀየሪያ አማራጭ ተለዋጭ ስም                                                            |
-| `OMNIROUTE_MCP_FETCH_TIMEOUT_MS`        | `10000`                     | ለውስጣዊ አስተዳደር ንባቦች (ጤንነት፣ ጽናት፣ ጥምረቶች፣ ኮታ፣ አጠቃቀም) የማቋረጫ ጊዜ ገደብ                                |
-| `OMNIROUTE_MCP_UPSTREAM_TIMEOUT_MS`     | `60000`                     | አቅራቢን ለሚጠብቁ የጥያቄ ደረጃዎች (`route_request`፣ `web_search`፣ `web_fetch`) የማቋረጫ ጊዜ ገደብ            |
-| `MCP_TOOL_DENY`                         | (ካልተዋቀረ = ማጣሪያ የለም)         | ከ`tools/list` የሚወገዱ፣ በኮማ የተለዩ የመሣሪያ ስሞች (የመሣሪያ ብዛት ቅነሳ — ከታች ይመልከቱ)                         |
-| `MCP_TOOL_ALLOW`                        | (ካልተዋቀረ = ማጣሪያ የለም)         | ብቻቸውን እንዲቆዩ በኮማ የተለዩ የመሣሪያ ስሞች (የፈቃድ ዝርዝር ሁነታ — ከታች ይመልከቱ)                                  |
-| `DATA_DIR`                              | `~/.omniroute`              | የልብ ምት ፋይሉ ወደ `${DATA_DIR}/runtime/mcp-heartbeat.json` ይጻፋል                                 |
+| ተለዋዋጭ                                   | ነባሪ                         | ዓላማ                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| :-------------------------------------- | :-------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `OMNIROUTE_BASE_URL`                    | `http://localhost:20128`    | የMCP አገልጋዩ የOmniRoute ውስጣዊ APIዎችን ሲጠራ የሚጠቀምበት መሠረታዊ URL                                                                                                                                                                                                                                                                                                                                                             |
+| `OMNIROUTE_API_KEY`                     | (ባዶ)                        | ወደ ውስጣዊ API ጥሪዎች እንደ `Authorization: Bearer` የሚተላለፍ API ቁልፍ                                                                                                                                                                                                                                                                                                                                                         |
+| `OMNIROUTE_MCP_ENFORCE_SCOPES`          | `false` (`"true"` ብቻ ያነቃዋል) | ሲነቃ፣ የጎደሉ የፈቃድ ወሰኖች የመሣሪያ ጥሪዎችን ይከለክላሉ፣ እና `scope_denied:<reason>`ን በኦዲት ምዝግብ ውስጥ ይመዘግባሉ። ሙሉ የ`manage`/`admin` ፈቃድ ወሰን ከሌለው፣ ለእያንዳንዱ ቁልፍ ከተዘጋጀ የAuthorization ራስጌ (`source === "authInfo"`) ለሚለይ ማንኛውም የHTTP/SSE ጠሪ፣ የዚህ ጠቋሚ ዋጋ ምንም ይሁን ምን ማስፈጸሙ እንዲሁ በግድ ይነቃል — ለምሳሌ፣ ጠባቡን የ`mcp:connect` ማለፊያ የፈቃድ ወሰን ብቻ የያዘ ቁልፍ — ስለዚህ ይህ ነባሪ ለአካባቢያዊ/stdio የአንድ ኦፕሬተር ፍሰት ብቻ ደህንነቱ የተጠበቀ ነው፤ ለርቀት loopback ላልሆነ መዳረሻ ፈጽሞ አይደለም |
+| `OMNIROUTE_MCP_SCOPES`                  | (ባዶ)                        | በነባሪነት «የሚገኙ» ተብለው የሚታሰቡ በኮማ የተለዩ የፈቃድ ወሰኖች ዝርዝር (ጠሪው የራሱን የፈቃድ ወሰኖች በማያቀርብበት ጊዜ ጥቅም ላይ ይውላል)                                                                                                                                                                                                                                                                                                                       |
+| `OMNIROUTE_MCP_COMPRESS_DESCRIPTIONS`   | (ካልተዋቀረ = ነቅቷል)             | ወደ `0/false/off/no` ሲዋቀር፣ በምዝገባ ጊዜ የMCP መግለጫ መጭመቅን ያሰናክላል                                                                                                                                                                                                                                                                                                                                                           |
+| `OMNIROUTE_MCP_DESCRIPTION_COMPRESSION` | (ካልተዋቀረ = ነቅቷል)             | ከላይ ላለው ተመሳሳይ መቀያየሪያ አማራጭ ቅጽል ስም                                                                                                                                                                                                                                                                                                                                                                                    |
+| `OMNIROUTE_MCP_FETCH_TIMEOUT_MS`        | `10000`                     | ለውስጣዊ የአስተዳደር ንባቦች (health፣ resilience፣ combos፣ quota፣ usage) የማቋረጫ ጊዜ በጀት                                                                                                                                                                                                                                                                                                                                          |
+| `OMNIROUTE_MCP_UPSTREAM_TIMEOUT_MS`     | `60000`                     | አቅራቢን ለሚጠብቁ ሽግግሮች (`route_request`፣ `web_search`፣ `web_fetch`) የማቋረጫ ጊዜ በጀት                                                                                                                                                                                                                                                                                                                                         |
+| `MCP_TOOL_DENY`                         | (ካልተዋቀረ = ማጣሪያ የለም)         | ከ`tools/list` የሚወገዱ በኮማ የተለዩ የመሣሪያ ስሞች (የመሣሪያ ብዛት ቅነሳ — ከታች ይመልከቱ)                                                                                                                                                                                                                                                                                                                                                  |
+| `MCP_TOOL_ALLOW`                        | (ካልተዋቀረ = ማጣሪያ የለም)         | ብቻቸውን እንዲቆዩ በኮማ የተለያዩ የመሣሪያ ስሞች (የፍቀድ-ዝርዝር ሁነታ — ከታች ይመልከቱ)                                                                                                                                                                                                                                                                                                                                                         |
+| `DATA_DIR`                              | `~/.omniroute`              | የልብ ምት ፋይሉ ወደ `${DATA_DIR}/runtime/mcp-heartbeat.json` ይጻፋል                                                                                                                                                                                                                                                                                                                                                         |
 
 ---
 

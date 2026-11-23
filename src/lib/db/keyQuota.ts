@@ -268,17 +268,31 @@ function getLedgerMonthTotal(apiKeyId: string, nowMs: number): number {
 /**
  * Full enforcement-ready status for a key: limits, current usage, and per
  * dimension exceeded flags.
+ * Enforcement-only reads skip unlimited dimensions and report their counters
+ * as zero. Dashboard callers retain full usage reads by default.
  */
 export function getKeyQuotaStatus(
   apiKeyId: string,
-  deps: { now?: () => number; monthTotalUsd?: number } = {}
+  deps: { now?: () => number; monthTotalUsd?: number; enforcementOnly?: boolean } = {}
 ): KeyQuotaStatus {
   const limits = getKeyQuotaLimits(apiKeyId);
-  const counters = getKeyQuotaCounters(apiKeyId, deps);
+  const nowMs = (deps.now ?? Date.now)();
+  const counters = deps.enforcementOnly
+    ? {
+        tpmUsed:
+          limits.tpmLimit !== null ? effectiveWindowCount(apiKeyId, DIMENSION_TPM, nowMs) : 0,
+        rpmUsed:
+          limits.rpmLimit !== null ? effectiveWindowCount(apiKeyId, DIMENSION_RPM, nowMs) : 0,
+        monthlyAmountUsd:
+          limits.monthlyAmountUsd !== null
+            ? deps.monthTotalUsd !== undefined
+              ? deps.monthTotalUsd
+              : getLedgerMonthTotal(apiKeyId, nowMs)
+            : 0,
+      }
+    : getKeyQuotaCounters(apiKeyId, { ...deps, now: () => nowMs });
   const enabled =
     limits.tpmLimit !== null || limits.rpmLimit !== null || limits.monthlyAmountUsd !== null;
-
-  const nowMs = (deps.now ?? Date.now)();
 
   return {
     enabled,

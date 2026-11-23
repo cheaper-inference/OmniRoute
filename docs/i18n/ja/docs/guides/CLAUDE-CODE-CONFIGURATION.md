@@ -96,33 +96,46 @@ Kimi プロバイダーがオンの場合、Kimi のモデルだけが公開さ�
 
 ---
 
-## ダッシュボード上のオンボーディングブロック
+## ダッシュボードのオンボーディングブロック
 
-Claude ツールカード（**ダッシュボード → CLI Code**）には、このインスタンス用の正確な `settings.json` フラグメントが、検出エイリアスの情報ボタンとコピーボタンの横に表示されます。
+Claude ツールカード（**ダッシュボード → CLI Code**）には、このインスタンス用の正確な `settings.json` フラグメントが、検出エイリアス情報ボタンおよびコピーボタンとともに表示されます。
 
 ```jsonc
 {
   "env": {
-    "ANTHROPIC_BASE_URL": "http://<your OmniRoute>:20128",
-    "ANTHROPIC_AUTH_TOKEN": "<your OmniRoute API key>",
+    "ANTHROPIC_BASE_URL": "http://<あなたの OmniRoute>:20128",
+    "ANTHROPIC_AUTH_TOKEN": "<あなたの OmniRoute API キー>",
     "CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY": "1",
   },
 }
 ```
 
-ベース URL には、カードによって解決された URL（入力したカスタムオーバーライドを含む）が使用され、すでに正規化されています。`/v1` サフィックスも末尾のスラッシュもありません。**キーが表示されることはありません**。このブロックにはプレースホルダーが設定されているため、スクリーンショットや貼り付けたスニペットからキーが漏洩することはありません。プレースホルダーを自分のキーで置き換えてください。
+ベース URL には、カードによって解決されたもの（入力したカスタムオーバーライドを含む）が使用され、すでに正規化されています。つまり、`/v1` サフィックスも末尾のスラッシュもありません。**キーが表示されることはありません**。このブロックではプレースホルダーが使用されるため、スクリーンショットや貼り付けたスニペットからキーが漏洩することはありません。プレースホルダーを自分のキーで置き換えてください。
 
-実際のコンテキストウィンドウが 200K ではないモデルについては、同じ `env` ブロックの下に `CLAUDE_CODE_AUTO_COMPACT_WINDOW` を追加してください。Claude Code は認識できないすべての id に対して 200K を想定するため、設定しないと自動コンパクションが誤ったタイミングで実行されます（前のセクションの警告を参照してください）。スニペットビルダーもこの値を受け付けるため、ターゲットモデルのウィンドウサイズを把握している呼び出し元は、その値を直接出力できます。
+実際のコンテキストウィンドウが 200K ではないモデルについては、同じ `env` ブロック内に `CLAUDE_CODE_AUTO_COMPACT_WINDOW` を追加してください。Claude Code は、認識できないすべての ID に対して 200K と想定するため、設定しない場合、自動コンパクションが誤ったタイミングで実行されます（前のセクションの警告を参照）。スニペットビルダーもこの値を受け付けるため、ターゲットモデルのウィンドウサイズを把握している呼び出し元は、その値を直接出力できます。
 
-ソース: `src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet`（純粋なビルダー、単体テスト済み）。`ClaudeGatewayOnboardingBlock` によってレンダリングされます。
+ソース：`src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet`（単体テスト済みの純粋なビルダー）。`ClaudeGatewayOnboardingBlock` によってレンダリングされます。
+
+### 1 つのアカウントに固定する（任意）
+
+すべての Claude Code リクエストを特定のプロバイダーアカウント経由で送信するには、同じ `env` ブロック内の `ANTHROPIC_CUSTOM_HEADERS` を使用して `x-omniroute-connection` ヘッダーを追加します。
+
+```jsonc
+"ANTHROPIC_CUSTOM_HEADERS": "x-omniroute-connection: <connection id>"
+```
+
+プロバイダーページの接続行にある `xxxxxxxx…` チップから ID をコピーしてください。固定は単一モデル ID（`provider/model`）にのみ適用され、コンボには適用されません。正確なフォールバック動作については、[リクエスト単位のアカウント固定](../reference/API_REFERENCE.md#account-pinning-per-request)を参照してください。
 
 ---
 
-## プロファイル（`CLAUDE_CONFIG_DIR`）
+## プロファイル (`CLAUDE_CONFIG_DIR`)
 
-Claude Code には（Codex の `~/.codex/<name>.config.toml` とは異なり）**ネイティブのプロファイルファイルはありません**。標準的な仕組みは `CLAUDE_CONFIG_DIR` です。プロファイルごとに個別の設定ディレクトリを用意し、それぞれ独自の `settings.json`、認証情報、履歴、キャッシュを保持します。
+Claude Code には、Codex の `~/.codex/<name>.config.toml` とは異なり、**ネイティブのプロファイルファイルはありません**。
+標準的な仕組みは `CLAUDE_CONFIG_DIR` です。これはプロファイルごとに個別の設定ディレクトリを使用するもので、それぞれが独自の `settings.json`、認証情報、履歴、キャッシュを持ちます。
 
-`omniroute setup-claude` は稼働中の `/v1/models` カタログを取得し、モデルごとに 1 つのプロファイルを `~/.claude/profiles/<name>/settings.json` に書き込みます。名前には **`setup-codex` と同じ名前**（`glm52`、`kimi-k27`、`deepseek-pro`、…）が再利用されます。
+`omniroute setup-claude` は稼働中の `/v1/models` カタログを取得し、
+モデルごとに 1 つのプロファイルを `~/.claude/profiles/<name>/settings.json` に書き込みます。
+このとき、**`setup-codex` と同じ名前**（`glm52`、`kimi-k27`、`deepseek-pro`、…）が再利用されます。
 
 ```jsonc
 // ~/.claude/profiles/glm52/settings.json
@@ -139,9 +152,15 @@ Claude Code には（Codex の `~/.codex/<name>.config.toml` とは異なり）*
 }
 ```
 
-> **認証トークンがプロファイルに書き込まれることはありません。** `omniroute launch --profile <name>` で起動するか（アクティブなコンテキストから `ANTHROPIC_AUTH_TOKEN` が注入されます）、自分で `ANTHROPIC_AUTH_TOKEN` をエクスポートしてから `CLAUDE_CONFIG_DIR=~/.claude/profiles/<name> claude` を実行してください。
+> **認証トークンがプロファイルに書き込まれることはありません。**
+> `omniroute launch --profile <name>` で起動するか（アクティブなコンテキストから `ANTHROPIC_AUTH_TOKEN` が注入されます）、
+> 自分で `ANTHROPIC_AUTH_TOKEN` をエクスポートして
+> `CLAUDE_CONFIG_DIR=~/.claude/profiles/<name> claude` を実行してください。
 
-**モデル検出後の自動同期（オプトイン）。** OmniRoute は、プロバイダーモデルの同期によって稼働中のカタログが変更されるたびに、同じ `~/.claude/profiles/<name>/settings.json` ファイルを自動的に再生成できます。これにより、コマンドを再実行しなくても、新規モデルや名前が変更されたモデルのプロファイルが作成されます。これは**デフォルトでは無効**です。**CLI Code ダッシュボード**から切り替えるか（「CLI プロファイルの自動同期」→ Claude Code）、`OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES=true` を設定してください（デフォルトで有効な `CLI_ALLOW_CONFIG_WRITES` の設定も適用されます）。有効にした場合、プロファイルファイルのみが書き込まれます。アクティブまたはデフォルトの Claude 設定、認証、`~/.claude/settings.json` が変更されることはありません。
+**モデル検出後の自動同期（オプトイン）。** OmniRoute は、プロバイダーのモデル同期によって稼働中のカタログが変更されるたびに、同じ
+`~/.claude/profiles/<name>/settings.json` ファイルを自動的に再生成できます。これにより、新規モデルや名前が変更されたモデルのプロファイルを、コマンドを再実行せずに作成できます。
+この機能は**デフォルトでは無効**です。**CLI Code ダッシュボード**（「CLI profile auto-sync」→ Claude Code）から切り替えるか、`OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES=true` を設定してください（デフォルトで有効な `CLI_ALLOW_CONFIG_WRITES` の設定にも従います）。
+有効にした場合も、書き込まれるのはプロファイルファイルのみです。アクティブまたはデフォルトの Claude 設定、認証情報、`~/.claude/settings.json` が変更されることはありません。
 
 ### プロファイルの生成と使用
 
@@ -149,11 +168,15 @@ Claude Code には（Codex の `~/.codex/<name>.config.toml` とは異なり）*
 # ローカルの OmniRoute
 omniroute setup-claude
 
-# リモート VPS（各プロファイルに VPS の URL を組み込む）
+# リモート VPS（各プロファイルに VPS の URL を埋め込む）
 omniroute setup-claude --remote http://192.168.0.15:20128 --api-key oma_live_xxx
 
 # 一部のプロバイダーのみ
 omniroute setup-claude --only glm,kimi
+
+# このホストで検出されなかったローカル CLI プロバイダー（zcode、auggie、devin-cli-agentic、
+# codex-app-server）のプロファイルも書き込む（ローカルターゲットではデフォルトでスキップ）
+omniroute setup-claude --include-local
 
 # 書き込まずにプレビュー
 omniroute setup-claude --dry-run

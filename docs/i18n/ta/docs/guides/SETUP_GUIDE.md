@@ -140,11 +140,11 @@ omniroute providers validate
 
 ### 1) வழங்குநர்களை இணைத்து API விசையை உருவாக்குதல்
 
-1. Dashboard → `Providers` என்பதைத் திறந்து, குறைந்தது ஒரு வழங்குநரையாவது இணைக்கவும் (OAuth அல்லது API விசை).
-2. Dashboard → `Endpoints` என்பதைத் திறந்து, ஓர் API விசையை உருவாக்கவும்.
-3. (விருப்பத்தேர்வு) Dashboard → `Combos` என்பதைத் திறந்து, உங்கள் மாற்றுச் சங்கிலியை அமைக்கவும்.
+1. Dashboard → `Providers` என்பதைத் திறந்து, குறைந்தது ஒரு வழங்குநரையாவது (OAuth அல்லது API விசை) இணைக்கவும்.
+2. Dashboard → `Endpoints` என்பதைத் திறந்து, ஒரு API விசையை உருவாக்கவும்.
+3. (விருப்பத்திற்குரியது) Dashboard → `Combos` என்பதைத் திறந்து, உங்கள் மாற்றுக் காப்புச் சங்கிலியை அமைக்கவும்.
 
-### 2) உங்கள் குறியீட்டு கருவியை அமைத்தல்
+### 2) உங்கள் நிரலாக்கக் கருவியைச் சுட்டிக்காட்டுதல்
 
 ```txt
 அடிப்படை URL: http://localhost:20128/v1
@@ -174,19 +174,20 @@ omniroute setup-opencode     # ~/.config/opencode/opencode.json (OpenAI-இண�
 omniroute setup-cline        # Cline CLI + VS Code நீட்டிப்பு அமைப்புகள்
 omniroute setup-kilo         # Kilo Code
 omniroute setup-continue     # ~/.continue/config.yaml (Continue / cn)
-omniroute setup-cursor       # Cursor செயலியிலுள்ள படிகளை அச்சிடுகிறது
+omniroute setup-cursor       # Cursor பயன்பாட்டிற்குள் செய்ய வேண்டிய படிகளை அச்சிடும்
 omniroute setup-roo          # Roo Code இறக்குமதி + autoImport சுட்டி
 omniroute setup-crush        # ~/.config/crush/crush.json
+omniroute setup-zed          # ~/.config/zed/settings.json (openai_compatible)
 omniroute setup-goose        # ~/.config/goose/config.yaml
 omniroute setup-aider        # ~/.aider.conf.yml
 omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 ```
 
-ஒரு **தொலைநிலை** OmniRoute-க்கு எதிராக உள்ளூர் கருவியை உள்ளமைக்க, ஒவ்வொன்றும் `--remote <url> --api-key <key>` என்பதையும், முன்னோட்டமிட `--dry-run` என்பதையும் ஏற்கின்றன. சரியான சூழல் மாறிகள் செலுத்தப்பட்டும் எந்த உள்ளமைவும் எழுதப்படாமலும் ஒரு CLI-ஐத் தொடங்க, பொதுவான துவக்கி `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini) என்பதைப் பயன்படுத்தவும்; பழைய கருவி-சார் துவக்கிகளான `omniroute launch` (Claude Code) மற்றும் `omniroute launch-codex` (Codex) ஆகியவையும் தொடர்ந்து கிடைக்கின்றன.
+ஒரு உள்ளூர் கருவியை **தொலைநிலை** OmniRoute-க்கு எதிராக உள்ளமைக்க, ஒவ்வொன்றும் `--remote <url> --api-key <key>` என்பதை ஏற்கின்றன; முன்னோட்டமிட `--dry-run` என்பதையும் ஏற்கின்றன. சரியான env செலுத்தப்பட்ட நிலையில், எந்த உள்ளமைவையும் எழுதாமல் ஒரு CLI-ஐத் தொடங்க, பொதுவான தொடக்கியைப் பயன்படுத்தவும்: `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini); முந்தைய ஒவ்வொரு கருவிக்குமான தொடக்கிகளான `omniroute launch` (Claude Code) மற்றும் `omniroute launch-codex` (Codex) ஆகியவையும் தொடர்ந்து கிடைக்கின்றன.
 
 முழுமையான அட்டவணைக்கு (ஒவ்வொரு கட்டளையும் எதை எழுதுகிறது, அனைத்து கொடிகள், உள்ளூர் மற்றும் தொலைநிலை, அடிப்படை-URL `/v1` மரபுகள்), **[CLI ஒருங்கிணைப்புகள்](./CLI-INTEGRATIONS.md)** என்பதைப் பார்க்கவும்.
 
-ஒவ்வொரு கருவிக்குமான விரிவான உள்ளமைவுக்கு (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot மற்றும் மேலும் பல), பிரத்யேகமான **[CLI கருவிகள் வழிகாட்டி](../reference/CLI-TOOLS.md)** என்பதைப் பார்க்கவும்.
+ஒவ்வொரு கருவிக்குமான விரிவான உள்ளமைவுக்கு (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot மற்றும் பல), பிரத்யேகமான **[CLI கருவிகள் வழிகாட்டி](../reference/CLI-TOOLS.md)** என்பதைப் பார்க்கவும்.
 
 ---
 
@@ -315,12 +316,12 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Void Linux (xbps-src) டெம்ப்ளேட்
+## Void Linux (xbps-src) வார்ப்புரு
 
-Void Linux பயனர்கள் `xbps-src`-ஐப் பயன்படுத்தி ஒரு நேட்டிவ் தொகுப்பை உருவாக்கலாம். இந்தத் தொகுதியை `srcpkgs/omniroute/template` எனச் சேமிக்கவும்:
+Void Linux பயனர்கள், `xbps-src`-ஐப் பயன்படுத்தி இயல்பான தொகுப்பை உருவாக்கலாம். இந்தத் துண்டை `srcpkgs/omniroute/template` எனச் சேமிக்கவும்:
 
 ```bash
-# 'omniroute'-க்கான டெம்ப்ளேட் கோப்பு
+# 'omniroute'-க்கான வார்ப்புருக் கோப்பு
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -331,7 +332,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# ஒவ்வொரு வெளியீட்டிற்கும் checksum-ஐப் பின்வரும் கட்டளை மூலம் மீண்டும் உருவாக்கவும்:
+# ஒவ்வொரு வெளியீட்டிற்கும் checksum-ஐப் பின்வருமாறு மீண்டும் உருவாக்கவும்:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

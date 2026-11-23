@@ -12,7 +12,7 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ### Передумови
 
-- **Node.js** `>=22.22.3 <23` або `>=24.0.0 <27` (рекомендовано: 24 LTS)
+- **Node.js** `>=22.22.2 <23` або `>=24.0.0 <27` (рекомендовано: 24 LTS)
 - **npm** 10+
 
 > **Користувачам npm v11+ (Node 24+):** після `npm install` перевірте, чи встановлено нативні модулі:
@@ -46,21 +46,21 @@ echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 | Змінна                 | Значення за замовчуванням для розробки | Опис                            |
 | ---------------------- | -------------------------------------- | ------------------------------- |
 | `PORT`                 | `20128`                                | Порт сервера                    |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`               | Базова URL-адреса для фронтенду |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`               | Базова URL-адреса фронтенду     |
 | `JWT_SECRET`           | (згенеруйте вище)                      | Секрет для підписування JWT     |
 | `INITIAL_PASSWORD`     | `CHANGEME`                             | Пароль для першого входу        |
 | `APP_LOG_LEVEL`        | `info`                                 | Рівень деталізації журналювання |
 
 ### Налаштування панелі керування
 
-Панель керування надає перемикачі інтерфейсу для функцій, які також можна налаштувати за допомогою змінних середовища:
+Панель керування містить перемикачі функцій в інтерфейсі, які також можна налаштувати за допомогою змінних середовища:
 
-| Розташування налаштування | Перемикач               | Опис                                        |
-| ------------------------- | ----------------------- | ------------------------------------------- |
-| Налаштування → Розширені  | Режим налагодження      | Увімкнути журнали запитів налагодження (UI) |
-| Налаштування → Загальні   | Видимість бічної панелі | Показати/приховати розділи бічної панелі    |
+| Розташування налаштування | Перемикач               | Опис                                            |
+| ------------------------- | ----------------------- | ----------------------------------------------- |
+| Налаштування → Розширені  | Режим налагодження      | Увімкнути журнали запитів для налагодження (UI) |
+| Налаштування → Загальні   | Видимість бічної панелі | Показати/приховати розділи бічної панелі        |
 
-Ці налаштування зберігаються в базі даних і не втрачаються після перезапусків, замінюючи встановлені значення змінних середовища за замовчуванням.
+Ці налаштування зберігаються в базі даних і не втрачаються після перезапусків, перевизначаючи встановлені значення змінних середовища за замовчуванням.
 
 ### Локальний запуск
 
@@ -68,31 +68,31 @@ echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 # Режим розробки (гаряче перезавантаження)
 npm run dev
 
-# Виробнича збірка
+# Продакшен-збірка
 npm run build    # next build → .build/next/, потім assembleStandalone → dist/
 npm run start
 
-# Швидка компіляція лише бекенду/API для перевірки змін від учасників
+# Швидка компіляція лише бекенду/API для перевірки змін від контриб'юторів
 npm run build:contributor
 
-# Релізна збірка (чиста повторна збірка + контрольний файл HEAD — обов’язково для розгортання)
-npm run build:release   # rm -rf .build dist, потім збірка + запис dist/BUILD_SHA
+# Релізна збірка (чиста повторна збірка + контрольний маркер HEAD — обов'язково для розгортання)
+npm run build:release   # rm -rf .build dist && build + записує dist/BUILD_SHA
 
-# Типова конфігурація порту
+# Типове налаштування порту
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Збірка для учасників виконує лише перевірку компіляції: вона не формує автономний
-дистрибутив і не збирає необов’язкові ресурси нативного пакування. Використовуйте звичайну виробничу збірку, коли
-потрібно перевірити готовий до розповсюдження пакет.
+Збірка для контриб'юторів виконує лише перевірку компіляції: вона не створює автономний
+дистрибутив і не збирає необов'язкові ресурси для нативного пакування. Використовуйте звичайну
+продакшен-збірку, коли потрібно перевірити готовий до постачання пакет.
 
 ### Структура результатів збірки
 
-| Каталог   | Вміст                                                                                | Відстежується |
-| --------- | ------------------------------------------------------------------------------------ | ------------- |
-| `src/`    | Вихідний код застосунку (TypeScript / TSX)                                           | Так           |
-| `.build/` | Проміжні файли — результат `next build` (ігнорується Git, `distDir = .build/next`)   | Ні            |
-| `dist/`   | Готовий до розповсюдження пакет — сформований `assembleStandalone` (ігнорується Git) | Ні            |
+| Каталог   | Вміст                                                                              | Відстежується |
+| --------- | ---------------------------------------------------------------------------------- | ------------- |
+| `src/`    | Вихідний код застосунку (TypeScript / TSX)                                         | Так           |
+| `.build/` | Проміжні файли — результат `next build` (ігнорується Git, `distDir = .build/next`) | Ні            |
+| `dist/`   | Готовий до постачання пакет — створений `assembleStandalone` (ігнорується Git)     | Ні            |
 
 Конвеєр збірки виконується за один прохід:
 
@@ -103,17 +103,18 @@ npm run build
        └─ результат: dist/                (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` додатково спочатку очищає обидва каталоги та записує
+`npm run build:release` також спочатку очищує обидва каталоги та записує
 `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) як контрольний маркер цілісності розгортання.
 
-`npm run build:contributor` використовує профіль збірки лише для бекенду. Під час збірки він тимчасово замінює
-файли інтерфейсу панелі керування заглушками, зберігає обробники маршрутів API та відновлює початкові файли
-після збірки. Використовуйте `npm run build` для змін, які впливають на інтерфейс панелі керування, або для повної
-перевірки релізу; профіль для учасників не замінює релізну збірку.
+`npm run build:contributor` використовує профіль збірки лише для бекенду. Під час збірки він
+тимчасово замінює файли UI панелі керування заглушками, зберігає обробники маршрутів API та
+відновлює оригінальні файли після збірки. Використовуйте `npm run build` для змін, що впливають
+на UI панелі керування, або для повної перевірки релізу; профіль для контриб'юторів не замінює
+релізну збірку.
 
-> **Примітка щодо розгортання на VPS:** віддалений каталог образу `/usr/lib/node_modules/omniroute/app/`
+> **Примітка щодо розгортання на VPS:** каталог віддаленого образу `/usr/lib/node_modules/omniroute/app/`
 > не змінився. Засоби розгортання синхронізують вміст `dist/` із ним за допомогою rsync.
-> Змінився лише шлях до результату збірки в репозиторії (`app/` → `dist/`).
+> Змінився лише шлях результатів збірки в репозиторії (`app/` → `dist/`).
 
 URL-адреси за замовчуванням:
 
@@ -283,65 +284,72 @@ npm run test:combo:live:vps:failover     # додає реальний сцен�
 
 ---
 
-## Project Structure
+## Структура проєкту
 
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # Dashboard pages (23 sections)
-│   ├── api/                # API routes (51 directories)
-│   └── login/              # Auth pages (.tsx)
-├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
-├── lib/                    # Core business logic (.ts)
-│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
-│   ├── acp/                # Agent Communication Protocol registry
-│   ├── compliance/         # Compliance policy engine
-│   ├── db/                 # SQLite database layer (110 top-level modules + 130 migrations)
-│   ├── memory/             # Persistent conversational memory
-│   ├── oauth/              # OAuth providers, services, and utilities
-│   ├── skills/             # Extensible skill framework
-│   ├── usage/              # Usage tracking and cost calculation
-│   └── localDb.ts          # Re-export layer only — never add logic here
-├── middleware/              # Request middleware (promptInjectionGuard)
-├── mitm/                   # MITM proxy (cert, DNS, target routing)
+│   ├── (dashboard)/        # Сторінки панелі керування (23 розділи)
+│   ├── api/                # Маршрути API (51 каталог)
+│   └── login/              # Сторінки автентифікації (.tsx)
+├── domain/                 # Рушій політик (policyEngine, comboResolver, costRules тощо)
+├── lib/                    # Основна бізнес-логіка (.ts)
+│   ├── a2a/                # Сервер протоколу Agent-to-Agent v0.3
+│   ├── acp/                # Реєстр Agent Communication Protocol
+│   ├── compliance/         # Рушій політик відповідності вимогам
+│   ├── db/                 # Доменні модулі SQLite + 130 міграцій
+│   ├── memory/             # Постійна пам’ять розмов
+│   ├── oauth/              # Провайдери, служби та утиліти OAuth
+│   ├── skills/             # Розширюваний фреймворк навичок
+│   ├── usage/              # Відстеження використання та розрахунок вартості
+│   └── localDb.ts          # Лише рівень повторного експорту — ніколи не додавайте сюди логіку
+├── middleware/              # Проміжне ПЗ для запитів (promptInjectionGuard)
+├── mitm/                   # Проксі MITM (сертифікат, DNS, маршрутизація до цілі)
 ├── shared/
-│   ├── components/         # React components (.tsx)
-│   ├── constants/          # Provider definitions (329), MCP scopes, routing strategies
-│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
-│   └── validation/         # Zod v4 schemas
-└── sse/                    # SSE proxy pipeline
+│   ├── components/         # Компоненти React (.tsx)
+│   ├── constants/          # Визначення провайдерів (329), області дії MCP, 20 стратегій маршрутизації
+│   ├── utils/              # Автоматичний вимикач, санітизатор, допоміжні засоби автентифікації
+│   └── validation/         # Схеми Zod v4
+└── sse/                    # Конвеєр проксі SSE
 
-open-sse/                   # @omniroute/open-sse workspace
-├── executors/              # 89 executor implementation modules
-├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
-├── mcp-server/             # MCP server (107 tools, 3 transports, 32 scopes)
-├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
-├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Responses API transformer
-└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
+open-sse/                   # Робочий простір @omniroute/open-sse
+├── executors/              # 150 модулів виконавців (класи виконавців + допоміжні засоби для кожного провайдера)
+├── handlers/               # 11 обробників запитів (чат, відповіді, вбудовування, зображення тощо)
+├── mcp-server/             # Сервер MCP (110 унікальних інструментів, 3 транспорти, 33 області дії)
+├── services/               # 178 служб верхнього рівня (combo, autoCombo, rateLimitManager тощо)
+├── translator/             # Перетворювачі форматів (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Перетворювач Responses API
+└── utils/                  # 22 модулі утиліт (потоки, TLS, проксі, журналювання)
 
-electron/                   # Electron desktop app (cross-platform)
+electron/                   # Настільний застосунок Electron (кросплатформний)
 
 tests/
-├── unit/                   # Node.js test runner (122 test files)
-├── integration/            # Integration tests
-├── e2e/                    # Playwright tests
-├── security/               # Security tests
-├── translator/             # Translator-specific tests
-└── load/                   # Load tests
+├── unit/                   # Засіб запуску тестів Node.js (1 574 тестові файли)
+├── integration/            # Інтеграційні тести
+├── e2e/                    # Тести Playwright
+├── security/               # Тести безпеки
+├── translator/             # Тести, специфічні для перетворювача
+└── load/                   # Навантажувальні тести
 
-docs/                       # Documentation
-├── ARCHITECTURE.md         # System architecture
-├── API_REFERENCE.md        # All endpoints
-├── USER_GUIDE.md           # Provider setup, CLI integration
-├── TROUBLESHOOTING.md      # Common issues
-├── MCP-SERVER.md           # MCP server (107 tools)
-├── A2A-SERVER.md           # A2A agent protocol
-├── AUTO-COMBO.md           # Auto-combo engine
-├── CLI-TOOLS.md            # CLI tools integration
-├── COVERAGE_PLAN.md        # Test coverage improvement plan
-├── openapi.yaml            # OpenAPI specification
-└── adr/                    # Architecture Decision Records
+docs/
+├── adr/                     # Записи архітектурних рішень
+├── architecture/            # Архітектура та відмовостійкість системи
+├── comparison/              # Порівняння OmniRoute з альтернативами
+├── compression/             # Посібники та правила зі стиснення
+├── dev/                     # Посібники з розробки
+├── diagrams/                # Архітектурні діаграми
+├── frameworks/              # MCP, A2A, OpenCode, пам’ять, навички
+├── guides/                  # Посібник користувача, Docker, налаштування, усунення несправностей
+├── i18n/                    # Інтернаціоналізовані переклади README
+├── marketing/               # Маркетингові матеріали
+├── ops/                     # Розгортання, проксі, покриття, випуски
+├── providers/               # Документація для окремих провайдерів
+├── reference/               # Довідник API, змінні середовища, інструменти CLI, безкоштовні рівні
+├── releases/                # Примітки до випусків
+├── routing/                 # Рушій автоматичного комбінування, повторне відтворення міркувань
+├── screenshots/             # Знімки екрана панелі керування
+├── security/                # Захисні механізми, відповідність вимогам, прихованість, токени
+└── specs/                   # Проєктні специфікації
 ```
 
 ---
@@ -386,24 +394,28 @@ docs/                       # Documentation
 
 - [ ] Тести проходять (`npm test`)
 - [ ] Перевірка лінтером проходить (`npm run lint`)
-- [ ] Збірка виконується успішно (`npm run build`)
+- [ ] Збірка успішна (`npm run build`)
 - [ ] Додано типи TypeScript для нових публічних функцій та інтерфейсів
 - [ ] Немає жорстко закодованих секретів або резервних значень
-- [ ] Публічні облікові дані вбудовано через `resolvePublicCred()` (див. [`docs/security/PUBLIC_CREDS.md`](./docs/security/PUBLIC_CREDS.md)), а не задано як літерали
+- [ ] Публічні облікові дані upstream-сервісів вбудовано через `resolvePublicCred()` (див. [`docs/security/PUBLIC_CREDS.md`](./docs/security/PUBLIC_CREDS.md)), а не як літерали
 - [ ] Відповіді з помилками проходять через `buildErrorBody()` / `sanitizeErrorMessage()` — у тілах відповідей немає необроблених трасувань стека (див. [`docs/security/ERROR_SANITIZATION.md`](./docs/security/ERROR_SANITIZATION.md))
-- [ ] Команди оболонки (`exec` / `spawn`) передають значення середовища виконання через `env`, а не через інтерполяцію рядків
+- [ ] Команди оболонки (`exec` / `spawn`) передають значення часу виконання через `env`, а не через інтерполяцію рядків
 - [ ] Усі вхідні дані перевіряються за допомогою схем Zod
 - [ ] Для змін, видимих користувачам, додано **фрагмент** журналу змін у `changelog.d/{features|fixes|maintenance}/<PR>-<slug>.md` (див. [`changelog.d/README.md`](./changelog.d/README.md)) — **не** редагуйте `CHANGELOG.md` безпосередньо; фрагменти об’єднуються під час випуску й ніколи не спричиняють конфліктів між PR
 - [ ] Документацію оновлено (якщо застосовно)
 - [ ] Не створено нових сповіщень CodeQL / Secret-Scanning або кожне з них відхилено з технічним обґрунтуванням і посиланням на відповідний документ у `docs/security/`
-- [ ] Маршрути, які запускають дочірні процеси (`/api/mcp/`, `/api/cli-tools/runtime/`), класифіковано як `isLocalOnlyPath()` у `src/server/authz/routeGuard.ts` — див. [жорстке правило №15](docs/security/ROUTE_GUARD_TIERS.md)
-- [ ] У повідомленнях комітів немає завершальних рядків `Co-Authored-By` — коміти мають відображатися виключно під Git-ідентичністю власника репозиторію (жорстке правило №16)
+- [ ] Маршрути, що запускають дочірні процеси (`/api/mcp/`, `/api/cli-tools/runtime/`), класифіковано як `isLocalOnlyPath()` у `src/server/authz/routeGuard.ts` — див. [Жорстке правило №15](docs/security/ROUTE_GUARD_TIERS.md)
+- [ ] У повідомленнях комітів немає трейлерів AI/ботів `Co-authored-by` (Жорстке правило №16) — людей-співавторів, чию роботу повторно використано, зазначено стандартними трейлерами `Co-authored-by: Name <email>`
 
 ---
 
-## Releasing
+## Випуск релізів
 
-Releases are managed via the `/generate-release` workflow. When a new GitHub Release is created, the package is **automatically published to npm** via GitHub Actions.
+Керування релізами здійснюється через робочий процес `/generate-release`. Коли створюється новий реліз GitHub, пакет **автоматично публікується в npm** за допомогою GitHub Actions.
+
+Для розгортання на VPS використовуйте `npm run build:release` (не `npm run build`) — ця команда виконує чисту
+повторну збірку, формує пакет у `dist/` і записує сигнальний файл `dist/BUILD_SHA`.
+Потім використовуйте навички `/deploy-vps-*-cc`, які синхронізують `dist/` із віддаленим каталогом `app/` за допомогою rsync.
 
 ---
 

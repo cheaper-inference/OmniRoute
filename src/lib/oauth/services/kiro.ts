@@ -3,6 +3,11 @@ import {
   buildExternalIdpRefreshParams,
   isExternalIdpAuthMethod,
 } from "@omniroute/open-sse/services/kiroExternalIdp.ts";
+import {
+  KIRO_API_KEY_AUTO_REGION,
+  KIRO_PROFILE_REGIONS,
+  kiroApiKeyRuntimeHost,
+} from "@omniroute/open-sse/services/kiroRegion.ts";
 
 /**
  * Kiro OAuth Service
@@ -14,6 +19,7 @@ import {
  */
 
 const KIRO_AUTH_SERVICE = "https://prod.us-east-1.auth.desktop.kiro.dev";
+const KIRO_API_KEY_VALIDATION_TIMEOUT_MS = 10_000;
 
 export class KiroService {
   /**
@@ -493,6 +499,7 @@ export class KiroService {
         tokentype: "API_KEY",
       },
       body: JSON.stringify({ maxResults: 10 }),
+      signal: AbortSignal.timeout(KIRO_API_KEY_VALIDATION_TIMEOUT_MS),
     });
 
     if (!response.ok) {
@@ -510,38 +517,83 @@ export class KiroService {
   }
 
   /**
-   * Normalize a long-lived Kiro/CodeWhisperer API key.
+   * Probe the Amazon Q model catalog (`q.<region>/ListAvailableModels`) with a long-lived API
+   * key — the same surface API-key inference uses. Returns the HTTP status (0 on a network
+   * failure or timeout) without reading the upstream body.
+   */
+  async probeApiKeyModels(apiKey: string, region: string): Promise<number> {
+    const params = new URLSearchParams({ origin: "AI_EDITOR" });
+    try {
+      const response = await fetch(
+        `${kiroApiKeyRuntimeHost(region)}/ListAvailableModels?${params}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+            tokentype: "API_KEY",
+            Accept: "application/json",
+          },
+          signal: AbortSignal.timeout(KIRO_API_KEY_VALIDATION_TIMEOUT_MS),
+        }
+      );
+      await response.body?.cancel().catch(() => undefined);
+      return response.status;
+    } catch {
+      return 0;
+    }
+  }
+
+  /**
+   * Validate a long-lived Kiro/CodeWhisperer API key on the Amazon Q surface used for inference
+   * and pin it to the region where it works. `auto` (default) probes us-east-1 then
+   * eu-central-1; an explicit region probes only that region. ListAvailableProfiles is not
+   * proof — AWS denies it for API keys — so it is only used afterwards, best-effort, to
+   * discover an optional profileArn.
    */
   async validateApiKey(apiKey: string, regionInput?: string) {
     // Default kept OUT of the parameter list: check-public-creds' CRED_KEY_RE matches the
     // `apiKey:` annotation and flags any string literal in the signature (fn-param FP class).
-    const region = regionInput || "us-east-1";
-    assertValidAwsRegion(region);
-    const accessToken = apiKey.trim();
+    const requested = String(regionInput || KIRO_API_KEY_AUTO_REGION)
+      .trim()
+      .toLowerCase();
+    const isAuto = requested === KIRO_API_KEY_AUTO_REGION;
+    if (!isAuto && !(KIRO_PROFILE_REGIONS as readonly string[]).includes(requested)) {
+      throw new Error("Invalid region for Kiro API key (supported: us-east-1, eu-central-1)");
+    }
+    const accessToken = typeof apiKey === "string" ? apiKey.trim() : "";
     if (!accessToken) {
       throw new Error("API key is required");
     }
 
-    let profileArn: string | null = null;
-    try {
-      profileArn = await this.listAvailableProfiles(accessToken, region);
-    } catch (error: any) {
-      const message = String(error?.message || error || "");
-      const isApiKeyProfileDenied =
-        message.includes("AccessDeniedException") &&
-        message.includes("API key authentication is not supported for this operation");
-      if (!isApiKeyProfileDenied) {
-        throw error;
+    const candidates: string[] = isAuto ? [...KIRO_PROFILE_REGIONS] : [requested];
+    const failures: string[] = [];
+    let rejected = false;
+    for (const region of candidates) {
+      const status = await this.probeApiKeyModels(accessToken, region);
+      if (status >= 200 && status < 300) {
+        let profileArn: string | null = null;
+        try {
+          profileArn = await this.listAvailableProfiles(accessToken, region);
+        } catch {
+          // Optional discovery: AWS denies ListAvailableProfiles for most API keys.
+        }
+        return {
+          accessToken,
+          refreshToken: null,
+          profileArn,
+          region,
+          authMethod: "api_key",
+        };
       }
+      if (status === 401 || status === 403) rejected = true;
+      failures.push(`${region}: ${status === 0 ? "unreachable" : `HTTP ${status}`}`);
     }
 
-    return {
-      accessToken,
-      refreshToken: null,
-      profileArn,
-      region,
-      authMethod: "api_key",
-    };
+    const detail = failures.join(", ");
+    if (rejected) {
+      throw new Error(`Invalid Kiro API key: Amazon Q rejected the key (${detail})`);
+    }
+    throw new Error(`Kiro API key validation failed: Amazon Q unavailable (${detail})`);
   }
 
   /**

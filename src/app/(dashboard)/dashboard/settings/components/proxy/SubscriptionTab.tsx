@@ -4,6 +4,16 @@ import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/shared/components";
 import { isNeedsCoreNode } from "@/lib/proxySubscription/needsCore";
+import { parseLocalCoreEndpoints } from "@/lib/proxySubscription/coreEndpoint";
+import { parseSelectorTag } from "@/lib/proxySubscription/selectorEndpoint";
+import type { SelectorEarlyReasonCounts } from "@/lib/proxySubscription/selectorEarlyReasons";
+
+interface SelectorLastSwitchEntry {
+  at: string;
+  result: string;
+  member: string | null;
+  kind: string | null;
+}
 
 interface SubscriptionRecord {
   id: string;
@@ -15,11 +25,15 @@ interface SubscriptionRecord {
   localCoreEndpoint: string | null;
   updateIntervalMinutes: number;
   controlUrl: string | null;
+  coreConfigPath: string | null;
+  coreReloadMode?: "api" | "command" | "external" | "undeclared" | null;
   hasControlSecret: boolean;
   selectorMinGapSeconds: number;
   selectorLastSwitchAt: string | null;
   selectorLastSwitchResult: string | null;
   selectorLastSwitchMember: string | null;
+  selectorLastSwitchKind: string | null;
+  selectorLastSwitchBySelector?: Record<string, SelectorLastSwitchEntry | null> | null;
   lastFetchedAt: string | null;
   status: "ok" | "error" | "empty";
   error: string | null;
@@ -41,6 +55,7 @@ type FormState = {
   ruleProviders: string[];
   localCoreEndpoint: string;
   controlUrl: string;
+  coreConfigPath: string;
   controlSecret: string;
   selectorMinGapSeconds: number;
   updateIntervalMinutes: number;
@@ -54,6 +69,7 @@ const EMPTY_FORM: FormState = {
   ruleProviders: [],
   localCoreEndpoint: "",
   controlUrl: "",
+  coreConfigPath: "",
   controlSecret: "",
   selectorMinGapSeconds: 60,
   updateIntervalMinutes: 60,
@@ -76,7 +92,76 @@ function nextSwitchLabel(
   return new Date(next).toISOString();
 }
 
-type SubscriptionsFetchResult = { items?: SubscriptionRecord[]; error?: string };
+/** Selector tags that carry a stored trace entry, in line order. Pure. */
+function selectorTagsWithTrace(sub: SubscriptionRecord): string[] {
+  const bySelector = sub.selectorLastSwitchBySelector;
+  if (!bySelector || typeof bySelector !== "object") return [];
+  return parseLocalCoreEndpoints(sub.localCoreEndpoint)
+    .map((line) => parseSelectorTag(line))
+    .filter((tag): tag is string => tag !== null)
+    .filter((tag) => bySelector[tag] !== undefined && bySelector[tag] !== null);
+}
+
+type SwitchLabels = {
+  (key: "proxySubscription.lastSwitch"): string;
+  (key: "proxySubscription.lastSwitchMember"): string;
+  (key: "proxySubscription.lastSwitchKind"): string;
+  (key: "proxySubscription.nextSwitch"): string;
+  (key: "proxySubscription.nextSwitchNow"): string;
+};
+
+/** Suffix of a switch line: result, member, cause. Pure. */
+function switchLineSuffix(
+  resultValue: string | null,
+  memberValue: string | null,
+  kindLabel: string | null,
+  t: SwitchLabels
+): string {
+  const result = resultValue && resultValue !== "ok" ? ` (${resultValue})` : "";
+  const member = memberValue ? ` · ${t("proxySubscription.lastSwitchMember")}: ${memberValue}` : "";
+  const kind = kindLabel ? ` · ${t("proxySubscription.lastSwitchKind")}: ${kindLabel}` : "";
+  return `${result}${member}${kind}`;
+}
+
+/** Resolved values behind one switch line. Pure. */
+function switchLineValues(
+  sub: SubscriptionRecord,
+  tag: string | null,
+  entry: SelectorLastSwitchEntry | null,
+  switchKindLabel: (kind: string | null) => string | null
+): { at: string; result: string | null; member: string | null; kindLabel: string | null } {
+  return {
+    at: entry?.at ?? sub.selectorLastSwitchAt!,
+    result: entry?.result ?? sub.selectorLastSwitchResult,
+    member: entry?.member ?? (tag === null ? sub.selectorLastSwitchMember : null),
+    kindLabel: switchKindLabel(entry?.kind ?? (tag === null ? sub.selectorLastSwitchKind : null)),
+  };
+}
+
+/** One summary line, or one `"<tag> · …"` line for a selector entry. Pure. */
+function formatSwitchLine(
+  sub: SubscriptionRecord,
+  tag: string | null,
+  entry: SelectorLastSwitchEntry | null,
+  t: SwitchLabels,
+  switchKindLabel: (kind: string | null) => string | null
+): string {
+  const v = switchLineValues(sub, tag, entry, switchKindLabel);
+  const next = nextSwitchLabel({
+    selectorLastSwitchAt: v.at,
+    selectorMinGapSeconds: sub.selectorMinGapSeconds,
+  });
+  const nextText = next === "now" ? t("proxySubscription.nextSwitchNow") : next;
+  const prefix = tag === null ? "" : `${tag} · `;
+  const suffix = switchLineSuffix(v.result, v.member, v.kindLabel, t);
+  return `${prefix}${t("proxySubscription.lastSwitch")}: ${v.at}${suffix} · ${t("proxySubscription.nextSwitch")}: ${nextText}`;
+}
+
+type SubscriptionsFetchResult = {
+  items?: SubscriptionRecord[];
+  earlyReasons?: Partial<SelectorEarlyReasonCounts>;
+  error?: string;
+};
 
 async function fetchSubscriptionsResult(
   loadFailedMessage: string
@@ -85,19 +170,73 @@ async function fetchSubscriptionsResult(
     const res = await fetch("/api/v1/management/proxy-subscriptions");
     if (!res.ok) throw new Error(loadFailedMessage);
     const data = await res.json();
-    return { items: Array.isArray(data.items) ? data.items : [] };
+    return {
+      items: Array.isArray(data.items) ? data.items : [],
+      earlyReasons: data.earlyReasons ?? undefined,
+    };
   } catch (e) {
     return { error: e instanceof Error ? e.message : String(e) };
   }
 }
 
+type EarlyReasonLabelKey =
+  | "proxySubscription.earlySkipsSinceRestart"
+  | "proxySubscription.error.SELECTOR_EARLY_NO_CONTROL"
+  | "proxySubscription.error.SELECTOR_EARLY_UNMAPPED";
+
+/**
+ * Early selector-skip counts (in-memory, reset on restart). The server only
+ * sends counts > 0 that concern a configured selector; renders nothing
+ * otherwise. Pure.
+ */
+function EarlyReasonsSummary({
+  reasons,
+  text,
+}: {
+  reasons: Partial<SelectorEarlyReasonCounts> | null;
+  text: (key: EarlyReasonLabelKey) => string;
+}) {
+  if (!reasons) return null;
+  const parts = (
+    [
+      ["proxySubscription.error.SELECTOR_EARLY_NO_CONTROL", reasons["no-control"]],
+      ["proxySubscription.error.SELECTOR_EARLY_UNMAPPED", reasons.unmapped],
+    ] as const
+  )
+    .filter(([, count]) => typeof count === "number" && count > 0)
+    .map(([key, count]) => `${text(key)}: ${count}`);
+  if (parts.length === 0) return null;
+  return (
+    <p className="text-xs text-text-muted">
+      {text("proxySubscription.earlySkipsSinceRestart")} — {parts.join(" · ")}
+    </p>
+  );
+}
+
 export default function SubscriptionTab() {
   const [subs, setSubs] = useState<SubscriptionRecord[]>([]);
+  const [earlyReasons, setEarlyReasons] = useState<Partial<SelectorEarlyReasonCounts> | null>(null);
   const [providers, setProviders] = useState<ProviderOption[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const t = useTranslations("settings");
+
+  // Map a stored refusal kind to a generic display label. Unknown future
+  // kinds fall back to plain English so the UI never shows a raw code.
+  const switchKindLabel = useCallback(
+    (kind: string | null): string | null => {
+      if (!kind) return null;
+      try {
+        const label = t(`proxySubscription.switchKind.${kind}`);
+        if (label && !label.includes("switchKind.")) return label;
+      } catch {
+        // fall through to the generic fallback below
+      }
+      return kind.replace(/_/g, " ");
+    },
+    [t]
+  );
 
   // Resolve a subscription `error` value into a localized message. Values are
   // either a `{ code, detail? }` JSON (user-facing, i18n'd) or a plain
@@ -128,6 +267,7 @@ export default function SubscriptionTab() {
 
   const applyLoadResult = useCallback((result: SubscriptionsFetchResult) => {
     if (result.items) setSubs(result.items);
+    setEarlyReasons(result.earlyReasons ?? null);
     if (result.error !== undefined) setError(result.error);
     setLoading(false);
   }, []);
@@ -183,6 +323,7 @@ export default function SubscriptionTab() {
       ruleProviders: sub.ruleProviders ?? [],
       localCoreEndpoint: sub.localCoreEndpoint ?? "",
       controlUrl: sub.controlUrl ?? "",
+      coreConfigPath: sub.coreConfigPath ?? "",
       controlSecret: "",
       selectorMinGapSeconds: sub.selectorMinGapSeconds ?? 60,
       updateIntervalMinutes: sub.updateIntervalMinutes,
@@ -207,6 +348,7 @@ export default function SubscriptionTab() {
         ruleProviders: form.mode === "rule" ? form.ruleProviders : null,
         localCoreEndpoint: form.localCoreEndpoint.trim() || null,
         controlUrl: form.controlUrl.trim() || null,
+        coreConfigPath: form.coreConfigPath.trim() || null,
         selectorMinGapSeconds: Number(form.selectorMinGapSeconds) || 60,
         updateIntervalMinutes: Number(form.updateIntervalMinutes) || 60,
         enabled: form.enabled,
@@ -287,22 +429,26 @@ export default function SubscriptionTab() {
   // Last switch state comes from the subscription row columns (persisted by
   // the trigger, surfaced by the list API) — the screen never calls the core
   // at open time.
+  //
+  // One line per selector (same tag parser as the server,
+  // `parseSelectorTag`, so the lines shown are the lines stored), or the
+  // single summary line when only one selector exists or the per-selector
+  // column is missing (old DB, single-selector subscription).
   const describeSwitch = useCallback(
     (sub: SubscriptionRecord): string | null => {
       if (!sub.controlUrl) return null;
       if (!sub.selectorLastSwitchAt) return t("proxySubscription.lastSwitchNever");
-      const result =
-        sub.selectorLastSwitchResult && sub.selectorLastSwitchResult !== "ok"
-          ? ` (${sub.selectorLastSwitchResult})`
-          : "";
-      const member = sub.selectorLastSwitchMember
-        ? ` · ${t("proxySubscription.lastSwitchMember")}: ${sub.selectorLastSwitchMember}`
-        : "";
-      const next = nextSwitchLabel(sub);
-      const nextText = next === "now" ? t("proxySubscription.nextSwitchNow") : next;
-      return `${t("proxySubscription.lastSwitch")}: ${sub.selectorLastSwitchAt}${result}${member} · ${t("proxySubscription.nextSwitch")}: ${nextText}`;
+      const tags = selectorTagsWithTrace(sub);
+      if (tags.length <= 1) return formatSwitchLine(sub, null, null, t, switchKindLabel);
+      const bySelector = sub.selectorLastSwitchBySelector as Record<
+        string,
+        SelectorLastSwitchEntry | null
+      >;
+      return tags
+        .map((tag) => formatSwitchLine(sub, tag, bySelector[tag] ?? null, t, switchKindLabel))
+        .join("\n");
     },
-    [t]
+    [t, switchKindLabel]
   );
 
   const statusBadge: Record<SubscriptionRecord["status"], string> = {
@@ -472,6 +618,20 @@ export default function SubscriptionTab() {
                   : t("proxySubscription.controlSecretNotSet")}
               </span>
             </label>
+
+            <label className="flex flex-col gap-1 text-sm">
+              <span className="text-text-muted">{t("proxySubscription.coreConfigPath")}</span>
+              <input
+                className="rounded border border-border bg-surface px-2 py-1.5 text-text outline-none focus:border-primary"
+                value={form.coreConfigPath}
+                onChange={(e) => setForm({ ...form, coreConfigPath: e.target.value })}
+                placeholder={t("proxySubscription.coreConfigPathPlaceholder")}
+                inputMode="url"
+              />
+              <span className="text-xs text-text-muted">
+                {t("proxySubscription.coreConfigPathDesc")}
+              </span>
+            </label>
           </div>
 
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
@@ -532,6 +692,7 @@ export default function SubscriptionTab() {
       )}
 
       <div className="space-y-2">
+        <EarlyReasonsSummary reasons={earlyReasons} text={(key) => t(key)} />
         {loading && <p className="text-sm text-text-muted">{t("proxySubscription.loading")}</p>}
         {!loading && subs.length === 0 && (
           <p className="text-sm text-text-muted">{t("proxySubscription.noSubscriptions")}</p>
@@ -579,7 +740,16 @@ export default function SubscriptionTab() {
                     </p>
                   )}
                   {describeSwitch(sub) && (
-                    <p className="text-xs text-text-muted mt-1">{describeSwitch(sub)}</p>
+                    <p className="text-xs text-text-muted mt-1 whitespace-pre-wrap">
+                      {describeSwitch(sub)}
+                    </p>
+                  )}
+                  {sub.coreConfigPath && (
+                    <p className="text-xs text-text-muted mt-1">
+                      {t("proxySubscription.coreReloadAppliedBy", {
+                        mode: sub.coreReloadMode ?? "undeclared",
+                      })}
+                    </p>
                   )}
                   {showCoreHint && (
                     <div className="mt-2 rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-700 space-y-1.5">

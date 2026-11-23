@@ -33,7 +33,10 @@ export function isInRefreshBackoff(conn: any, nowMs: number): boolean {
  * is worth keeping for the retries. Same reasoning as #3679 for non-rotating
  * providers: the stored refresh token is the user's only recovery artifact.
  */
-const PRESERVE_REFRESH_TOKEN_PROVIDERS = new Set(["claude"]);
+// #16984: a Kimi Coding invalid_grant can be a provider-side misclassification;
+// keep the stored credential available to the existing bounded retry path.
+// Codex/OpenAI one-time-use refresh tokens are deliberately excluded.
+const PRESERVE_REFRESH_TOKEN_PROVIDERS = new Set(["claude", "kimi-coding"]);
 
 export function preservesRefreshTokenOnUnrecoverable(provider: unknown): boolean {
   return PRESERVE_REFRESH_TOKEN_PROVIDERS.has(String(provider || "").toLowerCase());

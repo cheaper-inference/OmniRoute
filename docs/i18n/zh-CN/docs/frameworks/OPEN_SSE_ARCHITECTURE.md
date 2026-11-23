@@ -34,8 +34,8 @@ open-sse/
 ├── types.d.ts            # 公共类型导出
 ├── package.json          # @omniroute/open-sse
 ├── config/               # 提供者配置、常量、注册表
-├── executors/            # 各提供者的 HTTP 执行器（67 个，加上 base.ts/index.ts）
-├── handlers/             # 请求处理器（chatCore、responses 等）
+├── executors/            # 各提供者的 HTTP 执行器（150 个模块 + base.ts/index.ts）
+├── handlers/             # 请求处理程序（chatCore、responses 等）
 ├── lib/                  # 内部工具
 ├── mcp-server/           # 模型上下文协议服务器
 ├── services/             # 约 298 个服务模块
@@ -169,7 +169,7 @@ needsTranslation(source, target): boolean
 
 ### chatCore.ts（5977 行）
 
-**主请求处理器**。尽管体量庞大，但其结构清晰：
+**主请求处理器**。尽管体量庞大，但结构清晰：
 
 ```ts
 // chatCore.ts 的伪结构
@@ -205,9 +205,9 @@ export async function handleChat(request: NextRequest) {
 }
 ```
 
-尽管它是一个巨型函数，但内部按**带注释的区段**组织，这些区段与五阶段流水线一一对应。
+尽管它是一个庞大的函数，但内部划分成了多个**带注释的区段**，分别对应五阶段流水线。
 
-### combo.ts（4456 LOC）
+### combo.ts（4456 行代码）
 
 将组合解析为有序目标列表的**路由引擎**。
 
@@ -219,49 +219,49 @@ export async function handleComboChat(body, comboId): Promise<ChatResult> {
     try {
       return await handleSingleModel(target, body);
     } catch (err) {
-      log.warn("目标失败，正在尝试下一个目标", { target, err });
+      log.warn("target failed, trying next", { target, err });
     }
   }
-  throw new ComboExhaustedError("所有目标均失败");
+  throw new ComboExhaustedError("All targets failed");
 }
 ```
 
 支持 **19 种路由策略**（参见 `src/shared/constants/routingStrategies.ts`）：
 
-| 策略                | 行为                                                              |
-| ------------------- | ----------------------------------------------------------------- |
-| `priority`          | 按列表顺序优先选择第一个目标                                      |
-| `weighted`          | 根据每个目标的权重进行概率选择                                    |
-| `round-robin`       | 按顺序循环选择目标                                                |
-| `context-relay`     | 在不同目标之间传递上下文                                          |
-| `fill-first`        | 用满配额后再转向下一个目标                                        |
-| `p2c`               | 两个随机选择的幂                                                  |
-| `random`            | 均匀随机选择                                                      |
-| `least-used`        | 选择近期使用次数最少的目标                                        |
-| `cost-optimized`    | 优先选择成本最低且健康的目标                                      |
-| `reset-aware`       | 感知提供者的重置时间窗口                                          |
-| `reset-window`      | 基于重置时间窗口进行路由                                          |
-| `headroom`          | 优先选择剩余配额余量最大的目标                                    |
-| `strict-random`     | 真正均匀随机（不进行质量加权）                                    |
-| `auto`              | 使用 16 因子评分（`autoCombo/`）                                  |
-| `lkgp`              | 优先选择最近已知可用的提供者                                      |
-| `context-optimized` | 最适合长上下文请求的目标                                          |
-| `fusion`            | 并行分发给多个目标组成的面板，然后通过裁判进行综合（`fusion.ts`） |
+| 策略                | 行为                                                      |
+| ------------------- | --------------------------------------------------------- |
+| `priority`          | 按目标优先顺序排列，优先使用第一个目标                    |
+| `weighted`          | 根据每个目标的权重进行概率选择                            |
+| `round-robin`       | 按顺序循环使用各个目标                                    |
+| `context-relay`     | 在目标之间传递上下文                                      |
+| `fill-first`        | 先用满当前目标的配额，再切换到下一个目标                  |
+| `p2c`               | 二选一负载均衡                                            |
+| `random`            | 均匀随机选择                                              |
+| `least-used`        | 选择近期使用次数最少的目标                                |
+| `cost-optimized`    | 优先选择成本最低且健康的目标                              |
+| `reset-aware`       | 感知提供者的重置时间窗口                                  |
+| `reset-window`      | 基于重置时间窗口进行路由                                  |
+| `headroom`          | 优先选择剩余配额空间最大的目标                            |
+| `strict-random`     | 真正的均匀随机选择（不进行质量加权）                      |
+| `auto`              | 使用 16 因子评分（`autoCombo/`）                          |
+| `lkgp`              | 优先使用最近一次确认可用的提供者                          |
+| `context-optimized` | 最适合长上下文请求的目标                                  |
+| `fusion`            | 并行分发给一组目标，再通过评判模型进行综合（`fusion.ts`） |
 
-### base.ts（1170 LOC）
+### base.ts（1170 行代码）
 
-所有 107 个执行器都继承的**抽象执行器**。它包含：
+每个执行器类都要扩展的**抽象执行器**（直接扩展，或通过 `DefaultExecutor` 及其他子类间接扩展）。它包含：
 
-- `buildUrl()` — 默认 URL 构造逻辑（子类可针对自定义需求覆盖）
+- `buildUrl()` — 默认 URL 构造逻辑（子类可针对自定义需求进行覆盖）
 - `buildHeaders()` — 默认请求头（身份验证、content-type）
 - `transformRequest()` — 默认直接透传
-- `execute()` — 包含重试、退避和断路器机制的主要 HTTP 循环
+- `execute()` — 包含重试、退避和断路器机制的主 HTTP 循环
 
 ```ts
 // open-sse/executors/default.ts
 export class DefaultExecutor extends BaseExecutor {
   // 处理所有与 OpenAI/Anthropic 兼容的提供者
-  // 提供者注册配置（URL、身份验证、请求头），但共享执行器逻辑
+  // 提供者注册各自的配置（URL、身份验证、请求头），但共享执行器逻辑
 }
 ```
 
@@ -273,7 +273,7 @@ export class DefaultExecutor extends BaseExecutor {
 
 ## 服务（117 个模块）
 
-服务是由处理器组合的**专注于单一用途的模块**。主要类别包括：
+服务是处理程序组合使用的**专注于单一用途的模块**。主要类别如下：
 
 ### 路由与组合
 
@@ -284,28 +284,28 @@ export class DefaultExecutor extends BaseExecutor {
 
 ### 速率限制与配额
 
-- `rateLimitManager.ts` — 每个密钥和提供者使用一个令牌桶
-- `usage.ts` — 用量记录
+- `rateLimitManager.ts` — 每个密钥与提供者组合对应一个令牌桶
+- `usage.ts` — 使用量记录
 - `quotaCache.ts` — 内存中的配额快照
 
 ### 账户与令牌
 
-- `tokenRefresh.ts` — 遇到 401 时刷新 OAuth
+- `tokenRefresh.ts` — 出现 401 时刷新 OAuth
 - `accountFallback.ts` — 切换到备用账户
 - `sessionManager.ts` — 多轮会话状态
 
-### 智能功能
+### 智能处理
 
 - `intentClassifier.ts` — 对请求意图进行分类
-- `taskAwareRouter.ts` — 按任务类型路由
+- `taskAwareRouter.ts` — 按任务类型进行路由
 - `thinkingBudget.ts` — 分配思考令牌
 - `contextManager.ts` — 注入路由上下文
 
 ### 弹性与容错
 
-- `resilience.ts` — 重试、退避和熔断器编排
-- `emergencyFallback.ts` — 最后手段回退
-- `modelDeprecation.ts` — 自动路由到后继模型
+- `resilience.ts` — 重试、退避和断路器编排
+- `emergencyFallback.ts` — 最终兜底回退
+- `modelDeprecation.ts` — 自动路由至后继模型
 
 ### 状态
 
@@ -322,21 +322,21 @@ export class DefaultExecutor extends BaseExecutor {
 
 - （详见 [SKILLS.md](./SKILLS.md)）
 
-### 记忆
+### 内存
 
 - （详见 [MEMORY.md](./MEMORY.md)）
 
 ---
 
-## 执行器（75+ 个文件）
+## 执行器（150 个模块）
 
-每个提供者对应一个文件。它们都扩展 `BaseExecutor`，并覆写各自不同的部分。
+大多数提供者各自对应一个文件。所有执行器类都扩展 `BaseExecutor` 并覆写差异部分；其他模块则是针对各提供者的辅助组件（工具架构、fetch/TTS 适配器、特殊行为处理程序）。
 
 ### 通用模式
 
-提供者通过 `getExecutor(providerId)` 解析，该函数返回已配置的执行器。兼容 OpenAI/Anthropic 的提供者使用 `DefaultExecutor`（`executors/default.ts`）。提供者特定的行为（基础 URL、身份验证标头、API 版本）在 `open-sse/config/providers/` 中配置，而请求正文转换则在 `open-sse/translator/` 中处理。
+通过 `getExecutor(providerId)` 解析提供者，该函数会返回已配置的执行器。与 OpenAI/Anthropic 兼容的提供者使用 `DefaultExecutor`（`executors/default.ts`）。提供者特定行为（基础 URL、认证标头、API 版本）在 `open-sse/config/providers/` 中配置，而请求体转换则在 `open-sse/translator/` 中处理。
 
-**自定义 URL** 通过提供者配置进行设置：
+**自定义 URL**通过提供者配置进行设置：
 
 ```ts
 // open-sse/config/providers/ 中的提供者配置
@@ -346,9 +346,9 @@ export default {
 }
 ````
 
-**自定义身份验证**通过提供者注册表的身份验证配置（API 密钥、OAuth、标头配置文件）处理。
+**自定义认证**通过提供者注册表的认证配置（API 密钥、OAuth、标头配置文件）进行处理。
 
-**自定义请求正文**转换（例如 Anthropic 将 `system` 与 `messages` 分离）在 `open-sse/translator/` 中按提供者注册。
+**自定义请求体**转换（例如 Anthropic 将 `system` 与 `messages` 分离）按提供者注册在 `open-sse/translator/` 中。
 
 ````
 
@@ -366,7 +366,7 @@ const result = await executor.execute({
 });
 ````
 
-解析过程通过 `ExecutorRegistry`（`executors/registry.ts`）完成：每个专用执行器都声明在 `executors/index.ts` 的内置表中，并在模块加载时通过 `registerExecutor(alias, instance)` 注册；`getExecutor()` 查询注册表，对于没有专用条目的提供者，则回退到记忆化的 `DefaultExecutor`。完整的别名 → 执行器映射由黄金测试 `tests/unit/executor-map-golden.test.ts` 进行特征验证。
+解析过程通过 `ExecutorRegistry`（`executors/registry.ts`）完成：每个专用执行器都在 `executors/index.ts` 的内置表中声明，并在模块加载时通过 `registerExecutor(alias, instance)` 注册；`getExecutor()` 会查询注册表，并对任何没有专用条目的提供者回退到经记忆化处理的 `DefaultExecutor`。完整的别名 → 执行器映射由黄金测试 `tests/unit/executor-map-golden.test.ts` 描述。
 
 ---
 
@@ -485,13 +485,13 @@ createResponsesApiTransformStream(): TransformStream
 
 | 文件                                | 用途                                  |
 | ----------------------------------- | ------------------------------------- |
-| `providerRegistry.ts`               | 基于 352 个提供者目录的聊天模型注册表 |
+| `providerRegistry.ts`               | 基于 374 个提供者目录的聊天模型注册表 |
 | `providerModels.ts`                 | 模型别名、格式映射                    |
-| `constants.ts`                      | 超时时间、限制、状态码                |
+| `constants.ts`                      | 超时、限制、状态码                    |
 | `defaultThinkingSignature.ts`       | 默认 Claude 思考签名                  |
-| `modelStrip.ts`（位于 services 中） | 按提供者移除字段                      |
+| `modelStrip.ts`（位于 services 中） | 按提供者剥离字段                      |
 
-### 提供者注册表 Schema
+### 提供者注册表模式
 
 ```ts
 interface ProviderConfig {
@@ -506,7 +506,7 @@ interface ProviderConfig {
 }
 ```
 
-模块加载时进行 Zod 验证，以确保所有提供者配置均有效。
+模块加载时执行 Zod 验证，以确保所有提供者配置均有效。
 
 ---
 

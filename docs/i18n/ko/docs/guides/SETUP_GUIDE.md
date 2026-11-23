@@ -138,9 +138,9 @@ omniroute providers validate
 
 ## CLI 도구 구성
 
-### 1) 제공업체 연결 및 API 키 생성
+### 1) 공급자 연결 및 API 키 생성
 
-1. Dashboard → `Providers`를 열고 하나 이상의 제공업체를 연결합니다(OAuth 또는 API 키).
+1. Dashboard → `Providers`를 열고 하나 이상의 공급자를 연결합니다(OAuth 또는 API 키).
 2. Dashboard → `Endpoints`를 열고 API 키를 생성합니다.
 3. (선택 사항) Dashboard → `Combos`를 열고 폴백 체인을 설정합니다.
 
@@ -149,10 +149,10 @@ omniroute providers validate
 ```txt
 기본 URL: http://localhost:20128/v1
 API 키:   [Endpoint 페이지에서 복사]
-모델:     if/qwen3.8-max-preview (또는 임의의 제공업체/모델 접두사)
+모델:     if/qwen3.8-max-preview (또는 임의의 공급자/모델 접두사)
 ```
 
-편집기에서 `Authorization: Bearer ...`를 전송할 수 없는 경우에는 토큰이 포함된 호환성 기본 URL을 대신 사용합니다.
+편집기에서 `Authorization: Bearer ...`를 전송할 수 없다면 토큰이 포함된 호환성 기본 URL을 대신 사용하세요.
 
 ```txt
 기본 URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/
@@ -161,12 +161,12 @@ API 키:   [Endpoint 페이지에서 복사]
 Ollama 태그 URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
 ```
 
-Claude Code, Codex CLI, Cursor, Cline, OpenClaw, OpenCode 및 OpenAI 호환 SDK에서 작동합니다.
+Claude Code, Codex CLI, Cursor, Cline, OpenClaw, OpenCode 및 OpenAI 호환 SDK와 함께 사용할 수 있습니다.
 
-#### `setup-*`로 자동 구성
+#### `setup-*`으로 자동 구성
 
 기본 URL과 키를 직접 붙여 넣는 대신, OmniRoute가 실시간 모델 카탈로그를 바탕으로 각 도구의
-자체 구성을 작성하도록 할 수 있습니다. 도구별로 하나의 명령을 사용합니다.
+구성을 작성하도록 할 수 있습니다. 도구마다 하나의 명령을 사용합니다.
 
 ```bash
 omniroute setup-codex        # ~/.codex/<name>.config.toml 프로필
@@ -175,24 +175,25 @@ omniroute setup-opencode     # ~/.config/opencode/opencode.json (OpenAI 호환)
 omniroute setup-cline        # Cline CLI + VS Code 확장 프로그램 설정
 omniroute setup-kilo         # Kilo Code
 omniroute setup-continue     # ~/.continue/config.yaml (Continue / cn)
-omniroute setup-cursor       # Cursor의 앱 내 설정 절차 출력
+omniroute setup-cursor       # Cursor의 앱 내 단계를 출력
 omniroute setup-roo          # Roo Code 가져오기 + autoImport 포인터
 omniroute setup-crush        # ~/.config/crush/crush.json
+omniroute setup-zed          # ~/.config/zed/settings.json (openai_compatible)
 omniroute setup-goose        # ~/.config/goose/config.yaml
 omniroute setup-aider        # ~/.aider.conf.yml
 omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 ```
 
-각 명령은 **원격** OmniRoute에 로컬 도구를 연결하도록 구성하는 `--remote <url> --api-key <key>`와
-미리보기를 위한 `--dry-run`을 지원합니다. 올바른 환경 변수를 주입하면서 구성 파일을 전혀 작성하지 않고 CLI를 실행하려면
-범용 실행 명령인 `omniroute run <target>`(claude, codex, aider, goose, opencode, qwen, gemini)을 사용합니다.
-기존 도구별 실행 명령인 `omniroute launch`(Claude Code)와
+각 명령은 로컬 도구가 **원격** OmniRoute를 사용하도록 구성하는 `--remote <url> --api-key <key>`와 구성을 미리 확인하기 위한 `--dry-run`을 지원합니다. 올바른
+환경 변수를 주입하여 구성 파일을 전혀 작성하지 않고 CLI를 실행하려면 범용 실행 명령인
+`omniroute run <target>`(claude, codex, aider, goose, opencode, qwen, gemini)을 사용하세요.
+기존의 도구별 실행 명령인 `omniroute launch`(Claude Code)와
 `omniroute launch-codex`(Codex)도 계속 사용할 수 있습니다.
 
-전체 표(각 명령이 작성하는 항목, 모든 플래그, 로컬과 원격의 차이, 기본 URL의
+전체 표(각 명령이 작성하는 내용, 모든 플래그, 로컬 및 원격, 기본 URL
 `/v1` 규칙)는 **[CLI 통합](./CLI-INTEGRATIONS.md)**을 참조하세요.
 
-도구별 상세 구성(Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot 등)은 전용 **[CLI 도구 가이드](../reference/CLI-TOOLS.md)**를 참조하세요.
+도구별 세부 구성(Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot 등)은 전용 **[CLI 도구 가이드](../reference/CLI-TOOLS.md)**를 참조하세요.
 
 ---
 
@@ -323,7 +324,7 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ## Void Linux (xbps-src) 템플릿
 
-Void Linux 사용자는 `xbps-src`를 사용하여 네이티브 패키지를 빌드할 수 있습니다. 이 블록을 `srcpkgs/omniroute/template`로 저장하세요.
+Void Linux 사용자는 `xbps-src`를 사용하여 네이티브 패키지를 빌드할 수 있습니다. 이 블록을 `srcpkgs/omniroute/template`로 저장하세요:
 
 ```bash
 # 'omniroute'용 템플릿 파일
@@ -332,7 +333,7 @@ version=3.8.0
 revision=1
 hostmakedepends="nodejs python3 make"
 depends="openssl"
-short_desc="여러 LLM 제공자를 위한 스마트 라우팅 기능을 갖춘 범용 AI 게이트웨이"
+short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"

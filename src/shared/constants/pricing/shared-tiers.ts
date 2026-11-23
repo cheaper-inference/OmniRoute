@@ -11,6 +11,14 @@ export const GPT_6_ASTRA_PRICING = {
   cache_creation: 12.5,
 };
 
+export const GPT_6_SOL_PRICING = {
+  input: 2.0,
+  output: 10.0,
+  cached: 0.1,
+  reasoning: 10.0,
+  cache_creation: 2.5,
+};
+
 export const GPT_5_3_CODEX_PRICING = {
   input: 5.0,
   output: 20.0,
@@ -62,6 +70,29 @@ export const GEMINI_3_7_FLASH_PROMO_PRICING = {
   cache_creation: 0.75,
 };
 
+// Gemini 4 Argon introductory paid-tier pricing through 2026-11-30; standard
+// becomes $4/$20/$0.20 (input/output/cached input) on 2026-12-01.
+// https://ai.google.dev/gemini-api/docs/pricing
+export const GEMINI_4_ARGON_PROMO_PRICING = {
+  input: 2.0,
+  output: 10.0,
+  cached: 0.1,
+  reasoning: 10.0,
+  cache_creation: 2.0,
+};
+
+// Gemini 3.8 Flash paid-tier pricing through 2026-12-31; standard becomes
+// $1.50/$7.50/$0.15 (input/output/cached input) on 2027-01-01. Keep separate
+// from 3.7 so their rates can diverge.
+// https://ai.google.dev/gemini-api/docs/pricing
+export const GEMINI_3_8_FLASH_PROMO_PRICING = {
+  input: 0.75,
+  output: 3.75,
+  cached: 0.075,
+  reasoning: 3.75,
+  cache_creation: 0.75,
+};
+
 export const CLAUDE_FABLE_5_PRICING = {
   input: 15.0,
   output: 75.0,
@@ -76,6 +107,14 @@ export const CLAUDE_FABLE_5_1_PRICING = {
   cached: 0.25,
   reasoning: 50.0,
   cache_creation: 12.5,
+};
+
+export const CLAUDE_OPUS_5_5_PRICING = {
+  input: 4.0,
+  output: 20.0,
+  cached: 0.2,
+  reasoning: 20.0,
+  cache_creation: 5.0,
 };
 
 export const CLAUDE_OPUS_5_PRICING = {
@@ -118,14 +157,16 @@ export const CLAUDE_SONNET_46_PRICING = {
   cache_creation: 3.0,
 };
 
-// Claude Sonnet 5 — Sonnet-tier ($3/$15/M, same sticker as Sonnet 4.6; intro
-// $2/$10 through 2026-08-31 not encoded — track the standard rate like 4.6).
+// Claude Sonnet 5 / 5.5 — platform.claude.com, 2026-09-28.
+// Published: input $2, output $10, cache reads $0.20, 5-minute cache
+// writes $2.50 (prompt-caching docs). reasoning is not published as its
+// own rate; $10 follows the output price.
 export const CLAUDE_SONNET_5_PRICING = {
-  input: 3.0,
-  output: 15.0,
-  cached: 1.5,
-  reasoning: 22.5,
-  cache_creation: 3.0,
+  input: 2.0,
+  output: 10.0,
+  cached: 0.2,
+  reasoning: 10.0,
+  cache_creation: 2.5,
 };
 
 export const GLM_PRICING = {
@@ -281,3 +322,41 @@ export const GLM_PRICING = {
     cache_creation: 0.2,
   },
 };
+
+type TokenPricingRow = {
+  input: number;
+  output: number;
+  cached: number;
+  reasoning: number;
+  cache_creation: number;
+};
+
+/**
+ * Optional long-context override on a pricing row, applied by the cost calculator when the
+ * (cache-inclusive) prompt exceeds `threshold` — or reaches it when `inclusive` is true.
+ */
+export type LongContextPricingTier = Partial<TokenPricingRow> & {
+  threshold: number;
+  inclusive?: boolean;
+};
+
+/**
+ * OpenAI: prompts with more than 272K input tokens are priced at 2x input and cache rates and
+ * 1.5x output for the full request (https://developers.openai.com/api/docs/models/gpt-5.5,
+ * https://developers.openai.com/api/docs/models/gpt-6-sol).
+ */
+export function withOpenAiLongContextTier<T extends TokenPricingRow>(
+  row: T
+): T & { long_context: LongContextPricingTier } {
+  return {
+    ...row,
+    long_context: {
+      threshold: 272_000,
+      input: row.input * 2,
+      cached: row.cached * 2,
+      cache_creation: row.cache_creation * 2,
+      output: row.output * 1.5,
+      reasoning: row.reasoning * 1.5,
+    },
+  };
+}

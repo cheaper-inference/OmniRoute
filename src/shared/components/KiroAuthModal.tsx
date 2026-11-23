@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import Modal from "./Modal";
 import Button from "./Button";
 import Input from "./Input";
+import Select from "./Select";
 
 type KiroAuthModalProps = {
   isOpen: boolean;
@@ -31,7 +32,8 @@ export default function KiroAuthModal({
   const [idcRegion, setIdcRegion] = useState("us-east-1");
   const [refreshToken, setRefreshToken] = useState("");
   const [apiKey, setApiKey] = useState("");
-  const [apiKeyRegion, setApiKeyRegion] = useState("us-east-1");
+  // "auto" lets the import probe the Amazon Q regions and pin the key to the one that works.
+  const [apiKeyRegion, setApiKeyRegion] = useState("auto");
   const [error, setError] = useState(null);
   const [importing, setImporting] = useState(false);
   const [importingApiKey, setImportingApiKey] = useState(false);
@@ -48,7 +50,7 @@ export default function KiroAuthModal({
       setIdcRegion("us-east-1");
       setRefreshToken("");
       setApiKey("");
-      setApiKeyRegion("us-east-1");
+      setApiKeyRegion("auto");
       setError(null);
     }
   }
@@ -148,7 +150,7 @@ export default function KiroAuthModal({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             apiKey: apiKey.trim(),
-            region: apiKeyRegion.trim() || "us-east-1",
+            region: apiKeyRegion || "auto",
           }),
         }
       );
@@ -414,16 +416,18 @@ export default function KiroAuthModal({
               <p className="text-xs text-text-muted mt-1">{t("apiKeyStoredDescription")}</p>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium mb-2">{t("awsRegion")}</label>
-              <Input
-                value={apiKeyRegion}
-                onChange={(e) => setApiKeyRegion(e.target.value)}
-                placeholder={t("regionPlaceholder")}
-                className="font-mono text-sm"
-              />
-              <p className="text-xs text-text-muted mt-1">{t("apiKeyRegionDescription")}</p>
-            </div>
+            <Select
+              label={t("awsRegion")}
+              value={apiKeyRegion}
+              onChange={(e) => setApiKeyRegion(e.target.value)}
+              placeholder=""
+              options={[
+                { value: "auto", label: t("apiKeyRegionAuto") },
+                { value: "us-east-1", label: t("apiKeyRegionUsEast1") },
+                { value: "eu-central-1", label: t("apiKeyRegionEuCentral1") },
+              ]}
+              hint={t("apiKeyRegionAutoDescription")}
+            />
 
             {error && (
               <div className="bg-red-50 dark:bg-red-900/20 p-3 rounded-lg border border-red-200 dark:border-red-800">

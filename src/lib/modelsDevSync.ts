@@ -24,6 +24,7 @@
 import { getDbInstance } from "./db/core";
 import { invalidateDbCache, getModelCatalogCacheVersion } from "./db/readCache";
 import { backupDbFile } from "./db/backup";
+import { preserveStoredModalitySets } from "./db/models/capabilityModalities";
 
 import {
   transformModelsDevToPricing,
@@ -196,6 +197,20 @@ function toRecord(value: unknown): Record<string, unknown> {
   return value && typeof value === "object" ? (value as Record<string, unknown>) : {};
 }
 
+function parseReasoningEfforts(value: unknown): string[] | null {
+  if (typeof value !== "string" || value.length === 0) return null;
+  try {
+    const parsed = JSON.parse(value);
+    if (!Array.isArray(parsed)) return null;
+    const efforts = parsed.filter(
+      (entry): entry is string => typeof entry === "string" && entry.length > 0
+    );
+    return efforts.length > 0 ? efforts : null;
+  } catch {
+    return null;
+  }
+}
+
 function mapCapabilityRecord(record: Record<string, unknown>): ModelCapabilityEntry {
   return {
     tool_call: record.tool_call === 1 ? true : record.tool_call === 0 ? false : null,
@@ -218,6 +233,7 @@ function mapCapabilityRecord(record: Record<string, unknown>): ModelCapabilityEn
     limit_output: typeof record.limit_output === "number" ? record.limit_output : null,
     interleaved_field:
       typeof record.interleaved_field === "string" ? record.interleaved_field : null,
+    reasoning_efforts: parseReasoningEfforts(record.reasoning_efforts),
   };
 }
 
@@ -327,6 +343,7 @@ export function ensureCapabilitiesTable(): void {
       limit_input INTEGER,
       limit_output INTEGER,
       interleaved_field TEXT,
+      reasoning_efforts TEXT,
       last_synced TEXT,
       PRIMARY KEY (provider, model_id)
     )
@@ -377,6 +394,17 @@ export function loadAllSyncedCapabilitiesUncached(): CapabilitiesByProvider {
 }
 
 /**
+ * Reasoning tiers already resident in this process. A catalog/discovery read
+ * must use this instead of `getSyncedCapabilities()` — that path opens SQLite
+ * and runs migrations.
+ */
+export function peekCachedReasoningEfforts(provider: string, modelId: string): string[] | null {
+  if (!cachedCapabilitiesLoadedAll || !cachedCapabilities) return null;
+  const efforts = cachedCapabilities[provider]?.[modelId]?.reasoning_efforts;
+  return efforts && efforts.length > 0 ? [...efforts] : null;
+}
+
+/**
  * Read synced capabilities from `model_capabilities` table.
  */
 export function getSyncedCapabilities(provider?: string, modelId?: string): CapabilitiesByProvider {
@@ -420,21 +448,17 @@ export function getSyncedCapabilities(provider?: string, modelId?: string): Capa
 
 /**
  * Resolved providers/aliases to also try when looking up a synced capability.
- * Required because models.dev has historically stored capability rows under the
- * alias side of an alias pair (e.g. "opencode-zen") while the catalog & combo
- * targets reference the canonical id (e.g. "opencode"). Without this fallback,
- * combos whose targets use the canonical id (e.g. "Opencode FREE Omni" → all
- * `opencode/...` models) end up with `context_length: null` in the catalog.
+ * Required because models.dev has historically stored capability rows under one
+ * side of an alias pair while the catalog & combo targets reference the other.
+ * Without this fallback such combos end up with `context_length: null` in the
+ * catalog.
  */
 const SYNCED_CAPABILITY_FALLBACK_ALIASES: Record<string, string[]> = {
-  opencode: ["opencode-zen"],
-  "opencode-zen": ["opencode"],
   "opencode-go": ["opencode-zen"],
 };
 
 function lookupSyncedCapabilityWithFallbacks(
   provider: string,
-  modelId: string,
   lookup: (provider: string) => ModelCapabilityEntry | null
 ): ModelCapabilityEntry | null {
   const direct = lookup(provider);
@@ -459,18 +483,13 @@ export function getSyncedCapability(
   if (!provider || !modelId) return null;
 
   if (bulk) {
-    return lookupSyncedCapabilityWithFallbacks(
-      provider,
-      modelId,
-      (p) => bulk[p]?.[modelId] ?? null
-    );
+    return lookupSyncedCapabilityWithFallbacks(provider, (p) => bulk[p]?.[modelId] ?? null);
   }
 
   // Fast path: every provider is in the in-memory cache, skip SQLite entirely.
   if (cachedCapabilitiesLoadedAll) {
     return lookupSyncedCapabilityWithFallbacks(
       provider,
-      modelId,
       (p) => cachedCapabilities?.[p]?.[modelId] ?? null
     );
   }
@@ -481,7 +500,7 @@ export function getSyncedCapability(
   const stmt = db.prepare(
     "SELECT * FROM model_capabilities WHERE provider = ? AND model_id = ? LIMIT 1"
   );
-  return lookupSyncedCapabilityWithFallbacks(provider, modelId, (p) => {
+  return lookupSyncedCapabilityWithFallbacks(provider, (p) => {
     const row = stmt.get(p, modelId);
     if (!row) return null;
     return mapCapabilityRecord(toRecord(row));
@@ -501,8 +520,8 @@ export function saveModelsDevCapabilities(data: CapabilitiesByProvider): void {
       provider, model_id, tool_call, reasoning, attachment, structured_output,
       temperature, modalities_input, modalities_output, knowledge_cutoff,
       release_date, last_updated, status, family, open_weights,
-      limit_context, limit_input, limit_output, interleaved_field, last_synced
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      limit_context, limit_input, limit_output, interleaved_field, reasoning_efforts, last_synced
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
 
   const now = new Date().toISOString();
@@ -531,6 +550,7 @@ export function saveModelsDevCapabilities(data: CapabilitiesByProvider): void {
           cap.limit_input,
           cap.limit_output,
           cap.interleaved_field,
+          cap.reasoning_efforts ? JSON.stringify(cap.reasoning_efforts) : null,
           now
         );
         if (info.changes > 0) changed = true;
@@ -561,8 +581,8 @@ export function upsertSyncedCapabilities(
       provider, model_id, tool_call, reasoning, attachment, structured_output,
       temperature, modalities_input, modalities_output, knowledge_cutoff,
       release_date, last_updated, status, family, open_weights,
-      limit_context, limit_input, limit_output, interleaved_field, last_synced
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      limit_context, limit_input, limit_output, interleaved_field, reasoning_efforts, last_synced
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ON CONFLICT(provider, model_id) DO UPDATE SET
       tool_call=excluded.tool_call,
       reasoning=excluded.reasoning,
@@ -581,12 +601,33 @@ export function upsertSyncedCapabilities(
       limit_input=excluded.limit_input,
       limit_output=excluded.limit_output,
       interleaved_field=excluded.interleaved_field,
+      reasoning_efforts=excluded.reasoning_efforts,
       last_synced=excluded.last_synced
+    WHERE (
+      model_capabilities.tool_call, model_capabilities.reasoning,
+      model_capabilities.attachment, model_capabilities.structured_output,
+      model_capabilities.temperature, model_capabilities.modalities_input,
+      model_capabilities.modalities_output, model_capabilities.knowledge_cutoff,
+      model_capabilities.release_date, model_capabilities.last_updated,
+      model_capabilities.status, model_capabilities.family, model_capabilities.open_weights,
+      model_capabilities.limit_context, model_capabilities.limit_input,
+      model_capabilities.limit_output, model_capabilities.interleaved_field,
+      model_capabilities.reasoning_efforts
+    ) IS NOT (
+      excluded.tool_call, excluded.reasoning, excluded.attachment, excluded.structured_output,
+      excluded.temperature, excluded.modalities_input, excluded.modalities_output,
+      excluded.knowledge_cutoff, excluded.release_date, excluded.last_updated,
+      excluded.status, excluded.family, excluded.open_weights,
+      excluded.limit_context, excluded.limit_input, excluded.limit_output,
+      excluded.interleaved_field, excluded.reasoning_efforts
+    )
   `);
   const now = new Date().toISOString();
   let changed = false;
+  let persistedModels = models;
   const tx = db.transaction(() => {
-    for (const [modelId, cap] of Object.entries(models)) {
+    persistedModels = preserveStoredModalitySets(provider, models);
+    for (const [modelId, cap] of Object.entries(persistedModels)) {
       const info = insert.run(
         provider,
         modelId,
@@ -607,8 +648,11 @@ export function upsertSyncedCapabilities(
         cap.limit_input,
         cap.limit_output,
         cap.interleaved_field,
+        cap.reasoning_efforts ? JSON.stringify(cap.reasoning_efforts) : null,
         now
       );
+      // A catalog read must not invalidate its own generation just by refreshing
+      // last_synced. The null-safe SQL predicate counts only semantic changes.
       if (info.changes > 0) changed = true;
     }
   });
@@ -616,7 +660,7 @@ export function upsertSyncedCapabilities(
   if (cachedCapabilities) {
     cachedCapabilities[provider] = {
       ...(cachedCapabilities[provider] || {}),
-      ...models,
+      ...persistedModels,
     };
   }
   if (changed) invalidateDbCache("model-capabilities");

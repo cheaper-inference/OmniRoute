@@ -5,8 +5,12 @@
 import {
   GPT_6_ASTRA_PRICING,
   CLAUDE_FABLE_5_1_PRICING,
+  CLAUDE_OPUS_5_5_PRICING,
   CLAUDE_OPUS_5_PRICING,
+  CLAUDE_SONNET_5_PRICING,
   GEMINI_3_7_FLASH_PROMO_PRICING,
+  GEMINI_3_8_FLASH_PROMO_PRICING,
+  GEMINI_4_ARGON_PROMO_PRICING,
   GPT_5_3_CODEX_PRICING,
   GPT_5_5_PRICING,
   GPT_5_6_LUNA_PRICING,
@@ -14,10 +18,83 @@ import {
   GPT_5_6_TERRA_PRICING,
 } from "./shared-tiers";
 
-const ANTIGRAVITY_GEMINI_3_7_PRICING = {
+// Both connection ids and the legacy alias must reach the same billing data.
+const ANTIGRAVITY_PRICING = {
+  "gemini-3.1-pro-low": {
+    input: 2.0,
+    output: 12.0,
+    cached: 0.25,
+    reasoning: 18.0,
+    cache_creation: 2.0,
+  },
+  "gemini-pro-agent": {
+    input: 4.0,
+    output: 18.0,
+    cached: 0.5,
+    reasoning: 27.0,
+    cache_creation: 4.0,
+  },
   "gemini-3.7-flash-low": GEMINI_3_7_FLASH_PROMO_PRICING,
   "gemini-3.7-flash-medium": GEMINI_3_7_FLASH_PROMO_PRICING,
   "gemini-3.7-flash-high": GEMINI_3_7_FLASH_PROMO_PRICING,
+  "gemini-3.7-flash-tiered": GEMINI_3_7_FLASH_PROMO_PRICING,
+  "gemini-3.8-flash": GEMINI_3_8_FLASH_PROMO_PRICING,
+  "gemini-3.8-flash-low": GEMINI_3_8_FLASH_PROMO_PRICING,
+  "gemini-3.8-flash-medium": GEMINI_3_8_FLASH_PROMO_PRICING,
+  "gemini-3.8-flash-high": GEMINI_3_8_FLASH_PROMO_PRICING,
+  "gemini-3.8-flash-tiered": GEMINI_3_8_FLASH_PROMO_PRICING,
+  "gemini-4-argon": GEMINI_4_ARGON_PROMO_PRICING,
+  "gemini-4-argon-low": GEMINI_4_ARGON_PROMO_PRICING,
+  "gemini-4-argon-medium": GEMINI_4_ARGON_PROMO_PRICING,
+  "gemini-4-argon-high": GEMINI_4_ARGON_PROMO_PRICING,
+  "gemini-3.5-flash-lite": {
+    input: 0.3,
+    output: 2.5,
+    cached: 0.03,
+    reasoning: 2.5,
+    cache_creation: 0.3,
+  },
+  "gemini-3.1-flash-lite": {
+    input: 0.25,
+    output: 1.5,
+    cached: 0.025,
+    reasoning: 1.5,
+    cache_creation: 0.25,
+  },
+  "gemini-3-flash": {
+    input: 0.5,
+    output: 3.0,
+    cached: 0.05,
+    reasoning: 3.0,
+    cache_creation: 0.5,
+  },
+  "claude-sonnet-4-6": {
+    input: 3.0,
+    output: 15.0,
+    cached: 0.3,
+    reasoning: 22.5,
+    cache_creation: 3.0,
+  },
+  "claude-opus-4-6-thinking": {
+    input: 5.0,
+    output: 25.0,
+    cached: 0.5,
+    reasoning: 37.5,
+    cache_creation: 5.0,
+  },
+  "claude-opus-5-5-low": CLAUDE_OPUS_5_5_PRICING,
+  "claude-opus-5-5-medium": CLAUDE_OPUS_5_5_PRICING,
+  "claude-opus-5-5-high": CLAUDE_OPUS_5_5_PRICING,
+  "claude-sonnet-5-5-low": CLAUDE_SONNET_5_PRICING,
+  "claude-sonnet-5-5-medium": CLAUDE_SONNET_5_PRICING,
+  "claude-sonnet-5-5-high": CLAUDE_SONNET_5_PRICING,
+  "gpt-oss-120b-medium": {
+    input: 0.5,
+    output: 2.0,
+    cached: 0.25,
+    reasoning: 3.0,
+    cache_creation: 0.5,
+  },
 };
 
 // Codex Standard: 250 / 25 / 1250 credits per MTok, at 25 credits per USD.
@@ -30,6 +107,14 @@ const GPT_6_SOL_CODEX_PRICING = {
   cached: 0.2,
   reasoning: 10.0,
   cache_creation: 2.5,
+};
+// GPT-6.1 Sol Standard: 50 / 2.5 / 250 credits per MTok (input / cached / output).
+// Keep GPT-6 Sol's 5-credit cached rate separate. Dollar equivalents below use
+// this table's existing 25 credits/USD convention, not included-plan usage.
+// https://learn.chatgpt.com/docs/pricing#token-rates (checked 2026-10-07)
+const GPT_6_1_SOL_CODEX_PRICING = {
+  ...GPT_6_SOL_CODEX_PRICING,
+  cached: 0.1,
 };
 const GPT_6_LUNA_CODEX_PRICING = {
   input: 0.1,
@@ -49,6 +134,7 @@ export const DEFAULT_PRICING_OAUTH = {
       reasoning: 50.0,
       cache_creation: 12.5,
     },
+    "claude-opus-5-5": CLAUDE_OPUS_5_5_PRICING,
     "claude-opus-5": CLAUDE_OPUS_5_PRICING,
     "claude-opus-4-8": {
       input: 5.0,
@@ -122,6 +208,13 @@ export const DEFAULT_PRICING_OAUTH = {
     "gpt-6-sol-high": GPT_6_SOL_CODEX_PRICING,
     "gpt-6-sol-medium": GPT_6_SOL_CODEX_PRICING,
     "gpt-6-sol-low": GPT_6_SOL_CODEX_PRICING,
+    "gpt-6.1-sol": GPT_6_1_SOL_CODEX_PRICING,
+    "gpt-6.1-sol-ultra": GPT_6_1_SOL_CODEX_PRICING,
+    "gpt-6.1-sol-max": GPT_6_1_SOL_CODEX_PRICING,
+    "gpt-6.1-sol-xhigh": GPT_6_1_SOL_CODEX_PRICING,
+    "gpt-6.1-sol-high": GPT_6_1_SOL_CODEX_PRICING,
+    "gpt-6.1-sol-medium": GPT_6_1_SOL_CODEX_PRICING,
+    "gpt-6.1-sol-low": GPT_6_1_SOL_CODEX_PRICING,
     "gpt-6-luna": GPT_6_LUNA_CODEX_PRICING,
     "gpt-6-luna-max": GPT_6_LUNA_CODEX_PRICING,
     "gpt-6-luna-xhigh": GPT_6_LUNA_CODEX_PRICING,
@@ -318,46 +411,9 @@ export const DEFAULT_PRICING_OAUTH = {
       cache_creation: 0.75,
     },
   },
-  ag: {
-    "gemini-3.1-pro-low": {
-      input: 2.0,
-      output: 12.0,
-      cached: 0.25,
-      reasoning: 18.0,
-      cache_creation: 2.0,
-    },
-    "gemini-pro-agent": {
-      input: 4.0,
-      output: 18.0,
-      cached: 0.5,
-      reasoning: 27.0,
-      cache_creation: 4.0,
-    },
-    ...ANTIGRAVITY_GEMINI_3_7_PRICING,
-    "claude-sonnet-4-6": {
-      input: 3.0,
-      output: 15.0,
-      cached: 0.3,
-      reasoning: 22.5,
-      cache_creation: 3.0,
-    },
-    "claude-opus-4-6-thinking": {
-      input: 5.0,
-      output: 25.0,
-      cached: 0.5,
-      reasoning: 37.5,
-      cache_creation: 5.0,
-    },
-    "gpt-oss-120b-medium": {
-      input: 0.5,
-      output: 2.0,
-      cached: 0.25,
-      reasoning: 3.0,
-      cache_creation: 0.5,
-    },
-  },
-  antigravity: ANTIGRAVITY_GEMINI_3_7_PRICING,
-  agy: ANTIGRAVITY_GEMINI_3_7_PRICING,
+  ag: ANTIGRAVITY_PRICING,
+  antigravity: ANTIGRAVITY_PRICING,
+  agy: ANTIGRAVITY_PRICING,
   gh: {
     "claude-opus-5": CLAUDE_OPUS_5_PRICING,
     "gpt-5": {

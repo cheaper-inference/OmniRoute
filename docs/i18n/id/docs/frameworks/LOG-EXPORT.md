@@ -16,82 +16,156 @@ tujuan pertama; pipeline ini merupakan registry, sehingga tujuan lain dapat dita
 ## 1. Cara kerjanya
 
 ```
-call_logs (SQLite)
-  → callLogExportSource.getCallLogsForExport(cursor, batchSize)
-    → LogExportRecord[]  (kumpulan bidang tab Logs)
-      → destination client.send(batch)
-        → advanceLogExportCursor(id, lastRowId, count)
+server (mendekripsi + memvalidasi konfigurasi, merekonsiliasi kursor)
+  → memulai IPC → proses OS exportChild yang terisolasi
+    → storage.sqlite hanya-baca → kueri/pemetaan log panggilan bersama
+      → hidrasi artefak asinkron → prepare()/send() tujuan
+        → IPC batch → server menyimpan kursor → IPC ack
+          → batch berikutnya; IPC done → server mencatat keberhasilan
 ```
 
-- **Jadwal** — satu cron job `JobRegistry`, `log_export`, dengan nilai default `0 * * * *` (setiap jam,
+- **Jadwal** — satu tugas cron `JobRegistry`, `log_export`, dengan nilai default `0 * * * *` (setiap jam,
   UTC). Didaftarkan di `src/lib/initCloudSync.ts`; dapat ditimpa dengan `OMNIROUTE_LOG_EXPORT_CRON`.
-  Setiap tick menguras setiap tujuan yang **diaktifkan**, secara berurutan.
-- **Cursor** — `call_logs.rowid` implisit milik SQLite, yang dipertahankan per tujuan di
-  `log_export_destinations.cursor_row_id`. `timestamp` sengaja tidak digunakan sebagai cursor: pemanggil
-  dapat memberikan nilainya sendiri, sehingga permintaan yang lambat dapat ditulis setelah permintaan lebih cepat yang dimulai
-  kemudian, dan cursor berbasis timestamp akan melewatkannya.
-- **Batching** — `batch_size` baris per permintaan (default 500), `max_rows_per_run` baris per eksekusi
-  (default 10000), sehingga backlog yang besar dikuras dalam beberapa tick alih-alih memblokir satu eksekusi.
-- **Pengiriman** — cursor hanya bergerak maju setelah `send()` selesai. Batch yang gagal membiarkan
-  cursor tetap di posisinya, sehingga baris yang sama akan dicoba kembali pada eksekusi berikutnya. Jaminannya adalah
-  setidaknya satu kali pengiriman ditambah deduplikasi di sisi tujuan, bukan tepat satu kali yang sesungguhnya: BigQuery memberi
-  kunci pada setiap baris berdasarkan ID log panggilan, yang dipatuhinya berdasarkan upaya terbaik dalam jendela deduplikasinya sendiri.
-- **Pelindung tumpang tindih** — tick cron dan `POST .../run` dapat berjalan bersamaan. Tujuan yang
-  sedang dikuras akan dilewati alih-alih dikuras dua kali (`skipped: true` dalam hasil eksekusi),
-  sehingga eksekusi bersamaan tidak dapat mengirim ulang batch atau memundurkan cursor.
-- **Pemulihan setelah purge** — jika `cursor_row_id` berakhir di atas `MAX(rowid)` (seluruh tabel
-  telah dibersihkan dan rowid dimulai ulang), runner mengembalikannya ke 0 agar tidak kehilangan visibilitas secara permanen.
+  Setiap tick menguras semua tujuan yang **diaktifkan**, secara berurutan.
+- **Kursor** — `call_logs.rowid` implisit milik SQLite, disimpan per tujuan di
+  `log_export_destinations.cursor_row_id`. `timestamp` sengaja tidak digunakan sebagai kursor: pemanggil
+  dapat memberikan nilainya sendiri, sehingga permintaan lambat dapat ditulis setelah permintaan lebih cepat yang dimulai
+  belakangan, dan kursor berbasis stempel waktu akan melewatkannya.
+- **Batching** — `batch_size` baris per permintaan (default 500), `max_rows_per_run` baris per proses
+  (default 10000), sehingga backlog besar dikuras selama beberapa tick alih-alih memblokir satu tick.
+- **Pengiriman** — kursor hanya maju setelah `send()` diselesaikan. Batch yang gagal membiarkan
+  kursor tetap di posisinya, sehingga baris yang sama dicoba kembali pada proses berikutnya. Jaminannya adalah
+  setidaknya sekali ditambah deduplikasi di sisi tujuan, bukan tepat-sekali yang sesungguhnya: BigQuery memberi kunci pada setiap
+  baris berdasarkan id log panggilan, yang dipatuhinya sebisa mungkin dalam jendela deduplikasinya sendiri.
+- **Pengaman tumpang tindih** — tick cron dan `POST .../run` dapat berjalan bersamaan. Tujuan yang
+  sedang dikuras akan dilewati alih-alih dikuras dua kali (`skipped: true` dalam hasil proses),
+  sehingga proses bersamaan tidak dapat mengirim ulang batch atau menulis mundur kursor.
+- **Pemulihan setelah penghapusan** — jika `cursor_row_id` berakhir di atas `MAX(rowid)` (seluruh tabel
+  telah dihapus dan rowid dimulai ulang), runner memundurkan kursor ke 0 agar tidak kehilangan visibilitas secara permanen.
+
+### Runner terisolasi dan batasan
+
+Setiap proses tujuan di Node memulai proses anak OS terpisah yang berumur pendek (`child_process`
+dengan IPC, bukan `worker_threads`). Pembacaan body, parsing/serialisasi JSON payload, `prepare()`
+tujuan, dan I/O jaringan tujuan semuanya dijalankan di sana, bukan di event loop server.
+Hanya konfigurasi dan pesan progres kecil yang melewati IPC; rekaman yang diekspor tidak pernah kembali ke
+server. Tugas cron dan rute Jalankan sekarang mempertahankan hasil publik dan pengaman tumpang tindih yang sama.
+
+Proses anak membuka `DATA_DIR/storage.sqlite` yang telah di-resolve oleh server dalam mode hanya-baca menggunakan `node:sqlite`,
+dengan `busy_timeout=5000` dan `query_only=ON`. Proses ini tidak mengimpor singleton DB dan tidak melakukan
+migrasi, pencadangan, atau pembaruan SQLite. Pembukuan artefak yang hilang/rusak (termasuk
+UPDATE artefak rusak) tetap hanya berada di jalur detail dasbor. Kedua jalur menggunakan resolver
+detail murni yang sama; ekspor menggunakan pembacaan filesystem asinkron dan urutan resolusi
+artefak → inline lama → disk lama → tidak ada yang sama. Suatu proses mengambil snapshot rowid penyisipan maksimum
+saat proses anak membuka reader-nya; penyisipan berikutnya menunggu hingga proses selanjutnya. Ini adalah batas
+penyisipan, bukan transaksi SQLite berumur panjang: writer WAL dan checkpoint tetap bebas selama
+menunggu jaringan. Pembaruan/penghapusan baris yang sudah ada tidak dibekukan oleh batas ini.
+
+Setelah setiap batch diterima, proses anak menunggu acknowledgement. Server terlebih dahulu menyimpan
+kursor dengan `advanceLogExportCursor`, lalu mengirim `ack`; tidak ada batch berikutnya yang dimulai sebelum itu.
+Kegagalan pengiriman, crash, atau timeout mencatat kegagalan tanpa memajukan batch tersebut. Batch yang
+sebelumnya telah menerima acknowledgement tetap di-commit; maksimal satu batch yang belum menerima acknowledgement dapat dikirim ulang.
+Keberhasilan hanya dicatat setelah `done` dan proses anak keluar secara bersih. Kegagalan menghentikan proses anak
+dengan SIGTERM, yang ditingkatkan menjadi SIGKILL setelah 500 ms, dan runner menunggu proses ditutup.
+
+| Variabel lingkungan                           | Default | Tujuan                                  |
+| --------------------------------------------- | ------- | --------------------------------------- |
+| `OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS`         | 900000  | Batas waktu nyata per tujuan            |
+| `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` | 1024    | Batas old-space V8 proses anak dalam MB |
+
+Nilai yang tidak valid/tidak positif/bukan bilangan bulat menggunakan nilai default. Pengaturan heap bukanlah batas
+RSS total; batch yang sangat besar masih dapat menghabiskan memori proses anak dan menggagalkan proses dengan aman.
+Nilai default 1024 MB menyediakan ruang cadangan untuk batch default 500 baris berisi artefak 512 KiB dengan
+body diaktifkan, termasuk serialisasi JSON BigQuery yang dipotong berdasarkan byte. Nilai ini tidak membuat
+batch body 10000 baris menjadi aman. Kehabisan heap V8 mencatat kegagalan yang dapat ditindaklanjuti: kurangi ukuran
+batch atau naikkan `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB`; kursor tetap berada pada batch terakhir yang
+telah menerima acknowledgement. Body inline/disk historis tidak tercakup dalam batas artefak modern.
+Operator harus mengalokasikan RSS secara terpisah, terutama di dalam container dengan memori terbatas.
+
+Proses anak hanya mewarisi `DATA_DIR` yang telah di-resolve, `NODE_ENV`, `TZ` eksplisit (resolusi waktu lokal
+untuk nama file lama), `ELECTRON_RUN_AS_NODE` jika tersedia, dan input keluar berikut:
+`HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY` (beserta bentuk huruf kecilnya),
+`OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`, `NODE_EXTRA_CA_CERTS`, `SSL_CERT_FILE`, `SSL_CERT_DIR`.
+Dispatcher Undici global menggunakan resolusi proxy lingkungan murni dan aturan bypass host lokal
+yang sama dengan server, termasuk `NO_PROXY`; dispatcher ini tidak mengimpor `proxyFetch.ts` maupun flag DB/fiturnya.
+Kredensial proxy disamarkan dari output yang diteruskan dan kesalahan yang dicatat. Kredensial tujuan
+hanya dikirim melalui satu pesan IPC awal, tidak pernah melalui argv atau lingkungan; penerusan output/kesalahan
+diberi prefiks dan disanitasi. Hanya `ExperimentalWarning` yang dinonaktifkan dalam argumen eksekusi proses anak untuk menghindari
+pengulangan peringatan SQLite Node pada setiap proses cron; jenis peringatan lainnya tetap terlihat.
+
+Modul tujuan harus dapat diimpor tanpa dependensi Next.js/khusus server. Implementasi
+BigQuery yang ada sudah memenuhi kontrak tersebut. Cache token akses hanya bertahan selama
+proses anak berjalan, bukan lintas proses. Node adalah runtime yang didukung (`package.json`
+engines), tetapi bagian instalasi Bun di README dan `Dockerfile.bun` juga menawarkan jalur
+kompatibilitas produksi yang menggunakan `bun:sqlite` (`src/lib/db/core.ts` / adaptor). Oleh
+karena itu, pada Bun, proses ekspor tetap menggunakan jalur dalam proses sebelumnya dan
+mengeluarkan peringatan satu kali: isolasi heap/timeout proses anak tidak tersedia. Gunakan
+Node untuk isolasi event loop dan OOM; Bun tidak diperlakukan sebagai khusus pengembangan di sini.
+
+Saat `includeBodies` diaktifkan, pilih interval per menit seperti
+`OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"` daripada menumpuk backlog payload setiap jam.
+Batas batch dan baris tetap membatasi setiap proses. Biaya startup proses dikenakan per tujuan
+per proses; ini menukar sedikit biaya startup dengan isolasi event loop server, bukan mengurangi
+total penggunaan CPU.
 
 ### Payload (prompt dan completion)
 
-Secara default, ekspor hanya membawa bidang ringkasan yang ditampilkan oleh **daftar** Logs. Mengaktifkan
-**Ekspor prompt dan respons** (`includeBodies`) juga mengirimkan hal-hal yang ditampilkan panel **detail**
-Logs untuk setiap panggilan:
+Secara default, ekspor hanya memuat bidang ringkasan yang ditampilkan dalam tampilan **daftar**
+Logs. Mengaktifkan **Ekspor prompt dan respons** (`includeBodies`) juga mengirimkan apa yang
+ditampilkan panel **detail** Logs untuk setiap panggilan:
 
 | Bidang                           | Isinya                                                             |
 | -------------------------------- | ------------------------------------------------------------------ |
-| `request_body` / `response_body` | Payload panggilan sebagaimana dirender oleh dasbor                 |
+| `request_body` / `response_body` | Payload panggilan sebagaimana dirender dasbor                      |
 | `pipeline_route_decision`        | Target dan model yang dipilih router                               |
 | `pipeline_client_request`        | Permintaan mentah persis seperti yang dikirim klien                |
-| `pipeline_openai_request`        | Setelah diterjemahkan ke format internal OpenAI                    |
+| `pipeline_openai_request`        | Setelah diterjemahkan ke bentuk internal OpenAI                    |
 | `pipeline_provider_request`      | Sebagaimana benar-benar dikirim ke upstream, dalam dialek penyedia |
 | `pipeline_provider_response`     | Respons mentah dari upstream                                       |
 | `pipeline_client_response`       | Yang dikembalikan kepada pemanggil                                 |
-| `pipeline_error`                 | Detail error tingkat pipeline untuk panggilan yang gagal           |
-| `bodies_truncated`               | True ketika salah satu bidang di atas mencapai `maxBodyBytes`      |
+| `pipeline_error`                 | Detail galat tingkat pipeline untuk panggilan yang gagal           |
+| `bodies_truncated`               | True jika salah satu bidang di atas mencapai `maxBodyBytes`        |
 
-Ini merupakan konten prompt, sehingga **dinonaktifkan secara default** dan sengaja menjadi pilihan per tujuan.
-Yang dikirim adalah apa yang ditampilkan dasbor, karena keduanya membaca melalui `getCallLogById`: payload
-telah disanitasi dari PII dan disunting untuk menghapus informasi rahasia ketika ditulis, dan panggilan yang dibuat dengan
-kunci API `noLog` sama sekali tidak menyimpan payload, sehingga tidak ada yang dapat diekspor.
+Ini adalah konten prompt, sehingga **dinonaktifkan secara default** dan sengaja menjadi pilihan
+per tujuan. Yang dikirim adalah apa yang ditampilkan dasbor, karena ekspor dan `getCallLogById`
+menggunakan resolusi detail yang sama: payload
+telah dibersihkan dari PII dan disunting untuk menghapus rahasia saat ditulis, dan panggilan yang
+dilakukan dengan kunci API `noLog` sama sekali tidak menyimpan payload, sehingga tidak ada yang
+dapat diekspor.
 
-Payload dibaca per baris dari artefak sistem berkas, sehingga hidrasi hanya dijalankan untuk tujuan
-yang memintanya. Baris dengan artefak yang hilang atau rusak akan mengekspor ringkasannya dengan
-payload null alih-alih menggagalkan batch dan membuat cursor terhenti.
+Payload dibaca per baris dari artefak sistem berkas, sehingga hidrasi hanya dijalankan untuk
+tujuan yang memintanya. Artefak yang hilang atau rusak mengekspor ringkasannya dengan payload
+null, alih-alih menggagalkan batch dan membuat kursor tertahan.
 
-`maxBodyBytes` (default 262144) membatasi setiap bidang. Payload yang lebih panjang akan **dipotong, bukan
-dihapus** — prompt yang terpotong masih menjawab "apa yang ditanyakan" — dan baris tersebut ditandai dengan
-`bodies_truncated`. Delta yang dialirkan chunk demi chunk tidak diekspor; respons yang telah dirangkai
-sudah tersedia dalam `pipeline_provider_response` dan `pipeline_client_response`.
+`maxBodyBytes` (default 262144) membatasi setiap bidang. Payload yang lebih panjang akan
+**dipotong, bukan dibuang** — prompt yang terpotong tetap menjawab "apa yang ditanyakan" — dan
+baris tersebut ditandai dengan `bodies_truncated`. Delta streaming per chunk tidak diekspor;
+respons yang telah dirakit sudah tersedia di `pipeline_provider_response` dan
+`pipeline_client_response`.
 
 ---
 
-## 2. File
+## 2. Berkas
 
-| Bagian                | Lokasi                                       |
-| --------------------- | -------------------------------------------- |
-| Kontrak tujuan        | `src/lib/logExport/types.ts`                 |
-| Registri              | `src/lib/logExport/registry.ts`              |
-| Penanganan rahasia    | `src/lib/logExport/secrets.ts`               |
-| Runner (loop cursor)  | `src/lib/logExport/runner.ts`                |
-| Proyeksi API          | `src/lib/logExport/presenter.ts`             |
-| Tujuan BigQuery       | `src/lib/logExport/destinations/bigquery.ts` |
-| Autentikasi SA Google | `src/lib/logExport/googleServiceAccount.ts`  |
-| Sumber log panggilan  | `src/lib/usage/callLogExportSource.ts`       |
-| Persistensi           | `src/lib/db/logExportDestinations.ts`        |
-| Tugas cron            | `src/lib/jobs/logExportJob.ts`               |
-| Lapisan REST          | `src/app/api/log-export/`                    |
-| Halaman dasbor        | `src/app/(dashboard)/dashboard/log-export/`  |
+| Komponen               | Lokasi                                       |
+| ---------------------- | -------------------------------------------- |
+| Kontrak tujuan         | `src/lib/logExport/types.ts`                 |
+| Registri               | `src/lib/logExport/registry.ts`              |
+| Penanganan rahasia     | `src/lib/logExport/secrets.ts`               |
+| Runner (IPC induk)     | `src/lib/logExport/runner.ts`                |
+| Siklus hidup proses    | `src/lib/logExport/childRunner.ts`           |
+| Titik masuk child      | `src/lib/logExport/exportChild.ts`           |
+| Pembuka hanya-baca     | `src/lib/db/logExportReadOnly.ts`            |
+| Kueri/pemetaan bersama | `src/lib/usage/callLogExportQueries.ts`      |
+| Resolver detail        | `src/lib/usage/callLogDetailResolver.ts`     |
+| Proyeksi API           | `src/lib/logExport/presenter.ts`             |
+| Tujuan BigQuery        | `src/lib/logExport/destinations/bigquery.ts` |
+| Autentikasi SA Google  | `src/lib/logExport/googleServiceAccount.ts`  |
+| Sumber log panggilan   | `src/lib/usage/callLogExportSource.ts`       |
+| Persistensi            | `src/lib/db/logExportDestinations.ts`        |
+| Tugas cron             | `src/lib/jobs/logExportJob.ts`               |
+| Lapisan REST           | `src/app/api/log-export/`                    |
+| Halaman dasbor         | `src/app/(dashboard)/dashboard/log-export/`  |
 
 Skema: `src/lib/db/migrations/170_log_export_destinations.sql`.
 

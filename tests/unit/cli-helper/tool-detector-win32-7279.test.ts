@@ -22,6 +22,7 @@ import * as toolDetector from "../../../src/lib/cli-helper/tool-detector.ts";
 // `where.exe`.
 
 describe("tool-detector — win32 (#7279)", () => {
+  const calls: Array<{ cmd: string; args: string[]; shell: boolean }> = [];
   const originalPlatformDescriptor = Object.getOwnPropertyDescriptor(process, "platform");
 
   function setPlatform(value: string) {
@@ -43,14 +44,18 @@ describe("tool-detector — win32 (#7279)", () => {
     });
 
     // @ts-expect-error - internal test hook
-    toolDetector.__setExecFileImpl(async (_cmd: string, _args: string[], opts?: { shell?: boolean }) => {
-      // Reproduces the real-world failure: without shell:true, spawning the
-      // .cmd shim throws (Node's CVE-2024-27980 hardening on Windows).
-      if (opts?.shell === true) {
-        return { stdout: "v0.75.3\n" };
+    toolDetector.__setExecFileImpl(
+      async (cmd: string, args: string[], opts?: { shell?: boolean }) => {
+        calls.push({ cmd, args: [...args], shell: opts?.shell === true });
+        // Reproduces the real-world failure: spawning the .cmd shim directly throws
+        // (Node's CVE-2024-27980 hardening on Windows); it has to go through cmd.exe.
+        const viaCmd = /(^|[\\/])cmd\.exe$/i.test(cmd) && args.some((a) => /\.cmd$/i.test(a));
+        if (opts?.shell === true || viaCmd) {
+          return { stdout: "v0.75.3\n" };
+        }
+        throw new Error("spawn hermes.cmd ENOENT (cmd.exe required on win32 for .cmd shims)");
       }
-      throw new Error("spawn hermes.cmd ENOENT (shell:true required on win32 for .cmd shims)");
-    });
+    );
   });
 
   after(() => {
@@ -70,6 +75,29 @@ describe("tool-detector — win32 (#7279)", () => {
       "expected hermes to be detected as installed via locateCommand + shell:true probe on win32"
     );
     assert.strictEqual(result!.version, "0.75.3");
+  });
+
+  it("probes a .cmd shim through cmd.exe without shell: true plus an argument array (DEP0190, #15315)", async () => {
+    calls.length = 0;
+    const result = await toolDetector.detectTool("hermes");
+    assert.ok(result !== null);
+    assert.strictEqual(result!.installed, true);
+    assert.ok(calls.length > 0, "expected the --version probe to run");
+    for (const call of calls) {
+      assert.ok(
+        !(call.shell && call.args.length > 0),
+        `shell: true with a non-empty argument array is what Node 24 deprecates (DEP0190): ${JSON.stringify(call)}`
+      );
+    }
+    const probe = calls.find((call) => call.args.includes("--version"));
+    assert.ok(probe, "expected a --version probe");
+    assert.match(probe!.cmd, /cmd\.exe$/i);
+    assert.deepStrictEqual(probe!.args, [
+      "/d",
+      "/c",
+      "C:\\Users\\dev\\AppData\\Roaming\\npm\\hermes.cmd",
+      "--version",
+    ]);
   });
 
   it("reports a genuinely absent CLI as not installed on native Windows", async () => {

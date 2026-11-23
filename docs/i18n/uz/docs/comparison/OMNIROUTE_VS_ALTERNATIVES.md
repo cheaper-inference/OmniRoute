@@ -37,13 +37,13 @@ Mashhur ochiq kodli AI routerlari bilan funksiyalarning xolis taqqoslanishi.
 | **Tunnel qo‘llovi (Cloudflared, Tailscale, Ngrok)**     |                       ✅                       |         ❌         |        n/a        |     n/a     |
 | **Litsenziya**                                          |                      MIT                       |        MIT         |    yopiq kodli    | yopiq kodli |
 
-## OmniRoute’ni qachon tanlash kerak
+## OmniRoute'ni qachon tanlash kerak
 
-- Siz mustaqil joylashtirasiz va **provayderlarning maksimal qamrovini** xohlaysiz (329 ta provayder, 155 ta bepul/autentifikatsiyasiz katalog yozuvi)
-- Sizga **ichki MCP serveri** kerak (LLM vositalari, xotira va ko‘nikmalar vosita sifatida taqdim etiladi)
-- Agentlararo ish jarayonlari uchun sizga **A2A protokoli** kerak
-- Yuqori oqimdagi CAPTCHA’lar tomonidan aniqlanmaslik uchun **fingerprint yashirinligini** (JA3/JA4) xohlaysiz
-- Sizga SaaS hisobisiz **korporativ funksiyalar** (himoya cheklovlari, baholashlar, audit jurnali) kerak
+- Oʻzingiz hosting qilasiz va **provayderlarning maksimal qamrovi** kerak (374 ta provayder, 155 ta bepul/autentifikatsiyasiz katalog yozuvi)
+- Sizga **ichki MCP serveri** kerak (LLM vositalari, xotira va koʻnikmalar vosita sifatida taqdim etiladi)
+- Agentlararo ish jarayonlari uchun **A2A protokoli** kerak
+- Yuqori oqimdagi CAPTCHA'lar tomonidan aniqlanishning oldini olish uchun **raqamli izni yashirish** (JA3/JA4) kerak
+- SaaS toʻlovisiz **korporativ funksiyalar** (himoya cheklovlari, baholashlar, audit jurnali) kerak
 
 ## LiteLLM’ni qachon tanlash kerak
 

@@ -13,15 +13,15 @@ UI/UX、i18n、CLI、資料庫和建置/部署變更對應到其合約、重點�
 
 ---
 
-## 開發設定
+## 開發環境設定
 
 ### 先決條件
 
-- **Node.js** `>=22.22.3 <23`，或 `>=24.0.0 <27`（建議：24 LTS）
+- **Node.js** `>=22.22.2 <23`，或 `>=24.0.0 <27`（建議：24 LTS）
 - **npm** 10+
 
-> **npm v11+ 使用者（Node 24+）：** 在 `npm install` 之後，請驗證原生模組是否已安裝：
-> `node -e "require('better-sqlite3')"`。如果失敗並顯示 `MODULE_NOT_FOUND`，
+> **npm v11+ 使用者（Node 24+）：** 執行 `npm install` 後，請確認原生模組已安裝：
+> `node -e "require('better-sqlite3')"`。若執行失敗並顯示 `MODULE_NOT_FOUND`，
 > 請執行 `npm approve-scripts better-sqlite3 && npm install`。請參閱
 > [疑難排解](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module)。
 
@@ -38,34 +38,34 @@ npm install
 ### 環境變數
 
 ```bash
-# 從範本建立您的 .env 檔案
+# 從範本建立您的 .env
 cp .env.example .env
 
-# 產生所需的密鑰
+# 產生必要的密鑰
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-開發用的關鍵變數：
+開發環境的主要變數：
 
-| 變數                   | 開發預設值               | 說明             |
-| ---------------------- | ------------------------ | ---------------- |
-| `PORT`                 | `20128`                  | 伺服器連接埠     |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | 前端的基礎 URL   |
-| `JWT_SECRET`           | （如上產生）             | JWT 簽章密鑰     |
-| `INITIAL_PASSWORD`     | `CHANGEME`               | 首次登入密碼     |
-| `APP_LOG_LEVEL`        | `info`                   | 日誌詳細程度層級 |
+| 變數                   | 開發環境預設值           | 說明           |
+| ---------------------- | ------------------------ | -------------- |
+| `PORT`                 | `20128`                  | 伺服器連接埠   |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | 前端的基礎 URL |
+| `JWT_SECRET`           | （於上方產生）           | JWT 簽署密鑰   |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | 首次登入密碼   |
+| `APP_LOG_LEVEL`        | `info`                   | 日誌詳細程度   |
 
 ### 儀表板設定
 
-儀表板提供可透過環境變數設定的功能切換開關：
+儀表板提供可切換功能的 UI 選項，這些功能也可以透過環境變數設定：
 
-| 設定位置    | 切換開關     | 說明                   |
+| 設定位置    | 切換選項     | 說明                   |
 | ----------- | ------------ | ---------------------- |
-| 設定 → 進階 | 除錯模式     | 啟用除錯請求日誌（UI） |
-| 設定 → 一般 | 側邊欄可見性 | 顯示/隱藏側邊欄區段    |
+| 設定 → 進階 | 偵錯模式     | 啟用偵錯請求日誌（UI） |
+| 設定 → 一般 | 側邊欄可見性 | 顯示／隱藏側邊欄區段   |
 
-這些設定儲存在資料庫中，並在重新啟動後持續存在，設定後會覆蓋環境變數的預設值。
+這些設定會儲存在資料庫中，並在重新啟動後持續保留；設定後會覆寫環境變數的預設值。
 
 ### 在本機執行
 
@@ -73,51 +73,52 @@ echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 # 開發模式（熱重新載入）
 npm run dev
 
-# 生產建置
-npm run build    # next build → .build/next/ 然後 assembleStandalone → dist/
+# 正式環境建置
+npm run build    # next build → .build/next/，接著 assembleStandalone → dist/
 npm run start
 
-# 快速後端/僅 API 編譯，適用於貢獻者變更
+# 針對貢獻者變更的快速後端／僅 API 編譯
 npm run build:contributor
 
-# 發行建置（全新重建 + HEAD 哨兵 — 部署所需）
-npm run build:release   # rm -rf .build dist && build + 寫入 dist/BUILD_SHA
+# 發行建置（全新重建 + HEAD 哨兵檔案——部署時必要）
+npm run build:release   # rm -rf .build dist && 建置 + 寫入 dist/BUILD_SHA
 
-# 常見連接埠設定
+# 常用連接埠設定
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-貢獻者建置執行僅編譯的驗證：它不會組合獨立
-發行版或建置選用的原生封裝資產。當您需要驗證可出貨的套件時，請使用一般的生產建置。
+貢獻者建置只會執行編譯驗證：它不會組裝獨立執行版發行內容，
+也不會建置選用的原生封裝資產。需要驗證可交付套件時，
+請使用一般的正式環境建置。
 
-### 建置輸出佈局
+### 建置輸出配置
 
-| 目錄      | 內容                                                             | 追蹤 |
-| --------- | ---------------------------------------------------------------- | ---- |
-| `src/`    | 應用程式原始碼（TypeScript / TSX）                               | 是   |
-| `.build/` | 中間產物 — `next build` 輸出（git忽略，`distDir = .build/next`） | 否   |
-| `dist/`   | 可出貨套件 — 由 `assembleStandalone` 組合（git忽略）             | 否   |
+| 目錄      | 內容                                                                | 是否追蹤 |
+| --------- | ------------------------------------------------------------------- | -------- |
+| `src/`    | 應用程式原始碼（TypeScript / TSX）                                  | 是       |
+| `.build/` | 中間產物——`next build` 輸出（由 git 忽略，`distDir = .build/next`） | 否       |
+| `dist/`   | 可交付套件——由 `assembleStandalone` 組裝（由 git 忽略）             | 否       |
 
-建置管線是單次傳遞：
+建置管線只會執行一輪：
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (Next.js 輸出)
-  └─ assembleStandalone()                 (複製 standalone + static + public + 原生資產)
-       └─ 輸出： dist/                   (server.js, .next/static/, public/, node_modules/)
+  └─ next build → .build/next/standalone  （Next.js 輸出）
+  └─ assembleStandalone()                 （複製獨立執行版 + 靜態檔案 + 公開檔案 + 原生資產）
+       └─ 輸出：dist/                     （server.js、.next/static/、public/、node_modules/）
 ```
 
-`npm run build:release` 會額外先清理兩個目錄，並寫入
-`dist/BUILD_SHA`（= `git rev-parse --short HEAD`）作為部署完整性哨兵。
+`npm run build:release` 還會先清除這兩個目錄，並寫入
+`dist/BUILD_SHA`（= `git rev-parse --short HEAD`）作為部署完整性哨兵檔案。
 
-`npm run build:contributor` 使用僅後端的建置設定檔。它會在建置時暫時存根
-儀表板 UI 檔案，保留 API 路由處理常式，並在建置後還原原始檔案。
-對於影響儀表板 UI 的變更或完整的發行驗證，請使用 `npm run build`；
+`npm run build:contributor` 使用僅限後端的建置設定檔。它會在建置期間暫時以替代檔案取代
+儀表板 UI 檔案、保留 API 路由處理常式，並在建置後還原原始檔案。
+若變更會影響儀表板 UI，或需要進行完整的發行驗證，請使用 `npm run build`；
 貢獻者設定檔不能取代發行建置。
 
 > **VPS 部署注意事項：** 遠端映像目錄 `/usr/lib/node_modules/omniroute/app/`
-> 保持不變。部署技能會將 `dist/` 的內容 rsync 到其中。
-> 只有儲存庫內的建置輸出路徑已移動（`app/` → `dist/`）。
+> 維持不變。部署技能會使用 rsync 將 `dist/` 的內容同步至該目錄。
+> 只有儲存庫內的建置輸出路徑有所變更（`app/` → `dist/`）。
 
 預設 URL：
 
@@ -296,33 +297,33 @@ src/                        # TypeScript（.ts / .tsx）
 │   ├── api/                # API 路由（51 個目錄）
 │   └── login/              # 驗證頁面（.tsx）
 ├── domain/                 # 政策引擎（policyEngine、comboResolver、costRules 等）
-├── lib/                    # 核心業務邏輯（.ts）
+├── lib/                    # 核心商業邏輯（.ts）
 │   ├── a2a/                # Agent-to-Agent v0.3 協定伺服器
-│   ├── acp/                # Agent Communication Protocol 註冊表
+│   ├── acp/                # Agent Communication Protocol 登錄檔
 │   ├── compliance/         # 合規政策引擎
 │   ├── db/                 # SQLite 領域模組 + 130 個遷移
-│   ├── memory/             # 持久性對話記憶
+│   ├── memory/             # 持久化對話記憶
 │   ├── oauth/              # OAuth 提供者、服務與工具
-│   ├── skills/             # 可擴展技能框架
+│   ├── skills/             # 可擴充的技能框架
 │   ├── usage/              # 使用量追蹤與成本計算
-│   └── localDb.ts          # 僅為重新匯出層 — 絕不在此加入邏輯
+│   └── localDb.ts          # 僅限重新匯出層——切勿在此新增邏輯
 ├── middleware/              # 請求中介軟體（promptInjectionGuard）
-├── mitm/                   # MITM 代理（憑證、DNS、目標路由）
+├── mitm/                   # MITM Proxy（憑證、DNS、目標路由）
 ├── shared/
 │   ├── components/         # React 元件（.tsx）
-│   ├── constants/          # 提供者定義（329）、MCP 範圍、19 種路由策略
+│   ├── constants/          # 提供者定義（329 個）、MCP 範圍、20 種路由策略
 │   ├── utils/              # 斷路器、清理器、驗證輔助工具
-│   └── validation/         # Zod v4 schema
-└── sse/                    # SSE 代理管線
+│   └── validation/         # Zod v4 結構描述
+└── sse/                    # SSE Proxy 管線
 
 open-sse/                   # @omniroute/open-sse 工作區
-├── executors/              # 89 個執行器實作模組
-├── handlers/               # 11 個請求處理器（chat、responses、embeddings、images 等）
-├── mcp-server/             # MCP 伺服器（110 個獨特工具、3 種傳輸、33 個範圍）
+├── executors/              # 150 個執行器模組（執行器類別 + 各提供者的輔助工具）
+├── handlers/               # 11 個請求處理常式（聊天、回應、嵌入、影像等）
+├── mcp-server/             # MCP 伺服器（110 個不重複工具、3 種傳輸方式、33 個範圍）
 ├── services/               # 178 個頂層服務（combo、autoCombo、rateLimitManager 等）
 ├── translator/             # 格式轉換器（OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama）
 ├── transformer/            # Responses API 轉換器
-└── utils/                  # 22 個工具模組（stream、TLS、proxy、logging）
+└── utils/                  # 22 個工具模組（串流、TLS、Proxy、記錄）
 
 electron/                   # Electron 桌面應用程式（跨平台）
 
@@ -337,21 +338,21 @@ tests/
 docs/
 ├── adr/                     # 架構決策記錄
 ├── architecture/            # 系統架構與韌性
-├── comparison/              # OmniRoute 與替代方案
+├── comparison/              # OmniRoute 與替代方案的比較
 ├── compression/             # 壓縮指南與規則
 ├── dev/                     # 開發指南
-├── diagrams/                # 架構圖表
+├── diagrams/                # 架構圖
 ├── frameworks/              # MCP、A2A、OpenCode、Memory、Skills
 ├── guides/                  # 使用者指南、Docker、設定、疑難排解
 ├── i18n/                    # 國際化 README 翻譯
-├── marketing/               # 行銷素材
-├── ops/                     # 部署、代理、覆蓋率、發布
-├── providers/               # 提供者專屬文件
+├── marketing/               # 行銷資料
+├── ops/                     # 部署、Proxy、覆蓋率、版本發布
+├── providers/               # 提供者專用文件
 ├── reference/               # API 參考、環境變數、CLI 工具、免費方案
-├── releases/                # 版本說明
+├── releases/                # 版本資訊
 ├── routing/                 # 自動組合引擎、推理重播
-├── screenshots/             # 儀表板螢幕截圖
-├── security/                # 護欄、合規、隱匿、權杖
+├── screenshots/             # 儀表板螢幕擷取畫面
+├── security/                # 防護措施、合規性、隱匿性、權杖
 └── specs/                   # 設計規格
 ```
 
@@ -393,22 +394,22 @@ docs/
 
 ---
 
-## 提取要求檢查清單
+## Pull Request 檢查清單
 
 - [ ] 測試通過（`npm test`）
-- [ ] Linting 通過（`npm run lint`）
+- [ ] Lint 檢查通過（`npm run lint`）
 - [ ] 建置成功（`npm run build`）
-- [ ] 為新的公開函式與介面新增 TypeScript 類型
-- [ ] 沒有硬式編碼的機密或後備值
-- [ ] 公開上游認證資訊透過 `resolvePublicCred()` 嵌入（請參閱 [`docs/security/PUBLIC_CREDS.md`](./docs/security/PUBLIC_CREDS.md)），絕不以常值形式
-- [ ] 錯誤回應會經過 `buildErrorBody()` / `sanitizeErrorMessage()` — 回應主體中沒有原始的堆疊追蹤（請參閱 [`docs/security/ERROR_SANITIZATION.md`](./docs/security/ERROR_SANITIZATION.md)）
-- [ ] Shell 指令（`exec` / `spawn`）透過 `env` 傳遞執行階段值，而非透過字串插補
-- [ ] 所有輸入都使用 Zod schema 驗證
-- [ ] Changelog **片段** 新增於 `changelog.d/{features|fixes|maintenance}/<PR>-<slug>.md` 下，用於使用者可見的變更（請參閱 [`changelog.d/README.md`](./changelog.d/README.md)）— **請勿**直接編輯 `CHANGELOG.md`；片段會在發佈時彙總，且永遠不會在 PR 之間發生衝突
-- [ ] 文件已更新（如適用）
-- [ ] 沒有開啟新的 CodeQL / Secret-Scanning 警示，或者每個都已使用技術理由駁回，並參照相關的 `docs/security/` 文件
-- [ ] 會生成子處理程序的路由（`/api/mcp/`, `/api/cli-tools/runtime/`）在 `src/server/authz/routeGuard.ts` 中被歸類為 `isLocalOnlyPath()` — 請參閱 [硬性規則 #15](docs/security/ROUTE_GUARD_TIERS.md)
-- [ ] 提交訊息中沒有 `Co-Authored-By` 尾標 — 提交必須僅以儲存庫擁有者的 Git 身分出現（硬性規則 #16）
+- [ ] 已為新的公開函式與介面新增 TypeScript 類型
+- [ ] 沒有硬編碼的密鑰或備援值
+- [ ] 公開的上游憑證透過 `resolvePublicCred()` 嵌入（請參閱 [`docs/security/PUBLIC_CREDS.md`](./docs/security/PUBLIC_CREDS.md)），絕不以字面值形式嵌入
+- [ ] 錯誤回應透過 `buildErrorBody()` / `sanitizeErrorMessage()` 處理——回應主體中不得包含原始堆疊追蹤（請參閱 [`docs/security/ERROR_SANITIZATION.md`](./docs/security/ERROR_SANITIZATION.md)）
+- [ ] Shell 命令（`exec` / `spawn`）透過 `env` 傳遞執行階段值，而非使用字串插值
+- [ ] 所有輸入均使用 Zod schema 進行驗證
+- [ ] 若有面向使用者的變更，已在 `changelog.d/{features|fixes|maintenance}/<PR>-<slug>.md` 下新增變更日誌**片段**（請參閱 [`changelog.d/README.md`](./changelog.d/README.md)）——請**勿**直接編輯 `CHANGELOG.md`；片段會在發布時彙整，且各 PR 之間永遠不會發生衝突
+- [ ] 已更新文件（如適用）
+- [ ] 未新增任何 CodeQL / Secret-Scanning 警示，或每個警示均已附上引用相關 `docs/security/` 文件的技術理由並予以駁回
+- [ ] 會產生子行程的路由（`/api/mcp/`、`/api/cli-tools/runtime/`）已在 `src/server/authz/routeGuard.ts` 中分類為 `isLocalOnlyPath()`——請參閱[硬性規則 #15](docs/security/ROUTE_GUARD_TIERS.md)
+- [ ] 提交訊息中不得包含 AI／機器人的 `Co-authored-by` 尾註（硬性規則 #16）——若重用了人類協作者的工作，應使用標準的 `Co-authored-by: Name <email>` 尾註予以署名
 
 ---
 

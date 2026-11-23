@@ -298,13 +298,13 @@ Temel davranışlar:
 
 ## 🔑 Senkronizasyon Token'ları ve Yapılandırma Paketi _(v3.6.6+)_
 
-**Kapsamlı senkronizasyon token'ları** sayesinde artık birden fazla cihazdan ve harici operatörler tarafından erişim mümkündür:
+Artık **kapsamlandırılmış senkronizasyon token'ları** aracılığıyla birden fazla cihazdan ve harici operatörler tarafından erişim mümkündür:
 
-- **`POST /api/sync/tokens`** — Yeni bir senkronizasyon token'ı oluşturur (kapsamlı, isteğe bağlı son kullanma süresiyle)
+- **`POST /api/sync/tokens`** — Yeni bir senkronizasyon token'ı oluşturur (kapsamlandırılmış, isteğe bağlı süre sonu ile)
 - **`DELETE /api/sync/tokens/:id`** — Bir token'ı iptal eder
-- **`GET /api/sync/bundle`** — Hassas olmayan tüm ayarların sürümlendirilmiş, ETag anahtarlı JSON anlık görüntüsünü indirir (parolalar gizlenir)
+- **`GET /api/sync/bundle`** — Yapılandırmanın sürümlendirilmiş, ETag anahtarlı JSON anlık görüntüsünü indirir (yalnızca bir senkronizasyon token'ı ile kimlik doğrulanır). Pano parolası gibi kimlik doğrulama ayarları çıkarılır ancak sağlayıcı kimlik bilgileri ve API anahtarları pakete dahil edilir; bu nedenle dosyayı gizli bilgi olarak değerlendirin
 
-Yapılandırma paketi `src/lib/sync/bundle.ts` tarafından oluşturulur. İstemciler, tam yükü yeniden indirmeden değişiklikleri tespit etmek için `ETag` yanıt üstbilgisini karşılaştırır.
+Yapılandırma paketi `src/lib/sync/bundle.ts` tarafından oluşturulur. İstemciler, tam yükü yeniden indirmeden değişiklikleri tespit etmek için `ETag` yanıt üst bilgisini karşılaştırır. CLI üzerinden `omniroute sync bundle <outPath> --token <syncToken>` (veya `OMNIROUTE_SYNC_TOKEN`) komutu, paketi yalnızca dosya sahibinin erişebileceği bir dosyaya kaydeder.
 
 ---
 

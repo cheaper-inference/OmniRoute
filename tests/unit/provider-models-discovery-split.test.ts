@@ -268,6 +268,7 @@ test("codex.normalizeCodexModelsResponse parses the Codex live catalog shape", (
   assert.deepEqual(
     parsed.map((m) => ({ id: m.id, name: m.name })),
     [
+      { id: "codex-auto-review", name: "Codex Auto Review" },
       { id: "gpt-5.4", name: "GPT-5.4" },
       { id: "gpt-5.5", name: "GPT-5.5" },
     ]
@@ -310,7 +311,7 @@ test("codex safe discovery classifies public metadata before activating it", () 
 });
 
 test("codex retired ids stay out of the discovery catalog", () => {
-  for (const id of ["gpt-5.3-codex-spark", "codex-auto-review"]) {
+  for (const id of ["gpt-5.3-codex-spark"]) {
     assert.equal(isCodexDiscoveryModelExcluded({ id }), true);
     assert.equal(isSharedCodexDiscoveryModelExcluded({ id }), true);
     assert.deepEqual(
@@ -350,7 +351,7 @@ test("codex retired ids stay out of the discovery catalog", () => {
   );
   assert.deepEqual(
     catalog.map((model) => model.id),
-    ["gpt-6-sol"]
+    ["codex-auto-review", "gpt-6-sol"]
   );
 });
 
@@ -493,7 +494,7 @@ test("codex.normalizeCodexGithubCatalogResponse parses current client catalog me
 
   assert.deepEqual(
     parsed.map((model) => model.id),
-    ["gpt-5.6-sol", "future-model"]
+    ["gpt-5.6-sol", "future-model", "codex-auto-review"]
   );
   assert.equal(parsed[0]?.description, "Latest frontier agentic coding model.");
   assert.equal(parsed[0]?.inputTokenLimit, 372000);
@@ -590,6 +591,36 @@ test("codex.enrichCodexModelsFromGithubCatalog keeps live entitlement list autho
   assert.equal(enriched[0]?.supportsVision, true);
 });
 
+test("codex.enrichCodexModelsFromGithubCatalog uses the GitHub catalog when there is no live list", () => {
+  const catalog = enrichCodexModelsFromGithubCatalog(
+    [],
+    [
+      {
+        id: "gpt-5.6-luna",
+        name: "GitHub Luna",
+        owned_by: "codex",
+        apiFormat: "responses",
+        supportedEndpoints: ["responses"],
+      },
+      {
+        id: "gpt-5.6-terra",
+        name: "GitHub Terra",
+        owned_by: "codex",
+        apiFormat: "responses",
+        supportedEndpoints: ["responses"],
+        inputTokenLimit: 272000,
+      },
+    ]
+  );
+
+  assert.deepEqual(
+    catalog.map((model) => model.id),
+    ["gpt-5.6-luna", "gpt-5.6-terra"]
+  );
+  assert.equal(catalog[0]?.name, "GitHub Luna");
+  assert.equal(catalog[1]?.inputTokenLimit, 272000);
+});
+
 test("codex.mergeCodexLiveModelsWithLocalCatalog merges capacity limits conservatively (smaller wins)", () => {
   const merged = mergeCodexLiveModelsWithLocalCatalog(
     [
@@ -631,7 +662,7 @@ test("codex.mergeCodexLiveModelsWithLocalCatalog merges capacity limits conserva
   const ids = merged.map((model) => model.id);
   assert.ok(ids.includes("future-codex-model"));
   assert.ok(ids.includes("gpt-5.6-sol"));
-  assert.ok(ids.includes("gpt-5.6-sol-low"));
+  assert.ok(!ids.includes("gpt-5.6-sol-low"));
   const sol = merged.find((model) => model.id === "gpt-5.6-sol");
   assert.equal(sol?.name, "Live Sol");
   // Live (272000) is SMALLER than the pinned contract (372000) here — the
@@ -699,7 +730,7 @@ test("codex.buildCodexDiscoveryCatalog merges then filters in one step", () => {
   const ids = catalog.map((model) => model.id);
   assert.ok(ids.includes("brand-new-codex"));
   assert.ok(ids.includes("gpt-5.6-sol"));
-  assert.ok(ids.includes("gpt-5.6-sol-max"));
+  assert.ok(!ids.includes("gpt-5.6-sol-max"));
   assert.equal(
     ids.some((id) => String(id).startsWith("gpt-5.4")),
     false

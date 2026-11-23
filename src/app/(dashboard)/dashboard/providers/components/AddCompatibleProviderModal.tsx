@@ -27,6 +27,7 @@ interface AddCompatibleProviderModalProps {
 interface CompatibleFormState {
   name: string;
   prefix: string;
+  providerIdSuffix: string;
   apiType: string;
   baseUrl: string;
   chatPath: string;
@@ -85,6 +86,7 @@ function createInitialForm(mode: CompatibleMode): CompatibleFormState {
   return {
     name: "",
     prefix: "",
+    providerIdSuffix: "",
     apiType: "chat",
     baseUrl: defaults.baseUrl,
     chatPath: defaults.chatPath,
@@ -226,6 +228,8 @@ export default function AddCompatibleProviderModal({
       if (defaults.hasApiType) body.apiType = formData.apiType;
       if (defaults.hasModelsPath) body.modelsPath = formData.modelsPath || "";
       if (defaults.compatMode) body.compatMode = defaults.compatMode;
+      const providerIdSuffix = formData.providerIdSuffix.trim();
+      if (providerIdSuffix) body.providerIdSuffix = providerIdSuffix;
       body.iconUrl = formData.iconUrl.trim();
       // Merge the selected identity profile's preset headers into the SAME
       // `customHeaders` field the node already persists (see
@@ -261,7 +265,11 @@ export default function AddCompatibleProviderModal({
       });
       const failedCreate = providerText(t, "failedCreate", "Failed to create provider");
       if (!res.ok) {
-        setSaveError(await readFetchErrorMessage(res, failedCreate));
+        setSaveError(
+          res.status === 409
+            ? t("providerIdConflict")
+            : await readFetchErrorMessage(res, failedCreate)
+        );
         return;
       }
 
@@ -344,6 +352,13 @@ export default function AddCompatibleProviderModal({
           onChange={(e) => setFormData({ ...formData, prefix: e.target.value })}
           placeholder={prefixPlaceholder}
           hint={prefixHint}
+        />
+        <Input
+          label={t("providerIdSuffixLabel")}
+          value={formData.providerIdSuffix}
+          onChange={(e) => setFormData({ ...formData, providerIdSuffix: e.target.value })}
+          placeholder="team-gateway"
+          hint={t("providerIdSuffixHint")}
         />
         {defaults.hasApiType && (
           <Select

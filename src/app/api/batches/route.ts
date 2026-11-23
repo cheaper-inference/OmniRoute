@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { parseIntegerQueryParam } from "@/lib/api/queryIntegerParam";
 export const dynamic = "force-dynamic";
 import { listBatches } from "@/lib/db/batches";
 import { getApiKeyRequestScope, resolveListScope } from "@/app/api/v1/_helpers/apiKeyScope";
@@ -16,7 +17,9 @@ export async function GET(request: Request) {
 
   try {
     const url = new URL(request.url);
-    const limit = Number.parseInt(url.searchParams.get("limit") || "100", 10);
+    const parsedLimit = parseIntegerQueryParam(url.searchParams, "limit", 100);
+    if (parsedLimit.ok === false) return parsedLimit.response;
+    const limit = parsedLimit.value;
     const ownerFilter = listScope.mode === "api_key" ? listScope.apiKeyId : undefined;
     const batches = listBatches(ownerFilter, limit);
     return NextResponse.json({ batches });

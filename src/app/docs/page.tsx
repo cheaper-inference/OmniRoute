@@ -24,19 +24,19 @@ export async function generateMetadata(): Promise<Metadata> {
 
 const featuredLinks = [
   {
-    href: "/docs/getting-started/quick-start",
+    href: "/docs/getting-started/QUICK-START",
     titleKey: "featuredQuickStartTitle",
     icon: "rocket_launch",
     descriptionKey: "featuredQuickStartDescription",
   },
   {
-    href: "/docs/getting-started/auto-combo-guide",
+    href: "/docs/getting-started/AUTO-COMBO-GUIDE",
     titleKey: "featuredAutoComboTitle",
     icon: "auto_awesome",
     descriptionKey: "featuredAutoComboDescription",
   },
   {
-    href: "/docs/getting-started/providers-guide",
+    href: "/docs/getting-started/PROVIDERS-GUIDE",
     titleKey: "featuredProvidersTitle",
     icon: "link",
     descriptionKey: "featuredProvidersDescription",
@@ -64,6 +64,8 @@ const sections = [
       "security",
       "compression",
       "ops",
+      "providers",
+      "comparison",
     ],
   },
 ];

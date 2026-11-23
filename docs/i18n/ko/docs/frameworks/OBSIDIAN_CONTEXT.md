@@ -32,18 +32,18 @@ OmniRoute는 **Obsidian** 볼트를 **컨텍스트 소스**로 연결합니다. 
 ## 설정
 
 Obsidian 토큰이나 기본 URL을 위한 **환경 변수는 없습니다**. 둘 다
-`src/lib/db/obsidian.ts`를 통해 SQLite `key_value` 테이블(namespace `obsidian`)에
-저장됩니다. 토큰은 **저장 시 암호화**됩니다(AES-256-GCM, 이전 버전과의 호환성을 위한
-평문 폴백 포함). Endpoint 대시보드의 **Context Sources** 탭(`ObsidianSourceCard`)에서
-또는 설정 REST API를 통해 구성할 수 있습니다.
+`src/lib/db/obsidian.ts`를 통해 SQLite `key_value` 테이블(네임스페이스 `obsidian`)에
+저장됩니다. 토큰은 **저장 시 암호화**됩니다(AES-256-GCM, 평문 하위 호환 폴백 지원).
+Endpoint 대시보드의 **Context Sources** 탭(`ObsidianSourceCard`) 또는 설정 REST API를
+통해 구성하세요.
 
 > [!IMPORTANT]
-> **Obsidian Local REST API** 플러그인이 설치되어 실행 중이어야 합니다. REST
-> 인터페이스는 **HTTP `127.0.0.1:27123`**(기본 URL)에서 수신 대기합니다. 포트 `27124`는
+> **Obsidian Local REST API** 플러그인이 설치되어 실행 중이어야 합니다. 해당 REST
+> 인터페이스는 **HTTP `127.0.0.1:27123`**(기본 기본 URL)에서 수신 대기합니다. 포트 `27124`는
 > _별도의_ MCP/HTTPS 엔드포인트이며 설정 라우트에서 명시적으로 거부됩니다.
 > 다른 기기에서 연결하는 경우 `http://<tailscale-ip>:27123`을 사용하세요.
 
-### 구성 키(SQLite `key_value`, namespace `obsidian`)
+### 구성 키(SQLite `key_value`, 네임스페이스 `obsidian`)
 
 | 키                | 용도                                           | 암호화 여부 |
 | ----------------- | ---------------------------------------------- | ----------- |
@@ -52,12 +52,12 @@ Obsidian 토큰이나 기본 URL을 위한 **환경 변수는 없습니다**. �
 | `vault_path`      | 볼트 디렉터리의 절대 경로(동기화용)            | 아니요      |
 | `webdav_username` | 생성된 WebDAV 사용자 이름(볼트 동기화)         | 아니요      |
 | `webdav_password` | 생성된 WebDAV 비밀번호(볼트 동기화)            | 예          |
-| `webdav_enabled`  | WebDAV 볼트 동기화 활성화 여부                 | 아니요      |
+| `webdav_enabled`  | WebDAV 볼트 동기화의 활성화 여부               | 아니요      |
 
 ### REST를 통한 구성
 
 ```bash
-# Local REST API 토큰 저장 + 검증(POST는 상태 확인을 통해 검증)
+# Local REST API 토큰 저장 및 검증(POST는 상태 확인을 통해 검증)
 curl -X POST http://localhost:20128/api/settings/obsidian \
   -H "Content-Type: application/json" \
   -d '{"token":"<obsidian-rest-api-key>","baseUrl":"http://127.0.0.1:27123"}'
@@ -69,17 +69,18 @@ curl http://localhost:20128/api/settings/obsidian
 curl -X DELETE http://localhost:20128/api/settings/obsidian
 ```
 
-모든 메서드에는 대시보드 인증이 필요합니다. `POST`는 포트 `27124`를 사용하는 모든 URL을
+모든 메서드에는 대시보드 인증이 필요합니다. `POST`는 포트 `27124`의 모든 URL을
 거부하며, 저장하기 전에 Local REST API 상태 엔드포인트를 호출하여 토큰을 검증합니다.
 
 ### WebDAV 볼트 동기화
 
-`src/app/api/settings/obsidian/webdav/route.ts`는 선택적 WebDAV 기반 볼트 동기화를
-관리합니다(`src/lib/obsidianSync.ts`에 의해 구동). 이를 활성화하면 OmniRoute가 로컬
-볼트 디렉터리를 가리키도록 설정되고 임의의 WebDAV 사용자 이름/비밀번호 쌍이 생성됩니다.
+`src/app/api/settings/obsidian/webdav/route.ts`는 선택적 WebDAV 기반
+볼트 동기화(`src/lib/obsidianSync.ts`에 의해 구동)를 관리합니다. 이를 활성화하면
+OmniRoute가 로컬 볼트 디렉터리를 가리키도록 설정되고 임의의 WebDAV 사용자 이름/비밀번호
+쌍이 생성됩니다.
 
 ```bash
-# 볼트 디렉터리에 WebDAV 동기화 활성화(사용자 이름/비밀번호 생성)
+# 볼트 디렉터리에 대한 WebDAV 동기화 활성화(사용자 이름/비밀번호 생성)
 curl -X POST http://localhost:20128/api/settings/obsidian/webdav \
   -H "Content-Type: application/json" \
   -d '{"vaultPath":"/home/me/MyVault"}'
@@ -87,17 +88,26 @@ curl -X POST http://localhost:20128/api/settings/obsidian/webdav \
 # WebDAV 동기화 상태 확인(활성화된 동안에만 자격 증명 반환)
 curl http://localhost:20128/api/settings/obsidian/webdav
 
-# WebDAV 동기화 비활성화(자격 증명 + 관리되는 .stignore 삭제)
+# WebDAV 동기화 비활성화(자격 증명 및 관리되는 .stignore 삭제)
 curl -X DELETE http://localhost:20128/api/settings/obsidian/webdav
 ```
 
 ### API 키별 컨텍스트 소스(선택 사항)
 
-Obsidian 구성은 `api_key_context_sources` 테이블을 통해 **API 키별로** 범위를 지정할 수
-있습니다(`src/lib/db/apiKeyContextSources.ts`). MCP 호출에 인증된 API 키 id가 포함되면
-`getObsidianConfigForApiKey()`는 해당 키 자체의 토큰/기본 URL/볼트 경로
-(`source: "api_key"`)를 우선 사용하고, 그렇지 않으면 전역 구성
+Obsidian 구성은 `api_key_context_sources` 테이블
+(`src/lib/db/apiKeyContextSources.ts`)을 통해 **API 키별로** 범위를 지정할 수 있습니다.
+MCP 호출에 인증된 API 키 ID가 포함된 경우 `getObsidianConfigForApiKey()`는 해당 키 자체의
+토큰/기본 URL/볼트 경로(`source: "api_key"`)를 우선 사용하며, 그렇지 않으면 전역 구성
 (`source: "global"`)으로 폴백합니다.
+
+동기화 이외의 MCP 도구는 이 구성을 읽기 전에 확인된 호출자 ID를 요구합니다.
+ID가 없는 호출자는 `Obsidian API token not configured`를 받으며, 볼트 요청은
+전송되지 않습니다. HTTP 호출자는 요청 자격 증명을 통해 확인되며, stdio 호출자는
+`OMNIROUTE_API_KEY` 또는 `ROUTER_API_KEY`를 통해 확인될 수 있습니다. 확인되지 않은 HTTP
+호출자는 서버의 환경 ID를 상속할 수 없습니다. 플레이스홀더 ID만으로는 액세스 권한이
+부여되지 않습니다. `env-key`로 확인되는 유효한 환경 자격 증명은 계속 지원됩니다.
+키별 Obsidian 구성이 없는 인증된 키는 전역 폴백을 유지합니다. 네 개의
+`obsidian_sync_*` 도구는 별도의 동기화 토큰 동작을 유지합니다.
 
 ## MCP 도구 (22개)
 

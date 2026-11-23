@@ -13,27 +13,27 @@
 
 ## Ihe Ọ Bụ
 
-OmniRoute debanyere ndị na-enye ọrụ 329, gụnyere ndenye katalọgụ 155 e depụtara dịka **n’efu/anaghị achọ nkwenye njirimara**
-(no-auth,
-OAuth nke ọkwa efu, ma ọ bụ API key nke ọkwa efu — lee
-[Ntuziaka Ọkwa Efefu](../getting-started/FREE-TIERS-GUIDE.md) na
-[Ndepụta Ọkwa Efefu](../reference/FREE_TIERS.md) zuru ezu). Nsogbu bụ na: ogo ụdị nke ndị na-enye ọrụ n’efu
-dịgasị nnọọ iche. Onye na-enye ọrụ na-achọghị nkwenye njirimara nke na-enye ụdị ọgbara ọhụrụ kacha elu bara uru karịa
-onye na-enye obere ụdị ochie.
+OmniRoute na-edebanye ndị na-eweta ọrụ 374, gụnyere ndenye katalọgụ 155 e kara akara dị ka **n'efu/anaghị achọ nkwenye njirimara**
+(anaghị achọ nkwenye njirimara,
+OAuth nke ọkwa efu, ma ọ bụ igodo API nke ọkwa efu — lee
+[Ntuziaka Ọkwa Efụ](../getting-started/FREE-TIERS-GUIDE.md) na
+[Ndepụta Ọkwa Efụ zuru ezu](../reference/FREE_TIERS.md)). Ihe ịma aka bụ na: ogo model nke ndị na-eweta ọrụ efu
+dịgasị iche nke ukwuu. Onye na-eweta ọrụ na-achọghị nkwenye njirimara nke na-enye model kachasị ọhụrụ bara uru karịa
+onye na-enye obere model ochie.
 
-**Nhazi Ndị Na-enye Ọrụ N’efu** na-aza ajụjụ "**olee onye na-enye ọrụ n’efu na-enye m ụdị kacha mma?**" site
-n’ijikọ katalọgụ onye na-enye ọrụ n’efu ọ bụla na **akara ogo sitere n’aka ìgwè mmadụ** site na
-**bọọdụ ndị ndu Arena AI** (ELO nke dabere na nhọrọ mmadụ, otu echiche ahụ dị n’azụ ebe asọmpi chatbot
-LMArena). A na-ahazi ndị na-enye ọrụ dịka ike nke **ụdị n’efu ha kacha mma** si dị.
+**Nhazi Ọkwa Ndị Na-eweta Ọrụ Efụ** na-aza "**kedu onye na-eweta ọrụ efu na-enye m model kacha mma?**" site na
+ijikọ katalọgụ onye na-eweta ọrụ efu ọ bụla na **akara ogo sitere n'aka ọtụtụ ndị ọrụ** nke
+**bọọdụ ndị ndu Arena AI** (ELO dabere na nhọrọ mmadụ, otu echiche ahụ dị n'azụ ama egwuregwu chatbot
+LMArena). A na-ahazizi ndị na-eweta ọrụ n'ọkwa dịka ike nke **model efu ha kacha mma** si dị.
 
-A na-agbakọ nhazi ahụ site na isi mmalite atọ n’ezie:
+A na-agbakọ nhazi ọkwa ahụ site na isi mmalite atọ n'ezie:
 
-1. Ndepụta ndị na-enye ọrụ n’efu — `NOAUTH_PROVIDERS`, tinyere ndenye `OAUTH_PROVIDERS` /
-   `APIKEY_PROVIDERS` ndị nwere ọkọlọtọ `hasFree`
+1. Ndepụta ndị na-eweta ọrụ efu — `NOAUTH_PROVIDERS`, tinyere ndenye `OAUTH_PROVIDERS` /
+   `APIKEY_PROVIDERS` ndị e ji `hasFree` kaa akara
    (`src/shared/constants/providers.ts`).
-2. Katalọgụ ụdị nke onye na-enye ọrụ ọ bụla sitere na ndekọ ndị na-enye ọrụ
+2. Katalọgụ model nke onye na-eweta ọrụ ọ bụla sitere na ndekọ ndị na-eweta ọrụ
    (`open-sse/config/providerRegistry.ts`).
-3. Akara ndakọrịta ọrụ ewepụtara na ELO nke injin mmekọrịta Arena ELO na-echekwa na tebụl DB `model_intelligence`
+3. Akara ndakọrịta ọrụ sitere na ELO nke injin mmekọrịta Arena ELO na-echekwa na tebụl DB `model_intelligence`
    (`src/lib/arenaEloSync.ts`).
 
 Usoro njikọta ahụ dị na `src/lib/freeProviderRankings.ts`.

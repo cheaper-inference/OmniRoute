@@ -13,6 +13,7 @@
     "admission-lanes",
     "cluster-decisions",
     "persistence-backend-boundary",
-    "ADAPTIVE_ROUTING"
+    "ADAPTIVE_ROUTING",
+    "MODIFICATION_SCENARIOS"
   ]
 }

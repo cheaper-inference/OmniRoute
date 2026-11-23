@@ -1,7 +1,10 @@
+import {
+  STANDARD_REASONING_EFFORTS,
+  EXTENDED_REASONING_EFFORTS,
+} from "@omniroute/open-sse/config/reasoningEfforts.ts";
 import { codexModelFamilySupportsExtendedEffort } from "./codexExtendedEffort";
 
-export const STANDARD_REASONING_EFFORTS = ["none", "low", "medium", "high", "xhigh"] as const;
-export const EXTENDED_REASONING_EFFORTS = ["max", "ultra"] as const;
+export { STANDARD_REASONING_EFFORTS, EXTENDED_REASONING_EFFORTS };
 
 type ExtendedReasoningEffort = (typeof EXTENDED_REASONING_EFFORTS)[number];
 

@@ -29,7 +29,7 @@ function extractEmailFromJwtLocal(idToken: string): string | null {
   }
 }
 
-function previewCodexJson(json: unknown): { valid: boolean; email: string | null } {
+export function previewCodexJson(json: unknown): { valid: boolean; email: string | null } {
   try {
     const doc = json && typeof json === "object" ? (json as Record<string, unknown>) : null;
     // Codex CLI no longer writes auth_mode — accept both with and without it.
@@ -39,11 +39,19 @@ function previewCodexJson(json: unknown): { valid: boolean; email: string | null
       (doc.auth_mode !== undefined && doc.auth_mode !== null && doc.auth_mode !== "chatgpt")
     )
       return { valid: false, email: null };
+    // The OAuth fields live under `tokens` in the Codex CLI / OmniRoute export shape, but
+    // other Codex-compatible clients write them at the top level. `/api/oauth/codex/import`
+    // accepts both, so accept both here as well — mirroring parseAndValidateCodexAuth()
+    // on the server, which reads the same two places.
     const tokens =
       doc.tokens && typeof doc.tokens === "object" ? (doc.tokens as Record<string, unknown>) : null;
-    if (!tokens?.id_token || typeof tokens.id_token !== "string")
-      return { valid: false, email: null };
-    return { valid: true, email: extractEmailFromJwtLocal(tokens.id_token as string) };
+    const pickIdToken = (record: Record<string, unknown> | null): string | null => {
+      const value = record?.id_token;
+      return typeof value === "string" && value.trim() ? value.trim() : null;
+    };
+    const idToken = pickIdToken(tokens) ?? pickIdToken(doc);
+    if (!idToken) return { valid: false, email: null };
+    return { valid: true, email: extractEmailFromJwtLocal(idToken) };
   } catch {
     return { valid: false, email: null };
   }

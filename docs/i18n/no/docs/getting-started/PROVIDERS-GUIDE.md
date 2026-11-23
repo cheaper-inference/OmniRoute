@@ -10,18 +10,18 @@
 
 ## Hva er en leverandør?
 
-Tenk på en leverandør som en **mobiloperatør**. På samme måte som du trenger en mobiloperatør for å ringe, trenger du en KI-leverandør for å bruke KI-modeller. OmniRoute er som en telefon som fungerer med **alle operatører** – du kan bytte automatisk mellom dem.
+Tenk på en leverandør som en **mobiloperatør**. Akkurat som du trenger en mobiloperatør for å ringe, trenger du en KI-leverandør for å bruke KI-modeller. OmniRoute er som en telefon som fungerer med **alle operatører** — du kan bytte mellom dem automatisk.
 
 ### Typer leverandører
 
-| Type                            | Hva det er                | Eksempler                         | Kostnad                 |
-| ------------------------------- | ------------------------- | --------------------------------- | ----------------------- |
-| **Gratis**                      | Ingen betaling kreves     | Kiro, OpenCode Free, Pollinations | $0                      |
-| **API-nøkkel**                  | Du trenger en API-nøkkel  | OpenAI, Anthropic, Google         | Betaling per bruk       |
-| **OAuth**                       | Logg inn med kontoen din  | Claude Code, GitHub Copilot       | Abonnement              |
-| **Nettleserinformasjonskapsel** | Bruker nettleserøkten din | ChatGPT Web (Codex), Gemini Web   | $0 (bruker kontoen din) |
+| Type               | Hva det er                | Eksempler                       | Kostnad                 |
+| ------------------ | ------------------------- | ------------------------------- | ----------------------- |
+| **Gratis**         | Ingen betaling kreves     | Kiro, Pollinations              | $0                      |
+| **API-nøkkel**     | Du trenger en API-nøkkel  | OpenAI, Anthropic, Google       | Betaling etter bruk     |
+| **OAuth**          | Logg inn med kontoen din  | Claude Code, GitHub Copilot     | Abonnement              |
+| **Nettinfokapsel** | Bruker nettleserøkten din | ChatGPT Web (Codex), Gemini Web | $0 (bruker kontoen din) |
 
-### Leverandører med nettleserinformasjonskapsler
+### Leverandører med nettinfokapsler
 
 Se **[WEB-COOKIE-GUIDE.md](./WEB-COOKIE-GUIDE.md)** for generelle konfigurasjonsinstruksjoner, begrensninger, feilsøking og leverandørspesifikk veiledning for autentisering.
 ---
@@ -30,28 +30,27 @@ Se **[WEB-COOKIE-GUIDE.md](./WEB-COOKIE-GUIDE.md)** for generelle konfigurasjons
 
 ### Valgfritt førstegangsoppsett av gratisleverandører
 
-Førstegangsveiviseren tilbyr et eget kort for **Konfigurer gratisleverandører**. Den henter den gjeldende
+Veiviseren ved første oppstart tilbyr et eget kort for **Konfigurer gratisleverandører**. Den henter den gjeldende
 listen over kvalifiserte leverandører fra OmniRoutes register over leverandører uten autentisering, og lar deg deretter gjennomgå og velge bort hver enkelt
 leverandør før du bekrefter. OmniRoute viser leverandørens advarsel og en lenke til nettstedet
-slik at du først kan gjennomgå tredjepartsvilkår, personvern, tilgjengelighet og hastighetsgrenser.
+slik at du først kan gjennomgå tredjepartsvilkår, personvern, tilgjengelighet og hastighetsbegrensninger.
 
-Denne handlingen er valgfri: Når veiviseren fullføres, opprettes aldri tilkoblinger til gratisleverandører uten at du blir informert.
+Denne handlingen er valgfri: Når veiviseren fullføres, opprettes det aldri tilkoblinger til gratisleverandører i det skjulte.
 Den oppretter bare leverandører som fortsatt mangler, lar eksisterende tilpassede tilkoblinger
-være uendret og rapporterer opprettede, allerede konfigurerte og mislykkede leverandører enkeltvis. Etter et delvis resultat kan du
-trygt prøve bare de mislykkede leverandørene på nytt.
+være urørt og rapporterer opprettede, allerede konfigurerte og mislykkede leverandører enkeltvis. Etter et delvis resultat kan du
+trygt prøve på nytt bare for de mislykkede leverandørene.
 
-### Alternativ A: Gratisleverandør (ikke noe kredittkort)
+### Alternativ A: Gratisleverandør (uten kredittkort)
 
 1. Åpne kontrollpanelet på `http://localhost:20128`
 2. Gå til **Leverandører** → **Legg til leverandør**
-3. Velg én av disse gratisleverandørene:
-   - **Kiro AI** – Gratis Claude-modeller (ingen autentisering nødvendig)
-   - **OpenCode Free** – Gratis GPT-modeller (ingen autentisering nødvendig)
-   - **Pollinations** – Gratis GPT-5, Claude og Gemini (ingen nøkkel nødvendig)
-   - **LongCat** – 10M tokens gratis (engangstildeling, krever konto + KYC)
-   - **Cloudflare AI** – Over 50 modeller, 10K nevroner/dag
-   - **MLX Gemma 26B** – Lokal Apple Silicon-modell (~38.5 tok/s, ~15.9GB RAM)
-   - **MLX Qwen 3.8 27B** – Lokal Apple Silicon-modell (~9.1 tok/s, ~13.1GB RAM)
+3. Velg en av disse gratisleverandørene:
+   - **Kiro AI** — Gratis Claude-modeller (ingen autentisering kreves)
+   - **Pollinations** — Gratis GPT-5, Claude og Gemini (ingen nøkkel kreves)
+   - **LongCat** — 10M tokener gratis (engangstildeling, krever konto + KYC)
+   - **Cloudflare AI** — Over 50 modeller, 10K nevroner/dag
+   - **MLX Gemma 26B** — Lokal Apple Silicon-modell (~38.5 tok/s, ~15.9GB RAM)
+   - **MLX Qwen 3.8 27B** — Lokal Apple Silicon-modell (~9.1 tok/s, ~13.1GB RAM)
 4. Klikk på **Koble til**
 5. Ferdig! Du har nå gratis tilgang til KI.
 
@@ -68,7 +67,7 @@ trygt prøve bare de mislykkede leverandørene på nytt.
 4. Velg leverandøren din
 5. Lim inn API-nøkkelen din
 6. Klikk på **Koble til**
-7. Ferdig! Du har nå tilgang til modellene til den aktuelle leverandøren.
+7. Ferdig! Du har nå tilgang til modellene fra denne leverandøren.
 
 ### Alternativ C: OAuth-leverandør (abonnement)
 
@@ -81,12 +80,12 @@ trygt prøve bare de mislykkede leverandørene på nytt.
 
 ### Alternativ D: Lokale MLX-modeller (Apple Silicon)
 
-For Apple Silicon-Macer med fellesminne støtter OmniRoute tilkobling til lokale MLX-modeller som kjører via `mlx-lm.server`, som vanlige lokale leverandører som er kompatible med OpenAI.
+For Apple Silicon-Mac-er med fellesminne støtter OmniRoute tilkobling til lokale MLX-modeller som kjører via `mlx-lm.server`, som vanlige OpenAI-kompatible lokale leverandører.
 
 #### Forutsetninger
 
 - **Apple Silicon-Mac** (M1/M2/M3/M4) med 24GB+ fellesminne anbefales
-- Pakkebehandleren **uv**: `curl -LsSf https://astral.sh/uv/install.sh | sh`
+- **uv**-pakkebehandler: `curl -LsSf https://astral.sh/uv/install.sh | sh`
 - **mlx-lm**: `uv pip install mlx-lm`
 
 #### Hurtigstart
@@ -114,13 +113,13 @@ For Apple Silicon-Macer med fellesminne støtter OmniRoute tilkobling til lokale
 3. **Koble til i OmniRoute-kontrollpanelet**:
    - Gå til **Leverandører** → **Legg til leverandør**
    - Velg **MLX Gemma 26B** eller **MLX Qwen 3.8 27B**
-   - Klikk på **Koble til** (ingen API-nøkkel nødvendig)
+   - Klikk på **Koble til** (ingen API-nøkkel kreves)
 
 4. **Bruk med OpenCode**:
    ```bash
    # Konfigurer OpenCode til å bruke OmniRoute
    opencode config set api.base_url http://localhost:20128/v1
-   opencode config set api.key <din-omniroute-api-nøkkel>
+   opencode config set api.key <your-omniroute-api-key>
 
    # Bruk MLX-modeller
    opencode run --model mlx-gemma/gemma-4-26b
@@ -140,7 +139,7 @@ Du må håndtere dette manuelt:
 - Kjør dem på separate maskiner, eller
 - Stopp den ene før du starter den andre
 
-OmniRoute administrerer ikke MLX-serverprosesser automatisk – den ruter bare forespørsler til de OpenAI-kompatible endepunktene du konfigurerer.
+OmniRoute administrerer ikke MLX-serverprosesser automatisk — den ruter bare forespørsler til de OpenAI-kompatible endepunktene du konfigurerer.
 
 #### Støtte for verktøykall
 
@@ -152,20 +151,20 @@ curl -X POST http://localhost:20128/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{
     "model": "mlx-gemma/gemma-4-26b",
-    "messages": [{"role": "user", "content": "Hva er 2+2? Bruk kalkulatorverktøyet."}],
-    "tools": [{"type": "function", "function": {"name": "calculator", "description": "Beregn", "parameters": {"type": "object", "properties": {"expression": {"type": "string"}}, "required": ["expression"]}}}]
+    "messages": [{"role": "user", "content": "What is 2+2? Use the calculator tool."}],
+    "tools": [{"type": "function", "function": {"name": "calculator", "description": "Calculate", "parameters": {"type": "object", "properties": {"expression": {"type": "string"}}, "required": ["expression"]}}}]
   }'
 ```
 
 #### Feilsøking
 
-| Problem                 | Løsning                                                                                            |
-| ----------------------- | -------------------------------------------------------------------------------------------------- |
-| Serveren starter ikke   | Sjekk `uv run mlx_lm.server --help` og kontroller modell-ID-ene                                    |
-| Ikke nok minne          | Sørg for at bare én modell kjører; lukk andre apper; sjekk Aktivitetsovervåking                    |
-| Tilkoblingen ble avvist | Kontroller at serveren kjører på riktig port (11435/11436)                                         |
-| Trege svar              | Den første forespørselen laster modellen inn i minnet (~30–60 s); påfølgende forespørsler er raske |
-| Verktøykall mislykkes   | Sørg for at modellen støtter verktøy; sjekk OmniRoute-loggene for oversettelsesfeil                |
+| Problem                 | Løsning                                                                                              |
+| ----------------------- | ---------------------------------------------------------------------------------------------------- |
+| Serveren starter ikke   | Sjekk `uv run mlx_lm.server --help`, og bekreft modell-ID-ene                                        |
+| Ikke nok minne          | Sørg for at bare én modell kjører; lukk andre apper; sjekk Aktivitetsovervåking                      |
+| Tilkoblingen ble avvist | Bekreft at serveren kjører på riktig port (11435/11436)                                              |
+| Trege svar              | Den første forespørselen laster modellen inn i minnet (~30-60s); etterfølgende forespørsler er raske |
+| Verktøykall mislykkes   | Sørg for at modellen støtter verktøy; sjekk OmniRoute-loggene for oversettelsesfeil                  |
 
 ---
 
@@ -176,15 +175,13 @@ Disse leverandørene tilbyr **gratis tilgang** uten kredittkort:
 | Leverandør        | Gratiskvote               | Modeller                                 | Slik kobler du til            |
 | ----------------- | ------------------------- | ---------------------------------------- | ----------------------------- |
 | **Kiro AI**       | 50 kreditter/måned        | Claude Sonnet 4.5, Haiku 4.5, Opus 4.6   | Ingen autentisering nødvendig |
-| **OpenCode Free** | Ubegrenset                | GPT-4o, Claude, Gemini                   | Ingen autentisering nødvendig |
 | **Pollinations**  | Ingen nøkkel nødvendig    | GPT-5, Claude, Gemini, DeepSeek, Llama 4 | Ingen autentisering nødvendig |
 | **LongCat**       | 10M én gang               | LongCat-2.0                              | API-nøkkel + KYC              |
-| **Cloudflare AI** | 10K nevroner/dag          | 50+ modeller                             | Ingen autentisering nødvendig |
+| **Cloudflare AI** | 10K nevroner/dag          | Over 50 modeller                         | Ingen autentisering nødvendig |
 | **NVIDIA NIM**    | ~40 RPM                   | 129 modeller                             | API-nøkkel nødvendig          |
 | **Cerebras**      | $5 i registreringskreditt | GLM 4.7, GPT-OSS 120B                    | API-nøkkel + kort             |
-| **Qoder**         | Ubegrenset                | Kimi-K2, DeepSeek-R1, Qwen3-coder        | Ingen autentisering nødvendig |
 
-**Tips**: Koble til flere gratisleverandører for **ubegrenset gratis KI** med automatisk reservebytte!
+**Tips**: Koble til flere gratisleverandører for **ubegrenset gratis KI** med automatisk reserveleverandør!
 
 ---
 
@@ -241,8 +238,8 @@ Leverandøren din er nå tilkoblet. Du kan bruke den med `model: "auto"` eller a
 
 OmniRoute fungerer best med **flere leverandører**. Dette gir deg:
 
-- **Automatisk reservebytte** — Hvis én leverandør svikter, prøver OmniRoute den neste
-- **Kostnadsoptimalisering** — OmniRoute velger den billigste leverandøren for hver forespørsel
+- **Automatisk reserveløsning** — Hvis én leverandør svikter, prøver OmniRoute den neste
+- **Kostnadsoptimalisering** — OmniRoute velger den rimeligste leverandøren for hver forespørsel
 - **Hastighetsoptimalisering** — OmniRoute velger den raskeste leverandøren for hver forespørsel
 - **Kvalitetsoptimalisering** — OmniRoute velger den beste leverandøren for hver oppgave
 
@@ -250,7 +247,7 @@ OmniRoute fungerer best med **flere leverandører**. Dette gir deg:
 
 Koble til minst **3 leverandører** for å få den beste opplevelsen:
 
-1. **Én gratisleverandør** (Kiro, OpenCode Free eller Pollinations) — Alltid tilgjengelig
+1. **Én gratis leverandør** (Kiro eller Pollinations) — Alltid tilgjengelig
 2. **Én rask leverandør** (Groq, Cerebras) — For raske svar
 3. **Én kvalitetsleverandør** (OpenAI, Anthropic, Google) — For komplekse oppgaver
 
@@ -284,6 +281,46 @@ Bruk deretter `model: "auto"`, så velger OmniRoute automatisk den beste leveran
 2. I OmniRoute: Leverandører → Legg til leverandør → DeepSeek
 3. Lim inn API-nøkkelen → Koble til
 
+### Qoder: velg legitimasjonstransport
+
+Qoder krever legitimasjon. De to transportmetodene har ulike funksjoner; et modellnavn
+alene identifiserer ikke hva en bestemt tilkobling kan gjøre.
+
+| Legitimasjon                            | OmniRoute-transport                             | Verktøykall fra klienten                          | Strømming                                                          |
+| --------------------------------------- | ----------------------------------------------- | ------------------------------------------------- | ------------------------------------------------------------------ |
+| PAT som begynner med `pt-`              | Lokal `qodercli`-prosess på OmniRoute-verten    | Støttes ikke                                      | Bufret: SSE sendes først etter at CLI-en har returnert hele svaret |
+| Ikke-PAT-tilgangstoken eller API-nøkkel | DashScope sitt OpenAI-kompatible HTTP-endepunkt | Videresendes, avhengig av oppstrømsmodell/-nøkkel | Oppstrøms HTTP/SSE-bane                                            |
+
+For en PAT må du installere Qoder CLI på samme vert eller i samme container som OmniRoute. Den kjørbare filen
+må kunne finnes som `qodercli`, eller angi banen til den kjørbare filen i `CLI_QODER_BIN`. En CLI
+som bare er installert på Docker-verten, finnes ikke automatisk i containeren. Manglende
+binærfiler gir en eksplisitt feilmelding som henviser deg til installasjonen eller baneinnstillingen.
+
+PAT-chatbanen har et prosesstidsavbrudd på 45 sekunder. Den slår sammen samtalen til én
+ledetekst og starter CLI-en i ikke-strømmende utskriftsmodus. Hvis du ber om `stream: true`, endres
+responsformatet til SSE. Det gir ikke trinnvis levering av tokener fra oppstrømstjenesten.
+CLI-validering/modellisting bruker et separat tidsavbrudd på 20 sekunder. Dette er gjeldende standardverdier
+i koden, ikke konfigurerbare innstillinger i kontrollpanelet.
+
+Bruk PAT-tilkoblinger for vanlig chat. Agentforespørsler som inneholder `tools` eller eldre `functions`,
+utelukker PAT-kontoer under valg av legitimasjon, inkludert festede kombinasjonsmål. En blandet
+Qoder-pool kan fortsatt velge HTTP-kontoen sin. Direkte kall til PAT-kjøreren mislykkes også
+eksplisitt før CLI-en startes, i stedet for å forkaste verktøydefinisjoner i stillhet. Denne
+begrensningen gjelder verktøy som leveres av API-klienten, ikke eventuelle interne verktøy som Qoder
+CLI selv kan bruke. En HTTP-nøkkel garanterer ikke at alle modeller støtter verktøy. Vanlige
+kontroller av modellfunksjonalitet gjelder fortsatt.
+
+OAuth i nettleseren er bare tilgjengelig når administratoren konfigurerer alle de fem innstillingene:
+`QODER_OAUTH_AUTHORIZE_URL`, `QODER_OAUTH_TOKEN_URL`, `QODER_OAUTH_USERINFO_URL`,
+`QODER_OAUTH_CLIENT_ID` og `QODER_OAUTH_CLIENT_SECRET`. De er tomme som standard. En
+ukonfigurert installasjon bør bruke en støttet importmetode for legitimasjon i stedet for å anta
+at påloggingsflyten i nettleseren er klar.
+
+Implementasjonsreferanser: [Qoder-kjører](../../open-sse/executors/qoder.ts),
+[CLI-kjøretid](../../open-sse/services/qoderCli.ts) og
+[OAuth-konfigurasjon](../../src/lib/oauth/constants/oauth.ts). Trinnvis PAT-strømming
+og et konfigurerbart tidsavbrudd er separate forbedringer. Denne virkemåten innebærer ikke at de er tilgjengelige.
+
 ### Groq
 
 1. Hent API-nøkkel: https://console.groq.com/
@@ -296,23 +333,23 @@ Bruk deretter `model: "auto"`, så velger OmniRoute automatisk den beste leveran
 
 ### «Må jeg betale for å bruke OmniRoute?»
 
-**Nei!** OmniRoute er gratis og har åpen kildekode. Du kan bruke gratisleverandører (Kiro, OpenCode Free, Pollinations) uten å betale noe. Du betaler bare hvis du velger å bruke betalte leverandører.
+**Nei!** OmniRoute er gratis og har åpen kildekode. Du kan bruke gratisleverandører (Kiro, Pollinations) uten å betale noe. Du betaler bare hvis du velger å bruke betalte leverandører.
 
 ### «Hvilken leverandør bør jeg starte med?»
 
-Start med **Kiro AI** — den er gratis, krever ingen API-nøkkel og gir deg tilgang til Claude-modeller. Legg deretter til flere leverandører etter behov.
+Start med **Kiro AI** — den er gratis, krever ingen API-nøkkel og gir deg tilgang til Claude-modeller. Deretter kan du legge til flere leverandører etter behov.
 
 ### «Kan jeg bruke flere leverandører samtidig?»
 
-**Ja!** Det er hele poenget med OmniRoute. Koble til flere leverandører, og bruk `model: "auto"` for å la OmniRoute velge den beste for hver forespørsel.
+**Ja!** Det er hele poenget med OmniRoute. Koble til flere leverandører og bruk `model: "auto"` for å la OmniRoute velge den beste for hver forespørsel.
 
 ### «Hva skjer hvis en leverandør blir utilgjengelig?»
 
-OmniRoute hopper automatisk over leverandører som feiler, og prøver den neste. Du trenger ikke å gjøre noe.
+OmniRoute hopper automatisk over leverandører som ikke fungerer, og prøver den neste. Du trenger ikke å gjøre noe.
 
 ### «Hvordan kobler jeg fra en leverandør?»
 
-Gå til Leverandører → klikk på leverandøren → klikk på **Koble fra**.
+Gå til Providers → klikk på leverandøren → klikk på **Disconnect**.
 
 ### «Kan jeg bruke API-nøklene jeg allerede har?»
 

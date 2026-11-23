@@ -37,36 +37,36 @@ Search Tools Studio transformiše `/dashboard/search-tools` iz osnovnog igrališ
 
 ## Kartice
 
-### Kartica Pretraga
+### Kartica za pretragu
 
-Razvija postojeće `SearchForm` + `ResultsPanel` + `RerankPanel` u karticu:
+Pretvara postojeće `SearchForm` + `ResultsPanel` + `RerankPanel` u karticu:
 
 - Upit → rezultati (naslov, URL, isječak, ocjena relevantnosti).
-- Metapodaci provajdera u panelu Konfiguracija (trošak, kvota, status).
-- Sekcija za rerank: odaberite model za rerank, promijenite redoslijed rezultata, prikažite `positionDelta`.
-- Prazno stanje sa CTA (pozivom na akciju) kada nijedan provajder pretrage nije konfigurisan.
-- Istorija pretrage putem `SearchHistory.tsx`.
-- Poziva `POST /v1/search` (postojeći endpoint, bez izmjena).
+- Metapodaci pružatelja u oknu za konfiguraciju (trošak, kvota, status).
+- Odjeljak za ponovno rangiranje: odaberite model za ponovno rangiranje, promijenite redoslijed rezultata, prikažite `positionDelta`.
+- Prazno stanje s pozivom na radnju kada nijedan pružatelj pretrage nije konfigurisan.
+- Historija pretrage putem `SearchHistory.tsx`.
+- Poziva `POST /v1/search` (postojeća krajnja tačka, bez izmjena).
 
-### Kartica Scrape
+### Kartica za prikupljanje sadržaja
 
-Nova kartica za ekstrakciju sadržaja sa URL-a putem `POST /v1/web/fetch` (kreirano u planu 05):
+Nova kartica za izdvajanje sadržaja s URL-a putem `POST /v1/web/fetch` (kreirano u planu 05):
 
-- Unos: URL + prekidač za cijelu stranicu + selektor formata (markdown / tekst / HTML).
-- Slanje → dohvat → renderovanje `ScrapeResult.tsx`.
-- `ScrapeResult` renderuje pregled markdowna + prekidač za sirovi prikaz.
-- Ograničenje: ako je tijelo odgovora > **256 KB**, UI prikazuje `(skraćeno, pogledaj sirovo)` i otvara sirovi prikaz u Monaco modalu (D21).
-- Panel metapodataka: provajder (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search), latencija, trošak, veličina odgovora, broj linkova.
-- Koristi `useScrapeFetch.ts` hook.
+- Unos: URL + prekidač za cijelu stranicu + odabir formata (markdown / tekst / HTML).
+- Slanje → dohvaćanje → prikazivanje `ScrapeResult.tsx`.
+- `ScrapeResult` prikazuje pregled markdowna + prekidač za sirovi prikaz.
+- Ograničenje: ako je tijelo odgovora veće od **256 KB**, korisničko sučelje prikazuje `(skraćeno, prikaži sirovo)` i otvara sirovi sadržaj u Monaco modalnom prozoru (D21).
+- Ploča s metapodacima: pružatelj (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), latencija, trošak, veličina odgovora, broj linkova.
+- Koristi hook `useScrapeFetch.ts`.
 
-### Kartica Poređenje
+### Kartica za poređenje
 
-Pokreće isti upit/URL na do **4 provajdera paralelno** (D22):
+Pokreće isti upit/URL paralelno kod najviše **4 pružatelja** (D22):
 
-- Kolone jedna pored druge po provajderu.
+- Uporedne kolone za svakog pružatelja.
 - Metrike: latencija, trošak, broj rezultata, veličina odgovora.
 - Izračunavanje preklapanja URL-ova za pretragu (broj zajedničkih URL-ova u odnosu na početni rezultat).
-- Poziva `POST /v1/search` (pretraga) ili `POST /v1/web/fetch` (scrape) po provajderu.
+- Poziva `POST /v1/search` (pretraga) ili `POST /v1/web/fetch` (prikupljanje sadržaja) za svakog pružatelja.
 
 ---
 
@@ -99,14 +99,15 @@ Pokreće isti upit/URL na do **4 provajdera paralelno** (D22):
 
 ---
 
-## Katalog provajdera
+## Katalog pružatelja usluga
 
-`ProviderCatalog.tsx` izlaže punu listu provajdera iz `GET /api/search/providers`
-(prošireno u F4 da uključi fetch provajdere):
+`ProviderCatalog.tsx` prikazuje potpunu listu pružatelja usluga iz `GET /api/search/providers`
+(proširenu u F4 kako bi uključivala pružatelje usluga dohvaćanja):
 
-| `kind` | `"search"` (20 provajdera) ili `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search) |
+| `kind` | `"search"` (20 pružatelja usluga) ili `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
-Status se **izvodi u vrijeme zahtjeva** provjerom da li akreditivi postoje i da li su svi ključevi trenutno u cooldown-u.
+Status se **izvodi u trenutku zahtjeva** provjerom postoje li pristupni podaci i jesu li
+svi ključevi trenutno u periodu čekanja.
 
 ---
 
@@ -120,16 +121,16 @@ Rezervisano mjesto za API ključ je uvijek `$OMNIROUTE_API_KEY` (D11, dijeljeno 
 
 ## Promjene na backendu
 
-Bila je potrebna samo jedna promjena na backendu za ovu funkciju:
+Za ovu funkcionalnost bila je potrebna samo jedna promjena na backendu:
 
-### Proširen `GET /api/search/providers`
+### Prošireni `GET /api/search/providers`
 
-`src/app/api/search/providers/route.ts` je proširen da:
+`src/app/api/search/providers/route.ts` je proširen kako bi:
 
-- Uključi svih 6 fetch provajdera (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`) u niz.
-- Dodaj `kind: "search" | "fetch"` svakoj stavci.
-- Dodaj `status: "configured" | "missing" | "rate_limited"` izveden iz trenutnog stanja akreditiva.
-- Održava kompatibilnost unazad — postojeća polja (`id`, `name`, itd.) ostaju nepromijenjena.
+- Uključio svakog pružaoca dohvata (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`, `parallel-search`) u niz.
+- Dodao `kind: "search" | "fetch"` svakoj stavci.
+- Dodao `status: "configured" | "missing" | "rate_limited"` izveden iz trenutnog stanja vjerodajnica.
+- Zadržao kompatibilnost unazad — postojeća polja (`id`, `name` itd.) ostala su nepromijenjena.
 
 ---
 

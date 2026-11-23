@@ -203,7 +203,11 @@ export async function maybeFallbackAfterReadiness(ctx: ReadinessFallbackContext)
       finalBody: ctx.finalBody,
     };
   }
-  if (ctx.streamReadiness.ok === true || ctx.clientAborted) {
+  if (
+    ctx.streamReadiness.ok === true ||
+    ctx.clientAborted ||
+    ctx.streamReadiness.code === "empty_content"
+  ) {
     return {
       readiness: ctx.streamReadiness,
       providerResponse: ctx.failedBody,

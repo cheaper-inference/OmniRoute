@@ -35,6 +35,18 @@
 export const AWS_REGION_PATTERN = /^[a-z]{2}-[a-z]+-\d{1,2}$/;
 
 /**
+ * Normalize (trim + lowercase) a stored region and return it only when it matches the canonical
+ * AWS region shape; otherwise return `fallback`. For sinks that interpolate the region into an
+ * upstream host (e.g. `oidc.{region}.amazonaws.com`) and must never throw — such as the
+ * background token refresh — so a tampered `providerSpecificData.region` cannot steer the
+ * request (and the credentials it carries) off AWS (GHSA-6mwv-4mrm-5p3m).
+ */
+export function safeAwsRegion(region: unknown, fallback = "us-east-1"): string {
+  const normalized = typeof region === "string" ? region.trim().toLowerCase() : "";
+  return AWS_REGION_PATTERN.test(normalized) ? normalized : fallback;
+}
+
+/**
  * Regions where the Amazon Q Developer *profile* is currently hosted (AWS docs: "Supported
  * Regions for the Q Developer console and Q Developer profile"). These are the guaranteed
  * discovery targets and the only regions trusted as a runtime fallback when no profileArn is
@@ -53,6 +65,31 @@ export function kiroRuntimeHost(region: string): string {
   return region === "us-east-1"
     ? "https://codewhisperer.us-east-1.amazonaws.com"
     : `https://q.${region}.amazonaws.com`;
+}
+
+/** Region selector value that asks API-key import to detect the key's Amazon Q region. */
+export const KIRO_API_KEY_AUTO_REGION = "auto";
+
+/**
+ * Normalize a stored/requested API-key region to one of the Q profile regions, falling back to
+ * us-east-1. The result is interpolated into a hostname, so only allowlisted values pass (SSRF
+ * guard, GHSA-6mwv-4mrm-5p3m).
+ */
+export function resolveKiroApiKeyRegion(region: unknown): string {
+  const normalized = typeof region === "string" ? region.trim().toLowerCase() : "";
+  return (KIRO_PROFILE_REGIONS as readonly string[]).includes(normalized)
+    ? normalized
+    : "us-east-1";
+}
+
+/**
+ * Runtime host for long-lived Kiro API keys. API keys authenticate only on the regional Amazon Q
+ * surface: the Kiro IDE gateway (runtime.*.kiro.dev) rejects TokenType=API_KEY, and
+ * codewhisperer.us-east-1 authenticates the key but answers HTTP 400 REQUEST_BODY_INVALID for
+ * the same payload. So, unlike kiroRuntimeHost, us-east-1 also maps to q.us-east-1.
+ */
+export function kiroApiKeyRuntimeHost(region: unknown): string {
+  return `https://q.${resolveKiroApiKeyRegion(region)}.amazonaws.com`;
 }
 
 /** Extract the region from a CodeWhisperer profile ARN (`arn:aws:codewhisperer:{region}:...`). */

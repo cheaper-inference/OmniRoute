@@ -24,6 +24,11 @@ import {
   type PricingByProvider,
 } from "@/lib/modelsDevSync";
 import { getSyncedPricing } from "@/lib/pricingSync";
+import {
+  lookupUserCatalogPricing,
+  readUserPricingMemoized,
+  type UserPricingByProvider,
+} from "@/lib/catalogUserPricing";
 import { getPricingForModel as getDefaultPricingForModel } from "@/shared/constants/pricing";
 import {
   CANONICAL_EFFORT_VALUES,
@@ -40,6 +45,8 @@ type JsonRecord = Record<string, unknown>;
 
 export interface CatalogEnrichmentSnapshot {
   modelsDevPricing: PricingByProvider | null;
+  /** #15528: bulk-loaded user `pricing` namespace (PATCH /api/pricing overrides). */
+  userPricing?: UserPricingByProvider | null;
   providerNodeIdsByPrefix?: Readonly<Record<string, string>>;
   /** #9147: build-local bulk load of synced capabilities + token/context overrides
    * so per-entry enrichment never hits SQLite again (see catalogResponse.ts). */
@@ -357,7 +364,22 @@ function resolveCatalogPricing(
   snapshot?: CatalogEnrichmentSnapshot
 ): Record<string, number> | null {
   if (!provider || !model) return null;
+  const base = resolveBaseCatalogPricing(provider, model, snapshot);
+  // #15528: user overrides win per-field over models.dev / LiteLLM / defaults.
+  const user = lookupUserCatalogPricing(
+    snapshot?.userPricing !== undefined ? snapshot.userPricing : readUserPricingMemoized(),
+    provider,
+    model,
+    findInsensitive
+  );
+  return user ? { ...(base || {}), ...user } : base;
+}
 
+function resolveBaseCatalogPricing(
+  provider: string,
+  model: string,
+  snapshot?: CatalogEnrichmentSnapshot
+): Record<string, number> | null {
   // Prefer models.dev synced pricing when present; fall back to hardcoded defaults.
   try {
     const modelsDev = (
@@ -621,7 +643,15 @@ export function enrichCatalogModelEntry<T extends JsonRecord>(
   if (persistedOutputLimit !== null) {
     nextEntry.max_output_tokens = persistedOutputLimit;
   } else if (
-    typeof nextEntry.max_output_tokens !== "number" &&
+    // #16579: these OpenCode Go imports can carry a stale generic 32K output
+    // ceiling. For the three upstream-verified models use the resolved model
+    // metadata instead, which still honors a synced limit if one is present.
+    // Do not rewrite other providers' explicit advertised output limits.
+    (typeof nextEntry.max_output_tokens !== "number" ||
+      (metadata.provider === "opencode-go" &&
+        (model === "deepseek-v4.1-flash" ||
+          model === "deepseek-flash" ||
+          model === "minimax-m2.5"))) &&
     typeof metadata.limits.maxOutputTokens === "number" &&
     metadata.limits.maxOutputTokens > 0
   ) {

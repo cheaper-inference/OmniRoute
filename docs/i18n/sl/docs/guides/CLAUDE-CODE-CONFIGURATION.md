@@ -97,8 +97,8 @@ modeli Kimi.
 
 ## Uvodni blok na nadzorni plošči
 
-Kartica orodja Claude (**Nadzorna plošča → Koda CLI**) prikaže natančen fragment `settings.json`
-za ta primerek, poleg informacijskega gumba za vzdevek za odkrivanje in z gumbom za kopiranje:
+Kartica orodja Claude (**Nadzorna plošča → Koda CLI**) prikaže točen fragment `settings.json`
+za ta primerek, poleg informacijskega gumba za vzdevek odkrivanja in z gumbom za kopiranje:
 
 ```jsonc
 {
@@ -110,29 +110,42 @@ za ta primerek, poleg informacijskega gumba za vzdevek za odkrivanje in z gumbom
 }
 ```
 
-Osnovni URL je tisti, ki ga razreši kartica (vključno s preglasitvijo po meri, ki ste jo vnesli), in je že
+Osnovni URL je tisti, ki ga je razrešila kartica (vključno s preglasitvijo po meri, ki ste jo vnesli), in je že
 normaliziran — brez pripone `/v1` in brez končne poševnice. **Ključ ni nikoli prikazan**: blok vsebuje
-nadomestno besedilo, zato ga posnetek zaslona ali prilepljeni izsek ne more razkriti. Nadomestno besedilo zamenjajte s svojim ključem.
+označbo mesta, zato ga posnetek zaslona ali prilepljen izsek ne more razkriti. Označbo mesta nadomestite s svojim ključem.
 
 Dodajte `CLAUDE_CODE_AUTO_COMPACT_WINDOW` v isti blok `env` za vsak model, katerega dejansko
-kontekstno okno ni 200K — Claude Code za vsak ID, ki ga ne prepozna, predpostavlja 200K, zato se
-samodejno strnjevanje sicer sproži ob napačnem času (glejte opozorilo v prejšnjem razdelku).
-Graditelj izseka sprejema tudi to vrednost, zato jo lahko klicatelj, ki pozna velikost kontekstnega okna
-ciljnega modela, vključi neposredno.
+kontekstno okno ni 200K — Claude Code za vsak ID, ki ga ne prepozna, privzame 200K, zato se sicer
+samodejno zgoščevanje sproži ob napačnem trenutku (glejte opozorilo v prejšnjem razdelku).
+Sestavljalnik izsekov sprejme tudi to vrednost, zato jo lahko klicatelj, ki pozna velikost kontekstnega okna
+ciljnega modela, neposredno vključi.
 
 Vir: `src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet` (čisti
-graditelj, preizkušen s testi enot), ki ga prikaže `ClaudeGatewayOnboardingBlock`.
+sestavljalnik, pokrit s testi enot), ki ga prikaže `ClaudeGatewayOnboardingBlock`.
+
+### Pripnite en račun (izbirno)
+
+Če želite vse zahteve Claude Code poslati prek enega določenega računa ponudnika, dodajte glavo
+`x-omniroute-connection` prek `ANTHROPIC_CUSTOM_HEADERS` v istem bloku `env`:
+
+```jsonc
+"ANTHROPIC_CUSTOM_HEADERS": "x-omniroute-connection: <connection id>"
+```
+
+ID kopirajte iz oznake `xxxxxxxx…` v vrstici povezave na strani ponudnika. Pripenjanje velja samo
+za ID-je posameznih modelov (`provider/model`), ne pa za kombinacije. Za natančno
+vedenje ob preklopu glejte [Pripenjanje računa za posamezno zahtevo](../reference/API_REFERENCE.md#account-pinning-per-request).
 
 ---
 
 ## Profili (`CLAUDE_CONFIG_DIR`)
 
-Claude Code **nima izvornih datotek profilov** (za razliko od Codexove datoteke `~/.codex/<name>.config.toml`).
-Običajni mehanizem je `CLAUDE_CONFIG_DIR` — ločen imenik z nastavitvami za vsak
-profil, pri čemer ima vsak svoj `settings.json`, poverilnice, zgodovino in predpomnilnik.
+Claude Code **nima izvornih datotek profilov** (za razliko od Codexovih `~/.codex/<name>.config.toml`).
+Običajni mehanizem je `CLAUDE_CONFIG_DIR` — ločen konfiguracijski imenik za vsak
+profil, vsak s svojimi nastavitvami `settings.json`, poverilnicami, zgodovino in predpomnilnikom.
 
 `omniroute setup-claude` pridobi aktualni katalog `/v1/models` in zapiše en
-profil na model v `~/.claude/profiles/<name>/settings.json`, pri čemer znova uporabi
+profil na model v `~/.claude/profiles/<name>/settings.json`, pri čemer ponovno uporabi
 **ista imena kot `setup-codex`** (`glm52`, `kimi-k27`, `deepseek-pro`, …):
 
 ```jsonc
@@ -150,18 +163,18 @@ profil na model v `~/.claude/profiles/<name>/settings.json`, pri čemer znova up
 }
 ```
 
-> **Žeton za preverjanje pristnosti ni nikoli zapisan v profil.** Zaženite z ukazom
-> `omniroute launch --profile <name>` (ta vstavi `ANTHROPIC_AUTH_TOKEN` iz
+> **Žeton za preverjanje pristnosti se nikoli ne zapiše v profil.** Zaženite z
+> `omniroute launch --profile <name>` (vstavi `ANTHROPIC_AUTH_TOKEN` iz
 > aktivnega konteksta) ali pa sami izvozite `ANTHROPIC_AUTH_TOKEN` in zaženite
 > `CLAUDE_CONFIG_DIR=~/.claude/profiles/<name> claude`.
 
-**Samodejna sinhronizacija po odkrivanju modelov (zahteva izrecno vključitev).** OmniRoute lahko samodejno znova ustvari iste
+**Samodejna sinhronizacija po odkritju modelov (izbirno).** OmniRoute lahko samodejno znova ustvari iste
 datoteke `~/.claude/profiles/<name>/settings.json` vsakič, ko sinhronizacija modelov ponudnika
-spremeni aktualni katalog — tako novi ali preimenovani modeli dobijo profile, ne da bi morali znova zagnati
-ukaz. Ta možnost je **privzeto izklopljena**: preklopite jo na **nadzorni plošči Koda CLI** (»Samodejna
-sinhronizacija profilov CLI« → Claude Code) ali nastavite `OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES=true` (upošteva tudi
-`CLI_ALLOW_CONFIG_WRITES`, ki je privzeto vključen). Ko je možnost omogočena, zapisuje samo datoteke profilov; nikoli ne
-spremeni vaše aktivne/privzete konfiguracije Claude, preverjanja pristnosti ali datoteke `~/.claude/settings.json`.
+spremeni aktualni katalog — tako novi ali preimenovani modeli dobijo profile brez ponovnega zagona
+ukaza. Privzeto je **izklopljena**: preklopite jo na **nadzorni plošči CLI Code** ("Samodejna
+sinhronizacija profilov CLI" → Claude Code) ali nastavite `OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES=true` (upošteva tudi
+`CLI_ALLOW_CONFIG_WRITES`, ki je privzeto vklopljen). Ko je omogočena, zapisuje samo datoteke profilov; nikoli
+ne spremeni vaše aktivne/privzete konfiguracije Claude, preverjanja pristnosti ali datoteke `~/.claude/settings.json`.
 
 ### Ustvarjanje in uporaba profilov
 
@@ -169,16 +182,20 @@ spremeni vaše aktivne/privzete konfiguracije Claude, preverjanja pristnosti ali
 # Lokalni OmniRoute
 omniroute setup-claude
 
-# Oddaljeni VPS (URL strežnika VPS vključi v vsak profil)
+# Oddaljeni VPS (v vsak profil vgradi URL strežnika VPS)
 omniroute setup-claude --remote http://192.168.0.15:20128 --api-key oma_live_xxx
 
 # Samo nekateri ponudniki
 omniroute setup-claude --only glm,kimi
 
+# Zapiši tudi profile za ponudnike lokalnega CLI-ja (zcode, auggie, devin-cli-agentic,
+# codex-app-server), ki niso zaznani na tem gostitelju (privzeto so za lokalni cilj preskočeni)
+omniroute setup-claude --include-local
+
 # Predogled brez zapisovanja
 omniroute setup-claude --dry-run
 
-# Zagon profila
+# Zaženi profil
 omniroute launch --profile kimi-k27
 ```
 

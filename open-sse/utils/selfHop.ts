@@ -4,11 +4,18 @@ import { randomBytes, timingSafeEqual } from "node:crypto";
 
 export const SELF_HOP_HEADER = "x-omniroute-self-hop";
 
-let token: string | null = null;
+// One token per process, never persisted or logged. It lives on globalThis, not in a
+// module-level variable: Next bundles open-sse, so the instrumentation bundle (whose
+// copy of proxyFetch patches global fetch and stamps the header) and the route bundles
+// (whose copy of chatAdmissionIdentity verifies it) each load their own copy of this
+// module. A module-level token gave the two sides different values (same split #14740
+// fixed for the self-loop secret).
+const SELF_HOP_TOKEN_KEY = Symbol.for("omniroute.selfHopToken");
+const selfHopStore = globalThis as unknown as Record<symbol, string | undefined>;
 
 export function ownListenerSelfHopToken(): string {
-  if (!token) token = randomBytes(32).toString("hex");
-  return token;
+  selfHopStore[SELF_HOP_TOKEN_KEY] ??= randomBytes(32).toString("hex");
+  return selfHopStore[SELF_HOP_TOKEN_KEY];
 }
 
 export function listenPort(): string {

@@ -123,7 +123,9 @@
       "maxCostOpt": "每日最大成本（美元）",
       "allowedModelsOpt": "逗號分隔的允許模型列表",
       "nothingToSet": "未提供策略欄位。使用 --rate-limit、--max-cost 或 --allowed-models。",
-      "updated": "策略已更新。"
+      "updated": "策略已更新。",
+      "modelAccessModeOpt": "模型存取模式 (all | restricted)",
+      "unrestrictedOpt": "允許所有模型 (--model-access-mode all)"
     },
     "expiration": {
       "title": "金鑰過期",
@@ -254,6 +256,7 @@
     "log": "內聯顯示伺服器日誌",
     "no_recovery": "停用崩潰自動重啟（除錯模式）",
     "max_restarts": "30 秒內的最大崩潰重啟次數（預設：2）",
+    "headless": "僅執行代理引擎：停用儀表板（404），略過選用子系統（設定 OMNIROUTE_HEADLESS=1）",
     "tray": "顯示系統托盤圖示（僅桌面，選擇加入）",
     "no_tray": "停用系統托盤圖示",
     "ready_timeout": "就緒探測逾時（毫秒）（也可用 OMNIROUTE_READY_TIMEOUT_MS，預設 60000）",
@@ -1168,32 +1171,18 @@
   "sync": {
     "description": "在 OmniRoute 例項之間同步配置",
     "push": {
-      "description": "將配置推送到雲或遠端例項",
-      "target": "目標（cloud 或 context:name）",
-      "bundle": "要同步的包部分",
-      "dryRun": "預覽但不應用"
+      "description": "將配置推送到雲或遠端例項"
     },
     "pull": {
-      "description": "從雲或遠端拉取配置",
-      "source": "來源（cloud 或 context:name）",
-      "merge": "與現有配置合併",
-      "replace": "替換現有配置",
-      "dryRun": "預覽但不應用"
-    },
-    "diff": {
-      "source": "源上下文",
-      "target": "目標上下文"
+      "description": "從雲或遠端拉取配置"
     },
     "bundle": {
       "description": "將配置匯出為包檔案",
-      "include": "要包含的部分（逗號分隔）"
+      "token": "Sync token (from `sync tokens create`); defaults to OMNIROUTE_SYNC_TOKEN"
     },
     "import": {
       "description": "匯入包檔案",
       "dryRun": "驗證但不應用"
-    },
-    "initialize": {
-      "fromCloud": "從雲備份初始化"
     },
     "tokens": {
       "description": "管理同步權杖",
@@ -1205,9 +1194,6 @@
       "revoke": {
         "yes": "跳過確認"
       }
-    },
-    "resolve": {
-      "description": "互動式解決同步衝突"
     }
   },
   "config": {

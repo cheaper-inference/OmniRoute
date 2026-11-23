@@ -12,140 +12,245 @@
 
 ### سطح ۱ — LOCAL_ONLY
 
-**اعمال شده توسط:** `isLocalOnlyPath(path)` ← بررسی میزبان لوپبک
-**دور زدن:** به طور پیشفرض هیچ. استثنای محدود برای مسیرها در
-`LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` هنگامی که درخواست حاوی یک
-کلید API معتبر با دامنه `manage` باشد (به [استثنای دامنه مدیریت](#manage-scope-carve-out) مراجعه کنید).
+**اعمالشده توسط:** `isLocalOnlyPath(path)` ← بررسی میزبان loopback  
+**دور زدن:** بهطور پیشفرض امکانپذیر نیست. یک استثنای محدود برای مسیرهای موجود در
+`LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES`، هنگامی که درخواست دارای یک
+کلید API معتبر با scope برابر با `manage` باشد (نگاه کنید به [استثنای scope مدیریت](#manage-scope-carve-out)).
 
-این مسیرها فرآیندهای فرزند را ایجاد میکنند یا کد زمان اجرا را اجرا میکنند. قرار دادن آنها در معرض
-ترافیک غیر لوپبک به مهاجمی که یک JWT معتبر به دست آورده است (به عنوان مثال،
-از طریق یک تونل Cloudflared/Ngrok) اجازه میدهد تا ایجاد فرآیند را فعال کند — یک کلاس CVE
-شناخته شده ([GHSA-fhh6-4qxv-rpqj](https://github.com/advisories/GHSA-fhh6-4qxv-rpqj)).
+این routeها فرایندهای فرزند ایجاد میکنند یا کد runtime را اجرا میکنند. در معرض
+ترافیک غیر-loopback قرار دادن آنها به مهاجمی که یک JWT معتبر به دست آورده است (برای مثال،
+از طریق تونل Cloudflared/Ngrok) اجازه میدهد ایجاد فرایند را فعال کند — یک کلاس شناختهشده
+از CVEها
+([GHSA-fhh6-4qxv-rpqj](https://github.com/advisories/GHSA-fhh6-4qxv-rpqj)).
 
-**GHSA-fhh6-4qxv-rpqj چیست (کلاس حمله):** یک سرور مدیریت/عامل
-یک نقطه پایانی را در معرض دید قرار میدهد که یک زیرفرآیند را راهاندازی میکند (`npm install`, `node`, یک مرورگر،
-یک پروکسی، `git`, `tar`, …). اگر آن نقطه پایانی از خارج از میزبان قابل دسترسی باشد — زیرا
+**GHSA-fhh6-4qxv-rpqj چیست (کلاس حمله):** یک سرور مدیریت/عامل،
+endpointای را در معرض دسترسی قرار میدهد که یک زیرفرایند (`npm install`، `node`، یک مرورگر،
+یک پروکسی، `git`، `tar`، …) را اجرا میکند. اگر آن endpoint از خارج میزبان قابل دسترسی باشد — زیرا
 اپراتور OmniRoute را پشت یک تونل nginx/Cloudflare/Tailscale قرار داده و یک JWT
-فاش شده است، یا احراز هویت به اشتباه پیکربندی شده است — مهاجم "فراخوانی یک API" را به "اجرای یک
-دستور روی میزبان" (اجرای کد از راه دور) تبدیل میکند. OmniRoute این مشکل را با اعمال یک
-**بررسی میزبان لوپبک بدون قید و شرط، قبل از هرگونه بررسی احراز هویت**، در هر
-مسیر با قابلیت ایجاد فرآیند، برطرف میکند: یک توکن فاش شده از طریق تونل همچنان نمیتواند به ایجاد فرآیند دسترسی پیدا کند.
+افشا شده است، یا احراز هویت بهاشتباه پیکربندی شده است — مهاجم «فراخوانی یک API» را به «اجرای یک
+فرمان روی میزبان» (اجرای کد از راه دور) تبدیل میکند. OmniRoute با اعمال بدون قیدوشرط
+**بررسی میزبان loopback، پیش از هرگونه بررسی احراز هویت**، روی هر
+route دارای قابلیت ایجاد فرایند، این مسیر را مسدود میکند: یک توکن افشاشده از طریق تونل همچنان نمیتواند به قابلیت ایجاد فرایند دسترسی پیدا کند.
 
-**مجموعه کامل LOCAL_ONLY.** منبع معتبر عبارت است از
+**مجموعه کامل LOCAL_ONLY.** منبع معتبر،
 `LOCAL_ONLY_API_PREFIXES` / `LOCAL_ONLY_API_PATTERNS` در
-`src/server/authz/routeGuard.ts`؛ جدول زیر وضعیت فعلی را منعکس میکند.
-دروازه `check-route-guard-membership` هر `route.ts` را تحت
-پیشوندهای با قابلیت ایجاد فرآیند شمارش میکند و اگر هر یک به عنوان فقط محلی (local-only) طبقهبندی نشده باشد، CI را با شکست مواجه میکند.
+`src/server/authz/routeGuard.ts` است؛ جدول زیر وضعیت فعلی را منعکس میکند. گیت
+`check-route-guard-membership` تمام فایلهای `route.ts` زیر prefixهای
+دارای قابلیت ایجاد فرایند را فهرست میکند و اگر هرکدام بهعنوان local-only طبقهبندی نشده باشد، CI را ناموفق میکند.
 
-| Prefix / pattern                                                                                         | چرا فقط محلی است                                                                                              |
-| -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| `/api/mcp/`                                                                                              | سرور MCP — پلهای stdio و کنترلکنندههای SSE را راهاندازی میکند                                                 |
-| `/api/cli-tools/runtime/`                                                                                | زمان اجرای ابزار CLI — کد پلاگین دلخواه را اجرا میکند                                                         |
-| `/api/cli-tools/{omp,letta,grok-build,forge,jcode,qwen}-settings`                                        | نویسندگان تنظیمات هر ابزار که میتوانند باینریها/پیکربندی ابزار را روی میزبان تغییر دهند                       |
-| `/api/cli-tools/{claude,cline,codewhale,codex,crush,deepseek-tui,droid,kilo,openclaw,pi,smelt}-settings` | همان راهاندازی `getCliRuntimeStatus()` مانند شش مورد بالا (GHSA-35fw-cv32-2373)                               |
-| `/api/cli-tools/{all-statuses,status,detect}`                                                            | پروبهای موجودی CLI — `command -v` / `--version` را برای هر ابزار راهاندازی میکنند (GHSA-35fw-cv32-2373)       |
-| `/api/cli-tools/antigravity-mitm`                                                                        | کنترل پروکسی MITM Antigravity (پروکسی سیستمی را راهاندازی/اشاره میکند)                                        |
-| `/api/modality-bridge/video/`                                                                            | پروب زمان اجرای Video Bridge با حلقه برگشتی قابل اعتماد و پل استخراج داخلی                                    |
-| `/api/services/`                                                                                         | سرویسهای جاسازی شده (9Router / CLIProxy / Bifrost / Mux / Dario) — `npm install` + راهاندازی                  |
-| `/dashboard/providers/services/`                                                                         | پروکسی معکوس به رابطهای کاربری سرویسهای جاسازی شده                                                            |
-| `/api/tunnels/cloudflared`                                                                               | باینری cloudflared را نصب/راهاندازی میکند                                                                     |
-| `/api/tunnels/tailscale/{install,enable,disable,login,start-daemon}`                                     | tailscaled را روی میزبان نصب/کنترل میکند                                                                      |
-| `/api/copilot/`                                                                                          | درایور LLM بدون احراز هویت — به طور پیشفرض فقط CLI                                                            |
-| `/api/tools/agent-bridge/`                                                                               | AgentBridge — سرور MITM و ویرایشهای DNS را راهاندازی میکند                                                    |
-| `/api/tools/traffic-inspector/`                                                                          | بازرس ترافیک — شنونده http-proxy + پروکسی سیستمی                                                              |
-| `/api/settings/mitm`                                                                                     | رهگیری MITM را فعال میکند (وضعیت پروکسی در سطح سیستم)                                                         |
-| `/api/issue-agent/`                                                                                      | عامل مشکل — ابزارهای محلی را در برابر مخزن راهاندازی میکند                                                    |
-| `/api/plugins/`, `/api/plugins`                                                                          | پلاگینها — بارگذاری/اجرا از طریق `worker_threads` + `child_process`                                           |
-| `/api/middleware/`                                                                                       | میانافزار کاربر — کد اپراتور را درون فرآیند بارگذاری/اجرا میکند                                               |
-| `/api/system/version`                                                                                    | بهروزرسانی خودکار (فقط POST؛ GET/HEAD/OPTIONS معاف هستند) — `git checkout` + `npm install` را راهاندازی میکند |
-| `/api/db-backups/exportAll`                                                                              | `tar` را برای آرشیو صادرات راهاندازی میکند                                                                    |
-| `/api/local/`                                                                                            | راهاندازهای محلی 1-کلیک (امروز Redis) — podman/docker را راهاندازی میکند                                      |
-| `/api/headroom/start`, `/api/headroom/stop`                                                              | چرخه حیات پروکسی Headroom — CLI پایتون را راهاندازی میکند / PID را سیگنال میدهد                               |
-| `/api/jobs`, `/api/jobs/`                                                                                | کنترل اجرای وظایف — کارهای برنامهریزی شده سمت میزبان را اجرا میکند                                            |
-| `/api/oauth/cursor/auto-import`                                                                          | `execFile("which", ["cursor"])` قبل از وارد کردن اعتبارنامهها                                                 |
-| `/api/oauth/kiro/auto-import`                                                                            | فایلهای اعتبارنامه Kiro CLI را از میزبان میخواند                                                              |
-| `/api/skills/collect/`                                                                                   | جمعآوری مهارت — ابزارهای محلی را شناسایی/نصب میکند                                                            |
-| `/api/skills/install`, `/api/skills/executions`                                                          | ثبت و اجرای کنترلکننده مهارت — به راهاندازی کانتینر sandbox میرسد (GHSA-jx89)                                 |
-| `/api/discovery/`                                                                                        | پروبهای کشف شبکه/ارائهدهنده محلی                                                                              |
-| `/api/vnc-session` (`VNC_ROUTE_PREFIX`)                                                                  | یک مرورگر هدفل (headful) + جلسه VNC برای ورودهای تعاملی ایجاد میکند                                           |
-| `/api/acp/agents`                                                                                        | ACP — باینریهای عامل CLI محلی را کشف و ایجاد میکند                                                            |
-| `/api/resilience/connections`                                                                            | JSON تابآوری به ازای هر حساب (cooldown, breaker, lockout). HTML داشبورد فقط محلی نیست.                        |
-| `/api/providers/cursor/agent-availability`                                                               | بررسی "نصب-یادآوری" داشبورد — `cursor-agent status --format json` را ایجاد میکند                              |
-| `/api/providers/{id}/login` (regex)                                                                      | یک Playwright Chromium هدفل برای ورود با کوکی وب را راهاندازی میکند                                           |
-| `/api/providers/volcengine-plan/connect` (regex)                                                         | جریان هدفل دستی + ورود خودکار تلفنی/پیامکی مبتنی بر جلسه (Playwright را ایجاد میکند)                          |
-| `/api/providers/{id}/refresh-cursor` (regex)                                                             | تمدید دستی جلسه Cursor — `cursor-agent` را تحریک میکند                                                        |
-| `/api/providers/{id}/chatgpt-web-codex-doctor` (regex)                                                   | نصب Codex CLI محلی را تشخیص میدهد (باینری را ایجاد میکند)                                                     |
+| پیشوند / الگو                                                                                            | دلیل محلیبودن                                                                                                              |
+| -------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `/api/mcp/`                                                                                              | سرور MCP — پلهای stdio و کنترلکنندههای SSE را راهاندازی میکند                                                              |
+| `/api/cli-tools/runtime/`                                                                                | محیط اجرای ابزار CLI — کد دلخواه افزونه را اجرا میکند                                                                      |
+| `/api/cli-tools/{omp,letta,grok-build,forge,jcode,qwen}-settings`                                        | نویسندههای تنظیمات مختص هر ابزار که میتوانند فایلهای اجرایی/پیکربندی ابزار را روی میزبان تغییر دهند                        |
+| `/api/cli-tools/{claude,cline,codewhale,codex,crush,deepseek-tui,droid,kilo,openclaw,pi,smelt}-settings` | همان فرایند راهاندازی `getCliRuntimeStatus()` مانند شش مورد مشابه بالا (GHSA-35fw-cv32-2373)                               |
+| `/api/cli-tools/{all-statuses,status,detect}`                                                            | کاوشگرهای موجودی CLI — برای هر ابزار `command -v` / `--version` را راهاندازی میکنند (GHSA-35fw-cv32-2373)                  |
+| `/api/cli-tools/antigravity-mitm`                                                                        | کنترل پراکسی MITM مربوط به Antigravity (پراکسی سیستم را راهاندازی/تنظیم میکند)                                             |
+| `/api/modality-bridge/video/`                                                                            | کاوش زمان اجرای Video Bridge با الزام حلقهٔ بازگشتی قابلاعتماد و پل استخراج داخلی                                          |
+| `/api/services/`                                                                                         | سرویسهای تعبیهشده (9Router / CLIProxy / Bifrost / Mux / Dario) — `npm install` و راهاندازی                                 |
+| `/dashboard/providers/services/`                                                                         | پراکسی معکوس به رابطهای کاربری سرویسهای تعبیهشده                                                                           |
+| `/api/tunnels/cloudflared`                                                                               | فایل اجرایی cloudflared را نصب/راهاندازی میکند                                                                             |
+| `/api/tunnels/tailscale/{install,enable,disable,login,start-daemon}`                                     | tailscaled را روی میزبان نصب/کنترل میکند                                                                                   |
+| `/api/copilot/`                                                                                          | راهانداز LLM بدون احراز هویت — بهطور پیشفرض فقط برای CLI                                                                   |
+| `/api/tools/agent-bridge/`                                                                               | AgentBridge — سرور MITM را راهاندازی و DNS را ویرایش میکند                                                                 |
+| `/api/tools/traffic-inspector/`                                                                          | Traffic Inspector — شنوندهٔ http-proxy و پراکسی سیستم                                                                      |
+| `/api/settings/mitm`                                                                                     | رهگیری MITM را فعال میکند (وضعیت پراکسی در سطح سیستم)                                                                      |
+| `/api/issue-agent/`                                                                                      | عامل رسیدگی به مشکلات — ابزارهای محلی را روی مخزن اجرا میکند                                                               |
+| `/api/plugins/`, `/api/plugins`                                                                          | افزونهها — بارگذاری/اجرا از طریق `worker_threads` و `child_process`                                                        |
+| `/api/middleware/`                                                                                       | میانافزار کاربر — کد اپراتور را درون فرایند بارگذاری/اجرا میکند                                                            |
+| `/api/system/version`                                                                                    | بهروزرسانی خودکار (فقط POST؛ درخواستهای GET/HEAD/OPTIONS مستثنا هستند) — `git checkout` و `npm install` را راهاندازی میکند |
+| `/api/db-backups/exportAll`                                                                              | برای بایگانی خروجی، `tar` را راهاندازی میکند                                                                               |
+| `/api/local/`                                                                                            | راهاندازهای محلی با یک کلیک (در حال حاضر Redis) — podman/docker را راهاندازی میکنند                                        |
+| `/api/headroom/start`, `/api/headroom/stop`                                                              | چرخهٔ عمر پراکسی Headroom — CLI پایتون را راهاندازی میکند / به PID سیگنال میفرستد                                          |
+| `/api/jobs`, `/api/jobs/`                                                                                | کنترل اجراکنندهٔ کارها — کارهای زمانبندیشدهٔ سمت میزبان را اجرا میکند                                                      |
+| `/api/oauth/cursor/auto-import`                                                                          | پیش از واردکردن اطلاعات اعتبارسنجی، `execFile("which", ["cursor"])` را اجرا میکند                                          |
+| `/api/oauth/kiro/auto-import`                                                                            | فایلهای اطلاعات اعتبارسنجی Kiro CLI را از میزبان میخواند                                                                   |
+| `/api/skills/collect/`                                                                                   | گردآوری مهارتها — ابزارهای محلی را شناسایی/نصب میکند                                                                       |
+| `/api/skills/install`, `/api/skills/executions`                                                          | ثبت کنترلکنندهٔ Skill و اجرا — دسترسی به ایجاد کانتینر sandbox ‏(GHSA-jx89)                                                |
+| `/api/discovery/`                                                                                        | کاوشهای کشف شبکهٔ محلی/ارائهدهنده                                                                                          |
+| `/api/vnc-session` (`VNC_ROUTE_PREFIX`)                                                                  | یک مرورگر گرافیکی و نشست VNC برای ورودهای تعاملی ایجاد میکند                                                               |
+| `/api/acp/agents`                                                                                        | ACP — باینریهای محلی عامل CLI را کشف و اجرا میکند                                                                          |
+| `/api/resilience/connections`                                                                            | JSON تابآوری بهازای هر حساب (cooldown، breaker، lockout). فایل HTML داشبورد فقط محلی نیست.                                 |
+| `/api/providers/cursor/agent-availability`                                                               | بررسی اعلان نصب در داشبورد — دستور `cursor-agent status --format json` را اجرا میکند                                       |
+| `/api/providers/{id}/login` (regex)                                                                      | یک Chromium گرافیکی مبتنی بر Playwright را برای ورود با کوکی وب اجرا میکند                                                 |
+| `/api/providers/volcengine-plan/connect` (regex)                                                         | جریان گرافیکی دستی + ورود خودکار تلفن/SMS مبتنی بر نشست (Playwright را اجرا میکند)                                         |
+| `/api/providers/{id}/refresh-cursor` (regex)                                                             | تمدید دستی نشست Cursor — به `cursor-agent` اعلان میدهد                                                                     |
+| `/api/providers/{id}/chatgpt-web-codex-doctor` (regex)                                                   | نصب محلی Codex CLI را عیبیابی میکند (باینری را اجرا میکند)                                                                 |
 
-**پاسخ در صورت نقض:** `403 LOCAL_ONLY`
+**پاسخ در صورت تخلف:** `403 LOCAL_ONLY`
 
-#### استثنای محدوده مدیریت (Manage-scope carve-out)
+#### استثنای محدودِ دامنهٔ مدیریت
 
-زیرمجموعهای از مسیرهای LOCAL_ONLY ممکن است از خارج از لوپبک نیز قابل دسترسی باشند، تنها در صورتی که درخواست حاوی یک `Authorization: Bearer <api-key>` باشد که متادیتای آن شامل محدوده `manage` (یا `admin`) باشد. این استثنا به صراحت برای هر مسیر از طریق `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` کنترل میشود، بنابراین پیشفرض برای هر مسیر جدید LOCAL_ONLY، لوپبک سختگیرانه باقی میماند. درخواستهای احراز هویت نشده و درخواستهایی با کلیدهای غیر مدیریتی همچنان با `403 LOCAL_ONLY` رد میشوند.
+زیرمجموعهای از مسیرهای LOCAL_ONLY همچنین ممکن است از آدرسهای غیر-loopback قابل دسترسی باشند، اگر و
+تنها اگر درخواست دارای `Authorization: Bearer <api-key>` باشد که
+فرادادهٔ آن شامل دامنهٔ `manage` (یا `admin`) است. این استثنا بهطور
+صریح برای هر مسیر از طریق `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` کنترل میشود تا
+حالت پیشفرض برای هر مسیر جدید LOCAL_ONLY همچنان الزام سختگیرانهٔ loopback باشد. درخواستهای
+احراز هویتنشده و درخواستهایی با کلیدهای فاقد دامنهٔ مدیریت همچنان با
+`403 LOCAL_ONLY` رد میشوند.
 
-امروزه تنها پیشوند قابل دور زدن `/api/mcp/` است. `/api/cli-tools/runtime/` و `/api/services/` عمداً مستثنی شدهاند زیرا میتوانند زیرفرآیندهای دلخواه (مانند `npm install`, `node`) را ایجاد کنند، که دقیقاً همان کلاس CVE است که لایه LOCAL_ONLY برای جلوگیری از آن وجود دارد.
+در حال حاضر، تنها پیشوند قابل استثنا `/api/mcp/` است. `/api/cli-tools/runtime/` و
+`/api/services/` عمداً مستثنا شدهاند، زیرا میتوانند زیرفرایندهای دلخواه
+(`npm install`، `node`) را ایجاد کنند؛ این دقیقاً همان دستهٔ CVE است که
+سطح LOCAL_ONLY برای جلوگیری از آن وجود دارد.
 
-**#7895 — محدوده باریک `mcp:connect`:** استثنای `/api/mcp/` همچنین یک کلید Bearer را میپذیرد که دارای محدوده باریک `mcp:connect` باشد (`src/shared/constants/managementScopes.ts::MCP_CONNECT_SCOPE`)، که از طریق `hasMcpConnectOrManageScope()` در `src/server/authz/policies/management.ts` بررسی میشود. این محدوده **فقط** به `/api/mcp/` محدود میشود — `mcp:connect` هیچ امتیازی در هیچ مسیر مدیریتی دیگری (از جمله هر پیشوند دور زننده LOCAL_ONLY دیگر، در صورت اضافه شدن) اعطا نمیکند، و عمداً از `MANAGEMENT_API_KEY_SCOPES` مستثنی شده است. یک کلید دارای `manage`/`admin` همچنان دقیقاً مانند قبل از استثنا عبور میکند؛ `mcp:connect` یک جایگزین با امتیاز کمتر برای تماسگیرندگان راه دور فقط MCP است که نباید به دسترسی مدیریتی گسترده نیاز داشته باشند.
+**#7895 — دامنهٔ محدود `mcp:connect`:** استثنای `/api/mcp/` همچنین یک کلید Bearer
+دارای دامنهٔ محدود `mcp:connect` را میپذیرد
+(`src/shared/constants/managementScopes.ts::MCP_CONNECT_SCOPE`) که از طریق
+`hasMcpConnectOrManageScope()` در `src/server/authz/policies/management.ts`
+بررسی میشود. این مورد **فقط** به `/api/mcp/` محدود است — `mcp:connect` در هیچ مسیر
+مدیریتی دیگری هیچ مجوزی اعطا نمیکند (از جمله هر پیشوند استثنای LOCAL_ONLY دیگری که ممکن است
+در آینده اضافه شود) و عمداً از `MANAGEMENT_API_KEY_SCOPES` کنار گذاشته شده است.
+کلیدی که دارای `manage`/`admin` باشد همچنان دقیقاً مانند گذشته از این استثنا عبور میکند؛
+`mcp:connect` جایگزینی با سطح دسترسی پایینتر برای فراخوانهای راه دور مختص MCP است
+که نباید به دسترسی مدیریتی گسترده نیاز داشته باشند.
 
-| درخواست                                       | مسیر                       | نتیجه                    |
-| :-------------------------------------------- | :------------------------- | :----------------------- |
-| غیر لوپبک، بدون Bearer                        | `/api/mcp/*`               | 403 LOCAL_ONLY           |
-| غیر لوپبک، Bearer با محدوده `manage`          | `/api/mcp/*`               | مجاز (Allow)             |
-| غیر لوپبک، Bearer با محدوده `mcp:connect`     | `/api/mcp/*`               | مجاز (Allow)             |
-| غیر لوپبک، Bearer بدون `manage`/`mcp:connect` | `/api/mcp/*`               | 403 LOCAL_ONLY           |
-| غیر لوپبک، Bearer با محدوده `mcp:connect`     | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY           |
-| غیر لوپبک، Bearer با محدوده `manage`          | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY           |
-| لوپبک، هر Bearer/بدون Bearer                  | هر LOCAL_ONLY              | مجاز (دروازه عبور میکند) |
+| درخواست                                          | مسیر                       | نتیجه                   |
+| ------------------------------------------------ | -------------------------- | ----------------------- |
+| غیر-loopback، بدون Bearer                        | `/api/mcp/*`               | 403 LOCAL_ONLY          |
+| غیر-loopback، Bearer با دامنهٔ `manage`          | `/api/mcp/*`               | مجاز                    |
+| غیر-loopback، Bearer با دامنهٔ `mcp:connect`     | `/api/mcp/*`               | مجاز                    |
+| غیر-loopback، Bearer بدون `manage`/`mcp:connect` | `/api/mcp/*`               | 403 LOCAL_ONLY          |
+| غیر-loopback، Bearer با دامنهٔ `mcp:connect`     | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY          |
+| غیر-loopback، Bearer با دامنهٔ `manage`          | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY          |
+| loopback، با هر Bearer یا بدون آن                | هر مسیر LOCAL_ONLY         | مجاز (کنترل عبور میکند) |
 
-#### راهنمایی و ممیزی اپراتور
+#### راهنمای اپراتور و ممیزی
 
-اگر OmniRoute را پشت یک پروکسی معکوس یا تونل (nginx, Caddy, Cloudflare Tunnel, Tailscale, Ngrok) اجرا میکنید، بررسی لوپبک همچنان از مسیرهای قابل ایجاد (spawn-capable) بالا محافظت میکند — درخواستی که آدرس کلاینت آن غیر لوپبک باشد، **قبل از اجرای احراز هویت** با `403 LOCAL_ONLY` رد میشود، بنابراین یک JWT لو رفته نمیتواند به یک ایجاد (spawn) برسد. دو مسئولیت اپراتور باقی میماند:
+اگر OmniRoute را پشت یک پراکسی معکوس یا تونل (nginx، Caddy، Cloudflare
+Tunnel، Tailscale، Ngrok) اجرا میکنید، بررسی loopback همچنان از مسیرهای
+قادر به ایجاد فرایند در بالا محافظت میکند — درخواستی که آدرس کلاینت آن غیر-loopback باشد،
+**پیش از اجرای احراز هویت** با `403 LOCAL_ONLY` رد میشود؛ بنابراین یک JWT افشاشده
+نمیتواند به قابلیت ایجاد فرایند دسترسی پیدا کند. دو مسئولیت اپراتور همچنان باقی میماند:
 
-- **یک 403 را با جعل IP کلاینت به عنوان لوپبک "اصلاح" نکنید.** تنظیم `X-Forwarded-For: 127.0.0.1`، یا یک پروکسی که آدرس مبدأ را به لوپبک بازنویسی میکند، دقیقاً همان کلاس RCE را که این لایه مسدود میکند، دوباره باز میکند. داشبورد/API را از طریق پروکسی در معرض دید قرار دهید — هرگز مسیرهای قابل ایجاد را نه.
-- **دور زدن محدوده مدیریت را حداقل نگه دارید.** فقط `/api/mcp/` قابل دور زدن است، و فقط با یک کلید API با محدوده `manage`. `SPAWN_CAPABLE_PREFIXES` هرگز نمیتوانند به لیست دور زدن اضافه شوند — طرحواره zod آنها را رد میکند و `isLocalOnlyBypassableByManageScope` آنها را در زمان اجرا رد میکند (دفاع عمیق)، که منظور داشبورد از "نمیتوان آن را قابل دور زدن کرد" همین است. مسیرهای قابل ایجاد با بخش پویا و مسیر ثابت تحت `/api/providers/` (مانند `/login`, `/refresh-cursor`) توسط `SPAWN_CAPABLE_PATTERNS` / `SPAWN_CAPABLE_PATTERN_ANCESTORS` مبتنی بر regex در `src/shared/constants/spawnCapablePrefixes.ts` پوشش داده میشوند، نه توسط آرایه مسطح `SPAWN_CAPABLE_PREFIXES` — آرایه مسطح باید کل پیشوند `/api/providers/` را پوشش دهد تا آنها را بگیرد، که باعث گسترش بیش از حد یک درخت مسیر میشود که داشبوردهای راه دور به طور قانونی برای CRUD ارائهدهنده از آن استفاده میکنند.
+- **یک خطای 403 را با جعل IP کلاینت بهعنوان loopback «رفع» نکنید.** تنظیم
+  `X-Forwarded-For: 127.0.0.1`، یا استفاده از پراکسیای که آدرس مبدأ را به
+  loopback بازنویسی میکند، دقیقاً همان دسته RCE را که این سطح مسدود میکند دوباره فعال میسازد. فقط
+  داشبورد/API را از طریق پراکسی در دسترس قرار دهید — هرگز مسیرهای دارای قابلیت spawn را در معرض دسترسی قرار ندهید.
+- **دور زدن محدودیت با scope مدیریتی را در حداقل ممکن نگه دارید.** فقط `/api/mcp/` قابل دور زدن است، آن هم
+  صرفاً با کلید API دارای scope از نوع `manage`. مقادیر `SPAWN_CAPABLE_PREFIXES` هرگز نمیتوانند
+  به فهرست دور زدن محدودیت افزوده شوند — schema مربوط به zod آنها را رد میکند و
+  `isLocalOnlyBypassableByManageScope` نیز در زمان اجرا آنها را رد میکند (دفاع در عمق)،
+  و منظور داشبورد از عبارت «نمیتوان آن را قابل دور زدن کرد» همین است. همان
+  deny-list چند مسیر LOCAL_ONLY را نیز شامل میشود که spawn انجام نمیدهند، اما آنها هم هرگز نباید
+  از راه دور قابل دسترسی باشند — `/api/oauth/kiro/auto-import` (فایلهای credential محلی Kiro روی میزبان را
+  میخواند)، `/api/discovery/` و `/api/issue-agent/`. بارگذار snapshot در زمان اجرا
+  نیز چنین ورودیهایی را از ردیف تنظیمات ذخیرهشده حذف میکند، و import قدیمی JSON
+  (`/api/settings/import-json`) هرگز کلیدهای دور زدن محدودیت را نمینویسد.
+  هر ورودی `LOCAL_ONLY_API_PREFIXES` باید یا در deny-list قرار داشته باشد یا
+  برای واجد شرایط بودن جهت دور زدن محدودیت بازبینی شده باشد (`tests/unit/authz/local-only-bypass-spawn-denylist.test.ts`). مسیرهای دارای segment پویا
+  و مسیرهای ایستای دارای قابلیت spawn در زیر `/api/providers/` (برای مثال `/login` و
+  `/refresh-cursor`) توسط مجموعه مکمل مبتنی بر regex یعنی `SPAWN_CAPABLE_PATTERNS` /
+  `SPAWN_CAPABLE_PATTERN_ANCESTORS` در
+  `src/shared/constants/spawnCapablePrefixes.ts` پوشش داده میشوند، نه توسط آرایه مسطح
+  `SPAWN_CAPABLE_PREFIXES` — برای شناسایی آنها، آرایه مسطح ناچار بود
+  کل پیشوند `/api/providers/` را پوشش دهد که باعث میشد یک درخت مسیر که داشبوردهای
+  راه دور بهطور مشروع برای CRUD ارائهدهنده استفاده میکنند، بیش از حد گسترده محدود شود.
 
-**ممیزی دسترسی** — برای تأیید اینکه هیچ چیز خارج از هاست به این مسیرها دسترسی ندارد:
+**ممیزی دسترسی** — برای اطمینان از اینکه هیچ درخواست خارج از میزبان به این مسیرها نمیرسد:
 
-- **فهرست موجودی مجوزها** را در `/dashboard/settings/security` باز کنید: این بخش لیست پیشوندهای فعال LOCAL_ONLY، پیشوندهایی که قابل دور زدن هستند، و مجموعه قابل تولید در زمان کامپایل ("نمیتوان آنها را قابل دور زدن کرد") را نمایش میدهد.
-- در لاگهای پروکسی معکوس / دسترسی خود، پیشوندهای بالا را که با یک آدرس کلاینت غیر-لوپبک جفت شدهاند، جستجو (grep) کنید. هر مورد یافت شدهای که به جای `403 LOCAL_ONLY`، کد `200` را برگردانده باشد، به این معنی است که پروکسی آدرس IP واقعی کلاینت را پنهان میکند — پروکسی را اصلاح کنید.
-- یک `403 LOCAL_ONLY` در لاگهای OmniRoute برای یکی از این مسیرها نشاندهنده عملکرد صحیح محافظ است، نه خطایی که باید سرکوب شود.
+- **Authorization Inventory** را در `/dashboard/settings/security` باز کنید: این بخش
+  فهرست زنده پیشوندهای LOCAL_ONLY، پیشوندهای قابل دور زدن، و مجموعه دارای قابلیت spawn در زمان کامپایل
+  («نمیتوان آن را قابل دور زدن کرد») را نمایش میدهد.
+- در logهای reverse-proxy / access خود، پیشوندهای بالا را همراه با
+  آدرس کلاینت غیر-loopback جستوجو کنید. هر موردی از این نوع که بهجای
+  `403 LOCAL_ONLY` پاسخ `200` دریافت کرده باشد، به این معنی است که پراکسی IP واقعی کلاینت را پنهان میکند — پراکسی را اصلاح کنید.
+- وجود `403 LOCAL_ONLY` در logهای OmniRoute برای یکی از این مسیرها، نشان میدهد guard
+  مطابق انتظار کار میکند و خطایی نیست که باید سرکوب شود.
 
-### رده ۲ — ALWAYS_PROTECTED
+#### مسیرهای قابل دسترسی از راه دور با gate بررسی در محل فراخوانی
 
-**اجرا شده توسط:** `isAlwaysProtectedPath(path)` ← دور زدن `requireLogin=false` را نادیده میگیرد
-**دور زدن:** در صورت `requireLogin=false` هیچ؛ JWT همیشه مورد نیاز است
+برخی مسیرها باید از داشبورد راه دور قابل دسترسی باقی بمانند، اما برای فراخوانیکنندگان محلی یک بررسی
+سمت میزبان (`which <binary>`، `<binary> --version`، `tailscale status --json`) اجرا میکنند.
+این مسیرها برای `GET` در دسته LOCAL_ONLY نیستند؛ در عوض handler نتیجه قابلاعتماد مربوط به peer را
+با `getRequestPeerLocality()` (`src/shared/utils/apiAuth.ts`) میخواند و بررسی را فقط
+برای فراخوانیکنندگان `loopback` / `lan` اجرا میکند. یک فراخوانیکننده `remote` همان ساختار پاسخ را که از
+منابع بدون spawn (وضعیت ذخیرهشده، تنظیمات و بررسیهای fs) ساخته شده است، با پرچم `probed: false` دریافت میکند.
 
-این مسیرها مخرب یا غیرقابل بازگشت هستند. اجازه دادن به آنها در یک نصب "بدون رمز عبور" به این معنی است که هر کسی در همان شبکه محلی (LAN) میتواند پایگاه داده را پاک کند یا فرآیند سرور را از بین ببرد.
+| مسیر                                                             | بررسیهایی که برای فراخوانیکنندگان راه دور نادیده گرفته میشوند             |
+| ---------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| `POST /api/providers/{id}/test`, `/api/providers/test-batch`     | بررسی runtime مربوط به CLI (`allowLocalRuntimeProbe`) و spawn جایگزین CLI |
+| `GET /api/headroom/status`                                       | `which headroom` و بررسیهای `--version` مربوط به python                   |
+| `GET /api/tunnels/tailscale`, `GET /api/tunnels/tailscale/check` | `which tailscale`، `tailscale status/funnel --json` و `which brew`        |
+| `GET /api/tunnels/cloudflared` (GET-exempt from LOCAL_ONLY)      | جستوجوی PATH با `which cloudflared`                                       |
 
-| مسیر                                      | دلیل                                                                     |
-| ----------------------------------------- | ------------------------------------------------------------------------ |
-| `/api/shutdown`                           | فرآیند سرور را خاتمه میدهد                                               |
-| `/api/settings/database`                  | صدور، وارد کردن و پاک کردن پایگاه داده                                   |
-| `/api/db-backups`                         | دسترسی به آرشیو کامل پشتیبانگیری پایگاه داده                             |
-| `/api/settings/export-json`               | کل بلوک تنظیمات (شامل اسرار) را صادر میکند                               |
-| `/api/settings/import-json`               | کل بلوک تنظیمات را جایگزین میکند                                         |
-| `/api/providers/health-autopilot/actions` | اقدامات اصلاحی خلبان خودکار را اجرا میکند                                |
-| `/api/settings/obsidian`                  | اعتبارنامههای WebDAV قابل استفاده مجدد را برای هر ریشه vault ایجاد میکند |
+هر مسیر خواندنی جدیدی که میزبان را بررسی میکند باید از همین الگو پیروی کند، یا مستقیماً
+در دسته LOCAL_ONLY طبقهبندی شود.
+
+### سطح 2 — ALWAYS_PROTECTED
+
+**اعمالشده توسط:** `isAlwaysProtectedPath(path)` ← نادیده گرفتن دور زدن با `requireLogin=false`
+**دور زدن:** هنگامی که `requireLogin=false` است، هیچکدام؛ JWT همیشه الزامی است
+
+این مسیرها مخرب یا برگشتناپذیر هستند. مجاز کردن آنها در یک نصب «بدون گذرواژه»
+به این معنی است که هر کسی در همان LAN میتواند پایگاه داده را پاک کند یا فرایند
+سرور را خاتمه دهد.
+
+| مسیر                                      | دلیل                                                                           |
+| ----------------------------------------- | ------------------------------------------------------------------------------ |
+| `/api/shutdown`                           | فرایند سرور را خاتمه میدهد                                                     |
+| `/api/settings/database`                  | export، import و پاکسازی پایگاه داده                                           |
+| `/api/db-backups`                         | دسترسی به archive کامل پشتیبان پایگاه داده                                     |
+| `/api/settings/export-json`               | کل blob تنظیمات را export میکند (از جمله secretها)                             |
+| `/api/settings/import-json`               | کل blob تنظیمات را جایگزین میکند                                               |
+| `/api/providers/health-autopilot/actions` | اقدامهای اصلاحی autopilot را اجرا میکند                                        |
+| `/api/settings/obsidian`                  | برای هر root مربوط به vault، credentialهای قابل استفاده مجدد WebDAV صادر میکند |
+| `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens                                   |
 
 **پاسخ در صورت نقض:** `401 Authentication required`
 
-`/api/settings/obsidian` فرزند خود `/webdav` را پوشش میدهد: `POST` سرویس فایل WebDAV — که توسط لایه سفارشی Node قبل از Next.js، خارج از این پایپلاین ارائه میشود — را به یک ریشه انتخابی توسط فراخواننده هدایت میکند و اعتبارنامههای Basic تازه ایجاد شده را بازتاب میدهد، `DELETE` آنها را میچرخاند، و `POST` والد توکن REST API Obsidian را ذخیره میکند. GHSA-62vw فقط افشای رمز عبور `GET` را پنهان میکرد؛ صدور همچنان در رده fail-open بود (GHSA-7pq4-8pvv-rx7r). `enableObsidianVaultSync()` علاوه بر این، vaultی را که در دایرکتوری داده قرار دارد، یا شامل آن است، رد میکند.
+`/api/settings/obsidian` مسیر فرزند `/webdav` خود را پوشش میدهد: `POST` سرویس فایل WebDAV را —
+که پیش از Next.js توسط لایه سفارشی Node و خارج از این pipeline ارائه میشود — به root انتخابشده توسط فراخوانیکننده
+هدایت میکند و credentialهای Basic تازه صادرشده را در پاسخ بازمیگرداند؛ `DELETE` آنها را rotate میکند، و `POST` والد
+توکن REST API مربوط به Obsidian را ذخیره میکند. GHSA-62vw فقط نمایش گذرواژه در `GET` را پوشاند؛ فرایند صدور
+همچنان در سطح fail-open قرار داشت (GHSA-7pq4-8pvv-rx7r). `enableObsidianVaultSync()` همچنین
+هر vaultی را که خود data directory باشد، داخل آن قرار داشته باشد، یا آن را در بر بگیرد، رد میکند.
 
-### بوتاسترپ نصب تازه فقط لوپبک است — توسط همتای واقعی، نه `Host`
+#### export کردن credentialها فقط برای اپراتور مجاز است
 
-با عدم پیکربندی رمز عبور مدیریت (و عدم وجود `INITIAL_PASSWORD`)، `isAuthRequired()` در
-`src/shared/utils/apiAuth.ts` بوتاسترپ ناشناس را **فقط برای همتایان لوپبک** باز نگه میدارد.
-لوپبک از سیگنالهای همتای مورد اعتماد، به ترتیب زیر تعیین میشود: همتای واقعی TCP دارای توکن
-(`PEER_IP_HEADER` + `VIA_PROXY_HEADER`، آنچه سیاست میبیند)، حکم `AUTHZ_HEADER_PEER_LOCALITY`
-خود پایپلاین (آنچه کنترلکنندههای مسیر میبینند، فقط زمانی قابل اعتماد است که
-`OMNIROUTE_PEER_STAMP_TOKEN` تنظیم شده باشد)، یا یک همتای سوکت واقعی برای فراخوانندههای مستقیم.
-`Host` / `nextUrl.hostname` هرگز مورد مشورت قرار نمیگیرند، و اولین نوشتن رمز عبور
-(`POST /api/settings/require-login`) تحت همان محدودیت است تا اینکه برای هر همتای شبکه باز باشد
-(GHSA-7pq4-8pvv-rx7r). `managementPolicy` حکم `peerContext` خود را به صراحت منتقل میکند، بنابراین
-هدرهای درخواست اصلی (قبل از حذف) هرگز آن را تعیین نمیکنند.
+سطح بالا فقط تعیین میکند که آیا _نوعی_ اعتبارنامه لازم است یا نه. مسیرهایی که اعتبارنامههای
+ذخیرهشده را دانلود میکنند، بررسی دومی را در handler انجام میدهند: `GET /api/settings/export-json` (اتصالهای
+رمزگشاییشدهٔ ارائهدهندگان و کلیدهای خام API)، `GET /api/db-backups/export` (فایل SQLite) و
+`GET /api/db-backups/exportAll` (آرشیو کامل)، تابع `requireOperatorCredential()`
+(`src/lib/api/operatorCredential.ts`) را فراخوانی میکنند. این تابع یک نشست dashboard، هویت محلی CLI یا
+نمونهای با ورود غیرفعال را میپذیرد و برای کلیدهای API با هر سطح دسترسی (از جمله `manage`
+و `admin`) و توکنهای دسترسی `oma_`، پاسخ `403` میدهد. صدور توکن همگامسازی (`POST /api/sync/tokens`) از
+همین تابع کمکی، بهعلاوهٔ توکن سرویس داخلی loopback مورد اعتماد، استفاده میکند.
 
-### رده ۳ — MANAGEMENT (پیشفرض)
+#### Credential exports and restores are operator-only
 
-تمام مسیرهای مدیریتی دیگر. احراز هویت مورد نیاز است مگر اینکه `requireLogin=false` پیکربندی شده باشد. توکنهای CLI میتوانند این مسیرها را احراز هویت کنند (لوپبک + HMAC معتبر).
+The tier above only decides whether _some_ credential is required. The routes that download
+stored credentials add a second check in the handler: `GET /api/settings/export-json` (decrypted
+provider connections and raw API keys), `GET /api/db-backups/export` (the SQLite file) and
+`GET /api/db-backups/exportAll` (the full archive) call `requireOperatorCredential()`
+(`src/lib/api/operatorCredential.ts`). It accepts a dashboard session, the local CLI subject, or
+an instance with login disabled, and answers `403` to API keys of any scope (including `manage`
+and `admin`) and to `oma_` access tokens. The destructive counterparts hold the same boundary:
+`POST /api/db-backups/import` (uploaded `.sqlite`, `dryRun=true` included), `POST /api/db-backups`
+(restore a stored backup by id) and `POST /api/settings/import-json` (legacy JSON restore)
+replace the live database or the whole settings/connections/API-key set, so a machine credential
+cannot trigger them either. Listing, creating, retention and cleanup of backups
+(`GET`/`PUT`/`PATCH`/`DELETE /api/db-backups`) keep ordinary management auth. Sync token
+issuance (`POST /api/sync/tokens`) uses the same helper, plus the trusted loopback
+internal-service token.
+
+### راهاندازی اولیهٔ نصب جدید فقط از طریق loopback ممکن است — بر اساس همتای واقعی، نه `Host`
+
+وقتی هیچ گذرواژهٔ مدیریتی پیکربندی نشده باشد (و `INITIAL_PASSWORD` نیز وجود نداشته باشد)، تابع `isAuthRequired()` در
+`src/shared/utils/apiAuth.ts` راهاندازی اولیهٔ ناشناس را **فقط برای همتاهای loopback** باز نگه میدارد.
+loopback بر اساس سیگنالهای همتای مورد اعتماد و به این ترتیب تعیین میشود: همتای واقعی TCP که روی توکن مهر شده است
+(`PEER_IP_HEADER` + `VIA_PROXY_HEADER`، یعنی چیزی که policy میبیند)، نتیجهٔ
+`AUTHZ_HEADER_PEER_LOCALITY` خود pipeline (یعنی چیزی که handlerهای مسیر میبینند و فقط تا زمانی مورد اعتماد است که
+`OMNIROUTE_PEER_STAMP_TOKEN` تنظیم شده باشد)، یا همتای واقعی socket برای فراخوانیکنندگان مستقیم. `Host` /
+`nextUrl.hostname` هرگز بررسی نمیشوند و ثبت اولین گذرواژه
+(`POST /api/settings/require-login`) نیز مشمول همین محدودیت است، نه اینکه برای هر
+همتای شبکه باز باشد (GHSA-7pq4-8pvv-rx7r). `managementPolicy` نتیجهٔ `peerContext` خود را
+بهطور صریح به لایهٔ پایینتر ارسال میکند؛ بنابراین headerهای درخواست ORIGINAL (پیش از حذف) هرگز آن را تعیین نمیکنند.
+
+### سطح 3 — MANAGEMENT (پیشفرض)
+
+تمام مسیرهای مدیریتی دیگر. احراز هویت الزامی است، مگر اینکه
+`requireLogin=false` پیکربندی شده باشد. توکنهای CLI میتوانند این مسیرها را احراز هویت کنند (loopback + HMAC معتبر).
 
 ## ترتیب ارزیابی
 

@@ -37,13 +37,13 @@ Tqabbil oġġettiv tal-karatteristiċi ma’ routers tal-IA popolari u open-sour
 | **Appoġġ għal tunnels (Cloudflared, Tailscale, Ngrok)**   |                         ✅                          |         ❌         |        n/a        |     n/a      |
 | **Liċenzja**                                              |                         MIT                         |        MIT         |   proprjetarja    | proprjetarja |
 
-## Meta għandek tagħżel OmniRoute
+## Meta tagħżel OmniRoute
 
-- Tospita lokalment u trid **kopertura massima tal-fornituri** (329 fornitur, 155 entrata tal-katalgu bla ħlas/bla awtentikazzjoni)
+- Tospita int stess u trid **kopertura massima tal-fornituri** (374 fornitur, 155 entrata fil-katalgu b'xejn/mingħajr awtentikazzjoni)
 - Għandek bżonn **server MCP integrat** (għodod LLM, memorja u ħiliet esposti bħala għodod)
 - Għandek bżonn il-**protokoll A2A** għal flussi tax-xogħol bejn aġent u ieħor
-- Trid **taħbi l-fingerprint** (JA3/JA4) biex tevita l-identifikazzjoni minn CAPTCHAs upstream
-- Għandek bżonn **karatteristiċi għall-intrapriżi** (miżuri protettivi, evalwazzjonijiet, rekord tal-awditjar) mingħajr kont ta’ SaaS
+- Trid **ħabi tal-marki tas-swaba' diġitali** (JA3/JA4) biex tevita li tinqabad minn CAPTCHAs tas-servizzi upstream
+- Għandek bżonn **karatteristiċi għall-intrapriżi** (guardrails, evals, audit trail) mingħajr kont ta' SaaS
 
 ## Meta għandek tagħżel LiteLLM
 

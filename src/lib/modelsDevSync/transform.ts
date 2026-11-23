@@ -3,12 +3,15 @@
  *
  * Extracted verbatim from modelsDevSync.ts. Holds the models.dev data-model
  * types, the provider-id mapping table, and the raw→OmniRoute transform
- * functions. Zero imports, no DB access, no module state — pure functions and
- * static data. The host (modelsDevSync.ts) imports these for its sync
- * orchestration and re-exports the originally-public symbols.
+ * functions. No DB access, no module state — pure functions and static data; the
+ * only import is the shared reasoning-effort vocabulary. The host
+ * (modelsDevSync.ts) imports these for its sync orchestration and re-exports the
+ * originally-public symbols.
  *
  * @module lib/modelsDevSync/transform
  */
+
+import { REASONING_EFFORT_ORDER } from "@omniroute/open-sse/services/learnedReasoningEffortCaps";
 
 export type PricingEntry = {
   input: number;
@@ -24,6 +27,7 @@ export type PricingByProvider = Record<string, PricingModels>;
 export interface ModelCapabilityEntry {
   tool_call: boolean | null;
   reasoning: boolean | null;
+  reasoning_efforts?: string[] | null;
   attachment: boolean | null;
   structured_output: boolean | null;
   temperature: boolean | null;
@@ -70,12 +74,18 @@ export interface ModelsDevInterleaved {
   field?: string;
 }
 
+export interface ModelsDevReasoningOption {
+  type?: string;
+  values?: string[];
+}
+
 export interface ModelsDevModel {
   id: string;
   name: string;
   family?: string;
   attachment?: boolean;
   reasoning?: boolean;
+  reasoning_options?: ModelsDevReasoningOption[];
   tool_call?: boolean;
   structured_output?: boolean;
   temperature?: boolean;
@@ -140,17 +150,8 @@ export const MODELS_DEV_PROVIDER_MAP: Record<string, string[]> = {
   kilo: ["kilocode", "kc", "kilo-gateway"],
   kilocode: ["kilocode", "kc", "kilo-gateway"],
   "kimi-for-coding": ["kimi-coding", "kmc", "kimi-coding-apikey", "kmca"],
-  // The `opencode` models.dev entry used to map only to "opencode-zen" because
-  // that is the historical alias pair. But OmniRoute's catalog & combo targets
-  // reference models under BOTH provider IDs:
-  //   - `opencode-zen/big-pickle` (alias form)
-  //   - `opencode/big-pickle`    (canonical id form, used by live API catalog
-  //                               and by combos like "Opencode FREE Omni")
-  // If we only store synced capabilities under "opencode-zen", the canonical
-  // `opencode/<model>` lookup in getCanonicalModelMetadata returns null and
-  // any combo that targets `opencode/...` ends up with no computed context.
-  // Symmetric mapping keeps both lookup paths populated.
-  opencode: ["opencode", "opencode-zen"],
+  // The `opencode` models.dev entry is OpenCode Zen.
+  opencode: ["opencode-zen"],
   "opencode-go": ["opencode-go", "opencode-zen"],
   // Additional providers that may overlap with OmniRoute
   alibaba: ["ali", "alibaba"],
@@ -231,6 +232,33 @@ export function transformModelsDevToPricing(raw: ModelsDevData): PricingByProvid
 
 // ─── Transform: Capabilities ─────────────────────────────
 
+// models.dev lists tiers as reasoning_options: [{ type: "effort", values }].
+// Only the effort option is a reasoning tier; anything else is unrelated.
+function modelsDevEffortValues(options: ModelsDevReasoningOption[] | undefined): string[] | null {
+  if (!Array.isArray(options)) return null;
+  const values = options.flatMap((option) =>
+    option?.type === "effort" && Array.isArray(option.values) ? option.values : []
+  );
+  // Stored as published: the known-vocabulary filter runs where the tiers are read
+  // (knownReasoningEffortTiers), so MODELS_DEV_EFFORT_TIERS_ENABLED toggles losslessly.
+  const efforts = values.filter((value) => typeof value === "string" && value.length > 0);
+  return efforts.length > 0 ? [...new Set(efforts)] : null;
+}
+
+/**
+ * Keep only the tiers an executor accepts (`minimal` included, unknown names such as
+ * `turbo` dropped), preserving the published order. `null` when nothing known remains.
+ */
+export function knownReasoningEffortTiers(
+  efforts: readonly unknown[] | null | undefined
+): string[] | null {
+  if (!Array.isArray(efforts)) return null;
+  const known = efforts.filter(
+    (value): value is string => typeof value === "string" && REASONING_EFFORT_ORDER.includes(value)
+  );
+  return known.length > 0 ? [...new Set(known)] : null;
+}
+
 /**
  * Transform models.dev raw data → CapabilitiesByProvider format.
  */
@@ -260,6 +288,7 @@ export function transformModelsDevToCapabilities(raw: ModelsDevData): Capabiliti
       const cap: ModelCapabilityEntry = {
         tool_call: model.tool_call ?? null,
         reasoning: model.reasoning ?? null,
+        reasoning_efforts: modelsDevEffortValues(model.reasoning_options),
         attachment,
         structured_output: model.structured_output ?? null,
         temperature: model.temperature ?? null,

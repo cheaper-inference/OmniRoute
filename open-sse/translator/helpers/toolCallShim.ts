@@ -43,7 +43,19 @@ function isValidPdfPagesArg(filePath: unknown, pages: unknown): boolean {
   );
 }
 
+// Some models name the Read path `path` / `filePath`; Claude Code requires `file_path`.
+// Only applied when `file_path` is missing or empty.
+function sanitizeFilePathArg(args: Record<string, unknown>): void {
+  if (typeof args.file_path === "string" && args.file_path) return;
+  const alias = [args.path, args.filePath].find((v) => typeof v === "string" && v);
+  if (!alias) return;
+  args.file_path = alias;
+  if (typeof args.path === "string") delete args.path;
+  if (typeof args.filePath === "string") delete args.filePath;
+}
+
 function sanitizeReadArgs(args: Record<string, unknown>): void {
+  sanitizeFilePathArg(args);
   // Coerce numeric-string limit/offset (some non-Anthropic models stringify everything).
   if (typeof args.limit === "string" && /^\d+$/.test(args.limit)) {
     args.limit = Number(args.limit);

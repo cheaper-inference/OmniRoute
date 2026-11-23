@@ -148,27 +148,27 @@ curl -X POST http://localhost:20128/a2a \
 
 ## Tilgængelige færdigheder
 
-OmniRoute eksponerer 6 A2A-færdigheder, der er tilknyttet i `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Hvert færdighedsmodul findes i `src/lib/a2a/skills/`.
+OmniRoute eksponerer 6 A2A-færdigheder, der er koblet op i `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Hvert færdighedsmodul findes i `src/lib/a2a/skills/`.
 
-| Færdighed           | ID                   | Beskrivelse                                                                                                                                                 | Tags                               | Eksempler                                |
-| :------------------ | :------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------- | :--------------------------------------- |
-| Intelligent routing | `smart-routing`      | Dirigerer en prompt gennem den optimale udbyder/kombination ved hjælp af OmniRoutes kombinationsmotor og scoring                                            | routing, udbydere                  | "Send denne prompt via den bedste model" |
-| Kvotestyring        | `quota-management`   | Rapporterer kvotestatus pr. udbyder og hjælper kaldere med at beslutte, hvornår de skal begrænse trafikken eller skifte                                     | kvote, udbydere                    | "Kontrollér kvoten for anthropic"        |
-| Udbyderregistrering | `provider-discovery` | Viser installerede udbydere med funktioner, markeringer for gratis niveau og OAuth-status                                                                   | udbydere, registrering             | "Hvilke udbydere er tilgængelige?"       |
-| Omkostningsanalyse  | `cost-analysis`      | Estimerer omkostningerne ved en anmodning/samtale baseret på kataloget og den seneste brug                                                                  | omkostninger, brug                 | "Estimér prisen for denne samtale"       |
-| Tilstandsrapport    | `health-report`      | Samler status for circuit breaker, nedkøling og spærring pr. udbyder                                                                                        | tilstand, robusthed                | "Vis tilstandsstatus for alle udbydere"  |
-| Vis funktioner      | `list-capabilities`  | Returnerer hele kataloget med 45 Agent Skills-poster (23 API + 21 CLI + 1 konfiguration) som en markdown-tabel med rå SKILL.md-URL'er til kontekstinjektion | katalog, registrering, færdigheder | "Vis alle OmniRoute-funktioner"          |
+| Færdighed           | ID                   | Beskrivelse                                                                                                                                                   | Tags                       | Eksempler                                  |
+| :------------------ | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------ | :------------------------- | :----------------------------------------- |
+| Smart routing       | `smart-routing`      | Router en prompt gennem den optimale udbyder/kombination ved hjælp af OmniRoutes kombinationsmotor og scoring                                                 | routing, providers         | "Send denne prompt via den bedste model"   |
+| Kvoteadministration | `quota-management`   | Rapporterer kvotestatus pr. udbyder og hjælper klienter med at beslutte, hvornår de skal begrænse hastigheden eller skifte                                    | quota, providers           | "Kontrollér kvoten for anthropic"          |
+| Udbyderregistrering | `provider-discovery` | Viser installerede udbydere med funktioner, oplysninger om gratis niveauer og OAuth-status                                                                    | providers, discovery       | "Hvilke udbydere er tilgængelige?"         |
+| Omkostningsanalyse  | `cost-analysis`      | Estimerer omkostningerne ved en anmodning/samtale ud fra kataloget og den seneste brug                                                                        | cost, usage                | "Estimér omkostningerne for denne samtale" |
+| Tilstandsrapport    | `health-report`      | Samler status for circuit breaker, cooldown og lockout pr. udbyder                                                                                            | health, resilience         | "Vis tilstandsstatus for alle udbydere"    |
+| Vis funktioner      | `list-capabilities`  | Returnerer hele kataloget med 45 Agent Skills-poster (23 API + 21 CLI + 1 konfiguration) som en markdown-tabel med rå SKILL.md-URL'er til kontekstindsættelse | catalog, discovery, skills | "Vis alle OmniRoute-funktioner"            |
 
-> Agentkortet bør holdes synkroniseret med det aktive katalog med 352 udbydere. Antallet af udbydere og metadata om gratis adgang/ingen godkendelse hentes fra runtime-registreringsdatabasen.
+> Agentkortet bør holdes synkroniseret med det aktive katalog med 374 udbydere. Antal udbydere samt metadata om gratis adgang og adgang uden godkendelse hentes fra runtime-registreringsdatabasen.
 
 ### Detaljer om færdigheden `list-capabilities`
 
-Færdigheden `list-capabilities` er især nyttig for eksterne agenter, der har brug for at finde ud af, hvad OmniRoute eksponerer, før de sender API-kald. Den returnerer et struktureret markdown-tabelartefakt:
+Færdigheden `list-capabilities` er særligt nyttig for eksterne agenter, der skal finde ud af, hvad OmniRoute eksponerer, før de sender API-kald. Den returnerer et struktureret markdown-tabelartefakt:
 
 ```
-| ID | Navn | Kategori | Område | Slutpunkter/kommandoer | Rå URL |
+| ID | Navn | Kategori | Område | Endpoints/kommandoer | Rå URL |
 | --- | --- | --- | --- | --- | --- |
-| omni-auth | Godkendelse og sessioner | api | godkendelse | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
+| omni-auth | Godkendelse og sessioner | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
 ...
 ```
 

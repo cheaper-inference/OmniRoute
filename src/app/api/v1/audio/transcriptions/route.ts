@@ -1,5 +1,6 @@
 // Allow large audio/video file uploads — 5min for processing large files (up to 2GB)
 export const maxDuration = 300;
+import { getRequestedModelEndpointMismatch } from "@/lib/providerModels/modelEndpointGuard";
 import { handleAudioTranscription } from "@omniroute/open-sse/handlers/audioTranscription.ts";
 import {
   getProviderCredentialsWithQuotaPreflight,
@@ -19,13 +20,20 @@ import { errorResponse } from "@omniroute/open-sse/utils/error.ts";
 import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
 import { enforceApiKeyPolicy } from "@/shared/utils/apiKeyPolicy";
 import {
+  createComboTargetKeyGate,
+  isKeyScopeBlockedCredentials,
+  keyScopeBlockedResponse,
+  keylessProviderRejection,
+  resolveKeyConnectionScope,
+} from "@/sse/services/keyConnectionScope";
+import {
   isAllRateLimitedCredentials,
   rateLimitedProviderResponse,
 } from "@/app/api/v1/_shared/rateLimit";
 import { attachOmniRouteMetaToResponse } from "@/domain/omnirouteResponseMeta";
 import { generateRequestId } from "@/shared/utils/requestId";
 import { getComboByName, getCombos } from "@/lib/db/combos";
-import { getDatabaseSettings } from "@/lib/db/databaseSettings";
+import { getUserDatabaseSettings } from "@/lib/db/databaseSettings";
 import { handleComboChat } from "@omniroute/open-sse/services/combo.ts";
 import { log } from "@omniroute/open-sse/utils/logger.ts";
 import { saveCallLog } from "@/lib/usageDb";
@@ -90,7 +98,8 @@ async function transcribeWithModel(
   modelStr: string,
   startTime: number,
   apiKeyId?: string | null,
-  apiKeyName?: string | null
+  apiKeyName?: string | null,
+  allowedConnections: string[] | null = null
 ): Promise<Response> {
   // Provider nodes eligible for transcription: this route's own audio type plus
   // general chat/responses gateways. Remote hosts are opt-in (default OFF).
@@ -98,6 +107,12 @@ async function transcribeWithModel(
     "/audio/transcriptions",
     "audio-transcriptions"
   );
+
+  const endpointMismatch = await getRequestedModelEndpointMismatch(
+    modelStr,
+    "audio-transcriptions"
+  );
+  if (endpointMismatch) return errorResponse(HTTP_STATUS.BAD_REQUEST, endpointMismatch);
 
   const parsed = parseTranscriptionModel(modelStr, dynamicProviders);
   let provider = parsed.provider;
@@ -121,11 +136,17 @@ async function transcribeWithModel(
     const credentialKey = providerConfig.credentialProviderId || provider;
     // NOTE: the 2nd arg of this helper is `excludeConnectionId`, not "use this
     // connection" — a combo target's connectionId must never be passed here.
-    credentials = await getProviderCredentialsWithQuotaPreflight(credentialKey);
+    // GHSA-3w2r: the pool is bounded by the caller key's allowed connections.
+    credentials = await getProviderCredentialsWithQuotaPreflight(
+      credentialKey,
+      null,
+      allowedConnections
+    );
     // Prefix match wins (`deepgram/nova-3` → native Deepgram). If that
     // provider has no credentials, retry gateways that list the same nested
-    // model id (e.g. OpenRouter's `deepgram/nova-3`).
-    if (!credentials) {
+    // model id (e.g. OpenRouter's `deepgram/nova-3`). A pool emptied by the
+    // key's scope may still be served by an in-scope gateway.
+    if (!credentials || isKeyScopeBlockedCredentials(credentials)) {
       const candidates = audioModelAliasCandidates(modelStr, provider, resolvedModel);
       const alternate = findAlternateAudioProvider(
         AUDIO_TRANSCRIPTION_PROVIDERS,
@@ -134,9 +155,15 @@ async function transcribeWithModel(
       );
       if (alternate) {
         const alternateCredentials = await getProviderCredentialsWithQuotaPreflight(
-          alternate.provider
+          alternate.provider,
+          null,
+          allowedConnections
         );
-        if (alternateCredentials && !isAllRateLimitedCredentials(alternateCredentials)) {
+        if (
+          alternateCredentials &&
+          !isAllRateLimitedCredentials(alternateCredentials) &&
+          !isKeyScopeBlockedCredentials(alternateCredentials)
+        ) {
           provider = alternate.provider;
           resolvedModel = alternate.model;
           providerConfig = alternate.config;
@@ -154,9 +181,21 @@ async function transcribeWithModel(
         )
       );
     }
+    if (isKeyScopeBlockedCredentials(credentials)) {
+      return keyScopeBlockedResponse(provider, credentials);
+    }
     if (isAllRateLimitedCredentials(credentials)) {
       return rateLimitedProviderResponse(provider, credentials);
     }
+  } else if (providerConfig) {
+    // GHSA-3w2r: a keyless provider (local default or a keyless remote) is
+    // reachable by a connection-scoped key only when its allowlist admits
+    // keyless providers or an in-scope connection serves it (chat's #9057).
+    const keylessCredentialKey = providerConfig.credentialProviderId || provider;
+    const keylessRejection = await keylessProviderRejection(provider, allowedConnections, () =>
+      getProviderCredentialsWithQuotaPreflight(keylessCredentialKey, null, allowedConnections)
+    );
+    if (keylessRejection) return keylessRejection;
   }
 
   let response = await handleAudioTranscription({
@@ -244,6 +283,13 @@ export async function POST(request) {
   // request, matching the pattern every other proxied route follows (#13544).
   const apiKeyId = policy.apiKeyInfo?.id || null;
   const apiKeyName = policy.apiKeyInfo?.name || null;
+  // GHSA-3w2r: credential selection stays on the key's connection scope — for
+  // the internal self-loop bearer, that of the caller key it names
+  // (x-omniroute-self-loop-key-id, resolved by enforceApiKeyPolicy). null = the
+  // key is not connection-scoped.
+  const scope = await resolveKeyConnectionScope(policy.apiKeyInfo);
+  if (scope.rejection) return scope.rejection;
+  const { allowedConnections } = scope;
 
   // A bare name (no "/") may be a combo. /v1/models advertises combos, and chat and
   // embeddings both resolve them — resolving here too keeps the catalog honest and
@@ -258,7 +304,7 @@ export async function POST(request) {
         } catch {}
         let settings = {};
         try {
-          settings = getDatabaseSettings();
+          settings = getUserDatabaseSettings();
         } catch {}
 
         return handleComboChat({
@@ -270,9 +316,10 @@ export async function POST(request) {
               targetModelStr,
               startTime,
               apiKeyId,
-              apiKeyName
+              apiKeyName,
+              allowedConnections
             ),
-          isModelAvailable: undefined,
+          isModelAvailable: createComboTargetKeyGate(policy, modelStr),
           log,
           settings,
           allCombos: allCombos as any,
@@ -285,5 +332,12 @@ export async function POST(request) {
     }
   }
 
-  return transcribeWithModel(formData, modelStr, startTime, apiKeyId, apiKeyName);
+  return transcribeWithModel(
+    formData,
+    modelStr,
+    startTime,
+    apiKeyId,
+    apiKeyName,
+    allowedConnections
+  );
 }

@@ -22,9 +22,14 @@
  * Registration: call registerDeepseekQuotaFetcher() once at server startup.
  */
 
-import { registerQuotaFetcher, type QuotaInfo } from "./quotaPreflight.ts";
+import {
+  registerQuotaCacheInvalidator,
+  registerQuotaFetcher,
+  type QuotaInfo,
+} from "./quotaPreflight.ts";
 import { registerMonitorFetcher } from "./quotaMonitor.ts";
 import { throttleQuotaFetch } from "./quotaFetchThrottle.ts";
+import { fetchWithConnectionProxy } from "./connectionProxyFetch.ts";
 
 // DeepSeek API config
 const DEEPSEEK_CONFIG = {
@@ -194,7 +199,7 @@ export async function fetchDeepseekQuota(
     // Cache hits above never reach here; this only paces genuine network calls.
     await throttleQuotaFetch();
 
-    const response = await fetch(url, {
+    const response = await fetchWithConnectionProxy(connectionId, url, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${apiKey}`,
@@ -203,6 +208,7 @@ export async function fetchDeepseekQuota(
       },
       signal: AbortSignal.timeout(8_000),
     });
+    if (!response) return null;
 
     // 401/403: token invalid — remove from cache
     if (response.status === 401 || response.status === 403) {
@@ -246,5 +252,6 @@ export function invalidateDeepseekQuotaCache(connectionId: string): void {
  */
 export function registerDeepseekQuotaFetcher(): void {
   registerQuotaFetcher("deepseek", fetchDeepseekQuota);
+  registerQuotaCacheInvalidator("deepseek", invalidateDeepseekQuotaCache);
   registerMonitorFetcher("deepseek", fetchDeepseekQuota);
 }

@@ -349,3 +349,84 @@ test("#12229 exhaustion: output_tokens exclusion names max_tokens vs the model c
   assert.doesNotMatch(exhaustion!.message, /structured output/i);
   assert.equal(exhaustion!.terminalReason, "capability_mismatch");
 });
+
+// #14313 — an auto combo whose candidate pool is already empty. Off by default the empty
+// pool keeps the legacy 400 capability_mismatch; COMBO_EMPTY_POOL_NO_ELIGIBLE_TARGETS_ENABLED
+// turns it into a truthful 503 no_eligible_targets.
+function emptyPoolRequest() {
+  return resolveAutoStrategyOrder({
+    orderedTargets: [] as never,
+    body: {
+      messages: [{ role: "user", content: "hi" }],
+      tools: Array.from({ length: 12 }, (_, i) => ({
+        type: "function",
+        function: { name: `lookup_${i}`, parameters: {} },
+      })),
+    },
+    combo: { id: "c1", name: "auto/best-coding", config: {} } as never,
+    settings: null,
+    config: {},
+    relayOptions: null,
+    resilienceSettings: { quotaPreflight: { enabled: false } } as never,
+    log: log as never,
+    buildAutoCandidates: (async () => []) as never,
+  });
+}
+
+test("#14313 auto: empty candidate pool keeps the legacy 400 with the flag off (default)", async () => {
+  delete process.env.COMBO_EMPTY_POOL_NO_ELIGIBLE_TARGETS_ENABLED;
+  const result = await emptyPoolRequest();
+  assert.ok("earlyResponse" in result);
+  if ("earlyResponse" in result) {
+    assert.equal(result.earlyResponse.status, 400);
+    const body = await result.earlyResponse.json();
+    assert.match(String(body?.error?.message || ""), /supports tool calling/i);
+    assert.equal(body?.error?.code, "capability_mismatch");
+    assert.equal(body?.diagnostics?.terminalReason, "capability_mismatch");
+  }
+});
+
+test("#14313 auto: empty candidate pool answers 503 no_eligible_targets with the flag on", async () => {
+  process.env.COMBO_EMPTY_POOL_NO_ELIGIBLE_TARGETS_ENABLED = "true";
+  try {
+    const result = await emptyPoolRequest();
+    assert.ok("earlyResponse" in result);
+    if ("earlyResponse" in result) {
+      assert.equal(result.earlyResponse.status, 503);
+      const body = await result.earlyResponse.json();
+      assert.doesNotMatch(String(body?.error?.message || ""), /supports tool calling/i);
+      assert.match(String(body?.error?.message || ""), /candidate pool is empty/i);
+      assert.equal(body?.error?.code, "no_eligible_targets");
+      assert.equal(body?.diagnostics?.poolSize, 0);
+      assert.equal(body?.diagnostics?.terminalReason, "no_eligible_targets");
+    }
+  } finally {
+    delete process.env.COMBO_EMPTY_POOL_NO_ELIGIBLE_TARGETS_ENABLED;
+  }
+});
+
+test("#14313 auto: the flag never fires on a populated pool (tool pre-filter still decides)", async () => {
+  process.env.COMBO_EMPTY_POOL_NO_ELIGIBLE_TARGETS_ENABLED = "true";
+  try {
+    const result = await resolveAutoStrategyOrder({
+      orderedTargets: [target("no-tools-provider", "no-tools-provider/model-x")] as never,
+      body: {
+        messages: [{ role: "user", content: "hi" }],
+        tools: [{ type: "function", function: { name: "lookup", parameters: {} } }],
+      },
+      combo: { id: "c1", name: "auto/best-coding", config: {} } as never,
+      settings: null,
+      config: {},
+      relayOptions: null,
+      resilienceSettings: { quotaPreflight: { enabled: false } } as never,
+      log: log as never,
+      buildAutoCandidates: (async () => []) as never,
+    });
+    if ("earlyResponse" in result) {
+      const body = await result.earlyResponse.json();
+      assert.notEqual(body?.error?.code, "no_eligible_targets");
+    }
+  } finally {
+    delete process.env.COMBO_EMPTY_POOL_NO_ELIGIBLE_TARGETS_ENABLED;
+  }
+});

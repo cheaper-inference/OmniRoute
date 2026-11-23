@@ -671,6 +671,134 @@ test("403 forbidden marks only that connection exhausted, not the whole provider
   assert.ok(s.exhaustedConnections.has("test-dedup-provider:conn-1"));
 });
 
+// #14313 — three generic guards on the exhaustion classifier. Each case below fails on the
+// release tip (the connection was marked exhausted, skipping every sibling target that
+// shares it) and passes with the guards. The target is a plain non-passthrough provider
+// (`test-dedup-provider`), so no per-model-quota exemption hides the guard under test.
+
+// (1) A 401/403 whose body names the MODEL as unsupported is model-scoped (errorClassifier
+// classifies it MODEL_NOT_FOUND, #7268): chatCore locks the model; the connection stays
+// eligible for its sibling models.
+test("#14313 model-scoped 401 (Model X is not supported) does NOT exhaust the connection", () => {
+  const s = sets();
+  const { providerExhausted: exhausted } = applyComboTargetExhaustion(target(), {
+    ...baseOpts,
+    result: { status: 401 },
+    fallbackResult: {},
+    errorText: "[401]: Model some-rotated-model is not supported",
+    sets: s,
+  });
+  assert.equal(exhausted, false, "model-scoped 401 must not mark the connection exhausted");
+  assert.equal(s.exhaustedConnections.size, 0, "a delisted model must not poison its siblings");
+  assert.equal(s.exhaustedProviders.size, 0, "a delisted model must not poison the provider");
+});
+
+test("#14313 model-scoped 403 (message only in structuredError) does NOT exhaust", () => {
+  const s = sets();
+  const { providerExhausted: exhausted } = applyComboTargetExhaustion(target(), {
+    ...baseOpts,
+    result: { status: 403 },
+    fallbackResult: {},
+    errorText: "Forbidden",
+    structuredError: { message: "Model some-premium-model is not supported" },
+    sets: s,
+  });
+  assert.equal(exhausted, false);
+  assert.equal(s.exhaustedConnections.size, 0);
+  assert.equal(s.exhaustedProviders.size, 0);
+});
+
+// (2) streamReadiness rewrites an upstream stream that dies before any non-ping event into
+// a synthetic 502 (code STREAM_EARLY_EOF / type stream_early_eof). The connection answered
+// and opened the stream; only this MODEL's backend failed — same verdict as #5085.
+test("#14313 synthetic early-EOF 502 does NOT exhaust the connection (structured code)", () => {
+  const s = sets();
+  const { providerExhausted: exhausted } = applyComboTargetExhaustion(target(), {
+    ...baseOpts,
+    result: { status: 502, headers: null },
+    fallbackResult: {},
+    errorText: "Stream ended before producing a non-ping SSE event",
+    structuredError: { code: "STREAM_EARLY_EOF", type: "stream_early_eof" },
+    sets: s,
+  });
+  assert.equal(exhausted, false);
+  assert.equal(s.exhaustedConnections.size, 0, "model-level EOF must not poison siblings");
+  assert.equal(s.exhaustedProviders.size, 0);
+});
+
+test("#14313 synthetic early-EOF 502 does NOT exhaust the connection (text only)", () => {
+  const s = sets();
+  applyComboTargetExhaustion(target(), {
+    ...baseOpts,
+    result: { status: 502, headers: null },
+    fallbackResult: {},
+    errorText:
+      "Stream ended before producing a non-ping SSE event: Streaming response failed: [503] Upstream error from Nvidia: Service temporarily overloaded",
+    sets: s,
+  });
+  assert.equal(s.exhaustedConnections.size, 0, "model-level overload must not poison siblings");
+});
+
+test("#14313 a plain 502 still exhausts the connection — the EOF guard is not over-broad", () => {
+  const s = sets();
+  applyComboTargetExhaustion(target(), {
+    ...baseOpts,
+    result: { status: 502, headers: null },
+    fallbackResult: {},
+    errorText: "Bad Gateway",
+    sets: s,
+  });
+  assert.ok(s.exhaustedConnections.has("test-dedup-provider:conn-1"));
+});
+
+// (3) A request-scoped failure refuses the REQUEST SHAPE, never the credentials. The
+// connection-level and provider-quota branches already honored `requestScopedFailure` /
+// `isRequestScopedUpstreamFailure`; the 401/403 auth branch did not.
+test("#14313 request-scoped 401 does NOT exhaust (requestScopedFailure option)", () => {
+  const s = sets();
+  const { providerExhausted: exhausted } = applyComboTargetExhaustion(target(), {
+    ...baseOpts,
+    result: { status: 401 },
+    fallbackResult: {},
+    errorText: "This request shape is not accepted on this tier.",
+    requestScopedFailure: true,
+    sets: s,
+  });
+  assert.equal(exhausted, false, "requestScopedFailure must bypass auth-level exhaustion");
+  assert.equal(s.exhaustedConnections.size, 0);
+  assert.equal(s.exhaustedProviders.size, 0);
+});
+
+test("#14313 request-scoped 403 does NOT exhaust (structured invalid_request_error)", () => {
+  const s = sets();
+  const { providerExhausted: exhausted } = applyComboTargetExhaustion(target(), {
+    ...baseOpts,
+    result: { status: 403 },
+    fallbackResult: {},
+    errorText: "Forbidden.",
+    structuredError: { type: "invalid_request_error" },
+    sets: s,
+  });
+  assert.equal(exhausted, false, "a request-scoped structured type must bypass auth exhaustion");
+  assert.equal(s.exhaustedConnections.size, 0);
+});
+
+test("#14313 a plain 403 still exhausts the connection — the gates did not over-exempt", () => {
+  const s = sets();
+  const { providerExhausted: exhausted } = applyComboTargetExhaustion(target(), {
+    ...baseOpts,
+    result: { status: 403 },
+    fallbackResult: {},
+    errorText: "Forbidden.",
+    sets: s,
+  });
+  assert.equal(exhausted, true);
+  assert.ok(
+    s.exhaustedConnections.has("test-dedup-provider:conn-1"),
+    "a real auth 403 must still exhaust the connection"
+  );
+});
+
 test("401 without a connectionId falls back to whole-provider exhaustion (#8133)", () => {
   const s = sets();
   const { providerExhausted: exhausted } = applyComboTargetExhaustion(

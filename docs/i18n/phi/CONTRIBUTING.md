@@ -8,15 +8,15 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ---
 
-## Pag-set Up para sa Development
+## Pag-setup ng Development
 
 ### Mga Kinakailangan
 
-- **Node.js** `>=22.22.3 <23`, o `>=24.0.0 <27` (inirerekomenda: 24 LTS)
+- **Node.js** `>=22.22.2 <23`, o `>=24.0.0 <27` (inirerekomenda: 24 LTS)
 - **npm** 10+
 
 > **Mga gumagamit ng npm v11+ (Node 24+):** Pagkatapos ng `npm install`, tiyaking na-install ang mga native module:
-> `node -e "require('better-sqlite3')"`. Kung mabigo ito dahil sa `MODULE_NOT_FOUND`,
+> `node -e "require('better-sqlite3')"`. Kung mabigo ito nang may `MODULE_NOT_FOUND`,
 > patakbuhin ang `npm approve-scripts better-sqlite3 && npm install`. Tingnan ang
 > [Pag-troubleshoot](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
@@ -41,26 +41,26 @@ echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-Mga pangunahing variable para sa development:
+Mahahalagang variable para sa development:
 
-| Variable               | Default sa Development   | Paglalarawan                   |
-| ---------------------- | ------------------------ | ------------------------------ |
-| `PORT`                 | `20128`                  | Port ng server                 |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | Base URL para sa frontend      |
-| `JWT_SECRET`           | (buuin sa itaas)         | Secret para sa pag-sign ng JWT |
-| `INITIAL_PASSWORD`     | `CHANGEME`               | Password sa unang pag-login    |
-| `APP_LOG_LEVEL`        | `info`                   | Antas ng detalye ng log        |
+| Variable               | Default sa Development   | Paglalarawan                |
+| ---------------------- | ------------------------ | --------------------------- |
+| `PORT`                 | `20128`                  | Port ng server              |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | Base URL para sa frontend   |
+| `JWT_SECRET`           | (buuin sa itaas)         | Secret sa pag-sign ng JWT   |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | Password sa unang pag-login |
+| `APP_LOG_LEVEL`        | `info`                   | Antas ng detalye ng mga log |
 
 ### Mga Setting ng Dashboard
 
-Nagbibigay ang dashboard ng mga UI toggle para sa mga feature na maaari ding i-configure sa pamamagitan ng mga environment variable:
+Nagbibigay ang dashboard ng mga UI toggle para sa mga feature na maaari ring i-configure sa pamamagitan ng mga environment variable:
 
 | Lokasyon ng Setting | Toggle             | Paglalarawan                             |
 | ------------------- | ------------------ | ---------------------------------------- |
-| Settings → Advanced | Debug Mode         | I-enable ang mga debug request log (UI)  |
+| Settings → Advanced | Debug Mode         | Paganahin ang mga debug request log (UI) |
 | Settings → General  | Sidebar Visibility | Ipakita/itago ang mga seksyon ng sidebar |
 
-Nakaimbak sa database ang mga setting na ito at nananatili ang mga ito sa bawat pag-restart, na nag-o-override sa mga default ng env var kapag naitakda.
+Iniimbak ang mga setting na ito sa database at nananatili ang mga ito sa bawat pag-restart, na pumapalit sa mga default ng env var kapag itinakda.
 
 ### Lokal na Pagpapatakbo
 
@@ -75,45 +75,45 @@ npm run start
 # Mabilis na backend/API-only compile para sa mga pagbabago ng contributor
 npm run build:contributor
 
-# Release build (malinis na rebuild + HEAD sentinel — kinakailangan para sa deploy)
-npm run build:release   # rm -rf .build dist && build + isinusulat ang dist/BUILD_SHA
+# Release build (malinis na rebuild + HEAD sentinel — kinakailangan para sa pag-deploy)
+npm run build:release   # rm -rf .build dist && build + nagsusulat sa dist/BUILD_SHA
 
 # Karaniwang configuration ng port
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
 Nagsasagawa ang contributor build ng compile-only na validation: hindi nito binubuo ang standalone
-distribution o ang mga opsyonal na native packaging asset. Gamitin ang regular na production build kapag
-kailangan mong i-validate ang bundle na maaaring i-deploy.
+distribution o ang mga opsyonal na native packaging asset. Gamitin ang karaniwang production build kapag
+kailangan mong i-validate ang bundle na maaaring i-release.
 
-### Layout ng Build Output
+### Ayos ng Build Output
 
 | Directory | Mga Nilalaman                                                                   | Sinusubaybayan |
 | --------- | ------------------------------------------------------------------------------- | -------------- |
 | `src/`    | Source ng application (TypeScript / TSX)                                        | Oo             |
 | `.build/` | Mga intermediate — output ng `next build` (gitignored, `distDir = .build/next`) | Hindi          |
-| `dist/`   | Bundle na maaaring i-deploy — binuo ng `assembleStandalone` (gitignored)        | Hindi          |
+| `dist/`   | Bundle na maaaring i-release — binuo ng `assembleStandalone` (gitignored)       | Hindi          |
 
 Iisang pass ang build pipeline:
 
 ```
 npm run build
   └─ next build → .build/next/standalone  (output ng Next.js)
-  └─ assembleStandalone()                 (kinokopya ang standalone + static + public + native asset)
+  └─ assembleStandalone()                 (kinokopya ang standalone + static + public + mga native asset)
        └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-Bukod dito, nililinis muna ng `npm run build:release` ang parehong directory at isinusulat ang
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) bilang sentinel ng integridad ng deploy.
+Nililinis din muna ng `npm run build:release` ang parehong directory at isinusulat ang
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) bilang sentinel ng integridad ng pag-deploy.
 
-Ginagamit ng `npm run build:contributor` ang backend-only na build profile. Pansamantala nitong pinapalitan ng mga stub ang
-mga dashboard UI file habang nagbi-build, pinapanatili ang mga API route handler, at ibinabalik ang mga orihinal na file
-pagkatapos ng build. Gamitin ang `npm run build` para sa mga pagbabagong nakaaapekto sa dashboard UI o para sa buong
-release validation; hindi kapalit ng release build ang contributor profile.
+Ginagamit ng `npm run build:contributor` ang backend-only na build profile. Pansamantala nitong pinapalitan
+ng mga stub ang mga dashboard UI file habang nagbu-build, pinananatili ang mga API route handler, at ibinabalik ang mga orihinal na file
+pagkatapos ng build. Gamitin ang `npm run build` para sa mga pagbabagong nakaaapekto sa dashboard UI o para sa ganap na
+validation ng release; hindi pamalit sa release build ang contributor profile.
 
-> **Tala para sa pag-deploy sa VPS:** hindi nagbago ang remote image directory na `/usr/lib/node_modules/omniroute/app/`.
-> Gumagamit ang mga deploy skill ng rsync upang ilagay rito ang mga nilalaman ng `dist/`.
-> Ang in-repo build output path lamang ang nagbago (`app/` → `dist/`).
+> **Paalala sa pag-deploy sa VPS:** hindi nagbago ang remote image directory na `/usr/lib/node_modules/omniroute/app/`.
+> Ini-rsync ng mga deploy skill ang mga nilalaman ng `dist/` papunta rito.
+> Tanging ang path ng build output sa repository ang nagbago (`app/` → `dist/`).
 
 Mga default na URL:
 
@@ -288,65 +288,72 @@ Tingnan ang `open-sse/utils/stream.ts` at `open-sse/utils/streamHandler.ts` para
 
 ---
 
-## Project Structure
+## Estruktura ng Proyekto
 
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # Dashboard pages (23 sections)
-│   ├── api/                # API routes (51 directories)
-│   └── login/              # Auth pages (.tsx)
-├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
-├── lib/                    # Core business logic (.ts)
-│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
-│   ├── acp/                # Agent Communication Protocol registry
-│   ├── compliance/         # Compliance policy engine
-│   ├── db/                 # SQLite database layer (110 top-level modules + 130 migrations)
-│   ├── memory/             # Persistent conversational memory
-│   ├── oauth/              # OAuth providers, services, and utilities
-│   ├── skills/             # Extensible skill framework
-│   ├── usage/              # Usage tracking and cost calculation
-│   └── localDb.ts          # Re-export layer only — never add logic here
-├── middleware/              # Request middleware (promptInjectionGuard)
-├── mitm/                   # MITM proxy (cert, DNS, target routing)
+│   ├── (dashboard)/        # Mga pahina ng dashboard (23 seksyon)
+│   ├── api/                # Mga ruta ng API (51 direktoryo)
+│   └── login/              # Mga pahina ng pagpapatotoo (.tsx)
+├── domain/                 # Engine ng patakaran (policyEngine, comboResolver, costRules, atbp.)
+├── lib/                    # Pangunahing lohika ng negosyo (.ts)
+│   ├── a2a/                # Server ng Agent-to-Agent v0.3 protocol
+│   ├── acp/                # Registry ng Agent Communication Protocol
+│   ├── compliance/         # Engine ng patakaran sa pagsunod
+│   ├── db/                 # Mga domain module ng SQLite + 130 migrasyon
+│   ├── memory/             # Persistent na memorya ng pag-uusap
+│   ├── oauth/              # Mga provider, serbisyo, at utility ng OAuth
+│   ├── skills/             # Napapalawak na framework ng kasanayan
+│   ├── usage/              # Pagsubaybay sa paggamit at pagkalkula ng gastos
+│   └── localDb.ts          # Re-export layer lamang — huwag kailanman magdagdag ng lohika rito
+├── middleware/              # Middleware ng request (promptInjectionGuard)
+├── mitm/                   # MITM proxy (sertipiko, DNS, pagruruta ng target)
 ├── shared/
-│   ├── components/         # React components (.tsx)
-│   ├── constants/          # Provider definitions (329), MCP scopes, routing strategies
-│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
-│   └── validation/         # Zod v4 schemas
-└── sse/                    # SSE proxy pipeline
+│   ├── components/         # Mga React component (.tsx)
+│   ├── constants/          # Mga depinisyon ng provider (329), MCP scope, 20 estratehiya sa pagruruta
+│   ├── utils/              # Circuit breaker, sanitizer, mga helper sa pagpapatotoo
+│   └── validation/         # Mga Zod v4 schema
+└── sse/                    # Pipeline ng SSE proxy
 
 open-sse/                   # @omniroute/open-sse workspace
-├── executors/              # 89 executor implementation modules
-├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
-├── mcp-server/             # MCP server (107 tools, 3 transports, 32 scopes)
-├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
-├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Responses API transformer
-└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
+├── executors/              # 150 executor module (mga executor class + helper para sa bawat provider)
+├── handlers/               # 11 request handler (chat, responses, embeddings, images, atbp.)
+├── mcp-server/             # MCP server (110 natatanging tool, 3 transport, 33 scope)
+├── services/               # 178 nangungunang antas na serbisyo (combo, autoCombo, rateLimitManager, atbp.)
+├── translator/             # Mga tagasalin ng format (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Transformer ng Responses API
+└── utils/                  # 22 utility module (stream, TLS, proxy, logging)
 
 electron/                   # Electron desktop app (cross-platform)
 
 tests/
-├── unit/                   # Node.js test runner (122 test files)
-├── integration/            # Integration tests
-├── e2e/                    # Playwright tests
-├── security/               # Security tests
-├── translator/             # Translator-specific tests
-└── load/                   # Load tests
+├── unit/                   # Node.js test runner (1,574 test file)
+├── integration/            # Mga integration test
+├── e2e/                    # Mga Playwright test
+├── security/               # Mga security test
+├── translator/             # Mga test na partikular sa translator
+└── load/                   # Mga load test
 
-docs/                       # Documentation
-├── ARCHITECTURE.md         # System architecture
-├── API_REFERENCE.md        # All endpoints
-├── USER_GUIDE.md           # Provider setup, CLI integration
-├── TROUBLESHOOTING.md      # Common issues
-├── MCP-SERVER.md           # MCP server (107 tools)
-├── A2A-SERVER.md           # A2A agent protocol
-├── AUTO-COMBO.md           # Auto-combo engine
-├── CLI-TOOLS.md            # CLI tools integration
-├── COVERAGE_PLAN.md        # Test coverage improvement plan
-├── openapi.yaml            # OpenAPI specification
-└── adr/                    # Architecture Decision Records
+docs/
+├── adr/                     # Mga Talaan ng Desisyon sa Arkitektura
+├── architecture/            # Arkitektura at katatagan ng system
+├── comparison/              # OmniRoute kumpara sa mga alternatibo
+├── compression/             # Mga gabay at panuntunan sa compression
+├── dev/                     # Mga gabay sa development
+├── diagrams/                # Mga diagram ng arkitektura
+├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
+├── guides/                  # Gabay ng user, Docker, setup, troubleshooting
+├── i18n/                    # Mga internasyonal na salin ng README
+├── marketing/               # Mga materyal sa marketing
+├── ops/                     # Deployment, proxy, coverage, mga release
+├── providers/               # Dokumentasyong partikular sa provider
+├── reference/               # Sanggunian ng API, mga env var, CLI tool, mga libreng tier
+├── releases/                # Mga tala sa release
+├── routing/                 # Auto-combo engine, reasoning replay
+├── screenshots/             # Mga screenshot ng dashboard
+├── security/                # Mga guardrail, pagsunod, stealth, mga token
+└── specs/                   # Mga espesipikasyon ng disenyo
 ```
 
 ---
@@ -392,23 +399,27 @@ Sumulat ng mga unit test sa `tests/unit/` na sumasaklaw, bilang minimum, sa:
 - [ ] Pumapasa ang mga test (`npm test`)
 - [ ] Pumapasa ang linting (`npm run lint`)
 - [ ] Matagumpay ang build (`npm run build`)
-- [ ] Naidagdag ang mga TypeScript type para sa mga bagong pampublikong function at interface
-- [ ] Walang mga naka-hardcode na secret o fallback value
-- [ ] Naka-embed ang mga pampublikong upstream credential sa pamamagitan ng `resolvePublicCred()` (tingnan ang [`docs/security/PUBLIC_CREDS.md`](./docs/security/PUBLIC_CREDS.md)), at hindi kailanman bilang mga literal
-- [ ] Dumadaan ang mga tugon sa error sa `buildErrorBody()` / `sanitizeErrorMessage()` — walang mga raw stack trace sa mga response body (tingnan ang [`docs/security/ERROR_SANITIZATION.md`](./docs/security/ERROR_SANITIZATION.md))
-- [ ] Ipinapasa ng mga shell command (`exec` / `spawn`) ang mga runtime value sa pamamagitan ng `env`, hindi sa pamamagitan ng string interpolation
-- [ ] Na-validate ang lahat ng input gamit ang mga Zod schema
-- [ ] Nagdagdag ng **fragment** ng changelog sa ilalim ng `changelog.d/{features|fixes|maintenance}/<PR>-<slug>.md` para sa mga pagbabagong nakikita ng user (tingnan ang [`changelog.d/README.md`](./changelog.d/README.md)) — **huwag** direktang i-edit ang `CHANGELOG.md`; pinagsasama-sama ang mga fragment sa oras ng release at hindi kailanman nagkakaroon ng conflict sa pagitan ng mga PR
+- [ ] Nagdagdag ng mga TypeScript type para sa mga bagong pampublikong function at interface
+- [ ] Walang naka-hardcode na mga secret o fallback value
+- [ ] Ang mga pampublikong upstream credential ay naka-embed sa pamamagitan ng `resolvePublicCred()` (tingnan ang [`docs/security/PUBLIC_CREDS.md`](./docs/security/PUBLIC_CREDS.md)), at hindi kailanman bilang mga literal
+- [ ] Ang mga error response ay dumaraan sa `buildErrorBody()` / `sanitizeErrorMessage()` — walang mga raw stack trace sa mga response body (tingnan ang [`docs/security/ERROR_SANITIZATION.md`](./docs/security/ERROR_SANITIZATION.md))
+- [ ] Ang mga shell command (`exec` / `spawn`) ay nagpapasa ng mga runtime value sa pamamagitan ng `env`, hindi sa pamamagitan ng string interpolation
+- [ ] Napatunayan ang bisa ng lahat ng input gamit ang mga Zod schema
+- [ ] Nagdagdag ng **fragment** ng changelog sa ilalim ng `changelog.d/{features|fixes|maintenance}/<PR>-<slug>.md` para sa mga pagbabagong nakikita ng user (tingnan ang [`changelog.d/README.md`](./changelog.d/README.md)) — **huwag** direktang i-edit ang `CHANGELOG.md`; pinagsasama-sama ang mga fragment sa oras ng release at hindi kailanman nagkakasalungatan sa pagitan ng mga PR
 - [ ] Na-update ang dokumentasyon (kung naaangkop)
-- [ ] Walang bagong nabuksang alerto mula sa CodeQL / Secret-Scanning, o na-dismiss ang bawat isa nang may teknikal na katwirang tumutukoy sa nauugnay na dokumento sa `docs/security/`
+- [ ] Walang bagong nabuksang alerto mula sa CodeQL / Secret-Scanning, o ang bawat isa ay na-dismiss nang may teknikal na katwiran na tumutukoy sa nauugnay na dokumento sa `docs/security/`
 - [ ] Ang mga route na naglulunsad ng mga child process (`/api/mcp/`, `/api/cli-tools/runtime/`) ay inuri bilang `isLocalOnlyPath()` sa `src/server/authz/routeGuard.ts` — tingnan ang [Mahigpit na Panuntunan #15](docs/security/ROUTE_GUARD_TIERS.md)
-- [ ] Walang mga trailer na `Co-Authored-By` sa mga commit message — dapat lumabas ang mga commit sa ilalim lamang ng Git identity ng may-ari ng repository (Mahigpit na Panuntunan #16)
+- [ ] Walang mga AI/bot na `Co-authored-by` trailer sa mga commit message (Mahigpit na Panuntunan #16) — ang mga taong collaborator na muling ginamit ang gawa ay kinikilala gamit ang karaniwang `Co-authored-by: Name <email>` na mga trailer
 
 ---
 
-## Releasing
+## Paglalabas ng Release
 
-Releases are managed via the `/generate-release` workflow. When a new GitHub Release is created, the package is **automatically published to npm** via GitHub Actions.
+Pinamamahalaan ang mga release sa pamamagitan ng workflow na `/generate-release`. Kapag gumawa ng bagong GitHub Release, **awtomatikong inilalathala sa npm** ang package sa pamamagitan ng GitHub Actions.
+
+Para sa mga pag-deploy sa VPS, gamitin ang `npm run build:release` (hindi ang `npm run build`) — nagsasagawa ito ng malinis na
+muling pag-build, binubuo ang bundle sa `dist/`, at isinusulat ang sentinel na `dist/BUILD_SHA`.
+Pagkatapos, gamitin ang mga skill na `/deploy-vps-*-cc`, na gumagamit ng rsync upang ilipat ang `dist/` sa remote na direktoryong `app/`.
 
 ---
 

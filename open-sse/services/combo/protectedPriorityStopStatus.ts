@@ -29,3 +29,20 @@ export function protectedPriorityStopStatus(cause?: ProtectedPriorityStopCause):
     return 503;
   }
 }
+
+/**
+ * #14313 — opt-in gate for the auto strategy's empty-candidate-pool answer (503
+ * `no_eligible_targets` instead of the legacy 400 capability_mismatch). Lives beside the
+ * protected-priority status because both decide a client-visible combo stop status behind
+ * a default-off flag, and this module already holds the feature-flag read (keeps the
+ * open-sse → src boundary from growing). Fail closed: a flag-read failure keeps the
+ * legacy answer.
+ */
+export function isComboEmptyPoolNoEligibleTargetsEnabled(): boolean {
+  try {
+    return isFeatureFlagEnabled("COMBO_EMPTY_POOL_NO_ELIGIBLE_TARGETS_ENABLED");
+  } catch {
+    // no-effect: an unreadable flag store keeps the legacy 400 capability_mismatch
+    return false;
+  }
+}

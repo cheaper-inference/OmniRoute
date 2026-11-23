@@ -40,12 +40,12 @@ O `TrafficBuffer` (`src/mitm/inspector/buffer.ts`) é um buffer circular partilh
 
 ## §2 Modos de captura
 
-O Traffic Inspector suporta **5 fontes de captura simultâneas**. Cada uma pode ser ativada ou desativada de forma independente. O campo `source` de cada `InterceptedRequest` (`src/mitm/inspector/types.ts`) tem um dos valores `"agent-bridge"`, `"custom-host"`, `"http-proxy"`, `"system-proxy"` ou `"tproxy"`.
+O Traffic Inspector suporta **5 fontes de captura simultâneas**. Cada uma pode ser ativada ou desativada de forma independente. O campo `source` de cada `InterceptedRequest` (`src/mitm/inspector/types.ts`) tem um dos seguintes valores: `"agent-bridge"`, `"custom-host"`, `"http-proxy"`, `"system-proxy"` ou `"tproxy"`.
 
 ### Modo 1 — AgentBridge (predefinido, sempre ativo)
 
 **Origem:** Processadores do AgentBridge (`src/mitm/handlers/base.ts`)
-**Mecanismo:** Cada chamada a `intercept()` em `MitmHandlerBase` chama `hookBufferStart()` antes de reencaminhar e `hookBufferUpdate()` após a conclusão. Não requer configuração adicional — funciona assim que o AgentBridge estiver em execução.
+**Mecanismo:** Cada chamada a `intercept()` em `MitmHandlerBase` chama `hookBufferStart()` antes de encaminhar e `hookBufferUpdate()` após a conclusão. Não requer configuração adicional — funciona assim que o AgentBridge estiver em execução.
 **Abrangência:** Os 9 agentes de IDE configurados no AgentBridge
 **Nota:** Campo `source` em `InterceptedRequest` = `"agent-bridge"`
 
@@ -62,30 +62,30 @@ Exemplos de utilização:
 - Depurar `my-internal-llm.company.com`
 - Capturar tráfego de dispositivos móveis na mesma rede (através de falsificação ARP — avançado)
 
-### Modo 3 — Serviço de escuta HTTP_PROXY (porta 8080)
+### Modo 3 — Listener HTTP_PROXY (porta 8080)
 
 **Origem:** Aplicações que utilizam as variáveis de ambiente `HTTP_PROXY`/`HTTPS_PROXY`
-**Mecanismo:** Serviço de escuta secundário na porta 8080 (`src/mitm/inspector/httpProxyServer.ts`) que funciona como um proxy HTTP/HTTPS explícito padrão. Aceita túneis `CONNECT` (HTTPS) e pedidos HTTP diretos.
-**Abrangência:** Qualquer aplicação que respeite a variável de ambiente `HTTP_PROXY` — sem alterações de DNS, sem sudo
+**Mecanismo:** Listener secundário na porta 8080 (`src/mitm/inspector/httpProxyServer.ts`) que funciona como um proxy HTTP/HTTPS explícito padrão. Aceita túneis `CONNECT` (HTTPS) e pedidos HTTP diretos.
+**Abrangência:** Qualquer aplicação que respeite a variável de ambiente `HTTP_PROXY` — sem alteração de DNS nem sudo
 **Nota:** `source` = `"http-proxy"`
 
 ```bash
 # Captura rápida para um único comando:
 HTTPS_PROXY=http://127.0.0.1:8080 curl https://api.openai.com/v1/models
 
-# Captura persistente numa sessão de shell:
+# Captura persistente numa sessão da shell:
 export HTTP_PROXY=http://127.0.0.1:8080
 export HTTPS_PROXY=http://127.0.0.1:8080
 ```
 
-**Limitação de TLS:** Os túneis HTTPS `CONNECT` são capturados apenas como metadados (host, porta, tempos) — o corpo TLS não é desencriptado por predefinição. Ative a opção "Desencriptar HTTPS no modo proxy" (adesão opcional, requer que o certificado do AgentBridge seja considerado fidedigno) para inspecionar o corpo completo.
+**Limitação de TLS:** O HTTPS passa por um túnel `CONNECT` simples: o listener retransmite os bytes encriptados sem qualquer alteração e regista apenas os metadados (host, porta, temporização). Nunca desencripta HTTPS e não existe qualquer definição que ative a desencriptação neste modo. Para capturar corpos HTTPS, encaminhe o host através do Modo 1 (AgentBridge), do Modo 2 (Hosts personalizados) ou do Modo 5 (desencriptação TPROXY).
 
 **Conflito de porta:** Se a porta 8080 estiver a ser utilizada, o AgentBridge devolve um erro 409 estruturado. Altere a porta através da variável de ambiente `INSPECTOR_HTTP_PROXY_PORT`.
 
-### Modo 4 — Proxy para todo o sistema (avançado, opcional)
+### Modo 4 — Proxy ao nível de todo o sistema (avançado, opcional)
 
 **Origem:** Definições de proxy ao nível do SO (aplicam-se a todas as aplicações na máquina)
-**Mecanismo:** Utiliza as APIs do SO para redirecionar todo o tráfego HTTP/HTTPS através do serviço de escuta HTTP_PROXY:
+**Mecanismo:** Utiliza APIs do SO para redirecionar todo o tráfego HTTP/HTTPS através do listener HTTP_PROXY:
 
 - **macOS:** `networksetup -setwebproxy / -setsecurewebproxy`
 - **Linux:** `gsettings set org.gnome.system.proxy` + `/etc/environment`
@@ -95,31 +95,31 @@ export HTTPS_PROXY=http://127.0.0.1:8080
 
 **Mecanismos de segurança:**
 
-- Temporizador de desativação automática (30 min por predefinição, configurável através de `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`)
+- Temporizador de desativação automática (predefinição de 30 min, configurável através de `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`)
 - O estado anterior do proxy do sistema é guardado na BD e restaurado ao reverter
-- O painel apresenta a mensagem "A reverter o proxy do sistema" se o utilizador sair da página enquanto estiver ativo
+- O painel apresenta o aviso "A reverter o proxy do sistema" se o utilizador sair da página enquanto este estiver ativo
 - A IU apresenta o distintivo `⚠ Avançado` + uma caixa de confirmação explícita
 
 ### Modo 5 — Desencriptação transparente TPROXY (Linux, root, opcional)
 
 **Origem:** TPROXY do kernel + encaminhamento baseado em políticas (`src/mitm/tproxy/`)
-**Mecanismo:** Marca novas ligações TCP locais de saída para uma porta de destino (por predefinição, `443`) em `mangle OUTPUT`; uma `ip rule` reencaminha os pacotes marcados para entrega local; e o destino `TPROXY` de `mangle PREROUTING` entrega-os a um serviço de escuta transparente (**IP_TRANSPARENT**) (porta predefinida `8443`). O serviço de escuta termina o TLS com um certificado de folha emitido **a pedido para cada nome de host SNI** por uma AC dinâmica, captura a comunicação desencriptada e reencaminha o pedido, novamente encriptado, para o destino original.
-**Abrangência:** Hosts de destino **arbitrários** na porta de destino — sem falsificação de `/etc/hosts`, sem variável de ambiente `HTTP_PROXY`, sem alteração do proxy de todo o sistema. O processo intercetado não requer qualquer alteração de configuração, mas tem de confiar na AC dinâmica.
+**Mecanismo:** Marca as novas ligações TCP locais de saída destinadas a uma porta de destino (predefinição: `443`) em `mangle OUTPUT`; uma `ip rule` reencaminha os pacotes marcados para entrega local; e o destino `TPROXY` de `mangle PREROUTING` entrega-os a um listener transparente (**IP_TRANSPARENT**) (porta predefinida: `8443`). O listener termina o TLS com um certificado de entidade final emitido **a pedido para cada nome de host SNI** por uma AC dinâmica, captura a comunicação desencriptada e encaminha o pedido, novamente encriptado, para o destino original.
+**Abrangência:** Hosts de destino **arbitrários** na porta de destino — sem falsificação de `/etc/hosts`, sem variável de ambiente `HTTP_PROXY` e sem alteração do proxy ao nível de todo o sistema. O processo intercetado não necessita de alterações de configuração, mas tem de confiar na AC dinâmica.
 **Nota:** `source` = `"tproxy"`
 
-**Requisitos:** Apenas Linux (**IP_TRANSPARENT** só está disponível no Linux), a capacidade **CAP_NET_ADMIN** (root) e um addon N-API nativo que tem de ser compilado com uma cadeia de ferramentas C (`npm run build:native:tproxy`). Quando não está disponível, a opção no painel fica desativada com a descrição "A desencriptação TPROXY requer Linux + root + o addon nativo". As regras de firewall são aplicadas/revertidas de forma transacional (uma falha nunca deixa uma regra `mangle` para trás) e são removidas no reinício. Um mecanismo antirrecursão baseado em SO_MARK impede que o reencaminhamento novamente encriptado do próprio proxy seja intercetado de novo.
+**Requisitos:** Apenas Linux (**IP_TRANSPARENT** é exclusivo do Linux), a capacidade **CAP_NET_ADMIN** (root) e um módulo adicional N-API nativo que tem de ser compilado com uma cadeia de ferramentas C (`npm run build:native:tproxy`). Quando não está disponível, o botão de alternância do painel fica desativado com a descrição "A desencriptação TPROXY requer Linux + root + o módulo adicional nativo". As regras da firewall são aplicadas/revertidas de forma transacional (uma falha nunca deixa para trás uma regra `mangle`) e são removidas ao reiniciar. Um mecanismo antirrecursão baseado em SO_MARK impede que o encaminhamento novamente encriptado do próprio proxy seja novamente intercetado.
 
-Este é um subsistema substancial, com o seu próprio guia dedicado para operadores — consulte `docs/security/MITM-TPROXY-DECRYPT.md` (git; não compilado em `/docs`) para obter a configuração completa da firewall, a AC dinâmica por SNI + o instalador do arquivo de confiança, a rota apenas local, os detalhes do mecanismo antirrecursão e o esquema de configuração. A opção é controlada por `GET / POST / DELETE /api/tools/agent-bridge/tproxy` (nota: a rota encontra-se sob o prefixo do AgentBridge, não sob o prefixo do Traffic Inspector).
+Este é um subsistema substancial com o seu próprio guia dedicado para operadores — consulte `docs/security/MITM-TPROXY-DECRYPT.md` (git; não compilado em `/docs`) para obter a configuração completa da firewall, a AC dinâmica por SNI + o instalador do arquivo de confiança, a rota exclusivamente local, os detalhes do mecanismo antirrecursão e o esquema de configuração. O botão de alternância é controlado por `GET / POST / DELETE /api/tools/agent-bridge/tproxy` (nota: a rota encontra-se sob o prefixo do AgentBridge, não sob o prefixo do Traffic Inspector).
 
 ### Comparação dos modos de captura
 
-| Modo                     | Configuração                    |             Sudo?             | Âmbito                                   | Notas                                                                                                                                        |
-| ------------------------ | ------------------------------- | :---------------------------: | ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1. AgentBridge           | Automática                      |     Uma vez (cert+hosts)      | 9 agentes de IDE                         | Ativado por predefinição                                                                                                                     |
-| 2. Hosts personalizados  | Introdução por host             |     Sim (ficheiro hosts)      | Qualquer aplicação que utilize esse host | Guardado na BD                                                                                                                               |
-| 3. HTTP_PROXY            | `export HTTPS_PROXY=...`        |              Não              | Aplicações que respeitem o ambiente      | Porta 8080, sem desencriptação TLS por predefinição                                                                                          |
-| 4. Em todo o sistema     | Alternar + confirmar            |              Sim              | Todas as aplicações na máquina           | Desativação automática após 30 min                                                                                                           |
-| 5. Desencriptação TPROXY | Alternar (Linux + addon nativo) | Sim (root + instalação da CA) | Qualquer host na porta de destino        | Desencripta hosts arbitrários; desativada por predefinição — consulte `docs/security/MITM-TPROXY-DECRYPT.md` (git; não compilado em `/docs`) |
+| Modo                     | Configuração                    |             Sudo?             | Abrangência                          | Notas                                                                                                                                        |
+| ------------------------ | ------------------------------- | :---------------------------: | ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. AgentBridge           | Automática                      |  Uma vez (certificado+hosts)  | 9 agentes de IDE                     | Ativado por predefinição                                                                                                                     |
+| 2. Hosts personalizados  | Introdução por host             |     Sim (ficheiro hosts)      | Qualquer aplicação que use esse host | Persistido na BD                                                                                                                             |
+| 3. HTTP_PROXY            | `export HTTPS_PROXY=...`        |              Não              | Aplicações que respeitem o ambiente  | Porta 8080; HTTPS é encaminhado por túnel CONNECT (apenas metadados, nunca desencriptado)                                                    |
+| 4. Em todo o sistema     | Alternar + confirmar            |              Sim              | Todas as aplicações na máquina       | Desativação automática após 30 min.                                                                                                          |
+| 5. Desencriptação TPROXY | Alternar (Linux + addon nativo) | Sim (root + instalação da AC) | Qualquer host na porta de destino    | Desencripta hosts arbitrários; desativado por predefinição — consulte `docs/security/MITM-TPROXY-DECRYPT.md` (git; não compilado em `/docs`) |
 
 ---
 
@@ -342,27 +342,27 @@ Exporte através de `GET /api/tools/traffic-inspector/sessions/{id}/export.har` 
 
 O Traffic Inspector mostra **todo o tráfego HTTPS intercetado**, incluindo cabeçalhos de autorização e corpos dos pedidos. Estão implementados os seguintes controlos:
 
-| Controlo                              | Detalhes                                                                                                                                                                                                                       |
-| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **LOCAL_ONLY**                        | Todas as rotas e o endpoint WebSocket estão limitados ao endereço de loopback (imposto em `routeGuard.ts` antes da autenticação)                                                                                               |
-| **Ocultação de segredos**             | O analisador linear `maskSecret()` oculta credenciais Bearer da RFC 6750, chaves com prefixos de fornecedores e tokens opacos longos antes de `TrafficBuffer.push()`                                                           |
-| **Limite do tamanho do corpo**        | Os corpos > `INSPECTOR_MAX_BODY_KB` (predefinição: 1024 KB) são truncados com o aviso `"(truncado por motivos de desempenho)"`                                                                                                 |
-| **Saneamento de cabeçalhos**          | Os nomes são convertidos para minúsculas; os cabeçalhos de enquadramento/salto a salto e de autenticação do proxy são removidos; os cookies são totalmente ocultados; os valores de credenciais são delegados a `maskSecret()` |
-| **CSP**                               | Política de Segurança de Conteúdos rigorosa nas páginas do Traffic Inspector para impedir XSS através de corpos de resposta injetados                                                                                          |
-| **Sem persistência por predefinição** | O `TrafficBuffer` é mantido em memória e perde-se ao reiniciar o servidor. As sessões apenas são persistidas quando gravadas explicitamente                                                                                    |
+| Controlo                              | Detalhes                                                                                                                                                                                                                  |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **LOCAL_ONLY**                        | Todas as rotas e o endpoint WebSocket são acessíveis apenas através da interface de loopback (imposto em `routeGuard.ts` antes da autenticação)                                                                           |
+| **Ocultação de segredos**             | O analisador linear `maskSecret()` oculta credenciais Bearer RFC 6750, chaves com prefixos de fornecedores e tokens opacos longos antes de `TrafficBuffer.push()`                                                         |
+| **Limite do tamanho do corpo**        | Os corpos > `INSPECTOR_MAX_BODY_KB` (predefinição: 1024 KB) são truncados com o aviso `"(truncated for performance)"`                                                                                                     |
+| **Sanitização de cabeçalhos**         | Os nomes são convertidos em minúsculas; os cabeçalhos de enquadramento/hop-by-hop e de autenticação de proxy são removidos; os cookies são totalmente ocultados; os valores de credenciais são delegados a `maskSecret()` |
+| **CSP**                               | Política de Segurança de Conteúdo rigorosa nas páginas do Traffic Inspector para impedir XSS através de corpos de resposta injetados                                                                                      |
+| **Sem persistência por predefinição** | O `TrafficBuffer` é mantido em memória e perde-se quando o servidor é reiniciado. As sessões só são persistidas quando são explicitamente gravadas                                                                        |
 
-### Regras rígidas aplicadas
+### Regras estritas aplicadas
 
 | Regra                             | Aplicação                                                                                   |
 | --------------------------------- | ------------------------------------------------------------------------------------------- |
-| **#12** `sanitizeErrorMessage`    | Todas as respostas de erro HTTP das rotas do Traffic Inspector são saneadas                 |
-| **#15 + #17** `isLocalOnlyPath()` | `/api/tools/traffic-inspector/` é LOCAL_ONLY + SPAWN_CAPABLE (comandos do proxy do sistema) |
+| **#12** `sanitizeErrorMessage`    | Todas as respostas de erro HTTP das rotas do Traffic Inspector são sanitizadas              |
+| **#15 + #17** `isLocalOnlyPath()` | `/api/tools/traffic-inspector/` é LOCAL_ONLY + SPAWN_CAPABLE (comandos de proxy do sistema) |
 
 ### Limitações conhecidas
 
-- O **modo de proxy para todo o sistema** afeta todas as aplicações na máquina, incluindo clientes VPN e SSO. Utilize-o sempre com o temporizador de desativação automática. Não o utilize em máquinas partilhadas.
-- **HTTPS em túnel CONNECT**: o Modo 3 (HTTP_PROXY) captura apenas metadados do túnel para destinos HTTPS, a menos que a interceção TLS esteja ativada. Isto é intencional — a captura transparente sem que o certificado AgentBridge seja considerado fidedigno interromperia a verificação TLS dessas aplicações.
-- **Cadeias de caracteres codificadas diretamente em alguns componentes**: alguns componentes da IU (F7/F8) têm um pequeno número de cadeias de caracteres codificadas diretamente que ainda não estão abrangidas por chaves de i18n. Estas estão documentadas como uma Limitação Conhecida no relatório de lacunas de i18n; serão migradas numa fase posterior. As cadeias de caracteres afetadas são etiquetas decorativas da IU que não necessitam de tradução para uma utilização funcional.
+- **O modo de proxy ao nível de todo o sistema** afeta todas as aplicações na máquina, incluindo clientes VPN e SSO. Utilize-o sempre com o temporizador de desativação automática. Não o utilize em máquinas partilhadas.
+- **HTTPS através de túnel CONNECT**: o Modo 3 (HTTP_PROXY) captura apenas os metadados do túnel para destinos HTTPS e nunca os desencripta. Isto é intencional — a desencriptação exigiria que todos os clientes confiassem num certificado MITM, pelo que o listener mantém o HTTPS cifrado ponto a ponto. Utilize AgentBridge, Custom Hosts ou a desencriptação TPROXY quando necessitar dos corpos HTTPS.
+- **Cadeias de caracteres codificadas diretamente em alguns componentes**: alguns componentes da IU (F7/F8) têm um pequeno número de cadeias de caracteres codificadas diretamente que ainda não são abrangidas por chaves i18n. Estas estão documentadas como uma Limitação Conhecida no relatório de lacunas de i18n; serão migradas numa revisão posterior. As cadeias afetadas são etiquetas decorativas da IU que não necessitam de tradução para utilização funcional.
 
 ---
 
@@ -438,38 +438,37 @@ Caminho base: `/api/tools/traffic-inspector/`
 | GET    | `/requests`                 | Lista pedidos (filtráveis: `?profile=llm&host=&agent=&status=&source=&sessionId=`) |
 | GET    | `/requests/{id}`            | Detalhes de um único pedido                                                        |
 | DELETE | `/requests`                 | Limpa o buffer em memória                                                          |
-| POST   | `/requests/{id}/replay`     | Volta a executar o mesmo pedido através do router do OmniRoute                     |
+| POST   | `/requests/{id}/replay`     | Volta a executar o mesmo pedido através do router OmniRoute                        |
 | PUT    | `/requests/{id}/annotation` | Guarda ou atualiza uma nota num pedido                                             |
 
 ### WebSocket
 
-| Método | Caminho | Descrição                                                                                                          |
-| ------ | ------- | ------------------------------------------------------------------------------------------------------------------ |
-| GET    | `/ws`   | Fluxo WebSocket em direto. Envia `snapshot` ao estabelecer a ligação e, em seguida, eventos `new`/`update`/`clear` |
+| Método | Caminho | Descrição                                                                                                    |
+| ------ | ------- | ------------------------------------------------------------------------------------------------------------ |
+| GET    | `/ws`   | Fluxo WebSocket em direto. Envia `snapshot` ao estabelecer ligação e, depois, eventos `new`/`update`/`clear` |
 
 ### Exportação
 
-| Método | Caminho       | Descrição                                        |
-| ------ | ------------- | ------------------------------------------------ |
-| GET    | `/export.har` | Exporta a lista atualmente filtrada como HAR 1.2 |
+| Método | Caminho       | Descrição                                   |
+| ------ | ------------- | ------------------------------------------- |
+| GET    | `/export.har` | Exporta a lista filtrada atual como HAR 1.2 |
 
-### Anfitriões personalizados
+### Hosts personalizados
 
-| Método | Caminho         | Descrição                                                  |
-| ------ | --------------- | ---------------------------------------------------------- |
-| GET    | `/hosts`        | Lista anfitriões personalizados                            |
-| POST   | `/hosts`        | Adiciona um anfitrião (edita automaticamente `/etc/hosts`) |
-| DELETE | `/hosts/{host}` | Remove o anfitrião                                         |
-| PATCH  | `/hosts/{host}` | Alterna `enabled`                                          |
+| Método | Caminho         | Descrição                                             |
+| ------ | --------------- | ----------------------------------------------------- |
+| GET    | `/hosts`        | Lista os hosts personalizados                         |
+| POST   | `/hosts`        | Adiciona um host (edita automaticamente `/etc/hosts`) |
+| DELETE | `/hosts/{host}` | Remove o host                                         |
+| PATCH  | `/hosts/{host}` | Alterna `enabled`                                     |
 
 ### Modos de captura
 
-| Método | Caminho                        | Descrição                                                                                                        |
-| ------ | ------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
-| GET    | `/capture-modes`               | Estado dos modos AgentBridge / anfitriões personalizados / HTTP_PROXY / proxy do sistema + opção `tls-intercept` |
-| POST   | `/capture-modes/http-proxy`    | Inicia/para o listener HTTP_PROXY (`{action: "start"\|"stop"}`)                                                  |
-| POST   | `/capture-modes/system-proxy`  | Aplica/reverte o proxy para todo o sistema (`{action: "apply"\|"revert"}`)                                       |
-| POST   | `/capture-modes/tls-intercept` | Ativa/desativa a desencriptação do corpo HTTPS no modo de proxy (`{enabled: boolean}`)                           |
+| Método | Caminho                       | Descrição                                                                           |
+| ------ | ----------------------------- | ----------------------------------------------------------------------------------- |
+| GET    | `/capture-modes`              | Estado dos modos AgentBridge / hosts personalizados / HTTP_PROXY / proxy do sistema |
+| POST   | `/capture-modes/http-proxy`   | Inicia/para o listener HTTP_PROXY (`{action: "start"\|"stop"}`)                     |
+| POST   | `/capture-modes/system-proxy` | Aplica/reverte o proxy ao nível do sistema (`{action: "apply"\|"revert"}`)          |
 
 > A **desencriptação TPROXY** (modo de captura 5) é controlada por uma rota
 > **separada** sob o prefixo AgentBridge — `GET / POST / DELETE /api/tools/agent-bridge/tproxy` — e não
@@ -487,10 +486,10 @@ Caminho base: `/api/tools/traffic-inspector/`
 | DELETE | `/sessions/{id}`            | Elimina a sessão                                                  |
 | GET    | `/sessions/{id}/export.har` | Exporta a sessão como HAR 1.2                                     |
 
-### Ingestão interna (recurso D4)
+### Ingestão interna (fallback D4)
 
 | Método | Caminho            | Descrição                                                                                                                          |
 | ------ | ------------------ | ---------------------------------------------------------------------------------------------------------------------------------- |
-| POST   | `/internal/ingest` | Aceita pedidos intercetados provenientes do caminho de passagem `server.cjs`; requer o cabeçalho `INSPECTOR_INTERNAL_INGEST_TOKEN` |
+| POST   | `/internal/ingest` | Aceita um pedido intercetado a partir do caminho de passagem de `server.cjs`; requer o cabeçalho `INSPECTOR_INTERNAL_INGEST_TOKEN` |
 
 Esquemas OpenAPI completos: `docs/openapi.yaml` → etiqueta `Traffic Inspector`.

@@ -116,31 +116,40 @@ Idan ba a saka filin `region` ba, ƙimarsa ta asali ita ce `us-east-1`.
 
 ---
 
-## Tsarin Shigo da API-Key
+## Tsarin Shigo da Maɓallin API
 
-Tabbatarwa ta API-key ana amfani da ita ne don takardun shaidar bearer na Kiro / AWS CodeWhisperer masu dogon lokaci. Ba ta
-amfani da sabuntawar OAuth, don haka tana kauce wa lalacewar zaman OIDC da aka raba.
+Tabbatarwa ta maɓallin API an tsara ta ne don takardun shaidar bearer na Kiro / AWS CodeWhisperer masu dogon lokaci. Ba ta
+amfani da sabunta OAuth, don haka tana kauce wa lalacewar zaman OIDC da ake rabawa.
 
 ### Dashboard
 
 1. Buɗe **Dashboard -> Providers -> Kiro**.
 2. Zaɓi **API Key**.
-3. Liƙa API key da yankin AWS na zaɓi (`us-east-1` ne na asali).
-4. OmniRoute yana tabbatar da key ɗin sannan ya adana haɗin.
+3. Liƙa maɓallin API ɗin sannan zaɓi yankin AWS: **Auto-detect** (tsoho), **US East
+   (N. Virginia)** ko **Europe (Frankfurt)**.
+4. OmniRoute yana tabbatar da ingancin maɓallin kuma yana adana haɗin a kulle zuwa yankin da
+   maɓallin ke aiki.
 
 ### API
 
 ```bash
 curl -X POST http://localhost:20128/api/oauth/kiro/api-key \
   -H "Content-Type: application/json" \
-  -d '{"apiKey": "kiro_or_codewhisperer_key", "region": "us-east-1"}'
+  -d '{"apiKey": "kiro_or_codewhisperer_key", "region": "auto"}'
 ```
+
+`region` yana karɓar `auto` (tsoho), `us-east-1` ko `eu-central-1`; duk wata ƙima dabam
+za a ƙi ta da HTTP 400.
 
 ### Yarjejeniyar Ciki
 
-Hanyar API tana tabbatar da key ɗin ta hanyar kiran `KiroService.validateApiKey()`, wanda
-ke amfani da `ListAvailableProfiles` a kan endpoint na CodeWhisperer/Amazon Q da ya dace da yankin
-kuma yana gano `profileArn`.
+Hanyar API tana tabbatar da ingancin maɓallin ta hanyar kiran `KiroService.validateApiKey()`, wanda
+ke kiran `GET https://q.<region>.amazonaws.com/ListAvailableModels?origin=AI_EDITOR`
+(API ɗin saman Amazon Q da tantancewa ta maɓallin API ke amfani da shi) tare da iyakar lokaci ta daƙiƙa 10 ga kowane yanki. A
+yanayin `auto`, tana gwada `us-east-1`, sannan `eu-central-1`, kuma tana adana yankin farko
+da ya karɓi maɓallin. Idan aka ƙi maɓalli a dukkan yankunan da aka zaɓa, shigo da shi zai gaza da
+HTTP 400. Daga nan ana kiran `ListAvailableProfiles` gwargwadon iko don gano `profileArn`
+na zaɓi (AWS yana hana wannan ga yawancin maɓallan API).
 
 Haɗin da aka adana yana amfani da:
 
@@ -155,10 +164,13 @@ Haɗin da aka adana yana amfani da:
 }
 ```
 
-A lokacin aiki, `KiroExecutor.buildHeaders()` yana aika key ɗin a matsayin
-`Authorization: Bearer <key>` kuma yana ƙara `tokentype: API_KEY`. Kiran ƙididdigar amfani/profile
-yana amfani da wannan alamar domin AWS ya ɗauki bearer ɗin a matsayin API key mai dogon lokaci maimakon
-OIDC ko social access token.
+A lokacin aiki, `KiroExecutor.buildHeaders()` yana aika maɓallin a matsayin
+`Authorization: Bearer <key>` kuma yana ƙara `tokentype: API_KEY`. Kiraye-kirayen ƙayyadadden amfani/profile
+suna amfani da alama iri ɗaya domin AWS ya ɗauki bearer ɗin a matsayin maɓallin API mai dogon lokaci maimakon
+token na samun dama na OIDC ko na kafofin sada zumunta. `KiroExecutor.execute()` yana aika tantancewa ta maɓallin API kawai
+zuwa `https://q.<region>.amazonaws.com/generateAssistantResponse` — har da `us-east-1`
+— saboda gateway na Kiro IDE yana ƙin `TokenType=API_KEY`, sannan
+`codewhisperer.us-east-1` yana ƙin payload na maɓallin API a matsayin jikin buƙata mara inganci (HTTP 400).
 
 ---
 

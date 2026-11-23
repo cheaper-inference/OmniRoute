@@ -18,9 +18,9 @@ suorituksen aikana, rekisteri kirjaa virheen ja jatkaa seuraavaan suojaukseen
 sen sijaan, että pyyntö epäonnistuisi. Estäminen on aina nimenomainen päätös
 (`block: true`), ei koskaan vahinko.
 
-## Sisäänrakennetut suojakaiteet
+## Sisäänrakennetut suojaukset
 
-Rekisteri lataa automaattisesti kuusi suojakaidetta prioriteettijärjestyksessä tuonnin yhteydessä
+Rekisteri lataa tuonnin yhteydessä automaattisesti kuusi suojausta prioriteettijärjestyksessä
 (katso `registry.ts` → `registerDefaultGuardrails()`):
 
 | Prioriteetti | Nimi                | Vaihe(et)      | Tiedosto              |
@@ -32,112 +32,127 @@ Rekisteri lataa automaattisesti kuusi suojakaidetta prioriteettijärjestyksessä
 | `20`         | `prompt-injection`  | `preCall`      | `promptInjection.ts`  |
 | `95`         | `credential-masker` | `pre` + `post` | `credentialMasker.ts` |
 
-Pienemmät prioriteettinumerot ajetaan **ensin**.
+Pienemmän prioriteettiluvun suojaukset suoritetaan **ensin**.
 
-### Vision Bridge (`visionBridge.ts`) — Modality Bridge PR-1
+### Näkökykysilta (`visionBridge.ts`) — Modaliteettisilta PR-1
 
-Sieppaa kuvia sisältävät pyynnöt, jotka on suunnattu **ei-näkömalleille**, ja joko
-uudelleenreitittää koko pyynnön näkökykyiselle mallille tai korvaa kuvaosat
-tekstikuvauksilla, jotka on tuotettu konfiguroitavalla näkömallilla ennen
-ylävirran kutsua. Tämä antaa vain tekstiä tukeville palveluntarjoajille mahdollisuuden käsitellä
-läpinäkyvästi multimodaalisia hyötykuormia.
+Sieppaa kuvia sisältävät pyynnöt, jotka on suunnattu **malleille ilman näkökykyä**, ja joko
+reitittää koko pyynnön uudelleen näkökykyä tukevalle mallille tai korvaa kuvia
+sisältävät osat määritettävällä näkökykymallilla tuotetuilla tekstikuvauksilla ennen
+ylävirran kutsua. Näin vain tekstiä tukevat palveluntarjoajat voivat käsitellä
+multimodaalisia hyötykuormia läpinäkyvästi.
 
 Kulku:
 
-1. Ohita, jos kohdemalli tukee jo näköä (ellei se esiinny
-   pakotetun sillan luettelossa `isVisionBridgeForcedModel`).
-2. Pura kuvaosat `extractImageParts(messages)`-funktion avulla
-   (`visionBridgeHelpers.ts`), joka delegointi **yhdistetylle median
-   tunnistimelle** `detectMediaParts()` tiedostossa `open-sse/utils/mediaParts.ts` —
-   yksi totuuden lähde, joka jaetaan yhdistelmäyhteensopivuussuodattimen kanssa.
-   Purku on sallittu ylätason osille muodoista, jotka
-   `replaceImageParts` voi liittää takaisin (extract↔replace-sopimus): OpenAI
+1. Ohita, jos kohdemalli tukee jo näkökykyä (ellei se ole
+   pakkosiltauksen luettelossa `isVisionBridgeForcedModel`).
+2. Poimi kuvaosat funktiolla `extractImageParts(messages)`
+   (`visionBridgeHelpers.ts`), joka delegoi ne **yhtenäiselle median
+   tunnistimelle** `detectMediaParts()` tiedostossa `open-sse/utils/mediaParts.ts` — tämä on
+   yhdistelmäyhteensopivuussuodattimen kanssa jaettu ainoa totuuden lähde.
+   Poiminta on sallittujen luettelolla rajattu ylimmän tason osiin, joiden muodot
+   `replaceImageParts` voi liittää takaisin (poiminta↔korvaus-sopimus): OpenAI
    `image_url`, Anthropic base64 `source.type:"base64"`, Anthropic URL
-   `source.type:"url"` ja Responses API `input_image`. Sisäkkäiset osumat ja
-   vain indikaattorimuodot ovat yhdistelmäsuodattimen materiaalia, eikä niitä koskaan pureta.
-   Ohita, jos mitään ei löydy.
-3. Ratkaise ajonaikainen konfiguraatio `resolveVisionBridgeRuntimeSettings()`-funktion avulla
-   (`src/shared/constants/modalityBridgeDefaults.ts`): uudet `modalityBridge*`
-   asetusavaimet voittavat; vanhat `visionBridge*`-avaimet pysyvät **yhden syklin
-   vararatkaisuna** (palautusikkuna). Ohita ennen median läpikäyntiä, kun
-   silta on poissa käytöstä.
-4. Tilavalitsin (`modalityBridgeVisionMode`, katso alla oleva taulukko) päättää
-   uudelleenreitityksen vs. kuvauksen. Uudelleenreititys palauttaa `modifiedPayload`-tiedon, jossa vain `model` on
-   vaihdettu, sekä metatiedot `{ rerouted, fromModel, toModel, imagesKept }`.
-5. Kuvauspolku: rajoita kuvat `maxImages`-arvoon, muodosta tehtävätietoinen kehotus,
-   konsultoi kuvausvälimuistia, kutsu näkömallia **rinnakkain**
-   (`Promise.allSettled`), ja lisää `[Image N]: <kuvaus>` -tekstiosat
-   niiden paikalle. Epäonnistunut kuvaus tuottaa `null`-arvon ja alkuperäinen kuvaosa
-   **säilytetään** (#4012) — paitsi yhdistelmäkuvauspolulla, kun jokainen
-   kuvaus epäonnistui, jolloin vahvistettu ei-näköinen ylävirta saa
-   `(ei saatavilla – ei näkökykyistä palveluntarjoajaa yhdistetty)` -tyngän (#8430).
+   `source.type:"url"` ja Responses API `input_image`. Sisäkkäisiä osumia ja
+   vain ilmaisimen sisältäviä muotoja käsittelee yhdistelmäsuodatin, eikä niitä koskaan poimita.
+   Ohita, jos niitä ei löydy.
+3. Selvitä ajonaikainen määritys funktiolla `resolveVisionBridgeRuntimeSettings()`
+   (`src/shared/constants/modalityBridgeDefaults.ts`): uudet `modalityBridge*`-
+   asetusavaimet ovat ensisijaisia; vanhat `visionBridge*`-avaimet säilyvät
+   **yhden syklin varavaihtoehtona** (palautusikkuna). Ohita ennen median läpikäyntiä,
+   jos silta on poistettu käytöstä.
+4. Tilan valitsin (`modalityBridgeVisionMode`, katso alla oleva taulukko) päättää
+   uudelleenreitityksen ja kuvailun välillä. Uudelleenreititys palauttaa `modifiedPayload`-arvon,
+   jossa vain `model` on vaihdettu, sekä metatiedot `{ rerouted, fromModel, toModel, imagesKept }`.
+5. Kuvailupolku: rajoita kuvien määrä arvoon `maxImages`, muodosta tehtävän huomioiva kehote,
+   tarkista kuvailuvälimuisti, kutsu näkökykymallia **rinnakkain**
+   (`Promise.allSettled`) ja lisää kuvien tilalle `[Image N]: <description>`-tekstiosat.
+   Epäonnistunut kuvailu tuottaa arvon `null`, ja alkuperäinen kuvaosa
+   **säilytetään** (#4012) — paitsi yhdistelmän kuvailupolulla, kun kaikki
+   kuvailut epäonnistuivat. Tällöin vahvistetusti näkökyvytön ylävirta saa sen sijaan
+   paikkamerkin `(unavailable — no vision-capable provider connected)` (#8430).
 6. Palauta `modifiedPayload` + metatiedot (`imagesProcessed`, `descriptions`,
    `processingTimeMs`, `visionModel`).
 
-#### Tilavalitsin (`modalityBridgeVisionMode`)
+#### Tilan valitsin (`modalityBridgeVisionMode`)
 
-| Tila       | Oletus | Käyttäytyminen                                                                                                                                                                                                                                                                                                             |
-| ---------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `auto`     | ✔      | Vanha heuristiikka, koskematon (#6640/#7204): ei-yhdistelmä-/`auto/`-mallit uudelleenreitittävät parhaaseen näkömalliin, ellei alkuperäisellä mallilla ole jo käyttökelpoisia tunnistetietoja (sitten kuvaus); yhdistelmäkohteet kuvaavat aina.                                                                            |
-| `describe` |        | Kuvaa aina – uudelleenreitityslohko ohitetaan kokonaan; käyttäjän valitsema malli vastaa aina.                                                                                                                                                                                                                             |
-| `reroute`  |        | Pakota uudelleenreititys: tunnistetietojen säilyttämisen mallisuoja ohitetaan. Uudelleenreitityksen **kohde**-tunnistetietojen suoja on edelleen voimassa – kun käyttökelpoista näkökohdetta ei ole, pyyntö menee kuvaukseen, jotta raakakuvat eivät koskaan päädy vain tekstiä käsittelevään taustajärjestelmään (#8430). |
+| Tila       | Oletus | Toiminta                                                                                                                                                                                                                                                                                                                                    |
+| ---------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `auto`     | ✔      | Vanha heuristiikka muuttamattomana (#6640/#7204): muut kuin yhdistelmä- ja `auto/`-mallit reititetään uudelleen parhaalle näkökykymallille, ellei alkuperäisellä mallilla jo ole käyttökelpoisia tunnistetietoja (jolloin käytetään kuvailua); yhdistelmäkohteet kuvaillaan aina.                                                           |
+| `describe` |        | Kuvaile aina — uudelleenreitityslohko ohitetaan kokonaan; käyttäjän valitsema malli vastaa aina.                                                                                                                                                                                                                                            |
+| `reroute`  |        | Pakota uudelleenreititys: tunnistetiedoilla varustetun mallin säilyttävä tarkistus ohitetaan. Uudelleenreitityksen **kohteen** tunnistetietotarkistus on edelleen voimassa — kun käyttökelpoista näkökykykohdetta ei ole, pyyntö siirtyy kuvailuun, jotta raakakuvat eivät koskaan päädy vain tekstiä tukevaan taustajärjestelmään (#8430). |
 
-Pakotetut tilat oikosulkevat **ennen** automaattisen heuristiikan suorittamista; `auto`-käyttäytyminen
-on tavuittain identtinen PR-1:tä edeltävän suojakaiteen kanssa.
+Pakotetut tilat oikosulkevat suorituksen **ennen** automaattisen heuristiikan suorittamista; `auto`-toiminta
+on tavutasolla identtinen PR-1:tä edeltävän suojauksen kanssa.
 
-#### Tehtävätietoinen kuvauskehotus (`modalityBridgeVisionTaskAware`)
+#### API-avaimen laajuus (`visionBridgeKeyScope.ts`)
 
-Oletus **true**. `composeVisionPrompt()` (`visionBridgeHelpers.ts`) liittää
-**viimeisen käyttäjäviestin** tekstin (katkaistu 500 merkkiin) peruskuvauskehotukseen,
-ohjaten kuvauksen kohti sitä, mitä käyttäjä todella kysyi
-(codex-vision-proxy-malli) ja pyytäen näkömallia transkriptoimaan näkyvän
-tekstin. Jos lippu on pois päältä – tai käyttäjätekstiä ei ole – peruskehotusta
-käytetään muuttumattomana.
+Kun kutsujan API-avain rajoittaa `allowedConnections`-yhteyksiä, kiintiöpooleja
+(`allowedQuotas`) tai malleja (`allowedModels` / `blockedModels` /
+`modelAccessMode: "restricted"` / `disableNonPublicModels`), silta valitsee
+uudelleenreititys- ja kuvailumalleiksi vain malleja, joita avain saa käyttää,
+ja vain yhteyksissä, joita avain saa käyttää. Kuvailukutsu kulkee tämän jälkeen aina
+OmniRoute-itsepalautussilmukan kautta `x-omniroute-self-loop-key-id`-otsakkeella,
+jotta vastaanottava chat-pyyntö pakottaa kyseisen avaimen yhteys- ja mallikäytännön
+uudelleen käyttöön. `enforceApiKeyPolicy()` huomioi kyseisen otsakkeen vain yhdessä
+itsepalautussilmukan bearer-tunnisteen kanssa, joten se voi ainoastaan kaventaa
+käyttöoikeuksia, ja tunniste, jota ei pystytä selvittämään, hylätään.
 
-Kuvaileva silmukka oma OpenAI-yhteensopiva pyyntö (`callVisionModelSingle()`
-tiedostossa `visionBridgeHelpers.ts`) pyytää aina `image_url.detail: "high"` –
-ehdoitta, jokaiselle kutsujalle/palveluntarjoajalle, ilman asiakkaan signaalia.
-Matalan yksityiskohdan näytteenotto heikentää OCR-tarkkuutta juuri siinä tekstin
-transkriptiotehtävässä, jota tämä kehotus pyytää, joten kuvauspyyntö itsessään
-pyytää aina korkeaa yksityiskohtaa riippumatta siitä, mitä yksityiskohtatasoa
-alkuperäinen saapuva pyyntö käytti. Tämä vaikuttaa vain sisäiseen kuvauspyynnön
-runkoon; se ei muuta sitä, miten OmniRoute välittää kutsujan oman
-`image_url.detail`-arvon ensisijaisessa pyynnössä – tämä oletusarvo
-sovelletaan erikseen ja vain havaittuihin OpenCode-asiakkaisiin
-`defaultImageDetail()`-funktiossa (`open-sse/handlers/chatCore/upstreamBody.ts`).
-Kuvaavan silmukan Anthropic-langallisen muodon haarassa ei ole `detail`-kenttää,
-eikä kumpikaan oletusarvo vaikuta siihen.
+Jos avaimelle ei ole sallittu yhtään näkökykymallia, kuvailupolku väistyy ja
+pyyntö välitetään muuttamattomana. Tämä on sama avoimeksi jättävä toiminta kuin käytöstä
+poistetulla suojauksella (metatiedot `{ skipped: true, reason: "no_permitted_vision_model" }`).
+Pyynnöt ilman avainta ja avaimet, joilla ei ole näitä rajoituksia, toimivat täsmälleen
+kuten ennenkin.
 
-#### Kuvausrajoitus (`modalityBridgeVisionMaxChars`)
+#### Tehtävän huomioiva kuvailukehote (`modalityBridgeVisionTaskAware`)
+
+Oletus on **true**. `composeVisionPrompt()` (`visionBridgeHelpers.ts`) lisää
+peruskuvauskehotteeseen **viimeisimmän käyttäjäviestin** tekstin (katkaistuna 500 merkkiin),
+jolloin kuvaus kohdistuu siihen, mitä käyttäjä todella pyysi
+(codex-vision-proxy-malli), ja pyytää näkömallia litteroimaan näkyvän
+tekstin. Kun asetus on pois käytöstä — tai käyttäjätekstiä ei ole — peruskehotetta käytetään muuttamattomana.
+
+Kuvauksen itsesilmukan oma OpenAI-yhteensopiva pyyntö (`callVisionModelSingle()`
+tiedostossa `visionBridgeHelpers.ts`) pyytää aina asetusta `image_url.detail: "high"` —
+ehdoitta jokaiselle kutsujalle ja palveluntarjoajalle eikä minkään asiakassignaalin perusteella.
+Alhaisen tarkkuuden otanta heikentää OCR-tarkkuutta juuri siinä tekstinlitterointitehtävässä,
+jota tämä kehote pyytää, joten itse kuvauskutsu pyytää aina korkeaa
+tarkkuutta riippumatta alkuperäisessä saapuvassa pyynnössä käytetystä tarkkuustasosta. Tämä
+vaikuttaa vain sisäisen kuvauspyynnön runkoon; se ei muuta tapaa, jolla
+OmniRoute välittää kutsujan oman `image_url.detail`-arvon ensisijaisessa pyynnössä —
+kyseinen oletus asetetaan erikseen ja vain tunnistetuille OpenCode-asiakkaille
+funktiossa `defaultImageDetail()` (`open-sse/handlers/chatCore/upstreamBody.ts`). Kuvausten
+itsesilmukan Anthropic-siirtomuotohaarassa ei ole `detail`-kenttää,
+eikä kumpikaan oletus vaikuta siihen.
+
+#### Kuvauksen tulosteen enimmäispituus (`modalityBridgeVisionMaxChars`)
 
 | Avain                          | Oletus | Alue              |
 | ------------------------------ | ------ | ----------------- |
 | `modalityBridgeVisionMaxChars` | `0`    | `0` tai 100–50000 |
 
-`0` (oletus) tarkoittaa **ei rajoitusta** – `callVisionModel()`-funktion
-palauttama kuvaus välitetään muokkaamattomana, säilyttäen olemassa olevan
-käyttäytymisen. Mikä tahansa arvo välillä 100–50000 katkaisee kuvauksen
-`…`-suffiksilla ennen kuin se liitetään takaisin muodossa
-`[Image N]: <description>` (`VisionBridgeGuardrail.preCall()` tiedostossa
-`src/lib/guardrails/visionBridge.ts`). Nosta tätä arvoa yksityiskohtaisissa
-OCR-tehtävissä, joissa alavirran malli tarvitsee täyden transkription; laske
-sitä rajoittaaksesi tokenien käyttöä puheliaissa näkömalleissa.
+`0` (oletus) tarkoittaa, että **enimmäispituutta ei ole** — funktion
+`callVisionModel()` palauttama kuvaus välitetään muuttamattomana, mikä säilyttää nykyisen
+toiminnan. Mikä tahansa arvo välillä 100–50000 katkaisee kuvauksen ja lisää loppuun
+`…`-merkin ennen kuin kuvaus liitetään takaisin muodossa `[Image N]: <description>`
+(`VisionBridgeGuardrail.preCall()` tiedostossa `src/lib/guardrails/visionBridge.ts`).
+Suurenna tätä yksityiskohtaisissa OCR-tehtävissä, joissa jatkokäsittelevä malli tarvitsee
+koko litteroinnin; pienennä sitä rajoittaaksesi sanallisesti runsaiden näkömallien tokenien käyttöä.
 Hallintapaneelin kenttä sijaitsee Vision-välilehden Advanced-paneelissa
-(`modality-bridge-max-chars` tiedostossa `ModalityBridgeVisionTab.tsx`) ja
-rajoittaa minkä tahansa arvon välillä 1 ja 99 sadan alarajaan jättäen
-nimenomaisen `0`-arvon koskemattomaksi – `0` on kelvollinen Zod-arvo
-itsessään (`z.union([z.literal(0), z.number().int().min(100).max(50000)])`),
-ei pelkästään "asettamaton" oletusarvo.
+(`modality-bridge-max-chars` tiedostossa `ModalityBridgeVisionTab.tsx`) ja nostaa kaikki
+arvot väliltä 1–99 vähimmäisarvoon 100 jättäen eksplisiittisen arvon `0`
+koskemattomaksi — `0` on itsenäisesti kelvollinen Zod-arvo
+(`z.union([z.literal(0), z.number().int().min(100).max(50000)])`), ei pelkästään
+asettamattoman arvon oletus.
 
 #### Kuvausvälimuisti (`modalityBridge/bridgeCache.ts`)
 
-Muistissa oleva LRU + TTL-välimuisti kuvausten tuloksille, jaettu prosessikohtaisesti.
-Avain = `sha256(imageRef + composedPrompt + configuredBridgeModel)`
-pituus-etuliitteen kehystyksellä (ei kenttärajojen törmäyksiä). Mallikomponentti
-on **määritetty** siltamalli, ei malli, joka todella vastasi –
-`callVisionModel` voi palata sisäisesti, ja avaimen asettaminen yrityskohtaisesti
-hajottaisi välimuistin. Epäonnistuneita kuvauksia ei koskaan tallenneta välimuistiin.
-Asetukset:
+Prosessinlaajuisesti jaettu muistissa oleva LRU- ja TTL-välimuisti kuvausten tulosteille.
+Avain = `sha256(imageRef + composedPrompt + configuredBridgeModel)`, jossa käytetään
+pituusetuliitekehystystä (ei kenttien rajojen törmäyksiä). Mallikomponentti on
+**määritetty** siltamalli, ei tosiasiassa vastannut malli —
+`callVisionModel` voi käyttää sisäisesti varamallia, ja avaintaminen yrityskohtaisesti
+pirstaloisi välimuistin. Epäonnistuneita kuvauksia ei koskaan tallenneta välimuistiin. Asetukset:
 
 | Avain                           | Oletus | Alue    |
 | ------------------------------- | ------ | ------- |
@@ -145,299 +160,648 @@ Asetukset:
 | `modalityBridgeCacheTtlMinutes` | `60`   | 1–1440  |
 | `modalityBridgeCacheMaxEntries` | `200`  | 10–5000 |
 
-#### Etäkuvan normalisointi (silmukan kuvaus/base64-haku)
+#### Etäkuvien normalisointi (itsesilmukan kuvaus/base64-nouto)
 
-Kun silta hakee **etäkuvan** itse – Anthropicin itsepuhelu ja claude-wire-format
-base64-muunnos (`ensureBase64ImagesForClaudeWire`), molemmat
-`fetchRemoteImageAsDataUri()`-funktion kautta tiedostossa `visionBridgeHelpers.ts`
-– tuloksena oleva data-URI välitetään `normalizeDataUri()`-funktion kautta
-(`open-sse/utils/imageNormalize.ts`) ennen kuin se upotetaan näkömallipyyntöön.
-Ylisuuret kuvat skaalataan alas **2048 pikselin pitkään reunaan** (vastaa
-OpenAI/Anthropicin jo palvelinpuolella soveltamaa koonmuutosrajoitusta), mikä
-vähentää lähetettyjä tavuja/viivettä muuttamatta sitä, mitä näkömalli näkee.
-Koonmuutos käyttää `sharp`-kirjastoa, joka ladataan dynaamisella tuonnilla:
-alustalla, jossa sen natiivi binääri ei lataudu, `normalizeDataUri()`
-**ei koskaan heitä poikkeusta** – se palaa alkuperäisten tavujen läpivientiin,
-joten kuvaus/base64-muunnosreitti toimii aina. Ei-kuvatavut (haku, joka ei
-palauttanut dekoodattavaa kuvaa) välitetään myös koskemattomina. Tämä
-normalisointi on rajattu kuviin, jotka silta hakee omaa itsepuheluaan varten –
-sitä ei koskaan sovelleta kutsujan raakaan läpivientidataan, mikä on
-yhdenmukaista vain opt-in-muutosperiaatteen kanssa (kova sääntö #20).
+Kun silta noutaa itse **etäkuvan** — Anthropic-kuvauksen
+itsekutsua ja claude-siirtomuotoista base64-muunnosta
+(`ensureBase64ImagesForClaudeWire`) varten, molemmat funktion
+`fetchRemoteImageAsDataUri()` kautta tiedostossa `visionBridgeHelpers.ts` — tuloksena saatu data-URI
+välitetään funktion `normalizeDataUri()`
+(`open-sse/utils/imageNormalize.ts`) kautta ennen sen upottamista näkömallin
+pyyntöön. Ylisuuret kuvat pienennetään siten, että **pitkä sivu on 2048px** (vastaten
+koonmuutosrajaa, jota OpenAI/Anthropic jo käyttävät palvelinpuolella), mikä vähentää
+lähetettävien tavujen määrää ja viivettä muuttamatta sitä, mitä näkömalli näkee. Koonmuutokseen
+käytetään pakettia `sharp`, joka ladataan dynaamisella tuonnilla: alustalla, jolla sen natiivi
+binääri ei lataudu, `normalizeDataUri()` **ei koskaan heitä poikkeusta** — se
+välittää alkuperäiset tavut sellaisinaan, joten kuvaus-/base64-muunnospolku
+toimii aina. Myös muut kuin kuvatavut (nouto, joka ei palauttanut
+dekoodattavaa kuvaa) välitetään koskemattomina. Tämä normalisointi koskee vain kuvia,
+jotka silta noutaa omaa itsekutsuaan varten — sitä ei koskaan sovelleta
+kutsujan sellaisenaan välitettävään raakahyötykuormaan, mikä noudattaa
+vain erikseen käyttöön otettavien muutosten periaatetta (Hard Rule #20).
 
-#### Asetusten skeema + migraatio
+#### Asetusskeema + migraatio
 
-Uudet `modalityBridge*`-avaimet validoidaan Zodilla `updateSettingsSchema`-funktiossa
+Uudet `modalityBridge*`-avaimet validoidaan Zodilla skeemassa `updateSettingsSchema`
 (`src/shared/validation/settingsSchemas.ts`): `modalityBridgeVisionEnabled`,
 `modalityBridgeVisionMode`, `modalityBridgeVisionModel`,
 `modalityBridgeVisionTaskAware`, `modalityBridgeVisionPrompt`,
 `modalityBridgeVisionTimeout`, `modalityBridgeVisionMaxImages`,
-`modalityBridgeVisionMaxChars`, `modalityBridgeCache*`-kolmikko ja
-`modalityBridgeAudio*`-ryhmä, jota Audio Bridge käyttää. Migraatio
-`141_modality_bridge_settings.sql` kopioi olemassa olevat vanhat
-`visionBridge*`-arvot vastaaviin uusiin avaimiin (idempotentti, ei koskaan
-kirjoita yli operaattorin asettamaa `modalityBridge*`-arvoa); vanhat avaimet
-hyväksytään edelleen lukupalautuksena yhden julkaisusyklin ajan.
+`modalityBridgeVisionMaxChars`, `modalityBridgeCache*`-kolmikko sekä
+Audio Bridgen käyttämä `modalityBridgeAudio*`-ryhmä. Migraatio
+`141_modality_bridge_settings.sql` kopioi nykyiset vanhat
+`visionBridge*`-arvot vastaaviin uusiin avaimiin (idempotentisti eikä koskaan korvaa
+operaattorin asettamaa `modalityBridge*`-arvoa); vanhat avaimet hyväksytään edelleen
+lukemisen varavaihtoehtona yhden julkaisusyklin ajan.
 
-#### Läpinäkyvyysotsikko + tilastot
+#### Läpinäkyvyysotsake + tilastot
 
-Kuvausmuunnetut vastaukset sisältävät
+Kuvauksella muunnetut vastaukset sisältävät otsakkeen
 `x-omniroute-modality-bridge: image->text;model=<visionModel>;parts=<n>`
-(rakennettu `buildModalityBridgeHeader()`-funktiolla tiedostossa
-`modalityBridge/bridgeStats.ts`, leimattu `withModalityBridgeHeader()`-funktiolla
-tiedostossa `src/sse/handlers/chatHelpers.ts`). Uudelleenohjatut pyynnöt
-**eivät saa** otsikkoa – hyötykuorma oli koskematon ja mallinvaihto näkyy jo
-vastauksen rungon `model`-kentässä.
+(jonka muodostaa `buildModalityBridgeHeader()` tiedostossa `modalityBridge/bridgeStats.ts`
+ja jonka lisää `withModalityBridgeHeader()` tiedostossa `src/sse/handlers/chatHelpers.ts`).
+Uudelleenreititetyt pyynnöt **eivät** saa otsaketta — hyötykuorma säilyi koskemattomana ja mallin
+vaihto näkyy jo vastauksen rungon `model`-kentässä.
 
-`GET /api/modality-bridge/stats` (hallintatunnistus, sama taso kuin
+`GET /api/modality-bridge/stats` (hallinnan todennus, sama taso kuin
 `GET /api/settings`) palauttaa muistissa olevat modaliteettikohtaiset laskurit
 `{ attempts, successes, bridged, cacheHits, failures, totalLatencyMs,
-latencySamples, averageLatencyMs, lastUsedAt }` `vision`, `audio` ja `video`
-osalta. `averageLatencyMs` käyttää `latencySamples`-arvoa, ei kaikkia yrityksiä,
-nimittäjänä; operaatio ilman ajoitusta ei luo nollan millisekunnin näytettä.
-`bridged` pysyy taaksepäin yhteensopivana aliasina onnistuneille muunnoksille;
-epäonnistuneet yritykset eivät lisää sitä.
-Laskurit nollautuvat prosessin uudelleenkäynnistyksessä suunnitellusti
-(telemetria, ei kirjanpito).
+latencySamples, averageLatencyMs, lastUsedAt }` modaliteeteille `vision`, `audio` ja
+`video`. `averageLatencyMs` käyttää nimittäjänään arvoa `latencySamples`, ei kaikkia
+yrityksiä; operaatio, jolle ei ole ajoitusta, ei luo keinotekoista nollan millisekunnin
+näytettä. `bridged` säilyy taaksepäin yhteensopivana aliaksena onnistuneille
+muunnoksille; epäonnistuneet yritykset eivät kasvata sitä.
+Laskurit nollautuvat tarkoituksellisesti prosessin uudelleenkäynnistyksen yhteydessä
+(telemetriaa, ei kirjanpitoa).
 
-#### Hallintapaneelin konfiguraatio
+#### Hallintapaneelin määritys
 
-Oma koontinäyttösivu on
-`/dashboard/settings/modality-bridge`. Sen URL-osoitteelliset `Vision`-, `Audio`-
+Erillinen hallintapaneelisivu on
+`/dashboard/settings/modality-bridge`. Sen URL-osoitettavat `Vision`-, `Audio`-
 ja `Video`-välilehdet säilyttävät kyselyparametrit vaihtaessaan `tab`-arvoa.
-Vision-välilehti näyttää käytön, tilan, mallin valinnan (mukaan lukien automaattisen
-oletuksen), tehtävätietoisen kehotuksen, edistyneet aikakatkaisu-/kuva-/kuvaus-pituus-/välimuisti-
-rajat, ajonaikaiset laskurit ja suojatun esimerkkipyynnön. Audio-välilehti on myös käytössä: se näyttää
-käytön, vain STT-mallin valitsimen Autolla, aikakatkaisu-/maksimileike-rajat, äänilaskurit ja
-`input_audio`-esimerkkikokeilun. Video-välilehti on toiminnallinen: se raportoi
-FFmpeg/ffprobe-ajonaikaisen tilan – yhden neljästä eksplisiittisestä käyttöliittymätilasta (`unknown`
-kun tarkistus on käynnissä tai ei voinut valmistua, `restricted` ei-loopback-
-koontinäyttöisännässä, jossa tarkistus ohitetaan asiakaspuolella, `unavailable` kun tarkistettu
-ja vahvistettu puuttuvaksi, tai `available` FFmpeg/ffprobe-versioiden kanssa) – säilyttää
-käyttö-/malli-/kehys-/video-/aikakatkaisurajat, suodattaa mallinvalitsimen näkökykyisiin
-malleihin ja näyttää videolaskurit.
+Vision-välilehti tarjoaa käyttöönoton, tilan, mallin valinnan (mukaan lukien automaattinen
+oletusvalinta), tehtävät huomioivan kehotteen muodostamisen, aikakatkaisun sekä kuvan,
+kuvauksen pituuden ja välimuistin lisärajat, ajonaikaiset
+laskurit ja suojatun esimerkkipyynnön. Myös Audio-välilehti on toiminnassa: se tarjoaa
+käyttöönoton, vain STT-malleja sisältävän mallivalitsimen Auto-vaihtoehdolla,
+aikakatkaisun ja leikkeen enimmäispituuden rajat, äänilaskurit sekä `input_audio`-esimerkkitestin.
+Video-välilehti on toiminnallinen: se ilmoittaa
+FFmpeg/ffprobe-ajonaikaisen tilan — yhden neljästä eksplisiittisestä käyttöliittymätilasta (`unknown`, kun
+tarkistus on käynnissä tai sitä ei voitu suorittaa loppuun, `restricted`, kun hallintapaneelin
+isäntä ei ole loopback-osoite ja tarkistus ohitetaan asiakaspuolella, `unavailable`, kun tarkistus
+on tehty ja puuttuminen vahvistettu, tai `available` yhdessä FFmpeg/ffprobe-versioiden kanssa) — tallentaa
+käyttöönoton sekä malli-, kuva-, video- ja aikakatkaisurajat, suodattaa mallivalitsimeen vain
+näköominaisuuksia tukevat mallit ja näyttää videolaskurit.
 
-Entinen Vision Bridge -kortti tekoälyasetusten alla on yhteensopivuuslinkki
-uudelle sivulle; se ei enää omista toista kopiota lomakkeesta. Media Providers
+AI-asetusten aiempi Vision Bridge -kortti on yhteensopivuuslinkki
+uudelle sivulle; se ei enää ylläpidä lomakkeen toista kopiota. Media Providers
 linkittää myös Image-to-Text- ja Speech-to-Text-työnkulut vastaaviin Modality
-Bridge -välilehtiin poistamatta olemassa olevaa Speech-to-Text-leikkikenttää.
+Bridge -välilehtiin poistamatta nykyistä Speech-to-Text-kokeiluympäristöä.
 
-**Itsesilmukan pääsyn ohitus:** kun kuvauspyyntö reititetään OmniRouten
-oman `/v1`-itsesilmukan kautta (epästandardi palveluntarjoajamalli), alipyyntö lähettää
-`x-omniroute-admission-bypass: internal` ja se todennetaan ratkaistulla
-itsesilmukan tunnuksella – paikallisella `sk_omniroute`-sentinelillä paikallisessa tilassa, tai
-operaattorin määrittämällä `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` -ympäristöavaimella (#1350), jotta
-`REQUIRE_API_KEY=true`-käyttöönotot voivat silti suorittaa kuvauspyynnön. Ohitus
-hyväksytään vain näille täsmällisille tunnuksille, joten ulkoiset asiakkaat eivät voi käyttää
-otsikkoa pääsyn ohittamiseen.
+**Itseensä kohdistuvan silmukan pääsynvalvonnan ohitus:** kun kuvauspyyntö reititetään OmniRouten
+oman `/v1`-silmukan kautta (epästandardi palveluntarjoajamalli), alipyyntö lähettää
+`x-omniroute-admission-bypass: internal`-otsakkeen ja todennetaan selvitetyn
+itseensä kohdistuvan silmukan tunnistetiedolla — paikallisessa tilassa paikallisella
+`sk_omniroute`-sentineliarvolla tai operaattorin määrittämällä
+`OMNIROUTE_API_KEY`- / `ROUTER_API_KEY`-ympäristömuuttujan avaimella (#1350), jotta
+`REQUIRE_API_KEY=true`-käyttöönotot voivat edelleen suorittaa kuvauspyynnön. Ohitus
+hyväksytään vain näillä täsmällisillä tunnistetiedoilla, joten ulkoiset asiakkaat eivät voi käyttää
+otsaketta pääsynvalvonnan ohittamiseen.
 
-Vanhat oletukset ovat tiedostossa `src/shared/constants/visionBridgeDefaults.ts`;
-uudet tila-/tehtävätietoiset-/välimuistioletukset ja asetusten ratkaisija ovat tiedostossa
-`src/shared/constants/modalityBridgeDefaults.ts`. Suojakaide näyttää
-`deps`-konstruktorivaihtoehdon, jotta testit voivat syöttää väärennettyjä `getSettings`- ja
-`callVisionModel`-toteutuksia.
+Vanhat oletusarvot sijaitsevat tiedostossa `src/shared/constants/visionBridgeDefaults.ts`;
+uudet tilan, tehtävät huomioivan toiminnan ja välimuistin oletusarvot sekä asetusten selvitystoiminto sijaitsevat tiedostossa
+`src/shared/constants/modalityBridgeDefaults.ts`. Suojamekanismi tarjoaa
+`deps`-konstruktorivalinnan, jotta testeihin voidaan injektoida keinotekoiset `getSettings`- ja
+`callVisionModel`-toteutukset.
 
 ### Audio Bridge (`audioBridge.ts`) — Modality Bridge PR-3
 
-Sieppaa ääntä sisältävät chat-pyynnöt ennen kuin ne saavuttavat kohteen, jonka
-ei tiedetä hyväksyvän äänisyötettä. Se ei koskaan uudelleenreititä chat-pyyntöä: ääniosat
-transkriboidaan olemassa olevan OpenAI-yhteensopivan moniosaisen päätepisteen kautta ja
-valittu chat-malli jatkaa tekstikopioilla.
+Sieppaa ääntä sisältävät keskustelupyynnöt ennen kuin ne saavuttavat kohteen, jonka
+ei tiedetä hyväksyvän äänisyötettä. Se ei koskaan reititä keskustelupyyntöä uudelleen: ääniosat
+litteroidaan nykyisen OpenAI-yhteensopivan multipart-päätepisteen kautta, ja
+valittu keskustelumalli jatkaa tekstilitteraatioilla.
 
 Kulku:
 
-1. Ratkaise `supportsAudio` `getResolvedModelCapabilities()`-funktion kautta. Nimenomainen
-   palveluntarjoajarekisterin metatiedot voittavat, sitten staattiset mallin metatiedot, sitten synkronoidut
-   `modalities_input`. Ilmoitettu syöttölista ilman `audio`-kenttää on `false`; ei
-   kykyjen todisteita jää `null`. Sekä `false` että `null` aktivoivat
+1. Selvitä `supportsAudio` funktion `getResolvedModelCapabilities()` avulla. Eksplisiittiset
+   palveluntarjoajarekisterin metatiedot ovat etusijalla, sitten staattiset mallin metatiedot ja lopuksi synkronoitu
+   `modalities_input`. Määritetty syöteluettelo ilman `audio`-arvoa on `false`;
+   jos ominaisuudesta ei ole näyttöä, arvoksi jää `null`. Sekä `false` että `null` aktivoivat
    konservatiivisen sillan, kun taas `true` ohittaa sen.
-2. Ratkaise `modalityBridgeAudio*`-asetukset ja pura liitettävät ylimmän tason
-   ääniosat jokaisesta viestistä jaetun `detectMediaParts()`-tunnistimen kautta.
-   Tuetut johdinmuodot ovat OpenAI `input_audio`, `audio_url` ja
+2. Selvitä `modalityBridgeAudio*`-asetukset ja poimi liitettävissä olevat ylimmän tason
+   ääniosat jokaisesta viestistä jaetulla `detectMediaParts()`-
+   tunnistimella. Tuettuja siirtomuotoja ovat OpenAI:n `input_audio`, `audio_url` ja
    `source.media_type: "audio/*"`. Sisäkkäinen ääni tunnistetaan reititystä varten, mutta sitä ei
-   poisteta liitospolun kautta. Työ on rajattu `modalityBridgeAudioMaxClips`-arvolla;
-   myöhemmät osat pysyvät koskemattomina.
-3. Kunnioita määritettyä `provider/model`-arvoa tai anna `selectAudioBridgeModel()`-funktion käydä läpi
-   `AUDIO_TRANSCRIPTION_PROVIDERS` vakaassa luettelojärjestyksessä ja valita ensimmäinen
-   malli, jolla on käyttökelpoinen aktiivinen palveluntarjoajan tunnus.
-4. `callAudioTranscription()` muuntaa base64/data-URI-äänen moniosaiseksi
-   `file`-tiedostoksi tai lataa etäisen `audio_url`-tiedoston vain julkisen ulospäin suuntautuvan
-   suojauksen kautta DNS-kiinnityksellä ja 25 Mt:n rajalla. Se sitten POSTaa tiedoston ja valitun
-   mallin paikalliseen `/v1/audio/transcriptions`-itsesilmukkaan, todennettuna
-   `resolveSelfLoopBearer()`-funktion avulla. Olemassa oleva transkriptioreitti suorittaa normaalin
-   tunnusten haun, jäähtymis-/nopeusrajoitusten käsittelyn ja palveluntarjoajan lähetyksen.
-5. Onnistuneet puhelut korvaavat osansa `[Audio N]: <transcript>`-merkkijonolla. Puhelut
-   suoritetaan `Promise.allSettled`-funktiolla: yksittäinen virhe säilyttää alkuperäisen
-   ääniosan (#4012-sopimus). Jos jokainen puhelu epäonnistuu ja kohde on todistettu
-   `supportsAudio === false`, osista tulee
-   `[Audio N]: (unavailable — no STT provider connected)` (#8430-sopimus). Tuntemattomalle
-   kohteelle (`null`) kaikki epäonnistuneet tulokset pysyvät koskemattomina. Todistettu
-   vain tekstiä tukeva kohde, jolla ei ole käyttökelpoista STT-tunnusta, saa saman eksplisiittisen
-   stubin ilman verkkopuhelua.
+   poisteta liitospolulla. Työmäärää rajoittaa `modalityBridgeAudioMaxClips`;
+   myöhemmät osat jätetään koskemattomiksi.
+3. Käytä määritettyä `provider/model`-arvoa tai anna funktion `selectAudioBridgeModel()` käydä
+   `AUDIO_TRANSCRIPTION_PROVIDERS` läpi vakaassa luettelojärjestyksessä ja valita ensimmäinen
+   malli, jolla on käyttökelpoinen aktiivisen palveluntarjoajan tunnistetieto.
+4. `callAudioTranscription()` muuntaa base64-/data-URI-äänen multipart-
+   `file`-tiedostoksi tai lataa etäresurssin `audio_url` vain julkiset osoitteet sallivan lähtevän liikenteen
+   suojauksen kautta käyttäen DNS-kiinnitystä ja 25 MB:n rajaa. Sen jälkeen se lähettää tiedoston ja valitun
+   mallin POST-pyynnöllä paikalliseen `/v1/audio/transcriptions`-itseensä kohdistuvaan silmukkaan, joka todennetaan
+   funktion `resolveSelfLoopBearer()` avulla. Nykyinen litterointireitti suorittaa normaalin
+   tunnistetietojen haun, jäähdytys- ja nopeusrajoitusten käsittelyn sekä palveluntarjoajalle välityksen.
+5. Onnistuneet kutsut korvaavat osansa muodolla `[Audio N]: <transcript>`. Kutsut
+   suoritetaan käyttäen `Promise.allSettled`-metodia: yksittäinen virhe säilyttää kyseisen alkuperäisen
+   ääniosan (#4012-sopimus). Jos kaikki kutsut epäonnistuvat ja kohteen on todistettu olevan
+   `supportsAudio === false`, osien arvoksi tulee
+   `[Audio N]: (unavailable — no STT provider connected)` (#8430-sopimus). Jos
+   kohde on tuntematon (`null`), kaikkien kutsujen epäonnistuessa sisältö jätetään koskemattomaksi. Todistetusti
+   vain tekstiä tukeva kohde, jolla ei ole käyttökelpoista STT-tunnistetietoa, saa saman eksplisiittisen
+   paikkamerkin ilman verkkokutsua.
 
-Onnistuneet transkriptiot käyttävät prosessikohtaista Modality Bridge LRU/TTL -välimuistia.
-Avain yhdistää ääniviitteen, vakaan `audio-transcription`-toimintatunnisteen ja valitun STT-mallin;
-virheitä ei koskaan tallenneta välimuistiin. Äänikokeilut päivittävät jaettuja
-`bridged`, `cacheHits`, `failures` ja `lastUsedAt` -laskureita.
+Onnistuneet litteraatiot käyttävät prosessinlaajuista Modality Bridge -LRU/TTL-välimuistia. Avain
+yhdistää ääniviitteen, vakaan `audio-transcription`-operaatiotunnisteen
+ja valitun STT-mallin; virheitä ei koskaan tallenneta välimuistiin. Ääniyritykset päivittävät
+jaetut `bridged`-, `cacheHits`-, `failures`- ja `lastUsedAt`-laskurit.
 Muunnetut vastaukset sisältävät
-`x-omniroute-modality-bridge: audio->text;model=<sttModel>;parts=<n>`; koskemattomat
-pyynnöt eivät saa Audio Bridge -segmenttiä.
+`x-omniroute-modality-bridge: audio->text;model=<sttModel>;parts=<n>`-otsakkeen; koskemattomat
+pyynnöt eivät saa Audio Bridge -osiota.
 
-Ajonaikaiset asetukset ovat tietokantapohjaisia ja Zod-validoituja:
+Ajonaikaiset asetukset tallennetaan tietokantaan ja validoidaan Zodilla:
 
-| Avain                         | Oletus  | Alue            |
-| :---------------------------- | :------ | :-------------- |
-| `modalityBridgeAudioEnabled`  | `true`  | —               |
-| `modalityBridgeAudioModel`    | `""`    | Auto tai STT ID |
-| `modalityBridgeAudioTimeout`  | `60000` | 1000–300000     |
-| `modalityBridgeAudioMaxClips` | `3`     | 1–10            |
+| Avain                         | Oletusarvo | Alue            |
+| ----------------------------- | ---------- | --------------- |
+| `modalityBridgeAudioEnabled`  | `true`     | —               |
+| `modalityBridgeAudioModel`    | `""`       | Auto tai STT ID |
+| `modalityBridgeAudioTimeout`  | `60000`    | 1000–300000     |
+| `modalityBridgeAudioMaxClips` | `3`        | 1–10            |
 
-Jaettu välimuisti pysyy `modalityBridgeCacheEnabled`,
-`modalityBridgeCacheTtlMinutes` ja `modalityBridgeCacheMaxEntries` -asetusten hallinnassa.
+Jaettua välimuistia hallitaan edelleen asetuksilla `modalityBridgeCacheEnabled`,
+`modalityBridgeCacheTtlMinutes` ja `modalityBridgeCacheMaxEntries`.
 
-### Video Bridge (`videoBridge.ts`, `videoBridgePipeline.ts`)
+### Videosilta (`videoBridge.ts`, `videoBridgePipeline.ts`)
 
-Sieppaa ylimmän tason video-osat Chat Completions `messages` -viesteissä ja Responses API `input` -syötteessä ennen kuin kutsutaan kohdetta, jolla ei ole tunnettua natiivia videotukea.
-Tuetut muodot ovat `input_video`, `video_url`, `video_source`, HTTPS-URL-osoitteet ja `data:video/*;base64,...` data-URI:t. Pelkkiä tiedostonimiä tekstissä ei käsitellä videona.
+Sieppaa Chat Completions -rajapinnan `messages`-kentän ja Responses
+API -rajapinnan `input`-kentän ylimmän tason video-osat ennen sellaisen kohteen
+kutsumista, jolla ei tiedetä olevan natiivia videotukea.
+Tuettuja muotoja ovat `input_video`, `video_url`, `video_source`, HTTPS-URL-osoitteet
+ja `data:video/*;base64,...`-data-URI:t. Tekstissä esiintyviä pelkkiä tiedostonimiä
+ei käsitellä videoina.
 
-`VideoBridgeGuardrail.preCall` (`videoBridge.ts`) vastaa pyynnön läpikäynnistä, kykyjen/käytäntöjen tarkistuksesta, pyyntökohtaisesta yhdistämisestä ja vastauskuormasta.
-Videokohtainen työ – hankinta, koko tuloksen välimuisti, kehyssekvenssin kuvaaminen (joka yhdistää kaikki kutsujan ilmoittamat äänitranskriptiot) ja yrityskohtaiset mittarit/keskeytys/siivous – on piilotettu `processVideoPart`-funktion taakse tiedostossa `videoBridgePipeline.ts`, jota kutsutaan kerran videon osaa kohden `preCall`-silmukan sisällä.
-Tämä moduuli määrittelee myös eksplisiittiset porttirajat `VideoMediaBrokerPort` (tavujen hankinta ja näytteistettyjen kehysten poiminta), `VideoAudioTranscriptionPort` (kutsujan ilmoittaman äänitranskription yhdistäminen näytteistettyihin tekstityksiin) ja `VideoDrilldownPort` (kehysten porautumisen pysyvyysraja; ei vielä kytketty `processVideoPart`-funktioon – vain erillinen `/api/modality-bridge/video/drilldown`-reitti kirjoittaa porautumistietoja tänään).
+`VideoBridgeGuardrail.preCall` (`videoBridge.ts`) vastaa pyynnön läpikäynnistä,
+ominaisuus- ja käytäntötarkistuksesta, pyyntökohtaisesta koostamisesta sekä
+vastaushyötykuormasta. Videokohtainen työ — hankinta, koko tuloksen välimuisti,
+kuvasarjan kuvailu (jossa yhdistetään mahdollinen kutsujan ilmoittama
+äänitranskriptio) sekä yrityskohtaiset mittarit, keskeytys ja siivous — on
+piilotettu `videoBridgePipeline.ts`-tiedoston `processVideoPart`-toiminnon taakse.
+Sitä kutsutaan kerran kutakin video-osaa kohti `preCall`-silmukassa.
+Moduuli määrittää myös eksplisiittiset porttirajat `VideoMediaBrokerPort`
+(tavujen hankinta ja näytteistettyjen kuvien poiminta), `VideoAudioTranscriptionPort`
+(kutsujan ilmoittaman äänitranskription yhdistäminen näytteistettyjen kuvien
+kuvateksteihin) ja `VideoDrilldownPort` (kuvien tarkempien tietojen pysyvyysraja;
+sitä ei ole vielä kytketty `processVideoPart`-toimintoon — nykyisin vain erillinen
+`/api/modality-bridge/video/drilldown`-reitti kirjoittaa tarkempien tietojen
+merkintöjä).
 
-Julkinen `/v1`-pyyntöpolku ei koskaan tuo tai kutsu aliprosessia. Etävideot ladataan 50 MiB:n rajan puitteissa; sisäisillä base64-videoilla on konservatiivinen 36 MiB:n dekoodattu videokohtainen raja, jotta malli/viestit/kehystyskuori voi pysyä julkisen JSON-pyynnön hyväksymisrajan (50 MiB) sisällä. Sisäisen pituuden ja dekoodatun koon arviot tarkistetaan ennen varausta. HTTPS vaaditaan alkuperäisessä etä-URL-osoitteessa ja jokaisessa uudelleenohjauksessa, käyttäen olemassa olevaa vain julkista ulospäin suuntautuvaa suojakaistaa DNS-kiinnityksellä. Tavut ylittävät sitten tarkan sisäisen `POST /api/modality-bridge/video/extract` välittäjärajan. Tämä reitti on sekä `LOCAL_ONLY` että `SPAWN_CAPABLE`, hyväksyy vain prosessikohtaisesti todennetun, luotetun takaisinkytkentäpyynnön, eikä koskaan hyväksy URL-osoitetta, tiedostojärjestelmäpolkua, suoritettavaa tiedostoa tai argumenttiluetteloa. API:n runkokoon putki ja käsittelijän inkrementaalinen rungonlukija valvovat itsenäisesti 50 MiB:n välittäjän syöttörajaa. Sen rajattu jono suorittaa yhden poiminnan kerrallaan, sallii neljä odottavaa työtä ja rajoittaa odottavan syötteen 100 MiB:iin.
+Julkinen `/v1`-pyyntöpolku ei koskaan tuo tai käynnistä aliprosessia.
+Etävideot ladataan 50 MiB:n rajoissa. Sisäisillä base64-videoilla on
+konservatiivinen 36 MiB:n puretun datan videokohtainen enimmäiskoko, jotta
+mallin, viestien ja kehystyksen muodostama kokonaisuus pysyy julkisten
+JSON-pyyntöjen 50 MiB:n hyväksymisrajan sisällä. Sisäisen datan pituus ja
+arvioitu purettu koko tarkistetaan ennen muistin varaamista. Alkuperäisen
+etä-URL-osoitteen ja jokaisen uudelleenohjauksen on käytettävä HTTPS:ää, ja
+tarkistuksessa käytetään olemassa olevaa vain julkiset osoitteet sallivaa
+lähtevän liikenteen suojausta DNS-kiinnityksellä. Tämän jälkeen tavut ylittävät
+täsmällisen sisäisen `POST /api/modality-bridge/video/extract`-välittäjärajan.
+Kyseinen reitti on sekä `LOCAL_ONLY` että `SPAWN_CAPABLE`, hyväksyy vain
+prosessikohtaisesti todennetun, luotetusta takaisinkytkentäosoitteesta tulevan
+pyynnön eikä koskaan hyväksy URL-osoitetta, tiedostojärjestelmäpolkua,
+suoritettavaa tiedostoa tai argumenttiluetteloa. API:n rungon kokoputki ja
+käsittelijän inkrementaalinen rungon lukija valvovat toisistaan riippumatta
+välittäjän 50 MiB:n syöterajaa. Sen rajattu jono suorittaa yhden poiminnan
+kerrallaan, sallii neljä odottavaa työtä ja rajoittaa odottavan syötteen
+100 MiB:uun.
 
-Välittäjän sisällä `ffprobe` lukee yksityisen paikallisen tiedoston; kiinteä muotoluettelo sulkee pois soittolista- ja manifestimuodot. Sallituissa MOV-perheen konteissa ulkoiset MOV-dataviittaukset pysyvät oletusarvoisesti poissa käytöstä, eikä kiinteä komento ota niitä käyttöön. Sekä `ffprobe` että `ffmpeg` käyttävät vain `file`-protokollan sallittujen luetteloa, yhtä säiettä, kiinteitä argumenttitaulukoita, ei shelliä ja suoritettavia tiedostoja, jotka on ratkaistu `PATH`-ympäristömuuttujasta. Liitetyt kuvakannet eivät ole toistettavia ehdokkaita. Kaikkien toistettavien virtojen on täytettävä rajoitukset, ja eksplisiittinen oletusvirta on etusijalla ennen determinististä pienimmän indeksin varajärjestelmää. Videot on rajoitettu 600 sekuntiin, 8 192 pikseliin per ulottuvuus ja 33 554 432 lähdepikseliin. FFmpeg näytteistää 1–16 keskipisteen JPEG-kehystä, skaalaa pitkän reunan enintään 1 024 pikseliin skaalaamatta pienempiä syötteitä ylöspäin, eikä koskaan vastaanota URL-osoitetta. Näytteistys on oletusarvoisesti `uniform`. Valinnaiset `scene_aware` ja kokeelliset `segment_aware` -käytännöt suorittavat yhden ylimääräisen kiinteän FFmpeg-kierroksen jo validoidun paikallisen virran yli, valitsevat rajatut `showinfo`-kohtausaikaleimat ja palautuvat deterministisesti samoihin yhtenäisiin keskipisteisiin ilmaisimen vian, aikakatkaisun, virheellisen tulosteen tai tyhjän ehdokasjoukon sattuessa. Segmenttitietoinen tila jakaa keskipistenäytteet suhteellisesti validoituihin kohtausväleihin; segmenttitietoisen todisteen ja varajärjestelmän käyttäytymisen yksityiskohdat ovat alla. Kova 16 kehyksen raja
-sovelletaan valinnan jälkeen jokaisessa käytännössä. Kun kohtauskohtaisella pyynnöllä on vain yhden kehyksen budjetti, se käyttää aktiivisen koko videon tai tarkennusikkunan yhtenäistä keskipistettä ja ilmoittaa `policyEffective: uniform`: yksittäinen valittu kohtauskehys ei voi säilyttää molempia ajallisia päitä. Kutsuja voi valinnaisesti antaa äärellisen tarkennusikkunan (`start`/`end` sekuntia); rajat rajataan median kestoon, käännetyt tai äärettömät ikkunat hylätään, ja kaikki näytteenottokäytännöt suoritetaan vain normalisoidun aikavälin sisällä. Tuloksena oleva ikkuna sisällytetään näytteenottometatietoihin ja epäluotettavaan kuvauksen etuliitteeseen, jotta alavirran mallit voivat erottaa tarkennetun otteen koko aikajanasta.
+Välittäjän sisällä `ffprobe` lukee yksityistä paikallista tiedostoa. Kiinteä
+muotojen sallittujen luettelo sulkee pois soittolista- ja manifestimuodot.
+Sallituissa MOV-perheen säilöissä ulkoiset MOV-dataviittaukset ovat oletusarvoisesti
+poissa käytöstä, eikä kiinteä komento ota niitä käyttöön. Sekä `ffprobe` että
+`ffmpeg` käyttävät vain `file`-protokollan sallivaa luetteloa, yhtä säiettä,
+kiinteitä argumenttitaulukoita ja eivät lainkaan komentotulkkia, ja suoritettavat
+tiedostot ratkaistaan `PATH`-muuttujasta. Liitettyjen kansikuvien kuvavirrat
+eivät ole toistettavia ehdokkaita. Kaikkien toistettavien virtojen on täytettävä
+rajat, ja eksplisiittistä oletusvirtaa suositaan ennen determinististä
+pienimmän indeksin varavaihtoehtoa. Videoiden enimmäiskesto on 600 sekuntia,
+enimmäiskoko 8 192 pikseliä ulottuvuutta kohti ja lähdepikselien enimmäismäärä
+33 554 432. FFmpeg ottaa 1–16 JPEG-näytekuvaa aikavälien keskipisteistä, pienentää
+pitkän sivun enintään 1 024 pikseliin suurentamatta pienempiä syötteitä eikä
+koskaan vastaanota URL-osoitetta. Näytteistyksen oletusarvo on `uniform`.
+Valinnaiset `scene_aware`- ja kokeelliset `segment_aware`-käytännöt suorittavat
+yhden kiinteän FFmpeg-lisäajon jo validoidulle paikalliselle virralle, valitsevat
+rajatun määrän `showinfo`-kohtausaikaleimoja ja palaavat deterministisesti samoihin
+tasavälisiin keskipisteisiin, jos tunnistus epäonnistuu tai aikakatkaistaan,
+tuloste on virheellinen tai ehdokasjoukko on tyhjä. Segmenttitietoinen tila
+jakaa keskipistenäytteet suhteessa validoituihin kohtausväleihin;
+segmenttitietoinen todistusaineisto ja varatoiminta kuvataan tarkemmin jäljempänä.
+Kaikissa käytännöissä valinnan jälkeen sovelletaan ehdotonta 16 kuvan rajaa.
+Kun kohtaustietoisen pyynnön budjetti on vain yksi kuva, se käyttää aktiivisen
+koko videon tai kohdistusikkunan tasavälistä keskipistettä ja ilmoittaa
+`policyEffective: uniform`: yksi valittu kohtauskuva ei voi säilyttää ajallisen
+välin molempia päitä. Kutsuja voi valinnaisesti määrittää äärellisen
+kohdistusikkunan (`start`/`end` sekunteina). Rajat sovitetaan median kestoon,
+käänteiset tai ei-äärelliset ikkunat hylätään, ja kaikkia näytteistyskäytäntöjä
+sovelletaan vain normalisoidulla aikavälillä. Tuloksena saatu ikkuna sisällytetään
+näytteistyksen metatietoihin ja epäluotettavan kuvauksen etuliitteeseen, jotta
+myöhemmät mallit voivat erottaa kohdistetun otteen koko aikajanalta.
 
-Semanttinen kuvatekstin tarkennus on erillinen, eksplisiittinen asetus. Oletusarvoinen `full`-analyysitila säilyttää olemassa olevan kehyskehotteen eikä koskaan välitä pyyntötekstiä kuvatekstimallille. `focused`-tilassa silta lukee vain uusimman ei-tyhjän käyttäjän kirjoittaman `text`/`input_text`-kentän samasta Chat- tai Responses-säilöstä, normalisoi sen NFC:ksi, tiivistää ohjausmerkit ja välilyönnit ja rajoittaa sen 500 Unicode-koodipisteeseen. Tyhjä tulos palautuu tarkkaan `full`-kehotteeseen. Käyttökelpoinen vihje serialisoidaan JSON-muodossa erillisessä epäluotettavan käyttäjän kontekstilohkossa ja se voi vain priorisoida havaittavia yksityiskohtia; se ei voi ohittaa erillistä varoitusta ohjeiden noudattamista vastaan, jotka ovat näkyvissä tai kuuluvissa mediassa. Tekstuaalinen tarkennus ei koskaan päättelee `start`/`end`-arvoja tai muuta ajallista näytteenottajaa.
+Semanttinen kuvatekstin kohdistus on erillinen, eksplisiittinen asetus.
+Oletusarvoinen `full`-analyysitila säilyttää nykyisen kuvakehotteen eikä koskaan
+välitä pyyntötekstiä kuvatekstimallille. `focused`-tilassa silta lukee vain
+uusimman ei-tyhjän käyttäjän kirjoittaman `text`/`input_text`-sisällön samasta
+Chat- tai Responses-säilöstä, normalisoi sen NFC-muotoon, tiivistää ohjausmerkit
+ja tyhjemerkit sekä rajoittaa sen 500 Unicode-koodipisteeseen. Tyhjä tulos
+palautuu täsmälleen `full`-kehotteeseen. Käyttökelpoinen vihje sarjallistetaan
+JSON-muodossa erilliseen epäluotetun käyttäjäkontekstin lohkoon, ja se saa
+ainoastaan priorisoida havaittavia yksityiskohtia. Se ei voi ohittaa erillistä
+varoitusta siitä, ettei mediassa näkyviä tai kuuluvia ohjeita saa noudattaa.
+Tekstuaalinen kohdistus ei koskaan päättele `start`/`end`-arvoja eikä muuta
+ajallista näytteistintä.
 
-#### FU-07 rakenteellisen segmentin todisteet
+#### FU-07:n rakenteellinen segmenttitodistusaineisto
 
-`segment_aware` käyttää yhtä rajattua esianalyysikierrosta jo validoidun paikallisen videovirran yli. Kiinteä suodatinketju skaalaa ensin enintään 320 pikselin leveyteen, havaitsee kohtausmuutokset ja jäädytetyt aikavälit, sitten näytteistää 1 kuvan sekunnissa sumeuden, keskimääräisen luminanssin ja spatiaalisen/ajallisen tiedon osalta. Kierros on rajoitettu 600 rakenteelliseen näytteeseen, yhteen FFmpeg/suodatinsäikeeseen, samaan `file`-protokollaan ja säilöjen sallittujen luetteloihin, 1 MiB:n prosessin tulostusrajaan ja enintään 30 sekuntiin välittäjän jaetun keskeytyksen/määräajan sisällä. Se ei koskaan hyväksy komentoa, suodatinta, polkua tai URL-osoitetta pyynnöstä.
+`segment_aware` käyttää yhden rajatun esianalyysikierroksen jo validoidulle
+paikalliselle videovirralle. Kiinteä suodatinketju skaalaa videon ensin enintään
+320 pikselin levyiseksi, tunnistaa kohtausvaihdokset ja pysähtyneet jaksot sekä
+ottaa sitten yhden kuvan sekunnissa epäterävyyden, keskimääräisen luminanssin ja
+tila-/aikainformaation analysointia varten. Kierros on rajattu 600 rakenteelliseen
+näytteeseen, yhteen FFmpeg-/suodatinsäikeeseen, samoihin vain `file`-protokollan
+ja säilömuotojen sallittujen luetteloihin, 1 MiB:n prosessitulostusrajaan sekä
+enintään 30 sekuntiin välittäjän yhteisen keskeytys-/määräajan sisällä. Se ei
+koskaan hyväksy pyynnöstä komentoa, suodatinta, polkua tai URL-osoitetta.
 
-Rakenteelliset arvot ovat deterministisiä näytteenottoon perustuvia todisteita, eivät semanttista videon ymmärtämistä. Ne eivät päättele aiheita, toimintoja, kuvatekstejä, puhetta tai käyttäjän tarkoitusta. Kohtaus- ja pysäytysrajat muodostavat segmenttejä; pysäytyksen kattavuus, sumeus, valotus, spatiaalinen yksityiskohta ja ajallinen muutos vaikuttavat vain siihen, miten olemassa oleva 1–16 ruudun budjetti jaetaan. Täysin pysäytetty segmentti on rajattu yhteen ruutuun, kun taas ei-pysäytetyt segmentit kilpailevat jäljellä olevasta budjetista. Kun rajat ylittävät ruutujen määrän, tasainen aikajanan kattavuus säilytetään, jotta nopeat varhaiset leikkaukset eivät voi piilottaa pitkää loppusegmenttiä. Kohtausrajat, jotka ovat 1 sekunnin analyysiresoluution sisällä pysäytysrajasta, yhdistetään.
+Rakenteelliset arvot ovat determinististä otantaan perustuvaa näyttöä, eivät
+videon semanttista ymmärtämistä. Niistä ei päätellä kohteita, toimintoja,
+tekstityksiä, puhetta tai käyttäjän tarkoitusta. Kohtaus- ja pysähtymisrajat
+muodostavat segmentit; pysähtyneen kuvan osuus, epäterävyys, valotus,
+tilallinen yksityiskohtaisuus ja ajallinen muutos vaikuttavat ainoastaan siihen,
+miten nykyinen 1–16 kuvan budjetti jaetaan. Kokonaan pysähtynyt segmentti
+rajoitetaan yhteen kuvaan, kun taas pysähtymättömät segmentit kilpailevat
+jäljellä olevasta budjetista. Kun rajoja on enemmän kuin kuvia, aikajanan
+tasainen kattavuus säilytetään, jotta nopeat leikkaukset videon alussa eivät voi
+peittää pitkää loppusegmenttiä. Kohtausrajat, jotka ovat pysähtymisrajasta
+yhden sekunnin analyysiresoluution sisällä, yhdistetään.
 
-Puuttuvat suodattimet, virheelliset/tyhjät todisteet, ilmaisinvirhe tai rajattu esianalyysin aikakatkaisu epäonnistuvat avoimesti tarkkaan tasaiseen keskipistepolitiikkaan. Kutsujan keskeytys tai välittäjän määräaika ei epäonnistu avoimesti: se lopettaa käynnissä olevan aliprosessin, estää myöhemmän ruudun poiminnan, ja yksityinen väliaikainen puu poistetaan `finally`-lohkossa.
+Puuttuvat suodattimet, virheellinen tai tyhjä näyttö, tunnistimen virhe tai
+rajatun esianalyysin aikakatkaisu palautuvat täsmälleen tasaisten keskipisteiden
+käytäntöön. Kutsujan keskeytys tai välittäjän määräaika ei kuitenkaan palaudu
+siihen: se lopettaa käynnissä olevan aliprosessin, estää myöhemmän kuvien
+poiminnan, ja yksityinen väliaikainen hakemistopuu poistetaan `finally`-lohkossa.
 
-`scripts/perf/video-bridge-fu07-eval.ts` luo deterministisiä todellisia FFmpeg-tietoja jälkikäsittelyn kuvatekstipuhelujen säästöjä, tiheän liikkeen budjetin allokointia, sumeuden/valotuksen/SI-TI-todisteita, nopeita leikkauksia pitkällä hännällä ja asteittaisen häivytyksen vääriä positiivisia varten. Se tallentaa esianalyysin todellisen ajan ja, jos `/usr/bin/time` on saatavilla, lapsiprosessorin ja huippumuistin käytön. Sen laaduntarkistukset ovat vain rakenteellisia oraakkeleita. Todellisen kuvatekstimallin laatu pysyy `HOLD`-tilassa, koska tällä testivaljaalla ei ole valtuutettua päätepistettä tai jäädytettyä tuomaria. Rahalliset säästöt pysyvät myös `HOLD`-tilassa, ellei `--caption-cost-per-call-usd` anna eksplisiittistä positiivista puhelukohtaista arviota; skripti ei koskaan väärennä kumpaakaan tulosta.
+`scripts/perf/video-bridge-fu07-eval.ts` tuottaa deterministisiä, aitoja
+FFmpeg-testiaineistoja deduplikoinnin jälkeisten kuvatekstikutsujen säästöjen,
+tiheän liikkeen budjetinjaon, epäterävyys-/valotus-/SI-TI-näytön, nopeiden
+leikkausten ja pitkän loppuosan sekä asteittaisten häivytysten väärien
+positiivisten tulosten arviointiin. Se tallentaa esianalyysin seinäkelloajan
+sekä, kun `/usr/bin/time` on käytettävissä, aliprosessin suoritinajan ja RSS:n
+huippuarvon. Sen laatutarkistukset ovat vain rakenteellisia oraakkeleita. Aidon
+kuvatekstimallin laadun tila on edelleen `HOLD`, koska tällä testikehyksellä ei
+ole valtuutettua päätepistettä tai jäädytettyä arvioijaa. Myös rahallisten
+säästöjen tila pysyy arvossa `HOLD`, ellei
+`--caption-cost-per-call-usd` anna nimenomaista positiivista kutsukohtaista
+kustannusarviota; skripti ei koskaan keksi kumpaakaan tulosta.
 
-Jokainen ruutu on rajoitettu 4 MiB:iin, kaikki raakarutut yhteensä 23 MiB:iin ja sarjoitettu välittäjän vastaus 32 MiB:iin. Yksityinen väliaikainen hakemisto poistetaan `finally`-lohkossa. OmniRoute ei niputa FFmpeg:iä eikä hyväksy mukautettua suoritettavan tiedoston polkua. Ennen kuvatekstien luomista silta soveltaa konservatiivista visuaalista duplikaattien poistamista: jokainen JPEG-kuva pienennetään 16x16 harmaasävyiseksi puskuriksi ja sitä verrataan vain viimeksi säilytettyyn ruutuun. Pyydetyn kuvatekstibudjetin ollessa yli yhden ruudun, poiminta tarjoaa rajatun ehdokasjoukon, joka on enintään kaksi kertaa budjetin kokoinen ja ei koskaan yli 16 ruutua. Pyydetty raja sovelletaan vasta duplikaattien poistamisen jälkeen, ja ensimmäinen ja viimeinen valittu ehdokas säilytetään lopullisen ohennuksen aikana, kun budjetti on vähintään kaksi. Versioitu `grayscale-16x16-mean-cells-v2` -käytäntö käyttää suurempaa keskimääräisen luma-deltan ja niiden pikkukuvakennojen suhteen, joiden normalisoitu delta on vähintään 0,05. Duplikaattikynnys on vakio 0,04, joka on valittu ennustettavuuden vuoksi eikä sitä ole paljastettu ajonaikaisena asetuksena. Tämä toissijainen korkeakontrastinen signaali säilyttää pienen liikkeen ja näkyvän tekstin muutokset, jotka pelkkä keskiarvovertailu voi piilottaa. Vertailijan tai dekooderin virheet epäonnistuvat avoimesti ja säilyttävät kattavuuden. Tulostusmetadata erottaa poimitut ehdokkaat, onnistuneesti käytetyt ruudut ja visuaalisesti pudotetut duplikaatit.
+Kunkin kuvan koko on rajattu 4 MiB:uun, kaikkien raakakuvien yhteiskoko
+23 MiB:uun ja välittäjän sarjoitettu vastaus 32 MiB:uun. Yksityinen väliaikainen
+hakemisto poistetaan `finally`-lohkossa. OmniRoute ei sisällä FFmpeg:iä eikä
+hyväksy mukautettua suoritettavan tiedoston polkua. Ennen kuvatekstien luontia
+silta suorittaa varovaisen visuaalisen deduplikointikierroksen: jokainen JPEG
+pienennetään 16×16-kokoiseksi harmaasävypuskuriksi ja sitä verrataan ainoastaan
+viimeiseen säilytettyyn kuvaan. Kun pyydetty kuvatekstibudjetti on suurempi kuin
+yksi kuva, poiminta tuottaa rajatun ehdokasjoukon, jonka koko on enintään
+kaksinkertainen budjettiin nähden ja aina enintään 16 kuvaa. Pyydettyä rajaa
+sovelletaan vasta deduplikoinnin jälkeen, ja ensimmäinen sekä viimeinen valittu
+ehdokas säilytetään lopullisessa harvennuksessa, kun budjetti on vähintään kaksi.
+Versioitu `grayscale-16x16-mean-cells-v2`-käytäntö käyttää suurempaa arvoa
+keskimääräisen luminanssin muutoksesta ja niiden pikkukuvan solujen osuudesta,
+joiden normalisoitu muutos on vähintään 0.05. Kaksoiskappaleen kynnysarvo on
+vakio 0.04, joka on valittu ennakoitavuuden vuoksi sen sijaan, että se olisi
+tarjolla ajonaikaisena asetuksena. Tämä toissijainen suuren kontrastin signaali
+säilyttää pienet liikkeet ja näkyvän tekstin muutokset, jotka pelkkään
+keskiarvoon perustuva vertailu voi piilottaa. Vertailijan tai dekooderin
+virhetilanteessa käsittely jatkuu avoimesti ja kattavuus säilytetään.
+Tulosteen metatiedoissa erotellaan poimitut ehdokkaat, onnistuneesti käytetyt
+kuvat ja poistetut visuaaliset kaksoiskappaleet.
 
-Nimenomaisesti merkitty videon osa voi pyytää aikaleimattua yhteenvetokuvaa. Silta rakentaa enintään 4-sarakkeisen, 16-ruutuisen JPEG-ruudukon. Jokainen 512 pikselin solu polttaa lähdeaikaleimansa korkeakontrastiseen alareunaan, kun taas samat aikaleimat säilyvät tekstimuotoisessa metadatassa myöhempää yhdistämistä ja tarkastusta varten. Koko JPEG on edelleen rajattu 32 MiB:iin. Jos `sharp` ei pysty dekoodaamaan tai koostamaan ruudukkoa, silta palaa yksittäisiin JPEG-ruutuihin; asiakkaan keskeytys leviää edelleen ruudukon toiminnon läpi.
+Nimenomaisesti videoksi merkitty osa voi pyytää aikaleimallisen kontaktikartan.
+Silta rakentaa enintään 4 sarakkeen ja 16 kuvan JPEG-ruudukon. Jokainen
+512 pikselin solu polttaa lähteensä aikaleiman suuren kontrastin alapalkkiin,
+ja samat aikaleimat säilyvät tekstimuotoisissa metatiedoissa myöhempää
+yhdistämistä ja auditointia varten. Koko JPEG on edelleen rajattu 32 MiB:uun.
+Jos `sharp` ei pysty dekoodaamaan tai koostamaan ruudukkoa, silta palaa
+yksittäisiin JPEG-kuviin; asiakkaan keskeytys välittyy silti kontaktikartan
+käsittelyyn.
 
-Ylennyksen todisteet ovat tarkoituksellisesti erillään synteettisestä koostumuksen mikrovertailusta. `scripts/perf/video-bridge-contact-sheet-eval.ts` määrittelee skeemaversioidun A/B-testivaljaan todellisille OpenAI-yhteensopiville näkömalleille. Se mittaa palveluntarjoajan ilmoittamia tokeneita, päästä päähän -viivettä (mukaan lukien arkin koostumus), mallikutsujen määrää ja manifestissa määriteltyjen tosiasioiden säilyttämistä. Raakoja mallivastauksia ei kirjoiteta raporttiin; vain SHA-256-tiivisteet ja vastaavat tosiasiatunnukset säilytetään. Testivaljaat eivät tee verkko- tai maksullisia mallikutsuja, ellei `--execute-real` ole annettu ja `--model`, `OMNIROUTE_BASE_URL` ja `OMNIROUTE_API_KEY` ole määritetty. Ilman tätä eksplisiittistä todellista ajoa sen koneellisesti luettava tuomio pysyy `HOLD`-tilassa; pelkät synteettiset hyötykuorma-/kutsulaskentamittaukset eivät ole ylennyksen todisteita.
+Tuotantoon siirtämistä tukeva näyttö pidetään tarkoituksella erillään
+synteettisestä koostamisen mikrosuorituskykytestistä.
+`scripts/perf/video-bridge-contact-sheet-eval.ts` määrittää skeemaversioidun
+A/B-testikehyksen todellisille OpenAI-yhteensopiville konenäkömalleille. Se
+mittaa palveluntarjoajan ilmoittamat tokenit, päästä päähän -seinäkelloviiveen
+(kontaktikartan koostaminen mukaan lukien), mallikutsujen määrän ja manifestissa
+määritellyn faktojen säilymisen. Mallien raakavastauksia ei kirjoiteta
+raporttiin; vain SHA-256-tiivisteet ja täsmänneiden faktojen tunnisteet
+säilytetään. Testikehys ei tee verkko- tai maksullista mallikutsua, ellei
+`--execute-real`-valitsinta anneta ja arvoja `--model`, `OMNIROUTE_BASE_URL`
+ja `OMNIROUTE_API_KEY` ole määritetty. Ilman tätä nimenomaista todellista ajoa
+sen koneluettavan arvion tila pysyy arvossa `HOLD`; synteettiset hyötykuorman
+tai kutsumäärän mittaukset eivät yksinään ole näyttöä tuotantoon siirtämisen
+puolesta.
 
-Kutsujat voivat liittää valinnaisen `transcript.cues`-taulukon tuettuun videon osaan, kun heillä on jo kohdistettu teksti. Jokaisen vihjeen on sisällettävä `text`, äärellinen `start`/`end`-väli tutkitun keston sisällä ja sallittu `source` (`client`, `embedded` tai `audio-bridge`); `confidence` oletusarvo on `1` ja sen on pysyttävä välillä `0` ja `1`. Tarkat kaksoiskappaleet yhdistetään. OmniRoute ei koskaan aloita transkriptiota tästä metadatasta: validoidut vihjeet kopioidaan kuvattuun tulokseen lähteen, luottamuksen ja aikavälin kanssa, ja ne esitetään epäluotettavina havaintoina ruutujen kuvatekstien rinnalla. Virheellinen, alueen ulkopuolinen tai alkuperätön teksti hylätään sen sijaan, että se sekoitettaisiin kuvatekstivirtaan. `source`-kenttä on tällä hetkellä kutsujan ilmoittama, ei palvelimen vahvistama: OmniRoute varmistaa, että arvo on yksi kolmesta sallitusta merkkijonosta, mutta ei vielä kryptografisesti vahvista, että `embedded`- tai `audio-bridge`-merkintä todella tuli palvelimen omistamasta poiminnasta. Käsittele `source`-kenttää epäluotettavana vihjeenä, kunnes tämä vahvistus saadaan; älä rakenna valtuutuspäätöksiä sen varaan.
+Kutsujat voivat liittää valinnaisen `transcript.cues`-taulukon tuettuun
+video-osaan, kun heillä on jo käytettävissään ajallisesti kohdistettu teksti.
+Jokaisen vihjeen tulee sisältää `text`, äärellinen `start`/`end`-aikaväli
+tunnistetun keston sisällä sekä sallittujen luetteloon kuuluva `source`
+(`client`, `embedded` tai `audio-bridge`); kohteen `confidence` oletusarvo on
+`1`, ja sen tulee pysyä välillä `0`–`1`. Täsmälleen samat vihjeet yhdistetään.
+OmniRoute ei koskaan käynnistä litterointia näiden metatietojen perusteella:
+validoidut vihjeet kopioidaan kuvattuun tulokseen lähteen, luottamusarvon ja
+aikavälin kanssa, ja ne esitetään epäluotettuina havaintoina kuvatekstien
+rinnalla. Virheellinen, sallitun aikavälin ulkopuolinen tai alkuperätiedoton
+teksti hylätään sen sijaan, että se sekoitettaisiin kuvatekstivirtaan. Molemmat
+pyynnön rungon litterointikanavat normalisoivat annetun alkuperän arvoksi
+`client`, myös itse ilmoitetut `embedded`- tai `audio-bridge`-tunnisteet.
+Vain palvelimen hallinnoima sovitin voi määrittää nämä luotetut tunnisteet
+ainoastaan koodissa käytettävän `trustedSource`-argumentin kautta; pyynnön
+JSON-kenttä ei voi välittyä tähän argumenttiin. Litteroinnin teksti on
+alkuperästään riippumatta epäluotettua, mediasisällöstä johdettua sisältöä,
+eikä se saa koskaan määrittää valtuutusta.
 
-Edistynyt kutsuja voi tarjota jo valtuutetun `audioTranscript`-raidan samalle videolle. Fuusaumakohta yhdistää visuaaliset ja audiotarkkailut yhden määräajan ja keskeytyssignaalin alle, järjestää ne yhteiselle aikajanalle, poistaa tarkat kaksoiskappaleet ja raportoi osittaisen tuloksen, kun vain toinen puoli onnistuu. Virheellinen `audioTranscript` heikkenee tähän osittaiseen tulokseen – visuaalinen kuvaus säilytetään ja audioraita tallentaa puhdistetun virhekoodin – sen sijaan, että koko video epäonnistuisi. Haarakohtainen saatavuus, osittainen lippu ja puhdistetut virhekoodit säilytetään kuvatussa tuloksessa, suojakaiteen metatiedoissa (`audioFusionRuns`/`audioFusionPartials`/`audioFusionFailureCodes`), tulosvälimuistin metatiedoissa ja sillan fuusiolaskureissa. Oletusarvoinen Video Bridge -polku ei kutsu puheentunnistusta tai lataa toista mediakopiota; ilman tätä eksplisiittistä raitaa se pysyy vain videona.
+Edistynyt kutsuja voi antaa samalle videolle `audioTranscript`-raidan;
+sitä käsitellään asiakkaan toimittamana tekstinä, ei todisteena palvelimen tekemästä litteroinnista.
+Yhdistämiskohta suorittaa visuaaliset ja äänihavainnot saman
+määräajan ja keskeytyssignaalin alaisina, järjestää ne yhteiselle aikajanalle, yhdistää
+täsmälleen identtiset kaksoiskappaleet ja raportoi osittaisen tuloksen, kun vain toinen haara onnistuu.
+Virheellinen `audioTranscript` johtaa tähän osittaiseen tulokseen — visuaalinen
+kuvaus säilytetään ja äänihaaraan kirjataan puhdistettu virhekoodi —
+sen sijaan, että koko videon käsittely epäonnistuisi. Haarakohtainen saatavuus, osittaisuuden ilmaisin
+ja puhdistetut virhekoodit säilytetään kuvaillussa tuloksessa,
+suojakaiteen metatiedoissa (`audioFusionRuns`/`audioFusionPartials`/
+`audioFusionFailureCodes`), tulosvälimuistin metatiedoissa ja sillan
+yhdistämislaskureissa. Video Bridgen oletuspolku ei käynnistä puheen muuntamista tekstiksi
+eikä lataa mediasta toista kopiota; ilman nimenomaisesti annettua raitaa se pysyy
+vain videota käsittelevänä.
 
-**Transkription säilyttäminen (#12150 P1).** Tämä soveltuu automaattisesti aina, kun Video Bridge (joka on itsessään opt-in) renderöi transkription vihjeen – erillistä säilytyslippua ei ole. Kun pyyntö renderöi minkä tahansa transkription vihjeen (kutsujan ilmoittama `transcript` tai yhdistetty `audioTranscript`), suojakaide merkitsee sen `videoBridgeObserved`-tilaksi ja tuottaa videokuvauksen redaktoidun varjon – identtisen renderöinnin, jossa jokaisen vihjeen vapaatekstikenttä korvataan `[redacted-video-transcript]`-tekstillä, joka rakennetaan korvaamalla strukturoitu vihjekenttä ennen merkkijonon kokoamista (ei koskaan jäsentämällä litistettyä tekstiä, joten mikään vihjeen sisältö – haitallinen tai tavallinen, mukaan lukien `]`-merkin sisältävät kappaleet, kuten `[inaudible]`/`[music]` – ei voi säilyä). Säilytetty puhelulokin pyynnön runko vaihtaa jokaisen videosta johdetun tekstiosan tähän redaktoituun varjoon, joka vastaa sisällön samankaltaisuutta; `fullText`-ankkuri luetaan uudelleen valmiista esipuhelun suojakaiteen hyötykuormasta, joten vastaavuus onnistuu edelleen myöhempien ketjun suojakaiteiden (PII- ja tunnistetietojen peittäjät, prioriteetit 10/95) kirjoittaessa kuvaustekstin paikoilleen ja järjestelmän kehotteen/siirron/muistin injektion muokatessa viestitaulukkoa. Mallille lähetetty runko on muuttumaton. Tarkkailtu pyyntö ei myöskään täytä kestävää muistia (sekä pyynnöstä että vastauksesta johdettu poiminta ohitetaan), joten mallin oma vastaus ei voi toistaa transkriptiotekstiä muistiin.
+**Litterointien säilytys (#12150 P1).** Tätä sovelletaan automaattisesti aina, kun
+Video Bridge (joka itsessään on erikseen käyttöönotettava) hahmontaa litterointivihjeen — erillistä
+säilytysvalitsinta ei ole. Kun pyyntö hahmontaa minkä tahansa litterointivihjeen (kutsujan ilmoittaman
+`transcript`-kentän tai yhdistetyn `audioTranscript`-kentän), suojakaide merkitsee sen
+`videoBridgeObserved`-arvolla ja tuottaa videokuvauksesta peitetyn varjokopion —
+identtisen hahmonnoksen, jossa jokaisen vihjeen vapaamuotoinen tekstirunko korvataan arvolla
+`[redacted-video-transcript]`. Tämä tehdään korvaamalla jäsennelty vihjekenttä
+ennen merkkijonon kokoamista (ei koskaan jäsentämällä litistettyä tekstiä, joten mikään vihjeen
+sisältö — haitallinen tai tavallinen, mukaan lukien merkkiä `]` sisältävät rungot, kuten
+`[inaudible]`/`[music]` — ei voi säilyä). Tallennetun kutsulokin pyyntörungossa
+jokainen videosta johdettu tekstiosa vaihdetaan tähän peitettyyn varjokopioon sisällön
+täsmällisen vastaavuuden perusteella; `fullText`-ankkuri luetaan uudelleen valmiista kutsua edeltävästä suojakaidehyötykuormasta,
+joten vastaavuus löytyy edelleen senkin jälkeen, kun ketjun myöhemmät suojakaiteet (henkilötieto- ja
+tunnistetietopeittimet, prioriteetit 10/95) ovat kirjoittaneet kuvaustekstin uudelleen paikallaan,
+sekä sen jälkeen, kun järjestelmäkehotteen, siirron tai Muistin lisääminen on muokannut viestitaulukon rakennetta.
+Mallille lähetettävä runko säilyy muuttumattomana. Havaittu pyyntö ei myöskään tallenna
+mitään pysyvään Muistiin (sekä pyynnöstä että vastauksesta johdettava poiminta ohitetaan),
+joten mallin oma vastaus ei voi kaiuttaa litterointitekstiä Muistiin.
 
-Lisäkopiot käyttävät samaa tarkkailtua pyyntösignaalia. Raaka ennen suojakaidetta otettu asiakaspyynnön tilannekuva, muistissa odottava pyyntö ja varhainen hylätyn pyynnön loki korvaavat rakenteellisesti transkriptiokentät videon osissa; putkilinjan vaiheiden syntetisoimat merkkijonokehotteet ja kontekstin siirto redaktoidaan säilytetyn pyynnön rungon vastaanottajassa. Säilytetty `video_content_removed`-merkki saa `previous_response_id`-jatkumon epäonnistumaan suljettuna sen sijaan, että se rekonstruoisi tarkoituksella hylätyn tekstin. Jos tarkkailtu pyyntö menettää osakohtaisen redaktointivarjonsa ennen lokitusta, tai jopa yksi useista videovarjoista ei vastaa myöhempien pyyntömuutosten jälkeen, säilytetty pyynnön runko jätetään kokonaan pois sen sijaan, että säilytettäisiin osittain redaktoitu transkriptio.
+**Videon raakakentät (#12430).** Kun silta on käytössä ja natiivi videotuki on tuntematon tai puuttuu, määritetyt `transcript`-/`audioTranscript`-kentät aktivoivat myös `videoBridgeObserved`-arvon, jopa kuvauksen epäonnistumisen tai `maxVideos`-rajoituksen jälkeen. `null` ja tyhjät merkkijonot lasketaan mukaan; puuttuvia kenttiä ja muita kuin videon metatietoja ei lasketa. Säilytetyissä kopioissa nämä kentät peitetään tai pyyntö jätetään pois, ja välimuistit/Muisti ohitetaan.
 
-Tarkkaillun pyynnön osalta mallin vastaus voi lainata mitä tahansa osaa transkriptiosta ilman strukturoitua vihjerajaa. Sen säilytetty puhelulokin `responseBody` korvataan siksi poisjättömerkillä; yksityiskohtaista putkilinjan artefaktia (joka voi sisältää ylävirran/asiakkaan runkoja ja virran osia) ei säilytetä. Semanttiset, idempotenttiset ja päättely-uudelleentoistovälimuistit ohittavat luku- ja kirjoitustoiminnot kyseiselle pyynnölle. Palveluntarjoajan pyyntö ja asiakkaalle näkyvä vastaus pysyvät muuttumattomina. Varhaiset keepalive-tavut tyhjennetään väliaikaisesta puskurista, kun yksityiskohtainen artefakti jätetään pois. Kiron virheellinen EventStream-varoitus ilmoittaa vain hyötykuorman tavumäärän, ei koskaan sen sisältöä tai JSON-jäsentimen raakaa virhettä.
-Tämä ei väitä, että jokainen toisiinsa liittymätön palveluntarjoajan/lisäosan diagnostiikka olisi tarkastettu; laajempi säilytettyjen kohteiden tarkastus on seurannassa numerolla #11658.
+Näillä varapoluilla kutsujan kelvollisista vihjeistä tulee tuettuja `text`-/`input_text`-
+osia epästandardien palveluntarjoajakenttien sijaan. Molemmat pyynnössä annetut raidat
+pysyvät epäluotettuina `client`-havaintoina, ja mukana on nimenomainen varoitus siitä, ettei videota
+kuvailtu eikä aikaleimoja varmennettu mediaa vasten. Nykyisiä
+256 vihjeen / 64 KiB:n kokonaisrajoja ja vihjekohtaisia rajoja sovelletaan molempiin raitoihin yhteensä;
+aikaleimojen on mahduttava välittäjän 600 sekunnin enimmäisrajaan ja mahdolliseen annettuun kohdistusikkunaan.
+Virheelliset raidat hylätään, eikä niitä välitetä mielivaltaisena tekstinä; kelvollista
+sisarraitaa voidaan silti käyttää, ellei niiden yhteisraja ylity. Null-arvoiset tai tyhjät
+kentät eivät lisää tekstiä. Tämä varamenettely ei lisää median noutamista tai litterointia.
+Litterointilaajennuksen kentät poistetaan varapolun videokantajasta ja sen
+`video_url`-/`source`-objekteista. OpenAI-siirtoformaatin sallittujen kenttien luettelo pysyy tiukkana; natiiviltaan
+tuntemattomat videokantajat säilyvät käytettävissä ja tunnetut vain tekstiä tukevat kohteet säilyttävät turvalliset merkinnät.
+Jäsennellyt peitetyt varjokopiot suojaavat lisättyä litterointitekstiä, kun taas
+kutsujan omistama alkuperäinen pyyntö pysyy muuttumattomana. Natiivisti tuetut kohteet ja
+käytöstä poistetut sillat säilyttävät nykyisen ohituskäyttäytymisensä.
 
-Sisäinen `/api/modality-bridge/video/drilldown`-elinkaari on erillinen, takaisinkytketty/tunnistautunut välimuistin alusta. Jokainen operaatio vaatii myös kanonisen läpinäkymättömän pääkäyttäjätunnuksen. Ennen kuin tuotantokutsuja otetaan käyttöön, sen on johdettava tämä tunnus todennetusta vuokralaisesta eikä se saa koskaan välittää asiakkaan valitsemaa arvoa. Välimuistin avaimet sitovat tämän pääkäyttäjän kanonisiin istunto- ja videoviitetunnuksiin, tallentavat vain niiden SHA-256-johdetut avaimet ja rajaavat sekä luku- että poistotoiminnot samalle pääkäyttäjälle. Välimuisti tallentaa enintään 16 johdettua JPEG-kehystä merkintää kohti, vanhentaa ne kymmenen minuutin kuluttua ja tukee rajattuja `start`/`end`-lukuja tai eksplisiittistä istunnon poistamista.
+Muut säilytetyt kopiot käyttävät samaa havaitun pyynnön signaalia. Suojakaiteita edeltävä
+asiakaspyynnön raaka tilannevedos, muistissa oleva odottava pyyntö ja varhaisen
+hylätyn pyynnön loki korvaavat rakenteellisesti video-osien litterointikentät;
+putkiston vaiheiden ja kontekstinsiirron tuottamat merkkijonokehotteet peitetään
+tallennetun pyyntörungon vastaanottopisteessä. Tallennettu `video_content_removed`-merkintä
+saa `previous_response_id`-jatkamisen epäonnistumaan turvallisesti sen sijaan, että se rakentaisi uudelleen
+tahallisesti hylätyn tekstin. Jos havaittu pyyntö menettää
+osakohtaisen peitetyn varjokopionsa ennen lokitusta tai jos yksikin useista videon varjokopioista
+ei enää vastaa myöhempien pyyntömuutosten jälkeen, säilytettävä pyyntörunko
+jätetään kokonaan pois sen sijaan, että osittain peitetty litterointi säilytettäisiin.
 
-Jokainen pääkäyttäjä on rajoitettu 16 merkintään ja 64 MiB kanoniseen JPEG-dataan. Nämä rajat ovat riippumattomia globaalista 64 merkinnän/256 MiB:n katosta: pääkäyttäjän kiintiöpaine poistaa vain kyseisen pääkäyttäjän vähiten äskettäin käytetyt merkinnät ennen kuin globaalia LRU-poistoa harkitaan. Vanhentuneet merkinnät poistetaan sekä pääkäyttäjän että globaalista kirjanpidosta välimuistin toiminnan yhteydessä, kun taas peruutus ja validointivirhe eivät sitoudu osittaiseen korvaukseen.
+Havaitun pyynnön tapauksessa mallin vastaus voi lainata mitä tahansa litteroinnin osaa
+ilman jäsenneltyä vihjerajaa. Sen vuoksi kutsulokiin tallennettava
+`responseBody` korvataan poisjättömerkinnällä; yksityiskohtaista
+putkistoartefaktia (joka voi sisältää palveluntarjoajan ja asiakkaan rungot sekä suoratoiston osat)
+ei säilytetä. Semanttiset, idempotenssi- ja päättelyn toistovälimuistit
+ohittavat tämän pyynnön luku- ja kirjoitusoperaatiot. Palveluntarjoajalle lähetettävä pyyntö ja asiakkaalle näkyvä
+vastaus säilyvät muuttumattomina. Varhaiset keepalive-tavut tyhjennetään tilapäisestä
+puskurista, kun yksityiskohtainen artefakti jätetään pois. Kiron virheellistä EventStream-muotoa koskeva
+varoitus ilmoittaa vain hyötykuorman tavumäärän, ei koskaan sen sisältöä tai JSON-
+jäsentimen raakaa virhettä.
+Tämä ei tarkoita, että kaikki asiaan liittymättömät palveluntarjoajien tai liitännäisten diagnostiikat olisi
+tarkastettu; laajempaa säilytettävien vastaanottopisteiden läpikäyntiä seurataan kohdassa #11658.
 
-Välimuisti hylkää ei-kanonisen Base64:n, liiallisen täytteen, ei-JPEG-median, virheelliset tai katkaistut JPEG-kuvat ja JPEG-kuvat, jotka tuottavat varoituksen rajatun koko kuvan `sharp`-dekoodauksen aikana. Se uudelleenkoodaa jokaisen hyväksytyn kuvan kanoniseksi JPEG-kuvaksi, johtaa leveyden ja korkeuden dekoodatuista tavuista luottamatta kutsujan kenttiin ja hylkää kaikki jäljellä olevat monikieliset tavut sen sijaan, että säilyttäisi ne. Vain rajattu kanoninen pakattu puskuri veloitetaan molemmista kiintiöistä. JSON-rajajohto sisältää Base64-yläkustannukset 32 MiB:n dekoodatun syötteen katolle. Jokainen tallennettu johdannainen tallentaa validoidun JPEG-muotonsa/resoluutionsa, näytteenottopolitiikkansa, johdannaisversion, luomisajan, palvelimen laskeman sisällön tiivisteen ja tiivistetyn vanhemman viitteen sekä luotetun kutsujan vanhemman sisällön tiivisteen. Peruutus tarkistetaan asynkronisten dekoodaus-/tiivistysvaiheiden välillä ennen atomista välimuistin sitoutumista.
+Sisäinen `/api/modality-bridge/video/drilldown`-elinkaari on erillinen,
+loopback-/token-todennettu välimuistialusta. Jokainen toiminto edellyttää myös
+kanonista läpinäkymätöntä pääkäyttäjätunnusta. Ennen tuotantokutsujan käyttöönottoa sen on
+johdettava kyseinen tunnus todennetusta tenantista, eikä se saa koskaan välittää
+asiakkaan valitsemaa arvoa. Välimuistiavaimet sitovat kyseisen pääkäyttäjän kanonisiin istunto- ja
+videoviitetunnuksiin, tallentavat niistä vain SHA-256-johdetut avaimet ja rajaavat sekä luvut
+että poistot samaan pääkäyttäjään. Välimuisti tallentaa kuhunkin merkintään enintään 16 johdettua JPEG-
+kehystä, vanhentaa ne kymmenen minuutin kuluttua ja tukee rajattuja
+`start`/`end`-lukuja tai istunnon eksplisiittistä poistamista.
 
-Tämä erä ei vielä yhdistä tuotantotuottajaa reittiin eikä tarjoa moniresoluutioista variantinvalintaa. Läpinäkyvä Video Bridge -pyyntöpolku ei siksi aiheuta lisätyötä, kun taas vuokralaiskohtainen pääperiaatteen johtaminen ja täysi FU-08 moniresoluutioinen elinkaari pysyvät nimenomaisena jatkotyönä sen sijaan, että ne olisi dokumentoitu valmiiksi toiminnoksi.
+Kukin pääkäyttäjä on rajoitettu 16 merkintään ja 64 MiB:uun kanonista JPEG-dataa. Nämä
+rajat ovat riippumattomia globaalista 64 merkinnän / 256 MiB:n enimmäisrajasta: pääkäyttäjän kiintiön
+ylittyessä poistetaan ensin vain kyseisen pääkäyttäjän vähiten äskettäin käytettyjä merkintöjä, ennen kuin globaalia
+LRU-poistoa harkitaan. Vanhentuneet merkinnät poistetaan sekä pääkäyttäjäkohtaisesta että
+globaalista kirjanpidosta välimuistitoiminnan yhteydessä, kun taas peruutus ja validointivirhe eivät
+tallenna osittaista korvausta.
 
-Kuvat tekstitetään peräkkäin määritetyn Video-mallin mukaisesti. Tyhjä Video-ohitus perii Vision-asetuksen; jos molemmat ovat tyhjiä, Vision-automaattireititin valitsee tehokkaan näkökykyisen mallin. Onnistuneet kuvatekstit korvaavat alkuperäisen osan vakaalla `[Video description:` -etuliitteellä, joka myös merkitsee tekstin epäluotettavaksi mediasta johdetuksi havainnoksi ja kehottaa alavirran malleja olemaan noudattamatta mediasta löytyviä ohjeita. Kuva-tekstityksen välimuistin avaimet sisältävät JPEG-tavuja, kehotteen, aikaleiman ja tehokkaan mallin; vain onnistuneet kuvatekstit tallennetaan välimuistiin. Välimuistin merkinnät säilyttävät todellisen onnistuneen tuottajamallin, mukaan lukien varamallin; silta ilmoittaa `mixed`, kun eri kehykset on tuotettu eri malleilla. Välimuistiosuma käyttää uudelleen kyseistä tuottajan identiteettiä sen sijaan, että se nimitettäisiin uudelleen pyydetyksi reitityssuunnitelmaksi. Koko videon tulosvälimuisti on avainnettu jokaisen syötteen perusteella, joka muuttaa tulostetta — kehote, tehokas malli, näytteenottopolitiikka, kehysten määrä, semanttisen analyysin tila, normalisoidun tarkennusvihjeen SHA-256-sormenjälki, tarkennusikkuna, `transcript`, `audioTranscript` ja yhteystietolomakkeen lippu — joten minkä tahansa näiden ulottuvuuksien muuttaminen on välimuistihuti, ei koskaan vanhentunut uudelleenkäyttö. Visuaalisen dedup-politiikan versio, kynnysarvo ja rajattu ehdokaskehysten määrä ovat myös eksplisiittisiä tulosvälimuistin avaimessa ja metatiedoissa; politiikan muutos ei siksi voi käyttää uudelleen vanhentunutta koko videon kuvausta. Tulosvälimuistin v4-metatiedot säilyttävät tilan ja sormenjäljen, eivät koskaan raakaa käyttäjän tehtävää. Suojakaiteen metatiedot raportoivat sekä pyydetyt että tehokkaat analyysitilat; pyydetty `focused`-tila ilman käyttökelpoista käyttäjätekstiä raportoidaan tehokkaasti `full`.
+Välimuisti hylkää ei-kanonisen Base64:n, ylimääräisen täytteen, muun kuin JPEG-median, virheelliset tai
+katkaistut JPEG-kuvat sekä JPEG-kuvat, jotka tuottavat varoituksen rajatun koko kuvan `sharp`-
+dekoodauksen aikana. Jokainen hyväksytty kuva koodataan uudelleen kanoniseksi JPEG-kuvaksi, leveys ja korkeus
+johdetaan dekoodatuista tavuista kutsujan kenttiin luottamisen sijaan, ja kaikki loppuun liitetyt
+polyglottitavut hylätään niiden säilyttämisen sijaan. Vain rajattu kanoninen pakattu puskuri
+lasketaan kumpaankin kiintiöön. JSON-siirtoraja sisältää Base64-lisäkuorman 32 MiB:n
+dekoodatun syötteen enimmäisrajaa varten. Jokainen
+tallennettu johdos kirjaa validoidun JPEG-muodon/-resoluution, näytteenottokäytännön,
+johdosversion, luontiajan, palvelimen laskeman sisältötiivisteen ja hajautetun ylätason
+viitteen sekä luotetun kutsujan ylätason sisältötiivisteen. Peruutus tarkistetaan
+asynkronisten dekoodaus-/tiivistevaiheiden välillä ennen atomista välimuistiin tallennusta.
 
-Suojakaide poimii kaikki tuetut video-osat, mutta kuvaa enintään `modalityBridgeVideoMaxVideos`. Kohteelle, jonka on todistettu olevan `supportsVideo === false`, epäonnistuneet ja ylisuuret videot muuttuvat eksplisiittisiksi turvallisiksi tekstimerkeiksi, jotta raakaa videota ei säily. Kun ominaisuus on tuntematon, nämä osat pysyvät koskemattomina. Kohteet, joilla on `supportsVideo === true`, ohittavat sillan. Asiakkaan pyynnön keskeytyssignaali leviää latauksen, välittäjäjonon, aliprosessien ja kuvatekstikutsujen kautta; keskeytykset pysähtyvät videoiden välillä eivätkä koskaan epäonnistu avautumaan raakaan mediaan.
+Tämä toimituserä ei vielä yhdistä tuotantotuottajaa reittiin eikä tarjoa
+moniresoluutioista variantin valintaa. Läpinäkyvä Video Bridge -pyyntöpolku
+ei siksi aiheuta lisätyötä, ja tenanttiin sidotun pääkäyttäjän johtaminen sekä
+täysi FU-08-moniresoluutioelinkaari ovat edelleen eksplisiittisiä jatkotöitä sen sijaan,
+että ne olisi dokumentoitu valmiiksi toiminnallisuudeksi.
 
-Ajonaikaiset asetukset ovat DB-pohjaisia ja Zod-validoituja:
+Kehyksille luodaan kuvatekstit peräkkäin määritetyllä Video-mallilla. Tyhjä
+Video-ohitus perii Vision-asetuksen; jos molemmat ovat tyhjiä, Vision-
+automaattireititin valitsee käytettävän näkökykyisen mallin. Onnistuneet kuvatekstit
+korvaavat alkuperäisen osan vakaalla `[Video description:`-etuliitteellä, joka myös
+merkitsee tekstin epäluotetuksi mediasta johdetuksi havainnoksi ja ohjeistaa myöhempiä
+malleja olemaan noudattamatta mediasta löytyviä ohjeita. Kehysten kuvatekstien välimuistiavaimet
+sisältävät JPEG-tavut, kehotteen, aikaleiman ja käytettävän mallin; vain onnistuneet
+kuvatekstit tallennetaan välimuistiin. Välimuistimerkinnät säilyttävät todellisen onnistuneen tuottajamallin,
+myös varamallin; silta raportoi arvon `mixed`, kun eri kehykset
+on tuotettu eri malleilla. Välimuistiosuma käyttää kyseistä tuottajan identiteettiä uudelleen
+sen sijaan, että se nimettäisiin uudelleen pyydetyn reitityssuunnitelman mukaiseksi. Koko videon tulosvälimuisti
+avaintetaan jokaisella tulosta muuttavalla syötteellä — kehote, käytettävä
+malli, näytteenottokäytäntö, kehysten määrä, semanttisen analyysin tila, normalisoidun kohdistusvihjeen
+SHA-256-sormenjälki, kohdistusikkuna, `transcript`,
+`audioTranscript` ja kontaktikuvataulukon lippu — joten minkä tahansa näistä
+ulottuvuuksista muuttaminen aiheuttaa välimuistihudin eikä koskaan vanhentuneen tuloksen uudelleenkäyttöä. Visuaalisen duplikaattien poiston käytännön
+versio, kynnysarvo ja rajattu ehdokaskehysten määrä sisältyvät myös eksplisiittisesti
+tulosvälimuistin avaimeen ja metatietoihin; käytännön muutos ei siksi voi käyttää uudelleen vanhentunutta
+koko videon kuvausta. Tulosvälimuistin v4-metatiedot säilyttävät tilan ja
+sormenjäljen, eivät koskaan käyttäjän raakaa tehtävää. Suojakaiteiden metatiedot raportoivat sekä
+pyydetyn että käytetyn analyysitilan; pyydetty `focused`-tila ilman
+käyttökelpoista käyttäjätekstiä raportoidaan käytännössä tilana `full`.
 
-| Key                                 | Default     | Alue / toiminta                                                                                             |
-| ----------------------------------- | ----------- | ----------------------------------------------------------------------------------------------------------- |
-| `modalityBridgeVideoEnabled`        | `false`     | Valinnainen ajonaikainen, opt-in                                                                            |
-| `modalityBridgeVideoAnalysisMode`   | `"full"`    | `full` säilyttää yleiset kuvatekstit; `focused` käyttää rajattua, epäluotettavaa uusinta käyttäjäkontekstia |
-| `modalityBridgeVideoFrameCount`     | `8`         | 1–16                                                                                                        |
-| `modalityBridgeVideoSamplingPolicy` | `"uniform"` | `uniform`, `scene_aware` tai suhteellinen `segment_aware`; ilmaisimen vika palautuu `uniform`iin            |
-| `modalityBridgeVideoMaxVideos`      | `1`         | 1–4                                                                                                         |
-| `modalityBridgeVideoTimeout`        | `120000`    | 1000–120000 ms                                                                                              |
+Suojakaide poimii kaikki tuetut video-osat, mutta kuvailee enintään
+`modalityBridgeVideoMaxVideos` videota. Kohteelle, jonka on osoitettu täyttävän ehdon
+`supportsVideo === false`, epäonnistuneet ja rajan ylittävät videot muutetaan eksplisiittisiksi turvallisiksi
+tekstimerkinnöiksi, jotta raakaa videota ei säily. Kun kyvykkyyttä ei tunneta, kyseiset osat
+säilyttävät videosäiliönsä; mahdollinen varatranskriptio noudattaa yllä olevaa rajattua tekstiksi
+muunnosta. Kohteet, joilla `supportsVideo === true`, ohittavat sillan.
+Asiakaspyynnön keskeytyssignaali välittyy latauksen, välittäjäjonon,
+aliprosessien ja kuvatekstikutsujen läpi; keskeytykset pysäyttävät käsittelyn videoiden välillä eivätkä koskaan virhetilanteessa päästä
+raakaa mediaa läpi.
 
-Vanhat tallennetut videon aikakatkaisu-arvot yli 120 sekunnin rajataan välittäjän määräaikaan; uudet asetuskirjoitukset tämän rajan yli hylätään. `GET /api/modality-bridge/video/runtime` vaatii luotetun leimatun takaisinkytkentäpaikallisuuden ennen todennusta tai ajonaikaista tarkistusta, ja sen jälkeen hallintatodennuksen. Se palauttaa vain `available`, puhdistetut FFmpeg/ffprobe-versiot ja kiinteän syyn, kun ajonaikainen ympäristö ei ole käytettävissä. Sisäinen poimintapäätepiste ei ole julkinen lataus-API: jonon kyllästyminen palauttaa `503` plus `Retry-After`, soittajan katkaisu palauttaa `499`, ja kiinteä välittäjän määräaika palauttaa `504`. Muunnetut vastaukset lisäävät `video->text;model=<visionModel>;parts=<videos>` keskitettyyn `x-omniroute-modality-bridge`-otsakkeeseen poistamatta Vision- tai Audio-segmenttejä.
+Ajonaikaiset asetukset ovat tietokantataustaisia ja Zod-validoituja:
 
-### PII-maskaaja (`piiMasker.ts`)
+| Avain                               | Oletus      | Alue / toiminta                                                                                                    |
+| ----------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------ |
+| `modalityBridgeVideoEnabled`        | `false`     | Valinnainen suoritusympäristö, erikseen käyttöön otettava                                                          |
+| `modalityBridgeVideoAnalysisMode`   | `"full"`    | `full` säilyttää yleiset kuvatekstit; `focused` käyttää rajattua, epäluotettavaa viimeisimmän käyttäjän kontekstia |
+| `modalityBridgeVideoModel`          | `""`        | Perii Vision Bridgen mallin                                                                                        |
+| `modalityBridgeVideoFrameCount`     | `8`         | 1–16                                                                                                               |
+| `modalityBridgeVideoSamplingPolicy` | `"uniform"` | `uniform`, `scene_aware` tai suhteellinen `segment_aware`; tunnistimen virhe palauttaa käytännöksi `uniform`       |
+| `modalityBridgeVideoMaxVideos`      | `1`         | 1–4                                                                                                                |
+| `modalityBridgeVideoTimeout`        | `120000`    | 1000–120000 ms                                                                                                     |
 
-Käynnistyy **molemmissa** vaiheissa.
+Aiemmin tallennetut, yli 120 sekunnin videon aikakatkaisuarvot rajataan
+välittäjän määräaikaan; tämän rajan ylittävät uusien asetusten tallennukset hylätään.
+`GET /api/modality-bridge/video/runtime` edellyttää luotettavasti merkittyä loopback-
+paikallisuutta ennen todennusta tai suoritusympäristön tutkimista ja sen jälkeen hallinnan
+todennusta. Se palauttaa vain arvon `available`, puhdistetut FFmpeg/ffprobe-versiot ja kiinteän
+syyn, kun suoritusympäristö ei ole käytettävissä. Sisäinen poimintapäätepiste ei ole
+julkinen latausrajapinta: jonon ylikuormitus palauttaa `503` sekä `Retry-After`-otsakkeen, kutsujan
+yhteyden katkeaminen palauttaa `499` ja välittäjän kiinteän määräajan ylittyminen palauttaa `504`. Muunnetut vastaukset lisäävät
+arvon `video->text;model=<visionModel>;parts=<videos>` keskitettyyn
+`x-omniroute-modality-bridge`-otsakkeeseen poistamatta Vision- tai Audio-osuuksia.
 
-- **`preCall`** kloonaa hyötykuorman, käy läpi `system`, `messages`, `input` ja `prompt` (mukaan lukien pelkät merkkijono-kohteet) ja soveltaa `processPII()`-funktiota (tiedostosta `@/shared/utils/inputSanitizer`) merkkijono `content`/`text`-kenttiin. Kun `PII_REDACTION_ENABLED=true`, havaittu PII redaktoidaan lähtevästä hyötykuormasta. Tämä on riippumaton `INPUT_SANITIZER_MODE`-asetuksesta (joka ohjaa vain kehotteen injektiopolitiikkaa). Kun redaktointi on pois päältä, kutsu tallentaa havaintomäärät ilman sisällön uudelleenkirjoitusta.
-- **`postCall`** tekee syväkloonin vastauksesta, suorittaa `sanitizePIIResponse()`-funktion sekä Responses-API-muotoisen maskaajan (`maskResponsesOutput` — kattaa `output_text` ja `output[].content[].text`). Jos redaktointia tapahtuu, muokattu vastaus korvaa alkuperäisen.
+### PII-peittäjä (`piiMasker.ts`)
 
-Suojakaide ei koskaan estä; se vain annotoi (`meta.detections`, `meta.redacted`) tai kirjoittaa uudelleen.
+Suoritetaan **molemmissa** vaiheissa.
 
-### Kehotteen injektio (`promptInjection.ts`)
+- **`preCall`** kloonaa hyötykuorman, käy läpi kentät `system`, `messages`, `input` ja
+  `prompt` (mukaan lukien tavalliset merkkijonoalkiot) ja soveltaa `processPII()`-funktiota
+  (`@/shared/utils/inputSanitizer`) merkkijonomuotoisiin `content`/`text`-kenttiin. Kun
+  `PII_REDACTION_ENABLED=true`, havaittu PII peitetään lähtevässä
+  hyötykuormassa. Tämä on riippumaton asetuksesta `INPUT_SANITIZER_MODE` (joka hallitsee vain
+  kehotesyötteiden manipuloinnin käytäntöä). Kun peittäminen ei ole käytössä, kutsu tallentaa havaintojen
+  määrät kirjoittamatta sisältöä uudelleen.
+- **`postCall`** syväkloonaa vastauksen, suorittaa `sanitizePIIResponse()`-funktion sekä
+  Responses API -muodon peittäjän (`maskResponsesOutput` — kattaa kentät
+  `output_text` ja `output[].content[].text`). Jos peittämistä tapahtuu,
+  muokattu vastaus korvaa alkuperäisen.
 
-Havaitsee haitallisia rakenteita käyttäjän syöttämässä sisällössä ja panee täytäntöön määritetyn käytännön. Toimintaa ohjaavat ympäristömuuttujat ja konstruktorin asetukset:
+Suojakaide ei koskaan estä toimintaa; se vain lisää merkintöjä (`meta.detections`,
+`meta.redacted`) tai kirjoittaa sisällön uudelleen.
 
-| Asetus     | Ympäristömuuttuja                                                                                      | Oletus | Vaikutus                                                                                                                                                                                                |
-| ---------- | ------------------------------------------------------------------------------------------------------ | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Käytössä   | `INPUT_SANITIZER_ENABLED`                                                                              | `true` | Kun `false`, suojakaide ohittaa toiminnon.                                                                                                                                                              |
-| Tila       | `INJECTION_GUARD_MODE` / `INPUT_SANITIZER_MODE`                                                        | `warn` | Injektiokäytäntö: `block`, `warn` tai `log`. (`redact` hyväksytään taaksepäin yhteensopivuuden vuoksi, mutta se **ei** poista injektiotekstiä; PII-uudelleenkirjoitusta ohjaa `PII_REDACTION_ENABLED`.) |
-| Estokynnys | `blockThreshold` -asetus / `INPUT_SANITIZER_BLOCK_THRESHOLD` (alias `INJECTION_GUARD_BLOCK_THRESHOLD`) | `high` | Estämiseen vaadittava vähimmäisvakavuus. Keskivakavuus on oletuksena vain tarkkailutilassa.                                                                                                             |
+#### Tyyppikohtainen valinta, mukautetut mallit ja havaintolaskurit
 
-**Tilan etusija** (`getMode`): kutsujan `options.mode` →
-`INJECTION_GUARD_MODE` **tietokannan ominaisuuslipun ohitus** (Dashboard → Settings →
-Feature Flags) → `INJECTION_GUARD_MODE` ympäristömuuttuja → `INPUT_SANITIZER_MODE` ympäristömuuttuja →
-`warn`. Kojelaudan ohitus voittaa siis ympäristömuuttujat, joten ominaisuuslippujen käyttöliittymä
-ohjaa käynnissä olevaa suojaa reaaliaikaisesti (ei uudelleenkäynnistystä). Tietokannan luku on vikasietoinen:
-jos se epäonnistuu, suoja palautuu ympäristömuuttujiin perustuvaan toimintaan, ja jos ohitusta ei ole asetettu,
-toiminta on identtinen vain ympäristömuuttujiin perustuvan ratkaisun kanssa.
+**Koontinäyttö → Asetukset → Tietoturva → PII:n peittäminen** määrittää, _mitä_ peitetään. Se
+ei ota peittämistä käyttöön: sitä hallitsevat edelleen `PII_REDACTION_ENABLED` (pyyntö) ja
+`PII_RESPONSE_SANITIZATION` (vastaus + SSE), jotka molemmat ovat oletusarvoisesti poissa käytöstä.
+
+- **Tyyppikohtainen valinta** — sisäänrakennetut tunnisteet on lueteltu tiedostossa
+  `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). Määrittämätön arvo tarkoittaa kaikkia
+  tyyppejä (toimintatapa ennen tämän asetuksen lisäämistä). Pyyntömoottorin
+  `ssn_us`-malli vastaa tyyppiä `ssn`. Mallipohjat (Minimal, Standard, Financial,
+  Brazilian, USA, Full) täyttävät vain käyttöliittymän valintaruudut.
+- **Mukautetut mallit** — enintään 20 säännöllistä lauseketta tai jokerimerkkimallia (`*` = enintään 64
+  muuta kuin tyhjemerkkiä, `?` = yksi merkki). Osumat korvataan arvolla `[CUSTOM_REDACTED]`.
+  Jokainen malli käsitellään `compilePiiCustomPattern()`-funktiolla
+  (`src/shared/utils/piiCustomPatterns.ts`): enintään 500 merkkiä, lipuista sallitaan vain
+  `g i m s u`, mallin on käännyttävä, läpäistävä `safe-regex`-tarkistus (katastrofaalinen
+  takaisinkelaus), eikä se saa vastata tyhjää merkkijonoa tai peittämisen paikkamerkkiä.
+  Epäonnistunut malli hylätään tallennettaessa ja testattaessa, ja epäonnistunut tallennettu rivi
+  ohitetaan suorituksen aikana sen sijaan, että se käännettäisiin. Mukautetut mallit suoritetaan vain,
+  kun peittäminen on käytössä.
+- **Havaintolaskurit** — tyyppikohtaiset määrät (eivät koskaan löytyneitä arvoja), joita säilytetään
+  muistissa ja jotka nollataan uudelleenkäynnistyksen yhteydessä (`src/lib/pii/piiDetectionStats.ts`). Ne kasvavat vain,
+  kun peittäminen on käytössä.
+
+Asetukset sijaitsevat `key_value`-taulussa (nimiavaruus `pii_settings`,
+`src/lib/db/piiSettings.ts`), ja ne luetaan 1 s:n välimuistin kautta. API:
+
+| Menetelmä | Polku                    | Tarkoitus                                                              |
+| --------- | ------------------------ | ---------------------------------------------------------------------- |
+| `GET`     | `/api/settings/pii`      | Lippujen tila, `enabledTypes`, `customPatterns`, havaintolaskurit      |
+| `PUT`     | `/api/settings/pii`      | Korvaa `enabledTypes`- (`null` = kaikki) ja/tai `customPatterns`-arvot |
+| `POST`    | `/api/settings/pii/test` | Testaa yksi malli tallentamatta sitä enintään 8 KB:n näytettä vasten   |
+
+Kaikki kolme edellyttävät hallinnan todennusta ja validoivat rungon Zodilla
+(`src/shared/validation/schemas/piiSettings.ts`).
+
+### Kehotesyötteiden manipulointi (`promptInjection.ts`)
+
+Tunnistaa käyttäjän toimittaman sisällön vihamieliset rakenteet ja pakottaa
+määritetyn käytännön käyttöön. Toimintaa ohjaavat ympäristömuuttujat ja konstruktorin
+valinnat:
+
+| Asetus     | Ympäristömuuttuja                                                                                     | Oletus | Vaikutus                                                                                                                                                                                                                        |
+| ---------- | ----------------------------------------------------------------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Käytössä   | `INPUT_SANITIZER_ENABLED`                                                                             | `true` | Kun arvo on `false`, suojakaide ohitetaan.                                                                                                                                                                                      |
+| Tila       | `INJECTION_GUARD_MODE` / `INPUT_SANITIZER_MODE`                                                       | `warn` | Injektiokäytäntö: `block`, `warn` tai `log`. (`redact` hyväksytään taaksepäin yhteensopivuuden vuoksi, mutta se **ei** poista injektiotekstiä; pyynnön PII-uudelleenkirjoitusta hallitaan asetuksella `PII_REDACTION_ENABLED`.) |
+| Estokynnys | `blockThreshold`-asetus / `INPUT_SANITIZER_BLOCK_THRESHOLD` (alias `INJECTION_GUARD_BLOCK_THRESHOLD`) | `high` | Estämiseen vaadittava vähimmäisvakavuus. Oletusarvoisesti keskitasoa vain tarkkaillaan.                                                                                                                                         |
+
+**Tilan ensisijaisuusjärjestys** (`getMode`): kutsujan `options.mode` →
+`INJECTION_GUARD_MODE`-arvon **tietokannan ominaisuuslipun ohitus** (Hallintapaneeli → Asetukset →
+Ominaisuusliput) → `INJECTION_GUARD_MODE`-ympäristömuuttuja → `INPUT_SANITIZER_MODE`-ympäristömuuttuja →
+`warn`. Hallintapaneelin ohitus on siten ensisijainen ympäristömuuttujiin nähden, joten Ominaisuusliput-käyttöliittymä
+ohjaa käynnissä olevaa suojakaidetta reaaliaikaisesti (uudelleenkäynnistystä ei tarvita). Tietokantaluku on vikasietoinen:
+jos siinä tapahtuu virhe, suojakaide palaa ympäristömuuttujiin perustuvaan toimintaan, ja jos
+ohitusta ei ole asetettu, toiminta vastaa täysin pelkkiin ympäristömuuttujiin perustuvaa ratkaisua.
 
 Tunnistuslähteet:
 
-1.  `sanitizeRequest()` osoitteesta `@/shared/utils/inputSanitizer` (jaettu tunnistinsarja, jota käytetään muualla putkessa).
-2.  Sisäänrakennetut `DEFAULT_GUARD_PATTERNS` (tällä hetkellä `system_override_inline` ja
-    `markdown_system_block`, molemmat `high` vakavuusasteella).
-3.  Valinnaiset `customPatterns`, jotka välitetään konstruktorin asetusten kautta (merkkijonot, regex tai
-    `{ name, pattern, severity }` -tietueet).
+1. `sanitizeRequest()` moduulista `@/shared/utils/inputSanitizer` (muuallakin
+   käsittelyketjussa käytetty yhteinen tunnistinjoukko).
+2. Sisäänrakennetut `DEFAULT_GUARD_PATTERNS`-mallit (tällä hetkellä `system_override_inline` ja
+   `markdown_system_block`, molempien vakavuus `high`).
+3. Valinnaiset konstruktoriasetusten kautta välitetyt `customPatterns`-mallit (merkkijonoja, säännöllisiä lausekkeita
+   tai `{ name, pattern, severity }`-tietueita).
 
-Kun `mode === "block"` **ja** vähintään yksi tunnistus täyttää vakavuuskynnyksen,
-`preCall` palauttaa `{ block: true, message: "Request rejected: suspicious content detected" }`.
-`warn`/`log`-tiloissa suojakaide kirjaa tapahtuman, mutta sallii kutsun. Jaettu apufunktio
-`evaluatePromptInjection()` on myös viety ulos kutsujille, jotka tarvitsevat kehotteiden arviointia
-rekisterin kautta kulkematta.
+Kun `mode === "block"` **ja** vähintään yksi tunnistus saavuttaa vakavuus-
+kynnyksen, `preCall` palauttaa arvon `{ block: true, message: "Request rejected:
+suspicious content detected" }`. `warn`-/`log`-tiloissa suojakaide kirjaa tapahtuman mutta
+sallii kutsun. Myös yhteinen apufunktio `evaluatePromptInjection()` viedään
+kutsujille, joiden on arvioitava kehotteita käyttämättä rekisteriä.
 
-**Skannausraja (v3.8.20):** tunnistin tarkastaa vain yhdistetyn kehotetekstin **ensimmäiset 16 KB**
-— `MAX_INJECTION_SCAN_BYTES = 16 * 1024` (16 384 tavua) tiedostossa
-`src/shared/utils/inputSanitizer.ts`. Sekä `detectInjection()` että `evaluatePromptInjection()`
-käyttävät `slice(0, MAX_INJECTION_SCAN_BYTES)` ennen kuviosilmukan suorittamista.
-Injektiokäskyt sijaitsevat syötteen yläosassa, joten tämä rajoittaa regexin suorittimen/roskankeruun
-kuormitusta satojen kilotavujen kokoisilla hyötykuormilla heikentämättä tunnistusta (vrt. #3932, #4041).
+**Tarkistuksen raja (v3.8.20):** tunnistin tarkistaa vain yhdistetyn
+kehotetekstin **ensimmäiset 16 KB** — `MAX_INJECTION_SCAN_BYTES = 16 * 1024` (16 384 tavua) tiedostossa
+`src/shared/utils/inputSanitizer.ts`. Sekä `detectInjection()` että
+`evaluatePromptInjection()` suorittavat `slice(0, MAX_INJECTION_SCAN_BYTES)`-kutsun ennen
+mallisilmukan suorittamista. Injektio-ohjeet sijaitsevat syötteen alkupäässä, joten tämä
+rajoittaa säännöllisten lausekkeiden suoritin- ja roskienkeräyskuormaa satojen kilotavujen hyötykuormissa heikentämättä tunnistusta (vrt.
+#3932, #4041).
 
 ### Tunnistetietojen peittäjä (`credentialMasker.ts`)
 
-Käynnistyy **molemmissa** vaiheissa, viimeisenä oletusketjussa (prioriteetti `95`). Poistaa
-tunnetut API-avain- / salaisen tunnuksen kuviot lähtevästä hyötykuormasta (viestin sisältö,
-työkalukutsun argumentit, työkalun tulokset) **ja** palveluntarjoajan vastauksesta, jotta
-kehotteeseen liitetty tunnistetieto (tai työkalun tuloksena takaisin kaikuva) ei vuoda
-ylävirran palveluntarjoajalle tai takaisin asiakkaalle.
+Suoritetaan **molemmissa** vaiheissa, oletusketjun viimeisenä (prioriteetti `95`). Peittää
+tunnetut API-avainten ja salaisten tunnusten mallit lähtevästä hyötykuormasta (viestien
+sisältö, työkalukutsujen argumentit ja työkalujen tulokset) **sekä** palveluntarjoajan vastauksesta, jotta
+kehotteeseen liitetty tunnistetieto (tai työkalun tuloksessa toistettu tunnistetieto) ei vuoda
+palveluntarjoajalle tai takaisin asiakkaalle.
 
-- **Vain valinnainen**, sama käytäntö kuin PII-sensuroinnissa (Hard Rule #20:n vieressä):
-  poissa käytöstä, ellei `settings.credentialRedactionEnabled === true` **tai**
-  `CREDENTIAL_REDACTION_ENABLED=true`. Kun se on pois päältä, suojakaide ei tee mitään –
-  se ei koskaan estä eikä koskaan uudelleenkirjoita.
+- **Vain erikseen käyttöön otettava**, sama käytäntö kuin PII-peittämisessä (lähellä kovaa sääntöä #20):
+  poistettu käytöstä, ellei `settings.credentialRedactionEnabled === true` **tai**
+  `CREDENTIAL_REDACTION_ENABLED=true`. Kun se on pois käytöstä, suojakaide ei tee mitään —
+  se ei koskaan estä eikä kirjoita sisältöä uudelleen.
 - `redactCredentials()` käy läpi koko hyötykuorma-/vastauspuun (`walkValue()`,
-  prototyyppisaasteelta turvallinen, sykliturvallinen `WeakSet`:in kautta) ja korvaa
-  vastaavuudet `[REDACTED:<type>]` -paikkamerkillä, kloonaten vain ne haarat, jotka
-  todella muuttuivat.
+  suojattu prototyyppisaastutukselta, suojattu sykleiltä `WeakSet`-joukon avulla) ja korvaa osumat
+  `[REDACTED:<type>]`-paikkamerkillä kloonaten vain ne haarat, jotka todella
+  muuttuivat.
 - `CREDENTIAL_PATTERNS` kattaa LLM-palveluntarjoajien avaimet (OpenAI, OpenAI-proj,
-  Anthropic, Google, Hugging Face, Replicate), VCS/SaaS-tunnukset (GitHub, Slack, Linear,
-  Notion, npm, Postman, Discord), maksuavaimet (Stripe, Square), pilviavaimet (AWS access key,
-  Twilio, SendGrid, Mailgun), yksityiset avaimet / JWT:t, tunnistetietoja sisältävät
-  yhteysmerkkijonot (`mongodb://user:pass@...`, jne.) ja yleisen
-  `Authorization`/`x-api-key`/`api-key`/`apikey` -otsikkoarvokuvion. Otsikkomuotoiset avaimet
-  (`authorization`, `x-api-key`, `api-key`, `apikey`) sensuroidaan rakenteellisesti (vain arvo,
-  skeeman etuliite kuten `Bearer `/`Basic ` säilytetään) yleisen tekstiregexin sijaan.
-- Suojakaide ei koskaan estä; se vain uudelleenkirjoittaa (`modifiedPayload` /
-  `modifiedResponse`) ja annotoi (`meta.credentialsRedacted`, `meta.count`).
+  Anthropic, Google, Hugging Face, Replicate), VCS-/SaaS-tunnukset (GitHub, Slack,
+  Linear, Notion, npm, Postman, Discord), maksuavaimet (Stripe, Square), pilvipalveluiden
+  avaimet (AWS-käyttöavain, Twilio, SendGrid, Mailgun), yksityiset avaimet / JWT:t,
+  tunnistetietoja sisältävät yhteysmerkkijonot (`mongodb://user:pass@...` jne.) sekä
+  yleisen `Authorization`-/`x-api-key`-/`api-key`-/`apikey`-otsakearvon
+  mallin. Otsakkeen muotoiset avaimet (`authorization`, `x-api-key`, `api-key`,
+  `apikey`) peitetään rakenteellisesti (vain arvo; skeeman etuliite, kuten
+  `Bearer `/`Basic `, säilytetään) yleisen tekstin säännöllisen lausekkeen sijaan.
+- Suojakaide ei koskaan estä; se vain kirjoittaa uudelleen (`modifiedPayload` /
+  `modifiedResponse`) ja lisää metatiedot (`meta.credentialsRedacted`, `meta.count`).
 
-Regressiotesti: `tests/unit/credential-masker-guardrail.test.ts`.
+Regressiosuoja: `tests/unit/credential-masker-guardrail.test.ts`.
 
 ## Perussopimus (`base.ts`)
 

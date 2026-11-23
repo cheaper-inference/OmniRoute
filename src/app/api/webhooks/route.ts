@@ -5,6 +5,7 @@
  */
 
 import { z } from "zod";
+import { parseIntegerQueryParam } from "@/lib/api/queryIntegerParam";
 import { NextResponse } from "next/server";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
 import { getWebhooks, createWebhook } from "@/lib/db/webhooks";
@@ -47,9 +48,16 @@ export async function GET(request: Request) {
 
   try {
     const { searchParams } = new URL(request.url);
-    const limit = searchParams.has("limit") ? Number(searchParams.get("limit")) : undefined;
-    const offset = searchParams.has("offset") ? Number(searchParams.get("offset")) : 0;
-    const result = getWebhooks(limit !== undefined ? { limit, offset } : undefined);
+    // No `limit` keeps the unpaginated list; a present one is the page size.
+    const parsedLimit = parseIntegerQueryParam(searchParams, "limit", 0);
+    if (parsedLimit.ok === false) return parsedLimit.response;
+    const parsedOffset = parseIntegerQueryParam(searchParams, "offset", 0);
+    if (parsedOffset.ok === false) return parsedOffset.response;
+    const result = getWebhooks(
+      searchParams.get("limit")
+        ? { limit: parsedLimit.value, offset: parsedOffset.value }
+        : undefined
+    );
     // Mask secrets in listing
     const masked = result.webhooks.map((w) => ({
       ...w,

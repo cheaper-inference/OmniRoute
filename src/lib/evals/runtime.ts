@@ -1,6 +1,7 @@
 import { POST as postChatCompletion } from "@/app/api/v1/chat/completions/route";
 import type { PersistedEvalRun, EvalTargetType } from "@/lib/db/evals";
 import { saveEvalRun } from "@/lib/db/evals";
+import { resolveSelfLoopBearer } from "@/shared/middleware/chatAdmissionIdentity";
 import { getApiKeyById } from "@/lib/db/apiKeys";
 import { getCombos } from "@/lib/db/combos";
 import { getSuite, listSuites, runSuite } from "./evalRunner";
@@ -217,9 +218,7 @@ export function buildEvalCaseRequest(
     "x-omniroute-no-memory": "true",
   });
 
-  if (apiKey) {
-    headers.set("Authorization", `Bearer ${apiKey}`);
-  }
+  headers.set("Authorization", `Bearer ${apiKey || resolveSelfLoopBearer()}`);
 
   return new Request("http://localhost/api/v1/chat/completions", {
     method: "POST",

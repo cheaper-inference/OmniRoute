@@ -39,11 +39,11 @@ So sánh tính năng khách quan với các bộ định tuyến AI mã nguồn 
 
 ## Khi nào nên chọn OmniRoute
 
-- Bạn tự lưu trữ và muốn **phạm vi hỗ trợ nhà cung cấp tối đa** (329 nhà cung cấp, 155 mục danh mục miễn phí/không cần xác thực)
-- Bạn cần **máy chủ MCP tích hợp** (các công cụ LLM, bộ nhớ và kỹ năng được cung cấp dưới dạng công cụ)
+- Bạn tự lưu trữ và muốn **độ phủ nhà cung cấp tối đa** (374 nhà cung cấp, 155 mục miễn phí/không cần xác thực trong danh mục)
+- Bạn cần một **máy chủ MCP tích hợp sẵn** (các công cụ LLM, bộ nhớ, kỹ năng được cung cấp dưới dạng công cụ)
 - Bạn cần **giao thức A2A** cho các quy trình làm việc giữa các tác nhân
-- Bạn muốn **ẩn dấu vân tay** (JA3/JA4) để tránh bị CAPTCHA thượng nguồn phát hiện
-- Bạn cần **các tính năng dành cho doanh nghiệp** (rào chắn bảo vệ, đánh giá, dấu vết kiểm toán) mà không phải trả phí SaaS
+- Bạn muốn **ẩn dấu vân tay** (JA3/JA4) để tránh bị CAPTCHA từ các dịch vụ thượng nguồn phát hiện
+- Bạn cần **các tính năng dành cho doanh nghiệp** (rào chắn, đánh giá, nhật ký kiểm tra) mà không phải trả phí SaaS
 
 ## Khi nào nên chọn LiteLLM
 

@@ -75,40 +75,54 @@ La variable de entorno `EXPOSE_CC_DISCOVERY_ALIASES` activa forzosamente el nive
 ## Bloque de incorporación en el panel
 
 La tarjeta de la herramienta Claude (**Panel → Código CLI**) muestra el fragmento exacto de `settings.json`
-para esta instancia, junto al botón de información del alias de descubrimiento, con un botón para copiar:
+para esta instancia, junto al botón de información del alias de descubrimiento y con un botón para copiar:
 
 ```jsonc
 {
   "env": {
-    "ANTHROPIC_BASE_URL": "http://<your OmniRoute>:20128",
-    "ANTHROPIC_AUTH_TOKEN": "<your OmniRoute API key>",
+    "ANTHROPIC_BASE_URL": "http://<tu OmniRoute>:20128",
+    "ANTHROPIC_AUTH_TOKEN": "<tu clave de API de OmniRoute>",
     "CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY": "1",
   },
 }
 ```
 
-La URL base es la resuelta por la tarjeta (incluida cualquier sobrescritura personalizada que hayas introducido), ya
-normalizada: sin el sufijo `/v1` ni una barra final. **La clave nunca se muestra**: el bloque incluye un
+La URL base es la resuelta por la tarjeta (incluida cualquier anulación personalizada que hayas introducido) y ya está
+normalizada: sin el sufijo `/v1` ni una barra diagonal final. **La clave nunca se muestra**: el bloque incluye un
 marcador de posición, por lo que ni una captura de pantalla ni un fragmento pegado pueden filtrarla. Sustitúyelo por tu clave.
 
-Añade `CLAUDE_CODE_AUTO_COMPACT_WINDOW` bajo el mismo bloque `env` para cualquier modelo cuya ventana
-de contexto real no sea de 200K; Claude Code presupone 200K para cada id que no reconoce, por lo que,
+Añade `CLAUDE_CODE_AUTO_COMPACT_WINDOW` en el mismo bloque `env` para cualquier modelo cuya ventana
+de contexto real no sea de 200K. Claude Code presupone 200K para todos los identificadores que no reconoce, por lo que,
 de lo contrario, la compactación automática se activa en el momento equivocado (consulta la advertencia de la sección anterior).
-El generador de fragmentos también acepta ese valor, por lo que un invocador que conozca la ventana del modelo de destino
+El generador de fragmentos también acepta ese valor, de modo que un invocador que conozca la ventana del modelo de destino
 puede incluirlo directamente.
 
 Fuente: `src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet` (generador
 puro, con pruebas unitarias), mostrado por `ClaudeGatewayOnboardingBlock`.
 
+### Fijar una cuenta (opcional)
+
+Para enviar todas las solicitudes de Claude Code a través de una cuenta específica del proveedor, añade el
+encabezado `x-omniroute-connection` mediante `ANTHROPIC_CUSTOM_HEADERS` en el mismo bloque `env`:
+
+```jsonc
+"ANTHROPIC_CUSTOM_HEADERS": "x-omniroute-connection: <connection id>"
+```
+
+Copia el identificador del chip `xxxxxxxx…` de la fila de conexión en la página del proveedor. La fijación solo
+se aplica a identificadores de un único modelo (`provider/model`), no a combinaciones. Consulta
+[Fijación de cuenta por solicitud](../reference/API_REFERENCE.md#account-pinning-per-request) para conocer el
+comportamiento alternativo exacto.
+
 ---
 
 ## Perfiles (`CLAUDE_CONFIG_DIR`)
 
-Claude Code **no tiene archivos de perfil nativos** (a diferencia de `~/.codex/<name>.config.toml`
-de Codex). El mecanismo habitual es `CLAUDE_CONFIG_DIR`: un directorio de configuración independiente por
-perfil, cada uno con sus propios `settings.json`, credenciales, historial y caché.
+Claude Code **no tiene archivos de perfil nativos** (a diferencia de `~/.codex/<name>.config.toml` de Codex).
+El mecanismo idiomático es `CLAUDE_CONFIG_DIR`: un directorio de configuración independiente por
+perfil, cada uno con su propio `settings.json`, credenciales, historial y caché.
 
-`omniroute setup-claude` obtiene el catálogo activo de `/v1/models` y escribe un
+`omniroute setup-claude` obtiene el catálogo `/v1/models` activo y escribe un
 perfil por modelo en `~/.claude/profiles/<name>/settings.json`, reutilizando los
 **mismos nombres que `setup-codex`** (`glm52`, `kimi-k27`, `deepseek-pro`, …):
 
@@ -127,18 +141,17 @@ perfil por modelo en `~/.claude/profiles/<name>/settings.json`, reutilizando los
 }
 ```
 
-> **El token de autenticación nunca se escribe en el perfil.** Inícialo con
+> **El token de autenticación nunca se escribe en el perfil.** Inicia con
 > `omniroute launch --profile <name>` (inyecta `ANTHROPIC_AUTH_TOKEN` desde el
-> contexto activo), o exporta tú mismo `ANTHROPIC_AUTH_TOKEN` y ejecuta
+> contexto activo), o exporta `ANTHROPIC_AUTH_TOKEN` tú mismo y ejecuta
 > `CLAUDE_CONFIG_DIR=~/.claude/profiles/<name> claude`.
 
-**Sincronización automática tras el descubrimiento de modelos (opcional).** OmniRoute puede regenerar automáticamente estos mismos
-archivos `~/.claude/profiles/<name>/settings.json` cada vez que una sincronización de modelos del proveedor
-cambie el catálogo activo, para que los modelos nuevos o renombrados obtengan perfiles sin tener que volver a ejecutar el
-comando. Está **desactivada de forma predeterminada**: actívala desde el **panel de Código CLI** («Sincronización automática de
-perfiles CLI» → Claude Code), o establece `OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES=true` (también respeta
+**Sincronización automática después del descubrimiento de modelos (opcional).** OmniRoute puede regenerar automáticamente estos mismos
+archivos `~/.claude/profiles/<name>/settings.json` cada vez que la sincronización de modelos de un proveedor
+cambie el catálogo activo, de modo que los modelos nuevos o renombrados obtengan perfiles sin tener que volver a ejecutar el
+comando. Está **desactivada de forma predeterminada**: actívala desde el **panel de CLI Code** ("Sincronización automática de perfiles de CLI" → Claude Code), o establece `OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES=true` (también respeta
 `CLI_ALLOW_CONFIG_WRITES`, activado de forma predeterminada). Cuando está habilitada, solo escribe archivos de perfil; nunca
-cambia tu configuración activa o predeterminada de Claude, la autenticación ni `~/.claude/settings.json`.
+cambia la configuración activa o predeterminada de Claude, la autenticación ni `~/.claude/settings.json`.
 
 ### Generación y uso de perfiles
 
@@ -146,11 +159,15 @@ cambia tu configuración activa o predeterminada de Claude, la autenticación ni
 # OmniRoute local
 omniroute setup-claude
 
-# VPS remoto (incorpora la URL del VPS en cada perfil)
+# VPS remoto (incluye la URL del VPS en cada perfil)
 omniroute setup-claude --remote http://192.168.0.15:20128 --api-key oma_live_xxx
 
 # Solo algunos proveedores
 omniroute setup-claude --only glm,kimi
+
+# Escribir también perfiles para proveedores de CLI locales (zcode, auggie, devin-cli-agentic,
+# codex-app-server) no detectados en este host (omitidos de forma predeterminada para un destino local)
+omniroute setup-claude --include-local
 
 # Vista previa sin escribir
 omniroute setup-claude --dry-run

@@ -136,36 +136,37 @@ omniroute providers validate
 
 ---
 
-## Διαμόρφωση εργαλείων CLI
+## Ρύθμιση εργαλείων CLI
 
-### 1) Σύνδεση παρόχων και δημιουργία κλειδιού API
+### 1) Συνδέστε παρόχους και δημιουργήστε κλειδί API
 
-1. Ανοίξτε το Dashboard → `Providers` και συνδέστε τουλάχιστον έναν πάροχο (OAuth ή κλειδί API).
-2. Ανοίξτε το Dashboard → `Endpoints` και δημιουργήστε ένα κλειδί API.
-3. (Προαιρετικά) Ανοίξτε το Dashboard → `Combos` και ορίστε την αλυσίδα εφεδρείας σας.
+1. Ανοίξτε τον Πίνακα ελέγχου → `Πάροχοι` και συνδέστε τουλάχιστον έναν πάροχο (OAuth ή κλειδί API).
+2. Ανοίξτε τον Πίνακα ελέγχου → `Τελικά σημεία` και δημιουργήστε ένα κλειδί API.
+3. (Προαιρετικά) Ανοίξτε τον Πίνακα ελέγχου → `Συνδυασμοί` και ορίστε την αλυσίδα εφεδρείας σας.
 
-### 2) Ρύθμιση του εργαλείου προγραμματισμού σας
-
-```txt
-Base URL: http://localhost:20128/v1
-API Key:  [copy from Endpoint page]
-Model:    if/qwen3.8-max-preview (or any provider/model prefix)
-```
-
-Εάν το πρόγραμμα επεξεργασίας σας δεν μπορεί να στείλει `Authorization: Bearer ...`, χρησιμοποιήστε αντ’ αυτού τη βάση συμβατότητας με ενσωματωμένο διακριτικό:
+### 2) Κατευθύνετε το εργαλείο προγραμματισμού σας
 
 ```txt
-Base URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/
-Models URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/models
-Chat URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/chat/completions
-Ollama Tags URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
+Βασικό URL: http://localhost:20128/v1
+Κλειδί API: [αντιγράψτε από τη σελίδα Τελικού σημείου]
+Μοντέλο:     if/qwen3.8-max-preview (ή οποιοδήποτε πρόθεμα παρόχου/μοντέλου)
 ```
 
-Λειτουργεί με Claude Code, Codex CLI, Cursor, Cline, OpenClaw, OpenCode και SDK συμβατά με το OpenAI.
+Αν το πρόγραμμα επεξεργασίας σας δεν μπορεί να στείλει `Authorization: Bearer ...`, χρησιμοποιήστε αντ’ αυτού τη βασική διεύθυνση συμβατότητας με ενσωματωμένο διακριτικό:
 
-#### Αυτόματη διαμόρφωση με `setup-*`
+```txt
+Βασικό URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/
+URL μοντέλων: http://localhost:20128/api/v1/vscode/YOUR_KEY/models
+URL συνομιλίας: http://localhost:20128/api/v1/vscode/YOUR_KEY/chat/completions
+URL ετικετών Ollama: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
+```
 
-Αντί να επικολλήσετε χειροκίνητα το βασικό URL και το κλειδί, επιτρέψτε στο OmniRoute να δημιουργήσει τη διαμόρφωση κάθε εργαλείου από τον ενεργό κατάλογο μοντέλων. Μία εντολή ανά εργαλείο:
+Λειτουργεί με τα Claude Code, Codex CLI, Cursor, Cline, OpenClaw, OpenCode και SDK συμβατά με το OpenAI.
+
+#### Αυτόματη ρύθμιση με `setup-*`
+
+Αντί να επικολλήσετε χειροκίνητα το βασικό URL και το κλειδί, αφήστε το OmniRoute να γράψει τη
+ρύθμιση κάθε εργαλείου από τον ενεργό κατάλογο μοντέλων. Μία εντολή ανά εργαλείο:
 
 ```bash
 omniroute setup-codex        # Προφίλ ~/.codex/<name>.config.toml
@@ -177,16 +178,23 @@ omniroute setup-continue     # ~/.continue/config.yaml (Continue / cn)
 omniroute setup-cursor       # Εμφανίζει τα βήματα εντός της εφαρμογής Cursor
 omniroute setup-roo          # Εισαγωγή Roo Code + δείκτης autoImport
 omniroute setup-crush        # ~/.config/crush/crush.json
+omniroute setup-zed          # ~/.config/zed/settings.json (openai_compatible)
 omniroute setup-goose        # ~/.config/goose/config.yaml
 omniroute setup-aider        # ~/.aider.conf.yml
 omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 ```
 
-Καθεμία δέχεται `--remote <url> --api-key <key>` για τη διαμόρφωση ενός τοπικού εργαλείου ώστε να χρησιμοποιεί ένα **απομακρυσμένο** OmniRoute, καθώς και `--dry-run` για προεπισκόπηση. Για να εκκινήσετε ένα CLI με εισαγωγή του κατάλληλου περιβάλλοντος χωρίς να εγγραφεί καμία διαμόρφωση, χρησιμοποιήστε το γενικό πρόγραμμα εκκίνησης `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini). Τα παλαιότερα προγράμματα εκκίνησης ανά εργαλείο `omniroute launch` (Claude Code) και `omniroute launch-codex` (Codex) παραμένουν διαθέσιμα.
+Καθεμία δέχεται `--remote <url> --api-key <key>` για τη ρύθμιση ενός τοπικού εργαλείου ώστε να χρησιμοποιεί ένα
+**απομακρυσμένο** OmniRoute, καθώς και `--dry-run` για προεπισκόπηση. Για να εκκινήσετε ένα CLI με το σωστό
+περιβάλλον ενσωματωμένο και χωρίς να γραφτεί καμία ρύθμιση, χρησιμοποιήστε το γενικό πρόγραμμα εκκίνησης
+`omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini)·
+τα παλαιού τύπου προγράμματα εκκίνησης ανά εργαλείο `omniroute launch` (Claude Code) και
+`omniroute launch-codex` (Codex) παραμένουν διαθέσιμα.
 
-Για τον πλήρη πίνακα (τι εγγράφει κάθε εντολή, όλες τις σημαίες, τοπική έναντι απομακρυσμένης λειτουργίας, συμβάσεις `/v1` για τα βασικά URL), ανατρέξτε στις **[Ενσωματώσεις CLI](./CLI-INTEGRATIONS.md)**.
+Για τον πλήρη πίνακα (τι γράφει κάθε εντολή, κάθε σημαία, τοπική έναντι απομακρυσμένης λειτουργίας, συμβάσεις βασικού URL
+`/v1`), ανατρέξτε στις **[Ενσωματώσεις CLI](./CLI-INTEGRATIONS.md)**.
 
-Για λεπτομερή διαμόρφωση ανά εργαλείο (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot και άλλα), ανατρέξτε στον ειδικό **[Οδηγό εργαλείων CLI](../reference/CLI-TOOLS.md)**.
+Για λεπτομερείς ρυθμίσεις ανά εργαλείο (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot και άλλα), ανατρέξτε στον ειδικό **[Οδηγό εργαλείων CLI](../reference/CLI-TOOLS.md)**.
 
 ---
 
@@ -317,7 +325,7 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ## Πρότυπο για Void Linux (xbps-src)
 
-Οι χρήστες του Void Linux μπορούν να δημιουργήσουν ένα εγγενές πακέτο χρησιμοποιώντας το `xbps-src`. Αποθηκεύστε αυτό το μπλοκ ως `srcpkgs/omniroute/template`:
+Για χρήστες του Void Linux, μπορείτε να δημιουργήσετε ένα εγγενές πακέτο χρησιμοποιώντας το `xbps-src`. Αποθηκεύστε αυτό το μπλοκ ως `srcpkgs/omniroute/template`:
 
 ```bash
 # Αρχείο προτύπου για το 'omniroute'

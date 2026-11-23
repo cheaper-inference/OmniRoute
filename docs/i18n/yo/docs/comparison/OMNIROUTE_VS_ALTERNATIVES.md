@@ -37,13 +37,13 @@
 | **Àtìlẹ́yìn tunnel (Cloudflared, Tailscale, Ngrok)**     |                      ✅                      |      ❌      |        n/a        |        n/a        |
 | **Ìwé-àṣẹ**                                             |                     MIT                      |     MIT      | ohun-ìní aládàáni | ohun-ìní aládàáni |
 
-## Ìgbà tí ó yẹ kí o yan OmniRoute
+## Ìgbà tí o yẹ kí o yan OmniRoute
 
-- O ń gbàlejò fúnra rẹ, o sì fẹ́ **àgbègbè àtìlẹ́yìn olùpèsè tó pọ̀ jù** (olùpèsè 329, àkọọ́lẹ̀ kátálọ́ọ̀gù ọ̀fẹ́/tí kò nílò ìfàṣẹsí 155)
-- O nílò **sẹ́fà MCP inú-ẹ̀rọ** (àwọn irinṣẹ́ LLM, ìrántí, àti ọgbọ́n tí a ṣí sílẹ̀ gẹ́gẹ́ bí irinṣẹ́)
-- O nílò **ìlànà A2A** fún àwọn ìṣàn-iṣẹ́ láti aṣojú kan sí aṣojú mìíràn
-- O fẹ́ **ìfarapamọ́ ìtẹ̀wọ́-ọ́** (JA3/JA4) láti yẹra fún ìṣàwárí láti ọ̀dọ̀ àwọn CAPTCHA olùpèsè òkè
-- O nílò **àwọn ẹ̀ya ara ilé-iṣẹ́ ńlá** (àwọn ìdènà ààbò, àwọn eval, àkọsílẹ̀ àyẹ̀wò) láìsí owó SaaS
+- O ń gbàlejò rẹ fúnra rẹ, o sì fẹ́ **àtìlẹ́yìn olùpèsè tó pọ̀ jù lọ** (olùpèsè 374, àkọsílẹ̀ katalọ́ọ̀gù ọ̀fẹ́/tí kò nílò ìfàṣẹsí 155)
+- O nílò **sáfíà MCP tí a kọ́ sínú rẹ̀** (àwọn irinṣẹ́ LLM, ìrántí, àti àwọn òye iṣẹ́ tí a pèsè gẹ́gẹ́ bí irinṣẹ́)
+- O nílò **ìlànà A2A** fún àwọn ìṣàn iṣẹ́ láti aṣojú kan sí òmíràn
+- O fẹ́ **ìfarapamọ́ ìtẹ̀wọ́-ìka** (JA3/JA4) láti yẹra fún ìṣàwárí láti ọwọ́ àwọn CAPTCHA orísun
+- O nílò **àwọn ẹ̀yà fún ilé-iṣẹ́ ńlá** (àwọn òfin ààbò, àwọn àyẹ̀wò, àti àkọsílẹ̀ àyẹ̀wò) láìsan owó SaaS
 
 ## Ìgbà tí ó yẹ kí o yan LiteLLM
 

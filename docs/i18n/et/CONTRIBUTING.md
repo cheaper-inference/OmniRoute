@@ -17,13 +17,13 @@ katvuse ja vastavusse viimise sammudega.
 
 ### Eeltingimused
 
-- **Node.js** `>=22.22.3 <23` või `>=24.0.0 <27` (soovitatav: 24 LTS)
+- **Node.js** `>=22.22.2 <23` või `>=24.0.0 <27` (soovitatav: 24 LTS)
 - **npm** 10+
 
-> **npm v11+ kasutajad (Node 24+):** Pärast käsku `npm install` kontrollige, et omamoodulid oleksid installitud:
-> `node -e "require('better-sqlite3')"`. Kui see nurjub veaga `MODULE_NOT_FOUND`,
-> käivitage `npm approve-scripts better-sqlite3 && npm install`. Vaadake
-> [tõrkeotsingut](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
+> **npm v11+ kasutajad (Node 24+):** Pärast käsku `npm install` kontrollige, kas omamoodulid installiti:
+> `node -e "require('better-sqlite3')"`. Kui see ebaõnnestub veaga `MODULE_NOT_FOUND`,
+> käivitage `npm approve-scripts better-sqlite3 && npm install`. Vaadake jaotist
+> [Tõrkeotsing](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
 - **Git**
 
@@ -38,7 +38,7 @@ npm install
 ### Keskkonnamuutujad
 
 ```bash
-# Looge mallist oma .env
+# Looge malli põhjal oma .env
 cp .env.example .env
 
 # Genereerige nõutavad saladused
@@ -46,28 +46,28 @@ echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-Peamised arenduseks vajalikud muutujad:
+Peamised arenduskeskkonna muutujad:
 
-| Muutuja                | Arenduse vaikeväärtus    | Kirjeldus                    |
-| ---------------------- | ------------------------ | ---------------------------- |
-| `PORT`                 | `20128`                  | Serveri port                 |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | Kasutajaliidese baas-URL     |
-| `JWT_SECRET`           | (genereerige ülal)       | JWT allkirjastussaladus      |
-| `INITIAL_PASSWORD`     | `CHANGEME`               | Esimese sisselogimise parool |
-| `APP_LOG_LEVEL`        | `info`                   | Logimise detailsusaste       |
+| Muutuja                | Arenduskeskkonna vaikeväärtus | Kirjeldus                       |
+| ---------------------- | ----------------------------- | ------------------------------- |
+| `PORT`                 | `20128`                       | Serveri port                    |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`      | Kasutajaliidese baas-URL        |
+| `JWT_SECRET`           | (genereerige ülal)            | JWT allkirjastamise saladus     |
+| `INITIAL_PASSWORD`     | `CHANGEME`                    | Esmakordse sisselogimise parool |
+| `APP_LOG_LEVEL`        | `info`                        | Logimise detailsusaste          |
 
 ### Juhtpaneeli seaded
 
 Juhtpaneel pakub funktsioonide jaoks kasutajaliidese lüliteid, mida saab seadistada ka keskkonnamuutujate kaudu:
 
-| Seadistuse asukoht | Lüliti            | Kirjeldus                        |
-| ------------------ | ----------------- | -------------------------------- |
-| Seaded → Täpsemad  | Silumisrežiim     | Luba silumispäringute logid (UI) |
-| Seaded → Üldine    | Külgriba nähtavus | Kuva või peida külgriba jaotised |
+| Seadete asukoht   | Lüliti            | Kirjeldus                                    |
+| ----------------- | ----------------- | -------------------------------------------- |
+| Seaded → Täpsemad | Silumisrežiim     | Luba päringute silumislogid (kasutajaliides) |
+| Seaded → Üldine   | Külgriba nähtavus | Kuva või peida külgriba jaotised             |
 
-Need seaded salvestatakse andmebaasi ja säilivad taaskäivitamiste vahel, alistades määramise korral keskkonnamuutujate vaikeväärtused.
+Need seaded salvestatakse andmebaasi ja säilivad taaskäivituste vahel, alistades määramise korral keskkonnamuutujate vaikeväärtused.
 
-### Kohalik käitamine
+### Kohalik käivitamine
 
 ```bash
 # Arendusrežiim (automaatne taaslaadimine)
@@ -77,46 +77,47 @@ npm run dev
 npm run build    # next build → .build/next/, seejärel assembleStandalone → dist/
 npm run start
 
-# Kiire ainult taustsüsteemi/API kompileerimine panustaja muudatuste jaoks
+# Kiire, ainult taustsüsteemi/API kompileerimine kaastöötajate muudatuste jaoks
 npm run build:contributor
 
-# Väljalaske koostamine (puhas uuesti koostamine + HEAD-i kontrolltähis — juurutamiseks nõutav)
+# Väljalaske koostamine (puhas korduskoostamine + HEAD-valvur — juurutamiseks kohustuslik)
 npm run build:release   # rm -rf .build dist && build + kirjutab faili dist/BUILD_SHA
 
-# Levinud pordi konfiguratsioon
+# Levinud pordikonfiguratsioon
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Panustaja koostamine teostab ainult kompileerimise valideerimise: see ei pane kokku eraldiseisvat
-distributsiooni ega koosta valikulisi omapakenduse ressursse. Kasutage tavalist tootmisversiooni koostamist, kui
-peate valideerima tarnitavat komplekti.
+Kaastöötaja koostamine teostab ainult kompileerimise valideerimise: see ei koosta autonoomset
+jaotust ega valikulisi omarakenduse pakendamise ressursse. Kasutage tavalist tootmiskoostamist,
+kui peate kontrollima väljastatavat paketti.
 
 ### Koostamisväljundi paigutus
 
-| Kataloog  | Sisu                                                                                   | Versioonihalduses |
-| --------- | -------------------------------------------------------------------------------------- | ----------------- |
-| `src/`    | Rakenduse lähtekood (TypeScript / TSX)                                                 | Jah               |
-| `.build/` | Vahefailid — käsu `next build` väljund (gitignore'itud, `distDir = .build/next`)       | Ei                |
-| `dist/`   | Tarnitav komplekt — pannakse kokku funktsiooniga `assembleStandalone` (gitignore'itud) | Ei                |
+| Kataloog  | Sisu                                                                                      | Versioonihalduses |
+| --------- | ----------------------------------------------------------------------------------------- | ----------------- |
+| `src/`    | Rakenduse lähtekood (TypeScript / TSX)                                                    | Jah               |
+| `.build/` | Vahefailid — käsu `next build` väljund (gitignore’iga eiratud, `distDir = .build/next`)   | Ei                |
+| `dist/`   | Väljastatav pakett — koostatud funktsiooniga `assembleStandalone` (gitignore’iga eiratud) | Ei                |
 
-Koostamiskonveier töötab ühe läbimisega:
+Koostamiskonveier läbitakse ühe korraga:
 
 ```
 npm run build
   └─ next build → .build/next/standalone  (Next.js-i väljund)
-  └─ assembleStandalone()                 (kopeerib eraldiseisva versiooni + staatilised failid + avalikud failid + omavarad)
+  └─ assembleStandalone()                 (kopeerib autonoomse väljundi + staatilised failid + avalikud failid + omarakenduse ressursid)
        └─ väljund: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` puhastab esmalt ka mõlemad kataloogid ja kirjutab
-juurutuse tervikluse kontrolltähisena faili `dist/BUILD_SHA` (= `git rev-parse --short HEAD`).
+`npm run build:release` puhastab esmalt mõlemad kataloogid ja kirjutab juurutuse tervikluse
+valvurina faili `dist/BUILD_SHA` (= `git rev-parse --short HEAD`).
 
-`npm run build:contributor` kasutab ainult taustsüsteemi koostamisprofiili. See asendab koostamise ajaks
-juhtpaneeli UI failid ajutiselt asendusfailidega, säilitab API marsruutide töötlejad ja taastab algsed failid
-pärast koostamist. Kasutage käsku `npm run build` muudatuste puhul, mis mõjutavad juhtpaneeli UI-d, või täielikuks
-väljalaske valideerimiseks; panustaja profiil ei asenda väljalaske koostamist.
+`npm run build:contributor` kasutab ainult taustsüsteemi koostamisprofiili. See asendab koostamise
+ajaks juhtpaneeli kasutajaliidese failid ajutiselt tüvifailidega, säilitab API marsruudikäitlejad
+ja taastab pärast koostamist algsed failid. Kasutage käsku `npm run build` muudatuste puhul,
+mis mõjutavad juhtpaneeli kasutajaliidest, või väljalaske täielikuks valideerimiseks;
+kaastöötaja profiil ei asenda väljalaske koostamist.
 
-> **Märkus VPS-i juurutamise kohta:** kaugkujutise kataloog `/usr/lib/node_modules/omniroute/app/`
+> **Märkus VPS-i juurutamise kohta:** kaugserveri tõmmise kataloog `/usr/lib/node_modules/omniroute/app/`
 > ei ole muutunud. Juurutusoskused sünkroonivad käsuga rsync kataloogi `dist/` sisu sinna.
 > Muutus ainult hoidlasisese koostamisväljundi asukoht (`app/` → `dist/`).
 
@@ -295,69 +296,71 @@ Vaata `open-sse/utils/stream.ts` ja `open-sse/utils/streamHandler.ts` rakendatud
 
 ```
 src/                        # TypeScript (.ts / .tsx)
-├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # Dashboard lehed (23 sektsiooni)
+├── app/                    # Next.js 16 rakenduse ruuter
+│   ├── (dashboard)/        # Töölaua lehed (23 jaotist)
 │   ├── api/                # API marsruudid (51 kataloogi)
-│   └── login/              # Autentimise lehed (.tsx)
-├── domain/                 # Poliitika mootor (policyEngine, comboResolver, costRules, jne)
+│   └── login/              # Autentimislehed (.tsx)
+├── domain/                 # Reeglimootor (policyEngine, comboResolver, costRules jne)
 ├── lib/                    # Põhiline äriloogika (.ts)
-│   ├── a2a/                # Agent-to-Agent v0.3 protokolli server
-│   ├── acp/                # Agent Communication Protocol registri
-│   ├── compliance/         # Vastavuse poliitika mootor
-│   ├── db/                 # SQLite domeeni moodulid + 130 migreerimist
-│   ├── memory/             # Pidev konversatsioonimälu
-│   ├── oauth/              # OAuth pakkujad, teenused ja utiliidid
+│   ├── a2a/                # Agentidevahelise v0.3 protokolli server
+│   ├── acp/                # Agent Communication Protocol register
+│   ├── compliance/         # Vastavusreeglite mootor
+│   ├── db/                 # SQLite'i domeenimoodulid + 130 migratsiooni
+│   ├── memory/             # Püsiv vestlusmälu
+│   ├── oauth/              # OAuthi pakkujad, teenused ja utiliidid
 │   ├── skills/             # Laiendatav oskuste raamistik
 │   ├── usage/              # Kasutuse jälgimine ja kulude arvutamine
-│   └── localDb.ts          # Ainult re-eksporti kihi — kunagi ei lisa loogikat siia
-├── middleware/              # Päringu middleware (promptInjectionGuard)
-├── mitm/                   # MITM proksi (sert, DNS, sihtmarsruutimine)
+│   └── localDb.ts          # Ainult reeksportimise kiht — ära lisa siia kunagi loogikat
+├── middleware/              # Päringute vahevara (promptInjectionGuard)
+├── mitm/                   # MITM-puhverserver (sertifikaat, DNS, sihtkohta marsruutimine)
 ├── shared/
-│   ├── components/         # React komponendid (.tsx)
-│   ├── constants/          # Pakkuja definitsioonid (329), MCP skoobid, 19 marsruutimisstrategiat
-│   ├── utils/              # Ringi katkestaja, sanitaizer, autentimise abid
+│   ├── components/         # Reacti komponendid (.tsx)
+│   ├── constants/          # Pakkujate definitsioonid (329), MCP ulatused, 20 marsruutimisstrateegiat
+│   ├── utils/              # Kaitselüliti, puhastaja, autentimise abifunktsioonid
 │   └── validation/         # Zod v4 skeemid
-└── sse/                    # SSE proksi pipeline
+└── sse/                    # SSE-puhverserveri konveier
 
 open-sse/                   # @omniroute/open-sse tööruum
-├── executors/              # 89 eksikuteeri implementatsiooni moodulit
-├── handlers/               # 11 päringu käsitlejat (vestlus, vastused, embeddings, pildid, jne)
-├── mcp-server/             # MCP server (110 unikaalset tööriista, 3 transpordi, 33 skoobi)
-├── services/               # 178 ülemise taseme teenust (combo, autoCombo, rateLimitManager, jne)
-├── translator/             # Formaadi tõlkijad (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Responses API transformeri
-└── utils/                  # 22 utiliidi moodulit (voog, TLS, proksi, logimine)
+├── executors/              # 150 täiturimoodulit (täituriklassid + pakkujapõhised abifunktsioonid)
+├── handlers/               # 11 päringutöötlejat (vestlus, vastused, manused, pildid jne)
+├── mcp-server/             # MCP-server (110 unikaalset tööriista, 3 transporti, 33 ulatust)
+├── services/               # 178 tipptaseme teenust (combo, autoCombo, rateLimitManager jne)
+├── translator/             # Vorminguteisendajad (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Responses API teisendaja
+└── utils/                  # 22 utiliidimoodulit (voog, TLS, puhverserver, logimine)
 
-electron/                   # Electroni töölauarakendus (cross-platform)
+electron/                   # Electroni töölauarakendus (platvormideülene)
 
 tests/
-├── unit/                   # Node.js test runner (1,574 testifaili)
+├── unit/                   # Node.js-i testikäitaja (1574 testifaili)
 ├── integration/            # Integratsioonitestid
-├── e2e/                    # Playwright testid
-├── security/               # Turvatestid
-├── translator/             # Tõlke-spetsiifilised testid
+├── e2e/                    # Playwrighti testid
+├── security/               # Turbetestid
+├── translator/             # Teisendajapõhised testid
 └── load/                   # Koormustestid
 
 docs/
-├── adr/                     # Arhitektuuripõhiste otsuste kirjed
+├── adr/                     # Arhitektuuriotsuste kirjed
 ├── architecture/            # Süsteemi arhitektuur ja vastupidavus
-├── comparison/              # OmniRoute vs alternatiivid
-├── compression/             # Pakkimise juhised ja reeglid
-├── dev/                     # Arendamise juhised
-├── diagrams/                # Arhitektuuridiagrammid
-├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
-├── guides/                  # Kasutajajuhend, Docker, seadistamine, tõrkeotsing
-├── i18n/                    # Rahvusvahelised README tõlked
+├── comparison/              # OmniRoute võrreldes alternatiividega
+├── compression/             # Tihendamisjuhendid ja -reeglid
+├── dev/                     # Arendusjuhendid
+├── diagrams/                # Arhitektuuriskeemid
+├── frameworks/              # MCP, A2A, OpenCode, mälu, oskused
+├── guides/                  # Kasutusjuhend, Docker, seadistamine, tõrkeotsing
+├── i18n/                    # Lokaliseeritud README tõlked
 ├── marketing/               # Turundusmaterjalid
-├── ops/                     # Juurutamine, proksi, katvus, väljalasked
-├── providers/               # Pakkuja-spetsiifilised dokumendid
-├── reference/               # API viide, keskkonna muutujad, CLI tööriistad, tasuta kihid
+├── ops/                     # Juurutus, puhverserver, katvus, väljalasked
+├── providers/               # Pakkujapõhine dokumentatsioon
+├── reference/               # API teatmik, keskkonnamuutujad, CLI-tööriistad, tasuta paketid
 ├── releases/                # Väljalaskemärkmed
-├── routing/                 # Auto-combo mootor, põhjenduse uuesti mängimine
-├── screenshots/             # Dashboardi ekraanipildid
-├── security/                # Kaitsekaitsed, vastavus, saladus, märgid
+├── routing/                 # Automaatkombinatsioonide mootor, arutluskäigu taasesitus
+├── screenshots/             # Töölaua kuvatõmmised
+├── security/                # Kaitsepiirded, vastavus, varjatus, tõendid
 └── specs/                   # Disainispetsifikatsioonid
 ```
+
+---
 
 ## Uue tarnija lisamine
 
@@ -395,22 +398,22 @@ Kirjuta üksiktestid `tests/unit/` kataloogi, kattes vähemalt:
 
 ---
 
-## Pull requesti kontrollnimekiri
+## Tõmbetaotluse kontrollnimekiri
 
-- [ ] Testid läbivad (`npm test`)
-- [ ] Linting läbib (`npm run lint`)
-- [ ] Ehitamine õnnestub (`npm run build`)
-- [ ] TypeScripti tüübid lisatud uutele avalikele funktsioonidele ja liidestele
-- [ ] Pole peidetud salajasi väärtusi ega fallback väärtusi
-- [ ] Avalikud ülemised volikirjad sisestatud `resolvePublicCred()` kaudu (vaata [`docs/security/PUBLIC_CREDS.md`](./docs/security/PUBLIC_CREDS.md)), mitte kunagi sõna-sõnalt
-- [ ] Vigavastused suunatakse läbi `buildErrorBody()` / `sanitizeErrorMessage()` — vastuste kehades ei ole toored stack trace'id (vaata [`docs/security/ERROR_SANITIZATION.md`](./docs/security/ERROR_SANITIZATION.md))
-- [ ] Käsurea käsud (`exec` / `spawn`) edastavad käitusväärtused `env` kaudu, mitte stringi interpoleerimise teel
-- [ ] Kõik sisendid valideeritud skeemidega
-- [ ] Muudatuste logi **fragment** lisatud `changelog.d/{features|fixes|maintenance}/<PR>-<slug>.md` alla kasutajate suunatud muudatuste jaoks (vaata [`changelog.d/README.md`](./changelog.d/README.md)) — **ära** muuda `CHANGELOG.md` otse; fragmendid kogutakse väljaandmise ajal ja ei tekki kunagi konflikte
-- [ ] Dokumentatsioon uuendatud (kohaldatavatel juhtudel)
-- [ ] Uusi CodeQL / Secret-Scanning hoiatusi ei avatud, või iga neist lükati tagasi tehnilise põhjendusega, viidates asjakohasele `docs/security/` dokumendile
-- [ ] Marsruudid, mis käivitavad lapseprotsesse (`/api/mcp/`, `/api/cli-tools/runtime/`), on klassifitseeritud `isLocalOnlyPath()` abil `src/server/authz/routeGuard.ts` failis — vaata [Rangedreegel nr 15](docs/security/ROUTE_GUARD_TIERS.md)
-- [ ] Kommitedetsioonides pole `Co-Authored-By` trailerid — kommid peavad ilmuma ainult hoidla omaniku Git identiteedi all (Rangedreegel nr 16)
+- [ ] Testid läbivad edukalt (`npm test`)
+- [ ] Lintimine läbib edukalt (`npm run lint`)
+- [ ] Järk õnnestub (`npm run build`)
+- [ ] Uutele avalikele funktsioonidele ja liidestele on lisatud TypeScripti tüübid
+- [ ] Puuduvad kõvakodeeritud saladused või varuväärtused
+- [ ] Avalikud ülesvoolu pääsutunnused on manustatud `resolvePublicCred()` kaudu (vt [`docs/security/PUBLIC_CREDS.md`](./docs/security/PUBLIC_CREDS.md)), mitte kunagi literaalidena
+- [ ] Veavastused läbivad `buildErrorBody()` / `sanitizeErrorMessage()` — vastuste kehades pole töötlemata pinujälgi (vt [`docs/security/ERROR_SANITIZATION.md`](./docs/security/ERROR_SANITIZATION.md))
+- [ ] Kestakäsud (`exec` / `spawn`) edastavad käitusaegsed väärtused `env` kaudu, mitte stringinterpolatsiooni abil
+- [ ] Kõik sisendid on valideeritud Zodi skeemidega
+- [ ] Kasutajale nähtavate muudatuste jaoks on lisatud muudatuste logi **fragment** asukohta `changelog.d/{features|fixes|maintenance}/<PR>-<slug>.md` (vt [`changelog.d/README.md`](./changelog.d/README.md)) — ärge muutke faili `CHANGELOG.md` otse; fragmendid koondatakse väljalaske ajal ega lähe tõmbetaotluste vahel kunagi konflikti
+- [ ] Dokumentatsioon on värskendatud (kui kohaldatav)
+- [ ] Uusi CodeQL-i / saladuste skannimise hoiatusi pole avatud või iga hoiatus on tagasi lükatud tehnilise põhjendusega, mis viitab asjakohasele dokumendile kataloogis `docs/security/`
+- [ ] Alamprotsesse käivitavad marsruudid (`/api/mcp/`, `/api/cli-tools/runtime/`) on failis `src/server/authz/routeGuard.ts` liigitatud funktsiooniga `isLocalOnlyPath()` — vt [ranget reeglit nr 15](docs/security/ROUTE_GUARD_TIERS.md)
+- [ ] Sissekannete sõnumites pole tehisintellekti/roboti `Co-authored-by` järelridu (range reegel nr 16) — inimkaastöötajaid, kelle tööd taaskasutatakse, tunnustatakse standardsete `Co-authored-by: Name <email>` järelridadega
 
 ---
 

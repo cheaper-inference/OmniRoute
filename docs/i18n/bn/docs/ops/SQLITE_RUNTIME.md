@@ -4,46 +4,46 @@
 
 ---
 
-OmniRoute স্টার্টআপের সময় একটি ৫-ধাপের ফলব্যাক চেইনের মাধ্যমে তার SQLite ড্রাইভার নির্ধারণ করে:
+OmniRoute স্টার্টআপের সময় একটি ৫-ধাপের ফলব্যাক চেইনের মাধ্যমে এর SQLite ড্রাইভার নির্ধারণ করে:
 
 1. **বান্ডল করা `better-sqlite3`** (`package.json`-এর `dependencies`-এর মাধ্যমে)
-   — সবচেয়ে দ্রুত, নেটিভ বাইনারি; বিল্ড টুল উপস্থিত থাকলে `npm install` দ্বারা ইনস্টল করা হয়।
+   — সবচেয়ে দ্রুত, নেটিভ বাইনারি; বিল্ড টুল উপস্থিত থাকলে `npm install` এটি ইনস্টল করে।
 
 2. **রানটাইমে ইনস্টল করা `better-sqlite3`** (`~/.omniroute/runtime/`-এ)
    — প্রথমবার চালানোর সময় অলসভাবে **অথবা** `scripts/build/postinstall.mjs → scripts/postinstall.mjs` দ্বারা ইনস্টল করা হয়।
-   লোড করার আগে নেটিভ `.node` ম্যাজিক বাইট (ELF / Mach-O / PE) যাচাই করে,
-   যাতে ক্ষতিগ্রস্ত বা ভুল প্ল্যাটফর্মের বাইনারি থেকে সুরক্ষা পাওয়া যায়।
+   লোড করার আগে নেটিভ `.node`-এর ম্যাজিক বাইট (ELF / Mach-O / PE) যাচাই করে,
+   যাতে নষ্ট বা ভুল-প্ল্যাটফর্মের বাইনারি থেকে সুরক্ষা পাওয়া যায়।
 
-3. **`node:sqlite`** (Node ≥22.5 স্ট্যান্ডার্ড লাইব্রেরি) — নেটিভ বিল্ডের প্রয়োজন নেই; উভয়
+3. **`node:sqlite`** (Node ≥22.5 stdlib) — কোনো নেটিভ বিল্ডের প্রয়োজন নেই; উভয়
    better-sqlite3 পাথ ব্যর্থ হলে ব্যবহৃত হয়। ফিচার সেট সীমিত।
 
-4. **`sql.js`** (WASM) — চূড়ান্ত ফলব্যাক। সর্বত্র কাজ করে, তবে ধীর
-   এবং সিঙ্ক্রোনাসভাবে লেখার পরিবর্তে নির্দিষ্ট বিরতিতে ডেটা লেখে।
+4. **`sql.js`** (WASM) — চূড়ান্ত ফলব্যাক। সর্বত্র কাজ করে, তবে ধীরগতির
+   এবং সিঙ্ক্রোনাসভাবে না লিখে নির্দিষ্ট বিরতিতে ডেটা লেখে।
 
-## এই জটিলতা কেন?
+## এত জটিলতার কারণ কী?
 
-- **Windows EBUSY**: পূর্ববর্তী সংস্করণের `better_sqlite3.node` কোনো চলমান
-  প্রক্রিয়া দ্বারা লক করা থাকলে `npm install -g omniroute@latest` ব্যর্থ হতে পারে। `~/.omniroute/runtime/`-এ রানটাইম
-  ইনস্টলেশন গ্লোবাল npm ক্যাশ এড়িয়ে যায়।
-- **কোনো বিল্ড টুল নেই**: কিছু পরিবেশ (VS Build Tools ছাড়া কর্পোরেট Windows,
-  ন্যূনতম Docker ইমেজ) `better-sqlite3` কম্পাইল করতে পারে না। রানটাইম
-  ইনস্টলার npm রেজিস্ট্রি থেকে একটি প্রি-বিল্ট বাইনারি সংগ্রহ করে; সেটিও ব্যর্থ হলে ফলব্যাক
-  ড্রাইভারগুলো নিশ্চিত করে যে OmniRoute তারপরও চালু হয়।
+- **Windows EBUSY**: কোনো চলমান প্রসেস যদি আগের সংস্করণের
+  `better_sqlite3.node` লক করে রাখে, তাহলে `npm install -g omniroute@latest` ব্যর্থ হতে পারে। `~/.omniroute/runtime/`-এ রানটাইম
+  ইনস্টল গ্লোবাল npm ক্যাশ এড়িয়ে যায়।
+- **বিল্ড টুল নেই**: কিছু পরিবেশে (VS Build Tools ছাড়া কর্পোরেট Windows,
+  ন্যূনতম Docker ইমেজ) `better-sqlite3` কম্পাইল করা যায় না। রানটাইম
+  ইনস্টলার npm রেজিস্ট্রি থেকে একটি আগে থেকে বিল্ড করা বাইনারি সংগ্রহ করে; সেটিও ব্যর্থ হলেও ফলব্যাক
+  ড্রাইভারগুলো নিশ্চিত করে যে OmniRoute চালু হতে পারে।
 - **এয়ার-গ্যাপড সিস্টেম**: npm রেজিস্ট্রিতে পৌঁছানো না গেলে, `node:sqlite`
   অথবা `sql.js` মৌলিক কার্যকারিতা নিশ্চিত করে।
 
 ## ম্যাজিক-বাইট যাচাইকরণ
 
 রানটাইমে ইনস্টল করা কোনো `.node` ফাইল লোড করার আগে, OmniRoute প্রথম ৮টি
-বাইট পড়ে এবং পরিচিত প্ল্যাটফর্ম ম্যাজিকের সঙ্গে মিলিয়ে দেখে:
+বাইট পড়ে এবং পরিচিত প্ল্যাটফর্ম ম্যাজিকের সঙ্গে মেলায়:
 
-| প্ল্যাটফর্ম               | বাইট (হেক্স)  | লেবেল       |
-| ------------------------- | ------------- | ----------- |
-| Linux                     | `7F 45 4C 46` | `elf`       |
-| macOS 64-বিট BE           | `FE ED FA CF` | `macho`     |
-| macOS 64-বিট LE           | `CF FA ED FE` | `macho-le`  |
-| macOS ফ্যাট (ইউনিভার্সাল) | `CA FE BA BE` | `macho-fat` |
-| Windows                   | `4D 5A` (MZ)  | `pe`        |
+| প্ল্যাটফর্ম           | বাইট (hex)    | লেবেল       |
+| --------------------- | ------------- | ----------- |
+| Linux                 | `7F 45 4C 46` | `elf`       |
+| macOS 64-bit BE       | `FE ED FA CF` | `macho`     |
+| macOS 64-bit LE       | `CF FA ED FE` | `macho-le`  |
+| macOS fat (universal) | `CA FE BA BE` | `macho-fat` |
+| Windows               | `4D 5A` (MZ)  | `pe`        |
 
 ম্যাজিক না মিললে → ফাইলটি উপেক্ষা করা হয় এবং ফলব্যাক পরবর্তী ধাপে এগিয়ে যায়।
 
@@ -68,28 +68,48 @@ rm -rf ~/.omniroute/runtime
 omniroute  # পরবর্তীবার চালু হলে পুনরায় ইনস্টল হবে
 
 # কোন ড্রাইভার সক্রিয় আছে তা পরীক্ষা করুন
-omniroute config db-info  # (CLI কমান্ডটি বিদ্যমান থাকলে)
+omniroute config db-info  # CLI কমান্ডটি বিদ্যমান থাকলে
 ```
+
+## সিঙ্ক্রোনাস স্থবিরতা নির্ণয় করা
+
+`better-sqlite3` ব্যবহার করলে, সিঙ্ক্রোনাস অ্যাডাপ্টার টাইমিং সক্রিয় করতে স্টার্টআপের আগে
+`OMNIROUTE_SQLITE_SLOW_MS=200` সেট করুন। ডিফল্টভাবে এটি বন্ধ থাকে। সম্পন্ন হওয়া কোনো অপারেশনে
+অন্তত ওই পরিমাণ মিলিসেকেন্ড লাগলে একটি `[SQLITE-SLOW]` সতর্কতা নির্গত হয়—প্রতি
+অ্যাডাপ্টারের জন্য প্রতি দশ সেকেন্ডে সর্বোচ্চ একবার। সতর্কতাটিতে কেবল ড্রাইভার, অপারেশন শ্রেণি
+(`prepare`, `get`, `all`, `run`, `exec`, `pragma`, transaction বা maintenance) এবং
+অতিবাহিত মিলিসেকেন্ড থাকে: কোনো SQL, binding, row, path বা exception text থাকে না।
+
+এটি একটি ডায়াগনস্টিক সহায়িকা, timeout বা query optimization নয়। এটি এমন কোনো
+অপারেশন সম্পর্কে রিপোর্ট করতে পারে না যা কখনো রিটার্ন করে না, CPU-এর কাজকে disk wait থেকে আলাদা করতে পারে না, নির্দিষ্ট
+SQL শনাক্ত করতে পারে না বা raw driver handle-এর মাধ্যমে সম্পাদিত অপারেশন পর্যবেক্ষণ করতে পারে না।
+Async backup-এর সময়কাল ইচ্ছাকৃতভাবে বাদ দেওয়া হয়েছে; অন্য SQLite ড্রাইভারগুলোতে
+এই opt-in instrumentation প্রয়োগ করা হয় না। ভেরিয়েবলটি নিষ্ক্রিয় করলে timing wrapper ছাড়াই মূল অ্যাডাপ্টার
+পুনরুদ্ধার হয়। database schema বা সংরক্ষিত configuration-এ কোনো পরিবর্তন হয় না।
+
+`/healthz` lag সতর্কতা আগের sample-এর পর থেকে event-loop-এর peak রিপোর্ট করে,
+পুরো সময়কালের average নয়। কোনো স্থবিরতার জন্য SQLite বা disk failure-কে দায়ী করার আগে এর timestamp-গুলোকে
+slow-operation সতর্কতা এবং host/storage metric-এর সঙ্গে মিলিয়ে দেখুন।
 
 ## রেফারেন্স
 
 ইমপ্লিমেন্টেশন:
 
-- `bin/cli/runtime/magicBytes.mjs` — বাইনারি ম্যাজিক-বাইট যাচাইকরণের সহায়ক
-- `bin/cli/runtime/sqliteRuntime.mjs` — ৫-ধাপের রানটাইম রিজলভার + লেজি ইনস্টলার
-- `bin/cli/runtime/index.mjs` — স্টার্টআপ অর্কেস্ট্রেটর (`warmUpRuntimes()`)
-- `scripts/postinstall.mjs` — npm পোস্ট-ইনস্টল হুক (ব্যর্থ হলেও মারাত্মক নয় এমন ওয়ার্ম-আপ)
-- `src/lib/db/core.ts` — `ensureDbInitialized()` / `getDriverInfo()` এক্সপোর্ট
+- `bin/cli/runtime/magicBytes.mjs` — বাইনারি ম্যাজিক-বাইট যাচাইকরণ সহায়ক
+- `bin/cli/runtime/sqliteRuntime.mjs` — ৫-ধাপের রানটাইম resolver + lazy installer
+- `bin/cli/runtime/index.mjs` — স্টার্টআপ orchestrator (`warmUpRuntimes()`)
+- `scripts/postinstall.mjs` — npm post-install hook (ব্যর্থ হলেও মারাত্মক নয় এমন warm-up)
+- `src/lib/db/core.ts` — `ensureDbInitialized()` / `getDriverInfo()` export
 
-## একক-রাইটার টপোলজি (HA সমর্থিত নয়)
+## একক-writer টপোলজি (HA সমর্থিত নয়)
 
-উপরের ড্রাইভার ফলব্যাক চেইনটি এখনও **একটি প্রক্রিয়ার** মধ্যেই চলে। ডিফল্ট SQLite-এ
-OmniRoute একটি **একক রাইটার**:
+উপরের ড্রাইভার ফলব্যাক চেইনটি এখনও **একটি প্রসেসে** চলে। ডিফল্ট SQLite
+OmniRoute হলো একটি **একক writer**:
 
-- একই `storage.sqlite` ফাইলে দুটি OmniRoute রেপ্লিকা সংযুক্ত করবেন না।
-- কনটেইনার রিস্টার্ট, Recreate ডিপ্লয়, OOM kill অথবা HEALTHCHECK রিস্টার্ট চলমান
-  প্রতিটি SSE সেশন বিচ্ছিন্ন করে। ডিফল্ট পাথে কোনো সেশন ড্রেইন নেই।
-- ধীর `/healthz`-কে অকার্যকর হিসেবে বিবেচনা করা অর্কেস্ট্রেটর লাইভনেস একমাত্র
-  রেপ্লিকাটিকেই বন্ধ করে দেবে। TCP লাইভনেস + HTTP `/healthz` রেডিনেসকে অগ্রাধিকার দিন। দেখুন
-  [Docker নির্দেশিকা — উপলভ্যতা](../guides/DOCKER_GUIDE.md#availability-default-sqlite-is-single-replica)
-  এবং [Kubernetes প্রোবের সুপারিশ](./MONITORING_GUIDE.md#kubernetes-probe-recommendations)।
+- একই `storage.sqlite` ফাইলের সঙ্গে দুটি OmniRoute replica যুক্ত করবেন না।
+- container restart, Recreate deploy, OOM kill বা HEALTHCHECK restart হলে
+  চলমান প্রতিটি SSE session বিচ্ছিন্ন হয়ে যায়। স্টক পাথে কোনো session drain নেই।
+- ধীর `/healthz`-কে মৃত হিসেবে বিবেচনা করা orchestrator liveness একমাত্র
+  replica-টিকে বন্ধ করে দেবে। TCP liveness + HTTP `/healthz` readiness-কে অগ্রাধিকার দিন। দেখুন
+  [Docker নির্দেশিকা — প্রাপ্যতা](../guides/DOCKER_GUIDE.md#availability-default-sqlite-is-single-replica)
+  এবং [Kubernetes probe-এর সুপারিশ](./MONITORING_GUIDE.md#kubernetes-probe-recommendations)।

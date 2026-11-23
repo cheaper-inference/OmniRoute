@@ -123,7 +123,9 @@
       "maxCostOpt": "Največji strošek na dan (USD)",
       "allowedModelsOpt": "Seznam dovoljenih modelov, ločenih z vejicami",
       "nothingToSet": "Podano ni bilo nobeno polje pravilnika. Uporabite --rate-limit, --max-cost ali --allowed-models.",
-      "updated": "Pravilnik je posodobljen."
+      "updated": "Pravilnik je posodobljen.",
+      "modelAccessModeOpt": "Način dostopa do modelov (all | restricted)",
+      "unrestrictedOpt": "Dovoli vse modele (--model-access-mode all)"
     },
     "expiration": {
       "title": "Potek veljavnosti ključa",
@@ -254,6 +256,7 @@
     "log": "Prikaži strežniške dnevnike neposredno",
     "no_recovery": "Onemogoči samodejni ponovni zagon ob sesutju (način za razhroščevanje)",
     "max_restarts": "Največje število ponovnih zagonov po sesutju v 30 s, preden se poskušanje opusti (privzeto: 2)",
+    "headless": "Zaženi samo posredniški pogon: nadzorna plošča onemogočena (404), izbirni podsistemi preskočeni (nastavi OMNIROUTE_HEADLESS=1)",
     "tray": "Zaženi v sistemski vrstici (samo za namizne sisteme, po izbiri)",
     "no_tray": "Onemogoči ikono sistemske vrstice",
     "ready_timeout": "Časovna omejitev preverjanja pripravljenosti v ms (tudi OMNIROUTE_READY_TIMEOUT_MS, privzeto 60000)",
@@ -1168,32 +1171,18 @@
   "sync": {
     "description": "Sinhroniziraj konfiguracijo med primerki OmniRoute",
     "push": {
-      "description": "Potisni konfiguracijo v oblak ali oddaljeni primerek",
-      "target": "Cilj (cloud ali context:name)",
-      "bundle": "Deli paketa za sinhronizacijo",
-      "dryRun": "Predogled brez uveljavitve"
+      "description": "Potisni konfiguracijo v oblak ali oddaljeni primerek"
     },
     "pull": {
-      "description": "Pridobi konfiguracijo iz oblaka ali oddaljenega primerka",
-      "source": "Vir (cloud ali context:name)",
-      "merge": "Združi z obstoječo konfiguracijo",
-      "replace": "Zamenjaj obstoječo konfiguracijo",
-      "dryRun": "Predogled brez uveljavitve"
-    },
-    "diff": {
-      "source": "Kontekst vira",
-      "target": "Kontekst cilja"
+      "description": "Pridobi konfiguracijo iz oblaka ali oddaljenega primerka"
     },
     "bundle": {
       "description": "Izvozi konfiguracijo kot datoteko paketa",
-      "include": "Deli, ki naj bodo vključeni (ločeni z vejicami)"
+      "token": "Sync token (from `sync tokens create`); defaults to OMNIROUTE_SYNC_TOKEN"
     },
     "import": {
       "description": "Uvozi datoteko paketa",
       "dryRun": "Preveri veljavnost brez uveljavitve"
-    },
-    "initialize": {
-      "fromCloud": "Inicializiraj iz varnostne kopije v oblaku"
     },
     "tokens": {
       "description": "Upravljaj žetone za sinhronizacijo",
@@ -1205,9 +1194,6 @@
       "revoke": {
         "yes": "Preskoči potrditev"
       }
-    },
-    "resolve": {
-      "description": "Interaktivno razreši spore pri sinhronizaciji"
     }
   },
   "config": {

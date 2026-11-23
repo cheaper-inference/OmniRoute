@@ -235,6 +235,23 @@ export function normalizeUpstreamFailure(data: unknown, fallbackType = "server_e
   };
 }
 
+// `response.done` is a terminal alias some Responses upstreams send instead of (or
+// after) response.completed / response.incomplete / response.failed. Route it by
+// response.status so the translator's existing terminal branches handle it.
+export function resolveResponsesDoneEventType(
+  eventType: string | undefined,
+  data: unknown
+): string | undefined {
+  if (eventType !== "response.done") return eventType;
+  const response =
+    data && typeof data === "object" ? (data as { response?: unknown }).response : null;
+  const status =
+    response && typeof response === "object" ? (response as { status?: unknown }).status : null;
+  if (status === "failed" || status === "cancelled") return "response.failed";
+  if (status === "incomplete") return "response.incomplete";
+  return "response.completed";
+}
+
 export function extractResponsesReasoningSummaryText(item: unknown): string {
   const summary = item && typeof item === "object" ? (item as { summary?: unknown }).summary : null;
   if (!Array.isArray(summary)) return "";

@@ -123,7 +123,9 @@
       "maxCostOpt": "Gündəlik maksimum xərc (USD)",
       "allowedModelsOpt": "İcazə verilən modellərin vergüllə ayrılmış siyahısı",
       "nothingToSet": "Heç bir siyasət sahəsi təqdim edilməyib. --rate-limit, --max-cost və ya --allowed-models istifadə edin.",
-      "updated": "Siyasət yeniləndi."
+      "updated": "Siyasət yeniləndi.",
+      "modelAccessModeOpt": "Modelə giriş rejimi (all | restricted)",
+      "unrestrictedOpt": "Bütün modellərə icazə ver (--model-access-mode all)"
     },
     "expiration": {
       "title": "Açarın etibarlılıq müddəti",
@@ -254,6 +256,7 @@
     "log": "Server jurnallarını daxildə göstərin",
     "no_recovery": "Qəza zamanı avtomatik yenidən başlatmanı deaktiv edin (sazlama rejimi)",
     "max_restarts": "İmtina etməzdən əvvəl 30 saniyə ərzində qəza sonrası maksimum yenidən başlatma sayı (standart: 2)",
+    "headless": "Yalnız proksi mühərrikini işə sal: idarə paneli söndürülüb (404), isteğe bağlı alt sistemlər ötürülür (OMNIROUTE_HEADLESS=1 təyin edir)",
     "tray": "Sistem treyində başladın (yalnız masaüstü, istifadəçi seçimi ilə)",
     "no_tray": "Sistem treyi ikonunu deaktiv edin",
     "ready_timeout": "Hazırlıq yoxlamasının ms ilə gözləmə müddəti (həmçinin OMNIROUTE_READY_TIMEOUT_MS, standart 60000)",
@@ -1168,32 +1171,18 @@
   "sync": {
     "description": "Konfiqurasiyanı OmniRoute instansiyaları arasında sinxronlaşdır",
     "push": {
-      "description": "Konfiqurasiyanı buluda və ya uzaq instansiyaya göndər",
-      "target": "Hədəf (cloud və ya context:name)",
-      "bundle": "Sinxronlaşdırılacaq paket hissələri",
-      "dryRun": "Tətbiq etmədən önizlə"
+      "description": "Konfiqurasiyanı buluda və ya uzaq instansiyaya göndər"
     },
     "pull": {
-      "description": "Konfiqurasiyanı buluddan və ya uzaq instansiyadan əldə et",
-      "source": "Mənbə (cloud və ya context:name)",
-      "merge": "Mövcud konfiqurasiya ilə birləşdir",
-      "replace": "Mövcud konfiqurasiyanı əvəz et",
-      "dryRun": "Tətbiq etmədən önizlə"
-    },
-    "diff": {
-      "source": "Mənbə konteksti",
-      "target": "Hədəf konteksti"
+      "description": "Konfiqurasiyanı buluddan və ya uzaq instansiyadan əldə et"
     },
     "bundle": {
       "description": "Konfiqurasiyanı paket faylı kimi ixrac et",
-      "include": "Daxil ediləcək hissələr (vergüllə ayrılmış)"
+      "token": "Sync token (from `sync tokens create`); defaults to OMNIROUTE_SYNC_TOKEN"
     },
     "import": {
       "description": "Paket faylını idxal et",
       "dryRun": "Tətbiq etmədən doğrula"
-    },
-    "initialize": {
-      "fromCloud": "Bulud ehtiyat nüsxəsindən ilkin quraşdırma et"
     },
     "tokens": {
       "description": "Sinxronlaşdırma tokenlərini idarə et",
@@ -1205,9 +1194,6 @@
       "revoke": {
         "yes": "Təsdiqi keç"
       }
-    },
-    "resolve": {
-      "description": "Sinxronlaşdırma ziddiyyətlərini interaktiv şəkildə həll et"
     }
   },
   "config": {

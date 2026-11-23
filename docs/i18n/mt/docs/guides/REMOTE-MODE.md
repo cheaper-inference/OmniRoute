@@ -249,104 +249,88 @@ il-konnessjoni tidher attiva.
 
 ```bash
 omniroute tokens create --name "laptop" --scope write [--expires 30]
-#   ↳ jistampa s-secret DARBA BISS — ikkopjah issa
-omniroute tokens list                 # moħbija: id, isem, scope, prefiss, status, skadenza
-omniroute tokens revoke <id|prefix>   # irrevoka immedjatament
-omniroute tokens scopes               # spjega t-tliet scopes
+#   ↳ juri s-sigriet DARBA BISS — ikkopjah issa
+omniroute tokens list                 # moħbi: id, name, scope, prefix, status, expiry
+omniroute tokens revoke <id|prefix>   # irtira minnufih
+omniroute tokens scopes               # tispjega t-tliet skopijiet
 ```
 
-Il-kmandi `tokens` jeħtieġu kredenzjali ta’ **admin**. Tista’ wkoll timmaniġġja
-t-tokens fid-dashboard taħt **Settings → Access Tokens** (oħloq, irrevoka,
-ikkopja darba biss).
+Il-kmandi `tokens` jeħtieġu credential **admin**. Tista' wkoll tiġġestixxi t-tokens fid-dashboard taħt **Settings → Access Tokens** (oħloq, irtira, ikkopja-darba).
+
+Token ma jistax qatt jinħoloq b'privileġġ akbar minn dak li għandu l-ħallieq tiegħu. Token `admin` jista' joħloqu biss l-operatur: sessjoni tad-dashboard, is-CLI lokali fuq is-server innifsu, jew `omniroute connect` bil-password. Credentials tal-magni (token ta' aċċess `admin`, jew ċavetta API bl-iskop `manage`/`admin`) jistgħu joħolqu biss tokens `write` u `read`; jekk jitolbu `--scope admin`, jirritornaw `403`. It-tneħħija tal-login ma tiftaħx il-minting: token ta' aċċess ta' kwalunkwe skop huwa credential li r-rotot dejjem awtentikati jaċċettaw, għalhekk sejħa anonima tirċievi `401` f'kwalunkwe skop.
 
 ---
 
-## Konfigurazzjoni ta’ CLI tal-coding mill-katalgu remot
+## Il-konfigurazzjoni ta' CLI tal-kodifikazzjoni mill-katalgu remot
 
-`omniroute configure` jaqra l-katalgu live tal-mudelli tas-**server attiv** u
-jikteb konfigurazzjoni fuq il-magna **tiegħek**.
+`omniroute configure` jaqra l-katalgu tal-mudelli live tas-**server attiv** u jikteb konfigurazzjoni fuq **il-magna** tiegħek.
 
 ```bash
 omniroute configure codex
-#   Fornituri: glm, kmc, ollamacloud, opencode-go, …
-#   Fornitur: glm
-#   ID tal-mudell: glm/glm-5.2
-#   ✔ Inkiteb ~/.codex/glm52.config.toml
-#   Użah:  codex --profile glm52
+#   Providers: glm, kmc, ollamacloud, opencode-go, …
+#   Provider: glm
+#   Model id: glm/glm-5.2
+#   ✔ Miktub ~/.codex/glm52.config.toml
+#   Uża: codex --profile glm52
 
-# mhux interattiv
+# mingħajr interazzjoni
 omniroute configure codex --provider glm --model glm/glm-5.2 --name glm52
 
-# żomm mudell użat ta’ spiss fil-quċċata tal-picker interattiv
+# żomm mudell użat spiss fil-quċċata tal-għażla interattiva
 omniroute configure codex --provider glm --model glm/glm-5.2 --favorite --yes
 ```
 
-Il-picker iżomm biss l-IDs tal-mudelli (qatt URLs jew kredenzjali) fil-fajl
-lokali `model-preferences.json`, skont il-kuntest u l-mira CLI. Il-favoriti
-jidhru qabel l-għażliet riċenti; uża `--unfavorite` biex tneħħi mudell magħżul
-mil-lista ta’ dak il-kuntest/mira.
+L-għażel iżomm biss il-model IDs (qatt mhux URLs jew credentials) fil-fajl lokali `model-preferences.json`, fil-limiti tal-kuntest u tal-mira tas-CLI. Il-favoriti jintweru qabel l-għażliet reċenti; uża `--unfavorite` biex titneħħa mudell magħżul mil-lista tal-kuntest/mira.
 
-Il-profil miktub jirreferi għall-inference key permezz ta’ env var
-(`OMNIROUTE_API_KEY`) — is-secret qatt ma jinkiteb fuq id-disk. Għas-setup
-bażiku ta’ Codex li jsir darba biss (il-blokka `[model_providers.omniroute]`),
-ara [CODEX-CLI-CONFIGURATION.md](./CODEX-CLI-CONFIGURATION.md).
+Il-profil miktub jirreferi għaċ-ċavetta tal-inferenza permezz ta' varjabbli tal-ambjent (`OMNIROUTE_API_KEY`). Is-sigriet qatt ma jinkiteb fuq id-disk. Għas-setup bażiku ta' Codex darba (il-blokk `[model_providers.omniroute]`), ara [CODEX-CLI-CONFIGURATION.md](./CODEX-CLI-CONFIGURATION.md).
 
-### Tħaddim ta’ CLI kontra s-server remot (mingħajr ma tinkiteb konfigurazzjoni)
+### Ibda CLI kontra r-remot (mingħajr ma tinkiteb konfigurazzjoni)
 
-`omniroute run <target>` jirrispetta wkoll il-kuntest attiv: il-URL bażi remot
-u l-kredenzjali tal-kuntest jiġu injettati biss fil-proċess li jinħoloq.
+`omniroute run <target>` jirrispetta wkoll il-kuntest attiv: l-URL bażi remota u l-credential tal-kuntest jiġu injettati fil-proċess imnedi biss.
 
 ```bash
 omniroute connect 192.168.0.15
-omniroute run claude   --model openai/gpt-5.4          # Claude Code → remot
+omniroute run claude   --model openai/gpt-5.4          # Claude Code → remote
 omniroute run gemini   --model glm/glm-5.2 -- --skip-trust -p "hello"
 omniroute run opencode --model glm/glm-5.2 -- run "reply OK"
 
-# Ara minn qabel eżattament x’se jinħoloq (ISMIJIET tal-KEYS tal-env biss, qatt il-valuri):
+# Ara eżattament dak li jiġi mnedi (ismijiet ta' KEY tal-env biss, mhux il-valuri):
 omniroute run codex --dry-run --json
 ```
 
-Miri: `claude`, `codex`, `aider`, `goose`, `opencode`, `qwen`, `gemini`
-(sors uniku: `bin/cli/cli-manifest.mjs`). Qwen u Gemini jitħaddmu b’home
-temporanju u iżolat li jitneħħa mal-ħruġ, għalhekk it-tnedija qatt ma tmiss —
-jew tnixxi ġo — il-konfigurazzjoni personali tal-għodda tiegħek.
+Il-mira: `claude`, `codex`, `aider`, `goose`, `opencode`, `qwen`, `gemini` (sors wieħed: `bin/cli/cli-manifest.mjs`). Qwen u Gemini jaħdmu b'dar iżolata temporanja li titneħħa meta joħorġu, għalhekk it-tnedija qatt ma tmiss jew titnixxa fil-konfigurazzjoni personali tal-għodda tiegħek.
 
-### Kmandi ta’ setup għal kull CLI
+### Kmandi ta' setup għal kull CLI
 
-Kull CLI appoġġjat għandu kmand ta’ setup li jaħdem mas-server remot (kollha
-jirrispettaw il-kuntest attiv, jew `--remote <url> --api-key <key>`):
+Kull CLI appoġġjat għandu kmand ta' setup li jaf bir-remot (kollha jirrispettaw il-kuntest attiv, jew `--remote <url> --api-key <key>`):
 
-| CLI         | Kmand                      | X’jikteb                                                                                                                                                                                                |
-| ----------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Codex       | `omniroute setup-codex`    | profili `~/.codex/<name>.config.toml` (wieħed għal kull mudell)                                                                                                                                         |
-| Claude Code | `omniroute setup-claude`   | `~/.claude/profiles/<name>/settings.json` (wieħed għal kull mudell)                                                                                                                                     |
-| OpenCode    | `omniroute setup-opencode` | `~/.config/opencode/opencode.json` — il-fornitur `omniroute` kompatibbli ma’ OpenAI bil-mudelli kollha tal-katalgu (ħaddem `opencode -m omniroute/<model>`)                                             |
-| Cline       | `omniroute setup-cline`    | `~/.cline/data/{globalState,secrets}.json` (modalità CLI) + jistampa s-settings tal-estensjoni ta’ VS Code biex twaħħalhom (kompatibbli ma’ OpenAI, Base URL **mingħajr** `/v1`)                        |
-| Kilo Code   | `omniroute setup-kilo`     | `~/.local/share/kilo/auth.json` (CLI) + settings `kilocode.*` ta’ VS Code — kompatibbli ma’ OpenAI, Base URL **b’** `/v1`                                                                               |
-| Continue    | `omniroute setup-continue` | `~/.continue/config.yaml` (VS Code/JetBrains + CLI `cn`) — `provider: openai`, `apiBase` **b’** `/v1`, ċavetta permezz ta’ `${{ secrets.OMNIROUTE_API_KEY }}`                                           |
-| Cursor      | `omniroute setup-cursor`   | jistampa l-passi fl-app (Settings → Models → Override OpenAI Base URL **b’** `/v1` + ċavetta + mudell). Il-konfigurazzjoni ta’ Cursor hija SQLite opaka — il-pannell taċ-chat biss                      |
-| Roo Code    | `omniroute setup-roo`      | jikteb JSON għall-importazzjoni ta’ Roo (`~/.omniroute/roo-settings.json`) + jistabbilixxi `roo-cline.autoImportSettingsPath` + jistampa l-passi tal-UI (kompatibbli ma’ OpenAI, Base URL **b’** `/v1`) |
-| Crush       | `omniroute setup-crush`    | `~/.config/crush/crush.json` — fornitur `openai-compat`, `base_url` **b’** `/v1`, ċavetta permezz ta’ `$OMNIROUTE_API_KEY`                                                                              |
-| Goose       | `omniroute setup-goose`    | `~/.config/goose/config.yaml` (`GOOSE_PROVIDER=openai` + `OPENAI_HOST` **mingħajr** `/v1` + `GOOSE_MODEL`) + istruzzjonijiet għall-varjabbli tal-ambjent                                                |
-| Aider       | `omniroute setup-aider`    | `~/.aider.conf.yml` (`openai-api-base` **mingħajr** `/v1` + `model: openai/<id>`) + istruzzjonijiet għall-varjabbli tal-ambjent (`aider --message --yes`)                                               |
-| Qwen Code   | `omniroute setup-qwen`     | entrata V4 `modelProviders.openai` f’`~/.qwen/settings.json` + `OMNIROUTE_API_KEY` f’`~/.qwen/.env`                                                                                                     |
+| CLI         | Kmand                      | Dak li jikteb                                                                                                                                                                                        |
+| ----------- | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Codex       | `omniroute setup-codex`    | profili `~/.codex/<name>.config.toml` (għal kull mudell)                                                                                                                                             |
+| Claude Code | `omniroute setup-claude`   | `~/.claude/profiles/<name>/settings.json` (għal kull mudell)                                                                                                                                         |
+| OpenCode    | `omniroute setup-opencode` | `~/.config/opencode/opencode.json`: il-provider `omniroute` kompatibbli ma' openai b'kull mudell tal-katalgu (mexxi `opencode -m omniroute/<model>`)                                                 |
+| Cline       | `omniroute setup-cline`    | `~/.cline/data/{globalState,secrets}.json` (modalità CLI) + jistampa s-settings tal-estensjoni tal-VS Code biex tiġi mmexxija (kompatibbli ma' OpenAI, Base URL **mingħajr** `/v1`)                  |
+| Kilo Code   | `omniroute setup-kilo`     | `~/.local/share/kilo/auth.json` (CLI) + settings tal-VS Code `kilocode.*`: kompatibbli ma' OpenAI, Base URL **b'** `/v1`                                                                             |
+| Continue    | `omniroute setup-continue` | `~/.continue/config.yaml` (VS Code/JetBrains + `cn` CLI): `provider: openai`, `apiBase` **b'** `/v1`, ċavetta permezz ta' `${{ secrets.OMNIROUTE_API_KEY }}`                                         |
+| Cursor      | `omniroute setup-cursor`   | jistampa l-passi ġewwa l-app (Settings → Models → Override OpenAI Base URL **b'** `/v1` + ċavetta + mudell). Il-konfigurazzjoni tal-Cursor hija SQLite mhux trasparenti, għalhekk biss il-chat panel |
+| Roo Code    | `omniroute setup-roo`      | jikteb JSON ta' importazzjoni għal Roo (`~/.omniroute/roo-settings.json`) + jissettja `roo-cline.autoImportSettingsPath` + jistampa l-passi tal-UI (kompatibbli ma' OpenAI, Base URL **b'** `/v1`)   |
+| Crush       | `omniroute setup-crush`    | `~/.config/crush/crush.json`: provider `openai-compat`, `base_url` **b'** `/v1`, ċavetta permezz ta' `$OMNIROUTE_API_KEY`                                                                            |
+| Zed         | `omniroute setup-zed`      | `~/.config/zed/settings.json`: `language_models.openai_compatible.omniroute`, `api_url` **b'** `/v1`, Zed jaqra č-ċavetta minn `$OMNIROUTE_API_KEY` (qatt ma tinkiteb)                               |
+| Goose       | `omniroute setup-goose`    | `~/.config/goose/config.yaml` (`GOOSE_PROVIDER=openai` + `OPENAI_HOST` **mingħajr** `/v1` + `GOOSE_MODEL`) + env recipe                                                                              |
+| Aider       | `omniroute setup-aider`    | `~/.aider.conf.yml` (`openai-api-base` **mingħajr** `/v1` + `model: openai/<id>`) + env recipe (`aider --message --yes`)                                                                             |
+| Qwen Code   | `omniroute setup-qwen`     | `~/.qwen/settings.json` entry V4 `modelProviders.openai` + `OMNIROUTE_API_KEY` f'`~/.qwen/.env`                                                                                                      |
 
 ```bash
-# OpenCode (fornitur kompatibbli ma’ OpenAI, il-mudelli kollha tal-katalgu, VPS remot)
+# OpenCode (provider kompatibbli ma' openai, il-mudelli kollha tal-katalgu, VPS remota)
 omniroute setup-opencode --remote http://192.168.0.15:20128 --api-key oma_live_xxx
 omniroute setup-opencode --only glm,kimi        # żomm biss il-mudelli li jaqblu
-opencode -m omniroute/glm/glm-5.2 "..."          # l-ewwel esporta OMNIROUTE_API_KEY
+opencode -m omniroute/glm/glm-5.2 "..."          # esporta OMNIROUTE_API_KEY l-ewwel
 ```
 
-> OpenCode għandu wkoll integrazzjoni aktar avvanzata permezz ta’ **plugin**: `omniroute setup opencode`
-> (issa konxja tal-konfigurazzjoni remota permezz ta’ `--remote`) tinstalla `@omniroute/opencode-plugin`.
-> `setup-opencode` hija l-alternattiva ħafifa kompatibbli ma’ OpenAI. Iċ-ċavetta tal-API
-> tiġi referenzjata permezz ta’ `{env:OMNIROUTE_API_KEY}` — qatt ma tinkiteb fuq id-diska.
+> OpenCode għandu wkoll integrazzjoni **plugin** aktar rikka: `omniroute setup opencode` (issa jaf bir-remot permezz ta' `--remote`) jinstalla `@omniroute/opencode-plugin`.
+> `setup-opencode` huwa alternattiva ħafifa kompatibbli ma' openai. Iċ-ċavetta tal-API tiġi rreferita permezz ta' `{env:OMNIROUTE_API_KEY}`, u qatt ma tinkiteb fuq id-disk.
 >
-> Fuq OpenCode v2, minflok uża `@omniroute/opencode-plugin-v2`: l-istess katalgu,
-> kuntratt differenti tal-loader. Dan jaqra ċ-ċavetta mill-maħżen tal-kredenzjali
-> ta’ OpenCode stess meta l-integrazzjoni tkun konnessa, għalhekk gateway remot ma jeħtieġ
-> ebda ċavetta f’`opencode.json`.
+> Fuq OpenCode v2, uża minflok `@omniroute/opencode-plugin-v2`: l-istess katalgu, kuntratt ta' loader differenti. Jaqra č-ċavetta mill-ħażna tal-credentials tal-OpenCode innifsu meta l-integrazzjoni tkun konnessa, għalhekk gateway remota ma teħtieġ l-ebda ċavetta f'`opencode.json`.
 
 ---
 

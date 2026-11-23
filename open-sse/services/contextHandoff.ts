@@ -642,7 +642,7 @@ ${decisions}
 <messages_processed>${payload.messageCount}</messages_processed>
 </context_handoff>
 
-Continues conversation transfered from ${escapedPrev} to ${escapedCurr}.
+Continues conversation transferred from ${escapedPrev} to ${escapedCurr}.
 The context above contains a concise summary of prior work.
 Continue seamlessly from where the session left off.`;
 }

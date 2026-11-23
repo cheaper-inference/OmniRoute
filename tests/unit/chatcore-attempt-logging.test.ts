@@ -9,6 +9,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { CALL_LOG_SETTLE_TIMEOUT_MS } from "../helpers/callLogSettle.ts";
 
 const testDataDir = fs.mkdtempSync(path.join(os.tmpdir(), "omni-attempt-logging-test-"));
 process.env.DATA_DIR = testDataDir;
@@ -57,12 +58,13 @@ function baseCtx(overrides: Record<string, unknown> = {}) {
   } as Parameters<typeof persistAttemptLogs>[1];
 }
 
-async function pollForCallLog(traceId: string, tries = 120) {
+async function pollForCallLog(traceId: string, timeoutMs = CALL_LOG_SETTLE_TIMEOUT_MS) {
   // #14451: call_logs.id is a fresh UUID. The dashboard traceId is stored on
   // correlation_id so a test can still find the attempt without sharing a PK.
-  for (let i = 0; i < tries; i++) {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
     const rows = await getCallLogs({ correlationId: traceId, limit: 5 });
-    if (rows[0]?.id) {
+    if (rows[0]?.id && rows[0].detailState === "ready") {
       const row = await getCallLogById(rows[0].id);
       if (row) return row as Record<string, unknown>;
     }

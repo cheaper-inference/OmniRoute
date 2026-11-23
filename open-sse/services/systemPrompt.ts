@@ -204,10 +204,13 @@ function markInjected(body: Record<string, unknown>): void {
  *     recency position, preserving the "After Prompt" semantics.
  *
  * @param {object} body - Translated request body (target shape resolved)
- * @param {object} [opts] - `{ targetFormat }` from the resolved wire target
+ * @param {object} [opts] - `{ targetFormat, provider }` from the resolved wire target
  * @returns {object} Modified body
  */
-export function injectSystemPromptPostTranslation<T>(body: T, opts?: { targetFormat?: string }): T {
+export function injectSystemPromptPostTranslation<T>(
+  body: T,
+  opts?: { targetFormat?: string; provider?: string | null }
+): T {
   const cfg = getConfig();
   if (!cfg.enabled) return body;
   const prefix = cfg.prefixPrompt || "";
@@ -227,9 +230,18 @@ export function injectSystemPromptPostTranslation<T>(body: T, opts?: { targetFor
   // invalid there. When the translated body has no system field at all, CREATE
   // it (combined) — previously this body shape fell through the messages[]
   // early-return and silently got zero injection.
+  // An anthropic-compatible relay can still carry system-role turns inside
+  // messages[] when the opt-in mid-conversation-system passthrough kept them in
+  // place (#16236 — ANTHROPIC_COMPATIBLE_MID_CONVERSATION_SYSTEM + client beta;
+  // with it off every turn is hoisted before this point, so nothing changes);
+  // those are conversation turns, not the prompt carrier — writing the suffix
+  // onto the LAST one would move it every turn and break the cached prefix.
+  // Native `claude` keeps its existing placement.
   if (targetFormat === "claude" || result.system !== undefined) {
     const hasSystemRole = Array.isArray(result.messages) && result.messages.some(isSystemMessage);
-    if (!hasSystemRole) {
+    const keptTurnsOnRelay =
+      targetFormat === "claude" && !!opts?.provider?.startsWith("anthropic-compatible-");
+    if (keptTurnsOnRelay || !hasSystemRole) {
       if (typeof result.system === "string") {
         let sys = result.system;
         if (prefix) sys = prefix + "\n\n" + sys;

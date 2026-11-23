@@ -12,10 +12,10 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ### پیشنیازها
 
-- **Node.js** `>=22.22.3 <23`، یا `>=24.0.0 <27` (پیشنهادشده: 24 LTS)
-- **npm** 10+
+- **Node.js** نسخهٔ `>=22.22.2 <23` یا `>=24.0.0 <27` (پیشنهادی: 24 LTS)
+- **npm** نسخهٔ 10+
 
-> **کاربران npm v11+ ‏(Node 24+):** پس از `npm install`، بررسی کنید که ماژولهای بومی نصب شده باشند:
+> **کاربران npm v11+‏ (Node 24+):** پس از `npm install`، بررسی کنید که ماژولهای بومی نصب شده باشند:
 > `node -e "require('better-sqlite3')"`. اگر با خطای `MODULE_NOT_FOUND` مواجه شد،
 > دستور `npm approve-scripts better-sqlite3 && npm install` را اجرا کنید. به
 > [عیبیابی](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module) مراجعه کنید.
@@ -33,34 +33,34 @@ npm install
 ### متغیرهای محیطی
 
 ```bash
-# فایل .env خود را از روی قالب ایجاد کنید
+# فایل .env خود را از روی الگو ایجاد کنید
 cp .env.example .env
 
-# مقادیر محرمانه موردنیاز را تولید کنید
+# مقادیر محرمانهٔ موردنیاز را تولید کنید
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
 متغیرهای کلیدی برای توسعه:
 
-| متغیر                  | مقدار پیشفرض توسعه       | توضیحات                 |
-| ---------------------- | ------------------------ | ----------------------- |
-| `PORT`                 | `20128`                  | پورت سرور               |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | آدرس پایه برای فرانتاند |
-| `JWT_SECRET`           | (در بالا تولید کنید)     | مقدار محرمانه امضای JWT |
-| `INITIAL_PASSWORD`     | `CHANGEME`               | گذرواژه نخستین ورود     |
-| `APP_LOG_LEVEL`        | `info`                   | سطح جزئیات گزارشها      |
+| متغیر                  | مقدار پیشفرض توسعه       | توضیحات                  |
+| ---------------------- | ------------------------ | ------------------------ |
+| `PORT`                 | `20128`                  | پورت سرور                |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | نشانی پایه برای فرانتاند |
+| `JWT_SECRET`           | (در بالا تولید کنید)     | کلید محرمانهٔ امضای JWT  |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | گذرواژهٔ ورود نخست       |
+| `APP_LOG_LEVEL`        | `info`                   | سطح جزئیات گزارشها       |
 
 ### تنظیمات داشبورد
 
-داشبورد کلیدهای رابط کاربری را برای قابلیتهایی ارائه میدهد که از طریق متغیرهای محیطی نیز قابل پیکربندی هستند:
+داشبورد برای قابلیتهایی که از طریق متغیرهای محیطی نیز قابل پیکربندی هستند، گزینههای روشن/خاموش رابط کاربری ارائه میدهد:
 
-| محل تنظیمات       | کلید             | توضیحات                                            |
+| محل تنظیمات       | گزینه            | توضیحات                                            |
 | ----------------- | ---------------- | -------------------------------------------------- |
 | تنظیمات ← پیشرفته | حالت اشکالزدایی  | فعالسازی گزارش درخواستهای اشکالزدایی (رابط کاربری) |
-| تنظیمات ← عمومی   | نمایش نوار کناری | نمایش/پنهانسازی بخشهای نوار کناری                  |
+| تنظیمات ← عمومی   | نمایش نوار کناری | نمایش/پنهانکردن بخشهای نوار کناری                  |
 
-این تنظیمات در پایگاه داده ذخیره میشوند و پس از راهاندازیهای مجدد باقی میمانند؛ در صورت تنظیم شدن، مقادیر پیشفرض متغیرهای محیطی را بازنویسی میکنند.
+این تنظیمات در پایگاه داده ذخیره میشوند و پس از راهاندازی مجدد نیز باقی میمانند؛ همچنین در صورت تنظیمشدن، مقادیر پیشفرض متغیرهای محیطی را بازنویسی میکنند.
 
 ### اجرای محلی
 
@@ -68,54 +68,49 @@ echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 # حالت توسعه (بارگذاری مجدد خودکار)
 npm run dev
 
-# ساخت نسخه تولید
-npm run build    # next build ← .build/next/، سپس assembleStandalone ← dist/
+# ساخت نسخهٔ تولیدی
+npm run build    # next build → .build/next/ سپس assembleStandalone → dist/
 npm run start
 
-# کامپایل سریعِ صرفاً بکاند/API برای تغییرات مشارکتکنندگان
+# کامپایل سریع و صرفاً بکاند/API برای تغییرات مشارکتکنندگان
 npm run build:contributor
 
 # ساخت انتشار (ساخت مجدد پاک + نشانگر HEAD — الزامی برای استقرار)
-npm run build:release   # rm -rf .build dist، سپس ساخت + نوشتن dist/BUILD_SHA
+npm run build:release   # rm -rf .build dist && build + فایل dist/BUILD_SHA را مینویسد
 
-# پیکربندی رایج پورت
+# پیکربندی متداول پورت
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-ساخت مشارکتکننده فقط اعتبارسنجی کامپایل را انجام میدهد: این فرایند توزیع مستقل را مونتاژ نمیکند
-و داراییهای اختیاری بستهبندی بومی را نیز نمیسازد. هنگامی که نیاز دارید بسته قابل انتشار را
-اعتبارسنجی کنید، از ساخت معمول نسخه تولید استفاده کنید.
+ساخت مخصوص مشارکتکنندگان فقط اعتبارسنجی کامپایل را انجام میدهد: این فرایند توزیع مستقل را مونتاژ نمیکند و داراییهای اختیاری بستهبندی بومی را نمیسازد. هنگامی که نیاز دارید بستهٔ قابلانتشار را اعتبارسنجی کنید، از ساخت معمول نسخهٔ تولیدی استفاده کنید.
 
 ### ساختار خروجی ساخت
 
-| دایرکتوری | محتوا                                                                                 | ردیابیشده |
+| پوشه      | محتویات                                                                               | رهگیریشده |
 | --------- | ------------------------------------------------------------------------------------- | --------- |
 | `src/`    | کد منبع برنامه (TypeScript / TSX)                                                     | بله       |
 | `.build/` | فایلهای میانی — خروجی `next build` (نادیدهگرفتهشده توسط git، `distDir = .build/next`) | خیر       |
-| `dist/`   | بسته قابل انتشار — مونتاژشده توسط `assembleStandalone` (نادیدهگرفتهشده توسط git)      | خیر       |
+| `dist/`   | بستهٔ قابلانتشار — مونتاژشده توسط `assembleStandalone` (نادیدهگرفتهشده توسط git)      | خیر       |
 
-خط لوله ساخت در یک مرحله اجرا میشود:
+خط لولهٔ ساخت در یک مرحله اجرا میشود:
 
 ```
 npm run build
   └─ next build → .build/next/standalone  (خروجی Next.js)
-  └─ assembleStandalone()                 (کپی فایلهای مستقل + ایستا + عمومی + داراییهای بومی)
-       └─ خروجی: dist/                    (server.js، .next/static/، public/، node_modules/)
+  └─ assembleStandalone()                 (فایلهای مستقل + ایستا + عمومی + داراییهای بومی را کپی میکند)
+       └─ خروجی: dist/                    (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` علاوه بر این، ابتدا هر دو دایرکتوری را پاک میکند و
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) را بهعنوان نشانگر یکپارچگی استقرار مینویسد.
+`npm run build:release` علاوه بر این، ابتدا هر دو پوشه را پاک میکند و
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) را بهعنوان نشانگر صحت استقرار مینویسد.
 
-`npm run build:contributor` از پروفایل ساخت صرفاً بکاند استفاده میکند. هنگام ساخت، فایلهای
-رابط کاربری داشبورد را موقتاً با فایلهای جایگزین عوض میکند، کنترلکنندههای مسیر API را نگه میدارد و پس از ساخت، فایلهای اصلی را
-بازیابی میکند. برای تغییراتی که بر رابط کاربری داشبورد اثر میگذارند یا برای اعتبارسنجی کامل
-انتشار، از `npm run build` استفاده کنید؛ پروفایل مشارکتکننده جایگزین ساخت انتشار نیست.
+`npm run build:contributor` از نمایهٔ ساخت صرفاً بکاند استفاده میکند. هنگام ساخت، فایلهای رابط کاربری داشبورد را بهطور موقت با فایلهای جایگزین ساده عوض میکند، کنترلکنندههای مسیر API را نگه میدارد و پس از ساخت، فایلهای اصلی را بازیابی میکند. برای تغییراتی که بر رابط کاربری داشبورد تأثیر میگذارند یا برای اعتبارسنجی کامل انتشار، از `npm run build` استفاده کنید؛ نمایهٔ مشارکتکنندگان جایگزینی برای ساخت انتشار نیست.
 
-> **نکته استقرار VPS:** دایرکتوری ایمیج راهدور `/usr/lib/node_modules/omniroute/app/`
-> بدون تغییر باقی مانده است. مهارتهای استقرار با استفاده از rsync محتویات `dist/` را در آن کپی میکنند.
-> فقط مسیر خروجی ساخت درون مخزن تغییر کرده است (`app/` ← `dist/`).
+> **نکتهٔ استقرار روی VPS:** پوشهٔ ایمیج راهدور `/usr/lib/node_modules/omniroute/app/`
+> بدون تغییر باقی مانده است. ابزارهای استقرار، محتویات `dist/` را با rsync در آن همگامسازی میکنند.
+> فقط مسیر خروجی ساخت درون مخزن تغییر کرده است (`app/` → `dist/`).
 
-آدرسهای پیشفرض:
+نشانیهای پیشفرض:
 
 - **داشبورد**: `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
@@ -283,65 +278,72 @@ npm run test:combo:live:vps:failover     # یک سناریوی واقعی failov
 
 ---
 
-## Project Structure
+## ساختار پروژه
 
 ```
 src/                        # TypeScript (.ts / .tsx)
-├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # Dashboard pages (23 sections)
-│   ├── api/                # API routes (51 directories)
-│   └── login/              # Auth pages (.tsx)
-├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
-├── lib/                    # Core business logic (.ts)
-│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
-│   ├── acp/                # Agent Communication Protocol registry
-│   ├── compliance/         # Compliance policy engine
-│   ├── db/                 # SQLite database layer (110 top-level modules + 130 migrations)
-│   ├── memory/             # Persistent conversational memory
-│   ├── oauth/              # OAuth providers, services, and utilities
-│   ├── skills/             # Extensible skill framework
-│   ├── usage/              # Usage tracking and cost calculation
-│   └── localDb.ts          # Re-export layer only — never add logic here
-├── middleware/              # Request middleware (promptInjectionGuard)
-├── mitm/                   # MITM proxy (cert, DNS, target routing)
+├── app/                    # مسیریاب برنامه Next.js 16
+│   ├── (dashboard)/        # صفحات داشبورد (۲۳ بخش)
+│   ├── api/                # مسیرهای API (۵۱ دایرکتوری)
+│   └── login/              # صفحات احراز هویت (.tsx)
+├── domain/                 # موتور سیاستگذاری (policyEngine، comboResolver، costRules و غیره)
+├── lib/                    # منطق اصلی کسبوکار (.ts)
+│   ├── a2a/                # سرور پروتکل Agent-to-Agent v0.3
+│   ├── acp/                # رجیستری Agent Communication Protocol
+│   ├── compliance/         # موتور سیاستگذاری انطباق
+│   ├── db/                 # ماژولهای دامنه SQLite + ۱۳۰ مهاجرت
+│   ├── memory/             # حافظه پایدار مکالمه
+│   ├── oauth/              # ارائهدهندگان، سرویسها و ابزارهای OAuth
+│   ├── skills/             # چارچوب مهارت توسعهپذیر
+│   ├── usage/              # ردیابی میزان استفاده و محاسبه هزینه
+│   └── localDb.ts          # فقط لایه بازصادرکردن — هرگز منطق را اینجا اضافه نکنید
+├── middleware/              # میانافزار درخواست (promptInjectionGuard)
+├── mitm/                   # پراکسی MITM (گواهی، DNS، مسیریابی مقصد)
 ├── shared/
-│   ├── components/         # React components (.tsx)
-│   ├── constants/          # Provider definitions (329), MCP scopes, routing strategies
-│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
-│   └── validation/         # Zod v4 schemas
-└── sse/                    # SSE proxy pipeline
+│   ├── components/         # مؤلفههای React (.tsx)
+│   ├── constants/          # تعاریف ارائهدهندگان (۳۲۹)، محدودههای MCP، ۲۰ راهبرد مسیریابی
+│   ├── utils/              # قطعکننده مدار، پاکساز و ابزارهای احراز هویت
+│   └── validation/         # شِماهای Zod v4
+└── sse/                    # خط لوله پراکسی SSE
 
-open-sse/                   # @omniroute/open-sse workspace
-├── executors/              # 89 executor implementation modules
-├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
-├── mcp-server/             # MCP server (107 tools, 3 transports, 32 scopes)
-├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
-├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Responses API transformer
-└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
+open-sse/                   # فضای کاری @omniroute/open-sse
+├── executors/              # ۱۵۰ ماژول اجراکننده (کلاسهای اجراکننده + ابزارهای ویژه هر ارائهدهنده)
+├── handlers/               # ۱۱ کنترلکننده درخواست (گفتوگو، پاسخها، جاسازیها، تصاویر و غیره)
+├── mcp-server/             # سرور MCP (۱۱۰ ابزار منحصربهفرد، ۳ انتقال، ۳۳ محدوده)
+├── services/               # ۱۷۸ سرویس سطحبالا (combo، autoCombo، rateLimitManager و غیره)
+├── translator/             # مترجمهای قالب (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # تبدیلکننده Responses API
+└── utils/                  # ۲۲ ماژول کاربردی (جریان، TLS، پراکسی، ثبت رویداد)
 
-electron/                   # Electron desktop app (cross-platform)
+electron/                   # برنامه دسکتاپ Electron (چندسکویی)
 
 tests/
-├── unit/                   # Node.js test runner (122 test files)
-├── integration/            # Integration tests
-├── e2e/                    # Playwright tests
-├── security/               # Security tests
-├── translator/             # Translator-specific tests
-└── load/                   # Load tests
+├── unit/                   # اجراکننده آزمون Node.js (۱٬۵۷۴ فایل آزمون)
+├── integration/            # آزمونهای یکپارچهسازی
+├── e2e/                    # آزمونهای Playwright
+├── security/               # آزمونهای امنیتی
+├── translator/             # آزمونهای ویژه مترجم
+└── load/                   # آزمونهای بار
 
-docs/                       # Documentation
-├── ARCHITECTURE.md         # System architecture
-├── API_REFERENCE.md        # All endpoints
-├── USER_GUIDE.md           # Provider setup, CLI integration
-├── TROUBLESHOOTING.md      # Common issues
-├── MCP-SERVER.md           # MCP server (107 tools)
-├── A2A-SERVER.md           # A2A agent protocol
-├── AUTO-COMBO.md           # Auto-combo engine
-├── CLI-TOOLS.md            # CLI tools integration
-├── COVERAGE_PLAN.md        # Test coverage improvement plan
-├── openapi.yaml            # OpenAPI specification
-└── adr/                    # Architecture Decision Records
+docs/
+├── adr/                     # سوابق تصمیمهای معماری
+├── architecture/            # معماری و تابآوری سیستم
+├── comparison/              # مقایسه OmniRoute با جایگزینها
+├── compression/             # راهنماها و قواعد فشردهسازی
+├── dev/                     # راهنماهای توسعه
+├── diagrams/                # نمودارهای معماری
+├── frameworks/              # MCP، A2A، OpenCode، حافظه، مهارتها
+├── guides/                  # راهنمای کاربر، Docker، راهاندازی، عیبیابی
+├── i18n/                    # ترجمههای بینالمللیشده README
+├── marketing/               # مطالب بازاریابی
+├── ops/                     # استقرار، پراکسی، پوشش آزمون، انتشارها
+├── providers/               # مستندات ویژه ارائهدهندگان
+├── reference/               # مرجع API، متغیرهای محیطی، ابزارهای CLI، سطوح رایگان
+├── releases/                # یادداشتهای انتشار
+├── routing/                 # موتور ترکیب خودکار، بازپخش استدلال
+├── screenshots/             # تصاویر داشبورد
+├── security/                # محدودیتهای ایمنی، انطباق، پنهانکاری، توکنها
+└── specs/                   # مشخصات طراحی
 ```
 
 ---
@@ -388,22 +390,25 @@ docs/                       # Documentation
 - [ ] بررسی Lint با موفقیت انجام میشود (`npm run lint`)
 - [ ] Build با موفقیت انجام میشود (`npm run build`)
 - [ ] نوعهای TypeScript برای توابع و رابطهای عمومی جدید اضافه شدهاند
-- [ ] هیچ secret یا مقدار fallback بهصورت hardcoded وجود ندارد
-- [ ] اطلاعات احراز هویت عمومی upstream از طریق `resolvePublicCred()` تعبیه شدهاند (نگاه کنید به [`docs/security/PUBLIC_CREDS.md`](./docs/security/PUBLIC_CREDS.md)) و هرگز بهصورت مقادیر literal نیستند
-- [ ] پاسخهای خطا از طریق `buildErrorBody()` / `sanitizeErrorMessage()` هدایت میشوند — هیچ stack trace خامی در بدنه پاسخها وجود ندارد (نگاه کنید به [`docs/security/ERROR_SANITIZATION.md`](./docs/security/ERROR_SANITIZATION.md))
-- [ ] فرمانهای Shell (`exec` / `spawn`) مقادیر زمان اجرا را از طریق `env` ارسال میکنند، نه از طریق string interpolation
+- [ ] هیچ مقدار محرمانه یا مقدار جایگزینی بهصورت hardcoded وجود ندارد
+- [ ] اطلاعات احراز هویت عمومی upstream از طریق `resolvePublicCred()` تعبیه شدهاند (به [`docs/security/PUBLIC_CREDS.md`](./docs/security/PUBLIC_CREDS.md) مراجعه کنید) و هرگز بهصورت literal درج نشدهاند
+- [ ] پاسخهای خطا از طریق `buildErrorBody()` / `sanitizeErrorMessage()` پردازش میشوند — هیچ stack trace خامی در بدنه پاسخها وجود ندارد (به [`docs/security/ERROR_SANITIZATION.md`](./docs/security/ERROR_SANITIZATION.md) مراجعه کنید)
+- [ ] فرمانهای Shell (`exec` / `spawn`) مقادیر زمان اجرا را از طریق `env` ارسال میکنند، نه از طریق درونیابی رشتهای
 - [ ] همه ورودیها با schemaهای Zod اعتبارسنجی شدهاند
-- [ ] برای تغییرات قابل مشاهده توسط کاربر، **fragment** مربوط به Changelog در مسیر `changelog.d/{features|fixes|maintenance}/<PR>-<slug>.md` اضافه شده است (نگاه کنید به [`changelog.d/README.md`](./changelog.d/README.md)) — فایل `CHANGELOG.md` را مستقیماً ویرایش **نکنید**؛ fragmentها هنگام انتشار تجمیع میشوند و هرگز میان PRها تداخل ایجاد نمیکنند
+- [ ] برای تغییرات قابل مشاهده برای کاربر، یک **قطعه** Changelog در مسیر `changelog.d/{features|fixes|maintenance}/<PR>-<slug>.md` اضافه شده است (به [`changelog.d/README.md`](./changelog.d/README.md) مراجعه کنید) — فایل `CHANGELOG.md` را مستقیماً ویرایش **نکنید**؛ قطعهها هنگام انتشار تجمیع میشوند و هرگز میان PRها تداخل ایجاد نمیکنند
 - [ ] مستندات بهروزرسانی شدهاند (در صورت نیاز)
-- [ ] هیچ هشدار جدیدی از CodeQL / Secret-Scanning ایجاد نشده است، یا هر مورد با توجیه فنی و ارجاع به سند مرتبط در `docs/security/` رد شده است
-- [ ] مسیرهایی که فرایندهای فرزند ایجاد میکنند (`/api/mcp/`، `/api/cli-tools/runtime/`) در `src/server/authz/routeGuard.ts` بهعنوان `isLocalOnlyPath()` طبقهبندی شدهاند — نگاه کنید به [قانون قطعی شماره ۱۵](docs/security/ROUTE_GUARD_TIERS.md)
-- [ ] هیچ trailer از نوع `Co-Authored-By` در پیامهای commit وجود ندارد — commitها باید صرفاً تحت هویت Git مالک repository ثبت شوند (قانون قطعی شماره ۱۶)
+- [ ] هیچ هشدار جدید CodeQL / Secret-Scanning ایجاد نشده است، یا هر هشدار با توجیه فنی و ارجاع به سند مرتبط در `docs/security/` رد شده است
+- [ ] مسیرهایی که فرایندهای فرزند ایجاد میکنند (`/api/mcp/`، `/api/cli-tools/runtime/`) در `src/server/authz/routeGuard.ts` بهعنوان `isLocalOnlyPath()` طبقهبندی شدهاند — به [قانون سختگیرانه شماره ۱۵](docs/security/ROUTE_GUARD_TIERS.md) مراجعه کنید
+- [ ] هیچ trailer از نوع `Co-authored-by` برای AI/bot در پیامهای commit وجود ندارد (قانون سختگیرانه شماره ۱۶) — از همکاران انسانی که از کارشان دوباره استفاده شده است، با trailerهای استاندارد `Co-authored-by: Name <email>` قدردانی میشود
 
 ---
 
-## Releasing
+## انتشار
 
-Releases are managed via the `/generate-release` workflow. When a new GitHub Release is created, the package is **automatically published to npm** via GitHub Actions.
+انتشارها از طریق گردشکار `/generate-release` مدیریت میشوند. هنگامی که یک GitHub Release جدید ایجاد شود، بسته از طریق GitHub Actions **بهطور خودکار در npm منتشر میشود**.
+
+برای استقرار روی VPS، از `npm run build:release` (نه `npm run build`) استفاده کنید — این فرمان یک بازسازی پاک انجام میدهد، بسته را در `dist/` مونتاژ میکند و فایل نشانهگر `dist/BUILD_SHA` را مینویسد.
+سپس از مهارتهای `/deploy-vps-*-cc` استفاده کنید که با استفاده از rsync، پوشهٔ `dist/` را به دایرکتوری راهدور `app/` منتقل میکنند.
 
 ---
 

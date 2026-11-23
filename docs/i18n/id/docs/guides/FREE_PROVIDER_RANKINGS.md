@@ -13,18 +13,18 @@
 
 ## Apa Itu
 
-OmniRoute mendaftarkan 329 penyedia, termasuk 155 entri katalog yang ditandai **gratis/tanpa autentikasi**
+OmniRoute mendaftarkan 374 penyedia, termasuk 155 entri katalog yang ditandai **gratis/tanpa autentikasi**
 (tanpa autentikasi,
 OAuth tingkat gratis, atau kunci API tingkat gratis — lihat
 [Panduan Tingkat Gratis](../getting-started/FREE-TIERS-GUIDE.md) dan
-[Direktori Tingkat Gratis](../reference/FREE_TIERS.md) lengkap). Namun, kualitas model
-dari penyedia gratis sangat bervariasi. Penyedia tanpa autentikasi yang menyajikan model frontier jauh lebih berguna
-daripada penyedia yang menyajikan model lama berukuran kecil.
+[Direktori Tingkat Gratis](../reference/FREE_TIERS.md) lengkap). Namun, penyedia gratis sangat
+bervariasi dalam hal kualitas model. Penyedia tanpa autentikasi yang menyediakan model terdepan jauh lebih berguna
+daripada penyedia yang menyediakan model lama berukuran kecil.
 
 **Peringkat Penyedia Gratis** menjawab "**penyedia gratis mana yang memberi saya model terbaik?**" dengan
-menggabungkan katalog setiap penyedia gratis dengan **skor kualitas berbasis kontribusi komunitas** dari
-**papan peringkat Arena AI** (ELO berdasarkan preferensi manusia, konsep yang sama di balik arena
-chatbot LMArena). Penyedia kemudian diperingkat berdasarkan kekuatan **model gratis terbaik** mereka.
+menggabungkan katalog setiap penyedia gratis dengan **skor kualitas hasil kontribusi komunitas** dari
+**papan peringkat Arena AI** (ELO preferensi manusia, konsep yang sama di balik arena chatbot
+LMArena). Penyedia kemudian diperingkat berdasarkan kualitas **model gratis terbaik** mereka.
 
 Peringkat dihitung dari tiga sumber nyata:
 
@@ -33,7 +33,7 @@ Peringkat dihitung dari tiga sumber nyata:
    (`src/shared/constants/providers.ts`).
 2. Katalog model setiap penyedia dari registri penyedia
    (`open-sse/config/providerRegistry.ts`).
-3. Skor kesesuaian tugas yang diturunkan dari ELO dan disimpan dalam tabel DB `model_intelligence` oleh
+3. Skor kesesuaian tugas berbasis ELO yang disimpan dalam tabel DB `model_intelligence` oleh
    mesin sinkronisasi ELO Arena (`src/lib/arenaEloSync.ts`).
 
 Logika penggabungan berada di `src/lib/freeProviderRankings.ts`.

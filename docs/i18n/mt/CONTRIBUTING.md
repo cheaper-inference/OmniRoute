@@ -17,7 +17,7 @@ u mal-passi ta' rikonċiljazzjoni.
 
 ### Prerekwiżiti
 
-- **Node.js** `>=22.22.3 <23`, jew `>=24.0.0 <27` (rakkomandat: 24 LTS)
+- **Node.js** `>=22.22.2 <23`, jew `>=24.0.0 <27` (rakkomandat: 24 LTS)
 - **npm** 10+
 
 > **Utenti ta' npm v11+ (Node 24+):** Wara `npm install`, ivverifika li l-moduli nattivi ġew installati:
@@ -38,7 +38,7 @@ npm install
 ### Varjabbli tal-Ambjent
 
 ```bash
-# Oħloq il-.env tiegħek mill-mudell
+# Oħloq il-fajl .env tiegħek mill-mudell
 cp .env.example .env
 
 # Iġġenera s-sigrieti meħtieġa
@@ -48,77 +48,77 @@ echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 
 Varjabbli ewlenin għall-iżvilupp:
 
-| Varjabbli              | Valur Predefinit tal-Iżvilupp | Deskrizzjoni                   |
-| ---------------------- | ----------------------------- | ------------------------------ |
-| `PORT`                 | `20128`                       | Port tas-server                |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`      | URL bażi għall-frontend        |
-| `JWT_SECRET`           | (iġġenerah hawn fuq)          | Sigriet għall-iffirmar tal-JWT |
-| `INITIAL_PASSWORD`     | `CHANGEME`                    | Password tal-ewwel login       |
-| `APP_LOG_LEVEL`        | `info`                        | Livell ta' dettall tal-logs    |
+| Varjabbli              | Valur Predefinit tal-Iżvilupp | Deskrizzjoni                    |
+| ---------------------- | ----------------------------- | ------------------------------- |
+| `PORT`                 | `20128`                       | Port tas-server                 |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`      | URL bażi għall-frontend         |
+| `JWT_SECRET`           | (iġġenera hawn fuq)           | Sigriet għall-iffirmar tal-JWT  |
+| `INITIAL_PASSWORD`     | `CHANGEME`                    | Password tal-ewwel login        |
+| `APP_LOG_LEVEL`        | `info`                        | Livell ta' dettall tar-reġistru |
 
 ### Settings tad-Dashboard
 
-Id-dashboard jipprovdi swiċċijiet tal-UI għal funzjonalitajiet li jistgħu jiġu kkonfigurati wkoll permezz tal-varjabbli tal-ambjent:
+Id-dashboard jipprovdi kontrolli fl-UI għal funzjonalitajiet li jistgħu jiġu kkonfigurati wkoll permezz tal-varjabbli tal-ambjent:
 
-| Post tas-Setting     | Swiċċ                            | Deskrizzjoni                                    |
-| -------------------- | -------------------------------- | ----------------------------------------------- |
-| Settings → Avvanzati | Modalità ta' Debugging           | Ippermetti logs ta' debugging għat-talbiet (UI) |
-| Settings → Ġenerali  | Viżibbiltà tal-Istrixxa tal-Ġenb | Uri/aħbi t-taqsimiet tal-istrixxa tal-ġenb      |
+| Post tas-Setting     | Kontroll                         | Deskrizzjoni                                 |
+| -------------------- | -------------------------------- | -------------------------------------------- |
+| Settings → Avvanzati | Modalità ta' Debug               | Attiva r-reġistri tat-talbiet tad-debug (UI) |
+| Settings → Ġenerali  | Viżibbiltà tal-Istrixxa tal-Ġenb | Uri/aħbi t-taqsimiet tal-istrixxa tal-ġenb   |
 
-Dawn is-settings jinħażnu fid-database u jibqgħu fis-seħħ wara li s-sistema terġa' tinbeda, filwaqt li jegħlbu l-valuri predefiniti tal-varjabbli tal-ambjent meta jkunu ssettjati.
+Dawn is-settings jinħażnu fid-database u jibqgħu fis-seħħ bejn startjar mill-ġdid, filwaqt li jieħdu preċedenza fuq il-valuri predefiniti tal-varjabbli tal-ambjent meta jkunu ssettjati.
 
 ### Tħaddim Lokalment
 
 ```bash
-# Modalità tal-iżvilupp (aġġornament awtomatiku)
+# Modalità tal-iżvilupp (rikarigu awtomatiku)
 npm run dev
 
-# Bini għall-produzzjoni
+# Build tal-produzzjoni
 npm run build    # next build → .build/next/ imbagħad assembleStandalone → dist/
 npm run start
 
-# Kompilazzjoni rapida tal-backend/API biss għall-bidliet tal-kontributuri
+# Kompilazzjoni rapida tal-backend/API biss għal bidliet mill-kontributuri
 npm run build:contributor
 
-# Bini tar-rilaxx (bini mill-ġdid nadif + indikatur HEAD — meħtieġ għall-implimentazzjoni)
+# Build tar-rilaxx (build mill-ġdid nadif + sentinella HEAD — meħtieġ għad-deployment)
 npm run build:release   # rm -rf .build dist && build + jikteb dist/BUILD_SHA
 
 # Konfigurazzjoni komuni tal-port
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Il-bini għall-kontributuri jwettaq validazzjoni permezz tal-kompilazzjoni biss: ma jiġborx id-distribuzzjoni
-standalone u lanqas ma jibni r-riżorsi fakultattivi għall-ippakkjar nattiv. Uża l-bini regolari għall-produzzjoni meta
+Il-build tal-kontributur iwettaq validazzjoni permezz tal-kompilazzjoni biss: ma jiġborx id-distribuzzjoni
+standalone u lanqas jibni l-assi fakultattivi tal-ippakkjar nattiv. Uża l-build regolari tal-produzzjoni meta
 jkollok bżonn tivvalida l-pakkett lest għad-distribuzzjoni.
 
-### Struttura tal-Output tal-Bini
+### Struttura tal-Output tal-Build
 
-| Direttorju | Kontenut                                                                               | Traċċat |
-| ---------- | -------------------------------------------------------------------------------------- | ------- |
-| `src/`     | Kodiċi sors tal-applikazzjoni (TypeScript / TSX)                                       | Iva     |
-| `.build/`  | Fajls intermedji — output ta' `next build` (injorat minn git, `distDir = .build/next`) | Le      |
-| `dist/`    | Pakkett lest għad-distribuzzjoni — miġbur minn `assembleStandalone` (injorat minn git) | Le      |
+| Direttorju | Kontenut                                                                         | Traċċat |
+| ---------- | -------------------------------------------------------------------------------- | ------- |
+| `src/`     | Kodiċi sors tal-applikazzjoni (TypeScript / TSX)                                 | Iva     |
+| `.build/`  | Fajls intermedji — output ta' `next build` (gitignored, `distDir = .build/next`) | Le      |
+| `dist/`    | Pakkett lest għad-distribuzzjoni — miġbur minn `assembleStandalone` (gitignored) | Le      |
 
-Il-pipeline tal-bini jitwettaq f'pass wieħed:
+Il-pipeline tal-build jitwettaq f'pass wieħed:
 
 ```
 npm run build
   └─ next build → .build/next/standalone  (output ta' Next.js)
-  └─ assembleStandalone()                 (jikkopja l-fajls standalone + static + public + ir-riżorsi nattivi)
+  └─ assembleStandalone()                 (jikkopja standalone + static + public + assi nattivi)
        └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
 `npm run build:release` barra minn hekk inaddaf iż-żewġ direttorji l-ewwel u jikteb
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) bħala indikatur tal-integrità tal-implimentazzjoni.
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) bħala sentinella tal-integrità tad-deployment.
 
-`npm run build:contributor` juża l-profil tal-bini għall-backend biss. Dan jissostitwixxi temporanjament
-il-fajls tal-UI tad-dashboard bi stubs matul il-bini, iżomm il-handlers tar-rotot tal-API, u jirrestawra l-fajls oriġinali
-wara l-bini. Uża `npm run build` għal bidliet li jaffettwaw l-UI tad-dashboard jew għal
-validazzjoni sħiħa tar-rilaxx; il-profil għall-kontributuri mhuwiex sostitut għall-bini tar-rilaxx.
+`npm run build:contributor` juża l-profil tal-build tal-backend biss. Huwa jissostitwixxi temporanjament
+il-fajls tal-UI tad-dashboard b'verżjonijiet stub waqt il-build, iżomm il-handlers tar-rotot tal-API, u jirrestawra l-fajls oriġinali
+wara l-build. Uża `npm run build` għal bidliet li jaffettwaw l-UI tad-dashboard jew għal
+validazzjoni sħiħa tar-rilaxx; il-profil tal-kontributur mhuwiex sostitut għall-build tar-rilaxx.
 
-> **Nota dwar l-implimentazzjoni fuq VPS:** id-direttorju remot tal-immaġni `/usr/lib/node_modules/omniroute/app/`
-> ma nbidilx. Il-proċeduri tal-implimentazzjoni jużaw rsync għall-kontenut ta' `dist/` fih.
-> Inbidlet biss il-mogħdija tal-output tal-bini fir-repo (`app/` → `dist/`).
+> **Nota dwar deployment fuq VPS:** id-direttorju remot tal-image `/usr/lib/node_modules/omniroute/app/`
+> ma nbidilx. Il-mekkaniżmi tad-deployment jużaw rsync biex jikkopjaw fih il-kontenut ta' `dist/`.
+> Inbidlet biss il-mogħdija tal-output tal-build fir-repożitorju (`app/` → `dist/`).
 
 URLs predefiniti:
 
@@ -290,69 +290,71 @@ Ara `open-sse/utils/stream.ts` u `open-sse/utils/streamHandler.ts` għal eżempj
 
 ```
 src/                        # TypeScript (.ts / .tsx)
-├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # Paġni tal-dashboard (23 sezzjonijiet)
-│   ├── api/',              # Rotot API (51 direttorju)
+├── app/                    # App Router ta’ Next.js 16
+│   ├── (dashboard)/        # Paġni tad-dashboard (23 taqsima)
+│   ├── api/                # Rotot tal-API (51 direttorju)
 │   └── login/              # Paġni tal-awtentikazzjoni (.tsx)
-├── domain/                 # Magna tal-politika (policyEngine, comboResolver, costRules, eċċ.)
-├── lib/                    # Logika tan-negozju ta' l-qalba (.ts)
-│   ├── a2a/                # Server tal-protokoll A2A v0.3
-│   ├── acp/                # Reġistru tal-Komunikazzjoni tal-Aġent
-│   ├── compliance/         # Magna tal-politika tal-konformità
-│   ├── db/               # Moduli tal-q域 SQLite + 130 migrazzjonijiet
-│   ├── memory/             # Memorja twila tal-konversazzjoni
-│   ├── oauth/              # Fornituri, servizzi, u għodod tal-OAuth
-│   ├── skills/             # Frizat tar-ħiliet estiżibbli
-│   ├── usage/              # Tħassir tal-użu u kalkolu tal-ispiża
-│   └── localDb.ts          # Saff ta' re-export biss — qatt iżid logika hawn
-├── middleware/              # Middleware tal-bżonnijiet (promptInjectionGuard)
-├── mitm/                   # Proxy MITM (ċertifikat, DNS, rotta tal-miri)
+├── domain/                 # Magna tal-politiki (policyEngine, comboResolver, costRules, eċċ.)
+├── lib/                    # Loġika ewlenija tan-negozju (.ts)
+│   ├── a2a/                # Server tal-protokoll Agent-to-Agent v0.3
+│   ├── acp/                # Reġistru tal-Agent Communication Protocol
+│   ├── compliance/         # Magna tal-politiki tal-konformità
+│   ├── db/                 # Moduli tad-dominju SQLite + 130 migrazzjoni
+│   ├── memory/             # Memorja persistenti tal-konversazzjonijiet
+│   ├── oauth/              # Fornituri, servizzi u utilitajiet OAuth
+│   ├── skills/             # Qafas estensibbli tal-ħiliet
+│   ├── usage/              # Traċċar tal-użu u kalkolu tal-ispejjeż
+│   └── localDb.ts          # Saff ta’ esportazzjoni mill-ġdid biss — qatt iżżid loġika hawn
+├── middleware/              # Middleware tat-talbiet (promptInjectionGuard)
+├── mitm/                   # Proxy MITM (ċertifikat, DNS, direzzjonar tad-destinazzjoni)
 ├── shared/
 │   ├── components/         # Komponenti React (.tsx)
-│   ├── constants/          # Definizzjonijiet tal-fornitur (329), ambiti MCP, 19 strateġiji tal-rotta
-│   ├── utils/              # Serparator tal-midja, sanitizer, għodod tal-awtentikazzjoni
-│   └── validation/         # Schemas tal-Zod v4
-└── sse/                    # Provvista tal-rotta SSE
+│   ├── constants/          # Definizzjonijiet tal-fornituri (329), ambiti MCP, 20 strateġija ta’ direzzjonar
+│   ├── utils/              # Circuit breaker, sanitizer, għodod awżiljarji tal-awtentikazzjoni
+│   └── validation/         # Skemi Zod v4
+└── sse/                    # Pipeline tal-proxy SSE
 
-open-sse/                   # Spazju ta' @omniroute/open-sse
-├── executors/              # 89 modulu ta' implimentazzjoni tal-eżekutur
-├── handlers/               # 11 trattaturi tal-bżonnijiet (chat, risposti, embendings, immaġini, eċċ.)
-├── mcp-server/             # Server MCP (110 għodod uniċi, 3 trasporti, 33 ambiti)
-├── services/               # 178 servizz ta' l-ewwel livell (combo, autoCombo, rateLimitManager, eċċ.)
-├── translator/             # Tradutturi tal-format (OpenAI ↔ Claude ↔ Gemini ↔ Risposti ↔ Ollama)
-├── transformer/            # Traduttur tar-Risposti API
-└── utils/                  # 22 modulu tal-għodod (stream, TLS, proxy, logging)
+open-sse/                   # Spazju tax-xogħol @omniroute/open-sse
+├── executors/              # 150 modulu ta’ eżekuzzjoni (klassijiet tal-eżekuturi + għodod awżiljarji għal kull fornitur)
+├── handlers/               # 11-il handler tat-talbiet (chat, responses, embeddings, images, eċċ.)
+├── mcp-server/             # Server MCP (110 għodda unika, 3 trasporti, 33 ambitu)
+├── services/               # 178 servizz tal-ogħla livell (combo, autoCombo, rateLimitManager, eċċ.)
+├── translator/             # Tradutturi tal-formati (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Transformer tal-API Responses
+└── utils/                  # 22 modulu ta’ utilità (stream, TLS, proxy, logging)
 
-electron/                   # App desktop tal-Electron (pjanforma multipla)
+electron/                   # Applikazzjoni desktop Electron (għal diversi pjattaformi)
 
 tests/
-├── unit/                   # Test runner Node.js (1,574 fajls tal-test)
+├── unit/                   # Runner tat-testijiet Node.js (1,574 fajl tat-testijiet)
 ├── integration/            # Testijiet tal-integrazzjoni
 ├── e2e/                    # Testijiet Playwright
-├── security/               # Testijiet ta' sigurtà
+├── security/               # Testijiet tas-sigurtà
 ├── translator/             # Testijiet speċifiċi għat-traduttur
-└── load/                   # Testijiet tal-piż
+└── load/                   # Testijiet tat-tagħbija
 
 docs/
-├── adr/                     # Rekords tad-deċiżjonijiet tal-arkitettura
-├── architecture/            # Arkitettura tal-isistema u reżiljenza
-├── comparison/              # OmniRoute vs alternattivi
+├── adr/                     # Rekords tad-Deċiżjonijiet Arkitettoniċi
+├── architecture/            # Arkitettura u reżiljenza tas-sistema
+├── comparison/              # OmniRoute kontra alternattivi
 ├── compression/             # Gwidi u regoli tal-kompressjoni
 ├── dev/                     # Gwidi tal-iżvilupp
 ├── diagrams/                # Dijagrammi tal-arkitettura
-├── frameworks/              # MCP, A2A, OpenCode, Memorja, Ħiliet
-├── guides/                  # Gwida tal-utent, Docker, tħejjija, tifwir
-├── i18n/                    # Traduzzjonijiet internazzjonali tal-README
-├── marketing/               # Materiali tal-kummerċjalizzazzjoni
-├── ops/                     # Tħaddim, proxy, koperanza, rilizzi
-├── providers/               # Dokumenti speċifiċi tal-fornitur
-├── reference/             # Referenza API, varjambli tal-ambjent, għodod CLI, oqsas ħelsien
-├── releases/               # Noti tar-rilizzi
-├── routing/                 # Magna tal-combo awtomatika, riproduzzjoni tar-raguni
-├── screenshots/             # Skrinshots tal-dashboard
-├── security/               # Barriers, konformità, stealth, tokens
-└── specs/                   # Speċifikazzjonijiet tal-disinn
+├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
+├── guides/                  # Gwida għall-utent, Docker, konfigurazzjoni, soluzzjoni tal-problemi
+├── i18n/                    # Traduzzjonijiet internazzjonalizzati tar-README
+├── marketing/               # Materjal tal-marketing
+├── ops/                     # Distribuzzjoni, proxy, kopertura, rilaxxi
+├── providers/               # Dokumentazzjoni speċifika għall-fornituri
+├── reference/               # Referenza tal-API, varjabbli tal-ambjent, għodod CLI, livelli bla ħlas
+├── releases/                # Noti tar-rilaxx
+├── routing/                 # Magna auto-combo, riproduzzjoni tar-raġunament
+├── screenshots/             # Screenshots tad-dashboard
+├── security/                # Salvagwardji, konformità, stealth, tokens
+└── specs/                   # Speċifikazzjonijiet tad-disinn
 ```
+
+---
 
 ## Ġdid tal-Foritur
 
@@ -390,22 +392,24 @@ Ikteb testijiet unitarji f'`tests/unit/` li jkopru mill-inqas:
 
 ---
 
-## Kaxxa tal-Għarfien tal-Pull Request
+## Lista ta' Kontroll tal-Pull Request
 
-- [ ] Testijiet għaddew (`npm test`)
-- [ ] Linting għaddew (`npm run lint`)
-- [ ] Build rnexxielu (`npm run build`)
-- [ ] It-Tipijiet TypeScript ġew miżjuda għal funzjonijiet u interfaces ġodda pubbliċi
-- [ ] M'hemm xejn skrin fiżjati ta' sigrieti jew valuri fallback
-- [ ] Kredenzjali upstream pubbliċi ġew imbodding permezz ta' `resolvePublicCred()` (ara [`docs/security/PUBLIC_CREDS.md`](./docs/security/PUBLIC_CREDS.md)), qatt bħala literals
-- [ ] Ir-risponsi ta' żball jgħaddu minn `buildErrorBody()` / `sanitizeErrorMessage()` — l-ebda trace rwiexi fil-korp tal-Response (ara [`docs/security/ERROR_SANITIZATION.md`](./docs/security/ERROR_SANITIZATION.md))
-- [ ] Il-kmandi shell (`exec` / `spawn`) jgħaddu valuri runtime permezz ta' `env`, mhux permezz ta' interpolarzjoni tal-stringa
-- [ ] Kull input ġie validat permezz ta' skemi Zod
-- [ ] **Fragament** tal-CHANGELOG ġie miżjud taħt `changelog.d/{features|fixes|maintenance}/<PR>-<slug>.md` għal bidliet li jaffettwaw l-utenti (ara [`changelog.d/README.md`](./changelog.d/README.md)) — tagħmilx direttament editjar `CHANGELOG.md`; il-fragments jiġbru fis-sak ħin tat-tħarir u qatt ma jikkuntrastaw bejn il-PRs
-- [ ] Dukumentazzjoni aġġornata (jekk applicable)
-- [ ] L-ebda ġdida CodeQL / Secret-Scanning alerts miftuħa, jew kollha riżolvuti b'ġustifikazzjoni teknika li tirreferi għad-dokument rilevanti ta' `docs/security/`
-- [ ] Rotot li jħaddmu proċessi iben (`/api/mcp/`, `/api/cli-tools/runtime/`) huma klassifikati bħala `isLocalOnlyPath()` f'`src/server/authz/routeGuard.ts` — ara [Rekwiżiti Ħorox #15](docs/security/ROUTE_GUARD_TIERS.md)
-- [ ] M'hemm l-ebda `Co-Authored-By` trailers fil-messaġġi tal-kommit — il-kommits iridu jidhru biss taħt l-identità Git tal-sid tal-repositorju (Rekwiżit Ħarxa #16)
+- [ ] It-testijiet jgħaddu (`npm test`)
+- [ ] Il-linting jgħaddi (`npm run lint`)
+- [ ] Il-build jirnexxi (`npm run build`)
+- [ ] Żdiedu t-tipi TypeScript għal funzjonijiet u interfaces pubbliċi ġodda
+- [ ] L-ebda sigriet jew valur ta' riżerva kkodifikat direttament
+- [ ] Il-kredenzjali upstream pubbliċi huma inkorporati permezz ta' `resolvePublicCred()` (ara [`docs/security/PUBLIC_CREDS.md`](./docs/security/PUBLIC_CREDS.md)), u qatt bħala litterali
+- [ ] Ir-risposti ta' żball jgħaddu minn `buildErrorBody()` / `sanitizeErrorMessage()` — l-ebda stack trace mhux ipproċessat fil-korpi tar-risposti (ara [`docs/security/ERROR_SANITIZATION.md`](./docs/security/ERROR_SANITIZATION.md))
+- [ ] Il-kmandi tax-shell (`exec` / `spawn`) jgħaddu l-valuri waqt l-eżekuzzjoni permezz ta' `env`, mhux permezz ta' interpolazzjoni ta' strings
+- [ ] L-inputs kollha huma vvalidati bi skemi Zod
+- [ ] Żdied **framment** tal-changelog taħt `changelog.d/{features|fixes|maintenance}/<PR>-<slug>.md` għal bidliet viżibbli għall-utent (ara [`changelog.d/README.md`](./changelog.d/README.md)) — teditjax `CHANGELOG.md` direttament; il-frammenti jiġu aggregati waqt ir-rilaxx u qatt ma joħolqu kunflitti bejn il-PRs
+- [ ] Id-dokumentazzjoni ġiet aġġornata (jekk applikabbli)
+- [ ] Ma nfetħux twissijiet ġodda ta' CodeQL / Secret-Scanning, jew kull waħda ġiet miċħuda b'ġustifikazzjoni teknika li tirreferi għad-dokument rilevanti f'`docs/security/`
+- [ ] Ir-rotot li jniedu proċessi sekondarji (`/api/mcp/`, `/api/cli-tools/runtime/`) huma kklassifikati bħala `isLocalOnlyPath()` f'`src/server/authz/routeGuard.ts` — ara [Regola Stretta #15](docs/security/ROUTE_GUARD_TIERS.md)
+- [ ] L-ebda trailer `Co-authored-by` ta' AI/bot fil-messaġġi tal-commit (Regola Stretta #16) — il-kollaboraturi umani li x-xogħol tagħhom jerġa' jintuża jingħataw kreditu bi trailers standard `Co-authored-by: Name <email>`
+
+---
 
 ## Rilaxjar
 

@@ -123,7 +123,9 @@
       "maxCostOpt": "Maximal kostnad per dag (USD)",
       "allowedModelsOpt": "Kommaseparerad lista över tillåtna modeller",
       "nothingToSet": "Inga policyfält har angetts. Använd --rate-limit, --max-cost eller --allowed-models.",
-      "updated": "Policyn har uppdaterats."
+      "updated": "Policyn har uppdaterats.",
+      "modelAccessModeOpt": "Åtkomstläge för modeller (all | restricted)",
+      "unrestrictedOpt": "Tillåt alla modeller (--model-access-mode all)"
     },
     "expiration": {
       "title": "Nyckelns utgångsdatum",
@@ -254,6 +256,7 @@
     "log": "Visa serverloggar direkt",
     "no_recovery": "Inaktivera automatisk omstart vid krasch (felsökningsläge)",
     "max_restarts": "Maximalt antal omstarter efter krascher inom 30 s innan försöken avbryts (standard: 2)",
+    "headless": "Kör endast proxymotorn: instrumentpanel inaktiverad (404), valfria delsystem hoppas över (sätter OMNIROUTE_HEADLESS=1)",
     "tray": "Starta i systemfältet (endast skrivbord, måste aktiveras)",
     "no_tray": "Inaktivera ikonen i systemfältet",
     "ready_timeout": "Tidsgräns för beredskapskontroll i ms (även OMNIROUTE_READY_TIMEOUT_MS, standard 60000)",
@@ -1168,32 +1171,18 @@
   "sync": {
     "description": "Synkronisera konfiguration mellan OmniRoute-instanser",
     "push": {
-      "description": "Skicka konfiguration till molnet eller en fjärrinstans",
-      "target": "Mål (cloud eller context:name)",
-      "bundle": "Paketdelar att synkronisera",
-      "dryRun": "Förhandsgranska utan att tillämpa"
+      "description": "Skicka konfiguration till molnet eller en fjärrinstans"
     },
     "pull": {
-      "description": "Hämta konfiguration från molnet eller en fjärrinstans",
-      "source": "Källa (cloud eller context:name)",
-      "merge": "Slå samman med befintlig konfiguration",
-      "replace": "Ersätt befintlig konfiguration",
-      "dryRun": "Förhandsgranska utan att tillämpa"
-    },
-    "diff": {
-      "source": "Källkontext",
-      "target": "Målkontext"
+      "description": "Hämta konfiguration från molnet eller en fjärrinstans"
     },
     "bundle": {
       "description": "Exportera konfiguration som en paketfil",
-      "include": "Delar som ska inkluderas (kommaseparerade)"
+      "token": "Sync token (from `sync tokens create`); defaults to OMNIROUTE_SYNC_TOKEN"
     },
     "import": {
       "description": "Importera en paketfil",
       "dryRun": "Validera utan att tillämpa"
-    },
-    "initialize": {
-      "fromCloud": "Initiera från molnsäkerhetskopia"
     },
     "tokens": {
       "description": "Hantera synkroniseringstoken",
@@ -1205,9 +1194,6 @@
       "revoke": {
         "yes": "Hoppa över bekräftelse"
       }
-    },
-    "resolve": {
-      "description": "Lös synkroniseringskonflikter interaktivt"
     }
   },
   "config": {

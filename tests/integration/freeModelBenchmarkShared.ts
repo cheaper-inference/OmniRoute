@@ -87,8 +87,8 @@ export const FREE_MODELS: FreeModelSpec[] = [
   },
   {
     provider: "opencode",
-    model: "opencode/deepseek-v4-flash-free",
-    displayName: "DeepSeek V4 Flash Free (OpenCode)",
+    model: "opencode/deepseek-v4.1-flash-free",
+    displayName: "DeepSeek V4.1 Flash Free (OpenCode)",
   },
   {
     provider: "duckduckgo-web",

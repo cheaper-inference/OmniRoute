@@ -1,9 +1,23 @@
 import { generateModels, generateAliasMap, type RegistryModel } from "./providerRegistry.ts";
 import { getVertexModelTargetFormat } from "./vertexModels.ts";
+import {
+  getPublishedModelNpm,
+  surfaceTargetFormatForNpm,
+} from "../utils/opencodePublishedCatalog.ts";
 
 // Lazy PROVIDER_MODELS: deferred until first property access to speed up startup.
 // The Proxy defers `generateModels()` from module-evaluation time to the first read.
 let _models: Record<string, RegistryModel[]> | null = null;
+
+// #16814 — memo for the exact-id / scoresAs lookups below. Both used to scan every provider
+// array per call, which made auto/* scoring O(candidates x registry). Cleared whenever the
+// registry is mutated through the Proxy (set / deleteProperty) and by resetRegistryLookupCache().
+const _modelByIdMemo = new Map<string, RegistryModel | undefined>();
+const _scoresAsMemo = new Map<string, string | undefined>();
+export function resetRegistryLookupCache(): void {
+  _modelByIdMemo.clear();
+  _scoresAsMemo.clear();
+}
 function initModels(): Record<string, RegistryModel[]> {
   if (!_models) _models = generateModels();
   return _models;
@@ -30,10 +44,12 @@ export const PROVIDER_MODELS: Record<string, RegistryModel[]> = new Proxy(
     set(_, prop, value) {
       if (typeof prop === "symbol") return false;
       (initModels() as Record<string, RegistryModel[]>)[prop] = value;
+      resetRegistryLookupCache();
       return true;
     },
     deleteProperty(_, prop) {
       if (typeof prop === "symbol") return false;
+      resetRegistryLookupCache();
       return Reflect.deleteProperty(initModels(), prop);
     },
   }
@@ -80,8 +96,8 @@ export function getProviderModels(aliasOrId: string): RegistryModel[] {
   // provider id (e.g. "github") and resolve id→alias before reading the namespace
   // map — so callers don't need to know which form they hold. We resolve here rather
   // than mirroring raw-id keys into PROVIDER_MODELS, whose keys ARE the public
-  // prefixes (a raw id like "opencode" would collide with the opencode-zen route —
-  // see #2798/#3870).
+  // prefixes (a raw id could collide with another provider's route — see
+  // #2798/#3870).
   const alias = PROVIDER_ID_TO_ALIAS[aliasOrId] || aliasOrId;
   return PROVIDER_MODELS[alias] || PROVIDER_MODELS[aliasOrId] || [];
 }
@@ -158,6 +174,13 @@ function getGlobalModel(modelId: string): RegistryModel | undefined {
  */
 export function findRegistryModelById(modelId: string): RegistryModel | undefined {
   if (typeof modelId !== "string" || modelId.length === 0) return undefined;
+  if (_modelByIdMemo.has(modelId)) return _modelByIdMemo.get(modelId);
+  const found = scanRegistryModelById(modelId);
+  _modelByIdMemo.set(modelId, found);
+  return found;
+}
+
+function scanRegistryModelById(modelId: string): RegistryModel | undefined {
   for (const models of Object.values(PROVIDER_MODELS)) {
     const found = models.find((m) => m.id === modelId);
     if (found) return found;
@@ -179,6 +202,13 @@ export function findRegistryModelById(modelId: string): RegistryModel | undefine
  */
 export function findRegistryScoresAs(modelId: string): string | undefined {
   if (typeof modelId !== "string" || modelId.length === 0) return undefined;
+  if (_scoresAsMemo.has(modelId)) return _scoresAsMemo.get(modelId);
+  const found = scanRegistryScoresAs(modelId);
+  _scoresAsMemo.set(modelId, found);
+  return found;
+}
+
+function scanRegistryScoresAs(modelId: string): string | undefined {
   const basename = modelId.split("/").pop() || modelId;
   for (const models of Object.values(PROVIDER_MODELS)) {
     for (const m of models) {
@@ -215,10 +245,10 @@ export function findModelName(aliasOrId: string, modelId: string): string {
 // OpenCode's Muse Spark family is Responses-only. Keep this rule provider-scoped
 // and version-agnostic so a newly published Muse Spark model is routed correctly
 // before the static catalog is refreshed.
-const OPENCODE_MUSE_SPARK_ALIASES = new Set(["oc", "opencode-zen", "opencode-go"]);
+const OPENCODE_MUSE_SPARK_ALIASES = new Set(["opencode-zen", "opencode-go"]);
 const MUSE_SPARK_MODEL_PATTERN = /^muse-spark(?:-|$)/i;
 
-const OPENCODE_MODEL_PREFIXES = ["opencode/", "oc/", "opencode-zen/", "opencode-go/"] as const;
+const OPENCODE_MODEL_PREFIXES = ["opencode/", "opencode-zen/", "opencode-go/"] as const;
 
 /**
  * OpenCode Zen's Responses endpoint accepts the upstream model id only. The
@@ -233,6 +263,41 @@ export function stripOpencodeModelPrefix(model: unknown): unknown {
   return model;
 }
 
+/**
+ * The published catalog declares each model's surface per model id; an explicit
+ * registry entry stays an override and wins. Unmeasured SDKs decide nothing.
+ * Opt-in (OPENCODE_PUBLISHED_CATALOG_ROUTING_ENABLED): with the flag off the lookup
+ * answers nothing and never reads the catalog, so the heuristics below decide as before.
+ */
+function publishedCatalogFormat(aliasOrId: string, bareModelId: string): string | null {
+  return surfaceTargetFormatForNpm(getPublishedModelNpm(aliasOrId, bareModelId));
+}
+
+/**
+ * OpenCode's Muse Spark family is Responses-only. Resolved models can still carry
+ * an extra provider segment (for example "opencode/muse-spark-1.3-contributor-free"
+ * under opencode-zen): match the family against the final model segment so both
+ * forms work.
+ */
+function museSparkTargetFormat(alias: string, bareModelId: string): string | null {
+  if (!OPENCODE_MUSE_SPARK_ALIASES.has(alias)) return null;
+  const modelFamilyId = bareModelId.split("/").pop() || bareModelId;
+  if (!MUSE_SPARK_MODEL_PATTERN.test(modelFamilyId)) return null;
+  return "openai-responses";
+}
+
+/**
+ * Effort suffixes (gpt-6-astra-high, gpt-5.6-sol-xhigh) are not separate
+ * catalog rows on the public OpenAI provider. They must keep the base
+ * model's endpoint, or tools+reasoning land on /v1/chat/completions and
+ * OpenAI returns a 400 that the Responses API would have accepted.
+ */
+function effortBaseTargetFormat(alias: string, bareModelId: string): string | null {
+  const effortStripped = bareModelId.replace(/-(?:ultra|max|xhigh|high|medium|low|none)$/i, "");
+  if (effortStripped === bareModelId) return null;
+  return PROVIDER_MODELS[alias]?.find((m) => m.id === effortStripped)?.targetFormat ?? null;
+}
+
 export function getModelTargetFormat(aliasOrId: string, modelId: string): string | null {
   // Accept either the public alias ("cmd") or the raw provider id ("command-code"),
   // mirroring getProviderModels (same pattern as #2798/#3870).
@@ -243,22 +308,12 @@ export function getModelTargetFormat(aliasOrId: string, modelId: string): string
   const bareModelId = prefix ? modelId.slice(prefix.length) : modelId;
   const found = PROVIDER_MODELS[alias]?.find((m) => m.id === bareModelId);
   if (found?.targetFormat) return found.targetFormat;
-  // Resolved models can still carry the raw provider id (for example
-  // "opencode/muse-spark-1.3-contributor-free") even when the public alias is
-  // "oc". Match the family against the final model segment so both forms work.
-  const modelFamilyId = bareModelId.split("/").pop() || bareModelId;
-  if (OPENCODE_MUSE_SPARK_ALIASES.has(alias) && MUSE_SPARK_MODEL_PATTERN.test(modelFamilyId)) {
-    return "openai-responses";
-  }
-  // Effort suffixes (gpt-6-astra-high, gpt-5.6-sol-xhigh) are not separate
-  // catalog rows on the public OpenAI provider. They must keep the base
-  // model's endpoint, or tools+reasoning land on /v1/chat/completions and
-  // OpenAI returns a 400 that the Responses API would have accepted.
-  const effortStripped = bareModelId.replace(/-(?:ultra|max|xhigh|high|medium|low|none)$/i, "");
-  if (effortStripped !== bareModelId) {
-    const base = PROVIDER_MODELS[alias]?.find((m) => m.id === effortStripped);
-    if (base?.targetFormat) return base.targetFormat;
-  }
+  const catalogFormat = publishedCatalogFormat(aliasOrId, bareModelId);
+  if (catalogFormat) return catalogFormat;
+  const sparkFormat = museSparkTargetFormat(alias, bareModelId);
+  if (sparkFormat) return sparkFormat;
+  const effortFormat = effortBaseTargetFormat(alias, bareModelId);
+  if (effortFormat) return effortFormat;
   // #5842: OpenAI "*-pro" reasoning models (o1-pro, gpt-5.x-pro) are only served by
   // the native /v1/responses endpoint — /v1/chat/completions 404s ("only supported
   // in v1/responses"). Curated catalog entries are tagged explicitly; this heuristic
@@ -286,6 +341,28 @@ export function getModelTargetFormat(aliasOrId: string, modelId: string): string
   // executor actually sends the request (same pattern as the openai "-pro" heuristic above,
   // #5842).
   if ((alias === "gh" || alias === "ghe-copilot") && /claude/i.test(bareModelId)) return "claude";
+  // #15499: GheCopilotExecutor.buildUrl sends any unregistered `gpt-6*` id to
+  // /responses (`/^gpt-6/i`, same gate as supportsResponsesEndpoint). A missing
+  // catalog tag otherwise leaves the body on the provider's chat-completions
+  // format (`messages` / `max_tokens`), which /responses rejects. github.com
+  // Copilot does not use that URL regex, so this stays ghe-copilot-only.
+  if (
+    alias === "ghe-copilot" &&
+    /^gpt-6/i.test(bareModelId) &&
+    !/gemini|claude/i.test(bareModelId)
+  ) {
+    return "openai-responses";
+  }
+  // The gh executors send any *codex* id to /responses (9router#102);
+  // keep the body in Responses shape too, or an uncatalogued codex id goes out as
+  // a chat-completions body on the Responses endpoint.
+  if (
+    (alias === "gh" || alias === "ghe-copilot") &&
+    /codex/i.test(bareModelId) &&
+    !/gemini/i.test(bareModelId)
+  ) {
+    return "openai-responses";
+  }
   // Model-level targetFormat is provider-scoped: a catalog entry declares how THIS
   // provider's endpoint serves the model — do NOT import another provider's tag.
   // #9994 scoped this for providers WITH a catalog; #10072 extends it to catalogless
@@ -324,7 +401,11 @@ export function getModelTimeoutMs(aliasOrId: string, modelId: string): number | 
 }
 
 const CLAUDE_MODEL_PATTERN = /(?:^|[\/._-])claude(?:[._-]|$)/;
-const CLAUDE_MAX_EFFORT_UNSUPPORTED_FAMILY_PATTERNS = [/(?:^|[\/._-])haiku(?:[._-]|$)/] as const;
+const CLAUDE_MAX_EFFORT_UNSUPPORTED_FAMILY_PATTERNS = [
+  /(?:^|[\/._-])haiku(?:[._-]|$)/,
+  // Sonnet 5.5 caps effort at xhigh; max returns a 400.
+  /(?:^|[\/._-])claude-sonnet-5-5(?:[._-]|$)/,
+] as const;
 const ANTHROPIC_COMPATIBLE_PREFIX = "anthropic-compatible-";
 
 export function supportsClaudeMaxEffort(modelId: string | null | undefined): boolean {

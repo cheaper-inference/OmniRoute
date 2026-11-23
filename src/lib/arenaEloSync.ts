@@ -666,9 +666,22 @@ export function stopArenaEloSync(): void {
  */
 export function getArenaEloSyncStatus(): SyncStatus {
   const enabled = getEffectiveArenaEloSyncEnabled();
+  // Stored synced_at comes from SQLite datetime('now'): UTC "YYYY-MM-DD HH:MM:SS"
+  // without a timezone suffix. Date.parse reads that as local time, which
+  // shifts the served date under non-UTC TZ, so normalize to ISO UTC here.
+  let persisted: string | null = null;
+  try {
+    const persistedRaw = getLatestSyncedAt("arena_elo");
+    const persistedMs = persistedRaw
+      ? Date.parse(persistedRaw.includes("T") ? persistedRaw : `${persistedRaw.replace(" ", "T")}Z`)
+      : NaN;
+    persisted = Number.isFinite(persistedMs) ? new Date(persistedMs).toISOString() : null;
+  } catch (error) {
+    console.warn(`[ARENA_ELO_SYNC] Failed to read persisted sync time: ${getErrorMessage(error)}`);
+  }
   return {
     enabled,
-    lastSync: lastSyncTime,
+    lastSync: persisted ?? lastSyncTime,
     lastSyncModelCount,
     nextSync:
       syncTimer && lastSyncTime

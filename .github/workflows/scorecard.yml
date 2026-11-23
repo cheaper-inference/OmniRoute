@@ -10,9 +10,18 @@ on:
 
 permissions: read-all
 
+# One analysis per ref at a time. The `push` trigger fires on every push to the active
+# release branch (~10/hour) and the job guard below only skips INSIDE the run, so each
+# push still queued a hosted run (20 queued on 2026-10-17 against the account's
+# concurrent-job limit). Scorecard scores repository posture, not the commit: the
+# newest push supersedes the older ones and the weekly schedule keeps its own ref.
+concurrency:
+  group: scorecard-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   analysis:
-    if: ${{ github.event_name != 'push' || github.ref == format('refs/heads/{0}', github.event.repository.default_branch) }}
+    if: ${{ (github.event_name != 'push' || github.ref == format('refs/heads/{0}', github.event.repository.default_branch)) && (github.event_name != 'schedule' || github.repository == 'diegosouzapw/OmniRoute') }}
     name: Scorecard analysis
     runs-on: ubuntu-latest
     permissions:
@@ -29,7 +38,7 @@ jobs:
           persist-credentials: false
 
       - name: Run analysis
-        uses: ossf/scorecard-action@v2.4.4
+        uses: ossf/scorecard-action@v2.5.0
         with:
           results_file: results.sarif
           results_format: sarif

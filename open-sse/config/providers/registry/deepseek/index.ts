@@ -42,6 +42,8 @@ export const deepseekProvider: RegistryEntry = {
       supportsReasoning: true,
       supportedThinkingEfforts: ["none", "low", "high", "max"],
       toolCalling: true,
+      // Flash reads images on the official API; v4-pro stays text-only.
+      supportsVision: true,
     },
     {
       id: "deepseek-flash",
@@ -51,6 +53,7 @@ export const deepseekProvider: RegistryEntry = {
       supportsReasoning: true,
       supportedThinkingEfforts: ["none", "low", "high", "max"],
       toolCalling: true,
+      supportsVision: true,
     },
   ],
 };

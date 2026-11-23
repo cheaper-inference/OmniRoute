@@ -27,6 +27,10 @@ import {
 } from "./cleanup/usagePurge";
 import { ensureCompressionRunTelemetryTable } from "./compressionRunTelemetry";
 import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
+import {
+  pruneDbBackupsOutsideMigrationWindow,
+  resolveReusedPreMigrationSha,
+} from "./cleanup/backupPrune";
 
 interface CleanupResult {
   deleted: number;
@@ -827,6 +831,11 @@ export interface ResetUsageHistoryResult extends CleanupResult {
   deletedCompressionRunTelemetry: number;
   deletedRoutingDecisions: number;
   deletedQuotaConsumption: number;
+  /**
+   * Always 0. `token_ledger` is the transfer record behind token balances and
+   * idempotency keys, not usage analytics, so a usage reset never deletes it.
+   * The field stays so the response shape of the purge API does not change.
+   */
   deletedTokenLedger: number;
   deletedConversationTurnNodes: number;
   deletedAgenticConversations: number;
@@ -910,7 +919,6 @@ const RESET_TARGETS: Array<
     cutoff: "epochMs",
     resultKey: "deletedQuotaConsumption",
   },
-  { table: "token_ledger", column: "created_at", cutoff: "iso", resultKey: "deletedTokenLedger" },
   {
     table: "conversation_turn_nodes",
     column: "last_seen_at",
@@ -1038,6 +1046,9 @@ export {
   type ReclaimFreedPagesResult,
   type ReclaimStopReason,
 };
+// Backup-directory pruning for the scheduled pass lives in ./cleanup/backupPrune
+// (same file-size reason) — re-exported so tests drive the pass's own symbols.
+export { pruneDbBackupsOutsideMigrationWindow, resolveReusedPreMigrationSha };
 
 // ──────────────── Background Cleanup Scheduler ────────────────
 
@@ -1055,6 +1066,8 @@ export async function runScheduledCleanupPass(phase: "startup" | "periodic"): Pr
   if (result.totalDeleted > 0) {
     console.log(`[Cleanup] ${label} cleanup freed ${result.totalDeleted} rows.`);
   }
+
+  pruneDbBackupsOutsideMigrationWindow();
 
   // Always run: it also drains pages left over from a previous capped pass or
   // from deletes made outside this scheduler. Costs a few PRAGMA reads when idle.

@@ -4,9 +4,12 @@
 
 ---
 
-🌐 **Languages:** 🇺🇸 [English](../../../../reference/API_REFERENCE.md) · 🇪🇹 [am](../../../am/docs/reference/API_REFERENCE.md) · 🇸🇦 [ar](../../../ar/docs/reference/API_REFERENCE.md) · 🇦🇿 [az](../../../az/docs/reference/API_REFERENCE.md) · 🇧🇬 [bg](../../../bg/docs/reference/API_REFERENCE.md) · 🇧🇩 [bn](../../../bn/docs/reference/API_REFERENCE.md) · 🇧🇦 [bs](../../../bs/docs/reference/API_REFERENCE.md) · 🇨🇿 [cs](../../../cs/docs/reference/API_REFERENCE.md) · 🇩🇰 [da](../../../da/docs/reference/API_REFERENCE.md) · 🇩🇪 [de](../../../de/docs/reference/API_REFERENCE.md) · 🇬🇷 [el](../../../el/docs/reference/API_REFERENCE.md) · 🇪🇸 [es](../../../es/docs/reference/API_REFERENCE.md) · 🇪🇪 [et](../../../et/docs/reference/API_REFERENCE.md) · 🇮🇷 [fa](../../../fa/docs/reference/API_REFERENCE.md) · 🇫🇮 [fi](../../../fi/docs/reference/API_REFERENCE.md) · 🇫🇷 [fr](../../../fr/docs/reference/API_REFERENCE.md) · 🇮🇪 [ga](../../../ga/docs/reference/API_REFERENCE.md) · 🇮🇳 [gu](../../../gu/docs/reference/API_REFERENCE.md) · 🇳🇬 [ha](../../../ha/docs/reference/API_REFERENCE.md) · 🇮🇱 [he](../../../he/docs/reference/API_REFERENCE.md) · 🇮🇳 [hi](../../../hi/docs/reference/API_REFERENCE.md) · 🇭🇷 [hr](../../../hr/docs/reference/API_REFERENCE.md) · 🇭🇺 [hu](../../../hu/docs/reference/API_REFERENCE.md) · 🇦🇲 [hy](../../../hy/docs/reference/API_REFERENCE.md) · 🇮🇩 [id](../../../id/docs/reference/API_REFERENCE.md) · 🇳🇬 [ig](../../../ig/docs/reference/API_REFERENCE.md) · 🇮🇹 [it](../../../it/docs/reference/API_REFERENCE.md) · 🇯🇵 [ja](../../../ja/docs/reference/API_REFERENCE.md) · 🇬🇪 [ka](../../../ka/docs/reference/API_REFERENCE.md) · 🇰🇭 [km](../../../km/docs/reference/API_REFERENCE.md) · 🇮🇳 [kn](../../../kn/docs/reference/API_REFERENCE.md) · 🇰🇷 [ko](../../../ko/docs/reference/API_REFERENCE.md) · 🇱🇹 [lt](../../../lt/docs/reference/API_REFERENCE.md) · 🇱🇻 [lv](../../../lv/docs/reference/API_REFERENCE.md) · 🇮🇳 [ml](../../../ml/docs/reference/API_REFERENCE.md) · 🇮🇳 [mr](../../../mr/docs/reference/API_REFERENCE.md) · 🇲🇾 [ms](../../../ms/docs/reference/API_REFERENCE.md) · 🇲🇹 [mt](../../../mt/docs/reference/API_REFERENCE.md) · 🇲🇲 [my](../../../my/docs/reference/API_REFERENCE.md) · 🇳🇵 [ne](../../../ne/docs/reference/API_REFERENCE.md) · 🇳🇴 [no](../../../no/docs/reference/API_REFERENCE.md) · 🇮🇳 [or](../../../or/docs/reference/API_REFERENCE.md) · 🇮🇳 [pa](../../../pa/docs/reference/API_REFERENCE.md) · 🇵🇭 [phi](../../../phi/docs/reference/API_REFERENCE.md) · 🇵🇱 [pl](../../../pl/docs/reference/API_REFERENCE.md) · 🇵🇹 [pt](../../../pt/docs/reference/API_REFERENCE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/reference/API_REFERENCE.md) · 🇷🇴 [ro](../../../ro/docs/reference/API_REFERENCE.md) · 🇷🇺 [ru](../../../ru/docs/reference/API_REFERENCE.md) · 🇱🇰 [si](../../../si/docs/reference/API_REFERENCE.md) · 🇸🇰 [sk](../../../sk/docs/reference/API_REFERENCE.md) · 🇸🇮 [sl](../../../sl/docs/reference/API_REFERENCE.md) · 🇷🇸 [sr](../../../sr/docs/reference/API_REFERENCE.md) · 🇸🇪 [sv](../../../sv/docs/reference/API_REFERENCE.md) · 🇰🇪 [sw](../../../sw/docs/reference/API_REFERENCE.md) · 🇮🇳 [ta](../../../ta/docs/reference/API_REFERENCE.md) · 🇮🇳 [te](../../../te/docs/reference/API_REFERENCE.md) · 🇹🇭 [th](../../../th/docs/reference/API_REFERENCE.md) · 🇹🇷 [tr](../../../tr/docs/reference/API_REFERENCE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/reference/API_REFERENCE.md) · 🇵🇰 [ur](../../../ur/docs/reference/API_REFERENCE.md) · 🇺🇿 [uz](../../../uz/docs/reference/API_REFERENCE.md) · 🇻🇳 [vi](../../../vi/docs/reference/API_REFERENCE.md) · 🇳🇬 [yo](../../../yo/docs/reference/API_REFERENCE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/reference/API_REFERENCE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/reference/API_REFERENCE.md)
+🌐 **Talen:** 🇺🇸 [English](./API_REFERENCE.md) | 🇪🇹 [አማርኛ](../i18n/am/docs/reference/API_REFERENCE.md) | 🇸🇦 [العربية](../i18n/ar/docs/reference/API_REFERENCE.md) | 🇦🇿 [Azərbaycan dili](../i18n/az/docs/reference/API_REFERENCE.md) | 🇧🇬 [Български](../i18n/bg/docs/reference/API_REFERENCE.md) | 🇧🇩 [বাংলা](../i18n/bn/docs/reference/API_REFERENCE.md) | 🇧🇦 [Bosanski](../i18n/bs/docs/reference/API_REFERENCE.md) | 🇨🇿 [Čeština](../i18n/cs/docs/reference/API_REFERENCE.md) | 🇩🇰 [Dansk](../i18n/da/docs/reference/API_REFERENCE.md) | 🇩🇪 [Deutsch](../i18n/de/docs/reference/API_REFERENCE.md) | 🇬🇷 [Ελληνικά](../i18n/el/docs/reference/API_REFERENCE.md) | 🇪🇸 [Español](../i18n/es/docs/reference/API_REFERENCE.md) | 🇪🇪 [Eesti](../i18n/et/docs/reference/API_REFERENCE.md) | 🇮🇷 [فارسی](../i18n/fa/docs/reference/API_REFERENCE.md) | 🇫🇮 [Suomi](../i18n/fi/docs/reference/API_REFERENCE.md) | 🇫🇷 [Français](../i18n/fr/docs/reference/API_REFERENCE.md) | 🇮🇪 [Gaeilge](../i18n/ga/docs/reference/API_REFERENCE.md) | 🇮🇳 [ગુજરાતી](../i18n/gu/docs/reference/API_REFERENCE.md) | 🇳🇬 [Hausa](../i18n/ha/docs/reference/API_REFERENCE.md) | 🇮🇱 [עברית](../i18n/he/docs/reference/API_REFERENCE.md) | 🇮🇳 [हिन्दी](../i18n/hi/docs/reference/API_REFERENCE.md) | 🇭🇷 [Hrvatski](../i18n/hr/docs/reference/API_REFERENCE.md) | 🇭🇺 [Magyar](../i18n/hu/docs/reference/API_REFERENCE.md) | 🇦🇲 [Հայերեն](../i18n/hy/docs/reference/API_REFERENCE.md) | 🇮🇩 [Bahasa Indonesia](../i18n/id/docs/reference/API_REFERENCE.md) | 🇳🇬 [Igbo](../i18n/ig/docs/reference/API_REFERENCE.md) | 🇮🇹 [Italiano](../i18n/it/docs/reference/API_REFERENCE.md) | 🇯🇵 [日本語](../i18n/ja/docs/reference/API_REFERENCE.md) | 🇬🇪 [ქართული](../i18n/ka/docs/reference/API_REFERENCE.md) | 🇰🇭 [ខ្មែរ](../i18n/km/docs/reference/API_REFERENCE.md) | 🇮🇳 [ಕನ್ನಡ](../i18n/kn/docs/reference/API_REFERENCE.md) | 🇰🇷 [한국어](../i18n/ko/docs/reference/API_REFERENCE.md) | 🇱🇹 [Lietuvių](../i18n/lt/docs/reference/API_REFERENCE.md) | 🇱🇻 [Latviešu](../i18n/lv/docs/reference/API_REFERENCE.md) | 🇮🇳 [മലയാളം](../i18n/ml/docs/reference/API_REFERENCE.md) | 🇮🇳 [मराठी](../i18n/mr/docs/reference/API_REFERENCE.md) | 🇲🇾 [Bahasa Melayu](../i18n/ms/docs/reference/API_REFERENCE.md) | 🇲🇹 [Malti](../i18n/mt/docs/reference/API_REFERENCE.md) | 🇲🇲 [မြန်မာ](../i18n/my/docs/reference/API_REFERENCE.md) | 🇳🇵 [नेपाली](../i18n/ne/docs/reference/API_REFERENCE.md) | 🇳🇱 [Nederlands](../i18n/nl/docs/reference/API_REFERENCE.md) | 🇳🇴 [Norsk](../i18n/no/docs/reference/API_REFERENCE.md) | 🇮🇳 [ଓଡ଼ିଆ](../i18n/or/docs/reference/API_REFERENCE.md) | 🇮🇳 [ਪੰਜਾਬੀ](../i18n/pa/docs/reference/API_REFERENCE.md) | 🇵🇭 [Filipino](../i18n/phi/docs/reference/API_REFERENCE.md) | 🇵🇱 [Polski](../i18n/pl/docs/reference/API_REFERENCE.md) | 🇵🇹 [Português (Portugal)](../i18n/pt/docs/reference/API_REFERENCE.md) | 🇧🇷 [Português (Brasil)](../i18n/pt-BR/docs/reference/API_REFERENCE.md) | 🇷🇴 [Română](../i18n/ro/docs/reference/API_REFERENCE.md) | 🇷🇺 [Русский](../i18n/ru/docs/reference/API_REFERENCE.md) | 🇱🇰 [සිංහල](../i18n/si/docs/reference/API_REFERENCE.md) | 🇸🇰 [Slovenčina](../i18n/sk/docs/reference/API_REFERENCE.md) | 🇸🇮 [Slovenščina](../i18n/sl/docs/reference/API_REFERENCE.md) | 🇷🇸 [Српски](../i18n/sr/docs/reference/API_REFERENCE.md) | 🇸🇪 [Svenska](../i18n/sv/docs/reference/API_REFERENCE.md) | 🇰🇪 [Kiswahili](../i18n/sw/docs/reference/API_REFERENCE.md) | 🇮🇳 [தமிழ்](../i18n/ta/docs/reference/API_REFERENCE.md) | 🇮🇳 [తెలుగు](../i18n/te/docs/reference/API_REFERENCE.md) | 🇹🇭 [ไทย](../i18n/th/docs/reference/API_REFERENCE.md) | 🇹🇷 [Türkçe](../i18n/tr/docs/reference/API_REFERENCE.md) | 🇺🇦 [Українська](../i18n/uk-UA/docs/reference/API_REFERENCE.md) | 🇵🇰 [اردو](../i18n/ur/docs/reference/API_REFERENCE.md) | 🇺🇿 [Oʻzbekcha](../i18n/uz/docs/reference/API_REFERENCE.md) | 🇻🇳 [Tiếng Việt](../i18n/vi/docs/reference/API_REFERENCE.md) | 🇳🇬 [Yorùbá](../i18n/yo/docs/reference/API_REFERENCE.md) | 🇨🇳 [中文 (简体)](../i18n/zh-CN/docs/reference/API_REFERENCE.md) | 🇹🇼 [中文 (繁體)](../i18n/zh-TW/docs/reference/API_REFERENCE.md)
 
-Kernreferentie voor de OmniRoute-API. Deze behandelt het openbare `/v1`-oppervlak en de meestgebruikte beheerendpoints; het machineleesbare [`docs/openapi.yaml`](../openapi.yaml) en de routeboom onder `src/app/api/` zijn de volledige bronnen.
+Kernreferentie voor de OmniRoute-API. Deze behandelt het openbare `/v1`-oppervlak en de meest gebruikte beheer-eindpunten; het machineleesbare bestand [`docs/openapi.yaml`](../openapi.yaml) en de routestructuur onder `src/app/api/` zijn de volledige bronnen.
+
+Raadpleeg voor het specifieke OpenAI-compatibele protocol en de matrix met providermogelijkheden
+[`OPENAI_COMPATIBILITY.md`](./OPENAI_COMPATIBILITY.md).
 
 ---
 
@@ -61,30 +64,78 @@ Content-Type: application/json
 
 ### Aangepaste headers
 
-| Header                   | Richting | Beschrijving                                                                                                                                                                                                                                                 |
-| ------------------------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `X-OmniRoute-No-Cache`   | Verzoek  | Stel in op `true` om de cache te omzeilen                                                                                                                                                                                                                    |
-| `x-omniroute-no-memory`  | Verzoek  | Stel in op `true` om de injectie van geheugen en vaardigheden voor dit verzoek over te slaan (analoog aan no-cache; voorkomt de overhead voor tokens/kosten per aanroep)                                                                                     |
-| `X-OmniRoute-Progress`   | Verzoek  | Stel in op `true` voor voortgangsgebeurtenissen                                                                                                                                                                                                              |
-| `X-Session-Id`           | Verzoek  | Sticky-sessiesleutel voor externe sessieaffiniteit                                                                                                                                                                                                           |
-| `x_session_id`           | Verzoek  | Variant met onderstrepingstekens wordt ook geaccepteerd (rechtstreekse HTTP)                                                                                                                                                                                 |
-| `X-OmniRoute-Session-Id` | Verzoek  | Door de aanroeper opgegeven sessie-/conversatietag (wordt ook aan het geheugen doorgegeven). Indien aanwezig, wordt deze ongewijzigd opgeslagen in `call_logs.session_tag` voor kostentoewijzing per sessie (#8249) — wordt nooit gegenereerd indien afwezig |
-| `Idempotency-Key`        | Verzoek  | Deduplicatiesleutel (venster van 5 s)                                                                                                                                                                                                                        |
-| `X-Request-Id`           | Verzoek  | Alternatieve deduplicatiesleutel                                                                                                                                                                                                                             |
-| `X-OmniRoute-Cache`      | Antwoord | `HIT` of `MISS` (zonder streaming)                                                                                                                                                                                                                           |
-| `X-OmniRoute-Idempotent` | Antwoord | `true` indien gededupliceerd                                                                                                                                                                                                                                 |
-| `X-OmniRoute-Progress`   | Antwoord | `enabled` als voortgangsregistratie is ingeschakeld                                                                                                                                                                                                          |
-| `X-OmniRoute-Session-Id` | Antwoord | Effectieve sessie-ID die door OmniRoute wordt gebruikt                                                                                                                                                                                                       |
-| `X-OmniRoute-Request-Id` | Antwoord | Correlatie-ID van het verzoek (indien bekend)                                                                                                                                                                                                                |
-| `X-OmniRoute-Version`    | Antwoord | Buildversie van OmniRoute (altijd aanwezig)                                                                                                                                                                                                                  |
-| `X-OmniRoute-Cost-Saved` | Antwoord | Bedrag in USD dat dankzij de cache is bespaard bij een HIT (alleen cachetreffers)                                                                                                                                                                            |
-| `X-OmniRoute-Decision`   | Antwoord | Routeringstracering: `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` is de combostrategie, of `single` voor een verzoek zonder combo) — altijd aanwezig in voltooiingsantwoorden                                                               |
+| Header                   | Richting | Beschrijving                                                                                                                                                                                                                                             |
+| ------------------------ | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `X-OmniRoute-No-Cache`   | Verzoek  | Stel in op `true` om de cache te omzeilen                                                                                                                                                                                                                |
+| `x-omniroute-no-memory`  | Verzoek  | Stel in op `true` om geheugen- en vaardigheidsinjectie voor dit verzoek over te slaan (komt overeen met no-cache en voorkomt de token-/kostenoverhead per aanroep)                                                                                       |
+| `X-OmniRoute-Progress`   | Verzoek  | Stel in op `true` voor voortgangsgebeurtenissen                                                                                                                                                                                                          |
+| `X-Session-Id`           | Verzoek  | Permanente sessiesleutel voor externe sessieaffiniteit                                                                                                                                                                                                   |
+| `x_session_id`           | Verzoek  | Variant met onderstrepingstekens wordt ook geaccepteerd (rechtstreeks via HTTP)                                                                                                                                                                          |
+| `X-OmniRoute-Session-Id` | Verzoek  | Door de aanroeper opgegeven sessie-/conversielabel (wordt ook voor geheugen gebruikt). Indien aanwezig, wordt dit ongewijzigd opgeslagen in `call_logs.session_tag` voor kostentoewijzing per sessie (#8249) — wordt nooit gegenereerd als het ontbreekt |
+| `Idempotency-Key`        | Verzoek  | Deduplicatiesleutel (venster van 5 s)                                                                                                                                                                                                                    |
+| `X-Request-Id`           | Verzoek  | Alternatieve deduplicatiesleutel                                                                                                                                                                                                                         |
+| `x-omniroute-connection` | Verzoek  | Koppel een verzoek voor één model aan één providerverbinding (account) via de id ervan — zie [Account per verzoek vastzetten](#account-pinning-per-request)                                                                                              |
+| `X-OmniRoute-Cache`      | Antwoord | `HIT` of `MISS` (niet-streamend)                                                                                                                                                                                                                         |
+| `X-OmniRoute-Idempotent` | Antwoord | `true` indien gededupliceerd                                                                                                                                                                                                                             |
+| `X-OmniRoute-Progress`   | Antwoord | `enabled` indien voortgangsregistratie is ingeschakeld                                                                                                                                                                                                   |
+| `X-OmniRoute-Session-Id` | Antwoord | Effectieve sessie-ID die door OmniRoute wordt gebruikt                                                                                                                                                                                                   |
+| `X-OmniRoute-Request-Id` | Antwoord | Correlatie-id van het verzoek (indien bekend)                                                                                                                                                                                                            |
+| `X-OmniRoute-Version`    | Antwoord | Buildversie van OmniRoute (altijd aanwezig)                                                                                                                                                                                                              |
+| `X-OmniRoute-Cost-Saved` | Antwoord | Het USD-bedrag dat de cache bij een HIT heeft bespaard (alleen cachetreffers)                                                                                                                                                                            |
+| `X-OmniRoute-Decision`   | Antwoord | Routeringstracering: `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` is de combinatiestrategie, of `single` voor een niet-gecombineerd verzoek) — altijd aanwezig in voltooiingsantwoorden                                                 |
 
-> Opmerking voor Nginx: als u afhankelijk bent van headers met onderstrepingstekens (bijvoorbeeld `x_session_id`), schakel dan `underscores_in_headers on;` in.
+> Opmerking voor Nginx: als u headers met onderstrepingstekens gebruikt (bijvoorbeeld `x_session_id`), schakel dan `underscores_in_headers on;` in.
 
-> **Headers voor kostentelemetrie:** niet-streamende succesvolle responses bevatten ook de set `X-OmniRoute-*` voor kostentelemetrie — `X-OmniRoute-Response-Cost` (USD, vast 10 decimalen; `0.0000000000` voor gratis/niet-geprijsd), `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`, `X-OmniRoute-Model`, `X-OmniRoute-Provider`, `X-OmniRoute-Latency-Ms`, `X-OmniRoute-Cache-Hit` en `X-OmniRoute-Fallback-Attempts` (alleen wanneer > 0), plus `X-OmniRoute-Request-Id` en `X-OmniRoute-Version`. Deze worden uitgestuurd door chatvoltooiingen, `/v1/responses`, `/v1/messages`, **en de media-endpoints** — `/v1/embeddings`, `/v1/images/generations`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/rerank`, `/v1/videos/generations`, `/v1/music/generations` en `/v1/moderations` (kosten altijd `0`). Mediakosten worden per modaliteit berekend (per afbeelding, per seconde, per teken, per zoekeenheid) wanneer prijsinformatie beschikbaar is; anders zijn ze `0` (fail-open).
+#### Account per verzoek vastzetten
 
-> **Kostensemantiek bij cachetreffers:** bij een HIT in de semantische cache (`X-OmniRoute-Cache-Hit: true`) wordt geen upstream-aanroep gedaan. Daarom is `X-OmniRoute-Response-Cost` gelijk aan `0.0000000000` (de **incrementele** kosten voor het afhandelen van de treffer). De oorspronkelijke kosten/kosten die anders zouden zijn gemaakt, worden afzonderlijk gerapporteerd in `X-OmniRoute-Cost-Saved`. Facturatieprocessen moeten `X-OmniRoute-Response-Cost` optellen (treffers kosten niets); voor cacheanalyses kan `X-OmniRoute-Cost-Saved` worden geaggregeerd.
+Wanneer een provider meerdere verbindingen (accounts of sleutels) heeft, kiest OmniRoute er normaal gesproken één
+via de strategie voor accountselectie. Een verzoek kan in plaats daarvan één specifieke verbinding vastzetten
+met de header `x-omniroute-connection`:
+
+```bash
+curl http://localhost:20128/v1/chat/completions \
+  -H "Authorization: Bearer <your OmniRoute API key>" \
+  -H "Content-Type: application/json" \
+  -H "x-omniroute-connection: <connection id>" \
+  -d '{"model": "codex/gpt-5.5", "messages": [{"role": "user", "content": "hi"}]}'
+```
+
+- **Waar de id te vinden is.** Open de providerpagina in het dashboard
+  (**Dashboard → Providers → <provider>**) en klik op de `xxxxxxxx…`-idchip in een verbindingsrij
+  — hiermee wordt de volledige verbindings-id gekopieerd.
+- **Welke aanvragen deze respecteren.** Aanvragen voor één model (`provider/model`) op
+  `/v1/chat/completions`, `/v1/messages` en `/v1/responses`. Combinaties negeren de header: zet
+  in plaats daarvan per combinatiestap een account vast via de eigen verbinding van die stap.
+- **De vastzetting is strikt, geen voorkeur.** Uitsluitend de vastgezette verbinding wordt gebruikt. Een
+  fout binnen de aanvraag registreert de afkoelperiode van het account, maar schakelt **niet** over naar een
+  ander account van dezelfde provider.
+- **Afkoelperiode en quota heffen de vastzetting op.** Terwijl de vastgezette verbinding zich in een afkoelperiode bevindt,
+  het quota is opgebruikt of de verbinding door een quotabeleid wordt geblokkeerd, vallen latere aanvragen terug op de
+  andere verbindingen van de provider, precies zoals bij niet-vastgezet verkeer.
+- **Onbekende of uitgeschakelde id's mislukken.** Een id die zich niet in de actieve pool van de provider bevindt (verwijderd,
+  gedeactiveerd of behorend bij een andere provider), laat geen geschikt account over, waardoor de aanvraag
+  mislukt in plaats van ongemerkt elders te worden gerouteerd.
+
+Claude Code verzendt aangepaste headers via `ANTHROPIC_CUSTOM_HEADERS`. Plaats deze in het `env`-blok
+van `~/.claude/settings.json`, of in een `.claude/settings.json` op projectniveau om per project een ander
+account vast te zetten:
+
+```jsonc
+{
+  "env": {
+    "ANTHROPIC_BASE_URL": "http://<your OmniRoute>:20128",
+    "ANTHROPIC_AUTH_TOKEN": "<your OmniRoute API key>",
+    "ANTHROPIC_CUSTOM_HEADERS": "x-omniroute-connection: <connection id>",
+  },
+}
+```
+
+Bron: `src/sse/handlers/chat.ts` (header uitlezen), `src/sse/services/auth.ts` en
+`src/sse/services/sessionAffinityPin.ts` (opheffen van de vastzetting en de controle op afwezigheid in de pool).
+
+> **Headers voor kostentelemetrie:** geslaagde niet-streamingantwoorden bevatten ook de `X-OmniRoute-*`-set voor kostentelemetrie — `X-OmniRoute-Response-Cost` (USD, vast aantal van 10 decimalen; `0.0000000000` voor gratis/niet-geprijsd), `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`, `X-OmniRoute-Model`, `X-OmniRoute-Provider`, `X-OmniRoute-Latency-Ms`, `X-OmniRoute-Cache-Hit` en `X-OmniRoute-Fallback-Attempts` (alleen wanneer > 0), plus `X-OmniRoute-Request-Id` en `X-OmniRoute-Version`. Deze worden verzonden door chatvoltooiingen, `/v1/responses`, `/v1/messages`, **en de media-eindpunten** — `/v1/embeddings`, `/v1/images/generations`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/rerank`, `/v1/videos/generations`, `/v1/music/generations` en `/v1/moderations` (kosten altijd `0`). Mediakosten worden per modaliteit berekend (per afbeelding, per seconde, per teken, per zoekeenheid) wanneer prijsinformatie beschikbaar is, en anders als `0` (fail-open).
+
+> **Kostensemantiek bij cachetreffers:** bij een HIT in de semantische cache (`X-OmniRoute-Cache-Hit: true`) wordt geen upstreamaanroep uitgevoerd, dus is `X-OmniRoute-Response-Cost` gelijk aan `0.0000000000` (de **incrementele** kosten voor het leveren van de treffer). De oorspronkelijke kosten/kosten die anders zouden zijn gemaakt, worden afzonderlijk gerapporteerd in `X-OmniRoute-Cost-Saved`. Factureringssystemen moeten `X-OmniRoute-Response-Cost` optellen (treffers kosten niets); cacheanalyses kunnen `X-OmniRoute-Cost-Saved` aggregeren.
 
 ## Exclusieve Beheerde Sessieleases
 
@@ -204,16 +255,16 @@ Content-Type: application/json
 
 Beschikbare providers: Nebius, OpenAI, Mistral, Together AI, Fireworks, NVIDIA, **OpenRouter**, Jina AI.
 
-Catalogus-id's hebben de vorm `provider/model` (voorbeeld: `jina-ai/jina-embeddings-v5-omni-small`). Losse Jina-model-id's die in het register voorkomen (bijvoorbeeld `jina-embeddings-v5-text-small`, `jina-reranker-v3.5`) worden ook herkend. Jina embed/rerank/classify/segment gebruikt eerst `jina-ai`-inloggegevens uit het dashboard; `JINA_AI_API_KEY` wordt alleen als terugvaloptie gebruikt wanneer er geen dashboardsleutel bestaat. De kaart `jina-reader` is uitsluitend voor Reader / `r.jina.ai` (`POST /v1/web/fetch`) en levert nooit embeddings of reranking.
+Catalogus-id's hebben de vorm `provider/model` (voorbeeld: `jina-ai/jina-embeddings-v5-omni-small`). Losse Jina-model-id's die in het register voorkomen (bijvoorbeeld `jina-embeddings-v5-text-small`, `jina-reranker-v3.5`) worden ook herkend. Jina embed/rerank/classify/segment gebruikt eerst `jina-ai`-referenties uit het dashboard; `JINA_AI_API_KEY` wordt alleen als fallback gebruikt wanneer er geen dashboardsleutel bestaat. De kaart `jina-reader` is uitsluitend bedoeld voor Reader / `r.jina.ai` (`POST /v1/web/fetch`) en levert nooit embeddings of reranking.
 
-Registermodellen die multimodale ondersteuning aangeven, accepteren ook maximaal 32 providersonafhankelijke gestructureerde
+Registermodellen die multimodale ondersteuning vermelden, accepteren ook maximaal 32 providerneutrale gestructureerde
 items. Typen media-items zijn `text`, `image`, `audio`, `video` en `document`. Hun media-`source`
 is `{"type":"url","url":"https://..."}` of
 `{"type":"base64","data":"...","media_type":"..."}`.
 
-Jina v5 Omni (`jina-ai/jina-embeddings-v5-omni-small`, `jina-ai/jina-embeddings-v5-omni-nano`,
-en de familie-alias `jina-ai/jina-embeddings-v5-omni` → omni-small) accepteert ook de systeemeigen
-EmbeddingsV5Request-documenten van Jina en **stuurt deze intact door** naar `https://api.jina.ai/v1/embeddings`:
+Jina v5 Omni (`jina-ai/jina-embeddings-v5-omni-small`, `jina-ai/jina-embeddings-v5-omni-nano`
+en de familiealias `jina-ai/jina-embeddings-v5-omni` → omni-small) accepteert ook Jina's eigen
+EmbeddingsV5Request-documenten en **stuurt deze intact door** naar `https://api.jina.ai/v1/embeddings`:
 
 ```json
 {
@@ -230,26 +281,32 @@ EmbeddingsV5Request-documenten van Jina en **stuurt deze intact door** naar `htt
 }
 ```
 
-Systeemeigen `{ image | audio | video | pdf }`-waarden mogen een openbare HTTPS-URL, een `data:`-URI of onbewerkte
-base64 zijn. OmniRoute converteert deze objecten niet naar tekenreeksen en haalt systeemeigen afbeeldings-URL's niet op — Jina haalt
+Eigen `{ image | audio | video | pdf }`-waarden kunnen een openbare HTTPS-URL, een `data:`-URI of onbewerkte
+base64 zijn. OmniRoute zet deze objecten niet om naar tekenreeksen en haalt eigen afbeeldings-URL's niet op — Jina haalt
 openbare media zelf op. Extra Jina-velden (`task`, `normalized`, `truncate`, `embedding_type`) worden
-doorgestuurd. Jina-SKU's die uitsluitend tekst ondersteunen, weigeren nog steeds documenten die geen tekst bevatten.
+doorgestuurd. Jina-SKU's die uitsluitend tekst ondersteunen, blijven documenten met andere inhoud dan tekst weigeren.
 
 Beveiligings- en transportlimieten:
 
-- Externe media-URL's moeten openbaar en via HTTPS bereikbaar zijn. Canonieke `{type,source:url}`-items worden
-  aan de serverzijde opgehaald (hervalidatie van omleidingen, time-out, groottelimieten, openbare DNS, verbindingsvastlegging) en
-  vóór de provideraanroep inline ingevoegd. Systeemeigen Jina-items van de vorm `{image:"https://..."}` worden ongewijzigd doorgestuurd
-  na dezelfde controle op openbare HTTPS; Jina haalt de URL op.
-- Inline base64-media zijn beperkt tot 8 MiB gedecodeerd per item en 16 MiB gedecodeerd voor het volledige verzoek.
+- Externe media-URL's moeten openbaar en via HTTPS toegankelijk zijn. Canonieke `{type,source:url}`-items worden
+  aan de serverzijde opgehaald (opnieuw valideren van omleidingen, time-out, groottelimieten, openbare DNS, vastzetten van verbindingen) en
+  inline opgenomen vóór de provideraanroep. Jina-eigen `{image:"https://..."}`-items worden ongewijzigd doorgestuurd
+  na dezelfde controle op openbare HTTPS-toegang; Jina haalt de URL op.
+- Inline base64-media zijn beperkt tot 8 MiB gedecodeerd per item en 16 MiB gedecodeerd voor de gehele aanvraag.
 
 Providervertaling (canonieke items worden nooit ongewijzigd doorgestuurd):
 
 - Multimodale Jina-modellen: elk item op het hoogste niveau wordt één object met een modaliteitssleutel
-  (`text` / `image` / `audio` / `video` / `pdf`), waarbij data-URI's worden gebruikt voor inline media; één vector per
+  (`text` / `image` / `audio` / `video` / `pdf`), waarbij data-URI's voor inline media worden gebruikt; één vector per
   item op het hoogste niveau.
-- Gemini Embedding 2-familie: één array op het hoogste niveau wordt één systeemeigen
-  `models/{model}:embedContent`-verzoek met `content.parts` (`text` of `inline_data`).
+- Gemini Embedding 2-familie: één array op het hoogste niveau wordt één eigen
+  `models/{model}:embedContent`-aanvraag met `content.parts` (`text` of `inline_data`).
+- llama.cpp (`llama-cpp/<model>`, elk model dat door de lokale server is geladen): canonieke `text`-items
+  worden gewone tekenreeksen, en `image` / `audio` / `video` worden elk één
+  `{"content": [part]}`-object, waarbij llama-server's chatinhoudsonderdelen (`image_url`,
+  `input_audio` met indeling `wav` / `mp3` / `flac`, `input_video`) met inline gegevens worden gebruikt; één vector
+  per item op het hoogste niveau. De server moet worden uitgevoerd met `--embedding --mmproj …`; zonder projector
+  weigert de server zelf media. `document` wordt niet ondersteund.
 - Onbekende/dynamische modellen zonder expliciete modaliteitsmetadata weigeren gestructureerde invoer met HTTP 400.
 
 ```json
@@ -267,8 +324,8 @@ Providervertaling (canonieke items worden nooit ongewijzigd doorgestuurd):
 }
 ```
 
-Niet-ondersteunde combinaties van model en modaliteit retourneren HTTP 400 in plaats van het item te converteren. Uitbreidingsvelden
-die geen invoervelden zijn, blijven bij verouderde tekenreeks-/tokenverzoeken ongewijzigd doorgegeven.
+Niet-ondersteunde combinaties van model en modaliteit retourneren HTTP 400 in plaats van het item te converteren. Uitbreidingsvelden die geen invoervelden zijn
+in verouderde aanvragen met tekenreeksen/tokens, worden nog steeds ongewijzigd doorgegeven.
 
 ```bash
 # Alle embeddingmodellen weergeven
@@ -291,7 +348,34 @@ Content-Type: application/json
 }
 ```
 
-Beschikbare providers: OpenAI (GPT Image 2), xAI (Grok Image), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana, **OpenRouter**, SD WebUI (lokaal), ComfyUI (lokaal).
+Beschikbare providers zijn onder andere OpenAI (GPT Image 2), xAI (Grok Image), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana, **OpenRouter**, **ZenMux**, SD WebUI (lokaal), ComfyUI (lokaal).
+
+`n` retourneert `n` afbeeldingen in `data[]`. Voor providers waarvan de upstream-API één afbeelding per aanroep retourneert
+(Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik,
+NVIDIA NIM, Cloudflare Workers AI), worden `n` afzonderlijke upstream-aanroepen uitgevoerd, met maximaal 4 gelijktijdige aanroepen. Een
+vaste `seed` wordt verhoogd met de aanroepindex (`seed`, `seed + 1`, …), zodat de afbeeldingen verschillen maar
+reproduceerbaar blijven. `n` is beperkt tot 10. De aanvraag mislukt in zijn geheel als een van de aanroepen mislukt. De lijst
+met fan-outindelingen staat in `SINGLE_IMAGE_FANOUT_FORMATS` in
+`open-sse/handlers/imageGeneration/fanOut.ts`.
+
+ZenMux hergebruikt de bestaande API-sleutelverbinding en accepteert de voorvoegsels `zenmux/` of `zm/`:
+
+- `zenmux/openai/gpt-image-2` gebruikt de OpenAI Images API van ZenMux. Opties zijn onder andere `size`,
+  `quality`, `n`, `output_format`, `output_compression`, `background` en `response_format`.
+- Andere uitgevers, zoals `zm/meta/muse-image-1.0`, gebruiken ZenMux' Vertex AI-`:predict`-
+  endpoint. `n` wordt gekoppeld aan `sampleCount`, `aspect_ratio` aan `aspectRatio` en `image_size`
+  (`1K`, `2K`, `4K`) aan `sampleImageSize`. Een `size` in pixels bepaalt alleen een beeldverhouding,
+  niet gegarandeerde pixelafmetingen. Ondersteunde verhoudingen, resoluties en aantallen verschillen per model.
+- `zm/inclusionai/ming-image-0.1-design` kiest zijn eigen afmetingen. Laat `size`,
+  `aspect_ratio` en `image_size` weg; expliciete waarden retourneren HTTP 400. PNG, JPEG en WebP
+  kunnen worden aangevraagd met `output_format`.
+
+Deze integratie ondersteunt het genereren van tekst naar afbeelding, niet het bewerken van referentieafbeeldingen. Vertex-
+uitvoer wordt genormaliseerd naar `data[].b64_json`; `response_format: "url"` retourneert een upstream-
+HTTPS-URL of een base64-data-URL wanneer alleen afbeeldingsbytes beschikbaar zijn. Lege/gefilterde uitvoer
+retourneert een fout in plaats van een leeg succesvol resultaat. Toegang tot modellen is afhankelijk van het ZenMux-account.
+Zie [de Vertex API van ZenMux](https://docs.zenmux.ai/api/vertexai/generate-images) en
+[OpenAI Images API](https://docs.zenmux.ai/api/openai/generate-an-image).
 
 ```bash
 # Alle afbeeldingsmodellen weergeven
@@ -367,38 +451,102 @@ standaard `us-central1` gebruikt. Beide resoluties vinden plaats in `open-sse/ha
 GET /v1/models
 Authorization: Bearer your-api-key
 
-→ Retourneert alle chat-, embedding- en afbeeldingsmodellen + combinaties in OpenAI-indeling
+→ Retourneert alle chat-, embedding- en afbeeldingsmodellen + combo's in OpenAI-indeling
 ```
 
 ### Model-id-prefixen (`?prefix=`)
 
-De meeste modellen worden aangeboden onder een **providerprefix**. Welk prefix je krijgt, wordt bepaald door de featureflag `MODELS_CATALOG_PREFIX_MODE` en kan **per verzoek** worden overschreven met een queryparameter — handig voor een client die een overzichtelijke lijst wil zonder de serverbrede instelling voor alle anderen te wijzigen:
+De meeste modellen worden aangeboden onder een **providerprefix**. Welke prefix je krijgt, wordt bepaald door
+de featureflag `MODELS_CATALOG_PREFIX_MODE` en kan **per verzoek** worden overschreven met een
+queryparameter — handig voor een client die een overzichtelijke lijst wil zonder de serverbrede
+instelling voor alle anderen te wijzigen:
 
 ```bash
-GET /v1/models?prefix=alias        # één id per model — het korte aliasprefix
-GET /v1/models?prefix=dual         # beide vormen (standaardinstelling van de server)
-GET /v1/models?prefix=canonical    # alleen het volledige provider-id-prefix
+GET /v1/models?prefix=alias        # één id per model — de korte aliasprefix
+GET /v1/models?prefix=dual         # beide vormen (serverstandaard)
+GET /v1/models?prefix=canonical    # alleen de volledige provider-id-prefix
 ```
 
-| Modus       | Geeft terug                                              | Opmerkingen                                                                                                                                                                                                     |
-| ----------- | -------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `dual`      | `cc/claude-sonnet-4-6` **en** `claude/claude-sonnet-4-6` | **Standaard.** Beide id's worden naar hetzelfde model gerouteerd; dit blijft behouden zodat clientconfiguraties waarin een van beide vormen hardgecodeerd is, blijven werken. Verdubbelt de catalogus ongeveer. |
-| `alias`     | `cc/claude-sonnet-4-6`                                   | Eén vermelding per model. Providers zonder afzonderlijke alias geven hun vermelding nog steeds terug, zodat er niets verloren gaat.                                                                             |
-| `canonical` | `claude/claude-sonnet-4-6`                               | Eén vermelding per model onder het volledige provider-id-prefix. Providers zonder afzonderlijke alias (bijv. `antigravity/…`, `agy/…`) geven hier ook hun enige id terug, zodat er niets verloren gaat.         |
+| Modus       | Levert op                                                | Opmerkingen                                                                                                                                                                                           |
+| ----------- | -------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `dual`      | `cc/claude-sonnet-4-6` **en** `claude/claude-sonnet-4-6` | **Standaard.** Beide id's worden naar hetzelfde model gerouteerd; behouden zodat clientconfiguraties waarin een van beide vormen hardgecodeerd is, blijven werken. Verdubbelt de catalogus ongeveer.  |
+| `alias`     | `cc/claude-sonnet-4-6`                                   | Eén vermelding per model. Providers zonder afzonderlijke alias leveren nog steeds hun vermelding op, zodat er niets verloren gaat.                                                                    |
+| `canonical` | `claude/claude-sonnet-4-6`                               | Eén vermelding per model onder de volledige provider-id-prefix. Providers zonder afzonderlijke alias (bijv. `antigravity/…`, `agy/…`) leveren hier ook hun enige id op, zodat er niets verloren gaat. |
 
-Een mirror in de modus `dual` kan ook zonder de queryparameter worden herkend: deze bevat een veld `parent` dat naar het primaire id verwijst.
+Een mirror in de modus `dual` kan ook zonder de queryparameter worden herkend: deze bevat een `parent`-veld
+dat naar het primaire id verwijst.
 
-Clients die een modelkiezer weergeven, moeten `?prefix=alias` aanvragen — dit is wat de [OmniCopilot VS Code-extensie](../guides/VSCODE-COPILOT.md) doet.
+Clients die een modelkiezer weergeven, moeten `?prefix=alias` opvragen — dit is wat de
+[OmniCopilot VS Code-extensie](../guides/VSCODE-COPILOT.md) doet.
 
-### Modelvarianten zonder denkmodus
+### Detectiefilters (`?capability=`, `?min_context=`, `?kind=`, `?q=`)
 
-Voor Claude-modellen die denkfunctionaliteit ondersteunen, biedt `/v1/models` ook een variant **zonder denkmodus** aan, waarvan het id wordt voorafgegaan door `claude-3-omniroute-no-thinking/`:
+`GET /v1/models` accepteert optionele detectiefilters. Zonder deze filters blijft het antwoord
+ongewijzigd. Ze beperken de catalogus die de aanroeper al kan zien (API-sleutelrechten worden eerst toegepast),
+en ze worden uitgevoerd vóór de OpenAI-achtige paginering met `limit` / `after`:
+
+```bash
+GET /v1/models?capability=vision&capability=tool_calling   # elke vermelde capability moet waar zijn
+GET /v1/models?capability=vision,reasoning&min_context=200000
+GET /v1/models?kind=embedding                              # catalogus-`type`; rijen zonder type zijn `chat`
+GET /v1/models?q=sonnet&limit=10                           # hoofdletterongevoelige overeenkomst met id of naam
+```
+
+| Parameter     | Waarden                                                                                             |
+| ------------- | --------------------------------------------------------------------------------------------------- |
+| `capability`  | `attachment`, `reasoning`, `structured_output`, `temperature`, `thinking`, `tool_calling`, `vision` |
+| `min_context` | niet-negatief geheel getal, vergeleken met `context_length`                                         |
+| `kind`        | `chat`, `audio`, `embedding`, `image`, `moderation`, `music`, `rerank`, `video`                     |
+| `q`           | 1–200 tekens                                                                                        |
+
+Een onbekende waarde of een `min_context` die geen niet-negatief geheel getal is (bijvoorbeeld `1.5`),
+retourneert HTTP `400` en het bericht vermeldt de geldige waarden. Implementatie:
+`src/app/api/v1/models/catalogFilters.ts`.
+
+### Modellenvoorselectie (`POST /v1/models/query`)
+
+`POST /v1/models/query` retourneert een korte, deterministische lijst uit dezelfde catalogus, met dezelfde
+authenticatie en zichtbaarheid per sleutel als `GET /v1/models`:
+
+```bash
+POST /v1/models/query
+Authorization: Bearer your-api-key
+Content-Type: application/json
+
+{ "capabilities": ["vision", "tool_calling"], "min_context": 128000, "max_output": 16000,
+  "kind": "chat", "q": "gpt", "owned_by": "openai", "exclude": ["openai/gpt-4o"], "limit": 5 }
+
+→ { "object": "list", "data": [ ...models ] }
+```
+
+Elk veld is optioneel. `capabilities` en `exclude` accepteren een array of een door komma's gescheiden tekenreeks;
+`max_output` wordt vergeleken met `max_output_tokens`. Resultaten worden eerst op `owned_by` en daarna op `id` gesorteerd.
+`limit` is standaard `20` en waarden boven `100` worden begrensd op `100`. Ongeldige JSON, een onbekend
+veld of een ongeldige waarde retourneert HTTP `400`.
+
+### Afzonderlijk verborgen chatmodellen
+
+Een model dat op de providerpagina als **Verborgen** is gemarkeerd, wordt uitgesloten van de catalogus en geweigerd
+met HTTP `404` / `model_not_found` wanneer het expliciet wordt opgevraagd. De controle gebruikt de opgeloste
+provider en het opgeloste model, inclusief provideraliases, nodeprefixen van compatibele providers en
+standaardwaarden voor verbindingen. Een combo slaat verborgen doelen over en kan een zichtbare variant gebruiken; wanneer er geen
+uitvoerbaar doel overblijft, wordt dezelfde foutcode geretourneerd. Het zichtbaar maken gaat bij het volgende
+verzoek in. Zichtbaarheidsoverschrijvingen die alleen voor afbeeldingen gelden, verbergen het chatmodel met hetzelfde ID niet.
+
+Deze afzonderlijke modelinstelling staat los van de
+[allow-/deny-lijsten voor modelblootstelling](../routing/MODEL_EXPOSURE_LIST.md), die catalogusvermeldingen
+en kandidaten voor automatische routering filteren, terwijl expliciete dispatch behouden blijft. Modelrechten voor
+API-sleutels blijven onafhankelijk van toepassing. De standaardmodus voor catalogusprefixen blijft `dual`.
+
+### Modelvarianten zonder thinking
+
+Voor Claude-modellen met thinking-ondersteuning biedt `/v1/models` ook een **variant zonder thinking** aan waarvan het id is voorzien van de prefix `claude-3-omniroute-no-thinking/`:
 
 ```
 claude-3-omniroute-no-thinking/<provider>/<model>
 ```
 
-Als dit id wordt geselecteerd (bijv. in een Claude Code-configuratie die altijd een `thinking`-blok toevoegt), wordt het terugverwezen naar het echte `<provider>/<model>`, waarbij redeneren wordt onderdrukt — `thinking:{type:"disabled"}` op het `/v1/messages`-pad, of waarbij de velden `reasoning`/`reasoning_effort` op het `/v1/chat/completions`-pad worden weggelaten. De variant wordt alleen vermeld voor modellen uit de Claude-familie die denkfunctionaliteit ondersteunen **en** `disabled` respecteren (dus bijvoorbeeld modellen die alleen adaptief werken en `disabled` afwijzen, worden uitgesloten). Beheerders kunnen de variant per model geforceerd in- of uitschakelen via `ModelSpec.noThinkingAlias`.
+Het selecteren van deze id (bijv. in een Claude Code-configuratie die altijd een `thinking`-blok toevoegt) wordt terugvertaald naar het werkelijke `<provider>/<model>`, waarbij redeneren wordt onderdrukt — `thinking:{type:"disabled"}` op het `/v1/messages`-pad, of waarbij de velden `reasoning`/`reasoning_effort` worden weggelaten op het `/v1/chat/completions`-pad. De variant wordt alleen vermeld voor modellen uit de Claude-familie die thinking ondersteunen **en** `disabled` respecteren (dus bijv. modellen die uitsluitend adaptief werken en `disabled` afwijzen, worden uitgesloten). Operators kunnen de variant per model afdwingen of uitschakelen via `ModelSpec.noThinkingAlias`.
 
 ---
 
@@ -416,55 +564,56 @@ Gebruik dit endpoint wanneer een sidecar buiten het proces wordt uitgevoerd en `
 
 ## Compatibiliteitseindpunten
 
-| Methode | Pad                                       | Formaat                                 |
-| ------- | ----------------------------------------- | --------------------------------------- |
-| POST    | `/v1/chat/completions`                    | OpenAI                                  |
-| POST    | `/v1/messages`                            | Anthropic                               |
-| POST    | `/v1/responses`                           | OpenAI Responses                        |
-| POST    | `/v1/embeddings`                          | OpenAI                                  |
-| POST    | `/v1/images/generations`                  | OpenAI Images                           |
-| POST    | `/v1/images/edits`                        | OpenAI Images (bewerken/inpainten)      |
-| POST    | `/v1/videos/generations`                  | Videogeneratie in OpenAI-stijl          |
-| POST    | `/v1/music/generations`                   | Muziekgeneratie in OpenAI-stijl         |
-| POST    | `/v1/audio/transcriptions`                | OpenAI Audio (STT)                      |
-| POST    | `/v1/audio/speech`                        | OpenAI TTS (retourneert audiobody)      |
-| POST    | `/v1/rerank`                              | Herrangschikking in Cohere/Voyage-stijl |
-| POST    | `/v1/classify`                            | Jina-classificatie (`api.jina.ai`)      |
-| POST    | `/v1/segment`                             | Jina-segmenter (`segment.jina.ai`)      |
-| POST    | `/v1/moderations`                         | OpenAI Moderations                      |
-| GET     | `/v1/models`                              | OpenAI                                  |
-| POST    | `/v1/messages/count_tokens`               | Anthropic                               |
-| GET     | `/v1beta/models`                          | Gemini                                  |
-| POST    | `/v1beta/models/{...path}`                | Gemini generateContent                  |
-| POST    | `/v1/api/chat`                            | Ollama                                  |
-| GET     | `/api/v1/vscode/{token}/`                 | Alias voor OpenAI-catalogus             |
-| GET     | `/api/v1/vscode/{token}/models`           | Alias voor OpenAI-modellen              |
-| POST    | `/api/v1/vscode/{token}/chat/completions` | OpenAI-alias met token                  |
-| POST    | `/api/v1/vscode/{token}/responses`        | OpenAI Responses-alias met token        |
-| POST    | `/api/v1/vscode/{token}/api/chat`         | Ollama-alias met token                  |
-| GET     | `/api/v1/vscode/{token}/api/tags`         | Ollama-tagsalias met token              |
+| Methode | Pad                                       | Indeling                             |
+| ------- | ----------------------------------------- | ------------------------------------ |
+| POST    | `/v1/chat/completions`                    | OpenAI                               |
+| POST    | `/v1/messages`                            | Anthropic                            |
+| POST    | `/v1/responses`                           | OpenAI Responses                     |
+| POST    | `/v1/embeddings`                          | OpenAI                               |
+| POST    | `/v1/images/generations`                  | OpenAI Images                        |
+| POST    | `/v1/images/edits`                        | OpenAI Images (bewerken/inpainten)   |
+| POST    | `/v1/videos/generations`                  | Videogeneratie in OpenAI-stijl       |
+| POST    | `/v1/music/generations`                   | Muziekgeneratie in OpenAI-stijl      |
+| POST    | `/v1/audio/transcriptions`                | OpenAI Audio (STT)                   |
+| POST    | `/v1/audio/speech`                        | OpenAI TTS (retourneert audio)       |
+| POST    | `/v1/rerank`                              | Herordening in Cohere/Voyage-stijl   |
+| POST    | `/v1/classify`                            | Jina-classificatie (`api.jina.ai`)   |
+| POST    | `/v1/segment`                             | Jina-segmentatie (`segment.jina.ai`) |
+| POST    | `/v1/moderations`                         | OpenAI Moderations                   |
+| GET     | `/v1/models`                              | OpenAI                               |
+| POST    | `/v1/models/query`                        | Gefilterde modellenlijst             |
+| POST    | `/v1/messages/count_tokens`               | Anthropic                            |
+| GET     | `/v1beta/models`                          | Gemini                               |
+| POST    | `/v1beta/models/{...path}`                | Gemini generateContent               |
+| POST    | `/v1/api/chat`                            | Ollama                               |
+| GET     | `/api/v1/vscode/{token}/`                 | OpenAI-catalogusalias                |
+| GET     | `/api/v1/vscode/{token}/models`           | OpenAI-modellenalias                 |
+| POST    | `/api/v1/vscode/{token}/chat/completions` | OpenAI-alias met token               |
+| POST    | `/api/v1/vscode/{token}/responses`        | OpenAI Responses-alias met token     |
+| POST    | `/api/v1/vscode/{token}/api/chat`         | Ollama-alias met token               |
+| GET     | `/api/v1/vscode/{token}/api/tags`         | Ollama-tagsalias met token           |
 
-Alle POST-routes volgen dezelfde structuur: `Bearer your-api-key` + een met Zod gevalideerde JSON-body (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema`, enzovoort; zie `src/shared/validation/schemas.ts`). Bij een schemafout wordt 4xx geretourneerd.
+Alle POST-routes hebben dezelfde structuur: `Bearer your-api-key` + een door Zod gevalideerde JSON-body (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema`, enzovoort; zie `src/shared/validation/schemas.ts`). Bij een schemafout wordt 4xx geretourneerd.
 
-Voor clients die geen `Authorization: Bearer ...` kunnen toevoegen, accepteert OmniRoute ook API-sleutels in de URL via compatibele querystrings (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`) of via de hieronder gedocumenteerde specifieke `/api/v1/vscode/{token}/...`-eindpunten.
+Voor clients die geen `Authorization: Bearer ...` kunnen toevoegen, accepteert OmniRoute ook API-sleutels in de URL via compatibiliteit met querystrings (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`) of via de speciale `/api/v1/vscode/{token}/...`-eindpunten die hieronder worden beschreven.
 
 ```bash
-# Herrangschikken (provider uit het cloudregister, of een OpenAI-compatibele providernode als "<prefix>/<model>")
+# Herordenen (provider uit het cloudregister of een OpenAI-compatibele providernode als "<prefix>/<model>")
 POST /v1/rerank      { "model": "jina-ai/jina-reranker-v3.5", "query": "...", "documents": ["..."] }
 
-# Jina-classificatie (referenties voor de Foundation API)
+# Jina-classificatie (inloggegevens voor Foundation API)
 POST /v1/classify    { "model": "jina-embeddings-v5-text-small", "input": ["..."], "labels": ["a", "b"] }
 
-# Jina-segmenter
+# Jina-segmentatie
 POST /v1/segment     { "content": "...", "return_chunks": true }
 
-# Jina-zoekopdracht (s.jina.ai; provideraliases: jina-search, jina-ai, jina)
+# Jina-zoekopdracht (s.jina.ai; provideraliasen: jina-search, jina-ai, jina)
 POST /v1/search      { "query": "...", "provider": "jina-search" }
 
-# Moderaties
+# Moderatie
 POST /v1/moderations { "model": "omni-moderation-latest", "input": "..." }
 
-# TTS — retourneert een audio/mpeg-body (of de body in de gevraagde indeling)
+# TTS — retourneert een audio/mpeg-body (of de aangevraagde indeling)
 POST /v1/audio/speech { "model": "openai/tts-1", "input": "Hello", "voice": "alloy" }
 
 # Soniox TTS vereist een taal en een stem: `language` is standaard "en"; een ontbrekende
@@ -474,34 +623,37 @@ POST /v1/audio/speech { "model": "soniox/tts-rt-v1", "input": "Xin chào", "voic
 # Afbeelding bewerken (multipart)
 POST /v1/images/edits  -F image=@input.png -F prompt="..." -F mask=@mask.png
 
-# Video-/muziekgeneratie (model-ID met providerprefix)
+# Video-/muziekgeneratie (model-id met providerprefix)
 POST /v1/videos/generations { "model": "runway/gen-3", "prompt": "..." }
 POST /v1/music/generations  { "model": "kie/suno-v4.0",   "prompt": "..." }
 ```
 
-> **Providernodes voor herrangschikking:** `POST /v1/rerank` routeert ook naar OpenAI-compatibele providernodes
-> (oMLX, vLLM, Infinity, TEI achter een gateway, …) die worden geadresseerd als `<node-prefix>/<model>`. Loopbacknodes
-> (`localhost`, `127.0.0.1`, `172.16.0.0/12`) komen altijd in aanmerking. Nodes op elke andere
-> host — een machine in het LAN of een Tailscale-peer — komen alleen in aanmerking wanneer de beheerder de
-> featureflag `RERANK_REMOTE_PROVIDER_NODES` inschakelt **en** de basis-URL van de node voldoet aan het beleid voor
-> uitgaande provider-URL's (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`);
-> hosts voor cloudmetadata worden nooit gebruikt voor routering. De herrangschikkingsstap van de geheugenengine roept deze route aan via
-> loopback, zodat dezelfde regel geldt voor `rerankProviderModel` in de geheugeninstellingen.
+> **Rerank-providernodes:** `POST /v1/rerank` routeert ook naar OpenAI-compatibele providernodes
+> (oMLX, vLLM, Infinity, TEI achter een gateway, …) die worden aangeduid als `<node-prefix>/<model>`. Loopbacknodes
+> (`localhost`, `127.0.0.1`, `172.16.0.0/12`) komen altijd in aanmerking, net als hostnamen die de
+> beheerder vermeldt in `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS` (bijvoorbeeld een Docker/Compose-servicenaam
+> zoals `http://reranker:8080/v1`; deze worden rechtstreeks aangeroepen, nooit via `HTTP(S)_PROXY` of de
+> vastgezette proxy van een verbinding). Nodes op elke andere
+> host — een apparaat op het LAN of een Tailscale-peer — komen alleen in aanmerking wanneer de beheerder
+> de featureflag `RERANK_REMOTE_PROVIDER_NODES` inschakelt **en** de basis-URL van de node voldoet aan het
+> beleid voor uitgaande provider-URL's (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`).
+> De rerankstap van de geheugenengine roept deze route aan via
+> loopback, waardoor dezelfde regel geldt voor `rerankProviderModel` in de geheugeninstellingen.
 >
-> **Structuren van lokale servers:** de node wordt aangeroepen via `<base>/v1/rerank` en, bij een 404, via `<base>/rerank`
+> **Vormen van lokale servers:** de node wordt aangeroepen op `<base>/v1/rerank` en, bij een 404, op `<base>/rerank`
 > (Infinity, TEI). De upstream-body bevat zowel de Cohere/OpenAI-spelling (`documents`,
-> `return_documents`) als de TEI-spelling (`texts`, `return_text`), en het upstream-antwoord wordt
-> genormaliseerd naar de Cohere-envelope: TEI's kale `[{index, score, text}]`, `{results: [{index, score}]}`
-> van eenvoudige gateways en Voyage-achtige `{data: [...]}` worden allemaal naar de client teruggestuurd als
+> `return_documents`) als de TEI-spelling (`texts`, `return_text`), en de upstream-respons wordt
+> genormaliseerd naar de Cohere-envelop: TEI's kale `[{index, score, text}]`, `{results: [{index, score}]}`
+> van eenvoudige gateways en Voyage-achtige `{data: [...]}` worden allemaal aan de client geretourneerd als
 > `{results: [{index, relevance_score, document?}]}`, gesorteerd op score en beperkt tot `top_n`.
 
-> **Detectie van provider-nodes:** modellen op een OpenAI-compatibele provider-node verschijnen in `GET /v1/models`
-> onder het node-voorvoegsel. Rijen zonder endpointmetadata (gebruikelijk voor lokale `/v1/models`-lijsten)
-> nemen het `apiType` van de node over, zodat de modellen van een `embeddings`-node `type: "embedding"` hebben en die van een
-> `rerank`-node `type: "rerank"` in plaats van standaard chat te gebruiken; een expliciete
+> **Detectie van providernodes:** modellen op een OpenAI-compatibele providernode verschijnen in `GET /v1/models`
+> onder het nodevoorvoegsel. Rijen zonder endpointmetadata (zoals gebruikelijk bij lokale `/v1/models`-overzichten)
+> nemen de `apiType` van de node over, zodat de modellen van een `embeddings`-node `type: "embedding"` zijn en de
+> modellen van een `rerank`-node `type: "rerank"` zijn in plaats van standaard chat te gebruiken; een expliciete
 > `supportedEndpoints` in een gesynchroniseerde of handmatig toegevoegde rij heeft nog steeds voorrang.
 
-### Specifieke providerroutes
+### Speciale providerroutes
 
 ```bash
 POST /v1/providers/{provider}/chat/completions
@@ -509,7 +661,7 @@ POST /v1/providers/{provider}/embeddings
 POST /v1/providers/{provider}/images/generations
 ```
 
-Het provider-voorvoegsel wordt automatisch toegevoegd als het ontbreekt. Niet-overeenkomende modellen retourneren `400`.
+Het providervoorvoegsel wordt automatisch toegevoegd als het ontbreekt. Niet-overeenkomende modellen retourneren `400`.
 
 ---
 
@@ -557,39 +709,75 @@ aanroeper zonder sessie (ophalen, verwijderen, annuleren en de controle van `inp
 
 Abstractielaag voor web-/zoekproviders (Tavily, Brave, Exa, Serper, enz.).
 
-| Methode | Pad                    | Beschrijving                                                                                        |
-| ------- | ---------------------- | --------------------------------------------------------------------------------------------------- |
-| GET     | `/v1/search`           | Geconfigureerde zoekproviders en mogelijkheden weergeven                                            |
-| POST    | `/v1/search`           | Een zoekopdracht uitvoeren — body gevalideerd door `v1SearchSchema`, ondersteunt caching/coalescing |
-| GET     | `/v1/search/analytics` | Statistieken per provider voor hits/latentie/cache                                                  |
+| Methode | Pad                    | Beschrijving                                                                                          |
+| ------- | ---------------------- | ----------------------------------------------------------------------------------------------------- |
+| GET     | `/v1/search`           | Geconfigureerde zoekproviders en mogelijkheden weergeven                                              |
+| POST    | `/v1/search`           | Een zoekopdracht uitvoeren — body gevalideerd door `v1SearchSchema`, ondersteunt caching/samenvoeging |
+| GET     | `/v1/search/analytics` | Statistieken per provider over treffers, latentie en cache                                            |
 
 **Authenticatie:** Bearer-API-sleutel (`extractApiKey` + `isValidApiKey`). Zoekbeleid wordt afgedwongen via `enforceApiKeyPolicy`.
 
+### Exa en Tavily `provider_options`
+
+Exa en Tavily lezen providerspecifieke velden uit een geneste verzameling:
+`provider_options.exa` (of `provider_options["exa-search"]`) en `provider_options.tavily`
+(of `provider_options["tavily-search"]`). Alleen de onderstaande sleutels worden doorgestuurd. Elke sleutel wordt
+gecontroleerd aan de hand van het eigen Zod-schema in `open-sse/handlers/search/providerOptionsPassthrough.ts`,
+en een sleutel met het verkeerde type wordt verwijderd. Alle andere sleutels worden genegeerd, waaronder authenticatie, basis-URL,
+`stream` en `outputSchema`. De platte sleutels die door andere providers worden gebruikt (`cx`, `depth`, ...) werken
+zoals voorheen.
+
+| Provider | Velden op het hoogste niveau                                                                                                                                                                                                                                                                                                                                              | Genest                                                                                                                                                                        |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa      | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (platte primitieve waarden), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                    | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` samengevoegd met de standaardwaarde `{ text: true, highlights: true }` |
+| Tavily   | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                                             |
+
+De generieke velden hebben altijd voorrang: `query`, `max_results`, `filters` (domeinen), `country` en het
+onderwerp dat is afgeleid van `search_type`. Bij Exa behoudt `search_type: "news"` de waarde `category: "news"`.
+Tavily accepteert ook `search_type: "finance"` (`topic: "finance"`).
+
+De generieke `time_range` bereikt nu beide providers: Exa ontvangt `startPublishedDate` (ISO-
+tijdstempel) en Tavily ontvangt `start_date` (`YYYY-MM-DD`). Een expliciete datum in `provider_options`
+overschrijft de toegewezen datum.
+
+Exa-resultaten behouden `id`, `highlight_scores`, `summary`, `subpages`, `entities` en `extras` in
+`provider_raw`. Tavily-resultaten behouden `images` en `favicon`.
+
+De kostenberekening gebruikt nog steeds het platte register `costPerQuery`. Tavily brengt voor
+`search_depth: "advanced"` meer credits per aanroep in rekening, en dat verschil wordt niet weergegeven in
+`usage.search_cost_usd`.
+
 ---
 
-## Web Fetch-API
+## Web Fetch API
 
-Extraheer inhoud uit een URL via een geconfigureerde web-fetchprovider (Firecrawl, Jina
-Reader, Tavily Extract, TinyFish Fetch, Nimble Extract).
+Extraheer inhoud uit een URL via een geconfigureerde web-fetch-provider (Firecrawl, Jina
+Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract).
+
+Parallel Extract (`parallel-search`, dezelfde API-sleutel als Parallel Search) retourneert uitsluitend Markdown
+— elke andere `format` resulteert in een `400` — en beperkt de inhoud tot 100.000 tekens. Wanneer
+de doelpagina zelf niet kan worden geëxtraheerd, meldt de upstream-provider dit binnen een HTTP 200;
+OmniRoute geeft dit weer als een `422` met een vaste melding.
 
 | Methode | Pad             | Beschrijving                                                       |
 | ------- | --------------- | ------------------------------------------------------------------ |
 | POST    | `/v1/web/fetch` | Een URL ophalen/scrapen — body gevalideerd door `v1WebFetchSchema` |
 
-**Authenticatie:** Bearer-API-sleutel (`extractApiKey` + `isValidApiKey`). Beleid wordt afgedwongen via `enforceApiKeyPolicy`.
+**Authenticatie:** Bearer-API-sleutel (`extractApiKey` + `isValidApiKey`). Beleid afgedwongen via `enforceApiKeyPolicy`.
 
 **Quotabewuste fallback (#8297):** wanneer geen expliciete `provider` is opgegeven, wordt de pool
-(`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search`) in een vaste
-prioriteitsvolgorde doorlopen (fill-first) — een provider die is geconfigureerd maar waarvan de
-snelheidslimiet is bereikt, wordt overgeslagen in plaats van dat het verzoek direct wordt afgebroken,
-en een herhaalbare upstreamfout/quotafout (altijd HTTP 429; 402/403 voor quota-achtige gratis niveaus
-van Firecrawl/Tavily/TinyFish — niet voor Jina Reader en nooit voor een gewone 400-fout wegens een
-ongeldig verzoek) valt tijdens het verzoek terug op de volgende nog niet geprobeerde provider waarvoor
-referenties beschikbaar zijn. Wanneer elke provider in de pool is uitgeput, retourneert het endpoint
-één `429` (met een `Retry-After`-header) in plaats van de eerdere generieke `400`. Wanneer expliciet
-een `provider` wordt aangevraagd, is er **geen** stille fallback — een expliciete provider waarvan de
-snelheidslimiet is bereikt of die faalt, geeft zijn eigen fout door (`429` als de snelheidslimiet is
-bereikt, anders de upstreamstatus).
+(`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` →
+`parallel-search`) in een vaste
+prioriteitsvolgorde doorlopen (fill-first) — een provider die vanwege een frequentielimiet niet beschikbaar maar wel geconfigureerd is, wordt overgeslagen
+in plaats van het verzoek direct af te breken, en bij een opnieuw te proberen upstream-fout of quotafout
+(altijd bij HTTP 429; 402/403 voor quotagerelateerde gratis abonnementen van Firecrawl/Tavily/TinyFish —
+niet voor Jina Reader en nooit voor een gewone 400-fout vanwege een ongeldig verzoek) wordt tijdens het verzoek
+doorgegaan naar de volgende nog niet geprobeerde provider waarvoor inloggegevens beschikbaar zijn. Wanneer elke provider in de
+pool is uitgeput, retourneert het endpoint één `429` (met een `Retry-After`-
+header) in plaats van de eerdere algemene `400`. Wanneer expliciet om een `provider` wordt
+verzocht, is er **geen** stille fallback — een expliciete provider die vanwege een frequentielimiet niet beschikbaar is of faalt,
+geeft zijn eigen fout door (`429` bij een frequentielimiet, anders de upstream-
+status).
 
 ---
 
@@ -677,17 +865,17 @@ voltooiing.
 
 ---
 
-## Zelfbedieningsgebruik (`/api/usage/om-usage`)
+## Selfservicegebruik (`/api/usage/om-usage`)
 
-Elke API-sleutel kan het **eigen** gebruik en de eigen quota lezen — zonder beheerauthenticatie. Dit is het endpoint dat een
-client (CLI, het OmniCopilot-paneel) gebruikt om de uitgaven van een sleutelhouder weer te geven.
+Elke API-sleutel kan **zijn eigen** gebruik en quota lezen — zonder beheerdersauthenticatie. Dit is het endpoint dat een
+client (CLI, het OmniCopilot-paneel) gebruikt om de houder van een sleutel diens uitgaven te tonen.
 
 ```bash
 # Tekstvorm (het historische contract — platte tekst voor een terminal)
 curl -H "Authorization: Bearer <your-api-key>" \
   http://localhost:20128/api/usage/om-usage
 
-# Gestructureerde vorm — wat een gebruikersinterface gebruikt
+# Gestructureerde vorm — wat een UI gebruikt
 curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
@@ -696,12 +884,12 @@ Voor de sleutel moet **`allowUsageCommand`** zijn ingeschakeld (standaard uitges
 van het dashboard schakelt dit per sleutel in of uit). Zonder deze instelling antwoordt het endpoint met `403`.
 
 `?format=json` retourneert een gediscrimineerde structuur, zodat een aanroeper nooit een gegevensveld van een
-weigering uitleest. Bij succes:
+weigering leest. Bij succes:
 
 ```jsonc
 {
   "allowed": true,
-  // alleen aanwezig wanneer voor de sleutel gebruikslimieten per sleutel zijn ingesteld (dagelijks/wekelijks in USD):
+  // alleen aanwezig wanneer voor de sleutel gebruikslimieten per sleutel zijn ingeschakeld (dagelijks/wekelijks in USD):
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -710,14 +898,14 @@ weigering uitleest. Bij succes:
     "weeklyLimitUsd": 20,
     "weeklyResetAtIso": "…" /* … */,
   },
-  // de geselecteerde momentopname van het providerquotum, of null wanneer er nog niets in de cache staat:
+  // de geselecteerde momentopname van het providerquotum, of null wanneer nog niets in de cache staat:
   "provider": {
     "connectionId": "…",
     "provider": "claude",
     "plan": "…",
     "quotas": {/* … */},
   },
-  // de momentopname van elke verbinding, zodat een gebruikersinterface meerdere providers naast elkaar kan weergeven:
+  // de momentopname van elke verbinding, zodat een UI meerdere providers naast elkaar kan weergeven:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
     { "provider": "codex" /* … */ },
@@ -727,11 +915,62 @@ weigering uitleest. Bij succes:
 
 Bij weigering (`401` ongeldige sleutel / `403` niet toegestaan) retourneert dezelfde route
 `{ "allowed": false, "error": { "message": "…" } }` — een aanwezige maar lege `personal`/`provider`
-(sleutel toegestaan, nog niets gedetecteerd) is een andere status dan een weigering, en alleen de JSON-vorm
+(sleutel toegestaan, nog niets bekend) is een andere toestand dan een weigering, en alleen de JSON-vorm
 maakt daar onderscheid tussen.
 
 **Authenticatie:** de eigen Bearer-API-sleutel van de aanroeper, gevalideerd met `isValidApiKey` — dit is _niet_ het
 beheeroppervlak (`/api/keys/…`), dat beschermd blijft door `requireManagementAuth`.
+
+### Ruwe versus voor afkapwaarden gecorrigeerde quotapercentages
+
+Bij het gebruiken van `/api/usage/om-usage` moeten aanroepers rekening houden met het verschil tussen de
+percentages in de **platte-tekstuitvoer** en die in de gestructureerde **JSON-uitvoer**:
+
+| Aspect                 | Platte-tekstindeling (`/api/usage/om-usage` / `@@om-usage`)                                              | JSON-indeling (`?format=json`)                                              |
+| :--------------------- | :------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------- |
+| **Uitvoerveld**        | `NN% left` (bijv. `20% left`)                                                                            | `provider.quotas` / `providers[].quotas`                                    |
+| **Meting**             | **Voor afkapwaarde gecorrigeerde bruikbare ruimte**: resterende capaciteit boven de afkapdrempel         | **Ruw upstreamquotum**: niet-gecorrigeerde meting van de provider           |
+| **Afkapschaling**      | Geschaald via `effectiveRemainingPercent()`, zodat de beschermde reserve als `0% left` wordt weergegeven | Geen (ruwe momentopnamewaarden zoals gerapporteerd door de provider)        |
+| **Drempelgegevens**    | Verwerkt in het weergegeven percentage                                                                   | Opgeslagen in `quotaWindowThresholds` per verbinding (of serverstandaarden) |
+| **Primaire gebruiker** | Interactieve CLI's, terminalprompts, menselijke operators                                                | Programmatische integraties, dashboards, analyses, factureringstrackers     |
+
+#### De formule voor correctie op basis van de afkapwaarde
+
+OmniRoute ondersteunt proactieve quota-afkapwaarden om uitputting bij de upstreamprovider te voorkomen (geconfigureerd via
+`quotaWindowThresholds` van de verbinding, providerstandaarden of globale weerbaarheidsinstellingen). Wanneer een afkapdrempel
+(bijv. `cutoff = 25%`) actief is voor een quotavenster, berekent de tekstweergave de resterende ruimte als volgt:
+
+- Als `remaining <= cutoff`: retourneert `0%`.
+- Als `remaining > cutoff`: retourneert `((remaining - cutoff) / (100 - cutoff)) * 100`.
+
+De opgemaakte tekstuitvoer rondt dit af op het dichtstbijzijnde gehele getal (`Math.round(...)`).
+
+#### Illustratief voorbeeld
+
+Neem een providervenster met **60% ruw gebruik** (en dus **40% ruw resterend quotum**) en een geconfigureerde
+**afkapdrempel van 25% resterend quotum**:
+
+| Weergave                       | Berekening                                         | Resterend |               Impliciet gebruikt               |
+| :----------------------------- | :------------------------------------------------- | :-------: | :--------------------------------------------: |
+| **Ruwe JSON (`?format=json`)** | Upstreammomentopname (`quotas[window]`)            |  **40%**  |                    **60%**                     |
+| **Tekstindeling (`NN% left`)** | `((40 - 25) / (100 - 25)) * 100 = (15 / 75) * 100` |  **20%**  | **80%** (bij berekening van `100 - remaining`) |
+
+- **Waarom de tekst 20% resterend toont:** Van het fysieke quotum van 40% dat nog op het account beschikbaar is, wordt 25% door het
+  afkapbeleid gereserveerd. De aanroeper heeft nog slechts 15% van de 75% bruikbare marge over voordat de router stopt
+  met het routeren naar deze verbinding. De schaling zorgt ervoor dat de verbinding uitputting aangeeft (`0% left`) precies wanneer
+  het routeren wordt beëindigd.
+- **Waarom JSON de ruwe waarden behoudt:** De JSON-payload retourneert de exacte providermomentopname (`UsageSnapshot`),
+  zodat externe tools toegang hebben tot de werkelijke upstreambenutting en `quotaWindowThresholds` op verbindingsniveau,
+  zonder verliesgevende schaling aan de serverzijde.
+
+#### Richtlijnen voor de migratie van gebruikers
+
+Als een externe integratie (zoals een editorplug-in of agentextensie) eerder het tekstendpoint
+(`NN% left`) uitleesde en het gebruikte percentage berekende als `100 - NN`, betekent migratie naar `?format=json` het volgende:
+
+- Het lezen van ruwe JSON-waarden weerspiegelt het **werkelijke upstreamverbruik** (60% gebruikt in het bovenstaande voorbeeld).
+- Als de integratie de semantiek voor bruikbare ruimte van het tekstendpoint wil behouden, kan deze
+  de formule voor effectief resterende ruimte aan de clientzijde berekenen met `quotaWindowThresholds` voor overschrijvingen op verbindingsniveau.
 
 ---
 
@@ -802,73 +1041,157 @@ X-OmniRoute-No-Cache: true
 
 ## Dashboard & beheer
 
-Beheerroutes (`/api/*` behalve openbare authenticatie/aanmelding) worden **niet** geautoriseerd door
-gewone API-sleutels voor inferentie. Zie voor referentiefamilies, scopes en curl-voorbeelden:
+Beheerroutes (`/api/*` behalve openbare authenticatie/login) worden **niet** geautoriseerd met
+gewone API-sleutels voor inferentie. Zie voor typen aanmeldgegevens, scopes en curl-voorbeelden:
 [Beheerauthenticatie](../guides/MANAGEMENT-AUTH.md).
 
 ### Authenticatie
 
-| Endpoint                      | Methode | Beschrijving                         |
-| ----------------------------- | ------- | ------------------------------------ |
-| `/api/auth/login`             | POST    | Aanmelden                            |
-| `/api/auth/logout`            | POST    | Afmelden                             |
-| `/api/settings/require-login` | GET/PUT | Vereiste aanmelding in-/uitschakelen |
+| Endpoint                      | Methode  | Beschrijving                                                                                                                                                                                                                                                                                                                      |
+| ----------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/auth/login`             | POST     | Inloggen                                                                                                                                                                                                                                                                                                                          |
+| `/api/auth/logout`            | POST     | Uitloggen                                                                                                                                                                                                                                                                                                                         |
+| `/api/settings/require-login` | GET/POST | Inlogstatus (GET, openbaar). POST stelt het wachtwoord in / schakelt inloggen in of uit: alleen voor operators zodra er een wachtwoord bestaat (dashboardsessie, lokale CLI of inloggen uitgeschakeld — API-sleutels en `oma_`-tokens krijgen `403`); een dashboardsessie stuurt `currentPassword` om het wachtwoord te vervangen |
 
 ### Providerbeheer
 
-| Endpoint                                | Methode               | Beschrijving                                                                                                                                                                     |
-| --------------------------------------- | --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/providers`                        | GET/POST              | Providers weergeven / aanmaken                                                                                                                                                   |
-| `/api/providers/[id]`                   | GET/PUT/DELETE        | Een provider beheren                                                                                                                                                             |
-| `/api/providers/[id]/test`              | POST                  | Providerverbinding testen                                                                                                                                                        |
-| `/api/providers/[id]/models`            | GET                   | Providermodellen weergeven                                                                                                                                                       |
-| `/api/providers/validate`               | POST                  | Providerconfiguratie valideren                                                                                                                                                   |
-| `/api/providers/bulk`                   | POST                  | API-sleutels bulksgewijs toevoegen voor ÉÉN provider                                                                                                                             |
-| `/api/providers/import`                 | POST                  | Een heterogene provider-LIJST importeren uit een geparseerd CSV-/JSON-bestand (#6836); resultaten met gedeeltelijke fouten per rij                                               |
-| `/api/provider-nodes*`                  | Diverse               | Providernodes beheren                                                                                                                                                            |
-| `/api/provider-models`                  | GET/POST/PATCH/DELETE | Aangepaste modellen (toevoegen, bijwerken, verbergen/weergeven, verwijderen)                                                                                                     |
-| `/api/provider-models/validate-and-add` | POST                  | Door beheerauthenticatie beveiligde, optionele strikte verbindingsvalidatie en atomaire registratie van aangepaste modellen; zie [Modelvalidatie](../guides/MODEL-VALIDATION.md) |
+| Endpoint                                | Methode                   | Beschrijving                                                                                                                                                              |
+| --------------------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/providers`                        | GET/POST                  | Providers weergeven / aanmaken                                                                                                                                            |
+| `/api/providers/[id]`                   | GET/PUT/DELETE            | Een provider beheren                                                                                                                                                      |
+| `/api/providers/[id]/test`              | POST                      | Providerverbinding testen                                                                                                                                                 |
+| `/api/providers/[id]/models`            | GET                       | Providermodellen weergeven                                                                                                                                                |
+| `/api/providers/validate`               | POST                      | Providerconfiguratie valideren                                                                                                                                            |
+| `/api/providers/bulk`                   | POST                      | API-sleutels bulksgewijs toevoegen voor ÉÉN provider                                                                                                                      |
+| `/api/providers/import`                 | POST                      | Een heterogene providerLIJST importeren uit een geparseerd CSV-/JSON-bestand (#6836); resultaten met gedeeltelijke fouten per rij                                         |
+| `/api/provider-nodes*`                  | Diverse                   | Providernodes beheren                                                                                                                                                     |
+| `/api/provider-models`                  | GET/POST/PUT/PATCH/DELETE | Aangepaste modellen en overrides per model (toevoegen, bijwerken, verbergen/weergeven, verwijderen)                                                                       |
+| `/api/provider-models/validate-and-add` | POST                      | Door beheer geauthenticeerde, optionele strikte verbindingsvalidatie en atomaire registratie van aangepaste modellen; zie [Modelvalidatie](../guides/MODEL-VALIDATION.md) |
+
+Voor gesynchroniseerde/geïmporteerde modellen accepteert `PUT /api/provider-models` de velden `provider`, `modelId` en
+`maxOutputTokenOverride`: een positief geheel getal stelt de handmatige limiet voor uitvoertokens in en `null`
+wist deze om de standaardwaarde te herstellen. `GET /api/provider-models?provider=<provider>` retourneert deze
+waarden in `modelOutputOverrides`, inclusief modellen zonder rij voor een aangepast model. De override
+gebruikt tijdens runtime de mogelijkheid `max_output_tokens` en blijft behouden wanneer een model opnieuw wordt gesynchroniseerd. De pagina voor
+OpenAI-compatibele providers biedt dezelfde besturingselementen voor bewerken/wissen en markeert modellen met expliciete ondersteuning voor vision.
+
+Aangepaste Chat Completions-nodes passen expliciete afmeldingen voor reasoning aan de upstreambackend aan. Bij een
+geslaagde verbindingstest worden automatisch chattemplatebesturingselementen geselecteerd voor elke exacte model-ID
+waarvan de `/models`-vermelding een herkende `owned_by`-waarde aantoont: `vllm`, `sglang` of `llamacpp`.
+Transparante OpenAI-compatibele wrappers kunnen de oorspronkelijke modelvermelding behouden in een genest
+`openai`-object; de detectie volgt maximaal drie van zulke enveloppen. Modellen met ontbrekend, onbekend of
+tegenstrijdig eigenaarschap behouden het normale OpenAI-gedrag. De detectie hergebruikt het bestaande catalogusverzoek,
+genereert geen voltooiingstokens en wordt ongeldig gemaakt wanneer het verbindingseindpunt verandert.
+
+Gebruik de bestaande API voor gedeeltelijke providerupdates om het gedrag vast te zetten voor een backend die deze metadata niet beschikbaar stelt:
+
+```json
+{
+  "providerSpecificData": {
+    "reasoningControl": "chat-template"
+  }
+}
+```
+
+Stuur die body mee met `PUT /api/providers/<connection-id>`. Voor die verbinding wordt een expliciete
+redeneerinspanning van `none` verzonden als `chat_template_kwargs.thinking=false` en
+`chat_template_kwargs.enable_thinking=false`. Expliciete waarden van de native template blijven leidend,
+tenzij een redeneerregel aan de serverzijde een inspanning afdwingt. De instelling is alleen van toepassing
+wanneer een aangepaste OpenAI-compatibele verbinding een Chat Completions-body verzendt; Responses-verzoeken
+en reguliere providers behouden hun native verzoekstructuur. Stel `reasoningControl` in op `openai` om de
+reguliere OpenAI-doorgifte van `reasoning_effort` af te dwingen, of laat deze weg/stel deze in op `null` om
+automatische detectie te gebruiken.
+
+Classifierverzoeken in de automatische modus van Claude Code schakelen native thinking standaard uit
+wanneer ze geen expliciete redeneerbesturing bevatten. Detectie gebruikt de systeemmarkering van de
+classifier in verzoeken met Claude-indeling, niet modelnamen of voltooiingslimieten. Expliciete
+body-besturing, ondersteunde inspannings-/thinking-headers, routeringsregels en opgeloste modelinspanning
+behouden hun bestaande prioriteit. Beide classifierfasen behouden hun prompts, voltooiingslimieten,
+stopsequenties en echte upstream-toestemmingsbeslissingen; de tweede fase kan de gevraagde zichtbare
+redenering nog steeds als gewone tekst produceren.
 
 ### OAuth-stromen
 
-| Endpoint                         | Methode | Beschrijving             |
-| -------------------------------- | ------- | ------------------------ |
-| `/api/oauth/[provider]/[action]` | Diverse | Providerspecifieke OAuth |
+| Endpoint                         | Methode      | Beschrijving             |
+| -------------------------------- | ------------ | ------------------------ |
+| `/api/oauth/[provider]/[action]` | Verschillend | Providerspecifieke OAuth |
 
-### Routering & configuratie
+### Routering en configuratie
 
-| Endpoint              | Methode  | Beschrijving                      |
-| --------------------- | -------- | --------------------------------- |
-| `/api/models/alias`   | GET/POST | Modelaliassen                     |
-| `/api/models/catalog` | GET      | Alle modellen per provider + type |
-| `/api/combos*`        | Diverse  | Combobeheer                       |
-| `/api/keys*`          | Diverse  | API-sleutelbeheer                 |
-| `/api/pricing`        | GET      | Modelprijzen                      |
+| Endpoint              | Methode      | Beschrijving                      |
+| --------------------- | ------------ | --------------------------------- |
+| `/api/models/alias`   | GET/POST     | Modelaliassen                     |
+| `/api/models/catalog` | GET          | Alle modellen per provider + type |
+| `/api/combos*`        | Verschillend | Combobeheer                       |
+| `/api/keys*`          | Verschillend | API-sleutelbeheer                 |
+| `/api/pricing`        | GET          | Modelprijzen                      |
 
-### Gebruik & analyse
+### Gebruik en analyse
 
-| Endpoint                         | Methode         | Beschrijving                                                                                                                                                                                                                                                                                                                                                           |
-| -------------------------------- | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/usage/history`             | GET             | Gebruiksgeschiedenis                                                                                                                                                                                                                                                                                                                                                   |
-| `/api/usage/logs`                | GET             | Gebruikslogboeken                                                                                                                                                                                                                                                                                                                                                      |
-| `/api/usage/request-logs`        | GET             | Logboeken op verzoekniveau                                                                                                                                                                                                                                                                                                                                             |
-| `/api/usage/[connectionId]`      | GET             | Gebruik per verbinding                                                                                                                                                                                                                                                                                                                                                 |
-| `/api/usage/token-limits`        | GET/POST/DELETE | Tokenlimietbudgetten per API-sleutel                                                                                                                                                                                                                                                                                                                                   |
-| `/api/usage/model-latency-stats` | GET             | Voortschrijdend latentie-aggregaat per provider/model (gem./p50/p95/p99, slagingspercentage); filters: `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                                                                                                 |
-| `/api/usage/cache-health`        | GET             | Samenvatting van de status van de promptcache op basis van `call_logs` — schrijf-/leesverhouding, p50/p90/p99-verdeling van schrijfgrootte, concentratie van zware schrijfbewerkingen, uitsplitsing per model en een oordeel `healthy`/`degraded`/`thrash`/`no-data`; queryparameters `range` (`1h`\|`24h`\|`7d`\|`30d`, standaard `24h`) en optioneel `model` (#8827) |
+| Endpoint                         | Methode         | Beschrijving                                                                                                                                                                                                                                                                                                                                                   |
+| -------------------------------- | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/usage/history`             | GET             | Gebruiksgeschiedenis                                                                                                                                                                                                                                                                                                                                           |
+| `/api/usage/logs`                | GET             | Gebruikslogboeken                                                                                                                                                                                                                                                                                                                                              |
+| `/api/usage/request-logs`        | GET             | Logboeken op verzoekniveau                                                                                                                                                                                                                                                                                                                                     |
+| `/api/usage/[connectionId]`      | GET             | Gebruik per verbinding                                                                                                                                                                                                                                                                                                                                         |
+| `/api/usage/token-limits`        | GET/POST/DELETE | Budgetten voor tokenlimieten per API-sleutel                                                                                                                                                                                                                                                                                                                   |
+| `/api/usage/model-latency-stats` | GET             | Voortschrijdend aggregaat van latentie per provider/model (gem./p50/p95/p99, slagingspercentage); filters: `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                                                                                     |
+| `/api/usage/cache-health`        | GET             | Samenvatting van de status van de promptcache voor `call_logs` — schrijf-/leesverhouding, p50/p90/p99-verdeling van schrijfgrootte, concentratie van zware schrijfbewerkingen, uitsplitsing per model en een oordeel `healthy`/`degraded`/`thrash`/`no-data`; queryparameters `range` (`1h`\|`24h`\|`7d`\|`30d`, standaard `24h`) en optioneel `model` (#8827) |
+
+### Machtigingen voor API-sleutels
+
+`PATCH /api/keys/{id}` werkt de machtigingen van een bestaande sleutel bij. Net als elke `/api/keys*`-route vereist deze beheerautorisatie (zie [Beheerauthenticatie](../guides/MANAGEMENT-AUTH.md)), niet een inferentiesleutel. Stuur alleen de velden die je wilt wijzigen; een verzoek zonder deze velden wordt afgewezen met `No valid fields to update`. De geaccepteerde velden worden gedefinieerd door `updateKeyPermissionsSchema` in `src/shared/validation/schemas/keys.ts`.
+
+| Veld                                        | Type                                                                             | Opmerkingen                                                                                                                                 |
+| ------------------------------------------- | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                                      | tekenreeks, 1-200 tekens                                                         |                                                                                                                                             |
+| `isActive`                                  | booleaans                                                                        |                                                                                                                                             |
+| `isBanned`                                  | booleaans                                                                        |                                                                                                                                             |
+| `expiresAt`                                 | ISO 8601-datum en -tijd of `null`                                                | `null` wist de vervaldatum                                                                                                                  |
+| `modelAccessMode`                           | `all` \| `restricted`                                                            | `allowedModels` moet leeg zijn wanneer de modus `all` is                                                                                    |
+| `allowedModels`, `blockedModels`            | array van tekenreeksen, maximaal 1000                                            |                                                                                                                                             |
+| `allowedCombos`                             | array van tekenreeksen, maximaal 500                                             | Bepaalt welke combo's de sleutel mag aanroepen; directe modellen worden beheerd via `modelAccessMode` / `allowedModels`                     |
+| `connectionAccessMode`                      | `all` \| `restricted`                                                            | `allowedConnections` mag niet leeg zijn bij `restricted` en moet leeg zijn bij `all`                                                        |
+| `allowedConnections`                        | array van UUID's, maximaal 100                                                   |                                                                                                                                             |
+| `allowAutoCombos`                           | booleaans                                                                        | `false` weigert aanvragen voor `auto/*`-modellen met deze sleutel; sleutels waarvoor dit nooit is ingesteld, zijn toegestaan                |
+| `catalogScope`                              | `all` \| `combos` \| `models`                                                    | Wat `GET /v1/models` voor deze sleutel vermeldt (alleen combo's, alleen modellen of beide); dit verandert niet wat de sleutel mag aanroepen |
+| `forcedModel`                               | tekenreeks van maximaal 300 tekens, of `null`                                    | Routeert chataanvragen naar dit model/deze combo, vóór `X-Route-Model` en `body.model`; de limieten van de sleutel blijven gelden           |
+| `noLog`, `autoResolve`                      | booleaans                                                                        |                                                                                                                                             |
+| `throttleDelayMs`                           | geheel getal, 0-300000                                                           |                                                                                                                                             |
+| `maxSessions`                               | geheel getal, 0-10000                                                            |                                                                                                                                             |
+| `rateLimits`                                | array van `{ limit, window }` (positieve gehele getallen, maximaal 50) of `null` | `null` wist de limieten                                                                                                                     |
+| `accessSchedule`                            | planningsobject of `null`                                                        | `null` wist de planning                                                                                                                     |
+| `scopes`                                    | array van tekenreeksen, maximaal 32                                              |                                                                                                                                             |
+| `allowedEndpoints`                          | array van tekenreeksen, maximaal 20                                              |                                                                                                                                             |
+| `streamDefaultMode`                         | `legacy` \| `json`                                                               |                                                                                                                                             |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                             | Zie [Cache omzeilen per sleutel](#per-key-cache-bypass)                                                                                     |
+| `compressionEnabled`                        | booleaans                                                                        |                                                                                                                                             |
+| `codexServiceMode`                          | een van de Codex-servicemodi                                                     |                                                                                                                                             |
+| `disableNonPublicModels`                    | boolean                                                                          |                                                                                                                                             |
+| `allowUsageCommand`                         | boolean                                                                          |                                                                                                                                             |
+| `usageLimitEnabled`                         | boolean                                                                          |                                                                                                                                             |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | getal >= 0 of `null`                                                             |                                                                                                                                             |
+| `chaosModeEnabled`                          | boolean                                                                          |                                                                                                                                             |
+
+```bash
+curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
+  -H "Authorization: Bearer <management-credential>" \
+  -H "Content-Type: application/json" \
+  -d '{ "allowAutoCombos": false, "catalogScope": "combos" }'
+```
 
 ### Instellingen
 
-| Endpoint                              | Methode       | Beschrijving                                                                                                                                                                                                     |
-| ------------------------------------- | ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/settings`                       | GET/PUT/PATCH | Algemene instellingen                                                                                                                                                                                            |
-| `/api/settings/proxy`                 | GET/PUT       | Netwerkproxyconfiguratie                                                                                                                                                                                         |
-| `/api/settings/proxy/test`            | POST          | Proxyverbinding testen                                                                                                                                                                                           |
-| `/api/settings/ip-filter`             | GET/PUT       | IP-toestaanlijst/blokkeerlijst                                                                                                                                                                                   |
-| `/api/settings/thinking-budget`       | GET/PUT       | Herschrijfmodus voor **verzoeken** voor denk-/redeneerbudget (doorgeven / automatisch verwijderen / aangepast / adaptief). Onafhankelijk van compressie. Zie [THINKING_BUDGET.md](../guides/THINKING_BUDGET.md). |
-| `/api/settings/system-prompt`         | GET/PUT       | Globale systeemprompt                                                                                                                                                                                            |
-| `/api/settings/compression`           | GET/PUT       | Globale compressieconfiguratie                                                                                                                                                                                   |
-| `/api/settings/purge-request-history` | POST          | Rijen in verzoeklogboeken en lokale aanroeplogartefacten wissen                                                                                                                                                  |
+| Eindpunt                              | Methode       | Beschrijving                                                                                                                                                                                                                                                                                                   |
+| ------------------------------------- | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/settings`                       | GET/PUT/PATCH | Algemene instellingen. Sleutels voor het beveiligingsbeleid (`requireLogin`, `newPassword`, `oidc*`, `corsOrigins`, `bruteForceProtection`) vereisen `currentPassword` en beheerdersreferenties — API-sleutels en `oma_`-tokens krijgen `403`; elke wijziging vereist het `admin`-bereik van het toegangstoken |
+| `/api/settings/proxy`                 | GET/PUT       | Netwerkproxyconfiguratie                                                                                                                                                                                                                                                                                       |
+| `/api/settings/proxy/test`            | POST          | Proxyverbinding testen                                                                                                                                                                                                                                                                                         |
+| `/api/settings/ip-filter`             | GET/PUT       | IP-toestaanlijst/blokkeerlijst                                                                                                                                                                                                                                                                                 |
+| `/api/settings/thinking-budget`       | GET/PUT       | Herschrijfmodus voor **verzoeken** voor denk-/redeneerbudgetten (ongewijzigd doorgeven / automatisch verwijderen / aangepast / adaptief). Onafhankelijk van compressie. Zie [THINKING_BUDGET.md](../guides/THINKING_BUDGET.md).                                                                                |
+| `/api/settings/system-prompt`         | GET/PUT       | Globale systeemprompt                                                                                                                                                                                                                                                                                          |
+| `/api/settings/compression`           | GET/PUT       | Globale compressieconfiguratie                                                                                                                                                                                                                                                                                 |
+| `/api/settings/purge-request-history` | POST          | Verzoeklogboekrijen en lokale aanroeplogboekartefacten wissen                                                                                                                                                                                                                                                  |
 
 ### Context en compressie
 
@@ -878,66 +1201,78 @@ gewone API-sleutels voor inferentie. Zie voor referentiefamilies, scopes en curl
 | `/api/compression/language-packs`      | GET            | Beschikbare Caveman-taalpakketten weergeven                                          |
 | `/api/compression/rules`               | GET            | Metadata van Caveman-regels weergeven                                                |
 | `/api/context/caveman/config`          | GET/PUT        | Alias voor Caveman-specifieke instellingen                                           |
-| `/api/context/rtk/config`              | GET/PUT        | RTK-specifieke instellingen, inclusief aangepaste filters en behoud van ruwe uitvoer |
+| `/api/context/rtk/config`              | GET/PUT        | RTK-specifieke instellingen, waaronder aangepaste filters en behoud van ruwe uitvoer |
 | `/api/context/rtk/filters`             | GET            | RTK-filtercatalogus en diagnostiek voor aangepaste filters                           |
 | `/api/context/rtk/test`                | POST           | RTK-voorbeeld/test uitvoeren op een tekstpayload                                     |
-| `/api/context/rtk/raw-output/[id]`     | GET            | Bewaarde, geredigeerde ruwe uitvoer lezen op basis van aanwijzer-id                  |
+| `/api/context/rtk/raw-output/[id]`     | GET            | Bewaarde, geredigeerde ruwe uitvoer lezen via aanwijzer-id                           |
 | `/api/context/combos`                  | GET/POST       | Compressiecombinaties weergeven/maken                                                |
 | `/api/context/combos/[id]`             | GET/PUT/DELETE | Details van compressiecombinatie ophalen/bijwerken/verwijderen                       |
 | `/api/context/combos/[id]/assignments` | GET/PUT        | Compressiecombinaties aan routeringscombinaties toewijzen                            |
-| `/api/context/analytics`               | GET            | Alias voor compressieanalyse                                                         |
+| `/api/context/analytics`               | GET            | Alias voor compressieanalyses                                                        |
 
-### Monitoring
+### Bewaking
 
-| Endpoint                             | Methode    | Beschrijving                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| ------------------------------------ | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/sessions`                      | GET        | Actieve sessies bijhouden                                                                                                                                                                                                                                                                                                                                                                                                     |
-| `/api/rate-limits`                   | GET        | Limieten per account                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `/api/monitoring/health`             | GET        | Statuscontrole + providersamenvatting (`catalogCount`, `configuredCount`, `activeCount`, `monitoredCount`). De beheerweergave bevat `credentialHealth`: scalaire waarden uit de probe-cache, `failedConnections` wanneer `failed>0`, en `staleDbNonOkCount` (blijvende SQLite-waarde `test_status`, niet de meter). Zie [MONITORING_GUIDE.md](../ops/MONITORING_GUIDE.md#credentialhealth-probe-cache-vs-sqlite-test_status). |
-| `/api/cache/stats`                   | GET/DELETE | Cachestatistieken / wissen                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `/api/modality-bridge/stats`         | GET        | In-memory `attempts`, geslaagde pogingen/`bridged`, mislukte pogingen, cachetreffers, `totalLatencyMs`, `latencySamples`, op steekproeven gebaseerde `averageLatencyMs` en tijdstip van laatste gebruik (wordt bij herstart gereset; beheerauthenticatie)                                                                                                                                                                     |
-| `/api/modality-bridge/video/runtime` | GET        | Strikte controle op vertrouwde loopback vóór beheerauthenticatie/probe; opgeschoonde beschikbaarheid en versies van FFmpeg/ffprobe (no-store)                                                                                                                                                                                                                                                                                 |
-| `/api/modality-bridge/video/extract` | POST       | Interne geauthenticeerde bytebroker via vertrouwde loopback; invoer van 50 MiB, begrensde wachtrij/uitvoer van 32 MiB, `503` bij capaciteitsgebrek, `499` bij verbreking, `504` bij overschrijding van de deadline; geen openbare upload-API                                                                                                                                                                                  |
+| Endpoint                             | Methode    | Beschrijving                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| ------------------------------------ | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `/api/sessions`                      | GET        | Actieve sessies bijhouden                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `/api/rate-limits`                   | GET        | Snelheidslimieten per account                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `/api/monitoring/health`             | GET        | Statuscontrole en providersamenvatting (`catalogCount`, `configuredCount`, `activeCount`, `monitoredCount`). De beheerweergave bevat `credentialHealth`: scalaire waarden uit de probe-cache, `failedConnections` wanneer `failed>0`, en `staleDbNonOkCount` (blijvende SQLite-waarde `test_status`, niet de meter). Zie [MONITORING_GUIDE.md](../ops/MONITORING_GUIDE.md#credentialhealth-probe-cache-vs-sqlite-test_status). |
+| `/api/cache/stats`                   | GET/DELETE | Cachestatistieken / cache wissen                                                                                                                                                                                                                                                                                                                                                                                               |
+| `/api/modality-bridge/stats`         | GET        | In-memory `attempts`, geslaagde pogingen/`bridged`, mislukkingen, cachetreffers, `totalLatencyMs`, `latencySamples`, op steekproeven gebaseerde `averageLatencyMs` en tijdstip van laatste gebruik (wordt bij opnieuw opstarten gereset; beheerauthenticatie)                                                                                                                                                                  |
+| `/api/modality-bridge/video/runtime` | GET        | Strikte controle op vertrouwde loopback vóór beheerauthenticatie/probe; opgeschoonde beschikbaarheid en versies van FFmpeg/ffprobe (no-store)                                                                                                                                                                                                                                                                                  |
+| `/api/modality-bridge/video/extract` | POST       | Interne, geauthenticeerde bytebroker voor vertrouwde loopback; invoer van 50 MiB, begrensde wachtrij/uitvoer van 32 MiB, `503` bij capaciteitsgebrek, `499` bij verbroken verbinding, `504` bij overschrijding van de deadline; geen openbare upload-API                                                                                                                                                                       |
 
-### Back-up & export/import
+### Back-up en export/import
 
-| Endpoint                    | Methode | Beschrijving                                      |
-| --------------------------- | ------- | ------------------------------------------------- |
-| `/api/db-backups`           | GET     | Beschikbare back-ups weergeven                    |
-| `/api/db-backups`           | PUT     | Een handmatige back-up maken                      |
-| `/api/db-backups`           | POST    | Herstellen vanuit een specifieke back-up          |
-| `/api/db-backups/export`    | GET     | Database downloaden als .sqlite-bestand           |
-| `/api/db-backups/import`    | POST    | .sqlite-bestand uploaden om database te vervangen |
-| `/api/db-backups/exportAll` | GET     | Volledige back-up downloaden als .tar.gz-archief  |
+| Endpoint                    | Methode | Beschrijving                                                                           |
+| --------------------------- | ------- | -------------------------------------------------------------------------------------- |
+| `/api/db-backups`           | GET     | Beschikbare back-ups weergeven                                                         |
+| `/api/db-backups`           | PUT     | Een handmatige back-up maken                                                           |
+| `/api/db-backups`           | POST    | Herstellen vanuit een specifieke back-up                                               |
+| `/api/db-backups`           | PATCH   | Instellingen voor back-upretentie opslaan (alleen voor operators)                      |
+| `/api/db-backups`           | DELETE  | Opgeslagen back-ups opschonen volgens de retentie-instellingen (alleen voor operators) |
+| `/api/db-backups/export`    | GET     | Database downloaden als .sqlite-bestand                                                |
+| `/api/db-backups/import`    | POST    | .sqlite-bestand uploaden om de database te vervangen (`?dryRun=true` valideert alleen) |
+| `/api/db-backups/exportAll` | GET     | Volledige back-up downloaden als .tar.gz-archief                                       |
+
+`/api/db-backups/export`, `/api/db-backups/exportAll` en `/api/settings/export-json` verstrekken
+alle opgeslagen referenties en vereisen daarom de dashboardsessie of de lokale CLI (of dat aanmelden
+is uitgeschakeld). API-sleutels met elk bereik en `oma_`-toegangstokens krijgen `403`. Voor herstelbewerkingen
+geldt dezelfde grens: `POST /api/db-backups/import` (inclusief `dryRun=true`), `POST /api/db-backups` (herstellen
+op basis van id) en `POST /api/settings/import-json` vervangen de actieve database of instellingen, waardoor
+een machinereferentie daar eveneens `403` krijgt; `omniroute sync import` verzendt de lokale CLI-referentie. Dit geldt
+ook voor `DELETE /api/db-backups` (opgeslagen back-ups opschonen) en `PATCH /api/db-backups` (retentie-instellingen:
+de opgeslagen waarden bepalen de automatische opschoning na elke back-up). Voor het weergeven (`GET`) en maken
+van een handmatige back-up (`PUT`) blijft gewone beheer-authenticatie van toepassing.
 
 ### Cloudsynchronisatie
 
-| Endpoint               | Methode       | Beschrijving                         |
-| ---------------------- | ------------- | ------------------------------------ |
-| `/api/sync/cloud`      | Verschillende | Bewerkingen voor cloudsynchronisatie |
-| `/api/sync/initialize` | POST          | Synchronisatie initialiseren         |
-| `/api/cloud/*`         | Verschillende | Cloudbeheer                          |
+| Endpoint               | Methode      | Beschrijving                         |
+| ---------------------- | ------------ | ------------------------------------ |
+| `/api/sync/cloud`      | Verschillend | Bewerkingen voor cloudsynchronisatie |
+| `/api/sync/initialize` | POST         | Synchronisatie initialiseren         |
+| `/api/cloud/*`         | Verschillend | Cloudbeheer                          |
 
 ### Tunnels
 
-| Endpoint                   | Methode | Beschrijving                                                                       |
-| -------------------------- | ------- | ---------------------------------------------------------------------------------- |
-| `/api/tunnels/cloudflared` | GET     | Installatie-/runtimestatus van Cloudflare Quick Tunnel voor het dashboard opvragen |
-| `/api/tunnels/cloudflared` | POST    | Cloudflare Quick Tunnel in- of uitschakelen (`action=enable/disable`)              |
-| `/api/tunnels/ngrok`       | GET     | Runtimestatus van ngrok Tunnel voor het dashboard opvragen                         |
-| `/api/tunnels/ngrok`       | POST    | ngrok Tunnel in- of uitschakelen (`action=enable/disable`)                         |
+| Endpoint                   | Methode | Beschrijving                                                                    |
+| -------------------------- | ------- | ------------------------------------------------------------------------------- |
+| `/api/tunnels/cloudflared` | GET     | Installatie-/runtimestatus van Cloudflare Quick Tunnel voor het dashboard lezen |
+| `/api/tunnels/cloudflared` | POST    | Cloudflare Quick Tunnel in- of uitschakelen (`action=enable/disable`)           |
+| `/api/tunnels/ngrok`       | GET     | Runtimestatus van ngrok Tunnel voor het dashboard lezen                         |
+| `/api/tunnels/ngrok`       | POST    | ngrok Tunnel in- of uitschakelen (`action=enable/disable`)                      |
 
-### CLI-tools
+### CLI-hulpmiddelen
 
-| Endpoint                           | Methode | Beschrijving            |
-| ---------------------------------- | ------- | ----------------------- |
-| `/api/cli-tools/claude-settings`   | GET     | Status van Claude CLI   |
-| `/api/cli-tools/codex-settings`    | GET     | Status van Codex CLI    |
-| `/api/cli-tools/droid-settings`    | GET     | Status van Droid CLI    |
-| `/api/cli-tools/openclaw-settings` | GET     | Status van OpenClaw CLI |
-| `/api/cli-tools/runtime/[toolId]`  | GET     | Generieke CLI-runtime   |
+| Endpoint                           | Methode | Beschrijving          |
+| ---------------------------------- | ------- | --------------------- |
+| `/api/cli-tools/claude-settings`   | GET     | Claude CLI-status     |
+| `/api/cli-tools/codex-settings`    | GET     | Codex CLI-status      |
+| `/api/cli-tools/droid-settings`    | GET     | Droid CLI-status      |
+| `/api/cli-tools/openclaw-settings` | GET     | OpenClaw CLI-status   |
+| `/api/cli-tools/runtime/[toolId]`  | GET     | Generieke CLI-runtime |
 
-CLI-responses bevatten: `installed`, `runnable`, `command`, `commandPath`, `runtimeMode`, `reason`.
+CLI-responsen bevatten: `installed`, `runnable`, `command`, `commandPath`, `runtimeMode`, `reason`.
 
 ### ACP-agents
 
@@ -947,7 +1282,7 @@ CLI-responses bevatten: `installed`, `runnable`, `command`, `commandPath`, `runt
 | `/api/acp/agents` | POST    | Aangepaste agent toevoegen of detectiecache vernieuwen                 |
 | `/api/acp/agents` | DELETE  | Een aangepaste agent verwijderen via de queryparameter `id`            |
 
-De GET-response bevat `agents[]` (id, name, binary, version, installed, protocol, isCustom) en `summary` (total, installed, notFound, builtIn, custom).
+De GET-respons bevat `agents[]` (id, naam, binair bestand, versie, geïnstalleerd, protocol, aangepast) en `summary` (totaal, geïnstalleerd, niet gevonden, ingebouwd, aangepast).
 
 ### Veerkracht en frequentielimieten
 
@@ -955,12 +1290,12 @@ De GET-response bevat `agents[]` (id, name, binary, version, installed, protocol
 | --------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------- |
 | `/api/resilience`                 | GET/PATCH | Aanvraagwachtrij, afkoelperiode voor verbindingen, provideronderbreker en wachtinstellingen ophalen/bijwerken |
 | `/api/resilience/reset`           | POST      | Stroomonderbrekers van providers resetten                                                                     |
-| `/api/resilience/model-cooldowns` | GET       | Actieve blokkeringen per (provider, verbinding, model) weergeven, gesorteerd op resterende tijd               |
+| `/api/resilience/model-cooldowns` | GET       | Actieve blokkeringen per (provider, verbinding, model), gesorteerd op resterende tijd, weergeven              |
 | `/api/resilience/model-cooldowns` | DELETE    | Een modelblokkering opheffen — body `{provider, model}` of `{all: true}` om alles te wissen                   |
 | `/api/rate-limits`                | GET       | Status van frequentielimieten per account                                                                     |
-| `/api/rate-limit`                 | GET       | Globale configuratie van frequentielimieten                                                                   |
+| `/api/rate-limit`                 | GET       | Algemene configuratie van frequentielimieten                                                                  |
 
-> Alle vier de routes onder `/api/resilience/*` vereisen **beheerautorisatie** (`requireManagementAuth`). Zie [Veerkracht (uitgebreid)](#resilience-extended) voor een volledig overzicht van provideronderbreker versus afkoelperiode voor verbindingen versus modelblokkering.
+> Alle vier routes onder `/api/resilience/*` vereisen **beheer-authenticatie** (`requireManagementAuth`). Zie [Veerkracht (uitgebreid)](#resilience-extended) voor een volledig overzicht van provideronderbrekers versus afkoelperioden voor verbindingen versus modelblokkeringen.
 
 ### Evaluaties
 
@@ -970,36 +1305,38 @@ De GET-response bevat `agents[]` (id, name, binary, version, installed, protocol
 
 ### Beleidsregels
 
-| Endpoint        | Methode         | Beschrijving             |
-| --------------- | --------------- | ------------------------ |
-| `/api/policies` | GET/POST/DELETE | Routeringsbeleid beheren |
+| Endpoint        | Methode         | Beschrijving                    |
+| --------------- | --------------- | ------------------------------- |
+| `/api/policies` | GET/POST/DELETE | Routeringsbeleidsregels beheren |
 
 ### Naleving
 
-| Endpoint                    | Methode | Beschrijving                      |
-| --------------------------- | ------- | --------------------------------- |
-| `/api/compliance/audit-log` | GET     | Nalevingsauditlogboek (laatste N) |
+| Endpoint                    | Methode | Beschrijving                    |
+| --------------------------- | ------- | ------------------------------- |
+| `/api/compliance/audit-log` | GET     | Compliance-auditlog (laatste N) |
 
-### v1beta (compatibel met Gemini)
+### v1beta (Gemini-compatibel)
 
 | Endpoint                   | Methode | Beschrijving                          |
 | -------------------------- | ------- | ------------------------------------- |
 | `/v1beta/models`           | GET     | Modellen in Gemini-indeling weergeven |
 | `/v1beta/models/{...path}` | POST    | Gemini-`generateContent`-endpoint     |
 
-Deze endpoints volgen de API-indeling van Gemini voor clients die native compatibiliteit met de Gemini SDK verwachten.
+Deze endpoints weerspiegelen de API-indeling van Gemini voor clients die compatibiliteit met de native Gemini-SDK verwachten.
 
 ### Interne API's / systeem-API's
 
-| Eindpunt                 | Methode | Beschrijving                                                      |
-| ------------------------ | ------- | ----------------------------------------------------------------- |
-| `/api/init`              | GET     | Controle van applicatie-initialisatie (gebruikt bij eerste start) |
-| `/api/tags`              | GET     | Ollama-compatibele modeltags (voor Ollama-clients)                |
-| `/api/restart`           | POST    | Activeer een gecontroleerde herstart van de server                |
-| `/api/shutdown`          | POST    | Activeer een gecontroleerde afsluiting van de server              |
-| `/api/system/env/repair` | POST    | Herstel omgevingsvariabelen van de OAuth-provider                 |
+| Endpoint                 | Methode | Beschrijving                                                             |
+| ------------------------ | ------- | ------------------------------------------------------------------------ |
+| `/api/init`              | GET     | Initialisatiecontrole van de applicatie (gebruikt bij eerste uitvoering) |
+| `/api/tags`              | GET     | Ollama-compatibele modeltags (voor Ollama-clients)                       |
+| `/api/restart`           | POST    | Een gecontroleerde herstart van de server activeren                      |
+| `/api/shutdown`          | POST    | Een gecontroleerde afsluiting van de server activeren                    |
+| `/api/system/env/repair` | POST    | Omgevingsvariabelen van OAuth-providers herstellen                       |
+| `/api/system/version`    | GET     | Huidige/nieuwste versie, updatestatus, releasekanaal                     |
+| `/api/system/version`    | POST    | Een implementatiebewuste update naar de nieuwste versie starten          |
 
-> **Opmerking:** Deze eindpunten worden intern door het systeem of voor compatibiliteit met Ollama-clients gebruikt. Ze worden doorgaans niet door eindgebruikers aangeroepen.
+> **Opmerking:** Deze endpoints worden intern door het systeem of voor compatibiliteit met Ollama-clients gebruikt. Ze worden doorgaans niet door eindgebruikers aangeroepen.
 
 ### Herstel van OAuth-omgevingsvariabelen _(v3.6.1+)_
 
@@ -1021,6 +1358,43 @@ Herstelt ontbrekende of beschadigde OAuth-omgevingsvariabelen voor een specifiek
   "backupPath": "/home/user/.omniroute/backups/env-repair-2026-04-11.bak"
 }
 ```
+
+### Versie en releasekanaal
+
+```bash
+GET /api/system/version
+```
+
+Beheerroute die uitsluitend via loopback toegankelijk is (beheerdersauthenticatie). Retourneert de actieve versie, de nieuwste
+gepubliceerde versie en de status van automatische updates. `releaseChannel` en `channels` zijn aanvullende
+velden (rail 3.8.54); `channel` behoudt zijn betekenis — de implementatiemodus die de dashboard-updater
+gebruikt (`npm`, `source` of `docker-compose`).
+
+```json
+{
+  "current": "3.8.52",
+  "latest": "3.8.52",
+  "updateAvailable": false,
+  "channel": "npm",
+  "autoUpdateSupported": true,
+  "autoUpdateError": null,
+  "news": null,
+  "releaseChannel": "latest",
+  "channels": { "latest": "3.8.52", "next": "3.8.53-rc.1" }
+}
+```
+
+- `releaseChannel` — npm-kanaal van de actieve build: `nightly` voor `-nightly.*`-versies,
+  `next` voor andere prereleases (`-rc.*`, `-beta.*`, `-alpha.*`), `lts` voor een stabiele versie van een
+  oudere hoofdversie dan `channels.latest`, anders `latest`. Dezelfde regels als in
+  `scripts/release/dist-tag.mjs`, dat tijdens het publiceren de npm-dist-tag kiest.
+- `channels` — de laatst gepubliceerde versie van elke dist-tag, afkomstig van `npm view omniroute dist-tags` (met het register
+  via HTTP als fallback), gecachet met dezelfde TTL van 10 minuten als `latest`. `latest` is altijd aanwezig
+  (valt terug op het veld `latest` en vervolgens op `"unavailable"`); `next`, `nightly` en `lts` verschijnen
+  alleen wanneer die dist-tag bestaat. Een verzoek met `Cache-Control: no-cache` vernieuwt beide opzoekacties.
+
+Het kanaalmodel (`latest` = v3 tot de GA-release van 4.0, `next` = rc, `nightly` = builds van `develop`,
+`lts` = v3-patches na de GA-release van 4.0) wordt beschreven in `docs/ops/RELEASE_STRATEGY.md`.
 
 ---
 
@@ -1236,17 +1610,17 @@ Uitgaande webhookabonnementen voor OmniRoute-gebeurtenissen (voltooiing van verz
 
 ## Geregistreerde sleutels (automatisch beheer)
 
-Wordt door het subsysteem voor automatisch sleutelbeheer gebruikt om API-sleutels uit te geven en te roteren bij een achterliggende provider/account, met dagelijkse/uurlijkse quota.
+Wordt gebruikt door het subsysteem voor automatisch sleutelbeheer om API-sleutels uit te geven en te roteren bij een achterliggende provider/account, met dagelijkse/uurlijkse quota.
 
-| Methode | Pad                                   | Beschrijving                                                                                                                                                                                                                                |
-| ------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET     | `/api/v1/registered-keys`             | Geregistreerde sleutels weergeven (alleen gemaskeerd voorvoegsel)                                                                                                                                                                           |
-| POST    | `/api/v1/registered-keys`             | Een nieuwe geregistreerde sleutel uitgeven — body: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Retourneert de onbewerkte sleutel **eenmalig**. Retourneert `429` bij weigering wegens quota. |
-| GET     | `/api/v1/registered-keys/[id]`        | De metadata van een geregistreerde sleutel ophalen (geen onbewerkt sleutelmateriaal)                                                                                                                                                        |
-| DELETE  | `/api/v1/registered-keys/[id]`        | Een geregistreerde sleutel intrekken                                                                                                                                                                                                        |
-| POST    | `/api/v1/registered-keys/[id]/revoke` | Expliciet eindpunt voor intrekking (hetzelfde effect als DELETE)                                                                                                                                                                            |
+| Methode | Pad                                   | Beschrijving                                                                                                                                                                                                                                 |
+| ------- | ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET     | `/api/v1/registered-keys`             | Geregistreerde sleutels weergeven (alleen gemaskeerd voorvoegsel)                                                                                                                                                                            |
+| POST    | `/api/v1/registered-keys`             | Een nieuwe geregistreerde sleutel uitgeven — body: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Retourneert de onbewerkte sleutel **eenmalig**. Retourneert `429` bij weigering vanwege quota. |
+| GET     | `/api/v1/registered-keys/[id]`        | De metadata van een geregistreerde sleutel ophalen (geen onbewerkt sleutelmateriaal)                                                                                                                                                         |
+| DELETE  | `/api/v1/registered-keys/[id]`        | Een geregistreerde sleutel intrekken                                                                                                                                                                                                         |
+| POST    | `/api/v1/registered-keys/[id]/revoke` | Expliciet endpoint voor intrekking (zelfde effect als DELETE)                                                                                                                                                                                |
 
-**Authenticatie:** Bearer-API-sleutel (`isAuthenticated`). Zie ook `/v1/quotas/check` en `/v1/issues/report`.
+**Authenticatie:** beheersessie/API-sleutel (`requireManagementAuth`) — dezelfde toegangscontrole als `/api/keys`: een dashboardsessie, het lokale CLI-token of een API-sleutel met het bereik `manage`/`admin`; API-sleutels die uitsluitend voor inferentie bestemd zijn, krijgen `403`. Zie ook `/v1/quotas/check` en `/v1/issues/report`.
 
 ---
 

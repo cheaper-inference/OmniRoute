@@ -4,51 +4,50 @@
 
 ---
 
-Kasutage seda juhendit, et valida pull request'i jaoks väikseim töökindel arendustsükkel. See ei
+Kasutage seda juhendit, et valida tõmbetaotluse jaoks väikseim usaldusväärne arendustsükkel. See ei
 asenda allpool lingitud valdkonnapõhiseid arhitektuuri- ja turbedokumente, vaid seob iga levinud
 muudatuse tüübi selle lepingute, sihitud kontrollide ja CI-katvusega.
 
-## Iga muudatuse teekond
+## Tee, mida iga muudatus järgib
 
-1. **Valige enne muutmist alusharu.** Leidke kõrgeima versiooniga aktiivne `release/v*` haru ja looge
-   uus haru selle tipust. Sihtige seda haru, mitte haru `main`. Kui väljalaske külmutamine on aktiivne,
-   ärge sihtige külmutatud haru; kasutage järgmist aktiivset tsüklit, mida kirjeldab
-   [Harundamis- ja väljalaskemudel](BRANCHING_MODEL.md).
+1. **Valige enne muutmist baasharu.** Leidke kõrgeima versiooniga aktiivne `release/v*` haru ja looge
+   uus haru selle tipust. Sihtige seda haru, mitte `main`-haru. Kui väljalaske külmutamine on aktiivne,
+   ärge sihtige külmutatud haru; kasutage järgmist aktiivset tsüklit, mida kirjeldatakse dokumendis
+   [Harude ja väljalasete mudel](BRANCHING_MODEL.md).
 2. **Nimetage lepingud.** Tuvastage kõik kataloogid, skeemid, genereeritud artefaktid, avalikud API-d
-   või kasutajaliidesed, mida muudatus mõjutab. Allolev tabel annab minimaalse lähtekomplekti.
-3. **Kirjutage või värskendage sihitud teste.** Tootmiskoodi muudatused kataloogides `src/`,
-   `open-sse/`, `electron/` või `bin/` nõuavad samas PR-is automatiseeritud testi. Käivitage esmalt
-   kõige väiksemad käitumist tõendavad testifailid ja seejärel loetletud sihitud kontrollid.
-4. **Laske CI-l käitada laia maatriksit.** PR-is käivitatakse kõik üksustestide jaotised, Vitest,
-   katvuse lävendi kontroll ja tootmisjärk. Käivitage lai testikogum kohalikult ainult siis, kui
-   sihitud tõrge viitab laiemale mõjule või kui muudatus hõlmab mitut alamsüsteemi.
-5. **Kooskõlastage enne ülevaatust.** Tõmmake aktiivne alusharu, vaadake üle selle uued sissekanded
-   ja oma erinevused sellega ning seejärel tehke alusharuga rebase või merge vastavalt panustaja
-   töövoole. Lahendage genereeritud failide ja kataloogide konfliktid nende lähtekohas, genereerige
-   need uuesti, käivitage sihitud tsükkel uuesti ning veenduge, et PR sihib endiselt aktiivset
-   väljalaskeharu.
-6. **Dokumenteerige tõendid.** Loetlege PR-i mallis käivitatud käsud, kõik lisatud või muudetud
-   testifailid, migratsioonid või funktsioonilipud ning kõik veel ootel olevad ainult CI-s tehtavad
-   kontrollid.
+   või kasutajaliidesed, mida muudatus mõjutab. Allolevas tabelis on esitatud minimaalne lähtekomplekt.
+3. **Kirjutage või uuendage sihitud teste.** Tootmiskoodi muudatused kataloogides `src/`, `open-sse/`,
+   `electron/` või `bin/` nõuavad samas tõmbetaotluses automatiseeritud testi. Käivitage esmalt kõige
+   väiksemad testifailid, mis tõendavad käitumist, ja seejärel loetletud sihitud kontrollid.
+4. **Laske CI-l käivitada ulatuslik maatriks.** Tõmbetaotluses käivitatakse kõik üksustestide jaotised,
+   Vitest, katvuse lävendi kontroll ja tootmisversiooni koostamine. Käivitage ulatuslik testikomplekt
+   kohalikult ainult siis, kui sihitud tõrge viitab laiemale mõjule või kui muudatus hõlmab mitut
+   alamsüsteemi.
+5. **Ühtlustage enne ülevaatust.** Hankige aktiivne baasharu, uurige selle uusi sissekandeid ja oma
+   erinevusi selle suhtes ning tehke seejärel kaastöövoo kohaselt rebase või ühendage baasharu.
+   Lahendage genereeritud failide ja kataloogide konfliktid nende lähteallikas, genereerige need uuesti,
+   käivitage sihitud tsükkel uuesti ja veenduge, et tõmbetaotlus sihiks endiselt aktiivset väljalaskeharu.
+6. **Dokumenteerige tõendid.** Loetlege tõmbetaotluse mallis käivitatud käsud, kõik lisatud või muudetud
+   testifailid, migratsioonid või funktsioonilipud ning kõik pooleliolevad kontrollid, mida tehakse
+   ainult CI-s.
 
-## Standardlahendused muudatuse tüübi järgi
+## Põhiteed muudatuse tüübi järgi
 
 Allolevad käsud on minimaalsed sihitud kontrollid, mitte luba jätta vahele test, mis katab otseselt
 teie muudetud käitumist.
 
-### Pakkuja
+### Teenusepakkuja
 
 **Lepingud**
 
-- Pakkuja definitsioon kataloogis `src/shared/constants/providers/` ja selle koondamine failis
+- Teenusepakkuja definitsioon kataloogis `src/shared/constants/providers/` ja selle kooste failis
   `src/shared/constants/providers.ts`.
-- Mudelid ja võimekused failis `open-sse/config/providerRegistry.ts` või sellest eraldatud
-  registrifailides.
-- Täituri/tõlkija valik, OAuth-i või API-võtme konfiguratsioon, töölaua ressursid ja genereeritud
-  pakkuja viide, kui see on asjakohane.
-- Avalikud identimisteabe väärtused peavad kasutama funktsiooni `resolvePublicCred()`; veavastused
-  peavad kasutama ühiseid puhastatud vigade abifunktsioone. Vaadake
-  `docs/security/PUBLIC_CREDS.md` (git-is; seda ei kompileerita kataloogi `/docs`) ja
+- Mudelid ja võimekused failis `open-sse/config/providerRegistry.ts` või sellest eraldatud registrifailides.
+- Käituri/tõlkija valik, OAuth-i või API-võtme konfiguratsioon, töölaua varad ja vajaduse korral
+  genereeritud teenusepakkujate viitedokument.
+- Avalikud autentimisandmed peavad kasutama funktsiooni `resolvePublicCred()`; veavastused peavad
+  kasutama ühiseid puhastatud veateadete abifunktsioone. Vaadake `docs/security/PUBLIC_CREDS.md`
+  (git; seda ei kompileerita kataloogi `/docs`) ja dokumenti
   [Vigade puhastamine](../security/ERROR_SANITIZATION.md).
 
 **Sihitud tsükkel**
@@ -58,12 +57,12 @@ npm run check:provider-consistency
 npm run check:provider-assets
 node --import tsx/esm --test tests/unit/provider-translate-path-golden.test.ts
 node --import tsx/esm --test tests/unit/<provider-or-executor>.test.ts
-npm run gen:provider-reference   # kui kataloog muutub; kinnitage genereeritud erinevus
+npm run gen:provider-reference   # kui kataloog muutub; kandke genereeritud erinevus sisse
 npm run lint
 ```
 
-Testige ka kõiki mõjutatud päringutüüpe: vestlus, Responses, pildid, manused, heli või video.
-Käsitlege genereeritud kataloogi ja etalonide erinevusi lepingumuudatustena; ärge aktsepteerige neid
+Testige ka iga mõjutatud päringuperet: vestlus, Responses, pildid, manused, heli või video.
+Vaadake genereeritud kataloogi ja etalonide erinevused üle lepingumuudatustena; ärge kinnitage neid
 pimesi.
 
 ### Marsruutimine
@@ -72,35 +71,35 @@ pimesi.
 
 - Avalikud strateegiaväärtused ja kasutajaliidese metaandmed failis
   `src/shared/constants/routingStrategies.ts`.
-- Jaotamine ja järjestamine failis `open-sse/services/combo.ts` ning kataloogis
+- Edastamine ja järjestamine failis `open-sse/services/combo.ts` ning kataloogis
   `open-sse/services/combo/`.
-- Kombinatsioonide skeemid, püsivus, tõrkekindluse olek, mudelite võimekused ning API ja
-  kasutajaliidese juhtelemendid.
-- [Automaatse kombinatsiooni mootor](../routing/AUTO-COMBO.md) ja tõrkekindluse dokumentatsioon,
+- Kombinatsioonide skeemid, püsivus, tõrkekindluse olek, mudelite võimekused ning API/kasutajaliidese
+  juhtelemendid.
+- [Automaatse kombineerimise mootor](../routing/AUTO-COMBO.md) ja tõrkekindluse dokumentatsioon,
   kui käitumine muutub.
 
 **Sihitud tsükkel**
 
 ```bash
 node --import tsx/esm --test tests/unit/combo-<behavior>.test.ts
-npm run test:combo:matrix        # strateegia või jaotamise muudatused
+npm run test:combo:matrix        # strateegia või edastamise muudatused
 npm run check:known-symbols      # strateegia registreerimise muudatused
 npm run lint
 ```
 
-Kasutage kohalikult deterministlikke testitud ülesvoolu teenuste imitatsioone. Reaalteenustega
-kombinatsioonide suitsutestid nõuavad identimisteavet ja on käsitsi tehtavad, mitte CI asendajad.
+Kasutage kohalikult deterministlikke, jäljendatud ülesvooluteenusega teste. Reaalsete kombinatsioonide
+suitsutestid nõuavad autentimisandmeid ja on käsitsi käivitatavad, mitte CI-testide asendajad.
 
 ### Kasutajaliides / kasutajakogemus
 
 **Lepingud**
 
-- Next.js-i marsruudi/lehe ja jagatud komponentide piirid kataloogides `src/app/` ja
+- Next.js-i marsruudi/lehe ja ühiskomponentide piirid kataloogides `src/app/` ja
   `src/shared/components/`.
-- API vastuste kujud, laadimis-, tühjad ja veaolekud, klaviatuuri ning ekraanilugeja käitumine,
-  kohanduv paigutus, kujundusteemad ja lokaatide laiendamine.
-- Ingliskeelsed kasutajaliidese lähtestringid failis `src/i18n/messages/en.json`; ärge kodeerige uut
-  kasutajale nähtavat teksti otse lähtekoodi.
+- API vastuste kujud, laadimise/tühja oleku/vea olekud, klaviatuuri ja ekraanilugeri kasutus,
+  kohanduv paigutus, kujundusteemad ning lokaatide laiendamine.
+- Ingliskeelsed kasutajaliidese lähtetekstid failis `src/i18n/messages/en.json`; ärge kodeerige uut
+  kasutajale kuvatavat teksti otse lähtekoodi.
 
 **Sihitud tsükkel**
 
@@ -112,8 +111,9 @@ npm run lint
 ```
 
 Käivitage rakendus interaktsiooni- või visuaalsete muudatuste korral ning kontrollige nii kitsaid kui
-ka laiu vaatealasid. CI käitab tootmisjärgu ja laiemad testikogumid; visuaalne käitumine vajab siiski
-muudatusele sobivat sihitud komponenditesti, Playwrighti testi või dokumenteeritud käsitsi kontrolli.
+ka laiu vaatealasid. CI käivitab tootmisversiooni koostamise ja ulatuslikumad testikomplektid;
+visuaalne käitumine vajab siiski muudatusele sobivat sihitud komponenditesti, Playwrighti testi või
+dokumenteeritud käsitsi kontrolli.
 
 ### i18n
 
@@ -121,9 +121,9 @@ muudatusele sobivat sihitud komponenditesti, Playwrighti testi või dokumenteeri
 
 - `src/i18n/messages/en.json` on kasutajaliidese lähtefail; `config/i18n.json` on lokaatide lähtefail.
 - CLI kataloogid asuvad eraldi kataloogis `bin/cli/locales/`.
-- Säilitage ICU kohatäited ja sildid täpselt. Ärge tõlkige toote-, pakkuja- ega mudelinimesid,
-  protokollide ja päiste nimesid, käske, koodi/JSON-i identifikaatoreid, URL-e, keskkonnamuutujaid
-  ega kaitstud termineid, nagu `OmniRoute`, `OAuth`, `MCP` ja `A2A`. Praegune lähteloend asub failis
+- Säilitage ICU kohatäited ja sildid täpselt. Ärge tõlkige toote-, teenusepakkuja- või mudelinimesid,
+  protokolli- ja päisenimesid, käske, koodi/JSON-i identifikaatoreid, URL-e, keskkonnamuutujaid ega
+  kaitstud termineid, nagu `OmniRoute`, `OAuth`, `MCP` ja `A2A`. Praegune lähteloend asub failis
   `scripts/i18n/glossary/protected-terms.json`.
 
 **Sihitud tsükkel**
@@ -133,22 +133,22 @@ npm run i18n:sync-ui:dry
 npm run i18n:check-ui-coverage
 npm run i18n:check-value-drift
 npm run i18n:check-glossary
-npm run check:cli-i18n          # kui CLI stringid/kataloogid muutuvad
+npm run check:cli-i18n          # kui CLI tekstid/kataloogid muutuvad
 npm run lint
 ```
 
 See on olemasoleva süsteemi juhend, mitte kutse laiendada selle tööriistu või võtmemudelit.
-Hoidke i18n-i paigad täpselt piiritletuna, kuni asendussüsteemi kavandatakse. Ärge käivitage
-väliste teenustega ühenduvaid tõlkekäske, välja arvatud juhul, kui ülesanne nõuab sõnaselgelt
-genereeritud tõlkeid ja olete saadud erinevuse üle vaadanud.
+Hoidke i18n-i paigad täpselt piiritletuna, kuni asendussüsteemi kavandatakse. Ärge käivitage väliseid
+teenuseid kasutavaid tõlkekäske, välja arvatud juhul, kui ülesanne nõuab sõnaselgelt genereeritud
+tõlkeid ja olete saadud erinevuse üle vaadanud.
 
 ### CLI
 
 **Lepingud**
 
-- Avalikud käsud ja lipud kaustas `bin/cli/`, genereeritud API-käsud, väljumiskoodid, stdout/stderr ja
+- Avalikud käsud ja lipud kataloogis `bin/cli/`, genereeritud API-käsud, väljumiskoodid, stdout/stderr ja
   JSON-väljundi struktuurid, konfiguratsiooni-/keskkonnakäitumine ning pakendatud failid.
-- CLI kasutajale kuvatavad tekstid peavad kasutama CLI i18n-kihti ning `en`/`pt-BR` kataloogid peavad olema kooskõlas.
+- CLI kasutajale kuvatavad sõned peavad kasutama CLI i18n-kihti ning hoidma `en`/`pt-BR` kataloogid sünkroonis.
 - Säilitage Node toetatud käituskeskkonnana ja avaldatud binaarliidese leping.
 
 **Fookustatud tsükkel**
@@ -157,21 +157,21 @@ genereeritud tõlkeid ja olete saadud erinevuse üle vaadanud.
 node --import tsx/esm --test tests/unit/cli/<command>.test.ts
 npm run check:cli-i18n
 npm run build:cli             # genereeritud/pakendatud CLI muudatused
-npm run check:pack-policy     # paketi avaliku pinna muudatused
+npm run check:pack-policy     # paketipinna muudatused
 npm run lint
 ```
 
-Kui käitumine sõltub parsimisest, failidest või väljumisolekust, kasutage täpset käsku ajutises andmekataloogis.
-CI teeb laiemad paketi artefaktide ja ökosüsteemi kontrollid.
+Kui käitumine sõltub parsimisest, failidest või väljumisolekust, kasutage täpset käsku ajutises
+andmekataloogis. CI teeb laiemad paketi artefakti- ja ökosüsteemikontrollid.
 
 ### Andmebaas
 
 **Lepingud**
 
-- Domeenimoodulid asuvad kaustas `src/lib/db/`; importige konkreetsed moodulid otse (vana `localDb.ts` reekspordikiht eemaldati).
-- Nummerdatud ja idempotentsed SQL-migratsioonid kaustas `src/lib/db/migrations/`, tehinguohutus, uuendamise
-  käitumine, indeksid ning kõik skeemist mõjutatud väljakutsujad.
-- Marsruudid ja töötlejad ei väljasta kunagi töötlemata SQL-i otse.
+- Domeenimoodulid asuvad kataloogis `src/lib/db/`; importige konkreetsed moodulid otse (vana `localDb.ts` reeksportimise kiht eemaldati).
+- Nummerdatud idempotentsed SQL-migratsioonid kataloogis `src/lib/db/migrations/`, tehinguohutus, uuendamise
+  käitumine, indeksid ja kõik skeemist mõjutatud väljakutsujad.
+- Marsruudid ja töötlejad ei käivita kunagi toorest SQL-i otse.
 
 **Fookustatud tsükkel**
 
@@ -183,57 +183,121 @@ node --import tsx/esm --test tests/unit/db/migration-<number>.test.ts
 npm run lint
 ```
 
-Migratsiooni lisamisel testige nii värsket andmebaasi kui ka eelmise skeemi versioonilt uuendamist. Andmebaasitestid
-peavad puhastamise ajal ühendused sulgema ja kutsuma `resetDbInstance()`. Käivitage `npm run test:bun:db` ainult siis,
-kui muutub Bun-adapteri parima võimaliku toe tee; Node jääb autoriteetseks.
+Migratsiooni lisamisel testige nii värsket andmebaasi kui ka eelmiselt skeemilt uuendamist. Andmebaasitestid
+peavad puhastamise ajal sulgema ressursipidemed ja kutsuma välja `resetDbInstance()`. Käivitage `npm run test:bun:db` ainult siis,
+kui parima võimaliku toe põhimõttel töötava Bun-adapteri tee muutub; Node jääb määravaks.
 
-### Ehitamine / juurutamine
+### Koostamine / juurutamine
 
 **Lepingud**
 
-- Juur- ja tööruumimanifestid/lukufail, `scripts/build/`, Next.js-i eraldiseisev komplekteerimine, `dist/`
-  paketi sisu, Electroni platvormi metaandmed, CI töövood ja juurutamise kontrollmarkerid.
-- Toetatud Node’i versioonivahemikud ja failis `CLAUDE.md` lubatud Bun-kasutus peavad säilima.
-- Ehitamise artefakte ei jälgita; rakenduvad sõltuvuste, litsentside, töövoogude ja pakettide eeskirjad.
+- Juur- ja tööruumi manifestid/lukustusfail, `scripts/build/`, Next.js-i autonoomne komplekteerimine, `dist/`
+  paketi sisu, Electroni platvormi metaandmed, CI töövood ning juurutuse kontrolltähised.
+- Toetatud Node'i versioonivahemikud ja failis `CLAUDE.md` lubatud Bun-i kasutus peavad säilima.
+- Koostamisartefakte ei lisata versioonihaldusse; rakenduvad sõltuvuste, litsentside, töövoogude ja pakettide reeglid.
 
 **Fookustatud tsükkel**
 
 ```bash
 node --import tsx/esm --test tests/unit/build/<behavior>.test.ts
 npm run check:build-scope
-npm run check:lockfile         # sõltuvuse või lukufaili muudatused
-npm run check:pack-policy      # avaldatud paketi pinna muudatused
+npm run check:lockfile         # sõltuvuse või lukustusfaili muudatused
+npm run check:pack-policy      # avaldatud paketipinna muudatused
 npm run lint
 ```
 
-Kasutage käsku `npm run build` lokaalselt ainult siis, kui muudatus mõjutab kompileerimist, eraldiseisvat komplekteerimist, ressursse
-või käitusaegset pakkimist. Kasutage käsku `npm run build:release` ainult väljalaske/juurutuse valideerimiseks. CI ehitus on
-lõplik platvormideülene signaal; platvormipõhised Electroni muudatused vajavad vastava fookustatud ehituse
+Kasutage `npm run build` lokaalselt ainult siis, kui muudatus mõjutab kompileerimist, autonoomset komplekteerimist, varasid
+või käitusaegset pakendamist. Kasutage `npm run build:release` ainult väljalaske/juurutuse valideerimiseks. CI koostamine on
+lõplik platvormideülene signaal; platvormipõhised Electroni muudatused vajavad vastavat fookustatud koostamist
 või suitsutesti tõendit.
 
-## Kohalik tsükkel võrreldes CI-ga
+## Arendaja skriptid ühiskasutatava masina jaoks
 
-| Käivita lokaalselt iga paranduse puhul                                                                          | CI annab laiaulatusliku signaali                                          |
-| --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
-| Ülaltoodud otsesed käitumistestid ja kategooriaväravad                                                          | Osadeks jaotatud täielik ühiktestide komplekt ja järjestikused testid     |
-| `npm run lint`                                                                                                  | Vitesti testikomplektid ning katvuse/kvaliteedi rangemaks muutmine        |
-| Tüübikontroll või kompileerimine ainult siis, kui mõjutatud leping seda nõuab                                   | Tootmisjärk, turbe-, dokumentatsiooni-, sõltuvus- ja PR-poliitika väravad |
-| Käsitsi interaktsiooni- või reaalajas kontrollid ainult siis, kui automatiseerimine ei suuda käitumist tõendada | Töödeülene integratsioon ja töövoos konfigureeritud platvormikontrollid   |
+Kaks `scripts/dev/` abiskripti määratlevad kohaliku töötsükli arendusmasinas, kus teised seansid on aktiivsed:
 
-Roheline fokuseeritud tsükkel on tõend muudetud lepingu kohta, mitte kinnitus, et mitteseotud CI-kontrollid
-läbivad edukalt. Samas ära lase igal lokaalsel muudatusel oodata kogu repositooriumi maatriksi läbimist.
+```bash
+scripts/dev/typecheck-touched.sh --base release/vX.Y.Z   # failid vahemikust merge-base(HEAD, base)..HEAD
+scripts/dev/typecheck-touched.sh src/a.ts tests/unit/b.test.ts   # ainult need failid
+scripts/dev/new-worktree.sh fix/1234-slug release/vX.Y.Z  # isoleeritud worktree, ohutu paralleelkasutuseks
+```
 
-## Ühitamise kontrollnimekiri
+- `typecheck-touched.sh` kontrollib tüüpe ainult muudetud `.ts/.tsx` failides ajutise
+  `tsconfig.touched.tmp.json` kaudu (`extends ./tsconfig.json`, `types: ["node"]`, `noEmit`,
+  `incremental: false`), kasutades 6 GB kuhja, ning asendab seega kogu projekti hõlmava käsu `tsc -p tsconfig.json`,
+  mis põhjustab koormatud masinas OOM-i. See väljastab muudetud failide vead ja ühe kokkuvõtva rea ning lõpetab
+  koodiga `1`, kui muudetud failides on vigu, koodiga `2`, kui ainsad vead on imporditud failides või tsc lakkas töötamast
+  ilma diagnostikata (loe nimetatud logi kataloogis `_artifacts/typecheck-touched/`), ning koodiga `0`, kui
+  vigu pole. Ajutine tsconfig eemaldatakse alati; ära seda kunagi commiti.
+- `new-worktree.sh` järjestab samaaegsed käivitused lukuga `<git-common-dir>/omniroute-new-worktree.lock`
+  (ootab vaikimisi kuni 600 s ja kuvab selle kohta teate; skripti päis kirjeldab
+  väärtuse alistamist) ning võtab
+  loodud haru tagasi, kui `git worktree add` nurjub enne worktree loomist, mistõttu ei ole
+  korduskatseks vaja käsitsi käivitada `git branch -D`. Kõvalingitud `node_modules` ja `.husky/_` koopia jäävad muutmata.
+
+## Kohalik kandidaadi töötsükkel
+
+Lähtekoodi testid ei saa tõestada, et pakendatud artefakt käivitub: pakendamisloendid, kärbitud sõltuvused
+ja natiivsed binaarfailid tekitavad tõrkeid alles siis, kui tarball on installitud ja käivitatud. `npm run dev:candidate`
+(`scripts/dev/candidate.mjs`) on RFC #8084 protsessi „koosta üks kord / valideeri / eduta“ kohalik osa:
+see koostab ühe kandidaadi, valideerib täpselt selle artefakti, edutab selle kataloogide
+ümbernimetamisega ja võtab edutamise tagasi, kui edutatud pesa tervisekontroll nurjub.
+
+```bash
+npm run dev:candidate -- run --dry-run --json  # väljasta plaan, ära muuda midagi
+npm run dev:candidate -- run                   # koosta + valideeri + eduta, automaatne tagasivõtmine
+npm run dev:candidate -- build                 # npm pack + installimine asukohta _artifacts/candidate/<id>/
+npm run dev:candidate -- validate --id <id>    # käivita vabal pordil, /api/health + /v1/models
+npm run dev:candidate -- promote --id <id>     # <id> → current, current → previous
+npm run dev:candidate -- rollback              # vaheta current ja previous
+npm run dev:candidate -- run --from-tarball <file.tgz>  # kasuta mujal (CI-s) koostatud tarballi uuesti
+```
+
+- **Koosta üks kord.** `build` pakendab praeguse tööpuu (see vajab faili `dist/server.js`, seega käivita
+  esmalt `npm run build:release`) või kopeerib `--from-tarball` abil, seejärel installib tarballi
+  isoleeritud npm-i prefiksisse, sest tarball ei sisalda kataloogi `node_modules`. ID on lühike `HEAD`
+  sha (`-dirty`, kui tööpuus on kohalikke muudatusi) või tarballi puhul `tgz-<sha256>`. Puhast ID-d, mille
+  järguga kandidaat on juba koostatud, kasutatakse uuesti; selle uuesti koostamiseks anna `--force`.
+- **Valideeri paketti, mitte lähtekoodi.** `validate` käivitab installitud CLI
+  (`serve --port <free port>`) värske muutujaga `DATA_DIR=<candidate>/data`, võltsitud saladustega ning nii, et
+  operaatori `OMNIROUTE_API_KEY`, `STORAGE_ENCRYPTION_KEY` ja `INITIAL_PASSWORD` on
+  keskkonnast eemaldatud; sel viisil kontrollitakse värske installi võtmeta loopback-seadistust. See ootab, kuni
+  `GET /api/health` tagastab 200, nõuab, et `GET /v1/models` tagastaks 200, peatab protsessirühma
+  ja salvestab tulemuse koos tarballi räsiga faili `validation.json`.
+- **Eduta sama artefakt.** `promote` keeldub edutamast kandidaati, mille praeguse tarballi räsi kohta
+  puudub edukas valideerimine. Vaikimisi aktiivne pesa on `_artifacts/candidate/current`; `--target <dir>`
+  valib samas failisüsteemis teise kataloogi ja selle eelmine pesa on `<dir>.previous`.
+  Iga ümbernimetamine on atomaarne ning poole toimingu pealt tekkinud tõrke korral pööratakse juba tehtud ümbernimetamised tagasi.
+- **Võta tagasi.** `run` valideerib edutatud pesa uuesti ning vahetab `current` ja `previous` tagasi, kui
+  see kontroll nurjub. Esimesel valideerimisel nurjunud kandidaati ei edutata kunagi.
+
+Kõik kirjutatakse gitignore'i lisatud kataloogi `_artifacts/candidate/`; olemasolevat OmniRoute'i
+installatsiooni ega selle andmekataloogi ei muudeta kunagi. Edutatud CLI asub failis
+`_artifacts/candidate/current/prefix/bin/omniroute`; kasutamisel käivita see oma muutujaga `DATA_DIR`.
+Väljumiskoodid: `0` õnnestumine, `1` nurjunud valideerimine või edutamine, `2` kasutusviga või puuduv koosteversioon.
+
+## Kohalik tsükkel versus CI
+
+| Käivita iga muudatuse puhul kohalikult                                                              | CI annab laiaulatusliku signaali                                                        |
+| --------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| Ülaltoodud otsesed käitumistestid ja kategooriaväravad                                              | Osadeks jaotatud täielik ühiktestide komplekt ja jadatestid                             |
+| `npm run lint`                                                                                      | Vitesti testikomplektid ning katvuse/kvaliteedi järkjärgulised lävendid                 |
+| Tüübikontroll või koostamine ainult siis, kui mõjutatud leping seda nõuab                           | Tootmisversiooni koostamise, turbe, dokumentatsiooni, sõltuvuste ja PR-reeglite väravad |
+| Käsitsi interaktsiooni-/reaalajakontrollid ainult siis, kui automaatika ei suuda käitumist tõendada | Töödevahelise integratsiooni ja platvormi kontrollid, mis on töövooga seadistatud       |
+
+Roheline fokuseeritud tsükkel tõendab muudetud lepingu toimimist, kuid ei tõesta, et mitteseotud CI-kontrollid
+läbivad edukalt. Samuti ära lase igal kohalikul muudatusel oodata kogu hoidla maatriksi läbimist.
+
+## Kooskõlastamise kontrollnimekiri
 
 Enne ülevaatuse taotlemist:
 
-- Veendu, et PR-i baas on endiselt kõrgeim aktiivne `release/v*` haru.
-- Tõmba see baas alla ja vaata üle pärast oma haru loomist lisandunud commit'id.
-- Vaata käsuga `git diff <active-base>...HEAD` üle juhuslikud või genereeritud muudatused.
+- Veendu, et PR-i baasharu on endiselt kõrgeima versiooniga aktiivne `release/v*` haru.
+- Tõmba see baasharu ja vaata üle pärast oma haru loomist sinna lisatud muudatused.
+- Vaata üle `git diff <active-base>...HEAD`, et leida juhuslikud või genereeritud tarbetud muudatused.
 - Lahenda kataloogi ja genereeritud dokumentide konfliktid, uuendades lähtefaili ning genereerides väljundi uuesti.
-- Pärast ühitamist käivita uuesti kõik PR-i kirjelduses loetletud fokuseeritud testid/väravad.
-- Ära kunagi nõrgenda kontrolle ega eemalda nõutud teste pelgalt selleks, et kohanduda nihkunud baasiga.
+- Käivita pärast kooskõlastamist uuesti kõik PR-i kirjelduses loetletud fokuseeritud testid/väravad.
+- Ära kunagi nõrgenda kontrolle ega jäta nõutud teste ära üksnes selleks, et kohanduda muutunud baasharuga.
 
 Väljalaske külmutamise ja sihtharu muutmise reeglite kohta vaata
-[Harundamise ja väljalasete mudelit](BRANCHING_MODEL.md). Täieliku CI-loendi leiad dokumendist
+[Harude loomise ja väljalasete mudelit](BRANCHING_MODEL.md). CI-kontrollide täieliku loendi leiad dokumendist
 [Kvaliteediväravate viide](../architecture/QUALITY_GATES.md).

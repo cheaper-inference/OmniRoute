@@ -202,9 +202,12 @@ test("codex still clears its single-use refresh token", async () => {
 });
 
 // ── Opt-in list is explicit ──────────────────────────────────────────────────
-test("only claude opts out of clearing the rotating refresh token", () => {
+test("Claude and Kimi Coding retain recovery tokens; Codex does not (#16984)", () => {
   assert.equal(tokenHealthCheck.preservesRefreshTokenOnUnrecoverable("claude"), true);
   assert.equal(tokenHealthCheck.preservesRefreshTokenOnUnrecoverable("Claude"), true);
+  assert.equal(tokenHealthCheck.preservesRefreshTokenOnUnrecoverable("kimi-coding"), true);
+  assert.equal(tokenHealthCheck.preservesRefreshTokenOnUnrecoverable("KIMI-CODING"), true);
   assert.equal(tokenHealthCheck.preservesRefreshTokenOnUnrecoverable("codex"), false);
+  assert.equal(tokenHealthCheck.preservesRefreshTokenOnUnrecoverable("openai"), false);
   assert.equal(tokenHealthCheck.preservesRefreshTokenOnUnrecoverable(undefined), false);
 });

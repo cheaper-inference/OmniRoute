@@ -196,46 +196,48 @@ xAI அல்லது Grok CLI-ஐ இணைக்கும்போது `145
 
 ---
 
-## Token-களை நிர்வகித்தல்
+## Tokens-ஐ நிர்வகித்தல்
 
 ```bash
 omniroute tokens create --name "laptop" --scope write [--expires 30]
-#   ↳ ரகசியத்தை ஒரே முறை மட்டும் அச்சிடும் — இப்போதே அதை நகலெடுக்கவும்
-omniroute tokens list                 # மறைக்கப்பட்டவை: id, பெயர், scope, prefix, நிலை, காலாவதி
-omniroute tokens revoke <id|prefix>   # உடனடியாக revoke செய்யவும்
-omniroute tokens scopes               # மூன்று scope-களையும் விளக்கவும்
+#   ↳ secret ஒருமுறை மட்டுமே அச்சிடப்படும் — இப்போதே நகலெடுக்கவும்
+omniroute tokens list                 # மறைக்கப்பட்டது: id, name, scope, prefix, status, expiry
+omniroute tokens revoke <id|prefix>   # உடனடியாக ரத்து செய்
+omniroute tokens scopes               # மூன்று scopes-ஐ விளக்கும்
 ```
 
-`tokens` கட்டளைகளுக்கு **admin** credential தேவை. Dashboard-இல் **அமைப்புகள் → Access Token-கள்** என்பதன் கீழும் token-களை நிர்வகிக்கலாம் (உருவாக்குதல், revoke செய்தல், ஒருமுறை மட்டும் நகலெடுத்தல்).
+`tokens` கட்டளைகளுக்கு **admin** credential தேவை. Dashboard-இல் **Settings → Access Tokens** கீழும் tokens-ஐ நிர்வகிக்கலாம் (உருவாக்கு, ரத்து செய், ஒருமுறை நகலெடு).
+
+உருவாக்குபவர் வைத்திருப்பதை விட அதிக privilege கொண்ட token-ஐ ஒருபோதும் உருவாக்க முடியாது. `admin` token-ஐ operator மட்டுமே உருவாக்க முடியும் — dashboard session, சேவையகத்திலேயே உள்ள உள்ளூர் CLI, அல்லது கடவுச்சொல்லுடன் `omniroute connect`. Machine credentials (`admin` access token, அல்லது `manage`/`admin` scope கொண்ட API key) `write` மற்றும் `read` tokens-ஐ மட்டுமே உருவாக்க முடியும்; `--scope admin`-ஐக் கேட்டால் `403` கிடைக்கும். Login முடக்கப்பட்டிருப்பதால் minting திறந்துவிடாது: எந்த scope-இன் access token-உம், எப்போதும்-அங்கீகரிக்கப்பட்ட routes ஏற்கும் credential ஆகும்; எனவே எந்த scope-இலும் அநாமதேய call-க்கு `401` கிடைக்கும்.
 
 ---
 
-## தொலைநிலை catalog-இலிருந்து coding CLI-ஐ உள்ளமைத்தல்
+## தொலைநிலை catalog-இலிருந்து coding CLI-ஐ கட்டமைத்தல்
 
-`omniroute configure`, **active server-இன்** live model catalog-ஐப் படித்து, **உங்கள்** கணினியில் config ஒன்றை எழுதுகிறது.
+`omniroute configure` **செயலில் உள்ள சேவையகத்தின்** நேரடி model catalog-ஐப் படிக்கிறது, மேலும் **உங்கள்** கணினியில் ஒரு config-ஐ எழுதுகிறது.
 
 ```bash
 omniroute configure codex
-#   வழங்குநர்கள்: glm, kmc, ollamacloud, opencode-go, …
-#   வழங்குநர்: glm
+#   Providers: glm, kmc, ollamacloud, opencode-go, …
+#   Provider: glm
 #   Model id: glm/glm-5.2
-#   ✔ ~/.codex/glm52.config.toml-ஐ எழுதியது
-#   இதைப் பயன்படுத்தவும்:  codex --profile glm52
+#   ✔ ~/.codex/glm52.config.toml எழுதப்பட்டது
+#   பயன்படுத்த:  codex --profile glm52
 
-# interactive அல்லாத முறை
+# non-interactive
 omniroute configure codex --provider glm --model glm/glm-5.2 --name glm52
 
-# அடிக்கடி பயன்படுத்தப்படும் model-ஐ interactive picker-இன் மேலே வைத்திருக்கவும்
+# அடிக்கடி பயன்படுத்தும் model-ஐ interactive picker-இன் மேலே வைத்திருக்கவும்
 omniroute configure codex --provider glm --model glm/glm-5.2 --favorite --yes
 ```
 
-Picker, உள்ளூர் `model-preferences.json` கோப்பில் model ID-களை மட்டும் வைத்திருக்கும் (URL-கள் அல்லது credential-களை ஒருபோதும் வைத்திருக்காது); இவை context மற்றும் CLI target அடிப்படையில் பிரிக்கப்படும். சமீபத்திய தேர்வுகளுக்கு முன் favorites காட்டப்படும்; அந்த context/target பட்டியலிலிருந்து தேர்ந்தெடுக்கப்பட்ட model-ஐ அகற்ற `--unfavorite`-ஐப் பயன்படுத்தவும்.
+Picker `model-preferences.json` கோப்பில் model IDs-ஐ மட்டுமே வைத்திருக்கிறது (URLs அல்லது credentials ஒருபோதும் இல்லை), context மற்றும் CLI target வாரியாக வகைப்படுத்தப்பட்டு. Favorites, recent selections-க்கு முன் காட்டப்படும்; தேர்ந்த model-ஐ அந்த context/target பட்டியலிலிருந்து நீக்க `--unfavorite`-ஐப் பயன்படுத்தவும்.
 
-எழுதப்படும் profile, env var (`OMNIROUTE_API_KEY`) மூலமாக inference key-ஐக் குறிப்பிடுகிறது — ரகசியம் ஒருபோதும் disk-இல் எழுதப்படாது. ஒருமுறை செய்ய வேண்டிய அடிப்படை Codex setup (`[model_providers.omniroute]` block) குறித்து அறிய, [CODEX-CLI-CONFIGURATION.md](./CODEX-CLI-CONFIGURATION.md)-ஐப் பார்க்கவும்.
+எழுதப்பட்ட profile, inference key-ஐ env var (`OMNIROUTE_API_KEY`) மூலம் குறிப்பிடுகிறது — secret ஒருபோதும் disk-இல் எழுதப்படுவதில்லை. ஒருமுறை மட்டும் செய்யும் அடிப்படை Codex அமைப்புக்கு (`[model_providers.omniroute]` block), [CODEX-CLI-CONFIGURATION.md](./CODEX-CLI-CONFIGURATION.md) பார்க்கவும்.
 
-### தொலைநிலைக்கு எதிராக CLI ஒன்றைத் தொடங்குதல் (config எழுதப்படாது)
+### config எதுவும் எழுதாமல் தொலைநிலையுடன் CLI-ஐத் தொடங்குதல்
 
-`omniroute run <target>` active context-ஐயும் மதிக்கிறது: தொலைநிலை base URL மற்றும் context credential ஆகியவை தொடங்கப்படும் process-இல் மட்டும் செலுத்தப்படுகின்றன.
+`omniroute run <target>` செயலில் உள்ள context-ஐயும் மதிக்கிறது: தொலைநிலை base URL மற்றும் context credential ஆகியவை தொடங்கப்படும் process-க்கு மட்டுமே செலுத்தப்படும்.
 
 ```bash
 omniroute connect 192.168.0.15
@@ -243,47 +245,43 @@ omniroute run claude   --model openai/gpt-5.4          # Claude Code → தொ�
 omniroute run gemini   --model glm/glm-5.2 -- --skip-trust -p "hello"
 omniroute run opencode --model glm/glm-5.2 -- run "reply OK"
 
-# சரியாக எது தொடங்கப்படும் என்பதை preview செய்யவும் (env KEY பெயர்கள் மட்டும், மதிப்புகள் ஒருபோதும் இல்லை):
+# சரியாக எதை spawn செய்யும் என்று முன்னோட்டம் பார்க்கவும் (env KEY NAMES மட்டும், values அல்ல):
 omniroute run codex --dry-run --json
 ```
 
-Target-கள்: `claude`, `codex`, `aider`, `goose`, `opencode`, `qwen`, `gemini` (ஒற்றை மூலம்: `bin/cli/cli-manifest.mjs`). Qwen மற்றும் Gemini ஆகியவை வெளியேறும்போது அகற்றப்படும் தற்காலிகமான, தனிமைப்படுத்தப்பட்ட home-உடன் இயங்குகின்றன; எனவே அவற்றைத் தொடங்குவது உங்கள் தனிப்பட்ட tool configuration-ஐத் தொடவோ — அதற்குள் கசியவோ — செய்யாது.
+Targets: `claude`, `codex`, `aider`, `goose`, `opencode`, `qwen`, `gemini` (ஒரே மூலம்: `bin/cli/cli-manifest.mjs`). Qwen மற்றும் Gemini ஒரு தற்காலிக, தனிமைப்படுத்தப்பட்ட home-இல் இயங்குகின்றன; அது வெளியேறும்போது நீக்கப்படும். எனவே launch ஒருபோதும் உங்கள் தனிப்பட்ட tool configuration-ஐத் தொடுவதில்லை — அல்லது அதில் கசிவதில்லை.
 
-### ஒவ்வொரு CLI-க்குமான setup கட்டளைகள்
+### ஒவ்வொரு CLI-க்குமான அமைப்புக் கட்டளைகள்
 
-ஆதரிக்கப்படும் ஒவ்வொரு CLI-க்கும் தொலைநிலையை உணரும் setup கட்டளை உள்ளது (அனைத்தும் active context-ஐ அல்லது `--remote <url> --api-key <key>`-ஐ மதிக்கும்):
+ஒவ்வொரு ஆதரிக்கப்படும் CLI-க்கும் தொலைநிலையை அறியும் அமைப்புக் கட்டளை உண்டு (அனைத்தும் செயலில் உள்ள context-ஐ மதிக்கும், அல்லது `--remote <url> --api-key <key>`):
 
-| CLI         | கட்டளை                     | இது எழுதுவது                                                                                                                                                                                                               |
-| ----------- | -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Codex       | `omniroute setup-codex`    | `~/.codex/<name>.config.toml` சுயவிவரங்கள் (ஒவ்வொரு மாதிரிக்கும்)                                                                                                                                                          |
-| Claude Code | `omniroute setup-claude`   | `~/.claude/profiles/<name>/settings.json` (ஒவ்வொரு மாதிரிக்கும்)                                                                                                                                                           |
-| OpenCode    | `omniroute setup-opencode` | `~/.config/opencode/opencode.json` — பட்டியலிலுள்ள ஒவ்வொரு மாதிரியையும் கொண்ட OpenAI-இணக்கமான `omniroute` வழங்குநர் (`opencode -m omniroute/<model>`-ஐ இயக்கவும்)                                                          |
-| Cline       | `omniroute setup-cline`    | `~/.cline/data/{globalState,secrets}.json` (CLI பயன்முறை) + ஒட்டுவதற்கான VS Code நீட்டிப்பு அமைப்புகளை அச்சிடுகிறது (OpenAI-இணக்கமானது, `/v1` **இல்லாத** Base URL)                                                         |
-| Kilo Code   | `omniroute setup-kilo`     | `~/.local/share/kilo/auth.json` (CLI) + VS Code `kilocode.*` அமைப்புகள் — OpenAI-இணக்கமானது, `/v1` **உள்ள** Base URL                                                                                                       |
-| Continue    | `omniroute setup-continue` | `~/.continue/config.yaml` (VS Code/JetBrains + `cn` CLI) — `provider: openai`, `/v1` **உள்ள** `apiBase`, `${{ secrets.OMNIROUTE_API_KEY }}` வழியாக விசை                                                                    |
-| Cursor      | `omniroute setup-cursor`   | பயன்பாட்டிற்குள் மேற்கொள்ள வேண்டிய படிகளை அச்சிடுகிறது (Settings → Models → `/v1` **உள்ள** OpenAI Base URL-ஐ Override செய்தல் + விசை + மாதிரி). Cursor உள்ளமைவு வெளிப்படாத SQLite வடிவில் உள்ளது — அரட்டை பலகைக்கு மட்டும் |
-| Roo Code    | `omniroute setup-roo`      | Roo இறக்குமதி JSON (`~/.omniroute/roo-settings.json`)-ஐ எழுதுகிறது + `roo-cline.autoImportSettingsPath`-ஐ அமைக்கிறது + UI படிகளை அச்சிடுகிறது (OpenAI-இணக்கமானது, `/v1` **உள்ள** Base URL)                                 |
-| Crush       | `omniroute setup-crush`    | `~/.config/crush/crush.json` — `openai-compat` வழங்குநர், `/v1` **உள்ள** `base_url`, `$OMNIROUTE_API_KEY` வழியாக விசை                                                                                                      |
-| Goose       | `omniroute setup-goose`    | `~/.config/goose/config.yaml` (`GOOSE_PROVIDER=openai` + `/v1` **இல்லாத** `OPENAI_HOST` + `GOOSE_MODEL`) + சூழல் மாறி வழிமுறை                                                                                              |
-| Aider       | `omniroute setup-aider`    | `~/.aider.conf.yml` (`/v1` **இல்லாத** `openai-api-base` + `model: openai/<id>`) + சூழல் மாறி வழிமுறை (`aider --message --yes`)                                                                                             |
-| Qwen Code   | `omniroute setup-qwen`     | `~/.qwen/settings.json`-இல் V4 `modelProviders.openai` பதிவு + `~/.qwen/.env`-இல் `OMNIROUTE_API_KEY`                                                                                                                      |
+| CLI         | கட்டளை                     | எதை எழுதும்                                                                                                                                                                               |
+| ----------- | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Codex       | `omniroute setup-codex`    | `~/.codex/<name>.config.toml` profiles (மாதிரி வாரியாக)                                                                                                                                   |
+| Claude Code | `omniroute setup-claude`   | `~/.claude/profiles/<name>/settings.json` (மாதிரி வாரியாக)                                                                                                                                |
+| OpenCode    | `omniroute setup-opencode` | `~/.config/opencode/opencode.json` — catalog-இல் உள்ள ஒவ்வொரு model-உடனும் `omniroute` openai-compatible provider (`opencode -m omniroute/<model>` எனப் பயன்படுத்தவும்)                   |
+| Cline       | `omniroute setup-cline`    | `~/.cline/data/{globalState,secrets}.json` (CLI mode) + VS Code extension settings-ஐ ஒட்டுவதற்கு அச்சிடும் (OpenAI-compatible, Base URL **without** `/v1`)                                |
+| Kilo Code   | `omniroute setup-kilo`     | `~/.local/share/kilo/auth.json` (CLI) + VS Code `kilocode.*` settings — OpenAI-compatible, Base URL **with** `/v1`                                                                        |
+| Continue    | `omniroute setup-continue` | `~/.continue/config.yaml` (VS Code/JetBrains + `cn` CLI) — `provider: openai`, `apiBase` **with** `/v1`, key `${{ secrets.OMNIROUTE_API_KEY }}` மூலம்                                     |
+| Cursor      | `omniroute setup-cursor`   | in-app படிகளை அச்சிடும் (Settings → Models → Override OpenAI Base URL **with** `/v1` + key + model). Cursor config ஒளிபுகா SQLite — chat panel மட்டும்                                    |
+| Roo Code    | `omniroute setup-roo`      | Roo import JSON (`~/.omniroute/roo-settings.json`) எழுதி, `roo-cline.autoImportSettingsPath`-ஐ அமைத்து UI படிகளை அச்சிடும் (OpenAI-compatible, Base URL **with** `/v1`)                   |
+| Crush       | `omniroute setup-crush`    | `~/.config/crush/crush.json` — `openai-compat` provider, `base_url` **with** `/v1`, key `$OMNIROUTE_API_KEY` மூலம்                                                                        |
+| Zed         | `omniroute setup-zed`      | `~/.config/zed/settings.json` — `language_models.openai_compatible.omniroute`, `api_url` **with** `/v1`, key Zed-ஆல் `$OMNIROUTE_API_KEY`-இலிருந்து படிக்கப்படும் (ஒருபோதும் எழுதப்படாது) |
+| Goose       | `omniroute setup-goose`    | `~/.config/goose/config.yaml` (`GOOSE_PROVIDER=openai` + `OPENAI_HOST` **without** `/v1` + `GOOSE_MODEL`) + env recipe                                                                    |
+| Aider       | `omniroute setup-aider`    | `~/.aider.conf.yml` (`openai-api-base` **without** `/v1` + `model: openai/<id>`) + env recipe (`aider --message --yes`)                                                                   |
+| Qwen Code   | `omniroute setup-qwen`     | `~/.qwen/settings.json` V4 `modelProviders.openai` entry + `~/.qwen/.env`-இல் `OMNIROUTE_API_KEY`                                                                                         |
 
 ```bash
-# OpenCode (OpenAI-இணக்கமான வழங்குநர், பட்டியலிலுள்ள அனைத்து மாதிரிகள், தொலைநிலை VPS)
+# OpenCode (openai-compatible provider, catalog-இன் அனைத்து models, தொலைநிலை VPS)
 omniroute setup-opencode --remote http://192.168.0.15:20128 --api-key oma_live_xxx
-omniroute setup-opencode --only glm,kimi        # பொருந்தும் மாதிரிகளை மட்டும் வைத்திருக்கவும்
+omniroute setup-opencode --only glm,kimi        # பொருந்தும் models மட்டும் வைத்திருக்கும்
 opencode -m omniroute/glm/glm-5.2 "..."          # முதலில் OMNIROUTE_API_KEY-ஐ export செய்யவும்
 ```
 
-> OpenCode மேலும் வசதிகள் நிறைந்த **செருகுநிரல்** ஒருங்கிணைப்பையும் கொண்டுள்ளது: `omniroute setup opencode`
-> (இப்போது `--remote` வழியாக தொலைநிலையை ஆதரிக்கிறது) `@omniroute/opencode-plugin`-ஐ நிறுவுகிறது.
-> `setup-opencode` என்பது எளிய OpenAI-இணக்கமான மாற்று வழியாகும். API விசை
-> `{env:OMNIROUTE_API_KEY}` வழியாகக் குறிப்பிடப்படுகிறது — ஒருபோதும் வட்டில் எழுதப்படாது.
+> OpenCode-க்கு மேலும் வளமான **plugin** integration-உம் உண்டு: `omniroute setup opencode` (இப்போது `--remote` வழியாக தொலைநிலையை அறிகிறது) `@omniroute/opencode-plugin`-ஐ நிறுவும்.
+> `setup-opencode` என்பது இலகுவான openai-compatible மாற்று. API key `{env:OMNIROUTE_API_KEY}` மூலம் குறிப்பிடப்படுகிறது — ஒருபோதும் disk-இல் எழுதப்படுவதில்லை.
 >
-> OpenCode v2-இல், அதற்குப் பதிலாக `@omniroute/opencode-plugin-v2`-ஐப் பயன்படுத்தவும்: அதே பட்டியல்,
-> வேறுபட்ட ஏற்றி ஒப்பந்தம். ஒருங்கிணைப்பு இணைக்கப்பட்டிருக்கும்போது, இது OpenCode-இன் சொந்த நற்சான்று
-> சேமிப்பகத்திலிருந்து விசையைப் படிக்கிறது; எனவே தொலைநிலை நுழைவாயிலுக்கு
-> `opencode.json`-இல் விசை எதுவும் தேவையில்லை.
+> OpenCode v2-இல், அதற்குப் பதிலாக `@omniroute/opencode-plugin-v2`-ஐப் பயன்படுத்தவும்: அதே catalog, ஆனால் வேறுபட்ட loader contract. Integration இணைக்கப்பட்டிருக்கும்போது அது key-ஐ OpenCode-இன் சொந்த credential store-இலிருந்து படிக்கும், எனவே தொலைநிலை gateway-க்கு `opencode.json`-இல் key தேவையே இல்லை.
 
 ---
 

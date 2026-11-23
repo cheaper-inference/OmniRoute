@@ -140,9 +140,9 @@ omniroute providers validate
 
 ### 1) Tilslut udbydere, og opret en API-nøgle
 
-1. Åbn Dashboard → `Providers`, og tilslut mindst én udbyder (OAuth eller API-nøgle).
-2. Åbn Dashboard → `Endpoints`, og opret en API-nøgle.
-3. (Valgfrit) Åbn Dashboard → `Combos`, og konfigurer din fallback-kæde.
+1. Åbn Kontrolpanel → `Providers`, og tilslut mindst én udbyder (OAuth eller API-nøgle).
+2. Åbn Kontrolpanel → `Endpoints`, og opret en API-nøgle.
+3. (Valgfrit) Åbn Kontrolpanel → `Combos`, og konfigurer din fallback-kæde.
 
 ### 2) Konfigurer dit kodeværktøj
 
@@ -152,7 +152,7 @@ API-nøgle: [kopiér fra Endpoint-siden]
 Model:     if/qwen3.8-max-preview (eller et vilkårligt udbyder-/modelpræfiks)
 ```
 
-Hvis din editor ikke kan sende `Authorization: Bearer ...`, skal du i stedet bruge den tokeniserede kompatibilitetsbasis:
+Hvis din editor ikke kan sende `Authorization: Bearer ...`, skal du i stedet bruge den tokeniserede kompatibilitetsbase:
 
 ```txt
 Basis-URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/
@@ -163,37 +163,38 @@ Ollama Tags-URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
 
 Fungerer med Claude Code, Codex CLI, Cursor, Cline, OpenClaw, OpenCode og OpenAI-kompatible SDK'er.
 
-#### Automatisk konfiguration med `setup-*`
+#### Konfigurer automatisk med `setup-*`
 
 I stedet for manuelt at indsætte basis-URL'en og nøglen kan du lade OmniRoute skrive hvert værktøjs
-egen konfiguration ud fra det aktive modelkatalog. Én kommando pr. værktøj:
+egen konfiguration ud fra det aktuelle modelkatalog. Én kommando pr. værktøj:
 
 ```bash
-omniroute setup-codex        # ~/.codex/<name>.config.toml-profiler
+omniroute setup-codex        # profiler i ~/.codex/<name>.config.toml
 omniroute setup-claude       # ~/.claude/profiles/<name>/settings.json
 omniroute setup-opencode     # ~/.config/opencode/opencode.json (OpenAI-kompatibel)
-omniroute setup-cline        # Indstillinger for Cline CLI + VS Code-udvidelsen
+omniroute setup-cline        # indstillinger for Cline CLI + VS Code-udvidelsen
 omniroute setup-kilo         # Kilo Code
 omniroute setup-continue     # ~/.continue/config.yaml (Continue / cn)
-omniroute setup-cursor       # udskriver trinnene i Cursor-appen
-omniroute setup-roo          # Roo Code-import + autoImport-markør
+omniroute setup-cursor       # viser trinnene i Cursor-appen
+omniroute setup-roo          # Roo Code-import + autoImport-reference
 omniroute setup-crush        # ~/.config/crush/crush.json
+omniroute setup-zed          # ~/.config/zed/settings.json (openai_compatible)
 omniroute setup-goose        # ~/.config/goose/config.yaml
 omniroute setup-aider        # ~/.aider.conf.yml
 omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 ```
 
 Hver kommando accepterer `--remote <url> --api-key <key>` til konfiguration af et lokalt værktøj mod en
-**ekstern** OmniRoute samt `--dry-run` til forhåndsvisning. Hvis du vil starte en CLI med de korrekte
-miljøvariabler indsat uden overhovedet at skrive en konfiguration, skal du bruge den generiske starter
+**fjernbaseret** OmniRoute samt `--dry-run` til forhåndsvisning. Hvis du vil starte en CLI med det korrekte
+miljø indsat uden overhovedet at skrive nogen konfiguration, skal du bruge den generiske launcher
 `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini);
-de ældre værktøjsspecifikke startere `omniroute launch` (Claude Code) og
+de ældre værktøjsspecifikke launchere `omniroute launch` (Claude Code) og
 `omniroute launch-codex` (Codex) er fortsat tilgængelige.
 
-Se **[CLI-integrationer](./CLI-INTEGRATIONS.md)** for den komplette tabel (hvad hver kommando skriver, alle flag, lokal kontra ekstern samt basis-URL-
-`/v1`-konventioner).
+Du kan finde den komplette tabel (hvad hver kommando skriver, alle flag, lokal kontra fjernbaseret samt konventioner for basis-URL'ens
+`/v1`) under **[CLI-integrationer](./CLI-INTEGRATIONS.md)**.
 
-Se den dedikerede **[vejledning til CLI-værktøjer](../reference/CLI-TOOLS.md)** for detaljeret konfiguration af hvert værktøj (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot med flere).
+Detaljeret konfiguration for hvert værktøj (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot med flere) findes i den dedikerede **[vejledning til CLI-værktøjer](../reference/CLI-TOOLS.md)**.
 
 ---
 
@@ -322,9 +323,9 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Skabelon til Void Linux (xbps-src)
+## Void Linux-skabelon (xbps-src)
 
-Void Linux-brugere kan bygge en oprindelig pakke ved hjælp af `xbps-src`. Gem denne blok som `srcpkgs/omniroute/template`:
+For Void Linux-brugere kan du bygge en systemintegreret pakke ved hjælp af `xbps-src`. Gem denne blok som `srcpkgs/omniroute/template`:
 
 ```bash
 # Skabelonfil til 'omniroute'
@@ -338,7 +339,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# Generér kontrolsummen igen for hver udgivelse med:
+# Generér checksummen igen for hver udgivelse med:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

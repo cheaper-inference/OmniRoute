@@ -4,9 +4,12 @@
 
 ---
 
-🌐 **Languages:** 🇺🇸 [English](../../../../reference/API_REFERENCE.md) · 🇪🇹 [am](../../../am/docs/reference/API_REFERENCE.md) · 🇸🇦 [ar](../../../ar/docs/reference/API_REFERENCE.md) · 🇦🇿 [az](../../../az/docs/reference/API_REFERENCE.md) · 🇧🇬 [bg](../../../bg/docs/reference/API_REFERENCE.md) · 🇧🇩 [bn](../../../bn/docs/reference/API_REFERENCE.md) · 🇧🇦 [bs](../../../bs/docs/reference/API_REFERENCE.md) · 🇨🇿 [cs](../../../cs/docs/reference/API_REFERENCE.md) · 🇩🇰 [da](../../../da/docs/reference/API_REFERENCE.md) · 🇩🇪 [de](../../../de/docs/reference/API_REFERENCE.md) · 🇬🇷 [el](../../../el/docs/reference/API_REFERENCE.md) · 🇪🇸 [es](../../../es/docs/reference/API_REFERENCE.md) · 🇪🇪 [et](../../../et/docs/reference/API_REFERENCE.md) · 🇮🇷 [fa](../../../fa/docs/reference/API_REFERENCE.md) · 🇫🇮 [fi](../../../fi/docs/reference/API_REFERENCE.md) · 🇫🇷 [fr](../../../fr/docs/reference/API_REFERENCE.md) · 🇮🇪 [ga](../../../ga/docs/reference/API_REFERENCE.md) · 🇮🇳 [gu](../../../gu/docs/reference/API_REFERENCE.md) · 🇳🇬 [ha](../../../ha/docs/reference/API_REFERENCE.md) · 🇮🇱 [he](../../../he/docs/reference/API_REFERENCE.md) · 🇮🇳 [hi](../../../hi/docs/reference/API_REFERENCE.md) · 🇭🇷 [hr](../../../hr/docs/reference/API_REFERENCE.md) · 🇭🇺 [hu](../../../hu/docs/reference/API_REFERENCE.md) · 🇦🇲 [hy](../../../hy/docs/reference/API_REFERENCE.md) · 🇮🇩 [id](../../../id/docs/reference/API_REFERENCE.md) · 🇳🇬 [ig](../../../ig/docs/reference/API_REFERENCE.md) · 🇮🇹 [it](../../../it/docs/reference/API_REFERENCE.md) · 🇯🇵 [ja](../../../ja/docs/reference/API_REFERENCE.md) · 🇬🇪 [ka](../../../ka/docs/reference/API_REFERENCE.md) · 🇰🇭 [km](../../../km/docs/reference/API_REFERENCE.md) · 🇮🇳 [kn](../../../kn/docs/reference/API_REFERENCE.md) · 🇰🇷 [ko](../../../ko/docs/reference/API_REFERENCE.md) · 🇱🇹 [lt](../../../lt/docs/reference/API_REFERENCE.md) · 🇱🇻 [lv](../../../lv/docs/reference/API_REFERENCE.md) · 🇮🇳 [ml](../../../ml/docs/reference/API_REFERENCE.md) · 🇮🇳 [mr](../../../mr/docs/reference/API_REFERENCE.md) · 🇲🇾 [ms](../../../ms/docs/reference/API_REFERENCE.md) · 🇲🇹 [mt](../../../mt/docs/reference/API_REFERENCE.md) · 🇲🇲 [my](../../../my/docs/reference/API_REFERENCE.md) · 🇳🇵 [ne](../../../ne/docs/reference/API_REFERENCE.md) · 🇳🇱 [nl](../../../nl/docs/reference/API_REFERENCE.md) · 🇳🇴 [no](../../../no/docs/reference/API_REFERENCE.md) · 🇮🇳 [or](../../../or/docs/reference/API_REFERENCE.md) · 🇮🇳 [pa](../../../pa/docs/reference/API_REFERENCE.md) · 🇵🇭 [phi](../../../phi/docs/reference/API_REFERENCE.md) · 🇵🇱 [pl](../../../pl/docs/reference/API_REFERENCE.md) · 🇵🇹 [pt](../../../pt/docs/reference/API_REFERENCE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/reference/API_REFERENCE.md) · 🇷🇴 [ro](../../../ro/docs/reference/API_REFERENCE.md) · 🇷🇺 [ru](../../../ru/docs/reference/API_REFERENCE.md) · 🇸🇰 [sk](../../../sk/docs/reference/API_REFERENCE.md) · 🇸🇮 [sl](../../../sl/docs/reference/API_REFERENCE.md) · 🇷🇸 [sr](../../../sr/docs/reference/API_REFERENCE.md) · 🇸🇪 [sv](../../../sv/docs/reference/API_REFERENCE.md) · 🇰🇪 [sw](../../../sw/docs/reference/API_REFERENCE.md) · 🇮🇳 [ta](../../../ta/docs/reference/API_REFERENCE.md) · 🇮🇳 [te](../../../te/docs/reference/API_REFERENCE.md) · 🇹🇭 [th](../../../th/docs/reference/API_REFERENCE.md) · 🇹🇷 [tr](../../../tr/docs/reference/API_REFERENCE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/reference/API_REFERENCE.md) · 🇵🇰 [ur](../../../ur/docs/reference/API_REFERENCE.md) · 🇺🇿 [uz](../../../uz/docs/reference/API_REFERENCE.md) · 🇻🇳 [vi](../../../vi/docs/reference/API_REFERENCE.md) · 🇳🇬 [yo](../../../yo/docs/reference/API_REFERENCE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/reference/API_REFERENCE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/reference/API_REFERENCE.md)
+🌐 **භාෂා:** 🇺🇸 [ඉංග්රීසි](./API_REFERENCE.md) | 🇪🇹 [አማርኛ](../i18n/am/docs/reference/API_REFERENCE.md) | 🇸🇦 [العربية](../i18n/ar/docs/reference/API_REFERENCE.md) | 🇦🇿 [Azərbaycan dili](../i18n/az/docs/reference/API_REFERENCE.md) | 🇧🇬 [Български](../i18n/bg/docs/reference/API_REFERENCE.md) | 🇧🇩 [বাংলা](../i18n/bn/docs/reference/API_REFERENCE.md) | 🇧🇦 [Bosanski](../i18n/bs/docs/reference/API_REFERENCE.md) | 🇨🇿 [Čeština](../i18n/cs/docs/reference/API_REFERENCE.md) | 🇩🇰 [Dansk](../i18n/da/docs/reference/API_REFERENCE.md) | 🇩🇪 [Deutsch](../i18n/de/docs/reference/API_REFERENCE.md) | 🇬🇷 [Ελληνικά](../i18n/el/docs/reference/API_REFERENCE.md) | 🇪🇸 [Español](../i18n/es/docs/reference/API_REFERENCE.md) | 🇪🇪 [Eesti](../i18n/et/docs/reference/API_REFERENCE.md) | 🇮🇷 [فارسی](../i18n/fa/docs/reference/API_REFERENCE.md) | 🇫🇮 [Suomi](../i18n/fi/docs/reference/API_REFERENCE.md) | 🇫🇷 [Français](../i18n/fr/docs/reference/API_REFERENCE.md) | 🇮🇪 [Gaeilge](../i18n/ga/docs/reference/API_REFERENCE.md) | 🇮🇳 [ગુજરાતી](../i18n/gu/docs/reference/API_REFERENCE.md) | 🇳🇬 [Hausa](../i18n/ha/docs/reference/API_REFERENCE.md) | 🇮🇱 [עברית](../i18n/he/docs/reference/API_REFERENCE.md) | 🇮🇳 [हिन्दी](../i18n/hi/docs/reference/API_REFERENCE.md) | 🇭🇷 [Hrvatski](../i18n/hr/docs/reference/API_REFERENCE.md) | 🇭🇺 [Magyar](../i18n/hu/docs/reference/API_REFERENCE.md) | 🇦🇲 [Հայերեն](../i18n/hy/docs/reference/API_REFERENCE.md) | 🇮🇩 [Bahasa Indonesia](../i18n/id/docs/reference/API_REFERENCE.md) | 🇳🇬 [Igbo](../i18n/ig/docs/reference/API_REFERENCE.md) | 🇮🇹 [Italiano](../i18n/it/docs/reference/API_REFERENCE.md) | 🇯🇵 [日本語](../i18n/ja/docs/reference/API_REFERENCE.md) | 🇬🇪 [ქართული](../i18n/ka/docs/reference/API_REFERENCE.md) | 🇰🇭 [ខ្មែរ](../i18n/km/docs/reference/API_REFERENCE.md) | 🇮🇳 [ಕನ್ನಡ](../i18n/kn/docs/reference/API_REFERENCE.md) | 🇰🇷 [한국어](../i18n/ko/docs/reference/API_REFERENCE.md) | 🇱🇹 [Lietuvių](../i18n/lt/docs/reference/API_REFERENCE.md) | 🇱🇻 [Latviešu](../i18n/lv/docs/reference/API_REFERENCE.md) | 🇮🇳 [മലയാളം](../i18n/ml/docs/reference/API_REFERENCE.md) | 🇮🇳 [मराठी](../i18n/mr/docs/reference/API_REFERENCE.md) | 🇲🇾 [Bahasa Melayu](../i18n/ms/docs/reference/API_REFERENCE.md) | 🇲🇹 [Malti](../i18n/mt/docs/reference/API_REFERENCE.md) | 🇲🇲 [မြန်မာ](../i18n/my/docs/reference/API_REFERENCE.md) | 🇳🇵 [नेपाली](../i18n/ne/docs/reference/API_REFERENCE.md) | 🇳🇱 [Nederlands](../i18n/nl/docs/reference/API_REFERENCE.md) | 🇳🇴 [Norsk](../i18n/no/docs/reference/API_REFERENCE.md) | 🇮🇳 [ଓଡ଼ିଆ](../i18n/or/docs/reference/API_REFERENCE.md) | 🇮🇳 [ਪੰਜਾਬੀ](../i18n/pa/docs/reference/API_REFERENCE.md) | 🇵🇭 [Filipino](../i18n/phi/docs/reference/API_REFERENCE.md) | 🇵🇱 [Polski](../i18n/pl/docs/reference/API_REFERENCE.md) | 🇵🇹 [Português (Portugal)](../i18n/pt/docs/reference/API_REFERENCE.md) | 🇧🇷 [Português (Brasil)](../i18n/pt-BR/docs/reference/API_REFERENCE.md) | 🇷🇴 [Română](../i18n/ro/docs/reference/API_REFERENCE.md) | 🇷🇺 [Русский](../i18n/ru/docs/reference/API_REFERENCE.md) | 🇱🇰 [සිංහල](../i18n/si/docs/reference/API_REFERENCE.md) | 🇸🇰 [Slovenčina](../i18n/sk/docs/reference/API_REFERENCE.md) | 🇸🇮 [Slovenščina](../i18n/sl/docs/reference/API_REFERENCE.md) | 🇷🇸 [Српски](../i18n/sr/docs/reference/API_REFERENCE.md) | 🇸🇪 [Svenska](../i18n/sv/docs/reference/API_REFERENCE.md) | 🇰🇪 [Kiswahili](../i18n/sw/docs/reference/API_REFERENCE.md) | 🇮🇳 [தமிழ்](../i18n/ta/docs/reference/API_REFERENCE.md) | 🇮🇳 [తెలుగు](../i18n/te/docs/reference/API_REFERENCE.md) | 🇹🇭 [ไทย](../i18n/th/docs/reference/API_REFERENCE.md) | 🇹🇷 [Türkçe](../i18n/tr/docs/reference/API_REFERENCE.md) | 🇺🇦 [Українська](../i18n/uk-UA/docs/reference/API_REFERENCE.md) | 🇵🇰 [اردو](../i18n/ur/docs/reference/API_REFERENCE.md) | 🇺🇿 [Oʻzbekcha](../i18n/uz/docs/reference/API_REFERENCE.md) | 🇻🇳 [Tiếng Việt](../i18n/vi/docs/reference/API_REFERENCE.md) | 🇳🇬 [Yorùbá](../i18n/yo/docs/reference/API_REFERENCE.md) | 🇨🇳 [中文 (简体)](../i18n/zh-CN/docs/reference/API_REFERENCE.md) | 🇹🇼 [中文 (繁體)](../i18n/zh-TW/docs/reference/API_REFERENCE.md)
 
-OmniRoute API සඳහා මූලික යොමුව. මෙය පොදු `/v1` පෘෂ්ඨය සහ වැඩිපුරම භාවිත වන කළමනාකරණ අන්ත ලක්ෂ්ය ආවරණය කරයි; යන්ත්රයෙන් කියවිය හැකි [`docs/openapi.yaml`](../openapi.yaml) සහ `src/app/api/` යටතේ ඇති මාර්ග වෘක්ෂය සම්පූර්ණ මූලාශ්ර වේ.
+OmniRoute API සඳහා මූලික යොමුව. මෙය පොදු `/v1` අතුරුමුහුණත සහ වැඩිපුරම භාවිත වන කළමනාකරණ අන්ත ලක්ෂ්ය ආවරණය කරයි; යන්ත්රයෙන් කියවිය හැකි [`docs/openapi.yaml`](../openapi.yaml) සහ `src/app/api/` යටතේ ඇති මාර්ග වෘක්ෂය පරිපූර්ණ මූලාශ්ර වේ.
+
+විශේෂයෙන් අවධානය යොමු කළ OpenAI-අනුකූල ප්රොටෝකෝලය සහ සැපයුම්කරු හැකියා අනුකෘතිය සඳහා,
+[`OPENAI_COMPATIBILITY.md`](./OPENAI_COMPATIBILITY.md) බලන්න.
 
 ---
 
@@ -61,30 +64,78 @@ Content-Type: application/json
 
 ### අභිරුචි ශීර්ෂක
 
-| ශීර්ෂකය                  | දිශාව     | විස්තරය                                                                                                                                                                                                  |
-| ------------------------ | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `X-OmniRoute-No-Cache`   | ඉල්ලීම    | හැඹිලිය මඟහැරීමට `true` ලෙස සකසන්න                                                                                                                                                                       |
-| `x-omniroute-no-memory`  | ඉල්ලීම    | මෙම ඉල්ලීම සඳහා මතකය + කුසලතා ඇතුළත් කිරීම මඟහැරීමට `true` ලෙස සකසන්න (හැඹිලි-රහිත ක්රියාකාරීත්වයට සමාන වේ; එක් ඇමතුමකට ඇති ටෝකන/පිරිවැය අතිරේකය වළක්වයි)                                                |
-| `X-OmniRoute-Progress`   | ඉල්ලීම    | ප්රගති සිදුවීම් සඳහා `true` ලෙස සකසන්න                                                                                                                                                                   |
-| `X-Session-Id`           | ඉල්ලීම    | බාහිර සැසි අනුබද්ධතාව සඳහා ස්ථාවර සැසි යතුර                                                                                                                                                              |
-| `x_session_id`           | ඉල්ලීම    | යටි ඉරි සහිත ප්රභේදය ද පිළිගනු ලැබේ (සෘජු HTTP)                                                                                                                                                          |
-| `X-OmniRoute-Session-Id` | ඉල්ලීම    | ඇමතුම්කරු සපයන සැසි/සංවාද ටැගය (මතකයට ද දත්ත සපයයි). පවතින විට, එක් සැසියකට පිරිවැය ආරෝපණය කිරීම සඳහා `call_logs.session_tag` වෙත එලෙසම සුරකියි (#8249) — නොමැති විට කිසි විටෙක සංස්ලේෂණය නොකෙරේ         |
-| `Idempotency-Key`        | ඉල්ලීම    | අනුපිටපත් ඉවත් කිරීමේ යතුර (තත්පර 5ක කවුළුව)                                                                                                                                                             |
-| `X-Request-Id`           | ඉල්ලීම    | විකල්ප අනුපිටපත් ඉවත් කිරීමේ යතුර                                                                                                                                                                        |
-| `X-OmniRoute-Cache`      | ප්රතිචාරය | `HIT` හෝ `MISS` (ප්රවාහනය නොවන)                                                                                                                                                                          |
-| `X-OmniRoute-Idempotent` | ප්රතිචාරය | අනුපිටපත් ඉවත් කර ඇත්නම් `true`                                                                                                                                                                          |
-| `X-OmniRoute-Progress`   | ප්රතිචාරය | ප්රගති ලුහුබැඳීම ක්රියාත්මක නම් `enabled`                                                                                                                                                                |
-| `X-OmniRoute-Session-Id` | ප්රතිචාරය | OmniRoute භාවිත කළ ක්රියාත්මක සැසි ID                                                                                                                                                                    |
-| `X-OmniRoute-Request-Id` | ප්රතිචාරය | ඉල්ලීම් සහසම්බන්ධතා id (දන්නා විට)                                                                                                                                                                       |
-| `X-OmniRoute-Version`    | ප්රතිචාරය | OmniRoute ගොඩනැගීමේ අනුවාදය (සැමවිටම පවතී)                                                                                                                                                               |
-| `X-OmniRoute-Cost-Saved` | ප්රතිචාරය | HIT එකකදී හැඹිලිය නිසා වැළකුණු USD පිරිවැය (හැඹිලි හමු සඳහා පමණි)                                                                                                                                        |
-| `X-OmniRoute-Decision`   | ප්රතිචාරය | මාර්ගගත කිරීමේ අනුරේඛනය: `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` යනු සංයෝජන උපායමාර්ගයයි, නැතහොත් සංයෝජන නොවන ඉල්ලීමක් සඳහා `single` වේ) — සම්පූර්ණ කිරීමේ ප්රතිචාරවල සැමවිටම පවතී |
+| ශීර්ෂකය                  | දිශාව     | විස්තරය                                                                                                                                                                                                    |
+| ------------------------ | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `X-OmniRoute-No-Cache`   | ඉල්ලීම    | හැඹිලිය මඟහැරීමට `true` ලෙස සකසන්න                                                                                                                                                                         |
+| `x-omniroute-no-memory`  | ඉල්ලීම    | මෙම ඉල්ලීම සඳහා මතකය + කුසලතා ඇතුළත් කිරීම මඟහැරීමට `true` ලෙස සකසන්න (හැඹිලිය නොමැති හැසිරීම පිළිබිඹු කරයි; එක් ඇමතුමකට ඇති ටෝකන්/පිරිවැය අතිරේකය වළක්වයි)                                                |
+| `X-OmniRoute-Progress`   | ඉල්ලීම    | ප්රගති සිදුවීම් සඳහා `true` ලෙස සකසන්න                                                                                                                                                                     |
+| `X-Session-Id`           | ඉල්ලීම    | බාහිර සැසි සම්බන්ධතාව සඳහා ස්ථිර සැසි යතුර                                                                                                                                                                 |
+| `x_session_id`           | ඉල්ලීම    | යටි ඉරි සහිත ප්රභේදයද පිළිගනු ලැබේ (සෘජු HTTP)                                                                                                                                                             |
+| `X-OmniRoute-Session-Id` | ඉල්ලීම    | ඇමතුම්කරු විසින් සපයන සැසි/සංවාද ටැගය (මතකයටද ලබා දෙයි). පවතින විට, එක් සැසියකට පිරිවැය ආරෝපණය කිරීම සඳහා `call_logs.session_tag` වෙත එලෙසම සුරකියි (#8249) — නොමැති විට කිසිවිටෙක සංස්ලේෂණය නොකරයි        |
+| `Idempotency-Key`        | ඉල්ලීම    | අනුපිටපත් ඉවත් කිරීමේ යතුර (තත්පර 5ක කාල කවුළුව)                                                                                                                                                           |
+| `X-Request-Id`           | ඉල්ලීම    | විකල්ප අනුපිටපත් ඉවත් කිරීමේ යතුර                                                                                                                                                                          |
+| `x-omniroute-connection` | ඉල්ලීම    | තනි-මාදිලි ඉල්ලීමක් එහි id මඟින් එක් සපයන්නකුගේ සම්බන්ධතාවකට (ගිණුමකට) ස්ථිර කරන්න — [එක් ඉල්ලීමකට ගිණුම් ස්ථිර කිරීම](#account-pinning-per-request) බලන්න                                                 |
+| `X-OmniRoute-Cache`      | ප්රතිචාරය | `HIT` හෝ `MISS` (ප්රවාහනය නොවන)                                                                                                                                                                            |
+| `X-OmniRoute-Idempotent` | ප්රතිචාරය | අනුපිටපත් ඉවත් කළේ නම් `true`                                                                                                                                                                              |
+| `X-OmniRoute-Progress`   | ප්රතිචාරය | ප්රගති හඹායෑම සක්රිය නම් `enabled`                                                                                                                                                                         |
+| `X-OmniRoute-Session-Id` | ප්රතිචාරය | OmniRoute විසින් භාවිත කරන ලද ක්රියාත්මක සැසි ID                                                                                                                                                           |
+| `X-OmniRoute-Request-Id` | ප්රතිචාරය | ඉල්ලීම් සහසම්බන්ධතා id (දන්නා විට)                                                                                                                                                                         |
+| `X-OmniRoute-Version`    | ප්රතිචාරය | OmniRoute ගොඩනැගීමේ අනුවාදය (සැමවිටම පවතී)                                                                                                                                                                 |
+| `X-OmniRoute-Cost-Saved` | ප්රතිචාරය | HIT එකකදී හැඹිලිය මඟින් වළක්වාගත් USD මුදල (හැඹිලි පහරවල් සඳහා පමණි)                                                                                                                                       |
+| `X-OmniRoute-Decision`   | ප්රතිචාරය | මාර්ගගත කිරීමේ අනුරේඛනය: `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` යනු සංයුක්ත උපායමාර්ගයයි, නැතහොත් සංයුක්ත නොවන ඉල්ලීමක් සඳහා `single` වේ) — සම්පූර්ණ කිරීමේ ප්රතිචාරවල සැමවිටම පවතී |
 
-> Nginx සටහන: ඔබ යටි ඉරි සහිත ශීර්ෂක මත රඳා පවතින්නේ නම් (උදාහරණයක් ලෙස `x_session_id`), `underscores_in_headers on;` සක්රීය කරන්න.
+> Nginx සටහන: ඔබ යටි ඉරි සහිත ශීර්ෂක මත රඳා පවතින්නේ නම් (උදාහරණයක් ලෙස `x_session_id`), `underscores_in_headers on;` සක්රිය කරන්න.
 
-> **පිරිවැය ටෙලිමෙට්රි ශීර්ෂ:** ප්රවාහනය නොවන සාර්ථක ප්රතිචාරවල `X-OmniRoute-*` පිරිවැය-ටෙලිමෙට්රි කට්ටලයද ඇතුළත් වේ — `X-OmniRoute-Response-Cost` (USD, ස්ථාවර දශම ස්ථාන 10ක්; නොමිලේ/මිල නියම කර නොමැති අවස්ථා සඳහා `0.0000000000`), `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`, `X-OmniRoute-Model`, `X-OmniRoute-Provider`, `X-OmniRoute-Latency-Ms`, `X-OmniRoute-Cache-Hit`, සහ `X-OmniRoute-Fallback-Attempts` (> 0 විට පමණක්), එමෙන්ම `X-OmniRoute-Request-Id` සහ `X-OmniRoute-Version`. මේවා chat completions, `/v1/responses`, `/v1/messages`, **සහ මාධ්ය අන්ත ලක්ෂ්ය** — `/v1/embeddings`, `/v1/images/generations`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/rerank`, `/v1/videos/generations`, `/v1/music/generations`, සහ `/v1/moderations` (සැමවිටම පිරිවැය `0`) — මඟින් නිකුත් කෙරේ. මිලකරණය තිබෙන විට මාධ්ය පිරිවැය මාදිලිය අනුව (රූපයකට, තත්පරයකට, අක්ෂරයකට, සෙවුම් ඒකකයකට) ගණනය කෙරෙන අතර, එසේ නොමැති නම් `0` වේ (fail-open).
+#### එක් ඉල්ලීමකට ගිණුම් ස්ථිර කිරීම
 
-> **හැඹිලි-ගැළපුම් පිරිවැය අර්ථ විග්රහය:** semantic-cache HIT එකකදී (`X-OmniRoute-Cache-Hit: true`) upstream ඇමතුමක් සිදු නොවන බැවින්, `X-OmniRoute-Response-Cost` අගය `0.0000000000` වේ (එම ගැළපුම සපයන **වර්ධක** පිරිවැය). මුල්/එසේ නොවුණේ නම් දැරීමට තිබූ පිරිවැය `X-OmniRoute-Cost-Saved` තුළ වෙනම වාර්තා කෙරේ. බිල්කරණ පාරිභෝගිකයන් `X-OmniRoute-Response-Cost` එකතු කළ යුතුය (ගැළපුම් සඳහා කිසිදු පිරිවැයක් නැත); හැඹිලි විශ්ලේෂණ සඳහා `X-OmniRoute-Cost-Saved` සමස්ත කළ හැක.
+සපයන්නකුට සම්බන්ධතා කිහිපයක් (ගිණුම් හෝ යතුරු) ඇති විට, OmniRoute සාමාන්යයෙන් එකක් තෝරාගන්නේ
+එහි ගිණුම්-තේරීමේ උපායමාර්ගය හරහාය. ඒ වෙනුවට, ඉල්ලීමකට `x-omniroute-connection`
+ශීර්ෂකය සමඟ නිශ්චිත සම්බන්ධතාවක් ස්ථිර කළ හැකිය:
+
+```bash
+curl http://localhost:20128/v1/chat/completions \
+  -H "Authorization: Bearer <your OmniRoute API key>" \
+  -H "Content-Type: application/json" \
+  -H "x-omniroute-connection: <connection id>" \
+  -d '{"model": "codex/gpt-5.5", "messages": [{"role": "user", "content": "hi"}]}'
+```
+
+- **id එක සොයාගත හැකි ස්ථානය.** dashboard එකේ provider පිටුව විවෘත කරන්න
+  (**Dashboard → Providers → <provider>**) සහ connection පේළියක ඇති `xxxxxxxx…` id chip එක ක්ලික්
+  කරන්න — එය සම්පූර්ණ connection id එක පිටපත් කරයි.
+- **එය පිළිපදින requests.** `/v1/chat/completions`, `/v1/messages` සහ
+  `/v1/responses` මත single-model requests (`provider/model`). Combos විසින් header එක නොසලකා හරිනු ලැබේ: ඒ වෙනුවට
+  එක් එක් combo step එක සඳහා account එකක් එම step එකේම connection එක හරහා pin කරන්න.
+- **Pin කිරීම දැඩි නියමයකි, මනාපයක් නොවේ.** Pin කළ connection එක පමණක් භාවිත වේ. Request එක
+  තුළ සිදුවන failure එකක් account එකේ cooldown එක සටහන් කරන නමුත්, එය එකම providerගේ
+  වෙනත් account එකකට **මාරු නොවේ**.
+- **Cooldown සහ quota මඟින් pin එක නිදහස් වේ.** Pin කළ connection එක cooldown තත්ත්වයේ පවතින විට,
+  quota අවසන් වී ඇති විට හෝ quota policy එකකින් අවහිර වී ඇති විට, පසුව එන requests providerගේ
+  අනෙකුත් connections වෙත fallback වේ; එය pin නොකළ traffic සඳහා සිදුවන ආකාරයටම වේ.
+- **නොදන්නා හෝ අක්රිය කළ ids අසාර්ථක වේ.** Providerගේ active pool එකේ නොමැති id එකක් (මකා දැමූ,
+  අක්රිය කළ, හෝ වෙනත් provider කෙනෙකුට අයත්) නිසා භාවිතයට සුදුසු account එකක් ඉතිරි නොවන බැවින්, request එක
+  නිහඬව වෙනත් තැනකට route වීම වෙනුවට අසාර්ථක වේ.
+
+Claude Code විසින් custom headers `ANTHROPIC_CUSTOM_HEADERS` හරහා යවයි. එය
+`~/.claude/settings.json` හි `env` block එක තුළ, හෝ එක් එක් project එක සඳහා වෙනස්
+account එකක් pin කිරීමට project-level `.claude/settings.json` එකක තබන්න:
+
+```jsonc
+{
+  "env": {
+    "ANTHROPIC_BASE_URL": "http://<your OmniRoute>:20128",
+    "ANTHROPIC_AUTH_TOKEN": "<your OmniRoute API key>",
+    "ANTHROPIC_CUSTOM_HEADERS": "x-omniroute-connection: <connection id>",
+  },
+}
+```
+
+මූලාශ්රය: `src/sse/handlers/chat.ts` (header කියවීම), `src/sse/services/auth.ts` සහ
+`src/sse/services/sessionAffinityPin.ts` (pin නිදහස් කිරීම සහ pool එකේ නොමැති බව පරීක්ෂා කිරීම).
+
+> **Cost telemetry headers:** non-streaming සාර්ථක responses වල `X-OmniRoute-*` cost-telemetry කට්ටලයද අඩංගු වේ — `X-OmniRoute-Response-Cost` (USD, දශමස්ථාන 10කට ස්ථාවරයි; නොමිලේ/මිල නියම කර නොමැති ඒවා සඳහා `0.0000000000`), `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`, `X-OmniRoute-Model`, `X-OmniRoute-Provider`, `X-OmniRoute-Latency-Ms`, `X-OmniRoute-Cache-Hit`, සහ `X-OmniRoute-Fallback-Attempts` (> 0 වූ විට පමණි), ඊට අමතරව `X-OmniRoute-Request-Id` සහ `X-OmniRoute-Version`. මේවා chat completions, `/v1/responses`, `/v1/messages`, **සහ media endpoints** මඟින් නිකුත් කෙරේ — `/v1/embeddings`, `/v1/images/generations`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/rerank`, `/v1/videos/generations`, `/v1/music/generations`, සහ `/v1/moderations` (සැමවිටම cost එක `0`). Pricing ලබාගත හැකි විට media cost එක modality එකකට අදාළව (image එකකට, තත්පරයකට, අක්ෂරයකට, search-unit එකකට) ගණනය කෙරෙන අතර, එසේ නොමැති නම් `0` වේ (fail-open).
+
+> **Cache-hit cost semantics:** semantic-cache HIT එකකදී (`X-OmniRoute-Cache-Hit: true`) upstream call එකක් සිදු නොවන බැවින්, `X-OmniRoute-Response-Cost` යනු `0.0000000000` වේ (hit එක ලබාදීමේ **incremental** cost එක). මුල්/සිදු වීමට තිබූ cost එක `X-OmniRoute-Cost-Saved` තුළ වෙනම වාර්තා කෙරේ. Billing consumers විසින් `X-OmniRoute-Response-Cost` එකතුව ගණනය කළ යුතුය (hits සඳහා වියදමක් නැත); cache analytics වලට `X-OmniRoute-Cost-Saved` එකතු කළ හැක.
 
 ## සුවිශේෂී කළමනාකරණය කළ සැසි බදු
 
@@ -202,18 +253,18 @@ Content-Type: application/json
 }
 ```
 
-ලබාගත හැකි සැපයුම්කරුවන්: Nebius, OpenAI, Mistral, Together AI, Fireworks, NVIDIA, **OpenRouter**, Jina AI.
+ලබා ගත හැකි සැපයුම්කරුවන්: Nebius, OpenAI, Mistral, Together AI, Fireworks, NVIDIA, **OpenRouter**, Jina AI.
 
-නාමාවලි හැඳුනුම් `provider/model` ආකාරයෙන් පවතී (උදාහරණය: `jina-ai/jina-embeddings-v5-omni-small`). රෙජිස්ට්රියේ පෙනෙන සැපයුම්කරු රහිත Jina ආකෘති හැඳුනුම් ද (උදාහරණයක් ලෙස `jina-embeddings-v5-text-small`, `jina-reranker-v3.5`) නිරාකරණය වේ. Jina embed/rerank/classify/segment පළමුව dashboard `jina-ai` අක්තපත්ර භාවිත කරයි; dashboard යතුරක් නොමැති විට පමණක් `JINA_AI_API_KEY` විකල්පයක් ලෙස භාවිත වේ. `jina-reader` කාඩ්පත Reader / `r.jina.ai` සඳහා පමණි (`POST /v1/web/fetch`) සහ කිසිවිටෙක embeddings හෝ rerank සපයන්නේ නැත.
+නාමාවලි හැඳුනුම් `provider/model` ආකෘතියෙන් ඇත (උදාහරණය: `jina-ai/jina-embeddings-v5-omni-small`). රෙජිස්ට්රියේ දිස්වන සැපයුම්කරු නාමය නොමැති Jina ආකෘති හැඳුනුම්ද (උදාහරණයක් ලෙස `jina-embeddings-v5-text-small`, `jina-reranker-v3.5`) විසඳනු ලැබේ. Jina embed/rerank/classify/segment සඳහා පළමුව උපකරණ පුවරුවේ `jina-ai` අක්තපත්ර භාවිත වේ; උපකරණ පුවරු යතුරක් නොමැති විට පමණක් `JINA_AI_API_KEY` විකල්පයක් ලෙස භාවිත වේ. `jina-reader` කාඩ්පත Reader / `r.jina.ai` සඳහා පමණක් (`POST /v1/web/fetch`) වන අතර කිසිවිටෙක embeddings හෝ rerank සපයන්නේ නැත.
 
-බහුමාධ්ය සහාය ඇති බව දක්වන රෙජිස්ට්රි ආකෘති, සැපයුම්කරු-ස්වාධීන ව්යුහගත
-අයිතම 32ක් දක්වා ද පිළිගනී. මාධ්ය අයිතම වර්ග වන්නේ `text`, `image`, `audio`, `video`, සහ `document` ය. ඒවායේ මාධ්ය `source`
+බහුමාධ්ය සහාය දක්වන රෙජිස්ට්රි ආකෘති, සැපයුම්කරු-ස්වාධීන ව්යුහගත අයිතම 32ක් දක්වාද පිළිගනී.
+මාධ්ය අයිතම වර්ග වන්නේ `text`, `image`, `audio`, `video`, සහ `document` ය. ඒවායේ මාධ්ය `source`
 එක `{"type":"url","url":"https://..."}` හෝ
 `{"type":"base64","data":"...","media_type":"..."}` වේ.
 
 Jina v5 Omni (`jina-ai/jina-embeddings-v5-omni-small`, `jina-ai/jina-embeddings-v5-omni-nano`,
 සහ පවුල් අන්වර්ථ නාමය `jina-ai/jina-embeddings-v5-omni` → omni-small) Jina හි ස්වදේශීය
-EmbeddingsV5Request ලේඛන ද පිළිගෙන, ඒවා **වෙනස් නොකරම** `https://api.jina.ai/v1/embeddings` වෙත යොමු කරයි:
+EmbeddingsV5Request ලේඛනද පිළිගෙන ඒවා `https://api.jina.ai/v1/embeddings` වෙත **වෙනස් නොකර යොමු කරයි**:
 
 ```json
 {
@@ -231,26 +282,32 @@ EmbeddingsV5Request ලේඛන ද පිළිගෙන, ඒවා **වෙ�
 ```
 
 ස්වදේශීය `{ image | audio | video | pdf }` අගයන් පොදු HTTPS URL එකක්, `data:` URI එකක්, හෝ අමු
-base64 විය හැක. OmniRoute එම වස්තු පෙළ බවට පරිවර්තනය කරන්නේවත් ස්වදේශීය රූප URL ලබාගන්නේවත් නැත — Jina විසින්ම
+base64 දත්ත විය හැක. OmniRoute එම වස්තු තන්තු බවට පත් කරන්නේවත් ස්වදේශීය රූප URL ලබාගන්නේවත් නැත — Jina විසින්
 පොදු මාධ්ය ලබාගනී. අමතර Jina ක්ෂේත්ර (`task`, `normalized`, `truncate`, `embedding_type`)
-යොමු කරනු ලැබේ. පෙළ-පමණක් සහිත Jina SKU තවමත් පෙළ නොවන ලේඛන ප්රතික්ෂේප කරයි.
+යොමු කරනු ලැබේ. පෙළ-පමණක් වන Jina SKU තවමත් පෙළ නොවන ලේඛන ප්රතික්ෂේප කරයි.
 
 ආරක්ෂක සහ ප්රවාහන සීමා:
 
 - දුරස්ථ මාධ්ය URL පොදු HTTPS විය යුතුය. සම්මත `{type,source:url}` අයිතම
-  සේවාදායක පාර්ශ්වයෙන් ලබාගෙන (යළි-යොමු නැවත වලංගු කිරීම, කාලසීමාව, ප්රමාණ සීමා, පොදු DNS, සම්බන්ධතා ඇණගැසීම)
-  සැපයුම්කරු ඇමතුමට පෙර පේළිගත කරනු ලැබේ. Jina-ස්වදේශීය `{image:"https://..."}` අයිතම
-  එම පොදු-HTTPS පරීක්ෂාවෙන් පසු ඒ ආකාරයෙන්ම යොමු කරනු ලැබේ; Jina විසින් URL එක ලබාගනී.
-- පේළිගත base64 මාධ්ය, එක් අයිතමයකට විකේතනය කළ 8 MiBකට සහ ඉල්ලීම පුරා විකේතනය කළ 16 MiBකට සීමා වේ.
+  සේවාදායක පාර්ශ්වයෙන් ලබාගෙන (යළි-යොමු නැවත වලංගු කිරීම, කාලසීමාව, ප්රමාණ සීමා, පොදු DNS, සම්බන්ධතා ස්ථාපනය)
+  සැපයුම්කරු ඇමතීමට පෙර පේළිගත කරනු ලැබේ. Jina-ස්වදේශීය `{image:"https://..."}` අයිතම
+  එම පොදු-HTTPS පරීක්ෂාවෙන් පසු එලෙසම යොමු කරනු ලැබේ; Jina විසින් URL එක ලබාගනී.
+- පේළිගත base64 මාධ්ය එක් අයිතමයකට විකේතනය කළ 8 MiB දක්වාත්, ඉල්ලීම පුරා විකේතනය කළ 16 MiB දක්වාත් සීමා වේ.
 
 සැපයුම්කරු පරිවර්තනය (සම්මත අයිතම කිසිවිටෙක වෙනස් නොකර යොමු නොකෙරේ):
 
-- Jina බහුමාධ්ය ආකෘති: සෑම ඉහළ-මට්ටමේ අයිතමයක්ම, පේළිගත මාධ්ය සඳහා data URI භාවිත කරමින්, එක් මාධ්ය-යතුරුගත වස්තුවක්
-  (`text` / `image` / `audio` / `video` / `pdf`) බවට පත්වේ; එක් ඉහළ-මට්ටමේ
-  අයිතමයකට එක් දෛශිකයකි.
+- Jina බහුමාධ්ය ආකෘති: සෑම ඉහළ-මට්ටමේ අයිතමයක්ම එක් මාධ්ය-යතුරුගත වස්තුවක් බවට පත්වේ
+  (`text` / `image` / `audio` / `video` / `pdf`), පේළිගත මාධ්ය සඳහා data URI භාවිත කරමින්; එක්
+  ඉහළ-මට්ටමේ අයිතමයකට එක් දෛශිකයක්.
 - Gemini Embedding 2 පවුල: එක් ඉහළ-මට්ටමේ අරාවක්, `content.parts` (`text` හෝ `inline_data`) සහිත තනි ස්වදේශීය
   `models/{model}:embedContent` ඉල්ලීමක් බවට පත්වේ.
-- පැහැදිලි මාධ්ය-ආකාර පාරදත්ත නොමැති නොදන්නා/ගතික ආකෘති, HTTP 400 සමඟ ව්යුහගත ආදානය ප්රතික්ෂේප කරයි.
+- llama.cpp (`llama-cpp/<model>`, දේශීය සේවාදායකය පූරණය කළ ඕනෑම ආකෘතියක්): සම්මත `text` අයිතම
+  සරල තන්තු බවටත්, `image` / `audio` / `video` එක් එක් අයිතමය තනි
+  `{"content": [part]}` වස්තුවක් බවටත් පත්වේ. මෙහිදී පේළිගත දත්ත සහිත llama-server හි කතාබස් අන්තර්ගත කොටස් (`image_url`,
+  `input_audio`, `wav` / `mp3` / `flac` ආකෘතිය සමඟ, `input_video`) භාවිත වේ; එක්
+  ඉහළ-මට්ටමේ අයිතමයකට එක් දෛශිකයක්. සේවාදායකය `--embedding --mmproj …` සමඟ ක්රියාත්මක විය යුතුය; ප්රක්ෂේපකයක් නොමැතිව එය
+  මාධ්ය ස්වයංක්රීයව ප්රතික්ෂේප කරයි. `document` සඳහා සහාය නොමැත.
+- පැහැදිලි මාධ්ය-වර්ග පාරදත්ත නොමැති නොදන්නා/ගතික ආකෘති, HTTP 400 සමඟ ව්යුහගත ආදානය ප්රතික්ෂේප කරයි.
 
 ```json
 {
@@ -267,11 +324,11 @@ base64 විය හැක. OmniRoute එම වස්තු පෙළ බවට
 }
 ```
 
-සහාය නොදක්වන ආකෘති/මාධ්ය-ආකාර සංයෝජන, අයිතමය බලහත්කාරයෙන් පරිවර්තනය කිරීම වෙනුවට HTTP 400 ආපසු ලබා දෙයි. පැරණි පෙළ/ටෝකන ඉල්ලීම්වල ආදානය නොවන
-විස්තාරණ ක්ෂේත්ර, වෙනස් නොවී දිගටම යොමු වේ.
+සහාය නොදක්වන ආකෘති/මාධ්ය-වර්ග සංයෝජන, අයිතමය බලහත්කාරයෙන් පරිවර්තනය කිරීම වෙනුවට HTTP 400 ආපසු ලබා දෙයි. පැරණි තන්තු/token ඉල්ලීම්වල ආදාන නොවන
+ව්යාප්ති ක්ෂේත්ර වෙනස් නොවී ඉදිරියට යැවීම දිගටම සිදු වේ.
 
 ```bash
-# සියලු embedding ආකෘති ලැයිස්තුගත කරන්න
+# සියලුම embedding ආකෘති ලැයිස්තුගත කරන්න
 GET /v1/embeddings
 ```
 
@@ -286,15 +343,42 @@ Content-Type: application/json
 
 {
   "model": "openai/gpt-image-2",
-  "prompt": "A beautiful sunset over mountains",
+  "prompt": "කඳු මතින් දිස්වන සුන්දර හිරු බැස යෑමක්",
   "size": "1024x1024"
 }
 ```
 
-ලබා ගත හැකි සපයන්නන්: OpenAI (GPT Image 2), xAI (Grok Image), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana, **OpenRouter**, SD WebUI (දේශීය), ComfyUI (දේශීය).
+ලබා ගත හැකි සපයන්නන් අතර OpenAI (GPT Image 2), xAI (Grok Image), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana, **OpenRouter**, **ZenMux**, SD WebUI (දේශීය), ComfyUI (දේශීය) ඇතුළත් වේ.
+
+`n` මඟින් `data[]` තුළ රූප `n`ක් ආපසු ලබා දෙයි. එක් ඇමතුමකට එක් රූපයක් ආපසු ලබා දෙන උඩුගං API සහිත සපයන්නන්
+(Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik,
+NVIDIA NIM, Cloudflare Workers AI) සඳහා, එකවර ක්රියාත්මක වන ඇමතුම් සංඛ්යාව උපරිම 4කට සීමා කරමින්, වෙන වෙනම උඩුගං ඇමතුම් `n`ක් සිදු කෙරේ. ස්ථාවර
+`seed` අගයක් ඇමතුම් දර්ශකය අනුව (`seed`, `seed + 1`, …) වැඩි කරනු ලබන බැවින්, රූප එකිනෙකට වෙනස් වුවද
+නැවත ප්රතිනිෂ්පාදනය කළ හැකිව පවතී. `n` උපරිම 10කට සීමා කර ඇත. කිසියම් ඇමතුමක් අසාර්ථක වුවහොත් සම්පූර්ණ ඉල්ලීමම
+අසාර්ථක වේ. විහිදුම් ආකෘති ලැයිස්තුව
+`open-sse/handlers/imageGeneration/fanOut.ts` හි `SINGLE_IMAGE_FANOUT_FORMATS` වේ.
+
+ZenMux දැනට පවතින API-යතුරු සම්බන්ධතාව නැවත භාවිත කරන අතර `zenmux/` හෝ `zm/` උපසර්ග පිළිගනී:
+
+- `zenmux/openai/gpt-image-2` ZenMux හි OpenAI Images API භාවිත කරයි. විකල්ප අතර `size`,
+  `quality`, `n`, `output_format`, `output_compression`, `background`, සහ `response_format` ඇතුළත් වේ.
+- `zm/meta/muse-image-1.0` වැනි අනෙකුත් ප්රකාශකයන් ZenMux හි Vertex AI `:predict`
+  අන්ත ලක්ෂ්යය භාවිත කරයි. `n` යන්න `sampleCount` වෙතත්, `aspect_ratio` යන්න `aspectRatio` වෙතත්, `image_size`
+  (`1K`, `2K`, `4K`) යන්න `sampleImageSize` වෙතත් සිතියම්ගත වේ. පික්සල් `size` අගයකින් සපයන්නේ දර්ශන අනුපාතයක් පමණක් වන අතර,
+  පික්සල් මාන සහතික නොකෙරේ. සහාය දක්වන අනුපාත, විභේදන සහ ගණන් මාදිලිය අනුව වෙනස් වේ.
+- `zm/inclusionai/ming-image-0.1-design` තමන්ගේම මාන තෝරා ගනී. `size`,
+  `aspect_ratio`, සහ `image_size` ඉවත් කරන්න; පැහැදිලි අගයන් ලබා දීමෙන් HTTP 400 ආපසු ලැබේ. `output_format` සමඟ PNG, JPEG, සහ WebP
+  ඉල්ලා සිටිය හැක.
+
+මෙම ඒකාබද්ධ කිරීම පෙළෙන්-රූපයට උත්පාදනයට සහාය දක්වන නමුත්, යොමු-රූප සංස්කරණයට සහාය නොදක්වයි. Vertex
+ප්රතිදානය `data[].b64_json` වෙත සාමාන්යකරණය කෙරේ; `response_format: "url"` මඟින් උඩුගං
+HTTPS URL එකක් හෝ රූප බයිට් පමණක් ලබා ගත හැකි විට base64 දත්ත URL එකක් ආපසු ලබා දෙයි. හිස්/පෙරහන් කළ ප්රතිදාන
+හිස් සාර්ථක ප්රතිචාරයක් වෙනුවට දෝෂයක් ආපසු ලබා දෙයි. මාදිලි ප්රවේශය ZenMux ගිණුම මත රඳා පවතී.
+[ZenMux හි Vertex API](https://docs.zenmux.ai/api/vertexai/generate-images) සහ
+[OpenAI Images API](https://docs.zenmux.ai/api/openai/generate-an-image) බලන්න.
 
 ```bash
-# සියලුම රූප ආකෘති ලැයිස්තුගත කරන්න
+# සියලුම රූප මාදිලි ලැයිස්තුගත කරන්න
 GET /v1/images/generations
 ```
 
@@ -359,49 +443,107 @@ region මත පදනම්ව ගොඩනඟන Vertex හි සාමා�
 
 ---
 
-## මාදිලි ලැයිස්තුගත කිරීම
+## ආකෘති ලැයිස්තුගත කිරීම
 
 ```bash
 GET /v1/models
 Authorization: Bearer your-api-key
 
-→ OpenAI ආකෘතියෙන් සියලුම කතාබස්, embedding සහ රූප මාදිලි + සංයෝජන ලබා දෙයි
+→ සියලු chat, embedding සහ image ආකෘති + සංයෝජන OpenAI ආකෘතියෙන් ආපසු ලබා දෙයි
 ```
 
-### මාදිලි id උපසර්ග (`?prefix=`)
+### ආකෘති id උපසර්ග (`?prefix=`)
 
-බොහෝ මාදිලි **සපයන්නාගේ උපසර්ගයක්** යටතේ ප්රකාශයට පත් කෙරේ. ඔබට ලැබෙන උපසර්ගය
+බොහෝ ආකෘති **සපයන්නාගේ උපසර්ගයක්** යටතේ ප්රචාරණය කෙරේ. ඔබට ලැබෙන උපසර්ගය
 `MODELS_CATALOG_PREFIX_MODE` විශේෂාංග ධජය මඟින් පාලනය වන අතර, query පරාමිතියක් සමඟ
-**එක් එක් ඉල්ලීම සඳහා** එය අතික්රමණය කළ හැක — අනෙක් සියලු දෙනා සඳහා සේවාදායකය පුරා ඇති
-සැකසුම වෙනස් නොකර පිරිසිදු ලැයිස්තුවක් අවශ්ය client එකකට මෙය ප්රයෝජනවත් වේ:
+**එක් එක් ඉල්ලීම සඳහා** එය අභිබවා යා හැක — අනෙක් සියලු දෙනා සඳහා server-පුළුල් සැකසුම
+වෙනස් නොකර පිරිසිදු ලැයිස්තුවක් අවශ්ය client එකකට මෙය ප්රයෝජනවත් වේ:
 
 ```bash
-GET /v1/models?prefix=alias        # එක් මාදිලියකට එක් id එකක් — කෙටි alias උපසර්ගය
-GET /v1/models?prefix=dual         # ආකාර දෙකම (සේවාදායකයේ පෙරනිමිය)
+GET /v1/models?prefix=alias        # එක් ආකෘතියකට එක් id එකක් — කෙටි alias උපසර්ගය
+GET /v1/models?prefix=dual         # ආකාර දෙකම (server පෙරනිමිය)
 GET /v1/models?prefix=canonical    # සම්පූර්ණ provider-id උපසර්ගය පමණි
 ```
 
-| ප්රකාරය     | නිකුත් කරන්නේ                                            | සටහන්                                                                                                                                                                                              |
-| ----------- | -------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `dual`      | `cc/claude-sonnet-4-6` **සහ** `claude/claude-sonnet-4-6` | **පෙරනිමිය.** id දෙකම එකම මාදිලිය වෙත යොමු වේ; ආකාර දෙකෙන් ඕනෑම එකක් hardcode කර ඇති client වින්යාස දිගටම ක්රියා කිරීමට මෙය පවත්වාගෙන යයි. මෙය නාමාවලියේ ප්රමාණය ආසන්න වශයෙන් දෙගුණ කරයි.          |
-| `alias`     | `cc/claude-sonnet-4-6`                                   | එක් මාදිලියකට එක් ඇතුළත් කිරීමකි. වෙනම alias එකක් නොමැති සපයන්නන්ද ඔවුන්ගේ ඇතුළත් කිරීම නිකුත් කරන බැවින් කිසිවක් අහිමි නොවේ.                                                                      |
-| `canonical` | `claude/claude-sonnet-4-6`                               | සම්පූර්ණ provider-id උපසර්ගය යටතේ එක් මාදිලියකට එක් ඇතුළත් කිරීමකි. වෙනම alias එකක් නොමැති සපයන්නන් (උදා. `antigravity/…`, `agy/…`) ද ඔවුන්ගේ තනි id එක මෙහි නිකුත් කරන බැවින් කිසිවක් අහිමි නොවේ. |
+| ප්රකාරය     | නිකුත් කරන දෑ                                            | සටහන්                                                                                                                                                                                         |
+| ----------- | -------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `dual`      | `cc/claude-sonnet-4-6` **සහ** `claude/claude-sonnet-4-6` | **පෙරනිමිය.** id දෙකම එකම ආකෘතියට route වේ; ආකාර දෙකෙන් එකක් hardcode කර ඇති client වින්යාස දිගටම ක්රියා කිරීමට මෙය තබා ඇත. Catalog එක ආසන්න වශයෙන් දෙගුණ කරයි.                               |
+| `alias`     | `cc/claude-sonnet-4-6`                                   | එක් ආකෘතියකට එක් entry එකක්. වෙනස් alias එකක් නොමැති සපයන්නන් ද ඔවුන්ගේ entry එක නිකුත් කරන බැවින් කිසිවක් නැති නොවේ.                                                                         |
+| `canonical` | `claude/claude-sonnet-4-6`                               | සම්පූර්ණ provider-id උපසර්ගය යටතේ එක් ආකෘතියකට එක් entry එකක්. වෙනස් alias එකක් නොමැති සපයන්නන් (උදා. `antigravity/…`, `agy/…`) ද මෙහි ඔවුන්ගේ තනි id එක නිකුත් කරන බැවින් කිසිවක් නැති නොවේ. |
 
-query පරාමිතිය නොමැතිව වුවද `dual`-ප්රකාරයේ mirror එකක් හඳුනාගත හැක: එහි ප්රධාන id එක වෙත
-යොමු වන `parent` ක්ෂේත්රයක් අඩංගු වේ.
+query පරාමිතිය නොමැතිව ද `dual`-ප්රකාරයේ mirror එකක් හඳුනාගත හැක: එහි ප්රධාන id එක වෙත
+යොමු කරන `parent` ක්ෂේත්රයක් ඇත.
 
-මාදිලි තේරීම් අතුරුමුහුණතක් පෙන්වන clients විසින් `?prefix=alias` ඉල්ලා සිටිය යුතුය —
-[OmniCopilot VS Code දිගුව](../guides/VSCODE-COPILOT.md) සිදු කරන්නේද මෙයයි.
+ආකෘති තේරීම් අතුරුමුහුණතක් render කරන clients විසින් `?prefix=alias` ඉල්ලා සිටිය යුතුය —
+[OmniCopilot VS Code extension](../guides/VSCODE-COPILOT.md) එක සිදු කරන්නේ මෙයයි.
 
-### සිතීම-රහිත මාදිලි ප්රභේද
+### සොයාගැනීමේ පෙරහන් (`?capability=`, `?min_context=`, `?kind=`, `?q=`)
 
-සිතීමේ හැකියාව ඇති Claude මාදිලි සඳහා, `/v1/models` විසින් `claude-3-omniroute-no-thinking/` උපසර්ගය සහිත **සිතීම-රහිත** ප්රභේදයක් ද ප්රකාශයට පත් කරයි:
+`GET /v1/models` අභිමතයෙන් සක්රිය කළ හැකි සොයාගැනීමේ පෙරහන් පිළිගනී. ඒවා කිසිවක් නොමැතිව ප්රතිචාරය
+වෙනස් නොවේ. ඒවා caller දැනටමත් දකින catalog එක සීමා කරයි (API-key අවසර පළමුව යෙදේ),
+එමෙන්ම ඒවා OpenAI-ශෛලියේ `limit` / `after` පිටුකරණයට පෙර ක්රියාත්මක වේ:
+
+```bash
+GET /v1/models?capability=vision&capability=tool_calling   # ලැයිස්තුගත කළ සෑම හැකියාවක්ම true විය යුතුය
+GET /v1/models?capability=vision,reasoning&min_context=200000
+GET /v1/models?kind=embedding                              # catalog `type`; එකක් නොමැති පේළි `chat` වේ
+GET /v1/models?q=sonnet&limit=10                           # id හෝ name මත case-insensitive ගැළපීම
+```
+
+| පරාමිතිය      | අගයන්                                                                                               |
+| ------------- | --------------------------------------------------------------------------------------------------- |
+| `capability`  | `attachment`, `reasoning`, `structured_output`, `temperature`, `thinking`, `tool_calling`, `vision` |
+| `min_context` | ඍණ නොවන පූර්ණ සංඛ්යාවක්, `context_length` සමඟ සසඳනු ලැබේ                                            |
+| `kind`        | `chat`, `audio`, `embedding`, `image`, `moderation`, `music`, `rerank`, `video`                     |
+| `q`           | අක්ෂර 1–200                                                                                         |
+
+නොදන්නා අගයක් හෝ ඍණ නොවන පූර්ණ සංඛ්යාවක් නොවන `min_context` අගයක් (උදාහරණයක් ලෙස `1.5`)
+HTTP `400` ආපසු ලබා දෙන අතර පණිවිඩය වලංගු අගයන් ලැයිස්තුගත කරයි. ක්රියාත්මක කිරීම:
+`src/app/api/v1/models/catalogFilters.ts`.
+
+### ආකෘති කෙටි ලැයිස්තුව (`POST /v1/models/query`)
+
+`POST /v1/models/query`, `GET /v1/models` හා සමාන auth සහ එක් key එකකට අදාළ දෘශ්යතාව සමඟ,
+එම catalog එකෙන්ම කෙටි, නියත ලැයිස්තුවක් ආපසු ලබා දෙයි:
+
+```bash
+POST /v1/models/query
+Authorization: Bearer your-api-key
+Content-Type: application/json
+
+{ "capabilities": ["vision", "tool_calling"], "min_context": 128000, "max_output": 16000,
+  "kind": "chat", "q": "gpt", "owned_by": "openai", "exclude": ["openai/gpt-4o"], "limit": 5 }
+
+→ { "object": "list", "data": [ ...models ] }
+```
+
+සෑම ක්ෂේත්රයක්ම වෛකල්පික වේ. `capabilities` සහ `exclude` සඳහා array එකක් හෝ කොමාවෙන් වෙන් කළ string එකක්
+ලබා ගත හැක; `max_output`, `max_output_tokens` සමඟ සසඳයි. ප්රතිඵල පළමුව `owned_by` අනුවත්, ඉන්පසු `id` අනුවත්
+අනුපිළිවෙළට සකසනු ලැබේ. `limit` හි පෙරනිමි අගය `20` වන අතර `100` ට වැඩි අගයන් `100` දක්වා සීමා කරනු ලැබේ. වලංගු නොවන JSON, නොදන්නා
+ක්ෂේත්රයක් හෝ වලංගු නොවන අගයක් HTTP `400` ආපසු ලබා දෙයි.
+
+### තනි තනිව සඟවා ඇති chat ආකෘති
+
+එහි සපයන්නාගේ පිටුවේ **Hidden** ලෙස සලකුණු කළ ආකෘතියක් catalog එකෙන් ඉවත් කරනු ලබන අතර පැහැදිලිව
+ඉල්ලූ විට HTTP `404` / `model_not_found` සමඟ ප්රතික්ෂේප කෙරේ. පරීක්ෂාව provider aliases,
+compatible-provider node උපසර්ග සහ connection පෙරනිමි ඇතුළුව resolve කළ සපයන්නා සහ ආකෘතිය භාවිත කරයි.
+සංයෝජනයක් සැඟවූ targets මඟහැර දෘශ්යමාන sibling එකක් භාවිත කළ හැක; ක්රියාත්මක කළ හැකි target එකක්වත් ඉතිරි නොවන විට
+එය එම error code එකම ආපසු ලබා දෙයි. සැඟවීම ඉවත් කිරීම ඊළඟ ඉල්ලීමේදී බලපැවැත්වේ.
+Image සඳහා පමණක් වන දෘශ්යතා overrides, එකම ID සහිත chat ආකෘතිය නොසඟවයි.
+
+මෙම තනි ආකෘති සැකසුම, පැහැදිලි dispatch එක රඳවා තබා ගනිමින් catalog ප්රචාරණය සහ auto-routing candidates පෙරහන් කරන
+[model exposure allow/deny lists](../routing/MODEL_EXPOSURE_LIST.md) වෙතින් වෙන් වූවකි.
+API-key ආකෘති අවසර ස්වාධීනව දිගටම යෙදේ. පෙරනිමි catalog උපසර්ග ප්රකාරය `dual` ලෙසම පවතී.
+
+### Thinking නොමැති ආකෘති ප්රභේද
+
+Thinking හැකියාව ඇති Claude ආකෘති සඳහා, `/v1/models` විසින් id එක `claude-3-omniroute-no-thinking/` සමඟ උපසර්ග කළ **no-thinking** ප්රභේදයක් ද ප්රචාරණය කරයි:
 
 ```
 claude-3-omniroute-no-thinking/<provider>/<model>
 ```
 
-මෙම id එක තේරීමෙන් (උදා. සැමවිටම `thinking` block එකක් අමුණන Claude Code වින්යාසයක) reasoning යටපත් කරමින් සැබෑ `<provider>/<model>` වෙත නැවත විසඳේ — `/v1/messages` මාර්ගයෙහි `thinking:{type:"disabled"}` භාවිතයෙන් හෝ `/v1/chat/completions` මාර්ගයෙහි `reasoning`/`reasoning_effort` ක්ෂේත්ර ඉවත් කිරීමෙන්. මෙම ප්රභේදය ලැයිස්තුගත කරන්නේ සිතීමට සහාය දක්වන **සහ** `disabled` පිළිපදින Claude-පවුලේ මාදිලි සඳහා පමණි (එබැවින්, උදාහරණයක් ලෙස, `disabled` ප්රතික්ෂේප කරන adaptive-only මාදිලි බැහැර කෙරේ). ක්රියාකරුවන්ට `ModelSpec.noThinkingAlias` හරහා එක් එක් මාදිලිය සඳහා මෙම ප්රභේදය බලහත්කාරයෙන් සක්රිය හෝ අක්රිය කළ හැක.
+මෙම id එක තේරීමෙන් (උදා. සෑම විටම `thinking` block එකක් අමුණන Claude Code config එකකදී), reasoning අක්රිය කර ඇති සැබෑ `<provider>/<model>` වෙත නැවත resolve වේ — `/v1/messages` path එකේ `thinking:{type:"disabled"}` ලෙස හෝ `/v1/chat/completions` path එකේ `reasoning`/`reasoning_effort` fields ඉවත් කිරීමෙන්. මෙම variant එක ලැයිස්තුගත කරන්නේ thinking සඳහා සහාය දක්වන **සහ** `disabled` පිළිගන්නා Claude-family models සඳහා පමණි (එබැවින්, උදා. `disabled` ප්රතික්ෂේප කරන adaptive-only models බැහැර කෙරේ). Operators හට `ModelSpec.noThinkingAlias` හරහා එක් එක් model එක සඳහා variant එක බලෙන් සක්රිය හෝ අක්රිය කළ හැක.
 
 ---
 
@@ -428,15 +570,16 @@ sidecar එකක් ක්රියාවලියෙන් පිටත ධා
 | POST  | `/v1/embeddings`                          | OpenAI                                   |
 | POST  | `/v1/images/generations`                  | OpenAI Images                            |
 | POST  | `/v1/images/edits`                        | OpenAI Images (සංස්කරණය/inpaint)         |
-| POST  | `/v1/videos/generations`                  | OpenAI-ශෛලියේ වීඩියෝ ජනනය                |
-| POST  | `/v1/music/generations`                   | OpenAI-ශෛලියේ සංගීත ජනනය                 |
+| POST  | `/v1/videos/generations`                  | OpenAI-ආකාරයේ වීඩියෝ උත්පාදනය            |
+| POST  | `/v1/music/generations`                   | OpenAI-ආකාරයේ සංගීත උත්පාදනය             |
 | POST  | `/v1/audio/transcriptions`                | OpenAI Audio (STT)                       |
 | POST  | `/v1/audio/speech`                        | OpenAI TTS (ශ්රව්ය body එක ලබා දෙයි)     |
-| POST  | `/v1/rerank`                              | Cohere/Voyage-ශෛලියේ නැවත ශ්රේණිගත කිරීම |
+| POST  | `/v1/rerank`                              | Cohere/Voyage-ආකාරයේ නැවත ශ්රේණිගත කිරීම |
 | POST  | `/v1/classify`                            | Jina වර්ගීකරණය (`api.jina.ai`)           |
 | POST  | `/v1/segment`                             | Jina ඛණ්ඩකය (`segment.jina.ai`)          |
 | POST  | `/v1/moderations`                         | OpenAI Moderations                       |
 | GET   | `/v1/models`                              | OpenAI                                   |
+| POST  | `/v1/models/query`                        | පෙරහන් කළ ආකෘති කෙටි ලැයිස්තුව           |
 | POST  | `/v1/messages/count_tokens`               | Anthropic                                |
 | GET   | `/v1beta/models`                          | Gemini                                   |
 | POST  | `/v1beta/models/{...path}`                | Gemini generateContent                   |
@@ -448,12 +591,12 @@ sidecar එකක් ක්රියාවලියෙන් පිටත ධා
 | POST  | `/api/v1/vscode/{token}/api/chat`         | Ollama token සහිත අන්වර්ථය               |
 | GET   | `/api/v1/vscode/{token}/api/tags`         | Ollama tags token සහිත අන්වර්ථය          |
 
-සියලුම POST මාර්ග එකම ආකෘතිය අනුගමනය කරයි: `Bearer your-api-key` + Zod මඟින් වලංගු කළ JSON body එකක් (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema`, ආදිය; `src/shared/validation/schemas.ts` බලන්න). schema අසමත් වුවහොත් 4xx ආපසු ලබා දෙයි.
+සියලුම POST මාර්ග එකම ව්යුහය අනුගමනය කරයි: `Bearer your-api-key` + Zod මඟින් වලංගු කළ JSON body එක (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema` ආදිය; `src/shared/validation/schemas.ts` බලන්න). schema එක අසමත් වුවහොත් 4xx ලබා දෙයි.
 
-`Authorization: Bearer ...` ඇමිණිය නොහැකි clients සඳහා, query-string ගැළපුම (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`) හෝ පහත ලේඛනගත කර ඇති කැපවූ `/api/v1/vscode/{token}/...` අන්ත ලක්ෂ්ය හරහා URL තුළ API keys ද OmniRoute පිළිගනී.
+`Authorization: Bearer ...` අමුණා යැවිය නොහැකි clients සඳහා, query-string ගැළපුම (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`) හෝ පහත ලේඛනගත කර ඇති කැපවූ `/api/v1/vscode/{token}/...` අන්ත ලක්ෂ්ය හරහා URL එක තුළ API keys ද OmniRoute පිළිගනී.
 
 ```bash
-# නැවත ශ්රේණිගත කිරීම (cloud registry provider එකක්, හෝ "<prefix>/<model>" ලෙස OpenAI-ගැළපෙන provider node එකක්)
+# නැවත ශ්රේණිගත කිරීම (cloud registry provider එකක් හෝ "<prefix>/<model>" ලෙස OpenAI-ගැළපෙන provider node එකක්)
 POST /v1/rerank      { "model": "jina-ai/jina-reranker-v3.5", "query": "...", "documents": ["..."] }
 
 # Jina වර්ගීකරණය (Foundation API අක්තපත්ර)
@@ -468,44 +611,47 @@ POST /v1/search      { "query": "...", "provider": "jina-search" }
 # අන්තර්ගත පාලනය
 POST /v1/moderations { "model": "omni-moderation-latest", "input": "..." }
 
-# TTS — audio/mpeg body එකක් (හෝ ඉල්ලූ ආකෘතිය) ලබා දෙයි
+# TTS — audio/mpeg body එකක් (හෝ ඉල්ලා ඇති ආකෘතිය) ලබා දෙයි
 POST /v1/audio/speech { "model": "openai/tts-1", "input": "Hello", "voice": "alloy" }
 
-# Soniox TTS සඳහා භාෂාවක් සහ හඬක් අවශ්ය වේ: `language` හි පෙරනිමිය "en" වේ; නොමැති
-# හඬක් හෝ OpenAI හි සම්මත හඬ නාමයක් (alloy, nova, …) "Adrian" බවට පත් වේ
+# Soniox TTS සඳහා භාෂාවක් සහ හඬක් අවශ්ය වේ: `language` හි පෙරනිමිය "en" වේ; හඬක් නොමැති නම්
+# හෝ OpenAI සම්මත හඬ නාමයක් (alloy, nova, …) නම් එය "Adrian" බවට පත් වේ
 POST /v1/audio/speech { "model": "soniox/tts-rt-v1", "input": "Xin chào", "voice": "Adrian", "language": "vi" }
 
 # රූප සංස්කරණය (multipart)
 POST /v1/images/edits  -F image=@input.png -F prompt="..." -F mask=@mask.png
 
-# වීඩියෝ / සංගීත ජනනය (provider-prefix සහිත model id)
+# වීඩියෝ / සංගීත උත්පාදනය (provider-prefix සහිත model id)
 POST /v1/videos/generations { "model": "runway/gen-3", "prompt": "..." }
 POST /v1/music/generations  { "model": "kie/suno-v4.0",   "prompt": "..." }
 ```
 
-> **නැවත ශ්රේණිගත කිරීමේ provider nodes:** `POST /v1/rerank` මඟින් `<node-prefix>/<model>` ලෙස යොමු කරන ලද OpenAI-ගැළපෙන provider nodes
-> (oMLX, vLLM, Infinity, gateway එකක් පිටුපස ඇති TEI, …) වෙත ද ඉල්ලීම් මාර්ගගත කරයි. Loopback
-> nodes (`localhost`, `127.0.0.1`, `172.16.0.0/12`) සැමවිටම සුදුසුකම් ලබයි. වෙනත් ඕනෑම
-> host එකක ඇති nodes — LAN යන්ත්රයක් හෝ Tailscale peer එකක් — සුදුසුකම් ලබන්නේ operator විසින්
-> `RERANK_REMOTE_PROVIDER_NODES` විශේෂාංග ධජය සක්රීය කර ඇති විට **සහ** node එකේ base URL එක provider
-> outbound URL ප්රතිපත්තිය (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`) සමත් වන විට පමණි;
-> cloud-metadata hosts වෙත කිසි විටෙකත් මාර්ගගත නොකෙරේ. memory engine එකේ නැවත ශ්රේණිගත කිරීමේ පියවර loopback හරහා
-> මෙම මාර්ගය කැඳවන බැවින්, Memory සැකසුම්වල `rerankProviderModel` සඳහාත් මෙම රීතියම අදාළ වේ.
+> **නැවත ශ්රේණිගත කිරීමේ සපයන්නාගේ නෝඩ:** `POST /v1/rerank` මඟින් OpenAI-අනුකූල සපයන්නාගේ නෝඩ වෙතද මාර්ගගත කරයි
+> (oMLX, vLLM, Infinity, ද්වාරයක් පිටුපස ඇති TEI, …), ඒවා `<node-prefix>/<model>` ලෙස ඇමතේ. ලූප්බැක්
+> නෝඩ (`localhost`, `127.0.0.1`, `172.16.0.0/12`) සැමවිටම සුදුසුකම් ලබන අතර, ක්රියාකරු විසින්
+> `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS` තුළ ලැයිස්තුගත කරන සත්කාරක නාමද සුදුසුකම් ලබයි (උදා. `http://reranker:8080/v1`
+> වැනි Docker/Compose සේවා නාමයක්; මේවා සැමවිටම සෘජුවම අමතනු ලබන අතර `HTTP(S)_PROXY` හෝ
+> සම්බන්ධතාවයකට ස්ථාවර කර ඇති ප්රොක්සියක් හරහා කිසිවිටෙකත් නොයවයි). වෙනත් ඕනෑම
+> සත්කාරකයක ඇති නෝඩයක් — LAN යන්ත්රයක් හෝ Tailscale සමපාර්ශ්වයක් — සුදුසුකම් ලබන්නේ ක්රියාකරු
+> `RERANK_REMOTE_PROVIDER_NODES` විශේෂාංග ධජය සක්රීය කර ඇති **සහ** නෝඩයේ මූලික URL එක සපයන්නාගේ
+> පිටතට යන URL ප්රතිපත්තිය (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`) සමත් වන විට පමණි.
+> මතක එන්ජිමේ නැවත ශ්රේණිගත කිරීමේ පියවර ලූප්බැක් හරහා මෙම මාර්ගය අමතන බැවින්,
+> මතක සැකසුම්වල `rerankProviderModel` සඳහාද එම රීතියම අදාළ වේ.
 >
-> **Local server ආකෘති:** node එක `<base>/v1/rerank` හිදීත්, 404 ලැබුණහොත් `<base>/rerank` හිදීත්
-> (Infinity, TEI) කැඳවනු ලැබේ. upstream body එක Cohere/OpenAI අක්ෂර වින්යාසය (`documents`,
-> `return_documents`) සහ TEI අක්ෂර වින්යාසය (`texts`, `return_text`) යන දෙකම රැගෙන යන අතර, upstream ප්රතිචාරය
-> Cohere envelope එකට සාමාන්යකරණය කෙරේ: TEI හි හිස් `[{index, score, text}]`, සරල gateways වෙතින් ලැබෙන
-> `{results: [{index, score}]}`, සහ Voyage-ශෛලියේ `{data: [...]}` යන සියල්ල client වෙත
-> `{results: [{index, relevance_score, document?}]}` ලෙස, score අනුව අනුපිළිවෙළට සකසා `top_n` දක්වා සීමා කර ආපසු ලැබේ.
+> **දේශීය සේවාදායක ආකෘති:** නෝඩය `<base>/v1/rerank` හිදීද, 404 ලැබුණහොත් `<base>/rerank`
+> (Infinity, TEI) හිදීද අමතනු ලැබේ. උඩුගං ඉල්ලීම් අන්තර්ගතය Cohere/OpenAI අක්ෂර වින්යාසය (`documents`,
+> `return_documents`) සහ TEI අක්ෂර වින්යාසය (`texts`, `return_text`) යන දෙකම රැගෙන යන අතර, උඩුගං ප්රතිචාරය
+> Cohere ආවරණයට සාමාන්යකරණය කෙරේ: TEI හි සෘජු `[{index, score, text}]`, සරල ද්වාරවලින් ලැබෙන
+> `{results: [{index, score}]}`, සහ Voyage-ශෛලියේ `{data: [...]}` යන සියල්ල ලකුණු අනුව අනුපිළිවෙළට සකසා
+> `top_n` දක්වා සීමා කර, `{results: [{index, relevance_score, document?}]}` ලෙස සේවාලාභියා වෙත ආපසු ලැබේ.
 
-> **සපයන්නා-නෝඩ් සොයාගැනීම:** OpenAI-අනුකූල සපයන්නා නෝඩයක ඇති ආකෘති, නෝඩ් උපසර්ගය යටතේ `GET /v1/models` තුළ දිස් වේ.
-> අන්ත ලක්ෂ්ය පාරදත්ත නොමැති පේළි (දේශීය `/v1/models` ලැයිස්තු සඳහා සාමාන්ය වේ)
-> නෝඩයේ `apiType` උරුම කරගනී. එබැවින් `embeddings` නෝඩයක ආකෘති පෙරනිමියෙන් සංවාද ලෙස සැලකීම වෙනුවට `type: "embedding"` වන අතර,
-> `rerank` නෝඩයක ආකෘති `type: "rerank"` වේ; සමමුහුර්ත කළ හෝ අතින් එක් කළ පේළියක පැහැදිලිව දක්වා ඇති
-> `supportedEndpoints` අගයක් තවමත් ප්රමුඛත්වය ගනී.
+> **සපයන්නාගේ නෝඩ සොයාගැනීම:** OpenAI-අනුකූල සපයන්නාගේ නෝඩයක ඇති මාදිලි නෝඩ උපසර්ගය යටතේ
+> `GET /v1/models` තුළ දිස් වේ. අන්ත ලක්ෂ්ය පාරදත්ත නොමැති පේළි (දේශීය `/v1/models` ලැයිස්තුගත කිරීම් සඳහා සාමාන්යය)
+> නෝඩයේ `apiType` උරුම කරගනී; එබැවින් `embeddings` නෝඩයක මාදිලි `type: "embedding"` වන අතර
+> `rerank` නෝඩයක මාදිලි පෙරනිමියෙන් කතාබස් ලෙස සැලකීම වෙනුවට `type: "rerank"` වේ; සමමුහුර්ත කළ හෝ අතින් එක් කළ
+> පේළියක පැහැදිලි `supportedEndpoints` අගයක් තවමත් ප්රමුඛත්වය ගනී.
 
-### කැපවූ සපයන්නා මාර්ග
+### කැපවූ සපයන්නාගේ මාර්ග
 
 ```bash
 POST /v1/providers/{provider}/chat/completions
@@ -513,7 +659,7 @@ POST /v1/providers/{provider}/embeddings
 POST /v1/providers/{provider}/images/generations
 ```
 
-සපයන්නා උපසර්ගය නොමැති නම් එය ස්වයංක්රීයව එක් කෙරේ. නොගැළපෙන ආකෘති `400` ආපසු ලබා දෙයි.
+සපයන්නාගේ උපසර්ගය නොමැති නම් එය ස්වයංක්රීයව එක් කෙරේ. නොගැළපෙන මාදිලි `400` ආපසු ලබා දෙයි.
 
 ---
 
@@ -559,40 +705,78 @@ OpenAI-අනුකූල කාණ්ඩ සැකසීම.
 
 ## Search API
 
-වෙබ්/සෙවුම් සැපයුම්කරු වියුක්තකරණය (Tavily, Brave, Exa, Serper, ආදිය).
+වෙබ්/සෙවුම් සැපයුම්කරු සඳහා වියුක්තකරණයක් (Tavily, Brave, Exa, Serper, ආදිය).
 
-| ක්රමය | මාර්ගය                 | විස්තරය                                                                                                                      |
-| ----- | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| GET   | `/v1/search`           | වින්යාස කර ඇති සෙවුම් සැපයුම්කරුවන් + හැකියාවන් ලැයිස්තුගත කරන්න                                                             |
-| POST  | `/v1/search`           | සෙවුම් විමසුමක් ක්රියාත්මක කරන්න — අන්තර්ගතය `v1SearchSchema` මඟින් වලංගු කෙරේ, හැඹිලිගත කිරීම/ඒකාබද්ධ කිරීම සඳහා සහය දක්වයි |
-| GET   | `/v1/search/analytics` | එක් එක් සැපයුම්කරු සඳහා ප්රතිඵල/ප්රමාද/හැඹිලි සංඛ්යාලේඛන                                                                     |
+| ක්රමය | මාර්ගය                 | විස්තරය                                                                                                                        |
+| ----- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| GET   | `/v1/search`           | වින්යාස කළ සෙවුම් සැපයුම්කරුවන් සහ හැකියාවන් ලැයිස්තුගත කරයි                                                                   |
+| POST  | `/v1/search`           | සෙවුම් විමසුමක් ධාවනය කරයි — ඉල්ලීම් අන්තර්ගතය `v1SearchSchema` මඟින් වලංගු කරයි, හැඹිලිගත කිරීම/ඒකාබද්ධ කිරීම සඳහා සහය දක්වයි |
+| GET   | `/v1/search/analytics` | එක් එක් සැපයුම්කරු සඳහා ප්රතිඵල/ප්රමාදය/හැඹිලි සංඛ්යාලේඛන                                                                      |
 
-**සත්යාපනය:** Bearer API යතුර (`extractApiKey` + `isValidApiKey`). සෙවුම් ප්රතිපත්තිය `enforceApiKeyPolicy` හරහා බලාත්මක කෙරේ.
+**සත්යාපනය:** Bearer API යතුර (`extractApiKey` + `isValidApiKey`). සෙවුම් ප්රතිපත්තිය `enforceApiKeyPolicy` හරහා බලාත්මක කරයි.
+
+### Exa සහ Tavily `provider_options`
+
+Exa සහ Tavily, නාමාවකාශිත ගොනුවකින් සැපයුම්කරුට විශේෂිත ක්ෂේත්ර කියවයි:
+`provider_options.exa` (හෝ `provider_options["exa-search"]`) සහ `provider_options.tavily`
+(හෝ `provider_options["tavily-search"]`). පහත යතුරු පමණක් ඉදිරියට යවනු ලැබේ. එක් එක් යතුර
+`open-sse/handlers/search/providerOptionsPassthrough.ts` තුළ ඇති එයටම අදාළ Zod schema එකට
+එරෙහිව පරීක්ෂා කරන අතර, වැරදි වර්ගයක් සහිත යතුරක් ඉවත් කරනු ලැබේ. සත්යාපනය, මූලික URL,
+`stream` සහ `outputSchema` ඇතුළුව වෙනත් ඕනෑම යතුරක් නොසලකා හරිනු ලැබේ. අනෙකුත් සැපයුම්කරුවන්
+භාවිත කරන පැතලි යතුරු (`cx`, `depth`, ...) පෙර පරිදිම ක්රියා කරයි.
+
+| සැපයුම්කරු | ඉහළ-මට්ටමේ ක්ෂේත්ර                                                                                                                                                                                                                                                                                                                                                        | කූඩු කළ ක්ෂේත්ර                                                                                                                                                   |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa        | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (පැතලි ප්රාථමික අගයන්), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                         | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` පෙරනිමි `{ text: true, highlights: true }` මත ඒකාබද්ධ කරයි |
+| Tavily     | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                                 |
+
+සාමාන්ය ක්ෂේත්ර සෑම විටම ප්රමුඛත්වය ගනී: `query`, `max_results`, `filters` (වසම්), `country` සහ
+`search_type` වෙතින් ව්යුත්පන්න කළ මාතෘකාව. Exa හිදී, `search_type: "news"` මඟින් `category: "news"`
+එලෙසම තබා ගනී. Tavily විසින් `search_type: "finance"` (`topic: "finance"`) ද පිළිගනී.
+
+සාමාන්ය `time_range` දැන් සැපයුම්කරුවන් දෙදෙනා වෙතම ළඟා වේ: Exa වෙත `startPublishedDate` (ISO
+කාල මුද්රාව) සහ Tavily වෙත `start_date` (`YYYY-MM-DD`) ලැබේ. `provider_options` තුළ පැහැදිලිව
+දක්වා ඇති දිනයක් සිතියම්ගත කළ දිනය අභිබවා යයි.
+
+Exa ප්රතිඵල `provider_raw` තුළ `id`, `highlight_scores`, `summary`, `subpages`, `entities` සහ `extras`
+රඳවා ගනී. Tavily ප්රතිඵල `images` සහ `favicon` රඳවා ගනී.
+
+පිරිවැය ගිණුම්කරණය තවමත් පැතලි ලේඛනය වන `costPerQuery` භාවිත කරයි. Tavily,
+`search_depth: "advanced"` සඳහා එක් ඇමතුමකට වැඩි ණය ඒකක ගණනක් අය කරන අතර, එම වෙනස
+`usage.search_cost_usd` තුළ පිළිබිඹු නොවේ.
 
 ---
 
 ## Web Fetch API
 
-වින්යාස කළ web-fetch සපයන්නෙකු (Firecrawl, Jina Reader, Tavily Extract, TinyFish Fetch, Nimble Extract) හරහා URL එකකින් අන්තර්ගතය උපුටා ගන්න.
+වින්යාස කළ web-fetch සැපයුම්කරුවෙකු (Firecrawl, Jina
+Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract) හරහා URL එකකින් අන්තර්ගතය උපුටා ගන්න.
 
-| ක්රමය | මාර්ගය          | විස්තරය                                                                           |
-| ----- | --------------- | --------------------------------------------------------------------------------- |
-| POST  | `/v1/web/fetch` | URL එකක් ලබාගැනීම/ස්ක්රේප් කිරීම — ඉල්ලීම් බඳ `v1WebFetchSchema` මඟින් වලංගු කෙරේ |
+Parallel Extract (`parallel-search`, Parallel Search සඳහා භාවිත කරන API යතුරම) Markdown
+පමණක් ආපසු ලබා දෙයි — වෙනත් ඕනෑම `format` එකක් `400` ප්රතිචාරයක් ඇති කරයි — තවද අන්තර්ගතය අක්ෂර 100,000කට සීමා කරයි. ඉලක්ක පිටුවම
+උපුටා ගැනීමට නොහැකි වූ විට, upstream සේවාව එය HTTP 200 ප්රතිචාරයක් තුළ වාර්තා කරයි;
+OmniRoute එය ස්ථාවර පණිවිඩයක් සහිත `422` ප්රතිචාරයක් ලෙස ඉදිරිපත් කරයි.
+
+| ක්රමය | මාර්ගය          | විස්තරය                                                                       |
+| ----- | --------------- | ----------------------------------------------------------------------------- |
+| POST  | `/v1/web/fetch` | URL එකක් ලබා ගැනීම/scrape කිරීම — body එක `v1WebFetchSchema` මඟින් වලංගු කෙරේ |
 
 **සත්යාපනය:** Bearer API යතුර (`extractApiKey` + `isValidApiKey`). ප්රතිපත්තිය `enforceApiKeyPolicy` හරහා බලාත්මක කෙරේ.
 
-**කෝටා පිළිබඳ දැනුවත් fallback (#8297):** පැහැදිලි `provider` එකක් ලබා දී නොමැති විට, pool එක
-(`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search`) ස්ථාවර
-ප්රමුඛතා අනුපිළිවෙළකට (fill-first) පරීක්ෂා කෙරේ — ඉල්ලීම වහාම අවසන් කිරීම වෙනුවට,
-වින්යාස කර ඇති නමුත් අනුපාත සීමාවකට ලක් වූ සපයන්නෙකු මඟ හරිනු ලබන අතර, නැවත උත්සාහ කළ හැකි/කෝටා සම්බන්ධ upstream අසාර්ථක වීමක්
-(HTTP 429 සැමවිටම; Firecrawl/Tavily/TinyFish හි කෝටා ආකාරයේ නොමිලේ මට්ටම් සඳහා 402/403 —
-Jina Reader සඳහා නොවන අතර, සාමාන්ය 400 වැරදි ඉල්ලීමක් සඳහා කිසිවිටෙක නොවේ) ඉල්ලීම ක්රියාත්මක වන අවස්ථාවේදී
-මීළඟ මෙතෙක් උත්සාහ නොකළ, අක්තපත්ර සහිත සපයන්නා වෙත යොමු වේ. pool එකේ සෑම සපයන්නෙකුම
-අවසන් වූ විට, endpoint එක පෙර පැවති සාමාන්ය `400` වෙනුවට තනි `429` එකක්
-(`Retry-After` ශීර්ෂයක් සමඟ) ආපසු ලබා දෙයි. පැහැදිලි `provider` එකක් ඉල්ලා ඇති විට,
-නිහඬ fallback එකක් **නොමැත** — අනුපාත සීමාවකට ලක් වූ හෝ අසාර්ථක වන පැහැදිලි
-සපයන්නාගේම දෝෂය පෙන්වනු ලැබේ (අනුපාත සීමාවකට ලක් වී ඇත්නම් `429`, එසේ නොමැති නම් upstream
-තත්ත්වය).
+**Quota පිළිබඳ දැනුවත් fallback (#8297):** පැහැදිලි `provider` එකක් ලබා දී නොමැති විට, pool එක
+(`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` →
+`parallel-search`) ස්ථාවර
+ප්රමුඛතා අනුපිළිවෙළට (fill-first) අනුව
+පරීක්ෂා කෙරේ — rate limit වී ඇති නමුත් වින්යාස කර ඇති සැපයුම්කරුවෙකු ඉල්ලීම එතැනින්ම නතර කිරීම වෙනුවට මඟ හරිනු ලැබේ,
+තවද නැවත උත්සාහ කළ හැකි/quota සම්බන්ධ upstream අසාර්ථකත්වයක්
+(HTTP 429 සෑම විටම; Firecrawl/Tavily/TinyFish හි quota ආකාරයේ free tier සඳහා 402/403 —
+Jina Reader සඳහා නොවන අතර, සාමාන්ය 400 bad request එකක් සඳහා කිසිවිටෙකත් නොවේ) ඉල්ලීම සිදු කරන අවස්ථාවේදී
+තවම උත්සාහ නොකළ අක්තපත්ර සහිත ඊළඟ සැපයුම්කරු වෙත යොමු වේ. pool එකෙහි ඇති සෑම සැපයුම්කරුවෙකුම
+අවසන් වූ විට, endpoint එක පෙර පැවති සාමාන්ය `400` ප්රතිචාරය වෙනුවට තනි `429` ප්රතිචාරයක් (`Retry-After`
+header එකක් සමඟ) ආපසු ලබා දෙයි. පැහැදිලි `provider` එකක්
+ඉල්ලා ඇති විට, නිහඬ fallback එකක් **නොමැත** — rate limit වූ හෝ අසාර්ථක වූ පැහැදිලි
+සැපයුම්කරුගේම දෝෂය ඉදිරිපත් වේ (rate limit වී ඇත්නම් `429`, එසේ නොමැති නම් upstream
+status එක).
 
 ---
 
@@ -682,26 +866,26 @@ CLI එක `base_url + /responses` WebSocket එකක් දක්වා උත
 
 ## ස්වයං-සේවා භාවිතය (`/api/usage/om-usage`)
 
-ඕනෑම API යතුරකට **තමන්ගේම** භාවිතය සහ කෝටා කියවිය හැකිය — කළමනාකරණ සත්යාපනය අවශ්ය නොවේ. යතුරක් දරන්නෙකුට තම වියදම පෙන්වීමට සේවාලාභියෙකු (CLI, OmniCopilot පැනලය) භාවිත කරන අන්ත ලක්ෂ්යය මෙයයි.
+ඕනෑම API යතුරකට **තමන්ගේම** භාවිතය සහ කෝටා කියවිය හැක — කළමනාකරණ සත්යාපනය අවශ්ය නොවේ. යතුරු හිමියෙකුට තම වියදම පෙන්වීම සඳහා client එකක් (CLI, OmniCopilot පැනලය) භාවිත කරන endpoint එක මෙයයි.
 
 ```bash
-# පෙළ ආකෘතිය (ඓතිහාසික ගිවිසුම — ටර්මිනලයක් සඳහා සරල පෙළ)
+# පෙළ ආකෘතිය (ඓතිහාසික ගිවිසුම — terminal එකක් සඳහා සාමාන්ය පෙළ)
 curl -H "Authorization: Bearer <your-api-key>" \
   http://localhost:20128/api/usage/om-usage
 
-# ව්යුහගත ආකෘතිය — UI එකක් භාවිත කරන්නේ මෙයයි
+# ව්යුහගත ආකෘතිය — UI එකක් පරිභෝජනය කරන ආකෘතිය
 curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-යතුරෙහි **`allowUsageCommand`** සක්රීය කර තිබිය යුතුය (පෙරනිමියෙන් අක්රීයයි — උපකරණ පුවරුවේ API-යතුරු කළමනාකරු එය එක් එක් යතුර සඳහා මාරු කරයි). එය නොමැතිව අන්ත ලක්ෂ්යය `403` සමඟ ප්රතිචාර දක්වයි.
+යතුර සඳහා **`allowUsageCommand`** සක්රීය කර තිබිය යුතුය (පෙරනිමියෙන් අක්රීයයි — dashboard එකේ API-key කළමනාකරු එය එක් එක් යතුර සඳහා මාරු කරයි). එය නොමැතිව endpoint එක `403` ලෙස ප්රතිචාර දක්වයි.
 
-`?format=json` මඟින් වෙනස්කම් හඳුනාගත හැකි ව්යුහයක් ආපසු ලබා දෙන බැවින්, ඇමතුම්කරු කිසි විටෙකත් ප්රතික්ෂේප කිරීමකින් දත්ත ක්ෂේත්රයක් කියවන්නේ නැත. සාර්ථක වූ විට:
+ප්රතික්ෂේප කිරීමකදී caller කෙනෙකු දත්ත ක්ෂේත්රයක් කිසිවිටෙක කියවන්නේ නැති පරිදි `?format=json` විසින් වෙනස්කම් හඳුනාගත හැකි ව්යුහයක් ආපසු ලබා දෙයි. සාර්ථක වූ විට:
 
 ```jsonc
 {
   "allowed": true,
-  // යතුර එක්-යතුරකට අදාළ භාවිත සීමා (දෛනික/සතිපතා USD) තෝරාගෙන ඇති විට පමණක් පවතී:
+  // යතුර එක් යතුරකට අදාළ භාවිත සීමා (දෛනික/සතිපතා USD) සඳහා තේරීම සිදු කර ඇති විට පමණක් පවතී:
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -710,14 +894,14 @@ curl -H "Authorization: Bearer <your-api-key>" \
     "weeklyLimitUsd": 20,
     "weeklyResetAtIso": "…" /* … */,
   },
-  // තෝරාගත් සැපයුම්කරුගේ කෝටා සැණරුව, හෝ තවම කිසිවක් හැඹිලිගත කර නොමැති විට null:
+  // තෝරාගත් provider කෝටා snapshot එක, හෝ තවම කිසිවක් cache කර නොමැති විට null:
   "provider": {
     "connectionId": "…",
     "provider": "claude",
     "plan": "…",
     "quotas": {/* … */},
   },
-  // UI එකකට සැපයුම්කරුවන් කිහිපදෙනෙකු පසෙකින් පසෙකට නිරූපණය කළ හැකි වන පරිදි, සෑම සම්බන්ධතාවකම සැණරුව:
+  // UI එකකට provider කිහිපයක් එකිනෙකට යාබදව render කළ හැකි වන පරිදි, සෑම connection එකකම snapshot එක:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
     { "provider": "codex" /* … */ },
@@ -725,12 +909,61 @@ curl -H "Authorization: Bearer <your-api-key>" \
 }
 ```
 
-ප්රතික්ෂේප කිරීමකදී (`401` වැරදි යතුර / `403` අවසර නැත), එම මාර්ගයම
+ප්රතික්ෂේප කිරීමකදී (`401` වැරදි යතුර / `403` අවසර නැත) එම route එකම
 `{ "allowed": false, "error": { "message": "…" } }` ආපසු ලබා දෙයි — පවතින නමුත් හිස් `personal`/`provider`
-(යතුරට අවසර ඇත, තවම කිසිවක් අනාවරණය වී නැත) යනු ප්රතික්ෂේප කිරීමකට වඩා වෙනස් තත්ත්වයක් වන අතර, ඒවා වෙන්කර හඳුනාගන්නේ JSON ආකෘතිය පමණි.
+(යතුරට අවසර ඇත, තවම කිසිවක් දැනගෙන නැත) යනු ප්රතික්ෂේප කිරීමකට වඩා වෙනස් තත්ත්වයක් වන අතර, ඒවා වෙන්කර හඳුනාගන්නේ JSON ආකෘතිය පමණි.
 
-**සත්යාපනය:** ඇමතුම්කරුගේම Bearer API යතුර, `isValidApiKey` සමඟ වලංගු කර ඇත — මෙය
-`requireManagementAuth` පිටුපස දිගටම පවතින කළමනාකරණ මතුපිට (`/api/keys/…`) _නොවේ_.
+**සත්යාපනය:** caller ගේම Bearer API යතුර, `isValidApiKey` සමඟ වලංගු කරනු ලැබේ — මෙය
+`requireManagementAuth` පසුපස පවතින කළමනාකරණ පෘෂ්ඨය (`/api/keys/…`) _නොවේ_.
+
+### අමු හා Cutoff-සීරුමාරු කළ කෝටා ප්රතිශත
+
+`/api/usage/om-usage` පරිභෝජනය කරන විට, **සාමාන්ය පෙළ ප්රතිදානය** සහ ව්යුහගත **JSON ප්රතිදානය** මඟින් ඉදිරිපත් කරන ප්රතිශත අතර වෙනස caller විසින් සැලකිල්ලට ගත යුතුය:
+
+| අංශය                   | සාමාන්ය පෙළ ආකෘතිය (`/api/usage/om-usage` / `@@om-usage`)                                  | JSON ආකෘතිය (`?format=json`)                                                      |
+| :--------------------- | :----------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------- |
+| **ප්රතිදාන ක්ෂේත්රය**  | `NN% left` (උදා., `20% left`)                                                              | `provider.quotas` / `providers[].quotas`                                          |
+| **මිනුම**              | **Cutoff-සීරුමාරු කළ භාවිත කළ හැකි දීමනාව**: cutoff සීමාවට ඉහළින් ඉතිරි ධාරිතාව            | **අමු upstream කෝටාව**: සීරුමාරු නොකළ provider මිනුම                              |
+| **Cutoff පරිමාණනය**    | ආරක්ෂිත සංචිතය `0% left` ලෙස කියවෙන පරිදි `effectiveRemainingPercent()` හරහා පරිමාණනය කරයි | කිසිවක් නැත (provider විසින් වාර්තා කළ පරිදි අමු snapshot අගයන්)                  |
+| **සීමා දත්ත**          | පෙන්වන ප්රතිශතයට ඇතුළත් කර ඇත                                                              | එක් එක් connection එකට `quotaWindowThresholds` තුළ ගබඩා කර ඇත (හෝ server පෙරනිමි) |
+| **ප්රධාන පාරිභෝගිකයා** | අන්තර්ක්රියාකාරී CLI, terminal prompt, මානව ක්රියාකරුවන්                                   | ක්රමලේඛනමය ඒකාබද්ධ කිරීම්, dashboard, විශ්ලේෂණ, බිල්පත් ලුහුබැඳීම්                |
+
+#### Cutoff සීරුමාරු කිරීමේ සූත්රය
+
+upstream සම්පත් අවසන් වීම වැළැක්වීම සඳහා OmniRoute ක්රියාකාරී කෝටා cutoff සඳහා සහාය දක්වයි (connection
+`quotaWindowThresholds`, provider පෙරනිමි, හෝ ගෝලීය resilience සැකසුම් හරහා වින්යාස කෙරේ). කෝටා කවුළුවක cutoff සීමාවක්
+(උදා., `cutoff = 25%`) සක්රීය වූ විට, පෙළ renderer එක ඉතිරි දීමනාව පහත පරිදි ගණනය කරයි:
+
+- `remaining <= cutoff` නම්: `0%` ආපසු ලබා දෙයි.
+- `remaining > cutoff` නම්: `((remaining - cutoff) / (100 - cutoff)) * 100` ආපසු ලබා දෙයි.
+
+ආකෘතිගත පෙළ ප්රතිදානය මෙය ආසන්නතම පූර්ණ සංඛ්යාවට වටයයි (`Math.round(...)`).
+
+#### නිදර්ශනාත්මක උදාහරණය
+
+**60% අමු භාවිතයක්** (එබැවින් **40% අමු ඉතිරි කෝටාවක්**) සහ වින්යාස කළ
+**25% ඉතිරි-කෝටා cutoff** සීමාවක් සහිත provider කවුළුවක් සලකා බලන්න:
+
+| නිරූපණය                       | ගණනය                                               | ඉතිරිය  |                  අනුමාන භාවිතය                  |
+| :---------------------------- | :------------------------------------------------- | :-----: | :---------------------------------------------: |
+| **අමු JSON (`?format=json`)** | Upstream snapshot (`quotas[window]`)               | **40%** |                     **60%**                     |
+| **පෙළ ආකෘතිය (`NN% left`)**   | `((40 - 25) / (100 - 25)) * 100 = (15 / 75) * 100` | **20%** | **80%** (`100 - remaining` ලෙස ගණනය කරන්නේ නම්) |
+
+- **පෙළෙහි 20% ඉතිරි බව පෙන්වන්නේ ඇයි:** ගිණුමේ භෞතිකව ඉතිරිව ඇති 40% කෝටාවෙන්, 25% ක්
+  cutoff ප්රතිපත්තිය මඟින් සංචිත කර ඇත. router එක මෙම connection එක වෙත routing කිරීම නවත්වන්නට පෙර,
+  භාවිත කළ හැකි 75% headroom එකෙන් caller ට ඉතිරිව ඇත්තේ 15% ක් පමණි. routing නතර වන මොහොතේම
+  connection එක සම්පත් අවසන් වීම (`0% left`) සංඥා කරන බව පරිමාණනය සහතික කරයි.
+- **JSON අමු අගයන් සුරකින්නේ ඇයි:** බාහිර මෙවලම්වලට සත්ය upstream භාවිතය සහ connection මට්ටමේ
+  `quotaWindowThresholds` වෙත ප්රවේශය ලබා දීම සඳහා JSON payload එක නිශ්චිත provider snapshot එක (`UsageSnapshot`)
+  ආපසු ලබා දෙයි; server පාර්ශ්වයේ දත්ත අහිමි කරන පරිමාණනයක් සිදු නොකරයි.
+
+#### පාරිභෝගික සංක්රමණ මාර්ගෝපදේශය
+
+බාහිර ඒකාබද්ධ කිරීමක් (editor plugin එකක් හෝ agent extension එකක් වැනි) මීට පෙර පෙළ
+endpoint එකෙන් (`NN% left`) දත්ත උපුටාගෙන භාවිත කළ ප්රතිශතය `100 - NN` ලෙස ගණනය කළේ නම්, `?format=json` වෙත සංක්රමණය වීමේ අර්ථය වන්නේ:
+
+- අමු JSON අගයන් කියවීමෙන් **සැබෑ upstream පරිභෝජනය** පිළිබිඹු වේ (ඉහත උදාහරණයේ භාවිතය 60% කි).
+- ඒකාබද්ධ කිරීම පෙළ endpoint එකේ භාවිත කළ හැකි-දීමනා අර්ථය සුරැකීමට කැමති නම්, connection මට්ටමේ overrides සඳහා `quotaWindowThresholds` භාවිත කරමින් effective remaining සූත්රය client පාර්ශ්වයේ ඇගයිය හැක.
 
 ---
 
@@ -799,73 +1032,152 @@ X-OmniRoute-No-Cache: true
 
 ## උපකරණ පුවරුව සහ කළමනාකරණය
 
-කළමනාකරණ මාර්ග (`/api/*`, පොදු auth/login හැර) සාමාන්ය inference API යතුරු මඟින් අවසර ලබා **නොදේ**.
-අක්තපත්ර කාණ්ඩ, විෂය පථ සහ curl උදාහරණ:
+කළමනාකරණ මාර්ග (`/api/*`, පොදු සත්යාපනය/පිවිසුම හැර) සාමාන්ය inference API යතුරු මඟින් **අවසර ලබා නොදේ**. අක්තපත්ර කාණ්ඩ, විෂය පථ සහ curl උදාහරණ:
 [කළමනාකරණ සත්යාපනය](../guides/MANAGEMENT-AUTH.md).
 
 ### සත්යාපනය
 
-| අන්ත ලක්ෂ්යය                  | ක්රමය   | විස්තරය                          |
-| ----------------------------- | ------- | -------------------------------- |
-| `/api/auth/login`             | POST    | පුරනය වීම                        |
-| `/api/auth/logout`            | POST    | ඉවත් වීම                         |
-| `/api/settings/require-login` | GET/PUT | පුරනය වීම අවශ්යද යන්න මාරු කිරීම |
+| අන්ත ලක්ෂ්යය                  | ක්රමය    | විස්තරය                                                                                                                                                                                                                                                                                        |
+| ----------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/auth/login`             | POST     | පිවිසීම                                                                                                                                                                                                                                                                                        |
+| `/api/auth/logout`            | POST     | පිටවීම                                                                                                                                                                                                                                                                                         |
+| `/api/settings/require-login` | GET/POST | පිවිසුම් තත්ත්වය (GET, පොදු). POST මුරපදය සකසයි / පිවිසුම සක්රිය හෝ අක්රිය කරයි: මුරපදයක් පවතින විට ක්රියාකරුට පමණි (උපකරණ පුවරු සැසිය, දේශීය CLI, හෝ පිවිසුම අක්රිය කර තිබීම — API යතුරු සහ `oma_` ටෝකනවලට `403` ලැබේ); මුරපදය ප්රතිස්ථාපනය කිරීමට උපකරණ පුවරු සැසියක් `currentPassword` යවයි |
 
-### සපයන්නන් කළමනාකරණය
+### සැපයුම්කරු කළමනාකරණය
 
-| අන්ත ලක්ෂ්යය                            | ක්රමය                 | විස්තරය                                                                                                                                                      |
-| --------------------------------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `/api/providers`                        | GET/POST              | සපයන්නන් ලැයිස්තුගත කිරීම / නිර්මාණය කිරීම                                                                                                                   |
-| `/api/providers/[id]`                   | GET/PUT/DELETE        | සපයන්නෙකු කළමනාකරණය කිරීම                                                                                                                                    |
-| `/api/providers/[id]/test`              | POST                  | සපයන්නාගේ සම්බන්ධතාව පරීක්ෂා කිරීම                                                                                                                           |
-| `/api/providers/[id]/models`            | GET                   | සපයන්නාගේ ආකෘති ලැයිස්තුගත කිරීම                                                                                                                             |
-| `/api/providers/validate`               | POST                  | සපයන්නාගේ වින්යාසය වලංගු කිරීම                                                                                                                               |
-| `/api/providers/bulk`                   | POST                  | එක් සපයන්නෙකු සඳහා API යතුරු තොග වශයෙන් එක් කිරීම                                                                                                            |
-| `/api/providers/import`                 | POST                  | විග්රහ කළ CSV/JSON ගොනුවකින් විෂම සපයන්නන්ගේ ලැයිස්තුවක් ආයාත කිරීම (#6836); එක් එක් පේළිය සඳහා අර්ධ-අසාර්ථක ප්රතිඵල                                         |
-| `/api/provider-nodes*`                  | විවිධ                 | සපයන්නාගේ නෝඩ් කළමනාකරණය                                                                                                                                     |
-| `/api/provider-models`                  | GET/POST/PATCH/DELETE | අභිරුචි ආකෘති (එක් කිරීම, යාවත්කාලීන කිරීම, සැඟවීම/පෙන්වීම, මකා දැමීම)                                                                                       |
-| `/api/provider-models/validate-and-add` | POST                  | කළමනාකරණ-සත්යාපිත, තේරීමෙන් සක්රිය කරන දැඩි සම්බන්ධතා වලංගුකරණය සහ පරමාණුක අභිරුචි-ආකෘති ලියාපදිංචිය; [ආකෘති වලංගුකරණය](../guides/MODEL-VALIDATION.md) බලන්න |
+| අන්ත ලක්ෂ්යය                            | ක්රමය                     | විස්තරය                                                                                                                                        |
+| --------------------------------------- | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/providers`                        | GET/POST                  | සැපයුම්කරුවන් ලැයිස්තුගත කිරීම / නිර්මාණය කිරීම                                                                                                |
+| `/api/providers/[id]`                   | GET/PUT/DELETE            | සැපයුම්කරුවෙකු කළමනාකරණය කිරීම                                                                                                                 |
+| `/api/providers/[id]/test`              | POST                      | සැපයුම්කරු සම්බන්ධතාව පරීක්ෂා කිරීම                                                                                                            |
+| `/api/providers/[id]/models`            | GET                       | සැපයුම්කරුගේ ආකෘති ලැයිස්තුගත කිරීම                                                                                                            |
+| `/api/providers/validate`               | POST                      | සැපයුම්කරු වින්යාසය වලංගු කිරීම                                                                                                                |
+| `/api/providers/bulk`                   | POST                      | එක් සැපයුම්කරුවෙකු සඳහා API යතුරු තොග වශයෙන් එක් කිරීම                                                                                         |
+| `/api/providers/import`                 | POST                      | විග්රහ කළ CSV/JSON ගොනුවකින් විෂම සැපයුම්කරු ලැයිස්තුවක් ආයාත කිරීම (#6836); එක් එක් පේළියට අදාළ අර්ධ-අසාර්ථක ප්රතිඵල                          |
+| `/api/provider-nodes*`                  | විවිධ                     | සැපයුම්කරු නෝඩ් කළමනාකරණය                                                                                                                      |
+| `/api/provider-models`                  | GET/POST/PUT/PATCH/DELETE | අභිරුචි ආකෘති සහ එක් එක් ආකෘතියට අදාළ අතික්රමණ (එක් කිරීම, යාවත්කාලීන කිරීම, සැඟවීම/පෙන්වීම, මකා දැමීම)                                        |
+| `/api/provider-models/validate-and-add` | POST                      | කළමනාකරණ-සත්යාපිත, අභිමත දැඩි-සම්බන්ධතා වලංගුකරණය සහ පරමාණුක අභිරුචි-ආකෘති ලියාපදිංචිය; [ආකෘති වලංගුකරණය](../guides/MODEL-VALIDATION.md) බලන්න |
+
+සමමුහුර්ත කළ/ආයාත කළ ආකෘති සඳහා, `PUT /api/provider-models` විසින් `provider`, `modelId`, සහ
+`maxOutputTokenOverride` පිළිගනී: ධන පූර්ණ සංඛ්යාවක් අතින් නියම කළ ප්රතිදාන-ටෝකන සීමාව සකසන අතර, `null`
+එය ඉවත් කර පෙරනිමිය ප්රතිස්ථාපනය කරයි. `GET /api/provider-models?provider=<provider>` විසින් අභිරුචි-ආකෘති පේළියක් නොමැති ආකෘතිද ඇතුළුව,
+මෙම අගයන් `modelOutputOverrides` තුළ ආපසු ලබා දෙයි. මෙම අතික්රමණය ධාවනකාල `max_output_tokens`
+හැකියාව භාවිත කරන අතර ආකෘතිය නැවත සමමුහුර්ත කිරීමෙන් පසුවද පවතී. OpenAI-අනුකූල
+සැපයුම්කරු පිටුව එම සංස්කරණ/ඉවත් කිරීමේ පාලකම ලබා දෙන අතර පැහැදිලි දෘශ්ය සහාය සහිත ආකෘති සලකුණු කරයි.
+
+අභිරුචි Chat Completions නෝඩ් පැහැදිලි reasoning අත්හැරීම් upstream backend එකට අනුවර්තනය කරයි.
+සාර්ථක සම්බන්ධතා පරීක්ෂණයක්, පිළිගත් `owned_by` අගයක් වන `vllm`, `sglang`, හෝ `llamacpp`
+ඔප්පු කරන `/models` ඇතුළත්කිරීමක් ඇති සෑම නිශ්චිත ආකෘති ID එකක් සඳහාම chat-template පාලක ස්වයංක්රීයව තෝරයි.
+පාරදෘශ්ය OpenAI-අනුකූල wrappers මඟින් මුල් ආකෘති ඇතුළත්කිරීම කැදලිගත `openai`
+වස්තුවක් තුළ රඳවා තැබිය හැක; හඳුනාගැනීම එවැනි ආවරණ තුනක් දක්වා අනුගමනය කරයි. හිමිකාරිත්වය නොමැති, නොදන්නා හෝ
+ගැටෙන ආකෘති සාමාන්ය OpenAI හැසිරීම රඳවා ගනී. හඳුනාගැනීම දැනට පවතින නාමාවලි ඉල්ලීම නැවත භාවිත කරයි,
+completion ටෝකන කිසිවක් ජනනය නොකරයි, සහ සම්බන්ධතා අන්ත ලක්ෂ්යය වෙනස් වූ විට අවලංගු වේ.
+
+එම metadata නිරාවරණය නොකරන backend එකක් සඳහා හැසිරීම ස්ථිර කිරීමට, දැනට පවතින අර්ධ
+සැපයුම්කරු යාවත්කාලීන API භාවිත කරන්න:
+
+```json
+{
+  "providerSpecificData": {
+    "reasoningControl": "chat-template"
+  }
+}
+```
+
+එම body එක `PUT /api/providers/<connection-id>` සමඟ යවන්න. එම connection එකෙහි, `none` ලෙස පැහැදිලිව දක්වා ඇති reasoning effort එකක් `chat_template_kwargs.thinking=false` සහ
+`chat_template_kwargs.enable_thinking=false` ලෙස යවනු ලැබේ. server-side reasoning rule එකක් මඟින් effort එකක් අනිවාර්ය කරන්නේ නම් හැර, පැහැදිලි native template අගයන්ට ප්රමුඛතාව හිමි වේ.
+මෙම සැකසුම අදාළ වන්නේ custom OpenAI-compatible connection එකක් Chat Completions body එකක් dispatch කරන විට පමණි; Responses requests සහ සාමාන්ය
+providers තම native request ආකෘතිය පවත්වා ගනී. සාමාන්ය OpenAI
+`reasoning_effort` passthrough එක බලෙන් යෙදීමට `reasoningControl` අගය `openai` ලෙස සකසන්න, නැතහොත් ස්වයංක්රීය හඳුනාගැනීම භාවිත කිරීමට එය සඳහන් නොකරන්න/`null` ලෙස සකසන්න.
+
+Claude Code auto-mode classifier requests තුළ පැහැදිලි reasoning controls නොමැති විට, පෙරනිමි ලෙස native thinking අක්රිය කරයි.
+හඳුනාගැනීම සඳහා model නාම හෝ completion සීමා නොව, Claude-format requests තුළ ඇති classifier හි system marker එක භාවිත වේ.
+පැහැදිලි body controls, සහාය දක්වන effort/thinking headers, routing rules, සහ resolve කළ model effort ඒවායේ පවතින ප්රමුඛතාව පවත්වා ගනී. classifier
+අදියර දෙකම ඒවායේ prompts, completion සීමා, stop sequences, සහ සැබෑ upstream permission
+තීන්දු පවත්වා ගනී; දෙවන අදියරට තවමත් එය ඉල්ලා ඇති දෘශ්ය reasoning සාමාන්ය පෙළ ලෙස නිපදවිය හැක.
 
 ### OAuth ප්රවාහ
 
-| අන්ත ලක්ෂ්යය                     | ක්රමය | විස්තරය                |
+| Endpoint                         | ක්රමය | විස්තරය                |
 | -------------------------------- | ----- | ---------------------- |
-| `/api/oauth/[provider]/[action]` | විවිධ | සපයන්නාට විශේෂිත OAuth |
+| `/api/oauth/[provider]/[action]` | විවිධ | Provider-විශේෂිත OAuth |
 
-### මාර්ගගත කිරීම සහ වින්යාසය
+### Routing සහ Config
 
-| අන්ත ලක්ෂ්යය          | ක්රමය    | විස්තරය                            |
+| Endpoint              | ක්රමය    | විස්තරය                            |
 | --------------------- | -------- | ---------------------------------- |
-| `/api/models/alias`   | GET/POST | ආකෘති අන්වර්ථ නාම                  |
-| `/api/models/catalog` | GET      | සපයන්නා සහ වර්ගය අනුව සියලුම ආකෘති |
-| `/api/combos*`        | විවිධ    | සංයෝජන කළමනාකරණය                   |
-| `/api/keys*`          | විවිධ    | API යතුරු කළමනාකරණය                |
-| `/api/pricing`        | GET      | ආකෘති මිලකරණය                      |
+| `/api/models/alias`   | GET/POST | Model aliases                      |
+| `/api/models/catalog` | GET      | Provider + වර්ගය අනුව සියලු models |
+| `/api/combos*`        | විවිධ    | Combo කළමනාකරණය                    |
+| `/api/keys*`          | විවිධ    | API key කළමනාකරණය                  |
+| `/api/pricing`        | GET      | Model මිලකරණය                      |
 
-### භාවිතය සහ විශ්ලේෂණය
+### භාවිතය සහ විශ්ලේෂණ
 
-| අන්ත ලක්ෂ්යය                     | ක්රමය           | විස්තරය                                                                                                                                                                                                                                                                                                         |
-| -------------------------------- | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/usage/history`             | GET             | භාවිත ඉතිහාසය                                                                                                                                                                                                                                                                                                   |
-| `/api/usage/logs`                | GET             | භාවිත ලොග                                                                                                                                                                                                                                                                                                       |
-| `/api/usage/request-logs`        | GET             | ඉල්ලීම් මට්ටමේ ලොග                                                                                                                                                                                                                                                                                              |
-| `/api/usage/[connectionId]`      | GET             | සම්බන්ධතාවකට අදාළ භාවිතය                                                                                                                                                                                                                                                                                        |
-| `/api/usage/token-limits`        | GET/POST/DELETE | එක් එක් API යතුර සඳහා ටෝකන සීමා අයවැය                                                                                                                                                                                                                                                                           |
-| `/api/usage/model-latency-stats` | GET             | සැපයුම්කරු/මාදිලිය අනුව අඛණ්ඩ ප්රමාද සමස්තය (avg/p50/p95/p99, සාර්ථකත්ව අනුපාතය); පෙරහන්: `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                                                       |
-| `/api/usage/cache-health`        | GET             | `call_logs` මත පදනම් වූ ප්රේරක-හැඹිලි සෞඛ්ය සාරාංශය — ලිවීම්/කියවීම් අනුපාතය, p50/p90/p99 ලිවීම්-ප්රමාණ ව්යාප්තිය, අධික ලිවීම් සාන්ද්රණය, මාදිලිය අනුව බෙදීම සහ `healthy`/`degraded`/`thrash`/`no-data` තීන්දුවක්; විමසුම් පරාමිති `range` (`1h`\|`24h`\|`7d`\|`30d`, පෙරනිමිය `24h`) සහ විකල්ප `model` (#8827) |
+| Endpoint                         | ක්රමය           | විස්තරය                                                                                                                                                                                                                                                                                            |
+| -------------------------------- | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/usage/history`             | GET             | භාවිත ඉතිහාසය                                                                                                                                                                                                                                                                                      |
+| `/api/usage/logs`                | GET             | භාවිත logs                                                                                                                                                                                                                                                                                         |
+| `/api/usage/request-logs`        | GET             | Request-මට්ටමේ logs                                                                                                                                                                                                                                                                                |
+| `/api/usage/[connectionId]`      | GET             | එක් එක් connection සඳහා භාවිතය                                                                                                                                                                                                                                                                     |
+| `/api/usage/token-limits`        | GET/POST/DELETE | එක් එක් API key සඳහා token-limit budgets                                                                                                                                                                                                                                                           |
+| `/api/usage/model-latency-stats` | GET             | එක් එක් provider/model සඳහා අඛණ්ඩ latency සමස්තය (avg/p50/p95/p99, සාර්ථකත්ව අනුපාතය); filters: `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                                    |
+| `/api/usage/cache-health`        | GET             | `call_logs` මත prompt-cache සෞඛ්ය සාරාංශය — write/read අනුපාතය, p50/p90/p99 write-size ව්යාප්තිය, heavy-write සාන්ද්රණය, එක් එක් model සඳහා බෙදීම, සහ `healthy`/`degraded`/`thrash`/`no-data` තීන්දුවක්; query params `range` (`1h`\|`24h`\|`7d`\|`30d`, පෙරනිමිය `24h`) සහ විකල්ප `model` (#8827) |
+
+### API key අවසර
+
+`PATCH /api/keys/{id}` මඟින් පවතින key එකක අවසර යාවත්කාලීන කරයි. සෑම `/api/keys*` route එකක් මෙන්ම, මෙයට inference key එකක් නොව management authorization අවශ්ය වේ ([Management Authentication](../guides/MANAGEMENT-AUTH.md) බලන්න). ඔබට වෙනස් කිරීමට අවශ්ය fields පමණක් යවන්න; ඒවායින් කිසිවක් නොමැති request එකක් `No valid fields to update` සමඟ ප්රතික්ෂේප කරනු ලැබේ. පිළිගන්නා fields `src/shared/validation/schemas/keys.ts` තුළ ඇති `updateKeyPermissionsSchema` මඟින් අර්ථ දක්වා ඇත.
+
+| ක්ෂේත්රය                                    | වර්ගය                                                        | සටහන්                                                                                                                       |
+| ------------------------------------------- | ------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------- |
+| `name`                                      | string, අක්ෂර 1-200                                          |                                                                                                                             |
+| `isActive`                                  | boolean                                                      |                                                                                                                             |
+| `isBanned`                                  | boolean                                                      |                                                                                                                             |
+| `expiresAt`                                 | ISO 8601 datetime හෝ `null`                                  | `null` මඟින් කල් ඉකුත් වීම ඉවත් කරයි                                                                                        |
+| `modelAccessMode`                           | `all` \| `restricted`                                        | ප්රකාරය `all` වන විට `allowedModels` හිස් විය යුතුය                                                                         |
+| `allowedModels`, `blockedModels`            | string අරාවක්, උපරිම 1000                                    |                                                                                                                             |
+| `allowedCombos`                             | string අරාවක්, උපරිම 500                                     | යතුරට ඇමතිය හැකි combos පාලනය කරයි; සෘජු models `modelAccessMode` / `allowedModels` මඟින් පාලනය වේ                          |
+| `connectionAccessMode`                      | `all` \| `restricted`                                        | `restricted` වන විට `allowedConnections` හිස් නොවිය යුතු අතර `all` වන විට හිස් විය යුතුය                                    |
+| `allowedConnections`                        | UUID අරාවක්, උපරිම 100                                       |                                                                                                                             |
+| `allowAutoCombos`                           | boolean                                                      | `false` නම් මෙම යතුර සමඟ `auto/*` models සඳහා වන ඉල්ලීම් ප්රතික්ෂේප කරයි; එය කිසිදා සකසා නොමැති යතුරුවලට අවසර ලැබේ          |
+| `catalogScope`                              | `all` \| `combos` \| `models`                                | මෙම යතුර සඳහා `GET /v1/models` ලැයිස්තුගත කරන දේ (combos පමණක්, models පමණක්, හෝ දෙකම); එය යතුරට ඇමතිය හැකි දේ වෙනස් නොකරයි |
+| `forcedModel`                               | අක්ෂර 300ක් දක්වා string එකක්, හෝ `null`                     | chat ඉල්ලීම් `X-Route-Model` සහ `body.model` අභිබවා මෙම model/combo වෙත යොමු කරයි; යතුරේ සීමාවන් තවමත් අදාළ වේ              |
+| `noLog`, `autoResolve`                      | boolean                                                      |                                                                                                                             |
+| `throttleDelayMs`                           | integer, 0-300000                                            |                                                                                                                             |
+| `maxSessions`                               | integer, 0-10000                                             |                                                                                                                             |
+| `rateLimits`                                | `{ limit, window }` අරාවක් (ධන integers, උපරිම 50) හෝ `null` | `null` මඟින් සීමා ඉවත් කරයි                                                                                                 |
+| `accessSchedule`                            | කාලසටහන් object එකක් හෝ `null`                               | `null` මඟින් කාලසටහන ඉවත් කරයි                                                                                              |
+| `scopes`                                    | string අරාවක්, උපරිම 32                                      |                                                                                                                             |
+| `allowedEndpoints`                          | string අරාවක්, උපරිම 20                                      |                                                                                                                             |
+| `streamDefaultMode`                         | `legacy` \| `json`                                           |                                                                                                                             |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                         | [යතුරකට cache bypass කිරීම](#per-key-cache-bypass) බලන්න                                                                    |
+| `compressionEnabled`                        | boolean                                                      |                                                                                                                             |
+| `codexServiceMode`                          | Codex සේවා ප්රකාරවලින් එකක්                                  |                                                                                                                             |
+| `disableNonPublicModels`                    | boolean                                                      |                                                                                                                             |
+| `allowUsageCommand`                         | boolean                                                      |                                                                                                                             |
+| `usageLimitEnabled`                         | boolean                                                      |                                                                                                                             |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | number >= 0 හෝ `null`                                        |                                                                                                                             |
+| `chaosModeEnabled`                          | boolean                                                      |                                                                                                                             |
+
+```bash
+curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
+  -H "Authorization: Bearer <management-credential>" \
+  -H "Content-Type: application/json" \
+  -d '{ "allowAutoCombos": false, "catalogScope": "combos" }'
+```
 
 ### සැකසුම්
 
-| අන්ත ලක්ෂ්යය                          | ක්රමය         | විස්තරය                                                                                                                                                                                                |
-| ------------------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `/api/settings`                       | GET/PUT/PATCH | සාමාන්ය සැකසුම්                                                                                                                                                                                        |
-| `/api/settings/proxy`                 | GET/PUT       | ජාල ප්රොක්සි වින්යාසය                                                                                                                                                                                  |
-| `/api/settings/proxy/test`            | POST          | ප්රොක්සි සම්බන්ධතාව පරීක්ෂා කිරීම                                                                                                                                                                      |
-| `/api/settings/ip-filter`             | GET/PUT       | IP අවසර ලැයිස්තුව/අවහිර ලැයිස්තුව                                                                                                                                                                      |
-| `/api/settings/thinking-budget`       | GET/PUT       | සිතීමේ/තර්ක කිරීමේ **ඉල්ලීම්** නැවත ලිවීමේ ප්රකාරය (වෙනස් නොකර යැවීම / ස්වයංක්රීයව ඉවත් කිරීම / අභිරුචි / අනුවර්තී). සම්පීඩනයෙන් ස්වාධීන වේ. [THINKING_BUDGET.md](../guides/THINKING_BUDGET.md) බලන්න. |
-| `/api/settings/system-prompt`         | GET/PUT       | ගෝලීය පද්ධති ප්රේරකය                                                                                                                                                                                   |
-| `/api/settings/compression`           | GET/PUT       | ගෝලීය සම්පීඩන වින්යාසය                                                                                                                                                                                 |
-| `/api/settings/purge-request-history` | POST          | ඉල්ලීම් ලොග පේළි සහ දේශීය ඇමතුම්-ලොග කෘති මැකීම                                                                                                                                                        |
+| අන්ත ලක්ෂ්යය                          | ක්රමය         | විස්තරය                                                                                                                                                                                                                                                                               |
+| ------------------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/settings`                       | GET/PUT/PATCH | සාමාන්ය සැකසුම්. ආරක්ෂක-ප්රතිපත්ති යතුරු (`requireLogin`, `newPassword`, `oidc*`, `corsOrigins`, `bruteForceProtection`) සඳහා `currentPassword` සහ ක්රියාකරු අක්තපත්රයක් අවශ්ය වේ — API යතුරු සහ `oma_` ටෝකන සඳහා `403` ලැබේ; සෑම වෙනස් කිරීමකටම `admin` ප්රවේශ-ටෝකන විෂයපථය අවශ්ය වේ |
+| `/api/settings/proxy`                 | GET/PUT       | ජාල ප්රොක්සි වින්යාසය                                                                                                                                                                                                                                                                 |
+| `/api/settings/proxy/test`            | POST          | ප්රොක්සි සම්බන්ධතාව පරීක්ෂා කරන්න                                                                                                                                                                                                                                                     |
+| `/api/settings/ip-filter`             | GET/PUT       | IP අවසර ලැයිස්තුව/අවහිර ලැයිස්තුව                                                                                                                                                                                                                                                     |
+| `/api/settings/thinking-budget`       | GET/PUT       | සිතීමේ/තර්ක කිරීමේ **ඉල්ලීම්** නැවත ලිවීමේ ප්රකාරය (එලෙසම යැවීම / ස්වයංක්රීයව ඉවත් කිරීම / අභිරුචි / අනුවර්තී). සම්පීඩනයෙන් ස්වාධීන වේ. [THINKING_BUDGET.md](../guides/THINKING_BUDGET.md) බලන්න.                                                                                     |
+| `/api/settings/system-prompt`         | GET/PUT       | ගෝලීය පද්ධති ප්රේරකය                                                                                                                                                                                                                                                                  |
+| `/api/settings/compression`           | GET/PUT       | ගෝලීය සම්පීඩන වින්යාසය                                                                                                                                                                                                                                                                |
+| `/api/settings/purge-request-history` | POST          | ඉල්ලීම් ලොග් පේළි සහ දේශීය ඇමතුම්-ලොග් කෞතුක ඉවත් කරන්න                                                                                                                                                                                                                               |
 
 ### සන්දර්භය සහ සම්පීඩනය
 
@@ -874,55 +1186,67 @@ X-OmniRoute-No-Cache: true
 | `/api/compression/preview`             | POST           | off/lite/standard/aggressive/ultra/RTK/stacked සම්පීඩනය පෙරදසුන් කරන්න |
 | `/api/compression/language-packs`      | GET            | පවතින Caveman භාෂා ඇසුරුම් ලැයිස්තුගත කරන්න                            |
 | `/api/compression/rules`               | GET            | Caveman රීති පාරදත්ත ලැයිස්තුගත කරන්න                                  |
-| `/api/context/caveman/config`          | GET/PUT        | Caveman-විශේෂිත සැකසුම් සඳහා අන්වර්ථ නාමය                              |
-| `/api/context/rtk/config`              | GET/PUT        | අභිරුචි පෙරහන් සහ අමු ප්රතිදාන රඳවාගැනීම ඇතුළුව RTK-විශේෂිත සැකසුම්    |
-| `/api/context/rtk/filters`             | GET            | RTK පෙරහන් නාමාවලිය සහ අභිරුචි පෙරහන් රෝගනිශ්චය                        |
-| `/api/context/rtk/test`                | POST           | පෙළ දත්තභාරයකට එරෙහිව RTK පෙරදසුනක්/පරීක්ෂණයක් ධාවනය කරන්න             |
-| `/api/context/rtk/raw-output/[id]`     | GET            | පොයින්ටර් id අනුව රඳවාගත් සංස්කරණය කළ අමු ප්රතිදානය කියවන්න            |
-| `/api/context/combos`                  | GET/POST       | සම්පීඩන සංයෝජන ලැයිස්තුව/නිර්මාණය                                      |
+| `/api/context/caveman/config`          | GET/PUT        | Caveman-විශේෂිත සැකසුම් අන්වර්ථ නාමය                                   |
+| `/api/context/rtk/config`              | GET/PUT        | අභිරුචි පෙරහන් සහ අමු ප්රතිදාන රඳවා ගැනීම ඇතුළුව RTK-විශේෂිත සැකසුම්   |
+| `/api/context/rtk/filters`             | GET            | RTK පෙරහන් නාමාවලිය සහ අභිරුචි-පෙරහන් නිර්ණය                           |
+| `/api/context/rtk/test`                | POST           | පෙළ පේලෝඩයක් මත RTK පෙරදසුනක්/පරීක්ෂණයක් ක්රියාත්මක කරන්න              |
+| `/api/context/rtk/raw-output/[id]`     | GET            | පොයින්ටර් id මඟින් රඳවාගත් සංස්කරණය කළ අමු ප්රතිදානය කියවන්න           |
+| `/api/context/combos`                  | GET/POST       | සම්පීඩන සංයෝජන ලැයිස්තුගත කිරීම/සෑදීම                                  |
 | `/api/context/combos/[id]`             | GET/PUT/DELETE | සම්පීඩන සංයෝජන විස්තර/යාවත්කාලීන කිරීම/මකා දැමීම                       |
-| `/api/context/combos/[id]/assignments` | GET/PUT        | මාර්ගගත කිරීමේ සංයෝජනවලට සම්පීඩන සංයෝජන පවරන්න                         |
+| `/api/context/combos/[id]/assignments` | GET/PUT        | මාර්ගගත කිරීමේ සංයෝජනවලට සම්පීඩන සංයෝජන පැවරීම                         |
 | `/api/context/analytics`               | GET            | සම්පීඩන විශ්ලේෂණ අන්වර්ථ නාමය                                          |
 
 ### අධීක්ෂණය
 
-| අන්ත ලක්ෂ්යය                         | ක්රමය      | විස්තරය                                                                                                                                                                                                                                                                                                                                                                                             |
-| ------------------------------------ | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/sessions`                      | GET        | සක්රිය සැසි ලුහුබැඳීම                                                                                                                                                                                                                                                                                                                                                                               |
-| `/api/rate-limits`                   | GET        | ගිණුමකට අදාළ අනුපාත සීමා                                                                                                                                                                                                                                                                                                                                                                            |
-| `/api/monitoring/health`             | GET        | සෞඛ්ය පරීක්ෂාව + සැපයුම්කරු සාරාංශය (`catalogCount`, `configuredCount`, `activeCount`, `monitoredCount`). කළමනාකරණ දසුනෙහි `credentialHealth` ඇතුළත් වේ: probe-cache ස්කේලර්, `failed>0` වන විට `failedConnections`, සහ `staleDbNonOkCount` (SQLite ඇලෙනසුලු `test_status`, මානය නොවේ). [MONITORING_GUIDE.md](../ops/MONITORING_GUIDE.md#credentialhealth-probe-cache-vs-sqlite-test_status) බලන්න. |
-| `/api/cache/stats`                   | GET/DELETE | හැඹිලි සංඛ්යාලේඛන / හිස් කිරීම                                                                                                                                                                                                                                                                                                                                                                      |
-| `/api/modality-bridge/stats`         | GET        | මතකයේ ඇති `attempts`, සාර්ථකවීම්/`bridged`, අසාර්ථකවීම්, හැඹිලි පහරවල්, `totalLatencyMs`, `latencySamples`, නියැදි-හරය සහිත `averageLatencyMs`, සහ අවසන් භාවිත වේලාව (නැවත ආරම්භයේදී යළි සකසයි; කළමනාකරණ සත්යාපනය)                                                                                                                                                                                  |
-| `/api/modality-bridge/video/runtime` | GET        | කළමනාකරණ සත්යාපනය/පිරික්සීමට පෙර දැඩි විශ්වාසදායක-loopback පරීක්ෂාව; සනීපාරක්ෂිත කළ FFmpeg/ffprobe ලබාගත හැකි බව සහ අනුවාද (ගබඩා නොකරයි)                                                                                                                                                                                                                                                            |
-| `/api/modality-bridge/video/extract` | POST       | අභ්යන්තර සත්යාපිත විශ්වාසදායක-loopback බයිට් තැරැව්කරු; 50 MiB ආදානය, සීමා කළ පෝලිම/32 MiB ප්රතිදානය, `503` ධාරිතාව, `499` විසන්ධි වීම, `504` කාලසීමාව; පොදු උඩුගත කිරීමේ API එකක් නොවේ                                                                                                                                                                                                             |
+| අන්ත ලක්ෂ්යය                         | ක්රමය      | විස්තරය                                                                                                                                                                                                                                                                                                                                                                                                  |
+| ------------------------------------ | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/sessions`                      | GET        | සක්රිය සැසි ලුහුබැඳීම                                                                                                                                                                                                                                                                                                                                                                                    |
+| `/api/rate-limits`                   | GET        | ගිණුමකට අදාළ අනුපාත සීමා                                                                                                                                                                                                                                                                                                                                                                                 |
+| `/api/monitoring/health`             | GET        | සෞඛ්ය පරීක්ෂාව + සැපයුම්කරු සාරාංශය (`catalogCount`, `configuredCount`, `activeCount`, `monitoredCount`). කළමනාකරණ දසුනට `credentialHealth` ඇතුළත් වේ: විමර්ශන-හැඹිලි අදිශ රාශි, `failed>0` වන විට `failedConnections`, සහ `staleDbNonOkCount` (SQLite ඇලී පවතින `test_status`, මාපකය නොවේ). [MONITORING_GUIDE.md](../ops/MONITORING_GUIDE.md#credentialhealth-probe-cache-vs-sqlite-test_status) බලන්න. |
+| `/api/cache/stats`                   | GET/DELETE | හැඹිලි සංඛ්යාලේඛන / හිස් කිරීම                                                                                                                                                                                                                                                                                                                                                                           |
+| `/api/modality-bridge/stats`         | GET        | මතකයේ පවතින `attempts`, සාර්ථකවීම්/`bridged`, අසාර්ථකවීම්, හැඹිලි ගැළපීම්, `totalLatencyMs`, `latencySamples`, නියැදි-හරය මත ගණනය කළ `averageLatencyMs`, සහ අවසන් භාවිත වේලාව (නැවත ආරම්භයේදී යළි සකසයි; කළමනාකරණ සත්යාපනය)                                                                                                                                                                              |
+| `/api/modality-bridge/video/runtime` | GET        | කළමනාකරණ සත්යාපනයට/විමර්ශනයට පෙර දැඩි විශ්වාසදායක-loopback පරීක්ෂාව; පිරිසිදු කළ FFmpeg/ffprobe ලබාගත හැකි බව සහ අනුවාද (ගබඩා නොකරයි)                                                                                                                                                                                                                                                                    |
+| `/api/modality-bridge/video/extract` | POST       | අභ්යන්තර සත්යාපිත විශ්වාසදායක-loopback බයිට් තැරැව්කරු; 50 MiB ආදානය, සීමා කළ පෝලිම/32 MiB ප්රතිදානය, `503` ධාරිතාව, `499` විසන්ධි වීම, `504` කාලසීමාව; පොදු උඩුගත කිරීමේ API එකක් නොවේ                                                                                                                                                                                                                  |
 
-### උපස්ථ කිරීම සහ නිර්යාතය/ආයාතය
+### උපස්ථ සහ අපනයනය/ආනයනය
 
-| අන්ත ලක්ෂ්යය                | ක්රමය | විස්තරය                                                     |
-| --------------------------- | ----- | ----------------------------------------------------------- |
-| `/api/db-backups`           | GET   | පවතින උපස්ථ ලැයිස්තුගත කරන්න                                |
-| `/api/db-backups`           | PUT   | අතින් උපස්ථයක් සාදන්න                                       |
-| `/api/db-backups`           | POST  | නිශ්චිත උපස්ථයකින් ප්රතිසාධනය කරන්න                         |
-| `/api/db-backups/export`    | GET   | දත්ත සමුදාය .sqlite ගොනුවක් ලෙස බාගන්න                      |
-| `/api/db-backups/import`    | POST  | දත්ත සමුදාය ප්රතිස්ථාපනය කිරීමට .sqlite ගොනුවක් උඩුගත කරන්න |
-| `/api/db-backups/exportAll` | GET   | සම්පූර්ණ උපස්ථය .tar.gz සංරක්ෂිතයක් ලෙස බාගන්න              |
+| අන්ත ලක්ෂ්යය                | ක්රමය  | විස්තරය                                                                                             |
+| --------------------------- | ------ | --------------------------------------------------------------------------------------------------- |
+| `/api/db-backups`           | GET    | පවතින උපස්ථ ලැයිස්තුගත කරන්න                                                                        |
+| `/api/db-backups`           | PUT    | අතින් උපස්ථයක් සාදන්න                                                                               |
+| `/api/db-backups`           | POST   | නිශ්චිත උපස්ථයකින් ප්රතිසාධනය කරන්න                                                                 |
+| `/api/db-backups`           | PATCH  | උපස්ථ රඳවාගැනීමේ සැකසුම් සුරකින්න (ක්රියාකරුට පමණි)                                                 |
+| `/api/db-backups`           | DELETE | රඳවාගැනීමේ සැකසුම් අනුව ගබඩා කළ උපස්ථ ඉවත් කරන්න (ක්රියාකරුට පමණි)                                  |
+| `/api/db-backups/export`    | GET    | දත්ත සමුදාය .sqlite ගොනුවක් ලෙස බාගන්න                                                              |
+| `/api/db-backups/import`    | POST   | දත්ත සමුදාය ප්රතිස්ථාපනය කිරීමට .sqlite ගොනුවක් උඩුගත කරන්න (`?dryRun=true` වලංගු කිරීම පමණක් කරයි) |
+| `/api/db-backups/exportAll` | GET    | සම්පූර්ණ උපස්ථය .tar.gz සංරක්ෂිතයක් ලෙස බාගන්න                                                      |
+
+`/api/db-backups/export`, `/api/db-backups/exportAll` සහ `/api/settings/export-json` මඟින්
+ගබඩා කර ඇති සෑම අක්තපත්රයක්ම ලබා දෙන බැවින්, ඒවාට උපකරණ පුවරු සැසිය හෝ දේශීය CLI එක අවශ්ය වේ (නැතහොත් පිවිසුම
+අක්රිය කර තිබිය යුතුය). ඕනෑම විෂය පථයක API යතුරු සහ `oma_` ප්රවේශ ටෝකනවලට `403` ලැබේ. ප්රතිසාධන සඳහාද එම
+සීමාවම අදාළ වේ: `POST /api/db-backups/import` (`dryRun=true` ඇතුළුව), `POST /api/db-backups` (id අනුව ප්රතිසාධනය)
+සහ `POST /api/settings/import-json` මඟින් සජීවී දත්ත සමුදාය හෝ සැකසුම් ප්රතිස්ථාපනය කරන බැවින්, යන්ත්ර
+අක්තපත්රයකට එහිදීද `403` ලැබේ; `omniroute sync import` දේශීය CLI අක්තපත්රය යවයි. එසේම
+`DELETE /api/db-backups` (ගබඩා කළ උපස්ථ ඉවත් කිරීම) සහ `PATCH /api/db-backups` (රඳවාගැනීමේ සැකසුම්:
+ස්ථිරව සුරැකි අගයන් සෑම උපස්ථයකටම පසු ස්වයංක්රීය ඉවත් කිරීම මෙහෙයවයි) සඳහාද මෙය අදාළ වේ. ලැයිස්තුගත කිරීම (`GET`) සහ
+අතින් උපස්ථයක් සෑදීම (`PUT`) සාමාන්ය කළමනාකරණ සත්යාපනය දිගටම භාවිත කරයි.
 
 ### වලාකුළු සමමුහුර්තකරණය
 
-| අන්ත ලක්ෂ්යය           | ක්රමය | විස්තරය                       |
-| ---------------------- | ----- | ----------------------------- |
-| `/api/sync/cloud`      | විවිධ | වලාකුළු සමමුහුර්තකරණ මෙහෙයුම් |
-| `/api/sync/initialize` | POST  | සමමුහුර්තකරණය ආරම්භ කරන්න     |
-| `/api/cloud/*`         | විවිධ | වලාකුළු කළමනාකරණය             |
+| අන්ත ලක්ෂ්යය           | ක්රමය | විස්තරය                    |
+| ---------------------- | ----- | -------------------------- |
+| `/api/sync/cloud`      | විවිධ | වලාකුළු සමමුහුර්ත මෙහෙයුම් |
+| `/api/sync/initialize` | POST  | සමමුහුර්තකරණය ආරම්භ කරන්න  |
+| `/api/cloud/*`         | විවිධ | වලාකුළු කළමනාකරණය          |
 
 ### උමං
 
-| අන්ත ලක්ෂ්යය               | ක්රමය | විස්තරය                                                                  |
-| -------------------------- | ----- | ------------------------------------------------------------------------ |
-| `/api/tunnels/cloudflared` | GET   | උපකරණ පුවරුව සඳහා Cloudflare Quick Tunnel ස්ථාපන/ධාවන තත්ත්වය කියවන්න    |
-| `/api/tunnels/cloudflared` | POST  | Cloudflare Quick Tunnel සක්රිය හෝ අක්රිය කරන්න (`action=enable/disable`) |
-| `/api/tunnels/ngrok`       | GET   | උපකරණ පුවරුව සඳහා ngrok Tunnel ධාවන තත්ත්වය කියවන්න                      |
-| `/api/tunnels/ngrok`       | POST  | ngrok Tunnel සක්රිය හෝ අක්රිය කරන්න (`action=enable/disable`)            |
+| අන්ත ලක්ෂ්යය               | ක්රමය | විස්තරය                                                               |
+| -------------------------- | ----- | --------------------------------------------------------------------- |
+| `/api/tunnels/cloudflared` | GET   | උපකරණ පුවරුව සඳහා Cloudflare Quick Tunnel ස්ථාපන/ධාවන තත්ත්වය කියවන්න |
+| `/api/tunnels/cloudflared` | POST  | Cloudflare Quick Tunnel සබල හෝ අක්රිය කරන්න (`action=enable/disable`) |
+| `/api/tunnels/ngrok`       | GET   | උපකරණ පුවරුව සඳහා ngrok Tunnel ධාවන තත්ත්වය කියවන්න                   |
+| `/api/tunnels/ngrok`       | POST  | ngrok Tunnel සබල හෝ අක්රිය කරන්න (`action=enable/disable`)            |
 
 ### CLI මෙවලම්
 
@@ -938,26 +1262,26 @@ CLI ප්රතිචාරවල ඇතුළත් වන්නේ: `installe
 
 ### ACP නියෝජිතයන්
 
-| අන්ත ලක්ෂ්යය      | ක්රමය  | විස්තරය                                                                          |
-| ----------------- | ------ | -------------------------------------------------------------------------------- |
-| `/api/acp/agents` | GET    | අනාවරණය කරගත් සියලු නියෝජිතයන් (අන්තර්ගත + අභිරුචි) තත්ත්වය සමඟ ලැයිස්තුගත කරන්න |
-| `/api/acp/agents` | POST   | අභිරුචි නියෝජිතයෙකු එක් කරන්න හෝ අනාවරණ හැඹිලිය නැවුම් කරන්න                     |
-| `/api/acp/agents` | DELETE | `id` විමසුම් පරාමිතිය මඟින් අභිරුචි නියෝජිතයෙකු ඉවත් කරන්න                       |
+| අන්ත ලක්ෂ්යය      | ක්රමය  | විස්තරය                                                                            |
+| ----------------- | ------ | ---------------------------------------------------------------------------------- |
+| `/api/acp/agents` | GET    | අනාවරණය කළ සියලු නියෝජිතයන් (අන්තර්නිර්මිත + අභිරුචි) තත්ත්වය සමඟ ලැයිස්තුගත කරන්න |
+| `/api/acp/agents` | POST   | අභිරුචි නියෝජිතයෙකු එක් කරන්න හෝ අනාවරණ හැඹිලිය නැවුම් කරන්න                       |
+| `/api/acp/agents` | DELETE | `id` විමසුම් පරාමිතිය අනුව අභිරුචි නියෝජිතයෙකු ඉවත් කරන්න                          |
 
 GET ප්රතිචාරයට `agents[]` (id, name, binary, version, installed, protocol, isCustom) සහ `summary` (total, installed, notFound, builtIn, custom) ඇතුළත් වේ.
 
 ### ප්රත්යස්ථතාව සහ අනුපාත සීමා
 
-| අන්ත ලක්ෂ්යය                      | ක්රමය     | විස්තරය                                                                                                             |
-| --------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------- |
-| `/api/resilience`                 | GET/PATCH | ඉල්ලීම් පෝලිම, සම්බන්ධතා සිසිලන කාලය, සැපයුම්කරු පරිපථ බිඳුම සහ රැඳී සිටීමේ සැකසුම් ලබාගන්න/යාවත්කාලීන කරන්න        |
-| `/api/resilience/reset`           | POST      | සැපයුම්කරු පරිපථ බිඳුම් යළි සකසන්න                                                                                  |
-| `/api/resilience/model-cooldowns` | GET       | ඉතිරි කාලය අනුව අනුපිළිවෙළට සකසා ඇති, සක්රිය එක් එක්-(සැපයුම්කරු, සම්බන්ධතාව, ආකෘතිය) අගුලු දැමීම් ලැයිස්තුගත කරන්න |
-| `/api/resilience/model-cooldowns` | DELETE    | ආකෘති අගුලු දැමීමක් ඉවත් කරන්න — සියල්ල මකා දැමීමට body `{provider, model}` හෝ `{all: true}`                        |
-| `/api/rate-limits`                | GET       | එක් එක් ගිණුම සඳහා අනුපාත සීමා තත්ත්වය                                                                              |
-| `/api/rate-limit`                 | GET       | ගෝලීය අනුපාත සීමා වින්යාසය                                                                                          |
+| අන්ත ලක්ෂ්යය                      | ක්රමය     | විස්තරය                                                                                                     |
+| --------------------------------- | --------- | ----------------------------------------------------------------------------------------------------------- |
+| `/api/resilience`                 | GET/PATCH | ඉල්ලීම් පෝලිම, සම්බන්ධතා සිසිලන කාලය, සැපයුම්කරු බිඳිනය සහ රැඳී සිටීමේ සැකසුම් ලබාගන්න/යාවත්කාලීන කරන්න     |
+| `/api/resilience/reset`           | POST      | සැපයුම්කරු පරිපථ බිඳින නැවත සකසන්න                                                                          |
+| `/api/resilience/model-cooldowns` | GET       | ඉතිරි කාලය අනුව වර්ග කළ, එක් එක් (සැපයුම්කරු, සම්බන්ධතාව, ආකෘතිය) සඳහා සක්රිය අගුලු දැමීම් ලැයිස්තුගත කරන්න |
+| `/api/resilience/model-cooldowns` | DELETE    | ආකෘති අගුලු දැමීමක් ඉවත් කරන්න — සියල්ල මැකීමට body එක `{provider, model}` හෝ `{all: true}` ලෙස දෙන්න       |
+| `/api/rate-limits`                | GET       | එක් එක් ගිණුමට අදාළ අනුපාත සීමා තත්ත්වය                                                                     |
+| `/api/rate-limit`                 | GET       | ගෝලීය අනුපාත සීමා වින්යාසය                                                                                  |
 
-> `/api/resilience/*` මාර්ග හතරටම **කළමනාකරණ සත්යාපනය** (`requireManagementAuth`) අවශ්ය වේ. සැපයුම්කරු පරිපථ බිඳුම, සම්බන්ධතා සිසිලන කාලය සහ ආකෘති අගුලු දැමීම අතර වෙනස්කම් පිළිබඳ සම්පූර්ණ විස්තරයක් සඳහා [ප්රත්යස්ථතාව (විස්තීර්ණ)](#resilience-extended) බලන්න.
+> `/api/resilience/*` මාර්ග හතරටම **කළමනාකරණ සත්යාපනය** (`requireManagementAuth`) අවශ්ය වේ. සැපයුම්කරු බිඳිනය, සම්බන්ධතා සිසිලන කාලය සහ ආකෘති අගුලු දැමීම අතර වෙනස පිළිබඳ සම්පූර්ණ විස්තරයක් සඳහා [ප්රත්යස්ථතාව (විස්තීර්ණ)](#resilience-extended) බලන්න.
 
 ### ඇගයීම්
 
@@ -973,32 +1297,34 @@ GET ප්රතිචාරයට `agents[]` (id, name, binary, version, instal
 
 ### අනුකූලතාව
 
-| අන්ත ලක්ෂ්යය                | ක්රමය | විස්තරය                       |
-| --------------------------- | ----- | ----------------------------- |
-| `/api/compliance/audit-log` | GET   | අනුකූලතා විගණන ලොගය (අවසන් N) |
+| Endpoint                    | ක්රමය | විස්තරය                              |
+| --------------------------- | ----- | ------------------------------------ |
+| `/api/compliance/audit-log` | GET   | අනුකූලතා විගණන ලොගය (අවසන් N වාර්තා) |
 
-### v1beta (Gemini-අනුකූල)
+### v1beta (Gemini සමඟ අනුකූල)
 
-| අන්ත ලක්ෂ්යය               | ක්රමය | විස්තරය                                 |
-| -------------------------- | ----- | --------------------------------------- |
-| `/v1beta/models`           | GET   | Gemini ආකෘතියෙන් ආකෘති ලැයිස්තුගත කරන්න |
-| `/v1beta/models/{...path}` | POST  | Gemini `generateContent` අන්ත ලක්ෂ්යය   |
+| Endpoint                   | ක්රමය | විස්තරය                                  |
+| -------------------------- | ----- | ---------------------------------------- |
+| `/v1beta/models`           | GET   | Gemini ආකෘතියෙන් models ලැයිස්තුගත කිරීම |
+| `/v1beta/models/{...path}` | POST  | Gemini `generateContent` endpoint එක     |
 
-ස්වදේශීය Gemini SDK අනුකූලතාව අපේක්ෂා කරන සේවාලාභීන් සඳහා මෙම අන්ත ලක්ෂ්ය Gemini හි API ආකෘතිය පිළිබිඹු කරයි.
+දේශීය Gemini SDK අනුකූලතාව අපේක්ෂා කරන clients සඳහා මෙම endpoints Gemini හි API ආකෘතිය අනුකරණය කරයි.
 
-### අභ්යන්තර / පද්ධති API
+### අභ්යන්තර / පද්ධති APIs
 
-| අන්ත ලක්ෂ්යය             | ක්රමය | විස්තරය                                                |
-| ------------------------ | ----- | ------------------------------------------------------ |
-| `/api/init`              | GET   | යෙදුම ආරම්භ කිරීමේ පරීක්ෂාව (පළමු ධාවනයේදී භාවිත කෙරේ) |
-| `/api/tags`              | GET   | Ollama-අනුකූල ආකෘති ටැග් (Ollama සේවාලාභීන් සඳහා)      |
-| `/api/restart`           | POST  | විධිමත් සේවාදායක යළි ඇරඹීමක් ක්රියාත්මක කිරීම          |
-| `/api/shutdown`          | POST  | විධිමත් සේවාදායක වසා දැමීමක් ක්රියාත්මක කිරීම          |
-| `/api/system/env/repair` | POST  | OAuth සැපයුම්කරුගේ පරිසර විචල්ය අලුත්වැඩියා කිරීම      |
+| Endpoint                 | ක්රමය | විස්තරය                                                   |
+| ------------------------ | ----- | --------------------------------------------------------- |
+| `/api/init`              | GET   | යෙදුම් ආරම්භක පරීක්ෂාව (පළමු වරට ධාවනය කිරීමේදී භාවිත වේ) |
+| `/api/tags`              | GET   | Ollama සමඟ අනුකූල model tags (Ollama clients සඳහා)        |
+| `/api/restart`           | POST  | ක්රමානුකූල server නැවත ආරම්භ කිරීමක් ක්රියාත්මක කිරීම     |
+| `/api/shutdown`          | POST  | ක්රමානුකූල server වසා දැමීමක් ක්රියාත්මක කිරීම            |
+| `/api/system/env/repair` | POST  | OAuth provider පරිසර විචල්ය අලුත්වැඩියා කිරීම             |
+| `/api/system/version`    | GET   | වත්මන්/නවතම version, update තත්ත්වය, release channel      |
+| `/api/system/version`    | POST  | නවතම version එකට deployment-aware update එකක් ආරම්භ කිරීම |
 
-> **සටහන:** මෙම අන්ත ලක්ෂ්ය පද්ධතිය විසින් අභ්යන්තරව හෝ Ollama සේවාලාභී අනුකූලතාව සඳහා භාවිත කෙරේ. සාමාන්යයෙන් අවසාන පරිශීලකයන් විසින් ඒවා කැඳවනු නොලැබේ.
+> **සටහන:** මෙම endpoints පද්ධතිය විසින් අභ්යන්තරව හෝ Ollama client අනුකූලතාව සඳහා භාවිත කරයි. සාමාන්යයෙන් අවසාන පරිශීලකයන් විසින් ඒවා කැඳවනු නොලැබේ.
 
-### OAuth පරිසර අලුත්වැඩියාව _(v3.6.1+)_
+### OAuth පරිසරය අලුත්වැඩියා කිරීම _(v3.6.1+)_
 
 ```bash
 POST /api/system/env/repair
@@ -1009,7 +1335,7 @@ Content-Type: application/json
 }
 ```
 
-නිශ්චිත සැපයුම්කරුවකු සඳහා අස්ථානගත වූ හෝ දූෂිත වූ OAuth පරිසර විචල්ය අලුත්වැඩියා කරයි. පහත ප්රතිචාරය ලබා දෙයි:
+නිශ්චිත provider එකක් සඳහා අස්ථානගත වූ හෝ දූෂිත වූ OAuth පරිසර විචල්ය අලුත්වැඩියා කරයි. ආපසු ලබා දෙන්නේ:
 
 ```json
 {
@@ -1018,6 +1344,43 @@ Content-Type: application/json
   "backupPath": "/home/user/.omniroute/backups/env-repair-2026-04-11.bak"
 }
 ```
+
+### Version සහ Release Channel
+
+```bash
+GET /api/system/version
+```
+
+loopback සඳහා පමණක් වූ කළමනාකරණ route එකකි (admin auth). ධාවනය වන version එක, නවතම
+ප්රකාශිත version එක සහ ස්වයංක්රීය update තත්ත්වය ආපසු ලබා දෙයි. `releaseChannel` සහ `channels` යනු එකතු කළ
+fields වේ (rail 3.8.54); `channel` එහි අර්ථය එලෙසම පවත්වා ගනී — dashboard updater එක භාවිත කරන
+deployment මාදිලිය (`npm`, `source` හෝ `docker-compose`).
+
+```json
+{
+  "current": "3.8.52",
+  "latest": "3.8.52",
+  "updateAvailable": false,
+  "channel": "npm",
+  "autoUpdateSupported": true,
+  "autoUpdateError": null,
+  "news": null,
+  "releaseChannel": "latest",
+  "channels": { "latest": "3.8.52", "next": "3.8.53-rc.1" }
+}
+```
+
+- `releaseChannel` — ධාවනය වන build එකේ npm channel එක: `-nightly.*` versions සඳහා `nightly`,
+  අනෙකුත් pre-releases (`-rc.*`, `-beta.*`, `-alpha.*`) සඳහා `next`, `channels.latest` හි ඇති major එකට
+  වඩා පැරණි major එකක stable version එකක් සඳහා `lts`, එසේ නොමැති නම් `latest`. publish කරන අවස්ථාවේ
+  npm dist-tag එක තෝරන `scripts/release/dist-tag.mjs` හි නීතිම වේ.
+- `channels` — `npm view omniroute dist-tags` වෙතින් (registry
+  HTTP fallback සමඟ) ලැබෙන එක් එක් dist-tag හි ප්රකාශිත නවතම අගය, `latest` සඳහා භාවිත කරන මිනිත්තු 10ක TTL එකෙන්ම cache කර ඇත. `latest` සැමවිටම පවතී
+  (පළමුව `latest` field එකටත්, අනතුරුව `"unavailable"` වෙතත් fallback වේ); `next`, `nightly` සහ `lts` දිස්වන්නේ
+  එම dist-tag එක පවතින විට පමණි. `Cache-Control: no-cache` request එකක් lookup දෙකම නැවුම් කරයි.
+
+channel ආකෘතිය (`latest` = 4.0 GA තෙක් v3, `next` = rc, `nightly` = `develop` builds,
+`lts` = 4.0 GA පසු v3 patches) `docs/ops/RELEASE_STRATEGY.md` හි විස්තර කර ඇත.
 
 ---
 
@@ -1233,17 +1596,17 @@ OmniRoute සිදුවීම් සඳහා පිටතට යැවෙන 
 
 ## ලියාපදිංචි කළ යතුරු (ස්වයංක්රීය කළමනාකරණය)
 
-දෛනික/පැයක quota සමඟ, පසුබිම් සැපයුම්කරුවෙකුට/ගිණුමකට අදාළව API යතුරු නිකුත් කිරීමට සහ මාරු කිරීමට ස්වයංක්රීය යතුරු කළමනාකරණ උපපද්ධතිය විසින් භාවිත කරයි.
+දෛනික/පැයකට අදාළ කෝටා සහිතව, පසුබිම් සැපයුම්කරුවෙකුට/ගිණුමකට එරෙහිව API යතුරු නිකුත් කිරීමට සහ මාරු කිරීමට ස්වයංක්රීය යතුරු කළමනාකරණ උපපද්ධතිය විසින් භාවිත කරයි.
 
-| ක්රමය  | මාර්ගය                                | විස්තරය                                                                                                                                                                                                                               |
-| ------ | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/v1/registered-keys`             | ලියාපදිංචි කළ යතුරු ලැයිස්තුගත කරයි (සඟවා පෙන්වන prefix එක පමණි)                                                                                                                                                                      |
-| POST   | `/api/v1/registered-keys`             | නව ලියාපදිංචි යතුරක් නිකුත් කරයි — body: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. අමු යතුර ආපසු ලබා දෙන්නේ **එක් වරක්** පමණි. quota හේතුවෙන් ප්රතික්ෂේප කළහොත් `429` ආපසු ලබා දෙයි. |
-| GET    | `/api/v1/registered-keys/[id]`        | ලියාපදිංචි කළ යතුරක metadata ලබා ගනියි (අමු යතුරු දත්ත නොමැතිව)                                                                                                                                                                       |
-| DELETE | `/api/v1/registered-keys/[id]`        | ලියාපදිංචි කළ යතුරක් අවලංගු කරයි                                                                                                                                                                                                      |
-| POST   | `/api/v1/registered-keys/[id]/revoke` | පැහැදිලි අවලංගු කිරීමේ endpoint එක (DELETE හා සමාන ප්රතිඵලයක් ඇත)                                                                                                                                                                     |
+| ක්රමය  | මාර්ගය                                | විස්තරය                                                                                                                                                                                                                                 |
+| ------ | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/v1/registered-keys`             | ලියාපදිංචි කළ යතුරු ලැයිස්තුගත කරයි (ආවරණය කළ උපසර්ගය පමණි)                                                                                                                                                                             |
+| POST   | `/api/v1/registered-keys`             | නව ලියාපදිංචි කළ යතුරක් නිකුත් කරයි — body: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. අමු යතුර **එක් වරක්** පමණක් ආපසු ලබා දෙයි. කෝටාව හේතුවෙන් ප්රතික්ෂේප කළහොත් `429` ආපසු ලබා දෙයි. |
+| GET    | `/api/v1/registered-keys/[id]`        | ලියාපදිංචි කළ යතුරක පාරදත්ත ලබා ගනී (අමු දත්ත නොමැතිව)                                                                                                                                                                                  |
+| DELETE | `/api/v1/registered-keys/[id]`        | ලියාපදිංචි කළ යතුරක් අවලංගු කරයි                                                                                                                                                                                                        |
+| POST   | `/api/v1/registered-keys/[id]/revoke` | පැහැදිලි අවලංගු කිරීමේ අන්ත ලක්ෂ්යය (DELETE හා සමාන බලපෑමක් ඇත)                                                                                                                                                                         |
 
-**සත්යාපනය:** Bearer API යතුර (`isAuthenticated`). `/v1/quotas/check` සහ `/v1/issues/report` ද බලන්න.
+**සත්යාපනය:** කළමනාකරණ සැසිය/API යතුර (`requireManagementAuth`) — `/api/keys` සඳහා භාවිත කරන ආරක්ෂකයම වේ: උපකරණ පුවරු සැසියක්, දේශීය CLI ටෝකනය, හෝ `manage`/`admin` විෂයපථය සහිත API යතුරක්; අනුමානය සඳහා පමණක් වන API යතුරුවලට `403` ලැබේ. `/v1/quotas/check` සහ `/v1/issues/report` ද බලන්න.
 
 ---
 

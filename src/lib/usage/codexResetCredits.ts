@@ -5,6 +5,7 @@ import {
   fetchAndPersistProviderLimits,
   refreshAndUpdateCredentials,
 } from "@/lib/usage/providerLimits";
+import { releaseCodexCooldownAfterResetCredit } from "@/lib/usage/resetCreditCooldownRelease";
 import { invalidateCodexQuotaCache } from "@omniroute/open-sse/services/codexQuotaFetcher.ts";
 import { getCodexBackendIdentityHeaders } from "@omniroute/open-sse/config/codexClient.ts";
 import { runWithProxyContext } from "@omniroute/open-sse/utils/proxyFetch.ts";
@@ -508,6 +509,12 @@ export async function consumeCodexResetCredit(
 
     const refreshed = await fetchAndPersistProviderLimits(connectionId, "manual", {
       allowRotatingRefresh: true,
+    });
+    // The credit is already spent upstream: a failed local release must not turn it into a 500.
+    await releaseCodexCooldownAfterResetCredit(connectionId, refreshed.usage).catch((error) => {
+      console.warn(
+        `[CodexResetCredits] Cooldown release failed for ${connectionId}: ${sanitizeErrorMessage(error)}`
+      );
     });
 
     return { outcome, usage: refreshed.usage };

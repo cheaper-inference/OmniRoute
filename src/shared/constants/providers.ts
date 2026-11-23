@@ -1,6 +1,7 @@
 // Re-export service kinds from leaf module (avoids circular dep with providerSchema)
 export type { ServiceKind } from "./serviceKinds";
-export type RiskNoticeVariant = "oauth" | "webCookie" | "deprecated" | "embedded-service";
+export type RiskNoticeVariant =
+  "oauth" | "webCookie" | "deprecated" | "embedded-service" | "official-client-only";
 
 import { NOAUTH_PROVIDERS } from "./providers/noauth";
 export { supportsNoAuthProviderProxy } from "./providers/noauth";
@@ -22,7 +23,6 @@ export const FREE_PROVIDERS = {};
 
 export const FREE_APIKEY_PROVIDER_IDS = new Set([
   "qoder",
-  "opencode",
   "dahl",
   // auggie is a fully local, credential-less CLI passthrough (auth handled by
   // `auggie login` outside OmniRoute). Admitted here purely so POST /api/providers
@@ -43,7 +43,15 @@ export function supportsApiKeyOnFreeProvider(providerId: unknown): boolean {
 
 // Providers presented as one dashboard card with OAuth as the primary action
 // and a direct API-key alternative. Keep these out of FREE_APIKEY_PROVIDER_IDS.
-const DUAL_AUTH_PROVIDER_IDS = new Set(["clinepass", "codebuddy-cn", "xai", "muse-code"]);
+const DUAL_AUTH_PROVIDER_IDS = new Set([
+  "clinepass",
+  "codebuddy-cn",
+  "codebuddy-intl",
+  "xai",
+  "muse-code",
+  "cline",
+  "kilocode",
+]);
 
 export function supportsDualAuthProvider(providerId: unknown): boolean {
   return typeof providerId === "string" && DUAL_AUTH_PROVIDER_IDS.has(providerId);
@@ -120,12 +128,16 @@ export const AGGREGATOR_PROVIDER_IDS = new Set([
   "zylo-api",
   "fastrouter",
   "anyapi",
+  "beatapi",
   "electronhub",
   "llmgateway",
   "lyceum",
   "llm-kiwi",
   "literouter",
+  "onomeo",
   "eurouter",
+  "unifically",
+  "y-api",
   "mnn-ai",
   "meganova-ai",
   "mixlayer",
@@ -148,6 +160,9 @@ export const AGGREGATOR_PROVIDER_IDS = new Set([
   "tabitoken",
   "logfare",
   "seekai",
+  "tokenmarket",
+  "demonroute",
+  "daoxe",
 ]);
 
 export const ENTERPRISE_CLOUD_PROVIDER_IDS = new Set([

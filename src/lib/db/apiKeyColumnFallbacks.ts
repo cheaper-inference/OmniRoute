@@ -1,4 +1,9 @@
 export const API_KEY_COLUMN_FALLBACKS = [
+  {
+    name: "codex_service_mode",
+    definition:
+      "codex_service_mode TEXT NOT NULL DEFAULT 'inherit' CHECK (codex_service_mode IN ('inherit', 'default', 'priority', 'flex'))",
+  },
   { name: "allowed_models", definition: "allowed_models TEXT" },
   {
     name: "model_access_mode",
@@ -67,4 +72,26 @@ export const API_KEY_COLUMN_FALLBACKS = [
     definition:
       "catalog_scope TEXT NOT NULL DEFAULT 'all' CHECK (catalog_scope IN ('all', 'combos', 'models'))",
   },
+  // Per-key enforced routing target (NULL = not pinned). See resolveApiKeyForcedModel.
+  { name: "forced_model", definition: "forced_model TEXT" },
 ] as const;
+
+interface ApiKeySchemaDb {
+  prepare: (sql: string) => { all: (...params: unknown[]) => unknown[] };
+  exec: (sql: string) => void;
+}
+
+/**
+ * Adds every api_keys column from API_KEY_COLUMN_FALLBACKS that the table still lacks.
+ * Shared by the api-keys module and the JSON backup import, which must see the full
+ * column set before restoring rows (a missing `is_banned` would drop a ban on restore).
+ */
+export function ensureApiKeyFallbackColumns(db: ApiKeySchemaDb): void {
+  const columns = db.prepare("PRAGMA table_info(api_keys)").all() as Array<{ name?: unknown }>;
+  const columnNames = new Set(columns.map((column) => String(column.name ?? "")));
+  for (const column of API_KEY_COLUMN_FALLBACKS) {
+    if (columnNames.has(column.name)) continue;
+    db.exec(`ALTER TABLE api_keys ADD COLUMN ${column.definition}`);
+    console.log(`[DB] Added api_keys.${column.name} column`);
+  }
+}

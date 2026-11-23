@@ -508,11 +508,11 @@ sqlite3 ~/.omniroute/storage.sqlite "PRAGMA integrity_check;"
 
 ---
 
-## Fəlakətdən Sonra Bərpa
+## Fəlakətdən sonra bərpa
 
-### Ssenari 1: WAL Faylı İtib
+### Ssenari 1: WAL faylı itib
 
-`-wal` faylı yoxdur, lakin `-shm` faylı və əsas verilənlər bazası bütövdür:
+`-wal` faylı yoxdur, lakin `-shm` və əsas verilənlər bazası bütövdür:
 
 ```bash
 # Növbəti açılışda avtomatik bərpa olunur
@@ -527,21 +527,24 @@ sqlite3 recovered.db < recovered.sql
 mv recovered.db ~/.omniroute/storage.sqlite
 ```
 
-### Ssenari 2: Əsas Verilənlər Bazası Faylı Zədələnib
+### Ssenari 2: Əsas verilənlər bazası faylı zədələnib
 
 Ehtiyat nüsxədən bərpa edin:
 
 ```bash
-omniroute sync pull --merge   # və ya: omniroute backup restore <backup-id>
+omniroute backup restore <backup-id>
 ```
 
-### Ssenari 3: Şifrələmə Açarı İtib
+`omniroute sync pull [outPath]` yalnız işləyən serverdən tam `.tar.gz` arxivini endirir
+(`GET /api/db-backups/exportAll`, operator giriş məlumatları tələb olunur); heç nəyi bərpa etmir.
+
+### Ssenari 3: Şifrələmə açarı itib
 
 Açar olmadan **bərpa mümkün deyil**. Şifrələnmiş sahələri oxumaq mümkün deyil. Bütün provayderləri yeni giriş məlumatları ilə əl ilə yenidən əlavə edin.
 
-> **Qarşısının alınması**: Şifrələmə açarının ehtiyat nüsxəsini həmişə ayrıca, ideal olaraq parol menecerində və ya KMS-də saxlayın.
+> **Riskin azaldılması**: Şifrələmə açarının ehtiyat nüsxəsini həmişə ayrıca, ideal olaraq parol menecerində və ya KMS-də saxlayın.
 
-### Ssenari 4: Disk Doludur
+### Ssenari 4: Disk doludur
 
 SQLite `SQLITE_FULL` xətaları qaytaracaq. Diskdə yer boşaldın, sonra:
 

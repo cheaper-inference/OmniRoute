@@ -140,3 +140,41 @@ test("saveRequestUsage: two entries with different providers are both inserted",
     "Two entries with different providers should both be inserted"
   );
 });
+
+test("saveRequestUsage: legacy dedup retains endpoint and cpa auth backfills", async () => {
+  const db = getDbInstance();
+  const before = countRows(db);
+  const ts = "2026-10-11T12:34:56.789Z";
+  const entry = makeEntry({ timestamp: ts, endpoint: null, cpaAuthIndex: null });
+
+  await saveRequestUsage(entry);
+  await saveRequestUsage({
+    ...entry,
+    endpoint: "/v1/chat/completions",
+    cpaAuthIndex: "auth-index-fixture",
+  });
+
+  assert.equal(countRows(db), before + 1);
+  const row = db
+    .prepare("SELECT endpoint, cpa_auth_index FROM usage_history WHERE timestamp = ?")
+    .get(ts) as { endpoint: string | null; cpa_auth_index: string | null };
+  assert.deepEqual(row, {
+    endpoint: "/v1/chat/completions",
+    cpa_auth_index: "auth-index-fixture",
+  });
+});
+
+test("saveRequestUsage: opt-in physical attempts insert same natural key twice", async () => {
+  const db = getDbInstance();
+  const before = countRows(db);
+  const entry = makeEntry({ timestamp: new Date().toISOString() });
+
+  await saveRequestUsage(entry, { deduplicate: false });
+  await saveRequestUsage(entry, { deduplicate: false });
+
+  assert.equal(
+    countRows(db),
+    before + 2,
+    "Distinct physical attempts must not share the legacy natural-key dedup"
+  );
+});

@@ -12,10 +12,12 @@ import {
   splitClaudeEffortSuffix,
   getProviderModels,
 } from "@omniroute/open-sse/config/providerModels.ts";
+import { splitKimiCodingEffortVariant } from "@omniroute/open-sse/utils/kimiCodingEffortVariant.ts";
 import {
   codexModelFamilySupportsExtendedEffort,
   isCodexExtendedEffortBaseModel,
 } from "@/shared/reasoning/codexExtendedEffort";
+import { shouldDeriveDisabledReasoningEffort } from "@/shared/reasoning/effortStandardization";
 
 type JsonRecord = Record<string, unknown>;
 const EFFORTS = new Set<ReasoningEffort>([
@@ -61,8 +63,9 @@ function asRecord(value: unknown): JsonRecord {
 
 function effort(value: unknown): ReasoningEffort | null {
   if (typeof value !== "string") return null;
-  const normalized = value.trim().toLowerCase() as ReasoningEffort;
-  return EFFORTS.has(normalized) ? normalized : null;
+  const normalized = value.trim().toLowerCase();
+  if (normalized === "extra") return "xhigh";
+  return EFFORTS.has(normalized as ReasoningEffort) ? (normalized as ReasoningEffort) : null;
 }
 
 function thinkingLevelEffort(value: unknown): ReasoningEffort | null {
@@ -79,7 +82,31 @@ function splitGenericEffortSuffix(model: string): {
 } {
   const claude = model.toLowerCase().includes("claude") ? splitClaudeEffortSuffix(model) : null;
   if (claude?.effort) return { model: claude.baseModel, effort: claude.effort };
+  const kimi = splitKimiEffortSuffix(model);
+  if (kimi) return kimi;
   return splitCodexEffortSuffix(model) ?? { model, effort: null };
+}
+
+const KIMI_CODING_PREFIX_PROVIDER: Record<string, string> = {
+  "kimi-coding": "kimi-coding",
+  kmc: "kimi-coding",
+  "kimi-coding-apikey": "kimi-coding-apikey",
+  kmca: "kimi-coding-apikey",
+};
+
+function splitKimiEffortSuffix(model: string): { model: string; effort: ReasoningEffort } | null {
+  // Kimi Coding serves bare ids (k3, kimi-for-coding) and takes the effort as a request
+  // property; chatCore strips the suffix before dispatch (#16985). Mirror that split for
+  // reasoning-rule matching, using the same splitter, and only for ids explicitly routed
+  // to a Kimi Coding provider — a bare `kimi-k3-high` may be Cursor's genuine id.
+  const slash = model.indexOf("/");
+  if (slash <= 0) return null;
+  const provider = KIMI_CODING_PREFIX_PROVIDER[model.slice(0, slash).toLowerCase()];
+  if (!provider) return null;
+  const split = splitKimiCodingEffortVariant(provider, model.slice(slash + 1));
+  if (!split) return null;
+  const baseModel = model.slice(0, -(split.effort.length + 1));
+  return { model: baseModel, effort: split.effort };
 }
 
 function supportsCodexSuffix(candidate: string, normalizedBase: string): boolean {
@@ -121,6 +148,7 @@ function firstDefinedEffort(
     thinkingLevelEffort(thinkingConfig.thinkingLevel ?? thinkingConfig.thinking_level),
     body.thinking === false || thinking.type === "disabled" ? "none" : null,
     suffixEffort,
+    shouldDeriveDisabledReasoningEffort(body) ? "none" : null,
   ];
   return values.find((value): value is ReasoningEffort => value !== null) ?? null;
 }

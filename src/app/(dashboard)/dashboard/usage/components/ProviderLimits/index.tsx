@@ -13,6 +13,7 @@ import {
   matchesProviderFilter,
   buildProviderOptions,
   compareQuotaConnections,
+  quotaStatusLevel,
 } from "./utils";
 import Card from "@/shared/components/Card";
 import { CardSkeleton } from "@/shared/components/Loading";
@@ -50,8 +51,6 @@ const LS_PROVIDER_FILTER = "omniroute:limits:providerFilter";
 const LS_LAYOUT_MODE = "omniroute:limits:layoutMode";
 
 const MIN_FETCH_INTERVAL_MS = 30000;
-const QUOTA_BAR_GREEN_THRESHOLD = 50;
-const QUOTA_BAR_YELLOW_THRESHOLD = 20;
 
 type PurchaseTypeKey = "all" | "oauth-free" | "oauth-sub" | "apikey";
 type StatusKey = "all" | "critical" | "alert" | "ok" | "empty";
@@ -78,8 +77,9 @@ function getWorstStatus(quotas: any[] | undefined): StatusKey {
   let worst: "ok" | "alert" = "ok";
   for (const q of quotas) {
     const pct = q.unlimited ? 100 : (q.remainingPercentage ?? calculatePercentage(q.used, q.total));
-    if (pct <= QUOTA_BAR_YELLOW_THRESHOLD) return "critical";
-    if (pct <= QUOTA_BAR_GREEN_THRESHOLD && worst === "ok") worst = "alert";
+    const level = quotaStatusLevel(pct);
+    if (level === "critical") return "critical";
+    if (level === "alert" && worst === "ok") worst = "alert";
   }
   return worst;
 }
@@ -124,11 +124,13 @@ const getQuotaBarWidthClass = (pct: number) => {
   return "w-full";
 };
 
-const getQuotaToneClasses = (pct: number) => {
-  if (pct <= QUOTA_BAR_YELLOW_THRESHOLD) return "bg-red-500 text-red-500";
-  if (pct <= QUOTA_BAR_GREEN_THRESHOLD) return "bg-yellow-500 text-yellow-500";
-  return "bg-green-500 text-green-500";
-};
+const QUOTA_TONE_CLASSES = {
+  critical: "bg-red-500 text-red-500",
+  alert: "bg-yellow-500 text-yellow-500",
+  ok: "bg-green-500 text-green-500",
+} as const;
+
+const getQuotaToneClasses = (pct: number) => QUOTA_TONE_CLASSES[quotaStatusLevel(pct)];
 
 const STATUS_TONE: Record<
   StatusKey,
@@ -556,7 +558,7 @@ export default function ProviderLimits({
   const tierByConnection = useMemo(() => {
     const out: Record<string, ReturnType<typeof normalizePlanTier>> = {};
     for (const conn of sortedConnections) {
-      out[conn.id] = normalizePlanTier(resolvedPlanByConnection[conn.id]);
+      out[conn.id] = normalizePlanTier(resolvedPlanByConnection[conn.id], conn.provider);
     }
     return out;
   }, [sortedConnections, resolvedPlanByConnection]);

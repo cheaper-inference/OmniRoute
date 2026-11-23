@@ -10,7 +10,15 @@
  * (callers gate writes and decisions on it) and it stays free of the proxy dispatcher, so
  * the DB layer can consult it without loading undici or the SOCKS connector.
  */
-import { notifyProxyTransition } from "./proxyTransitionListeners.ts";
+import { notifyProxyTransition, getSharedRefusalStore } from "./proxyTransitionListeners.ts";
+import type {
+  RefusalState,
+  SharedRefusalStore,
+  SlowOverrun,
+  SlowServe,
+  TransportFailure,
+  TransportSuccess,
+} from "./proxyTransitionListeners.ts";
 import { stripIpv6Brackets } from "./proxyFamily.ts";
 
 // Field trends show a refused egress rarely recovers within minutes, so the
@@ -60,6 +68,7 @@ export const REFUSAL_POLICIES: {
   ip_quota_429: RefusalPolicy;
   transport: { baseMs: 60_000; maxMs: 600_000 };
   slow: { baseMs: 60_000; maxMs: 600_000 };
+  geo_blocked: { baseMs: 60_000; maxMs: 600_000 };
 } = {
   /** The TCP probe could not open a connection to the proxy. */
   proxy_unreachable: { baseMs: 60_000, maxMs: 600_000 },
@@ -77,12 +86,16 @@ export const REFUSAL_POLICIES: {
    * a refused probe, kept apart from the quota curve.
    */
   slow: { baseMs: 60_000, maxMs: 600_000 },
+  /** The provider refused this region through this member; short set-aside. */
+  geo_blocked: { baseMs: 60_000, maxMs: 600_000 },
 };
 
 export type ProxyRefusalKind = keyof typeof REFUSAL_POLICIES;
 
-// `seq` orders set-aside events so a cache can tell whether it already saw this one.
-type RefusalState = { streak: number; until: number; seq: number };
+// Shared across duplicated server module copies (see getSharedRefusalStore):
+// rebind on each module evaluation so HMR keeps the same object.
+const store: SharedRefusalStore = getSharedRefusalStore();
+const memory: Map<string, RefusalState> = store.memory;
 
 const MAX_ENTRIES = 1000;
 const REFUSAL_KINDS = Object.keys(REFUSAL_POLICIES) as ProxyRefusalKind[];
@@ -91,8 +104,54 @@ const DEFAULT_PORTS: Record<string, string> = { http: "8080", https: "443", sock
 const RELAY_TYPES = new Set(["vercel", "deno", "cloudflare"]);
 const FAMILY_MARKER = /\?family=(ipv4|ipv6)$/;
 
-const memory = new Map<string, RefusalState>();
-let refusalSeq = 0;
+/**
+ * Credential-free label for one egress key (`scheme://user@host:port` as
+ * proxyEgressKey writes it): `scheme://host:port`. String surgery only, no
+ * `new URL` (empty userinfo and bare IPv6 break URL parsing). Never receives
+ * anything but egress keys, which never carry passwords or observed addresses.
+ */
+export function describeEgressForLog(key: string): string {
+  const bare = key.replace(FAMILY_MARKER, "");
+  const schemeEnd = bare.indexOf("://");
+  const scheme = (schemeEnd === -1 ? "http" : bare.slice(0, schemeEnd)).toLowerCase();
+  const rest = schemeEnd === -1 ? bare : bare.slice(schemeEnd + 3);
+  const at = rest.lastIndexOf("@");
+  const hostPort = at === -1 ? rest : rest.slice(at + 1);
+  const slash = hostPort.indexOf("/");
+  const authority = slash === -1 ? hostPort : hostPort.slice(0, slash);
+  const colon = authority.lastIndexOf(":");
+  const rawHost = colon === -1 ? authority : authority.slice(0, colon);
+  const port = colon === -1 ? "" : authority.slice(colon + 1);
+  const host = stripIpv6Brackets(rawHost).toLowerCase();
+  const bracketed = host.includes(":") && !host.startsWith("[") ? `[${host}]` : host;
+  return port ? `${scheme}://${bracketed}:${port}` : `${scheme}://${bracketed}`;
+}
+
+// Instance proof: fixed at module load so two readers seeing different values
+// spot a duplicated store at a glance. Random hex, not the pid: two copies in
+// one process share the pid but not this value.
+const storeInstanceId = Math.floor(Math.random() * 0xffffffff)
+  .toString(16)
+  .padStart(8, "0");
+
+/** Opaque id of this store instance, set once at module load. */
+export function getRefusalStoreInstance(): string {
+  return storeInstanceId;
+}
+
+// Duplicate-load alarm: counts module loads on shared globalThis keys (plain
+// Symbol.for scalars, independent of any shared-store object) and warns once.
+const LOADS_KEY = Symbol.for("omniroute.proxyRefusalMemory.loads");
+const WARNED_KEY = Symbol.for("omniroute.proxyRefusalMemory.warned");
+{
+  const holder = globalThis as unknown as { [key: symbol]: unknown };
+  const loads = typeof holder[LOADS_KEY] === "number" ? (holder[LOADS_KEY] as number) : 0;
+  holder[LOADS_KEY] = loads + 1;
+  if (loads + 1 > 1 && !holder[WARNED_KEY]) {
+    holder[WARNED_KEY] = true;
+    console.warn("[ProxyRefusalMemory] module loaded more than once (duplicated bundle copy)");
+  }
+}
 
 const textField = (value: unknown): string => (typeof value === "string" ? value : "");
 
@@ -201,7 +260,7 @@ function insertState(key: string, kind: ProxyRefusalKind, nowMs: number): number
   const periodMs = Math.min(policy.baseMs * 2 ** (streak - 1), policy.maxMs);
   const id = entryId(key, kind);
   memory.delete(id);
-  memory.set(id, { streak, until: nowMs + periodMs, seq: ++refusalSeq });
+  memory.set(id, { streak, until: nowMs + periodMs, seq: ++store.seq.value });
   if (memory.size > MAX_ENTRIES) {
     const oldest = memory.keys().next().value;
     if (oldest !== undefined) memory.delete(oldest);
@@ -227,9 +286,14 @@ export function noteProxyRefusal(
   nowMs: number = Date.now()
 ): number | null {
   if (key === null) return null;
+  const before = readState(key, kind, nowMs);
   const periodMs = insertState(key, kind, nowMs);
   if (periodMs < 0) return null;
+  const streak = (before?.streak ?? 0) + 1;
   notifyProxyTransition({ key, kind, periodMs, until: nowMs + periodMs });
+  console.warn(
+    `[ProxyRefusalMemory] set aside ${describeEgressForLog(key)} kind=${kind} periodMs=${periodMs} streak=${streak}`
+  );
   return periodMs;
 }
 
@@ -247,8 +311,13 @@ export function noteProxyMemberRefusal(
   nowMs: number = Date.now()
 ): number | null {
   if (entryKey === null || member === null) return null;
+  const before = readMemberState(entryKey, member, kind, nowMs);
   const periodMs = insertState(keyForEntryMember(entryKey, member), kind, nowMs);
-  return periodMs < 0 ? null : periodMs;
+  if (periodMs < 0) return null;
+  console.warn(
+    `[ProxyRefusalMemory] set aside ${describeEgressForLog(entryKey)} member=${member} kind=${kind} periodMs=${periodMs} streak=${(before?.streak ?? 0) + 1}`
+  );
+  return periodMs;
 }
 
 /** The proxy answered again: end its period now, keep the streak so a repeat doubles. */
@@ -259,7 +328,14 @@ export function noteProxyRecovered(
 ): void {
   if (key === null) return;
   const state = readState(key, kind, nowMs);
-  if (state && state.until > nowMs) state.until = nowMs;
+  if (!state || state.until <= nowMs) return;
+  const policy = REFUSAL_POLICIES[kind];
+  const periodMs = Math.min(policy.baseMs * 2 ** (state.streak - 1), policy.maxMs);
+  const setAsideAt = state.until - periodMs;
+  console.warn(
+    `[ProxyRefusalMemory] recovered ${describeEgressForLog(key)} kind=${kind} setAsideMs=${nowMs - setAsideAt} streak=${state.streak}`
+  );
+  state.until = nowMs;
 }
 
 /** A response came back through this proxy: forget every refusal kind for it. */
@@ -330,6 +406,38 @@ export function snapshotProxySetAside(
 }
 
 /**
+ * Read-only set-aside state across every refusal motive still in force for
+ * one proxy egress key. Unlike the latest-event snapshot above, quotaOnly is
+ * true only when every motive in force is a quota refusal, and endsAt is the
+ * end of the real set-aside (the latest motive end), so one stale slow or
+ * transport record cannot pass the quota filter by recency.
+ */
+export interface ProxySetAsideStatus {
+  setAside: boolean;
+  quotaOnly: boolean;
+  endsAt: number | null;
+}
+
+export function proxySetAsideStatus(
+  key: string | null,
+  nowMs: number = Date.now()
+): ProxySetAsideStatus {
+  if (key === null || memory.size === 0) return { setAside: false, quotaOnly: false, endsAt: null };
+  let found = false;
+  let quotaOnly = true;
+  let endsAt = 0;
+  for (const kind of REFUSAL_KINDS) {
+    const state = readState(key, kind, nowMs);
+    if (!state || state.until <= nowMs) continue;
+    found = true;
+    if (kind !== "ip_quota_429") quotaOnly = false;
+    if (state.until > endsAt) endsAt = state.until;
+  }
+  if (!found) return { setAside: false, quotaOnly: false, endsAt: null };
+  return { setAside: true, quotaOnly, endsAt };
+}
+
+/**
  * Read-only snapshot of the set-aside state still in force for one
  * (entry, selector member) pair, or null when the member is not set aside.
  * Same shape as snapshotProxySetAside so the pool visibility route can reuse
@@ -391,7 +499,7 @@ export function listEntryMembers(entryKey: string | null): string[] {
 
 /** Sequence number of the last set-aside event recorded in this process (0 = none yet). */
 export function getProxyRefusalSeq(): number {
-  return refusalSeq;
+  return store.seq.value;
 }
 
 /**
@@ -488,11 +596,8 @@ export const TRANSPORT_EVIDENCE_WINDOW_MS = 300_000;
 export const TRANSPORT_EVIDENCE_THRESHOLD = 3;
 const MAX_TRANSPORT_EVIDENCE = 1000;
 
-type TransportFailure = { key: string; destination: string; at: number };
-type TransportSuccess = { destination: string; key: string; at: number };
-
-const transportFailures: TransportFailure[] = [];
-const transportSuccesses: TransportSuccess[] = [];
+const transportFailures: TransportFailure[] = store.transportFailures;
+const transportSuccesses: TransportSuccess[] = store.transportSuccesses;
 
 // Lazy purge mirrors readState: entries older than the evidence window plus
 // twice the transport cap can no longer contribute, so drop them on read.
@@ -563,6 +668,38 @@ export function __resetTransportEvidenceForTesting(): void {
   transportSuccesses.length = 0;
 }
 
+/**
+ * Read-only transport proof for one entry key: tagged failures through this
+ * egress plus successes to the same destinations through a different egress,
+ * both inside TRANSPORT_EVIDENCE_WINDOW_MS. Runs the existing lazy purge
+ * first (bounded and pre-existing, never a refusal write) so counts never
+ * grow stale.
+ */
+export function countTransportEvidenceFor(
+  key: string | null,
+  nowMs: number = Date.now()
+): { failures: number; crossSuccesses: number } {
+  if (key === null || (transportFailures.length === 0 && transportSuccesses.length === 0)) {
+    return { failures: 0, crossSuccesses: 0 };
+  }
+  purgeTransportEvidence(nowMs);
+  const from = nowMs - TRANSPORT_EVIDENCE_WINDOW_MS;
+  let failures = 0;
+  let destinations: string[] | null = null;
+  for (const f of transportFailures) {
+    if (f.key === key && f.at >= from) {
+      failures++;
+      (destinations ??= []).push(f.destination);
+    }
+  }
+  if (destinations === null) return { failures: 0, crossSuccesses: 0 };
+  let crossSuccesses = 0;
+  for (const s of transportSuccesses) {
+    if (s.key !== key && s.at >= from && destinations.includes(s.destination)) crossSuccesses++;
+  }
+  return { failures, crossSuccesses };
+}
+
 /** Test-only: current evidence store sizes. */
 export function __transportEvidenceSizeForTesting(): { failures: number; successes: number } {
   return { failures: transportFailures.length, successes: transportSuccesses.length };
@@ -577,16 +714,19 @@ export const SLOW_OVERRUN_WINDOW_MS = 300_000;
 export const SLOW_OVERRUN_THRESHOLD = 3;
 const MAX_SLOW_OVERRUNS = 1000;
 
-type SlowOverrun = { key: string; at: number };
-
-const slowOverruns: SlowOverrun[] = [];
+const slowOverruns: SlowOverrun[] = store.slowOverruns;
+const slowServes: SlowServe[] = store.slowServes;
 
 // Lazy purge mirrors readState: entries older than the evidence window plus
-// twice the slow cap can no longer contribute, so drop them on record.
+// twice the slow cap can no longer contribute, so drop them on record. Slow
+// serves share the same window, so one purge covers both stores.
 function purgeSlowOverruns(nowMs: number): void {
   const cutoff = nowMs - SLOW_OVERRUN_WINDOW_MS - 2 * REFUSAL_POLICIES.slow.maxMs;
   while (slowOverruns.length > 0 && slowOverruns[0].at < cutoff) {
     slowOverruns.shift();
+  }
+  while (slowServes.length > 0 && slowServes[0].at < cutoff) {
+    slowServes.shift();
   }
 }
 
@@ -600,13 +740,30 @@ export function recordSlowOverrun(key: string | null, nowMs: number = Date.now()
 
 /**
  * True when this egress waited out the headers window at least
- * SLOW_OVERRUN_THRESHOLD times inside SLOW_OVERRUN_WINDOW_MS. Overruns for
- * other keys never count.
+ * SLOW_OVERRUN_THRESHOLD times inside SLOW_OVERRUN_WINDOW_MS, with
+ * cross-egress proof: another egress served the same destination inside the
+ * window. Without any other egress active in the window the repetition alone
+ * decides (a lone upstream queue still condemns a lone member). A null
+ * destination keeps the repetition rule (callers without a destination).
  */
-export function hasSlowOverrunEvidence(key: string | null, nowMs: number = Date.now()): boolean {
+export function hasSlowOverrunEvidence(
+  key: string | null,
+  destinationOrNowMs: string | null | number = Date.now(),
+  nowMs: number = Date.now()
+): boolean {
+  const destination = typeof destinationOrNowMs === "number" ? null : (destinationOrNowMs ?? null);
+  const at = typeof destinationOrNowMs === "number" ? destinationOrNowMs : nowMs;
   if (key === null || key === "") return false;
-  purgeSlowOverruns(nowMs);
-  const from = nowMs - SLOW_OVERRUN_WINDOW_MS;
+  if (!hasSlowOverrunRepetition(key, at)) return false;
+  if (destination === null || destination === "") return true;
+  if (hasSlowServeCrossEvidence(key, destination, at)) return true;
+  return !hasOtherSlowEgressActivity(key, at);
+}
+
+// Three settled waits through the same key inside the window: repetition alone.
+function hasSlowOverrunRepetition(key: string, at: number): boolean {
+  purgeSlowOverruns(at);
+  const from = at - SLOW_OVERRUN_WINDOW_MS;
   let overruns = 0;
   for (const o of slowOverruns) {
     if (o.key === key && o.at >= from) {
@@ -617,14 +774,66 @@ export function hasSlowOverrunEvidence(key: string | null, nowMs: number = Date.
   return false;
 }
 
-/** Test-only: forget slow overruns (refusal memory is separate). */
+// Any overrun or serve by another live egress inside the window. The direct
+// sentinel never counts: it can never be accused, so it can never witness.
+function hasOtherSlowEgressActivity(key: string, at: number): boolean {
+  const from = at - SLOW_OVERRUN_WINDOW_MS;
+  for (const o of slowOverruns) {
+    if (o.key !== key && o.key !== "direct" && o.at >= from) return true;
+  }
+  for (const s of slowServes) {
+    if (s.key !== key && s.key !== "direct" && s.at >= from) return true;
+  }
+  return false;
+}
+
+/**
+ * True when another egress served the same destination inside the slow
+ * window: a headers wait answered in time there, so the destination answers
+ * and the accused member — not the destination — is at fault. The egress
+ * itself is never its own witness.
+ */
+export function hasSlowServeCrossEvidence(
+  key: string | null,
+  destination: string | null,
+  nowMs: number = Date.now()
+): boolean {
+  if (key === null || destination === null || destination === "") return false;
+  purgeSlowOverruns(nowMs);
+  const from = nowMs - SLOW_OVERRUN_WINDOW_MS;
+  return slowServes.some((s) => s.destination === destination && s.key !== key && s.at >= from);
+}
+
+/**
+ * Record one headers wait answered in time through this egress. The writers
+ * (never this store) keep the sentinel out: `direct` is never recorded, so
+ * readers need no sentinel filter. Never throws, never writes refusal memory.
+ */
+export function recordSlowServe(
+  key: string | null,
+  destination: string | null,
+  nowMs: number = Date.now()
+): void {
+  if (key === null || key === "" || destination === null || destination === "") return;
+  purgeSlowOverruns(nowMs);
+  slowServes.push({ key, destination, at: nowMs });
+  while (slowServes.length > MAX_SLOW_OVERRUNS) slowServes.shift();
+}
+
+/** Test-only: forget slow overruns and slow serves (refusal memory is separate). */
 export function __resetSlowOverrunsForTesting(): void {
   slowOverruns.length = 0;
+  slowServes.length = 0;
 }
 
 /** Test-only: current slow-overrun store size. */
 export function __slowOverrunSizeForTesting(): number {
   return slowOverruns.length;
+}
+
+/** Test-only: current slow-serve store size. */
+export function __slowServeSizeForTesting(): number {
+  return slowServes.length;
 }
 
 /** Test-only: number of (key, kind) entries held. */

@@ -13,22 +13,22 @@
 
 ## Hva det er
 
-OmniRoute registrerer 329 leverandører, inkludert 155 katalogoppføringer merket **gratis/uten autentisering**
+OmniRoute registrerer 374 leverandører, inkludert 155 katalogoppføringer merket **gratis/uten autentisering**
 (uten autentisering,
-OAuth med gratisnivå eller API-nøkkel med gratisnivå — se
-[Veiledning for gratisnivåer](../getting-started/FREE-TIERS-GUIDE.md) og den fullstendige
-[oversikten over gratisnivåer](../reference/FREE_TIERS.md)). Utfordringen er at gratisleverandørene varierer
-kraftig i modellkvalitet. En leverandør uten autentisering som tilbyr en banebrytende modell, er langt mer nyttig
-enn en som tilbyr en liten, eldre modell.
+OAuth med gratisnivå eller API-nøkkel med gratisnivå – se
+[veiledningen for gratisnivåer](../getting-started/FREE-TIERS-GUIDE.md) og den fullstendige
+[katalogen over gratisnivåer](../reference/FREE_TIERS.md)). Utfordringen er at gratisleverandører varierer
+kraftig i modellkvalitet. En leverandør uten autentisering som tilbyr en ledende modell, er langt mer nyttig
+enn en som tilbyr en liten eldre modell.
 
 **Rangering av gratisleverandører** besvarer spørsmålet «**hvilken gratisleverandør gir meg den beste modellen?**» ved å
-koble katalogen til hver gratisleverandør med **folkebaserte kvalitetspoengsummer** fra
-**Arena AI-resultatlisten** (ELO basert på menneskelige preferanser, samme idé som ligger bak LMArena-
-chatbotarenaen). Leverandørene rangeres deretter etter kvaliteten på sin **beste gratis modell**.
+koble hver gratisleverandørs katalog med **folkebaserte kvalitetspoeng** fra
+**Arena AI-resultatlisten** (ELO basert på menneskelige preferanser, samme idé som ligger bak LMArena
+chatbotarena). Leverandørene rangeres deretter etter kvaliteten på deres **beste gratis modell**.
 
 Rangeringen beregnes fra tre reelle kilder:
 
-1. Listene over gratisleverandører — `NOAUTH_PROVIDERS`, pluss oppføringer i `OAUTH_PROVIDERS` /
+1. Listene over gratisleverandører – `NOAUTH_PROVIDERS`, samt oppføringer i `OAUTH_PROVIDERS` /
    `APIKEY_PROVIDERS` merket med `hasFree`
    (`src/shared/constants/providers.ts`).
 2. Modellkatalogen til hver leverandør fra leverandørregisteret

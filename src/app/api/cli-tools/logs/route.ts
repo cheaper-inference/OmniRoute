@@ -22,10 +22,11 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { readFileSync, existsSync } from "fs";
+import fs from "node:fs";
 import { getAppLogFilePath } from "@/lib/logEnv";
 import { requireCliToolsAuth } from "@/lib/api/requireCliToolsAuth";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error.ts";
+import { readTailLines } from "@/lib/logTail";
 
 // Map pino numeric levels to string levels
 const NUMERIC_LEVEL_MAP: Record<number, string> = {
@@ -60,6 +61,27 @@ function stringifyLogValue(value: unknown): string {
 }
 
 /**
+ * Returns true when a parsed log entry passes the route's hour and token gates.
+ */
+function matchesCliEntry(
+  entry: Record<string, unknown>,
+  filterTokens: string[],
+  oneHourAgo: number
+): boolean {
+  const ts = entry.time || entry.timestamp;
+  if (ts) {
+    const entryTime = new Date(ts as string | number).getTime();
+    if (Number.isFinite(entryTime) && entryTime < oneHourAgo) return false;
+  }
+
+  const component = stringifyLogValue(entry.component);
+  const mod = stringifyLogValue(entry.module);
+  const msg = stringifyLogValue(entry.msg ?? entry.message ?? "");
+  if (filterTokens.length === 0) return true;
+  const haystack = `${component} ${mod} ${msg}`.toLowerCase();
+  return filterTokens.some((token) => haystack.includes(token));
+}
+/**
  * GET /api/cli-tools/logs
  */
 export async function GET(request: NextRequest) {
@@ -85,14 +107,20 @@ export async function GET(request: NextRequest) {
 
     const logPath = getAppLogFilePath();
 
-    if (!existsSync(logPath)) {
+    if (!fs.existsSync(logPath)) {
       return NextResponse.json([], { status: 200 });
     }
 
-    const raw = readFileSync(logPath, "utf-8");
-    const lines = raw.trim().split("\n").filter(Boolean);
-
     const oneHourAgo = Date.now() - 60 * 60 * 1000;
+    const size = fs.statSync(logPath).size;
+    const lines = readTailLines(
+      logPath,
+      size,
+      limit,
+      (entry) => matchesCliEntry(entry, filterTokens, oneHourAgo),
+      oneHourAgo
+    );
+
     const entries: Record<string, unknown>[] = [];
 
     for (const line of lines) {

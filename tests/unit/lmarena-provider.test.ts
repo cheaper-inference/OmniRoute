@@ -52,6 +52,7 @@ type LMArenaExecutorTestAccess = {
     modelAMessageId: string;
     modelBMessageId?: string;
     recaptchaV3Token: string | null;
+    cx?: string;
     userMessage: {
       content: string;
       experimental_attachments: unknown[];
@@ -287,6 +288,11 @@ describe("LMArena Executor", () => {
     assert.equal(arenaBody.modelBId, undefined, "Should not set modelBId for direct mode");
     assert.equal(arenaBody.modelBMessageId, undefined, "Should not set modelBMessageId");
     assert.equal(arenaBody.recaptchaV3Token, null);
+    assert.equal(
+      "cx" in arenaBody,
+      false,
+      "Should not attach a cx blob unless the operator supplied one (or opted in, #16895)"
+    );
     assert.deepEqual(arenaBody.userMessage.experimental_attachments, []);
     assert.deepEqual(arenaBody.userMessage.metadata, {});
     assert.ok(
@@ -652,6 +658,45 @@ describe("LMArena Executor", () => {
       { cookie: "x=1", providerSpecificData: { recaptchaV3Token: "tok_abc" } }
     );
     assert.equal(body.recaptchaV3Token, "tok_abc");
+  });
+
+  it("forwards the reconstructed cookie and reCAPTCHA token to the TLS request", async () => {
+    let captured:
+      | {
+          url: string;
+          options: { method?: string; headers?: Record<string, string>; body?: string };
+        }
+      | undefined;
+    __setTlsFetchOverrideForTesting(async (url, options) => {
+      captured = { url, options };
+      return {
+        status: 400,
+        headers: new Headers({ "Content-Type": "application/json" }),
+        text: "{}",
+        body: null,
+      };
+    });
+
+    try {
+      await new LMArenaExecutor().execute({
+        model: TEST_ARENA_MODEL_ID,
+        body: { messages: [{ role: "user", content: "Hello" }] },
+        credentials: {
+          cookie: "arena-auth-prod-v1=; arena-auth-prod-v1.0=chunk-a; arena-auth-prod-v1.1=chunk-b",
+          providerSpecificData: { recaptchaV3Token: "tok_abc" },
+        },
+        signal: new AbortController().signal,
+        log: null,
+      });
+
+      assert.ok(captured);
+      assert.match(captured.url, /\/nextjs-api\/stream\/create-evaluation$/);
+      assert.equal(captured.options.method, "POST");
+      assert.equal(captured.options.headers?.Cookie, "arena-auth-prod-v1=chunk-achunk-b");
+      assert.equal(JSON.parse(captured.options.body ?? "{}").recaptchaV3Token, "tok_abc");
+    } finally {
+      __setTlsFetchOverrideForTesting(null);
+    }
   });
 
   it("surfaces Cloudflare challenge as bot-management error", async () => {

@@ -17,10 +17,10 @@ dan langkah-langkah rekonsiliasinya.
 
 ### Prasyarat
 
-- **Node.js** `>=22.22.3 <23`, atau `>=24.0.0 <27` (disarankan: 24 LTS)
+- **Node.js** `>=22.22.2 <23`, atau `>=24.0.0 <27` (direkomendasikan: 24 LTS)
 - **npm** 10+
 
-> **Pengguna npm v11+ (Node 24+):** Setelah `npm install`, pastikan modul native telah terinstal:
+> **Pengguna npm v11+ (Node 24+):** Setelah `npm install`, pastikan modul native telah diinstal:
 > `node -e "require('better-sqlite3')"`. Jika gagal dengan `MODULE_NOT_FOUND`,
 > jalankan `npm approve-scripts better-sqlite3 && npm install`. Lihat
 > [Pemecahan Masalah](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
@@ -58,19 +58,19 @@ Variabel utama untuk pengembangan:
 
 ### Pengaturan Dasbor
 
-Dasbor menyediakan tombol UI untuk fitur yang juga dapat dikonfigurasi melalui variabel lingkungan:
+Dasbor menyediakan tombol UI untuk fitur-fitur yang juga dapat dikonfigurasi melalui variabel lingkungan:
 
-| Lokasi Pengaturan   | Tombol Visibilitas     | Deskripsi                               |
-| ------------------- | ---------------------- | --------------------------------------- |
-| Settings → Advanced | Mode Debug             | Aktifkan log permintaan debug (UI)      |
-| Settings → General  | Visibilitas Bilah Sisi | Tampilkan/sembunyikan bagian bilah sisi |
+| Lokasi Pengaturan     | Tombol                 | Deskripsi                               |
+| --------------------- | ---------------------- | --------------------------------------- |
+| Pengaturan → Lanjutan | Mode Debug             | Aktifkan log permintaan debug (UI)      |
+| Pengaturan → Umum     | Visibilitas Bilah Sisi | Tampilkan/sembunyikan bagian bilah sisi |
 
-Pengaturan ini disimpan dalam basis data dan tetap tersedia setelah aplikasi dimulai ulang, serta menggantikan nilai default variabel lingkungan jika ditetapkan.
+Pengaturan ini disimpan dalam basis data dan tetap berlaku setelah proses dimulai ulang, serta mengesampingkan nilai default variabel lingkungan jika telah ditetapkan.
 
 ### Menjalankan Secara Lokal
 
 ```bash
-# Mode pengembangan (muat ulang otomatis)
+# Mode pengembangan (pemuatan ulang otomatis)
 npm run dev
 
 # Build produksi
@@ -80,45 +80,45 @@ npm run start
 # Kompilasi cepat khusus backend/API untuk perubahan kontributor
 npm run build:contributor
 
-# Build rilis (build ulang bersih + sentinel HEAD — diwajibkan untuk deployment)
+# Build rilis (build ulang bersih + sentinel HEAD — diperlukan untuk deployment)
 npm run build:release   # rm -rf .build dist && build + menulis dist/BUILD_SHA
 
 # Konfigurasi port umum
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Build kontributor melakukan validasi kompilasi saja: build ini tidak merakit distribusi
-mandiri atau membuat aset pemaketan native opsional. Gunakan build produksi reguler saat
-Anda perlu memvalidasi bundel yang dapat didistribusikan.
+Build kontributor melakukan validasi kompilasi saja: build ini tidak merakit distribusi mandiri
+atau membangun aset pengemasan native opsional. Gunakan build produksi reguler ketika
+Anda perlu memvalidasi bundel yang siap didistribusikan.
 
-### Tata Letak Output Build
+### Tata Letak Keluaran Build
 
-| Direktori | Isi                                                                             | Dilacak |
-| --------- | ------------------------------------------------------------------------------- | ------- |
-| `src/`    | Sumber aplikasi (TypeScript / TSX)                                              | Ya      |
-| `.build/` | Berkas perantara — output `next build` (diabaikan git, `distDir = .build/next`) | Tidak   |
-| `dist/`   | Bundel siap didistribusikan — dirakit oleh `assembleStandalone` (diabaikan git) | Tidak   |
+| Direktori | Isi                                                                               | Dilacak |
+| --------- | --------------------------------------------------------------------------------- | ------- |
+| `src/`    | Sumber aplikasi (TypeScript / TSX)                                                | Ya      |
+| `.build/` | Berkas perantara — keluaran `next build` (diabaikan Git, `distDir = .build/next`) | Tidak   |
+| `dist/`   | Bundel siap didistribusikan — dirakit oleh `assembleStandalone` (diabaikan Git)   | Tidak   |
 
-Pipeline build dilakukan dalam satu tahap:
+Pipeline build dilakukan dalam satu lintasan:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (output Next.js)
+  └─ next build → .build/next/standalone  (keluaran Next.js)
   └─ assembleStandalone()                 (menyalin standalone + static + public + aset native)
-       └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
+       └─ keluaran: dist/                 (server.js, .next/static/, public/, node_modules/)
 ```
 
 `npm run build:release` juga membersihkan kedua direktori terlebih dahulu dan menulis
 `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) sebagai sentinel integritas deployment.
 
-`npm run build:contributor` menggunakan profil build khusus backend. Build ini untuk sementara mengganti
-file UI dasbor dengan stub selama proses build, mempertahankan handler rute API, dan memulihkan file asli
-setelah build selesai. Gunakan `npm run build` untuk perubahan yang memengaruhi UI dasbor atau untuk
-validasi rilis lengkap; profil kontributor bukan pengganti build rilis.
+`npm run build:contributor` menggunakan profil build khusus backend. Profil ini membuat stub sementara
+untuk berkas UI dasbor selama proses build, mempertahankan handler rute API, dan memulihkan berkas asli
+setelah build. Gunakan `npm run build` untuk perubahan yang memengaruhi UI dasbor atau untuk validasi
+rilis penuh; profil kontributor bukan pengganti build rilis.
 
 > **Catatan deployment VPS:** direktori image jarak jauh `/usr/lib/node_modules/omniroute/app/`
 > tidak berubah. Skill deployment melakukan rsync terhadap isi `dist/` ke direktori tersebut.
-> Hanya jalur output build dalam repositori yang berpindah (`app/` → `dist/`).
+> Hanya jalur keluaran build di dalam repositori yang berubah (`app/` → `dist/`).
 
 URL default:
 
@@ -309,31 +309,31 @@ src/                        # TypeScript (.ts / .tsx)
 │   ├── db/                 # Modul domain SQLite + 130 migrasi
 │   ├── memory/             # Memori percakapan persisten
 │   ├── oauth/              # Penyedia, layanan, dan utilitas OAuth
-│   ├── skills/             # Kerangka kerja skill yang dapat diperluas
+│   ├── skills/             # Kerangka kerja keterampilan yang dapat diperluas
 │   ├── usage/              # Pelacakan penggunaan dan penghitungan biaya
 │   └── localDb.ts          # Hanya lapisan ekspor ulang — jangan pernah menambahkan logika di sini
 ├── middleware/              # Middleware permintaan (promptInjectionGuard)
 ├── mitm/                   # Proksi MITM (sertifikat, DNS, perutean target)
 ├── shared/
 │   ├── components/         # Komponen React (.tsx)
-│   ├── constants/          # Definisi penyedia (329), cakupan MCP, 19 strategi perutean
-│   ├── utils/              # Circuit breaker, sanitizer, helper autentikasi
+│   ├── constants/          # Definisi penyedia (329), cakupan MCP, 20 strategi perutean
+│   ├── utils/              # Pemutus sirkuit, sanitizer, pembantu autentikasi
 │   └── validation/         # Skema Zod v4
 └── sse/                    # Pipeline proksi SSE
 
-open-sse/                   # Workspace @omniroute/open-sse
-├── executors/              # 89 modul implementasi executor
-├── handlers/               # 11 handler permintaan (chat, respons, embedding, gambar, dll.)
-├── mcp-server/             # Server MCP (110 alat unik, 3 transport, 33 cakupan)
+open-sse/                   # Ruang kerja @omniroute/open-sse
+├── executors/              # 150 modul eksekutor (kelas eksekutor + pembantu per penyedia)
+├── handlers/               # 11 penangan permintaan (obrolan, respons, embedding, gambar, dll.)
+├── mcp-server/             # Server MCP (110 alat unik, 3 transportasi, 33 cakupan)
 ├── services/               # 178 layanan tingkat atas (combo, autoCombo, rateLimitManager, dll.)
 ├── translator/             # Penerjemah format (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
 ├── transformer/            # Transformer Responses API
-└── utils/                  # 22 modul utilitas (aliran, TLS, proksi, logging)
+└── utils/                  # 22 modul utilitas (aliran, TLS, proksi, pencatatan)
 
 electron/                   # Aplikasi desktop Electron (lintas platform)
 
 tests/
-├── unit/                   # Test runner Node.js (1.574 file pengujian)
+├── unit/                   # Runner pengujian Node.js (1.574 berkas pengujian)
 ├── integration/            # Pengujian integrasi
 ├── e2e/                    # Pengujian Playwright
 ├── security/               # Pengujian keamanan
@@ -347,9 +347,9 @@ docs/
 ├── compression/             # Panduan & aturan kompresi
 ├── dev/                     # Panduan pengembangan
 ├── diagrams/                # Diagram arsitektur
-├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
+├── frameworks/              # MCP, A2A, OpenCode, Memori, Keterampilan
 ├── guides/                  # Panduan pengguna, Docker, penyiapan, pemecahan masalah
-├── i18n/                    # Terjemahan README yang diinternasionalisasi
+├── i18n/                    # Terjemahan README yang diinternasionalkan
 ├── marketing/               # Materi pemasaran
 ├── ops/                     # Deployment, proksi, cakupan, rilis
 ├── providers/               # Dokumentasi khusus penyedia
@@ -357,7 +357,7 @@ docs/
 ├── releases/                # Catatan rilis
 ├── routing/                 # Mesin auto-combo, pemutaran ulang penalaran
 ├── screenshots/             # Tangkapan layar dasbor
-├── security/                # Guardrail, kepatuhan, stealth, token
+├── security/                # Pembatas, kepatuhan, mode tersamar, token
 └── specs/                   # Spesifikasi desain
 ```
 
@@ -405,16 +405,16 @@ Tulis pengujian unit di `tests/unit/` yang sekurang-kurangnya mencakup:
 - [ ] Linting lulus (`npm run lint`)
 - [ ] Build berhasil (`npm run build`)
 - [ ] Tipe TypeScript ditambahkan untuk fungsi dan antarmuka publik baru
-- [ ] Tidak ada secret atau nilai fallback yang di-hardcode
-- [ ] Kredensial upstream publik disematkan melalui `resolvePublicCred()` (lihat [`docs/security/PUBLIC_CREDS.md`](./docs/security/PUBLIC_CREDS.md)), jangan pernah sebagai literal
-- [ ] Respons kesalahan diproses melalui `buildErrorBody()` / `sanitizeErrorMessage()` — tidak ada stack trace mentah dalam body respons (lihat [`docs/security/ERROR_SANITIZATION.md`](./docs/security/ERROR_SANITIZATION.md))
+- [ ] Tidak ada rahasia atau nilai fallback yang di-hardcode
+- [ ] Kredensial upstream publik disematkan melalui `resolvePublicCred()` (lihat [`docs/security/PUBLIC_CREDS.md`](./docs/security/PUBLIC_CREDS.md)), tidak pernah sebagai literal
+- [ ] Respons kesalahan diproses melalui `buildErrorBody()` / `sanitizeErrorMessage()` — tidak ada stack trace mentah dalam isi respons (lihat [`docs/security/ERROR_SANITIZATION.md`](./docs/security/ERROR_SANITIZATION.md))
 - [ ] Perintah shell (`exec` / `spawn`) meneruskan nilai runtime melalui `env`, bukan melalui interpolasi string
 - [ ] Semua input divalidasi dengan skema Zod
-- [ ] **Fragmen** changelog ditambahkan di bawah `changelog.d/{features|fixes|maintenance}/<PR>-<slug>.md` untuk perubahan yang terlihat oleh pengguna (lihat [`changelog.d/README.md`](./changelog.d/README.md)) — **jangan** mengedit `CHANGELOG.md` secara langsung; fragmen digabungkan saat rilis dan tidak pernah menimbulkan konflik antar-PR
+- [ ] **Fragmen** changelog ditambahkan di bawah `changelog.d/{features|fixes|maintenance}/<PR>-<slug>.md` untuk perubahan yang terlihat oleh pengguna (lihat [`changelog.d/README.md`](./changelog.d/README.md)) — **jangan** mengedit `CHANGELOG.md` secara langsung; fragmen diagregasikan saat rilis dan tidak pernah berkonflik antar-PR
 - [ ] Dokumentasi diperbarui (jika berlaku)
-- [ ] Tidak ada peringatan CodeQL / Secret-Scanning baru yang dibuka, atau setiap peringatan telah ditutup dengan justifikasi teknis yang merujuk pada dokumen `docs/security/` yang relevan
-- [ ] Route yang menjalankan proses anak (`/api/mcp/`, `/api/cli-tools/runtime/`) diklasifikasikan sebagai `isLocalOnlyPath()` di `src/server/authz/routeGuard.ts` — lihat [Aturan Ketat #15](docs/security/ROUTE_GUARD_TIERS.md)
-- [ ] Tidak ada trailer `Co-Authored-By` dalam pesan commit — commit harus ditampilkan hanya di bawah identitas Git pemilik repositori (Aturan Ketat #16)
+- [ ] Tidak ada peringatan CodeQL / Secret-Scanning baru yang dibuka, atau setiap peringatan ditolak dengan justifikasi teknis yang merujuk pada dokumen `docs/security/` yang relevan
+- [ ] Rute yang menjalankan proses turunan (`/api/mcp/`, `/api/cli-tools/runtime/`) diklasifikasikan sebagai `isLocalOnlyPath()` dalam `src/server/authz/routeGuard.ts` — lihat [Aturan Ketat #15](docs/security/ROUTE_GUARD_TIERS.md)
+- [ ] Tidak ada trailer `Co-authored-by` dari AI/bot dalam pesan commit (Aturan Ketat #16) — kolaborator manusia yang karyanya digunakan kembali diberi kredit dengan trailer standar `Co-authored-by: Name <email>`
 
 ---
 

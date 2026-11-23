@@ -4,9 +4,12 @@
 
 ---
 
-🌐 **Languages:** 🇺🇸 [English](../../../../reference/API_REFERENCE.md) · 🇪🇹 [am](../../../am/docs/reference/API_REFERENCE.md) · 🇸🇦 [ar](../../../ar/docs/reference/API_REFERENCE.md) · 🇦🇿 [az](../../../az/docs/reference/API_REFERENCE.md) · 🇧🇬 [bg](../../../bg/docs/reference/API_REFERENCE.md) · 🇧🇩 [bn](../../../bn/docs/reference/API_REFERENCE.md) · 🇧🇦 [bs](../../../bs/docs/reference/API_REFERENCE.md) · 🇨🇿 [cs](../../../cs/docs/reference/API_REFERENCE.md) · 🇩🇰 [da](../../../da/docs/reference/API_REFERENCE.md) · 🇩🇪 [de](../../../de/docs/reference/API_REFERENCE.md) · 🇬🇷 [el](../../../el/docs/reference/API_REFERENCE.md) · 🇪🇸 [es](../../../es/docs/reference/API_REFERENCE.md) · 🇪🇪 [et](../../../et/docs/reference/API_REFERENCE.md) · 🇮🇷 [fa](../../../fa/docs/reference/API_REFERENCE.md) · 🇫🇮 [fi](../../../fi/docs/reference/API_REFERENCE.md) · 🇫🇷 [fr](../../../fr/docs/reference/API_REFERENCE.md) · 🇮🇪 [ga](../../../ga/docs/reference/API_REFERENCE.md) · 🇮🇳 [gu](../../../gu/docs/reference/API_REFERENCE.md) · 🇳🇬 [ha](../../../ha/docs/reference/API_REFERENCE.md) · 🇮🇱 [he](../../../he/docs/reference/API_REFERENCE.md) · 🇮🇳 [hi](../../../hi/docs/reference/API_REFERENCE.md) · 🇭🇷 [hr](../../../hr/docs/reference/API_REFERENCE.md) · 🇭🇺 [hu](../../../hu/docs/reference/API_REFERENCE.md) · 🇦🇲 [hy](../../../hy/docs/reference/API_REFERENCE.md) · 🇮🇩 [id](../../../id/docs/reference/API_REFERENCE.md) · 🇳🇬 [ig](../../../ig/docs/reference/API_REFERENCE.md) · 🇮🇹 [it](../../../it/docs/reference/API_REFERENCE.md) · 🇯🇵 [ja](../../../ja/docs/reference/API_REFERENCE.md) · 🇬🇪 [ka](../../../ka/docs/reference/API_REFERENCE.md) · 🇰🇭 [km](../../../km/docs/reference/API_REFERENCE.md) · 🇮🇳 [kn](../../../kn/docs/reference/API_REFERENCE.md) · 🇱🇹 [lt](../../../lt/docs/reference/API_REFERENCE.md) · 🇱🇻 [lv](../../../lv/docs/reference/API_REFERENCE.md) · 🇮🇳 [ml](../../../ml/docs/reference/API_REFERENCE.md) · 🇮🇳 [mr](../../../mr/docs/reference/API_REFERENCE.md) · 🇲🇾 [ms](../../../ms/docs/reference/API_REFERENCE.md) · 🇲🇹 [mt](../../../mt/docs/reference/API_REFERENCE.md) · 🇲🇲 [my](../../../my/docs/reference/API_REFERENCE.md) · 🇳🇵 [ne](../../../ne/docs/reference/API_REFERENCE.md) · 🇳🇱 [nl](../../../nl/docs/reference/API_REFERENCE.md) · 🇳🇴 [no](../../../no/docs/reference/API_REFERENCE.md) · 🇮🇳 [or](../../../or/docs/reference/API_REFERENCE.md) · 🇮🇳 [pa](../../../pa/docs/reference/API_REFERENCE.md) · 🇵🇭 [phi](../../../phi/docs/reference/API_REFERENCE.md) · 🇵🇱 [pl](../../../pl/docs/reference/API_REFERENCE.md) · 🇵🇹 [pt](../../../pt/docs/reference/API_REFERENCE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/reference/API_REFERENCE.md) · 🇷🇴 [ro](../../../ro/docs/reference/API_REFERENCE.md) · 🇷🇺 [ru](../../../ru/docs/reference/API_REFERENCE.md) · 🇱🇰 [si](../../../si/docs/reference/API_REFERENCE.md) · 🇸🇰 [sk](../../../sk/docs/reference/API_REFERENCE.md) · 🇸🇮 [sl](../../../sl/docs/reference/API_REFERENCE.md) · 🇷🇸 [sr](../../../sr/docs/reference/API_REFERENCE.md) · 🇸🇪 [sv](../../../sv/docs/reference/API_REFERENCE.md) · 🇰🇪 [sw](../../../sw/docs/reference/API_REFERENCE.md) · 🇮🇳 [ta](../../../ta/docs/reference/API_REFERENCE.md) · 🇮🇳 [te](../../../te/docs/reference/API_REFERENCE.md) · 🇹🇭 [th](../../../th/docs/reference/API_REFERENCE.md) · 🇹🇷 [tr](../../../tr/docs/reference/API_REFERENCE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/reference/API_REFERENCE.md) · 🇵🇰 [ur](../../../ur/docs/reference/API_REFERENCE.md) · 🇺🇿 [uz](../../../uz/docs/reference/API_REFERENCE.md) · 🇻🇳 [vi](../../../vi/docs/reference/API_REFERENCE.md) · 🇳🇬 [yo](../../../yo/docs/reference/API_REFERENCE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/reference/API_REFERENCE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/reference/API_REFERENCE.md)
+🌐 **언어:** 🇺🇸 [English](./API_REFERENCE.md) | 🇪🇹 [አማርኛ](../i18n/am/docs/reference/API_REFERENCE.md) | 🇸🇦 [العربية](../i18n/ar/docs/reference/API_REFERENCE.md) | 🇦🇿 [Azərbaycan dili](../i18n/az/docs/reference/API_REFERENCE.md) | 🇧🇬 [Български](../i18n/bg/docs/reference/API_REFERENCE.md) | 🇧🇩 [বাংলা](../i18n/bn/docs/reference/API_REFERENCE.md) | 🇧🇦 [Bosanski](../i18n/bs/docs/reference/API_REFERENCE.md) | 🇨🇿 [Čeština](../i18n/cs/docs/reference/API_REFERENCE.md) | 🇩🇰 [Dansk](../i18n/da/docs/reference/API_REFERENCE.md) | 🇩🇪 [Deutsch](../i18n/de/docs/reference/API_REFERENCE.md) | 🇬🇷 [Ελληνικά](../i18n/el/docs/reference/API_REFERENCE.md) | 🇪🇸 [Español](../i18n/es/docs/reference/API_REFERENCE.md) | 🇪🇪 [Eesti](../i18n/et/docs/reference/API_REFERENCE.md) | 🇮🇷 [فارسی](../i18n/fa/docs/reference/API_REFERENCE.md) | 🇫🇮 [Suomi](../i18n/fi/docs/reference/API_REFERENCE.md) | 🇫🇷 [Français](../i18n/fr/docs/reference/API_REFERENCE.md) | 🇮🇪 [Gaeilge](../i18n/ga/docs/reference/API_REFERENCE.md) | 🇮🇳 [ગુજરાતી](../i18n/gu/docs/reference/API_REFERENCE.md) | 🇳🇬 [Hausa](../i18n/ha/docs/reference/API_REFERENCE.md) | 🇮🇱 [עברית](../i18n/he/docs/reference/API_REFERENCE.md) | 🇮🇳 [हिन्दी](../i18n/hi/docs/reference/API_REFERENCE.md) | 🇭🇷 [Hrvatski](../i18n/hr/docs/reference/API_REFERENCE.md) | 🇭🇺 [Magyar](../i18n/hu/docs/reference/API_REFERENCE.md) | 🇦🇲 [Հայերեն](../i18n/hy/docs/reference/API_REFERENCE.md) | 🇮🇩 [Bahasa Indonesia](../i18n/id/docs/reference/API_REFERENCE.md) | 🇳🇬 [Igbo](../i18n/ig/docs/reference/API_REFERENCE.md) | 🇮🇹 [Italiano](../i18n/it/docs/reference/API_REFERENCE.md) | 🇯🇵 [日本語](../i18n/ja/docs/reference/API_REFERENCE.md) | 🇬🇪 [ქართული](../i18n/ka/docs/reference/API_REFERENCE.md) | 🇰🇭 [ខ្មែរ](../i18n/km/docs/reference/API_REFERENCE.md) | 🇮🇳 [ಕನ್ನಡ](../i18n/kn/docs/reference/API_REFERENCE.md) | 🇰🇷 [한국어](../i18n/ko/docs/reference/API_REFERENCE.md) | 🇱🇹 [Lietuvių](../i18n/lt/docs/reference/API_REFERENCE.md) | 🇱🇻 [Latviešu](../i18n/lv/docs/reference/API_REFERENCE.md) | 🇮🇳 [മലയാളം](../i18n/ml/docs/reference/API_REFERENCE.md) | 🇮🇳 [मराठी](../i18n/mr/docs/reference/API_REFERENCE.md) | 🇲🇾 [Bahasa Melayu](../i18n/ms/docs/reference/API_REFERENCE.md) | 🇲🇹 [Malti](../i18n/mt/docs/reference/API_REFERENCE.md) | 🇲🇲 [မြန်မာ](../i18n/my/docs/reference/API_REFERENCE.md) | 🇳🇵 [नेपाली](../i18n/ne/docs/reference/API_REFERENCE.md) | 🇳🇱 [Nederlands](../i18n/nl/docs/reference/API_REFERENCE.md) | 🇳🇴 [Norsk](../i18n/no/docs/reference/API_REFERENCE.md) | 🇮🇳 [ଓଡ଼ିଆ](../i18n/or/docs/reference/API_REFERENCE.md) | 🇮🇳 [ਪੰਜਾਬੀ](../i18n/pa/docs/reference/API_REFERENCE.md) | 🇵🇭 [Filipino](../i18n/phi/docs/reference/API_REFERENCE.md) | 🇵🇱 [Polski](../i18n/pl/docs/reference/API_REFERENCE.md) | 🇵🇹 [Português (Portugal)](../i18n/pt/docs/reference/API_REFERENCE.md) | 🇧🇷 [Português (Brasil)](../i18n/pt-BR/docs/reference/API_REFERENCE.md) | 🇷🇴 [Română](../i18n/ro/docs/reference/API_REFERENCE.md) | 🇷🇺 [Русский](../i18n/ru/docs/reference/API_REFERENCE.md) | 🇱🇰 [සිංහල](../i18n/si/docs/reference/API_REFERENCE.md) | 🇸🇰 [Slovenčina](../i18n/sk/docs/reference/API_REFERENCE.md) | 🇸🇮 [Slovenščina](../i18n/sl/docs/reference/API_REFERENCE.md) | 🇷🇸 [Српски](../i18n/sr/docs/reference/API_REFERENCE.md) | 🇸🇪 [Svenska](../i18n/sv/docs/reference/API_REFERENCE.md) | 🇰🇪 [Kiswahili](../i18n/sw/docs/reference/API_REFERENCE.md) | 🇮🇳 [தமிழ்](../i18n/ta/docs/reference/API_REFERENCE.md) | 🇮🇳 [తెలుగు](../i18n/te/docs/reference/API_REFERENCE.md) | 🇹🇭 [ไทย](../i18n/th/docs/reference/API_REFERENCE.md) | 🇹🇷 [Türkçe](../i18n/tr/docs/reference/API_REFERENCE.md) | 🇺🇦 [Українська](../i18n/uk-UA/docs/reference/API_REFERENCE.md) | 🇵🇰 [اردو](../i18n/ur/docs/reference/API_REFERENCE.md) | 🇺🇿 [Oʻzbekcha](../i18n/uz/docs/reference/API_REFERENCE.md) | 🇻🇳 [Tiếng Việt](../i18n/vi/docs/reference/API_REFERENCE.md) | 🇳🇬 [Yorùbá](../i18n/yo/docs/reference/API_REFERENCE.md) | 🇨🇳 [中文 (简体)](../i18n/zh-CN/docs/reference/API_REFERENCE.md) | 🇹🇼 [中文 (繁體)](../i18n/zh-TW/docs/reference/API_REFERENCE.md)
 
-OmniRoute API의 핵심 참조 문서입니다. 공개 `/v1` 인터페이스와 가장 자주 사용되는 관리 엔드포인트를 다룹니다. 전체 내용은 기계 판독 가능한 [`docs/openapi.yaml`](../openapi.yaml)과 `src/app/api/` 아래의 라우트 트리를 참조하세요.
+OmniRoute API의 핵심 참조 문서입니다. 공개 `/v1` 인터페이스와 가장 많이 사용되는 관리 엔드포인트를 다룹니다. 전체 내용은 기계 판독 가능한 [`docs/openapi.yaml`](../openapi.yaml)과 `src/app/api/` 아래의 라우트 트리에서 확인할 수 있습니다.
+
+OpenAI 호환 프로토콜과 공급자 기능 매트릭스에 대한 자세한 내용은
+[`OPENAI_COMPATIBILITY.md`](./OPENAI_COMPATIBILITY.md)를 참조하세요.
 
 ---
 
@@ -43,7 +46,7 @@ OmniRoute API의 핵심 참조 문서입니다. 공개 `/v1` 인터페이스와 
 
 ---
 
-## 채팅 완성
+## Chat Completions
 
 ```bash
 POST /v1/chat/completions
@@ -53,7 +56,7 @@ Content-Type: application/json
 {
   "model": "cc/claude-opus-4-6",
   "messages": [
-    {"role": "user", "content": "다음을 수행하는 함수를 작성하세요..."}
+    {"role": "user", "content": "함수를 작성하세요..."}
   ],
   "stream": true
 }
@@ -61,30 +64,78 @@ Content-Type: application/json
 
 ### 사용자 지정 헤더
 
-| 헤더                     | 방향 | 설명                                                                                                                                                                            |
-| ------------------------ | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `X-OmniRoute-No-Cache`   | 요청 | 캐시를 우회하려면 `true`로 설정                                                                                                                                                 |
-| `x-omniroute-no-memory`  | 요청 | 이 요청에서 메모리 및 스킬 주입을 건너뛰려면 `true`로 설정합니다(no-cache와 동일하게 동작하며, 호출별 토큰/비용 오버헤드를 방지함)                                              |
-| `X-OmniRoute-Progress`   | 요청 | 진행 이벤트를 받으려면 `true`로 설정                                                                                                                                            |
-| `X-Session-Id`           | 요청 | 외부 세션 선호도를 위한 고정 세션 키                                                                                                                                            |
-| `x_session_id`           | 요청 | 밑줄 변형도 허용됨(직접 HTTP)                                                                                                                                                   |
-| `X-OmniRoute-Session-Id` | 요청 | 호출자가 제공하는 세션/대화 태그(메모리에도 전달됨). 지정된 경우 세션별 비용 귀속을 위해 `call_logs.session_tag`에 그대로 저장됨(#8249) — 지정되지 않은 경우 절대 생성되지 않음 |
-| `Idempotency-Key`        | 요청 | 중복 제거 키(5초 범위)                                                                                                                                                          |
-| `X-Request-Id`           | 요청 | 대체 중복 제거 키                                                                                                                                                               |
-| `X-OmniRoute-Cache`      | 응답 | `HIT` 또는 `MISS`(비스트리밍)                                                                                                                                                   |
-| `X-OmniRoute-Idempotent` | 응답 | 중복 제거된 경우 `true`                                                                                                                                                         |
-| `X-OmniRoute-Progress`   | 응답 | 진행 상황 추적이 활성화된 경우 `enabled`                                                                                                                                        |
-| `X-OmniRoute-Session-Id` | 응답 | OmniRoute에서 사용한 유효 세션 ID                                                                                                                                               |
-| `X-OmniRoute-Request-Id` | 응답 | 요청 상관관계 ID(알려진 경우)                                                                                                                                                   |
-| `X-OmniRoute-Version`    | 응답 | OmniRoute 빌드 버전(항상 포함됨)                                                                                                                                                |
-| `X-OmniRoute-Cost-Saved` | 응답 | HIT으로 인해 캐시가 절감한 USD 금액(캐시 적중 시에만 해당)                                                                                                                      |
-| `X-OmniRoute-Decision`   | 응답 | 라우팅 추적: `strategy=<name>; provider=<alias>; latency_ms=<n>`(`<name>`은 콤보 전략이며, 비콤보 요청의 경우 `single`) — 완료 응답에 항상 포함됨                               |
+| 헤더                     | 방향 | 설명                                                                                                                                                                       |
+| ------------------------ | ---- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `X-OmniRoute-No-Cache`   | 요청 | 캐시를 우회하려면 `true`로 설정                                                                                                                                            |
+| `x-omniroute-no-memory`  | 요청 | 이 요청에서 메모리 및 스킬 주입을 건너뛰려면 `true`로 설정(no-cache와 동일하게 작동하며, 호출당 토큰/비용 오버헤드를 방지)                                                 |
+| `X-OmniRoute-Progress`   | 요청 | 진행 이벤트를 받으려면 `true`로 설정                                                                                                                                       |
+| `X-Session-Id`           | 요청 | 외부 세션 어피니티를 위한 고정 세션 키                                                                                                                                     |
+| `x_session_id`           | 요청 | 밑줄 변형도 허용됨(직접 HTTP 요청)                                                                                                                                         |
+| `X-OmniRoute-Session-Id` | 요청 | 호출자가 제공하는 세션/대화 태그(메모리에도 전달됨). 지정된 경우 세션별 비용 귀속을 위해 `call_logs.session_tag`에 그대로 저장됨(#8249) — 지정되지 않은 경우 생성되지 않음 |
+| `Idempotency-Key`        | 요청 | 중복 제거 키(5초 범위)                                                                                                                                                     |
+| `X-Request-Id`           | 요청 | 대체 중복 제거 키                                                                                                                                                          |
+| `x-omniroute-connection` | 요청 | 단일 모델 요청을 ID를 기준으로 하나의 제공업체 연결(계정)에 고정 — [요청별 계정 고정](#요청별-계정-고정) 참조                                                              |
+| `X-OmniRoute-Cache`      | 응답 | `HIT` 또는 `MISS`(비스트리밍)                                                                                                                                              |
+| `X-OmniRoute-Idempotent` | 응답 | 중복 제거된 경우 `true`                                                                                                                                                    |
+| `X-OmniRoute-Progress`   | 응답 | 진행 상황 추적이 활성화된 경우 `enabled`                                                                                                                                   |
+| `X-OmniRoute-Session-Id` | 응답 | OmniRoute에서 사용한 유효 세션 ID                                                                                                                                          |
+| `X-OmniRoute-Request-Id` | 응답 | 요청 상관관계 ID(알려진 경우)                                                                                                                                              |
+| `X-OmniRoute-Version`    | 응답 | OmniRoute 빌드 버전(항상 포함)                                                                                                                                             |
+| `X-OmniRoute-Cost-Saved` | 응답 | HIT으로 인해 캐시가 절감한 USD 금액(캐시 적중 시에만 해당)                                                                                                                 |
+| `X-OmniRoute-Decision`   | 응답 | 라우팅 추적: `strategy=<name>; provider=<alias>; latency_ms=<n>`(`<name>`은 조합 전략이며, 비조합 요청의 경우 `single`) — 완료 응답에 항상 포함                            |
 
 > Nginx 참고: 밑줄 헤더(예: `x_session_id`)를 사용하는 경우 `underscores_in_headers on;`을 활성화하세요.
 
-> **비용 텔레메트리 헤더:** 비스트리밍 성공 응답에는 `X-OmniRoute-*` 비용 텔레메트리 세트도 포함됩니다. 이 세트에는 `X-OmniRoute-Response-Cost`(USD, 소수점 이하 10자리 고정; 무료/가격 미책정 시 `0.0000000000`), `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`, `X-OmniRoute-Model`, `X-OmniRoute-Provider`, `X-OmniRoute-Latency-Ms`, `X-OmniRoute-Cache-Hit`, `X-OmniRoute-Fallback-Attempts`(0보다 큰 경우에만)와 `X-OmniRoute-Request-Id` 및 `X-OmniRoute-Version`이 포함됩니다. 이러한 헤더는 채팅 완성, `/v1/responses`, `/v1/messages`뿐만 아니라 **미디어 엔드포인트**인 `/v1/embeddings`, `/v1/images/generations`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/rerank`, `/v1/videos/generations`, `/v1/music/generations`, `/v1/moderations`(비용은 항상 `0`)에서도 제공됩니다. 미디어 비용은 가격 정보가 있는 경우 모달리티별(이미지당, 초당, 문자당, 검색 단위당)로 계산되며, 그렇지 않은 경우 `0`으로 처리됩니다(장애 허용).
+#### 요청별 계정 고정
 
-> **캐시 적중 비용 의미:** 시맨틱 캐시 적중(`X-OmniRoute-Cache-Hit: true`) 시에는 업스트림 호출이 발생하지 않으므로 `X-OmniRoute-Response-Cost`는 `0.0000000000`입니다(적중 결과 제공에 따른 **증분** 비용). 원래 발생했거나 발생했을 비용은 `X-OmniRoute-Cost-Saved`에 별도로 보고됩니다. 청구 시스템에서는 `X-OmniRoute-Response-Cost`를 합산해야 하며(캐시 적중 비용은 없음), 캐시 분석에서는 `X-OmniRoute-Cost-Saved`를 집계할 수 있습니다.
+제공업체에 여러 연결(계정 또는 키)이 있는 경우 OmniRoute는 일반적으로
+계정 선택 전략을 통해 하나를 선택합니다. 대신 요청에서 `x-omniroute-connection` 헤더를 사용하여
+특정 연결 하나에 고정할 수 있습니다.
+
+```bash
+curl http://localhost:20128/v1/chat/completions \
+  -H "Authorization: Bearer <OmniRoute API 키>" \
+  -H "Content-Type: application/json" \
+  -H "x-omniroute-connection: <connection id>" \
+  -d '{"model": "codex/gpt-5.5", "messages": [{"role": "user", "content": "안녕하세요"}]}'
+```
+
+- **id를 찾는 위치.** 대시보드에서 제공자 페이지
+  (**Dashboard → Providers → <provider>**)를 열고 연결 행의 `xxxxxxxx…` id 칩을 클릭하세요.
+  그러면 전체 연결 id가 복사됩니다.
+- **이를 따르는 요청.** `/v1/chat/completions`, `/v1/messages`, `/v1/responses`의
+  단일 모델 요청(`provider/model`)입니다. 콤보는 이 헤더를 무시합니다. 대신 각 콤보 단계의
+  자체 연결을 통해 단계별로 계정을 고정하세요.
+- **고정은 선호 사항이 아니라 엄격하게 적용됩니다.** 고정된 연결만 단독으로 사용됩니다.
+  요청 내에서 오류가 발생하면 해당 계정의 쿨다운이 기록되지만, 동일한 제공자의 다른
+  계정으로는 **전환되지 않습니다**.
+- **쿨다운과 할당량 제한은 고정을 해제합니다.** 고정된 연결이 쿨다운 중이거나,
+  할당량이 소진되었거나, 할당량 정책에 의해 차단된 동안에는 이후 요청이 고정되지 않은
+  트래픽과 정확히 동일하게 제공자의 다른 연결로 폴백됩니다.
+- **알 수 없거나 비활성화된 id는 실패합니다.** 제공자의 활성 풀에 없는 id(삭제되었거나,
+  비활성화되었거나, 다른 제공자에 속한 경우)를 사용하면 적격 계정이 남지 않으므로,
+  요청은 다른 곳으로 자동 라우팅되지 않고 실패합니다.
+
+Claude Code는 `ANTHROPIC_CUSTOM_HEADERS`를 통해 사용자 지정 헤더를 전송합니다. 프로젝트별로
+다른 계정을 고정하려면 `~/.claude/settings.json`의 `env` 블록 또는 프로젝트 수준의
+`.claude/settings.json`에 이를 추가하세요.
+
+```jsonc
+{
+  "env": {
+    "ANTHROPIC_BASE_URL": "http://<your OmniRoute>:20128",
+    "ANTHROPIC_AUTH_TOKEN": "<your OmniRoute API key>",
+    "ANTHROPIC_CUSTOM_HEADERS": "x-omniroute-connection: <connection id>",
+  },
+}
+```
+
+출처: `src/sse/handlers/chat.ts`(헤더 읽기), `src/sse/services/auth.ts` 및
+`src/sse/services/sessionAffinityPin.ts`(고정 해제 및 풀에 없음 확인).
+
+> **비용 텔레메트리 헤더:** 스트리밍이 아닌 성공 응답에는 `X-OmniRoute-*` 비용 텔레메트리 세트도 포함됩니다. 여기에는 `X-OmniRoute-Response-Cost`(USD, 소수점 이하 10자리 고정; 무료이거나 가격이 책정되지 않은 경우 `0.0000000000`), `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`, `X-OmniRoute-Model`, `X-OmniRoute-Provider`, `X-OmniRoute-Latency-Ms`, `X-OmniRoute-Cache-Hit`, `X-OmniRoute-Fallback-Attempts`(0보다 큰 경우에만), 그리고 `X-OmniRoute-Request-Id` 및 `X-OmniRoute-Version`이 포함됩니다. 이러한 헤더는 채팅 완성, `/v1/responses`, `/v1/messages`, **그리고 미디어 엔드포인트**인 `/v1/embeddings`, `/v1/images/generations`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/rerank`, `/v1/videos/generations`, `/v1/music/generations`, `/v1/moderations`(비용은 항상 `0`)에서 생성됩니다. 가격 정보가 있는 경우 미디어 비용은 모달리티별(이미지당, 초당, 문자당, 검색 단위당)로 계산되며, 그렇지 않으면 `0`으로 처리됩니다(페일 오픈).
+
+> **캐시 적중 비용 의미:** 시맨틱 캐시 적중(`X-OmniRoute-Cache-Hit: true`) 시에는 업스트림 호출이 이루어지지 않으므로, `X-OmniRoute-Response-Cost`는 `0.0000000000`(적중 결과를 제공하는 데 드는 **증분** 비용)입니다. 원래 발생했거나 발생했을 비용은 `X-OmniRoute-Cost-Saved`에 별도로 보고됩니다. 과금 소비자는 `X-OmniRoute-Response-Cost`를 합산해야 하며(캐시 적중 비용은 없음), 캐시 분석에서는 `X-OmniRoute-Cost-Saved`를 집계할 수 있습니다.
 
 ## 독점 관리 세션 리스
 
@@ -202,18 +253,16 @@ Content-Type: application/json
 }
 ```
 
-사용 가능한 제공업체: Nebius, OpenAI, Mistral, Together AI, Fireworks, NVIDIA, **OpenRouter**, Jina AI.
+사용 가능한 제공자: Nebius, OpenAI, Mistral, Together AI, Fireworks, NVIDIA, **OpenRouter**, Jina AI.
 
-카탈로그 ID는 `provider/model` 형식입니다(예: `jina-ai/jina-embeddings-v5-omni-small`). 레지스트리에 표시되는 Jina 모델 ID만으로도(예: `jina-embeddings-v5-text-small`, `jina-reranker-v3.5`) 확인할 수 있습니다. Jina의 임베딩/재순위화/분류/분할은 먼저 대시보드의 `jina-ai` 자격 증명을 사용하며, 대시보드 키가 없는 경우에만 `JINA_AI_API_KEY`를 대체 수단으로 사용합니다. `jina-reader` 카드는 Reader / `r.jina.ai` 전용이며(`POST /v1/web/fetch`), 임베딩이나 재순위화에는 사용되지 않습니다.
+카탈로그 ID는 `provider/model` 형식입니다(예: `jina-ai/jina-embeddings-v5-omni-small`). 레지스트리에 표시되는 제공자 접두사 없는 Jina 모델 ID(예: `jina-embeddings-v5-text-small`, `jina-reranker-v3.5`)도 해석됩니다. Jina embed/rerank/classify/segment는 대시보드의 `jina-ai` 자격 증명을 우선 사용하며, `JINA_AI_API_KEY`는 대시보드 키가 없을 때만 대체 수단으로 사용됩니다. `jina-reader` 카드는 Reader / `r.jina.ai` 전용(`POST /v1/web/fetch`)이며 임베딩이나 리랭크를 제공하지 않습니다.
 
-멀티모달 지원을 명시하는 레지스트리 모델은 제공업체에 종속되지 않는 구조화된
-항목도 최대 32개까지 허용합니다. 미디어 항목 유형은 `text`, `image`, `audio`, `video`, `document`입니다. 해당 미디어의 `source`는
-`{"type":"url","url":"https://..."}` 또는
+멀티모달 지원을 명시하는 레지스트리 모델은 제공자에 종속되지 않는 구조화된 항목도 최대 32개까지 허용합니다. 미디어 항목 유형은 `text`, `image`, `audio`, `video`, `document`입니다. 해당 미디어의 `source`는 `{"type":"url","url":"https://..."}` 또는
 `{"type":"base64","data":"...","media_type":"..."}`입니다.
 
 Jina v5 Omni(`jina-ai/jina-embeddings-v5-omni-small`, `jina-ai/jina-embeddings-v5-omni-nano`,
-그리고 제품군 별칭 `jina-ai/jina-embeddings-v5-omni` → omni-small)는 Jina의 네이티브
-EmbeddingsV5Request 문서도 허용하며, 이를 `https://api.jina.ai/v1/embeddings`로 **변경 없이 전달합니다**:
+그리고 패밀리 별칭 `jina-ai/jina-embeddings-v5-omni` → omni-small)는 Jina의 네이티브
+EmbeddingsV5Request 문서도 허용하며, 이를 `https://api.jina.ai/v1/embeddings`로 **그대로 전달합니다**:
 
 ```json
 {
@@ -231,25 +280,31 @@ EmbeddingsV5Request 문서도 허용하며, 이를 `https://api.jina.ai/v1/embed
 ```
 
 네이티브 `{ image | audio | video | pdf }` 값은 공개 HTTPS URL, `data:` URI 또는 원시
-base64일 수 있습니다. OmniRoute는 이러한 객체를 문자열로 변환하거나 네이티브 이미지 URL을 가져오지 않으며, Jina가
+base64일 수 있습니다. OmniRoute는 이러한 객체를 문자열화하거나 네이티브 이미지 URL을 가져오지 않으며, Jina가
 공개 미디어를 직접 가져옵니다. 추가 Jina 필드(`task`, `normalized`, `truncate`, `embedding_type`)도
 전달됩니다. 텍스트 전용 Jina SKU는 여전히 텍스트가 아닌 문서를 거부합니다.
 
 보안 및 전송 제한:
 
 - 원격 미디어 URL은 공개 HTTPS여야 합니다. 표준 `{type,source:url}` 항목은
-  서버 측에서 가져온 후(리디렉션 재검증, 시간 제한, 크기 제한, 공개 DNS, 연결 고정)
-  제공업체 호출 전에 인라인으로 포함됩니다. Jina 네이티브 `{image:"https://..."}` 항목은 동일한
-  공개 HTTPS 검사를 거친 뒤 그대로 전달되며, Jina가 URL을 가져옵니다.
-- 인라인 base64 미디어는 항목당 디코딩 후 8 MiB, 요청 전체에서 디코딩 후 16 MiB로 제한됩니다.
+  서버 측에서 가져오며(리디렉션 재검증, 시간 제한, 크기 제한, 공개 DNS, 연결 고정),
+  제공자 호출 전에 인라인 처리됩니다. Jina 네이티브 `{image:"https://..."}` 항목은 동일한 공개 HTTPS 검사를
+  거친 후 그대로 전달되며, Jina가 URL을 가져옵니다.
+- 인라인 base64 미디어는 디코딩된 크기를 기준으로 항목당 8 MiB, 요청 전체에서 16 MiB로 제한됩니다.
 
-제공업체 변환(표준 항목은 변경 없이 전달되지 않음):
+제공자 변환(표준 항목은 변경되지 않은 상태로 전달되지 않음):
 
-- Jina 멀티모달 모델: 각 최상위 항목은 인라인 미디어에 데이터 URI를 사용하여
-  하나의 모달리티 키 객체(`text` / `image` / `audio` / `video` / `pdf`)가 되며, 최상위
+- Jina 멀티모달 모델: 각 최상위 항목은 하나의 모달리티 키 객체
+  (`text` / `image` / `audio` / `video` / `pdf`)가 되며, 인라인 미디어에는 데이터 URI를 사용합니다. 최상위
   항목당 하나의 벡터가 생성됩니다.
-- Gemini Embedding 2 제품군: 하나의 최상위 배열은 `content.parts`(`text` 또는 `inline_data`)를 사용하는
-  단일 네이티브 `models/{model}:embedContent` 요청이 됩니다.
+- Gemini Embedding 2 패밀리: 하나의 최상위 배열이 `content.parts`(`text` 또는 `inline_data`)를 포함하는 단일 네이티브
+  `models/{model}:embedContent` 요청이 됩니다.
+- llama.cpp(`llama-cpp/<model>`, 로컬 서버가 로드한 모든 모델): 표준 `text` 항목은
+  일반 문자열이 되고, `image` / `audio` / `video`는 각각 하나의
+  `{"content": [part]}` 객체가 됩니다. 이때 인라인 데이터와 함께 llama-server의 채팅 콘텐츠 파트(`image_url`,
+  `input_audio`와 형식 `wav` / `mp3` / `flac`, `input_video`)를 사용하며, 최상위 항목당
+  하나의 벡터가 생성됩니다. 서버는 `--embedding --mmproj …`로 실행되어야 하며, 프로젝터가 없으면
+  서버 자체에서 미디어를 거부합니다. `document`는 지원되지 않습니다.
 - 명시적인 모달리티 메타데이터가 없는 알 수 없는/동적 모델은 구조화된 입력을 HTTP 400으로 거부합니다.
 
 ```json
@@ -267,8 +322,8 @@ base64일 수 있습니다. OmniRoute는 이러한 객체를 문자열로 변환
 }
 ```
 
-지원되지 않는 모델/모달리티 조합은 항목을 강제로 변환하는 대신 HTTP 400을 반환합니다. 레거시 문자열/토큰 요청의
-입력 이외 확장 필드는 이전과 마찬가지로 변경 없이 전달됩니다.
+지원되지 않는 모델/모달리티 조합은 항목을 강제 변환하는 대신 HTTP 400을 반환합니다. 기존 문자열/토큰 요청의 입력 외
+확장 필드는 변경되지 않은 상태로 계속 전달됩니다.
 
 ```bash
 # 모든 임베딩 모델 나열
@@ -286,12 +341,39 @@ Content-Type: application/json
 
 {
   "model": "openai/gpt-image-2",
-  "prompt": "산 너머로 펼쳐지는 아름다운 일몰",
+  "prompt": "산 너머로 보이는 아름다운 일몰",
   "size": "1024x1024"
 }
 ```
 
-사용 가능한 제공자: OpenAI (GPT Image 2), xAI (Grok Image), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana, **OpenRouter**, SD WebUI (로컬), ComfyUI (로컬).
+사용 가능한 제공업체에는 OpenAI (GPT Image 2), xAI (Grok Image), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana, **OpenRouter**, **ZenMux**, SD WebUI (로컬), ComfyUI (로컬)가 포함됩니다.
+
+`n`은 `data[]`에 `n`개의 이미지를 반환합니다. 업스트림 API가 호출당 하나의 이미지를 반환하는 제공업체
+(Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik,
+NVIDIA NIM, Cloudflare Workers AI)의 경우 `n`개의 개별 업스트림 호출이 이루어지며, 동시에 최대 4개까지 실행됩니다. 고정된
+`seed`는 호출 인덱스에 따라 오프셋(`seed`, `seed + 1`, …)되므로, 이미지가 서로 다르면서도
+재현성을 유지합니다. `n`의 상한은 10입니다. 호출 중 하나라도 실패하면 요청 전체가 실패합니다. 팬아웃
+형식 목록은
+`open-sse/handlers/imageGeneration/fanOut.ts`의 `SINGLE_IMAGE_FANOUT_FORMATS`에 있습니다.
+
+ZenMux는 기존 API 키 연결을 재사용하며 `zenmux/` 또는 `zm/` 접두사를 허용합니다.
+
+- `zenmux/openai/gpt-image-2`는 ZenMux의 OpenAI Images API를 사용합니다. 옵션에는 `size`,
+  `quality`, `n`, `output_format`, `output_compression`, `background`, `response_format`가 포함됩니다.
+- `zm/meta/muse-image-1.0`과 같은 다른 게시자는 ZenMux의 Vertex AI `:predict`
+  엔드포인트를 사용합니다. `n`은 `sampleCount`에, `aspect_ratio`는 `aspectRatio`에, `image_size`
+  (`1K`, `2K`, `4K`)는 `sampleImageSize`에 매핑됩니다. 픽셀 `size`는 가로세로 비율만 제공하며,
+  해당 픽셀 크기를 보장하지 않습니다. 지원되는 비율, 해상도 및 개수는 모델마다 다릅니다.
+- `zm/inclusionai/ming-image-0.1-design`은 자체적으로 크기를 선택합니다. `size`,
+  `aspect_ratio`, `image_size`는 생략하세요. 값을 명시하면 HTTP 400이 반환됩니다. `output_format`을 사용하여
+  PNG, JPEG, WebP를 요청할 수 있습니다.
+
+이 통합은 텍스트-이미지 생성을 지원하지만 참조 이미지 편집은 지원하지 않습니다. Vertex
+출력은 `data[].b64_json`으로 정규화됩니다. `response_format: "url"`은 업스트림
+HTTPS URL을 반환하거나, 이미지 바이트만 사용할 수 있는 경우 base64 데이터 URL을 반환합니다. 비어 있거나 필터링된 출력은
+빈 성공 응답 대신 오류를 반환합니다. 모델 접근 권한은 ZenMux 계정에 따라 달라집니다.
+[ZenMux의 Vertex API](https://docs.zenmux.ai/api/vertexai/generate-images) 및
+[OpenAI Images API](https://docs.zenmux.ai/api/openai/generate-an-image)를 참조하세요.
 
 ```bash
 # 모든 이미지 모델 나열
@@ -367,27 +449,27 @@ Service Account JSON 자격 증명(JWT bearer 흐름을 통해 수명이 짧은 
 GET /v1/models
 Authorization: Bearer your-api-key
 
-→ OpenAI 형식으로 모든 채팅, 임베딩 및 이미지 모델과 조합을 반환
+→ 모든 채팅, 임베딩 및 이미지 모델과 조합을 OpenAI 형식으로 반환
 ```
 
 ### 모델 ID 접두사 (`?prefix=`)
 
 대부분의 모델은 **제공자 접두사** 아래에 표시됩니다. 어떤 접두사를 사용할지는
-`MODELS_CATALOG_PREFIX_MODE` 기능 플래그로 제어하며, 쿼리 매개변수를 사용해 **요청별로**
-재정의할 수 있습니다. 이는 다른 모든 사용자의 서버 전체 설정을 변경하지 않고 깔끔한 목록을 원하는
-클라이언트에 유용합니다.
+`MODELS_CATALOG_PREFIX_MODE` 기능 플래그로 제어되며, 쿼리 매개변수를 사용하여 **요청별로**
+재정의할 수 있습니다. 이는 다른 모든 사용자의 서버 전역 설정을 변경하지 않고 깔끔한 목록을
+원하는 클라이언트에 유용합니다.
 
 ```bash
-GET /v1/models?prefix=alias        # 모델당 하나의 ID — 짧은 별칭 접두사
+GET /v1/models?prefix=alias        # 모델마다 하나의 ID — 짧은 별칭 접두사
 GET /v1/models?prefix=dual         # 두 형식 모두(서버 기본값)
 GET /v1/models?prefix=canonical    # 전체 제공자 ID 접두사만
 ```
 
 | 모드        | 출력                                                     | 참고                                                                                                                                                                          |
 | ----------- | -------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `dual`      | `cc/claude-sonnet-4-6` **및** `claude/claude-sonnet-4-6` | **기본값입니다.** 두 ID 모두 동일한 모델로 라우팅되며, 두 형식 중 하나를 하드코딩한 클라이언트 설정이 계속 작동하도록 유지됩니다. 카탈로그 크기가 대략 두 배가 됩니다.        |
-| `alias`     | `cc/claude-sonnet-4-6`                                   | 모델당 하나의 항목입니다. 고유한 별칭이 없는 제공자도 해당 항목을 계속 출력하므로 누락되는 것은 없습니다.                                                                     |
-| `canonical` | `claude/claude-sonnet-4-6`                               | 전체 제공자 ID 접두사 아래에 모델당 하나의 항목을 출력합니다. 고유한 별칭이 없는 제공자(예: `antigravity/…`, `agy/…`)도 여기에서 단일 ID를 출력하므로 누락되는 것은 없습니다. |
+| `dual`      | `cc/claude-sonnet-4-6` **및** `claude/claude-sonnet-4-6` | **기본값.** 두 ID 모두 동일한 모델로 라우팅됩니다. 두 형식 중 하나를 하드코딩한 클라이언트 설정이 계속 작동하도록 유지됩니다. 카탈로그 크기는 대략 두 배가 됩니다.            |
+| `alias`     | `cc/claude-sonnet-4-6`                                   | 모델마다 항목 하나가 제공됩니다. 고유한 별칭이 없는 제공자도 해당 항목을 계속 출력하므로 누락되는 것은 없습니다.                                                              |
+| `canonical` | `claude/claude-sonnet-4-6`                               | 전체 제공자 ID 접두사 아래에 모델마다 항목 하나가 제공됩니다. 고유한 별칭이 없는 제공자(예: `antigravity/…`, `agy/…`)도 여기에서 단일 ID를 출력하므로 누락되는 것은 없습니다. |
 
 `dual` 모드 미러는 쿼리 매개변수 없이도 식별할 수 있습니다. 기본 ID를 가리키는 `parent`
 필드가 포함되어 있기 때문입니다.
@@ -395,15 +477,74 @@ GET /v1/models?prefix=canonical    # 전체 제공자 ID 접두사만
 모델 선택기를 렌더링하는 클라이언트는 `?prefix=alias`를 요청해야 합니다. 이는
 [OmniCopilot VS Code 확장 프로그램](../guides/VSCODE-COPILOT.md)에서 사용하는 방식입니다.
 
+### 탐색 필터 (`?capability=`, `?min_context=`, `?kind=`, `?q=`)
+
+`GET /v1/models`는 선택적으로 사용할 수 있는 탐색 필터를 지원합니다. 이러한 필터가 없으면 응답은
+변경되지 않습니다. 필터는 호출자가 이미 볼 수 있는 카탈로그 범위를 좁히며(API 키 권한이 먼저 적용됨),
+OpenAI 스타일의 `limit` / `after` 페이지 처리 전에 실행됩니다.
+
+```bash
+GET /v1/models?capability=vision&capability=tool_calling   # 나열된 모든 기능이 참이어야 함
+GET /v1/models?capability=vision,reasoning&min_context=200000
+GET /v1/models?kind=embedding                              # 카탈로그 `type`; 값이 없는 행은 `chat`
+GET /v1/models?q=sonnet&limit=10                           # ID 또는 이름에서 대소문자를 구분하지 않고 일치
+```
+
+| 매개변수      | 값                                                                                                  |
+| ------------- | --------------------------------------------------------------------------------------------------- |
+| `capability`  | `attachment`, `reasoning`, `structured_output`, `temperature`, `thinking`, `tool_calling`, `vision` |
+| `min_context` | `context_length`와 비교되는 음이 아닌 정수                                                          |
+| `kind`        | `chat`, `audio`, `embedding`, `image`, `moderation`, `music`, `rerank`, `video`                     |
+| `q`           | 1~200자                                                                                             |
+
+알 수 없는 값이나 음이 아닌 정수가 아닌 `min_context` 값(예: `1.5`)을 지정하면
+HTTP `400`이 반환되며 메시지에 유효한 값이 나열됩니다. 구현:
+`src/app/api/v1/models/catalogFilters.ts`.
+
+### 모델 후보 목록 (`POST /v1/models/query`)
+
+`POST /v1/models/query`는 `GET /v1/models`와 동일한 카탈로그에서 짧고 결정론적인 목록을 반환하며,
+인증 및 키별 표시 범위도 동일하게 적용됩니다.
+
+```bash
+POST /v1/models/query
+Authorization: Bearer your-api-key
+Content-Type: application/json
+
+{ "capabilities": ["vision", "tool_calling"], "min_context": 128000, "max_output": 16000,
+  "kind": "chat", "q": "gpt", "owned_by": "openai", "exclude": ["openai/gpt-4o"], "limit": 5 }
+
+→ { "object": "list", "data": [ ...models ] }
+```
+
+모든 필드는 선택 사항입니다. `capabilities`와 `exclude`에는 배열 또는 쉼표로 구분된 문자열을 사용할 수 있으며,
+`max_output`은 `max_output_tokens`와 비교됩니다. 결과는 `owned_by`, 그다음 `id` 순으로 정렬됩니다.
+`limit`의 기본값은 `20`이며, `100`을 초과하는 값은 `100`으로 제한됩니다. 잘못된 JSON, 알 수 없는
+필드 또는 유효하지 않은 값은 HTTP `400`을 반환합니다.
+
+### 개별적으로 숨겨진 채팅 모델
+
+제공자 페이지에서 **숨김**으로 표시된 모델은 카탈로그에서 제외되며, 명시적으로 요청할 경우
+HTTP `404` / `model_not_found`로 거부됩니다. 이 검사는 제공자 별칭, 호환 제공자 노드 접두사 및
+연결 기본값을 포함하여 해석된 제공자와 모델을 사용합니다. 조합은 숨겨진 대상을 건너뛰고 표시되는
+형제 모델을 사용할 수 있습니다. 실행 가능한 대상이 남아 있지 않으면 동일한 오류 코드를 반환합니다.
+숨김 해제는 다음 요청부터 적용됩니다. 이미지 전용 표시 여부 재정의는 동일한 ID를 가진 채팅 모델을
+숨기지 않습니다.
+
+이 개별 모델 설정은 카탈로그 표시와 자동 라우팅 후보를 필터링하면서 명시적 디스패치는 유지하는
+[모델 노출 허용/거부 목록](../routing/MODEL_EXPOSURE_LIST.md)과 별개입니다. API 키 모델 권한도
+독립적으로 계속 적용됩니다. 기본 카탈로그 접두사 모드는 `dual`로 유지됩니다.
+
 ### 비사고 모델 변형
 
-사고 기능을 지원하는 Claude 모델의 경우 `/v1/models`는 ID 앞에 `claude-3-omniroute-no-thinking/`이 붙은 **비사고** 변형도 표시합니다.
+사고 기능을 지원하는 Claude 모델의 경우 `/v1/models`는 ID 앞에 `claude-3-omniroute-no-thinking/`이 붙은
+**비사고** 변형도 표시합니다.
 
 ```
 claude-3-omniroute-no-thinking/<provider>/<model>
 ```
 
-이 ID를 선택하면(예: 항상 `thinking` 블록을 첨부하는 Claude Code 설정에서) 추론이 억제된 실제 `<provider>/<model>`로 다시 해석됩니다. `/v1/messages` 경로에서는 `thinking:{type:"disabled"}`가 적용되고, `/v1/chat/completions` 경로에서는 `reasoning`/`reasoning_effort` 필드가 제거됩니다. 이 변형은 사고 기능을 지원하면서 **동시에** `disabled`를 준수하는 Claude 계열 모델에만 표시됩니다(따라서 예를 들어 `disabled`를 거부하고 적응형 모드만 지원하는 모델은 제외됩니다). 운영자는 `ModelSpec.noThinkingAlias`를 통해 모델별로 이 변형을 강제로 활성화하거나 비활성화할 수 있습니다.
+이 id를 선택하면(예: 항상 `thinking` 블록을 첨부하는 Claude Code 구성에서) 추론이 억제된 실제 `<provider>/<model>`로 다시 해석됩니다. 즉, `/v1/messages` 경로에서는 `thinking:{type:"disabled"}`가 사용되고, `/v1/chat/completions` 경로에서는 `reasoning`/`reasoning_effort` 필드가 제거됩니다. 이 변형은 thinking을 지원하면서 **동시에** `disabled`를 준수하는 Claude 계열 모델에만 표시됩니다(따라서 예를 들어 `disabled`를 거부하는 adaptive 전용 모델은 제외됩니다). 운영자는 `ModelSpec.noThinkingAlias`를 통해 모델별로 이 변형을 강제로 활성화하거나 비활성화할 수 있습니다.
 
 ---
 
@@ -429,7 +570,7 @@ Bifrost, CLIProxyAPI 및 향후 사이드카 라우터에서 사용하는 JSON �
 | POST   | `/v1/embeddings`                          | OpenAI                           |
 | POST   | `/v1/images/generations`                  | OpenAI Images                    |
 | POST   | `/v1/images/edits`                        | OpenAI Images(편집/인페인팅)     |
-| POST   | `/v1/videos/generations`                  | OpenAI 스타일 비디오 생성        |
+| POST   | `/v1/videos/generations`                  | OpenAI 스타일 동영상 생성        |
 | POST   | `/v1/music/generations`                   | OpenAI 스타일 음악 생성          |
 | POST   | `/v1/audio/transcriptions`                | OpenAI Audio(STT)                |
 | POST   | `/v1/audio/speech`                        | OpenAI TTS(오디오 본문 반환)     |
@@ -438,6 +579,7 @@ Bifrost, CLIProxyAPI 및 향후 사이드카 라우터에서 사용하는 JSON �
 | POST   | `/v1/segment`                             | Jina 세그멘터(`segment.jina.ai`) |
 | POST   | `/v1/moderations`                         | OpenAI Moderations               |
 | GET    | `/v1/models`                              | OpenAI                           |
+| POST   | `/v1/models/query`                        | 필터링된 모델 후보 목록          |
 | POST   | `/v1/messages/count_tokens`               | Anthropic                        |
 | GET    | `/v1beta/models`                          | Gemini                           |
 | POST   | `/v1beta/models/{...path}`                | Gemini generateContent           |
@@ -449,12 +591,12 @@ Bifrost, CLIProxyAPI 및 향후 사이드카 라우터에서 사용하는 JSON �
 | POST   | `/api/v1/vscode/{token}/api/chat`         | Ollama 토큰화 별칭               |
 | GET    | `/api/v1/vscode/{token}/api/tags`         | Ollama 태그 토큰화 별칭          |
 
-모든 POST 경로는 동일한 형식을 따릅니다. `Bearer your-api-key` + Zod로 검증된 JSON 본문(`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema` 등, `src/shared/validation/schemas.ts` 참조). 스키마 검증에 실패하면 4xx가 반환됩니다.
+모든 POST 경로는 `Bearer your-api-key` + Zod로 검증된 JSON 본문(`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema` 등, `src/shared/validation/schemas.ts` 참조)이라는 동일한 형식을 따릅니다. 스키마 검증에 실패하면 4xx가 반환됩니다.
 
 `Authorization: Bearer ...`를 첨부할 수 없는 클라이언트를 위해 OmniRoute는 쿼리 문자열 호환 방식(`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`) 또는 아래에 설명된 전용 `/api/v1/vscode/{token}/...` 엔드포인트를 통해 URL에 포함된 API 키도 허용합니다.
 
 ```bash
-# 재순위 지정(클라우드 레지스트리 제공자 또는 "<prefix>/<model>" 형식의 OpenAI 호환 제공자 노드)
+# 재순위 지정(클라우드 레지스트리 공급자 또는 "<prefix>/<model>" 형식의 OpenAI 호환 공급자 노드)
 POST /v1/rerank      { "model": "jina-ai/jina-reranker-v3.5", "query": "...", "documents": ["..."] }
 
 # Jina 분류(Foundation API 자격 증명)
@@ -463,52 +605,55 @@ POST /v1/classify    { "model": "jina-embeddings-v5-text-small", "input": ["..."
 # Jina 세그멘터
 POST /v1/segment     { "content": "...", "return_chunks": true }
 
-# Jina 검색(s.jina.ai; 제공자 별칭: jina-search, jina-ai, jina)
+# Jina 검색(s.jina.ai, 공급자 별칭: jina-search, jina-ai, jina)
 POST /v1/search      { "query": "...", "provider": "jina-search" }
 
-# 검토
+# 콘텐츠 조정
 POST /v1/moderations { "model": "omni-moderation-latest", "input": "..." }
 
-# TTS — audio/mpeg(또는 요청한 형식) 본문 반환
+# TTS — audio/mpeg(또는 요청된 형식) 본문 반환
 POST /v1/audio/speech { "model": "openai/tts-1", "input": "Hello", "voice": "alloy" }
 
 # Soniox TTS에는 언어와 음성이 필요합니다. `language`의 기본값은 "en"입니다. 음성이
-# 없거나 OpenAI 기본 음성 이름(alloy, nova, …)이면 "Adrian"으로 설정됩니다.
+# 누락되었거나 OpenAI 기본 음성 이름(alloy, nova, …)이면 "Adrian"으로 설정됩니다.
 POST /v1/audio/speech { "model": "soniox/tts-rt-v1", "input": "Xin chào", "voice": "Adrian", "language": "vi" }
 
 # 이미지 편집(multipart)
 POST /v1/images/edits  -F image=@input.png -F prompt="..." -F mask=@mask.png
 
-# 비디오/음악 생성(제공자 접두사가 붙은 모델 ID)
+# 동영상/음악 생성(공급자 접두사가 포함된 모델 ID)
 POST /v1/videos/generations { "model": "runway/gen-3", "prompt": "..." }
 POST /v1/music/generations  { "model": "kie/suno-v4.0",   "prompt": "..." }
 ```
 
-> **재순위 지정 제공자 노드:** `POST /v1/rerank`는 `<node-prefix>/<model>`로 지정된
-> OpenAI 호환 제공자 노드(oMLX, vLLM, Infinity, 게이트웨이 뒤의 TEI 등)로도 요청을
-> 라우팅합니다. 루프백 노드(`localhost`, `127.0.0.1`, `172.16.0.0/12`)는 항상 사용할
-> 수 있습니다. 그 외 호스트의 노드(LAN 장비 또는 Tailscale 피어)는 운영자가
-> `RERANK_REMOTE_PROVIDER_NODES` 기능 플래그를 활성화하고 노드의 기본 URL이 제공자의
+> **리랭크 제공자 노드:** `POST /v1/rerank`는 `<node-prefix>/<model>` 형식으로 지정된 OpenAI 호환 제공자 노드
+> (oMLX, vLLM, Infinity, 게이트웨이 뒤의 TEI 등)로도 라우팅됩니다. 루프백
+> 노드(`localhost`, `127.0.0.1`, `172.16.0.0/12`)는 항상 사용할 수 있으며, 운영자가
+> `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`에 나열한 호스트 이름도 사용할 수 있습니다(예:
+> `http://reranker:8080/v1`과 같은 Docker/Compose 서비스 이름. 이러한 노드는 `HTTP(S)_PROXY` 또는
+> 연결에 고정된 프록시를 절대 거치지 않고 직접 호출됩니다). 그 밖의
+> 호스트에 있는 노드(LAN 장비 또는 Tailscale 피어)는 운영자가
+> `RERANK_REMOTE_PROVIDER_NODES` 기능 플래그를 활성화하고 노드의 기본 URL이 제공자
 > 아웃바운드 URL 정책(`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`)을
-> 통과하는 경우에만 사용할 수 있습니다. 클라우드 메타데이터 호스트로는 절대 라우팅되지
-> 않습니다. 메모리 엔진의 재순위 지정 단계는 루프백을 통해 이 경로를 호출하므로, Memory
-> 설정의 `rerankProviderModel`에도 동일한 규칙이 적용됩니다.
+> 통과하는 경우에만 사용할 수 있습니다.
+> 메모리 엔진의 리랭크 단계는 루프백을 통해 이 라우트를 호출하므로,
+> 메모리 설정의 `rerankProviderModel`에도 동일한 규칙이 적용됩니다.
 >
-> **로컬 서버 형식:** 노드는 `<base>/v1/rerank`에서 호출되며, 404가 발생하면
+> **로컬 서버 형식:** 노드는 `<base>/v1/rerank`에서 호출되며, 404가 반환되면
 > `<base>/rerank`(Infinity, TEI)에서 호출됩니다. 업스트림 본문에는 Cohere/OpenAI 표기
 > (`documents`, `return_documents`)와 TEI 표기(`texts`, `return_text`)가 모두 포함되며,
-> 업스트림 응답은 Cohere 엔벌로프로 정규화됩니다. TEI의 단순 배열
-> `[{index, score, text}]`, 경량 게이트웨이의 `{results: [{index, score}]}`, Voyage 스타일의
-> `{data: [...]}`는 모두 클라이언트에 `{results: [{index, relevance_score, document?}]}`
-> 형식으로 반환되며, 점수순으로 정렬되고 `top_n`개로 제한됩니다.
+> 업스트림 응답은 Cohere 엔벌로프로 정규화됩니다. 즉, TEI의 단순 `[{index, score, text}]`,
+> 경량 게이트웨이의 `{results: [{index, score}]}`, Voyage 형식의 `{data: [...]}`는 모두
+> 점수순으로 정렬되고 `top_n`으로 제한된
+> `{results: [{index, relevance_score, document?}]}` 형식으로 클라이언트에 반환됩니다.
 
-> **프로바이더 노드 검색:** OpenAI 호환 프로바이더 노드의 모델은 노드 접두사 아래의 `GET /v1/models`에 표시됩니다.
-> 엔드포인트 메타데이터가 없는 항목(로컬 `/v1/models` 목록에서 일반적)은
-> 노드의 `apiType`을 상속하므로, `embeddings` 노드의 모델은 기본적으로 채팅으로 설정되는 대신 `type: "embedding"`이 되고
-> `rerank` 노드의 모델은 `type: "rerank"`가 됩니다. 동기화되었거나 수동으로 추가된 항목에 명시적인
-> `supportedEndpoints`가 있으면 여전히 이것이 우선합니다.
+> **제공자 노드 검색:** OpenAI 호환 제공자 노드의 모델은 노드 접두사 아래에서 `GET /v1/models`에
+> 표시됩니다. 엔드포인트 메타데이터가 없는 행(로컬 `/v1/models` 목록에서 일반적)은
+> 노드의 `apiType`을 상속하므로, 기본값이 채팅으로 설정되는 대신 `embeddings` 노드의 모델은
+> `type: "embedding"`이 되고 `rerank` 노드의 모델은 `type: "rerank"`가 됩니다. 동기화되었거나
+> 수동으로 추가된 행의 명시적 `supportedEndpoints`는 여전히 우선 적용됩니다.
 
-### 전용 프로바이더 라우트
+### 전용 제공자 라우트
 
 ```bash
 POST /v1/providers/{provider}/chat/completions
@@ -516,7 +661,7 @@ POST /v1/providers/{provider}/embeddings
 POST /v1/providers/{provider}/images/generations
 ```
 
-프로바이더 접두사가 없으면 자동으로 추가됩니다. 일치하지 않는 모델은 `400`을 반환합니다.
+제공자 접두사가 없으면 자동으로 추가됩니다. 일치하지 않는 모델은 `400`을 반환합니다.
 
 ---
 
@@ -560,7 +705,7 @@ OpenAI 호환 배치 처리입니다.
 
 ---
 
-## 검색 API
+## Search API
 
 웹/검색 제공자 추상화(Tavily, Brave, Exa, Serper 등).
 
@@ -572,32 +717,59 @@ OpenAI 호환 배치 처리입니다.
 
 **인증:** Bearer API 키(`extractApiKey` + `isValidApiKey`). 검색 정책은 `enforceApiKeyPolicy`를 통해 적용됩니다.
 
+### Exa 및 Tavily `provider_options`
+
+Exa와 Tavily는 네임스페이스가 지정된 백에서 제공자별 필드를 읽습니다:
+`provider_options.exa`(또는 `provider_options["exa-search"]`) 및 `provider_options.tavily`
+(또는 `provider_options["tavily-search"]`). 아래 키만 전달됩니다. 각 키는
+`open-sse/handlers/search/providerOptionsPassthrough.ts`에 있는 자체 Zod 스키마를 기준으로
+검사되며, 타입이 잘못된 키는 제외됩니다. 인증, 기본 URL, `stream`, `outputSchema`를
+포함한 그 밖의 모든 키는 무시됩니다. 다른 제공자가 사용하는 플랫 키(`cx`, `depth`, ...)
+는 이전과 동일하게 작동합니다.
+
+| 제공자 | 최상위 필드                                                                                                                                                                                                                                                                                                                                                               | 중첩                                                                                                                                                           |
+| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa    | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance`(플랫 원시 값), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                                  | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}`가 기본값 `{ text: true, highlights: true }` 위에 병합됨 |
+| Tavily | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                              |
+
+일반 필드가 항상 우선합니다: `query`, `max_results`, `filters`(도메인), `country` 및
+`search_type`에서 파생된 주제입니다. Exa에서는 `search_type: "news"`가 `category: "news"`를
+유지합니다. Tavily는 `search_type: "finance"`(`topic: "finance"`)도 허용합니다.
+
+이제 일반 `time_range`가 두 제공자 모두에 전달됩니다. Exa에는 `startPublishedDate`(ISO
+타임스탬프)가 전달되고, Tavily에는 `start_date`(`YYYY-MM-DD`)가 전달됩니다. `provider_options`에
+명시된 날짜가 매핑된 날짜보다 우선합니다.
+
+Exa 결과는 `id`, `highlight_scores`, `summary`, `subpages`, `entities`, `extras`를
+`provider_raw`에 유지합니다. Tavily 결과는 `images`와 `favicon`을 유지합니다.
+
+비용 계산에는 여전히 플랫 레지스트리 `costPerQuery`가 사용됩니다. Tavily의
+`search_depth: "advanced"`는 호출당 더 많은 크레딧이 청구되며, 이 차이는
+`usage.search_cost_usd`에 반영되지 않습니다.
+
 ---
 
-## 웹 가져오기 API
+## Web Fetch API
 
-구성된 웹 가져오기 제공자(Firecrawl, Jina
-Reader, Tavily Extract, TinyFish Fetch, Nimble Extract)를 통해 URL에서 콘텐츠를 추출합니다.
+구성된 웹 가져오기 제공자(Firecrawl, Jina Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract)를 통해 URL에서 콘텐츠를 추출합니다.
 
-| 메서드 | 경로            | 설명                                                         |
-| ------ | --------------- | ------------------------------------------------------------ |
-| POST   | `/v1/web/fetch` | URL 가져오기/스크레이핑 — 본문은 `v1WebFetchSchema`로 검증됨 |
+Parallel Extract(`parallel-search`, Parallel Search와 동일한 API 키)는 Markdown만 반환합니다. 다른 `format`은 모두 `400`을 반환하며, 콘텐츠는 100,000자로 제한됩니다. 대상 페이지 자체를 추출할 수 없는 경우 업스트림은 이를 HTTP 200 응답 내에 보고하며, OmniRoute는 고정 메시지가 포함된 `422`로 이를 노출합니다.
+
+| 메서드 | 경로            | 설명                                                       |
+| ------ | --------------- | ---------------------------------------------------------- |
+| POST   | `/v1/web/fetch` | URL 가져오기/스크래핑 — 본문은 `v1WebFetchSchema`로 검증됨 |
 
 **인증:** Bearer API 키(`extractApiKey` + `isValidApiKey`). 정책은 `enforceApiKeyPolicy`를 통해 적용됩니다.
 
-**할당량 인식 폴백(#8297):** 명시적인 `provider`가 지정되지 않으면 풀
-(`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search`)을
-고정된 우선순위 순서(선순위 우선 소진)로
-순회합니다. 속도 제한에 걸렸지만 구성되어 있는 제공자는 요청을 즉시 중단시키는 대신
-건너뛰며, 재시도 가능/할당량 관련 업스트림 실패
+**할당량 인식 폴백(#8297):** 명시적인 `provider`가 지정되지 않은 경우, 풀
+(`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` →
+`parallel-search`)을
+고정된 우선순위 순서(우선 채우기)로
+순회합니다. 속도 제한이 적용되었지만 구성된 제공자는 요청을 즉시 중단하는 대신 건너뛰며, 재시도 가능한/할당량 관련 업스트림 실패
 (HTTP 429는 항상 해당; Firecrawl/Tavily/TinyFish의 할당량 방식 무료 티어에서는 402/403도 해당 —
-Jina Reader에는 적용되지 않으며, 일반적인 400 잘못된 요청에는 절대 적용되지 않음)가 발생하면 요청 시점에
-아직 시도하지 않은 다음 자격 증명 보유 제공자로 넘어갑니다. 풀의 모든 제공자가
-소진되면 엔드포인트는 이전의 일반적인 `400` 대신 단일 `429`
-(`Retry-After` 헤더 포함)를 반환합니다. 명시적인 `provider`가
-요청된 경우에는 자동 폴백이 **없습니다**. 속도 제한에 걸리거나 실패한 명시적
-제공자는 자체 오류를 그대로 노출합니다(속도 제한이면 `429`, 그 외에는 업스트림
-상태 코드).
+Jina Reader에는 해당하지 않으며, 일반적인 400 잘못된 요청에는 절대 해당하지 않음)가 발생하면 요청 시점에 아직 시도하지 않은 다음 자격 증명 구성 제공자로 넘어갑니다. 풀의 모든 제공자가 소진되면 엔드포인트는 이전의 일반적인 `400` 대신 단일 `429`(`Retry-After`
+헤더 포함)를 반환합니다. 명시적인 `provider`가 요청된 경우에는 자동 폴백이 **없습니다**. 속도 제한이 적용되거나 실패한 명시적 제공자는 자체 오류(속도 제한 시 `429`, 그 외에는 업스트림
+상태)를 그대로 노출합니다.
 
 ---
 
@@ -685,12 +857,13 @@ ChatGPT가 `codex.rate_limits` + `response.created`를 반환하고 완료 결�
 
 ---
 
-## 셀프서비스 사용량 조회(`/api/usage/om-usage`)
+## 셀프서비스 사용량 조회 (`/api/usage/om-usage`)
 
-모든 API 키는 관리 인증 없이 **자체** 사용량과 할당량을 조회할 수 있습니다. 클라이언트(CLI, OmniCopilot 패널)는 이 엔드포인트를 사용해 키 보유자에게 지출액을 표시합니다.
+모든 API 키는 관리 인증 없이 **자체** 사용량과 할당량을 조회할 수 있습니다. 이는
+클라이언트(CLI, OmniCopilot 패널)가 키 보유자에게 지출액을 표시할 때 사용하는 엔드포인트입니다.
 
 ```bash
-# 텍스트 형식(기존 계약 — 터미널용 일반 텍스트)
+# 텍스트 형식(기존 계약 형식 — 터미널용 일반 텍스트)
 curl -H "Authorization: Bearer <your-api-key>" \
   http://localhost:20128/api/usage/om-usage
 
@@ -699,14 +872,16 @@ curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-키에는 **`allowUsageCommand`**가 활성화되어 있어야 합니다(기본값은 비활성화이며, 대시보드의 API 키 관리자가 키별로 이를 전환합니다). 활성화되어 있지 않으면 엔드포인트가 `403`을 반환합니다.
+키에 **`allowUsageCommand`**가 활성화되어 있어야 합니다(기본적으로 비활성화됨 — 대시보드의 API 키
+관리자에서 키별로 전환할 수 있음). 활성화되어 있지 않으면 엔드포인트는 `403`을 반환합니다.
 
-`?format=json`은 호출자가 거부 응답에서 데이터 필드를 읽지 않도록 판별 가능한 구조를 반환합니다. 성공 시:
+`?format=json`은 호출자가 거부 응답에서 데이터 필드를 읽는 일이 없도록 판별 가능한 구조를 반환합니다.
+성공 시:
 
 ```jsonc
 {
   "allowed": true,
-  // 키에서 키별 사용량 한도(일간/주간 USD)를 사용하도록 설정한 경우에만 존재:
+  // 키가 키별 사용량 한도(일별/주별 USD)를 사용하도록 설정된 경우에만 존재:
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -715,14 +890,14 @@ curl -H "Authorization: Bearer <your-api-key>" \
     "weeklyLimitUsd": 20,
     "weeklyResetAtIso": "…" /* … */,
   },
-  // 선택한 제공자의 할당량 스냅샷. 아직 캐시된 항목이 없으면 null:
+  // 선택된 공급자의 할당량 스냅샷. 아직 캐시된 항목이 없으면 null:
   "provider": {
     "connectionId": "…",
     "provider": "claude",
     "plan": "…",
     "quotas": {/* … */},
   },
-  // UI에서 여러 제공자를 나란히 렌더링할 수 있도록 모든 연결의 스냅샷 제공:
+  // UI가 여러 공급자를 나란히 렌더링할 수 있도록 모든 연결의 스냅샷을 제공:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
     { "provider": "codex" /* … */ },
@@ -730,9 +905,64 @@ curl -H "Authorization: Bearer <your-api-key>" \
 }
 ```
 
-거부 시(`401`: 잘못된 키 / `403`: 허용되지 않음), 동일한 경로가 `{ "allowed": false, "error": { "message": "…" } }`를 반환합니다. `personal`/`provider`가 존재하지만 비어 있는 상태(키는 허용되었으나 아직 확인된 정보가 없음)는 거부 상태와 다르며, JSON 형식만 이 둘을 구분합니다.
+거부 시(`401`: 잘못된 키 / `403`: 허용되지 않음), 동일한 경로는
+`{ "allowed": false, "error": { "message": "…" } }`를 반환합니다. 값이 존재하지만 비어 있는 `personal`/`provider`
+(키는 허용되지만 아직 확인된 정보가 없음)는 거부와 다른 상태이며, JSON 형식에서만
+이 둘을 구분할 수 있습니다.
 
-**인증:** `isValidApiKey`로 검증된 호출자 본인의 Bearer API 키입니다. 이는 `requireManagementAuth`로 계속 보호되는 관리 인터페이스(`/api/keys/…`)가 _아닙니다_.
+**인증:** `isValidApiKey`로 검증되는 호출자 자신의 Bearer API 키를 사용합니다. 이는
+`requireManagementAuth`로 보호되는 관리 인터페이스(`/api/keys/…`)가 _아닙니다_.
+
+### 원시 할당량 백분율과 컷오프 조정 할당량 백분율
+
+`/api/usage/om-usage`를 사용할 때 호출자는 **일반 텍스트 출력**과 구조화된 **JSON 출력**에
+표시되는 백분율의 차이에 유의해야 합니다.
+
+| 측면              | 일반 텍스트 형식 (`/api/usage/om-usage` / `@@om-usage`)                             | JSON 형식 (`?format=json`)                                |
+| :---------------- | :---------------------------------------------------------------------------------- | :-------------------------------------------------------- |
+| **출력 필드**     | `NN% left`(예: `20% left`)                                                          | `provider.quotas` / `providers[].quotas`                  |
+| **측정값**        | **컷오프 조정 가용 허용량**: 컷오프 임계값을 초과하여 남은 용량                     | **원시 업스트림 할당량**: 조정되지 않은 공급자 측정값     |
+| **컷오프 조정**   | 보호된 예비 용량이 `0% left`로 표시되도록 `effectiveRemainingPercent()`를 통해 조정 | 없음(공급자가 보고한 원시 스냅샷 값)                      |
+| **임계값 데이터** | 표시되는 백분율에 반영됨                                                            | 연결별 `quotaWindowThresholds`에 저장됨(또는 서버 기본값) |
+| **주요 소비자**   | 대화형 CLI, 터미널 프롬프트, 운영자                                                 | 프로그래밍 방식의 통합, 대시보드, 분석, 결제 추적기       |
+
+#### 컷오프 조정 공식
+
+OmniRoute는 업스트림 소진을 방지하기 위한 선제적 할당량 컷오프를 지원합니다(연결의
+`quotaWindowThresholds`, 공급자 기본값 또는 전역 복원력 설정을 통해 구성). 할당량 기간에 컷오프 임계값
+(예: `cutoff = 25%`)이 활성화되면 텍스트 렌더러는 남은 허용량을 다음과 같이 계산합니다.
+
+- `remaining <= cutoff`인 경우: `0%`를 반환합니다.
+- `remaining > cutoff`인 경우: `((remaining - cutoff) / (100 - cutoff)) * 100`을 반환합니다.
+
+서식이 지정된 텍스트 출력은 이를 가장 가까운 정수로 반올림합니다(`Math.round(...)`).
+
+#### 예시
+
+**원시 사용량이 60%**(따라서 **원시 잔여 할당량이 40%**)이고
+**잔여 할당량 컷오프가 25%**로 구성된 공급자 기간을 생각해 보겠습니다.
+
+| 표현 방식                      | 계산                                               | 잔여량  |               추정 사용량               |
+| :----------------------------- | :------------------------------------------------- | :-----: | :-------------------------------------: |
+| **원시 JSON (`?format=json`)** | 업스트림 스냅샷(`quotas[window]`)                  | **40%** |                 **60%**                 |
+| **텍스트 형식 (`NN% left`)**   | `((40 - 25) / (100 - 25)) * 100 = (15 / 75) * 100` | **20%** | **80%** (`100 - remaining`으로 계산 시) |
+
+- **텍스트에 잔여량이 20%로 표시되는 이유:** 계정에 물리적으로 남아 있는 40%의 할당량 중 25%는
+  컷오프 정책에 의해 예약됩니다. 라우터가 이 연결로의 라우팅을 중지하기 전까지 호출자에게 남은 사용 가능
+  여유분은 75% 중 15%뿐입니다. 조정을 적용하면 라우팅이 중단되는 정확한 시점에 연결이
+  소진 상태(`0% left`)를 나타냅니다.
+- **JSON이 원시 값을 유지하는 이유:** JSON 페이로드는 정확한 공급자 스냅샷(`UsageSnapshot`)을 반환하므로
+  외부 도구가 서버 측의 손실 조정 없이 실제 업스트림 사용률과 연결 수준의
+  `quotaWindowThresholds`에 접근할 수 있습니다.
+
+#### 소비자 마이그레이션 지침
+
+외부 통합(예: 편집기 플러그인 또는 에이전트 확장 프로그램)이 이전에 텍스트
+엔드포인트(`NN% left`)를 스크레이핑하고 사용된 백분율을 `100 - NN`으로 계산했다면, `?format=json`으로 마이그레이션할 때는 다음 사항을 고려해야 합니다.
+
+- 원시 JSON 값을 읽으면 **실제 업스트림 사용량**이 반영됩니다(위 예시에서는 60% 사용).
+- 통합에서 텍스트 엔드포인트의 가용 허용량 의미 체계를 유지하려면 연결 수준 재정의에 해당하는
+  `quotaWindowThresholds`를 사용하여 클라이언트 측에서 유효 잔여량 공식을 계산할 수 있습니다.
 
 ---
 
@@ -799,72 +1029,155 @@ X-OmniRoute-No-Cache: true
 
 ## 대시보드 및 관리
 
-관리 경로(공개 인증/로그인을 제외한 `/api/*`)는 일반 추론 API 키로 **인증되지 않습니다**. 자격 증명 유형, 범위 및 curl 예시는 다음을 참조하세요:
+관리 경로(공개 인증/로그인을 제외한 `/api/*`)는 일반 추론 API 키로 **인증되지 않습니다**.
+자격 증명 유형, 범위 및 curl 예시는 다음을 참조하세요.
 [관리 인증](../guides/MANAGEMENT-AUTH.md).
 
 ### 인증
 
-| 엔드포인트                    | 메서드  | 설명                  |
-| ----------------------------- | ------- | --------------------- |
-| `/api/auth/login`             | POST    | 로그인                |
-| `/api/auth/logout`            | POST    | 로그아웃              |
-| `/api/settings/require-login` | GET/PUT | 로그인 필수 여부 전환 |
+| 엔드포인트                    | 메서드   | 설명                                                                                                                                                                                                                                                                                    |
+| ----------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/auth/login`             | POST     | 로그인                                                                                                                                                                                                                                                                                  |
+| `/api/auth/logout`            | POST     | 로그아웃                                                                                                                                                                                                                                                                                |
+| `/api/settings/require-login` | GET/POST | 로그인 상태(GET, 공개). POST는 비밀번호를 설정하거나 로그인을 전환합니다. 비밀번호가 존재하면 운영자만 사용할 수 있습니다(대시보드 세션, 로컬 CLI 또는 로그인 비활성화 — API 키와 `oma_` 토큰에는 `403` 반환). 대시보드 세션은 비밀번호를 변경하기 위해 `currentPassword`를 전송합니다. |
 
-### 제공자 관리
+### 공급자 관리
 
-| 엔드포인트                              | 메서드                | 설명                                                                                                                    |
-| --------------------------------------- | --------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `/api/providers`                        | GET/POST              | 제공자 목록 조회 / 생성                                                                                                 |
-| `/api/providers/[id]`                   | GET/PUT/DELETE        | 제공자 관리                                                                                                             |
-| `/api/providers/[id]/test`              | POST                  | 제공자 연결 테스트                                                                                                      |
-| `/api/providers/[id]/models`            | GET                   | 제공자 모델 목록 조회                                                                                                   |
-| `/api/providers/validate`               | POST                  | 제공자 구성 검증                                                                                                        |
-| `/api/providers/bulk`                   | POST                  | 하나의 제공자에 API 키 일괄 추가                                                                                        |
-| `/api/providers/import`                 | POST                  | 파싱된 CSV/JSON 파일에서 서로 다른 제공자로 구성된 목록 가져오기(#6836); 행별 부분 실패 결과                            |
-| `/api/provider-nodes*`                  | 다양한 메서드         | 제공자 노드 관리                                                                                                        |
-| `/api/provider-models`                  | GET/POST/PATCH/DELETE | 사용자 지정 모델(추가, 업데이트, 숨기기/표시, 삭제)                                                                     |
-| `/api/provider-models/validate-and-add` | POST                  | 관리 인증을 거친 선택적 엄격 연결 검증 및 원자적 사용자 지정 모델 등록. [모델 검증](../guides/MODEL-VALIDATION.md) 참조 |
+| 엔드포인트                              | 메서드                    | 설명                                                                                                                                 |
+| --------------------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `/api/providers`                        | GET/POST                  | 공급자 목록 조회 / 생성                                                                                                              |
+| `/api/providers/[id]`                   | GET/PUT/DELETE            | 공급자 관리                                                                                                                          |
+| `/api/providers/[id]/test`              | POST                      | 공급자 연결 테스트                                                                                                                   |
+| `/api/providers/[id]/models`            | GET                       | 공급자 모델 목록 조회                                                                                                                |
+| `/api/providers/validate`               | POST                      | 공급자 구성 검증                                                                                                                     |
+| `/api/providers/bulk`                   | POST                      | 단일 공급자의 API 키 일괄 추가                                                                                                       |
+| `/api/providers/import`                 | POST                      | 파싱된 CSV/JSON 파일에서 서로 다른 공급자로 구성된 목록 가져오기(#6836), 행별 부분 실패 결과 제공                                    |
+| `/api/provider-nodes*`                  | 다양함                    | 공급자 노드 관리                                                                                                                     |
+| `/api/provider-models`                  | GET/POST/PUT/PATCH/DELETE | 사용자 지정 모델 및 모델별 재정의(추가, 업데이트, 숨기기/표시, 삭제)                                                                 |
+| `/api/provider-models/validate-and-add` | POST                      | 관리 인증을 사용하는 옵트인 방식의 엄격한 연결 검증 및 원자적 사용자 지정 모델 등록. [모델 검증](../guides/MODEL-VALIDATION.md) 참조 |
+
+동기화하거나 가져온 모델의 경우, `PUT /api/provider-models`는 `provider`, `modelId` 및
+`maxOutputTokenOverride`를 허용합니다. 양의 정수는 수동 출력 토큰 한도를 설정하고, `null`은
+이를 지워 기본값을 복원합니다. `GET /api/provider-models?provider=<provider>`는 사용자 지정
+모델 행이 없는 모델을 포함하여 이러한 값을 `modelOutputOverrides`에 반환합니다. 이 재정의는
+런타임 `max_output_tokens` 기능을 사용하며 모델을 다시 동기화한 후에도 유지됩니다. OpenAI 호환
+공급자 페이지에서도 동일한 편집/삭제 컨트롤을 제공하며, 명시적으로 비전을 지원하는 모델을 표시합니다.
+
+사용자 지정 Chat Completions 노드는 명시적인 추론 비활성화 설정을 업스트림 백엔드에 맞게 조정합니다.
+연결 테스트가 성공하면 `/models` 항목에서 인식 가능한 `owned_by` 값(`vllm`, `sglang` 또는
+`llamacpp`)이 확인된 각 정확한 모델 ID에 대해 채팅 템플릿 컨트롤을 자동으로 선택합니다.
+투명한 OpenAI 호환 래퍼는 중첩된 `openai` 객체 안에 원본 모델 항목을 유지할 수 있으며,
+감지는 이러한 엔벌로프를 최대 3개까지 따라갑니다. 소유권 정보가 누락되었거나 알 수 없거나
+충돌하는 모델은 일반적인 OpenAI 동작을 유지합니다. 감지는 기존 카탈로그 요청을 재사용하고,
+완료 토큰을 생성하지 않으며, 연결 엔드포인트가 변경되면 무효화됩니다.
+
+해당 메타데이터를 노출하지 않는 백엔드의 동작을 고정하려면 기존의 부분 공급자 업데이트
+API를 사용하세요:
+
+```json
+{
+  "providerSpecificData": {
+    "reasoningControl": "chat-template"
+  }
+}
+```
+
+해당 본문을 `PUT /api/providers/<connection-id>`로 전송하세요. 이 연결에서는 명시적인
+추론 수준 `none`이 `chat_template_kwargs.thinking=false` 및
+`chat_template_kwargs.enable_thinking=false`로 전송됩니다. 서버 측 추론 규칙이 추론 수준을 강제하지 않는 한,
+명시적인 네이티브 템플릿 값이 우선합니다. 이 설정은 사용자 지정 OpenAI 호환 연결이 Chat Completions 본문을
+전송할 때만 적용됩니다. Responses 요청과 일반 제공자는 기존의 네이티브 요청 형식을 유지합니다.
+일반적인 OpenAI `reasoning_effort` 전달을 강제하려면 `reasoningControl`을 `openai`로 설정하고,
+자동 감지를 사용하려면 이를 생략하거나 `null`로 설정하세요.
+
+명시적인 추론 제어가 포함되지 않은 경우 Claude Code 자동 모드 분류기 요청은 기본적으로 네이티브 사고를
+비활성화합니다. 감지는 모델 이름이나 완료 한도가 아니라 Claude 형식 요청에 포함된 분류기의 시스템 마커를
+사용합니다. 명시적인 본문 제어, 지원되는 추론 수준/사고 헤더, 라우팅 규칙 및 확정된 모델 추론 수준은
+기존 우선순위를 유지합니다. 두 분류기 단계 모두 프롬프트, 완료 한도, 중지 시퀀스 및 실제 업스트림 권한
+판정 결과를 유지합니다. 두 번째 단계는 요청된 가시적 추론을 일반 텍스트로 계속 생성할 수 있습니다.
 
 ### OAuth 흐름
 
-| 엔드포인트                       | 메서드        | 설명           |
-| -------------------------------- | ------------- | -------------- |
-| `/api/oauth/[provider]/[action]` | 다양한 메서드 | 제공자별 OAuth |
+| 엔드포인트                       | 메서드 | 설명           |
+| -------------------------------- | ------ | -------------- |
+| `/api/oauth/[provider]/[action]` | 다양함 | 제공자별 OAuth |
 
 ### 라우팅 및 구성
 
-| 엔드포인트            | 메서드        | 설명                       |
-| --------------------- | ------------- | -------------------------- |
-| `/api/models/alias`   | GET/POST      | 모델 별칭                  |
-| `/api/models/catalog` | GET           | 제공자 및 유형별 모든 모델 |
-| `/api/combos*`        | 다양한 메서드 | 콤보 관리                  |
-| `/api/keys*`          | 다양한 메서드 | API 키 관리                |
-| `/api/pricing`        | GET           | 모델 가격                  |
+| 엔드포인트            | 메서드   | 설명                       |
+| --------------------- | -------- | -------------------------- |
+| `/api/models/alias`   | GET/POST | 모델 별칭                  |
+| `/api/models/catalog` | GET      | 제공자 및 유형별 모든 모델 |
+| `/api/combos*`        | 다양함   | 콤보 관리                  |
+| `/api/keys*`          | 다양함   | API 키 관리                |
+| `/api/pricing`        | GET      | 모델 가격                  |
 
 ### 사용량 및 분석
 
-| 엔드포인트                       | 메서드          | 설명                                                                                                                                                                                                                                                               |
-| -------------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `/api/usage/history`             | GET             | 사용량 기록                                                                                                                                                                                                                                                        |
-| `/api/usage/logs`                | GET             | 사용량 로그                                                                                                                                                                                                                                                        |
-| `/api/usage/request-logs`        | GET             | 요청 수준 로그                                                                                                                                                                                                                                                     |
-| `/api/usage/[connectionId]`      | GET             | 연결별 사용량                                                                                                                                                                                                                                                      |
-| `/api/usage/token-limits`        | GET/POST/DELETE | API 키별 토큰 한도 예산                                                                                                                                                                                                                                            |
-| `/api/usage/model-latency-stats` | GET             | 제공자/모델별 롤링 지연 시간 집계(avg/p50/p95/p99, 성공률); 필터: `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                                  |
-| `/api/usage/cache-health`        | GET             | `call_logs`에 대한 프롬프트 캐시 상태 요약 — 쓰기/읽기 비율, p50/p90/p99 쓰기 크기 분포, 대규모 쓰기 집중도, 모델별 분석 및 `healthy`/`degraded`/`thrash`/`no-data` 판정; 쿼리 매개변수 `range` (`1h`\|`24h`\|`7d`\|`30d`, 기본값 `24h`) 및 선택적 `model` (#8827) |
+| 엔드포인트                       | 메서드          | 설명                                                                                                                                                                                                                                                             |
+| -------------------------------- | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/usage/history`             | GET             | 사용량 기록                                                                                                                                                                                                                                                      |
+| `/api/usage/logs`                | GET             | 사용량 로그                                                                                                                                                                                                                                                      |
+| `/api/usage/request-logs`        | GET             | 요청 수준 로그                                                                                                                                                                                                                                                   |
+| `/api/usage/[connectionId]`      | GET             | 연결별 사용량                                                                                                                                                                                                                                                    |
+| `/api/usage/token-limits`        | GET/POST/DELETE | API 키별 토큰 한도 예산                                                                                                                                                                                                                                          |
+| `/api/usage/model-latency-stats` | GET             | 제공자/모델별 이동 지연 시간 집계(avg/p50/p95/p99, 성공률); 필터: `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                                |
+| `/api/usage/cache-health`        | GET             | `call_logs`에 대한 프롬프트 캐시 상태 요약 — 쓰기/읽기 비율, p50/p90/p99 쓰기 크기 분포, 대량 쓰기 집중도, 모델별 분할 및 `healthy`/`degraded`/`thrash`/`no-data` 판정; 쿼리 매개변수 `range` (`1h`\|`24h`\|`7d`\|`30d`, 기본값 `24h`) 및 선택적 `model` (#8827) |
+
+### API 키 권한
+
+`PATCH /api/keys/{id}`는 기존 키의 권한을 업데이트합니다. 모든 `/api/keys*` 경로와 마찬가지로 추론 키가 아니라 관리 권한이 필요합니다([관리 인증](../guides/MANAGEMENT-AUTH.md) 참조). 변경하려는 필드만 전송하세요. 해당 필드가 하나도 없는 요청은 `No valid fields to update` 오류와 함께 거부됩니다. 허용되는 필드는 `src/shared/validation/schemas/keys.ts`의 `updateKeyPermissionsSchema`에 정의되어 있습니다.
+
+| 필드                                        | 타입                                                       | 참고                                                                                                                              |
+| ------------------------------------------- | ---------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                                      | 문자열, 1~200자                                            |                                                                                                                                   |
+| `isActive`                                  | 불리언                                                     |                                                                                                                                   |
+| `isBanned`                                  | 불리언                                                     |                                                                                                                                   |
+| `expiresAt`                                 | ISO 8601 날짜/시간 또는 `null`                             | `null`은 만료 시간을 초기화합니다                                                                                                 |
+| `modelAccessMode`                           | `all` \| `restricted`                                      | 모드가 `all`이면 `allowedModels`는 비어 있어야 합니다                                                                             |
+| `allowedModels`, `blockedModels`            | 문자열 배열, 최대 1000개                                   |                                                                                                                                   |
+| `allowedCombos`                             | 문자열 배열, 최대 500개                                    | 키가 호출할 수 있는 콤보를 제한합니다. 직접 모델은 `modelAccessMode` / `allowedModels`의 적용을 받습니다                          |
+| `connectionAccessMode`                      | `all` \| `restricted`                                      | `restricted`이면 `allowedConnections`가 비어 있지 않아야 하고, `all`이면 비어 있어야 합니다                                       |
+| `allowedConnections`                        | UUID 배열, 최대 100개                                      |                                                                                                                                   |
+| `allowAutoCombos`                           | 불리언                                                     | `false`이면 이 키를 사용하는 `auto/*` 모델 요청을 거부합니다. 이 값을 설정한 적이 없는 키는 허용됩니다                            |
+| `catalogScope`                              | `all` \| `combos` \| `models`                              | 이 키에 대해 `GET /v1/models`가 나열할 항목(콤보만, 모델만 또는 둘 다)을 지정합니다. 키가 호출할 수 있는 항목은 변경하지 않습니다 |
+| `forcedModel`                               | 최대 300자의 문자열 또는 `null`                            | 채팅 요청을 이 모델/콤보로 라우팅하며, `X-Route-Model`과 `body.model`보다 우선합니다. 키의 제한은 계속 적용됩니다                 |
+| `noLog`, `autoResolve`                      | 불리언                                                     |                                                                                                                                   |
+| `throttleDelayMs`                           | 정수, 0~300000                                             |                                                                                                                                   |
+| `maxSessions`                               | 정수, 0~10000                                              |                                                                                                                                   |
+| `rateLimits`                                | `{ limit, window }` 배열(양의 정수, 최대 50개) 또는 `null` | `null`은 제한을 초기화합니다                                                                                                      |
+| `accessSchedule`                            | 일정 객체 또는 `null`                                      | `null`은 일정을 초기화합니다                                                                                                      |
+| `scopes`                                    | 문자열 배열, 최대 32개                                     |                                                                                                                                   |
+| `allowedEndpoints`                          | 문자열 배열, 최대 20개                                     |                                                                                                                                   |
+| `streamDefaultMode`                         | `legacy` \| `json`                                         |                                                                                                                                   |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                       | [키별 캐시 우회](#per-key-cache-bypass)를 참조하세요                                                                              |
+| `compressionEnabled`                        | 불리언                                                     |                                                                                                                                   |
+| `codexServiceMode`                          | Codex 서비스 모드 중 하나                                  |                                                                                                                                   |
+| `disableNonPublicModels`                    | boolean                                                    |                                                                                                                                   |
+| `allowUsageCommand`                         | boolean                                                    |                                                                                                                                   |
+| `usageLimitEnabled`                         | boolean                                                    |                                                                                                                                   |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | 0 이상의 number 또는 `null`                                |                                                                                                                                   |
+| `chaosModeEnabled`                          | boolean                                                    |                                                                                                                                   |
+
+```bash
+curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
+  -H "Authorization: Bearer <management-credential>" \
+  -H "Content-Type: application/json" \
+  -d '{ "allowAutoCombos": false, "catalogScope": "combos" }'
+```
 
 ### 설정
 
-| 엔드포인트                            | 메서드        | 설명                                                                                                                                                                    |
-| ------------------------------------- | ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/settings`                       | GET/PUT/PATCH | 일반 설정                                                                                                                                                               |
-| `/api/settings/proxy`                 | GET/PUT       | 네트워크 프록시 구성                                                                                                                                                    |
-| `/api/settings/proxy/test`            | POST          | 프록시 연결 테스트                                                                                                                                                      |
-| `/api/settings/ip-filter`             | GET/PUT       | IP 허용 목록/차단 목록                                                                                                                                                  |
-| `/api/settings/thinking-budget`       | GET/PUT       | 사고/추론 **요청** 재작성 모드(그대로 전달 / 자동 제거 / 사용자 지정 / 적응형). 압축과는 독립적입니다. [THINKING_BUDGET.md](../guides/THINKING_BUDGET.md)를 참조하세요. |
-| `/api/settings/system-prompt`         | GET/PUT       | 전역 시스템 프롬프트                                                                                                                                                    |
-| `/api/settings/compression`           | GET/PUT       | 전역 압축 구성                                                                                                                                                          |
-| `/api/settings/purge-request-history` | POST          | 요청 로그 행 및 로컬 호출 로그 아티팩트 삭제                                                                                                                            |
+| 엔드포인트                            | 메서드        | 설명                                                                                                                                                                                                                                                              |
+| ------------------------------------- | ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/settings`                       | GET/PUT/PATCH | 일반 설정. 보안 정책 키(`requireLogin`, `newPassword`, `oidc*`, `corsOrigins`, `bruteForceProtection`)에는 `currentPassword`와 운영자 자격 증명이 필요합니다. API 키와 `oma_` 토큰에는 `403`이 반환되며, 모든 변경 작업에는 `admin` 액세스 토큰 범위가 필요합니다 |
+| `/api/settings/proxy`                 | GET/PUT       | 네트워크 프록시 구성                                                                                                                                                                                                                                              |
+| `/api/settings/proxy/test`            | POST          | 프록시 연결 테스트                                                                                                                                                                                                                                                |
+| `/api/settings/ip-filter`             | GET/PUT       | IP 허용 목록/차단 목록                                                                                                                                                                                                                                            |
+| `/api/settings/thinking-budget`       | GET/PUT       | 사고/추론 **요청** 재작성 모드(그대로 전달 / 자동 제거 / 사용자 지정 / 적응형). 압축과는 독립적입니다. [THINKING_BUDGET.md](../guides/THINKING_BUDGET.md)를 참조하세요.                                                                                           |
+| `/api/settings/system-prompt`         | GET/PUT       | 전역 시스템 프롬프트                                                                                                                                                                                                                                              |
+| `/api/settings/compression`           | GET/PUT       | 전역 압축 구성                                                                                                                                                                                                                                                    |
+| `/api/settings/purge-request-history` | POST          | 요청 로그 행과 로컬 호출 로그 아티팩트 삭제                                                                                                                                                                                                                       |
 
 ### 컨텍스트 및 압축
 
@@ -876,8 +1189,8 @@ X-OmniRoute-No-Cache: true
 | `/api/context/caveman/config`          | GET/PUT        | Caveman 전용 설정 별칭                                       |
 | `/api/context/rtk/config`              | GET/PUT        | 사용자 지정 필터 및 원시 출력 보존을 포함한 RTK 전용 설정    |
 | `/api/context/rtk/filters`             | GET            | RTK 필터 카탈로그 및 사용자 지정 필터 진단                   |
-| `/api/context/rtk/test`                | POST           | 텍스트 페이로드를 대상으로 RTK 미리보기/테스트 실행          |
-| `/api/context/rtk/raw-output/[id]`     | GET            | 포인터 ID로 보존된 수정 처리 원시 출력 읽기                  |
+| `/api/context/rtk/test`                | POST           | 텍스트 페이로드에 대해 RTK 미리보기/테스트 실행              |
+| `/api/context/rtk/raw-output/[id]`     | GET            | 포인터 id로 보존된 수정 처리 원시 출력 읽기                  |
 | `/api/context/combos`                  | GET/POST       | 압축 조합 목록/생성                                          |
 | `/api/context/combos/[id]`             | GET/PUT/DELETE | 압축 조합 상세 정보/업데이트/삭제                            |
 | `/api/context/combos/[id]/assignments` | GET/PUT        | 라우팅 조합에 압축 조합 할당                                 |
@@ -885,38 +1198,50 @@ X-OmniRoute-No-Cache: true
 
 ### 모니터링
 
-| 엔드포인트                           | 메서드     | 설명                                                                                                                                                                                                                                                                                                                                                                                                   |
-| ------------------------------------ | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `/api/sessions`                      | GET        | 활성 세션 추적                                                                                                                                                                                                                                                                                                                                                                                         |
-| `/api/rate-limits`                   | GET        | 계정별 요청 한도                                                                                                                                                                                                                                                                                                                                                                                       |
-| `/api/monitoring/health`             | GET        | 상태 확인 + 제공자 요약(`catalogCount`, `configuredCount`, `activeCount`, `monitoredCount`). 관리 뷰에는 `credentialHealth`가 포함됩니다. 즉, 프로브 캐시 스칼라, `failed>0`일 때의 `failedConnections`, 그리고 `staleDbNonOkCount`(게이지가 아닌 SQLite 고정 `test_status`)입니다. [MONITORING_GUIDE.md](../ops/MONITORING_GUIDE.md#credentialhealth-probe-cache-vs-sqlite-test_status)를 참조하세요. |
-| `/api/cache/stats`                   | GET/DELETE | 캐시 통계 / 지우기                                                                                                                                                                                                                                                                                                                                                                                     |
-| `/api/modality-bridge/stats`         | GET        | 메모리 내 `attempts`, 성공 횟수/`bridged`, 실패 횟수, 캐시 적중 횟수, `totalLatencyMs`, `latencySamples`, 샘플 수를 분모로 계산한 `averageLatencyMs`, 마지막 사용 시간(재시작 시 초기화, 관리 인증 필요)                                                                                                                                                                                               |
-| `/api/modality-bridge/video/runtime` | GET        | 관리 인증/프로브 전에 엄격한 신뢰 루프백 검사 수행, 정제된 FFmpeg/ffprobe 가용성 및 버전(no-store)                                                                                                                                                                                                                                                                                                     |
-| `/api/modality-bridge/video/extract` | POST       | 내부 인증된 신뢰 루프백 바이트 브로커. 입력 제한 50 MiB, 제한된 큐/출력 제한 32 MiB, 용량 초과 시 `503`, 연결 해제 시 `499`, 기한 초과 시 `504`. 공개 업로드 API가 아님                                                                                                                                                                                                                                |
+| 엔드포인트                           | 메서드     | 설명                                                                                                                                                                                                                                                                                                                                                                                                           |
+| ------------------------------------ | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/sessions`                      | GET        | 활성 세션 추적                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `/api/rate-limits`                   | GET        | 계정별 요청 한도                                                                                                                                                                                                                                                                                                                                                                                               |
+| `/api/monitoring/health`             | GET        | 상태 점검 + 제공자 요약(`catalogCount`, `configuredCount`, `activeCount`, `monitoredCount`). 관리 뷰에는 `credentialHealth`가 포함됩니다. 이는 프로브 캐시 스칼라, `failed>0`일 때의 `failedConnections`, 그리고 `staleDbNonOkCount`(게이지가 아닌 SQLite 고정 `test_status`)로 구성됩니다. [MONITORING_GUIDE.md](../ops/MONITORING_GUIDE.md#credentialhealth-probe-cache-vs-sqlite-test_status)를 참조하세요. |
+| `/api/cache/stats`                   | GET/DELETE | 캐시 통계 / 지우기                                                                                                                                                                                                                                                                                                                                                                                             |
+| `/api/modality-bridge/stats`         | GET        | 인메모리 `attempts`, 성공 횟수/`bridged`, 실패 횟수, 캐시 적중 횟수, `totalLatencyMs`, `latencySamples`, 샘플 수를 분모로 계산한 `averageLatencyMs`, 마지막 사용 시간(재시작 시 초기화, 관리 인증 필요)                                                                                                                                                                                                        |
+| `/api/modality-bridge/video/runtime` | GET        | 관리 인증/프로브 전에 엄격한 신뢰 루프백 검사 수행, 정제된 FFmpeg/ffprobe 가용성 및 버전(`no-store`)                                                                                                                                                                                                                                                                                                           |
+| `/api/modality-bridge/video/extract` | POST       | 내부 인증된 신뢰 루프백 바이트 브로커. 입력 50 MiB, 제한된 대기열/출력 32 MiB, 용량 초과 시 `503`, 연결 해제 시 `499`, 기한 초과 시 `504`. 공개 업로드 API가 아님                                                                                                                                                                                                                                              |
 
 ### 백업 및 내보내기/가져오기
 
-| 엔드포인트                  | 메서드 | 설명                                      |
-| --------------------------- | ------ | ----------------------------------------- |
-| `/api/db-backups`           | GET    | 사용 가능한 백업 목록 조회                |
-| `/api/db-backups`           | PUT    | 수동 백업 생성                            |
-| `/api/db-backups`           | POST   | 특정 백업에서 복원                        |
-| `/api/db-backups/export`    | GET    | 데이터베이스를 .sqlite 파일로 다운로드    |
-| `/api/db-backups/import`    | POST   | 데이터베이스를 교체할 .sqlite 파일 업로드 |
-| `/api/db-backups/exportAll` | GET    | 전체 백업을 .tar.gz 아카이브로 다운로드   |
+| Endpoint                    | Method | 설명                                                                    |
+| --------------------------- | ------ | ----------------------------------------------------------------------- |
+| `/api/db-backups`           | GET    | 사용 가능한 백업 목록 조회                                              |
+| `/api/db-backups`           | PUT    | 수동 백업 생성                                                          |
+| `/api/db-backups`           | POST   | 특정 백업에서 복원                                                      |
+| `/api/db-backups`           | PATCH  | 백업 보존 설정 저장(운영자 전용)                                        |
+| `/api/db-backups`           | DELETE | 저장된 백업을 보존 설정에 맞게 정리(운영자 전용)                        |
+| `/api/db-backups/export`    | GET    | 데이터베이스를 .sqlite 파일로 다운로드                                  |
+| `/api/db-backups/import`    | POST   | 데이터베이스를 교체할 .sqlite 파일 업로드(`?dryRun=true`는 검증만 수행) |
+| `/api/db-backups/exportAll` | GET    | 전체 백업을 .tar.gz 아카이브로 다운로드                                 |
+
+`/api/db-backups/export`, `/api/db-backups/exportAll`, `/api/settings/export-json`은 저장된
+모든 자격 증명을 제공하므로 대시보드 세션이나 로컬 CLI가 필요합니다(또는 로그인이
+비활성화되어 있어야 합니다). 모든 범위의 API 키와 `oma_` 액세스 토큰에는 `403`이 반환됩니다. 복원에도 동일한
+경계가 적용됩니다. `POST /api/db-backups/import`(`dryRun=true` 포함), `POST /api/db-backups`(id로 복원),
+`POST /api/settings/import-json`은 실제 데이터베이스 또는 설정을 교체하므로 머신
+자격 증명에도 `403`이 반환됩니다. `omniroute sync import`는 로컬 CLI 자격 증명을 전송합니다.
+`DELETE /api/db-backups`(저장된 백업 정리)와 `PATCH /api/db-backups`(보존 설정:
+저장된 값에 따라 각 백업 후 자동 정리가 수행됨)도 마찬가지입니다. 목록 조회(`GET`)와
+수동 백업 생성(`PUT`)에는 일반 관리 인증이 계속 적용됩니다.
 
 ### 클라우드 동기화
 
-| 엔드포인트             | 메서드 | 설명                 |
-| ---------------------- | ------ | -------------------- |
-| `/api/sync/cloud`      | 다양함 | 클라우드 동기화 작업 |
-| `/api/sync/initialize` | POST   | 동기화 초기화        |
-| `/api/cloud/*`         | 다양함 | 클라우드 관리        |
+| Endpoint               | Method  | 설명                 |
+| ---------------------- | ------- | -------------------- |
+| `/api/sync/cloud`      | Various | 클라우드 동기화 작업 |
+| `/api/sync/initialize` | POST    | 동기화 초기화        |
+| `/api/cloud/*`         | Various | 클라우드 관리        |
 
 ### 터널
 
-| 엔드포인트                 | 메서드 | 설명                                                                  |
+| Endpoint                   | Method | 설명                                                                  |
 | -------------------------- | ------ | --------------------------------------------------------------------- |
 | `/api/tunnels/cloudflared` | GET    | 대시보드용 Cloudflare Quick Tunnel 설치/런타임 상태 조회              |
 | `/api/tunnels/cloudflared` | POST   | Cloudflare Quick Tunnel 활성화 또는 비활성화(`action=enable/disable`) |
@@ -925,48 +1250,48 @@ X-OmniRoute-No-Cache: true
 
 ### CLI 도구
 
-| 엔드포인트                         | 메서드 | 설명              |
+| Endpoint                           | Method | 설명              |
 | ---------------------------------- | ------ | ----------------- |
 | `/api/cli-tools/claude-settings`   | GET    | Claude CLI 상태   |
 | `/api/cli-tools/codex-settings`    | GET    | Codex CLI 상태    |
 | `/api/cli-tools/droid-settings`    | GET    | Droid CLI 상태    |
 | `/api/cli-tools/openclaw-settings` | GET    | OpenClaw CLI 상태 |
-| `/api/cli-tools/runtime/[toolId]`  | GET    | 범용 CLI 런타임   |
+| `/api/cli-tools/runtime/[toolId]`  | GET    | 일반 CLI 런타임   |
 
 CLI 응답에는 `installed`, `runnable`, `command`, `commandPath`, `runtimeMode`, `reason`이 포함됩니다.
 
 ### ACP 에이전트
 
-| 엔드포인트        | 메서드 | 설명                                                           |
-| ----------------- | ------ | -------------------------------------------------------------- |
-| `/api/acp/agents` | GET    | 감지된 모든 에이전트(기본 제공 + 사용자 정의)와 상태 목록 조회 |
-| `/api/acp/agents` | POST   | 사용자 정의 에이전트 추가 또는 감지 캐시 새로 고침             |
-| `/api/acp/agents` | DELETE | `id` 쿼리 매개변수로 사용자 정의 에이전트 제거                 |
+| Endpoint          | Method | 설명                                                      |
+| ----------------- | ------ | --------------------------------------------------------- |
+| `/api/acp/agents` | GET    | 감지된 모든 에이전트(기본 제공 + 사용자 지정)와 상태 조회 |
+| `/api/acp/agents` | POST   | 사용자 지정 에이전트 추가 또는 감지 캐시 새로 고침        |
+| `/api/acp/agents` | DELETE | `id` 쿼리 매개변수로 사용자 지정 에이전트 제거            |
 
 GET 응답에는 `agents[]`(id, name, binary, version, installed, protocol, isCustom)와 `summary`(total, installed, notFound, builtIn, custom)가 포함됩니다.
 
 ### 복원력 및 속도 제한
 
-| 엔드포인트                        | 메서드    | 설명                                                                                     |
-| --------------------------------- | --------- | ---------------------------------------------------------------------------------------- |
-| `/api/resilience`                 | GET/PATCH | 요청 큐, 연결 쿨다운, 제공자 차단기 및 대기 설정 조회/업데이트                           |
-| `/api/resilience/reset`           | POST      | 제공자 회로 차단기 재설정                                                                |
-| `/api/resilience/model-cooldowns` | GET       | 남은 시간순으로 정렬된 활성 (제공자, 연결, 모델)별 잠금 목록 조회                        |
-| `/api/resilience/model-cooldowns` | DELETE    | 모델 잠금 해제 — 본문에 `{provider, model}`을 사용하거나 전체 삭제 시 `{all: true}` 사용 |
-| `/api/rate-limits`                | GET       | 계정별 속도 제한 상태                                                                    |
-| `/api/rate-limit`                 | GET       | 전역 속도 제한 구성                                                                      |
+| Endpoint                          | Method    | 설명                                                                                |
+| --------------------------------- | --------- | ----------------------------------------------------------------------------------- |
+| `/api/resilience`                 | GET/PATCH | 요청 큐, 연결 쿨다운, 공급자 차단기 및 대기 설정 조회/업데이트                      |
+| `/api/resilience/reset`           | POST      | 공급자 회로 차단기 재설정                                                           |
+| `/api/resilience/model-cooldowns` | GET       | 활성화된 (공급자, 연결, 모델)별 잠금 목록을 남은 시간순으로 조회                    |
+| `/api/resilience/model-cooldowns` | DELETE    | 모델 잠금 해제 — 본문에 `{provider, model}` 또는 모두 삭제하려면 `{all: true}` 지정 |
+| `/api/rate-limits`                | GET       | 계정별 속도 제한 상태                                                               |
+| `/api/rate-limit`                 | GET       | 전역 속도 제한 구성                                                                 |
 
-> 네 개의 `/api/resilience/*` 경로에는 모두 **관리 인증**(`requireManagementAuth`)이 필요합니다. 제공자 차단기, 연결 쿨다운 및 모델 잠금에 대한 전체 설명은 [복원력(확장)](#resilience-extended)을 참조하세요.
+> 네 개의 `/api/resilience/*` 경로에는 모두 **관리 인증**(`requireManagementAuth`)이 필요합니다. 공급자 차단기, 연결 쿨다운, 모델 잠금의 자세한 차이점은 [복원력(확장)](#resilience-extended)을 참조하세요.
 
 ### 평가
 
-| 엔드포인트   | 메서드   | 설명                              |
-| ------------ | -------- | --------------------------------- |
-| `/api/evals` | GET/POST | 평가 스위트 목록 조회 / 평가 실행 |
+| Endpoint     | Method   | 설명                       |
+| ------------ | -------- | -------------------------- |
+| `/api/evals` | GET/POST | 평가 모음 조회 / 평가 실행 |
 
 ### 정책
 
-| 엔드포인트      | 메서드          | 설명             |
+| Endpoint        | Method          | 설명             |
 | --------------- | --------------- | ---------------- |
 | `/api/policies` | GET/POST/DELETE | 라우팅 정책 관리 |
 
@@ -983,19 +1308,21 @@ GET 응답에는 `agents[]`(id, name, binary, version, installed, protocol, isCu
 | `/v1beta/models`           | GET    | Gemini 형식으로 모델 목록 조회      |
 | `/v1beta/models/{...path}` | POST   | Gemini `generateContent` 엔드포인트 |
 
-이 엔드포인트들은 네이티브 Gemini SDK 호환성을 요구하는 클라이언트를 위해 Gemini의 API 형식을 그대로 따릅니다.
+이러한 엔드포인트는 네이티브 Gemini SDK 호환성을 요구하는 클라이언트를 위해 Gemini API 형식을 그대로 따릅니다.
 
 ### 내부 / 시스템 API
 
-| 엔드포인트               | 메서드 | 설명                                        |
-| ------------------------ | ------ | ------------------------------------------- |
-| `/api/init`              | GET    | 애플리케이션 초기화 확인(최초 실행 시 사용) |
-| `/api/tags`              | GET    | Ollama 호환 모델 태그(Ollama 클라이언트용)  |
-| `/api/restart`           | POST   | 정상적인 서버 재시작 트리거                 |
-| `/api/shutdown`          | POST   | 정상적인 서버 종료 트리거                   |
-| `/api/system/env/repair` | POST   | OAuth 제공자 환경 변수 복구                 |
+| 엔드포인트               | 메서드 | 설명                                             |
+| ------------------------ | ------ | ------------------------------------------------ |
+| `/api/init`              | GET    | 애플리케이션 초기화 확인(최초 실행 시 사용)      |
+| `/api/tags`              | GET    | Ollama 호환 모델 태그(Ollama 클라이언트용)       |
+| `/api/restart`           | POST   | 정상적인 서버 재시작 실행                        |
+| `/api/shutdown`          | POST   | 정상적인 서버 종료 실행                          |
+| `/api/system/env/repair` | POST   | OAuth 제공자의 환경 변수 복구                    |
+| `/api/system/version`    | GET    | 현재/최신 버전, 업데이트 상태, 릴리스 채널       |
+| `/api/system/version`    | POST   | 배포 방식을 고려하여 최신 버전으로 업데이트 시작 |
 
-> **참고:** 이러한 엔드포인트는 시스템 내부에서 사용되거나 Ollama 클라이언트와의 호환성을 위해 사용됩니다. 일반적으로 최종 사용자가 직접 호출하지 않습니다.
+> **참고:** 이러한 엔드포인트는 시스템 내부에서 사용되거나 Ollama 클라이언트 호환성을 위해 사용됩니다. 일반적으로 최종 사용자가 직접 호출하지 않습니다.
 
 ### OAuth 환경 복구 _(v3.6.1+)_
 
@@ -1008,7 +1335,7 @@ Content-Type: application/json
 }
 ```
 
-특정 제공자의 누락되거나 손상된 OAuth 환경 변수를 복구합니다. 반환값:
+특정 제공자에서 누락되거나 손상된 OAuth 환경 변수를 복구합니다. 반환값:
 
 ```json
 {
@@ -1017,6 +1344,33 @@ Content-Type: application/json
   "backupPath": "/home/user/.omniroute/backups/env-repair-2026-04-11.bak"
 }
 ```
+
+### 버전 및 릴리스 채널
+
+```bash
+GET /api/system/version
+```
+
+루프백 전용 관리 경로(관리자 인증)입니다. 실행 중인 버전, 최근에 게시된 버전 및 자동 업데이트 상태를 반환합니다. `releaseChannel`과 `channels`는 추가 필드(rail 3.8.54)이며, `channel`은 대시보드 업데이터가 사용하는 배포 모드(`npm`, `source` 또는 `docker-compose`)라는 기존 의미를 유지합니다.
+
+```json
+{
+  "current": "3.8.52",
+  "latest": "3.8.52",
+  "updateAvailable": false,
+  "channel": "npm",
+  "autoUpdateSupported": true,
+  "autoUpdateError": null,
+  "news": null,
+  "releaseChannel": "latest",
+  "channels": { "latest": "3.8.52", "next": "3.8.53-rc.1" }
+}
+```
+
+- `releaseChannel` — 실행 중인 빌드의 npm 채널입니다. `-nightly.*` 버전은 `nightly`, 기타 프리릴리스(`-rc.*`, `-beta.*`, `-alpha.*`)는 `next`, `channels.latest`보다 이전 메이저 버전의 안정 버전은 `lts`, 그 외에는 `latest`입니다. 게시 시 npm dist-tag를 선택하는 `scripts/release/dist-tag.mjs`와 동일한 규칙을 사용합니다.
+- `channels` — `npm view omniroute dist-tags`에서 가져온 각 dist-tag의 최신 게시 버전입니다(레지스트리 HTTP 폴백 사용). `latest`와 동일하게 10분 TTL로 캐시됩니다. `latest`는 항상 존재하며(`latest` 필드로 폴백한 다음 `"unavailable"`로 폴백), `next`, `nightly`, `lts`는 해당 dist-tag가 존재할 때만 표시됩니다. `Cache-Control: no-cache` 요청은 두 조회 결과를 모두 새로 고칩니다.
+
+채널 모델(`latest` = 4.0 GA 전까지 v3, `next` = rc, `nightly` = `develop` 빌드, `lts` = 4.0 GA 이후의 v3 패치)은 `docs/ops/RELEASE_STRATEGY.md`에 설명되어 있습니다.
 
 ---
 
@@ -1232,17 +1586,17 @@ OmniRoute 이벤트(요청 완료, 할당량 소진, 키 교체 등)에 대한 �
 
 ## 등록된 키(자동 관리)
 
-자동 키 관리 하위 시스템에서 기반 제공자/계정에 대해 일별/시간별 할당량을 적용하여 API 키를 발급하고 교체하는 데 사용됩니다.
+자동 키 관리 하위 시스템에서 백엔드 제공업체/계정을 대상으로 API 키를 발급하고 교체하며, 일일/시간당 할당량을 적용하는 데 사용됩니다.
 
 | 메서드 | 경로                                  | 설명                                                                                                                                                                                              |
 | ------ | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | GET    | `/api/v1/registered-keys`             | 등록된 키 목록 조회(마스킹된 접두사만 표시)                                                                                                                                                       |
 | POST   | `/api/v1/registered-keys`             | 새 등록 키 발급 — 본문: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. 원본 키는 **한 번만** 반환됩니다. 할당량으로 인해 거부되면 `429`를 반환합니다. |
-| GET    | `/api/v1/registered-keys/[id]`        | 등록된 키의 메타데이터 조회(원본 키 자료 제외)                                                                                                                                                    |
+| GET    | `/api/v1/registered-keys/[id]`        | 등록된 키의 메타데이터 조회(원본 키 정보 제외)                                                                                                                                                    |
 | DELETE | `/api/v1/registered-keys/[id]`        | 등록된 키 폐기                                                                                                                                                                                    |
 | POST   | `/api/v1/registered-keys/[id]/revoke` | 명시적 폐기 엔드포인트(DELETE와 동일한 효과)                                                                                                                                                      |
 
-**인증:** Bearer API 키(`isAuthenticated`). `/v1/quotas/check` 및 `/v1/issues/report`도 참조하세요.
+**인증:** 관리 세션/API 키(`requireManagementAuth`) — `/api/keys`와 동일한 가드입니다. 대시보드 세션, 로컬 CLI 토큰 또는 `manage`/`admin` 범위가 있는 API 키를 사용할 수 있으며, 추론 전용 API 키에는 `403`이 반환됩니다. `/v1/quotas/check` 및 `/v1/issues/report`도 참조하세요.
 
 ---
 

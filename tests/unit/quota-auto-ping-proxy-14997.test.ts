@@ -16,6 +16,9 @@ test.after(() => {
   resetDbInstance();
 });
 
+// A ping only counts once the Responses stream carries `response.completed`.
+const COMPLETED_PING_SSE =
+  'event: response.completed\ndata: {"type":"response.completed","response":{"status":"completed"}}\n\n';
 const NOW_MS = Date.parse("2026-01-01T12:00:00.000Z");
 const PREVIOUS_RESET = "2026-01-01T17:00:00.000Z";
 const SLID_RESET = "2026-01-01T17:01:00.000Z";
@@ -56,7 +59,7 @@ function createTickFixture(connectionId: string, overrides: Record<string, unkno
     getExecutor: async () => ({
       execute: async () => {
         calls.executor += 1;
-        return { response: { ok: true, text: async () => "" } };
+        return { response: { ok: true, text: async () => COMPLETED_PING_SSE } };
       },
     }),
     canExecuteProvider: () => true,
@@ -109,7 +112,7 @@ test("#14997 binds concurrent usage reads and warm-up pings to each connection p
       getExecutor: async () => ({
         execute: async () => {
           record();
-          return { response: { ok: true, text: async () => "" } };
+          return { response: { ok: true, text: async () => COMPLETED_PING_SSE } };
         },
       }),
     });

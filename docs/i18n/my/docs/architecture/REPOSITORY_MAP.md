@@ -114,165 +114,165 @@ OmniRoute/
 
 ```
 src/
-├── app/                 # App Router (စာမျက်နှာများ + API လမ်းကြောင်းများ + အခြေအနေပြစာမျက်နှာများ + မိတ်ဆက်စာမျက်နှာ)
-├── lib/                 # ပင်မလိုင်ဘရီများ / ဒိုမိန်းမော်ဂျူးများ (လမ်းညွှန်ခွဲ 80 ခု + ထိပ်တန်းအဆင့်ဖိုင် ~70 ခု)
-├── domain/              # သီးသန့်ဒိုမိန်းလော့ဂျစ် (မူဝါဒအင်ဂျင်၊ အရန်နည်းလမ်း၊ ကုန်ကျစရိတ်၊ လော့ခ်ချခြင်း၊ comboResolver၊ အကဲဖြတ်ခြင်း)
-├── server/              # ဆာဗာသီးသန့်မော်ဂျူးများ (authz pipeline၊ cors၊ auth middleware) — client မှ import လုပ်၍မရပါ
-├── shared/              # ဘေးကင်းသည့်နေရာများတွင် ဆာဗာနှင့် client အကြား မျှဝေသုံးစွဲသည် (ကိန်းသေများ၊ အမျိုးအစားများ၊ စစ်ဆေးအတည်ပြုခြင်း၊ ကန်ထရိုက်များ၊ အသုံးဝင်ကိရိယာများ)
-├── i18n/                # next-intl ပြင်ဆင်သတ်မှတ်မှု + locale တစ်ခုချင်းစီအလိုက် မက်ဆေ့ချ် JSON (locale 42 ခု)
-├── middleware/          # Next.js middleware (တောင်းဆိုမှုအချက်အလက် ဖြည့်စွက်ခြင်း၊ locale ရှာဖွေသတ်မှတ်ခြင်း)
-├── mitm/                # MITM proxy ပင်မပိုင်း- လက်မှတ်ထုတ်လုပ်ခြင်း/ထည့်သွင်းခြင်း၊ handler များ၊ ပစ်မှတ်များ၊ inspector၊ mask များ၊ တိုက်ရိုက်ဖြတ်သန်းပို့ဆောင်ခြင်း
-│   ├── handlers/        # MitmHandlerBase ကို ဆက်ခံထားသည့် IDE-agent handler class 9 ခု (antigravity, kiro, copilot, codex, cursor, zed, claudeCode, openCode, trae)
-│   └── inspector/       # အသွားအလာဖမ်းယူရေးအလွှာ- buffer (မမ်မိုရီအတွင်း ring)၊ sseMerger၊ conversationNormalizer၊ kindDetector၊ contextKey၊ httpProxyServer၊ systemProxyConfig
-├── models/              # မော်ဒယ် adapter ချိတ်ဆက်ပိုင်း (legacy shim)
-├── scripts/             # ပရောဂျက်အတွင်း ထိန်းသိမ်းရေး script များ (ဥပမာ၊ backfillAggregation)
-├── sse/                 # အမွေဆက်ခံထားသော SSE handler/service များ (chat.ts, chatHelpers.ts, services/auth.ts)
-├── store/               # အမွေဆက်ခံထားသော မမ်မိုရီအတွင်း store (src/lib/db သို့ အဆင့်ဆင့်ပြောင်းရွှေ့နေသည်)
-├── types/               # မျှဝေသုံးစွဲသည့် TS type ဖိုင်များ
-├── instrumentation.ts   # Next.js တယ်လီမက်ထရီ hook (ဘရောက်ဇာ + edge)
-├── instrumentation-node.ts  # Node သီးသန့် instrumentation
+├── app/                 # App Router (စာမျက်နှာများ + API လမ်းကြောင်းများ + အခြေအနေပြစာမျက်နှာများ + ပင်မစာမျက်နှာ)
+├── lib/                 # ပင်မလိုင်ဘရီများ / ဒိုမိန်းမော်ဂျူးများ (ဖိုင်တွဲခွဲ 80 ခု + ထိပ်တန်းအဆင့်ဖိုင် ~70 ခု)
+├── domain/              # သီးသန့်ဒိုမိန်းလော့ဂျစ် (မူဝါဒအင်ဂျင်၊ အရန်လုပ်ဆောင်ချက်၊ ကုန်ကျစရိတ်၊ လော့ခ်ချခြင်း၊ comboResolver၊ အကဲဖြတ်ခြင်း)
+├── server/              # ဆာဗာအတွက်သာဖြစ်သော မော်ဂျူးများ (authz pipeline၊ cors၊ auth middleware) — client မှ import လုပ်၍မရပါ
+├── shared/              # ဘေးကင်းသည့်အခါ ဆာဗာနှင့် client အကြား မျှဝေအသုံးပြုရန် (ကိန်းသေများ၊ အမျိုးအစားများ၊ စစ်ဆေးအတည်ပြုခြင်း၊ စာချုပ်များ၊ အသုံးဝင်ကိရိယာများ)
+├── i18n/                # next-intl ဖွဲ့စည်းမှု + locale တစ်ခုချင်းစီအလိုက် message JSON (locale 67 ခု)
+├── middleware/          # Next.js middleware (request ဖြည့်စွက်ခြင်း၊ locale ရှာဖွေသတ်မှတ်ခြင်း)
+├── mitm/                # MITM proxy ပင်မစနစ်- cert ထုတ်လုပ်ခြင်း/ထည့်သွင်းခြင်း၊ handler များ၊ target များ၊ inspector၊ mask များ၊ တိုက်ရိုက်ဖြတ်သန်းပေးခြင်း
+│   ├── handlers/        # MitmHandlerBase ကို တိုးချဲ့ထားသော IDE-agent handler class 9 ခု (antigravity, kiro, copilot, codex, cursor, zed, claudeCode, openCode, trae)
+│   └── inspector/       # Traffic ဖမ်းယူရေးအလွှာ- buffer (မှတ်ဉာဏ်အတွင်းရှိ ring)၊ sseMerger၊ conversationNormalizer၊ kindDetector၊ contextKey၊ httpProxyServer၊ systemProxyConfig
+├── models/              # Model adapter ဆက်စပ်ချိတ်ဆက်မှု (အမွေဆက်ခံ shim)
+├── scripts/             # ပရောဂျက်အတွင်းရှိ ပြုပြင်ထိန်းသိမ်းရေး script များ (ဥပမာ၊ backfillAggregation)
+├── sse/                 # အမွေဆက်ခံ SSE handler/service များ (chat.ts, chatHelpers.ts, services/auth.ts)
+├── store/               # အမွေဆက်ခံ memory အတွင်းရှိ store (src/lib/db ဖြင့် တဖြည်းဖြည်း အစားထိုးနေသည်)
+├── types/               # မျှဝေအသုံးပြုသော TS type ဖိုင်များ
+├── instrumentation.ts   # Next.js telemetry hook (browser + edge)
+├── instrumentation-node.ts  # Node အတွက်သာဖြစ်သော instrumentation
 └── proxy.ts             # HTTP-proxy အဝင် shim
 ```
 
 ### `src/app/` — App Router (Next.js 16)
 
-| လမ်းကြောင်း                                                                  | ရည်ရွယ်ချက်                                                                                                                                                                                                                                                                                                                |
+| Path                                                                         | ရည်ရွယ်ချက်                                                                                                                                                                                                                                                                                                                |
 | ---------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `app/api/v1/`                                                                | အများပြည်သူသုံး OpenAI-compatible API (~25 လမ်းကြောင်းခွဲများ- chat, completions, embeddings, files, batches, audio, images, videos, music, rerank, moderations, search, ws, agents, accounts, providers စသည်တို့)                                                                                                         |
+| `app/api/v1/`                                                                | အများသုံး OpenAI-compatible API (လမ်းကြောင်းခွဲ ~25 ခု- chat, completions, embeddings, files, batches, audio, images, videos, music, rerank, moderations, search, ws, agents, accounts, providers စသည်)                                                                                                                    |
 | `app/api/v1beta/`                                                            | Gemini ပုံစံ API endpoint များ                                                                                                                                                                                                                                                                                             |
-| `app/api/playground/`                                                        | Playground Studio လမ်းကြောင်းများ- `improve-prompt/` (POST — LLM prompt ပြန်လည်ရေးသားပေးသည့်စနစ်), `presets/` (စာရင်းရယူရန် GET / အသစ်ဖန်တီးရန် POST), `presets/[id]/` (GET / PUT / DELETE) — `docs/frameworks/PLAYGROUND_STUDIO.md` ကို ကြည့်ပါ                                                                           |
-| `app/api/` (v1 မဟုတ်သော)                                                     | စီမံခန့်ခွဲမှု/admin လမ်းကြောင်းများ (~60 directory များ- providers, combos, settings, mcp, a2a, evals, memory, skills, webhooks, compliance, resilience, monitoring, tunnels, cli-tools စသည်တို့)                                                                                                                         |
-| `app/api/tools/agent-bridge/`                                                | AgentBridge REST API — လမ်းကြောင်း 12 ခု (ဆာဗာထိန်းချုပ်မှု၊ agent အခြေအနေ/DNS/mappings၊ bypass၊ cert၊ upstream-CA)။ LOCAL_ONLY + SPAWN_CAPABLE။ `docs/frameworks/AGENTBRIDGE.md §7` ကို ကြည့်ပါ။                                                                                                                          |
-| `app/api/tools/traffic-inspector/`                                           | Traffic Inspector REST + WS API — လမ်းကြောင်း 16+ ခု (requests, sessions, hosts, capture-modes, export, ws)။ LOCAL_ONLY + SPAWN_CAPABLE။ `docs/frameworks/TRAFFIC_INSPECTOR.md §8` ကို ကြည့်ပါ။                                                                                                                            |
-| `app/a2a/`                                                                   | A2A JSON-RPC 2.0 ဝင်ပေါက် (`POST /a2a`)                                                                                                                                                                                                                                                                                    |
-| `app/.well-known/agent.json/`                                                | A2A Agent Card (ရှာဖွေတွေ့ရှိမှု)                                                                                                                                                                                                                                                                                          |
-| `app/(dashboard)/dashboard/`                                                 | Dashboard UI စာမျက်နှာများ (ကဏ္ဍ 50+၊ page.tsx ဖိုင် ~118 ခု- providers, combos, settings, memory, skills, webhooks, evals, audit, batch, cache, costs, health, system, activity စသည်တို့)                                                                                                                                 |
-| `app/(dashboard)/dashboard/search-tools/`                                    | Search Tools Studio UI (tab 3 ခု- Search/Scrape/Compare + SearchConceptCard + ProviderCatalog) — `docs/frameworks/SEARCH_TOOLS_STUDIO.md` ကို ကြည့်ပါ                                                                                                                                                                      |
+| `app/api/playground/`                                                        | Playground Studio လမ်းကြောင်းများ- `improve-prompt/` (POST — LLM prompt ပြန်လည်ရေးသားပေးသည့်စနစ်), `presets/` (GET စာရင်း / POST ဖန်တီးခြင်း), `presets/[id]/` (GET / PUT / DELETE) — `docs/frameworks/PLAYGROUND_STUDIO.md` ကိုကြည့်ပါ                                                                                    |
+| `app/api/` (non-v1)                                                          | စီမံခန့်ခွဲမှု/admin လမ်းကြောင်းများ (လမ်းညွှန် ~60 ခု- providers, combos, settings, mcp, a2a, evals, memory, skills, webhooks, compliance, resilience, monitoring, tunnels, cli-tools စသည်)                                                                                                                               |
+| `app/api/tools/agent-bridge/`                                                | AgentBridge REST API — လမ်းကြောင်း 12 ခု (server ထိန်းချုပ်မှု၊ agent အခြေအနေ/DNS/mappings၊ bypass၊ cert၊ upstream-CA)။ LOCAL_ONLY + SPAWN_CAPABLE။ `docs/frameworks/AGENTBRIDGE.md §7` ကိုကြည့်ပါ။                                                                                                                        |
+| `app/api/tools/traffic-inspector/`                                           | Traffic Inspector REST + WS API — လမ်းကြောင်း 16+ ခု (requests, sessions, hosts, capture-modes, export, ws)။ LOCAL_ONLY + SPAWN_CAPABLE။ `docs/frameworks/TRAFFIC_INSPECTOR.md §8` ကိုကြည့်ပါ။                                                                                                                             |
+| `app/a2a/`                                                                   | A2A JSON-RPC 2.0 အဝင်မှတ် (`POST /a2a`)                                                                                                                                                                                                                                                                                    |
+| `app/.well-known/agent.json/`                                                | A2A Agent Card (ရှာဖွေသိရှိမှု)                                                                                                                                                                                                                                                                                            |
+| `app/(dashboard)/dashboard/`                                                 | Dashboard UI စာမျက်နှာများ (ကဏ္ဍ 50+ ခု၊ page.tsx ဖိုင် ~118 ခု- providers, combos, settings, memory, skills, webhooks, evals, audit, batch, cache, costs, health, system, activity စသည်)                                                                                                                                  |
+| `app/(dashboard)/dashboard/search-tools/`                                    | Search Tools Studio UI (tab 3 ခု- Search/Scrape/Compare + SearchConceptCard + ProviderCatalog) — `docs/frameworks/SEARCH_TOOLS_STUDIO.md` ကိုကြည့်ပါ                                                                                                                                                                       |
 | `app/(dashboard)/dashboard/memory/`                                          | Memory Studio (အစီအစဉ် 21)- `page.tsx` (tab 3 ခုပါ shell), `components/` (MemoryConceptCard, MemoryEngineStatus, EmbeddingSourceSelector, EditMemoryModal, RetrievePreview, QdrantConfigCard, RerankConfigCard), `components/tabs/` (MemoriesTab, PlaygroundTab, EngineTab), `hooks/` (useEngineStatus, useMemorySettings) |
-| `app/(dashboard)/dashboard/tools/agent-bridge/`                              | AgentBridge dashboard စာမျက်နှာ — ဆာဗာကတ်၊ agent ကတ် 9 ခု၊ setup wizard၊ model mapping၊ bypass စာရင်း။ i18n PT-BR + EN။ `docs/frameworks/AGENTBRIDGE.md` ကို ကြည့်ပါ။                                                                                                                                                      |
-| `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Traffic Inspector dashboard စာမျက်နှာ — DevTools ခွဲခြမ်းမြင်ကွင်း၊ အသေးစိတ် tab 7 ခု၊ capture mode toggle 4 ခု၊ session recorder၊ context အလိုက် အရောင်ခွဲခြားမှု။ i18n PT-BR + EN။ `docs/frameworks/TRAFFIC_INSPECTOR.md` ကို ကြည့်ပါ။                                                                                   |
-| `app/(dashboard)/dashboard/activity/`                                        | လုပ်ဆောင်ချက်မှတ်တမ်း စာမျက်နှာ (Group B): `page.tsx` (ဆာဗာ) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — `docs/architecture/MONITORING_SECTIONS.md` ကို ကြည့်ပါ                                                                                                  |
+| `app/(dashboard)/dashboard/tools/agent-bridge/`                              | AgentBridge dashboard စာမျက်နှာ — server card၊ agent card 9 ခု၊ setup wizard၊ model mapping၊ bypass စာရင်း။ i18n PT-BR + EN။ `docs/frameworks/AGENTBRIDGE.md` ကိုကြည့်ပါ။                                                                                                                                                  |
+| `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Traffic Inspector dashboard စာမျက်နှာ — DevTools split၊ အသေးစိတ် tab 7 ခု၊ capture mode toggle 4 ခု၊ session recorder၊ context အလိုက် အရောင်ခွဲခြားမှု။ i18n PT-BR + EN။ `docs/frameworks/TRAFFIC_INSPECTOR.md` ကိုကြည့်ပါ။                                                                                                |
+| `app/(dashboard)/dashboard/activity/`                                        | လုပ်ဆောင်ချက် feed စာမျက်နှာ (Group B): `page.tsx` (server) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — `docs/architecture/MONITORING_SECTIONS.md` ကို ကြည့်ပါ                                                                                                   |
 | `app/(dashboard)/dashboard/costs/quota-share/`                               | Quota မျှဝေခြင်း စာမျက်နှာ (Group B): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                          |
-| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | Provider အစီအစဉ် စီစဉ်သတ်မှတ်မှု စာမျက်နှာ (Group B): `page.tsx` + `ProviderPlanConfigClient.tsx` — ချိတ်ဆက်မှုတစ်ခုချင်းစီအလိုက် quota အတိုင်းအတာများကို အစားထိုးသတ်မှတ်ခြင်း                                                                                                                                             |
-| `app/docs/`                                                                  | ထည့်သွင်းပေါင်းစပ်ထားသော စာရွက်စာတမ်းကြည့်ရှုစနစ် (`docs/*.md` ကို ဖော်ပြပေးသည်)                                                                                                                                                                                                                                           |
-| `app/landing/`                                                               | ဈေးကွက်မြှင့်တင်ရေး မိတ်ဆက်စာမျက်နှာ                                                                                                                                                                                                                                                                                       |
-| `app/login/`, `forgot-password/`, `forbidden/`                               | အထောက်အထားစိစစ်ခြင်းနှင့် သက်ဆိုင်သော စာမျက်နှာများ                                                                                                                                                                                                                                                                        |
-| `app/{400,401,403,408,429,500,502,503}/`                                     | HTTP အမှား စာမျက်နှာများ                                                                                                                                                                                                                                                                                                   |
-| `app/maintenance/`, `offline/`, `status/`, `privacy/`, `terms/`, `callback/` | တည်ငြိမ်အကြောင်းအရာ/အခြေအနေ စာမျက်နှာများ                                                                                                                                                                                                                                                                                  |
-| `app/layout.tsx`, `page.tsx`, `manifest.ts`, `globals.css`                   | ပင်မ layout၊ ပင်မစာမျက်နှာ၊ PWA manifest နှင့် ကမ္ဘာလုံးဆိုင်ရာ CSS                                                                                                                                                                                                                                                        |
-| `app/error.tsx`, `global-error.tsx`, `not-found.tsx`, `loading.tsx`          | အမှားထိန်းချုပ် နယ်နိမိတ်များ                                                                                                                                                                                                                                                                                              |
+| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | Provider plan စီစဉ်သတ်မှတ်မှု စာမျက်နှာ (Group B): `page.tsx` + `ProviderPlanConfigClient.tsx` — ချိတ်ဆက်မှုတစ်ခုချင်းစီအလိုက် quota dimension များကို override ပြုလုပ်ခြင်း                                                                                                                                               |
+| `app/docs/`                                                                  | ထည့်သွင်းထားသော documentation viewer (`docs/*.md` ကို render လုပ်သည်)                                                                                                                                                                                                                                                      |
+| `app/landing/`                                                               | စျေးကွက်မြှင့်တင်ရေး landing စာမျက်နှာ                                                                                                                                                                                                                                                                                     |
+| `app/login/`, `forgot-password/`, `forbidden/`                               | Authentication နှင့်သက်ဆိုင်သော စာမျက်နှာများ                                                                                                                                                                                                                                                                              |
+| `app/{400,401,403,408,429,500,502,503}/`                                     | HTTP error စာမျက်နှာများ                                                                                                                                                                                                                                                                                                   |
+| `app/maintenance/`, `offline/`, `status/`, `privacy/`, `terms/`, `callback/` | Static/status စာမျက်နှာများ                                                                                                                                                                                                                                                                                                |
+| `app/layout.tsx`, `page.tsx`, `manifest.ts`, `globals.css`                   | Root layout၊ ပင်မစာမျက်နှာ၊ PWA manifest နှင့် global CSS                                                                                                                                                                                                                                                                  |
+| `app/error.tsx`, `global-error.tsx`, `not-found.tsx`, `loading.tsx`          | Error boundary များ                                                                                                                                                                                                                                                                                                        |
 
-### `src/lib/` — အဓိက library များ (~50 module)
+### `src/lib/` — အဓိက library များ (~50 modules)
 
-| မော်ဂျူး                                 | ရည်ရွယ်ချက်                                                                                                                                                                                                                                                                                                                     |
-| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `a2a/`                                   | A2A ပရိုတိုကော အလုပ်မန်နေဂျာ၊ ကျွမ်းကျင်မှုများ (5)၊ streaming                                                                                                                                                                                                                                                                  |
-| `acp/`                                   | CLI Agent Registry (စက်တွင်း CLI ရှာဖွေဖော်ထုတ်မှု — `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md` ကို ကြည့်ပါ)                                                                                                                                                                                                                    |
-| `api/`                                   | မျှဝေသုံး API အကူလုပ်ဆောင်ချက်များ (`requireManagementAuth`၊ validation)                                                                                                                                                                                                                                                        |
-| `auth/`                                  | Session၊ စကားဝှက် hashing၊ token validation                                                                                                                                                                                                                                                                                     |
-| `batches/`                               | OpenAI Batches API ကိုင်တွယ်လုပ်ဆောင်ချက်များ                                                                                                                                                                                                                                                                                   |
-| `catalog/`                               | Provider catalog အတွက် Zod validation + စွမ်းဆောင်ရည် ခွဲခြားသတ်မှတ်ခြင်း                                                                                                                                                                                                                                                       |
-| `cloudAgent/`                            | Cloud Agents (Codex Cloud၊ Devin၊ Jules) — `docs/frameworks/CLOUD_AGENT.md` ကို ကြည့်ပါ                                                                                                                                                                                                                                         |
-| `combos/`                                | Combo ခွဲခြားသတ်မှတ်ခြင်း + အစီအစဉ်ပြန်စီသည့် အကူလုပ်ဆောင်ချက်များ                                                                                                                                                                                                                                                              |
-| `audit/`                                 | လုပ်ဆောင်ချက် feed အကူလုပ်ဆောင်ချက်များ: `highLevelActions.ts` (ခွင့်ပြုစာရင်း + `isHighLevelAction()`), `activityIcons.ts` (လုပ်ဆောင်ချက် → icon/ကြိယာ map), `timeline.ts` (groupByDay/relativeTime) — `docs/architecture/MONITORING_SECTIONS.md` ကို ကြည့်ပါ                                                                  |
-| `compliance/`                            | Audit log + provider audit — `docs/security/COMPLIANCE.md` ကို ကြည့်ပါ                                                                                                                                                                                                                                                          |
-| `compression/`                           | Compression engine ချိတ်ဆက်အလွှာ (engines များသည် `open-sse/services/compression/` တွင် ရှိသည်)                                                                                                                                                                                                                                 |
-| `config/`                                | Runtime config အကူလုပ်ဆောင်ချက်များ                                                                                                                                                                                                                                                                                             |
-| `db/`                                    | ဒိုမိန်း DB မော်ဂျူး 120+ ခု + migration 168 ခု (SQLite အတွက် ဤနေရာမှတစ်ဆင့် အမြဲလုပ်ဆောင်ပါ)                                                                                                                                                                                                                                   |
-| `quota/`                                 | Quota Sharing Engine: `dimensions.ts` (types/Zod), `types.ts` (QuotaStore interface), `sqliteQuotaStore.ts`, `redisQuotaStore.ts`, `storeFactory.ts`, `fairShare.ts`, `burnRate.ts`, `planResolver.ts`, `planRegistry.ts`, `saturationSignals.ts`, `enforce.ts`, `spendRecorder.ts` — `docs/routing/QUOTA_SHARE.md` ကို ကြည့်ပါ |
-| `radar/`                                 | Radar အခမဲ့မော်ဒယ် catalog client: `feedSchema.ts`, `pinnedKeys.ts`, `verify.ts`, `sync.ts`, `applyFeed.ts`, `index.ts` (`getRadarCatalog()`) — `docs/frameworks/RADAR.md` ကို ကြည့်ပါ                                                                                                                                          |
-| `display/`                               | UI ဖော်မတ်ချခြင်းဆိုင်ရာ အကူလုပ်ဆောင်ချက်များ (ကုန်ကျစရိတ်၊ တုံ့ပြန်ချိန် စသည်)                                                                                                                                                                                                                                                 |
-| `embeddings/`                            | Embeddings ဝန်ဆောင်မှုဆိုင်ရာ အကူလုပ်ဆောင်ချက်များ                                                                                                                                                                                                                                                                              |
-| `env/`                                   | Env variable များကို parse လုပ်ခြင်း + အတည်ပြုခြင်း                                                                                                                                                                                                                                                                             |
-| `evals/`                                 | Eval framework (suite များ၊ runner၊ runtime) — `docs/frameworks/EVALS.md` ကို ကြည့်ပါ                                                                                                                                                                                                                                           |
-| `guardrails/`                            | PII ဖုံးကွယ်ကိရိယာ၊ prompt injection၊ vision bridge — `docs/security/GUARDRAILS.md` ကို ကြည့်ပါ                                                                                                                                                                                                                                 |
-| `jobs/`                                  | နောက်ခံ job များ (cron ပုံစံ)                                                                                                                                                                                                                                                                                                   |
-| `memory/`                                | စကားဝိုင်းမှတ်ဉာဏ် (SQLite FTS5 + sqlite-vec ပေါင်းစပ် RRF + Qdrant tier 2) — `docs/frameworks/MEMORY.md` ကို ကြည့်ပါ                                                                                                                                                                                                           |
-| `memory/embedding/`                      | ရင်းမြစ်မျိုးစုံ embedding layer: `index.ts` (resolver), `remote.ts`, `staticPotion.ts`, `transformersLocal.ts`, `cache.ts`, `types.ts` (အစီအစဉ် 21)                                                                                                                                                                            |
-| `memory/vectorStore.ts`                  | sqlite-vec v0.1.9 wrapper — KNN brute-force + ပေါင်းစပ် RRF (FTS5 + vector, k=60)။ Lazy-init ပြုလုပ်ပြီး sqlite-vec မရရှိသည့်အခါ ချို့ယွင်းမှုမဖြစ်စေဘဲ စွမ်းဆောင်ရည်လျှော့ချသည်။ (အစီအစဉ် 21)                                                                                                                                  |
-| `memory/reindex.ts`                      | `runReindexBatch()` — `needs_reindex=1` ရှိသော memory များကို နောက်ခံတွင် လုပ်ဆောင်သည်၊ `POST /api/memory/reindex` နှင့် lazy-backfill လမ်းကြောင်းက ခေါ်ယူသည်။ (အစီအစဉ် 21)                                                                                                                                                     |
-| `monitoring/`                            | စနစ်အခြေအနေ စစ်ဆေးမှုများ၊ metrics ထုတ်လွှတ်မှု                                                                                                                                                                                                                                                                                 |
-| `oauth/`                                 | provider module 22 ခုအတွက် OAuth/import flow များ (agy, antigravity, claude, cline, codebuddy-cn, codex, cursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-coding, kiro, openference, qoder, trae, xai-oauth, zed-hosted, zed)                                                   |
-| `plugins/`                               | Plugin registry                                                                                                                                                                                                                                                                                                                 |
-| `promptCache/`                           | Anthropic ပုံစံ prompt cache breakpoint များ                                                                                                                                                                                                                                                                                    |
-| `skills/`                                | Skills framework (built-in + marketplace + SkillsSH) — `docs/frameworks/SKILLS.md` ကို ကြည့်ပါ                                                                                                                                                                                                                                  |
-| `playground/`                            | Playground Studio မျှဝေအကူပရိုဂရမ်များ- `codeExport.ts` (curl/Python/TS ထုတ်ပေးစက်), `promptImprover.ts` (meta-prompt တည်ဆောက်ပေးစက်), `streamMetrics.ts` (သီးသန့် TTFT/TPS), `types.ts` (ဈေးနှုန်းဇယား) — `docs/frameworks/PLAYGROUND_STUDIO.md` ကို ကြည့်ပါ                                                                   |
-| `webhookDispatcher.ts`                   | HMAC webhook ပေးပို့မှု — `docs/frameworks/WEBHOOKS.md` ကို ကြည့်ပါ                                                                                                                                                                                                                                                             |
-| `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | Tunnel စီမံခန့်ခွဲပေးစက်များ — `docs/ops/TUNNELS_GUIDE.md` ကို ကြည့်ပါ                                                                                                                                                                                                                                                          |
-| `cloudSync.ts`, `initCloudSync.ts`       | အခြေအနေကို ရွေးချယ်အသုံးပြုနိုင်သော cloud sync ပြုလုပ်ခြင်း                                                                                                                                                                                                                                                                     |
-| `localDb.ts`                             | db module များအတွက် ပြန်လည်တင်ပို့သည့် barrel (လုပ်ဆောင်ချက်မရှိ — ပြန်လည်တင်ပို့ခြင်းသာ)                                                                                                                                                                                                                                       |
-| `cacheLayer.ts`, `idempotencyLayer.ts`   | တောင်းဆိုမှု caching + idempotency                                                                                                                                                                                                                                                                                              |
-| (ထိပ်တန်းအဆင့်ဖိုင် နောက်ထပ် ~30 ခု)     | အထူးပြုအကူပရိုဂရမ်များ (logEnv, modelsDevSync, piiSanitizer စသည်)                                                                                                                                                                                                                                                               |
+| မော်ဂျူး                                 | ရည်ရွယ်ချက်                                                                                                                                                                                                                                                                                                                               |
+| ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `a2a/`                                   | A2A ပရိုတိုကော အလုပ်စီမံခန့်ခွဲမှု၊ ကျွမ်းကျင်မှုများ (5)၊ တိုက်ရိုက်ထုတ်လွှင့်မှု                                                                                                                                                                                                                                                        |
+| `acp/`                                   | CLI Agent မှတ်ပုံတင်စာရင်း (စက်တွင်း CLI ရှာဖွေမှု — `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md` ကို ကြည့်ပါ)                                                                                                                                                                                                                              |
+| `api/`                                   | မျှဝေသုံး API အကူလုပ်ဆောင်ချက်များ (`requireManagementAuth`၊ အတည်ပြုစစ်ဆေးခြင်း)                                                                                                                                                                                                                                                          |
+| `auth/`                                  | ဆက်ရှင်၊ စကားဝှက် hash ပြုလုပ်ခြင်း၊ တိုကင်အတည်ပြုစစ်ဆေးခြင်း                                                                                                                                                                                                                                                                             |
+| `batches/`                               | OpenAI Batches API ကိုင်တွယ်ရေးလုပ်ဆောင်ချက်များ                                                                                                                                                                                                                                                                                          |
+| `catalog/`                               | ပံ့ပိုးသူကတ်တလောက်၏ Zod အတည်ပြုစစ်ဆေးခြင်း + စွမ်းဆောင်ရည် ဖြေရှင်းသတ်မှတ်ခြင်း                                                                                                                                                                                                                                                           |
+| `cloudAgent/`                            | Cloud Agents (Codex Cloud၊ Devin၊ Jules) — `docs/frameworks/CLOUD_AGENT.md` ကို ကြည့်ပါ                                                                                                                                                                                                                                                   |
+| `combos/`                                | ပေါင်းစပ်မှု ဖြေရှင်းသတ်မှတ်ခြင်း + အစီအစဉ်ပြန်စီရန် အကူလုပ်ဆောင်ချက်များ                                                                                                                                                                                                                                                                 |
+| `audit/`                                 | လုပ်ဆောင်ချက် feed အကူလုပ်ဆောင်ချက်များ- `highLevelActions.ts` (ခွင့်ပြုစာရင်း + `isHighLevelAction()`), `activityIcons.ts` (လုပ်ဆောင်ချက် → အိုင်ကွန်/ကြိယာ မြေပုံ), `timeline.ts` (groupByDay/relativeTime) — `docs/architecture/MONITORING_SECTIONS.md` ကို ကြည့်ပါ                                                                    |
+| `compliance/`                            | စစ်ဆေးမှတ်တမ်း + ပံ့ပိုးသူ စစ်ဆေးခြင်း — `docs/security/COMPLIANCE.md` ကို ကြည့်ပါ                                                                                                                                                                                                                                                        |
+| `compression/`                           | ဖိသိပ်မှုအင်ဂျင် ချိတ်ဆက်ပေးသည့်ကုဒ် (အင်ဂျင်များသည် `open-sse/services/compression/` တွင် ရှိသည်)                                                                                                                                                                                                                                        |
+| `config/`                                | Runtime ဖွဲ့စည်းသတ်မှတ်မှု အကူလုပ်ဆောင်ချက်များ                                                                                                                                                                                                                                                                                           |
+| `db/`                                    | ဒိုမိန်း DB မော်ဂျူး 120+ + migration 168 ခု (SQLite အတွက် ဤနေရာမှတစ်ဆင့် အမြဲလုပ်ဆောင်ပါ)                                                                                                                                                                                                                                                |
+| `quota/`                                 | Quota Sharing Engine- `dimensions.ts` (အမျိုးအစားများ/Zod), `types.ts` (QuotaStore အင်တာဖေ့စ်), `sqliteQuotaStore.ts`, `redisQuotaStore.ts`, `storeFactory.ts`, `fairShare.ts`, `burnRate.ts`, `planResolver.ts`, `planRegistry.ts`, `saturationSignals.ts`, `enforce.ts`, `spendRecorder.ts` — `docs/routing/QUOTA_SHARE.md` ကို ကြည့်ပါ |
+| `radar/`                                 | Radar အခမဲ့မော်ဒယ် ကတ်တလောက် client: `feedSchema.ts`, `pinnedKeys.ts`, `verify.ts`, `sync.ts`, `applyFeed.ts`, `index.ts` (`getRadarCatalog()`) — `docs/frameworks/RADAR.md` ကို ကြည့်ပါ                                                                                                                                                  |
+| `display/`                               | UI ဖော်မတ်ပြင်ဆင်ရေး အကူလုပ်ဆောင်ချက်များ (ကုန်ကျစရိတ်၊ latency စသည်)                                                                                                                                                                                                                                                                     |
+| `embeddings/`                            | Embeddings ဝန်ဆောင်မှု အကူလုပ်ဆောင်ချက်များ                                                                                                                                                                                                                                                                                               |
+| `env/`                                   | ပတ်ဝန်းကျင် variable များကို parse လုပ်ခြင်း + အတည်ပြုခြင်း                                                                                                                                                                                                                                                                               |
+| `evals/`                                 | အကဲဖြတ် framework (suite များ၊ runner၊ runtime) — `docs/frameworks/EVALS.md` ကို ကြည့်ပါ                                                                                                                                                                                                                                                  |
+| `guardrails/`                            | PII ဖုံးကွယ်ကိရိယာ၊ prompt injection၊ vision bridge — `docs/security/GUARDRAILS.md` ကို ကြည့်ပါ                                                                                                                                                                                                                                           |
+| `jobs/`                                  | နောက်ခံအလုပ်များ (cron ပုံစံ)                                                                                                                                                                                                                                                                                                             |
+| `memory/`                                | စကားဝိုင်းဆိုင်ရာ memory (SQLite FTS5 + sqlite-vec ပေါင်းစပ် RRF + Qdrant အဆင့် ၂) — `docs/frameworks/MEMORY.md` ကို ကြည့်ပါ                                                                                                                                                                                                              |
+| `memory/embedding/`                      | ရင်းမြစ်မျိုးစုံ embedding layer: `index.ts` (resolver), `remote.ts`, `staticPotion.ts`, `transformersLocal.ts`, `cache.ts`, `types.ts` (အစီအစဉ် ၂၁)                                                                                                                                                                                      |
+| `memory/vectorStore.ts`                  | sqlite-vec v0.1.9 wrapper — KNN brute-force + ပေါင်းစပ် RRF (FTS5 + vector, k=60)။ လိုအပ်မှ စတင်ပြီး sqlite-vec မရနိုင်သည့်အခါ ချို့ယွင်းမှုမဖြစ်ဘဲ လုပ်ဆောင်နိုင်စွမ်းကို လျှော့ချပေးသည်။ (အစီအစဉ် ၂၁)                                                                                                                                   |
+| `memory/reindex.ts`                      | `runReindexBatch()` — နောက်ခံတွင် `needs_reindex=1` ဖြစ်သော memory များကို စီမံလုပ်ဆောင်သည်၊ `POST /api/memory/reindex` နှင့် lazy-backfill လမ်းကြောင်းတို့က ခေါ်ယူအသုံးပြုသည်။ (အစီအစဉ် ၂၁)                                                                                                                                              |
+| `monitoring/`                            | ကျန်းမာရေးစစ်ဆေးမှုများ၊ metrics ထုတ်လွှတ်မှု                                                                                                                                                                                                                                                                                             |
+| `oauth/`                                 | provider module ၂၂ ခုအတွက် OAuth/import လုပ်ငန်းစဉ်များ (agy, antigravity, claude, cline, codebuddy-cn, codex, cursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-coding, kiro, openference, qoder, trae, xai-oauth, zed-hosted, zed)                                                       |
+| `plugins/`                               | Plugin registry                                                                                                                                                                                                                                                                                                                           |
+| `promptCache/`                           | Anthropic ပုံစံ prompt cache breakpoint များ                                                                                                                                                                                                                                                                                              |
+| `skills/`                                | Skills framework (built-in + marketplace + SkillsSH) — `docs/frameworks/SKILLS.md` ကို ကြည့်ပါ                                                                                                                                                                                                                                            |
+| `playground/`                            | Playground Studio မျှဝေသုံး အကူကိရိယာများ- `codeExport.ts` (curl/Python/TS ထုတ်ပေးသည့်စနစ်), `promptImprover.ts` (meta-prompt တည်ဆောက်သည့်စနစ်), `streamMetrics.ts` (သီးသန့် TTFT/TPS), `types.ts` (ဈေးနှုန်းဇယား) — `docs/frameworks/PLAYGROUND_STUDIO.md` ကို ကြည့်ပါ                                                                   |
+| `webhookDispatcher.ts`                   | HMAC webhook ပေးပို့မှု — `docs/frameworks/WEBHOOKS.md` ကို ကြည့်ပါ                                                                                                                                                                                                                                                                       |
+| `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | Tunnel စီမံခန့်ခွဲသည့်စနစ်များ — `docs/ops/TUNNELS_GUIDE.md` ကို ကြည့်ပါ                                                                                                                                                                                                                                                                  |
+| `cloudSync.ts`, `initCloudSync.ts`       | အခြေအနေကို ရွေးချယ်အသုံးပြုနိုင်သည့် cloud sync ပြုလုပ်ခြင်း                                                                                                                                                                                                                                                                              |
+| `localDb.ts`                             | db module များအတွက် ပြန်လည် export လုပ်ပေးသည့် barrel (logic မပါ — ပြန်လည် export လုပ်ခြင်းသာ)                                                                                                                                                                                                                                            |
+| `cacheLayer.ts`, `idempotencyLayer.ts`   | Request caching + idempotency                                                                                                                                                                                                                                                                                                             |
+| (နောက်ထပ် ထိပ်တန်းအဆင့် file ~30 ခု)     | အထူးပြု အကူကိရိယာများ (logEnv, modelsDevSync, piiSanitizer စသည်)                                                                                                                                                                                                                                                                          |
 
-### `src/lib/db/` — ဒေတာဘေ့စ် (module 137 ခု + migration 193 ခု)
+### `src/lib/db/` — Database (module 147 ခု + migration 208 ခု)
 
-| ဖိုင်တွဲခွဲ               | ရည်ရွယ်ချက်                                                                                                                                                                           |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `db/core.ts`              | WAL journaling ပါဝင်သော `getDbInstance()` singleton                                                                                                                                   |
-| `db/migrations/`          | Version သတ်မှတ်ထားသော SQL ဖိုင်များ (idempotent၊ transactional)။ `073_memory_vec.sql` သည် `memory_vec_meta` + `needs_reindex` column (အစီအစဉ် 21) ကို ထည့်သွင်းသည်။                   |
-| `db/playgroundPresets.ts` | Playground Studio preset များအတွက် CRUD module (`listPlaygroundPresets`, `getPlaygroundPreset`, `createPlaygroundPreset`, `updatePlaygroundPreset`, `deletePlaygroundPreset`)         |
-| `db/memoryVec.ts`         | `memory_vec_meta` (active_dim, embedding_signature, last_reset_at, vec_loaded) အတွက် CRUD + `markMemoryNeedsReindex`, `getMemoryReindexQueue` စသည် (အစီအစဉ် 21)                       |
-| `db/<domain>.ts`          | domain တစ်ခုစီအတွက် module တစ်ခု- providers, combos, apiKeys, users, sessions, usage, audit*log, webhooks, skills, memory_entries, cloud_agent_tasks, evals*\*, reasoning_cache စသည်။ |
+| Subdir                    | ရည်ရွယ်ချက်                                                                                                                                                                                   |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `db/core.ts`              | WAL journaling ပါဝင်သည့် `getDbInstance()` singleton                                                                                                                                          |
+| `db/migrations/`          | Version သတ်မှတ်ထားသော SQL file များ (idempotent ဖြစ်ပြီး transaction အလိုက် လုပ်ဆောင်သည်)။ `073_memory_vec.sql` သည် `memory_vec_meta` + `needs_reindex` column ကို ထည့်သွင်းသည် (အစီအစဉ် 21)။ |
+| `db/playgroundPresets.ts` | Playground Studio preset များအတွက် CRUD module (`listPlaygroundPresets`, `getPlaygroundPreset`, `createPlaygroundPreset`, `updatePlaygroundPreset`, `deletePlaygroundPreset`)                 |
+| `db/memoryVec.ts`         | `memory_vec_meta` (active_dim, embedding_signature, last_reset_at, vec_loaded) အတွက် CRUD + `markMemoryNeedsReindex`, `getMemoryReindexQueue` စသည် (အစီအစဉ် 21)                               |
+| `db/<domain>.ts`          | Domain တစ်ခုစီအတွက် module တစ်ခု- providers, combos, apiKeys, users, sessions, usage, audit*log, webhooks, skills, memory_entries, cloud_agent_tasks, evals*\*, reasoning_cache စသည်။         |
 
 ### `src/domain/`
 
-| Module                 | ရည်ရွယ်ချက်                                        |
-| ---------------------- | -------------------------------------------------- |
-| `policy.ts`            | Policy engine                                      |
-| `fallbackPolicy.ts`    | Fallback ဆုံးဖြတ်ချက် tree                         |
-| `costRules.ts`         | ကုန်ကျစရိတ်တွက်ချက်မှု စည်းမျဉ်းများ               |
-| `lockoutPolicy.ts`     | Model/connection lockout policy                    |
-| `tagRouter.ts`         | Tag အခြေပြု routing                                |
-| `comboResolver.ts`     | Combo ဖြေရှင်းမှု (combo engine က အသုံးပြုသည်)     |
-| `modelAvailability.ts` | Model တစ်ခုချင်းစီအလိုက် ရရှိနိုင်မှုစစ်ဆေးခြင်း   |
-| `assessment/`          | Model အကဲဖြတ်ခြင်း (RFC-AUTO-ASSESSMENT ၏ အဆင့် 1) |
+| Module                 | ရည်ရွယ်ချက်                                         |
+| ---------------------- | --------------------------------------------------- |
+| `policy.ts`            | Policy engine                                       |
+| `fallbackPolicy.ts`    | Fallback ဆုံးဖြတ်ချက် tree                          |
+| `costRules.ts`         | ကုန်ကျစရိတ် တွက်ချက်ခြင်းဆိုင်ရာ စည်းမျဉ်းများ      |
+| `lockoutPolicy.ts`     | Model/connection lockout policy                     |
+| `tagRouter.ts`         | Tag အခြေပြု routing                                 |
+| `comboResolver.ts`     | Combo resolution (combo engine မှ အသုံးပြုသည်)      |
+| `modelAvailability.ts` | Model တစ်ခုချင်းစီ၏ အသုံးပြုနိုင်မှုကို စစ်ဆေးခြင်း |
+| `assessment/`          | Model အကဲဖြတ်ခြင်း (RFC-AUTO-ASSESSMENT ၏ အဆင့် 1)  |
 
 ### `src/server/`
 
-| Module   | ရည်ရွယ်ချက်                                                                                                 |
-| -------- | ----------------------------------------------------------------------------------------------------------- |
-| `authz/` | ခွင့်ပြုချက် pipeline- `classify` → `policies` → `enforce` — `docs/architecture/AUTHZ_GUIDE.md` ကို ကြည့်ပါ |
-| `cors/`  | CORS ဖွဲ့စည်းသတ်မှတ်မှု                                                                                     |
-| `auth/`  | Session middleware                                                                                          |
+| Module   | ရည်ရွယ်ချက်                                                                                                  |
+| -------- | ------------------------------------------------------------------------------------------------------------ |
+| `authz/` | Authorization pipeline- `classify` → `policies` → `enforce` — `docs/architecture/AUTHZ_GUIDE.md` ကို ကြည့်ပါ |
+| `cors/`  | CORS configuration                                                                                           |
+| `auth/`  | Session middleware                                                                                           |
 
 ### `src/shared/`
 
-| မော်ဂျူး                         | ရည်ရွယ်ချက်                                                                                                |
-| -------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `constants/providers.ts`         | Zod စစ်ဆေးအတည်ပြုမှုပါဝင်သော **ပံ့ပိုးသူ 355 ခု** (အမှန်တရား၏ မူလရင်းမြစ်)                                 |
-| `constants/cliTools.ts`          | ပြင်ပ CLI ကိရိယာ မှတ်ပုံတင်စာရင်း                                                                          |
-| `constants/routingStrategies.ts` | ဦးစားပေးအဆင့်များပါဝင်သော **လမ်းကြောင်းသတ်မှတ်မှု နည်းဗျူဟာ 19 ခု**                                        |
-| `constants/publicApiRoutes.ts`   | စီမံခန့်ခွဲမှု စစ်မှန်ကြောင်းအတည်ပြုခြင်းအစား Bearer စစ်မှန်ကြောင်းအတည်ပြုခြင်း လိုအပ်သည့် လမ်းကြောင်းများ |
-| `constants/upstreamHeaders.ts`   | upstream တောင်းဆိုမှုများအတွက် header ပိတ်ပင်စာရင်း                                                        |
-| `validation/schemas.ts`          | Zod schema ~80 ခု (API သဘောတူစာချုပ်များအတွက် တစ်ခုတည်းသော အမှန်တရားရင်းမြစ်)                              |
-| `validation/helpers.ts`          | Zod စစ်ဆေးအတည်ပြုမှု အကူလုပ်ဆောင်ချက်များ (`validateBody` စသည်)                                            |
-| `types/`                         | မျှဝေသုံးစွဲသည့် TS type များ                                                                              |
-| `contracts/`                     | အများသုံး API သဘောတူစာချုပ်များ (`package.json` ရှိ `files:` က အသုံးပြုသည်)                                |
-| `utils/circuitBreaker.ts`        | ပံ့ပိုးသူ circuit breaker (`docs/architecture/RESILIENCE_GUIDE.md` ကို ကြည့်ပါ)                            |
-| `utils/apiAuth.ts`               | API key စစ်ဆေးအတည်ပြုခြင်းနှင့် scope စစ်ဆေးခြင်း                                                          |
-| `utils/fetchTimeout.ts`          | upstream fetch အတွက် အချိန်ကုန်ဆုံးမှု/ပယ်ဖျက်မှု wrapper များ                                             |
-| `utils/releaseNotes.ts`          | ပိတ်ထားသော v2/legacy ကြေညာချက် parser၊ ဒေသန္တရပြုခြင်းနှင့် ID ပယ်ဖျက်ခြင်း                                |
+| မော်ဂျူး                         | ရည်ရွယ်ချက်                                                                                    |
+| -------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `constants/providers.ts`         | Zod အတည်ပြုစစ်ဆေးမှုပါဝင်သော **ဝန်ဆောင်မှုပေးသူ 375 ခု** (အမှန်တရား၏ မူလရင်းမြစ်)              |
+| `constants/cliTools.ts`          | ပြင်ပ CLI ကိရိယာ မှတ်ပုံတင်စာရင်း                                                              |
+| `constants/routingStrategies.ts` | ဦးစားပေးအဆင့်များပါဝင်သော **လမ်းကြောင်းရွေးချယ်မှု နည်းဗျူဟာ 20 ခု**                           |
+| `constants/publicApiRoutes.ts`   | စီမံခန့်ခွဲမှု အထောက်အထားစိစစ်ခြင်းအစား Bearer အထောက်အထားစိစစ်ခြင်း လိုအပ်သည့် လမ်းကြောင်းများ |
+| `constants/upstreamHeaders.ts`   | အထက်အဆင့် တောင်းဆိုမှုများအတွက် header တားမြစ်စာရင်း                                           |
+| `validation/schemas.ts`          | Zod schema ~80 ခု (API contract များအတွက် တစ်ခုတည်းသော မူလရင်းမြစ်)                            |
+| `validation/helpers.ts`          | Zod အတည်ပြုစစ်ဆေးရေး အကူများ (`validateBody` စသည်)                                             |
+| `types/`                         | မျှဝေအသုံးပြုသော TS type များ                                                                  |
+| `contracts/`                     | အများသုံး API contract များ (`package.json` ရှိ `files:` မှ အသုံးပြုသည်)                       |
+| `utils/circuitBreaker.ts`        | ဝန်ဆောင်မှုပေးသူ circuit breaker (`docs/architecture/RESILIENCE_GUIDE.md` ကို ကြည့်ပါ)         |
+| `utils/apiAuth.ts`               | API key အတည်ပြုစစ်ဆေးခြင်းနှင့် scope စစ်ဆေးခြင်း                                              |
+| `utils/fetchTimeout.ts`          | အထက်အဆင့် fetch အတွက် timeout/abort wrapper များ                                               |
+| `utils/releaseNotes.ts`          | ပိတ်ထားသော v2/legacy ကြေညာချက် parser၊ ဒေသန္တရဘာသာပြန်ခြင်းနှင့် ID ပယ်ဖျက်ခြင်း               |
 
 ---
 
 ## `open-sse/` — Streaming Engine Workspace
 
-သီးခြား npm workspace (`@omniroute/open-sse`) ဖြစ်သည်။ Request processing နှင့် provider execution တို့ကို ကိုင်တွယ်သည်။
+သီးခြား npm workspace (`@omniroute/open-sse`) ဖြစ်သည်။ တောင်းဆိုမှု လုပ်ဆောင်ခြင်းနှင့် provider များကို အကောင်အထည်ဖော် လည်ပတ်ခြင်းတို့ကို ကိုင်တွယ်သည်။
 
 ```
 open-sse/
 ├── handlers/            # ဖိုင် 16 ခု (handler 12 ခု + helper 4 ခု): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search စသည်တို့
-├── executors/           # Provider အလိုက် executor 67 ခု (BaseExecutor ကို extend လုပ်သည်)
-├── translator/          # Format converter များ (request 9 ခု၊ response 9 ခု၊ helper 9 ခု)
+├── executors/           # executor module 150 ခု (BaseExecutor ကို တိုးချဲ့ထားသော class များ + provider တစ်ခုချင်းစီအတွက် helper များ)
+├── translator/          # format converter များ (request 9 ခု၊ response 9 ခု၊ helper 9 ခု)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
-├── services/            # Service module ~80+ ခု (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM စသည်တို့)
+├── services/            # service module ~80+ ခု (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM စသည်တို့)
 ├── mcp-server/          # MCP server (tool 110 ခု၊ transport 3 ခု၊ scope 33 ခု)
-├── config/              # Provider/model registry များ၊ header config၊ model alias များ
+├── config/              # provider/model registry များ၊ header config၊ model alias များ
 ├── utils/               # TLS client၊ proxy fetch/dispatcher၊ network helper များ
-├── index.ts             # Workspace entry
+├── index.ts             # Workspace ဝင်ပေါက်
 ├── package.json         # Workspace manifest
 ├── tsconfig.json        # Workspace TS config
-└── types.d.ts           # Workspace type declaration များ
+└── types.d.ts           # Workspace type ကြေညာချက်များ
 ```
 
 ### `open-sse/mcp-server/`
@@ -281,16 +281,16 @@ open-sse/
 | --------------------------- | ----------------------------------------------------------------------------------------------- |
 | `server.ts`                 | MCP server lifecycle (stdio + HTTP transport များ)                                              |
 | `httpTransport.ts`          | HTTP Streamable + SSE transport များ (`/api/mcp/sse`, `/api/mcp/stream`)                        |
-| `audit.ts`                  | `mcp_tool_audit` table သို့ audit log ရေးသားခြင်း                                               |
-| `scopeEnforcement.ts`       | Tool တစ်ခုချင်းစီအလိုက် scope validation                                                        |
-| `runtimeHeartbeat.ts`       | `DATA_DIR/runtime/mcp-heartbeat.json` သို့ health heartbeat ပေးပို့ခြင်း                        |
-| `descriptionCompressor.ts`  | Context ချွေတာရန် tool description metadata ကို ချုံ့ခြင်း                                      |
-| `schemas/tools.ts`          | အခြေခံ tool definition 36 ခု + scope များ                                                       |
-| `tools/advancedTools.ts`    | အဆင့်မြင့် tool implementation များ                                                             |
-| `tools/memoryTools.ts`      | Memory tool 3 ခု (ရှာဖွေခြင်း/ထည့်သွင်းခြင်း/ရှင်းလင်းခြင်း)                                    |
-| `tools/skillTools.ts`       | Skill tool 4 ခု (စာရင်းပြုစုခြင်း/ဖွင့်ခြင်း/လုပ်ဆောင်ခြင်း/လုပ်ဆောင်မှုများ)                   |
-| `tools/compressionTools.ts` | Compression tool 5 ခု                                                                           |
-| `README.md`                 | အတွင်းပိုင်း MCP server README (`docs/frameworks/MCP-SERVER.md` မှ အပြန်အလှန်လင့်ခ်ချိတ်ထားသည်) |
+| `audit.ts`                  | `mcp_tool_audit` table သို့ audit မှတ်တမ်းတင်ခြင်း                                              |
+| `scopeEnforcement.ts`       | tool တစ်ခုချင်းစီအလိုက် scope စစ်ဆေးအတည်ပြုခြင်း                                                |
+| `runtimeHeartbeat.ts`       | `DATA_DIR/runtime/mcp-heartbeat.json` သို့ ကျန်းမာရေးအခြေအနေ heartbeat ပေးပို့ခြင်း             |
+| `descriptionCompressor.ts`  | context ချွေတာရန် tool ဖော်ပြချက် metadata ကို ချုံ့ခြင်း                                       |
+| `schemas/tools.ts`          | အခြေခံ tool သတ်မှတ်ချက် 36 ခု + scope များ                                                      |
+| `tools/advancedTools.ts`    | အဆင့်မြင့် tool အကောင်အထည်ဖော်မှုများ                                                           |
+| `tools/memoryTools.ts`      | memory tool 3 ခု (search/add/clear)                                                             |
+| `tools/skillTools.ts`       | skill tool 4 ခု (list/enable/execute/executions)                                                |
+| `tools/compressionTools.ts` | compression tool 5 ခု                                                                           |
+| `README.md`                 | အတွင်းပိုင်း MCP server README (`docs/frameworks/MCP-SERVER.md` မှ အပြန်အလှန် link ချိတ်ထားသည်) |
 
 ---
 
@@ -375,80 +375,80 @@ open-sse/
 
 ---
 
-## `docs/` — အများပြည်သူသုံး စာရွက်စာတမ်းများ (ပင်မဖိုင် 7 ခု + ဖိုင်တွဲခွဲ 17 ခု)
+## `docs/` — အများသုံး စာရွက်စာတမ်းများ (ပင်မဖိုင် 7 ဖိုင် + ဖိုင်တွဲခွဲ 17 ခု)
 
-### အဓိကအဆင့် လမ်းညွှန်များ
+### ထိပ်တန်းအဆင့် လမ်းညွှန်များ
 
-| စာရွက်စာတမ်း                | ရည်ရွယ်ချက်                                                                                                            |
-| --------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | အဆင့်မြင့် ဗိသုကာဖွဲ့စည်းပုံ၊ စနစ်ခွဲမြေပုံနှင့် ဒက်ရှ်ဘုတ် မျက်နှာပြင်များ                                            |
-| `CODEBASE_DOCUMENTATION.md` | အင်ဂျင်နီယာဆိုင်ရာ ကိုးကားချက်—ဖိုင်တွဲများ၊ မော်ဂျူးများနှင့် သတ်မှတ်ကျင့်ဝတ်များ                                     |
-| `FEATURES.md`               | v3.8 အထူးပြုချက်များ ပါဝင်သော လုပ်ဆောင်ချက်ဇယား                                                                        |
-| `USER_GUIDE.md`             | အသုံးပြုသူလက်စွဲ (ပြင်ဆင်သတ်မှတ်မှု၊ မော်ဒယ်များ၊ combo များ၊ CLI များ၊ အသံ စသည်)                                      |
-| `API_REFERENCE.md`          | အထောက်အထားစိစစ်မှု မော်ဒယ်ပါဝင်သော API endpoint ကိုးကားချက်                                                            |
-| `openapi.yaml`              | OpenAPI 3.0 သတ်မှတ်ချက် (လမ်းကြောင်း 121 ခု)                                                                           |
-| `SETUP_GUIDE.md`            | ထည့်သွင်းနည်းများ (npm, npx, Docker, Electron, Termux, မူရင်းကုဒ်)                                                     |
-| `ENVIRONMENT.md`            | ပတ်ဝန်းကျင်ဆိုင်ရာ variable အားလုံး (~800 ခု မှတ်တမ်းပြုထားပြီး `.env.example` တွင် ~3,050 လိုင်း)                     |
-| `TROUBLESHOOTING.md`        | အဖြစ်များသော အမှားများ + v3.8.0 တွင် သိရှိထားသည့် ပြဿနာများ                                                            |
-| `RELEASE_CHECKLIST.md`      | ထုတ်ဝေမှု လုပ်ငန်းစဉ်အပြည့်အစုံ (ကျွမ်းကျင်မှုများ၊ husky၊ conventional commits၊ ဖြန့်ကျက်မှု)                         |
-| `COVERAGE_PLAN.md`          | လွှမ်းခြုံမှု ရည်မှန်းချက်များနှင့် လက်ရှိအခြေအနေ                                                                      |
-| `FREE_TIERS.md`             | စိစစ်ရွေးချယ်ထားသော အခမဲ့အဆင့် ဝန်ဆောင်မှုပေးသူများ (အခမဲ့ 48+ ခု + OAuth 11 ခု)                                       |
-| `CLI-TOOLS.md`              | ပြင်ပ CLI ပေါင်းစည်းမှုများ + အတွင်းပိုင်း OmniRoute CLI                                                               |
-| `I18N.md`                   | i18n ဗိသုကာဖွဲ့စည်းပုံ၊ ဘာသာစကားတစ်ခု ထည့်သွင်းနည်းနှင့် locale 42 ခု                                                  |
-| `UNINSTALL.md`              | အပြည့်အဝ ရှင်းလင်းဖယ်ရှားရန် အဆင့်များ                                                                                 |
-| `PROVIDER_REFERENCE.md`     | ဝန်ဆောင်မှုပေးသူ 355 ခု၏ **အလိုအလျောက်ထုတ်လုပ်ထားသော** ကတ်တလောက် (ပြန်လည်ထုတ်လုပ်ရန်—`npm run gen:provider-reference`) |
+| စာရွက်စာတမ်း                | ရည်ရွယ်ချက်                                                                                               |
+| --------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `ARCHITECTURE.md`           | အဆင့်မြင့် ဗိသုကာဖွဲ့စည်းပုံ၊ စနစ်ခွဲမြေပုံနှင့် dashboard မျက်နှာပြင်များ                                |
+| `CODEBASE_DOCUMENTATION.md` | အင်ဂျင်နီယာဆိုင်ရာ ကိုးကားချက်- ဖိုင်တွဲများ၊ module များနှင့် သတ်မှတ်ကျင့်သုံးပုံများ                    |
+| `FEATURES.md`               | v3.8 အထူးပြုချက်များပါဝင်သည့် လုပ်ဆောင်ချက်ဇယား                                                           |
+| `USER_GUIDE.md`             | အသုံးပြုသူလက်စွဲ (တပ်ဆင်သတ်မှတ်မှု၊ model များ၊ combo များ၊ CLI များ၊ အသံ စသည်တို့)                       |
+| `API_REFERENCE.md`          | အထောက်အထားစိစစ်မှု model ပါဝင်သည့် API endpoint ကိုးကားချက်                                               |
+| `openapi.yaml`              | OpenAPI 3.0 သတ်မှတ်ချက် (လမ်းကြောင်း 121 ခု)                                                              |
+| `SETUP_GUIDE.md`            | ထည့်သွင်းနည်းလမ်းများ (npm၊ npx၊ Docker၊ Electron၊ Termux၊ source)                                        |
+| `ENVIRONMENT.md`            | env var အားလုံး (မှတ်တမ်းပြုထားသော ~800 ခု၊ `.env.example` စာကြောင်း ~3,050)                              |
+| `TROUBLESHOOTING.md`        | အဖြစ်များသော အမှားများ + v3.8.0 တွင် သိရှိထားသော ပြဿနာများ                                                |
+| `RELEASE_CHECKLIST.md`      | အပြည့်အစုံ release လုပ်ငန်းစဉ် (skill များ၊ husky၊ conventional commit များ၊ deploy)                      |
+| `COVERAGE_PLAN.md`          | လွှမ်းခြုံမှု ရည်မှန်းချက်များနှင့် လက်ရှိအခြေအနေ                                                         |
+| `FREE_TIERS.md`             | စိစစ်ရွေးချယ်ထားသော အခမဲ့အဆင့် provider များ (အခမဲ့ 48+ ခု + OAuth 11 ခု)                                 |
+| `CLI-TOOLS.md`              | ပြင်ပ CLI ပေါင်းစပ်မှုများ + အတွင်းပိုင်း OmniRoute CLI                                                   |
+| `I18N.md`                   | i18n ဗိသုကာဖွဲ့စည်းပုံ၊ ဘာသာစကားတစ်ခု ထည့်သွင်းခြင်းနှင့် locale 67 ခု                                    |
+| `UNINSTALL.md`              | အပြည့်အဝရှင်းလင်းသော ဖြုတ်ချမှုအဆင့်များ                                                                  |
+| `PROVIDER_REFERENCE.md`     | provider 375 ခု၏ **အလိုအလျောက် ထုတ်လုပ်ထားသော** ကတ်တလောက် (ပြန်ထုတ်ရန်- `npm run gen:provider-reference`) |
 
-### စနစ်ခွဲဆိုင်ရာ အသေးစိတ်လေ့လာချက်များ
+### စနစ်ခွဲအလိုက် အသေးစိတ်လေ့လာချက်များ
 
-| စာရွက်စာတမ်း                                  | ရည်ရွယ်ချက်                                                                            |
-| --------------------------------------------- | -------------------------------------------------------------------------------------- |
-| `MCP-SERVER.md`                               | MCP ဆာဗာ—ကိရိယာ 110 ခု၊ ပို့ဆောင်မှုနည်းလမ်း 3 ခု၊ scope 33 ခုနှင့် REST endpoint များ |
-| `A2A-SERVER.md`                               | A2A v0.3—JSON-RPC၊ ကျွမ်းကျင်မှု 6 ခု၊ REST အကူလုပ်ဆောင်ချက်များနှင့် agent card       |
-| `AGENT_PROTOCOLS_GUIDE.md`                    | ပေါင်းစည်းထားသော လမ်းညွှန်—A2A၊ ACP နှင့် Cloud Agents တို့ကို နှိုင်းယှဉ်ခြင်း        |
-| `CLOUD_AGENT.md`                              | Codex Cloud / Devin / Jules တို့၏ လုပ်ငန်းစဉ် စီမံညှိနှိုင်းမှု                        |
-| `SKILLS.md`                                   | ကျွမ်းကျင်မှု မူဘောင် (ထည့်သွင်းပါရှိမှု + marketplace + SkillsSH + sandbox)           |
-| `RADAR.md`                                    | Radar အခမဲ့မော်ဒယ် ကတ်တလောက် ထပ်ဆင့်အလွှာ (`RADAR_ENABLED`၊ မူလအတိုင်း ပိတ်ထားသည်)     |
-| `MEMORY.md`                                   | မှတ်ဉာဏ်စနစ် (SQLite FTS5 + Qdrant)                                                    |
-| `EVALS.md`                                    | အကဲဖြတ်မူဘောင် (စမ်းသပ်အစုများ၊ လုပ်ဆောင်မှုများ၊ အကဲဖြတ်စံများ)                       |
-| `GUARDRAILS.md`                               | PII ဖုံးကွယ်ကိရိယာ၊ prompt injection နှင့် vision bridge                               |
-| `COMPLIANCE.md`                               | စာရင်းစစ်မှတ်တမ်း၊ ထိန်းသိမ်းထားမှုနှင့် noLog ဖြင့် ဖယ်ထုတ်နိုင်မှု                   |
-| `WEBHOOKS.md`                                 | HMAC လက်မှတ်ထိုးထားသော webhook ပေးပို့မှု                                              |
-| `REASONING_REPLAY.md`                         | `reasoning_content` အတွက် ပေါင်းစပ် memory/SQLite cache                                |
-| `AUTHZ_GUIDE.md`                              | ခွင့်ပြုချက်ပေးခြင်း လုပ်ငန်းစဉ် (`classify` → `policies` → `enforce`)                 |
-| `RESILIENCE_GUIDE.md`                         | Circuit breaker + cooldown + မော်ဒယ် လော့ခ်ချမှု                                       |
-| `docs/security/STEALTH_GUIDE.md` (git တွင်သာ) | TLS လက်ဗွေဖော်ထုတ်ခြင်း (JA3/JA4)၊ Claude Code CCH နှင့် MITM လက်မှတ်                  |
-| `AUTO-COMBO.md`                               | Auto Combo အင်ဂျင် (အချက် 16 ချက် အမှတ်ပေးမှု၊ mode pack 6 ခု၊ virtual factory)        |
+| စာရွက်စာတမ်း                                  | ရည်ရွယ်ချက်                                                                        |
+| --------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `MCP-SERVER.md`                               | MCP server- tool 110 ခု၊ transport 3 ခု၊ scope 33 ခုနှင့် REST endpoint များ       |
+| `A2A-SERVER.md`                               | A2A v0.3- JSON-RPC၊ skill 6 ခု၊ REST အကူလုပ်ဆောင်ချက်များနှင့် agent card          |
+| `AGENT_PROTOCOLS_GUIDE.md`                    | စုစည်းထားသော လမ်းညွှန်- A2A၊ ACP နှင့် Cloud Agent များ၏ နှိုင်းယှဉ်ချက်           |
+| `CLOUD_AGENT.md`                              | Codex Cloud / Devin / Jules ပေါင်းစပ်ညှိနှိုင်းဆောင်ရွက်မှု                        |
+| `SKILLS.md`                                   | Skill framework (အသင့်ပါဝင်သော skill များ + marketplace + SkillsSH + sandbox)      |
+| `RADAR.md`                                    | Radar အခမဲ့ model ကတ်တလောက် ထပ်ဆင့်အလွှာ (`RADAR_ENABLED`၊ မူလအားဖြင့် ပိတ်ထားသည်) |
+| `MEMORY.md`                                   | Memory စနစ် (SQLite FTS5 + Qdrant)                                                 |
+| `EVALS.md`                                    | Eval framework (suite များ၊ run များနှင့် rubric များ)                             |
+| `GUARDRAILS.md`                               | PII masker၊ prompt injection နှင့် vision bridge                                   |
+| `COMPLIANCE.md`                               | Audit log၊ ထိန်းသိမ်းကာလနှင့် noLog မှ ဖယ်ထွက်နိုင်မှု                             |
+| `WEBHOOKS.md`                                 | HMAC ဖြင့် လက်မှတ်ထိုးထားသော webhook ပေးပို့မှု                                    |
+| `REASONING_REPLAY.md`                         | `reasoning_content` အတွက် ပေါင်းစပ် memory/SQLite cache                            |
+| `AUTHZ_GUIDE.md`                              | ခွင့်ပြုချက်စီမံဆောင်ရွက်မှု pipeline (`classify` → `policies` → `enforce`)        |
+| `RESILIENCE_GUIDE.md`                         | Circuit breaker + cooldown + model lockout                                         |
+| `docs/security/STEALTH_GUIDE.md` (git တွင်သာ) | TLS fingerprinting (JA3/JA4)၊ Claude Code CCH နှင့် MITM certificate               |
+| `AUTO-COMBO.md`                               | Auto Combo engine (အချက် 16 ချက် အမှတ်ပေးမှု၊ mode pack 6 ခုနှင့် virtual factory) |
 
-### ချုံ့ခြင်း
+### ချုံ့သိပ်မှု
 
-| စာရွက်စာတမ်း                    | ရည်ရွယ်ချက်                                        |
-| ------------------------------- | -------------------------------------------------- |
-| `COMPRESSION_GUIDE.md`          | ချုံ့ခြင်း mode များနှင့် လမ်းပြမြေပုံ၏ အနှစ်ချုပ် |
-| `COMPRESSION_ENGINES.md`        | Caveman + RTK အင်ဂျင်များနှင့် registry contract   |
-| `COMPRESSION_RULES_FORMAT.md`   | Caveman rule pack JSON schema                      |
-| `COMPRESSION_LANGUAGE_PACKS.md` | ဘာသာစကားအလိုက် rule pack စာရင်း                    |
-| `RTK_COMPRESSION.md`            | RTK ကြေညာချက်အခြေပြု pipeline (filter 49 ခု)       |
+| စာရွက်စာတမ်း                    | ရည်ရွယ်ချက်                                                |
+| ------------------------------- | ---------------------------------------------------------- |
+| `COMPRESSION_GUIDE.md`          | ချုံ့သိပ်မှု mode များနှင့် roadmap ကို ခြုံငုံသုံးသပ်ချက် |
+| `COMPRESSION_ENGINES.md`        | Caveman + RTK engine များနှင့် registry contract           |
+| `COMPRESSION_RULES_FORMAT.md`   | Caveman rule pack JSON schema                              |
+| `COMPRESSION_LANGUAGE_PACKS.md` | ဘာသာစကားအလိုက် rule pack စာရင်း                            |
+| `RTK_COMPRESSION.md`            | RTK ကြေညာသတ်မှတ်ထားသော pipeline (filter 49 ခု)             |
 
-### ဖြန့်ကျက်ခြင်း
+### ဖြန့်ချိတပ်ဆင်ခြင်း
 
-| စာရွက်စာတမ်း                 | ရည်ရွယ်ချက်                                                                      |
-| ---------------------------- | -------------------------------------------------------------------------------- |
-| `DOCKER_GUIDE.md`            | Docker တည်ဆောက်မှု၊ profile များ (base/cli/host/cliproxyapi) နှင့် Redis sidecar |
-| `VM_DEPLOYMENT_GUIDE.md`     | ယေဘုယျ VM/VPS ဖြန့်ကျက်မှု (Ubuntu/Debian + nginx + systemd)                     |
-| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io ဖြန့်ကျက်မှု (လက်ရှိတွင် တရုတ်ဘာသာဖြင့်သာ ရရှိနိုင်သည်)                   |
-| `TERMUX_GUIDE.md`            | Termux မှတစ်ဆင့် မျက်နှာပြင်မဲ့ Android အသုံးပြုမှု                              |
-| `PWA_GUIDE.md`               | Progressive Web App ထည့်သွင်းမှု + service worker                                |
-| `ELECTRON_GUIDE.md`          | Desktop app တည်ဆောက်ခြင်း + လက်မှတ်ထိုးခြင်း + ဖြန့်ဝေခြင်း                      |
-| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                                           |
-| `PROXY_GUIDE.md`             | အဆင့် 4 ဆင့်ပါ outbound proxy + 1proxy marketplace                               |
+| စာရွက်စာတမ်း                 | ရည်ရွယ်ချက်                                                               |
+| ---------------------------- | ------------------------------------------------------------------------- |
+| `DOCKER_GUIDE.md`            | Docker တည်ဆောက်ခြင်း၊ profiles (base/cli/host/cliproxyapi)၊ Redis sidecar |
+| `VM_DEPLOYMENT_GUIDE.md`     | ယေဘုယျ VM/VPS ဖြန့်ကျက်ခြင်း (Ubuntu/Debian + nginx + systemd)            |
+| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io ဖြန့်ကျက်ခြင်း (လက်ရှိတွင် တရုတ်ဘာသာဖြင့်သာ ရရှိနိုင်သည်)          |
+| `TERMUX_GUIDE.md`            | Termux မှတစ်ဆင့် မျက်နှာပြင်မလိုသော Android အသုံးပြုမှု                   |
+| `PWA_GUIDE.md`               | Progressive Web App ထည့်သွင်းခြင်း + service worker                       |
+| `ELECTRON_GUIDE.md`          | Desktop app တည်ဆောက်ခြင်း + လက်မှတ်ထိုးခြင်း + ဖြန့်ဝေခြင်း               |
+| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                                    |
+| `PROXY_GUIDE.md`             | အဆင့် ၄ ဆင့်ရှိ outbound proxy + 1proxy marketplace                       |
 
-### ဖိုင်တွဲခွဲများ
+### လမ်းကြောင်းခွဲများ
 
-| ဖိုင်တွဲခွဲ           | ရည်ရွယ်ချက်                                                                                                                                                                                                                                          |
-| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | ဒေသသုံးဘာသာစကားအလိုက် ဘာသာပြန်ထားသော စာရွက်စာတမ်းများ (ဒေသသုံးဘာသာစကား 41 မျိုး)                                                                                                                                                                     |
-| `docs/screenshots/`   | လမ်းညွှန်များအတွက် ပုံရိပ်ဖိုင်များ                                                                                                                                                                                                                  |
-| `_tasks/superpowers/` | superpowers (`writing-plans`/`brainstorming`) မှ အစီအစဉ်များ/သတ်မှတ်ချက်များ + သုတေသနများ — သီးခြားခွဲထားပြီး သီးခြားဗားရှင်းထိန်းချုပ်ထားသော repo ဖြစ်ကာ ပင်မ tree က gitignore လုပ်ထားသည်။ CLAUDE.md → "Planning & Research Artifacts" ကို ကြည့်ပါ။ |
+| လမ်းကြောင်းခွဲ        | ရည်ရွယ်ချက်                                                                                                                                                                                                                                      |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `docs/i18n/`          | ဒေသန္တရဘာသာပြန်ထားသော စာရွက်စာတမ်းများ (ဒေသန္တရဘာသာ 41 မျိုး)                                                                                                                                                                                    |
+| `docs/screenshots/`   | လမ်းညွှန်များအတွက် ပုံရိပ်ဆိုင်ရာ အရင်းအမြစ်များ                                                                                                                                                                                                 |
+| `_tasks/superpowers/` | superpowers (`writing-plans`/`brainstorming`) မှ အစီအစဉ်များ/သတ်မှတ်ချက်များ + သုတေသန — သီးခြားခွဲထားပြီး version သီးခြားစီ စီမံထားသော repo ဖြစ်ကာ ပင်မ tree တွင် gitignore လုပ်ထားသည်။ CLAUDE.md → "Planning & Research Artifacts" ကို ကြည့်ပါ။ |
 
 ---
 

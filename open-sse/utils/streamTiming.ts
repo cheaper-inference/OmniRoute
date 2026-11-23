@@ -52,6 +52,8 @@ export interface StreamTiming {
    * Inspect a forwarded SSE chunk and mark the first one that carries output. Only the first
    * MAX_OUTPUT_PROBES chunks are parsed, so an unrecognized client format cannot turn this into
    * per-chunk parsing for the whole stream; TTFT then falls back to latency, as before.
+   * With `probeLateOutput` (#16927, STREAM_LATE_OUTPUT_PROBE_ENABLED) one chunk out of
+   * OUTPUT_PROBE_STRIDE keeps being parsed past the window, see createStreamTiming().
    */
   observeOutput(bytes: Uint8Array): void;
   markInterrupted(): void;
@@ -83,6 +85,8 @@ export interface StreamTiming {
 const MAX_INTER_CHUNK_GAPS = 32;
 /** Max number of forwarded chunks parsed while looking for the first output. */
 const MAX_OUTPUT_PROBES = 64;
+/** Beyond the full window, probe one forwarded chunk out of this many. */
+const OUTPUT_PROBE_STRIDE = 16;
 
 /**
  * Request start → first chunk with text, reasoning or a tool call: `originOffsetMs` is the time
@@ -111,17 +115,39 @@ export function registerStreamTiming<T extends object>(stream: T, timing: Stream
 /**
  * True once the stream forwarded a chunk carrying text, reasoning or a tool call to the
  * client. A failure after that point cannot be retried on another target. Only the first
- * MAX_OUTPUT_PROBES forwarded chunks are probed, so a stream whose output starts later reads
- * false here — the conservative answer (callers keep their pre-output behavior).
+ * MAX_OUTPUT_PROBES forwarded chunks are probed by default, so a stream whose output starts
+ * later reads false here — the conservative answer (callers keep their pre-output behavior).
+ * With `probeLateOutput` one chunk out of OUTPUT_PROBE_STRIDE is still probed past the window;
+ * output that stops before the next probed chunk keeps reading false.
  */
 export function streamEmittedOutput(stream: object | null | undefined): boolean {
   if (!stream) return false;
   return (timingByStream.get(stream)?.firstOutputAt ?? null) !== null;
 }
 
-export function createStreamTiming(): StreamTiming {
+export interface StreamTimingOptions {
+  /**
+   * #16927 opt-in (STREAM_LATE_OUTPUT_PROBE_ENABLED, resolved by the caller): past the first
+   * MAX_OUTPUT_PROBES chunks keep parsing one forwarded chunk out of OUTPUT_PROBE_STRIDE.
+   */
+  probeLateOutput?: boolean;
+}
+
+type SkippedChunk = { bytes: Uint8Array; at: number };
+
+export function createStreamTiming(options: StreamTimingOptions = {}): StreamTiming {
   const outputDecoder = new TextDecoder();
-  let outputProbes = 0;
+  const probeLateOutput = options.probeLateOutput === true;
+  let observedChunks = 0;
+  // Chunks forwarded since the last negative strided probe (at most OUTPUT_PROBE_STRIDE - 1).
+  // When a strided probe finds output, the earliest of these that also carries output is the
+  // true first output, so firstOutputAt is back-filled to its forward time instead of being
+  // recorded up to OUTPUT_PROBE_STRIDE - 1 chunks late. Cleared on every negative probe, so
+  // output that started in an EARLIER gap and paused across a probe is still timed at the
+  // gap where it was found (an upper bound, never earlier than the real first output).
+  const skippedSinceProbe: SkippedChunk[] = [];
+  const carriesOutput = (bytes: Uint8Array): boolean =>
+    sseChunkCarriesOutput(outputDecoder.decode(bytes));
   const timing: StreamTiming = {
     startedAt: performance.now(),
     firstByteAt: null,
@@ -147,9 +173,27 @@ export function createStreamTiming(): StreamTiming {
       if (this.firstOutputAt === null) this.firstOutputAt = performance.now();
     },
     observeOutput(bytes) {
-      if (this.firstOutputAt !== null || outputProbes >= MAX_OUTPUT_PROBES) return;
-      outputProbes += 1;
-      if (sseChunkCarriesOutput(outputDecoder.decode(bytes))) this.markOutput();
+      if (this.firstOutputAt !== null) return;
+      const observed = observedChunks;
+      if (observed < MAX_OUTPUT_PROBES) {
+        observedChunks += 1;
+        if (carriesOutput(bytes)) this.markOutput();
+        return;
+      }
+      if (!probeLateOutput) return;
+      observedChunks += 1;
+      const at = performance.now();
+      if (observed % OUTPUT_PROBE_STRIDE !== 0) {
+        skippedSinceProbe.push({ bytes, at });
+        return;
+      }
+      if (!carriesOutput(bytes)) {
+        skippedSinceProbe.length = 0;
+        return;
+      }
+      const earliest = skippedSinceProbe.find((chunk) => carriesOutput(chunk.bytes));
+      skippedSinceProbe.length = 0;
+      this.firstOutputAt = earliest ? earliest.at : at;
     },
     markInterrupted() {
       this.interrupted = true;

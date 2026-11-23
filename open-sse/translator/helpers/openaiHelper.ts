@@ -26,6 +26,27 @@ export const VALID_OPENAI_MESSAGE_TYPES = [
   "tool_calls",
   "tool_result",
 ];
+
+/**
+ * #16384 — the standard field per content-part type, beyond `type` itself. A
+ * block is rebuilt from this allowlist so unknown client metadata can never
+ * reach the wire on a known-typed part. `cache_control` is handled separately
+ * by the #2069 preservation contract; carriers within each list include the
+ * alternative payload shapes `filterToOpenAIFormat`'s own file/document
+ * conversion branches read.
+ */
+export const OPENAI_CONTENT_PART_FIELDS: Record<string, readonly string[]> = {
+  text: ["text"],
+  image_url: ["image_url"],
+  image: ["image", "image_url"],
+  file_url: ["file_url"],
+  file: ["file", "file_url", "name", "content", "text"],
+  document: ["document", "file", "file_url", "name", "content", "text"],
+  input_audio: ["input_audio"],
+  audio_url: ["audio_url"],
+  video_url: ["video_url"],
+  fallback: [],
+};
 const CLAUDE_TOOL_CHOICE_REQUIRED = "an" + "y";
 
 // Filter messages to OpenAI standard format
@@ -38,6 +59,12 @@ export interface FilterToOpenAIFormatOptions {
   preserveVideoUrl?: boolean;
   /** Keep `reasoning_content` on tool-call assistant turns (reasoning-replay providers). */
   preserveReasoningContent?: boolean;
+  /** Keep the `developer` role (targets that accept it); otherwise it is lowered to `system`. */
+  preserveDeveloperRole?: boolean;
+}
+
+function hasToolCalls(msg: { tool_calls?: unknown }): boolean {
+  return Array.isArray(msg.tool_calls) && msg.tool_calls.length > 0;
 }
 
 export function filterToOpenAIFormat(body, opts: FilterToOpenAIFormatOptions = {}) {
@@ -55,22 +82,32 @@ export function filterToOpenAIFormat(body, opts: FilterToOpenAIFormatOptions = {
   // REQUIRE the client's reasoning_content to be passed back, so keep it for them
   // (the caller sets this when the routed model needs reasoning replay).
   const preserveReasoningContent = opts?.preserveReasoningContent === true;
+  const preserveDeveloperRole = opts?.preserveDeveloperRole === true;
   if (!body.messages || !Array.isArray(body.messages)) return body;
 
   body.messages = body.messages.map((msg) => {
     // Normalize OpenAI Responses-style `developer` role to `system` — many
     // OpenAI-compatible providers reject `developer` (ported from
-    // decolua/9router#1011).
-    if (msg.role === "developer") msg = { ...msg, role: "system" };
+    // decolua/9router#1011). Skipped when the role normalizer decided the
+    // target accepts `developer` (provider allowlist / per-model compat toggle).
+    if (msg.role === "developer" && !preserveDeveloperRole) msg = { ...msg, role: "system" };
 
     // Keep tool messages as-is (OpenAI format)
     if (msg.role === "tool") return msg;
+
+    // An empty `tool_calls: []` carries no tool calls: drop the key (several providers
+    // 400 on an empty array) and let the turn go through the normal content
+    // normalization below instead of being passed through untouched.
+    if (msg.role === "assistant" && Array.isArray(msg.tool_calls) && !hasToolCalls(msg)) {
+      const { tool_calls, ...withoutToolCalls } = msg;
+      msg = withoutToolCalls;
+    }
 
     // Keep assistant messages with tool_calls, but strip reasoning_content —
     // reasoning blobs inflate context on every subsequent agentic turn (O(n^2)).
     // Exception: reasoning-replay providers must keep client-provided
     // reasoning_content (they 400 without it), so preserve it when requested.
-    if (msg.role === "assistant" && msg.tool_calls) {
+    if (msg.role === "assistant" && hasToolCalls(msg)) {
       if (!preserveReasoningContent && msg.reasoning_content !== undefined) {
         const { reasoning_content, ...cleanMsg } = msg;
         return cleanMsg;
@@ -100,13 +137,27 @@ export function filterToOpenAIFormat(body, opts: FilterToOpenAIFormatOptions = {
           VALID_OPENAI_CONTENT_TYPES.includes(block.type) ||
           (preserveVideoUrl && block.type === "video_url")
         ) {
-          // Strip `signature` always; strip `cache_control` unless the provider
-          // honors OpenAI-format cache breakpoints and preservation was requested (#2069).
-          const { signature, cache_control, ...rest } = block;
-          const cleanBlock =
-            preserveCacheControl && cache_control !== undefined
-              ? { ...rest, cache_control }
-              : rest;
+          // #16384: rebuild each known-type block from a per-type field
+          // allowlist instead of spreading `...rest`. The allowlist below
+          // covers the block TYPES; without the field rebuild, client
+          // metadata riding on a known-type block (e.g. a compaction
+          // `message_id` on a text part) reached strict validators (Cerebras
+          // `400 property … is unsupported`, Mistral `422 extra_forbidden`,
+          // Groq) and burned the whole request — one level deeper than
+          // 9router#1157's top-level fields. The per-type carriers are the
+          // payload shapes the conversion branches below read. `signature`
+          // stays stripped; `cache_control` survives only the #2069
+          // preservation contract.
+          const allowedFields =
+            OPENAI_CONTENT_PART_FIELDS[block.type] ?? OPENAI_CONTENT_PART_FIELDS.fallback;
+          const cache_control = block.cache_control;
+          const cleanBlock: Record<string, unknown> = { type: block.type };
+          if (preserveCacheControl && cache_control !== undefined) {
+            cleanBlock.cache_control = cache_control;
+          }
+          for (const field of allowedFields) {
+            if (block[field] !== undefined) cleanBlock[field] = block[field];
+          }
           if (
             cleanBlock.type === "text" &&
             typeof cleanBlock.text === "string" &&
@@ -114,18 +165,17 @@ export function filterToOpenAIFormat(body, opts: FilterToOpenAIFormatOptions = {
           ) {
             continue;
           }
-          const fileData = cleanBlock.file_url ?? cleanBlock.file ?? cleanBlock.document;
+          const fileData = (cleanBlock.file_url ?? cleanBlock.file ?? cleanBlock.document) as
+            Record<string, unknown> | undefined;
           if (
             (cleanBlock.type === "file" || cleanBlock.type === "document") &&
             !fileData?.url &&
             !fileData?.data
           ) {
+            const file = cleanBlock.file as Record<string, unknown> | undefined;
             const fileContent =
-              cleanBlock.file?.content ??
-              cleanBlock.file?.text ??
-              cleanBlock.content ??
-              cleanBlock.text;
-            const fileName = cleanBlock.file?.name ?? cleanBlock.name ?? "attachment";
+              file?.content ?? file?.text ?? cleanBlock.content ?? cleanBlock.text;
+            const fileName = file?.name ?? cleanBlock.name ?? "attachment";
             if (typeof fileContent === "string" && fileContent.length > 0) {
               filteredContent.push({ type: "text", text: `[${fileName}]\n${fileContent}` });
               continue;
@@ -176,7 +226,7 @@ export function filterToOpenAIFormat(body, opts: FilterToOpenAIFormatOptions = {
     // Always keep tool messages
     if (msg.role === "tool") return true;
     // Always keep assistant messages with tool_calls
-    if (msg.role === "assistant" && msg.tool_calls) return true;
+    if (msg.role === "assistant" && hasToolCalls(msg)) return true;
     // Moonshot partial assistant messages are output prefixes, and an empty
     // prefix is valid when `name` supplies the constrained value.
     if (msg.role === "assistant" && msg.partial === true) return true;

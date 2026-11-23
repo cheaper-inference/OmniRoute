@@ -9,6 +9,7 @@
  */
 
 import { extractApiKey } from "@/sse/services/auth";
+import { resolveClientApiKey } from "@/sse/services/clientApiKeyResolver";
 import { getApiKeyMetadata, isModelAllowedForKey, getApiKeyById } from "@/lib/db/apiKeys";
 import { getComboByName } from "@/lib/db/combos";
 import { isDashboardSessionAuthenticated } from "./apiAuth";
@@ -32,6 +33,9 @@ import { resolveQuotaKeyScope } from "@/lib/quota/quotaKey";
 import { isQuotaModelName, parseQuotaModelName } from "@/lib/quota/quotaModelNaming";
 import { buildApiKeyUsageLimitPolicyRejection } from "@/lib/usage/apiKeyUsageLimits";
 import { ALL_COMBOS_ACCESS_RULE } from "@/shared/constants/comboAccess";
+import { hasApiKeyModelRestrictions } from "./resolvedModelAccess";
+import { resolveSelfLoopBearer } from "@/shared/middleware/chatAdmissionIdentity";
+import { timingSafeCompare } from "./timingSafeCompare";
 
 // Default to no per-key request cap. API keys can still opt into explicit
 // limits via Settings/API Keys, while provider/account quota controls remain
@@ -72,6 +76,7 @@ interface AccessSchedule {
 
 /** Metadata stored for an API key in the local database. */
 export interface ApiKeyMetadata {
+  codexServiceMode?: import("../constants/codexServiceMode").ApiKeyCodexServiceMode;
   id: string;
   name?: string;
   modelAccessMode?: "all" | "restricted";
@@ -103,6 +108,7 @@ export interface ApiKeyMetadata {
   compressionEnabled?: boolean;
   allowAutoCombos?: boolean;
   catalogScope?: "all" | "combos" | "models";
+  forcedModel?: string | null;
 }
 
 /**
@@ -177,7 +183,7 @@ function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-function normalizeComboAccessName(value: unknown): string | null {
+export function normalizeComboAccessName(value: unknown): string | null {
   if (typeof value !== "string") return null;
   const trimmed = value.trim();
   if (!trimmed) return null;
@@ -377,11 +383,7 @@ async function validateStandardRoutingTarget(
     }
   }
 
-  const hasModelRestrictions =
-    apiKeyInfo.modelAccessMode === "restricted" ||
-    Boolean(apiKeyInfo.allowedModels?.length) ||
-    Boolean(apiKeyInfo.blockedModels?.length) ||
-    apiKeyInfo.disableNonPublicModels === true;
+  const hasModelRestrictions = hasApiKeyModelRestrictions(apiKeyInfo);
   if (!requestedComboName && hasModelRestrictions && modelStr.startsWith("auto/")) {
     requestedComboName = modelStr;
   }
@@ -641,11 +643,7 @@ async function validateModelAccess(context: PolicyContext): Promise<Response | n
   if (comboAccess.rejection) return comboAccess.rejection;
   let requestedComboName = comboAccess.comboName;
 
-  const hasModelRestrictions =
-    apiKeyInfo.modelAccessMode === "restricted" ||
-    Boolean(apiKeyInfo.allowedModels?.length) ||
-    Boolean(apiKeyInfo.blockedModels?.length) ||
-    apiKeyInfo.disableNonPublicModels === true;
+  const hasModelRestrictions = hasApiKeyModelRestrictions(apiKeyInfo);
   if (!requestedComboName && hasModelRestrictions) {
     if (isVirtualComboModel(modelStr)) {
       requestedComboName = modelStr;
@@ -824,19 +822,130 @@ function extractUngatedClientApiKey(request: Request): string | null {
   return null;
 }
 
+/**
+ * The API key the policy layer evaluates for a request. The credential that
+ * actually validated wins (a stale Bearer sent next to a valid x-api-key must
+ * not hide that key's policy); then a real bearer key; then a bare
+ * x-api-key/x-goog-api-key that auth accepted but extractApiKey() gates out;
+ * otherwise an authenticated dashboard playground may test a specific key's
+ * policy by id (resolved server-side, secret never sent).
+ */
+export async function resolvePolicyApiKey(request: Request): Promise<string | null> {
+  const resolved = await resolveClientApiKey(request);
+  return (
+    (resolved.valid ? resolved.apiKey : null) ||
+    extractApiKey(request) ||
+    extractUngatedClientApiKey(request) ||
+    (await resolvePlaygroundTestKey(request))
+  );
+}
+
+/**
+ * Authorization-only view of the key policy, for side paths that make an
+ * upstream call on the key's behalf without dispatching a chat request (e.g.
+ * `/v1/messages/count_tokens`). Checks key status, endpoint category and the
+ * model/combo/quota authorization of `modelStr`; never consumes budget,
+ * token-limit or rate-limit state. Returns the rejection, or null when allowed.
+ */
+export async function checkApiKeyAuthorization(
+  request: Request,
+  apiKey: string,
+  apiKeyInfo: ApiKeyMetadata,
+  modelStr: string
+): Promise<Response | null> {
+  const context = { request, apiKey, apiKeyInfo, modelStr };
+  return (
+    validateKeyStatus(context) ??
+    validateEndpointAccess(context) ??
+    (await validateApiKeyRoutingTarget(request, apiKey, apiKeyInfo, modelStr))
+  );
+}
+
+/**
+ * Header an internal self-loop sub-request (the Vision Bridge describe call)
+ * uses to scope itself to the caller's API key.
+ */
+const SELF_LOOP_KEY_ID_HEADER = "x-omniroute-self-loop-key-id";
+
+type SelfLoopScope = { key: string | null; rejection: Response | null };
+const NO_SELF_LOOP_SCOPE: SelfLoopScope = { key: null, rejection: null };
+
+/**
+ * The self-loop bearer maps to an unrestricted synthetic key. When an internal
+ * describe call acts for a restricted caller it names that caller's key id, and
+ * the request is evaluated under THAT key's policy. Honored only together with
+ * the self-loop bearer (which already has full access), so the header can only
+ * narrow access; a client cannot use it to switch to another key. An id that
+ * does not resolve fails closed instead of falling back to the unrestricted key.
+ */
+async function resolveSelfLoopScopedKey(
+  request: Request,
+  presentedKey: string | null
+): Promise<SelfLoopScope> {
+  const keyId = request.headers.get(SELF_LOOP_KEY_ID_HEADER)?.trim();
+  if (!keyId || !presentedKey) return NO_SELF_LOOP_SCOPE;
+  if (!timingSafeCompare(presentedKey, resolveSelfLoopBearer())) return NO_SELF_LOOP_SCOPE;
+  try {
+    const row = (await getApiKeyById(keyId)) as { key?: unknown } | null;
+    if (typeof row?.key === "string" && row.key.length > 0) {
+      return { key: row.key, rejection: null };
+    }
+  } catch (error) {
+    log.error("API_POLICY", "Self-loop key scope lookup failed. Request blocked.", { error });
+    return {
+      key: null,
+      rejection: errorResponse(HTTP_STATUS.SERVICE_UNAVAILABLE, "API key policy unavailable"),
+    };
+  }
+  return {
+    key: null,
+    rejection: errorResponse(HTTP_STATUS.FORBIDDEN, "Scoped API key is not available"),
+  };
+}
+
+/**
+ * The key the policy evaluates: the presented key, or — for a self-loop scoped
+ * to a caller's key — that caller's key. On a scope rejection the presented key
+ * is kept so the result still names what the client sent.
+ */
+export async function resolveEnforcedPolicyKey(
+  request: Request
+): Promise<{ apiKey: string | null; selfLoopScope: SelfLoopScope }> {
+  const presentedKey = await resolvePolicyApiKey(request);
+  const selfLoopScope = await resolveSelfLoopScopedKey(request, presentedKey);
+  if (selfLoopScope.rejection || !selfLoopScope.key) return { apiKey: presentedKey, selfLoopScope };
+  return { apiKey: selfLoopScope.key, selfLoopScope };
+}
+
+/**
+ * A self-loop scoped to a key that no longer resolves must not fall back to the
+ * unrestricted self-loop identity.
+ */
+function unresolvedScopedKeyRejection(selfLoopScope: SelfLoopScope): Response | null {
+  if (!selfLoopScope.key) return null;
+  return errorResponse(HTTP_STATUS.FORBIDDEN, "Scoped API key is not available");
+}
+
+/**
+ * Internal sub-request of a parent request that already passed the full policy
+ * (schedule, budget, limits): re-check authorization only, so the key's
+ * allowances are not charged twice.
+ */
+async function validateSelfLoopScopedAccess(
+  context: Parameters<typeof validateQuotaAccess>[0]
+): Promise<Response | null> {
+  return (await validateQuotaAccess(context)) ?? (await validateModelAccess(context));
+}
+
 export async function enforceApiKeyPolicy(
   request: Request,
   modelStr: string | null,
   options?: EnforceApiKeyPolicyOptions
 ): Promise<ApiKeyPolicyResult> {
-  // A real bearer key wins; then a bare x-api-key/x-goog-api-key that auth
-  // accepted but extractApiKey() gates out; otherwise an authenticated dashboard
-  // playground may test a specific key's policy by id (resolved server-side,
-  // secret never sent).
-  const apiKey =
-    extractApiKey(request) ||
-    extractUngatedClientApiKey(request) ||
-    (await resolvePlaygroundTestKey(request));
+  const { apiKey, selfLoopScope } = await resolveEnforcedPolicyKey(request);
+  if (selfLoopScope.rejection) {
+    return { apiKey, apiKeyInfo: null, rejection: selfLoopScope.rejection };
+  }
 
   // No API key = local/session mode, skip policy checks
   if (!apiKey) {
@@ -859,12 +968,15 @@ export async function enforceApiKeyPolicy(
 
   // Key not found in DB — skip policy (auth layer handles validation)
   if (!apiKeyInfo) {
-    return { apiKey, apiKeyInfo: null, rejection: null };
+    return { apiKey, apiKeyInfo: null, rejection: unresolvedScopedKeyRejection(selfLoopScope) };
   }
 
   const context = { request, apiKey, apiKeyInfo, modelStr };
   const statusRejection = validateKeyStatus(context);
   if (statusRejection) return { apiKey, apiKeyInfo, rejection: statusRejection };
+  if (selfLoopScope.key) {
+    return { apiKey, apiKeyInfo, rejection: await validateSelfLoopScopedAccess(context) };
+  }
   const scheduleRejection = await validateKeyScheduleAndUsage(context);
   if (scheduleRejection) return { apiKey, apiKeyInfo, rejection: scheduleRejection };
   const endpointRejection = validateEndpointAccess(context);

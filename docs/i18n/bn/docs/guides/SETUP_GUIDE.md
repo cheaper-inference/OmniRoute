@@ -140,11 +140,11 @@ omniroute providers validate
 
 ### 1) প্রোভাইডার সংযুক্ত করুন এবং API কী তৈরি করুন
 
-1. Dashboard → `Providers` খুলুন এবং অন্তত একটি প্রোভাইডার সংযুক্ত করুন (OAuth বা API কী)।
+1. Dashboard → `Providers` খুলুন এবং অন্তত একটি প্রোভাইডার সংযুক্ত করুন (OAuth অথবা API কী)।
 2. Dashboard → `Endpoints` খুলুন এবং একটি API কী তৈরি করুন।
 3. (ঐচ্ছিক) Dashboard → `Combos` খুলুন এবং আপনার ফলব্যাক চেইন সেট করুন।
 
-### 2) আপনার কোডিং টুলকে নির্দেশ করুন
+### 2) আপনার কোডিং টুলকে সংযুক্ত করুন
 
 ```txt
 বেস URL: http://localhost:20128/v1
@@ -152,7 +152,7 @@ API কী:  [Endpoint পৃষ্ঠা থেকে কপি করুন]
 মডেল:    if/qwen3.8-max-preview (অথবা যেকোনো প্রোভাইডার/মডেল প্রিফিক্স)
 ```
 
-আপনার এডিটর যদি `Authorization: Bearer ...` পাঠাতে না পারে, তাহলে এর পরিবর্তে টোকেনযুক্ত সামঞ্জস্যপূর্ণ বেস ব্যবহার করুন:
+আপনার এডিটর `Authorization: Bearer ...` পাঠাতে না পারলে, এর পরিবর্তে টোকেনযুক্ত সামঞ্জস্যপূর্ণ বেস ব্যবহার করুন:
 
 ```txt
 বেস URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/
@@ -161,38 +161,39 @@ API কী:  [Endpoint পৃষ্ঠা থেকে কপি করুন]
 Ollama ট্যাগ URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
 ```
 
-Claude Code, Codex CLI, Cursor, Cline, OpenClaw, OpenCode এবং OpenAI-সামঞ্জস্যপূর্ণ SDK-গুলোর সঙ্গে কাজ করে।
+Claude Code, Codex CLI, Cursor, Cline, OpenClaw, OpenCode এবং OpenAI-সামঞ্জস্যপূর্ণ SDK-এর সঙ্গে কাজ করে।
 
 #### `setup-*` দিয়ে স্বয়ংক্রিয়ভাবে কনফিগার করুন
 
-বেস URL ও কী হাতে পেস্ট করার পরিবর্তে, লাইভ মডেল ক্যাটালগ থেকে OmniRoute-কে প্রতিটি টুলের
-নিজস্ব কনফিগ লিখতে দিন। প্রতি টুলে একটি কমান্ড:
+বেস URL এবং কী হাতে পেস্ট করার পরিবর্তে, লাইভ মডেল ক্যাটালগ থেকে প্রতিটি টুলের
+নিজস্ব কনফিগ OmniRoute-কে লিখতে দিন। প্রতি টুলের জন্য একটি কমান্ড:
 
 ```bash
-omniroute setup-codex        # ~/.codex/<name>.config.toml প্রোফাইলসমূহ
+omniroute setup-codex        # ~/.codex/<name>.config.toml প্রোফাইল
 omniroute setup-claude       # ~/.claude/profiles/<name>/settings.json
 omniroute setup-opencode     # ~/.config/opencode/opencode.json (openai-সামঞ্জস্যপূর্ণ)
 omniroute setup-cline        # Cline CLI + VS Code এক্সটেনশন সেটিংস
 omniroute setup-kilo         # Kilo Code
 omniroute setup-continue     # ~/.continue/config.yaml (Continue / cn)
-omniroute setup-cursor       # Cursor-এর ইন-অ্যাপ ধাপগুলো প্রিন্ট করে
+omniroute setup-cursor       # Cursor-এর অ্যাপের ভেতরের ধাপগুলো প্রিন্ট করে
 omniroute setup-roo          # Roo Code ইমপোর্ট + autoImport পয়েন্টার
 omniroute setup-crush        # ~/.config/crush/crush.json
+omniroute setup-zed          # ~/.config/zed/settings.json (openai_compatible)
 omniroute setup-goose        # ~/.config/goose/config.yaml
 omniroute setup-aider        # ~/.aider.conf.yml
 omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 ```
 
-একটি **রিমোট** OmniRoute-এর বিপরীতে স্থানীয় টুল কনফিগার করতে প্রতিটি কমান্ড `--remote <url> --api-key <key>`
-গ্রহণ করে, পাশাপাশি প্রিভিউয়ের জন্য `--dry-run` গ্রহণ করে। সঠিক env ইনজেক্ট করে এবং কোনো কনফিগ একেবারেই
-না লিখে একটি CLI চালু করতে জেনেরিক লঞ্চার `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini)
-ব্যবহার করুন; পুরোনো প্রতি-টুল লঞ্চার `omniroute launch` (Claude Code) এবং
-`omniroute launch-codex` (Codex) এখনও উপলভ্য।
+একটি **রিমোট** OmniRoute-এর বিপরীতে কোনো লোকাল টুল কনফিগার করতে প্রতিটি কমান্ডে `--remote <url> --api-key <key>` ব্যবহার করা যায়, আর প্রিভিউয়ের জন্য রয়েছে `--dry-run`। সঠিক
+env ইনজেক্ট করে এবং কোনো কনফিগ না লিখেই একটি CLI চালু করতে জেনেরিক লঞ্চার
+`omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini) ব্যবহার করুন;
+আগের প্রতি-টুল লঞ্চার `omniroute launch` (Claude Code) এবং
+`omniroute launch-codex` (Codex) এখনো উপলভ্য।
 
-সম্পূর্ণ টেবিলের জন্য (প্রতিটি কমান্ড কী লেখে, প্রতিটি ফ্ল্যাগ, স্থানীয় বনাম রিমোট, বেস-URL
+সম্পূর্ণ টেবিলের জন্য (প্রতিটি কমান্ড কী লেখে, সব ফ্ল্যাগ, লোকাল বনাম রিমোট, বেস-URL
 `/v1` কনভেনশন), **[CLI ইন্টিগ্রেশনসমূহ](./CLI-INTEGRATIONS.md)** দেখুন।
 
-প্রতি-টুলের বিস্তারিত কনফিগারেশনের জন্য (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot এবং আরও), নির্দিষ্ট **[CLI টুলস গাইড](../reference/CLI-TOOLS.md)** দেখুন।
+প্রতিটি টুলের বিস্তারিত কনফিগারেশনের জন্য (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot এবং আরও অনেক), নিবেদিত **[CLI টুলস গাইড](../reference/CLI-TOOLS.md)** দেখুন।
 
 ---
 
@@ -337,7 +338,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# প্রতিটি রিলিজের জন্য নিম্নলিখিত কমান্ড দিয়ে চেকসাম পুনরায় তৈরি করুন:
+# প্রতিটি রিলিজের জন্য চেকসাম পুনরায় তৈরি করুন এভাবে:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

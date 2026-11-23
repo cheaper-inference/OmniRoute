@@ -123,7 +123,9 @@
       "maxCostOpt": "တစ်ရက်လျှင် အများဆုံးကုန်ကျစရိတ် (USD)",
       "allowedModelsOpt": "အသုံးပြုခွင့်ပြုထားသော မော်ဒယ်များ၏ ကော်မာခြားစာရင်း",
       "nothingToSet": "မူဝါဒအကွက်များ ထည့်သွင်းပေးထားခြင်း မရှိပါ။ --rate-limit၊ --max-cost သို့မဟုတ် --allowed-models ကို အသုံးပြုပါ။",
-      "updated": "မူဝါဒကို အပ်ဒိတ်လုပ်ပြီးပါပြီ။"
+      "updated": "မူဝါဒကို အပ်ဒိတ်လုပ်ပြီးပါပြီ။",
+      "modelAccessModeOpt": "မော်ဒယ် အသုံးပြုခွင့်မုဒ် (all | restricted)",
+      "unrestrictedOpt": "မော်ဒယ်အားလုံးကို ခွင့်ပြုပါ (--model-access-mode all)"
     },
     "expiration": {
       "title": "ကီးသက်တမ်းကုန်ဆုံးမှု",
@@ -254,6 +256,7 @@
     "log": "server log များကို inline ပြသရန်",
     "no_recovery": "ပျက်သွားပါက အလိုအလျောက် ပြန်လည်စတင်ခြင်းကို ပိတ်ရန် (debugging mode)",
     "max_restarts": "လက်လျှော့မတိုင်မီ 30s အတွင်း ပျက်သွား၍ ပြန်လည်စတင်နိုင်သည့် အများဆုံးအကြိမ်ရေ (မူလသတ်မှတ်ချက်: 2)",
+    "headless": "ပရောက်စီ အင်ဂျင်ကိုသာ လုပ်ဆောင်ရန်- ဒက်ရှ်ဘုတ် ပိတ်ထားသည် (404)၊ ရွေးချယ်နိုင်သော စနစ်ခွဲများကို ကျော်သည် (OMNIROUTE_HEADLESS=1 သတ်မှတ်သည်)",
     "tray": "စနစ် tray တွင် စတင်ပါ (desktop အတွက်သာ၊ ရွေးချယ်ဖွင့်သုံးရန်)",
     "no_tray": "စနစ် tray အိုင်ကွန်ကို ပိတ်ပါ",
     "ready_timeout": "အဆင်သင့်ဖြစ်မှု စစ်ဆေးချက်၏ အချိန်ကုန်ဆုံးကာလကို ms ဖြင့် သတ်မှတ်ပါ (OMNIROUTE_READY_TIMEOUT_MS လည်းဖြစ်ပြီး မူလတန်ဖိုးမှာ 60000 ဖြစ်သည်)",
@@ -1168,32 +1171,18 @@
   "sync": {
     "description": "OmniRoute instance များအကြား config ကို ထပ်တူပြုပါ",
     "push": {
-      "description": "Config ကို cloud သို့မဟုတ် အဝေးရှိ instance သို့ ပို့ပါ",
-      "target": "ဦးတည်နေရာ (cloud သို့မဟုတ် context:name)",
-      "bundle": "ထပ်တူပြုမည့် bundle အစိတ်အပိုင်းများ",
-      "dryRun": "အပြောင်းအလဲများ မသက်ရောက်စေဘဲ အစမ်းကြည့်ပါ"
+      "description": "Config ကို cloud သို့မဟုတ် အဝေးရှိ instance သို့ ပို့ပါ"
     },
     "pull": {
-      "description": "Cloud သို့မဟုတ် အဝေးရှိ instance မှ config ကို ရယူပါ",
-      "source": "ရင်းမြစ် (cloud သို့မဟုတ် context:name)",
-      "merge": "ရှိပြီးသား config နှင့် ပေါင်းစည်းပါ",
-      "replace": "ရှိပြီးသား config ကို အစားထိုးပါ",
-      "dryRun": "အသုံးမချဘဲ အစမ်းကြည့်ရန်"
-    },
-    "diff": {
-      "source": "ရင်းမြစ် အကြောင်းအရာ",
-      "target": "ဦးတည်ရာ အကြောင်းအရာ"
+      "description": "Cloud သို့မဟုတ် အဝေးရှိ instance မှ config ကို ရယူပါ"
     },
     "bundle": {
       "description": "ဖွဲ့စည်းသတ်မှတ်ချက်ကို bundle ဖိုင်အဖြစ် ထုတ်ယူရန်",
-      "include": "ထည့်သွင်းမည့် အစိတ်အပိုင်းများ (ကော်မာဖြင့် ခွဲခြားထားသည်)"
+      "token": "Sync token (from `sync tokens create`); defaults to OMNIROUTE_SYNC_TOKEN"
     },
     "import": {
       "description": "bundle ဖိုင်တစ်ခုကို တင်သွင်းရန်",
       "dryRun": "အသုံးမချဘဲ မှန်ကန်မှုစစ်ဆေးရန်"
-    },
-    "initialize": {
-      "fromCloud": "cloud အရန်သိမ်းဆည်းမှုမှ စတင်သတ်မှတ်ရန်"
     },
     "tokens": {
       "description": "စင့်ခ်တိုကင်များကို စီမံရန်",
@@ -1205,9 +1194,6 @@
       "revoke": {
         "yes": "အတည်ပြုချက်ကို ကျော်ရန်"
       }
-    },
-    "resolve": {
-      "description": "စင့်ခ်ပဋိပက္ခများကို အပြန်အလှန်တုံ့ပြန်၍ ဖြေရှင်းရန်"
     }
   },
   "config": {

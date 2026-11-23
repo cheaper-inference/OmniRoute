@@ -1,5 +1,22 @@
 import { NextResponse } from "next/server";
 import { getCachedSettings } from "@/lib/db/readCache";
+import {
+  PKCE_CHALLENGE_METHOD,
+  generateCodeChallenge,
+  generateCodeVerifier,
+} from "@/lib/oauth/utils/pkce";
+
+function setOidcFlowCookies(res: NextResponse, cookies: Record<string, string>, secure: boolean) {
+  for (const [name, value] of Object.entries(cookies)) {
+    res.cookies.set(name, value, {
+      httpOnly: true,
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 10,
+      secure,
+    });
+  }
+}
 
 /**
  * GET /api/auth/oidc/login
@@ -67,6 +84,12 @@ export async function GET(request: Request) {
     typeof crypto !== "undefined" && crypto.randomUUID
       ? crypto.randomUUID()
       : Math.random().toString(36).slice(2);
+  const codeVerifier = generateCodeVerifier();
+  const codeChallenge = generateCodeChallenge(codeVerifier);
+  const nonce =
+    typeof crypto !== "undefined" && crypto.randomUUID
+      ? crypto.randomUUID()
+      : Math.random().toString(36).slice(2);
 
   const url = new URL(authEndpoint);
   url.searchParams.set("response_type", "code");
@@ -74,16 +97,17 @@ export async function GET(request: Request) {
   url.searchParams.set("redirect_uri", redirectUri);
   url.searchParams.set("scope", scope);
   url.searchParams.set("state", state);
+  url.searchParams.set("code_challenge", codeChallenge);
+  url.searchParams.set("code_challenge_method", PKCE_CHALLENGE_METHOD);
+  url.searchParams.set("nonce", nonce);
   const isHttpsRequest = scheme === "https";
   const useSecureCookie = process.env.AUTH_COOKIE_SECURE === "true" || isHttpsRequest;
 
   const res = NextResponse.redirect(url.toString());
-  res.cookies.set("oidc_state", state, {
-    httpOnly: true,
-    sameSite: "lax",
-    path: "/",
-    maxAge: 60 * 10,
-    secure: useSecureCookie,
-  });
+  setOidcFlowCookies(
+    res,
+    { oidc_state: state, oidc_pkce_verifier: codeVerifier, oidc_nonce: nonce },
+    useSecureCookie
+  );
   return res;
 }

@@ -54,7 +54,7 @@ function buildAuthHeader(providerConfig, token) {
       model: body.model,
       query: { text: body.query },
       passages: (body.documents || []).map((doc) => ({
-        text: typeof doc === "string" ? doc : doc.text || "",
+        text: typeof doc === "string" ? doc : doc?.text || "",
       })),
       top_n: body.top_n,
     };
@@ -65,7 +65,7 @@ function buildAuthHeader(providerConfig, token) {
     return {
       queries: [body.query],
       documents: (body.documents || []).map((doc) =>
-        typeof doc === "string" ? doc : doc.text || ""
+        typeof doc === "string" ? doc : doc?.text || ""
       ),
     };
   }

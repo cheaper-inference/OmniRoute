@@ -3,7 +3,15 @@ import {
   buildGeminiThoughtSignatureKey,
   storeGeminiThoughtSignature,
 } from "../services/geminiThoughtSignatureStore.ts";
-import { normalizeOpenAICompatibleFinishReasonString } from "../utils/finishReason.ts";
+import {
+  isTopLevelCacheWriteOnly,
+  pickCacheCreationInPrompt,
+} from "../utils/pickCacheCreationTokens.ts";
+import {
+  normalizeOpenAICompatibleFinishReasonString,
+  openAIFinishReasonToClaudeStopReason,
+} from "../utils/finishReason.ts";
+import { computeFinishReason } from "../translator/response/openai-responses/synthesizeCompletedToolCalls.ts";
 import { containsTextualToolCallMarker } from "../utils/textualToolCall.ts";
 import { stripObfuscationZeroWidth } from "../utils/zeroWidth.ts";
 import { getAnyReasoningValue } from "../utils/reasoningFields.ts";
@@ -91,14 +99,15 @@ function parseTextualToolCall(text: unknown): { name: string; args: unknown } | 
   return null;
 }
 
-function extractMessageOutputText(item: JsonRecord): string {
+function extractMessageOutputText(item: JsonRecord, refusal = false): string {
   if (!Array.isArray(item.content)) return "";
   let text = "";
   for (const part of item.content) {
     if (!part || typeof part !== "object") continue;
     const partObj = toRecord(part);
-    if (partObj.type === "output_text" && typeof partObj.text === "string") {
-      text += partObj.text;
+    const value = refusal ? partObj.refusal : partObj.text;
+    if (partObj.type === (refusal ? "refusal" : "output_text") && typeof value === "string") {
+      text += value;
     }
   }
   return text;
@@ -119,7 +128,7 @@ function findBestMessageText(output: unknown[]): {
 
   for (let i = messageItems.length - 1; i >= 0; i -= 1) {
     const text = extractMessageOutputText(messageItems[i]);
-    if (text.trim().length > 0) {
+    if (text.trim().length > 0 || extractMessageOutputText(messageItems[i], true).length > 0) {
       return { text, selectedMessageIndex: i, messageItems };
     }
   }
@@ -261,6 +270,11 @@ export function translateNonStreamingResponse(
     }
 
     const message: JsonRecord = { role: "assistant" };
+    const refusal = extractMessageOutputText(
+      messageSelection.messageItems[messageSelection.selectedMessageIndex] ?? {},
+      true
+    );
+    if (refusal) message.refusal = refusal;
     if (textContent) {
       message.content = textContent;
     }
@@ -299,7 +313,12 @@ export function translateNonStreamingResponse(
 
     const createdAt = toNumber(response.created_at, Math.floor(Date.now() / 1000));
     const model = toString(response.model || responseRoot.model, "openai-responses");
-    const finishReason = toolCalls.length > 0 ? "tool_calls" : "stop";
+    // Same rule as the streaming path (#15867): an incomplete response is a
+    // truncated or filtered turn, not a clean stop.
+    const finishReason = computeFinishReason({
+      toolCallIndex: toolCalls.length,
+      incompleteReason: toRecord(response.incomplete_details).reason,
+    });
 
     const result: JsonRecord = {
       id: `chatcmpl-${toString(response.id, String(Date.now()))}`,
@@ -343,10 +362,18 @@ export function translateNonStreamingResponse(
         usage.reasoning_tokens
       );
 
+      const anthropicKeys = "cache_read_input_tokens" in usage;
+      const sourceWriteInPrompt = pickCacheCreationInPrompt(usage);
+      const promptTokens = anthropicKeys
+        ? inputTokens +
+          cachedInputTokens +
+          (sourceWriteInPrompt === true ? 0 : cacheCreationInputTokens)
+        : inputTokens;
+
       result.usage = {
-        prompt_tokens: inputTokens,
+        prompt_tokens: promptTokens,
         completion_tokens: outputTokens,
-        total_tokens: inputTokens + outputTokens,
+        total_tokens: promptTokens + outputTokens,
       };
 
       if (reasoningTokens > 0) {
@@ -362,6 +389,11 @@ export function translateNonStreamingResponse(
         }
         if (cacheCreationInputTokens > 0) {
           promptDetails.cache_creation_tokens = cacheCreationInputTokens;
+          const writeInPrompt = anthropicKeys
+            ? true
+            : (pickCacheCreationInPrompt(usage) ??
+              (isTopLevelCacheWriteOnly(usage) ? undefined : true));
+          if (writeInPrompt !== undefined) promptDetails.cache_creation_in_prompt = writeInPrompt;
         }
       }
     }
@@ -531,7 +563,8 @@ export function translateNonStreamingResponse(
         result.usage = {
           prompt_tokens: promptTokens,
           completion_tokens: completionTokens,
-          total_tokens: toNumber(usage.totalTokenCount, 0),
+          // Gemini may omit totalTokenCount; derive it instead of reporting 0.
+          total_tokens: toNumber(usage.totalTokenCount, 0) || promptTokens + completionTokens,
         };
         if (reasoningTokens > 0) {
           (result.usage as JsonRecord).completion_tokens_details = {
@@ -624,13 +657,11 @@ export function translateNonStreamingResponse(
         message.content = "";
       }
 
-      let finishReason = toString(root.stop_reason, "stop");
-      if (finishReason === "end_turn") finishReason = "stop";
-      if (finishReason === "tool_use") finishReason = "tool_calls";
-      // Streaming claude-to-openai already maps this (convertStopReason). Leaving
-      // the raw spelling here makes a truncated completion look like an unknown
-      // finish to the chat empty-output check.
-      if (finishReason === "max_tokens") finishReason = "length";
+      // Same mapping as the streaming claude-to-openai path (convertStopReason):
+      // refusal -> content_filter, max_tokens and model_context_window_exceeded ->
+      // length, stop_sequence and pause_turn -> stop. A raw spelling here reached
+      // non-OpenAI clients unmapped (a Gemini client saw a refusal as STOP).
+      const finishReason = normalizeOpenAICompatibleFinishReasonString(root.stop_reason, "stop");
 
       const result: JsonRecord = {
         id: `chatcmpl-${toString(root.id, String(Date.now()))}`,
@@ -673,7 +704,10 @@ export function translateNonStreamingResponse(
         if (cachedTokens > 0 || cacheCreationTokens > 0) {
           const details: JsonRecord = {};
           if (cachedTokens > 0) details.cached_tokens = cachedTokens;
-          if (cacheCreationTokens > 0) details.cache_creation_tokens = cacheCreationTokens;
+          if (cacheCreationTokens > 0) {
+            details.cache_creation_tokens = cacheCreationTokens;
+            details.cache_creation_in_prompt = false;
+          }
           usageOut.prompt_tokens_details = details;
         }
         result.usage = usageOut;
@@ -773,13 +807,22 @@ function convertOpenAINonStreamingToClaude(
   // Always include text if it exists (even empty string), or if there are no tool calls and no reasoning
   const hasToolCalls = Array.isArray(messageObj.tool_calls) && messageObj.tool_calls.length > 0;
 
-  if (messageObj.content !== undefined && messageObj.content !== null) {
+  if (typeof messageObj.refusal === "string" && messageObj.refusal) {
+    hasTextOrReasoning = true;
+    if (typeof messageObj.content === "string" && messageObj.content) {
+      content.push({ type: "text", text: messageObj.content });
+    }
+    content.push({ type: "text", text: messageObj.refusal });
+  } else if (messageObj.content !== undefined && messageObj.content !== null) {
     hasTextOrReasoning = true;
     const resolvedText = toString(messageObj.content);
-    content.push({
-      type: "text",
-      text: resolvedText === "" ? "(empty response)" : resolvedText,
-    });
+    // #15764: no placeholder text block next to tool_use when the text is empty.
+    if (resolvedText !== "" || !hasToolCalls) {
+      content.push({
+        type: "text",
+        text: resolvedText === "" ? "(empty response)" : resolvedText,
+      });
+    }
   } else if (suppressThinking && reasoningText) {
     // Reasoning-ONLY response with thinking opted out (requestedThinking===false):
     // no ordinary content, reasoning suppressed above. Relay the reasoning text as
@@ -801,7 +844,8 @@ function convertOpenAINonStreamingToClaude(
     for (const tool of messageObj.tool_calls) {
       const toolObj = toRecord(tool);
       const fn = toRecord(toolObj.function);
-      const rawId = toString(toolObj.id, `call_${Date.now()}`);
+      // An id-less call gets a random id; a timestamp collides across calls.
+      const rawId = toString(toolObj.id) || undefined;
       content.push({
         type: "tool_use",
         id: sanitizeToolId(rawId),
@@ -812,9 +856,7 @@ function convertOpenAINonStreamingToClaude(
     }
   }
 
-  let stopReason = toString(choiceObj.finish_reason, "end_turn");
-  if (stopReason === "stop") stopReason = "end_turn";
-  if (stopReason === "tool_calls") stopReason = "tool_use";
+  const stopReason = openAIFinishReasonToClaudeStopReason(choiceObj.finish_reason);
 
   const usageSrc = toRecord(openaiResponse.usage);
   const promptTokens = toNumber(usageSrc.prompt_tokens, 0);
@@ -826,10 +868,12 @@ function convertOpenAINonStreamingToClaude(
   const cachedTokens = toNumber(promptDetails.cached_tokens, 0);
   const cacheCreationTokens = toNumber(promptDetails.cache_creation_tokens, 0);
 
-  // OpenAI's prompt_tokens includes all prompt-side tokens (cached + non-cached).
-  // Claude expects input_tokens to be only non-cached tokens, with cached tokens
-  // exposed separately as cache_read_input_tokens.
-  const inputTokens = promptTokens - cachedTokens - cacheCreationTokens;
+  // Same rule as openai-to-claude.ts trackUsageFromChunk.
+  const writeInPrompt = promptDetails.cache_creation_in_prompt !== false;
+  const inputTokens = Math.max(
+    0,
+    promptTokens - cachedTokens - (writeInPrompt ? cacheCreationTokens : 0)
+  );
 
   const usage: JsonRecord = {
     input_tokens: inputTokens,

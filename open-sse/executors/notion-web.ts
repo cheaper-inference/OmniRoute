@@ -63,6 +63,7 @@ import {
   type NotionAgentOptions,
 } from "../services/notionTranscriptBuilder.ts";
 import { tlsFetchNotion } from "../services/notionTlsClient.ts";
+import { currentAppliedProxySink } from "../utils/proxyFetch.ts";
 
 // Re-exported for unit tests that destructure `mod.<name>` on this module.
 export {
@@ -495,7 +496,11 @@ async function sendNotionInferenceRequest(opts: {
   reqBody: Record<string, unknown>;
   reqHeaders: Record<string, string>;
   signal: ExecuteInput["signal"];
-}): Promise<{ rawText?: string; errorResult?: ReturnType<typeof makeErrorResult> }> {
+}): Promise<{
+  rawText?: string;
+  errorResult?: ReturnType<typeof makeErrorResult>;
+  receivedStatus?: number;
+}> {
   const { reqBody, reqHeaders, signal } = opts;
   // Notion's edge rejects Node/undici TLS fingerprints with in-band
   // temporarily-unavailable (HTTP 200, no assistant text). Always use the
@@ -529,6 +534,7 @@ async function sendNotionInferenceRequest(opts: {
 
   if (status === 401 || status === 403) {
     return {
+      receivedStatus: status,
       errorResult: makeErrorResult(
         status,
         "Notion session expired or invalid — re-paste token_v2 from notion.so",
@@ -540,6 +546,7 @@ async function sendNotionInferenceRequest(opts: {
 
   if (status < 200 || status >= 300) {
     return {
+      receivedStatus: status,
       errorResult: makeErrorResult(
         status || 502,
         `Notion error: ${rawText.slice(0, 500)}`,
@@ -632,6 +639,7 @@ export class NotionWebExecutor extends BaseExecutor {
           errorResult: ReturnType<typeof makeErrorResult>;
           retryable: boolean;
           reqBody: Record<string, unknown>;
+          receivedStatus?: number;
         };
 
     // `strictNullChecks: false` narrows a boolean-literal discriminant on the positive
@@ -665,7 +673,7 @@ export class NotionWebExecutor extends BaseExecutor {
         notionThreadMarkCreateAttempted(rootKey, opts.threadId);
       }
 
-      const { rawText, errorResult } = await sendNotionInferenceRequest({
+      const { rawText, errorResult, receivedStatus } = await sendNotionInferenceRequest({
         reqBody,
         reqHeaders,
         signal,
@@ -675,7 +683,7 @@ export class NotionWebExecutor extends BaseExecutor {
         // HTTP-level failure — keep sticky binding so the next turn reuses threadId
         const status = errorResult.response?.status ?? 502;
         const retryable = status === 429 || status === 503 || status >= 500;
-        return { ok: false, errorResult, retryable, reqBody };
+        return { ok: false, errorResult, retryable, reqBody, receivedStatus };
       }
 
       const raw = rawText || "";
@@ -723,6 +731,10 @@ export class NotionWebExecutor extends BaseExecutor {
     }
 
     if (isFailedAttempt(attempt)) {
+      const sink = currentAppliedProxySink();
+      if (sink && attempt.receivedStatus !== undefined && attempt.receivedStatus >= 400) {
+        sink.upstreamStatus = attempt.receivedStatus;
+      }
       return attempt.errorResult;
     }
 

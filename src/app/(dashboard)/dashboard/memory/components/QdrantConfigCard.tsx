@@ -57,6 +57,18 @@ export default function QdrantConfigCard() {
   // settings save and read the pre-save configuration) can never be applied
   // out of order.
   const healthSeqRef = useRef(0);
+  const saveStatusTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const mountedRef = useRef(false);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+      healthSeqRef.current += 1;
+      if (saveStatusTimerRef.current !== null) clearTimeout(saveStatusTimerRef.current);
+      saveStatusTimerRef.current = null;
+    };
+  }, []);
 
   useEffect(() => {
     Promise.all([
@@ -104,6 +116,10 @@ export default function QdrantConfigCard() {
 
   const save = useCallback(
     async (updates: Partial<QdrantSettings> & { apiKey?: string }) => {
+      if (saveStatusTimerRef.current !== null) {
+        clearTimeout(saveStatusTimerRef.current);
+        saveStatusTimerRef.current = null;
+      }
       const prev = qdrant;
       const next = { ...qdrant, ...updates };
       // Settings are changing, so any prior health result is stale: drop it and
@@ -128,8 +144,10 @@ export default function QdrantConfigCard() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(body),
         });
+        if (!mountedRef.current) return;
         if (res.ok) {
           const data = await res.json().catch(() => next);
+          if (!mountedRef.current) return;
           setQdrant(data);
           setApiKeyInput("");
           setSaveStatus("saved");
@@ -143,16 +161,20 @@ export default function QdrantConfigCard() {
           healthSeqRef.current += 1;
           setHealth(null);
           void checkHealth();
-          setTimeout(() => setSaveStatus(""), 2000);
+          saveStatusTimerRef.current = setTimeout(() => {
+            saveStatusTimerRef.current = null;
+            setSaveStatus("");
+          }, 2000);
         } else {
           setQdrant(prev);
           setSaveStatus("error");
         }
       } catch {
+        if (!mountedRef.current) return;
         setQdrant(prev);
         setSaveStatus("error");
       } finally {
-        setSaving(false);
+        if (mountedRef.current) setSaving(false);
       }
     },
     [qdrant, checkHealth]

@@ -12,17 +12,17 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ### पूर्वापेक्षाएँ
 
-- **Node.js** `>=22.22.3 <23`, या `>=24.0.0 <27` (अनुशंसित: 24 LTS)
+- **Node.js** `>=22.22.2 <23`, या `>=24.0.0 <27` (अनुशंसित: 24 LTS)
 - **npm** 10+
 
-> **npm v11+ उपयोगकर्ता (Node 24+):** `npm install` के बाद सत्यापित करें कि नेटिव मॉड्यूल इंस्टॉल किए गए थे:
+> **npm v11+ उपयोगकर्ता (Node 24+):** `npm install` के बाद सत्यापित करें कि नेटिव मॉड्यूल इंस्टॉल किए गए हैं:
 > `node -e "require('better-sqlite3')"`. यदि यह `MODULE_NOT_FOUND` के साथ विफल होता है,
 > तो `npm approve-scripts better-sqlite3 && npm install` चलाएँ। देखें
 > [समस्या निवारण](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module)।
 
 - **Git**
 
-### क्लोन और इंस्टॉल करना
+### क्लोन और इंस्टॉल करें
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -30,7 +30,7 @@ cd OmniRoute
 npm install
 ```
 
-### एनवायरनमेंट वेरिएबल
+### पर्यावरण वेरिएबल
 
 ```bash
 # टेम्पलेट से अपनी .env फ़ाइल बनाएँ
@@ -53,14 +53,14 @@ echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 
 ### डैशबोर्ड सेटिंग्स
 
-डैशबोर्ड उन सुविधाओं के लिए UI टॉगल प्रदान करता है जिन्हें एनवायरनमेंट वेरिएबल के माध्यम से भी कॉन्फ़िगर किया जा सकता है:
+डैशबोर्ड उन सुविधाओं के लिए UI टॉगल प्रदान करता है जिन्हें पर्यावरण वेरिएबल के माध्यम से भी कॉन्फ़िगर किया जा सकता है:
 
 | सेटिंग का स्थान    | टॉगल            | विवरण                           |
 | ------------------ | --------------- | ------------------------------- |
 | सेटिंग्स → उन्नत   | डीबग मोड        | डीबग अनुरोध लॉग सक्षम करें (UI) |
 | सेटिंग्स → सामान्य | साइडबार दृश्यता | साइडबार अनुभाग दिखाएँ/छिपाएँ    |
 
-ये सेटिंग्स डेटाबेस में संग्रहीत होती हैं और पुनः आरंभ करने के बाद भी बनी रहती हैं। सेट किए जाने पर ये env var के डिफ़ॉल्ट मानों को ओवरराइड करती हैं।
+ये सेटिंग्स डेटाबेस में संग्रहीत होती हैं और पुनः आरंभ करने के बाद भी बनी रहती हैं; सेट किए जाने पर ये env var डिफ़ॉल्ट को ओवरराइड करती हैं।
 
 ### स्थानीय रूप से चलाना
 
@@ -72,11 +72,11 @@ npm run dev
 npm run build    # next build → .build/next/ फिर assembleStandalone → dist/
 npm run start
 
-# योगदानकर्ता के बदलावों के लिए तेज़, केवल बैकएंड/API कंपाइल
+# योगदानकर्ता परिवर्तनों के लिए तेज़ बैकएंड/API-मात्र कंपाइल
 npm run build:contributor
 
-# रिलीज़ बिल्ड (क्लीन रीबिल्ड + HEAD सेंटिनल — डिप्लॉय के लिए आवश्यक)
-npm run build:release   # rm -rf .build dist && build + dist/BUILD_SHA लिखता है
+# रिलीज़ बिल्ड (क्लीन रीबिल्ड + HEAD प्रहरी — डिप्लॉय के लिए आवश्यक)
+npm run build:release   # rm -rf .build dist && बिल्ड + dist/BUILD_SHA लिखता है
 
 # सामान्य पोर्ट कॉन्फ़िगरेशन
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
@@ -84,15 +84,15 @@ PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 
 योगदानकर्ता बिल्ड केवल कंपाइल सत्यापन करता है: यह स्टैंडअलोन
 डिस्ट्रिब्यूशन को असेंबल नहीं करता या वैकल्पिक नेटिव पैकेजिंग एसेट नहीं बनाता। जब आपको
-डिलीवर किए जा सकने वाले बंडल को सत्यापित करना हो, तो नियमित प्रोडक्शन बिल्ड का उपयोग करें।
+वितरण-योग्य बंडल को सत्यापित करने की आवश्यकता हो, तो नियमित प्रोडक्शन बिल्ड का उपयोग करें।
 
-### बिल्ड आउटपुट लेआउट
+### बिल्ड आउटपुट संरचना
 
-| डायरेक्टरी | सामग्री                                                                           | ट्रैक किया गया |
-| ---------- | --------------------------------------------------------------------------------- | -------------- |
-| `src/`     | एप्लिकेशन सोर्स (TypeScript / TSX)                                                | हाँ            |
-| `.build/`  | मध्यवर्ती फ़ाइलें — `next build` आउटपुट (gitignored, `distDir = .build/next`)     | नहीं           |
-| `dist/`    | डिलीवर करने योग्य बंडल — `assembleStandalone` द्वारा असेंबल किया गया (gitignored) | नहीं           |
+| डायरेक्टरी | सामग्री                                                                       | ट्रैक की गई |
+| ---------- | ----------------------------------------------------------------------------- | ----------- |
+| `src/`     | एप्लिकेशन सोर्स (TypeScript / TSX)                                            | हाँ         |
+| `.build/`  | मध्यवर्ती फ़ाइलें — `next build` आउटपुट (gitignored, `distDir = .build/next`) | नहीं        |
+| `dist/`    | वितरण-योग्य बंडल — `assembleStandalone` द्वारा असेंबल किया गया (gitignored)   | नहीं        |
 
 बिल्ड पाइपलाइन एकल पास में चलती है:
 
@@ -103,13 +103,13 @@ npm run build
        └─ आउटपुट: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` पहले दोनों डायरेक्टरी को अतिरिक्त रूप से साफ़ करता है और
-डिप्लॉय अखंडता सेंटिनल के रूप में `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) लिखता है।
+`npm run build:release` अतिरिक्त रूप से पहले दोनों डायरेक्टरियों को साफ़ करता है और
+डिप्लॉय अखंडता प्रहरी के रूप में `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) लिखता है।
 
-`npm run build:contributor` केवल बैकएंड वाले बिल्ड प्रोफ़ाइल का उपयोग करता है। बिल्ड करते समय यह अस्थायी रूप से
-डैशबोर्ड UI फ़ाइलों को स्टब करता है, API रूट हैंडलर बनाए रखता है और बिल्ड के बाद मूल फ़ाइलों को
-पुनर्स्थापित करता है। डैशबोर्ड UI को प्रभावित करने वाले बदलावों या पूर्ण रिलीज़ सत्यापन के लिए
-`npm run build` का उपयोग करें; योगदानकर्ता प्रोफ़ाइल रिलीज़ बिल्ड का प्रतिस्थापन नहीं है।
+`npm run build:contributor` केवल-बैकएंड बिल्ड प्रोफ़ाइल का उपयोग करता है। यह बिल्ड के दौरान
+डैशबोर्ड UI फ़ाइलों को अस्थायी रूप से स्टब करता है, API रूट हैंडलर बनाए रखता है और बिल्ड के
+बाद मूल फ़ाइलों को पुनर्स्थापित करता है। डैशबोर्ड UI को प्रभावित करने वाले परिवर्तनों या पूर्ण
+रिलीज़ सत्यापन के लिए `npm run build` का उपयोग करें; योगदानकर्ता प्रोफ़ाइल रिलीज़ बिल्ड का प्रतिस्थापन नहीं है।
 
 > **VPS डिप्लॉय नोट:** रिमोट इमेज डायरेक्टरी `/usr/lib/node_modules/omniroute/app/`
 > अपरिवर्तित है। डिप्लॉय स्किल्स `dist/` की सामग्री को इसमें rsync करती हैं।
@@ -286,65 +286,72 @@ checks पहले से नहीं देंगे, और छोटी म
 
 ---
 
-## Project Structure
+## परियोजना संरचना
 
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # Dashboard pages (23 sections)
-│   ├── api/                # API routes (51 directories)
-│   └── login/              # Auth pages (.tsx)
-├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
-├── lib/                    # Core business logic (.ts)
-│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
-│   ├── acp/                # Agent Communication Protocol registry
-│   ├── compliance/         # Compliance policy engine
-│   ├── db/                 # SQLite database layer (110 top-level modules + 130 migrations)
-│   ├── memory/             # Persistent conversational memory
-│   ├── oauth/              # OAuth providers, services, and utilities
-│   ├── skills/             # Extensible skill framework
-│   ├── usage/              # Usage tracking and cost calculation
-│   └── localDb.ts          # Re-export layer only — never add logic here
-├── middleware/              # Request middleware (promptInjectionGuard)
-├── mitm/                   # MITM proxy (cert, DNS, target routing)
+│   ├── (dashboard)/        # डैशबोर्ड पृष्ठ (23 अनुभाग)
+│   ├── api/                # API रूट (51 डायरेक्टरियाँ)
+│   └── login/              # प्रमाणीकरण पृष्ठ (.tsx)
+├── domain/                 # नीति इंजन (policyEngine, comboResolver, costRules आदि)
+├── lib/                    # मुख्य व्यावसायिक लॉजिक (.ts)
+│   ├── a2a/                # Agent-to-Agent v0.3 प्रोटोकॉल सर्वर
+│   ├── acp/                # Agent Communication Protocol रजिस्ट्री
+│   ├── compliance/         # अनुपालन नीति इंजन
+│   ├── db/                 # SQLite डोमेन मॉड्यूल + 130 माइग्रेशन
+│   ├── memory/             # स्थायी संवादात्मक मेमोरी
+│   ├── oauth/              # OAuth प्रदाता, सेवाएँ और उपयोगिताएँ
+│   ├── skills/             # विस्तार योग्य कौशल फ्रेमवर्क
+│   ├── usage/              # उपयोग ट्रैकिंग और लागत गणना
+│   └── localDb.ts          # केवल पुनः-निर्यात परत — यहाँ कभी लॉजिक न जोड़ें
+├── middleware/              # अनुरोध मिडलवेयर (promptInjectionGuard)
+├── mitm/                   # MITM प्रॉक्सी (प्रमाणपत्र, DNS, लक्ष्य रूटिंग)
 ├── shared/
-│   ├── components/         # React components (.tsx)
-│   ├── constants/          # Provider definitions (329), MCP scopes, routing strategies
-│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
-│   └── validation/         # Zod v4 schemas
-└── sse/                    # SSE proxy pipeline
+│   ├── components/         # React कॉम्पोनेंट (.tsx)
+│   ├── constants/          # प्रदाता परिभाषाएँ (329), MCP स्कोप, 20 रूटिंग रणनीतियाँ
+│   ├── utils/              # सर्किट ब्रेकर, सैनिटाइज़र, प्रमाणीकरण सहायक
+│   └── validation/         # Zod v4 स्कीमा
+└── sse/                    # SSE प्रॉक्सी पाइपलाइन
 
-open-sse/                   # @omniroute/open-sse workspace
-├── executors/              # 89 executor implementation modules
-├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
-├── mcp-server/             # MCP server (107 tools, 3 transports, 32 scopes)
-├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
-├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Responses API transformer
-└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
+open-sse/                   # @omniroute/open-sse वर्कस्पेस
+├── executors/              # 150 एक्ज़ीक्यूटर मॉड्यूल (एक्ज़ीक्यूटर क्लास + प्रत्येक प्रदाता के लिए सहायक)
+├── handlers/               # 11 अनुरोध हैंडलर (चैट, रिस्पॉन्स, एम्बेडिंग, इमेज आदि)
+├── mcp-server/             # MCP सर्वर (110 अद्वितीय टूल, 3 ट्रांसपोर्ट, 33 स्कोप)
+├── services/               # 178 शीर्ष-स्तरीय सेवाएँ (combo, autoCombo, rateLimitManager आदि)
+├── translator/             # प्रारूप अनुवादक (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Responses API ट्रांसफॉर्मर
+└── utils/                  # 22 उपयोगिता मॉड्यूल (स्ट्रीम, TLS, प्रॉक्सी, लॉगिंग)
 
-electron/                   # Electron desktop app (cross-platform)
+electron/                   # Electron डेस्कटॉप ऐप (क्रॉस-प्लेटफ़ॉर्म)
 
 tests/
-├── unit/                   # Node.js test runner (122 test files)
-├── integration/            # Integration tests
-├── e2e/                    # Playwright tests
-├── security/               # Security tests
-├── translator/             # Translator-specific tests
-└── load/                   # Load tests
+├── unit/                   # Node.js टेस्ट रनर (1,574 टेस्ट फ़ाइलें)
+├── integration/            # एकीकरण टेस्ट
+├── e2e/                    # Playwright टेस्ट
+├── security/               # सुरक्षा टेस्ट
+├── translator/             # अनुवादक-विशिष्ट टेस्ट
+└── load/                   # लोड टेस्ट
 
-docs/                       # Documentation
-├── ARCHITECTURE.md         # System architecture
-├── API_REFERENCE.md        # All endpoints
-├── USER_GUIDE.md           # Provider setup, CLI integration
-├── TROUBLESHOOTING.md      # Common issues
-├── MCP-SERVER.md           # MCP server (107 tools)
-├── A2A-SERVER.md           # A2A agent protocol
-├── AUTO-COMBO.md           # Auto-combo engine
-├── CLI-TOOLS.md            # CLI tools integration
-├── COVERAGE_PLAN.md        # Test coverage improvement plan
-├── openapi.yaml            # OpenAPI specification
-└── adr/                    # Architecture Decision Records
+docs/
+├── adr/                     # आर्किटेक्चर निर्णय रिकॉर्ड
+├── architecture/            # सिस्टम आर्किटेक्चर और लचीलापन
+├── comparison/              # OmniRoute बनाम विकल्प
+├── compression/             # संपीड़न मार्गदर्शिकाएँ और नियम
+├── dev/                     # विकास मार्गदर्शिकाएँ
+├── diagrams/                # आर्किटेक्चर आरेख
+├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
+├── guides/                  # उपयोगकर्ता मार्गदर्शिका, Docker, सेटअप, समस्या निवारण
+├── i18n/                    # अंतरराष्ट्रीयकृत README अनुवाद
+├── marketing/               # विपणन सामग्री
+├── ops/                     # परिनियोजन, प्रॉक्सी, कवरेज, रिलीज़
+├── providers/               # प्रदाता-विशिष्ट दस्तावेज़
+├── reference/               # API संदर्भ, पर्यावरण चर, CLI टूल, निःशुल्क टियर
+├── releases/                # रिलीज़ नोट्स
+├── routing/                 # Auto-combo इंजन, रीजनिंग रीप्ले
+├── screenshots/             # डैशबोर्ड स्क्रीनशॉट
+├── security/                # सुरक्षा सीमाएँ, अनुपालन, स्टेल्थ, टोकन
+└── specs/                   # डिज़ाइन विनिर्देश
 ```
 
 ---
@@ -385,28 +392,32 @@ OAuth क्रेडेंशियल्स को `src/lib/oauth/constants/oa
 
 ---
 
-## पुल अनुरोध चेकलिस्ट
+## पुल रिक्वेस्ट चेकलिस्ट
 
 - [ ] परीक्षण सफल हैं (`npm test`)
 - [ ] लिंटिंग सफल है (`npm run lint`)
 - [ ] बिल्ड सफल है (`npm run build`)
-- [ ] नए सार्वजनिक फ़ंक्शन और इंटरफ़ेस के लिए TypeScript प्रकार जोड़े गए हैं
-- [ ] कोई हार्डकोड किया गया सीक्रेट या फ़ॉलबैक मान नहीं है
+- [ ] नए सार्वजनिक फ़ंक्शनों और इंटरफ़ेस के लिए TypeScript प्रकार जोड़े गए हैं
+- [ ] कोई हार्डकोडेड सीक्रेट या फ़ॉलबैक मान नहीं है
 - [ ] सार्वजनिक अपस्ट्रीम क्रेडेंशियल `resolvePublicCred()` के माध्यम से एम्बेड किए गए हैं ([`docs/security/PUBLIC_CREDS.md`](./docs/security/PUBLIC_CREDS.md) देखें), कभी भी लिटरल के रूप में नहीं
-- [ ] त्रुटि प्रतिक्रियाएँ `buildErrorBody()` / `sanitizeErrorMessage()` के माध्यम से भेजी जाती हैं — प्रतिक्रिया बॉडी में कोई रॉ स्टैक ट्रेस नहीं है ([`docs/security/ERROR_SANITIZATION.md`](./docs/security/ERROR_SANITIZATION.md) देखें)
+- [ ] त्रुटि प्रतिक्रियाएँ `buildErrorBody()` / `sanitizeErrorMessage()` के माध्यम से भेजी जाती हैं — प्रतिक्रिया बॉडी में कोई रॉ स्टैक ट्रेस नहीं ([`docs/security/ERROR_SANITIZATION.md`](./docs/security/ERROR_SANITIZATION.md) देखें)
 - [ ] शेल कमांड (`exec` / `spawn`) रनटाइम मानों को स्ट्रिंग इंटरपोलेशन के बजाय `env` के माध्यम से पास करते हैं
-- [ ] सभी इनपुट Zod स्कीमा से सत्यापित किए गए हैं
-- [ ] उपयोगकर्ता को प्रभावित करने वाले परिवर्तनों के लिए `changelog.d/{features|fixes|maintenance}/<PR>-<slug>.md` के अंतर्गत चेंजलॉग **फ़्रैगमेंट** जोड़ा गया है ([`changelog.d/README.md`](./changelog.d/README.md) देखें) — `CHANGELOG.md` को सीधे संपादित **न करें**; फ़्रैगमेंट रिलीज़ के समय एकत्रित किए जाते हैं और PR के बीच कभी टकराव उत्पन्न नहीं करते
-- [ ] दस्तावेज़ अपडेट किए गए हैं (यदि लागू हो)
-- [ ] कोई नया CodeQL / Secret-Scanning अलर्ट नहीं खुला है, या प्रत्येक को संबंधित `docs/security/` दस्तावेज़ का संदर्भ देने वाले तकनीकी औचित्य के साथ खारिज किया गया है
-- [ ] चाइल्ड प्रोसेस शुरू करने वाले रूट (`/api/mcp/`, `/api/cli-tools/runtime/`) `src/server/authz/routeGuard.ts` में `isLocalOnlyPath()` के रूप में वर्गीकृत किए गए हैं — [कठोर नियम #15](docs/security/ROUTE_GUARD_TIERS.md) देखें
-- [ ] कमिट संदेशों में कोई `Co-Authored-By` ट्रेलर नहीं है — कमिट केवल रिपॉज़िटरी स्वामी की Git पहचान के अंतर्गत दिखाई देने चाहिए (कठोर नियम #16)
+- [ ] सभी इनपुट Zod स्कीमा के साथ सत्यापित किए गए हैं
+- [ ] उपयोगकर्ता-दृश्य परिवर्तनों के लिए `changelog.d/{features|fixes|maintenance}/<PR>-<slug>.md` के अंतर्गत चेंजलॉग **फ़्रैगमेंट** जोड़ा गया है ([`changelog.d/README.md`](./changelog.d/README.md) देखें) — `CHANGELOG.md` को सीधे संपादित **न करें**; फ़्रैगमेंट रिलीज़ के समय एकत्रित किए जाते हैं और PR के बीच कभी टकराव नहीं करते
+- [ ] दस्तावेज़ीकरण अपडेट किया गया है (यदि लागू हो)
+- [ ] कोई नया CodeQL / Secret-Scanning अलर्ट नहीं खुला है, या प्रत्येक को संबंधित `docs/security/` दस्तावेज़ का संदर्भ देते हुए तकनीकी औचित्य के साथ खारिज किया गया है
+- [ ] चाइल्ड प्रोसेस शुरू करने वाले रूट (`/api/mcp/`, `/api/cli-tools/runtime/`) को `src/server/authz/routeGuard.ts` में `isLocalOnlyPath()` के रूप में वर्गीकृत किया गया है — [कठोर नियम #15](docs/security/ROUTE_GUARD_TIERS.md) देखें
+- [ ] कमिट संदेशों में AI/बॉट `Co-authored-by` ट्रेलर नहीं हैं (कठोर नियम #16) — जिन मानव सहयोगियों के कार्य का पुनः उपयोग किया गया है, उन्हें मानक `Co-authored-by: Name <email>` ट्रेलर के साथ श्रेय दिया गया है
 
 ---
 
-## Releasing
+## रिलीज़ करना
 
-Releases are managed via the `/generate-release` workflow. When a new GitHub Release is created, the package is **automatically published to npm** via GitHub Actions.
+रिलीज़ को `/generate-release` वर्कफ़्लो के माध्यम से प्रबंधित किया जाता है। जब कोई नया GitHub Release बनाया जाता है, तो पैकेज GitHub Actions के माध्यम से **स्वचालित रूप से npm पर प्रकाशित हो जाता है**।
+
+VPS डिप्लॉयमेंट के लिए, `npm run build` के बजाय `npm run build:release` का उपयोग करें — यह एक साफ़
+रीबिल्ड करता है, बंडल को `dist/` में संयोजित करता है और `dist/BUILD_SHA` सेंटिनल लिखता है।
+इसके बाद `/deploy-vps-*-cc` स्किल्स का उपयोग करें, जो `dist/` को रिमोट `app/` डायरेक्टरी में rsync करती हैं।
 
 ---
 

@@ -116,31 +116,39 @@ Ha a `region` mezőt kihagyja, annak alapértelmezett értéke `us-east-1`.
 
 ---
 
-## API-kulcsos importálási folyamat
+## API-kulcs importálási folyamata
 
-Az API-kulcsos hitelesítés a hosszú élettartamú Kiro / AWS CodeWhisperer bearer hitelesítő adatokhoz használható. Nem
-használ OAuth-frissítést, így elkerüli a megosztott OIDC-munkamenetek érvénytelenítését.
+Az API-kulcsos hitelesítés hosszú élettartamú Kiro / AWS CodeWhisperer bearer hitelesítő adatokhoz használható. Nem használ OAuth-frissítést, így elkerüli a megosztott OIDC-munkamenetek érvénytelenítését.
 
 ### Irányítópult
 
-1. Nyissa meg az **Irányítópult -> Szolgáltatók -> Kiro** oldalt.
+1. Nyissa meg az **Irányítópult -> Szolgáltatók -> Kiro** menüpontot.
 2. Válassza az **API-kulcs** lehetőséget.
-3. Illessze be az API-kulcsot és opcionálisan az AWS-régiót (alapértelmezés szerint `us-east-1`).
-4. Az OmniRoute ellenőrzi a kulcsot, és menti a kapcsolatot.
+3. Illessze be az API-kulcsot, és válassza ki az AWS-régiót: **Automatikus észlelés** (alapértelmezett), **USA keleti régiója
+   (Észak-Virginia)** vagy **Európa (Frankfurt)**.
+4. Az OmniRoute ellenőrzi a kulcsot, és a kapcsolatot ahhoz a régióhoz rögzítve menti, ahol a
+   kulcs működik.
 
 ### API
 
 ```bash
 curl -X POST http://localhost:20128/api/oauth/kiro/api-key \
   -H "Content-Type: application/json" \
-  -d '{"apiKey": "kiro_or_codewhisperer_key", "region": "us-east-1"}'
+  -d '{"apiKey": "kiro_or_codewhisperer_key", "region": "auto"}'
 ```
+
+A `region` az `auto` (alapértelmezett), `us-east-1` vagy `eu-central-1` értéket fogadja el; minden más érték
+HTTP 400 válasszal elutasításra kerül.
 
 ### Belső szerződés
 
 Az API-útvonal a `KiroService.validateApiKey()` meghívásával ellenőrzi a kulcsot, amely
-a régiónak megfelelő CodeWhisperer/Amazon Q végponttal szemben használja a `ListAvailableProfiles`
-műveletet, és felold egy `profileArn` értéket.
+régiónként 10 másodperces időkorláttal meghívja a `GET https://q.<region>.amazonaws.com/ListAvailableModels?origin=AI_EDITOR`
+végpontot (az Amazon Q felületi API-ja használja ezt az API-kulcsos következtetéshez). `auto`
+módban először a `us-east-1`, majd az `eu-central-1` régióval próbálkozik, és az első olyan régiót
+menti, amely elfogadja a kulcsot. Ha minden lehetséges régió elutasítja a kulcsot, az importálás
+HTTP 400 hibával meghiúsul. Ezután a rendszer a lehetőségekhez mérten meghívja a `ListAvailableProfiles`
+végpontot egy opcionális `profileArn` felderítéséhez (az AWS ezt a legtöbb API-kulcs esetében megtagadja).
 
 A mentett kapcsolat a következőket használja:
 
@@ -156,9 +164,12 @@ A mentett kapcsolat a következőket használja:
 ```
 
 Futásidőben a `KiroExecutor.buildHeaders()` a kulcsot
-`Authorization: Bearer <key>` formában küldi el, és hozzáadja a `tokentype: API_KEY` értéket. A kvóta-/profilhívások
-ugyanezt a jelölőt használják, így az AWS a bearer hitelesítő adatot hosszú élettartamú API-kulcsként kezeli,
-nem pedig OIDC- vagy közösségi hozzáférési tokenként.
+`Authorization: Bearer <key>` formában küldi el, és hozzáadja a `tokentype: API_KEY` fejlécet. A kvóta-/profilhívások
+ugyanezt a jelölőt használják, így az AWS hosszú élettartamú API-kulcsként kezeli a bearert,
+nem pedig OIDC- vagy közösségi hozzáférési tokenként. A `KiroExecutor.execute()` az API-kulcsos következtetési kéréseket kizárólag
+a `https://q.<region>.amazonaws.com/generateAssistantResponse` végpontnak küldi el — beleértve a `us-east-1`
+régiót is —, mivel a Kiro IDE-átjáró elutasítja a `TokenType=API_KEY` értéket, a
+`codewhisperer.us-east-1` pedig érvénytelen kérés törzseként utasítja el az API-kulcsos hasznos adatokat (HTTP 400).
 
 ---
 

@@ -133,6 +133,9 @@ for (const item of budget) {
   // Remove block and line comments to avoid false positives with the word "any" in comments
   let cleanContent = content.replace(/\/\*[\s\S]*?\*\//g, "");
   cleanContent = cleanContent.replace(/\/\/.*$/gm, "");
+  // A property access (including AbortSignal.any) is an identifier, not a type.
+  // Leave type annotations and the existing string-literal budgets unchanged.
+  cleanContent = cleanContent.replace(/(?<!\.)\.\s*any\b/g, "");
   const matches = cleanContent.match(anyRegex);
   const count = matches ? matches.length : 0;
   const status = count <= item.maxAny ? "OK" : "FAIL";

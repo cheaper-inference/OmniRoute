@@ -533,21 +533,24 @@ mv recovered.db ~/.omniroute/storage.sqlite
 Irrestawra mill-backup:
 
 ```bash
-omniroute sync pull --merge   # jew: omniroute backup restore <backup-id>
+omniroute backup restore <backup-id>
 ```
+
+`omniroute sync pull [outPath]` iniżżel biss arkivju sħiħ `.tar.gz` minn server li jkun qed jaħdem
+(`GET /api/db-backups/exportAll`, hija meħtieġa kredenzjali ta’ operatur); ma jirrestawra xejn.
 
 ### Xenarju 3: Iċ-Ċavetta tal-Kriptaġġ Intilfet
 
-**L-irkupru mhuwiex possibbli** mingħajr iċ-ċavetta. L-oqsma kriptati ma jistgħux jinqraw. Erġa’ żid il-fornituri kollha manwalment bi kredenzjali ġodda.
+**L-ebda rkupru mhu possibbli** mingħajr iċ-ċavetta. Il-kampijiet kriptati ma jistgħux jinqraw. Erġa’ żid il-fornituri kollha manwalment bi kredenzjali ġodda.
 
 > **Mitigazzjoni**: Dejjem agħmel backup separat taċ-ċavetta tal-kriptaġġ, idealment f’maniġer tal-passwords jew KMS.
 
 ### Xenarju 4: Id-Diska Mimlija
 
-SQLite jirritorna żbalji `SQLITE_FULL`. Illibera spazju fuq id-diska, imbagħad:
+SQLite se jirritorna żbalji `SQLITE_FULL`. Illibera spazju fuq id-diska, imbagħad:
 
 ```bash
-# Agħmel checkpoint tal-WAL biex tillibera l-ispazju
+# Oħloq checkpoint tal-WAL biex tillibera l-ispazju
 sqlite3 ~/.omniroute/storage.sqlite "PRAGMA wal_checkpoint(TRUNCATE);"
 ```
 

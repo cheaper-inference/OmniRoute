@@ -21,25 +21,6 @@ export const NOAUTH_PROVIDERS = {
       text: "This provider accepts only the official Devin CLI over local ACP stdio and never falls back to another provider.",
     },
   },
-  opencode: {
-    id: "opencode",
-    alias: "oc",
-    name: "OpenCode Free",
-    icon: "terminal",
-    color: "#E87040",
-    textIcon: "OC",
-    website: "https://opencode.ai",
-    noAuth: true,
-    hasFree: true,
-    serviceKinds: ["llm"],
-    authHint:
-      "No API key required — OpenCode's free tier can only be used from within OpenCode (client-contract requests).",
-    freeNote:
-      "No API key required — public OpenCode endpoint with Kimi, GLM, Qwen, MiMo, MiniMax models. Free tier only works from within OpenCode.",
-    notice: {
-      text: "OpenCode Free uses the public OpenCode endpoint (https://opencode.ai/zen/v1). No signup or API key needed. Rate limits apply. OpenCode's free tier can only be used from within OpenCode — requests that do not match the OpenCode client contract are refused with 403 FreeTierError.",
-    },
-  },
   "duckduckgo-web": {
     id: "duckduckgo-web",
     alias: "ddgw",
@@ -55,6 +36,10 @@ export const NOAUTH_PROVIDERS = {
     authHint: "No credentials required — DuckDuckGo AI Chat is anonymous and free.",
     // #7286: tools[] is prompt-emulated via webTools.ts (parseToolCallsFromText).
     toolCalling: "emulated",
+    // Transport gate (read by emulatedNoAuthAllowlist.ts): with the browser pool
+    // enabled (OMNIROUTE_BROWSER_POOL / WEB_COOKIE_USE_BROWSER) a request runs
+    // through a local Playwright/Cloakbrowser page instead of the HTTP path.
+    browserBacked: true,
   },
   "cloudflare-playground": {
     id: "cloudflare-playground",
@@ -67,6 +52,10 @@ export const NOAUTH_PROVIDERS = {
     noAuth: true,
     hasFree: true,
     serviceKinds: ["llm"],
+    toolCalling: "emulated",
+    // Transport gate (read by emulatedNoAuthAllowlist.ts): every request opens
+    // the cf_agent WebSocket inside a local Playwright/Chromium page.
+    browserBacked: true,
     freeNote:
       "Free — Cloudflare's AI Playground: GLM 5.2, Kimi K2.7 Code, DeepSeek V4 Pro, gpt-oss-120B and 16 more. No account, no API key.",
     authHint:
@@ -163,8 +152,9 @@ export const NOAUTH_PROVIDERS = {
     hasFree: true,
     passthroughModels: true,
     serviceKinds: ["llm"],
+    toolCalling: "emulated",
     authHint:
-      "No auth required. API accepts any non-empty string as key for identification. If older built-in models return 404, use Available Models → Import from /models or Auto-Sync; verified live model: Lorbus/Qwen3.6-27B-int4-AutoRound.",
+      "No auth required. API accepts any non-empty string as key for identification. If older built-in models return 404, use Available Models → Import from /models or Auto-Sync; verified live model: turboderp/Qwen3.8-27B-exl3.",
     freeNote: "Free forever — no signup, no credit card. OpenAI-compatible endpoints.",
     notice: {
       text: "UncloseAI needs no API key. API accepts any non-empty string as key for identification. If older built-in models return 404, use Available Models → Import from /models or Auto-Sync.",
@@ -196,7 +186,7 @@ export const NOAUTH_PROVIDERS = {
 // upstream path runs through OmniRoute's proxy-aware global fetch. Providers
 // with browser, WebSocket, direct dispatcher, media, or local CLI paths stay
 // hidden until those paths can guarantee the configured provider proxy.
-export const NOAUTH_PROVIDER_PROXY_SUPPORTED = new Set(["opencode"]);
+export const NOAUTH_PROVIDER_PROXY_SUPPORTED = new Set<string>();
 
 export function supportsNoAuthProviderProxy(providerId: string): boolean {
   return NOAUTH_PROVIDER_PROXY_SUPPORTED.has(providerId);

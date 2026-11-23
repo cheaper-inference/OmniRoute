@@ -98,7 +98,7 @@ globális beállítás és bekapcsolt Kimi-szolgáltató mellett csak a Kimi mod
 
 ## Bevezetési blokk az irányítópulton
 
-A Claude eszközkártya (**Irányítópult → CLI-kód**) megjeleníti az adott példányhoz tartozó pontos `settings.json`-részletet a felderítési alias információs gombja mellett, egy másolás gombbal:
+A Claude eszközkártya (**Irányítópult → CLI Code**) megjeleníti az adott példányhoz tartozó pontos `settings.json`-részletet a felderítési alias információs gombja mellett, egy másolás gombbal:
 
 ```jsonc
 {
@@ -110,20 +110,33 @@ A Claude eszközkártya (**Irányítópult → CLI-kód**) megjeleníti az adott
 }
 ```
 
-Az alap URL a kártya által feloldott cím (beleértve az Ön által megadott egyéni felülbírálást is), már normalizálva — `/v1` utótag és záró perjel nélkül. **A kulcs soha nem jelenik meg**: a blokk helyőrzőt tartalmaz, így sem képernyőkép, sem beillesztett kódrészlet nem szivárogtathatja ki. Cserélje le a helyőrzőt a saját kulcsára.
+Az alap-URL a kártya által feloldott cím (beleértve az Ön által megadott egyéni felülbírálást is), már normalizálva — `/v1` utótag és záró perjel nélkül. **A kulcs soha nem jelenik meg**: a blokk helyőrzőt tartalmaz, így sem képernyőkép, sem beillesztett kódrészlet nem szivárogtathatja ki. Írja felül a helyőrzőt a saját kulcsával.
 
-Adja hozzá a `CLAUDE_CODE_AUTO_COMPACT_WINDOW` változót ugyanahhoz az `env` blokkhoz minden olyan modellnél, amelynek valós kontextusablaka nem 200K — a Claude Code minden általa nem felismert azonosító esetében 200K méretet feltételez, ezért enélkül az automatikus tömörítés rossz ponton indul el (lásd az előző szakasz figyelmeztetését). A kódrészlet-összeállító ezt az értéket is elfogadja, így a célmodell ablakméretét ismerő hívó közvetlenül belefoglalhatja azt.
+Adja hozzá a `CLAUDE_CODE_AUTO_COMPACT_WINDOW` változót ugyanahhoz az `env` blokkhoz minden olyan modellnél, amelynek tényleges kontextusablaka nem 200K — a Claude Code minden általa nem felismert azonosító esetén 200K méretet feltételez, ezért az automatikus tömörítés enélkül rossz ponton aktiválódik (lásd az előző szakasz figyelmeztetését). A kódrészlet-generátor ezt az értéket is elfogadja, így a célmodell ablakméretét ismerő hívó közvetlenül kiírhatja azt.
 
-Forrás: `src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet` (tiszta, egységtesztekkel lefedett összeállító), amelyet a `ClaudeGatewayOnboardingBlock` jelenít meg.
+Forrás: `src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet` (tiszta, egységtesztekkel lefedett generátor), amelyet a `ClaudeGatewayOnboardingBlock` jelenít meg.
+
+### Egy fiók rögzítése (opcionális)
+
+Ha minden Claude Code-kérést egy adott szolgáltatói fiókon keresztül szeretne küldeni, adja hozzá az `x-omniroute-connection` fejlécet az `ANTHROPIC_CUSTOM_HEADERS` használatával ugyanabban az `env` blokkban:
+
+```jsonc
+"ANTHROPIC_CUSTOM_HEADERS": "x-omniroute-connection: <connection id>"
+```
+
+Másolja ki az azonosítót a szolgáltatói oldal kapcsolatának sorában található `xxxxxxxx…` címkéről. A rögzítés csak egyetlen modellhez tartozó azonosítókra (`provider/model`) vonatkozik, kombinációkra nem. A pontos tartalék viselkedést lásd a [Fiók rögzítése kérésenként](../reference/API_REFERENCE.md#account-pinning-per-request) szakaszban.
 
 ---
 
 ## Profilok (`CLAUDE_CONFIG_DIR`)
 
 A Claude Code **nem rendelkezik natív profilfájlokkal** (ellentétben a Codex `~/.codex/<name>.config.toml` fájljával).
-A bevett megoldás a `CLAUDE_CONFIG_DIR` használata — profilonként külön konfigurációs könyvtárral, amelyek mindegyike saját `settings.json` fájllal, hitelesítő adatokkal, előzményekkel és gyorsítótárral rendelkezik.
+Az idiomatikus megoldás a `CLAUDE_CONFIG_DIR` — profilonként külön konfigurációs könyvtár,
+mindegyik saját `settings.json` fájllal, hitelesítő adatokkal, előzményekkel és gyorsítótárral.
 
-Az `omniroute setup-claude` lekéri az aktuális `/v1/models` katalógust, és modellenként egy profilt ír a `~/.claude/profiles/<name>/settings.json` helyre, **ugyanazokat a neveket használva, mint a `setup-codex`** (`glm52`, `kimi-k27`, `deepseek-pro`, …):
+Az `omniroute setup-claude` lekéri az aktuális `/v1/models` katalógust, és modellenként
+egy profilt ír a `~/.claude/profiles/<name>/settings.json` helyre, a
+**`setup-codex` parancsnál használt nevekkel megegyező neveket** használva (`glm52`, `kimi-k27`, `deepseek-pro`, …):
 
 ```jsonc
 // ~/.claude/profiles/glm52/settings.json
@@ -141,10 +154,18 @@ Az `omniroute setup-claude` lekéri az aktuális `/v1/models` katalógust, és m
 ```
 
 > **A hitelesítési token soha nem kerül bele a profilba.** Indítsa a következővel:
-> `omniroute launch --profile <name>` (ez az aktív kontextusból beilleszti az `ANTHROPIC_AUTH_TOKEN` értékét), vagy exportálja saját maga az `ANTHROPIC_AUTH_TOKEN` változót, majd futtassa ezt:
+> `omniroute launch --profile <name>` (ez beilleszti az `ANTHROPIC_AUTH_TOKEN` értékét az
+> aktív kontextusból), vagy exportálja saját maga az `ANTHROPIC_AUTH_TOKEN` változót, majd futtassa ezt:
 > `CLAUDE_CONFIG_DIR=~/.claude/profiles/<name> claude`.
 
-**Automatikus szinkronizálás modellfelderítés után (külön engedélyezhető).** Az OmniRoute automatikusan újragenerálhatja ugyanezeket a `~/.claude/profiles/<name>/settings.json` fájlokat, amikor egy szolgáltatói modell szinkronizálása módosítja az aktuális katalógust — így az új vagy átnevezett modellekhez a parancs ismételt futtatása nélkül jönnek létre profilok. Ez **alapértelmezés szerint ki van kapcsolva**: kapcsolja be a **CLI-kód irányítópulton** („CLI-profilok automatikus szinkronizálása” → Claude Code), vagy állítsa be az `OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES=true` értéket (figyelembe veszi az alapértelmezés szerint bekapcsolt `CLI_ALLOW_CONFIG_WRITES` beállítást is). Ha engedélyezve van, kizárólag profilfájlokat ír; soha nem módosítja az aktív/alapértelmezett Claude-konfigurációt, a hitelesítést vagy a `~/.claude/settings.json` fájlt.
+**Automatikus szinkronizálás a modellfelderítés után (opcionális).** Az OmniRoute automatikusan újragenerálhatja ugyanezeket a
+`~/.claude/profiles/<name>/settings.json` fájlokat, amikor egy szolgáltatói modellszinkronizálás
+módosítja az aktuális katalógust — így az új vagy átnevezett modellekhez a parancs ismételt futtatása
+nélkül jönnek létre profilok. Ez **alapértelmezés szerint ki van kapcsolva**: kapcsolja be a **CLI Code irányítópulton**
+("CLI profile auto-sync" → Claude Code), vagy állítsa be az `OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES=true` értéket
+(ez a `CLI_ALLOW_CONFIG_WRITES` beállítást is figyelembe veszi, amely alapértelmezés szerint be van kapcsolva).
+Bekapcsolt állapotban csak profilfájlokat ír; soha nem módosítja az aktív/alapértelmezett Claude-konfigurációt,
+a hitelesítést vagy a `~/.claude/settings.json` fájlt.
 
 ### Profilok létrehozása és használata
 
@@ -152,11 +173,15 @@ Az `omniroute setup-claude` lekéri az aktuális `/v1/models` katalógust, és m
 # Helyi OmniRoute
 omniroute setup-claude
 
-# Távoli VPS (minden profilba beágyazza a VPS URL-jét)
+# Távoli VPS (minden profilba beépíti a VPS URL-jét)
 omniroute setup-claude --remote http://192.168.0.15:20128 --api-key oma_live_xxx
 
-# Csak néhány szolgáltató
+# Csak bizonyos szolgáltatók
 omniroute setup-claude --only glm,kimi
+
+# Profilok írása a helyi CLI-szolgáltatókhoz is (zcode, auggie, devin-cli-agentic,
+# codex-app-server), amelyek ezen a gazdagépen nem észlelhetők (helyi cél esetén alapértelmezés szerint kihagyva)
+omniroute setup-claude --include-local
 
 # Előnézet írás nélkül
 omniroute setup-claude --dry-run

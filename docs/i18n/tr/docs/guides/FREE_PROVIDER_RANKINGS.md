@@ -14,32 +14,31 @@
 
 ## Nedir?
 
-OmniRoute, **ücretsiz/kimlik doğrulamasız** olarak işaretlenmiş 155 katalog girdisi
-dahil olmak üzere 329 sağlayıcı kaydeder (kimlik doğrulamasız,
+OmniRoute, **ücretsiz/kimlik doğrulamasız** olarak işaretlenmiş 155 katalog girdisi dahil olmak üzere 374 sağlayıcı kaydeder
+(kimlik doğrulamasız,
 ücretsiz katmanlı OAuth veya ücretsiz katmanlı API anahtarı — bkz.
 [Ücretsiz Katmanlar Kılavuzu](../getting-started/FREE-TIERS-GUIDE.md) ve eksiksiz
 [Ücretsiz Katmanlar dizini](../reference/FREE_TIERS.md)). Ancak ücretsiz sağlayıcıların
-model kalitesi büyük ölçüde değişiklik gösterir. Öncü bir model sunan kimlik
-doğrulamasız sağlayıcı, küçük ve eski bir model sunan sağlayıcıdan çok daha kullanışlıdır.
+model kalitesi büyük ölçüde değişir. Öncü bir model sunan kimlik doğrulamasız bir sağlayıcı,
+küçük ve eski bir model sunan sağlayıcıdan çok daha kullanışlıdır.
 
-**Ücretsiz Sağlayıcı Sıralamaları**, her ücretsiz sağlayıcının kataloğunu **Arena AI
-liderlik tablosundaki** **kitle kaynaklı kalite puanlarıyla** (insan tercihlerine dayalı
-ELO; LMArena sohbet botu arenasının arkasındakiyle aynı yaklaşım) birleştirerek
+**Ücretsiz Sağlayıcı Sıralamaları**, her ücretsiz sağlayıcının kataloğunu
+**Arena AI liderlik tablosundaki** **kitle kaynaklı kalite puanlarıyla** (insan tercihlerine
+dayalı ELO; LMArena sohbet robotu arenasının temelindeki aynı fikir) birleştirerek
 "**hangi ücretsiz sağlayıcı bana en iyi modeli sunuyor?**" sorusunu yanıtlar.
 Sağlayıcılar daha sonra **en iyi ücretsiz modellerinin** gücüne göre sıralanır.
 
 Sıralama üç gerçek kaynaktan hesaplanır:
 
-1. Ücretsiz sağlayıcı listeleri — `NOAUTH_PROVIDERS` ve `hasFree` olarak işaretlenmiş
+1. Ücretsiz sağlayıcı listeleri — `NOAUTH_PROVIDERS` ile `hasFree` olarak işaretlenmiş
    `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` girdileri
    (`src/shared/constants/providers.ts`).
-2. Sağlayıcı kayıt defterinden her sağlayıcının model kataloğu
+2. Sağlayıcı kayıt sistemindeki her sağlayıcının model kataloğu
    (`open-sse/config/providerRegistry.ts`).
-3. Arena ELO eşitleme motoru (`src/lib/arenaEloSync.ts`) tarafından
-   `model_intelligence` DB tablosunda saklanan, ELO'dan türetilmiş göreve uygunluk
-   puanları.
+3. Arena ELO senkronizasyon motoru (`src/lib/arenaEloSync.ts`) tarafından
+   `model_intelligence` veritabanı tablosunda saklanan ELO türevi göreve uygunluk puanları.
 
-Birleştirme mantığı `src/lib/freeProviderRankings.ts` dosyasında bulunur.
+Birleştirme mantığı `src/lib/freeProviderRankings.ts` dosyasında yer alır.
 
 ---
 

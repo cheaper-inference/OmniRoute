@@ -1,5 +1,10 @@
+import { hasTrustedEmptyTurn, inheritEmptyTurnPolicy } from "./emptyTurnPolicy.ts";
 import { HTTP_STATUS } from "../config/constants.ts";
 import { buildErrorBody, sanitizeErrorMessage } from "./error.ts";
+import {
+  CODEX_REASONING_REPLAY_ERROR_CODE,
+  matchesReasoningReplayRejectionMessage,
+} from "../executors/codex/reasoningReplayRejection.ts";
 
 type StreamReadinessLogger = {
   debug?: (tag: string, message: string) => void;
@@ -47,9 +52,29 @@ function hasNonEmptyString(value: unknown): boolean {
   return typeof value === "string" && value.length > 0;
 }
 
-function hasUsefulValue(value: unknown): boolean {
+// A Claude thinking or signature delta is proof the model is working, even
+// when its payload carries no readable text (encrypted reasoning, empty
+// signature envelope). Presence of a non-empty `thinking` or `signature`
+// string on a typed delta object counts as liveness — never as user-visible
+// output. Plain `signature: ""` bootstraps stay excluded: only a non-empty
+// value passes.
+function hasThinkingLiveness(value: Record<string, unknown>): boolean {
+  const deltaType = value.type;
+  if (deltaType !== "thinking_delta" && deltaType !== "signature_delta") return false;
+  return hasNonEmptyString(value.thinking) || hasNonEmptyString(value.signature);
+}
+
+/**
+ * #16438 content-probe semantics (EMPTY_STREAM_SIBLING_RECOVERY_ENABLED only): an
+ * opaque signature is reasoning progress, not usable output, while a tool start (or a
+ * Responses `item` carrying one) commits an action before its name/arguments arrive.
+ * The default (`contentProbe: false`) keeps the release semantics untouched.
+ */
+type UsefulContentOptions = { contentProbe?: boolean };
+
+function hasUsefulValue(value: unknown, contentProbe = false): boolean {
   if (hasNonEmptyString(value)) return true;
-  if (Array.isArray(value)) return value.some(hasUsefulValue);
+  if (Array.isArray(value)) return value.some((item) => hasUsefulValue(item, contentProbe));
   if (!isRecord(value)) return false;
 
   // A Responses compaction item IS the turn's output: remote compaction
@@ -59,6 +84,13 @@ function hasUsefulValue(value: unknown): boolean {
   // tripping the #8649 empty-content guard.
   // This shape is specific to Responses streams; chat-completion frames do not produce it.
   if (value.type === "compaction" && hasNonEmptyString(value.encrypted_content)) return true;
+
+  if (contentProbe) {
+    // Tool starts commit an action even before their name/arguments arrive.
+    if (value.type === "function_call" || value.type === "tool_use") return true;
+  } else if (hasThinkingLiveness(value)) {
+    return true;
+  }
 
   for (const key of [
     "content",
@@ -81,7 +113,11 @@ function hasUsefulValue(value: unknown): boolean {
   ]) {
     const candidate = value[key];
     if (hasNonEmptyString(candidate)) return true;
-    if ((Array.isArray(candidate) || isRecord(candidate)) && hasUsefulValue(candidate)) return true;
+    if (
+      (Array.isArray(candidate) || isRecord(candidate)) &&
+      hasUsefulValue(candidate, contentProbe)
+    )
+      return true;
   }
 
   for (const key of [
@@ -92,21 +128,22 @@ function hasUsefulValue(value: unknown): boolean {
     "function_call",
     "function_call_output",
     "output",
+    ...(contentProbe ? ["item"] : []),
     "content_block",
     "response",
     "choices",
     "candidates",
     "parts",
   ]) {
-    if (hasUsefulValue(value[key])) return true;
+    if (hasUsefulValue(value[key], contentProbe)) return true;
   }
 
   return false;
 }
 
-function hasUsefulJsonPayload(payload: unknown): boolean {
+function hasUsefulJsonPayload(payload: unknown, contentProbe = false): boolean {
   if (!isRecord(payload)) return false;
-  return hasUsefulValue(payload);
+  return hasUsefulValue(payload, contentProbe);
 }
 
 function isPingEventType(type: string): boolean {
@@ -156,7 +193,7 @@ function hasNonPingStructuredPayload(payload: unknown, eventType = ""): boolean 
   return payload !== null && payload !== undefined;
 }
 
-export function hasUsefulStreamContent(text: string): boolean {
+export function hasUsefulStreamContent(text: string, options: UsefulContentOptions = {}): boolean {
   const lines = text.split(/\r?\n/);
 
   for (const line of lines) {
@@ -169,7 +206,7 @@ export function hasUsefulStreamContent(text: string): boolean {
     if (!data || data === "[DONE]") continue;
 
     try {
-      if (hasUsefulJsonPayload(JSON.parse(data))) return true;
+      if (hasUsefulJsonPayload(JSON.parse(data), options.contentProbe === true)) return true;
     } catch {
       if (data.length > 0) return true;
     }
@@ -189,7 +226,29 @@ const LEGIT_EMPTY_TERMINAL_REASONS = new Set([
   "tool_use",
 ]);
 
-const TERMINAL_REASON_PATTERN = /"(?:finish_reason|stop_reason)"\s*:\s*"([^"]+)"/g;
+// #16438 content probe only (EMPTY_STREAM_SIBLING_RECOVERY_ENABLED): Claude terminals
+// that also end a turn without content on purpose, so the probe must not turn them
+// into a retryable empty_content failure. The default watcher keeps the set above.
+const CONTENT_PROBE_LEGIT_EMPTY_TERMINAL_REASONS: ReadonlySet<string> = new Set([
+  ...LEGIT_EMPTY_TERMINAL_REASONS,
+  "refusal",
+  "pause_turn",
+  "model_context_window_exceeded",
+]);
+
+// #16072: terminal states that say the turn ended NORMALLY with no content —
+// the model's answer simply is "nothing to say" (agent "no reply needed"
+// turns). These are the same clean empty terminators #15505 accepts for
+// Claude-format streams (end_turn, stop_sequence) plus the OpenAI finish twin
+// ("stop"). Distinct from LEGIT_EMPTY_TERMINAL_REASONS above, whose members
+// describe terminations where content was legitimately absent for structural
+// reasons (length cap, tool-call-only turns).
+const NORMAL_STOP_TERMINALS: ReadonlyMap<string, Set<string>> = new Map([
+  ["finish_reason", new Set(["stop"])],
+  ["stop_reason", new Set(["end_turn", "stop_sequence"])],
+]);
+
+const TERMINAL_REASON_PATTERN = /"(finish_reason|stop_reason)"\s*:\s*"([^"]+)"/g;
 
 const SSE_FIELD_LINE = /(?:^|\r?\n)\s*(?:data|event):/;
 
@@ -246,6 +305,89 @@ export function frameHasStructuredStreamError(frame: string): boolean {
   return false;
 }
 
+const CLAUDE_REASONING_DELTA_TYPES = new Set(["thinking_delta", "signature_delta"]);
+const CLAUDE_REASONING_BLOCK_TYPES = new Set(["thinking", "redacted_thinking"]);
+const RESPONSES_ITEM_EVENTS = new Set(["response.output_item.added", "response.output_item.done"]);
+
+function hasGeminiReasoningProgress(payload: Record<string, unknown>): boolean {
+  if (!Array.isArray(payload.candidates)) return false;
+  return payload.candidates.some((candidate) => {
+    if (!isRecord(candidate) || !isRecord(candidate.content)) return false;
+    const parts = candidate.content.parts;
+    return (
+      Array.isArray(parts) &&
+      parts.some((part) => isRecord(part) && hasNonEmptyString(part.thoughtSignature))
+    );
+  });
+}
+
+function hasChatReasoningProgress(payload: Record<string, unknown>): boolean {
+  if (!Array.isArray(payload.choices)) return false;
+  return payload.choices.some((choice) => {
+    if (!isRecord(choice) || !isRecord(choice.delta)) return false;
+    const delta = choice.delta;
+    if (typeof delta.reasoning_content === "string" || typeof delta.reasoning === "string")
+      return true;
+    return (
+      Array.isArray(delta.reasoning_details) &&
+      delta.reasoning_details.some((detail) => {
+        if (!isRecord(detail)) return false;
+        if (detail.type === "reasoning.encrypted") return hasNonEmptyString(detail.data);
+        return detail.type === "reasoning.text" && hasNonEmptyString(detail.signature);
+      })
+    );
+  });
+}
+
+function isReasoningProgressPayload(payload: Record<string, unknown>, type: string): boolean {
+  if (type === "content_block_delta") {
+    const delta = isRecord(payload.delta) ? payload.delta : null;
+    return typeof delta?.type === "string" && CLAUDE_REASONING_DELTA_TYPES.has(delta.type);
+  }
+  if (type === "content_block_start") {
+    const block = isRecord(payload.content_block) ? payload.content_block : null;
+    return typeof block?.type === "string" && CLAUDE_REASONING_BLOCK_TYPES.has(block.type);
+  }
+  if (RESPONSES_ITEM_EVENTS.has(type)) {
+    return isRecord(payload.item) && payload.item.type === "reasoning";
+  }
+  return (
+    type.startsWith("response.reasoning") ||
+    hasGeminiReasoningProgress(payload) ||
+    hasChatReasoningProgress(payload)
+  );
+}
+
+/**
+ * True when an SSE frame shows a reasoning model still working: a Claude thinking block
+ * (start, thinking_delta or signature_delta, even with no visible thinking text) or an
+ * OpenAI Responses reasoning item, Gemini thought signature, or Chat reasoning delta.
+ * Encrypted/signature-only Chat reasoning details also count. These frames are not model output —
+ * an encrypted or omitted thought is not something the client can show, so
+ * hasUsefulStreamContent stays false for them (#8649). They signal reasoning activity
+ * to the content-stall watchdog; an explicitly empty delta does not prove token emission.
+ */
+export function isReasoningProgressFrame(frame: string): boolean {
+  if (!/thinking|signature|reasoning|thoughtSignature/.test(frame)) return false;
+  let eventType = "";
+  for (const line of frame.split(/\r?\n/)) {
+    const trimmed = line.trim();
+    if (trimmed.startsWith("event:")) {
+      eventType = trimmed.slice(6).trim();
+      continue;
+    }
+    if (!trimmed.startsWith("data:")) continue;
+    try {
+      const parsed: unknown = JSON.parse(trimmed.slice(5).trim());
+      if (isRecord(parsed) && isReasoningProgressPayload(parsed, getPayloadType(parsed, eventType)))
+        return true;
+    } catch {
+      // non-JSON data lines carry no reasoning signal
+    }
+  }
+  return false;
+}
+
 export type StreamContentWatcher = {
   /** Feed a decoded slice of the client-facing stream. Safe to call with partial frames. */
   note: (text: string) => void;
@@ -253,8 +395,19 @@ export type StreamContentWatcher = {
   finish: () => void;
   /** True once any frame carried real model output (text, reasoning, or a tool call). */
   sawContent: () => boolean;
+  /**
+   * Reasoning-progress frames (isReasoningProgressFrame) seen before the first real
+   * output. Grows while a reasoning model thinks without visible output.
+   */
+  reasoningProgress: () => number;
   /** True once a terminal state was seen where emitting no content is valid. */
   sawLegitEmptyTerminal: () => boolean;
+  /**
+   * True once a terminal frame declared a NORMAL stop (finish_reason "stop",
+   * stop_reason "end_turn"/"stop_sequence") — the upstream's own verdict that
+   * the turn is complete, even when no content followed (#16072).
+   */
+  sawNormalStopTerminal: () => boolean;
   /**
    * True once the stream looked like SSE at all. Not every body reaching the
    * client wrapper is event-stream — a plain JSON completion is forwarded
@@ -283,22 +436,40 @@ export type StreamContentWatcher = {
  * Also tracks `sawError` so an already-emitted structured error is not rewritten
  * as empty content (parity with Claude #3685 `lifecycle.hasError` and readiness #8972).
  */
-export function createStreamContentWatcher(): StreamContentWatcher {
+export function createStreamContentWatcher(
+  options: UsefulContentOptions = {}
+): StreamContentWatcher {
+  const contentProbe = options.contentProbe === true;
+  const legitEmptyReasons: ReadonlySet<string> = contentProbe
+    ? CONTENT_PROBE_LEGIT_EMPTY_TERMINAL_REASONS
+    : LEGIT_EMPTY_TERMINAL_REASONS;
   const MAX_BUFFERED = 64 * 1024;
   let pending = "";
   let content = false;
   let legitEmpty = false;
+  let normalStop = false;
   let sse = false;
   let error = false;
+  let progress = 0;
 
   const inspect = (frame: string): void => {
     if (!frame) return;
     if (!sse && SSE_FIELD_LINE.test(frame)) sse = true;
     if (!error && frameHasStructuredStreamError(frame)) error = true;
-    if (!content && hasUsefulStreamContent(frame)) content = true;
+    if (!content && hasUsefulStreamContent(frame, { contentProbe })) content = true;
+    if (!content && isReasoningProgressFrame(frame)) progress += 1;
+    if (!normalStop) {
+      for (const match of frame.matchAll(TERMINAL_REASON_PATTERN)) {
+        const reasons = NORMAL_STOP_TERMINALS.get(match[1] ?? "");
+        if (reasons?.has(match[2] ?? "")) {
+          normalStop = true;
+          break;
+        }
+      }
+    }
     if (legitEmpty) return;
     for (const match of frame.matchAll(TERMINAL_REASON_PATTERN)) {
-      if (LEGIT_EMPTY_TERMINAL_REASONS.has(match[1])) {
+      if (legitEmptyReasons.has(match[2])) {
         legitEmpty = true;
         return;
       }
@@ -325,7 +496,9 @@ export function createStreamContentWatcher(): StreamContentWatcher {
       pending = "";
     },
     sawContent: () => content,
+    reasoningProgress: () => progress,
     sawLegitEmptyTerminal: () => legitEmpty,
+    sawNormalStopTerminal: () => normalStop,
     sawSseFrame: () => sse,
     sawError: () => error,
   };
@@ -449,7 +622,8 @@ function createErrorResponse(
 
 export function prependBufferedChunks(
   chunks: Uint8Array[],
-  reader: ReadableStreamDefaultReader<Uint8Array>
+  reader: ReadableStreamDefaultReader<Uint8Array>,
+  pendingRead?: Promise<ReadableStreamReadResult<Uint8Array>> | null
 ): ReadableStream<Uint8Array> {
   let bufferedIndex = 0;
   let readInFlight = false;
@@ -494,7 +668,9 @@ export function prependBufferedChunks(
 
       readInFlight = true;
       try {
-        const { done, value } = await reader.read();
+        const next = pendingRead ?? reader.read();
+        pendingRead = null;
+        const { done, value } = await next;
         if (cancelRequested) return;
         if (done) {
           releaseReader();
@@ -523,12 +699,12 @@ class StreamReadinessReadTimeout extends Error {
 }
 
 function readWithTimeout(
-  reader: ReadableStreamDefaultReader<Uint8Array>,
+  read: Promise<ReadableStreamReadResult<Uint8Array>>,
   timeoutMs: number
 ): Promise<ReadableStreamReadResult<Uint8Array>> {
   return new Promise((resolve, reject) => {
     const timeout = setTimeout(() => reject(new StreamReadinessReadTimeout()), timeoutMs);
-    reader.read().then(
+    read.then(
       (value) => {
         clearTimeout(timeout);
         resolve(value);
@@ -551,6 +727,8 @@ export async function ensureStreamReadiness(
     provider?: string | null;
     model?: string | null;
     log?: StreamReadinessLogger | null;
+    /** Brief content check after the first lifecycle event; expiry hands off, never aborts. */
+    contentProbeMs?: number;
   }
 ): Promise<StreamReadinessResult> {
   if (!response.body || options.timeoutMs <= 0) return { ok: true, response };
@@ -575,6 +753,12 @@ export async function ensureStreamReadiness(
       : startedAt + effectiveTimeoutMs;
   let deadline = startedAt + effectiveTimeoutMs;
   let handedOffReader = false;
+  const contentWatcher = options.contentProbeMs
+    ? createStreamContentWatcher({ contentProbe: true })
+    : null;
+  let contentProbeDeadline = 0;
+  let bufferedBytes = 0;
+  let pendingRead: Promise<ReadableStreamReadResult<Uint8Array>> | null = null;
   // Parked streams honor the parked state: the stall deadline is suspended
   // (frozen) on heartbeat comment frames instead of merely extended, so a
   // long park does not trip the stall timeout. The absolute ceiling
@@ -591,11 +775,14 @@ export async function ensureStreamReadiness(
     const headers = new Headers(response.headers);
     // The parked marker is internal: honor it, never forward it.
     headers.delete(PARKED_STREAM_HEADER);
-    return new Response(prependBufferedChunks(chunks, reader), {
-      status: response.status,
-      statusText: response.statusText,
-      headers,
-    });
+    return inheritEmptyTurnPolicy(
+      response,
+      new Response(prependBufferedChunks(chunks, reader, pendingRead), {
+        status: response.status,
+        statusText: response.statusText,
+        headers,
+      })
+    );
   };
 
   const timeoutReason = () =>
@@ -603,7 +790,11 @@ export async function ensureStreamReadiness(
 
   try {
     while (true) {
-      const remainingMs = deadline - Date.now();
+      if (contentProbeDeadline && Date.now() >= contentProbeDeadline) {
+        handedOffReader = true;
+        return { ok: true, response: buildReadyResponse() };
+      }
+      const remainingMs = (contentProbeDeadline || deadline) - Date.now();
       if (remainingMs <= 0) {
         const reason = timeoutReason();
         options.log?.warn?.(
@@ -630,8 +821,19 @@ export async function ensureStreamReadiness(
       const deadlineBeforeRead = deadline;
       const readStart = Date.now();
       try {
-        readResult = await readWithTimeout(reader, remainingMs);
+        pendingRead = reader.read();
+        readResult = await readWithTimeout(
+          pendingRead,
+          contentProbeDeadline ? Math.max(1, contentProbeDeadline - Date.now()) : remainingMs
+        );
+        pendingRead = null;
       } catch (error) {
+        if (contentProbeDeadline) {
+          // A slow reasoning turn is ready, not failed. The replay owns this exact
+          // pending read, including a rejection; starting another read would lose a chunk.
+          handedOffReader = true;
+          return { ok: true, response: buildReadyResponse() };
+        }
         // A source stream that errors before its first non-ping event (e.g. an
         // executor watchdog giving up on a stalled upstream) must say so instead of
         // claiming a readiness timeout. The code/type/status stay on the timeout class on
@@ -687,6 +889,34 @@ export async function ensureStreamReadiness(
       }
 
       if (readResult.done) {
+        contentWatcher?.finish();
+        if (
+          contentProbeDeadline &&
+          contentWatcher?.sawSseFrame() &&
+          !contentWatcher.sawContent() &&
+          !contentWatcher.sawError() &&
+          !contentWatcher.sawLegitEmptyTerminal() &&
+          !hasTrustedEmptyTurn(response)
+        ) {
+          const reason = "Provider returned empty content";
+          return {
+            ok: false,
+            reason,
+            classificationReason: reason,
+            code: "empty_content",
+            type: "stream_empty_content",
+            response: createErrorResponse(
+              HTTP_STATUS.BAD_GATEWAY,
+              reason,
+              "empty_content",
+              "stream_empty_content"
+            ),
+          };
+        }
+        if (contentProbeDeadline) {
+          handedOffReader = true;
+          return { ok: true, response: buildReadyResponse() };
+        }
         const tail = decoder.decode(undefined, { stream: false });
         if (tail && appendStreamReadinessSignal(readinessState, tail)) {
           handedOffReader = true;
@@ -699,6 +929,34 @@ export async function ensureStreamReadiness(
 
         const classificationReason = "Stream ended before producing a non-ping SSE event";
         const upstreamDiagnostic = readinessState.upstreamDiagnostic || undefined;
+        // #16364: a Codex replayed-reasoning rejection rides a 200-OK SSE that
+        // then closes with zero useful content — a deterministic request error,
+        // not the transient hang-up STREAM_EARLY_EOF describes. Surface the
+        // same stable 400 code the non-streaming path already returns
+        // (reasoningReplayRejection.ts): the client sees the real cause, and
+        // shouldRetryStreamEarlyEof (keyed on this code) stops buying a
+        // same-connection retry of a payload that will fail identically.
+        if (upstreamDiagnostic && matchesReasoningReplayRejectionMessage(upstreamDiagnostic)) {
+          options.log?.warn?.(
+            "STREAM",
+            `${classificationReason}: ${upstreamDiagnostic} (${options.provider || "provider"}/${options.model || "unknown"})`
+          );
+          return {
+            ok: false,
+            reason: `${classificationReason}: ${upstreamDiagnostic}`,
+            classificationReason,
+            upstreamDiagnostic,
+            code: CODEX_REASONING_REPLAY_ERROR_CODE,
+            type: "invalid_request_error",
+            response: createErrorResponse(
+              HTTP_STATUS.BAD_REQUEST,
+              upstreamDiagnostic,
+              CODEX_REASONING_REPLAY_ERROR_CODE,
+              "invalid_request_error",
+              upstreamDiagnostic
+            ),
+          };
+        }
         const reason = upstreamDiagnostic
           ? `${classificationReason}: ${upstreamDiagnostic}`
           : classificationReason;
@@ -726,6 +984,20 @@ export async function ensureStreamReadiness(
       if (!readResult.value) continue;
       chunks.push(readResult.value);
       const decodedChunk = decoder.decode(readResult.value, { stream: true });
+      bufferedBytes += readResult.value.byteLength;
+      contentWatcher?.note(decodedChunk);
+      if (contentProbeDeadline) {
+        if (
+          contentWatcher?.sawContent() ||
+          contentWatcher?.sawError() ||
+          contentWatcher?.sawLegitEmptyTerminal() ||
+          bufferedBytes >= 64 * 1024
+        ) {
+          handedOffReader = true;
+          return { ok: true, response: buildReadyResponse() };
+        }
+        continue;
+      }
 
       // Liveness extension: bytes arrived → connection is alive, not dead.
       // Reset the deadline so slow-but-alive upstreams (reasoning warm-ups,
@@ -752,6 +1024,16 @@ export async function ensureStreamReadiness(
       }
 
       if (appendStreamReadinessSignal(readinessState, decodedChunk)) {
+        if (
+          contentWatcher &&
+          !contentWatcher.sawContent() &&
+          !contentWatcher.sawError() &&
+          !contentWatcher.sawLegitEmptyTerminal() &&
+          bufferedBytes < 64 * 1024
+        ) {
+          contentProbeDeadline = Date.now() + Math.min(1000, Math.max(1, options.contentProbeMs!));
+          continue;
+        }
         options.log?.debug?.(
           "STREAM",
           `Stream readiness confirmed in ${Date.now() - startedAt}ms (${options.provider || "provider"}/${options.model || "unknown"})`

@@ -2,7 +2,7 @@
  * Integration tests for GET /api/search/providers — extended catalog (F4).
  *
  * Tests:
- * - Returns 25 items total (20 search + 6 fetch providers).
+ * - Returns 28 items total (21 search + 7 fetch providers).
  * - Each item carries the correct `kind` field.
  * - Status reflects actual DB credential state:
  *   - "configured"  when an active, non-rate-limited connection exists.
@@ -48,11 +48,11 @@ const route = await import("../../src/app/api/search/providers/route.ts");
 // Constants
 // ---------------------------------------------------------------------------
 
-// 20 search-kind providers: serper, brave, perplexity, exa, tavily, nimble-search, firecrawl,
+// 21 search-kind providers: serper, brave, perplexity, exa, tavily, nimble-search, firecrawl,
 // google-pse, linkup, searchapi, youcom, searxng, ollama, zai, jina-search, anysearch-search,
-// context7 (#11140), duckduckgo-free, x-search, xquik-search.
-const EXPECTED_SEARCH_COUNT = 20;
-const EXPECTED_FETCH_COUNT = 6;
+// context7 (#11140), duckduckgo-free, x-search, xquik-search, parallel-search.
+const EXPECTED_SEARCH_COUNT = 21;
+const EXPECTED_FETCH_COUNT = 7;
 const EXPECTED_TOTAL = EXPECTED_SEARCH_COUNT + EXPECTED_FETCH_COUNT;
 
 // ---------------------------------------------------------------------------
@@ -138,7 +138,7 @@ test("search-providers-catalog: returns 401 for unauthenticated requests when au
   assert.ok(!bodyStr.includes(" at /"), "error body must not contain stack trace");
 });
 
-test("search-providers-catalog: returns 25 providers (20 search + 6 fetch)", async () => {
+test("search-providers-catalog: returns 28 providers (21 search + 7 fetch)", async () => {
   const req = await buildAuthRequest();
   const res = await route.GET(req);
 
@@ -293,6 +293,7 @@ test("search-providers-catalog: fetch providers have correct metadata", async ()
   assert.ok(ids.includes("tinyfish"), "tinyfish must be present");
   assert.ok(ids.includes("nimble-search"), "nimble-search must be present");
   assert.ok(ids.includes("anysearch-search"), "anysearch-search must be present");
+  assert.ok(ids.includes("parallel-search"), "parallel-search must be present");
 
   const firecrawl = fetchProviders.find((p: { id: string }) => p.id === "firecrawl");
   assert.equal(firecrawl.name, "Firecrawl");

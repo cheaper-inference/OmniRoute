@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { Card, Button, Badge, ConfirmModal } from "@/shared/components";
 import { useLocale, useTranslations } from "next-intl";
 import DatabaseBackupRetentionCard from "./DatabaseBackupRetentionCard";
+import ProviderTransferPanel from "./ProviderTransferPanel";
 import {
   fetchDatabaseSettingsData,
   isAuthRequiredResponse,
@@ -1286,6 +1287,14 @@ export default function SystemStorageTab() {
         <div className="flex-1">
           <h3 className="text-lg font-semibold">{t("systemStorage")}</h3>
           <p className="text-xs text-text-muted">{t("allDataLocal")}</p>
+          <p className="text-xs text-text-muted mt-1">
+            Database backups are stored on this server in the db_backups folder under its data
+            directory.{" "}
+            <a href="/dashboard/endpoint" className="underline">
+              Cloud sync is a separate setting under Endpoints
+            </a>{" "}
+            and can upload credentials to a configured remote destination.
+          </p>
         </div>
         <Badge variant="success" size="sm">
           {storageHealth.driver || "json"}
@@ -1387,6 +1396,7 @@ export default function SystemStorageTab() {
             className="hidden"
             onChange={handleJsonSelected}
           />
+          <ProviderTransferPanel />
         </div>
 
         {confirmImport && pendingImportFile && (

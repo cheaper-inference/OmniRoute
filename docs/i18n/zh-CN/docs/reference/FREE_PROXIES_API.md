@@ -13,7 +13,7 @@ OmniRoute 在 `free_proxies` 表中提供了一组精选的免费代理，
 
 返回经过筛选、排序和分页的数据切片以及总数。筛选和
 计数均在 SQL 中完成，因此 UI 无需将每一行加载到内存中，
-即可显示真实总数（例如 `总计：0`）。
+即可显示真实总数（例如 `Total: 0`）。
 
 ### 查询参数
 
@@ -53,8 +53,8 @@ OmniRoute 在 `free_proxies` 表中提供了一组精选的免费代理，
 ```
 
 `total` 表示分页**之前**经过筛选的总数，因此 UI 可以独立渲染
-`总计：N` 和 `hasMore`。`syncErrors` 以来源 ID 为键，
-并且仅为上次同步失败的来源填充内容，因此 `总计：0` 的结果
+`Total: N` 和 `hasMore`。`syncErrors` 以来源 ID 为键，
+并且仅为上次同步失败的来源填充内容，因此 `Total: 0` 的结果
 绝不会在没有说明的情况下出现。
 
 ## 添加到代理池 — `POST /api/settings/free-proxies/[id]/add-to-pool`

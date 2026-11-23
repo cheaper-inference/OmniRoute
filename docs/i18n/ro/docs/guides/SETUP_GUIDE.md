@@ -136,9 +136,9 @@ omniroute providers validate
 
 ---
 
-## Configurarea instrumentului CLI
+## Configurarea instrumentelor CLI
 
-### 1) Conectați furnizorii și creați cheia API
+### 1) Conectați furnizorii și creați o cheie API
 
 1. Deschideți Dashboard → `Providers` și conectați cel puțin un furnizor (OAuth sau cheie API).
 2. Deschideți Dashboard → `Endpoints` și creați o cheie API.
@@ -152,41 +152,49 @@ Cheie API:    [copiați de pe pagina Endpoint]
 Model:        if/qwen3.8-max-preview (sau orice prefix furnizor/model)
 ```
 
-Dacă editorul dvs. nu poate trimite `Authorization: Bearer ...`, utilizați în schimb baza de compatibilitate cu token inclus:
+Dacă editorul dvs. nu poate trimite `Authorization: Bearer ...`, utilizați în schimb adresa de bază de compatibilitate care include tokenul:
 
 ```txt
-URL de bază:         http://localhost:20128/api/v1/vscode/YOUR_KEY/
-URL pentru modele:   http://localhost:20128/api/v1/vscode/YOUR_KEY/models
-URL pentru chat:     http://localhost:20128/api/v1/vscode/YOUR_KEY/chat/completions
-URL pentru taguri Ollama: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
+URL de bază:       http://localhost:20128/api/v1/vscode/YOUR_KEY/
+URL pentru modele: http://localhost:20128/api/v1/vscode/YOUR_KEY/models
+URL pentru chat:   http://localhost:20128/api/v1/vscode/YOUR_KEY/chat/completions
+URL pentru etichetele Ollama: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
 ```
 
 Funcționează cu Claude Code, Codex CLI, Cursor, Cline, OpenClaw, OpenCode și SDK-uri compatibile cu OpenAI.
 
 #### Configurare automată cu `setup-*`
 
-În loc să introduceți manual URL-ul de bază și cheia, permiteți OmniRoute să scrie configurația proprie a fiecărui instrument folosind catalogul activ de modele. Câte o comandă pentru fiecare instrument:
+În loc să introduceți manual URL-ul de bază și cheia, permiteți OmniRoute să scrie configurația
+proprie a fiecărui instrument pe baza catalogului activ de modele. Câte o comandă pentru fiecare instrument:
 
 ```bash
 omniroute setup-codex        # profiluri ~/.codex/<name>.config.toml
 omniroute setup-claude       # ~/.claude/profiles/<name>/settings.json
 omniroute setup-opencode     # ~/.config/opencode/opencode.json (compatibil cu OpenAI)
-omniroute setup-cline        # setările Cline CLI + extensia VS Code
+omniroute setup-cline        # setările pentru Cline CLI + extensia VS Code
 omniroute setup-kilo         # Kilo Code
 omniroute setup-continue     # ~/.continue/config.yaml (Continue / cn)
-omniroute setup-cursor       # afișează pașii din aplicația Cursor
+omniroute setup-cursor       # afișează pașii de urmat în aplicația Cursor
 omniroute setup-roo          # import Roo Code + indicator autoImport
 omniroute setup-crush        # ~/.config/crush/crush.json
+omniroute setup-zed          # ~/.config/zed/settings.json (openai_compatible)
 omniroute setup-goose        # ~/.config/goose/config.yaml
 omniroute setup-aider        # ~/.aider.conf.yml
 omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 ```
 
-Fiecare acceptă `--remote <url> --api-key <key>` pentru a configura un instrument local cu un OmniRoute **la distanță**, precum și `--dry-run` pentru previzualizare. Pentru a lansa un CLI cu mediul corespunzător injectat și fără a scrie nicio configurație, utilizați lansatorul generic `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini); lansatoarele vechi specifice fiecărui instrument, `omniroute launch` (Claude Code) și `omniroute launch-codex` (Codex), rămân disponibile.
+Fiecare acceptă `--remote <url> --api-key <key>` pentru configurarea unui instrument local cu o instanță
+OmniRoute **la distanță**, precum și `--dry-run` pentru previzualizare. Pentru a lansa un CLI cu variabilele de
+mediu corecte injectate, fără a scrie nicio configurație, utilizați lansatorul generic
+`omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini);
+lansatoarele vechi specifice fiecărui instrument, `omniroute launch` (Claude Code) și
+`omniroute launch-codex` (Codex), rămân disponibile.
 
-Pentru tabelul complet (ce scrie fiecare comandă, toate opțiunile, local comparativ cu la distanță, convențiile `/v1` pentru URL-ul de bază), consultați **[Integrări CLI](./CLI-INTEGRATIONS.md)**.
+Pentru tabelul complet (ce scrie fiecare comandă, toate opțiunile, local față de la distanță, convențiile URL-ului
+de bază `/v1`), consultați **[Integrări CLI](./CLI-INTEGRATIONS.md)**.
 
-Pentru configurarea detaliată a fiecărui instrument (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot și altele), consultați ghidul dedicat **[Ghidul instrumentelor CLI](../reference/CLI-TOOLS.md)**.
+Pentru configurarea detaliată a fiecărui instrument (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot și altele), consultați ghidul dedicat **[Instrumentelor CLI](../reference/CLI-TOOLS.md)**.
 
 ---
 
@@ -317,7 +325,7 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ## Șablon pentru Void Linux (xbps-src)
 
-Utilizatorii Void Linux pot construi un pachet nativ folosind `xbps-src`. Salvați acest bloc ca `srcpkgs/omniroute/template`:
+Pentru utilizatorii Void Linux, puteți construi un pachet nativ folosind `xbps-src`. Salvați acest bloc ca `srcpkgs/omniroute/template`:
 
 ```bash
 # Fișier șablon pentru „omniroute”

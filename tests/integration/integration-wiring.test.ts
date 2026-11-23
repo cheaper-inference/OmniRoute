@@ -82,6 +82,8 @@ describe("Pipeline Wiring — instrumentation-node.ts", () => {
 describe("Pipeline Wiring — sse chat handler", () => {
   const src = readProjectFile("src/sse/handlers/chat.ts");
   const coreSrc = readProjectFile("open-sse/handlers/chatCore.ts");
+  // recordCost moved with the streaming tail when handleChatCore was split into leaves.
+  const streamingTailSrc = readProjectFile("open-sse/handlers/chatCore/streamingTail.ts");
 
   it("should import and use guardrail pre-call validation", () => {
     assert.ok(src, "src/sse/handlers/chat.ts should exist");
@@ -107,8 +109,9 @@ describe("Pipeline Wiring — sse chat handler", () => {
 
   it("should keep cost tracking integration in the chat pipeline", () => {
     assert.ok(coreSrc, "open-sse/handlers/chatCore.ts should exist");
+    assert.ok(streamingTailSrc, "open-sse/handlers/chatCore/streamingTail.ts should exist");
     assert.match(coreSrc, /calculateCost/);
-    assert.match(coreSrc, /recordCost/);
+    assert.match(streamingTailSrc, /recordCost/);
   });
 
   it("should not track backup artifacts in the active src/sse shim", () => {
@@ -271,14 +274,25 @@ describe("API Routes — dashboard and tool consumers", () => {
   it("keeps usage quota wired through A2A and MCP tools", () => {
     const quotaSkill = readProjectFile("src/lib/a2a/skills/quotaManagement.ts");
     const mcpAdvancedTools = readProjectFile("open-sse/mcp-server/tools/advancedTools.ts");
+    const mcpOpsTools = readProjectFile("open-sse/mcp-server/tools/opsTools.ts");
     const mcpServer = readProjectFile("open-sse/mcp-server/server.ts");
 
     assert.ok(quotaSkill, "quotaManagement skill should exist");
     assert.ok(mcpAdvancedTools, "advanced MCP tools should exist");
+    assert.ok(mcpOpsTools, "operational MCP tools should exist");
     assert.ok(mcpServer, "MCP server should exist");
     assert.match(quotaSkill, /\/api\/usage\/quota/);
     assert.match(mcpAdvancedTools, /\/api\/usage\/quota/);
-    assert.match(mcpServer, /\/api\/usage\/quota/);
+    // The quota handler moved out of the registration module in #15159.
+    assert.match(mcpOpsTools, /["']\/api\/usage\/quota["']/);
+    assert.match(
+      mcpServer,
+      /^import\s*\{[^}]*\bhandleCheckQuota\b[^}]*\}\s*from\s*"\.\/tools\/opsTools\.ts";/m
+    );
+    assert.match(
+      mcpServer,
+      /^\s+withScopeEnforcement\("omniroute_check_quota",\s*\(args\)\s*=>\s*handleCheckQuota\(checkQuotaInput\.parse\(args\)\)\s*\)/m
+    );
     assertRouteMethods("src/app/api/usage/quota/route.ts", ["GET"]);
   });
 

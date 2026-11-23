@@ -123,7 +123,9 @@
       "maxCostOpt": "Ìnáwó tó pọ̀ jù lọ fún ọjọ́ kan (USD)",
       "allowedModelsOpt": "Àtòjọ àwọn módẹ́lì tí a fàyè gbà, tí a fi àmì kọ́mà yà sọ́tọ̀",
       "nothingToSet": "Kò sí ààyè ìlànà kankan tí a pèsè. Lo --rate-limit, --max-cost, tàbí --allowed-models.",
-      "updated": "A ti ṣàfikún ìlànà náà."
+      "updated": "A ti ṣàfikún ìlànà náà.",
+      "modelAccessModeOpt": "Ìpo ìráyè sí àwòṣe (all | restricted)",
+      "unrestrictedOpt": "Gba gbogbo àwòṣe láàyè (--model-access-mode all)"
     },
     "expiration": {
       "title": "Ìparí Àkókò Kọ́kọ́rọ́",
@@ -254,6 +256,7 @@
     "log": "Ṣàfihàn àwọn log server níbẹ̀",
     "no_recovery": "Pa ìtunbẹ̀rẹ̀ aládàáṣe lẹ́yìn ìkọ̀lù (ipò debugging)",
     "max_restarts": "Iye ìtunbẹ̀rẹ̀ lẹ́yìn ìkọ̀lù tó pọ̀ jù láàárín 30s kí ó tó jáwọ́ (àìyípadà: 2)",
+    "headless": "Ṣiṣẹ ẹ̀rọ proxy nìkan: dashboard ti wà ní pípa (404), a fo àwọn ètò kékeré àṣàyàn (ó ṣètò OMNIROUTE_HEADLESS=1)",
     "tray": "Bẹ̀rẹ̀ nínú atẹ eto (dẹ́sítọ́ọ̀pù nìkan, àṣàyàn ni)",
     "no_tray": "Pa àmì atẹ eto rẹ́",
     "ready_timeout": "Àkókò ìdádúró tó pọ̀ jù fún àyẹ̀wò ìmúrasílẹ̀ ní ms (bákan náà OMNIROUTE_READY_TIMEOUT_MS, àìyípadà 60000)",
@@ -1168,32 +1171,18 @@
   "sync": {
     "description": "Mú ìṣètò bá ara mu láàárín àwọn instance OmniRoute",
     "push": {
-      "description": "Fi ìṣètò ránṣẹ́ sí cloud tàbí instance jíjìn",
-      "target": "Àfojúsùn (cloud tàbí context:name)",
-      "bundle": "Àwọn apá bundle láti mú bá ara mu",
-      "dryRun": "Ṣàyẹ̀wò àkọ́kọ́ láì lò ó"
+      "description": "Fi ìṣètò ránṣẹ́ sí cloud tàbí instance jíjìn"
     },
     "pull": {
-      "description": "Fa ìṣètò láti cloud tàbí ibi jíjìn wá",
-      "source": "Orísun (cloud tàbí context:name)",
-      "merge": "Dapọ̀ mọ́ ìṣètò tó wà",
-      "replace": "Rọ́pò ìṣètò tó wà",
-      "dryRun": "Ṣàkọ́wò láìfi sílò"
-    },
-    "diff": {
-      "source": "Àyíká orísun",
-      "target": "Àyíká ibi-àfojúsùn"
+      "description": "Fa ìṣètò láti cloud tàbí ibi jíjìn wá"
     },
     "bundle": {
       "description": "Gbé àtòpọ̀ ìṣètò jáde gẹ́gẹ́ bí fáìlì àkójọpọ̀",
-      "include": "Àwọn apá láti fi kún un (fi kọ́mà yà wọ́n)"
+      "token": "Sync token (from `sync tokens create`); defaults to OMNIROUTE_SYNC_TOKEN"
     },
     "import": {
       "description": "Gbé fáìlì àkójọpọ̀ wọlé",
       "dryRun": "Fọ̀rọ̀sí i láìfi sílò"
-    },
-    "initialize": {
-      "fromCloud": "Bẹ̀rẹ̀ láti inú ẹ̀dà àfẹ́yinti awọsánmà"
     },
     "tokens": {
       "description": "Ṣàkóso àwọn àmì ìṣiṣẹ́pọ̀",
@@ -1205,9 +1194,6 @@
       "revoke": {
         "yes": "Fò ìmúdájú kọjá"
       }
-    },
-    "resolve": {
-      "description": "Yanjú àwọn ìforígbárí ìṣiṣẹ́pọ̀ ní ìbánisọ̀rọ̀"
     }
   },
   "config": {

@@ -1,8 +1,9 @@
 "use client";
 
-import { Button, DistributeProxiesButton, Toggle } from "@/shared/components";
+import { ActionBar, Button, DistributeProxiesButton, Toggle } from "@/shared/components";
 import { providerText, type ProviderMessageTranslator } from "../providerPageHelpers";
 import type { CodexGlobalServiceMode } from "@/lib/providers/codexFastTier";
+import AccountProxyResetButton from "./AccountProxyResetButton";
 
 type ConnectionsHeaderToolbarProps = {
   providerId: string;
@@ -16,6 +17,7 @@ type ConnectionsHeaderToolbarProps = {
   batchTesting: boolean;
   batchRetesting: boolean;
   retestingId: string | null;
+  distributingProxies?: boolean;
   proxyConfig: any;
   reorderingByAvailability: boolean;
   handleReorderByAvailability: () => void | Promise<void>;
@@ -36,6 +38,7 @@ type ConnectionsHeaderToolbarProps = {
   // Modal triggers
   onSetProxyTarget: (target: { level: string; id: string; label: string }) => void;
   handleDistributeProxies: () => void;
+  onAccountProxiesReset: () => Promise<void>;
   handleBatchTestAll: () => void;
   gateConnectionFlow: (callback: () => void) => void;
   openApiKeyAddFlow: () => void;
@@ -66,6 +69,7 @@ export default function ConnectionsHeaderToolbar({
   batchTesting,
   batchRetesting,
   retestingId,
+  distributingProxies = false,
   proxyConfig,
   reorderingByAvailability,
   handleReorderByAvailability,
@@ -84,6 +88,7 @@ export default function ConnectionsHeaderToolbar({
   loadCodexSettings,
   onSetProxyTarget,
   handleDistributeProxies,
+  onAccountProxiesReset,
   handleBatchTestAll,
   gateConnectionFlow,
   openApiKeyAddFlow,
@@ -102,7 +107,9 @@ export default function ConnectionsHeaderToolbar({
   t,
 }: ConnectionsHeaderToolbarProps) {
   return (
-    <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div
+      className={`mb-4 flex flex-col gap-3 ${providerId === "codex" ? "" : "sm:flex-row sm:items-center sm:justify-between"}`}
+    >
       <div className="flex min-w-0 flex-wrap items-center gap-2">
         <h2 className="text-lg font-semibold">{t("connections")}</h2>
         {providerId === "claude" && (
@@ -165,7 +172,7 @@ export default function ConnectionsHeaderToolbar({
         )}
         {providerId === "codex" && (
           <div
-            className="inline-flex items-center gap-2 rounded-lg border border-sky-500/20 bg-sky-500/5 px-2 py-1 text-xs font-medium text-text-muted"
+            className="inline-flex max-w-full flex-wrap items-center gap-2 rounded-lg border border-border bg-bg-subtle px-2 py-1 text-xs font-medium text-text-muted"
             title={providerText(
               t,
               "providerDetailServiceModeTooltip",
@@ -180,7 +187,7 @@ export default function ConnectionsHeaderToolbar({
               }
               disabled={savingCodexGlobalServiceMode || !codexSettingsLoaded}
               aria-label={providerText(t, "globalCodexServiceMode", "Global Codex service mode")}
-              className="rounded-md border border-border bg-bg px-2 py-1 text-xs text-text-main outline-none transition-colors focus:border-primary disabled:opacity-60"
+              className="min-w-0 max-w-full rounded-md border border-border bg-bg px-2 py-1 text-xs text-text-main outline-none transition-colors focus:border-primary disabled:opacity-60"
             >
               {codexGlobalServiceModeOptions.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -228,13 +235,20 @@ export default function ConnectionsHeaderToolbar({
             : t("providerProxy")}
         </button>
       </div>
-      <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
+      <ActionBar align={providerId === "codex" ? "start" : "end"}>
         {connections.length > 0 && (
           <DistributeProxiesButton
             onDistribute={async () => {
               await handleDistributeProxies();
             }}
-            disabled={batchTesting || !!retestingId}
+            disabled={batchTesting || batchRetesting || distributingProxies || !!retestingId}
+          />
+        )}
+        {connections.length > 0 && (
+          <AccountProxyResetButton
+            connectionIds={connections.map((connection) => connection.id)}
+            disabled={batchTesting || batchRetesting || distributingProxies || !!retestingId}
+            onReset={onAccountProxiesReset}
           />
         )}
         {connections.length > 1 && (
@@ -389,7 +403,7 @@ export default function ConnectionsHeaderToolbar({
             </Button>
           )
         )}
-      </div>
+      </ActionBar>
     </div>
   );
 }

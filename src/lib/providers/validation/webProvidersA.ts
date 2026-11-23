@@ -3,12 +3,18 @@
 // functions with no dispatcher-state captures; behavior is byte-identical to the original inline defs.
 import { applyCustomUserAgent } from "./headers";
 import { toValidationErrorResult, validationRead, validationWrite } from "./transport";
+import { fetchWithTimeout } from "@/shared/utils/fetchTimeout";
 import {
   buildGrokCookieHeader,
   extractCookieValue,
   extractKimiAccessToken,
   normalizeSessionCookieHeader,
 } from "@/lib/providers/webCookieAuth";
+
+// Deadline for the kimi-web / deepseek-web profile probes, which call the upstream directly
+// (not through safeOutboundFetch's presets). Without it a stalled upstream leaves the dashboard
+// "Test connection" spinning forever. 15s matches the other direct web probes (Kiro, Freebuff).
+const WEB_PROFILE_PROBE_TIMEOUT_MS = 15_000;
 
 // kimi-web uses the international (west-facing) `www.kimi.ai` Connect-RPC API by
 // default. `www.kimi.com` is the China-region endpoint — it serves China users but
@@ -37,7 +43,8 @@ export async function validateKimiWebProvider({ apiKey }: any) {
   }
 
   try {
-    const resp = await fetch("https://www.kimi.ai/api/user", {
+    const resp = await fetchWithTimeout("https://www.kimi.ai/api/user", {
+      timeoutMs: WEB_PROFILE_PROBE_TIMEOUT_MS,
       headers: {
         Accept: "application/json, text/plain, */*",
         Authorization: `Bearer ${accessToken}`,
@@ -96,7 +103,8 @@ export async function validateDeepSeekWebProvider({ apiKey }: any) {
   }
 
   try {
-    const resp = await fetch("https://chat.deepseek.com/api/v0/users/current", {
+    const resp = await fetchWithTimeout("https://chat.deepseek.com/api/v0/users/current", {
+      timeoutMs: WEB_PROFILE_PROBE_TIMEOUT_MS,
       headers: {
         Authorization: `Bearer ${token}`,
         Accept: "*/*",

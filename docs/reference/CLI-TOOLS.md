@@ -56,7 +56,7 @@ omniroute setup-codex        omniroute setup-claude       omniroute setup-openco
 omniroute setup-cline        omniroute setup-kilo         omniroute setup-continue
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
-omniroute setup-5dive
+omniroute setup-5dive        omniroute setup-zed
 ```
 
 Each accepts `--remote <url> --api-key <key>` (configure a local tool against a
@@ -147,7 +147,7 @@ one surface without the others fails the suite instead of drifting silently.
 
 ---
 
-## 1. CLI Code's Catalog (26 tools)
+## 1. CLI Code's Catalog (27 tools)
 
 All tools that appear in `/dashboard/cli-code`. Those with `baseUrlSupport: none` are wired through MITM or a manual guide instead of a custom base URL:
 
@@ -174,6 +174,7 @@ All tools that appear in `/dashboard/cli-code`. Those with `baseUrlSupport: none
 | grok-build   | Grok Build              | xAI                 | full           | custom         | false        |
 | crush        | Crush                   | OSS (Charm)         | full           | custom         | false        |
 | qwen         | Qwen Code               | Alibaba             | full           | guide          | true         |
+| zed          | Zed                     | Zed Industries      | full           | guide          | false        |
 | cursor       | Cursor                  | Anysphere           | none           | guide          | false        |
 | antigravity  | Antigravity             | Google              | none           | mitm           | false        |
 | hermes       | Hermes                  | Nous Research       | none           | guide          | false        |
@@ -689,6 +690,18 @@ redacted presence/shape. `providers available` reads the OmniRoute catalog;
 `providers list/test/test-all/validate` retain their local SQLite behavior and
 do not require the server to be running.
 
+For a custom OpenAI-compatible or Anthropic-compatible node, attach credentials to
+the node ID returned by `omniroute nodes add`, using `omniroute keys add "$NODE_ID" --stdin`.
+This requires a running server and management authentication for the active context.
+The CLI uses `POST /api/providers`, which validates the node and copies its endpoint
+settings into the connection. A missing node, authorization failure, or unavailable
+server returns an error without creating a local fallback credential.
+
+`nodes add --base-url` sets the node endpoint; it is distinct from the server address
+in `OMNIROUTE_BASE_URL`. For OpenAPI files, use
+`omniroute openapi dump --format json --out ./openapi.json`; the global `--output`
+selects CLI display formatting, not a destination filename.
+
 ### Recovery & Reset
 
 ```bash
@@ -800,3 +813,35 @@ Ollama chat: http://localhost:20128/api/v1/vscode/sk-a3ab3c080beaee3a-69f4a4-070
 | Dashboard shows "not detected" after install | Cache stale             | Click "⟳ Refresh detection" in dashboard         |
 | Old link `/dashboard/cli-tools`              | Pre-v3.8.6 bookmark     | Auto-redirected to `/dashboard/cli-code` (308)   |
 | Old link `/dashboard/agents`                 | Pre-v3.8.6 bookmark     | Auto-redirected to `/dashboard/acp-agents` (308) |
+
+## Manage inference-key policy with the OmniRoute CLI
+
+Use an authenticated management context (see [Remote Mode](../guides/REMOTE-MODE.md))
+to inspect or update an existing inference key by its ID:
+
+```bash
+omniroute --output json keys policy show KEY_ID
+omniroute keys policy set KEY_ID --unrestricted
+omniroute --output json keys policy show KEY_ID
+```
+
+`--unrestricted` is an alias for `--model-access-mode all`. The update clears the
+model allowlist. It preserves scopes, connection rules, blocked models, rate limits
+and cost limits, so those other controls can still deny a request. An explicit
+`--allowed-models ""` also selects `all`; combine it with
+`--model-access-mode restricted` to keep a restricted key with no allowed models.
+A nonempty comma-separated list selects `restricted` unless explicitly specified.
+Contradictory `all` plus a nonempty allowlist is rejected before sending a request.
+
+`--rate-limit 30` sets requests per minute and preserves rules for other time
+windows. `--max-cost 5` enables the daily USD cap without changing the weekly cap;
+`--max-cost 0` removes the daily cap and preserves the existing usage-limit toggle
+and weekly cap. Omitted policy fields remain unchanged. Rate changes read the
+current policy first; avoid concurrent edits to the same key's rate-limit array.
+
+Policy commands use authenticated `GET`/`PATCH /api/keys/{id}` and honor the active
+context and global `--api-key` option. JSON output contains policy fields only,
+without the stored key or its masked representation. An inference-only credential
+cannot authorize management changes. A 401/403 requires checking the management
+credential and context; it does not establish a local CLI-token or salt failure.
+See [CLI Token](../security/CLI_TOKEN.md) for the separate local authentication contract.

@@ -7,9 +7,8 @@ import assert from "node:assert/strict";
 // can get a Codex OAuth token revoked). MinIntervalThrottle serializes the actual
 // network calls and spaces each start >= minIntervalMs after the previous one.
 
-const { MinIntervalThrottle, resolveQuotaFetchMinIntervalMs } = await import(
-  "../../open-sse/services/quotaFetchThrottle.ts"
-);
+const { MinIntervalThrottle, resolveQuotaFetchMinIntervalMs, resolveQuotaFetchJitterMs } =
+  await import("../../open-sse/services/quotaFetchThrottle.ts");
 
 class FakeClock {
   t = 1000;
@@ -34,11 +33,48 @@ test("#6009 spaces concurrent fetch starts by at least minIntervalMs", async () 
   assert.equal(clock.now(), 1750);
 });
 
+test("#16948 zero-valued clocks still enforce spacing on the second acquisition", async () => {
+  const clock = new FakeClock();
+  clock.t = 0;
+  const throttle = new MinIntervalThrottle({ minIntervalMs: 250, jitterMs: 0, clock });
+  await Promise.all([throttle.acquire(), throttle.acquire(), throttle.acquire()]);
+  assert.deepEqual(clock.slept, [250, 250]);
+  assert.equal(clock.now(), 500);
+});
+
+test("#16948 reopens spacing window after idle time, then throttles a new burst", async () => {
+  const clock = new FakeClock();
+  const throttle = new MinIntervalThrottle({ minIntervalMs: 300, jitterMs: 0, clock });
+  await throttle.acquire(); // first fetch at t=1000
+  clock.t = 5000; // no requests for four seconds
+  await throttle.acquire(); // first fetch after idle is immediate
+  await throttle.acquire(); // following fetch must still wait 300ms
+  assert.deepEqual(clock.slept, [300]);
+  assert.equal(clock.now(), 5300);
+});
+
 test("#6009 minIntervalMs=0 disables throttling (no sleeps)", async () => {
   const clock = new FakeClock();
   const throttle = new MinIntervalThrottle({ minIntervalMs: 0, jitterMs: 0, clock });
   await Promise.all([throttle.acquire(), throttle.acquire(), throttle.acquire()]);
   assert.deepEqual(clock.slept, []);
+});
+
+test("#16948 disabled minimum interval bypasses jitter and serialization entirely", async () => {
+  const clock = new FakeClock();
+  let randomCalls = 0;
+  const throttle = new MinIntervalThrottle({
+    minIntervalMs: resolveQuotaFetchMinIntervalMs({ OMNIROUTE_QUOTA_FETCH_MIN_INTERVAL_MS: "0" }),
+    jitterMs: resolveQuotaFetchJitterMs({ OMNIROUTE_QUOTA_FETCH_JITTER_MS: "60000" }),
+    clock,
+    rand: () => {
+      randomCalls++;
+      return 0.5;
+    },
+  });
+  await Promise.all(Array.from({ length: 8 }, () => throttle.acquire()));
+  assert.deepEqual(clock.slept, [], "explicitly disabled throttle must not add jitter delays");
+  assert.equal(randomCalls, 0, "disabled throttle must not evaluate random jitter");
 });
 
 test("#6009 a single fetch is never delayed", async () => {
@@ -75,10 +111,44 @@ test("#6009 env resolver clamps to sane bounds and defaults", () => {
     resolveQuotaFetchMinIntervalMs({ OMNIROUTE_QUOTA_FETCH_MIN_INTERVAL_MS: "abc" }),
     250
   );
-  assert.equal(resolveQuotaFetchMinIntervalMs({ OMNIROUTE_QUOTA_FETCH_MIN_INTERVAL_MS: "-5" }), 250);
-  // absurdly high → clamped to max 5000
+  assert.equal(
+    resolveQuotaFetchMinIntervalMs({ OMNIROUTE_QUOTA_FETCH_MIN_INTERVAL_MS: "-5" }),
+    250
+  );
+  // absurdly high → clamped to max 60000
   assert.equal(
     resolveQuotaFetchMinIntervalMs({ OMNIROUTE_QUOTA_FETCH_MIN_INTERVAL_MS: "999999" }),
-    5000
+    60000
   );
+});
+
+test("#16948 quota spacing supports bounded larger intervals and configurable jitter", () => {
+  assert.equal(
+    resolveQuotaFetchMinIntervalMs({ OMNIROUTE_QUOTA_FETCH_MIN_INTERVAL_MS: "30000" }),
+    30000
+  );
+  assert.equal(
+    resolveQuotaFetchMinIntervalMs({ OMNIROUTE_QUOTA_FETCH_MIN_INTERVAL_MS: "999999" }),
+    60000
+  );
+  assert.equal(resolveQuotaFetchJitterMs({}), 120);
+  assert.equal(resolveQuotaFetchJitterMs({ OMNIROUTE_QUOTA_FETCH_JITTER_MS: "0" }), 0);
+  assert.equal(resolveQuotaFetchJitterMs({ OMNIROUTE_QUOTA_FETCH_JITTER_MS: "30000" }), 30000);
+  assert.equal(resolveQuotaFetchJitterMs({ OMNIROUTE_QUOTA_FETCH_JITTER_MS: "999999" }), 60000);
+  assert.equal(resolveQuotaFetchJitterMs({ OMNIROUTE_QUOTA_FETCH_JITTER_MS: "NaN" }), 120);
+  assert.equal(resolveQuotaFetchJitterMs({ OMNIROUTE_QUOTA_FETCH_JITTER_MS: "-5" }), 120);
+});
+
+test("#16948 larger configured spacing is honored across simultaneous quota calls", async () => {
+  const clock = new FakeClock();
+  const throttle = new MinIntervalThrottle({
+    minIntervalMs: resolveQuotaFetchMinIntervalMs({
+      OMNIROUTE_QUOTA_FETCH_MIN_INTERVAL_MS: "10000",
+    }),
+    jitterMs: resolveQuotaFetchJitterMs({ OMNIROUTE_QUOTA_FETCH_JITTER_MS: "10000" }),
+    clock,
+    rand: () => 0.5,
+  });
+  await Promise.all(Array.from({ length: 4 }, () => throttle.acquire()));
+  assert.deepEqual(clock.slept, [15000, 15000, 15000]);
 });

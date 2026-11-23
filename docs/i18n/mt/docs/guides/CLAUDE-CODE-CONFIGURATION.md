@@ -93,44 +93,58 @@ biss il-mudelli ta’ Kimi.
 
 ---
 
-## Blokka ta' onboarding fid-dashboard
+## Blokka ta’ onboarding fid-dashboard
 
-Il-kard tal-għodda Claude (**Dashboard → CLI Code**) tirrendi l-framment eżatt ta' `settings.json`
-għal din l-istanza, ħdejn il-buttuna tal-informazzjoni dwar id-discovery alias, flimkien ma' buttuna għall-ikkupjar:
+Il-kard tal-għodda Claude (**Dashboard → CLI Code**) turi l-framment eżatt ta’ `settings.json`
+għal din l-istanza, ħdejn il-buttuna tal-informazzjoni dwar l-alias tal-iskoperta, flimkien ma’ buttuna għall-ikkupjar:
 
 ```jsonc
 {
   "env": {
-    "ANTHROPIC_BASE_URL": "http://<l-OmniRoute tiegħek>:20128",
-    "ANTHROPIC_AUTH_TOKEN": "<il-kjavi API tal-OmniRoute tiegħek>",
+    "ANTHROPIC_BASE_URL": "http://<OmniRoute tiegħek>:20128",
+    "ANTHROPIC_AUTH_TOKEN": "<iċ-ċavetta API ta’ OmniRoute tiegħek>",
     "CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY": "1",
   },
 }
 ```
 
-Il-URL bażi huwa dak riżolt mill-kard (inkluża sostituzzjoni personalizzata li tkun daħħalt), diġà
-normalizzat — mingħajr is-suffiss `/v1` u mingħajr slash fl-aħħar. **Il-kjavi qatt ma tiġi rrenduta**: il-blokka tinkludi
-placeholder, għalhekk screenshot jew framment imwaħħal ma jistax jiżvelaha. Waħħal il-kjavi tiegħek minflokha.
+Il-URL bażi huwa dak riżolt mill-kard (inkluża sovrascrittura personalizzata li daħħalt), diġà
+normalizzat — mingħajr is-suffiss `/v1` u mingħajr slash finali. **Iċ-ċavetta qatt ma tintwera**: il-blokka tinkludi
+placeholder, sabiex screenshot jew snippet imwaħħal ma jkunux jistgħu jiżvelawha. Issostitwixxih biċ-ċavetta tiegħek.
 
 Żid `CLAUDE_CODE_AUTO_COMPACT_WINDOW` taħt l-istess blokka `env` għal kwalunkwe mudell li t-tieqa
 tal-kuntest reali tiegħu mhijiex 200K — Claude Code jassumi 200K għal kull id li ma jagħrafx, għalhekk
-il-kompattazzjoni awtomatika inkella tibda fil-punt ħażin (ara t-twissija fit-taqsima preċedenti).
-Il-bennej tal-framment jaċċetta wkoll dak il-valur, sabiex min isejjaħ u jkun jaf id-daqs tat-tieqa
-tal-mudell fil-mira jkun jista' jiġġenerah direttament.
+il-kompattazzjoni awtomatika inkella tibda fil-punt żbaljat (ara t-twissija fit-taqsima preċedenti).
+Il-bennej tas-snippet jaċċetta wkoll dak il-valur, sabiex min isejjaħ u jaf id-daqs tat-tieqa tal-mudell fil-mira
+jkun jista’ joħorġu direttament.
 
 Sors: `src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet` (bennej
-pur, ittestjat b'testijiet tal-unità) irrendut minn `ClaudeGatewayOnboardingBlock`.
+pur, ittestjat b’testijiet tal-unità) muri minn `ClaudeGatewayOnboardingBlock`.
+
+### Waħħal kont wieħed (mhux obbligatorju)
+
+Biex tibgħat kull talba ta’ Claude Code permezz ta’ kont speċifiku wieħed ta’ fornitur, żid il-header
+`x-omniroute-connection` permezz ta’ `ANTHROPIC_CUSTOM_HEADERS` fl-istess blokka `env`:
+
+```jsonc
+"ANTHROPIC_CUSTOM_HEADERS": "x-omniroute-connection: <connection id>"
+```
+
+Ikkopja l-id miċ-ċippa `xxxxxxxx…` fir-ringiela tal-konnessjoni fil-paġna tal-fornitur. L-iffissar japplika biss
+għal ids ta’ mudell wieħed (`provider/model`), mhux għal kombinazzjonijiet. Ara
+[It-twaħħil ta’ kont għal kull talba](../reference/API_REFERENCE.md#account-pinning-per-request) għall-imġiba
+eżatta ta’ fallback.
 
 ---
 
 ## Profili (`CLAUDE_CONFIG_DIR`)
 
-Claude Code **m'għandux fajls tal-profili nattivi** (għall-kuntrarju ta' `~/.codex/<name>.config.toml` ta' Codex).
-Il-mekkaniżmu idjomatiku huwa `CLAUDE_CONFIG_DIR` — direttorju separat tal-konfigurazzjoni għal kull
+Claude Code **m’għandux fajls tal-profili nattivi** (għall-kuntrarju ta’ `~/.codex/<name>.config.toml` ta’ Codex).
+Il-mekkaniżmu idjomatiku huwa `CLAUDE_CONFIG_DIR` — direttorju tal-konfigurazzjoni separat għal kull
 profil, kull wieħed bis-`settings.json`, bil-kredenzjali, bl-istorja u bil-cache tiegħu stess.
 
-`omniroute setup-claude` jikseb il-katalgu attiv ta' `/v1/models` u jikteb
-profil wieħed għal kull mudell f'`~/.claude/profiles/<name>/settings.json`, filwaqt li jerġa' juża
+`omniroute setup-claude` jikseb il-katalgu attiv ta’ `/v1/models` u jikteb
+profil wieħed għal kull mudell f’`~/.claude/profiles/<name>/settings.json`, billi jerġa’ juża
 **l-istess ismijiet bħal `setup-codex`** (`glm52`, `kimi-k27`, `deepseek-pro`, …):
 
 ```jsonc
@@ -148,35 +162,39 @@ profil wieħed għal kull mudell f'`~/.claude/profiles/<name>/settings.json`, fi
 }
 ```
 
-> **It-token tal-awtentikazzjoni qatt ma jinkiteb fil-profil.** Niedi permezz ta'
+> **It-token tal-awtentikazzjoni qatt ma jinkiteb fil-profil.** Ħaddem permezz ta’
 > `omniroute launch --profile <name>` (dan jinjetta `ANTHROPIC_AUTH_TOKEN` mill-kuntest
-> attiv), jew esporta `ANTHROPIC_AUTH_TOKEN` inti stess u ħaddem
+> attiv), jew esporta `ANTHROPIC_AUTH_TOKEN` int stess u ħaddem
 > `CLAUDE_CONFIG_DIR=~/.claude/profiles/<name> claude`.
 
-**Sinkronizzazzjoni awtomatika wara l-iskoperta tal-mudelli (b'parteċipazzjoni volontarja).** OmniRoute jista' jirriġenera dawn l-istess
+**Sinkronizzazzjoni awtomatika wara l-iskoperta tal-mudelli (fuq għażla).** OmniRoute jista’ jerġa’ jiġġenera dawn l-istess
 fajls `~/.claude/profiles/<name>/settings.json` awtomatikament kull meta sinkronizzazzjoni tal-mudelli
-ta' fornitur tibdel il-katalgu attiv — sabiex mudelli ġodda jew b'isem mibdul jingħataw profili mingħajr ma jerġa' jitħaddem il-
-kmand. Din hija **mitfija b'mod awtomatiku**: attivaha mid-**dashboard CLI Code** ("Sinkronizzazzjoni
+ta’ fornitur tibdel il-katalgu attiv — sabiex mudelli ġodda jew b’isem mibdul jiksbu profili mingħajr ma jerġa’ jitħaddem il-
+kmand. Din hija **diżattivata b’mod predefinit**: aqleb l-għażla mid-**dashboard ta’ CLI Code** ("Sinkronizzazzjoni
 awtomatika tal-profili CLI" → Claude Code), jew issettja `OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES=true` (tirrispetta wkoll
-`CLI_ALLOW_CONFIG_WRITES`, li hija mixgħula b'mod awtomatiku). Meta tkun attivata, tikteb biss il-fajls tal-profili; qatt ma
+`CLI_ALLOW_CONFIG_WRITES`, attivata b’mod predefinit). Meta tkun attivata, tikteb biss il-fajls tal-profili; qatt ma
 tbiddel il-konfigurazzjoni Claude attiva/predefinita tiegħek, l-awtentikazzjoni, jew `~/.claude/settings.json`.
 
-### Ġenerazzjoni u użu tal-profili
+### Ġenerazzjoni + użu tal-profili
 
 ```bash
 # OmniRoute lokali
 omniroute setup-claude
 
-# VPS remot (jinkorpora l-URL tal-VPS f'kull profil)
+# VPS remot (jinkludi l-URL tal-VPS f’kull profil)
 omniroute setup-claude --remote http://192.168.0.15:20128 --api-key oma_live_xxx
 
 # Xi fornituri biss
 omniroute setup-claude --only glm,kimi
 
-# Previżjoni mingħajr kitba
+# Ikteb ukoll profili għal fornituri lokali tas-CLI (zcode, auggie, devin-cli-agentic,
+# codex-app-server) li ma ġewx identifikati fuq dan il-host (maqbuża b’mod predefinit għal mira lokali)
+omniroute setup-claude --include-local
+
+# Uri previżjoni mingħajr ma tikteb
 omniroute setup-claude --dry-run
 
-# Niedi profil
+# Ħaddem profil
 omniroute launch --profile kimi-k27
 ```
 

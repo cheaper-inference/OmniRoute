@@ -4,11 +4,11 @@
 
 ---
 
-> Samodejno prihranite 15–95 % pri primernem kontekstu. Za hiter pregled glejte [razdelek o stiskanju v datoteki README](../README.md#%EF%B8%8F-prompt-compression--save-15-95-eligible-tokens-automatically).
+> Samodejno prihranite 15–95 % pri primernem kontekstu. Za hiter pregled si oglejte [razdelek o stiskanju v datoteki README](../README.md#%EF%B8%8F-prompt-compression--save-15-95-eligible-tokens-automatically).
 
 ## Pregled
 
-OmniRoute uporablja modularen cevovod za stiskanje pozivov, ki se izvede **proaktivno**, preden zahteve dosežejo ponudnike višje ravni. To pomeni, da žetone prihranite pregledno — vašega poteka dela ni treba spreminjati.
+OmniRoute uporablja modularni cevovod za stiskanje pozivov, ki se izvede **proaktivno**, preden zahteve dosežejo ponudnike višje ravni. To pomeni, da se prihranek žetonov doseže pregledno — vašega poteka dela ni treba spreminjati.
 
 ```
 Zahteva odjemalca
@@ -16,15 +16,15 @@ Zahteva odjemalca
     → Preglasitev s kombinacijo? → Uporabi nastavitev kombinacije
     → Prag samodejnega sproženja? → Uporabi samodejni način
     → Privzeti način? → Uporabi globalno nastavitev
-    → Izklopljeno? → Preskoči stiskanje
+    → Off? → Preskoči stiskanje
   → Izbrani način stiskanja
-    → Izklopljeno: Brez stiskanja
-    → Lahko: Varno čiščenje presledkov/oblikovanja (~15 %)
-    → Standardno: Odstranjevanje mašil v telegrafskem slogu (~30 %)
-    → Agresivno: Staranje zgodovine + povzemanje (~50 %)
-    → Ultra: Heuristično obrezovanje + redčenje kodnih blokov (~75 %)
-    → RTK: Filtriranje izhoda terminala/orodij z upoštevanjem ukazov (razpon 60–90 % pri nadaljnjih ponudnikih)
-    → Zloženo: Urejen cevovod z več mehanizmi, običajno RTK in nato Caveman (razpon 78–95 % primerne vsebine)
+    → Off: Brez stiskanja
+    → Lite: Varno čiščenje presledkov/oblikovanja (~15 %)
+    → Standard: Odstranjevanje mašil v slogu Caveman (~30 %)
+    → Aggressive: Staranje zgodovine + povzemanje (~50 %)
+    → Ultra: Hevristično obrezovanje + redčenje blokov kode (~75 %)
+    → RTK: Filtriranje terminalskih/izhodnih podatkov orodij z upoštevanjem ukazov (60–90 % pri ponudniku višje ravni)
+    → Stacked: Urejen cevovod z več mehanizmi, običajno RTK in nato Caveman (78–95 % primernega obsega)
   → Stisnjena zahteva → Ponudnik
 ```
 
@@ -32,11 +32,11 @@ Zahteva odjemalca
 
 ## Načini stiskanja
 
-### Izklopljeno
+### Off
 
-Stiskanje se ne uporabi. Vsa sporočila so posredovana nespremenjena.
+Stiskanje se ne uporabi. Vsa sporočila se posredujejo nespremenjena.
 
-### Lahki način (~15 % prihranka, zakasnitev <1 ms)
+### Način Lite (~15 % prihranka, zakasnitev <1 ms)
 
 Najvarnejši način — brez pomenskih sprememb, samo čiščenje oblikovanja:
 
@@ -44,138 +44,142 @@ Najvarnejši način — brez pomenskih sprememb, samo čiščenje oblikovanja:
 | ------------------------ | --------------------------------------------------- |
 | `collapseWhitespace`     | Združi zaporedne prazne vrstice in končne presledke |
 | `dedupSystemPrompt`      | Odstrani podvojena sistemska sporočila              |
-| `compressToolResults`    | Stisne obširne izhode orodij/funkcij                |
-| `removeRedundantContent` | Odstrani ponovljena navodila                        |
+| `compressToolResults`    | Stisne obsežne izhode orodij/funkcij                |
+| `removeRedundantContent` | Odstrani ponavljajoča se navodila                   |
 | `replaceImageUrls`       | Skrajša podatkovne URI-je slik base64               |
 
 **Najprimernejše za:** Stalno uporabo in delovne tokove, pri katerih je varnost ključnega pomena.
 
-### Standardni način (~30 % prihranka)
+### Način Standard (~30 % prihranka)
 
-Navdihnjen s projektom [Caveman](https://github.com/JuliusBrussee/caveman) — odstrani mašila in razvlečene formulacije, pri tem pa ohrani pomen:
+Navdih črpa iz projekta [Caveman](https://github.com/JuliusBrussee/caveman) — odstrani mašila in dolgovezne besedne zveze, pri tem pa ohrani pomen:
 
-- Odstrani mašila (»prosim«, »mislim«, »v bistvu«, »pravzaprav«)
-- Strne razvlečene besedne zveze (»z namenom, da« → »da«, »kot posledica« → »zaradi«)
-- Odstrani vljudnostno omiljevanje (»Ali bi vas motilo ...«, »Če bi morda lahko ...«)
+- Odstrani mašila ("prosim", "mislim", "v bistvu", "pravzaprav")
+- Zgosti dolgovezne besedne zveze ("z namenom, da" → "da", "kot posledica" → "zaradi")
+- Odstrani vljudno omahovanje ("Ali bi vas motilo ...", "Če bi morda lahko ...")
 - Več kot 30 pravil regularnih izrazov, prilagojenih pozivom za programiranje
 
-**Najprimernejše za:** Vsakodnevne delovne tokove programiranja in stroškovno ozaveščene ekipe.
+**Najprimernejše za:** Vsakodnevne delovne tokove programiranja in ekipe, ki pazijo na stroške.
 
-### Agresivni način (~50 % prihranka)
+### Način Aggressive (~50 % prihranka)
 
-Pametno upravljanje zgodovine za dolge seje:
+Pametno upravljanje zgodovine pri dolgih sejah:
 
 - **Staranje sporočil** — starejša sporočila se postopoma vse bolj stiskajo
-- **Povzemanje rezultatov orodij** — dolgi izhodi orodij so nadomeščeni s povzetki
+- **Stiskanje rezultatov orodij** — dolgi izhodi orodij se skrajšajo ali izpustijo (prve/zadnje vrstice,
+  filtriranje vrstic z ujemanji, zgoščevanje ključev JSON)
 - **Varovala strukturne celovitosti** — zagotavljajo, da pari `tool_use` + `tool_result` ostanejo usklajeni
-- **Upoštevanje kontekstnega okna** — upošteva omejitve števila žetonov posameznega modela
+- **Upoštevanje kontekstnega okna** — upošteva omejitve žetonov posameznega modela
 
-**Najprimernejše za:** Dolgotrajne seje odpravljanja napak in velike kodne zbirke.
+**Najprimernejše za:** Daljše seje odpravljanja napak in velike zbirke izvorne kode.
 
 ### Način Ultra (~75 % prihranka)
 
-Največje stiskanje za primere, pri katerih je število žetonov ključnega pomena:
+Največje stiskanje za scenarije, pri katerih so žetoni ključnega pomena:
 
-- **Heuristično obrezovanje** — odstrani sporočila pod pragom relevantnosti
-- **Redčenje kodnih blokov** — stisne ponavljajoče se primere kode
-- **Prirezovanje z binarnim iskanjem** — poišče optimalno točko reza za kontekstno okno
-- Vključene so vse funkcije agresivnega načina
+- **Hevristično obrezovanje** — obrezovanje žetonov v prozi na podlagi točkovanja
+- **Ohranjanje strukture** — ograjeni bloki kode, koda v vrstici, URL-ji in identifikatorji se
+  začasno nadomestijo z označbami in nato dobesedno znova vstavijo; nikoli se ne obrežejo
+- **Izbirna raven SLM** — majhen lokalni model lahko dodatno izboljša obrezovanje, če je konfiguriran
+- Neodvisno od načina Aggressive: ne izvaja staranja sporočil, stiskanja rezultatov orodij
+  ali nadomestnega povzemanja (le napaka na ravni SLM lahko nadomestni prehod usmeri skozi
+  način Aggressive)
 
 **Najprimernejše za:** Primere, ko vedno znova dosegate omejitve konteksta.
 
-### Način RTK (razpon 60–90 % pri nadaljnjih ponudnikih)
+### Način RTK (60–90 % pri ponudniku višje ravni)
 
-Način RTK je optimiziran za obširne izhode orodij, ki se pojavljajo v sejah programerskih agentov:
+Način RTK je optimiziran za obsežne izhode orodij, ki se pojavljajo v sejah programerskih agentov:
 
 - Zazna razrede ukazov/izhodov, kot so `git status`, `git diff`, `git log`, izvajalniki testov,
-  gradnje TypeScript/Vite/Webpack, ESLint/Biome/Prettier, revizije/namestitve npm, dnevniki Docker, izhodi
-  infrastrukture in splošni izhodi lupine
+  gradnje TypeScript/Vite/Webpack, ESLint/Biome/Prettier, revizije/namestitve npm, dnevniki Docker, infrastrukturni
+  izhodi in splošni izhodi lupine
 - Uporabi pakete filtrov JSON iz `open-sse/services/compression/engines/rtk/filters/`
-- Uvozi filtre sheme RTK TOML v1 iz projektnih ali globalnih datotek `filters.toml`, s preverjanjem
-  vdelanih testov in nadzorom zaupanja za projektne datoteke
-- Vključuje 49 vgrajenih filtrov z vdelanimi vzorci za preverjanje
-- Odstrani nadzorna zaporedja ANSI, vrstice napredka, ponovljene vrstice in šum, ki ne zahteva ukrepanja
-- Ohrani neuspehe, napake, opozorila, spremenjene datoteke, povzetke in konec dolgih izhodov
-- Podpira projektne filtre z nadzorom zaupanja, globalne filtre in izbirno obnovitev anonimiziranega neobdelanega izhoda
+- Uvozi filtre RTK TOML sheme v1 iz projektnih ali globalnih datotek `filters.toml`, s preverjanjem
+  vgrajenih testov in nadzorom zaupanja za projektne datoteke
+- Vključuje 55 vgrajenih filtrov z vgrajenimi vzorci za preverjanje
+- Odstrani nadzorna zaporedja ANSI, vrstice napredka, ponavljajoče se vrstice in neuporaben šum
+- Ohrani neuspehe, napake, opozorila, spremenjene datoteke, povzetke in konec dolgega izhoda
+- Podpira projektne filtre z nadzorom zaupanja, globalne filtre in izbirno obnovitev redigiranega neobdelanega izhoda
 
 **Najprimernejše za:** Seje agentov s prepisi lupine, gradenj, testov, ukazov git in grep ter izhodov datotek.
 
-### Zloženi način (razpon 78–95 % primerne vsebine)
+### Način Stacked (78–95 % primernega obsega)
 
-Zloženi način zažene več mehanizmov stiskanja v determinističnem vrstnem redu. Privzeti cevovod je:
+Način Stacked izvaja več mehanizmov stiskanja v determinističnem vrstnem redu. Privzeti cevovod je:
 
 ```txt
 RTK -> Caveman
 ```
 
-Ta vrstni red najprej zmanjša izhod terminala/orodij, nato pa na preostalem pozivu v naravnem jeziku
-uporabi pomensko zgoščevanje Caveman. Zložene cevovode je mogoče konfigurirati globalno ali prek
+Ta vrstni red najprej zgosti izhod terminala/orodij, nato pa uporabi pomensko zgoščevanje Caveman za
+preostali poziv v naravnem jeziku. Cevovode Stacked je mogoče konfigurirati globalno ali prek
 kombinacij stiskanja, dodeljenih kombinacijam usmerjanja.
 
 **Najprimernejše za:** Mešani kontekst z obsežnimi dnevniki orodij ter človeškimi navodili ali povzetki pomočnika.
 
 ---
 
-## Izračun prihrankov iz izvornih projektov
+## Izračun prihrankov na podlagi izvornih projektov
 
-OmniRoute dokumentira prihranke zaradi stiskanja iz dveh virov: primerjalnih testov izvornih projektov in
+OmniRoute dokumentira prihranke zaradi stiskanja iz dveh virov: primerjalnih preizkusov izvornih projektov in
 lastne sestave pogonov OmniRoute.
 
-| Vir     | Podatek iz izvorne datoteke README, uporabljen tukaj                                                                                        |
-| ------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| Caveman | `~75%` manj izhodnih žetonov, `65%` povprečnega prihranka izhoda v primerjalnih testih, razpon `22-87%` in orodje za `~46%` stiskanje vhoda |
-| RTK     | `60-90%` prihranka pri izhodu ukazov; vzorčna seja z `~118,000 -> ~23,900` žetoni oziroma `79.7%` prihranka (`~80%`)                        |
+| Vir     | Številka iz izvornega README-ja, uporabljena tukaj                                                                                              |
+| ------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| Caveman | `~75%` manj izhodnih žetonov, `65%` povprečnega prihranka izhoda v primerjalnih preizkusih, razpon `22-87%` in orodje za `~46%` stiskanje vhoda |
+| RTK     | `60-90%` prihranka pri izhodu ukazov; vzorčna seja z `~118,000 -> ~23,900` žetoni oziroma `79.7%` prihranka (`~80%`)                            |
 
-Za prekrivajoče se koristne vsebine orodij/konteksta privzeta kombinacija OmniRoute zaporedno uporabi pogona:
+Za prekrivajoče se vsebine orodij/konteksta privzeta kombinacija OmniRoute združuje pogona:
 
 ```txt
 RTK -> Caveman
 ```
 
-Skupni prihranki se množijo in ne seštevajo:
+Skupni prihranki so multiplikativni in ne aditivni:
 
 ```txt
-skupaj  = 1 - (1 - prihranek RTK) * (1 - prihranek vhoda Caveman)
+skupaj   = 1 - (1 - prihranek RTK) * (1 - prihranek vhoda Caveman)
 povprečje = 1 - (1 - 0.80) * (1 - 0.46) = 89.2%
-razpon   = 1 - (1 - 0.60..0.90) * (1 - 0.46) = 78.4-94.6%
+razpon    = 1 - (1 - 0.60..0.90) * (1 - 0.46) = 78.4-94.6%
 ```
 
-Ta vrednost `78-95%` velja, kadar lahko tako RTK kot Caveman zmanjšata isto vhodno/kontekstno koristno vsebino.
-Način izhodnih odgovorov Caveman je ločen: ko je omogočen, uporabite lastne prihranke izhoda Caveman (`65%`
-v povprečju, `~75%` izpostavljena vrednost, razpon `22-87%`). Skupni prihranki pri obračunavanju so odvisni od razmerja med pozivi in izhodi.
+Ta vrednost `78-95%` velja, kadar lahko tako RTK kot Caveman zmanjšata isto vhodno/kontekstno vsebino.
+Način izhoda odgovorov Caveman je ločen: ko je omogočen, uporabite Cavemanove lastne prihranke izhoda (`65%`
+v povprečju, `~75%` kot glavna navedba, razpon `22-87%`). Skupni prihranki pri obračunavanju so odvisni od razmerja med pozivi in izhodi.
 
-### Kaj "primerno" dejansko pomeni
+### Kaj dejansko pomeni »primerno«
 
-Izpostavljeni razpon 15-95% je resničen, vendar velja samo za **odvečno ali razvlečeno** vsebino — ponavljajoče se
-vrstice z napakami, dnevnik gradnje, ki nenehno ponavlja isto opozorilo, ali preobsežen izpis ukaza `grep`/branja datoteke. To
-**ne** pomeni, da vsak zahtevek doseže tolikšen prihranek.
+Glavni navedeni razpon 15-95% je resničen, vendar velja samo za **odvečno ali razvlečeno** vsebino — ponavljajoče se
+vrstice napak, dnevnik gradnje, ki nenehno izpisuje isto opozorilo, ali preobsežen izpis `grep`/branja datoteke. To
+**ne** pomeni, da vsaka zahteva prihrani toliko.
 
-Empirično preverjeno (`tests/unit/compression/stacked-compression-tool-result-savings.test.ts`): izvajanje načina
-`stacked` (RTK + Caveman) na bloku `tool_result` v obliki Anthropic, ki vsebuje 300 enakih
-vrstic z napakami, je doseglo **95.93% prihranka žetonov / 96.26% prihranka znakov** — povsem znotraj oglaševanega
-razpona. Toda isti cevovod, izveden na običajnem, neodvečnem izhodu orodja (čist seznam zadetkov `grep`,
-kratko branje datoteke, običajno pogovorno besedilo), pravilno doseže **skoraj ničelne prihranke**, ker
-ni nobenih ponovitev, ki bi jih bilo mogoče odstraniti, `validateCompression()` (`validation.ts`) pa zavrne posredovanje
-predelane vsebine, ki bi odstranila ali spremenila bloke kode, URL-je, naslove, različice ali identifikatorje konstant, zapisane IZKLJUČNO Z VELIKIMI ČRKAMI.
+Empirično preverjeno (`tests/unit/compression/stacked-compression-tool-result-savings.test.ts`): izvajanje
+`stacked` (RTK + Caveman) nad blokom `tool_result` v obliki Anthropic, ki vsebuje 300 enakih
+vrstic napak, je doseglo **95.93% prihranka žetonov / 96.26% prihranka znakov** — povsem znotraj oglaševanega
+razpona. Toda isti cevovod pri običajnem, neodvečnem izhodu orodja (čistem seznamu zadetkov `grep`,
+kratkem branju datoteke, običajnem pogovornem besedilu) pravilno doseže **skoraj ničelne prihranke**, ker
+ni ponavljajoče se vsebine, ki bi jo bilo mogoče odstraniti, `validateCompression()` (`validation.ts`) pa zavrne posredovanje
+predelane vsebine, ki bi izpustila ali spremenila bloke kode, URL-je, naslove, različice ali identifikatorje konstant, zapisane VELIKIMI ČRKAMI.
 
-To je pričakovano in varno vedenje, ne napaka: seja programiranja, ki večinoma bere ali preiskuje čiste datoteke,
-bo tudi ob popolnoma omogočenem stiskanju dosegla zmerne skupne prihranke, medtem ko bo seja, ki naleti na neuspešno
-zanko ali pretirano zgovoren linter, pri takem prometu dosegla celoten razpon 78-95%. Nizkega skupnega odstotka
-prihranka posamezne seje ne uporabljajte kot dokaz, da je stiskanje napačno konfigurirano — najprej preverite, ali je
-bil osnovni izhod orodja dejansko odvečen.
+To je pričakovano in varno vedenje, ne napaka: seja programiranja, ki večinoma bere/preiskuje čiste datoteke,
+bo dosegla skromne skupne prihranke tudi ob popolnoma omogočenem stiskanju, medtem ko bo seja, ki naleti na neuspešno
+zanko ali zelo zgovoren linter, za ta promet dosegla celoten razpon 78-95%. Nizkega skupnega odstotka prihranka ene same seje
+ne uporabljajte kot dokaz, da je stiskanje napačno konfigurirano — najprej preverite, ali je bil
+osnovni izhod orodja dejansko odvečen.
 
 ---
 
 ## Vizualizacija prihranka žetonov
 
 ```
-Brez stiskanja:       47K žetonov, poslanih modelu LLM
-Z Lite:               40K poslanih žetonov          (15% prihranka — varno, vedno omogočeno)
-S Standard:           33K poslanih žetonov          (30% prihranka — pravila sloga caveman-speak)
-Z Aggressive:         24K poslanih žetonov          (50% prihranka — staranje + povzemanje)
-Z Ultra:              12K poslanih žetonov          (75% prihranka — hevristično obrezovanje)
-Z RTK:                19K-5K poslanih žetonov       (60-90% prihranka pri izhodu ukazov/orodij)
-S Stacked:            10K-2.5K poslanih žetonov     (78-95% razpon RTK+Caveman za primerno vsebino)
+Brez stiskanja:       47K žetonov poslanih LLM-u
+Z Lite:               40K žetonov poslanih          (15% prihranka — varno, vedno vklopljeno)
+S Standard:           33K žetonov poslanih          (30% prihranka — pravila caveman-speak)
+Z Aggressive:         24K žetonov poslanih          (50% prihranka — staranje + povzemanje)
+Z Ultra:              12K žetonov poslanih          (75% prihranka — hevristično obrezovanje)
+Z RTK:                19K-5K žetonov poslanih       (60-90% prihranka pri izhodu ukazov/orodij)
+S Stacked:            10K-2.5K žetonov poslanih     (78-95% razpon RTK+Caveman za primerno vsebino)
 ```
 
 ---
@@ -184,17 +188,17 @@ S Stacked:            10K-2.5K poslanih žetonov     (78-95% razpon RTK+Caveman 
 
 ### Nadzorna plošča
 
-Pojdite na `Nadzorna plošča → Kontekst in predpomnilnik`:
+Pomaknite se do `Dashboard → Context & Cache`:
 
 - **Caveman** — izbira načina, jezikovni paketi, predogled in globalne privzete nastavitve
 - **RTK** — predogled filtra ukazov, varnostne nastavitve RTK in katalog filtrov
-- **Kombinacije stiskanja** — poimenovani cevovodi motorjev, dodeljeni usmerjevalnim kombinacijam
-- **Prag samodejnega sprožilca** — samodejno vklopi stiskanje, ko število žetonov preseže prag
+- **Kombinacije stiskanja** — poimenovani cevovodi mehanizmov, dodeljeni kombinacijam usmerjanja
+- **Prag samodejnega sproženja** — samodejno vključi stiskanje, ko število žetonov preseže prag
 
-### Prekrivanje na kombinacijo
+### Preglasitev za posamezno kombinacijo
 
-V `Nadzorna plošča → Kontekst in predpomnilnik → Kombinacije stiskanja` dodelite kombinacijo stiskanja
-usmerjevalni kombinaciji:
+V `Dashboard → Context & Cache → Compression Combos` dodelite kombinacijo stiskanja kombinaciji
+usmerjanja:
 
 ```txt
 Kombinacija: "free-tier-fallback"
@@ -205,42 +209,42 @@ Kombinacija: "free-tier-fallback"
     2. if/qwen3.8-max-preview
 ```
 
-To vam omogoča uporabo naloženega stiskanja na brezplačnih/kodirnih ponudnikih, medtem ko ohranjate
-lahek način na plačljivih naročninah.
+To omogoča uporabo zloženega stiskanja pri brezplačnih ponudnikih oziroma ponudnikih za programiranje,
+pri plačljivih naročninah pa lahko ohranite lahki način.
 
-Ta dodelitev "Prekrivanje na kombinacijo" je drugačen nadzor od prekrivanja **načina stiskanja
-usmerjevalne kombinacije** (Privzeto/Izklopljeno/Lahko/Standardno/Agresivno/Ultra) — to prekrivanje
-ne izbere poimenovanega cevovoda kombinacije stiskanja; samo nastavi polje `compressionMode`, ki ga
-uporablja `resolveCompressionPlan`. Nastavite ga lahko na kartici kombinacije (`Nadzorna plošča →
-Kombinacije`) ali, od #6760, na usmerjevalno kombinacijo na seznamu "Dodelitev usmerjanju" na
-`Nadzorna plošča → Kontekst in predpomnilnik → Kombinacije stiskanja`, tik ob potrditvenem polju za
-dodelitev cevovoda, dokumentiranem zgoraj. Obe površini se ohranita prek iste končne točke `PUT
-/api/combos/{id}`.
+Ta dodelitev »preglasitve za posamezno kombinacijo« je ločen nadzorni element od preglasitve
+**načina stiskanja kombinacije usmerjanja** (Default/Off/Lite/Standard/Aggressive/Ultra/Codex Responses
+— shema polja sprejema tudi `rtk`, `stacked` in `omniglyph`) — ta preglasitev ne izbere poimenovanega
+cevovoda kombinacije stiskanja, temveč samo nastavi polje `compressionMode`, ki ga upošteva
+`resolveCompressionPlan`. Nastavite jo lahko na kartici kombinacije (`Dashboard → Combos`) ali pa od
+#6760 naprej za posamezno kombinacijo usmerjanja na seznamu »Assign to routing« v
+`Dashboard → Context & Cache → Compression Combos`, tik ob potrditvenem polju za dodelitev cevovoda,
+opisanem zgoraj. Obe možnosti se shranjujeta prek iste končne točke `PUT /api/combos/{id}`.
 
-### Prekrivanje na zahtevo
+### Preglasitev za posamezno zahtevo
 
-Pošljite glavo zahteve `x-omniroute-compression`, da preglasite načrt stiskanja za eno samo
-zahtevo. Ima najvišjo prioriteto — preglasi prekrivanje usmerjevalne kombinacije, aktivni profil,
-samodejni sprožilec in privzeto ploščo. Neznane vrednosti se ignorirajo (zahteva ni nikoli
-zavržena) in globalno glavno stikalo še vedno nadzoruje vse: ko je stiskanje globalno izklopljeno,
+Pošljite glavo zahteve `x-omniroute-compression`, da preglasite načrt stiskanja za posamezno
+zahtevo. Ima najvišjo prednost — preglasi nastavitev kombinacije usmerjanja, aktivni profil,
+samodejno sprožanje in privzeto nastavitev plošče. Neznane vrednosti so prezrte (zahteva ni nikoli
+zavrnjena), globalno glavno stikalo pa še vedno nadzoruje vse: ko je stiskanje globalno izklopljeno,
 ga glava ne more vklopiti. Vrednosti:
 
-| Vrednost      | Učinek                                                                                               |
-| ------------- | ---------------------------------------------------------------------------------------------------- |
-| `off`         | Brez stiskanja za to zahtevo.                                                                        |
-| `default`     | Privzeti profil, izpeljan iz plošče (ignorira aktivni profil). Izgubni motorji ostanejo izklopljeni. |
-| `safe`        | Enako kot izpustitev glave: samo odstranjevanje podvojenih podatkov in zlaganje presledkov.          |
-| `allow-lossy` | Ohrani načrt operaterja te zahteve, vključno s povzetki, filtri relevantnosti in prepisi sloga.      |
-| `engine:<id>` | En sam motor, ko je omogočen, npr. `engine:rtk`. To je vključitev na zahtevo za ta motor.            |
-| `<combo>`     | Poimenovana kombinacija, najprej se ujema po imenu (neobčutljivo na velikost črk), nato po ID-ju.    |
+| Vrednost      | Učinek                                                                                                             |
+| ------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `off`         | Brez stiskanja za to zahtevo.                                                                                      |
+| `default`     | Privzeti profil, izpeljan iz plošče (aktivni profil je prezrt). Mehanizmi z izgubami ostanejo izklopljeni.         |
+| `safe`        | Enako kot brez glave: samo odstranjevanje podvojitev in združevanje presledkov.                                    |
+| `allow-lossy` | Ohrani operaterjev načrt za to zahtevo, vključno s povzetki, filtri ustreznosti in slogovnimi preoblikovanji.      |
+| `engine:<id>` | Posamezen omogočen mehanizem, npr. `engine:rtk`. To je izrecna vključitev tega mehanizma za posamezno zahtevo.     |
+| `<combo>`     | Poimenovana kombinacija, najprej usklajena po imenu (brez razlikovanja med velikimi in malimi črkami), nato po ID. |
 
-Brez `allow-lossy`, `engine:<id>` ali poimenovane kombinacije se izgubni motorji ne uporabijo.
-Zahteva še vedno dobi odstranjevanje podvojenih podatkov seje in zlaganje presledkov, ko je
-stiskanje vklopljeno.
+Brez `allow-lossy`, `engine:<id>` ali poimenovane kombinacije se mehanizmi z izgubami ne uporabijo.
+Če je stiskanje vklopljeno, se za zahtevo še vedno izvedeta odstranjevanje podvojitev v seji in
+združevanje presledkov.
 
-Uporabljeni načrt se ponovi v glavi odgovora `X-OmniRoute-Compression: <mode>; source=<source>`,
-kjer je `<source>` eden od `request-header`, `routing-override`, `active-profile`, `auto-trigger`,
-`default` ali `off`.
+Uporabljeni načrt je vrnjen v glavi odgovora `X-OmniRoute-Compression: <mode>; source=<source>`,
+pri čemer je `<source>` ena od vrednosti `request-header`, `routing-override`, `active-profile`,
+`auto-trigger`, `default` ali `off`.
 
 ### API
 
@@ -253,15 +257,15 @@ curl -X PUT http://localhost:20128/api/settings/compression \
   -H "Content-Type: application/json" \
   -d '{"defaultMode":"stacked","autoTriggerMode":"stacked","autoTriggerTokens":32000}'
 
-# Predogled določenega tovora RTK/naloženega tovora
+# Predogled določene vsebine RTK/stacked
 curl -X POST http://localhost:20128/api/compression/preview \
   -H "Content-Type: application/json" \
   -d '{"mode":"rtk","messages":[{"role":"tool","content":"npm test output here"}]}'
 
-# Seznam paketov filtrov RTK
+# Prikaži seznam paketov filtrov RTK
 curl http://localhost:20128/api/context/rtk/filters
 
-# Preizkusite RTK neposredno z izbirnimi metapodatki ukaza
+# Neposredno preskusi RTK z neobveznimi metapodatki ukaza
 curl -X POST http://localhost:20128/api/context/rtk/test \
   -H "Content-Type: application/json" \
   -d '{"command":"npm test","text":"FAIL tests/example.test.ts\nError: boom"}'
@@ -273,7 +277,7 @@ curl -X POST http://localhost:20128/api/context/rtk/test \
 
 Mehanizem za stiskanje **vedno ohrani:**
 
-- ✅ Bloke kode (ograjene in v vrstici)
+- ✅ Bloke kode (ograjene in vrstične)
 - ✅ URL-je in poti datotek
 - ✅ Strukture JSON in strukturirane podatke
 - ✅ Identifikatorje in zaščitene tehnične žetone
@@ -281,14 +285,14 @@ Mehanizem za stiskanje **vedno ohrani:**
 - ✅ Definicije klicev orodij/funkcij
 - ✅ Sistemske pozive (v lahkem načinu)
 
-Obnovitev neobdelanega izhoda RTK zakrije običajne ključe API, žetone bearer, žetone Slack, dostopne ključe AWS,
+Obnovitev neobdelanega izhoda RTK zakrije običajne ključe API, žetone bearer, žetone Slack, ključe za dostop AWS,
 gesla, žetone in skrivnosti, preden se kar koli trajno shrani.
 
 ---
 
-## Statistični podatki stiskanja
+## Statistika stiskanja
 
-Vsaka stisnjena zahteva vključuje statistične podatke v dnevnikih strežnika:
+Vsaka stisnjena zahteva vključuje statistiko v dnevnikih strežnika:
 
 ```json
 {
@@ -306,48 +310,57 @@ Vsaka stisnjena zahteva vključuje statistične podatke v dnevnikih strežnika:
 
 ---
 
-## Časovni načrt faz
+## Načrt faz
 
-| Faza    | Načini                                                                                                                                                                   | Status        |
-| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------- |
-| Faza 1  | Izklopljeno, Lite                                                                                                                                                        | ✅ Dobavljeno |
-| Faza 2  | Standardno, Agresivno, Ultra                                                                                                                                             | ✅ Dobavljeno |
-| Faza 3  | RTK, Zloženo, Kombinacije stiskanja                                                                                                                                      | ✅ Dobavljeno |
-| Faza 4  | Izhodni slogi, SLM-tier Ultra, eval harness                                                                                                                              | ✅ Dobavljeno |
-| Faza 4C | Prilagodljiv proračun konteksta ("številčnica") – računski mehanizem + API (`contextBudget` na `PUT /api/settings/compression`) + nadzor načina/politike nadzorne plošče | ✅ Dobavljeno |
+| Faza    | Načini                                                                                                                                                                      | Stanje    |
+| ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
+| Faza 1  | Izklopljeno, lahko                                                                                                                                                          | ✅ Izdano |
+| Faza 2  | Standardno, agresivno, ultra                                                                                                                                                | ✅ Izdano |
+| Faza 3  | RTK, sestavljeno, kombinacije stiskanja                                                                                                                                     | ✅ Izdano |
+| Faza 4  | Slogi izhoda, ultra na ravni SLM, ogrodje za vrednotenje                                                                                                                    | ✅ Izdano |
+| Faza 4C | Prilagodljiv proračun konteksta (»gumb«) — računski mehanizem + API (`contextBudget` na `PUT /api/settings/compression`) + kontrolniki načina/pravilnika na nadzorni plošči | ✅ Izdano |
 
 ---
 
 ## Zahvale
 
-Pravila stiskanja standardnega načina temeljijo na navdihu projekta **[Caveman](https://github.com/JuliusBrussee/caveman)** avtorja **[JuliusBrussee](https://github.com/JuliusBrussee)** (⭐ 51K+) — viralnega projekta »zakaj uporabiti veliko žetonov, ko malo žetonov opravi delo«. Caveman poroča o `~75%` manj izhodnih žetonih, `65%` povprečnem prihranku izhoda pri primerjalnih preizkusih, razponu izhoda `22-87%` in orodju za stiskanje vhoda z `~46%`.
+Pravila stiskanja v standardnem načinu se zgledujejo po projektu **[Caveman](https://github.com/JuliusBrussee/caveman)** avtorja **[Juliusa Brusseeja](https://github.com/JuliusBrussee)** (⭐ 51K+) — viralnem projektu »zakaj uporabiti veliko žeton, ko malo žeton naredi trik«. Caveman poroča o `~75%` manj izhodnih žetonih, povprečnem `65%` prihranku izhoda v primerjalnih preizkusih, razponu izhoda `22-87%` in orodju za stiskanje vhoda z `~46%` prihrankom.
 
-Način RTK temelji na navdihu projekta **[RTK - Rust Token Killer](https://github.com/rtk-ai/rtk)** organizacije **[RTK AI](https://github.com/rtk-ai)** — visokozmogljivega projekta za stiskanje izhoda ukazov za terminal, gradnjo, preizkušanje, git in filtriranje izhoda orodij. RTK poroča o prihrankih `60-90%`, pri čemer vzorčna seja v njegovem dokumentu README prikazuje prihranek `~80%`.
+Način RTK se zgleduje po projektu **[RTK - Rust Token Killer](https://github.com/rtk-ai/rtk)** organizacije **[RTK AI](https://github.com/rtk-ai)** — visoko zmogljivem projektu za stiskanje izhoda ukazov pri filtriranju izhoda terminala, gradnje, preizkusov, sistema git in orodij. RTK poroča o `60-90%` prihrankih, pri čemer vzorčna seja v njegovi datoteki README prikazuje `~80%` prihranka.
 
 ---
 
 ## Napredni sistemi stiskanja
 
-Poleg 7 standardnih načinov OmniRoute vključuje več naprednih sistemov stiskanja,
-ki glede na kontekst delujejo samodejno.
+Poleg 7 zgoraj opisanih načinov (izvorna koda sprejema tudi načina `codex-responses` in
+`omniglyph`, ki ju ta vodnik ne obravnava) spodnji razdelki opisujejo funkcije,
+ki delujejo znotraj teh načinov ali skupaj z njimi: stiskanje rezultatov orodij in progresivno staranje
+sta 1. in 2. korak agresivnega mehanizma (agresivni način in korak `aggressive` v
+sestavljenem cevovodu), sestavljeni cevovod določa izvajanje sestavljenega načina, stiskanje
+z upoštevanjem predpomnilnika pa pri ponudnikih s predpomnjenjem zniža `aggressive` in `ultra`
+na `standard`, kadar je stiskanje vklopljeno. Jamski način izpisa in slogi izpisa so
+izbirna navodila sistemskega poziva, ki so privzeto izklopljena in namesto stiskanja zahteve
+oblikujejo izhod modela.
 
 ### Stiskanje z upoštevanjem predpomnilnika
 
 Nekateri ponudniki (na primer Anthropic s predpomnjenjem pozivov) podpirajo **predpomnjenje pozivov**,
-ki jim omogoča predpomnjenje delov poziva za zmanjšanje stroškov in zakasnitve. Ko je
+kar jim omogoča predpomnjenje delov poziva, da zmanjšajo stroške in zakasnitve. Ko je
 predpomnjenje omogočeno, lahko agresivno stiskanje dejansko **poslabša** učinkovitost,
-saj spremeni predpomnjene žetone in s tem razveljavi predpomnilnik.
+ker spremeni predpomnjene žetone in s tem razveljavi predpomnilnik.
 
-Modul `cachingAware.ts` to rešuje z **zaznavanjem konteksta predpomnjenja** in
-ustreznim **prilagajanjem strategije stiskanja**.
+Modul `cachingAware.ts` to rešuje tako, da **zazna kontekst predpomnjenja** in
+**ustrezno prilagodi strategijo stiskanja**.
 
 #### Kako deluje
 
 1. **Zaznavanje konteksta predpomnjenja** — Pregleda telo zahteve in poišče oznake `cache_control`
 2. **Prepoznavanje ponudnikov s predpomnjenjem** — Preveri, ali ciljni ponudnik podpira predpomnjenje
-3. **Prilagajanje strategije** — Za ponudnike s predpomnjenjem zniža `aggressive`/`ultra` na `standard`
-4. **Izpustitev sistemskega poziva** — Sistemski pozivi so običajno predpomnjeni, zato jih ne stiska
-5. **Uporaba determinističnih pretvorb** — Uporablja samo pretvorbe, ki dajejo dosleden rezultat
+3. **Prilagoditev strategije** — Zniža `aggressive`/`ultra` na `standard` za ponudnike s predpomnjenjem
+4. **Izpustitev sistemskega poziva** — Sistemski pozivi so običajno predpomnjeni, zato jih ne stisne
+
+Pomožna funkcija za strategijo vrne tudi zastavico `deterministicOnly`, vendar graditelj načrta uporabi
+samo strategijo — trenutno nobena nadaljnja komponenta ne bere te zastavice.
 
 #### Primer kode
 
@@ -364,7 +377,7 @@ const body = {
 };
 
 const ctx = detectCachingContext(body, { provider: "anthropic" });
-// → { hasCacheControl: true, provider: "anthropic", isCachingProvider: true }
+// → { hasCacheControl: true, provider: "anthropic", targetFormat: null, isCachingProvider: true }
 
 const strategy = getCacheAwareStrategy("aggressive", ctx);
 // → { strategy: "standard", skipSystemPrompt: true, deterministicOnly: true }
@@ -372,21 +385,26 @@ const strategy = getCacheAwareStrategy("aggressive", ctx);
 
 #### Kdaj uporabiti
 
-Stiskanje z upoštevanjem predpomnilnika je **vedno vklopljeno** — konfiguracija ni potrebna. Aktivira se
-samo, ko:
+Stiskanje z upoštevanjem predpomnilnika je **vedno vklopljeno** — konfiguracija ni potrebna. Aktivira se,
+kadar je stiskanje vklopljeno in ciljni ponudnik podpira predpomnjenje pozivov (Anthropic, OpenAI
+itd.); izrecne oznake `cache_control` niso potrebne — že ponudnik s predpomnjenjem
+sproži znižanje, same oznake pa ga nikoli ne sprožijo (zaznavanje oznak zagotavlja podatke za
+telemetrijo predpomnilnika, ne pa za odločitev o strategiji).
 
-- Zahteva vsebuje oznake `cache_control`
-- Ciljni ponudnik podpira predpomnjenje pozivov (Anthropic, OpenAI itd.)
-
-### Postopno staranje
+### Progresivno staranje
 
 V dolgih pogovorih se nabere veliko izmenjav sporočil, vendar starejše izmenjave postanejo manj
-pomembne. Modul `progressiveAging.ts` **zmanjšuje podrobnost sporočil glede na oddaljenost izmenjave**:
+pomembne. Modul `progressiveAging.ts` **okrni sporočila glede na oddaljenost izmenjave**
+(oddaljenost se meri od konca pogovora). S privzetimi dobavljenimi nastavitvami
+(`verbatim: 2, light: 2, moderate: 3`):
 
-- **Nedavne izmenjave (0–3)**: Ohranjene dobesedno (vse podrobnosti)
-- **Srednje stare izmenjave (4–8)**: Rahlo stiskanje (čiščenje presledkov in oblikovanja)
-- **Stare izmenjave (9+)**: Jamsko stiskanje (odstranjevanje mašil, povzemanje)
-- **Zelo stare izmenjave (20+)**: Močno povzete ali odstranjene
+- **Zadnji 2 izmenjavi (oddaljenost ≤ 2)**: Ohranjeni dobesedno
+- **Oddaljenost 3**: Jamsko stiskanje (odstranjevanje mašil)
+- **Oddaljenost 4+**: Sporočila pomočnika so povzeta; uporabniška sporočila so skrajšana na prvo
+  vrstico z največ 120 znaki; druge vloge ostanejo nespremenjene. Sistemski pozivi, že postarana
+  sporočila in najnovejše uporabniško sporočilo so vedno ohranjeni dobesedno ne glede na oddaljenost.
+  Nič ni v celoti odstranjeno, pas `light` pa je
+  z dobavljenimi privzetimi nastavitvami nedosegljiv (`light` je enak `verbatim`).
 
 #### Primer kode
 
@@ -401,10 +419,11 @@ const messages = [
 ];
 
 const { messages: aged, saved } = applyAging(messages, {
-  verbatim: 3, // Prve 3 izmenjave: dobesedno
-  light: 8, // Izmenjave 4–8: rahlo stiskanje
-  moderate: 20, // Izmenjave 9–20: jamsko stiskanje
-  // Izmenjave 21+: močno povzemanje
+  verbatim: 3, // zadnje 3 izmenjave: dobesedno
+  light: 8, // oddaljenost <= 8: blago stiskanje
+  moderate: 20, // oddaljenost <= 20: jamsko stiskanje
+  fullSummary: 5, // zahteva ga tip, vendar ga koda za razvrščanje v pasove ne bere
+  // oddaljenost > 20: povzeto (pomočnik) / ohranjena prva vrstica (uporabnik)
 });
 
 // saved = število prihranjenih žetonov
@@ -412,100 +431,156 @@ const { messages: aged, saved } = applyAging(messages, {
 
 #### Kdaj uporabiti
 
-Postopno staranje je **vedno vklopljeno** za načina `aggressive` in `ultra`. Še posebej
-učinkovito je pri:
+Progresivno staranje je **vedno vklopljeno** v načinu `aggressive` — je 2. korak funkcije
+`compressAggressive()`. Način Ultra ga ne izvaja. Še posebej učinkovito je pri:
 
 - Dolgotrajnih programerskih sejah
 - Večdnevnih pogovorih
-- Agentskih delovnih tokovih s številnimi klici orodij
+- Agentskih delovnih tokovih z veliko klici orodij
 
 ### Jamski način izpisa
 
-Modul `outputMode.ts` vstavi **navodila v sistemski poziv**, da model
-sam ustvari stisnjen, jedrnat izpis (v »jamskem« slogu).
+Jamski način izpisa doda **navodila sistemskega poziva**, ki od modela zahtevajo
+jedrnat izhod — raven `lite` zahteva kratke odgovore, ki ohranijo cele povedi, raven `full`
+zahteva, naj »odgovarja jedrnato kot pameten jamski človek«, raven `ultra` pa zahteva telegrafski izhod;
+navodila so zgolj zahteva in tega ne morejo zagotoviti. Zahteve jih prejmejo prek
+`applyOutputStyles()` (`open-sse/services/compression/outputStyles/apply.ts`):
+`open-sse/handlers/chatCore.ts` najprej razreši izbiro prek prilagoditvene plasti za združljivost za nazaj
+(`resolveOutputStyleSelection()` v
+`open-sse/services/compression/outputStyles/backCompat.ts`), ki, kadar je `outputStyles`
+prazen, omogočeni `cavemanOutputMode` preslika v slog izpisa `terse-prose` z intenzivnostjo
+`cavemanOutputMode.intensity` (glejte razdelek Združljivost za nazaj); neprazna izbira `outputStyles`
+se uporabi takšna, kot je, zato `cavemanOutputMode.enabled` in `intensity` nimata
+učinka, medtem ko njegovo stikalo `autoClarity` še vedno velja. `outputMode.ts` vsebuje
+besedila navodil (`CAVEMAN_INSTRUCTION_BY_LANGUAGE`), obhod vsebine in
+pomožno funkcijo za umestitev, ki jo uporablja vstavljanje; njegov lastni vstavljalnik `applyCavemanOutputMode()` nima
+klicatelja v produkciji.
 
 #### Kako deluje
 
-Namesto stiskanja vhoda ta način doda sistemski poziv, kot je:
+Ta način ne stisne vhoda. Sistemskemu pozivu doda blok navodil
+(glejte spodaj Kako deluje vstavljanje), nato pa se na telesu, ki zdaj vsebuje ta blok,
+še vedno izvede kateri koli način stiskanja vhoda, izbran za zahtevo. Pred skupno
+klavzulo o omejitvah, s katero se konča vsaka raven, se angleška raven `full` glasi:
 
-> »Odgovori z najmanj besedami. Preskoči vljudnostne fraze. Uporabljaj kratke stavke.«
+> "Odgovarjaj jedrnato kot pameten jamski človek. Izpusti člene (a/an/the), mašila (just/really/basically/actually/simply), vljudnostne fraze, omahovanje. Fragmenti v redu. Kratke sopomenke (velik, ne obsežen; popravi, ne implementiraj). Ohrani vso tehnično vsebino, kodo, napake, URL-je in identifikatorje natančne."
 
-To je še posebej učinkovito pri:
+To deluje posebej dobro za:
 
-- Ustvarjanju kode (jedrnatejši izpis = manj žetonov)
-- Hitrih vprašanjih in odgovorih (podrobne razlage niso potrebne)
-- Paketni obdelavi (največja prepustnost)
+- Ustvarjanje kode (jedrnatejši izhod = manj žetonov)
+- Hitra vprašanja in odgovore (ni potrebe po obširnih razlagah)
+- Paketno obdelavo (največja prepustnost)
 
 #### Kdaj uporabiti
 
-Jamski način izpisa je **izbiren** — nastavite ga prek kombinirane konfiguracije:
+Način izhoda Caveman je **izbiren**. Ko je stiskanje vklopljeno (`enabled: true`, glavno stikalo
+na strani Compression Settings), ga vklopite z `cavemanOutputMode.enabled`; `intensity`
+izbere `lite`, `full` ali `ultra`:
 
 ```json
 {
-  "strategy": "auto",
-  "config": {
-    "auto": {
-      "outputMode": "caveman"
-    }
+  "enabled": true,
+  "cavemanOutputMode": {
+    "enabled": true,
+    "intensity": "full"
   }
 }
 ```
 
-### Slogi izpisa (katalog)
+Stikalo **Output Mode** kombinacije stiskanja (`outputMode`, raven v `outputModeIntensity`)
+nastavi isto možnost za zahteve, za katere velja ta kombinacija, orodje MCP
+`omniroute_set_compression_engine` pa jo zapiše prek svojega logičnega argumenta `outputMode`.
+Neprazen izbor `outputStyles` ima prednost pred tem stikalom. Če na nadzorni plošči
+omogočite izhodni slog **Terse prose**, se vstavi isti blok (glejte spodaj Output
+Styles).
 
-Zgoraj opisani jamski način izpisa je **starejša pot z enim samim slogom**. Faza 4 ga je posplošila
-v katalog sestavljivih slogov izpisa: `OUTPUT_STYLE_CATALOG` v
-`open-sse/services/compression/outputStyles/catalog.ts`. Vsak slog je navodilo v sistemskem pozivu,
-zaradi katerega model sam ustvari cenejši izpis; hkrati je mogoče omogočiti več slogov,
-ki se vstavijo po vrstnem redu v katalogu.
+### Izhodni slogi (katalog)
 
-| Slog                         | `id`          | Kaj počne                                                                                                                                                                                                                   | Jeziki navodil                                                                 |
-| ---------------------------- | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
-| Jedrnato besedilo            | `terse-prose` | Odstrani mašila/člene/omiljevanje; natančno ohrani tehnično vsebino. Enako besedilo kot v podedovanem načinu izpisa caveman (navedeno, ne prepisano).                                                                       | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi                                  |
-| Manj kode                    | `less-code`   | Lestvica YAGNI: najmanjša delujoča sprememba brez nezahtevanih abstrakcij.                                                                                                                                                  | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi                                  |
-| Čop (len izkušen razvijalec) | `ponytail`    | »Najboljša koda je koda, ki ni bila nikoli napisana«: ponovna uporaba > ponovno pisanje, temeljni vzrok > simptom, najkrajša delujoča razlika.                                                                              | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi                                  |
-| Imam ADHD (najprej dejanje)  | `i-have-adhd` | Najprej dejanje (ukaz/pot/izsek pred besedilom), oštevilčeni omejeni koraki, EN konkreten naslednji korak, brez uvoda/povzetka/zaključka. Prilagojeno po [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd) (MIT). | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi                                  |
-| Jedrnati CJK (文言)          | `terse-cjk`   | Izjemno jedrnat slog klasične kitajščine.                                                                                                                                                                                   | zh (omejeno na področno nastavitev: ponujeno samo, ko je razrešeni jezik `zh`) |
+Zgornji način izhoda Caveman je **starejša pot z enim slogom**. Faza 4 ga je posplošila
+v katalog sestavljivih izhodnih slogov: `OUTPUT_STYLE_CATALOG` v
+`open-sse/services/compression/outputStyles/catalog.ts`. Vsak slog je navodilo sistemskega
+poziva, ki od modela zahteva varčnejši izhod; sloge je mogoče omogočiti
+skupaj, vstavljeni pa so v vrstnem redu kataloga.
 
-Vsak slog je na voljo s tremi stopnjami intenzivnosti — `lite`, `full`, `ultra` — in vsaka stopnja
-se konča s skupno določbo o mejah, ki bloke kode, poti datotek, ukaze,
-nize napak, URL-je in identifikatorje ohrani nespremenjene.
+| Slog                                   | `id`            | Kaj naredi                                                                                                                                                                                                                                                                                   | Jeziki navodil                                          |
+| -------------------------------------- | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
+| Jedrnata proza                         | `terse-prose`   | Izpusti mašila/člene/omahovanje; ohrani tehnično vsebino natančno. Enako besedilo kot pri starejšem načinu izhoda Caveman (sklic, ne ponovitev).                                                                                                                                             | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi           |
+| Manj kode                              | `less-code`     | Lestvica YAGNI: najmanjša delujoča sprememba, brez nezahtevanih abstrakcij.                                                                                                                                                                                                                  | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi           |
+| Čop (leni starejši razvijalec)         | `ponytail`      | "Najboljša koda je koda, ki ni bila nikoli napisana": ponovna uporaba > prepisovanje, osnovni vzrok > simptom, najkrajša delujoča razlika.                                                                                                                                                   | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi           |
+| Imam ADHD (najprej dejanje)            | `i-have-adhd`   | Najprej dejanje (ukaz/pot/izsek pred prozo), oštevilčeni omejeni koraki, EN konkreten naslednji korak, brez uvoda/povzetka/zaključka. Prirejeno po [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd) (MIT).                                                                        | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi           |
+| Filter Antislop za uporabniški vmesnik | `antislop-ui`   | Vsaka vizualna tehnika mora prestati preizkus namena (hierarhija, identiteta, berljivost); brez privzetih prelivov/stekla/sija, omejena paleta, brez predlognih postavitev. Oba sloga antislop dodata omejitev brez mrtvih kontrolnikov / brez izmišljenih trditev.                          | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi           |
+| Filter Antislop za besedilo in ljudi   | `antislop-copy` | Konkretno besedilo (brez pomišljajev, splošnih CTA-jev, modnih izrazov, zaključkov klepetalnih robotov in izmišljenih dejstev) ter pravila za ljudi: kontrast WCAG AA, vidno stanje fokusa, dostop s tipkovnico, prazna stanja ter stanja nalaganja/napake, prilagoditev za mobilne naprave. | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi           |
+| Jedrnati CJK (文言)                    | `terse-cjk`     | Odgovor ravni `full`/`ultra` v klasični kitajščini (文言); `lite` zahteva le kratke odgovore brez funkcijskih besed, vljudnostnih fraz ali olepševanja.                                                                                                                                      | zh (omejeno glede na območne nastavitve, glejte spodaj) |
+
+Vsak slog vključuje tri ravni intenzivnosti — `lite`, `full`, `ultra` — in vsaka raven
+se konča s skupno klavzulo o omejitvah (`SHARED_BOUNDARIES` v `outputMode.ts`), ki
+ohranja bloke kode, poti datotek, ukaze, napake in URL-je natančne. Besedila ravni
+`terse-prose` in `terse-cjk` na ta seznam dodajo identifikatorje.
+
+`terse-cjk` je na dveh mestih omejen na območne nastavitve `zh`. Stran Compression Settings
+prikaže njegovo vrstico le, ko je jezik uporabniškega vmesnika nadzorne plošče kitajščina
+(`zh-CN` ali `zh-TW`), funkcija `applyOutputStyles()` pa ga vstavi le, ko je razrešeni
+jezik zahteve (glejte spodaj Izbira jezika) `zh`. Skrivanje vrstice ne izbriše shranjenega
+izbora `terse-cjk`: API za nastavitve sprejme kateri koli id sloga, shranjevanje drugih
+slogov na strani pa ga ohrani. Ob zahtevi je preverjanje jezika v `applyOutputStyles()`
+edina omejitev glede na območne nastavitve.
 
 #### Kako deluje vstavljanje
 
 `applyOutputStyles()` (`open-sse/services/compression/outputStyles/apply.ts`) razreši
-izbor glede na katalog (neznani ID-ji in slogi, ki se ne ujemajo s področno nastavitvijo, so
-izpuščeni, ne da bi prišlo do napake), združi izbrana navodila v vrstnem redu kataloga,
-**enkrat** doda določbo o mejah in blok začne z enim samim označevalnikom
-idempotentnosti (`[OmniRoute Output Styles]`), zato ponovna uporaba ne naredi ničesar. Ko
-za razrešeni jezik (glejte Izbira jezika spodaj) obstaja prevod, se namesto angleškega
-navodila vstavi lokalizirano navodilo.
+izbor glede na katalog (neznani ID-ji in slogi, ki se ne ujemajo z jezikovno nastavitvijo,
+se opustijo, vendar nikoli ne povzročijo napake; če se izbor ne razreši v noben slog, telo
+ostane nespremenjeno in se preskoči kot `no_styles`), združi izbrana navodila po vrstnem
+redu v katalogu,
+**enkrat** doda določilo o mejah (ter varnostno določilo, `SAFETY_BOUNDARIES` ali njegov
+prevod, kadar je izbran `less-code` ali `ponytail`) in začne blok z enim označevalnikom
+idempotentnosti (`[OmniRoute Output Styles]`), zato ponovna uporaba ne povzroči sprememb.
+Kadar ima razrešeni jezik (glejte razdelek Izbira jezika spodaj) prevod, se namesto
+angleškega navodila vstavi lokalizirano navodilo.
 
-Pri telesu z `messages` obhod glede na vsebino (`shouldBypassCavemanOutputMode()` v
-`open-sse/services/compression/outputMode.ts`) preveri zadnja tri sporočila in preskoči
-sloge za celoten obrat, ko se ujemajo z njegovimi ključnimi besedami za varnost,
-nepovratna dejanja, pojasnjevanje ali občutljivost na vrstni red. Obhod se izvaja glede
-na nastavitev stikala **Auto-Clarity Bypass** (`cavemanOutputMode.autoClarity`) na nadzorni plošči.
+Pri telesu z neprazno matriko `messages` se preverjanje idempotentnosti izvede pred
+obhodom glede na vsebino: kadar je označevalnik `[OmniRoute Output Styles]` že v polju
+`system` na vrhnji ravni (kot niz ali matrika vsebinskih blokov) ali v sistemskem
+sporočilu z vsebino v obliki niza, telo ostane nespremenjeno kot `already_applied`,
+preverjanje ključnih besed pa se ne izvede. Sicer obhod glede na vsebino
+(`shouldBypassCavemanOutputMode()` v
+`open-sse/services/compression/outputMode.ts`) preveri besedilo zadnjih treh sporočil ne
+glede na njihovo vlogo in preskoči sloge za celoten obrat, kadar se to besedilo ujema s
+ključnimi besedami za varnost, nepovratna dejanja ali pojasnila oziroma z zaporedjem, pri
+katerem je vrstni red pomemben: `first`, `then`, `after that`, `before`, `rollback` ali
+`backup`, ki mu znotraj 240 znakov sledi `delete`, `drop`, `migrate`, `deploy` ali
+`release`. Obhod se izvaja, dokler je preklopnik **Auto-Clarity Bypass**
+(`cavemanOutputMode.autoClarity`, privzeto vklopljen) vklopljen; z izklopom preklopnika
+se preverjanje ključnih besed preskoči.
 
-Ko obhod dovoli obdelavo obrata, `placeSystemInstruction()` (ista datoteka), ki
-nikoli ne ustvari novega `messages[0]`, postavi blok na prvo najdeno mesto med naslednjimi:
+Ko obhod dovoli obdelavo obrata, `placeSystemInstruction()` (v isti datoteki), ki nikoli
+ne ustvari novega `messages[0]`, blok umesti na prvo od naslednjih mest, ki ga najde:
 
 1. Začetno sistemsko sporočilo z vsebino v obliki niza: blok se doda za njegovo besedilo.
-2. Polje `system` na najvišji ravni: blok se doda za besedilo niza ali
-   kot nov besedilni blok v polje blokov vsebine.
+2. Polje `system` na vrhnji ravni: blok se doda za besedilo niza ali kot nov besedilni
+   blok v matriko vsebinskih blokov.
 3. Prvo poznejše sistemsko sporočilo z vsebino v obliki niza: blok se doda za njegovo
    besedilo.
 4. Nič od navedenega: blok se doda v novo sistemsko sporočilo na koncu `messages`.
 
-Pri telesu brez `messages` se blok doda polju `instructions` v obliki niza
-ali postane `instructions`, ko telo vsebuje `input` (niz ali polje). Telo
-brez `instructions` in `input` se preskoči kot `no_messages`.
+Pri telesu brez matrike `messages` (ali s prazno matriko) se obhod glede na vsebino ne
+izvede, polje `system` na vrhnji ravni pa se ne upošteva. Blok se doda za besedilo polja
+`instructions` v obliki niza, razen če to polje že vsebuje označevalnik
+`[OmniRoute Output Styles]`; v tem primeru telo ostane nespremenjeno kot
+`already_applied`. Kadar telo nima polja `instructions` v obliki niza, vendar vsebuje
+`input` (niz ali matriko), blok postane vrednost `instructions` in nadomesti morebitno
+vrednost, ki ni niz in jo je to polje vsebovalo. Telo, ki nima niti polja `instructions`
+v obliki niza niti polja `input` v obliki niza ali matrike, ostane nespremenjeno in se
+preskoči kot `no_messages`.
 
 #### Kako omogočiti
 
-Na nadzorni plošči: **Kontekst → Nastavitve → Stiskanje** — ena vrstica na slog s
-stikalom za vklop/izklop in izbirnikom stopnje. Programsko konfiguracija stiskanja
-shrani izbor kot:
+Na nadzorni plošči: **Kontekst stiskanja → Nastavitve stiskanja**
+(`/dashboard/context/settings`), razdelek Slogi izhoda: ena vrstica za vsak slog s
+preklopnikom za vklop/izklop in izbirnikom ravni. Slogi se vstavijo, ko je vklopljeno
+samo stiskanje (glavni preklopnik strani, `enabled`). Preklopnik **Auto-Clarity Bypass**
+je na strani **Caveman** (`/dashboard/context/caveman`) na njeni kartici **Output
+Mode**. Programsko konfiguracija stiskanja shrani izbor kot:
 
 ```json
 {
@@ -516,76 +591,147 @@ shrani izbor kot:
 }
 ```
 
-Združljivost za nazaj: podedovana kombinirana nastavitev `outputMode: "caveman"` še vedno deluje in se preslika v
-`terse-prose`, pri čemer je v vsakem podedovanem jeziku bajtno enaka staremu vstavljanju.
+Združljivost za nazaj: dokler je `outputStyles` prazen, se podedovana nastavitev
+`cavemanOutputMode.enabled` preslika v `terse-prose` pri
+`cavemanOutputMode.intensity`. Blok se nato začne z označevalnikom
+`[OmniRoute Output Styles]`, medtem ko je podedovani vstavljalnik
+`applyCavemanOutputMode()` vstavil `[OmniRoute Caveman Output Mode]`. Pod
+označevalnikom se besedilo ujema s podedovanim vstavljenim besedilom v jezikih en,
+pt-BR, es, de, fr, it, ru, id in vi; v ja in zh vsebuje en dodaten presledek pred
+določilom o mejah. `terse-prose` je preveden v pt-BR, es, de, fr, it, ru, zh, ja, id in
+vi, zato zahteva, katere razrešeni jezik je `hu`, prejme angleško besedilo, medtem ko je
+podedovani vstavljalnik uporabil madžarsko besedilo.
 
-Izbira jezika: ko je `languageConfig.enabled` vklopljen, `autoDetect` izbere
-jezik zadnjega uporabniškega sporočila (isti detektor kot pri vhodnih mehanizmih);
-izklop `autoDetect` pripne `defaultLanguage`. Izklopljeno → angleščina.
+Izbira jezika sloga izhoda (`resolveOutputStyleLanguage()` v
+`outputStyles/apply.ts`): ko je `languageConfig.enabled` vklopljen, `autoDetect` vzorči
+najnovejše uporabniško sporočilo v matriki `messages` zahteve, ki vsebuje besedilo
+(vsebina v obliki niza ali `text` njegovih delov vsebine), in na njem zažene detektor
+pogona Caveman (`detectCompressionLanguage()`). Detektor vrne `zh` za besedilo z znaki
+han in brez kane; sicer vrne tistega izmed `it`, `pt-BR`, `es`, `de`, `fr`, `ru`, `ja`,
+`hu` in `id`, ki ima največ ujemanj z namigi, oziroma `en`, kadar ni nobenega ujemanja —
+besedilo, ki ga ne more razvrstiti, dobi angleščino, nikoli `defaultLanguage`, jezik
+`vi` pa ni nikoli zaznan, čeprav slogi vključujejo besedilo v jeziku `vi`. Telo API-ja
+Responses hrani svoje obrate v `input`, ki se ne vzorči, zato prejme `defaultLanguage`,
+nato pa angleščino. Kadar nobeno uporabniško sporočilo v `messages` ne vsebuje besedila
+ali ko je `autoDetect` izklopljen, se uporabi `defaultLanguage`, nato pa angleščina. Ko
+je `languageConfig.enabled` izklopljen, je jezik angleščina — razen če se za zahtevo
+uporabi kombinacija stiskanja (kombinacija, dodeljena usmerjevalni kombinaciji zahteve,
+ali privzeta kombinacija stiskanja, ki jo chatCore uporabi kot nadomestno možnost za
+vgrajeni zloženi cevovod): uporaba kombinacije za to zahtevo vklopi
+`languageConfig.enabled` in nastavi `defaultLanguage` iz jezikovnih paketov kombinacije
+(shranjena vrednost, če je med paketi kombinacije, sicer prvi paket kombinacije, ki je
+privzeto `en`), pri čemer še vedno velja shranjena nastavitev `autoDetect` (privzeto
+vklopljena). Vhodni pogon Caveman izbere jezik paketa pravil drugače — za vsak besedilni
+del posebej, ko je samodejno zaznavanje izklopljeno, pa je izbira pogojena z
+`enabledPacks`.
 
 Matriko slog × jezik določa
-`tests/unit/compression/output-styles-i18n-matrix.test.ts`: novega sloga ni mogoče izdati
-brez vsaj prevoda v pt-BR (ali izrecno zabeležene izjeme), obstoječi slog pa ne more
-neopazno izgubiti področne nastavitve. Za dodajanje sloga glejte
+`tests/unit/compression/output-styles-i18n-matrix.test.ts`: vsak slog kataloga potrebuje
+vnos v `BASELINE_LANGUAGES` testa; slog, ki ni omejen na področne nastavitve, mora
+vključevati prevod pt-BR (slog `terse-cjk`, omejen na področne nastavitve, je izvzet iz
+tega pravila), razen če je naveden v `KNOWN_ENGLISH_ONLY`, ki lahko vsebuje samo sloge
+brez kakršnih koli prevodov — navedeni slog, ki ima kakršen koli prevod, povzroči
+neuspeh testa; slog pa ne prestane testa tudi, če izgubi jezik, naveden v njegovem vnosu
+`BASELINE_LANGUAGES`. Če želite dodati slog, glejte
 [EXTENDING_COMPRESSION.md](./EXTENDING_COMPRESSION.md#adding-an-output-style).
 
 ### Stiskanje rezultatov orodij
 
-Modul `toolResultCompressor.ts` zagotavlja **5 specializiranih strategij stiskanja**
-za rezultate orodij (klice funkcij, izpise agentov, rezultate iskanja itd.):
+`compressToolResult()` v `open-sse/services/compression/toolResultCompressor.ts`
+stisne besedilo rezultata orodja s **5 strategijami**. Preizkusi jih v tem vrstnem redu,
+rezultat pa določi prva omogočena strategija, katere preverjanje se ujema z vsebino:
 
-1. **Stiskanje rezultatov iskanja** — Odstrani odvečne rezultate, ohrani najboljših N
-2. **Stiskanje branja datotek** — Skrajša velike datoteke, ohrani glave/uvoze
-3. **Stiskanje izvajanja kode** — Ohrani samo bistvena stdout/stderr
-4. **Stiskanje poizvedb v podatkovni zbirki** — Omeji vrstice, odstrani obsežne metapodatke
-5. **Stiskanje odzivov API-ja** — Odstrani polja z vrednostjo null, zgosti polja
+1. **`fileContent`**: vsebina s 3 ali več vrsticami, pri kateri se vsaj ena vrstica, če
+   zanemarimo začetni zamik, začne z `import `, `export `, `function `, `class `,
+   `const `, `let `, `var ` ali `return ` (ključna beseda in presledek), oziroma z `if`,
+   `for` ali `while`, ki mu sledi `(` ali ` (`, ohrani prvih 20 in zadnjih 5 vrstic,
+   izpuščeni srednji del pa označi.
+2. **`grepSearch`**: vsebina z vsaj eno vrstico oblike `<path>:<digits>:`,
+   kjer besedilo pred prvim dvopičjem ne vsebuje presledkov, ohrani samo takšne vrstice,
+   največ 30, čemur sledita število morebitnih dodatnih zadetkov in seznam datotek z
+   zadetki; vse druge vrstice so odstranjene. Za sprožitev strategije zadošča ena sama
+   takšna vrstica, zato šteje tudi vrstica dnevnika, ki se začne s časovnim žigom, kot je
+   `12:30:45`.
+3. **`shellOutput`**: izhod, ki vsebuje zaporedje ANSI CSI (`ESC[`, nato števke ali
+   podpičja in nato črko, kot pri barvnih kodah) ali znak `$`, ki mu kjer koli v
+   besedilu sledi presledek, izgubi ta zaporedja (druga ubežna zaporedja, kot je
+   `ESC[?25l`, ali zaporedje OSC za naslov okna se ohranijo) in ohrani svojih zadnjih
+   50 vrstic, pri čemer se zaporedne ponavljajoče se vrstice združijo. Ker se to
+   preverjanje izvede pred `json` in `errorMessage`, izhod JSON ali izhod z napako, ki
+   vsebuje takšen `$`, nikoli ne doseže teh strategij, dokler je `shellOutput` vključen.
+4. **`json`**: vsebina JSON, daljša od 2.000 znakov, ki se začne z `{` ali `[` (po
+   morebitnih presledkih) in jo je mogoče razčleniti, se povzame: polje z več kot 7
+   elementi ohrani prvih 5 in zadnja 2 elementa ter skupno število elementov, objekt pa
+   ohrani prvih 20 ključev, pri čemer se vsaka vrednost ugnezdenega objekta ali polja
+   nadomesti z označbo mesta `{…N keys}` (pri polju je N njegova dolžina), oznaka
+   `_remaining_<N>_keys` pa šteje ključe, izpuščene po prvih 20. Skalarne vrednosti se
+   prekopirajo v celoti, zato se objekt z največ 20 ključi brez ugnezdenih vrednosti le
+   znova zamakne — pomanjšan objekt pridobi znake in ostane nespremenjen.
+5. **`errorMessage`**: izhod, ki kjer koli in ne glede na velikost črk vsebuje `error:`,
+   `error ` (besedo, ki ji sledi presledek, kot v `no error found`), `[error]`,
+   `exception:`, `exception `, `[exception]` ali `traceback`, ohrani svojo prvo vrstico,
+   naslednjih 10 vrstic in zadnje 3, pri čemer se vrstice med njimi nadomestijo z oznako
+   `… [N frames elided] …`. Oznaka se prikaže samo, kadar prvi vrstici sledi več kot 13
+   vrstic, zato se izhod z napako s 14 vrsticami ali manj ne skrajša (pri 12 ali 13
+   vrsticah zadnje 3 ponovijo že ohranjene vrstice).
+
+Ko se strategija ujema, se poznejše strategije ne preizkusijo, tudi če ta strategija ne
+prihrani ničesar. Kadar ujemajoča se strategija ne prihrani nobenega ocenjenega žetona
+(dolžina ÷ 4, zaokrožena navzgor) — na primer datoteka, podobna kodi, s 25 vrsticami ali
+manj oziroma polje JSON z več kot 2.000 znaki in največ 7 elementi — agresivni mehanizem
+ohrani izvirni rezultat orodja: oba klicatelja (`compressAggressive()` in
+`compressAnthropicToolResultBlock()`) ohranita izvirnik, kadar je `saved` enak 0 ali
+manj, medtem ko `compressToolResult()` še vedno vrne izhod te strategije. Korak z
+rezultatom orodja ni zadnja stopnja: nadomestni povzemalnik mehanizma lahko še vedno
+skrajša sporočilo `tool` ali `function`, daljše od 8.192 znakov (`maxTokensPerMessage`,
+2.048, krat 4).
 
 #### Kdaj uporabiti
 
-Stiskanje rezultatov orodij je ob prisotnosti klicev orodij **vedno vklopljeno**. Konfiguracija ni
-potrebna.
+Stiskanje rezultatov orodij je 1. korak agresivnega mehanizma (`compressAggressive()` v
+`open-sse/services/compression/aggressive.ts`), zato se izvaja v agresivnem načinu in v
+koraku `aggressive` sestavljenega cevovoda. Stisne sporočila `tool` in `function` v
+obliki OpenAI ter besedilo znotraj blokov Anthropic `tool_result`. Vsaka strategija ima
+lastno stikalo pod `aggressive.toolStrategies`; vsa so privzeto vklopljena. Na nadzorni
+plošči so stikala v pogledu **Advanced** strani Caveman, ko je stiskanje vklopljeno in je
+privzeti način nastavljen na Aggressive.
 
-### Zaporedni cevovod
+### Sestavljeni cevovod
 
-Zaporedni način izvaja **več mehanizmov enega za drugim** — običajno najprej RTK
-(60–90 % prihranka pri izhodu orodij), nato Caveman (dodatnih 30 % prihranka pri
-preostalem besedilu). Tako doseže **78–95 % skupnega prihranka**.
+Sestavljeni način izvaja **več mehanizmov zaporedoma** — običajno najprej RTK
+(60–90-% prihranek pri izhodu orodij), nato pa Caveman nad preostalim besedilom
+(~46-% prihranek pri vhodu). Skupaj to pomeni **78–95-% razpon za upravičeno vsebino**
+(glejte zgornji razdelek Matematika prihrankov predhodnih korakov):
+`1 - (1 - 0.60..0.90) × (1 - 0.46)` v povprečju znaša ≈89 %.
 
 #### Kako deluje
 
 ```
 Vhod (1000 žetonov)
   → RTK (filter, ki upošteva ukaze) → 200 žetonov
-    → Caveman (odstranjevanje mašil) → 140 žetonov
-  → Izhod (140 žetonov, 86 % prihranka)
+    → Caveman (odstranjevanje mašil) → 108 žetonov
+  → Izhod (108 žetonov, ~89-% prihranek)
 ```
 
-#### Kdaj ga uporabiti
+#### Kdaj uporabiti
 
-Zaporedni način uporabite za:
+Sestavljeni način uporabite za:
 
 - Delovne tokove z intenzivno uporabo orodij (agentsko programiranje, raziskovanje)
-- Stroškovno občutljivo paketno obdelavo
-- Ko potrebujete največji možni prihranek žetonov
+- Paketno obdelavo, občutljivo na stroške
+- Primere, ko potrebujete največji prihranek žetonov
 
-Konfigurirajte prek kombinacije:
-
-```json
-{
-  "strategy": "auto",
-  "config": {
-    "auto": {
-      "modePack": "stacked"
-    }
-  }
-}
-```
+Sestavljeni cevovodi se konfigurirajo prek globalne nastavitve stiskanja
+`stackedPipeline` ali prek poimenovane kombinacije stiskanja, dodeljene kombinaciji
+usmerjanja (glejte zgornji razdelek Preglasitev za posamezno kombinacijo) — ne pa prek
+`modePack` samodejne kombinacije (to polje samo na novo uteži izbiro modela samodejne
+kombinacije, `stacked` pa ni veljavno ime paketa).
 
 ---
 
 ## Preglasitve stiskanja za posamezne kombinacije
 
-Globalni način stiskanja lahko preglasite **za vsako kombinacijo posebej**, da natančno prilagodite vedenje
+Globalni način stiskanja lahko preglasite **za vsako kombinacijo posebej**, da natančno prilagodite delovanje
 različnim primerom uporabe:
 
 ```json
@@ -593,25 +739,21 @@ različnim primerom uporabe:
   "id": "coding-combo",
   "strategy": "priority",
   "config": {
-    "auto": {
-      "weights": { "taskFit": 0.5 },
-      "modePack": "quality-first"
-    }
+    "weights": { "taskFit": 0.5 },
+    "modePack": "quality-first"
   },
-  "compressionOverride": {
-    "mode": "aggressive",
-    "stackedPipelines": ["rtk", "caveman"],
-    "preserveToolDefinitions": true
-  }
+  "compressionOverride": "aggressive"
 }
 ```
 
 To je uporabno za:
 
-- **Kombinacije za programiranje**: Uporabite način `aggressive` za dolge seje
-- **Kombinacije za hitra vprašanja in odgovore**: Uporabite način `lite` za hitre odgovore
-- **Kombinacije z intenzivno uporabo orodij**: Uporabite način `stacked` za največje prihranke
-- **Produkcijske kombinacije**: Uporabite način `cache-aware` za ponudnike s predpomnjenjem
+- **Kombinacije za programiranje**: za dolge seje uporabite način `aggressive`
+- **Kombinacije za hitra vprašanja in odgovore**: za hitre odzive uporabite način `lite`
+- **Kombinacije z intenzivno uporabo orodij**: za največje prihranke uporabite način `stacked`
+- **Produkcijske kombinacije**: za ponudnike s predpomnjenjem pustite preglasitev izklopljeno — vedno omogočena
+  prilagoditev, ki upošteva predpomnilnik, samodejno zniža `aggressive`/`ultra` na `standard`
+  (načina `cache-aware` ni mogoče izbrati)
 
 ---
 
@@ -620,7 +762,7 @@ To je uporabno za:
 - [Konfiguracija okolja](../reference/ENVIRONMENT.md) — Okoljske spremenljivke za stiskanje
 - [Vodnik po arhitekturi](../architecture/ARCHITECTURE.md) — Notranje delovanje cevovoda za stiskanje
 - [Uporabniški vodnik](../guides/USER_GUIDE.md) — Uvod v uporabo stiskanja
-- [Stiskanje RTK](./RTK_COMPRESSION.md) — Filtri RTK, model zaupanja, preveritvena zapora in obnovitev neobdelanega izhoda
-- [Mehanizmi za stiskanje](./COMPRESSION_ENGINES.md) — Caveman, RTK, zlaganje, API-ji, MCP in nadzorna plošča
+- [Stiskanje RTK](./RTK_COMPRESSION.md) — Filtri RTK, model zaupanja, preveritvena pregrada in obnovitev neobdelanega izhoda
+- [Mehanizmi za stiskanje](./COMPRESSION_ENGINES.md) — Caveman, RTK, stacked, API-ji, MCP in nadzorna plošča
 - [Oblika pravil za stiskanje](./COMPRESSION_RULES_FORMAT.md) — Oblika paketov pravil JSON
 - [Jezikovni paketi za stiskanje](./COMPRESSION_LANGUAGE_PACKS.md) — Jezikovno specifična pravila Caveman

@@ -2,15 +2,20 @@ import {
   clearRecoveredProviderState,
   getProviderCredentialsWithQuotaPreflight,
 } from "@/sse/services/auth";
-import {
-  isAllRateLimitedCredentials,
-  rateLimitedProviderResponse,
-} from "@/app/api/v1/_shared/rateLimit";
 import { buildErrorBody, sanitizeErrorMessage } from "@omniroute/open-sse/utils/error.ts";
 import { CORS_HEADERS, handleCorsOptions } from "@/shared/utils/cors";
+import {
+  enforceApiKeyPolicyWithScope,
+  unusableCredentialsResponse,
+} from "@/app/api/v1/_shared/keyScopedRoute";
 
 const FISH_AUDIO_API_BASE = "https://api.fish.audio";
-const ALLOWED_RESPONSE_HEADERS = ["content-type", "content-disposition", "retry-after", "x-request-id"] as const;
+const ALLOWED_RESPONSE_HEADERS = [
+  "content-type",
+  "content-disposition",
+  "retry-after",
+  "x-request-id",
+] as const;
 
 type FishAudioCredentials = {
   apiKey?: string | null;
@@ -49,18 +54,28 @@ export async function proxyFishAudioRequest(
   pathname: string,
   init: FishAudioRequestInit = {}
 ): Promise<Response> {
-  const credentials = (await getProviderCredentialsWithQuotaPreflight(
-    "fishaudio"
-  )) as FishAudioCredentials | null;
-  if (credentials && isAllRateLimitedCredentials(credentials)) {
-    return rateLimitedProviderResponse("fishaudio", credentials);
-  }
+  // GHSA-3w2r: resolve the caller key's policy like the sibling ElevenLabs
+  // proxy does, so the Fish Audio connection is one the key may use.
+  const scope = await enforceApiKeyPolicyWithScope(request, null);
+  if (scope.rejection) return scope.rejection;
+
+  const selection = await getProviderCredentialsWithQuotaPreflight(
+    "fishaudio",
+    null,
+    scope.allowedConnections
+  );
+  const unusable = unusableCredentialsResponse("fishaudio", selection);
+  if (unusable) return unusable;
+  const credentials = selection as FishAudioCredentials | null;
   const apiKey = credentials?.apiKey || credentials?.accessToken;
   if (!apiKey || credentials?.allExpired) {
-    return new Response(JSON.stringify(buildErrorBody(401, "No credentials for provider: fishaudio")), {
-      status: 401,
-      headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify(buildErrorBody(401, "No credentials for provider: fishaudio")),
+      {
+        status: 401,
+        headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
+      }
+    );
   }
 
   const incomingUrl = new URL(request.url);

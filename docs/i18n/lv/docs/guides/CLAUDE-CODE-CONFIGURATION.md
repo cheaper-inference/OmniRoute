@@ -98,8 +98,8 @@ tiek parādīti tikai Kimi modeļi.
 
 ## Darba sākšanas bloks informācijas panelī
 
-Claude rīka kartīte (**Informācijas panelis → CLI Code**) parāda precīzu šīs instances `settings.json` fragmentu
-blakus atklāšanas aizstājvārda informācijas pogai, kā arī kopēšanas pogu:
+Claude rīka kartīte (**Dashboard → CLI Code**) attēlo precīzu šīs instances `settings.json` fragmentu
+blakus atklāšanas aizstājvārda informācijas pogai kopā ar kopēšanas pogu:
 
 ```jsonc
 {
@@ -111,18 +111,31 @@ blakus atklāšanas aizstājvārda informācijas pogai, kā arī kopēšanas pog
 }
 ```
 
-Bāzes URL ir kartītes noteiktais URL (tostarp jūsu ievadītā pielāgotā vērtība), kas jau ir
-normalizēts — bez `/v1` sufiksa un bez noslēdzošās slīpsvītras. **Atslēga nekad netiek parādīta**: blokā ir
+Bāzes URL ir kartītes noteiktā adrese (ieskaitot jūsu ievadītu pielāgotu vērtību), kas jau ir
+normalizēta — bez `/v1` sufiksa un bez beigu slīpsvītras. **Atslēga nekad netiek attēlota**: blokā ir
 vietturis, tāpēc ekrānuzņēmums vai ielīmēts fragments nevar to nopludināt. Aizstājiet vietturi ar savu atslēgu.
 
-Pievienojiet `CLAUDE_CODE_AUTO_COMPACT_WINDOW` tam pašam `env` blokam katram modelim, kura faktiskais
-konteksta logs nav 200K — Claude Code pieņem, ka katram neatpazītam id tas ir 200K, tāpēc
-pretējā gadījumā automātiskā saspiešana tiek aktivizēta nepareizajā brīdī (skatiet brīdinājumu iepriekšējā sadaļā).
-Fragmentu veidotājs pieņem arī šo vērtību, tāpēc izsaucējs, kas zina mērķa modeļa loga
-izmēru, var to norādīt tieši.
+Pievienojiet `CLAUDE_CODE_AUTO_COMPACT_WINDOW` tajā pašā `env` blokā jebkuram modelim, kura faktiskais
+konteksta logs nav 200K — Claude Code pieņem 200K katram neatpazītam id, tāpēc pretējā gadījumā
+automātiskā saspiešana tiek aktivizēta nepareizā brīdī (skatiet brīdinājumu iepriekšējā sadaļā).
+Fragmenta veidotājs pieņem arī šo vērtību, tāpēc izsaucējs, kurš zina mērķa modeļa loga lielumu,
+var to norādīt tieši.
 
 Avots: `src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet` (tīrs
 veidotājs, pārbaudīts ar vienībtestiem), ko attēlo `ClaudeGatewayOnboardingBlock`.
+
+### Viena konta piesaiste (neobligāti)
+
+Lai visus Claude Code pieprasījumus nosūtītu caur vienu konkrētu pakalpojumu sniedzēja kontu, pievienojiet
+`x-omniroute-connection` galveni, izmantojot `ANTHROPIC_CUSTOM_HEADERS` tajā pašā `env` blokā:
+
+```jsonc
+"ANTHROPIC_CUSTOM_HEADERS": "x-omniroute-connection: <connection id>"
+```
+
+Nokopējiet id no `xxxxxxxx…` emblēmas pakalpojumu sniedzēja lapas savienojuma rindā. Piesaiste
+attiecas tikai uz viena modeļa id (`provider/model`), nevis uz kombinācijām. Precīzu
+atkāpšanās darbību skatiet sadaļā [Konta piesaiste katram pieprasījumam](../reference/API_REFERENCE.md#account-pinning-per-request).
 
 ---
 
@@ -132,8 +145,8 @@ Claude Code **nav iebūvētu profilu failu** (atšķirībā no Codex `~/.codex/<
 Ieteicamais mehānisms ir `CLAUDE_CONFIG_DIR` — katram profilam atsevišķs konfigurācijas direktorijs,
 kurā katram ir savs `settings.json`, akreditācijas dati, vēsture un kešatmiņa.
 
-`omniroute setup-claude` iegūst aktuālo `/v1/models` katalogu un katram modelim izveido vienu
-profilu ceļā `~/.claude/profiles/<name>/settings.json`, atkārtoti izmantojot
+`omniroute setup-claude` iegūst aktuālo `/v1/models` katalogu un katram modelim izveido
+profilu failā `~/.claude/profiles/<name>/settings.json`, atkārtoti izmantojot
 **tos pašus nosaukumus kā `setup-codex`** (`glm52`, `kimi-k27`, `deepseek-pro`, …):
 
 ```jsonc
@@ -151,18 +164,18 @@ profilu ceļā `~/.claude/profiles/<name>/settings.json`, atkārtoti izmantojot
 }
 ```
 
-> **Autorizācijas marķieris nekad netiek ierakstīts profilā.** Palaidiet ar
-> `omniroute launch --profile <name>` (tas ievieto `ANTHROPIC_AUTH_TOKEN` no
+> **Autentifikācijas marķieris nekad netiek ierakstīts profilā.** Palaidiet ar
+> `omniroute launch --profile <name>` (tas ievada `ANTHROPIC_AUTH_TOKEN` no
 > aktīvā konteksta) vai pats eksportējiet `ANTHROPIC_AUTH_TOKEN` un izpildiet
 > `CLAUDE_CONFIG_DIR=~/.claude/profiles/<name> claude`.
 
-**Automātiskā sinhronizācija pēc modeļu atklāšanas (pēc izvēles).** OmniRoute var automātiski atkārtoti ģenerēt šos pašus
+**Automātiska sinhronizācija pēc modeļu atklāšanas (pēc izvēles).** OmniRoute var automātiski atkārtoti ģenerēt šos pašus
 `~/.claude/profiles/<name>/settings.json` failus ikreiz, kad nodrošinātāja modeļu
-sinhronizācija maina aktuālo katalogu — tādējādi jauniem vai pārdēvētiem modeļiem tiek izveidoti profili bez atkārtotas
-komandas izpildes. Pēc noklusējuma tā ir **izslēgta**: ieslēdziet to **CLI Code informācijas panelī** („CLI profilu
-automātiskā sinhronizācija” → Claude Code) vai iestatiet `OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES=true` (tiek ņemts vērā arī
+sinhronizācija maina aktuālo katalogu, tādējādi jauniem vai pārdēvētiem modeļiem tiek izveidoti profili bez atkārtotas
+komandas palaišanas. Pēc noklusējuma tā ir **izslēgta**: pārslēdziet to **CLI Code informācijas panelī** ("CLI profilu
+automātiskā sinhronizācija" → Claude Code) vai iestatiet `OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES=true` (tiek ņemts vērā arī
 `CLI_ALLOW_CONFIG_WRITES`, kas pēc noklusējuma ir ieslēgts). Kad šī funkcija ir iespējota, tā raksta tikai profilu failus; tā nekad
-nemaina jūsu aktīvo/noklusējuma Claude konfigurāciju, autorizāciju vai `~/.claude/settings.json`.
+nemaina jūsu aktīvo/noklusējuma Claude konfigurāciju, autentifikāciju vai `~/.claude/settings.json`.
 
 ### Profilu ģenerēšana un izmantošana
 
@@ -176,7 +189,11 @@ omniroute setup-claude --remote http://192.168.0.15:20128 --api-key oma_live_xxx
 # Tikai daži nodrošinātāji
 omniroute setup-claude --only glm,kimi
 
-# Priekšskatījums bez rakstīšanas
+# Izveidot profilus arī lokālajiem CLI nodrošinātājiem (zcode, auggie, devin-cli-agentic,
+# codex-app-server), kas šajā resursdatorā nav noteikti (lokālam mērķim pēc noklusējuma tiek izlaisti)
+omniroute setup-claude --include-local
+
+# Priekšskatīt, neveicot ierakstīšanu
 omniroute setup-claude --dry-run
 
 # Palaist profilu

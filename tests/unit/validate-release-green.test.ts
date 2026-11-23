@@ -19,6 +19,10 @@ const {
   curatedEquivalentId,
   fullCiKindFor,
   ESLINT_TIMEOUT_MS,
+  unitShardCountFromCi,
+  unitShardPool,
+  runPool,
+  mergeUnitShardResults,
 } = mod;
 
 const extract = extractCiGates as (
@@ -237,6 +241,26 @@ test("pre-flight wires the test-masking PR-context gate against origin/main (v3.
   );
 });
 
+test("pre-flight reports pricing freshness as drift, not as a hard failure", async () => {
+  const fs = await import("node:fs");
+  const src = fs.readFileSync(
+    new URL("../../scripts/quality/validate-release-green.mjs", import.meta.url),
+    "utf8"
+  );
+  // The gate reads git history (KNOWN_MODEL_PRICING untouched for 90 days), so it turns red
+  // by itself as time passes: a drift entry keeps it visible without blocking a release.
+  assert.match(
+    src,
+    /driftCmd\(\s*"pricing-freshness"[\s\S]*?"check:pricing-freshness"/,
+    "pricing-freshness must run check:pricing-freshness as a drift check"
+  );
+  assert.doesNotMatch(
+    src,
+    /hardCmd\(\s*"pricing-freshness"/,
+    "pricing-freshness must not be a HARD gate"
+  );
+});
+
 test("pre-flight --hermetic scrubs the live-test trigger vars (2026-07-05 false-positive fix)", async () => {
   const fs = await import("node:fs");
   const src = fs.readFileSync(
@@ -253,24 +277,147 @@ test("pre-flight --hermetic scrubs the live-test trigger vars (2026-07-05 false-
   assert.match(src, /_artifacts[/", ]+release-green/, "logs must land in _artifacts/release-green");
 });
 
-test("pre-flight runs the slow suites CONCURRENTLY (v3.8.45 perf — was ~1h serial)", async () => {
+test("pre-flight runs the heavy lanes one at a time, with unit split like ci.yml (2026-10-19 sweep)", async () => {
   const fs = await import("node:fs");
   const src = fs.readFileSync(
     new URL("../../scripts/quality/validate-release-green.mjs", import.meta.url),
     "utf8"
   );
-  // main() must be async and the slow suites (unit/vitest/integration/pack-artifact)
-  // must run via a single Promise.all over runAsync — not four sequential hardCmd calls.
-  assert.match(src, /async function main\(\)/, "main must be async to await the parallel wave");
+  // The 2026-10-18/19 full sweeps killed unit, integration and the package build at their
+  // ceilings in the same parallel wave: the webpack build (14-16 GB) pushed the 20 GB
+  // omni-release slot past memory.high, and the app's own pressure guard answered 503 inside
+  // unit tests. The lanes now run one after another; the parallelism moves inside unit.
+  assert.match(src, /async function main\(\)/, "main must be async to await each lane");
   assert.match(src, /await runGateProcess\(/, "commands must use the asynchronous supervisor");
-  assert.match(src, /const runAsync = run/, "slow suites must use the same supervised runner");
-  assert.match(src, /await Promise\.all\(\s*slow\.map\(/, "slow suites must run concurrently");
-  // The four slow-gate ids must all be present in the parallel wave.
-  for (const id of ["unit", "vitest", "integration", "pack-artifact"]) {
-    assert.ok(src.includes(`id: "${id}"`), `slow gate ${id} must be in the parallel wave`);
-  }
-  // Each still saves its per-gate log for red diagnosis without a re-run.
-  assert.match(src, /slow\.forEach\([\s\S]*?saveGateLog\(g\.id/, "each slow gate persists its log");
+  assert.match(src, /const runAsync = run/, "slow lanes must use the same supervised runner");
+  assert.doesNotMatch(src, /Promise\.all\(\s*slow\.map\(/, "no parallel wave of heavy lanes");
+  assert.match(
+    src,
+    /for \(const g of slow\) \{\s*announce\(g\.label\);\s*const result = await \(/,
+    "each heavy lane must be awaited before the next one starts"
+  );
+  const wave = src.slice(src.indexOf("const slow = ["), src.indexOf("for (const g of slow)"));
+  const order = ["unit", "integration", "vitest", "pack-artifact"].map((id) =>
+    wave.indexOf(`id: "${id}"`)
+  );
+  assert.ok(
+    order.every((at) => at >= 0),
+    `every heavy lane is planned: ${order}`
+  );
+  assert.deepEqual(
+    [...order].sort((a, b) => a - b),
+    order,
+    "unit → integration → vitest → build"
+  );
+  // unit runs ci.yml's own shards, not one --test-concurrency=4 process over 32k tests
+  assert.match(wave, /run: \(timeout\) => runUnitShards\(/, "unit must run as ci.yml shards");
+  assert.match(src, /\["run", "test:unit:ci:shard"\]/, "the shard script ci.yml runs");
+  assert.match(src, /TEST_SHARD: `\$\{shard\}\/\$\{total\}`/, "TEST_SHARD=<i>/<n> like ci.yml");
+  // Each lane saves its per-gate log and is reported as soon as it ends (a ~1 h sequence
+  // must not stay silent until the last lane).
+  assert.match(
+    src,
+    /const result = await \([\s\S]*?saveGateLog\(g\.id, result\.out\);\s*record\(\{/,
+    "each slow gate persists its log and is recorded right away"
+  );
+});
+
+test("unit shards: the count comes from ci.yml's unit job (matrix and TEST_SHARD agree)", () => {
+  const job = (matrix: string, shardEnv: string) => `
+jobs:
+  test-unit:
+    strategy:
+      matrix:
+        shard: ${matrix}
+    steps:
+      - run: npm ci
+      - name: Unit tests
+        env:
+          TEST_SHARD: ${shardEnv}
+        run: npm run test:unit:ci:shard
+`;
+  assert.equal(unitShardCountFromCi(job("[1, 2, 3, 4, 5, 6, 7, 8]", "${{ matrix.shard }}/8")), 8);
+  assert.equal(unitShardCountFromCi(job("[1, 2, 3]", "${{ matrix.shard }}/3")), 3);
+  // anything the validator cannot reproduce exactly falls back to the unsharded suite
+  assert.equal(unitShardCountFromCi(job("[1, 2, 3]", "${{ matrix.shard }}/4")), null);
+  assert.equal(unitShardCountFromCi(job("[1, 3, 4]", "${{ matrix.shard }}/3")), null);
+  assert.equal(unitShardCountFromCi(job("[1]", "${{ matrix.shard }}/1")), null);
+  assert.equal(unitShardCountFromCi("jobs: {}"), null);
+  assert.equal(unitShardCountFromCi("jobs: [unclosed"), null);
+});
+
+test("unit shards: the REAL ci.yml yields its shard count and the shard script exists", async () => {
+  const fs = await import("node:fs");
+  const ci = fs.readFileSync(new URL("../../.github/workflows/ci.yml", import.meta.url), "utf8");
+  const shards = unitShardCountFromCi(ci);
+  assert.ok(Number.isInteger(shards) && shards >= 2, `ci.yml unit shards: ${shards}`);
+  const pkg = JSON.parse(
+    fs.readFileSync(new URL("../../package.json", import.meta.url), "utf8")
+  ) as { scripts: Record<string, string> };
+  assert.match(pkg.scripts["test:unit:ci:shard"], /--test-shard=\$TEST_SHARD/);
+  assert.match(pkg.scripts["test:unit:ci:shard"], /--test-concurrency=4/);
+});
+
+test("unit shards: the pool gives each running shard four cores (its --test-concurrency)", () => {
+  // availableParallelism() honours the runner's cgroup cpu.max: omniroute-113-6 (CPUQuota=800%)
+  // reports 8 on a 32-core box, measured 2026-10-19.
+  assert.equal(unitShardPool(8, 8), 2, "omni-release: 2 shards × 4 test files on 8 cores");
+  assert.equal(unitShardPool(8, 4), 1, "hosted ubuntu-latest: one shard at a time");
+  assert.equal(unitShardPool(8, 16), 4);
+  assert.equal(unitShardPool(8, 12), 3);
+  assert.equal(unitShardPool(8, 1), 1);
+  assert.equal(unitShardPool(8, 64), 8, "never more workers than shards");
+  assert.equal(unitShardPool(3, 32), 3);
+});
+
+test("runPool never exceeds its limit and keeps results in input order", async () => {
+  let active = 0;
+  let peak = 0;
+  const started: number[] = [];
+  const results = await runPool([1, 2, 3, 4, 5, 6, 7], 3, async (n: number) => {
+    started.push(n);
+    active += 1;
+    peak = Math.max(peak, active);
+    await new Promise((resolve) => setTimeout(resolve, (8 - n) * 3));
+    active -= 1;
+    return n * 10;
+  });
+  assert.deepEqual(results, [10, 20, 30, 40, 50, 60, 70]);
+  assert.equal(peak, 3);
+  assert.deepEqual(started.slice(0, 3), [1, 2, 3], "the first shards start first");
+  assert.deepEqual(await runPool([], 4, async () => 1), []);
+});
+
+test("unit shard results: a failed or timed-out shard fails the gate and is named first", () => {
+  const merged = mergeUnitShardResults([
+    { shard: 1, total: 3, code: 0, out: "ℹ pass 10\n" },
+    {
+      shard: 2,
+      total: 3,
+      code: 124,
+      out: "[BATCHES] Create failed: Error: SQLITE_CANTOPEN\nGate execution TIMEOUT; see a.log.json\n",
+    },
+    { shard: 3, total: 3, code: 1, out: "✔ fine (1ms)\n✖ broken test (5ms)\n" },
+  ]);
+  assert.equal(merged.code, 124, "the first failing shard decides the exit code");
+  assert.equal(merged.detail, "unit shard 2/3 TIMEOUT, 3/3 exit 1 — ✖ broken test (5ms)");
+  assert.match(merged.out, /──── unit shard 1\/3: PASS ────\nℹ pass 10/);
+  assert.match(merged.out, /──── unit shard 2\/3: TIMEOUT ────/);
+  assert.match(merged.out, /──── unit shard 3\/3: exit 1 ────\n✔ fine/);
+
+  // A timeout alone names no failure line: the log's fixture errors are not the cause.
+  const hung = mergeUnitShardResults([
+    { shard: 1, total: 2, code: 124, out: "Error: fixture noise\nGate execution TIMEOUT\n" },
+    { shard: 2, total: 2, code: 0, out: "" },
+  ]);
+  assert.equal(hung.detail, "unit shard 1/2 TIMEOUT");
+
+  const green = mergeUnitShardResults([
+    { shard: 1, total: 2, code: 0, out: "a" },
+    { shard: 2, total: 2, code: 0, out: "b" },
+  ]);
+  assert.equal(green.code, 0);
+  assert.equal(green.detail, "pass");
 });
 
 test("pre-flight runs tarball boot only after the package artifact builder completes", async () => {
@@ -279,14 +426,11 @@ test("pre-flight runs tarball boot only after the package artifact builder compl
     new URL("../../scripts/quality/validate-release-green.mjs", import.meta.url),
     "utf8"
   );
-  const parallelWave = src.indexOf("const slowResults = await Promise.all");
+  const laneLoop = src.indexOf("for (const g of slow)");
   const packBoot = src.indexOf('id: "pack-boot"');
 
-  assert.ok(parallelWave >= 0, "the parallel slow-gate wave must exist");
-  assert.ok(
-    packBoot > parallelWave,
-    "pack-boot must be declared after the parallel artifact build"
-  );
+  assert.ok(laneLoop >= 0, "the sequential slow-lane loop must exist");
+  assert.ok(packBoot > laneLoop, "pack-boot must be declared after the artifact build lane");
   assert.match(
     src,
     /packArtifactResult[\s\S]*?check:pack-boot/,
@@ -315,7 +459,7 @@ test("pack gate builds, stamps dist/BUILD_SHA, then validates against the tree u
     "a release-branch tip is never an ancestor of origin/main mid-cycle"
   );
   assert.match(src, /const PACK_GATE_ENV = \{ OMNIROUTE_RELEASE_REF: "HEAD" \}/);
-  // Both entry points (the parallel wave and --with-build --quick) must use it.
+  // Both entry points (the build lane and --with-build --quick) must use it.
   assert.equal(src.match(/runPackArtifactGate\b/g)?.length, 3);
   assert.doesNotMatch(src, /runAsync\(npmCmd, \["run", "check:pack-artifact"\]/);
   assert.doesNotMatch(src, /id: "pack-artifact",[^}]*args:/);

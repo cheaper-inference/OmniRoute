@@ -2,6 +2,7 @@ import { z } from "zod";
 import { CORS_HEADERS, handleCorsOptions } from "@/shared/utils/cors";
 import { callCloudWithMachineId } from "@/shared/utils/cloud";
 import { handleChat } from "@/sse/handlers/chat";
+import { logAdmissionRejection } from "@/sse/handlers/admissionRejectionLog";
 import { generateRequestId } from "@/shared/utils/requestId";
 import { resolveIncomingCorrelationId } from "@/shared/utils/correlationPreserve.ts";
 import { errorResponse } from "@omniroute/open-sse/utils/error.ts";
@@ -34,6 +35,7 @@ import {
 } from "@/shared/utils/compressionHeaderEcho";
 import { resolveModelAliasWithSeedFallbackOnBody } from "@/lib/modelAliasResolver";
 import { enforceApiKeyPolicy } from "@/shared/utils/apiKeyPolicy";
+import { enforceClientApiRouteAuth } from "@/shared/utils/clientApiRouteAuth";
 import {
   assertRuntimeModelProviderAvailable,
   isRuntimeProviderRetirementError,
@@ -99,6 +101,13 @@ export async function OPTIONS() {
 export async function POST(request) {
   await ensureInitialized();
 
+  // Defense-in-depth: the authz proxy (src/proxy.ts) is the primary gate, but
+  // its matcher can miss path variants (e.g. uppercase /V1/ aliases), so the
+  // handler enforces authentication independently. Without this, a proxy
+  // bypass means unauthenticated upstream dispatch.
+  const authRejection = await enforceClientApiRouteAuth(request);
+  if (authRejection) return authRejection;
+
   // Content-Type guard (#6414) — reject non-JSON POST bodies with 415 per RFC 7231.
   // OpenAI/Anthropic reject `text/plain` or missing Content-Type at the edge; matching
   // that behavior prevents a text/plain body from silently reaching provider lookup.
@@ -127,7 +136,17 @@ export async function POST(request) {
     sessionId,
     queueMs: CHAT_ADMISSION_QUEUE_MAX_MS,
   });
-  if (admissionResult.admit === false) return admissionResult.response;
+  if (admissionResult.admit === false) {
+    void logAdmissionRejection(admissionResult.response, {
+      path: new URL(request.url).pathname,
+      model: "-",
+      requestBody: null,
+      apiKeyId: null,
+      apiKeyName: null,
+      correlationId: resolveIncomingCorrelationId(request.headers.get("x-correlation-id")),
+    });
+    return admissionResult.response;
+  }
   const admission = admissionResult;
   request = admission.request;
   const finishAdmission = (response: Response) =>
@@ -218,6 +237,15 @@ export async function POST(request) {
           signal: request.signal,
         });
         if (structuralAdmission.admit === false) {
+          void logAdmissionRejection(structuralAdmission.response, {
+            path: new URL(request.url).pathname,
+            model:
+              typeof parsedBody?.model === "string" && parsedBody.model ? parsedBody.model : "-",
+            requestBody: parsedBody ?? null,
+            apiKeyId: null,
+            apiKeyName: null,
+            correlationId: resolveIncomingCorrelationId(request.headers.get("x-correlation-id")),
+          });
           admission.lease?.release();
           return finishAdmission(structuralAdmission.response);
         }
@@ -291,10 +319,8 @@ export async function POST(request) {
 
     if (wantsStreaming) {
       const reqId = callerCorrelationId ?? generateRequestId();
-      const {
-        signal: routeDeadlineSignal,
-        deadlineController: routeDeadlineController,
-      } = createStreamDeadlineSignal(request.signal);
+      const { signal: routeDeadlineSignal, deadlineController: routeDeadlineController } =
+        createStreamDeadlineSignal(request.signal);
       // Wrap the real handler response, not the synthetic early-keepalive response. If the
       // client cancels while handleChat is still pending, earlyStreamKeepalive will cancel the
       // eventual handler body; only that confirmed cleanup releases heavyweight capacity.

@@ -1,7 +1,9 @@
+import { kiroApiKeyRuntimeHost } from "@omniroute/open-sse/services/kiroRegion.ts";
+
 // Kiro runtime probe — falls back to a generateAssistantResponse call when an API key
 // cannot list profiles. Extracted from validation.ts (god-file decomposition) — top-level
-// function with no dispatcher-state captures; behavior is byte-identical to the original
-// inline def.
+// function with no dispatcher-state captures.
+
 export async function validateKiroApiKeyRuntimeProbe({
   apiKey,
   region,
@@ -11,10 +13,9 @@ export async function validateKiroApiKeyRuntimeProbe({
   region: string;
   profileArn?: string | null;
 }) {
-  const endpoint =
-    region === "us-east-1"
-      ? "https://codewhisperer.us-east-1.amazonaws.com/generateAssistantResponse"
-      : `https://q.${region}.amazonaws.com/generateAssistantResponse`;
+  // API keys only work on the regional Amazon Q host (q.<region>), us-east-1 included —
+  // codewhisperer.us-east-1 answers REQUEST_BODY_INVALID for API-key payloads.
+  const endpoint = `${kiroApiKeyRuntimeHost(region)}/generateAssistantResponse`;
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 15_000);

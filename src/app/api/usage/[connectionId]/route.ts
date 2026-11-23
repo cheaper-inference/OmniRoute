@@ -1,3 +1,4 @@
+import { withConnectionSpeedStats } from "@/lib/usage/connectionSpeedStats";
 import { fetchAndPersistProviderLimits } from "@/lib/usage/providerLimits";
 
 /**
@@ -10,6 +11,9 @@ import { fetchAndPersistProviderLimits } from "@/lib/usage/providerLimits";
  * expired access_token still surfaces live quota — made cascade-safe by
  * `serializeRefresh` (one token mint at a time per Auth0 group). The bulk
  * scheduler keeps the #3019 behaviour of never refreshing rotating providers.
+ *
+ * The response also carries `speed` (recent decode tok/s + TTFT for this
+ * connection), computed at read time and fail-open; it is not persisted.
  */
 export async function GET(
   _request: Request,
@@ -20,7 +24,7 @@ export async function GET(
     const { usage } = await fetchAndPersistProviderLimits(connectionId, "manual", {
       allowRotatingRefresh: true,
     });
-    return Response.json(usage);
+    return Response.json(withConnectionSpeedStats(connectionId, usage));
   } catch (error) {
     const status =
       typeof (error as { status?: unknown })?.status === "number"

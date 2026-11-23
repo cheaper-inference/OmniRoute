@@ -1,4 +1,5 @@
 import { handleImageGeneration } from "@omniroute/open-sse/handlers/imageGeneration.ts";
+import { getRequestedModelEndpointMismatch } from "@/lib/providerModels/modelEndpointGuard";
 import { withInjectionGuard } from "@/middleware/promptInjectionGuard";
 import {
   getProviderCredentialsWithQuotaPreflight,
@@ -10,12 +11,25 @@ import {
   getImageModelEntry,
   modalitiesRequireImageInput,
 } from "@omniroute/open-sse/config/imageRegistry.ts";
-import { errorResponse, unavailableResponse } from "@omniroute/open-sse/utils/error.ts";
+import {
+  errorResponse,
+  sanitizeErrorMessage,
+  unavailableResponse,
+} from "@omniroute/open-sse/utils/error.ts";
 import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
 import { isAllRateLimitedCredentials } from "@/app/api/v1/_shared/rateLimit";
 import * as log from "@/sse/utils/logger";
 import { toJsonErrorPayload } from "@/shared/utils/upstreamError";
 import { enforceApiKeyPolicy } from "@/shared/utils/apiKeyPolicy";
+import {
+  createComboTargetKeyGate,
+  isKeyScopeBlockedCredentials,
+  keyScopeBlockedResponse,
+  keylessProviderRejection,
+  narrowConnectionScope,
+  resolveKeyConnectionScope,
+  withoutKeyScopeBlocked,
+} from "@/sse/services/keyConnectionScope";
 import { v1ImageGenerationSchema } from "@/shared/validation/schemas";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
 
@@ -38,7 +52,7 @@ import { calculateModalCost } from "@/lib/usage/costCalculator";
 import { generateRequestId } from "@/shared/utils/requestId";
 import { getSpecialtyModelsResponse } from "@/app/api/v1/_shared/specialtyCatalog";
 import { enforceClientApiRouteAuth } from "@/shared/utils/clientApiRouteAuth";
-import { runWithCallLogApiKeyContext } from "@/lib/usage/callLogApiKeyContext";
+import { runImageRequestWithAccounting } from "@/lib/usage/imageRequestAccounting";
 import { executeImageWithCredentialFallback } from "@/sse/services/imageCredentialRetry";
 import { AUTHZ_HEADER_PEER_LOCALITY } from "@/server/authz/headers";
 import {
@@ -46,6 +60,10 @@ import {
   CHATGPT_WEB_RETIRED_ERROR_CODE,
   isCommonChatGptWebRetirementError,
 } from "@/shared/constants/chatgptWebRetirement";
+import { PLAYGROUND_IMAGE_STREAM_HEADER } from "@/shared/utils/playgroundImageStream";
+import { createPlaygroundImageStreamResponse } from "@/lib/playground/imageGenerationStream";
+import { getImageLongJobOptions } from "@/lib/images/imageGenerationLongJobs";
+import { isImageGenerationLongJobsEnabled } from "@/shared/utils/featureFlags";
 
 export const dynamic = "force-dynamic";
 
@@ -144,6 +162,14 @@ async function postHandler(request, context) {
   // Enforce API key policies (model restrictions + budget limits)
   const policy = await enforceApiKeyPolicy(request, body.model);
   if (policy.rejection) return policy.rejection;
+  // GHSA-3w2r: credential selection (direct, account fallback and per combo
+  // target) stays inside the key's connection scope, the same scope chat applies.
+  const scope = await resolveKeyConnectionScope(policy.apiKeyInfo);
+  if (scope.rejection) return scope.rejection;
+  // Respect the authenticated API key's credential scope before checking model capabilities.
+  const endpointMismatch = await getRequestedModelEndpointMismatch(body.model, "images");
+  if (endpointMismatch) return errorResponse(HTTP_STATUS.BAD_REQUEST, endpointMismatch);
+  const { allowedConnections } = scope;
 
   const modelPrefix = body.model.includes("/")
     ? body.model.slice(0, body.model.indexOf("/"))
@@ -158,7 +184,20 @@ async function postHandler(request, context) {
     const combo = await getComboByName(body.model as string);
     if (combo) {
       const { executeImageCombo } = await import("@omniroute/open-sse/services/imageCombo");
-      return executeImageCombo(body.model as string, body, { request, policy }, startTime, log);
+      return executeImageCombo(
+        body.model as string,
+        body,
+        {
+          request,
+          policy,
+          keyScope: {
+            allowedConnections,
+            isTargetAllowed: createComboTargetKeyGate(policy, body.model as string),
+          },
+        },
+        startTime,
+        log
+      );
     }
   }
 
@@ -259,7 +298,7 @@ async function postHandler(request, context) {
     credentials = await getProviderCredentialsWithQuotaPreflight(
       provider,
       null,
-      null,
+      allowedConnections,
       requestedModel
     );
     if (!credentials) {
@@ -267,6 +306,9 @@ async function postHandler(request, context) {
         HTTP_STATUS.BAD_REQUEST,
         `No credentials for image provider: ${provider}`
       );
+    }
+    if (isKeyScopeBlockedCredentials(credentials)) {
+      return keyScopeBlockedResponse(provider, credentials);
     }
     if (credentials.allRateLimited) {
       return unavailableResponse(
@@ -280,7 +322,7 @@ async function postHandler(request, context) {
     credentials = await getProviderCredentialsWithQuotaPreflight(
       provider,
       null,
-      syncedEndpointRoute?.connectionIds ?? null,
+      narrowConnectionScope(allowedConnections, syncedEndpointRoute?.connectionIds ?? null),
       requestedModel
     );
     if (!credentials) {
@@ -288,6 +330,9 @@ async function postHandler(request, context) {
         HTTP_STATUS.BAD_REQUEST,
         `No credentials for custom image provider: ${provider}`
       );
+    }
+    if (isKeyScopeBlockedCredentials(credentials)) {
+      return keyScopeBlockedResponse(provider, credentials);
     }
     if (credentials.allRateLimited) {
       return unavailableResponse(
@@ -301,12 +346,22 @@ async function postHandler(request, context) {
     // #6928: best-effort per-connection base-URL override lookup for local
     // no-auth media providers (ComfyUI). A connection is optional here — unlike
     // the authType !== "none" branch above, we never 400 when none exists.
-    const localCredentials = await getProviderCredentialsWithQuotaPreflight(
+    // A connection outside the key's scope is never used for the override, and
+    // a connection-scoped key reaches the zero-config default only when its
+    // allowlist admits keyless providers (chat's #9057 rule).
+    const lookup = await getProviderCredentialsWithQuotaPreflight(
       provider,
       null,
-      null,
+      allowedConnections,
       requestedModel
     );
+    const keylessRejection = await keylessProviderRejection(
+      provider,
+      allowedConnections,
+      async () => lookup
+    );
+    if (keylessRejection) return keylessRejection;
+    const localCredentials = withoutKeyScopeBlocked(lookup);
     if (localCredentials && !isAllRateLimitedCredentials(localCredentials)) {
       credentials = localCredentials;
     }
@@ -316,6 +371,7 @@ async function postHandler(request, context) {
     provider,
     requestedModel,
     credentials,
+    allowedConnections,
     execute: async (attemptCredentials) => {
       let proxyInfo = null;
       if (attemptCredentials?.connectionId) {
@@ -327,10 +383,14 @@ async function postHandler(request, context) {
       }
 
       const generateImage = () =>
-        runWithCallLogApiKeyContext(
+        runImageRequestWithAccounting(
           {
-            apiKeyId: policy.apiKeyInfo?.id ?? null,
-            apiKeyName: policy.apiKeyInfo?.name ?? null,
+            endpoint: "/v1/images/generations",
+            provider,
+            model: isCustomModel ? body.model : requestedModel,
+            apiKeyInfo: policy.apiKeyInfo,
+            credentials: attemptCredentials,
+            startTime,
           },
           () =>
             handleImageGeneration({
@@ -339,6 +399,8 @@ async function postHandler(request, context) {
               log,
               ...(isCustomModel && { resolvedProvider: provider }),
               signal: request.signal,
+              // #16260 — IMAGE_GENERATION_LONG_JOBS (default off): null keeps the default path.
+              longJobs: getImageLongJobOptions(),
               clientHeaders: publicBaseUrlHeaders(request.headers),
               // Trusted "loopback"|"lan"|"remote" verdict stamped by the authz
               // pipeline from the real TCP peer (never the spoofable Host
@@ -353,7 +415,12 @@ async function postHandler(request, context) {
         ? runWithProxyContext(proxyInfo?.proxy || null, generateImage).catch((err: any) => ({
             success: false,
             status: err.statusCode || 500,
-            error: err.message,
+            // Hard Rule #12 (#15159 wave 1.2): sanitize where the raw value is
+            // captured. The response below already goes through `errorResponse`,
+            // which sanitizes internally, but the gate judges per LINE and cannot
+            // see through the downstream builder — so without this the site stayed
+            // frozen in KNOWN_MISSING_ERROR_HELPER.
+            error: sanitizeErrorMessage(err.message),
           }))
         : generateImage();
     },
@@ -363,10 +430,9 @@ async function postHandler(request, context) {
 
   if (result.success) {
     await clearRecoveredProviderState(credentials);
-    const n = Math.max(
-      Number(body.n) || 1,
-      (result as { data?: { data?: unknown[] } }).data?.data?.length || 0
-    );
+    // Bill the images actually delivered: a provider that returns fewer than the
+    // requested `n` must not be charged for the missing ones (#16398 follow-up).
+    const n = (result as { data?: { data?: unknown[] } }).data?.data?.length || 1;
     const costUsd = await calculateModalCost("image", provider, body.model, { n });
     const headers = new Headers({ "Content-Type": "application/json" });
     attachOmniRouteMetaHeaders(headers, {
@@ -395,4 +461,16 @@ async function postHandler(request, context) {
   return errorResponse((result as any).status, message);
 }
 
-export const POST = withInjectionGuard(postHandler);
+const guardedPost = withInjectionGuard(postHandler);
+
+export function POST(request: Request, context?: unknown) {
+  // #16260 — the Playground SSE keepalive wrapper is honoured only with
+  // IMAGE_GENERATION_LONG_JOBS on; off, the header is ignored and the JSON response is unchanged.
+  if (
+    request.headers.get(PLAYGROUND_IMAGE_STREAM_HEADER) === "1" &&
+    isImageGenerationLongJobsEnabled()
+  ) {
+    return createPlaygroundImageStreamResponse(request, context, guardedPost);
+  }
+  return guardedPost(request, context);
+}

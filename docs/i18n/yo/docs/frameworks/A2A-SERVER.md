@@ -146,33 +146,33 @@ curl -X POST http://localhost:20128/a2a \
 
 ---
 
-## Àwọn Òye Tó Wà
+## Àwọn Ọgbọ́n Tó Wà
 
-OmniRoute ń ṣí àwọn òye A2A mẹ́fà (6) tí a so pọ̀ sínú `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Mọ́júùlù òye kọ̀ọ̀kan wà nínú `src/lib/a2a/skills/`.
+OmniRoute ń ṣàfihàn àwọn ọgbọ́n A2A mẹ́fà tí a so mọ́ `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Mọ́dùlù ọgbọ́n kọ̀ọ̀kan wà nínú `src/lib/a2a/skills/`.
 
-| Òye                  | ID                   | Àpèjúwe                                                                                                                                                           | Àwọn àmì                 | Àwọn àpẹẹrẹ                               |
-| :------------------- | :------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------- | :---------------------------------------- |
-| Ìdarí Ọ̀nà Ọlọ́gbọ́n    | `smart-routing`      | Ń darí ìbéèrè kan gba olùpèsè/àkójọpọ̀ tó dára jù lọ nípa lílo ẹ́ńjìnnì àkójọpọ̀ OmniRoute + fífún ní àmì                                                            | ìdarí ọ̀nà, àwọn olùpèsè  | "Darí ìbéèrè yìí gba àwòṣe tó dára jù lọ" |
-| Ìṣàkóso Ìpín         | `quota-management`   | Ń jàbọ̀ ipò ìpín olùpèsè kọ̀ọ̀kan, ó sì ń ran àwọn olùpè lọ́wọ́ láti pinnu ìgbà tí wọ́n máa dín ìṣàn kù/yí padà                                                         | ìpín, àwọn olùpèsè       | "Ṣàyẹ̀wò ìpín fún anthropic"               |
-| Ìṣàwárí Olùpèsè      | `provider-discovery` | Ń ṣe àkójọ àwọn olùpèsè tí a ti fi sílẹ̀ pẹ̀lú agbára wọn, àwọn àmì ipele ọ̀fẹ́, àti ipò OAuth                                                                        | àwọn olùpèsè, ìṣàwárí    | "Àwọn olùpèsè wo ló wà?"                  |
-| Ìtúpalẹ̀ Iye Owó      | `cost-analysis`      | Ń fojú díwọ̀n iye owó ìbéèrè/ìjíròrò kan nípa lílo àkójọ ọjà + ìlò àìpẹ́                                                                                            | iye owó, ìlò             | "Fojú díwọ̀n iye owó ìjíròrò yìí"          |
-| Ìròyìn Ìlera         | `health-report`      | Ń ṣàkójọpọ̀ ipò olùdáwọ́lé àyíká, àkókò ìtútù, àti títìmọ́de fún olùpèsè kọ̀ọ̀kan                                                                                      | ìlera, ìfaradà           | "Ṣàfihàn ipò ìlera gbogbo àwọn olùpèsè"   |
-| Ṣe Àkójọ Àwọn Agbára | `list-capabilities`  | Ń dá gbogbo àkójọ àwọn Òye Aṣojú tó ní àkọsílẹ̀ 45 padà (23 API + 21 CLI + 1 àtúnṣe) gẹ́gẹ́ bí tábìlì markdown pẹ̀lú àwọn URL SKILL.md àìṣẹ̀dá fún fífi àyíká-ọ̀rọ̀ sínú | àkójọ, ìṣàwárí, àwọn òye | "Ṣe àkójọ gbogbo àwọn agbára OmniRoute"   |
+| Ọgbọ́n             | ID                   | Àpèjúwe                                                                                                                                                  | Àwọn Àmì                   | Àwọn Àpẹẹrẹ                                   |
+| :---------------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------- | :-------------------------------------------- |
+| Ìdarí Ọ̀nà Ọlọ́gbọ́n | `smart-routing`      | Ń darí ìbéèrè kan gba ọ̀dọ̀ olùpèsè/àkópọ̀ tó dára jù lọ nípa lílo ẹ́ńjìnnì àkópọ̀ OmniRoute àti ìṣírò àmì                                                    | routing, providers         | "Darí ìbéèrè yìí nípasẹ̀ módẹ́lì tó dára jù lọ" |
+| Ìṣàkóso Ìwọ̀n Lílo | `quota-management`   | Ń jabo ipò ìwọ̀n lílo fún olùpèsè kọ̀ọ̀kan, ó sì ń ran àwọn olùpè lọ́wọ́ láti pinnu ìgbà tí wọ́n yẹ kí wọ́n dín ìṣàn kù/tàbí yí padà                            | quota, providers           | "Ṣàyẹ̀wò ìwọ̀n lílo fún anthropic"              |
+| Ìṣàwárí Olùpèsè   | `provider-discovery` | Ń ṣe àtòjọ àwọn olùpèsè tí a ti fi sílẹ̀ pẹ̀lú àwọn agbára wọn, àwọn àmì ipele ọ̀fẹ́, àti ipò OAuth                                                          | providers, discovery       | "Àwọn olùpèsè wo ló wà?"                      |
+| Ìtúpalẹ̀ Iye Owó   | `cost-analysis`      | Ń fojú díwọ̀n iye owó ìbéèrè/ìfọ̀rọ̀wérọ̀ kan nípasẹ̀ àkójọpọ̀ àti lílo àìpẹ́                                                                                   | cost, usage                | "Fojú díwọ̀n iye owó fún ìfọ̀rọ̀wérọ̀ yìí"        |
+| Ìròyìn Ìlera      | `health-report`      | Ń ṣàkójọpọ̀ ipò circuit breaker, cooldown, àti lockout fún olùpèsè kọ̀ọ̀kan                                                                                 | health, resilience         | "Ṣàfihàn ipò ìlera gbogbo àwọn olùpèsè"       |
+| Àtòjọ Àwọn Agbára | `list-capabilities`  | Ń dá gbogbo àkójọpọ̀ Agent Skills olóǹkà 45 padà (23 API + 21 CLI + 1 config) gẹ́gẹ́ bí tábìlì markdown pẹ̀lú àwọn URL SKILL.md aise fún fífi àyíká-ọ̀rọ̀ sínú | catalog, discovery, skills | "Ṣe àtòjọ gbogbo àwọn agbára OmniRoute"       |
 
-> Ó yẹ kí Káàdì Aṣojú bá àkójọ àwọn olùpèsè 352 tó ń ṣiṣẹ́ mu; iye àwọn olùpèsè àti metadata ọ̀fẹ́/tí kò nílò ìfàṣẹsí ni a ń mú láti inú ìforúkọsílẹ̀ runtime.
+> Ó yẹ kí Agent Card máa bá àkójọpọ̀ olùpèsè 374 tó ń ṣiṣẹ́ mu; iye àwọn olùpèsè àti metadata ọ̀fẹ́/tí kò nílò ìfàṣẹsí ni a ń gba láti inú runtime registry.
 
-### Àlàyé Òye `list-capabilities`
+### Àlàyé Ọgbọ́n `list-capabilities`
 
-Òye `list-capabilities` wúlò gan-an fún àwọn aṣojú ìta tí wọ́n nílò láti ṣàwárí ohun tí OmniRoute ń pèsè kí wọ́n tó fi àwọn ìpè API ránṣẹ́. Ó ń dá artifact tábìlì markdown tí a ṣètò padà:
+Ọgbọ́n `list-capabilities` wúlò gan-an fún àwọn aṣojú òde tí wọ́n nílò láti ṣàwárí ohun tí OmniRoute ń ṣàfihàn kí wọ́n tó fi àwọn ìpè API ránṣẹ́. Ó ń dá artifact tábìlì markdown tó ní ètò padà:
 
 ```
-| ID | Orúkọ | Ẹ̀ka | Agbègbè | Àwọn Endpoint/Àṣẹ | URL Àìṣẹ̀dá |
+| ID | Orúkọ | Ẹ̀ka | Agbègbè | Àwọn Endpoint/Àṣẹ | URL Aise |
 | --- | --- | --- | --- | --- | --- |
-| omni-auth | Ìfàṣẹsí & Àwọn Sáà | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
+| omni-auth | Ìfàṣẹsí àti Àwọn Àkókò Ìṣiṣẹ́ | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
 ...
 ```
 
-Ìlà kọ̀ọ̀kan ní kọ́lùmù `rawUrl` kí àwọn aṣojú lè lọ gba SKILL.md kíkún lẹ́sẹ̀kẹsẹ̀. Ààyè `metadata.totalSkills` ń ṣàfihàn iye àkójọ náà (45 lónìí). Ìmúṣẹ: `src/lib/a2a/skills/listCapabilities.ts`. Tún wo [AGENT-SKILLS.md](./AGENT-SKILLS.md).
+Ìlà kọ̀ọ̀kan ní ọ̀wọ̀n `rawUrl` kí àwọn aṣojú lè gba gbogbo SKILL.md lẹ́sẹ̀kẹsẹ̀. Ààyè `metadata.totalSkills` bá ìwọ̀n àkójọpọ̀ mu (45 lónìí). Ìmúlò: `src/lib/a2a/skills/listCapabilities.ts`. Tún wo [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 

@@ -19,6 +19,7 @@ import { getProviderDisplayLabel } from "@/shared/utils/providerDisplayLabel";
 import { useIsElectron, useOpenExternal } from "@/shared/hooks/useElectron";
 import { HomeProviderTopologySection } from "./HomeProviderTopologySection";
 import { shouldShowProviderTopologyOnHome } from "./homeAppearance";
+import ManualUpdateCommand from "./ManualUpdateCommand";
 import HomeRecentRequests from "../home/HomeRecentRequests";
 
 type UpdateStep = {
@@ -34,6 +35,7 @@ type VersionInfo = {
   channel: string;
   autoUpdateSupported: boolean;
   autoUpdateError?: string | null;
+  manualUpdateCommand?: string | null;
 };
 
 type HomePageClientProps = {
@@ -569,7 +571,8 @@ export default function HomePageClient({ machineId }: HomePageClientProps) {
 
       setUpdateSteps(initialSteps);
 
-      const maxAttempts = channel === "docker-compose" ? 72 : 36;
+      // Docker rebuilds and host-side image pulls (docker-trigger) take longer than npm.
+      const maxAttempts = channel.startsWith("docker") ? 72 : 36;
 
       for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
         await wait(5000);
@@ -947,6 +950,11 @@ export default function HomePageClient({ machineId }: HomePageClientProps) {
                       versionInfo.autoUpdateError || t("manualUpdateRequired")
                     )}
                   </p>
+                  {!isElectron &&
+                    !versionInfo.autoUpdateSupported &&
+                    versionInfo.manualUpdateCommand && (
+                      <ManualUpdateCommand command={versionInfo.manualUpdateCommand} />
+                    )}
                 </div>
               </div>
 

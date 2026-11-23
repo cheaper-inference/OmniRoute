@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { isAuthenticated } from "@/shared/utils/apiAuth";
+import { getRequestPeerLocality, isAuthenticated } from "@/shared/utils/apiAuth";
 import {
   formatValidationMessage,
   isValidationFailure,
@@ -29,7 +29,12 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const status = await getCloudflaredTunnelStatus();
+    // GET is exempt from the LOCAL_ONLY gate so a remote dashboard can poll it, but the
+    // binary PATH lookup spawns `which`: only loopback/LAN callers run it
+    // (GHSA-35fw-cv32-2373 class, GHSA-jmq6-8j86-8xqj call-site gate).
+    const status = await getCloudflaredTunnelStatus({
+      allowLocalProbe: getRequestPeerLocality(request) !== "remote",
+    });
     return NextResponse.json(status);
   } catch (error) {
     return NextResponse.json(

@@ -1,3 +1,8 @@
+import {
+  PROVIDER_SPECIFIC_RESPONSE_ONLY_FIELDS,
+  PROVIDER_SPECIFIC_SECRET_FIELDS,
+} from "@/lib/db/providers/providerSpecificDataSecrets";
+
 type JsonRecord = Record<string, unknown>;
 const WARNING_PATTERNS = [
   /\[sanitizer\]/i,
@@ -10,6 +15,17 @@ const WARNING_KEY_PATTERN = /warning/i;
 const MAX_WARNING_HITS = 5;
 const MAX_WARNING_DEPTH = 6;
 const MAX_WARNING_LENGTH = 400;
+
+/**
+ * Audit records can outlive management responses. The redaction set is derived from the
+ * same inventories the dashboard sanitizer uses — the at-rest allowlist plus its
+ * response-only strips — so console/session credentials never get written to audit
+ * details, even on legacy plaintext connections, and the two cannot drift.
+ */
+const AUDIT_SENSITIVE_METADATA_FIELDS: ReadonlySet<string> = new Set<string>([
+  ...PROVIDER_SPECIFIC_SECRET_FIELDS,
+  ...PROVIDER_SPECIFIC_RESPONSE_ONLY_FIELDS,
+]);
 
 function toRecord(value: unknown): JsonRecord {
   return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
@@ -75,9 +91,12 @@ export function summarizeProviderConnectionForAudit(connection: unknown) {
   const providerSpecificData = toRecord(record.providerSpecificData);
   if (Object.keys(providerSpecificData).length > 0) {
     const sanitizedProviderSpecificData = { ...providerSpecificData };
-    delete sanitizedProviderSpecificData.consoleApiKey;
-    delete sanitizedProviderSpecificData.alibabaConsoleCookie;
-    delete sanitizedProviderSpecificData.alibabaConsoleSecToken;
+    for (const field of AUDIT_SENSITIVE_METADATA_FIELDS) {
+      delete sanitizedProviderSpecificData[field];
+    }
+    if (sanitizedProviderSpecificData.browserCdpEndpoint) {
+      sanitizedProviderSpecificData.browserCdpEndpoint = "configured";
+    }
     sanitized.providerSpecificData = sanitizedProviderSpecificData;
   }
 

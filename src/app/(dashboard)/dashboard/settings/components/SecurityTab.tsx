@@ -5,6 +5,7 @@ import { Card, Button, Input, Toggle, Modal } from "@/shared/components";
 import { AI_PROVIDERS } from "@/shared/constants/providers";
 import ProviderIcon from "@/shared/components/ProviderIcon";
 import IPFilterSection from "./IPFilterSection";
+import PiiMaskingCard from "./PiiMaskingCard";
 import SessionInfoCard from "./SessionInfoCard";
 import AuthzSection from "./AuthzSection";
 import { useTranslations } from "next-intl";
@@ -17,7 +18,13 @@ export default function SecurityTab() {
   const [passLoading, setPassLoading] = useState(false);
 
   const [requireLoginModalOpen, setRequireLoginModalOpen] = useState(false);
-  const [pendingRequireLoginVal, setPendingRequireLoginVal] = useState<boolean | null>(null);
+  // Security-policy change waiting for the current password: `requireLogin`,
+  // `bruteForceProtection` and `corsOrigins` all need `currentPassword` once a password is set.
+  const [pendingSecurityUpdate, setPendingSecurityUpdate] = useState<Record<
+    string,
+    unknown
+  > | null>(null);
+  const [savedCorsOrigins, setSavedCorsOrigins] = useState("");
   const [requireLoginPassword, setRequireLoginPassword] = useState("");
   const [requireLoginError, setRequireLoginError] = useState("");
   const [requireLoginLoading, setRequireLoginLoading] = useState(false);
@@ -33,17 +40,26 @@ export default function SecurityTab() {
       .then((res) => res.json())
       .then((data) => {
         setSettings(data);
+        setSavedCorsOrigins(typeof data?.corsOrigins === "string" ? data.corsOrigins : "");
         setLoading(false);
       })
       .catch(() => setLoading(false));
   }, []);
 
+  const rememberSavedSecurityValues = (update: Record<string, unknown>) => {
+    if (typeof update.corsOrigins === "string") setSavedCorsOrigins(update.corsOrigins);
+  };
+
+  const openSecurityUpdateModal = (update: Record<string, unknown>) => {
+    setPendingSecurityUpdate(update);
+    setRequireLoginPassword("");
+    setRequireLoginError("");
+    setRequireLoginModalOpen(true);
+  };
+
   const updateRequireLogin = async (requireLogin: boolean) => {
     if (settings.hasPassword) {
-      setPendingRequireLoginVal(requireLogin);
-      setRequireLoginPassword("");
-      setRequireLoginError("");
-      setRequireLoginModalOpen(true);
+      openSecurityUpdateModal({ requireLogin });
       return;
     }
 
@@ -61,8 +77,8 @@ export default function SecurityTab() {
     }
   };
 
-  const confirmRequireLoginUpdate = async () => {
-    if (pendingRequireLoginVal === null) return;
+  const confirmSecurityUpdate = async () => {
+    if (!pendingSecurityUpdate) return;
     setRequireLoginLoading(true);
     setRequireLoginError("");
 
@@ -71,13 +87,14 @@ export default function SecurityTab() {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          requireLogin: pendingRequireLoginVal,
+          ...pendingSecurityUpdate,
           currentPassword: requireLoginPassword,
         }),
       });
 
       if (res.ok) {
-        setSettings((prev: any) => ({ ...prev, requireLogin: pendingRequireLoginVal }));
+        setSettings((prev: any) => ({ ...prev, ...pendingSecurityUpdate }));
+        rememberSavedSecurityValues(pendingSecurityUpdate);
         setRequireLoginModalOpen(false);
       } else {
         const data = await res.json();
@@ -100,10 +117,21 @@ export default function SecurityTab() {
       });
       if (res.ok) {
         setSettings((prev) => ({ ...prev, [key]: value }));
+        rememberSavedSecurityValues({ [key]: value });
       }
     } catch (err) {
       console.error(`Failed to update ${key}:`, err);
     }
+  };
+
+  // `bruteForceProtection` / `corsOrigins` are security-impacting: once a password exists the
+  // server refuses them without `currentPassword`, so ask for it like the requireLogin toggle.
+  const updateSecuritySetting = (key: string, value: unknown) => {
+    if (settings.hasPassword) {
+      openSecurityUpdateModal({ [key]: value });
+      return;
+    }
+    void updateSetting(key, value);
   };
 
   const toggleBlockedProvider = (providerId: string) => {
@@ -202,7 +230,7 @@ export default function SecurityTab() {
                 value={requireLoginPassword}
                 onChange={(e) => setRequireLoginPassword(e.target.value)}
                 onKeyDown={(e) =>
-                  e.key === "Enter" && requireLoginPassword && confirmRequireLoginUpdate()
+                  e.key === "Enter" && requireLoginPassword && confirmSecurityUpdate()
                 }
                 autoFocus
                 disabled={requireLoginLoading}
@@ -218,7 +246,7 @@ export default function SecurityTab() {
                 </Button>
                 <Button
                   variant="primary"
-                  onClick={confirmRequireLoginUpdate}
+                  onClick={confirmSecurityUpdate}
                   loading={requireLoginLoading}
                   disabled={!requireLoginPassword}
                 >
@@ -282,6 +310,8 @@ export default function SecurityTab() {
 
       <IPFilterSection />
 
+      <PiiMaskingCard />
+
       {/* API Endpoint Protection */}
       <Card>
         <div className="flex items-center gap-3 mb-4">
@@ -310,7 +340,10 @@ export default function SecurityTab() {
             <Toggle
               checked={settings.bruteForceProtection !== false}
               onChange={() =>
-                updateSetting("bruteForceProtection", !(settings.bruteForceProtection !== false))
+                updateSecuritySetting(
+                  "bruteForceProtection",
+                  !(settings.bruteForceProtection !== false)
+                )
               }
               disabled={loading}
             />
@@ -326,7 +359,10 @@ export default function SecurityTab() {
               placeholder="https://app.example.com, https://admin.example.com"
               value={typeof settings.corsOrigins === "string" ? settings.corsOrigins : ""}
               onChange={(e) => setSettings((prev) => ({ ...prev, corsOrigins: e.target.value }))}
-              onBlur={(e) => updateSetting("corsOrigins", e.target.value.trim())}
+              onBlur={(e) => {
+                const next = e.target.value.trim();
+                if (next !== savedCorsOrigins) updateSecuritySetting("corsOrigins", next);
+              }}
             />
           </div>
 

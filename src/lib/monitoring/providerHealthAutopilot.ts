@@ -2,6 +2,8 @@ import { createHash } from "crypto";
 
 import { getProviderConnections, updateProviderConnection } from "@/lib/db/providers";
 import { getCachedProviderConnectionById } from "@/lib/db/readCache";
+import { isRetestAutoDisabledEnabled } from "@/lib/credentialHealth/retestAutoDisabledFlag";
+import { applyOperatorActivationIntent } from "@/lib/providers/operatorDisable";
 import { clearProviderFailure, clearModelLock } from "@omniroute/open-sse/services/accountFallback";
 import { resolveProviderAlias } from "@omniroute/open-sse/services/model";
 
@@ -740,7 +742,22 @@ export async function executeProviderHealthAutopilotAction(
         return { status: 409, body: { success: false, error: "terminal connection state" } };
       }
       const isActive = input.type === "reactivate_connection";
-      await updateProviderConnection(connectionId, { isActive });
+      // With CREDENTIAL_HEALTH_RETEST_AUTO_DISABLED on, this operator action is recorded like
+      // the connection toggle, so the credential-health retest (and the connection test) never
+      // switch a connection the operator disabled here back on (#16190). Flag off: the
+      // pre-#16190 write, isActive only.
+      await updateProviderConnection(
+        connectionId,
+        isRetestAutoDisabledEnabled()
+          ? {
+              isActive,
+              providerSpecificData: applyOperatorActivationIntent(
+                connection.providerSpecificData,
+                isActive
+              ),
+            }
+          : { isActive }
+      );
       changed = { isActive };
       break;
     }

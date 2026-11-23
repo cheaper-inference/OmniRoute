@@ -8,7 +8,6 @@ import { useNotificationStore } from "@/store/notificationStore";
 import { providerText } from "../providerPageHelpers";
 
 const ACCOUNT_PROVIDER_NAMES: Record<string, string> = {
-  opencode: "OpenCode",
   dahl: "Dahl",
 };
 
@@ -174,6 +173,7 @@ export default function NoAuthProviderControls({
 
   return (
     <NoAuthProviderCard
+      providerId={providerId}
       enabled={enabled}
       saving={savingEnabled}
       onEnabledChange={handleEnabledChange}

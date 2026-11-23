@@ -296,15 +296,15 @@ Các hành vi chính:
 
 ---
 
-## 🔑 Token đồng bộ & Gói cấu hình _(v3.6.6+)_
+## 🔑 Token đồng bộ & gói cấu hình _(v3.6.6+)_
 
-Giờ đây có thể truy cập từ nhiều thiết bị và qua toán tử bên ngoài bằng **token đồng bộ có phạm vi**:
+Giờ đây, nhiều thiết bị và các tác nhân bên ngoài có thể truy cập thông qua **token đồng bộ có phạm vi**:
 
-- **`POST /api/sync/tokens`** — Cấp token đồng bộ mới (có phạm vi, với thời hạn hết hạn tùy chọn)
-- **`DELETE /api/sync/tokens/:id`** — Thu hồi token
-- **`GET /api/sync/bundle`** — Tải xuống bản chụp nhanh JSON có phiên bản, được định danh bằng ETag, chứa tất cả cài đặt không nhạy cảm (mật khẩu được che)
+- **`POST /api/sync/tokens`** — Cấp một token đồng bộ mới (có phạm vi, với thời hạn hết hiệu lực tùy chọn)
+- **`DELETE /api/sync/tokens/:id`** — Thu hồi một token
+- **`GET /api/sync/bundle`** — Tải xuống bản chụp nhanh JSON có phiên bản và được định danh bằng ETag của cấu hình (chỉ xác thực bằng token đồng bộ). Các thiết lập xác thực như mật khẩu bảng điều khiển sẽ bị loại bỏ, nhưng thông tin xác thực của nhà cung cấp và các khóa API vẫn được bao gồm, vì vậy hãy coi tệp này là thông tin bí mật
 
-Gói cấu hình được tạo bởi `src/lib/sync/bundle.ts`. Các ứng dụng sử dụng so sánh header phản hồi `ETag` để phát hiện thay đổi mà không cần tải lại toàn bộ dữ liệu.
+Gói cấu hình được tạo bởi `src/lib/sync/bundle.ts`. Các ứng dụng sử dụng so sánh header phản hồi `ETag` để phát hiện thay đổi mà không cần tải xuống lại toàn bộ dữ liệu. Từ CLI, `omniroute sync bundle <outPath> --token <syncToken>` (hoặc `OMNIROUTE_SYNC_TOKEN`) lưu gói này vào một tệp chỉ chủ sở hữu mới có quyền truy cập.
 
 ---
 

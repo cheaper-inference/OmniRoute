@@ -26,7 +26,7 @@
 
 ---
 
-## Struktura na najvišji ravni
+## Struktura najvišje ravni
 
 ```
 open-sse/
@@ -34,14 +34,14 @@ open-sse/
 ├── types.d.ts            # Javni izvozi tipov
 ├── package.json          # @omniroute/open-sse
 ├── config/               # Konfiguracije ponudnikov, konstante, registri
-├── executors/            # Izvajalniki HTTP za posamezne ponudnike (67 + base.ts/index.ts)
+├── executors/            # Izvajalniki HTTP za posamezne ponudnike (150 modulov + base.ts/index.ts)
 ├── handlers/             # Obdelovalniki zahtev (chatCore, responses itd.)
 ├── lib/                  # Notranji pripomočki
 ├── mcp-server/           # Strežnik Model Context Protocol
-├── services/             # Približno 298 storitvenih modulov
-├── transformer/          # Pretvornik formata Responses API
-├── translator/           # Prevajanje formatov (OpenAI ↔ Claude ↔ Gemini)
-└── utils/                # Skupni pripomočki (beleženje, napake, pretoki itd.)
+├── services/             # ~298 storitvenih modulov
+├── transformer/          # Pretvornik oblike zapisa za Responses API
+├── translator/           # Prevajanje oblik zapisa (OpenAI ↔ Claude ↔ Gemini)
+└── utils/                # Skupni pripomočki (beleženje, napake, tokovi itd.)
 ```
 
 ### Število modulov
@@ -50,9 +50,9 @@ open-sse/
 | `executors/` | 167 | Izvajalniki HTTP za posamezne ponudnike (poenoteni prek tovarne DefaultExecutor) |
 | `handlers/` | 157 | Vstopne točke zahtev (chatCore, responses, embeddings) |
 | `services/` | ~536 | Usmerjanje, predpomnjenje, omejevanje hitrosti, osveževanje itd. |
-| `translator/` | 56 | Pretvorba formatov (OpenAI ↔ Claude ↔ Gemini) |
+| `translator/` | 56 | Pretvorba oblik zapisa (OpenAI ↔ Claude ↔ Gemini) |
 | `mcp-server/` | 44 | Orodja in prenosi MCP |
-| `utils/` | ~108 | Prečni pripomočki (beleženje, napake, pretoki) |
+| `utils/` | ~108 | Prečni pripomočki (beleženje, napake, tokovi) |
 | `config/` | ~339 | Konfiguracije ponudnikov, konstante, registri |
 
 ---
@@ -169,7 +169,7 @@ Artefakti dnevnika klicev (če so omogočeni) se zapišejo v `${DATA_DIR}/call_l
 
 ### chatCore.ts (5977 vrstic)
 
-**Glavni obdelovalnik zahtev**. Kljub velikosti ima jasno strukturo:
+**Glavna obdelovalna funkcija zahtev**. Kljub velikosti ima jasno strukturo:
 
 ```ts
 // Psevdostruktura datoteke chatCore.ts
@@ -209,7 +209,7 @@ export async function handleChat(request: NextRequest) {
 
 ### combo.ts (4456 vrstic kode)
 
-**Mehanizem za usmerjanje**, ki kombinacijo razreši v urejen seznam ciljev.
+**Usmerjevalni mehanizem**, ki kombinacijo razreši v urejen seznam ciljev.
 
 ```ts
 // services/combo.ts
@@ -228,44 +228,44 @@ export async function handleComboChat(body, comboId): Promise<ChatResult> {
 
 Podpira **19 strategij usmerjanja** (glejte `src/shared/constants/routingStrategies.ts`):
 
-| Strategija          | Delovanje                                                                                        |
-| ------------------- | ------------------------------------------------------------------------------------------------ |
-| `priority`          | Urejen seznam s prvim ciljem na prvem mestu                                                      |
-| `weighted`          | Verjetnostna izbira glede na utež posameznega cilja                                              |
-| `round-robin`       | Kroženje skozi cilje po vrstnem redu                                                             |
-| `context-relay`     | Predajanje konteksta med cilji                                                                   |
-| `fill-first`        | Zapolnitev kvote pred prehodom na naslednji cilj                                                 |
-| `p2c`               | Izbira med dvema možnostma                                                                       |
-| `random`            | Enakomerna naključna izbira                                                                      |
-| `least-used`        | Izbira cilja z najmanj nedavnimi uporabami                                                       |
-| `cost-optimized`    | Najprej najcenejši razpoložljivi cilj                                                            |
-| `reset-aware`       | Upošteva časovna okna ponastavitve ponudnikov                                                    |
-| `reset-window`      | Usmerjanje na podlagi časovnega okna ponastavitve                                                |
-| `headroom`          | Najprej cilj z največ preostale razpoložljive kvote                                              |
-| `strict-random`     | Resnično enakomerna izbira (brez uteževanja glede na kakovost)                                   |
-| `auto`              | Uporabi ocenjevanje s 16 dejavniki (`autoCombo/`)                                                |
-| `lkgp`              | Najprej zadnji znani delujoči ponudnik                                                           |
-| `context-optimized` | Najprimernejši za zahteve z dolgim kontekstom                                                    |
-| `fusion`            | Vzporedno razpošlje zahtevo skupini, nato pa odgovore sintetizira prek ocenjevalca (`fusion.ts`) |
+| Strategija          | Delovanje                                                                                   |
+| ------------------- | ------------------------------------------------------------------------------------------- |
+| `priority`          | Urejen seznam s prvim ciljem na prvem mestu                                                 |
+| `weighted`          | Verjetnostna izbira glede na težo posameznega cilja                                         |
+| `round-robin`       | Zaporedno kroženje med cilji                                                                |
+| `context-relay`     | Predajanje konteksta med cilji                                                              |
+| `fill-first`        | Zapolnitev kvote pred prehodom na naslednjega                                               |
+| `p2c`               | Moč dveh izbir                                                                              |
+| `random`            | Enakomerna naključna izbira                                                                 |
+| `least-used`        | Izbira cilja z najmanj nedavnimi uporabami                                                  |
+| `cost-optimized`    | Najprej najcenejši delujoči cilj                                                            |
+| `reset-aware`       | Upoštevanje časovnih oken ponastavitve ponudnika                                            |
+| `reset-window`      | Usmerjanje na podlagi časovnega okna ponastavitve                                           |
+| `headroom`          | Najprej cilj z največ preostale kvote                                                       |
+| `strict-random`     | Resnično enakomerna izbira (brez uteževanja glede na kakovost)                              |
+| `auto`              | Uporaba 16-faktorskega točkovanja (`autoCombo/`)                                            |
+| `lkgp`              | Najprej zadnji znani delujoči ponudnik                                                      |
+| `context-optimized` | Najprimernejši za zahteve z dolgim kontekstom                                               |
+| `fusion`            | Vzporedno razpošlje zahtevo skupini, nato pa odgovore združi prek ocenjevalca (`fusion.ts`) |
 
 ### base.ts (1170 vrstic kode)
 
-**Abstraktni izvajalnik**, ki ga razširja vseh 107 izvajalnikov. Vsebuje:
+**Abstraktni izvajalnik**, ki ga razširja vsak razred izvajalnika (neposredno ali prek `DefaultExecutor` in drugih podrazredov). Vsebuje:
 
 - `buildUrl()` — privzeta sestava URL-ja (podrazredi jo preglasijo za prilagojeno vedenje)
 - `buildHeaders()` — privzete glave (preverjanje pristnosti, vrsta vsebine)
-- `transformRequest()` — privzeto posredovanje brez sprememb
-- `execute()` — glavna zanka HTTP s ponovnimi poskusi, eksponentnim zamikom in prekinjevalnikom
+- `transformRequest()` — privzeto nespremenjeno posredovanje
+- `execute()` — glavna zanka HTTP s ponovnimi poskusi, eksponentnim zakasnjevanjem in odklopnikom
 
 ```ts
 // open-sse/executors/default.ts
 export class DefaultExecutor extends BaseExecutor {
   // Obravnava vse ponudnike, združljive z OpenAI/Anthropic
-  // Ponudniki registrirajo konfiguracije (URL, preverjanje pristnosti, glave), vendar si delijo logiko izvajalnika
+  // Ponudniki registrirajo konfiguracije (URL, preverjanje pristnosti, glave), vendar souporabljajo logiko izvajalnika
 }
 ```
 
-Vedenje, specifično za ponudnika (glave za preverjanje pristnosti, osnovni URL, glave različice), je konfigurirano prek registra ponudnikov in ne prek ločenih razredov izvajalnikov.
+Vedenje, specifično za ponudnika (glave za preverjanje pristnosti, osnovni URL, glave različice), se konfigurira prek registra ponudnikov in ne z ločenimi razredi izvajalnikov.
 
 ````
 
@@ -273,26 +273,26 @@ Vedenje, specifično za ponudnika (glave za preverjanje pristnosti, osnovni URL,
 
 ## Storitve (117 modulov)
 
-Storitve so **osredotočeni, namenski moduli**, ki jih obdelovalniki združujejo. Glavne kategorije:
+Storitve so **osredotočeni, namenski moduli**, ki jih upravljalniki združujejo. Glavne kategorije:
 
 ### Usmerjanje in kombiniranje
 
 - `combo.ts` — vstopna točka za kombinirano usmerjene zahteve
-- `services/autoCombo/` — 16-faktorsko točkovanje, 8 strategij samodejnega usmerjanja
+- `services/autoCombo/` — 16-faktorsko ocenjevanje, 8 strategij samodejnega usmerjanja
 - `wildcardRouter.ts` — ujema poti z nadomestnimi znaki (`gpt-*`)
 - `modelFamilyFallback.ts` — nadomestna izbira znotraj družine T5
 
-### Omejevanje hitrosti in kvote
+### Omejevanje hitrosti in kvota
 
-- `rateLimitManager.ts` — žetonovni vedro za vsako kombinacijo ključa in ponudnika
+- `rateLimitManager.ts` — žetonovno vedro za vsak ključ in ponudnika
 - `usage.ts` — beleženje uporabe
 - `quotaCache.ts` — posnetki kvot v pomnilniku
 
-### Računi in žetoni
+### Račun in žeton
 
-- `tokenRefresh.ts` — osvežitev OAuth ob napaki 401
+- `tokenRefresh.ts` — osvežitev OAuth ob odgovoru 401
 - `accountFallback.ts` — preklop na nadomestni račun
-- `sessionManager.ts` — stanje večkrožne seje
+- `sessionManager.ts` — stanje večkoračne seje
 
 ### Inteligenca
 
@@ -303,20 +303,20 @@ Storitve so **osredotočeni, namenski moduli**, ki jih obdelovalniki združujejo
 
 ### Odpornost
 
-- `resilience.ts` — usklajevanje ponovnih poskusov, zakasnitev in odklopnika
-- `emergencyFallback.ts` — nadomestna možnost v skrajni sili
+- `resilience.ts` — orkestracija ponovnih poskusov, zakasnitve in odklopnika
+- `emergencyFallback.ts` — skrajna nadomestna možnost
 - `modelDeprecation.ts` — samodejno usmerjanje na nasledniške modele
 
 ### Stanje
 
-- `signatureCache.ts` — odstranjevanje dvojnikov glede na podpis zahteve
+- `signatureCache.ts` — odstranjevanje dvojnikov na podlagi podpisa zahteve
 - `volumeDetector.ts` — razbremenjevanje obremenitve
 - `contextHandoff.ts` — serializacija seje
 
 ### Stiskanje
 
-- `compression/` (podimenik) — celoten cevovod stiskanja
-- 39 datotek, ki zajemajo mehanizme, pakete pravil in prilagojevalnike
+- `compression/` (podimenik) — celoten cevovod za stiskanje
+- 39 datotek, ki pokrivajo mehanizme, pakete pravil in vmesnike
 
 ### Veščine
 
@@ -328,15 +328,15 @@ Storitve so **osredotočeni, namenski moduli**, ki jih obdelovalniki združujejo
 
 ---
 
-## Izvajalniki (več kot 75 datotek)
+## Izvajalniki (150 modulov)
 
-Ena datoteka na ponudnika. Vsi razširjajo `BaseExecutor` in preglasijo tisto, kar se razlikuje.
+Večinoma ena datoteka na ponudnika. Vsi razredi izvajalnikov razširjajo `BaseExecutor` in prepišejo tisto, kar se razlikuje; drugi moduli so pomožni moduli za posamezne ponudnike (sheme orodij, vmesniki za pridobivanje/TTS, upravljalniki posebnosti).
 
 ### Pogosti vzorci
 
-Ponudniki se razrešijo prek `getExecutor(providerId)`, ki vrne konfigurirani izvajalnik. Ponudniki, združljivi z OpenAI/Anthropic, uporabljajo `DefaultExecutor` (`executors/default.ts`). Vedenje, specifično za ponudnika (osnovni URL, glave za preverjanje pristnosti, različica API-ja), je konfigurirano v `open-sse/config/providers/`, medtem ko se pretvorbe telesa zahteve izvajajo v `open-sse/translator/`.
+Ponudniki se razrešujejo prek `getExecutor(providerId)`, ki vrne konfigurirani izvajalnik. Ponudniki, združljivi z OpenAI/Anthropic, uporabljajo `DefaultExecutor` (`executors/default.ts`). Vedenje, značilno za posameznega ponudnika (osnovni URL, glave za preverjanje pristnosti, različica API-ja), je konfigurirano v `open-sse/config/providers/`, medtem ko se pretvorbe telesa zahteve izvajajo v `open-sse/translator/`.
 
-**URL po meri** se nastavi prek konfiguracije ponudnika:
+**URL po meri** je nastavljen prek konfiguracije ponudnika:
 
 ```ts
 // Konfiguracija ponudnika v open-sse/config/providers/
@@ -346,9 +346,9 @@ export default {
 }
 ````
 
-**Preverjanje pristnosti po meri** se obravnava prek konfiguracije preverjanja pristnosti v registru ponudnikov (ključ API, OAuth, profili glav).
+**Preverjanje pristnosti po meri** se upravlja prek konfiguracije preverjanja pristnosti v registru ponudnikov (ključ API, OAuth, profili glav).
 
-**Pretvorbe telesa zahteve po meri** (npr. Anthropicovo ločevanje `system` od `messages`) se registrirajo za posameznega ponudnika v `open-sse/translator/`.
+Pretvorbe **telesa zahteve po meri** (npr. Anthropicovo ločevanje `system` od `messages`) se registrirajo za posameznega ponudnika v `open-sse/translator/`.
 
 ````
 
@@ -366,7 +366,7 @@ const result = await executor.execute({
 });
 ````
 
-Razreševanje poteka prek `ExecutorRegistry` (`executors/registry.ts`): vsak specializirani izvajalnik je deklariran v vgrajeni tabeli datoteke `executors/index.ts` in registriran prek `registerExecutor(alias, instance)` ob nalaganju modula; `getExecutor()` preveri register in za vsakega ponudnika brez specializiranega vnosa uporabi predpomnjeni `DefaultExecutor`. Celotna preslikava vzdevek → izvajalnik je opredeljena z referenčnim testom `tests/unit/executor-map-golden.test.ts`.
+Razreševanje poteka prek `ExecutorRegistry` (`executors/registry.ts`): vsak specializiran izvajalnik je deklariran v vgrajeni tabeli datoteke `executors/index.ts` in ob nalaganju modula registriran prek `registerExecutor(alias, instance)`; `getExecutor()` preveri register in za vsakega ponudnika brez specializiranega vnosa uporabi predpomnjeni `DefaultExecutor`. Celotno preslikavo vzdevek → izvajalnik opredeljuje zlati test `tests/unit/executor-map-golden.test.ts`.
 
 ---
 
@@ -483,13 +483,13 @@ Ta obravnava:
 
 `open-sse/config/` vsebuje konfiguracijsko plast:
 
-| Datoteka                      | Namen                                                 |
-| ----------------------------- | ----------------------------------------------------- |
-| `providerRegistry.ts`         | Register modelov za klepet iz kataloga 352 ponudnikov |
-| `providerModels.ts`           | Vzdevki modelov, preslikava formatov                  |
-| `constants.ts`                | Časovne omejitve, omejitve, kode stanja               |
-| `defaultThinkingSignature.ts` | Privzeti podpis razmišljanja Claude                   |
-| `modelStrip.ts` (v storitvah) | Odstranjevanje polj glede na ponudnika                |
+| Datoteka                      | Namen                                                |
+| ----------------------------- | ---------------------------------------------------- |
+| `providerRegistry.ts`         | Register modelov za klepet v katalogu 374 ponudnikov |
+| `providerModels.ts`           | Vzdevki modelov, preslikava formatov                 |
+| `constants.ts`                | Časovne omejitve, omejitve, statusne kode            |
+| `defaultThinkingSignature.ts` | Privzeti podpis razmišljanja Claude                  |
+| `modelStrip.ts` (v storitvah) | Odstranjevanje polj glede na ponudnika               |
 
 ### Shema registra ponudnikov
 
@@ -506,7 +506,7 @@ interface ProviderConfig {
 }
 ```
 
-Preverjanje z Zodom ob nalaganju modula zagotavlja veljavnost vseh konfiguracij ponudnikov.
+Preverjanje z Zod ob nalaganju modula zagotavlja veljavnost vseh konfiguracij ponudnikov.
 
 ---
 

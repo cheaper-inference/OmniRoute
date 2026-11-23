@@ -32,6 +32,23 @@
  * promise nobody is awaiting anymore, which otherwise kills the whole process
  * over a single upstream stall that the retry path was built to handle.
  *
+ * The same escape reached production on 2026-10-02 (exit code 7) with the
+ * pooled relay path's per-attempt timeout (`RELAY_TIMEOUT`,
+ * `open-sse/utils/proxyFetch.ts`): a stray copy of the 504 the combo/executor
+ * layer already handles took the process down. Both timeout codes are
+ * classified in `isRecoverableUpstreamTimeoutError` below.
+ *
+ * It escaped again on 2026-10-11 (exit code 7, #16347) with a stream-lifecycle
+ * error: an empty Claude upstream (`empty_response`, stamped by
+ * `open-sse/utils/stream.ts::emitClaudeEmptyStreamErrorAndAbort`) had already
+ * been reported as a 502 / combo failover, but while the combo loop sat in its
+ * retry wait nothing consumed the errored transform stream, so the rejection
+ * reached this guard unclassified. Those errors carry the
+ * `__omniroutePendingRequestCleared` marker (`PENDING_REQUEST_CLEARED_MARKER`,
+ * `open-sse/utils/stream.ts`) once the stream layer has cleared the request's
+ * pending entry — they are classified in `isHandledStreamLifecycleError`
+ * below.
+ *
  * Two layers:
  *   1. `attachRequestStreamGuards(req, res)` — per-request listeners that absorb
  *      client-abort errors so they never bubble to the process level. Call it
@@ -116,18 +133,27 @@ export function isClientAbortError(err) {
 }
 
 /**
- * #12861: a recoverable upstream-fetch timeout that `proxyFetch.ts` already
- * retries on a fresh socket (see `open-sse/utils/directResponseStartTimeout.ts`).
- * A narrow timer/promise-settlement race can still deliver its abort reason to
- * a promise nobody is awaiting anymore, which otherwise surfaces here as an
- * unhandledRejection/uncaughtException — even though the retry path already
- * handles this exact condition and normally logs it as a plain 504.
+ * A recoverable upstream-fetch timeout whose request-layer handling already
+ * exists, but a stray copy can still reach this guard as an
+ * unhandledRejection/uncaughtException and must not be process-fatal:
  *
- * Kept as a bare string-code check (no import of the `.ts` source of truth)
+ * - `DIRECT_RESPONSE_START_TIMEOUT` (#12861): `proxyFetch.ts` retries it on a
+ *   fresh socket (see `open-sse/utils/directResponseStartTimeout.ts`). A narrow
+ *   timer/promise-settlement race can deliver its abort reason to a promise
+ *   nobody is awaiting anymore.
+ * - `RELAY_TIMEOUT` (2026-10-02 production exit 7): the pooled relay path
+ *   (`open-sse/utils/proxyFetch.ts`, #9100/#9158) fails a hung attempt fast as
+ *   a 504 after `RELAY_FETCH_TIMEOUT_MS` and the combo/executor layer falls
+ *   back. The thrown error escaped its execute chain as a stray rejection and
+ *   this guard re-threw it because the code was not classified here.
+ *
+ * Kept as bare string-code checks (no import of the `.ts` source of truth)
  * because this file has to stay build-free/plain-JS-loadable — see the module
- * docstring. `DIRECT_RESPONSE_START_TIMEOUT_CODE` in
- * `open-sse/utils/directResponseStartTimeout.ts` is the canonical definition;
- * keep this string literal in sync with it.
+ * docstring. Canonical definitions: `DIRECT_RESPONSE_START_TIMEOUT_CODE` in
+ * `open-sse/utils/directResponseStartTimeout.ts`, and the `RELAY_TIMEOUT` /
+ * `relay_timeout` stamps in `open-sse/utils/proxyFetch.ts` (the same pair
+ * `src/lib/usage/glmResetCards.ts` matches on). Keep these literals in sync
+ * with them.
  *
  * @param {unknown} err
  * @returns {boolean}
@@ -135,9 +161,29 @@ export function isClientAbortError(err) {
 export function isRecoverableUpstreamTimeoutError(err) {
   // Same reason-shape tolerance as isIntentionalComboAbort: a bare string
   // reason rejects waiters with the string itself, not an Error object.
-  if (err === "DIRECT_RESPONSE_START_TIMEOUT") return true;
+  if (
+    err === "DIRECT_RESPONSE_START_TIMEOUT" ||
+    err === "RELAY_TIMEOUT" ||
+    err === "relay_timeout"
+  ) {
+    return true;
+  }
   if (!err || typeof err !== "object") return false;
-  return /** @type {NodeJS.ErrnoException} */ (err).code === "DIRECT_RESPONSE_START_TIMEOUT";
+  const e = /** @type {NodeJS.ErrnoException & { errorCode?: string }} */ (err);
+  // open-sse's withBodyTimeout rejects with a plain Error (no .code). Restrict
+  // this match to its exact name and message shape to preserve crash semantics.
+  if (
+    e.name === "BodyTimeoutError" &&
+    typeof e.message === "string" &&
+    /^Response body read timeout after [1-9]\d*ms$/.test(e.message)
+  ) {
+    return true;
+  }
+  return (
+    e.code === "DIRECT_RESPONSE_START_TIMEOUT" ||
+    e.code === "RELAY_TIMEOUT" ||
+    e.errorCode === "relay_timeout"
+  );
 }
 
 /**
@@ -191,6 +237,7 @@ export function isUpstreamNetworkError(err) {
   if (e.name === "TypeError" && e.message === "fetch failed") return true;
   switch (e.code) {
     case "PROXY_UNREACHABLE":
+    case "PROXY_REQUEST_FAILED":
     case "UND_ERR_SOCKET":
     case "UND_ERR_CONNECT_TIMEOUT":
     case "UND_ERR_HEADERS_TIMEOUT":
@@ -206,9 +253,40 @@ export function isUpstreamNetworkError(err) {
 }
 
 /**
+ * A stream-lifecycle error OmniRoute's own streaming pipeline already accounted
+ * for. `open-sse/utils/stream.ts` stamps `markPendingRequestCleared()` on every
+ * stream error whose pending-request entry was cleared at emit time (the empty
+ * Claude flush `empty_response`, the upstream-start timeout, the empty-choices
+ * flush, and the `streamFailureBoundary.ts` fallback) — the request layer has
+ * by then already surfaced the failure (502 error event, combo failover,
+ * single-model retry classification), so a stray copy delivered to nobody is a
+ * bookkeeping leftover, not a fault. Kept as literal checks because this file
+ * must stay build-free: canonical definitions are `PENDING_REQUEST_CLEARED_MARKER`
+ * and the `empty_response` stamp in `open-sse/utils/stream.ts` (keep in sync).
+ *
+ * 2026-10-11 production exit 7 (#16347): the combo retry wait left the errored
+ * transform stream unconsumed and the `empty_response` rejection escaped as an
+ * uncaughtException. Same escape class as RELAY_TIMEOUT (#15339) and
+ * RATE_LIMIT_QUEUE_TIMEOUT (#15706).
+ *
+ * @param {unknown} err
+ * @returns {boolean}
+ */
+export function isHandledStreamLifecycleError(err) {
+  if (err === "empty_response") return true;
+  if (!err || typeof err !== "object") return false;
+  const e = /** @type {Error & { code?: string; __omniroutePendingRequestCleared?: boolean }} */ (
+    err
+  );
+  if (e.__omniroutePendingRequestCleared === true) return true;
+  return e.code === "empty_response";
+}
+
+/**
  * Decide whether a process-level uncaughtException/unhandledRejection should be
- * swallowed (benign client-abort, or a recoverable upstream timeout that a
- * retry path already handles — #12861) or allowed to surface (genuine bug).
+ * swallowed (benign client-abort, or a recoverable upstream timeout the
+ * request layer already handles — #12861 / RELAY_TIMEOUT) or allowed to
+ * surface (genuine bug).
  *
  * Pure + exported so it can be unit-tested without poking process listeners.
  *
@@ -222,7 +300,8 @@ export function shouldSwallowUncaught(err, origin) {
     !isClientAbortError(err) &&
     !isRecoverableUpstreamTimeoutError(err) &&
     !isIntentionalComboAbort(err) &&
-    !isUpstreamNetworkError(err)
+    !isUpstreamNetworkError(err) &&
+    !isHandledStreamLifecycleError(err)
   ) {
     return false;
   }

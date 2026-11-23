@@ -22,9 +22,8 @@ test("USAGE_FETCHER_PROVIDERS includes ollama-cloud (#7026)", () => {
 });
 
 test("registerGenericQuotaFetchers wires a preflight quota fetcher for ollama-cloud (#7026)", async () => {
-  const { registerGenericQuotaFetchers } = await import(
-    "../../open-sse/services/genericQuotaFetcher.ts"
-  );
+  const { registerGenericQuotaFetchers } =
+    await import("../../open-sse/services/genericQuotaFetcher.ts");
   const { getQuotaFetcher } = await import("../../open-sse/services/quotaPreflight.ts");
   registerGenericQuotaFetchers();
   assert.ok(
@@ -33,7 +32,7 @@ test("registerGenericQuotaFetchers wires a preflight quota fetcher for ollama-cl
   );
 });
 
-test("getUsageForProvider returns helpful message when Ollama Cloud has no usage cookie", async () => {
+test("getUsageForProvider returns helpful message when Ollama Cloud has neither API key nor usage cookie", async () => {
   const originalCookie = process.env.OLLAMA_USAGE_COOKIE;
   const originalOmniCookie = process.env.OMNIROUTE_OLLAMA_USAGE_COOKIE;
   delete process.env.OLLAMA_USAGE_COOKIE;
@@ -48,9 +47,10 @@ test("getUsageForProvider returns helpful message when Ollama Cloud has no usage
 
   try {
     const result = (await usage.getUsageForProvider({
+      // With an API key the documented /api/balance endpoint is used instead (see
+      // tests/unit/ollama-cloud-balance-api.test.ts); this covers the no-credentials case.
       id: "ollama-cloud-no-cookie",
       provider: "ollama-cloud",
-      apiKey: "ollama-chat-key",
     })) as { message?: string };
 
     assert.equal(called, false, "settings scrape must not run without a cookie");

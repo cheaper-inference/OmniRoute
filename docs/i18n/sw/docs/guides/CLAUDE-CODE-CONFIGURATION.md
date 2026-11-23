@@ -93,10 +93,10 @@ modeli za Kimi pekee.
 
 ---
 
-## Sehemu ya utambulisho kwenye dashibodi
+## Sehemu ya uanzishaji kwenye dashibodi
 
-Kadi ya zana ya Claude (**Dashibodi → Msimbo wa CLI**) huonyesha kipande halisi cha `settings.json`
-cha instansi hii, karibu na kitufe cha maelezo ya lakabu ya ugunduzi, pamoja na kitufe cha kunakili:
+Kadi ya zana ya Claude (**Dashibodi → Msimbo wa CLI**) huonyesha kipande kamili cha `settings.json`
+cha instansi hii, kando ya kitufe cha taarifa za lakabu ya ugunduzi, pamoja na kitufe cha kunakili:
 
 ```jsonc
 {
@@ -108,18 +108,32 @@ cha instansi hii, karibu na kitufe cha maelezo ya lakabu ya ugunduzi, pamoja na 
 }
 ```
 
-URL ya msingi ndiyo iliyobainishwa na kadi (ikiwemo thamani maalum ya kubatilisha uliyoandika), na tayari
-imesawazishwa — haina kiambishi tamati cha `/v1` wala mfuo wa mwisho. **Ufunguo hauonyeshwi kamwe**: sehemu hiyo hutolewa ikiwa na
-kishikilia nafasi, kwa hivyo picha ya skrini au kipande kilichobandikwa hakiwezi kuuvujisha. Bandika ufunguo wako juu yake.
+URL ya msingi ndiyo iliyotambuliwa na kadi (ikiwemo thamani maalum ya kubatilisha uliyoandika), na tayari
+imesawazishwa — haina kiambishi tamati cha `/v1` wala mkwaju wa mwisho. **Ufunguo hauonyeshwi kamwe**: sehemu hiyo huja na
+kishika nafasi, kwa hivyo picha ya skrini au kipande kilichobandikwa hakiwezi kuuvujisha. Bandika ufunguo wako juu yake.
 
 Ongeza `CLAUDE_CODE_AUTO_COMPACT_WINDOW` chini ya sehemu hiyo hiyo ya `env` kwa modeli yoyote ambayo dirisha lake halisi
-la muktadha si 200K — Claude Code hudhani kuwa kila kitambulisho kisichotambuliwa kina 200K, kwa hivyo
-ufupishaji wa kiotomatiki huanza katika sehemu isiyofaa (angalia onyo katika sehemu iliyotangulia).
-Kiunda kipande kinakubali thamani hiyo pia, kwa hivyo mwitaji anayejua ukubwa wa dirisha la modeli lengwa
+la muktadha si 200K — Claude Code huchukulia 200K kwa kila kitambulisho isichokitambua, kwa hivyo
+ufupishaji wa kiotomatiki vinginevyo huanza katika hatua isiyofaa (tazama onyo katika sehemu iliyotangulia).
+Kiundaji cha kipande pia hukubali thamani hiyo, kwa hivyo mwitaji anayejua ukubwa wa dirisha la modeli lengwa
 anaweza kuitoa moja kwa moja.
 
-Chanzo: `src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet` (kiunda safi
-kilichofanyiwa majaribio ya vitengo) kinachoonyeshwa na `ClaudeGatewayOnboardingBlock`.
+Chanzo: `src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet` (kiundaji kisicho na
+athari za pembeni, kilichojaribiwa kwa majaribio ya kitengo) kinachoonyeshwa na `ClaudeGatewayOnboardingBlock`.
+
+### Bandika akaunti moja (si lazima)
+
+Ili kutuma kila ombi la Claude Code kupitia akaunti moja mahususi ya mtoa huduma, ongeza kichwa cha
+`x-omniroute-connection` kupitia `ANTHROPIC_CUSTOM_HEADERS` katika sehemu hiyo hiyo ya `env`:
+
+```jsonc
+"ANTHROPIC_CUSTOM_HEADERS": "x-omniroute-connection: <connection id>"
+```
+
+Nakili kitambulisho kutoka kwenye chipu ya `xxxxxxxx…` katika safu ya muunganisho kwenye ukurasa wa mtoa huduma. Ubandikaji huo
+hutumika tu kwa vitambulisho vya modeli moja (`provider/model`), si kwa mikusanyiko. Tazama
+[Ubandikaji wa akaunti kwa kila ombi](../reference/API_REFERENCE.md#account-pinning-per-request) kwa
+tabia kamili ya mbadala.
 
 ---
 
@@ -129,9 +143,9 @@ Claude Code **haina faili asilia za wasifu** (tofauti na `~/.codex/<name>.config
 Utaratibu unaopendekezwa ni `CLAUDE_CONFIG_DIR` — saraka tofauti ya usanidi kwa kila
 wasifu, kila moja ikiwa na `settings.json`, vitambulisho, historia na akiba yake.
 
-`omniroute setup-claude` huleta katalogi ya moja kwa moja ya `/v1/models` na kuandika
-wasifu mmoja kwa kila modeli katika `~/.claude/profiles/<name>/settings.json`, huku ikitumia tena
-**majina yaleyale kama `setup-codex`** (`glm52`, `kimi-k27`, `deepseek-pro`, …):
+`omniroute setup-claude` huchukua katalogi ya moja kwa moja ya `/v1/models` na kuandika
+wasifu mmoja kwa kila modeli katika `~/.claude/profiles/<name>/settings.json`, ikitumia tena
+**majina sawa na `setup-codex`** (`glm52`, `kimi-k27`, `deepseek-pro`, …):
 
 ```jsonc
 // ~/.claude/profiles/glm52/settings.json
@@ -148,33 +162,39 @@ wasifu mmoja kwa kila modeli katika `~/.claude/profiles/<name>/settings.json`, h
 }
 ```
 
-> **Tokeni ya uthibitishaji haiandikwi kamwe kwenye wasifu.** Zindua kwa
+> **Tokeni ya uthibitishaji haiandikwi kamwe kwenye wasifu.** Anzisha kwa
 > `omniroute launch --profile <name>` (huingiza `ANTHROPIC_AUTH_TOKEN` kutoka kwenye
-> muktadha unaotumika), au hamisha `ANTHROPIC_AUTH_TOKEN` mwenyewe na uendeshe
+> muktadha unaotumika), au hamisha `ANTHROPIC_AUTH_TOKEN` mwenyewe na utekeleze
 > `CLAUDE_CONFIG_DIR=~/.claude/profiles/<name> claude`.
 
-**Usawazishaji wa kiotomatiki baada ya ugunduzi wa modeli (kwa hiari).** OmniRoute inaweza kuzalisha upya kiotomatiki faili hizi hizi za
-`~/.claude/profiles/<name>/settings.json` kila usawazishaji wa modeli za mtoa huduma unapobadilisha katalogi ya moja kwa moja — ili modeli mpya/zilizobadilishwa majina zipate wasifu bila kuendesha tena
-amri. Hali hii **imezimwa kwa chaguo-msingi**: iwashwe kutoka kwenye **dashibodi ya Msimbo wa CLI** ("Usawazishaji wa kiotomatiki wa wasifu wa CLI" → Claude Code), au weka `OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES=true` (pia huzingatia
-`CLI_ALLOW_CONFIG_WRITES`, ambayo huwashwa kwa chaguo-msingi). Ikiwashwa, huandika faili za wasifu pekee; haibadilishi kamwe
-usanidi unaotumika/chaguo-msingi wa Claude, uthibitishaji, wala `~/.claude/settings.json`.
+**Usawazishaji otomatiki baada ya ugunduzi wa modeli (kwa hiari).** OmniRoute inaweza kutengeneza upya faili hizi hizi za
+`~/.claude/profiles/<name>/settings.json` kiotomatiki wakati wowote usawazishaji wa modeli za mtoa huduma
+unapobadilisha katalogi ya moja kwa moja — hivyo modeli mpya/zilizobadilishwa majina hupata wasifu bila kutekeleza tena
+amri. Kipengele hiki **kimezimwa kwa chaguo-msingi**: kiwashe kutoka kwenye **dashibodi ya CLI Code** ("Usawazishaji
+otomatiki wa wasifu wa CLI" → Claude Code), au weka `OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES=true` (pia huheshimu
+`CLI_ALLOW_CONFIG_WRITES`, ambayo imewashwa kwa chaguo-msingi). Kikiwashwa, huandika faili za wasifu pekee; kamwe
+hakibadilishi usanidi unaotumika/chaguo-msingi wa Claude, uthibitishaji, au `~/.claude/settings.json`.
 
-### Kuzalisha + kutumia wasifu
+### Kutengeneza + kutumia wasifu
 
 ```bash
 # OmniRoute ya ndani
 omniroute setup-claude
 
-# VPS ya mbali (hupachika URL ya VPS katika kila wasifu)
+# VPS ya mbali (hupachika URL ya VPS kwenye kila wasifu)
 omniroute setup-claude --remote http://192.168.0.15:20128 --api-key oma_live_xxx
 
 # Baadhi tu ya watoa huduma
 omniroute setup-claude --only glm,kimi
 
+# Pia andika wasifu kwa watoa huduma wa CLI ya ndani (zcode, auggie, devin-cli-agentic,
+# codex-app-server) ambao hawakugunduliwa kwenye seva hii (hurukwa kwa chaguo-msingi kwa lengwa la ndani)
+omniroute setup-claude --include-local
+
 # Hakiki bila kuandika
 omniroute setup-claude --dry-run
 
-# Zindua wasifu
+# Anzisha wasifu
 omniroute launch --profile kimi-k27
 ```
 

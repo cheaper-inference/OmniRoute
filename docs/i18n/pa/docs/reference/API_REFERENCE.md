@@ -4,9 +4,12 @@
 
 ---
 
-🌐 **Languages:** 🇺🇸 [English](../../../../reference/API_REFERENCE.md) · 🇪🇹 [am](../../../am/docs/reference/API_REFERENCE.md) · 🇸🇦 [ar](../../../ar/docs/reference/API_REFERENCE.md) · 🇦🇿 [az](../../../az/docs/reference/API_REFERENCE.md) · 🇧🇬 [bg](../../../bg/docs/reference/API_REFERENCE.md) · 🇧🇩 [bn](../../../bn/docs/reference/API_REFERENCE.md) · 🇧🇦 [bs](../../../bs/docs/reference/API_REFERENCE.md) · 🇨🇿 [cs](../../../cs/docs/reference/API_REFERENCE.md) · 🇩🇰 [da](../../../da/docs/reference/API_REFERENCE.md) · 🇩🇪 [de](../../../de/docs/reference/API_REFERENCE.md) · 🇬🇷 [el](../../../el/docs/reference/API_REFERENCE.md) · 🇪🇸 [es](../../../es/docs/reference/API_REFERENCE.md) · 🇪🇪 [et](../../../et/docs/reference/API_REFERENCE.md) · 🇮🇷 [fa](../../../fa/docs/reference/API_REFERENCE.md) · 🇫🇮 [fi](../../../fi/docs/reference/API_REFERENCE.md) · 🇫🇷 [fr](../../../fr/docs/reference/API_REFERENCE.md) · 🇮🇪 [ga](../../../ga/docs/reference/API_REFERENCE.md) · 🇮🇳 [gu](../../../gu/docs/reference/API_REFERENCE.md) · 🇳🇬 [ha](../../../ha/docs/reference/API_REFERENCE.md) · 🇮🇱 [he](../../../he/docs/reference/API_REFERENCE.md) · 🇮🇳 [hi](../../../hi/docs/reference/API_REFERENCE.md) · 🇭🇷 [hr](../../../hr/docs/reference/API_REFERENCE.md) · 🇭🇺 [hu](../../../hu/docs/reference/API_REFERENCE.md) · 🇦🇲 [hy](../../../hy/docs/reference/API_REFERENCE.md) · 🇮🇩 [id](../../../id/docs/reference/API_REFERENCE.md) · 🇳🇬 [ig](../../../ig/docs/reference/API_REFERENCE.md) · 🇮🇹 [it](../../../it/docs/reference/API_REFERENCE.md) · 🇯🇵 [ja](../../../ja/docs/reference/API_REFERENCE.md) · 🇬🇪 [ka](../../../ka/docs/reference/API_REFERENCE.md) · 🇰🇭 [km](../../../km/docs/reference/API_REFERENCE.md) · 🇮🇳 [kn](../../../kn/docs/reference/API_REFERENCE.md) · 🇰🇷 [ko](../../../ko/docs/reference/API_REFERENCE.md) · 🇱🇹 [lt](../../../lt/docs/reference/API_REFERENCE.md) · 🇱🇻 [lv](../../../lv/docs/reference/API_REFERENCE.md) · 🇮🇳 [ml](../../../ml/docs/reference/API_REFERENCE.md) · 🇮🇳 [mr](../../../mr/docs/reference/API_REFERENCE.md) · 🇲🇾 [ms](../../../ms/docs/reference/API_REFERENCE.md) · 🇲🇹 [mt](../../../mt/docs/reference/API_REFERENCE.md) · 🇲🇲 [my](../../../my/docs/reference/API_REFERENCE.md) · 🇳🇵 [ne](../../../ne/docs/reference/API_REFERENCE.md) · 🇳🇱 [nl](../../../nl/docs/reference/API_REFERENCE.md) · 🇳🇴 [no](../../../no/docs/reference/API_REFERENCE.md) · 🇮🇳 [or](../../../or/docs/reference/API_REFERENCE.md) · 🇵🇭 [phi](../../../phi/docs/reference/API_REFERENCE.md) · 🇵🇱 [pl](../../../pl/docs/reference/API_REFERENCE.md) · 🇵🇹 [pt](../../../pt/docs/reference/API_REFERENCE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/reference/API_REFERENCE.md) · 🇷🇴 [ro](../../../ro/docs/reference/API_REFERENCE.md) · 🇷🇺 [ru](../../../ru/docs/reference/API_REFERENCE.md) · 🇱🇰 [si](../../../si/docs/reference/API_REFERENCE.md) · 🇸🇰 [sk](../../../sk/docs/reference/API_REFERENCE.md) · 🇸🇮 [sl](../../../sl/docs/reference/API_REFERENCE.md) · 🇷🇸 [sr](../../../sr/docs/reference/API_REFERENCE.md) · 🇸🇪 [sv](../../../sv/docs/reference/API_REFERENCE.md) · 🇰🇪 [sw](../../../sw/docs/reference/API_REFERENCE.md) · 🇮🇳 [ta](../../../ta/docs/reference/API_REFERENCE.md) · 🇮🇳 [te](../../../te/docs/reference/API_REFERENCE.md) · 🇹🇭 [th](../../../th/docs/reference/API_REFERENCE.md) · 🇹🇷 [tr](../../../tr/docs/reference/API_REFERENCE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/reference/API_REFERENCE.md) · 🇵🇰 [ur](../../../ur/docs/reference/API_REFERENCE.md) · 🇺🇿 [uz](../../../uz/docs/reference/API_REFERENCE.md) · 🇻🇳 [vi](../../../vi/docs/reference/API_REFERENCE.md) · 🇳🇬 [yo](../../../yo/docs/reference/API_REFERENCE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/reference/API_REFERENCE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/reference/API_REFERENCE.md)
+🌐 **ਭਾਸ਼ਾਵਾਂ:** 🇺🇸 [English](./API_REFERENCE.md) | 🇪🇹 [አማርኛ](../i18n/am/docs/reference/API_REFERENCE.md) | 🇸🇦 [العربية](../i18n/ar/docs/reference/API_REFERENCE.md) | 🇦🇿 [Azərbaycan dili](../i18n/az/docs/reference/API_REFERENCE.md) | 🇧🇬 [Български](../i18n/bg/docs/reference/API_REFERENCE.md) | 🇧🇩 [বাংলা](../i18n/bn/docs/reference/API_REFERENCE.md) | 🇧🇦 [Bosanski](../i18n/bs/docs/reference/API_REFERENCE.md) | 🇨🇿 [Čeština](../i18n/cs/docs/reference/API_REFERENCE.md) | 🇩🇰 [Dansk](../i18n/da/docs/reference/API_REFERENCE.md) | 🇩🇪 [Deutsch](../i18n/de/docs/reference/API_REFERENCE.md) | 🇬🇷 [Ελληνικά](../i18n/el/docs/reference/API_REFERENCE.md) | 🇪🇸 [Español](../i18n/es/docs/reference/API_REFERENCE.md) | 🇪🇪 [Eesti](../i18n/et/docs/reference/API_REFERENCE.md) | 🇮🇷 [فارسی](../i18n/fa/docs/reference/API_REFERENCE.md) | 🇫🇮 [Suomi](../i18n/fi/docs/reference/API_REFERENCE.md) | 🇫🇷 [Français](../i18n/fr/docs/reference/API_REFERENCE.md) | 🇮🇪 [Gaeilge](../i18n/ga/docs/reference/API_REFERENCE.md) | 🇮🇳 [ગુજરાતી](../i18n/gu/docs/reference/API_REFERENCE.md) | 🇳🇬 [Hausa](../i18n/ha/docs/reference/API_REFERENCE.md) | 🇮🇱 [עברית](../i18n/he/docs/reference/API_REFERENCE.md) | 🇮🇳 [हिन्दी](../i18n/hi/docs/reference/API_REFERENCE.md) | 🇭🇷 [Hrvatski](../i18n/hr/docs/reference/API_REFERENCE.md) | 🇭🇺 [Magyar](../i18n/hu/docs/reference/API_REFERENCE.md) | 🇦🇲 [Հայերեն](../i18n/hy/docs/reference/API_REFERENCE.md) | 🇮🇩 [Bahasa Indonesia](../i18n/id/docs/reference/API_REFERENCE.md) | 🇳🇬 [Igbo](../i18n/ig/docs/reference/API_REFERENCE.md) | 🇮🇹 [Italiano](../i18n/it/docs/reference/API_REFERENCE.md) | 🇯🇵 [日本語](../i18n/ja/docs/reference/API_REFERENCE.md) | 🇬🇪 [ქართული](../i18n/ka/docs/reference/API_REFERENCE.md) | 🇰🇭 [ខ្មែរ](../i18n/km/docs/reference/API_REFERENCE.md) | 🇮🇳 [ಕನ್ನಡ](../i18n/kn/docs/reference/API_REFERENCE.md) | 🇰🇷 [한국어](../i18n/ko/docs/reference/API_REFERENCE.md) | 🇱🇹 [Lietuvių](../i18n/lt/docs/reference/API_REFERENCE.md) | 🇱🇻 [Latviešu](../i18n/lv/docs/reference/API_REFERENCE.md) | 🇮🇳 [മലയാളം](../i18n/ml/docs/reference/API_REFERENCE.md) | 🇮🇳 [मराठी](../i18n/mr/docs/reference/API_REFERENCE.md) | 🇲🇾 [Bahasa Melayu](../i18n/ms/docs/reference/API_REFERENCE.md) | 🇲🇹 [Malti](../i18n/mt/docs/reference/API_REFERENCE.md) | 🇲🇲 [မြန်မာ](../i18n/my/docs/reference/API_REFERENCE.md) | 🇳🇵 [नेपाली](../i18n/ne/docs/reference/API_REFERENCE.md) | 🇳🇱 [Nederlands](../i18n/nl/docs/reference/API_REFERENCE.md) | 🇳🇴 [Norsk](../i18n/no/docs/reference/API_REFERENCE.md) | 🇮🇳 [ଓଡ଼ିଆ](../i18n/or/docs/reference/API_REFERENCE.md) | 🇮🇳 [ਪੰਜਾਬੀ](../i18n/pa/docs/reference/API_REFERENCE.md) | 🇵🇭 [Filipino](../i18n/phi/docs/reference/API_REFERENCE.md) | 🇵🇱 [Polski](../i18n/pl/docs/reference/API_REFERENCE.md) | 🇵🇹 [Português (Portugal)](../i18n/pt/docs/reference/API_REFERENCE.md) | 🇧🇷 [Português (Brasil)](../i18n/pt-BR/docs/reference/API_REFERENCE.md) | 🇷🇴 [Română](../i18n/ro/docs/reference/API_REFERENCE.md) | 🇷🇺 [Русский](../i18n/ru/docs/reference/API_REFERENCE.md) | 🇱🇰 [සිංහල](../i18n/si/docs/reference/API_REFERENCE.md) | 🇸🇰 [Slovenčina](../i18n/sk/docs/reference/API_REFERENCE.md) | 🇸🇮 [Slovenščina](../i18n/sl/docs/reference/API_REFERENCE.md) | 🇷🇸 [Српски](../i18n/sr/docs/reference/API_REFERENCE.md) | 🇸🇪 [Svenska](../i18n/sv/docs/reference/API_REFERENCE.md) | 🇰🇪 [Kiswahili](../i18n/sw/docs/reference/API_REFERENCE.md) | 🇮🇳 [தமிழ்](../i18n/ta/docs/reference/API_REFERENCE.md) | 🇮🇳 [తెలుగు](../i18n/te/docs/reference/API_REFERENCE.md) | 🇹🇭 [ไทย](../i18n/th/docs/reference/API_REFERENCE.md) | 🇹🇷 [Türkçe](../i18n/tr/docs/reference/API_REFERENCE.md) | 🇺🇦 [Українська](../i18n/uk-UA/docs/reference/API_REFERENCE.md) | 🇵🇰 [اردو](../i18n/ur/docs/reference/API_REFERENCE.md) | 🇺🇿 [Oʻzbekcha](../i18n/uz/docs/reference/API_REFERENCE.md) | 🇻🇳 [Tiếng Việt](../i18n/vi/docs/reference/API_REFERENCE.md) | 🇳🇬 [Yorùbá](../i18n/yo/docs/reference/API_REFERENCE.md) | 🇨🇳 [中文 (简体)](../i18n/zh-CN/docs/reference/API_REFERENCE.md) | 🇹🇼 [中文 (繁體)](../i18n/zh-TW/docs/reference/API_REFERENCE.md)
 
-OmniRoute API ਲਈ ਮੁੱਖ ਹਵਾਲਾ। ਇਹ ਜਨਤਕ `/v1` ਸਤਹ ਅਤੇ ਸਭ ਤੋਂ ਵੱਧ ਵਰਤੇ ਜਾਣ ਵਾਲੇ ਪ੍ਰਬੰਧਨ ਐਂਡਪੌਇੰਟਾਂ ਨੂੰ ਕਵਰ ਕਰਦਾ ਹੈ; ਮਸ਼ੀਨ ਦੁਆਰਾ ਪੜ੍ਹਨਯੋਗ [`docs/openapi.yaml`](../openapi.yaml) ਅਤੇ `src/app/api/` ਅਧੀਨ ਰੂਟ ਟ੍ਰੀ ਸੰਪੂਰਨ ਸਰੋਤ ਹਨ।
+OmniRoute API ਲਈ ਮੁੱਖ ਹਵਾਲਾ। ਇਹ ਜਨਤਕ `/v1` ਸਤਹ ਅਤੇ ਸਭ ਤੋਂ ਵੱਧ ਵਰਤੇ ਜਾਣ ਵਾਲੇ ਪ੍ਰਬੰਧਨ ਐਂਡਪੌਇੰਟਾਂ ਨੂੰ ਕਵਰ ਕਰਦਾ ਹੈ; ਮਸ਼ੀਨ ਦੁਆਰਾ ਪੜ੍ਹਨਯੋਗ [`docs/openapi.yaml`](../openapi.yaml) ਅਤੇ `src/app/api/` ਦੇ ਅਧੀਨ ਰੂਟ ਟ੍ਰੀ ਸੰਪੂਰਨ ਸਰੋਤ ਹਨ।
+
+OpenAI-ਅਨੁਕੂਲ ਪ੍ਰੋਟੋਕੋਲ ਅਤੇ ਪ੍ਰਦਾਤਾ ਸਮਰੱਥਾ ਮੈਟ੍ਰਿਕਸ ਬਾਰੇ ਕੇਂਦਰਿਤ ਜਾਣਕਾਰੀ ਲਈ, ਵੇਖੋ
+[`OPENAI_COMPATIBILITY.md`](./OPENAI_COMPATIBILITY.md)।
 
 ---
 
@@ -43,7 +46,7 @@ OmniRoute API ਲਈ ਮੁੱਖ ਹਵਾਲਾ। ਇਹ ਜਨਤਕ `/v1` �
 
 ---
 
-## ਚੈਟ ਸੰਪੂਰਨਤਾਵਾਂ
+## ਚੈਟ ਕੰਪਲੀਸ਼ਨਜ਼
 
 ```bash
 POST /v1/chat/completions
@@ -61,30 +64,76 @@ Content-Type: application/json
 
 ### ਕਸਟਮ ਹੈਡਰ
 
-| ਹੈਡਰ                     | ਦਿਸ਼ਾ | ਵੇਰਵਾ                                                                                                                                                                                                                                         |
-| ------------------------ | ----- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `X-OmniRoute-No-Cache`   | ਬੇਨਤੀ | ਕੈਸ਼ ਨੂੰ ਬਾਈਪਾਸ ਕਰਨ ਲਈ `true` ਸੈੱਟ ਕਰੋ                                                                                                                                                                                                        |
-| `x-omniroute-no-memory`  | ਬੇਨਤੀ | ਇਸ ਬੇਨਤੀ ਲਈ ਮੈਮੋਰੀ + ਹੁਨਰ ਇੰਜੈਕਸ਼ਨ ਛੱਡਣ ਵਾਸਤੇ `true` ਸੈੱਟ ਕਰੋ (no-cache ਦੇ ਅਨੁਰੂਪ; ਪ੍ਰਤੀ-ਕਾਲ ਟੋਕਨ/ਲਾਗਤ ਓਵਰਹੈੱਡ ਤੋਂ ਬਚਦਾ ਹੈ)                                                                                                                   |
-| `X-OmniRoute-Progress`   | ਬੇਨਤੀ | ਪ੍ਰਗਤੀ ਇਵੈਂਟਾਂ ਲਈ `true` ਸੈੱਟ ਕਰੋ                                                                                                                                                                                                             |
-| `X-Session-Id`           | ਬੇਨਤੀ | ਬਾਹਰੀ ਸੈਸ਼ਨ ਐਫ਼ਿਨਿਟੀ ਲਈ ਸਟਿੱਕੀ ਸੈਸ਼ਨ ਕੁੰਜੀ                                                                                                                                                                                                    |
-| `x_session_id`           | ਬੇਨਤੀ | ਅੰਡਰਸਕੋਰ ਰੂਪ ਵੀ ਸਵੀਕਾਰ ਕੀਤਾ ਜਾਂਦਾ ਹੈ (ਸਿੱਧਾ HTTP)                                                                                                                                                                                             |
-| `X-OmniRoute-Session-Id` | ਬੇਨਤੀ | ਕਾਲਰ ਵੱਲੋਂ ਦਿੱਤਾ ਸੈਸ਼ਨ/ਗੱਲਬਾਤ ਟੈਗ (ਮੈਮੋਰੀ ਨੂੰ ਵੀ ਦਿੱਤਾ ਜਾਂਦਾ ਹੈ)। ਮੌਜੂਦ ਹੋਣ 'ਤੇ, ਪ੍ਰਤੀ-ਸੈਸ਼ਨ ਲਾਗਤ ਨਿਰਧਾਰਣ ਲਈ ਬਿਨਾਂ ਬਦਲਾਅ ਦੇ `call_logs.session_tag` ਵਿੱਚ ਸਥਾਈ ਤੌਰ 'ਤੇ ਸੰਭਾਲਿਆ ਜਾਂਦਾ ਹੈ (#8249) — ਗੈਰਹਾਜ਼ਰ ਹੋਣ 'ਤੇ ਕਦੇ ਵੀ ਤਿਆਰ ਨਹੀਂ ਕੀਤਾ ਜਾਂਦਾ |
-| `Idempotency-Key`        | ਬੇਨਤੀ | ਡੀਡੁਪ ਕੁੰਜੀ (5s ਵਿੰਡੋ)                                                                                                                                                                                                                        |
-| `X-Request-Id`           | ਬੇਨਤੀ | ਵਿਕਲਪਿਕ ਡੀਡੁਪ ਕੁੰਜੀ                                                                                                                                                                                                                           |
-| `X-OmniRoute-Cache`      | ਜਵਾਬ  | `HIT` ਜਾਂ `MISS` (ਗੈਰ-ਸਟ੍ਰੀਮਿੰਗ)                                                                                                                                                                                                              |
-| `X-OmniRoute-Idempotent` | ਜਵਾਬ  | ਜੇ ਡੀਡੁਪਲੀਕੇਟ ਕੀਤਾ ਗਿਆ ਹੋਵੇ ਤਾਂ `true`                                                                                                                                                                                                        |
-| `X-OmniRoute-Progress`   | ਜਵਾਬ  | ਜੇ ਪ੍ਰਗਤੀ ਟ੍ਰੈਕਿੰਗ ਚਾਲੂ ਹੋਵੇ ਤਾਂ `enabled`                                                                                                                                                                                                    |
-| `X-OmniRoute-Session-Id` | ਜਵਾਬ  | OmniRoute ਦੁਆਰਾ ਵਰਤੀ ਗਈ ਪ੍ਰਭਾਵੀ ਸੈਸ਼ਨ ID                                                                                                                                                                                                      |
-| `X-OmniRoute-Request-Id` | ਜਵਾਬ  | ਬੇਨਤੀ ਕੋਰਿਲੇਸ਼ਨ id (ਜਦੋਂ ਪਤਾ ਹੋਵੇ)                                                                                                                                                                                                            |
-| `X-OmniRoute-Version`    | ਜਵਾਬ  | OmniRoute ਬਿਲਡ ਸੰਸਕਰਣ (ਹਮੇਸ਼ਾ ਮੌਜੂਦ)                                                                                                                                                                                                          |
-| `X-OmniRoute-Cost-Saved` | ਜਵਾਬ  | HIT ਉੱਤੇ ਕੈਸ਼ ਦੁਆਰਾ ਬਚਾਏ ਗਏ USD (ਸਿਰਫ਼ ਕੈਸ਼ ਹਿੱਟਾਂ ਲਈ)                                                                                                                                                                                        |
-| `X-OmniRoute-Decision`   | ਜਵਾਬ  | ਰੂਟਿੰਗ ਟ੍ਰੇਸ: `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` ਕੌਂਬੋ ਰਣਨੀਤੀ ਹੈ, ਜਾਂ ਗੈਰ-ਕੌਂਬੋ ਬੇਨਤੀ ਲਈ `single`) — ਸੰਪੂਰਨਤਾ ਜਵਾਬਾਂ ਵਿੱਚ ਹਮੇਸ਼ਾ ਮੌਜੂਦ                                                                             |
+| ਹੈਡਰ                     | ਦਿਸ਼ਾ | ਵੇਰਵਾ                                                                                                                                                                                                                                                         |
+| ------------------------ | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `X-OmniRoute-No-Cache`   | ਬੇਨਤੀ | ਕੈਸ਼ ਨੂੰ ਬਾਈਪਾਸ ਕਰਨ ਲਈ `true` ਸੈੱਟ ਕਰੋ                                                                                                                                                                                                                        |
+| `x-omniroute-no-memory`  | ਬੇਨਤੀ | ਇਸ ਬੇਨਤੀ ਲਈ ਮੈਮੋਰੀ + ਸਕਿੱਲਜ਼ ਇੰਜੈਕਸ਼ਨ ਨੂੰ ਛੱਡਣ ਵਾਸਤੇ `true` ਸੈੱਟ ਕਰੋ (no-cache ਦੇ ਅਨੁਰੂਪ; ਪ੍ਰਤੀ-ਕਾਲ ਟੋਕਨ/ਲਾਗਤ ਓਵਰਹੈੱਡ ਤੋਂ ਬਚਾਉਂਦਾ ਹੈ)                                                                                                                         |
+| `X-OmniRoute-Progress`   | ਬੇਨਤੀ | ਪ੍ਰਗਤੀ ਇਵੈਂਟਾਂ ਲਈ `true` ਸੈੱਟ ਕਰੋ                                                                                                                                                                                                                             |
+| `X-Session-Id`           | ਬੇਨਤੀ | ਬਾਹਰੀ ਸੈਸ਼ਨ ਐਫਿਨਿਟੀ ਲਈ ਸਟਿੱਕੀ ਸੈਸ਼ਨ ਕੁੰਜੀ                                                                                                                                                                                                                     |
+| `x_session_id`           | ਬੇਨਤੀ | ਅੰਡਰਸਕੋਰ ਵਾਲਾ ਰੂਪ ਵੀ ਸਵੀਕਾਰ ਕੀਤਾ ਜਾਂਦਾ ਹੈ (ਸਿੱਧਾ HTTP)                                                                                                                                                                                                        |
+| `X-OmniRoute-Session-Id` | ਬੇਨਤੀ | ਕਾਲਰ ਵੱਲੋਂ ਦਿੱਤਾ ਗਿਆ ਸੈਸ਼ਨ/ਗੱਲਬਾਤ ਟੈਗ (ਮੈਮੋਰੀ ਨੂੰ ਵੀ ਪ੍ਰਦਾਨ ਕੀਤਾ ਜਾਂਦਾ ਹੈ)। ਮੌਜੂਦ ਹੋਣ 'ਤੇ, ਪ੍ਰਤੀ-ਸੈਸ਼ਨ ਲਾਗਤ ਐਟ੍ਰਿਬਿਊਸ਼ਨ (#8249) ਲਈ `call_logs.session_tag` ਵਿੱਚ ਜਿਉਂ ਦਾ ਤਿਉਂ ਸਥਾਈ ਤੌਰ 'ਤੇ ਸੰਭਾਲਿਆ ਜਾਂਦਾ ਹੈ — ਗੈਰਹਾਜ਼ਰ ਹੋਣ 'ਤੇ ਕਦੇ ਵੀ ਆਪਣੇ ਆਪ ਨਹੀਂ ਬਣਾਇਆ ਜਾਂਦਾ |
+| `Idempotency-Key`        | ਬੇਨਤੀ | ਡੀਡੁਪ ਕੁੰਜੀ (5s ਵਿੰਡੋ)                                                                                                                                                                                                                                        |
+| `X-Request-Id`           | ਬੇਨਤੀ | ਵਿਕਲਪਕ ਡੀਡੁਪ ਕੁੰਜੀ                                                                                                                                                                                                                                            |
+| `x-omniroute-connection` | ਬੇਨਤੀ | ਇੱਕ ਸਿੰਗਲ-ਮਾਡਲ ਬੇਨਤੀ ਨੂੰ ਉਸਦੀ id ਰਾਹੀਂ ਇੱਕ ਪ੍ਰਦਾਤਾ ਕਨੈਕਸ਼ਨ (ਖਾਤੇ) ਨਾਲ ਪਿੰਨ ਕਰੋ — [ਪ੍ਰਤੀ ਬੇਨਤੀ ਖਾਤਾ ਪਿੰਨਿੰਗ](#account-pinning-per-request) ਵੇਖੋ                                                                                                                |
+| `X-OmniRoute-Cache`      | ਜਵਾਬ  | `HIT` ਜਾਂ `MISS` (ਗੈਰ-ਸਟ੍ਰੀਮਿੰਗ)                                                                                                                                                                                                                              |
+| `X-OmniRoute-Idempotent` | ਜਵਾਬ  | ਜੇ ਡੀਡੁਪਲੀਕੇਟ ਕੀਤਾ ਗਿਆ ਹੋਵੇ ਤਾਂ `true`                                                                                                                                                                                                                        |
+| `X-OmniRoute-Progress`   | ਜਵਾਬ  | ਜੇ ਪ੍ਰਗਤੀ ਟ੍ਰੈਕਿੰਗ ਚਾਲੂ ਹੋਵੇ ਤਾਂ `enabled`                                                                                                                                                                                                                    |
+| `X-OmniRoute-Session-Id` | ਜਵਾਬ  | OmniRoute ਵੱਲੋਂ ਵਰਤੀ ਗਈ ਪ੍ਰਭਾਵੀ ਸੈਸ਼ਨ ID                                                                                                                                                                                                                      |
+| `X-OmniRoute-Request-Id` | ਜਵਾਬ  | ਬੇਨਤੀ ਕੋਰਿਲੇਸ਼ਨ id (ਜਦੋਂ ਪਤਾ ਹੋਵੇ)                                                                                                                                                                                                                            |
+| `X-OmniRoute-Version`    | ਜਵਾਬ  | OmniRoute ਬਿਲਡ ਵਰਜਨ (ਹਮੇਸ਼ਾ ਮੌਜੂਦ)                                                                                                                                                                                                                            |
+| `X-OmniRoute-Cost-Saved` | ਜਵਾਬ  | HIT 'ਤੇ ਕੈਸ਼ ਵੱਲੋਂ ਬਚਾਈ ਗਈ USD ਰਕਮ (ਸਿਰਫ਼ ਕੈਸ਼ ਹਿੱਟਾਂ ਲਈ)                                                                                                                                                                                                     |
+| `X-OmniRoute-Decision`   | ਜਵਾਬ  | ਰੂਟਿੰਗ ਟ੍ਰੇਸ: `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` ਕੌਂਬੋ ਰਣਨੀਤੀ ਹੈ, ਜਾਂ ਗੈਰ-ਕੌਂਬੋ ਬੇਨਤੀ ਲਈ `single`) — ਪੂਰਨਤਾ ਵਾਲੇ ਜਵਾਬਾਂ ਵਿੱਚ ਹਮੇਸ਼ਾ ਮੌਜੂਦ                                                                                          |
 
-> Nginx ਨੋਟ: ਜੇ ਤੁਸੀਂ ਅੰਡਰਸਕੋਰ ਹੈਡਰਾਂ (ਉਦਾਹਰਨ ਲਈ `x_session_id`) ਉੱਤੇ ਨਿਰਭਰ ਕਰਦੇ ਹੋ, ਤਾਂ `underscores_in_headers on;` ਸਮਰੱਥ ਕਰੋ।
+> Nginx ਨੋਟ: ਜੇ ਤੁਸੀਂ ਅੰਡਰਸਕੋਰ ਹੈਡਰਾਂ (ਉਦਾਹਰਨ ਲਈ `x_session_id`) 'ਤੇ ਨਿਰਭਰ ਕਰਦੇ ਹੋ, ਤਾਂ `underscores_in_headers on;` ਸਮਰੱਥ ਕਰੋ।
 
-> **ਲਾਗਤ ਟੈਲੀਮੈਟਰੀ ਹੈਡਰ:** ਗੈਰ-ਸਟ੍ਰੀਮਿੰਗ ਸਫਲਤਾ ਜਵਾਬਾਂ ਵਿੱਚ `X-OmniRoute-*` ਲਾਗਤ-ਟੈਲੀਮੈਟਰੀ ਸੈੱਟ ਵੀ ਸ਼ਾਮਲ ਹੁੰਦਾ ਹੈ — `X-OmniRoute-Response-Cost` (USD, ਨਿਸ਼ਚਿਤ 10 ਦਸ਼ਮਲਵ ਸਥਾਨ; ਮੁਫ਼ਤ/ਬਿਨਾਂ ਕੀਮਤ ਵਾਲੇ ਲਈ `0.0000000000`), `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`, `X-OmniRoute-Model`, `X-OmniRoute-Provider`, `X-OmniRoute-Latency-Ms`, `X-OmniRoute-Cache-Hit`, ਅਤੇ `X-OmniRoute-Fallback-Attempts` (ਸਿਰਫ਼ ਜਦੋਂ > 0 ਹੋਵੇ), ਨਾਲ ਹੀ `X-OmniRoute-Request-Id` ਅਤੇ `X-OmniRoute-Version`। ਇਹ ਚੈਟ ਕੰਪਲੀਸ਼ਨਾਂ, `/v1/responses`, `/v1/messages`, **ਅਤੇ ਮੀਡੀਆ ਐਂਡਪੌਇੰਟਾਂ** — `/v1/embeddings`, `/v1/images/generations`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/rerank`, `/v1/videos/generations`, `/v1/music/generations`, ਅਤੇ `/v1/moderations` (ਲਾਗਤ ਹਮੇਸ਼ਾ `0`) — ਵੱਲੋਂ ਉਤਸਰਜਿਤ ਕੀਤੇ ਜਾਂਦੇ ਹਨ। ਜਦੋਂ ਕੀਮਤ ਉਪਲਬਧ ਹੋਵੇ, ਮੀਡੀਆ ਲਾਗਤ ਦੀ ਗਣਨਾ ਹਰ ਮੋਡੈਲਿਟੀ ਮੁਤਾਬਕ (ਪ੍ਰਤੀ-ਚਿੱਤਰ, ਪ੍ਰਤੀ-ਸਕਿੰਟ, ਪ੍ਰਤੀ-ਅੱਖਰ, ਪ੍ਰਤੀ ਖੋਜ-ਇਕਾਈ) ਕੀਤੀ ਜਾਂਦੀ ਹੈ; ਨਹੀਂ ਤਾਂ ਇਹ `0` (ਫੇਲ-ਓਪਨ) ਹੁੰਦੀ ਹੈ।
+#### ਪ੍ਰਤੀ ਬੇਨਤੀ ਖਾਤਾ ਪਿੰਨਿੰਗ
 
-> **ਕੈਸ਼-ਹਿੱਟ ਲਾਗਤ ਅਰਥਵਿਵਸਥਾ:** ਸਿਮੈਂਟਿਕ-ਕੈਸ਼ HIT (`X-OmniRoute-Cache-Hit: true`) ਹੋਣ ’ਤੇ ਕੋਈ ਅੱਪਸਟ੍ਰੀਮ ਕਾਲ ਨਹੀਂ ਕੀਤੀ ਜਾਂਦੀ, ਇਸ ਲਈ `X-OmniRoute-Response-Cost` `0.0000000000` ਹੁੰਦੀ ਹੈ (ਹਿੱਟ ਸਰਵ ਕਰਨ ਦੀ **ਵਾਧੂ** ਲਾਗਤ)। ਮੂਲ/ਸੰਭਾਵਿਤ ਲਾਗਤ ਨੂੰ `X-OmniRoute-Cost-Saved` ਵਿੱਚ ਵੱਖਰੇ ਤੌਰ ’ਤੇ ਰਿਪੋਰਟ ਕੀਤਾ ਜਾਂਦਾ ਹੈ। ਬਿਲਿੰਗ ਉਪਭੋਗਤਾਵਾਂ ਨੂੰ `X-OmniRoute-Response-Cost` ਦਾ ਜੋੜ ਕਰਨਾ ਚਾਹੀਦਾ ਹੈ (ਹਿੱਟਾਂ ਦੀ ਕੋਈ ਲਾਗਤ ਨਹੀਂ ਹੁੰਦੀ); ਕੈਸ਼ ਵਿਸ਼ਲੇਸ਼ਣ `X-OmniRoute-Cost-Saved` ਨੂੰ ਇਕੱਠਾ ਕਰ ਸਕਦਾ ਹੈ।
+ਜਦੋਂ ਕਿਸੇ ਪ੍ਰਦਾਤਾ ਕੋਲ ਕਈ ਕਨੈਕਸ਼ਨ (ਖਾਤੇ ਜਾਂ ਕੁੰਜੀਆਂ) ਹੁੰਦੇ ਹਨ, ਤਾਂ OmniRoute ਆਮ ਤੌਰ 'ਤੇ ਆਪਣੀ ਖਾਤਾ-ਚੋਣ ਰਣਨੀਤੀ ਰਾਹੀਂ ਇੱਕ ਦੀ ਚੋਣ ਕਰਦਾ ਹੈ।
+ਇਸਦੀ ਬਜਾਏ, ਕੋਈ ਬੇਨਤੀ `x-omniroute-connection` ਹੈਡਰ ਨਾਲ ਇੱਕ ਖਾਸ ਕਨੈਕਸ਼ਨ ਨੂੰ ਪਿੰਨ ਕਰ ਸਕਦੀ ਹੈ:
+
+```bash
+curl http://localhost:20128/v1/chat/completions \
+  -H "Authorization: Bearer <your OmniRoute API key>" \
+  -H "Content-Type: application/json" \
+  -H "x-omniroute-connection: <connection id>" \
+  -d '{"model": "codex/gpt-5.5", "messages": [{"role": "user", "content": "hi"}]}'
+```
+
+- **id ਕਿੱਥੇ ਲੱਭਣੀ ਹੈ।** ਡੈਸ਼ਬੋਰਡ ਵਿੱਚ ਪ੍ਰਦਾਤਾ ਪੰਨਾ ਖੋਲ੍ਹੋ
+  (**ਡੈਸ਼ਬੋਰਡ → ਪ੍ਰਦਾਤਾ → <provider>**) ਅਤੇ ਕਿਸੇ ਕਨੈਕਸ਼ਨ ਦੀ ਕਤਾਰ ਵਿੱਚ `xxxxxxxx…` id ਚਿੱਪ 'ਤੇ ਕਲਿੱਕ ਕਰੋ
+  — ਇਹ ਪੂਰੀ ਕਨੈਕਸ਼ਨ id ਕਾਪੀ ਕਰ ਦਿੰਦੀ ਹੈ।
+- **ਕਿਹੜੀਆਂ ਬੇਨਤੀਆਂ ਇਸਦੀ ਪਾਲਣਾ ਕਰਦੀਆਂ ਹਨ।** `/v1/chat/completions`,
+  `/v1/messages` ਅਤੇ `/v1/responses` ਉੱਤੇ ਸਿੰਗਲ-ਮਾਡਲ ਬੇਨਤੀਆਂ (`provider/model`)। ਕੌਂਬੋ ਹੈਡਰ ਨੂੰ ਅਣਡਿੱਠਾ ਕਰਦੇ ਹਨ: ਇਸਦੀ ਬਜਾਏ
+  ਹਰ ਕੌਂਬੋ ਪੜਾਅ ਲਈ ਖਾਤੇ ਨੂੰ ਉਸ ਪੜਾਅ ਦੇ ਆਪਣੇ ਕਨੈਕਸ਼ਨ ਰਾਹੀਂ ਪਿੰਨ ਕਰੋ।
+- **ਪਿੰਨ ਸਖ਼ਤ ਹੈ, ਸਿਰਫ਼ ਤਰਜੀਹ ਨਹੀਂ।** ਪਿੰਨ ਕੀਤਾ ਕਨੈਕਸ਼ਨ ਵਿਸ਼ੇਸ਼ ਤੌਰ 'ਤੇ ਵਰਤਿਆ ਜਾਂਦਾ ਹੈ। ਬੇਨਤੀ
+  ਦੇ ਅੰਦਰ ਕੋਈ ਅਸਫਲਤਾ ਖਾਤੇ ਦਾ ਕੂਲਡਾਊਨ ਦਰਜ ਕਰਦੀ ਹੈ, ਪਰ ਉਸੇ ਪ੍ਰਦਾਤਾ ਦੇ
+  ਕਿਸੇ ਹੋਰ ਸਮਕੱਛ ਖਾਤੇ ਵੱਲ **ਨਹੀਂ** ਬਦਲਦੀ।
+- **ਕੂਲਡਾਊਨ ਅਤੇ ਕੋਟਾ ਪਿੰਨ ਨੂੰ ਛੱਡ ਦਿੰਦੇ ਹਨ।** ਜਦੋਂ ਪਿੰਨ ਕੀਤਾ ਕਨੈਕਸ਼ਨ ਕੂਲਡਾਊਨ ਵਿੱਚ ਹੋਵੇ,
+  ਕੋਟਾ ਖ਼ਤਮ ਹੋ ਚੁੱਕਾ ਹੋਵੇ ਜਾਂ ਕਿਸੇ ਕੋਟਾ ਨੀਤੀ ਦੁਆਰਾ ਬਲੌਕ ਕੀਤਾ ਗਿਆ ਹੋਵੇ, ਤਾਂ ਬਾਅਦ ਦੀਆਂ ਬੇਨਤੀਆਂ ਪ੍ਰਦਾਤਾ ਦੇ
+  ਹੋਰ ਕਨੈਕਸ਼ਨਾਂ 'ਤੇ ਫਾਲਬੈਕ ਕਰਦੀਆਂ ਹਨ, ਬਿਲਕੁਲ ਅਣਪਿੰਨ ਟ੍ਰੈਫ਼ਿਕ ਵਾਂਗ।
+- **ਅਣਜਾਣ ਜਾਂ ਅਸਮਰੱਥ ਕੀਤੀਆਂ ids ਅਸਫਲ ਹੁੰਦੀਆਂ ਹਨ।** ਉਹ id ਜੋ ਪ੍ਰਦਾਤਾ ਦੇ ਸਰਗਰਮ ਪੂਲ ਵਿੱਚ ਨਹੀਂ ਹੈ (ਮਿਟਾਈ ਗਈ,
+  ਅਕਿਰਿਆਸ਼ੀਲ ਕੀਤੀ ਗਈ, ਜਾਂ ਕਿਸੇ ਹੋਰ ਪ੍ਰਦਾਤਾ ਨਾਲ ਸੰਬੰਧਿਤ) ਕੋਈ ਯੋਗ ਖਾਤਾ ਨਹੀਂ ਛੱਡਦੀ, ਇਸ ਲਈ ਬੇਨਤੀ
+  ਚੁੱਪਚਾਪ ਕਿਸੇ ਹੋਰ ਥਾਂ ਰੂਟ ਹੋਣ ਦੀ ਬਜਾਏ ਅਸਫਲ ਹੋ ਜਾਂਦੀ ਹੈ।
+
+Claude Code, `ANTHROPIC_CUSTOM_HEADERS` ਰਾਹੀਂ ਕਸਟਮ ਹੈਡਰ ਭੇਜਦਾ ਹੈ। ਇਸਨੂੰ `~/.claude/settings.json` ਦੇ
+`env` ਬਲੌਕ ਵਿੱਚ ਰੱਖੋ, ਜਾਂ ਹਰ ਪ੍ਰੋਜੈਕਟ ਲਈ ਵੱਖਰਾ ਖਾਤਾ ਪਿੰਨ ਕਰਨ ਵਾਸਤੇ ਪ੍ਰੋਜੈਕਟ-ਪੱਧਰੀ `.claude/settings.json` ਵਿੱਚ ਰੱਖੋ:
+
+```jsonc
+{
+  "env": {
+    "ANTHROPIC_BASE_URL": "http://<your OmniRoute>:20128",
+    "ANTHROPIC_AUTH_TOKEN": "<your OmniRoute API key>",
+    "ANTHROPIC_CUSTOM_HEADERS": "x-omniroute-connection: <connection id>",
+  },
+}
+```
+
+ਸਰੋਤ: `src/sse/handlers/chat.ts` (ਹੈਡਰ ਰੀਡ), `src/sse/services/auth.ts` ਅਤੇ
+`src/sse/services/sessionAffinityPin.ts` (ਪਿੰਨ ਰਿਲੀਜ਼ ਅਤੇ ਪੂਲ ਵਿੱਚੋਂ ਗੁੰਮ ਹੋਣ ਦੀ ਜਾਂਚ)।
+
+> **ਲਾਗਤ ਟੈਲੀਮੈਟਰੀ ਹੈਡਰ:** ਨਾਨ-ਸਟ੍ਰੀਮਿੰਗ ਸਫਲਤਾ ਜਵਾਬਾਂ ਵਿੱਚ `X-OmniRoute-*` ਲਾਗਤ-ਟੈਲੀਮੈਟਰੀ ਸੈੱਟ ਵੀ ਹੁੰਦਾ ਹੈ — `X-OmniRoute-Response-Cost` (USD, ਨਿਸ਼ਚਿਤ 10 ਦਸ਼ਮਲਵ ਅੰਕ; ਮੁਫ਼ਤ/ਬਿਨਾਂ ਕੀਮਤ ਵਾਲੇ ਲਈ `0.0000000000`), `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`, `X-OmniRoute-Model`, `X-OmniRoute-Provider`, `X-OmniRoute-Latency-Ms`, `X-OmniRoute-Cache-Hit`, ਅਤੇ `X-OmniRoute-Fallback-Attempts` (ਕੇਵਲ ਜਦੋਂ > 0 ਹੋਵੇ), ਨਾਲ ਹੀ `X-OmniRoute-Request-Id` ਅਤੇ `X-OmniRoute-Version`। ਇਹ ਚੈਟ ਕੰਪਲੀਸ਼ਨਾਂ, `/v1/responses`, `/v1/messages`, **ਅਤੇ ਮੀਡੀਆ ਐਂਡਪੌਇੰਟਾਂ** — `/v1/embeddings`, `/v1/images/generations`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/rerank`, `/v1/videos/generations`, `/v1/music/generations`, ਅਤੇ `/v1/moderations` (ਲਾਗਤ ਹਮੇਸ਼ਾ `0`) — ਦੁਆਰਾ ਉਤਪੰਨ ਕੀਤੇ ਜਾਂਦੇ ਹਨ। ਕੀਮਤ ਉਪਲਬਧ ਹੋਣ 'ਤੇ ਮੀਡੀਆ ਲਾਗਤ ਦੀ ਗਣਨਾ ਹਰ ਮੋਡੈਲਿਟੀ ਅਨੁਸਾਰ (ਪ੍ਰਤੀ-ਚਿੱਤਰ, ਪ੍ਰਤੀ-ਸਕਿੰਟ, ਪ੍ਰਤੀ-ਅੱਖਰ, ਪ੍ਰਤੀ ਖੋਜ-ਇਕਾਈ) ਕੀਤੀ ਜਾਂਦੀ ਹੈ, ਨਹੀਂ ਤਾਂ `0` (ਫੇਲ-ਓਪਨ)।
+
+> **ਕੈਸ਼-ਹਿੱਟ ਲਾਗਤ ਦੇ ਅਰਥ:** ਸਿਮੈਂਟਿਕ-ਕੈਸ਼ HIT (`X-OmniRoute-Cache-Hit: true`) ਉੱਤੇ ਕੋਈ ਅੱਪਸਟ੍ਰੀਮ ਕਾਲ ਨਹੀਂ ਕੀਤੀ ਜਾਂਦੀ, ਇਸ ਲਈ `X-OmniRoute-Response-Cost` `0.0000000000` ਹੁੰਦੀ ਹੈ (ਹਿੱਟ ਸਰਵ ਕਰਨ ਦੀ **ਵਾਧੂ** ਲਾਗਤ)। ਮੂਲ/ਸੰਭਾਵੀ ਲਾਗਤ ਨੂੰ `X-OmniRoute-Cost-Saved` ਵਿੱਚ ਵੱਖਰੇ ਤੌਰ 'ਤੇ ਰਿਪੋਰਟ ਕੀਤਾ ਜਾਂਦਾ ਹੈ। ਬਿਲਿੰਗ ਉਪਭੋਗਤਾਵਾਂ ਨੂੰ `X-OmniRoute-Response-Cost` ਦਾ ਜੋੜ ਕਰਨਾ ਚਾਹੀਦਾ ਹੈ (ਹਿੱਟ ਦੀ ਕੋਈ ਲਾਗਤ ਨਹੀਂ ਹੁੰਦੀ); ਕੈਸ਼ ਵਿਸ਼ਲੇਸ਼ਣ `X-OmniRoute-Cost-Saved` ਨੂੰ ਇਕੱਠਾ ਕਰ ਸਕਦੇ ਹਨ।
 
 ## ਵਿਸ਼ੇਸ਼ ਪ੍ਰਬੰਧਿਤ ਸੈਸ਼ਨ ਲੀਜ਼
 
@@ -204,16 +253,16 @@ Content-Type: application/json
 
 ਉਪਲਬਧ ਪ੍ਰਦਾਤਾ: Nebius, OpenAI, Mistral, Together AI, Fireworks, NVIDIA, **OpenRouter**, Jina AI।
 
-ਕੈਟਾਲੌਗ ਆਈਡੀਆਂ `provider/model` ਹੁੰਦੀਆਂ ਹਨ (ਉਦਾਹਰਨ: `jina-ai/jina-embeddings-v5-omni-small`)। ਰਜਿਸਟਰੀ ਵਿੱਚ ਮੌਜੂਦ ਸਿਰਫ਼ Jina ਮਾਡਲ ਆਈਡੀਆਂ (ਉਦਾਹਰਨ ਵਜੋਂ `jina-embeddings-v5-text-small`, `jina-reranker-v3.5`) ਵੀ ਰਿਜ਼ੌਲਵ ਹੁੰਦੀਆਂ ਹਨ। Jina embed/rerank/classify/segment ਪਹਿਲਾਂ ਡੈਸ਼ਬੋਰਡ ਦੇ `jina-ai` ਕ੍ਰੈਡੈਂਸ਼ਲ ਵਰਤਦੇ ਹਨ; `JINA_AI_API_KEY` ਕੇਵਲ ਉਦੋਂ ਫਾਲਬੈਕ ਹੁੰਦੀ ਹੈ ਜਦੋਂ ਕੋਈ ਡੈਸ਼ਬੋਰਡ ਕੁੰਜੀ ਮੌਜੂਦ ਨਾ ਹੋਵੇ। `jina-reader` ਕਾਰਡ ਸਿਰਫ਼ Reader / `r.jina.ai` ਲਈ ਹੈ (`POST /v1/web/fetch`) ਅਤੇ ਕਦੇ ਵੀ ਐਮਬੈਡਿੰਗਜ਼ ਜਾਂ ਰੀਰੈਂਕ ਪ੍ਰਦਾਨ ਨਹੀਂ ਕਰਦਾ।
+ਕੈਟਾਲਾਗ ਆਈਡੀਆਂ `provider/model` ਰੂਪ ਵਿੱਚ ਹੁੰਦੀਆਂ ਹਨ (ਉਦਾਹਰਨ: `jina-ai/jina-embeddings-v5-omni-small`)। ਰਜਿਸਟਰੀ ਵਿੱਚ ਮੌਜੂਦ ਸਿਰਫ਼ Jina ਮਾਡਲ ਆਈਡੀਆਂ (ਉਦਾਹਰਨ ਲਈ `jina-embeddings-v5-text-small`, `jina-reranker-v3.5`) ਵੀ ਰਿਜ਼ਾਲਵ ਹੁੰਦੀਆਂ ਹਨ। Jina embed/rerank/classify/segment ਪਹਿਲਾਂ ਡੈਸ਼ਬੋਰਡ `jina-ai` ਕਰੀਡੈਂਸ਼ਲ ਵਰਤਦੇ ਹਨ; `JINA_AI_API_KEY` ਕੇਵਲ ਉਦੋਂ ਫਾਲਬੈਕ ਹੁੰਦਾ ਹੈ ਜਦੋਂ ਕੋਈ ਡੈਸ਼ਬੋਰਡ ਕੁੰਜੀ ਮੌਜੂਦ ਨਾ ਹੋਵੇ। `jina-reader` ਕਾਰਡ ਸਿਰਫ਼ Reader / `r.jina.ai` ਲਈ ਹੈ (`POST /v1/web/fetch`) ਅਤੇ ਕਦੇ ਵੀ embeddings ਜਾਂ rerank ਮੁਹੱਈਆ ਨਹੀਂ ਕਰਦਾ।
 
 ਮਲਟੀਮੋਡਲ ਸਮਰਥਨ ਦਰਸਾਉਣ ਵਾਲੇ ਰਜਿਸਟਰੀ ਮਾਡਲ ਵੱਧ ਤੋਂ ਵੱਧ 32 ਪ੍ਰਦਾਤਾ-ਨਿਰਪੱਖ ਸੰਰਚਿਤ
-ਆਈਟਮ ਵੀ ਸਵੀਕਾਰ ਕਰਦੇ ਹਨ। ਮੀਡੀਆ ਆਈਟਮ ਕਿਸਮਾਂ `text`, `image`, `audio`, `video`, ਅਤੇ `document` ਹਨ। ਉਨ੍ਹਾਂ ਦਾ ਮੀਡੀਆ `source`
+ਆਈਟਮਾਂ ਵੀ ਸਵੀਕਾਰ ਕਰਦੇ ਹਨ। ਮੀਡੀਆ ਆਈਟਮ ਕਿਸਮਾਂ `text`, `image`, `audio`, `video`, ਅਤੇ `document` ਹਨ। ਉਨ੍ਹਾਂ ਦਾ ਮੀਡੀਆ `source`
 ਜਾਂ ਤਾਂ `{"type":"url","url":"https://..."}` ਹੁੰਦਾ ਹੈ ਜਾਂ
 `{"type":"base64","data":"...","media_type":"..."}`।
 
 Jina v5 Omni (`jina-ai/jina-embeddings-v5-omni-small`, `jina-ai/jina-embeddings-v5-omni-nano`,
 ਅਤੇ ਫੈਮਿਲੀ ਉਪਨਾਮ `jina-ai/jina-embeddings-v5-omni` → omni-small) Jina ਦੇ ਮੂਲ
-EmbeddingsV5Request ਡੌਕਸ ਵੀ ਸਵੀਕਾਰ ਕਰਦਾ ਹੈ ਅਤੇ ਉਨ੍ਹਾਂ ਨੂੰ `https://api.jina.ai/v1/embeddings` ਵੱਲ **ਬਿਨਾਂ ਬਦਲਾਅ ਦੇ ਫਾਰਵਰਡ ਕਰਦਾ ਹੈ**:
+EmbeddingsV5Request ਦਸਤਾਵੇਜ਼ ਵੀ ਸਵੀਕਾਰ ਕਰਦਾ ਹੈ ਅਤੇ ਉਨ੍ਹਾਂ ਨੂੰ **ਬਿਨਾਂ ਬਦਲਾਅ ਦੇ ਅੱਗੇ ਭੇਜਦਾ ਹੈ** `https://api.jina.ai/v1/embeddings` ਵੱਲ:
 
 ```json
 {
@@ -231,26 +280,32 @@ EmbeddingsV5Request ਡੌਕਸ ਵੀ ਸਵੀਕਾਰ ਕਰਦਾ ਹੈ �
 ```
 
 ਮੂਲ `{ image | audio | video | pdf }` ਮੁੱਲ ਇੱਕ ਜਨਤਕ HTTPS URL, ਇੱਕ `data:` URI, ਜਾਂ ਕੱਚਾ
-base64 ਹੋ ਸਕਦੇ ਹਨ। OmniRoute ਉਨ੍ਹਾਂ ਆਬਜੈਕਟਾਂ ਨੂੰ ਸਟਰਿੰਗ ਵਿੱਚ ਨਹੀਂ ਬਦਲਦਾ ਜਾਂ ਮੂਲ ਚਿੱਤਰ URL ਫੈਚ ਨਹੀਂ ਕਰਦਾ — Jina
+base64 ਹੋ ਸਕਦੇ ਹਨ। OmniRoute ਇਨ੍ਹਾਂ ਆਬਜੈਕਟਾਂ ਨੂੰ ਸਟ੍ਰਿੰਗ ਵਿੱਚ ਨਹੀਂ ਬਦਲਦਾ ਜਾਂ ਮੂਲ image URLs ਨੂੰ ਪ੍ਰਾਪਤ ਨਹੀਂ ਕਰਦਾ — Jina
 ਜਨਤਕ ਮੀਡੀਆ ਨੂੰ ਖੁਦ ਪ੍ਰਾਪਤ ਕਰਦਾ ਹੈ। ਵਾਧੂ Jina ਫੀਲਡ (`task`, `normalized`, `truncate`, `embedding_type`)
-ਫਾਰਵਰਡ ਕੀਤੇ ਜਾਂਦੇ ਹਨ। ਸਿਰਫ਼-ਟੈਕਸਟ Jina SKU ਹਾਲੇ ਵੀ ਗੈਰ-ਟੈਕਸਟ ਡੌਕਸ ਨੂੰ ਅਸਵੀਕਾਰ ਕਰਦੇ ਹਨ।
+ਅੱਗੇ ਭੇਜੇ ਜਾਂਦੇ ਹਨ। ਸਿਰਫ਼ ਟੈਕਸਟ ਵਾਲੇ Jina SKUs ਅਜੇ ਵੀ ਗੈਰ-ਟੈਕਸਟ ਦਸਤਾਵੇਜ਼ਾਂ ਨੂੰ ਅਸਵੀਕਾਰ ਕਰਦੇ ਹਨ।
 
 ਸੁਰੱਖਿਆ ਅਤੇ ਟ੍ਰਾਂਸਪੋਰਟ ਸੀਮਾਵਾਂ:
 
-- ਰਿਮੋਟ ਮੀਡੀਆ URL ਜਨਤਕ HTTPS ਹੋਣੇ ਲਾਜ਼ਮੀ ਹਨ। ਕੈਨੋਨਿਕਲ `{type,source:url}` ਆਈਟਮ
-  ਸਰਵਰ-ਸਾਈਡ ਫੈਚ ਕੀਤੇ ਜਾਂਦੇ ਹਨ (ਰੀਡਾਇਰੈਕਟ ਮੁੜ-ਪ੍ਰਮਾਣਿਕਤਾ, ਸਮਾਂ-ਸੀਮਾ, ਆਕਾਰ ਸੀਮਾਵਾਂ, ਜਨਤਕ DNS, ਕਨੈਕਸ਼ਨ ਪਿਨਿੰਗ) ਅਤੇ
-  ਪ੍ਰਦਾਤਾ ਕਾਲ ਤੋਂ ਪਹਿਲਾਂ ਇਨਲਾਈਨ ਕੀਤੇ ਜਾਂਦੇ ਹਨ। Jina-ਮੂਲ `{image:"https://..."}` ਆਈਟਮ ਉਸੇ ਜਨਤਕ-HTTPS ਜਾਂਚ ਤੋਂ ਬਾਅਦ
-  ਜਿਵੇਂ ਦੇ ਤਿਵੇਂ ਫਾਰਵਰਡ ਕੀਤੇ ਜਾਂਦੇ ਹਨ; Jina URL ਨੂੰ ਫੈਚ ਕਰਦਾ ਹੈ।
-- ਇਨਲਾਈਨ base64 ਮੀਡੀਆ ਪ੍ਰਤੀ ਆਈਟਮ 8 MiB ਡੀਕੋਡ ਕੀਤੇ ਡਾਟੇ ਅਤੇ ਪੂਰੀ ਬੇਨਤੀ ਵਿੱਚ ਕੁੱਲ 16 MiB ਡੀਕੋਡ ਕੀਤੇ ਡਾਟੇ ਤੱਕ ਸੀਮਿਤ ਹੈ।
+- ਰਿਮੋਟ ਮੀਡੀਆ URLs ਜਨਤਕ HTTPS ਹੋਣੇ ਲਾਜ਼ਮੀ ਹਨ। ਕੈਨੋਨਿਕਲ `{type,source:url}` ਆਈਟਮਾਂ ਨੂੰ
+  ਸਰਵਰ ਪਾਸੇ ਪ੍ਰਾਪਤ ਕੀਤਾ ਜਾਂਦਾ ਹੈ (ਰੀਡਾਇਰੈਕਟ ਦੀ ਮੁੜ-ਪ੍ਰਮਾਣਿਕਤਾ, ਟਾਈਮਆਉਟ, ਆਕਾਰ ਸੀਮਾਵਾਂ, ਜਨਤਕ DNS, ਕਨੈਕਸ਼ਨ ਪਿਨਿੰਗ) ਅਤੇ
+  ਪ੍ਰਦਾਤਾ ਕਾਲ ਤੋਂ ਪਹਿਲਾਂ ਇਨਲਾਈਨ ਕੀਤਾ ਜਾਂਦਾ ਹੈ। Jina ਦੇ ਮੂਲ `{image:"https://..."}` ਆਈਟਮਾਂ ਨੂੰ
+  ਉਸੇ ਜਨਤਕ-HTTPS ਜਾਂਚ ਤੋਂ ਬਾਅਦ ਜਿਵੇਂ ਦਾ ਤਿਵੇਂ ਅੱਗੇ ਭੇਜਿਆ ਜਾਂਦਾ ਹੈ; Jina URL ਨੂੰ ਪ੍ਰਾਪਤ ਕਰਦਾ ਹੈ।
+- ਇਨਲਾਈਨ base64 ਮੀਡੀਆ ਪ੍ਰਤੀ ਆਈਟਮ ਡੀਕੋਡ ਕੀਤੇ 8 MiB ਅਤੇ ਪੂਰੀ ਬੇਨਤੀ ਵਿੱਚ ਡੀਕੋਡ ਕੀਤੇ 16 MiB ਤੱਕ ਸੀਮਿਤ ਹੈ।
 
-ਪ੍ਰਦਾਤਾ ਰੂਪਾਂਤਰਨ (ਕੈਨੋਨਿਕਲ ਆਈਟਮ ਕਦੇ ਵੀ ਬਿਨਾਂ ਬਦਲਾਅ ਦੇ ਫਾਰਵਰਡ ਨਹੀਂ ਕੀਤੇ ਜਾਂਦੇ):
+ਪ੍ਰਦਾਤਾ ਰੂਪਾਂਤਰਨ (ਕੈਨੋਨਿਕਲ ਆਈਟਮਾਂ ਨੂੰ ਕਦੇ ਵੀ ਬਿਨਾਂ ਬਦਲਾਅ ਦੇ ਅੱਗੇ ਨਹੀਂ ਭੇਜਿਆ ਜਾਂਦਾ):
 
-- Jina ਮਲਟੀਮੋਡਲ ਮਾਡਲ: ਹਰ ਸਿਖਰਲੇ-ਪੱਧਰ ਦੀ ਆਈਟਮ ਇੱਕ ਮੋਡੈਲਿਟੀ-ਕੁੰਜੀ ਵਾਲਾ ਆਬਜੈਕਟ ਬਣਦੀ ਹੈ
-  (`text` / `image` / `audio` / `video` / `pdf`), ਜਿਸ ਵਿੱਚ ਇਨਲਾਈਨ ਮੀਡੀਆ ਲਈ ਡਾਟਾ URI ਵਰਤੇ ਜਾਂਦੇ ਹਨ; ਪ੍ਰਤੀ
-  ਸਿਖਰਲੇ-ਪੱਧਰ ਦੀ ਆਈਟਮ ਇੱਕ ਵੇਕਟਰ।
-- Gemini Embedding 2 ਫੈਮਿਲੀ: ਇੱਕ ਸਿਖਰਲੇ-ਪੱਧਰ ਦੀ ਐਰੇ, `content.parts` (`text` ਜਾਂ `inline_data`) ਨਾਲ ਇੱਕੋ ਮੂਲ
+- Jina ਮਲਟੀਮੋਡਲ ਮਾਡਲ: ਹਰ ਸਿਖਰਲੇ-ਪੱਧਰ ਦੀ ਆਈਟਮ ਇਨਲਾਈਨ ਮੀਡੀਆ ਲਈ data URIs ਵਰਤਦਿਆਂ ਇੱਕ ਮੋਡੈਲਿਟੀ-ਕੁੰਜੀ ਵਾਲਾ ਆਬਜੈਕਟ
+  (`text` / `image` / `audio` / `video` / `pdf`) ਬਣ ਜਾਂਦੀ ਹੈ; ਪ੍ਰਤੀ
+  ਸਿਖਰਲੇ-ਪੱਧਰ ਦੀ ਆਈਟਮ ਇੱਕ ਵੈਕਟਰ।
+- Gemini Embedding 2 ਫੈਮਿਲੀ: ਇੱਕ ਸਿਖਰਲੇ-ਪੱਧਰ ਦੀ ਐਰੇ `content.parts` (`text` ਜਾਂ `inline_data`) ਵਾਲੀ ਇੱਕੋ ਮੂਲ
   `models/{model}:embedContent` ਬੇਨਤੀ ਬਣ ਜਾਂਦੀ ਹੈ।
-- ਸਪਸ਼ਟ ਮੋਡੈਲਿਟੀ ਮੈਟਾਡੇਟਾ ਤੋਂ ਬਿਨਾਂ ਅਣਜਾਣ/ਡਾਇਨਾਮਿਕ ਮਾਡਲ HTTP 400 ਨਾਲ ਸੰਰਚਿਤ ਇਨਪੁੱਟ ਨੂੰ ਅਸਵੀਕਾਰ ਕਰਦੇ ਹਨ।
+- llama.cpp (`llama-cpp/<model>`, ਸਥਾਨਕ ਸਰਵਰ ਵੱਲੋਂ ਲੋਡ ਕੀਤਾ ਕੋਈ ਵੀ ਮਾਡਲ): ਕੈਨੋਨਿਕਲ `text` ਆਈਟਮਾਂ
+  ਸਧਾਰਨ ਸਟ੍ਰਿੰਗਾਂ ਬਣ ਜਾਂਦੀਆਂ ਹਨ, ਅਤੇ `image` / `audio` / `video` ਹਰ ਇੱਕ
+  ਇੱਕ `{"content": [part]}` ਆਬਜੈਕਟ ਬਣ ਜਾਂਦੀ ਹੈ, ਜੋ ਇਨਲਾਈਨ ਡਾਟੇ ਨਾਲ llama-server ਦੇ ਚੈਟ ਸਮੱਗਰੀ ਭਾਗਾਂ (`image_url`,
+  `input_audio` ਜਿਸਦਾ ਫਾਰਮੈਟ `wav` / `mp3` / `flac` ਹੈ, `input_video`) ਦੀ ਵਰਤੋਂ ਕਰਦੀ ਹੈ; ਪ੍ਰਤੀ
+  ਸਿਖਰਲੇ-ਪੱਧਰ ਦੀ ਆਈਟਮ ਇੱਕ ਵੈਕਟਰ। ਸਰਵਰ ਨੂੰ `--embedding --mmproj …` ਨਾਲ ਚੱਲਣਾ ਲਾਜ਼ਮੀ ਹੈ; ਪ੍ਰੋਜੈਕਟਰ ਤੋਂ ਬਿਨਾਂ ਇਹ
+  ਮੀਡੀਆ ਨੂੰ ਖੁਦ ਅਸਵੀਕਾਰ ਕਰਦਾ ਹੈ। `document` ਸਮਰਥਿਤ ਨਹੀਂ ਹੈ।
+- ਸਪਸ਼ਟ ਮੋਡੈਲਿਟੀ ਮੈਟਾਡਾਟਾ ਤੋਂ ਬਿਨਾਂ ਅਣਜਾਣ/ਡਾਇਨਾਮਿਕ ਮਾਡਲ ਸੰਰਚਿਤ ਇਨਪੁੱਟ ਨੂੰ HTTP 400 ਨਾਲ ਅਸਵੀਕਾਰ ਕਰਦੇ ਹਨ।
 
 ```json
 {
@@ -267,8 +322,8 @@ base64 ਹੋ ਸਕਦੇ ਹਨ। OmniRoute ਉਨ੍ਹਾਂ ਆਬਜੈ�
 }
 ```
 
-ਅਸਮਰਥਿਤ ਮਾਡਲ/ਮੋਡੈਲਿਟੀ ਜੋੜ ਆਈਟਮ ਨੂੰ ਜ਼ਬਰਦਸਤੀ ਰੂਪਾਂਤਰਿਤ ਕਰਨ ਦੀ ਬਜਾਏ HTTP 400 ਵਾਪਸ ਕਰਦੇ ਹਨ। ਪੁਰਾਤਨ ਸਟਰਿੰਗ/ਟੋਕਨ ਬੇਨਤੀਆਂ ਉੱਤੇ
-ਗੈਰ-ਇਨਪੁੱਟ ਐਕਸਟੈਂਸ਼ਨ ਫੀਲਡ ਬਿਨਾਂ ਬਦਲਾਅ ਦੇ ਅੱਗੇ ਭੇਜੇ ਜਾਂਦੇ ਰਹਿੰਦੇ ਹਨ।
+ਅਸਮਰਥਿਤ ਮਾਡਲ/ਮੋਡੈਲਿਟੀ ਸੰਯੋਜਨ ਆਈਟਮ ਨੂੰ ਰੂਪਾਂਤਰਿਤ ਕਰਨ ਦੀ ਬਜਾਏ HTTP 400 ਵਾਪਸ ਕਰਦੇ ਹਨ। ਪੁਰਾਣੀਆਂ ਸਟ੍ਰਿੰਗ/ਟੋਕਨ ਬੇਨਤੀਆਂ ਉੱਤੇ ਗੈਰ-ਇਨਪੁੱਟ
+ਐਕਸਟੈਂਸ਼ਨ ਫੀਲਡ ਪਹਿਲਾਂ ਵਾਂਗ ਬਿਨਾਂ ਬਦਲਾਅ ਦੇ ਅੱਗੇ ਭੇਜੇ ਜਾਂਦੇ ਹਨ।
 
 ```bash
 # ਸਾਰੇ ਐਮਬੈਡਿੰਗ ਮਾਡਲਾਂ ਦੀ ਸੂਚੀ ਦਿਖਾਓ
@@ -277,7 +332,7 @@ GET /v1/embeddings
 
 ---
 
-## ਚਿੱਤਰ ਜਨਰੇਸ਼ਨ
+## ਚਿੱਤਰ ਬਣਾਉਣਾ
 
 ```bash
 POST /v1/images/generations
@@ -286,12 +341,39 @@ Content-Type: application/json
 
 {
   "model": "openai/gpt-image-2",
-  "prompt": "A beautiful sunset over mountains",
+  "prompt": "ਪਹਾੜਾਂ ਉੱਤੇ ਇੱਕ ਸੁੰਦਰ ਸੂਰਜ ਡੁੱਬਣ ਦਾ ਦ੍ਰਿਸ਼",
   "size": "1024x1024"
 }
 ```
 
-ਉਪਲਬਧ ਪ੍ਰਦਾਤਾ: OpenAI (GPT Image 2), xAI (Grok Image), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana, **OpenRouter**, SD WebUI (ਸਥਾਨਕ), ComfyUI (ਸਥਾਨਕ)।
+ਉਪਲਬਧ ਪ੍ਰਦਾਤਾਵਾਂ ਵਿੱਚ OpenAI (GPT Image 2), xAI (Grok Image), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana, **OpenRouter**, **ZenMux**, SD WebUI (ਸਥਾਨਕ), ComfyUI (ਸਥਾਨਕ) ਸ਼ਾਮਲ ਹਨ।
+
+`n`, `data[]` ਵਿੱਚ `n` ਚਿੱਤਰ ਵਾਪਸ ਕਰਦਾ ਹੈ। ਜਿਨ੍ਹਾਂ ਪ੍ਰਦਾਤਾਵਾਂ ਦੀ ਅੱਪਸਟ੍ਰੀਮ API ਪ੍ਰਤੀ ਕਾਲ ਇੱਕ ਚਿੱਤਰ ਵਾਪਸ ਕਰਦੀ ਹੈ
+(Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik,
+NVIDIA NIM, Cloudflare Workers AI), ਉਨ੍ਹਾਂ ਲਈ `n` ਵੱਖਰੀਆਂ ਅੱਪਸਟ੍ਰੀਮ ਕਾਲਾਂ ਕੀਤੀਆਂ ਜਾਂਦੀਆਂ ਹਨ, ਜਿਨ੍ਹਾਂ ਵਿੱਚ ਵੱਧ ਤੋਂ ਵੱਧ 4 ਇੱਕੋ ਸਮੇਂ ਚੱਲ ਸਕਦੀਆਂ ਹਨ। ਇੱਕ
+ਨਿਸ਼ਚਿਤ `seed` ਨੂੰ ਕਾਲ ਇੰਡੈਕਸ ਅਨੁਸਾਰ ਵਧਾਇਆ ਜਾਂਦਾ ਹੈ (`seed`, `seed + 1`, …), ਤਾਂ ਜੋ ਚਿੱਤਰ ਵੱਖਰੇ ਹੋਣ ਪਰ
+ਮੁੜ-ਉਤਪਾਦਨਯੋਗ ਰਹਿਣ। `n` ਦੀ ਵੱਧ ਤੋਂ ਵੱਧ ਸੀਮਾ 10 ਹੈ। ਜੇ ਕੋਈ ਵੀ ਕਾਲ ਅਸਫਲ ਹੁੰਦੀ ਹੈ, ਤਾਂ ਪੂਰੀ ਬੇਨਤੀ
+ਅਸਫਲ ਹੋ ਜਾਂਦੀ ਹੈ। ਫੈਨ-ਆਉਟ ਫਾਰਮੈਟਾਂ ਦੀ ਸੂਚੀ
+`open-sse/handlers/imageGeneration/fanOut.ts` ਵਿੱਚ `SINGLE_IMAGE_FANOUT_FORMATS` ਹੈ।
+
+ZenMux ਮੌਜੂਦਾ API-ਕੁੰਜੀ ਕਨੈਕਸ਼ਨ ਦੀ ਮੁੜ ਵਰਤੋਂ ਕਰਦਾ ਹੈ ਅਤੇ `zenmux/` ਜਾਂ `zm/` ਪ੍ਰੀਫਿਕਸ ਸਵੀਕਾਰ ਕਰਦਾ ਹੈ:
+
+- `zenmux/openai/gpt-image-2`, ZenMux ਦੀ OpenAI Images API ਵਰਤਦਾ ਹੈ। ਵਿਕਲਪਾਂ ਵਿੱਚ `size`,
+  `quality`, `n`, `output_format`, `output_compression`, `background`, ਅਤੇ `response_format` ਸ਼ਾਮਲ ਹਨ।
+- ਹੋਰ ਪ੍ਰਕਾਸ਼ਕ, ਜਿਵੇਂ ਕਿ `zm/meta/muse-image-1.0`, ZenMux ਦਾ Vertex AI `:predict`
+  ਐਂਡਪੌਇੰਟ ਵਰਤਦੇ ਹਨ। `n`, `sampleCount` ਨਾਲ; `aspect_ratio`, `aspectRatio` ਨਾਲ; ਅਤੇ `image_size`
+  (`1K`, `2K`, `4K`), `sampleImageSize` ਨਾਲ ਮੈਪ ਹੁੰਦਾ ਹੈ। ਪਿਕਸਲਾਂ ਵਿੱਚ ਦਿੱਤਾ `size` ਸਿਰਫ਼ ਪੱਖ ਅਨੁਪਾਤ ਪ੍ਰਦਾਨ ਕਰਦਾ ਹੈ,
+  ਪਿਕਸਲ ਮਾਪਾਂ ਦੀ ਗਾਰੰਟੀ ਨਹੀਂ। ਸਮਰਥਿਤ ਅਨੁਪਾਤ, ਰੈਜ਼ੋਲਿਊਸ਼ਨ ਅਤੇ ਗਿਣਤੀਆਂ ਮਾਡਲ ਅਨੁਸਾਰ ਵੱਖ-ਵੱਖ ਹੁੰਦੀਆਂ ਹਨ।
+- `zm/inclusionai/ming-image-0.1-design` ਆਪਣੇ ਮਾਪ ਖੁਦ ਚੁਣਦਾ ਹੈ। `size`,
+  `aspect_ratio`, ਅਤੇ `image_size` ਨੂੰ ਛੱਡ ਦਿਓ; ਸਪਸ਼ਟ ਮੁੱਲ HTTP 400 ਵਾਪਸ ਕਰਦੇ ਹਨ। `output_format` ਨਾਲ PNG, JPEG, ਅਤੇ WebP
+  ਦੀ ਬੇਨਤੀ ਕੀਤੀ ਜਾ ਸਕਦੀ ਹੈ।
+
+ਇਹ ਇੰਟੀਗ੍ਰੇਸ਼ਨ ਟੈਕਸਟ-ਤੋਂ-ਚਿੱਤਰ ਬਣਾਉਣ ਦਾ ਸਮਰਥਨ ਕਰਦਾ ਹੈ, ਸੰਦਰਭ-ਚਿੱਤਰ ਸੰਪਾਦਨ ਦਾ ਨਹੀਂ। Vertex
+ਆਉਟਪੁੱਟ ਨੂੰ `data[].b64_json` ਵਿੱਚ ਮਿਆਰੀਕ੍ਰਿਤ ਕੀਤਾ ਜਾਂਦਾ ਹੈ; `response_format: "url"` ਇੱਕ ਅੱਪਸਟ੍ਰੀਮ
+HTTPS URL ਜਾਂ, ਜਦੋਂ ਸਿਰਫ਼ ਚਿੱਤਰ ਬਾਈਟ ਉਪਲਬਧ ਹੋਣ, ਇੱਕ base64 ਡਾਟਾ URL ਵਾਪਸ ਕਰਦਾ ਹੈ। ਖਾਲੀ/ਫਿਲਟਰ ਕੀਤੇ ਆਉਟਪੁੱਟ
+ਖਾਲੀ ਸਫਲਤਾ ਦੀ ਬਜਾਏ ਇੱਕ ਤਰੁੱਟੀ ਵਾਪਸ ਕਰਦੇ ਹਨ। ਮਾਡਲ ਤੱਕ ਪਹੁੰਚ ZenMux ਖਾਤੇ 'ਤੇ ਨਿਰਭਰ ਕਰਦੀ ਹੈ।
+[ZenMux ਦੀ Vertex API](https://docs.zenmux.ai/api/vertexai/generate-images) ਅਤੇ
+[OpenAI Images API](https://docs.zenmux.ai/api/openai/generate-an-image) ਵੇਖੋ।
 
 ```bash
 # ਸਾਰੇ ਚਿੱਤਰ ਮਾਡਲਾਂ ਦੀ ਸੂਚੀ ਦਿਖਾਓ
@@ -366,43 +448,102 @@ Service Account JSON ਕ੍ਰਿਡੈਂਸ਼ੀਅਲ ਹੁੰਦੀ ਹੈ
 GET /v1/models
 Authorization: Bearer your-api-key
 
-→ OpenAI ਫਾਰਮੈਟ ਵਿੱਚ ਸਾਰੇ ਚੈਟ, ਐਮਬੈਡਿੰਗ ਅਤੇ ਚਿੱਤਰ ਮਾਡਲ + ਕੰਬੋ ਵਾਪਸ ਕਰਦਾ ਹੈ
+→ OpenAI ਫਾਰਮੈਟ ਵਿੱਚ ਸਾਰੇ ਚੈਟ, ਐਮਬੈਡਿੰਗ ਅਤੇ ਚਿੱਤਰ ਮਾਡਲ + ਕੌਂਬੋ ਵਾਪਸ ਕਰਦਾ ਹੈ
 ```
 
 ### ਮਾਡਲ id ਪ੍ਰੀਫਿਕਸ (`?prefix=`)
 
-ਜ਼ਿਆਦਾਤਰ ਮਾਡਲ ਇੱਕ **ਪ੍ਰੋਵਾਈਡਰ ਪ੍ਰੀਫਿਕਸ** ਹੇਠ ਦਰਸਾਏ ਜਾਂਦੇ ਹਨ। ਤੁਹਾਨੂੰ ਕਿਹੜਾ ਪ੍ਰੀਫਿਕਸ ਮਿਲਦਾ ਹੈ, ਇਹ
-`MODELS_CATALOG_PREFIX_MODE` ਫੀਚਰ ਫਲੈਗ ਦੁਆਰਾ ਨਿਯੰਤਰਿਤ ਹੁੰਦਾ ਹੈ ਅਤੇ ਇਸਨੂੰ ਇੱਕ
-ਕੁਐਰੀ ਪੈਰਾਮੀਟਰ ਨਾਲ **ਹਰੇਕ ਬੇਨਤੀ ਲਈ** ਓਵਰਰਾਈਡ ਕੀਤਾ ਜਾ ਸਕਦਾ ਹੈ — ਇਹ ਉਸ ਕਲਾਇੰਟ ਲਈ ਲਾਭਦਾਇਕ ਹੈ ਜੋ ਬਾਕੀ ਸਭ ਲਈ
-ਸਰਵਰ-ਪੱਧਰੀ ਸੈਟਿੰਗ ਬਦਲੇ ਬਿਨਾਂ ਇੱਕ ਸਾਫ਼ ਸੂਚੀ ਚਾਹੁੰਦਾ ਹੈ:
+ਜ਼ਿਆਦਾਤਰ ਮਾਡਲ ਇੱਕ **ਪ੍ਰਦਾਤਾ ਪ੍ਰੀਫਿਕਸ** ਅਧੀਨ ਪ੍ਰਦਰਸ਼ਿਤ ਕੀਤੇ ਜਾਂਦੇ ਹਨ। ਤੁਹਾਨੂੰ ਕਿਹੜਾ ਪ੍ਰੀਫਿਕਸ ਮਿਲਦਾ ਹੈ, ਇਹ
+`MODELS_CATALOG_PREFIX_MODE` ਫੀਚਰ ਫਲੈਗ ਦੁਆਰਾ ਨਿਯੰਤਰਿਤ ਹੁੰਦਾ ਹੈ ਅਤੇ ਇਸ ਨੂੰ ਇੱਕ
+ਕੁਐਰੀ ਪੈਰਾਮੀਟਰ ਨਾਲ **ਹਰੇਕ ਬੇਨਤੀ ਲਈ** ਓਵਰਰਾਈਡ ਕੀਤਾ ਜਾ ਸਕਦਾ ਹੈ — ਇਹ ਉਸ ਕਲਾਇੰਟ ਲਈ ਲਾਭਦਾਇਕ ਹੈ ਜੋ ਹੋਰ ਸਾਰਿਆਂ ਲਈ
+ਸਰਵਰ-ਵਿਆਪੀ ਸੈਟਿੰਗ ਬਦਲੇ ਬਿਨਾਂ ਇੱਕ ਸਾਫ਼ ਸੂਚੀ ਚਾਹੁੰਦਾ ਹੈ:
 
 ```bash
-GET /v1/models?prefix=alias        # ਪ੍ਰਤੀ ਮਾਡਲ ਇੱਕ id — ਛੋਟਾ alias ਪ੍ਰੀਫਿਕਸ
+GET /v1/models?prefix=alias        # ਹਰੇਕ ਮਾਡਲ ਲਈ ਇੱਕ id — ਛੋਟਾ ਉਪਨਾਮ ਪ੍ਰੀਫਿਕਸ
 GET /v1/models?prefix=dual         # ਦੋਵੇਂ ਰੂਪ (ਸਰਵਰ ਡਿਫਾਲਟ)
 GET /v1/models?prefix=canonical    # ਸਿਰਫ਼ ਪੂਰਾ provider-id ਪ੍ਰੀਫਿਕਸ
 ```
 
-| ਮੋਡ         | ਨਿਕਾਸ                                                     | ਨੋਟਸ                                                                                                                                                                                          |
+| ਮੋਡ         | ਉਤਸਰਜਿਤ ਕਰਦਾ ਹੈ                                           | ਟਿੱਪਣੀਆਂ                                                                                                                                                                                      |
 | ----------- | --------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `dual`      | `cc/claude-sonnet-4-6` **ਅਤੇ** `claude/claude-sonnet-4-6` | **ਡਿਫਾਲਟ।** ਦੋਵੇਂ ids ਇੱਕੋ ਮਾਡਲ ਵੱਲ ਰੂਟ ਹੁੰਦੇ ਹਨ; ਇਸਨੂੰ ਇਸ ਲਈ ਰੱਖਿਆ ਗਿਆ ਹੈ ਤਾਂ ਜੋ ਕਿਸੇ ਵੀ ਰੂਪ ਨੂੰ ਹਾਰਡਕੋਡ ਕਰਨ ਵਾਲੀਆਂ ਕਲਾਇੰਟ ਕੌਂਫਿਗਾਂ ਕੰਮ ਕਰਦੀਆਂ ਰਹਿਣ। ਇਹ ਕੈਟਾਲਾਗ ਨੂੰ ਲਗਭਗ ਦੁੱਗਣਾ ਕਰ ਦਿੰਦਾ ਹੈ। |
-| `alias`     | `cc/claude-sonnet-4-6`                                    | ਪ੍ਰਤੀ ਮਾਡਲ ਇੱਕ ਐਂਟਰੀ। ਵੱਖਰਾ alias ਨਾ ਰੱਖਣ ਵਾਲੇ ਪ੍ਰੋਵਾਈਡਰ ਵੀ ਆਪਣੀ ਐਂਟਰੀ ਜਾਰੀ ਕਰਦੇ ਹਨ, ਇਸ ਲਈ ਕੁਝ ਵੀ ਗੁਆਚਦਾ ਨਹੀਂ।                                                                                |
-| `canonical` | `claude/claude-sonnet-4-6`                                | ਪੂਰੇ provider-id ਪ੍ਰੀਫਿਕਸ ਹੇਠ ਪ੍ਰਤੀ ਮਾਡਲ ਇੱਕ ਐਂਟਰੀ। ਵੱਖਰਾ alias ਨਾ ਰੱਖਣ ਵਾਲੇ ਪ੍ਰੋਵਾਈਡਰ (ਜਿਵੇਂ `antigravity/…`, `agy/…`) ਵੀ ਇੱਥੇ ਆਪਣੀ ਇਕੱਲੀ id ਜਾਰੀ ਕਰਦੇ ਹਨ, ਇਸ ਲਈ ਕੁਝ ਵੀ ਗੁਆਚਦਾ ਨਹੀਂ।         |
+| `dual`      | `cc/claude-sonnet-4-6` **ਅਤੇ** `claude/claude-sonnet-4-6` | **ਡਿਫਾਲਟ।** ਦੋਵੇਂ ids ਇੱਕੋ ਮਾਡਲ ਵੱਲ ਰੂਟ ਹੁੰਦੇ ਹਨ; ਇਸ ਨੂੰ ਇਸ ਲਈ ਰੱਖਿਆ ਗਿਆ ਹੈ ਤਾਂ ਜੋ ਕਿਸੇ ਵੀ ਰੂਪ ਨੂੰ ਹਾਰਡਕੋਡ ਕਰਨ ਵਾਲੀਆਂ ਕਲਾਇੰਟ ਸੰਰਚਨਾਵਾਂ ਕੰਮ ਕਰਦੀਆਂ ਰਹਿਣ। ਇਹ ਕੈਟਾਲੌਗ ਨੂੰ ਲਗਭਗ ਦੁੱਗਣਾ ਕਰਦਾ ਹੈ।   |
+| `alias`     | `cc/claude-sonnet-4-6`                                    | ਹਰੇਕ ਮਾਡਲ ਲਈ ਇੱਕ ਐਂਟਰੀ। ਵੱਖਰਾ ਉਪਨਾਮ ਨਾ ਰੱਖਣ ਵਾਲੇ ਪ੍ਰਦਾਤਾ ਫਿਰ ਵੀ ਆਪਣੀ ਐਂਟਰੀ ਉਤਸਰਜਿਤ ਕਰਦੇ ਹਨ, ਇਸ ਲਈ ਕੁਝ ਵੀ ਗੁੰਮ ਨਹੀਂ ਹੁੰਦਾ।                                                                     |
+| `canonical` | `claude/claude-sonnet-4-6`                                | ਪੂਰੇ provider-id ਪ੍ਰੀਫਿਕਸ ਅਧੀਨ ਹਰੇਕ ਮਾਡਲ ਲਈ ਇੱਕ ਐਂਟਰੀ। ਵੱਖਰਾ ਉਪਨਾਮ ਨਾ ਰੱਖਣ ਵਾਲੇ ਪ੍ਰਦਾਤਾ (ਜਿਵੇਂ `antigravity/…`, `agy/…`) ਇੱਥੇ ਵੀ ਆਪਣੀ ਇਕੱਲੀ id ਉਤਸਰਜਿਤ ਕਰਦੇ ਹਨ, ਇਸ ਲਈ ਕੁਝ ਵੀ ਗੁੰਮ ਨਹੀਂ ਹੁੰਦਾ। |
 
-ਕੁਐਰੀ ਪੈਰਾਮੀਟਰ ਤੋਂ ਬਿਨਾਂ ਵੀ ਇੱਕ `dual`-ਮੋਡ ਮਿਰਰ ਨੂੰ ਪਛਾਣਿਆ ਜਾ ਸਕਦਾ ਹੈ: ਇਸ ਵਿੱਚ ਪ੍ਰਾਇਮਰੀ id ਵੱਲ ਇਸ਼ਾਰਾ ਕਰਨ ਵਾਲੀ ਇੱਕ `parent`
-ਫੀਲਡ ਹੁੰਦੀ ਹੈ।
+ਇੱਕ `dual`-ਮੋਡ ਮਿਰਰ ਨੂੰ ਕੁਐਰੀ ਪੈਰਾਮੀਟਰ ਤੋਂ ਬਿਨਾਂ ਵੀ ਪਛਾਣਿਆ ਜਾ ਸਕਦਾ ਹੈ: ਇਸ ਵਿੱਚ ਮੁੱਖ id ਵੱਲ ਸੰਕੇਤ ਕਰਦਾ ਇੱਕ `parent`
+ਫੀਲਡ ਹੁੰਦਾ ਹੈ।
 
-ਜਿਹੜੇ ਕਲਾਇੰਟ ਮਾਡਲ ਪਿਕਰ ਦਿਖਾਉਂਦੇ ਹਨ, ਉਹਨਾਂ ਨੂੰ `?prefix=alias` ਦੀ ਬੇਨਤੀ ਕਰਨੀ ਚਾਹੀਦੀ ਹੈ —
-[OmniCopilot VS Code ਐਕਸਟੈਂਸ਼ਨ](../guides/VSCODE-COPILOT.md) ਵੀ ਇਹੀ ਕਰਦੀ ਹੈ।
+ਮਾਡਲ ਚੋਣਕਰਤਾ ਰੈਂਡਰ ਕਰਨ ਵਾਲੇ ਕਲਾਇੰਟਾਂ ਨੂੰ `?prefix=alias` ਦੀ ਬੇਨਤੀ ਕਰਨੀ ਚਾਹੀਦੀ ਹੈ — ਇਹੀ
+[OmniCopilot VS Code ਐਕਸਟੈਂਸ਼ਨ](../guides/VSCODE-COPILOT.md) ਕਰਦਾ ਹੈ।
 
-### ਬਿਨਾਂ-ਥਿੰਕਿੰਗ ਵਾਲੇ ਮਾਡਲ ਵੇਰੀਐਂਟ
+### ਖੋਜ ਫਿਲਟਰ (`?capability=`, `?min_context=`, `?kind=`, `?q=`)
 
-ਥਿੰਕਿੰਗ ਸਮਰੱਥਾ ਵਾਲੇ Claude ਮਾਡਲਾਂ ਲਈ, `/v1/models` ਇੱਕ **ਬਿਨਾਂ-ਥਿੰਕਿੰਗ** ਵੇਰੀਐਂਟ ਵੀ ਦਰਸਾਉਂਦਾ ਹੈ, ਜਿਸਦੀ id ਦੇ ਸ਼ੁਰੂ ਵਿੱਚ `claude-3-omniroute-no-thinking/` ਹੁੰਦਾ ਹੈ:
+`GET /v1/models` ਚੋਣਵੀਂ ਖੋਜ ਲਈ ਫਿਲਟਰ ਸਵੀਕਾਰ ਕਰਦਾ ਹੈ। ਇਨ੍ਹਾਂ ਵਿੱਚੋਂ ਕਿਸੇ ਦੇ ਨਾ ਹੋਣ 'ਤੇ ਜਵਾਬ
+ਬਦਲਦਾ ਨਹੀਂ ਹੈ। ਇਹ ਉਸ ਕੈਟਾਲੌਗ ਨੂੰ ਸੀਮਿਤ ਕਰਦੇ ਹਨ ਜੋ ਕਾਲਰ ਪਹਿਲਾਂ ਹੀ ਵੇਖਦਾ ਹੈ (API-key ਅਨੁਮਤੀਆਂ ਪਹਿਲਾਂ ਲਾਗੂ ਹੁੰਦੀਆਂ ਹਨ),
+ਅਤੇ ਇਹ OpenAI-ਸ਼ੈਲੀ `limit` / `after` ਪੇਜਿੰਗ ਤੋਂ ਪਹਿਲਾਂ ਚੱਲਦੇ ਹਨ:
+
+```bash
+GET /v1/models?capability=vision&capability=tool_calling   # ਸੂਚੀਬੱਧ ਹਰੇਕ ਸਮਰੱਥਾ true ਹੋਣੀ ਲਾਜ਼ਮੀ ਹੈ
+GET /v1/models?capability=vision,reasoning&min_context=200000
+GET /v1/models?kind=embedding                              # ਕੈਟਾਲੌਗ `type`; ਇਸ ਤੋਂ ਬਿਨਾਂ ਕਤਾਰਾਂ `chat` ਹਨ
+GET /v1/models?q=sonnet&limit=10                           # id ਜਾਂ ਨਾਮ ਉੱਤੇ ਅੱਖਰਾਂ ਦੇ ਕੇਸ ਤੋਂ ਅਸੰਵੇਦਨਸ਼ੀਲ ਮਿਲਾਨ
+```
+
+| ਪੈਰਾਮੀਟਰ      | ਮੁੱਲ                                                                                                |
+| ------------- | --------------------------------------------------------------------------------------------------- |
+| `capability`  | `attachment`, `reasoning`, `structured_output`, `temperature`, `thinking`, `tool_calling`, `vision` |
+| `min_context` | ਗੈਰ-ਨਕਾਰਾਤਮਕ ਪੂਰਨ ਅੰਕ, ਜਿਸ ਦੀ ਤੁਲਨਾ `context_length` ਨਾਲ ਕੀਤੀ ਜਾਂਦੀ ਹੈ                              |
+| `kind`        | `chat`, `audio`, `embedding`, `image`, `moderation`, `music`, `rerank`, `video`                     |
+| `q`           | 1–200 ਅੱਖਰ                                                                                          |
+
+ਕੋਈ ਅਣਜਾਣ ਮੁੱਲ, ਜਾਂ ਅਜਿਹਾ `min_context` ਜੋ ਗੈਰ-ਨਕਾਰਾਤਮਕ ਪੂਰਨ ਅੰਕ ਨਹੀਂ ਹੈ (ਉਦਾਹਰਨ ਲਈ `1.5`),
+HTTP `400` ਵਾਪਸ ਕਰਦਾ ਹੈ ਅਤੇ ਸੁਨੇਹਾ ਵੈਧ ਮੁੱਲਾਂ ਦੀ ਸੂਚੀ ਦਿੰਦਾ ਹੈ। ਲਾਗੂਕਰਨ:
+`src/app/api/v1/models/catalogFilters.ts`।
+
+### ਮਾਡਲ ਸੰਖੇਪ-ਸੂਚੀ (`POST /v1/models/query`)
+
+`POST /v1/models/query` ਉਸੇ ਕੈਟਾਲੌਗ ਤੋਂ ਇੱਕ ਛੋਟੀ, ਨਿਰਧਾਰਤ ਸੂਚੀ ਵਾਪਸ ਕਰਦਾ ਹੈ, ਜਿਸ ਵਿੱਚ `GET /v1/models` ਵਰਗੀ ਹੀ
+ਪ੍ਰਮਾਣਿਕਤਾ ਅਤੇ ਪ੍ਰਤੀ-key ਦਿੱਖ ਹੁੰਦੀ ਹੈ:
+
+```bash
+POST /v1/models/query
+Authorization: Bearer your-api-key
+Content-Type: application/json
+
+{ "capabilities": ["vision", "tool_calling"], "min_context": 128000, "max_output": 16000,
+  "kind": "chat", "q": "gpt", "owned_by": "openai", "exclude": ["openai/gpt-4o"], "limit": 5 }
+
+→ { "object": "list", "data": [ ...models ] }
+```
+
+ਹਰੇਕ ਫੀਲਡ ਚੋਣਵਾਂ ਹੈ। `capabilities` ਅਤੇ `exclude` ਇੱਕ ਐਰੇ ਜਾਂ ਕੌਮੇ ਨਾਲ ਵੱਖ ਕੀਤੀ ਸਤਰ ਸਵੀਕਾਰ ਕਰਦੇ ਹਨ;
+`max_output` ਦੀ ਤੁਲਨਾ `max_output_tokens` ਨਾਲ ਕੀਤੀ ਜਾਂਦੀ ਹੈ। ਨਤੀਜੇ ਪਹਿਲਾਂ `owned_by`, ਫਿਰ `id` ਅਨੁਸਾਰ ਕ੍ਰਮਬੱਧ ਕੀਤੇ ਜਾਂਦੇ ਹਨ।
+`limit` ਦਾ ਡਿਫਾਲਟ `20` ਹੈ ਅਤੇ `100` ਤੋਂ ਵੱਧ ਮੁੱਲਾਂ ਨੂੰ `100` ਤੱਕ ਸੀਮਿਤ ਕਰ ਦਿੱਤਾ ਜਾਂਦਾ ਹੈ। ਅਵੈਧ JSON, ਕੋਈ ਅਣਜਾਣ
+ਫੀਲਡ ਜਾਂ ਅਵੈਧ ਮੁੱਲ HTTP `400` ਵਾਪਸ ਕਰਦਾ ਹੈ।
+
+### ਵੱਖਰੇ ਤੌਰ 'ਤੇ ਲੁਕਾਏ ਚੈਟ ਮਾਡਲ
+
+ਕਿਸੇ ਪ੍ਰਦਾਤਾ ਪੰਨੇ ਉੱਤੇ **ਲੁਕਿਆ ਹੋਇਆ** ਚਿੰਨ੍ਹਿਤ ਮਾਡਲ ਨੂੰ ਕੈਟਾਲੌਗ ਵਿੱਚੋਂ ਬਾਹਰ ਰੱਖਿਆ ਜਾਂਦਾ ਹੈ ਅਤੇ ਸਪਸ਼ਟ ਤੌਰ 'ਤੇ ਬੇਨਤੀ ਕੀਤੇ ਜਾਣ 'ਤੇ
+HTTP `404` / `model_not_found` ਨਾਲ ਅਸਵੀਕਾਰ ਕੀਤਾ ਜਾਂਦਾ ਹੈ। ਜਾਂਚ ਹੱਲ ਕੀਤੇ ਗਏ
+ਪ੍ਰਦਾਤਾ ਅਤੇ ਮਾਡਲ ਦੀ ਵਰਤੋਂ ਕਰਦੀ ਹੈ, ਜਿਸ ਵਿੱਚ ਪ੍ਰਦਾਤਾ ਉਪਨਾਮ, ਅਨੁਕੂਲ-ਪ੍ਰਦਾਤਾ ਨੋਡ ਪ੍ਰੀਫਿਕਸ ਅਤੇ
+ਕਨੈਕਸ਼ਨ ਡਿਫਾਲਟ ਸ਼ਾਮਲ ਹਨ। ਇੱਕ ਕੌਂਬੋ ਲੁਕਾਏ ਟਾਰਗੇਟਾਂ ਨੂੰ ਛੱਡ ਦਿੰਦਾ ਹੈ ਅਤੇ ਕਿਸੇ ਦਿਸਣਯੋਗ ਸਮਾਨ ਮਾਡਲ ਦੀ ਵਰਤੋਂ ਕਰ ਸਕਦਾ ਹੈ; ਜਦੋਂ ਕੋਈ
+ਚਲਾਉਣਯੋਗ ਟਾਰਗੇਟ ਨਹੀਂ ਬਚਦਾ, ਤਾਂ ਇਹ ਉਹੀ ਗਲਤੀ ਕੋਡ ਵਾਪਸ ਕਰਦਾ ਹੈ। ਲੁਕਾਉਣਾ ਹਟਾਉਣਾ ਅਗਲੀ
+ਬੇਨਤੀ 'ਤੇ ਪ੍ਰਭਾਵੀ ਹੁੰਦਾ ਹੈ। ਸਿਰਫ਼-ਚਿੱਤਰ ਦਿੱਖ ਓਵਰਰਾਈਡ ਉਸੇ ID ਵਾਲੇ ਚੈਟ ਮਾਡਲ ਨੂੰ ਨਹੀਂ ਲੁਕਾਉਂਦੇ।
+
+ਇਹ ਵਿਅਕਤੀਗਤ ਮਾਡਲ ਸੈਟਿੰਗ
+[ਮਾਡਲ ਐਕਸਪੋਜ਼ਰ ਮਨਜ਼ੂਰ/ਇਨਕਾਰ ਸੂਚੀਆਂ](../routing/MODEL_EXPOSURE_LIST.md) ਤੋਂ ਵੱਖਰੀ ਹੈ, ਜੋ ਸਪਸ਼ਟ ਡਿਸਪੈਚ ਨੂੰ ਬਰਕਰਾਰ ਰੱਖਦੇ ਹੋਏ ਕੈਟਾਲੌਗ
+ਵਿਗਿਆਪਨ ਅਤੇ ਆਟੋ-ਰੂਟਿੰਗ ਉਮੀਦਵਾਰਾਂ ਨੂੰ ਫਿਲਟਰ ਕਰਦੀਆਂ ਹਨ। API-key ਮਾਡਲ
+ਅਨੁਮਤੀਆਂ ਸੁਤੰਤਰ ਤੌਰ 'ਤੇ ਲਾਗੂ ਹੁੰਦੀਆਂ ਰਹਿੰਦੀਆਂ ਹਨ। ਡਿਫਾਲਟ ਕੈਟਾਲੌਗ ਪ੍ਰੀਫਿਕਸ ਮੋਡ `dual` ਹੀ ਰਹਿੰਦਾ ਹੈ।
+
+### ਸੋਚ-ਰਹਿਤ ਮਾਡਲ ਰੂਪ
+
+ਸੋਚਣ ਦੀ ਸਮਰੱਥਾ ਵਾਲੇ Claude ਮਾਡਲਾਂ ਲਈ, `/v1/models` ਇੱਕ **ਸੋਚ-ਰਹਿਤ** ਰੂਪ ਵੀ ਪ੍ਰਦਰਸ਼ਿਤ ਕਰਦਾ ਹੈ ਜਿਸਦੀ id ਅੱਗੇ `claude-3-omniroute-no-thinking/` ਲੱਗਿਆ ਹੁੰਦਾ ਹੈ:
 
 ```
 claude-3-omniroute-no-thinking/<provider>/<model>
 ```
 
-ਇਸ id ਨੂੰ ਚੁਣਨ ਨਾਲ (ਉਦਾਹਰਨ ਲਈ, ਇੱਕ Claude Code ਕੌਂਫਿਗ ਵਿੱਚ ਜੋ ਹਮੇਸ਼ਾ ਇੱਕ `thinking` ਬਲਾਕ ਜੋੜਦੀ ਹੈ) ਇਹ ਰੀਜ਼ਨਿੰਗ ਨੂੰ ਦਬਾ ਕੇ ਅਸਲ `<provider>/<model>` ਵੱਲ ਮੁੜ ਰਿਜ਼ਾਲਵ ਹੁੰਦੀ ਹੈ — `/v1/messages` ਪਾਥ ਉੱਤੇ `thinking:{type:"disabled"}`, ਜਾਂ `/v1/chat/completions` ਪਾਥ ਉੱਤੇ `reasoning`/`reasoning_effort` ਫੀਲਡਾਂ ਨੂੰ ਹਟਾ ਦਿੱਤਾ ਜਾਂਦਾ ਹੈ। ਇਹ ਵੇਰੀਐਂਟ ਸਿਰਫ਼ ਉਹਨਾਂ Claude-ਪਰਿਵਾਰ ਮਾਡਲਾਂ ਲਈ ਸੂਚੀਬੱਧ ਹੁੰਦਾ ਹੈ ਜੋ ਥਿੰਕਿੰਗ ਦਾ ਸਮਰਥਨ ਕਰਦੇ ਹਨ **ਅਤੇ** `disabled` ਦੀ ਪਾਲਣਾ ਕਰਦੇ ਹਨ (ਇਸ ਲਈ, ਉਦਾਹਰਨ ਵਜੋਂ, adaptive-only ਮਾਡਲ ਜੋ `disabled` ਨੂੰ ਰੱਦ ਕਰਦੇ ਹਨ, ਸ਼ਾਮਲ ਨਹੀਂ ਕੀਤੇ ਜਾਂਦੇ)। ਓਪਰੇਟਰ `ModelSpec.noThinkingAlias` ਰਾਹੀਂ ਪ੍ਰਤੀ ਮਾਡਲ ਇਸ ਵੇਰੀਐਂਟ ਨੂੰ ਜ਼ਬਰਦਸਤੀ ਚਾਲੂ ਜਾਂ ਬੰਦ ਕਰ ਸਕਦੇ ਹਨ।
+ਇਸ id ਨੂੰ ਚੁਣਨ ਨਾਲ (ਉਦਾਹਰਨ ਲਈ, ਇੱਕ Claude Code ਸੰਰਚਨਾ ਵਿੱਚ ਜੋ ਹਮੇਸ਼ਾਂ ਇੱਕ `thinking` ਬਲਾਕ ਜੋੜਦੀ ਹੈ) ਇਹ ਮੁੜ ਅਸਲ `<provider>/<model>` ਨਾਲ ਹੱਲ ਹੁੰਦਾ ਹੈ, ਜਿਸ ਵਿੱਚ ਤਰਕ-ਪ੍ਰਕਿਰਿਆ ਦਬਾਈ ਹੋਈ ਹੁੰਦੀ ਹੈ—`/v1/messages` ਪਾਥ ਉੱਤੇ `thinking:{type:"disabled"}`, ਜਾਂ `/v1/chat/completions` ਪਾਥ ਉੱਤੇ `reasoning`/`reasoning_effort` ਫ਼ੀਲਡ ਹਟਾਏ ਜਾਂਦੇ ਹਨ। ਇਹ ਵੇਰੀਐਂਟ ਸਿਰਫ਼ ਉਹਨਾਂ Claude-ਪਰਿਵਾਰ ਮਾਡਲਾਂ ਲਈ ਸੂਚੀਬੱਧ ਕੀਤਾ ਜਾਂਦਾ ਹੈ ਜੋ ਸੋਚਣ ਦੀ ਸਮਰੱਥਾ ਦਾ ਸਮਰਥਨ ਕਰਦੇ ਹਨ **ਅਤੇ** `disabled` ਦੀ ਪਾਲਣਾ ਕਰਦੇ ਹਨ (ਇਸ ਲਈ, ਉਦਾਹਰਨ ਵਜੋਂ, ਸਿਰਫ਼ ਅਨੁਕੂਲੀ ਮਾਡਲ ਜੋ `disabled` ਨੂੰ ਅਸਵੀਕਾਰ ਕਰਦੇ ਹਨ, ਸ਼ਾਮਲ ਨਹੀਂ ਕੀਤੇ ਜਾਂਦੇ)। ਓਪਰੇਟਰ `ModelSpec.noThinkingAlias` ਰਾਹੀਂ ਹਰ ਮਾਡਲ ਲਈ ਇਸ ਵੇਰੀਐਂਟ ਨੂੰ ਜ਼ਬਰਦਸਤੀ ਚਾਲੂ ਜਾਂ ਬੰਦ ਕਰ ਸਕਦੇ ਹਨ।
 
 ---
 
@@ -437,23 +578,24 @@ Bifrost, CLIProxyAPI ਅਤੇ ਭਵਿੱਖ ਦੇ sidecar ਰਾਊਟਰਾ
 | POST | `/v1/segment`                             | Jina ਸੈਗਮੈਂਟਰ (`segment.jina.ai`)   |
 | POST | `/v1/moderations`                         | OpenAI Moderations                  |
 | GET  | `/v1/models`                              | OpenAI                              |
+| POST | `/v1/models/query`                        | ਫਿਲਟਰ ਕੀਤੀ ਮਾਡਲ ਸੰਖੇਪ-ਸੂਚੀ          |
 | POST | `/v1/messages/count_tokens`               | Anthropic                           |
 | GET  | `/v1beta/models`                          | Gemini                              |
 | POST | `/v1beta/models/{...path}`                | Gemini generateContent              |
 | POST | `/v1/api/chat`                            | Ollama                              |
-| GET  | `/api/v1/vscode/{token}/`                 | OpenAI ਕੈਟਾਲੌਗ ਉਪਨਾਮ                |
+| GET  | `/api/v1/vscode/{token}/`                 | OpenAI ਕੈਟਾਲਾਗ ਉਪਨਾਮ                |
 | GET  | `/api/v1/vscode/{token}/models`           | OpenAI ਮਾਡਲ ਉਪਨਾਮ                   |
-| POST | `/api/v1/vscode/{token}/chat/completions` | OpenAI ਟੋਕਨਾਈਜ਼ਡ ਉਪਨਾਮ              |
-| POST | `/api/v1/vscode/{token}/responses`        | OpenAI Responses ਟੋਕਨਾਈਜ਼ਡ ਉਪਨਾਮ    |
-| POST | `/api/v1/vscode/{token}/api/chat`         | Ollama ਟੋਕਨਾਈਜ਼ਡ ਉਪਨਾਮ              |
-| GET  | `/api/v1/vscode/{token}/api/tags`         | Ollama ਟੈਗ ਟੋਕਨਾਈਜ਼ਡ ਉਪਨਾਮ          |
+| POST | `/api/v1/vscode/{token}/chat/completions` | OpenAI ਟੋਕਨ-ਯੁਕਤ ਉਪਨਾਮ              |
+| POST | `/api/v1/vscode/{token}/responses`        | OpenAI Responses ਟੋਕਨ-ਯੁਕਤ ਉਪਨਾਮ    |
+| POST | `/api/v1/vscode/{token}/api/chat`         | Ollama ਟੋਕਨ-ਯੁਕਤ ਉਪਨਾਮ              |
+| GET  | `/api/v1/vscode/{token}/api/tags`         | Ollama ਟੈਗ ਟੋਕਨ-ਯੁਕਤ ਉਪਨਾਮ          |
 
-ਸਾਰੇ POST ਰੂਟ ਇੱਕੋ ਬਣਤਰ ਦੀ ਪਾਲਣਾ ਕਰਦੇ ਹਨ: `Bearer your-api-key` + Zod-ਪ੍ਰਮਾਣਿਤ JSON ਬਾਡੀ (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema`, ਆਦਿ, `src/shared/validation/schemas.ts` ਵੇਖੋ)। ਸਕੀਮਾ ਅਸਫਲ ਹੋਣ 'ਤੇ 4xx ਵਾਪਸ ਕੀਤਾ ਜਾਂਦਾ ਹੈ।
+ਸਾਰੇ POST ਰੂਟ ਇੱਕੋ ਬਣਤਰ ਦੀ ਪਾਲਣਾ ਕਰਦੇ ਹਨ: `Bearer your-api-key` + Zod ਦੁਆਰਾ ਪ੍ਰਮਾਣਿਤ JSON ਬਾਡੀ (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema`, ਆਦਿ, `src/shared/validation/schemas.ts` ਵੇਖੋ)। ਸਕੀਮਾ ਅਸਫਲ ਹੋਣ 'ਤੇ 4xx ਵਾਪਸ ਕੀਤਾ ਜਾਂਦਾ ਹੈ।
 
-ਜਿਹੜੇ ਕਲਾਇੰਟ `Authorization: Bearer ...` ਨਹੀਂ ਜੋੜ ਸਕਦੇ, ਉਨ੍ਹਾਂ ਲਈ OmniRoute ਕਵੈਰੀ-ਸਟਰਿੰਗ ਅਨੁਕੂਲਤਾ (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`) ਜਾਂ ਹੇਠਾਂ ਦਸਤਾਵੇਜ਼ਬੱਧ ਸਮਰਪਿਤ `/api/v1/vscode/{token}/...` ਐਂਡਪੌਇੰਟਾਂ ਰਾਹੀਂ URL ਵਿੱਚ API ਕੁੰਜੀਆਂ ਵੀ ਸਵੀਕਾਰ ਕਰਦਾ ਹੈ।
+ਜਿਹੜੇ ਕਲਾਇੰਟ `Authorization: Bearer ...` ਨੱਥੀ ਨਹੀਂ ਕਰ ਸਕਦੇ, ਉਨ੍ਹਾਂ ਲਈ OmniRoute ਕਵੈਰੀ-ਸਟ੍ਰਿੰਗ ਅਨੁਕੂਲਤਾ (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`) ਜਾਂ ਹੇਠਾਂ ਦਸਤਾਵੇਜ਼ਬੱਧ ਸਮਰਪਿਤ `/api/v1/vscode/{token}/...` ਐਂਡਪੌਇੰਟਾਂ ਰਾਹੀਂ URL ਵਿੱਚ API ਕੁੰਜੀਆਂ ਵੀ ਸਵੀਕਾਰ ਕਰਦਾ ਹੈ।
 
 ```bash
-# ਰੀਰੈਂਕ (ਕਲਾਊਡ ਰਜਿਸਟਰੀ ਪ੍ਰਦਾਤਾ, ਜਾਂ "<prefix>/<model>" ਵਜੋਂ ਇੱਕ OpenAI-ਅਨੁਕੂਲ ਪ੍ਰਦਾਤਾ ਨੋਡ)
+# ਰੀਰੈਂਕ (ਕਲਾਉਡ ਰਜਿਸਟਰੀ ਪ੍ਰਦਾਤਾ, ਜਾਂ "<prefix>/<model>" ਵਜੋਂ OpenAI-ਅਨੁਕੂਲ ਪ੍ਰਦਾਤਾ ਨੋਡ)
 POST /v1/rerank      { "model": "jina-ai/jina-reranker-v3.5", "query": "...", "documents": ["..."] }
 
 # Jina ਵਰਗੀਕਰਨ (Foundation API ਪ੍ਰਮਾਣ-ਪੱਤਰ)
@@ -468,41 +610,44 @@ POST /v1/search      { "query": "...", "provider": "jina-search" }
 # ਮਾਡਰੇਸ਼ਨ
 POST /v1/moderations { "model": "omni-moderation-latest", "input": "..." }
 
-# TTS — audio/mpeg (ਜਾਂ ਮੰਗੇ ਗਏ ਫਾਰਮੈਟ) ਦੀ ਬਾਡੀ ਵਾਪਸ ਕਰਦਾ ਹੈ
+# TTS — audio/mpeg (ਜਾਂ ਬੇਨਤੀ ਕੀਤਾ ਫਾਰਮੈਟ) ਬਾਡੀ ਵਾਪਸ ਕਰਦਾ ਹੈ
 POST /v1/audio/speech { "model": "openai/tts-1", "input": "Hello", "voice": "alloy" }
 
-# Soniox TTS ਲਈ ਇੱਕ ਭਾਸ਼ਾ ਅਤੇ ਇੱਕ ਆਵਾਜ਼ ਲੋੜੀਂਦੀ ਹੈ: `language` ਦਾ ਡਿਫਾਲਟ "en" ਹੈ; ਗੁੰਮ
-# ਆਵਾਜ਼ ਜਾਂ OpenAI ਦੀ ਸਟਾਕ ਆਵਾਜ਼ ਦਾ ਨਾਮ (alloy, nova, …) "Adrian" ਬਣ ਜਾਂਦਾ ਹੈ
+# Soniox TTS ਲਈ ਭਾਸ਼ਾ ਅਤੇ ਆਵਾਜ਼ ਲੋੜੀਂਦੀ ਹੈ: `language` ਦਾ ਡਿਫਾਲਟ "en" ਹੈ; ਗੁੰਮ
+# ਆਵਾਜ਼ ਜਾਂ OpenAI ਦੀ ਮਿਆਰੀ ਆਵਾਜ਼ ਦਾ ਨਾਮ (alloy, nova, …) "Adrian" ਬਣ ਜਾਂਦਾ ਹੈ
 POST /v1/audio/speech { "model": "soniox/tts-rt-v1", "input": "Xin chào", "voice": "Adrian", "language": "vi" }
 
 # ਚਿੱਤਰ ਸੰਪਾਦਨ (multipart)
 POST /v1/images/edits  -F image=@input.png -F prompt="..." -F mask=@mask.png
 
-# ਵੀਡੀਓ / ਸੰਗੀਤ ਜਨਰੇਸ਼ਨ (ਪ੍ਰਦਾਤਾ-ਅਗੇਤਰ ਵਾਲੀ ਮਾਡਲ ID)
+# ਵੀਡੀਓ / ਸੰਗੀਤ ਜਨਰੇਸ਼ਨ (ਪ੍ਰਦਾਤਾ-ਅਗੇਤਰ ਵਾਲੀ ਮਾਡਲ id)
 POST /v1/videos/generations { "model": "runway/gen-3", "prompt": "..." }
 POST /v1/music/generations  { "model": "kie/suno-v4.0",   "prompt": "..." }
 ```
 
-> **ਰੀਰੈਂਕ ਪ੍ਰਦਾਤਾ ਨੋਡ:** `POST /v1/rerank` ਨੂੰ `<node-prefix>/<model>` ਵਜੋਂ ਸੰਬੋਧਿਤ OpenAI-ਅਨੁਕੂਲ ਪ੍ਰਦਾਤਾ ਨੋਡਾਂ
-> (oMLX, vLLM, Infinity, ਗੇਟਵੇ ਦੇ ਪਿੱਛੇ TEI, …) ਵੱਲ ਵੀ ਰੂਟ ਕੀਤਾ ਜਾਂਦਾ ਹੈ। ਲੂਪਬੈਕ
-> ਨੋਡ (`localhost`, `127.0.0.1`, `172.16.0.0/12`) ਹਮੇਸ਼ਾਂ ਯੋਗ ਹੁੰਦੇ ਹਨ। ਕਿਸੇ ਹੋਰ
-> ਹੋਸਟ ਉੱਤੇ ਮੌਜੂਦ ਨੋਡ—ਇੱਕ LAN ਬਾਕਸ ਜਾਂ Tailscale ਪੀਅਰ—ਕੇਵਲ ਉਦੋਂ ਯੋਗ ਹੁੰਦੇ ਹਨ ਜਦੋਂ ਆਪਰੇਟਰ
-> `RERANK_REMOTE_PROVIDER_NODES` ਫੀਚਰ ਫਲੈਗ ਸਮਰੱਥ ਕਰਦਾ ਹੈ **ਅਤੇ** ਨੋਡ ਦਾ ਬੇਸ URL ਪ੍ਰਦਾਤਾ
-> ਆਊਟਬਾਊਂਡ URL ਨੀਤੀ (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`) ਪਾਸ ਕਰਦਾ ਹੈ;
-> ਕਲਾਊਡ-ਮੈਟਾਡੇਟਾ ਹੋਸਟਾਂ ਵੱਲ ਕਦੇ ਵੀ ਰੂਟ ਨਹੀਂ ਕੀਤਾ ਜਾਂਦਾ। ਮੈਮੋਰੀ ਇੰਜਣ ਦਾ ਰੀਰੈਂਕ ਪੜਾਅ ਇਸ ਰੂਟ ਨੂੰ
-> ਲੂਪਬੈਕ ਰਾਹੀਂ ਕਾਲ ਕਰਦਾ ਹੈ, ਇਸ ਲਈ ਇਹੀ ਨਿਯਮ Memory ਸੈਟਿੰਗਾਂ ਵਿੱਚ `rerankProviderModel` ਨੂੰ ਨਿਯੰਤ੍ਰਿਤ ਕਰਦਾ ਹੈ।
+> **ਰੀਰੈਂਕ ਪ੍ਰਦਾਤਾ ਨੋਡ:** `POST /v1/rerank` ਬੇਨਤੀਆਂ ਨੂੰ OpenAI-ਅਨੁਕੂਲ ਪ੍ਰਦਾਤਾ ਨੋਡਾਂ
+> (oMLX, vLLM, Infinity, ਗੇਟਵੇ ਦੇ ਪਿੱਛੇ TEI, …) ਵੱਲ ਵੀ ਰੂਟ ਕਰਦਾ ਹੈ, ਜਿਨ੍ਹਾਂ ਨੂੰ `<node-prefix>/<model>` ਵਜੋਂ ਸੰਬੋਧਿਤ ਕੀਤਾ ਜਾਂਦਾ ਹੈ। ਲੂਪਬੈਕ
+> ਨੋਡ (`localhost`, `127.0.0.1`, `172.16.0.0/12`) ਹਮੇਸ਼ਾ ਯੋਗ ਹੁੰਦੇ ਹਨ, ਅਤੇ ਉਹ ਹੋਸਟਨਾਮ ਵੀ ਯੋਗ ਹੁੰਦੇ ਹਨ ਜਿਨ੍ਹਾਂ ਨੂੰ
+> ਓਪਰੇਟਰ `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS` ਵਿੱਚ ਸੂਚੀਬੱਧ ਕਰਦਾ ਹੈ (ਉਦਾਹਰਨ ਲਈ, ਕੋਈ Docker/Compose ਸੇਵਾ ਨਾਮ ਜਿਵੇਂ
+> `http://reranker:8080/v1`; ਇਨ੍ਹਾਂ ਨੂੰ ਸਿੱਧਾ ਕਾਲ ਕੀਤਾ ਜਾਂਦਾ ਹੈ, ਕਦੇ ਵੀ `HTTP(S)_PROXY` ਜਾਂ ਕਿਸੇ
+> ਕਨੈਕਸ਼ਨ ਦੇ ਪਿੰਨ ਕੀਤੇ ਪ੍ਰਾਕਸੀ ਰਾਹੀਂ ਨਹੀਂ)। ਕਿਸੇ ਹੋਰ
+> ਹੋਸਟ ਉੱਤੇ ਮੌਜੂਦ ਨੋਡ—ਜਿਵੇਂ ਕੋਈ LAN ਬਾਕਸ ਜਾਂ Tailscale ਪੀਅਰ—ਕੇਵਲ ਉਦੋਂ ਹੀ ਯੋਗ ਹੁੰਦੇ ਹਨ ਜਦੋਂ ਓਪਰੇਟਰ
+> `RERANK_REMOTE_PROVIDER_NODES` ਫੀਚਰ ਫਲੈਗ ਨੂੰ ਸਮਰੱਥ ਕਰਦਾ ਹੈ **ਅਤੇ** ਨੋਡ ਦਾ ਬੇਸ URL ਪ੍ਰਦਾਤਾ ਦੀ
+> ਆਊਟਬਾਊਂਡ URL ਨੀਤੀ (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`) ਨੂੰ ਪਾਸ ਕਰਦਾ ਹੈ।
+> ਮੈਮੋਰੀ ਇੰਜਣ ਦਾ ਰੀਰੈਂਕ ਪੜਾਅ ਇਸ ਰੂਟ ਨੂੰ
+> ਲੂਪਬੈਕ ਰਾਹੀਂ ਕਾਲ ਕਰਦਾ ਹੈ, ਇਸ ਲਈ ਇਹੀ ਨਿਯਮ ਮੈਮੋਰੀ ਸੈਟਿੰਗਾਂ ਵਿੱਚ `rerankProviderModel` ਉੱਤੇ ਲਾਗੂ ਹੁੰਦਾ ਹੈ।
 >
-> **ਸਥਾਨਕ ਸਰਵਰ ਬਣਤਰਾਂ:** ਨੋਡ ਨੂੰ `<base>/v1/rerank` ਉੱਤੇ ਅਤੇ 404 ਮਿਲਣ 'ਤੇ `<base>/rerank`
-> (Infinity, TEI) ਉੱਤੇ ਕਾਲ ਕੀਤਾ ਜਾਂਦਾ ਹੈ। ਅੱਪਸਟ੍ਰੀਮ ਬਾਡੀ ਵਿੱਚ Cohere/OpenAI ਸਪੈਲਿੰਗ (`documents`,
-> `return_documents`) ਅਤੇ TEI ਸਪੈਲਿੰਗ (`texts`, `return_text`) ਦੋਵੇਂ ਹੁੰਦੀਆਂ ਹਨ, ਅਤੇ ਅੱਪਸਟ੍ਰੀਮ ਜਵਾਬ ਨੂੰ
-> Cohere ਐਨਵਲਪ ਵਿੱਚ ਨਾਰਮਲਾਈਜ਼ ਕੀਤਾ ਜਾਂਦਾ ਹੈ: TEI ਦਾ ਸਿੱਧਾ `[{index, score, text}]`, ਪਤਲੇ ਗੇਟਵੇਜ਼ ਤੋਂ
-> `{results: [{index, score}]}`, ਅਤੇ Voyage-ਸ਼ੈਲੀ `{data: [...]}`—ਇਹ ਸਭ ਕਲਾਇੰਟ ਨੂੰ
+> **ਸਥਾਨਕ ਸਰਵਰ ਰੂਪ:** ਨੋਡ ਨੂੰ `<base>/v1/rerank` ਉੱਤੇ ਅਤੇ, 404 ਆਉਣ ਦੀ ਸਥਿਤੀ ਵਿੱਚ, `<base>/rerank`
+> (Infinity, TEI) ਉੱਤੇ ਕਾਲ ਕੀਤਾ ਜਾਂਦਾ ਹੈ। ਅੱਪਸਟ੍ਰੀਮ ਬਾਡੀ ਵਿੱਚ Cohere/OpenAI ਵਾਲੀ ਸ਼ਬਦਾਵਲੀ (`documents`,
+> `return_documents`) ਅਤੇ TEI ਵਾਲੀ ਸ਼ਬਦਾਵਲੀ (`texts`, `return_text`) ਦੋਵੇਂ ਹੁੰਦੀਆਂ ਹਨ, ਅਤੇ ਅੱਪਸਟ੍ਰੀਮ ਜਵਾਬ ਨੂੰ
+> Cohere ਐਨਵਲਪ ਅਨੁਸਾਰ ਸਧਾਰਨ ਬਣਾਇਆ ਜਾਂਦਾ ਹੈ: TEI ਦਾ ਸਿੱਧਾ `[{index, score, text}]`, ਹਲਕੇ ਗੇਟਵੇਜ਼ ਤੋਂ
+> `{results: [{index, score}]}`, ਅਤੇ Voyage-ਸ਼ੈਲੀ ਦਾ `{data: [...]}`—ਇਹ ਸਭ ਕਲਾਇੰਟ ਨੂੰ
 > `{results: [{index, relevance_score, document?}]}` ਵਜੋਂ ਵਾਪਸ ਮਿਲਦੇ ਹਨ, ਸਕੋਰ ਅਨੁਸਾਰ ਕ੍ਰਮਬੱਧ ਅਤੇ `top_n` ਤੱਕ ਸੀਮਿਤ।
-
-> **ਪ੍ਰਦਾਤਾ-ਨੋਡ ਖੋਜ:** OpenAI-ਅਨੁਕੂਲ ਪ੍ਰਦਾਤਾ ਨੋਡ ਉੱਤੇ ਮਾਡਲ `GET /v1/models`
-> ਵਿੱਚ ਨੋਡ ਪ੍ਰੀਫਿਕਸ ਹੇਠ ਦਿਖਾਈ ਦਿੰਦੇ ਹਨ। ਜਿਹੜੀਆਂ ਕਤਾਰਾਂ ਵਿੱਚ ਕੋਈ ਐਂਡਪੌਇੰਟ ਮੈਟਾਡਾਟਾ ਨਹੀਂ ਹੁੰਦਾ (ਸਥਾਨਕ `/v1/models` ਸੂਚੀਆਂ ਲਈ ਆਮ),
-> ਉਹ ਨੋਡ ਦਾ `apiType` ਵਿਰਾਸਤ ਵਿੱਚ ਲੈਂਦੀਆਂ ਹਨ, ਇਸ ਲਈ `embeddings` ਨੋਡ ਦੇ ਮਾਡਲ `type: "embedding"` ਅਤੇ
-> `rerank` ਨੋਡ ਦੇ ਮਾਡਲ `type: "rerank"` ਹੁੰਦੇ ਹਨ, ਨਾ ਕਿ ਮੂਲ ਰੂਪ ਵਿੱਚ ਚੈਟ; ਸਿੰਕ ਕੀਤੀ ਜਾਂ ਹੱਥੀਂ ਜੋੜੀ ਕਤਾਰ ਉੱਤੇ ਸਪਸ਼ਟ
+>
+> **ਪ੍ਰਦਾਤਾ-ਨੋਡ ਖੋਜ:** OpenAI-ਅਨੁਕੂਲ ਪ੍ਰਦਾਤਾ ਨੋਡ ਉੱਤੇ ਮਾਡਲ `GET /v1/models` ਵਿੱਚ
+> ਨੋਡ ਪ੍ਰੀਫਿਕਸ ਹੇਠ ਦਿਖਾਈ ਦਿੰਦੇ ਹਨ। ਜਿਨ੍ਹਾਂ ਕਤਾਰਾਂ ਵਿੱਚ ਕੋਈ ਐਂਡਪੋਇੰਟ ਮੈਟਾਡੇਟਾ ਨਹੀਂ ਹੁੰਦਾ (ਸਥਾਨਕ `/v1/models` ਸੂਚੀਆਂ ਲਈ ਆਮ),
+> ਉਹ ਨੋਡ ਦਾ `apiType` ਵਿਰਾਸਤ ਵਿੱਚ ਲੈਂਦੀਆਂ ਹਨ, ਇਸ ਲਈ ਕਿਸੇ `embeddings` ਨੋਡ ਦੇ ਮਾਡਲ ਚੈਟ ਨੂੰ ਡਿਫਾਲਟ ਕਰਨ ਦੀ ਬਜਾਏ
+> `type: "embedding"` ਅਤੇ ਕਿਸੇ `rerank` ਨੋਡ ਦੇ ਮਾਡਲ `type: "rerank"` ਹੁੰਦੇ ਹਨ; ਸਿੰਕ ਕੀਤੀ ਜਾਂ ਹੱਥੀਂ ਜੋੜੀ ਗਈ ਕਤਾਰ ਉੱਤੇ ਸਪਸ਼ਟ
 > `supportedEndpoints` ਨੂੰ ਫਿਰ ਵੀ ਤਰਜੀਹ ਮਿਲਦੀ ਹੈ।
 
 ### ਸਮਰਪਿਤ ਪ੍ਰਦਾਤਾ ਰੂਟ
@@ -513,7 +658,7 @@ POST /v1/providers/{provider}/embeddings
 POST /v1/providers/{provider}/images/generations
 ```
 
-ਜੇ ਪ੍ਰਦਾਤਾ ਪ੍ਰੀਫਿਕਸ ਮੌਜੂਦ ਨਾ ਹੋਵੇ, ਤਾਂ ਉਹ ਆਪਣੇ ਆਪ ਜੋੜ ਦਿੱਤਾ ਜਾਂਦਾ ਹੈ। ਮੇਲ ਨਾ ਖਾਂਦੇ ਮਾਡਲ `400` ਵਾਪਸ ਕਰਦੇ ਹਨ।
+ਜੇ ਪ੍ਰਦਾਤਾ ਪ੍ਰੀਫਿਕਸ ਮੌਜੂਦ ਨਾ ਹੋਵੇ ਤਾਂ ਇਹ ਆਪਣੇ ਆਪ ਜੋੜ ਦਿੱਤਾ ਜਾਂਦਾ ਹੈ। ਨਾ-ਮਿਲਦੇ ਮਾਡਲ `400` ਵਾਪਸ ਕਰਦੇ ਹਨ।
 
 ---
 
@@ -559,40 +704,74 @@ OpenAI-ਅਨੁਕੂਲ ਬੈਚ ਪ੍ਰੋਸੈਸਿੰਗ।
 
 ## Search API
 
-ਵੈੱਬ/ਖੋਜ ਪ੍ਰਦਾਤਾ ਐਬਸਟ੍ਰੈਕਸ਼ਨ (Tavily, Brave, Exa, Serper, ਆਦਿ)।
+ਵੈੱਬ/ਖੋਜ ਪ੍ਰਦਾਤਾ ਐਬਸਟਰੈਕਸ਼ਨ (Tavily, Brave, Exa, Serper ਆਦਿ)।
 
-| ਵਿਧੀ | ਪਾਥ                    | ਵੇਰਵਾ                                                                                                       |
-| ---- | ---------------------- | ----------------------------------------------------------------------------------------------------------- |
-| GET  | `/v1/search`           | ਕੌਂਫ਼ਿਗਰ ਕੀਤੇ ਖੋਜ ਪ੍ਰਦਾਤਿਆਂ + ਸਮਰੱਥਾਵਾਂ ਦੀ ਸੂਚੀ ਦਿਖਾਓ                                                       |
-| POST | `/v1/search`           | ਖੋਜ ਕਵੇਰੀ ਚਲਾਓ — ਬਾਡੀ ਨੂੰ `v1SearchSchema` ਦੁਆਰਾ ਪ੍ਰਮਾਣਿਤ ਕੀਤਾ ਜਾਂਦਾ ਹੈ, ਕੈਸ਼ਿੰਗ/ਕੋਐਲੇਸਿੰਗ ਦਾ ਸਮਰਥਨ ਕਰਦਾ ਹੈ |
-| GET  | `/v1/search/analytics` | ਹਰੇਕ ਪ੍ਰਦਾਤਾ ਲਈ ਹਿੱਟ/ਲੇਟੈਂਸੀ/ਕੈਸ਼ ਅੰਕੜੇ                                                                     |
+| ਵਿਧੀ | ਪਾਥ                    | ਵੇਰਵਾ                                                                                                |
+| ---- | ---------------------- | ---------------------------------------------------------------------------------------------------- |
+| GET  | `/v1/search`           | ਕੌਂਫਿਗਰ ਕੀਤੇ ਖੋਜ ਪ੍ਰਦਾਤਾਵਾਂ + ਸਮਰੱਥਾਵਾਂ ਦੀ ਸੂਚੀ                                                      |
+| POST | `/v1/search`           | ਖੋਜ ਕਵੇਰੀ ਚਲਾਓ — ਬਾਡੀ ਨੂੰ `v1SearchSchema` ਦੁਆਰਾ ਪ੍ਰਮਾਣਿਤ ਕੀਤਾ ਜਾਂਦਾ ਹੈ, ਕੈਸ਼ਿੰਗ/ਕੋਅਲੇਸਿੰਗ ਸਮਰਥਿਤ ਹੈ |
+| GET  | `/v1/search/analytics` | ਪ੍ਰਤੀ-ਪ੍ਰਦਾਤਾ ਹਿੱਟ/ਲੇਟੈਂਸੀ/ਕੈਸ਼ ਅੰਕੜੇ                                                                |
 
 **ਪ੍ਰਮਾਣੀਕਰਨ:** Bearer API ਕੁੰਜੀ (`extractApiKey` + `isValidApiKey`)। ਖੋਜ ਨੀਤੀ ਨੂੰ `enforceApiKeyPolicy` ਰਾਹੀਂ ਲਾਗੂ ਕੀਤਾ ਜਾਂਦਾ ਹੈ।
+
+### Exa ਅਤੇ Tavily `provider_options`
+
+Exa ਅਤੇ Tavily ਨੇਮਸਪੇਸ ਕੀਤੇ ਬੈਗ ਤੋਂ ਪ੍ਰਦਾਤਾ-ਵਿਸ਼ੇਸ਼ ਫ਼ੀਲਡ ਪੜ੍ਹਦੇ ਹਨ:
+`provider_options.exa` (ਜਾਂ `provider_options["exa-search"]`) ਅਤੇ `provider_options.tavily`
+(ਜਾਂ `provider_options["tavily-search"]`)। ਸਿਰਫ਼ ਹੇਠਾਂ ਦਿੱਤੀਆਂ ਕੁੰਜੀਆਂ ਹੀ ਅੱਗੇ ਭੇਜੀਆਂ ਜਾਂਦੀਆਂ ਹਨ। ਹਰੇਕ ਨੂੰ
+`open-sse/handlers/search/providerOptionsPassthrough.ts` ਵਿੱਚ ਇਸਦੇ ਆਪਣੇ Zod ਸਕੀਮਾ ਅਨੁਸਾਰ
+ਜਾਂਚਿਆ ਜਾਂਦਾ ਹੈ, ਅਤੇ ਗ਼ਲਤ ਕਿਸਮ ਵਾਲੀ ਕੁੰਜੀ ਨੂੰ ਹਟਾ ਦਿੱਤਾ ਜਾਂਦਾ ਹੈ। ਪ੍ਰਮਾਣੀਕਰਨ, ਬੇਸ URL,
+`stream` ਅਤੇ `outputSchema` ਸਮੇਤ ਕਿਸੇ ਵੀ ਹੋਰ ਕੁੰਜੀ ਨੂੰ ਅਣਡਿੱਠਾ ਕੀਤਾ ਜਾਂਦਾ ਹੈ। ਹੋਰ ਪ੍ਰਦਾਤਾਵਾਂ ਦੁਆਰਾ ਵਰਤੀਆਂ ਜਾਣ ਵਾਲੀਆਂ ਫਲੈਟ ਕੁੰਜੀਆਂ (`cx`, `depth`, ...) ਪਹਿਲਾਂ ਵਾਂਗ
+ਕੰਮ ਕਰਦੀਆਂ ਹਨ।
+
+| ਪ੍ਰਦਾਤਾ | ਸਿਖਰਲੇ-ਪੱਧਰ ਦੀਆਂ ਫ਼ੀਲਡਾਂ                                                                                                                                                                                                                                                                                                                                                  | ਨੇਸਟਡ                                                                                                                                                                       |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa     | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (ਫਲੈਟ ਪ੍ਰਿਮਿਟਿਵ), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                               | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` ਨੂੰ ਡਿਫੌਲਟ `{ text: true, highlights: true }` ਉੱਤੇ ਮਰਜ ਕੀਤਾ ਜਾਂਦਾ ਹੈ |
+| Tavily  | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                                           |
+
+ਜਨਰਿਕ ਫ਼ੀਲਡ ਹਮੇਸ਼ਾ ਤਰਜੀਹ ਲੈਂਦੀਆਂ ਹਨ: `query`, `max_results`, `filters` (ਡੋਮੇਨ), `country` ਅਤੇ
+`search_type` ਤੋਂ ਪ੍ਰਾਪਤ ਕੀਤਾ ਟੌਪਿਕ। Exa ਉੱਤੇ, `search_type: "news"` `category: "news"` ਨੂੰ ਬਰਕਰਾਰ ਰੱਖਦਾ ਹੈ।
+Tavily `search_type: "finance"` (`topic: "finance"`) ਨੂੰ ਵੀ ਸਵੀਕਾਰ ਕਰਦਾ ਹੈ।
+
+ਜਨਰਿਕ `time_range` ਹੁਣ ਦੋਵਾਂ ਪ੍ਰਦਾਤਾਵਾਂ ਤੱਕ ਪਹੁੰਚਦਾ ਹੈ: Exa ਨੂੰ `startPublishedDate` (ISO
+ਟਾਈਮਸਟੈਂਪ) ਅਤੇ Tavily ਨੂੰ `start_date` (`YYYY-MM-DD`) ਮਿਲਦਾ ਹੈ। `provider_options`
+ਵਿੱਚ ਦਿੱਤੀ ਸਪਸ਼ਟ ਮਿਤੀ ਮੈਪ ਕੀਤੀ ਮਿਤੀ ਨੂੰ ਓਵਰਰਾਈਡ ਕਰਦੀ ਹੈ।
+
+Exa ਨਤੀਜੇ `id`, `highlight_scores`, `summary`, `subpages`, `entities` ਅਤੇ `extras` ਨੂੰ
+`provider_raw` ਵਿੱਚ ਬਰਕਰਾਰ ਰੱਖਦੇ ਹਨ। Tavily ਨਤੀਜੇ `images` ਅਤੇ `favicon` ਨੂੰ ਬਰਕਰਾਰ ਰੱਖਦੇ ਹਨ।
+
+ਲਾਗਤ ਦੀ ਗਿਣਤੀ ਅਜੇ ਵੀ ਫਲੈਟ ਰਜਿਸਟਰੀ `costPerQuery` ਹੈ। Tavily ਵਿੱਚ
+`search_depth: "advanced"` ਲਈ ਪ੍ਰਤੀ ਕਾਲ ਵਧੇਰੇ ਕ੍ਰੈਡਿਟ ਲੱਗਦੇ ਹਨ, ਅਤੇ ਇਹ ਅੰਤਰ
+`usage.search_cost_usd` ਵਿੱਚ ਨਹੀਂ ਦਰਸਾਇਆ ਜਾਂਦਾ।
 
 ---
 
 ## Web Fetch API
 
-ਕਿਸੇ ਸੰਰਚਿਤ web-fetch ਪ੍ਰਦਾਤਾ (Firecrawl, Jina Reader, Tavily Extract, TinyFish Fetch, Nimble Extract) ਰਾਹੀਂ URL ਤੋਂ ਸਮੱਗਰੀ ਕੱਢੋ।
+ਕਨਫਿਗਰ ਕੀਤੇ web-fetch ਪ੍ਰਦਾਤਾ (Firecrawl, Jina Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract) ਰਾਹੀਂ ਕਿਸੇ URL ਤੋਂ ਸਮੱਗਰੀ ਕੱਢੋ।
 
-| ਵਿਧੀ | ਪਾਥ             | ਵੇਰਵਾ                                                                             |
-| ---- | --------------- | --------------------------------------------------------------------------------- |
-| POST | `/v1/web/fetch` | URL ਨੂੰ ਪ੍ਰਾਪਤ/ਸਕ੍ਰੇਪ ਕਰੋ — ਬੌਡੀ ਦੀ ਪੁਸ਼ਟੀ `v1WebFetchSchema` ਦੁਆਰਾ ਕੀਤੀ ਜਾਂਦੀ ਹੈ |
+Parallel Extract (`parallel-search`, Parallel Search ਵਾਲੀ ਹੀ API key) ਸਿਰਫ਼ Markdown ਵਾਪਸ ਕਰਦਾ ਹੈ — ਕੋਈ ਵੀ ਹੋਰ `format` ਇੱਕ `400` ਦਿੰਦਾ ਹੈ — ਅਤੇ ਸਮੱਗਰੀ ਨੂੰ 100,000 ਅੱਖਰਾਂ ਤੱਕ ਸੀਮਿਤ ਕਰਦਾ ਹੈ। ਜਦੋਂ ਟਾਰਗੇਟ ਪੰਨੇ ਨੂੰ ਹੀ extract ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਦਾ, ਤਾਂ upstream ਇਸਦੀ ਰਿਪੋਰਟ HTTP 200 ਦੇ ਅੰਦਰ ਕਰਦਾ ਹੈ; OmniRoute ਇਸਨੂੰ ਇੱਕ ਨਿਸ਼ਚਿਤ ਸੁਨੇਹੇ ਨਾਲ `422` ਵਜੋਂ ਪੇਸ਼ ਕਰਦਾ ਹੈ।
 
-**ਪ੍ਰਮਾਣੀਕਰਨ:** Bearer API ਕੁੰਜੀ (`extractApiKey` + `isValidApiKey`)। ਨੀਤੀ `enforceApiKeyPolicy` ਰਾਹੀਂ ਲਾਗੂ ਕੀਤੀ ਜਾਂਦੀ ਹੈ।
+| ਵਿਧੀ | ਪਾਥ             | ਵੇਰਵਾ                                                                                    |
+| ---- | --------------- | ---------------------------------------------------------------------------------------- |
+| POST | `/v1/web/fetch` | ਕਿਸੇ URL ਨੂੰ fetch/scrape ਕਰੋ — body ਨੂੰ `v1WebFetchSchema` ਦੁਆਰਾ validate ਕੀਤਾ ਜਾਂਦਾ ਹੈ |
 
-**ਕੋਟਾ-ਸਚੇਤ ਫਾਲਬੈਕ (#8297):** ਜਦੋਂ ਕੋਈ ਸਪਸ਼ਟ `provider` ਨਹੀਂ ਦਿੱਤਾ ਜਾਂਦਾ, ਤਾਂ ਪੂਲ
-(`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search`) ਨੂੰ
-ਸਥਿਰ ਤਰਜੀਹੀ ਕ੍ਰਮ (ਪਹਿਲਾਂ-ਭਰੋ) ਵਿੱਚ ਵਰਤਿਆ ਜਾਂਦਾ ਹੈ — ਦਰ-ਸੀਮਿਤ-ਪਰ-ਸੰਰਚਿਤ ਪ੍ਰਦਾਤੇ ਨੂੰ
-ਬੇਨਤੀ ਤੁਰੰਤ ਰੋਕਣ ਦੀ ਬਜਾਏ ਛੱਡ ਦਿੱਤਾ ਜਾਂਦਾ ਹੈ, ਅਤੇ ਮੁੜ-ਕੋਸ਼ਿਸ਼ਯੋਗ/ਕੋਟਾ-ਸੰਬੰਧੀ ਅੱਪਸਟ੍ਰੀਮ ਅਸਫਲਤਾ
-(HTTP 429 ਹਮੇਸ਼ਾ; Firecrawl/Tavily/TinyFish ਦੀਆਂ ਕੋਟਾ-ਸ਼ੈਲੀ ਮੁਫ਼ਤ ਟੀਅਰਾਂ ਲਈ 402/403 —
-Jina Reader ਲਈ ਨਹੀਂ, ਅਤੇ ਸਧਾਰਨ 400 ਗਲਤ ਬੇਨਤੀ ਲਈ ਕਦੇ ਨਹੀਂ) ਬੇਨਤੀ ਦੇ ਸਮੇਂ
-ਅਗਲੇ ਅਣਅਜ਼ਮਾਏ, ਪ੍ਰਮਾਣ-ਪੱਤਰ ਵਾਲੇ ਪ੍ਰਦਾਤੇ ਵੱਲ ਚਲੀ ਜਾਂਦੀ ਹੈ। ਜਦੋਂ ਪੂਲ ਦੇ ਸਾਰੇ ਪ੍ਰਦਾਤੇ
-ਖ਼ਤਮ ਹੋ ਜਾਂਦੇ ਹਨ, ਤਾਂ ਐਂਡਪੌਇੰਟ ਪਿਛਲੇ ਆਮ `400` ਦੀ ਬਜਾਏ ਇੱਕੋ `429`
-(`Retry-After` ਹੈਡਰ ਸਮੇਤ) ਵਾਪਸ ਕਰਦਾ ਹੈ। ਜਦੋਂ ਕਿਸੇ ਸਪਸ਼ਟ `provider` ਦੀ ਬੇਨਤੀ ਕੀਤੀ ਜਾਂਦੀ ਹੈ,
-ਤਾਂ ਕੋਈ ਚੁੱਪ ਫਾਲਬੈਕ **ਨਹੀਂ** ਹੁੰਦਾ — ਦਰ-ਸੀਮਿਤ ਜਾਂ ਅਸਫਲ ਹੋਣ ਵਾਲਾ ਸਪਸ਼ਟ
-ਪ੍ਰਦਾਤਾ ਆਪਣੀ ਤਰੁੱਟੀ ਦਿਖਾਉਂਦਾ ਹੈ (ਦਰ-ਸੀਮਿਤ ਹੋਣ 'ਤੇ `429`, ਨਹੀਂ ਤਾਂ ਅੱਪਸਟ੍ਰੀਮ
-ਸਥਿਤੀ)।
+**ਪ੍ਰਮਾਣੀਕਰਨ:** Bearer API key (`extractApiKey` + `isValidApiKey`)। ਨੀਤੀ `enforceApiKeyPolicy` ਰਾਹੀਂ ਲਾਗੂ ਕੀਤੀ ਜਾਂਦੀ ਹੈ।
+
+**ਕੋਟਾ-ਜਾਗਰੂਕ fallback (#8297):** ਜਦੋਂ ਕੋਈ ਸਪਸ਼ਟ `provider` ਨਹੀਂ ਦਿੱਤਾ ਜਾਂਦਾ, ਤਾਂ pool
+(`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` →
+`parallel-search`) ਨੂੰ
+ਨਿਸ਼ਚਿਤ
+ਤਰਜੀਹੀ ਕ੍ਰਮ (fill-first) ਵਿੱਚ ਵਰਤਿਆ ਜਾਂਦਾ ਹੈ — rate-limited ਪਰ ਕਨਫਿਗਰ ਕੀਤੇ ਪ੍ਰਦਾਤਾ ਨੂੰ
+ਬੇਨਤੀ ਤੁਰੰਤ ਰੋਕਣ ਦੀ ਬਜਾਏ ਛੱਡ ਦਿੱਤਾ ਜਾਂਦਾ ਹੈ, ਅਤੇ retryable/quota upstream ਅਸਫਲਤਾ
+(HTTP 429 ਹਮੇਸ਼ਾ; Firecrawl/Tavily/TinyFish ਦੇ quota-ਸ਼ੈਲੀ free tiers ਲਈ 402/403 —
+Jina Reader ਲਈ ਨਹੀਂ, ਅਤੇ ਸਧਾਰਨ 400 bad request ਲਈ ਕਦੇ ਨਹੀਂ) ਬੇਨਤੀ ਦੇ ਸਮੇਂ ਅਗਲੇ
+ਹਾਲੇ ਤੱਕ ਨਾ ਅਜ਼ਮਾਏ ਗਏ credential ਵਾਲੇ ਪ੍ਰਦਾਤਾ ਵੱਲ ਚਲੀ ਜਾਂਦੀ ਹੈ। ਜਦੋਂ pool ਵਿੱਚ
+ਹਰੇਕ ਪ੍ਰਦਾਤਾ ਖਤਮ ਹੋ ਜਾਂਦਾ ਹੈ, ਤਾਂ endpoint ਪਿਛਲੇ ਆਮ `400` ਦੀ ਬਜਾਏ ਇੱਕੋ `429`
+(`Retry-After` header ਨਾਲ) ਵਾਪਸ ਕਰਦਾ ਹੈ। ਜਦੋਂ ਕਿਸੇ ਸਪਸ਼ਟ `provider` ਦੀ ਬੇਨਤੀ ਕੀਤੀ
+ਜਾਂਦੀ ਹੈ, ਤਾਂ ਕੋਈ ਵੀ ਚੁੱਪ fallback **ਨਹੀਂ** ਹੁੰਦਾ — rate-limited ਜਾਂ ਅਸਫਲ ਸਪਸ਼ਟ
+ਪ੍ਰਦਾਤਾ ਆਪਣੀ ਹੀ ਗਲਤੀ ਦਿਖਾਉਂਦਾ ਹੈ (ਜੇ rate-limited ਹੋਵੇ ਤਾਂ `429`, ਨਹੀਂ ਤਾਂ upstream
+status)।
 
 ---
 
@@ -682,8 +861,8 @@ ChatGPT `codex.rate_limits` + `response.created` ਵਾਪਸ ਕਰਦਾ ਹ�
 
 ## ਸਵੈ-ਸੇਵਾ ਵਰਤੋਂ (`/api/usage/om-usage`)
 
-ਕੋਈ ਵੀ API ਕੁੰਜੀ **ਆਪਣੀ ਖੁਦ ਦੀ** ਵਰਤੋਂ ਅਤੇ ਕੋਟੇ ਪੜ੍ਹ ਸਕਦੀ ਹੈ — ਪ੍ਰਬੰਧਨ ਪ੍ਰਮਾਣੀਕਰਨ ਦੀ ਲੋੜ ਨਹੀਂ। ਇਹ ਉਹ ਐਂਡਪੌਇੰਟ ਹੈ ਜਿਸਦੀ ਵਰਤੋਂ
-ਕਲਾਇੰਟ (CLI, OmniCopilot ਪੈਨਲ) ਕਿਸੇ ਕੁੰਜੀ ਧਾਰਕ ਨੂੰ ਉਸਦਾ ਖਰਚਾ ਦਿਖਾਉਣ ਲਈ ਕਰਦਾ ਹੈ।
+ਕੋਈ ਵੀ API ਕੁੰਜੀ **ਆਪਣੀ ਖੁਦ ਦੀ** ਵਰਤੋਂ ਅਤੇ ਕੋਟੇ ਪੜ੍ਹ ਸਕਦੀ ਹੈ — ਪ੍ਰਬੰਧਨ ਪ੍ਰਮਾਣੀਕਰਨ ਦੀ ਲੋੜ ਨਹੀਂ ਹੈ। ਇਹ ਉਹ ਐਂਡਪੌਇੰਟ ਹੈ ਜਿਸਦੀ ਵਰਤੋਂ ਕੋਈ
+ਕਲਾਇੰਟ (CLI, OmniCopilot ਪੈਨਲ) ਕਿਸੇ ਕੁੰਜੀ ਧਾਰਕ ਨੂੰ ਉਸਦਾ ਖਰਚ ਦਿਖਾਉਣ ਲਈ ਕਰਦਾ ਹੈ।
 
 ```bash
 # ਟੈਕਸਟ ਰੂਪ (ਇਤਿਹਾਸਕ ਇਕਰਾਰਨਾਮਾ — ਟਰਮੀਨਲ ਲਈ ਸਧਾਰਨ ਟੈਕਸਟ)
@@ -696,15 +875,15 @@ curl -H "Authorization: Bearer <your-api-key>" \
 ```
 
 ਕੁੰਜੀ ਲਈ **`allowUsageCommand`** ਸਮਰੱਥ ਹੋਣਾ ਲਾਜ਼ਮੀ ਹੈ (ਮੂਲ ਰੂਪ ਵਿੱਚ ਬੰਦ — ਡੈਸ਼ਬੋਰਡ ਦਾ API-ਕੁੰਜੀ
-ਮੈਨੇਜਰ ਇਸਨੂੰ ਹਰ ਕੁੰਜੀ ਲਈ ਵੱਖਰੇ ਤੌਰ 'ਤੇ ਬਦਲਦਾ ਹੈ)। ਇਸ ਤੋਂ ਬਿਨਾਂ ਐਂਡਪੌਇੰਟ `403` ਨਾਲ ਜਵਾਬ ਦਿੰਦਾ ਹੈ।
+ਮੈਨੇਜਰ ਇਸਨੂੰ ਹਰ ਕੁੰਜੀ ਲਈ ਵੱਖਰੇ ਤੌਰ 'ਤੇ ਟੌਗਲ ਕਰਦਾ ਹੈ)। ਇਸ ਤੋਂ ਬਿਨਾਂ ਐਂਡਪੌਇੰਟ `403` ਨਾਲ ਜਵਾਬ ਦਿੰਦਾ ਹੈ।
 
-`?format=json` ਇੱਕ ਭੇਦਯੋਗ ਸੰਰਚਨਾ ਵਾਪਸ ਕਰਦਾ ਹੈ ਤਾਂ ਜੋ ਕਾਲਰ ਕਦੇ ਵੀ ਇਨਕਾਰ ਵਾਲੇ ਜਵਾਬ ਵਿੱਚੋਂ ਡੇਟਾ ਫੀਲਡ ਨਾ ਪੜ੍ਹੇ।
-ਸਫਲਤਾ ਉੱਤੇ:
+`?format=json` ਇੱਕ ਵੱਖਰੀ ਪਛਾਣ ਵਾਲੀ ਸੰਰਚਨਾ ਵਾਪਸ ਕਰਦਾ ਹੈ, ਤਾਂ ਜੋ ਕਾਲਰ ਕਦੇ ਵੀ ਇਨਕਾਰ ਵਾਲੇ ਜਵਾਬ ਤੋਂ ਕੋਈ ਡਾਟਾ ਫ਼ੀਲਡ ਨਾ ਪੜ੍ਹੇ।
+ਸਫਲਤਾ 'ਤੇ:
 
 ```jsonc
 {
   "allowed": true,
-  // ਸਿਰਫ਼ ਉਦੋਂ ਮੌਜੂਦ ਹੁੰਦਾ ਹੈ ਜਦੋਂ ਕੁੰਜੀ ਨੇ ਪ੍ਰਤੀ-ਕੁੰਜੀ ਵਰਤੋਂ ਸੀਮਾਵਾਂ (ਰੋਜ਼ਾਨਾ/ਹਫ਼ਤਾਵਾਰੀ USD) ਚੁਣੀਆਂ ਹੋਣ:
+  // ਕੇਵਲ ਉਦੋਂ ਮੌਜੂਦ ਹੁੰਦਾ ਹੈ ਜਦੋਂ ਕੁੰਜੀ ਨੇ ਪ੍ਰਤੀ-ਕੁੰਜੀ ਵਰਤੋਂ ਸੀਮਾਵਾਂ (ਰੋਜ਼ਾਨਾ/ਹਫ਼ਤਾਵਾਰੀ USD) ਚੁਣੀਆਂ ਹੋਣ:
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -713,14 +892,14 @@ curl -H "Authorization: Bearer <your-api-key>" \
     "weeklyLimitUsd": 20,
     "weeklyResetAtIso": "…" /* … */,
   },
-  // ਚੁਣੇ ਹੋਏ ਪ੍ਰਦਾਤਾ ਦੇ ਕੋਟੇ ਦਾ ਸਨੈਪਸ਼ਾਟ, ਜਾਂ ਜਦੋਂ ਹਾਲੇ ਕੁਝ ਵੀ ਕੈਸ਼ ਨਾ ਹੋਇਆ ਹੋਵੇ ਤਾਂ null:
+  // ਚੁਣੇ ਹੋਏ ਪ੍ਰਦਾਤਾ ਦਾ ਕੋਟਾ ਸਨੈਪਸ਼ਾਟ, ਜਾਂ ਜਦੋਂ ਹਾਲੇ ਕੁਝ ਵੀ ਕੈਸ਼ ਨਾ ਹੋਇਆ ਹੋਵੇ ਤਾਂ null:
   "provider": {
     "connectionId": "…",
     "provider": "claude",
     "plan": "…",
     "quotas": {/* … */},
   },
-  // ਹਰ ਕਨੈਕਸ਼ਨ ਦਾ ਸਨੈਪਸ਼ਾਟ, ਤਾਂ ਜੋ UI ਕਈ ਪ੍ਰਦਾਤਾਵਾਂ ਨੂੰ ਨਾਲ-ਨਾਲ ਦਿਖਾ ਸਕੇ:
+  // ਹਰ ਕਨੈਕਸ਼ਨ ਦਾ ਸਨੈਪਸ਼ਾਟ, ਤਾਂ ਜੋ UI ਕਈ ਪ੍ਰਦਾਤਿਆਂ ਨੂੰ ਨਾਲ-ਨਾਲ ਰੈਂਡਰ ਕਰ ਸਕੇ:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
     { "provider": "codex" /* … */ },
@@ -728,13 +907,64 @@ curl -H "Authorization: Bearer <your-api-key>" \
 }
 ```
 
-ਇਨਕਾਰ ਹੋਣ ਉੱਤੇ (`401` ਗਲਤ ਕੁੰਜੀ / `403` ਆਗਿਆ ਨਹੀਂ) ਉਹੀ ਰੂਟ
+ਇਨਕਾਰ ਦੀ ਸਥਿਤੀ ਵਿੱਚ (`401` ਗਲਤ ਕੁੰਜੀ / `403` ਇਜਾਜ਼ਤ ਨਹੀਂ) ਇਹੀ ਰੂਟ
 `{ "allowed": false, "error": { "message": "…" } }` ਵਾਪਸ ਕਰਦਾ ਹੈ — ਮੌਜੂਦ-ਪਰ-ਖਾਲੀ `personal`/`provider`
-(ਕੁੰਜੀ ਨੂੰ ਆਗਿਆ ਹੈ, ਪਰ ਹਾਲੇ ਕੁਝ ਪਤਾ ਨਹੀਂ ਲੱਗਿਆ) ਇਨਕਾਰ ਤੋਂ ਵੱਖਰੀ ਸਥਿਤੀ ਹੈ, ਅਤੇ ਸਿਰਫ਼ JSON ਰੂਪ
-ਇਨ੍ਹਾਂ ਵਿਚਕਾਰ ਫ਼ਰਕ ਕਰਦਾ ਹੈ।
+(ਕੁੰਜੀ ਮਨਜ਼ੂਰ ਹੈ, ਹਾਲੇ ਕੁਝ ਪਤਾ ਨਹੀਂ ਲੱਗਿਆ) ਇਨਕਾਰ ਤੋਂ ਇੱਕ ਵੱਖਰੀ ਸਥਿਤੀ ਹੈ, ਅਤੇ ਕੇਵਲ JSON ਰੂਪ
+ਇਨ੍ਹਾਂ ਵਿੱਚ ਫ਼ਰਕ ਕਰਦਾ ਹੈ।
 
-**ਪ੍ਰਮਾਣੀਕਰਨ:** ਕਾਲਰ ਦੀ ਆਪਣੀ ਬੇਅਰਰ API ਕੁੰਜੀ, ਜਿਸਦੀ ਪੁਸ਼ਟੀ `isValidApiKey` ਨਾਲ ਕੀਤੀ ਜਾਂਦੀ ਹੈ — ਇਹ
+**ਪ੍ਰਮਾਣੀਕਰਨ:** ਕਾਲਰ ਦੀ ਆਪਣੀ Bearer API ਕੁੰਜੀ, ਜਿਸਨੂੰ `isValidApiKey` ਨਾਲ ਪ੍ਰਮਾਣਿਤ ਕੀਤਾ ਜਾਂਦਾ ਹੈ — ਇਹ
 ਪ੍ਰਬੰਧਨ ਸਤਹ (`/api/keys/…`) _ਨਹੀਂ_ ਹੈ, ਜੋ `requireManagementAuth` ਦੇ ਪਿੱਛੇ ਹੀ ਰਹਿੰਦੀ ਹੈ।
+
+### ਕੱਚੇ ਬਨਾਮ ਕਟੌਫ਼-ਅਨੁਕੂਲਿਤ ਕੋਟਾ ਪ੍ਰਤੀਸ਼ਤ
+
+`/api/usage/om-usage` ਦੀ ਵਰਤੋਂ ਕਰਦੇ ਸਮੇਂ, ਕਾਲਰਾਂ ਨੂੰ **ਸਧਾਰਨ-ਟੈਕਸਟ ਆਉਟਪੁੱਟ** ਅਤੇ ਸੰਰਚਿਤ **JSON ਆਉਟਪੁੱਟ**
+ਵਿੱਚ ਪੇਸ਼ ਕੀਤੇ ਪ੍ਰਤੀਸ਼ਤਾਂ ਦੇ ਅੰਤਰ ਨੂੰ ਧਿਆਨ ਵਿੱਚ ਰੱਖਣਾ ਚਾਹੀਦਾ ਹੈ:
+
+| ਪੱਖ                 | ਸਧਾਰਨ-ਟੈਕਸਟ ਫਾਰਮੈਟ (`/api/usage/om-usage` / `@@om-usage`)                                          | JSON ਫਾਰਮੈਟ (`?format=json`)                                                    |
+| :------------------ | :------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------ |
+| **ਆਉਟਪੁੱਟ ਫ਼ੀਲਡ**   | `NN% left` (ਉਦਾਹਰਨ ਲਈ, `20% left`)                                                                 | `provider.quotas` / `providers[].quotas`                                        |
+| **ਮਾਪ**             | **ਕਟੌਫ਼-ਅਨੁਕੂਲਿਤ ਵਰਤਣਯੋਗ ਭੱਤਾ**: ਕਟੌਫ਼ ਥ੍ਰੈਸ਼ਹੋਲਡ ਤੋਂ ਉੱਪਰ ਬਾਕੀ ਸਮਰੱਥਾ                             | **ਕੱਚਾ ਅੱਪਸਟ੍ਰੀਮ ਕੋਟਾ**: ਪ੍ਰਦਾਤਾ ਦਾ ਬਿਨਾਂ ਅਨੁਕੂਲਿਤ ਕੀਤਾ ਮਾਪ                     |
+| **ਕਟੌਫ਼ ਸਕੇਲਿੰਗ**   | `effectiveRemainingPercent()` ਰਾਹੀਂ ਸਕੇਲ ਕੀਤਾ ਜਾਂਦਾ ਹੈ, ਤਾਂ ਜੋ ਸੁਰੱਖਿਅਤ ਰਿਜ਼ਰਵ `0% left` ਵਜੋਂ ਦਿਖੇ | ਕੋਈ ਨਹੀਂ (ਪ੍ਰਦਾਤਾ ਵੱਲੋਂ ਰਿਪੋਰਟ ਕੀਤੇ ਕੱਚੇ ਸਨੈਪਸ਼ਾਟ ਮੁੱਲ)                         |
+| **ਥ੍ਰੈਸ਼ਹੋਲਡ ਡਾਟਾ** | ਦਿਖਾਏ ਗਏ ਪ੍ਰਤੀਸ਼ਤ ਵਿੱਚ ਸ਼ਾਮਲ                                                                       | ਹਰ ਕਨੈਕਸ਼ਨ ਲਈ `quotaWindowThresholds` ਵਿੱਚ ਸਟੋਰ ਕੀਤਾ ਜਾਂਦਾ ਹੈ (ਜਾਂ ਸਰਵਰ ਡਿਫਾਲਟ) |
+| **ਮੁੱਖ ਉਪਭੋਗਤਾ**    | ਇੰਟਰਐਕਟਿਵ CLIs, ਟਰਮੀਨਲ ਪ੍ਰੌਂਪਟ, ਮਨੁੱਖੀ ਓਪਰੇਟਰ                                                      | ਪ੍ਰੋਗਰਾਮੈਟਿਕ ਇੰਟੀਗ੍ਰੇਸ਼ਨ, ਡੈਸ਼ਬੋਰਡ, ਵਿਸ਼ਲੇਸ਼ਣ, ਬਿਲਿੰਗ ਟ੍ਰੈਕਰ                    |
+
+#### ਕਟੌਫ਼ ਅਨੁਕੂਲਨ ਫ਼ਾਰਮੂਲਾ
+
+OmniRoute ਅੱਪਸਟ੍ਰੀਮ ਸਮਾਪਤੀ ਨੂੰ ਰੋਕਣ ਲਈ ਸਰਗਰਮ ਕੋਟਾ ਕਟੌਫ਼ਾਂ ਦਾ ਸਮਰਥਨ ਕਰਦਾ ਹੈ (ਜੋ ਕਨੈਕਸ਼ਨ
+`quotaWindowThresholds`, ਪ੍ਰਦਾਤਾ ਡਿਫਾਲਟਾਂ, ਜਾਂ ਗਲੋਬਲ ਲਚਕੀਲਾਪਣ ਸੈਟਿੰਗਾਂ ਰਾਹੀਂ ਕੌਂਫਿਗਰ ਕੀਤੇ ਜਾਂਦੇ ਹਨ)। ਜਦੋਂ ਕਿਸੇ ਕੋਟਾ ਵਿੰਡੋ 'ਤੇ ਕਟੌਫ਼ ਥ੍ਰੈਸ਼ਹੋਲਡ
+(ਉਦਾਹਰਨ ਲਈ, `cutoff = 25%`) ਸਰਗਰਮ ਹੁੰਦਾ ਹੈ, ਤਾਂ ਟੈਕਸਟ ਰੈਂਡਰਰ ਬਾਕੀ ਭੱਤੇ ਦੀ ਗਣਨਾ ਇਸ ਤਰ੍ਹਾਂ ਕਰਦਾ ਹੈ:
+
+- ਜੇ `remaining <= cutoff`: `0%` ਵਾਪਸ ਕਰਦਾ ਹੈ।
+- ਜੇ `remaining > cutoff`: `((remaining - cutoff) / (100 - cutoff)) * 100` ਵਾਪਸ ਕਰਦਾ ਹੈ।
+
+ਫਾਰਮੈਟ ਕੀਤਾ ਟੈਕਸਟ ਆਉਟਪੁੱਟ ਇਸਨੂੰ ਸਭ ਤੋਂ ਨੇੜਲੇ ਪੂਰਨ ਅੰਕ ਤੱਕ ਰਾਊਂਡ ਕਰਦਾ ਹੈ (`Math.round(...)`)।
+
+#### ਵਿਆਖਿਆਤਮਕ ਉਦਾਹਰਨ
+
+ਇੱਕ ਪ੍ਰਦਾਤਾ ਵਿੰਡੋ 'ਤੇ ਵਿਚਾਰ ਕਰੋ ਜਿਸਦੀ **60% ਕੱਚੀ ਵਰਤੋਂ** ਹੈ (ਇਸ ਲਈ **40% ਕੱਚਾ ਬਾਕੀ ਕੋਟਾ**) ਅਤੇ ਜਿਸ ਲਈ
+**25% ਬਾਕੀ-ਕੋਟਾ ਕਟੌਫ਼** ਥ੍ਰੈਸ਼ਹੋਲਡ ਕੌਂਫਿਗਰ ਕੀਤਾ ਗਿਆ ਹੈ:
+
+| ਪ੍ਰਸਤੁਤੀ                       | ਗਣਨਾ                                               |  ਬਾਕੀ   |                  ਸੰਕੇਤਿਤ ਵਰਤੋਂ                   |
+| :----------------------------- | :------------------------------------------------- | :-----: | :----------------------------------------------: |
+| **ਕੱਚਾ JSON (`?format=json`)** | ਅੱਪਸਟ੍ਰੀਮ ਸਨੈਪਸ਼ਾਟ (`quotas[window]`)              | **40%** |                     **60%**                      |
+| **ਟੈਕਸਟ ਫਾਰਮੈਟ (`NN% left`)**  | `((40 - 25) / (100 - 25)) * 100 = (15 / 75) * 100` | **20%** | **80%** (ਜੇ `100 - remaining` ਦੀ ਗਣਨਾ ਕੀਤੀ ਜਾਵੇ) |
+
+- **ਟੈਕਸਟ 20% ਬਾਕੀ ਕਿਉਂ ਦਿਖਾਉਂਦਾ ਹੈ:** ਖਾਤੇ ਵਿੱਚ ਬਚੇ 40% ਭੌਤਿਕ ਕੋਟੇ ਵਿੱਚੋਂ, 25% ਨੂੰ
+  ਕਟੌਫ਼ ਨੀਤੀ ਦੁਆਰਾ ਰਾਖਵਾਂ ਰੱਖਿਆ ਗਿਆ ਹੈ। ਰਾਊਟਰ ਵੱਲੋਂ ਇਸ ਕਨੈਕਸ਼ਨ ਨੂੰ ਰੂਟ ਕਰਨਾ ਬੰਦ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ ਕਾਲਰ ਕੋਲ ਵਰਤਣਯੋਗ 75% ਹੈੱਡਰੂਮ ਵਿੱਚੋਂ ਕੇਵਲ 15%
+  ਬਾਕੀ ਹੈ। ਸਕੇਲਿੰਗ ਇਹ ਯਕੀਨੀ ਬਣਾਉਂਦੀ ਹੈ ਕਿ ਕਨੈਕਸ਼ਨ ਠੀਕ ਉਸੇ ਵੇਲੇ ਸਮਾਪਤੀ (`0% left`) ਦਾ ਸੰਕੇਤ ਦੇਵੇ
+  ਜਦੋਂ ਰੂਟਿੰਗ ਬੰਦ ਹੋਵੇਗੀ।
+- **JSON ਕੱਚੇ ਮੁੱਲਾਂ ਨੂੰ ਕਿਉਂ ਬਰਕਰਾਰ ਰੱਖਦਾ ਹੈ:** JSON ਪੇਲੋਡ ਸਹੀ ਪ੍ਰਦਾਤਾ ਸਨੈਪਸ਼ਾਟ (`UsageSnapshot`)
+  ਵਾਪਸ ਕਰਦਾ ਹੈ, ਤਾਂ ਜੋ ਬਾਹਰੀ ਟੂਲਾਂ ਨੂੰ ਅਸਲੀ ਅੱਪਸਟ੍ਰੀਮ ਵਰਤੋਂ ਅਤੇ ਕਨੈਕਸ਼ਨ-ਪੱਧਰੀ
+  `quotaWindowThresholds` ਤੱਕ ਬਿਨਾਂ ਸਰਵਰ-ਸਾਈਡ ਨੁਕਸਾਨਦਾਇਕ ਸਕੇਲਿੰਗ ਦੇ ਪਹੁੰਚ ਮਿਲੇ।
+
+#### ਉਪਭੋਗਤਾ ਮਾਈਗ੍ਰੇਸ਼ਨ ਮਾਰਗਦਰਸ਼ਨ
+
+ਜੇ ਕਿਸੇ ਬਾਹਰੀ ਇੰਟੀਗ੍ਰੇਸ਼ਨ (ਜਿਵੇਂ ਕਿ ਕੋਈ ਐਡੀਟਰ ਪਲੱਗਇਨ ਜਾਂ ਏਜੰਟ ਐਕਸਟੈਂਸ਼ਨ) ਨੇ ਪਹਿਲਾਂ ਟੈਕਸਟ
+ਐਂਡਪੌਇੰਟ (`NN% left`) ਨੂੰ ਸਕ੍ਰੇਪ ਕੀਤਾ ਅਤੇ ਵਰਤਿਆ ਗਿਆ ਪ੍ਰਤੀਸ਼ਤ `100 - NN` ਵਜੋਂ ਗਿਣਿਆ ਸੀ, ਤਾਂ `?format=json` ਵੱਲ ਮਾਈਗ੍ਰੇਟ ਕਰਨ ਦਾ ਮਤਲਬ ਹੈ:
+
+- ਕੱਚੇ JSON ਮੁੱਲ ਪੜ੍ਹਨਾ **ਅਸਲ ਅੱਪਸਟ੍ਰੀਮ ਖਪਤ** ਨੂੰ ਦਰਸਾਏਗਾ (ਉੱਪਰਲੀ ਉਦਾਹਰਨ ਵਿੱਚ 60% ਵਰਤਿਆ ਗਿਆ)।
+- ਜੇ ਇੰਟੀਗ੍ਰੇਸ਼ਨ ਟੈਕਸਟ ਐਂਡਪੌਇੰਟ ਦੇ ਵਰਤਣਯੋਗ-ਭੱਤਾ ਅਰਥਾਂ ਨੂੰ ਬਰਕਰਾਰ ਰੱਖਣਾ ਚਾਹੁੰਦਾ ਹੈ, ਤਾਂ ਇਹ ਕਨੈਕਸ਼ਨ-ਪੱਧਰੀ ਓਵਰਰਾਈਡਾਂ ਲਈ `quotaWindowThresholds` ਦੀ ਵਰਤੋਂ ਕਰਕੇ
+  ਕਲਾਇੰਟ-ਸਾਈਡ 'ਤੇ ਪ੍ਰਭਾਵਸ਼ਾਲੀ ਬਾਕੀ ਫ਼ਾਰਮੂਲੇ ਦਾ ਮੁਲਾਂਕਣ ਕਰ ਸਕਦਾ ਹੈ।
 
 ---
 
@@ -804,124 +1034,220 @@ X-OmniRoute-No-Cache: true
 
 ## ਡੈਸ਼ਬੋਰਡ ਅਤੇ ਪ੍ਰਬੰਧਨ
 
-ਪ੍ਰਬੰਧਨ ਰੂਟ (`/api/*`, ਜਨਤਕ auth/login ਤੋਂ ਇਲਾਵਾ) ਆਮ inference API ਕੁੰਜੀਆਂ ਦੁਆਰਾ **ਅਧਿਕਾਰਿਤ ਨਹੀਂ** ਹਨ। ਕ੍ਰੈਡੈਂਸ਼ਲ ਪਰਿਵਾਰਾਂ, ਸਕੋਪਾਂ ਅਤੇ curl ਉਦਾਹਰਨਾਂ ਲਈ:
+ਪ੍ਰਬੰਧਨ ਰੂਟ (`/api/*`, ਸਰਵਜਨਕ auth/login ਤੋਂ ਇਲਾਵਾ) ਆਮ inference API ਕੁੰਜੀਆਂ ਦੁਆਰਾ **ਅਧਿਕਾਰਤ ਨਹੀਂ** ਕੀਤੇ ਜਾਂਦੇ।
+ਕ੍ਰੈਡੈਂਸ਼ੀਅਲ ਪਰਿਵਾਰਾਂ, ਸਕੋਪਾਂ ਅਤੇ curl ਉਦਾਹਰਨਾਂ ਲਈ ਵੇਖੋ:
 [ਪ੍ਰਬੰਧਨ ਪ੍ਰਮਾਣੀਕਰਨ](../guides/MANAGEMENT-AUTH.md)।
 
 ### ਪ੍ਰਮਾਣੀਕਰਨ
 
-| ਐਂਡਪੌਇੰਟ                      | ਵਿਧੀ    | ਵੇਰਵਾ                         |
-| ----------------------------- | ------- | ----------------------------- |
-| `/api/auth/login`             | POST    | ਲੌਗਇਨ                         |
-| `/api/auth/logout`            | POST    | ਲੌਗਆਉਟ                        |
-| `/api/settings/require-login` | GET/PUT | ਲੌਗਇਨ ਦੀ ਲੋੜ ਨੂੰ ਚਾਲੂ/ਬੰਦ ਕਰੋ |
+| ਐਂਡਪੌਇੰਟ                      | ਵਿਧੀ     | ਵੇਰਵਾ                                                                                                                                                                                                                                                                                      |
+| ----------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `/api/auth/login`             | POST     | ਲੌਗਇਨ                                                                                                                                                                                                                                                                                      |
+| `/api/auth/logout`            | POST     | ਲੌਗਆਉਟ                                                                                                                                                                                                                                                                                     |
+| `/api/settings/require-login` | GET/POST | ਲੌਗਇਨ ਸਥਿਤੀ (GET, ਸਰਵਜਨਕ)। POST ਪਾਸਵਰਡ ਸੈੱਟ ਕਰਦਾ ਹੈ / ਲੌਗਇਨ ਨੂੰ ਚਾਲੂ ਜਾਂ ਬੰਦ ਕਰਦਾ ਹੈ: ਪਾਸਵਰਡ ਮੌਜੂਦ ਹੋਣ ਤੋਂ ਬਾਅਦ ਸਿਰਫ਼ ਆਪਰੇਟਰ ਲਈ (ਡੈਸ਼ਬੋਰਡ ਸੈਸ਼ਨ, ਸਥਾਨਕ CLI, ਜਾਂ ਲੌਗਇਨ ਅਸਮਰੱਥ — API ਕੁੰਜੀਆਂ ਅਤੇ `oma_` ਟੋਕਨਾਂ ਨੂੰ `403` ਮਿਲਦਾ ਹੈ); ਡੈਸ਼ਬੋਰਡ ਸੈਸ਼ਨ ਪਾਸਵਰਡ ਬਦਲਣ ਲਈ `currentPassword` ਭੇਜਦਾ ਹੈ |
 
 ### ਪ੍ਰਦਾਤਾ ਪ੍ਰਬੰਧਨ
 
-| ਐਂਡਪੌਇੰਟ                                | ਵਿਧੀ                  | ਵੇਰਵਾ                                                                                                                                    |
-| --------------------------------------- | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/providers`                        | GET/POST              | ਪ੍ਰਦਾਤਾਵਾਂ ਦੀ ਸੂਚੀ ਵੇਖੋ / ਬਣਾਓ                                                                                                           |
-| `/api/providers/[id]`                   | GET/PUT/DELETE        | ਪ੍ਰਦਾਤਾ ਦਾ ਪ੍ਰਬੰਧਨ ਕਰੋ                                                                                                                   |
-| `/api/providers/[id]/test`              | POST                  | ਪ੍ਰਦਾਤਾ ਕਨੈਕਸ਼ਨ ਦੀ ਜਾਂਚ ਕਰੋ                                                                                                              |
-| `/api/providers/[id]/models`            | GET                   | ਪ੍ਰਦਾਤਾ ਮਾਡਲਾਂ ਦੀ ਸੂਚੀ ਵੇਖੋ                                                                                                              |
-| `/api/providers/validate`               | POST                  | ਪ੍ਰਦਾਤਾ ਸੰਰਚਨਾ ਨੂੰ ਪ੍ਰਮਾਣਿਤ ਕਰੋ                                                                                                          |
-| `/api/providers/bulk`                   | POST                  | ਇੱਕ ਪ੍ਰਦਾਤਾ ਲਈ API ਕੁੰਜੀਆਂ ਵੱਡੀ ਗਿਣਤੀ ਵਿੱਚ ਸ਼ਾਮਲ ਕਰੋ                                                                                     |
-| `/api/providers/import`                 | POST                  | ਪਾਰਸ ਕੀਤੀ CSV/JSON ਫ਼ਾਈਲ ਤੋਂ ਵੱਖ-ਵੱਖ ਕਿਸਮਾਂ ਦੇ ਪ੍ਰਦਾਤਾਵਾਂ ਦੀ ਸੂਚੀ ਆਯਾਤ ਕਰੋ (#6836); ਹਰ ਕਤਾਰ ਲਈ ਅੰਸ਼ਕ-ਅਸਫਲਤਾ ਨਤੀਜੇ                        |
-| `/api/provider-nodes*`                  | ਵੱਖ-ਵੱਖ               | ਪ੍ਰਦਾਤਾ ਨੋਡ ਪ੍ਰਬੰਧਨ                                                                                                                      |
-| `/api/provider-models`                  | GET/POST/PATCH/DELETE | ਕਸਟਮ ਮਾਡਲ (ਸ਼ਾਮਲ ਕਰੋ, ਅੱਪਡੇਟ ਕਰੋ, ਲੁਕਾਓ/ਦਿਖਾਓ, ਮਿਟਾਓ)                                                                                    |
-| `/api/provider-models/validate-and-add` | POST                  | ਪ੍ਰਬੰਧਨ-ਪ੍ਰਮਾਣਿਤ, ਚੋਣਯੋਗ ਸਖ਼ਤ-ਕਨੈਕਸ਼ਨ ਪ੍ਰਮਾਣੀਕਰਨ ਅਤੇ ਐਟਾਮਿਕ ਕਸਟਮ-ਮਾਡਲ ਰਜਿਸਟ੍ਰੇਸ਼ਨ; [ਮਾਡਲ ਪ੍ਰਮਾਣੀਕਰਨ](../guides/MODEL-VALIDATION.md) ਵੇਖੋ |
+| ਐਂਡਪੌਇੰਟ                                | ਵਿਧੀ                      | ਵੇਰਵਾ                                                                                                                                        |
+| --------------------------------------- | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/providers`                        | GET/POST                  | ਪ੍ਰਦਾਤਾਵਾਂ ਦੀ ਸੂਚੀ ਦਿਖਾਓ / ਬਣਾਓ                                                                                                              |
+| `/api/providers/[id]`                   | GET/PUT/DELETE            | ਕਿਸੇ ਪ੍ਰਦਾਤਾ ਦਾ ਪ੍ਰਬੰਧਨ ਕਰੋ                                                                                                                  |
+| `/api/providers/[id]/test`              | POST                      | ਪ੍ਰਦਾਤਾ ਕਨੈਕਸ਼ਨ ਦੀ ਜਾਂਚ ਕਰੋ                                                                                                                  |
+| `/api/providers/[id]/models`            | GET                       | ਪ੍ਰਦਾਤਾ ਮਾਡਲਾਂ ਦੀ ਸੂਚੀ ਦਿਖਾਓ                                                                                                                 |
+| `/api/providers/validate`               | POST                      | ਪ੍ਰਦਾਤਾ ਸੰਰਚਨਾ ਦੀ ਪੁਸ਼ਟੀ ਕਰੋ                                                                                                                 |
+| `/api/providers/bulk`                   | POST                      | ਇੱਕ ਪ੍ਰਦਾਤਾ ਲਈ API ਕੁੰਜੀਆਂ ਇਕੱਠੀਆਂ ਸ਼ਾਮਲ ਕਰੋ                                                                                                 |
+| `/api/providers/import`                 | POST                      | ਪਾਰਸ ਕੀਤੀ CSV/JSON ਫ਼ਾਈਲ ਤੋਂ ਵੱਖ-ਵੱਖ ਕਿਸਮਾਂ ਦੇ ਪ੍ਰਦਾਤਾਵਾਂ ਦੀ ਸੂਚੀ ਆਯਾਤ ਕਰੋ (#6836); ਹਰ ਕਤਾਰ ਲਈ ਅੰਸ਼ਕ-ਅਸਫਲਤਾ ਨਤੀਜੇ                            |
+| `/api/provider-nodes*`                  | ਵੱਖ-ਵੱਖ                   | ਪ੍ਰਦਾਤਾ ਨੋਡ ਪ੍ਰਬੰਧਨ                                                                                                                          |
+| `/api/provider-models`                  | GET/POST/PUT/PATCH/DELETE | ਕਸਟਮ ਮਾਡਲ ਅਤੇ ਪ੍ਰਤੀ-ਮਾਡਲ ਓਵਰਰਾਈਡ (ਸ਼ਾਮਲ ਕਰੋ, ਅੱਪਡੇਟ ਕਰੋ, ਲੁਕਾਓ/ਦਿਖਾਓ, ਮਿਟਾਓ)                                                                 |
+| `/api/provider-models/validate-and-add` | POST                      | ਪ੍ਰਬੰਧਨ-ਪ੍ਰਮਾਣੀਕ੍ਰਿਤ, ਚੋਣਵੇਂ ਸਖ਼ਤ-ਕਨੈਕਸ਼ਨ ਪ੍ਰਮਾਣੀਕਰਨ ਅਤੇ ਐਟਾਮਿਕ ਕਸਟਮ-ਮਾਡਲ ਰਜਿਸਟ੍ਰੇਸ਼ਨ; [ਮਾਡਲ ਪ੍ਰਮਾਣੀਕਰਨ](../guides/MODEL-VALIDATION.md) ਵੇਖੋ |
 
-### OAuth ਪ੍ਰਵਾਹ
+ਸਿੰਕ/ਆਯਾਤ ਕੀਤੇ ਮਾਡਲਾਂ ਲਈ, `PUT /api/provider-models` `provider`, `modelId`, ਅਤੇ
+`maxOutputTokenOverride` ਸਵੀਕਾਰ ਕਰਦਾ ਹੈ: ਇੱਕ ਧਨਾਤਮਕ ਪੂਰਨ ਅੰਕ ਮੈਨੁਅਲ ਆਉਟਪੁੱਟ-ਟੋਕਨ ਸੀਮਾ ਸੈੱਟ ਕਰਦਾ ਹੈ, ਅਤੇ `null`
+ਡਿਫਾਲਟ ਨੂੰ ਮੁੜ-ਬਹਾਲ ਕਰਨ ਲਈ ਇਸ ਨੂੰ ਹਟਾ ਦਿੰਦਾ ਹੈ। `GET /api/provider-models?provider=<provider>` ਇਹ ਮੁੱਲ
+`modelOutputOverrides` ਵਿੱਚ ਵਾਪਸ ਕਰਦਾ ਹੈ, ਜਿਸ ਵਿੱਚ ਕਸਟਮ-ਮਾਡਲ ਕਤਾਰ ਤੋਂ ਬਿਨਾਂ ਵਾਲੇ ਮਾਡਲ ਵੀ ਸ਼ਾਮਲ ਹਨ। ਇਹ ਓਵਰਰਾਈਡ
+ਰਨਟਾਈਮ `max_output_tokens` ਸਮਰੱਥਾ ਦੀ ਵਰਤੋਂ ਕਰਦਾ ਹੈ ਅਤੇ ਮਾਡਲ ਦੇ ਮੁੜ-ਸਿੰਕ ਹੋਣ ਤੋਂ ਬਾਅਦ ਵੀ ਕਾਇਮ ਰਹਿੰਦਾ ਹੈ। OpenAI-ਅਨੁਕੂਲ
+ਪ੍ਰਦਾਤਾ ਪੰਨਾ ਉਹੀ ਸੰਪਾਦਨ/ਹਟਾਉਣ ਨਿਯੰਤਰਣ ਮੁਹੱਈਆ ਕਰਦਾ ਹੈ ਅਤੇ ਸਪਸ਼ਟ vision ਸਹਾਇਤਾ ਵਾਲੇ ਮਾਡਲਾਂ ਨੂੰ ਚਿੰਨ੍ਹਿਤ ਕਰਦਾ ਹੈ।
 
-| ਐਂਡਪੌਇੰਟ                         | ਵਿਧੀ    | ਵੇਰਵਾ                 |
-| -------------------------------- | ------- | --------------------- |
-| `/api/oauth/[provider]/[action]` | ਵੱਖ-ਵੱਖ | ਪ੍ਰਦਾਤਾ-ਵਿਸ਼ੇਸ਼ OAuth |
+ਕਸਟਮ Chat Completions ਨੋਡ ਸਪਸ਼ਟ reasoning opt-outs ਨੂੰ ਅੱਪਸਟ੍ਰੀਮ ਬੈਕਐਂਡ ਮੁਤਾਬਕ ਅਨੁਕੂਲ ਬਣਾਉਂਦੇ ਹਨ। ਇੱਕ
+ਸਫਲ ਕਨੈਕਸ਼ਨ ਜਾਂਚ ਹਰ ਉਸ ਸਟੀਕ ਮਾਡਲ ID ਲਈ ਆਪਣੇ-ਆਪ chat-template ਨਿਯੰਤਰਣ ਚੁਣਦੀ ਹੈ
+ਜਿਸਦੀ `/models` ਐਂਟਰੀ ਕੋਈ ਮਾਨਤਾ-ਪ੍ਰਾਪਤ `owned_by` ਮੁੱਲ ਸਾਬਤ ਕਰਦੀ ਹੈ: `vllm`, `sglang`, ਜਾਂ `llamacpp`।
+ਪਾਰਦਰਸ਼ੀ OpenAI-ਅਨੁਕੂਲ ਰੈਪਰ ਮੂਲ ਮਾਡਲ ਐਂਟਰੀ ਨੂੰ ਇੱਕ ਨੇਸਟ ਕੀਤੇ
+`openai` ਆਬਜੈਕਟ ਅੰਦਰ ਸੁਰੱਖਿਅਤ ਰੱਖ ਸਕਦੇ ਹਨ; ਖੋਜ ਇਸ ਤਰ੍ਹਾਂ ਦੇ ਵੱਧ ਤੋਂ ਵੱਧ ਤਿੰਨ ਆਵਰਣਾਂ ਦੀ ਪਾਲਣਾ ਕਰਦੀ ਹੈ। ਗੁੰਮ, ਅਣਜਾਣ ਜਾਂ
+ਟਕਰਾਉਂਦੀ ਮਾਲਕੀ ਵਾਲੇ ਮਾਡਲ ਆਮ OpenAI ਵਿਹਾਰ ਕਾਇਮ ਰੱਖਦੇ ਹਨ। ਖੋਜ ਮੌਜੂਦਾ ਕੈਟਾਲਾਗ ਬੇਨਤੀ ਨੂੰ ਮੁੜ ਵਰਤਦੀ ਹੈ,
+ਕੋਈ completion ਟੋਕਨ ਨਹੀਂ ਬਣਾਉਂਦੀ, ਅਤੇ ਕਨੈਕਸ਼ਨ ਐਂਡਪੌਇੰਟ ਬਦਲਣ 'ਤੇ ਅਵੈਧ ਹੋ ਜਾਂਦੀ ਹੈ।
 
-### ਰੂਟਿੰਗ ਅਤੇ ਸੰਰਚਨਾ
+ਉਸ ਬੈਕਐਂਡ ਲਈ ਵਿਹਾਰ ਨੂੰ ਸਥਿਰ ਕਰਨ ਵਾਸਤੇ ਜੋ ਇਹ ਮੈਟਾਡਾਟਾ ਉਪਲਬਧ ਨਹੀਂ ਕਰਦਾ, ਮੌਜੂਦਾ ਅੰਸ਼ਕ
+ਪ੍ਰਦਾਤਾ ਅੱਪਡੇਟ API ਦੀ ਵਰਤੋਂ ਕਰੋ:
 
-| ਐਂਡਪੌਇੰਟ              | ਵਿਧੀ     | ਵੇਰਵਾ                           |
-| --------------------- | -------- | ------------------------------- |
-| `/api/models/alias`   | GET/POST | ਮਾਡਲ ਉਪਨਾਮ                      |
-| `/api/models/catalog` | GET      | ਪ੍ਰਦਾਤਾ + ਕਿਸਮ ਅਨੁਸਾਰ ਸਾਰੇ ਮਾਡਲ |
-| `/api/combos*`        | ਵੱਖ-ਵੱਖ  | ਕੌਂਬੋ ਪ੍ਰਬੰਧਨ                   |
-| `/api/keys*`          | ਵੱਖ-ਵੱਖ  | API ਕੁੰਜੀ ਪ੍ਰਬੰਧਨ               |
-| `/api/pricing`        | GET      | ਮਾਡਲ ਕੀਮਤ-ਨਿਰਧਾਰਨ               |
+```json
+{
+  "providerSpecificData": {
+    "reasoningControl": "chat-template"
+  }
+}
+```
+
+ਉਹ ਬਾਡੀ `PUT /api/providers/<connection-id>` ਨਾਲ ਭੇਜੋ। ਉਸ ਕਨੈਕਸ਼ਨ 'ਤੇ, `none` ਦੀ ਸਪਸ਼ਟ
+ਰੀਜ਼ਨਿੰਗ ਐਫ਼ਰਟ ਨੂੰ `chat_template_kwargs.thinking=false` ਅਤੇ
+`chat_template_kwargs.enable_thinking=false` ਵਜੋਂ ਭੇਜਿਆ ਜਾਂਦਾ ਹੈ। ਸਪਸ਼ਟ ਮੂਲ ਟੈਂਪਲੇਟ ਮੁੱਲ ਅਧਿਕਾਰਤ ਰਹਿੰਦੇ ਹਨ,
+ਜਦੋਂ ਤੱਕ ਕੋਈ ਸਰਵਰ-ਸਾਈਡ ਰੀਜ਼ਨਿੰਗ ਨਿਯਮ ਕਿਸੇ ਐਫ਼ਰਟ ਨੂੰ ਲਾਜ਼ਮੀ ਨਾ ਕਰੇ। ਇਹ ਸੈਟਿੰਗ ਸਿਰਫ਼ ਉਦੋਂ ਲਾਗੂ ਹੁੰਦੀ ਹੈ ਜਦੋਂ ਕੋਈ ਕਸਟਮ
+OpenAI-ਅਨੁਕੂਲ ਕਨੈਕਸ਼ਨ Chat Completions ਬਾਡੀ ਡਿਸਪੈਚ ਕਰਦਾ ਹੈ; Responses ਬੇਨਤੀਆਂ ਅਤੇ ਆਮ
+ਪ੍ਰੋਵਾਈਡਰ ਆਪਣੀ ਮੂਲ ਬੇਨਤੀ ਬਣਤਰ ਕਾਇਮ ਰੱਖਦੇ ਹਨ। ਆਮ OpenAI
+`reasoning_effort` ਪਾਸਥਰੂ ਨੂੰ ਲਾਜ਼ਮੀ ਕਰਨ ਲਈ `reasoningControl` ਨੂੰ `openai` 'ਤੇ ਸੈੱਟ ਕਰੋ, ਜਾਂ ਆਟੋਮੈਟਿਕ ਖੋਜ ਵਰਤਣ ਲਈ ਇਸਨੂੰ ਛੱਡ ਦਿਓ/`null` 'ਤੇ ਸੈੱਟ ਕਰੋ।
+
+Claude Code ਆਟੋ-ਮੋਡ ਕਲਾਸੀਫਾਇਰ ਬੇਨਤੀਆਂ ਵਿੱਚ ਜਦੋਂ ਕੋਈ ਸਪਸ਼ਟ ਰੀਜ਼ਨਿੰਗ ਕੰਟਰੋਲ ਨਹੀਂ ਹੁੰਦੇ, ਤਾਂ ਮੂਲ ਥਿੰਕਿੰਗ ਡਿਫਾਲਟ ਤੌਰ 'ਤੇ ਅਸਮਰੱਥ ਰਹਿੰਦੀ ਹੈ।
+ਖੋਜ ਮਾਡਲ ਨਾਮਾਂ ਜਾਂ ਕੰਪਲੀਸ਼ਨ ਸੀਮਾਵਾਂ ਦੀ ਬਜਾਏ Claude-ਫਾਰਮੈਟ
+ਬੇਨਤੀਆਂ ਵਿੱਚ ਕਲਾਸੀਫਾਇਰ ਦੇ ਸਿਸਟਮ ਮਾਰਕਰ ਦੀ ਵਰਤੋਂ ਕਰਦੀ ਹੈ। ਸਪਸ਼ਟ ਬਾਡੀ ਕੰਟਰੋਲ, ਸਮਰਥਿਤ ਐਫ਼ਰਟ/ਥਿੰਕਿੰਗ
+ਹੈਡਰ, ਰਾਊਟਿੰਗ ਨਿਯਮ ਅਤੇ ਰਿਜ਼ਾਲਵ ਕੀਤੀ ਮਾਡਲ ਐਫ਼ਰਟ ਆਪਣੀ ਮੌਜੂਦਾ ਤਰਜੀਹ ਕਾਇਮ ਰੱਖਦੇ ਹਨ। ਕਲਾਸੀਫਾਇਰ ਦੇ
+ਦੋਵੇਂ ਪੜਾਅ ਆਪਣੇ ਪ੍ਰੌਂਪਟ, ਕੰਪਲੀਸ਼ਨ ਸੀਮਾਵਾਂ, ਸਟਾਪ ਸੀਕਵੈਂਸ ਅਤੇ ਅਸਲ ਅੱਪਸਟ੍ਰੀਮ ਅਨੁਮਤੀ
+ਫ਼ੈਸਲੇ ਕਾਇਮ ਰੱਖਦੇ ਹਨ; ਦੂਜਾ ਪੜਾਅ ਹਾਲੇ ਵੀ ਆਪਣੀ ਮੰਗੀ ਹੋਈ ਦਿੱਖਣਯੋਗ ਰੀਜ਼ਨਿੰਗ ਨੂੰ ਆਮ ਟੈਕਸਟ ਵਜੋਂ ਤਿਆਰ ਕਰ ਸਕਦਾ ਹੈ।
+
+### OAuth ਫ਼ਲੋ
+
+| ਐਂਡਪੌਇੰਟ                         | ਢੰਗ     | ਵੇਰਵਾ                   |
+| -------------------------------- | ------- | ----------------------- |
+| `/api/oauth/[provider]/[action]` | ਵੱਖ-ਵੱਖ | ਪ੍ਰੋਵਾਈਡਰ-ਵਿਸ਼ੇਸ਼ OAuth |
+
+### ਰਾਊਟਿੰਗ ਅਤੇ ਕੌਂਫਿਗ
+
+| ਐਂਡਪੌਇੰਟ              | ਢੰਗ      | ਵੇਰਵਾ                             |
+| --------------------- | -------- | --------------------------------- |
+| `/api/models/alias`   | GET/POST | ਮਾਡਲ ਉਪਨਾਮ                        |
+| `/api/models/catalog` | GET      | ਪ੍ਰੋਵਾਈਡਰ + ਕਿਸਮ ਅਨੁਸਾਰ ਸਾਰੇ ਮਾਡਲ |
+| `/api/combos*`        | ਵੱਖ-ਵੱਖ  | ਕੌਂਬੋ ਪ੍ਰਬੰਧਨ                     |
+| `/api/keys*`          | ਵੱਖ-ਵੱਖ  | API ਕੁੰਜੀ ਪ੍ਰਬੰਧਨ                 |
+| `/api/pricing`        | GET      | ਮਾਡਲ ਕੀਮਤਾਂ                       |
 
 ### ਵਰਤੋਂ ਅਤੇ ਵਿਸ਼ਲੇਸ਼ਣ
 
-| ਐਂਡਪੌਇੰਟ                         | ਵਿਧੀ            | ਵੇਰਵਾ                                                                                                                                                                                                                                                                            |
-| -------------------------------- | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/usage/history`             | GET             | ਵਰਤੋਂ ਦਾ ਇਤਿਹਾਸ                                                                                                                                                                                                                                                                  |
-| `/api/usage/logs`                | GET             | ਵਰਤੋਂ ਲੌਗ                                                                                                                                                                                                                                                                        |
-| `/api/usage/request-logs`        | GET             | ਬੇਨਤੀ-ਪੱਧਰੀ ਲੌਗ                                                                                                                                                                                                                                                                  |
-| `/api/usage/[connectionId]`      | GET             | ਪ੍ਰਤੀ-ਕਨੈਕਸ਼ਨ ਵਰਤੋਂ                                                                                                                                                                                                                                                              |
-| `/api/usage/token-limits`        | GET/POST/DELETE | ਪ੍ਰਤੀ-API-ਕੁੰਜੀ ਟੋਕਨ-ਸੀਮਾ ਬਜਟ                                                                                                                                                                                                                                                    |
-| `/api/usage/model-latency-stats` | GET             | ਪ੍ਰਤੀ-ਪ੍ਰਦਾਤਾ/ਮਾਡਲ ਰੋਲਿੰਗ ਲੇਟੈਂਸੀ ਦਾ ਸਮੁੱਚਾ ਅੰਕੜਾ (ਔਸਤ/p50/p95/p99, ਸਫਲਤਾ ਦਰ); ਫਿਲਟਰ: `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                            |
-| `/api/usage/cache-health`        | GET             | `call_logs` ਉੱਤੇ ਪ੍ਰੌਂਪਟ-ਕੈਸ਼ ਦੀ ਸਿਹਤ ਦਾ ਸਾਰ — ਲਿਖਣ/ਪੜ੍ਹਨ ਅਨੁਪਾਤ, p50/p90/p99 ਲਿਖਤ-ਆਕਾਰ ਵੰਡ, ਭਾਰੀ-ਲਿਖਤ ਕੇਂਦਰੀਕਰਨ, ਪ੍ਰਤੀ-ਮਾਡਲ ਵੰਡ, ਅਤੇ `healthy`/`degraded`/`thrash`/`no-data` ਨਿਰਣਾ; ਕਵੇਰੀ ਪੈਰਾਮੀਟਰ `range` (`1h`\|`24h`\|`7d`\|`30d`, ਡਿਫੌਲਟ `24h`) ਅਤੇ ਵਿਕਲਪਿਕ `model` (#8827) |
+| ਐਂਡਪੌਇੰਟ                         | ਢੰਗ             | ਵੇਰਵਾ                                                                                                                                                                                                                                                                          |
+| -------------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `/api/usage/history`             | GET             | ਵਰਤੋਂ ਇਤਿਹਾਸ                                                                                                                                                                                                                                                                   |
+| `/api/usage/logs`                | GET             | ਵਰਤੋਂ ਲੌਗ                                                                                                                                                                                                                                                                      |
+| `/api/usage/request-logs`        | GET             | ਬੇਨਤੀ-ਪੱਧਰੀ ਲੌਗ                                                                                                                                                                                                                                                                |
+| `/api/usage/[connectionId]`      | GET             | ਪ੍ਰਤੀ-ਕਨੈਕਸ਼ਨ ਵਰਤੋਂ                                                                                                                                                                                                                                                            |
+| `/api/usage/token-limits`        | GET/POST/DELETE | ਪ੍ਰਤੀ-API-ਕੁੰਜੀ ਟੋਕਨ-ਸੀਮਾ ਬਜਟ                                                                                                                                                                                                                                                  |
+| `/api/usage/model-latency-stats` | GET             | ਰੋਲਿੰਗ ਪ੍ਰਤੀ-ਪ੍ਰੋਵਾਈਡਰ/ਮਾਡਲ ਲੇਟੈਂਸੀ ਸਮੁੱਚਾ (avg/p50/p95/p99, ਸਫਲਤਾ ਦਰ); ਫ਼ਿਲਟਰ: `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                                |
+| `/api/usage/cache-health`        | GET             | `call_logs` ਵਿੱਚ ਪ੍ਰੌਂਪਟ-ਕੈਸ਼ ਸਿਹਤ ਸੰਖੇਪ — ਲਿਖਣ/ਪੜ੍ਹਨ ਅਨੁਪਾਤ, p50/p90/p99 ਲਿਖਤ-ਆਕਾਰ ਵੰਡ, ਭਾਰੀ-ਲਿਖਤ ਸੰਘਣਤਾ, ਪ੍ਰਤੀ-ਮਾਡਲ ਵੰਡ, ਅਤੇ ਇੱਕ `healthy`/`degraded`/`thrash`/`no-data` ਫ਼ੈਸਲਾ; ਕਵੇਰੀ ਪੈਰਾਮੀਟਰ `range` (`1h`\|`24h`\|`7d`\|`30d`, ਡਿਫਾਲਟ `24h`) ਅਤੇ ਵਿਕਲਪਿਕ `model` (#8827) |
+
+### API ਕੁੰਜੀ ਅਨੁਮਤੀਆਂ
+
+`PATCH /api/keys/{id}` ਕਿਸੇ ਮੌਜੂਦਾ ਕੁੰਜੀ ਦੀਆਂ ਅਨੁਮਤੀਆਂ ਨੂੰ ਅੱਪਡੇਟ ਕਰਦਾ ਹੈ। ਹਰ `/api/keys*` ਰੂਟ ਵਾਂਗ ਇਸਨੂੰ ਪ੍ਰਬੰਧਨ ਅਧਿਕਾਰਤਾ ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ ([ਪ੍ਰਬੰਧਨ ਪ੍ਰਮਾਣੀਕਰਨ](../guides/MANAGEMENT-AUTH.md) ਵੇਖੋ), ਨਾ ਕਿ ਕਿਸੇ ਇਨਫ਼ਰੈਂਸ ਕੁੰਜੀ ਦੀ। ਸਿਰਫ਼ ਉਹੀ ਫ਼ੀਲਡ ਭੇਜੋ ਜਿਨ੍ਹਾਂ ਨੂੰ ਤੁਸੀਂ ਬਦਲਣਾ ਚਾਹੁੰਦੇ ਹੋ; ਇਨ੍ਹਾਂ ਵਿੱਚੋਂ ਕੋਈ ਵੀ ਫ਼ੀਲਡ ਨਾ ਰੱਖਣ ਵਾਲੀ ਬੇਨਤੀ ਨੂੰ `No valid fields to update` ਨਾਲ ਰੱਦ ਕਰ ਦਿੱਤਾ ਜਾਂਦਾ ਹੈ। ਸਵੀਕਾਰ ਕੀਤੀਆਂ ਫ਼ੀਲਡਾਂ ਨੂੰ `src/shared/validation/schemas/keys.ts` ਵਿੱਚ `updateKeyPermissionsSchema` ਦੁਆਰਾ ਪਰਿਭਾਸ਼ਿਤ ਕੀਤਾ ਗਿਆ ਹੈ।
+
+| ਫੀਲਡ                                        | ਕਿਸਮ                                                                      | ਨੋਟਸ                                                                                                                                              |
+| ------------------------------------------- | ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                                      | string, 1-200 ਅੱਖਰ                                                        |                                                                                                                                                   |
+| `isActive`                                  | boolean                                                                   |                                                                                                                                                   |
+| `isBanned`                                  | boolean                                                                   |                                                                                                                                                   |
+| `expiresAt`                                 | ISO 8601 datetime ਜਾਂ `null`                                              | `null` ਮਿਆਦ ਸਮਾਪਤੀ ਨੂੰ ਹਟਾ ਦਿੰਦਾ ਹੈ                                                                                                               |
+| `modelAccessMode`                           | `all` \| `restricted`                                                     | ਜਦੋਂ ਮੋਡ `all` ਹੋਵੇ, ਤਾਂ `allowedModels` ਖਾਲੀ ਹੋਣਾ ਲਾਜ਼ਮੀ ਹੈ                                                                                      |
+| `allowedModels`, `blockedModels`            | strings ਦੀ array, ਵੱਧ ਤੋਂ ਵੱਧ 1000                                        |                                                                                                                                                   |
+| `allowedCombos`                             | strings ਦੀ array, ਵੱਧ ਤੋਂ ਵੱਧ 500                                         | ਇਹ ਨਿਯੰਤਰਿਤ ਕਰਦਾ ਹੈ ਕਿ key ਕਿਹੜੇ combos ਨੂੰ ਕਾਲ ਕਰ ਸਕਦੀ ਹੈ; ਸਿੱਧੇ models ਨੂੰ `modelAccessMode` / `allowedModels` ਦੁਆਰਾ ਨਿਯੰਤਰਿਤ ਕੀਤਾ ਜਾਂਦਾ ਹੈ     |
+| `connectionAccessMode`                      | `all` \| `restricted`                                                     | `restricted` ਹੋਣ 'ਤੇ `allowedConnections` ਗੈਰ-ਖਾਲੀ ਅਤੇ `all` ਹੋਣ 'ਤੇ ਖਾਲੀ ਹੋਣਾ ਲਾਜ਼ਮੀ ਹੈ                                                          |
+| `allowedConnections`                        | UUIDs ਦੀ array, ਵੱਧ ਤੋਂ ਵੱਧ 100                                           |                                                                                                                                                   |
+| `allowAutoCombos`                           | boolean                                                                   | `false` ਇਸ key ਨਾਲ `auto/*` models ਲਈ ਬੇਨਤੀਆਂ ਨੂੰ ਅਸਵੀਕਾਰ ਕਰਦਾ ਹੈ; ਜਿਨ੍ਹਾਂ keys ਨੇ ਇਸਨੂੰ ਕਦੇ ਸੈੱਟ ਨਹੀਂ ਕੀਤਾ, ਉਹਨਾਂ ਨੂੰ ਆਗਿਆ ਹੈ                    |
+| `catalogScope`                              | `all` \| `combos` \| `models`                                             | ਇਹ ਨਿਰਧਾਰਤ ਕਰਦਾ ਹੈ ਕਿ ਇਸ key ਲਈ `GET /v1/models` ਕੀ ਸੂਚੀਬੱਧ ਕਰਦਾ ਹੈ (ਕੇਵਲ combos, ਕੇਵਲ models, ਜਾਂ ਦੋਵੇਂ); ਇਹ ਨਹੀਂ ਬਦਲਦਾ ਕਿ key ਕੀ ਕਾਲ ਕਰ ਸਕਦੀ ਹੈ |
+| `forcedModel`                               | ਵੱਧ ਤੋਂ ਵੱਧ 300 ਅੱਖਰਾਂ ਦੀ string, ਜਾਂ `null`                              | chat ਬੇਨਤੀਆਂ ਨੂੰ `X-Route-Model` ਅਤੇ `body.model` ਨਾਲੋਂ ਤਰਜੀਹ ਦੇ ਕੇ ਇਸ model/combo ਵੱਲ ਰੂਟ ਕਰਦਾ ਹੈ; key ਦੀਆਂ ਸੀਮਾਵਾਂ ਫਿਰ ਵੀ ਲਾਗੂ ਹੁੰਦੀਆਂ ਹਨ       |
+| `noLog`, `autoResolve`                      | boolean                                                                   |                                                                                                                                                   |
+| `throttleDelayMs`                           | integer, 0-300000                                                         |                                                                                                                                                   |
+| `maxSessions`                               | integer, 0-10000                                                          |                                                                                                                                                   |
+| `rateLimits`                                | `{ limit, window }` ਦੀ array (ਧਨਾਤਮਕ integers, ਵੱਧ ਤੋਂ ਵੱਧ 50) ਜਾਂ `null` | `null` ਸੀਮਾਵਾਂ ਨੂੰ ਹਟਾ ਦਿੰਦਾ ਹੈ                                                                                                                   |
+| `accessSchedule`                            | schedule object ਜਾਂ `null`                                                | `null` schedule ਨੂੰ ਹਟਾ ਦਿੰਦਾ ਹੈ                                                                                                                  |
+| `scopes`                                    | strings ਦੀ array, ਵੱਧ ਤੋਂ ਵੱਧ 32                                          |                                                                                                                                                   |
+| `allowedEndpoints`                          | strings ਦੀ array, ਵੱਧ ਤੋਂ ਵੱਧ 20                                          |                                                                                                                                                   |
+| `streamDefaultMode`                         | `legacy` \| `json`                                                        |                                                                                                                                                   |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                      | [ਹਰ-key cache bypass](#per-key-cache-bypass) ਵੇਖੋ                                                                                                 |
+| `compressionEnabled`                        | boolean                                                                   |                                                                                                                                                   |
+| `codexServiceMode`                          | Codex service modes ਵਿੱਚੋਂ ਇੱਕ                                            |                                                                                                                                                   |
+| `disableNonPublicModels`                    | boolean                                                                   |                                                                                                                                                   |
+| `allowUsageCommand`                         | boolean                                                                   |                                                                                                                                                   |
+| `usageLimitEnabled`                         | boolean                                                                   |                                                                                                                                                   |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | number >= 0 ਜਾਂ `null`                                                    |                                                                                                                                                   |
+| `chaosModeEnabled`                          | boolean                                                                   |                                                                                                                                                   |
+
+```bash
+curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
+  -H "Authorization: Bearer <management-credential>" \
+  -H "Content-Type: application/json" \
+  -d '{ "allowAutoCombos": false, "catalogScope": "combos" }'
+```
 
 ### ਸੈਟਿੰਗਾਂ
 
-| ਐਂਡਪੌਇੰਟ                              | ਵਿਧੀ          | ਵੇਰਵਾ                                                                                                                                                                              |
-| ------------------------------------- | ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/settings`                       | GET/PUT/PATCH | ਆਮ ਸੈਟਿੰਗਾਂ                                                                                                                                                                        |
-| `/api/settings/proxy`                 | GET/PUT       | ਨੈੱਟਵਰਕ ਪ੍ਰੌਕਸੀ ਸੰਰਚਨਾ                                                                                                                                                             |
-| `/api/settings/proxy/test`            | POST          | ਪ੍ਰੌਕਸੀ ਕਨੈਕਸ਼ਨ ਦੀ ਜਾਂਚ ਕਰੋ                                                                                                                                                        |
-| `/api/settings/ip-filter`             | GET/PUT       | IP ਮਨਜ਼ੂਰ-ਸੂਚੀ/ਬਲੌਕ-ਸੂਚੀ                                                                                                                                                           |
-| `/api/settings/thinking-budget`       | GET/PUT       | ਸੋਚਣ/ਤਰਕ ਕਰਨ ਦੀ **ਬੇਨਤੀ** ਮੁੜ-ਲਿਖਣ ਵਿਧੀ (ਜਿਉਂ ਦਾ ਤਿਉਂ ਭੇਜਣਾ / ਆਪਣੇ-ਆਪ ਹਟਾਉਣਾ / ਕਸਟਮ / ਅਨੁਕੂਲਨਸ਼ੀਲ)। ਕੰਪ੍ਰੈਸ਼ਨ ਤੋਂ ਸੁਤੰਤਰ। [THINKING_BUDGET.md](../guides/THINKING_BUDGET.md) ਵੇਖੋ। |
-| `/api/settings/system-prompt`         | GET/PUT       | ਗਲੋਬਲ ਸਿਸਟਮ ਪ੍ਰੌਂਪਟ                                                                                                                                                                |
-| `/api/settings/compression`           | GET/PUT       | ਗਲੋਬਲ ਕੰਪ੍ਰੈਸ਼ਨ ਸੰਰਚਨਾ                                                                                                                                                             |
-| `/api/settings/purge-request-history` | POST          | ਬੇਨਤੀ ਲੌਗ ਦੀਆਂ ਕਤਾਰਾਂ ਅਤੇ ਸਥਾਨਕ ਕਾਲ-ਲੌਗ ਆਰਟੀਫੈਕਟ ਸਾਫ਼ ਕਰੋ                                                                                                                          |
+| ਐਂਡਪੌਇੰਟ                              | ਵਿਧੀ          | ਵੇਰਵਾ                                                                                                                                                                                                                                                                              |
+| ------------------------------------- | ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/settings`                       | GET/PUT/PATCH | ਆਮ ਸੈਟਿੰਗਾਂ। ਸੁਰੱਖਿਆ-ਨੀਤੀ ਕੁੰਜੀਆਂ (`requireLogin`, `newPassword`, `oidc*`, `corsOrigins`, `bruteForceProtection`) ਲਈ `currentPassword` ਅਤੇ ਇੱਕ ਓਪਰੇਟਰ ਕ੍ਰੈਡੈਂਸ਼ੀਅਲ ਲੋੜੀਂਦੇ ਹਨ — API ਕੁੰਜੀਆਂ ਅਤੇ `oma_` ਟੋਕਨਾਂ ਨੂੰ `403` ਮਿਲਦਾ ਹੈ; ਹਰ ਤਬਦੀਲੀ ਲਈ `admin` ਐਕਸੈੱਸ-ਟੋਕਨ ਸਕੋਪ ਲੋੜੀਂਦਾ ਹੈ |
+| `/api/settings/proxy`                 | GET/PUT       | ਨੈੱਟਵਰਕ ਪ੍ਰੌਕਸੀ ਸੰਰਚਨਾ                                                                                                                                                                                                                                                             |
+| `/api/settings/proxy/test`            | POST          | ਪ੍ਰੌਕਸੀ ਕਨੈਕਸ਼ਨ ਦੀ ਜਾਂਚ ਕਰੋ                                                                                                                                                                                                                                                        |
+| `/api/settings/ip-filter`             | GET/PUT       | IP ਮਨਜ਼ੂਰ-ਸੂਚੀ/ਬਲੌਕ-ਸੂਚੀ                                                                                                                                                                                                                                                           |
+| `/api/settings/thinking-budget`       | GET/PUT       | ਸੋਚਣ/ਤਰਕ ਕਰਨ ਦੀ **ਬੇਨਤੀ** ਦਾ ਮੁੜ-ਲਿਖਣ ਮੋਡ (ਜਿਉਂ-ਦਾ-ਤਿਉਂ / ਸਵੈਚਾਲਿਤ-ਹਟਾਉਣਾ / ਕਸਟਮ / ਅਨੁਕੂਲ)। ਕੰਪ੍ਰੈਸ਼ਨ ਤੋਂ ਸੁਤੰਤਰ। [THINKING_BUDGET.md](../guides/THINKING_BUDGET.md) ਵੇਖੋ।                                                                                                         |
+| `/api/settings/system-prompt`         | GET/PUT       | ਗਲੋਬਲ ਸਿਸਟਮ ਪ੍ਰੌਂਪਟ                                                                                                                                                                                                                                                                |
+| `/api/settings/compression`           | GET/PUT       | ਗਲੋਬਲ ਕੰਪ੍ਰੈਸ਼ਨ ਸੰਰਚਨਾ                                                                                                                                                                                                                                                             |
+| `/api/settings/purge-request-history` | POST          | ਬੇਨਤੀ ਲੌਗ ਕਤਾਰਾਂ ਅਤੇ ਸਥਾਨਕ ਕਾਲ-ਲੌਗ ਆਰਟੀਫੈਕਟ ਸਾਫ਼ ਕਰੋ                                                                                                                                                                                                                               |
 
 ### ਸੰਦਰਭ ਅਤੇ ਕੰਪ੍ਰੈਸ਼ਨ
 
-| ਐਂਡਪੌਇੰਟ                               | ਮੈਥਡ           | ਵੇਰਵਾ                                                                |
+| ਐਂਡਪੌਇੰਟ                               | ਵਿਧੀ           | ਵੇਰਵਾ                                                                |
 | -------------------------------------- | -------------- | -------------------------------------------------------------------- |
 | `/api/compression/preview`             | POST           | off/lite/standard/aggressive/ultra/RTK/stacked ਕੰਪ੍ਰੈਸ਼ਨ ਦੀ ਝਲਕ ਵੇਖੋ |
 | `/api/compression/language-packs`      | GET            | ਉਪਲਬਧ Caveman ਭਾਸ਼ਾ ਪੈਕਾਂ ਦੀ ਸੂਚੀ                                    |
-| `/api/compression/rules`               | GET            | Caveman ਨਿਯਮ ਮੈਟਾਡੇਟਾ ਦੀ ਸੂਚੀ                                        |
+| `/api/compression/rules`               | GET            | Caveman ਨਿਯਮ ਮੈਟਾਡਾਟਾ ਦੀ ਸੂਚੀ                                        |
 | `/api/context/caveman/config`          | GET/PUT        | Caveman-ਵਿਸ਼ੇਸ਼ ਸੈਟਿੰਗਾਂ ਦਾ ਉਪਨਾਮ                                    |
-| `/api/context/rtk/config`              | GET/PUT        | ਕਸਟਮ ਫਿਲਟਰਾਂ ਅਤੇ ਕੱਚੀ ਆਉਟਪੁੱਟ ਦੀ ਸੰਭਾਲ ਸਮੇਤ RTK-ਵਿਸ਼ੇਸ਼ ਸੈਟਿੰਗਾਂ     |
-| `/api/context/rtk/filters`             | GET            | RTK ਫਿਲਟਰ ਕੈਟਾਲਾਗ ਅਤੇ ਕਸਟਮ-ਫਿਲਟਰ ਡਾਇਗਨੌਸਟਿਕਸ                         |
+| `/api/context/rtk/config`              | GET/PUT        | ਕਸਟਮ ਫਿਲਟਰਾਂ ਅਤੇ ਕੱਚੇ ਆਉਟਪੁੱਟ ਦੀ ਸੰਭਾਲ ਸਮੇਤ RTK-ਵਿਸ਼ੇਸ਼ ਸੈਟਿੰਗਾਂ     |
+| `/api/context/rtk/filters`             | GET            | RTK ਫਿਲਟਰ ਕੈਟਾਲੌਗ ਅਤੇ ਕਸਟਮ-ਫਿਲਟਰ ਡਾਇਗਨੌਸਟਿਕਸ                         |
 | `/api/context/rtk/test`                | POST           | ਟੈਕਸਟ ਪੇਲੋਡ ਉੱਤੇ RTK ਝਲਕ/ਟੈਸਟ ਚਲਾਓ                                   |
-| `/api/context/rtk/raw-output/[id]`     | GET            | ਪੁਆਇੰਟਰ id ਰਾਹੀਂ ਸੰਭਾਲੀ ਗਈ ਸੰਪਾਦਿਤ ਕੱਚੀ ਆਉਟਪੁੱਟ ਪੜ੍ਹੋ                |
-| `/api/context/combos`                  | GET/POST       | ਕੰਪ੍ਰੈਸ਼ਨ ਕੌਂਬੋ ਦੀ ਸੂਚੀ/ਰਚਨਾ                                         |
-| `/api/context/combos/[id]`             | GET/PUT/DELETE | ਕੰਪ੍ਰੈਸ਼ਨ ਕੌਂਬੋ ਦਾ ਵੇਰਵਾ/ਅੱਪਡੇਟ/ਮਿਟਾਉਣਾ                              |
-| `/api/context/combos/[id]/assignments` | GET/PUT        | ਰੂਟਿੰਗ ਕੌਂਬੋਜ਼ ਨੂੰ ਕੰਪ੍ਰੈਸ਼ਨ ਕੌਂਬੋ ਸੌਂਪੋ                             |
-| `/api/context/analytics`               | GET            | ਕੰਪ੍ਰੈਸ਼ਨ ਐਨਾਲਿਟਿਕਸ ਦਾ ਉਪਨਾਮ                                         |
+| `/api/context/rtk/raw-output/[id]`     | GET            | ਪੁਆਇੰਟਰ id ਰਾਹੀਂ ਸੰਭਾਲਿਆ ਹੋਇਆ ਸੰਪਾਦਿਤ ਕੱਚਾ ਆਉਟਪੁੱਟ ਪੜ੍ਹੋ             |
+| `/api/context/combos`                  | GET/POST       | ਕੰਪ੍ਰੈਸ਼ਨ ਕੌਂਬੋ ਦੀ ਸੂਚੀ/ਬਣਾਓ                                         |
+| `/api/context/combos/[id]`             | GET/PUT/DELETE | ਕੰਪ੍ਰੈਸ਼ਨ ਕੌਂਬੋ ਦਾ ਵੇਰਵਾ/ਅੱਪਡੇਟ/ਮਿਟਾਓ                                |
+| `/api/context/combos/[id]/assignments` | GET/PUT        | ਰੂਟਿੰਗ ਕੌਂਬੋਜ਼ ਨੂੰ ਕੰਪ੍ਰੈਸ਼ਨ ਕੌਂਬੋਜ਼ ਸੌਂਪੋ                           |
+| `/api/context/analytics`               | GET            | ਕੰਪ੍ਰੈਸ਼ਨ ਵਿਸ਼ਲੇਸ਼ਣ ਦਾ ਉਪਨਾਮ                                         |
 
 ### ਨਿਗਰਾਨੀ
 
-| ਐਂਡਪੌਇੰਟ                             | ਮੈਥਡ       | ਵੇਰਵਾ                                                                                                                                                                                                                                                                                                                                                                                |
-| ------------------------------------ | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `/api/sessions`                      | GET        | ਸਰਗਰਮ ਸੈਸ਼ਨ ਟ੍ਰੈਕਿੰਗ                                                                                                                                                                                                                                                                                                                                                                 |
-| `/api/rate-limits`                   | GET        | ਪ੍ਰਤੀ-ਖਾਤਾ ਦਰ ਸੀਮਾਵਾਂ                                                                                                                                                                                                                                                                                                                                                                |
-| `/api/monitoring/health`             | GET        | ਸਿਹਤ ਜਾਂਚ + ਪ੍ਰਦਾਤਾ ਸਾਰ (`catalogCount`, `configuredCount`, `activeCount`, `monitoredCount`)। ਪ੍ਰਬੰਧਨ ਦ੍ਰਿਸ਼ ਵਿੱਚ `credentialHealth` ਸ਼ਾਮਲ ਹੈ: ਪ੍ਰੋਬ-ਕੈਸ਼ ਸਕੇਲਰ, `failed>0` ਹੋਣ 'ਤੇ `failedConnections`, ਅਤੇ `staleDbNonOkCount` (SQLite ਸਟਿੱਕੀ `test_status`, ਗੇਜ ਨਹੀਂ)। [MONITORING_GUIDE.md](../ops/MONITORING_GUIDE.md#credentialhealth-probe-cache-vs-sqlite-test_status) ਵੇਖੋ। |
-| `/api/cache/stats`                   | GET/DELETE | ਕੈਸ਼ ਅੰਕੜੇ / ਸਾਫ਼ ਕਰੋ                                                                                                                                                                                                                                                                                                                                                                |
-| `/api/modality-bridge/stats`         | GET        | ਇਨ-ਮੈਮੋਰੀ `attempts`, ਸਫਲਤਾਵਾਂ/`bridged`, ਅਸਫਲਤਾਵਾਂ, ਕੈਸ਼ ਹਿੱਟ, `totalLatencyMs`, `latencySamples`, ਨਮੂਨਾ-ਹਰ ਵਾਲਾ `averageLatencyMs`, ਅਤੇ ਆਖਰੀ-ਵਰਤੋਂ ਦਾ ਸਮਾਂ (ਰੀਸਟਾਰਟ 'ਤੇ ਰੀਸੈੱਟ; ਪ੍ਰਬੰਧਨ ਪ੍ਰਮਾਣੀਕਰਨ)                                                                                                                                                                                |
-| `/api/modality-bridge/video/runtime` | GET        | ਪ੍ਰਬੰਧਨ ਪ੍ਰਮਾਣੀਕਰਨ/ਪ੍ਰੋਬ ਤੋਂ ਪਹਿਲਾਂ ਸਖ਼ਤ ਭਰੋਸੇਯੋਗ-ਲੂਪਬੈਕ ਜਾਂਚ; ਸਾਫ਼ ਕੀਤੀ FFmpeg/ffprobe ਉਪਲਬਧਤਾ ਅਤੇ ਵਰਜਨ (no-store)                                                                                                                                                                                                                                                                  |
-| `/api/modality-bridge/video/extract` | POST       | ਅੰਦਰੂਨੀ ਪ੍ਰਮਾਣਿਤ ਭਰੋਸੇਯੋਗ-ਲੂਪਬੈਕ ਬਾਈਟ ਬ੍ਰੋਕਰ; 50 MiB ਇਨਪੁੱਟ, ਸੀਮਿਤ ਕਤਾਰ/32 MiB ਆਉਟਪੁੱਟ, `503` ਸਮਰੱਥਾ, `499` ਡਿਸਕਨੈਕਟ, `504` ਸਮਾਂ-ਸੀਮਾ; ਇਹ ਜਨਤਕ ਅੱਪਲੋਡ API ਨਹੀਂ ਹੈ                                                                                                                                                                                                                    |
+| ਐਂਡਪੌਇੰਟ                             | ਵਿਧੀ       | ਵੇਰਵਾ                                                                                                                                                                                                                                                                                                                                                                                        |
+| ------------------------------------ | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/sessions`                      | GET        | ਸਰਗਰਮ ਸੈਸ਼ਨਾਂ ਦੀ ਟਰੈਕਿੰਗ                                                                                                                                                                                                                                                                                                                                                                     |
+| `/api/rate-limits`                   | GET        | ਪ੍ਰਤੀ-ਖਾਤਾ ਦਰ ਸੀਮਾਵਾਂ                                                                                                                                                                                                                                                                                                                                                                        |
+| `/api/monitoring/health`             | GET        | ਸਿਹਤ ਜਾਂਚ + ਪ੍ਰਦਾਤਾ ਸੰਖੇਪ (`catalogCount`, `configuredCount`, `activeCount`, `monitoredCount`)। ਪ੍ਰਬੰਧਨ ਦ੍ਰਿਸ਼ ਵਿੱਚ `credentialHealth` ਸ਼ਾਮਲ ਹੈ: ਪ੍ਰੋਬ-ਕੈਸ਼ ਸਕੇਲਰ, ਜਦੋਂ `failed>0` ਹੋਵੇ ਤਾਂ `failedConnections`, ਅਤੇ `staleDbNonOkCount` (SQLite ਸਟਿੱਕੀ `test_status`, ਗੇਜ ਨਹੀਂ)। [MONITORING_GUIDE.md](../ops/MONITORING_GUIDE.md#credentialhealth-probe-cache-vs-sqlite-test_status) ਵੇਖੋ। |
+| `/api/cache/stats`                   | GET/DELETE | ਕੈਸ਼ ਅੰਕੜੇ / ਸਾਫ਼ ਕਰੋ                                                                                                                                                                                                                                                                                                                                                                        |
+| `/api/modality-bridge/stats`         | GET        | ਇਨ-ਮੈਮੋਰੀ `attempts`, ਸਫਲਤਾਵਾਂ/`bridged`, ਅਸਫਲਤਾਵਾਂ, ਕੈਸ਼ ਹਿੱਟਾਂ, `totalLatencyMs`, `latencySamples`, ਨਮੂਨਾ-ਡਿਨੋਮੀਨੇਟਡ `averageLatencyMs`, ਅਤੇ ਆਖਰੀ-ਵਰਤੋਂ ਸਮਾਂ (ਰੀਸਟਾਰਟ ਉੱਤੇ ਰੀਸੈੱਟ; ਪ੍ਰਬੰਧਨ ਪ੍ਰਮਾਣੀਕਰਨ)                                                                                                                                                                                     |
+| `/api/modality-bridge/video/runtime` | GET        | ਪ੍ਰਬੰਧਨ ਪ੍ਰਮਾਣੀਕਰਨ/ਪ੍ਰੋਬ ਤੋਂ ਪਹਿਲਾਂ ਸਖ਼ਤ ਭਰੋਸੇਯੋਗ-ਲੂਪਬੈਕ ਜਾਂਚ; ਸੈਨਿਟਾਈਜ਼ ਕੀਤੀ FFmpeg/ffprobe ਉਪਲਬਧਤਾ ਅਤੇ ਵਰਜਨ (no-store)                                                                                                                                                                                                                                                                     |
+| `/api/modality-bridge/video/extract` | POST       | ਅੰਦਰੂਨੀ ਪ੍ਰਮਾਣਿਤ ਭਰੋਸੇਯੋਗ-ਲੂਪਬੈਕ ਬਾਈਟ ਬ੍ਰੋਕਰ; 50 MiB ਇਨਪੁੱਟ, ਸੀਮਿਤ ਕਤਾਰ/32 MiB ਆਉਟਪੁੱਟ, `503` ਸਮਰੱਥਾ, `499` ਡਿਸਕਨੈਕਟ, `504` ਡੈੱਡਲਾਈਨ; ਇਹ ਜਨਤਕ ਅੱਪਲੋਡ API ਨਹੀਂ ਹੈ                                                                                                                                                                                                                             |
 
 ### ਬੈਕਅੱਪ ਅਤੇ ਐਕਸਪੋਰਟ/ਇੰਪੋਰਟ
 
-| ਐਂਡਪੌਇੰਟ                    | ਮੈਥਡ | ਵੇਰਵਾ                                        |
-| --------------------------- | ---- | -------------------------------------------- |
-| `/api/db-backups`           | GET  | ਉਪਲਬਧ ਬੈਕਅੱਪਾਂ ਦੀ ਸੂਚੀ                       |
-| `/api/db-backups`           | PUT  | ਮੈਨੂਅਲ ਬੈਕਅੱਪ ਬਣਾਓ                           |
-| `/api/db-backups`           | POST | ਕਿਸੇ ਖਾਸ ਬੈਕਅੱਪ ਤੋਂ ਰੀਸਟੋਰ ਕਰੋ               |
-| `/api/db-backups/export`    | GET  | ਡਾਟਾਬੇਸ ਨੂੰ .sqlite ਫ਼ਾਈਲ ਵਜੋਂ ਡਾਊਨਲੋਡ ਕਰੋ   |
-| `/api/db-backups/import`    | POST | ਡਾਟਾਬੇਸ ਨੂੰ ਬਦਲਣ ਲਈ .sqlite ਫ਼ਾਈਲ ਅੱਪਲੋਡ ਕਰੋ |
-| `/api/db-backups/exportAll` | GET  | ਪੂਰਾ ਬੈਕਅੱਪ .tar.gz ਆਰਕਾਈਵ ਵਜੋਂ ਡਾਊਨਲੋਡ ਕਰੋ  |
+| ਐਂਡਪੌਇੰਟ                    | ਢੰਗ    | ਵੇਰਵਾ                                                                            |
+| --------------------------- | ------ | -------------------------------------------------------------------------------- |
+| `/api/db-backups`           | GET    | ਉਪਲਬਧ ਬੈਕਅੱਪਾਂ ਦੀ ਸੂਚੀ ਬਣਾਓ                                                      |
+| `/api/db-backups`           | PUT    | ਹੱਥੀਂ ਬੈਕਅੱਪ ਬਣਾਓ                                                                |
+| `/api/db-backups`           | POST   | ਕਿਸੇ ਖ਼ਾਸ ਬੈਕਅੱਪ ਤੋਂ ਰੀਸਟੋਰ ਕਰੋ                                                  |
+| `/api/db-backups`           | PATCH  | ਬੈਕਅੱਪ ਰਿਟੇਨਸ਼ਨ ਸੈਟਿੰਗਾਂ ਸੰਭਾਲੋ (ਸਿਰਫ਼ ਆਪਰੇਟਰ ਲਈ)                                |
+| `/api/db-backups`           | DELETE | ਸਟੋਰ ਕੀਤੇ ਬੈਕਅੱਪਾਂ ਨੂੰ ਰਿਟੇਨਸ਼ਨ ਸੈਟਿੰਗਾਂ ਅਨੁਸਾਰ ਛਾਂਟੋ (ਸਿਰਫ਼ ਆਪਰੇਟਰ ਲਈ)          |
+| `/api/db-backups/export`    | GET    | ਡਾਟਾਬੇਸ ਨੂੰ .sqlite ਫ਼ਾਈਲ ਵਜੋਂ ਡਾਊਨਲੋਡ ਕਰੋ                                       |
+| `/api/db-backups/import`    | POST   | ਡਾਟਾਬੇਸ ਬਦਲਣ ਲਈ .sqlite ਫ਼ਾਈਲ ਅੱਪਲੋਡ ਕਰੋ (`?dryRun=true` ਸਿਰਫ਼ ਪ੍ਰਮਾਣਿਤ ਕਰਦਾ ਹੈ) |
+| `/api/db-backups/exportAll` | GET    | ਪੂਰਾ ਬੈਕਅੱਪ .tar.gz ਆਰਕਾਈਵ ਵਜੋਂ ਡਾਊਨਲੋਡ ਕਰੋ                                      |
+
+`/api/db-backups/export`, `/api/db-backups/exportAll` ਅਤੇ `/api/settings/export-json` ਹਰ ਸਟੋਰ ਕੀਤਾ
+ਕ੍ਰੈਡੈਂਸ਼ਲ ਪ੍ਰਦਾਨ ਕਰਦੇ ਹਨ, ਇਸ ਲਈ ਇਨ੍ਹਾਂ ਲਈ ਡੈਸ਼ਬੋਰਡ ਸੈਸ਼ਨ ਜਾਂ ਸਥਾਨਕ CLI (ਜਾਂ ਲੌਗਇਨ
+ਅਯੋਗ ਹੋਣਾ) ਲੋੜੀਂਦਾ ਹੈ। ਕਿਸੇ ਵੀ ਸਕੋਪ ਵਾਲੀਆਂ API ਕੁੰਜੀਆਂ ਅਤੇ `oma_` ਐਕਸੈੱਸ ਟੋਕਨਾਂ ਨੂੰ `403` ਮਿਲਦਾ ਹੈ। ਰੀਸਟੋਰ ਵੀ ਇਸੇ
+ਸੀਮਾ ਦੀ ਪਾਲਣਾ ਕਰਦੇ ਹਨ: `POST /api/db-backups/import` (`dryRun=true` ਸਮੇਤ), `POST /api/db-backups` (id
+ਰਾਹੀਂ ਰੀਸਟੋਰ) ਅਤੇ `POST /api/settings/import-json` ਲਾਈਵ ਡਾਟਾਬੇਸ ਜਾਂ ਸੈਟਿੰਗਾਂ ਨੂੰ ਬਦਲਦੇ ਹਨ, ਇਸ ਲਈ ਮਸ਼ੀਨ
+ਕ੍ਰੈਡੈਂਸ਼ਲ ਨੂੰ ਉੱਥੇ ਵੀ `403` ਮਿਲਦਾ ਹੈ; `omniroute sync import` ਸਥਾਨਕ CLI ਕ੍ਰੈਡੈਂਸ਼ਲ ਭੇਜਦਾ ਹੈ। ਇਹੀ ਗੱਲ
+`DELETE /api/db-backups` (ਸਟੋਰ ਕੀਤੇ ਬੈਕਅੱਪਾਂ ਦੀ ਛਾਂਟ) ਅਤੇ `PATCH /api/db-backups` (ਰਿਟੇਨਸ਼ਨ ਸੈਟਿੰਗਾਂ:
+ਸਥਾਈ ਤੌਰ 'ਤੇ ਸੰਭਾਲੇ ਮੁੱਲ ਹਰ ਬੈਕਅੱਪ ਤੋਂ ਬਾਅਦ ਆਟੋਮੈਟਿਕ ਛਾਂਟ ਨੂੰ ਨਿਯੰਤਰਿਤ ਕਰਦੇ ਹਨ) ਉੱਤੇ ਵੀ ਲਾਗੂ ਹੁੰਦੀ ਹੈ। ਸੂਚੀ ਦਿਖਾਉਣਾ (`GET`) ਅਤੇ ਹੱਥੀਂ
+ਬੈਕਅੱਪ ਬਣਾਉਣਾ (`PUT`) ਆਮ ਪ੍ਰਬੰਧਨ ਪ੍ਰਮਾਣੀਕਰਨ ਦੀ ਵਰਤੋਂ ਜਾਰੀ ਰੱਖਦੇ ਹਨ।
 
 ### ਕਲਾਉਡ ਸਿੰਕ
 
-| ਐਂਡਪੌਇੰਟ               | ਮੈਥਡ    | ਵੇਰਵਾ               |
+| ਐਂਡਪੌਇੰਟ               | ਢੰਗ     | ਵੇਰਵਾ               |
 | ---------------------- | ------- | ------------------- |
 | `/api/sync/cloud`      | ਵੱਖ-ਵੱਖ | ਕਲਾਉਡ ਸਿੰਕ ਕਾਰਵਾਈਆਂ |
 | `/api/sync/initialize` | POST    | ਸਿੰਕ ਸ਼ੁਰੂ ਕਰੋ      |
 | `/api/cloud/*`         | ਵੱਖ-ਵੱਖ | ਕਲਾਉਡ ਪ੍ਰਬੰਧਨ       |
 
-### ਟਨਲ
+### ਟਨਲਾਂ
 
-| ਐਂਡਪੌਇੰਟ                   | ਮੈਥਡ | ਵੇਰਵਾ                                                                      |
+| ਐਂਡਪੌਇੰਟ                   | ਢੰਗ  | ਵੇਰਵਾ                                                                      |
 | -------------------------- | ---- | -------------------------------------------------------------------------- |
 | `/api/tunnels/cloudflared` | GET  | ਡੈਸ਼ਬੋਰਡ ਲਈ Cloudflare Quick Tunnel ਦੀ ਇੰਸਟਾਲੇਸ਼ਨ/ਰਨਟਾਈਮ ਸਥਿਤੀ ਪੜ੍ਹੋ       |
 | `/api/tunnels/cloudflared` | POST | Cloudflare Quick Tunnel ਨੂੰ ਸਮਰੱਥ ਜਾਂ ਅਸਮਰੱਥ ਕਰੋ (`action=enable/disable`) |
@@ -930,65 +1256,65 @@ X-OmniRoute-No-Cache: true
 
 ### CLI ਟੂਲ
 
-| ਐਂਡਪੌਇੰਟ                           | ਮੈਥਡ | ਵੇਰਵਾ              |
-| ---------------------------------- | ---- | ------------------ |
-| `/api/cli-tools/claude-settings`   | GET  | Claude CLI ਸਥਿਤੀ   |
-| `/api/cli-tools/codex-settings`    | GET  | Codex CLI ਸਥਿਤੀ    |
-| `/api/cli-tools/droid-settings`    | GET  | Droid CLI ਸਥਿਤੀ    |
-| `/api/cli-tools/openclaw-settings` | GET  | OpenClaw CLI ਸਥਿਤੀ |
-| `/api/cli-tools/runtime/[toolId]`  | GET  | ਆਮ CLI ਰਨਟਾਈਮ      |
+| ਐਂਡਪੌਇੰਟ                           | ਢੰਗ | ਵੇਰਵਾ              |
+| ---------------------------------- | --- | ------------------ |
+| `/api/cli-tools/claude-settings`   | GET | Claude CLI ਸਥਿਤੀ   |
+| `/api/cli-tools/codex-settings`    | GET | Codex CLI ਸਥਿਤੀ    |
+| `/api/cli-tools/droid-settings`    | GET | Droid CLI ਸਥਿਤੀ    |
+| `/api/cli-tools/openclaw-settings` | GET | OpenClaw CLI ਸਥਿਤੀ |
+| `/api/cli-tools/runtime/[toolId]`  | GET | ਆਮ CLI ਰਨਟਾਈਮ      |
 
-CLI ਜਵਾਬਾਂ ਵਿੱਚ ਇਹ ਸ਼ਾਮਲ ਹਨ: `installed`, `runnable`, `command`, `commandPath`, `runtimeMode`, `reason`.
+CLI ਜਵਾਬਾਂ ਵਿੱਚ ਇਹ ਸ਼ਾਮਲ ਹਨ: `installed`, `runnable`, `command`, `commandPath`, `runtimeMode`, `reason`।
 
 ### ACP ਏਜੰਟ
 
-| ਐਂਡਪੌਇੰਟ          | ਮੈਥਡ   | ਵੇਰਵਾ                                                   |
-| ----------------- | ------ | ------------------------------------------------------- |
-| `/api/acp/agents` | GET    | ਸਥਿਤੀ ਸਮੇਤ ਖੋਜੇ ਗਏ ਸਾਰੇ ਏਜੰਟਾਂ (ਬਿਲਟ-ਇਨ + ਕਸਟਮ) ਦੀ ਸੂਚੀ |
-| `/api/acp/agents` | POST   | ਕਸਟਮ ਏਜੰਟ ਸ਼ਾਮਲ ਕਰੋ ਜਾਂ ਖੋਜ ਕੈਸ਼ ਨੂੰ ਤਾਜ਼ਾ ਕਰੋ          |
-| `/api/acp/agents` | DELETE | `id` ਕਵੇਰੀ ਪੈਰਾਮੀਟਰ ਰਾਹੀਂ ਕਸਟਮ ਏਜੰਟ ਹਟਾਓ                |
+| ਐਂਡਪੌਇੰਟ          | ਢੰਗ    | ਵੇਰਵਾ                                                        |
+| ----------------- | ------ | ------------------------------------------------------------ |
+| `/api/acp/agents` | GET    | ਸਥਿਤੀ ਸਮੇਤ ਸਾਰੇ ਖੋਜੇ ਗਏ ਏਜੰਟਾਂ (ਬਿਲਟ-ਇਨ + ਕਸਟਮ) ਦੀ ਸੂਚੀ ਬਣਾਓ |
+| `/api/acp/agents` | POST   | ਕਸਟਮ ਏਜੰਟ ਜੋੜੋ ਜਾਂ ਖੋਜ ਕੈਸ਼ ਤਾਜ਼ਾ ਕਰੋ                        |
+| `/api/acp/agents` | DELETE | `id` ਕਵੇਰੀ ਪੈਰਾਮੀਟਰ ਰਾਹੀਂ ਕਸਟਮ ਏਜੰਟ ਹਟਾਓ                     |
 
 GET ਜਵਾਬ ਵਿੱਚ `agents[]` (id, name, binary, version, installed, protocol, isCustom) ਅਤੇ `summary` (total, installed, notFound, builtIn, custom) ਸ਼ਾਮਲ ਹਨ।
 
-### ਲਚਕੀਲਾਪਣ ਅਤੇ ਦਰ ਸੀਮਾਵਾਂ
+### ਲਚੀਲਾਪਣ ਅਤੇ ਦਰ ਸੀਮਾਵਾਂ
 
-| ਐਂਡਪੌਇੰਟ                          | ਮੈਥਡ      | ਵੇਰਵਾ                                                                            |
-| --------------------------------- | --------- | -------------------------------------------------------------------------------- |
-| `/api/resilience`                 | GET/PATCH | ਬੇਨਤੀ ਕਤਾਰ, ਕਨੈਕਸ਼ਨ ਕੂਲਡਾਊਨ, ਪ੍ਰਦਾਤਾ ਬ੍ਰੇਕਰ ਅਤੇ ਉਡੀਕ ਸੈਟਿੰਗਾਂ ਪ੍ਰਾਪਤ/ਅੱਪਡੇਟ ਕਰੋ  |
-| `/api/resilience/reset`           | POST      | ਪ੍ਰਦਾਤਾ ਸਰਕਿਟ ਬ੍ਰੇਕਰ ਰੀਸੈੱਟ ਕਰੋ                                                  |
-| `/api/resilience/model-cooldowns` | GET       | ਬਾਕੀ ਸਮੇਂ ਅਨੁਸਾਰ ਕ੍ਰਮਬੱਧ ਸਰਗਰਮ ਪ੍ਰਤੀ-(ਪ੍ਰਦਾਤਾ, ਕਨੈਕਸ਼ਨ, ਮਾਡਲ) ਲੌਕਆਊਟਾਂ ਦੀ ਸੂਚੀ   |
-| `/api/resilience/model-cooldowns` | DELETE    | ਮਾਡਲ ਲੌਕਆਊਟ ਸਾਫ਼ ਕਰੋ—ਬਾਡੀ `{provider, model}` ਜਾਂ ਸਭ ਕੁਝ ਮਿਟਾਉਣ ਲਈ `{all: true}` |
-| `/api/rate-limits`                | GET       | ਪ੍ਰਤੀ-ਖਾਤਾ ਦਰ ਸੀਮਾ ਸਥਿਤੀ                                                         |
-| `/api/rate-limit`                 | GET       | ਗਲੋਬਲ ਦਰ ਸੀਮਾ ਸੰਰਚਨਾ                                                             |
+| ਐਂਡਪੌਇੰਟ                          | ਢੰਗ       | ਵੇਰਵਾ                                                                                 |
+| --------------------------------- | --------- | ------------------------------------------------------------------------------------- |
+| `/api/resilience`                 | GET/PATCH | ਬੇਨਤੀ ਕਤਾਰ, ਕਨੈਕਸ਼ਨ ਕੂਲਡਾਊਨ, ਪ੍ਰੋਵਾਈਡਰ ਬ੍ਰੇਕਰ ਅਤੇ ਉਡੀਕ ਸੈਟਿੰਗਾਂ ਪ੍ਰਾਪਤ/ਅੱਪਡੇਟ ਕਰੋ     |
+| `/api/resilience/reset`           | POST      | ਪ੍ਰੋਵਾਈਡਰ ਸਰਕਿਟ ਬ੍ਰੇਕਰ ਰੀਸੈੱਟ ਕਰੋ                                                     |
+| `/api/resilience/model-cooldowns` | GET       | ਬਾਕੀ ਸਮੇਂ ਅਨੁਸਾਰ ਕ੍ਰਮਬੱਧ ਸਰਗਰਮ ਪ੍ਰਤੀ-(ਪ੍ਰੋਵਾਈਡਰ, ਕਨੈਕਸ਼ਨ, ਮਾਡਲ) ਲਾਕਆਉਟਾਂ ਦੀ ਸੂਚੀ ਬਣਾਓ |
+| `/api/resilience/model-cooldowns` | DELETE    | ਮਾਡਲ ਲਾਕਆਉਟ ਸਾਫ਼ ਕਰੋ — ਬਾਡੀ `{provider, model}` ਜਾਂ ਸਭ ਕੁਝ ਮਿਟਾਉਣ ਲਈ `{all: true}`    |
+| `/api/rate-limits`                | GET       | ਪ੍ਰਤੀ-ਖਾਤਾ ਦਰ ਸੀਮਾ ਸਥਿਤੀ                                                              |
+| `/api/rate-limit`                 | GET       | ਗਲੋਬਲ ਦਰ ਸੀਮਾ ਸੰਰਚਨਾ                                                                  |
 
-> ਸਾਰੇ ਚਾਰ `/api/resilience/*` ਰੂਟਾਂ ਲਈ **ਪ੍ਰਬੰਧਨ ਪ੍ਰਮਾਣੀਕਰਨ** (`requireManagementAuth`) ਲੋੜੀਂਦਾ ਹੈ। ਪ੍ਰਦਾਤਾ ਬ੍ਰੇਕਰ ਬਨਾਮ ਕਨੈਕਸ਼ਨ ਕੂਲਡਾਊਨ ਬਨਾਮ ਮਾਡਲ ਲੌਕਆਊਟ ਦੀ ਪੂਰੀ ਵਿਆਖਿਆ ਲਈ [ਲਚਕੀਲਾਪਣ (ਵਿਸਤ੍ਰਿਤ)](#resilience-extended) ਵੇਖੋ।
+> ਸਾਰੇ ਚਾਰ `/api/resilience/*` ਰੂਟਾਂ ਲਈ **ਪ੍ਰਬੰਧਨ ਪ੍ਰਮਾਣੀਕਰਨ** (`requireManagementAuth`) ਲੋੜੀਂਦਾ ਹੈ। ਪ੍ਰੋਵਾਈਡਰ ਬ੍ਰੇਕਰ ਬਨਾਮ ਕਨੈਕਸ਼ਨ ਕੂਲਡਾਊਨ ਬਨਾਮ ਮਾਡਲ ਲਾਕਆਉਟ ਦੀ ਪੂਰੀ ਵਿਆਖਿਆ ਲਈ [ਲਚੀਲਾਪਣ (ਵਿਸਤ੍ਰਿਤ)](#resilience-extended) ਵੇਖੋ।
 
 ### ਮੁਲਾਂਕਣ
 
-| ਐਂਡਪੌਇੰਟ     | ਮੈਥਡ     | ਵੇਰਵਾ                                |
-| ------------ | -------- | ------------------------------------ |
-| `/api/evals` | GET/POST | ਮੁਲਾਂਕਣ ਸੂਟਾਂ ਦੀ ਸੂਚੀ / ਮੁਲਾਂਕਣ ਚਲਾਓ |
+| ਐਂਡਪੌਇੰਟ     | ਢੰਗ      | ਵੇਰਵਾ                                     |
+| ------------ | -------- | ----------------------------------------- |
+| `/api/evals` | GET/POST | ਮੁਲਾਂਕਣ ਸੂਟਾਂ ਦੀ ਸੂਚੀ ਬਣਾਓ / ਮੁਲਾਂਕਣ ਚਲਾਓ |
 
 ### ਨੀਤੀਆਂ
 
-| ਐਂਡਪੌਇੰਟ        | ਮੈਥਡ            | ਵੇਰਵਾ                        |
+| ਐਂਡਪੌਇੰਟ        | ਢੰਗ             | ਵੇਰਵਾ                        |
 | --------------- | --------------- | ---------------------------- |
 | `/api/policies` | GET/POST/DELETE | ਰੂਟਿੰਗ ਨੀਤੀਆਂ ਦਾ ਪ੍ਰਬੰਧਨ ਕਰੋ |
 
-### ਪਾਲਣਾ
+### ਅਨੁਪਾਲਨਾ
 
-| ਐਂਡਪੌਇੰਟ                    | ਮੈਥਡ | ਵੇਰਵਾ                   |
-| --------------------------- | ---- | ----------------------- |
-| `/api/compliance/audit-log` | GET  | ਪਾਲਣਾ ਆਡਿਟ ਲੌਗ (ਆਖਰੀ N) |
+| ਐਂਡਪੌਇੰਟ                    | ਵਿਧੀ | ਵੇਰਵਾ                      |
+| --------------------------- | ---- | -------------------------- |
+| `/api/compliance/audit-log` | GET  | ਅਨੁਕੂਲਤਾ ਆਡਿਟ ਲੌਗ (ਆਖਰੀ N) |
 
 ### v1beta (Gemini-ਅਨੁਕੂਲ)
 
-| ਐਂਡਪੌਇੰਟ                   | ਮੈਥਡ | ਵੇਰਵਾ                             |
+| ਐਂਡਪੌਇੰਟ                   | ਵਿਧੀ | ਵੇਰਵਾ                             |
 | -------------------------- | ---- | --------------------------------- |
 | `/v1beta/models`           | GET  | Gemini ਫਾਰਮੈਟ ਵਿੱਚ ਮਾਡਲਾਂ ਦੀ ਸੂਚੀ |
 | `/v1beta/models/{...path}` | POST | Gemini `generateContent` ਐਂਡਪੌਇੰਟ |
 
-ਇਹ ਐਂਡਪੌਇੰਟ ਉਹਨਾਂ ਕਲਾਇੰਟਾਂ ਲਈ Gemini ਦੇ API ਫਾਰਮੈਟ ਦੀ ਨਕਲ ਕਰਦੇ ਹਨ, ਜਿਨ੍ਹਾਂ ਨੂੰ ਮੂਲ Gemini SDK ਅਨੁਕੂਲਤਾ ਦੀ ਉਮੀਦ ਹੁੰਦੀ ਹੈ।
+ਇਹ ਐਂਡਪੌਇੰਟ ਉਨ੍ਹਾਂ ਕਲਾਇੰਟਾਂ ਲਈ Gemini ਦੇ API ਫਾਰਮੈਟ ਨੂੰ ਪ੍ਰਤੀਬਿੰਬਤ ਕਰਦੇ ਹਨ ਜਿਨ੍ਹਾਂ ਨੂੰ ਮੂਲ Gemini SDK ਅਨੁਕੂਲਤਾ ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ।
 
 ### ਅੰਦਰੂਨੀ / ਸਿਸਟਮ API
 
@@ -996,11 +1322,13 @@ GET ਜਵਾਬ ਵਿੱਚ `agents[]` (id, name, binary, version, installed, 
 | ------------------------ | ---- | --------------------------------------------------------------- |
 | `/api/init`              | GET  | ਐਪਲੀਕੇਸ਼ਨ ਸ਼ੁਰੂਆਤੀਕਰਨ ਜਾਂਚ (ਪਹਿਲੀ ਵਾਰ ਚਲਾਉਣ ਵੇਲੇ ਵਰਤੀ ਜਾਂਦੀ ਹੈ) |
 | `/api/tags`              | GET  | Ollama-ਅਨੁਕੂਲ ਮਾਡਲ ਟੈਗ (Ollama ਕਲਾਇੰਟਾਂ ਲਈ)                     |
-| `/api/restart`           | POST | ਸਰਵਰ ਨੂੰ ਸੁਚਾਰੂ ਢੰਗ ਨਾਲ ਮੁੜ ਚਾਲੂ ਕਰੋ                            |
-| `/api/shutdown`          | POST | ਸਰਵਰ ਨੂੰ ਸੁਚਾਰੂ ਢੰਗ ਨਾਲ ਬੰਦ ਕਰੋ                                 |
+| `/api/restart`           | POST | ਸਰਵਰ ਨੂੰ ਸੁਚਾਰੂ ਢੰਗ ਨਾਲ ਮੁੜ-ਚਾਲੂ ਕਰਨਾ ਸ਼ੁਰੂ ਕਰੋ                 |
+| `/api/shutdown`          | POST | ਸਰਵਰ ਨੂੰ ਸੁਚਾਰੂ ਢੰਗ ਨਾਲ ਬੰਦ ਕਰਨਾ ਸ਼ੁਰੂ ਕਰੋ                      |
 | `/api/system/env/repair` | POST | OAuth ਪ੍ਰਦਾਤਾ ਦੇ ਵਾਤਾਵਰਣ ਵੇਰੀਏਬਲਾਂ ਦੀ ਮੁਰੰਮਤ ਕਰੋ                |
+| `/api/system/version`    | GET  | ਮੌਜੂਦਾ/ਨਵੀਨਤਮ ਵਰਜਨ, ਅੱਪਡੇਟ ਸਥਿਤੀ, ਰਿਲੀਜ਼ ਚੈਨਲ                   |
+| `/api/system/version`    | POST | ਨਵੀਨਤਮ ਵਰਜਨ ਲਈ ਡਿਪਲੌਇਮੈਂਟ-ਅਨੁਕੂਲ ਅੱਪਡੇਟ ਸ਼ੁਰੂ ਕਰੋ               |
 
-> **ਨੋਟ:** ਇਹ ਐਂਡਪੌਇੰਟ ਸਿਸਟਮ ਵੱਲੋਂ ਅੰਦਰੂਨੀ ਤੌਰ 'ਤੇ ਜਾਂ Ollama ਕਲਾਇੰਟ ਅਨੁਕੂਲਤਾ ਲਈ ਵਰਤੇ ਜਾਂਦੇ ਹਨ। ਆਮ ਤੌਰ 'ਤੇ ਅੰਤਿਮ ਉਪਭੋਗਤਾ ਇਨ੍ਹਾਂ ਨੂੰ ਕਾਲ ਨਹੀਂ ਕਰਦੇ।
+> **ਨੋਟ:** ਇਹ ਐਂਡਪੌਇੰਟ ਸਿਸਟਮ ਵੱਲੋਂ ਅੰਦਰੂਨੀ ਤੌਰ 'ਤੇ ਜਾਂ Ollama ਕਲਾਇੰਟ ਅਨੁਕੂਲਤਾ ਲਈ ਵਰਤੇ ਜਾਂਦੇ ਹਨ। ਆਮ ਤੌਰ 'ਤੇ ਅੰਤਿਮ ਵਰਤੋਂਕਾਰ ਇਨ੍ਹਾਂ ਨੂੰ ਕਾਲ ਨਹੀਂ ਕਰਦੇ।
 
 ### OAuth ਵਾਤਾਵਰਣ ਮੁਰੰਮਤ _(v3.6.1+)_
 
@@ -1013,7 +1341,7 @@ Content-Type: application/json
 }
 ```
 
-ਕਿਸੇ ਖ਼ਾਸ ਪ੍ਰਦਾਤਾ ਲਈ ਗੁੰਮ ਜਾਂ ਖ਼ਰਾਬ OAuth ਵਾਤਾਵਰਣ ਵੇਰੀਏਬਲਾਂ ਦੀ ਮੁਰੰਮਤ ਕਰਦਾ ਹੈ। ਇਹ ਵਾਪਸ ਕਰਦਾ ਹੈ:
+ਕਿਸੇ ਖਾਸ ਪ੍ਰਦਾਤਾ ਲਈ ਗੁੰਮ ਜਾਂ ਖਰਾਬ ਹੋਏ OAuth ਵਾਤਾਵਰਣ ਵੇਰੀਏਬਲਾਂ ਦੀ ਮੁਰੰਮਤ ਕਰਦਾ ਹੈ। ਇਹ ਵਾਪਸ ਕਰਦਾ ਹੈ:
 
 ```json
 {
@@ -1022,6 +1350,43 @@ Content-Type: application/json
   "backupPath": "/home/user/.omniroute/backups/env-repair-2026-04-11.bak"
 }
 ```
+
+### ਵਰਜਨ ਅਤੇ ਰਿਲੀਜ਼ ਚੈਨਲ
+
+```bash
+GET /api/system/version
+```
+
+ਕੇਵਲ ਲੂਪਬੈਕ ਲਈ ਪ੍ਰਬੰਧਨ ਰੂਟ (ਐਡਮਿਨ ਪ੍ਰਮਾਣੀਕਰਨ)। ਚੱਲ ਰਿਹਾ ਵਰਜਨ, ਨਵੀਨਤਮ
+ਪ੍ਰਕਾਸ਼ਿਤ ਵਰਜਨ ਅਤੇ ਸਵੈਚਾਲਿਤ ਅੱਪਡੇਟ ਸਥਿਤੀ ਵਾਪਸ ਕਰਦਾ ਹੈ। `releaseChannel` ਅਤੇ `channels` ਵਾਧੂ
+ਫੀਲਡ ਹਨ (rail 3.8.54); `channel` ਦਾ ਅਰਥ ਪਹਿਲਾਂ ਵਾਲਾ ਹੀ ਹੈ — ਉਹ ਡਿਪਲੌਇਮੈਂਟ ਮੋਡ ਜਿਸਨੂੰ ਡੈਸ਼ਬੋਰਡ ਅੱਪਡੇਟਰ
+ਵਰਤਦਾ ਹੈ (`npm`, `source` ਜਾਂ `docker-compose`)।
+
+```json
+{
+  "current": "3.8.52",
+  "latest": "3.8.52",
+  "updateAvailable": false,
+  "channel": "npm",
+  "autoUpdateSupported": true,
+  "autoUpdateError": null,
+  "news": null,
+  "releaseChannel": "latest",
+  "channels": { "latest": "3.8.52", "next": "3.8.53-rc.1" }
+}
+```
+
+- `releaseChannel` — ਚੱਲ ਰਹੇ ਬਿਲਡ ਦਾ npm ਚੈਨਲ: `-nightly.*` ਵਰਜਨਾਂ ਲਈ `nightly`,
+  ਹੋਰ ਪ੍ਰੀ-ਰਿਲੀਜ਼ਾਂ (`-rc.*`, `-beta.*`, `-alpha.*`) ਲਈ `next`, `channels.latest` ਤੋਂ ਪੁਰਾਣੇ
+  ਮੁੱਖ ਵਰਜਨ ਦੇ ਸਥਿਰ ਵਰਜਨ ਲਈ `lts`, ਨਹੀਂ ਤਾਂ `latest`। ਇਹ
+  `scripts/release/dist-tag.mjs` ਵਾਲੇ ਹੀ ਨਿਯਮ ਹਨ, ਜੋ ਪ੍ਰਕਾਸ਼ਨ ਸਮੇਂ npm dist-tag ਚੁਣਦਾ ਹੈ।
+- `channels` — `npm view omniroute dist-tags` ਤੋਂ ਹਰ dist-tag ਦਾ ਪ੍ਰਕਾਸ਼ਿਤ ਮੁੱਖ ਵਰਜਨ (ਰਜਿਸਟਰੀ
+  HTTP ਫਾਲਬੈਕ), ਜਿਸਨੂੰ `latest` ਵਾਂਗ ਹੀ 10-ਮਿੰਟ ਦੀ TTL ਨਾਲ ਕੈਸ਼ ਕੀਤਾ ਜਾਂਦਾ ਹੈ। `latest` ਹਮੇਸ਼ਾ ਮੌਜੂਦ ਹੁੰਦਾ ਹੈ
+  (ਪਹਿਲਾਂ `latest` ਫੀਲਡ ਅਤੇ ਫਿਰ `"unavailable"` ਨੂੰ ਫਾਲਬੈਕ ਵਜੋਂ ਵਰਤਦਾ ਹੈ); `next`, `nightly` ਅਤੇ `lts`
+  ਸਿਰਫ਼ ਉਦੋਂ ਦਿਖਾਈ ਦਿੰਦੇ ਹਨ ਜਦੋਂ ਉਹ dist-tag ਮੌਜੂਦ ਹੋਵੇ। ਇੱਕ `Cache-Control: no-cache` ਬੇਨਤੀ ਦੋਵਾਂ ਲੁੱਕਅੱਪਾਂ ਨੂੰ ਤਾਜ਼ਾ ਕਰਦੀ ਹੈ।
+
+ਚੈਨਲ ਮਾਡਲ (`latest` = 4.0 GA ਤੱਕ v3, `next` = rc, `nightly` = `develop` ਬਿਲਡ,
+`lts` = 4.0 GA ਤੋਂ ਬਾਅਦ v3 ਪੈਚ) ਦਾ ਵਰਣਨ `docs/ops/RELEASE_STRATEGY.md` ਵਿੱਚ ਕੀਤਾ ਗਿਆ ਹੈ।
 
 ---
 
@@ -1235,19 +1600,19 @@ OmniRoute ਇਵੈਂਟਾਂ (ਬੇਨਤੀ ਦੀ ਪੂਰਤੀ, ਕੋ�
 
 ---
 
-## ਰਜਿਸਟਰ ਕੀਤੀਆਂ ਕੁੰਜੀਆਂ (ਸਵੈਚਲਿਤ ਪ੍ਰਬੰਧਨ)
+## ਰਜਿਸਟਰ ਕੀਤੀਆਂ ਕੁੰਜੀਆਂ (ਆਟੋਮੈਟਿਕ ਪ੍ਰਬੰਧਨ)
 
-ਰੋਜ਼ਾਨਾ/ਘੰਟਾਵਾਰ ਕੋਟਿਆਂ ਦੇ ਨਾਲ, ਕਿਸੇ ਬੈਕਿੰਗ ਪ੍ਰਦਾਤਾ/ਖਾਤੇ ਲਈ API ਕੁੰਜੀਆਂ ਜਾਰੀ ਕਰਨ ਅਤੇ ਰੋਟੇਟ ਕਰਨ ਵਾਸਤੇ ਸਵੈਚਲਿਤ ਕੁੰਜੀ ਪ੍ਰਬੰਧਨ ਉਪ-ਸਿਸਟਮ ਦੁਆਰਾ ਵਰਤੀਆਂ ਜਾਂਦੀਆਂ ਹਨ।
+ਰੋਜ਼ਾਨਾ/ਪ੍ਰਤੀ-ਘੰਟਾ ਕੋਟਿਆਂ ਦੇ ਨਾਲ ਕਿਸੇ ਬੈਕਿੰਗ ਪ੍ਰਦਾਤਾ/ਖਾਤੇ ਲਈ API ਕੁੰਜੀਆਂ ਜਾਰੀ ਕਰਨ ਅਤੇ ਰੋਟੇਟ ਕਰਨ ਵਾਸਤੇ ਆਟੋਮੈਟਿਕ ਕੁੰਜੀ ਪ੍ਰਬੰਧਨ ਸਬਸਿਸਟਮ ਦੁਆਰਾ ਵਰਤਿਆ ਜਾਂਦਾ ਹੈ।
 
-| ਵਿਧੀ   | ਪਾਥ                                   | ਵੇਰਵਾ                                                                                                                                                                                                                          |
-| ------ | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| GET    | `/api/v1/registered-keys`             | ਰਜਿਸਟਰ ਕੀਤੀਆਂ ਕੁੰਜੀਆਂ ਦੀ ਸੂਚੀ ਦਿਓ (ਸਿਰਫ਼ ਲੁਕਾਇਆ ਹੋਇਆ ਪ੍ਰੀਫਿਕਸ)                                                                                                                                                                 |
-| POST   | `/api/v1/registered-keys`             | ਨਵੀਂ ਰਜਿਸਟਰ ਕੀਤੀ ਕੁੰਜੀ ਜਾਰੀ ਕਰੋ — ਬਾਡੀ: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`। ਅਸਲ ਕੁੰਜੀ ਸਿਰਫ਼ **ਇੱਕ ਵਾਰ** ਵਾਪਸ ਕੀਤੀ ਜਾਂਦੀ ਹੈ। ਕੋਟੇ ਕਾਰਨ ਇਨਕਾਰ ਹੋਣ 'ਤੇ `429` ਵਾਪਸ ਕਰਦਾ ਹੈ। |
-| GET    | `/api/v1/registered-keys/[id]`        | ਰਜਿਸਟਰ ਕੀਤੀ ਕੁੰਜੀ ਦਾ ਮੈਟਾਡੇਟਾ ਪ੍ਰਾਪਤ ਕਰੋ (ਕੋਈ ਅਸਲ ਕੁੰਜੀ ਸਮੱਗਰੀ ਨਹੀਂ)                                                                                                                                                           |
-| DELETE | `/api/v1/registered-keys/[id]`        | ਰਜਿਸਟਰ ਕੀਤੀ ਕੁੰਜੀ ਰੱਦ ਕਰੋ                                                                                                                                                                                                      |
-| POST   | `/api/v1/registered-keys/[id]/revoke` | ਸਪਸ਼ਟ ਰੱਦਗੀ ਐਂਡਪੌਇੰਟ (DELETE ਦੇ ਸਮਾਨ ਪ੍ਰਭਾਵ)                                                                                                                                                                                   |
+| ਵਿਧੀ   | ਪਾਥ                                   | ਵੇਰਵਾ                                                                                                                                                                                                                      |
+| ------ | ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/v1/registered-keys`             | ਰਜਿਸਟਰ ਕੀਤੀਆਂ ਕੁੰਜੀਆਂ ਦੀ ਸੂਚੀ ਦਿਖਾਓ (ਕੇਵਲ ਮਾਸਕ ਕੀਤਾ ਪ੍ਰੀਫਿਕਸ)                                                                                                                                                              |
+| POST   | `/api/v1/registered-keys`             | ਇੱਕ ਨਵੀਂ ਰਜਿਸਟਰ ਕੀਤੀ ਕੁੰਜੀ ਜਾਰੀ ਕਰੋ — ਬਾਡੀ: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`। ਕੱਚੀ ਕੁੰਜੀ **ਸਿਰਫ਼ ਇੱਕ ਵਾਰ** ਵਾਪਸ ਕਰਦਾ ਹੈ। ਕੋਟਾ ਅਸਵੀਕਾਰ ਹੋਣ 'ਤੇ `429` ਵਾਪਸ ਕਰਦਾ ਹੈ। |
+| GET    | `/api/v1/registered-keys/[id]`        | ਰਜਿਸਟਰ ਕੀਤੀ ਕੁੰਜੀ ਦਾ ਮੈਟਾਡਾਟਾ ਪ੍ਰਾਪਤ ਕਰੋ (ਕੱਚੀ ਸਮੱਗਰੀ ਤੋਂ ਬਿਨਾਂ)                                                                                                                                                           |
+| DELETE | `/api/v1/registered-keys/[id]`        | ਰਜਿਸਟਰ ਕੀਤੀ ਕੁੰਜੀ ਰੱਦ ਕਰੋ                                                                                                                                                                                                  |
+| POST   | `/api/v1/registered-keys/[id]/revoke` | ਸਪਸ਼ਟ ਰੱਦ ਕਰਨ ਵਾਲਾ ਐਂਡਪੌਇੰਟ (DELETE ਦੇ ਸਮਾਨ ਪ੍ਰਭਾਵ)                                                                                                                                                                        |
 
-**ਪ੍ਰਮਾਣੀਕਰਨ:** Bearer API ਕੁੰਜੀ (`isAuthenticated`)। `/v1/quotas/check` ਅਤੇ `/v1/issues/report` ਵੀ ਵੇਖੋ।
+**ਪ੍ਰਮਾਣੀਕਰਨ:** ਪ੍ਰਬੰਧਨ ਸੈਸ਼ਨ/API ਕੁੰਜੀ (`requireManagementAuth`) — `/api/keys` ਵਾਲਾ ਹੀ ਗਾਰਡ: ਇੱਕ ਡੈਸ਼ਬੋਰਡ ਸੈਸ਼ਨ, ਲੋਕਲ CLI ਟੋਕਨ, ਜਾਂ `manage`/`admin` ਸਕੋਪ ਵਾਲੀ API ਕੁੰਜੀ; ਸਿਰਫ਼ ਇਨਫ਼ਰੈਂਸ ਲਈ API ਕੁੰਜੀਆਂ ਨੂੰ `403` ਮਿਲਦਾ ਹੈ। `/v1/quotas/check` ਅਤੇ `/v1/issues/report` ਵੀ ਵੇਖੋ।
 
 ---
 

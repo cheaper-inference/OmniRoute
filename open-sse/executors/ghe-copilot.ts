@@ -42,14 +42,20 @@ export class GheCopilotExecutor extends GithubExecutor {
       (typeof psd?.copilotApiUrl === "string" ? psd.copilotApiUrl : undefined) ||
       (typeof psd?.copilotProxyUrl === "string" ? psd.copilotProxyUrl : undefined);
     if (apiOrProxy) {
-      const base = apiOrProxy.replace(/\/chat\/completions\/?$/, "").replace(/\/responses\/?$/, "").replace(/\/+$/, "");
+      const base = apiOrProxy
+        .replace(/\/chat\/completions\/?$/, "")
+        .replace(/\/responses\/?$/, "")
+        .replace(/\/+$/, "");
       return base.endsWith("/chat/completions") ? base : `${base}/chat/completions`;
     }
     const gheUrl = psd?.gheUrl as string | undefined;
     if (!gheUrl) {
       throw new Error("GHE Copilot executor requires gheUrl in providerSpecificData");
     }
-    const base = gheUrl.replace(/\/chat\/completions\/?$/, "").replace(/\/responses\/?$/, "").replace(/\/+$/, "");
+    const base = gheUrl
+      .replace(/\/chat\/completions\/?$/, "")
+      .replace(/\/responses\/?$/, "")
+      .replace(/\/+$/, "");
     return base.endsWith("/chat/completions") ? base : `${base}/chat/completions`;
   }
 
@@ -63,14 +69,20 @@ export class GheCopilotExecutor extends GithubExecutor {
       (typeof psd?.copilotApiUrl === "string" ? psd.copilotApiUrl : undefined) ||
       (typeof psd?.copilotProxyUrl === "string" ? psd.copilotProxyUrl : undefined);
     if (apiOrProxy) {
-      const base = apiOrProxy.replace(/\/chat\/completions\/?$/, "").replace(/\/responses\/?$/, "").replace(/\/+$/, "");
+      const base = apiOrProxy
+        .replace(/\/chat\/completions\/?$/, "")
+        .replace(/\/responses\/?$/, "")
+        .replace(/\/+$/, "");
       return `${base}/responses`;
     }
     const gheUrl = psd?.gheUrl as string | undefined;
     if (!gheUrl) {
       throw new Error("GHE Copilot executor requires gheUrl in providerSpecificData");
     }
-    const base = gheUrl.replace(/\/chat\/completions\/?$/, "").replace(/\/responses\/?$/, "").replace(/\/+$/, "");
+    const base = gheUrl
+      .replace(/\/chat\/completions\/?$/, "")
+      .replace(/\/responses\/?$/, "")
+      .replace(/\/+$/, "");
     return `${base}/responses`;
   }
 
@@ -87,7 +99,9 @@ export class GheCopilotExecutor extends GithubExecutor {
       (typeof psd?.copilotProxyUrl === "string" ? psd.copilotProxyUrl : undefined);
     const host = apiOrProxy || (psd?.gheUrl as string | undefined);
     if (!host) {
-      throw new Error("GHE Copilot executor requires copilotApiUrl or gheUrl in providerSpecificData");
+      throw new Error(
+        "GHE Copilot executor requires copilotApiUrl or gheUrl in providerSpecificData"
+      );
     }
     const base = host
       .replace(/\/v1\/messages\/?$/, "")
@@ -107,9 +121,22 @@ export class GheCopilotExecutor extends GithubExecutor {
       : model;
   }
 
-  override buildUrl(model: string, stream: boolean, urlIndex = 0, credentials: ProviderCredentials | null = null): string {
+  override buildUrl(
+    model: string,
+    stream: boolean,
+    urlIndex = 0,
+    credentials: ProviderCredentials | null = null
+  ): string {
     const bareModel = this.stripPrefix(model);
-    const targetFormat = getModelTargetFormat("ghe-copilot", bareModel);
+    // Honor the per-request targetFormat (synced catalog / custom model)
+    // threaded by chatCore/executionCredentials.ts, same as GithubExecutor.buildUrl.
+    const overrideTargetFormat = (
+      credentials as { providerSpecificData?: { targetFormat?: unknown } } | null
+    )?.providerSpecificData?.targetFormat;
+    const targetFormat =
+      typeof overrideTargetFormat === "string"
+        ? overrideTargetFormat
+        : getModelTargetFormat("ghe-copilot", bareModel);
     // Claude models: ALWAYS route to the Anthropic-native /v1/messages shim
     // (same as github.com Copilot), matched on the model NAME so a Claude id
     // that is missing its registry targetFormat tag still gets the native shim
@@ -118,7 +145,7 @@ export class GheCopilotExecutor extends GithubExecutor {
       return this.getMessagesBase(credentials);
     }
     if (
-      (targetFormat === "openai-responses" || /codex/i.test(bareModel)) &&
+      (targetFormat === "openai-responses" || /codex|^gpt-6/i.test(bareModel)) &&
       this.supportsResponsesEndpoint(bareModel)
     ) {
       return this.getResponsesBase(credentials);
@@ -204,13 +231,13 @@ export class GheCopilotExecutor extends GithubExecutor {
       // GHE OAuth token endpoint
       const baseUrl = gheUrl.replace(/\/chat\/completions\/?$/, "").replace(/\/responses\/?$/, "");
       const tokenUrl = `${baseUrl}/login/oauth/access_token`;
-      
+
       const params = new URLSearchParams({
         grant_type: "refresh_token",
         refresh_token: refreshToken,
         client_id: this.config.clientId,
       });
-      
+
       if (this.config.clientSecret) {
         params.set("client_secret", this.config.clientSecret);
       }
@@ -223,7 +250,7 @@ export class GheCopilotExecutor extends GithubExecutor {
         },
         body: params,
       });
-      
+
       if (!response.ok) return null;
       const tokens = await response.json();
       log?.info?.("TOKEN", "GHE GitHub token refreshed");
@@ -271,7 +298,11 @@ export class GheCopilotExecutor extends GithubExecutor {
     );
     if (!githubTokens?.accessToken) return null;
 
-    const copilotResult = await this.refreshCopilotToken(githubTokens.accessToken, log, credentials);
+    const copilotResult = await this.refreshCopilotToken(
+      githubTokens.accessToken,
+      log,
+      credentials
+    );
     if (!copilotResult) return githubTokens;
 
     return {
@@ -288,7 +319,11 @@ export class GheCopilotExecutor extends GithubExecutor {
    * buildUrl routes chat/responses traffic to the correct enterprise host.
    */
   override async refreshCredentials(credentials: ProviderCredentials, log?: ExecutorLog | null) {
-    const copilotResult = await this.refreshCopilotToken(credentials?.accessToken, log, credentials);
+    const copilotResult = await this.refreshCopilotToken(
+      credentials?.accessToken,
+      log,
+      credentials
+    );
 
     if (!copilotResult && credentials?.refreshToken) {
       return this.refreshViaGitHubToken(credentials, log);

@@ -145,6 +145,47 @@ function backOffToWordBoundary(content: string, cutIndex: number): number {
   return cutIndex;
 }
 
+/** Truncate a tool result string to the Lite cap on a word boundary. */
+function truncateToolText(text: string, maxLength: number): string {
+  const cutIndex = backOffToWordBoundary(text, maxLength);
+  return text.slice(0, cutIndex) + "\n...[truncated]";
+}
+
+/**
+ * Anthropic tool results live in `tool_result` content blocks inside a
+ * `role:"user"` message (`content` is a string or an array of text blocks).
+ */
+function truncateToolResultBlocks(
+  msg: Message,
+  maxLength: number
+): { message: Message; applied: boolean } {
+  if (msg.role !== "user" || !Array.isArray(msg.content)) return { message: msg, applied: false };
+  let applied = false;
+  const content = msg.content.map((block) => {
+    if (block.type !== "tool_result") return block;
+    const inner = block.content;
+    if (typeof inner === "string") {
+      if (inner.length <= maxLength) return block;
+      applied = true;
+      return { ...block, content: truncateToolText(inner, maxLength) };
+    }
+    if (!Array.isArray(inner)) return block;
+    let innerApplied = false;
+    const newInner = inner.map((part) => {
+      const text = part.text;
+      if (part.type !== "text" || typeof text !== "string" || text.length <= maxLength) return part;
+      innerApplied = true;
+      return { ...part, text: truncateToolText(text, maxLength) };
+    });
+    if (!innerApplied) return block;
+    applied = true;
+    return { ...block, content: newInner };
+  });
+  return applied
+    ? { message: { ...msg, content }, applied: true }
+    : { message: msg, applied: false };
+}
+
 export function compressToolResults(
   body: ChatBody,
   options: LiteCompressionOptions = {}
@@ -162,14 +203,14 @@ export function compressToolResults(
   let applied = false;
   const messages = body.messages.map((msg, index) => {
     if (index >= currentTurnStart) return msg;
-    if (msg.role !== "tool" || typeof msg.content !== "string") return msg;
-    if (msg.content.length <= MAX_TOOL_LENGTH) return msg;
-    applied = true;
-    const cutIndex = backOffToWordBoundary(msg.content, MAX_TOOL_LENGTH);
-    return {
-      ...msg,
-      content: msg.content.slice(0, cutIndex) + "\n...[truncated]",
-    };
+    if (msg.role === "tool" && typeof msg.content === "string") {
+      if (msg.content.length <= MAX_TOOL_LENGTH) return msg;
+      applied = true;
+      return { ...msg, content: truncateToolText(msg.content, MAX_TOOL_LENGTH) };
+    }
+    const toolResult = truncateToolResultBlocks(msg, MAX_TOOL_LENGTH);
+    if (toolResult.applied) applied = true;
+    return toolResult.message;
   });
   return { body: { ...body, messages }, applied };
 }

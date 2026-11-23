@@ -12,6 +12,11 @@ import { cliModelConfigSchema } from "@/shared/validation/schemas";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
 import { resolveApiKey } from "@/shared/services/apiKeyResolver";
 import { readJsoncConfig } from "../_lib/jsoncConfig";
+import {
+  configClobberRefusalResponse,
+  parseJsoncObject,
+  readExistingConfig,
+} from "../_lib/readExistingConfig";
 
 const CLINE_DATA_DIR = path.join(os.homedir(), ".cline", "data");
 const GLOBAL_STATE_PATH = path.join(CLINE_DATA_DIR, "globalState.json");
@@ -134,14 +139,12 @@ export async function POST(request: Request) {
     await createBackup("cline", GLOBAL_STATE_PATH);
     await createBackup("cline", SECRETS_PATH);
 
-    // Read existing globalState or create new
-    let globalState: Record<string, any> = {};
-    try {
-      const existing = await fs.readFile(GLOBAL_STATE_PATH, "utf-8");
-      globalState = JSON.parse(existing);
-    } catch {
-      /* No existing config */
-    }
+    // Read BOTH files before writing either one; only a missing file starts
+    // fresh — an unreadable/unparsable one is refused (409), not replaced.
+    const globalState: Record<string, any> =
+      (await readExistingConfig(GLOBAL_STATE_PATH, parseJsoncObject)) ?? {};
+    const secrets: Record<string, any> =
+      (await readExistingConfig(SECRETS_PATH, parseJsoncObject)) ?? {};
 
     // Normalize baseUrl - Cline expects the base without /v1
     const normalizedBaseUrl = baseUrl.endsWith("/v1") ? baseUrl.slice(0, -3) : baseUrl;
@@ -157,14 +160,6 @@ export async function POST(request: Request) {
     await fs.writeFile(GLOBAL_STATE_PATH, JSON.stringify(globalState, null, 2));
 
     // Write API key to secrets
-    let secrets: Record<string, any> = {};
-    try {
-      const existing = await fs.readFile(SECRETS_PATH, "utf-8");
-      secrets = JSON.parse(existing);
-    } catch {
-      /* No existing secrets */
-    }
-
     secrets.openAiApiKey = apiKey || "sk_omniroute";
 
     await fs.writeFile(SECRETS_PATH, JSON.stringify(secrets, null, 2));
@@ -182,6 +177,8 @@ export async function POST(request: Request) {
       globalStatePath: GLOBAL_STATE_PATH,
     });
   } catch (error) {
+    const refusal = configClobberRefusalResponse(error);
+    if (refusal) return refusal;
     console.log("Error updating cline settings:", error);
     return NextResponse.json({ error: "Failed to update cline settings" }, { status: 500 });
   }
@@ -224,17 +221,14 @@ export async function DELETE(request: Request) {
       globalState.planModeApiProvider = "cline";
     }
 
+    // Read secrets before the first write so an unparsable file aborts the reset
+    // instead of being replaced by `{}`.
+    const secrets: Record<string, any> =
+      (await readExistingConfig(SECRETS_PATH, parseJsoncObject)) ?? {};
+
     await fs.writeFile(GLOBAL_STATE_PATH, JSON.stringify(globalState, null, 2));
 
     // Remove API key from secrets
-    let secrets: Record<string, any> = {};
-    try {
-      const existing = await fs.readFile(SECRETS_PATH, "utf-8");
-      secrets = JSON.parse(existing);
-    } catch {
-      /* ignore */
-    }
-
     delete secrets.openAiApiKey;
     await fs.writeFile(SECRETS_PATH, JSON.stringify(secrets, null, 2));
 
@@ -250,6 +244,8 @@ export async function DELETE(request: Request) {
       message: "OmniRoute settings removed from Cline",
     });
   } catch (error) {
+    const refusal = configClobberRefusalResponse(error);
+    if (refusal) return refusal;
     console.log("Error resetting cline settings:", error);
     return NextResponse.json({ error: "Failed to reset cline settings" }, { status: 500 });
   }

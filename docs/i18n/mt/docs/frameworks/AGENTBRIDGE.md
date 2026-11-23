@@ -14,36 +14,36 @@ AgentBridge huwa l-proxy MITM (Man-in-the-Middle) ta' OmniRoute li jinterċetta 
 
 ## §1 Ħarsa ġenerali
 
-### X'inhu AgentBridge?
+### X’inhu AgentBridge?
 
-Meta aġent tal-IDE (eż., GitHub Copilot, Cursor, Claude Code) jagħmel sejħa API, huwa jikkonnettja direttament mal-fornitur upstream tal-IA (OpenAI, Anthropic, eċċ.). AgentBridge jinterċetta dik il-konnessjoni b'mod trasparenti fil-livell TLS — mingħajr ma jeħtieġ ebda bidla fil-konfigurazzjoni tal-aġent — u jerġa' jikteb it-talba permezz ta' OmniRoute.
+Meta aġent tal-IDE (eż., GitHub Copilot, Cursor, Claude Code) jagħmel sejħa API, huwa jikkonnettja direttament mal-fornitur tal-AI upstream (OpenAI, Anthropic, eċċ.). AgentBridge jinterċetta dik il-konnessjoni b’mod trasparenti fil-livell ta’ TLS — mingħajr ma jeħtieġ ebda bidla fil-konfigurazzjoni tal-aġent — u jerġa’ jikteb it-talba permezz ta’ OmniRoute.
 
-Dan ifisser li tista':
+Dan ifisser li tista’:
 
-- **Terġa' tidderieġi kwalunkwe aġent lejn kwalunkwe fornitur**: Copilot qed jikkomunika ma' OpenAI? Irridireġih lejn Anthropic Claude, Gemini, jew kwalunkwe wieħed mit-352 fornitur ta' OmniRoute.
-- **Tapplika mmappjar tal-mudelli**: `gemini-3-flash` → `claude-sonnet-4.7` b'mod trasparenti fil-livell tal-handler.
-- **Tosserva t-traffiku kollu tal-aġenti**: kull talba interċettata tiġi ppubblikata fit-[Traffic Inspector](./TRAFFIC_INSPECTOR.md).
-- **Tapplika r-reżiljenza ta' OmniRoute**: ir-routing ikkombinat, is-circuit breakers, il-fallbacks, u t-traċċar tal-ispejjeż jaħdmu wkoll għat-traffiku tal-aġenti tal-IDE.
+- **Tidderieġi mill-ġdid kwalunkwe aġent lejn kwalunkwe fornitur**: Copilot qed jikkomunika ma’ OpenAI? Idderiġih mill-ġdid lejn Anthropic Claude, Gemini, jew kwalunkwe wieħed mill-374 fornitur ta’ OmniRoute.
+- **Tapplika mmappjar tal-mudelli**: `gemini-3-flash` → `claude-sonnet-4.7` b’mod trasparenti fil-livell tal-handler.
+- **Tissorvelja t-traffiku kollu tal-aġenti**: kull talba interċettata tiġi ppubblikata fit-[Traffic Inspector](./TRAFFIC_INSPECTOR.md).
+- **Tapplika r-reżiljenza ta’ OmniRoute**: ir-routing ikkombinat, is-circuit breakers, il-fallbacks, u t-traċċar tal-ispejjeż jaħdmu wkoll għat-traffiku tal-aġenti tal-IDE.
 
 ### Pożizzjonament meta mqabbel mas-suq
 
-| Karatteristika                         | 9router | anti-api | llm-interceptor | **OmniRoute AgentBridge** |
-| -------------------------------------- | :-----: | :------: | :-------------: | :-----------------------: |
-| Antigravity                            |    ✓    |    ✓     |        —        |             ✓             |
-| GitHub Copilot                         |    ✓    |    ✓     |        —        |             ✓             |
-| Kiro (AWS)                             |    ✓    |    ✓     |        —        |             ✓             |
-| OpenAI Codex                           |    —    |    ✓     |        —        |             ✓             |
-| Cursor IDE                             |    ✓    |    ✓     |        —        |             ✓             |
-| Zed Industries                         |    —    |    ✓     |        —        |             ✓             |
-| Claude Code                            |    —    |    —     |        ✓        |             ✓             |
-| Open Code                              |    —    |    —     |        ✓        |             ✓             |
-| Trae                                   |    —    |    —     |        —        |  🔍 Taħt investigazzjoni  |
-| Interfaċċa tad-dashboard               |    ✓    |    ✗     |        ✗        |             ✓             |
-| Spettur tat-traffiku                   |    ✗    |    ✗     |        ✓        |             ✓             |
-| Routing ta' OmniRoute                  |    ✗    |    ✗     |        ✗        |             ✓             |
-| Interfaċċa għall-immappjar tal-mudelli |    ✗    |    ✗     |        ✗        |             ✓             |
-| Lista ta' bypass                       |    ✗    |    ✗     |        ✓        |             ✓             |
-| Ċertifikat CA upstream                 |    ✗    |    ✗     |        ✓        |             ✓             |
+| Karatteristika                       | 9router | anti-api | llm-interceptor | **OmniRoute AgentBridge** |
+| ------------------------------------ | :-----: | :------: | :-------------: | :-----------------------: |
+| Antigravity                          |    ✓    |    ✓     |        —        |             ✓             |
+| GitHub Copilot                       |    ✓    |    ✓     |        —        |             ✓             |
+| Kiro (AWS)                           |    ✓    |    ✓     |        —        |             ✓             |
+| OpenAI Codex                         |    —    |    ✓     |        —        |             ✓             |
+| Cursor IDE                           |    ✓    |    ✓     |        —        |             ✓             |
+| Zed Industries                       |    —    |    ✓     |        —        |             ✓             |
+| Claude Code                          |    —    |    —     |        ✓        |             ✓             |
+| Open Code                            |    —    |    —     |        ✓        |             ✓             |
+| Trae                                 |    —    |    —     |        —        |  🔍 Qed jiġi investigat   |
+| Interfaċċa tad-dashboard             |    ✓    |    ✗     |        ✗        |             ✓             |
+| Spettur tat-traffiku                 |    ✗    |    ✗     |        ✓        |             ✓             |
+| Routing ta’ OmniRoute                |    ✗    |    ✗     |        ✗        |             ✓             |
+| Interfaċċa tal-immappjar tal-mudelli |    ✗    |    ✗     |        ✗        |             ✓             |
+| Lista ta’ bypass                     |    ✗    |    ✗     |        ✓        |             ✓             |
+| Ċertifikat CA upstream               |    ✗    |    ✗     |        ✓        |             ✓             |
 
 ---
 
@@ -189,14 +189,14 @@ lista kondiviża ta’ projbizzjoni hop-by-hop/framing (inkluża l-awtentikazzjo
 
 Uża l-Kard tas-Server AgentBridge f’`/dashboard/tools/agent-bridge`:
 
-| Azzjoni                         | Deskrizzjoni                                                                                     |
-| ------------------------------- | ------------------------------------------------------------------------------------------------ |
-| Ibda s-Server                   | Joħloq `src/mitm/server.cjs` fuq il-port 443                                                     |
-| Waqqaf is-Server                | Jagħlaq il-proċess sekondarju b’mod ikkontrollat                                                 |
-| Erġa’ Ibda s-Server             | Waqqaf + ibda (japplika l-bidliet fil-mira)                                                      |
-| Afda ċ-Ċertifikat               | Jinstalla `DATA_DIR/mitm/ca.crt` fil-maħżen taċ-ċertifikati fdati tal-OS                         |
-| Niżżel iċ-Ċertifikat            | Iniżżel `ca.crt` għal installazzjoni manwali                                                     |
-| Iġġenera ċ-Ċertifikat mill-Ġdid | Joħloq par ġdid ta’ ċavetta CA (iċ-ċertifikati eżistenti kollha għal kull aġent jiġu invalidati) |
+| Azzjoni                         | Deskrizzjoni                                                                                                                                                                                                                                                                                                                                                                                                            |
+| ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Ibda s-Server                   | Iniedi `src/mitm/server.cjs` fuq il-port 443. Bil-mudell root-CA, joħloq `ca.crt` mal-ewwel tnedija u jafda ċ-ċertifikat attiv meta tkun disponibbli password tas-sudo                                                                                                                                                                                                                                                  |
+| Waqqaf is-Server                | Jagħlaq il-proċess sekondarju b’mod korrett                                                                                                                                                                                                                                                                                                                                                                             |
+| Erġa’ Ibda s-Server             | Waqqaf + ibda (japplika l-bidliet fil-mira u ċertifikat iġġenerat mill-ġdid)                                                                                                                                                                                                                                                                                                                                            |
+| Afda ċ-Ċertifikat               | Jinstalla ċ-ċertifikat attiv fil-maħżen taċ-ċertifikati fdati tal-OS: `DATA_DIR/mitm/ca.crt` bil-mudell root-CA, `DATA_DIR/mitm/server.crt` fuq installazzjoni legacy-leaf                                                                                                                                                                                                                                              |
+| Niżżel iċ-Ċertifikat            | Iniżżel iċ-ċertifikat attiv għal installazzjoni manwali (`omniroute-mitm-ca.crt` = `ca.crt`, jew `omniroute-mitm.crt` = `server.crt` fuq installazzjoni legacy-leaf)                                                                                                                                                                                                                                                    |
+| Iġġenera ċ-Ċertifikat Mill-Ġdid | Qatt ma jibdel il-mudell taċ-ċertifikat. Installazzjoni legacy-leaf: joħloq `server.crt`/`server.key` ġodda (erġa’ ibda s-server biex iservihom). Mudell root-CA: jirrota `ca.crt`/`ca.key`, u jiġi rrifjutat waqt li s-server ikun qed jaħdem; CA qadima fdata l-ewwel titneħħielha l-fiduċja (teħtieġ il-password tas-sudo), inkella r-rotazzjoni tiġi abortita. Wara, il-klijenti jridu jerġgħu jafdaw il-CA l-ġdida |
 
 ### 3.2 Afda ċ-ċertifikat
 
@@ -221,37 +221,36 @@ sudo security add-trusted-cert -d -r trustRoot \
 certutil -addstore -f Root $env:USERPROFILE\.omniroute\mitm\ca.crt
 ```
 
-Jew uża l-buttuna "Afda ċ-Ċertifikat" fid-dashboard (din tħaddem il-kmand xieraq għall-OS tiegħek, bi prompt ta’ sudo jekk ikun meħtieġ).
+Jew uża l-buttuna "Afda ċ-Ċertifikat" fid-dashboard (tħaddem il-kmand xieraq għall-OS tiegħek, bi prompt tas-sudo jekk ikun meħtieġ).
 
-#### IDEs ibbażati fuq Electron jinjoraw il-maħżen taċ-ċertifikati fdati tal-OS (`NODE_EXTRA_CA_CERTS`)
+#### L-IDEs ibbażati fuq Electron jinjoraw il-maħżen taċ-ċertifikati fdati tal-OS (`NODE_EXTRA_CA_CERTS`)
 
-Xi IDEs — b’mod partikolari **Antigravity IDE**, u applikazzjonijiet oħra derivati minn Electron / VS Code — jinkludu
+Xi IDEs — b’mod partikolari **Antigravity IDE**, u apps oħra derivati minn Electron / VS Code — jinkludu
 r-runtime Node.js tagħhom stess li **ma jikkonsultax il-maħżen taċ-ċertifikati fdati tal-OS** għal
-`fetch`/HTTPS li joħroġ. Li tafda s-CA fil-livell tal-OS/NSS huwa biżżejjed għall-**backend** nattiv
-tal-IDE (eż. server tal-lingwa Go, li juża l-ġabra CA tal-OS), iżda l-**frontend ta’ Electron**
-xorta jfalli fit-TLS — dan jidher bħallikieku l-app tkun _ħarġet mill-kont_ jew tkun qed turi
-_"żball fil-konnessjoni"_ minkejja li l-log tal-MITM juri li s-sejħiet tal-bootstrap tal-backend
-qed jirritornaw `200`. Huma meħtieġa żewġ passi, u t-tnejn huma importanti:
+`fetch`/HTTPS ħerġin. Li tafda l-CA fil-livell tal-OS/NSS huwa biżżejjed għall-**backend** nattiv
+tal-IDE (eż. server tal-lingwa Go, li juża l-ġabra ta’ CAs tal-OS), iżda l-**frontend ta’ Electron**
+xorta se jfalli fit-TLS — dan jidher bħallikieku l-app tkun _illoggjat ’il barra_ jew turi
+_"żball fil-konnessjoni"_ minkejja li l-log tal-MITM juri li s-sejħiet inizjali tal-backend qed jirritornaw `200`. Huma
+meħtieġa żewġ passi, u t-tnejn huma importanti:
 
-1. Ippunta r-runtime lejn is-CA b’mod espliċitu:
+1. Ipponta r-runtime lejn il-CA b’mod espliċitu:
    ```bash
    export NODE_EXTRA_CA_CERTS=/path/to/omniroute-agentbridge-ca.crt
    ```
-2. **Ħaddem l-IDE minn dik ix-shell.** Jekk tibdieh mill-ikona tad-desktop / Dock / menu Start,
-   **ma** jiritx l-exports tax-shell, u `~/.config/environment.d/*.conf` japplika biss wara
-   login grafiku ġdid. Oħroġ kompletament mill-IDE l-ewwel — il-lock singleton ta’ Electron ifisser li
-   t-tieni tħaddim sempliċement jiffoka l-proċess eżistenti u l-ambjent il-ġdid jiġi injorat.
+2. **Niedi l-IDE minn dik ix-shell.** Jekk tibdieh mill-ikona tad-desktop / Dock / menu Start,
+   **ma** jiritx l-esportazzjonijiet tax-shell, u `~/.config/environment.d/*.conf` japplika biss wara
+   login grafiku ġdid. Oħroġ kompletament mill-IDE l-ewwel — il-lock singleton ta’ Electron ifisser li tnedija
+   oħra sempliċement tiffoka l-proċess eżistenti u l-ambjent il-ġdid jiġi injorat.
 
-Il-pass tal-fiduċja tal-OS + NSS imsemmi hawn fuq jibqa’ meħtieġ (l-istack tan-network ta’ Chromium
-użat minn xi flussi ta’ awtentikazzjoni jaqra l-maħżen NSS għal kull utent, u għandu l-pins statiċi
-tiegħu għal `*.googleapis.com` li CA fdata lokalment tegħleb). `NODE_EXTRA_CA_CERTS` ikopri wkoll
-il-mogħdija `fetch` ta’ Node.
+Il-pass tal-fiduċja tal-OS + NSS ta’ hawn fuq jibqa’ meħtieġ (l-istack tan-network ta’ Chromium użat minn xi flussi
+ta’ awtentikazzjoni jaqra l-maħżen NSS għal kull utent, u għandu l-pins statiċi tiegħu għal `*.googleapis.com` li
+CA fdata lokalment tegħleb). `NODE_EXTRA_CA_CERTS` ikopri wkoll il-perkors `fetch` ta’ Node.
 
-### 3.3 Rotot DNS
+### 3.3 Rotot tad-DNS
 
-Għal kull aġent li trid tinterċetta, l-host(s) tal-API tiegħu jridu jirriżolvu għal `127.0.0.1`. AgentBridge jimmaniġġja l-entrati ta’ `/etc/hosts` awtomatikament meta tattiva jew tiddiżattiva d-DNS għal aġent fil-Wizard tal-Konfigurazzjoni.
+Għal kull aġent li trid tinterċetta, l-host(s) tal-API tiegħu jridu jirriżolvu għal `127.0.0.1`. AgentBridge jimmaniġġja l-entrati ta’ `/etc/hosts` awtomatikament meta tattiva jew tiddiżattiva d-DNS għal aġent fil-Gwida tal-Konfigurazzjoni.
 
-Eżempju ta’ entrati ta’ `/etc/hosts` għal GitHub Copilot:
+Eżempji ta’ entrati f’`/etc/hosts` għal GitHub Copilot:
 
 ```
 127.0.0.1 api.githubcopilot.com
@@ -262,71 +261,71 @@ Eżempju ta’ entrati ta’ `/etc/hosts` għal GitHub Copilot:
 
 Uża t-Tabella tal-Immappjar tal-Mudelli f’kull kard tal-aġent biex tiddefinixxi mmappjar mis-sors → għall-mira:
 
-| Mudell tas-sors (nattiv tal-aġent) | Mudell fil-mira (OmniRoute) |
-| ---------------------------------- | --------------------------- |
-| `gpt-4o`                           | `claude-sonnet-4.7`         |
-| `*` (wildcard)                     | `claude-haiku-4.7`          |
+| Mudell tas-sors (nattiv għall-aġent) | Mudell fil-mira (OmniRoute) |
+| ------------------------------------ | --------------------------- |
+| `gpt-4o`                             | `claude-sonnet-4.7`         |
+| `*` (wildcard)                       | `claude-haiku-4.7`          |
 
-Il-wildcard `*` jimmappja kwalunkwe mudell mhux rikonoxxut mal-mira speċifikata. Jinħażen b’mod persistenti fit-tabella `agent_bridge_mappings`.
+Il-wildcard `*` jimmappja kwalunkwe mudell mhux rikonoxxut mal-mira speċifikata. Dan jinħażen b’mod persistenti fit-tabella `agent_bridge_mappings`.
 
-> **Suġġeriment — skopri l-IDs reali tal-mudelli tal-aġent.** IDE jista’ jibgħat ismijiet ta’ mudelli li jkunu differenti
-> mit-tikketti fl-UI tiegħu u li jinbidlu bejn verżjonijiet ewlenin. Pereżempju **Antigravity 2** jibgħat
-> `gemini-3.1-pro-low`, `gemini-pro-agent`, u `gemini-3.1-flash-lite` permezz tal-konnessjoni — mhux
-> `gemini-2.5-pro` muri f’dokumentazzjoni eqdem. Ibgħat chat wieħed mingħajr immappjar li jaqbel: il-MITM
-> jirreġistra l-`model:` eżatt li jkun dieħel u jgħaddi t-talba mingħajr tibdil. Immappja dak il-valur litterali, imbagħad
-> it-talba li jmiss tiġi interċettata u mgħoddija lejn il-mira tiegħek.
+> **Suġġeriment — skopri l-IDs reali tal-mudelli tal-aġent.** IDE jista’ jibgħat ismijiet ta’ mudelli li jkunu differenti mit-tikketti
+> fl-UI tiegħu u li jinbidlu bejn verżjonijiet ewlenin. Pereżempju, **Antigravity 2** jibgħat
+> `gemini-3.1-pro-low`, `gemini-pro-agent`, u `gemini-3.1-flash-lite` fuq il-konnessjoni — mhux
+> `gemini-2.5-pro` muri f’dokumentazzjoni eqdem. Ibgħat chat wieħed mingħajr mapping korrispondenti fis-seħħ: il-MITM
+> jirreġistra l-`model:` eżatt li jkun dieħel u jgħaddi t-talba. Oħloq mapping għal dak il-valur litterali, imbagħad
+> it-talba li jmiss tiġi interċettata u diretta lejn il-mira tiegħek.
 
 ### 3.5 Avviż dwar ir-riskju
 
-AgentBridge jinterċetta l-kredenzjali (tokens OAuth, ċwievet tal-API) li l-IDE juża biex jawtentika mal-fornituri upstream. Dawn jiġu **moħbija qabel ma jiġu rreġistrati** (ara §2.7), iżda jkunu viżibbli għas-saff MITM ta’ OmniRoute. L-ewwel attivazzjoni ta’ kull aġent turi tieqa modali ta’ avviż dwar ir-riskju li tista’ tingħalaq.
+AgentBridge jinterċetta l-kredenzjali (tokens OAuth, ċwievet API) li l-IDE juża biex jawtentika mal-fornituri upstream. Dawn jiġu **moħbija qabel ma jiġu rreġistrati** (ara §2.7) iżda jkunu viżibbli għas-saff MITM ta’ OmniRoute. L-ewwel attivazzjoni ta’ kull aġent turi tieqa modali b’avviż dwar ir-riskju li tista’ tingħalaq.
 
 ### 3.6 Manutenzjoni u Dijanjostika
 
-Id-dashboard jipprovdi kard ta’ **Manutenzjoni u Dijanjostika** (`AgentBridgeMaintenanceCard`, f’`src/app/(dashboard)/dashboard/tools/agent-bridge/components/`) li turi rotot operazzjonali tal-MITM li qabel ma kellhomx UI. Is-sottotitolu tagħha: _"Ittestja awtomatikament il-pipeline tal-qbid, neħħi l-istat tas-sistema li jkun fadal, u ċċaqlaq il-konfigurazzjoni tiegħek bejn magni."_ Il-helpers tal-klijent tal-kard jinsabu f’`src/lib/inspector/agentBridgeMaintenanceApi.ts`.
+Id-dashboard jesponi kard ta’ **Manutenzjoni u Dijanjostika** (`AgentBridgeMaintenanceCard`, f’`src/app/(dashboard)/dashboard/tools/agent-bridge/components/`) li turi rotot operazzjonali tal-MITM li qabel ma kellhomx UI. Is-sottotitolu tagħha: _"Ittestja awtomatikament il-pipeline tal-qbid, neħħi stat residwu tas-sistema, u ċċaqlaq il-konfigurazzjoni tiegħek bejn magni."_ Il-helpers tal-klijent għall-kard jinsabu f’`src/lib/inspector/agentBridgeMaintenanceApi.ts`.
 
-| Buttuna                       | Rotta                                  | X'tagħmel                                                                                                                                                                                                                |
-| ----------------------------- | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Iddijanjostika**            | `GET /api/tools/agent-bridge/diagnose` | Tħaddem l-awtotest tal-pipeline tal-qbid u turi rapport għal kull kontroll (✓/✗ + suġġeriment ta' rimedju).                                                                                                              |
-| **Sewwi**                     | `POST /api/tools/agent-bridge/repair`  | Tneħħi l-istat orfni tas-sistema MITM (entrati ta' spoofing tad-DNS, CA ewlenija, proxy tas-sistema) li jkun tħalla minn kraxx jew SIGKILL. Idempotenti — tirrapporta "M'hemm xejn xi jissewwa" meta l-istat ikun nadif. |
-| **Neħħi s-CA**                | `DELETE /api/tools/agent-bridge/cert`  | Tneħħi l-fiduċja u s-CA ewlenija MITM mill-maħżen tal-fiduċja tal-OS (espliċitu, idempotenti). Tintwera biss meta s-CA tkun attwalment fdata; teħtieġ konferma integrata "Neħħi s-CA?".                                  |
-| **Esporta l-konfigurazzjoni** | `GET /api/tools/agent-bridge/config`   | Tniżżel il-JSON tal-konfigurazzjoni portabbli (ara §3.7).                                                                                                                                                                |
-| **Importa l-konfigurazzjoni** | `POST /api/tools/agent-bridge/config`  | Tella' JSON ta' konfigurazzjoni esportat preċedentement (ara §3.7).                                                                                                                                                      |
+| Buttuna                       | Rotta                                  | X’tagħmel                                                                                                                                                                                                       |
+| ----------------------------- | -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Iddijanjostika**            | `GET /api/tools/agent-bridge/diagnose` | Tħaddem l-awtotest tal-pipeline tal-qbid u turi rapport għal kull kontroll (✓/✗ + suġġeriment għar-rimedju).                                                                                                    |
+| **Tiswija**                   | `POST /api/tools/agent-bridge/repair`  | Tneħħi stat orfni tas-sistema MITM (entrati ta’ DNS spoofing, CA ewlenija, proxy tas-sistema) li jkun baqa’ wara ħabta jew SIGKILL. Idempotenti — tirrapporta "M’hemm xejn x’jissewwa" meta l-istat ikun nadif. |
+| **Neħħi s-CA**                | `DELETE /api/tools/agent-bridge/cert`  | Tneħħi l-fiduċja mis-CA ewlenija tal-MITM u tneħħiha mill-maħżen tal-fiduċja tal-OS (espliċitu, idempotenti). Tintwera biss meta s-CA tkun attwalment fdata; teħtieġ konferma inline "Tneħħi s-CA?".            |
+| **Esporta l-konfigurazzjoni** | `GET /api/tools/agent-bridge/config`   | Tniżżel il-konfigurazzjoni JSON portabbli (ara §3.7).                                                                                                                                                           |
+| **Importa l-konfigurazzjoni** | `POST /api/tools/agent-bridge/config`  | Tella’ konfigurazzjoni JSON esportata preċedentement (ara §3.7).                                                                                                                                                |
 
-Kull karta ta' aġent għandha wkoll il-buttuna **Irrestawra l-valur predefinit** tagħha (`POST
-/api/tools/agent-bridge/agents/{id}/reset`) — annullament bi klikk waħda għal kull aġent li jneħħi l-ispoofing biss mill-hosts ta' dak
-l-aġent, ineħħi l-immappjar issejvjat tal-mudelli tiegħu, u jirrisettja l-istat `dns_enabled`/`setup_completed`
-tiegħu, sabiex l-IDE jerġa' jikkomunika mas-servizz upstream reali ladarba jerġa' jinbeda kompletament. Din **ma** taffettwax is-server
-MITM kondiviż jew is-CA ewlenija (aġenti oħra jistgħu jkunu għadhom jiddependu minnhom) — dawn jibqgħu aċċessibbli
-permezz tal-Karta tas-Server u l-azzjoni **Neħħi s-CA** ta' hawn fuq. Fuq Windows tipprova wkoll, kemm jista' jkun, tħaddem
-`ipconfig /flushdns`, billi l-Klijent DNS ta' Windows iżomm fil-cache l-entrati tal-fajl hosts u inkella ma jneħħix
-spoof li jkun għadu kif tneħħa.
+Kull kard ta’ aġent għandha wkoll il-buttuna **Irrestawra l-valur predefinit** tagħha (`POST
+/api/tools/agent-bridge/agents/{id}/reset`) — treġġigħ lura bi klikk waħda għal kull aġent li jneħħi l-ispoofing biss mill-hosts ta’ dak
+l-aġent, ineħħi l-mappings tal-mudelli ssejvjati tiegħu, u jerġa’ jissettja l-istat ta’ `dns_enabled`/`setup_completed`,
+sabiex l-IDE jerġa’ jikkomunika mal-upstream reali wara li jerġa’ jinbeda kompletament. Dan **ma** jaffettwax
+is-server MITM kondiviż jew is-CA ewlenija (aġenti oħra jistgħu jkunu għadhom jiddependu fuqhom) — dawn jibqgħu aċċessibbli
+permezz tal-Kard tas-Server u l-azzjoni **Neħħi s-CA** hawn fuq. Fuq Windows jipprova wkoll, mingħajr garanzija, iħaddem
+`ipconfig /flushdns`, peress li l-Klijent DNS ta’ Windows iżomm l-entrati tal-fajl hosts fil-cache u inkella ma jneħħix
+spoof li jkun għadu kemm tneħħa.
 
-**Kontrolli dijanjostiċi** (`summarizeDiagnostics()` f'`src/mitm/inspector/diagnostics.ts`). Ir-rotta tħaddem il-probe b'effetti għal kull wieħed u tgħaddi l-valuri Boolean lis-sommarizzatur pur; jiġu rritornati verdett wieħed `healthy` flimkien ma' suġġeriment għal kull falliment:
+**Kontrolli dijanjostiċi** (`summarizeDiagnostics()` f’`src/mitm/inspector/diagnostics.ts`). Ir-rotta tħaddem il-probe b’effetti sekondarji għal kull wieħed u tgħaddi l-valuri Boolean lis-sommarizzatur pur; jingħata verdett wieħed `healthy` flimkien ma’ suġġeriment għal kull falliment:
 
-| Isem tal-kontroll  | X'jivverifika                                                          | Suġġeriment f'każ ta' falliment                                                                                                                       |
-| ------------------ | ---------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `server-running`   | Il-proċess tas-server MITM huwa attiv                                  | "Is-server MITM mhux qed jaħdem. Ibdieh mit-tab AgentBridge."                                                                                         |
-| `server-reachable` | Is-server MITM jaċċetta konnessjonijiet fuq il-port tiegħu (probe TCP) | "Is-server MITM mhux qed jaċċetta konnessjonijiet fuq il-port tiegħu. Iċċekkja li l-port huwa liberu u li għandek il-privileġġi biex torbtu."         |
-| `cert-exists`      | Iċ-ċertifikat MITM ġie ġġenerat fuq id-diska                           | "Għadu ma ġie ġġenerat l-ebda ċertifikat MITM. Iġġenera wieħed mit-tab AgentBridge."                                                                  |
-| `cert-trusted`     | Is-CA ewlenija MITM tinsab fil-maħżen tal-fiduċja tal-OS               | "Is-CA ewlenija MITM mhijiex fdata mill-maħżen tal-OS, għalhekk l-interċettazzjoni TLS se tfalli. Afda ċ-ċertifikat mit-tab AgentBridge."             |
-| `dns-configured`   | Il-hostnames fil-mira huma spoofed f'`/etc/hosts`                      | "Il-hostnames fil-mira mhumiex spoofed f'/etc/hosts`, għalhekk it-traffiku qatt ma jasal għand il-proxy. Attiva d-DNS għall-aġent(i) li trid taqbad." |
+| Isem tal-kontroll  | X’jivverifika                                                          | Suġġeriment f’każ ta’ falliment                                                                                                                            |
+| ------------------ | ---------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `server-running`   | Il-proċess tas-server MITM huwa attiv                                  | "Is-server MITM mhux qed jaħdem. Ibdieh mit-tab AgentBridge."                                                                                              |
+| `server-reachable` | Is-server MITM jaċċetta konnessjonijiet fuq il-port tiegħu (probe TCP) | "Is-server MITM mhux qed jaċċetta konnessjonijiet fuq il-port tiegħu. Iċċekkja li l-port huwa disponibbli u li għandek il-privileġġi biex torbot miegħu."  |
+| `cert-exists`      | Iċ-ċertifikat MITM ġie ġġenerat fuq id-diska                           | "Għadu ma ġie ġġenerat l-ebda ċertifikat MITM. Iġġenera wieħed mit-tab AgentBridge."                                                                       |
+| `cert-trusted`     | Is-CA ewlenija tal-MITM tinsab fil-maħżen tal-fiduċja tal-OS           | "Is-CA ewlenija tal-MITM mhijiex fdata mill-maħżen tal-OS, għalhekk l-interċettazzjoni TLS se tfalli. Agħti fiduċja liċ-ċertifikat mit-tab AgentBridge."   |
+| `dns-configured`   | L-ismijiet tal-host fil-mira huma spoofed f’`/etc/hosts`               | "L-ismijiet tal-host fil-mira mhumiex spoofed f’/etc/hosts, għalhekk it-traffiku qatt ma jasal sal-proxy. Ippermetti d-DNS għall-aġent(i) li trid taqbad." |
 
-**Banner tal-istat orfni:** meta l-paġna tinduna bi stat li jkun tħalla minn kraxx (spoof tad-DNS / CA / proxy tas-sistema), il-karta turi banner ambra — _"Sessjoni preċedenti ħalliet warajha stat tas-sistema (spoof tad-DNS, CA, jew proxy tas-sistema). Ħaddem Sewwi biex tnaddfu."_ — u tenfasizza l-buttuna **Sewwi**. `Repair` huwa l-ekwivalenti fis-saff tal-applikazzjoni tal-flag `--cleanup` ta' ProxyBridge (jiddelega lil `repairMitm()` f'`src/mitm/manager.ts`).
+**Banner ta’ stat orfni:** meta l-paġna tinduna bi stat li jkun baqa’ wara ħabta (DNS spoof / CA / proxy tas-sistema), il-kard turi banner ambra — _"Sessjoni preċedenti ħalliet warajha stat tas-sistema (DNS spoof, CA, jew proxy tas-sistema). Ħaddem Tiswija biex tnaddfu."_ — u tenfasizza l-buttuna **Tiswija**. `Repair` huwa l-analogu fis-saff tal-applikazzjoni tal-flag `--cleanup` ta’ ProxyBridge (jiddelega lil `repairMitm()` f’`src/mitm/manager.ts`).
 
-> Is-CA ewlenija MITM tinżamm installata bejn waqfien u bidu biex jiġu evitati prompts sudo
-> ripetuti (l-istess imġiba bħal mitmproxy/Charles), għalhekk it-tneħħija tagħha hija azzjoni espliċita
-> **Neħħi s-CA** minflok xi ħaġa li sseħħ awtomatikament meta jitwaqqaf is-server.
+> Iċ-CA ewlenija tal-MITM tinżamm installata bejn waqfien u bidu biex jiġu evitati
+> talbiet ripetuti ta’ sudo (l-istess imġiba bħal mitmproxy/Charles), għalhekk it-tneħħija tagħha hija azzjoni espliċita
+> **Neħħi s-CA** minflok xi ħaġa li sseħħ awtomatikament mal-waqfien.
 
-### 3.7 Importazzjoni/esportazzjoni ta' konfigurazzjoni portabbli
+### 3.7 Importazzjoni/esportazzjoni portabbli tal-konfigurazzjoni
 
-AgentBridge jista' jisserjalizza l-istat **aġġustabbli mill-operatur** fi blob JSON b'verżjoni sabiex konfigurazzjoni tkun tista' tiġi replikata fuq magni differenti. Is-serjalizzatur huwa `src/lib/inspector/configPortability.ts` (`exportConfig()` / `importConfig()`), ivvalidat minn `AgentBridgeConfigSchema`.
+AgentBridge jista’ jissarjalizza l-istat **aġġustabbli mill-operatur** f’blokka JSON b’verżjoni sabiex konfigurazzjoni tkun tista’ tiġi replikata bejn magni. Is-serializzatur huwa `src/lib/inspector/configPortability.ts` (`exportConfig()` / `importConfig()`), ivvalidat minn `AgentBridgeConfigSchema`.
 
-L-esportazzjoni tinkludi eżattament tliet biċċiet (il-valuri predefiniti inkorporati intenzjonalment **MHUMIEX** esportati, sabiex l-importazzjoni qatt ma tidduplikahom jew tidħol f'kunflitt magħhom):
+L-esportazzjoni tinkludi eżattament tliet partijiet (il-valuri predefiniti integrati intenzjonalment **MA JIĠUX** esportati, sabiex l-importazzjoni qatt ma tidduplikahom jew toħloq kunflitt magħhom):
 
-| Qasam            | Sors                                                                  | Noti                                                                     |
+| Kamp             | Sors                                                                  | Noti                                                                     |
 | ---------------- | --------------------------------------------------------------------- | ------------------------------------------------------------------------ |
-| `bypassPatterns` | mudelli ta’ bypass definiti mill-utent (`agent_bridge_bypass`)        | il-mudelli default ta’ bank/gov/okta huma esklużi                        |
-| `customHosts`    | hosts personalizzati tat-Traffic Inspector (`inspector_custom_hosts`) | kull wieħed: `{ host, kind: "llm"\|"app"\|"custom", label? }`            |
+| `bypassPatterns` | mudelli ta’ bypass definiti mill-utent (`agent_bridge_bypass`)        | il-mudelli predefiniti bank/gov/okta huma esklużi                        |
+| `customHosts`    | hosts personalizzati ta’ Traffic Inspector (`inspector_custom_hosts`) | kull wieħed: `{ host, kind: "llm"\|"app"\|"custom", label? }`            |
 | `agentMappings`  | mappings tal-mudelli għal kull aġent (`agent_bridge_mappings`)        | `{ [agentId]: [{ source, target }] }` għal kull aġent li għandu mappings |
 
 ```jsonc
@@ -341,13 +340,13 @@ L-esportazzjoni tinkludi eżattament tliet biċċiet (il-valuri predefiniti inko
 }
 ```
 
-**Imġiba tal-importazzjoni** (`POST /api/tools/agent-bridge/config`): il-mudelli ta’ bypass u l-mappings għal kull aġent **jinbidlu kompletament**; il-hosts personalizzati jiżdiedu **b’mod idempotenti** (`INSERT OR IGNORE`). Ir-rispons jirrapporta kemm ġew applikati minn kull wieħed:
+**Imġiba tal-importazzjoni** (`POST /api/tools/agent-bridge/config`): il-mudelli ta’ bypass u l-mappings għal kull aġent **jissostitwixxu kollox**; il-hosts personalizzati jiżdiedu b’mod **idempotenti** (`INSERT OR IGNORE`). Ir-risposta tirrapporta kemm ġew applikati minn kull wieħed:
 
 ```jsonc
 { "ok": true, "bypassPatterns": 1, "customHosts": 1, "agents": 1 }
 ```
 
-Dak li **MHUWIEX** fil-konfigurazzjoni: l-istat tat-tħaddim tas-server, il-paths taċ-ċertifikati, l-istat tad-DNS għal kull aġent, il-path tas-CA upstream, u s-settings ta’ TPROXY — dawn huma stat tal-host/runtime, mhux preferenzi portabbli.
+Dak li **MHUX** fil-konfigurazzjoni: l-istat ta’ tħaddim tas-server, il-paths taċ-ċertifikati, l-istat tad-DNS għal kull aġent, il-path tas-CA upstream, u s-settings ta’ TPROXY — dawn huma stat tal-host/runtime, mhux preferenzi portabbli.
 
 ---
 
@@ -511,34 +510,34 @@ Ir-rotot kollha huma `LOCAL_ONLY` (aċċessibbli biss permezz tal-loopback, infu
 
 Path bażi: `/api/tools/agent-bridge/`
 
-| Metodu              | Path                                           | Deskrizzjoni                                                                                                                                          |
-| ------------------- | ---------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET                 | `/api/tools/agent-bridge/state`                | Stat globali tas-server + detezzjoni/stat għal kull aġent                                                                                             |
-| GET                 | `/api/tools/agent-bridge/agents`               | Elenka l-aġenti rreġistrati (id, isem, hosts, vijabbiltà, stat)                                                                                       |
-| GET                 | `/api/tools/agent-bridge/agents/{id}`          | Stat ta’ aġent wieħed (konfigurazzjoni tal-mira + detezzjoni + stat maħżun)                                                                           |
-| PATCH               | `/api/tools/agent-bridge/agents/{id}`          | Aġġorna `setup_completed` għall-aġent                                                                                                                 |
-| GET                 | `/api/tools/agent-bridge/agents/{id}/detect`   | Ħaddem test tad-detezzjoni għall-aġent (`installed`, `version?`, `path?`)                                                                             |
-| POST                | `/api/tools/agent-bridge/agents/{id}/dns`      | Attiva/iddiżattiva d-DNS għall-aġent (`{enabled: boolean}`)                                                                                           |
-| GET                 | `/api/tools/agent-bridge/agents/{id}/mappings` | Immappjar tal-mudelli għall-aġent                                                                                                                     |
-| PUT                 | `/api/tools/agent-bridge/agents/{id}/mappings` | Issostitwixxi l-immappjar tal-mudelli                                                                                                                 |
-| POST                | `/api/tools/agent-bridge/agents/{id}/reset`    | Irrestawra l-konfigurazzjoni predefinita: neħħi l-ispoofing tad-DNS ta’ dan l-aġent, ħassar l-immappjar tiegħu, u rrisettja l-istat tiegħu (ara §3.6) |
-| POST                | `/api/tools/agent-bridge/server`               | Ibda/waqqaf/erġa’ ibda s-server (`action: "start"\|"stop"\|"restart"\|"trust-cert"\|"regenerate-cert"`)                                               |
-| GET                 | `/api/tools/agent-bridge/cert`                 | Stat taċ-ċertifikat (`exists`, `trusted`, `path`)                                                                                                     |
-| POST                | `/api/tools/agent-bridge/cert`                 | Afda (installa) s-CA ewlenija tal-MITM                                                                                                                |
-| DELETE              | `/api/tools/agent-bridge/cert`                 | Neħħi l-fiduċja (neħħi) tas-CA ewlenija tal-MITM — idempotenti (ara §3.6)                                                                             |
-| POST                | `/api/tools/agent-bridge/cert/regenerate`      | Iġġenera mill-ġdid iċ-ċertifikat MITM awtofirmat                                                                                                      |
-| GET                 | `/api/tools/agent-bridge/cert/download`        | Ibgħat iċ-ċertifikat PEM bħala stream għat-tniżżil                                                                                                    |
-| GET                 | `/api/tools/agent-bridge/bypass`               | Elenka l-mudelli ta’ bypass (`default` + `user`)                                                                                                      |
-| POST                | `/api/tools/agent-bridge/bypass`               | Issostitwixxi kompletament il-mudelli ta’ bypass iddefiniti mill-utent                                                                                |
-| DELETE              | `/api/tools/agent-bridge/bypass?pattern=...`   | Neħħi mudell wieħed ta’ bypass iddefinit mill-utent                                                                                                   |
-| GET                 | `/api/tools/agent-bridge/diagnose`             | Awto-test tal-pipeline tal-qbid (ara §3.6)                                                                                                            |
-| POST                | `/api/tools/agent-bridge/repair`               | Reġġa’ lura stat orfni tas-sistema MITM (ara §3.6)                                                                                                    |
-| GET                 | `/api/tools/agent-bridge/config`               | Esporta l-konfigurazzjoni portabbli bħala JSON (ara §3.7)                                                                                             |
-| POST                | `/api/tools/agent-bridge/config`               | Importa l-konfigurazzjoni portabbli bħala JSON (ara §3.7)                                                                                             |
-| GET                 | `/api/tools/agent-bridge/upstream-ca`          | Ikseb il-path ikkonfigurat tas-CA upstream                                                                                                            |
-| POST                | `/api/tools/agent-bridge/upstream-ca`          | Ivvalida + ippersisti l-path tas-CA upstream                                                                                                          |
-| POST                | `/api/tools/agent-bridge/upstream-ca/test`     | Ivvalida biss (dry-run) path tas-CA upstream — ma jiġix ippersistit                                                                                   |
-| GET / POST / DELETE | `/api/tools/agent-bridge/tproxy`               | Modalità ta’ qbid TPROXY b’deċifrar trasparenti — ara `docs/security/MITM-TPROXY-DECRYPT.md` (git; mhux ikkompilat f’`/docs`)                         |
+| Metodu              | Path                                           | Deskrizzjoni                                                                                                                                |
+| ------------------- | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET                 | `/api/tools/agent-bridge/state`                | Stat globali tas-server + detezzjoni/stat għal kull aġent                                                                                   |
+| GET                 | `/api/tools/agent-bridge/agents`               | Elenka l-aġenti rreġistrati (id, name, hosts, viability, state)                                                                             |
+| GET                 | `/api/tools/agent-bridge/agents/{id}`          | Stat ta’ aġent wieħed (konfigurazzjoni tal-mira + detezzjoni + stat maħżun)                                                                 |
+| PATCH               | `/api/tools/agent-bridge/agents/{id}`          | Aġġorna `setup_completed` għall-aġent                                                                                                       |
+| GET                 | `/api/tools/agent-bridge/agents/{id}/detect`   | Ħaddem prova ta’ detezzjoni għall-aġent (`installed`, `version?`, `path?`)                                                                  |
+| POST                | `/api/tools/agent-bridge/agents/{id}/dns`      | Attiva/iddiżattiva d-DNS għall-aġent (`{enabled: boolean}`)                                                                                 |
+| GET                 | `/api/tools/agent-bridge/agents/{id}/mappings` | Immappjar tal-mudelli għall-aġent                                                                                                           |
+| PUT                 | `/api/tools/agent-bridge/agents/{id}/mappings` | Issostitwixxi l-immappjar tal-mudelli                                                                                                       |
+| POST                | `/api/tools/agent-bridge/agents/{id}/reset`    | Irrestawra l-valuri predefiniti: neħħi l-ispoofing tad-DNS ta’ dan l-aġent, neħħi l-immappjar tiegħu u rrisettja l-istat tiegħu (ara §3.6)  |
+| POST                | `/api/tools/agent-bridge/server`               | Ibda/waqqaf/erġa’ ibda s-server (`action: "start"\|"stop"\|"restart"\|"trust-cert"\|"regenerate-cert"`)                                     |
+| GET                 | `/api/tools/agent-bridge/cert`                 | Stat taċ-ċertifikat (`exists`, `trusted`, `path`)                                                                                           |
+| POST                | `/api/tools/agent-bridge/cert`                 | Afda (installa) l-CA ewlenija tal-MITM                                                                                                      |
+| DELETE              | `/api/tools/agent-bridge/cert`                 | Neħħi l-fiduċja (neħħi) mill-CA ewlenija tal-MITM — idempotenti (ara §3.6)                                                                  |
+| POST                | `/api/tools/agent-bridge/cert/regenerate`      | Iġġenera mill-ġdid iċ-ċertifikat attiv mingħajr ma tbiddel il-mudell taċ-ċertifikat (leaf legat, jew rotazzjoni tal-CA ewlenija — ara §3.1) |
+| GET                 | `/api/tools/agent-bridge/cert/download`        | Ixxandar iċ-ċertifikat PEM attiv għat-tniżżil (`ca.crt` taħt il-mudell tal-CA ewlenija, `server.crt` fuq installazzjoni b’leaf legat)       |
+| GET                 | `/api/tools/agent-bridge/bypass`               | Elenka l-mudelli tal-bypass (`default` + `user`)                                                                                            |
+| POST                | `/api/tools/agent-bridge/bypass`               | Issostitwixxi kompletament il-mudelli tal-bypass definiti mill-utent                                                                        |
+| DELETE              | `/api/tools/agent-bridge/bypass?pattern=...`   | Neħħi mudell wieħed tal-bypass definit mill-utent                                                                                           |
+| GET                 | `/api/tools/agent-bridge/diagnose`             | Awto-test tal-pipeline tal-qbid (ara §3.6)                                                                                                  |
+| POST                | `/api/tools/agent-bridge/repair`               | Ħoll l-istat tas-sistema MITM li tħalla orfni (ara §3.6)                                                                                    |
+| GET                 | `/api/tools/agent-bridge/config`               | Esporta l-konfigurazzjoni portabbli f’JSON (ara §3.7)                                                                                       |
+| POST                | `/api/tools/agent-bridge/config`               | Importa l-konfigurazzjoni portabbli f’JSON (ara §3.7)                                                                                       |
+| GET                 | `/api/tools/agent-bridge/upstream-ca`          | Ikseb il-path konfigurat tal-CA upstream                                                                                                    |
+| POST                | `/api/tools/agent-bridge/upstream-ca`          | Ivvalida + ippersisti l-path tal-CA upstream                                                                                                |
+| POST                | `/api/tools/agent-bridge/upstream-ca/test`     | Ivvalida biss (dry-run) path ta’ CA upstream — ma jippersistihx                                                                             |
+| GET / POST / DELETE | `/api/tools/agent-bridge/tproxy`               | Modalità ta’ qbid TPROXY bi deċifrar trasparenti — ara `docs/security/MITM-TPROXY-DECRYPT.md` (git; mhux ikkompilat f’`/docs`)              |
 
 Skemi OpenAPI sħaħ: `docs/openapi.yaml` → tag `AgentBridge`.
 

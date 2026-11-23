@@ -39,32 +39,32 @@ Search Tools Studio, `/dashboard/search-tools` sayfasını temel bir arama denem
 
 Mevcut `SearchForm` + `ResultsPanel` + `RerankPanel` bileşenlerini bir sekmeye dönüştürür:
 
-- Sorgu → sonuçlar (başlık, URL, özet, alaka puanı).
-- Yapılandırma bölmesinde sağlayıcı meta verileri (maliyet, kota, durum).
-- Yeniden sıralama bölümü: bir yeniden sıralama modeli seçer, sonuçları yeniden sıralar ve `positionDelta` değerini gösterir.
-- Hiçbir arama sağlayıcısı yapılandırılmadığında eylem çağrısı içeren boş durum.
+- Sorgu → sonuçlar (başlık, URL, metin parçacığı, alaka düzeyi puanı).
+- Config bölmesinde sağlayıcı meta verileri (maliyet, kota, durum).
+- Yeniden sıralama bölümü: bir yeniden sıralama modeli seçme, sonuçları yeniden sıralama, `positionDelta` değerini gösterme.
+- Hiçbir arama sağlayıcısı yapılandırılmadığında CTA içeren boş durum.
 - `SearchHistory.tsx` aracılığıyla arama geçmişi.
 - `POST /v1/search` çağrısı yapar (mevcut uç nokta, değişiklik yok).
 
 ### İçerik Çıkarma Sekmesi
 
-`POST /v1/web/fetch` aracılığıyla bir URL'den içerik çıkarmak için yeni sekme (plan 05'te oluşturuldu):
+`POST /v1/web/fetch` (05 numaralı planda oluşturuldu) aracılığıyla bir URL'den içerik çıkarmak için yeni sekme:
 
-- Girdi: URL + tam sayfa anahtarı + biçim seçici (markdown / metin / HTML).
+- Girdi: URL + tam sayfa geçiş düğmesi + biçim seçici (markdown / metin / HTML).
 - Gönder → getir → `ScrapeResult.tsx` bileşeninde görüntüle.
-- `ScrapeResult`, markdown önizlemesini ve ham görünüm anahtarını görüntüler.
-- Sınır: Yanıt gövdesi **256 KB**'tan büyükse kullanıcı arayüzü `(kısaltıldı, ham hâlini görüntüle)` ifadesini gösterir ve ham içeriği bir Monaco modalında açar (D21).
-- Meta veri paneli: sağlayıcı (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search), gecikme, maliyet, yanıt boyutu, bağlantı sayısı.
-- `useScrapeFetch.ts` kancasını kullanır.
+- `ScrapeResult`, markdown önizlemesi + ham veri geçiş düğmesini görüntüler.
+- Sınır: Yanıt gövdesi **256 KB**'tan büyükse kullanıcı arayüzü `(kesildi, ham veriyi görüntüle)` ifadesini gösterir ve ham veriyi bir Monaco modalında açar (D21).
+- Meta veri paneli: sağlayıcı (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), gecikme, maliyet, yanıt boyutu, bağlantı sayısı.
+- `useScrapeFetch.ts` hook'unu kullanır.
 
 ### Karşılaştırma Sekmesi
 
 Aynı sorguyu/URL'yi en fazla **4 sağlayıcıda paralel olarak** çalıştırır (D22):
 
-- Sağlayıcı başına yan yana sütunlar.
-- Ölçümler: gecikme, maliyet, sonuç sayısı, yanıt boyutu.
+- Her sağlayıcı için yan yana sütunlar.
+- Metrikler: gecikme, maliyet, sonuç sayısı, yanıt boyutu.
 - Arama için URL örtüşmesi hesaplaması (ilk sonuca kıyasla ortak URL sayısı).
-- Sağlayıcı başına `POST /v1/search` (arama) veya `POST /v1/web/fetch` (içerik çıkarma) çağrısı yapar.
+- Her sağlayıcı için `POST /v1/search` (arama) veya `POST /v1/web/fetch` (içerik çıkarma) çağrısı yapar.
 
 ---
 
@@ -99,13 +99,12 @@ Aynı sorguyu/URL'yi en fazla **4 sağlayıcıda paralel olarak** çalıştırı
 
 ## Sağlayıcı Kataloğu
 
-`ProviderCatalog.tsx`, sağlayıcıların tam listesini `GET /api/search/providers` üzerinden sunar
-(F4 kapsamında getirme sağlayıcılarını içerecek şekilde genişletilmiştir):
+`ProviderCatalog.tsx`, `GET /api/search/providers` uç noktasından tam sağlayıcı listesini sunar
+(F4'te getirme sağlayıcılarını içerecek şekilde genişletilmiştir):
 
-| `kind` | `"search"` (20 sağlayıcı) veya `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search) |
+| `kind` | `"search"` (20 sağlayıcı) veya `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
-Durum, kimlik bilgilerinin mevcut olup olmadığı ve tüm anahtarların o anda bekleme süresinde olup olmadığı
-kontrol edilerek **istek sırasında türetilir**.
+Durum, kimlik bilgilerinin mevcut olup olmadığı ve tüm anahtarların o anda bekleme süresinde olup olmadığı kontrol edilerek **istek sırasında türetilir**.
 
 ---
 
@@ -117,18 +116,18 @@ API anahtarı yer tutucusu her zaman `$OMNIROUTE_API_KEY` şeklindedir (D11, Pla
 
 ---
 
-## Arka Uç Değişiklikleri
+## Backend Değişiklikleri
 
-Bu özellik için yalnızca bir arka uç değişikliği gerekliydi:
+Bu özellik için yalnızca bir backend değişikliği gerekti:
 
 ### Genişletilmiş `GET /api/search/providers`
 
 `src/app/api/search/providers/route.ts` şu şekilde genişletildi:
 
-- 6 getirme sağlayıcısının tamamı (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`) diziye eklendi.
-- Her öğeye `kind: "search" | "fetch"` eklendi.
-- Canlı kimlik bilgisi durumundan türetilen `status: "configured" | "missing" | "rate_limited"` eklendi.
-- Geriye dönük uyumluluk korundu — mevcut alanlar (`id`, `name` vb.) değiştirilmedi.
+- Her fetch sağlayıcısını (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`, `parallel-search`) diziye dahil etme.
+- Her öğeye `kind: "search" | "fetch"` ekleme.
+- Canlı kimlik bilgisi durumundan türetilen `status: "configured" | "missing" | "rate_limited"` alanını ekleme.
+- Geriye dönük uyumluluğu koruma — mevcut alanlar (`id`, `name` vb.) değişmeden bırakıldı.
 
 ---
 

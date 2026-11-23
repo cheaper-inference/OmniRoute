@@ -509,14 +509,14 @@ Kung magbalik ito ng anuman maliban sa `ok`, **itigil kaagad ang paggamit sa dat
 
 ---
 
-## Pagbawi mula sa Sakuna
+## Pagbawi Mula sa Sakuna
 
-### Sitwasyon 1: Nawala ang WAL File
+### Sitwasyon 1: Nawalang WAL File
 
 Nawawala ang `-wal` file ngunit buo pa ang `-shm` at pangunahing DB:
 
 ```bash
-# Awtomatikong babawi sa susunod na pagbukas
+# Awtomatikong bumabawi sa susunod na pagbukas
 omniroute
 ```
 
@@ -528,19 +528,22 @@ sqlite3 recovered.db < recovered.sql
 mv recovered.db ~/.omniroute/storage.sqlite
 ```
 
-### Sitwasyon 2: Nasira ang Pangunahing DB File
+### Sitwasyon 2: Sirang Pangunahing DB File
 
-I-restore mula sa backup:
+Ibalik mula sa backup:
 
 ```bash
-omniroute sync pull --merge   # o: omniroute backup restore <backup-id>
+omniroute backup restore <backup-id>
 ```
 
-### Sitwasyon 3: Nawala ang Encryption Key
+Ang `omniroute sync pull [outPath]` ay nagda-download lamang ng buong `.tar.gz` archive mula sa isang tumatakbong server
+(`GET /api/db-backups/exportAll`, kinakailangan ang kredensyal ng operator); wala itong nire-restore.
 
-**Walang posibleng paraan ng pagbawi** kung wala ang key. Hindi mababasa ang mga naka-encrypt na field. Muling idagdag nang manu-mano ang lahat ng provider gamit ang mga bagong credential.
+### Sitwasyon 3: Nawalang Encryption Key
 
-> **Pag-iwas**: Palaging i-back up nang hiwalay ang encryption key, mas mainam kung sa isang password manager o KMS.
+**Walang posibleng pagbawi** kung wala ang key. Hindi mababasa ang mga naka-encrypt na field. Muling idagdag nang manu-mano ang lahat ng provider gamit ang mga bagong kredensyal.
+
+> **Pag-iwas**: Palaging i-back up nang hiwalay ang encryption key, pinakamainam sa isang password manager o KMS.
 
 ### Sitwasyon 4: Puno ang Disk
 

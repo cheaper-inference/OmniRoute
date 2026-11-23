@@ -13,15 +13,20 @@ import {
   normalizeRequestQueueSettings,
   normalizeConnectionCooldownProfile,
   normalizeProviderBreakerProfile,
+  normalizeTokenRefreshBreakerSettings,
   normalizeWaitForCooldownSettings,
   normalizeComboCooldownWaitSettings,
   normalizeQuotaShareConcurrencyLimitSettings,
+  normalizeStreamStallCooldownSettings,
   normalizeProviderCooldownSettings,
   normalizeQuotaPreflightSettings,
   normalizeStreamRecoverySettings,
   normalizeProviderQuotaOverrides,
   normalizeCredentialHealthCheckSettings,
+  pruneResilienceSettingsToProvided,
 } from "./settings/normalize";
+
+export { pruneResilienceSettingsToProvided };
 
 // Re-export the settings shape (moved to ./settings/types) so this module's
 // public API is unchanged.
@@ -29,6 +34,8 @@ export type {
   RequestQueueSettings,
   ConnectionCooldownProfileSettings,
   ProviderBreakerProfileSettings,
+  TokenRefreshBreakerScope,
+  TokenRefreshBreakerSettings,
   WaitForCooldownSettings,
   ComboCooldownWaitSettings,
   QuotaShareConcurrencyLimitSettings,
@@ -99,6 +106,14 @@ export const DEFAULT_RESILIENCE_SETTINGS: ResilienceSettings = {
       resetTimeoutMs: PROVIDER_PROFILES.apikey.circuitBreakerReset,
     },
   },
+  // Token-refresh breaker: provider-wide by default (current behavior), so
+  // existing installs see no change. Operators can switch to per-connection
+  // scope to isolate one dead account from healthy ones on the same provider.
+  tokenRefreshBreaker: {
+    scope: "provider",
+    failureThreshold: 5,
+    cooldownMs: 30 * 60 * 1000,
+  },
   // Wait at most 90s for a single connection cooldown (covers Gemini-class
   // TPM/RPM windows, which report ~60s retry-after live), at most 5 retry
   // cycles, never more than 300s (5 min) total (#7360 follow-up — raised now
@@ -129,6 +144,11 @@ export const DEFAULT_RESILIENCE_SETTINGS: ResilienceSettings = {
   // comes from each connection's max_concurrent.
   quotaShareConcurrencyLimit: {
     enabled: true,
+  },
+  // A stream content stall fails one request; it does not cool the account unless
+  // the operator opts in (see StreamStallCooldownSettings).
+  streamStallCooldown: {
+    enabled: false,
   },
   providerCooldown: {
     minRetryCooldownMs: Number(process.env.PROVIDER_COOLDOWN_MIN_MS || "5000"),
@@ -229,8 +249,7 @@ function buildLegacyFallback(settings: JsonRecord): ResilienceSettings {
         DEFAULT_RESILIENCE_SETTINGS.requestQueue.concurrentRequests,
         { min: 1, max: 10_000 }
       ),
-      globalConcurrentRequests:
-        DEFAULT_RESILIENCE_SETTINGS.requestQueue.globalConcurrentRequests,
+      globalConcurrentRequests: DEFAULT_RESILIENCE_SETTINGS.requestQueue.globalConcurrentRequests,
       maxWaitMs: DEFAULT_RESILIENCE_SETTINGS.requestQueue.maxWaitMs,
       executionMaxWaitMs: DEFAULT_RESILIENCE_SETTINGS.requestQueue.executionMaxWaitMs,
       maxQueueDepth: DEFAULT_RESILIENCE_SETTINGS.requestQueue.maxQueueDepth,
@@ -287,7 +306,9 @@ function buildLegacyFallback(settings: JsonRecord): ResilienceSettings {
     },
     comboCooldownWait: DEFAULT_RESILIENCE_SETTINGS.comboCooldownWait,
     quotaShareConcurrencyLimit: DEFAULT_RESILIENCE_SETTINGS.quotaShareConcurrencyLimit,
+    streamStallCooldown: DEFAULT_RESILIENCE_SETTINGS.streamStallCooldown,
     providerCooldown: DEFAULT_RESILIENCE_SETTINGS.providerCooldown,
+    tokenRefreshBreaker: DEFAULT_RESILIENCE_SETTINGS.tokenRefreshBreaker,
     quotaPreflight: DEFAULT_RESILIENCE_SETTINGS.quotaPreflight,
     streamRecovery: streamRecoveryDefaults,
     providerQuotaOverrides: DEFAULT_RESILIENCE_SETTINGS.providerQuotaOverrides,
@@ -347,6 +368,10 @@ export function resolveResilienceSettings(
         fallback.providerBreaker.apikey
       ),
     },
+    tokenRefreshBreaker: normalizeTokenRefreshBreakerSettings(
+      current.tokenRefreshBreaker,
+      fallback.tokenRefreshBreaker
+    ),
     waitForCooldown: normalizeWaitForCooldownSettings(
       current.waitForCooldown,
       fallback.waitForCooldown
@@ -358,6 +383,10 @@ export function resolveResilienceSettings(
     quotaShareConcurrencyLimit: normalizeQuotaShareConcurrencyLimitSettings(
       current.quotaShareConcurrencyLimit,
       fallback.quotaShareConcurrencyLimit
+    ),
+    streamStallCooldown: normalizeStreamStallCooldownSettings(
+      current.streamStallCooldown,
+      fallback.streamStallCooldown
     ),
     providerCooldown: normalizeProviderCooldownSettings(
       current.providerCooldown,
@@ -408,6 +437,10 @@ export function mergeResilienceSettings(
         current.providerBreaker.apikey
       ),
     },
+    tokenRefreshBreaker: normalizeTokenRefreshBreakerSettings(
+      updates.tokenRefreshBreaker,
+      current.tokenRefreshBreaker
+    ),
     waitForCooldown: normalizeWaitForCooldownSettings(
       updates.waitForCooldown,
       current.waitForCooldown
@@ -419,6 +452,10 @@ export function mergeResilienceSettings(
     quotaShareConcurrencyLimit: normalizeQuotaShareConcurrencyLimitSettings(
       updates.quotaShareConcurrencyLimit,
       current.quotaShareConcurrencyLimit
+    ),
+    streamStallCooldown: normalizeStreamStallCooldownSettings(
+      updates.streamStallCooldown,
+      current.streamStallCooldown
     ),
     providerCooldown: normalizeProviderCooldownSettings(
       updates.providerCooldown,

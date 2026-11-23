@@ -88,7 +88,13 @@ export async function GET(request: Request) {
       ? settings.oidcRedirectPath
       : "/api/auth/oidc/callback";
 
-  if (!enabled || !rawIssuer || !clientId || !clientSecret) {
+  // Without an allowlist every account at the identity provider would be let in as the
+  // dashboard admin, so an empty list counts as not configured.
+  const allowed = Array.isArray(settings.oidcAllowedSubjects)
+    ? settings.oidcAllowedSubjects.filter((v: unknown) => typeof v === "string" && v.trim() !== "")
+    : [];
+
+  if (!enabled || !rawIssuer || !clientId || !clientSecret || allowed.length === 0) {
     return NextResponse.redirect(new URL("/login?oidc_error=not_configured", originEarly));
   }
 
@@ -130,6 +136,9 @@ export async function GET(request: Request) {
     // use conventional endpoints
   }
 
+  // PKCE: the verifier is only sent when this browser started the flow with a challenge.
+  const codeVerifier = cookieStore.get("oidc_pkce_verifier")?.value;
+
   // Exchange code for tokens (form post)
   const tokenParams = new URLSearchParams({
     grant_type: "authorization_code",
@@ -138,6 +147,9 @@ export async function GET(request: Request) {
     client_id: clientId,
     client_secret: clientSecret,
   });
+  if (codeVerifier) {
+    tokenParams.set("code_verifier", codeVerifier);
+  }
 
   let tokenResp: Response;
   try {
@@ -193,23 +205,31 @@ export async function GET(request: Request) {
       audience: clientId,
     });
 
-    // Optional subject / email whitelist
-    const allowed = Array.isArray(settings.oidcAllowedSubjects) ? settings.oidcAllowedSubjects : [];
-    if (allowed.length > 0) {
-      const sub = typeof payload.sub === "string" ? payload.sub : "";
-      const emailVerified = (payload as Record<string, unknown>).email_verified === true;
-      const email =
-        emailVerified && typeof (payload as Record<string, unknown>).email === "string"
-          ? ((payload as Record<string, unknown>).email as string).toLowerCase()
-          : "";
-      const ok = allowed.some((v: unknown) => {
-        if (typeof v !== "string") return false;
-        if (v === sub) return true;
-        return email !== "" && v.toLowerCase() === email;
-      });
-      if (!ok) {
-        return NextResponse.redirect(new URL("/login?oidc_error=subject_not_allowed", originEarly));
-      }
+    // The id_token must echo the nonce sent in the authorization URL. The
+    // browser-bound cookie is required: an id_token replayed without the nonce
+    // must not mint a session.
+    const expectedNonce = cookieStore.get("oidc_nonce")?.value;
+    const tokenNonce = (payload as Record<string, unknown>).nonce;
+    if (
+      !expectedNonce ||
+      typeof tokenNonce !== "string" ||
+      !timingSafeCompare(expectedNonce, tokenNonce)
+    ) {
+      return NextResponse.redirect(new URL("/login?oidc_error=id_token_invalid", originEarly));
+    }
+
+    const sub = typeof payload.sub === "string" ? payload.sub : "";
+    const emailVerified = (payload as Record<string, unknown>).email_verified === true;
+    const email =
+      emailVerified && typeof (payload as Record<string, unknown>).email === "string"
+        ? ((payload as Record<string, unknown>).email as string).toLowerCase()
+        : "";
+    const ok = allowed.some((v: string) => {
+      if (v === sub) return true;
+      return email !== "" && v.toLowerCase() === email;
+    });
+    if (!ok) {
+      return NextResponse.redirect(new URL("/login?oidc_error=subject_not_allowed", originEarly));
     }
   } catch {
     return NextResponse.redirect(new URL("/login?oidc_error=id_token_invalid", originEarly));
@@ -241,6 +261,20 @@ export async function GET(request: Request) {
     sameSite: "lax",
     path: "/",
     maxAge: 60 * 60 * 24 * 30,
+  });
+
+  // Single-use PKCE material: clear it once the session is minted.
+  store.set("oidc_pkce_verifier", "", {
+    httpOnly: true,
+    sameSite: "lax",
+    path: "/",
+    maxAge: 0,
+  });
+  store.set("oidc_nonce", "", {
+    httpOnly: true,
+    sameSite: "lax",
+    path: "/",
+    maxAge: 0,
   });
 
   // Success — go to dashboard

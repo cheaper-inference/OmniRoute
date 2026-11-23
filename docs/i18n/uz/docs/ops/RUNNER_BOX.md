@@ -4,100 +4,177 @@
 
 ---
 
-Oʻz-oʻziga xizmat koʻrsatuvchi pool (barcha sakkizta runner’da `self-hosted, omni-release`; ikkitasida `omni-build`) **.113** serverida ishlaydi.
-2026-08-28 kuni oʻlchangan (v3.8.50 postmortem, III qism):
+Oʻzida joylashtirilgan pool **.113** mashinasida (`tomni-proxmox-113`) ishlaydi. 2026-10-18 sanasidan beri har bir
+OmniRoute runneri **bitta rol**, bitta label hamda uning ish yuklamasi bo‘yicha o‘lchangan natijalarga
+mos xotira/CPU budjetiga ega. Turbopack slotiga build uchun zarur resurslar ajratiladi; qolgan slotlar
+ularning o‘lchangan eng yuqori ko‘rsatkichlariga moslab sozlangan. Mashinada resurslar faqat Turbopack
+buildi Release-Green webpack buildi va lint job bilan bir vaqtda ishlaganda ortiqcha taqsimlanadi;
+host swap (16 GB) buni qoplaydi, pull-request Buildlari esa hostingdagi runnerlarda ishlagani uchun
+Turbopack sloti ko‘pincha bo‘sh turadi:
 
-| resurs     | qiymat                                                                                                                              | rejalashtirish uchun maʼnosi                                                                                                                                                                               |
-| ---------- | ----------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| RAM / CPU  | **31 GB / 32 yadro** (ushbu hujjat ilk bor yozilganida 16 GB edi)                                                                   | bitta `next-build` eng yuqori nuqtada **~14 GB** sarflaydi → bir vaqtdagi 2 ta ogʻir build serverni toʻliq band qiladi, 3 tasi uni ishdan chiqaradi (2026-08-28 06:42Z: yuklama 56, ikkita job yoʻqotildi) |
-| swap       | 15 GB                                                                                                                               | v3.8.50 nashri swap yordamida zoʻrgʻa yakunlandi; bosim `/proc/pressure/memory` ichida koʻrinadi                                                                                                           |
-| `/tmp`     | **12 GB tmpfs = RAM**                                                                                                               | u yerda saqlangan har qanday narsa xotirani egallaydi; qoldiqlar 3 soatdan keyin tozalanadi                                                                                                                |
-| disk       | 188 GB                                                                                                                              | 8 ta runner’ning `_work` checkout’lari cheklovsiz ~70 GB gacha yetadi                                                                                                                                      |
-| runner’lar | **6 ta listener**: 4 ta OmniRoute (1 ta `omni-build` + faqat `omni-release` uchun 1 ta + 2 ta `omni-light`) + OmniHeuris + OmniMind | barchasi yuqoridagi xotirani birga ishlatadi; `omniroute-113-3/-4/-7/-8` oʻchirilgan (`systemctl enable --now` ulardan birini qayta ishga tushiradi)                                                       |
+| runner               | label               | rol                                                                                                                                                 | `MemoryHigh` / `MemoryMax` | `CPUQuota`           |
+| -------------------- | ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | -------------------- |
+| `omniroute-113-5`    | `omni-build`        | Turbopack buildlari: `ci.yml` `Build` (faqat push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, tungi a11y buildi | 56 GB / 60 GB (swap 0)     | 1600 %               |
+| `omniroute-113-6`    | `omni-release`      | Release-Green (`release-green` + `main-green`), webpack buildi                                                                                      | 20 GB / 24 GB (swap 4 GB)  | 800 %                |
+| `omniroute-113-2`    | `omni-light`        | tungi ishlar (Schemathesis, promptfoo, garak, k6) va `quality.yml` faylidagi `lint-guard`                                                           | 12 GB / 16 GB (swap 4 GB)  | 600 %                |
+| `omniroute-113`      | `omni-light`        | yuqoridagi bilan bir xil pool                                                                                                                       | 8 GB / 12 GB               | 400 %                |
+| OmniHeuris, OmniMind | (ularning repolari) | faqat Dependabot (har biri uchun eng yuqori ko‘rsatkich 155 MB, 2026-10-18)                                                                         | 4 GB / 6 GB                | har biri uchun 200 % |
 
-## Janitor’ni oʻrnatish (bir marta, serverda)
+2026-10-18 sanasida o‘lchangan:
+
+| resurs    | qiymat                       | rejalashtirish uchun nimani anglatadi                                                                                                                                                                                                                                                                                                                                                                               |
+| --------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| RAM / CPU | **78 GB / 32 yadro**         | Turbopack production buildi cheklovsiz holatda 49 GB gacha yetdi (`tests/unit/ci-build-bundler-webpack.test.ts`); Next 16.3.8 da faqat compile bosqichining o‘zi ~40 GB egallaydi (`next-build` ichida 36 GB RSS va har biri 3 GB bo‘lgan 17 ta loader workeri, 2026-10-18 sanasida o‘lchangan); webpack buildi ~14–16 GB. Bitta Turbopack va bitta webpack buildi birga sig‘adi; ikkita Turbopack buildi sig‘maydi |
+| swap      | 16 GB                        | `omniroute-113-5` swap o‘chirilgan holda (`MemorySwapMax=0`) ishlaydi, shuning uchun nazoratdan chiqqan build mashinani swap ishlatishga majbur qilish o‘rniga o‘z limitida to‘xtatiladi                                                                                                                                                                                                                            |
+| `/tmp`    | **12 GB tmpfs = RAM**        | bu yerda saqlangan har qanday narsa xotirani egallaydi; qoldiqlar 3 soatdan keyin tozalanadi                                                                                                                                                                                                                                                                                                                        |
+| CPU       | 32 yadroda 60 load kuzatildi | kvotalardan oldin bitta Turbopack buildi (~1166 % CPU) va shu mashinadagi coverage to‘plami boshqa listenerlarning heartbeatlarini resursdan mahrum qilgan (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                                                    |
+| runnerlar | **6 ta listener**            | 4 ta OmniRoute + OmniHeuris + OmniMind; `omniroute-113-3/-4/-7/-8` o‘chirilgan (`systemctl enable --now` ulardan birini qayta ishga tushiradi)                                                                                                                                                                                                                                                                      |
+
+Limitlar har bir unitning `/etc/systemd/system/actions.runner.<…>.service.d/override.conf`
+faylida joylashgan (avvalgi qiymatlar `override.conf.bak-20261018` sifatida saqlangan) va
+`systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` orqali ishlayotgan
+tizimga qo‘llangan — restart qilinmagan, shuning uchun hech bir ishlayotgan jobga ta’sir qilinmagan.
+Labellar runnerlar API orqali
+(`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
+`gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`) o‘zgartiriladi va
+bu ham ishlayotgan tizimda amalga oshiriladi.
+
+## Tozalagichni o‘rnatish (bir marta, serverda)
 
 ```bash
 scp scripts/ops/runner-janitor.sh root@192.168.0.113:/opt/omniroute-ops/runner-janitor.sh
 ssh root@192.168.0.113 'chmod +x /opt/omniroute-ops/runner-janitor.sh; apt-get install -y lsof'
-# cron (root): har 30 daqiqada, logni /var/log/runner-janitor.log fayliga yozish
+# cron (root): har 30 daqiqada, jurnalni /var/log/runner-janitor.log fayliga yozish
 */30 * * * * MAX_ACTIVE_RUNNERS=6 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
 ```
 
-`lsof` talab qilinadi: janitor yoʻlni olib tashlashdan oldin ochiq fayllarning bir martalik snapshot’i yordamida uning ishlatilmayotganini tasdiqlaydi; bu vositasiz u hech narsani olib tashlamaydi va bu haqda xabar beradi
-(exit 1). Har qanday oʻzgarishni avval `--dry-run` bilan sinab koʻring — u aynan nima qilishini koʻrsatadi
-va hech narsaga tegmaydi.
+`lsof` talab qilinadi: tozalagich yo‘lni o‘chirishdan oldin ochiq fayllarning bir martalik
+holatini tekshirish orqali undan foydalanilmayotganini tasdiqlaydi; bu vosita bo‘lmasa, hech
+narsani o‘chirmaydi va bu haqda xabar beradi (exit 1). Har qanday o‘zgarishni avval
+`--dry-run` bilan sinab ko‘ring — u aynan nima qilishini ko‘rsatadi va hech narsaga tegmaydi.
 
-Har ishga tushirilganda bajaradigan ishlari: oʻz qoldiqlarimizni (`runner-*`, `omniroute-*`,
+Har ishga tushganda quyidagilarni bajaradi: o‘zimizdan qolgan fayllarni (`runner-*`, `omniroute-*`,
 `next-build*`, `e2e-build.tar.gz`) **tmpfs’da 3 soatdan** va diskdagi
 `_work/_temp` ichida 24 soatdan keyin tozalaydi; 75 daqiqadan eski `next-build` jarayonini
-toʻxtatadi (hech bir job buncha uzoq ishlamaydi — 2026-08-27 kuni GitHub uning job’ini yoʻqotilgan deb
-eʼlon qilganidan keyin bittasi 70 daqiqa ishlagan); unit’i **toʻxtatilgan** runner’larning
-48 soatdan eski checkout’larini tozalaydi; disk ≥ 85 %, xotira PSI
-`full/avg60` ≥ 10 % boʻlganda va listener’lar soni `MAX_ACTIVE_RUNNERS` qiymatidan oshganda
-(omniroute/boshqalar kesimida) ogohlantiradi. Exit 1 = eʼtibor talab qilinadi; logni oʻqing.
+to‘xtatadi (hech bir vazifa buncha uzoq ishlamaydi — 2026-08-27 kuni GitHub vazifani yo‘qolgan deb
+e’lon qilganidan keyin bittasi 70 daqiqa ishlagan); unit’i **to‘xtatilgan** runner’larning 48 soatlik
+checkout’larini tozalaydi; disk ≥ 85 %, xotira PSI `full/avg60` ≥ 10 % bo‘lsa va tinglovchilar soni
+`MAX_ACTIVE_RUNNERS` qiymatidan oshsa ogohlantiradi (omniroute/boshqalar bo‘yicha taqsimot bilan).
+Exit 1 = e’tibor talab qilinadi; jurnalni o‘qing.
 
-## Runner birliklari: KillMode
+75 daqiqalik qoida GitHub allaqachon voz kechgan vazifaning build jarayonini aniqlamaydi.
+`Runner.Listener` o‘z vazifasini yangilay olmasa, `_diag/Runner_*.log` ichida
+`POST request to …/renewjob timed out after 100 seconds` ko‘rinadi, API oxirgi muvaffaqiyatli
+yangilanishdan taxminan o‘n daqiqa o‘tib vazifani `completed` (muvaffaqiyatsiz) deb ko‘rsatadi,
+`next-build` esa hech qanday vazifaga biriktirilmagan holda ishlashda davom etadi
+(2026-10-18: #17066 build’i 19:43 da muvaffaqiyatsiz deb belgilangan, ammo uning build jarayoni
+besh daqiqadan keyin ham 40 GB xotirani band qilib turgan). Eng yangi `_diag/Worker_*.log` ichida
+ref’ni tasdiqlang, so‘ng faqat build jarayonlari daraxtiga PID bo‘yicha SIGTERM yuboring —
+`next-build`, `npm run build`, `build-next-isolated.mjs` va `_work` ishchi jarayonlariga.
+`Runner.Listener`, `RunnerService.js` yoki `Runner.Worker` jarayonlariga hech qachon tegmang:
+worker vazifa bekor qilinganini xabar qiladi, listener esa o‘z-o‘zidan yana onlayn holatga qaytadi.
 
-Runner uchun standart `KillMode=process` sozlamasi birlik toʻxtatilganda yoki qayta
-ishga tushirilganda `Runner.Worker → npm → next-build` jarayonini tirik qoldiradi —
-egasiz qolgan build hech qanday job biriktirilmagan holda RAM va CPU isteʼmol qilishda
-davom etadi. Har bir OmniRoute birligida
-(`/etc/systemd/system/actions.runner.diegosouzapw-OmniRoute.<name>.service.d/10-killmode.conf`)
-drop-in fayli mavjud va unda `KillMode=mixed` oʻrnatilgan: avval listener jarayoniga
-SIGTERM, `TimeoutStop` vaqtida esa butun cgroup uchun SIGKILL yuboriladi. Bu sozlama
-birlik keyingi safar qayta ishga tushirilganda kuchga kiradi — **bir vaqtda faqat bitta
-runnerni va faqat u boʻsh turganda** qayta ishga tushiring, boʻshlik tekshiruvi va qayta
-ishga tushirishni bitta buyruqda bajaring.
+## Runner unit’lari: KillMode
+
+Runner’ning standart `KillMode=process` sozlamasi unit to‘xtatilganda yoki qayta ishga
+tushirilganda `Runner.Worker → npm → next-build` jarayonlarini tirik qoldiradi — yetim build
+hech qanday vazifaga biriktirilmagan holda RAM va CPU’ni iste’mol qilishda davom etadi. Har bir
+OmniRoute unit’ida `KillMode=mixed` sozlamali drop-in mavjud
+(`/etc/systemd/system/actions.runner.diegosouzapw-OmniRoute.<name>.service.d/10-killmode.conf`):
+avval listener’ga SIGTERM, `TimeoutStop` vaqtida esa butun cgroup’ga SIGKILL yuboriladi.
+Bu sozlama unit keyingi safar qayta ishga tushirilganda kuchga kiradi — **bir vaqtda faqat bitta
+runner’ni, faqat u bo‘sh turganda** qayta ishga tushiring; bo‘sh turganini tekshirish va qayta
+ishga tushirish bitta buyruq ichida bajarilsin.
 
 ## Ishlatish qoidalari
 
-- **Ogʻir buildlar chegarasi: bir vaqtda BITTA — label orqali majburiy qoʻllanadi (2026-08-29 dan beri).** Toʻliq
-  `next build` ishga tushiradigan har bir job `[self-hosted, omni-build]` ni nishonga
-  oladi va faqat **`omniroute-113-5`** ushbu labelga ega (runners API orqali qoʻshilgan —
-  qayta roʻyxatdan oʻtkazilmagan): `ci.yml` dagi `Build`, `npm-publish.yml` dagi `publish`, ikkala
-  `nightly-release-green` validatsiyasi va `docker-publish.yml` dagi **amd64** (hosted
-  7 GB bu daraxtda ResourceExhausted bilan yakunlandi — #11976). arm64 Docker bosqichi
-  webpack bilan `ubuntu-24.04-arm` da qoladi (ARM mashinasi yoʻq). Docker amd64 ham webpackdan
-  foydalanadi: ushbu daraxtda Turbopack 31 GB boʻlsa ham BuildKit ichida xatolik bilan toʻxtadi
-  (`TurbopackInternalError: there must be a path to a root`, run 33253576569); xuddi shu
-  daraxtning hosted ARM dagi arm64 webpack buildi muvaffaqiyatli yakunlandi. `docker-publish` amd64
-  `ci.yml` dagi `Build` bilan bir xil `heavy-build-main` concurrency guruhidan
-  (`cancel-in-progress: false`) foydalanadi, shuning uchun yagona slot uchun navbatda turadi. Docker Engine
-  `omniroute-113-5` da boʻlishi shart (`docker info` publish jobining birinchi qadamidir).
-  Oldingi chegara ikkita edi va 31 GB uchun bu notoʻgʻri boʻlib chiqdi:
-  2026-08-29 17:26 UTC da ikkita parallel `next-build` (15.4 GB + 17.2 GB RSS) mashinadagi
-  boʻsh xotirani 5 GB gacha tushirdi, 4 GB swap ishlatildi va kernel OOM ulardan birini
-  toʻxtatdi — systemd bu toʻxtatishni _boshqa_ runner birligiga yozdi, `runsvc.sh` esa oʻsha
-  listenerga SIGKILL yubordi va undagi job "The runner has received a shutdown signal"
-  xabari bilan tugadi (hosted-runner OOM holatidagi matn bilan bir xil). `omniroute-113-6`
-  faqat `omni-release` labelini saqlab qoladi. `main` mergeʼlari, PRlar va tungi jarayonlardan
-  keladigan ogʻir buildlar endi bitta slotda ketma-ket bajariladi; navbat — buning badali.
-  Ikkinchi slot Proxmox VM koʻproq RAM (48–64 GB) olgan kuni qaytariladi:
-  `gh api -X POST repos/<repo>/actions/runners/<id of omniroute-113-6>/labels -f 'labels[]=omni-build'`.
-- **Yengil pool: `omni-light` (2026-08-29, #11965).** `omniroute-113` va `omniroute-113-2`
-  toʻliq build emas, faqat backend uchun `next build` (~5–6 GB) talab qiladigan joblar:
-  tungi Schemathesis, promptfoo, garak va axe-a11y joblari uchun `omni-light` labeliga ega.
-  Ular hosted 7 GB runnerda ishlagan va hech kim kuzatmayotgan paytda `release/v3.8.51` da
-  toʻxtab qolgan. Mashinadagi eng yomon holat: 2 ta ogʻir + 2 ta yengil ≈ 30 + 12 GB —
-  bu 31 GB RAMdan koʻp, ammo 16 GB swap doirasida; yetarli zaxira uchun haqiqiy yechim
-  Proxmox VM (`tomni-proxmox-113`) xotirasini oshirish boʻlib, shunda label chegaralari
-  3 ta ogʻir + 2 ta yengilga aylanadi.
-- **Listenerlar ataylab kamaytirilgan.** Toʻrtta OmniRoute birligi 2026-08-29 kuni
-  oʻchirildi — mashinadan faqat `ci.yml` dagi `Build` va tungi jarayonlar foydalanayotgan
-  paytda 8 ta listener boʻsh turardi va har bir qoʻshimcha listener potensial 14 GB
-  isteʼmolchi hisoblanadi. Janitor chegarasi 6 ta (`MAX_ACTIVE_RUNNERS=6` cron ichida):
-  u mashinadagi har bir `Runner.Listener` ni hisoblaydi, OmniHeuris + OmniMind esa bizning
-  toʻrtta runnerimizga yana ikkitasini qoʻshadi.
-- **Biror runner band paytda hech qachon `/tmp` yoki `_work` ni qoʻlda tozalamang.**
-  Tekshirish va oʻchirish orasida tanaffus boʻlgan jarayon sabab 2026-08-27 kuni faol
-  Build job oʻzining `_work` katalogini yoʻqotgan. Janitor tekshiruv va oʻchirishni
-  bitta qadamda bajaradi; bu ishni unga qoldiring.
-- Runnerni job davomida toʻxtatish jobni bekor qiladi (amalda kuzatilgan): `systemctl stop`
-  dan faqat uning listenerida `Runner.Worker` child jarayoni boʻlmaganda foydalaning —
-  va buni bitta buyruqda bajaring.
-- Workflowlar artefaktlarni `/tmp` da saqlab turmasligi kerak (u RAMda joylashgan).
-  `$RUNNER_TEMP` ga yuklab oling (diskda, har bir runner uchun alohida) — 1.3 GB hajmdagi
-  `next-build` artefaktini tmpfs ga joylash 27–32 daqiqa, diskdan upload qilish esa
-  2 daqiqa davom etdi.
-- `.15` VPS faqat homologatsiya uchun — unda hech qachon CI runnerlari ishlamaydi.
+- **Bir vaqtda faqat bitta Turbopack build — label orqali majburiy cheklangan.** To‘liq Turbopack
+  `next build` ishga tushiradigan har bir job `[self-hosted, omni-build]`ni nishonga oladi va bu
+  label faqat **`omniroute-113-5`**da mavjud: `ci.yml`dagi `Build`, `npm-publish.yml`dagi `publish`,
+  `nightly-v4-build`, `preview-artifact`, tungi a11y build (#16853) va `docker-publish.yml`dagi
+  **amd64** (BuildKit ichidagi webpack — u yerda Turbopack vahimali xato bilan to‘xtagan,
+  run 33253576569). Docker’ning arm64 qismi `ubuntu-24.04-arm`da qoladi. `docker-publish`ning
+  amd64 qismi `ci.yml`dagi `Build` bilan bir xil `heavy-build-main` concurrency guruhidan
+  foydalanadi (`cancel-in-progress: false`). Docker Engine `omniroute-113-5`da bo‘lishi shart.
+  Ikkinchi Turbopack sloti 78 GB ichiga sig‘maydi (2 × 33–37 GB va tizimning qolgan qismi);
+  ikkinchi slot faqat webpack buildlari uchun xavfsiz.
+- **Pull-request Buildlari hosted runnerlarda ishlaydi (2026-10-18).** `ci.yml`dagi `Build`
+  `omni-build`ga faqat `push` va `workflow_dispatch` uchun boradi; har bir `pull_request`
+  (o‘z repozitoriysidan yoki forkdan) hamda `merge_group` Buildi `ubuntu-latest`da webpack bilan
+  ishlaydi. O‘z repozitoriysidan kelgan har bir PR slotga yo‘naltirilganda, bitta Turbopack Build
+  uni 29–58 daqiqa band qilgan, 18 ta Build 18 soatgacha navbatda qolgan va reliz tarmog‘ining
+  o‘z push Buildi 40 ta job ichida slotni faqat bir marta olgan. Hosted runnerda ayni PR Build
+  PRning boshqa joblari bilan yonma-yon 8–12 daqiqada bajariladi. `npm-publish` tarqatadigan
+  bundler — Turbopack — reliz tarmog‘ida default branchning tungi a11y buildi (04:41 UTC), slotga
+  yetib boradigan har bir push yoki dispatch Build hamda `npm-publish`ning o‘zi orqali sinab
+  turiladi. `tests/unit/build/heavy-build-queue.test.ts` to‘rt shartli gateni qat’iy belgilaydi.
+- **Turbopack slotini hech qachon o‘lchangan ehtiyojidan kichik qilmang.** 2026-10-18 kuni 18:06da
+  `omni-release` uchun joy bo‘shatish maqsadida slot 56G/60Gdan 40G/44Gga tushirildi. Kompilyatsiya
+  bosqichi butun ish davomida `MemoryHigh` chegarasida turdi (xotira PSI `full` 30–43 %) va shu
+  cgroupni bo‘lishadigan `Runner.Listener` o‘z jobini yangilay olmadi. Ega tomonidan 2026-10-17da
+  o‘rnatilgan 56G/60G qiymati o‘sha kunning o‘zida tiklandi. Bu qiymatdan pastda build xato bilan
+  tugamaydi; u resurslar uchun tinimsiz talashadi va job yo‘qotiladi.
+- **Release-Green o‘z slotiga ega (2026-10-18).** Ungacha ikkala Release-Green validatsiyasi ham
+  `omni-build`da ishlagan: har bir pushda (~10/soat, bir kunda 100 ta push rundan 97 tasi ish
+  o‘rtasida bekor qilingan) va kuniga uchta ~2 soatlik to‘liq tekshiruvda (05:29dagi tekshiruv
+  slotni 6 soat kutgan) — yagona build slotining sig‘imi bir necha baravar ortiqcha band qilingan
+  va o‘z repozitoriysidan kelgan PR Buildlari soatlab kutgan. Endi `release-green` va `main-green`
+  `OMNIROUTE_USE_TURBOPACK=0` bilan `omni-release`ni (faqat `omniroute-113-6`) nishonga oladi va
+  boshlangan run endi yangiroq push sababli bekor qilinmaydi (kutilayotgan slot hali ham pushlar
+  oqimini birlashtiradi). `tests/unit/build/runner-capacity-routing.test.ts` routingni, webpack
+  switchini va `omni-release`dagi hech bir narsa Turbopack bilan build qilinmasligini qat’iy
+  belgilaydi.
+- **Yengil pool: `omni-light`.** `omniroute-113` va `omniroute-113-2` faqat backend uchun
+  `next build` talab qiladigan tungi ishlarni (~5–6 GB; webpack) hamda `quality.yml`dagi
+  `lint-guard`ni bajaradi. `omniroute-113`da 2026-10-18gacha `MemoryHigh=4G` bo‘lgan — promptfoo
+  build u yerda 54 daqiqa davomida xotirani qayta bo‘shatib ishlagan; 8 GB throttlingni bartaraf
+  etadi.
+- **Listenerlar ataylab kamaytirilgan.** To‘rtta OmniRoute unit 2026-08-29da o‘chirildi — har bir
+  qo‘shimcha listener yuqoridagi xotira budjetining yana bir iste’molchisidir. Janitor limiti 6 ta
+  (`MAX_ACTIVE_RUNNERS=6` cron ichida): u mashinadagi har bir `Runner.Listener`ni hisoblaydi,
+  OmniHeuris va OmniMind esa bizning to‘rttamizga yana ikkitasini qo‘shadi.
+- **Biror runner band paytda `/tmp` yoki `_work`ni hech qachon qo‘lda tozalamang.**
+  Tekshirish va o‘chirish orasida tanaffus bo‘lgan tekshir-keyin-o‘chir amali sababli
+  2026-08-27da faol Build job o‘zining `_work` katalogini yo‘qotgan. Janitor tekshirish va
+  o‘chirishni bitta bosqichda bajaradi; bu ishni unga qoldiring.
+- Runnerni job o‘rtasida to‘xtatish jobni bekor qiladi (amaldagi kuzatuv): `systemctl stop`ni
+  faqat listenerda `Runner.Worker` child bo‘lmaganda bajaring — va buni bitta buyruqda qiling.
+- Workflowlar artefaktlarni `/tmp`da saqlab turmasligi kerak (u RAMda joylashgan). Ularni
+  `$RUNNER_TEMP`ga (diskda, har bir runner uchun alohida) yuklab oling — 1.3 GB hajmdagi
+  `next-build` artefaktining tmpfsga tushishi 27–32 daqiqa, diskdan yuklanishi esa 2 daqiqa
+  davom etgan.
+- `.15` VPS faqat homologatsiya uchun — unda CI runnerlari hech qachon ishlamaydi.
+
+## Host qilingan yoʻlak (GitHub tomonidan host qilinadigan runnerlar)
+
+Hisob **Pro** tarifida: **bir vaqtda 40 ta host qilingan vazifa**, ular barcha PR tekshiruvlari,
+push orqali ishga tushiriladigan barcha workflow’lar va CodeQL’ning standart sozlamasi tomonidan birgalikda ishlatiladi.
+2026-10-18 kuni birlashtirish kampaniyasi vaqtida (`release/v3.8.52` da soatiga ~10 ta birlashtirish)
+oʻlchandi: **24 soatda 2 500 ta workflow ishga tushirilishi yaratildi**, 6 soatda branch’ga 44 ta push qilindi,
+PR tekshiruvlari soatlab kutib turgan va PR’lar ularsiz birlashtirilgan paytda **106 ta host qilingan vazifa navbatda turdi**.
+Branch’ga har bir push qilinganda toʻqqizta workflow ishga tushdi:
+
+| `release/v*` ga har bir push uchun          | host qilingan vazifalar | yuklama paytidagi natija                                                      | 2026-10-18 dan beri                                                                                 |
+| ------------------------------------------- | ----------------------: | ----------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `ci.yml` (toʻliq matritsa)                  |              30 tagacha | keyingi push tomonidan bekor qilindi, bir kunda 24 tadan 24 tasi              | `release/**` pushlarida ishga tushmaydi (PR ishga tushirilishi + Release-Green)                     |
+| `quality.yml`                               |                      ~6 | bekor qilindi, 23 tadan 23 tasi                                               | `release/**` pushlarida ishga tushmaydi                                                             |
+| `Release-Green` `--quick`                   |                       0 | `omni-build` da ishladi, 100 tadan 97 tasi bekor qilindi                      | `omni-release` sloti, hech qachon bekor qilinmaydi, kutilayotgan ishga tushirishlar birlashtiriladi |
+| `Lock released branch`, `OpenSSF Scorecard` |                       2 | har bir push uchun navbatda bitta ishga tushirish                             | har bir ref uchun bitta ishga tushirish (`tests/unit/build/hosted-lane-concurrency.test.ts`)        |
+| `Release acceptance` (yashirin hisobot)     |                       1 | har bir push uchun bitta host qilingan `npm ci`, hech qachon bekor qilinmaydi | oʻzgarishsiz — `paths:` filtri uchun nomzod                                                         |
+| `Publish to Docker Hub` → `Deploy to VPS`   |                       2 | har bir pushda bekor qilinadi; amd64 bosqichi `omni-build` da raqobatlashadi  | oʻzgarishsiz — egasining deploy kanali                                                              |
+| CodeQL standart sozlamasi (`dynamic`)       |                       4 | har bir push uchun `javascript-typescript`, `actions`, `c-cpp`, `python`      | oʻzgarishsiz — Sozlamalar → Kod xavfsizligi; `c-cpp`/`python` bu yerda hech narsani skanerlamaydi   |
+
+`tests/unit/build/push-storm-diet.test.ts` `ci.yml` va `quality.yml` fayllarining faqat `main` uchun
+push triggerini kafolatlaydi. Yon taʼsir: Codecov endi har bir release push uchun bazaviy yuklashni olmaydi
+(qadam faqat axborot uchun va `continue-on-error`); repozitoriy ichidagi qamrov nazorati va PR izohi
+taʼsirlanmagan.
+
+**Koʻproq self-hosted quvvat host qilingan navbat muammosini hal qilmaydi.** Devbox
+(`devbox-vm-06-dev002`, 24 vCPU / 54 GB) runner’ni host qilishi mumkin edi, ammo agent seanslari uning
+yuklamasini allaqachon 20–26 darajasida ushlab turibdi, agent konteynerida Docker daemon’i yoʻq va
+toʻyingan yoʻlak host qilingan yoʻlakdir. Xuddi shu paytda `.113` serverida 71 GB boʻsh joy va 5–8 yuklama
+bor edi; uning cheklovi CPU emas, balki yuqoridagi har bir listener uchun xotira byudjetidir
+(eng koʻpi 6 ta listener). Qolgan choralar jarayonga oid: kampaniya PR’larini Mergify navbati orqali
+birlashtirish (`label=queue`, paketlar har bir PR uchun bittadan va har bir push uchun bittadan CI ishga
+tushirish oʻrniga bitta `merge_group` CI ishga tushirishini baham koʻradi), CodeQL standart sozlamasidagi
+tillarni qisqartirish va `release-acceptance.yml` faylini u oʻqiydigan fayllar boʻyicha filtrlash.

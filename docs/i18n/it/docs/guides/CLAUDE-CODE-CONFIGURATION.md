@@ -95,7 +95,7 @@ solo i modelli Kimi.
 
 ## Blocco di onboarding nella dashboard
 
-La scheda dello strumento Claude (**Dashboard → Codice CLI**) mostra il frammento `settings.json` esatto
+La scheda dello strumento Claude (**Dashboard → CLI Code**) visualizza il frammento esatto di `settings.json`
 per questa istanza, accanto al pulsante informativo sull'alias di rilevamento, con un pulsante per copiarlo:
 
 ```jsonc
@@ -109,29 +109,43 @@ per questa istanza, accanto al pulsante informativo sull'alias di rilevamento, c
 ```
 
 L'URL di base è quello risolto dalla scheda (inclusa un'eventuale sostituzione personalizzata inserita), già
-normalizzato: nessun suffisso `/v1` e nessuna barra finale. **La chiave non viene mai mostrata**: il blocco contiene
-un segnaposto, quindi uno screenshot o un frammento incollato non può divulgarla. Sostituisci il segnaposto con la tua chiave.
+normalizzato, senza suffisso `/v1` né barra finale. **La chiave non viene mai visualizzata**: il blocco include un
+segnaposto, in modo che uno screenshot o un frammento incollato non possano divulgarla. Sostituisci il segnaposto con la tua chiave.
 
-Aggiungi `CLAUDE_CODE_AUTO_COMPACT_WINDOW` nello stesso blocco `env` per qualsiasi modello la cui finestra
-di contesto reale non sia 200K: Claude Code presume 200K per ogni id che non riconosce, quindi
-altrimenti la compattazione automatica si attiva nel momento sbagliato (consulta l'avviso nella sezione precedente).
-Anche il generatore di frammenti accetta questo valore, quindi un chiamante che conosce la finestra del modello di destinazione
-può specificarlo direttamente.
+Aggiungi `CLAUDE_CODE_AUTO_COMPACT_WINDOW` nello stesso blocco `env` per qualsiasi modello la cui finestra di
+contesto effettiva non sia 200K: Claude Code presume 200K per ogni id che non riconosce, quindi, in caso contrario,
+la compattazione automatica viene attivata nel momento sbagliato (consulta l'avviso nella sezione precedente).
+Il generatore di frammenti accetta anche questo valore, quindi un chiamante che conosce la finestra del modello
+di destinazione può includerlo direttamente.
 
-Origine: `src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet` (generatore
-puro, sottoposto a unit test), mostrato da `ClaudeGatewayOnboardingBlock`.
+Fonte: `src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet` (generatore
+puro, sottoposto a test unitari) visualizzato da `ClaudeGatewayOnboardingBlock`.
+
+### Fissare un account (facoltativo)
+
+Per inviare ogni richiesta di Claude Code tramite uno specifico account del provider, aggiungi l'header
+`x-omniroute-connection` tramite `ANTHROPIC_CUSTOM_HEADERS` nello stesso blocco `env`:
+
+```jsonc
+"ANTHROPIC_CUSTOM_HEADERS": "x-omniroute-connection: <connection id>"
+```
+
+Copia l'id dal chip `xxxxxxxx…` nella riga della connessione della pagina del provider. Il vincolo si
+applica solo agli id di modelli singoli (`provider/model`), non alle combinazioni. Consulta
+[Associazione dell'account per singola richiesta](../reference/API_REFERENCE.md#account-pinning-per-request) per il
+comportamento esatto del fallback.
 
 ---
 
 ## Profili (`CLAUDE_CONFIG_DIR`)
 
 Claude Code **non dispone di file di profilo nativi** (a differenza di `~/.codex/<name>.config.toml` di Codex).
-Il meccanismo idiomatico è `CLAUDE_CONFIG_DIR`: una directory di configurazione distinta per ogni
-profilo, ciascuna con i propri `settings.json`, credenziali, cronologia e cache.
+Il meccanismo idiomatico è `CLAUDE_CONFIG_DIR`: una directory di configurazione separata per
+ogni profilo, ciascuna con i propri `settings.json`, credenziali, cronologia e cache.
 
-`omniroute setup-claude` recupera il catalogo `/v1/models` in tempo reale e scrive un
-profilo per modello in `~/.claude/profiles/<name>/settings.json`, riutilizzando gli
-**stessi nomi di `setup-codex`** (`glm52`, `kimi-k27`, `deepseek-pro`, …):
+`omniroute setup-claude` recupera il catalogo `/v1/models` attivo e scrive un
+profilo per ogni modello in `~/.claude/profiles/<name>/settings.json`, riutilizzando
+**gli stessi nomi di `setup-codex`** (`glm52`, `kimi-k27`, `deepseek-pro`, …):
 
 ```jsonc
 // ~/.claude/profiles/glm52/settings.json
@@ -150,15 +164,15 @@ profilo per modello in `~/.claude/profiles/<name>/settings.json`, riutilizzando 
 
 > **Il token di autenticazione non viene mai scritto nel profilo.** Avvia con
 > `omniroute launch --profile <name>` (inietta `ANTHROPIC_AUTH_TOKEN` dal
-> contesto attivo), oppure esporta personalmente `ANTHROPIC_AUTH_TOKEN` ed esegui
+> contesto attivo), oppure esporta autonomamente `ANTHROPIC_AUTH_TOKEN` ed esegui
 > `CLAUDE_CONFIG_DIR=~/.claude/profiles/<name> claude`.
 
 **Sincronizzazione automatica dopo il rilevamento dei modelli (facoltativa).** OmniRoute può rigenerare automaticamente gli stessi
 file `~/.claude/profiles/<name>/settings.json` ogni volta che la sincronizzazione dei modelli di un provider
-modifica il catalogo in tempo reale, in modo che i modelli nuovi o rinominati ottengano profili senza dover eseguire nuovamente il
-comando. È **disattivata per impostazione predefinita**: attivala dalla **dashboard Codice CLI** ("Sincronizzazione automatica
-dei profili CLI" → Claude Code), oppure imposta `OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES=true` (rispetta anche
-`CLI_ALLOW_CONFIG_WRITES`, attivo per impostazione predefinita). Quando è abilitata, scrive soltanto i file dei profili; non
+modifica il catalogo attivo, in modo che i modelli nuovi o rinominati ottengano profili senza dover rieseguire il
+comando. È **disattivata per impostazione predefinita**: attivala dalla **dashboard CLI Code** ("Sincronizzazione
+automatica dei profili CLI" → Claude Code), oppure imposta `OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES=true` (rispetta anche
+`CLI_ALLOW_CONFIG_WRITES`, attivo per impostazione predefinita). Quando è abilitata, scrive soltanto i file di profilo; non
 modifica mai la configurazione Claude attiva/predefinita, l'autenticazione o `~/.claude/settings.json`.
 
 ### Generazione e utilizzo dei profili
@@ -173,7 +187,11 @@ omniroute setup-claude --remote http://192.168.0.15:20128 --api-key oma_live_xxx
 # Solo alcuni provider
 omniroute setup-claude --only glm,kimi
 
-# Anteprima senza scrittura
+# Scrive anche i profili per i provider CLI locali (zcode, auggie, devin-cli-agentic,
+# codex-app-server) non rilevati su questo host (ignorati per impostazione predefinita per una destinazione locale)
+omniroute setup-claude --include-local
+
+# Anteprima senza scrivere
 omniroute setup-claude --dry-run
 
 # Avvia un profilo

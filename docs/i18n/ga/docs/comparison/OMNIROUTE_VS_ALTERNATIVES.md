@@ -39,11 +39,11 @@ Comparáid oibiachtúil gnéithe le ródairí AI foinse oscailte a bhfuil tóir 
 
 ## Cathain OmniRoute a roghnú
 
-- Déanann tú féinstóstáil agus teastaíonn **an clúdach soláthraithe is mó** uait (329 soláthraí, 155 iontráil chatalóige saor/gan fíordheimhniú)
+- Déanann tú féinóstáil agus teastaíonn **an clúdach is leithne ar sholáthraithe** uait (374 soláthraí, 155 iontráil saor in aisce/gan fíordheimhniú sa chatalóg)
 - Teastaíonn **freastalaí MCP ionsuite** uait (uirlisí LLM, cuimhne agus scileanna nochta mar uirlisí)
 - Teastaíonn **prótacal A2A** uait le haghaidh sreafaí oibre ó ghníomhaire go gníomhaire
-- Teastaíonn **ceilt méarloirg** (JA3/JA4) uait chun brath ag CAPTCHAanna réamhtheachtacha a sheachaint
-- Teastaíonn **gnéithe fiontair** uait (ráillí cosanta, meastóireachtaí, rian iniúchóireachta) gan bille SaaS
+- Teastaíonn **ceilteacht méarloirg** (JA3/JA4) uait chun brath ag CAPTCHAanna réamhtheachtacha a sheachaint
+- Teastaíonn **gnéithe fiontraíochta** uait (srianta cosanta, meastóireachtaí, rian iniúchóireachta) gan bille SaaS
 
 ## Cathain LiteLLM a roghnú
 

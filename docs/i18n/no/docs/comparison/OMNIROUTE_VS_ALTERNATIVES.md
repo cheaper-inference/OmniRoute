@@ -39,11 +39,11 @@ Objektiv funksjonssammenligning med populære AI-rutere med åpen kildekode.
 
 ## Når du bør velge OmniRoute
 
-- Du drifter selv og ønsker **maksimal leverandørdekning** (329 leverandører, 155 gratis katalogoppføringer/uten autentisering)
+- Du drifter selv og ønsker **maksimal leverandørdekning** (374 leverandører, 155 gratis katalogoppføringer uten autentisering)
 - Du trenger en **innebygd MCP-server** (LLM-verktøy, minne og ferdigheter eksponert som verktøy)
 - Du trenger **A2A-protokollen** for arbeidsflyter mellom agenter
-- Du ønsker **skjult fingeravtrykk** (JA3/JA4) for å unngå å bli oppdaget av oppstrøms CAPTCHA-er
-- Du trenger **bedriftsfunksjoner** (sikkerhetsmekanismer, evalueringer, revisjonsspor) uten en SaaS-regning
+- Du ønsker **fingeravtrykkskamuflering** (JA3/JA4) for å unngå å bli oppdaget av oppstrøms CAPTCHA-er
+- Du trenger **bedriftsfunksjoner** (sikkerhetsmekanismer, evalueringer og revisjonsspor) uten å betale for en SaaS-tjeneste
 
 ## Når du bør velge LiteLLM
 

@@ -95,8 +95,7 @@ näkyviin vain Kimin mallit.
 
 ## Käyttöönotto-osio hallintapaneelissa
 
-Claude-työkalukortti (**Hallintapaneeli → CLI Code**) näyttää täsmälleen tämän instanssin `settings.json`-katkelman
-hakualias-tietopainikkeen vieressä sekä kopiointipainikkeen:
+Claude-työkalukortti (**Hallintapaneeli → CLI Code**) näyttää tämän instanssin tarkan `settings.json`-katkelman tunnistusaliaksen tietopainikkeen vieressä sekä kopiointipainikkeen:
 
 ```jsonc
 {
@@ -108,26 +107,29 @@ hakualias-tietopainikkeen vieressä sekä kopiointipainikkeen:
 }
 ```
 
-Perus-URL on kortin selvittämä osoite (mukaan lukien kirjoittamasi mukautettu ohitus), joka on jo
-normalisoitu — ei `/v1`-päätettä eikä lopun vinoviivaa. **Avainta ei koskaan näytetä**: lohko sisältää
-paikkamerkin, joten kuvakaappaus tai liitetty katkelma ei voi vuotaa avainta. Korvaa paikkamerkki avaimellasi.
+Perus-URL on kortin selvittämä osoite (mukaan lukien kirjoittamasi mukautettu ohitus), joka on jo normalisoitu — ei `/v1`-päätettä eikä lopun vinoviivaa. **Avainta ei koskaan näytetä**: lohko sisältää paikkamerkin, joten kuvakaappaus tai liitetty katkelma ei voi vuotaa avainta. Korvaa paikkamerkki omalla avaimellasi.
 
-Lisää `CLAUDE_CODE_AUTO_COMPACT_WINDOW` samaan `env`-lohkoon kaikille malleille, joiden todellinen
-konteksti-ikkuna ei ole 200K — Claude Code olettaa 200K jokaiselle tunnukselle, jota se ei tunnista, joten
-automaattinen tiivistys käynnistyy muuten väärässä kohdassa (katso edellisen osion varoitus).
-Katkelman muodostin hyväksyy myös tämän arvon, joten kohdemallin ikkunan tunteva kutsuja
-voi tuottaa sen suoraan.
+Lisää `CLAUDE_CODE_AUTO_COMPACT_WINDOW` samaan `env`-lohkoon kaikille malleille, joiden todellinen konteksti-ikkuna ei ole 200K — Claude Code olettaa konteksti-ikkunaksi 200K jokaiselle tunnistamattomalle tunnisteelle, joten automaattinen tiivistys käynnistyy muuten väärässä kohdassa (katso edellisen osion varoitus). Katkelman muodostin hyväksyy myös tämän arvon, joten kutsuja, joka tuntee kohdemallin konteksti-ikkunan, voi sisällyttää sen suoraan.
 
-Lähde: `src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet` (puhdas,
-yksikkötestattu muodostin), jonka renderöi `ClaudeGatewayOnboardingBlock`.
+Lähde: `src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet` (puhdas muodostin, yksikkötestattu), jonka renderöi `ClaudeGatewayOnboardingBlock`.
+
+### Kiinnitä yksi tili (valinnainen)
+
+Jos haluat lähettää kaikki Claude Code -pyynnöt yhden tietyn palveluntarjoajatilin kautta, lisää `x-omniroute-connection`-otsake `ANTHROPIC_CUSTOM_HEADERS`-muuttujan kautta samaan `env`-lohkoon:
+
+```jsonc
+"ANTHROPIC_CUSTOM_HEADERS": "x-omniroute-connection: <connection id>"
+```
+
+Kopioi tunniste palveluntarjoajasivun yhteysrivillä olevasta `xxxxxxxx…`-tunnisteesta. Kiinnitys koskee vain yksittäisten mallien tunnisteita (`provider/model`), ei yhdistelmiä. Tarkka varatoiminta on kuvattu kohdassa [Tilin kiinnitys pyyntökohtaisesti](../reference/API_REFERENCE.md#account-pinning-per-request).
 
 ---
 
 ## Profiilit (`CLAUDE_CONFIG_DIR`)
 
 Claude Codessa **ei ole natiiveja profiilitiedostoja** (toisin kuin Codexin `~/.codex/<name>.config.toml`).
-Vakiintunut mekanismi on `CLAUDE_CONFIG_DIR` — erillinen määrityshakemisto kullekin
-profiilille, joista jokaisella on oma `settings.json`-tiedostonsa, tunnistetietonsa, historiansa ja välimuistinsa.
+Suositeltu mekanismi on `CLAUDE_CONFIG_DIR` — erillinen määrityshakemisto kullekin
+profiilille, joista jokaisella on omat `settings.json`-tiedostonsa, tunnistetietonsa, historiansa ja välimuistinsa.
 
 `omniroute setup-claude` hakee ajantasaisen `/v1/models`-luettelon ja kirjoittaa yhden
 profiilin mallia kohden polkuun `~/.claude/profiles/<name>/settings.json` käyttäen
@@ -148,18 +150,18 @@ profiilin mallia kohden polkuun `~/.claude/profiles/<name>/settings.json` käytt
 }
 ```
 
-> **Todennustunnusta ei koskaan kirjoiteta profiiliin.** Käynnistä komennolla
+> **Todennustunnistetta ei koskaan kirjoiteta profiiliin.** Käynnistä komennolla
 > `omniroute launch --profile <name>` (se lisää `ANTHROPIC_AUTH_TOKEN`-arvon aktiivisesta
-> kontekstista) tai vie `ANTHROPIC_AUTH_TOKEN` itse ja suorita
+> kontekstista), tai vie `ANTHROPIC_AUTH_TOKEN` itse ja suorita
 > `CLAUDE_CONFIG_DIR=~/.claude/profiles/<name> claude`.
 
 **Automaattinen synkronointi mallien löytämisen jälkeen (valinnainen).** OmniRoute voi luoda nämä samat
 `~/.claude/profiles/<name>/settings.json`-tiedostot automaattisesti uudelleen aina, kun palveluntarjoajan mallien
 synkronointi muuttaa ajantasaista luetteloa — näin uudet tai uudelleennimetyt mallit saavat profiilit ilman komennon
-suorittamista uudelleen. Se on **oletusarvoisesti pois käytöstä**: ota se käyttöön **CLI Code -hallintapaneelista** ("CLI-profiilien
+suorittamista uudelleen. Se on **oletusarvoisesti pois käytöstä**: ota se käyttöön **CLI Code -koontinäytöstä** ("CLI-profiilien
 automaattinen synkronointi" → Claude Code) tai aseta `OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES=true` (se huomioi myös
-muuttujan `CLI_ALLOW_CONFIG_WRITES`, joka on oletusarvoisesti käytössä). Kun toiminto on käytössä, se kirjoittaa vain profiilitiedostoja; se ei koskaan
-muuta aktiivista Claude-oletusmääritystäsi, todennustasi tai tiedostoa `~/.claude/settings.json`.
+`CLI_ALLOW_CONFIG_WRITES`-asetuksen, joka on oletusarvoisesti käytössä). Kun toiminto on käytössä, se kirjoittaa vain profiilitiedostoja; se ei koskaan
+muuta aktiivista Claude-oletusmääritystäsi, todennusta tai tiedostoa `~/.claude/settings.json`.
 
 ### Profiilien luominen ja käyttäminen
 
@@ -167,13 +169,17 @@ muuta aktiivista Claude-oletusmääritystäsi, todennustasi tai tiedostoa `~/.cl
 # Paikallinen OmniRoute
 omniroute setup-claude
 
-# VPS-etäpalvelin (sisällyttää VPS:n URL-osoitteen jokaiseen profiiliin)
+# Etä-VPS (sisällyttää VPS:n URL-osoitteen jokaiseen profiiliin)
 omniroute setup-claude --remote http://192.168.0.15:20128 --api-key oma_live_xxx
 
 # Vain tietyt palveluntarjoajat
 omniroute setup-claude --only glm,kimi
 
-# Esikatselu kirjoittamatta
+# Kirjoita profiilit myös paikallisille CLI-palveluntarjoajille (zcode, auggie, devin-cli-agentic,
+# codex-app-server), joita ei havaittu tällä koneella (ohitetaan oletusarvoisesti paikalliselle kohteelle)
+omniroute setup-claude --include-local
+
+# Esikatsele kirjoittamatta
 omniroute setup-claude --dry-run
 
 # Käynnistä profiili

@@ -15,10 +15,10 @@
 //   node scripts/check/check-api-typecheck.mjs
 //   node scripts/check/check-api-typecheck.mjs --update
 
-import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
+import { runScopedTypecheck } from "./run-scoped-typecheck.mjs";
 import { diffAgainstBaseline, parseTscOutput } from "./typecheckBaseline.mjs";
 
 export { diffAgainstBaseline, parseTscOutput } from "./typecheckBaseline.mjs";
@@ -27,19 +27,6 @@ const ROOT = process.cwd();
 const TSCONFIG = path.join(ROOT, "tsconfig.typecheck-api.json");
 const BASELINE_PATH = path.join(ROOT, "config/quality/api-typecheck-baseline.json");
 const UPDATE = process.argv.includes("--update");
-
-function runTsc() {
-  try {
-    return execFileSync(
-      process.platform === "win32" ? "npx.cmd" : "npx",
-      ["tsc", "--pretty", "false", "--noEmit", "-p", TSCONFIG],
-      { encoding: "utf8", maxBuffer: 64 * 1024 * 1024, cwd: ROOT }
-    );
-  } catch (err) {
-    if (err.stdout) return String(err.stdout);
-    throw err;
-  }
-}
 
 function loadBaseline() {
   if (!fs.existsSync(BASELINE_PATH)) return {};
@@ -57,7 +44,7 @@ function main() {
   }
 
   console.log("[api-typecheck] Running tsc scoped to src/app/api/**…");
-  const stdout = runTsc();
+  const stdout = runScopedTypecheck(ROOT, TSCONFIG);
   const live = parseTscOutput(stdout);
   const baseline = loadBaseline();
   const { regressions, improvements } = diffAgainstBaseline(live, baseline);

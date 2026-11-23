@@ -115,38 +115,38 @@ OmniRoute/
 ```
 src/
 ├── app/                 # App Router (səhifələr + API marşrutları + status səhifələri + açılış səhifəsi)
-├── lib/                 # Əsas kitabxanalar / domen modulları (80 alt qovluq + ~70 üst səviyyəli fayl)
+├── lib/                 # Əsas kitabxanalar / domen modulları (80 alt qovluq + yuxarı səviyyədə ~70 fayl)
 ├── domain/              # Saf domen məntiqi (siyasət mühərriki, ehtiyat mexanizmi, xərc, bloklama, comboResolver, qiymətləndirmə)
-├── server/              # Yalnız server üçün modullar (authz konveyeri, cors, autentifikasiya ara proqramı) — klientdən idxal edilə bilməz
-├── shared/              # Təhlükəsiz olduqda server və klient arasında paylaşılanlar (sabitlər, tiplər, validasiya, müqavilələr, utilitlər)
-├── i18n/                # next-intl konfiqurasiyası + hər lokal üçün mesaj JSON-u (42 lokal)
+├── server/              # Yalnız server üçün modullar (authz konveyeri, cors, autentifikasiya ara proqramı) — klientdən import edilə bilməz
+├── shared/              # Təhlükəsiz olduğu hallarda server və klient arasında paylaşılanlar (sabitlər, tiplər, doğrulama, müqavilələr, utilitlər)
+├── i18n/                # next-intl konfiqurasiyası + hər lokal üçün mesaj JSON-u (67 lokal)
 ├── middleware/          # Next.js ara proqramı (sorğunun zənginləşdirilməsi, lokalın aşkarlanması)
-├── mitm/                # MITM proksisinin nüvəsi: sertifikatın yaradılması/quraşdırılması, emalçılar, hədəflər, inspeksiya vasitəsi, maskalar, birbaşa ötürmə
-│   ├── handlers/        # MitmHandlerBase-i genişləndirən 9 IDE-agent emalçı sinfi (antigravity, kiro, copilot, codex, cursor, zed, claudeCode, openCode, trae)
+├── mitm/                # MITM proksisinin nüvəsi: sertifikatın yaradılması/quraşdırılması, emalçılar, hədəflər, inspektor, maskalar, birbaşa ötürmə
+│   ├── handlers/        # MitmHandlerBase-i genişləndirən 9 IDE agenti emalçı sinfi (antigravity, kiro, copilot, codex, cursor, zed, claudeCode, openCode, trae)
 │   └── inspector/       # Trafikin tutulması qatı: bufer (yaddaşdaxili halqavari), sseMerger, conversationNormalizer, kindDetector, contextKey, httpProxyServer, systemProxyConfig
-├── models/              # Model adapterinin əlaqələndirici qatı (köhnə uyğunluq qatı)
+├── models/              # Model adapteri üçün əlaqələndirici kod (köhnə uyğunluq qatı)
 ├── scripts/             # Layihədaxili texniki xidmət skriptləri (məs., backfillAggregation)
 ├── sse/                 # Köhnə SSE emalçıları/xidmətləri (chat.ts, chatHelpers.ts, services/auth.ts)
-├── store/               # Köhnə yaddaşdaxili saxlanc (src/lib/db ilə mərhələli şəkildə əvəz olunur)
+├── store/               # Köhnə yaddaşdaxili saxlanc (src/lib/db ilə mərhələli şəkildə əvəzlənir)
 ├── types/               # Paylaşılan TS tip faylları
 ├── instrumentation.ts   # Next.js telemetriya qarmağı (brauzer + edge)
 ├── instrumentation-node.ts  # Yalnız Node üçün instrumentasiya
-└── proxy.ts             # HTTP proksisi üçün giriş uyğunluq qatı
+└── proxy.ts             # HTTP-proksi giriş uyğunlaşdırıcısı
 ```
 
 ### `src/app/` — App Router (Next.js 16)
 
-| Yol                                                                          | Məqsəd                                                                                                                                                                                                                                                                                                               |
+| Yol                                                                          | Təyinat                                                                                                                                                                                                                                                                                                              |
 | ---------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `app/api/v1/`                                                                | İctimai OpenAI-uyğun API (~25 alt marşrut: çat, tamamlamalar, embedding-lər, fayllar, paketlər, audio, şəkillər, videolar, musiqi, yenidən sıralama, moderasiya, axtarış, ws, agentlər, hesablar, provayderlər və s.)                                                                                                |
+| `app/api/v1/`                                                                | İctimai OpenAI-uyğun API (~25 alt marşrut: söhbət, tamamlamalar, daxiletmələr, fayllar, paketlər, audio, şəkillər, videolar, musiqi, yenidən sıralama, moderasiya, axtarış, ws, agentlər, hesablar, provayderlər və s.)                                                                                              |
 | `app/api/v1beta/`                                                            | Gemini üslublu API son nöqtələri                                                                                                                                                                                                                                                                                     |
-| `app/api/playground/`                                                        | Playground Studio marşrutları: `improve-prompt/` (POST — LLM prompt yenidən yazıcısı), `presets/` (GET siyahısı / POST yaratma), `presets/[id]/` (GET / PUT / DELETE) — `docs/frameworks/PLAYGROUND_STUDIO.md` sənədinə baxın                                                                                        |
-| `app/api/` (v1 olmayan)                                                      | İdarəetmə/admin marşrutları (~60 qovluq: provayderlər, kombinasiyalar, parametrlər, mcp, a2a, qiymətləndirmələr, yaddaş, bacarıqlar, webhook-lar, uyğunluq, dayanıqlılıq, monitorinq, tunellər, cli alətləri və s.)                                                                                                  |
-| `app/api/tools/agent-bridge/`                                                | AgentBridge REST API — 12 marşrut (server idarəetməsi, agent vəziyyəti/DNS/xəritələndirmələri, yan keçmə, sertifikat, yuxarı axın CA-sı). LOCAL_ONLY + SPAWN_CAPABLE. `docs/frameworks/AGENTBRIDGE.md §7` sənədinə baxın.                                                                                            |
-| `app/api/tools/traffic-inspector/`                                           | Traffic Inspector REST + WS API — 16+ marşrut (sorğular, sessiyalar, hostlar, tutma rejimləri, ixrac, ws). LOCAL_ONLY + SPAWN_CAPABLE. `docs/frameworks/TRAFFIC_INSPECTOR.md §8` sənədinə baxın.                                                                                                                     |
+| `app/api/playground/`                                                        | Playground Studio marşrutları: `improve-prompt/` (POST — LLM sorğu yenidən yazıcısı), `presets/` (GET siyahısı / POST yaratma), `presets/[id]/` (GET / PUT / DELETE) — `docs/frameworks/PLAYGROUND_STUDIO.md` sənədinə baxın                                                                                         |
+| `app/api/` (v1 olmayan)                                                      | İdarəetmə/inzibatçı marşrutları (~60 qovluq: provayderlər, kombinasiyalar, parametrlər, mcp, a2a, qiymətləndirmələr, yaddaş, bacarıqlar, veb-huklar, uyğunluq, dayanıqlılıq, monitorinq, tunellər, CLI alətləri və s.)                                                                                               |
+| `app/api/tools/agent-bridge/`                                                | AgentBridge REST API — 12 marşrut (server idarəetməsi, agent vəziyyəti/DNS/xəritələndirmələri, yan keçmə, sertifikat, yuxarı axın CA-sı). LOCAL_ONLY + SPAWN_CAPABLE. `docs/frameworks/AGENTBRIDGE.md §7` bölməsinə baxın.                                                                                           |
+| `app/api/tools/traffic-inspector/`                                           | Traffic Inspector REST + WS API — 16+ marşrut (sorğular, sessiyalar, hostlar, tutma rejimləri, ixrac, ws). LOCAL_ONLY + SPAWN_CAPABLE. `docs/frameworks/TRAFFIC_INSPECTOR.md §8` bölməsinə baxın.                                                                                                                    |
 | `app/a2a/`                                                                   | A2A JSON-RPC 2.0 giriş nöqtəsi (`POST /a2a`)                                                                                                                                                                                                                                                                         |
 | `app/.well-known/agent.json/`                                                | A2A Agent Card (aşkarlama)                                                                                                                                                                                                                                                                                           |
-| `app/(dashboard)/dashboard/`                                                 | İdarəetmə panelinin UI səhifələri (50+ bölmə, ~118 page.tsx faylı: provayderlər, kombinasiyalar, parametrlər, yaddaş, bacarıqlar, webhook-lar, qiymətləndirmələr, audit, paket, keş, xərclər, sağlamlıq, sistem, fəaliyyət və s.)                                                                                    |
+| `app/(dashboard)/dashboard/`                                                 | İdarəetmə panelinin UI səhifələri (50+ bölmə, ~118 page.tsx faylı: provayderlər, kombinasiyalar, parametrlər, yaddaş, bacarıqlar, veb-huklar, qiymətləndirmələr, audit, paket, keş, xərclər, sağlamlıq, sistem, fəaliyyət və s.)                                                                                     |
 | `app/(dashboard)/dashboard/search-tools/`                                    | Search Tools Studio UI (3 tab: Axtarış/Məlumat çıxarma/Müqayisə + SearchConceptCard + ProviderCatalog) — `docs/frameworks/SEARCH_TOOLS_STUDIO.md` sənədinə baxın                                                                                                                                                     |
 | `app/(dashboard)/dashboard/memory/`                                          | Memory Studio (plan 21): `page.tsx` (3 tablı qabıq), `components/` (MemoryConceptCard, MemoryEngineStatus, EmbeddingSourceSelector, EditMemoryModal, RetrievePreview, QdrantConfigCard, RerankConfigCard), `components/tabs/` (MemoriesTab, PlaygroundTab, EngineTab), `hooks/` (useEngineStatus, useMemorySettings) |
 | `app/(dashboard)/dashboard/tools/agent-bridge/`                              | AgentBridge idarəetmə paneli səhifəsi — server kartı, 9 agent kartı, quraşdırma sehrbazı, model xəritələndirməsi, yan keçmə siyahısı. i18n PT-BR + EN. `docs/frameworks/AGENTBRIDGE.md` sənədinə baxın.                                                                                                              |
@@ -159,60 +159,60 @@ src/
 | `app/login/`, `forgot-password/`, `forbidden/`                               | Autentifikasiya ilə əlaqəli səhifələr                                                                                                                                                                                                                                                                                |
 | `app/{400,401,403,408,429,500,502,503}/`                                     | HTTP xəta səhifələri                                                                                                                                                                                                                                                                                                 |
 | `app/maintenance/`, `offline/`, `status/`, `privacy/`, `terms/`, `callback/` | Statik/status səhifələri                                                                                                                                                                                                                                                                                             |
-| `app/layout.tsx`, `page.tsx`, `manifest.ts`, `globals.css`                   | Kök tərtibat, ana səhifə, PWA manifesti, qlobal CSS                                                                                                                                                                                                                                                                  |
+| `app/layout.tsx`, `page.tsx`, `manifest.ts`, `globals.css`                   | Kök maket, ana səhifə, PWA manifesti, qlobal CSS                                                                                                                                                                                                                                                                     |
 | `app/error.tsx`, `global-error.tsx`, `not-found.tsx`, `loading.tsx`          | Xəta sərhədləri                                                                                                                                                                                                                                                                                                      |
 
 ### `src/lib/` — Əsas kitabxanalar (~50 modul)
 
 | Modul                                    | Təyinat                                                                                                                                                                                                                                                                                                                          |
 | ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `a2a/`                                   | A2A protokolu üçün tapşırıq meneceri, bacarıqlar (5), axın ötürülməsi                                                                                                                                                                                                                                                            |
+| `a2a/`                                   | A2A protokolu üçün tapşırıq meneceri, bacarıqlar (5), axınla ötürmə                                                                                                                                                                                                                                                              |
 | `acp/`                                   | CLI Agent Reyestri (lokal CLI aşkarlanması — baxın: `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md`)                                                                                                                                                                                                                                  |
-| `api/`                                   | Ortaq API köməkçiləri (`requireManagementAuth`, doğrulama)                                                                                                                                                                                                                                                                       |
-| `auth/`                                  | Sessiya, parolun heşlənməsi, tokenin doğrulanması                                                                                                                                                                                                                                                                                |
+| `api/`                                   | Ortaq API köməkçiləri (`requireManagementAuth`, validasiya)                                                                                                                                                                                                                                                                      |
+| `auth/`                                  | Sessiya, parolun heşlənməsi, token validasiyası                                                                                                                                                                                                                                                                                  |
 | `batches/`                               | OpenAI Batches API emalçıları                                                                                                                                                                                                                                                                                                    |
-| `catalog/`                               | Provayder kataloqunun Zod ilə doğrulanması + imkanların müəyyənləşdirilməsi                                                                                                                                                                                                                                                      |
-| `cloudAgent/`                            | Bulud agentləri (Codex Cloud, Devin, Jules) — baxın: `docs/frameworks/CLOUD_AGENT.md`                                                                                                                                                                                                                                            |
+| `catalog/`                               | Provayder kataloqu üçün Zod validasiyası + imkanların müəyyənləşdirilməsi                                                                                                                                                                                                                                                        |
+| `cloudAgent/`                            | Bulud Agentləri (Codex Cloud, Devin, Jules) — baxın: `docs/frameworks/CLOUD_AGENT.md`                                                                                                                                                                                                                                            |
 | `combos/`                                | Kombinasiyaların müəyyənləşdirilməsi + yenidən sıralama köməkçiləri                                                                                                                                                                                                                                                              |
-| `audit/`                                 | Fəaliyyət lenti köməkçiləri: `highLevelActions.ts` (icazə siyahısı + `isHighLevelAction()`), `activityIcons.ts` (əməl → ikona/fel xəritəsi), `timeline.ts` (groupByDay/relativeTime) — baxın: `docs/architecture/MONITORING_SECTIONS.md`                                                                                         |
+| `audit/`                                 | Fəaliyyət lenti köməkçiləri: `highLevelActions.ts` (icazə siyahısı + `isHighLevelAction()`), `activityIcons.ts` (əməl → ikon/fel xəritəsi), `timeline.ts` (groupByDay/relativeTime) — baxın: `docs/architecture/MONITORING_SECTIONS.md`                                                                                          |
 | `compliance/`                            | Audit jurnalı + provayder auditi — baxın: `docs/security/COMPLIANCE.md`                                                                                                                                                                                                                                                          |
-| `compression/`                           | Sıxılma mühərriki üçün əlaqələndirici qat (mühərriklər `open-sse/services/compression/` daxilindədir)                                                                                                                                                                                                                            |
-| `config/`                                | İcra zamanı konfiqurasiya köməkçiləri                                                                                                                                                                                                                                                                                            |
+| `compression/`                           | Sıxılma mühərriklərini birləşdirən qat (mühərriklər `open-sse/services/compression/` daxilində yerləşir)                                                                                                                                                                                                                         |
+| `config/`                                | İcra vaxtı konfiqurasiyası üçün köməkçilər                                                                                                                                                                                                                                                                                       |
 | `db/`                                    | 120-dən çox domen DB modulu + 168 miqrasiya (SQLite üçün həmişə buradan istifadə edin)                                                                                                                                                                                                                                           |
-| `quota/`                                 | Kvota Paylaşma Mühərriki: `dimensions.ts` (növlər/Zod), `types.ts` (QuotaStore interfeysi), `sqliteQuotaStore.ts`, `redisQuotaStore.ts`, `storeFactory.ts`, `fairShare.ts`, `burnRate.ts`, `planResolver.ts`, `planRegistry.ts`, `saturationSignals.ts`, `enforce.ts`, `spendRecorder.ts` — baxın: `docs/routing/QUOTA_SHARE.md` |
+| `quota/`                                 | Kvota Paylaşma Mühərriki: `dimensions.ts` (tiplər/Zod), `types.ts` (QuotaStore interfeysi), `sqliteQuotaStore.ts`, `redisQuotaStore.ts`, `storeFactory.ts`, `fairShare.ts`, `burnRate.ts`, `planResolver.ts`, `planRegistry.ts`, `saturationSignals.ts`, `enforce.ts`, `spendRecorder.ts` — baxın: `docs/routing/QUOTA_SHARE.md` |
 | `radar/`                                 | Radar pulsuz model kataloqu klienti: `feedSchema.ts`, `pinnedKeys.ts`, `verify.ts`, `sync.ts`, `applyFeed.ts`, `index.ts` (`getRadarCatalog()`) — baxın: `docs/frameworks/RADAR.md`                                                                                                                                              |
 | `display/`                               | UI formatlaşdırma köməkçiləri (xərc, gecikmə və s.)                                                                                                                                                                                                                                                                              |
-| `embeddings/`                            | Embeddings xidməti köməkçiləri                                                                                                                                                                                                                                                                                                   |
-| `env/`                                   | Mühit dəyişənlərinin təhlili + yoxlanması                                                                                                                                                                                                                                                                                        |
-| `evals/`                                 | Qiymətləndirmə çərçivəsi (dəstlər, icraçı, icra mühiti) — baxın: `docs/frameworks/EVALS.md`                                                                                                                                                                                                                                      |
+| `embeddings/`                            | Embeddinq xidməti köməkçiləri                                                                                                                                                                                                                                                                                                    |
+| `env/`                                   | Mühit dəyişənlərinin təhlili + validasiyası                                                                                                                                                                                                                                                                                      |
+| `evals/`                                 | Qiymətləndirmə freymvorku (dəstlər, icraçı, icra mühiti) — baxın: `docs/frameworks/EVALS.md`                                                                                                                                                                                                                                     |
 | `guardrails/`                            | PII maskalayıcısı, prompt inyeksiyası, görüntü körpüsü — baxın: `docs/security/GUARDRAILS.md`                                                                                                                                                                                                                                    |
 | `jobs/`                                  | Fon tapşırıqları (cron tipli)                                                                                                                                                                                                                                                                                                    |
-| `memory/`                                | Dialoq yaddaşı (SQLite FTS5 + sqlite-vec hibrid RRF + Qdrant səviyyə 2) — baxın: `docs/frameworks/MEMORY.md`                                                                                                                                                                                                                     |
-| `memory/embedding/`                      | Çoxmənbəli embedding qatı: `index.ts` (həlledici), `remote.ts`, `staticPotion.ts`, `transformersLocal.ts`, `cache.ts`, `types.ts` (plan 21)                                                                                                                                                                                      |
-| `memory/vectorStore.ts`                  | sqlite-vec v0.1.9 örtüyü — kobud qüvvə ilə KNN + hibrid RRF (FTS5 + vektor, k=60). Tənbəl inisializasiya olunur, sqlite-vec əlçatan olmadıqda funksionallığı problemsiz azaldır. (plan 21)                                                                                                                                       |
+| `memory/`                                | Dialoq yaddaşı (SQLite FTS5 + sqlite-vec hibrid RRF + Qdrant 2-ci səviyyə) — baxın: `docs/frameworks/MEMORY.md`                                                                                                                                                                                                                  |
+| `memory/embedding/`                      | Çoxmənbəli embeddinq qatı: `index.ts` (rezolver), `remote.ts`, `staticPotion.ts`, `transformersLocal.ts`, `cache.ts`, `types.ts` (plan 21)                                                                                                                                                                                       |
+| `memory/vectorStore.ts`                  | sqlite-vec v0.1.9 örtüyü — KNN tam axtarış + hibrid RRF (FTS5 + vektor, k=60). Tənbəl başladılır, sqlite-vec əlçatan olmadıqda funksionallığı tədricən azaldır. (plan 21)                                                                                                                                                        |
 | `memory/reindex.ts`                      | `runReindexBatch()` — `needs_reindex=1` olan yaddaş qeydlərini fonda emal edir; `POST /api/memory/reindex` və tənbəl geriyə doldurma yolu tərəfindən çağırılır. (plan 21)                                                                                                                                                        |
-| `monitoring/`                            | Sağlamlıq yoxlamaları, metriklərin göndərilməsi                                                                                                                                                                                                                                                                                  |
-| `oauth/`                                 | 22 provayder modulu üçün OAuth/import axınları (agy, antigravity, claude, cline, codebuddy-cn, codex, cursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-coding, kiro, openference, qoder, trae, xai-oauth, zed-hosted, zed)                                                       |
+| `monitoring/`                            | Sağlamlıq yoxlamaları, metriklərin ötürülməsi                                                                                                                                                                                                                                                                                    |
+| `oauth/`                                 | 22 provayder modulu üçün OAuth/idxal axınları (agy, antigravity, claude, cline, codebuddy-cn, codex, cursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-coding, kiro, openference, qoder, trae, xai-oauth, zed-hosted, zed)                                                        |
 | `plugins/`                               | Plagin reyestri                                                                                                                                                                                                                                                                                                                  |
-| `promptCache/`                           | Anthropic üslublu prompt keşi kəsilmə nöqtələri                                                                                                                                                                                                                                                                                  |
-| `skills/`                                | Bacarıqlar çərçivəsi (daxili + marketplace + SkillsSH) — baxın: `docs/frameworks/SKILLS.md`                                                                                                                                                                                                                                      |
-| `playground/`                            | Playground Studio üçün ortaq köməkçi vasitələr: `codeExport.ts` (curl/Python/TS generatoru), `promptImprover.ts` (meta-prompt qurucusu), `streamMetrics.ts` (saf TTFT/TPS), `types.ts` (qiymətləndirmə cədvəli) — baxın: `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                  |
+| `promptCache/`                           | Anthropic üslublu prompt keşinin kəsilmə nöqtələri                                                                                                                                                                                                                                                                               |
+| `skills/`                                | Bacarıqlar freymvorku (daxili + marketpleys + SkillsSH) — baxın: `docs/frameworks/SKILLS.md`                                                                                                                                                                                                                                     |
+| `playground/`                            | Playground Studio üçün ortaq köməkçilər: `codeExport.ts` (curl/Python/TS generatoru), `promptImprover.ts` (meta-prompt qurucusu), `streamMetrics.ts` (saf TTFT/TPS), `types.ts` (qiymətləndirmə cədvəli) — baxın: `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                         |
 | `webhookDispatcher.ts`                   | HMAC webhook çatdırılması — baxın: `docs/frameworks/WEBHOOKS.md`                                                                                                                                                                                                                                                                 |
 | `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | Tunel menecerləri — baxın: `docs/ops/TUNNELS_GUIDE.md`                                                                                                                                                                                                                                                                           |
-| `cloudSync.ts`, `initCloudSync.ts`       | Vəziyyətin ixtiyari bulud sinxronizasiyası                                                                                                                                                                                                                                                                                       |
+| `cloudSync.ts`, `initCloudSync.ts`       | Vəziyyətin istəyə bağlı bulud sinxronizasiyası                                                                                                                                                                                                                                                                                   |
 | `localDb.ts`                             | Verilənlər bazası modulları üçün təkrar ixrac barrel-i (məntiq yoxdur — yalnız təkrar ixraclar)                                                                                                                                                                                                                                  |
 | `cacheLayer.ts`, `idempotencyLayer.ts`   | Sorğuların keşlənməsi + idempotentlik                                                                                                                                                                                                                                                                                            |
-| (daha ~30 üst səviyyəli fayl)            | İxtisaslaşdırılmış köməkçi vasitələr (logEnv, modelsDevSync, piiSanitizer və s.)                                                                                                                                                                                                                                                 |
+| (daha ~30 üst səviyyəli fayl)            | İxtisaslaşdırılmış köməkçilər (logEnv, modelsDevSync, piiSanitizer və s.)                                                                                                                                                                                                                                                        |
 
-### `src/lib/db/` — Verilənlər bazası (137 modul + 193 miqrasiya)
+### `src/lib/db/` — Verilənlər bazası (147 modul + 208 miqrasiya)
 
-| Alt qovluq                | Məqsəd                                                                                                                                                                                                                         |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `db/core.ts`              | WAL jurnallaşdırması ilə `getDbInstance()` singleton-u                                                                                                                                                                         |
-| `db/migrations/`          | Versiyalaşdırılmış SQL faylları (idempotent, tranzaksiyalı). `073_memory_vec.sql`, `memory_vec_meta` + `needs_reindex` sütununu əlavə edir (plan 21).                                                                          |
-| `db/playgroundPresets.ts` | Playground Studio əvvəlcədən təyin edilmiş parametrləri üçün CRUD modulu (`listPlaygroundPresets`, `getPlaygroundPreset`, `createPlaygroundPreset`, `updatePlaygroundPreset`, `deletePlaygroundPreset`)                        |
-| `db/memoryVec.ts`         | `memory_vec_meta` üçün CRUD (active_dim, embedding_signature, last_reset_at, vec_loaded) + `markMemoryNeedsReindex`, `getMemoryReindexQueue` və s. (plan 21)                                                                   |
-| `db/<domain>.ts`          | Hər domen üçün bir modul: provayderlər, kombinasiyalar, API açarları, istifadəçilər, sessiyalar, istifadə statistikası, audit*log, webhook-lar, bacarıqlar, memory_entries, cloud_agent_tasks, evals*\*, reasoning_cache və s. |
+| Alt qovluq                | Məqsəd                                                                                                                                                                                                            |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `db/core.ts`              | WAL jurnallaşdırması ilə `getDbInstance()` singleton-u                                                                                                                                                            |
+| `db/migrations/`          | Versiyalaşdırılmış SQL faylları (idempotent, tranzaksiyalı). `073_memory_vec.sql`, `memory_vec_meta` + `needs_reindex` sütununu əlavə edir (plan 21).                                                             |
+| `db/playgroundPresets.ts` | Playground Studio əvvəlcədən təyin edilmiş parametrləri üçün CRUD modulu (`listPlaygroundPresets`, `getPlaygroundPreset`, `createPlaygroundPreset`, `updatePlaygroundPreset`, `deletePlaygroundPreset`)           |
+| `db/memoryVec.ts`         | `memory_vec_meta` üçün CRUD (active_dim, embedding_signature, last_reset_at, vec_loaded) + `markMemoryNeedsReindex`, `getMemoryReindexQueue` və s. (plan 21)                                                      |
+| `db/<domain>.ts`          | Hər domen üçün bir modul: provayderlər, kombinasiyalar, API açarları, istifadəçilər, sessiyalar, istifadə, audit*log, webhook-lar, bacarıqlar, memory_entries, cloud_agent_tasks, evals*\*, reasoning_cache və s. |
 
 ### `src/domain/`
 
@@ -221,9 +221,9 @@ src/
 | `policy.ts`            | Siyasət mühərriki                                                         |
 | `fallbackPolicy.ts`    | Ehtiyat qərar ağacı                                                       |
 | `costRules.ts`         | Xərc hesablama qaydaları                                                  |
-| `lockoutPolicy.ts`     | Model/bağlantı bloklama siyasəti                                          |
-| `tagRouter.ts`         | Teq əsaslı marşrutlaşdırma                                                |
-| `comboResolver.ts`     | Kombinasiyanın həlli (kombinasiya mühərriki tərəfindən istifadə olunur)   |
+| `lockoutPolicy.ts`     | Model/bağlantı kilidləmə siyasəti                                         |
+| `tagRouter.ts`         | Teqlərə əsaslanan marşrutlaşdırma                                         |
+| `comboResolver.ts`     | Kombinasiya həlli (kombinasiya mühərriki tərəfindən istifadə olunur)      |
 | `modelAvailability.ts` | Hər model üzrə əlçatanlıq yoxlaması                                       |
 | `assessment/`          | Modelin qiymətləndirilməsi (RFC-AUTO-ASSESSMENT sənədinin 1-ci mərhələsi) |
 
@@ -233,64 +233,64 @@ src/
 | -------- | ------------------------------------------------------------------------------------------------------- |
 | `authz/` | Avtorizasiya konveyeri: `classify` → `policies` → `enforce` — baxın: `docs/architecture/AUTHZ_GUIDE.md` |
 | `cors/`  | CORS konfiqurasiyası                                                                                    |
-| `auth/`  | Sessiya aralıq proqram təminatı                                                                         |
+| `auth/`  | Sessiya ara proqram təminatı                                                                            |
 
 ### `src/shared/`
 
-| Modul                            | Məqsəd                                                                                         |
-| -------------------------------- | ---------------------------------------------------------------------------------------------- |
-| `constants/providers.ts`         | Zod validasiyası ilə **355 provayder** (əsas həqiqət mənbəyi)                                  |
-| `constants/cliTools.ts`          | Xarici CLI alətləri reyestri                                                                   |
-| `constants/routingStrategies.ts` | Prioritetləri olan **19 marşrutlaşdırma strategiyası**                                         |
-| `constants/publicApiRoutes.ts`   | Bearer autentifikasiyası tələb edən marşrutlar (idarəetmə autentifikasiyasından fərqli olaraq) |
-| `constants/upstreamHeaders.ts`   | Yuxarı axın sorğuları üçün başlıq qadağa siyahısı                                              |
-| `validation/schemas.ts`          | ~80 Zod sxemi (API müqavilələri üçün vahid həqiqət mənbəyi)                                    |
-| `validation/helpers.ts`          | Zod validasiya köməkçiləri (`validateBody` və s.)                                              |
-| `types/`                         | Ortaq TS tipləri                                                                               |
-| `contracts/`                     | İctimai API müqavilələri (`package.json` daxilindəki `files:` tərəfindən istifadə olunur)      |
-| `utils/circuitBreaker.ts`        | Provayder dövrəqıranı (bax: `docs/architecture/RESILIENCE_GUIDE.md`)                           |
-| `utils/apiAuth.ts`               | API açarının validasiyası, əhatə dairəsinin yoxlanması                                         |
-| `utils/fetchTimeout.ts`          | Yuxarı axın fetch sorğuları üçün vaxt aşımı/dayandırma örtükləri                               |
-| `utils/releaseNotes.ts`          | Bağlanmış v2/köhnə elanların təhlili, lokallaşdırılması və ID üzrə rədd edilməsi               |
+| Modul                            | Təyinatı                                                                                 |
+| -------------------------------- | ---------------------------------------------------------------------------------------- |
+| `constants/providers.ts`         | Zod doğrulaması ilə **375 provayder** (əsas həqiqət mənbəyi)                             |
+| `constants/cliTools.ts`          | Xarici CLI alətləri reyestri                                                             |
+| `constants/routingStrategies.ts` | Prioritetlərlə **20 marşrutlaşdırma strategiyası**                                       |
+| `constants/publicApiRoutes.ts`   | Bearer (idarəetmə əvəzinə) autentifikasiyası tələb edən marşrutlar                       |
+| `constants/upstreamHeaders.ts`   | Yuxarı axın sorğuları üçün başlıq qadağa siyahısı                                        |
+| `validation/schemas.ts`          | ~80 Zod sxemi (API müqavilələri üçün vahid həqiqət mənbəyi)                              |
+| `validation/helpers.ts`          | Zod doğrulama köməkçiləri (`validateBody` və s.)                                         |
+| `types/`                         | Ortaq TS tipləri                                                                         |
+| `contracts/`                     | İctimai API müqavilələri (`package.json` faylındakı `files:` tərəfindən istifadə olunur) |
+| `utils/circuitBreaker.ts`        | Provayder dövrə açarı (bax: `docs/architecture/RESILIENCE_GUIDE.md`)                     |
+| `utils/apiAuth.ts`               | API açarının doğrulanması, əhatə dairəsinin yoxlanması                                   |
+| `utils/fetchTimeout.ts`          | Yuxarı axın fetch sorğuları üçün vaxt aşımı/dayandırma örtükləri                         |
+| `utils/releaseNotes.ts`          | Bağlanmış v2/legacy elan analizatoru, lokallaşdırma və ID-nin rədd edilməsi              |
 
 ---
 
 ## `open-sse/` — Axın Mühərriki İş Sahəsi
 
-Ayrı npm iş sahəsi (`@omniroute/open-sse`). Sorğuların emalını və provayder icrasını idarə edir.
+Ayrıca npm iş sahəsi (`@omniroute/open-sse`). Sorğuların emalını və provayder icrasını idarə edir.
 
 ```
 open-sse/
-├── handlers/            # 16 fayl (12 emalçı + 4 köməkçi): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search və s.
-├── executors/           # Provayderə xas 67 icraçı (BaseExecutor sinfini genişləndirir)
+├── handlers/            # 16 fayl (12 emaledici + 4 köməkçi): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search və s.
+├── executors/           # 150 icraçı modul (BaseExecutor sinfini genişləndirən siniflər + hər provayder üçün köməkçilər)
 ├── translator/          # Format çeviriciləri (9 sorğu, 9 cavab, 9 köməkçi)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
 ├── services/            # ~80+ xidmət modulu (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM və s.)
-├── mcp-server/          # MCP serveri (110 alət, 3 nəqliyyat mexanizmi, 33 əhatə dairəsi)
+├── mcp-server/          # MCP serveri (110 alət, 3 nəqliyyat, 33 əhatə dairəsi)
 ├── config/              # Provayder/model reyestrləri, başlıq konfiqurasiyası, model ləqəbləri
 ├── utils/               # TLS klienti, proksi fetch/dispatcher, şəbəkə köməkçiləri
 ├── index.ts             # İş sahəsinin giriş nöqtəsi
-├── package.json         # İş sahəsinin manifesti
+├── package.json         # İş sahəsi manifesti
 ├── tsconfig.json        # İş sahəsinin TS konfiqurasiyası
-└── types.d.ts           # İş sahəsinin tip bəyannamələri
+└── types.d.ts           # İş sahəsinin tip bəyanları
 ```
 
 ### `open-sse/mcp-server/`
 
-| Yol                         | Məqsəd                                                                                                          |
-| --------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| `server.ts`                 | MCP serverinin həyat dövrü (stdio + HTTP nəqliyyat mexanizmləri)                                                |
-| `httpTransport.ts`          | HTTP Streamable + SSE nəqliyyat mexanizmləri (`/api/mcp/sse`, `/api/mcp/stream`)                                |
-| `audit.ts`                  | Audit qeydlərinin `mcp_tool_audit` cədvəlinə yazılması                                                          |
-| `scopeEnforcement.ts`       | Hər alət üzrə əhatə dairəsinin yoxlanması                                                                       |
-| `runtimeHeartbeat.ts`       | Sağlamlıq siqnalının `DATA_DIR/runtime/mcp-heartbeat.json` faylına yazılması                                    |
-| `descriptionCompressor.ts`  | Kontekstə qənaət etmək üçün alət təsviri metadatasını sıxır                                                     |
-| `schemas/tools.ts`          | 36 əsas alət tərifi + əhatə dairələri                                                                           |
-| `tools/advancedTools.ts`    | Təkmil alət realizasiyaları                                                                                     |
-| `tools/memoryTools.ts`      | 3 yaddaş aləti (axtarış/əlavə etmə/təmizləmə)                                                                   |
-| `tools/skillTools.ts`       | 4 bacarıq aləti (siyahı/aktivləşdirmə/icra/icralar)                                                             |
-| `tools/compressionTools.ts` | 5 sıxılma aləti                                                                                                 |
-| `README.md`                 | Daxili MCP serveri README faylı (`docs/frameworks/MCP-SERVER.md` sənədindən qarşılıqlı keçidlə əlaqələndirilib) |
+| Yol                         | Təyinatı                                                                                                 |
+| --------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `server.ts`                 | MCP serverinin həyat dövrü (stdio + HTTP nəqliyyatları)                                                  |
+| `httpTransport.ts`          | HTTP Streamable + SSE nəqliyyatları (`/api/mcp/sse`, `/api/mcp/stream`)                                  |
+| `audit.ts`                  | `mcp_tool_audit` cədvəlinə audit jurnallaşdırması                                                        |
+| `scopeEnforcement.ts`       | Hər alət üzrə əhatə dairəsinin doğrulanması                                                              |
+| `runtimeHeartbeat.ts`       | `DATA_DIR/runtime/mcp-heartbeat.json` faylına sağlamlıq nəbzi                                            |
+| `descriptionCompressor.ts`  | Kontekstə qənaət etmək üçün alət təsviri metadatasını sıxışdırır                                         |
+| `schemas/tools.ts`          | 36 əsas alət tərifi + əhatə dairələri                                                                    |
+| `tools/advancedTools.ts`    | Qabaqcıl alət reallaşdırmaları                                                                           |
+| `tools/memoryTools.ts`      | 3 yaddaş aləti (axtarış/əlavə etmə/təmizləmə)                                                            |
+| `tools/skillTools.ts`       | 4 bacarıq aləti (siyahı/aktivləşdirmə/icra/iclalar)                                                      |
+| `tools/compressionTools.ts` | 5 sıxışdırma aləti                                                                                       |
+| `README.md`                 | Daxili MCP serveri README-si (`docs/frameworks/MCP-SERVER.md` sənədindən çarpaz keçidlə əlaqələndirilib) |
 
 ---
 
@@ -375,80 +375,80 @@ open-sse/
 
 ---
 
-## `docs/` — İctimai sənədləşdirmə (7 kök fayl + 17 alt qovluq)
+## `docs/` — İctimai sənədləşmə (7 kök fayl + 17 alt qovluq)
 
 ### Yuxarı səviyyəli təlimatlar
 
-| Sənəd                       | Məqsəd                                                                                                             |
-| --------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| `ARCHITECTURE.md`           | Yüksək səviyyəli arxitektura, alt sistem xəritəsi, idarəetmə panelinin əhatə dairəsi                               |
-| `CODEBASE_DOCUMENTATION.md` | Mühəndislik istinad sənədi: qovluqlar, modullar, qaydalar                                                          |
-| `FEATURES.md`               | v3.8 yenilikləri ilə funksiya matrisi                                                                              |
-| `USER_GUIDE.md`             | Son istifadəçi təlimatı (quraşdırma, modellər, kombinasiyalar, CLI-lər, audio və s.)                               |
-| `API_REFERENCE.md`          | Autentifikasiya modeli ilə API son nöqtələri üzrə istinad sənədi                                                   |
-| `openapi.yaml`              | OpenAPI 3.0 spesifikasiyası (121 yol)                                                                              |
-| `SETUP_GUIDE.md`            | Quraşdırma üsulları (npm, npx, Docker, Electron, Termux, mənbə kodu)                                               |
-| `ENVIRONMENT.md`            | Bütün mühit dəyişənləri (~800 sənədləşdirilib, `.env.example` ~3,050 sətirdir)                                     |
-| `TROUBLESHOOTING.md`        | Ümumi xətalar + v3.8.0 üçün məlum problemlər                                                                       |
-| `RELEASE_CHECKLIST.md`      | Tam buraxılış prosesi (bacarıqlar, husky, conventional commits, yerləşdirmə)                                       |
-| `COVERAGE_PLAN.md`          | Əhatə məqsədləri və cari vəziyyət                                                                                  |
-| `FREE_TIERS.md`             | Seçilmiş pulsuz səviyyəli provayderlər (48+ pulsuz + 11 OAuth)                                                     |
-| `CLI-TOOLS.md`              | Xarici CLI inteqrasiyaları + daxili OmniRoute CLI                                                                  |
-| `I18N.md`                   | i18n arxitekturası, dil əlavə edilməsi, 42 lokalizasiya                                                            |
-| `UNINSTALL.md`              | Təmiz silmə addımları                                                                                              |
-| `PROVIDER_REFERENCE.md`     | 355 provayderdən ibarət **avtomatik yaradılmış** kataloq (yenidən yaratmaq üçün: `npm run gen:provider-reference`) |
+| Sənəd                       | Məqsəd                                                                                                            |
+| --------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `ARCHITECTURE.md`           | Yüksək səviyyəli arxitektura, altsistem xəritəsi, idarəetmə panelinin əhatə dairəsi                               |
+| `CODEBASE_DOCUMENTATION.md` | Mühəndislik arayışı: qovluqlar, modullar, konvensiyalar                                                           |
+| `FEATURES.md`               | v3.8 yenilikləri ilə xüsusiyyət matrisi                                                                           |
+| `USER_GUIDE.md`             | Son istifadəçi təlimatı (quraşdırma, modellər, kombinasiyalar, CLI-lər, audio və s.)                              |
+| `API_REFERENCE.md`          | Autentifikasiya modeli ilə API son nöqtələri arayışı                                                              |
+| `openapi.yaml`              | OpenAPI 3.0 spesifikasiyası (121 yol)                                                                             |
+| `SETUP_GUIDE.md`            | Quraşdırma üsulları (npm, npx, Docker, Electron, Termux, mənbə kodu)                                              |
+| `ENVIRONMENT.md`            | Bütün mühit dəyişənləri (~800 sənədləşdirilib, `.env.example` ~3 050 sətirdir)                                    |
+| `TROUBLESHOOTING.md`        | Ümumi xətalar + v3.8.0 məlum problemləri                                                                          |
+| `RELEASE_CHECKLIST.md`      | Tam buraxılış prosesi (bacarıqlar, husky, conventional commits, yerləşdirmə)                                      |
+| `COVERAGE_PLAN.md`          | Əhatə məqsədləri və cari vəziyyət                                                                                 |
+| `FREE_TIERS.md`             | Seçilmiş pulsuz səviyyəli provayderlər (48+ pulsuz + 11 OAuth)                                                    |
+| `CLI-TOOLS.md`              | Xarici CLI inteqrasiyaları + daxili OmniRoute CLI                                                                 |
+| `I18N.md`                   | i18n arxitekturası, dil əlavə edilməsi, 67 lokalizasiya                                                           |
+| `UNINSTALL.md`              | Təmiz silmə addımları                                                                                             |
+| `PROVIDER_REFERENCE.md`     | 375 provayderdən ibarət **avtomatik yaradılan** kataloq (yenidən yaratmaq üçün: `npm run gen:provider-reference`) |
 
-### Alt sistemlər üzrə ətraflı təlimatlar
+### Altsistemlər üzrə ətraflı təlimatlar
 
-| Sənəd                                            | Məqsəd                                                                            |
-| ------------------------------------------------ | --------------------------------------------------------------------------------- |
-| `MCP-SERVER.md`                                  | MCP serveri: 110 alət, 3 nəqliyyat üsulu, 33 əhatə sahəsi, REST son nöqtələri     |
-| `A2A-SERVER.md`                                  | A2A v0.3: JSON-RPC, 6 bacarıq, REST köməkçiləri, agent kartı                      |
-| `AGENT_PROTOCOLS_GUIDE.md`                       | Vahid təlimat: A2A, ACP və Cloud Agents müqayisəsi                                |
-| `CLOUD_AGENT.md`                                 | Codex Cloud / Devin / Jules orkestrasiya prosesi                                  |
-| `SKILLS.md`                                      | Bacarıqlar çərçivəsi (daxili + marketplace + SkillsSH + sandbox)                  |
-| `RADAR.md`                                       | Radar pulsuz model kataloqu örtüyü (`RADAR_ENABLED`, standart olaraq deaktivdir)  |
-| `MEMORY.md`                                      | Yaddaş sistemi (SQLite FTS5 + Qdrant)                                             |
-| `EVALS.md`                                       | Qiymətləndirmə çərçivəsi (dəstlər, icralar, meyarlar)                             |
-| `GUARDRAILS.md`                                  | PII maskalayıcısı, prompt inyeksiyası, görüntü körpüsü                            |
-| `COMPLIANCE.md`                                  | Audit jurnalı, saxlama müddəti, noLog imtinası                                    |
-| `WEBHOOKS.md`                                    | HMAC ilə imzalanmış webhook çatdırılması                                          |
-| `REASONING_REPLAY.md`                            | `reasoning_content` üçün hibrid yaddaş/SQLite keşi                                |
-| `AUTHZ_GUIDE.md`                                 | Avtorizasiya konveyeri (`classify` → `policies` → `enforce`)                      |
-| `RESILIENCE_GUIDE.md`                            | Dövrə kəsicisi + gözləmə müddəti + model bloklanması                              |
-| `docs/security/STEALTH_GUIDE.md` (yalnız git-də) | TLS barmaq izi (JA3/JA4), Claude Code CCH, MITM sertifikatı                       |
-| `AUTO-COMBO.md`                                  | Auto Combo mühərriki (16 faktorlu qiymətləndirmə, 6 rejim paketi, virtual fabrik) |
+| Sənəd                                         | Məqsəd                                                                            |
+| --------------------------------------------- | --------------------------------------------------------------------------------- |
+| `MCP-SERVER.md`                               | MCP serveri: 110 alət, 3 nəqliyyat, 33 əhatə dairəsi, REST son nöqtələri          |
+| `A2A-SERVER.md`                               | A2A v0.3: JSON-RPC, 6 bacarıq, REST köməkçiləri, agent kartı                      |
+| `AGENT_PROTOCOLS_GUIDE.md`                    | Vahid təlimat: A2A, ACP və Cloud Agents müqayisəsi                                |
+| `CLOUD_AGENT.md`                              | Codex Cloud / Devin / Jules orkestrasiya prosesi                                  |
+| `SKILLS.md`                                   | Bacarıqlar çərçivəsi (daxili + marketplace + SkillsSH + sandbox)                  |
+| `RADAR.md`                                    | Radar pulsuz model kataloqu əlavəsi (`RADAR_ENABLED`, standart olaraq söndürülüb) |
+| `MEMORY.md`                                   | Yaddaş sistemi (SQLite FTS5 + Qdrant)                                             |
+| `EVALS.md`                                    | Qiymətləndirmə çərçivəsi (dəstlər, icralar, rubrikalar)                           |
+| `GUARDRAILS.md`                               | PII maskalayıcısı, prompt inyeksiyası, görüntü körpüsü                            |
+| `COMPLIANCE.md`                               | Audit jurnalı, saxlama müddəti, noLog imtinası                                    |
+| `WEBHOOKS.md`                                 | HMAC ilə imzalanmış webhook çatdırılması                                          |
+| `REASONING_REPLAY.md`                         | `reasoning_content` üçün hibrid yaddaş/SQLite keşləməsi                           |
+| `AUTHZ_GUIDE.md`                              | Avtorizasiya konveyeri (`classify` → `policies` → `enforce`)                      |
+| `RESILIENCE_GUIDE.md`                         | Dövrə açarı + soyuma müddəti + modelin bloklanması                                |
+| `docs/security/STEALTH_GUIDE.md` (yalnız git) | TLS barmaq izi (JA3/JA4), Claude Code CCH, MITM sertifikatı                       |
+| `AUTO-COMBO.md`                               | Auto Combo mühərriki (16 amilli qiymətləndirmə, 6 rejim paketi, virtual fabrik)   |
 
-### Sıxılma
+### Sıxışdırma
 
-| Sənəd                           | Məqsəd                                         |
-| ------------------------------- | ---------------------------------------------- |
-| `COMPRESSION_GUIDE.md`          | Sıxılma rejimlərinə ümumi baxış + yol xəritəsi |
-| `COMPRESSION_ENGINES.md`        | Caveman + RTK mühərrikləri, reyestr müqaviləsi |
-| `COMPRESSION_RULES_FORMAT.md`   | Caveman qayda paketinin JSON sxemi             |
-| `COMPRESSION_LANGUAGE_PACKS.md` | Dillər üzrə qayda paketlərinin inventarı       |
-| `RTK_COMPRESSION.md`            | RTK deklarativ konveyeri (49 filtr)            |
+| Sənəd                           | Məqsəd                                            |
+| ------------------------------- | ------------------------------------------------- |
+| `COMPRESSION_GUIDE.md`          | Sıxışdırma rejimlərinə ümumi baxış + yol xəritəsi |
+| `COMPRESSION_ENGINES.md`        | Caveman + RTK mühərrikləri, reyestr müqaviləsi    |
+| `COMPRESSION_RULES_FORMAT.md`   | Caveman qaydalar paketinin JSON sxemi             |
+| `COMPRESSION_LANGUAGE_PACKS.md` | Hər dil üzrə qaydalar paketinin inventarı         |
+| `RTK_COMPRESSION.md`            | RTK deklarativ konveyeri (49 filtr)               |
 
 ### Yerləşdirmə
 
-| Sənəd                        | Məqsəd                                                                     |
-| ---------------------------- | -------------------------------------------------------------------------- |
-| `DOCKER_GUIDE.md`            | Docker yığımı, profillər (base/cli/host/cliproxyapi), Redis yan konteyneri |
-| `VM_DEPLOYMENT_GUIDE.md`     | Ümumi VM/VPS yerləşdirməsi (Ubuntu/Debian + nginx + systemd)               |
-| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io yerləşdirməsi (hazırda yalnız Çin dilindədir)                       |
-| `TERMUX_GUIDE.md`            | Termux vasitəsilə başsız Android                                           |
-| `PWA_GUIDE.md`               | Proqressiv Veb Tətbiqinin quraşdırılması + service worker                  |
-| `ELECTRON_GUIDE.md`          | Masaüstü tətbiqinin yığılması + imzalanması + paylanması                   |
-| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                                     |
-| `PROXY_GUIDE.md`             | 4 səviyyəli çıxış proksisi + 1proxy marketplace                            |
+| Sənəd                        | Məqsəd                                                                 |
+| ---------------------------- | ---------------------------------------------------------------------- |
+| `DOCKER_GUIDE.md`            | Docker qurulması, profillər (base/cli/host/cliproxyapi), Redis sidecar |
+| `VM_DEPLOYMENT_GUIDE.md`     | Ümumi VM/VPS yerləşdirilməsi (Ubuntu/Debian + nginx + systemd)         |
+| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io-da yerləşdirmə (hazırda yalnız Çin dilində)                     |
+| `TERMUX_GUIDE.md`            | Termux vasitəsilə qrafik interfeyssiz Android istifadəsi               |
+| `PWA_GUIDE.md`               | Progressive Web App quraşdırılması + service worker                    |
+| `ELECTRON_GUIDE.md`          | Masaüstü tətbiqinin qurulması + imzalanması + paylanması               |
+| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                                 |
+| `PROXY_GUIDE.md`             | 4 səviyyəli çıxış proksisi + 1proxy bazarı                             |
 
 ### Alt qovluqlar
 
-| Alt qovluq            | Təyinat                                                                                                                                                                                                                                                     |
-| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | Lokallaşdırılmış sənəd tərcümələri (41 lokal)                                                                                                                                                                                                               |
-| `docs/screenshots/`   | Təlimatlar üçün şəkil resursları                                                                                                                                                                                                                            |
-| `_tasks/superpowers/` | Superpowers-dən (`writing-plans`/`brainstorming`) planlar/spesifikasiyalar + araşdırma — təcrid edilmiş, ayrıca versiyalaşdırılan repozitoriya, əsas ağacda gitignore-a daxil edilib. CLAUDE.md → "Planlaşdırma və Araşdırma Artefaktları" bölməsinə baxın. |
+| Alt qovluq            | Məqsəd                                                                                                                                                                                                                                                              |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/i18n/`          | Lokallaşdırılmış sənəd tərcümələri (41 lokal)                                                                                                                                                                                                                       |
+| `docs/screenshots/`   | Təlimatlar üçün şəkil resursları                                                                                                                                                                                                                                    |
+| `_tasks/superpowers/` | superpowers-dən (`writing-plans`/`brainstorming`) planlar/spesifikasiyalar + araşdırmalar — təcrid olunmuş, ayrıca versiyalaşdırılan repozitoriya; əsas ağacda git tərəfindən nəzərə alınmır. CLAUDE.md → "Planlaşdırma və Araşdırma Artefaktları" bölməsinə baxın. |
 
 ---
 
