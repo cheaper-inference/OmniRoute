@@ -113,7 +113,7 @@ test("round-robin records each target decision instead of leaving the trace empt
 
   // The candidate set has to be complete: a target that was never reached is
   // recorded as such, not silently dropped, or the trace cannot be reconciled
-  // against the five configured targets in an incident.
+  // against every configured target in an incident.
   const notReached = trace.decisions
     .filter((d) => d.decision === "not_reached")
     .map((d) => d.target);
