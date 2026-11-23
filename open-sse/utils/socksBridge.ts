@@ -5,6 +5,7 @@
 // speaks plain HTTP CONNECT to the browser and performs the SOCKS5 handshake
 // itself. The browser only ever sees http://127.0.0.1:<port>.
 
+import { randomBytes, timingSafeEqual } from "node:crypto";
 import http from "node:http";
 import net from "node:net";
 import type { Duplex } from "node:stream";
@@ -24,7 +25,11 @@ export interface SocksBridgeCredential {
 }
 
 export interface SocksBridge {
-  /** `http://127.0.0.1:<port>` — the only value that may reach Playwright. */
+  /**
+   * `http://<user>:<secret>@127.0.0.1:<port>` — the only value that may reach
+   * Playwright. The userinfo is the per-bridge credential the listener demands,
+   * so another local process cannot borrow this upstream.
+   */
   server: string;
   port: number;
   close(): Promise<void>;
@@ -32,6 +37,7 @@ export interface SocksBridge {
 
 interface BridgeRecord {
   key: string;
+  secret: string;
   refs: number;
   port: number;
   server: http.Server;
@@ -81,6 +87,24 @@ function parseAuthority(target: string | undefined): { host: string; port: numbe
 
 function rejectConnect(socket: Duplex): void {
   socket.end("HTTP/1.1 405 Method Not Allowed\r\nContent-Length: 0\r\n\r\n");
+}
+
+// The bridge hands Playwright a URL with its own userinfo, so a browser that
+// was given the handle answers every CONNECT with that Basic credential. A
+// local process that merely found the port has no way to produce it.
+function hasBridgeCredential(req: http.IncomingMessage, secret: string): boolean {
+  const presented = req.headers["proxy-authorization"];
+  if (typeof presented !== "string") return false;
+  const expected = `Basic ${Buffer.from(`forge:${secret}`).toString("base64")}`;
+  const given = Buffer.from(presented);
+  const wanted = Buffer.from(expected);
+  return given.length === wanted.length && timingSafeEqual(given, wanted);
+}
+
+function rejectUnauthorized(socket: Duplex): void {
+  socket.end(
+    'HTTP/1.1 407 Proxy Authentication Required\r\nProxy-Authenticate: Basic realm="forge"\r\nContent-Length: 0\r\n\r\n'
+  );
 }
 
 /** In-flight listens, so concurrent callers for one credential share a port. */
@@ -162,7 +186,7 @@ export async function acquireSocksBridge(credential: SocksBridgeCredential): Pro
 function handleFor(key: string, record: BridgeRecord): SocksBridge {
   let released = false;
   return {
-    server: `http://127.0.0.1:${record.port}`,
+    server: `http://forge:${record.secret}@127.0.0.1:${record.port}`,
     port: record.port,
     close: async () => {
       if (released) return;
@@ -177,6 +201,7 @@ function listen(key: string, credential: SocksBridgeCredential): Promise<BridgeR
   const sockets = new Set<Duplex>();
   const record: BridgeRecord = {
     key,
+    secret: randomBytes(18).toString("base64url"),
     refs: 0,
     port: 0,
     server: http.createServer(),
@@ -194,6 +219,13 @@ function listen(key: string, credential: SocksBridgeCredential): Promise<BridgeR
     socket.on("error", () => socket.destroy());
   });
   server.on("connect", (req, client, head) => {
+    // The listener is reachable by every process on the host, so it demands the
+    // per-bridge secret. Without this any local process could ride the SOCKS5
+    // upstream we authenticated, to any destination it likes.
+    if (!hasBridgeCredential(req, record.secret)) {
+      rejectUnauthorized(client);
+      return;
+    }
     const authority = parseAuthority(req.url);
     if (!authority) {
       rejectConnect(client);

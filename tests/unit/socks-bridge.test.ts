@@ -117,9 +117,20 @@ function credential(upstream: Upstream, password = PASS): SocksBridgeCredential 
   return { host: "127.0.0.1", port: upstream.port, username: USER, password };
 }
 
-function request(port: number, payload: string): Promise<{ status: number; body: string }> {
+function bridgeAuth(server: string): string {
+  const url = new URL(server);
+  const user = decodeURIComponent(url.username);
+  const pass = decodeURIComponent(url.password);
+  return `Proxy-Authorization: Basic ${Buffer.from(`${user}:${pass}`).toString("base64")}`;
+}
+
+function request(
+  bridge: { port: number; server: string },
+  payload: string
+): Promise<{ status: number; body: string }> {
+  const authed = payload.replace("\r\n", `\r\n${bridgeAuth(bridge.server)}\r\n`, 1);
   return new Promise((resolve) => {
-    const socket = net.connect(port, "127.0.0.1");
+    const socket = net.connect(bridge.port, "127.0.0.1");
     let buf = "";
     socket.on("data", (chunk) => {
       buf += chunk.toString();
@@ -130,17 +141,35 @@ function request(port: number, payload: string): Promise<{ status: number; body:
       resolve({ status, body });
     });
     socket.on("error", () => resolve({ status: 0, body: "" }));
+    socket.end(authed);
+  });
+}
+
+// No credential injected: stands in for another local process that only knows the port.
+function rawRequest(port: number, payload: string): Promise<{ status: number; body: string }> {
+  return new Promise((resolve) => {
+    const socket = net.connect(port, "127.0.0.1");
+    let buf = "";
+    socket.on("data", (chunk) => {
+      buf += chunk.toString();
+    });
+    socket.on("end", () => {
+      const [head, body = ""] = buf.split("\r\n\r\n");
+      resolve({ status: Number(head.split(" ")[1]), body });
+    });
+    socket.on("error", () => resolve({ status: 0, body: "" }));
     socket.end(payload);
   });
 }
 
 function sendAndCollect(
-  port: number,
+  bridge: { port: number; server: string },
   payload: string,
   until: string
 ): Promise<{ status: number; body: string }> {
+  const authed = payload.replace("\r\n", `\r\n${bridgeAuth(bridge.server)}\r\n`, 1);
   return new Promise((resolve) => {
-    const socket = net.connect(port, "127.0.0.1");
+    const socket = net.connect(bridge.port, "127.0.0.1");
     let buf = "";
     let settled = false;
     const done = () => {
@@ -157,7 +186,7 @@ function sendAndCollect(
     socket.on("error", done);
     socket.on("end", done);
     setTimeout(done, 3000).unref();
-    socket.write(payload);
+    socket.write(authed);
   });
 }
 
@@ -190,9 +219,26 @@ describe("authenticated SOCKS5 bridge", () => {
     const upstream = await startUpstream(USER, PASS);
     const bridge = await acquireSocksBridge(credential(upstream));
     try {
-      const res = await request(bridge.port, "CONNECT example.com:443 HTTP/1.1\r\nHost: example.com:443\r\n\r\n");
+      const res = await request(bridge, "CONNECT example.com:443 HTTP/1.1\r\nHost: example.com:443\r\n\r\n");
       assert.equal(res.status, 200);
       assert.deepEqual(upstream.connects, [["example.com", 443]]);
+    } finally {
+      await bridge.close();
+      await upstream.close();
+    }
+  });
+
+  it("refuses a CONNECT that does not carry the bridge credential", async () => {
+    const upstream = await startUpstream(USER, PASS);
+    const bridge = await acquireSocksBridge(credential(upstream));
+    try {
+      const res = await rawRequest(
+        bridge.port,
+        "CONNECT example.com:443 HTTP/1.1\r\nHost: example.com:443\r\n\r\n"
+      );
+      assert.equal(res.status, 407);
+      assert.deepEqual(upstream.connects, []);
+      assert.match(bridge.server, /^http:\/\/forge:[^@]+@127\.0\.0\.1:\d+$/);
     } finally {
       await bridge.close();
       await upstream.close();
@@ -203,7 +249,7 @@ describe("authenticated SOCKS5 bridge", () => {
     const upstream = await startUpstream(USER, PASS);
     const bridge = await acquireSocksBridge(credential(upstream, "nope"));
     try {
-      const res = await request(bridge.port, "CONNECT example.com:443 HTTP/1.1\r\nHost: example.com:443\r\n\r\n");
+      const res = await request(bridge, "CONNECT example.com:443 HTTP/1.1\r\nHost: example.com:443\r\n\r\n");
       assert.equal(res.status, 502);
       assert.deepEqual(upstream.connects, []);
       assert.equal(upstream.authFailures, 1);
@@ -222,8 +268,8 @@ describe("authenticated SOCKS5 bridge", () => {
       assert.equal(second.port, first.port);
       assert.notEqual(third.port, first.port);
       assert.equal(socksBridgeCount(), 2);
-      const ok = await request(first.port, "CONNECT example.com:443 HTTP/1.1\r\nHost: example.com:443\r\n\r\n");
-      const foreign = await request(third.port, "CONNECT example.com:443 HTTP/1.1\r\nHost: example.com:443\r\n\r\n");
+      const ok = await request(first, "CONNECT example.com:443 HTTP/1.1\r\nHost: example.com:443\r\n\r\n");
+      const foreign = await request(third, "CONNECT example.com:443 HTTP/1.1\r\nHost: example.com:443\r\n\r\n");
       assert.equal(ok.status, 200);
       assert.equal(foreign.status, 502);
       assert.deepEqual(upstream.connects, [["example.com", 443]]);
@@ -240,9 +286,9 @@ describe("authenticated SOCKS5 bridge", () => {
     const upstream = await startUpstream(USER, PASS);
     const bridge = await acquireSocksBridge(credential(upstream));
     try {
-      const get = await request(bridge.port, "GET http://example.com/ HTTP/1.1\r\nHost: example.com\r\n\r\n");
-      const absolute = await request(bridge.port, "CONNECT http://example.com:443 HTTP/1.1\r\n\r\n");
-      const userinfo = await request(bridge.port, "CONNECT user:pass@example.com:443 HTTP/1.1\r\n\r\n");
+      const get = await request(bridge, "GET http://example.com/ HTTP/1.1\r\nHost: example.com\r\n\r\n");
+      const absolute = await request(bridge, "CONNECT http://example.com:443 HTTP/1.1\r\n\r\n");
+      const userinfo = await request(bridge, "CONNECT user:pass@example.com:443 HTTP/1.1\r\n\r\n");
       assert.deepEqual([get.status, absolute.status, userinfo.status], [405, 405, 405]);
       assert.deepEqual(upstream.connects, []);
     } finally {
@@ -301,7 +347,7 @@ describe("authenticated SOCKS5 bridge", () => {
     const upstream = await startUpstream(USER, PASS);
     const bridge = await acquireSocksBridge(credential(upstream));
     try {
-      const res = await request(bridge.port, "CONNECT [::1]:443 HTTP/1.1\r\nHost: [::1]:443\r\n\r\n");
+      const res = await request(bridge, "CONNECT [::1]:443 HTTP/1.1\r\nHost: [::1]:443\r\n\r\n");
       assert.equal(res.status, 200);
       // ATYP 4 carries the 16-byte address, not a bracketed domain name.
       assert.deepEqual(upstream.connects, [["00000000000000000000000000000001", 443]]);
@@ -315,7 +361,7 @@ describe("authenticated SOCKS5 bridge", () => {
     const upstream = await startUpstream(USER, PASS);
     const bridge = await acquireSocksBridge(credential(upstream));
     try {
-      const res = await request(bridge.port, "CONNECT a:b:443 HTTP/1.1\r\n\r\n");
+      const res = await request(bridge, "CONNECT a:b:443 HTTP/1.1\r\n\r\n");
       assert.equal(res.status, 405);
       assert.deepEqual(upstream.connects, []);
     } finally {
@@ -332,7 +378,7 @@ describe("authenticated SOCKS5 bridge", () => {
     try {
       await first.close();
       assert.equal(socksBridgeCount(), 1);
-      const res = await request(second.port, "CONNECT example.com:443 HTTP/1.1\r\nHost: example.com:443\r\n\r\n");
+      const res = await request(second, "CONNECT example.com:443 HTTP/1.1\r\nHost: example.com:443\r\n\r\n");
       assert.equal(res.status, 200);
     } finally {
       await second.close();
@@ -352,7 +398,7 @@ describe("authenticated SOCKS5 bridge", () => {
     });
     try {
       assert.ok(bridge);
-      const res = await request(bridge.port, "CONNECT example.com:443 HTTP/1.1\r\nHost: example.com:443\r\n\r\n");
+      const res = await request(bridge, "CONNECT example.com:443 HTTP/1.1\r\nHost: example.com:443\r\n\r\n");
       assert.equal(res.status, 200);
       assert.deepEqual(upstream.connects, [["example.com", 443]]);
     } finally {
@@ -365,8 +411,7 @@ describe("authenticated SOCKS5 bridge", () => {
     const upstream = await startUpstream(USER, PASS, { keepOpen: true });
     const bridge = await acquireSocksBridge(credential(upstream));
     try {
-      const res = await sendAndCollect(
-        bridge.port,
+      const res = await sendAndCollect(bridge,
         "CONNECT example.com:443 HTTP/1.1\r\nHost: example.com:443\r\n\r\nEARLYBYTES",
         "EARLYBYTES"
       );
@@ -395,14 +440,12 @@ describe("authenticated SOCKS5 bridge", () => {
       assert.ok(six.bridge);
       // Family is part of the credential identity: two directives, two bridges.
       assert.notEqual(four.bridge.port, six.bridge.port);
-      const ok = await request(
-        four.bridge.port,
+      const ok = await request(four.bridge,
         "CONNECT example.com:443 HTTP/1.1\r\nHost: example.com:443\r\n\r\n"
       );
       assert.equal(ok.status, 200);
       // The upstream listens on IPv4 only, so an IPv6-pinned hop cannot reach it.
-      const pinned = await request(
-        six.bridge.port,
+      const pinned = await request(six.bridge,
         "CONNECT example.com:443 HTTP/1.1\r\nHost: example.com:443\r\n\r\n"
       );
       assert.equal(pinned.status, 502);
@@ -426,7 +469,7 @@ describe("authenticated SOCKS5 bridge", () => {
     try {
       const started = Date.now();
       const res = await Promise.race([
-        request(bridge.port, "CONNECT example.com:443 HTTP/1.1\r\nHost: example.com:443\r\n\r\n"),
+        request(bridge, "CONNECT example.com:443 HTTP/1.1\r\nHost: example.com:443\r\n\r\n"),
         new Promise<null>((resolve) => setTimeout(() => resolve(null), 5000).unref()),
       ]);
       assert.ok(res, "handshake timeout not applied (request still pending after 5 s)");
@@ -473,7 +516,7 @@ describe("authenticated SOCKS5 bridge", () => {
     const upstream = await startUpstream(USER, PASS);
     const bridge = await acquireSocksBridge(credential(upstream));
     try {
-      const res = await request(bridge.port, "CONNECT [example.com]:443 HTTP/1.1\r\n\r\n");
+      const res = await request(bridge, "CONNECT [example.com]:443 HTTP/1.1\r\n\r\n");
       assert.equal(res.status, 405);
       assert.deepEqual(upstream.connects, []);
     } finally {
@@ -486,7 +529,7 @@ describe("authenticated SOCKS5 bridge", () => {
     const upstream = await startUpstream(USER, PASS);
     const bridge = await acquireSocksBridge(credential(upstream));
     try {
-      const res = await request(bridge.port, "CONNECT [fe80::1%eth0]:443 HTTP/1.1\r\n\r\n");
+      const res = await request(bridge, "CONNECT [fe80::1%eth0]:443 HTTP/1.1\r\n\r\n");
       assert.equal(res.status, 405);
       assert.deepEqual(upstream.connects, []);
     } finally {
@@ -524,8 +567,7 @@ describe("authenticated SOCKS5 bridge", () => {
       password: Buffer.from(PASS) as never,
     });
     try {
-      const res = await request(
-        bridge.port,
+      const res = await request(bridge,
         "CONNECT example.com:443 HTTP/1.1\r\nHost: example.com:443\r\n\r\n"
       );
       assert.equal(res.status, 200);
@@ -577,7 +619,7 @@ describe("authenticated SOCKS5 bridge", () => {
       // unrelated context must not close the bridge a gemini request is using.
       await shutdownPool("bridge-test");
       assert.equal(socksBridgeCount(), 1);
-      const res = await request(bridge.port, "CONNECT example.com:443 HTTP/1.1\r\nHost: example.com:443\r\n\r\n");
+      const res = await request(bridge, "CONNECT example.com:443 HTTP/1.1\r\nHost: example.com:443\r\n\r\n");
       assert.equal(res.status, 200);
     } finally {
       await bridge.close();
@@ -599,8 +641,7 @@ describe("authenticated SOCKS5 bridge", () => {
       // the listener the other is still using.
       await first.close();
       assert.equal(socksBridgeCount(), 1);
-      const res = await request(
-        second.port,
+      const res = await request(second,
         "CONNECT example.com:443 HTTP/1.1\r\nHost: example.com:443\r\n\r\n"
       );
       assert.equal(res.status, 200);
@@ -620,7 +661,7 @@ describe("authenticated SOCKS5 bridge", () => {
       await extra.close();
       await extra.close();
       assert.equal(socksBridgeCount(), 1);
-      const res = await request(held.port, "CONNECT example.com:443 HTTP/1.1\r\nHost: example.com:443\r\n\r\n");
+      const res = await request(held, "CONNECT example.com:443 HTTP/1.1\r\nHost: example.com:443\r\n\r\n");
       assert.equal(res.status, 200);
     } finally {
       await held.close();
