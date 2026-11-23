@@ -53,6 +53,15 @@ export interface AudioProvider {
 }
 
 export const AUDIO_TRANSCRIPTION_PROVIDERS: Record<string, AudioProvider> = {
+  "minimax-cn": {
+    id: "minimax-cn",
+    baseUrl: "https://api.minimax.cn/v1/speech_to_text",
+    authType: "apikey",
+    authHeader: "bearer",
+    format: "minimax-asr",
+    modelScoped: true,
+    models: [{ id: "asr-1.0", name: "MiniMax ASR 1.0 (China)" }],
+  },
   "grok-cli": {
     id: "grok-cli",
     baseUrl: "https://api.x.ai/v1/stt",

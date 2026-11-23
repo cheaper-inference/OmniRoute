@@ -252,6 +252,12 @@ RUN --mount=type=cache,id=s/92ca8a61-c1ba-421f-a389-d48ac7258c2d-next-cache,targ
 # ── Runner base ────────────────────────────────────────────────────────────
 FROM base AS runner-base
 
+# Optional for MediaRecorder WebM uploads to MiniMax ASR. Keep the default image lean.
+ARG OMNIROUTE_INSTALL_FFMPEG=0
+RUN if [ "$OMNIROUTE_INSTALL_FFMPEG" = "1" ]; then \
+      apt-get update && apt-get install -y --no-install-recommends ffmpeg && rm -rf /var/lib/apt/lists/*; \
+    fi
+
 LABEL org.opencontainers.image.title="omniroute" \
   org.opencontainers.image.description="Unified AI proxy — route any LLM through one endpoint" \
   org.opencontainers.image.url="https://omniroute.online" \
