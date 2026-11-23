@@ -1,0 +1,1 @@
+- **fix(combo):** failover on HTTP 200 model deprecation notices and filter combo targets by synced available models ([#21066](https://github.com/cheaper-inference/OmniRoute/pull/21066))
