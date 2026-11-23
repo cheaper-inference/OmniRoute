@@ -23,6 +23,16 @@ export const KEY = "sk-live-1234567890";
 /** A pool reference that matches the PATCH body schema. */
 export const LENDING_REF = "qpr_0123456789abcdef0123456789abcdef";
 
+export const OTHER_KEY = "sk-live-0987654321";
+
+/** Models a key may call, in server order and on purpose out of order (two providers). */
+export const QUOTA_MODELS = [
+  "qtSd/team/claude/claude-haiku-4-5-20251001",
+  "qtSd/team/codex/gpt-5.5",
+  "qtSd/team/claude/claude-opus-4-8",
+  "qtSd/team/claude/claude-sonnet-5",
+];
+
 export function renderQuota(ui: React.ReactElement, timeZone = "UTC") {
   return render(
     <NextIntlClientProvider locale="en" timeZone={timeZone} messages={messages}>
@@ -219,4 +229,49 @@ export function callsTo(calls: FetchCall[], prefix: string, method?: string): Fe
   return calls.filter(
     (call) => call.url.startsWith(prefix) && (method === undefined || call.method === method)
   );
+}
+
+let savedClipboard: PropertyDescriptor | undefined;
+let clipboardStubbed = false;
+
+/** Installs navigator.clipboard.writeText and returns the texts it receives. */
+export function stubClipboard(): string[] {
+  const writes: string[] = [];
+  if (!clipboardStubbed) savedClipboard = Object.getOwnPropertyDescriptor(navigator, "clipboard");
+  clipboardStubbed = true;
+  Object.defineProperty(navigator, "clipboard", {
+    configurable: true,
+    value: {
+      writeText: async (text: string) => {
+        writes.push(text);
+      },
+    },
+  });
+  return writes;
+}
+
+/** Removes the clipboard stub (call in afterEach). */
+export function restoreClipboard(): void {
+  if (!clipboardStubbed) return;
+  if (savedClipboard) Object.defineProperty(navigator, "clipboard", savedClipboard);
+  else Reflect.deleteProperty(navigator, "clipboard");
+  savedClipboard = undefined;
+  clipboardStubbed = false;
+}
+
+/** "tag@attribute" for every attribute whose value contains `needle`, plus "tag.value" for form controls. */
+export function attributesContaining(needle: string): string[] {
+  const found: string[] = [];
+  for (const element of Array.from(document.querySelectorAll("*"))) {
+    const tag = element.tagName.toLowerCase();
+    for (const attribute of Array.from(element.attributes)) {
+      if (attribute.value.includes(needle)) found.push(`${tag}@${attribute.name}`);
+    }
+    const isControl =
+      element instanceof HTMLInputElement ||
+      element instanceof HTMLTextAreaElement ||
+      element instanceof HTMLSelectElement;
+    if (isControl && element.value.includes(needle)) found.push(`${tag}.value`);
+  }
+  return found;
 }

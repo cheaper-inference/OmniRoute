@@ -893,6 +893,17 @@ values. An answer outside the contract reloads the quota. A failed save does not
 itself.
 When the reload after it is refused, the page removes the key as on any refused read.
 
+Once a key is accepted, the page also shows a "Set up your tools" card with three tabs. "Claude
+Code" gives the `env` block for `~/.claude/settings.json`. "Shell" gives the same variables as
+`export` lines. "Claude Desktop" gives the values for its third-party inference window. The models
+are the quota-share models the key may call for that provider. When no such list comes with the
+key, the block turns on gateway model discovery instead. The gateway address is the public API
+origin the server reports (`OMNIROUTE_PUBLIC_API_BASE_URL`, then `OMNIROUTE_PUBLIC_BASE_URL`).
+When neither is set, the card shows a placeholder and tells the holder to ask the administrator.
+The key is shown as a placeholder. "Include my key" puts the whole key in the text on screen and in
+what a copy button copies. That lasts until the box is cleared, the key is forgotten or replaced,
+or the page is left. The card sends no request and offers no file download.
+
 A reading the API marks `stale` is shown as possibly out of date. A reading it marks
 `unavailable` is shown with its reason, never as zero. On percentage plans the key's own share is
 not calculated yet, and the page says so.

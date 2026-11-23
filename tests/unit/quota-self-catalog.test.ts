@@ -6,6 +6,8 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import path from "node:path";
+import { IntlMessageFormat } from "intl-messageformat";
+import { createTranslator } from "next-intl";
 
 import { IntlMessageFormat } from "intl-messageformat";
 
@@ -166,6 +168,47 @@ const KEYS = [
   "spendTruncated",
   "spendLoading",
   "spendFailed",
+  "onboardingTitle",
+  "onboardingIntro",
+  "onboardingIncludeKey",
+  "onboardingIncludeKeyHint",
+  "onboardingKeyPlaceholder",
+  "onboardingBaseUrlPlaceholder",
+  "onboardingNoBaseUrl",
+  "onboardingMainModel",
+  "onboardingModelsTruncated",
+  "onboardingNoModels",
+  "onboardingLongContext",
+  "onboardingLongContextHint",
+  "onboardingTabsLabel",
+  "onboardingTabClaudeCode",
+  "onboardingTabShell",
+  "onboardingTabDesktop",
+  "onboardingSettingsHelp",
+  "onboardingSettingsBlockLabel",
+  "onboardingShellHelp",
+  "onboardingProfilePublic",
+  "onboardingProfileLocal",
+  "onboardingProfileLocalHint",
+  "onboardingShellPublicBlockLabel",
+  "onboardingShellLocalBlockLabel",
+  "onboardingDesktopHelp",
+  "onboardingDesktopBaseUrl",
+  "onboardingDesktopApiKey",
+  "onboardingDesktopCredentialKind",
+  "onboardingDesktopCredentialKindValue",
+  "onboardingDesktopAuthScheme",
+  "onboardingDesktopAuthSchemeValue",
+  "onboardingDesktopModelsHelp",
+  "onboardingDesktopModelsBlockLabel",
+  "onboardingCopySettings",
+  "onboardingCopyShellPublic",
+  "onboardingCopyShellLocal",
+  "onboardingCopyBaseUrl",
+  "onboardingCopyApiKey",
+  "onboardingCopyModels",
+  "onboardingCopied",
+  "onboardingCopyFailed",
 ];
 
 function namespace(): Record<string, unknown> {
@@ -240,4 +283,33 @@ test("the lending block sits right after modelCapReached", () => {
   const keys = Object.keys(namespace());
   const start = keys.indexOf("modelCapReached") + 1;
   assert.ok(keys.slice(start, start + 35).every((key) => key.startsWith("lending")));
+});
+
+test("the onboarding strings keep their placeholders and exact code tokens", () => {
+  const q = EN.quotaSelf as Record<string, string>;
+  const t = createTranslator({
+    locale: "en",
+    messages: { quotaSelf: q },
+    namespace: "quotaSelf",
+    onError: (error) => {
+      throw error;
+    },
+  });
+  for (const key of KEYS.filter((name) => name.startsWith("onboarding"))) {
+    assert.doesNotThrow(() => new IntlMessageFormat(q[key], "en"), `quotaSelf.${key} is valid ICU`);
+  }
+  assert.equal(new IntlMessageFormat(q.onboardingKeyPlaceholder, "en").format(), "<your API key>");
+  assert.equal(
+    new IntlMessageFormat(q.onboardingBaseUrlPlaceholder, "en").format(),
+    "<gateway base URL>"
+  );
+  assert.equal(t("onboardingKeyPlaceholder"), "<your API key>");
+  assert.equal(t("onboardingBaseUrlPlaceholder"), "<gateway base URL>");
+  assert.match(q.onboardingModelsTruncated, /\{shown\}.*\{total\}/);
+  assert.equal(
+    t("onboardingModelsTruncated", { shown: 40, total: 45 }),
+    "Showing 40 of the 45 models this key can call."
+  );
+  assert.match(q.onboardingNoModels, /\{provider\}/);
+  assert.match(t("onboardingSettingsHelp"), /~\/\.claude\/settings\.json/);
 });
