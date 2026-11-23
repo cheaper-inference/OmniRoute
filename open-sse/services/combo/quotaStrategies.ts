@@ -263,7 +263,10 @@ export async function expandTargetsByQuotaAwareConnections(
           .toLowerCase();
         // Terminal or exhausted accounts do not recover merely because this
         // timer expires. ACL and pool membership were already checked above.
-        if (!quotaExhausted && !["banned", "expired", "credits_exhausted"].includes(status)) {
+        if (
+          !quotaExhausted &&
+          !["banned", "deactivated", "expired", "credits_exhausted"].includes(status)
+        ) {
           exclusions.push({
             provider: target.provider,
             model: parseModel(target.modelStr).model || target.modelStr,

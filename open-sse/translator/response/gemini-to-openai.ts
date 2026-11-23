@@ -456,7 +456,12 @@ export function geminiToOpenAIResponse(chunk, state) {
         // following functionCall is cached and can be re-attached on later
         // turns; otherwise OpenAI-format clients lose the signature and the
         // next Gemini request has to stringify historical tool calls.
-        if (hasThoughtSig && !hasTextContent && !hasFunctionCall) {
+        if (
+          hasThoughtSig &&
+          !hasTextContent &&
+          !hasFunctionCall &&
+          !(part.inlineData || part.inline_data)
+        ) {
           continue;
         }
 
@@ -494,7 +499,7 @@ export function geminiToOpenAIResponse(chunk, state) {
           }
           emitFunctionCallPart(part, state, results);
         }
-        continue;
+        if (!(hasThoughtSig && (part.inlineData || part.inline_data))) continue;
       }
 
       // Text content (non-thinking). Some Gemini/Antigravity turns can imitate
@@ -832,6 +837,13 @@ export function geminiToOpenAIResponse(chunk, state) {
           ],
         });
       }
+    }
+
+    // A tag prefix held at a chunk boundary ("<", "<th") never became a tag: it is text.
+    // flushOpenTextualReasoning above already cleared it when a reasoning tag was open.
+    if (state.textualReasoningTagBuffer) {
+      emitTextDelta(state.textualReasoningTagBuffer, state, results);
+      state.textualReasoningTagBuffer = undefined;
     }
 
     // Live incident (dashboard log id 1784489701456-d8c0e9): MALFORMED_FUNCTION_CALL /
