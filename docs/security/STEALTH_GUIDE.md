@@ -100,13 +100,16 @@ SHA256(SALT + msg[4] + msg[7] + msg[20] + version)[:3]
 Server-side integrity check the official Claude Code CLI computes via Bun/Zig. OmniRoute reimplements with `xxhash-wasm`:
 
 1. Serialize body with `cch=00000;` placeholder
-2. `xxhash64(bytes, seed) & 0xFFFFF`
-3. Zero-padded 5-char lowercase hex
-4. Replace `cch=00000;` with the computed token
+2. Build the hash view with two plain-text replacements, in this order (`hashView()`):
+   - every match of `/"model":"[^"]*"/g` becomes `"model":""` — the match stops at the first `"`, so a value with an escaped quote (`"model":"a\"b"`) is emptied only up to that quote, as the client does
+   - every match of `/"max_tokens":\d+,|,?"max_tokens":\d+/g` is removed — only numeric values, at any depth
+3. `xxhash64(view_bytes, seed) & 0xFFFFF`
+4. Zero-padded 5-char lowercase hex
+5. Replace `cch=00000;` with the computed token
 
 Constants:
 
-- Seed: `0x6e52736ac806831e`
+- Seed: `0x4d659218e32a3268` (matches loopback captures of Claude Code 2.1.252 and 2.1.322)
 - Pattern: `/\bcch=([0-9a-f]{5});/`
 
 ### `claudeCodeObfuscation.ts`
