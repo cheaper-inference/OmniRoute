@@ -17,6 +17,31 @@ type CredentialCooldownState = {
   connectionsCount?: number;
 };
 
+/**
+ * The status and message of an all-cooling-down answer. A model-only lock that kept a non-429
+ * upstream status (a 400 billing error) answers with that status and message, so an earlier
+ * attempt's 429 cannot hide it. A 429 lock, which is also the default when the lock kept no
+ * status, leaves the attempt's own status in front.
+ */
+function cooldownStatusAndMessage(
+  credentials: CredentialCooldownState,
+  lastError: string | null,
+  lastStatus: number | null
+) {
+  const lockStatus = Number(credentials.lastErrorCode) || null;
+  const lockWins =
+    credentials.cooldownScope === "model" &&
+    lockStatus !== null &&
+    lockStatus !== HTTP_STATUS.RATE_LIMITED;
+  if (lockWins) {
+    return { status: lockStatus, errorMsg: credentials.lastError || lastError || "Unavailable" };
+  }
+  return {
+    status: lastStatus || lockStatus || HTTP_STATUS.SERVICE_UNAVAILABLE,
+    errorMsg: lastError || credentials.lastError || "Unavailable",
+  };
+}
+
 /** Preserve the existing cooldown diagnostics, with a specific learned-rejection response. */
 export function credentialCooldownResponse(
   credentials: CredentialCooldownState,
@@ -31,19 +56,7 @@ export function credentialCooldownResponse(
       type: "invalid_request_error",
     });
   }
-  // A model-only lock that kept a non-429 upstream status (a 400 billing error) answers with that
-  // status and message, so an earlier attempt's 429 cannot hide it. A 429 lock, which is also the
-  // default when the lock kept no status, leaves the attempt's own status in front.
-  const lockStatus = Number(credentials.lastErrorCode) || null;
-  const lockWins =
-    credentials.cooldownScope === "model" &&
-    lockStatus !== null &&
-    lockStatus !== HTTP_STATUS.RATE_LIMITED;
-  const errorMsg =
-    (lockWins ? credentials.lastError || lastError : lastError || credentials.lastError) ||
-    "Unavailable";
-  const status =
-    (lockWins ? lockStatus : lastStatus || lockStatus) || HTTP_STATUS.SERVICE_UNAVAILABLE;
+  const { status, errorMsg } = cooldownStatusAndMessage(credentials, lastError, lastStatus);
   const cooldownModel =
     typeof credentials.cooldownModel === "string" && credentials.cooldownModel.trim().length > 0
       ? credentials.cooldownModel.trim()
