@@ -149,6 +149,14 @@ const server = http.createServer(async (req, res) => {
     if (req.method === "GET" && (url.pathname === "/health" || url.pathname === "/")) {
       return json(res, 200, { ok: true, model: config.modelId });
     }
+    if (req.method === "GET" && url.pathname === "/debug") {
+      const state = await enqueue(async () => {
+        const context = await getContext();
+        if (!session) session = new MuseSession(context);
+        return session.debugState();
+      });
+      return json(res, 200, state);
+    }
     if (req.method === "GET" && url.pathname === "/v1/models") {
       return json(res, 200, {
         object: "list",

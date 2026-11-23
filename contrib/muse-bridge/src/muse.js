@@ -95,21 +95,37 @@ export class MuseSession {
     });
   }
 
+  async debugState() {
+    const page = await this.ensureReady();
+    return page.evaluate(() => {
+      const bubbles = [...document.querySelectorAll('[class*="hatch-chat-groupable-bubble"]')];
+      return {
+        url: location.href,
+        total: bubbles.length,
+        tail: bubbles.slice(-6).map((b) => ({
+          agent: String(b.className).includes("hatch-agent"),
+          text: (b.innerText || "").slice(0, 160),
+        })),
+        bodyTail: document.body.innerText.slice(-600),
+      };
+    });
+  }
+
   async send(text) {
     const page = await this.ensureReady();
     const box = await this.composer(page);
     if (!box) throw new Error("composer not found");
 
-    // The thread renders lazily after load; wait for the bubble count to stop moving so
-    // the pre-send baseline is the real one.
-    let before = -1;
-    for (let i = 0; i < 12; i += 1) {
-      const count = await this.countAssistant(page);
-      if (count === before) break;
-      before = count;
-      await page.waitForTimeout(700);
-    }
-    const beforeLast = await this.lastAssistant(page);
+    // Bubble counts are unreliable: the thread renders lazily and Muse may still be answering
+    // earlier prompts. Stamp every bubble present now, then read only unstamped agent bubbles
+    // that follow our own (unstamped) user bubble.
+    await page.waitForTimeout(1500);
+    const stamp = `mb-${Date.now()}`;
+    await page.evaluate((s) => {
+      document
+        .querySelectorAll('[class*="hatch-chat-groupable-bubble"]')
+        .forEach((b) => b.setAttribute("data-mb-seen", s));
+    }, stamp);
 
     await box.click();
     await page.keyboard.insertText(text);
@@ -122,17 +138,40 @@ export class MuseSession {
     let started = false;
 
     while (Date.now() < deadline) {
-      await page.waitForTimeout(700);
-      const count = await this.countAssistant(page);
-      if (count > before) {
-        started = true;
-        const current = await this.lastAssistant(page);
-        if (current !== beforeLast && current !== last) {
-          last = current;
-          stableSince = Date.now();
-        } else if (last && stableSince && Date.now() - stableSince >= config.settleMs) {
-          return last.trim();
-        }
+      await page.waitForTimeout(800);
+      const current = await page.evaluate(
+        (prompt) => {
+          const bubbles = [...document.querySelectorAll('[class*="hatch-chat-groupable-bubble"]')];
+          const fresh = bubbles.filter((b) => !b.hasAttribute("data-mb-seen"));
+          const isAgent = (b) => String(b.className).includes("hatch-agent");
+          const norm = (s) =>
+            String(s || "")
+              .replace(/\s+/g, " ")
+              .trim();
+          const mine = fresh.findIndex(
+            (b) => !isAgent(b) && norm(b.innerText).includes(norm(prompt))
+          );
+          if (mine < 0) return null;
+          const parts = [];
+          for (const b of fresh.slice(mine + 1)) {
+            if (!isAgent(b)) break;
+            const copy = b.cloneNode(true);
+            copy.querySelectorAll("button").forEach((x) => x.remove());
+            const t = (copy.innerText || "").trim();
+            if (t) parts.push(t);
+          }
+          return parts.join("\n\n");
+        },
+        text.trim().slice(0, 120)
+      );
+
+      if (current === null || current === "") continue;
+      started = true;
+      if (current !== last) {
+        last = current;
+        stableSince = Date.now();
+      } else if (Date.now() - stableSince >= config.settleMs) {
+        return last.trim();
       }
     }
 

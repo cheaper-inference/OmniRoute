@@ -22,16 +22,19 @@ client -> POST /v1/chat/completions -> muse-bridge -> Chromium (US/CA proxy) -> 
   `DATA_DIR/profile`. A missing session re-logs in on demand.
 - Requests are serialized: one page, one Muse thread. Concurrency is the caller's queue.
 - Only the last `user` message of each request is typed; Muse keeps the thread context.
-- A reply is considered finished when the assistant bubble count went up and its text stopped
-  changing for `REPLY_SETTLE_MS`.
+- A reply is the run of assistant bubbles that follows the request's own user bubble. Bubbles
+  already on screen are tagged before sending, so a repeated prompt (same text, same answer) or
+  a late reply to an earlier turn cannot be returned. It is final once its text stays unchanged
+  for `REPLY_SETTLE_MS`.
 
 ## Endpoints
 
-| Method | Path                   | Notes                             |
-| ------ | ---------------------- | --------------------------------- |
-| GET    | `/health`              | liveness                          |
-| GET    | `/v1/models`           | returns `MODEL_ID`                |
-| POST   | `/v1/chat/completions` | OpenAI schema, `stream` supported |
+| Method | Path                   | Notes                                                 |
+| ------ | ---------------------- | ----------------------------------------------------- |
+| GET    | `/health`              | liveness                                              |
+| GET    | `/debug`               | last chat bubbles the bridge sees, for selector drift |
+| GET    | `/v1/models`           | returns `MODEL_ID`                                    |
+| POST   | `/v1/chat/completions` | OpenAI schema, `stream` supported                     |
 
 ## Run
 
