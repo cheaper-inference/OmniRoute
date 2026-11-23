@@ -23,6 +23,7 @@ import {
   type ProviderLimitsCacheEntry,
 } from "@/lib/db/providerLimits";
 import { syncToCloud } from "@/lib/cloudSync";
+import { getProviderLimitsSyncSpacingMs } from "@/lib/usage/providerLimitsSync";
 import { setQuotaCache } from "@/domain/quotaCache";
 import { buildClaudeExtraUsageConnectionUpdate } from "@/lib/providers/claudeExtraUsage";
 import { clearRecoveredProviderState } from "@/sse/services/auth";
