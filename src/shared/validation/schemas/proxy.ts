@@ -232,6 +232,7 @@ export const PROXY_POOL_ROTATION_STRATEGY_VALUES = [
   "random",
   "sticky",
   "latency",
+  "session",
 ] as const;
 
 // Add/remove one proxy to/from a scope's pool. proxyId is REQUIRED (unlike the

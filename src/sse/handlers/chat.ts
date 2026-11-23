@@ -2311,7 +2311,8 @@ async function handleSingleModelChat(
           credentials.connectionId,
           apiKeyInfo?.id,
           provider,
-          comboName
+          comboName,
+          runtimeOptions.sessionAffinityKey ?? null
         ).catch(agyLease.releasingRethrow(leaseId));
       } catch (error) {
         releaseOAuthSession();
