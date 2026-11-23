@@ -93,7 +93,12 @@ export function preserveCodexMetadataSessionIdentity(
   request?: { provider?: string; body?: unknown }
 ): void {
   if (request?.provider !== "codex") return;
-  if (getCodexClientSessionId(headers)) return;
+  if (
+    getCodexClientSessionId(headers) ||
+    normalizeCodexSessionId(readHeaderCaseInsensitive(headers, "x-opencode-session"))
+  ) {
+    return;
+  }
   const metadataSessionId = extractClaudeMetadataSessionId(request.body);
   if (metadataSessionId) {
     headers[CODEX_METADATA_CACHE_SESSION_HEADER] = metadataSessionId;
@@ -110,6 +115,9 @@ export function readCodexCacheSessionHeader(
 ): string | null {
   return (
     getCodexClientSessionId(headers) ||
+    // OpenCode's canonical header is cache affinity only; it must not synthesize
+    // native Codex thread/turn identity through getCodexClientSessionId().
+    normalizeCodexSessionId(readHeaderCaseInsensitive(headers, "x-opencode-session")) ||
     normalizeCodexSessionId(
       readHeaderCaseInsensitive(headers, CODEX_METADATA_CACHE_SESSION_HEADER)
     ) ||
@@ -195,9 +203,7 @@ function extractConversationAnchor(body: Record<string, unknown>): {
   return { instructions, leadingDeveloperText, firstUserText };
 }
 
-function resolveAccountScopeSeed(
-  credentials: CodexCacheKeyCredentials | null | undefined
-): string {
+function resolveAccountScopeSeed(credentials: CodexCacheKeyCredentials | null | undefined): string {
   const psd = credentials?.providerSpecificData ?? null;
   return (
     getCodexFingerprintSeed(psd) ||

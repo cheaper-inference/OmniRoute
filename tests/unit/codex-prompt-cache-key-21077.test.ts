@@ -85,6 +85,18 @@ for (const headerName of [
   });
 }
 
+test("OpenCode's canonical session header isolates cache without fabricating native Codex identity", async () => {
+  const sessionUuid = "019a0000-1111-4222-8333-999999999999";
+  const { headers, body } = await captureCodexHttp({
+    body: { model: "gpt-5.6-terra", input: [] },
+    clientHeaders: { "x-opencode-session": sessionUuid },
+  });
+  assert.equal(body.prompt_cache_key, sessionUuid);
+  assert.notEqual(body.prompt_cache_key, WORKSPACE_ID);
+  assert.equal(headers.get("thread-id"), null);
+  assert.equal(headers.get("x-codex-turn-metadata"), null);
+});
+
 test("header-only session propagates to prompt_cache_key in all fingerprint modes and API-key mode", async () => {
   const sessionUuid = "019a0000-1111-4222-8333-555555555555";
   for (const mode of ["off", "device", "session", "full"] as const) {
@@ -262,10 +274,7 @@ test("extractClaudeMetadataSessionId rejects malformed, oversized, or account-on
     }),
     null
   );
-  assert.equal(
-    extractClaudeMetadataSessionId({ metadata: { user_id: "x".repeat(5000) } }),
-    null
-  );
+  assert.equal(extractClaudeMetadataSessionId({ metadata: { user_id: "x".repeat(5000) } }), null);
 });
 
 test("non-header Chat Completions conversations get stable per-conversation UUIDv4 keys and never collapse onto workspaceId", async () => {
@@ -356,10 +365,7 @@ test("non-header Chat Completions conversations get stable per-conversation UUID
 test("empty/stateless bodies still fall back to workspaceId as a last resort", () => {
   const creds = { providerSpecificData: { workspaceId: WORKSPACE_ID } };
   assert.equal(deriveCodexConversationCacheKey({ model: "gpt-5.5", input: [] }, creds), null);
-  assert.equal(
-    resolveCodexPromptCacheKey(creds, { model: "gpt-5.5", input: [] }),
-    WORKSPACE_ID
-  );
+  assert.equal(resolveCodexPromptCacheKey(creds, { model: "gpt-5.5", input: [] }), WORKSPACE_ID);
 
   const executor = new CodexExecutor();
   const transformed = executor.transformRequest(
