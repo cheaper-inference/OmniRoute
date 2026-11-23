@@ -138,23 +138,36 @@ test("IDE and CLI TTL refreshes are independent", async () => {
 });
 
 test("each resolver falls back only to its own last known good version", async () => {
+  let fetches = 0;
   const failingFetch = async () => {
+    fetches += 1;
     throw new Error("network down");
   };
+  let now = 1_000_000;
+  const realNow = Date.now;
+  Date.now = () => now;
 
-  assert.equal(
-    await resolveAntigravityIdeVersion(failingFetch as typeof fetch),
-    ANTIGRAVITY_IDE_FALLBACK_VERSION
-  );
-  assert.equal(
-    await resolveAntigravityCliVersion(failingFetch as typeof fetch),
-    ANTIGRAVITY_CLI_FALLBACK_VERSION
-  );
+  try {
+    assert.equal(
+      await resolveAntigravityIdeVersion(failingFetch as typeof fetch),
+      ANTIGRAVITY_IDE_FALLBACK_VERSION
+    );
+    assert.equal(
+      await resolveAntigravityCliVersion(failingFetch as typeof fetch),
+      ANTIGRAVITY_CLI_FALLBACK_VERSION
+    );
 
-  seedAntigravityIdeVersionCache("2.8.0", 0);
-  seedAntigravityCliVersionCache("1.6.0", 0);
-  assert.equal(await resolveAntigravityIdeVersion(failingFetch as typeof fetch), "2.8.0");
-  assert.equal(await resolveAntigravityCliVersion(failingFetch as typeof fetch), "1.6.0");
+    // Step past the retry window first: otherwise the failure above answers these two calls
+    // from its own branch and the fresh-cache path is never exercised.
+    now += ANTIGRAVITY_VERSION_RETRY_TTL_MS + 1;
+    seedAntigravityIdeVersionCache("2.8.0", now);
+    seedAntigravityCliVersionCache("1.6.0", now);
+    assert.equal(await resolveAntigravityIdeVersion(failingFetch as typeof fetch), "2.8.0");
+    assert.equal(await resolveAntigravityCliVersion(failingFetch as typeof fetch), "1.6.0");
+    assert.equal(fetches, 2, "a fresh cache answers these two without touching the network");
+  } finally {
+    Date.now = realNow;
+  }
 });
 
 test("concurrent requests coalesce within each product without crossing products", async () => {
