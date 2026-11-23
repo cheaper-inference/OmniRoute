@@ -1,63 +1,89 @@
 /** usage/museCode.ts — Muse Code (Meta) usage fetcher.
 
-Meta does not expose a user-facing usage/balance API for Muse Code. The
-inference key mint (`api.meta.ai/muse-code/key`) returns subscription metadata
-(`subsTierName`, `subsTierId`, `isSubsActive`, `hasPaymentMethod`) but no
-remaining-quota or balance endpoint. OmniRoute therefore cannot fetch a live
-token/USD balance for Muse Code.
+Meta reports subscription usage to the Muse Code client on every Responses stream: a
+`response.subscription_usage` frame after `response.completed` carries the session window (5 h)
+and the weekly allowance, each as a used percentage plus its reset time. The provider request path
+keeps the latest frame on the connection (`providerSpecificData.subscriptionUsage`, see
+services/museSubscriptionUsage.ts); this fetcher turns it into `session` / `weekly` quota windows.
 
-This fetcher:
-- Returns an empty/unknown quota (no used/total figures) — the planRegistry
-  already records `muse-code` with `limit: Number.EPSILON`, so the wizard
-  treats it as "unknown, set manually".
-- Surfaces the subscription tier captured at auth time (`subsTierName`,
-  `subsTierId`, `isSubsActive`, `hasPaymentMethod`) from `providerSpecificData`
-  so the quota page can show *something* meaningful.
-
-No network call is made: the persisted subscription metadata from
-`providerSpecificData` is all OmniRoute has. This is intentional — do not
-invent a fetch to `api.meta.ai` unless Meta publishes a usage endpoint.
+Until the connection has served a request there is no reading yet: the fetcher then reports only
+the subscription tier captured when the key was minted (`subsTierName`, `subsTierId`,
+`isSubsActive`, `hasPaymentMethod`) and leaves every quota field unreported, so missing usage is
+never mistaken for an exhausted (or an unused) allowance. A configured console session can refresh quota independently of inference traffic.
 */
 
+import { getMuseConsoleUsage } from "./museConsole.ts";
 import { toRecord } from "./scalars.ts";
+import { museUsageQuotas, readStoredMuseSubscriptionUsage } from "../museSubscriptionUsage.ts";
 
-/** Muse Code usage fetcher.
- *
- * Meta's Muse Code API has no public usage/balance endpoint. The only
- * subscription data OmniRoute holds is what was returned at key-mint time and
- * persisted in `providerSpecificData` (subsTierName, subsTierId,
- * isSubsActive, hasPaymentMethod). Return that as a flat "unknown usage"
- * response so the quota page shows tier info without fabricating numbers.
- */
+type JsonRecord = Record<string, unknown>;
+
+function stringOrUndefined(value: unknown): string | undefined {
+  return typeof value === "string" ? value : undefined;
+}
+
+function booleanOrUndefined(value: unknown): boolean | undefined {
+  return typeof value === "boolean" ? value : undefined;
+}
+
+/** The subscription tier captured at key mint, and the sentence that names it. */
+function describeSubscription(psd: JsonRecord): { metadata: JsonRecord; summary: string } {
+  const tierName = stringOrUndefined(psd.subsTierName);
+  const isActive = booleanOrUndefined(psd.isSubsActive);
+  const activity = isActive === undefined ? "activity unknown" : isActive ? "active" : "inactive";
+  return {
+    metadata: {
+      provider: "muse-code",
+      plan: tierName ?? "unknown",
+      subsTierId: stringOrUndefined(psd.subsTierId),
+      isSubsActive: isActive,
+      hasPaymentMethod: booleanOrUndefined(psd.hasPaymentMethod),
+      unlimited: false,
+      details: [],
+    },
+    summary: tierName
+      ? `Muse Code subscription: ${tierName} (${activity}).`
+      : "Muse Code subscription detected.",
+  };
+}
+
+/** Stored evidence is projected without changing the persisted observation. */
+function storedReading(data: JsonRecord): JsonRecord {
+  const { metadata, summary } = describeSubscription(data);
+  const reading = readStoredMuseSubscriptionUsage(data.subscriptionUsage);
+  if (!reading) {
+    return {
+      ...metadata,
+      resetAt: null,
+      message: `${summary} Usage appears after this connection serves its first request.`,
+    };
+  }
+  const quotas = museUsageQuotas(reading);
+  return {
+    ...metadata,
+    quotas,
+    resetAt: quotas.session?.resetAt ?? quotas.weekly?.resetAt ?? null,
+    observedAt: reading.observedAt,
+    message: `${summary} Usage as of ${reading.observedAt}, reported by Meta with the last response.`,
+  };
+}
+
+/** Resolve console, stream and metadata evidence in that order without cross-source timestamps. */
 export async function getMuseUsage(
   _accessToken?: string,
   providerSpecificData: Record<string, unknown> = {},
   _connectionId?: string
 ): Promise<JsonRecord> {
-  const psd = toRecord(providerSpecificData);
-
-  const tierName = typeof psd.subsTierName === "string" ? psd.subsTierName : undefined;
-  const tierId = typeof psd.subsTierId === "string" ? psd.subsTierId : undefined;
-  const isActive = typeof psd.isSubsActive === "boolean" ? psd.isSubsActive : undefined;
-  const hasPayment = typeof psd.hasPaymentMethod === "boolean" ? psd.hasPaymentMethod : undefined;
-
-  const activity = isActive === undefined ? "activity unknown" : isActive ? "active" : "inactive";
-
-  // No usage endpoint exists for Muse Code. Return only subscription metadata;
-  // omitting quota values distinguishes unreported usage from exhaustion.
+  const data = toRecord(providerSpecificData);
+  const stored = storedReading(data);
+  if (!data.museConsoleSession && !process.env.MUSE_CONSOLE_SESSION && stored.quotas) return stored;
+  const current = await getMuseConsoleUsage(data);
+  if ("message" in current) return { ...stored, message: `${stored.message} ${current.message}` };
+  const { metadata } = describeSubscription(data);
   return {
-    provider: "muse-code",
-    plan: tierName ?? "unknown",
-    subsTierId: tierId ?? undefined,
-    isSubsActive: isActive ?? undefined,
-    hasPaymentMethod: hasPayment ?? undefined,
-    resetAt: null,
-    unlimited: false,
-    details: [],
-    message: tierName
-      ? `Muse Code subscription: ${tierName} (${activity}). No usage API available from Meta — quota is manual.`
-      : "Muse Code subscription detected. No usage API available from Meta — quota is manual.",
+    ...metadata,
+    ...current,
+    resetAt: current.quotas.session?.resetAt ?? current.quotas.weekly?.resetAt ?? null,
+    message: "Live Muse Code console quota.",
   };
 }
-
-type JsonRecord = Record<string, unknown>;
