@@ -1,4 +1,5 @@
 import { persistCodexChildCooldown } from "../../services/codexAccount/index.ts";
+import { sanitizeErrorMessage } from "../../utils/errorSanitization.ts";
 
 type CodexFailoverCredentials = {
   connectionId?: string | null;
@@ -16,7 +17,12 @@ export async function markCodexScopeRateLimited(params: {
         connectionId: params.failedConnectionId,
         model: params.model,
         rateLimitedUntil: params.rateLimitedUntil,
-      }).catch(() => null)
+      }).catch((error) => {
+        console.warn(
+          `[codex] scope cooldown persist failed for ${params.failedConnectionId}: ${sanitizeErrorMessage(error instanceof Error ? error.message : String(error))}`
+        );
+        return null;
+      })
     : null;
 
   if (

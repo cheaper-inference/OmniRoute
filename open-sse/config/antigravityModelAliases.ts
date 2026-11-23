@@ -20,6 +20,8 @@ export const ANTIGRAVITY_MODEL_ALIASES = Object.freeze({
   "gemini-3.8-flash-tiered": "gemini-3.8-flash-high",
   // Gemini 4 Argon is served only at its tier ids; the bare id defaults to medium.
   "gemini-4-argon": "gemini-4-argon-medium",
+  // Gemini 4 Carbon follows the same tier-only serving; the bare id defaults to medium.
+  "gemini-4-carbon": "gemini-4-carbon-medium",
   // Gemini 4 Hydrogen is served only at its tier ids; the bare id defaults to high.
   "gemini-4-hydrogen": "gemini-4-hydrogen-high",
   "gpt-oss-120b": "gpt-oss-120b-medium",

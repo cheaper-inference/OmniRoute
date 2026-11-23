@@ -1,6 +1,7 @@
 import { register } from "../registry.ts";
 import { FORMATS } from "../formats.ts";
 import { buildGeminiUsageMetadata } from "./geminiUsageMetadata.ts";
+import { resolveToolCallIndex } from "./openai-to-gemini-sse.ts";
 
 type AntigravityCandidate = {
   content: {
@@ -51,7 +52,7 @@ export function openaiToAntigravityResponse(chunk, state) {
   // Accumulate tool calls silently (no emit until finish)
   if (delta.tool_calls) {
     for (const tc of delta.tool_calls) {
-      const idx = tc.index ?? 0;
+      const idx = resolveToolCallIndex(state._toolCallAccum, tc);
       if (!state._toolCallAccum[idx]) {
         state._toolCallAccum[idx] = { id: "", name: "", arguments: "" };
       }

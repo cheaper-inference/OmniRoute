@@ -98,6 +98,11 @@ function detectAuggie(ctx: Ctx): boolean {
   return findExecutable("auggie", ctx.env, ctx.platform) !== null;
 }
 
+/** Ids of the local-CLI providers this module can check (the rest stay fail-open). */
+export function getBinaryGatedLocalCliProviderIds(): string[] {
+  return Object.keys(GATED_PROVIDERS);
+}
+
 let cache: { at: number; keys: Set<string> } | null = null;
 
 /** Drop the cached result (tests, or after the operator installs a binary). */
