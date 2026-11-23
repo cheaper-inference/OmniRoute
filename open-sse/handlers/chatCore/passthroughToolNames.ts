@@ -3,13 +3,9 @@ import { restoreOpenAIToolNames } from "../../translator/helpers/toolCallHelper.
 
 type JsonRecord = Record<string, unknown>;
 
-export function buildClaudePassthroughToolNameMap(
-  body: Record<string, unknown> | null | undefined
-) {
-  if (!body || !Array.isArray(body.tools)) return null;
-
-  const toolNameMap = new Map<string, string>();
-  for (const tool of body.tools) {
+function declaredToolNames(tools: unknown[]): string[] {
+  const names: string[] = [];
+  for (const tool of tools) {
     const toolRecord = tool as Record<string, unknown>;
     const toolData =
       toolRecord?.type === "function" &&
@@ -18,8 +14,29 @@ export function buildClaudePassthroughToolNameMap(
         ? (toolRecord.function as Record<string, unknown>)
         : toolRecord;
     const originalName = typeof toolData?.name === "string" ? toolData.name.trim() : "";
-    if (!originalName) continue;
-    toolNameMap.set(`${CLAUDE_OAUTH_TOOL_PREFIX}${originalName}`, originalName);
+    if (originalName) names.push(originalName);
+  }
+  return names;
+}
+
+export function buildClaudePassthroughToolNameMap(
+  body: Record<string, unknown> | null | undefined
+) {
+  if (!body || !Array.isArray(body.tools)) return null;
+
+  const names = declaredToolNames(body.tools);
+  const lowerNames = new Set(names.map((name) => name.toLowerCase()));
+  const toolNameMap = new Map<string, string>();
+  for (const name of names) {
+    toolNameMap.set(`${CLAUDE_OAUTH_TOOL_PREFIX}${name}`, name);
+    // The native executor strips a leading `proxy_`, so a tool the client named
+    // `proxy_x` comes back as `x`. Map it home unless the client also declared `x`
+    // in any casing: the stream restorer matches names case-insensitively, so an
+    // `x` alias would otherwise rename a declared `X` to `proxy_x`.
+    const stripped = name.startsWith(CLAUDE_OAUTH_TOOL_PREFIX)
+      ? name.slice(CLAUDE_OAUTH_TOOL_PREFIX.length)
+      : "";
+    if (stripped && !lowerNames.has(stripped.toLowerCase())) toolNameMap.set(stripped, name);
   }
 
   return toolNameMap.size > 0 ? toolNameMap : null;

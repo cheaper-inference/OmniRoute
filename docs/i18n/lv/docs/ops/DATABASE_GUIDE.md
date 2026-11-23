@@ -309,6 +309,7 @@ Izmantojiet `IF NOT EXISTS`, `IF EXISTS` un `OR IGNORE` / `OR REPLACE` klauzulas
 3. **Rūpīgi aizpildiet datus** : izmantojiet `UPDATE ... WHERE ...`, lai apstrādātu esošās rindas
 4. **Pārbaudiet pasūtījumu un nosaukumu** : `npm run test:migrations:fresh` (visas migrācijas tukšā datu bāzē) un `npm run check:migration-numbering`
 5. **Tests uz kopijas** : nekad nepalaidiet nepārbaudītu migrāciju ražošanā
+6. **Tabulai, kas izveidota no koda, ir nepieciešama arī migrācija** : ja modulis arī laiski izveido tabulu (`CREATE TABLE IF NOT EXISTS`, tiek saglabāts kā pašārstniecības ceļš), migrācijai tā ir jāizveido ar to pašu DDL. Pretējā gadījumā tīrai instalēšanai un jauninātajai instalēšanai tiek izmantotas dažādas shēmas atkarībā no tā, vai šis koda ceļš tika palaists. `tests/unit/db/lazy-table-migration-guard.test.ts` skenē `src/` un `open-sse/` un neizdodas slinkā `CREATE` bez migrācijas (#20557). Piemērs: `src/lib/db/migrations/20261118120853_compression_run_telemetry.sql`.
 
 Piemērs:
 

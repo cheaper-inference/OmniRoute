@@ -471,7 +471,7 @@ Raadpleeg voor volledige details en stapsgewijze instructies voor het naast elka
 2. **Permanente oplossing:** Bind expliciet aan IPv4 door `-p 127.0.0.1:20128:20128` te gebruiken in uw `docker run`-opdracht:
    ```bash
    docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
-     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
    ```
    Dit dwingt de IPv4-binding af en voorkomt ook dat de proxy op alle hostinterfaces wordt blootgesteld.
 

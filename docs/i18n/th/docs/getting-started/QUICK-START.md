@@ -21,10 +21,10 @@ npm install -g omniroute
 ### ตัวเลือก B: Docker
 
 ```bash
-docker run -d --name omniroute -p 20128:20128 diegosouzapw/omniroute:latest
+docker run -d --name omniroute -p 20128:20128 cheaperinference/omniroute:latest
 ```
 
-`:latest` คือ SemVer เวอร์ชันเสถียรที่ **เผยแพร่แล้ว** และมีหมายเลขสูงสุด โดยจะ **ไม่** ติดตาม git `main` สำหรับ GitOps ให้ตรึงเวอร์ชันเป็น `diegosouzapw/omniroute:X.Y.Z` ดูข้อมูลเพิ่มเติมที่ [แท็กอิมเมจ / ช่องทางการเผยแพร่](../guides/DOCKER_GUIDE.md#release-channels)
+`:latest` คือ SemVer เวอร์ชันเสถียรที่ **เผยแพร่แล้ว** และมีหมายเลขสูงสุด โดยจะ **ไม่** ติดตาม git `main` สำหรับ GitOps ให้ตรึงเวอร์ชันเป็น `cheaperinference/omniroute:X.Y.Z` ดูข้อมูลเพิ่มเติมที่ [แท็กอิมเมจ / ช่องทางการเผยแพร่](../guides/DOCKER_GUIDE.md#release-channels)
 
 ### ตัวเลือก C: จากซอร์สโค้ด
 

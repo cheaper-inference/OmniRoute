@@ -256,9 +256,9 @@ describe("expiry-first combo ordering", () => {
     assert.deepEqual(leads, new Set([bId, cId]));
   });
 
-  it("case 8: a reset in the past clamps to minHours, no crash, still positive", async () => {
+  it("case 8: a reset in the past counts as a refilled window, rolled forward one period", async () => {
     const aId = await createConnection("codex", "c8-a");
-    // Weekly 80% left whose reset passed an hour before NOW.
+    // Weekly 80% left whose reset passed an hour before NOW: the snapshot is stale.
     const resetAt = new Date(NOW - 1 * HOUR).toISOString();
     setQuotaCache(aId, "codex", { weekly: { remainingPercentage: 80, resetAt } });
 
@@ -266,8 +266,10 @@ describe("expiry-first combo ordering", () => {
     assert.ok(view, "projection must survive a stale snapshot");
     const config = resolveExpiryFirstConfig(null);
     const { score } = scoreExpiryFirstQuota(view, config, NOW);
-    // Clamped to the default minHours 0.25: 0.8 / 0.25 = 3.2, maximally urgent.
-    assert.ok(Math.abs(score - 3.2) < 1e-9, `expected 3.2, got ${score}`);
+    // The window has refilled and its next reset is one week after the lapsed one,
+    // 167 h from NOW: 1.0 / 167. A stale read must not look maximally urgent, or it
+    // takes every request away from accounts that do hold expiring quota (#19583).
+    assert.ok(Math.abs(score - 1 / 167) < 1e-9, `expected 1/167, got ${score}`);
   });
 
   it("case 9: session window is capOnly — the weekly deadline wins", async () => {

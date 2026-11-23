@@ -55,6 +55,10 @@ export const config = {
     "/:codexseg([cC][oO][dD][eE][xX])/:path*",
     "/:codexseg([cC][oO][dD][eE][xX])",
     "/:modelsseg([mM][oO][dD][eE][lL][sS])",
+    "/:a2aseg([aA]2[aA])/:path*",
+    "/:a2aseg([aA]2[aA])",
+    "/:connectseg([cC][oO][nN][nN][eE][cC][tT])/:path*",
+    "/:connectseg([cC][oO][nN][nN][eE][cC][tT])",
     // CLIProxyAPI management compatibility (/v0/management/* → /api/v0/management/*).
     // Without this entry the rewrite would reach the handler with no authz pipeline run,
     // so the trusted x-omniroute-auth-* stamps would not be stripped from the request.

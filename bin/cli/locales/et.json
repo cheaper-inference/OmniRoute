@@ -12,7 +12,8 @@
     "dryRun": "[testkäivitus] tehakse {action}",
     "cancelled": "Tühistatud.",
     "jsonOpt": "Väljund JSON-formaadis",
-    "yesOpt": "Jäta kinnitusküsimus vahele"
+    "yesOpt": "Jäta kinnitusküsimus vahele",
+    "positiveIntegerRequired": "Limiit peab olema positiivne täisarv."
   },
   "setup": {
     "title": "OmniRoute seadistus",

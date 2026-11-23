@@ -470,7 +470,7 @@ OmniRoute автоматически обновляет токены. Если �
 2. **Постоянное исправление:** Выполните явную привязку к IPv4, используя `-p 127.0.0.1:20128:20128` в команде `docker run`:
    ```bash
    docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
-     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
    ```
    Это принудительно устанавливает привязку к IPv4, а также предотвращает доступ к прокси через все интерфейсы хоста.
 

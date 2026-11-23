@@ -88,6 +88,10 @@ curl http://localhost:20128/api/settings/obsidian/webdav
 curl -X DELETE http://localhost:20128/api/settings/obsidian/webdav
 ```
 
+### സുരക്ഷയും ഗതാഗതവും
+
+WebDAV പ്രാമാണീകരണം ഓരോ IP പരാജയ ട്രാക്കിംഗും ലോക്കൗട്ടും നടപ്പിലാക്കുന്നു (60 സെക്കൻഡ് വിൻഡോയ്ക്കുള്ളിൽ 10 പരാജയപ്പെട്ട ശ്രമങ്ങൾ `429 Too Many Requests`, `Retry-After` എന്നിവ ഉപയോഗിച്ച് 5 മിനിറ്റ് ലോക്കൗട്ട് ട്രിഗർ ചെയ്യുന്നു). WebDAV അടിസ്ഥാന പ്രാമാണീകരണ ക്രെഡൻഷ്യലുകൾ കൈമാറുന്നതിനാൽ, ലൂപ്പ്ബാക്കിന് പുറത്തുള്ള WebDAV എൻഡ്പോയിൻ്റ് ആക്സസ് ചെയ്യുമ്പോൾ TLS അവസാനിപ്പിക്കുന്നത് (അല്ലെങ്കിൽ Tailscale അല്ലെങ്കിൽ Cloudflare Tunnel പോലുള്ള ഒരു സുരക്ഷിത ടണലിലൂടെ റൂട്ടിംഗ്) ശക്തമായി ശുപാർശ ചെയ്യുന്നു.
+
 ### ഓരോ API key-ക്കും പ്രത്യേകമായ context source (ഐച്ഛികം)
 
 `api_key_context_sources` പട്ടിക വഴി Obsidian config **ഓരോ API key-ക്കും** പ്രത്യേകം

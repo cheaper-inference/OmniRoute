@@ -1,9 +1,16 @@
 import { resolveStreamIndices } from "./streamIndices";
-import { createSseTextTransform, FieldCategory, classifyField } from "./sseTextTransform";
+import {
+  createSseTextTransform,
+  FieldCategory,
+  classifyField,
+  omitEmittedOpaqueReasoningFromFlush,
+} from "./sseTextTransform";
 import { sanitizePII, getPiiResponseMode } from "./piiSanitizer";
 import {
   bufferField,
+  ensureResponsesTextDeltaIds,
   flushOpenAiTextBuffers,
+  responsesTextTailDelta,
   type BufferedField,
   type TextBuffers,
 } from "./sseTextBuffers";
@@ -207,7 +214,7 @@ export function createPiiSseTransform(options?: PiiTransformOptions): TransformS
         if (!buffers.content) return null;
         const delta = buffers.content;
         buffers.content = "";
-        return { type: "response.output_text.delta", output_index: idx, delta };
+        return responsesTextTailDelta(lastJson, idx, delta);
       }
       const finalJson = JSON.parse(JSON.stringify(lastJson));
       if (buffers.content) {
@@ -220,6 +227,7 @@ export function createPiiSseTransform(options?: PiiTransformOptions): TransformS
         };
         buffers.toolArgs = "";
       }
+      ensureResponsesTextDeltaIds(finalJson, idx);
       return finalJson;
     }
 
@@ -243,6 +251,7 @@ export function createPiiSseTransform(options?: PiiTransformOptions): TransformS
     // 5. Generic fallback
     const templateJson = lastContentJson || lastJson;
     const finalJson = JSON.parse(JSON.stringify(templateJson));
+    omitEmittedOpaqueReasoningFromFlush(finalJson);
     // Skip recognized system metadata (same `classifyField`/METADATA_KEYS as sanitizeObject
     // in sseTextTransform.ts) — fields like `provider` or `native_finish_reason` must never
     // be cleared to "" or refilled with buffered answer text here either. See #13488.
@@ -270,7 +279,12 @@ export function createPiiSseTransform(options?: PiiTransformOptions): TransformS
     ) => {
       if (!obj || typeof obj !== "object") return;
 
-      const { choiceIdx, toolIdx } = resolveStreamIndices(obj, currentChoiceIdx, currentToolIdx);
+      const { choiceIdx, toolIdx } = resolveStreamIndices(
+        obj,
+        currentChoiceIdx,
+        currentToolIdx,
+        parentKey
+      );
 
       const compositeKey = `${choiceIdx}_${toolIdx}`;
       const isArray = Array.isArray(obj);
@@ -282,9 +296,10 @@ export function createPiiSseTransform(options?: PiiTransformOptions): TransformS
             continue;
           }
           const choiceBuf = getBuffers(compositeKey);
-          if (choiceBuf[field]) {
-            obj[key] = (obj[key] || "") + choiceBuf[field];
-            choiceBuf[field] = "";
+          const bucket = bufferField(field, key);
+          if (choiceBuf[bucket]) {
+            obj[key] = (obj[key] || "") + choiceBuf[bucket];
+            choiceBuf[bucket] = "";
           }
         } else if (typeof obj[key] === "object") {
           populateRemaining(obj[key], choiceIdx, toolIdx, isArray ? parentKey : key);
