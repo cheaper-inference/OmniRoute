@@ -345,6 +345,8 @@ test("a stale successful lookup does not populate the cache", async () => {
 });
 
 test("a settled stale lookup does not free the slot a newer lookup owns", async () => {
+  const originalWarn = console.warn;
+  console.warn = () => {};
   clearAntigravityVersionCaches();
   const releases: Array<() => void> = [];
   const gates = [0, 1].map(
@@ -372,6 +374,10 @@ test("a settled stale lookup does not free the slot a newer lookup owns", async 
   // join the newer lookup instead of starting another fetch.
   const joined = resolveAntigravityIdeVersion(fetchImpl);
   releases[1]();
-  assert.equal(await joined, await current);
-  assert.equal(calls, 2, "the stale finally must not free the newer lookup's slot");
+  try {
+    assert.equal(await joined, await current);
+    assert.equal(calls, 2, "the stale finally must not free the newer lookup's slot");
+  } finally {
+    console.warn = originalWarn;
+  }
 });
