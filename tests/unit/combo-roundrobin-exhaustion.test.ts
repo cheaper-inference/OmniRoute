@@ -6,8 +6,6 @@ import assert from "node:assert/strict";
 
 import { roundRobinExhaustedResponse } from "../../open-sse/services/combo/roundRobinExhaustion.ts";
 
-type Target = { executionKey: string; modelStr: string; connectionId?: string };
-
 async function bodyOf(response: Response | null): Promise<Record<string, unknown>> {
   assert.ok(response, "a response is expected");
   return (await response.json()) as Record<string, unknown>;
