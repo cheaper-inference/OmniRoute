@@ -277,3 +277,27 @@ test("an outage warns once and stays quiet until the source recovers", async () 
     console.warn = originalWarn;
   }
 });
+
+test("a cache clear during an in-flight lookup is not undone when it fails", async () => {
+  clearAntigravityVersionCaches();
+  let release: () => void = () => {};
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  let calls = 0;
+  const failingFetch = (async () => {
+    calls += 1;
+    await gate;
+    throw new Error("feed down");
+  }) as unknown as typeof fetch;
+
+  const pending = resolveAntigravityIdeVersion(failingFetch);
+  clearAntigravityVersionCaches();
+  release();
+  await pending;
+
+  // The failed lookup started before the clear, so its failure timestamp must not be
+  // recorded: a second call has to reach the feed again instead of sitting in the retry window.
+  await resolveAntigravityIdeVersion(failingFetch);
+  assert.equal(calls, 2);
+});

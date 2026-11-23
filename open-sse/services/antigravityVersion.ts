@@ -33,6 +33,8 @@ type ProductVersionState = {
   // was emitted for the current outage (reset on the next success).
   failedAt: number | null;
   warnedAt: number | null;
+  /** Bumped by a cache clear; a lookup started before it must not write its result back. */
+  generation: number;
 };
 
 type FetchLike = typeof fetch;
@@ -43,12 +45,14 @@ const ideState: ProductVersionState = {
   inFlight: null,
   failedAt: null,
   warnedAt: null,
+  generation: 0,
 };
 const cliState: ProductVersionState = {
   cache: null,
   inFlight: null,
   failedAt: null,
   warnedAt: null,
+  generation: 0,
 };
 
 function normalizeVersion(value: unknown): string | null {
@@ -140,6 +144,9 @@ async function resolveProductVersion(
     return pickNewestVersion(state.cache?.version, fallbackVersion) ?? fallbackVersion;
   }
 
+  // A clear during the outage must not be undone by this lookup finishing: the writes below
+  // only apply while the generation it started in is still current.
+  const generation = state.generation;
   state.inFlight = (async () => {
     let resolved: string | null = null;
     let failure: unknown = null;
@@ -153,24 +160,25 @@ async function resolveProductVersion(
     const version =
       pickNewestVersion(resolved, state.cache?.version, fallbackVersion) ?? fallbackVersion;
 
-    if (resolved) {
-      state.cache = {
-        fetchedAt: Date.now(),
-        version,
-      };
-      state.failedAt = null;
-      state.warnedAt = null;
-      return version;
-    }
-
-    state.failedAt = Date.now();
-    if (state.warnedAt === null) {
-      state.warnedAt = state.failedAt;
-      const detail = failure instanceof Error ? failure.message : String(failure ?? "unknown");
-      console.warn(
-        `[antigravity-version] ${product} release lookup failed (${detail}); ` +
-          `reporting ${version} until the source recovers`
-      );
+    if (state.generation === generation) {
+      if (resolved) {
+        state.cache = {
+          fetchedAt: Date.now(),
+          version,
+        };
+        state.failedAt = null;
+        state.warnedAt = null;
+      } else {
+        state.failedAt = Date.now();
+        if (state.warnedAt === null) {
+          state.warnedAt = state.failedAt;
+          const detail = failure instanceof Error ? failure.message : String(failure ?? "unknown");
+          console.warn(
+            `[antigravity-version] ${product} release lookup failed (${detail}); ` +
+              `reporting ${version} until the source recovers`
+          );
+        }
+      }
     }
     return version;
   })();
@@ -178,7 +186,8 @@ async function resolveProductVersion(
   try {
     return await state.inFlight;
   } finally {
-    state.inFlight = null;
+    // Only the lookup that owns the slot may free it: a clear + new lookup already replaced it.
+    if (state.generation === generation) state.inFlight = null;
   }
 }
 
@@ -239,12 +248,11 @@ export function seedAntigravityCliVersionCache(version: string, fetchedAt = Date
 }
 
 export function clearAntigravityVersionCaches(): void {
-  ideState.cache = null;
-  ideState.inFlight = null;
-  ideState.failedAt = null;
-  ideState.warnedAt = null;
-  cliState.cache = null;
-  cliState.inFlight = null;
-  cliState.failedAt = null;
-  cliState.warnedAt = null;
+  for (const state of [ideState, cliState]) {
+    state.generation += 1;
+    state.cache = null;
+    state.inFlight = null;
+    state.failedAt = null;
+    state.warnedAt = null;
+  }
 }
