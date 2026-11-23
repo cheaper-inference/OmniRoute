@@ -101,3 +101,119 @@ export function extractFilepathsFromCommand(command: string, _output = ""): stri
 
   return [];
 }
+
+// ── Local replies for Claude Code helper requests ──────────────────────────────
+// Each detector answers only a strict request shape (single user turn, no tools,
+// last message only, commands understood without reading their output). The
+// shape picks the detector; the toggle only decides whether it answers, so a
+// recognised shape with its toggle off returns null instead of falling through.
+
+export const CLAUDE_CODE_META_FLAGS = {
+  commandPrefix: "CLAUDE_CODE_LOCAL_COMMAND_PREFIX_ENABLED",
+  suggestion: "CLAUDE_CODE_LOCAL_SUGGESTION_ENABLED",
+  filepaths: "CLAUDE_CODE_LOCAL_FILEPATHS_ENABLED",
+} as const;
+
+export type ClaudeCodeMetaKind = "command-prefix" | "suggestion" | "filepaths";
+
+export interface ClaudeCodeMetaToggles {
+  commandPrefix: boolean;
+  suggestion: boolean;
+  filepaths: boolean;
+}
+
+export interface ClaudeCodeMetaReply {
+  kind: ClaudeCodeMetaKind;
+  text: string;
+}
+
+type MetaMessage = { role?: unknown; content?: unknown };
+
+const SUGGESTION_MARKER = "[SUGGESTION MODE:";
+// Shell metacharacters that make a command depend on expansion, chaining or redirection.
+const FILEPATHS_UNSAFE_RE = /[;|&`<>\n*?[\]{}$~\\]/;
+const SIMPLE_GREP_FLAGS_RE = /^-[nilHhwvcsoEFx]+$/;
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+/** Text blocks of a content value (string content counts as one block). */
+function textBlocks(content: unknown): string[] {
+  if (typeof content === "string") return [content];
+  if (!Array.isArray(content)) return [];
+  return content
+    .filter((block) => isRecord(block) && block.type === "text" && typeof block.text === "string")
+    .map((block) => (block as { text: string }).text);
+}
+
+function contentText(content: unknown): string {
+  return textBlocks(content).join("\n");
+}
+
+function filepathsForCommand(command: string): string[] | null {
+  if (!command || FILEPATHS_UNSAFE_RE.test(command)) return null;
+  const tokens = tokenize(command);
+  if (!tokens.length) return null;
+  const [head, ...rest] = tokens;
+  if (LISTING_COMMANDS.has(head)) return [];
+  if (READ_COMMANDS.has(head)) {
+    if (rest.some((t) => t.startsWith("-") || t.startsWith("+"))) return null;
+    return extractFilepathsFromCommand(command);
+  }
+  if (head === "grep") {
+    if (rest.some((t) => t.startsWith("-") && !SIMPLE_GREP_FLAGS_RE.test(t))) return null;
+    return extractFilepathsFromCommand(command);
+  }
+  return null;
+}
+
+export function detectClaudeCodeMetaReply(
+  body: unknown,
+  toggles: ClaudeCodeMetaToggles
+): ClaudeCodeMetaReply | null {
+  if (!isRecord(body) || !Array.isArray(body.messages)) return null;
+  const messages = body.messages.filter(isRecord) as MetaMessage[];
+  const isSystemRole = (m: MetaMessage) => m.role === "system" || m.role === "developer";
+  const conversation = messages.filter((m) => !isSystemRole(m));
+  const singleTurn = conversation.length === 1 && conversation[0].role === "user";
+  const hasTools = Array.isArray(body.tools) && body.tools.length > 0;
+  const systemText = [
+    contentText(body.system),
+    ...messages.filter(isSystemRole).map((m) => contentText(m.content)),
+  ].join("\n");
+
+  if (singleTurn && !hasTools) {
+    const turnText = contentText(conversation[0].content);
+    const promptText = `${systemText}\n${turnText}`;
+
+    // Shape "filepaths": the turn is `Command: <cmd>\nOutput: <out>` and someone asked for <filepaths>.
+    const trimmed = turnText.trimStart();
+    const outputIdx = trimmed.indexOf("\nOutput:");
+    if (trimmed.startsWith("Command:") && outputIdx > 0 && promptText.includes("<filepaths>")) {
+      if (!toggles.filepaths) return null;
+      const paths = filepathsForCommand(trimmed.slice("Command:".length, outputIdx).trim());
+      if (!paths) return null;
+      return { kind: "filepaths", text: ["<filepaths>", ...paths, "</filepaths>"].join("\n") };
+    }
+
+    // Shape "command prefix": a <policy_spec> plus a `Command:` line in the turn.
+    if (promptText.includes("<policy_spec>") && turnText.includes("Command:")) {
+      if (!toggles.commandPrefix) return null;
+      const command = turnText.slice(turnText.lastIndexOf("Command:") + "Command:".length).trim();
+      const prefix = command ? extractCommandPrefix(command) : "";
+      return prefix ? { kind: "command-prefix", text: prefix } : null;
+    }
+  }
+
+  // Shape "suggestion": the last message is the user's and one of its text blocks opens with the marker.
+  const last = messages[messages.length - 1];
+  if (
+    last?.role === "user" &&
+    textBlocks(last.content).some((t) => t.trimStart().startsWith(SUGGESTION_MARKER))
+  ) {
+    return toggles.suggestion ? { kind: "suggestion", text: "" } : null;
+  }
+
+  return null;
+}
