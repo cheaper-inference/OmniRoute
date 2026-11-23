@@ -156,7 +156,9 @@ export async function getUsageForProvider(
   // endpoint, so it is read by its own fetcher before the generic path below.
   if (
     typeof provider === "string" &&
-    (provider.startsWith("openai-compatible-") || provider.startsWith("anthropic-compatible-")) &&
+    (provider === "sensenova" ||
+      provider.startsWith("openai-compatible-") ||
+      provider.startsWith("anthropic-compatible-")) &&
     isSensenovaQuotaConnection({ provider, providerSpecificData })
   ) {
     return await getSensenovaUsage({
