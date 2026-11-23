@@ -117,8 +117,15 @@ const SCAN_GAP = "\n[GAP]\n";
 
 // ─── PII Patterns ────────────────────────────────────────────────────
 
-/** @type {Array<{name: string, pattern: RegExp, replacement: string, validate?: (match: string, context: string) => boolean, optIn?: boolean}>} */
-const PII_PATTERNS = [
+interface InputPiiPattern {
+  name: string;
+  pattern: RegExp;
+  replacement: string;
+  validate?: (match: string, context: string) => boolean;
+  optIn?: boolean;
+}
+
+const PII_PATTERNS: InputPiiPattern[] = [
   {
     name: "email",
     // The same matches as `\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b`, in linear
