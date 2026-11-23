@@ -413,12 +413,7 @@ export default function ProviderDetailPageClient() {
       await Promise.all([fetchConnections(), fetchProviderModelMeta()]);
     }
   );
-  const handleToggleConnectionHealthCheck = useConnectionHealthCheck(
-    connections,
-    setConnections,
-    notify,
-    t
-  );
+  const handleToggleConnectionHealthCheck = useConnectionHealthCheck(setConnections, notify, t);
 
   // ── model-related effects (loading gate) ────────────────────────────────
   useEffect(() => {

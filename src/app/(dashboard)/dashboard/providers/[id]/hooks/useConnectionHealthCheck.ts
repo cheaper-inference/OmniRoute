@@ -16,7 +16,6 @@ interface NotificationStore {
  * (`providerSpecificData.autoHealthCheck`). Mirrors useConnectionAutoSync.
  */
 export function useConnectionHealthCheck(
-  connections: ConnectionRowConnection[],
   setConnections: Dispatch<SetStateAction<ConnectionRowConnection[]>>,
   notify: NotificationStore,
   t: ProviderMessageTranslator
@@ -24,12 +23,13 @@ export function useConnectionHealthCheck(
   return useCallback(
     async (connectionId: string, enabled: boolean) => {
       try {
-        const existingPsd = connections.find((c) => c.id === connectionId)?.providerSpecificData;
         const response = await fetch(`/api/providers/${connectionId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            providerSpecificData: { ...(existingPsd || {}), autoHealthCheck: enabled },
+            // Partial update: the PUT handler merges this over the stored value, so sending only
+            // the toggled key cannot overwrite sibling keys with a stale snapshot.
+            providerSpecificData: { autoHealthCheck: enabled },
           }),
         });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -55,6 +55,6 @@ export function useConnectionHealthCheck(
         notify.error(t("healthCheckToggleFailed"));
       }
     },
-    [notify, setConnections, t, connections]
+    [notify, setConnections, t]
   );
 }

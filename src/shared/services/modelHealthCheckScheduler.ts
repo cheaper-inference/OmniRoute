@@ -23,7 +23,11 @@
  * unref'd, a single-flight guard so cycles never overlap.
  * Interval override: MODEL_HEALTH_CHECK_INTERVAL_HOURS (default 12h).
  */
-import { DEFAULT_MODEL_TEST_TIMEOUT_MS, runSingleModelTest } from "@/lib/api/modelTestRunner";
+import {
+  DEFAULT_MODEL_TEST_TIMEOUT_MS,
+  runSingleModelTest,
+  type SingleModelTestResult,
+} from "@/lib/api/modelTestRunner";
 import {
   CONSECUTIVE_BOT_STOP_THRESHOLD,
   CONSECUTIVE_RATE_LIMIT_STOP_THRESHOLD,
@@ -36,7 +40,7 @@ import {
 } from "@/lib/api/modelHealthClassification";
 import {
   clearHealthCheckHiddenMarks,
-  getHealthCheckHiddenModelIds,
+  isHiddenByHealthCheck,
   markHiddenByHealthCheck,
 } from "@/lib/db/modelHealthAutoHidden";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
@@ -88,6 +92,35 @@ async function defaultListModelIds(provider: string, connectionId: string): Prom
   return models.map((m) => m.id).filter((id) => typeof id === "string" && id.length > 0);
 }
 
+/**
+ * `runSingleModelTest()` rejects probes for connections under an exclusive lease with a
+ * local 409 and no upstream status. That is the runner declining to dispatch, not a
+ * model failure, so it must never hide a model.
+ */
+function isLocalLeaseRejection(result: SingleModelTestResult): boolean {
+  return (
+    result.httpStatus === 409 &&
+    result.statusCode === undefined &&
+    typeof result.error === "string" &&
+    result.error.includes("managed lease")
+  );
+}
+
+/** Map a runner result onto the shared ProbeOutcome. Exported for tests. */
+export function mapSingleModelTestResult(result: SingleModelTestResult): ProbeOutcome {
+  const skipped = result.skipped === true || isLocalLeaseRejection(result);
+  return {
+    status: result.status === "ok" ? "ok" : result.status === "slow" ? "slow" : "error",
+    ...(result.statusCode !== undefined ? { statusCode: result.statusCode } : {}),
+    ...(result.error !== undefined ? { error: result.error } : {}),
+    ...(result.rateLimited === true ? { rateLimited: true } : {}),
+    ...(result.isTransient === true ? { isTransient: true } : {}),
+    ...(result.isQuota === true ? { isQuota: true } : {}),
+    ...(result.isTimeout === true ? { isTimeout: true } : {}),
+    ...(skipped ? { skipped: true } : {}),
+  };
+}
+
 async function defaultProbe(
   provider: string,
   modelId: string,
@@ -100,16 +133,7 @@ async function defaultProbe(
     timeoutMs: DEFAULT_MODEL_TEST_TIMEOUT_MS,
     streamChat: true,
   });
-  return {
-    status: result.status === "ok" ? "ok" : result.status === "slow" ? "slow" : "error",
-    ...(result.statusCode !== undefined ? { statusCode: result.statusCode } : {}),
-    ...(result.error !== undefined ? { error: result.error } : {}),
-    ...(result.rateLimited === true ? { rateLimited: true } : {}),
-    ...(result.isTransient === true ? { isTransient: true } : {}),
-    ...(result.isQuota === true ? { isQuota: true } : {}),
-    ...(result.isTimeout === true ? { isTimeout: true } : {}),
-    ...(result.skipped === true ? { skipped: true } : {}),
-  };
+  return mapSingleModelTestResult(result);
 }
 
 async function buildDefaultDeps(): Promise<HealthCheckDeps> {
@@ -126,29 +150,29 @@ async function buildDefaultDeps(): Promise<HealthCheckDeps> {
 
 /**
  * Decide and apply the visibility change for one probe outcome. Exported for
- * tests; the ownership rule lives here.
+ * tests; the ownership rule lives here. Ownership is read live from the marks
+ * table on every call, so a manual hide/unhide that lands while a long pass is
+ * running (and clears the mark) is respected instead of being overwritten.
  */
 export function applyHealthCheckOutcome(
   provider: string,
   modelId: string,
   outcome: ProbeOutcome,
-  deps: Pick<HealthCheckDeps, "isHidden" | "setHidden">,
-  scheduledHiddenIds: Set<string>
+  deps: Pick<HealthCheckDeps, "isHidden" | "setHidden">
 ): HealthCheckAction {
   const currentlyHidden = deps.isHidden(provider, modelId);
 
   if (isHealthyOutcome(outcome)) {
+    const ownedByHealthCheck = isHiddenByHealthCheck(provider, modelId);
     // Restore only what the health check itself hid. A user-hidden model has no mark.
-    if (currentlyHidden && scheduledHiddenIds.has(modelId)) {
+    if (currentlyHidden && ownedByHealthCheck) {
       deps.setHidden(provider, modelId, false);
       clearHealthCheckHiddenMarks(provider, [modelId]);
-      scheduledHiddenIds.delete(modelId);
       return "restored";
     }
-    if (!currentlyHidden && scheduledHiddenIds.has(modelId)) {
+    if (!currentlyHidden && ownedByHealthCheck) {
       // Someone made it visible already; drop the stale mark.
       clearHealthCheckHiddenMarks(provider, [modelId]);
-      scheduledHiddenIds.delete(modelId);
     }
     return "unchanged";
   }
@@ -158,12 +182,61 @@ export function applyHealthCheckOutcome(
     if (currentlyHidden) return "unchanged";
     deps.setHidden(provider, modelId, true);
     markHiddenByHealthCheck(provider, modelId);
-    scheduledHiddenIds.add(modelId);
     return "hidden";
   }
 
   // Rate-limited, timeout, transient, quota or skipped: not evidence either way.
   return "skipped";
+}
+
+/**
+ * Next window of at most MODEL_HEALTH_CHECK_MAX_MODELS_PER_CONNECTION models. A
+ * catalog larger than the cap is walked across successive cycles (per-connection
+ * rotating offset) so models past the cap are eventually probed too.
+ */
+const windowOffsets = new Map<string, number>();
+
+export function selectModelWindow(connectionId: string, modelIds: string[]): string[] {
+  const cap = MODEL_HEALTH_CHECK_MAX_MODELS_PER_CONNECTION;
+  if (modelIds.length <= cap) {
+    windowOffsets.delete(connectionId);
+    return modelIds;
+  }
+  const start = (windowOffsets.get(connectionId) ?? 0) % modelIds.length;
+  windowOffsets.set(connectionId, (start + cap) % modelIds.length);
+  return Array.from({ length: cap }, (_, i) => modelIds[(start + i) % modelIds.length]);
+}
+
+async function probeSafely(
+  conn: HealthCheckConnection,
+  modelId: string,
+  deps: HealthCheckDeps
+): Promise<ProbeOutcome> {
+  try {
+    return await deps.probe(conn.provider, modelId, conn.id);
+  } catch (error: unknown) {
+    // An exception inside our own runner is not proof the model is broken.
+    deps.log(`probe threw for ${conn.provider}/${modelId}: ${sanitizeErrorMessage(error)}`);
+    return { status: "error", isTransient: true };
+  }
+}
+
+function applySafely(
+  conn: HealthCheckConnection,
+  modelId: string,
+  outcome: ProbeOutcome,
+  deps: HealthCheckDeps,
+  result: ConnectionHealthCheckResult
+): void {
+  try {
+    const action = applyHealthCheckOutcome(conn.provider, modelId, outcome, deps);
+    if (action === "hidden") result.hidden.push(modelId);
+    if (action === "restored") result.restored.push(modelId);
+  } catch (error: unknown) {
+    deps.log(
+      `failed to update visibility for ${conn.provider}/${modelId}: ${sanitizeErrorMessage(error)}`
+    );
+  }
 }
 
 /** Probe every model of one opted-in connection and apply the results. */
@@ -178,11 +251,7 @@ export async function runHealthCheckForConnection(
     hidden: [],
     restored: [],
   };
-  const modelIds = (await deps.listModelIds(conn.provider, conn.id)).slice(
-    0,
-    MODEL_HEALTH_CHECK_MAX_MODELS_PER_CONNECTION
-  );
-  const scheduledHiddenIds = getHealthCheckHiddenModelIds(conn.provider);
+  const modelIds = selectModelWindow(conn.id, await deps.listModelIds(conn.provider, conn.id));
   const slowProbe = SLOW_PROBE_PROVIDERS.has(conn.provider);
   let consecutiveRateLimits = 0;
   let consecutiveBotBlocks = 0;
@@ -191,35 +260,14 @@ export async function runHealthCheckForConnection(
     if (slowProbe && result.tested > 0 && SLOW_PROBE_DELAY_MS > 0) {
       await deps.sleep(SLOW_PROBE_DELAY_MS);
     }
-    let outcome: ProbeOutcome;
-    try {
-      outcome = await deps.probe(conn.provider, modelId, conn.id);
-    } catch (error: unknown) {
-      // An exception inside our own runner is not proof the model is broken.
-      deps.log(`probe threw for ${conn.provider}/${modelId}: ${sanitizeErrorMessage(error)}`);
-      outcome = { status: "error", isTransient: true };
-    }
+    const outcome = await probeSafely(conn, modelId, deps);
     result.tested += 1;
 
     consecutiveRateLimits = outcome.rateLimited ? consecutiveRateLimits + 1 : 0;
     if (isBotBlockedOutcome(outcome)) consecutiveBotBlocks += 1;
     else if (outcome.status === "ok") consecutiveBotBlocks = 0;
 
-    try {
-      const action = applyHealthCheckOutcome(
-        conn.provider,
-        modelId,
-        outcome,
-        deps,
-        scheduledHiddenIds
-      );
-      if (action === "hidden") result.hidden.push(modelId);
-      if (action === "restored") result.restored.push(modelId);
-    } catch (error: unknown) {
-      deps.log(
-        `failed to update visibility for ${conn.provider}/${modelId}: ${sanitizeErrorMessage(error)}`
-      );
-    }
+    applySafely(conn, modelId, outcome, deps, result);
 
     if (consecutiveRateLimits >= CONSECUTIVE_RATE_LIMIT_STOP_THRESHOLD) {
       result.stoppedEarly = "consecutive_rate_limits";

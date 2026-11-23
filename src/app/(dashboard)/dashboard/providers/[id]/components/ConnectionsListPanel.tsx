@@ -119,6 +119,14 @@ function quotaVisibilityHandler(
   return supported ? (visible: boolean) => toggle(connectionId, visible) : undefined;
 }
 
+// Extracted so the two ConnectionRow render sites don't each add a ternary decision point.
+function healthCheckToggleHandler(
+  toggle: ((connectionId: string, enabled: boolean) => void) | undefined,
+  connectionId: string
+) {
+  return toggle ? (enabled: boolean) => toggle(connectionId, enabled) : undefined;
+}
+
 // #7643 — extracted so the two ConnectionRow render call sites (already
 // oversized map callbacks) don't each pick up a new `||` decision point.
 function resolveConnProxyField(
@@ -428,11 +436,10 @@ export default function ConnectionsListPanel({
                     ? (enabled) => handleToggleConnectionAutoSync(conn.id, enabled)
                     : undefined
                 }
-                onToggleHealthCheck={
-                  handleToggleConnectionHealthCheck
-                    ? (enabled) => handleToggleConnectionHealthCheck(conn.id, enabled)
-                    : undefined
-                }
+                onToggleHealthCheck={healthCheckToggleHandler(
+                  handleToggleConnectionHealthCheck,
+                  conn.id
+                )}
                 isCodex={providerId === "codex" || providerId === "codex-app-server"}
                 isCcCompatible={isCcCompatible}
                 cliproxyapiEnabled={cpaProviderEnabled}
@@ -633,11 +640,10 @@ export default function ConnectionsListPanel({
                         ? (enabled) => handleToggleConnectionAutoSync(conn.id, enabled)
                         : undefined
                     }
-                    onToggleHealthCheck={
-                      handleToggleConnectionHealthCheck
-                        ? (enabled) => handleToggleConnectionHealthCheck(conn.id, enabled)
-                        : undefined
-                    }
+                    onToggleHealthCheck={healthCheckToggleHandler(
+                      handleToggleConnectionHealthCheck,
+                      conn.id
+                    )}
                     isCodex={providerId === "codex" || providerId === "codex-app-server"}
                     isCcCompatible={isCcCompatible}
                     cliproxyapiEnabled={cpaProviderEnabled}

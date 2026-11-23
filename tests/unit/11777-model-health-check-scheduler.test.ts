@@ -238,3 +238,72 @@ test("interval override via MODEL_HEALTH_CHECK_INTERVAL_HOURS", () => {
     scheduler.MODEL_HEALTH_CHECK_DEFAULT_INTERVAL_MS
   );
 });
+
+test("a local exclusive-lease 409 rejection is a skipped probe, never a hide", async () => {
+  const outcome = scheduler.mapSingleModelTestResult({
+    modelId: "prov-lease/leased-model",
+    status: "error",
+    latencyMs: 0,
+    httpStatus: 409,
+    error: "Model tests are unavailable for managed lease connections",
+  });
+  assert.equal(outcome.skipped, true);
+  assert.equal(classification.isHideWorthyFailure(outcome), false);
+
+  const deps = makeDeps({ "leased-model": outcome });
+  const result = await scheduler.runHealthCheckForConnection(conn("prov-lease"), deps);
+  assert.deepEqual(result.hidden, []);
+  assert.equal(deps.hidden.has("leased-model"), false);
+
+  // A genuine upstream 409 (it carries an upstream statusCode) is still a hard failure.
+  const upstream = scheduler.mapSingleModelTestResult({
+    modelId: "prov-lease/real",
+    status: "error",
+    latencyMs: 10,
+    httpStatus: 409,
+    statusCode: 409,
+    error: "conflict",
+  });
+  assert.equal(upstream.skipped, undefined);
+});
+
+test("ownership is read live: a manual takeover mid-pass is not overwritten", async () => {
+  marks.markHiddenByHealthCheck("prov-live", "model-a");
+  marks.markHiddenByHealthCheck("prov-live", "model-b");
+  const deps = makeDeps(
+    { "model-a": { status: "ok" }, "model-b": { status: "ok" } },
+    new Set(["model-a", "model-b"])
+  );
+  // The user takes over model-b while the pass is probing model-a.
+  const probe = deps.probe;
+  deps.probe = async (provider, modelId, connectionId) => {
+    const outcome = await probe(provider, modelId, connectionId);
+    if (modelId === "model-a") marks.clearHealthCheckHiddenMarks("prov-live", ["model-b"]);
+    return outcome;
+  };
+  const result = await scheduler.runHealthCheckForConnection(conn("prov-live"), deps);
+  assert.deepEqual(result.restored, ["model-a"]);
+  assert.equal(deps.hidden.has("model-b"), true);
+});
+
+test("catalogs above the per-connection cap are walked across successive cycles", async () => {
+  const cap = scheduler.MODEL_HEALTH_CHECK_MAX_MODELS_PER_CONNECTION;
+  const models = Array.from({ length: cap + 50 }, (_, i) => `m${i}`);
+  const first = makeDeps({}, new Set(), models);
+  await scheduler.runHealthCheckForConnection(conn("prov-big"), first);
+  const second = makeDeps({}, new Set(), models);
+  await scheduler.runHealthCheckForConnection(conn("prov-big"), second);
+
+  assert.equal(first.probed.length, cap);
+  assert.equal(first.probed[0], "m0");
+  assert.equal(second.probed.length, cap);
+  assert.equal(second.probed[0], `m${cap}`);
+  assert.equal(new Set([...first.probed, ...second.probed]).size, models.length);
+});
+
+test("start/stop scheduler arms and clears its timers", () => {
+  scheduler.startModelHealthCheckScheduler(60_000);
+  scheduler.stopModelHealthCheckScheduler();
+  // A second stop is a harmless no-op.
+  scheduler.stopModelHealthCheckScheduler();
+});
