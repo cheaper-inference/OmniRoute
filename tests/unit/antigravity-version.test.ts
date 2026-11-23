@@ -301,3 +301,58 @@ test("a cache clear during an in-flight lookup is not undone when it fails", asy
   await resolveAntigravityIdeVersion(failingFetch);
   assert.equal(calls, 2);
 });
+
+test("a stale successful lookup does not populate the cache", async () => {
+  clearAntigravityVersionCaches();
+  let release: () => void = () => {};
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const pending = resolveAntigravityIdeVersion((async () => {
+    await gate;
+    return { ok: true, json: async () => [{ version: "9.9.9" }] };
+  }) as unknown as typeof fetch);
+
+  clearAntigravityVersionCaches();
+  release();
+  const version = await pending;
+
+  assert.equal(version, "9.9.9", "the caller still receives what it resolved");
+  assert.equal(
+    getCachedAntigravityIdeVersion(),
+    ANTIGRAVITY_IDE_FALLBACK_VERSION,
+    "a lookup started before the clear must not fill the cache"
+  );
+});
+
+test("a settled stale lookup does not free the slot a newer lookup owns", async () => {
+  clearAntigravityVersionCaches();
+  const releases: Array<() => void> = [];
+  const gates = [0, 1].map(
+    () =>
+      new Promise<void>((resolve) => {
+        releases.push(resolve);
+      })
+  );
+  let calls = 0;
+  const fetchImpl = (async () => {
+    const index = calls;
+    calls += 1;
+    await gates[index];
+    if (index === 0) throw new Error("feed down");
+    return { ok: true, json: async () => [{ version: "9.9.9" }] };
+  }) as unknown as typeof fetch;
+
+  const stale = resolveAntigravityIdeVersion(fetchImpl);
+  clearAntigravityVersionCaches();
+  const current = resolveAntigravityIdeVersion(fetchImpl);
+  releases[0]();
+  await stale;
+
+  // The stale lookup settled while the newer one still owns the slot: a third call has to
+  // join the newer lookup instead of starting another fetch.
+  const joined = resolveAntigravityIdeVersion(fetchImpl);
+  releases[1]();
+  assert.equal(await joined, await current);
+  assert.equal(calls, 2, "the stale finally must not free the newer lookup's slot");
+});
