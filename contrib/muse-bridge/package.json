@@ -1,0 +1,18 @@
+{
+  "name": "muse-bridge",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "OpenAI-compatible bridge for the Muse (muse.ai) web account: drives the real client in Chromium.",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "login": "node src/cli-login.js"
+  },
+  "dependencies": {
+    "playwright": "1.62.1"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
