@@ -31,8 +31,16 @@ export function credentialCooldownResponse(
       type: "invalid_request_error",
     });
   }
-  const errorMsg = lastError || credentials.lastError || "Unavailable";
-  const status = lastStatus || Number(credentials.lastErrorCode) || HTTP_STATUS.SERVICE_UNAVAILABLE;
+  // A model-only cooldown answers with the lock's own upstream status and message: an earlier
+  // attempt's status (a 429 from another connection) would hide a 400 billing lock.
+  const modelScoped = credentials.cooldownScope === "model";
+  const lockStatus = Number(credentials.lastErrorCode) || null;
+  const errorMsg =
+    (modelScoped ? credentials.lastError || lastError : lastError || credentials.lastError) ||
+    "Unavailable";
+  const status =
+    (modelScoped ? lockStatus || lastStatus : lastStatus || lockStatus) ||
+    HTTP_STATUS.SERVICE_UNAVAILABLE;
   const cooldownModel =
     typeof credentials.cooldownModel === "string" && credentials.cooldownModel.trim().length > 0
       ? credentials.cooldownModel.trim()

@@ -130,3 +130,26 @@ test("a model-only cooldown from a 429 keeps the existing model_cooldown answer 
     Object.fromEntries(expected.headers.entries())
   );
 });
+
+test("a prior attempt's 429 does not replace a model-scoped 400 lock's status and message", async () => {
+  const conn = await seedClaude("claude-20969-prior-429");
+  fallback.lockModel("claude", conn.id, MODEL, "quota_exhausted", 120_000, {
+    lastError: CREDIT_MESSAGE,
+    errorCode: 400,
+  });
+  const credentials = await auth.getProviderCredentials("claude", null, null, MODEL);
+  assert.equal(credentials.cooldownScope, "model");
+
+  const response = handleNoCredentials(
+    credentials,
+    null,
+    "claude",
+    MODEL,
+    "rate limit exceeded, please slow down",
+    429
+  );
+  const json = (await response.json()) as ApiErrorJson;
+  assert.equal(response.status, 400);
+  assert.match(json.error?.message ?? "", /credit balance is too low/i);
+  assert.notEqual(json.error?.code, "model_cooldown");
+});
