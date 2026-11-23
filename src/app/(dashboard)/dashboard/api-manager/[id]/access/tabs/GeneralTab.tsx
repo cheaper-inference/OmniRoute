@@ -10,6 +10,7 @@ import Input from "@/shared/components/Input";
 import { ENDPOINT_CATEGORIES } from "@/shared/constants/endpointCategories";
 import { toLocalDateTimeInputValue } from "@/app/(dashboard)/dashboard/api-manager/apiManagerPageUtils";
 import RoutingEntryLink from "@/shared/components/routing/RoutingEntryLink";
+import { KEY_EXPIRY_PRESET_DAYS, endOfLocalDayAfterDays } from "@/shared/utils/keyExpiry";
 import {
   MAX_KEY_NAME_LENGTH,
   type ApiKeyAccessData,
@@ -170,6 +171,19 @@ function ExpirationDateField({ formState, setExpiresAt }: GeneralSectionProps<"s
           {tc("clear")}
         </Button>
       </div>
+      <div className="flex flex-wrap gap-2">
+        {KEY_EXPIRY_PRESET_DAYS.map((days) => (
+          <Button
+            key={days}
+            variant="outline"
+            size="sm"
+            onClick={() => setExpiresAt(endOfLocalDayAfterDays(days, new Date()).toISOString())}
+          >
+            {t("keyExpiryPresetPlusDays", { days })}
+          </Button>
+        ))}
+      </div>
+      <p className="text-xs text-text-muted">{t("keyExpiryPresetsHint")}</p>
     </div>
   );
 }
