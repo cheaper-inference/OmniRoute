@@ -57,7 +57,7 @@ export async function GET(request: Request) {
   }
 }
 
-// ============ POST — delegação de entrada à frota do Conductor (PRD Conductor RF5) ============
+// ============ POST — inbound delegation to the Conductor fleet (PRD Conductor RF5) ============
 
 const delegationSchema = z.object({
   skill: z.string().default("conductor"),
@@ -107,9 +107,9 @@ export function authenticateA2A(request: Request): boolean {
 }
 
 /**
- * Traduz uma task A2A externa em `POST /v1/tasks` do hub do OmniConductor.
- * Só skills da frota (`conductor` / `conductor-cli-<profile>` — as anunciadas no
- * Agent Card) são delegáveis; os estados voltam pelo espelho SSE→A2A (RF1).
+ * Translates an external A2A task into `POST /v1/tasks` on the OmniConductor hub.
+ * Only fleet skills (`conductor` / `conductor-cli-<profile>` — as advertised in the
+ * Agent Card) are delegable; states return through the SSE→A2A mirror (RF1).
  */
 
 /**

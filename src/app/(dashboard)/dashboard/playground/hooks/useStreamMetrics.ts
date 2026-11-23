@@ -6,10 +6,10 @@ import type { StreamMetrics } from "@/shared/schemas/playground";
 import { computeMetrics } from "@/lib/playground/streamMetrics";
 
 /**
- * Mede TTFT/TPS client-perceived (D12). `start()` ao disparar request,
- * `onFirstChunk()` ao receber 1º chunk SSE, `onChunk(tokens)` ao processar
- * cada chunk com tokens, `finish(usage?)` ao stream completar (com optional
- * usage do upstream para tokensIn/tokensOut precisos).
+ * Measures client-perceived TTFT/TPS (D12). `start()` when firing the request,
+ * `onFirstChunk()` on the 1st SSE chunk, `onChunk(tokens)` when processing
+ * each chunk with tokens, `finish(usage?)` when the stream completes (with optional
+ * upstream usage for accurate tokensIn/tokensOut).
  */
 export interface UseStreamMetrics {
   metrics: StreamMetrics;

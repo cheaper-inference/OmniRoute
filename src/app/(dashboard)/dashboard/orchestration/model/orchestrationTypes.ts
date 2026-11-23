@@ -90,7 +90,7 @@ export function orchStateColor(state: OrchState): string {
   return STATE_VAR[state];
 }
 
-/** Fundo de badge com alpha — hex+"20" não funciona com var(); color-mix sim. */
+/** Badge background with alpha — hex+"20" does not work with var(); color-mix does. */
 export function orchStateBadgeBg(state: OrchState): string {
   return `color-mix(in srgb, ${STATE_VAR[state]} 13%, transparent)`;
 }

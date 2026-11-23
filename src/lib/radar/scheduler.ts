@@ -1,6 +1,6 @@
 /**
  * scheduler.ts — daily background sync for the Radar feed (spec: "GET 1×/dia,
- * só quando opt-in").
+ * only when opted in").
  *
  * Inertia contract: a flag-off boot NEVER creates a timer. The scheduler only
  * starts from (a) `initRadarSyncScheduler()` at boot when the flag AND the

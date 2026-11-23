@@ -252,7 +252,7 @@ function sortProvidersForTopology(
   };
   return [...providers].sort((a, b) => {
     const d = rank(a) - rank(b);
-    return d !== 0 ? d : a.provider.toLowerCase().localeCompare(b.provider.toLowerCase()); // ASCII kasıtlı
+    return d !== 0 ? d : a.provider.toLowerCase().localeCompare(b.provider.toLowerCase()); // ASCII is intentional
   });
 }
 

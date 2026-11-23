@@ -307,8 +307,8 @@ function normalizeLanguageConfig(value: unknown): CompressionLanguageConfig {
 function normalizeOmniglyphConfig(value: unknown): OmniglyphConfig {
   const record = toRecord(value);
   const profile = record.profile;
-  // Um perfil desconhecido não pode virar "roda com a política padrão": cai para
-  // o default explícito, e o adapter ainda falha fechado se algo passar por aqui.
+  // An unknown profile must not turn into "runs with the default policy": fall back to
+  // the explicit default, and the adapter still fails closed if anything slips through here.
   return {
     profile:
       profile === "coding-safe" || profile === "balanced" || profile === "passthrough"

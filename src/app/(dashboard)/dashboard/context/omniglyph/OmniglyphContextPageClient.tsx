@@ -24,8 +24,8 @@ interface CompressionConfigLite {
   omniglyph?: { profile?: string };
 }
 
-/** Perfis do pacote, na ordem do mais permissivo ao mais restrito. O primeiro é
- *  o default: a política que os recibos publicados mediram. */
+/** Package profiles, from most permissive to most restrictive. The first is
+ *  the default: the policy the published receipts measured. */
 const PROFILES = [
   { id: "aggressive", key: "aggressive" },
   { id: "balanced", key: "balanced" },
@@ -356,7 +356,7 @@ export default function OmniglyphContextPageClient() {
     void save({ engines: { omniglyph: { enabled: next } } }, () => setEnabled(previous));
   };
 
-  // O perfil vive na config do engine (não no mapa `engines`), então vai num PUT próprio.
+  // The profile lives in the engine config (not in the `engines` map), so it uses its own PUT.
   const changeProfile = (next: ProfileId) => {
     const previous = profile;
     setProfile(next);

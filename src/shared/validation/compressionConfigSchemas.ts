@@ -351,11 +351,11 @@ export const contextBudgetConfigSchema = z
   .strict();
 
 /**
- * Perfil semântico do OmniGlyph. O perfil é um TETO: o pacote não deixa um
- * override reabrir uma lane que o perfil fechou. `aggressive` é o default e a
- * política que os recibos publicados mediram; `coding-safe`/`balanced` mantêm
- * system, schemas de tools e tool results nativos, e não comprimem nada até a
- * sessão acumular histórico.
+ * OmniGlyph semantic profile. The profile is a CEILING: the pack does not let an
+ * override reopen a lane the profile closed. `aggressive` is the default and the
+ * policy the published receipts measured; `coding-safe`/`balanced` keep the
+ * system, tool schemas and native tool results, and compress nothing until the
+ * session accumulates history.
  */
 export const omniglyphConfigSchema = z
   .object({

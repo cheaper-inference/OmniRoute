@@ -27,13 +27,13 @@ export interface SqliteAdapter {
   exec(sql: string): void;
   pragma(pragmaStr: string, options?: { simple?: boolean }): unknown;
 
-  /** Retorna uma função que quando chamada executa fn em uma transação DEFERRED */
+  /** Returns a function that, when called, runs fn in a DEFERRED transaction */
   transaction<T>(fn: (...args: unknown[]) => T): (...args: unknown[]) => T;
 
-  /** Executa fn em uma transação IMMEDIATE (adquire write lock imediatamente) */
+  /** Runs fn in an IMMEDIATE transaction (acquires the write lock immediately) */
   immediate(fn: () => void): void;
 
-  /** Backup nativo ou file-copy fallback */
+  /** Native backup or file-copy fallback */
   backup(destination: string): Promise<void>;
 
   checkpoint(mode?: string): void;

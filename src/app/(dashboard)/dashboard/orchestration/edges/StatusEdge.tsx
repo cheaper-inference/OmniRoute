@@ -26,7 +26,7 @@ interface StatusEdgeData {
   particles?: boolean;
 }
 
-/** Mesma precedência do edgeStyle da v1: failed > active > succeeded > idle. */
+/** Same precedence as v1's edgeStyle: failed > active > succeeded > idle. */
 function strokeFor(d: StatusEdgeData): { stroke: string; strokeWidth: number; opacity: number } {
   if (d.state === "failed")
     return { stroke: orchStateColor("failed"), strokeWidth: 2, opacity: 0.85 };

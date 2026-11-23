@@ -417,15 +417,15 @@ function parseApiError(
 
   const isCredentials =
     typeof msg === "string" &&
-    // eslint-disable-next-line no-restricted-syntax -- teknik string kontrolü, kullanıcı metni araması değil
+    // eslint-disable-next-line no-restricted-syntax -- technical string check, not a user-text search
     (msg.toLowerCase().includes("no credentials") ||
-      // eslint-disable-next-line no-restricted-syntax -- teknik string kontrolü, kullanıcı metni araması değil
+      // eslint-disable-next-line no-restricted-syntax -- technical string check, not a user-text search
       msg.toLowerCase().includes("invalid api key") ||
-      // eslint-disable-next-line no-restricted-syntax -- teknik string kontrolü, kullanıcı metni araması değil
+      // eslint-disable-next-line no-restricted-syntax -- technical string check, not a user-text search
       msg.toLowerCase().includes("unauthorized") ||
-      // eslint-disable-next-line no-restricted-syntax -- teknik string kontrolü, kullanıcı metni araması değil
+      // eslint-disable-next-line no-restricted-syntax -- technical string check, not a user-text search
       msg.toLowerCase().includes("authentication") ||
-      // eslint-disable-next-line no-restricted-syntax -- teknik string kontrolü, kullanıcı metni araması değil
+      // eslint-disable-next-line no-restricted-syntax -- technical string check, not a user-text search
       msg.toLowerCase().includes("api key") ||
       statusCode === 401 ||
       statusCode === 403);
