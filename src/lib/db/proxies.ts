@@ -146,8 +146,8 @@ function insertProxyRow(
 ) {
   db.prepare(
     `INSERT INTO proxy_registry
-      (id, name, type, host, port, username, password, region, notes, status, source, family, subscription_id, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      (id, name, type, host, port, username, password, region, notes, status, source, family, subscription_id, rotating_egress, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
   ).run(
     id,
     payload.name,
@@ -162,6 +162,7 @@ function insertProxyRow(
     payload.source || "manual",
     payload.family || "auto",
     payload.subscriptionId ?? null,
+    payload.rotatingEgress === true ? 1 : 0,
     now,
     now
   );
@@ -189,12 +190,14 @@ function updateProxyRow(
     // otherwise preserve whatever the existing row already carries.
     subscriptionId:
       payload.subscriptionId === undefined ? existing.subscriptionId : payload.subscriptionId,
+    rotatingEgress:
+      payload.rotatingEgress === undefined ? existing.rotatingEgress : payload.rotatingEgress,
     updatedAt: now,
   };
 
   db.prepare(
     `UPDATE proxy_registry
-       SET name = ?, type = ?, host = ?, port = ?, username = ?, password = ?, region = ?, notes = ?, status = ?, source = ?, family = ?, subscription_id = ?, updated_at = ?
+       SET name = ?, type = ?, host = ?, port = ?, username = ?, password = ?, region = ?, notes = ?, status = ?, source = ?, family = ?, subscription_id = ?, rotating_egress = ?, updated_at = ?
      WHERE id = ?`
   ).run(
     merged.name,
@@ -209,6 +212,7 @@ function updateProxyRow(
     merged.source || "manual",
     merged.family || "auto",
     merged.subscriptionId ?? null,
+    merged.rotatingEgress === true ? 1 : 0,
     merged.updatedAt,
     id
   );
@@ -284,7 +288,7 @@ export async function listProxies(options?: {
   const offset = options?.offset ?? 0;
   const db = getDbInstance();
   let sql =
-    "SELECT id, name, type, host, port, username, password, region, notes, status, source, family, subscription_id, created_at, updated_at FROM proxy_registry ORDER BY datetime(updated_at) DESC, name ASC";
+    "SELECT id, name, type, host, port, username, password, region, notes, status, source, family, subscription_id, rotating_egress, created_at, updated_at FROM proxy_registry ORDER BY datetime(updated_at) DESC, name ASC";
   const params: unknown[] = [];
   if (limit !== undefined) {
     sql += " LIMIT ? OFFSET ?";
@@ -309,7 +313,7 @@ function getProxyRowById(
   const includeSecrets = options?.includeSecrets === true;
   const row = db
     .prepare(
-      "SELECT id, name, type, host, port, username, password, region, notes, status, source, family, subscription_id, created_at, updated_at FROM proxy_registry WHERE id = ?"
+      "SELECT id, name, type, host, port, username, password, region, notes, status, source, family, subscription_id, rotating_egress, created_at, updated_at FROM proxy_registry WHERE id = ?"
     )
     .get(id);
   if (!row) return null;
