@@ -338,15 +338,21 @@ async function exchangeRefreshToken(
     client_id: SENSENOVA_CLIENT_ID,
   });
 
-  const response = await fetchWithConnectionProxy(connectionId, SENSENOVA_TOKEN_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-      Accept: "application/json",
-    },
-    body: body.toString(),
-    signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
-  });
+  let response: Awaited<ReturnType<typeof fetchWithConnectionProxy>> = null;
+  try {
+    response = await fetchWithConnectionProxy(connectionId, SENSENOVA_TOKEN_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        Accept: "application/json",
+      },
+      body: body.toString(),
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+    });
+  } catch {
+    lastRefreshFailure.set(connectionId, "transient");
+    return null;
+  }
   if (!response) {
     lastRefreshFailure.set(connectionId, "transient");
     return null;
@@ -356,6 +362,12 @@ async function exchangeRefreshToken(
     // having a bad day, and the short auth window would just make us retry a struggling host.
     const dead = response.status === 400 || response.status === 401;
     lastRefreshFailure.set(connectionId, dead ? "auth" : "transient");
+    if (dead) {
+      // The platform rejected this credential pair: keeping the revoked access token around
+      // would make every later read try it again, fail, and re-run this exchange.
+      memoryAccessTokens.delete(connectionId);
+      latestRefreshTokens.delete(connectionId);
+    }
     return null;
   }
 
@@ -582,9 +594,10 @@ export async function fetchSensenovaQuota(
 
     const session = await resolveSession(connectionId, psd);
     if (!session) {
-      // The credential just proved unusable; remember it briefly so every routing
-      // pass does not retry it, but keep the window short for a quick fix.
-      if (stillCurrent()) rememberQuota(connectionId, null, "auth");
+      // A rejected credential gets the short auth window so a fix is picked up quickly; an
+      // endpoint that is merely down stays transient and is not retried as aggressively.
+      const reason = lastRefreshFailure.get(connectionId) ?? "auth";
+      if (stillCurrent()) rememberQuota(connectionId, null, reason);
       return null;
     }
 

@@ -1098,3 +1098,31 @@ test("a refresh rejected outright is cached as an auth failure, not as transient
     Date.now = realNow;
   }
 });
+
+test("a token endpoint outage is cached as transient, not as an auth failure", async () => {
+  const connectionId = `sn-outage-${Date.now()}`;
+  invalidateSensenovaQuotaCache(connectionId);
+  let tokenCalls = 0;
+
+  globalThis.fetch = (async () => {
+    tokenCalls += 1;
+    throw new Error("fetch failed");
+  }) as typeof fetch;
+
+  const connection = { providerSpecificData: { [SENSENOVA_PSD_REFRESH_TOKEN]: "stored-refresh" } };
+
+  assert.equal(await fetchSensenovaQuota(connectionId, connection), null);
+  assert.equal(tokenCalls, 1);
+
+  // Ten seconds on: an outage is still held back by the transient window. Labelling it auth
+  // would have expired after 5s and re-hit a console that is already struggling.
+  const realNow = Date.now;
+  const base = realNow();
+  Date.now = () => base + 10_000;
+  try {
+    assert.equal(await fetchSensenovaQuota(connectionId, connection), null);
+    assert.equal(tokenCalls, 1, "an outage must not be retried inside the transient window");
+  } finally {
+    Date.now = realNow;
+  }
+});
