@@ -211,6 +211,41 @@ describe("acquireBrowserContext proxy lookup failure", () => {
   });
 });
 
+describe("acquireBrowserContext proxy forwarding", () => {
+  it("hands the resolved account proxy to browser.newContext", async () => {
+    const playwright = await import("playwright");
+    const originalLaunch = playwright.chromium.launch;
+    const originalPoolFlag = process.env.OMNIROUTE_BROWSER_POOL;
+    const seen: Array<Record<string, unknown>> = [];
+    process.env.OMNIROUTE_BROWSER_POOL = "on";
+    playwright.chromium.launch = (async () => ({
+      isConnected: () => true,
+      newContext: async (options: Record<string, unknown>) => {
+        seen.push(options);
+        return { close: async () => undefined, on: () => undefined, pages: () => [] };
+      },
+      close: async () => undefined,
+    })) as never;
+    __resetBrowserPoolMetricsForTest();
+    try {
+      const pooled = await acquireBrowserContext("gemini-web", {
+        cookieDomain: "gemini-web.test",
+        proxyDeps: {
+          resolveProxy: async () => ({ host: "10.0.0.9", port: 1080, type: "socks5" }),
+        },
+      });
+      assert.equal(seen.length, 1);
+      assert.deepEqual(seen[0].proxy, { server: "socks5://10.0.0.9:1080" });
+      assert.equal(typeof pooled.context.close, "function");
+    } finally {
+      playwright.chromium.launch = originalLaunch;
+      if (originalPoolFlag === undefined) delete process.env.OMNIROUTE_BROWSER_POOL;
+      else process.env.OMNIROUTE_BROWSER_POOL = originalPoolFlag;
+      await shutdownPool("test-cleanup");
+    }
+  });
+});
+
 describe("resolvePlaywrightProxyForConnection", () => {
   it("prefers the connection-scoped proxy and never consults the provider resolver", async () => {
     let providerCalls = 0;

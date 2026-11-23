@@ -45,6 +45,8 @@ export interface BrowserPoolContextOptions {
   timezone?: string;
   preferCloakbrowser?: boolean;
   proxyProviderKey?: string;
+  /** Test seam: resolve the context proxy without touching the database. */
+  proxyDeps?: ResolvePlaywrightProxyDeps;
   /** Some first-party anti-bot flows reject Chromium's headless mode even with valid cookies. */
   headless?: boolean;
   /**
@@ -637,7 +639,7 @@ export async function acquireBrowserContext(
   const createPromise = (async (): Promise<PooledContext> => {
     const [browser, proxy] = await Promise.all([
       launchBrowser(options),
-      resolveBrowserContextProxy(key, options),
+      resolveBrowserContextProxy(key, options, options.proxyDeps),
     ]);
     const isStealth = headless && (state.engine === "obscura" || state.cloakLaunch !== null);
     const context = await browser.newContext({

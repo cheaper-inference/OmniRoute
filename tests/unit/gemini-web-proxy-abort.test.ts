@@ -15,16 +15,23 @@ type ContextArg = { proxy?: unknown };
 async function installFakePlaywright(options: {
   onNewContext?: (arg: ContextArg) => void;
   newContext: () => Promise<unknown>;
+  /** Holds the launch open so an abort can land before the context is created. */
+  launchDelayMs?: number;
 }) {
   const mod = await import("playwright");
   const original = mod.chromium.launch;
-  mod.chromium.launch = (async () => ({
-    newContext: async (arg: ContextArg) => {
-      options.onNewContext?.(arg);
-      return options.newContext();
-    },
-    close: async () => {},
-  })) as unknown as typeof original;
+  mod.chromium.launch = (async () => {
+    if (options.launchDelayMs) {
+      await new Promise((done) => setTimeout(done, options.launchDelayMs));
+    }
+    return {
+      newContext: async (arg: ContextArg) => {
+        options.onNewContext?.(arg);
+        return options.newContext();
+      },
+      close: async () => {},
+    };
+  }) as unknown as typeof original;
   return () => {
     mod.chromium.launch = original;
   };
@@ -59,6 +66,37 @@ test("an already-aborted signal never creates a browser context", async () => {
 
     assert.equal(statusOf(result), 499, "an aborted request must not report success");
     assert.equal(newContextCalls, 0, "no context may be created for an aborted request");
+  } finally {
+    restore();
+  }
+});
+
+test("an abort that lands after the pre-check stops before creating a context", async () => {
+  const controller = new AbortController();
+  let newContextCalls = 0;
+  const restore = await installFakePlaywright({
+    launchDelayMs: 50,
+    newContext: async () => {
+      newContextCalls += 1;
+      return { close: async () => {} };
+    },
+  });
+
+  try {
+    // The pre-check has already passed by the time this fires: the request is
+    // inside the launch/proxy window the post-resolution re-check exists for.
+    setTimeout(() => controller.abort(new Error("cancelled while the proxy lookup ran")), 10);
+    const result = await new GeminiWebExecutor().execute({
+      model: "gemini-3.1-pro",
+      body: baseBody,
+      stream: false,
+      credentials: baseCredentials,
+      signal: controller.signal,
+      log: null,
+    } as never);
+
+    assert.equal(statusOf(result), 499, "an aborted request must not report success");
+    assert.equal(newContextCalls, 0, "the re-check must stop the request before newContext");
   } finally {
     restore();
   }
