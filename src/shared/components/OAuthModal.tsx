@@ -2,7 +2,11 @@
 
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import Icon from "./Icon";
-import { isCallbackStateAcceptable } from "./oauthCallbackState";
+import {
+  acceptsRelayedCallback,
+  isCallbackStateAcceptable,
+  MANUAL_CALLBACK_ONLY_PROVIDERS,
+} from "./oauthCallbackState";
 import { useTranslations } from "next-intl";
 import { Tabs, TabsList, TabsTrigger } from "@omniroute/ui-kit/tabs";
 
@@ -676,7 +680,13 @@ function LegacyOAuthModal({
         // For non-true-localhost (LAN IPs, remote) or manual fallback: use manual input mode (user pastes callback URL)
         if (!isTrueLocalhost || forceManual) {
           setStep("input");
-          window.open(data.authUrl, "oauth_auth");
+          // Manual-only providers open without an opener: the /callback page then keeps the
+          // URL on screen for the operator to copy instead of relaying it and closing.
+          window.open(
+            data.authUrl,
+            "oauth_auth",
+            MANUAL_CALLBACK_ONLY_PROVIDERS.has(provider) ? "noopener" : undefined
+          );
         } else {
           // Localhost: Open popup and wait for message
           setStep("waiting");
@@ -804,6 +814,9 @@ function LegacyOAuthModal({
   // Listen for OAuth callback via multiple methods
   useEffect(() => {
     if (!authData) return;
+    // A provider with no per-attempt binding (no state, no attempt key) never completes from a
+    // relayed callback: the operator pastes the callback URL instead (#20576, #15688).
+    if (!acceptsRelayedCallback(provider)) return;
     callbackProcessedRef.current = false; // Reset when authData changes
 
     // Handler for callback data - only process once
@@ -1032,6 +1045,16 @@ function LegacyOAuthModal({
 
       if (errorParam) {
         throw new Error(errorDescription || errorParam);
+      }
+
+      if (MANUAL_CALLBACK_ONLY_PROVIDERS.has(provider)) {
+        // The /callback page also left this attempt's code in localStorage; drop it so a later
+        // modal does not read it as its own relayed callback.
+        try {
+          localStorage.removeItem("oauth_callback");
+        } catch {
+          // localStorage may be unavailable
+        }
       }
 
       if (!code) {

@@ -124,9 +124,11 @@ export function getProvider(name) {
 
 /**
  * Explicit allowlist of providers whose authorize redirect never echoes `state` back
- * (regression of GHSA-3fxv-j4h8-9mgg fix #15688, see #20576 / #20580). Every other provider
+ * (regression of the #15688 callback-state fix, see #20576 / #20580). Every other provider
  * keeps the strict state binding enforced by `isCallbackStateAcceptable`.
  * - cline: authorize URL only carries client_type/callback_url/redirect_uri; redirect has `?code=` only.
+ *   With no state to bind, OAuthModal never completes it from a relayed callback: the operator
+ *   pastes the callback URL by hand (`MANUAL_CALLBACK_ONLY_PROVIDERS`).
  * - zed-hosted: native-app redirect is `?user_id=&access_token=`; the attempt is bound by its
  *   one-time RSA key pair (server decrypts with the attempt's private key verifier).
  */
