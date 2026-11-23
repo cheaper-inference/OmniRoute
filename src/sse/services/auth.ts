@@ -129,7 +129,10 @@ import { copilotRejectionFlag, lockCopilotModelNotSupported } from "./copilotMod
 import { isSharedWalletCredits402 } from "@omniroute/open-sse/services/accountFallback/sharedWalletCredits.ts";
 import { resolveAvalancheCooldownMs } from "@omniroute/open-sse/services/accountFallback/antiAvalanche.ts";
 import { isModelScopedAccessDenial } from "@omniroute/open-sse/services/accountFallback/modelScopedAccessDenial.ts";
-import { isModelUnsupported401 } from "@omniroute/open-sse/services/accountFallback/perModelFailureScope.ts";
+import {
+  isModelUnsupported401,
+  isRequestLargerThanRateLimit,
+} from "@omniroute/open-sse/services/accountFallback/perModelFailureScope.ts";
 import { postOutputFailureReachesLockout } from "@omniroute/open-sse/services/accountFallback/postOutputFailureStreak.ts";
 import { isOpencodeFreeTierRefusalForProvider } from "@omniroute/open-sse/executors/opencodeGeoBlock.ts";
 import { isOpencodeFreeTierSkipped } from "@omniroute/open-sse/services/opencodeFreeTierSkip.ts";
@@ -2689,6 +2692,10 @@ export async function markAccountUnavailable(
   // Preserve the transport's original 429; cooling Opus would hide the cause and
   // prevent healthy small requests from using the same connection afterward.
   if (isCIPayloadQuotaFailure(provider, status, options.structuredError?.code))
+    return { shouldFallback: false, cooldownMs: 0 };
+  // #21049: a request above the account's whole rate limit fails the same on every sibling.
+  // The account is healthy: return the 413 as-is, with no rotation and no model lockout.
+  if (isRequestLargerThanRateLimit(status, errorText))
     return { shouldFallback: false, cooldownMs: 0 };
 
   const currentMutex = markMutexes.get(connectionId) || Promise.resolve();
