@@ -27,10 +27,38 @@ const CACHE_SECRET = "omniroute-token-cache";
 /**
  * Build the dedup/rotation cache key for a (provider, refreshToken) pair.
  * Hashed so a raw refresh_token never sits in a Map key in plaintext.
+ *
+ * `discriminator` replaces the refresh_token for providers that refresh from a
+ * credential OTHER than an OAuth refresh_token (Devin Desktop's `auth1_…`). Those
+ * connections have no refresh_token, so without a discriminator every account of
+ * such a provider would hash to the same key and share one in-flight refresh —
+ * handing account A's tokens to account B.
  */
-export function getRefreshCacheKey(provider, refreshToken) {
-  const tokenHash = pbkdf2Sync(refreshToken, CACHE_SECRET, 1000, 32, "sha256").toString("hex");
+export function getRefreshCacheKey(provider, refreshToken, discriminator = null) {
+  const secret =
+    typeof refreshToken === "string" && refreshToken.length > 0 ? refreshToken : discriminator;
+  // No identifier at all: keep the historical shape so existing callers/tests stay
+  // stable. Such a connection must NOT use the shared in-flight cache (the caller
+  // guards on this), because the key cannot distinguish accounts.
+  if (typeof secret !== "string" || secret.length === 0) {
+    return `${provider}:anonymous`;
+  }
+  const tokenHash = pbkdf2Sync(secret, CACHE_SECRET, 1000, 32, "sha256").toString("hex");
   return `${provider}:${tokenHash}`;
+}
+
+/**
+ * True when this credentials object carries a usable per-connection identity for
+ * the refresh caches, so a shared in-flight promise cannot leak across accounts.
+ */
+export function hasRefreshCacheIdentity(credentials) {
+  if (!credentials || typeof credentials !== "object") return false;
+  if (typeof credentials.refreshToken === "string" && credentials.refreshToken.length > 0) {
+    return true;
+  }
+  return typeof credentials.refreshCacheDiscriminator === "string"
+    ? credentials.refreshCacheDiscriminator.length > 0
+    : false;
 }
 
 type RotationEntry = {
@@ -47,9 +75,13 @@ function cleanupRotationMap(now: number = Date.now()): void {
   }
 }
 
-export function lookupRotation(provider: string, refreshToken: string): RotationEntry | undefined {
+export function lookupRotation(
+  provider: string,
+  refreshToken: string,
+  discriminator: string | null = null
+): RotationEntry | undefined {
   cleanupRotationMap();
-  const key = getRefreshCacheKey(provider, refreshToken);
+  const key = getRefreshCacheKey(provider, refreshToken, discriminator);
   const entry = tokenRotationMap.get(key);
   if (!entry) return undefined;
   if (entry.expiresAt <= Date.now()) {
