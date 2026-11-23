@@ -993,6 +993,7 @@ export async function executeTargetAttempt(
       tag: "COMBO",
       exhaustedLogLevel: "info",
       structuredError,
+      upstreamErrorBody: errorBody,
     });
     const {
       target: targetWithConnection,
