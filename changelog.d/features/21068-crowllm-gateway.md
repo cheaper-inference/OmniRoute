@@ -1,0 +1,1 @@
+- **feat(providers):** CrowLLM joins as an API-key gateway with a live model catalog, passthrough ids and a `:free` shelf (31 of 39 free-suffixed ids bill at zero) ([#21068](https://github.com/cheaper-inference/OmniRoute/pull/21068)) — thanks @crowtf
