@@ -395,6 +395,20 @@ test("extractUsageFromResponse returns null for non-object response bodies", () 
 
 // ── extractUsage (streaming) tests ──
 
+test("extractUsage preserves the OpenAI Chat provider's reported total", () => {
+  const reported = extractUsage({
+    usage: { prompt_tokens: 100, completion_tokens: 7, total_tokens: 113 },
+  });
+  assert.equal(reported?.prompt_tokens, 100);
+  assert.equal(reported?.completion_tokens, 7);
+  assert.equal(reported?.total_tokens, 113);
+
+  const missing = extractUsage({
+    usage: { prompt_tokens: 100, completion_tokens: 7 },
+  });
+  assert.equal(missing?.total_tokens, undefined);
+});
+
 test("extractUsage reads response.completed with prompt_tokens_details.cached_tokens", () => {
   const usage = extractUsage({
     type: "response.completed",
