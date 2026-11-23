@@ -35,6 +35,7 @@ import {
   parsePluginOptions,
   resolveTimeouts,
   toResolvedOptions,
+  warnOnIgnoredFreeSignals,
 } from "./options.js";
 
 /**
@@ -102,6 +103,7 @@ export default Plugin.define({
         `[omniroute-plugin] [WARN] host log probe failed, keeping console output: ${err instanceof Error ? err.message : String(err)}`
       );
     }
+    warnOnIgnoredFreeSignals(ctx.options, parsed, (message) => log.warn(message));
     log.info(`[omniroute-v2] init providerId=${X}`);
     // The inference key stands in below when no management token is set, and
     // gateways usually reject that stand-in with 401/403. Say so once here,
