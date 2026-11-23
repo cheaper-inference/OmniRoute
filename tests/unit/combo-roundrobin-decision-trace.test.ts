@@ -122,4 +122,15 @@ test("round-robin records each target decision instead of leaving the trace empt
     ["google/rr-t3"],
     "the target after the successful one is reported as not_reached"
   );
+
+  // Each target is recorded once, and every entry names the step it belongs to: a wrong or
+  // empty executionKey, or a duplicate decision for the same target, would otherwise pass.
+  const targets = trace.decisions.map((d) => d.target);
+  assert.equal(new Set(targets).size, targets.length, "each target is recorded once");
+  for (const decision of trace.decisions) {
+    assert.ok(
+      typeof decision.step === "string" && decision.step.length > 0,
+      `decision for ${decision.target} records its step`
+    );
+  }
 });
