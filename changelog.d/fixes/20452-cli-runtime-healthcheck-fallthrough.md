@@ -1,0 +1,1 @@
+- fix(cli): fall through to the next PATH candidate when the first located CLI binary fails its healthcheck, so a stale npm shim no longer hides a working install (#20452)

@@ -31,11 +31,25 @@ import {
   profileNameFromModelId,
 } from "./setup-codex.mjs";
 
-/** Map a Codex-style effort to a Claude Code settings.json effortLevel. */
-function effortLevelFor(cfg) {
-  // Codex categories use xhigh/high/low/undefined; Claude Code accepts the same
-  // names (low|medium|high|xhigh). Pass through, omit for the "simple" tier.
-  return cfg.effort || undefined;
+// Claude Code effortLevel values, lowest first. `minimal`/`none` are catalog tiers but not
+// Claude Code levels, so they are never a clamp target.
+const CLAUDE_EFFORT_LEVELS = ["low", "medium", "high", "xhigh", "max"];
+
+/**
+ * Map a Codex-style effort to a Claude Code settings.json effortLevel.
+ * Codex categories use xhigh/high/low/undefined; Claude Code accepts the same names. Omitted
+ * for the "simple" tier. When the catalog row lists the model's `effort_tiers`, a level it
+ * does not offer is lowered to the highest listed level below it, and omitted when none fits.
+ */
+function effortLevelFor(cfg, effortTiers) {
+  const wanted = cfg?.effort || undefined;
+  const tiers = Array.isArray(effortTiers) ? effortTiers : [];
+  if (!wanted || tiers.length === 0 || tiers.includes(wanted)) return wanted;
+  const rank = CLAUDE_EFFORT_LEVELS.indexOf(wanted);
+  if (rank < 0) return wanted;
+  return CLAUDE_EFFORT_LEVELS.slice(0, rank)
+    .reverse()
+    .find((level) => tiers.includes(level));
 }
 
 /**
@@ -107,8 +121,10 @@ export function inheritedAnthropicKeyWarning(env = process.env) {
  * `contextWindow` is the model's real window from the catalog; without it the profile table's
  * `cfg.ctx` is used. The window rule (compact at 85% below 200k, else 190000) is the one
  * `omniroute launch` applies; it lives in claudeWindowEnv, shared by both.
+ * `effortTiers` is the catalog row's `capabilities.effort_tiers`; it keeps `effortLevel` within
+ * the levels the model offers.
  */
-export function buildProfileSettings(modelId, baseUrl, cfg, contextWindow) {
+export function buildProfileSettings(modelId, baseUrl, cfg, contextWindow, effortTiers) {
   const window = claudeWindowEnv(contextWindow ?? cfg?.ctx);
   const env = {
     ANTHROPIC_BASE_URL: baseUrl,
@@ -126,7 +142,7 @@ export function buildProfileSettings(modelId, baseUrl, cfg, contextWindow) {
     model: modelId,
     env,
   };
-  const effort = effortLevelFor(cfg);
+  const effort = effortLevelFor(cfg, effortTiers);
   if (effort) settings.effortLevel = effort;
   // NOTE: ANTHROPIC_AUTH_TOKEN is intentionally NOT written here — `omniroute
   // launch --profile` injects it from the active context, keeping the secret off
@@ -232,7 +248,8 @@ export async function syncClaudeProfilesFromModels(models, opts = {}) {
     // Same order as `omniroute launch`: max_input_tokens, then context_length.
     const catalogWindow =
       typeof m === "string" ? undefined : (m.max_input_tokens ?? m.context_length);
-    const content = buildProfileSettings(id, baseUrl, cfg, catalogWindow);
+    const effortTiers = typeof m === "string" ? undefined : m.capabilities?.effort_tiers;
+    const content = buildProfileSettings(id, baseUrl, cfg, catalogWindow, effortTiers);
 
     if (dryRun) {
       log(`\n── [dry-run] ${filePath} ──`);

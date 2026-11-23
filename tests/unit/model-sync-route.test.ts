@@ -174,7 +174,87 @@ test("model sync route requires authentication for external requests when auth i
 
   assert.equal(response.status, 401);
   assert.equal(body.error.message, "Authentication required");
-  assert.equal(body.error.type, "invalid_api_key");
+  assert.equal(body.error.type, "invalid_request");
+});
+
+test("model sync route accepts validated management subjects and enforces admin scope on oma_ tokens", async () => {
+  await resetStorage();
+  await enableAuth();
+
+  const { createAccessToken } = await import("../../src/lib/db/accessTokens.ts");
+  const { AUTHZ_HEADER_AUTH_KIND, AUTHZ_HEADER_AUTH_LABEL } =
+    await import("../../src/server/authz/headers.ts");
+
+  // 1. Stamped local-cli-token subject passes auth and reaches connection lookup (404)
+  const cliSubjectResponse = await modelSyncRoute.POST(
+    new Request("http://localhost/api/providers/missing/sync-models", {
+      method: "POST",
+      headers: {
+        [AUTHZ_HEADER_AUTH_KIND]: "management_key",
+        [AUTHZ_HEADER_AUTH_LABEL]: "local-cli-token",
+      },
+    }),
+    { params: { id: "missing" } }
+  );
+  assert.equal(cliSubjectResponse.status, 404);
+  assert.deepEqual(await cliSubjectResponse.json(), { error: "Connection not found" });
+
+  // 2. Admin-scoped CLI access token (`oma_...`) passes auth and reaches connection lookup (404)
+  const { secret: adminToken } = createAccessToken({ name: "sync-admin", scope: "admin" });
+  const adminTokenResponse = await modelSyncRoute.POST(
+    new Request("http://localhost/api/providers/missing/sync-models", {
+      method: "POST",
+      headers: { authorization: `Bearer ${adminToken}` },
+    }),
+    { params: { id: "missing" } }
+  );
+  assert.equal(adminTokenResponse.status, 404);
+  assert.deepEqual(await adminTokenResponse.json(), { error: "Connection not found" });
+
+  // 3. Read-scoped CLI access token (`oma_...`) is rejected with 403 on POST
+  const { secret: readToken } = createAccessToken({ name: "sync-read", scope: "read" });
+  const readTokenResponse = await modelSyncRoute.POST(
+    new Request("http://localhost/api/providers/missing/sync-models", {
+      method: "POST",
+      headers: { authorization: `Bearer ${readToken}` },
+    }),
+    { params: { id: "missing" } }
+  );
+  assert.equal(readTokenResponse.status, 403);
+});
+
+test("model sync route accepts a manage-scoped API key and rejects an inference-only key with 403", async () => {
+  await resetStorage();
+  await enableAuth();
+
+  const manageKey = await apiKeysDb.createApiKey("Manage Key", "machine-manage", ["manage"]);
+  const inferenceKey = await apiKeysDb.createApiKey("Inference Key", "machine-inference", ["chat"]);
+
+  // Inference-only key is rejected with 403
+  const forbiddenRes = await modelSyncRoute.POST(
+    new Request("http://localhost/api/providers/non-existent-id/sync-models", {
+      method: "POST",
+      headers: { authorization: `Bearer ${inferenceKey.key}` },
+    }),
+    { params: Promise.resolve({ id: "non-existent-id" }) }
+  );
+  assert.equal(forbiddenRes.status, 403);
+  const forbiddenBody = (await forbiddenRes.json()) as {
+    error: { message: string; type: string };
+  };
+  assert.equal(forbiddenBody.error.type, "invalid_request");
+  assert.ok(forbiddenBody.error.message.includes("lacks 'manage' scope"));
+
+  // Manage-scoped key passes auth and reaches connection lookup (404)
+  const allowedRes = await modelSyncRoute.POST(
+    new Request("http://localhost/api/providers/non-existent-id/sync-models", {
+      method: "POST",
+      headers: { authorization: `Bearer ${manageKey.key}` },
+    }),
+    { params: Promise.resolve({ id: "non-existent-id" }) }
+  );
+  assert.equal(allowedRes.status, 404);
+  assert.deepEqual(await allowedRes.json(), { error: "Connection not found" });
 });
 
 test("model sync route returns 404 for unknown connections after internal auth passes", async () => {
