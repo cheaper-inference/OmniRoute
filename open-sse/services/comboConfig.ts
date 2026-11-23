@@ -407,8 +407,12 @@ export function getDefaultComboConfig() {
  * config. Encapsulated here so the ternary lives in one place (DRY) and its inferred union
  * return type is the single source of truth for ComboContext.config (combo/context.ts).
  */
-export function resolveComboSetupConfig(combo: ComboConfigLike, settings: ComboSettingsLike) {
-  if (settings) return resolveComboConfig(combo, settings);
+export function resolveComboSetupConfig(
+  combo: ComboConfigLike,
+  settings: ComboSettingsLike,
+  provider?: string | null
+) {
+  if (settings) return resolveComboConfig(combo, settings, provider);
   const comboConfig = (combo?.config as Record<string, unknown>) || {};
   const defaults = getDefaultComboConfig();
   return {
@@ -420,7 +424,26 @@ export function resolveComboSetupConfig(combo: ComboConfigLike, settings: ComboS
     failoverBeforeRetryExplicit: comboConfig.failoverBeforeRetry === true,
     trackStreamReadinessInCircuitBreaker: Boolean(
       comboConfig.trackStreamReadinessInCircuitBreaker ??
-        defaults.trackStreamReadinessInCircuitBreaker
+      defaults.trackStreamReadinessInCircuitBreaker
     ),
   };
+}
+
+/**
+ * Resolve `trackStreamReadinessInCircuitBreaker` for a specific target provider
+ * (preserving `combo > provider > global > env > default` precedence) without
+ * adding conditional branches inside large combo dispatchers.
+ */
+export function resolveTrackStreamReadinessForProvider(
+  combo: ComboConfigLike,
+  settings: ComboSettingsLike,
+  provider?: string | null,
+  setupFallback?: boolean
+): boolean {
+  if (settings) {
+    return resolveComboConfig(combo, settings, provider).trackStreamReadinessInCircuitBreaker;
+  }
+  return setupFallback !== undefined
+    ? Boolean(setupFallback)
+    : resolveComboSetupConfig(combo, null).trackStreamReadinessInCircuitBreaker;
 }

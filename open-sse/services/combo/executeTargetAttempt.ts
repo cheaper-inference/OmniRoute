@@ -48,6 +48,7 @@ import { emit } from "../../../src/lib/events/eventBus";
 import { notifyWebhookEvent } from "../../../src/lib/webhookDispatcher";
 import { getSessionConnection } from "../sessionManager.ts";
 import { recordSuccessfulComboStickyBinding } from "./sessionStickiness.ts";
+import { resolveTrackStreamReadinessForProvider } from "../comboConfig.ts";
 import { recordStickyWeightedSuccess } from "./rrState.ts";
 import { resolveReasoningBufferedMaxTokens, toPositiveInteger } from "../reasoningTokenBuffer.ts";
 import { parseModel } from "../model.ts";
@@ -1135,7 +1136,10 @@ export async function executeTargetAttempt(
       shouldRecordProviderBreakerFailure({
         isStreamReadinessFailure,
         isStreamEarlyEof,
-        trackStreamReadinessInCircuitBreaker: Boolean(
+        trackStreamReadinessInCircuitBreaker: resolveTrackStreamReadinessForProvider(
+          deps.combo,
+          deps.settings,
+          provider,
           deps.config?.trackStreamReadinessInCircuitBreaker
         ),
         status: result.status,

@@ -32,6 +32,7 @@ import {
 import {
   resolveComboSetupConfig,
   resolveComboQueueDepth,
+  resolveTrackStreamReadinessForProvider,
 } from "../comboConfig.ts";
 import { getHiddenModelsByProvider } from "@/models";
 import * as semaphore from "../rateLimitSemaphore.ts";
@@ -1296,7 +1297,12 @@ export async function handleRoundRobinCombo({
             nextProvider: nextRrTarget?.provider,
             isStreamReadinessFailure,
             isStreamEarlyEof,
-            trackStreamReadiness: Boolean(config.trackStreamReadinessInCircuitBreaker),
+            trackStreamReadiness: resolveTrackStreamReadinessForProvider(
+              combo,
+              settings,
+              provider,
+              config.trackStreamReadinessInCircuitBreaker
+            ),
             result,
             skipProviderBreaker: fallbackResult.skipProviderBreaker,
             requestScopedFailure: scopedFailure,

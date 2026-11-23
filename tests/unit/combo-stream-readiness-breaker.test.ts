@@ -12,19 +12,17 @@ const {
   getDefaultComboConfig,
   resolveComboConfig,
   resolveComboSetupConfig,
+  resolveTrackStreamReadinessForProvider,
 } = await import("../../open-sse/services/comboConfig.ts");
-const { shouldRecordProviderBreakerFailure } = await import(
-  "../../open-sse/services/combo/comboPredicates.ts"
-);
+const { shouldRecordProviderBreakerFailure } =
+  await import("../../open-sse/services/combo/comboPredicates.ts");
 const { handleComboChat } = await import("../../open-sse/services/combo.ts");
 const rrState = await import("../../open-sse/services/combo/rrState.ts");
 const semaphore = await import("../../open-sse/services/rateLimitSemaphore.ts");
-const { getCircuitBreaker, resetAllCircuitBreakers } = await import(
-  "../../src/shared/utils/circuitBreaker.ts"
-);
-const { connectionCircuitBreakerName } = await import(
-  "../../open-sse/services/connectionCircuitBreaker.ts"
-);
+const { getCircuitBreaker, resetAllCircuitBreakers } =
+  await import("../../src/shared/utils/circuitBreaker.ts");
+const { connectionCircuitBreakerName } =
+  await import("../../open-sse/services/connectionCircuitBreaker.ts");
 const { comboRuntimeConfigSchema } = await import("../../src/shared/validation/schemas/combo.ts");
 const dbCore = await import("../../src/lib/db/core.ts");
 
@@ -245,9 +243,8 @@ test("shouldRecordProviderBreakerFailure still respects veto gates when trackStr
 });
 
 test("recordRoundRobinFailureTracking preserves upstream semaphore-only behavior when opt-in is off", async () => {
-  const { recordRoundRobinFailureTracking } = await import(
-    "../../open-sse/services/combo/roundRobinBreaker.ts"
-  );
+  const { recordRoundRobinFailureTracking } =
+    await import("../../open-sse/services/combo/roundRobinBreaker.ts");
   const log = makeLog();
 
   // Non-stream-readiness 503 with opt-in OFF must NOT record provider breaker failure,
@@ -309,9 +306,8 @@ test("recordRoundRobinFailureTracking preserves upstream semaphore-only behavior
 });
 
 test("recordRoundRobinFailureTracking records breaker and semaphore cooldown for stream readiness timeout only when opted in", async () => {
-  const { recordRoundRobinFailureTracking } = await import(
-    "../../open-sse/services/combo/roundRobinBreaker.ts"
-  );
+  const { recordRoundRobinFailureTracking } =
+    await import("../../open-sse/services/combo/roundRobinBreaker.ts");
   const log = makeLog();
 
   // Non-stream-readiness 503 even with opt-in ON keeps upstream semaphore-only behavior.
@@ -396,7 +392,8 @@ async function runComboWithReadinessTimeout(
   strategy: "priority" | "round-robin",
   comboName: string,
   trackFlag: boolean | undefined,
-  firstResponseFactory: () => Response = streamReadinessTimeoutResponse
+  firstResponseFactory: () => Response = streamReadinessTimeoutResponse,
+  settings: Record<string, unknown> | null = null
 ) {
   const combo = {
     name: comboName,
@@ -415,7 +412,7 @@ async function runComboWithReadinessTimeout(
     isModelAvailable: async () => true,
     relayOptions: undefined,
     signal: undefined,
-    settings: null,
+    settings,
     log: makeLog(),
     handleSingleModel: async (_b: unknown, modelStr: string) => {
       if (modelStr.startsWith("glm/")) {
@@ -490,4 +487,99 @@ test("round-robin combo does not record provider breaker failure for non-stream-
     );
     assert.equal(getCircuitBreaker("glm").getStatus().failureCount, 0);
   });
+});
+
+test("resolveComboSetupConfig and resolveTrackStreamReadinessForProvider preserve combo > provider > global > env precedence", () => {
+  withEnv("true", () => {
+    const settings = {
+      comboDefaults: { trackStreamReadinessInCircuitBreaker: true },
+      providerOverrides: {
+        glm: { trackStreamReadinessInCircuitBreaker: false },
+        openai: { trackStreamReadinessInCircuitBreaker: true },
+      },
+    };
+    assert.equal(
+      resolveComboSetupConfig({}, settings, "glm").trackStreamReadinessInCircuitBreaker,
+      false
+    );
+    assert.equal(resolveTrackStreamReadinessForProvider({}, settings, "glm"), false);
+    assert.equal(resolveTrackStreamReadinessForProvider({}, settings, "openai"), true);
+    assert.equal(
+      resolveTrackStreamReadinessForProvider(
+        { config: { trackStreamReadinessInCircuitBreaker: true } },
+        settings,
+        "glm"
+      ),
+      true
+    );
+    assert.equal(resolveTrackStreamReadinessForProvider({}, null, "glm", true), true);
+    assert.equal(resolveTrackStreamReadinessForProvider({}, null, "glm", false), false);
+  });
+});
+
+test("priority and round-robin setup paths honor providerOverrides opt-in, opt-out, and combo precedence", async () => {
+  for (const strategy of ["priority", "round-robin"] as const) {
+    // 1. Provider-only opt-in via settings.providerOverrides (env unset, combo unset)
+    await withEnv(undefined, async () => {
+      await runComboWithReadinessTimeout(
+        strategy,
+        `${strategy}-provider-optin`,
+        undefined,
+        streamReadinessTimeoutResponse,
+        { providerOverrides: { glm: { trackStreamReadinessInCircuitBreaker: true } } }
+      );
+      assert.equal(getCircuitBreaker("glm").getStatus().failureCount, 1);
+    });
+
+    resetAllCircuitBreakers();
+    semaphore.resetAll();
+
+    // 2. Explicit provider opt-out overrides env=true and global comboDefaults=true
+    await withEnv("true", async () => {
+      await runComboWithReadinessTimeout(
+        strategy,
+        `${strategy}-provider-optout`,
+        undefined,
+        streamReadinessTimeoutResponse,
+        {
+          comboDefaults: { trackStreamReadinessInCircuitBreaker: true },
+          providerOverrides: { glm: { trackStreamReadinessInCircuitBreaker: false } },
+        }
+      );
+      assert.equal(getCircuitBreaker("glm").getStatus().failureCount, 0);
+    });
+
+    resetAllCircuitBreakers();
+    semaphore.resetAll();
+
+    // 3a. Combo override true beats providerOverrides false
+    await withEnv(undefined, async () => {
+      await runComboWithReadinessTimeout(
+        strategy,
+        `${strategy}-combo-true-beats-provider-false`,
+        true,
+        streamReadinessTimeoutResponse,
+        { providerOverrides: { glm: { trackStreamReadinessInCircuitBreaker: false } } }
+      );
+      assert.equal(getCircuitBreaker("glm").getStatus().failureCount, 1);
+    });
+
+    resetAllCircuitBreakers();
+    semaphore.resetAll();
+
+    // 3b. Combo override false beats providerOverrides true
+    await withEnv("true", async () => {
+      await runComboWithReadinessTimeout(
+        strategy,
+        `${strategy}-combo-false-beats-provider-true`,
+        false,
+        streamReadinessTimeoutResponse,
+        { providerOverrides: { glm: { trackStreamReadinessInCircuitBreaker: true } } }
+      );
+      assert.equal(getCircuitBreaker("glm").getStatus().failureCount, 0);
+    });
+
+    resetAllCircuitBreakers();
+    semaphore.resetAll();
+  }
 });
