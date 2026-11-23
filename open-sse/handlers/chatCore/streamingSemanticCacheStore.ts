@@ -15,6 +15,7 @@ import {
   setCachedResponse as defaultSetCachedResponse,
   isCacheableForWrite as defaultIsCacheableForWrite,
   isTruncatedStreamBody as defaultIsTruncatedStreamBody,
+  isRefusalOrUnavailableCompletion as defaultIsRefusalOrUnavailableCompletion,
   responseCarriesToolCalls,
 } from "@/lib/semanticCache";
 import { isSmallEnoughForSemanticCache as defaultIsSmallEnough } from "../../utils/estimateSize.ts";
@@ -33,6 +34,7 @@ export interface StreamingSemanticCacheStoreDeps {
   isCacheableForWrite: typeof defaultIsCacheableForWrite;
   /** Optional so pre-existing callers/tests with partial deps keep working. */
   isTruncatedStreamBody?: typeof defaultIsTruncatedStreamBody;
+  isRefusalOrUnavailableCompletion?: typeof defaultIsRefusalOrUnavailableCompletion;
   isSmallEnoughForSemanticCache: typeof defaultIsSmallEnough;
   generateSignature: typeof defaultGenerateSignature;
   setCachedResponse: typeof defaultSetCachedResponse;
@@ -41,6 +43,7 @@ export interface StreamingSemanticCacheStoreDeps {
 const DEFAULT_DEPS: StreamingSemanticCacheStoreDeps = {
   isCacheableForWrite: defaultIsCacheableForWrite,
   isTruncatedStreamBody: defaultIsTruncatedStreamBody,
+  isRefusalOrUnavailableCompletion: defaultIsRefusalOrUnavailableCompletion,
   isSmallEnoughForSemanticCache: defaultIsSmallEnough,
   generateSignature: defaultGenerateSignature,
   setCachedResponse: defaultSetCachedResponse,
@@ -58,6 +61,8 @@ interface StreamingCacheArgs {
   streamUsage?: Record<string, unknown> | null;
   log?: LoggerLike;
   videoTranscriptSensitive?: boolean;
+  /** Reversible PII vault minted tokens: a cached copy would replay unresolvable tokens. */
+  piiTokensMinted?: boolean;
 }
 
 function streamTokensSaved(streamUsage: Record<string, unknown> | null | undefined): number {
@@ -124,6 +129,7 @@ export function storeStreamingSemanticCacheResponse(
   if (
     args.provider === "muse-code" ||
     args.videoTranscriptSensitive ||
+    args.piiTokensMinted ||
     !args.enabled ||
     args.streamStatus !== 200 ||
     !args.streamResponseBody ||
@@ -131,6 +137,9 @@ export function storeStreamingSemanticCacheResponse(
     // The stream summary keeps only a bounded text tail; it is not the whole answer.
     args.streamResponseBody._summary_text_tail === true ||
     (deps.isTruncatedStreamBody ?? defaultIsTruncatedStreamBody)(args.streamResponseBody) ||
+    (deps.isRefusalOrUnavailableCompletion ?? defaultIsRefusalOrUnavailableCompletion)(
+      args.streamResponseBody
+    ) ||
     responseCarriesToolCalls(args.streamResponseBody)
   ) {
     return;

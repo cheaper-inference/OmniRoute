@@ -43,7 +43,6 @@ import {
 import { getCursorUsage } from "./usage/cursor.ts";
 import { getKimiUsage } from "./usage/kimi.ts";
 import { getCodexUsage } from "./usage/codex.ts";
-import { throttleQuotaFetch } from "./quotaFetchThrottle.ts";
 import { getClaudeUsage, getClaudePlanLabel } from "./usage/claude.ts";
 import { getKiroUsage, buildKiroUsageResult, discoverKiroProfileArn } from "./usage/kiro.ts";
 // Re-exported para os testes kiro-* (importam de services/usage).
@@ -60,6 +59,7 @@ import { getPromptQlUsage } from "./usage/promptql.ts";
 import { getHyperAgentUsage } from "./usage/hyperagent.ts";
 import { getGitHubUsage, formatGitHubQuotaSnapshot, inferGitHubPlanName } from "./usage/github.ts";
 import { getCrofUsage } from "./usage/crof.ts";
+import { getMistralUsage } from "./usage/mistral.ts";
 import { getClinepassUsage } from "./usage/clinepass.ts";
 import { getNanoGptUsage } from "./usage/nanogpt.ts";
 import { getNanUsage } from "./usage/nan.ts";
@@ -175,11 +175,8 @@ export async function getUsageForProvider(
         forceRefresh: options.forceRefresh === true,
       });
     case "codex":
-      // /me/status and the quota-cache refresh reach this fetch with no
-      // caller-side pacing. Gate the start here so those paths, and any later
-      // one, cannot burst the usage endpoint. Callers that already acquired the
-      // shared gate wait at most one more interval.
-      await throttleQuotaFetch();
+      // The Codex leaf gates at the actual fetch boundary, after proxy
+      // resolution, so lazy setup cannot consume part of the spacing interval.
       return await getCodexUsage(accessToken, providerSpecificData, id || "");
     case "cursor":
       return await getCursorUsage(accessToken || "", providerSpecificData, id || "");
@@ -213,6 +210,8 @@ export async function getUsageForProvider(
       return await getMiniMaxUsage(apiKey || "", provider);
     case "crof":
       return await getCrofUsage(apiKey || "");
+    case "mistral":
+      return await getMistralUsage(apiKey || "");
     case "clinepass":
       // Dual-auth: OAuth WorkOS token in `accessToken`, or a BYOK key in `apiKey`.
       return await getClinepassUsage(accessToken, apiKey);

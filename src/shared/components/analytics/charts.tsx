@@ -108,6 +108,9 @@ export function StatCard({
 
 export type CompactStatSection = {
   title: string;
+  /** One plain sentence under the title saying what the figures count. */
+  description?: string;
+  testId?: string;
   items: Array<{ icon: string; label: string; value: any; tooltip?: string; color?: string }>;
   /** On mobile use 1 column instead of 2 — useful when values can be long (model names, etc.) */
   wideValues?: boolean;
@@ -118,11 +121,14 @@ export function CompactStatGrid({ sections }: { sections: CompactStatSection[] }
     <Card className="px-5 py-4">
       <div className="flex flex-col gap-3">
         {sections.map((section, si) => (
-          <div key={si}>
+          <div key={si} data-testid={section.testId}>
             {si > 0 && <div className="border-t border-border mb-3" />}
             <div className="text-[10px] uppercase font-semibold tracking-widest text-text-muted mb-2">
               {section.title}
             </div>
+            {section.description && (
+              <p className="text-xs text-text-muted -mt-1 mb-2">{section.description}</p>
+            )}
             <div
               className={
                 section.wideValues
@@ -193,9 +199,7 @@ export function ActivityHeatmap({ activityMap }: { activityMap?: Record<string, 
   return (
     <Card className="p-4 h-full min-w-0 overflow-hidden">
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-sm font-semibold text-text-muted uppercase tracking-wider">
-          {t("overview")}
-        </h3>
+        <h3 className="text-sm text-text-muted uppercase">{t("overview")}</h3>
         <span className="text-xs text-text-muted">
           {t("activitySummary", {
             active: Object.keys(activityMap || {}).length,
@@ -268,9 +272,7 @@ export function ApiKeyTable({
   if (!hasData) {
     return (
       <Card className="p-4 flex-1">
-        <h3 className="text-sm font-semibold text-text-muted uppercase tracking-wider mb-3">
-          {t("chartApiKeyBreakdown")}
-        </h3>
+        <h3 className="text-sm text-text-muted uppercase mb-3">{t("chartApiKeyBreakdown")}</h3>
         <div className="text-center text-text-muted text-sm py-8">{t("chartNoData")}</div>
       </Card>
     );
@@ -279,9 +281,7 @@ export function ApiKeyTable({
   return (
     <Card className="overflow-hidden">
       <div className="p-4 border-b border-border flex items-center justify-between gap-3">
-        <h3 className="text-sm font-semibold text-text-muted uppercase tracking-wider">
-          {t("chartApiKeyBreakdown")}
-        </h3>
+        <h3 className="text-sm text-text-muted uppercase">{t("chartApiKeyBreakdown")}</h3>
         <Input
           type="search"
           value={query}
@@ -375,7 +375,7 @@ export function ApiKeyTable({
                   : fmt(row.completionTokens)}
               </TableCell>
               <TableCell
-                className="px-4 py-2.5 text-right font-mono font-semibold"
+                className="px-4 py-2.5 text-right font-mono"
                 title={
                   displayMode === "exact" ? `~${fmt(row.totalTokens)}` : fmtFull(row.totalTokens)
                 }
@@ -439,10 +439,7 @@ export function MostActiveDay7d({ activityMap }) {
 
   return (
     <Card className="p-4 flex flex-col justify-center" style={{ flex: 1, minHeight: 0 }}>
-      <h3
-        className="text-xs font-semibold uppercase tracking-wider mb-2"
-        style={{ color: "var(--color-text-muted)" }}
-      >
+      <h3 className="text-xs uppercase mb-2" style={{ color: "var(--color-text-muted)" }}>
         {t("mostActiveDay")}
       </h3>
       {data ? (
@@ -524,10 +521,7 @@ export function WeeklySquares7d({ activityMap }) {
 
   return (
     <Card className="p-4 flex flex-col justify-center" style={{ flex: 1, minHeight: 0 }}>
-      <h3
-        className="text-xs font-semibold uppercase tracking-wider mb-3"
-        style={{ color: "var(--color-text-muted)" }}
-      >
+      <h3 className="text-xs uppercase mb-3" style={{ color: "var(--color-text-muted)" }}>
         {t("chartWeekly")}
       </h3>
       <div style={{ display: "flex", alignItems: "flex-end", gap: 6, justifyContent: "center" }}>
@@ -604,7 +598,7 @@ export function ServiceTierBreakdown({ byServiceTier, summary }) {
   return (
     <Card className="overflow-hidden">
       <div className="p-4 border-b border-border flex items-center justify-between gap-3">
-        <h3 className="text-sm font-semibold text-text-muted uppercase tracking-wider">
+        <h3 className="text-sm text-text-muted uppercase">
           {translateCostText(t, "serviceTierBreakdownTitle", "Service Tier")}
         </h3>
         <span className="text-[11px] text-text-muted">
@@ -667,7 +661,14 @@ export function ServiceTierBreakdown({ byServiceTier, summary }) {
                   <div className="text-xs text-text-muted">{costDetailText}</div>
                 </div>
               </div>
-              <div className="h-1.5 rounded-full bg-surface-2 overflow-hidden">
+              <div
+                role="progressbar"
+                aria-label={tierLabel}
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-valuenow={Number(requestPct)}
+                className="h-1.5 rounded-full bg-surface-2 overflow-hidden"
+              >
                 <div
                   className={`h-full rounded-full ${getServiceTierBarClass(tier.serviceTier)}`}
                   style={{ width: `${requestPct}%` }}
@@ -693,9 +694,7 @@ export function UsageDetail({ summary }) {
 
   return (
     <Card className="p-4 flex-1">
-      <h3 className="text-sm font-semibold text-text-muted uppercase tracking-wider mb-3">
-        {t("chartUsageDetail")}
-      </h3>
+      <h3 className="text-sm text-text-muted uppercase mb-3">{t("chartUsageDetail")}</h3>
       <div className="flex flex-col gap-2">
         {items.map((item, i) => (
           <div key={i} className="flex items-center justify-between">
@@ -746,9 +745,7 @@ export function ProviderTable({
   if (!data.length) {
     return (
       <Card className="p-4">
-        <h3 className="text-sm font-semibold text-text-muted uppercase tracking-wider mb-3">
-          {t("chartProviderBreakdown")}
-        </h3>
+        <h3 className="text-sm text-text-muted uppercase mb-3">{t("chartProviderBreakdown")}</h3>
         <div className="text-center text-text-muted text-sm py-8">{t("chartNoData")}</div>
       </Card>
     );
@@ -757,9 +754,7 @@ export function ProviderTable({
   return (
     <Card className="overflow-hidden">
       <div className="p-4 border-b border-border">
-        <h3 className="text-sm font-semibold text-text-muted uppercase tracking-wider">
-          {t("chartProviderBreakdown")}
-        </h3>
+        <h3 className="text-sm text-text-muted uppercase">{t("chartProviderBreakdown")}</h3>
       </div>
       <Table
         containerClassName="rounded-none border-0"
@@ -849,7 +844,7 @@ export function ProviderTable({
                   {displayMode === "exact" ? fmtFull(p.completionTokens) : fmt(p.completionTokens)}
                 </TableCell>
                 <TableCell
-                  className="px-4 py-2.5 text-right font-mono font-semibold"
+                  className="px-4 py-2.5 text-right font-mono"
                   title={
                     displayMode === "exact" ? `~${fmt(p.totalTokens)}` : fmtFull(p.totalTokens)
                   }
@@ -861,7 +856,14 @@ export function ProviderTable({
                 </TableCell>
                 <TableCell className="px-4 py-2.5 text-right">
                   <div className="flex items-center gap-2 justify-end">
-                    <div className="w-16 h-1.5 rounded-full bg-surface-2 overflow-hidden">
+                    <div
+                      role="progressbar"
+                      aria-label={p.provider}
+                      aria-valuemin={0}
+                      aria-valuemax={100}
+                      aria-valuenow={Number(pct)}
+                      className="w-16 h-1.5 rounded-full bg-surface-2 overflow-hidden"
+                    >
                       <div
                         className="h-full rounded-full transition-all"
                         style={{

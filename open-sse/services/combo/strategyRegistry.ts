@@ -139,6 +139,7 @@ const STRATEGY_TRAIT_OVERRIDES: Record<AnyRoutingStrategyValue, StrategyTraitOve
     usesRoundRobinLoop: true,
     stickyPin: "round-robin",
     runtimeUnitOrder: "declared",
+    promptCacheAffinityScope: "model",
   },
   "context-relay": { ordering: "declared", contextRelay: true },
   "fill-first": {
@@ -172,6 +173,12 @@ const STRATEGY_TRAIT_OVERRIDES: Record<AnyRoutingStrategyValue, StrategyTraitOve
     appliesQuotaCutoffGate: false,
   },
   lkgp: { ordering: "lkgp", protectsFirstTargetFromAffinity: true },
+  jev: {
+    ordering: "declared",
+    runtimeUnitOrder: "declared",
+    promptCacheAffinityScope: "model",
+    protectsFirstTargetFromAffinity: true,
+  },
   "context-optimized": { ordering: "context-optimized" },
   "cache-optimized": { ordering: "cache-optimized", cacheAffinityOwnsOrdering: true },
   fusion: { ordering: "declared", dispatchPrelude: "fusion" },

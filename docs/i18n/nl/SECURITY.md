@@ -6,11 +6,11 @@
 
 ## Kwetsbaarheden melden
 
-Als u een beveiligingskwetsbaarheid in OmniRoute ontdekt, meld deze dan op verantwoorde wijze:
+Als u een beveiligingsprobleem in OmniRoute ontdekt, meld dit dan op een verantwoorde manier:
 
-1. Open **GEEN** openbare GitHub-issue
-2. Gebruik [GitHub Security Advisories](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)
-3. Vermeld: beschrijving, reproductiestappen en mogelijke impact
+1. **DO NOT** open een openbaar GitHub probleem
+2. Gebruik [GitHub Beveiligingsadviezen](https://github.com/cheaper-inference/OmniRoute/security/advisories/new)
+3. Inclusief: beschrijving, reproductiestappen en potentiële impact
 
 ## Reactietijdlijn
 
@@ -29,25 +29,14 @@ Als u een beveiligingskwetsbaarheid in OmniRoute ontdekt, meld deze dan op veran
 | 3.7.x   | ✅ Beveiliging                                 |
 | < 3.7.0 | ❌ Niet ondersteund                            |
 
-## LTS-ondersteuningsperiode (v3.9.x)
+## LTS ondersteuningsvenster (v3.9.x)
 
-Na 3.8.59 is de volgende versie **3.9.0**, waarmee de lijn voor langdurige ondersteuning op de
-`stable/v3`-branch wordt geopend (zie [`ROADMAP.md`](ROADMAP.md) → "Fase 3 — v3.9.0 LTS").
+Na 3.8.59 is de volgende versie** 3.9.0** , waarmee de ondersteuningslijn voor de lange termijn op de `stable/v3` tak wordt geopend (zie [`ROADMAP.md`](ROADMAP.md) → "Fase 3 — v3.9.0 LTS").
 
-- **Wat `stable/v3` ontvangt:** bugfixes, beveiligingspatches en providerupdates. Nieuwe
-  functies gaan naar het v4-kanaal; bij de LTS-lijn staat stabiliteit voorop. `npm install omniroute`
-  (de `latest` dist-tag) blijft gedurende de volledige v4-cyclus op v3.
-- **Duur van de periode:** `stable/v3` ontvangt **beveiligingsoplossingen en oplossingen voor kritieke regressies
-  gedurende 12 maanden na de release van 3.9.0, of tot 90 dagen nadat v4.0.0 als `latest` is gepubliceerd —
-  afhankelijk van welke datum later valt**. De resulterende einddatum wordt bij de release vastgelegd in de releaseopmerkingen van 3.9.0 en in
-  [`ROADMAP.md`](ROADMAP.md).
-- **Een kwetsbaarheid in de LTS-lijn melden:** via hetzelfde kanaal als voor elke andere versie —
-  een privé-[GitHub Security Advisory](https://github.com/diegosouzapw/OmniRoute/security/advisories/new),
-  nooit een openbare issue. Vermeld welke versie u hebt getest (bijvoorbeeld `3.9.2`); oplossingen worden toegepast op
-  `stable/v3` en voorwaarts geporteerd naar v4.
-- **Beveiligingsbasislijn bij de LTS-release:** de gemeten scannerstatus en het bewijs voor routebeveiliging en
-  openbare aanmeldgegevens worden vastgelegd in
-  [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md).
+- **Wat `stable/v3` ontvangt:** bugfixes, beveiligingspatches en providerupdates. Nieuwe functies gaan naar het v4-kanaal; bij de LTS lijn staat stabiliteit voorop. `npm install omniroute` (de `latest` dist-tag) blijft op v3 gedurende de hele v4-cyclus.
+- **Vensterduur:** `stable/v3` ontvangt** beveiligingsoplossingen en kritieke regressies gedurende 12 maanden na versie 3.9.0, of tot 90 dagen nadat v4.0.0 is gepubliceerd als `latest` — afhankelijk van wat later is** . De resulterende einddatum wordt vastgelegd in de release-opmerkingen van 3.9.0 en in [`ROADMAP.md`](ROADMAP.md) wanneer de verlaging plaatsvindt.
+- **Een kwetsbaarheid melden in de LTS lijn:** hetzelfde kanaal als elke andere versie — een privé [GitHub beveiligingsadvies](https://github.com/cheaper-inference/OmniRoute/security/advisories/new), nooit een openbaar probleem. Zeg welke versie je hebt getest (bijvoorbeeld `3.9.2`); fixes landen op `stable/v3` en worden doorgestuurd naar v4.
+- **Beveiligingsbasislijn bij de LTS verlaging:** gemeten scannerstatus, routebewaking en openbare legitimatiebewijzen worden vastgelegd in [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md).
 
 ---
 
@@ -211,7 +200,7 @@ docker run -d \
   -e JWT_SECRET="$(openssl rand -base64 48)" \
   -e API_KEY_SECRET="$(openssl rand -hex 32)" \
   -e STORAGE_ENCRYPTION_KEY="$(openssl rand -hex 32)" \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
 ---

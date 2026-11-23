@@ -186,29 +186,92 @@ Následné migrace přidávají tabulky, jako jsou:
 
 ## Migrace
 
-OmniRoute používá **verzované, idempotentní migrace** v `src/lib/db/migrations/`. Každá migrace je samostatný soubor SQL pojmenovaný `NNN_description.sql`.
+OmniRoute používá** verzované, idempotentní migrace** v `src/lib/db/migrations/`. Každá migrace je jeden soubor SQL. Existují dva formáty pojmenování; verze zaznamenaná v `_omniroute_migrations` je číselná předpona.
 
-### Pojmenování migrací
+### Pojmenování migrace
 
-```
-001_initial_schema.sql
-002_mcp_a2a_tables.sql
-003_provider_node_custom_paths.sql
-...
-021_combo_call_log_targets.sql
-```
+| Formát                                            | Příklad                              | Používá se pro                                                                                                                                                   |
+| ------------------------------------------------- | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `NNN_description.sql` (přesně 3 číslice)          | `241_seen_models.sql`                | Stará řada `001`–`241`. Zmrazeno, když formát časového razítka přistál (`240` a `241` byly sloučeny těsně před ním): žádný nový soubor nedostane pořadové číslo. |
+| `YYYYMMDDHHMMSS_description.sql` (14 číslic, UTC) | `20261113120000_add_usage_index.sql` | Každá migrace vytvořená od 2026-11-13 dále.                                                                                                                      |
 
-### Jak se migrace spouštějí
+Proč ta změna: u sekvenčních čísel paralelní PRs vybralo stejné další číslo a všichni kromě jednoho se museli před sloučením přečíslovat. Časové razítko UTC dává každému PR jeho vlastní verzi.
+
+Pravidla pro formát časového razítka (vynucená `npm run check:migration-numbering`, sdílená s generátorem v `scripts/check/lib/migrationNaming.mjs`):
+
+- Časové razítko je skutečné datum a čas UTC, ne dříve než `20261113000000` a ne více než 10 minut v budoucnosti.
+- Popis je malými písmeny `snake_case` začínajícími písmenem (`a-z`, `0-9`, jedno `_` mezi slovy), maximálně 80 znaků.
+- Dva soubory se stejným časovým razítkem jsou duplicitní.
+- Pravidlo bez mezer platí pouze pro starou řadu: každé číslo od `001` do `241` musí existovat, kromě známých mezer `026`, `055` a `121`. Odstranění `241` (nebo jakéhokoli starého souboru) selže. `001` a `241` nelze nikdy přidat do seznamu povolených `KNOWN_GAPS`. Soubory s časovým razítkem nikdy nevytvářejí mezeru.
+- Každý záznam v `src/lib/db/migrations/` musí být běžný soubor s platným názvem `.sql` malými písmeny. Adresář, symbolický odkaz, soubor `.SQL` nebo `.sql.bak`, skrytý soubor nebo název s mezerou selžou bránu, protože by je běžec tiše přeskočil nebo spadl při bootování.
+
+**Použít objednávku.** Běžec třídí podle číselné hodnoty předpony, nikoli podle textu: nejprve staré soubory `001`–`241`, poté soubory s časovým razítkem v pořadí podle časových razítek a poté libovolné adresáře s prostorem názvů registrované u `OMNIROUTE_EXTRA_MIGRATIONS_DIRS` (verze jako `ee-001`). Nevyřízená migrace je jakýkoli soubor, jehož verze není v `_omniroute_migrations`, takže migrace ze starší větve, která se sloučí za novější, stále platí pro existující databáze.
+
+**Časové razítko je pořadí vytvoření, nikoli pořadí sloučení.** Pokud vaše migrace závisí na tabulce nebo sloupci vytvořené migrací pomocí a** novější** časové razítko (například jeden z jiného PR, který se sloučil jako první), nová databáze by nejprve spustila vaši a selhala. Zatímco je váš PR stále otevřený, přegenerujte název souboru pomocí `npm run db:new-migration`, aby získal novější časové razítko, nebo jej udělejte nezávislým. `npm run test:migrations:fresh` aplikuje každou migraci na prázdnou databázi a zachytí ji.
+
+### Sloučená migrace se nikdy neodstraní ani nepřejmenuje
+
+Jakmile je soubor migrace ve větvi vydání nebo `main`, již běží na homologních a vývojářských databázích, na instalacích VPS a v podnikové synchronizaci. Od té doby:
+
+- **Nikdy to nemažte.** Čerstvé instalace by ztratily své schéma, zatímco upgradované databáze si je ponechají.
+- **Nikdy to nepřejmenovávejte.** Verze v `_omniroute_migrations` by již neodpovídala souboru, takže každá databáze, která ji již použila, by ji spustila znovu. Neidempotentní SQL pak duplikuje data nebo zastaví bootování.
+- **Potřebujete jiné schéma?** Vytvořte novou migraci pomocí `npm run db:new-migration`.
+
+Přejmenování je bezpečné pouze pro soubor, který ještě není sloučen, což je případ, na který odkazují rady brány. Značka vydání zde nic nemění: každý přesun do větve `release/v*` publikuje obraz Docker `:next` a běží na homologu, instalaci VPS a synchronizaci Enterprise, takže sloučená migrace proběhla na skutečných databázích dříve, než existuje jakákoli značka `vX.Y.Z`. Brána selže při každém odstranění základního souboru, ať už označeného nebo ne.
+
+- **Vrácení sloučené migrace.** `git revert`, která odstraní soubor, selže bránu. Ponechte soubor a zrušte jeho schéma při nové migraci: `npm run db:new-migration -- <description>`, s `DROP TABLE IF EXISTS`, `DROP INDEX IF EXISTS` atd. Upgradované a čerstvé databáze pak končí stejným schématem.
+- **Jedno přijaté přejmenování: záznam kompatibility a identický obsah.** Pokud se sloučený soubor musí přesunout (například dva sloučené soubory sdílejí časové razítko a běžec se zastaví s kolizí verzí), přejmenujte pozdější soubor, aniž byste se dotkli jeho SQL a přidejte `{ fromVersion, fromName, toVersion, toName }` k `RENAMED_MIGRATION_COMPATIBILITY` v `src/lib/db/migrationRunner/constants.ts`. Databáze, které aplikovaly starou verzi, místo opětovného spuštění souboru přesunou svůj řádek `_omniroute_migrations`. Brána na takové přejmenování upozorní a vždy na něm spustí kontrolu komutace bez ohledu na nové časové razítko: čerstvé instalace aplikují soubor na jeho novou pozici, upgradované databáze nikoli, takže vyberte nové časové razítko poblíž starého. Přejmenování brány se nezdaří, pokud se obsah změnil (změna schématu stále probíhá při nové migraci) nebo pokud cílový soubor položky není na disku.
+- **Nikdy nepřejmenovávejte v rámci stejného časového razítka.** Přejmenování, které zachová časové razítko a změní pouze popis, neprojde bránou, se záznamem nebo bez něj. Se záznamem, jehož `toVersion` se rovná jeho `fromVersion`, běžec odstraní starý řádek `_omniroute_migrations` a použije soubor znovu na každou databázi, která jej již spustila. Bez zadání sleduje běžec pouze verzi: přeskočí soubor v těchto databázích (nový obsah se tam nikdy nespustí) a při každém spuštění zaznamená chybu přečíslování. Použijte jiné časové razítko a záznam kompatibility nebo ponechte název.
+- **Brána zkontroluje, zda se přejmenovaný soubor znovu nespustí.** Pro každé zakryté přejmenování předá brána nový název souboru kontrole komutace pomocí `--must-not-apply`. Kontrola zavede upgradovanou databázi se skutečným běžcem, a pokud běžec znovu použije tento soubor (například proto, že záznam má špatnou verzi nebo jméno, nebo protože textový analyzátor brány četl `constants.ts` jinak než TypeScript), brána selže s `migration renomeada rodaria de novo` a požádá vás, abyste zkontrolovali staré a nové verze a názvy záznamu.
+
+### Co brána kontroluje proti základně
+
+Při požadavku na stažení a spuštění slučovací fronty `npm run check:migration-numbering` porovnává `src/lib/db/migrations/` na disku se stejným adresářem v základní větvi. Základem je v tomto pořadí: `--base-latest-tag`, `--base <ref>`, proměnná `MIGRATION_BASE_REF`, nebo, když `GITHUB_EVENT_NAME` je `pull_request`, `pull_request_target` nebo `merge_group`, první rodič slučovacího commitu, `merge_group.base_sha` datové části události nebo `git merge-base HEAD origin/$GITHUB_BASE_REF`. Při požadavku na stažení nebo při spuštění fronty sloučení bez řešitelného základu brána selže. Mimo CI bez `--base` vytiskne `comparação com a base: pulada (sem --base)` a tato pravidla přeskočí.
+
+`--base-latest-tag` se porovnává s nejnovějším tagem vydání (`vX.Y.Z` v pořadí semver; tagy s příponou jako nightlies se nepočítají), který je v historii `HEAD`, se stejnými pravidly jako `--base`. Release-Green (`scripts/quality/validate-release-green.mjs`) spouští bránu tímto způsobem, protože push a plánované běhy nemají žádnou základnu požadavků na stažení a sloučení může dopadnout bez nového spuštění CI. Bez známek uvolnění v historii brána selže; spustit `git fetch --tags` (v CI, `actions/checkout` s `fetch-depth: 0` přinese značky).
+
+| Změňte požadavek na stažení                                                                               | Výsledek                                                                                                                                                                                                                                                                                                                                  |
+| --------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Soubor, který existuje na základně, je přejmenován se záznamem `RENAMED_MIGRATION_COMPATIBILITY`          | **Varování** pokud je obsah identický a kontrola komutace probíhá bez ohledu na nové časové razítko; selže, pokud nová pozice změní konečné schéma (zruší přejmenování nebo vybere jiné nové časové razítko, kde dojíždí) nebo pokud by běžec znovu použil přejmenovaný soubor na upgradovanou databázi.** Selže** pokud se obsah změnil. |
+| Soubor, který existuje na základně, se přejmenuje a zachová se jeho časové razítko (změní se pouze popis) | **Selže** , se záznamem nebo bez něj: běžec by jej použil znovu (se záznamem) nebo by jej přeskočil podle verze (bez záznamu). Použijte jiné časové razítko a záznam kompatibility nebo ponechte název.                                                                                                                                   |
+| Soubor, který existuje na základně, je odstraněn nebo přejmenován bez záznamu                             | **Selže** , zda soubor je či není ve značce vydání. Chcete-li to vrátit zpět, obnovte soubor pomocí `git checkout <base> -- src/lib/db/migrations/<file>`; chcete-li vrátit jeho schéma, přidejte novou migraci pomocí `DROP ... IF EXISTS`.                                                                                              |
+| Soubor, který existuje na základně, má jiný obsah                                                         | **Varování** (anotace `::warning` v akcích GitHub ) a spustí se kontrola komutace. Selže, pokud úprava změní konečné schéma, protože upgradované databáze znovu nepoužijí upravený soubor: vložte změnu do nové migrace. Neškodná úprava (komentář, `IF NOT EXISTS`) pouze varuje.                                                        |
+| Je přidán soubor s časovým razítkem s časovým razítkem, který není novější než nejnovější na základně     | Spustí kontrolu komutace, popsanou níže.                                                                                                                                                                                                                                                                                                  |
+| Je přidán soubor `NNN_` ve starém formátu s číslem pod nejnovějším souborem starého formátu základny      | **Selže** , i když je `KNOWN_GAPS` upraveno ve stejném požadavku na stažení: stará řada je zmrazena, vytvořte migraci pomocí `npm run db:new-migration`. Soubory starého formátu nad nejnovějším souborem základny (žádost o stažení `release/v*` na `main` ) jsou přijímány.                                                             |
+| Nefunkční, upravený nebo přejmenovaný soubor obsahuje příkazy `INSERT`, `UPDATE`, `DELETE` nebo `REPLACE` | **Varování** : kontrola komutace neporovnává data, proto zkontrolujte, zda pořadí, ve kterém se použijí upgradované a nové databáze, nemění výsledek.                                                                                                                                                                                     |
+
+Jedno spuštění kontroly komutace pokryje společně neuspořádané, upravené a přejmenované soubory.
+
+Kontrola komutace (`scripts/check/migration-commutation.ts`) vytvoří dvě dočasné databáze se skutečnou instalační cestou: an** upgradován** jeden (zavést se základními migracemi a poté znovu spustit ze stejného souboru s migracemi požadavku na stažení) a** čerstvý** jeden (jedno zavedení s migrací požadavku na stažení). Porovnává výsledná schémata: tabulky a sloupce (ignoruje pořadí sloupců), omezení UNIQUE / PRIMARY KEY a FOREIGN KEY, normalizovaný text `CREATE TABLE` každé tabulky (který pokrývá omezení CHECK, kolace, generované sloupce a možnosti tabulky), indexy, spouštěče a pohledy. Data řádku se neporovnávají. Pokud se shodují, brána vytiskne, že soubor je mimo provoz, ale dojíždí a projde. Pokud se liší, brána selže s rozdílem a nápovědou pro případ: u souboru mimo pořadí přegenerujte jeho název pomocí `npm run db:new-migration`, což je bezpečné, protože soubor ještě není sloučen; pro upravený základní soubor obnovte základní obsah a vložte změnu do nové migrace; u přejmenovaného souboru vraťte přejmenování zpět nebo vyberte jiné nové časové razítko, kde bude dojíždět, nikdy stejné časové razítko s jiným názvem. Pokud samotná kontrola nemůže spustit, brána selže v CI a varuje pouze lokálně. U upraveného základního souboru je upgradovaná databáze sestavena s obsahem základního souboru a druhé spuštění jej přeskočí, protože jeho verze je již zaznamenána. U přejmenovaného souboru je upgradovaná databáze vytvořena se souborem pod jeho starým názvem a druhé zavádění přesune svůj řádek `_omniroute_migrations` přes položku kompatibility místo toho, aby jej znovu spustilo; brána předá nové jméno pomocí `--must-not-apply`, takže kontrola selže, pokud ji použije druhé spuštění. Pokud se migrace požadavku na stažení nepodaří použít na upgradované cestě, to znamená po každé migraci základny (bez ohledu na to, zda selže i při nové instalaci), brána ohlásí `migration do PR não aplica` a požádá vás o opravu SQL proti aktuálnímu schématu základny; pokud soubor závisí na další migraci požadavku na stažení s pozdějším časovým razítkem, vygenerujte jeho název pomocí `npm run db:new-migration`.
+
+Chcete-li provést stejné porovnání lokálně, předejte základ explicitně, například `npm run check:migration-numbering -- --base origin/<base-branch>` nebo `npm run check:migration-numbering -- --base-latest-tag` pro porovnání s nejnovější verzí.
+
+### Konverze migrace PR Open `NNN`
+
+Požadavek na stažení otevřený před přepínačem může stále nést sekvenční soubor, jako je `242_add_widgets.sql`. Stará čísla nad `241` jsou odmítnuta, proto je před sloučením převeďte:
+
+1. **Přejmenujte soubor pomocí generátoru a zachovejte popis.** Spusťte `npm run db:new-migration -- <same description>`, abyste získali nový název, přesuňte do něj SQL a odstraňte starý soubor `NNN_`. Popis musí zůstat identický: níže uvedený záznam o kompatibilitě se s ním shoduje.
+2. **Přidejte položku kompatibility, pokud trvalá databáze provozovala staré číslo.** Pokud nějaká uchovávaná databáze (homolog, VPS, vlastní instalace přispěvatele) spustila sestavení PR se souborem `NNN_`, přidejte `{ fromVersion: "<NNN>", fromName: "<description>", toVersion: "<YYYYMMDDHHMMSS>", toName: "<description>" }` k `RENAMED_MIGRATION_COMPATIBILITY` v `src/lib/db/migrationRunner/constants.ts`. Tohle je** požadované pro `237` až `241`** : tyto sloty nyní obsahují kanonické `237_usage_history_calculated_cost.sql`, `238_codex_connection_fences.sql`, `239_call_logs_pending_detail_index.sql`, `240_provider_node_custom_json_config.sql` a `241_seen_models.sql` a bez tohoto záznamu taková databáze navždy přeskočí kanonickou migraci a znovu spustí převedenou. Funguje také pro slot, který zůstává prázdný, jako je `242`, když je cílem časové razítko. V případě pochybností přidejte záznam. Nezáleží na tom, kde jej přidáte do pole: když cílový slot položky stále obsahuje řádek, který jiný záznam odsune (například `237` drží řádek PR zatímco starší řádek `usage_history_calculated_cost` čeká na přesun do `237`), runner nechá tento záznam počkat, dokud se slot neuvolní. Pouze skutečný konflikt, jako je slot držený řádkem bez pohybu, nebo dva záznamy, které prohodí sloty, zastaví zavádění pomocí `Cannot reconcile ...`.
+3. **Udržujte idempotentní SQL** (`CREATE TABLE IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`, `INSERT OR IGNORE`), protože převedená migrace se může setkat s databází, kde její schéma již existuje.
+4. **Přesunout speciální případy označené verzí.** Pokud PR přidal případ pro své staré číslo v `isSchemaAlreadyApplied()` (`src/lib/db/migrationRunner.ts`) nebo v `OPTIONAL_FTS5_MIGRATION_VERSIONS` (`src/lib/db/migrationRunner/constants.ts`), změňte klíč na nové časové razítko.
+
+`tests/unit/db/codex-fence-migration-rename.test.ts` je funkční příklad testu pro přejmenovanou migraci.
+
+### Backporty do poboček před přepnutím
+
+Nikdy nevybírejte ani neportujte soubor `YYYYMMDDHHMMSS_` do větve, která předchází přechodu (například starší větev `release/v*` ). Běžec tam třídí názvy souborů jako text, takže soubor s časovým razítkem by běžel mezi `201_` a `202_` na čerstvé databázi a stará brána tam nerozumí 14místným prefixům. Na takové větvi zapište změnu jako vlastní další `NNN_` soubor dané větve, idempotent, takže když verze s časovým razítkem dorazí později, nebude to fungovat.
+
+### Jak migrace běží
 
 Při spuštění `migrationRunner.ts`:
 
 1. Vytvoří tabulku `_omniroute_migrations`, pokud neexistuje
-2. Zjistí již aplikované migrace
-3. Postupně aplikuje všechny nové migrace, každou v samostatné transakci
-4. Zaznamená každou aplikovanou migraci spolu s časovým razítkem
+2. Dotazy na již použité migrace
+3. Použije všechny nové migrace v pořadí, každou v transakci
+4. Zaznamenává každou použitou migraci s časovým razítkem
 
 ```ts
-// src/lib/db/migrationRunner.ts (zjednodušeno)
+// src/lib/db/migrationRunner.ts (simplified)
 export async function runMigrations(db: SqliteDatabase, migrationsDir: string) {
   const applied = getAppliedMigrations(db);
   const available = readMigrationFiles(migrationsDir);
@@ -225,7 +288,7 @@ export async function runMigrations(db: SqliteDatabase, migrationsDir: string) {
 
 ### Idempotence
 
-Migrace musí být **idempotentní** — jejich druhé spuštění by nemělo provést žádnou změnu:
+Migrace musí být** idempotentní** — když je spustíte dvakrát, by to nemělo být:
 
 ```sql
 -- 004_proxy_registry.sql
@@ -237,26 +300,27 @@ CREATE TABLE IF NOT EXISTS proxy_registry (
 );
 ```
 
-Používejte hojně klauzule `IF NOT EXISTS`, `IF EXISTS` a `OR IGNORE` / `OR REPLACE`.
+Volně používejte klauzule `IF NOT EXISTS`, `IF EXISTS` a `OR IGNORE` / `OR REPLACE`.
 
 ### Přidání nové migrace
 
-1. **Zjistěte následující číslo**: `ls src/lib/db/migrations/ | tail -1`
-2. **Vytvořte soubor**: `NNN_my_change.sql`
-3. **Použijte bezpečné DDL**: `CREATE TABLE IF NOT EXISTS`, `ALTER TABLE ... ADD COLUMN`
-4. **Opatrně doplňte data**: pro zpracování existujících řádků použijte `UPDATE ... WHERE ...`
-5. **Otestujte migraci na kopii**: nikdy nespouštějte neotestované migrace v produkci
+1. **Vytvořte soubor pomocí generátoru** : `npm run db:new-migration -- <description>` (například `npm run db:new-migration -- add combo priority`). Zapíše `src/lib/db/migrations/<YYYYMMDDHHMMSS>_<description>.sql` s aktuálním časem UTC a záhlavím komentáře, posune se o jednu sekundu vpřed, pokud je toto časové razítko přijato, a nikdy nepřepíše soubor. Nevybírejte číslo ručně.
+2. **Použijte bezpečné DDL** : `CREATE TABLE IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`, `ALTER TABLE ... ADD COLUMN`
+3. **Pečlivě doplňte data** : použijte `UPDATE ... WHERE ...` ke zpracování existujících řádků
+4. **Zkontrolujte pořadí a pojmenování** : `npm run test:migrations:fresh` (všechny migrace na prázdnou databázi) a `npm run check:migration-numbering`
+5. **Test na kopii** : nikdy nespouštějte netestované migrace na produkci
+6. **Tabulka vytvořená z kódu také potřebuje migraci** : pokud modul také vytvoří tabulku líně (`CREATE TABLE IF NOT EXISTS`, vedená jako cesta k samoopravování), migrace ji musí vytvořit se stejným DDL. V opačném případě čistá instalace a upgradovaná instalace skončí s různými schématy v závislosti na tom, zda tato cesta kódu běžela. `tests/unit/db/lazy-table-migration-guard.test.ts` skenuje `src/` a `open-sse/` a selže na líném `CREATE` bez migrace (#20557). Příklad: `src/lib/db/migrations/20261118120853_compression_run_telemetry.sql`.
 
 Příklad:
 
 ```sql
--- 022_add_combo_priority.sql
+-- 20261113120000_add_combo_priority.sql
 ALTER TABLE combos ADD COLUMN priority INTEGER DEFAULT 100;
 UPDATE combos SET priority = 100 WHERE priority IS NULL;
 CREATE INDEX IF NOT EXISTS idx_combos_priority ON combos(priority);
 ```
 
-> **Zpětně nekompatibilní změny** (např. odstraňování sloupců) jsou problematické. OmniRoute NEPODPORUJE přechod na starší verzi — jakmile je migrace aplikována, změna schématu je trvalá. Plánujte s tímto omezením.
+> **Zpětně nekompatibilní změny** (např. vypuštění sloupců) jsou složité. OmniRoute podporuje NOT downgrade —, jakmile je použita migrace, změna schématu je trvalá. Podle toho plánujte.
 
 ---
 
@@ -407,22 +471,23 @@ Tento příkaz používá online zálohovací API SQLite — lze jej bezpečně 
 
 ### Režim WAL
 
-WAL je ve výchozím nastavení povolen. Pro úlohy s velkým množstvím zápisů zvažte:
+WAL je ve výchozím nastavení povoleno. Pro velké pracovní zatížení zápisu zvažte:
 
 ```sql
-PRAGMA wal_autocheckpoint = 1000;  -- Kontrolní bod každých 1000 stránek
-PRAGMA journal_size_limit = 67108864;  -- Limit WAL 64 MB
+PRAGMA wal_autocheckpoint = 1000;  -- Checkpoint every 1000 pages
 ```
+
+OmniRoute nenastavuje `journal_size_limit`. Kontrolní bod přesune snímky WAL do hlavního souboru, ale soubor WAL si zachová největší přidělenou velikost. Strážce `OMNIROUTE_WAL_GUARD_MAX_MB` pouze varuje a spustí `wal_checkpoint(RESTART)`; není to omezení velikosti disku.
 
 ### Indexy
 
-Klíčové indexy pro výkon (automaticky vytvářené migracemi):
+Klíčové indexy pro výkon (automaticky vytvořené migrací):
 
 - `idx_models_provider` — vyhledávání modelů podle poskytovatele
-- `idx_combo_targets_combo_id` — rozbalení cílů kombinace
-- `idx_usage_history_api_key_timestamp` — analytika využití
-- `idx_quota_snapshots_api_key_window` — sledování kvót
-- `idx_call_logs_timestamp` — dotazy na protokoly volání
+- `idx_combo_targets_combo_id` — combo target expanze
+- analýza využití `idx_usage_history_api_key_timestamp` —
+- sledování kvót `idx_quota_snapshots_api_key_window` —
+- `idx_call_logs_timestamp` — dotazy na protokol hovorů
 
 Chcete-li přidat nový index, vytvořte migraci:
 
@@ -431,24 +496,24 @@ Chcete-li přidat nový index, vytvořte migraci:
 CREATE INDEX IF NOT EXISTS idx_my_table_my_column ON my_table(my_column);
 ```
 
-### Vstup/výstup mapovaný do paměti
+### Paměťově mapovaná I/O
 
-U velmi rozsáhlých databází (>10 GB) lze mapování do paměti upravit pomocí pragmatu SQLite:
+U velmi velkých databází (> 10GB) lze mapování paměti upravit pomocí SQLite pragma:
 
 ```sql
--- Nastavte pomocí pragmatu SQLite (upravte v core.ts nebo za běhu)
-PRAGMA mmap_size = 268435456;  -- 256 MB
+-- Set via SQLite pragma (adjust in core.ts or runtime)
+PRAGMA mmap_size = 268435456;  -- 256MB
 ```
 
-### Kompaktování
+### Zhutňování
 
-Dlouhodobě spuštěným instancím OmniRoute prospívá příležitostné použití příkazu `VACUUM`:
+Dlouhotrvající instance OmniRoute těží z příležitostných `VACUUM`:
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite "VACUUM;"
 ```
 
-Spouštějte jej jednou měsíčně v době nízkého provozu. (Režim WAL tuto potřebu snižuje, ale neodstraňuje ji.)
+Spouštět měsíčně během oken s nízkou návštěvností. (režim WAL snižuje potřebu, ale neeliminuje ji.)
 
 ---
 

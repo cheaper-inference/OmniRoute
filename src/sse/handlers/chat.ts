@@ -1,4 +1,4 @@
-import { hasQoderCallerTools } from "@omniroute/open-sse/services/qoderCapabilities";
+import { requiresQoderHttpTransport } from "@omniroute/open-sse/services/qoderCapabilities";
 import { getRequestedModelEndpointMismatch } from "@/lib/providerModels/modelEndpointGuard";
 import { randomUUID } from "crypto";
 import { resolveChatRequestBody } from "./requestBody";
@@ -38,6 +38,7 @@ import {
   resolveAvalancheSettings,
 } from "@omniroute/open-sse/services/accountFallback/antiAvalanche.ts";
 import { estimateTokens } from "@omniroute/open-sse/services/contextManager.ts";
+import { getCodexPlanType } from "@omniroute/open-sse/services/codexPlanEligibility.ts";
 import { getCombo, getComboForModel, getModelInfo } from "../services/model";
 import { stripContextWindowSuffix } from "@omniroute/open-sse/services/model.ts";
 import { resolveBareModelToConnectionDefault } from "@omniroute/open-sse/services/model.ts";
@@ -124,6 +125,8 @@ import {
   isOpenAIResponsesStoreEnabled,
 } from "@/lib/providers/requestDefaults";
 import { guardrailRegistry, resolveDisabledGuardrails } from "@/lib/guardrails";
+import { getActiveRequestTokenVault } from "@/lib/pii/tokenVault";
+import { runWithRequestTokenVault } from "@/lib/pii/requestTokenVaultScope";
 import {
   resolveModelOrError,
   comboTargetCredentialProviderId,
@@ -160,7 +163,12 @@ import {
 import { markAntigravityMissingCloudCodeProject } from "@omniroute/open-sse/services/antigravityProjectPersistence.ts";
 import { connectionHasExtraKeys } from "@omniroute/open-sse/services/apiKeyRotator.ts";
 import { wrapResponseWithOAuthSessionRelease } from "@omniroute/open-sse/services/oauthSessionOccupancy.ts";
-import { inheritProviderProbeResponse, inheritResponsePolicies } from "./chat/responsePolicies.ts";
+import {
+  inheritProviderProbeResponse,
+  inheritResponsePolicies,
+  isNoReplayResponse,
+  markCustomJsonNoReplay,
+} from "./chat/responsePolicies.ts";
 import { resolveProviderId } from "@/shared/constants/providers";
 import {
   extractReasoningIntent,
@@ -885,6 +893,7 @@ async function handleChatImplementation(
     model: modelStr,
     signal,
     stream: body?.stream === true,
+    tokenVault: getActiveRequestTokenVault() ?? null,
   });
   if (preCallGuardrails.blocked) {
     log.warn("GUARDRAIL", "Request blocked during pre-call guardrails", {
@@ -1196,7 +1205,7 @@ async function handleChatImplementation(
         resolvedModel,
         {
           connectionRestrictionSources: restrictions.sources,
-          requireToolCalling: hasQoderCallerTools(body),
+          requireToolCalling: requiresQoderHttpTransport(body),
           sessionKey: sessionAffinityKey,
           preferredConnectionIds: apiKeyInfo?.preferredConnections ?? null,
           ...(target?.allowRateLimitedConnection ? { allowRateLimitedConnections: true } : {}),
@@ -1530,9 +1539,13 @@ async function handleChatImplementation(
 // One turn-execution ownership scope per client request (#18716): every account retry, rotation
 // and combo leg of this request re-enters chatCore under it and reuses the turn slot the request
 // already holds instead of 409ing itself. A scope per dispatch would not span those attempts.
+// The reversible PII vault is scoped the same way: one vault per client request, restored once
+// on the response that leaves here (a no-op unless both PII vault flags are on).
 export const handleChat = chatAdmission.withChatAdmission(
   (...args: Parameters<typeof handleChatImplementation>) =>
-    runWithTurnExecutionOwnership(() => handleChatImplementation(...args))
+    runWithRequestTokenVault(() =>
+      runWithTurnExecutionOwnership(() => handleChatImplementation(...args))
+    )
 );
 
 function readEmptyStreamSiblingRecoveryFlag(): boolean {
@@ -1664,8 +1677,10 @@ async function handleSingleModelChat(
             // A probe stays a probe through the redirect, so each target is gated as one.
             automatedProbe: runtimeOptions.automatedProbe === true,
             authorizationContextModel: runtimeOptions.authorizationContextModel ?? modelStr,
-            forcedConnectionId: runtimeOptions?.forcedConnectionId ?? null,
-            allowedConnectionIds: null,
+            // The redirected combo's own target pin and allow-list win over the caller's pin.
+            forcedConnectionId:
+              resolvedTarget?.connectionId ?? runtimeOptions?.forcedConnectionId ?? null,
+            allowedConnectionIds: resolvedTarget?.allowedConnectionIds ?? null,
             comboStepId: null,
             comboExecutionKey: null,
             skipUpstreamRetry: resolvedTarget?.failoverBeforeRetry === true,
@@ -1864,6 +1879,7 @@ async function handleSingleModelChat(
   // without cooling or excluding its connection ID; never replay a successful response.
   let staleCodexReselected = false;
   let accountFallbacks = 0;
+  let selectedConnectionPlan: string | null = null;
   let sameAccountRetries = 0;
   let routingWaitMs = 0;
   const accountFallbackReasons: string[] = [];
@@ -1875,6 +1891,7 @@ async function handleSingleModelChat(
   };
   const routingTelemetry = () => ({
     accountFallbacks,
+    selectedConnectionPlan,
     accountFallbackReasons,
     sameAccountRetries,
     routingWaitMs,
@@ -1938,7 +1955,7 @@ async function handleSingleModelChat(
           model,
           {
             connectionRestrictionSources: restrictions.sources,
-            requireToolCalling: hasQoderCallerTools(body),
+            requireToolCalling: requiresQoderHttpTransport(body),
             sessionKey: museOwner ? null : occupancySessionKey,
             preferredConnectionIds: apiKeyInfo?.preferredConnections ?? null,
             reserveOAuthSession: true,
@@ -2114,6 +2131,8 @@ async function handleSingleModelChat(
           excludedConnectionIds.size > 0
             ? Array.from(excludedConnectionIds)[excludedConnectionIds.size - 1]
             : null;
+        // No account was selected for this response; don't report a previous attempt's plan.
+        selectedConnectionPlan = null;
         return withRoutingTelemetry(noCredsRes, lastFailedConnectionId);
       }
 
@@ -2136,6 +2155,9 @@ async function handleSingleModelChat(
         }
         pendingStreamRetryConnectionId = null;
       }
+      // Refresh on every selected credential so fallback never reports a stale plan.
+      selectedConnectionPlan =
+        provider === "codex" ? getCodexPlanType(credentials.providerSpecificData) : null;
       const accountId = credentials.connectionId.slice(0, 8);
       const releaseOAuthSession = credentials.releaseOAuthSession ?? (() => {});
       // Undefined whenever the lease flag is off, which makes every release/hold below a no-op.
@@ -2174,16 +2196,23 @@ async function handleSingleModelChat(
         requestBody = { ...body, model: modelStr };
       }
       if (!runtimeOptions.reasoningDecision && runtimeOptions.reasoningIntent) {
-        const connectionRouting = await applyConnectionReasoningRule({
-          requestBody,
-          provider,
-          effectiveModel,
-          credentials,
-          apiKeyInfo,
-          reasoningIntent: runtimeOptions.reasoningIntent,
-          reasoningDecision: runtimeOptions.reasoningDecision,
-          requestRoutingTags: runtimeOptions.reasoningRequestTags,
-        }).catch(agyLease.releasingRethrow(leaseId));
+        let connectionRouting;
+        try {
+          connectionRouting = await applyConnectionReasoningRule({
+            requestBody,
+            provider,
+            effectiveModel,
+            credentials,
+            apiKeyInfo,
+            reasoningIntent: runtimeOptions.reasoningIntent,
+            reasoningDecision: runtimeOptions.reasoningDecision,
+            requestRoutingTags: runtimeOptions.reasoningRequestTags,
+          }).catch(agyLease.releasingRethrow(leaseId));
+        } catch (error) {
+          // The slot was taken above; a rule-store error must not keep the account occupied.
+          releaseOAuthSession();
+          throw error;
+        }
         if (connectionRouting.response) {
           releaseOAuthSession();
           agyLease.release(leaseId);
@@ -2379,6 +2408,7 @@ async function handleSingleModelChat(
         return execution.localResourcePressureResult.response;
       }
       const { result, tlsFingerprintUsed, wasProviderProbe } = execution;
+      markCustomJsonNoReplay(result.response, credentials?.providerSpecificData);
       if (!result.success) releaseOAuthSession();
       if (result.success && agyLease.isStreamingAntigravityResponse(result.response))
         result.response = inheritProviderProbeResponse(
@@ -2438,10 +2468,12 @@ async function handleSingleModelChat(
         correlationId: rotationAttributionOn ? (runtimeOptions?.correlationId ?? null) : null,
       });
 
+      // An in-pipeline account rotation rewrites refreshedCredentials, not credentials.
+      const servedConnectionId = refreshedCredentials?.connectionId || credentials.connectionId;
       if (result.success) {
         if (isCodexResponseCurrent(result.response, true)) {
-          clearModelLock(provider, credentials.connectionId, model);
-          markQuotaHealthy(credentials.connectionId);
+          clearModelLock(provider, servedConnectionId, model);
+          markQuotaHealthy(servedConnectionId);
         }
         // Acquired probes were settled inside execute(); other successes settle here or in combo.
         if (
@@ -2457,7 +2489,7 @@ async function handleSingleModelChat(
         if (telemetry) telemetry.endPhase();
         const successResponse = withRoutingTelemetry(
           museOwner ? muse.museRecordOutput(museOwner, result.response) : result.response,
-          credentials?.connectionId
+          servedConnectionId
         );
         if (requestBody.stream === true) {
           return inheritResponsePolicies(
@@ -2468,6 +2500,12 @@ async function handleSingleModelChat(
         releaseOAuthSession();
         return successResponse;
       }
+      // Custom JSON API node: the business call may already have taken effect. Surface
+      // its failure as-is — no account cooldown, no replay on this or another connection.
+      if (isNoReplayResponse(result.response)) {
+        return withSelectedConnectionHeader(result.response, credentials.connectionId);
+      }
+
       // A trusted caller's deadline must not cool a shared connection.
       // A shorter *preferred* deadline may perform one in-request sibling hop,
       // without recording a connection failure or evicting session affinity.

@@ -251,14 +251,14 @@ Sayfa karmaşıklığına bağlı olarak tarayıcı anlık görüntüsü araç s
 
 ## Sıkıştırma Kombinasyonları
 
-Sıkıştırma kombinasyonları, yönlendirme kombinasyonlarına atanabilen adlandırılmış sıkıştırma profilleridir:
+Sıkıştırma kombinasyonları, yönlendirme kombinasyonlarına atanabilen sıkıştırma profilleri olarak adlandırılır:
 
-- `compression_combos`: modu, işlem hattını, RTK yapılandırmasını, dil yapılandırmasını ve varsayılan işaretini depolar
-- `compression_combo_assignments`: bir sıkıştırma kombinasyonunu bir yönlendirme kombinasyonuyla eşler
-- çalışma zamanı entegrasyonu, genel kombinasyon geçersiz kılmalarından önce atanmış bir sıkıştırma kombinasyonunu çözümler
-- analizler `compression_combo_id` ve `engine` alanlarını içerir
+- `compression_combos`: modu, boru hattını, RTK yapılandırmasını, dil yapılandırmasını ve varsayılan işaretçiyi depolar
+- `compression_combo_assignments`: bir sıkıştırma kombinasyonunu bir yönlendirme kombinasyonuna eşler
+- çalışma zamanı entegrasyonu, genel birleşik geçersiz kılmadan önce atanmış bir sıkıştırma birleşimini çözer
+- analizler `compression_combo_id` ve `engine` içerir
 
-Pano konumu: `Pano -> Bağlam ve Önbellek -> Sıkıştırma Kombinasyonları`.
+Kontrol paneli yüzeyi: `Dashboard -> Context & Cache -> Compression Combos`.
 
 ## Önkoşullar / operatör kılavuzu (CCR ve oturum tekilleştirme)
 
@@ -287,7 +287,7 @@ CCR bir** iki katmanlı** mağaza, yalnızca bellekte değil:
 2. çalışma zamanı bir bulut çalışma zamanıdır (yerel disk yoktur);
 3. `COMPRESSION_CCR_DURABLE_STORE=false`.
 
-Yani "blok ortadan kayboldu" genel bir yeniden başlatma hikayesi değil: Yerel, bulut olmayan bir çalışma zamanındaki bir sub-512 KB bloğu, TTL bitene kadar dayanıklı katman aracılığıyla yeniden başlatmadan sağ çıkar. Değişken için [Ortam referansına](../reference/ENVIRONMENT.md) bakın.
+Yani "blok ortadan kayboldu" genel bir yeniden başlatma hikayesi değil: Yerel, bulut olmayan bir çalışma zamanındaki bir sub-512 KB bloğu, dayanıklı yazma işleminin başarılı olması koşuluyla, TTL bitene kadar dayanıklı katman aracılığıyla yeniden başlatmadan sağ çıkar. Bu yazma en iyi çabadır ve istek yolundan çıkar: 1000 kalıcı yazma zaten beklemedeyken bırakılır, bir SQLite yazma hatası günlüğe kaydedilir (`[ccr] durable persist failed`) ve yeniden denenmez ve ertelenmiş yazma çalıştırmalarından önceki bir çökme de onu kaybeder. Böyle bir blok yalnızca bellekte kalır ve yeniden başlatmanın ardından kaybolur. Değişken için [Ortam referansına](../reference/ENVIRONMENT.md) bakın.
 
 ### İki işaretleyici
 
@@ -302,7 +302,7 @@ Yani "blok ortadan kayboldu" genel bir yeniden başlatma hikayesi değil: Yerel,
 
 - **Anahtar (stdio):** stdio arayan, istek başına kimlik taşımaz, bu nedenle `OMNIROUTE_API_KEY` ile kimlik doğrulaması yapar ( MCP sunucusunun `env` dosyasında ayarlanır). Bu olmadan, arayan kişi anonimdir ve bir anapara gerektiren araçlar bozulabilir.
 - **`tools[]` enjeksiyonun önkoşuludur.** CCR alma protokolü talimatı (#8033) enjekte edilir** sadece** isteğin tanıtılan `tools[]` müşterinin gerçekten `omniroute_ccr_retrieve` ulaşabileceğini kanıtladığında. Eşleşme, bir ayırıcıyla (`__`, `.`, `/`, `:`) sınırlanan bir takip eden bölüm eşleşmesidir — hiçbir zaman çıplak bir — alt dizisi değildir, bu nedenle `mcp__gateway__omniroute_ccr_retrieve` gibi ad alanlı bir ad yine de sayılır. Eksik veya eşleşmeyen bir `tools[]` talimatın tasarım gereği enjekte edilmediği anlamına gelir.
-- **`codemode:false` (OpenCode istemcileri).** OpenCode varsayılan olarak yalnızca kendi yerel araçlarını modele tanıtan Kod Moduna sahiptir ve** değil** MCP araçlarını yerel `tools[]` listesine yerleştirin. `omniroute_ccr_*` araçlarının tanıtılması için MCP sunucusu girişinde `codemode: false` ayarlayın. Bu bir** müşteri** ayar, OmniRoute ayarı değil. Henüz CCR komutunu enjekte etmiyor: OpenCode `<server>_<tool>` aracını adlandırıyor, dolayısıyla `omniroute` adlı bir sunucu `omniroute_omniroute_ccr_retrieve` ortaya çıkarıyor ve `_` eşleşen ayırıcılardan biri değil.
+- **`codemode:false` (OpenCode istemcileri).** OpenCode varsayılan olarak yalnızca kendi yerel araçlarını modele tanıtan Kod Moduna sahiptir ve** değil** MCP araçlarını yerel `tools[]` listesine yerleştirin. `omniroute_ccr_*` araçlarının tanıtılması için MCP sunucu girişinde `codemode: false` ayarlayın. Bu bir** müşteri** ayar, OmniRoute ayarı değil. OpenCode bir aracı `<server>_<tool>` adlandırır, dolayısıyla `omniroute` adlı bir sunucu `omniroute_omniroute_ccr_retrieve` kullanıma sunar; `_` eşleşen ayırıcılardan biridir, dolayısıyla bir istek bir CCR işaretçisi taşıdığında CCR talimatı bu ad altında enjekte edilir.
 - **Müdürler.** Depolama ve alma, kimliği doğrulanmış prensip başına ( API anahtarı başına) izole edilmiştir. Bir anahtar yalnızca kendi bloklarını görür.
 
 ### Araç başına kapsamlar
@@ -322,12 +322,12 @@ Eksik bir kapsam şunu döndürür:**MCP aracı hatası sonucu** (`isError: true
 
 ### Müşteri matrisi
 
-| Müşteri        | Taşıma                                    | Kullanılacak yapılandırma                                                                                                                                                                                                                        | `tools[]` reklamı yapıldı mı? (→ CCR talimatı enjekte edildi)                                                                                                                                   |
-| -------------- | ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Claude Kodu    | yayınlanabilir-http                       | `claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream`                                                                                                                                                                | Evet — MCP özellikli; enjekte edildi.                                                                                                                                                           |
-| Cursor / Cline | `stdio`** veya** `streamable-http`        | stdio: `env` `OMNIROUTE_API_KEY` ile `omniroute --mcp` ; veya `http://localhost:20128/api/mcp/stream` işaret eden uzak bir MCP girişi (bkz. [Kurulum Kılavuzu → MCP İstemci Yapılandırması](../guides/SETUP_GUIDE.md#mcp-client-configuration) ) | Evet — `omniroute_ccr_*` araçlarının reklamını yapıyor.                                                                                                                                         |
-| OpenCode       | yayınlanabilir-http                       | `opencode mcp add omniroute --url http://localhost:20128/api/mcp/stream` artı `codemode: false`                                                                                                                                                  | Yalnızca `codemode: false` ile reklamı yapılan araçlar; `omniroute_omniroute_ccr_retrieve` eşleşmediğinden talimat hala enjekte edilmiyor (bkz. [İstemci önkoşulları](#client-prerequisites) ). |
-| OpenAI uyumlu  | OpenAI uyumlu HTTP (sohbet tamamlamaları) | OpenAI uyumlu uç noktaya karşı standart sohbet tamamlama istemcisi                                                                                                                                                                               | **Asla** — Düz bir OpenAI uyumlu arayana asla aracı çağırması söylenmez ve talimat enjekte edilmez.                                                                                             |
+| Müşteri        | Taşıma                                    | Kullanılacak yapılandırma                                                                                                                                                                                                                        | `tools[]` reklamı yapıldı mı? (→ CCR talimatı enjekte edildi)                                                                                                                                    |
+| -------------- | ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Claude Kodu    | yayınlanabilir-http                       | `claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream`                                                                                                                                                                | Evet — MCP özellikli; enjekte edildi.                                                                                                                                                            |
+| Cursor / Cline | `stdio`** veya** `streamable-http`        | stdio: `env` `OMNIROUTE_API_KEY` ile `omniroute --mcp` ; veya `http://localhost:20128/api/mcp/stream` işaret eden uzak bir MCP girişi (bkz. [Kurulum Kılavuzu → MCP İstemci Yapılandırması](../guides/SETUP_GUIDE.md#mcp-client-configuration) ) | Evet — `omniroute_ccr_*` araçlarının reklamını yapıyor.                                                                                                                                          |
+| OpenCode       | yayınlanabilir-http                       | `opencode mcp add omniroute --url http://localhost:20128/api/mcp/stream` artı `codemode: false`                                                                                                                                                  | Yalnızca `codemode: false` ile reklamı yapılan araçlar; daha sonra `omniroute_omniroute_ccr_retrieve` olarak adlandırılarak enjekte edilir (bkz. [Müşteri önkoşulları](#client-prerequisites) ). |
+| OpenAI uyumlu  | OpenAI uyumlu HTTP (sohbet tamamlamaları) | OpenAI uyumlu uç noktaya karşı standart sohbet tamamlama istemcisi                                                                                                                                                                               | **Asla** — Düz bir OpenAI uyumlu arayana asla aracı çağırması söylenmez ve talimat enjekte edilmez.                                                                                              |
 
 ### Alma sınırları ve sayfalandırma
 
@@ -347,7 +347,7 @@ Geri alma aracı şu anda `omniroute_ccr_retrieve` olarak adlandırılıyor ( `o
 
 ### Oturum yaşam döngüsü
 
-Yayınlanabilir HTTP oturumları boşta kalır ve sunucu bunları toplar; boşta kalma penceresi `OMNIROUTE_MCP_SESSION_IDLE_MS` tarafından ayarlanır (varsayılan 5 dakika; sabit kodlanmış bir değer değil, isimle başvurulur, bu nedenle bu sayfa değiştiğinde kaymaz). Boşta toplanan bir oturumun belirtisi, `Unknown Mcp-Session-Id` — bir HTTP 404'tür, bunun çaresi oturumu yeniden bağlamak veya yeniden başlatmaktır,** Olumsuz** Bir anahtarı döndürmek, kapsamı değiştirmek veya bir aracı yeniden adlandırmak için.
+Yayınlanabilir HTTP oturumları boşta kalır ve sunucu bunları toplar; boşta kalma penceresi `OMNIROUTE_MCP_SESSION_IDLE_MS` tarafından ayarlanır (varsayılan 5 dakika; sabit kodlanmış bir değer değil, isimle başvurulur, bu nedenle bu sayfa değiştiğinde kaymaz). Boşta toplanan bir oturumun belirtisi, `Unknown Mcp-Session-Id` — ile birlikte bir HTTP 404'tür, bunun çaresi oturumu yeniden bağlamak veya yeniden başlatmaktır,** Olumsuz** Bir anahtarı döndürmek, kapsamı değiştirmek veya bir aracı yeniden adlandırmak için.
 
 ## API Yüzeyi
 

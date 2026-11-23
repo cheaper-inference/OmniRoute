@@ -12,7 +12,8 @@
     "dryRun": "[dry-run] {action} bajarilgan bo‘lardi",
     "cancelled": "Bekor qilindi.",
     "jsonOpt": "JSON formatida chiqarish",
-    "yesOpt": "Tasdiqlash so‘rovini o‘tkazib yuborish"
+    "yesOpt": "Tasdiqlash so‘rovini o‘tkazib yuborish",
+    "positiveIntegerRequired": "Limit musbat butun son boʻlishi kerak."
   },
   "setup": {
     "title": "OmniRoute sozlamalari",

@@ -32,33 +32,43 @@ export function getLegacyDotDataDir() {
   return path.join(safeHomeDir(), `.${APP_NAME}`);
 }
 
+function hasDatabase(dir: string): boolean {
+  try {
+    return fs.statSync(path.join(dir, "storage.sqlite")).isFile();
+  } catch {
+    return false;
+  }
+}
+
 export function getDefaultDataDir() {
   const homeDir = safeHomeDir();
   const legacyDir = getLegacyDotDataDir();
 
-  // Preserve legacy path if it exists to avoid data loss on updates (e.g., Windows migration)
-  if (fs.existsSync(legacyDir)) {
-    try {
-      if (fs.statSync(legacyDir).isDirectory()) {
-        return legacyDir;
-      }
-    } catch {
-      // Ignore stat errors
-    }
+  let legacyIsDir = false;
+  try {
+    legacyIsDir = fs.statSync(legacyDir).isDirectory();
+  } catch {
+    // Ignore stat errors
   }
 
+  let platformDir: string | null = null;
   if (process.platform === "win32") {
     const appData = process.env.APPDATA || path.join(homeDir, "AppData", "Roaming");
-    return path.join(appData, APP_NAME);
+    platformDir = path.join(appData, APP_NAME);
+  } else {
+    // Support XDG on Linux/macOS when explicitly configured.
+    const xdgConfigHome = normalizeConfiguredPath(process.env.XDG_CONFIG_HOME);
+    if (xdgConfigHome) platformDir = path.join(xdgConfigHome, APP_NAME);
   }
 
-  // Support XDG on Linux/macOS when explicitly configured.
-  const xdgConfigHome = normalizeConfiguredPath(process.env.XDG_CONFIG_HOME);
-  if (xdgConfigHome) {
-    return path.join(xdgConfigHome, APP_NAME);
+  // Preserve legacy path if it exists to avoid data loss on updates (e.g., Windows migration),
+  // unless the platform dir holds the database and the legacy dir does not: other code creates
+  // ~/.omniroute/<sub> directly, and that alone must not move an XDG/APPDATA install to an
+  // empty database.
+  if (legacyIsDir && !(platformDir && !hasDatabase(legacyDir) && hasDatabase(platformDir))) {
+    return legacyDir;
   }
-
-  return legacyDir;
+  return platformDir ?? legacyDir;
 }
 
 export function resolveDataDir({ isCloud = false }: { isCloud?: boolean } = {}): string {

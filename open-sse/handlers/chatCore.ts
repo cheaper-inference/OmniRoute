@@ -52,7 +52,11 @@ import { runStreamingTail } from "./chatCore/streamingTail.ts";
 import { sanitizeChatRequestBody } from "./chatCore/sanitization.ts";
 import { isReasoningContinuationIncompatible } from "./chatCore/reasoningInputGate.ts";
 
-import { getHeaderValueCaseInsensitive, resolveCompressionHeader } from "./chatCore/headers.ts";
+import {
+  getHeaderValueCaseInsensitive,
+  resolveCompressionHeader,
+  resolveNoLogEnabled,
+} from "./chatCore/headers.ts";
 
 import {
   isCodexOriginatedHeaders,
@@ -295,6 +299,7 @@ import {
   shouldDeferAntigravityQuotaStateToCaller,
 } from "../services/accountFallback.ts";
 import { saveIdempotencyWithConfiguredWindow } from "@/lib/idempotencyLayer";
+import { hasMintedPiiTokens } from "../utils/piiTokenVault.ts";
 
 import { computeRequestHash, shouldDeduplicate } from "../services/requestDedup.ts";
 import {
@@ -520,6 +525,10 @@ async function handleChatCoreInner({
   // (chatCore/memoryExtraction.ts::runMemoryExtractionGate).
   const videoBridgeObserved: boolean =
     (videoBridgeLog as VideoBridgeLogParam | undefined)?.observed === true;
+  // Reversible PII vault: tokens minted for this request resolve only inside it, so memory and
+  // the idempotency / semantic cache writes are skipped. Read here, while the request scope is
+  // live; the streaming tail runs after it.
+  const piiTokensMinted = hasMintedPiiTokens();
   // resume flag from chat.ts, noted under the attempt store opened above.
   notePreviousResponseResumed(previousResponseResumed);
   const resilienceSettings = resolveResilienceSettings(cachedSettings);
@@ -613,7 +622,13 @@ async function handleChatCoreInner({
   ): EffectiveServiceTier | null => resolveReportedServiceTierFor(provider, payload, maxDepth);
   let upstreamHttpSelection: HttpAttemptSelection | null = null;
   let providerResponse;
-  const agentContext = resolveUsageAgentContext(body, clientRawRequest?.headers, apiKeyInfo);
+  // Per-key no-log flag OR the per-request `x-omniroute-no-log` header. Resolved
+  // before agent-context extraction so a header-only no-log request also drops
+  // prompt-derived project/branch fields from usage attribution.
+  const noLogEnabled = resolveNoLogEnabled(apiKeyInfo, clientRawRequest?.headers ?? null);
+  const agentContext = resolveUsageAgentContext(body, clientRawRequest?.headers, {
+    noLog: noLogEnabled,
+  });
   // Failure usage record building extracted to chatCore/failureUsage.ts (#3501); the handler keeps
   // the fire-and-forget save + computes latencyMs, so the call sites stay byte-identical.
   const persistFailureUsage = (
@@ -938,7 +953,6 @@ async function handleChatCoreInner({
       `Converted ${webFetchFallbackPlan.convertedToolCount} web_fetch tool(s) to OmniRoute fallback for ${provider}`
     );
   }
-  const noLogEnabled = apiKeyInfo?.noLog === true;
   // Consolidate settings reads — fetch once, reuse throughout the request
   const settings = cachedSettings ?? (await getCachedSettings());
   const geminiPromptCacheMode = settings.geminiPromptCacheMode === "implicit" ? "implicit" : "off";
@@ -1010,6 +1024,10 @@ async function handleChatCoreInner({
         )) || null;
   const pipelineSessionId = explicitSessionIdHeader || skillRequestId;
   const reasoningReplaySessionKey = sessionAffinityKey || explicitSessionIdHeader;
+  // One upstream Antigravity session per conversation (prompt-cache scope); the
+  // non-streaming server-tool follow-up leg must reuse it, or it falls back to the
+  // account-wide session and evicts parallel conversations' caches.
+  const antigravitySessionKey = conversationId || sessionAffinityKey || null;
   const reasoningCacheScope = buildReasoningCacheScope(
     apiKeyInfo?.id,
     reasoningReplaySessionKey ? String(reasoningReplaySessionKey) : null
@@ -2452,6 +2470,7 @@ async function handleChatCoreInner({
           signatureNamespace: connectionId,
           copilotClient: copilotCompatibleReasoning,
           reasoningCacheScope,
+          antigravitySessionKey,
           videoTranscriptSensitive: videoBridgeObserved,
           onReasoningReplayHistory: (messages) => {
             reasoningReplayHistory = messages;
@@ -3499,6 +3518,7 @@ async function handleChatCoreInner({
       persistFailureUsage,
       pipelineRecovered,
       pipelineSessionId,
+      antigravitySessionKey,
       preserveCacheControl,
       provider,
       providerHeaders,
@@ -3514,6 +3534,7 @@ async function handleChatCoreInner({
       reqLogger,
       requestToolIdentityMap,
       resolveReportedServiceTier,
+      piiTokensMinted,
       runMemoryExtractionGate,
       runPluginOnResponseHook,
       sanitizeErrorMessage,
@@ -3616,6 +3637,7 @@ async function handleChatCoreInner({
     pendingRequestOwner,
     persistAttemptLogs,
     persistFailureUsage,
+    piiTokensMinted,
     pipelineSessionId,
     provider,
     providerHeaders,

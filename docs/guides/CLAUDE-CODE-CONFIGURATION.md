@@ -1,7 +1,7 @@
 ---
 title: "Claude Code CLI — Configuration with OmniRoute"
 version: 3.8.40
-lastUpdated: 2026-09-25
+lastUpdated: 2026-11-18
 ---
 
 # Claude Code CLI — Configuration with OmniRoute
@@ -101,18 +101,23 @@ compute it when Claude Code launches. Add this to `~/.zshrc` or `~/.bashrc` and 
 claude() {
   local common name repo
   if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
-    name=$(basename "$(dirname "$common")")  # repository name, also inside worktrees
+    case $common in
+      */.git) name=$(basename "$(dirname "$common")") ;;  # repository name, also in worktrees
+      *) name=$(basename "$common" .git) ;;                # bare repository (/srv/foo.git)
+    esac
     repo=$(git remote get-url origin 2>/dev/null \
-      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s#\.git$##')
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s|[?#].*$||; s#\.git$##')
   else
-    name=$(basename "$PWD")                  # not a git repository: folder name
+    name=$(basename "$PWD")                                # not a git repository: folder name
   fi
-  ANTHROPIC_CUSTOM_HEADERS="x-omniroute-project: ${name}${repo:+
+  ANTHROPIC_CUSTOM_HEADERS="${ANTHROPIC_CUSTOM_HEADERS:+${ANTHROPIC_CUSTOM_HEADERS}
+}x-omniroute-project: ${name}${repo:+
 x-omniroute-project-repo: ${repo}}" command claude "$@"
 }
 ```
 
-The `sed` expression strips any credentials embedded in the remote URL. IDE extensions launch
+The `sed` expression strips any credentials, query string and fragment embedded in the remote URL,
+and headers already in `ANTHROPIC_CUSTOM_HEADERS` are kept. IDE extensions launch
 Claude Code without your shell, so their sessions fall back to the working directory.
 
 ---
@@ -321,6 +326,28 @@ unprefixed Claude models** — the toggle on the Claude provider page, or
 `OMNIROUTE_PREFER_CLAUDE_CODE_FOR_UNPREFIXED_CLAUDE_MODELS=true` (default off;
 see [Environment](../reference/ENVIRONMENT.md)) — which routes bare `claude-*`
 IDs to Claude Code instead. Explicit provider prefixes always win.
+
+**"auto mode … this session isn't eligible" (classifier requests billed)** — in
+auto mode Claude Code asks the server to review actions inside its own model
+requests ([Anthropic docs](https://code.claude.com/docs/en/auto-mode-classifier-billing)).
+That needs the `anthropic-beta` value `dangerous-tool-use-2026-09-03` and the
+`safeguards` body field to reach Anthropic as a pair, and `safeguard_results`
+plus the upstream tool-use IDs to come back unchanged. OmniRoute does this when
+the request is routed to the native `claude` provider or to an
+`anthropic-compatible-*` node, streamed or not (regression guard:
+`tests/integration/claude-auto-mode-classifier-e2e.test.ts`). Other targets
+cannot return the review, so Claude Code falls back to its own classifier
+requests and shows the notice:
+
+- a model on a non-Anthropic provider, or a combo that lands on one;
+- a Claude-Code-compatible relay node (`anthropic-compatible-cc-*`), which
+  rebuilds the request body and does not carry `safeguards`;
+- an older OmniRoute that predates the allowlisted betas, or a Claude Code
+  version below the one the Anthropic page lists for gateway sessions.
+
+Run `/status` in Claude Code: the **Auto mode server** row reads `Enabled`
+while the server's review is active. Whether those requests are billed is
+decided by Anthropic, not by OmniRoute.
 
 **Auth errors** — the profile holds no token. Use `omniroute launch --profile`
 (injects it) or export `ANTHROPIC_AUTH_TOKEN`.

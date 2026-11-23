@@ -1423,11 +1423,31 @@
     outline-offset: calc(-1 * var(--ci-focus-ring-width));
   }
 
+  /* maxHeight bounds the container, so it scrolls on both axes (and takes focus while it does)
+     with the header row pinned above the rows. The header cells sit above the sticky end cells. */
+  .ci-table-container[data-capped] { max-block-size: var(--ci-table-max-height); overflow: auto; isolation: isolate; }
+  /* The table paints under the container's own outline, so the pinned header cells cannot cover
+     the inset focus outline. Clicks and hover still reach the cells. */
+  .ci-table-container[data-capped] > .ci-table { position: relative; z-index: -1; }
+  .ci-table-container[data-capped] > .ci-table > .ci-table__header .ci-table__head {
+    position: sticky;
+    inset-block-start: 0;
+    z-index: 3;
+    background: var(--ci-color-surface-subtle);
+    box-shadow: inset 0 calc(-1 * var(--ci-border-default)) 0 var(--ci-color-border-subtle);
+  }
+  .ci-table-container[data-capped] > .ci-table > .ci-table__header .ci-table__head--sticky-end {
+    z-index: 4;
+    box-shadow: -1px 0 0 var(--ci-color-border-subtle), inset 0 calc(-1 * var(--ci-border-default)) 0 var(--ci-color-border-subtle);
+  }
+
   .ci-table-scroll-area { width: 100%; min-width: 0; }
-  .ci-table-scroll-area > .ci-table-container,
-  .ci-table-scroll-area > .ci-table-loading-region > [data-slot="table-loading-content"] > .ci-table-container { scrollbar-width: none; }
-  .ci-table-scroll-area > .ci-table-container::-webkit-scrollbar,
-  .ci-table-scroll-area > .ci-table-loading-region > [data-slot="table-loading-content"] > .ci-table-container::-webkit-scrollbar { display: none; }
+  /* The top scrollbar replaces the native one, except on a capped container: its bottom edge stays
+     in view and its vertical scrollbar has no replacement. */
+  .ci-table-scroll-area > .ci-table-container:not([data-capped]),
+  .ci-table-scroll-area > .ci-table-loading-region > [data-slot="table-loading-content"] > .ci-table-container:not([data-capped]) { scrollbar-width: none; }
+  .ci-table-scroll-area > .ci-table-container:not([data-capped])::-webkit-scrollbar,
+  .ci-table-scroll-area > .ci-table-loading-region > [data-slot="table-loading-content"] > .ci-table-container:not([data-capped])::-webkit-scrollbar { display: none; }
   .ci-table-scrollbar {
     position: relative;
     display: block;

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useFormatter, useTranslations } from "next-intl";
-import { CodePreview } from "@omniroute/ui-kit/code-preview";
+import CodePreview from "@/shared/components/CodePreview";
 import { PageHeader } from "@omniroute/ui-kit/page-header";
 import {
   Table,
@@ -23,6 +23,7 @@ import {
   EmptyState,
   Modal,
 } from "@/shared/components";
+import { ACCESS_TOKEN_NAME_MAX_LENGTH } from "@/shared/constants/formLimits";
 
 interface AccessTokenRow {
   id: string;
@@ -51,6 +52,7 @@ async function fetchTokens(): Promise<AccessTokenRow[]> {
 export default function AccessTokensTab() {
   const t = useTranslations("settings");
   const tc = useTranslations("common");
+  const tv = useTranslations("formValidation");
   const nameRef = useRef<HTMLInputElement>(null);
   const format = useFormatter();
   const scopeLabels = {
@@ -66,6 +68,8 @@ export default function AccessTokensTab() {
   const [scope, setScope] = useState("read");
   const [expires, setExpires] = useState("");
   const [creating, setCreating] = useState(false);
+  // Set by a refused Create: an untouched form is not flagged for being empty.
+  const [showNameRequired, setShowNameRequired] = useState(false);
   const [newSecret, setNewSecret] = useState<string | null>(null);
   // Name + scope of the token just created, shown as the secret preview's header.
   const [newSecretMeta, setNewSecretMeta] = useState({ name: "", scope: "read" });
@@ -101,12 +105,31 @@ export default function AccessTokensTab() {
     };
   }, [t]);
 
+  // The request carries the trimmed name, so that is what the server's limit is measured on.
+  const trimmedName = name.trim();
+  const nameTooLong = trimmedName.length > ACCESS_TOKEN_NAME_MAX_LENGTH;
+  const nameField = t("accessTokensColName");
+  const nameError = nameTooLong
+    ? tv("maxLength", {
+        field: nameField,
+        max: ACCESS_TOKEN_NAME_MAX_LENGTH,
+        count: trimmedName.length,
+      })
+    : showNameRequired && !trimmedName
+      ? tv("required", { field: nameField })
+      : undefined;
+
   const createToken = async () => {
-    if (!name.trim()) return;
+    if (!trimmedName || nameTooLong) {
+      // Create stays enabled: the click is what tells the user which field needs fixing.
+      setShowNameRequired(true);
+      nameRef.current?.focus();
+      return;
+    }
     setCreating(true);
     setError("");
     try {
-      const body: Record<string, unknown> = { name: name.trim(), scope };
+      const body: Record<string, unknown> = { name: trimmedName, scope };
       const days = Number(expires);
       if (expires && Number.isFinite(days) && days > 0) body.expiresInDays = days;
       const res = await fetch("/api/cli/tokens", {
@@ -123,9 +146,10 @@ export default function AccessTokensTab() {
         );
         return;
       }
-      setNewSecretMeta({ name: name.trim(), scope });
+      setNewSecretMeta({ name: trimmedName, scope });
       setNewSecret(data.token);
       setName("");
+      setShowNameRequired(false);
       setExpires("");
       setScope("read");
       await load();
@@ -159,8 +183,8 @@ export default function AccessTokensTab() {
       : format.dateTime(date, { dateStyle: "medium", timeStyle: "short" });
   };
 
-  // The dialog's opener ("Create") is disabled again once the name is cleared, so the Modal's
-  // own focus return lands on <body>; send focus back to the name field instead.
+  // After the secret dialog closes, the next thing to do is name another token: send focus to
+  // the name field rather than leaving it on the dialog's opener ("Create").
   const dismissSecret = () => {
     setNewSecret(null);
     requestAnimationFrame(() => nameRef.current?.focus());
@@ -176,12 +200,16 @@ export default function AccessTokensTab() {
 
       {/* Create */}
       <Card title={t("accessTokensCreateHeading")}>
-        <div className="grid gap-3 sm:grid-cols-4 sm:items-end">
+        {/* Top-aligned so the message under Name does not push its input out of the row; the
+            button drops by the height of a label (sm:mt-7) to sit level with the inputs. */}
+        <div className="grid gap-3 sm:grid-cols-4 sm:items-start">
           <Input
             ref={nameRef}
-            label={t("accessTokensColName")}
+            label={nameField}
             placeholder={t("accessTokensNamePlaceholder")}
             value={name}
+            required
+            error={nameError}
             onChange={(e) => setName(e.target.value)}
           />
           <Select
@@ -203,7 +231,7 @@ export default function AccessTokensTab() {
             value={expires}
             onChange={(e) => setExpires(e.target.value)}
           />
-          <Button onClick={createToken} disabled={creating || !name.trim()}>
+          <Button className="sm:mt-7" onClick={createToken} disabled={creating}>
             {creating ? t("accessTokensCreating") : t("accessTokensCreate")}
           </Button>
         </div>
@@ -256,7 +284,11 @@ export default function AccessTokensTab() {
         ) : tokens.length === 0 ? (
           <EmptyState icon="key" title={t("accessTokensEmpty")} className="py-6" />
         ) : (
-          <Table scrollbarLabel={t("accessTokensExisting")}>
+          <Table
+            scrollbarLabel={t("accessTokensExisting")}
+            scrollLabel={t("accessTokensExisting")}
+            containerClassName="rounded-none border-0"
+          >
             <TableHeader>
               <TableRow>
                 <TableHead>{t("accessTokensColName")}</TableHead>

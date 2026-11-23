@@ -325,6 +325,101 @@ function buildInjectionScanText(text) {
   return text.slice(0, head) + SCAN_GAP + text.slice(text.length - tail);
 }
 
+// Decode limits. The scan text is capped at 16 KB, so these bound the extra work per request.
+const MAX_DECODE_DEPTH = 2;
+// Decode budget in decoded bytes, shared by both layers. A scan text of MAX_INJECTION_SCAN_BYTES
+// yields at most ~4x that in candidate bytes (hex runs also match the base64 expression, and
+// layer 2 rescans what layer 1 decoded), so a real scan never reaches this: short decoy runs
+// placed first can no longer use it up and hide an encoded instruction behind them.
+const MAX_DECODE_BYTES = 8 * MAX_INJECTION_SCAN_BYTES;
+// Linear runs: one character class with a fixed floor, no nested quantifier. 24 base64 characters
+// are 18 bytes; 24 hex digits are 12 bytes. Shorter runs hold no usable instruction.
+const BASE64_RUN_RE = /[A-Za-z0-9+/_-]{24,}={0,2}/g;
+const HEX_RUN_RE = /(?:[0-9a-fA-F]{2}){12,}/g;
+const PERCENT_RUN_RE = /(?:%[0-9a-fA-F]{2})+/g;
+// Binary garbage fails this: a control character or U+FFFD from invalid UTF-8.
+const NOT_READABLE_RE = /[\u0000-\u0008\u000e-\u001f\u007f\ufffd]/;
+const ENCODING_EVASION_RULE = INJECTION_PATTERNS.find((rule) => rule.name === "encoding_evasion");
+
+/** The decoded text when the bytes read as text, else null (hashes, keys, binary). */
+function readableText(bytes) {
+  const decoded = bytes.toString("utf8");
+  return decoded.trim() && !NOT_READABLE_RE.test(decoded) ? decoded : null;
+}
+
+/**
+ * Decode one percent-encoding layer of the text, or null when nothing decodes.
+ * @param {string} text
+ * @returns {string | null}
+ */
+function decodePercentOnce(text) {
+  if (!text.includes("%")) return null;
+  const unescaped = text.replace(PERCENT_RUN_RE, (run) => {
+    try {
+      return decodeURIComponent(run);
+    } catch {
+      return run;
+    }
+  });
+  return unescaped !== text ? unescaped : null;
+}
+
+/**
+ * Byte candidates from the hex and base64 runs of the text.
+ * @param {string} text
+ * @returns {Buffer[]}
+ */
+function byteCandidates(text) {
+  const candidates = [];
+  for (const run of text.match(HEX_RUN_RE) ?? []) {
+    candidates.push(Buffer.from(run, "hex"));
+  }
+  for (const run of text.match(BASE64_RUN_RE) ?? []) {
+    candidates.push(Buffer.from(run.replace(/-/g, "+").replace(/_/g, "/"), "base64"));
+  }
+  return candidates;
+}
+
+/**
+ * Decode one layer of sources into the next layer. Reads and consumes the shared
+ * byte budget (sized so the capped scan text cannot exhaust it).
+ * @param {string[]} layer
+ * @param {{ left: number }} budget
+ * @returns {string[]}
+ */
+function decodeOneLayer(layer, budget) {
+  const next = [];
+  for (const source of layer) {
+    const unescaped = decodePercentOnce(source);
+    if (unescaped) next.push(unescaped);
+    for (const bytes of byteCandidates(source)) {
+      if (bytes.length > budget.left) break;
+      budget.left -= bytes.length;
+      const decoded = readableText(bytes);
+      if (decoded) next.push(decoded);
+    }
+  }
+  return next;
+}
+
+/**
+ * Decode base64, hex and percent-encoded runs found in the text, up to MAX_DECODE_DEPTH layers.
+ * Only text that decodes to readable UTF-8 is returned. A run that is not an encoding of text
+ * (a hash, a token, a long path) decodes to binary and is dropped.
+ * @param {string} text
+ * @returns {string[]}
+ */
+function decodeEncodedLayers(text) {
+  const found = [];
+  const budget = { left: MAX_DECODE_BYTES };
+  let layer = [text];
+  for (let depth = 0; depth < MAX_DECODE_DEPTH && layer.length > 0; depth++) {
+    layer = decodeOneLayer(layer, budget);
+    found.push(...layer);
+  }
+  return found;
+}
+
 /**
  * Scan content for prompt injection patterns.
  * @param {string} text
@@ -340,6 +435,22 @@ function detectInjection(text) {
         pattern: rule.name,
         severity: rule.severity,
         match: match[0].slice(0, 50), // truncate for logging
+      });
+    }
+  }
+  // Instructions hidden in base64, hex or percent-encoding: scan what they decode to. A hit keeps
+  // the rule's severity and takes a "decoded:" name, so it lands in the same bucket.
+  const seen = new Set(detections.map((d) => d.pattern));
+  for (const decoded of decodeEncodedLayers(scanText)) {
+    for (const rule of INJECTION_PATTERNS) {
+      if (rule === ENCODING_EVASION_RULE || seen.has(`decoded:${rule.name}`)) continue;
+      const match = decoded.match(rule.pattern);
+      if (!match) continue;
+      seen.add(`decoded:${rule.name}`);
+      detections.push({
+        pattern: `decoded:${rule.name}`,
+        severity: rule.severity,
+        match: match[0].slice(0, 50),
       });
     }
   }
@@ -364,20 +475,72 @@ function resolvePiiRules(options) {
   return custom.length > 0 ? [...builtins, ...custom] : builtins;
 }
 
+// Surrogate tokens of the reversible PII vault (src/lib/pii/tokenVault.ts). While minting,
+// a later rule must not rewrite part of a token an earlier rule wrote.
+const PII_VAULT_TOKEN = /<<PII_[A-Z0-9_]{1,40}>>/g;
+
+/**
+ * Replacement for one match: a vault token when `tokenize` is given and succeeds, otherwise
+ * the rule's irreversible placeholder (fail-closed: never the raw value).
+ * @param {{ name: string, replacement: string }} rule
+ * @param {string} match
+ * @param {((type: string, value: string) => string | null) | undefined} tokenize
+ */
+function piiSubstitute(rule, match, tokenize) {
+  if (!tokenize) return rule.replacement;
+  try {
+    const token = tokenize(rule.name, match);
+    return typeof token === "string" && token.length > 0 ? token : rule.replacement;
+  } catch {
+    return rule.replacement;
+  }
+}
+
+/** @param {string} text */
+function vaultTokenSpans(text) {
+  const spans = [];
+  if (!text.includes("<<PII_")) return spans;
+  for (const match of text.matchAll(PII_VAULT_TOKEN)) {
+    const start = match.index ?? 0;
+    spans.push([start, start + match[0].length]);
+  }
+  return spans;
+}
+
+function insideSpan(spans, index) {
+  return spans.some(([start, end]) => index >= start && index < end);
+}
+
+/**
+ * Replace a rule's matches with vault tokens, skipping any match that starts inside a token.
+ * @param {string} text
+ * @param {{ name: string, pattern: RegExp, replacement: string }} rule
+ * @param {(type: string, value: string) => string | null} tokenize
+ */
+function tokenizeMatches(text, rule, tokenize) {
+  const spans = vaultTokenSpans(text);
+  return text.replace(rule.pattern, (match, ...rest) => {
+    const offset = rest.find((value) => typeof value === "number");
+    if (typeof offset === "number" && insideSpan(spans, offset)) return match;
+    return piiSubstitute(rule, match, tokenize);
+  });
+}
+
 /**
  * Scan and optionally redact PII from text.
  * @param {string} text
  * @param {boolean} redact - If true, replaces PII with placeholders
- * @param {{ enabledTypes?: ReadonlySet<string> | null, customRules?: Array<{name: string, regex: RegExp, replacement: string}> }} [options] - per-type selection and custom rules
+ * @param {{ enabledTypes?: ReadonlySet<string> | null, customRules?: Array<{name: string, regex: RegExp, replacement: string}>, tokenize?: (type: string, value: string) => string | null }} [options] - per-type selection, custom rules, and the reversible-vault minter (only the pii-masker passes one)
  * @returns {{ text: string, detections: Array<{type: string, count: number}> }}
  */
 function processPII(text, redact = false, options = undefined) {
   const detections = [];
   let processed = text;
+  const tokenize = redact && typeof options?.tokenize === "function" ? options.tokenize : undefined;
 
   for (const rule of resolvePiiRules(options)) {
     if (rule.validate) {
-      const validated = redactValidatedMatches(processed, rule, redact);
+      const validated = redactValidatedMatches(processed, rule, redact, tokenize);
       if (validated.count > 0) {
         detections.push({ type: rule.name, count: validated.count });
         processed = validated.text;
@@ -387,9 +550,7 @@ function processPII(text, redact = false, options = undefined) {
     const matches = text.match(rule.pattern);
     if (matches && matches.length > 0) {
       detections.push({ type: rule.name, count: matches.length });
-      if (redact) {
-        processed = processed.replace(rule.pattern, rule.replacement);
-      }
+      if (redact) processed = redactRuleMatches(processed, rule, tokenize);
     }
   }
 
@@ -397,21 +558,36 @@ function processPII(text, redact = false, options = undefined) {
 }
 
 /**
+ * Redact one unvalidated rule: placeholders, or vault tokens when a minter is given.
+ * @param {string} text
+ * @param {{ name: string, pattern: RegExp, replacement: string }} rule
+ * @param {((type: string, value: string) => string | null) | undefined} tokenize
+ */
+function redactRuleMatches(text, rule, tokenize) {
+  return tokenize
+    ? tokenizeMatches(text, rule, tokenize)
+    : text.replace(rule.pattern, rule.replacement);
+}
+
+/**
  * Count (and optionally redact) only the matches the rule's validator accepts.
  * @param {string} text
- * @param {{ pattern: RegExp, replacement: string, validate: (match: string, context: string) => boolean }} rule
+ * @param {{ name: string, pattern: RegExp, replacement: string, validate: (match: string, context: string) => boolean }} rule
  * @param {boolean} redact
+ * @param {((type: string, value: string) => string | null) | undefined} [tokenize]
  * @returns {{ text: string, count: number }}
  */
-function redactValidatedMatches(text, rule, redact) {
+function redactValidatedMatches(text, rule, redact, tokenize = undefined) {
   let count = 0;
   let output = "";
   let cursor = 0;
+  const spans = tokenize ? vaultTokenSpans(text) : [];
   for (const match of text.matchAll(rule.pattern)) {
     const index = match.index ?? 0;
+    if (spans.length > 0 && insideSpan(spans, index)) continue;
     if (!rule.validate(match[0], precedingContext(text, index))) continue;
     count++;
-    output += text.slice(cursor, index) + rule.replacement;
+    output += text.slice(cursor, index) + piiSubstitute(rule, match[0], tokenize);
     cursor = index + match[0].length;
   }
   return { text: redact ? output + text.slice(cursor) : text, count };

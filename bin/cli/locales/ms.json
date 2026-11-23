@@ -12,7 +12,8 @@
     "dryRun": "[dry-run] akan {action}",
     "cancelled": "Dibatalkan.",
     "jsonOpt": "Output sebagai JSON",
-    "yesOpt": "Langkau gesaan pengesahan"
+    "yesOpt": "Langkau gesaan pengesahan",
+    "positiveIntegerRequired": "Had mestilah integer positif."
   },
   "setup": {
     "title": "Persediaan OmniRoute",

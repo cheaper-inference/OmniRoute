@@ -557,6 +557,8 @@ GET|POST|... /dashboard/providers/services/9router/embed/[...path]
 
 WebSocket jauninājumus iegultajam informācijas panelim apstrādā pavadošais serveris speciālā portā (skatiet `src/lib/services/embedWsProxy.ts`).
 
+Katrs WebSocket jauninājums tiek autorizēts pirms tuneļa atvēršanas saskaņā ar tiem pašiem noteikumiem, ko izmanto HTTP iegulšanas maršruts: savienojuma otram galam jāizmanto atgriezeniskās cilpas adrese bez reversā starpniekservera pārsūtīšanas galvenes, pārlūka `Origin` vērtībai jābūt informācijas paneļa izcelsmei (`LIVE_WS_ALLOWED_ORIGINS` un `LIVE_WS_ALLOWED_HOSTS` paplašina atgriezeniskās cilpas noklusējuma iestatījumus), un izsaucējam ir nepieciešama informācijas paneļa sesija vai pārvaldības tvēruma API atslēga, ja vien pieteikšanās informācijas panelī nav atspējota.
+
 **Drošība:** Iegulšanas starpniekservera maršruti ir klasificēti zem `LOCAL_ONLY_API_PREFIXES`, un tos var sasniegt tikai no atpakaļcilpas. Uzbrucējs, kurš iegūst JWT izmantojot Cloudflare/Ngrok tuneli, nevar izmantot starpniekserveri iegultos pakalpojumos.
 
 ---

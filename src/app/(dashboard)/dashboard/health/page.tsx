@@ -15,6 +15,9 @@ import { useProviderNodeMap, resolveProviderName } from "@/lib/display/useProvid
 import { compareTr } from "@/shared/utils/turkishText";
 import { startVisiblePolling } from "@/shared/utils/visiblePolling";
 import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
+import { LocalOnlyNotice } from "@/shared/components/LocalOnlyNotice";
+import { useLocalOnlyBlocked } from "@/shared/hooks/useLocalOnlyAccess";
+import { detectLocalOnlyRejection } from "@/shared/utils/localOnlyAccess";
 import { useLocale, useTranslations } from "next-intl";
 import TelemetryCard from "./TelemetryCard";
 import ProviderHealthAutopilotCard from "./ProviderHealthAutopilotCard";
@@ -47,6 +50,8 @@ function formatRelativeTime(timestamp) {
   const diffDays = Math.floor(diffHours / 24);
   return `${diffDays}d`;
 }
+
+const DB_HEALTH_API_PATH = "/api/db/health";
 
 const CB_STYLES = {
   CLOSED: { bg: "bg-success/10", text: "text-success", labelKey: "healthy" },
@@ -99,6 +104,8 @@ function HealthSnapshot() {
   const [unblocking, setUnblocking] = useState(false);
   const [unblockingKey, setUnblockingKey] = useState<string | null>(null);
   const [showAdvanced, setShowAdvanced] = useState(false);
+  // The database check is a local-only route: a remote session gets the notice, not a verdict.
+  const dbHealthLocalOnly = useLocalOnlyBlocked(DB_HEALTH_API_PATH);
 
   const fetchHealth = useCallback(async () => {
     try {
@@ -114,8 +121,10 @@ function HealthSnapshot() {
   }, []);
 
   const fetchDbHealth = useCallback(async () => {
+    if (dbHealthLocalOnly) return;
     try {
-      const res = await fetch("/api/db/health");
+      const res = await fetch(DB_HEALTH_API_PATH);
+      if (await detectLocalOnlyRejection(res, DB_HEALTH_API_PATH)) return;
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const json = await res.json();
       setDbHealth(json);
@@ -123,7 +132,7 @@ function HealthSnapshot() {
     } catch (err) {
       setDbHealthError(err.message);
     }
-  }, []);
+  }, [dbHealthLocalOnly]);
 
   // Fetch cache, signature cache, and degradation stats.
   const fetchExtras = useCallback(async () => {
@@ -203,7 +212,8 @@ function HealthSnapshot() {
   const handleRepairDb = async () => {
     setRepairingDb(true);
     try {
-      const res = await fetch("/api/db/health", { method: "POST" });
+      const res = await fetch(DB_HEALTH_API_PATH, { method: "POST" });
+      if (await detectLocalOnlyRejection(res, DB_HEALTH_API_PATH)) return;
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const json = await res.json();
       setDbHealth(json);
@@ -262,6 +272,19 @@ function HealthSnapshot() {
   } = data;
   const cbEntries = Object.entries(providerHealth || {});
   const lockoutEntries = Object.entries(lockouts || {});
+  // No answer yet, or a failed check, is not "attention needed": only a report can say that.
+  const dbHealthStatusLabel = dbHealth
+    ? dbHealth.isHealthy
+      ? t("healthy")
+      : t("attentionNeeded")
+    : dbHealthError
+      ? t("dbHealthCheckFailed")
+      : t("dbHealthChecking");
+  const dbHealthTone = dbHealth?.isHealthy
+    ? "success"
+    : dbHealth || dbHealthError
+      ? "warning"
+      : "muted";
 
   return (
     <HealthLayout
@@ -349,51 +372,64 @@ function HealthSnapshot() {
             <div className="flex items-center gap-3 mb-2">
               <div
                 className={`flex items-center justify-center size-9 rounded-lg ${
-                  dbHealth?.isHealthy ? "bg-success/10 text-success" : "bg-warning/10 text-warning"
+                  dbHealthLocalOnly || dbHealthTone === "muted"
+                    ? "bg-surface/50 text-text-muted"
+                    : dbHealthTone === "success"
+                      ? "bg-success/10 text-success"
+                      : "bg-warning/10 text-warning"
                 }`}
               >
                 <Icon name="database" size={18} />
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-text-main">{t("databaseHealth")}</h2>
+                <h2 className="text-lg text-text-main">{t("databaseHealth")}</h2>
                 <p className="text-sm text-text-muted">{t("databaseHealthDescription")}</p>
               </div>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4">
-              <div className="rounded-xl border border-border bg-surface/50 p-3">
-                <p className="text-xs uppercase tracking-wide text-text-muted">{t("status")}</p>
-                <p
-                  className={`mt-1 text-sm font-medium ${
-                    dbHealth?.isHealthy ? "text-success" : "text-warning"
-                  }`}
-                >
-                  {dbHealth?.isHealthy ? t("healthy") : t("attentionNeeded")}
-                </p>
+            {!dbHealthLocalOnly && (
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4">
+                <div className="rounded-xl border border-border bg-surface/50 p-3">
+                  <p className="text-xs uppercase tracking-wide text-text-muted">{t("status")}</p>
+                  <p
+                    className={`mt-1 text-sm font-medium ${
+                      dbHealthTone === "success"
+                        ? "text-success"
+                        : dbHealthTone === "warning"
+                          ? "text-warning"
+                          : "text-text-muted"
+                    }`}
+                  >
+                    {dbHealthStatusLabel}
+                  </p>
+                </div>
+                <div className="rounded-xl border border-border bg-surface/50 p-3">
+                  <p className="text-xs uppercase tracking-wide text-text-muted">{t("issues")}</p>
+                  <p className="mt-1 text-sm font-medium text-text-main">
+                    {dbHealth ? (dbHealth.issues?.length ?? 0) : t("notAvailable")}
+                  </p>
+                </div>
+                <div className="rounded-xl border border-border bg-surface/50 p-3">
+                  <p className="text-xs uppercase tracking-wide text-text-muted">{t("repairs")}</p>
+                  <p className="mt-1 text-sm font-medium text-text-main">
+                    {dbHealth ? (dbHealth.repairedCount ?? 0) : t("notAvailable")}
+                  </p>
+                </div>
               </div>
-              <div className="rounded-xl border border-border bg-surface/50 p-3">
-                <p className="text-xs uppercase tracking-wide text-text-muted">{t("issues")}</p>
-                <p className="mt-1 text-sm font-medium text-text-main">
-                  {dbHealth?.issues?.length ?? 0}
-                </p>
-              </div>
-              <div className="rounded-xl border border-border bg-surface/50 p-3">
-                <p className="text-xs uppercase tracking-wide text-text-muted">{t("repairs")}</p>
-                <p className="mt-1 text-sm font-medium text-text-main">
-                  {dbHealth?.repairedCount ?? 0}
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="flex flex-col items-stretch gap-2 min-w-45">
-            <Button variant="secondary" size="sm" onClick={handleRepairDb} loading={repairingDb}>
-              {repairingDb ? t("repairing") : t("runAutoRepair")}
-            </Button>
-            {dbHealth?.backupCreated && (
-              <p className="text-xs text-text-muted">{t("repairBackupCreated")}</p>
             )}
-            {dbHealthError && <p className="text-xs text-error">{dbHealthError}</p>}
           </div>
+          {!dbHealthLocalOnly && (
+            <div className="flex flex-col items-stretch gap-2 min-w-45">
+              <Button variant="secondary" size="sm" onClick={handleRepairDb} loading={repairingDb}>
+                {repairingDb ? t("repairing") : t("runAutoRepair")}
+              </Button>
+              {dbHealth?.backupCreated && (
+                <p className="text-xs text-text-muted">{t("repairBackupCreated")}</p>
+              )}
+              {dbHealthError && <p className="text-xs text-error">{dbHealthError}</p>}
+            </div>
+          )}
         </div>
+        {dbHealthLocalOnly && <LocalOnlyNotice className="mt-4" />}
         {Array.isArray(dbHealth?.issues) && dbHealth.issues.length > 0 && (
           <div className="mt-4 space-y-2">
             {dbHealth.issues.map((issue, index) => (
@@ -495,7 +531,7 @@ function HealthSnapshot() {
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
         <Card className="p-5">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-text-main flex items-center gap-2">
+            <h2 className="text-lg text-text-main flex items-center gap-2">
               <Icon name="groups" size={20} className="text-primary" />
               {t("sessionActivity")}
             </h2>
@@ -549,7 +585,7 @@ function HealthSnapshot() {
 
         <Card className="p-5">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-text-main flex items-center gap-2">
+            <h2 className="text-lg text-text-main flex items-center gap-2">
               <Icon name="radar" size={20} className="text-primary" />
               {t("quotaMonitors")}
             </h2>
@@ -633,7 +669,7 @@ function HealthSnapshot() {
       {degradation && degradation.features && degradation.features.length > 0 && (
         <Card className="p-5" role="region" aria-label={t("gracefulDegradationStatus")}>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-text-main flex items-center gap-2">
+            <h2 className="text-lg text-text-main flex items-center gap-2">
               <Icon name="healing" size={20} className="text-primary" />
               {t("gracefulDegradationStatus")}
             </h2>
@@ -709,7 +745,7 @@ function HealthSnapshot() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Prompt Cache Card */}
         <Card className="p-4">
-          <h3 className="text-sm font-semibold text-text-muted mb-3 flex items-center gap-2">
+          <h3 className="text-sm text-text-muted mb-3 flex items-center gap-2">
             <Icon name="cached" size={18} />
             {t("promptCache")}
           </h3>
@@ -739,7 +775,7 @@ function HealthSnapshot() {
 
         {/* Signature Cache Card */}
         <Card className="p-4">
-          <h3 className="text-sm font-semibold text-text-muted mb-3 flex items-center gap-2">
+          <h3 className="text-sm text-text-muted mb-3 flex items-center gap-2">
             <Icon name="database" size={18} />
             {t("signatureCache")}
           </h3>
@@ -759,7 +795,7 @@ function HealthSnapshot() {
                 {
                   label: t("signatureFamily"),
                   value: `${signatureCache.family.entries}/${signatureCache.family.patterns}`,
-                  color: "text-chart-3",
+                  color: "text-chart-3-ink",
                 },
                 {
                   label: t("signatureSession"),
@@ -785,7 +821,7 @@ function HealthSnapshot() {
       {/* Provider Health */}
       <Card className="p-5" role="region" aria-label={t("providerHealthStatusAria")}>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-text-main flex items-center gap-2">
+          <h2 className="text-lg text-text-main flex items-center gap-2">
             <Icon name="health_and_safety" size={20} className="text-primary" />
             {t("providerHealth")}
           </h2>
@@ -962,7 +998,7 @@ function HealthSnapshot() {
           return (
             <Card className="p-5">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-text-main flex items-center gap-2">
+                <h2 className="text-lg text-text-main flex items-center gap-2">
                   <Icon name="speed" size={20} className="text-warning" />
                   {t("rateLimitStatus")}
                 </h2>
@@ -1069,23 +1105,17 @@ function HealthSnapshot() {
                                 })}
                               </span>
                             </div>
-                            {/* Kit Progress, decorative: the kit spreads aria-* onto its outer div and
-                                never names the inner role="progressbar" (no label forwarding), so the
-                                bar is hidden from assistive tech — the remaining/limit text above
-                                carries the value. No tone prop either: status colour on the indicator. */}
-                            <div aria-hidden="true" data-testid="health-pool-bar">
-                              <Progress
-                                value={quotaProgress}
-                                animate={false}
-                                className={
-                                  exhausted
-                                    ? "[&_.ci-progress__indicator]:bg-none [&_.ci-progress__indicator]:bg-error"
-                                    : lowRemaining
-                                      ? "[&_.ci-progress__indicator]:bg-none [&_.ci-progress__indicator]:bg-warning"
-                                      : "[&_.ci-progress__indicator]:bg-none [&_.ci-progress__indicator]:bg-success"
-                                }
-                              />
-                            </div>
+                            <Progress
+                              data-testid="health-pool-bar"
+                              aria-label={t("learnedFromHeaders")}
+                              aria-valuetext={t("remainingOfLimit", {
+                                remaining: learnedRemaining,
+                                limit: learnedLimit,
+                              })}
+                              value={quotaProgress}
+                              tone={exhausted ? "danger" : lowRemaining ? "warning" : "success"}
+                              animate={false}
+                            />
                           </div>
                         )}
                         <div className="flex items-center gap-3 text-[11px] text-text-muted">
@@ -1125,7 +1155,7 @@ function HealthSnapshot() {
       {lockoutEntries.length > 0 && (
         <Card className="p-5">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-text-main flex items-center gap-2">
+            <h2 className="text-lg text-text-main flex items-center gap-2">
               <Icon name="lock" size={20} className="text-error" />
               {t("activeLockouts")}
             </h2>

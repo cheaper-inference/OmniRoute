@@ -22,10 +22,11 @@ function getTool(name: string) {
   return tool!;
 }
 
-function writeTestPlugin(opts?: { name?: string; onRequest?: boolean }) {
+function writeTestPlugin(opts?: { name?: string; onRequest?: boolean; parent?: string }) {
   const name = opts?.name ?? "test-tools-plugin";
   const onRequest = opts?.onRequest ?? true;
-  const sourceDir = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-plugin-src-"));
+  if (opts?.parent) fs.mkdirSync(opts.parent, { recursive: true });
+  const sourceDir = fs.mkdtempSync(path.join(opts?.parent ?? os.tmpdir(), "omniroute-plugin-src-"));
   const pluginDir = path.join(sourceDir, name);
   fs.mkdirSync(pluginDir, { recursive: true });
   const manifest = {
@@ -126,8 +127,12 @@ test("plugin_list: filters by status", async () => {
 
 // ── plugin_install ──
 
-test("plugin_install: installs a valid plugin", async () => {
-  const { sourceDir, name } = writeTestPlugin({ name: "install-tool" });
+test("plugin_install: installs a valid plugin from the plugin sources directory", async () => {
+  const { pluginManager } = await import("../../src/lib/plugins/manager.ts");
+  const { sourceDir, name } = writeTestPlugin({
+    name: "install-tool",
+    parent: pluginManager.getSourcesDir(),
+  });
   activeSourceDirs.push(sourceDir);
 
   const tool = getTool("plugin_install");
@@ -135,8 +140,22 @@ test("plugin_install: installs a valid plugin", async () => {
   assert.equal(result.success, true);
   assert.equal(result.plugin.name, name);
 
-  const { pluginManager } = await import("../../src/lib/plugins/manager.ts");
   await pluginManager.uninstall(name);
+});
+
+test("plugin_install: refuses a path outside the plugin sources directory", async () => {
+  const { sourceDir, name } = writeTestPlugin({ name: "install-tool-outside" });
+  activeSourceDirs.push(sourceDir);
+
+  const tool = getTool("plugin_install");
+  await assert.rejects(
+    () => tool.handler({ path: sourceDir }),
+    (err: Error) => {
+      assert.equal(err.name, "PluginInstallSourceError");
+      return true;
+    }
+  );
+  assert.equal(dbPlugins.getPluginByName(name), null, "nothing may be installed");
 });
 
 test("plugin_install: throws for invalid path", async () => {
@@ -144,7 +163,7 @@ test("plugin_install: throws for invalid path", async () => {
   await assert.rejects(
     () => tool.handler({ path: "/nonexistent/path" }),
     (err: Error) => {
-      assert.ok(err.message.includes("No valid plugin found"));
+      assert.equal(err.name, "PluginInstallSourceError");
       return true;
     }
   );

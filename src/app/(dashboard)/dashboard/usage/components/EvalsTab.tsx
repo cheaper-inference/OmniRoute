@@ -1,9 +1,10 @@
 "use client";
 
-import { memo, useEffect, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { buttonVariants } from "@omniroute/ui-kit/button";
 import { Field } from "@omniroute/ui-kit/field";
+import { Progress } from "@omniroute/ui-kit/progress";
 import {
   Card,
   Button,
@@ -19,6 +20,9 @@ import Icon from "@/shared/components/Icon";
 import { useNotificationStore } from "@/store/notificationStore";
 import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
 import { matchesSearch } from "@/shared/utils/turkishText";
+import { focusFirstInvalidField } from "@/shared/utils/focusFirstInvalidField";
+import { EVAL_DEFAULT_CASE_MODEL } from "@/shared/constants/evals";
+import { hasSuiteDraftErrors, validateSuiteDraft, type SuiteDraftErrors } from "./evalSuiteDraft";
 
 type EvalTargetType = "suite-default" | "model" | "combo";
 
@@ -198,7 +202,7 @@ const STRATEGIES = [
     name: "custom",
     labelKey: "evalsStrategyCustomLabel",
     icon: "tune",
-    color: "text-chart-3",
+    color: "text-chart-3-ink",
     bg: "bg-chart-3/10",
     descriptionKey: "evalsStrategyCustomDescription",
   },
@@ -457,6 +461,10 @@ export default function EvalsTab() {
   const [isBuilderOpen, setIsBuilderOpen] = useState(false);
   const [suiteDraft, setSuiteDraft] = useState<EvalSuiteDraft>(createEmptySuiteDraft());
   const [savingSuite, setSavingSuite] = useState(false);
+  // Set by a refused save: the builder then flags the fields inline (an untouched form is not
+  // flagged for being empty) and `refusedSaves` moves focus to the first of them.
+  const [showSuiteErrors, setShowSuiteErrors] = useState(false);
+  const [refusedSaves, setRefusedSaves] = useState(0);
   const [deletingSuiteId, setDeletingSuiteId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -660,29 +668,17 @@ export default function EvalsTab() {
 
   async function handleSaveSuite() {
     const suiteName = suiteDraft.name.trim();
-    if (!suiteName) {
-      notify.warning(t("suiteBuilderNameRequired"));
-      return;
-    }
 
     if (suiteDraft.cases.length === 0) {
       notify.warning(t("suiteBuilderCasesRequired"));
       return;
     }
 
-    const invalidCaseIndex = suiteDraft.cases.findIndex((draftCase) => {
-      const hasMessage =
-        draftCase.systemPrompt.trim().length > 0 || draftCase.userPrompt.trim().length > 0;
-      return (
-        !draftCase.name.trim() ||
-        !draftCase.expectedValue.trim() ||
-        !hasMessage ||
-        !draftCase.model.trim()
-      );
-    });
-
-    if (invalidCaseIndex >= 0) {
-      notify.warning(t("suiteBuilderCaseInvalid", { index: invalidCaseIndex + 1 }));
+    // Each missing field is flagged next to itself by the builder; a toast would only repeat
+    // it away from the field. A case's model is optional (see evalSuiteDraft.ts).
+    if (hasSuiteDraftErrors(validateSuiteDraft(suiteDraft))) {
+      setShowSuiteErrors(true);
+      setRefusedSaves((count) => count + 1);
       return;
     }
 
@@ -703,7 +699,8 @@ export default function EvalsTab() {
           return {
             ...(draftCase.id.startsWith("draft-") ? {} : { id: draftCase.id }),
             name: draftCase.name.trim(),
-            model: draftCase.model.trim(),
+            // Omitted when empty: the save schema takes a missing model, not an empty one.
+            ...(draftCase.model.trim() ? { model: draftCase.model.trim() } : {}),
             input: {
               messages,
             },
@@ -738,6 +735,7 @@ export default function EvalsTab() {
       await refreshDashboard();
       setExpanded(result?.suite?.id || suiteDraft.id || null);
       setIsBuilderOpen(false);
+      setShowSuiteErrors(false);
       setSuiteDraft(createEmptySuiteDraft());
       notify.success(
         isEditing ? t("suiteBuilderUpdated") : t("suiteBuilderCreated"),
@@ -1025,7 +1023,7 @@ export default function EvalsTab() {
           <span className="text-xs text-text-muted uppercase font-semibold tracking-wide">
             {t("statsSuites")}
           </span>
-          <div className="text-2xl font-semibold mt-1 text-chart-3">{suites.length}</div>
+          <div className="text-2xl font-semibold mt-1 text-chart-3-ink">{suites.length}</div>
         </Card>
         <Card className="px-4 py-3 text-center">
           <span className="text-xs text-text-muted uppercase font-semibold tracking-wide">
@@ -1055,7 +1053,7 @@ export default function EvalsTab() {
             <Icon name="route" size={20} />
           </div>
           <div>
-            <h3 className="text-lg font-semibold">{t("evalControlsTitle")}</h3>
+            <h3 className="text-lg">{t("evalControlsTitle")}</h3>
             <p className="text-xs text-text-muted">{t("evalControlsHint")}</p>
           </div>
         </div>
@@ -1121,7 +1119,7 @@ export default function EvalsTab() {
               <Icon name="analytics" size={20} />
             </div>
             <div>
-              <h3 className="text-lg font-semibold">{t("scorecardTitle")}</h3>
+              <h3 className="text-lg">{t("scorecardTitle")}</h3>
               <p className="text-xs text-text-muted">{t("scorecardHint")}</p>
             </div>
           </div>
@@ -1131,7 +1129,7 @@ export default function EvalsTab() {
               <p className="text-xs uppercase tracking-wide text-text-muted">
                 {t("scorecardSuites")}
               </p>
-              <p className="text-2xl font-semibold text-chart-3 mt-1">{scorecard.suites}</p>
+              <p className="text-2xl font-semibold text-chart-3-ink mt-1">{scorecard.suites}</p>
             </Card>
             <Card className="px-4 py-3">
               <p className="text-xs uppercase tracking-wide text-text-muted">
@@ -1180,14 +1178,14 @@ export default function EvalsTab() {
           variant="ghost"
           aria-expanded={showHowItWorks}
           onClick={() => setShowHowItWorks((prev) => !prev)}
-          className="h-auto min-h-0 w-full justify-between rounded-none px-6 py-4 text-left font-normal whitespace-normal"
+          className="h-auto min-h-0 w-full justify-between rounded-none px-6 py-4 text-left whitespace-normal"
         >
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-primary/10 text-primary">
               <Icon name="help" size={20} />
             </div>
             <div>
-              <h3 className="text-sm font-semibold text-text-main">{t("howItWorks")}</h3>
+              <h3 className="text-sm text-text-main">{t("howItWorks")}</h3>
               <p className="text-xs text-text-muted">{t("howItWorksSubtitle")}</p>
             </div>
           </div>
@@ -1205,29 +1203,29 @@ export default function EvalsTab() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
               <div className="flex flex-col items-center text-center p-4 rounded-lg bg-chart-3/5 border border-chart-3/10">
                 <div className="w-10 h-10 rounded-full bg-chart-3/20 flex items-center justify-center mb-3">
-                  <span className="text-lg font-semibold text-chart-3">1</span>
+                  <span className="text-lg font-semibold text-chart-3-ink">1</span>
                 </div>
-                <h4 className="text-sm font-semibold text-text-main mb-1">{t("define")}</h4>
+                <h4 className="text-sm text-text-main mb-1">{t("define")}</h4>
                 <p className="text-xs text-text-muted">{t("defineStepDescription")}</p>
               </div>
               <div className="flex flex-col items-center text-center p-4 rounded-lg bg-info/5 border border-info/10">
                 <div className="w-10 h-10 rounded-full bg-info/20 flex items-center justify-center mb-3">
                   <span className="text-lg font-semibold text-info">2</span>
                 </div>
-                <h4 className="text-sm font-semibold text-text-main mb-1">{t("run")}</h4>
+                <h4 className="text-sm text-text-main mb-1">{t("run")}</h4>
                 <p className="text-xs text-text-muted">{t("runStepDescription")}</p>
               </div>
               <div className="flex flex-col items-center text-center p-4 rounded-lg bg-success/5 border border-success/10">
                 <div className="w-10 h-10 rounded-full bg-success/20 flex items-center justify-center mb-3">
                   <span className="text-lg font-semibold text-success">3</span>
                 </div>
-                <h4 className="text-sm font-semibold text-text-main mb-1">{t("evaluate")}</h4>
+                <h4 className="text-sm text-text-main mb-1">{t("evaluate")}</h4>
                 <p className="text-xs text-text-muted">{t("evaluateStepDescription")}</p>
               </div>
             </div>
 
             <div className="mt-6">
-              <h4 className="text-xs font-semibold text-text-muted uppercase tracking-wide mb-3">
+              <h4 className="text-xs text-text-muted uppercase mb-3">
                 {t("evaluationStrategies")}
               </h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
@@ -1257,12 +1255,13 @@ export default function EvalsTab() {
             <Icon name="history" size={20} />
           </div>
           <div>
-            <h3 className="text-lg font-semibold">{t("recentRunsTitle")}</h3>
+            <h3 className="text-lg">{t("recentRunsTitle")}</h3>
             <p className="text-xs text-text-muted">{t("recentRunsHint")}</p>
           </div>
         </div>
 
         <DataTable
+          label={t("recentRunsTitle")}
           framed={false}
           columns={HISTORY_COLUMNS.map((column) => ({
             key: column.key,
@@ -1319,7 +1318,7 @@ export default function EvalsTab() {
               <Icon name="science" size={20} />
             </div>
             <div>
-              <h3 className="text-lg font-semibold">{t("evalSuites")}</h3>
+              <h3 className="text-lg">{t("evalSuites")}</h3>
               <p className="text-xs text-text-muted">{t("evalSuitesHint")}</p>
             </div>
           </div>
@@ -1383,12 +1382,16 @@ export default function EvalsTab() {
               </span>
               <span className="text-xs font-semibold text-primary">{runAllPercent}%</span>
             </div>
-            <div className="h-2 overflow-hidden rounded-full bg-surface-2">
-              <div
-                className="h-full rounded-full bg-primary transition-all duration-300"
-                style={{ width: `${runAllPercent}%` }}
-              />
-            </div>
+            <Progress
+              aria-label={t("runAllProgress", {
+                current: runProgress.current,
+                total: runProgress.total,
+                name: runProgress.suiteName || t("runAllSuites"),
+              })}
+              aria-valuetext={`${runAllPercent}%`}
+              value={runAllPercent}
+              animate={false}
+            />
             {runProgress.failedSuites > 0 && (
               <p className="mt-2 text-xs text-warning">
                 {t("runAllFailedSuites", { count: runProgress.failedSuites })}
@@ -1408,7 +1411,9 @@ export default function EvalsTab() {
           {null}
         </FilterBar>
 
-        <div className="flex flex-col gap-3 mt-4">
+        {/* Suites are sections of this card, split by hairlines like the kit plain accordion:
+            the Card is the only frame (#19620). */}
+        <div className="mt-4 flex flex-col divide-y divide-border">
           {filteredSuites.map((suite) => {
             const isExpanded = expanded === suite.id;
             const isRunning = running === suite.id;
@@ -1427,7 +1432,7 @@ export default function EvalsTab() {
               liveResult?.runs?.[0]?.summary.passRate ?? suiteHistory[0]?.summary.passRate;
 
             return (
-              <div key={suite.id} className="border border-border/30 rounded-lg overflow-hidden">
+              <div key={suite.id}>
                 <div
                   className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 cursor-pointer hover:bg-surface/30 transition-colors"
                   onClick={() => setExpanded(isExpanded ? null : suite.id)}
@@ -1569,9 +1574,7 @@ export default function EvalsTab() {
                       <div className="rounded-lg border border-border/20 bg-surface/20 px-4 py-3">
                         <div className="flex items-center justify-between gap-3">
                           <div>
-                            <h4 className="text-sm font-semibold text-text-main">
-                              {t("targetComparisonTitle")}
-                            </h4>
+                            <h4 className="text-sm text-text-main">{t("targetComparisonTitle")}</h4>
                             <p className="text-xs text-text-muted">{t("targetComparisonHint")}</p>
                           </div>
                           <span className="text-lg font-semibold text-primary">
@@ -1611,7 +1614,7 @@ export default function EvalsTab() {
                           <Card key={run.id} className="p-4">
                             <div className="flex items-center justify-between gap-3 mb-3">
                               <div>
-                                <h4 className="text-sm font-semibold text-text-main">
+                                <h4 className="text-sm text-text-main">
                                   {getTargetLabel(run.target, t)}
                                 </h4>
                                 <p className="text-xs text-text-muted">
@@ -1658,7 +1661,7 @@ export default function EvalsTab() {
                                     >
                                       <Button
                                         variant="ghost"
-                                        className="grid h-auto min-h-0 w-full grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-none px-3 py-3 text-left font-normal whitespace-normal"
+                                        className="grid h-auto min-h-0 w-full grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-none px-3 py-3 text-left whitespace-normal"
                                         aria-expanded={isResultExpanded}
                                         aria-label={
                                           isResultExpanded ? t("collapseResult") : t("expandResult")
@@ -1744,9 +1747,7 @@ export default function EvalsTab() {
                       <div className="rounded-lg border border-border/20 bg-surface/20 px-4 py-4">
                         <div className="flex items-center justify-between gap-3 mb-3">
                           <div>
-                            <h4 className="text-sm font-semibold text-text-main">
-                              {t("suiteLatestRuns")}
-                            </h4>
+                            <h4 className="text-sm text-text-main">{t("suiteLatestRuns")}</h4>
                             <p className="text-xs text-text-muted">{t("suiteLatestRunsHint")}</p>
                           </div>
                         </div>
@@ -1783,6 +1784,8 @@ export default function EvalsTab() {
                       </span>
                     </div>
                     <DataTable
+                      label={t("testCasesCount", { count: (suite.cases || []).length })}
+                      framed={false}
                       columns={[
                         { key: "name", label: t("columnCase") },
                         { key: "model", label: t("columnModel") },
@@ -1852,10 +1855,13 @@ export default function EvalsTab() {
         onClose={() => {
           if (savingSuite) return;
           setIsBuilderOpen(false);
+          setShowSuiteErrors(false);
           setSuiteDraft(createEmptySuiteDraft());
         }}
         onSave={() => void handleSaveSuite()}
         saving={savingSuite}
+        errors={showSuiteErrors ? validateSuiteDraft(suiteDraft) : null}
+        focusInvalidRequest={refusedSaves}
         t={t}
       />
       {confirmDialog}
@@ -1883,7 +1889,7 @@ const HeroSection = memo(function HeroSection({
             <Icon name="science" size={28} />
           </div>
           <div className="flex-1">
-            <h2 className="text-xl font-semibold text-text-main mb-1">{t("modelEvals")}</h2>
+            <h2 className="text-xl text-text-main mb-1">{t("modelEvals")}</h2>
             <p className="text-sm text-text-muted leading-relaxed max-w-2xl">
               {t("evalsHeroDescription")}
             </p>
@@ -1919,6 +1925,8 @@ function SuiteBuilderModal({
   onClose,
   onSave,
   saving,
+  errors,
+  focusInvalidRequest,
   t,
 }: {
   draft: EvalSuiteDraft;
@@ -1927,9 +1935,19 @@ function SuiteBuilderModal({
   onClose: () => void;
   onSave: () => void;
   saving: boolean;
+  /** The draft's problems once a save was refused; `null` before that. */
+  errors: SuiteDraftErrors | null;
+  /** Bumped on each refused save: focus (and scroll) goes to the first flagged field. */
+  focusInvalidRequest: number;
   t: (key: string, values?: Record<string, unknown>) => string;
 }) {
+  const tv = useTranslations("formValidation");
   const editableStrategies = STRATEGIES.filter((strategy) => strategy.name !== "custom");
+  const bodyRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (focusInvalidRequest > 0) focusFirstInvalidField(bodyRef.current);
+  }, [focusInvalidRequest]);
 
   function updateCase(caseId: string, patch: Partial<EvalCaseDraft>) {
     onChange({
@@ -1995,13 +2013,15 @@ function SuiteBuilderModal({
       title={draft.id ? t("suiteBuilderEditTitle") : t("suiteBuilderCreateTitle")}
       onClose={onClose}
     >
-      <div className="flex max-h-[75vh] flex-col gap-4 overflow-y-auto pr-1">
+      <div ref={bodyRef} className="flex max-h-[75vh] flex-col gap-4 overflow-y-auto pr-1">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <Input
             label={t("suiteBuilderNameLabel")}
             value={draft.name}
             onChange={(event) => onChange({ ...draft, name: event.target.value })}
             placeholder={t("suiteBuilderNamePlaceholder")}
+            required
+            error={errors?.name ? t("suiteBuilderNameRequired") : undefined}
           />
           <Input
             label={t("suiteBuilderDescriptionLabel")}
@@ -2014,9 +2034,7 @@ function SuiteBuilderModal({
         <div className="rounded-xl border border-border/20 bg-surface/20 p-4">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div>
-              <h4 className="text-sm font-semibold text-text-main">
-                {t("suiteBuilderCasesTitle")}
-              </h4>
+              <h4 className="text-sm text-text-main">{t("suiteBuilderCasesTitle")}</h4>
               <p className="text-xs text-text-muted">{t("suiteBuilderCasesHint")}</p>
             </div>
             <Button icon="add" variant="secondary" onClick={addCase}>
@@ -2029,12 +2047,14 @@ function SuiteBuilderModal({
           const selectedStrategy = editableStrategies.find(
             (strategy) => strategy.name === draftCase.strategy
           );
+          const caseErrors = errors?.cases[draftCase.id];
+          const promptErrorId = `suite-case-${draftCase.id}-prompt-error`;
 
           return (
             <Card key={draftCase.id} className="p-4">
               <div className="mb-4 flex items-center justify-between gap-3">
                 <div>
-                  <h4 className="text-sm font-semibold text-text-main">
+                  <h4 className="text-sm text-text-main">
                     {t("suiteBuilderCaseCardTitle", { index: index + 1 })}
                   </h4>
                   <p className="text-xs text-text-muted">
@@ -2067,12 +2087,22 @@ function SuiteBuilderModal({
                   value={draftCase.name}
                   onChange={(event) => updateCase(draftCase.id, { name: event.target.value })}
                   placeholder={t("suiteBuilderCaseNamePlaceholder")}
+                  required
+                  error={
+                    caseErrors?.name
+                      ? tv("required", { field: t("suiteBuilderCaseNameLabel") })
+                      : undefined
+                  }
                 />
                 <Input
                   label={t("suiteBuilderCaseModelLabel")}
                   value={draftCase.model}
                   onChange={(event) => updateCase(draftCase.id, { model: event.target.value })}
                   placeholder={t("suiteBuilderCaseModelPlaceholder")}
+                  hint={t("suiteBuilderCaseModelHint", {
+                    target: t("targetSuiteDefaults"),
+                    fallback: EVAL_DEFAULT_CASE_MODEL,
+                  })}
                 />
                 <Input
                   label={t("suiteBuilderCaseTagsLabel")}
@@ -2126,9 +2156,18 @@ function SuiteBuilderModal({
                 <Field
                   label={t("suiteBuilderCaseUserPromptLabel")}
                   htmlFor={`suite-case-${draftCase.id}-userPrompt`}
+                  error={
+                    caseErrors?.prompt ? (
+                      <span id={promptErrorId} role="alert">
+                        {t("suiteBuilderCasePromptRequired")}
+                      </span>
+                    ) : undefined
+                  }
                 >
                   <Textarea
                     id={`suite-case-${draftCase.id}-userPrompt`}
+                    error={Boolean(caseErrors?.prompt)}
+                    aria-describedby={caseErrors?.prompt ? promptErrorId : undefined}
                     value={draftCase.userPrompt}
                     onChange={(event) =>
                       updateCase(draftCase.id, { userPrompt: event.target.value })
@@ -2145,6 +2184,12 @@ function SuiteBuilderModal({
                   }
                   placeholder={getExpectedPlaceholder(draftCase.strategy)}
                   hint={getExpectedHint(draftCase.strategy)}
+                  required
+                  error={
+                    caseErrors?.expectedValue
+                      ? tv("required", { field: t("suiteBuilderCaseExpectedLabel") })
+                      : undefined
+                  }
                 />
               </div>
             </Card>

@@ -130,8 +130,10 @@
 - [`POST /api/v1/vscode/{token}/responses`](#post-apiv1vscodetokenresponses)
 - [`POST /api/v1/vscode/{token}/v1/chat/completions`](#post-apiv1vscodetokenv1chatcompletions)
 - [`GET /api/v1/vscode/{token}/v1/models`](#get-apiv1vscodetokenv1models)
-- [`GET /api/v1/vscode/combos/{token}/{{slug}}`](#get-apiv1vscodecombostokenslug)
-- [`POST /api/v1/vscode/combos/{token}/{{slug}}`](#post-apiv1vscodecombostokenslug)
+- [`GET /api/v1/vscode/combos/{token}`](#get-apiv1vscodecombostoken)
+- [`GET /api/v1/vscode/combos/{token}/api/version`](#get-apiv1vscodecombostokenapiversion)
+- [`GET /api/v1/vscode/combos/{token}/api/tags`](#get-apiv1vscodecombostokenapitags)
+- [`POST /api/v1/vscode/combos/{token}/api/show`](#post-apiv1vscodecombostokenapishow)
 - [`GET /api/v1/vscode/raw/{token}`](#get-apiv1vscoderawtoken)
 - [`POST /api/v1/vscode/raw/{token}/api/chat`](#post-apiv1vscoderawtokenapichat)
 - [`POST /api/v1/vscode/raw/{token}/api/show`](#post-apiv1vscoderawtokenapishow)
@@ -180,7 +182,7 @@ curl http://localhost:20128/api/v1/search \
 
 Run a unified search
 
-Searches the web, news, or X through a configured provider. Set `provider` to `xquik-search` to use Xquik for X search. The aliases `xquik` and `xquik_search` resolve to the same provider. AnySearch (`anysearch-search`, aliases `anysearch` / `anysearch_search`) provides free fallback-only web search. Codex Web Search (`codex-search`, alias `codex_search`) reuses connected Codex (ChatGPT) accounts. Name it explicitly to use it; automatic selection (a credentialed last resort before keyless search) needs the `CODEX_SEARCH_AUTO_FALLBACK_ENABLED` feature flag, off by default. It spends subscription quota (not a free API), typically takes 10–40 seconds, and uses a 60-second timeout unless the operator sets a lower search timeout. Time range and domain filters are instruction hints, not hard filters.
+Searches the web, news, or X through a configured provider. Set `provider` to `xquik-search` to use Xquik for X search. The aliases `xquik` and `xquik_search` resolve to the same provider. AnySearch (`anysearch-search`, aliases `anysearch` / `anysearch_search`) provides free fallback-only web search. Alternatively, set `model` to a saved priority/fill-first combo name. Only search-capable targets are attempted, in configured order. `model` and `provider` are mutually exclusive. Codex Web Search (`codex-search`, alias `codex_search`) reuses connected Codex (ChatGPT) accounts. Name it explicitly to use it; automatic selection (a credentialed last resort before keyless search) needs the `CODEX_SEARCH_AUTO_FALLBACK_ENABLED` feature flag, off by default. It spends subscription quota (not a free API), typically takes 10–40 seconds, and uses a 60-second timeout unless the operator sets a lower search timeout. Time range and domain filters are instruction hints, not hard filters.
 
 ```bash
 curl -X POST http://localhost:20128/api/v1/search \
@@ -1376,7 +1378,7 @@ curl http://localhost:20128/api/v1/systemone \
 
 System One typed decisions
 
-One `state` plus typed `questions` (`noul` / `choice` / `score`); the backend is selected by the model id — `typesafe/jev-*` or a bare `jev-*` alias routes natively to api.typesafe.ai, `openrouter/<vendor>/ <model>` routes to OpenRouter's alpha decisions endpoint. Answers, probabilities and usage (tokens, cost) pass through untouched.
+One `state` plus typed `questions` (`noul` / `choice` / `score`); the backend is selected by the model id — `typesafe/jev-*` or a bare `jev-*` alias routes natively to api.typesafe.ai, `openrouter/<vendor>/ <model>` routes to OpenRouter's alpha decisions endpoint, and `cloudflare-ai/<jev|clef|clef-flash>` (alias `cf/`) runs on Cloudflare Workers AI through the existing `cloudflare-ai` connection (Jev draws AI Gateway credits, Clef draws Workers AI neurons; opt-in through the `SYSTEMONE_CLOUDFLARE_BACKEND_ENABLED` feature flag, default off). Answers, probabilities and usage (tokens, cost) pass through untouched.
 
 ```bash
 curl -X POST http://localhost:20128/api/v1/systemone \
@@ -1542,21 +1544,39 @@ curl http://localhost:20128/api/v1/vscode/{token}/v1/models \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN"
 ```
 
-### GET /api/v1/vscode/combos/{token}/{{slug}}
+### GET /api/v1/vscode/combos/{token}
 
-GET vscode › combos › <token> › <{slug>}
+List the VS Code combo catalog
 
 ```bash
-curl http://localhost:20128/api/v1/vscode/combos/{token}/{{slug}} \
+curl http://localhost:20128/api/v1/vscode/combos/{token} \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN"
 ```
 
-### POST /api/v1/vscode/combos/{token}/{{slug}}
+### GET /api/v1/vscode/combos/{token}/api/version
 
-POST vscode › combos › <token> › <{slug>}
+Read the Ollama compatibility version for the combo endpoint
 
 ```bash
-curl -X POST http://localhost:20128/api/v1/vscode/combos/{token}/{{slug}} \
+curl http://localhost:20128/api/v1/vscode/combos/{token}/api/version \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### GET /api/v1/vscode/combos/{token}/api/tags
+
+List the combo catalog in Ollama format
+
+```bash
+curl http://localhost:20128/api/v1/vscode/combos/{token}/api/tags \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### POST /api/v1/vscode/combos/{token}/api/show
+
+Describe one combo in Ollama format
+
+```bash
+curl -X POST http://localhost:20128/api/v1/vscode/combos/{token}/api/show \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{}'
@@ -1674,6 +1694,8 @@ curl http://localhost:20128/api/v1/vscode/raw/{token}/v1/models \
 ### POST /api/v1/web/fetch
 
 POST web › fetch
+
+Fetch a URL with an explicit provider, native automatic selection, or a saved priority/fill-first combo in `model`. Mixed combos skip targets without a fetch executor. `model` and `provider` are mutually exclusive.
 
 ```bash
 curl -X POST http://localhost:20128/api/v1/web/fetch \
