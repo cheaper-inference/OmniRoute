@@ -161,6 +161,23 @@ test("a legacy banned key keeps its state and gains no guessed reason on upgrade
   }
 });
 
+test("summary reads return the shared error format on a storage failure", async () => {
+  await keys.createApiKey("Storage failure fixture", "storage-failure-fixture");
+  const { secret } = createAccessToken({ name: "Failure reader", scope: "read" });
+  const db = core.getDbInstance();
+  db.exec("ALTER TABLE api_keys RENAME COLUMN banned_at TO unavailable_banned_at");
+  try {
+    const response = await GET(request(secret));
+    assert.equal(response.status, 500);
+    assert.equal(response.headers.get("cache-control"), "private, no-store");
+    const body = await response.json();
+    assert.equal(body.error.message, "Failed to load API key bans");
+    assert.doesNotMatch(JSON.stringify(body), /banned_at|SQLite|at \//);
+  } finally {
+    db.exec("ALTER TABLE api_keys RENAME COLUMN unavailable_banned_at TO banned_at");
+  }
+});
+
 test("open dashboard mode still requires credentials for the summary and ban reason", async () => {
   const enabled = await keys.createApiKey("Open mode fixture", "open-fixture");
   await updateSettings({ requireLogin: false });
