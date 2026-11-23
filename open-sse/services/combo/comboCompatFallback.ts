@@ -32,6 +32,8 @@ export interface CompatFallbackContext {
   log: ComboLogger;
   /** Effective combo strategy, threaded into the single-model dispatch for telemetry. */
   strategy: string;
+  /** Called with the target about to be dispatched, so the caller can record the decision. */
+  onDispatch?: (target: ResolvedComboTarget, modelStr: string) => void;
 }
 
 /**
@@ -73,6 +75,7 @@ export async function attemptCompatRejectedFallback(
       "COMBO",
       `Last-resort compat fallback → ${target.modelStr} (all compat-kept targets were unavailable)`
     );
+    ctx.onDispatch?.(target, target.modelStr);
     const result = await ctx.handleSingleModel(body, target.modelStr, {
       ...target,
       effectiveComboStrategy: ctx.strategy,

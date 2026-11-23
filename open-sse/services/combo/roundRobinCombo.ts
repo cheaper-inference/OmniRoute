@@ -512,8 +512,13 @@ export async function handleRoundRobinCombo({
   // The loop's finally is not the end of the function: a compat-rejected target can still
   // serve the request afterwards. Finalize where every exit has already run, so that
   // dispatch — and the targets skipped on the way to it — are in the record.
+  // The compat-rejected set can still serve the request, so its targets belong to the same
+  // candidate list: otherwise the trace would show a request that dispatched nothing.
   const traceTargets = () =>
-    filteredTargets.map((t) => ({ executionKey: t.executionKey, modelStr: t.modelStr }));
+    [...filteredTargets, ...compatRejectedTargets].map((t) => ({
+      executionKey: t.executionKey,
+      modelStr: t.modelStr,
+    }));
   let loopExhausted = false;
   const finalizeTrace = () => trace.finalize(traceTargets());
   // #11134: operator-configurable shared attempt budget (clamped to the hard
@@ -1492,6 +1497,7 @@ export async function handleRoundRobinCombo({
         ),
       log,
       strategy: "round-robin",
+      onDispatch: (target, modelStr) => trace.dispatched(target, modelStr),
     });
     if (compatFallbackResult) {
       if (!compatFallbackResult.ok) {
