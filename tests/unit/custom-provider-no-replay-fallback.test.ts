@@ -111,7 +111,7 @@ async function seedKeyConnection(
   priority: number,
   baseUrl: string
 ) {
-  await harness.seedConnection(provider, {
+  return harness.seedConnection(provider, {
     name: `${provider}-${apiKey}`,
     apiKey,
     priority,
@@ -275,4 +275,53 @@ test("non-custom provider: a 429 keeps its normal retry", async () => {
   const result = await chat("openai/gpt-4o-mini");
   assert.equal(attempts, 2);
   assert.equal(result.status, 200, result.text);
+});
+
+test("preferred-account failover does not hop a slow custom node to its sibling", async () => {
+  // The preferred-connection response-start deadline (#19259) ends in one sibling hop, which
+  // resends the request. A custom node withholds replay, so it waits for its own answer.
+  const PREFERRED_HEADERS_DELAY_MS = 2_500;
+  const upstream = await startUpstream({
+    [PRIMARY_KEY]: (request, response) => {
+      setTimeout(() => ok(request, response), PREFERRED_HEADERS_DELAY_MS);
+    },
+    [SIBLING_KEY]: ok,
+  });
+  try {
+    const provider = "openai-compatible-chat-preferred";
+    await seedNode(provider, "custom-preferred", upstream.baseUrl);
+    const primary = (await seedKeyConnection(provider, PRIMARY_KEY, 1, upstream.baseUrl)) as {
+      id: string;
+    };
+    await seedKeyConnection(provider, SIBLING_KEY, 2, upstream.baseUrl);
+    await harness.settingsDb.updateSettings({
+      resilienceSettings: {
+        preferredAccountFailover: {
+          enabled: true,
+          defaultTimeoutMs: 500,
+          providerTimeoutsMs: {},
+          modelTimeoutsMs: {},
+        },
+      },
+    });
+    const key = (await harness.apiKeysDb.createApiKey("custom preferred", "machine-test", [], {
+      preferredConnections: [primary.id],
+    })) as { key: string };
+
+    const response = await harness.handleChat(
+      harness.buildRequest({
+        authKey: key.key,
+        body: {
+          model: `custom-preferred/${MODEL}`,
+          messages: [{ role: "user", content: "one controlled request" }],
+          stream: false,
+        },
+      })
+    );
+    const text = await response.text();
+    assert.deepEqual(upstream.posts, [PRIMARY_KEY], `no sibling hop: ${upstream.posts}`);
+    assert.equal(response.status, 200, text);
+  } finally {
+    await upstream.close();
+  }
 });

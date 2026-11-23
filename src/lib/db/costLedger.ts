@@ -221,8 +221,16 @@ export function aggregateLedger(
 export const SEARCH_LEDGER_SERVICE_TIER = "search";
 
 /**
- * Total web-search spend for an api key since an ISO timestamp, failed calls
- * included (a provider that reports a cost on an error status still charged).
+ * `service_tier` marker on rerank ledger rows. Rerank writes no usage_history row, so per-key USD
+ * limits read its spend from the ledger. Speech, transcription and image calls are not tagged: they
+ * already have a usage_history row, and counting both would charge them twice.
+ */
+export const MODAL_LEDGER_SERVICE_TIER = "modal";
+
+/**
+ * Total web-search and modal (rerank) spend for an api key since an ISO
+ * timestamp, failed calls included (a provider that reports a cost on an error status still
+ * charged).
  */
 export function sumSearchLedgerSpendSince(apiKeyId: string, sinceIso: string): number {
   if (!apiKeyId) return 0;
@@ -230,22 +238,23 @@ export function sumSearchLedgerSpendSince(apiKeyId: string, sinceIso: string): n
     .prepare(
       `SELECT COALESCE(SUM(amount_usd), 0) AS amount_usd
        FROM request_cost_ledger
-       WHERE api_key_id = ? AND timestamp >= ? AND service_tier = ?`
+       WHERE api_key_id = ? AND timestamp >= ? AND service_tier IN (?, ?)`
     )
-    .get(apiKeyId, sinceIso, SEARCH_LEDGER_SERVICE_TIER);
+    .get(apiKeyId, sinceIso, SEARCH_LEDGER_SERVICE_TIER, MODAL_LEDGER_SERVICE_TIER);
   return getAggRow(row).amountUsd;
 }
 
-/** Oldest search-ledger spend in the window, or null when there is none. */
+/** Oldest search or modal ledger spend in the window, or null when there is none. */
 export function getOldestSearchLedgerSpendSince(apiKeyId: string, sinceIso: string): string | null {
   if (!apiKeyId) return null;
   const row = getDbInstance()
     .prepare(
       `SELECT MIN(timestamp) AS oldest
        FROM request_cost_ledger
-       WHERE api_key_id = ? AND timestamp >= ? AND service_tier = ?`
+       WHERE api_key_id = ? AND timestamp >= ? AND service_tier IN (?, ?)`
     )
-    .get(apiKeyId, sinceIso, SEARCH_LEDGER_SERVICE_TIER) as { oldest?: unknown } | undefined;
+    .get(apiKeyId, sinceIso, SEARCH_LEDGER_SERVICE_TIER, MODAL_LEDGER_SERVICE_TIER) as
+    { oldest?: unknown } | undefined;
   return typeof row?.oldest === "string" && row.oldest ? row.oldest : null;
 }
 
