@@ -442,7 +442,6 @@ export const FREE_QUOTA_UNIT: Record<string, FreeQuotaUnit> = {
   xkiro: "tokens",
   mistral: "tokens",
   nara: "tokens",
-  llm7: "tokens",
   groq: "tokens",
   navy: "tokens",
   sambanova: "tokens",

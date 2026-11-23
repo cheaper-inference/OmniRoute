@@ -15,6 +15,8 @@ import {
   computeFreeCatalogCounts,
   resolveFreeAccessType,
 } from "@omniroute/open-sse/config/freeModelCatalog.counts.ts";
+import { FREE_TIER_PROVIDER_SET } from "@omniroute/open-sse/config/freeTierProviders.ts";
+import { isCatalogFreeModel } from "@/shared/utils/freeModels.ts";
 import { membershipFromProviderConstants } from "./_helpers/providerAccessMembership.ts";
 
 /**
@@ -290,4 +292,58 @@ test("catalog counts after the re-audit", () => {
   });
   assert.equal(c.accessRows, 214);
   assert.equal(c.freeModels, 185);
+});
+
+// --- Retired pools and their ledger --------------------------------------------------------
+
+const RETIRED_POOLS = [
+  "mistral",
+  "nara",
+  "navy",
+  "llm7",
+  "huggingface",
+  "bluesminds",
+  "arcee-ai",
+  "huggingchat",
+  "ainative",
+  "stepfun",
+  "predibase",
+];
+
+test("retired pools grant no free access anywhere", () => {
+  for (const p of RETIRED_POOLS) {
+    assertRetired(p);
+    assert.equal(FREE_TIER_PROVIDER_SET.has(p), false, `${p} must not be a free-tier provider`);
+    for (const m of rows(p))
+      assert.equal(isCatalogFreeModel(p, m.modelId), false, `${p}/${m.modelId} is not free`);
+  }
+  assert.ok(!computePublicFreeHeadline().uncappedProviders.includes("ainative"));
+});
+
+const LEDGER_BLOCKS: Array<[string, number, string]> = [
+  ["mistral", 1_000_000_000, "ended"],
+  ["nara", 210_000_000, "no-models"],
+  ["navy", 4_500_000, "unverifiable"],
+  ["bluesminds", 7_200_000, "ended"],
+  ["arcee-ai", 4_800_000, "paid-only"],
+  ["huggingface", 200_000, "paid-only"],
+  ["huggingchat", 500_000, "paid-only"],
+];
+
+test("the ledger keeps the last quota of every retired pool row, with its reason", () => {
+  for (const [provider, tokens, reason] of LEDGER_BLOCKS) {
+    const ledger = RETIRED_FREE_ROWS.filter((r) => r.provider === provider);
+    assert.deepEqual(ids(ledger), ids(rows(provider)), `${provider} ledger ids`);
+    for (const r of ledger) {
+      assert.equal(r.lastListedMonthlyTokens, tokens, `${provider}/${r.modelId}`);
+      assert.equal(r.reason, reason, `${provider}/${r.modelId}`);
+      assert.equal(r.retiredAt, "2026-11-23");
+      assert.equal(r.poolKey, rows(provider).find((m) => m.modelId === r.modelId)?.poolKey);
+      assert.match(r.evidence, /https:\/\/\S+ .*2026-11-23/);
+    }
+  }
+  // Rows without a quota (uncapped or credit) and the LLM7 row whose 150M was never the published
+  // quota (owner decision 2026-11-21, PL) stay out of the ledger.
+  for (const p of ["llm7", "ainative", "stepfun", "predibase"])
+    assert.ok(!RETIRED_FREE_ROWS.some((r) => r.provider === p), p);
 });

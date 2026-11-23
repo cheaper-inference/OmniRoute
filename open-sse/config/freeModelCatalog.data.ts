@@ -22,7 +22,7 @@ import type { FreeModelBudget } from "./freeModelCatalog.ts";
  * rewrites file timestamps on every deploy, which would report a months-old
  * catalog as "updated today". Bump this whenever the entries below change.
  */
-export const FREE_CATALOG_CURATED_AT = "2026-11-09";
+export const FREE_CATALOG_CURATED_AT = "2026-11-23";
 
 export const FREE_MODEL_BUDGETS: FreeModelBudget[] = [
   { provider: "agentrouter", modelId: "claude-opus-4-8", displayName: "Claude Opus 4.8", monthlyTokens: 0, creditTokens: 200000000, freeType: "one-time-initial", poolKey: "agentrouter", tos: "caution" },
@@ -46,7 +46,9 @@ export const FREE_MODEL_BUDGETS: FreeModelBudget[] = [
   { provider: "api-airforce", modelId: "moonshot/kimi-k2.6", displayName: "Kimi K2.6 (Free)", monthlyTokens: 24000000, creditTokens: 0, freeType: "recurring-daily", poolKey: "api-airforce", tos: "caution" },
   { provider: "api-airforce", modelId: "google/gemini-2.5-flash", displayName: "Gemini 2.5 Flash (Free)", monthlyTokens: 24000000, creditTokens: 0, freeType: "recurring-daily", poolKey: "api-airforce", tos: "caution" },
   { provider: "api-airforce", modelId: "deepseek/deepseek-v3", displayName: "DeepSeek V3 (Free)", monthlyTokens: 24000000, creditTokens: 0, freeType: "recurring-daily", poolKey: "api-airforce", tos: "caution" },
-  { provider: "arcee-ai", modelId: "arcee-ai/trinity-large-preview:free", displayName: "Arcee Trinity Large Preview (free)", monthlyTokens: 4800000, creditTokens: 0, freeType: "recurring-daily", poolKey: "arcee-free", tos: "caution" },
+  // evidence: public-page https://docs.arcee.ai/get-started/pricing (2026-11-23) — paid prices only, no free,
+  // trial or credit. Retired on 2026-11-23 (reason paid-only); last quota in freeModelCatalog.retired.data.ts.
+  { provider: "arcee-ai", modelId: "arcee-ai/trinity-large-preview:free", displayName: "Arcee Trinity Large Preview (free)", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "arcee-free", tos: "caution" },
   { provider: "baichuan", modelId: "Baichuan4", displayName: "Baichuan 4", monthlyTokens: 0, creditTokens: 0, freeType: "one-time-initial", poolKey: "baichuan", tos: "ambiguous" },
   { provider: "baidu", modelId: "ernie-4.0-8k", displayName: "ERNIE 4.0 8K", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "baidu", tos: "caution" },
   { provider: "bazaarlink", modelId: "auto:free", displayName: "Auto Free (Zero Cost)", monthlyTokens: 3600000, creditTokens: 0, freeType: "recurring-daily", poolKey: "bazaarlink", tos: "caution" },
@@ -87,28 +89,31 @@ export const FREE_MODEL_BUDGETS: FreeModelBudget[] = [
   { provider: "blackbox", modelId: "deepseek-v3", displayName: "DeepSeek V3", monthlyTokens: 0, creditTokens: 0, freeType: "keyless", poolKey: "blackbox", tos: "avoid" },
   { provider: "blackbox", modelId: "blackboxai", displayName: "Blackbox AI", monthlyTokens: 0, creditTokens: 0, freeType: "keyless", poolKey: "blackbox", tos: "avoid" },
   { provider: "blackbox", modelId: "blackboxai-pro", displayName: "Blackbox AI Pro", monthlyTokens: 0, creditTokens: 0, freeType: "keyless", poolKey: "blackbox", tos: "avoid" },
-  { provider: "bluesminds", modelId: "gpt-4o", displayName: "GPT-4o", monthlyTokens: 7200000, creditTokens: 0, freeType: "recurring-daily", poolKey: "bluesminds", tos: "ambiguous" },
-  { provider: "bluesminds", modelId: "gpt-4o-mini", displayName: "GPT-4o Mini", monthlyTokens: 7200000, creditTokens: 0, freeType: "recurring-daily", poolKey: "bluesminds", tos: "ambiguous" },
-  { provider: "bluesminds", modelId: "gpt-4.1", displayName: "GPT-4.1", monthlyTokens: 7200000, creditTokens: 0, freeType: "recurring-daily", poolKey: "bluesminds", tos: "ambiguous" },
-  { provider: "bluesminds", modelId: "gpt-4.1-mini", displayName: "GPT-4.1 Mini", monthlyTokens: 7200000, creditTokens: 0, freeType: "recurring-daily", poolKey: "bluesminds", tos: "ambiguous" },
-  { provider: "bluesminds", modelId: "gpt-4.1-nano", displayName: "GPT-4.1 Nano", monthlyTokens: 7200000, creditTokens: 0, freeType: "recurring-daily", poolKey: "bluesminds", tos: "ambiguous" },
-  { provider: "bluesminds", modelId: "claude-sonnet-4-5", displayName: "Claude Sonnet 4.5", monthlyTokens: 7200000, creditTokens: 0, freeType: "recurring-daily", poolKey: "bluesminds", tos: "ambiguous" },
-  { provider: "bluesminds", modelId: "claude-haiku-4-5", displayName: "Claude Haiku 4.5", monthlyTokens: 7200000, creditTokens: 0, freeType: "recurring-daily", poolKey: "bluesminds", tos: "ambiguous" },
-  { provider: "bluesminds", modelId: "gemini-2.0-flash", displayName: "Gemini 2.0 Flash", monthlyTokens: 7200000, creditTokens: 0, freeType: "recurring-daily", poolKey: "bluesminds", tos: "ambiguous" },
-  { provider: "bluesminds", modelId: "gemini-2.0-flash-exp", displayName: "Gemini 2.0 Flash (Exp)", monthlyTokens: 7200000, creditTokens: 0, freeType: "recurring-daily", poolKey: "bluesminds", tos: "ambiguous" },
-  { provider: "bluesminds", modelId: "deepseek-reasoner", displayName: "DeepSeek Reasoner", monthlyTokens: 7200000, creditTokens: 0, freeType: "recurring-daily", poolKey: "bluesminds", tos: "ambiguous" },
-  { provider: "bluesminds", modelId: "deepseek-chat", displayName: "DeepSeek Chat", monthlyTokens: 7200000, creditTokens: 0, freeType: "recurring-daily", poolKey: "bluesminds", tos: "ambiguous" },
-  { provider: "bluesminds", modelId: "qwen-plus", displayName: "Qwen Plus", monthlyTokens: 7200000, creditTokens: 0, freeType: "recurring-daily", poolKey: "bluesminds", tos: "ambiguous" },
-  { provider: "bluesminds", modelId: "qwen-turbo", displayName: "Qwen Turbo", monthlyTokens: 7200000, creditTokens: 0, freeType: "recurring-daily", poolKey: "bluesminds", tos: "ambiguous" },
-  { provider: "bluesminds", modelId: "kimi-k2", displayName: "Kimi K2", monthlyTokens: 7200000, creditTokens: 0, freeType: "recurring-daily", poolKey: "bluesminds", tos: "ambiguous" },
-  { provider: "bluesminds", modelId: "kimi-k2-thinking", displayName: "Kimi K2 Thinking", monthlyTokens: 7200000, creditTokens: 0, freeType: "recurring-daily", poolKey: "bluesminds", tos: "ambiguous" },
-  { provider: "bluesminds", modelId: "glm-4.7", displayName: "GLM 4.7", monthlyTokens: 7200000, creditTokens: 0, freeType: "recurring-daily", poolKey: "bluesminds", tos: "ambiguous" },
-  { provider: "bluesminds", modelId: "glm-4-flash", displayName: "GLM 4 Flash", monthlyTokens: 7200000, creditTokens: 0, freeType: "recurring-daily", poolKey: "bluesminds", tos: "ambiguous" },
-  { provider: "bluesminds", modelId: "minimax-m2.5", displayName: "MiniMax M2.5", monthlyTokens: 7200000, creditTokens: 0, freeType: "recurring-daily", poolKey: "bluesminds", tos: "ambiguous" },
-  { provider: "bluesminds", modelId: "claude-opus-4-5", displayName: "Claude Opus 4.5 (VIP)", monthlyTokens: 7200000, creditTokens: 0, freeType: "recurring-daily", poolKey: "bluesminds", tos: "ambiguous" },
-  { provider: "bluesminds", modelId: "gemini-2.5-pro", displayName: "Gemini 2.5 Pro (VIP)", monthlyTokens: 7200000, creditTokens: 0, freeType: "recurring-daily", poolKey: "bluesminds", tos: "ambiguous" },
-  { provider: "bluesminds", modelId: "grok-3", displayName: "Grok-3 (VIP)", monthlyTokens: 7200000, creditTokens: 0, freeType: "recurring-daily", poolKey: "bluesminds", tos: "ambiguous" },
-  { provider: "bluesminds", modelId: "qwen-max", displayName: "Qwen Max (VIP)", monthlyTokens: 7200000, creditTokens: 0, freeType: "recurring-daily", poolKey: "bluesminds", tos: "ambiguous" },
+  // evidence: public-page https://bluesminds.com and api-public https://api.bluesminds.com/api/status (2026-11-23)
+  // — no free offer; the status notice says "contact for buying credit", and /api/pricing has no zero-priced
+  // model. Retired on 2026-11-23 (reason ended); last quota in freeModelCatalog.retired.data.ts.
+  { provider: "bluesminds", modelId: "gpt-4o", displayName: "GPT-4o", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "bluesminds", tos: "ambiguous" },
+  { provider: "bluesminds", modelId: "gpt-4o-mini", displayName: "GPT-4o Mini", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "bluesminds", tos: "ambiguous" },
+  { provider: "bluesminds", modelId: "gpt-4.1", displayName: "GPT-4.1", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "bluesminds", tos: "ambiguous" },
+  { provider: "bluesminds", modelId: "gpt-4.1-mini", displayName: "GPT-4.1 Mini", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "bluesminds", tos: "ambiguous" },
+  { provider: "bluesminds", modelId: "gpt-4.1-nano", displayName: "GPT-4.1 Nano", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "bluesminds", tos: "ambiguous" },
+  { provider: "bluesminds", modelId: "claude-sonnet-4-5", displayName: "Claude Sonnet 4.5", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "bluesminds", tos: "ambiguous" },
+  { provider: "bluesminds", modelId: "claude-haiku-4-5", displayName: "Claude Haiku 4.5", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "bluesminds", tos: "ambiguous" },
+  { provider: "bluesminds", modelId: "gemini-2.0-flash", displayName: "Gemini 2.0 Flash", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "bluesminds", tos: "ambiguous" },
+  { provider: "bluesminds", modelId: "gemini-2.0-flash-exp", displayName: "Gemini 2.0 Flash (Exp)", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "bluesminds", tos: "ambiguous" },
+  { provider: "bluesminds", modelId: "deepseek-reasoner", displayName: "DeepSeek Reasoner", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "bluesminds", tos: "ambiguous" },
+  { provider: "bluesminds", modelId: "deepseek-chat", displayName: "DeepSeek Chat", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "bluesminds", tos: "ambiguous" },
+  { provider: "bluesminds", modelId: "qwen-plus", displayName: "Qwen Plus", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "bluesminds", tos: "ambiguous" },
+  { provider: "bluesminds", modelId: "qwen-turbo", displayName: "Qwen Turbo", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "bluesminds", tos: "ambiguous" },
+  { provider: "bluesminds", modelId: "kimi-k2", displayName: "Kimi K2", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "bluesminds", tos: "ambiguous" },
+  { provider: "bluesminds", modelId: "kimi-k2-thinking", displayName: "Kimi K2 Thinking", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "bluesminds", tos: "ambiguous" },
+  { provider: "bluesminds", modelId: "glm-4.7", displayName: "GLM 4.7", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "bluesminds", tos: "ambiguous" },
+  { provider: "bluesminds", modelId: "glm-4-flash", displayName: "GLM 4 Flash", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "bluesminds", tos: "ambiguous" },
+  { provider: "bluesminds", modelId: "minimax-m2.5", displayName: "MiniMax M2.5", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "bluesminds", tos: "ambiguous" },
+  { provider: "bluesminds", modelId: "claude-opus-4-5", displayName: "Claude Opus 4.5 (VIP)", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "bluesminds", tos: "ambiguous" },
+  { provider: "bluesminds", modelId: "gemini-2.5-pro", displayName: "Gemini 2.5 Pro (VIP)", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "bluesminds", tos: "ambiguous" },
+  { provider: "bluesminds", modelId: "grok-3", displayName: "Grok-3 (VIP)", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "bluesminds", tos: "ambiguous" },
+  { provider: "bluesminds", modelId: "qwen-max", displayName: "Qwen Max (VIP)", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "bluesminds", tos: "ambiguous" },
   // evidence: public-page https://docs.bytez.com/model-api/docs/billing (2026-10-15).
   // Free open models are limited to 7B; credits refresh every 4 weeks and bill per inference second.
   // Token allowance is unpublished: both token counters are 0 (unknown), not a claim of zero credits.
@@ -209,36 +214,41 @@ export const FREE_MODEL_BUDGETS: FreeModelBudget[] = [
   { provider: "groq", modelId: "openai/gpt-oss-safeguard-20b", displayName: "GPT-OSS Safeguard 20B", monthlyTokens: 6000000, creditTokens: 0, freeType: "recurring-daily", poolKey: null, tos: "caution", hardStopGuaranteed: true },
   { provider: "groq", modelId: "qwen/qwen3.6-27b", displayName: "Qwen3.6 27B", monthlyTokens: 6000000, creditTokens: 0, freeType: "recurring-daily", poolKey: null, tos: "caution", hardStopGuaranteed: true },
   { provider: "groq", modelId: "qwen/qwen3.8-27b", displayName: "Qwen3.8 27B", monthlyTokens: 6000000, creditTokens: 0, freeType: "recurring-daily", poolKey: null, tos: "caution", hardStopGuaranteed: true },
-  { provider: "huggingchat", modelId: "baidu/ERNIE-4.5-VL-424B-A47B-Base-PT", displayName: "ERNIE 4.5 VL 424B A47B Base PT", monthlyTokens: 500000, creditTokens: 0, freeType: "recurring-monthly", poolKey: "huggingchat", tos: "caution" },
-  { provider: "huggingchat", modelId: "CohereLabs/c4ai-command-r7b-12-2024", displayName: "Command R7B 12-2024", monthlyTokens: 500000, creditTokens: 0, freeType: "recurring-monthly", poolKey: "huggingchat", tos: "caution" },
-  { provider: "huggingchat", modelId: "CohereLabs/command-a-reasoning-08-2025", displayName: "Command A Reasoning 08-2025", monthlyTokens: 500000, creditTokens: 0, freeType: "recurring-monthly", poolKey: "huggingchat", tos: "caution" },
-  { provider: "huggingchat", modelId: "CohereLabs/command-a-vision-07-2025", displayName: "Command A Vision 07-2025", monthlyTokens: 500000, creditTokens: 0, freeType: "recurring-monthly", poolKey: "huggingchat", tos: "caution" },
-  { provider: "huggingchat", modelId: "deepseek-ai/DeepSeek-V4-Pro", displayName: "DeepSeek V4 Pro", monthlyTokens: 500000, creditTokens: 0, freeType: "recurring-monthly", poolKey: "huggingchat", tos: "caution" },
-  { provider: "huggingchat", modelId: "deepseek-ai/DeepSeek-V4-Flash", displayName: "DeepSeek V4 Flash", monthlyTokens: 500000, creditTokens: 0, freeType: "recurring-monthly", poolKey: "huggingchat", tos: "caution" },
-  { provider: "huggingchat", modelId: "google/gemma-4-31B-it", displayName: "Gemma 4 31B", monthlyTokens: 500000, creditTokens: 0, freeType: "recurring-monthly", poolKey: "huggingchat", tos: "caution" },
-  { provider: "huggingchat", modelId: "google/gemma-4-26B-A4B-it", displayName: "Gemma 4 26B A4B", monthlyTokens: 500000, creditTokens: 0, freeType: "recurring-monthly", poolKey: "huggingchat", tos: "caution" },
-  { provider: "huggingchat", modelId: "inclusionAI/Ling-2.6-1T", displayName: "Ling 2.6 1T", monthlyTokens: 500000, creditTokens: 0, freeType: "recurring-monthly", poolKey: "huggingchat", tos: "caution" },
-  { provider: "huggingchat", modelId: "meta-llama/Llama-4-Scout-17B-16E-Instruct", displayName: "Llama 4 Scout 17B 16E Instruct", monthlyTokens: 500000, creditTokens: 0, freeType: "recurring-monthly", poolKey: "huggingchat", tos: "caution" },
-  { provider: "huggingchat", modelId: "meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8", displayName: "Llama 4 Maverick 17B 128E Instruct FP8", monthlyTokens: 500000, creditTokens: 0, freeType: "recurring-monthly", poolKey: "huggingchat", tos: "caution" },
-  { provider: "huggingchat", modelId: "MiniMaxAI/MiniMax-M3", displayName: "MiniMax M3", monthlyTokens: 500000, creditTokens: 0, freeType: "recurring-monthly", poolKey: "huggingchat", tos: "caution" },
-  { provider: "huggingchat", modelId: "moonshotai/Kimi-K2.7-Code", displayName: "Kimi K2.7 Code", monthlyTokens: 500000, creditTokens: 0, freeType: "recurring-monthly", poolKey: "huggingchat", tos: "caution" },
-  { provider: "huggingchat", modelId: "moonshotai/Kimi-K2.6", displayName: "Kimi K2.6", monthlyTokens: 500000, creditTokens: 0, freeType: "recurring-monthly", poolKey: "huggingchat", tos: "caution" },
-  { provider: "huggingchat", modelId: "nvidia/NVIDIA-Nemotron-3-Ultra-550B-A55B-NVFP4", displayName: "NVIDIA Nemotron 3 Ultra 550B A55B NVFP4", monthlyTokens: 500000, creditTokens: 0, freeType: "recurring-monthly", poolKey: "huggingchat", tos: "caution" },
-  { provider: "huggingchat", modelId: "openai/gpt-oss-120b", displayName: "GPT-OSS 120B", monthlyTokens: 500000, creditTokens: 0, freeType: "recurring-monthly", poolKey: "huggingchat", tos: "caution" },
-  { provider: "huggingchat", modelId: "openai/gpt-oss-20b", displayName: "GPT-OSS 20B", monthlyTokens: 500000, creditTokens: 0, freeType: "recurring-monthly", poolKey: "huggingchat", tos: "caution" },
-  { provider: "huggingchat", modelId: "Qwen/Qwen3.5-122B-A10B", displayName: "Qwen3.5 122B A10B", monthlyTokens: 500000, creditTokens: 0, freeType: "recurring-monthly", poolKey: "huggingchat", tos: "caution" },
-  { provider: "huggingchat", modelId: "Qwen/Qwen3.5-397B-A17B", displayName: "Qwen3.5 397B A17B", monthlyTokens: 500000, creditTokens: 0, freeType: "recurring-monthly", poolKey: "huggingchat", tos: "caution" },
-  { provider: "huggingchat", modelId: "Qwen/Qwen3.6-27B", displayName: "Qwen3.6 27B", monthlyTokens: 500000, creditTokens: 0, freeType: "recurring-monthly", poolKey: "huggingchat", tos: "caution" },
-  { provider: "huggingchat", modelId: "Qwen/Qwen3.6-35B-A3B", displayName: "Qwen3.6 35B A3B", monthlyTokens: 500000, creditTokens: 0, freeType: "recurring-monthly", poolKey: "huggingchat", tos: "caution" },
-  { provider: "huggingchat", modelId: "stepfun-ai/Step-3.7-Flash", displayName: "Step 3.7 Flash", monthlyTokens: 500000, creditTokens: 0, freeType: "recurring-monthly", poolKey: "huggingchat", tos: "caution" },
-  { provider: "huggingchat", modelId: "XiaomiMiMo/MiMo-V2.5-Pro", displayName: "MiMo V2.5 Pro", monthlyTokens: 500000, creditTokens: 0, freeType: "recurring-monthly", poolKey: "huggingchat", tos: "caution" },
-  { provider: "huggingchat", modelId: "zai-org/GLM-5.2", displayName: "GLM 5.2", monthlyTokens: 500000, creditTokens: 0, freeType: "recurring-monthly", poolKey: "huggingchat", tos: "caution" },
-  { provider: "huggingface", modelId: "meta-llama/llama-3.1-8b-instruct", displayName: "Llama 3.1 8B", monthlyTokens: 200000, creditTokens: 0, freeType: "recurring-monthly", poolKey: "huggingface", tos: "caution" },
-  { provider: "huggingface", modelId: "meta-llama/llama-3.2-11b-instruct", displayName: "Llama 3.2 11B", monthlyTokens: 200000, creditTokens: 0, freeType: "recurring-monthly", poolKey: "huggingface", tos: "caution" },
-  { provider: "huggingface", modelId: "mistralai/mistral-7b-instruct", displayName: "Mistral 7B", monthlyTokens: 200000, creditTokens: 0, freeType: "recurring-monthly", poolKey: "huggingface", tos: "caution" },
-  { provider: "huggingface", modelId: "google/gemma-2-9b-it", displayName: "Gemma 2 9B", monthlyTokens: 200000, creditTokens: 0, freeType: "recurring-monthly", poolKey: "huggingface", tos: "caution" },
-  { provider: "huggingface", modelId: "Qwen/Qwen2.5-7B-Instruct", displayName: "Qwen 2.5 7B", monthlyTokens: 200000, creditTokens: 0, freeType: "recurring-monthly", poolKey: "huggingface", tos: "caution" },
-  { provider: "huggingface", modelId: "deepseek-ai/DeepSeek-V3", displayName: "DeepSeek V3", monthlyTokens: 200000, creditTokens: 0, freeType: "recurring-monthly", poolKey: "huggingface", tos: "caution" },
+  // evidence: public-page https://huggingface.co/docs/inference-providers/pricing (2026-11-23) — "Free Users None
+  // - yes (credits purchase required)". Retired on 2026-11-23 (reason paid-only); last quota in
+  // freeModelCatalog.retired.data.ts.
+  { provider: "huggingchat", modelId: "baidu/ERNIE-4.5-VL-424B-A47B-Base-PT", displayName: "ERNIE 4.5 VL 424B A47B Base PT", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "huggingchat", tos: "caution" },
+  { provider: "huggingchat", modelId: "CohereLabs/c4ai-command-r7b-12-2024", displayName: "Command R7B 12-2024", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "huggingchat", tos: "caution" },
+  { provider: "huggingchat", modelId: "CohereLabs/command-a-reasoning-08-2025", displayName: "Command A Reasoning 08-2025", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "huggingchat", tos: "caution" },
+  { provider: "huggingchat", modelId: "CohereLabs/command-a-vision-07-2025", displayName: "Command A Vision 07-2025", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "huggingchat", tos: "caution" },
+  { provider: "huggingchat", modelId: "deepseek-ai/DeepSeek-V4-Pro", displayName: "DeepSeek V4 Pro", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "huggingchat", tos: "caution" },
+  { provider: "huggingchat", modelId: "deepseek-ai/DeepSeek-V4-Flash", displayName: "DeepSeek V4 Flash", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "huggingchat", tos: "caution" },
+  { provider: "huggingchat", modelId: "google/gemma-4-31B-it", displayName: "Gemma 4 31B", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "huggingchat", tos: "caution" },
+  { provider: "huggingchat", modelId: "google/gemma-4-26B-A4B-it", displayName: "Gemma 4 26B A4B", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "huggingchat", tos: "caution" },
+  { provider: "huggingchat", modelId: "inclusionAI/Ling-2.6-1T", displayName: "Ling 2.6 1T", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "huggingchat", tos: "caution" },
+  { provider: "huggingchat", modelId: "meta-llama/Llama-4-Scout-17B-16E-Instruct", displayName: "Llama 4 Scout 17B 16E Instruct", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "huggingchat", tos: "caution" },
+  { provider: "huggingchat", modelId: "meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8", displayName: "Llama 4 Maverick 17B 128E Instruct FP8", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "huggingchat", tos: "caution" },
+  { provider: "huggingchat", modelId: "MiniMaxAI/MiniMax-M3", displayName: "MiniMax M3", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "huggingchat", tos: "caution" },
+  { provider: "huggingchat", modelId: "moonshotai/Kimi-K2.7-Code", displayName: "Kimi K2.7 Code", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "huggingchat", tos: "caution" },
+  { provider: "huggingchat", modelId: "moonshotai/Kimi-K2.6", displayName: "Kimi K2.6", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "huggingchat", tos: "caution" },
+  { provider: "huggingchat", modelId: "nvidia/NVIDIA-Nemotron-3-Ultra-550B-A55B-NVFP4", displayName: "NVIDIA Nemotron 3 Ultra 550B A55B NVFP4", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "huggingchat", tos: "caution" },
+  { provider: "huggingchat", modelId: "openai/gpt-oss-120b", displayName: "GPT-OSS 120B", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "huggingchat", tos: "caution" },
+  { provider: "huggingchat", modelId: "openai/gpt-oss-20b", displayName: "GPT-OSS 20B", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "huggingchat", tos: "caution" },
+  { provider: "huggingchat", modelId: "Qwen/Qwen3.5-122B-A10B", displayName: "Qwen3.5 122B A10B", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "huggingchat", tos: "caution" },
+  { provider: "huggingchat", modelId: "Qwen/Qwen3.5-397B-A17B", displayName: "Qwen3.5 397B A17B", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "huggingchat", tos: "caution" },
+  { provider: "huggingchat", modelId: "Qwen/Qwen3.6-27B", displayName: "Qwen3.6 27B", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "huggingchat", tos: "caution" },
+  { provider: "huggingchat", modelId: "Qwen/Qwen3.6-35B-A3B", displayName: "Qwen3.6 35B A3B", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "huggingchat", tos: "caution" },
+  { provider: "huggingchat", modelId: "stepfun-ai/Step-3.7-Flash", displayName: "Step 3.7 Flash", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "huggingchat", tos: "caution" },
+  { provider: "huggingchat", modelId: "XiaomiMiMo/MiMo-V2.5-Pro", displayName: "MiMo V2.5 Pro", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "huggingchat", tos: "caution" },
+  { provider: "huggingchat", modelId: "zai-org/GLM-5.2", displayName: "GLM 5.2", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "huggingchat", tos: "caution" },
+  // evidence: same page as huggingchat (2026-11-23) — "Free users can use Inference Providers by purchasing
+  // credits, or by upgrading to PRO". Retired on 2026-11-23 (reason paid-only).
+  { provider: "huggingface", modelId: "meta-llama/llama-3.1-8b-instruct", displayName: "Llama 3.1 8B", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "huggingface", tos: "caution" },
+  { provider: "huggingface", modelId: "meta-llama/llama-3.2-11b-instruct", displayName: "Llama 3.2 11B", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "huggingface", tos: "caution" },
+  { provider: "huggingface", modelId: "mistralai/mistral-7b-instruct", displayName: "Mistral 7B", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "huggingface", tos: "caution" },
+  { provider: "huggingface", modelId: "google/gemma-2-9b-it", displayName: "Gemma 2 9B", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "huggingface", tos: "caution" },
+  { provider: "huggingface", modelId: "Qwen/Qwen2.5-7B-Instruct", displayName: "Qwen 2.5 7B", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "huggingface", tos: "caution" },
+  { provider: "huggingface", modelId: "deepseek-ai/DeepSeek-V3", displayName: "DeepSeek V3", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "huggingface", tos: "caution" },
   { provider: "hyperbolic", modelId: "Qwen/QwQ-32B", displayName: "QwQ 32B", monthlyTokens: 0, creditTokens: 5000000, freeType: "one-time-initial", poolKey: "hyperbolic", tos: "ok" },
   { provider: "hyperbolic", modelId: "deepseek-ai/DeepSeek-R1", displayName: "DeepSeek R1", monthlyTokens: 0, creditTokens: 5000000, freeType: "one-time-initial", poolKey: "hyperbolic", tos: "ok" },
   { provider: "hyperbolic", modelId: "deepseek-ai/DeepSeek-V3", displayName: "DeepSeek V3", monthlyTokens: 0, creditTokens: 5000000, freeType: "one-time-initial", poolKey: "hyperbolic", tos: "ok" },
@@ -274,23 +284,26 @@ export const FREE_MODEL_BUDGETS: FreeModelBudget[] = [
   { provider: "kiro", modelId: "glm-5", displayName: "GLM-5", monthlyTokens: 25000, creditTokens: 0, freeType: "recurring-monthly", poolKey: "kiro", tos: "avoid" },
   { provider: "kiro", modelId: "qwen3-coder-next", displayName: "Qwen3 Coder Next", monthlyTokens: 25000, creditTokens: 0, freeType: "recurring-monthly", poolKey: "kiro", tos: "avoid" },
   { provider: "liquid", modelId: "liquid-lfm-40b", displayName: "Liquid LFM 40B", monthlyTokens: 0, creditTokens: 0, freeType: "keyless", poolKey: "liquid", tos: "unknown" },
-  { provider: "llm7", modelId: "gpt-4o-mini-2024-07-18", displayName: "GPT-4o mini (LLM7)", monthlyTokens: 150000000, creditTokens: 0, freeType: "recurring-daily", poolKey: "llm7-free", tos: "caution" },
-  { provider: "llm7", modelId: "gpt-4.1-nano-2025-04-14", displayName: "GPT-4.1 nano (LLM7)", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-daily", poolKey: "llm7-free", tos: "caution" },
-  { provider: "llm7", modelId: "deepseek-r1-0528", displayName: "DeepSeek R1 (LLM7)", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-daily", poolKey: "llm7-free", tos: "caution" },
-  { provider: "llm7", modelId: "qwen2.5-coder-32b-instruct", displayName: "Qwen2.5 Coder 32B (LLM7)", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-daily", poolKey: "llm7-free", tos: "caution" },
+  // evidence: https://docs.llm7.io/limits (2026-11-23) answers 404 to get.mjs and curl, and the "Limits" page left
+  // the official index https://docs.llm7.io/llms.txt; no other official page publishes a free quota.
+  // api-public https://api.llm7.io/v1/models lists 91 models, every one with a price, and none of the ids below.
+  // Retired on 2026-11-23 as unverifiable (owner decision 2026-11-23). The 150M figure of the first row was never
+  // the published quota, so it stays out of the retired ledger (owner decision 2026-11-21, PL).
+  { provider: "llm7", modelId: "gpt-4o-mini-2024-07-18", displayName: "GPT-4o mini (LLM7)", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "llm7-free", tos: "caution" },
+  { provider: "llm7", modelId: "gpt-4.1-nano-2025-04-14", displayName: "GPT-4.1 nano (LLM7)", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "llm7-free", tos: "caution" },
+  { provider: "llm7", modelId: "deepseek-r1-0528", displayName: "DeepSeek R1 (LLM7)", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "llm7-free", tos: "caution" },
+  { provider: "llm7", modelId: "qwen2.5-coder-32b-instruct", displayName: "Qwen2.5 Coder 32B (LLM7)", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "llm7-free", tos: "caution" },
   { provider: "longcat", modelId: "LongCat-2.0", displayName: "LongCat-2.0", monthlyTokens: 0, creditTokens: 10000000, freeType: "one-time-initial", poolKey: "longcat-free", tos: "caution" },
-  // evidence: console-verified 2026-09-02 por diegosouzapw (https://console.mistral.ai → Limits, Free mode,
-  // "Tokens per month" = 1,000,000,000). Public pages only confirm that the cap exists:
-  // https://docs.mistral.ai/admin/billing-usage/usage-limits — "Free mode lets you create API keys and use
-  // included monthly usage within the limits shown on the Limits page";
-  // https://help.mistral.ai/en/articles/698531 — "Tokens per month: overall consumption cap", "set at the
-  // organization level". Re-verify in the console whenever this block is touched; without a dated
-  // console-verified line above, this pool MUST become recurring-uncapped (0).
-  { provider: "mistral", modelId: "mistral-large-latest", displayName: "Mistral Large 3", monthlyTokens: 1000000000, creditTokens: 0, freeType: "recurring-monthly", poolKey: "mistral", tos: "caution" },
-  { provider: "mistral", modelId: "mistral-medium-3-5", displayName: "Mistral Medium 3.5", monthlyTokens: 1000000000, creditTokens: 0, freeType: "recurring-monthly", poolKey: "mistral", tos: "caution" },
-  { provider: "mistral", modelId: "mistral-small-latest", displayName: "Mistral Small 4", monthlyTokens: 1000000000, creditTokens: 0, freeType: "recurring-monthly", poolKey: "mistral", tos: "caution" },
-  { provider: "mistral", modelId: "devstral-latest", displayName: "Devstral 2", monthlyTokens: 1000000000, creditTokens: 0, freeType: "recurring-monthly", poolKey: "mistral", tos: "caution" },
-  { provider: "mistral", modelId: "codestral-latest", displayName: "Codestral", monthlyTokens: 1000000000, creditTokens: 0, freeType: "recurring-monthly", poolKey: "mistral", tos: "caution" },
+  // evidence: public-page https://docs.mistral.ai/admin/billing-usage/usage-limits (2026-11-23) — "Free mode
+  // includes a monthly usage budget for trying Vibe and Studio. It doesn't include API access. Creating API keys
+  // and using the API require billing activation and pay-as-you-go." Retired on 2026-11-23 (owner decision
+  // 2026-11-21: retire now; reopen only if a dated console check shows an API allowance). The 1B/month the
+  // console showed on 2026-09-02 lives in freeModelCatalog.retired.data.ts.
+  { provider: "mistral", modelId: "mistral-large-latest", displayName: "Mistral Large 3", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "mistral", tos: "caution" },
+  { provider: "mistral", modelId: "mistral-medium-3-5", displayName: "Mistral Medium 3.5", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "mistral", tos: "caution" },
+  { provider: "mistral", modelId: "mistral-small-latest", displayName: "Mistral Small 4", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "mistral", tos: "caution" },
+  { provider: "mistral", modelId: "devstral-latest", displayName: "Devstral 2", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "mistral", tos: "caution" },
+  { provider: "mistral", modelId: "codestral-latest", displayName: "Codestral", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "mistral", tos: "caution" },
   // evidence: public-page https://modelscope.cn/docs/model-service/API-Inference/limits and
   // https://modelscope.cn/docs/magicube/intro (2026-09-02) — API-Inference is free; calls are paid with
   // 魔粒: "注册并登录 200 魔粒/日" + "绑定阿里云账号 50 魔粒/日", 1 魔粒 per call on "主流" models ⇒ ~250 calls/day
@@ -384,7 +397,9 @@ export const FREE_MODEL_BUDGETS: FreeModelBudget[] = [
   { provider: "pollinations", modelId: "qwen-large", displayName: "Qwen Large (Pollinations)", monthlyTokens: 0, creditTokens: 0, freeType: "keyless", poolKey: "pollinations", tos: "caution" },
   { provider: "pollinations", modelId: "qwen-vision", displayName: "Qwen Vision (Pollinations)", monthlyTokens: 0, creditTokens: 0, freeType: "keyless", poolKey: "pollinations", tos: "caution" },
   { provider: "pollinations", modelId: "qwen-safety", displayName: "Qwen Safety (Pollinations)", monthlyTokens: 0, creditTokens: 0, freeType: "keyless", poolKey: "pollinations", tos: "caution" },
-  { provider: "predibase", modelId: "llama-3.3-70b", displayName: "llama-3.3-70b", monthlyTokens: 0, creditTokens: 25000000, freeType: "one-time-initial", poolKey: "predibase", tos: "caution" },
+  // evidence: https://predibase.com/pricing (2026-11-23) redirects to rubrik.com/products/rubrik-agent-cloud — the
+  // product is gone. Retired on 2026-11-23 (no recurring quota, so no ledger row).
+  { provider: "predibase", modelId: "llama-3.3-70b", displayName: "llama-3.3-70b", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "predibase", tos: "caution" },
   { provider: "publicai", modelId: "swiss-ai/apertus-70b-instruct", displayName: "swiss-ai/apertus-70b-instruct", monthlyTokens: 0, creditTokens: 0, freeType: "one-time-initial", poolKey: "publicai", tos: "caution" },
   { provider: "publicai", modelId: "aisingapore/Qwen-SEA-LION-v4-32B-IT", displayName: "aisingapore/Qwen-SEA-LION-v4-32B-IT", monthlyTokens: 0, creditTokens: 0, freeType: "one-time-initial", poolKey: "publicai", tos: "caution" },
   { provider: "publicai", modelId: "allenai/Olmo-3-32B-Think", displayName: "allenai/Olmo-3-32B-Think", monthlyTokens: 0, creditTokens: 0, freeType: "one-time-initial", poolKey: "publicai", tos: "caution" },
@@ -415,7 +430,9 @@ export const FREE_MODEL_BUDGETS: FreeModelBudget[] = [
   // #17028: Do not pre-label SiliconFlow paid flagship models as free. Evaluate only explicit
   // live provider evidence; a one-time signup credit does not mean a model is free.
   { provider: "sparkdesk", modelId: "lite", displayName: "Spark Lite", monthlyTokens: 0, creditTokens: 0, freeType: "keyless", poolKey: "sparkdesk", tos: "caution" },
-  { provider: "stepfun", modelId: "step-1v", displayName: "Step 1V", monthlyTokens: 0, creditTokens: 0, freeType: "one-time-initial", poolKey: "stepfun", tos: "ok" },
+  // evidence: public-page https://platform.stepfun.com/docs/zh/guides/pricing/details (2026-11-23) — pay-per-use
+  // pricing only; step-1v is not on the price table. Retired on 2026-11-23 (no quota, so no ledger row).
+  { provider: "stepfun", modelId: "step-1v", displayName: "Step 1V", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "stepfun", tos: "ok" },
   { provider: "t3-web", modelId: "claude-opus-4", displayName: "Claude Opus 4 (via t3.chat)", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-daily", poolKey: "t3-web", tos: "avoid" },
   { provider: "t3-web", modelId: "claude-sonnet-4", displayName: "Claude Sonnet 4 (via t3.chat)", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-daily", poolKey: "t3-web", tos: "avoid" },
   { provider: "t3-web", modelId: "claude-haiku-4", displayName: "Claude Haiku 4 (via t3.chat)", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-daily", poolKey: "t3-web", tos: "avoid" },
@@ -486,18 +503,24 @@ export const FREE_MODEL_BUDGETS: FreeModelBudget[] = [
   { provider: "agnes-cn", modelId: "agnes-3.0-flash", displayName: "Agnes 3.0 Flash", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "agnes-cn-free", tos: "ok" },
   { provider: "glm", modelId: "glm-4.7-flash", displayName: "GLM-4.7-Flash", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "zhipu-flash-free", tos: "ok" },
   { provider: "glm", modelId: "glm-4.5-flash", displayName: "GLM-4.5-Flash", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "zhipu-flash-free", tos: "ok" },
-  { provider: "navy", modelId: "shared-pool", displayName: "NavyAI free pool (150K tokens/day, shared)", monthlyTokens: 4500000, creditTokens: 0, freeType: "recurring-daily", poolKey: "navy-free", tos: "ok" },
+  // evidence: https://api.navy/ (2026-11-23) answered 403 (Cloudflare challenge) to get.mjs, curl and WebFetch;
+  // api-public https://api.navy/v1/models lists models with token_multiplier but publishes no free quota.
+  // No dated evidence for the 150K tokens/day pool ⇒ retired as unverifiable (owner decision 2026-11-21, PN);
+  // last quota in freeModelCatalog.retired.data.ts.
+  { provider: "navy", modelId: "shared-pool", displayName: "NavyAI free pool (150K tokens/day, shared)", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "navy-free", tos: "ok" },
   { provider: "aihorde", modelId: "aphrodite/TheDrummer/Cydonia-24B-v4.3", displayName: "Cydonia 24B (AI Horde)", monthlyTokens: 0, creditTokens: 0, freeType: "keyless", poolKey: "aihorde-anon", tos: "ok" },
   { provider: "aihorde", modelId: "aphrodite/TheDrummer/Skyfall-31B-v4.2", displayName: "Skyfall 31B (AI Horde)", monthlyTokens: 0, creditTokens: 0, freeType: "keyless", poolKey: "aihorde-anon", tos: "ok" },
   { provider: "aihorde", modelId: "google/gemma-4-31b", displayName: "Gemma 4 31B (AI Horde)", monthlyTokens: 0, creditTokens: 0, freeType: "keyless", poolKey: "aihorde-anon", tos: "ok" },
-  { provider: "ainative", modelId: "qwen3-235b-cerebras", displayName: "Qwen3 235B (Cerebras)", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "ainative-free", tos: "caution" },
-  { provider: "ainative", modelId: "qwen3-32b", displayName: "Qwen3 32B", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "ainative-free", tos: "caution" },
-  { provider: "ainative", modelId: "qwen3-14b", displayName: "Qwen3 14B", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "ainative-free", tos: "caution" },
-  { provider: "ainative", modelId: "qwen3-8b", displayName: "Qwen3 8B", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "ainative-free", tos: "caution" },
-  { provider: "ainative", modelId: "llama-4-maverick", displayName: "Llama 4 Maverick", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "ainative-free", tos: "caution" },
-  { provider: "ainative", modelId: "llama3.1-8b-cerebras", displayName: "Llama 3.1 8B (Cerebras)", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "ainative-free", tos: "caution" },
+  // evidence: public-page https://ainative.studio/pricing (2026-11-23) — "Start the Hobbyist plan — 3-day trial,
+  // then $5/mo". Retired on 2026-11-23 (uncapped, so no ledger row).
+  { provider: "ainative", modelId: "qwen3-235b-cerebras", displayName: "Qwen3 235B (Cerebras)", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "ainative-free", tos: "caution" },
+  { provider: "ainative", modelId: "qwen3-32b", displayName: "Qwen3 32B", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "ainative-free", tos: "caution" },
+  { provider: "ainative", modelId: "qwen3-14b", displayName: "Qwen3 14B", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "ainative-free", tos: "caution" },
+  { provider: "ainative", modelId: "qwen3-8b", displayName: "Qwen3 8B", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "ainative-free", tos: "caution" },
+  { provider: "ainative", modelId: "llama-4-maverick", displayName: "Llama 4 Maverick", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "ainative-free", tos: "caution" },
+  { provider: "ainative", modelId: "llama3.1-8b-cerebras", displayName: "Llama 3.1 8B (Cerebras)", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "ainative-free", tos: "caution" },
   // 2026-10-28: docs.ainative.studio/docs/api/models/ retires nous-coder; R1 requires Enterprise.
-  { provider: "ainative", modelId: "gemini-flash", displayName: "Gemini Flash", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "ainative-free", tos: "caution" },
+  { provider: "ainative", modelId: "gemini-flash", displayName: "Gemini Flash", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "ainative-free", tos: "caution" },
   { provider: "aion", modelId: "aion-labs/aion-3.0", displayName: "Aion 3.0", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "aion-free", tos: "ok" },
   { provider: "aion", modelId: "aion-labs/aion-3.0-mini", displayName: "Aion 3.0 Mini", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "aion-free", tos: "ok" },
   { provider: "aion", modelId: "aion-labs/aion-2.5", displayName: "Aion 2.5", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "aion-free", tos: "ok" },
@@ -516,18 +539,18 @@ export const FREE_MODEL_BUDGETS: FreeModelBudget[] = [
   { provider: "routeway", modelId: "laguna-m.1:free", displayName: "Laguna M.1 (free)", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "routeway-free", tos: "caution" },
   { provider: "routeway", modelId: "laguna-xs.2:free", displayName: "Laguna XS.2 (free)", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "routeway-free", tos: "caution" },
   { provider: "routeway", modelId: "llama-3.2-3b-instruct:free", displayName: "Llama 3.2 3B Instruct (free)", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "routeway-free", tos: "caution" },
-  // evidence: api-public https://router.bynara.id/api/plans (2026-09-02) — plan "free": token_cap_daily=7000000,
-  // rpm_limit=15, models=[agnes-2.0-flash, agnes-2.5-flash, laguna-s-2.1, minimax-m3-free, mistral-large,
-  // mistral-medium-3-5, qwen3.8-27b, stepfun-3.7-flash]; home: "Token Cap 7M / day · Free tokens reset daily
-  // at 07:00 WIB". One daily bucket per account ⇒ single pool: 7M × 30 = 210M. Key requires linking Telegram.
-  { provider: "nara", modelId: "agnes-2.0-flash", displayName: "Agnes 2.0 Flash", monthlyTokens: 210000000, creditTokens: 0, freeType: "recurring-daily", poolKey: "nara-free", tos: "caution" },
-  { provider: "nara", modelId: "agnes-2.5-flash", displayName: "Agnes 2.5 Flash", monthlyTokens: 210000000, creditTokens: 0, freeType: "recurring-daily", poolKey: "nara-free", tos: "caution" },
-  { provider: "nara", modelId: "laguna-s-2.1", displayName: "Laguna S 2.1", monthlyTokens: 210000000, creditTokens: 0, freeType: "recurring-daily", poolKey: "nara-free", tos: "caution" },
-  { provider: "nara", modelId: "minimax-m3-free", displayName: "MiniMax M3 Free", monthlyTokens: 210000000, creditTokens: 0, freeType: "recurring-daily", poolKey: "nara-free", tos: "caution" },
-  { provider: "nara", modelId: "mistral-large", displayName: "Mistral Large", monthlyTokens: 210000000, creditTokens: 0, freeType: "recurring-daily", poolKey: "nara-free", tos: "caution" },
-  { provider: "nara", modelId: "mistral-medium-3-5", displayName: "Mistral Medium 3.5", monthlyTokens: 210000000, creditTokens: 0, freeType: "recurring-daily", poolKey: "nara-free", tos: "caution" },
-  { provider: "nara", modelId: "qwen3.8-27b", displayName: "Qwen3.8 27B", monthlyTokens: 210000000, creditTokens: 0, freeType: "recurring-daily", poolKey: "nara-free", tos: "caution" },
-  { provider: "nara", modelId: "stepfun-3.7-flash", displayName: "StepFun 3.7 Flash", monthlyTokens: 210000000, creditTokens: 0, freeType: "recurring-daily", poolKey: "nara-free", tos: "caution" },
+  // evidence: api-public https://router.bynara.id/api/plans (2026-11-23) — plan "free": "Start free, forever.",
+  // "token_cap_daily":7000000 … "models":[] — the free plan lists no model; https://router.bynara.id/v1/models has
+  // every model with "payg_enabled": true. Retired on 2026-11-23 (reason no-models); last quota (7M/day × 30 = 210M)
+  // in freeModelCatalog.retired.data.ts.
+  { provider: "nara", modelId: "agnes-2.0-flash", displayName: "Agnes 2.0 Flash", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "nara-free", tos: "caution" },
+  { provider: "nara", modelId: "agnes-2.5-flash", displayName: "Agnes 2.5 Flash", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "nara-free", tos: "caution" },
+  { provider: "nara", modelId: "laguna-s-2.1", displayName: "Laguna S 2.1", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "nara-free", tos: "caution" },
+  { provider: "nara", modelId: "minimax-m3-free", displayName: "MiniMax M3 Free", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "nara-free", tos: "caution" },
+  { provider: "nara", modelId: "mistral-large", displayName: "Mistral Large", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "nara-free", tos: "caution" },
+  { provider: "nara", modelId: "mistral-medium-3-5", displayName: "Mistral Medium 3.5", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "nara-free", tos: "caution" },
+  { provider: "nara", modelId: "qwen3.8-27b", displayName: "Qwen3.8 27B", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "nara-free", tos: "caution" },
+  { provider: "nara", modelId: "stepfun-3.7-flash", displayName: "StepFun 3.7 Flash", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "nara-free", tos: "caution" },
   // evidence: public-page https://xkiro.com/ (2026-09-02) — Free plan: "$0 / month · Free forever · Free tokens
   // 5M / day · Access to 40+ free models · No credit card"; https://docs.xkiro.com/models/tiers/ — "free — any
   // account — Callable on every plan, including the free one, within a daily token allowance". One allowance per
