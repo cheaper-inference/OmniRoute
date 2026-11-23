@@ -1,0 +1,1 @@
+- Preserve the required `max_tokens` field for Anthropic Messages targets even when model capability metadata is missing, and normalize `max_completion_tokens` back to it.

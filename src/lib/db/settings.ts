@@ -306,8 +306,11 @@ export async function getSettings() {
     // Operators flip the kill-switch to false (or drop the prefix) via the
     // Settings UI; the change hot-reloads through `applyRuntimeSettings` →
     // `applyAuthzBypassSection` → `getAuthzBypassSnapshot()`.
+    // `/api/resilience/connections` is read-only JSON (no spawn): bypassable by
+    // default so Resilience > Connections loads on a remote dashboard. An install
+    // that already stored its own list keeps that list.
     localOnlyManageScopeBypassEnabled: true,
-    localOnlyManageScopeBypassPrefixes: ["/api/mcp/"],
+    localOnlyManageScopeBypassPrefixes: ["/api/mcp/", "/api/resilience/connections"],
     customBannedSignals: [],
     autoDisableBannedScope: "all",
     proxyEnabled: true,

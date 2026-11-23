@@ -101,6 +101,10 @@ const CACHING_PROVIDERS = new Set([
   "openai",
   "codex",
   "azure",
+  // Mistral caches the longest matching prefix automatically (64-token blocks, cached
+  // tokens billed at 10%) and `prompt_cache_key` raises the hit chance. It rejects
+  // explicit cache_control markers, so it stays out of OPENAI_FORMAT_CACHE_CONTROL_PROVIDERS.
+  "mistral",
   // #2069 — DashScope's OpenAI-compatible endpoints (Alibaba Model Studio and
   // Qwen Cloud pay-as-you-go, upstream "alicode"/"alicode-intl") natively honor
   // `cache_control: {type:"ephemeral"}` breakpoints. Without these entries
@@ -142,7 +146,7 @@ const OPENAI_FORMAT_CACHE_CONTROL_PROVIDERS = new Set([
 /** Providers whose cache is populated from the longest matching prefix without
  * an explicit `cache_control` breakpoint. This is deliberately narrower than
  * CACHING_PROVIDERS, which also includes explicit-breakpoint providers. */
-const AUTOMATIC_PREFIX_CACHING_PROVIDERS = new Set(["openai", "codex", "azure"]);
+const AUTOMATIC_PREFIX_CACHING_PROVIDERS = new Set(["openai", "codex", "azure", "mistral"]);
 
 // #18787: these provider lanes contain both caching and non-caching upstream models.
 // Enable the implicit-cache guard only for a verified model, or a per-connection
@@ -201,18 +205,34 @@ export function resolveConnectionCacheOverride(
 }
 
 /**
+ * OpenRouter serves every vendor's models under one provider id, so the model family decides.
+ * Only `anthropic/*` documents Anthropic-style `cache_control` breakpoints on its OpenAI-style
+ * chat endpoint (4 explicit breakpoints at most). Every other family stays stripped: strict
+ * upstreams behind OpenRouter reject unknown part fields (#16384), and google/* or qwen/* have
+ * no capture of their own yet.
+ */
+function isOpenRouterAnthropicModel(providerId: string, model?: string | null): boolean {
+  return providerId === "openrouter" && !!model && model.toLowerCase().startsWith("anthropic/");
+}
+
+/**
  * Whether `cache_control` markers should be PASSED THROUGH the OpenAI-format
  * translation for this provider (vs. stripped). Used to gate the request-side
  * passthrough so generic / implicit-cache OpenAI providers keep getting cleaned.
  */
 export function providerHonorsOpenAIFormatCacheControl(
   provider: string | null | undefined,
-  connectionCacheOverride?: ConnectionCacheOverride | null
+  connectionCacheOverride?: ConnectionCacheOverride | null,
+  model?: string | null
 ): boolean {
   if (connectionCacheOverride?.cacheControlPassthrough === "openai-format") return true;
   if (connectionCacheOverride?.cacheControlPassthrough === "strip") return false;
   if (!provider) return false;
-  return OPENAI_FORMAT_CACHE_CONTROL_PROVIDERS.has(provider.toLowerCase());
+  const providerId = provider.toLowerCase();
+  return (
+    OPENAI_FORMAT_CACHE_CONTROL_PROVIDERS.has(providerId) ||
+    isOpenRouterAnthropicModel(providerId, model)
+  );
 }
 
 /**
@@ -291,6 +311,7 @@ export function providerSupportsCaching(
     return isClaudeTargetFormat(targetFormat);
   }
   if (isOpenCodeCacheableModel(providerId, model)) return true;
+  if (isOpenRouterAnthropicModel(providerId, model)) return true;
   if (CACHING_PROVIDERS.has(providerId)) return true;
   // All Claude-protocol providers support prompt caching.
   return isClaudeTargetFormat(targetFormat);
