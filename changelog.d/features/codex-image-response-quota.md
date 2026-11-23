@@ -1,0 +1,1 @@
+- **feat(images):** Expose Codex response-observed quota percentages to explicitly opted-in admin keys on single hosted image generations and edits, without extra provider requests or account IDs.

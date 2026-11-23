@@ -35,12 +35,22 @@ test.after(() => {
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
+// Persisted proxy logs outlive each test's proxy row. Reusing an ephemeral
+// port would let a prior test's providers contaminate later passive verdicts.
+const usedPorts = new Set<number>();
+
 async function freePort(): Promise<number> {
-  const probe = net.createServer();
-  await new Promise<void>((resolve) => probe.listen(0, "127.0.0.1", () => resolve()));
-  const { port } = probe.address() as net.AddressInfo;
-  await new Promise<void>((resolve) => probe.close(() => resolve()));
-  return port;
+  for (let attempt = 0; attempt < 20; attempt++) {
+    const probe = net.createServer();
+    await new Promise<void>((resolve) => probe.listen(0, "127.0.0.1", () => resolve()));
+    const { port } = probe.address() as net.AddressInfo;
+    await new Promise<void>((resolve) => probe.close(() => resolve()));
+    if (!usedPorts.has(port)) {
+      usedPorts.add(port);
+      return port;
+    }
+  }
+  throw new Error("Could not allocate a distinct proxy port for this test suite");
 }
 
 async function sweepCapturingSummary(): Promise<string> {
