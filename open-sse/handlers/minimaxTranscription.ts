@@ -1,13 +1,34 @@
 import { Buffer } from "node:buffer";
 import type { AudioProvider } from "../config/audioRegistry.ts";
 import { buildAuthHeaders } from "../config/registryUtils.ts";
-import { convertToPcm16k, GeminiLiveError } from "../executors/geminiLiveTranscribe.ts";
+import {
+  convertToPcm16k,
+  FfmpegNotFoundError,
+  GeminiLiveError,
+} from "../executors/geminiLiveTranscribe.ts";
 import { pcmToWav } from "../executors/vertexMedia.ts";
 import { buildMultipartBody, getUploadedFileName } from "../utils/audioMultipart.ts";
 import { audioErrorResponse, upstreamErrorResponse } from "../utils/audioResponse.ts";
 import { CORS_HEADERS } from "../utils/cors.ts";
 
 const MAX_UPLOAD_BYTES = 50_000_000;
+const MAX_WEBM_SECONDS = 500;
+
+/** Decoder errors may include stderr. Only expose known, client-actionable reasons. */
+export function webmConversionErrorResponse(error: GeminiLiveError): Response {
+  if (error instanceof FfmpegNotFoundError)
+    return audioErrorResponse(
+      error.status,
+      "Install ffmpeg to transcribe WebM recordings with MiniMax ASR"
+    );
+  const messages: Record<number, string> = {
+    400: "Could not decode the WebM recording",
+    413: `WebM recordings must not exceed ${MAX_WEBM_SECONDS} seconds`,
+    499: "WebM conversion was cancelled",
+    504: "WebM conversion timed out",
+  };
+  return audioErrorResponse(error.status, messages[error.status] ?? "WebM conversion failed");
+}
 
 export async function handleMiniMaxTranscription(
   provider: AudioProvider,
@@ -33,7 +54,7 @@ export async function handleMiniMaxTranscription(
     if (/webm/i.test(file.type) || /\.webm$/i.test(getUploadedFileName(file))) {
       const pcm = await convertToPcm16k(Buffer.from(await file.arrayBuffer()), {
         maxInputBytes: MAX_UPLOAD_BYTES,
-        maxPcmBytes: 16_000 * 2 * 500,
+        maxPcmBytes: 16_000 * 2 * MAX_WEBM_SECONDS,
         signal: signal ?? undefined,
       });
       upload = new File([pcmToWav(pcm, 16_000)], "recording.wav", { type: "audio/wav" });
@@ -63,11 +84,7 @@ export async function handleMiniMaxTranscription(
       },
     });
   } catch (error) {
-    if (error instanceof GeminiLiveError)
-      return audioErrorResponse(
-        error.status,
-        "WebM conversion failed; MiniMax ASR requires ffmpeg for WebM recordings"
-      );
+    if (error instanceof GeminiLiveError) return webmConversionErrorResponse(error);
     return audioErrorResponse(502, "MiniMax transcription request failed");
   }
 }
