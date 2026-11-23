@@ -86,7 +86,8 @@ describe("feature-flags-settings count update", () => {
     // COMBO_DECISION_ROUTER_ENABLED (decision auto-router, default off) to 128.
     // AGENT_GUARD_MODE (client-agent observation mode, default off) takes it to 129.
     // AGENT_GUARD_STRICT (agent guard strict mode, default off) takes it to 130.
-    assert.equal(FEATURE_FLAG_DEFINITIONS.length, 130);
+    // QUOTA_SELF_PANEL (self-service quota API, default off) to 131.
+    assert.equal(FEATURE_FLAG_DEFINITIONS.length, 131);
     // COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE (#17114, default off) to 114.
     // CURSOR_GROK_47_DROP_MAX_EFFORT (#17386, default off) to 112.
     // UNPRICED_USAGE_BUDGET_POLICY (#14604, default fail_closed) to 113.

@@ -1,0 +1,1 @@
+- **fix(api):** The API-only port (`API_PORT`) refuses a request path that contains a dot segment (`.` or `..`, literal or percent-encoded) or a fragment marker before it applies its route allowlist, for plain requests and WebSocket upgrades. The port relays a path exactly as it validated it ([#20793](https://github.com/cheaper-inference/OmniRoute/pull/20793))
