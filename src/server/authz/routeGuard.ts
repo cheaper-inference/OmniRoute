@@ -97,7 +97,7 @@ export const LOCAL_ONLY_API_PREFIXES: ReadonlyArray<string> = [
   "/api/discovery/", // Discovery tool (opt-in provider scanner): the scan route makes outbound probes to provider endpoints (SSRF-adjacent) and the whole surface is an admin research tool — strict-loopback only, no manage-scope bypass (NOT in LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES). See _tasks/features-v3.8.42/gaps/DISCOVERY_TOOL_DESIGN.md.
   VNC_ROUTE_PREFIX, // #7892: /api/vnc-session/* spawns Docker containers via child_process.spawn (src/lib/vncSession/service.ts) — RCE-via-tunnel surface (Hard Rules #15 + #17), same CVE class (GHSA-fhh6-4qxv-rpqj).
   "/api/acp/agents", // ACP custom-agent registry: POST registers a client-chosen `binary`; GET / POST {action:"refresh"} runs detectInstalledAgents() -> execFileSync(probe.command, probe.args, { shell }) transitively (src/lib/acp/registry.ts) — RCE-via-tunnel surface (Hard Rules #15 + #17, #7948)
-  "/api/resilience/connections", // Per-account resilience state. NOTE: prefix matching also gates future /api/resilience/connections-* paths.
+  "/api/resilience/connections", // Per-account resilience state. Spawns nothing, so it is in the default manage-scope bypass list below: a remote caller needs an authenticated dashboard session or a manage-scope key, and an anonymous one still gets 403 (KEA-9357). NOTE: prefix matching also gates future /api/resilience/connections-* paths.
   // Dashboard HTML stays out of this list: a reverse proxy is not loopback, so
   // gating the page logged the session out. The JSON API above stays local-only.
   "/api/providers/agy-auth/apply-local", // spawns `secret-tool` through detectLocalAgyTokenRaw() and reads host-local token files (Hard Rules #15 + #17). Exact entry on purpose: the sibling import, import-bulk and zip-extract routes only parse what the request carries, and tunnel-served dashboards use them.
@@ -172,7 +172,12 @@ export { SPAWN_CAPABLE_PREFIXES, SPAWN_CAPABLE_PATTERNS };
  * consult this constant — it reads `getAuthzBypassSnapshot().prefixes`,
  * which is hot-reloaded on every settings PATCH.
  */
-export const LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES: ReadonlyArray<string> = ["/api/mcp/"];
+export const LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES: ReadonlyArray<string> = [
+  "/api/mcp/",
+  // Read-only JSON behind Resilience > Connections. Without it the page can never
+  // load on a remote dashboard (managed instance, tunnel, reverse proxy): KEA-9357.
+  "/api/resilience/connections",
+];
 
 export const ALWAYS_PROTECTED_API_PATHS: ReadonlyArray<string> = [
   "/api/shutdown",
@@ -387,6 +392,11 @@ export function isPrivateLanHost(hostHeader: string | null): boolean {
  *   bifrost/dario/mux/openwa call `getLatestVersion()` → `npm view` (execFile) on
  *   a cache miss, which a remote caller must never trigger (Hard Rules #15/#17),
  *   and 9router also supports `?reveal=key` (plaintext service credential).
+ *   /api/skills/executions — GET lists stored execution rows (two SQLite reads in
+ *   skillExecutor.listExecutions/countExecutions); only POST runs a skill and reaches
+ *   the sandbox container spawn (GHSA-jx89-f37j-pq89), and it stays LOCAL_ONLY.
+ *   Without the exemption Skills > Executions can never load on a remote dashboard
+ *   (KEA-9359). Same shape as the /api/mcp/audit exemption (#13941).
  */
 export const LOCAL_ONLY_API_GET_EXEMPTIONS: ReadonlySet<string> = new Set([
   "/api/system/version",
@@ -402,6 +412,7 @@ export const LOCAL_ONLY_API_GET_EXEMPTIONS: ReadonlySet<string> = new Set([
   "/api/mcp/audit",
   "/api/mcp/audit/stats",
   "/api/services/cliproxy/status",
+  "/api/skills/executions",
 ]);
 
 /** Safe HTTP methods that can be exempted for read-only paths. */

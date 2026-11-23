@@ -1,0 +1,1 @@
+- **fix(translator):** Gemini-native streams (`/v1beta/models/*:streamGenerateContent`) now forward the mid-stream keepalive as an empty `data:` frame, so a client idle-read timer resets while the upstream is quiet. Before, the keepalive was dropped and the socket stayed silent. ([#19403](https://github.com/cheaper-inference/OmniRoute/pull/19403))

@@ -1,5 +1,6 @@
 import { updateProviderConnection } from "@/lib/db/providers";
 import { shouldIsolateProbeFailures } from "@/shared/utils/probeOrigin";
+import { sanitizeErrorMessage } from "../../utils/errorSanitization.ts";
 
 /**
  * chatCore leaf for the non-terminal "exclude this connection for a while"
@@ -32,8 +33,12 @@ export async function excludeConnectionForCooldown(params: {
     try {
       const { setConnectionRateLimitUntil } = await import("@/lib/db/providers");
       setConnectionRateLimitUntil(connectionId, Date.now() + cooldownMs);
-    } catch {
-      // DB write failure must never break the fallback loop
+    } catch (error) {
+      // DB write failure must never break the fallback loop, but without a trace the connection is
+      // simply selected again with no hint why it was not parked.
+      console.warn(
+        `[provider] Node ${connectionId} cooldown write failed: ${sanitizeErrorMessage(error instanceof Error ? error.message : String(error))}`
+      );
     }
   }
   console.warn(
