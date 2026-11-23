@@ -42,11 +42,15 @@ export function proxyAuthority(record: ProxyRecordLike): { host: string; port: n
 }
 
 function schemeFor(type: unknown): string {
-  const normalized = typeof type === "string" ? type.toLowerCase() : "";
+  const normalized = typeof type === "string" ? type.toLowerCase().trim() : "";
+  // A record without a type predates the field and was an HTTP proxy. Anything else unknown
+  // must fail closed: sending a typo'd or unsupported scheme to Chromium as HTTP silently
+  // connects through a proxy the operator never chose.
+  if (!normalized || normalized === "http") return "http";
   if (SOCKS5_TYPES.has(normalized)) return "socks5";
   if (SOCKS4_TYPES.has(normalized)) return "socks4";
   if (normalized === "https") return "https";
-  return "http";
+  throw new Error(`Unsupported proxy type "${normalized}"; refusing to treat it as an HTTP proxy`);
 }
 
 // Chromium takes the proxy as a URL, so an IPv6 literal has to be bracketed

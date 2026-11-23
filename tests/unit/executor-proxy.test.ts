@@ -19,7 +19,7 @@ describe("resolveExecutorProxy", () => {
     const { proxy, bridge } = await resolveExecutorProxy(socks());
     try {
       assert.equal(bridge !== null, true);
-      assert.equal(proxy?.server.startsWith("http://127.0.0.1:"), true);
+      assert.match(proxy?.server ?? "", /^http:\/\/forge:[^@]+@127\.0\.0\.1:\d+$/);
       assert.equal(proxy?.username, undefined);
       assert.equal(proxy?.password, undefined);
       assert.equal(proxy?.server.includes("alice"), false);
@@ -165,7 +165,7 @@ describe("resolveExecutorProxy", () => {
     const { proxy, bridge } = await resolveExecutorProxy(socks({ type: "socks5h" }));
     try {
       assert.equal(bridge !== null, true);
-      assert.equal(proxy?.server.startsWith("http://127.0.0.1:"), true);
+      assert.match(proxy?.server ?? "", /^http:\/\/forge:[^@]+@127\.0\.0\.1:\d+$/);
     } finally {
       await bridge?.close();
     }
@@ -183,7 +183,7 @@ describe("resolveExecutorProxy", () => {
     );
     try {
       assert.equal(bridge !== null, true);
-      assert.equal(proxy?.server.startsWith("http://127.0.0.1:"), true);
+      assert.match(proxy?.server ?? "", /^http:\/\/forge:[^@]+@127\.0\.0\.1:\d+$/);
       assert.equal(proxy?.server.includes("alice"), false);
     } finally {
       await bridge?.close();

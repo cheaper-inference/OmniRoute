@@ -79,7 +79,7 @@ describe("resolveGeminiWebProxy", () => {
     });
     try {
       assert.equal(resolved.bridge !== null, true);
-      assert.equal(resolved.proxy?.server.startsWith("http://127.0.0.1:"), true);
+      assert.match(resolved.proxy?.server ?? "", /^http:\/\/forge:[^@]+@127\.0\.0\.1:\d+$/);
       assert.equal(socksBridgeCount(), 1);
     } finally {
       await resolved.bridge?.close();
