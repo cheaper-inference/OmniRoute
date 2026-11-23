@@ -362,9 +362,10 @@ async function exchangeRefreshToken(
     // having a bad day, and the short auth window would just make us retry a struggling host.
     const dead = response.status === 400 || response.status === 401;
     lastRefreshFailure.set(connectionId, dead ? "auth" : "transient");
-    if (dead) {
+    if (dead && currentSeq(connectionId) === seqAtStart) {
       // The platform rejected this credential pair: keeping the revoked access token around
-      // would make every later read try it again, fail, and re-run this exchange.
+      // would make every later read try it again, fail, and re-run this exchange. Only for the
+      // generation this exchange started in: an operator may have replaced it meanwhile.
       memoryAccessTokens.delete(connectionId);
       latestRefreshTokens.delete(connectionId);
     }
