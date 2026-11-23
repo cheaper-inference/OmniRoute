@@ -1,6 +1,7 @@
 import type { FeatureFlagDefinition } from "./featureFlagTypes";
 import { SEARCH_FEATURE_FLAG_DEFINITIONS } from "./searchFeatureFlagDefinitions";
 import { FAL_NATIVE_ENABLED_FLAG } from "./featureFlagDefinitionsFal";
+import { AGENT_GUARD_FLAG_DEFINITIONS } from "./featureFlagDefinitionsAgentGuard";
 import { PLUGIN_PERMISSION_MODEL_ENABLED_FLAG } from "./featureFlagDefinitionsPlugins";
 import { CODE_ASSIST_LEGACY_TIER_FLAG } from "./featureFlagDefinitionsCodeAssist";
 import { SYSTEM_ONE_FEATURE_FLAG_DEFINITIONS } from "./featureFlagDefinitionsSystemOne";
@@ -47,6 +48,7 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     requiresRestart: false,
     warningLevel: "info",
   },
+  ...AGENT_GUARD_FLAG_DEFINITIONS,
   {
     key: "API_KEY_AUDIT_CLIENT_DETAILS_ENABLED",
     label: "API Key Audit: Record Client IP and User-Agent",
