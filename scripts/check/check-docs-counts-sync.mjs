@@ -218,8 +218,9 @@ export function checkFreeTierHeadline(content, totals) {
   if (!claims.length) return { ok: true, detail: "no aggregate free-tier headline in this file" };
   const steady = totals.s / 1e9;
   const first = totals.m / 1e9;
+  // Claims are valued in tokens since the typed locator (lib/derivedClaims.mjs).
   const stale = claims.filter(
-    (c) => Math.abs(c.value - steady) >= 0.05 && Math.abs(c.value - first) >= 0.05
+    (c) => Math.abs(c.value / 1e9 - steady) >= 0.05 && Math.abs(c.value / 1e9 - first) >= 0.05
   );
   const problems = [];
   if (stale.length) {
