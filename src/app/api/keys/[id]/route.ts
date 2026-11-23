@@ -88,6 +88,7 @@ export async function PATCH(request, { params }) {
       isActive,
       throttleDelayMs,
       isBanned,
+      banReason,
       expiresAt,
       maxSessions,
       accessSchedule,
@@ -117,6 +118,11 @@ export async function PATCH(request, { params }) {
     if (scopeAuthError) return scopeAuthError;
 
     const payload: Parameters<typeof updateApiKeyPermissions>[1] = {};
+    if (banReason !== undefined) {
+      const reasonAuthError = await requireManagementAuth(request, { alwaysRequireAuth: true });
+      if (reasonAuthError) return reasonAuthError;
+      payload.banReason = banReason;
+    }
     if (name !== undefined) payload.name = name;
     if (modelAccessMode !== undefined) payload.modelAccessMode = modelAccessMode;
     if (allowedModels !== undefined) payload.allowedModels = allowedModels;

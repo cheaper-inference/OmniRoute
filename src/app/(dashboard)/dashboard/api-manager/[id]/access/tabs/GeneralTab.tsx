@@ -3,6 +3,12 @@
 import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
 import Toggle from "@/shared/components/Toggle";
+import Select from "@/shared/components/Select";
+import {
+  API_KEY_BAN_REASONS,
+  parseApiKeyBanReason,
+  type ApiKeyBanReason,
+} from "@/shared/constants/apiKeyBanReasons";
 
 import { useTranslations } from "next-intl";
 import { Checkbox, CheckboxGroup } from "@omniroute/ui-kit/checkbox";
@@ -23,6 +29,7 @@ interface GeneralTabProps {
   setName: (name: string) => void;
   setIsActive: (isActive: boolean) => void;
   setIsBanned: (isBanned: boolean) => void;
+  setBanReason: (banReason: ApiKeyBanReason | null) => void;
   setExpiresAt: (expiresAt: string) => void;
   setManageEnabled: (enabled: boolean) => void;
   setSelfUsageEnabled: (enabled: boolean) => void;
@@ -107,7 +114,11 @@ function KeyActiveToggle({ formState, setIsActive }: GeneralSectionProps<"setIsA
   );
 }
 
-function BanToggle({ formState, setIsBanned }: GeneralSectionProps<"setIsBanned">) {
+function BanToggle({
+  formState,
+  setIsBanned,
+  setBanReason,
+}: GeneralSectionProps<"setIsBanned" | "setBanReason">) {
   const t = useTranslations("apiManager");
 
   return (
@@ -118,6 +129,20 @@ function BanToggle({ formState, setIsBanned }: GeneralSectionProps<"setIsBanned"
         <p className="text-xs text-error">
           Immediately revoke all access. Used for suspected abuse or compromised keys.
         </p>
+        {formState.isBanned && (
+          <Select
+            className="mt-2"
+            label={t("banReason.label")}
+            placeholder={t("banReason.keepCurrent")}
+            placeholderDisabled={false}
+            value={formState.banReason ?? ""}
+            options={API_KEY_BAN_REASONS.map((reason) => ({
+              value: reason,
+              label: t(`banReason.${reason}`),
+            }))}
+            onChange={(event) => setBanReason(parseApiKeyBanReason(event.target.value))}
+          />
+        )}
       </div>
       <Toggle
         size="sm"
@@ -328,6 +353,7 @@ export default function GeneralTab({
   setName,
   setIsActive,
   setIsBanned,
+  setBanReason,
   setExpiresAt,
   setManageEnabled,
   setSelfUsageEnabled,
@@ -347,7 +373,7 @@ export default function GeneralTab({
 
       <ExclusiveLeaseNotice apiKey={apiKey} />
       <KeyActiveToggle formState={formState} setIsActive={setIsActive} />
-      <BanToggle formState={formState} setIsBanned={setIsBanned} />
+      <BanToggle formState={formState} setIsBanned={setIsBanned} setBanReason={setBanReason} />
       <ExpirationDateField formState={formState} setExpiresAt={setExpiresAt} />
       <ManagementAccessToggle formState={formState} setManageEnabled={setManageEnabled} />
       <SelfServiceVisibility

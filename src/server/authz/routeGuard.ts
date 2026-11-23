@@ -180,6 +180,8 @@ export const LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES: ReadonlyArray<string> = [
 ];
 
 export const ALWAYS_PROTECTED_API_PATHS: ReadonlyArray<string> = [
+  // Key names and security decisions are management information, including in open mode.
+  "/api/keys/bans",
   "/api/shutdown",
   // Skill writers. generate with prune=true deletes every non-catalog directory under
   // skills/ on the host; the two install routes register a global, enabled, auto-mode

@@ -1,4 +1,5 @@
 import { useState, useCallback, useMemo, type Dispatch, type SetStateAction } from "react";
+import type { ApiKeyBanReason } from "@/shared/constants/apiKeyBanReasons";
 import { ALL_COMBOS_ACCESS_RULE } from "@/shared/constants/comboAccess";
 import { SELF_ACCOUNT_QUOTA_SCOPE, SELF_USAGE_SCOPE } from "@/shared/constants/selfServiceScopes";
 import { hasProviderQuotaBypassScope } from "@/shared/constants/apiKeyPolicyScopes";
@@ -156,6 +157,7 @@ export interface ApiKeyAccessFormState {
   isActive: boolean;
   throttleDelayMs: number;
   isBanned: boolean;
+  banReason?: ApiKeyBanReason | null;
   expiresAt: string;
   maxSessions: number;
   scheduleEnabled: boolean;
@@ -523,6 +525,7 @@ export function buildApiKeyAccessPayload(
     isActive: formState.isActive,
     throttleDelayMs: normalizedThrottleDelayMs,
     isBanned: formState.isBanned,
+    ...(formState.isBanned && formState.banReason ? { banReason: formState.banReason } : {}),
     expiresAt: formState.expiresAt || null,
     maxSessions: normalizedMaxSessions,
     accessSchedule: schedule,
@@ -616,7 +619,7 @@ function useGeneralSetters(setFormState: FormStateSetter) {
 
   const setIsBanned = useCallback(
     (isBanned: boolean) => {
-      setFormState((prev) => ({ ...prev, isBanned }));
+      setFormState((prev) => ({ ...prev, isBanned, banReason: isBanned ? prev.banReason : null }));
     },
     [setFormState]
   );
@@ -628,7 +631,14 @@ function useGeneralSetters(setFormState: FormStateSetter) {
     [setFormState]
   );
 
-  return { setName, setIsActive, setIsBanned, setExpiresAt };
+  const setBanReason = useCallback(
+    (banReason: ApiKeyBanReason | null) => {
+      setFormState((prev) => ({ ...prev, banReason }));
+    },
+    [setFormState]
+  );
+
+  return { setName, setIsActive, setIsBanned, setBanReason, setExpiresAt };
 }
 
 /** Management scope, self-service scopes and endpoint setters (General tab). */
