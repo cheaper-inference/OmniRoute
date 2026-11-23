@@ -42,26 +42,23 @@ flowchart LR
 `main` gündəlik inteqrasiya budağı deyil. `main` üçün açılmış PR-ların adətən
 birləşdirilməzdən əvvəl başqa hədəfə yönəldilməsi tələb olunur.
 
-## Buraxılışın dondurulması (paralel dövrlər)
+## Dondurmanı buraxın (paralel dövrlər)
 
-Buraxılış uyğunlaşdırılarkən `release-freeze` etiketli marker məsələ açılır.
-Bu, **inkişafı dayandırmır**:
+Buraxılış uyğunlaşdırılarkən, `release-freeze` etiketli marker məsələsi açılır. Bu** inkişafı dayandırmır** :
 
-- Dondurulmuş `release/vX.Y.Z` həmin buraxılış üçün buraxılış rəhbərinə aiddir.
-- İştirakçıların işlərini daxil etməyə davam edə bilməsi üçün növbəti dövrün
-  `release/vX+1` budağı dondurulmuş son nöqtədən yaradılır.
-- Hələ də dondurulmuş budağı hədəfləyən açıq PR-lar aktiv (ən yüksək)
-  `release/v*` budağına **yenidən yönəldilməlidir**.
+- Dondurulmuş `release/vX.Y.Z` həmin gəminin buraxılış kapitanına məxsusdur.
+- Növbəti dövrənin `release/vX+1` dondurulmuş ucundan kəsilir ki, ianəçilər eniş işlərini davam etdirsinlər.
+- Hələ də dondurulmuş filialı hədəf alan açıq PRs olmalıdır** yenidən hədəflənmişdir** aktiv (ən yüksək) `release/v*` filialına.
 
-İstədiyiniz budağın birləşdirilə biləcəyini güman etməzdən əvvəl açıq dondurulmanın
-olub-olmadığını yoxlayın:
+İstədiyiniz filialın birləşdirilə biləcəyini fərz etməzdən əvvəl açıq donma olub olmadığını yoxlayın:
 
 ```bash
 gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
 ```
 
-Birləşdirmə mexanizmləri (sahibin `queue` etiketi → Mergify)
-[MERGE_TRAIN.md](./MERGE_TRAIN.md) sənədində təsvir edilib.
+Birləşmə mexanikası (sahibi `queue` etiketi → Mergify) [MERGE_TRAIN.md](./MERGE_TRAIN.md) -də sənədləşdirilmişdir.
+
+> **11-19-2026: Birləşdirmə növbəsi ləğv edildi** (sahibinin qərarı). `.mergify.yml` artıq növbə təyin etmir və çəkmə sorğusunu birləşdirən və ya yenidən yazan Birləşdirmə əmrlərini rədd edir. Buraxılış PRs "Aktiv buraxılışda yaşıl qapılar tələb olun" (`Gate / CI` + `Gate / Quality`) repozitoriya qaydaları altında əl ilə birləşdirilir, omni-növbə canlı rejimdə və ondan sonra omni-növbə vasitəsilə ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). `queue` etiketi artıq heç nəyi birləşdirmir.
 
 ## Nə üçün həm budaq, həm də teq var?
 

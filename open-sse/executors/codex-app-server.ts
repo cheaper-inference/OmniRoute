@@ -331,11 +331,34 @@ export class CodexAppServerExecutor extends BaseExecutor {
         events.close();
         markTerminated();
       };
+      const failTurn = (err: unknown) => {
+        if (terminated) return;
+        const message = sanitizeErrorMessage(err instanceof Error ? err.message : err);
+        const status = drainAwareFailureStatus(502);
+        events.push({
+          type: "error",
+          message,
+          status,
+          errorType: status === 499 ? "client_disconnected" : "provider_error",
+          code: status === 499 ? "client_disconnected" : "codex_app_server_turn_failed",
+        });
+        events.close();
+        markTerminated();
+      };
+      // Socket callbacks run outside this function's catch: a push that overflows the event
+      // backlog must still end the turn with an error the consumer sees.
+      const pushEvent = (event: AdapterEvent) => {
+        try {
+          events.push(event);
+        } catch (err) {
+          failTurn(err);
+        }
+      };
       try {
         // Setup responses and socket closure can arrive in the same frame batch.
         client.onNotification((method, params) => {
           if (terminated) return;
-          const isTerminal = translateNotification(method, params, (event) => events.push(event));
+          const isTerminal = translateNotification(method, params, pushEvent);
           if (isTerminal) {
             events.close();
             markTerminated();
@@ -394,7 +417,7 @@ export class CodexAppServerExecutor extends BaseExecutor {
           const toolParams = (
             params && typeof params === "object" ? params : {}
           ) as DynamicToolCallLike;
-          translateToolCall(toolParams, (event) => events.push(event));
+          translateToolCall(toolParams, pushEvent);
           // Settle the app-server request so the socket does not stall. The router
           // does not have the tool output (the harness will produce it next turn),
           // so we report the passthrough as an unsuccessful in-line result and end
@@ -447,19 +470,7 @@ export class CodexAppServerExecutor extends BaseExecutor {
         // down the socket mid-turn and the queue never closes (request hangs).
         await turnDone;
       } catch (err) {
-        if (!terminated) {
-          const message = sanitizeErrorMessage(err instanceof Error ? err.message : err);
-          const status = drainAwareFailureStatus(502);
-          events.push({
-            type: "error",
-            message,
-            status,
-            errorType: status === 499 ? "client_disconnected" : "provider_error",
-            code: status === 499 ? "client_disconnected" : "codex_app_server_turn_failed",
-          });
-          events.close();
-          markTerminated();
-        }
+        failTurn(err);
       } finally {
         client.close();
       }

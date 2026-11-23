@@ -29,6 +29,8 @@ Hver JSON -kvittering identifiserer utsjekket SHA, arbeidsflytkjøring og forsø
 
 ### Slå sammen kø
 
+> **2026-11-19: Mergify-flettingskøen er trukket tilbake** (eiers vedtak). `.mergify.yml` definerer ikke lenger en kø og nekter Mergify-kommandoene som slår sammen eller omskriver en pull-forespørsel. Release PRs blir slått sammen for hånd under depotregelsettet "Krev grønne porter på den aktive utgivelsen" (`Gate / CI` + `Gate / Quality`) til omni-kø kjører i live-modus, og gjennom omni-kø etter det ( [OMNI_QUEUE.md](../ops/OMNI_QUEUE.md) ). Arbeidsflythåndteringen av Mergify-utkast beskrevet nedenfor er fortsatt i `ci.yml` og `quality.yml`, men ingen Mergify-utkast åpnes lenger.
+
 `queue` etiketten sender en PR til Mergify-køen (`.mergify.yml`). Mergify åpner et utkast til PR på en `mergify/merge-queue/` -gren, CI kjører hele utvalget der, og den originale PR smelter sammen når `Gate / CI`, `Gate / Quality` og `Merge integrity (changelog + generated skills)` passerer.
 
 Mergify skriver køsammendraget i utkastets beskrivelse, og andre apper kan også redigere det. En `pull_request` `edited` -hendelse på et slikt utkast tar sin egen samtidighetsgruppe (`-queue-edit-<run_id>`) slik at det ikke kan avbryte utkastets virkelige løp, og det hopper over porten og matrisen. Bare `Merge integrity` kjører fortsatt. Den hoppede gate-jobben har et annet sjekknavn, fordi Mergify leser en hoppet over `Gate / CI` som en mislykket sjekk og setter PR.
@@ -43,28 +45,28 @@ CLI krever `--evidence-root` for å bekrefte beholdt bevis. Filer løses som `<e
 
 ### Inventar for statisk skanning
 
-Den versjonerte npm-alias-beholdningen og medlemskapet for statisk skanning lever i `config/quality/gate-manifest.json`. Kjør `npm run check:gate-manifest` for å validere skriptnavn og eksakte kommandoer mot `package.json`; tillegg, fjerninger og kommandodrift feiler både den lokale kroken og endringsklassifiseringsjobbene i CI. Et alias er ikke en arbeidsflytjobb, matriseforekomst eller testtilfelle: disse tellingene må ikke presenteres som utskiftbare.
+Den versjonerte npm-alias-beholdningen og statisk skanningsmedlemskap lever i `config/quality/gate-manifest.json`. Kjør `npm run check:gate-manifest` for å validere skriptnavn og eksakte kommandoer mot `package.json`; tillegg, fjerninger og kommandodrift mislykkes både med den lokale kroken og endringsklassifiseringsjobbene i CI. Et alias er ikke en arbeidsflytjobb, matriseforekomst eller testtilfelle: disse tellingene må ikke presenteres som utskiftbare.
 
-Bruk `npm run quality:scan -- --list` eller `npm run quality:scan:fast -- --list` for å inspisere de valgte aliasene uten å kjøre dem. Løperen påkaller npm-inngangspunktet, slik at kjøretiden (inkludert Bun der den er konfigurert) bevares. Manifestet registrerer aliaser utenfor disse profilene som separat påkalt, og vedlikeholdskommandoer er forbudt i skrivebeskyttede skanneprofiler.
+Bruk `npm run quality:scan -- --list` eller `npm run quality:scan:fast -- --list` for å inspisere de valgte aliasene uten å utføre dem. Løperen påkaller npm-inngangspunktet, slik at kjøretiden (inkludert Bun der den er konfigurert) bevares. Manifestet registrerer aliaser utenfor disse profilene som separat påkalt, og vedlikeholdskommandoer er forbudt i skrivebeskyttede skanneprofiler.
 
 Disse profilene dekker kun den statiske skanningen. De sertifiserer ikke produkttester, dekning, emballasje, eksterne kontroller eller en kandidats fulle utgivelsesgodkjennelse. Arbeidsflytopptak bruker de koblede `config/quality/admission-policy.json` og `scripts/quality/admission-verdict.mjs`. Utgivelsesobservatørprofiler forblir separate; inspisere gjeldende sjekker og kvitteringer uavhengig. Den fullstendige observatørens statiske kommandoer er deklarert i `config/quality/release-green-static-profile.json`, inkludert `audit:deps`, mutasjonstestvalg og translasjonssjekker. Lasteren validerer npm-kommandoer mot package.json og modellerte CI/Quality -deklarasjoner; den avviser drift i stedet for å utføre shell-tokens som argumenter. Nødvendig skanner SKIP/INCOMPLETE utgang kan ikke etablere PASS. Profilen registrerer eksterne ekskluderinger og erstatter ikke vertsbasert dekning, testmatriser, pakke- eller distribusjonsbevis. Prosainventaret nedenfor er en referanse, ikke et bevis på at en port faktisk gikk.
 
 Skript lever under `scripts/check/` (policy porter) og `scripts/quality/` (ratchet engine). CI kilden til sannhet er `.github/workflows/ci.yml`.
 
-### Slipp PR hurtigsti (`quality.yml`)
+### Slipp PR fast-path (`quality.yml`)
 
 `.github/workflows/quality.yml` utfyller CI på main/release PRs, skyver til `main`, sender ut og slår sammen grupper. PRs bruker banefiltrerte hurtigsjekker. Det permanent deaktiverte duplikatbygget ble fjernet. de ekte build/package/boot -sjekkene forblir i CI. Enhetspakken og vitest kjører bare i CI (`Unit Tests (N/8)` og `Vitest`).
 
-| Jobb                                             | Omfang                                                                                                           | Blokkering           |
-| ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- | -------------------- |
-| `Docs Gates (fast-path)`                         | Docs/code PRs; API docs refs og docs-all                                                                         | Ja                   |
-| `Fast Quality Gates`                             | Kode PRs; statiske sjekker, typesjekk, dashbordtypesjekk, berørte enhetstester, glemte søskentester (rådgivende) |
-| `No new ESLint warnings`                         | Kode PRs; lobeskyttelse som er bevisst på undertrykkelse                                                         | Ja, inkludert gafler |
-| `Merge integrity (changelog + generated skills)` | Ikke-utkast PRs; endringslogg og generert ferdighetssynkronisering                                               | Ja, inkludert gafler |
+| Jobb                                             | Omfang                                                                                                                | Blokkering           |
+| ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------- | -------------------- |
+| `Docs Gates (fast-path)`                         | Docs/code PRs; API docs refs og docs-all                                                                              | Ja                   |
+| `Fast Quality Gates`                             | Kode PRs; statiske kontroller, typesjekk, dashbordtypesjekk, påvirkede enhetstester, glemte søskentester (rådgivende) |
+| `No new ESLint warnings`                         | Kode PRs; lobeskyttelse som er bevisst på undertrykkelse                                                              | Ja, inkludert gafler |
+| `Merge integrity (changelog + generated skills)` | Ikke-utkast PRs; endringslogg og generert ferdighetssynkronisering                                                    | Ja, inkludert gafler |
 
 #### Glemt søskenprøverapport
 
-`npm run check:forgotten-sibling-tests` kjører som et rådgivende trinn for `Fast Quality Gates` og gjenbruker importresolveren bak test-effektkartet. For hver endret produksjonsmodul rapporterer den deterministiske `changed module/symbol -> static consumer -> candidate sibling test` kjeder når kandidattesten er fraværende fra pull-request diff. Markdown-sammendraget og JSON resultatet beholdes som `forgotten-sibling-tests` arbeidsflytartefakten for kalibrering før blokkerende utrulling.
+`npm run check:forgotten-sibling-tests` kjører som et rådgivende trinn for `Fast Quality Gates` og gjenbruker importløseren bak test-effektkartet. For hver endret produksjonsmodul rapporterer den deterministiske `changed module/symbol -> static consumer -> candidate sibling test` kjeder når kandidattesten er fraværende fra pull-request diff. Markdown-sammendraget og JSON resultatet beholdes som `forgotten-sibling-tests` arbeidsflytartefakten for kalibrering før blokkerende utrulling.
 
 Reeksport av fat og dynamisk import er kun oppløsningsdiagnostikk; de skaper aldri et blokkerende funn. Anmeldte unntak lever i `config/quality/forgotten-sibling-allowlist.json`. Hver oppføring må navngi forbruker- og kandidattesten, gi en spesifikk begrunnelse og koble en GitHub problemstilling eller pull-forespørsel. Feilaktige oppføringer er ikke lukket. Unntak kan ikke undertrykke en slettet kandidattest eller en diff som legger til `.skip`/`.todo`; påstandssvekkelse og annen maskering forblir eid av den uavhengig blokkerende `check:test-masking` porten.
 
@@ -121,7 +123,7 @@ Løper etter `test-coverage`. Blokker smelter sammen ved feil.
 | Manus                        | Validerer                                                                                                                                                          | Blokkering                 |
 | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------- |
 | `quality:collect`            | Sender ut `quality-metrics.json` (antall ESLint -varsler, dekning fra sammenslått shard-rapport)                                                                   | Ja (oppstrøms for skralle) |
-| `quality:ratchet`            | Hver beregning i `quality-baseline.json` har ikke gått tilbake (ESLint advarsler ≤ baseline; dekning ≥ baseline)                                                   | Ja                         |
+| `quality:ratchet`            | Hver metrikk i `quality-baseline.json` har ikke regressert (ESLint advarsler ≤ grunnlinje; dekning ≥ grunnlinje)                                                   | Ja                         |
 | `check:duplication`          | Kodeduplisering (jscpd@4) overskrider ikke baseline i `quality-baseline.json`                                                                                      | Ja                         |
 | `check:complexity`           | Syklomatisk kompleksitet på filnivå overskrider ikke grensen (kjerne ESLint `complexity` + `max-lines-per-function`)                                               | Ja                         |
 | `check:cognitive-complexity` | Kognitiv kompleksitet skralle (`eslint-plugin-sonarjs`) — separat ESLint pass; CI kjører begge sammenslått som enkelt `check:complexity-ratchets` trinn            | Ja                         |
@@ -228,16 +230,16 @@ Uten en oppløselig base (ingen `BASE_SHA`/`BASE_REF`, ingen lokal `origin/relea
 
 ### Jobb: `i18n-ui-coverage`
 
-| Manus                             | Validerer                                                                                                                                                                                            | Blokkering             |
-| --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- |
-| `check-ui-keys-coverage` (inline) | UI i18n nøkkeldekning er ≥ 65 %                                                                                                                                                                      | Ja (begge moduser)     |
-| `check:ui-icu`                    | Hver melding i hver UI -katalog kompileres med `IntlMessageFormat`                                                                                                                                   | Ja (begge moduser)     |
-| `check-ui-value-drift` (inline)   | En omskrevet engelsk** verdi** etterlater ingen gammel oversettelse                                                                                                                                  | Ja (bare utløsermodus) |
-| `check-new-key-coverage` (inline) | EN** ny** Engelsk nøkkel oversettes i hver lokalitet — en `__MISSING__:` -markør blir avvist                                                                                                         | Ja (bare utløsermodus) |
-| `check-key-completeness` (inline) | Hver UI katalog (og med `--catalog=cli`, hver CLI -katalog) har nøyaktig nøkkelsettet til `en.json`; i `pr` modus endret hver katalog PR mot seg selv ved flettebasen                                | Ja (begge moduser)     |
-| `check-translation-ratio`         | Real-oversettelsesforhold per lokalitet (identisk-til-engelsk / plassholder / manglende blader utenfor godkjenningslisten) må ikke overstige `config/quality/i18n-translation-baseline.json` + slakk | Ja (bare utløsermodus) |
+| Manus                             | Validerer                                                                                                                                                                                           | Blokkering             |
+| --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- |
+| `check-ui-keys-coverage` (inline) | UI i18n nøkkeldekning er ≥ 65 %                                                                                                                                                                     | Ja (begge moduser)     |
+| `check:ui-icu`                    | Hver melding i hver UI -katalog kompileres med `IntlMessageFormat`                                                                                                                                  | Ja (begge moduser)     |
+| `check-ui-value-drift` (inline)   | En omskrevet engelsk** verdi** etterlater ingen gammel oversettelse                                                                                                                                 | Ja (bare utløsermodus) |
+| `check-new-key-coverage` (inline) | EN** ny** Engelsk nøkkel oversettes i hver lokalitet — en `__MISSING__:` -markør blir avvist                                                                                                        | Ja (bare utløsermodus) |
+| `check-key-completeness` (inline) | Hver UI katalog (og med `--catalog=cli`, hver CLI -katalog) har nøyaktig nøkkelsettet til `en.json`; i `pr` modus endret hver katalog PR mot seg selv ved flettebasen                               | Ja (begge moduser)     |
+| `check-translation-ratio`         | Real-oversettelsesforhold per lokalitet (identisk-til-engelsk / plassholder / manglende blader utenfor tillatelseslisten) må ikke overstige `config/quality/i18n-translation-baseline.json` + slakk | Ja (bare utløsermodus) |
 
-Trenger `fetch-depth: 0` — verdidriftporten differer `en.json` mot flettebasen.
+Trenger `fetch-depth: 0` — verdidriftporten diff `en.json` mot flettebasen.
 
 **To moduser (siden 2026-11-13).** En funksjon PR legger til eller omskriver nøkler i `en.json` (og `bin/cli/locales/en.json`) og berører ingen annen lokalitet; `check:pr-derived-paths` (jobb `pr-test-policy`, familie `config/quality/derived-paths/translation.json`) feiler en funksjon PR som gjør det. De andre lokalitetene fullføres én gang per utgivelse av `release:refresh-derived`, som kaller `syncUiKeys()` i `scripts/i18n/sync-ui-keys.mjs` (legg til manglende nøkler, beskjær dem som er slettet, merk oversettelser av omskrevet engelsk med `rewrittenSinceRef`, oversett), eller ved en oversettelsesbølge. Portene leser modusen fra `scripts/check/lib/gateMode.mjs`: i `pr` modus (funksjon PRs, `merge_group`, `omni-queue/**`) skriver utløsningsmodusportene over `SKIP reason=pr-mode` og går ut av 0; i `release` modus (utgivelsen PR, pusher til `main`, `workflow_dispatch`, lokale kjøringer) er de strenge som før, og på utgivelsen PR får de diff-bevisste `BASE_REF=origin/main`, så de bedømmer hver tast syklusen har lagt til eller omskrevet. Forhåndsvis feature-PR-dommen lokalt med `--mode=pr`.
 
@@ -249,15 +251,15 @@ Lokale-paritetsenhetstestene (`cli-i18n-catalog`, `i18n-pt-br`, `i18n-vi-complet
 
 Fanger den ene i18n-regresjonen som de andre portene strukturelt ikke kan se: en engelsk verdi skrives om og oversettelsene avledet fra den _forrige_ engelsken blir igjen, så ikke-engelske brukere fortsetter å lese selvsikkert formulert, nå feil kopi.
 
-Dette ble sendt på ekte. `oauthModal.googleOAuthWarning` ble skrevet om da Antigravity-påloggingshjelperen landet (#5203);** 39 av 43 lokaliteter** beholdt tekst som forteller operatører å "kopiere hele URL og lim den inn under" — en flyt som ikke kan fullføres for den leverandøren. Det gikk ubemerket frem til #8463 fordi:
+Dette ble sendt på ekte. `oauthModal.googleOAuthWarning` ble skrevet om da Antigravity -påloggingshjelperen landet (#5203);** 39 av 43 lokaliteter** holdt tekst som forteller operatørene om å "kopiere hele URL og lime den inn under" — en flyt som ikke kan fullføres for den leverandøren. Det gikk ubemerket frem til #8463 fordi:
 
 - `sync-ui-keys` fyller bare nøkler som er** fraværende** , aldri de som er det** foreldet** ;
 - `check-ui-keys-coverage` teller nøkkelen _tilstedeværelse_, så en foreldet oversettelse scorer som dekket;
 - `check-translation-drift` sporer `docs/i18n/<locale>/**.md` -dokumentasjonen speiler — den leser aldri `src/i18n/messages/*.json`. Den kjører i jobb `docs-sync-strict`: rådgivende på PRs, streng på push og nattlig; oversettelsesbølgen oppdaterer speilene, ikke funksjonen PR.
 
-**Diff-bevisst, ikke baseline-støttet.** Den sammenligner `en.json` ved flettebasen med arbeidstreet; for hver nøkkel hvis engelske verdi er endret, er enhver lokalitet som fortsatt har en uberørt oversettelse foreldet. Dette bevisst** fryser eksisterende gjeld** — a diff kan ikke avsløre hvilken gammel engelsk en langvarig oversettelse kom fra, så porten bedømmer kun hva den nåværende endringen berører. Alternativet (en per-nøkkel-hash-grunnlinje) vil koste en ~ 600 KB -generert fil, 3 × den største eksisterende grunnlinjen, som churning på hver i18n PR.
+**Diff-bevisst, ikke baseline-støttet.** Den sammenligner `en.json` ved flettebasen med arbeidstreet; for hver nøkkel hvis engelske verdi er endret, er enhver lokalitet som fortsatt har en uberørt oversettelse foreldet. Dette med vilje** fryser eksisterende gjeld** — a diff kan ikke avsløre hvilken gammel engelsk en langvarig oversettelse kom fra, så porten bedømmer kun hva den nåværende endringen berører. Alternativet (en per-nøkkel-hash-grunnlinje) vil koste en ~ 600 KB -generert fil, 3 × den største eksisterende grunnlinjen, som churning på hver i18n PR.
 
-To måter å tilfredsstille det:
+To måter å tilfredsstille det på:
 
 1. oppdatere de berørte oversettelsene, eller
 2. sett dem til `__MISSING__:<new english>` — kjøretiden serverer deretter den korrigerte engelsken (`src/i18n/request.ts::deepMergeFallback`, #7258) og nøkkelkøene for oversettelse.

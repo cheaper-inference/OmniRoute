@@ -10,6 +10,7 @@ import {
   parseToolInput,
   normalizeKiroToolSchema,
   serializeToolResultContent,
+  splitToolErrorMarker,
 } from "./openai-to-kiro/messageHelpers.ts";
 import {
   resolveKiroModelAlias,
@@ -167,6 +168,24 @@ function hasFollowingToolResult(messages, index: number): boolean {
  * Convert OpenAI messages to Kiro format
  * Rules: system/tool/user -> user role, merge consecutive same roles
  */
+type OrphanToolResult = {
+  toolUseId?: string;
+  status?: string;
+  content?: Array<{ text?: string }>;
+};
+
+/**
+ * Text for a tool result whose tool call is missing from the history (truncated conversation).
+ * The status is lost with the toolResults field, so a failed run keeps the `[tool_error: true]`
+ * line that claude-to-openai writes for it.
+ */
+function orphanToolResultText(tr: OrphanToolResult): string {
+  const id = tr.toolUseId || "";
+  const text = tr.content?.map((c) => c.text || "").join("\n") || "";
+  const body = tr.status === "error" ? `[tool_error: true]\n${text}` : text;
+  return id ? `[Tool Result (${id})]\n${body}` : `[Tool Result]\n${body}`;
+}
+
 function convertMessages(messages, tools, model) {
   let history = [];
   let currentMessage = null;
@@ -367,6 +386,7 @@ function convertMessages(messages, tools, model) {
 
         // Extract images (OpenAI image_url and Anthropic image formats).
         // Skip entirely for models that do not support images — see supportsImages.
+        const imagesBefore = pendingImages.length;
         for (const block of msg.content) {
           if (supportsImages && block.type === "image_url") {
             const url: string = block.image_url?.url || "";
@@ -393,6 +413,17 @@ function convertMessages(messages, tools, model) {
           }
         }
 
+        // Kiro takes only inline bytes, and only for Claude models. Say so in the text, so the
+        // model does not answer as if no image was sent.
+        const imageBlocks = msg.content.filter(
+          (c) => c.type === "image_url" || c.type === "image"
+        ).length;
+        const omittedImages = imageBlocks - (pendingImages.length - imagesBefore);
+        if (omittedImages > 0) {
+          const note = `[${omittedImages} ${omittedImages === 1 ? "image" : "images"} omitted: Kiro accepts only inline image data, and only for Claude models]`;
+          content = content ? `${content}\n${note}` : note;
+        }
+
         // Check for tool_result blocks
         const toolResultBlocks = msg.content.filter((c) => c.type === "tool_result");
         if (toolResultBlocks.length > 0) {
@@ -413,10 +444,11 @@ function convertMessages(messages, tools, model) {
         // blocks, images) is never collapsed to an empty string. CodeWhisperer rejects a
         // toolResult whose content is [{ text: "" }] with 400 "Improperly formed request"
         // — the same failure mode that hit the Anthropic tool_result path (issue #2446).
-        const toolContent = serializeToolResultContent(msg.content);
+        const toolResult = splitToolErrorMarker(msg.content);
+        const toolContent = serializeToolResultContent(toolResult.content);
         pendingToolResults.push({
           toolUseId: msg.tool_call_id,
-          status: "success",
+          status: toolResult.isError ? "error" : "success",
           content: [{ text: toolContent }],
         });
       } else if (content) {
@@ -680,17 +712,9 @@ function convertMessages(messages, tools, model) {
       prev?.assistantResponseMessage?.toolUses && prev.assistantResponseMessage.toolUses.length > 0;
 
     if (!hasPrecedingAssistant) {
-      const toolResults = item.userInputMessage.userInputMessageContext.toolResults as Array<{
-        toolUseId?: string;
-        content?: Array<{ text?: string }>;
-      }>;
-      const toolResultTexts = toolResults
-        .map((tr) => {
-          const id = tr.toolUseId || "";
-          const text = tr.content?.map((c) => c.text || "").join("\n") || "";
-          return id ? `[Tool Result (${id})]\n${text}` : `[Tool Result]\n${text}`;
-        })
-        .join("\n\n");
+      const toolResults = item.userInputMessage.userInputMessageContext
+        .toolResults as OrphanToolResult[];
+      const toolResultTexts = toolResults.map(orphanToolResultText).join("\n\n");
 
       const originalContent = item.userInputMessage.content || "";
       item.userInputMessage.content = originalContent
@@ -713,14 +737,8 @@ function convertMessages(messages, tools, model) {
 
     if (!hasPrecedingAssistant) {
       const toolResults = currentMessage.userInputMessage.userInputMessageContext
-        .toolResults as Array<{ toolUseId?: string; content?: Array<{ text?: string }> }>;
-      const toolResultTexts = toolResults
-        .map((tr) => {
-          const id = tr.toolUseId || "";
-          const text = tr.content?.map((c) => c.text || "").join("\n") || "";
-          return id ? `[Tool Result (${id})]\n${text}` : `[Tool Result]\n${text}`;
-        })
-        .join("\n\n");
+        .toolResults as OrphanToolResult[];
+      const toolResultTexts = toolResults.map(orphanToolResultText).join("\n\n");
 
       const originalContent = currentMessage.userInputMessage.content || "";
       currentMessage.userInputMessage.content = originalContent
@@ -747,16 +765,15 @@ function convertMessages(messages, tools, model) {
   const answeredToolUseIds = new Set<string>();
   for (const item of mergedHistory) {
     const toolResults = item.userInputMessage?.userInputMessageContext?.toolResults as
-      | Array<{ toolUseId?: string }>
-      | undefined;
+      Array<{ toolUseId?: string }> | undefined;
     if (Array.isArray(toolResults)) {
       for (const result of toolResults) {
         if (result?.toolUseId) answeredToolUseIds.add(result.toolUseId);
       }
     }
   }
-  const currentToolResultsForOrphanCheck = currentMessage?.userInputMessage
-    ?.userInputMessageContext?.toolResults as Array<{ toolUseId?: string }> | undefined;
+  const currentToolResultsForOrphanCheck = currentMessage?.userInputMessage?.userInputMessageContext
+    ?.toolResults as Array<{ toolUseId?: string }> | undefined;
   if (Array.isArray(currentToolResultsForOrphanCheck)) {
     for (const result of currentToolResultsForOrphanCheck) {
       if (result?.toolUseId) answeredToolUseIds.add(result.toolUseId);
@@ -764,8 +781,7 @@ function convertMessages(messages, tools, model) {
   }
   for (const item of mergedHistory) {
     const toolUses = item.assistantResponseMessage?.toolUses as
-      | Array<{ toolUseId?: string }>
-      | undefined;
+      Array<{ toolUseId?: string }> | undefined;
     if (!Array.isArray(toolUses)) continue;
     const filtered = toolUses.filter(
       (use) => use?.toolUseId && answeredToolUseIds.has(use.toolUseId)
@@ -957,6 +973,9 @@ export function buildKiroPayload(model, body, stream, credentials) {
   const profileArn = credentials?.providerSpecificData?.profileArn || "";
 
   let finalContent = currentMessage?.userInputMessage?.content || "";
+  // Seed for the conversationId below: the user text BEFORE the clock line is prepended, so a
+  // single-message request (no history yet) gets the same id on every call and on turn 2.
+  const conversationSeedContent = finalContent;
   const timestamp = new Date().toISOString();
   finalContent = `[Context: Current time is ${timestamp}]\n\n${finalContent}`;
 
@@ -1048,7 +1067,9 @@ export function buildKiroPayload(model, body, stream, credentials) {
     : "";
   const firstRealUserTurn = history.find((h) => h?.userInputMessage?.content && !h.__synthetic);
   const firstContent =
-    seedFromPreCompression || firstRealUserTurn?.userInputMessage?.content || finalContent;
+    seedFromPreCompression ||
+    firstRealUserTurn?.userInputMessage?.content ||
+    conversationSeedContent;
 
   // Use uuidv5 with the hash of the system prompt / first message to maintain AWS Builder ID context cache
   payload.conversationState.conversationId = uuidv5(

@@ -11,6 +11,7 @@ import net from "node:net";
 import { generateKeyPairSync } from "node:crypto";
 import { build } from "esbuild";
 import { setTimeout as delay } from "node:timers/promises";
+import { nativeCoverageArgs } from "../_helpers/nativeCoverageArgs.ts";
 
 const dir = fs.mkdtempSync(path.join(os.tmpdir(), "omni-export-child-"));
 process.env.DATA_DIR = dir;
@@ -26,9 +27,11 @@ const fixture = await import("./fixtures/logExportTestDestination.ts");
 const output = path.join(dir, "received.jsonl");
 const modulePath = path.join(import.meta.dirname, "fixtures/logExportTestDestination.ts");
 const secret = "synthetic-secret-not-for-argv-or-env";
+const [, coveragePreload] = nativeCoverageArgs();
 let child: ChildProcess | undefined;
 type TestOptions = {
   modulePath: string;
+  coveragePreload?: string;
   beforeAck?: () => Promise<void>;
   onSpawn?: (child: ChildProcess) => void;
   config?: Record<string, unknown>;
@@ -40,6 +43,7 @@ const configure = (
 function options(beforeAck?: () => Promise<void>) {
   configure?.({
     modulePath,
+    coveragePreload,
     beforeAck,
     onSpawn: (spawned) => {
       child = spawned;
@@ -617,6 +621,7 @@ test("R1 real child routes public HTTP and HTTPS through env proxy, NO_PROXY and
       direct.length = 0;
       configure?.({
         modulePath,
+        coveragePreload,
         config: { network: true },
         onSpawn: (spawned) => {
           child = spawned;
@@ -839,6 +844,7 @@ test("R3 default 500-row maximum artifacts batch passes with heap margin through
   console.log = () => {}; // Capture raw GC output instead of flooding test logs.
   configure?.({
     modulePath,
+    coveragePreload,
     config: { memoryOutput: `${output}.memory` },
     onSpawn: (spawned) => {
       child = spawned;

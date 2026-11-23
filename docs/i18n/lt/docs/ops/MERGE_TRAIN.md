@@ -4,10 +4,9 @@
 
 ---
 
-Nuo v3.8.49 (kokybės / spartos plano WS3.2/WS3.4) numatytasis peržiūrėtų PR
-sujungimo į `release/vX.Y.Z` kelias yra **„Mergify“ sujungimo eilė** (`.mergify.yml`);
-toliau aprašytas **rankinis sujungimo traukinys** yra ATSARGINIS variantas — naudojamas incidentų,
-leidimo įšaldymo metu arba jei kada nors pasikeistų „Mergify“ atvirojo kodo planas.
+> **2026-11-19: sujungimo eilė panaikinta** (savininko sprendimas). `.mergify.yml` nebeapibrėžia eilės ir atmeta sujungimo komandas, kurios sujungia arba perrašo ištraukimo užklausą. Leidimas PRs yra sujungiamas rankomis pagal saugyklos taisyklių rinkinį „Reikalauti žaliųjų vartų aktyviam leidimui“ (`Gate / CI` + `Gate / Quality`), kol visa eilė paleidžiama tiesioginiu režimu, o po to per visą eilę ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Toliau pateiktuose skyriuose „Sujungti“ aprašoma tokia eilė, kokia ji buvo.
+
+Nuo 3.8.49 versijos ( quality/velocity plano WS3.2/WS3.4 ) numatytasis peržiūrėto PRs sujungimo kelias į `release/vX.Y.Z` yra** Sujungti sujungimo eilę** (`.mergify.yml`); į** rankinis sujungimas-traukinys** Toliau dokumentuotas FALLBACK —, naudojamas incidentų, leidimo įšaldymo metu arba jei kada nors pasikeičia sujungimo atvirojo kodo planas.
 
 ## Numatytasis kelias: „Mergify“ eilė
 
