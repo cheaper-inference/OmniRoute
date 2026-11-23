@@ -1365,6 +1365,25 @@ async function handleGeminiImageGeneration({ model, providerConfig, body, creden
 /**
  * Handle OpenAI-compatible image generation (standard providers + Nebius fallback)
  */
+function prepareOpenAIJpegAlias(provider: string, body: Record<string, unknown>) {
+  const format = body.output_format;
+  if (
+    provider !== "openai" ||
+    typeof format !== "string" ||
+    format.trim().toLowerCase() !== "jpg"
+  ) {
+    return undefined;
+  }
+
+  const compression = body.output_compression;
+  return {
+    output_format: "jpeg",
+    ...(typeof compression === "number" && Number.isFinite(compression)
+      ? { output_compression: compression }
+      : {}),
+  };
+}
+
 function buildAgnesImageRequestBody(model, body) {
   const upstreamBody: Record<string, unknown> = {
     model,
@@ -1403,6 +1422,8 @@ async function handleOpenAIImageGeneration({
   longJobs,
 }) {
   const startTime = Date.now();
+  const jpegAlias = prepareOpenAIJpegAlias(provider, body);
+  if (jpegAlias) body = { ...body, output_format: jpegAlias.output_format };
 
   // Summarized request for call log
   const logRequestBody = {
@@ -1423,6 +1444,7 @@ async function handleOpenAIImageGeneration({
       : {
           model,
           prompt: body.prompt,
+          ...jpegAlias,
         };
 
   if (providerConfig.format === "xai-image") {
