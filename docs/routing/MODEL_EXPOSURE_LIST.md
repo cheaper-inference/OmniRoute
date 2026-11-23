@@ -82,3 +82,21 @@ Like the lists above, it only changes advertisement:
 - an explicit `provider/model` id still dispatches, and `GET /v1/models/{id}` still resolves it;
 - the dashboard catalog (`GET /api/models/catalog`, used by the model pickers) is not narrowed;
 - it is not mirrored into the `auto/*` candidate pools, so `auto/*` combos keep their full pool.
+
+## Lean catalog (`leanCatalog`)
+
+A third opt-in boolean, `false` by default, for clients that choke on a long `/v1/models` list full
+of synthetic variants (#9418, #13562). One switch applies, to the public listing only:
+
+- `hideAutoCombos` — the built-in `auto/*` combos are not advertised;
+- `hideNoThinkVariants` — the `no-think/*` mirrors are not advertised;
+- no effort-suffix variants (`-low` / `-medium` / `-high`), the same effect as
+  `OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS`;
+- canonical prefixes only — each model is listed once under its real provider id instead of
+  twice (alias + canonical). An explicit `?prefix=alias|canonical|dual` query still wins.
+
+Your own combos stay in the list. Toggle it in **Settings → Routing → Models API listing**, or with
+`PATCH /api/settings {"leanCatalog": true}`.
+
+Like the other lists on this page it only changes advertisement: every hidden id still routes when
+sent explicitly, and the dashboard catalog (`GET /api/models/catalog`) is not narrowed.
