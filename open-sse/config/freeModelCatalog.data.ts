@@ -3,7 +3,10 @@
 // adversarial verification); 2026-07-20 added the free tiers of providers we could already route but had
 // never mapped (requesty, ovhcloud, agnes, glm), plus two new providers (navy, aihorde), and reconciled
 // kilo-gateway against its live /models list; 2026-09-02 re-audited gemini, ollama-cloud, groq, nara and
-// mistral against the providers' own pages.
+// mistral against the providers' own pages; 2026-11-23 re-audited every row with a quota, every retired
+// offer and the card gates against the providers' own pages (config/quality/free-catalog-evidence.json).
+// Retired rows stay here as `discontinued` (0 tokens) for at least one release; their last quota lives in
+// freeModelCatalog.retired.data.ts.
 // Evidence: every numeric block MUST carry an `// evidence:` comment naming its source class —
 //   public-page (a provider page anyone can read), api-public (an unauthenticated provider endpoint), or
 //   console-verified <date> por <who> (visible only inside an account console). No evidence ⇒ no number

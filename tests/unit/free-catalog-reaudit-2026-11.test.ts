@@ -7,6 +7,8 @@ import {
   validateCatalogEvidence,
 } from "../../scripts/check/freeCatalogEvidence.mjs";
 
+import { FREE_CATALOG_CURATED_AT } from "@omniroute/open-sse/config/freeModelCatalog.data.ts";
+import { FREE_TIER_BUDGETS } from "@omniroute/open-sse/config/freeTierCatalog.ts";
 import {
   FREE_MODEL_BUDGETS,
   FREE_QUOTA_UNIT,
@@ -444,4 +446,42 @@ test("the xKiro Telegram bonus is a social boost, never a deposit boost", () => 
   const pub = computePublicFreeHeadline();
   assert.equal(pub.boostMonthlyTokens, 24_000_000);
   assert.equal(pub.socialGatedRecurringTokens, 15_000_000);
+});
+
+// --- Curation date, data-file rule and the legacy per-provider map --------------------------
+
+test("the catalog is curated as of the re-audit day and states where retired quotas go", () => {
+  assert.equal(FREE_CATALOG_CURATED_AT, "2026-11-23");
+  const src = readFileSync(
+    new URL("../../open-sse/config/freeModelCatalog.data.ts", import.meta.url),
+    "utf8"
+  );
+  assert.ok(
+    src
+      .replace(/\n\/\/ /g, " ")
+      .includes(
+        "Retired rows stay here as `discontinued` (0 tokens) for at least one release; their last quota lives in freeModelCatalog.retired.data.ts"
+      )
+  );
+});
+
+test("legacy provider budgets agree with the per-model catalog", () => {
+  const S = freeTypesInBucket("steady-monthly");
+  const expected = new Map<string, number>();
+  const pools = new Map<string, Map<string, number>>();
+  for (const m of FREE_MODEL_BUDGETS) {
+    if (!S.has(m.freeType) || !(m.monthlyTokens > 0) || isCountingGated(m) || isSocialGated(m))
+      continue;
+    if (m.poolKey) {
+      const byPool = pools.get(m.provider) ?? new Map<string, number>();
+      byPool.set(m.poolKey, Math.max(byPool.get(m.poolKey) ?? 0, m.monthlyTokens));
+      pools.set(m.provider, byPool);
+    } else expected.set(m.provider, (expected.get(m.provider) ?? 0) + m.monthlyTokens);
+  }
+  for (const [provider, byPool] of pools)
+    for (const v of byPool.values()) expected.set(provider, (expected.get(provider) ?? 0) + v);
+  assert.deepEqual(
+    Object.fromEntries(Object.entries(FREE_TIER_BUDGETS).sort()),
+    Object.fromEntries([...expected].sort())
+  );
 });

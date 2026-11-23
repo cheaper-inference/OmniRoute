@@ -38,9 +38,11 @@ const REAL_CONN = "conn-real-1";
 const QUOTA_SAFE = { provider: "groq", model: "openai/gpt-oss-120b", connectionId: REAL_CONN };
 // A real quota-based entry WITHOUT a documented hard-stop guarantee → always
 // excluded as `no-hard-stop`, whatever the live allowance state reports.
+// agentrouter/claude-opus-5 was retired in the November 2026 re-audit (not on agentrouter.org/api/pricing);
+// gpt-5.6-sol is the AgentRouter row that stays free, with the same one-time-initial economics.
 const QUOTA_UNGUARANTEED = {
   provider: "agentrouter",
-  model: "claude-opus-5",
+  model: "gpt-5.6-sol",
   connectionId: REAL_CONN,
 };
 
