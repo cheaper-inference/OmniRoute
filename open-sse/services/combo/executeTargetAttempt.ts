@@ -686,11 +686,13 @@ export async function executeTargetAttempt(
       // (independent of universal handoff — always fires when context_cache_protection is on)
       // #3825: write under the SAME effectiveSessionId used by the read site so a
       // sessionless conversation re-pins to this model on its next turn.
+      let recordedHistoryKey: string | null = null;
       if (
         deps.combo.context_cache_protection &&
         deps.effectiveSessionId &&
         !(deps.body as Record<string, unknown>)?.[SKIP_UNIVERSAL_HANDOFF_FLAG]
       ) {
+        recordedHistoryKey = deps.effectiveSessionId;
         recordSessionModelUsage(
           deps.effectiveSessionId,
           deps.combo.name,
@@ -707,16 +709,20 @@ export async function executeTargetAttempt(
         !(deps.body as Record<string, unknown>)?.[SKIP_UNIVERSAL_HANDOFF_FLAG]
       ) {
         const prevModel = getLastSessionModel(handoffSessionId, deps.combo.name);
-        recordSessionModelUsage(
-          handoffSessionId,
-          deps.combo.name,
-          modelStr,
-          provider,
-          target.connectionId ?? undefined
-        );
+        // One row per successful target. The context-cache block above already wrote this exact
+        // row when both features share the session key.
+        if (handoffSessionId !== recordedHistoryKey) {
+          recordSessionModelUsage(
+            handoffSessionId,
+            deps.combo.name,
+            modelStr,
+            provider,
+            target.connectionId ?? undefined
+          );
+        }
         // i === 0 only: a same-request fallback target (i > 0) never
         // needs a summary generated for it -- see the injection-site
-        // comment above. recordSessionModelUsage above stays
+        // comment above. The row recorded above stays
         // unconditional regardless of i: it must reflect whichever
         // model actually served THIS response, since the next
         // request's i === 0 comparison depends on that being
@@ -739,14 +745,6 @@ export async function executeTargetAttempt(
             handleSingleModel: deps.handleSingleModelWithTimeout,
           });
         }
-
-        recordSessionModelUsage(
-          handoffSessionId,
-          deps.combo.name,
-          modelStr,
-          provider,
-          target.connectionId ?? undefined
-        );
       }
       // Context-relay intentionally splits responsibilities:
       // combo.ts decides whether a successful turn should generate a handoff,

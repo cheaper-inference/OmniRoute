@@ -2001,7 +2001,7 @@ The three uses:
 
 - **Hotfix**: a commit that cannot wait for a batch.
 - **Sync-back landing**: the `main → release/vX+1` merge commit, pushed as the merge commit it
-  already is (see AGENTS.md → "Sync-back landings are fast-forward, never squash").
+  already is (see AGENTS.md → "Sync-back landings are merge commits, never squash").
 - **Base repair**: a fix to a red base that the maintainer lands directly instead of through a
   batch.
 
