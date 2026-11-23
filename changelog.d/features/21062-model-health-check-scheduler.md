@@ -1,0 +1,1 @@
+- **feat(providers):** Opt-in scheduled model health check per connection. Failing models are hidden and restored only when the scheduler hid them itself; interval set by `MODEL_HEALTH_CHECK_INTERVAL_HOURS` (default 12). ([#21062](https://github.com/cheaper-inference/OmniRoute/pull/21062) — thanks @Rahulsharma0810)
