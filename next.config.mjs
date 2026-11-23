@@ -11,6 +11,10 @@ import {
   resolveDashboardEmbedMode,
 } from "./scripts/build/dashboardEmbed.mjs";
 import { shouldBuildStandalone } from "./scripts/build/backendOnlyPages.mjs";
+import {
+  filterKnownInfrastructureWarnings,
+  isNextIntlExtractorDynamicImportWarning,
+} from "./scripts/build/knownBuildWarnings.mjs";
 
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 const distDir = process.env.NEXT_DIST_DIR || ".build/next";
@@ -60,45 +64,6 @@ const securityHeaders = [
     value: "max-age=63072000; includeSubDomains; preload",
   },
 ];
-
-function isNextIntlExtractorDynamicImportWarning(warning) {
-  const message = typeof warning === "string" ? warning : warning?.message || "";
-  const resource = warning?.module?.resource || warning?.file || "";
-  const target = "next-intl/dist/esm/production/extractor/format/index.js";
-  return (
-    resource.includes(target) &&
-    (message.includes("import(t)") || message.includes("dependency is an expression"))
-  );
-}
-
-const IGNORED_INFRASTRUCTURE_BUILD_DEPENDENCY_MODULES = [
-  "/node_modules/fumadocs-mdx/dist/load-from-file-",
-  "/node_modules/next-intl/dist/esm/production/extractor/format/index.js",
-];
-
-function isKnownInfrastructureBuildDependencyWarning(args) {
-  const message = args
-    .filter((value) => typeof value === "string")
-    .join(" ")
-    .replaceAll("\\", "/");
-  return (
-    message.includes("webpack.FileSystemInfo") &&
-    message.includes("for build dependencies failed at 'import(") &&
-    message.includes("incorrect cache invalidation") &&
-    IGNORED_INFRASTRUCTURE_BUILD_DEPENDENCY_MODULES.some((modulePath) =>
-      message.includes(modulePath)
-    )
-  );
-}
-
-function filterKnownInfrastructureWarnings(baseConsole) {
-  const filteredConsole = Object.create(baseConsole);
-  filteredConsole.warn = (...args) => {
-    if (isKnownInfrastructureBuildDependencyWarning(args)) return;
-    Reflect.apply(baseConsole.warn, baseConsole, args);
-  };
-  return filteredConsole;
-}
 
 const isMinimalBuild = process.env.OMNIROUTE_BUILD_PROFILE === "minimal";
 const dashboardEmbedMode = resolveDashboardEmbedMode(process.env);
@@ -228,6 +193,14 @@ const nextConfig = {
     "pino-abstract-transport",
     "better-sqlite3",
     "sql.js",
+    // tiktoken's node build reads tiktoken_bg.wasm via __dirname-relative
+    // fs.readFileSync at import time. When bundled (webpack or Turbopack), the
+    // wasm asset is not traced into the server chunk / the ESM entry's module
+    // graph omits the runtime asset, and page-data collection for any route
+    // importing the vendored ChatGPT Web tokenizer (e.g. /api/providers) fails
+    // with "Missing tiktoken_bg.wasm". Externalizing keeps Node's CommonJS
+    // require at runtime, where node_modules/tiktoken/tiktoken_bg.wasm
+    // resolves normally.
     "tiktoken",
     "sqlite-vec",
     "node-machine-id",
@@ -237,6 +210,10 @@ const nextConfig = {
     "jsdom",
     "@ngrok/ngrok",
     "@huggingface/transformers",
+    // copilot-m365-web.ts imports 'ws' as a client-side WebSocket. When bundled,
+    // ws cannot resolve its 'bufferutil' native addon (frame masking) and throws
+    // TypeError: b.mask is not a function on the first outgoing frame, causing
+    // every chat request to time out at the stream-readiness watchdog. (#6062)
     "ws",
     "bufferutil",
     "utf-8-validate",
@@ -329,7 +306,10 @@ const nextConfig = {
     if (isMinimalBuild) {
       const replacements = [
         [/^@\/mitm\/cert\/install$/, join(projectRoot, "src/mitm/cert/install.stub.ts")],
-        [/^@\/lib\/zed-oauth\/keychain-reader$/, join(projectRoot, "src/lib/zed-oauth/keychain-reader.stub.ts")],
+        [
+          /^@\/lib\/zed-oauth\/keychain-reader$/,
+          join(projectRoot, "src/lib/zed-oauth/keychain-reader.stub.ts"),
+        ],
         [/^@\/lib\/cloudSync$/, join(projectRoot, "src/lib/cloudSync.stub.ts")],
         [
           /^@\/lib\/services\/installers\/ninerouter$/,
