@@ -95,6 +95,12 @@ export function buildPluginContext(opts = {}) {
   };
 }
 
+// Startup entry (#21056): `--version`/`-v` stays fast and never imports plugin code.
+export async function loadCliPlugins(program, argv = process.argv, env = process.env) {
+  if (argv.slice(2).some((a) => a === "--version" || a === "-v")) return 0;
+  return loadPlugins(program, { baseUrl: env.OMNIROUTE_BASE_URL, apiKey: env.OMNIROUTE_API_KEY });
+}
+
 export async function loadPlugins(program, ctx = {}) {
   const plugins = await discoverPlugins();
   for (const p of plugins) {
