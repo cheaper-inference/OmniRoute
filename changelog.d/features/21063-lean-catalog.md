@@ -1,0 +1,1 @@
+- **feat(api):** Opt-in `leanCatalog` setting that trims `/v1/models`: hides `auto/*`, `no-think/*` and effort-suffix ids and lists each model once under its canonical provider prefix. Hidden ids still route when sent explicitly. ([#21063](https://github.com/cheaper-inference/OmniRoute/pull/21063) — thanks @Rahulsharma0810)
