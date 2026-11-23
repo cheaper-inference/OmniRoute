@@ -15,6 +15,9 @@ import {
   getAccessToken,
   getConnectionRefreshMutexStatus,
   setRefreshMutexMaxMsForTest,
+  _resetCasGuardStats,
+  getCasGuardStats,
+  runWithCasGuard,
 } from "../../open-sse/services/tokenRefresh.ts";
 import {
   serializeRefresh,
@@ -142,5 +145,94 @@ test("#14970 hung lane refresh releases the rotation-group lane for queued sibli
     setRefreshLaneMaxMsForTest(null);
     if (prevSpacing === undefined) delete process.env.CODEX_REFRESH_SPACING_MS;
     else process.env.CODEX_REFRESH_SPACING_MS = prevSpacing;
+  }
+});
+
+test("late OAuth success after the rotation-lane timeout persists once", async () => {
+  setRefreshLaneMaxMsForTest(75);
+  const previousSpacing = process.env.CODEX_REFRESH_SPACING_MS;
+  process.env.CODEX_REFRESH_SPACING_MS = "0";
+  let resolveFetch!: (response: Response) => void;
+  const delayedFetch = () => new Promise<Response>((resolve) => (resolveFetch = resolve));
+  const persisted: unknown[] = [];
+
+  try {
+    await withFetch(delayedFetch, async () => {
+      const result = await getAccessToken(
+        "claude",
+        { refreshToken: `late-${Date.now()}` },
+        silentLog,
+        null,
+        async (tokens) => {
+          persisted.push(tokens);
+        }
+      );
+
+      assert.equal(result, null, "the timed-out caller still receives refresh failure");
+      assert.equal(persisted.length, 0, "persistence waits for the delayed OAuth response");
+
+      resolveFetch(await okTokenFetch());
+      for (let attempt = 0; attempt < 100 && persisted.length === 0; attempt++) {
+        await new Promise((resolve) => setTimeout(resolve, 5));
+      }
+
+      assert.equal(persisted.length, 1, "the late token result is persisted exactly once");
+      assert.equal((persisted[0] as { refreshToken?: string }).refreshToken, "R1");
+    });
+  } finally {
+    setRefreshLaneMaxMsForTest(null);
+    if (previousSpacing === undefined) delete process.env.CODEX_REFRESH_SPACING_MS;
+    else process.env.CODEX_REFRESH_SPACING_MS = previousSpacing;
+  }
+});
+
+test("late OAuth success skips persistence when the CAS guard sees a newer rotation", async () => {
+  setRefreshLaneMaxMsForTest(75);
+  const previousSpacing = process.env.CODEX_REFRESH_SPACING_MS;
+  process.env.CODEX_REFRESH_SPACING_MS = "0";
+  let resolveFetch!: (response: Response) => void;
+  const delayedFetch = () => new Promise<Response>((resolve) => (resolveFetch = resolve));
+  const persisted: unknown[] = [];
+  const refreshToken = `late-guard-${Date.now()}`;
+  _resetCasGuardStats();
+
+  try {
+    await withFetch(delayedFetch, async () => {
+      const result = await runWithCasGuard(
+        { expectedRefreshToken: refreshToken, reread: async () => "R2" },
+        () =>
+          getAccessToken(
+            "claude",
+            { refreshToken },
+            silentLog,
+            null,
+            async (tokens) => {
+              persisted.push(tokens);
+            }
+          )
+      );
+
+      assert.equal(result, null, "the timed-out caller still receives refresh failure");
+      resolveFetch(await okTokenFetch());
+      for (let attempt = 0; attempt < 100 && getCasGuardStats().skipped === 0; attempt++) {
+        await new Promise((resolve) => setTimeout(resolve, 5));
+      }
+
+      assert.deepEqual(
+        persisted,
+        [],
+        "a stale late result must not overwrite newer credentials"
+      );
+      assert.equal(
+        getCasGuardStats().skipped,
+        1,
+        "the late persist must run through the CAS guard"
+      );
+    });
+  } finally {
+    setRefreshLaneMaxMsForTest(null);
+    _resetCasGuardStats();
+    if (previousSpacing === undefined) delete process.env.CODEX_REFRESH_SPACING_MS;
+    else process.env.CODEX_REFRESH_SPACING_MS = previousSpacing;
   }
 });

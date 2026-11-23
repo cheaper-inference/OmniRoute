@@ -111,7 +111,8 @@ export function rotationGroupFor(provider: string): string | null {
 export async function serializeRefresh<T>(
   provider: string,
   fn: () => Promise<T>,
-  log?: { warn?: (...args: unknown[]) => void; error?: (...args: unknown[]) => void } | null
+  log?: { warn?: (...args: unknown[]) => void; error?: (...args: unknown[]) => void } | null,
+  onLateResult?: (result: T) => Promise<unknown> | unknown
 ): Promise<T> {
   const group = rotationGroupFor(provider);
   if (!group) return fn();
@@ -137,11 +138,19 @@ export async function serializeRefresh<T>(
   // forever on an unresponsive upstream. Promise.race keeps fn()'s late
   // rejection handled while the lane releases for queued siblings.
   let laneTimer: ReturnType<typeof setTimeout> | null = null;
+  let timedOut = false;
   try {
+    const work = heldGroups.run(new Set([...(held ?? []), group]), fn);
+    if (onLateResult) {
+      void work
+        .then((result) => (timedOut ? onLateResult(result) : undefined))
+        .catch(() => {});
+    }
     return (await Promise.race([
-      heldGroups.run(new Set([...(held ?? []), group]), fn),
+      work,
       new Promise<null>((resolve) => {
         laneTimer = setTimeout(() => {
+          timedOut = true;
           log?.error?.(
             "TOKEN_REFRESH",
             `Refresh for ${provider} exceeded ${refreshLaneMaxMs}ms holding the "${group}" rotation lane — releasing the lane for queued siblings (upstream fetch may still be hanging)`

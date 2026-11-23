@@ -482,6 +482,33 @@ test("checkConnection uses the latest stored refresh token instead of a stale sw
   );
 });
 
+test("conditional refresh write preserves a newer concurrent credential rotation", async () => {
+  await resetStorage();
+  const connection = await providersDb.createProviderConnection({
+    provider: "claude",
+    authType: "oauth",
+    name: "Concurrent refresh account",
+    accessToken: "access-old",
+    refreshToken: "refresh-old",
+    isActive: true,
+  });
+
+  await providersDb.updateProviderConnection((connection as any).id, {
+    accessToken: "access-concurrent",
+    refreshToken: "refresh-concurrent",
+  });
+  const staleWrite = await providersDb.updateProviderConnection(
+    (connection as any).id,
+    { accessToken: "access-late", refreshToken: "refresh-late" },
+    { expectedRefreshToken: "refresh-old" }
+  );
+
+  const updated = await providersDb.getProviderConnectionById((connection as any).id);
+  assert.equal(staleWrite, null, "the CAS write reports that its expected token was stale");
+  assert.equal(updated?.accessToken, "access-concurrent");
+  assert.equal(updated?.refreshToken, "refresh-concurrent");
+});
+
 test("checkConnection skips interval refresh when token expiry is known and still far away", async () => {
   await resetStorage();
 

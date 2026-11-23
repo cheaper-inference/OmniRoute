@@ -1035,60 +1035,73 @@ export async function checkConnection(conn: any) {
   let persistedResult: RefreshResultShape | null = null;
   let result: RefreshResultShape | null;
   try {
-    result = await tokenRefresh.getAccessToken(
-      conn.provider,
-      credentials,
-      healthCheckLog,
-      proxyConfig,
-      async (refreshResult: RefreshResultShape) => {
-        const now = new Date().toISOString();
-        const updateData: ConnectionUpdate = {
-          accessToken: refreshResult.accessToken,
-          lastHealthCheckAt: now,
-          ...(await getRefreshRecoveryUpdate(conn.id)),
-          expiredRetryCount: null,
-          expiredRetryAt: null,
-        };
-        if (refreshResult.refreshToken) {
-          updateData.refreshToken = refreshResult.refreshToken;
-        }
-        if (refreshResult.expiresAt) {
-          updateData.expiresAt = refreshResult.expiresAt;
-          updateData.tokenExpiresAt = refreshResult.expiresAt;
-        } else if (refreshResult.expiresIn) {
-          const expiresAt = new Date(Date.now() + refreshResult.expiresIn * 1000).toISOString();
-          updateData.expiresAt = expiresAt;
-          updateData.tokenExpiresAt = expiresAt;
-        } else if (refreshResult.accessToken && refreshResult.expiresAt === null) {
-          updateData.expiresAt = null;
-          updateData.tokenExpiresAt = null;
-        }
-        // Merge new providerSpecificData and ALWAYS clear the refresh circuit
-        // breaker streak on a successful refresh.
-        const mergedProviderData = {
-          ...(conn.providerSpecificData || {}),
-          ...(refreshResult.providerSpecificData || {}),
-        };
-        const clearedProviderData = clearRefreshCircuit(mergedProviderData);
-        if (clearedProviderData !== undefined) {
-          updateData.providerSpecificData = clearedProviderData;
-        } else if (refreshResult.providerSpecificData) {
-          updateData.providerSpecificData = mergedProviderData;
-        }
-        try {
-          await updateProviderConnection(conn.id, updateData);
-        } catch (dbErr) {
-          // DB write failed after successful refresh - log but do not throw.
-          // The outer catch would misclassify this as a network error.
-          logWarn(
-            `${LOG_PREFIX} ~ ${conn.provider}/${getConnectionLogLabel(conn)} DB write failed after successful refresh` +
-              ` (${dbErr instanceof Error ? dbErr.message : String(dbErr)}); token not persisted`
-          );
-          return;
-        }
-        // Mark as persisted AFTER the DB write succeeds.
-        persistedResult = refreshResult;
-      }
+    result = await tokenRefresh.runWithCasGuard(
+      {
+        expectedRefreshToken: attemptedRefreshToken ?? null,
+        reread: async () => {
+          const current = await getProviderConnectionById(conn.id);
+          return current?.refreshToken ?? null;
+        },
+      },
+      () =>
+        tokenRefresh.getAccessToken(
+          conn.provider,
+          credentials,
+          healthCheckLog,
+          proxyConfig,
+          async (refreshResult: RefreshResultShape) => {
+            const now = new Date().toISOString();
+            const updateData: ConnectionUpdate = {
+              accessToken: refreshResult.accessToken,
+              lastHealthCheckAt: now,
+              ...(await getRefreshRecoveryUpdate(conn.id)),
+              expiredRetryCount: null,
+              expiredRetryAt: null,
+            };
+            if (refreshResult.refreshToken) {
+              updateData.refreshToken = refreshResult.refreshToken;
+            }
+            if (refreshResult.expiresAt) {
+              updateData.expiresAt = refreshResult.expiresAt;
+              updateData.tokenExpiresAt = refreshResult.expiresAt;
+            } else if (refreshResult.expiresIn) {
+              const expiresAt = new Date(Date.now() + refreshResult.expiresIn * 1000).toISOString();
+              updateData.expiresAt = expiresAt;
+              updateData.tokenExpiresAt = expiresAt;
+            } else if (refreshResult.accessToken && refreshResult.expiresAt === null) {
+              updateData.expiresAt = null;
+              updateData.tokenExpiresAt = null;
+            }
+            // Merge new providerSpecificData and ALWAYS clear the refresh circuit
+            // breaker streak on a successful refresh.
+            const mergedProviderData = {
+              ...(conn.providerSpecificData || {}),
+              ...(refreshResult.providerSpecificData || {}),
+            };
+            const clearedProviderData = clearRefreshCircuit(mergedProviderData);
+            if (clearedProviderData !== undefined) {
+              updateData.providerSpecificData = clearedProviderData;
+            } else if (refreshResult.providerSpecificData) {
+              updateData.providerSpecificData = mergedProviderData;
+            }
+            try {
+              const persistedConnection = await updateProviderConnection(conn.id, updateData, {
+                expectedRefreshToken: attemptedRefreshToken ?? null,
+              });
+              if (!persistedConnection) return;
+            } catch (dbErr) {
+              // DB write failed after successful refresh - log but do not throw.
+              // The outer catch would misclassify this as a network error.
+              logWarn(
+                `${LOG_PREFIX} ~ ${conn.provider}/${getConnectionLogLabel(conn)} DB write failed after successful refresh` +
+                  ` (${dbErr instanceof Error ? dbErr.message : String(dbErr)}); token not persisted`
+              );
+              return;
+            }
+            // Mark as persisted AFTER the DB write succeeds.
+            persistedResult = refreshResult;
+          }
+        )
     );
   } catch (err) {
     // If onPersist already wrote a successful result, do not overwrite it.
@@ -1258,7 +1271,10 @@ export async function checkConnection(conn: any) {
         };
       }
 
-      await updateProviderConnection(conn.id, updateData);
+      const persistedConnection = await updateProviderConnection(conn.id, updateData, {
+        expectedRefreshToken: attemptedRefreshToken ?? null,
+      });
+      if (!persistedConnection) return;
     }
     log(`${LOG_PREFIX} ✓ ${conn.provider}/${getConnectionLogLabel(conn)} refreshed`);
 
