@@ -53,7 +53,7 @@ function explicitPort(raw: string): string | null {
 // Legacy config levels store a proxy as a URL string instead of a record. A
 // string that carries a proxy but cannot be read is an error, not a reason to
 // go direct.
-function fromUrl(raw: string): ResolvedProxy {
+export function parseProxyUrl(raw: string): ResolvedProxy {
   const trimmed = raw.trim();
   let url: URL;
   try {
@@ -84,7 +84,7 @@ function normalizeProxyValue(value: unknown): ResolvedProxy | null {
   if (value == null) return null;
   // An empty string is how a cleared legacy setting looks; it means "unset",
   // while a non-empty string that will not parse is a configuration error.
-  if (typeof value === "string") return value.trim() ? fromUrl(value) : null;
+  if (typeof value === "string") return value.trim() ? parseProxyUrl(value) : null;
   if (typeof value === "object" && !Array.isArray(value)) return value as ResolvedProxy;
   throw new Error("[ExecutorProxy] Invalid proxy config; refusing a direct connection");
 }

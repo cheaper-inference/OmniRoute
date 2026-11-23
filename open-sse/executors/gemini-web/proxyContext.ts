@@ -71,7 +71,8 @@ export async function openGeminiContext(
   try {
     context = await browser.newContext({ ...options, ...(proxy ? { proxy } : {}) });
   } catch (error) {
-    await bridge?.close();
+    // The context failure is the one the caller needs: a close error here would replace it.
+    await bridge?.close().catch(() => undefined);
     throw error;
   }
   if (bridge) {

@@ -5,6 +5,7 @@
 // deployment surface differs.
 import { randomUUID } from "crypto";
 import { getDbInstance } from "./core";
+import { parseProxyUrl } from "../../../open-sse/utils/executorProxy";
 import { backupDbFile } from "./backup";
 import type {
   JsonRecord,
@@ -1087,6 +1088,24 @@ type LegacyProxyRecord = {
  * caller cannot connect direct behind the operator's back.
  */
 function readLegacyProxyLevel(value: unknown, label: string): LegacyProxyRecord | null {
+  // A legacy level may hold a URL string rather than a record (the shape executorProxy already
+  // parses). Reading it here keeps a global proxy from shadowing the more specific one, and a
+  // string that cannot be parsed stays an error instead of a silent direct connection.
+  if (typeof value === "string") {
+    if (!value.trim()) return null;
+    const parsed = parseProxyUrl(value);
+    const host = String(parsed.host ?? "").trim();
+    if (!host) {
+      throw new Error(`${label} has no host; fix or remove it instead of connecting directly`);
+    }
+    return {
+      type: parsed.type ?? "http",
+      host,
+      port: parsed.port === undefined ? undefined : Number(parsed.port),
+      username: parsed.username ?? undefined,
+      password: parsed.password ?? undefined,
+    };
+  }
   if (!value || typeof value !== "object") return null;
   const record = value as {
     type?: string;

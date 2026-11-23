@@ -37,3 +37,15 @@ test("a global proxy stored as a URL string is resolved, not skipped", async () 
   assert.equal(resolved?.type, "socks5");
   assert.equal(String(resolved?.port), "1080");
 });
+
+test("a provider-level legacy string wins over a global proxy", async () => {
+  const db = core.getDbInstance();
+  db.prepare("INSERT OR REPLACE INTO key_value (namespace, key, value) VALUES ('proxyConfig', 'global', ?)")
+    .run(JSON.stringify({ type: "http", host: "10.9.9.9", port: 8080 }));
+  db.prepare("INSERT OR REPLACE INTO key_value (namespace, key, value) VALUES ('proxyConfig', 'providers', ?)")
+    .run(JSON.stringify({ acme: "socks5://alice:secret@10.0.0.8:1080" }));
+
+  const resolved = await proxies.resolveProxyForProvider("acme");
+
+  assert.equal(resolved?.host, "10.0.0.8", "the provider-level proxy must win over the global one");
+});
