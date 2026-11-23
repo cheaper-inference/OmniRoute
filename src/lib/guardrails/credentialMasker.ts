@@ -21,11 +21,37 @@ export interface CredentialRedactionResult {
   modified: boolean;
 }
 
-export function redactCredentials(text: string): CredentialRedactionResult {
+// Signed or encrypted fields and long base64 blobs must replay byte for byte. Only patterns with a
+// long distinctive prefix may rewrite them: the short-prefix ones (hf_, r8_, sk-, gh*_, npm_, AIza)
+// hit random base64url about once in 30 blobs of 8 KB and would break the signature.
+const OPAQUE_PATTERN_NAMES = new Set([
+  "private_key",
+  "jwt",
+  "aws_access_key",
+  "anthropic",
+  "anthropic_alt",
+  "openai_proj",
+  "stripe",
+  "sendgrid",
+  "slack",
+  "connection_string",
+]);
+const OPAQUE_FIELD_KEYS = new Set([
+  "signature",
+  "thoughtSignature",
+  "thought_signature",
+  "encrypted_content",
+  "reasoning_encrypted_content",
+  "encrypted_index",
+]);
+const BASE64_BLOB = /^[A-Za-z0-9+/_-]{256,}={0,2}$/;
+
+export function redactCredentials(text: string, opaque = false): CredentialRedactionResult {
   if (typeof text !== "string" || !text) return { text, detections: [], modified: false };
   let result = text;
   const detections: Array<{ type: string; count: number }> = [];
   for (const p of CREDENTIAL_PATTERNS) {
+    if (opaque && !OPAQUE_PATTERN_NAMES.has(p.name)) continue;
     p.regex.lastIndex = 0;
     const matches = result.match(p.regex);
     if (matches && matches.length > 0) {
@@ -51,13 +77,14 @@ function redactHeaderValue(value: string): string {
 function walkValue(
   value: unknown,
   detections: Array<{ type: string; count: number }>,
-  seen = new WeakSet<object>()
+  seen = new WeakSet<object>(),
+  opaque = false
 ): { modified: boolean; value: unknown } {
   if (typeof value === "string") {
     // #13462: Skip redaction for base64-encoded image data URLs — applying
     // credential regexes to binary transport data corrupts valid base64.
     if (isImageDataUrl(value)) return { modified: false, value };
-    const r = redactCredentials(value);
+    const r = redactCredentials(value, opaque || BASE64_BLOB.test(value));
     if (r.detections.length) detections.push(...r.detections);
     return { modified: r.modified, value: r.text };
   }
@@ -86,7 +113,7 @@ function walkValue(
       const redactedHeader = structuredHeader ? redactHeaderValue(entryValue) : null;
       const r = structuredHeader
         ? { modified: redactedHeader !== entryValue, value: redactedHeader }
-        : walkValue(entryValue, detections, seen);
+        : walkValue(entryValue, detections, seen, OPAQUE_FIELD_KEYS.has(key));
       if (structuredHeader && r.modified) detections.push({ type: "auth_header", count: 1 });
       if (r.modified && !next) {
         next = Object.create(prototype) as JsonRecord;

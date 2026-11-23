@@ -25,7 +25,7 @@ test("ollama-local exposes a static no-auth embedding registry entry", () => {
   assert.ok(provider);
   assert.equal(provider.baseUrl, "http://localhost:11434/v1/embeddings");
   assert.equal(provider.authType, "none");
-  assert.equal(provider.authHeader, "none");
+  assert.equal(provider.authHeader, "bearer");
   assert.deepEqual(
     provider.models.map((model) => model.id),
     ["embeddinggemma", "nomic-embed-text", "bge-m3"]

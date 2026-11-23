@@ -1,0 +1,1 @@
+- **fix(sse):** disable Claude thinking when an OpenAI request forces a tool call. ([#20204](https://github.com/cheaper-inference/OmniRoute/pull/20204))
