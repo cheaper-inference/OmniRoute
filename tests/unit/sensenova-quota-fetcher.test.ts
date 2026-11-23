@@ -1016,3 +1016,44 @@ test("the usage adapter reports both windows with their own counters", () => {
   assert.equal(usage.quotas["7d"].total, 1200000);
   assert.equal(usage.quotas["7d"].used, 600000);
 });
+
+test("a 429 on the post-refresh retry is cached as transient, not as an auth failure", async () => {
+  const connectionId = `sn-transient-${Date.now()}`;
+  invalidateSensenovaQuotaCache(connectionId);
+  let poolCalls = 0;
+
+  globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+    const url = String(input);
+    if (url === SENSENOVA_TOKEN_URL) {
+      return jsonResponse({ access_token: "second-access", expires_in: 10800 });
+    }
+    poolCalls += 1;
+    const auth = new Headers(init?.headers).get("Authorization");
+    return auth === "Bearer second-access"
+      ? jsonResponse({ message: "slow down" }, 429)
+      : jsonResponse({ code: 16, message: "Invalid access token" }, 401);
+  }) as typeof fetch;
+
+  const connection = {
+    providerSpecificData: {
+      [SENSENOVA_PSD_ACCESS_TOKEN]: "revoked-access",
+      [SENSENOVA_PSD_ACCESS_EXPIRES_AT]: Date.now() + 3_600_000,
+      [SENSENOVA_PSD_REFRESH_TOKEN]: "stored-refresh",
+    },
+  };
+
+  assert.equal(await fetchSensenovaQuota(connectionId, connection), null);
+  assert.equal(poolCalls, 2);
+
+  // Ten seconds on, a transient failure still holds the next read back (30s window). An auth
+  // failure would have expired after 5s and let this call reach the console again.
+  const realNow = Date.now;
+  const base = realNow();
+  Date.now = () => base + 10_000;
+  try {
+    assert.equal(await fetchSensenovaQuota(connectionId, connection), null);
+    assert.equal(poolCalls, 2, "a 429 must not be re-read inside the transient window");
+  } finally {
+    Date.now = realNow;
+  }
+});

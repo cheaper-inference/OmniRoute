@@ -102,8 +102,9 @@ const inflightRefresh = new Map<
   { refreshToken: string; promise: Promise<SensenovaSession | null> }
 >();
 /** Newest refresh token per connection, kept in memory because a rotation is not
- * always writable to the row (locked database, read-only replica). Bounded like
- * the quota cache so a long-lived process does not retain every credential. */
+ * always writable to the row (locked database, read-only replica). One entry per
+ * connection and deliberately never evicted: dropping a rotation that exists only
+ * here would strand that connection until someone re-enters the credential. */
 const latestRefreshTokens = new Map<string, string>();
 /** Bumped whenever a connection's credential is invalidated. A fetch or exchange
  * that started before the bump must not publish its result: the credential it
@@ -112,7 +113,8 @@ const invalidationSeq = new Map<string, number>();
 /** Access tokens this process obtained but could not write to the row (locked or
  * read-only database). Kept apart from the connection object on purpose: the CAS
  * fence compares that object, so writing these into it would make every later
- * attempt look stale. */
+ * attempt look stale. Same policy as the refresh tokens: one entry per connection,
+ * never evicted, because it may be the only copy. */
 const memoryAccessTokens = new Map<string, { token: string; expiresAt: number }>();
 
 /** Bounded, least-recently-written eviction shared by the process-local maps. */
@@ -535,9 +537,11 @@ async function readPoolUsagePayload(
   if (!retried) return { payload: null, reason: "transient" };
 
   const second = await requestPoolUsage(connectionId, retried.accessToken);
-  return second.status === "ok"
-    ? { payload: second.payload, reason: "transient" }
-    : { payload: null, reason: "auth" };
+  if (second.status === "ok") return { payload: second.payload, reason: "transient" };
+  // Only a second unauthorized means the credential is bad. A 429 or a 5xx here is the console
+  // struggling: labelling it "auth" would cache it under the short auth window and report the
+  // wrong cause on the next pass.
+  return { payload: null, reason: second.status === "unauthorized" ? "auth" : "transient" };
 }
 
 export async function fetchSensenovaQuota(
