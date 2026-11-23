@@ -36,6 +36,53 @@ test("cache-stable compaction reserves translator output headroom before the fin
   assert.equal(requiredOutputHeadroom(body, "openai", "openai"), 0);
 });
 
+test("cacheable Claude translation reserves fitted manual thinking plus response output", () => {
+  const body = {
+    messages: [{ role: "user", content: "history" }],
+    max_tokens: 32_768,
+    thinking: { type: "enabled", budget_tokens: 16_384 },
+  };
+  const headroom = requiredOutputHeadroom(body, "openai", "claude", "claude-sonnet-4-5", "claude");
+  assert.equal(headroom, 49_152);
+  assert.equal(162_000 >= 200_000 - headroom, true);
+  assert.equal(requiredOutputHeadroom({ ...body, thinking: undefined }, "openai", "claude"), 0);
+  assert.equal(
+    requiredOutputHeadroom(
+      { ...body, max_tokens: undefined },
+      "openai",
+      "claude",
+      "claude-sonnet-4-5",
+      "claude"
+    ),
+    64_000
+  );
+});
+
+test("forced Claude tools do not reserve suppressed thinking output", () => {
+  const body = {
+    messages: [{ role: "user", content: "history" }],
+    max_tokens: 32_768,
+    thinking: { type: "enabled", budget_tokens: 16_384 },
+  };
+  for (const tool_choice of [
+    "required",
+    { type: "function", function: { name: "inspect" } },
+    { type: "allowed_tools", allowed_tools: { mode: "required", tools: [] } },
+  ]) {
+    assert.equal(
+      requiredOutputHeadroom(
+        { ...body, tool_choice },
+        "openai",
+        "claude",
+        "claude-sonnet-4-5",
+        "claude"
+      ),
+      0,
+      "the final gate caps explicit response tokens; the forced tool suppresses thinking"
+    );
+  }
+});
+
 test("Anthropic Messages clients get the compactable 'prompt is too long' message", () => {
   const result = enforceFinalOutputTokenBudget({ ...base, sourceFormat: "claude" });
 

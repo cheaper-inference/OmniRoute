@@ -2172,7 +2172,9 @@ async function handleChatCoreInner({
   // as the final budget gate before deciding whether last-resort is necessary.
   const requiredHeadroom =
     protectCachedPrefix && !contextWindowChecksDisabled && body
-      ? requiredOutputHeadroom(body as Record<string, unknown>, sourceFormat, targetFormat)
+      ? requiredOutputHeadroom(
+          body as Record<string, unknown>, sourceFormat, targetFormat, effectiveModel, provider
+        )
       : 0;
   const lastResortCeiling = Math.min(
     effectiveCompactionCeiling,

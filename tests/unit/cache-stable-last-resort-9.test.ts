@@ -158,6 +158,33 @@ test("#9: oversized leading system/developer instructions are mandatory", () => 
   assert.strictEqual(impossible.body, body);
 });
 
+test("#9: mid-history developer updates remain mandatory when compacting cached history", () => {
+  const developer = { role: "developer", content: "Keep the current policy" };
+  const body = {
+    messages: [
+      { role: "user", content: "first request" },
+      { role: "assistant", content: "old ".repeat(9_000) },
+      developer,
+      { role: "user", content: "another old request" },
+      { role: "assistant", content: "old answer ".repeat(9_000) },
+      { role: "user", content: "current request" },
+    ],
+  };
+  const result = compactCachedContext(body, {
+    maxTokens: 8_000,
+    fits: (candidate) => estimateTokens(candidate.messages) <= 8_000,
+  });
+  assert.equal(result.compressed, true);
+  assert.ok(result.body.messages.includes(developer), "mid-history policy must not be omitted");
+  assert.equal(result.stats.omitted, body.messages.length - result.body.messages.length);
+  const impossible = compactCachedContext(body, {
+    maxTokens: 8_000,
+    fits: (candidate) => estimateTokens(candidate.messages) < 5,
+  });
+  assert.equal(impossible.compressed, false);
+  assert.strictEqual(impossible.body, body);
+});
+
 test("#9: a user request pinned in the prefix keeps its complete subsequent tool cycles", () => {
   const body = {
     messages: [

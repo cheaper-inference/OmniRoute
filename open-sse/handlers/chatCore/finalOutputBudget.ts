@@ -13,20 +13,60 @@
 
 import { DEFAULT_MAX_TOKENS } from "../../config/constants.ts";
 import { FORMATS } from "../../translator/formats.ts";
+import { adjustMaxTokens } from "../../translator/helpers/maxTokensHelper.ts";
+import { fitThinkingToMaxTokens } from "../../translator/request/openai-to-claude/thinkingBudget.ts";
+import { claudeThinkingFromOpenAIRequest } from "../../translator/request/openai-to-claude/thinkingConfig.ts";
 import { enforceOutputTokenBudget } from "./outputTokenBudget.ts";
 
-/** Headroom required by the final gate when the Claude translator supplies its default. */
+function forcesClaudeToolChoice(choice: unknown): boolean {
+  if (choice === "required") return true;
+  if (!choice || typeof choice !== "object" || Array.isArray(choice)) return false;
+  const record = choice as Record<string, unknown>;
+  if (record.type === "allowed_tools") {
+    const spec =
+      record.allowed_tools && typeof record.allowed_tools === "object"
+        ? (record.allowed_tools as Record<string, unknown>)
+        : record;
+    return spec.mode === "required";
+  }
+  if (record.type === "required" || record.type === "any") return true;
+  if (record.type === "tool") return Boolean(record.name);
+  if (record.type === "function")
+    return Boolean((record.function as Record<string, unknown> | undefined)?.name);
+  return !record.type && Boolean((record.function as Record<string, unknown> | undefined)?.name);
+}
+
+/** Reserve output tokens that the OpenAI-to-Claude translator will request after the final gate. */
 export function requiredOutputHeadroom(
   body: Record<string, unknown>,
   sourceFormat: string,
-  targetFormat: string
+  targetFormat: string,
+  model?: string,
+  provider?: string
 ): number {
   if (targetFormat !== FORMATS.CLAUDE || sourceFormat === FORMATS.CLAUDE) return 0;
   const hasExplicitLimit = ["max_tokens", "max_completion_tokens"].some((field) => {
     const value = body[field];
     return typeof value === "number" && Number.isFinite(value) && value > 0;
   });
-  return hasExplicitLimit ? 0 : DEFAULT_MAX_TOKENS;
+  if (!model || !provider || ["kimi-coding", "kimi-coding-apikey"].includes(provider)) {
+    return hasExplicitLimit ? 0 : DEFAULT_MAX_TOKENS;
+  }
+  const thinking = forcesClaudeToolChoice(body.tool_choice)
+    ? undefined
+    : claudeThinkingFromOpenAIRequest(body, model).thinking;
+  if (!thinking || Number(thinking.budget_tokens) <= 0) {
+    return hasExplicitLimit ? 0 : DEFAULT_MAX_TOKENS;
+  }
+  // The final gate caps an explicit response limit to available room; the
+  // translator can then add a fitted thinking budget on top of that limit.
+  const translatedMaxTokens = fitThinkingToMaxTokens(
+    model,
+    adjustMaxTokens(body, { honorExplicitCap: true }),
+    thinking,
+    provider
+  ).maxTokens;
+  return hasExplicitLimit ? translatedMaxTokens : Math.max(DEFAULT_MAX_TOKENS, translatedMaxTokens);
 }
 
 type LoggerLike =

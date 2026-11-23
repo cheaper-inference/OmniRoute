@@ -724,9 +724,24 @@ export function compactCachedContext(
   const mandatoryUnit =
     anchor < prefixEnd ? 0 : units.findIndex((unit) => unit.start <= anchor && anchor < unit.end);
   if (mandatoryUnit < 0) return unchanged;
+  // Instruction updates outside the leading run must survive every middle omission.
+  // Keep each at its original position relative to the retained suffix, so the
+  // latest policy is never silently replaced by an older conversation turn.
+  const mandatoryInstructions: number[] = [];
+  for (let i = prefixEnd; i < units[mandatoryUnit].start; i++) {
+    if (messages[i].role === "system" || messages[i].role === "developer") {
+      mandatoryInstructions.push(i);
+    }
+  }
   const candidate = (from: number): Record<string, unknown> => ({
     ...body,
-    messages: [...messages.slice(0, prefixEnd), ...messages.slice(units[from].start)],
+    messages: [
+      ...messages.slice(0, prefixEnd),
+      ...mandatoryInstructions
+        .filter((index) => index < units[from].start)
+        .map((index) => messages[index]),
+      ...messages.slice(units[from].start),
+    ],
   });
   if (!options.fits(candidate(mandatoryUnit))) return unchanged;
 
@@ -740,9 +755,9 @@ export function compactCachedContext(
     else low = mid + 1;
   }
   const keepFrom = low;
-  const omitted = units[keepFrom].start - prefixEnd;
-  if (omitted <= 0) return unchanged;
   const compacted = candidate(keepFrom);
+  const omitted = messages.length - (compacted.messages as CachedMessage[]).length;
+  if (omitted <= 0) return unchanged;
   const final = estimateTokens(compacted.messages);
   return {
     body: compacted,
