@@ -173,8 +173,6 @@ import { recordLocalCircuitRefusal } from "./localCircuitRefusal.ts";
  */
 export async function handleRoundRobinCombo({
   body,
-  // #10681: the caller owns the trace id; absent here means tracing is off
-  // for this invocation and every helper below becomes a no-op.
   invocationId,
   combo,
   handleSingleModel,
@@ -510,7 +508,6 @@ export async function handleRoundRobinCombo({
   // and the "Done with this model" path below), mirroring handleComboChat.
   const rrOutcomes: Array<ComboErrorEntry> = [];
 
-  // #10681: per-target decisions for the trace (no-op without an id).
   const trace = createRoundRobinTrace(invocationId);
   // #11134: operator-configurable shared attempt budget (clamped to the hard
   // cap). Defaults to MAX_GLOBAL_ATTEMPTS when unset.
