@@ -10,6 +10,10 @@ import {
   withEarlyStreamKeepalive,
   ANTHROPIC_PING_FRAME,
 } from "@omniroute/open-sse/utils/earlyStreamKeepalive";
+import {
+  withEarlyJsonKeepalive,
+  resolveJsonKeepaliveThresholdMs,
+} from "@omniroute/open-sse/utils/earlyJsonKeepalive";
 import { createStreamDeadlineSignal } from "@omniroute/open-sse/utils/streamDeadlineSignal";
 import { resolveKeepaliveThreshold } from "@omniroute/open-sse/utils/keepaliveThreshold";
 import { resolveStreamFlag } from "@omniroute/open-sse/utils/aiSdkCompat";
@@ -170,8 +174,8 @@ async function postHandler(request: any, context: any, preParsedBody: any = null
   // the response until the first useful upstream byte (ensureStreamReadiness), so keep
   // the connection warm with early keepalives during that gap — same wrapper used by
   // /v1/responses (#2544). Anthropic clients ignore SSE comments for their watchdog, so
-  // emit a real `event: ping` (ANTHROPIC_PING_FRAME). Non-streaming callers keep the
-  // verbatim path.
+  // emit a real `event: ping` (ANTHROPIC_PING_FRAME). Non-streaming callers get the
+  // JSON keepalive below.
   let body = preParsedBody;
   if (body == null) {
     try {
@@ -213,13 +217,15 @@ async function postHandler(request: any, context: any, preParsedBody: any = null
       })
     );
   }
+  // Non-streaming: a proxy with an idle-read timeout (Cloudflare 524 at ~100-120 s) cuts
+  // a slow answer before its first byte. Claude Code retries a failed stream this way.
+  const correlationId =
+    resolveIncomingCorrelationId(request.headers.get("x-correlation-id")) ?? generateRequestId();
   return applyHeaders(
-    await handleChat(
-      request,
-      null,
-      body,
-      resolveIncomingCorrelationId(request.headers.get("x-correlation-id")) ?? undefined
-    )
+    await withEarlyJsonKeepalive(handleChat(request, null, body, correlationId), {
+      thresholdMs: resolveJsonKeepaliveThresholdMs(),
+      extraHeaders: { "X-Correlation-Id": correlationId },
+    })
   );
 }
 
