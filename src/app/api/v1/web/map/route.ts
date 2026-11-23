@@ -2,7 +2,7 @@ import { z } from "zod";
 import { handleFirecrawlMap } from "@omniroute/open-sse/handlers/firecrawlMap.ts";
 import { errorResponse } from "@omniroute/open-sse/utils/error.ts";
 import { getProviderCredentialsWithQuotaPreflight } from "@/sse/services/auth";
-import { resolveClientApiKey } from "@/sse/services/clientApiKeyResolver";
+import { enforceClientApiRouteAuth } from "@/shared/utils/clientApiRouteAuth";
 import { enforceApiKeyPolicy } from "@/shared/utils/apiKeyPolicy";
 import {
   isKeyScopeBlockedCredentials,
@@ -10,7 +10,6 @@ import {
   resolveKeyConnectionScope,
   withoutKeyScopeBlocked,
 } from "@/sse/services/keyConnectionScope";
-import { isRequireApiKeyEnabled } from "@/shared/utils/featureFlags";
 import {
   validateBody,
   isValidationFailure,
@@ -63,11 +62,8 @@ export async function POST(request: Request) {
   if (isValidationFailure(validation))
     return errorResponse(400, formatValidationMessage(validation.error));
 
-  const { apiKey, valid: apiKeyValid } = await resolveClientApiKey(request);
-  if (isRequireApiKeyEnabled() && !apiKey) return errorResponse(401, "Authentication required");
-  if (isRequireApiKeyEnabled() && apiKey && !apiKeyValid) {
-    return errorResponse(401, "Invalid API key");
-  }
+  const authRejection = await enforceClientApiRouteAuth(request);
+  if (authRejection) return authRejection;
 
   const policy = await enforceApiKeyPolicy(request, "web-fetch");
   if (policy.rejection) return policy.rejection;

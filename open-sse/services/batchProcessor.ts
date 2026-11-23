@@ -16,6 +16,7 @@ import {
 } from "@/lib/db/batches";
 import { createFile, deleteFile, getFileContent, listFiles } from "@/lib/db/files";
 import { getApiKeyById } from "@/lib/db/apiKeys";
+import { getSsoShadowSecret, ssoOidForApiKeyId } from "@/lib/db/ssoIdentities";
 import { dispatch } from "@/lib/batches/dispatch";
 import type { SupportedBatchEndpoint } from "@/shared/constants/batchEndpoints";
 import { DEFAULT_BATCH_EXPIRATION_SECONDS } from "@/shared/constants/batch";
@@ -482,7 +483,25 @@ function isBatchCancelled(batchId: string): boolean {
 
 async function resolveApiKey(batch: BatchRecord): Promise<any> {
   const apiKeyRow = batch.apiKeyId ? await getApiKeyById(batch.apiKeyId) : null;
-  return resolveBatchApiKeyValue(batch, apiKeyRow);
+  const apiKey = resolveBatchApiKeyValue(batch, apiKeyRow);
+  if (apiKey || !batch.apiKeyId) return apiKey;
+  // `getApiKeyById` redacts SSO shadow-key secrets for safety: a batch owned by
+  // an SSO identity would otherwise dispatch every item with no credential
+  // (401 with REQUIRE_API_KEY on, anonymous otherwise — no group/budget
+  // policy). Resolve the shadow secret through the same lifecycle-checked
+  // path the policy layer uses; a deprovisioned user still resolves to null
+  // and her items fail closed. Never fall back to an operator/env key: that
+  // would silently attribute the user's batch to the deployment owner.
+  // Note: resolved once per batch, not per item — mid-batch deprovisioning
+  // takes effect on the next batch or restart.
+  const oid = ssoOidForApiKeyId(batch.apiKeyId);
+  if (!oid) {
+    console.warn(
+      `[batch] batch ${batch.id} owner key has no usable credential (redacted SSO secret or missing key)`
+    );
+    return null;
+  }
+  return getSsoShadowSecret(oid);
 }
 
 async function processSingleItemWithRetry(item: BatchRequestItem, apiKey: string) {

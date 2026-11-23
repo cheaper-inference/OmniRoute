@@ -106,6 +106,10 @@ import {
   hasContextLengthEnvOverride,
 } from "@omniroute/open-sse/services/contextManager";
 import { extractApiKey } from "@/sse/services/auth";
+import { getSsoShadowSecret } from "@/lib/db/ssoIdentities";
+import { AUTHZ_HEADER_AUTH_ID, AUTHZ_HEADER_AUTH_KIND } from "@/server/authz/headers";
+import { enforceClientApiRouteAuth } from "@/shared/utils/clientApiRouteAuth";
+import { errorResponse } from "@omniroute/open-sse/utils/error.ts";
 import type { ComboModelStep } from "@/lib/combos/steps";
 import {
   type CustomModelEntry,
@@ -237,11 +241,31 @@ function resolveCombosOnly(
  * rebuild starts only once the stale body has been flushed. Omitted by non-route
  * callers, which fall back to the cache module's own default.
  */
+async function resolveCatalogSsoRequest(request: Request): Promise<Request | Response> {
+  if (request.headers.get(AUTHZ_HEADER_AUTH_KIND) !== "sso_user") return request;
+  // Recheck the bearer and stamped identity before using the shadow key. The
+  // raw OIDC JWT has no API-key metadata and would expose an unfiltered list.
+  const authRejection = await enforceClientApiRouteAuth(request);
+  if (authRejection) return authRejection;
+  const oid = request.headers.get(AUTHZ_HEADER_AUTH_ID)?.trim();
+  const shadowSecret = oid ? getSsoShadowSecret(oid) : null;
+  if (!shadowSecret) return errorResponse(401, "Invalid API key");
+  const headers = new Headers(request.headers);
+  headers.set("authorization", `Bearer ${shadowSecret}`);
+  headers.delete("x-api-key");
+  headers.delete(AUTHZ_HEADER_AUTH_KIND);
+  headers.delete(AUTHZ_HEADER_AUTH_ID);
+  return new Request(request, { headers });
+}
+
 export async function getUnifiedModelsResponse(
   request: Request,
   corsHeaders: Record<string, string> = {},
   options: CatalogResponseOptions = {}
 ) {
+  const authorizedRequest = await resolveCatalogSsoRequest(request);
+  if (authorizedRequest instanceof Response) return authorizedRequest;
+  request = authorizedRequest;
   const diagnosticHeaders = getCatalogDiagnosticsHeaders({ request });
 
   // #6408 fast path: reject unauthorized callers first (auth state is per-request

@@ -3,13 +3,66 @@ import { recordApiKeyAuthTouch } from "@/lib/compliance/index";
 import { classifyIpScope, getClientIpFromRequest } from "@/lib/ipUtils";
 import { isFeatureFlagEnabled, isRequireApiKeyEnabled } from "@/shared/utils/featureFlags";
 import { extractApiKeyCandidates } from "@/sse/services/clientApiKeyResolver.ts";
-import { isEntraSsoEnabled } from "../entra/config";
-import { evaluateSsoAuth, looksLikeEntraJwt } from "../entra/evaluate";
+import { decodeJwt } from "jose";
+import { getEntraConfig, isEntraSsoEnabled, entraIssuer } from "../entra/config";
+import { evaluateSsoAuth } from "../entra/evaluate";
+import { evaluateOidcInferenceAuth, looksLikeOidcJwt } from "../oidcInference/evaluate";
+import { getOidcInferenceConfig } from "../oidcInference/config";
 import type { AuthOutcome, PolicyContext, RoutePolicy } from "../context";
 import { allow, reject } from "../context";
 import { isViaProxyRequest, requestPeerAddress } from "../peerContext";
 
 const HANDSHAKE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
+
+/** The decoded issuer is a routing hint only; each evaluator verifies signature and claims. */
+function claimedJwtIssuer(token: string): string | null {
+  try {
+    const issuer = decodeJwt(token).iss;
+    return typeof issuer === "string" ? issuer : null;
+  } catch {
+    return null;
+  }
+}
+
+async function selectSsoEvaluator(token: string): Promise<"entra" | "oidc" | null> {
+  if (!looksLikeOidcJwt(token)) return null;
+  const claimedIssuer = claimedJwtIssuer(token);
+  if (!claimedIssuer) return null;
+
+  if (await isEntraSsoEnabled()) {
+    const config = await getEntraConfig();
+    if (claimedIssuer === entraIssuer(config.tenantId, config.authorityHost)) return "entra";
+  }
+
+  const oidc = await getOidcInferenceConfig();
+  if (oidc.enabled && oidc.issuer && oidc.audience && claimedIssuer === oidc.issuer) {
+    return "oidc";
+  }
+  return null;
+}
+
+async function evaluateSelectedSso(token: string): Promise<AuthOutcome | null> {
+  const evaluator = await selectSsoEvaluator(token);
+  if (evaluator === "entra") {
+    const verdict = await evaluateSsoAuth(token);
+    if (!verdict.ok) {
+      const failure = verdict as { status: number; code: string; message: string };
+      return reject(failure.status, failure.code, failure.message);
+    }
+    return allow({ kind: "sso_user", id: verdict.oid, label: verdict.upn || undefined });
+  }
+  if (evaluator === "oidc") {
+    const verdict = await evaluateOidcInferenceAuth(token);
+    if (!verdict.ok) {
+      const failure = verdict as { status: number; code: string; message: string };
+      return reject(failure.status, failure.code, failure.message);
+    }
+    // The subject id is the stable identity. Unicode display names cannot be
+    // represented as a ByteString HTTP header; omit the optional label instead.
+    return allow({ kind: "sso_user", id: verdict.oid });
+  }
+  return null;
+}
 
 function isWsHandshake(ctx: PolicyContext): boolean {
   if (ctx.classification.normalizedPath !== "/api/v1/ws") return false;
@@ -143,19 +196,11 @@ export const clientApiPolicy: RoutePolicy = {
     // into open access. The highest-precedence credential is the one SSO
     // inspects (Claude Code's apiKeyHelper sends the JWT as both Bearer and
     // x-api-key, so it is always first).
-    const primary = credentials[0];
-    if (looksLikeEntraJwt(primary) && (await isEntraSsoEnabled())) {
-      const verdict = await evaluateSsoAuth(primary);
-      if (!verdict.ok) {
-        const failure = verdict as { status: number; code: string; message: string };
-        return reject(failure.status, failure.code, failure.message);
-      }
-      return allow({
-        kind: "sso_user",
-        id: verdict.oid,
-        label: verdict.upn || undefined,
-      });
-    }
+    // A matching issuer claims the bearer: a bad signature/audience or IdP
+    // outage is final, never allowed to fall back to a secondary static key.
+    // Unrelated JWTs do not claim SSO and may coexist with x-api-key.
+    const ssoOutcome = await evaluateSelectedSso(credentials[0]);
+    if (ssoOutcome) return ssoOutcome;
 
     const { validateApiKey } = await import("../../../lib/db/apiKeys");
     for (const credential of credentials) {
