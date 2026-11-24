@@ -176,7 +176,7 @@ export class CompressionWorkerPool {
     timeoutMs?: number;
     idleMs?: number;
     maxOldGenerationSizeMb?: number;
-    /** Test seam: replaces `new Worker(resolveWorkerFile(), { resourceLimits })`. */
+    /** Test seam: override worker startup. */
     workerFactory?: () => Worker;
   } = {}) {
     this.size = Math.max(1, Math.floor(size));
@@ -185,12 +185,12 @@ export class CompressionWorkerPool {
     this.maxOldGenerationSizeMb = Math.max(128, Math.floor(maxOldGenerationSizeMb));
     this.spawnWorker =
       workerFactory ??
-      (() =>
-        new Worker(resolveWorkerFile(), {
-          resourceLimits: {
-            maxOldGenerationSizeMb: this.maxOldGenerationSizeMb,
-          },
-        }));
+      (() => {
+        // The worker is colocated after the build. Let Node open the installed path
+        // directly instead of letting Turbopack resolve it in the bundle's module graph.
+        const options = { resourceLimits: { maxOldGenerationSizeMb: this.maxOldGenerationSizeMb } };
+        return Reflect.construct(Worker, [resolveWorkerFile(), options]) as Worker;
+      });
   }
 
   run(
