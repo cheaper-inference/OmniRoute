@@ -6,6 +6,7 @@ import SegmentedControl from "@/shared/components/SegmentedControl";
 import { FileDropZone, type FileRejection } from "@/shared/components/FileInput";
 import CsvMappingStep from "./CsvMappingStep";
 import type { WizardInput, WizardCsvMapping, WizardDestination } from "@/lib/batches/types";
+import Card from "@/shared/components/Card";
 
 const MAX_FULL_BYTES = 5_000_000; // 5 MB — full read threshold (D7)
 const SAMPLE_HEAD_BYTES = 5_000_000;
@@ -166,7 +167,7 @@ export default function InputStep({ input, onChange, destination }: InputStepPro
 
       {/* CSV mapping (inline step 2.5) */}
       {isCsv && !isReading && hasFile && input.csvContent && (
-        <div className="rounded-xl border border-border p-4">
+        <Card.Section>
           <CsvMappingStep
             csvContent={input.csvContent}
             mapping={input.csvMapping ?? {}}
@@ -177,7 +178,7 @@ export default function InputStep({ input, onChange, destination }: InputStepPro
           {csvMappingReady && (
             <p className="mt-3 text-xs text-success">{t("wizardInputCsvJsonlReady")}</p>
           )}
-        </div>
+        </Card.Section>
       )}
     </div>
   );

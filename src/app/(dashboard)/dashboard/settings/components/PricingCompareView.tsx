@@ -10,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@omniroute/ui-kit/table";
-import { Badge, Button } from "@/shared/components";
+import { Badge, Button, Card } from "@/shared/components";
 import Icon from "@/shared/components/Icon";
 import ProviderIcon from "@/shared/components/ProviderIcon";
 import {
@@ -36,7 +36,7 @@ function PriceCell({ value, offer }: { value: number | null; offer: ModelOffer }
 function ModelGroupCard({ group }: { group: ModelComparisonGroup }) {
   const t = useTranslations("settings");
   return (
-    <div className="rounded-lg border border-border/40 bg-bg-subtle/30 p-3">
+    <Card.Section>
       <div className="flex items-center gap-2 mb-2">
         <span className="font-semibold text-sm truncate">{group.name}</span>
         <code className="text-xs text-text-muted truncate">{group.key}</code>
@@ -44,19 +44,20 @@ function ModelGroupCard({ group }: { group: ModelComparisonGroup }) {
           {new Set(group.offers.map((offer) => offer.providerAlias)).size} {t("providers")}
         </Badge>
       </div>
-      <Table
-        scrollbarLabel={group.name}
-        scrollLabel={group.name}
-        className="text-sm"
-        containerClassName="rounded-none border-0"
-      >
+      <Table scrollbarLabel={group.name} scrollLabel={group.name} variant="plain">
         <TableHeader>
           <TableRow>
             <TableHead>{t("providers")}</TableHead>
             <TableHead>{t("model")}</TableHead>
-            <TableHead className="w-24 text-right">{t("input")}</TableHead>
-            <TableHead className="w-24 text-right">{t("output")}</TableHead>
-            <TableHead className="w-24 text-right">{t("cached")}</TableHead>
+            <TableHead numeric className="w-24">
+              {t("input")}
+            </TableHead>
+            <TableHead numeric className="w-24">
+              {t("output")}
+            </TableHead>
+            <TableHead numeric className="w-24">
+              {t("cached")}
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -76,13 +77,13 @@ function ModelGroupCard({ group }: { group: ModelComparisonGroup }) {
                 <TableCell>
                   <code className="text-xs">{offer.modelId}</code>
                 </TableCell>
-                <TableCell className="text-right">
+                <TableCell numeric>
                   <PriceCell value={offer.input} offer={offer} />
                 </TableCell>
-                <TableCell className="text-right">
+                <TableCell numeric>
                   <PriceCell value={offer.output} offer={offer} />
                 </TableCell>
-                <TableCell className="text-right">
+                <TableCell numeric>
                   <PriceCell value={offer.cached} offer={offer} />
                 </TableCell>
               </TableRow>
@@ -90,7 +91,7 @@ function ModelGroupCard({ group }: { group: ModelComparisonGroup }) {
           })}
         </TableBody>
       </Table>
-    </div>
+    </Card.Section>
   );
 }
 

@@ -5,7 +5,7 @@ import Icon from "@/shared/components/Icon";
 import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 
-import { Badge, Button, Input, Modal, Select, Toggle } from "@/shared/components";
+import { Badge, Button, Input, Modal, Select, Toggle, Notice } from "@/shared/components";
 import { readFetchErrorMessage } from "@/shared/utils/fetchError";
 import { isValidProviderIconUrl } from "@/shared/validation/iconUrl";
 import {
@@ -368,12 +368,9 @@ export default function AddCompatibleProviderModal({
     <Modal isOpen={isOpen} title={modalTitle} onClose={onClose}>
       <div className="flex flex-col gap-4">
         {defaults.hasWarning && (
-          <div className="rounded-lg border border-warning/25 bg-warning/10 px-3 py-2 text-sm text-text-muted">
-            <div className="flex items-start gap-2">
-              <Icon name="warning" size={18} className="mt-0.5 text-warning" />
-              <p>{t("ccCompatibleValidationHint")}</p>
-            </div>
-          </div>
+          <Notice variant="warning" icon="warning">
+            {t("ccCompatibleValidationHint")}
+          </Notice>
         )}
 
         <Input
@@ -443,7 +440,8 @@ export default function AddCompatibleProviderModal({
         <Button
           variant="ghost"
           size="sm"
-          className="self-start gap-1 px-1 text-text-muted"
+          tone="muted"
+          className="self-start gap-1 px-1"
           onClick={() => setShowAdvanced(!showAdvanced)}
           aria-expanded={showAdvanced}
           aria-controls={advancedId}
@@ -527,13 +525,9 @@ export default function AddCompatibleProviderModal({
         )}
 
         {saveError && (
-          <div
-            role="alert"
-            aria-live="assertive"
-            className="text-sm text-error bg-error/10 border border-error/20 rounded-lg px-3 py-2"
-          >
+          <Notice variant="critical" aria-live="assertive">
             {saveError}
-          </div>
+          </Notice>
         )}
         <div className="flex gap-2">
           <Button onClick={handleSubmit} fullWidth disabled={!hasRequiredFields || submitting}>
