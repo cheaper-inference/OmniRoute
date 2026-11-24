@@ -10,7 +10,7 @@
  * both default off). Nothing here turns it on.
  */
 
-export const PII_BUILTIN_TYPES = [
+export const PII_DEFAULT_BUILTIN_TYPES = [
   "email",
   "phone_us",
   "phone_br",
@@ -38,7 +38,31 @@ export const PII_BUILTIN_TYPES = [
   "za_tax_ref",
 ] as const;
 
+/** Opt-in built-in types excluded from default `enabledTypes: null` redaction. */
+export const PII_OPT_IN_TYPES = [
+  // Russia (RU)
+  "passport_ru",
+  "snils_ru",
+  "inn_ru",
+  "phone_ru",
+  "vin",
+] as const;
+
+export const PII_BUILTIN_TYPES = [...PII_DEFAULT_BUILTIN_TYPES, ...PII_OPT_IN_TYPES] as const;
+
 export type PiiBuiltinType = (typeof PII_BUILTIN_TYPES)[number];
+
+export function resolveInitialPiiSelection(enabledTypes: readonly string[] | null): string[] {
+  return enabledTypes ? [...enabledTypes] : [...PII_DEFAULT_BUILTIN_TYPES];
+}
+
+export function serializePiiSelectionForSave(selected: readonly string[]): string[] | null {
+  const unique = new Set(selected);
+  const matchesDefault =
+    unique.size === PII_DEFAULT_BUILTIN_TYPES.length &&
+    PII_DEFAULT_BUILTIN_TYPES.every((type) => unique.has(type));
+  return matchesDefault ? null : [...selected];
+}
 
 /** Request-side pattern name → catalog id. */
 export const PII_REQUEST_TYPE_ALIASES: Readonly<Record<string, PiiBuiltinType>> = {
@@ -80,6 +104,7 @@ export const PII_TEMPLATES: ReadonlyArray<{ id: string; types: readonly PiiBuilt
     ],
   },
   { id: "popia", types: ["email", "za_id", "za_phone", "za_vat", "za_tax_ref"] },
+  { id: "russian", types: ["email", "passport_ru", "snils_ru", "inn_ru", "phone_ru", "vin"] },
   { id: "full", types: [...PII_BUILTIN_TYPES] },
 ];
 

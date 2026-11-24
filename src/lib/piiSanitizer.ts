@@ -16,7 +16,7 @@
 import { isFeatureFlagEnabled, resolveFeatureFlag } from "@/shared/utils/featureFlags";
 import { getPiiRuleConfig, type PiiRuleConfig } from "@/lib/pii/piiRuleConfig";
 import { recordPiiDetections } from "@/lib/pii/piiDetectionStats";
-import { buildGdprPopiaRules, precedingContext } from "@/shared/utils/piiPatterns";
+import { buildGdprPopiaRules, buildRuPiiRules, precedingContext } from "@/shared/utils/piiPatterns";
 
 const isEnabled = () => isFeatureFlagEnabled("PII_RESPONSE_SANITIZATION");
 
@@ -50,6 +50,7 @@ interface PIIPattern {
   severity: "high" | "medium" | "low";
   /** When present, a regex match is redacted only if this accepts it (checksum / structure / context). */
   validate?: (match: string, context: string) => boolean;
+  optIn?: boolean;
 }
 
 const PII_PATTERNS: PIIPattern[] = [
@@ -139,13 +140,16 @@ const PII_PATTERNS: PIIPattern[] = [
     replacement: "[API_KEY_REDACTED]",
     severity: "high",
   },
+  // Russia (RU) identifiers, strict opt-in and placed after phone_us/phone_br/cpf/cnpj
+  // so default US/BR priority is preserved even when all types are explicitly enabled.
+  ...buildRuPiiRules(),
 ];
 
 /** Built-in patterns the operator kept enabled, followed by their gate-checked custom rules. */
 function resolveActivePatterns(rules: PiiRuleConfig): PIIPattern[] {
   const builtins = rules.enabledTypes
     ? PII_PATTERNS.filter((pattern) => rules.enabledTypes!.has(pattern.name))
-    : PII_PATTERNS;
+    : PII_PATTERNS.filter((pattern) => !pattern.optIn);
   if (rules.customRules.length === 0) return builtins;
   return [
     ...builtins,
@@ -229,11 +233,13 @@ export function sanitizePII(
     end: number;
     replacement: string;
     pattern: string;
+    priority: number;
   }
   const ranges: RedactRange[] = [];
   let endMatchIndex: number | undefined = undefined;
 
-  for (const pattern of activePatterns) {
+  for (let priority = 0; priority < activePatterns.length; priority++) {
+    const pattern = activePatterns[priority];
     pattern.regex.lastIndex = 0;
     let match;
     while ((match = pattern.regex.exec(cleanText)) !== null) {
@@ -280,6 +286,7 @@ export function sanitizePII(
           end,
           replacement: pattern.replacement,
           pattern: pattern.name,
+          priority,
         });
       }
 
@@ -335,6 +342,11 @@ export function sanitizePII(
         if (r.end >= last.start) {
           last.start = Math.min(r.start, last.start);
           last.end = Math.max(r.end, last.end);
+          if (r.priority < last.priority) {
+            last.replacement = r.replacement;
+            last.pattern = r.pattern;
+            last.priority = r.priority;
+          }
         } else {
           mergedRanges.push(r);
         }

@@ -16,7 +16,7 @@
  * @module shared/utils/piiPatterns
  */
 
-export type Jurisdiction = "EU" | "ZA";
+export type Jurisdiction = "EU" | "ZA" | "RU";
 
 /** Characters of text before a match handed to a validator as context. */
 const PII_CONTEXT_WINDOW = 48;
@@ -345,6 +345,144 @@ function isValidZA_TaxRef(value: string, context: string): boolean {
   return /\b(?:tax|taxpayer|sars)\b/i.test(context);
 }
 
+// ── Russia (RU) ──
+
+/**
+ * SNILS (11 digits, formatted XXX-XXX-XXX YY or XXX XXX XXX YY).
+ * Checksum: weighted sum of first 9 digits (weights 9..1) mod 101; 100 -> 00.
+ * Numbers <= 001-001-998 do not carry a checksum in the official spec, so we
+ * require > 001001998 and reject repeated digits.
+ */
+function isValidRU_SNILS(value: string): boolean {
+  const digits = digitsOnly(value);
+  if (digits.length !== 11 || isRepeatedDigit(digits)) return false;
+  if (parseInt(digits.slice(0, 9), 10) <= 1001998) return false;
+
+  let sum = 0;
+  for (let i = 0; i < 9; i++) {
+    sum += parseInt(digits[i], 10) * (9 - i);
+  }
+  let check = sum % 101;
+  if (check === 100) check = 0;
+  return check === parseInt(digits.slice(9, 11), 10);
+}
+
+/**
+ * INN (10 digits for legal entities, 12 digits for individuals).
+ * Rejects repeated digits and leading "00" (invalid region code).
+ */
+function isValidRU_INN(value: string): boolean {
+  const digits = digitsOnly(value);
+  if (isRepeatedDigit(digits) || digits.startsWith("00")) return false;
+
+  if (digits.length === 10) {
+    const weights = [2, 4, 10, 3, 5, 9, 4, 6, 8];
+    let sum = 0;
+    for (let i = 0; i < 9; i++) sum += parseInt(digits[i], 10) * weights[i];
+    return (sum % 11) % 10 === parseInt(digits[9], 10);
+  }
+
+  if (digits.length === 12) {
+    const w11 = [7, 2, 4, 10, 3, 5, 9, 4, 6, 8];
+    const w12 = [3, 7, 2, 4, 10, 3, 5, 9, 4, 6, 8];
+    let sum11 = 0;
+    for (let i = 0; i < 10; i++) sum11 += parseInt(digits[i], 10) * w11[i];
+    if ((sum11 % 11) % 10 !== parseInt(digits[10], 10)) return false;
+
+    let sum12 = 0;
+    for (let i = 0; i < 11; i++) sum12 += parseInt(digits[i], 10) * w12[i];
+    return (sum12 % 11) % 10 === parseInt(digits[11], 10);
+  }
+
+  return false;
+}
+
+/**
+ * Russian internal passport: `SS SS NNNNNN` or `SSSS NNNNNN` (4-digit series + 6-digit number).
+ * Series cannot start with `00`. `SS SS NNNNNN` is structurally distinctive; `SSSS NNNNNN`
+ * requires a passport cue in preceding context so arbitrary 4+6 digit pairs stay untouched.
+ */
+function isValidRU_Passport(value: string, context: string): boolean {
+  const match = /^(\d{2})\s?(\d{2})\s{1,2}(\d{6})$/.exec(value.trim());
+  if (!match) return false;
+  const series = match[1] + match[2];
+  const number = match[3];
+  if (series.startsWith("00") || number === "000000" || isRepeatedDigit(series + number)) {
+    return false;
+  }
+  if (/^\d{2}\s\d{2}\s{1,2}\d{6}$/.test(value.trim())) return true;
+  return /(?<![\p{L}\p{N}_])(?:passport|паспорт|серия|seria|doc(?:ument)?|id)(?![\p{L}\p{N}_])/iu.test(
+    context
+  );
+}
+
+/**
+ * Russian phone number (`+7` or `8` + 10 digits).
+ * `+7` is unambiguous on its own; national `8` requires separators or parentheses so a bare
+ * 11-digit number starting with `8` (like an order/account ID) is not redacted.
+ */
+function isValidRU_Phone(value: string): boolean {
+  const digits = digitsOnly(value);
+  if (digits.length !== 11 || digits[1] === "0" || isRepeatedDigit(digits.slice(1))) {
+    return false;
+  }
+  if (value.startsWith("+7")) return true;
+  return /[\s()-]/.test(value);
+}
+
+const VIN_TRANSLITERATION: Readonly<Record<string, number>> = {
+  A: 1,
+  B: 2,
+  C: 3,
+  D: 4,
+  E: 5,
+  F: 6,
+  G: 7,
+  H: 8,
+  J: 1,
+  K: 2,
+  L: 3,
+  M: 4,
+  N: 5,
+  P: 7,
+  R: 9,
+  S: 2,
+  T: 3,
+  U: 4,
+  V: 5,
+  W: 6,
+  X: 7,
+  Y: 8,
+  Z: 9,
+};
+const VIN_WEIGHTS = [8, 7, 6, 5, 4, 3, 2, 10, 0, 9, 8, 7, 6, 5, 4, 3, 2];
+
+/**
+ * Vehicle Identification Number (ISO 3779, 17 chars excluding I, O, Q).
+ * Requires mixed letters and digits, rejects pure hex unless a VIN cue is present,
+ * and requires either a valid ISO 3779 check digit at position 9 or a VIN context cue.
+ */
+function isValidVIN(value: string, context: string): boolean {
+  const upper = value.toUpperCase();
+  if (!/^[A-HJ-NPR-Z0-9]{17}$/.test(upper)) return false;
+  if (!/[A-HJ-NPR-Z]/.test(upper) || !/\d/.test(upper)) return false;
+  if (/^[0-9A-F]{17}$/.test(upper) && !/(?<![\p{L}\p{N}_])vin(?![\p{L}\p{N}_])/iu.test(context)) {
+    return false;
+  }
+
+  let sum = 0;
+  for (let i = 0; i < 17; i++) {
+    const ch = upper[i];
+    const val = /\d/.test(ch) ? parseInt(ch, 10) : VIN_TRANSLITERATION[ch];
+    if (val === undefined) return false;
+    sum += val * VIN_WEIGHTS[i];
+  }
+  const rem = sum % 11;
+  const expected = rem === 10 ? "X" : String(rem);
+  if (upper[8] === expected) return true;
+  return /(?<![\p{L}\p{N}_])(?:vin|chassis|кузов|авто)(?![\p{L}\p{N}_])/iu.test(context);
+}
+
 // ── Pattern table ──
 
 /**
@@ -481,7 +619,56 @@ export interface CompiledGdprPopiaRule {
   replacement: string;
   severity: "high" | "medium" | "low";
   validate: PiiMatchValidator;
+  optIn?: boolean;
 }
+
+export const RU_PII_PATTERNS: readonly GdprPopiaPatternDef[] = [
+  {
+    name: "passport_ru",
+    core: "\\d{2}\\s?\\d{2}\\s{1,2}\\d{6}",
+    flags: "g",
+    replacement: "[RU_PASSPORT_REDACTED]",
+    severity: "high",
+    jurisdiction: "RU",
+    validate: isValidRU_Passport,
+  },
+  {
+    name: "snils_ru",
+    core: "\\d{3}[-\\s]\\d{3}[-\\s]\\d{3}[-\\s]\\d{2}",
+    flags: "g",
+    replacement: "[RU_SNILS_REDACTED]",
+    severity: "high",
+    jurisdiction: "RU",
+    validate: isValidRU_SNILS,
+  },
+  {
+    name: "inn_ru",
+    core: "(?:\\d{12}|\\d{10})",
+    flags: "g",
+    replacement: "[RU_INN_REDACTED]",
+    severity: "high",
+    jurisdiction: "RU",
+    validate: isValidRU_INN,
+  },
+  {
+    name: "phone_ru",
+    core: "(?:\\+7|8)[\\s-]?(?:\\(\\d{3}\\)|\\d{3})[\\s-]?\\d{3}[\\s-]?\\d{2}[\\s-]?\\d{2}",
+    flags: "g",
+    replacement: "[RU_PHONE_REDACTED]",
+    severity: "medium",
+    jurisdiction: "RU",
+    validate: isValidRU_Phone,
+  },
+  {
+    name: "vin",
+    core: "[A-HJ-NPR-Z0-9]{17}",
+    flags: "gi",
+    replacement: "[VIN_REDACTED]",
+    severity: "high",
+    jurisdiction: "RU",
+    validate: isValidVIN,
+  },
+];
 
 /**
  * Compile the whole table. Each sanitizer calls this once and keeps its own copy,
@@ -494,6 +681,18 @@ export function buildGdprPopiaRules(): CompiledGdprPopiaRule[] {
     replacement: def.replacement,
     severity: def.severity,
     validate: def.validate,
+  }));
+}
+
+/** Compile the Russian PII pattern table as strict opt-in rules with fresh stateful regexes. */
+export function buildRuPiiRules(): CompiledGdprPopiaRule[] {
+  return RU_PII_PATTERNS.map((def) => ({
+    name: def.name,
+    regex: compileGdprPopiaPattern(def),
+    replacement: def.replacement,
+    severity: def.severity,
+    validate: def.validate,
+    optIn: true,
   }));
 }
 

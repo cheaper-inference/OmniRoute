@@ -11,7 +11,7 @@ import { getFeatureFlagOverride } from "@/lib/db/featureFlags";
 import { parseEnvBoolean } from "@/shared/utils/envBoolean";
 import { resolveBlockThreshold, shouldBlockDetections } from "@/shared/utils/injectionSeverity";
 import { PII_REQUEST_TYPE_ALIASES } from "@/shared/constants/piiTypes";
-import { buildGdprPopiaRules, precedingContext } from "@/shared/utils/piiPatterns";
+import { buildGdprPopiaRules, buildRuPiiRules, precedingContext } from "@/shared/utils/piiPatterns";
 
 // ─── Prompt Injection Patterns ───────────────────────────────────────
 
@@ -117,8 +117,15 @@ const SCAN_GAP = "\n[GAP]\n";
 
 // ─── PII Patterns ────────────────────────────────────────────────────
 
-/** @type {Array<{name: string, pattern: RegExp, replacement: string, validate?: (match: string, context: string) => boolean}>} */
-const PII_PATTERNS = [
+interface InputPiiPattern {
+  name: string;
+  pattern: RegExp;
+  replacement: string;
+  validate?: (match: string, context: string) => boolean;
+  optIn?: boolean;
+}
+
+const PII_PATTERNS: InputPiiPattern[] = [
   {
     name: "email",
     // The same matches as `\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b`, in linear
@@ -172,6 +179,15 @@ const PII_PATTERNS = [
     pattern: /\b\d{3}-\d{2}-\d{4}\b/g,
     replacement: "[SSN_REDACTED]",
   },
+  // Russia (RU) identifiers, strict opt-in and placed after phone_br/cpf/cnpj so
+  // default US/BR priority is preserved even when all types are explicitly enabled.
+  ...buildRuPiiRules().map((rule) => ({
+    name: rule.name,
+    pattern: rule.regex,
+    replacement: rule.replacement,
+    validate: rule.validate,
+    optIn: rule.optIn,
+  })),
 ];
 
 // ─── Configuration ────────────────────────────────────────────────────
@@ -466,7 +482,7 @@ function resolvePiiRules(options) {
   const enabled = options?.enabledTypes ?? null;
   const builtins = enabled
     ? PII_PATTERNS.filter((rule) => enabled.has(PII_REQUEST_TYPE_ALIASES[rule.name] ?? rule.name))
-    : PII_PATTERNS;
+    : PII_PATTERNS.filter((rule) => !rule.optIn);
   const custom = (options?.customRules ?? []).map((rule) => ({
     name: rule.name,
     pattern: rule.regex,
