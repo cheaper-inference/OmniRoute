@@ -1,0 +1,1 @@
+- **feat(oauth):** opt-in `TOKEN_REFRESH_RETRY_JITTER=1` spreads token-refresh retry delays by 75-125% per account, so different accounts spread their retries (off by default).

@@ -6,6 +6,8 @@ import Button from "@/shared/components/Button";
 import Checkbox from "@/shared/components/Checkbox";
 import Input from "@/shared/components/Input";
 import Modal from "@/shared/components/Modal";
+import NumberInput from "@/shared/components/NumberInput";
+
 import Select from "@/shared/components/Select";
 import Textarea from "@/shared/components/Textarea";
 import type { Team } from "./helpers";
@@ -62,12 +64,11 @@ function BudgetFields({
       >
         <div className="overflow-hidden">
           <fieldset disabled={!enabled || pending} className="space-y-3">
-            <Input
+            <NumberInput
               label={t("amount")}
-              type="number"
-              step="any"
-              value={amount}
-              onChange={(e) => onAmount(e.target.value)}
+              precision={6}
+              value={amount === "" ? null : Number(amount)}
+              onValueChange={(value) => onAmount(value === null ? "" : String(value))}
             />
             <Select
               label={t("duration")}

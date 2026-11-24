@@ -67,13 +67,15 @@ describe("ModelCompatPopover upstream headers — invalid single row cannot be d
     expect(nameInput).toBeTruthy();
     expect(nameInput.value).toBe("https://evil.example.com/callback");
 
-    const rowButtons = document.querySelectorAll('button[title="compatUpstreamRemoveRow"]');
+    const rowButtons = document.querySelectorAll('button[aria-label="compatUpstreamRemoveRow"]');
     expect(rowButtons.length).toBe(1);
 
     const removeButton = rowButtons[0] as HTMLButtonElement;
 
     // EXPECTED (fixed) behavior: a populated row should always be removable via
     // its own delete icon, even when it is the only row.
+    // The button carries a title: inactive would be aria-disabled, not `disabled`.
+    expect(removeButton.hasAttribute("aria-disabled")).toBe(false);
     expect(removeButton.disabled).toBe(false);
 
     await act(async () => removeButton.click());
@@ -101,13 +103,13 @@ describe("ModelCompatPopover upstream headers — invalid single row cannot be d
 
     await openPopover();
 
-    const rowButtons = document.querySelectorAll('button[title="compatUpstreamRemoveRow"]');
+    const rowButtons = document.querySelectorAll('button[aria-label="compatUpstreamRemoveRow"]');
     expect(rowButtons.length).toBe(1);
 
     const removeButton = rowButtons[0] as HTMLButtonElement;
 
     // A blank sole row must stay non-deletable so the form always shows an
     // editable add-affordance.
-    expect(removeButton.disabled).toBe(true);
+    expect(removeButton.getAttribute("aria-disabled")).toBe("true");
   });
 });

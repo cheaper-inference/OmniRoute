@@ -135,6 +135,7 @@
   --ci-radius-2xl: 1.5rem;
   --ci-radius-control: var(--ci-radius-md);
   --ci-radius-surface: var(--ci-radius-lg);
+  --ci-radius-surface-nested: var(--ci-radius-md);
   --ci-radius-pill: var(--ci-radius-full);
   --ci-shadow-xs: none;
   --ci-shadow-sm: none;
@@ -156,6 +157,9 @@
   --ci-sidebar-fg: var(--ci-color-foreground);
   --ci-sidebar-active-bg: #20211c;
   --ci-sidebar-active-fg: #f2f0e8;
+  /* One step darker than the default light theme: neutral-500 is 2.95:1 on the muted surface. */
+  --ci-scrollbar-thumb: var(--ci-neutral-600);
+  --ci-scrollbar-thumb-hover: var(--ci-neutral-700);
   --primary: var(--ci-button-primary-bg);
   --primary-foreground: var(--ci-button-primary-fg);
 }
@@ -241,6 +245,8 @@
   --ci-scale-div-7: #c1e3fc;
   --ci-sidebar-active-bg: rgb(229 172 130 / .14);
   --ci-sidebar-active-fg: #e5ac82;
+  --ci-scrollbar-thumb: var(--ci-neutral-500);
+  --ci-scrollbar-thumb-hover: var(--ci-neutral-400);
 }
 
 /* The host normally resolves system preference with data-theme. These tokens
@@ -333,6 +339,8 @@
     --ci-scale-div-7: #c1e3fc;
     --ci-sidebar-active-bg: rgb(229 172 130 / .14);
     --ci-sidebar-active-fg: #e5ac82;
+    --ci-scrollbar-thumb: var(--ci-neutral-500);
+    --ci-scrollbar-thumb-hover: var(--ci-neutral-400);
   }
 }
 
@@ -381,6 +389,7 @@
   --ci-radius-2xl: 8px;
   --ci-radius-control: 2px;
   --ci-radius-surface: 2px;
+  --ci-radius-surface-nested: 2px;
   --ci-radius-pill: 2px;
   --ci-button-primary-fg: #221b14;
   --ci-button-primary-hover: #edba94;

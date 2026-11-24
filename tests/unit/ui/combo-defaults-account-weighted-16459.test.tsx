@@ -4,7 +4,10 @@ import { createRoot } from "react-dom/client";
 import { afterEach, expect, it, vi } from "vitest";
 import { chooseKitSelectValue, kitSelectByLabel } from "../../helpers/kitSelect";
 
-vi.mock("next-intl", () => ({ useTranslations: () => (key: string) => key }));
+vi.mock("next-intl", () => ({
+  useTranslations: () => (key: string) => key,
+  useLocale: () => "en",
+}));
 
 const { default: ComboDefaultsTab } =
   await import("../../../src/app/(dashboard)/dashboard/settings/components/ComboDefaultsTab");

@@ -107,7 +107,7 @@ export default function DashboardShell({
             toggle (collapse on desktop, opens the Sheet on mobile). */}
         <Header onOpenCommandPalette={() => setCommandPaletteOpen(true)} />
         {!isE2EMode && <MaintenanceBanner />}
-        <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden custom-scrollbar p-4 sm:p-6 lg:p-10">
+        <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-4 sm:p-6 lg:p-10">
           {/* Fluid up to a 4K cap (3840px), centred beyond it. */}
           <div className="max-w-[3840px] mx-auto w-full h-full min-h-0 flex flex-col">
             <Breadcrumbs />

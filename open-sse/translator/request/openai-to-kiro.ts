@@ -164,6 +164,33 @@ function hasFollowingToolResult(messages, index: number): boolean {
   return false;
 }
 
+// Kiro validates that every toolResults entry answers a toolUse of the assistant turn right
+// before it. An entry that does not (a truncated history, a duplicate or stray result) is moved
+// into the message text so its content is kept and only the pairing is dropped.
+function demoteUnpairedToolResults(userInputMessage, previousTurn) {
+  const context = userInputMessage.userInputMessageContext;
+  const useIds = new Set(
+    (previousTurn?.assistantResponseMessage?.toolUses ?? []).map((u) => u.toolUseId)
+  );
+  const paired = [];
+  const unpaired = [];
+  for (const result of context.toolResults) {
+    (useIds.has(result?.toolUseId) ? paired : unpaired).push(result);
+  }
+  if (unpaired.length === 0) return;
+
+  const texts = (unpaired as OrphanToolResult[]).map(orphanToolResultText).join("\n\n");
+  const originalContent = userInputMessage.content || "";
+  userInputMessage.content = originalContent ? `${originalContent}\n\n${texts}` : texts;
+
+  if (paired.length > 0) {
+    context.toolResults = paired;
+    return;
+  }
+  delete context.toolResults;
+  if (Object.keys(context).length === 0) delete userInputMessage.userInputMessageContext;
+}
+
 /**
  * Convert OpenAI messages to Kiro format
  * Rules: system/tool/user -> user role, merge consecutive same roles
@@ -707,49 +734,15 @@ function convertMessages(messages, tools, model) {
     const item = mergedHistory[i];
     if (!item.userInputMessage?.userInputMessageContext?.toolResults) continue;
 
-    const prev = mergedHistory[i - 1];
-    const hasPrecedingAssistant =
-      prev?.assistantResponseMessage?.toolUses && prev.assistantResponseMessage.toolUses.length > 0;
-
-    if (!hasPrecedingAssistant) {
-      const toolResults = item.userInputMessage.userInputMessageContext
-        .toolResults as OrphanToolResult[];
-      const toolResultTexts = toolResults.map(orphanToolResultText).join("\n\n");
-
-      const originalContent = item.userInputMessage.content || "";
-      item.userInputMessage.content = originalContent
-        ? `${originalContent}\n\n${toolResultTexts}`
-        : toolResultTexts;
-      delete item.userInputMessage.userInputMessageContext.toolResults;
-
-      if (Object.keys(item.userInputMessage.userInputMessageContext).length === 0) {
-        delete item.userInputMessage.userInputMessageContext;
-      }
-    }
+    demoteUnpairedToolResults(item.userInputMessage, mergedHistory[i - 1]);
   }
 
   // Also check currentMessage for orphaned toolResults (not in history)
   if (currentMessage?.userInputMessage?.userInputMessageContext?.toolResults) {
-    const lastHistory = mergedHistory[mergedHistory.length - 1];
-    const hasPrecedingAssistant =
-      lastHistory?.assistantResponseMessage?.toolUses &&
-      lastHistory.assistantResponseMessage.toolUses.length > 0;
-
-    if (!hasPrecedingAssistant) {
-      const toolResults = currentMessage.userInputMessage.userInputMessageContext
-        .toolResults as OrphanToolResult[];
-      const toolResultTexts = toolResults.map(orphanToolResultText).join("\n\n");
-
-      const originalContent = currentMessage.userInputMessage.content || "";
-      currentMessage.userInputMessage.content = originalContent
-        ? `${originalContent}\n\n${toolResultTexts}`
-        : toolResultTexts;
-      delete currentMessage.userInputMessage.userInputMessageContext.toolResults;
-
-      if (Object.keys(currentMessage.userInputMessage.userInputMessageContext).length === 0) {
-        delete currentMessage.userInputMessage.userInputMessageContext;
-      }
-    }
+    demoteUnpairedToolResults(
+      currentMessage.userInputMessage,
+      mergedHistory[mergedHistory.length - 1]
+    );
   }
 
   // Strip orphaned toolUses: an assistantResponseMessage that advertises a

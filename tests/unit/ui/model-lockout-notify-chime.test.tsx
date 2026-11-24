@@ -13,6 +13,7 @@ const notifications = {
 
 vi.mock("next-intl", () => ({
   useTranslations: () => translate,
+  useLocale: () => "en",
 }));
 
 vi.mock("@/store/notificationStore", () => ({
