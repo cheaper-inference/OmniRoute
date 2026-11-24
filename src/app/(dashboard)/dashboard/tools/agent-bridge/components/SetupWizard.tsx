@@ -9,6 +9,7 @@ import { Spinner } from "@/shared/components/Loading";
 import Modal from "@/shared/components/Modal";
 import type { AgentStateEntry, AgentBridgeServerState } from "../AgentBridgePageClient";
 import type { MitmTargetView } from "@/mitm/types";
+import Card from "@/shared/components/Card";
 
 interface SetupWizardProps {
   target: MitmTargetView;
@@ -261,7 +262,7 @@ export function SetupWizard({
 
             {/* Tutorial steps */}
             {target.setupTutorial.steps.length > 0 && (
-              <div className="mt-2 rounded-control border border-border bg-bg-subtle p-3">
+              <Card.Section className="mt-2">
                 <p className="mb-2 text-xs font-medium text-text-muted">
                   {t("wizardTutorialTitle")}
                 </p>
@@ -273,7 +274,7 @@ export function SetupWizard({
                     </li>
                   ))}
                 </ol>
-              </div>
+              </Card.Section>
             )}
           </div>
         )}
@@ -281,13 +282,13 @@ export function SetupWizard({
         {step === "dns" && (
           <div className="flex flex-col gap-3">
             <p className="text-sm text-text-muted">{t("wizardStep2Desc")}</p>
-            <div className="flex flex-col gap-1 rounded-control border border-border bg-bg-subtle p-3 font-mono text-xs">
+            <Card.Section className="flex flex-col gap-1 font-mono text-xs">
               {target.hosts.map((host) => (
                 <div key={host} className="text-text-muted">
                   <span className="text-primary">127.0.0.1</span> {host}
                 </div>
               ))}
-            </div>
+            </Card.Section>
             {dnsEnabled && (
               <div className="flex items-center gap-2 text-sm text-success">
                 <Icon name="check_circle" size={16} />
@@ -314,7 +315,7 @@ export function SetupWizard({
                 <p className="text-sm text-text-muted">
                   {t("wizardDetectedModels", { count: detectedModels.length })}
                 </p>
-                <div className="flex max-h-[200px] flex-col gap-1 overflow-y-auto rounded-control border border-border bg-bg-subtle p-3">
+                <Card.Section className="flex max-h-[200px] flex-col gap-1 overflow-y-auto">
                   {detectedModels.map((model) => (
                     <Checkbox
                       key={model}
@@ -323,7 +324,7 @@ export function SetupWizard({
                       label={<span className="font-mono text-xs text-text-main">{model}</span>}
                     />
                   ))}
-                </div>
+                </Card.Section>
                 {selectedModels.size > 0 && (
                   <p className="text-xs text-text-muted">
                     {t("wizardSelectedModels", { count: selectedModels.size })}
@@ -331,12 +332,12 @@ export function SetupWizard({
                 )}
               </div>
             ) : (
-              <div className="rounded-control border border-border bg-bg-subtle p-3">
+              <Card.Section>
                 <p className="text-sm text-text-muted">
                   {t("wizardNoModelsDetected", { agent: target.name })}
                 </p>
                 <p className="mt-2 text-xs text-text-muted">{t("wizardNoModelsHint")}</p>
-              </div>
+              </Card.Section>
             )}
           </div>
         )}

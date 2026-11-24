@@ -52,14 +52,15 @@ export function StrategyNode({ data }: NodeProps) {
       />
 
       <span
-        className="text-xs font-semibold uppercase tracking-wide truncate text-text-main"
+        className="ci-eyebrow truncate text-text-main"
+        data-weight="medium"
         data-testid="strategy-label"
       >
         {label}
       </span>
       {count > 0 && (
         <span
-          className="text-[10px] font-mono px-1.5 rounded-full text-text-muted"
+          className="text-3xs font-mono px-1.5 rounded-full text-text-muted"
           style={{ backgroundColor: flowColorAlpha(color, 13) }}
           data-testid="strategy-target-count"
         >

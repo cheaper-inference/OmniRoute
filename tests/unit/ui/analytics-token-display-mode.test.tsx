@@ -40,11 +40,11 @@ vi.mock("next-intl", () => ({
   useTranslations: () => mockTranslate,
 }));
 
-vi.mock("@/shared/components/analytics/rechartsCore", () => ({
-  loadRecharts: vi.fn(),
-  useRecharts: () => null,
-  ChartLoadingCard: () => <div data-testid="chart-loading" />,
-  DarkTooltip: () => null,
+// The kit charts that draw with recharts stay out of this test (they load through next/dynamic).
+vi.mock("@omniroute/ui-kit/reporting-charts", () => ({
+  StackedBarChart: () => <div data-testid="chart-loading" />,
+  StackedAreaChart: () => <div data-testid="chart-loading" />,
+  Sparkline: () => <div data-testid="chart-loading" />,
 }));
 
 const mockAnalyticsData = {
@@ -173,9 +173,7 @@ describe("Analytics Token Display Mode (Compact vs Exact)", () => {
     expect(within(container).getByText("$1180.27")).toBeTruthy();
 
     // Click "Exact" toggle
-    const exactBtn = container.querySelector(
-      'button[role="radio"][title="Exact"]'
-    ) as HTMLButtonElement;
+    const exactBtn = within(container).getByRole("radio", { name: "Exact" }) as HTMLButtonElement;
     expect(exactBtn).not.toBeNull();
 
     await act(async () => {
@@ -194,9 +192,9 @@ describe("Analytics Token Display Mode (Compact vs Exact)", () => {
 
     // Check localStorage was persisted
     expect(localStorage.getItem("omniroute:analytics-token-display-mode")).toBe("exact");
-    const compactBtn = container.querySelector(
-      'button[role="radio"][title="Compact"]'
-    ) as HTMLButtonElement;
+    const compactBtn = within(container).getByRole("radio", {
+      name: "Compact",
+    }) as HTMLButtonElement;
     await act(async () => {
       compactBtn.click();
       compactBtn.click();
@@ -214,7 +212,7 @@ describe("Analytics Token Display Mode (Compact vs Exact)", () => {
 
     await renderUsageAnalytics();
 
-    const exactBtn = container.querySelector('button[role="radio"][title="Exact"]');
+    const exactBtn = within(container).getByRole("radio", { name: "Exact" });
     expect(exactBtn?.getAttribute("aria-checked")).toBe("true");
 
     const kpiValues = [

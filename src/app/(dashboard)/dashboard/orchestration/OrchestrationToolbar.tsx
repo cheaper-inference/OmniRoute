@@ -7,6 +7,7 @@
  */
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
+import { ToggleChip } from "@omniroute/ui-kit/toggle-chip";
 import Button from "@/shared/components/Button";
 import Input from "@/shared/components/Input";
 import { isEmptyFilter } from "./model/filterSnapshot";
@@ -53,18 +54,11 @@ function ChipGroup<T extends string>({
 }) {
   return (
     <div className="flex flex-wrap items-center gap-1">
-      <span className="text-[10px] text-text-muted">{label}</span>
+      <span className="text-3xs text-text-muted">{label}</span>
       {values.map((v) => (
-        <Button
-          key={v}
-          size="sm"
-          variant={active.has(v) ? "primary" : "outline"}
-          className="h-6 min-h-6 rounded-full px-2 text-[10px]"
-          aria-pressed={active.has(v)}
-          onClick={() => onToggle(v)}
-        >
+        <ToggleChip key={v} size="sm" pressed={active.has(v)} onClick={() => onToggle(v)}>
           {renderLabel(v)}
-        </Button>
+        </ToggleChip>
       ))}
     </div>
   );

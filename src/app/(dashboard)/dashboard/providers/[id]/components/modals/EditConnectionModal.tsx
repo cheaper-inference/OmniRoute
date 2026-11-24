@@ -1,12 +1,22 @@
 "use client";
 
+import Card from "@/shared/components/Card";
 import Icon from "@/shared/components/Icon";
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import ConnectionTestModelField from "@/shared/components/ConnectionTestModelField";
 import { useConnectionTestModelDraft } from "@/shared/components/useConnectionTestModelDraft";
-import { Button, Badge, Input, Modal, Toggle, Select } from "@/shared/components";
+import {
+  Button,
+  Badge,
+  Input,
+  Modal,
+  NumberInput,
+  Toggle,
+  Select,
+  Notice,
+} from "@/shared/components";
 import { CHATGPT_WEB_CODEX_CONNECTOR_NAME } from "@/shared/constants/chatgptWebCodex";
 import {
   isOpenAICompatibleProvider,
@@ -30,6 +40,7 @@ import {
   modelConcurrencyFormValue,
 } from "./rateLimitOverridesFromForm";
 import { resolveDashboardProviderInfo } from "../../../providerPageUtils";
+import { numberToText, textToNumber } from "../../../numberFieldText";
 import {
   isBaseUrlConfigurableProvider,
   isBaseUrlOverrideEligibleProvider,
@@ -920,7 +931,7 @@ export default function EditConnectionModal({
           />
         )}
         {(isCcCompatible || openRouterPreset.input) && (
-          <div className="flex flex-col gap-4 rounded-lg border border-border bg-bg-subtle p-4">
+          <Card.Section className="flex flex-col gap-4">
             {isCcCompatible && (
               <CcCompatibleRequestDefaultsFields
                 values={formData}
@@ -928,9 +939,9 @@ export default function EditConnectionModal({
               />
             )}
             {openRouterPreset.input}
-          </div>
+          </Card.Section>
         )}
-        <div className="flex flex-col gap-4 rounded-lg border border-border bg-bg-subtle p-4">
+        <Card.Section className="flex flex-col gap-4">
           {showFreeModelsToggle && (
             <Toggle
               checked={formData.importFreeModelsOnly}
@@ -965,7 +976,7 @@ export default function EditConnectionModal({
               {formatPeakHourSummary(formData.peakHourProtection)}
             </p>
           )}
-        </div>
+        </Card.Section>
         <QuotaScrapingFields
           provider={provider}
           values={formData}
@@ -974,7 +985,7 @@ export default function EditConnectionModal({
           editMode
         />
         {isAntigravityFamily && (
-          <div className="flex flex-col gap-4 rounded-lg border border-border bg-bg-subtle p-4">
+          <Card.Section className="flex flex-col gap-4">
             <Select
               label={t("antigravityClientProfileLabel")}
               value={formData.antigravityClientProfile}
@@ -995,60 +1006,48 @@ export default function EditConnectionModal({
               hint={t("antigravityProjectIdHint")}
               inputClassName="text-xs"
             />
-          </div>
+          </Card.Section>
         )}
         {isOAuth && <ConnectionEmailCard email={connection.email} label={t("email")} />}
-        <Input
+        <NumberInput
           label={t("healthCheckMinutes")}
-          type="number"
           min={0}
           max={1440}
-          value={formData.healthCheckInterval}
-          onChange={(e) => {
-            const parsed = Number.parseInt(e.target.value, 10);
-            const next = Number.isNaN(parsed) ? 0 : Math.min(1440, Math.max(0, parsed));
-            setFormData({ ...formData, healthCheckInterval: next });
-          }}
+          value={textToNumber(formData.healthCheckInterval)}
+          onValueChange={(value) =>
+            setFormData({
+              ...formData,
+              healthCheckInterval: Math.min(1440, Math.max(0, value ?? 0)),
+            })
+          }
           hint={t("healthCheckHint")}
         />
-        <Input
+        <NumberInput
           label={t("priorityLabel")}
-          type="number"
+          min={1}
           value={formData.priority}
-          onChange={(e) =>
-            setFormData({ ...formData, priority: Number.parseInt(e.target.value) || 1 })
-          }
+          onValueChange={(value) => setFormData({ ...formData, priority: value || 1 })}
         />
         <div className="flex flex-col gap-2 rounded-lg border border-primary/30 bg-primary/5 p-4">
           <div className="flex items-center gap-1.5 text-sm font-semibold text-primary">
             <Icon name="dynamic_feed" size={18} />
             {t("accountConcurrencyCapLabel")}
           </div>
-          <Input
-            type="number"
+          <NumberInput
             min={0}
             step={1}
             aria-label={t("accountConcurrencyCapLabel")}
-            value={formData.maxConcurrent}
-            onChange={(e) => {
-              const nextValue = e.target.value;
-              setFormData({ ...formData, maxConcurrent: nextValue });
-              if (saveError && nextValue.trim()) {
-                const numericValue = Number(nextValue);
-                if (Number.isInteger(numericValue) && numericValue >= 0) {
-                  setSaveError(null);
-                }
-              }
+            value={textToNumber(formData.maxConcurrent)}
+            onValueChange={(value) => {
+              setFormData({ ...formData, maxConcurrent: numberToText(value) });
+              // The field only lets a whole number of 0 or more through.
+              if (saveError && value !== null) setSaveError(null);
             }}
             placeholder="0"
             hint={t("accountConcurrencyCapHint")}
           />
         </div>
-        {saveError && (
-          <div className="text-sm text-error bg-error/10 border border-error/20 rounded-lg px-3 py-2">
-            {saveError}
-          </div>
-        )}
+        {saveError && <Notice variant="critical">{saveError}</Notice>}
         {!isOAuth && (
           <>
             {webSessionCredential && (
@@ -1101,7 +1100,7 @@ export default function EditConnectionModal({
               </div>
             )}
             {isChatGptWebCodex && (
-              <div className="space-y-3 rounded-lg border border-border bg-bg-subtle p-3">
+              <Card.Section className="space-y-3">
                 <p className="text-sm font-medium text-text-main">{t("codexTunnelTitle")}</p>
                 <Input
                   label={t("tunnelIdLabel")}
@@ -1176,7 +1175,7 @@ export default function EditConnectionModal({
                     )}
                   </div>
                 )}
-              </div>
+              </Card.Section>
             )}
             {isGooglePse && (
               <Input
@@ -1334,67 +1333,72 @@ export default function EditConnectionModal({
                     {t("rateLimitOverridesSection")}
                   </p>
                   <div className="grid grid-cols-2 gap-3">
-                    <Input
+                    <NumberInput
                       label={t("rateLimitOverridesRpmLabel")}
-                      type="number"
                       min={0}
-                      value={formData.rpm}
-                      onChange={(e) => setFormData({ ...formData, rpm: e.target.value })}
+                      value={textToNumber(formData.rpm)}
+                      onValueChange={(value) =>
+                        setFormData({ ...formData, rpm: numberToText(value) })
+                      }
                       placeholder={t("inherit")}
                       hint={t("rateLimitOverridesRpmHint")}
                     />
-                    <Input
+                    <NumberInput
                       label={t("rateLimitOverridesRpdLabel")}
-                      type="number"
                       min={0}
-                      value={formData.rpd}
-                      onChange={(e) => setFormData({ ...formData, rpd: e.target.value })}
+                      value={textToNumber(formData.rpd)}
+                      onValueChange={(value) =>
+                        setFormData({ ...formData, rpd: numberToText(value) })
+                      }
                       placeholder={t("inherit")}
                       hint={t("rateLimitOverridesRpdHint")}
                     />
-                    <Input
+                    <NumberInput
                       label={t("rateLimitOverridesTpmLabel")}
-                      type="number"
                       min={0}
-                      value={formData.tpm}
-                      onChange={(e) => setFormData({ ...formData, tpm: e.target.value })}
+                      value={textToNumber(formData.tpm)}
+                      onValueChange={(value) =>
+                        setFormData({ ...formData, tpm: numberToText(value) })
+                      }
                       placeholder={t("inherit")}
                       hint={t("rateLimitOverridesTpmHint")}
                     />
-                    <Input
+                    <NumberInput
                       label={t("rateLimitOverridesTpdLabel")}
-                      type="number"
                       min={0}
-                      value={formData.tpd}
-                      onChange={(e) => setFormData({ ...formData, tpd: e.target.value })}
+                      value={textToNumber(formData.tpd)}
+                      onValueChange={(value) =>
+                        setFormData({ ...formData, tpd: numberToText(value) })
+                      }
                       placeholder={t("inherit")}
                       hint={t("rateLimitOverridesTpdHint")}
                     />
-                    <Input
+                    <NumberInput
                       label={t("rateLimitOverridesMinTimeLabel")}
-                      type="number"
                       min={0}
-                      value={formData.minTime}
-                      onChange={(e) => setFormData({ ...formData, minTime: e.target.value })}
+                      value={textToNumber(formData.minTime)}
+                      onValueChange={(value) =>
+                        setFormData({ ...formData, minTime: numberToText(value) })
+                      }
                       placeholder={t("inherit")}
                       hint={t("rateLimitOverridesMinTimeHint")}
                     />
-                    <Input
+                    <NumberInput
                       label={t("rateLimitOverridesMaxWaitMsLabel")}
-                      type="number"
                       min={0}
-                      value={formData.maxWaitMs}
-                      onChange={(e) => setFormData({ ...formData, maxWaitMs: e.target.value })}
+                      value={textToNumber(formData.maxWaitMs)}
+                      onValueChange={(value) =>
+                        setFormData({ ...formData, maxWaitMs: numberToText(value) })
+                      }
                       placeholder={t("inherit")}
                       hint={t("rateLimitOverridesMaxWaitMsHint")}
                     />
-                    <Input
+                    <NumberInput
                       label={t("rateLimitOverridesMaxConcurrentLabel")}
-                      type="number"
                       min={0}
-                      value={formData.rateLimitMaxConcurrent}
-                      onChange={(e) =>
-                        setFormData({ ...formData, rateLimitMaxConcurrent: e.target.value })
+                      value={textToNumber(formData.rateLimitMaxConcurrent)}
+                      onValueChange={(value) =>
+                        setFormData({ ...formData, rateLimitMaxConcurrent: numberToText(value) })
                       }
                       placeholder={t("inherit")}
                       hint={t("rateLimitOverridesMaxConcurrentHint")}
@@ -1545,7 +1549,7 @@ export default function EditConnectionModal({
                     </span>
                     {health && (
                       <span
-                        className="text-[10px] text-text-muted whitespace-nowrap"
+                        className="text-3xs text-text-muted whitespace-nowrap"
                         title={statusLabel}
                       >
                         {health.failures}x
@@ -1616,7 +1620,7 @@ export default function EditConnectionModal({
                       <div className="flex items-center gap-1">
                         {health && (
                           <span
-                            className="text-[10px] text-text-muted whitespace-nowrap"
+                            className="text-3xs text-text-muted whitespace-nowrap"
                             title={statusLabel}
                           >
                             {health.failures}x
