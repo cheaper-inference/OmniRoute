@@ -6,13 +6,21 @@ import { pathToFileURL } from "node:url";
 const PLUGIN_PREFIX_RE = /^(@[^/]+\/)?omniroute-cmd-/;
 
 function getPluginDirs() {
-  return [join(homedir(), ".omniroute", "plugins"), process.env.OMNIROUTE_PLUGIN_PATH].filter(
-    Boolean
-  );
+  const userPluginDir = join(homedir(), ".omniroute", "plugins");
+  const dirs = [
+    userPluginDir,
+    join(userPluginDir, "node_modules"),
+    process.env.OMNIROUTE_PLUGIN_PATH,
+  ];
+  if (process.env.OMNIROUTE_PLUGIN_PATH) {
+    dirs.push(join(process.env.OMNIROUTE_PLUGIN_PATH, "node_modules"));
+  }
+  return dirs.filter(Boolean);
 }
 
 export async function discoverPlugins() {
   const found = [];
+  const seenNames = new Set();
   for (const dir of getPluginDirs()) {
     if (!existsSync(dir)) continue;
     let entries;
@@ -23,6 +31,39 @@ export async function discoverPlugins() {
     }
     for (const entry of entries) {
       if (!entry.isDirectory()) continue;
+
+      // Handle npm scoped packages, e.g. @scope/omniroute-cmd-foo
+      if (entry.name.startsWith("@")) {
+        const scopeDir = join(dir, entry.name);
+        let scopeEntries;
+        try {
+          scopeEntries = readdirSync(scopeDir, { withFileTypes: true });
+        } catch {
+          continue;
+        }
+        for (const sub of scopeEntries) {
+          if (!sub.isDirectory()) continue;
+          const pkgPath = join(scopeDir, sub.name, "package.json");
+          if (!existsSync(pkgPath)) continue;
+          let pkg;
+          try {
+            pkg = JSON.parse(readFileSync(pkgPath, "utf8"));
+          } catch {
+            continue;
+          }
+          if (!pkg.name || !PLUGIN_PREFIX_RE.test(pkg.name) || seenNames.has(pkg.name)) continue;
+          seenNames.add(pkg.name);
+          found.push({
+            name: pkg.name,
+            version: pkg.version || "0.0.0",
+            description: pkg.description || "",
+            dir: join(scopeDir, sub.name),
+            pkg,
+          });
+        }
+        continue;
+      }
+
       const pkgPath = join(dir, entry.name, "package.json");
       if (!existsSync(pkgPath)) continue;
       let pkg;
@@ -31,7 +72,8 @@ export async function discoverPlugins() {
       } catch {
         continue;
       }
-      if (!pkg.name || !PLUGIN_PREFIX_RE.test(pkg.name)) continue;
+      if (!pkg.name || !PLUGIN_PREFIX_RE.test(pkg.name) || seenNames.has(pkg.name)) continue;
+      seenNames.add(pkg.name);
       found.push({
         name: pkg.name,
         version: pkg.version || "0.0.0",

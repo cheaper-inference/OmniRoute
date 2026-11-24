@@ -4,15 +4,18 @@ import { join } from "node:path";
 import { t } from "../i18n.mjs";
 import { emit } from "../output.mjs";
 import { discoverPlugins } from "../plugins.mjs";
+import { npmBin, npmExecInvocation } from "../npm-exec.mjs";
 
-// Run npm with an explicit argument array and no shell. Passing args this way
-// (instead of string-interpolating into `execSync`) prevents a malicious plugin
-// name like `foo; rm -rf ~` or `` foo`id` `` from being interpreted by the shell.
+// Run npm safely with platform wrapper resolution (npm.cmd on Windows).
+// Respects Hard Rule #13 and DEP0190 by passing joined literal tokens on win32 (#11335, #15327).
 function runNpm(args) {
   const isBun = Boolean(process.versions.bun);
-  const pm = isBun ? "bun" : "npm";
+  const pm = npmBin();
   const cmdArgs = isBun && args[0] === "install" ? ["add", ...args.slice(1)] : args;
-  const res = spawnSync(pm, cmdArgs, { stdio: "inherit", shell: false });
+  const [file, spawnArgs, options] = npmExecInvocation(process.platform, pm, cmdArgs, {
+    stdio: "inherit",
+  });
+  const res = spawnSync(file, spawnArgs, options);
   if (res.error) throw res.error;
   if (typeof res.status === "number" && res.status !== 0) {
     throw new Error(`${pm} exited with code ${res.status}`);
@@ -23,7 +26,7 @@ const TEMPLATE_INDEX = `export const meta = {
   name: "PLUGIN_NAME",
   version: "0.1.0",
   description: "OmniRoute plugin",
-  omnirouteApi: ">=4.0.0",
+  omnirouteApi: ">=3.8.0",
 };
 
 export function register(program, ctx) {
@@ -85,8 +88,8 @@ export function registerPlugin(program) {
       try {
         runNpm(["install", "-g", pkgName]);
         process.stdout.write(`\n✓ Installed: ${pkgName}\n`);
-      } catch {
-        process.stderr.write(`✗ Failed to install ${pkgName}\n`);
+      } catch (err) {
+        process.stderr.write(`✗ Failed to install ${pkgName}: ${err.message || err}\n`);
         process.exit(1);
       }
     });
@@ -107,8 +110,8 @@ export function registerPlugin(program) {
       try {
         runNpm(["uninstall", "-g", pkgName]);
         process.stdout.write(`✓ Removed: ${pkgName}\n`);
-      } catch {
-        process.stderr.write(`✗ Failed to remove ${pkgName}\n`);
+      } catch (err) {
+        process.stderr.write(`✗ Failed to remove ${pkgName}: ${err.message || err}\n`);
         process.exit(1);
       }
     });
@@ -178,8 +181,8 @@ export function registerPlugin(program) {
         }
         runNpm(["update", "-g", ...names]);
         process.stdout.write(`✓ Updated: ${names.join(", ")}\n`);
-      } catch {
-        process.stderr.write(`✗ Update failed\n`);
+      } catch (err) {
+        process.stderr.write(`✗ Update failed: ${err.message || err}\n`);
         process.exit(1);
       }
     });
@@ -204,7 +207,7 @@ export function registerPlugin(program) {
             type: "module",
             main: "index.mjs",
             description: `OmniRoute CLI plugin: ${safeName}`,
-            engines: { omniroute: ">=4.0.0" },
+            engines: { omniroute: ">=3.8.0" },
             keywords: ["omniroute-plugin", "omniroute-cmd"],
           },
           null,
