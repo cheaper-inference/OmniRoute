@@ -2988,7 +2988,13 @@ export async function markAccountUnavailable(
     if (
       provider &&
       model &&
-      isModelScopedAccessDenial(provider, status, errorText, options.structuredError)
+      isModelScopedAccessDenial(
+        provider,
+        status,
+        errorText,
+        options.structuredError,
+        options.upstreamErrorBody
+      )
     ) {
       lockModel(provider, connectionId, model, "model_not_found", COOLDOWN_MS.notFound);
       return { shouldFallback: true, cooldownMs: 0 };
