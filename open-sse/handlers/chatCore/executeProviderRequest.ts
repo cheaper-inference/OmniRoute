@@ -160,6 +160,7 @@ export type ExecuteProviderRequestDeps = {
   settings: Record<string, unknown> | null | undefined;
   toolDisclosure?: ToolDisclosureConfig | null;
   skipUpstreamRetry: boolean;
+  nonReplayableRequest?: boolean;
   requestUpstreamStartTimeoutMs?: number;
   stream: boolean;
   streamController: { signal: AbortSignal };
@@ -222,6 +223,7 @@ export async function executeProviderRequest(
     resilienceSettings,
     settings,
     skipUpstreamRetry,
+    nonReplayableRequest = false,
     requestUpstreamStartTimeoutMs,
     stream,
     streamController,
@@ -424,6 +426,7 @@ export async function executeProviderRequest(
                         clientResponseFormat,
                         onCredentialsRefreshed: fencedCredentialsRefreshed,
                         skipUpstreamRetry,
+                        nonReplayableRequest,
                         contextEditing: { enabled: contextEditingEnabled },
                         correlationId,
                       });
@@ -635,6 +638,7 @@ export async function executeProviderRequest(
                             clientResponseFormat,
                             onCredentialsRefreshed: fencedCredentialsRefreshed,
                             skipUpstreamRetry,
+                            nonReplayableRequest,
                             contextEditing: { enabled: contextEditingEnabled },
                             correlationId,
                           });
