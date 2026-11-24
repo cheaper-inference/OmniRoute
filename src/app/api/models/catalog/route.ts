@@ -123,7 +123,7 @@ export async function GET(request: Request) {
     }
 
     return Response.json(
-      { catalog, data: rows, catalogVersion: response.headers.get("X-Model-Catalog-Version") },
+      { catalog, catalogVersion: response.headers.get("X-Model-Catalog-Version") },
       { headers }
     );
   } catch (error) {

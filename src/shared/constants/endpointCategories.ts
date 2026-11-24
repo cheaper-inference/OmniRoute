@@ -81,7 +81,7 @@ export const ENDPOINT_CATEGORIES: readonly EndpointCategory[] = [
   {
     id: "decisions",
     label: "Decisions",
-    description: "Native decision inference and discovery",
+    description: "Typed decisions: System One (Jev) and native OpenAI Decisions",
     prefixes: ["/v1/systemone", "/v1/decisions"],
   },
   {

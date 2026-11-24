@@ -140,7 +140,6 @@ export async function addCustomModel(
   modelName?: string,
   source = "manual",
   apiFormat:
-    | "systemone"
     | "chat-completions"
     | "responses"
     | "embeddings"

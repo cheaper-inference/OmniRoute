@@ -68,8 +68,7 @@ const P = await import("../../src/shared/constants/providers.ts");
 // ParalonCloud adds one apikey/inference-hosts entry — 258.
 // Replicate, Cerebrium, Hetzner Inference and Grokified (#19206) add four
 // apikey/inference-hosts entries — 262.
-// Native Supersonic Labs (#18838) adds one API-key provider — 263.
-const APIKEY_PROVIDER_COUNT = 263;
+const APIKEY_PROVIDER_COUNT = 262;
 
 test("barrel still exports every catalog + key helpers", () => {
   for (const name of [

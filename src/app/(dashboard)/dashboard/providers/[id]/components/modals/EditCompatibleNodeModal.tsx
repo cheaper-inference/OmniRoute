@@ -140,8 +140,6 @@ export default function EditCompatibleNodeModal({
   const apiTypeOptions = [
     { value: "chat", label: t("chatCompletions") },
     { value: "responses", label: t("responsesApi") },
-    { value: "decisions", label: "Decisions (OpenAI)" },
-    { value: "systemone", label: "System One (typed decisions)" },
     { value: "embeddings", label: t("embeddings") },
     { value: "audio-transcriptions", label: t("audioTranscriptions") },
     { value: "audio-speech", label: t("audioSpeech") },

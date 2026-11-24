@@ -1,4 +1,3 @@
-import { validateDecisionProvider } from "@/lib/providers/validation/decision";
 import { NextResponse } from "next/server";
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 import { getAuditRequestContext, logAuditEvent } from "@/lib/compliance/index";
@@ -284,16 +283,6 @@ export async function POST(request) {
         });
       }
       return NextResponse.json({ valid: false, error: getModelsErrorMessage(res.status) });
-    }
-
-    if (apiType === "decisions" || apiType === "systemone") {
-      return NextResponse.json(
-        await validateDecisionProvider({
-          provider: "compatible-decision",
-          apiKey,
-          providerSpecificData: { apiType, baseUrl, chatPath, modelsPath },
-        })
-      );
     }
 
     // OpenAI Compatible Validation (Default)

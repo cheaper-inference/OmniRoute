@@ -80,7 +80,6 @@ function GenericProviderIcon({ size }: { size: number }) {
 }
 
 const KNOWN_SVGS = new Set([
-  "supersoniclabs",
   "360ai",
   "alibaba",
   "anthropic",
@@ -223,8 +222,6 @@ const KNOWN_SVGS = new Set([
 ]);
 
 const LOCAL_SVG_ALIASES: Record<string, string> = {
-  "ollama-cloud": "ollama",
-  "cloudflare-ai": "cloudflare",
   bigmodel: "zhipu",
   "cursor-api": "cursor",
   "qwen-cloud": "qwencloud",
@@ -313,10 +310,6 @@ const GENERIC_PROVIDER_IDS = new Set([
 ]);
 
 const THEMED_SVGS: Record<string, { light: string; dark: string }> = {
-  orcarouter: {
-    light: "/providers/orcarouter-original.png",
-    dark: "/providers/orcarouter-original.png",
-  },
   chatgpt: {
     light: "/providers/chatgpt-logo-black.svg",
     dark: "/providers/chatgpt-logo-white.svg",

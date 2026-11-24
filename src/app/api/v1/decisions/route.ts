@@ -1,7 +1,15 @@
-import { postDecision } from "../_shared/decisionRuntime";
-import { withInjectionGuard } from "@/middleware/promptInjectionGuard";
-import { CORS_HEADERS } from "@omniroute/open-sse/utils/cors.ts";
+/**
+ * POST /v1/decisions — native OpenAI Decisions (#18838).
+ *
+ * Body: `{ model: "openai/gpt-6-luna" | "gpt-6-luna", input, questions[] }` in the
+ * Decisions wire format; the response is the upstream `{ model, answers[], usage }`.
+ * Not a chat endpoint and never translated to or from chat or System One.
+ */
+import { createDecisionsRouteHandlers } from "@/app/api/v1/_shared/decisionsRoute";
 
-export const runtime = "nodejs";
-export const POST = withInjectionGuard((request: Request) => postDecision(request, "decisions"));
-export const OPTIONS = () => new Response(null, { headers: CORS_HEADERS });
+const handlers = createDecisionsRouteHandlers();
+
+export const dynamic = "force-dynamic";
+
+export const OPTIONS = handlers.OPTIONS;
+export const POST = handlers.POST;

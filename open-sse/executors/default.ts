@@ -1,6 +1,5 @@
 import { createHash } from "node:crypto";
 import { BaseExecutor, type ExecuteInput } from "./base.ts";
-import { buildErrorBody } from "../utils/error.ts";
 import { mapNvidiaGlm52ReasoningParams } from "./base/reasoningEffort.ts";
 import { mapBasetenReasoningParams } from "./base/basetenReasoning.ts";
 import { PROVIDERS, OAUTH_ENDPOINTS } from "../config/constants.ts";
@@ -167,26 +166,6 @@ function normalizeNvidiaToolCallIds(body: unknown): void {
       record.tool_call_id = normalizeNvidiaToolCallId(record.tool_call_id);
     }
   }
-}
-
-/**
- * Native decision providers (System One / decisions) only answer on their own endpoint;
- * a chat-style dispatch to them gets a 400 naming the endpoint to call instead.
- */
-function rejectNativeDecisionEndpoint(provider: string, connectionFormat: unknown) {
-  const nativeFormat = getRegistryEntry(provider)?.format;
-  const formats = [nativeFormat, connectionFormat];
-  if (!formats.includes("systemone") && !formats.includes("decisions")) return null;
-  const endpoint = formats.includes("decisions") ? "decisions" : "systemone";
-  return {
-    response: Response.json(
-      buildErrorBody(400, `This provider requires POST /v1/${endpoint}.`, undefined, {
-        type: "invalid_request_error",
-        code: "native_endpoint_required",
-      }),
-      { status: 400 }
-    ),
-  };
 }
 
 export class DefaultExecutor extends BaseExecutor {
@@ -1151,12 +1130,6 @@ export class DefaultExecutor extends BaseExecutor {
   }
 
   async execute(input: ExecuteInput) {
-    const nativeEndpointRejection = rejectNativeDecisionEndpoint(
-      this.provider,
-      input.credentials?.providerSpecificData?.apiType
-    );
-    if (nativeEndpointRejection) return nativeEndpointRejection;
-
     // Custom JSON API nodes keep their immutable openai-compatible id; the stored apiType
     // (copied from the node onto each connection) selects the business-endpoint executor.
     if (

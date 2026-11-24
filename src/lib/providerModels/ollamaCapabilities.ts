@@ -9,7 +9,6 @@ const ollamaShowResponseSchema = z
   .passthrough();
 
 const OLLAMA_CAPABILITY_TO_ENDPOINT: Readonly<Record<string, string>> = {
-  decision: "systemone",
   completion: "chat",
   embedding: "embeddings",
   image: "images",
@@ -50,9 +49,7 @@ export function applyOllamaShowCapabilities(model: unknown, showResponse: unknow
     ? "chat-completions"
     : supportedEndpoints.includes("embeddings")
       ? "embeddings"
-      : supportedEndpoints.includes("systemone")
-        ? "systemone"
-        : "images-generations";
+      : "images-generations";
 
   return {
     ...record,
