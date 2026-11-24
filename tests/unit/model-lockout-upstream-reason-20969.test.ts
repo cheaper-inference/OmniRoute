@@ -18,6 +18,8 @@ const providersDb = await import("../../src/lib/db/providers.ts");
 const auth = await import("../../src/sse/services/auth.ts");
 const fallback = await import("../../open-sse/services/accountFallback.ts");
 const { handleNoCredentials } = await import("../../src/sse/handlers/chatHelpers.ts");
+const { handleComboChat } = await import("../../open-sse/services/combo.ts");
+const { LOCAL_MODEL_COOLDOWN_HEADER } = await import("../../open-sse/utils/localCooldownHeader.ts");
 
 const MODEL = "claude-sonnet-5-5";
 const CREDIT_MESSAGE =
@@ -153,3 +155,111 @@ test("a prior attempt's 429 does not replace a model-scoped 400 lock's status an
   assert.match(json.error?.message ?? "", /credit balance is too low/i);
   assert.notEqual(json.error?.code, "model_cooldown");
 });
+
+test("a model-only cooldown from a 402 credit lock echoes that status and message", async () => {
+  const conn = await seedClaude("claude-20969-402");
+  fallback.lockModel("claude", conn.id, MODEL, "quota_exhausted", 120_000, {
+    lastError: CREDIT_MESSAGE,
+    errorCode: 402,
+  });
+  const credentials = await auth.getProviderCredentials("claude", null, null, MODEL);
+  assert.equal(credentials.lastErrorCode, 402);
+  assert.equal(credentials.lastError, CREDIT_MESSAGE);
+
+  const response = handleNoCredentials(credentials, null, "claude", MODEL, null, null);
+  assert.equal(response.status, 402);
+  const json = (await response.json()) as ApiErrorJson;
+  assert.match(json.error?.message ?? "", /credit balance is too low/i);
+});
+
+// A local cooldown answer must never read as "your OmniRoute key was rejected" (401/403) or as a
+// provider outage the lock never saw (5xx): only 400/402 are echoed, every other status stays the
+// byte-identical 429 model_cooldown answer and drops the upstream message.
+for (const upstreamStatus of [401, 403, 500, 503]) {
+  test(`a model lock from an upstream ${upstreamStatus} still answers 429 model_cooldown`, async () => {
+    const conn = await seedClaude(`claude-20969-clamp-${upstreamStatus}`);
+    fallback.lockModel("claude", conn.id, MODEL, "quota_exhausted", 120_000, {
+      lastError: "upstream said: invalid api key for the provider account",
+      errorCode: upstreamStatus,
+    });
+    const credentials = await auth.getProviderCredentials("claude", null, null, MODEL);
+    assert.equal(credentials.allRateLimited, true);
+    assert.equal(credentials.cooldownScope, "model");
+    assert.equal(credentials.lastErrorCode, 429);
+    assert.equal(credentials.lastError, null);
+
+    const response = handleNoCredentials(credentials, null, "claude", MODEL, null, null);
+    assert.equal(response.status, 429);
+    const text = await response.text();
+    assert.doesNotMatch(text, /invalid api key/i);
+    assert.equal((JSON.parse(text) as ApiErrorJson).error?.code, "model_cooldown");
+
+    // An earlier attempt's own status must not be hidden by, nor replaced with, the lock status.
+    const afterAttempt = handleNoCredentials(credentials, null, "claude", MODEL, "boom", 503);
+    assert.equal(afterAttempt.status, 503);
+  });
+}
+
+// The 400/402 answer carries no X-OmniRoute-Local-Cooldown header (that header marks only the
+// 429 model_cooldown answer). A combo must still advance to its next target on it, and must not
+// mark the first target's provider as exhausted for the whole request.
+for (const upstreamStatus of [400, 402]) {
+  test(`a combo advances past a ${upstreamStatus} model-cooldown answer to the next target`, async () => {
+    const conn = await seedClaude(`claude-20969-combo-${upstreamStatus}`);
+    fallback.lockModel("claude", conn.id, MODEL, "quota_exhausted", 120_000, {
+      lastError: CREDIT_MESSAGE,
+      errorCode: upstreamStatus,
+    });
+    const credentials = await auth.getProviderCredentials("claude", null, null, MODEL);
+    const cooldownAnswer = handleNoCredentials(credentials, null, "claude", MODEL, null, null);
+    assert.equal(cooldownAnswer.status, upstreamStatus);
+    assert.equal(cooldownAnswer.headers.get(LOCAL_MODEL_COOLDOWN_HEADER), null);
+    // Drop the lock so the combo's pre-dispatch lock skip does not bypass the first target: the
+    // answer above is what the target returns, and the combo must classify it on its own.
+    fallback.clearAllModelLockouts();
+
+    const combo = {
+      name: `combo-20969-${upstreamStatus}`,
+      strategy: "priority",
+      config: { maxRetries: 0 },
+      models: [
+        {
+          kind: "model",
+          provider: "claude",
+          providerId: "claude",
+          model: MODEL,
+          connectionId: conn.id,
+          id: `20969-${upstreamStatus}-0`,
+        },
+        {
+          kind: "model",
+          provider: "codex",
+          providerId: "codex",
+          model: "m-next",
+          connectionId: "conn-next",
+          id: `20969-${upstreamStatus}-1`,
+        },
+      ],
+    };
+    const calls: string[] = [];
+    const log = { info() {}, warn() {}, debug() {}, error() {} };
+    const result = await handleComboChat({
+      body: { model: combo.name, messages: [{ role: "user", content: "hi" }], stream: false },
+      combo,
+      allCombos: [combo],
+      isModelAvailable: async () => true,
+      relayOptions: undefined,
+      signal: undefined,
+      settings: {},
+      log,
+      handleSingleModel: async (_b: unknown, modelStr: string) => {
+        calls.push(modelStr);
+        if (calls.length === 1) return cooldownAnswer.clone();
+        return Response.json({ choices: [{ message: { role: "assistant", content: "next" } }] });
+      },
+    });
+
+    assert.equal(calls.length, 2, `expected both targets to be tried, got ${calls.join(",")}`);
+    assert.equal(result.status, 200);
+  });
+}
