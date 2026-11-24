@@ -376,3 +376,46 @@ test("empty/stateless bodies still fall back to workspaceId as a last resort", (
   );
   assert.equal(transformed.prompt_cache_key, WORKSPACE_ID);
 });
+
+test("derived keys differ for first prompts sharing the bounded 4096-char anchor prefix", () => {
+  const creds = { providerSpecificData: { workspaceId: WORKSPACE_ID } };
+  const sharedPrefix = "a".repeat(4096);
+  const bodyFor = (suffix: string) => ({
+    model: "gpt-5.5",
+    messages: [{ role: "user", content: sharedPrefix + suffix }],
+  });
+
+  const keyA = deriveCodexConversationCacheKey(bodyFor("X"), creds);
+  const keyB = deriveCodexConversationCacheKey(bodyFor("Y"), creds);
+  assert.notEqual(keyA, keyB, "distinct long prompts sharing a 4096-char prefix must not collide");
+  assert.equal(
+    deriveCodexConversationCacheKey(bodyFor("X"), creds),
+    keyA,
+    "the same complete first prompt must keep a stable key"
+  );
+});
+
+test("derived keys differ for same-text first turns with different image parts", () => {
+  const creds = { providerSpecificData: { workspaceId: WORKSPACE_ID } };
+  const bodyFor = (imageUrl: string) => ({
+    model: "gpt-5.5",
+    messages: [
+      {
+        role: "user",
+        content: [
+          { type: "input_image", image_url: imageUrl },
+          { type: "input_text", text: "Compare these two screenshots." },
+        ],
+      },
+    ],
+  });
+
+  const keyA = deriveCodexConversationCacheKey(bodyFor("https://example.test/a.png"), creds);
+  const keyB = deriveCodexConversationCacheKey(bodyFor("https://example.test/b.png"), creds);
+  assert.notEqual(keyA, keyB, "same text with different first-turn images must not collide");
+  assert.equal(
+    deriveCodexConversationCacheKey(bodyFor("https://example.test/a.png"), creds),
+    keyA,
+    "the same image-bearing first prompt must keep a stable key"
+  );
+});

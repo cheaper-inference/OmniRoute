@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { normalizeCodexSessionId } from "../../config/codexClient.ts";
 import {
   type CodexClientIdentity,
@@ -138,49 +139,140 @@ function extractTextFromPart(part: unknown): string | null {
   );
 }
 
-function joinAnchoredTextParts(content: unknown[]): string | null {
-  const textParts: string[] = [];
-  let totalLen = 0;
-  for (const part of content) {
-    const textVal = extractTextFromPart(part);
-    if (textVal) {
-      textParts.push(textVal);
-      totalLen += textVal.length;
-      if (totalLen >= MAX_ANCHOR_TEXT_CHARS) break;
-    }
-  }
-  return textParts.length > 0
-    ? textParts.join("\n").slice(0, MAX_ANCHOR_TEXT_CHARS)
+interface AnchoredMessageContent {
+  /** Bounded anchor text (≤ MAX_ANCHOR_TEXT_CHARS) for a compact, inspectable seed. */
+  text: string;
+  /** sha256 of the complete, unbounded content so long prompts sharing a bounded-text
+   *  prefix never collapse onto one cache key (code review #21084, anchor-prefix case). */
+  digest: string;
+  /** Stable identifiers (URL / file reference) of image parts in content order, so
+   *  same-text first turns with different images stay in distinct cache partitions. */
+  imageRefs: string[];
+}
+
+const EMPTY_ANCHORED_CONTENT: AnchoredMessageContent = { text: "", digest: "", imageRefs: [] };
+
+function stableAnchorDigest(value: string): string {
+  return createHash("sha256").update(value).digest("hex");
+}
+
+function readImagePartRef(part: Record<string, unknown> | null): string | null {
+  const raw = part?.image_url ?? part?.source ?? part?.file_id ?? part?.input_file;
+  if (typeof raw === "string") return nonEmptyString(raw);
+  const obj = asRecord(raw);
+  return obj
+    ? nonEmptyString(obj.url) || nonEmptyString(obj.file_id) || nonEmptyString(obj.filename)
     : null;
 }
 
-function extractMessageText(content: unknown): string {
-  if (typeof content === "string") {
-    return content.trim().slice(0, MAX_ANCHOR_TEXT_CHARS);
+function collectContentImageRefs(content: unknown[]): string[] {
+  const refs: string[] = [];
+  for (const part of content) {
+    const ref = readImagePartRef(asRecord(part));
+    if (ref) refs.push(ref);
   }
-  if (!Array.isArray(content)) return "";
+  return refs;
+}
 
-  const joined = joinAnchoredTextParts(content);
-  if (joined) return joined;
+function collectTextParts(content: unknown[]): { bounded: string[]; full: string[] } {
+  const bounded: string[] = [];
+  const full: string[] = [];
+  let totalLen = 0;
+  for (const part of content) {
+    const textVal = extractTextFromPart(part);
+    if (!textVal) continue;
+    full.push(textVal);
+    if (totalLen >= MAX_ANCHOR_TEXT_CHARS) continue;
+    bounded.push(textVal);
+    totalLen += textVal.length;
+  }
+  return { bounded, full };
+}
 
-  if (content.length === 0) return "";
+function serializeAnchorFallback(content: unknown[]): string | null {
+  if (content.length === 0) return null;
   try {
-    return JSON.stringify(content).slice(0, MAX_ANCHOR_TEXT_CHARS);
+    return JSON.stringify(content);
   } catch {
-    return "";
+    return null;
   }
 }
 
-function extractConversationAnchor(body: Record<string, unknown>): {
-  instructions: string;
-  leadingDeveloperText: string;
-  firstUserText: string;
+function anchoredContentFromParts(content: unknown[]): AnchoredMessageContent {
+  const imageRefs = collectContentImageRefs(content);
+  const { bounded, full } = collectTextParts(content);
+  if (full.length === 0) {
+    const fallback = serializeAnchorFallback(content);
+    return fallback
+      ? {
+          text: fallback.slice(0, MAX_ANCHOR_TEXT_CHARS),
+          digest: stableAnchorDigest(fallback),
+          imageRefs,
+        }
+      : { ...EMPTY_ANCHORED_CONTENT, imageRefs };
+  }
+  const fullText = full.join("\n");
+  return {
+    text: bounded.join("\n").slice(0, MAX_ANCHOR_TEXT_CHARS),
+    digest: stableAnchorDigest(fullText),
+    imageRefs,
+  };
+}
+
+function extractMessageAnchor(content: unknown): AnchoredMessageContent {
+  if (typeof content === "string") {
+    const trimmed = content.trim();
+    if (!trimmed) return EMPTY_ANCHORED_CONTENT;
+    return {
+      text: trimmed.slice(0, MAX_ANCHOR_TEXT_CHARS),
+      digest: stableAnchorDigest(trimmed),
+      imageRefs: [],
+    };
+  }
+  if (!Array.isArray(content)) return EMPTY_ANCHORED_CONTENT;
+  return anchoredContentFromParts(content);
+}
+
+function anchoredContentIsEmpty(content: AnchoredMessageContent): boolean {
+  return !content.text && !content.digest;
+}
+
+function scanAnchorItems(items: unknown[]): {
+  leadingDeveloper: AnchoredMessageContent | null;
+  firstUser: AnchoredMessageContent | null;
 } {
-  const rawInstructions = nonEmptyString(body.instructions) || "";
+  let leadingDeveloper: AnchoredMessageContent | null = null;
+  let firstUser: AnchoredMessageContent | null = null;
+
+  for (const item of items) {
+    const rec = asRecord(item);
+    if (!rec) continue;
+    const role = typeof rec.role === "string" ? rec.role.toLowerCase() : "";
+    if (!leadingDeveloper && !firstUser && (role === "system" || role === "developer")) {
+      leadingDeveloper = extractMessageAnchor(rec.content);
+    } else if (!firstUser && role === "user") {
+      firstUser = extractMessageAnchor(rec.content);
+      break;
+    }
+  }
+
+  return { leadingDeveloper, firstUser };
+}
+
+function extractConversationAnchor(body: Record<string, unknown>): {
+  instructions: AnchoredMessageContent;
+  leadingDeveloper: AnchoredMessageContent;
+  firstUser: AnchoredMessageContent;
+} {
+  const rawInstructions = nonEmptyString(body.instructions);
   const instructions =
     rawInstructions && rawInstructions !== CODEX_CHAT_DEFAULT_INSTRUCTIONS
-      ? rawInstructions.slice(0, MAX_ANCHOR_TEXT_CHARS)
-      : "";
+      ? {
+          text: rawInstructions.slice(0, MAX_ANCHOR_TEXT_CHARS),
+          digest: stableAnchorDigest(rawInstructions),
+          imageRefs: [],
+        }
+      : EMPTY_ANCHORED_CONTENT;
 
   const items = Array.isArray(body.input)
     ? body.input
@@ -188,22 +280,13 @@ function extractConversationAnchor(body: Record<string, unknown>): {
       ? body.messages
       : [];
 
-  let leadingDeveloperText = "";
-  let firstUserText = "";
+  const { leadingDeveloper, firstUser } = scanAnchorItems(items);
 
-  for (const item of items) {
-    const rec = asRecord(item);
-    if (!rec) continue;
-    const role = typeof rec.role === "string" ? rec.role.toLowerCase() : "";
-    if (!leadingDeveloperText && !firstUserText && (role === "system" || role === "developer")) {
-      leadingDeveloperText = extractMessageText(rec.content);
-    } else if (!firstUserText && role === "user") {
-      firstUserText = extractMessageText(rec.content);
-      break;
-    }
-  }
-
-  return { instructions, leadingDeveloperText, firstUserText };
+  return {
+    instructions,
+    leadingDeveloper: leadingDeveloper ?? EMPTY_ANCHORED_CONTENT,
+    firstUser: firstUser ?? EMPTY_ANCHORED_CONTENT,
+  };
 }
 
 function resolveAccountScopeSeed(credentials: CodexCacheKeyCredentials | null | undefined): string {
@@ -229,6 +312,9 @@ function resolveAccountScopeSeed(credentials: CodexCacheKeyCredentials | null | 
  * - turns 1..N of the same conversation share one stable cache key;
  * - concurrent conversations with identical system prompts but different initial
  *   user prompts get distinct cache partitions;
+ * - each anchored component carries a sha256 digest of its complete content plus
+ *   ordered image-part references, so prompts sharing the bounded-text prefix or
+ *   differing only in first-turn images never collide;
  * - truly empty/stateless bodies return null (allowing last-resort fallback).
  */
 export function deriveCodexConversationCacheKey(
@@ -236,8 +322,12 @@ export function deriveCodexConversationCacheKey(
   credentials: CodexCacheKeyCredentials | null | undefined
 ): string | null {
   if (!body) return null;
-  const { instructions, leadingDeveloperText, firstUserText } = extractConversationAnchor(body);
-  if (!instructions && !leadingDeveloperText && !firstUserText) {
+  const { instructions, leadingDeveloper, firstUser } = extractConversationAnchor(body);
+  if (
+    anchoredContentIsEmpty(instructions) &&
+    anchoredContentIsEmpty(leadingDeveloper) &&
+    anchoredContentIsEmpty(firstUser)
+  ) {
     return null;
   }
 
@@ -247,8 +337,8 @@ export function deriveCodexConversationCacheKey(
     accountScope,
     model,
     instructions,
-    leadingDeveloperText,
-    firstUserText,
+    leadingDeveloper,
+    firstUser,
   ])}`;
   return deriveStableUUIDv4(seed);
 }
