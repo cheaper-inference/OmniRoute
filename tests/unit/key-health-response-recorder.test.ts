@@ -150,22 +150,27 @@ function requestDeps(
 }
 
 for (const stream of [true, false]) {
-  for (const status of [403, 402]) {
+  for (const status of [403, 402, 429]) {
     test(`the ${stream ? "streaming" : "non-streaming"} ${status} dispatch records its own response and sequence`, async () => {
       const { record, calls } = recorderSpy();
-      const response = new Response(
-        JSON.stringify({ error: { message: "Workspace access denied" } }),
-        {
-          status,
-          headers: { "content-type": "application/json" },
-        }
-      );
+      const body = JSON.stringify({
+        error: { message: status === 429 ? "Rate limited" : "Workspace access denied" },
+      });
+      const response = new Response(body, {
+        status,
+        headers: {
+          "content-type": "application/json",
+          ...(status === 429 ? { "retry-after": "2" } : {}),
+        },
+      });
       const result = await executeProviderRequest(requestDeps(response, record, stream));
-      await result.response.text();
+      assert.equal(result.response.status, status);
+      assert.equal(await result.response.text(), body);
       assert.equal(calls.length, 1);
       assert.equal(calls[0].status, status);
       assert.equal(calls[0].creds?.connectionId, "kh-real-dispatch");
-      assert.match(calls[0].failureDetail ?? "", /Workspace access denied/);
+      assert.equal(calls[0].failureDetail, body);
+      assert.equal(calls[0].retryAfterMs, status === 429 ? 2_000 : null);
       assert.ok(Number.isSafeInteger(calls[0].requestSeq) && calls[0].requestSeq > 0);
     });
   }

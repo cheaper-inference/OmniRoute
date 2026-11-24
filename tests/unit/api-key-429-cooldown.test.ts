@@ -272,20 +272,11 @@ describe("chatCore wiring (source-locked)", () => {
     "utf8"
   );
 
-  it("streaming executor site records 429 into key health (not only 2xx/401/403)", () => {
-    const i = executeSrc.indexOf("recordResponseKeyHealth(res.response,");
-    assert.notEqual(i, -1, "streaming recordResponseKeyHealth call site must exist");
+  it("the shared health recorder preserves the response owner fence", () => {
     assert.match(
       executeSrc,
       /runWithCodexResponseFence\(\s*response,\s*\(\) =>\s*record\(\s*response\.status,/,
       "the shared health recorder must preserve the response owner fence"
-    );
-    // Only the condition head counts — comments inside the block must not satisfy this.
-    const condStart = executeSrc.lastIndexOf("if (", i);
-    const cond = executeSrc.slice(condStart, condStart + 700);
-    assert.ok(
-      cond.includes("HTTP_STATUS.RATE_LIMITED"),
-      "streaming condition head must admit 429 via HTTP_STATUS.RATE_LIMITED"
     );
   });
 
