@@ -16,6 +16,7 @@ import {
 } from "@/lib/radar/offersFeedSchema";
 import { Card } from "@/shared/components";
 import Button from "@/shared/components/Button";
+import Badge from "@/shared/components/Badge";
 
 interface OffersMeta {
   version: string;
@@ -176,7 +177,9 @@ export default function RadarOffersPage() {
         <Card>
           <div className="flex flex-col items-center gap-4 py-8 text-center">
             <Icon name="redeem" size={36} className="text-primary" />
-            <h2 className="text-xl">{t("keyRequiredTitle")}</h2>
+            <h2 className="ci-heading" data-size="xl">
+              {t("keyRequiredTitle")}
+            </h2>
             <p className="max-w-xl text-text-muted">{t("keyRequiredDescription")}</p>
             <div className="flex flex-col sm:flex-row gap-3">
               {contributorClaimUrl && (
@@ -213,18 +216,14 @@ export default function RadarOffersPage() {
               <div className="flex h-full flex-col gap-4">
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="text-xs uppercase tracking-wide text-text-muted">
-                      {offer.provider}
-                    </p>
-                    <h2 className="text-lg">{localizeRadarOfferText(offer.title, locale)}</h2>
+                    <p className="ci-eyebrow">{offer.provider}</p>
+                    <h2 className="ci-heading" data-size="lg">
+                      {localizeRadarOfferText(offer.title, locale)}
+                    </h2>
                   </div>
-                  <span
-                    className={`rounded-full px-2 py-1 text-xs font-medium ${
-                      offer.partner ? "bg-primary/15 text-primary" : "bg-success/15 text-success"
-                    }`}
-                  >
+                  <Badge variant={offer.partner ? "primary" : "success"}>
                     {offer.partner ? t("partnerBadge") : t("officialBadge")}
-                  </span>
+                  </Badge>
                 </div>
 
                 <p className="text-2xl font-semibold text-primary">

@@ -1162,7 +1162,13 @@
     "tokensPageTitle": "Tokens",
     "tokensPageDescription": "Send tokens between API keys, share invite codes and connect community servers.",
     "tokensServerUrlLabel": "Server URL",
-    "table": "Table"
+    "table": "Table",
+    "tableScrollbarLabel": "Top {name} horizontal scrollbar",
+    "tableRowKeysHint": "Use the Up and Down arrow keys to move between rows, and Enter to open one.",
+    "previous": "Previous",
+    "goToPage": "Go to page {page}",
+    "morePages": "More pages",
+    "pageSummary": "Page {page} of {pageCount}"
   },
   "disabled": "Disabled",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Route budget-exhausted requests to the emergency free fallback provider/model.",
@@ -2144,6 +2150,7 @@
     "chartNoCostData": "No cost data",
     "chartModelUsageOverTime": "Model Usage Over Time",
     "chartNoData": "No data",
+    "chartDataPoints": "{name} data points",
     "chartWeekly": "Weekly",
     "activitySummary": "{active} active days · {tokens} tokens · {days} days",
     "activityCellTitle": "{date}: {tokens} tokens",
@@ -11377,6 +11384,8 @@
   },
   "stats": {
     "usageOverview": "Usage Overview",
+    "requestsPerMinuteTrend": "Requests per minute, last minutes: {values}",
+    "inputTokensPerMinuteTrend": "Input tokens per minute, last minutes: {values}",
     "outputTokens": "Output Tokens",
     "totalCost": "Total Cost",
     "usageByModel": "Usage by Model",

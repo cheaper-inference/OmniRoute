@@ -106,10 +106,10 @@ type TemplateJsonEditorProps = {
 function TemplateJsonEditor({ value, onChange, t }: TemplateJsonEditorProps) {
   return (
     <Textarea
+      mono
       label={t("customJsonTemplateModeJson")}
       rows={8}
       spellCheck={false}
-      className="font-mono text-xs"
       value={value}
       onChange={(e) => onChange(e.target.value)}
     />

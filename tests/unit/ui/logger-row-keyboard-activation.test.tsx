@@ -1,7 +1,8 @@
 // @vitest-environment jsdom
 // Review of 2026-11-15, defect 5 (finding A5-03): the rows of the two main loggers opened the
-// detail on a mouse click only. They now render `InteractiveTableRow`, so the row is a tab stop
-// and Enter / Space open the same detail, while the controls inside the row keep their own keys.
+// detail on a mouse click only. They now render the kit `<TableRow onActivate>`, so the row is a
+// tab stop and Enter / Space open the same detail, while the controls inside the row keep their
+// own keys.
 import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
@@ -70,6 +71,8 @@ const MOUNT_TIMEOUT_MS = 60_000;
 let container: HTMLElement;
 let root: Root;
 let fetchMock: ReturnType<typeof vi.fn>;
+let requestLogs: Array<Record<string, unknown>>;
+let proxyLogs: Array<Record<string, unknown>>;
 
 async function press(target: Element, key: string) {
   const event = new KeyboardEvent("keydown", { key, bubbles: true, cancelable: true });
@@ -103,13 +106,15 @@ beforeEach(() => {
     globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT?: boolean }
   ).IS_REACT_ACT_ENVIRONMENT = true;
   window.localStorage.clear();
+  requestLogs = [REQUEST_LOG];
+  proxyLogs = [PROXY_LOG];
   container = document.createElement("div");
   document.body.appendChild(container);
   root = createRoot(container);
   fetchMock = vi.fn(async (input: RequestInfo | URL) => {
     const url = String(input);
-    if (url.startsWith("/api/usage/call-logs")) return Response.json([REQUEST_LOG]);
-    if (url.startsWith("/api/usage/proxy-logs")) return Response.json([PROXY_LOG]);
+    if (url.startsWith("/api/usage/call-logs")) return Response.json(requestLogs);
+    if (url.startsWith("/api/usage/proxy-logs")) return Response.json(proxyLogs);
     if (url.startsWith("/api/provider-nodes")) return Response.json({ nodes: [] });
     if (url.startsWith("/api/logs/detail")) return Response.json({ enabled: false });
     return Response.json({});
@@ -205,6 +210,83 @@ describe("ProxyLogger row keyboard activation", () => {
 
       expect(event.defaultPrevented).toBe(false);
       expect(detailOpen()).toBe(false);
+    },
+    MOUNT_TIMEOUT_MS
+  );
+});
+
+// Kit #305 (table-roving-focus): a logger shows hundreds of rows, so its rows share one tab stop
+// and the arrow keys move between them. Nothing in the table role says so, hence the translated
+// hint that describes the table.
+describe.each([
+  {
+    name: "RequestLoggerV2",
+    mount: () => <RequestLoggerV2 />,
+    seed: () => {
+      requestLogs = [
+        REQUEST_LOG,
+        {
+          ...REQUEST_LOG,
+          id: "log-second",
+          model: "gpt-second",
+          timestamp: "2026-08-10T11:59:00.000Z",
+        },
+      ];
+    },
+  },
+  {
+    name: "ProxyLogger",
+    mount: () => <ProxyLogger />,
+    seed: () => {
+      proxyLogs = [
+        PROXY_LOG,
+        {
+          ...PROXY_LOG,
+          id: "proxy-second",
+          timestamp: new Date(Date.now() - 60_000).toISOString(),
+          correlationId: "corr-second-654321",
+        },
+      ];
+    },
+  },
+])("$name roving row focus", ({ mount, seed }) => {
+  async function renderRows() {
+    seed();
+    await render(mount());
+    const rows = Array.from(
+      container.querySelectorAll<HTMLTableRowElement>("tbody tr[data-interactive]")
+    );
+    expect(rows.length, "two log rows").toBe(2);
+    return rows;
+  }
+
+  it(
+    "gives the rows one tab stop between them and moves it with the arrow keys",
+    async () => {
+      const rows = await renderRows();
+      expect(container.querySelector("table")!.getAttribute("data-row-focus")).toBe("roving");
+      expect(rows.map((row) => row.getAttribute("tabindex"))).toEqual(["0", "-1"]);
+
+      await act(async () => {
+        rows[0].focus();
+      });
+      const event = await press(rows[0], "ArrowDown");
+
+      expect(event.defaultPrevented).toBe(true);
+      expect(document.activeElement).toBe(rows[1]);
+      expect(rows.map((row) => row.getAttribute("tabindex"))).toEqual(["-1", "0"]);
+    },
+    MOUNT_TIMEOUT_MS
+  );
+
+  it(
+    "describes the table with the translated hint about the arrow keys",
+    async () => {
+      await renderRows();
+      const hintId = container.querySelector("table")!.getAttribute("aria-describedby");
+      expect(hintId, "aria-describedby on the table").toBeTruthy();
+      const hint = document.getElementById(hintId!);
+      expect(hint?.textContent).toBe("tableRowKeysHint");
     },
     MOUNT_TIMEOUT_MS
   );

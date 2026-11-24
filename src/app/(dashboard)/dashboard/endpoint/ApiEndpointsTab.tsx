@@ -13,6 +13,7 @@ import EmptyState from "@/shared/components/EmptyState";
 import Input from "@/shared/components/Input";
 import Select from "@/shared/components/Select";
 import Textarea from "@/shared/components/Textarea";
+import IconChip from "@/shared/components/IconChip";
 import { cn } from "@/shared/utils/cn";
 import { useDisplayBaseUrl } from "@/shared/hooks";
 import VscodeTokenAliasCard from "./VscodeTokenAliasCard";
@@ -327,15 +328,17 @@ export default function ApiEndpointsTab() {
         <Card className="p-5">
           <div className="flex items-center justify-between flex-wrap gap-3">
             <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center size-10 rounded-xl bg-primary/10">
-                <Icon name="api" size={20} className="text-primary" />
-              </div>
+              <IconChip tone="accent">
+                <Icon name="api" />
+              </IconChip>
               <div>
                 <div className="flex items-center gap-2">
-                  <h2 className="text-base">{catalog.info.title || "API"}</h2>
-                  <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-mono font-semibold">
+                  <h2 className="ci-heading" data-size="md">
+                    {catalog.info.title || "API"}
+                  </h2>
+                  <Badge size="sm" variant="primary" className="font-mono">
                     {catalog.info.version}
-                  </span>
+                  </Badge>
                 </div>
                 <p className="text-xs text-text-muted mt-0.5">
                   {t("catalogStats", {
@@ -373,11 +376,13 @@ export default function ApiEndpointsTab() {
         <>
           <Card className="p-6">
             <div className="flex items-start gap-3">
-              <div className="flex size-10 items-center justify-center rounded-lg bg-error/10">
-                <Icon name="error" size={20} className="text-error" />
-              </div>
+              <IconChip tone="danger">
+                <Icon name="error" />
+              </IconChip>
               <div>
-                <h3 className="text-sm text-text-main">{t("apiEndpointsCatalogUnavailable")}</h3>
+                <h3 className="ci-heading" data-size="sm">
+                  {t("apiEndpointsCatalogUnavailable")}
+                </h3>
                 <p className="text-xs text-text-muted mt-1">
                   {catalogError || t("catalogUnavailableDescription")}
                 </p>
@@ -412,28 +417,26 @@ export default function ApiEndpointsTab() {
             />
             <div className="flex gap-1 flex-wrap">
               <Button
-                size="sm"
+                size="2xs"
                 variant={!selectedTag ? "secondary" : "ghost"}
                 aria-pressed={!selectedTag}
                 onClick={() => setSelectedTag(null)}
-                className="text-[10px]"
               >
                 {t("all")}
               </Button>
               {allTags.slice(0, 8).map((tag) => (
                 <Button
                   key={tag}
-                  size="sm"
+                  size="2xs"
                   variant={selectedTag === tag ? "secondary" : "ghost"}
                   aria-pressed={selectedTag === tag}
                   onClick={() => setSelectedTag(selectedTag === tag ? null : tag)}
-                  className="text-[10px]"
                 >
                   {tag}
                 </Button>
               ))}
               {allTags.length > 8 && (
-                <span className="px-2 py-1 text-[10px] text-text-muted">
+                <span className="px-2 py-1 text-3xs text-text-muted">
                   {t("more", { count: allTags.length - 8 })}
                 </span>
               )}
@@ -443,11 +446,10 @@ export default function ApiEndpointsTab() {
               {(["all", "auth", "loopback", "always-protected", "public"] as const).map((tier) => (
                 <Button
                   key={tier}
-                  size="sm"
+                  size="2xs"
                   variant={securityTier === tier ? "secondary" : "ghost"}
                   aria-pressed={securityTier === tier}
                   onClick={() => setSecurityTier(tier)}
-                  className="text-[10px]"
                 >
                   {tier === "all"
                     ? t("tierAll")
@@ -461,11 +463,11 @@ export default function ApiEndpointsTab() {
                 </Button>
               ))}
               <Button
-                size="sm"
+                size="2xs"
                 variant={showInternal ? "warning" : "ghost"}
                 aria-pressed={showInternal}
                 onClick={() => setShowInternal(!showInternal)}
-                className="text-[10px] ml-1"
+                className="ml-1"
                 title={t("showInternalTooltip")}
               >
                 {showInternal ? t("hideInternal") : t("showInternal")}
@@ -480,7 +482,7 @@ export default function ApiEndpointsTab() {
             <Card key={tag} className="overflow-hidden">
               <div className="flex items-center gap-2 px-4 py-3 border-b border-border">
                 <Icon name="folder" size={14} className="text-primary" />
-                <h3 className="text-xs uppercase text-text-muted">{tag}</h3>
+                <h3 className="ci-eyebrow">{tag}</h3>
                 <Badge size="sm">{endpoints.length}</Badge>
                 <div className="flex-1 h-px bg-border/30" />
               </div>
@@ -508,7 +510,7 @@ export default function ApiEndpointsTab() {
                         <code className="text-xs font-mono text-text-main flex-1 truncate">
                           {ep.path}
                         </code>
-                        <span className="text-[11px] text-text-muted hidden sm:inline truncate max-w-[200px]">
+                        <span className="text-xs text-text-muted hidden sm:inline truncate max-w-[200px]">
                           {ep.summary}
                         </span>
                         <EndpointBadges ep={ep} />
@@ -537,9 +539,9 @@ export default function ApiEndpointsTab() {
                             <div>
                               <p className="text-xs text-text-main font-medium">{ep.summary}</p>
                               {ep.description && ep.description !== ep.summary && (
-                                <p className="text-[11px] text-text-muted mt-1">{ep.description}</p>
+                                <p className="text-xs text-text-muted mt-1">{ep.description}</p>
                               )}
-                              <div className="flex items-center gap-3 mt-2 text-[10px] text-text-muted">
+                              <div className="flex items-center gap-3 mt-2 text-3xs text-text-muted">
                                 {ep.security && (
                                   <span className="flex items-center gap-1">
                                     <Icon name="lock" size={12} className="text-warning" />
@@ -558,14 +560,14 @@ export default function ApiEndpointsTab() {
                               </div>
                             </div>
                             <Button
-                              size="sm"
+                              size="2xs"
                               variant={isTrying ? "primary" : "secondary"}
                               icon={isTrying ? "close" : "play_arrow"}
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleTryIt(ep);
                               }}
-                              className="shrink-0 text-[10px]"
+                              className="shrink-0"
                             >
                               {isTrying ? t("close") : t("tryIt")}
                             </Button>
@@ -593,14 +595,13 @@ export default function ApiEndpointsTab() {
                               {ep.security && (
                                 <div>
                                   <div className="flex items-center justify-between mb-1">
-                                    <p className="text-[9px] font-semibold text-text-muted uppercase tracking-wider">
+                                    <p className="ci-eyebrow" data-size="3xs" data-weight="medium">
                                       {t("apiKey")}
                                     </p>
                                     <Button
                                       variant="ghost"
-                                      size="sm"
+                                      size="2xs"
                                       onClick={() => setUseManualKey(!useManualKey)}
-                                      className="h-auto min-h-0 px-1 py-0 text-[10px]"
                                     >
                                       {useManualKey ? t("switchToSelection") : t("enterManually")}
                                     </Button>
@@ -613,7 +614,8 @@ export default function ApiEndpointsTab() {
                                       onChange={(e) => setManualApiKey(e.target.value)}
                                       placeholder={t("pasteApiKey")}
                                       aria-label={t("apiKey")}
-                                      inputClassName="font-mono text-xs"
+                                      size="xs"
+                                      mono
                                     />
                                   ) : availableApiKeys.length > 0 ? (
                                     <Select
@@ -629,7 +631,7 @@ export default function ApiEndpointsTab() {
                                       ))}
                                     </Select>
                                   ) : (
-                                    <p className="text-[11px] text-warning">
+                                    <p className="text-xs text-warning">
                                       {apiKeyLoadError || t("noActiveApiKeys")}
                                     </p>
                                   )}
@@ -637,7 +639,7 @@ export default function ApiEndpointsTab() {
                               )}
                               {ep.method !== "GET" && (
                                 <div>
-                                  <p className="text-[9px] font-semibold text-text-muted uppercase tracking-wider">
+                                  <p className="ci-eyebrow" data-size="3xs" data-weight="medium">
                                     {t("requestBodyJson")}
                                   </p>
                                   <Textarea
@@ -645,7 +647,8 @@ export default function ApiEndpointsTab() {
                                     value={tryBody}
                                     onChange={(e) => setTryBody(e.target.value)}
                                     rows={8}
-                                    className="mt-1 font-mono text-xs resize-none"
+                                    mono
+                                    className="mt-1 resize-none"
                                     placeholder='{ "model": "gpt-4o", "messages": [...] }'
                                   />
                                 </div>
@@ -676,7 +679,7 @@ export default function ApiEndpointsTab() {
                                     </Badge>
                                     <span className="text-text-muted">{tryResult.latencyMs}ms</span>
                                   </div>
-                                  <pre className="text-[11px] font-mono text-text-main overflow-auto max-h-[300px] whitespace-pre-wrap">
+                                  <pre className="text-xs font-mono text-text-main overflow-auto max-h-[300px] whitespace-pre-wrap">
                                     {typeof tryResult.body === "string"
                                       ? tryResult.body
                                       : JSON.stringify(tryResult.body, null, 2)}
@@ -705,19 +708,14 @@ export default function ApiEndpointsTab() {
             <Card className="p-4">
               <div className="flex items-center gap-2 mb-3">
                 <Icon name="data_object" size={14} className="text-primary" />
-                <h3 className="text-xs uppercase text-text-muted">{t("dataSchemas")}</h3>
-                <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-surface-2 text-text-muted">
-                  {catalog.schemas.length}
-                </span>
+                <h3 className="ci-eyebrow">{t("dataSchemas")}</h3>
+                <Badge size="sm">{catalog.schemas.length}</Badge>
               </div>
               <div className="flex flex-wrap gap-1.5">
                 {catalog.schemas.map((schema) => (
-                  <span
-                    key={schema}
-                    className="text-[10px] px-2 py-1 rounded-md bg-chart-3/10 text-chart-3-ink font-mono"
-                  >
+                  <Badge key={schema} size="sm" tone="chart-3" className="font-mono">
                     {schema}
-                  </span>
+                  </Badge>
                 ))}
               </div>
             </Card>

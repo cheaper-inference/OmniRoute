@@ -73,7 +73,7 @@ export default function ResultNarrated({
       {/* Header */}
       <div className="flex items-center gap-2">
         <Icon name="translate" size={20} className="text-primary" />
-        <h3 className="text-sm text-text-main">
+        <h3 className="ci-heading" data-size="sm">
           {tr("simpleResultPanelTitle", "Translation + Response")}
         </h3>
       </div>
@@ -128,11 +128,11 @@ export default function ResultNarrated({
 
             {/* Response preview */}
             {result.responsePreview && (
-              <div className="rounded-md border border-border bg-bg-subtle p-3">
+              <Card.Section>
                 <pre className="overflow-x-auto whitespace-pre-wrap break-words font-mono text-xs text-text-main">
                   {result.responsePreview.slice(0, 500)}
                 </pre>
-              </div>
+              </Card.Section>
             )}
 
             {/* Secondary action buttons */}

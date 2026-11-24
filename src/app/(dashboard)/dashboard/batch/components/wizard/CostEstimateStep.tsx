@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import Icon from "@/shared/components/Icon";
 import { Spinner } from "@/shared/components/Loading";
+import Badge from "@/shared/components/Badge";
 import Button from "@/shared/components/Button";
 import { estimateBatchCost } from "@/lib/batches/costEstimator";
 import type { CostEstimate } from "@/lib/batches/types";
@@ -85,9 +86,9 @@ export default function CostEstimateStep({
           <div className="flex items-center justify-between px-4 py-3">
             <span className="text-sm font-medium text-success">{t("wizardCostBatch")}</span>
             <div className="flex items-center gap-2">
-              <span className="text-xs text-success/80 bg-success/10 rounded px-1.5 py-0.5">
+              <Badge size="sm" variant="success">
                 -50%
-              </span>
+              </Badge>
               <span className="text-sm font-semibold text-success">
                 ${estimate.batchCostUsd.toFixed(4)}
               </span>

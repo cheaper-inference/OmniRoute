@@ -164,7 +164,7 @@ describe("ProviderModelsSection catalog context-window override", () => {
   it("saves via PUT with {provider, modelId, contextWindowOverride} under the provider id", async () => {
     const el = await render(buildProps());
     const edit = [...el.querySelectorAll("button")].find(
-      (b) => b.getAttribute("title") === "contextWindowOverrideLabel"
+      (b) => b.getAttribute("aria-label") === "contextWindowOverrideLabel"
     )!;
     expect(edit).toBeDefined();
     act(() => edit.click());
@@ -193,7 +193,7 @@ describe("ProviderModelsSection catalog context-window override", () => {
   it("turns invalid input into an error toast without a PUT", async () => {
     const el = await render(buildProps());
     const edit = [...el.querySelectorAll("button")].find(
-      (b) => b.getAttribute("title") === "contextWindowOverrideLabel"
+      (b) => b.getAttribute("aria-label") === "contextWindowOverrideLabel"
     )!;
     act(() => edit.click());
     const input = el.querySelector(
