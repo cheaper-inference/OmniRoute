@@ -2,12 +2,14 @@
 import React from "react";
 import { act } from "react";
 import { createRoot } from "react-dom/client";
+import { fireEvent } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { compressionSettingsUpdateSchema } from "@/shared/validation/compressionConfigSchemas";
 
 // next-intl echoes the key, so labels are the translation keys.
 vi.mock("next-intl", () => ({
   useTranslations: () => (key: string) => key,
+  useLocale: () => "en",
 }));
 
 vi.mock("next/link", () => ({
@@ -90,11 +92,20 @@ function cacheTtlInput(): HTMLInputElement {
     candidate.textContent?.includes("compressionCacheTTL")
   );
   const forId = label?.getAttribute("for");
-  const input = forId
-    ? container.querySelector<HTMLInputElement>(`input[type="number"][id="${forId}"]`)
-    : null;
+  const input = forId ? container.querySelector<HTMLInputElement>(`input[id="${forId}"]`) : null;
   expect(input).toBeTruthy();
   return input!;
+}
+
+// The field is the kit NumberInput: a text field with no `min`/`max` attributes, which brings
+// an edited value into its bounds when the edit ends. The bound is what it leaves in place of
+// a value far outside the range.
+function boundFor(typed: string): number {
+  const input = cacheTtlInput();
+  expect(input.className).toContain("ci-number-input");
+  fireEvent.change(input, { target: { value: typed } });
+  fireEvent.blur(input);
+  return Number(cacheTtlInput().value);
 }
 
 // The bounds are read off the rendered input and checked against the PUT schema, so a change
@@ -105,14 +116,14 @@ const routeAccepts = (cacheMinutes: number) =>
 describe("CompressionSettingsTab cache TTL input bounds", () => {
   it("starts the input at the lowest cache TTL the settings route accepts", async () => {
     await renderTab();
-    const min = Number(cacheTtlInput().min);
+    const min = boundFor("0");
     expect(routeAccepts(min)).toBe(true);
     expect(routeAccepts(min - 1)).toBe(false);
   });
 
   it("stops the input at the highest cache TTL the settings route accepts", async () => {
     await renderTab();
-    const max = Number(cacheTtlInput().max);
+    const max = boundFor("99999");
     expect(routeAccepts(max)).toBe(true);
     expect(routeAccepts(max + 1)).toBe(false);
   });

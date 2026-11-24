@@ -57,7 +57,7 @@ State from `gh run list --workflow <file> --limit 3 --json conclusion,createdAt`
 | `dast-smoke.yml`           | PRs to `main`, `workflow_dispatch`        | Success on the release PR (2026-10-10 06:41 UTC); the run just before it was cancelled.                                                                                                                                                                                   | No (`continue-on-error`) |
 | `nightly-llm-security.yml` | nightly schedule, `workflow_dispatch`     | **Failed on every scheduled run from 2026-10-03 to 2026-10-09.** In the 2026-10-09 run both jobs failed before any probe ran (promptfoo at "Build CLI bundle", garak at "Start OmniRoute"), so neither produced a verdict.                                                | No                       |
 
-The Scorecard score comes from `https://api.securityscorecards.dev/projects/github.com/diegosouzapw/OmniRoute`.
+The Scorecard score comes from `https://api.securityscorecards.dev/projects/github.com/cheaper-inference/OmniRoute`.
 
 ## 5. npm publish provenance
 

@@ -48,8 +48,8 @@ Block the request and optionally return a custom response.
 
 ```ts
 onRequest: (ctx) => {
-  if (!ctx.headers["authorization"]) {
-    return blockRequest({ error: "Unauthorized", status: 401 });
+  if (!ctx.headers?.["x-client-team"]) {
+    return blockRequest({ error: "Missing x-client-team header", status: 400 });
   }
 };
 ```
@@ -76,15 +76,22 @@ onRequest: (ctx) => {
 
 ## Plugin Context (`PluginContext`)
 
-| Field       | Type                      | Description               |
-| ----------- | ------------------------- | ------------------------- |
-| `requestId` | `string`                  | Unique request identifier |
-| `model`     | `string`                  | Requested model name      |
-| `provider`  | `string`                  | Target provider ID        |
-| `body`      | `Record<string, unknown>` | Request body              |
-| `headers`   | `Record<string, string>`  | Request headers           |
-| `metadata`  | `Record<string, unknown>` | Mutable metadata          |
-| `timestamp` | `number`                  | Request timestamp         |
+| Field        | Type                      | Description                 |
+| ------------ | ------------------------- | --------------------------- |
+| `requestId`  | `string`                  | Unique request identifier   |
+| `model`      | `string`                  | Requested model name        |
+| `provider`   | `string`                  | Target provider ID          |
+| `body`       | `Record<string, unknown>` | Request body                |
+| `headers`    | `Record<string, string>`  | Request headers (see note)  |
+| `metadata`   | `Record<string, unknown>` | Mutable metadata            |
+| `timestamp`  | `number`                  | Request timestamp           |
+| `apiKeyInfo` | `object` (optional)       | API key metadata (see note) |
+
+The context never carries the client's credentials: the `authorization`, `x-api-key`,
+`proxy-authorization` and `cookie` headers are removed (any casing), and `apiKeyInfo` keeps the key's
+metadata (such as `id`, `name` and `scopes`) but not the key value or its fingerprint
+(`redactPluginContext()` in `src/lib/plugins/hooks.ts`). This applies to `onRequest`,
+`onResponse` and `onError`.
 
 ## Manifest (`plugin.json`)
 
@@ -139,17 +146,42 @@ Or as simple booleans (default priority 100):
 
 ## Permission System
 
-Plugins run in a sandboxed VM context. Access to external resources requires explicit permissions:
+By default plugins are **not sandboxed**. Each active plugin runs as a separate, ordinary Node.js
+child process (`loadPlugin()` in `src/lib/plugins/loader.ts`) under the same operating-system user
+as OmniRoute, with no VM context and no Node.js permission flags. Plugin code can use `node:fs`,
+`node:child_process`, `fetch` and every other Node.js API: it can read and write any file the
+OmniRoute user can (including the data directory), run programs and reach the network.
 
-| Permission   | Grants                                                       |
-| ------------ | ------------------------------------------------------------ |
-| `network`    | `fetch`, `AbortController`, `Headers`, `Request`, `Response` |
-| `file-read`  | `fs.readFile`, `fs.readdir`, `fs.stat`                       |
-| `file-write` | `fs.writeFile`, `fs.mkdir`, `fs.rm`                          |
-| `env`        | Read-only `process.env` proxy                                |
-| `exec`       | `child_process.exec`, `child_process.execSync`               |
+The manifest's `requires.permissions` accepts `network`, `file-read`, `file-write`, `env` and
+`exec`. With the default settings only `env` has an effect at runtime.
 
-Without a permission, the corresponding globals are simply not available in the sandbox.
+### Opt-in permission model (`PLUGIN_PERMISSION_MODEL_ENABLED`)
+
+The `PLUGIN_PERMISSION_MODEL_ENABLED` feature flag (category `security`, **off by default**) starts
+each plugin process with the
+[Node.js permission model](https://nodejs.org/api/permissions.html) (`--permission`, accepted by
+every supported Node.js line: 22.22+, 24 and 26). The flags are built from the manifest by
+`buildPermissionModelArgs()` in `src/lib/plugins/permissionModel.ts`. The flag is read when a plugin
+is activated, so it applies to plugins activated after the change; deactivate and activate a
+running plugin to apply it.
+
+The plugin data directory is `plugin-data/<plugin-name>` next to the plugin root
+(`~/.omniroute/plugin-data/<plugin-name>` by default, `getPluginDataDir()`). With the flag on, its
+path is passed to the plugin as `PLUGIN_DATA_DIR`.
+
+| Permission   | Flag off (default)                                                                                                                                                                                                                       | Flag on                                                                                                                                                                                                                                               |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (none)       | Full privileges of the OmniRoute user.                                                                                                                                                                                                   | File reads only inside the plugin directory. No file writes, no child processes, no worker threads, no native addons, no WASI.                                                                                                                        |
+| `env`        | The plugin process also receives `PORT`, `HOSTNAME`, `TZ` and `TMPDIR`. Without it, it receives only `PATH`, `HOME`, `USER`, `LANG`, `LC_ALL`, `NODE_ENV`, `PLUGIN_ENTRY` and `PLUGIN_NAME` (plus `SystemRoot` and `windir` on Windows). | Same as with the flag off.                                                                                                                                                                                                                            |
+| `file-read`  | None (declaration only).                                                                                                                                                                                                                 | The plugin data directory also becomes readable (it is created if missing).                                                                                                                                                                           |
+| `file-write` | None (declaration only).                                                                                                                                                                                                                 | The plugin data directory becomes readable and writable (`--allow-fs-write`). Nothing else is writable.                                                                                                                                               |
+| `exec`       | None (declaration only).                                                                                                                                                                                                                 | Child processes are allowed (`--allow-child-process`). Node.js passes the permission flags on to child Node.js processes through `NODE_OPTIONS`, but any other program runs without restrictions, so `exec` effectively lifts the file-system limits. |
+| `network`    | None (declaration only).                                                                                                                                                                                                                 | None. The Node.js permission model does not restrict outbound network access, so `network` stays a declaration and is never enforced.                                                                                                                 |
+
+Turning the flag on breaks plugins that read files outside their own directory (for example a
+module resolved from a parent `node_modules`), write anywhere but their data directory, or spawn
+processes without declaring `exec`. Even with the flag on the plugin keeps network access and runs
+as the OmniRoute user, so install only plugins whose source you trust.
 
 ## Config Schema
 
@@ -217,7 +249,7 @@ export default definePlugin({
   name: "rate-limiter",
   priority: 10,
   onRequest: async (ctx) => {
-    const key = ctx.headers["x-api-key"] || "anonymous";
+    const key = ctx.apiKeyInfo?.id || "anonymous";
     const now = Date.now();
     const window = 60000; // 1 minute
     const maxRequests = 100;

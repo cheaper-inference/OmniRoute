@@ -59,6 +59,23 @@ describe("RTK raw output retention", () => {
     assert.equal(result.rawOutputPointers, undefined);
   });
 
+  it("normalizes separators for filenames and preserves the full command in metadata", (t) => {
+    const tempData = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-rtk-raw-slug-"));
+    t.after(() => fs.rmSync(tempData, { recursive: true, force: true }));
+    process.env.DATA_DIR = tempData;
+    const command = " __ git    status ___ ";
+
+    const pointer = maybePersistRtkRawOutput("modified file", { retention: "always", command });
+
+    assert.ok(pointer);
+    assert.match(path.basename(pointer.path), /^\d+-git_status-[a-f0-9]+\.log$/);
+    const metadata = JSON.parse(
+      fs.readFileSync(pointer.path.replace(/\.log$/, ".meta.json"), "utf8")
+    );
+    assert.equal(metadata.command, command);
+    assert.equal(readRtkRawOutput(pointer.id), "modified file");
+  });
+
   it("retains only configured failure output and enforces byte caps", () => {
     const tempData = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-rtk-raw-cap-"));
     process.env.DATA_DIR = tempData;

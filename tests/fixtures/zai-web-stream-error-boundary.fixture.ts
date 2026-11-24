@@ -160,7 +160,10 @@ function assertFailureWasPersisted(result: PipelineResult): void {
   ]);
 }
 
-test("a pre-content Z.ai error fails stream readiness with a sanitized 502", async () => {
+test("a pre-content Z.ai error fails stream readiness with a sanitized 502", async (t) => {
+  // The in-memory upstream is already ready to send its error. Keep unrelated
+  // wall-clock scheduling delays from expiring the deadline during this test.
+  t.mock.timers.enable({ apis: ["Date", "setTimeout"], now: Date.now() });
   const rawFailure =
     'signature invalid at /srv/omniroute/open-sse/auth.ts:17:9 api_key="sk-private"\n' +
     "    at verify (/srv/omniroute/open-sse/auth.ts:17:9)";

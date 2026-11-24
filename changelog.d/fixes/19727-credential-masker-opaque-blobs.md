@@ -1,0 +1,1 @@
+- **fix(guardrails):** opt-in credential redaction no longer rewrites signed thinking blocks, encrypted reasoning or long base64 blobs because random bytes look like a short-prefix key, so replayed signatures stay valid. Full-format keys inside them are still redacted. ([#19727](https://github.com/cheaper-inference/OmniRoute/pull/19727))

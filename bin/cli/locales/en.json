@@ -12,7 +12,8 @@
     "dryRun": "[dry-run] would {action}",
     "cancelled": "Cancelled.",
     "jsonOpt": "Output as JSON",
-    "yesOpt": "Skip confirmation prompt"
+    "yesOpt": "Skip confirmation prompt",
+    "positiveIntegerRequired": "Limit must be a positive integer."
   },
   "setup": {
     "title": "OmniRoute Setup",
@@ -286,6 +287,7 @@
     "retentionOpt": "Keep only the last N backups",
     "passphrasePrompt": "Encryption passphrase: ",
     "noPassphrase": "Passphrase is required for encrypted backup.",
+    "restoreDecryptFailed": "Backup {name} could not be decrypted (wrong passphrase or damaged file); nothing was changed.",
     "cloudFailed": "Warning: cloud upload failed. Local backup was saved.",
     "cloudUploaded": "Cloud backup uploaded: {url}",
     "auto": {
@@ -972,7 +974,8 @@
       "description": "Manage resilience config",
       "threshold": "Failure threshold",
       "resetTimeout": "Reset timeout in ms",
-      "baseCooldown": "Base cooldown in ms"
+      "baseCooldown": "Base cooldown in ms",
+      "p2cLatencyWeight": "p2c latency weight, 0 (off) to 20"
     }
   },
   "nodes": {

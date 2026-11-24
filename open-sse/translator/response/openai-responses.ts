@@ -747,6 +747,16 @@ function announcedToolOutputIndex(state, tcIdx) {
   );
 }
 
+/**
+ * Tail of the short fragment, not a slice of the grown buffer (a slice pins the old prefix).
+ * A growing snapshot makes the tail shorter than the fragment: copy it so the event does
+ * not keep the whole snapshot alive (prefixing one char forces a flat copy; slice(1) drops it).
+ */
+function newArgumentTail(fragment: string, grown: number): string {
+  const tail = fragment.slice(fragment.length - grown);
+  return grown < fragment.length ? ` ${tail}`.slice(1) : tail;
+}
+
 // Only DOUBLE_ESCAPED_TAB_MODEL needs the repair; its scan state lives per tool call index.
 function repairDoubleEscapedTabs(state, tcIdx, rawArgs: string): string {
   if (!DOUBLE_ESCAPED_TAB_MODEL.test(state.model || "")) return rawArgs;
@@ -806,7 +816,7 @@ function emitToolCall(state, emit, tc) {
     const rawArgs = repairDoubleEscapedTabs(state, tcIdx, tc.function.arguments);
     const sanitized = escapeJsonStringValues(rawArgs, state.funcArgsEscapeState[tcIdx]);
     const nextArgs = appendToolCallArgumentDelta(existingArgs, sanitized);
-    const emittedDelta = nextArgs.slice(existingArgs.length);
+    const emittedDelta = newArgumentTail(sanitized, nextArgs.length - existingArgs.length);
     state.funcArgsBuf[tcIdx] = nextArgs;
 
     if (refCallId && emittedDelta && !isCustomTool && state.funcItemAdded[tcIdx]) {

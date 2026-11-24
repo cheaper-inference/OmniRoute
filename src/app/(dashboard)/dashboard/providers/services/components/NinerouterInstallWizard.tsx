@@ -9,7 +9,8 @@ import Icon from "@/shared/components/Icon";
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { Button, Card, Input } from "@/shared/components";
+import { Button, Card, Input, NumberInput, IconChip } from "@/shared/components";
+import { numberToText, textToNumber } from "../../numberFieldText";
 import { useServiceStatus } from "../hooks/useServiceStatus";
 
 const NAME = "9router";
@@ -51,11 +52,13 @@ export function NinerouterInstallWizard() {
   return (
     <Card padding="md">
       <div className="flex items-center gap-3 mb-4">
-        <div className="size-8 rounded-lg flex items-center justify-center border border-border bg-bg-subtle text-text-main">
-          <Icon name="download" size={20} />
-        </div>
+        <IconChip size="sm">
+          <Icon name="download" />
+        </IconChip>
         <div>
-          <h3 className="text-sm">{t("install9Router")}</h3>
+          <h3 className="ci-heading" data-size="sm">
+            {t("install9Router")}
+          </h3>
           <p className="text-xs text-text-muted">{t("install9RouterDescription")}</p>
         </div>
       </div>
@@ -71,13 +74,12 @@ export function NinerouterInstallWizard() {
           disabled={installing}
         />
 
-        <Input
+        <NumberInput
           id="ninerouter-port"
-          type="number"
           label={t("servicePort")}
           hint={t("servicePortHint")}
-          value={port}
-          onChange={(e) => setPort(e.target.value)}
+          value={textToNumber(port)}
+          onValueChange={(value) => setPort(numberToText(value))}
           min={1024}
           max={65535}
           disabled={installing}

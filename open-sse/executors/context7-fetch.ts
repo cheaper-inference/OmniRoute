@@ -35,21 +35,21 @@ const CONTEXT7_TIMEOUT_MS = 10_000;
 const MAX_BODY_BYTES = 2 * 1024 * 1024;
 const DEFAULT_TOKENS = 5000;
 const MAX_TOKENS = 20000;
+const LIBRARY_ID_SEGMENT = /^[A-Za-z0-9][\w-]*(?:\.[\w-]+)*$/;
 
 /**
  * Canonical Context7 library-id shape: exactly "/owner/repo", each segment
- * starting with an alphanumeric char, path-safe chars only. Dot-runs (".."
- * traversal) are rejected by the explicit includes check after the shape
- * test. Shared by the fetch executor and the search normalizer so the two
- * faces of the provider never drift apart.
+ * starting with an alphanumeric char, with single interior dots allowed.
+ * Shared by the fetch executor and the search normalizer.
  */
 export function isValidContext7LibraryId(id: string): id is string {
-  if (typeof id !== "string") return false;
-  // Each segment: starts with alphanumeric (GitHub owner/repo convention —
-  // no leading '-'), path-safe chars, no trailing dot, no dot-run.
-  const seg = /^[A-Za-z0-9][\w-]*(?:\.[\w-]+)*$/; // starts alnum, dots only interior, no dot-run
-  const m = /^\/(.+)\/(.+)$/.exec(id);
-  return m !== null && seg.test(m[1]) && seg.test(m[2]);
+  if (typeof id !== "string" || !id.startsWith("/")) return false;
+  const separator = id.indexOf("/", 1);
+  return (
+    separator !== -1 &&
+    LIBRARY_ID_SEGMENT.test(id.slice(1, separator)) &&
+    LIBRARY_ID_SEGMENT.test(id.slice(separator + 1))
+  );
 }
 
 interface Context7FetchOptions {

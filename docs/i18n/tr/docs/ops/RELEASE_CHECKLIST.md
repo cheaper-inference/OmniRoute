@@ -355,117 +355,70 @@ Herhangi bir v3.8.x sürümünü yayımlamadan önce şu ek öğeleri doğrulay�
 
 ---
 
-## 3.9.0 LTS ayrımı (3.8.58'de prova edildi)
+## 3.9.0 LTS kesimi (3.8.58'de prova edildi)
 
-v3.8.59'dan sonraki sürüm 3.9.0'dır ve bu sürümün uç noktası iki uzun ömürlü dala dönüşür:
-`stable/v3` (v3 LTS hattı, npm `latest`) ve `develop` (v4, 4.0.0'a yükseltilmiş, npm
-`nightly`). Dal/kanal modeli, ileri taşıma ve etiketler
-[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md) dosyasında; plan ise [ROADMAP](../../ROADMAP.md) (Aşama 3) içindedir. Ayrım bir kez çalıştırılır;
-3.8.58 bunu bir fork üzerinde baştan sona prova eder ve 3.8.59
-[GO/NO-GO kontrol listesi](./LTS_GO_NO_GO.md) ile kapanır.
+V3.8.59'dan sonra bir sonraki sürüm 3.9.0'dır ve bunun ucu iki uzun ömürlü dal haline gelir: `stable/v3` (v3 LTS çizgisi, npm `latest`) ve `develop` (v4, 4.0.0'a yükseldi, npm `nightly`). branch/channel modeli, ileri bağlantı noktası ve etiketler [RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md) biçimindedir; plan [ROADMAP](../../ROADMAP.md) (Aşama 3). Kesim bir kez yapılır; 3.8.58 bir çatal üzerinde uçtan uca prova eder ve 3.8.59 [GO/NO-GO kontrol listesiyle](./LTS_GO_NO_GO.md) kapanır.
 
-### Deneme çalıştırması (salt okunur, her zaman güvenli)
+### Prova (salt okunur, her zaman güvenli)
 
 ```bash
-npm run release:dry-run-lts-cut                       # gerçek ayrım: HEAD'den 3.9.0, önceki etiket v3.8.59
-npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # kaynak commit'i sabitle
+npm run release:dry-run-lts-cut                       # the real cut: 3.9.0 from HEAD, previous tag v3.8.59
+npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # pin the source commit
 ```
 
-`scripts/release/dry-run-lts-cut.mjs` hiçbir şeyi yürütmez: git ve `gh` verilerini okur ve
-tüm diziyi yazdırır — önkoşullar (kaynak çözümleniyor, kaynak depo eksiksiz geçmişe sahip —
-sığ bir klon `stable/v3` dalını gönderemez; alıcı taraf paketi ilk
-aşılanmış üst commit'te reddeder, bu nedenle ayrımı eksiksiz bir klondan yapın veya önce
-`git fetch --unshallow origin` çalıştırın — önceki etiket mevcut, `package.json` hedef
-sürümde, açık bir `release-freeze` kaydı var, mevcut bir yayın dalında açık
-`Release branch not green` kaydı yok — mevcut olmayan bir dal `?` bilinmiyor olarak
-raporlanır, hiçbir zaman yeşil sayılmaz — Mergify `release` kuyruğu yapılandırılmış
-(G11: `queue_rules`, `checks_timeout`, `queue` etiketi), `release/*` kural kümesi silmeyi ve
-zorlamalı göndermeyi hâlâ engelliyor ve `stable/v3` ile `develop` henüz mevcut değil), iki
-dal adımı, hangi atıl iş akışı tetikleyicilerinin ve `if:` koşullarının doğru hâle geldiği
-(ve hangilerinin bir depo değişkeni tarafından engellenmeye devam ettiği veya kanonik
-depoya sabitlendiği), beklenen dist-tag'ler (`latest` → 3.9.0, `next` ve `nightly` boş)
-ve geri alma işlemi. Çıkış kodu `0` = `RESULT: READY`, `1` = engelleyici bir önkoşul
-başarısız oldu (`✗`), `2` = kullanım hatası. `--advisory <id,...>`, bir denetimi gizlemeden
-uyarı (`!`) düzeyine indirger.
+`scripts/release/dry-run-lts-cut.mjs` hiçbir şey yürütmez: git ve `gh` okur ve — önkoşullarının tamamını yazdırır (kaynak çözümlenir, kaynak deposunun tam geçmişi vardır — sığ bir klon `stable/v3` itemez, alıcı taraf ilk aşılanmış ebeveyndeki paketi reddeder, dolayısıyla tam klondan kesilir veya `git fetch --unshallow origin` ilk önce — önceki etiketi vardır, `package.json` hedef sürümdür, bir `release-freeze` sorunu açıktır, mevcut bir yayın dalında açık `Release branch not green` sorunu yoktur — bir dal mevcut olmayan raporlar `?` bilinmiyor, asla yeşil — omni-queue PRs sürümünü indirir (G11: `config/merge-queue/config.json` geçerli, `bases` sürüm dalını yönetir, `mode` `live`, etiketi mevcut), `release/*` kural seti hala silmeyi ve zorla göndermeyi engelliyor ve `stable/v3` ve `develop` henüz mevcut değil), hareketsiz iş akışını tetikleyen ve `if:` koşullarını doğrulayan (ve bir depo tarafından kontrol edilen) iki dal adımı değişken veya standart depoya sabitlenmiş), beklenen dağıtım etiketleri (`latest` → 3.9.0, `next` ve `nightly` boş) ve geri alma. `0` = `RESULT: READY` çıkın, `1` = engelleme önkoşulu başarısız oldu (`✗`), `2` = kullanım hatası. `--advisory <id,...>` bir kontrolü gizlemeden uyarıya (`!`) düşürür.
 
-Gerçek ayrımın deneme çalıştırmasını 3.9.0 yayın dondurması hâlâ açıkken çalıştırın — dallar
-etiketten sonra ve Aşama 12c dondurmayı kaldırmadan önce oluşturulur.
+3.9.0 sürüm dondurması hala açıkken gerçek kesimin provasını çalıştırın — dallar etiketten sonra ve Aşama 12c dondurmayı kaldırmadan önce oluşturulur.
 
-### 3.8.58 provası (yalnızca fork)
+### 3.8.58 prova (yalnızca çatal)
 
 ```bash
-# 1. Geçerli uç noktada prova parametreleriyle deneme çalıştırması
+# 1. Dry-run on the current tip with rehearsal parameters
 npm run release:dry-run-lts-cut -- --target-version 3.8.58 --previous-tag v3.8.57 \
   --advisory freeze,base-green
 
-# 2. Bir FORK uzak deposuna karşı yürütün (origin veya URL'si kanonik depo olan
-#    herhangi bir uzak depo reddedilir; her adım terminalde onay ister)
+# 2. Execute against a FORK remote (origin, or any remote whose URL is the canonical
+#    repository, is refused; every step asks for confirmation on the terminal)
 git remote add rehearsal https://github.com/<you>/OmniRoute.git
 node scripts/release/dry-run-lts-cut.mjs --execute --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 
-# 3. Fork'taki atıl iş akışlarını çalıştırın (deneme çalıştırmasının kanonik depo
-#    sabitlemesi raporladığı yerlerde workflow_dispatch), ardından geri alın
+# 3. Exercise the dormant workflows in the fork (workflow_dispatch where the dry-run
+#    reports a canonical-repository pin), then roll back
 node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 ```
 
-develop yükseltme commit'i git tesisatıyla oluşturulur (çalışma ağacına dokunulmaz) ve
-döngü açılış commit'iyle aynı beş dosyayı yükseltir: `package.json`,
-`open-sse/package.json`, `electron/package.json`, `package-lock.json` ve
-`docs/openapi.yaml`. `[4.0.0]` CHANGELOG bölümü ve bunun i18n yansıları daha sonra,
-ilk PR'ından önce `develop` üzerinde açılır. Betik npm dist-tag'lerini hiçbir zaman
-değiştirmez — bunları geçici bir paket üzerinde prova edin.
+Geliştirme yükseltme taahhüdü git plumbing ile oluşturulmuştur (hiçbir çalışma ağacına dokunulmaz) ve döngüsel açma taahhüdüyle aynı beş dosyayı çarpar: `package.json`, `open-sse/package.json`, `electron/package.json`, `package-lock.json` ve `docs/openapi.yaml`. `[4.0.0]` CHANGELOG bölümü ve onun i18n aynaları `develop` daha sonra, ilk PR önce açılır. Betik, npm dist-tags — hiçbir zaman değiştirmez, bunları bir karalama paketi üzerinde prova eder.
 
-### PR önizleme yapıtı (bir kez derleyin, aynı baytları terfi ettirin)
+### PR önizleme yapıtı (bir kez derleyin, aynı baytları yükseltin)
 
-`.github/workflows/preview-artifact.yml`, bir PR uç noktasından tek bir üretim tarball'ı
-derler ve tam olarak bu derlemeyi doğrular (#8084 dilimi (a)). Yalnızca aynı depodaki
-PR'lar; hiçbir şey yayımlanmaz.
+`.github/workflows/preview-artifact.yml` bir PR kafasından bir üretim tarball'ı oluşturur ve bu yapıyı doğrular (#8084 dilim (a)). Yalnızca aynı depodaki PRs ; hiçbir şey yayınlanmıyor.
 
 ```bash
-gh workflow run preview-artifact.yml -f pr_number=<N>   # veya `preview-artifact` etiketini ekleyin
+gh workflow run preview-artifact.yml -f pr_number=<N>   # or add the `preview-artifact` label
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
 gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
-npm install -g ./omniroute-*.tgz                          # önizleme kurulumu
+npm install -g ./omniroute-*.tgz                          # preview install
 ```
 
-Çalıştırma; `npm ci`, `npm run build:release` ve `npm run check:pack-artifact` komutlarını
-yürütür, tarball'ı paketler, `npm run check:pack-boot` komutunu çalıştırır (sahte gizli
-değerler, geçici veri dizini), yeniden paketler ve özet aynı değilse başarısız olur;
-ardından `artifact-identity.json` dosyasını (uç SHA, temel SHA, kilit dosyası karması,
-platform, mimari, node ABI, paketleyici, derleme ilkesi —
-`scripts/release/artifact-identity.mjs`) kaydeder ve ayrı bir işte tarball için tasdik
-oluşturur. Bir önizlemeyi terfi ettirmek, söz konusu tarball'ı kurmak anlamına gelir:
-asla kaynaktan yeniden derlemeyin.
+Çalıştırma `npm ci`, `npm run build:release`, `npm run check:pack-artifact` yapar, tarball'ı paketler, `npm run check:pack-boot` (sahte sırlar, geçici veri dizini) çalıştırır, özet aynı olmadığı sürece yeniden paketler ve başarısız olur, ardından `artifact-identity.json` (head SHA, base SHA, lockfile hash, platform, arch, node ABI, paketleyici, derleme politikası — `scripts/release/artifact-identity.mjs`) kaydeder ve tarball'ı ayrı bir işte doğrular. Bir önizlemeyi tanıtmak, o tarball'ı yüklemek anlamına gelir: asla kaynaktan yeniden oluşturma.
 
-### Ayrım (3.9.0, GO sonrasında)
+### Kesim (3.9.0, GO sonra)
 
-1. GO, [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md) dosyasına kaydedilir.
-2. `npm run release:dry-run-lts-cut -- --from v3.9.0`, `RESULT: READY` çıktısını verir.
-3. Dalları, deneme çalıştırmasının yazdırdığı komutlarla `origin` üzerinde elle oluşturun —
-   betik `origin` hedefine göndermeyi reddeder. İncelenmiş bir develop commit'ini yeniden
-   kullanmak için önce 3.9.0 uç noktasında fork'unuza karşı `--execute` provasını çalıştırın;
-   bu işlem her iki SHA'yı da yazdırır ve aynı commit'ler gönderilebilir:
+1. GO [LTS_GO_NO_GO.md'ye](./LTS_GO_NO_GO.md) kaydedildi.
+2. `npm run release:dry-run-lts-cut -- --from v3.9.0` `RESULT: READY` yazdırır.
+3. `origin` dalları, kuru çalıştırma baskılarının — komutlarıyla, betiğin `origin` göndermeyi reddettiği komutlarla elle oluşturun. Gözden geçirilmiş bir geliştirme taahhüdünü yeniden kullanmak için, önce çatalınıza karşı 3.9.0 ipucundaki `--execute` provasını çalıştırın; her ikisini de yazdırır SHAs ve aynı taahhütler iletilebilir:
 
    ```bash
    git push origin <stable-sha>:refs/heads/stable/v3 <develop-sha>:refs/heads/develop
    ```
 
-4. İlk PR birleştirilmeden önce `stable/v3` ve `develop` dallarını koruyun (kural kümeleri + birleştirme kuyruğu).
-5. Etkin olmayan iş akışları, dalların varlığıyla etkinleşir: `forward-port.yml` (`stable/v3` dalına push),
-   `validate-stable-pr.yml` (`stable/v3` dalına yönelik PR'lar) ve `nightly-v4-build.yml`
-   (`develop` dalını derler). Canlıya geçmeden önce `secrets.FORWARD_PORT_TOKEN` depo gizli
-   bilgisini ayarlayın (böylece CI, ileri taşıma PR'larında çalışır); gecelik yayımlama, depo
-   sahibi `vars.NIGHTLY_PUBLISH` depo değişkenini `true` olarak ayarlayana ve npm Trusted Publishing
-   `nightly-v4-build.yml` dosyasını kabul edene kadar kapalı kalır. Kanal çözümlemesi,
-   `npm-publish.yml` tarafından da kullanılan aynı çözümleyici olan `scripts/release/dist-tag.mjs`
-   tarafından gerçekleştirilir.
-6. Kanalları doğrulayın: `npm view omniroute dist-tags --json`, `latest` = 3.9.0 değerini gösterir ve
-   v4 yayımlanana kadar `next` / `nightly` bulunmaz.
-7. Gerekirse geri alın: `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
-   ve `npm dist-tag add omniroute@3.8.59 latest`.
+4. İlk PR ulaşmadan önce `stable/v3` ve `develop` (kural kümeleri + birleştirme kuyruğu) koruyun.
+5. Hareketsiz iş akışları dal varlığına göre açılır: `forward-port.yml` ( `stable/v3`), `validate-stable-pr.yml` (PRs `stable/v3`) ve `nightly-v4-build.yml` ( `develop` oluşturur). Canlı kullanıma geçmeden önce `secrets.FORWARD_PORT_TOKEN` deposunun sırrını ayarlayın (böylece CI ileri bağlantı noktası PRs çalışır); gece yayınlama, sahibi `vars.NIGHTLY_PUBLISH` depo değişkenini `true` olarak ayarlayana ve npm Trusted Publishing `nightly-v4-build.yml` kabul edene kadar kapalı kalır. Kanal çözünürlüğü `scripts/release/dist-tag.mjs`, `npm-publish.yml` kullandığı çözümleyicinin aynısıdır.
+6. Kanalları doğrulayın: `npm view omniroute dist-tags --json` `latest` = 3.9.0'ı gösteriyor ve v4 yayınlanana kadar `next` / `nightly` yok.
+7. Gerekirse geri alma: `git push origin --delete refs/heads/stable/v3 refs/heads/develop` ve `npm dist-tag add omniroute@3.8.59 latest`.
 
 ---
 

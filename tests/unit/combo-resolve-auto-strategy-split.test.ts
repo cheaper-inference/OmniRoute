@@ -1,4 +1,4 @@
-import { test, after } from "node:test";
+import { test, after, mock } from "node:test";
 import assert from "node:assert/strict";
 
 import {
@@ -10,6 +10,10 @@ import { DEFAULT_WEIGHTS } from "@omniroute/open-sse/services/autoCombo/scoring.
 import { buildComplexityRoutingHint } from "@omniroute/open-sse/services/autoCombo/complexityRouter.ts";
 import { setTierConfig } from "@omniroute/open-sse/services/tierResolver.ts";
 import { resetDbInstance } from "@/lib/db/core.ts";
+import {
+  getStrategy,
+  registerStrategy,
+} from "@omniroute/open-sse/services/autoCombo/routerStrategy.ts";
 
 // resolveAutoStrategyOrder loads the LKGP via the DB singleton (dynamic import);
 // release the handle so the node:test runner does not hang on teardown (learning #3).
@@ -60,6 +64,188 @@ const baseDeps = (buildAutoCandidates: never) =>
 
 test("exports resolveAutoStrategyOrder", () => {
   assert.equal(typeof resolveAutoStrategyOrder, "function");
+});
+
+// Unified decision routing (step 7). Two candidates on different models so an explicit
+// router has a real choice to make.
+const decisionCandidates = () =>
+  [
+    {
+      kind: "model",
+      stepId: "s1",
+      executionKey: "openai>gpt-4o@account-a",
+      modelStr: "gpt-4o",
+      provider: "openai",
+      model: "gpt-4o",
+      connectionId: "account-a",
+      quotaRemaining: 100,
+      quotaTotal: 100,
+      circuitBreakerState: "CLOSED",
+      costPer1MTokens: 5,
+      p95LatencyMs: 100,
+      latencyStdDev: 10,
+      errorRate: 0,
+    },
+    {
+      kind: "model",
+      stepId: "s2",
+      executionKey: "anthropic>claude-3@account-b",
+      modelStr: "claude-3",
+      provider: "anthropic",
+      model: "claude-3",
+      connectionId: "account-b",
+      quotaRemaining: 100,
+      quotaTotal: 100,
+      circuitBreakerState: "CLOSED",
+      costPer1MTokens: 1,
+      p95LatencyMs: 100,
+      latencyStdDev: 10,
+      errorRate: 0,
+    },
+  ] as never;
+
+let capturedDecisionContext: Record<string, unknown> | undefined;
+registerStrategy("decision-forwarding-regression", {
+  name: "decision-forwarding-regression",
+  description: "captures the routing context",
+  select: (pool, context) => {
+    capturedDecisionContext = context as unknown as Record<string, unknown>;
+    const last = pool[pool.length - 1];
+    return {
+      provider: last.provider,
+      model: last.model,
+      connectionId: last.connectionId,
+      strategy: "decision-forwarding-regression",
+      reason: "captured",
+      candidatesConsidered: pool.length,
+      finalScore: 1,
+    };
+  },
+});
+
+test("decision config and request runtime reach the explicit router context", async () => {
+  const controller = new AbortController();
+  const dispatch = (async () => new Response("{}")) as never;
+  const deps = baseDeps((async () => decisionCandidates()) as never);
+  // (An allowlist would send the pool through DB connection expansion; its forwarding is
+  // pinned by the buildDecisionRoutingContext unit test in decision-strategy.test.ts.)
+  deps.decisionRuntime = { signal: controller.signal, dispatch, allCombos: [] };
+  deps.combo.config = {
+    auto: {
+      routerStrategy: "decision-forwarding-regression",
+      decision: { decider: "combo-model", model: "openai/gpt-4o-mini", timeoutMs: 800 },
+      explorationRate: 0,
+    },
+  };
+
+  const result = await resolveAutoStrategyOrder(deps);
+  assert.ok("orderedTargets" in result);
+  const decision = capturedDecisionContext?.decision as Record<string, unknown>;
+  assert.deepEqual(decision.config, {
+    valid: true,
+    config: { decider: "combo-model", model: "openai/gpt-4o-mini", timeoutMs: 800 },
+  });
+  assert.equal(decision.body, deps.body);
+  assert.equal(decision.apiKeyAllowedConnections, null);
+  assert.equal(decision.signal, controller.signal);
+  assert.equal(decision.dispatch, dispatch);
+});
+
+test("combos without decision config keep exactly today's order and context", async () => {
+  // Same combo, same candidates: once as today (no decision key, flag off) and once with the
+  // decision flag on and a key in the environment. Nothing may differ, and nothing may leave
+  // the process. The engine's `rules` path draws a weighted random tier, so Math.random is
+  // pinned to compare like with like.
+  const previousFlag = process.env.COMBO_DECISION_ROUTER_ENABLED;
+  const previousKey = process.env.OMNIROUTE_DECISION_API_KEY;
+  const originalFetch = globalThis.fetch;
+  const random = mock.method(Math, "random", () => 0.42);
+  let fetches = 0;
+  globalThis.fetch = (async () => {
+    fetches += 1;
+    return Response.json({});
+  }) as typeof fetch;
+  const run = async (strategy: string) => {
+    const deps = baseDeps((async () => decisionCandidates()) as never);
+    deps.orderedTargets = [target("openai", "gpt-4o"), target("anthropic", "claude-3")];
+    deps.combo.config = { routerStrategy: strategy, explorationRate: 0 };
+    capturedDecisionContext = undefined;
+    const result = await resolveAutoStrategyOrder(deps);
+    assert.ok("orderedTargets" in result);
+    return {
+      order: result.orderedTargets.map((t: { executionKey: string }) => t.executionKey),
+      explicit: result.autoUsedExplicitRouter,
+      context: capturedDecisionContext,
+    };
+  };
+  try {
+    delete process.env.COMBO_DECISION_ROUTER_ENABLED;
+    delete process.env.OMNIROUTE_DECISION_API_KEY;
+    const todayExplicit = await run("decision-forwarding-regression");
+    const todayRules = await run("rules");
+    process.env.COMBO_DECISION_ROUTER_ENABLED = "true";
+    process.env.OMNIROUTE_DECISION_API_KEY = "sk-env";
+    const flagOnExplicit = await run("decision-forwarding-regression");
+    const flagOnRules = await run("rules");
+
+    assert.deepEqual(flagOnExplicit.order, todayExplicit.order);
+    assert.equal(flagOnExplicit.explicit, todayExplicit.explicit);
+    assert.equal(todayExplicit.context?.decision, undefined);
+    assert.equal(flagOnExplicit.context?.decision, undefined);
+    assert.deepEqual(flagOnRules.order, todayRules.order);
+    assert.equal(todayRules.explicit, false);
+    assert.equal(flagOnRules.explicit, false);
+    assert.equal(fetches, 0);
+  } finally {
+    random.mock.restore();
+    globalThis.fetch = originalFetch;
+    if (previousFlag === undefined) delete process.env.COMBO_DECISION_ROUTER_ENABLED;
+    else process.env.COMBO_DECISION_ROUTER_ENABLED = previousFlag;
+    if (previousKey === undefined) delete process.env.OMNIROUTE_DECISION_API_KEY;
+    else process.env.OMNIROUTE_DECISION_API_KEY = previousKey;
+  }
+});
+
+// The registry's `rules` strategy (scorePool) is what every explicit router falls back to.
+registerStrategy("rules-registry-probe", {
+  name: "rules-registry-probe",
+  description: "delegates to the registry rules strategy",
+  select: (pool, context) => getStrategy("rules").select(pool, context),
+});
+
+test("a decision combo with the flag off routes exactly like the rules fallback, zero fetch", async () => {
+  const previousFlag = process.env.COMBO_DECISION_ROUTER_ENABLED;
+  const originalFetch = globalThis.fetch;
+  let fetches = 0;
+  globalThis.fetch = (async () => {
+    fetches += 1;
+    return Response.json({});
+  }) as typeof fetch;
+  const order = async (config: Record<string, unknown>) => {
+    const deps = baseDeps((async () => decisionCandidates()) as never);
+    deps.orderedTargets = [target("openai", "gpt-4o"), target("anthropic", "claude-3")];
+    deps.combo.config = { ...config, explorationRate: 0 };
+    const result = await resolveAutoStrategyOrder(deps);
+    assert.ok("orderedTargets" in result);
+    return {
+      order: result.orderedTargets.map((t: { executionKey: string }) => t.executionKey),
+      explicit: result.autoUsedExplicitRouter,
+    };
+  };
+  try {
+    delete process.env.COMBO_DECISION_ROUTER_ENABLED;
+    const decision = await order({
+      routerStrategy: "decision",
+      decision: { decider: "http", baseUrl: "https://decider.invalid", model: "m" },
+    });
+    const rules = await order({ routerStrategy: "rules-registry-probe" });
+    assert.deepEqual(decision, rules);
+    assert.equal(fetches, 0);
+  } finally {
+    globalThis.fetch = originalFetch;
+    if (previousFlag === undefined) delete process.env.COMBO_DECISION_ROUTER_ENABLED;
+    else process.env.COMBO_DECISION_ROUTER_ENABLED = previousFlag;
+  }
 });
 
 test("no candidates -> keeps default ordering, no explicit router", async () => {

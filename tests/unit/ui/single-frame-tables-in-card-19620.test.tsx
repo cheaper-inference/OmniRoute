@@ -45,8 +45,9 @@ function expectBorderlessTable(container: HTMLElement) {
   expect(container.querySelector(".ci-data-table__frame")).toBeNull();
   const tableContainer = container.querySelector("[data-slot=table-container]");
   expect(tableContainer).not.toBeNull();
-  expect(tableContainer!.className).toContain("border-0");
-  expect(tableContainer!.className).toContain("rounded-none");
+  // The kit frameless table (`variant="plain"`): no border, radius or background of its own.
+  expect(tableContainer!.classList.contains("ci-table-container")).toBe(true);
+  expect(tableContainer!.getAttribute("data-variant")).toBe("plain");
 }
 
 const entry = (i: number) => ({

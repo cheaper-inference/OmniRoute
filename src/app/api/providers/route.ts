@@ -55,11 +55,6 @@ import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 import { isManagedProviderConnectionId } from "@/lib/providers/catalog";
 import { isApiKeyRevealEnabled, maskStoredApiKey } from "@/lib/apiKeyExposure";
 import { cleanupProviderModelsAfterConnectionDelete } from "@/lib/db/models";
-import {
-  buildModelSyncInternalHeaders,
-  fetchModelSyncInternal,
-  getModelSyncInternalBaseUrl,
-} from "@/shared/services/modelSyncScheduler";
 // Dynamically imported below, inside the one `provider === "chatgpt-web-codex"`
 // branch that needs it: this module's transitive chain pulls in tiktoken's
 // WASM tokenizer, which Turbopack dev mode fails to resolve for this graph
@@ -69,7 +64,7 @@ import {
 // /api/providers request regardless of provider, turning an unrelated-
 // provider bug into a route-wide 500. Loading it lazily, only when actually
 // needed, avoids paying that cost (and that risk) on the common path.
-import { isAutoFetchModelsEnabled } from "@/lib/providerModels/modelDiscovery";
+import { triggerAutoModelSync } from "@/lib/providerModels/autoModelSyncTrigger";
 import { testSingleConnection } from "./[id]/test/route";
 import { rejectRetiredCommonChatGptWebProvider } from "@/lib/providers/chatgptWebRetirementResponse";
 import {
@@ -434,54 +429,14 @@ export async function POST(request: Request) {
       testStatus: testStatus || "unknown",
     });
 
-    // Auto-trigger model discovery only for an explicit autoFetchModels opt-in.
-    // Fire-and-forget: model sync can take seconds and should NOT block the
-    // POST response. If it fails, we log and move on — the connection itself
-    // is already persisted and the user can manually trigger a sync later.
-    // We use a self-fetch against our own /sync-models route, forwarding the
-    // incoming cookies (preserves management auth) plus the internal sync
-    // auth header (defense in depth) and an X-Internal-Auto-Sync marker for
-    // log correlation. The dashboard skips this server-owned copy when it
-    // performs the same sync itself so it can render progress.
-    if (
-      isAutoFetchModelsEnabled(providerSpecificData) &&
-      request.headers.get("x-skip-model-sync") !== "true"
-    ) {
-      try {
-        // SECURITY: use the trusted loopback/env-pinned origin, NOT
-        // `new URL(request.url).origin` — the latter comes from the client-
-        // controlled Host header, which would let a caller redirect this
-        // credential-bearing internal self-fetch to an arbitrary host
-        // (SSRF + internal-auth-header exfiltration; CodeQL js/request-forgery).
-        const internalOrigin = getModelSyncInternalBaseUrl();
-        const cookieHeader = request.headers.get("cookie") || "";
-        const syncHeaders: Record<string, string> = {
-          "Content-Type": "application/json",
-          "X-Internal-Auto-Sync": "true",
-          ...(cookieHeader ? { cookie: cookieHeader } : {}),
-          ...buildModelSyncInternalHeaders(),
-        };
-        const syncUrl = `${internalOrigin}/api/providers/${encodeURIComponent(newConnection.id)}/sync-models?mode=import`;
-        // Not awaited by the response, but tracked: graceful shutdown (and tests) wait for it.
-        runConnectionFollowUp(`Auto-sync error for ${newConnection.id}`, async () => {
-          const syncRes = await fetchModelSyncInternal(syncUrl, {
-            method: "POST",
-            headers: syncHeaders,
-            redirect: "error",
-          });
-          if (!syncRes.ok) {
-            console.log(`[providers] Auto-sync failed for ${newConnection.id}: ${syncRes.status}`);
-          }
-        });
-      } catch (syncSetupError) {
-        // Defensive: if URL parsing or header construction itself throws, do
-        // not let it break the (already successful) POST response.
-        console.log(
-          `[providers] Auto-sync setup failed for ${newConnection.id}:`,
-          syncSetupError?.message || syncSetupError
-        );
-      }
-    }
+    // Opt-in model discovery for the new connection: without it a connection
+    // added between scheduler ticks stays active with an empty catalog until
+    // the next six-hour cycle. Fire-and-forget; the helper logs failures and
+    // never touches the response.
+    triggerAutoModelSync(
+      { id: newConnection.id, provider, providerSpecificData },
+      { skipHeaderValue: request.headers.get("x-skip-model-sync"), mode: "import" }
+    );
 
     // Auto-test the newly created connection so `testStatus` reflects reality
     // shortly after creation instead of sitting at "unknown" until the

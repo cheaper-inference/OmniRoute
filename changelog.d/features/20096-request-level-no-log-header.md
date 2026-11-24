@@ -1,0 +1,1 @@
+- **feat(api):** add the per-request `x-omniroute-no-log` header to omit request/response payloads from call logs while keeping timestamp, model, status, duration and token counts ([#20096](https://github.com/cheaper-inference/OmniRoute/pull/20096))

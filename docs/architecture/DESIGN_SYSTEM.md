@@ -40,7 +40,10 @@ lastUpdated: 2026-11-03
   lime-800 in light and the lime accent in dark. Chart series use
   `--color-chart-1` … `--color-chart-8`, each with a text-safe `--color-chart-N-ink` and an opaque
   `--color-chart-N-subtle` chip tint, assigned in the kit series order (`ciChartSeriesOrder`).
-- **Themes.** `<html className="ci-theme">` (`src/app/layout.tsx`) opts the document into the kit theme.
+- **Themes.** `<html className="ci-theme ci-scrollbars">` (`src/app/layout.tsx`) opts the document into
+  the kit theme and into the kit scrollbars (`--ci-scrollbar-*` tokens; `globals.css` has no scrollbar
+  rule of its own, and an element must not set `scrollbar-width` or `scrollbar-color`, which would drop
+  the kit styling in Chromium and Safari; `tests/unit/design-kit-bridge.test.ts` guards both).
   The preference is `light`, `dark` or `system` (`THEME_CONFIG.defaultTheme = "system"` in
   `src/shared/constants/appConfig.ts`; `system` follows `prefers-color-scheme`). `applyTheme()` in
   `src/store/themeStore.ts` (mirrored by `THEME_BOOT_SCRIPT`, inlined in `src/app/layout.tsx`, which runs
@@ -84,12 +87,13 @@ lastUpdated: 2026-11-03
   `--ci-color-accent-foreground` ink in dark), `danger` is `destructive`, and `warning` is the kit `warning`
   button. `Badge` status variants are kit tones, and `Select` with `<option>` children renders the kit
   `NativeSelect`.
-  Two adapters are imported by path, not from the index: `InteractiveTableRow`
-  (`src/shared/components/InteractiveTableRow.tsx`), a kit `TableRow` that takes `onActivate` and
-  `selected` and answers Tab, Enter and Space, and `CodePreview`
+  One adapter is imported by path, not from the index: `CodePreview`
   (`src/shared/components/CodePreview.tsx`), the kit code block with its copy labels translated.
+  A clickable table row has no adapter: it is the kit `TableRow` with `onActivate` and `selected`.
   `tests/unit/ui/adapters/*.test.tsx` pin each adapter.
-- **Shell.** `src/app/(dashboard)/layout.tsx` renders `DashboardLayout`, which renders
+- **Shell.** `src/app/(dashboard)/layout.tsx` renders `DashboardLayout`, which wraps the shell in
+  `KitLabelsProvider` (kit texts set once for every screen: the translated sentence that names a
+  table's persistent scrollbar) and renders
   `src/shared/components/layouts/DashboardShell.tsx`: the kit `SidebarProvider` / `Sidebar` /
   `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`), with OmniRoute's navigation logic in
   `src/shared/components/Sidebar.tsx`. A "skip to content" link to `#main-content` is the first focusable
@@ -135,11 +139,23 @@ lastUpdated: 2026-11-03
 4. Tailwind utilities win over kit component classes (the kit declares
    `@layer theme, base, components, utilities` and its rules live in `components`) — use utilities for
    spacing and layout, not to re-color kit components. Typography is the exception:
-   `packages/ui-kit/src/ci-typography.css` is imported outside any layer, so its tag rules beat
+   `packages/ui-kit/src/ci-typography.css` is imported outside any layer, so its tag defaults beat
    utilities. Weight, `tracking-*` and `leading-*` classes have no effect on `h1`–`h6`, weight and
    `tracking-*` have none on table cells, and weight has none on buttons
    (`tests/unit/dead-typography-classes.test.ts` rejects them there); `font-mono` has no effect on
    `th`, `td`, `button`, `input` and `textarea`. Size, colour and `uppercase` utilities still apply.
+   The tag defaults have two exits, and neither makes a utility the way to set weight or tracking:
+   - An element that carries a kit type class is skipped by the tag defaults, so the class reads the
+     same on any tag. The role classes (`type-heading`, `type-body`, `type-reading`, `type-control`,
+     `type-data`, `type-caption`) are unlayered too, so utilities still lose next to them.
+     `ci-eyebrow` is a `components` rule: `<h3 className="ci-eyebrow">` now gets the eyebrow type,
+     and a utility on it does apply (the guard does not flag it), but prefer the eyebrow's own
+     `data-size` and `data-weight`. `ci-heading` is not an exit: the heading default still applies.
+   - `data-ci-type-roles="layered"` on a container moves the tag defaults of everything under it
+     into `@layer utilities.ci-type-roles`, below the host utilities. The dashboard does not set
+     it: setting it makes every weight, tracking and leading utility under it take effect at
+     once, so it needs this rule and the guard reviewed in the same change (the guard fails when
+     the attribute appears under `src/`).
 5. Headings: `.ci-heading` for page and section titles; `.ci-dashboard-display` only for large, sparse
    display text such as the error-page status code. Both use Switzer.
 6. `tests/unit/dashboard-kit-sweep.test.ts` guards the kit adoption: no Material ligature span under
@@ -161,11 +177,14 @@ lastUpdated: 2026-11-03
    (`tests/unit/color-alpha-concatenation.test.ts`).
 9. Tables: every kit `Table` passes `scrollLabel`, the name of its scroll region, and
    `scrollbarLabel` when it draws the persistent scrollbar
-   (`tests/unit/kit-tables-have-accessible-name.test.ts`). A clickable row is an
-   `InteractiveTableRow` with `onActivate`, never `<TableRow onClick>`
+   (`tests/unit/kit-tables-have-accessible-name.test.ts`). A clickable row is the kit
+   `<TableRow onActivate>` (tab stop, click, Enter and Space; a control inside the row, a portal
+   opened from it and a click that ends a text selection do not activate it), with `selected` for
+   the selected row, never a pointer-only `<TableRow onClick>`
    (`tests/unit/table-row-click-needs-keyboard.test.ts`). A table inside a card, or inside any
-   bordered box, drops its own frame with `containerClassName="rounded-none border-0"`
-   (`tests/unit/datatable-not-framed-inside-card.test.ts`).
+   bordered box, drops its own frame: `variant="plain"` on the kit `Table` or `DataTableShell`,
+   `framed={false}` on the `DataTable` adapter (`containerClassName="rounded-none border-0"` is the
+   older spelling, still accepted) (`tests/unit/datatable-not-framed-inside-card.test.ts`).
 10. A bar that shows an amount is the kit `Progress`, or carries `role="progressbar"` with a name and a
     value when the kit bar cannot draw it (`tests/unit/progress-bars-have-semantics.test.ts`). Menus,
     popovers and tooltips come from the kit (`Popover`, `SearchableSelect`, the `Tooltip` adapter), not

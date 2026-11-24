@@ -31,6 +31,7 @@ import { redactVideoTranscriptFieldsForLog } from "@/lib/guardrails/videoBridgeS
 import { FORMATS } from "../../translator/formats.ts";
 import { takeEarlyKeepaliveBytes } from "../../utils/earlyKeepaliveByteBuffer.ts";
 import { sanitizeErrorMessage } from "../../utils/error.ts";
+import { readBuyerCostMicro } from "../../utils/buyerCostMicro.ts";
 import { isEstimatedUsage } from "../../utils/usageTracking.ts";
 import { cloneBoundedChatLogPayload, truncateForLog } from "./logTruncation.ts";
 import { attachLogMeta } from "./cacheUsageMeta.ts";
@@ -258,6 +259,7 @@ export function extractResponsesId(sourceFormat: unknown, clientResponse: unknow
 }
 
 export type PersistAttemptLogsArgs = {
+  buyerCostMicro?: number | null;
   upstreamHttpSelection?: HttpAttemptSelection | null;
   status: number;
   tokens?: unknown;
@@ -731,6 +733,10 @@ export function persistAttemptLogs(args: PersistAttemptLogsArgs, ctx: PersistAtt
     videoContentRemoved: videoContentRemoved || false,
     addedWaitMs: addedWait?.ms ?? null,
     queueWaitMs: queueWaitMsFromDispatch(upstreamDispatchedAt, startTime),
+    buyerCostMicro:
+      args.buyerCostMicro === undefined
+        ? readBuyerCostMicro(args.providerResponse)
+        : args.buyerCostMicro,
     addedWaitCause: addedWait?.cause ?? null,
   }).catch(() => {});
 
