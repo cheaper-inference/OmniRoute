@@ -1,0 +1,1 @@
+- **feat(plugin):** an opt-in `publishPerProvider` setting publishes one provider per upstream canonical, with aliases of the same upstream sharing it and labels free of the redundant prefix, while keeping the default single-provider output and gateway model ids unchanged ([#20563](https://github.com/cheaper-inference/OmniRoute/pull/20563)) — thanks @maxmad64bis
