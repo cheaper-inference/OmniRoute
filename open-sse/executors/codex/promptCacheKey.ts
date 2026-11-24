@@ -125,47 +125,50 @@ export function readCodexCacheSessionHeader(
   );
 }
 
+function extractTextFromPart(part: unknown): string | null {
+  if (typeof part === "string") {
+    const trimmed = part.trim();
+    return trimmed || null;
+  }
+  const rec = asRecord(part);
+  return (
+    nonEmptyString(rec?.text) ||
+    nonEmptyString(rec?.input_text) ||
+    nonEmptyString(rec?.output_text)
+  );
+}
+
+function joinAnchoredTextParts(content: unknown[]): string | null {
+  const textParts: string[] = [];
+  let totalLen = 0;
+  for (const part of content) {
+    const textVal = extractTextFromPart(part);
+    if (textVal) {
+      textParts.push(textVal);
+      totalLen += textVal.length;
+      if (totalLen >= MAX_ANCHOR_TEXT_CHARS) break;
+    }
+  }
+  return textParts.length > 0
+    ? textParts.join("\n").slice(0, MAX_ANCHOR_TEXT_CHARS)
+    : null;
+}
+
 function extractMessageText(content: unknown): string {
   if (typeof content === "string") {
     return content.trim().slice(0, MAX_ANCHOR_TEXT_CHARS);
   }
   if (!Array.isArray(content)) return "";
 
-  const textParts: string[] = [];
-  let totalLen = 0;
-  for (const part of content) {
-    if (typeof part === "string") {
-      const trimmed = part.trim();
-      if (trimmed) {
-        textParts.push(trimmed);
-        totalLen += trimmed.length;
-      }
-    } else {
-      const rec = asRecord(part);
-      const textVal =
-        nonEmptyString(rec?.text) ||
-        nonEmptyString(rec?.input_text) ||
-        nonEmptyString(rec?.output_text);
-      if (textVal) {
-        textParts.push(textVal);
-        totalLen += textVal.length;
-      }
-    }
-    if (totalLen >= MAX_ANCHOR_TEXT_CHARS) break;
-  }
+  const joined = joinAnchoredTextParts(content);
+  if (joined) return joined;
 
-  if (textParts.length > 0) {
-    return textParts.join("\n").slice(0, MAX_ANCHOR_TEXT_CHARS);
+  if (content.length === 0) return "";
+  try {
+    return JSON.stringify(content).slice(0, MAX_ANCHOR_TEXT_CHARS);
+  } catch {
+    return "";
   }
-
-  if (content.length > 0) {
-    try {
-      return JSON.stringify(content).slice(0, MAX_ANCHOR_TEXT_CHARS);
-    } catch {
-      return "";
-    }
-  }
-  return "";
 }
 
 function extractConversationAnchor(body: Record<string, unknown>): {
@@ -250,6 +253,36 @@ export function deriveCodexConversationCacheKey(
   return deriveStableUUIDv4(seed);
 }
 
+function readTransientHeaderSessionId(
+  psd: Record<string, unknown> | null,
+  identity: CodexClientIdentity | null | undefined
+): string | null {
+  return (
+    normalizeCodexSessionId(psd?.[CODEX_TRANSIENT_CACHE_SESSION_KEY]) ||
+    normalizeCodexSessionId(identity?.clientSessionId) ||
+    null
+  );
+}
+
+function readExplicitBodySessionCandidate(body: Record<string, unknown> | null): string | null {
+  return (
+    normalizeCodexSessionId(body?.prompt_cache_key) ||
+    normalizeCodexSessionId(body?.session_id) ||
+    normalizeCodexSessionId(body?.conversation_id) ||
+    null
+  );
+}
+
+function applyThreadScopedCacheKey(
+  candidate: string,
+  identity: CodexClientIdentity | null | undefined,
+  psd: Record<string, unknown> | null,
+  connectionId: string | null
+): string {
+  const threadScoped = resolveCodexThreadScopedPromptCacheKey(candidate, identity, psd, connectionId);
+  return threadScoped || candidate;
+}
+
 /**
  * Resolve the outbound `body.prompt_cache_key` for Codex requests.
  *
@@ -273,34 +306,24 @@ export function resolveCodexPromptCacheKey(
 ): string | null {
   const psd = credentials?.providerSpecificData ?? null;
   const identity = psd?.codexClientIdentity as CodexClientIdentity | null | undefined;
-  const connectionId = credentials?.connectionId ?? null;
-
-  const transientHeaderSessionId =
-    normalizeCodexSessionId(psd?.[CODEX_TRANSIENT_CACHE_SESSION_KEY]) ||
-    normalizeCodexSessionId(identity?.clientSessionId) ||
-    null;
 
   const explicitOrSessionCandidate =
-    normalizeCodexSessionId(body?.prompt_cache_key) ||
-    normalizeCodexSessionId(body?.session_id) ||
-    normalizeCodexSessionId(body?.conversation_id) ||
-    transientHeaderSessionId ||
+    readExplicitBodySessionCandidate(body) ||
+    readTransientHeaderSessionId(psd, identity) ||
     extractClaudeMetadataSessionId(body);
 
   if (explicitOrSessionCandidate) {
-    const threadScoped = resolveCodexThreadScopedPromptCacheKey(
+    return applyThreadScopedCacheKey(
       explicitOrSessionCandidate,
       identity,
       psd,
-      connectionId
+      credentials?.connectionId ?? null
     );
-    return threadScoped || explicitOrSessionCandidate;
   }
 
-  const conversationKey = deriveCodexConversationCacheKey(body, credentials);
-  if (conversationKey) {
-    return conversationKey;
-  }
-
-  return normalizeCodexSessionId(psd?.workspaceId) || null;
+  return (
+    deriveCodexConversationCacheKey(body, credentials) ||
+    normalizeCodexSessionId(psd?.workspaceId) ||
+    null
+  );
 }
