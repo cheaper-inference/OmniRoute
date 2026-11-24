@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
-import { Card } from "@/shared/components";
+import Card from "@/shared/components/Card";
 
 type TelemetryPayload = {
   count?: number;
@@ -255,7 +255,7 @@ export default function TelemetryCard() {
     <Card className="p-5">
       <div className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
         <div>
-          <h2 className="flex items-center gap-2 text-lg text-text-main">
+          <h2 className="ci-heading flex items-center gap-2" data-size="lg">
             <Icon name="monitoring" size={20} className="text-primary" />
             {t("title")}
           </h2>
@@ -286,10 +286,10 @@ export default function TelemetryCard() {
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {metricCards.map((metric) => (
-          <div key={metric.label} className="rounded-xl border border-border bg-surface/50 p-3">
+          <Card.Section key={metric.label}>
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-xs font-medium uppercase tracking-wider text-text-muted">
+                <p className="ci-eyebrow" data-weight="medium">
                   {metric.label}
                 </p>
                 <p className="mt-1 text-xl font-semibold text-text-main">{metric.value}</p>
@@ -298,32 +298,32 @@ export default function TelemetryCard() {
                 <Icon name={metric.icon} size={20} />
               </span>
             </div>
-          </div>
+          </Card.Section>
         ))}
       </div>
 
       <div className="mt-5 grid gap-4 lg:grid-cols-3">
-        <div className="rounded-xl border border-border bg-surface/40 p-3">
+        <Card.Section>
           <div className="mb-2 flex items-center justify-between text-xs text-text-muted">
             <span>{t("latencyTrend")}</span>
             <span>{formatMs(values.p95Latency)} p95</span>
           </div>
           <Sparkline samples={samples} field="latencyMs" />
-        </div>
-        <div className="rounded-xl border border-border bg-surface/40 p-3">
+        </Card.Section>
+        <Card.Section>
           <div className="mb-2 flex items-center justify-between text-xs text-text-muted">
             <span>{t("throughputTrend")}</span>
             <span>{values.totalRequests.toLocaleString()}</span>
           </div>
           <Sparkline samples={samples} field="throughput" />
-        </div>
-        <div className="rounded-xl border border-border bg-surface/40 p-3">
+        </Card.Section>
+        <Card.Section>
           <div className="mb-2 flex items-center justify-between text-xs text-text-muted">
             <span>{t("memoryTrend")}</span>
             <span>{formatBytes(values.memoryUsage.heapUsed ?? 0)}</span>
           </div>
           <Sparkline samples={samples} field="memoryBytes" />
-        </div>
+        </Card.Section>
       </div>
     </Card>
   );

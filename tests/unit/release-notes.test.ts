@@ -49,7 +49,7 @@ test("parseNewsPayload validates the closed v2 feed and preserves inactive entri
           en: { title: "Radar", message: "Opt-in catalog", linkLabel: "Learn more" },
           "pt-BR": { title: "Radar", message: "Catálogo opt-in", linkLabel: "Saiba mais" },
         },
-        link: "https://radar.omniroute.online/planos",
+        link: "https://radar.omniroute.online/",
         icon: "radar",
       },
     ],
@@ -60,7 +60,7 @@ test("parseNewsPayload validates the closed v2 feed and preserves inactive entri
   assert.deepEqual(
     releaseNotes.parseNewsPayload({
       ...payload,
-      items: [{ ...payload.items[0], link: "http://radar.omniroute.online/planos" }],
+      items: [{ ...payload.items[0], link: "http://radar.omniroute.online/" }],
     }),
     []
   );

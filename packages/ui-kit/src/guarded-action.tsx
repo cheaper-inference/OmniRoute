@@ -5,7 +5,7 @@ import type { MouseEventHandler } from "react";
 import { Button, type ButtonProps } from "./button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./tooltip";
 
-export interface GuardedActionProps extends Omit<ButtonProps, "asChild" | "aria-disabled"> {
+export interface GuardedActionProps extends Omit<ButtonProps, "asChild" | "aria-disabled" | "tooltip" | "tooltipSide"> {
   /** An unmet requirement. The action stays focusable and explains this reason. */
   reason?: string;
   /** Reveal inline errors and focus the relevant field here. Never submits. */

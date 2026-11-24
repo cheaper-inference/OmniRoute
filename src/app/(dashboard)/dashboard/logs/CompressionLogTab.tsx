@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Badge, Card, Skeleton } from "@/shared/components";
+import { Badge, Skeleton } from "@/shared/components";
+import Card from "@/shared/components/Card";
 import Icon from "@/shared/components/Icon";
 import { useTranslations } from "next-intl";
 
@@ -53,7 +54,9 @@ export default function CompressionLogTab() {
       <Card className="p-6">
         <div className="flex items-center gap-3 mb-4">
           <Icon name="compress" size={20} className="text-info" />
-          <h3 className="text-lg">{t("compressionLogTitle")}</h3>
+          <h3 className="ci-heading" data-size="lg">
+            {t("compressionLogTitle")}
+          </h3>
         </div>
         <p className="text-sm text-text-muted">{t("compressionLogEmpty")}</p>
       </Card>
@@ -64,7 +67,9 @@ export default function CompressionLogTab() {
     <Card className="p-6">
       <div className="flex items-center gap-3 mb-5">
         <Icon name="compress" size={20} className="text-info" />
-        <h3 className="text-lg">{t("compressionLogTitle")}</h3>
+        <h3 className="ci-heading" data-size="lg">
+          {t("compressionLogTitle")}
+        </h3>
       </div>
 
       <div className="space-y-3">
@@ -73,10 +78,7 @@ export default function CompressionLogTab() {
           if (!stats) return null;
 
           return (
-            <div
-              key={entry.id}
-              className="space-y-2 rounded-lg border border-border bg-bg-subtle p-3"
-            >
+            <Card.Section key={entry.id} className="space-y-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-sm">
                   <span className="font-mono text-text-main">
@@ -118,17 +120,13 @@ export default function CompressionLogTab() {
               {stats.rulesApplied && stats.rulesApplied.length > 0 && (
                 <div className="flex flex-wrap gap-1">
                   {stats.rulesApplied.map((rule) => (
-                    <Badge
-                      key={rule}
-                      size="sm"
-                      className="border-chart-3/20 bg-chart-3/10 text-chart-3-ink"
-                    >
+                    <Badge key={rule} size="sm" tone="chart-3">
                       {rule.replace(/_/g, " ")}
                     </Badge>
                   ))}
                 </div>
               )}
-            </div>
+            </Card.Section>
           );
         })}
       </div>

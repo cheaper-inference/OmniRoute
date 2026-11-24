@@ -63,5 +63,7 @@ it("retains the cooldown and offers retry when release fails", async () => {
   const el = render();
   await act(async () => el.querySelector("button")!.click());
   expect(el.querySelector("[role=alert]")).not.toBeNull();
+  // The button carries a title: inactive would be aria-disabled, not `disabled`.
+  expect(el.querySelector("button")!.hasAttribute("aria-disabled")).toBe(false);
   expect(el.querySelector("button")!.disabled).toBe(false);
 });

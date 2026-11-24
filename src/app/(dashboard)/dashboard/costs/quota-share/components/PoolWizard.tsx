@@ -24,6 +24,8 @@ import ModalWizard, { MODAL_WIZARD_BODY_CLASS } from "@/shared/components/ModalW
 import Badge from "@/shared/components/Badge";
 import Checkbox from "@/shared/components/Checkbox";
 import Input from "@/shared/components/Input";
+import NumberInput from "@/shared/components/NumberInput";
+
 import SegmentedControl from "@/shared/components/SegmentedControl";
 import Select from "@/shared/components/Select";
 import { getSeriesColor } from "@/shared/components/analytics/chartColors";
@@ -42,6 +44,7 @@ import type {
   QuotaWindow,
 } from "@/lib/quota/dimensions";
 import type { QuotaPool } from "@/lib/db/quotaPools";
+import Card from "@/shared/components/Card";
 import BorrowModeField from "./BorrowModeField";
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -645,12 +648,14 @@ export default function PoolWizard({
             <div>
               <span
                 id="pool-wizard-connections-label"
-                className="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-text-muted"
+                className="ci-eyebrow mb-1 block"
+                data-size="2xs"
+                data-weight="medium"
               >
                 {t("wizardConnectionsLabel")}
               </span>
               {lockedProvider && (
-                <p className="text-[10px] text-warning mb-1.5">
+                <p className="text-xs text-warning mb-1.5">
                   {t("wizardSingleProviderNote")} ({lockedProvider})
                 </p>
               )}
@@ -709,7 +714,7 @@ export default function PoolWizard({
                   ))}
               </div>
               {connections.length === 0 && (
-                <p className="text-[10px] text-warning mt-1">{t("noEligibleConnections")}</p>
+                <p className="text-xs text-warning mt-1">{t("noEligibleConnections")}</p>
               )}
             </div>
 
@@ -748,7 +753,7 @@ export default function PoolWizard({
             {/* Default policy */}
             {connectionIds.length > 0 && (
               <div>
-                <span className="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-text-muted">
+                <span className="ci-eyebrow mb-1 block" data-size="2xs" data-weight="medium">
                   {t("policyLabel")}
                 </span>
                 <SegmentedControl
@@ -781,9 +786,9 @@ export default function PoolWizard({
         {step === 2 && (
           <div className="space-y-4">
             {/* Dimensions editor (ported from ProviderPlanConfigClient) */}
-            <div className="rounded-lg border border-border bg-bg-subtle p-3">
+            <Card.Section>
               <div className="flex items-center justify-between mb-2">
-                <span className="text-[11px] uppercase tracking-wide font-semibold text-text-muted">
+                <span className="ci-eyebrow" data-size="2xs" data-weight="medium">
                   {tPlans("dimensionLabel")}
                 </span>
                 <Button variant="ghost" size="sm" icon="add" onClick={addDimension}>
@@ -832,36 +837,38 @@ export default function PoolWizard({
                         </option>
                       ))}
                     </Select>
-                    <Input
-                      type="number"
+                    <NumberInput
+                      size="xs"
                       min={0}
+                      precision={6}
                       aria-label={tPlans("limitLabel")}
                       value={dim.limit}
-                      onChange={(e) => updateDimension(i, { limit: Number(e.target.value) })}
+                      onValueChange={(limit) => updateDimension(i, { limit: limit ?? 0 })}
                       placeholder={tPlans("limitLabel")}
-                      inputClassName="h-8 min-h-8 text-right text-xs tabular-nums"
+                      inputClassName="text-right"
                     />
                     <Button
                       variant="ghost"
-                      size="icon-sm"
+                      size="icon-2xs"
+                      tone="muted"
                       onClick={() => removeDimension(i)}
                       aria-label={t("wizardRemoveDimension")}
-                      className="size-6 min-h-6 text-text-muted hover:bg-error/10 hover:text-error"
+                      className="hover:bg-error/10 hover:text-error"
                     >
                       <Icon name="close" size={16} />
                     </Button>
                   </div>
                 ))}
               </div>
-            </div>
+            </Card.Section>
 
             {dimensionsEdited && (
-              <p className="text-[10px] text-warning">{t("wizardDimensionsEditedNotice")}</p>
+              <p className="text-xs text-warning">{t("wizardDimensionsEditedNotice")}</p>
             )}
 
             {/* Helper note when pool has multiple connections */}
             {connectionIds.length > 1 && (
-              <p className="rounded border border-border bg-bg-subtle px-3 py-2 text-[10px] text-text-muted">
+              <p className="rounded border border-border bg-bg-subtle px-3 py-2 text-xs text-text-muted">
                 {t("wizardAdditionalConnectionsNote")}
               </p>
             )}
@@ -891,28 +898,24 @@ export default function PoolWizard({
                         style={{ background: color }}
                       />
                       <span className="text-[12px] font-mono truncate">{keyLabel(a.apiKeyId)}</span>
-                      <Input
-                        type="number"
+                      <NumberInput
+                        size="xs"
                         min={0}
                         max={100}
+                        precision={6}
                         value={a.weight}
-                        onChange={(e) => updateWeight(a.apiKeyId, Number(e.target.value))}
-                        inputClassName="h-8 min-h-8 px-2 text-right tabular-nums"
+                        onValueChange={(weight) => updateWeight(a.apiKeyId, weight ?? 0)}
+                        inputClassName="text-right"
                         title={t("weightPercent")}
                         aria-label={t("weightPercent")}
                       />
-                      <Input
-                        type="number"
+                      <NumberInput
+                        size="xs"
                         min={0}
-                        value={a.capValue ?? ""}
-                        onChange={(e) =>
-                          updateCapValue(
-                            a.apiKeyId,
-                            e.target.value ? Number(e.target.value) : undefined
-                          )
-                        }
+                        precision={6}
+                        value={a.capValue ?? null}
+                        onValueChange={(cap) => updateCapValue(a.apiKeyId, cap ?? undefined)}
                         placeholder={t("policyCapAbsolutePlaceholder")}
-                        inputClassName="h-8 min-h-8 px-2 text-xs tabular-nums"
                         title={t("policyCapAbsoluteLabel")}
                         aria-label={t("policyCapAbsoluteLabel")}
                       />
@@ -931,10 +934,11 @@ export default function PoolWizard({
                       </Select>
                       <Button
                         variant="ghost"
-                        size="icon-sm"
+                        size="icon-2xs"
+                        tone="muted"
                         onClick={() => removeAllocation(a.apiKeyId)}
                         aria-label={t("wizardRemoveKey")}
-                        className="size-6 min-h-6 text-text-muted hover:bg-error/10 hover:text-error"
+                        className="hover:bg-error/10 hover:text-error"
                       >
                         <Icon name="close" size={16} />
                       </Button>
@@ -945,7 +949,7 @@ export default function PoolWizard({
             )}
 
             {/* Add key + equal split controls */}
-            <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border pt-1 text-[11px]">
+            <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border pt-1 text-2xs">
               <span
                 className={`font-semibold tabular-nums ${
                   totalWeight === 100
@@ -996,7 +1000,7 @@ export default function PoolWizard({
                     <span className="text-sm font-semibold text-text-main">
                       {t("wizardExclusiveLabel")}
                     </span>
-                    <span className="mt-0.5 text-[11px] text-text-muted">
+                    <span className="mt-0.5 text-2xs text-text-muted">
                       {t("wizardExclusiveHint")}
                     </span>
                   </span>
@@ -1012,8 +1016,8 @@ export default function PoolWizard({
 
             {/* quotaModelName preview — grouped by provider */}
             {previewByProvider.length > 0 && (
-              <div className="rounded-md border border-border bg-bg-subtle p-3 text-[11px]">
-                <div className="font-semibold text-text-muted uppercase tracking-wide mb-1.5 text-[10px]">
+              <Card.Section className="text-2xs">
+                <div className="ci-eyebrow mb-1.5" data-size="3xs" data-weight="medium">
                   {t("wizardPreviewLabel")}
                 </div>
                 <div className="space-y-2">
@@ -1022,7 +1026,7 @@ export default function PoolWizard({
                     return (
                       <div key={provider}>
                         {previewByProvider.length > 1 && (
-                          <div className="text-[10px] uppercase tracking-wide text-text-muted font-semibold mb-0.5">
+                          <div className="ci-eyebrow mb-0.5" data-size="3xs" data-weight="medium">
                             {provider}
                           </div>
                         )}
@@ -1042,7 +1046,7 @@ export default function PoolWizard({
                     );
                   })}
                 </div>
-              </div>
+              </Card.Section>
             )}
           </div>
         )}

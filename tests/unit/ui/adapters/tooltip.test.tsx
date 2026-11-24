@@ -4,6 +4,8 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
+// The kit tooltip opens on a focus the keyboard moved, not on a bare focus (kit #317).
+import { tabTo } from "../../../_helpers/buttonTooltip";
 
 const { default: Tooltip } = await import("@/shared/components/Tooltip");
 const { default: InfoTooltip } = await import("@/shared/components/InfoTooltip");
@@ -11,13 +13,13 @@ const { default: InfoTooltip } = await import("@/shared/components/InfoTooltip")
 afterEach(() => cleanup());
 
 describe("Tooltip adapters → kit Tooltip (Radix)", () => {
-  it("shows the content on focus with the requested side and multiline class", async () => {
+  it("shows the content on keyboard focus with the requested side and multiline class", async () => {
     render(
       <Tooltip content="Help text" position="bottom" multiline delayMs={0}>
         <button type="button">Trigger</button>
       </Tooltip>
     );
-    fireEvent.focus(screen.getByRole("button", { name: "Trigger" }));
+    tabTo(screen.getByRole("button", { name: "Trigger" }));
     await act(async () => {});
     const tip = await screen.findByRole("tooltip");
     expect(tip.textContent).toContain("Help text");
@@ -64,7 +66,7 @@ describe("Tooltip adapters → kit Tooltip (Radix)", () => {
     expect(trigger.querySelector("svg")).not.toBeNull();
     // The help text is no longer the button's name: a screen reader heard it twice.
     expect(screen.queryByRole("button", { name: "More about this" })).toBeNull();
-    fireEvent.focus(trigger);
+    tabTo(trigger);
     await act(async () => {});
     const tooltip = await screen.findByRole("tooltip");
     expect(tooltip.textContent).toContain("More about this");
@@ -83,7 +85,7 @@ describe("Tooltip adapters → kit Tooltip (Radix)", () => {
     const trigger = screen.getByRole("button", { name: "About the hit rate" });
     expect(trigger.className).toContain("ci-info-tooltip__trigger");
     expect(trigger.className).toContain("ms-1");
-    fireEvent.focus(trigger);
+    tabTo(trigger);
     await act(async () => {});
     await screen.findByRole("tooltip");
     const content = document.querySelector<HTMLElement>("[data-slot=tooltip-content]")!;
@@ -120,7 +122,7 @@ describe("Tooltip adapters → kit Tooltip (Radix)", () => {
     expect((await screen.findByRole("tooltip")).textContent).toContain("Why disabled");
     fireEvent.keyDown(wrapper, { key: "Escape" });
     await act(async () => {});
-    fireEvent.focus(wrapper);
+    tabTo(wrapper);
     await act(async () => {});
     expect((await screen.findByRole("tooltip")).textContent).toContain("Why disabled");
   });

@@ -59,7 +59,9 @@ function isHttpUrl(url: string | undefined): url is string {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="mb-4">
-      <div className="text-[10px] font-semibold uppercase text-text-muted mb-1">{title}</div>
+      <div className="ci-eyebrow mb-1" data-size="3xs" data-weight="medium">
+        {title}
+      </div>
       {children}
     </div>
   );
@@ -72,7 +74,7 @@ function Timeline({ node, detail }: { node: OrchNode; detail: unknown }) {
       <ol className="text-xs flex flex-col gap-1.5">
         {(t?.activities ?? []).map((a) => (
           <li key={a.id} className="flex gap-2">
-            <code className="text-[9px] shrink-0 text-text-muted">{a.type}</code>
+            <code className="text-3xs shrink-0 text-text-muted">{a.type}</code>
             <span className="break-words">{a.content}</span>
           </li>
         ))}
@@ -85,7 +87,7 @@ function Timeline({ node, detail }: { node: OrchNode; detail: unknown }) {
       <ol className="text-xs flex flex-col gap-1">
         {(t?.events ?? []).map((e, i) => (
           <li key={i}>
-            <code className="text-[9px] text-text-muted mr-1">{e.state}</code>
+            <code className="text-3xs text-text-muted mr-1">{e.state}</code>
             {e.message ?? e.timestamp}
           </li>
         ))}
@@ -93,7 +95,7 @@ function Timeline({ node, detail }: { node: OrchNode; detail: unknown }) {
     );
   }
   return (
-    <pre className="text-[10px] bg-muted rounded p-2 overflow-x-auto">
+    <pre className="text-xs bg-muted rounded p-2 overflow-x-auto">
       {JSON.stringify(detail, null, 2)}
     </pre>
   );
@@ -132,7 +134,7 @@ function DrawerHeader({
       />
       <div className="min-w-0">
         <SheetTitle className="text-sm font-semibold truncate">{node.label}</SheetTitle>
-        <div className="text-[10px] text-text-muted">
+        <div className="text-3xs text-text-muted">
           {node.source} · {t(STATE_KEY[state])}
         </div>
       </div>
@@ -263,7 +265,7 @@ function DrawerResult({
           <span className="text-xs break-words">{ca.result.prUrl}</span>
         ))}
       {a2a?.artifacts?.map((art, i) => (
-        <pre key={i} className="text-[10px] bg-muted rounded p-2 mt-1 overflow-x-auto">
+        <pre key={i} className="text-xs bg-muted rounded p-2 mt-1 overflow-x-auto">
           {art.content}
         </pre>
       ))}
@@ -303,9 +305,9 @@ function DrawerMemory({ a2a, t }: { a2a: A2ATask | null; t: Translate }) {
       <ul className="text-xs flex flex-col gap-1.5">
         {hits.map((h) => (
           <li key={h.id}>
-            <code className="text-[9px] text-text-muted mr-1">{h.type}</code>
+            <code className="text-3xs text-text-muted mr-1">{h.type}</code>
             <span className="font-medium">{h.key}</span>
-            <div className="text-[10px] text-text-muted break-words">{h.snippet}</div>
+            <div className="text-xs text-text-muted break-words">{h.snippet}</div>
           </li>
         ))}
       </ul>

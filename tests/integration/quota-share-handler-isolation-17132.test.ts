@@ -242,6 +242,18 @@ test("a real closed quota schedule preserves its Retry-After through handleChat"
   assert.deepEqual(await health(connection.id), before);
 });
 
+/**
+ * Seconds spelled by a trailing "(reset after 1h 2m 3s)" hint, or null when there is none.
+ * The formatter leaves out every part that is zero, so the shape follows the clock: "4s" in the
+ * last minute of the hour, "37m" on a whole minute, "1h" on a whole hour.
+ */
+function resetHintSeconds(message: string): number | null {
+  const match = /\(reset after(?: (\d+)h)?(?: (\d+)m)?(?: (\d+)s)?\)$/.exec(message);
+  if (!match || match.slice(1).every((part) => part === undefined)) return null;
+  const [hours, minutes, seconds] = match.slice(1).map((part) => Number(part ?? 0));
+  return hours * 3600 + minutes * 60 + seconds;
+}
+
 /** Key a has used its whole hourly share in a consent pool where nobody lends. */
 async function shareFixture() {
   const connection = await providers.createProviderConnection({
@@ -336,7 +348,14 @@ test("a combo whose targets all refuse the key for its share answers 429 without
   assert.equal(body.error.retry_after, retryAfter);
   const resetLagMs = Date.parse(body.error.reset_at) - Date.parse(clearBy);
   assert.ok(resetLagMs >= 0 && resetLagMs < 2000, `reset_at lags the instant by ${resetLagMs} ms`);
-  assert.match(body.error.message, /\(reset after \d+m \d+s\)$/);
+  // The hint spells the wait that Retry-After carries. Both round up from the same reset instant,
+  // a few milliseconds apart, so they may differ by one second.
+  const hintedSeconds = resetHintSeconds(body.error.message);
+  assert.ok(hintedSeconds !== null, body.error.message);
+  assert.ok(
+    Math.abs(hintedSeconds - retryAfter) <= 1,
+    `the hint says ${hintedSeconds} s and Retry-After says ${retryAfter} s`
+  );
   assert.deepEqual(dispatchedModels, []);
   assert.deepEqual(await health(connection.id), before);
   assert.equal(isModelLocked("claude", connection.id, MODEL), false);
