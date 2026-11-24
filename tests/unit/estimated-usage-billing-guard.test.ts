@@ -158,6 +158,7 @@ test("extraction preserves serializable field evidence and estimates through cop
   assert.deepStrictEqual(estimated, { ...tokenFields, usage_evidence: evidence, estimated: true });
   assert.deepStrictEqual(reported, {
     ...tokenFields,
+    total_tokens: USAGE.total_tokens,
     usage_evidence: {
       input: { source: "reported" },
       output: { source: "reported" },
