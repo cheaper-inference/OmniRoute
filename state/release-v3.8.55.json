@@ -3,44 +3,37 @@
   "base": "release/v3.8.55",
   "paused": null,
   "inFlight": {
-    "batchId": "b28",
+    "batchId": "b29",
     "kind": "batch",
-    "candidateRef": "omni-queue/release-v3.8.55/b28-d85f136e2bb0",
-    "candidateSha": "d85f136e2bb05d33e327b510a58c29222cfb3f35",
-    "baseSha": "b47ecc93c8101d5fcc9188cde7e2a3b84c0eca1b",
-    "treeSha": "568c7a9e8ea48c9b54cca6121cb8efbfd83233fd",
+    "candidateRef": "omni-queue/release-v3.8.55/b29-c944e126c57d",
+    "candidateSha": "c944e126c57d838a8c25656643264abe4a5d0239",
+    "baseSha": "eff2a475edf1d282db4b2ac485c9098df2de96de",
+    "treeSha": "a33b4a35677b8ff5017e279adb394e42c86c0ef6",
     "prs": [
       {
-        "n": 21080,
-        "head": "b1ace531875a5640ead3ff1dd2d188b9c163b985",
-        "title": "fix(sse): honor Cline daily free-limit countdown as a model lockout hint",
+        "n": 21091,
+        "head": "4e447b6bf60db4e687cc2ab490449f0bdaa86ea9",
+        "title": "feat(sse): declare new Cohere and Workers AI model ids",
         "author": "diegosouzapw",
-        "labeledAt": "2026-11-24T14:27:30Z"
+        "labeledAt": "2026-11-24T14:27:53Z"
       },
       {
-        "n": 21081,
-        "head": "da5d88d59c593136c49a37754042f13f7e7f7349",
-        "title": "fix(sse): keep error tool results out of RTK compression",
+        "n": 21092,
+        "head": "72556c31cd9eb9180ce594a0a7d61748495e262e",
+        "title": "fix(usage): drop implausible tok/s samples and aggregate by totals",
         "author": "diegosouzapw",
-        "labeledAt": "2026-11-24T14:27:35Z"
+        "labeledAt": "2026-11-24T14:27:59Z"
       },
       {
-        "n": 21082,
-        "head": "56d1842a74c48b49b7e2487114350b1eb91bf12a",
-        "title": "fix(sse): lock only the model on Kilo PAID_MODEL_AUTH_REQUIRED",
+        "n": 21097,
+        "head": "03063b4441c3d01189f465921abc2b9648719ca5",
+        "title": "feat(db): mark a proxy as a rotating endpoint exempt from per-IP quota set-aside",
         "author": "diegosouzapw",
-        "labeledAt": "2026-11-24T14:27:42Z"
-      },
-      {
-        "n": 21090,
-        "head": "aab9612b49532165cdcd06f730604878ea371309",
-        "title": "feat(sse): declare live OpenCode Zen/Go model ids in the registry",
-        "author": "diegosouzapw",
-        "labeledAt": "2026-11-24T14:27:47Z"
+        "labeledAt": "2026-11-24T14:28:06Z"
       }
     ],
     "stage": "testing",
-    "startedAt": "2026-11-24T14:28:36.736Z",
+    "startedAt": "2026-11-24T15:49:40.045Z",
     "attempts": 0,
     "bisect": null
   },
@@ -118,12 +111,16 @@
       "19149": "ce0f2e3b64d51c480eccfd4c21b4ebeeaa0c2a0b",
       "19167": "5a3523ee5d9dc3a3fe610ed93b4c5ccb048bbca0",
       "19305": "1f33f0e10883549e4374ac38d47e87c94936bc5c",
-      "19306": "4afb0ca62e19eb94155c5b9c2b78bf4b91ae1dee"
+      "19306": "4afb0ca62e19eb94155c5b9c2b78bf4b91ae1dee",
+      "21080": "b1ace531875a5640ead3ff1dd2d188b9c163b985",
+      "21081": "da5d88d59c593136c49a37754042f13f7e7f7349",
+      "21082": "56d1842a74c48b49b7e2487114350b1eb91bf12a",
+      "21090": "aab9612b49532165cdcd06f730604878ea371309"
     }
   },
   "counters": {
-    "batchSeq": 28,
-    "ciRuns": 32,
+    "batchSeq": 29,
+    "ciRuns": 33,
     "landedPrs": 0,
     "landedBatches": 0,
     "redBatches": 8,
@@ -1975,8 +1972,53 @@
         "21090": "2026-11-24T14:27:47Z"
       },
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45414318488"
+    },
+    {
+      "at": "2026-11-24T15:48:44.338Z",
+      "type": "checks-green",
+      "batchId": "b28",
+      "prs": [
+        21080,
+        21081,
+        21082,
+        21090
+      ],
+      "sha": "d85f136e2bb05d33e327b510a58c29222cfb3f35",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45429674017"
+    },
+    {
+      "at": "2026-11-24T15:49:01.857Z",
+      "type": "would-land",
+      "batchId": "b28",
+      "prs": [
+        21080,
+        21081,
+        21082,
+        21090
+      ],
+      "sha": "d85f136e2bb05d33e327b510a58c29222cfb3f35",
+      "detail": "shadow mode: would merge-ff onto b47ecc93c810",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45429674017"
+    },
+    {
+      "at": "2026-11-24T15:49:44.109Z",
+      "type": "batch-started",
+      "batchId": "b29",
+      "prs": [
+        21091,
+        21092,
+        21097
+      ],
+      "sha": "c944e126c57d838a8c25656643264abe4a5d0239",
+      "detail": "3 PR(s) on eff2a475edf1; window 5",
+      "labeledAt": {
+        "21091": "2026-11-24T14:27:53Z",
+        "21092": "2026-11-24T14:27:59Z",
+        "21097": "2026-11-24T14:28:06Z"
+      },
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45429674017"
     }
   ],
-  "updatedAt": "2026-11-24T15:24:32.024Z",
-  "batchWindow": 4
+  "updatedAt": "2026-11-24T15:49:45.999Z",
+  "batchWindow": 5
 }
