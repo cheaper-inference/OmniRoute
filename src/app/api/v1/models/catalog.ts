@@ -399,12 +399,15 @@ async function buildUnifiedModelsResponseCore(
     const includeAlias = prefixMode !== "canonical";
     const includeCanonical = prefixMode !== "alias";
     // No-auth providers never get a canonical row (see the canonical branches below), so in
-    // canonical/lean mode their alias row is the only routable listing and must stay.
+    // lean mode their alias row is the only routable listing and must stay. Scoped to
+    // leanCatalog: an explicit ?prefix=canonical / MODELS_CATALOG_PREFIX_MODE=canonical keeps its
+    // pre-lean behavior (#11632) and must not gain extra alias rows.
     const noAuthAliasOnly = (
       canonicalProviderId: string,
       alias: string,
       providerId?: string
-    ): boolean => !includeAlias && isNoAuthProviderKey(canonicalProviderId, providerId, alias);
+    ): boolean =>
+      leanCatalog && !includeAlias && isNoAuthProviderKey(canonicalProviderId, providerId, alias);
     const modelsDevEffortTiers = isModelsDevEffortTiersEnabled(); // #15944, default off
     const resolveCanonicalProviderId = (aliasOrProviderId: string, fallbackProviderId?: string) =>
       resolveCanonicalProviderIdFromMaps(aliasToProviderId, aliasOrProviderId, fallbackProviderId);

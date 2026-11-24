@@ -100,6 +100,20 @@ test("leanCatalog keeps the alias rows of no-auth providers (they have no canoni
   assert.ok(lean.some((m) => m.id.startsWith("cfp/")));
 });
 
+test("the no-auth alias carve-out is scoped to lean: explicit canonical mode keeps its pre-lean rows", async () => {
+  await settingsDb.updateSettings({ leanCatalog: false });
+  const res = await catalog.getUnifiedModelsResponse(
+    new Request("http://localhost/api/v1/models?prefix=canonical", { method: "GET" })
+  );
+  assert.equal(res.status, 200);
+  const rows = ((await res.json()) as { data: Row[] }).data;
+  assert.equal(
+    rows.some((m) => m.id.startsWith("ddgw/") || m.id.startsWith("cfp/")),
+    false,
+    "?prefix=canonical without lean must not gain no-auth alias rows (#11632)"
+  );
+});
+
 test("leanCatalog drops effort-tier ids that already exist in the source catalog", async () => {
   await providersDb.createProviderConnection({
     provider: "antigravity",
