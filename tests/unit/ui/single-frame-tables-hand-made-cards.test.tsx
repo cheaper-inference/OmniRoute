@@ -27,8 +27,11 @@ afterEach(() => cleanup());
 function expectBorderlessTable(container: HTMLElement) {
   const tableContainer = container.querySelector("[data-slot=table-container]");
   expect(tableContainer).not.toBeNull();
-  expect(tableContainer!.className).toContain("border-0");
-  expect(tableContainer!.className).toContain("rounded-none");
+  // Either the kit's frameless table (variant="plain") or, where a screen still does it by
+  // hand, the two classes that take the frame off.
+  const plain = tableContainer!.getAttribute("data-variant") === "plain";
+  expect(plain || tableContainer!.className.includes("border-0")).toBe(true);
+  expect(plain || tableContainer!.className.includes("rounded-none")).toBe(true);
 }
 
 describe("tables inside a frame the guard could not see draw no frame of their own", () => {

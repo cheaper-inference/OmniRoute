@@ -13,6 +13,7 @@
  * Rendered only for `claude` and `codex`: those are the only two kinds wired
  * into the override store (open-sse/config/cliVersions.ts).
  */
+import { InlineCode } from "@omniroute/ui-kit/inline-code";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import Button from "@/shared/components/Button";
@@ -199,9 +200,7 @@ function VersionSummary({ t, status }: { t: ProviderMessageTranslator; status: C
         <span className="font-medium text-text-main">
           {providerText(t, "cliVersionEffectiveLabel", "Currently advertised")}
         </span>
-        <code className="rounded bg-sidebar px-1.5 py-0.5 font-mono text-text-main">
-          {status.effective}
-        </code>
+        <InlineCode>{status.effective}</InlineCode>
       </div>
       <div className="mt-1 flex items-center justify-between gap-3 text-text-muted">
         <span>

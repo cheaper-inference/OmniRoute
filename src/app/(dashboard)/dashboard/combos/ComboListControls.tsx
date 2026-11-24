@@ -2,6 +2,7 @@
 
 import type { useTranslations } from "next-intl";
 import Button from "@/shared/components/Button";
+import Pager from "@/shared/components/Pager";
 import { getI18nOrFallback } from "./comboPageHelpers";
 
 type Translator = ReturnType<typeof useTranslations>;
@@ -86,39 +87,25 @@ export function ComboPaginationNav({
   onPageChange,
 }: ComboPaginationNavProps) {
   return (
-    <nav
-      className="flex flex-wrap items-center justify-center gap-3 pt-2"
-      aria-label={getI18nOrFallback(t, "paginationLabel", "Combo pages")}
+    <Pager
+      variant="summary"
+      className="pt-2"
       data-testid="combo-pagination"
-    >
-      <Button
-        size="sm"
-        variant="secondary"
-        icon="chevron_left"
-        onClick={() => onPageChange(Math.max(1, page - 1))}
-        disabled={page <= 1}
-        aria-label={getI18nOrFallback(t, "previousPage", "Previous combo page")}
-        data-testid="combo-pagination-previous"
-      >
-        {getI18nOrFallback(tc, "previous", "Previous")}
-      </Button>
-      <span className="text-sm tabular-nums text-text-muted" aria-current="page">
-        {getI18nOrFallback(t, "paginationPage", `Page ${page} of ${pageCount}`, {
-          page,
-          totalPages: pageCount,
-        })}
-      </span>
-      <Button
-        size="sm"
-        variant="secondary"
-        iconRight="chevron_right"
-        onClick={() => onPageChange(Math.min(pageCount, page + 1))}
-        disabled={page >= pageCount}
-        aria-label={getI18nOrFallback(t, "nextPage", "Next combo page")}
-        data-testid="combo-pagination-next"
-      >
-        {getI18nOrFallback(tc, "next", "Next")}
-      </Button>
-    </nav>
+      page={page}
+      pageCount={pageCount}
+      onPageChange={onPageChange}
+      labels={{
+        navigation: getI18nOrFallback(t, "paginationLabel", "Combo pages"),
+        previous: getI18nOrFallback(tc, "previous", "Previous"),
+        next: getI18nOrFallback(tc, "next", "Next"),
+        previousPage: getI18nOrFallback(t, "previousPage", "Previous combo page"),
+        nextPage: getI18nOrFallback(t, "nextPage", "Next combo page"),
+        summary: (current, count) =>
+          getI18nOrFallback(t, "paginationPage", `Page ${current} of ${count}`, {
+            page: current,
+            totalPages: count,
+          }),
+      }}
+    />
   );
 }

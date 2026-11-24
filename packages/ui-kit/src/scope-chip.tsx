@@ -3,13 +3,15 @@
 import { useId, useState } from "react";
 import type { ComponentProps, ReactNode } from "react";
 import { ChevronDown, X } from "lucide-react";
-import { Badge } from "./badge";
+import { Badge, type BadgeChartTone, type BadgeTone } from "./badge";
 import { Button } from "./button";
 import { cn } from "./lib/utils";
 
 export interface ScopeChipProps extends Omit<ComponentProps<"div">, "onChange"> {
   /** Filled carried filters remain the default; outline matches attachment chips for captured context. */
   variant?: "secondary" | "outline";
+  /** Badge tone for a scope that carries a status or a chart series. `outline` draws its border in the tone, over the tint. */
+  tone?: BadgeTone | BadgeChartTone;
   icon?: ReactNode;
   /** Full inline scope replaces the truncated summary while expanded. */
   details?: ReactNode;
@@ -25,7 +27,7 @@ export interface ScopeChipProps extends Omit<ComponentProps<"div">, "onChange"> 
 
 /** Common presentation for carried filters and one captured chat context. */
 export function ScopeChip({
-  variant = "secondary", icon, details, count, expanded: controlledExpanded, defaultExpanded = false,
+  variant = "secondary", tone, icon, details, count, expanded: controlledExpanded, defaultExpanded = false,
   onExpandedChange, onRemove, expandLabel = "Context details", removeLabel = "Remove context",
   children, className, ...props
 }: ScopeChipProps) {
@@ -39,7 +41,7 @@ export function ScopeChip({
     {!expanded && count != null && count > 0 && <span className="ci-scope-chip__count">+{count}</span>}
     {expandable && <ChevronDown className="ci-scope-chip__chevron" aria-hidden="true" />}
   </>;
-  return <Badge asChild variant={variant}><div {...props} data-slot="scope-chip" data-variant={variant} data-expanded={expanded || undefined} className={cn("ci-scope-chip", className)}>
+  return <Badge asChild variant={variant} tone={tone}><div {...props} data-slot="scope-chip" data-variant={variant} data-expanded={expanded || undefined} className={cn("ci-scope-chip", className)}>
     {expandable ? <Button type="button" variant="ghost" size="sm" className="ci-scope-chip__summary" aria-label={expandLabel} aria-expanded={expanded} aria-controls={id} onClick={() => {
       if (controlledExpanded === undefined) setLocalExpanded(!expanded);
       onExpandedChange?.(!expanded);

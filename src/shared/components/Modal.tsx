@@ -15,15 +15,14 @@ import {
 } from "@omniroute/ui-kit/alert-dialog";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  type DialogSize,
 } from "@omniroute/ui-kit/dialog";
 import { cn } from "@/shared/utils/cn";
-import Button, { type ButtonVariant } from "./Button";
-import Icon from "./Icon";
+import type { ButtonVariant } from "./Button";
 
 // #6265 — preset for content-heavy modals: caps height on the OUTERMOST dialog
 // wrapper only (single scroll owner) and keeps the inner body plain (no
@@ -33,13 +32,21 @@ export const TALL_MODAL_PROPS = {
   bodyClassName: "p-6",
 };
 
+type ModalSize = "sm" | "md" | "lg" | "xl" | "full";
+
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
   title?: React.ReactNode;
   children?: React.ReactNode;
   footer?: React.ReactNode;
-  size?: "sm" | "md" | "lg" | "xl" | "full";
+  /**
+   * Width cap, from the kit Dialog: `sm` 30rem (confirmations, short forms), `md` 36rem (the
+   * default), `lg` 48rem, `xl` 64rem, and `full`, which fills the viewport minus the dialog
+   * margin in width and in height whatever its content (editors, wide tables). On a phone every
+   * size is the viewport width minus the margin.
+   */
+  size?: ModalSize;
   closeOnOverlay?: boolean;
   showCloseButton?: boolean;
   /** Applied to the outermost dialog element (`role="dialog"`), so `TALL_MODAL_PROPS` lands there. */
@@ -49,6 +56,8 @@ interface ModalProps {
   /**
    * Accepted for API compatibility. Only a CSS length (`"640px"`, `"calc(…)"`) is applied
    * as an inline max-width; size names (`"lg"`, `"max-w-lg"`) stay inert as they always were.
+   * It is also the way to narrow an `md` dialog: the kit rule for that size sits outside the
+   * CSS layers, so a `max-w-*` class in `className` does not override it.
    */
   maxWidth?: string;
 }
@@ -71,19 +80,49 @@ const TOASTER_SELECTOR = '[data-slot="toaster"]';
 const isFromToaster = (event: Event) =>
   event.target instanceof Element && event.target.closest(TOASTER_SELECTOR) !== null;
 
-// Dialogs take ~70% of the viewport from the `sm` breakpoint up, so settings-style modals
-// (API key permissions, provider config, routing editors) stop cramming their forms into a
-// 28rem column. Below `sm` they keep the kit's `calc(100vw - 3rem)` width with its 30rem cap
-// lifted (`max-w-none`), i.e. full width minus the mobile gutter. Only `sm` keeps a fixed
-// narrow width — it is the confirm/alert dialog size.
-const WIDE = "max-w-none sm:w-[70vw] sm:max-w-[70vw]";
-const SIZES = {
-  sm: "max-w-sm",
-  md: WIDE,
-  lg: WIDE,
-  xl: WIDE,
-  full: WIDE,
-} as const;
+// The adapter's size names are the kit Dialog sizes: the width caps live in the kit CSS
+// (`.ci-dialog[data-size]`), so the adapter adds no width class of its own. The kit keeps the
+// `calc(100vw - 3rem)` width at every size, i.e. the viewport minus the mobile gutter.
+const KIT_SIZES: Record<ModalSize, DialogSize> = {
+  sm: "default",
+  md: "wide",
+  lg: "lg",
+  xl: "xl",
+  full: "full",
+};
+
+/** Root box: unpadded; a column for `full`, else a cap above the body's so only the body scrolls. */
+function rootClass(isFull: boolean, closeInCompactHeader: boolean) {
+  return cn(
+    "p-0",
+    isFull ? "flex flex-col" : "max-h-[calc(100vh-3rem)]",
+    // The kit close button sits 1rem from the top, for the regular header: pull it into the
+    // short one. It is the only <button> that is a direct child of the dialog (a class selector
+    // would need its `__` escaped: Tailwind reads `_` as a space in a variant).
+    closeInCompactHeader && "[&>button]:top-0.5 [&>button]:end-2"
+  );
+}
+
+/**
+ * Header row. With the close button it keeps room for it: the kit positions the button over the
+ * header's end corner (also when there is no visible title, so the header keeps its height).
+ */
+function headerClass(compactHeader: boolean, showCloseButton: boolean) {
+  if (compactHeader) {
+    return cn("flex items-center gap-3 px-4 py-2.5", showCloseButton && "min-h-10 pe-12");
+  }
+  return cn("flex items-center gap-3 px-6 pt-6", showCloseButton && "min-h-13 pe-14");
+}
+
+/** Body: the scroll owner by default; in `full` it also takes the height the dialog has left. */
+function bodyClass(isFull: boolean, bodyClassName: string | undefined) {
+  if (bodyClassName === undefined) {
+    return isFull
+      ? "p-6 flex-1 min-h-0 overflow-y-auto"
+      : "p-6 max-h-[calc(80vh-140px)] overflow-y-auto";
+  }
+  return isFull ? cn("flex-1", bodyClassName) : bodyClassName;
+}
 
 // A menu item leaves the DOM as soon as its menu closes, so it cannot take focus back. The kit
 // DropdownMenu (Radix) labels its content with the trigger's id: climb to the trigger that
@@ -142,6 +181,7 @@ export default function Modal({
     if (isOpen) setRenderOpener(currentFocus());
   }
   const inlineMaxWidth = maxWidth && /\d/.test(maxWidth) ? maxWidth : undefined;
+  const isFull = size === "full";
   // Resolved only when a string title is missing, so a locale catalog that has not
   // received `common.dialogTitleFallback` yet is never asked for it needlessly.
   const fallbackTitle = () => t("dialogTitleFallback");
@@ -154,7 +194,10 @@ export default function Modal({
       }}
     >
       <DialogContent
-        showCloseButton={false}
+        size={KIT_SIZES[size]}
+        // The kit close button (top end corner, last in the tab order), with a translated name.
+        showCloseButton={showCloseButton}
+        closeLabel={t("close")}
         aria-modal="true"
         // No generated description: repeating the title as one made screen readers announce
         // it twice. An explicit undefined is Radix's documented opt-out of the warning.
@@ -164,7 +207,9 @@ export default function Modal({
         // themselves as the legacy Modal did. Its cap sits above the default body cap, so the
         // body is the only scroll owner; `TALL_MODAL_PROPS` swaps in `max-h-[90vh]` (twMerge)
         // and a plain body, making the root the single scroll owner (#6265).
-        className={cn("p-0 max-h-[calc(100vh-3rem)]", SIZES[size], className)}
+        // `full` is different: the kit gives it a fixed height and its own cap, so the root is
+        // a column and the body takes what the header and the footer leave.
+        className={cn(rootClass(isFull, compactHeader && showCloseButton), className)}
         style={inlineMaxWidth ? { maxWidth: inlineMaxWidth } : undefined}
         onOpenAutoFocus={() => {
           openerRef.current = renderOpener ?? currentFocus();
@@ -184,8 +229,7 @@ export default function Modal({
       >
         <DialogHeader
           className={cn(
-            "flex items-center justify-between gap-3",
-            compactHeader ? "px-4 py-2.5" : "px-6 pt-6",
+            headerClass(compactHeader, showCloseButton),
             // No visible title and no close button: keep the (sr-only) title for the
             // accessible name without reserving header space.
             !title && !showCloseButton && "ci-sr-only"
@@ -196,19 +240,8 @@ export default function Modal({
           >
             {title || fallbackTitle()}
           </DialogTitle>
-          {showCloseButton && (
-            <DialogClose asChild>
-              {/* size="icon-sm" once track C's kit Button lands (F1 reconciles). */}
-              <Button variant="ghost" size="sm" aria-label={t("close")} className="!p-1 shrink-0">
-                <Icon name="close" size={18} />
-              </Button>
-            </DialogClose>
-          )}
         </DialogHeader>
-        <div
-          data-slot="modal-body"
-          className={bodyClassName ?? "p-6 max-h-[calc(80vh-140px)] overflow-y-auto"}
-        >
+        <div data-slot="modal-body" className={bodyClass(isFull, bodyClassName)}>
           {children}
         </div>
         {footer && <DialogFooter className="mt-0 px-6 pb-6">{footer}</DialogFooter>}

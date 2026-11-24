@@ -17327,6 +17327,23 @@ components:
           type: string
           minLength: 1
 
+    PayloadRuleCondition:
+      type: object
+      additionalProperties: false
+      required: [path, op]
+      description: |
+        One guard on a payload rule, read from the request body at the point the rule is reached.
+        `eq`, `neq` and `in` need `value` (`in` needs a list); `exists` and `missing` take none.
+        A missing path never equals anything, and always satisfies `neq` and `missing`.
+      properties:
+        path:
+          type: string
+          minLength: 1
+        op:
+          type: string
+          enum: [eq, neq, in, exists, missing]
+        value: {}
+
     PayloadMutationRule:
       type: object
       additionalProperties: false
@@ -17341,6 +17358,12 @@ components:
           type: object
           minProperties: 1
           additionalProperties: true
+        when:
+          type: array
+          minItems: 1
+          description: Optional. The rule applies only when every condition holds.
+          items:
+            $ref: "#/components/schemas/PayloadRuleCondition"
 
     PayloadFilterRule:
       type: object
@@ -17358,6 +17381,12 @@ components:
           items:
             type: string
             minLength: 1
+        when:
+          type: array
+          minItems: 1
+          description: Optional. The rule applies only when every condition holds.
+          items:
+            $ref: "#/components/schemas/PayloadRuleCondition"
 
     PayloadRulesConfig:
       type: object

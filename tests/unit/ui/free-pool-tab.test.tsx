@@ -8,6 +8,7 @@ import deMessages from "../../../src/i18n/messages/de.json";
 
 vi.mock("next-intl", () => ({
   useTranslations: () => Object.assign((key: string) => key, { has: () => false }),
+  useLocale: () => "en",
 }));
 
 // Stub localStorage before importing the component

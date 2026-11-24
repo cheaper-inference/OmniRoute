@@ -7,9 +7,10 @@
 // and, for each <DataTable> / <DataTableShell> / <Table> with a <Card> above it in the same JSX
 // tree, fails when:
 //   - a <DataTable> does not opt out of its frame with `framed={false}`;
-//   - a <DataTableShell> is used at all (its frame cannot be turned off: use the kit
-//     TableLoadingRegion and a borderless Table instead);
-//   - a <Table> does not zero its container border (`containerClassName` with `border-0`);
+//   - a <DataTableShell> does not drop its frame with the kit's `variant="plain"` (a <Table>
+//     under a shell is not checked: inside the shell the kit already zeroes its border);
+//   - a <Table> does not drop its frame: the kit's `variant="plain"` (no border, no radius, no
+//     surface of its own), or the older `containerClassName` with `border-0`;
 //   - an element between the table and the card draws a full border (`border` class): a
 //     bordered sub-panel inside the card is a frame too, so it becomes a plain section.
 //
@@ -122,9 +123,26 @@ function isHandMadeCard(node: JsxTag): boolean {
   );
 }
 
+/**
+ * `variant="plain"` written as a literal: the kit Table and DataTableShell then draw no border,
+ * no radius and no surface. A dynamic value (`variant={flat ? "plain" : undefined}`) proves
+ * nothing, like a dynamic container class.
+ */
+function hasPlainVariant(node: JsxTag): boolean {
+  const init = attribute(node, "variant")?.initializer;
+  if (!init) return false;
+  const expr = ts.isJsxExpression(init) ? init.expression : init;
+  return (
+    expr !== undefined &&
+    (ts.isStringLiteral(expr) || ts.isNoSubstitutionTemplateLiteral(expr)) &&
+    expr.text === "plain"
+  );
+}
+
 function tableDrawsOwnFrame(node: JsxTag, name: string): boolean {
-  if (name === "DataTableShell") return true;
+  if (name === "DataTableShell") return !hasPlainVariant(node);
   if (name === "DataTable") return !hasFramedFalse(node);
+  if (hasPlainVariant(node)) return false;
   // Unresolved (dynamic) container classes cannot prove the border is off.
   return !hasClass(staticClassText(node, "containerClassName"), "border-0");
 }
@@ -416,7 +434,13 @@ function findTablesFramedInsideCards(files: string[]): string[] {
     const { sf, at } = src;
     if (!TABLE_TAG_PATTERN.test(sf.text)) continue;
     const report = (node: JsxTag, name: string, between: JsxTag[], where: string) => {
-      if (tableDrawsOwnFrame(node, name)) violations.push(`${at(node)} <${name}> inside ${where}`);
+      // A <Table> directly under a <DataTableShell> has no frame of its own: the kit zeroes its
+      // container border inside the shell, and the shell is the element checked for the frame.
+      const shellOwnsFrame =
+        name === "Table" && between.some((el) => tagName(el, sf) === "DataTableShell");
+      if (!shellOwnsFrame && tableDrawsOwnFrame(node, name)) {
+        violations.push(`${at(node)} <${name}> inside ${where}`);
+      }
       for (const panel of between) {
         if (hasClass(staticClassText(panel, "className"), "border")) {
           violations.push(
@@ -494,6 +518,11 @@ test("the guard detects framed tables and bordered sub-panels in a card", () => 
         `export const R = () => <Card><Table containerClassName={\`mt-3 \${extra}\`} /></Card>;`,
         `export const S = () => <Card><div className={\`border \${tone}\`}><DataTable framed={false} /></div></Card>;`,
         `export const V = () => <Card><Table containerClassName={\`rounded-none border-0\${suffix}\`} /></Card>;`,
+        `export const Y = () => <Card><Table variant="bordered" /></Card>;`,
+        `export const Z = () => <Card><Table variant={flat ? "plain" : undefined} /></Card>;`,
+        `export const AA = () => <Card><DataTableShell variant={look}>{rows}</DataTableShell></Card>;`,
+        `export const AB = () => <Card><div className="rounded-lg border p-2"><Table variant="plain" /></div></Card>;`,
+        `export const AG = () => <Card><DataTableShell><Table /></DataTableShell></Card>;`,
         "",
       ].join("\n")
     );
@@ -512,6 +541,10 @@ test("the guard detects framed tables and bordered sub-panels in a card", () => 
         `export const T = () => <Card><Table containerClassName={\`rounded-none border-0 \${extra}\`} /></Card>;`,
         `export const U = () => <Card><div className={open ? "border p-2" : "p-2"}><Table containerClassName="rounded-none border-0" /></div></Card>;`,
         `export const X = () => <Card><div className={\`border\${suffix} p-2\`}><Table containerClassName={\`\${extra} rounded-none border-0\`} /></div></Card>;`,
+        `export const AC = () => <Card><Table variant="plain" scrollLabel="x" /></Card>;`,
+        `export const AD = () => <Card><Table variant={"plain"} containerClassName="mt-3" /></Card>;`,
+        `export const AE = () => <Card><DataTableShell variant="plain">{rows}</DataTableShell></Card>;`,
+        `export const AF = () => <Card><div className="p-2"><DataTableShell variant="plain"><Table /></DataTableShell></div></Card>;`,
         "",
       ].join("\n")
     );
@@ -522,11 +555,21 @@ test("the guard detects framed tables and bordered sub-panels in a card", () => 
     );
     // One violation per bad case. H, I and S are reported for their bordered sub-panel only
     // (their tables are unframed); Q, R and V because a dynamic container class proves nothing
-    // (V: `border-0${suffix}` can render as `border-0-x`).
+    // (V: `border-0${suffix}` can render as `border-0-x`). Y keeps the kit frame by name, Z and
+    // AA have a dynamic `variant`, AB is a plain table inside a bordered sub-panel, and AG is
+    // a shell that keeps its frame.
     const lines = found.map((v) => Number(v.split(":")[1].split(" ")[0]));
-    assert.deepEqual(lines, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], found.join("\n"));
-    for (const i of [5, 6, 10]) assert.ok(found[i].includes("bordered <div>"), found[i]);
-    for (const i of [8, 9, 11]) assert.ok(found[i].includes("<Table> inside <Card>"), found[i]);
+    assert.deepEqual(
+      lines,
+      [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17],
+      found.join("\n")
+    );
+    for (const i of [5, 6, 10, 15]) assert.ok(found[i].includes("bordered <div>"), found[i]);
+    for (const i of [8, 9, 11, 12, 13])
+      assert.ok(found[i].includes("<Table> inside <Card>"), found[i]);
+    // AG: one report, for the shell that keeps its frame; the table under it has none.
+    for (const i of [14, 16])
+      assert.ok(found[i].includes("<DataTableShell> inside <Card>"), found[i]);
   } finally {
     fs.rmSync(tmp, { recursive: true, force: true });
   }

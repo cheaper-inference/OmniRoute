@@ -12,6 +12,15 @@ import { getDbInstance } from "./core";
 import { clearApiKeyCaches } from "./apiKeys";
 import { getCachedProviderConnectionById, invalidateModelCatalogCache } from "./readCache";
 import { deleteSchedulesForPool } from "./quotaSchedules";
+import {
+  normalizeBorrowMode,
+  normalizeLendingPercent,
+  normalizeLendingUntil,
+  restorePoolLending,
+  setPoolBorrowMode,
+  snapshotPoolLending,
+  type BorrowMode,
+} from "./quotaLending";
 // Phase B2: auto-mint/prune quotaShared-* combos when pool allocations change.
 // Imported lazily (dynamic import in the hook) to avoid circular-dependency
 // risk between db/ and quota/ modules. Sync hooks are fire-and-forget; deletion
@@ -69,6 +78,10 @@ export interface PoolAllocation {
   capValue?: number;
   capUnit?: QuotaUnit;
   policy: Policy;
+  /** Set only when the key lends a positive percentage (same pattern as capValue). */
+  lendingPercent?: number;
+  /** Set only when a lending deadline is stored (epoch ms). */
+  lendingUntil?: number | null;
 }
 
 export interface QuotaPool {
@@ -82,6 +95,8 @@ export interface QuotaPool {
   groupId: string;
   createdAt: string;
   allocations: PoolAllocation[];
+  /** Every reader sets it. Absent in hand-built objects means saturation. */
+  borrowMode?: BorrowMode;
 }
 
 export interface PoolCreate {
@@ -96,6 +111,7 @@ export interface PoolCreate {
    * [connectionId].
    */
   connectionIds?: string[];
+  borrowMode?: BorrowMode;
 }
 
 export interface PoolUpdate {
@@ -108,6 +124,8 @@ export interface PoolUpdate {
    * connection_id column is synced to connectionIds[0].
    */
   connectionIds?: string[];
+  /** When provided, changes the pool's borrow mode. */
+  borrowMode?: BorrowMode;
 }
 
 export interface EnsurePoolResult {
@@ -163,6 +181,7 @@ interface PoolRow {
   name: string;
   group_id: string | null;
   created_at: string;
+  borrow_mode: string | null;
 }
 
 interface AllocationRow {
@@ -172,6 +191,8 @@ interface AllocationRow {
   cap_value: number | null;
   cap_unit: string | null;
   policy: string;
+  lending_percent: number | null;
+  lending_until: number | null;
 }
 
 const VALID_POLICIES: ReadonlySet<string> = new Set<Policy>(["hard", "soft", "burst"]);
@@ -196,6 +217,10 @@ function rowToAllocation(row: AllocationRow): PoolAllocation {
   };
   if (row.cap_value != null) alloc.capValue = row.cap_value;
   if (row.cap_unit != null) alloc.capUnit = row.cap_unit as QuotaUnit;
+  const lendingPercent = normalizeLendingPercent(row.lending_percent);
+  if (lendingPercent > 0) alloc.lendingPercent = lendingPercent;
+  const lendingUntil = normalizeLendingUntil(row.lending_until);
+  if (lendingUntil !== null) alloc.lendingUntil = lendingUntil;
   return alloc;
 }
 
@@ -206,7 +231,7 @@ interface PoolConnectionRow {
 function getConnectionIds(poolId: string, fallbackConnectionId: string): string[] {
   const rows = getDb()
     .prepare<PoolConnectionRow>(
-      "SELECT connection_id FROM quota_pool_connections WHERE pool_id = ? ORDER BY created_at ASC"
+      "SELECT connection_id FROM quota_pool_connections WHERE pool_id = ? ORDER BY created_at ASC, rowid ASC"
     )
     .all(poolId);
   if (rows.length > 0) {
@@ -225,6 +250,7 @@ function rowToPool(row: PoolRow, allocations: PoolAllocation[]): QuotaPool {
     groupId: row.group_id || "group-demo",
     createdAt: row.created_at,
     allocations,
+    borrowMode: normalizeBorrowMode(row.borrow_mode),
   };
 }
 
@@ -237,7 +263,7 @@ function batchBuildPools(rows: PoolRow[]): QuotaPool[] {
   // Batch allocations: 1 query for all pools
   const allocRows = db
     .prepare<AllocationRow>(
-      `SELECT pool_id, api_key_id, weight, cap_value, cap_unit, policy FROM quota_allocations WHERE pool_id IN (${ph})`
+      `SELECT pool_id, api_key_id, weight, cap_value, cap_unit, policy, lending_percent, lending_until FROM quota_allocations WHERE pool_id IN (${ph})`
     )
     .all(...poolIds);
   const allocsByPool = new Map<string, AllocationRow[]>();
@@ -253,7 +279,7 @@ function batchBuildPools(rows: PoolRow[]): QuotaPool[] {
   // Batch connections: 1 query for all pools
   const connRows = db
     .prepare<{ pool_id: string; connection_id: string }>(
-      `SELECT pool_id, connection_id FROM quota_pool_connections WHERE pool_id IN (${ph}) ORDER BY created_at ASC`
+      `SELECT pool_id, connection_id FROM quota_pool_connections WHERE pool_id IN (${ph}) ORDER BY created_at ASC, rowid ASC`
     )
     .all(...poolIds);
   const connsByPool = new Map<string, string[]>();
@@ -274,13 +300,14 @@ function batchBuildPools(rows: PoolRow[]): QuotaPool[] {
     groupId: row.group_id || "group-demo",
     createdAt: row.created_at,
     allocations: (allocsByPool.get(row.id) || []).map(rowToAllocation),
+    borrowMode: normalizeBorrowMode(row.borrow_mode),
   }));
 }
 
 function getAllocations(poolId: string): PoolAllocation[] {
   const rows = getDb()
     .prepare<AllocationRow>(
-      "SELECT pool_id, api_key_id, weight, cap_value, cap_unit, policy FROM quota_allocations WHERE pool_id = ?"
+      "SELECT pool_id, api_key_id, weight, cap_value, cap_unit, policy, lending_percent, lending_until FROM quota_allocations WHERE pool_id = ?"
     )
     .all(poolId);
   return rows.map(rowToAllocation);
@@ -300,7 +327,7 @@ function makeId(): string {
  */
 export function getPoolsByGroup(groupId: string, limit?: number, offset?: number): QuotaPool[] {
   let sql =
-    "SELECT id, connection_id, name, group_id, created_at FROM quota_pools WHERE group_id = ? ORDER BY created_at ASC";
+    "SELECT id, connection_id, name, group_id, created_at, borrow_mode FROM quota_pools WHERE group_id = ? ORDER BY created_at ASC";
   const params: unknown[] = [groupId];
   if (limit !== undefined && limit > 0) {
     sql += " LIMIT ?";
@@ -326,7 +353,7 @@ export function listPools(options?: { limit?: number; offset?: number }): {
   const limit = options?.limit;
   const offset = options?.offset;
   let sql =
-    "SELECT id, connection_id, name, group_id, created_at FROM quota_pools ORDER BY created_at ASC";
+    "SELECT id, connection_id, name, group_id, created_at, borrow_mode FROM quota_pools ORDER BY created_at ASC";
   const params: unknown[] = [];
   if (limit !== undefined && limit > 0) {
     sql += " LIMIT ?";
@@ -351,7 +378,7 @@ export function listPools(options?: { limit?: number; offset?: number }): {
 export function getPool(id: string): QuotaPool | null {
   const row = getDb()
     .prepare<PoolRow>(
-      "SELECT id, connection_id, name, group_id, created_at FROM quota_pools WHERE id = ?"
+      "SELECT id, connection_id, name, group_id, created_at, borrow_mode FROM quota_pools WHERE id = ?"
     )
     .get(id);
   if (!row) return null;
@@ -380,14 +407,15 @@ export function createPool(input: PoolCreate): QuotaPool {
   }
 
   const groupId = input.groupId || "group-demo";
+  const borrowMode = normalizeBorrowMode(input.borrowMode);
 
   const database = getDb();
   const doCreate = database.transaction(() => {
     database
       .prepare(
-        "INSERT INTO quota_pools (id, connection_id, name, group_id, created_at) VALUES (?, ?, ?, ?, ?)"
+        "INSERT INTO quota_pools (id, connection_id, name, group_id, created_at, borrow_mode) VALUES (?, ?, ?, ?, ?, ?)"
       )
-      .run(id, primaryConnectionId, input.name, groupId, now);
+      .run(id, primaryConnectionId, input.name, groupId, now, borrowMode);
 
     const insertConn = database.prepare(
       "INSERT OR IGNORE INTO quota_pool_connections (pool_id, connection_id) VALUES (?, ?)"
@@ -422,6 +450,7 @@ export function createPool(input: PoolCreate): QuotaPool {
       name: input.name,
       group_id: groupId,
       created_at: now,
+      borrow_mode: borrowMode,
     },
     getAllocations(id)
   );
@@ -448,6 +477,44 @@ function allocationFingerprint(allocations: PoolAllocation[] = []): string {
   );
 }
 
+/** True when an ensure call changes allocations, members or the borrow mode of the pool. */
+function ensureChangesPool(existing: QuotaPool, input: PoolCreate, members: string[]): boolean {
+  const allocationsChanged =
+    input.allocations !== undefined &&
+    allocationFingerprint(existing.allocations) !== allocationFingerprint(input.allocations);
+  const membersChanged =
+    existing.connectionIds.length !== members.length ||
+    existing.connectionIds.some((id) => !members.includes(id));
+  const borrowModeChanged =
+    input.borrowMode !== undefined &&
+    normalizeBorrowMode(input.borrowMode) !== normalizeBorrowMode(existing.borrowMode);
+  return allocationsChanged || membersChanged || borrowModeChanged;
+}
+
+/**
+ * Replaces the allocation rows of one pool (delete + insert) and keeps the lending
+ * consent of the keys that stay. Callers run it inside their transaction.
+ */
+function replaceAllocations(database: DbLike, poolId: string, allocations: PoolAllocation[]): void {
+  const lending = snapshotPoolLending(poolId);
+  database.prepare("DELETE FROM quota_allocations WHERE pool_id = ?").run(poolId);
+  const insertAlloc = database.prepare(
+    `INSERT INTO quota_allocations (pool_id, api_key_id, weight, cap_value, cap_unit, policy)
+     VALUES (?, ?, ?, ?, ?, ?)`
+  );
+  for (const alloc of allocations) {
+    insertAlloc.run(
+      poolId,
+      alloc.apiKeyId,
+      alloc.weight,
+      alloc.capValue ?? null,
+      alloc.capUnit ?? null,
+      alloc.policy
+    );
+  }
+  restorePoolLending(poolId, lending);
+}
+
 /** Idempotent pool management for automation and bounded CLI callers. */
 export function ensurePool(input: PoolCreate): EnsurePoolResult {
   const members =
@@ -461,29 +528,32 @@ export function ensurePool(input: PoolCreate): EnsurePoolResult {
 
   if (!existing) return { pool: createPool(input), created: true, updated: false };
 
-  const allocationsChanged =
-    input.allocations !== undefined &&
-    allocationFingerprint(existing.allocations) !== allocationFingerprint(input.allocations);
-  const membersChanged =
-    existing.connectionIds.length !== members.length ||
-    existing.connectionIds.some((id) => !members.includes(id));
-  if (!allocationsChanged && !membersChanged) {
+  if (!ensureChangesPool(existing, input, members)) {
     return { pool: existing, created: false, updated: false };
   }
 
   const update: PoolUpdate = { connectionIds: members };
   if (input.allocations !== undefined) update.allocations = input.allocations;
   if (input.groupId !== undefined) update.groupId = input.groupId;
+  if (input.borrowMode !== undefined) update.borrowMode = input.borrowMode;
   const updated = updatePool(existing.id, update);
   if (!updated) throw new Error(`Quota pool disappeared during ensure: ${existing.id}`);
   return { pool: updated, created: false, updated: true };
+}
+
+/** True when both lists name the same connections, in any order. */
+function sameMemberSet(current: string[], submitted: string[]): boolean {
+  const left = new Set(current);
+  const right = new Set(submitted);
+  return left.size === right.size && [...left].every((connectionId) => right.has(connectionId));
 }
 
 /**
  * Update an existing pool's name, allocations, and/or member connections.
  * Returns updated pool, or null if pool not found.
  * When `connectionIds` is provided, the join table is replaced atomically and
- * connection_id (primary) is synced to connectionIds[0].
+ * connection_id (primary) is synced to connectionIds[0]. The pool's schedules are deleted only
+ * when the set of member connections changes.
  */
 export function updatePool(id: string, input: PoolUpdate): QuotaPool | null {
   if (deletingPools.has(id)) return null;
@@ -491,7 +561,7 @@ export function updatePool(id: string, input: PoolUpdate): QuotaPool | null {
   const database = getDb();
   const existing = database
     .prepare<PoolRow>(
-      "SELECT id, connection_id, name, group_id, created_at FROM quota_pools WHERE id = ?"
+      "SELECT id, connection_id, name, group_id, created_at, borrow_mode FROM quota_pools WHERE id = ?"
     )
     .get(id);
   if (!existing) return null;
@@ -514,12 +584,15 @@ export function updatePool(id: string, input: PoolUpdate): QuotaPool | null {
 
     if (input.connectionIds !== undefined && input.connectionIds.length > 0) {
       const newPrimary = input.connectionIds[0];
-      // Replace join rows.
+      const membersChanged = !sameMemberSet(
+        getConnectionIds(id, existing.connection_id),
+        input.connectionIds
+      );
+      // Replace join rows, so the stored order follows the submitted list.
       database.prepare("DELETE FROM quota_pool_connections WHERE pool_id = ?").run(id);
       // Time-aware windows have no FK cascade (same reason as the model-cap
-      // table): drop them here so a deleted pool leaves no orphan schedule that
-      // a recycled pool id could inherit.
-      deleteSchedulesForPool(id);
+      // table). A new set of members drops them. The same members in any order keep them.
+      if (membersChanged) deleteSchedulesForPool(id);
       const insertConn = database.prepare(
         "INSERT OR IGNORE INTO quota_pool_connections (pool_id, connection_id) VALUES (?, ?)"
       );
@@ -531,23 +604,14 @@ export function updatePool(id: string, input: PoolUpdate): QuotaPool | null {
       existing.connection_id = newPrimary;
     }
 
+    if (input.borrowMode !== undefined) {
+      setPoolBorrowMode(id, input.borrowMode);
+      existing.borrow_mode = normalizeBorrowMode(input.borrowMode);
+    }
+
     if (input.allocations !== undefined) {
       // Inline the allocation upsert inside the transaction (avoids nested transaction).
-      database.prepare("DELETE FROM quota_allocations WHERE pool_id = ?").run(id);
-      const insertAlloc = database.prepare(
-        `INSERT INTO quota_allocations (pool_id, api_key_id, weight, cap_value, cap_unit, policy)
-         VALUES (?, ?, ?, ?, ?, ?)`
-      );
-      for (const alloc of input.allocations) {
-        insertAlloc.run(
-          id,
-          alloc.apiKeyId,
-          alloc.weight,
-          alloc.capValue ?? null,
-          alloc.capUnit ?? null,
-          alloc.policy
-        );
-      }
+      replaceAllocations(database, id, input.allocations);
     }
   });
   doUpdate();
@@ -664,7 +728,7 @@ export function upsertAllocations(poolId: string, allocations: PoolAllocation[])
   // Defensive: fall back to [poolId] (single-pool semantics) if pool not found.
   const targetPool = database
     .prepare<PoolRow>(
-      "SELECT id, connection_id, name, group_id, created_at FROM quota_pools WHERE id = ?"
+      "SELECT id, connection_id, name, group_id, created_at, borrow_mode FROM quota_pools WHERE id = ?"
     )
     .get(poolId);
 
@@ -681,22 +745,9 @@ export function upsertAllocations(poolId: string, allocations: PoolAllocation[])
   }
 
   const doUpsert = database.transaction(() => {
-    const insert = database.prepare(
-      `INSERT INTO quota_allocations (pool_id, api_key_id, weight, cap_value, cap_unit, policy)
-       VALUES (?, ?, ?, ?, ?, ?)`
-    );
+    // Each pool keeps its own lending consent: the snapshot is taken per pool.
     for (const pid of poolIdsInGroup) {
-      database.prepare("DELETE FROM quota_allocations WHERE pool_id = ?").run(pid);
-      for (const alloc of normalizedAllocations) {
-        insert.run(
-          pid,
-          alloc.apiKeyId,
-          alloc.weight,
-          alloc.capValue ?? null,
-          alloc.capUnit ?? null,
-          alloc.policy
-        );
-      }
+      replaceAllocations(database, pid, normalizedAllocations);
     }
   });
   doUpsert();
@@ -715,7 +766,7 @@ export function listAllocationsForApiKey(
 ): Array<{ poolId: string; allocation: PoolAllocation }> {
   const rows = getDb()
     .prepare<AllocationRow>(
-      `SELECT pool_id, api_key_id, weight, cap_value, cap_unit, policy
+      `SELECT pool_id, api_key_id, weight, cap_value, cap_unit, policy, lending_percent, lending_until
        FROM quota_allocations
        WHERE api_key_id = ?`
     )

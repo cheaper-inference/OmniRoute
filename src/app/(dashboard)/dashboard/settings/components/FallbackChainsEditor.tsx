@@ -10,26 +10,17 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useTranslations } from "next-intl";
-import { Card, Button, Input, EmptyState, Skeleton } from "@/shared/components";
+import { Badge, Card, Button, Input, EmptyState, Skeleton } from "@/shared/components";
 import Icon from "@/shared/components/Icon";
 import { useNotificationStore } from "@/store/notificationStore";
 import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
 
-// Chain position colours are data series (1st, 2nd, … provider), so they come from the
-// kit chart palette and cycle through its five steps. The palette is tuned for fills, not
-// text (chart-1 is ≈2.3:1 on a light tint), so the label stays on the text token and the
-// series colour sits on the border and a leading dot.
-const CHAIN_COLOR_COUNT = 5;
-function chainColor(index: number): string {
-  return `var(--color-chart-${(index % CHAIN_COLOR_COUNT) + 1})`;
-}
-function chainChipStyle(index: number): React.CSSProperties {
-  const color = chainColor(index);
-  return {
-    color: "var(--color-text-main)",
-    backgroundColor: `color-mix(in srgb, ${color} 12%, transparent)`,
-    border: `1px solid color-mix(in srgb, ${color} 60%, transparent)`,
-  };
+// Chain position colours are data series (1st, 2nd, … provider), so each chip is a Badge in a
+// kit chart tone (the series ink on its tint, which keeps the label readable), cycling through
+// the first five steps of the palette.
+const CHAIN_TONES = ["chart-1", "chart-2", "chart-3", "chart-4", "chart-5"] as const;
+function chainTone(index: number) {
+  return CHAIN_TONES[index % CHAIN_TONES.length];
 }
 
 async function fetchChainsData() {
@@ -167,7 +158,7 @@ export default function FallbackChainsEditor() {
     >
       {/* Create Form */}
       {showCreate && (
-        <div className="p-4 rounded-lg border border-border bg-bg-subtle mb-4">
+        <Card.Section className="mb-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
             <Input
               label={t("modelName")}
@@ -185,7 +176,7 @@ export default function FallbackChainsEditor() {
           <Button variant="primary" size="sm" onClick={handleCreate} loading={saving}>
             {t("createChain")}
           </Button>
-        </div>
+        </Card.Section>
       )}
 
       {/* Chains List */}
@@ -199,10 +190,7 @@ export default function FallbackChainsEditor() {
         ) : (
           <div className="flex flex-col gap-2">
             {chainEntries.map(([model, chain]) => (
-              <div
-                key={model}
-                className="flex items-center justify-between gap-2 px-4 py-3 rounded-lg border border-border bg-bg-subtle"
-              >
+              <Card.Section key={model} className="flex items-center justify-between gap-2">
                 <div className="flex flex-wrap items-center gap-3 flex-1 min-w-0">
                   <span className="font-mono text-sm text-text-main truncate max-w-[200px]">
                     {model}
@@ -210,18 +198,9 @@ export default function FallbackChainsEditor() {
                   <Icon name="arrow_forward" size={14} className="text-text-muted" />
                   <div className="flex gap-1.5 flex-wrap">
                     {(Array.isArray(chain) ? chain : []).map((entry, i) => (
-                      <span
-                        key={`${entry.provider}-${i}`}
-                        className="inline-flex items-center gap-1.5 text-xs px-2 py-0.5 rounded-full font-medium"
-                        style={chainChipStyle(i)}
-                      >
-                        <span
-                          aria-hidden="true"
-                          className="size-1.5 shrink-0 rounded-full"
-                          style={{ backgroundColor: chainColor(i) }}
-                        />
+                      <Badge key={`${entry.provider}-${i}`} size="sm" tone={chainTone(i)} dot>
                         {i + 1}. {entry.provider}
-                      </span>
+                      </Badge>
                     ))}
                   </div>
                 </div>
@@ -234,7 +213,7 @@ export default function FallbackChainsEditor() {
                 >
                   <Icon name="close" size={16} />
                 </Button>
-              </div>
+              </Card.Section>
             ))}
           </div>
         )}
