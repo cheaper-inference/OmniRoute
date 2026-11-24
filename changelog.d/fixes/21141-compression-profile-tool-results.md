@@ -1,0 +1,1 @@
+- **fix(compression):** Honor the request's lossy compression policy for active and routing-assigned profiles so earlier tool results reach the provider intact by default. ([#21141](https://github.com/cheaper-inference/OmniRoute/pull/21141)) — thanks @jonxsong
