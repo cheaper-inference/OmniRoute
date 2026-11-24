@@ -5,6 +5,7 @@ import os from "node:os";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { nativeCoverageArgs } from "../_helpers/nativeCoverageArgs.ts";
 
 // Gera o export estável do catálogo (scripts/release/radar-export.mjs) e valida
 // o contrato consumido pelo OmniRoute Radar + a proveniência (D16: desconhecido
@@ -17,7 +18,7 @@ const SCRIPT = path.join(REPO, "scripts/release/radar-export.mjs");
 function runExport(extraEnv = {}) {
   const outDir = fs.mkdtempSync(path.join(os.tmpdir(), "radar-export-"));
   const outPath = path.join(outDir, "export-omniroute.json");
-  execFileSync("node", ["--import", "tsx/esm", SCRIPT, outPath], {
+  execFileSync("node", [...nativeCoverageArgs(), "--import", "tsx/esm", SCRIPT, outPath], {
     cwd: REPO,
     stdio: ["ignore", "ignore", "inherit"],
     // Base limpa: sem herdar GITHUB_* do ambiente do CI que roda os testes.

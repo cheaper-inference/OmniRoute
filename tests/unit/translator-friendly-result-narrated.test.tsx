@@ -16,10 +16,18 @@ vi.mock("next-intl", () => ({
 
 // --- Mock shared components ---
 vi.mock("@/shared/components", () => ({
-  Card: ({ children, className }: { children: React.ReactNode; className?: string }) => (
-    <div data-testid="card" className={className}>
-      {children}
-    </div>
+  // The narrated text sits in a `Card.Section`, so the mock has both.
+  Card: Object.assign(
+    ({ children, className }: { children: React.ReactNode; className?: string }) => (
+      <div data-testid="card" className={className}>
+        {children}
+      </div>
+    ),
+    {
+      Section: ({ children }: { children: React.ReactNode }) => (
+        <div data-testid="card-section">{children}</div>
+      ),
+    }
   ),
   Badge: ({ children, variant }: { children: React.ReactNode; variant?: string }) => (
     <span data-testid="badge" data-variant={variant}>

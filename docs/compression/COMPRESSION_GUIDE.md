@@ -407,6 +407,8 @@ etc.); explicit `cache_control` markers are not required — a caching provider 
 triggers the downgrade, and markers alone never do (marker detection feeds cache
 telemetry, not the strategy decision).
 
+OpenRouter counts as a caching provider only for `anthropic/*` models: Claude Code requests keep their `cache_control` breakpoints (4 at most) and the guard protects the prefix, while every other OpenRouter family (`openai/`, `google/`, `qwen/`, …) stays stripped and unguarded.
+
 #### Prefix stability (rolling breakpoints)
 
 A provider matches a cached prefix by content, not by where the breakpoint sits — but the

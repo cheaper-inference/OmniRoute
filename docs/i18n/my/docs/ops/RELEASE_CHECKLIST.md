@@ -398,110 +398,70 @@ v3.8.x release တစ်ခုခုကို ထုတ်ပြန်မပိ�
 
 ---
 
-## 3.9.0 LTS ခွဲထုတ်ခြင်း (3.8.58 တွင် အစမ်းလေ့ကျင့်ထားသည်)
+## 3.9.0 LTS ဖြတ် (3.8.58 တွင် အစမ်းလေ့ကျင့်သည်)
 
-v3.8.59 ပြီးနောက် နောက်ထွက်ဗားရှင်းမှာ 3.9.0 ဖြစ်ပြီး ၎င်း၏ tip မှ သက်တမ်းရှည် branch နှစ်ခု ဖြစ်လာသည်-
-`stable/v3` (v3 LTS line၊ npm `latest`) နှင့် `develop` (v4၊ 4.0.0 သို့ မြှင့်ထားပြီး npm
-`nightly`)။ Branch/channel model၊ forward-port နှင့် label များကို
-[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md) တွင် ဖော်ပြထားပြီး အစီအစဉ်ကို [ROADMAP](../../ROADMAP.md) (Phase 3) တွင် ဖော်ပြထားသည်။ ခွဲထုတ်ခြင်းကို တစ်ကြိမ်သာ လုပ်ဆောင်မည်ဖြစ်သည်၊
-3.8.58 သည် ၎င်းကို fork တစ်ခုတွင် အစမှအဆုံး အစမ်းလေ့ကျင့်ပြီး 3.8.59 ကို
-[GO/NO-GO စစ်ဆေးရန်စာရင်း](./LTS_GO_NO_GO.md) ဖြင့် အဆုံးသတ်သည်။
+v3.8.59 ပြီးနောက် နောက်ဗားရှင်းမှာ 3.9.0 ဖြစ်ပြီး ၎င်း၏အစွန်အဖျားသည် တာရှည်အကိုင်းအခက်နှစ်ခုဖြစ်လာသည်- `stable/v3` (v3 LTS လိုင်း၊ npm `latest`) နှင့် `develop` (v4၊ 4.0.0၊ npm `nightly`)။ branch/channel မော်ဒယ်၊ ရှေ့သို့ပို့တ်နှင့် အညွှန်းများသည် [RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md) ; အစီအစဉ်သည် [ROADMAP](../../ROADMAP.md) (Phase 3) တွင်ဖြစ်သည်။ ဖြတ်ခြင်းသည် တစ်ကြိမ် လည်ပတ်သည်။ 3.8.58 သည် လမ်းဆုံလမ်းခွတွင် အဆုံးသတ်ရန် အစမ်းလေ့ကျင့်ပြီး 3.8.59 သည် [GO/NO-GO စစ်ဆေးရန်စာရင်း](./LTS_GO_NO_GO.md) ဖြင့် ပိတ်သည်။
 
-### အစမ်းလုပ်ဆောင်ခြင်း (ဖတ်ရန်သက်သက်၊ အချိန်မရွေး ဘေးကင်းသည်)
+### Dry-run (ဖတ်ရန်သပ်သပ်၊ အချိန်မရွေး ဘေးကင်းသည်)
 
 ```bash
-npm run release:dry-run-lts-cut                       # အမှန်တကယ်ခွဲထုတ်မှု- HEAD မှ 3.9.0၊ ယခင် tag v3.8.59
-npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # source commit ကို ပုံသေသတ်မှတ်ရန်
+npm run release:dry-run-lts-cut                       # the real cut: 3.9.0 from HEAD, previous tag v3.8.59
+npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # pin the source commit
 ```
 
-`scripts/release/dry-run-lts-cut.mjs` သည် မည်သည့်အရာကိုမျှ လက်တွေ့လုပ်ဆောင်ခြင်းမရှိဘဲ git နှင့် `gh` ကို ဖတ်ရှုပြီး
-လုပ်ငန်းစဉ်တစ်ခုလုံးကို ပရင့်ထုတ်သည် — ကြိုတင်လိုအပ်ချက်များ (source ကို resolve လုပ်နိုင်ခြင်း၊ source repository တွင် history အပြည့်အစုံရှိခြင်း —
-shallow clone တစ်ခုသည် `stable/v3` ကို push မလုပ်နိုင်ပါ၊ လက်ခံသည့်ဘက်က ပထမဆုံး
-grafted parent တွင် pack ကို ငြင်းပယ်မည်ဖြစ်သဖြင့် full clone မှ ခွဲထုတ်ပါ သို့မဟုတ် `git fetch --unshallow origin` ကို ဦးစွာလုပ်ဆောင်ပါ — ယခင်
-tag ရှိခြင်း၊ `package.json` သည် ပစ်မှတ်ဗားရှင်း ဖြစ်ခြင်း၊ `release-freeze` issue တစ်ခု ဖွင့်ထားခြင်း၊ ရှိပြီးသား release branch တွင်
-ဖွင့်ထားဆဲ `Release branch not green` issue
-မရှိခြင်း — မရှိသေးသော branch တစ်ခုကို `?` unknown ဟု ဖော်ပြပြီး
-green ဟု မည်သည့်အခါမျှ မသတ်မှတ်ပါ — Mergify `release` queue ကို စီစဉ်သတ်မှတ်ထားခြင်း (G11: `queue_rules`၊ `checks_timeout`၊
-label `queue`)၊ `release/*` ruleset က deletion နှင့် force-push တို့ကို ဆက်လက်ပိတ်ပင်ထားခြင်းနှင့်
-`stable/v3`၊ `develop` တို့ မရှိသေးခြင်း)၊ branch အဆင့်နှစ်ခု၊ dormant-workflow
-trigger များနှင့် `if:` condition များအနက် မည်သည့်အရာများ true ဖြစ်လာသည် (ထို့ပြင် မည်သည့်အရာများသည် repository variable ဖြင့် ဆက်လက်ကန့်သတ်ထားသည် သို့မဟုတ်
-canonical repository တွင် ပုံသေချိတ်ဆက်ထားသည်)၊ မျှော်မှန်းထားသည့် dist-tag များ (`latest` → 3.9.0၊ `next` နှင့်
-`nightly` ဗလာ) နှင့် rollback တို့ဖြစ်သည်။ Exit `0` = `RESULT: READY`၊ `1` = ပိတ်ဆို့သော ကြိုတင်လိုအပ်ချက်တစ်ခု
-မအောင်မြင်ပါ (`✗`)၊ `2` = အသုံးပြုမှုပုံစံအမှား။ `--advisory <id,...>` သည် စစ်ဆေးမှုတစ်ခုကို ဖုံးကွယ်ခြင်းမရှိဘဲ သတိပေးချက် (`!`)
-အဖြစ် အဆင့်လျှော့ပေးသည်။
+`scripts/release/dry-run-lts-cut.mjs` မည်သည့်အရာကိုမျှ လုပ်ဆောင်မည်မဟုတ်ပါ- ၎င်းသည် git နှင့် `gh` ဖတ်ပြီး sequence — preconditions တစ်ခုလုံးကို ပရင့်ထုတ်သည် (အရင်းအမြစ်ဖြေရှင်းသည်၊ အရင်းအမြစ်သိုလှောင်မှုတွင် ရာဇဝင်အပြည့်အစုံ — တိမ်သောကလိုနီသည် `stable/v3` တွန်းထုတ်၍မရပါ၊ လက်ခံသည့်ဖက်မှ ထုပ်ပိုးထားသော — မိဘမှ pack ကို ငြင်းပယ်သည်၊ ထို့ကြောင့် အပြည့်အစုံကို clone သို့မဟုတ် `git fetch --unshallow origin` `Release branch not green` `package.json` `release-freeze` — အမည်မသိ၊ မည်သည့်အခါမှ အစိမ်းရောင် — omni-queue သည် ထုတ်ဝေမှု `?` PRs သက်ရောက်စေသည် (G11: `config/merge-queue/config.json` မှန်ကန်သည်၊ ၎င်း၏ `bases` ထုတ်ဝေမှုဌာနခွဲကို စီမံခန့်ခွဲသည်၊ `mode` `live`၊ ၎င်း၏တံဆိပ်တည်ရှိသည်)၊ `release/*` စည်းမျဉ်းသတ်မှတ်မှုသည် ဖျက်ခြင်းနှင့် အတင်းတွန်းပို့ခြင်းတို့ကို ပိတ်ပင်ထားဆဲဖြစ်သည်)၊ နှင့် `stable/v3` အလုပ်မလုပ်သေးသော အဆင့်နှစ်ဆင့်၊ `develop` အလုပ်မလုပ်ရသေးသော အကိုင်းအခက်၊ အစပျိုးမှုများနှင့် `if:` အခြေအနေများသည် အမှန်ဖြစ်လာသည် (သိုလှောင်မှုမပြောင်းလဲနိုင်သော သို့မဟုတ် ကိန်းဂဏန်းဆိုင်ရာ သိုလှောင်ခန်းတွင် ချိတ်တွဲထားသည့်)၊ မျှော်လင့်ထားသည့် dist-tags (`latest` → 3.9.0၊ `next` နှင့် `nightly` ဗလာ) နှင့် ပြန်လှည့်သည်။ `0` = `RESULT: READY` ထွက်ပါ၊ `1` = ပိတ်ဆို့ခြင်းကြိုတင်အခြေအနေ မအောင်မြင်ပါ (`✗`), `2` = အသုံးပြုမှုအမှား။ `--advisory <id,...>` ၎င်းကို ဝှက်ထားခြင်းမရှိပဲ သတိပေးချက် (`!`) သို့ အဆင့်နှိမ့်ချသည်။
 
-3.9.0 release freeze ကို ဖွင့်ထားဆဲအချိန်တွင် အမှန်တကယ်ခွဲထုတ်မှု၏ dry-run ကို လုပ်ဆောင်ပါ — branch များကို
-tag ပြုလုပ်ပြီးနောက်နှင့် Phase 12c က freeze ကို မဖယ်ရှားမီ ဖန်တီးသည်။
+3.9.0 လွှတ်တင်မှု အေးခဲသွားချိန်တွင် — အစစ်အမှန်ဖြတ်တောက်မှု၏ အခြောက်လှန်ခြင်းကို လုပ်ဆောင်ပြီး အကိုင်းအခက်များကို တဂ်ပြီးနောက် ဖန်တီးထားပြီး Phase 12c သည် အေးခဲမှုကို မရုပ်သိမ်းမီတွင် လုပ်ဆောင်သည်။
 
-### 3.8.58 အစမ်းလေ့ကျင့်မှု (fork အတွက်သာ)
+### 3.8.58 အစမ်းလေ့ကျင့်မှု (လမ်းဆုံလမ်းခွများသာ)
 
 ```bash
-# 1. လက်ရှိ tip တွင် အစမ်းလေ့ကျင့်မှု parameter များဖြင့် dry-run လုပ်ပါ
+# 1. Dry-run on the current tip with rehearsal parameters
 npm run release:dry-run-lts-cut -- --target-version 3.8.58 --previous-tag v3.8.57 \
   --advisory freeze,base-green
 
-# 2. FORK remote တစ်ခုအပေါ်တွင် လုပ်ဆောင်ပါ (origin သို့မဟုတ် URL က canonical
-#    repository ဖြစ်သော မည်သည့် remote ကိုမဆို ငြင်းပယ်သည်၊ အဆင့်တိုင်းတွင် terminal ပေါ်၌ အတည်ပြုချက် တောင်းသည်)
+# 2. Execute against a FORK remote (origin, or any remote whose URL is the canonical
+#    repository, is refused; every step asks for confirmation on the terminal)
 git remote add rehearsal https://github.com/<you>/OmniRoute.git
 node scripts/release/dry-run-lts-cut.mjs --execute --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 
-# 3. fork အတွင်း dormant workflow များကို စမ်းသပ်ပါ (dry-run က
-#    canonical-repository pin တစ်ခုကို ဖော်ပြသည့်နေရာတွင် workflow_dispatch သုံးပါ)၊ ထို့နောက် rollback လုပ်ပါ
+# 3. Exercise the dormant workflows in the fork (workflow_dispatch where the dry-run
+#    reports a canonical-repository pin), then roll back
 node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 ```
 
-develop bump commit ကို git plumbing ဖြင့် တည်ဆောက်ထားသည် (working tree ကို လုံးဝမထိပါ)၊ ထို့ပြင်
-cycle-open commit တစ်ခုကဲ့သို့ပင် ဖိုင်ငါးခုကို bump လုပ်သည်- `package.json`၊ `open-sse/package.json`၊
-`electron/package.json`၊ `package-lock.json` နှင့် `docs/openapi.yaml`။ `[4.0.0]`
-CHANGELOG section နှင့် ၎င်း၏ i18n mirror များကို `develop` ၏ ပထမဆုံး
-PR မတိုင်မီ `develop` ပေါ်တွင် ဖွင့်ပေးသည်။ Script သည် npm dist-tag များကို မည်သည့်အခါမျှ မပြောင်းလဲပါ — ၎င်းတို့ကို scratch package တစ်ခုတွင် အစမ်းလေ့ကျင့်ပါ။
+develop bump commit ကို git plumbing ဖြင့်တည်ဆောက်ထားပါသည် (မည်သည့်သစ်ပင်ကိုမျှ မထိရ) နှင့် cycle-open commit ကဲ့သို့ တူညီသောဖိုင်ငါးခုကို `package.json`, `open-sse/package.json`, `electron/package.json`, `package-lock.json` နှင့် `docs/openapi.yaml`. `[4.0.0]` CHANGELOG အပိုင်းနှင့် ၎င်း၏ i18n မှန်များကို ၎င်း၏ပထမဆုံး PR မတိုင်မီတွင် `develop` နောက်ပိုင်းတွင် ဖွင့်ထားသည်။ ဇာတ်ညွှန်းသည် npm dist-tags — ခြစ်ရာပက်ကေ့ချ်တွင် ၎င်းတို့ကို အစမ်းလေ့ကျင့်ခြင်း ဘယ်သောအခါမှ မပြောင်းလဲပါ။
 
-### PR preview artifact (တစ်ကြိမ်သာ build လုပ်ပြီး တူညီသော byte များကို promote လုပ်ပါ)
+### PR preview artifact (တစ်ကြိမ်တည်ဆောက်ပါ၊ တူညီသောဘိုက်များကိုမြှင့်တင်ပါ)
 
-`.github/workflows/preview-artifact.yml` သည် PR head တစ်ခုမှ production tarball တစ်ခုကို တည်ဆောက်ပြီး
-ထို build အတိအကျကို အတည်ပြုစစ်ဆေးသည် (#8084 slice (a))။ Repository တူသော PR များအတွက်သာဖြစ်ပြီး မည်သည့်အရာကိုမျှ publish မလုပ်ပါ။
+`.github/workflows/preview-artifact.yml` PR ဦးခေါင်းမှ ထုတ်လုပ်ရေး tarball တစ်ခုကို တည်ဆောက်ပြီး အတိအကျ တည်ဆောက်သည် (#8084 အချပ် (က)) ကို အတည်ပြုသည်။ တူညီသောသိုလှောင်ရုံ PRs သာလျှင်; ဘာမှ မထုတ်ပြန်ပါဘူး။
 
 ```bash
-gh workflow run preview-artifact.yml -f pr_number=<N>   # သို့မဟုတ် `preview-artifact` label ကို ထည့်ပါ
+gh workflow run preview-artifact.yml -f pr_number=<N>   # or add the `preview-artifact` label
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
 gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
-npm install -g ./omniroute-*.tgz                          # preview ထည့်သွင်းမှု
+npm install -g ./omniroute-*.tgz                          # preview install
 ```
 
-Run သည် `npm ci`၊ `npm run build:release`၊ `npm run check:pack-artifact` တို့ကို လုပ်ဆောင်ပြီး
-tarball ကို pack လုပ်သည်၊ `npm run check:pack-boot` (အတု secret များ၊ ယာယီ data dir) ကို လုပ်ဆောင်ပြီး ပြန်လည် pack လုပ်ကာ
-digest မတူညီပါက မအောင်မြင်စေသည်။ ထို့နောက် `artifact-identity.json` (head SHA၊ base
-SHA၊ lockfile hash၊ platform၊ arch၊ node ABI၊ bundler၊ build policy —
-`scripts/release/artifact-identity.mjs`) ကို မှတ်တမ်းတင်ပြီး သီးခြား job တစ်ခုတွင် tarball ကို attest လုပ်သည်။ Preview တစ်ခုကို promote လုပ်ခြင်းဆိုသည်မှာ
-ထို tarball ကို install လုပ်ခြင်းဖြစ်သည်- source မှ မည်သည့်အခါမျှ ပြန်လည် build မလုပ်ပါနှင့်။
+The run does `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, packs the tarball, runs `npm run check:pack-boot` (fake secrets, ephemeral data dir), re-packs and fails unless the digest is identical, then records `artifact-identity.json` (head SHA, base SHA, lockfile hash, platform, arch, node ABI, bundler, build policy — `scripts/release/artifact-identity.mjs`) and attests the tarball in a separate job. Promoting a preview means installing that tarball: never rebuild from source.
 
-### ခွဲထုတ်ခြင်း (3.9.0၊ GO ပြီးနောက်)
+### ဖြတ်သည် (၃.၉.၀၊ GO ပြီးနောက်)
 
-1. GO ကို [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md) တွင် မှတ်တမ်းတင်ထားသည်။
-2. `npm run release:dry-run-lts-cut -- --from v3.9.0` က `RESULT: READY` ကို ပရင့်ထုတ်သည်။
-3. Dry-run က ပရင့်ထုတ်သော command များဖြင့် `origin` တွင် branch များကို ကိုယ်တိုင်ဖန်တီးပါ —
-   script သည် `origin` သို့ push လုပ်ရန် ငြင်းပယ်သည်။ Review ပြီးသော develop commit ကို ပြန်လည်အသုံးပြုရန်
-   သင်၏ fork ကို ပစ်မှတ်ထား၍ 3.9.0 tip တွင် `--execute` အစမ်းလေ့ကျင့်မှုကို ဦးစွာလုပ်ဆောင်ပါ၊ ၎င်းက SHA နှစ်ခုလုံးကို ပရင့်ထုတ်ပေးပြီး
-   တူညီသော commit များကို push လုပ်နိုင်သည်-
+1. GO [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md) တွင် မှတ်တမ်းတင်ထားသည်။
+2. `npm run release:dry-run-lts-cut -- --from v3.9.0` `RESULT: READY` ရိုက်နှိပ်သည်။
+3. script သည် `origin` သို့တွန်းရန်ငြင်းဆိုထားသော dry-run prints — command များဖြင့် `origin` ပေါ်ရှိ အကိုင်းအခက်များကို ဖန်တီးပါ။ ပြန်လည်သုံးသပ်ထားသော developer commit ကို ပြန်လည်အသုံးပြုရန်၊ သင့်ခက်ရင်းခွနှင့် 3.9.0 ထိပ်ဖျားရှိ `--execute` အစမ်းလေ့ကျင့်မှုကို ဦးစွာလုပ်ဆောင်ပါ။ ၎င်းသည် SHAs နှစ်မျိုးလုံးကို print ထုတ်ပြီး တူညီသော commits များကို တွန်းပို့နိုင်ပါသည်။
 
    ```bash
    git push origin <stable-sha>:refs/heads/stable/v3 <develop-sha>:refs/heads/develop
    ```
 
-4. ပထမဆုံး PR ကို ပေါင်းစည်းခြင်းမပြုမီ `stable/v3` နှင့် `develop` ကို ကာကွယ်ပါ (စည်းမျဉ်းအစုများ + ပေါင်းစည်းမှုတန်းစီစနစ်)။
-5. အသုံးမပြုဘဲထားသော workflow များသည် branch ရှိလာသည်နှင့် စတင်အလုပ်လုပ်ပါမည်- `forward-port.yml` (`stable/v3` သို့ push လုပ်ခြင်း)၊
-   `validate-stable-pr.yml` (`stable/v3` သို့ PR များ) နှင့် `nightly-v4-build.yml`
-   (`develop` ကို build လုပ်ခြင်း)။ တရားဝင်စတင်အသုံးမပြုမီ `secrets.FORWARD_PORT_TOKEN` repository secret ကို သတ်မှတ်ပါ (သို့မှသာ forward-port PR များတွင် CI အလုပ်လုပ်မည်)။
-   ပိုင်ရှင်က repository variable `vars.NIGHTLY_PUBLISH` ကို `true` ဟု သတ်မှတ်ပြီး npm Trusted Publishing က
-   `nightly-v4-build.yml` ကို လက်ခံသည့်အချိန်အထိ ညစဉ်ထုတ်ဝေမှုကို ပိတ်ထားမည်ဖြစ်သည်။ Channel သတ်မှတ်ဖြေရှင်းမှုကို `scripts/release/dist-tag.mjs` က ဆောင်ရွက်ပြီး
-   `npm-publish.yml` အသုံးပြုသည့် resolver နှင့် အတူတူပင်ဖြစ်သည်။
-6. Channel များကို စစ်ဆေးပါ- `npm view omniroute dist-tags --json` တွင် `latest` = 3.9.0 ဟု ပြသပြီး v4 မထုတ်ဝေမချင်း
-   `next` / `nightly` မရှိကြောင်း အတည်ပြုပါ။
-7. လိုအပ်ပါက ပြန်လည်ရုပ်သိမ်းရန်- `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
-   နှင့် `npm dist-tag add omniroute@3.8.59 latest` ကို အသုံးပြုပါ။
+4. `stable/v3` နှင့် `develop` (စည်းမျဉ်းများ + ပေါင်းစည်းထားသောတန်းစီ) ကို ပထမ PR မြေများရှေ့တွင် ကာကွယ်ပါ။
+5. အမြုံမထားသော အလုပ်အသွားအလာများသည် အကိုင်းအခက်ဖြစ်တည်မှုအလိုက် ပြောင်းလဲသွားသည်- `forward-port.yml` ( `stable/v3` သို့ တွန်းပို့သည်)၊ `validate-stable-pr.yml` (PRs မှ `stable/v3`) နှင့် `nightly-v4-build.yml` ( `develop` တည်ဆောက်သည် )။ တိုက်ရိုက်ထုတ်လွှင့်ခြင်းမပြုမီ `secrets.FORWARD_PORT_TOKEN` သိုလှောင်မှုလျှို့ဝှက်ချက်ကို သတ်မှတ်ပါ (ထို့ကြောင့် CI forward-port PRs တွင်အလုပ်လုပ်သည် ); ပိုင်ရှင်မှ သိုလှောင်မှု မပြောင်းလဲနိုင်သော `vars.NIGHTLY_PUBLISH` ကို `true` အဖြစ် သတ်မှတ်ပြီး npm Trusted Publishing သည် `nightly-v4-build.yml` လက်ခံသည်အထိ ညစဉ်ထုတ်ဝေခြင်းကို ပိတ်ထားပါသည်။ ချန်နယ် ကြည်လင်ပြတ်သားမှုသည် `scripts/release/dist-tag.mjs` ဖြစ်ပြီး တူညီသော ဖြေရှင်းသူ `npm-publish.yml` ကို အသုံးပြုသည်။
+6. ချန်နယ်များကိုအတည်ပြုပါ- `npm view omniroute dist-tags --json` `latest` = 3.9.0 ကိုပြသပြီး v4 ထုတ်ဝေသည်အထိ `next` / `nightly` မရှိပါ။
+7. လိုအပ်ပါက နောက်ပြန်လှည့်ပါ `git push origin --delete refs/heads/stable/v3 refs/heads/develop` နှင့် `npm dist-tag add omniroute@3.8.59 latest`။
 
 ---
 

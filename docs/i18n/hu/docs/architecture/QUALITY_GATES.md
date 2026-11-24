@@ -29,6 +29,8 @@ Minden JSON nyugta azonosítja a kivett SHA, a munkafolyamat futtatását és k�
 
 ### Várólista összevonása
 
+> **2026-11-19: a Mergify egyesítési sor megszűnt** (tulajdonos döntése). `.mergify.yml` már nem definiál sort, és elutasítja azokat a Mergify parancsokat, amelyek összevonják vagy átírják a lehívási kérelmet. A kiadási ághoz intézett lehívási kérelmek manuálisan egyesülnek a „Require green gates on the active release” (`Gate / CI` + `Gate / Quality`) lerakatszabályzat szerint, amíg omni-queue live módban nem fut, majd ezt követően omni-queue keresztül ([OMNI_QUEUE.md](../ops/OMNI_QUEUE.md)). A Mergify piszkozatok alább leírt munkafolyamat-kezelése továbbra is `ci.yml` és `quality.yml` formátumban történik, de Mergify piszkozatok már nem kerülnek megnyitásra.
+
 A `queue` címke PR küld az összevonási sorba (`.mergify.yml`). A Mergify megnyit egy PR piszkozatot egy `mergify/merge-queue/` ágon, CI ott futtatja a teljes kijelölést, és az eredeti PR összeolvad, amikor `Gate / CI`, `Gate / Quality` és `Merge integrity (changelog + generated skills)` áthalad.
 
 A Mergify beírja a várólista összefoglalóját a piszkozat leírásába, és más alkalmazások is szerkeszthetik azt. Egy ilyen piszkozaton lévő `pull_request` `edited` esemény saját egyidejűségi csoportot (`-queue-edit-<run_id>`) vesz fel, így nem tudja törölni a piszkozat valódi futtatását, és kihagyja a kaput és a mátrixot. Csak `Merge integrity` fut még. Az átugrott kapufeladat más ellenőrzési nevet visel, mivel a Mergify egy kihagyott `Gate / CI` sikertelen ellenőrzésként olvas fel, és kiírja a PR sorból.

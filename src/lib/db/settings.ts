@@ -15,6 +15,7 @@ import { isProxySkipRecentlyFailedEnabled } from "@/shared/utils/featureFlags";
 import { invalidateDbCache } from "./readCache";
 import { encrypt, decrypt } from "./encryption";
 import { getProxyRegistryGeneration, resolveProxyForScopeFromRegistry } from "./proxies";
+import { syncRotatingEgressExemptions } from "./proxies/rotatingEgress";
 import { isEgressBucketedLockScope } from "@omniroute/open-sse/config/providerErrorRules.ts";
 import { getComboModelProvider as getComboEntryProvider } from "@/lib/combos/steps";
 import {
@@ -306,8 +307,11 @@ export async function getSettings() {
     // Operators flip the kill-switch to false (or drop the prefix) via the
     // Settings UI; the change hot-reloads through `applyRuntimeSettings` →
     // `applyAuthzBypassSection` → `getAuthzBypassSnapshot()`.
+    // `/api/resilience/connections` is read-only JSON (no spawn): bypassable by
+    // default so Resilience > Connections loads on a remote dashboard. An install
+    // that already stored its own list keeps that list.
     localOnlyManageScopeBypassEnabled: true,
-    localOnlyManageScopeBypassPrefixes: ["/api/mcp/"],
+    localOnlyManageScopeBypassPrefixes: ["/api/mcp/", "/api/resilience/connections"],
     customBannedSignals: [],
     autoDisableBannedScope: "all",
     proxyEnabled: true,
@@ -688,6 +692,7 @@ export async function resolveProxyForConnection(
     refusalSeq: getProxyRefusalSeq(),
   };
   const db = getDbInstance();
+  syncRotatingEgressExemptions();
   const cached = proxyResolutionCache.get(cacheKey);
   if (
     cached &&

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Button, Card, Collapsible, Input, SegmentedControl } from "@/shared/components";
 import Icon from "@/shared/components/Icon";
+import IconChip from "@/shared/components/IconChip";
 
 interface WildcardAlias {
   pattern: string;
@@ -179,11 +180,11 @@ export default function ModelAliasesUnified() {
   return (
     <Card>
       <div className="flex items-center gap-3 mb-5">
-        <div className="p-2 rounded-lg bg-bg-subtle text-text-muted">
+        <IconChip>
           <Icon name="swap_horiz" size={20} />
-        </div>
+        </IconChip>
         <div className="flex-1">
-          <h3 className="text-lg">
+          <h3 className="ci-heading" data-size="lg">
             {translateOrFallback(t, "modelAliasesTitle", "Model Aliases")}
           </h3>
           <p className="text-sm text-text-muted">
@@ -206,7 +207,7 @@ export default function ModelAliasesUnified() {
         )}
       </div>
 
-      <div className="mb-5 rounded-lg border border-border/30 bg-surface/20 p-4">
+      <Card.Section className="mb-5">
         <SegmentedControl
           semantics="radio"
           aria-label={translateOrFallback(t, "modelAliasesTitle", "Model Aliases")}
@@ -272,10 +273,10 @@ export default function ModelAliasesUnified() {
             {t("add")}
           </Button>
         </div>
-      </div>
+      </Card.Section>
 
       <div className="mb-4">
-        <p className="text-xs font-medium text-text-muted uppercase tracking-wider mb-2">
+        <p className="ci-eyebrow mb-2" data-weight="medium">
           {translateOrFallback(t, "customAliases", "Custom Aliases")}
         </p>
         <div className="rounded-lg border border-border/30 divide-y divide-border/20">
@@ -309,7 +310,7 @@ export default function ModelAliasesUnified() {
       </div>
 
       <div className="mb-4">
-        <p className="text-xs font-medium text-text-muted uppercase tracking-wider mb-2">
+        <p className="ci-eyebrow mb-2" data-weight="medium">
           {translateOrFallback(t, "wildcardRulesTitle", "Wildcard Rules")}
         </p>
         <div className="rounded-lg border border-border/30 divide-y divide-border/20">

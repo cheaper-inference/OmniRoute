@@ -85,7 +85,7 @@ export default function CodexPingNowButton({
         {t("pingNow.label")}
       </Button>
       {outcome && (
-        <span role="status" className={`text-[11px] ${STATUS_CLASS[outcome.status]}`}>
+        <span role="status" className={`text-xs ${STATUS_CLASS[outcome.status]}`}>
           {outcome.message}
         </span>
       )}

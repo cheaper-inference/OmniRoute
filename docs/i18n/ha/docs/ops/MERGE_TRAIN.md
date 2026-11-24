@@ -4,10 +4,9 @@
 
 ---
 
-Tun daga v3.8.49 (WS3.2/WS3.4 na shirin inganci/gudu), hanyar haɗawa ta tsohuwa don
-PRs da aka yi wa bita zuwa `release/vX.Y.Z` ita ce **layin jiran haɗawa na Mergify** (`.mergify.yml`);
-**jirgin haɗawa na hannu** da aka rubuta a ƙasa shi ne MADADIN GAGGAWA — ana amfani da shi yayin matsaloli,
-dakatar da fitar da sigar, ko kuma idan shirin Mergify Open Source ya taɓa canzawa.
+> **2026-11-19: layin Mergify ya yi ritaya** (shawarar mai gida). `.mergify.yml` baya bayyana jerin gwano kuma ya ƙi umarnin Mergify waɗanda ke haɗa ko sake rubuta buƙatun ja. Ana haɗe PRs ta hannu da hannu ƙarƙashin ƙa'idodin ma'ajin "Bukatar kofofin kore akan sakin aiki" (`Gate / CI` + `Gate / Quality`) har sai omni-queue yana gudana cikin yanayin rayuwa, kuma ta hanyar layin-kowane bayan haka ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Sassan Mergify da ke ƙasa suna bayyana jerin gwano kamar yadda yake.
+
+Tun da v3.8.49 (WS3.2/WS3.4 na tsarin quality/velocity ) tsohuwar hanyar haɗawa don sake duba PRs zuwa `release/vX.Y.Z` shine** Haɗa layin haɗin kai** (`.mergify.yml`); da** jirgin kasa hade-haɗe** rubuce a ƙasa shine FALLBACK — da aka yi amfani da shi yayin aukuwa, daskarewa, ko kuma idan shirin Buɗaɗɗen Tushen Mergify ya taɓa canzawa.
 
 ## Tsohuwar hanya: jerin jiran Mergify
 

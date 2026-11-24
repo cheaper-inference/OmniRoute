@@ -24,9 +24,12 @@
  */
 
 import { createLogger } from "@/shared/utils/logger";
+import { normalizeHeaders } from "@omniroute/open-sse/utils/headers";
 import { boundedMap } from "./boundedMap";
 import { updateAccountBuckets, type ClaudeUsageResult } from "./accountBuckets";
 import type { QuotaUnit, QuotaWindow } from "./dimensions";
+import { claudePlanReading, claudeUsageDataTime, codexPlanReading } from "./planWindowReading";
+import type { PlanWindowReading } from "./types";
 
 const log = createLogger("quota:saturation");
 
@@ -40,18 +43,29 @@ interface DimensionSpec {
 }
 
 // ---------------------------------------------------------------------------
-// In-memory cache (boundedMap<cacheKey, saturation 0..1>, 30s TTL). Caps are
+// In-memory cache (boundedMap<cacheKey, SaturationEntry>, 30s TTL). Caps are
 // generous (one entry per connection/provider/dimension or provider/connection):
 // an evicted entry only costs one extra read, and normal deployments never hit them.
 // ---------------------------------------------------------------------------
 
 const CACHE_TTL_MS = 30_000; // 30 seconds
 
-const _cache = boundedMap<number>("saturation-cache", 4096, "ttl", CACHE_TTL_MS);
+/**
+ * One cached read: the saturation value getSaturation returns, and the plan-window
+ * reading of the same payload (null whenever the value is not that window's own
+ * fresh figure). `plan.fetchedAt` is fixed when the entry is built, so every call
+ * served by one entry sees the same reading.
+ */
+interface SaturationEntry {
+  value: number;
+  plan: PlanWindowReading | null;
+}
+
+const _cache = boundedMap<SaturationEntry>("saturation-cache", 4096, "ttl", CACHE_TTL_MS);
 
 // Pending miss fetches, keyed like _cache. Concurrent getSaturation calls for
 // the same key share the promise instead of firing one upstream read each.
-const _inflight = new Map<string, Promise<number>>();
+const _inflight = new Map<string, Promise<SaturationEntry>>();
 
 // ---------------------------------------------------------------------------
 // Rate-limit header cache (populated by response handlers)
@@ -176,18 +190,22 @@ function pickTokenTriple(
 
 /**
  * Store rate-limit headers from an upstream response for saturation signal use.
- * Called by the response handler after a successful request.
+ * Called by the response handler for every upstream response, including error
+ * responses such as a 429.
  *
  * Captures two independent signals, both keyed `${provider}:${connectionId}`:
  *   - REQUEST headers (per-minute RPM burst) — legacy, anthropic fallback.
  *   - TOKEN headers (per-window TPM) — universal proactive saturation; present
  *     on EVERY response, so we can throttle before the 429.
+ *
+ * Accepts the `Headers` of a `fetch` response or a plain object; names are compared in lower case.
  */
 export function storeRateLimitHeaders(
   connectionId: string,
   provider: string,
-  headers: Record<string, string>
+  rawHeaders: Headers | Record<string, string>
 ): void {
+  const headers = normalizeHeaders(rawHeaders);
   const key = `${provider}:${connectionId}`;
 
   // ── REQUEST headers (legacy path, unchanged) ──────────────────────────────
@@ -296,7 +314,7 @@ async function fetchCodexSaturation(
   connectionId: string,
   dim: DimensionSpec,
   connection?: Record<string, unknown>
-): Promise<number> {
+): Promise<SaturationEntry> {
   // Dynamic import — codexQuotaFetcher lives in open-sse workspace
   const mod = await import("@omniroute/open-sse/services/codexQuotaFetcher");
   // #6379: pass the loaded connection snapshot through so fetchCodexQuota can
@@ -307,22 +325,30 @@ async function fetchCodexSaturation(
   // fails open to 0 across the board — headroom then can't tell accounts
   // apart and keeps the original combo order.
   const quota = await mod.fetchCodexQuota(connectionId, connection);
-  if (!quota) return 0;
+  if (!quota) return { value: 0, plan: null };
+  const now = Date.now();
+  const reading = codexPlanReading(quota, dim.window, now);
+  // The fetcher can serve a cached figure from before the window's reset. It does not describe
+  // the current window, so it is no plan reading.
+  const plan = reading && reading.resetAt !== null && reading.resetAt <= now ? null : reading;
 
   const winKey = codexWindowKey(dim.window);
   const windows = quota.windows as Record<string, { percentUsed: number } | undefined>;
   const win = windows[winKey];
   if (win && typeof win.percentUsed === "number") {
-    return Math.min(1, Math.max(0, win.percentUsed));
+    return { value: Math.min(1, Math.max(0, win.percentUsed)), plan };
   }
   // fallback to overall percentUsed
-  return Math.min(1, Math.max(0, quota.percentUsed ?? 0));
+  return { value: Math.min(1, Math.max(0, quota.percentUsed ?? 0)), plan };
 }
 
-async function fetchBailianSaturation(connectionId: string, dim: DimensionSpec): Promise<number> {
+async function fetchBailianSaturation(
+  connectionId: string,
+  dim: DimensionSpec
+): Promise<SaturationEntry> {
   const mod = await import("@omniroute/open-sse/services/bailianQuotaFetcher");
   const quota = await mod.fetchBailianQuota(connectionId);
-  if (!quota) return 0;
+  if (!quota) return { value: 0, plan: null };
 
   const q = quota as unknown as Record<string, unknown>;
   let pct = 0;
@@ -339,7 +365,8 @@ async function fetchBailianSaturation(connectionId: string, dim: DimensionSpec):
     default:
       pct = (q.percentUsed as number) ?? 0;
   }
-  return Math.min(1, Math.max(0, pct));
+  // No plan-window reading: Bailian's figure never drives an attribution book.
+  return { value: Math.min(1, Math.max(0, pct)), plan: null };
 }
 
 /**
@@ -366,6 +393,8 @@ interface AnthropicSaturationDeps {
   loadConnection: (connectionId: string) => Promise<Record<string, unknown> | null>;
   /** Fetch usage for the connection (delegates to getUsageForProvider). */
   fetchUsage: (conn: Record<string, unknown>) => Promise<unknown>;
+  /** Epoch ms of the usage endpoint read kept for the connection's credential, or null. */
+  endpointReadAt?: (conn: Record<string, unknown>) => number | null;
 }
 
 let _anthropicDepsOverride: AnthropicSaturationDeps | null = null;
@@ -388,7 +417,23 @@ async function defaultAnthropicDeps(): Promise<AnthropicSaturationDeps> {
       > | null>,
     fetchUsage: (conn) =>
       usageMod.getUsageForProvider(conn as Parameters<typeof usageMod.getUsageForProvider>[0]),
+    endpointReadAt: (conn) =>
+      usageMod.getClaudeUsageEndpointReadAt(
+        typeof conn.accessToken === "string" ? conn.accessToken : undefined
+      ),
   };
+}
+
+/** The endpoint read time from the seam; any failure is "unknown", never a saturation error. */
+function endpointReadAtOf(
+  deps: AnthropicSaturationDeps,
+  conn: Record<string, unknown>
+): number | null {
+  try {
+    return deps.endpointReadAt?.(conn) ?? null;
+  } catch {
+    return null;
+  }
 }
 
 /**
@@ -431,7 +476,10 @@ function planUtilizationFromUsage(usage: unknown, window: QuotaWindow): number |
   return Math.min(1, Math.max(0, used / 100));
 }
 
-async function fetchAnthropicSaturation(connectionId: string, dim: DimensionSpec): Promise<number> {
+async function fetchAnthropicSaturation(
+  connectionId: string,
+  dim: DimensionSpec
+): Promise<SaturationEntry> {
   // Try the REAL plan-window utilization first (5h / weekly), via the same
   // /api/oauth/usage path usage.ts already uses. This is the signal fairShare
   // actually needs for Claude Pro/Max — the per-minute request headers do not
@@ -457,7 +505,11 @@ async function fetchAnthropicSaturation(connectionId: string, dim: DimensionSpec
         // intentionally swallowed — buckets are additive, never gate-breaking
       }
       const util = planUtilizationFromUsage(usage, dim.window);
-      if (util !== null) return util;
+      if (util !== null) {
+        const readAt = endpointReadAtOf(deps, conn as Record<string, unknown>);
+        const dataTime = claudeUsageDataTime(usage, readAt, Date.now());
+        return { value: util, plan: claudePlanReading(usage, dim.window, dataTime) };
+      }
     }
   } catch (err) {
     log.warn(
@@ -467,7 +519,7 @@ async function fetchAnthropicSaturation(connectionId: string, dim: DimensionSpec
   }
 
   // Fallback: per-minute REQUEST rate-limit headers (weak, TPM/RPM only).
-  return anthropicHeaderSaturation(connectionId);
+  return { value: anthropicHeaderSaturation(connectionId), plan: null };
 }
 
 /**
@@ -532,6 +584,63 @@ async function fetchGenericSaturation(connectionId: string, provider: string): P
 // Public API
 // ---------------------------------------------------------------------------
 
+/** Read one cache entry from the provider. The generic path never has a plan reading. */
+async function loadSaturationEntry(
+  connectionId: string,
+  provider: string,
+  dim: DimensionSpec,
+  connection?: Record<string, unknown>
+): Promise<SaturationEntry> {
+  switch (provider) {
+    case "codex":
+      return fetchCodexSaturation(connectionId, dim, connection);
+    case "bailian":
+      return fetchBailianSaturation(connectionId, dim);
+    case "anthropic":
+    case "claude":
+      return fetchAnthropicSaturation(connectionId, dim);
+    default:
+      return { value: await fetchGenericSaturation(connectionId, provider), plan: null };
+  }
+}
+
+/** The cached entry for a connection+dim, read once per TTL and shared by concurrent callers. */
+async function getSaturationEntry(
+  connectionId: string,
+  provider: string,
+  dim: DimensionSpec,
+  connection?: Record<string, unknown>
+): Promise<SaturationEntry> {
+  const key = cacheKey(connectionId, provider, dim);
+  const cached = _cache.get(key);
+  if (cached !== undefined) {
+    return cached;
+  }
+
+  const pending = _inflight.get(key);
+  if (pending !== undefined) return pending;
+  const task = (async (): Promise<SaturationEntry> => {
+    let entry: SaturationEntry;
+    try {
+      entry = await loadSaturationEntry(connectionId, provider, dim, connection);
+    } catch (err) {
+      log.warn(
+        { err: (err as Error)?.message, connectionId, provider },
+        "saturation fetch failed — failing open with 0"
+      );
+      entry = { value: 0, plan: null };
+    }
+    _cache.set(key, entry);
+    return entry;
+  })();
+  _inflight.set(key, task);
+  try {
+    return await task;
+  } finally {
+    _inflight.delete(key);
+  }
+}
+
 /**
  * Return the current global saturation signal (0..1) for a connection+dim.
  *
@@ -546,46 +655,39 @@ export async function getSaturation(
   dim: DimensionSpec,
   connection?: Record<string, unknown>
 ): Promise<number> {
-  const key = cacheKey(connectionId, provider, dim);
-  const cached = _cache.get(key);
-  if (cached !== undefined) {
-    return cached;
-  }
+  return (await getSaturationEntry(connectionId, provider, dim, connection)).value;
+}
 
-  const pending = _inflight.get(key);
-  if (pending) return pending;
-  const task = (async (): Promise<number> => {
-    let value = 0;
-    try {
-      switch (provider) {
-        case "codex":
-          value = await fetchCodexSaturation(connectionId, dim, connection);
-          break;
-        case "bailian":
-          value = await fetchBailianSaturation(connectionId, dim);
-          break;
-        case "anthropic":
-        case "claude":
-          value = await fetchAnthropicSaturation(connectionId, dim);
-          break;
-        default:
-          value = await fetchGenericSaturation(connectionId, provider);
-          break;
-      }
-    } catch (err) {
-      log.warn(
-        { err: (err as Error)?.message, connectionId, provider },
-        "saturation fetch failed — failing open with 0"
-      );
-      value = 0;
-    }
-    _cache.set(key, value);
-    return value;
-  })();
-  _inflight.set(key, task);
+/**
+ * Return the plan-window reading behind the same cached read as getSaturation,
+ * or null when that value is not the requested window's own fresh figure
+ * (another window, the worst case across windows, rate-limit headers, a failed
+ * read, a stale response, or a provider without plan windows). Never throws.
+ */
+export async function getPlanWindowReading(
+  connectionId: string,
+  provider: string,
+  dim: { unit: QuotaUnit; window: QuotaWindow },
+  connection?: Record<string, unknown>
+): Promise<PlanWindowReading | null> {
   try {
-    return await task;
-  } finally {
-    _inflight.delete(key);
+    const { plan } = await getSaturationEntry(connectionId, provider, dim, connection);
+    return plan ? { ...plan } : null;
+  } catch {
+    return null;
   }
+}
+
+/**
+ * The plan-window reading the cache already holds for a connection+dim, as a copy, or null when
+ * nothing is cached or the cached entry has no plan reading. Never reads the provider, never
+ * fills the cache and never joins a pending fetch.
+ */
+export function peekPlanWindowReading(
+  connectionId: string,
+  provider: string,
+  dim: { unit: QuotaUnit; window: QuotaWindow }
+): PlanWindowReading | null {
+  const plan = _cache.get(cacheKey(connectionId, provider, dim))?.plan;
+  return plan ? { ...plan } : null;
 }

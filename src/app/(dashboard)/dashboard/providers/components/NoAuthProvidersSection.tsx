@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { SectionHeader } from "@omniroute/ui-kit/page-header";
-import { Button, ProviderCardGrid } from "@/shared/components";
+import { Badge, Button, ProviderCardGrid } from "@/shared/components";
 import { computeNextBlockedProviders } from "@/shared/utils/noAuthProviders";
 import type { ProviderEntry } from "../providerPageUtils";
 import ProviderCard from "./ProviderCard";
@@ -145,7 +145,7 @@ export default function NoAuthProvidersSection({
       </ProviderCardGrid>
       {blockedEntries.length > 0 && (
         <div className="flex flex-col gap-2">
-          <p className="text-xs font-medium uppercase tracking-wide text-text-muted">
+          <p className="ci-eyebrow" data-weight="medium">
             {t("disabled")}
           </p>
           <ProviderCardGrid>
@@ -158,10 +158,9 @@ export default function NoAuthProvidersSection({
                   <span className="truncate text-sm font-medium text-text-main">
                     {entry.provider.name}
                   </span>
-                  <span className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide text-error">
-                    <span className="size-1.5 rounded-full bg-error" />
+                  <Badge variant="error" size="sm" dot className="self-start uppercase">
                     {t("disabled")}
-                  </span>
+                  </Badge>
                 </div>
                 <Button
                   size="sm"

@@ -418,6 +418,10 @@ function processToolResultBlocks(
   let compressed = false;
   const nextContent = content.map((part) => {
     if (!isAnthropicToolResultBlock(part)) return part;
+
+    // A failed tool call keeps its full error trace: a trimmed trace makes the model retry blind.
+    if (part.is_error === true) return part;
+
     // `cache_control` is metadata, not content: it moves to a newer message on every Claude Code
     // request (rolling breakpoint). Skipping the marked block makes the transformed bytes depend
     // on WHERE the marker sits, so each turn rewrites the block that carried the previous

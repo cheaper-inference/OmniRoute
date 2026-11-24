@@ -22,7 +22,18 @@ runs:
           echo "Invalid pinned npm version" >&2
           exit 1
         fi
-        if [ "$(npm --version)" != "$expected" ]; then
+        current=$(npm --version)
+        if [ "$current" != "$expected" ]; then
+          # npm 10.9.7 lazily requires promise-retry after a self-upgrade has
+          # removed it. Bootstrap through the fixed patch before npm 11.12+.
+          # https://github.com/npm/cli/pull/9152
+          if [ "$current" = "10.9.7" ]; then
+            npm install --global npm@10.9.8 --no-audit --no-fund
+            if [ "$(npm --version)" != "10.9.8" ]; then
+              echo "npm bootstrap version differs from the required patch" >&2
+              exit 1
+            fi
+          fi
           npm install --global "npm@$expected" --no-audit --no-fund
         fi
         actual=$(npm --version)

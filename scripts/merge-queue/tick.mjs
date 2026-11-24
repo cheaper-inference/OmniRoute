@@ -14,10 +14,13 @@
 //                          pull-requests: write is used by a squash-api landing (mergePull) only:
 //                          labels and comments on a PR go through the issues endpoints
 //   GITHUB_REPOSITORY      owner/repo
-//   OMNI_QUEUE_LAND_TOKEN  the repository owner's token, used ONLY by the landing itself (the
-//                          merge-ff push or the squash-api merges) when landing.actor is "owner";
-//                          everything else, the land status included, uses OMNI_QUEUE_TOKEN.
-//                          Optional: without it shadow mode runs and a live landing pauses.
+//   OMNI_QUEUE_LAND_TOKEN  the repository owner's token, used by the landing itself (the
+//                          merge-ff push or the squash-api merges) when landing.actor is "owner",
+//                          and, when config.voice is "owner", by the queue's human-visible writes
+//                          (voice.mjs: comments, label removals, the dashboard and other issues;
+//                          its GET /user names the owner's login). Everything else, the land
+//                          status included, uses OMNI_QUEUE_TOKEN. Optional: without it shadow
+//                          mode runs, a live landing pauses and the voice falls back to the App.
 //   OMNI_QUEUE_GIT_NAME, OMNI_QUEUE_GIT_EMAIL   TESTS/SANDBOX ONLY: identity for queue merge
 //                          commits, over everything else. Without it: landing.identity when
 //                          landing.actor is "owner", else OMNI_QUEUE_BOT_NAME +
@@ -27,7 +30,11 @@
 //                          it (the re-runner of a re-run, whose inputs stay the dispatcher's): a
 //                          bless is honoured only when BOTH are logins of config.approvers
 //   OMNI_QUEUE_CONFIG      optional path to an alternative config file (sandbox)
-//   RUNNER_TEMP            scratch directory for the bare compose repository
+//   RUNNER_TEMP            scratch directory for the bare compose repository; with
+//                          config.landing.signing "ssh", the merge-commit signing key is read
+//                          from compose.signingKeyPath(RUNNER_TEMP), written there by the
+//                          workflow from the OMNI_QUEUE_SIGNING_KEY secret (never this process's
+//                          environment); no file = the batch is composed unsigned, one `error` event
 //   GITHUB_SERVER_URL, GITHUB_RUN_ID   for run links in history/dashboard
 //   GITHUB_API_URL         REST API root (default https://api.github.com; GHES / tests)
 //   OMNI_QUEUE_REMOTE_URL  TESTS/SANDBOX ONLY: git remote of the repository instead of
@@ -142,6 +149,11 @@
 // mode would have done is recorded instead: `culprit-found` (with a shadow note) and
 // `would-dequeue` events, and the head is remembered in state.shadow.processed so it is not
 // batched again. Issues the queue owns (dashboard, base-red notice) are still written.
+//
+// OWNER VOICE (config.voice "owner", voice.mjs): those two, every issue comment (comment) and the
+// dashboard and divergence issues go out with the owner's token, each retried with the App's on a
+// missing token or a 401/403, recorded once per tick (voiceFallback). Statuses, refs, the state
+// branch, re-runs and every read stay the App's.
 
 import { mkdirSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -190,6 +202,13 @@ import { createGitHubClient } from "./github.mjs";
 import * as landModule from "./land.mjs";
 import { readQueueRefsProtection } from "./refs-guard.mjs";
 import { StateConflictError, createStateStore, updateStateWithRetry } from "./state.mjs";
+import {
+  VOICE_FALLBACK_PREFIX,
+  createOwnerLoginReader,
+  createOwnerVoice,
+  voiceFallbackDetail,
+  voiceFallbackNote,
+} from "./voice.mjs";
 import { WATCHDOG_LIMIT_MINUTES } from "./watchdog.mjs";
 
 export { StateConflictError };
@@ -223,6 +242,13 @@ export class UnmanagedBaseError extends Error {}
  *   OMNI_QUEUE_LAND_TOKEN, or null when that token is not set
  * @property {object|null} landGh             client of the squash-api landing: gh itself when
  *   landing.actor is "app"; with "owner", one with OMNI_QUEUE_LAND_TOKEN, or null without it
+ * @property {object|null} [voiceGh]          config.voice "owner": the client with
+ *   OMNI_QUEUE_LAND_TOKEN that performs the human-visible writes (voice.mjs); null otherwise or
+ *   without the token (the App writes, the fallback is recorded)
+ * @property {(() => Promise<string>)|null} [ownerLogin]  the owner's login read from that token
+ *   (voice.createOwnerLoginReader); null without voiceGh
+ * @property {{keyPath: string|null}|null} [signing]  config.landing.signing "ssh": the signing
+ *   key file of every merge commit (compose.composeCandidate `signing`); null = no signing
  * @property {string} repoDir                 scratch dir for the bare compose repository
  * @property {string} remoteUrl               https://github.com/<owner>/<repo>.git
  * @property {string|null} [fetchFilter]      partial-clone filter for the scratch repository
@@ -580,6 +606,25 @@ class Tick {
         ? readOnlyGitHub(landGh, this.violations)
         : landGh;
     this.landGit = null;
+    /**
+     * The client of the human-visible writes: the App's own (config.voice "app"), or the owner
+     * voice (voice.mjs), whose fallbacks to the App's token are recorded by voiceFallback.
+     */
+    this.voice =
+      this.config.voice === "owner"
+        ? createOwnerVoice({
+            app: this.gh,
+            owner: deps.voiceGh
+              ? this.dryRun
+                ? readOnlyGitHub(deps.voiceGh, this.violations)
+                : deps.voiceGh
+              : null,
+            ownerLogin: deps.ownerLogin ?? null,
+            onFallback: (cause, what) => this.voiceFallback(cause, what),
+          })
+        : this.gh;
+    /** True once this tick recorded a fallback of the owner voice (voiceFallback). */
+    this.voiceFellBack = false;
     this.m = { ...DEFAULT_MODULES, ...(deps.modules ?? {}) };
     this.decisions = [];
     /** PRs whose queue label this tick removed (GitHub may still list them for a while). */
@@ -738,10 +783,30 @@ class Tick {
     return this.s.history.some(predicate);
   }
 
-  /** Comment on an issue the queue owns (base-red notice, divergence): written in every mode. */
+  /**
+   * Comment on an issue the queue owns (base-red notice, divergence, dashboard): written in every
+   * mode, with the configured voice (this.voice).
+   */
   async comment(n, key, body) {
     if (this.dryRun) return this.note(`would comment on #${n} (${key})`);
-    await this.gh.commentOnce(n, key, body);
+    await this.voice.commentOnce(n, key, body);
+  }
+
+  /**
+   * The owner voice wrote `what` with the App's token for `cause` (voice.mjs: no owner token, or
+   * GitHub refused it). Every fallback is a note; the first of the tick is also an `error` event,
+   * unless the newest such event already says exactly this (a token missing for days must not
+   * add an event, and with it a dashboard change and one more fallback, on every tick).
+   */
+  voiceFallback(cause, what) {
+    this.note(voiceFallbackNote(what, cause));
+    if (this.voiceFellBack || !this.s) return;
+    this.voiceFellBack = true;
+    const detail = voiceFallbackDetail(cause);
+    const last = this.s.history.findLast(
+      (e) => e.type === "error" && String(e.detail ?? "").startsWith(VOICE_FALLBACK_PREFIX)
+    );
+    if (last?.detail !== detail) this.event("error", { detail });
   }
 
   /** Comment on a PULL REQUEST: never in shadow mode. */
@@ -755,7 +820,7 @@ class Tick {
     if (this.shadow) return this.note(`shadow: label "${label}" kept on #${n}`);
     this.touched.add(n);
     if (this.dryRun) return this.note(`would remove label "${label}" from #${n}`);
-    await this.gh.removeLabel(n, label);
+    await this.voice.removeLabel(n, label);
   }
 
   /**
@@ -2407,7 +2472,7 @@ class Tick {
     let issue = existing?.number ?? null;
     if (existing) await this.comment(existing.number, `divergence:${f.batchId}`, body);
     else if (this.dryRun) this.note(`would open issue "${title}"`);
-    else issue = (await this.gh.createIssue({ title, body, labels: [DASHBOARD_LABEL] })).number;
+    else issue = (await this.voice.createIssue({ title, body, labels: [DASHBOARD_LABEL] })).number;
     this.setPaused({
       reason: "tree-divergence",
       since: this.now(),
@@ -3283,7 +3348,17 @@ class Tick {
       prs,
       batchId,
       heads,
+      ...(this.deps.signing ? { signing: this.deps.signing } : {}),
     });
+    // Signing asked for and not (fully) done: the batch goes on unsigned (never blocked), and the
+    // operator is told once per batch. The cause names no key material and no path.
+    if (result.signing && result.signing.unsigned > 0) {
+      const detail =
+        `${batchId}: ${result.signing.unsigned} merge commit(s) composed unsigned: ` +
+        String(result.signing.cause ?? "unknown cause");
+      this.event("error", { batchId, detail });
+      this.note(detail);
+    }
     for (const pr of result.excludedBaseConflict ?? []) {
       if (this.shadow) {
         this.wouldDequeue(pr, "base-conflict", batchId);
@@ -3851,7 +3926,7 @@ class Tick {
       return null;
     }
     try {
-      return await this.m.dashboard.upsertDashboard({ gh: this.gh, base: this.base, body });
+      return await this.m.dashboard.upsertDashboard({ gh: this.voice, base: this.base, body });
     } catch (error) {
       // Cosmetic: never let the dashboard block the state save of real transitions.
       this.note(`dashboard update failed: ${error.message}`);
@@ -4076,7 +4151,7 @@ export async function recordTickFailure(deps, base, detail, warn = () => {}, rec
     // A base whose stored withdrawals are its only work is found by the next scheduled tick
     // through its open dashboard issue (discoverBases): one is created when none is open.
     try {
-      await dashboardIssueOf(deps, base, saved);
+      await dashboardIssueOf(deps, base, saved, voiceOf(deps, warn));
     } catch (error) {
       warn(`dashboard of a base with stored withdrawals not created: ${error.message}`);
     }
@@ -4461,7 +4536,7 @@ export function amendFailedTick(state, record, options) {
  * @param {QueueState} state
  * @returns {Promise<number>}
  */
-async function dashboardIssueOf(deps, base, state) {
+async function dashboardIssueOf(deps, base, state, voice = deps.gh) {
   const issue = await findDashboard({ gh: deps.gh, base });
   if (issue !== null) return issue;
   const body = renderDashboard({
@@ -4473,7 +4548,23 @@ async function dashboardIssueOf(deps, base, state) {
     runUrl: deps.runUrl ?? null,
     repository: deps.repository,
   });
-  return createDashboard({ gh: deps.gh, base, body });
+  return createDashboard({ gh: voice, base, body });
+}
+
+/**
+ * The client of the human-visible writes outside a Tick (main()'s failure path): deps.gh with
+ * config.voice "app", else the owner voice, whose fallbacks to the App's token go to `warn`.
+ * @param {TickDeps} deps
+ * @param {(message: string) => void} warn
+ */
+function voiceOf(deps, warn) {
+  if (deps.config.voice !== "owner") return deps.gh;
+  return createOwnerVoice({
+    app: deps.gh,
+    owner: deps.voiceGh ?? null,
+    ownerLogin: deps.ownerLogin ?? null,
+    onFallback: (cause, what) => warn(voiceFallbackNote(what, cause)),
+  });
 }
 
 /**
@@ -4492,9 +4583,10 @@ async function dashboardIssueOf(deps, base, state) {
 async function deliverStalledAlert(deps, base, state, warn) {
   const episode = state.stalled;
   const key = stalledKey(episode.since);
+  const voice = voiceOf(deps, warn);
   try {
-    const issue = await dashboardIssueOf(deps, base, state);
-    await deps.gh.commentOnce(
+    const issue = await dashboardIssueOf(deps, base, state, voice);
+    await voice.commentOnce(
       issue,
       key,
       stalledComment({ base, stalled: episode, config: deps.config })
@@ -4658,8 +4750,9 @@ export function parseArgs(argv) {
 
 /**
  * Build the TickDeps exactly as the CLI does, from the environment (see the header). The GitHub
- * client counts only comment markers written by `${config.appSlug}[bot]`, so a third party
- * cannot pre-post a marker to mute a queue comment.
+ * client counts only comment markers written by `${config.appSlug}[bot]` (and, with the owner
+ * voice, by the owner's login read from OMNI_QUEUE_LAND_TOKEN itself), so a third party cannot
+ * pre-post a marker to mute a queue comment.
  * @param {object} env   process.env-like
  * @param {{now?: () => string, log?: (msg: string) => void, gitEnv?: object}} [overrides]
  *   tests only: injected clock, logger and extra environment for every git process
@@ -4700,25 +4793,28 @@ export function createTickDeps(env, overrides = {}) {
   const remoteUrl = env.OMNI_QUEUE_REMOTE_URL || `${serverUrl}/${repository}.git`;
   const gitEnv = overrides.gitEnv ?? {};
   const gitFor = (cwd) => createGit({ cwd, token, identity, log, env: gitEnv });
-  // The owner's token, when landing as the owner: never an error here (shadow runs without it);
-  // a live landing without it pauses (Tick.landOrWouldLand).
-  const landToken = owner ? env.OMNI_QUEUE_LAND_TOKEN || null : null;
+  // The owner's token, when landing as the owner or speaking as the owner: never an error here
+  // (shadow runs without it, the voice falls back to the App); a live landing without it pauses
+  // (Tick.landOrWouldLand).
+  const ownerVoice = config.voice === "owner";
+  const ownerToken = owner || ownerVoice ? env.OMNI_QUEUE_LAND_TOKEN || null : null;
+  const landToken = owner ? ownerToken : null;
   const landGitFor = !owner
     ? gitFor
     : landToken
       ? (cwd) => createGit({ cwd, token: landToken, identity, log, env: gitEnv })
       : null;
-  const landGh = !owner
-    ? gh
-    : landToken
-      ? createGitHubClient({
-          token: landToken,
-          repository,
-          apiUrl: env.GITHUB_API_URL || undefined,
-          botLogin: `${config.appSlug}[bot]`,
-          log,
-        })
-      : null;
+  const ownerGh = ownerToken
+    ? createGitHubClient({
+        token: ownerToken,
+        repository,
+        apiUrl: env.GITHUB_API_URL || undefined,
+        botLogin: `${config.appSlug}[bot]`,
+        log,
+      })
+    : null;
+  const landGh = !owner ? gh : ownerGh;
+  const voiceGh = ownerVoice ? ownerGh : null;
   return {
     config,
     gh,
@@ -4726,6 +4822,13 @@ export function createTickDeps(env, overrides = {}) {
     gitFor,
     landGitFor,
     landGh,
+    voiceGh,
+    ownerLogin: createOwnerLoginReader(voiceGh),
+    // The key file the workflow wrote (never the key itself); missing = composed unsigned.
+    signing:
+      config.landing.signing === "ssh"
+        ? { keyPath: composeModule.signingKeyPath(env.RUNNER_TEMP) }
+        : null,
     repoDir,
     remoteUrl,
     // A local or file remote cannot serve a partial clone reliably: fetch everything.

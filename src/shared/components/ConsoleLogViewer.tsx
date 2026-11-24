@@ -237,7 +237,7 @@ function LogRow({
       {/* Level badge */}
       <span
         className={cn(
-          "inline-block px-1.5 py-0 rounded text-[10px] font-semibold uppercase border border-current/20 shrink-0",
+          "inline-block px-1.5 py-0 rounded text-3xs font-semibold uppercase border border-current/20 shrink-0",
           colorClass,
           !rowTinted && tintClass
         )}
@@ -603,7 +603,7 @@ export default function ConsoleLogViewer() {
           <div className="w-3 h-3 rounded-full bg-[var(--ci-log-error)]" />
           <div className="w-3 h-3 rounded-full bg-[var(--ci-log-warn)]" />
           <div className="w-3 h-3 rounded-full bg-[var(--ci-code-inverse-string)]" />
-          <span className="ml-3 text-[var(--ci-log-trace)] text-[11px]">
+          <span className="ml-3 text-[var(--ci-log-trace)] text-2xs">
             OmniRoute — {tv("applicationConsole")}
           </span>
         </div>
@@ -614,7 +614,7 @@ export default function ConsoleLogViewer() {
             <div className="text-[var(--ci-log-trace)] text-center py-12">
               <Icon name="terminal" size={40} className="block mb-2 opacity-30" />
               <p>{t("noLogEntries")}</p>
-              <p className="text-[10px] mt-1">{tv("emptyFileLoggingHint")}</p>
+              <p className="text-xs mt-1">{tv("emptyFileLoggingHint")}</p>
             </div>
           ) : (
             filteredLogs.map((entry, idx) => (
