@@ -86,7 +86,12 @@ export type ReEgressAttempt = {
   aborted: boolean;
   /** Egress keys already refused for this request; the refused one is added here. */
   triedKeys: Set<string>;
-  /** Asks the pool for the egress of the next send. */
+  /**
+   * Asks the pool for the egress of the next send. The caller resolves it without a
+   * session key on purpose: with the "session" pool strategy, the affinity hash would
+   * keep returning the member that was just refused, while no key falls back to
+   * round-robin and moves on to another member.
+   */
   resolveNext: () => Promise<unknown>;
 };
 
