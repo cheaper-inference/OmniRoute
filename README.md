@@ -1798,7 +1798,7 @@ What OmniRoute is built with, as declared in [`package.json`](package.json) on `
 
 </div>
 
-Every Markdown file in [`docs/`](docs/) outside the translations is linked below — 210 files — plus 19 documents that live elsewhere in the repository (contributing guide, changelog, package READMEs, the OpenAPI file). The searchable index is [`docs/README.md`](docs/README.md). Translations into 66 languages are in [`docs/i18n/`](docs/i18n/README.md).
+Every Markdown file in [`docs/`](docs/) outside the translations is linked below, plus the documents that live elsewhere in the repository (contributing guide, changelog, package READMEs, the OpenAPI file). The searchable index is [`docs/README.md`](docs/README.md). Translations into 66 languages are in [`docs/i18n/`](docs/i18n/README.md).
 
 | If you…                                       | Read first                                                  | Then browse                       |
 | --------------------------------------------- | ----------------------------------------------------------- | --------------------------------- |
