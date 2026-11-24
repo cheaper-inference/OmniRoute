@@ -306,14 +306,14 @@ export default function SecurityTab() {
       {/* API Endpoint Protection */}
       <Card title={t("apiEndpointProtection")} icon="api">
         <div className="flex flex-col gap-4">
-          <div className="rounded-lg border border-border bg-bg-subtle p-3 text-sm text-text-muted">
+          <Card.Section className="text-sm text-text-muted">
             <p className="font-medium text-text-main">{t("authModelHeading")}</p>
             <ul className="list-disc pl-5 mt-1 space-y-1">
               <li>{t("authModelClient")}</li>
               <li>{t("authModelManagement")}</li>
               <li>{t("authModelPublic")}</li>
             </ul>
-          </div>
+          </Card.Section>
 
           <div className="flex items-center justify-between">
             <div>

@@ -5,10 +5,13 @@ import { useTranslations } from "next-intl";
 import { Field } from "@omniroute/ui-kit/field";
 import { Switch } from "@omniroute/ui-kit/switch";
 import Icon from "@/shared/components/Icon";
+import Notice from "@/shared/components/Notice";
+import IconChip from "@/shared/components/IconChip";
 import { Card } from "@/shared/components";
 import Button from "@/shared/components/Button";
 import Input from "@/shared/components/Input";
 import Modal from "@/shared/components/Modal";
+import NumberInput from "@/shared/components/NumberInput";
 import Select from "@/shared/components/Select";
 
 interface QdrantSettings {
@@ -256,11 +259,13 @@ export default function QdrantConfigCard() {
   return (
     <Card>
       <div className="flex items-center gap-3 mb-5">
-        <div className="p-2 rounded-lg bg-success/10 text-success shrink-0">
-          <Icon name="database" size={20} />
-        </div>
+        <IconChip tone="success" className="shrink-0">
+          <Icon name="database" />
+        </IconChip>
         <div className="flex-1 min-w-0">
-          <h3 className="text-sm text-text-main">{t("qdrant.title")}</h3>
+          <h3 className="ci-heading" data-size="sm">
+            {t("qdrant.title")}
+          </h3>
           <p className="text-xs text-text-muted">{t("qdrant.description")}</p>
           <Button
             variant="ghost"
@@ -305,12 +310,12 @@ export default function QdrantConfigCard() {
       </div>
 
       {/* Tier 1 vs Tier 2 guidance */}
-      <div className="mb-4 p-3 rounded-lg bg-success/10 border border-success/20 text-xs text-text-muted leading-relaxed">
+      <Notice variant="success" className="mb-4">
         {t("qdrant.banner")}
-      </div>
+      </Notice>
 
       {/* Enable toggle + test connection */}
-      <div className="flex items-center justify-between p-4 rounded-lg bg-bg-subtle border border-border/30 mb-4">
+      <Card.Section className="flex items-center justify-between mb-4">
         <div>
           <p className="text-sm font-medium">{t("qdrant.enableLabel")}</p>
           <p className="text-xs text-text-muted mt-0.5">{t("qdrant.enableDesc")}</p>
@@ -335,7 +340,7 @@ export default function QdrantConfigCard() {
             disabled={saving || (!qdrant.enabled && !searchValidated)}
           />
         </div>
-      </div>
+      </Card.Section>
 
       {!qdrant.enabled && !searchValidated && (
         <p className="-mt-2 mb-4 text-xs text-warning">
@@ -355,7 +360,7 @@ export default function QdrantConfigCard() {
         </div>
       )}
       {health?.collection && (
-        <div className="mb-4 rounded-lg border border-border/50 bg-bg-subtle p-3 text-xs text-text-muted">
+        <Card.Section className="mb-4 text-xs text-text-muted">
           {health.collection.exists ? (
             <>
               Coleção compatível com vetores de dimensão{" "}
@@ -369,7 +374,7 @@ export default function QdrantConfigCard() {
               validado.
             </>
           )}
-        </div>
+        </Card.Section>
       )}
 
       {saveStatus === "saved" && (
@@ -383,42 +388,44 @@ export default function QdrantConfigCard() {
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
-        <div className="p-3 rounded-lg bg-bg-subtle border border-border/30">
+        <Card.Section>
           <Input
             label={t("qdrant.hostLabel")}
             hint={t("qdrant.hostHelp")}
             value={qdrant.host}
             onChange={(e) => setQdrant((s) => ({ ...s, host: e.target.value }))}
             placeholder="http://127.0.0.1"
-            inputClassName="font-mono"
+            mono
           />
-        </div>
-        <div className="p-3 rounded-lg bg-bg-subtle border border-border/30">
-          <Input
+        </Card.Section>
+        <Card.Section>
+          <NumberInput
             label={t("qdrant.portLabel")}
             value={qdrant.port}
-            type="number"
-            onChange={(e) =>
+            precision={0}
+            min={1}
+            max={65535}
+            onValueChange={(port) =>
               setQdrant((s) => ({
                 ...s,
-                port: Math.max(1, Math.min(65535, Number(e.target.value) || 1)),
+                port: Math.max(1, Math.min(65535, port || 1)),
               }))
             }
             placeholder="6333"
-            inputClassName="font-mono"
+            mono
           />
-        </div>
-        <div className="p-3 rounded-lg bg-bg-subtle border border-border/30">
+        </Card.Section>
+        <Card.Section>
           <Input
             label={t("qdrant.collectionLabel")}
             hint={t("qdrant.collectionHelp")}
             value={qdrant.collection}
             onChange={(e) => setQdrant((s) => ({ ...s, collection: e.target.value }))}
             placeholder="omniroute_memory"
-            inputClassName="font-mono"
+            mono
           />
-        </div>
-        <div className="p-3 rounded-lg bg-bg-subtle border border-border/30">
+        </Card.Section>
+        <Card.Section>
           <Field label={t("qdrant.embeddingModelLabel")} htmlFor={embeddingModelId}>
             {embeddingOptions.length > 0 && (
               <Select
@@ -443,11 +450,11 @@ export default function QdrantConfigCard() {
               value={qdrant.embeddingModel}
               onChange={(e) => setQdrant((s) => ({ ...s, embeddingModel: e.target.value }))}
               placeholder="openai/text-embedding-3-small"
-              inputClassName="font-mono"
+              mono
             />
           </Field>
-        </div>
-        <div className="p-3 rounded-lg bg-bg-subtle border border-border/30 md:col-span-2">
+        </Card.Section>
+        <Card.Section className="md:col-span-2">
           <Field
             htmlFor={apiKeyId}
             label={
@@ -469,7 +476,7 @@ export default function QdrantConfigCard() {
                   qdrant.hasApiKey ? t("qdrant.apiKeyKeepPlaceholder") : t("qdrant.apiKeyOptional")
                 }
                 className="flex-1"
-                inputClassName="font-mono"
+                mono
               />
               {qdrant.hasApiKey && (
                 <Button variant="outline" onClick={() => save({ apiKey: "" })} disabled={saving}>
@@ -484,11 +491,11 @@ export default function QdrantConfigCard() {
               </Button>
             </div>
           </Field>
-        </div>
+        </Card.Section>
       </div>
 
       {/* Search test */}
-      <div className="p-4 rounded-lg bg-bg-subtle border border-border/30 mb-3">
+      <Card.Section className="mb-3">
         <p className="text-sm font-medium mb-2">{t("qdrant.searchTestTitle")}</p>
         <div className="flex gap-2">
           <Input
@@ -523,10 +530,10 @@ export default function QdrantConfigCard() {
             ))}
           </div>
         )}
-      </div>
+      </Card.Section>
 
       {/* Cleanup */}
-      <div className="p-4 rounded-lg bg-bg-subtle border border-border/30">
+      <Card.Section>
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm font-medium">{t("qdrant.cleanupTitle")}</p>
@@ -542,7 +549,7 @@ export default function QdrantConfigCard() {
           </Button>
         </div>
         {cleanupMsg && <p className="mt-2 text-xs text-text-muted">{cleanupMsg}</p>}
-      </div>
+      </Card.Section>
       <Modal
         isOpen={tutorialOpen}
         onClose={() => setTutorialOpen(false)}

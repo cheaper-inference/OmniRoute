@@ -4,7 +4,6 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { PageHeader } from "@omniroute/ui-kit/page-header";
 import Link from "next/link";
-import Icon from "@/shared/components/Icon";
 import { Button, CardSkeleton, Input } from "@/shared/components";
 import Select from "@/shared/components/Select";
 import { CLI_TOOLS } from "@/shared/constants/cliTools";
@@ -15,6 +14,7 @@ import type { CliCatalogEntry } from "@/shared/schemas/cliCatalog";
 import CliProfileAutoSyncToggles from "./components/CliProfileAutoSyncToggles";
 import CliCompanionPanel from "./components/CliCompanionPanel";
 import type { CompanionTarget } from "@/shared/utils/cliCompanion";
+import Notice from "@/shared/components/Notice";
 
 // ── Static catalogue slice ────────────────────────────────────────────────────
 
@@ -207,23 +207,15 @@ export default function CliCodePageClient({
 
       {/* Empty state — no active providers */}
       {!providersLoading && !hasActiveProviders && (
-        <div className="rounded-lg border border-warning/40 bg-warning/10 p-4 flex items-start gap-3">
-          <Icon name="warning" className="text-warning flex-shrink-0" />
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-warning">
-              {tCommon("detail.noActiveProviders")}
-            </p>
-            <p className="text-xs text-text-muted mt-0.5">
-              {tCommon("detail.noActiveProvidersDesc")}
-            </p>
-            <Link
-              href="/dashboard/providers"
-              className="inline-flex items-center gap-1 mt-2 text-xs text-primary font-medium hover:underline"
-            >
-              {tCommon("detail.openProviders")}
-            </Link>
-          </div>
-        </div>
+        <Notice variant="warning" icon="warning" title={tCommon("detail.noActiveProviders")}>
+          <p>{tCommon("detail.noActiveProvidersDesc")}</p>
+          <Link
+            href="/dashboard/providers"
+            className="inline-flex items-center gap-1 mt-2 text-xs text-primary font-medium hover:underline"
+          >
+            {tCommon("detail.openProviders")}
+          </Link>
+        </Notice>
       )}
 
       {/* Grid */}

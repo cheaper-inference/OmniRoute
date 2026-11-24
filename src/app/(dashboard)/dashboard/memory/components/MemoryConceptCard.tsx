@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import Icon from "@/shared/components/Icon";
+import IconChip from "@/shared/components/IconChip";
 import Button from "@/shared/components/Button";
 import Card from "@/shared/components/Card";
 import { cn } from "@/shared/utils/cn";
@@ -14,11 +15,13 @@ export default function MemoryConceptCard() {
   return (
     <Card padding="sm" className="bg-bg-subtle/50">
       <div className="flex items-start gap-3">
-        <div className="p-2 rounded-lg bg-primary/10 text-primary shrink-0">
-          <Icon name="psychology" size={20} />
-        </div>
+        <IconChip tone="accent" className="shrink-0">
+          <Icon name="psychology" />
+        </IconChip>
         <div className="flex-1 min-w-0">
-          <h2 className="text-sm text-text-main">{t("concept.title")}</h2>
+          <h2 className="ci-heading" data-size="sm">
+            {t("concept.title")}
+          </h2>
           <p className="text-xs text-text-muted mt-1 leading-relaxed">{t("concept.description")}</p>
           <Button
             variant="ghost"
@@ -35,11 +38,11 @@ export default function MemoryConceptCard() {
             />
           </Button>
           {open && (
-            <div className="mt-3 p-3 rounded-lg bg-surface/50 border border-border/60 text-xs text-text-muted leading-relaxed space-y-1.5">
+            <Card.Section className="mt-3 text-xs text-text-muted leading-relaxed space-y-1.5">
               {(t("concept.howWorksContent") as string).split("\n").map((line, i) => (
                 <p key={i}>{line}</p>
               ))}
-            </div>
+            </Card.Section>
           )}
         </div>
       </div>
