@@ -404,6 +404,26 @@ export function surfaceFromBaseUrl(baseUrl: string | null | undefined): Opencode
   return "other";
 }
 
+/** A connection's `providerSpecificData.baseUrl` override, trimmed and without trailing slashes. */
+export function credentialBaseUrlOverride(psdBaseUrl: unknown): string | null {
+  return typeof psdBaseUrl === "string" && psdBaseUrl.trim()
+    ? psdBaseUrl.trim().replace(/\/+$/, "")
+    : null;
+}
+
+/**
+ * The surface of a request: a recognised connection `baseUrl` override wins, otherwise the
+ * registry `baseUrl` decides (an unrecognised override never turns a Zen/Go request into "other").
+ */
+export function surfaceForBaseUrls(
+  psdBaseUrl: unknown,
+  registryBaseUrl: string | null | undefined
+): OpencodeSurface {
+  const override = credentialBaseUrlOverride(psdBaseUrl);
+  const configured = override ? surfaceFromBaseUrl(override) : "other";
+  return configured !== "other" ? configured : surfaceFromBaseUrl(registryBaseUrl);
+}
+
 /**
  * Operator opt-out for the body half of the contract.
  *

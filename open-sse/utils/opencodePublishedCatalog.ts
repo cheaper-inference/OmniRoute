@@ -268,11 +268,17 @@ export function getPublishedBaseUrl(
 /**
  * The target format a published SDK rides, or `null` when the catalog decides nothing.
  * Only the measured SDKs map: everything else falls back to the registry heuristics.
+ * `@ai-sdk/google` maps to `gemini` for the Go provider only (pass `providerId`).
  */
-export function surfaceTargetFormatForNpm(npm: string | null | undefined): string | null {
+export function surfaceTargetFormatForNpm(
+  npm: string | null | undefined,
+  providerId?: string | null
+): string | null {
   if (npm === "@ai-sdk/openai") return "openai-responses";
   if (npm === "@ai-sdk/anthropic") return "claude";
-  if (npm === "@ai-sdk/google") return "gemini";
+  // The Gemini wire is only proven on the Go surface; Zen keeps the registry answer.
+  if (npm === "@ai-sdk/google" && normalizeCatalogKey(providerId) === "opencode-go")
+    return "gemini";
   return null;
 }
 

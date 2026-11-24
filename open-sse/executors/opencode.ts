@@ -65,6 +65,7 @@ import {
 import {
   applyZenResponsesAuth,
   attemptFor,
+  credentialBaseUrlOverride,
   isGatedFreeTierRequest,
   isGoGeminiWire,
   isPremiumOpencodeModel,
@@ -74,7 +75,7 @@ import {
   rebuildJsonFromForcedStream,
   resolveFreeTierCredential,
   resolveGatedCredential,
-  surfaceFromBaseUrl,
+  surfaceForBaseUrls,
 } from "./opencodeFreeTierContract.ts";
 import {
   applyOpencodeOutputBudgetFloors,
@@ -96,7 +97,13 @@ import {
   retryFreeTierRefusalWithObservedTools,
 } from "./opencodeFreeTierRetry.ts";
 import { withRequestShapeRetry } from "./opencodeRequestShape.ts";
-import { sanitizeResponsesBody } from "./opencodeResponsesFields.ts";
+import {
+  clampResponsesCallId,
+  coerceResponsesArguments,
+  coerceResponsesOutput,
+  normalizeResponsesReasoningField,
+  normalizeResponsesTokenFields,
+} from "./opencodeResponsesFields.ts";
 import { probeFreeTierRefusalEgress } from "./opencodeFreeTierEgressProbe.ts";
 import { trimOversizedToolEnums } from "./opencodeEnumTrim.ts";
 
@@ -165,7 +172,124 @@ export type { ScopedAccount as OpencodeAccountState };
 
 const EFFORT_LEVELS = ["none", "low", "high", "max"] as const;
 
-export { sanitizeResponsesBody };
+const MAX_TOOL_NAME_LEN = 128;
+
+/** Whether `value` is a non-array, non-null object. */
+function isPlainRecord(value: unknown): value is Record<string, unknown> {
+  return !!value && typeof value === "object" && !Array.isArray(value);
+}
+
+/**
+ * A string field on `toolObj`, falling back to the same field on a nested
+ * Chat-Completions `function` object when `toolObj` itself does not have it.
+ */
+function pickToolStringField(
+  toolObj: Record<string, unknown>,
+  fn: Record<string, unknown> | null,
+  key: "name" | "description"
+): string {
+  if (typeof toolObj[key] === "string") return toolObj[key] as string;
+  const nested = fn?.[key];
+  return typeof nested === "string" ? nested : "";
+}
+
+/**
+ * The tool's JSON-schema parameters object, from `toolObj` or a nested
+ * `function` object, defaulting to an empty object schema and always
+ * carrying a `properties` map (the Responses API rejects one without it).
+ */
+function resolveToolParameters(
+  toolObj: Record<string, unknown>,
+  fn: Record<string, unknown> | null
+): Record<string, unknown> {
+  const parameters = (isPlainRecord(toolObj.parameters) ? toolObj.parameters : null) ??
+    (isPlainRecord(fn?.parameters) ? (fn!.parameters as Record<string, unknown>) : null) ?? {
+      type: "object",
+      properties: {},
+    };
+  return parameters.type === "object" && !parameters.properties
+    ? { ...parameters, properties: {} }
+    : parameters;
+}
+
+/**
+ * Normalize one Responses-API tool entry to the flat `{type, name, description,
+ * parameters}` shape (accepting either that shape or a nested Chat-Completions
+ * `{function: {...}}` shape as input), mutating it in place. Returns `null` for
+ * an entry with no resolvable name, which the caller drops.
+ */
+function normalizeResponsesToolEntry(t: unknown): Record<string, unknown> | null {
+  if (!isPlainRecord(t)) return null;
+  const toolObj = t;
+  const fn = isPlainRecord(toolObj.function) ? toolObj.function : null;
+  const name = pickToolStringField(toolObj, fn, "name").trim();
+  if (!name) return null;
+  const description = pickToolStringField(toolObj, fn, "description");
+  const parameters = resolveToolParameters(toolObj, fn);
+  for (const k of Object.keys(toolObj)) delete toolObj[k];
+  toolObj.type = "function";
+  toolObj.name = name.slice(0, MAX_TOOL_NAME_LEN);
+  if (description) toolObj.description = description;
+  toolObj.parameters = parameters;
+  return toolObj;
+}
+
+/** Whether a Responses-API reasoning item carries plaintext in `content` or `summary`. */
+function hasReplayableReasoningText(item: Record<string, unknown>): boolean {
+  return [item.content, item.summary].some(
+    (parts) =>
+      Array.isArray(parts) &&
+      parts.some((part) => isPlainRecord(part) && typeof part.text === "string" && part.text !== "")
+  );
+}
+
+/**
+ * Whether a Responses-API `input` item should be kept, normalizing
+ * function_call/function_call_output entries in place as a side effect.
+ */
+function shouldKeepResponsesInputItem(item: unknown): boolean {
+  if (!item || typeof item !== "object" || Array.isArray(item)) return true;
+  const rec = item as Record<string, unknown>;
+  delete rec.encrypted_content;
+  delete rec.reasoning_encrypted_content;
+  // An opaque reasoning item means nothing to this upstream, but one with readable text is the
+  // replayed thinking DeepSeek rejects a turn without (#13031).
+  if (rec.type === "reasoning") return hasReplayableReasoningText(rec);
+  if (rec.type === "function_call") {
+    if (!rec.name || typeof rec.name !== "string" || (rec.name as string).trim() === "")
+      return false;
+    rec.name = (rec.name as string).trim().slice(0, MAX_TOOL_NAME_LEN);
+    rec.call_id = clampResponsesCallId(rec.call_id);
+    rec.arguments = coerceResponsesArguments(rec.arguments);
+    return true;
+  }
+  if (rec.type === "function_call_output") {
+    rec.call_id = clampResponsesCallId(rec.call_id);
+    rec.output = coerceResponsesOutput(rec.output);
+    return true;
+  }
+  return true;
+}
+
+/**
+ * Sanitize body for OpenAI Responses API endpoint (/responses) (PR #4145).
+ */
+export function sanitizeResponsesBody(body: Record<string, unknown>): void {
+  if (!body || typeof body !== "object") return;
+
+  normalizeResponsesTokenFields(body);
+  normalizeResponsesReasoningField(body);
+
+  if (Array.isArray(body.tools)) {
+    body.tools = body.tools
+      .map((t: unknown) => normalizeResponsesToolEntry(t))
+      .filter((t: Record<string, unknown> | null): t is Record<string, unknown> => t !== null);
+  }
+
+  if (Array.isArray(body.input)) {
+    body.input = body.input.filter(shouldKeepResponsesInputItem);
+  }
+}
 
 /**
  * Models on opencode-go that support effort-tier aliases. Each entry maps the
@@ -303,14 +427,8 @@ export class OpencodeExecutor extends BaseExecutor {
     if (context) context.session = value;
     else this._sessionFallback = value;
   }
-  private _surface = (credentials?: ProviderCredentials | null) => {
-    const psdBaseUrl = credentials?.providerSpecificData?.baseUrl;
-    if (typeof psdBaseUrl === "string" && psdBaseUrl.trim()) {
-      const configuredSurface = surfaceFromBaseUrl(psdBaseUrl);
-      if (configuredSurface !== "other") return configuredSurface;
-    }
-    return surfaceFromBaseUrl(this.config?.baseUrl);
-  };
+  private _surface = (credentials?: ProviderCredentials | null) =>
+    surfaceForBaseUrls(credentials?.providerSpecificData?.baseUrl, this.config?.baseUrl);
 
   /** Free-tier retry context: the request-scoped contract state the retry helper needs. */
   private freeTierRetryCtx(input: ExecuteInput) {
@@ -1441,14 +1559,8 @@ export class OpencodeExecutor extends BaseExecutor {
     credentials: ProviderCredentials | null = null
   ) {
     void urlIndex;
-
     const surface = this._surface(credentials);
-    const psdBaseUrl = credentials?.providerSpecificData?.baseUrl;
-    const customBase =
-      typeof psdBaseUrl === "string" && psdBaseUrl.trim()
-        ? psdBaseUrl.trim().replace(/\/+$/, "")
-        : null;
-
+    const customBase = credentialBaseUrlOverride(credentials?.providerSpecificData?.baseUrl);
     // Off, unpublished or invalid: the registered base URL (or operator override).
     // A gated free-tier request keeps the inference contract's constant and never consults the catalog.
     const base =
