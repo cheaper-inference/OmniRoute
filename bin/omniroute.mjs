@@ -448,7 +448,9 @@ try {
   const { createProgram } = await import(
     pathToFileURL(join(ROOT, "bin", "cli", "program.mjs")).href
   );
+  const { loadPlugins } = await import(pathToFileURL(join(ROOT, "bin", "cli", "plugins.mjs")).href);
   const program = createProgram();
+  await loadPlugins(program);
   await program.parseAsync(process.argv);
 } catch (err) {
   if (err?.exitCode !== undefined) process.exit(err.exitCode);
