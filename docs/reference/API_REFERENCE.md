@@ -442,11 +442,11 @@ Content-Type: application/json
 `mistral-ocr-latest`) resolves to its registered provider, and an omitted `model` defaults to
 Mistral (`mistral-ocr-latest`). Registered providers (`open-sse/config/ocrRegistry.ts`):
 
-| Provider id                   | Model id             | `model` value                                               | Notes                                                                                              |
-| ----------------------------- | -------------------- | ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| `mistral`                     | `mistral-ocr-latest` | `mistral/mistral-ocr-latest` (or bare `mistral-ocr-latest`) | Synchronous — the response is returned directly from the single upstream call.                     |
-| `azure-document-intelligence` | `prebuilt-read`      | `azure-document-intelligence/prebuilt-read`                 | Asynchronous upstream (`analyze` + poll) — see below.                                              |
-| `vertex-deepseek-ocr`         | `deepseek-ocr-maas`  | `vertex-deepseek-ocr/deepseek-ocr-maas`                     | Synchronous, via Vertex AI's `openapi/chat/completions` partner endpoint — see below for auth/URL. |
+| Provider id                   | Model id                          | `model` value                                               | Notes                                                                                                                                                                                                     |
+| ----------------------------- | --------------------------------- | ----------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mistral`                     | `mistral-ocr-latest`              | `mistral/mistral-ocr-latest` (or bare `mistral-ocr-latest`) | Synchronous — the response is returned directly from the single upstream call.                                                                                                                            |
+| `azure-document-intelligence` | `prebuilt-read`                   | `azure-document-intelligence/prebuilt-read`                 | Asynchronous upstream (`analyze` + poll) — see below.                                                                                                                                                     |
+| `vertex-deepseek-ocr`         | self-deployed (no built-in model) | `vertex-deepseek-ocr/<your-deployed-model-id>`              | Synchronous, via your own Vertex AI Model Garden DeepSeek-OCR endpoint (`openapi/chat/completions` shape); Google retired the managed `deepseek-ocr-maas` on 2026-10-21 (#20423), so that id returns 400. |
 
 All three providers respond in the same Mistral-shaped body:
 
@@ -740,6 +740,9 @@ Upstream contracts: [sound effects](https://elevenlabs.io/docs/api-reference/tex
 | POST   | `/v1/classify`                            | Jina classify (`api.jina.ai`)      |
 | POST   | `/v1/segment`                             | Jina segmenter (`segment.jina.ai`) |
 | POST   | `/v1/moderations`                         | OpenAI Moderations                 |
+| POST   | `/v1/systemone`                           | System One typed decisions         |
+| POST   | `/v1/decisions`                           | OpenAI Decisions (native)          |
+| GET    | `/v1/systemone/models`                    | Decision-model catalog             |
 | GET    | `/v1/models`                              | OpenAI                             |
 | POST   | `/v1/models/query`                        | Filtered model shortlist           |
 | POST   | `/v1/messages/count_tokens`               | Anthropic                          |
@@ -812,6 +815,43 @@ POST /v1/music/generations  { "model": "kie/suno-v4.0",   "prompt": "..." }
 > inherit the node's `apiType`, so an `embeddings` node's models are `type: "embedding"` and a
 > `rerank` node's models are `type: "rerank"` instead of defaulting to chat; an explicit
 > `supportedEndpoints` on a synced or manually added row still takes precedence.
+
+### Typed Decisions
+
+Decision models answer typed questions with calibrated probabilities instead of generating
+text. They are never chat models, and the two wire formats are never translated into each
+other:
+
+- `POST /v1/systemone` — System One `{ model, state, questions: { <id>: … } }` (TypeSafe Jev,
+  OpenRouter decisions, Cloudflare Workers AI, local Ollama).
+- `POST /v1/decisions` — native OpenAI Decisions `{ model, input, questions: [...] }`, served by
+  an `openai` connection. The model is `openai/gpt-6-luna` (the bare `gpt-6-luna` also works).
+  Answers come back in question order, untouched.
+- `GET /v1/systemone/models` — one catalog of both kinds; each row names its `api_format`
+  (`systemone` or `decisions`). `limit` / `after` page the final list. The
+  `X-OmniRoute-Catalog-Status` header reads `complete`, `partial` or `unavailable` (503).
+
+```bash
+POST /v1/decisions {
+  "model": "openai/gpt-6-luna",
+  "input": "My order arrived broken, I want my money back",
+  "questions": [
+    { "type": "predicate", "name": "refund", "instructions": "Does the user ask for a refund?" },
+    { "type": "choice", "name": "team", "instructions": "Which team handles it?",
+      "choices": [{ "value": "billing" }, { "value": "shipping" }] }
+  ]
+}
+```
+
+On `/v1/decisions` the API key's model allowlist, the `decisions` endpoint category, budget and
+connection scope are checked before any credential is read. The credential is the stored
+`openai` connection inside the key's scope (never an environment key); a connection base URL is
+honoured only when it is an `http(s)` URL without credentials, query or fragment that does not
+point at this OmniRoute. The call leaves through the same guarded transport as the `decision`
+auto-router ([AUTO-COMBO](../routing/AUTO-COMBO.md)): provider outbound guard, no retries, no
+redirects, a 5 s timeout and a 64 KB answer cap (a larger answer is a 502). Request bodies are
+limited to 4 MiB. Each call sends a fresh `Idempotency-Key`. Errors carry the upstream status
+only, never its body, the URL, the key or the prompt.
 
 ### Dedicated Provider Routes
 

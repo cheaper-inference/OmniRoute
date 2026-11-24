@@ -7,7 +7,9 @@ import { useProviderNodeMap, resolveProviderName } from "@/lib/display/useProvid
 import { SortableTableHead } from "@omniroute/ui-kit/data-table-shell";
 import { MetricCard } from "@omniroute/ui-kit/metric-card";
 import { PageHeader } from "@omniroute/ui-kit/page-header";
+import { Progress } from "@omniroute/ui-kit/progress";
 import type { StatProps } from "@omniroute/ui-kit/stat";
+
 import {
   Table,
   TableBody,
@@ -16,7 +18,8 @@ import {
   TableHeader,
   TableRow,
 } from "@omniroute/ui-kit/table";
-import { Card, EmptyState, SegmentedControl, CardSkeleton } from "@/shared/components";
+import { EmptyState, SegmentedControl, CardSkeleton } from "@/shared/components";
+import Card from "@/shared/components/Card";
 import Badge from "@/shared/components/Badge";
 import Button from "@/shared/components/Button";
 import Input from "@/shared/components/Input";
@@ -706,7 +709,9 @@ export default function CostOverviewTab() {
       />
 
       <Card className="p-5">
-        <h3 className="text-sm text-text-muted uppercase mb-4">{t("tokenUsage")}</h3>
+        <h3 className="ci-eyebrow mb-4" data-weight="medium">
+          {t("tokenUsage")}
+        </h3>
         <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
           <CompactMetric
             label={t("totalTokens")}
@@ -739,10 +744,12 @@ export default function CostOverviewTab() {
 
       {summary.totalRequests > 0 && (
         <Card className="p-5">
-          <h3 className="text-sm text-text-muted uppercase mb-4">{t("routingEfficiency")}</h3>
+          <h3 className="ci-eyebrow mb-4" data-weight="medium">
+            {t("routingEfficiency")}
+          </h3>
           <div className="grid grid-cols-2 xl:grid-cols-3 gap-4">
-            <div className="rounded-lg border border-border bg-bg-subtle px-4 py-3">
-              <p className="text-xs uppercase tracking-wide text-text-muted font-semibold">
+            <Card.Section>
+              <p className="ci-eyebrow" data-weight="medium">
                 {t("fallbackCount")}
               </p>
               <p className="text-lg font-semibold text-text-main mt-1">
@@ -753,9 +760,9 @@ export default function CostOverviewTab() {
                   total: new Intl.NumberFormat(locale).format(summary.totalRequests),
                 })}
               </p>
-            </div>
-            <div className="rounded-lg border border-border bg-bg-subtle px-4 py-3">
-              <p className="text-xs uppercase tracking-wide text-text-muted font-semibold">
+            </Card.Section>
+            <Card.Section>
+              <p className="ci-eyebrow" data-weight="medium">
                 {t("fallbackRate")}
               </p>
               <div className="flex items-center gap-2 mt-1">
@@ -782,16 +789,16 @@ export default function CostOverviewTab() {
                   }
                 />
               </div>
-            </div>
-            <div className="rounded-lg border border-border bg-bg-subtle px-4 py-3">
-              <p className="text-xs uppercase tracking-wide text-text-muted font-semibold">
+            </Card.Section>
+            <Card.Section>
+              <p className="ci-eyebrow" data-weight="medium">
                 {t("modelCoverage")}
               </p>
               <p className="text-lg font-semibold text-text-main mt-1">
                 {(summary.requestedModelCoveragePct || 0).toFixed(1)}%
               </p>
               <p className="text-xs text-text-muted mt-1">{t("modelCoverageDesc")}</p>
-            </div>
+            </Card.Section>
           </div>
         </Card>
       )}
@@ -801,7 +808,9 @@ export default function CostOverviewTab() {
           <Card className="p-5">
             <div className="flex items-center gap-2 mb-3">
               <Icon name="trending_up" size={18} className="text-info" />
-              <h3 className="text-sm text-text-muted uppercase">{t("monthlyForecast")}</h3>
+              <h3 className="ci-eyebrow" data-weight="medium">
+                {t("monthlyForecast")}
+              </h3>
             </div>
             <div className="flex items-end gap-3">
               <p className="text-3xl font-semibold text-info">
@@ -825,7 +834,9 @@ export default function CostOverviewTab() {
           <Card className="p-5">
             <div className="flex items-center gap-2 mb-3">
               <Icon name="compare_arrows" size={18} className="text-chart-3" />
-              <h3 className="text-sm text-text-muted uppercase">{t("periodComparison")}</h3>
+              <h3 className="ci-eyebrow" data-weight="medium">
+                {t("periodComparison")}
+              </h3>
             </div>
             <div className="flex items-end gap-3">
               <p
@@ -1071,7 +1082,9 @@ function CostExplorerCard({
         <div>
           <div className="flex items-center gap-2">
             <Icon name="travel_explore" size={20} className="text-success" />
-            <h3 className="text-lg text-text-main">{t("costExplorerTitle")}</h3>
+            <h3 className="ci-heading" data-size="lg">
+              {t("costExplorerTitle")}
+            </h3>
           </div>
           <p className="text-sm text-text-muted mt-1">{t("costExplorerDescription")}</p>
         </div>
@@ -1097,20 +1110,18 @@ function CostExplorerCard({
       </div>
 
       {rows.length === 0 ? (
-        <div className="rounded-xl border border-border bg-bg-subtle p-6">
-          <EmptyState
-            icon="manage_search"
-            title={t("noMatchingCostRows")}
-            description={t("noMatchingCostRowsDescription")}
-          />
-        </div>
+        <EmptyState
+          icon="manage_search"
+          title={t("noMatchingCostRows")}
+          description={t("noMatchingCostRowsDescription")}
+        />
       ) : (
         <>
           <Table
             scrollbarLabel={t("costExplorerTitle")}
             scrollLabel={t("costExplorerTitle")}
             className="min-w-205"
-            containerClassName="rounded-none border-0"
+            variant="plain"
           >
             <TableHeader>
               <TableRow>
@@ -1131,7 +1142,7 @@ function CostExplorerCard({
             <TableBody>
               {rows.map((row) => (
                 <TableRow key={row.id}>
-                  <TableCell className="pr-4">
+                  <TableCell>
                     <div className="flex flex-col">
                       <span className="font-medium text-text-main">{row.name}</span>
                       {row.detail ? (
@@ -1141,36 +1152,31 @@ function CostExplorerCard({
                       ) : null}
                     </div>
                   </TableCell>
-                  <TableCell className="text-right font-mono text-text-muted">
+                  <TableCell numeric className="text-text-muted">
                     {formatCost(row.cost)}
                   </TableCell>
-                  <TableCell className="text-right font-mono text-text-muted">
+                  <TableCell numeric className="text-text-muted">
                     {numberFormatter.format(row.requests)}
                   </TableCell>
-                  <TableCell className="text-right font-mono text-text-muted">
+                  <TableCell numeric className="text-text-muted">
                     {compactFormatter.format(row.totalTokens)}
                   </TableCell>
-                  <TableCell className="text-right font-mono text-text-muted">
+                  <TableCell numeric className="text-text-muted">
                     {row.avgCostPerRequest > 0
                       ? currencyFormatter.format(row.avgCostPerRequest)
                       : "—"}
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell numeric>
                     <div className="flex items-center justify-end gap-2">
-                      <div
-                        role="progressbar"
+                      <Progress
+                        value={row.sharePct}
+                        size="sm"
+                        tone="success"
+                        animate={false}
                         aria-label={row.name}
-                        aria-valuemin={0}
-                        aria-valuemax={100}
-                        aria-valuenow={Math.min(Math.max(row.sharePct, 0), 100)}
                         aria-valuetext={`${row.sharePct.toFixed(1)}%`}
-                        className="h-1.5 w-16 overflow-hidden rounded-full bg-border/60"
-                      >
-                        <div
-                          className="h-full rounded-full bg-success"
-                          style={{ width: `${Math.min(Math.max(row.sharePct, 0), 100)}%` }}
-                        />
-                      </div>
+                        className="w-16"
+                      />
                       <span className="w-12 font-mono text-text-muted">
                         {row.sharePct.toFixed(1)}%
                       </span>
@@ -1189,10 +1195,12 @@ function CostExplorerCard({
 
 function CompactMetric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg border border-border bg-bg-subtle px-4 py-3">
-      <p className="text-xs uppercase tracking-wide text-text-muted font-semibold">{label}</p>
+    <Card.Section>
+      <p className="ci-eyebrow" data-weight="medium">
+        {label}
+      </p>
       <p className="text-lg font-semibold text-text-main mt-1">{value}</p>
-    </div>
+    </Card.Section>
   );
 }
 
@@ -1213,7 +1221,9 @@ function ActivityHeatmap({
 }) {
   return (
     <Card className="p-5">
-      <h3 className="text-sm text-text-muted uppercase mb-4">{title}</h3>
+      <h3 className="ci-eyebrow mb-4" data-weight="medium">
+        {title}
+      </h3>
       <ActivityCalendar
         ariaLabel={title}
         activityMap={activityMap}
@@ -1264,15 +1274,14 @@ function CostBreakdownTable({
 
   return (
     <Card className="p-5">
-      <h3 className="text-sm text-text-muted uppercase mb-4">{title}</h3>
-      <Table scrollbarLabel={title} scrollLabel={title} containerClassName="rounded-none border-0">
+      <h3 className="ci-eyebrow mb-4" data-weight="medium">
+        {title}
+      </h3>
+      <Table scrollbarLabel={title} scrollLabel={title} variant="plain">
         <TableHeader>
           <TableRow>
             {columns.map((column) => (
-              <TableHead
-                key={column.key}
-                className={column.align === "right" ? "text-right" : "text-left"}
-              >
+              <TableHead key={column.key} numeric={column.align === "right"}>
                 {column.label}
               </TableHead>
             ))}
@@ -1284,10 +1293,11 @@ function CostBreakdownTable({
               {columns.map((column) => (
                 <TableCell
                   key={column.key}
+                  numeric={column.align === "right"}
                   className={
                     column.align === "right"
-                      ? "text-right font-mono text-text-muted"
-                      : "max-w-50 truncate text-left text-text-main"
+                      ? "text-text-muted"
+                      : "max-w-50 truncate text-text-main"
                   }
                 >
                   {formatValue(row[column.key], column.format)}

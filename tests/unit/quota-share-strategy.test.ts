@@ -29,7 +29,11 @@ import {
   _clearInflightForTest,
   DEFAULT_LEASE_MS,
 } from "../../open-sse/services/combo/quotaShareInflight.ts";
-import { recordUsage, _clearBucketsForTest } from "../../src/lib/quota/accountBuckets.ts";
+import {
+  recordUsage,
+  updateAccountBuckets,
+  _clearBucketsForTest,
+} from "../../src/lib/quota/accountBuckets.ts";
 import { QUOTA_SHARE_STRATEGY } from "../../src/lib/quota/quotaCombos.ts";
 import { INTERNAL_ROUTING_STRATEGY_VALUES } from "../../src/shared/constants/routingStrategies.ts";
 import type { ResolvedComboTarget } from "../../open-sse/services/combo/types.ts";
@@ -40,6 +44,28 @@ import type { ResolvedComboTarget } from "../../open-sse/services/combo/types.ts
 
 const NOW = Date.UTC(2026, 5, 24, 12, 0, 0); // 2026-06-24T12:00:00.000Z
 const RESET_AT = new Date(NOW + 3_600_000).toISOString(); // +1h (window still open)
+
+const FABLE = "claude/claude-fable-5-1";
+const SONNET = "claude/claude-sonnet-5";
+function exhaustFableWindow(connectionId: string): void {
+  const window = {
+    remainingPercentage: 0,
+    resetAt: new Date(NOW + 3 * 86_400_000).toISOString(),
+    claudeQuota: {
+      kind: "weekly_scoped",
+      active: true,
+      severity: "critical",
+      scopeKey: "model:fable",
+      modelId: "claude-fable-5-1",
+      modelDisplayName: "Fable",
+    },
+  };
+  updateAccountBuckets(
+    connectionId,
+    { quotas: {}, modelQuotas: { "weekly fable (7d)": window } } as never,
+    NOW
+  );
+}
 
 function makeTarget(
   executionKey: string,
@@ -162,7 +188,7 @@ describe("gating: per-model bucket saturation", () => {
     recordUsage("conn-sat", "5h", 100, RESET_AT, NOW);
 
     const targets = [makeTarget("ek-sat", "conn-sat"), makeTarget("ek-ok", "conn-ok")];
-    const result = selectQuotaShareTarget(targets, "combo-5h", "anthropic/claude-sonnet-4-5", NOW);
+    const result = selectQuotaShareTarget(targets, "combo-5h", NOW);
 
     assert.ok(result.target !== null, "must return a target");
     assert.equal(result.target.executionKey, "ek-ok", "non-saturated target must be selected");
@@ -177,37 +203,45 @@ describe("gating: per-model bucket saturation", () => {
     recordUsage("conn-7d", "7d", 100, RESET_AT, NOW);
     const targets = [makeTarget("ek-7d", "conn-7d"), makeTarget("ek-clean", "conn-clean")];
 
-    const result = selectQuotaShareTarget(targets, "combo-7d", "anthropic/claude-sonnet-4-5", NOW);
+    const result = selectQuotaShareTarget(targets, "combo-7d", NOW);
     assert.equal(result.target?.executionKey, "ek-clean");
   });
 
-  test("saturated per-model 7d window for the requested model → deprioritized", () => {
-    recordUsage("conn-pm", "7d:claude-sonnet-4-5", 100, RESET_AT, NOW);
+  test("exhausted model window for the target's own model → deprioritized, not dropped", () => {
+    exhaustFableWindow("conn-pm");
     const targets = [
-      makeTarget("ek-pm", "conn-pm", 100, "anthropic/claude-sonnet-4-5"),
-      makeTarget("ek-other", "conn-other", 100, "anthropic/claude-sonnet-4-5"),
+      makeTarget("ek-pm", "conn-pm", 100, FABLE),
+      makeTarget("ek-other", "conn-other", 100, FABLE),
     ];
-
-    const result = selectQuotaShareTarget(targets, "combo-pm", "anthropic/claude-sonnet-4-5", NOW);
-    assert.equal(result.target?.executionKey, "ek-other");
+    const result = selectQuotaShareTarget(targets, "combo-pm", NOW);
+    assert.deepEqual(
+      result.orderedTargets.map((t) => t.executionKey),
+      ["ek-other", "ek-pm"]
+    );
   });
 
-  test("per-model saturation for a DIFFERENT model does NOT deprioritize", () => {
-    // conn-x is saturated only on 7d:claude-opus-4, but the request is for sonnet.
-    recordUsage("conn-x", "7d:claude-opus-4", 100, RESET_AT, NOW);
-    const targets = [makeTarget("ek-x", "conn-x", 100, "anthropic/claude-sonnet-4-5")];
+  test("model window exhausted for a DIFFERENT model does NOT deprioritize", () => {
+    exhaustFableWindow("conn-x");
+    const targets = [
+      makeTarget("ek-x", "conn-x", 100, SONNET),
+      makeTarget("ek-y", "conn-y", 100, SONNET),
+    ];
+    const result = selectQuotaShareTarget(targets, "combo-other-model", NOW);
+    assert.equal(result.target?.executionKey, "ek-x", "an unrelated model window must not gate");
+  });
 
-    const result = selectQuotaShareTarget(
-      targets,
-      "combo-other-model",
-      "anthropic/claude-sonnet-4-5",
-      NOW
-    );
-    assert.equal(
-      result.target?.executionKey,
-      "ek-x",
-      "must not be gated by an unrelated model window"
-    );
+  test("every target's model window exhausted → all eligible again (fail-open)", () => {
+    exhaustFableWindow("conn-1");
+    exhaustFableWindow("conn-2");
+    const targets = [
+      makeTarget("ek-1", "conn-1", 100, FABLE),
+      makeTarget("ek-2", "conn-2", 100, FABLE),
+    ];
+    const result = selectQuotaShareTarget(targets, "combo-mw-all", NOW);
+    assert.equal(result.orderedTargets.length, 2);
+    assert.equal(result.target?.executionKey, "ek-1", "normal order is kept");
+    const solo = selectQuotaShareTarget([targets[0]], "combo-mw-solo", NOW);
+    assert.equal(solo.target?.executionKey, "ek-1", "a single-account pool still dispatches");
   });
 
   test("fail-open: all targets saturated → all eligible again, still returns a target", () => {
@@ -215,25 +249,20 @@ describe("gating: per-model bucket saturation", () => {
     recordUsage("conn-2", "5h", 100, RESET_AT, NOW);
     const targets = [makeTarget("ek-1", "conn-1"), makeTarget("ek-2", "conn-2")];
 
-    const result = selectQuotaShareTarget(targets, "combo-fo", "anthropic/claude-sonnet-4-5", NOW);
+    const result = selectQuotaShareTarget(targets, "combo-fo", NOW);
     assert.ok(result.target !== null, "must not return null when everything is saturated");
     assert.equal(result.orderedTargets.length, 2, "both targets remain dispatchable");
   });
 
   test("empty targets → returns null (fail-open, no crash)", () => {
-    const result = selectQuotaShareTarget([], "combo-empty", "anthropic/claude-sonnet-4-5", NOW);
+    const result = selectQuotaShareTarget([], "combo-empty", NOW);
     assert.equal(result.target, null);
     assert.deepEqual(result.orderedTargets, []);
   });
 
   test("no buckets recorded at all → fail-open, first/healthy target selected", () => {
     const targets = [makeTarget("ek-a", "conn-a"), makeTarget("ek-b", "conn-b")];
-    const result = selectQuotaShareTarget(
-      targets,
-      "combo-nodata",
-      "anthropic/claude-sonnet-4-5",
-      NOW
-    );
+    const result = selectQuotaShareTarget(targets, "combo-nodata", NOW);
     assert.ok(result.target !== null);
     assert.equal(result.orderedTargets.length, 2);
   });
@@ -246,8 +275,8 @@ describe("DRR: deficit round robin", () => {
     const t1 = makeTarget("ek-1", "conn-1", 100);
     const t2 = makeTarget("ek-2", "conn-2", 100);
 
-    const r1 = selectQuotaShareTarget([t1, t2], "combo-drr", "anthropic/claude-sonnet-4-5", NOW);
-    const r2 = selectQuotaShareTarget([t1, t2], "combo-drr", "anthropic/claude-sonnet-4-5", NOW);
+    const r1 = selectQuotaShareTarget([t1, t2], "combo-drr", NOW);
+    const r2 = selectQuotaShareTarget([t1, t2], "combo-drr", NOW);
 
     const selected = [r1.target?.executionKey, r2.target?.executionKey];
     assert.ok(selected.includes("ek-1"), "ek-1 must be selected at some point");
@@ -260,12 +289,7 @@ describe("DRR: deficit round robin", () => {
 
     const counts: Record<string, number> = { "ek-heavy": 0, "ek-light": 0 };
     for (let i = 0; i < 30; i++) {
-      const r = selectQuotaShareTarget(
-        [t1, t2],
-        "combo-weighted",
-        "anthropic/claude-sonnet-4-5",
-        NOW
-      );
+      const r = selectQuotaShareTarget([t1, t2], "combo-weighted", NOW);
       if (r.target) counts[r.target.executionKey]++;
       // Simulate the request settling (as a real caller's finally handler would),
       // so the P2C in-flight tie-break sees equal load and the DRR weighting shows.
@@ -291,12 +315,7 @@ describe("DRR: deficit round robin", () => {
 
     const selected: Array<string | undefined> = [];
     for (let i = 0; i < 4; i++) {
-      const r = selectQuotaShareTarget(
-        [t1, t2],
-        "combo-unweighted",
-        "anthropic/claude-sonnet-4-5",
-        NOW
-      );
+      const r = selectQuotaShareTarget([t1, t2], "combo-unweighted", NOW);
       selected.push(r.target?.executionKey);
       r.decrementInflight();
     }
@@ -313,12 +332,7 @@ describe("DRR: deficit round robin", () => {
     const disabled = makeTarget("ek-off", "conn-off", 0);
 
     for (let i = 0; i < 4; i++) {
-      const r = selectQuotaShareTarget(
-        [disabled, weighted],
-        "combo-disabled",
-        "anthropic/claude-sonnet-4-5",
-        NOW
-      );
+      const r = selectQuotaShareTarget([disabled, weighted], "combo-disabled", NOW);
       assert.equal(r.target?.executionKey, "ek-on");
       r.decrementInflight();
     }
@@ -326,7 +340,7 @@ describe("DRR: deficit round robin", () => {
 
   test("DRR state is isolated per comboName", () => {
     const t = makeTarget("ek-shared", "conn-shared", 100);
-    selectQuotaShareTarget([t], "combo-A", "anthropic/claude-sonnet-4-5", NOW);
+    selectQuotaShareTarget([t], "combo-A", NOW);
 
     const deficitA = _getDrrDeficitForTest("combo-A", "ek-shared");
     const deficitB = _getDrrDeficitForTest("combo-B", "ek-shared");
@@ -336,7 +350,7 @@ describe("DRR: deficit round robin", () => {
 
   test("single eligible target is returned unchanged", () => {
     const t = makeTarget("ek-solo", "conn-solo", 100);
-    const result = selectQuotaShareTarget([t], "combo-solo", "anthropic/claude-sonnet-4-5", NOW);
+    const result = selectQuotaShareTarget([t], "combo-solo", NOW);
     assert.equal(result.target?.executionKey, "ek-solo");
     assert.equal(result.orderedTargets.length, 1);
   });
@@ -353,12 +367,7 @@ describe("P2C in-flight", () => {
     incrementInflight("conn-busy", DEFAULT_LEASE_MS, NOW);
     incrementInflight("conn-busy", DEFAULT_LEASE_MS, NOW);
 
-    const result = selectQuotaShareTarget(
-      [t1, t2],
-      "combo-p2c",
-      "anthropic/claude-sonnet-4-5",
-      NOW
-    );
+    const result = selectQuotaShareTarget([t1, t2], "combo-p2c", NOW);
     assert.equal(
       result.target?.executionKey,
       "ek-free",
@@ -368,7 +377,7 @@ describe("P2C in-flight", () => {
 
   test("decrementInflight() releases the in-flight load", () => {
     const t = makeTarget("ek-dec", "conn-dec", 100);
-    const result = selectQuotaShareTarget([t], "combo-dec", "anthropic/claude-sonnet-4-5", NOW);
+    const result = selectQuotaShareTarget([t], "combo-dec", NOW);
     assert.equal(getInflight("conn-dec", NOW), 1, "in-flight should be 1 after a dispatch");
     result.decrementInflight();
     assert.equal(getInflight("conn-dec", NOW), 0, "in-flight should be 0 after the decrement");
@@ -376,7 +385,7 @@ describe("P2C in-flight", () => {
 
   test("decrementInflight() is idempotent (safe to call more than once)", () => {
     const t = makeTarget("ek-idem", "conn-idem", 100);
-    const result = selectQuotaShareTarget([t], "combo-idem", "anthropic/claude-sonnet-4-5", NOW);
+    const result = selectQuotaShareTarget([t], "combo-idem", NOW);
     result.decrementInflight();
     result.decrementInflight(); // must not go negative or throw
     assert.equal(getInflight("conn-idem", NOW), 0);
@@ -384,7 +393,7 @@ describe("P2C in-flight", () => {
 
   test("TTL releases in-flight automatically when decrement is never called (abort fallback)", () => {
     const t = makeTarget("ek-ttl", "conn-ttl", 100);
-    const result = selectQuotaShareTarget([t], "combo-ttl", "anthropic/claude-sonnet-4-5", NOW);
+    const result = selectQuotaShareTarget([t], "combo-ttl", NOW);
     // Simulate an aborted request: do NOT call result.decrementInflight().
     assert.equal(getInflight("conn-ttl", NOW), 1);
     assert.equal(
@@ -421,13 +430,9 @@ describe("gating: per-connection maxConcurrent", () => {
       ["conn-roomy", 10],
     ]);
 
-    const gated = selectQuotaShareTarget(
-      targets,
-      "combo-cap-lowest",
-      "anthropic/claude-sonnet-4-5",
-      NOW,
-      { maxConcurrentByConnection }
-    );
+    const gated = selectQuotaShareTarget(targets, "combo-cap-lowest", NOW, {
+      maxConcurrentByConnection,
+    });
     assert.equal(
       gated.target?.executionKey,
       "ek-roomy",
@@ -446,13 +451,9 @@ describe("gating: per-connection maxConcurrent", () => {
     const targets = [makeTarget("ek-a", "conn-a")];
     const maxConcurrentByConnection = new Map<string, number | null>([["conn-a", 3]]);
 
-    const result = selectQuotaShareTarget(
-      targets,
-      "combo-below",
-      "anthropic/claude-sonnet-4-5",
-      NOW,
-      { maxConcurrentByConnection }
-    );
+    const result = selectQuotaShareTarget(targets, "combo-below", NOW, {
+      maxConcurrentByConnection,
+    });
     assert.equal(result.target?.executionKey, "ek-a", "below-cap connection must remain selected");
   });
 
@@ -465,13 +466,9 @@ describe("gating: per-connection maxConcurrent", () => {
       ["conn-2", 1],
     ]);
 
-    const result = selectQuotaShareTarget(
-      targets,
-      "combo-allcap",
-      "anthropic/claude-sonnet-4-5",
-      NOW,
-      { maxConcurrentByConnection }
-    );
+    const result = selectQuotaShareTarget(targets, "combo-allcap", NOW, {
+      maxConcurrentByConnection,
+    });
     assert.ok(result.target !== null, "must never hard-block: a target is still returned");
     assert.equal(result.orderedTargets.length, 2, "both targets remain dispatchable");
   });
@@ -493,13 +490,9 @@ describe("gating: per-connection maxConcurrent", () => {
       ["conn-free", 50],
     ]);
 
-    const result = selectQuotaShareTarget(
-      targets,
-      "combo-cap-vs-load",
-      "anthropic/claude-sonnet-4-5",
-      NOW,
-      { maxConcurrentByConnection }
-    );
+    const result = selectQuotaShareTarget(targets, "combo-cap-vs-load", NOW, {
+      maxConcurrentByConnection,
+    });
     assert.equal(
       result.target?.executionKey,
       "ek-free",
@@ -521,13 +514,9 @@ describe("gating: per-connection maxConcurrent", () => {
       ["conn-light", 10],
     ]);
 
-    const result = selectQuotaShareTarget(
-      targets,
-      "combo-nolimit",
-      "anthropic/claude-sonnet-4-5",
-      NOW,
-      { maxConcurrentByConnection }
-    );
+    const result = selectQuotaShareTarget(targets, "combo-nolimit", NOW, {
+      maxConcurrentByConnection,
+    });
     assert.ok(result.target !== null);
     assert.equal(result.orderedTargets.length, 2, "no connection gated when cap is null");
 
@@ -538,7 +527,6 @@ describe("gating: per-connection maxConcurrent", () => {
     const zeroResult = selectQuotaShareTarget(
       [makeTarget("ek-zero", "conn-zero")],
       "combo-zero",
-      "anthropic/claude-sonnet-4-5",
       NOW,
       { maxConcurrentByConnection: new Map<string, number | null>([["conn-zero", 0]]) }
     );
@@ -550,12 +538,7 @@ describe("gating: per-connection maxConcurrent", () => {
     incrementInflight("conn-x", DEFAULT_LEASE_MS, NOW);
     incrementInflight("conn-x", DEFAULT_LEASE_MS, NOW);
     const targets = [makeTarget("ek-x", "conn-x")];
-    const result = selectQuotaShareTarget(
-      targets,
-      "combo-compat",
-      "anthropic/claude-sonnet-4-5",
-      NOW
-    );
+    const result = selectQuotaShareTarget(targets, "combo-compat", NOW);
     assert.equal(result.target?.executionKey, "ek-x");
     assert.equal(result.orderedTargets.length, 1);
   });

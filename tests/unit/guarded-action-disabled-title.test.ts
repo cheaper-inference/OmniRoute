@@ -11,15 +11,20 @@ import { fileURLToPath } from "node:url";
 //   <GuardedAction reason={…}> (src/shared/components/GuardedAction.tsx), which keeps the button
 //   focusable, swallows the click and shows the reason.
 // - A title that is the button's NAME (Refresh, Move up, Test all…) stays a title. The Button
-//   adapter (src/shared/components/Button.tsx) now shows it through the Tooltip adapter while
-//   the button is disabled or loading, and keeps the native title while it is enabled
+//   adapter (src/shared/components/Button.tsx) hands it to the kit as `tooltip`
+//   (keak-ai/cheaper-inference-ui-kit#231): the kit tooltip shows it on hover and on keyboard
+//   focus, also while the button is disabled or loading
 //   (tests/unit/ui/adapters/button-disabled-title-tooltip.test.tsx).
 //
 // The guard: a <Button> that is `disabled` and carries a `title` fails when the title can only
 // be a reason — the button is always disabled, or the title changes with state (ternary, `&&`,
-// `||`, `undefined`). A constant title is the button's name and passes: it now shows in both
+// `||`, `undefined`). A constant title is the button's name and passes: it shows in both
 // states. A state-dependent title that is still a name (a label that follows the state) is
-// listed in LABEL_TITLES, each with why; the adapter shows it while disabled too.
+// listed in LABEL_TITLES, each with why; the kit tooltip shows it while disabled too.
+//
+// An inactive Button with a title is `aria-disabled="true"`, not `disabled` (that is what keeps
+// it hoverable and focusable), so `:disabled` and Tailwind's `disabled:` no longer match it:
+// the third test keeps those out of titled Buttons.
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 
@@ -86,8 +91,8 @@ function attr(tag: string, name: string): string | null {
   return tag.slice(i, j + 1);
 }
 
-// Disabled buttons whose state-dependent title is still a name, not a reason. The Button
-// adapter shows it in a tooltip while the button is disabled, so it stays visible.
+// Disabled buttons whose state-dependent title is still a name, not a reason. The kit tooltip
+// shows it while the button is disabled, so it stays visible.
 const LABEL_TITLES: Array<{ file: string; marker: string; reason: string }> = [
   {
     file: "src/app/(dashboard)/dashboard/models/ModelCatalogTable.tsx",
@@ -222,4 +227,33 @@ test("the reasons that used to hide in a disabled title are GuardedAction reason
       assert.ok(!title.includes(key), `${file}:${g.line}: ${key} is still a title`);
     }
   }
+});
+
+test("a titled Button styles its inactive state with aria-disabled, not :disabled", () => {
+  // `disabled:opacity-40` on a titled Button is dead: the button never matches `:disabled`.
+  const offenders: string[] = [];
+  for (const file of SOURCES) {
+    const source = fs.readFileSync(file, "utf8");
+    if (!source.includes("<Button")) continue;
+    for (const { line, tag } of openingTags(source, "Button")) {
+      if (!attr(tag, "title")) continue;
+      if (/(^|[\s"'`:])disabled:/.test(tag)) offenders.push(`${rel(file)}:${line}`);
+    }
+  }
+  assert.deepEqual(
+    offenders,
+    [],
+    "a Button with a title is aria-disabled while inactive: use Tailwind's aria-disabled: variant"
+  );
+});
+
+test("the dashboard shell shares one kit TooltipProvider", () => {
+  // One provider for every kit tooltip in the dashboard: after one closes, the next opens
+  // without delay, so moving along a row of icon buttons shows each name at once.
+  const source = fs.readFileSync(
+    path.join(ROOT, "src/shared/components/layouts/DashboardLayout.tsx"),
+    "utf8"
+  );
+  assert.match(source, /import \{ TooltipProvider \} from "@omniroute\/ui-kit\/tooltip";/);
+  assert.match(source, /<TooltipProvider>\s*<DashboardShell[\s\S]*<\/TooltipProvider>/);
 });

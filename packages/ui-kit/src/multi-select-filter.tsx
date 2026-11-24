@@ -6,6 +6,7 @@ import type { ReactNode } from "react";
 import { Button, type ButtonSize } from "./button";
 import { Checkbox } from "./checkbox";
 import { Input } from "./input";
+import { foldSearchText } from "./lib/search-fold";
 import { cn } from "./lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 
@@ -115,12 +116,12 @@ export function filterMultiSelectFilterOptions(
   options: readonly MultiSelectFilterOption[],
   query: string,
 ): MultiSelectFilterOption[] {
-  const wanted = query.trim().toLocaleLowerCase();
+  const wanted = foldSearchText(query.trim());
   if (!wanted) return [...options];
   return options.filter((option) =>
     [option.label, option.value, ...(option.keywords ?? [])]
       .filter((candidate): candidate is string => Boolean(candidate))
-      .some((candidate) => candidate.toLocaleLowerCase().includes(wanted)),
+      .some((candidate) => foldSearchText(candidate).includes(wanted)),
   );
 }
 

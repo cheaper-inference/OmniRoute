@@ -365,11 +365,6 @@ export async function runRenderhourJob({
   return pollRenderhourJob({ baseUrl, token, job, timeoutMs, pollIntervalMs, log, signal });
 }
 
-/** A positive number from the request (e.g. `timeout_ms`), else the fallback. */
-export function renderhourNumber(value: unknown, fallback: number): number {
-  return typeof value === "number" && Number.isFinite(value) && value > 0 ? value : fallback;
-}
-
 /** Turns a thrown upload / network error into the handlers' failure shape. */
 export function renderhourFailure(err: unknown): { status: number; error: string } {
   if (err instanceof RenderhourRequestError) {

@@ -8,6 +8,7 @@ import {
   useState,
   useEffect,
   useCallback,
+  useId,
   useMemo,
   useRef,
   forwardRef,
@@ -33,7 +34,6 @@ import Button from "./Button";
 import ColumnToggle from "./ColumnToggle";
 import EmptyState from "./EmptyState";
 import Input from "./Input";
-import InteractiveTableRow from "./InteractiveTableRow";
 import Select from "./Select";
 import RequestLoggerDetail from "./RequestLoggerDetail";
 import RequestLogTokens from "./RequestLogTokens";
@@ -182,6 +182,7 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
     const [selectedApiKey, setSelectedApiKey] = useState("");
     const [sortBy, setSortBy] = useState("newest");
     const [selectedLog, setSelectedLog] = useState(null);
+    const rowKeysHintId = useId();
     const [relatedRows, setRelatedRows] = useState<typeof logs>([]);
     const [correlationIdFilter, setCorrelationIdFilter] = useState(
       () => initialCorrelationId ?? ""
@@ -1082,7 +1083,7 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
             >
               <Icon name="add" size={14} />
             </Button>
-            <span className="text-[10px] text-text-muted">s</span>
+            <span className="text-3xs text-text-muted">s</span>
 
             {/* Refresh */}
             <Button
@@ -1315,6 +1316,10 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
               ref={tableRef}
               scrollbarLabel={t("tableLabel")}
               scrollLabel={t("tableLabel")}
+              // One tab stop for the rows; the arrow keys move between them (the hint below says
+              // so). The "load more" row has no onActivate, so its button stays a normal stop.
+              rowFocus="roving"
+              aria-describedby={rowKeysHintId}
               // The table container is the scroll viewport: infinite scroll, the sticky header
               // and the user's resize all act on it (opaque bg-surface, #4233).
               containerClassName="min-h-[460px] resize-y overflow-auto rounded-none border-0 bg-surface"
@@ -1385,9 +1390,10 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
                   const isHoveredGroup = !!hoveredCid && log.correlationId === hoveredCid;
 
                   return (
-                    <InteractiveTableRow
+                    <TableRow
                       key={log.id}
                       onActivate={() => openDetail(log)}
+                      selected={selectedLog?.id === log.id}
                       data-cid={log.correlationId || undefined}
                       onMouseEnter={() => log.correlationId && setHoveredCid(log.correlationId)}
                       onMouseLeave={() => setHoveredCid(null)}
@@ -1427,14 +1433,14 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
                               </Badge>
                               {upstreamHttp?.send?.status &&
                                 upstreamHttp?.send?.status !== log.status && (
-                                  <span className="text-[10px] text-text-muted">
+                                  <span className="text-3xs text-text-muted">
                                     {t("upstreamStatus", {
                                       status: upstreamHttp?.send?.status,
                                     })}
                                   </span>
                                 )}
                               {upstreamHttp?.role === "logical" && upstreamHttp.omitted > 0 && (
-                                <span className="text-[10px] text-text-muted">
+                                <span className="text-3xs text-text-muted">
                                   {t("omittedHttpAttempts", { count: upstreamHttp.omitted })}
                                 </span>
                               )}
@@ -1443,7 +1449,7 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
                                 !log.isRetry &&
                                 log.status >= 400 && (
                                   <span
-                                    className="text-[11px] text-success"
+                                    className="text-2xs text-success"
                                     title={t("status.recoveredByRetry")}
                                   >
                                     ✓
@@ -1453,7 +1459,7 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
                                 <Button
                                   variant="ghost"
                                   size="icon-sm"
-                                  className="ml-0.5 size-5 min-h-5 text-[11px] text-warning"
+                                  className="ml-0.5 size-5 min-h-5 text-2xs text-warning"
                                   title={t("status.goToParent")}
                                   aria-label={t("status.goToParent")}
                                   onClick={(e) => {
@@ -1474,13 +1480,13 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
                       {visibleColumns.cacheSource && (
                         <TableCell className="px-3 py-2">
                           {isActive ? (
-                            <span className="text-[10px] text-text-muted">—</span>
+                            <span className="text-3xs text-text-muted">—</span>
                           ) : (
                             <>
                               <Badge
                                 size="sm"
                                 variant={cacheSourceMeta.variant}
-                                className="text-[9px] font-semibold uppercase"
+                                className="text-3xs font-semibold uppercase"
                                 title={
                                   isSemanticCache ? t("semanticCacheHit") : t("upstreamResponse")
                                 }
@@ -1501,12 +1507,12 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
                         </TableCell>
                       )}
                       {visibleColumns.model && (
-                        <TableCell className="px-3 py-2 font-mono text-[11px] text-primary">
+                        <TableCell className="px-3 py-2 font-mono text-2xs text-primary">
                           <div className="flex items-center gap-1.5">
                             <span>{log.model}</span>
                             {!isActive && log.groupStatus === "healed" && !log.isRetry && (
                               <span
-                                className="inline-flex items-center gap-0.5 rounded border border-success/25 bg-success/15 px-1 py-0 text-[8px] font-semibold text-success"
+                                className="inline-flex items-center gap-0.5 rounded border border-success/25 bg-success/15 px-1 py-0 text-3xs font-semibold text-success"
                                 title={t("status.recoveredAttemptsTitle", { count: log.groupSize })}
                               >
                                 {t("status.healed")}
@@ -1514,7 +1520,7 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
                             )}
                             {!isActive && log.groupStatus === "failed" && !log.isRetry && (
                               <span
-                                className="inline-flex items-center gap-0.5 rounded border border-error/25 bg-error/15 px-1 py-0 text-[8px] font-semibold text-error"
+                                className="inline-flex items-center gap-0.5 rounded border border-error/25 bg-error/15 px-1 py-0 text-3xs font-semibold text-error"
                                 title={t("status.latestOutcomeFailed")}
                               >
                                 {t("status.failed")}
@@ -1522,7 +1528,7 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
                             )}
                             {log.modelPinned && (
                               <span
-                                className="inline-flex items-center gap-0.5 rounded border border-chart-3/25 bg-chart-3/15 px-1 py-0 text-[8px] font-semibold text-chart-3-ink"
+                                className="inline-flex items-center gap-0.5 rounded border border-chart-3/25 bg-chart-3/15 px-1 py-0 text-3xs font-semibold text-chart-3-ink"
                                 title={t("status.pinnedTitle")}
                               >
                                 {t("status.pinned")}
@@ -1531,7 +1537,7 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
                           </div>
                           {log.correlationId && !log.isRetry && log.groupSize > 1 && (
                             <div
-                              className="max-w-[120px] truncate text-[9px] font-normal text-text-muted"
+                              className="max-w-[120px] truncate text-3xs font-normal text-text-muted"
                               title={log.correlationId}
                             >
                               {log.correlationId.slice(0, 12)}… · {log.groupSize} {t("attempts")}
@@ -1539,7 +1545,7 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
                           )}
                           {log.correlationId && !log.isRetry && log.groupSize <= 1 && (
                             <div
-                              className="max-w-[120px] truncate text-[9px] font-normal text-text-muted"
+                              className="max-w-[120px] truncate text-3xs font-normal text-text-muted"
                               title={log.correlationId}
                             >
                               {log.correlationId.slice(0, 12)}…
@@ -1547,7 +1553,7 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
                           )}
                           {log.correlationId && log.isRetry && (
                             <div
-                              className="max-w-[120px] truncate text-[9px] font-normal text-warning/70"
+                              className="max-w-[120px] truncate text-3xs font-normal text-warning/70"
                               title={log.correlationId}
                             >
                               {log.correlationId.slice(0, 12)}…
@@ -1556,7 +1562,7 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
                         </TableCell>
                       )}
                       {visibleColumns.requestedModel && (
-                        <TableCell className="px-3 py-2 font-mono text-[11px]">
+                        <TableCell className="px-3 py-2 font-mono text-2xs">
                           {log.requestedModel ? (
                             <span
                               className={
@@ -1576,7 +1582,7 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
                               {log.requestedModel}
                             </span>
                           ) : (
-                            <span className="text-[10px] text-text-muted">—</span>
+                            <span className="text-3xs text-text-muted">—</span>
                           )}
                         </TableCell>
                       )}
@@ -1584,7 +1590,7 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
                         <TableCell className="px-3 py-2">
                           {/* Provider identity tone (kit chart token), not a status tone. */}
                           <span
-                            className="inline-block rounded px-2 py-0.5 text-[9px] font-semibold uppercase"
+                            className="inline-block rounded px-2 py-0.5 text-3xs font-semibold uppercase"
                             style={{
                               backgroundColor: providerColor.bg,
                               color: providerColor.text,
@@ -1597,10 +1603,10 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
                       {visibleColumns.protocol && (
                         <TableCell className="px-3 py-2">
                           {isActive ? (
-                            <span className="text-[10px] text-text-muted">—</span>
+                            <span className="text-3xs text-text-muted">—</span>
                           ) : (
                             <span
-                              className="inline-block rounded px-2 py-0.5 text-[9px] font-semibold uppercase"
+                              className="inline-block rounded px-2 py-0.5 text-3xs font-semibold uppercase"
                               style={
                                 protocol
                                   ? { backgroundColor: protocol.bg, color: protocol.text }
@@ -1626,7 +1632,7 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
                           title={log.apiKeyName || log.apiKeyId || t("noApiKey")}
                         >
                           {isActive ? (
-                            <span className="text-[10px] text-text-muted">—</span>
+                            <span className="text-3xs text-text-muted">—</span>
                           ) : (
                             formatApiKeyLabel(log.apiKeyName, log.apiKeyId)
                           )}
@@ -1635,20 +1641,20 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
                       {visibleColumns.combo && (
                         <TableCell className="px-3 py-2">
                           {isActive ? (
-                            <span className="text-[10px] text-text-muted">—</span>
+                            <span className="text-3xs text-text-muted">—</span>
                           ) : log.comboName ? (
-                            <span className="inline-block rounded-full border border-chart-3/40 bg-chart-3/20 px-2 py-0.5 text-[9px] font-semibold text-chart-3-ink">
+                            <span className="inline-block rounded-full border border-chart-3/40 bg-chart-3/20 px-2 py-0.5 text-3xs font-semibold text-chart-3-ink">
                               {log.comboName}
                             </span>
                           ) : (
-                            <span className="text-[10px] text-text-muted">—</span>
+                            <span className="text-3xs text-text-muted">—</span>
                           )}
                         </TableCell>
                       )}
                       {visibleColumns.tokens && (
                         <TableCell className="whitespace-nowrap px-3 py-2 text-right">
                           {isActive ? (
-                            <span className="text-[10px] text-text-muted">—</span>
+                            <span className="text-3xs text-text-muted">—</span>
                           ) : (
                             <RequestLogTokens log={log} />
                           )}
@@ -1657,7 +1663,7 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
                       {visibleColumns.tps && (
                         <TableCell className="whitespace-nowrap px-3 py-2 text-right font-mono">
                           {isActive ? (
-                            <span className="text-[10px] text-text-muted">—</span>
+                            <span className="text-3xs text-text-muted">—</span>
                           ) : (
                             <RequestLogThroughput log={log} />
                           )}
@@ -1686,7 +1692,7 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
                         </TableCell>
                       )}
                       {visibleColumns.conversation && (
-                        <TableCell className="px-3 py-2 font-mono text-[10px] text-text-muted">
+                        <TableCell className="px-3 py-2 font-mono text-3xs text-text-muted">
                           {log.sessionTag ? (
                             <span title={log.sessionTag}>{log.sessionTag.slice(0, 12)}…</span>
                           ) : (
@@ -1694,7 +1700,7 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
                           )}
                         </TableCell>
                       )}
-                    </InteractiveTableRow>
+                    </TableRow>
                   );
                 })}
               </TableBody>
@@ -1712,7 +1718,12 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
             </Table>
           )}
         </DataTableShell>
-        <div className="text-[10px] text-text-muted italic">
+        {sortedLogs.length > 0 && (
+          <p id={rowKeysHintId} className="text-xs text-text-muted">
+            {tCommon("tableRowKeysHint")}
+          </p>
+        )}
+        <div className="text-3xs text-text-muted italic">
           {t("callLogsInfo", {
             dataDir: "{DATA_DIR}/call_logs/",
             retentionDays: "CALL_LOG_RETENTION_DAYS",

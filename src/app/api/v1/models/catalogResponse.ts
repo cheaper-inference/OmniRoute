@@ -50,10 +50,9 @@ import {
   isDisableThinkingLevelVariantsEnabled,
   isCatalogMirrorRefinementsEnabled,
 } from "@/shared/utils/featureFlags";
-import { extractApiKey } from "@/sse/services/auth";
 import { maybeOmitCatalogModelName, withCatalogDisplayName } from "./catalogHelpers";
 import { applyCatalogPage, catalogJsonResponse, parseCatalogPage } from "./catalogPagination";
-import { isCodexModelCatalogClient } from "./catalogRequest";
+import { extractCatalogApiKey, isCodexModelCatalogClient } from "./catalogRequest";
 import {
   attachCatalogPricing,
   normalizeCatalogEntryPricing,
@@ -65,7 +64,7 @@ type CatalogVariantAuthorizer = (model: Record<string, any>) => boolean | Promis
 async function resolveCatalogVariantAuthorizer(
   request: Request
 ): Promise<CatalogVariantAuthorizer | null> {
-  const apiKey = extractApiKey(request);
+  const apiKey = extractCatalogApiKey(request);
   if (!apiKey) return null;
 
   const { getApiKeyMetadata, isModelAllowedForKey } = await import("@/lib/db/apiKeys");
@@ -414,7 +413,7 @@ export async function finalizeCatalogResponse(
   headers: Record<string, string>,
   enrichmentSnapshot?: CatalogEnrichmentSnapshot
 ): Promise<Response> {
-  const apiKey = extractApiKey(request);
+  const apiKey = extractCatalogApiKey(request);
   if (apiKey) {
     const { getApiKeyMetadata, isModelAllowedForKey } = await import("@/lib/db/apiKeys");
     const keyMeta = await getApiKeyMetadata(apiKey);

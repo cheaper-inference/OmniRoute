@@ -149,7 +149,7 @@ function ModelNode({ data }: { data: ModelNodeData }) {
   const { label, active, color, overflow } = data;
   return (
     <div
-      className="flex items-center gap-1.5 px-2 py-0.5 rounded-full border bg-bg font-mono text-[10px] transition-all duration-300 cursor-pointer max-w-[136px] motion-reduce:[&_.animate-ping]:hidden"
+      className="flex items-center gap-1.5 px-2 py-0.5 rounded-full border bg-bg font-mono text-3xs transition-all duration-300 cursor-pointer max-w-[136px] motion-reduce:[&_.animate-ping]:hidden"
       style={{
         borderColor: active ? color : "var(--color-border)",
         boxShadow: active ? `0 0 10px ${flowColorAlpha(color, 25)}` : "none",
@@ -213,7 +213,7 @@ function RouterNode({ data }: { data: RouterNodeData }) {
       </div>
       <span className="text-sm font-semibold text-primary">OmniRoute</span>
       {data.activeCount > 0 && (
-        <span className="ml-1 px-1.5 py-0.5 rounded-full bg-primary text-accent-foreground text-[10px] font-semibold leading-none">
+        <span className="ml-1 px-1.5 py-0.5 rounded-full bg-primary text-accent-foreground text-3xs font-semibold leading-none">
           {data.activeCount}
         </span>
       )}
@@ -433,7 +433,7 @@ function ModelModeToolbar({
     <div
       role="group"
       aria-label={t("topologyModels")}
-      className="absolute top-2 left-2 z-10 flex items-center gap-1 rounded-md border border-border bg-bg/90 p-1 text-[11px] shadow-sm"
+      className="absolute top-2 left-2 z-10 flex items-center gap-1 rounded-md border border-border bg-bg/90 p-1 text-2xs shadow-sm"
     >
       <span className="px-1 font-semibold text-text-muted">{t("topologyModels")}</span>
       {MODEL_MODES.map((mode) => {

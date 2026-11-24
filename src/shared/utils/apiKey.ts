@@ -5,7 +5,8 @@ if (!process.env.API_KEY_SECRET) {
   console.error("[SECURITY] API_KEY_SECRET is not set. API key CRC validation is disabled.");
 }
 
-function getApiKeySecret(): string {
+/** The server's API-key secret; throws when it is unset or blank. */
+export function getApiKeySecret(): string {
   const secret = process.env.API_KEY_SECRET;
   if (!secret || secret.trim() === "") {
     throw new Error(

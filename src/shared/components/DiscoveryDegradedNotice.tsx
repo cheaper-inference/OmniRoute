@@ -31,7 +31,7 @@ export function DiscoveryDegradedNotice({
       {cause ? (
         <span
           data-testid="discovery-degraded-cause"
-          className="font-mono text-[11px] text-text-muted break-all"
+          className="font-mono text-2xs text-text-muted break-all"
         >
           {cause}
         </span>
