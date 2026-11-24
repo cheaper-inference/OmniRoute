@@ -1,6 +1,5 @@
 import { CORS_HEADERS } from "@/shared/utils/cors";
 import { enforceApiKeyPolicy } from "@/shared/utils/apiKeyPolicy";
-import { isRequireApiKeyEnabled } from "@/shared/utils/featureFlags";
 import { withChatAdmission } from "@/shared/middleware/withChatAdmission";
 import { v1ResponsesInputTokensSchema } from "@/shared/validation/schemas";
 import {
@@ -13,9 +12,7 @@ import {
   tokenizerContextFromBody,
   type TokenizerContext,
 } from "@/shared/utils/tiktokenCounter";
-import { resolveClientApiKey } from "@/sse/services/clientApiKeyResolver";
-import { errorResponse } from "@omniroute/open-sse/utils/error.ts";
-import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
+import { enforceClientApiRouteAuth } from "@/shared/utils/clientApiRouteAuth";
 
 /**
  * POST /v1/responses/input_tokens — local Responses token count.
@@ -178,13 +175,10 @@ async function postHandler(request: Request): Promise<Response> {
   // Preserve the same API-key and model-policy boundary as the catch-all
   // Responses route this static route shadows. Token counting is local, but it
   // must not turn into an unauthenticated model-catalog/policy side channel.
-  const { apiKey, valid: apiKeyValid } = await resolveClientApiKey(request);
-  if (isRequireApiKeyEnabled() && !apiKey) {
-    return errorResponse(HTTP_STATUS.UNAUTHORIZED, "Authentication required");
-  }
-  if (isRequireApiKeyEnabled() && apiKey && !apiKeyValid) {
-    return errorResponse(HTTP_STATUS.UNAUTHORIZED, "Invalid API key");
-  }
+  // A valid key or a signed-in dashboard session passes, as on the catch-all
+  // route (KEA-9515).
+  const authError = await enforceClientApiRouteAuth(request);
+  if (authError) return authError;
 
   const model = record.model ?? "";
   const policy = await enforceApiKeyPolicy(request, model);

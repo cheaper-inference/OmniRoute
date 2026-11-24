@@ -12,3 +12,6 @@ export const WEBHOOK_URL_MAX_LENGTH = 2000;
 
 /** `secret` of POST/PUT /api/webhooks (the HMAC signing key of a custom webhook). */
 export const WEBHOOK_SECRET_MAX_LENGTH = 500;
+
+/** `url` of POST /v1/web/fetch and POST /v1/web/map (Search Tools › Scrape). */
+export const WEB_FETCH_URL_MAX_LENGTH = 2000;
