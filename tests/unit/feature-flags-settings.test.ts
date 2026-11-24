@@ -84,7 +84,8 @@ const {
 // CLAUDE_CODE_LOCAL_{COMMAND_PREFIX,SUGGESTION,FILEPATHS}_ENABLED (Claude Code local helper replies, default off) take it to 134.
 // PROXY_REEGRESS_ON_QUOTA_429 (pool re-send after a per-IP 429, default off) takes it to 135.
 // QUOTA_DAILY_REVALIDATION (#20343, default off) takes it to 136.
-const EXPECTED_FEATURE_FLAG_COUNT = 136;
+// CODEBUDDY_TELEMETRY_ENABLED (#18398, codebuddy-intl turn reports, default off) takes it to 137.
+const EXPECTED_FEATURE_FLAG_COUNT = 137;
 // tool_call wrapper repair, default on) to 86; OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED
 // (#16571, OpenCode v2 client fingerprint, default off) to 87.
 // tool_call wrapper repair, default on) to 86; CLAUDE_OAUTH_SUMMARIZED_THINKING_UNREDACTED

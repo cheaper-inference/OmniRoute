@@ -90,7 +90,8 @@ describe("feature-flags-settings count update", () => {
     // CLAUDE_CODE_LOCAL_{COMMAND_PREFIX,SUGGESTION,FILEPATHS}_ENABLED (default off) to 134.
     // PROXY_REEGRESS_ON_QUOTA_429 (pool re-send after a per-IP 429, default off) to 135.
     // QUOTA_DAILY_REVALIDATION (#20343, default off) to 136.
-    assert.equal(FEATURE_FLAG_DEFINITIONS.length, 136);
+    // CODEBUDDY_TELEMETRY_ENABLED (#18398, codebuddy-intl turn reports, default off) to 137.
+    assert.equal(FEATURE_FLAG_DEFINITIONS.length, 137);
     // COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE (#17114, default off) to 114.
     // CURSOR_GROK_47_DROP_MAX_EFFORT (#17386, default off) to 112.
     // UNPRICED_USAGE_BUDGET_POLICY (#14604, default fail_closed) to 113.
