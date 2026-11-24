@@ -8,7 +8,13 @@ import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { RF, README_FACTS, readmeFact } from "../../scripts/docs/readmeFacts.mjs";
+import {
+  RF,
+  README_FACTS,
+  readmeFact,
+  readmeFactText,
+  hasFreeLabel,
+} from "../../scripts/docs/readmeFacts.mjs";
 import { loadFactsSnapshot } from "../../scripts/release/facts.mjs";
 
 const GENERATORS = {
@@ -98,8 +104,41 @@ describe("README generators follow the facts snapshot", () => {
     assert.deepEqual(README_FACTS, snapshot);
     assert.equal(RF.providers, snapshot.providers);
     assert.equal(RF.mcpTools, snapshot.code.mcpTools);
-    assert.equal(RF.freeSteadyBillions, (snapshot.code.freeSteady / 1e9).toFixed(2));
+    assert.equal(RF.headlineSteadyLabel, snapshot.code.headlineSteadyLabel);
     assert.throws(() => readmeFact("code.modePacks"), /no numeric fact/);
+  });
+
+  it("free-tier labels come from the snapshot, never from a local formatter", () => {
+    assert.equal(RF.rowSumTotalLabel, snapshot.code.rowSumTotalLabel);
+    assert.equal(RF.headlineFirstLabel, snapshot.code.headlineFirstLabel);
+    assert.equal(RF.rowSumLiveLabel, snapshot.code.rowSumLiveLabel);
+    assert.equal(RF.rowSumRetiredPct, `${(snapshot.code.rowSumRetiredShare * 100).toFixed(1)}%`);
+    assert.equal(RF.freeProvidersTotal, snapshot.code.freeProviders.total);
+    assert.equal(RF.freePublishedPools, snapshot.code.freePublishedPools);
+    assert.equal(RF.freeAccessRows, snapshot.code.freeAccessRows);
+    assert.equal(RF.freeModels, snapshot.code.freeModels);
+    assert.equal(RF.hasFreeProviders, snapshot.code.hasFreeProviders);
+    assert.equal(RF.hasFreeLabel, hasFreeLabel(snapshot.code.hasFreeProviders));
+    assert.equal(RF.catalogDate, snapshot.code.catalogDate);
+    // F-A (owner, 2026-11-24): rounded down to the ten, with a plus, so a recount cannot overstate it.
+    assert.equal(hasFreeLabel(144), "140+");
+    assert.equal(hasFreeLabel(150), "150+");
+    assert.equal(hasFreeLabel(9), "9");
+    assert.equal(readmeFactText("code.rowSumTotalLabel"), snapshot.code.rowSumTotalLabel);
+    assert.throws(() => readmeFactText("code.headlineSteady"), /no text fact/);
+    assert.equal("freeSteadyBillions" in RF, false);
+  });
+
+  it("no generator reads a legacy free-tier key", () => {
+    const LEGACY = /code\.(?:freeSteady|freeFirst|freePools|entries)\b|code\??\.freeTierBudget\b/;
+    const files = fs
+      .readdirSync("scripts/docs")
+      .filter((f) => /^gen-readme-.*\.mjs$/.test(f) || f === "readmeFacts.mjs")
+      .map((f) => path.join("scripts/docs", f));
+    assert.ok(files.length > 5);
+    for (const file of files) {
+      assert.doesNotMatch(fs.readFileSync(file, "utf8"), LEGACY, file);
+    }
   });
 
   it("hero: provider total, routing strategies and steady free tokens", () => {
