@@ -23,7 +23,10 @@ import { getCcAliasGlobalState } from "@/lib/db/ccDiscoveryAliases";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
 import { getSettings } from "@/lib/db/settings";
 import { resolveResilienceSettings } from "@/lib/resilience/settings";
-import { isAutoEnableActive } from "@omniroute/open-sse/services/rateLimitManager/autoProtection.ts";
+import {
+  getAutoEnableEnvOverride,
+  isAutoEnableActive,
+} from "@omniroute/open-sse/services/rateLimitManager/autoProtection.ts";
 
 const ACTIVE_VALUES = new Set(["true", "1", "yes"]);
 const CC_DISCOVERY_ALIASES_FLAG_KEY = "EXPOSE_CC_DISCOVERY_ALIASES";
@@ -78,8 +81,10 @@ export async function GET(request: NextRequest) {
     const settingsRecord = (await getSettings()) as unknown as {
       resilienceSettings?: { requestQueue?: { autoEnableApiKeyProviders?: unknown } };
     };
-    const autoEnableActive = isAutoEnableActive(resolveResilienceSettings(settingsRecord as never).requestQueue);
-    const autoEnableEnvSet = (process.env[RATE_LIMIT_AUTO_ENABLE_FLAG_KEY] ?? "").trim().length > 0;
+    const autoEnableActive = isAutoEnableActive(
+      resolveResilienceSettings(settingsRecord as never).requestQueue
+    );
+    const autoEnableEnvOverride = getAutoEnableEnvOverride();
     const autoEnableConfigured =
       typeof settingsRecord?.resilienceSettings?.requestQueue?.autoEnableApiKeyProviders === "boolean";
 
@@ -101,14 +106,13 @@ export async function GET(request: NextRequest) {
       }
       // RATE_LIMIT_AUTO_ENABLE is an env override on top of a dashboard
       // setting, not a pure env switch: the limiter falls back to
-      // requestQueue.autoEnableApiKeyProviders when the variable is unset
-      // (open-sse/services/rateLimitManager/autoProtection.ts:22-28). Report
-      // what the limiter actually does, including that fallback.
+      // requestQueue.autoEnableApiKeyProviders when the variable is unset or
+      // unrecognized. Report what the limiter actually does, including that fallback.
       if (key === RATE_LIMIT_AUTO_ENABLE_FLAG_KEY) {
         return flagPayload(
           definition,
           autoEnableActive ? "true" : "false",
-          autoEnableEnvSet ? "env" : autoEnableConfigured ? "db" : "default"
+          autoEnableEnvOverride !== undefined ? "env" : autoEnableConfigured ? "db" : "default"
         );
       }
       return { ...flagPayload(definition, effectiveValue, source), ...provenance };

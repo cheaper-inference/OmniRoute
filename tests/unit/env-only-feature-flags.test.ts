@@ -333,35 +333,71 @@ test("GET reports which keys are environment-only", async () => {
   assert.equal(envOnly?.envOnly, true);
   assert.equal(dbBacked?.envOnly, false);
 });
-test("GET reports the limiter's auto-enable verdict, not the catalog default", async () => {
-  // With the env override unset the limiter falls back to
-  // requestQueue.autoEnableApiKeyProviders, whose shipped default is true.
-  // Reporting the catalog default (false) would tell operators the safety net
-  // is off while it is actively enabling protection.
-  const previous = process.env.RATE_LIMIT_AUTO_ENABLE;
-  delete process.env.RATE_LIMIT_AUTO_ENABLE;
-  try {
-    const response = await route.GET(request());
-    const payload = (await response.json()) as {
-      flags: Array<{ key: string; effectiveValue: string; source: string }>;
-    };
-    const flag = payload.flags.find((entry) => entry.key === "RATE_LIMIT_AUTO_ENABLE");
-    assert.equal(flag?.effectiveValue, "true");
-    assert.equal(flag?.source, "default", "an inherited default is not a stored override");
+for (const stored of [undefined, false]) {
+  const fallbackSource = stored === undefined ? "default" : "db";
+  test(`GET reports only recognized rate-limit env overrides over the ${fallbackSource}`, async () => {
+    const { getSettings, updateSettings } = await import("../../src/lib/db/settings.ts");
+    const previousSettings = (await getSettings()).resilienceSettings;
+    const key = "RATE_LIMIT_AUTO_ENABLE";
+    const previousEnv = process.env[key];
+    async function readFlag() {
+      const response = await route.GET(request());
+      assert.equal(response.status, 200);
+      const { flags, summary } = (await response.json()) as {
+        flags: Array<{ key: string; effectiveValue: string; source: string; envOnly: boolean }>;
+        summary: { overriddenByEnv: number; overriddenByDb: number };
+      };
+      const flag = flags.find((entry) => entry.key === key);
+      assert.ok(flag);
+      return {
+        source: flag.source,
+        enabled: flag.effectiveValue,
+        envOnly: flag.envOnly,
+        envCount: summary.overriddenByEnv,
+        dbCount: summary.overriddenByDb,
+      };
+    }
 
-    process.env.RATE_LIMIT_AUTO_ENABLE = "false";
-    const forced = await route.GET(request());
-    const forcedPayload = (await forced.json()) as {
-      flags: Array<{ key: string; effectiveValue: string; source: string }>;
-    };
-    const forcedFlag = forcedPayload.flags.find((entry) => entry.key === "RATE_LIMIT_AUTO_ENABLE");
-    assert.equal(forcedFlag?.effectiveValue, "false", "the env override still wins");
-    assert.equal(forcedFlag?.source, "env");
-  } finally {
-    if (previous !== undefined) process.env.RATE_LIMIT_AUTO_ENABLE = previous;
-    else delete process.env.RATE_LIMIT_AUTO_ENABLE;
-  }
-});
+    try {
+      await updateSettings({
+        resilienceSettings:
+          stored === undefined ? {} : { requestQueue: { autoEnableApiKeyProviders: stored } },
+      });
+      delete process.env[key];
+      const fallback = await readFlag();
+      assert.equal(fallback.source, fallbackSource);
+      assert.equal(fallback.enabled, stored === undefined ? "true" : "false");
+      assert.equal(fallback.envOnly, true);
+
+      for (const raw of ["  ", "not-a-boolean"]) {
+        process.env[key] = raw;
+        assert.deepEqual(await readFlag(), fallback, "unrecognized values are not env overrides");
+      }
+
+      for (const [raw, enabled] of [
+        ["false", "false"],
+        ["0", "false"],
+        ["  OFF ", "false"],
+        ["true", "true"],
+        ["1", "true"],
+        ["  ON ", "true"],
+      ]) {
+        process.env[key] = raw;
+        assert.deepEqual(await readFlag(), {
+          source: "env",
+          enabled,
+          envOnly: true,
+          envCount: fallback.envCount + 1,
+          dbCount: fallback.dbCount - (stored === undefined ? 0 : 1),
+        });
+      }
+    } finally {
+      if (previousEnv === undefined) delete process.env[key];
+      else process.env[key] = previousEnv;
+      await updateSettings({ resilienceSettings: previousSettings ?? null });
+    }
+  });
+}
 
 test("the scanner sees every read form a consumer can be written in", () => {
   const definitions = [
