@@ -133,9 +133,7 @@ function extractTextFromPart(part: unknown): string | null {
   }
   const rec = asRecord(part);
   return (
-    nonEmptyString(rec?.text) ||
-    nonEmptyString(rec?.input_text) ||
-    nonEmptyString(rec?.output_text)
+    nonEmptyString(rec?.text) || nonEmptyString(rec?.input_text) || nonEmptyString(rec?.output_text)
   );
 }
 
@@ -369,7 +367,12 @@ function applyThreadScopedCacheKey(
   psd: Record<string, unknown> | null,
   connectionId: string | null
 ): string {
-  const threadScoped = resolveCodexThreadScopedPromptCacheKey(candidate, identity, psd, connectionId);
+  const threadScoped = resolveCodexThreadScopedPromptCacheKey(
+    candidate,
+    identity,
+    psd,
+    connectionId
+  );
   return threadScoped || candidate;
 }
 
