@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Obećanje — Jedna krajnja tačka i 394 dobavljača. Automatski rezervni način rada održava usmjeravanje dok je dostupno drugo zdravo odredište. Šest stubova: otporno prebacivanje između 394 dobavljača · do 95% uštede tokena na podržanim radnim opterećenjima · $0 za početak sa više od 150 besplatnih nivoa i 51 besplatnim dobavljačem koji se obnavljaju ili su zauvijek dostupni bez ključa · 39 CLI/agent integracija kroz jednu konfiguraciju · kompatibilnost sa OpenAI, Claude, Gemini i Responses API na /v1 · kontrole za produkciju, uključujući prekidače kola, TLS stealth, MCP sa 110 alata, A2A, memoriju, zaštitne mehanizme, evaluacije i više od 56.000 statičkih deklaracija testova kroz više od 7.800 praćenih datoteka testova."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Obećanje — Jedna krajnja tačka i 394 dobavljača. Automatski rezervni način rada održava usmjeravanje dok je dostupno drugo zdravo odredište. Šest stubova: otporno prebacivanje između 394 dobavljača · do 95% uštede tokena na podržanim radnim opterećenjima · $0 za početak sa više od 150 besplatnih nivoa i 40 besplatnim dobavljačem koji se obnavljaju ili su zauvijek dostupni bez ključa · 39 CLI/agent integracija kroz jednu konfiguraciju · kompatibilnost sa OpenAI, Claude, Gemini i Responses API na /v1 · kontrole za produkciju, uključujući prekidače kola, TLS stealth, MCP sa 110 alata, A2A, memoriju, zaštitne mehanizme, evaluacije i više od 56.000 statičkih deklaracija testova kroz više od 7.800 praćenih datoteka testova."/>
 
 <br/>
 <br/>
@@ -711,7 +711,7 @@ izvan vaše shell historije. → [CLI Integracije](docs/guides/CLI-INTEGRATIONS.
 
 </div>
 
-> **394 registrovana provajdera** u kanonskim kolekcijama za razgovor, medije, pretragu, lokalne sisteme, cloud agente i sistemske funkcije, uključujući **153 provajdera sa metapodacima za otkrivanje `hasFree: true`**. Registar modela za razgovor obuhvata **239 provajdera / 3,059 različitih parova provajder-model / 1,475 sirovih ID-ova modela**; zasebni katalog besplatnih budžeta ima **465 redova po modelu**, **34 periodična fonda** i **51 provajdera koji su trajno besplatni, bez ključa ili sa periodičnim fondom**. Ovo su različiti nazivnici po dizajnu; definicije i izračuni sa uklonjenim duplikatima fondova nalaze se u dokumentima [Referenca provajdera](docs/reference/PROVIDER_REFERENCE.md) i [Besplatni nivoi](docs/reference/FREE_TIERS.md).
+> **394 registrovana provajdera** u kanonskim kolekcijama za razgovor, medije, pretragu, lokalne sisteme, cloud agente i sistemske funkcije, uključujući **153 provajdera sa metapodacima za otkrivanje `hasFree: true`**. Registar modela za razgovor obuhvata **239 provajdera / 3,059 različitih parova provajder-model / 1,475 sirovih ID-ova modela**; zasebni katalog besplatnih budžeta ima **465 redova po modelu**, **34 periodična fonda** i **40 provajdera koji su trajno besplatni, bez ključa ili sa periodičnim fondom**. Ovo su različiti nazivnici po dizajnu; definicije i izračuni sa uklonjenim duplikatima fondova nalaze se u dokumentima [Referenca provajdera](docs/reference/PROVIDER_REFERENCE.md) i [Besplatni nivoi](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -1329,7 +1329,7 @@ Kanonske metrike na dan 2026-10-18: **1.976 jedinstvenih videozapisa** · **20.2
   <tr><td nowrap><b>Izvršno okruženje</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Jezik</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> u <code>src/</code> i <code>open-sse/</code> (nula <code>any</code> u jezgri od v2.0)</td></tr>
   <tr><td nowrap><b>Okvir</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Baza podataka</b></td><td>better-sqlite3 (SQLite, WAL evidentiranje) + LowDB (naslijeđeni JSON) — 147 domenskih modula, 244 migracija</td></tr>
+  <tr><td nowrap><b>Baza podataka</b></td><td>better-sqlite3 (SQLite, WAL evidentiranje) + LowDB (naslijeđeni JSON) — 147 domenskih modula, 252 migracija</td></tr>
   <tr><td nowrap><b>Memorija</b></td><td>SQLite FTS5 pretraga punog teksta + vektorski embeddingi kvantizovani na int8, tipizovano opadanje</td></tr>
   <tr><td nowrap><b>Sheme</b></td><td>Zod 4 — provjera ulaza/izlaza MCP alata + API ugovori</td></tr>
   <tr><td nowrap><b>Protokoli</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
