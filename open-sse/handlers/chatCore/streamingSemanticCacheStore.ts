@@ -63,6 +63,8 @@ interface StreamingCacheArgs {
   videoTranscriptSensitive?: boolean;
   /** Reversible PII vault minted tokens: a cached copy would replay unresolvable tokens. */
   piiTokensMinted?: boolean;
+  /** A response masking transform ran on the client copy: the assembled body is unmasked. */
+  maskingActive?: boolean;
 }
 
 function streamTokensSaved(streamUsage: Record<string, unknown> | null | undefined): number {
@@ -130,6 +132,7 @@ export function storeStreamingSemanticCacheResponse(
     args.provider === "muse-code" ||
     args.videoTranscriptSensitive ||
     args.piiTokensMinted ||
+    args.maskingActive ||
     !args.enabled ||
     args.streamStatus !== 200 ||
     !args.streamResponseBody ||
