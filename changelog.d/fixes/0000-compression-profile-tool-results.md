@@ -1,0 +1,1 @@
+- **fix(compression):** Honor the request's lossy compression policy for active and routing-assigned profiles so earlier tool results reach the provider intact by default.
