@@ -218,13 +218,18 @@ test("rotateCallLogs swallows filesystem errors during cleanup", () => {
   assert.ok(CALL_LOGS_DIR, "CALL_LOGS_DIR should resolve for test data dir");
   fs.mkdirSync(CALL_LOGS_DIR, { recursive: true });
 
-  const originalOpendirSync = fs.opendirSync;
+  const originalReaddirSync = fs.readdirSync;
   const originalConsoleError = console.error;
   const consoleCalls = [];
 
-  fs.opendirSync = () => {
-    throw new Error("simulated opendir failure");
-  };
+  // The orphan scan lists the call-log tree with readdirSync; failing that listing must be
+  // swallowed like the opendir failure it replaced.
+  fs.readdirSync = ((targetPath, options) => {
+    if (String(targetPath).startsWith(CALL_LOGS_DIR)) {
+      throw new Error("simulated readdir failure");
+    }
+    return originalReaddirSync(targetPath, options);
+  }) as typeof fs.readdirSync;
   console.error = (...args) => {
     consoleCalls.push(args.join(" "));
   };
@@ -232,11 +237,11 @@ test("rotateCallLogs swallows filesystem errors during cleanup", () => {
   try {
     assert.doesNotThrow(() => rotateCallLogs());
   } finally {
-    fs.opendirSync = originalOpendirSync;
+    fs.readdirSync = originalReaddirSync;
     console.error = originalConsoleError;
   }
 
-  assert.ok(consoleCalls.some((line) => /simulated opendir failure/.test(line)));
+  assert.ok(consoleCalls.some((line) => /simulated readdir failure/.test(line)));
 });
 
 test("cleanupOverflowCallLogFiles ignores rmSync failures for old artifacts", () => {
@@ -614,40 +619,130 @@ test("orphan traversal bounds every directory operation and resumes", () => {
     fs.writeFileSync(path.join(dayDir, `${String(i).padStart(4, "0")}.json`), "{}");
   }
 
-  const originalOpendirSync = fs.opendirSync;
-  let operations = 0;
-  fs.opendirSync = ((...args: Parameters<typeof fs.opendirSync>) => {
-    operations++;
-    const dir = originalOpendirSync(...args);
-    const originalReadSync = dir.readSync.bind(dir);
-    dir.readSync = () => {
-      operations++;
-      return originalReadSync();
-    };
-    return dir;
-  }) as typeof fs.opendirSync;
+  // Directory work is bounded by listings, never by one handle operation per entry: one
+  // listing of the base directory per scan cycle plus one per day directory entered, and a
+  // resumed pass still inside a day performs none at all.
+  const originalReaddirSync = fs.readdirSync;
+  const listings: string[] = [];
+  fs.readdirSync = ((...args: Parameters<typeof fs.readdirSync>) => {
+    const targetPath = String(args[0]);
+    if (targetPath === baseDir || targetPath === dayDir) listings.push(targetPath);
+    return originalReaddirSync(...args);
+  }) as typeof fs.readdirSync;
 
   const passOperations: number[] = [];
   let deleted = 0;
   try {
     for (let pass = 0; pass < 2; pass++) {
-      operations = 0;
+      listings.length = 0;
       deleted += cleanupOrphanCallLogFiles(baseDir, {
         maxCandidates: 100,
         maxScanEntries: 100,
         minAgeMs: 0,
       });
-      passOperations.push(operations);
+      passOperations.push(listings.length);
     }
   } finally {
-    fs.opendirSync = originalOpendirSync;
+    fs.readdirSync = originalReaddirSync;
   }
 
-  assert.equal(passOperations[0], 100);
-  assert.ok(passOperations[1] > 0 && passOperations[1] <= 100);
+  assert.ok(passOperations[0] > 0 && passOperations[0] <= 2, `pass 0: ${passOperations[0]}`);
+  assert.ok(passOperations[1] <= 2, `pass 1: ${passOperations[1]}`);
   assert.equal(deleted, 10);
   assert.equal(fs.readdirSync(dayDir).filter((entry) => entry.endsWith(".json")).length, 0);
 });
+
+test("orphan traversal resumes a large day across bounded passes", () => {
+  const baseDir = path.join(TEST_DATA_DIR, "big-artifact-day");
+  const dayDir = path.join(baseDir, "2026-04-11");
+  fs.mkdirSync(dayDir, { recursive: true });
+  const old = new Date(Date.now() - 10 * 60_000);
+  for (let i = 0; i < 250; i++) {
+    const file = path.join(dayDir, `${String(i).padStart(4, "0")}.json`);
+    fs.writeFileSync(file, "{}");
+    fs.utimesSync(file, old, old);
+  }
+
+  const passDeletes: number[] = [];
+  for (let pass = 0; pass < 10; pass++) {
+    const deleted = cleanupOrphanCallLogFiles(baseDir, {
+      maxCandidates: 100,
+      maxScanEntries: 100,
+      minAgeMs: 0,
+    });
+    passDeletes.push(deleted);
+    if (deleted === 0) break;
+  }
+
+  // Every bounded pass continues where the previous one stopped, so nothing is skipped and
+  // nothing is rescanned.
+  for (const deleted of passDeletes.slice(0, -1)) {
+    assert.ok(deleted > 0 && deleted <= 100, `bounded pass deleted ${deleted}`);
+  }
+  assert.ok(passDeletes.length >= 3, `expected several passes, got ${passDeletes.join(",")}`);
+  assert.equal(
+    passDeletes.reduce((sum, deleted) => sum + deleted, 0),
+    250
+  );
+  // Deleting a day's last artifact also removes the now-empty day directory.
+  assert.equal(fs.existsSync(dayDir) ? fs.readdirSync(dayDir).length : 0, 0);
+});
+
+function openDirectoryHandlesUnder(directory: string): string[] {
+  const real = fs.realpathSync.native(directory);
+  const prefix = `${real}${path.sep}`;
+  const handles: string[] = [];
+  for (const entry of fs.readdirSync("/proc/self/fd")) {
+    let target: string;
+    try {
+      target = fs.readlinkSync(path.join("/proc/self/fd", entry));
+    } catch {
+      continue; // the descriptor closed between readdir and readlink
+    }
+    if (target === real || target.startsWith(prefix)) handles.push(target);
+  }
+  return handles;
+}
+
+test(
+  "orphan cleanup holds no directory handle between bounded passes",
+  { skip: process.platform === "linux" ? false : "requires /proc/self/fd (Linux only)" },
+  () => {
+    const baseDir = path.join(TEST_DATA_DIR, "fd-release-artifacts");
+    const dayDir = path.join(baseDir, "2026-04-12");
+    fs.mkdirSync(dayDir, { recursive: true });
+    const old = new Date(Date.now() - 10 * 60_000);
+    for (let i = 0; i < 40; i++) {
+      const file = path.join(dayDir, `${String(i).padStart(4, "0")}.json`);
+      fs.writeFileSync(file, "{}");
+      fs.utimesSync(file, old, old);
+    }
+    assert.deepEqual(openDirectoryHandlesUnder(baseDir), []);
+
+    // A pass smaller than the day leaves the resumable cursor alive. The old cursor kept the
+    // base directory and the day directory open here for the rest of the scan cycle.
+    const deleted = cleanupOrphanCallLogFiles(baseDir, {
+      maxCandidates: 10,
+      maxScanEntries: 10,
+      minAgeMs: 0,
+    });
+    assert.ok(deleted > 0 && deleted < 40, `expected a bounded pass, deleted ${deleted}`);
+    assert.deepEqual(
+      openDirectoryHandlesUnder(baseDir),
+      [],
+      "a bounded orphan pass must not leave the call-log directories open"
+    );
+
+    while (
+      cleanupOrphanCallLogFiles(baseDir, { maxCandidates: 100, maxScanEntries: 100, minAgeMs: 0 }) >
+      0
+    ) {
+      // Drain the cycle: an exhausted scan must not leave handles behind either.
+    }
+    assert.deepEqual(openDirectoryHandlesUnder(baseDir), []);
+    assert.equal(fs.existsSync(dayDir) ? fs.readdirSync(dayDir).length : 0, 0);
+  }
+);
 
 test("hot rotation avoids full artifact listing and bounds stat calls", () => {
   assert.ok(CALL_LOGS_DIR);

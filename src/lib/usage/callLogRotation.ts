@@ -95,12 +95,24 @@ function deleteCallLogRowsByIds(ids: string[]): DeleteResult {
   };
 }
 
+/**
+ * Resumable orphan-scan position.
+ *
+ * The scan must survive across bounded cleanup passes (a day directory holds thousands of
+ * files, so one pass never finishes it), but it must NOT keep an `fs.Dir` — a directory file
+ * descriptor — open between runs: a long-lived cursor left the base directory and the current
+ * day directory in `/proc/<pid>/fd` until the whole cycle was exhausted. The position is a
+ * one-shot listing plus an index instead: no descriptor outlives the call that created it,
+ * and advancing is pure array arithmetic, so resumption stays O(1) per pass.
+ */
 type OrphanScanCursor = {
   baseDir: string;
-  root: fs.Dir;
-  day: fs.Dir | null;
+  rootListed: boolean;
+  dayNames: string[];
+  dayIndex: number;
   dayName: string | null;
-  pendingDayName: string | null;
+  fileNames: string[];
+  fileIndex: number;
 };
 
 type OrphanScanBatch = {
@@ -111,14 +123,33 @@ type OrphanScanBatch = {
 
 let orphanScanCursor: OrphanScanCursor | null = null;
 
-function closeOrphanScanCursor(): void {
-  try {
-    orphanScanCursor?.day?.closeSync();
-  } catch {}
-  try {
-    orphanScanCursor?.root.closeSync();
-  } catch {}
+/**
+ * Drop the resumable scan position. The cursor holds names only, never a descriptor, so this
+ * is the single reset point for shutdown paths and for a changed base directory.
+ */
+export function closeOrphanScanCursor(): void {
   orphanScanCursor = null;
+}
+
+function listOrphanDayNames(baseDir: string): string[] {
+  return fs
+    .readdirSync(baseDir, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name)
+    .sort();
+}
+
+function listOrphanDayFiles(dayDir: string): string[] {
+  try {
+    return fs
+      .readdirSync(dayDir, { withFileTypes: true })
+      .filter((entry) => entry.isFile() && entry.name.endsWith(".json"))
+      .map((entry) => entry.name)
+      .sort();
+  } catch {
+    // Unreadable or vanished day directory: skip it, like a failed opendir did before.
+    return [];
+  }
 }
 
 function readOrphanCandidates(
@@ -135,54 +166,49 @@ function readOrphanCandidates(
     scannedEntries++;
     orphanScanCursor = {
       baseDir,
-      root: fs.opendirSync(baseDir),
-      day: null,
+      rootListed: false,
+      dayNames: [],
+      dayIndex: 0,
       dayName: null,
-      pendingDayName: null,
+      fileNames: [],
+      fileIndex: 0,
     };
   }
+  const cursor = orphanScanCursor;
 
   const candidates: string[] = [];
   let exhausted = false;
   while (candidates.length < candidateLimit && scannedEntries < scanLimit) {
-    if (!orphanScanCursor.day) {
-      if (orphanScanCursor.pendingDayName) {
+    if (cursor.dayName === null) {
+      if (!cursor.rootListed) {
         scannedEntries++;
-        const dayName = orphanScanCursor.pendingDayName;
-        orphanScanCursor.pendingDayName = null;
-        try {
-          orphanScanCursor.day = fs.opendirSync(path.join(baseDir, dayName));
-          orphanScanCursor.dayName = dayName;
-        } catch {
-          continue;
-        }
+        cursor.dayNames = listOrphanDayNames(baseDir);
+        cursor.rootListed = true;
         continue;
       }
-
-      scannedEntries++;
-      const dayEntry = orphanScanCursor.root.readSync();
-      if (!dayEntry) {
+      if (cursor.dayIndex >= cursor.dayNames.length) {
         closeOrphanScanCursor();
         exhausted = true;
         break;
       }
-      if (!dayEntry.isDirectory()) continue;
-      orphanScanCursor.pendingDayName = dayEntry.name;
+      scannedEntries++;
+      cursor.dayName = cursor.dayNames[cursor.dayIndex];
+      cursor.fileNames = listOrphanDayFiles(path.join(baseDir, cursor.dayName));
+      cursor.fileIndex = 0;
+      continue;
+    }
+
+    if (cursor.fileIndex >= cursor.fileNames.length) {
+      cursor.dayName = null;
+      cursor.fileNames = [];
+      cursor.fileIndex = 0;
+      cursor.dayIndex++;
       continue;
     }
 
     scannedEntries++;
-    const fileEntry = orphanScanCursor.day.readSync();
-    if (!fileEntry) {
-      try {
-        orphanScanCursor.day.closeSync();
-      } catch {}
-      orphanScanCursor.day = null;
-      orphanScanCursor.dayName = null;
-      continue;
-    }
-    if (!fileEntry.isFile() || !fileEntry.name.endsWith(".json")) continue;
-    candidates.push(path.posix.join(orphanScanCursor.dayName!, fileEntry.name));
+    candidates.push(path.posix.join(cursor.dayName, cursor.fileNames[cursor.fileIndex]));
+    cursor.fileIndex++;
   }
   return { candidates, exhausted, scannedEntries };
 }

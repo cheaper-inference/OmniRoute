@@ -131,6 +131,7 @@ async function cleanup(): Promise<void> {
       { closeLogRotation },
       { closeSharedLoggerResource },
       { closeCallLogSaves },
+      { closeOrphanScanCursor },
     ] = await Promise.all([
       import("@omniroute/open-sse/mcp-server/audit.ts"),
       import("@/lib/db/core"),
@@ -138,6 +139,7 @@ async function cleanup(): Promise<void> {
       import("@/lib/logRotation"),
       import("@/shared/utils/loggerResource"),
       import("@/lib/usage/callLogs"),
+      import("@/lib/usage/callLogRotation"),
     ]);
     const flushResult = await flushSpendBatchWriter();
     if (flushResult.flushedEntries > 0) {
@@ -146,6 +148,8 @@ async function cleanup(): Promise<void> {
       );
     }
     await closeCallLogSaves();
+    // Drop the resumable orphan-scan position so no call-log directory state survives shutdown.
+    closeOrphanScanCursor();
     try {
       const { flushPayloadTraffic } = await import("@/lib/db/proxyTraffic");
       flushPayloadTraffic();
