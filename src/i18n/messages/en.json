@@ -3093,6 +3093,7 @@
     "scrapeSize": "Size",
     "scrapeEmptyState": "Enter a URL to extract its content",
     "scrapeProvidersAvailable": "Available providers: Firecrawl, Jina Reader, Tavily, TinyFish.",
+    "scrapeNoFetchProvider": "No fetch provider connected",
     "compareRun": "Compare",
     "compareRunning": "Comparing…",
     "autoProvider": "Auto (cheapest)",
