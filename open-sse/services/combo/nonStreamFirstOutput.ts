@@ -19,16 +19,84 @@
 import { FORMATS } from "../../translator/formats.ts";
 import { SseOutputScanner, isEventStreamResponse } from "./firstOutputStream.ts";
 
-/** What the per-target timer passes to its target so the dispatch can report first output. */
-export type ComboFirstOutputHook = { onFirstOutput: () => void };
+/**
+ * What the per-target timer passes to its target so the dispatch can report first output.
+ * `onAttemptStart` re-arms the budget when another account is tried for the same target after
+ * the previous one had already produced output.
+ */
+export type ComboFirstOutputHook = { onFirstOutput: () => void; onAttemptStart?: () => void };
 
 /** The hook copied into `clientRawRequest` by the dispatch, or null outside a timed combo target. */
-export function getComboFirstOutputHook(clientRawRequest: unknown): (() => void) | null {
+export function getComboFirstOutputHook(clientRawRequest: unknown): ComboFirstOutputHook | null {
   if (!clientRawRequest || typeof clientRawRequest !== "object") return null;
   const hook = (clientRawRequest as { comboFirstOutput?: unknown }).comboFirstOutput;
   if (!hook || typeof hook !== "object") return null;
-  const onFirstOutput = (hook as { onFirstOutput?: unknown }).onFirstOutput;
-  return typeof onFirstOutput === "function" ? (onFirstOutput as () => void) : null;
+  const { onFirstOutput, onAttemptStart } = hook as Record<string, unknown>;
+  if (typeof onFirstOutput !== "function") return null;
+  return {
+    onFirstOutput: onFirstOutput as () => void,
+    ...(typeof onAttemptStart === "function"
+      ? { onAttemptStart: onAttemptStart as () => void }
+      : {}),
+  };
+}
+
+/**
+ * Fan-out of one shared execution's first output. Identical requests can share one upstream
+ * call (requestDedup.ts); each caller has its own per-target timer, so every caller that joins
+ * the shared call registers here and hears the first output too, including one that joins after
+ * it already arrived.
+ */
+export class SharedFirstOutput {
+  private readonly listeners = new Set<() => void>();
+  private fired = false;
+
+  add(listener: (() => void) | null | undefined): void {
+    if (!listener) return;
+    if (this.fired) safeCall(listener);
+    else this.listeners.add(listener);
+  }
+
+  readonly notify = (): void => {
+    if (this.fired) return;
+    this.fired = true;
+    for (const listener of this.listeners) safeCall(listener);
+    this.listeners.clear();
+  };
+}
+
+const sharedFirstOutputs = new Map<string, SharedFirstOutput>();
+
+/**
+ * Join the first-output fan-out of the shared execution keyed by `hash` (created when absent) and
+ * register `listener`. `release` drops the entry once the shared call is done, so a later request
+ * with the same hash starts a fresh fan-out; it is safe to call more than once.
+ */
+export function joinSharedFirstOutput(
+  hash: string,
+  listener: (() => void) | null | undefined
+): { notify: () => void; release: () => void } {
+  let shared = sharedFirstOutputs.get(hash);
+  if (!shared) {
+    shared = new SharedFirstOutput();
+    sharedFirstOutputs.set(hash, shared);
+  }
+  shared.add(listener);
+  const entry = shared;
+  return {
+    notify: entry.notify,
+    release: () => {
+      if (sharedFirstOutputs.get(hash) === entry) sharedFirstOutputs.delete(hash);
+    },
+  };
+}
+
+function safeCall(listener: () => void): void {
+  try {
+    listener();
+  } catch {
+    // The timer's bookkeeping must never break the body read.
+  }
 }
 
 /**
@@ -41,13 +109,13 @@ export function shouldStreamUpstreamForFirstOutput(options: {
   stream: boolean;
   upstreamStream: boolean;
   targetFormat: string;
-  onFirstOutput: (() => void) | null;
+  onFirstOutput: ComboFirstOutputHook | (() => void) | null;
 }): boolean {
   return (
     !options.stream &&
     !options.upstreamStream &&
     options.targetFormat === FORMATS.CLAUDE &&
-    typeof options.onFirstOutput === "function"
+    options.onFirstOutput != null
   );
 }
 

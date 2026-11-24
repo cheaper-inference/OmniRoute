@@ -83,7 +83,10 @@ import { buildContinuationLogHooks } from "./recoveryTraceLogging.ts";
 import { formatStreamRecoveryRetryWarning } from "./streamErrorResult.ts";
 import { injectSystemPromptPostTranslation } from "../../services/systemPrompt.ts";
 import type { ToolDisclosureConfig } from "../../utils/toolDisclosure.ts";
-import { observeUpstreamFirstOutput } from "../../services/combo/nonStreamFirstOutput.ts";
+import {
+  joinSharedFirstOutput,
+  observeUpstreamFirstOutput,
+} from "../../services/combo/nonStreamFirstOutput.ts";
 
 export type ChatCoreExecutorResult = {
   upstreamHttpSelection?: HttpAttemptSelection | null;
@@ -263,7 +266,9 @@ export async function executeProviderRequest(
       response.ok
     );
   };
-  const execute = async () => {
+  // `firstOutput` hears this execution's first output: the caller's own hook, or the fan-out of
+  // a shared (deduplicated) execution.
+  const execute = async (firstOutput: (() => void) | null = onUpstreamFirstOutput ?? null) => {
     // Upstream body preparation extracted to chatCore/upstreamBody.ts (#3501 — first internal
     // sub-slice of executeProviderRequest); produces the body sent upstream (payload rules +
     // tool-limit truncation + prompt_cache_key injection).
@@ -767,8 +772,8 @@ export async function executeProviderRequest(
       let payload: string;
       try {
         payload = await readNonStreamingResponseBody(
-          onUpstreamFirstOutput
-            ? observeUpstreamFirstOutput(rawResult.response, onUpstreamFirstOutput)
+          firstOutput
+            ? observeUpstreamFirstOutput(rawResult.response, firstOutput)
             : rawResult.response,
           contentType,
           upstreamStream
@@ -825,11 +830,18 @@ export async function executeProviderRequest(
     // shared promise rejects with its abort. A joiner whose own client is still connected must
     // not inherit it: it runs its own call once, outside the dedup map.
     let dedupResult;
+    // Every caller that shares this execution has its own combo timer; each one hears the
+    // shared first output (nonStreamFirstOutput.ts SharedFirstOutput).
+    const sharedFirstOutput = joinSharedFirstOutput(dedupHash, onUpstreamFirstOutput);
     try {
-      dedupResult = await deduplicate(dedupHash, execute);
+      dedupResult = await deduplicate(dedupHash, () =>
+        execute(sharedFirstOutput.notify).finally(sharedFirstOutput.release)
+      );
     } catch (error) {
       if (streamController.signal.aborted || !isLocalStreamLifecycleError(error)) throw error;
       return execute();
+    } finally {
+      sharedFirstOutput.release();
     }
     if (dedupResult.wasDeduplicated) {
       log?.debug?.("DEDUP", `Joined in-flight request hash=${dedupHash}`);

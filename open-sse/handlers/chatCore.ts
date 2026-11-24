@@ -2271,6 +2271,9 @@ async function handleChatCoreInner({
   // providers via isClaudeCodeCompatible). A non-streamed combo target streams too, so its
   // first output can stop the per-target timer (combo/nonStreamFirstOutput.ts).
   const comboFirstOutput = getComboFirstOutputHook(clientRawRequest);
+  // Each account attempt of a combo target passes here: a replacement attempt after the previous
+  // account already produced output is held to the target budget again.
+  comboFirstOutput?.onAttemptStart?.();
   const streamForFirstOutput = shouldStreamUpstreamForFirstOutput({
     stream,
     upstreamStream: stream || isClaudeCodeCompatible || providerRequiresStreaming,
@@ -2772,7 +2775,7 @@ async function handleChatCoreInner({
     toolDisclosure,
     upstreamStream,
     userAgent,
-    onUpstreamFirstOutput: comboFirstOutput,
+    onUpstreamFirstOutput: comboFirstOutput?.onFirstOutput ?? null,
   };
   // The pre-decomposition inline executeProviderRequest closed over the LIVE
   // `translatedBody` binding: every mid-flight rebinding (pipeline wire update,

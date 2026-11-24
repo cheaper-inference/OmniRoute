@@ -1013,7 +1013,7 @@ REQUEST_TIMEOUT_MS (global override)
 | `OMNIROUTE_STANDALONE_DIR`                      | _.build/ standalone output_                                       | Build-time override for the standalone output directory consumed by the post-build colocation step (`scripts/build/colocate-standalone.mjs`); build tooling, not runtime.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 
 Each combo target gets a per-target budget: `targetTimeoutMs` from the combo, combo defaults,
-or provider override, otherwise 120 s (`DEFAULT_COMBO_TARGET_TIMEOUT_MS` in
+or provider override, otherwise 120 s (the code default in
 `open-sse/services/comboConfig.ts`). The budget covers the wait for the target's first output,
 not the whole answer. A streamed target is held until its first output event
 (`open-sse/services/combo/firstOutputStream.ts`). A non-streamed target stops its timer when the

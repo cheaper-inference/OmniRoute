@@ -283,12 +283,14 @@ test("only a non-streamed Claude-format combo target is switched to upstream str
 });
 
 test("the dispatch carries the first-output hook into clientRawRequest", () => {
-  const hook = { onFirstOutput: () => {} };
+  const hook = { onFirstOutput: () => {}, onAttemptStart: () => {} };
   const raw = { endpoint: "/v1/messages", signal: null };
 
   const merged = resolveDispatchClientRawRequest(raw, null, hook) as Record<string, unknown>;
 
-  assert.equal(getComboFirstOutputHook(merged), hook.onFirstOutput);
+  const carried = getComboFirstOutputHook(merged);
+  assert.equal(carried?.onFirstOutput, hook.onFirstOutput);
+  assert.equal(carried?.onAttemptStart, hook.onAttemptStart);
   assert.equal(getComboFirstOutputHook(raw), null);
   assert.equal(resolveDispatchClientRawRequest(raw, null, null), raw);
 });
@@ -304,8 +306,11 @@ function messagesBody(): Body {
   };
 }
 
-async function runAnthropicNonStream(clientExtras: Record<string, unknown>) {
-  const body = messagesBody();
+async function runAnthropicNonStream(
+  clientExtras: Record<string, unknown>,
+  bodyExtras: Record<string, unknown> = {}
+) {
+  const body = { ...messagesBody(), ...bodyExtras };
   return handleChatCore({
     body: structuredClone(body),
     modelInfo: { provider: "anthropic", model: "claude-sonnet-4-6", extendedContext: false },
@@ -372,4 +377,97 @@ test("without the combo hook a non-streamed Claude request is still sent non-str
   assert.ok(sent, "fetch was not called");
   assert.notEqual((sent as Body).stream, true);
   assert.equal(result.success, true);
+});
+
+// --- review follow-ups ---------------------------------------------------------------------
+
+test("a replacement attempt after a post-output failure is held to the budget again", async () => {
+  const runner = buildTargetTimeoutRunner({
+    comboTargetTimeoutMs: 100,
+    log: noopLog(),
+    handleSingleModel: async (_body, _model, target) => {
+      const hook = (
+        target as {
+          comboFirstOutput?: { onFirstOutput: () => void; onAttemptStart?: () => void };
+        }
+      ).comboFirstOutput;
+      assert.equal(typeof hook?.onAttemptStart, "function", "runner must pass an attempt hook");
+      hook?.onAttemptStart?.();
+      setTimeout(() => hook?.onFirstOutput(), 20);
+      await delay(60);
+      // The first account's body failed after its first output; a second account starts and
+      // stays silent.
+      hook?.onAttemptStart?.();
+      await delay(250);
+      return jsonResponse({ answer: "silent replacement" });
+    },
+  });
+
+  const response = await runner({ stream: false }, "claude/claude-opus-5-5");
+
+  assert.equal(response.status, 504);
+});
+
+test("a replacement attempt that produces output keeps running past the budget", async () => {
+  const runner = buildTargetTimeoutRunner({
+    comboTargetTimeoutMs: 100,
+    log: noopLog(),
+    handleSingleModel: async (_body, _model, target) => {
+      const hook = (
+        target as {
+          comboFirstOutput?: { onFirstOutput: () => void; onAttemptStart?: () => void };
+        }
+      ).comboFirstOutput;
+      setTimeout(() => hook?.onFirstOutput(), 20);
+      await delay(60);
+      hook?.onAttemptStart?.();
+      setTimeout(() => hook?.onFirstOutput(), 30);
+      await delay(250);
+      return jsonResponse({ answer: "replacement" });
+    },
+  });
+
+  const response = await runner({ stream: false }, "claude/claude-opus-5-5");
+
+  assert.equal(response.status, 200);
+});
+
+test("a caller that joins a shared non-streamed execution receives its first output", async () => {
+  let release: () => void = () => {};
+  const gate = new Promise<void>((resolve) => (release = resolve));
+  let fetches = 0;
+  globalThis.fetch = (async () => {
+    fetches++;
+    const frames = Object.values(CLAUDE_FRAMES);
+    let index = 0;
+    const body = new ReadableStream<Uint8Array>({
+      async pull(controller) {
+        if (index === 3) await gate;
+        if (index >= frames.length) return controller.close();
+        controller.enqueue(encoder.encode(frames[index++]));
+      },
+    });
+    return new Response(body, { status: 200, headers: { "content-type": "text/event-stream" } });
+  }) as typeof fetch;
+  let first = 0;
+  let joiner = 0;
+
+  // temperature 0: only low-temperature requests share an in-flight upstream call.
+  const initiator = runAnthropicNonStream(
+    { comboFirstOutput: { onFirstOutput: () => first++ } },
+    { temperature: 0 }
+  );
+  await delay(20);
+  const joined = runAnthropicNonStream(
+    { comboFirstOutput: { onFirstOutput: () => joiner++ } },
+    { temperature: 0 }
+  );
+  await delay(50);
+  release();
+  const [a, b] = await Promise.all([initiator, joined]);
+
+  assert.equal(fetches, 1, "the two identical requests must share one upstream call");
+  assert.equal(a.success && b.success, true);
+  assert.equal(first, 1);
+  assert.equal(joiner, 1, "the joining caller's timer must hear about the first output");
 });
