@@ -1,7 +1,7 @@
 import { test, beforeEach } from "node:test";
 import assert from "node:assert/strict";
-import { evalCapacity } from "../../src/sse/utils/backpressure.ts";
-import type { CapacityResult } from "../../src/sse/utils/backpressure.ts";
+import { acquireConnectionSlot, evalCapacity } from "../../src/sse/utils/backpressure.ts";
+import type { CapacityResult, ConnectionSlot } from "../../src/sse/utils/backpressure.ts";
 
 // ---------------------------------------------------------------------------
 // evalCapacity — pure function, no mocking required
@@ -106,4 +106,108 @@ test("backpressure: Content-Type is application/json", async () => {
   assert.equal(r.shouldReject, true);
   if (!r.shouldReject) throw new Error("unreachable");
   assert.ok(r.response.headers.get("Content-Type")?.includes("application/json"));
+});
+
+// ---------------------------------------------------------------------------
+// acquireConnectionSlot — one slot per in-flight request (#21157)
+// ---------------------------------------------------------------------------
+
+function setCap(cap: number) {
+  process.env.OMNI_MAX_CONCURRENT_CONNECTIONS = String(cap);
+}
+
+function admit(): ConnectionSlot {
+  const slot = acquireConnectionSlot();
+  if (slot.shouldReject) throw new Error("expected a free connection slot");
+  return slot;
+}
+
+function assertFull() {
+  assert.equal(acquireConnectionSlot().shouldReject, true);
+}
+
+function sse(body: ReadableStream<Uint8Array> | string): Response {
+  return new Response(body, { headers: { "Content-Type": "text/event-stream" } });
+}
+
+function openStream(): ReadableStream<Uint8Array> {
+  return new ReadableStream<Uint8Array>({
+    start(controller) {
+      controller.enqueue(new TextEncoder().encode("data: 1\n\n"));
+    },
+  });
+}
+
+test("backpressure: a disabled cap counts nothing and leaves the response as it is", () => {
+  const response = sse("data: 1\n\n");
+  assert.equal(admit().releaseAfter(response), response);
+
+  setCap(1);
+  admit().release();
+});
+
+test("backpressure: the cap admits `cap` requests and one release frees one slot", () => {
+  setCap(2);
+  const first = admit();
+  const second = admit();
+  assertFull();
+
+  first.release();
+  first.release();
+  const third = admit();
+  assertFull();
+
+  second.release();
+  third.release();
+});
+
+test("backpressure: a response that is not a stream frees its slot when it is returned", () => {
+  setCap(1);
+  const response = Response.json({ ok: true });
+  assert.equal(admit().releaseAfter(response), response);
+  admit().release();
+});
+
+test("backpressure: a stream keeps its slot until it has been read to the end", async () => {
+  setCap(1);
+  const response = admit().releaseAfter(sse("data: 1\n\ndata: [DONE]\n\n"));
+  assertFull();
+
+  assert.equal(await response.text(), "data: 1\n\ndata: [DONE]\n\n");
+  assert.equal(response.headers.get("Content-Type"), "text/event-stream");
+  admit().release();
+});
+
+test("backpressure: a stream that fails frees its slot", async () => {
+  setCap(1);
+  const failing = new ReadableStream<Uint8Array>({
+    pull(controller) {
+      controller.error(new Error("upstream closed"));
+    },
+  });
+  const response = admit().releaseAfter(sse(failing));
+  assertFull();
+
+  await assert.rejects(response.text(), /upstream closed/);
+  admit().release();
+});
+
+test("backpressure: a cancelled stream frees its slot", async () => {
+  setCap(1);
+  const response = admit().releaseAfter(sse(openStream()));
+  assertFull();
+
+  await response.body?.cancel();
+  admit().release();
+});
+
+test("backpressure: an aborted request frees the slot of a stream nobody reads", () => {
+  setCap(1);
+  const lifecycle = new AbortController();
+  admit().releaseAfter(sse(openStream()), lifecycle.signal);
+  assertFull();
+
+  lifecycle.abort();
+  admit().releaseAfter(sse(openStream()), lifecycle.signal);
+  admit().release();
 });
