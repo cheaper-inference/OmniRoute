@@ -45,6 +45,25 @@ These figures describe separate third-party accounts and eligibility conditions 
 
 Biggest **documented** contributors to the real figure today: `groq` 24M (4 per-model caps), `api-airforce` 24M, `cloudflare-ai` 23M, `xkiro` 15M. (`longcat` is excluded — its 10M LongCat-2.0 grant is a one-time, KYC-gated signup credit, not a recurring monthly budget.)
 
+## Correction, November 2026
+
+Until this release, this page and the README said 1.62 billion free tokens a month. That was wrong. Four pools carried 93% of it, and all four had changed at the provider while our catalog stayed the same. The real figure today is ~90M free tokens a month. The table puts what changed at each provider next to what we got wrong.
+
+| What changed at the provider (date, source)                                                                       | What we got wrong (what, since when)                                                                      |
+| ----------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| Mistral: the free mode no longer includes API access (docs.mistral.ai, read on 2026-11-18)                        | We kept counting 1 billion tokens a month from a console reading of 2026-09-02 and never checked it again |
+| Nara: the Free plan lists no models (the provider's `/api/plans`, read on 2026-11-18)                             | We counted 210 million tokens a month                                                                     |
+| xKiro: 500K tokens a day per account (xkiro.com, read on 2026-11-18)                                              | 30 model IDs that no longer exist stayed in the catalog                                                   |
+| LLM7: the limits page is gone and no official page publishes a free quota (2026-11-23)                            | We counted 150 million tokens a month without dated evidence                                              |
+| Groq: one model in the free pool was retired (2026-09-14)                                                         | The pool kept its old size                                                                                |
+| AgentRouter: the provider lists a daily $25 check-in credit and $50 more for invite sign-ups (read on 2026-11-23) | We listed a $200 signup credit                                                                            |
+| Predibase: the product ended                                                                                      | We still counted its signup credit in the first month                                                     |
+| (none)                                                                                                            | 16 providers kept the free-offer flag after their offer ended                                             |
+| (none)                                                                                                            | The README promised a re-audit every two weeks. The last one before this was on 2026-09-02                |
+| (none)                                                                                                            | The docs check allowed a 0.05B drift and could not read figures in millions                               |
+
+Summing one quota per row inflates any catalog, ours included. That is why the row-summed figure carries its label and the real one sits right under it.
+
 ## What counts
 
 A row counts toward the free figures when all of this holds:

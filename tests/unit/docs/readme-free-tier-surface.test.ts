@@ -397,3 +397,19 @@ test("the gate's required sentences survive", () => {
   );
   assert.match(FREE_TIERS, /\+~\d+M behind regional identity verification/);
 });
+
+test("the correction note sits under its stable anchor, with old figures spelled out", () => {
+  const note = ftSection("Correction, November 2026");
+  assert.ok(note.includes("1.62 billion"));
+  assert.ok(note.includes(`${REAL} free tokens`));
+  assert.match(
+    note,
+    /\|\s*What changed at the provider \(date, source\)\s*\|\s*What we got wrong \(what, since when\)\s*\|/
+  );
+  assert.doesNotMatch(note, /<N>/);
+  const removed = FREE_TIERS.indexOf("\n## Removed / no free tier");
+  assert.ok(
+    removed > FREE_TIERS.indexOf("\n## How we count"),
+    "Removed / no free tier follows How we count"
+  );
+});
