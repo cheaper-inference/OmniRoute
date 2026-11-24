@@ -200,13 +200,8 @@ import {
 import { classify429FromError, type FailureKind } from "@/shared/utils/classify429";
 import { isSubscriptionQuotaText } from "@omniroute/open-sse/services/quotaTextCooldowns.ts";
 import { resolveUseUpstream429BreakerHints } from "@/shared/utils/providerHints";
-import {
-  isFeatureFlagEnabled,
-  isProxyReEgressOnQuota429Enabled,
-  isRotationAttributionEnabled,
-} from "@/shared/utils/featureFlags";
+import { isFeatureFlagEnabled, isRotationAttributionEnabled } from "@/shared/utils/featureFlags";
 import * as reEgress from "../services/sameAccountEgressRetry";
-import { proxyEgressKey } from "@omniroute/open-sse/utils/proxyRefusalMemory.ts";
 import * as agyLease from "../services/antigravityLeaseLifecycle";
 import { shouldIsolateProbeFailures } from "@/shared/utils/probeOrigin";
 import { getCircuitBreaker, isLocalStreamLifecycleError } from "../../shared/utils/circuitBreaker";
@@ -2914,45 +2909,29 @@ async function handleSingleModelChat(
       // account through a member not tried yet, before the account is marked. Only reached with
       // a failed result, so no response byte went to the client; a pool with nothing new to
       // offer (one member, all tried or set aside) falls through to the handling below.
-      const refusedKey = proxyEgressKey(
-        appliedProxySink.proxy ?? (proxyInfo as { proxy?: unknown } | null)?.proxy
-      );
-      const quotaText = String(result.rawMessage ?? result.error ?? "");
-      if (
-        reEgress.isReEgressCandidate({
-          enabled: result.status === 429 && isProxyReEgressOnQuota429Enabled(),
-          status: result.status,
-          upstreamStatus: appliedProxySink.upstreamStatus,
-          provider,
-          proxySource: (proxyInfo as { source?: unknown } | null)?.source,
-          refusedKey,
-          attempt: egressRetries,
-          limit: reEgress.reEgressLimit(),
-          aborted: requestSignal?.aborted === true,
-          accountScopedQuota:
-            isDailyQuotaExhausted(quotaText) ||
-            isSubscriptionQuotaText(quotaText.toLowerCase(), provider),
-        })
-      ) {
-        egressTriedKeys.add(refusedKey as string);
-        const next = await safeResolveProxy(
-          credentials.connectionId,
-          apiKeyInfo?.id,
-          provider,
-          comboName
-        ).catch(() => null);
-        const nextKey = proxyEgressKey((next as { proxy?: unknown } | null)?.proxy);
-        if (reEgress.isFreshEgressKey(nextKey, refusedKey, egressTriedKeys)) {
-          egressRetries += 1;
-          sameAccountRetries += 1;
-          log.info(
-            "PROXY",
-            `${provider}/${model} per-IP 429 through a pool member — re-sending through another member (${egressRetries})`
-          );
-          pendingEgress = { connectionId: credentials.connectionId, proxyInfo: next };
-          preselectedCredentials = credentials;
-          continue;
-        }
+      const reEgressTo = await reEgress.nextReEgress({
+        status: result.status,
+        upstreamStatus: appliedProxySink.upstreamStatus,
+        provider,
+        proxyInfo,
+        appliedProxy: appliedProxySink.proxy,
+        quotaText: String(result.rawMessage ?? result.error ?? ""),
+        attempt: egressRetries,
+        aborted: requestSignal?.aborted === true,
+        triedKeys: egressTriedKeys,
+        resolveNext: () =>
+          safeResolveProxy(credentials.connectionId, apiKeyInfo?.id, provider, comboName),
+      });
+      if (reEgressTo) {
+        egressRetries += 1;
+        sameAccountRetries += 1;
+        log.info(
+          "PROXY",
+          `${provider}/${model} per-IP 429 through a pool member — re-sending through another member (${egressRetries})`
+        );
+        pendingEgress = { connectionId: credentials.connectionId, proxyInfo: reEgressTo.proxyInfo };
+        preselectedCredentials = credentials;
+        continue;
       }
 
       // Emergency fallback for budget exhaustion (402 / billing / quota keywords):

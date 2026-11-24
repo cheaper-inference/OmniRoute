@@ -10,10 +10,14 @@
  * Safety: the chat loop only reaches this decision with a failed result, so no response byte
  * has gone to the client; the number of re-sends is bounded; a pool that offers no new member
  * (one member, or all set aside) ends the re-sends and the original 429 flows on as before.
- * Pure helpers, no database access.
+ * The decision helpers are pure; nextReEgress also reads the flag and asks the pool.
  */
 
 import { rotatesEgressOnQuotaRefusal } from "@omniroute/open-sse/config/providerErrorRules.ts";
+import { proxyEgressKey } from "@omniroute/open-sse/utils/proxyRefusalMemory.ts";
+import { isDailyQuotaExhausted } from "@omniroute/open-sse/services/accountFallback.ts";
+import { isSubscriptionQuotaText } from "@omniroute/open-sse/services/quotaTextCooldowns.ts";
+import { isProxyReEgressOnQuota429Enabled } from "@/shared/utils/featureFlags";
 
 /** Re-sends (not sends) per request: 3 means up to four upstream calls through the pool. */
 export const REEGRESS_MAX_ATTEMPTS_DEFAULT = 3;
@@ -66,6 +70,54 @@ export function isFreshEgressKey(
   triedKeys: ReadonlySet<string>
 ): boolean {
   return !!nextKey && nextKey !== refusedKey && !triedKeys.has(nextKey);
+}
+
+/** What the chat loop knows about one failed attempt, raw (see {@link nextReEgress}). */
+export type ReEgressAttempt = {
+  status: unknown;
+  upstreamStatus: number | null | undefined;
+  provider: string;
+  /** Proxy resolved for the attempt (`proxy`, `source`), and the one the request really used. */
+  proxyInfo: unknown;
+  appliedProxy: unknown;
+  /** Upstream error text, read for daily or subscription quota wording. */
+  quotaText: string;
+  attempt: number;
+  aborted: boolean;
+  /** Egress keys already refused for this request; the refused one is added here. */
+  triedKeys: Set<string>;
+  /** Asks the pool for the egress of the next send. */
+  resolveNext: () => Promise<unknown>;
+};
+
+/**
+ * Decides one re-send: when the refusal qualifies (flag on, see {@link isReEgressCandidate}),
+ * records the refused member as tried and asks the pool for another egress. Returns that egress
+ * only when it is fresh, else null and the 429 flows on. A failed pool resolution counts as
+ * "nothing new".
+ */
+export async function nextReEgress(a: ReEgressAttempt): Promise<{ proxyInfo: unknown } | null> {
+  const proxyInfo = a.proxyInfo as { proxy?: unknown; source?: unknown } | null;
+  const refusedKey = proxyEgressKey(a.appliedProxy ?? proxyInfo?.proxy);
+  const candidate: ReEgressCandidateInput = {
+    enabled: a.status === 429 && isProxyReEgressOnQuota429Enabled(),
+    status: a.status,
+    upstreamStatus: a.upstreamStatus,
+    provider: a.provider,
+    proxySource: proxyInfo?.source,
+    refusedKey,
+    attempt: a.attempt,
+    limit: reEgressLimit(),
+    aborted: a.aborted,
+    accountScopedQuota:
+      isDailyQuotaExhausted(a.quotaText) ||
+      isSubscriptionQuotaText(a.quotaText.toLowerCase(), a.provider),
+  };
+  if (!isReEgressCandidate(candidate)) return null;
+  a.triedKeys.add(refusedKey as string);
+  const next = await a.resolveNext().catch(() => null);
+  const nextKey = proxyEgressKey((next as { proxy?: unknown } | null)?.proxy);
+  return isFreshEgressKey(nextKey, refusedKey, a.triedKeys) ? { proxyInfo: next } : null;
 }
 
 export type PendingEgress = { connectionId: string; proxyInfo: unknown };
