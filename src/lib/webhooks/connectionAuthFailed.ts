@@ -149,15 +149,26 @@ export function notifyOnExpiredTransition(
 ): boolean {
   if (after.testStatus !== "expired" || before.testStatus === "expired") return false;
   if (after.lastErrorType === "provider_deprecated") return false;
-  const updateCode = typeof update.errorCode === "string" ? update.errorCode : null;
   return notifyConnectionAuthFailed({
-    provider: typeof after.provider === "string" ? after.provider : null,
+    provider: stringOrNull(after.provider),
     connectionId: String(after.id ?? ""),
-    name: typeof after.name === "string" ? after.name : null,
-    email: typeof after.email === "string" ? after.email : null,
+    name: stringOrNull(after.name),
+    email: stringOrNull(after.email),
     stage: context?.stage ?? "refresh",
     status: context?.status ?? null,
-    code: context?.code ?? updateCode ?? update.lastErrorType ?? null,
+    code: expiredTransitionCode(update, context),
     needsReauth: true,
   });
+}
+
+function stringOrNull(value: unknown): string | null {
+  return typeof value === "string" ? value : null;
+}
+
+/** The most specific code for the needs-re-auth edge: caller context, then the written row. */
+function expiredTransitionCode(
+  update: Record<string, unknown>,
+  context?: ConnectionAuthFailureContext
+): unknown {
+  return context?.code ?? stringOrNull(update.errorCode) ?? update.lastErrorType ?? null;
 }
