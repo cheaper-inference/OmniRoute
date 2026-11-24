@@ -30,11 +30,16 @@ export function BreadcrumbSeparator({ className, children, ...props }: Component
   );
 }
 
-export function BreadcrumbEllipsis({ className, ...props }: ComponentProps<"span">) {
+export interface BreadcrumbEllipsisProps extends ComponentProps<"span"> {
+  /** Visually hidden text of the collapsed levels. Defaults to "More". */
+  label?: string;
+}
+
+export function BreadcrumbEllipsis({ className, label = "More", ...props }: BreadcrumbEllipsisProps) {
   return (
     <span aria-hidden="true" data-slot="breadcrumb-ellipsis" className={cn("ci-breadcrumb__ellipsis", className)} {...props}>
       <MoreHorizontal />
-      <span className="ci-sr-only">More</span>
+      <span className="ci-sr-only">{label}</span>
     </span>
   );
 }

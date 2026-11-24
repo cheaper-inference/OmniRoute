@@ -14,6 +14,7 @@ import {
   SegmentedPanel,
   SegmentedTabs,
   Textarea,
+  Notice,
 } from "@/shared/components";
 interface ImportClaudeAuthModalProps {
   onClose: () => void;
@@ -457,11 +458,11 @@ export function ImportClaudeAuthModal({ onClose, onSuccess }: ImportClaudeAuthMo
                   }
                 >
                   <Textarea
+                    mono
                     id="claude-import-single-paste"
                     value={singlePasteText}
                     onChange={(e) => setSinglePasteText(e.target.value)}
                     rows={6}
-                    className="font-mono text-xs"
                     placeholder='{ "claudeAiOauth": { ... } }'
                   />
                 </Field>
@@ -574,6 +575,7 @@ export function ImportClaudeAuthModal({ onClose, onSuccess }: ImportClaudeAuthMo
                       : "Paste an array of objects: [{ json, name?, email? }, ...]"}
                   </p>
                   <Textarea
+                    mono
                     value={bulkPasteText}
                     onChange={(e) => handleBulkPasteChange(e.target.value)}
                     rows={6}
@@ -582,7 +584,6 @@ export function ImportClaudeAuthModal({ onClose, onSuccess }: ImportClaudeAuthMo
                         ? t("claudeImportBulkModePaste")
                         : "Paste JSON array"
                     }
-                    className="font-mono text-xs"
                     placeholder="[{ ... }, { ... }]"
                   />
                 </div>
@@ -725,21 +726,19 @@ export function ApplyClaudeAuthModal({
     <Modal isOpen={isOpen} title={title} onClose={onClose}>
       <div className="flex flex-col gap-4">
         <div>
-          <div className="text-xs uppercase text-text-muted mb-1">{targetLabel}</div>
+          <div className="ci-eyebrow mb-1">{targetLabel}</div>
           <code className="block rounded bg-bg-subtle px-2 py-1.5 text-xs font-mono text-text-main">
             ~/.claude/.credentials.json
           </code>
           <p className="mt-1 text-xs text-text-muted">{t("providerDetailPathAutoDetected")}</p>
         </div>
         <div>
-          <div className="text-xs uppercase text-text-muted mb-1">{backupLabel}</div>
+          <div className="ci-eyebrow mb-1">{backupLabel}</div>
           <code className="block rounded bg-bg-subtle px-2 py-1.5 text-xs font-mono text-text-main">
             {"~/.claude/credentials-{timestamp}.bak"}
           </code>
         </div>
-        <div className="rounded bg-info/10 border border-info/20 px-3 py-2 text-xs text-info">
-          {mcpHint}
-        </div>
+        <Notice variant="info">{mcpHint}</Notice>
         <p className="text-sm text-text-muted">{warning}</p>
         <Checkbox
           label={confirmText}

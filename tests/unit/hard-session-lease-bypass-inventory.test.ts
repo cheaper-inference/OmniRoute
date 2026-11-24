@@ -68,6 +68,10 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // #13987: System One decisions (/v1/systemone), same
     // scoped quota-preflight credential lookup as /v1/classify (class B).
     "src/app/api/v1/_shared/systemOneRoute.ts": 1,
+    // #18838 (salvage): native OpenAI Decisions (/v1/decisions), the same scoped
+    // quota-preflight lookup as /v1/systemone, handed to the decision credential resolver
+    // inside the key's connection scope; it posts a typed decision, never chat (class B).
+    "src/app/api/v1/_shared/decisionsRoute.ts": 1,
     // GHSA-3w2r: keyless providers (local zero-config defaults, keyless
     // remotes) look up an in-scope connection for a connection-scoped API key
     // before running (chat's #9057 rule) — one extra scoped lookup per site.
@@ -211,7 +215,10 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // management route; the per-model probes it dispatches still go through the
     // fenced chat pipeline, so it never selects a connection itself (class C).
     "src/app/api/models/test-all/route.ts": 1,
-    "src/app/api/monitoring/health/route.ts": 1,
+    // The health payload reads every row for its counts; `?provider=<id>` reads the active rows
+    // of one provider for a pool summary (counts only). Both are monitoring reads behind
+    // management auth, never connection selection or dispatch (class C).
+    "src/app/api/monitoring/health/route.ts": 2,
     "src/app/api/oauth/[provider]/[action]/route.ts": 4,
     // Microsoft 365 sign-in: behind the OAuth route's management guard, the authorize step reads
     // the rows only to confirm a reconnect target exists; no selection or dispatch (class C).
