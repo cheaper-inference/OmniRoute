@@ -336,7 +336,7 @@ vendor extension if the route is classified by `routeGuard.ts`:
 
 | routeGuard.ts classification  | YAML annotation            | Enforcement                                     |
 | ----------------------------- | -------------------------- | ----------------------------------------------- |
-| `LOCAL_ONLY_API_PREFIXES`     | `x-loopback-only: true`    | Blocked from non-loopback for every method      |
+| `LOCAL_ONLY_API_PREFIXES`     | `x-loopback-only: true`    | Locality tier applies unless exempted          |
 | `LOCAL_ONLY_API_GET_EXEMPTIONS` | none on the exempted operation | Safe methods (GET/HEAD/OPTIONS) stay reachable on those paths |
 | `ALWAYS_PROTECTED_API_PATHS`  | `x-always-protected: true` | Auth required even with `requireLogin=false`    |
 | Internal admin/debug route    | `x-internal: true`         | Hidden from /dashboard/api-endpoints by default |

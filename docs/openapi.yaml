@@ -6013,7 +6013,6 @@ paths:
       description: >-
         Returns live supervisor state and DB metadata (no apiKeyMasked — CLIProxyAPI
         does not use an injected API key).
-        **LOCAL_ONLY** — loopback only.
       responses:
         "200":
           description: Status response
