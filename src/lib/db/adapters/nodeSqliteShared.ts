@@ -166,10 +166,15 @@ export function createNodeSqliteAdapterFromDatabase(
       }
       stmtCache.clear();
     } catch {}
+    let failure = false;
     try {
       db.close();
-    } catch {}
-    _isOpen = false;
+    } catch {
+      // The driver refused to close. Do not report a state we did not observe:
+      // the flag below follows the driver when it exposes one.
+      failure = true;
+    }
+    _isOpen = typeof db.isOpen === "boolean" ? db.isOpen : !failure;
   }
 
   return {

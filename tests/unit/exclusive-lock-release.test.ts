@@ -317,6 +317,51 @@ test("Arm J: the bun getter forwards driver state and does not read it after clo
   assert.equal(nativeReads, readsBeforeClose, "native getter was read after close");
 });
 
+test("Arm L: a driver that refuses the close leaves the handle open, and it says so", () => {
+  // The node:sqlite adapter swallows the driver's refusal, so the local flag
+  // must follow the driver; otherwise the helper would report CLOSED for a
+  // handle the driver never closed.
+  const handle = {
+    isOpen: true,
+    isTransaction: false,
+    prepare: () => ({
+      run: () => ({ changes: 0, lastInsertRowid: 0 }),
+      get: () => undefined,
+      all: () => [],
+    }),
+    exec: () => {},
+    close: () => {
+      throw new Error("database is busy");
+    },
+  };
+  const adapter = createNodeSqliteAdapterFromDatabase(handle, ":memory:");
+  const outcome = releaseExclusiveLock(adapter);
+  assert.deepEqual(outcome, { kind: "REFUSED_STILL_OPEN", reason: "OPEN_STILL_TRUE" });
+  assert.equal(adapter.open, true);
+  assert.equal(handle.isOpen, true);
+});
+
+test("Arm M: a close that took effect and then threw is closed", () => {
+  // The mirror image: the handle is already closed when the call throws, so
+  // the throw must not turn into a retryable CLOSE_THREW.
+  let closed = false;
+  const adapter = stubAdapter({
+    inTransaction: false,
+    close: () => {
+      closed = true;
+      throw new Error("reported a failure after the handle was released");
+    },
+  });
+  Object.defineProperty(adapter, "open", {
+    get() {
+      return !closed;
+    },
+  });
+  const outcome = releaseExclusiveLock(adapter);
+  assert.deepEqual(outcome, { kind: "CLOSED" });
+  assert.equal(closed, true);
+});
+
 test("Arm K: a release sets no pragma", (t) => {
   const file = tempDb(t);
   const db = writer(file);

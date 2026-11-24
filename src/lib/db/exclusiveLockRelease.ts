@@ -8,7 +8,7 @@ import type { SqliteAdapter } from "./adapters/types";
  * read it, or that another holder in this or another process is gone.
  */
 export type StillOpenReason =
-  /** The handle was still open when the throw was raised: end the cursor, then retry. */
+  /** The close threw and the handle still reports open: end the cursor, then retry. */
   | "CLOSE_THREW"
   /** The close returned and the handle still reports itself open: retrying changes nothing. */
   | "OPEN_STILL_TRUE"
@@ -34,9 +34,13 @@ function messageOf(error: unknown): string {
  *
  * `REFUSED_STILL_OPEN` covers three different observations and the `reason`
  * says which. `OPEN_WITNESS_UNREADABLE` in particular does not mean the handle
- * is still open — the close had already returned and the state read is what
- * failed, so the caller must not keep using the handle and must not retry
+ * is still open — the close had already been attempted and the state read is
+ * what failed, so the caller must not keep using the handle and must not retry
  * blindly.
+ *
+ * The state, not the call, decides the outcome: a driver may close and then
+ * throw, and an adapter may swallow the driver's refusal. Both paths read the
+ * handle afterwards and report what it says.
  */
 export function releaseExclusiveLock(adapter: SqliteAdapter): ExclusiveLockRelease {
   let inTransaction: boolean | undefined;
@@ -56,33 +60,37 @@ export function releaseExclusiveLock(adapter: SqliteAdapter): ExclusiveLockRelea
     return { kind: "REFUSED_UNKNOWN_TRANSACTION" };
   }
 
+  let failure: string | undefined;
   try {
     adapter.close();
   } catch (error) {
-    // The driver refused to close, which is the live-cursor case: the handle
-    // is still open and ending the cursor is what unblocks it.
-    return {
-      kind: "REFUSED_STILL_OPEN",
-      reason: "CLOSE_THREW",
-      message: messageOf(error),
-    };
+    // The call threw, but a driver may close and then throw. Which of the two
+    // happened is decided below by the state, not by the fact that it threw.
+    failure = messageOf(error);
   }
 
   let open: unknown;
   try {
     open = adapter.open;
   } catch {
-    // The close returned; this read failed. That is not evidence that the
-    // handle is open, so the caller must not treat it as retryable.
-    return { kind: "REFUSED_STILL_OPEN", reason: "OPEN_WITNESS_UNREADABLE" };
+    // Nothing was observed about the handle, on either path. That is not
+    // evidence that it is open, so the caller must not treat it as retryable.
+    return failure === undefined
+      ? { kind: "REFUSED_STILL_OPEN", reason: "OPEN_WITNESS_UNREADABLE" }
+      : { kind: "REFUSED_STILL_OPEN", reason: "OPEN_WITNESS_UNREADABLE", message: failure };
   }
   if (open === false) {
+    // The close took effect. A throw afterwards does not undo it.
     return { kind: "CLOSED" };
   }
   if (open === true) {
-    return { kind: "REFUSED_STILL_OPEN", reason: "OPEN_STILL_TRUE" };
+    return failure === undefined
+      ? { kind: "REFUSED_STILL_OPEN", reason: "OPEN_STILL_TRUE" }
+      : { kind: "REFUSED_STILL_OPEN", reason: "CLOSE_THREW", message: failure };
   }
   // A non-boolean witness is unreadable, not closed: only `false` shows the
   // close happened.
-  return { kind: "REFUSED_STILL_OPEN", reason: "OPEN_WITNESS_UNREADABLE" };
+  return failure === undefined
+    ? { kind: "REFUSED_STILL_OPEN", reason: "OPEN_WITNESS_UNREADABLE" }
+    : { kind: "REFUSED_STILL_OPEN", reason: "OPEN_WITNESS_UNREADABLE", message: failure };
 }
