@@ -25,6 +25,7 @@ import { getCachedProxyHealth } from "@/lib/proxyHealth";
 import { getRecentEgressIpForProxy, getRecentEgressIpsForProxy } from "../proxyLogs";
 import { egressKeyForAddresses, normalizeEgressAddress } from "@/shared/network/egressAddress";
 import { readOperatorEgressForMember } from "../proxyOperatorEgress";
+import { syncRotatingEgressExemptions } from "./rotatingEgress";
 import type { JsonRecord, ProxyScope, ProxyRotationStrategy } from "./types";
 import { PROXY_ROTATION_STRATEGIES, DEFAULT_PROXY_ROTATION_STRATEGY } from "./types";
 import {
@@ -170,6 +171,13 @@ function eligibleMemberIndexes(
   return isProxySkipRecentlyFailedEnabled() ? eligible : null;
 }
 
+// A rotating endpoint (rotating_egress = 1) hands out a new exit address per connection,
+// so the address it was last observed on says nothing about the next request: it never
+// counts as sharing a refused neighbor's address. Rows without the column are not rotating.
+function isRotatingEgressRow(row: unknown): boolean {
+  return Number((row as Record<string, unknown> | null)?.rotating_egress) === 1;
+}
+
 // Observed egress keys (an exact address, or the range an exit rotates inside) seeded
 // only from members the refusal memory already sets aside; matches
 // buildHotEgressPredicate's seed discipline. Only scopes in the egress-bucketed lock
@@ -199,6 +207,7 @@ function addressScopeFor(
   }
   return {
     isShared: (row: unknown) => {
+      if (isRotatingEgressRow(row)) return false;
       for (const key of readEgressKeysForMember(row, nowMs).keys) {
         if (hot.has(key)) return true;
       }
@@ -208,7 +217,7 @@ function addressScopeFor(
       if (isProxyAvoided(key, nowMs)) return true;
       if (key === null) return false;
       const row = byKey.get(key);
-      if (row === undefined) return false;
+      if (row === undefined || isRotatingEgressRow(row)) return false;
       for (const key of readEgressKeysForMember(row, nowMs).keys) {
         if (hot.has(key)) return true;
       }
@@ -543,6 +552,7 @@ export function buildHotEgressPredicate(
   }
   if (hot.size === 0) return none;
   return (candidate: unknown) => {
+    if (isRotatingEgressRow(candidate)) return false;
     for (const key of readEgressKeysForMember(candidate, nowMs).keys) {
       if (hot.has(key)) return true;
     }
@@ -819,7 +829,7 @@ function fetchAlivePoolRows(
   matchAnyScopeId: boolean
 ): JsonRecord[] {
   const baseSelect =
-    "SELECT p.id, p.name, p.type, p.host, p.port, p.username, p.password, p.notes, p.family, a.position AS __pos, a.id AS __aid " +
+    "SELECT p.id, p.name, p.type, p.host, p.port, p.username, p.password, p.notes, p.family, p.rotating_egress, a.position AS __pos, a.id AS __aid " +
     "FROM proxy_assignments a JOIN proxy_registry p ON p.id = a.proxy_id WHERE a.scope = ? ";
   const order = " ORDER BY a.position ASC, a.id ASC";
   if (matchAnyScopeId) {
@@ -864,6 +874,7 @@ function resolveScopePoolInternal(
     sessionKey?: string | null;
   }
 ): ReturnType<typeof toRegistryProxyResolution> | null {
+  syncRotatingEgressExemptions();
   const rows = fetchAlivePoolRows(
     db,
     scope,

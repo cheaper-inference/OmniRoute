@@ -15,6 +15,7 @@ import { isProxySkipRecentlyFailedEnabled } from "@/shared/utils/featureFlags";
 import { invalidateDbCache } from "./readCache";
 import { encrypt, decrypt } from "./encryption";
 import { getProxyRegistryGeneration, resolveProxyForScopeFromRegistry } from "./proxies";
+import { syncRotatingEgressExemptions } from "./proxies/rotatingEgress";
 import { isEgressBucketedLockScope } from "@omniroute/open-sse/config/providerErrorRules.ts";
 import { getComboModelProvider as getComboEntryProvider } from "@/lib/combos/steps";
 import {
@@ -704,6 +705,7 @@ export async function resolveProxyForConnection(
     refusalSeq: getProxyRefusalSeq(),
   };
   const db = getDbInstance();
+  syncRotatingEgressExemptions();
   const cached = proxyResolutionCache.get(cacheKey);
   if (
     cached &&
