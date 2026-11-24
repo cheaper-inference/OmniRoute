@@ -1,0 +1,1 @@
+- **feat(antigravity):** Add an authenticated Settings → Resilience toggle for adaptive account/model health. Persisted values override the environment default and apply to new requests without restart.

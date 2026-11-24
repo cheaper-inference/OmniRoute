@@ -240,6 +240,7 @@ export const preferredAccountFailoverSchema = z
 export const updateResilienceSchema = z
   .object({
     preferredAccountFailover: preferredAccountFailoverSchema.optional(),
+    antigravityAdaptiveHealth: z.object({ enabled: z.boolean().optional() }).strict().optional(),
     antigravityTimingTelemetry: z.object({ enabled: z.boolean().optional() }).strict().optional(),
     requestQueue: requestQueueSettingsSchema.optional(),
     connectionCooldown: z
@@ -300,6 +301,7 @@ export const updateResilienceSchema = z
     const provided = [
       value.requestQueue,
       value.preferredAccountFailover,
+      value.antigravityAdaptiveHealth,
       value.antigravityTimingTelemetry,
       value.connectionCooldown,
       value.providerBreaker,
