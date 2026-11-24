@@ -605,4 +605,20 @@ export const APIKEY_PROVIDERS_REGIONAL = {
     website: "https://apmix.ai",
     apiHint: "Get your API key from the Apmix dashboard (apmix.ai/dashboard).",
   },
+  infomaniak: {
+    id: "infomaniak",
+    serviceKinds: ["llm"],
+    alias: "imk",
+    name: "Infomaniak AI Tools",
+    icon: "cloud",
+    color: "#0098FF",
+    textIcon: "IMK",
+    website:
+      "https://developer.infomaniak.com/docs/api/post/2/ai/%7Bproduct_id%7D/openai/v1/chat/completions",
+    authHint:
+      "Create an API token with the AI Tools scope in the Infomaniak Manager. Base URL must include your AI Tools product id, for example https://api.infomaniak.com/2/ai/<product_id>/openai/v1.",
+    apiHint:
+      "OmniRoute probes <baseUrl>/models and routes chat traffic to <baseUrl>/chat/completions.",
+    passthroughModels: true,
+  },
 };

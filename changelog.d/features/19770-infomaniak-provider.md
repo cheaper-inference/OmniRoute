@@ -1,0 +1,1 @@
+- **feat(providers):** Infomaniak AI Tools (`infomaniak`, alias `imk`) as a built-in OpenAI-compatible provider; the per-account product id lives in the connection Base URL and models are discovered live ([#19770](https://github.com/cheaper-inference/OmniRoute/pull/19770))

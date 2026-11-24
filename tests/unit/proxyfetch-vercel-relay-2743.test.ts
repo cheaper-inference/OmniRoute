@@ -187,3 +187,67 @@ test("a non-vercel proxy context never takes the relay branch", async () => {
 
   assert.equal(relayCalls.length, 0, "http proxy context must not hit the vercel relay sink");
 });
+
+// --------------------------------------------------------------------------
+// 3. Redirects: the relay hands a 3xx back; undici must never follow it itself
+// --------------------------------------------------------------------------
+
+function redirectingSink(location: string) {
+  const calls: FetchCall[] = [];
+  const sink = (async (input: unknown, init: RequestInit = {}) => {
+    calls.push({ input, init });
+    if (calls.length === 1) return new Response(null, { status: 307, headers: { location } });
+    return Response.json({ via: "relay-after-redirect" });
+  }) as unknown as typeof globalThis.fetch;
+  return { calls, sink };
+}
+
+test("relay redirects are followed through the relay, never directly to the Location", async () => {
+  const { calls, sink } = redirectingSink("https://other.example/v2?y=1");
+  const response = await runWithProxyContext(VERCEL_CTX, () =>
+    proxyFetch(
+      "https://api.anthropic.com/v1/messages",
+      { method: "POST", body: "{}", headers: { authorization: "Bearer k" } },
+      { undiciFetch: sink as never }
+    )
+  );
+
+  assert.deepEqual(await response.json(), { via: "relay-after-redirect" });
+  assert.equal(calls.length, 2);
+  for (const call of calls) {
+    assert.equal(call.input, "https://omniroute-relay-abc123.vercel.app");
+    assert.equal(call.init.redirect, "manual", "undici must not follow the relay's 3xx");
+  }
+  const hop = new Headers(calls[1].init.headers);
+  assert.equal(hop.get("x-relay-target"), "https://other.example");
+  assert.equal(hop.get("x-relay-path"), "/v2?y=1");
+  assert.equal(hop.get("authorization"), null, "credentials dropped across origins");
+});
+
+test("a relay redirect fails a redirect: error caller without a second dispatch", async () => {
+  const { calls, sink } = redirectingSink("http://attacker.example/v1/chat/completions");
+  await assert.rejects(
+    runWithProxyContext(VERCEL_CTX, () =>
+      proxyFetch(
+        "https://api.anthropic.com/v1/messages",
+        { method: "POST", body: "{}", redirect: "error" },
+        { undiciFetch: sink as never }
+      )
+    ),
+    /redirect refused via relay/
+  );
+  assert.equal(calls.length, 1);
+});
+
+test("a redirect: manual caller gets the relay's 3xx as is", async () => {
+  const { calls, sink } = redirectingSink("https://other.example/v2");
+  const response = await runWithProxyContext(VERCEL_CTX, () =>
+    proxyFetch(
+      "https://api.anthropic.com/v1/messages",
+      { method: "POST", body: "{}", redirect: "manual" },
+      { undiciFetch: sink as never }
+    )
+  );
+  assert.equal(response.status, 307);
+  assert.equal(calls.length, 1);
+});

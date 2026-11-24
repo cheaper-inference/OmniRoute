@@ -13,6 +13,7 @@ import { directFetchWithBoundedResponseStart } from "./directResponseStartTimeou
 import { stampOwnListenerSelfHop } from "./selfHop.ts";
 import { recordFinalTransportOutcome, recordProxiedSuccess } from "./proxyTransportOutcome.ts";
 import { sanitizeTransportError } from "./proxyTransportError.ts";
+import { REDIRECT_STATUSES, redirectHopOptions } from "./redirectHop.ts";
 import { redactProxyDetailsInMessage } from "./proxyFetchRedaction.ts";
 import { dispatchDirectFetch } from "./proxyFetchDirectTransport.ts";
 import { tryTlsSend, isTlsSendEligible } from "./proxyFetchTlsTransport.ts";
@@ -136,7 +137,42 @@ function relayTimeout(url: string): Error {
   return error;
 }
 
+const MAX_RELAY_REDIRECTS = 5;
+
+/**
+ * The relays hand a 3xx back instead of following it. undici must not follow that Location
+ * itself: the hop would skip the relay and carry the x-relay-* headers to the redirect target.
+ * So the relay fetch is always "manual"; a "follow" caller is followed hop by hop through the relay.
+ */
 async function sendRelay(
+  input: RequestInfo | URL,
+  options: FetchWithDispatcherOptions,
+  deps: ProxyFetchDeps,
+  config: RelayConfig,
+  trafficProxy: unknown,
+  target: string
+): Promise<Response> {
+  const mode = options.redirect ?? "follow";
+  let url = target;
+  let hopOptions: FetchWithDispatcherOptions = { ...options, redirect: "manual" };
+  for (let hop = 0; ; hop++) {
+    const response = await sendRelayOnce(input, hopOptions, deps, config, trafficProxy, url);
+    const location = REDIRECT_STATUSES.has(response.status)
+      ? response.headers.get("location")
+      : null;
+    if (!location || mode === "manual") return response;
+    void response.body?.cancel().catch(() => {});
+    if (mode === "error") throw new TypeError("fetch failed: redirect refused via relay");
+    if (hop >= MAX_RELAY_REDIRECTS) {
+      throw new TypeError(`fetch failed: relay stopped after ${MAX_RELAY_REDIRECTS} redirects`);
+    }
+    const next = new URL(location, url).toString();
+    hopOptions = redirectHopOptions(hopOptions, response.status, url, next);
+    url = next;
+  }
+}
+
+async function sendRelayOnce(
   input: RequestInfo | URL,
   options: FetchWithDispatcherOptions,
   deps: ProxyFetchDeps,
