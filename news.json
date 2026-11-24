@@ -2,6 +2,25 @@
   "schemaVersion": 2,
   "items": [
     {
+      "id": "radar-free-2026-11",
+      "active": false,
+      "publishedAt": "2026-11-24T00:00:00.000Z",
+      "text": {
+        "en": {
+          "title": "OmniRoute Radar is free for everyone",
+          "message": "Radar keeps the free-tier catalog current between releases, and now it is free for everyone. It is opt-in and GET-only, with no telemetry. Radar never receives your prompts, traffic or provider settings. New free offers are added every week.",
+          "linkLabel": "Learn how to turn it on"
+        },
+        "pt-BR": {
+          "title": "O OmniRoute Radar é grátis para todos",
+          "message": "O Radar mantém o catálogo de cotas grátis atualizado entre as versões, e agora é grátis para todos. É opcional (opt-in) e só faz leitura (GET-only), sem telemetria. O Radar nunca recebe seus prompts, seu tráfego nem a configuração dos provedores. Ofertas grátis novas entram toda semana.",
+          "linkLabel": "Saiba como ativar"
+        }
+      },
+      "link": "https://radar.omniroute.online/",
+      "icon": "radar"
+    },
+    {
       "id": "radar-launch-2026-08",
       "active": false,
       "publishedAt": "2026-08-09T00:00:00.000Z",
@@ -17,7 +36,7 @@
           "linkLabel": "Conheça o Radar"
         }
       },
-      "link": "https://radar.omniroute.online/planos",
+      "link": "https://radar.omniroute.online/",
       "icon": "radar"
     },
     {
