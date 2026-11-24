@@ -141,11 +141,15 @@ describe("compression preservation and validation", () => {
     assert.match(output, /`the exact token`/);
   });
 
-  it("accepts preserved fenced and inline code blocks after whitespace normalization (#21117)", () => {
-    const phpPrompt =
-      "Here is the loader:\n```php\n<?php require __DIR__ . '/app.php';\n```\nExplain it.";
+  it("keeps preserved fenced and inline code byte-identical and valid (#21117)", () => {
+    const phpBlock = "```php\n<?php require __DIR__ . '/app.php';\n```\n";
+    const jsBlock = '```js\nconst s = "hello   world .  x";\nfoo ( a , b );\n```\n';
+    const inline = "`require __DIR__ . '/app.php'`";
+    const prompt =
+      `Here is the loader:\n${phpBlock}Also look at ${inline}  in the   loader .\n` +
+      `And this one:\n${jsBlock}Explain it   please .`;
     const result = cavemanCompress(
-      { messages: [{ role: "user", content: phpPrompt }] },
+      { messages: [{ role: "user", content: prompt }] },
       {
         enabled: true,
         compressRoles: ["user"],
@@ -158,19 +162,32 @@ describe("compression preservation and validation", () => {
     assert.equal(result.stats?.fallbackApplied, undefined);
     assert.equal(result.stats?.validationErrors, undefined);
 
-    const inlineOrig = "Please check `require __DIR__ . '/app.php'` in the loader.";
-    const inlineCompressed = "Check `require __DIR__. '/app.php'` in loader.";
-    const inlineValidation = validateCompression(inlineOrig, inlineCompressed);
-    assert.equal(inlineValidation.valid, true);
-    assert.equal(inlineValidation.fallbackApplied, false);
-    assert.deepEqual(inlineValidation.errors, []);
+    const body = result.body as { messages: Array<{ content: string }> };
+    const output = body.messages[0].content;
+    assert.notEqual(output, prompt, "prose outside the blocks should still be compressed");
+    for (const block of [phpBlock, jsBlock, inline]) {
+      assert.ok(output.includes(block), `preserved block must stay byte-identical: ${block}`);
+    }
+    assert.equal(validateCompression(prompt, output).valid, true);
+  });
 
-    const mutatedValidation = validateCompression(
+  it("still rejects a mutated preserved block (validator stays strict)", () => {
+    const phpPrompt =
+      "Here is the loader:\n```php\n<?php require __DIR__ . '/app.php';\n```\nExplain it.";
+    const mutated = validateCompression(
       phpPrompt,
       "Here is loader:\n```php\n<?php require __DIR__ . '/other.php';\n```\nExplain it."
     );
-    assert.equal(mutatedValidation.valid, false);
-    assert.equal(mutatedValidation.fallbackApplied, true);
-    assert.match(mutatedValidation.errors[0] ?? "", /fenced code block changed or missing/);
+    assert.equal(mutated.valid, false);
+    assert.equal(mutated.fallbackApplied, true);
+    assert.match(mutated.errors[0] ?? "", /fenced code block changed or missing/);
+
+    // Whitespace-only changes inside a preserved block are NOT tolerated either.
+    const spaced = validateCompression(
+      phpPrompt,
+      "Here is loader:\n```php\n<?php require __DIR__. '/app.php';\n```\nExplain it."
+    );
+    assert.equal(spaced.valid, false);
+    assert.equal(spaced.fallbackApplied, true);
   });
 });

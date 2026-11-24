@@ -7,24 +7,17 @@ export interface ValidationResult {
   fallbackApplied: boolean;
 }
 
-function stripWhitespace(text: string): string {
-  return text.replace(/\s+/g, "");
-}
-
 function requireExactPresence(
   label: string,
   originalItems: string[],
   compressed: string,
   errors: string[]
 ) {
-  let collapsed: string | undefined;
   for (const item of originalItems) {
-    if (compressed.includes(item)) continue;
-    collapsed ??= stripWhitespace(compressed);
-    const strippedItem = stripWhitespace(item);
-    if (strippedItem.length > 0 && collapsed.includes(strippedItem)) continue;
-    const preview = collapseWhitespaceForPreview(item).slice(0, 80);
-    errors.push(`${label} changed or missing: ${preview}`);
+    if (!compressed.includes(item)) {
+      const preview = collapseWhitespaceForPreview(item).slice(0, 80);
+      errors.push(`${label} changed or missing: ${preview}`);
+    }
   }
 }
 
