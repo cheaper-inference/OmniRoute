@@ -6,9 +6,11 @@
 // 360-minute default, and a stuck candidate costs the merge queue its whole checksTimeoutMinutes.
 //
 // Two guarantees are pinned here:
-//   1. the job has a `timeout-minutes` that leaves room for its longest legitimate run (the merge
-//      queue's base check runs the unsharded unit suite in this job: 94 min measured) and stays
-//      below the queue's own per-candidate limit;
+//   1. the job has a `timeout-minutes` that leaves room for its longest legitimate run (a TIA
+//      subset that selects nearly the whole unit suite runs unsharded in this job: 92.5 min
+//      measured; the merge queue's base check runs its suite in the base-check-unit shards since
+//      2026-11-21, see quality-base-check-unit-shards.test.mjs) and stays below the queue's own
+//      per-candidate limit;
 //   2. every `npm run` of the gates step goes through `run_gate` (a per-gate wall-clock limit,
 //      one retry after a timeout), and the step still counts failures the way it did: the step is
 //      EXECUTED with a fake npm and the limits shortened, not string-matched.
@@ -29,9 +31,9 @@ const job = workflow.jobs["fast-gates"];
 const GATES_STEP = "Quality gates (all, non-fail-fast)";
 const step = job.steps.find((s) => s.name === GATES_STEP);
 
-// The longest legitimate run of this job: the merge queue's base check (an omni-queue/** base-check
-// candidate runs the whole unsharded unit suite here), 94 min on basecheck-07a790f5c158.
-const BASE_CHECK_MINUTES = 94;
+// The longest legitimate run of this job: a TIA subset of 6,014 test files on a pull request
+// (run 44909506327, 92.5 min, 2026-11-21). The base check no longer runs here.
+const LONGEST_RUN_MINUTES = 93;
 const FLOOR_MINUTES = 120;
 
 const commandLines = (script) =>
@@ -40,12 +42,12 @@ const commandLines = (script) =>
     .map((line) => line.trim())
     .filter((line) => line && !line.startsWith("#"));
 
-test("fast-gates has a job time limit between the base check and the queue's limit", () => {
+test("fast-gates has a job time limit between its longest run and the queue's limit", () => {
   const minutes = job["timeout-minutes"];
   assert.equal(typeof minutes, "number", "fast-gates must declare a numeric timeout-minutes");
   assert.ok(
-    minutes >= FLOOR_MINUTES && minutes > BASE_CHECK_MINUTES,
-    `timeout-minutes ${minutes} must leave room for the ${BASE_CHECK_MINUTES}-minute base check`
+    minutes >= FLOOR_MINUTES && minutes > LONGEST_RUN_MINUTES,
+    `timeout-minutes ${minutes} must leave room for the ${LONGEST_RUN_MINUTES}-minute TIA subset`
   );
   const queueLimit = queueConfig.checksTimeoutMinutes;
   assert.equal(typeof queueLimit, "number", "config/merge-queue/config.json checksTimeoutMinutes");
