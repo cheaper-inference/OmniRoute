@@ -262,15 +262,15 @@ export async function snapshotGeminiDom(
 /**
  * Runs in the page: true when Gemini rendered its signed-out UI. A rotated-away or
  * expired cookie lands on the public page, where the composer still works but the
- * mode menu offers only "Sign in" and every Gemini 4 option is disabled.
+ * mode menu offers a "Sign in" button (live-confirmed, #21116).
+ *
+ * Deliberately NOT keyed on `accounts.google.com` links: a signed-in page can carry
+ * ServiceLogin / signin links (account chooser, "add account"), and a false positive
+ * would answer 401 for every request made with a good cookie.
  */
 export function isGeminiSignedOutInPage(doc?: Document): boolean {
   const d: Document = doc || document;
-  return Boolean(
-    d.querySelector('[data-test-id="mode-picker-sign-in-button"]') ||
-    d.querySelector('a[href*="accounts.google.com/ServiceLogin"]') ||
-    d.querySelector('a[href*="accounts.google.com/v3/signin"]')
-  );
+  return Boolean(d.querySelector('[data-test-id="mode-picker-sign-in-button"]'));
 }
 
 /** Null when the page cannot run in-page code (test fakes). */

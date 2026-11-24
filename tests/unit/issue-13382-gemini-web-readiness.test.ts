@@ -2,6 +2,7 @@
 // the composer. Readiness is the composer selector, bounded at 10s.
 import test from "node:test";
 import assert from "node:assert/strict";
+import { withGeminiMenu } from "./helpers/geminiWebMenu.ts";
 
 test("#13382 composer readiness replaces the fixed 3s wait", async () => {
   const playwright = await import("playwright");
@@ -12,22 +13,23 @@ test("#13382 composer readiness replaces the fixed 3s wait", async () => {
     ({
       newContext: async () => ({
         addCookies: async () => undefined,
-        newPage: async () => ({
-          on: () => undefined,
-          goto: async () => undefined,
-          waitForTimeout: async (ms: number) => {
-            waits.push(ms);
-          },
-          waitForSelector: async (selector: string) => {
-            selectors.push(selector);
-            if (selector.includes(".ql-editor")) return { click: async () => undefined };
-            return null;
-          },
-          keyboard: {
-            insertText: async () => undefined,
-            press: async () => undefined,
-          },
-        }),
+        newPage: async () =>
+          withGeminiMenu({
+            on: () => undefined,
+            goto: async () => undefined,
+            waitForTimeout: async (ms: number) => {
+              waits.push(ms);
+            },
+            waitForSelector: async (selector: string) => {
+              selectors.push(selector);
+              if (selector.includes(".ql-editor")) return { click: async () => undefined };
+              return null;
+            },
+            keyboard: {
+              insertText: async () => undefined,
+              press: async () => undefined,
+            },
+          }),
         cookies: async () => [],
       }),
       close: async () => undefined,

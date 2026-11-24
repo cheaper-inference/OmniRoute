@@ -12,9 +12,10 @@
  * model (and for the Extended Thinking control, #13381 follow-up comment
  * 2026-09-11), it tries the corresponding UI control, then READS BACK the
  * active-mode indicator to confirm the switch actually took effect before
- * the caller is allowed to proceed. `gemini-3.1-pro` is treated as the mode
- * `gemini.google.com/app` already opens to (no interaction needed); every
- * other advertised model requires a confirmed switch.
+ * the caller is allowed to proceed. Every advertised model requires a
+ * confirmed switch: there is no "default" mode that is assumed active, because
+ * an account's active mode varies (the #21116 reporter's is Hydrogen, whose
+ * menu has no "3.1 Pro"), and assuming it would answer under the wrong label.
  *
  * ⚠️ SELECTOR SET IS UNVALIDATED. Every CSS selector below is a best-effort
  * guess at Gemini's current DOM, not a value confirmed against a live
@@ -49,12 +50,7 @@ export type GeminiModeSelectionFailureReason =
 export interface GeminiWebModeDescriptor {
   /** The advertised `gweb/<model>` id, or a synthetic label for non-model controls. */
   readonly id: string;
-  /**
-   * true: this is the mode `gemini.google.com/app` already shows on load — no
-   * UI interaction is attempted, nothing to confirm.
-   */
-  readonly isDefault: boolean;
-  /** UNVALIDATED — opens/activates the control for this mode. Ignored when `isDefault`. */
+  /** UNVALIDATED — opens/activates the control for this mode. */
   readonly toggleSelector?: string;
   /** UNVALIDATED — element whose text proves which mode is now active. */
   readonly activeIndicatorSelector?: string;
@@ -90,13 +86,20 @@ const GEMINI_WEB_MODE_OPTION = '[role="menuitemradio"][data-test-id^="bard-mode-
  * honest behavior for a model this module cannot yet select.
  */
 export const GEMINI_WEB_MODEL_MODES: Readonly<Record<string, GeminiWebModeDescriptor>> = {
-  "gemini-3.1-pro": { id: "gemini-3.1-pro", isDefault: true },
-  "gemini-4-hydrogen": { id: "gemini-4-hydrogen", isDefault: false, menuSublabel: "4 Hydrogen" },
-  "gemini-4-neon": { id: "gemini-4-neon", isDefault: false, menuSublabel: "4 Neon" },
-  "gemini-4-carbon": { id: "gemini-4-carbon", isDefault: false, menuSublabel: "4 Carbon" },
+  // Sublabels (not localized): "4 Hydrogen", "4 Hydrogen Thinking" and "3.1 Pro" are the
+  // ones PGSCOM saw on a live account (#20842, 2026-11-20, Spanish UI); "4 Neon" and
+  // "4 Carbon" come from the #21116 account (pt-BR). A mode the menu lacks fails closed.
+  "gemini-3.1-pro": { id: "gemini-3.1-pro", menuSublabel: "3.1 Pro" },
+  "gemini-4-hydrogen": { id: "gemini-4-hydrogen", menuSublabel: "4 Hydrogen" },
+  "gemini-4-hydrogen-thinking": {
+    id: "gemini-4-hydrogen-thinking",
+    menuSublabel: "4 Hydrogen Thinking",
+  },
+  "gemini-4-neon": { id: "gemini-4-neon", menuSublabel: "4 Neon" },
+  "gemini-4-carbon": { id: "gemini-4-carbon", menuSublabel: "4 Carbon" },
   "gemini-4-argon": {
     id: "gemini-4-argon",
-    isDefault: false,
+
     toggleSelector:
       '[data-test-id="bard-mode-menu-button"], button[aria-haspopup="menu"][aria-label*="model" i]',
     activeIndicatorSelector:
@@ -105,7 +108,7 @@ export const GEMINI_WEB_MODEL_MODES: Readonly<Record<string, GeminiWebModeDescri
   },
   "gemini-3.7-flash": {
     id: "gemini-3.7-flash",
-    isDefault: false,
+
     toggleSelector:
       '[data-test-id="bard-mode-menu-button"], button[aria-haspopup="menu"][aria-label*="model" i]',
     activeIndicatorSelector:
@@ -114,7 +117,7 @@ export const GEMINI_WEB_MODEL_MODES: Readonly<Record<string, GeminiWebModeDescri
   },
   "gemini-3.1-flash-lite": {
     id: "gemini-3.1-flash-lite",
-    isDefault: false,
+
     toggleSelector:
       '[data-test-id="bard-mode-menu-button"], button[aria-haspopup="menu"][aria-label*="model" i]',
     activeIndicatorSelector:
@@ -126,7 +129,7 @@ export const GEMINI_WEB_MODEL_MODES: Readonly<Record<string, GeminiWebModeDescri
 /** The Extended Thinking control (#13381 follow-up, 2026-09-11) — account-dependent, not a model. */
 export const GEMINI_WEB_EXTENDED_THINKING_MODE: GeminiWebModeDescriptor = {
   id: "extended-thinking",
-  isDefault: false,
+
   toggleSelector:
     '[data-test-id="deep-think-toggle"], button[aria-label*="extended thinking" i], ' +
     'button[aria-label*="deep think" i]',
@@ -272,7 +275,6 @@ export async function selectGeminiUiMode(
   descriptor: GeminiWebModeDescriptor,
   timeoutMs = 5000
 ): Promise<GeminiModeSelectionResult> {
-  if (descriptor.isDefault) return { confirmed: true, descriptor };
   if (descriptor.menuSublabel) return selectGeminiMenuMode(page, descriptor, timeoutMs);
 
   const { toggleSelector, activeIndicatorSelector, expectedIndicatorPattern } = descriptor;

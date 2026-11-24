@@ -10,6 +10,7 @@
 
 import test from "node:test";
 import assert from "node:assert/strict";
+import { withGeminiMenu } from "./helpers/geminiWebMenu.ts";
 
 const { GeminiWebExecutor, buildGeminiToolResponse, buildGeminiToolPrompt } =
   await import("../../open-sse/executors/gemini-web.ts");
@@ -230,7 +231,7 @@ async function withMockedGeminiBrowser<T>(
             },
           },
         };
-        return page;
+        return withGeminiMenu(page);
       },
     }),
     close: async () => {},

@@ -164,6 +164,8 @@ test("menu mode: an option missing from the menu fails closed as mode_not_offere
   assert.deepEqual([r.confirmed, r.reason], [false, "mode_not_offered"]);
 });
 
+const CHECKED_PRO_OPTION = { testId: "bard-mode-option-pro", checked: true, locked: false };
+
 // ── Executor: no StreamGenerate at all, answer only in the DOM ───────────────
 
 const originalLaunch = playwright.chromium.launch;
@@ -185,7 +187,10 @@ function stubDomOnlyLaunch(answer: string) {
         // at 4 s so the DOM answer (stable after 2 s) wins the race.
         waitForTimeout: async (ms: number) => sleep(ms >= 10_000 ? 4000 : 5),
         waitForSelector: async () => ({ click: async () => {} }),
+        click: async () => {},
         evaluate: async (expression: string) => {
+          if (/"sublabel":/.test(expression)) return CHECKED_PRO_OPTION; // 3.1 Pro is picked from the menu
+          if (/mode-picker-sign-in-button/.test(expression)) return false;
           assert.match(expression, /model-response/);
           assert.match(expression, /const __name = \(f\) => f/);
           if (!sent) return { queries: 0, responses: 0, busy: false, text: "" };
@@ -197,7 +202,8 @@ function stubDomOnlyLaunch(answer: string) {
         keyboard: {
           type: async () => {},
           insertText: async () => {},
-          press: async () => {
+          press: async (key: string) => {
+            if (key === "Escape") return; // closes the model menu
             sent++;
           },
         },
@@ -317,7 +323,9 @@ test("a late, unreadable StreamGenerate body cannot replace the DOM answer", asy
         goto: async () => {},
         waitForTimeout: async (ms: number) => sleep(ms >= 10_000 ? 4000 : 5),
         waitForSelector: async () => ({ click: async () => {} }),
+        click: async () => {},
         evaluate: async (expression: string) => {
+          if (/"sublabel":/.test(expression)) return CHECKED_PRO_OPTION;
           if (/mode-picker-sign-in-button/.test(expression)) return false;
           return sent
             ? { queries: 1, responses: 1, busy: false, text: "pineapple" }
@@ -326,7 +334,8 @@ test("a late, unreadable StreamGenerate body cannot replace the DOM answer", asy
         keyboard: {
           type: async () => {},
           insertText: async () => {},
-          press: async () => {
+          press: async (key: string) => {
+            if (key === "Escape") return;
             sent++;
             void onResponse?.({
               url: () => "https://gemini.google.com/_/BardChatUi/data/x/StreamGenerate?rt=c",
@@ -352,4 +361,119 @@ test("a late, unreadable StreamGenerate body cannot replace the DOM answer", asy
   } as never);
   assert.equal(result.response.status, 200);
   assert.equal((await result.response.json()).choices[0].message.content, "pineapple");
+});
+
+// ── Review items (#21119): 3.1 Pro from the menu, signed-out heuristic ───────
+
+const { GEMINI_WEB_MODEL_MODES } =
+  await import("../../open-sse/executors/gemini-web/modeSelection.ts");
+const { resolveResponseTimeoutMs } =
+  await import("../../open-sse/executors/gemini-web/browserErrors.ts");
+
+// The #21116 reporter's menu: Hydrogen is the active mode and there is no "3.1 Pro" option.
+const REPORTER_MENU = {
+  "4 Hydrogen": { testId: "bard-mode-option-h", checked: true },
+  "4 Hydrogen Thinking": { testId: "bard-mode-option-ht", checked: false },
+  "4 Neon": { testId: "bard-mode-option-n", checked: false },
+};
+
+test("3.1 Pro is never assumed to be the active mode: no menu entry fails closed as mode_not_offered", async () => {
+  assert.equal(GEMINI_WEB_MODEL_MODES["gemini-3.1-pro"].menuSublabel, "3.1 Pro");
+  const r = await selectGeminiModel(menuPage(REPORTER_MENU, []), "gemini-3.1-pro", 200);
+  assert.deepEqual([r.confirmed, r.reason], [false, "mode_not_offered"]);
+});
+
+test("3.1 Pro is picked from the menu and read back when the account offers it", async () => {
+  const calls: string[] = [];
+  const menu = { ...REPORTER_MENU, "3.1 Pro": { testId: "bard-mode-option-p", checked: false } };
+  const r = await selectGeminiModel(menuPage(menu, calls), "gemini-3.1-pro", 200);
+  assert.equal(r.confirmed, true);
+  assert.ok(calls.includes('click [data-test-id="bard-mode-option-p"]'));
+});
+
+test("a locked 3.1 Pro option fails closed as mode_locked", async () => {
+  const menu = { "3.1 Pro": { testId: "bard-mode-option-upsell_PRO", checked: false } };
+  const r = await selectGeminiModel(menuPage(menu, []), "gemini-3.1-pro", 200);
+  assert.deepEqual([r.confirmed, r.reason], [false, "mode_locked"]);
+});
+
+test("4 Hydrogen Thinking is matched by its exact sublabel, never by the shorter 4 Hydrogen", async () => {
+  const calls: string[] = [];
+  const thinking = await selectGeminiModel(
+    menuPage(REPORTER_MENU, calls),
+    "gemini-4-hydrogen-thinking",
+    200
+  );
+  assert.equal(thinking.confirmed, true);
+  assert.ok(calls.includes('click [data-test-id="bard-mode-option-ht"]'));
+  const plain = await selectGeminiModel(menuPage(REPORTER_MENU, []), "gemini-4-hydrogen", 200);
+  assert.equal(plain.confirmed, true);
+  // Without the Thinking entry in the menu, the Thinking model must not fall back to 4 Hydrogen.
+  const { "4 Hydrogen Thinking": _omit, ...withoutThinking } = REPORTER_MENU;
+  const missing = await selectGeminiModel(
+    menuPage(withoutThinking, []),
+    "gemini-4-hydrogen-thinking",
+    200
+  );
+  assert.deepEqual([missing.confirmed, missing.reason], [false, "mode_not_offered"]);
+});
+
+test("gemini-4-hydrogen-thinking is advertised and gets the long Gemini 4 response timeout", async () => {
+  const { gemini_webProvider } =
+    await import("../../open-sse/config/providers/registry/gemini/web/index.ts");
+  assert.ok(
+    gemini_webProvider.models.some((m: { id: string }) => m.id === "gemini-4-hydrogen-thinking")
+  );
+  assert.ok(
+    resolveResponseTimeoutMs("gemini-4-hydrogen-thinking", {}) >
+      resolveResponseTimeoutMs("gemini-3.1-pro", {})
+  );
+});
+
+test("executor: gemini-3.1-pro on a menu without 3.1 Pro answers 400 and never types the prompt", async () => {
+  const typed: string[] = [];
+  playwright.chromium.launch = (async () => ({
+    newContext: async () => ({
+      addCookies: async () => {},
+      cookies: async () => [],
+      newPage: async () => ({
+        on: () => {},
+        goto: async () => {},
+        waitForTimeout: async () => {},
+        waitForSelector: async () => ({ click: async () => {} }),
+        click: async () => {},
+        // No "3.1 Pro" option in the menu; not signed out.
+        evaluate: async () => null,
+        keyboard: {
+          type: async (t: string) => void typed.push(t),
+          insertText: async (t: string) => void typed.push(t),
+          press: async () => {},
+        },
+      }),
+    }),
+    close: async () => {},
+  })) as unknown as typeof playwright.chromium.launch;
+  const result = await new GeminiWebExecutor().execute({
+    model: "gemini-3.1-pro",
+    body: { messages: [{ role: "user", content: "hello" }], stream: false },
+    stream: false,
+    credentials: { apiKey: "__Secure-1PSID=test-psid" },
+    signal: AbortSignal.timeout(5000),
+    log: null,
+  });
+  assert.equal(result.response.status, 400);
+  const body = await result.response.json();
+  assert.equal(body.error.code, "unsupported_control_for_provider");
+  assert.match(body.error.message, /does not offer it/);
+  assert.deepEqual(typed, []);
+});
+
+test("signed-out detection does not fire on a signed-in page that carries Google account links", () => {
+  const signedIn = new JSDOM(
+    `<body>${LIVE_LIKE_REPLY}
+      <a href="https://accounts.google.com/ServiceLogin?service=bard&continue=https://gemini.google.com">Add account</a>
+      <a href="https://accounts.google.com/v3/signin/identifier?flowName=GlifWebSignIn">Switch account</a>
+      <button data-test-id="bard-mode-menu-button">4 Hydrogen</button></body>`
+  ).window.document;
+  assert.equal(isGeminiSignedOutInPage(signedIn), false);
 });

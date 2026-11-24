@@ -28,6 +28,7 @@
 
 import test from "node:test";
 import assert from "node:assert/strict";
+import { withGeminiMenu } from "./helpers/geminiWebMenu.ts";
 
 const { GeminiWebExecutor } = await import("../../open-sse/executors/gemini-web.ts");
 const { checkGeminiWebUnsupportedControls, GEMINI_WEB_UNSUPPORTED_CONTROL_CODE } =
@@ -184,15 +185,16 @@ test(
     playwright.chromium.launch = (async () => ({
       newContext: async () => ({
         addCookies: async () => {},
-        newPage: async () => ({
-          on: () => {},
-          goto: async () => {},
-          waitForTimeout: async () => {},
-          // No Extended Thinking control exists in this fake page — every
-          // selector lookup reports "not found", proving the fail-closed path.
-          waitForSelector: async () => null,
-          keyboard: { type: async () => {}, insertText: async () => {}, press: async () => {} },
-        }),
+        newPage: async () =>
+          withGeminiMenu({
+            on: () => {},
+            goto: async () => {},
+            waitForTimeout: async () => {},
+            // No Extended Thinking control exists in this fake page — every
+            // selector lookup reports "not found", proving the fail-closed path.
+            waitForSelector: async () => null,
+            keyboard: { type: async () => {}, insertText: async () => {}, press: async () => {} },
+          }),
       }),
       close: async () => {},
     })) as unknown as typeof originalLaunch;
