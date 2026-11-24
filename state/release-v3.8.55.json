@@ -2,7 +2,27 @@
   "version": 1,
   "base": "release/v3.8.55",
   "paused": null,
-  "inFlight": null,
+  "inFlight": {
+    "batchId": "b30",
+    "kind": "batch",
+    "candidateRef": "omni-queue/release-v3.8.55/b30-e368cf45cbfe",
+    "candidateSha": "e368cf45cbfe0342dcabef2df83cd221ea8ef055",
+    "baseSha": "95b18be415924b7811625e6cc25ee510752704a3",
+    "treeSha": "8e5c7b630581aa0a0a84d53cab385778e6a57284",
+    "prs": [
+      {
+        "n": 21146,
+        "head": "37d66fabdcc7624575f7cb8f6e67c36e945ce04a",
+        "title": "chore(news): add the free Radar catalog item, inactive",
+        "author": "diegosouzapw",
+        "labeledAt": "2026-11-24T17:25:11Z"
+      }
+    ],
+    "stage": "testing",
+    "startedAt": "2026-11-24T17:42:15.976Z",
+    "attempts": 0,
+    "bisect": null
+  },
   "baseChecks": [
     {
       "baseSha": "0563eb2ec52bfd20ca39b3d4444df3cbd2316944",
@@ -81,8 +101,8 @@
     }
   },
   "counters": {
-    "batchSeq": 29,
-    "ciRuns": 33,
+    "batchSeq": 30,
+    "ciRuns": 34,
     "landedPrs": 0,
     "landedBatches": 0,
     "redBatches": 8,
@@ -2004,8 +2024,22 @@
       "sha": "c944e126c57d838a8c25656643264abe4a5d0239",
       "detail": "shadow mode: would merge-ff onto eff2a475edf1",
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45444649299"
+    },
+    {
+      "at": "2026-11-24T17:42:19.281Z",
+      "type": "batch-started",
+      "batchId": "b30",
+      "prs": [
+        21146
+      ],
+      "sha": "e368cf45cbfe0342dcabef2df83cd221ea8ef055",
+      "detail": "1 PR(s) on 95b18be41592; window 5",
+      "labeledAt": {
+        "21146": "2026-11-24T17:25:11Z"
+      },
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45451386157"
     }
   ],
-  "updatedAt": "2026-11-24T17:33:32.973Z",
+  "updatedAt": "2026-11-24T17:42:21.359Z",
   "batchWindow": 5
 }
