@@ -3,23 +3,30 @@
   "base": "release/v3.8.55",
   "paused": null,
   "inFlight": {
-    "batchId": "b33",
+    "batchId": "b34",
     "kind": "batch",
-    "candidateRef": "omni-queue/release-v3.8.55/b33-6fe53fde7957",
-    "candidateSha": "6fe53fde79571c6b1b8e6d50b75aa246d130db02",
-    "baseSha": "8967a3d85b906ffebdc6d7a32b2a2b4442135132",
-    "treeSha": "452bffb933940d1b9a83fb8dbba6fd7866d24f25",
+    "candidateRef": "omni-queue/release-v3.8.55/b34-b05619f054e7",
+    "candidateSha": "b05619f054e7408211402d21101220a00cf43d0f",
+    "baseSha": "c2944cc03feeb87572227315ae52c015ada722b3",
+    "treeSha": "2600be100cf2e7251ded971ad09ed3b2397e83aa",
     "prs": [
       {
-        "n": 21104,
-        "head": "d0662a94133f915cdfc69a5556b2b2eb22e90a72",
-        "title": "feat(db): add a session rotation strategy that keeps one conversation on one pool member",
+        "n": 21158,
+        "head": "76355c77af7edceac5677b086ea63a8105409a45",
+        "title": "refactor(dashboard): draw the shared quota bar with the UI Kit Progress",
         "author": "diegosouzapw",
-        "labeledAt": "2026-11-24T21:30:21Z"
+        "labeledAt": "2026-11-24T22:01:36Z"
+      },
+      {
+        "n": 21094,
+        "head": "47d3d9d306c851b3a512c69de578f1feb6d15973",
+        "title": "feat(sse): canonical free-catalog counts and the free-catalog facts",
+        "author": "diegosouzapw",
+        "labeledAt": "2026-11-24T22:41:01Z"
       }
     ],
     "stage": "testing",
-    "startedAt": "2026-11-24T21:53:59.671Z",
+    "startedAt": "2026-11-24T23:13:11.974Z",
     "attempts": 0,
     "bisect": null
   },
@@ -101,8 +108,8 @@
     }
   },
   "counters": {
-    "batchSeq": 33,
-    "ciRuns": 37,
+    "batchSeq": 34,
+    "ciRuns": 38,
     "landedPrs": 0,
     "landedBatches": 0,
     "redBatches": 8,
@@ -2143,8 +2150,45 @@
         "21104": "2026-11-24T21:30:21Z"
       },
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45495530004"
+    },
+    {
+      "at": "2026-11-24T23:12:42.627Z",
+      "type": "checks-green",
+      "batchId": "b33",
+      "prs": [
+        21104
+      ],
+      "sha": "6fe53fde79571c6b1b8e6d50b75aa246d130db02",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45507945239"
+    },
+    {
+      "at": "2026-11-24T23:12:52.465Z",
+      "type": "would-land",
+      "batchId": "b33",
+      "prs": [
+        21104
+      ],
+      "sha": "6fe53fde79571c6b1b8e6d50b75aa246d130db02",
+      "detail": "shadow mode: would merge-ff onto 8967a3d85b90; merged meanwhile by another path: #21104",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45507945239"
+    },
+    {
+      "at": "2026-11-24T23:13:15.311Z",
+      "type": "batch-started",
+      "batchId": "b34",
+      "prs": [
+        21158,
+        21094
+      ],
+      "sha": "b05619f054e7408211402d21101220a00cf43d0f",
+      "detail": "2 PR(s) on c2944cc03fee; window 5",
+      "labeledAt": {
+        "21094": "2026-11-24T22:41:01Z",
+        "21158": "2026-11-24T22:01:36Z"
+      },
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45507945239"
     }
   ],
-  "updatedAt": "2026-11-24T22:09:08.225Z",
+  "updatedAt": "2026-11-24T23:13:16.840Z",
   "batchWindow": 5
 }
