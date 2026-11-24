@@ -235,6 +235,30 @@ export async function snapshotGeminiDom(
 }
 
 /**
+ * Runs in the page: true when Gemini rendered its signed-out UI. A rotated-away or
+ * expired cookie lands on the public page, where the composer still works but the
+ * mode menu offers only "Sign in" and every Gemini 4 option is disabled.
+ */
+export function isGeminiSignedOutInPage(doc?: Document): boolean {
+  const d: Document = doc || document;
+  return Boolean(
+    d.querySelector('[data-test-id="mode-picker-sign-in-button"]') ||
+    d.querySelector('a[href*="accounts.google.com/ServiceLogin"]') ||
+    d.querySelector('a[href*="accounts.google.com/v3/signin"]')
+  );
+}
+
+/** Null when the page cannot run in-page code (test fakes). */
+export async function isGeminiSignedOut(page: GeminiDomPage): Promise<boolean | null> {
+  if (!canReadGeminiDom(page)) return null;
+  try {
+    return Boolean(await page.evaluate(toInPageExpression(isGeminiSignedOutInPage)));
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Wait until a `user-query` beyond `baselineQueries` is on the page, i.e. the
  * prompt was actually submitted. Returns false when it never appears.
  */

@@ -25,6 +25,7 @@ import {
 import { getStableLauncher } from "./gemini-web/browserLease.ts";
 import {
   canReadGeminiDom,
+  isGeminiSignedOut,
   snapshotGeminiDom,
   waitForGeminiDomReply,
   waitForGeminiPromptSubmitted,
@@ -693,6 +694,26 @@ export class GeminiWebExecutor extends BaseExecutor {
       // required, or the request is rejected instead of silently running the account
       // default under the requested model's label. See ./gemini-web/modeSelection.ts
       // for why the selectors involved are UNVALIDATED and why that is safe here.
+      // A signed-out page still has a composer, so the readiness check above passes;
+      // without this the mode menu's disabled options read as "locked by the plan".
+      if (await isGeminiSignedOut(page)) {
+        log?.warn?.("GEMINI-WEB", "Rejected request: the Gemini cookie no longer signs in");
+        return {
+          response: new Response(
+            JSON.stringify({
+              error:
+                "Gemini Web session is signed out: the stored cookie expired or was rotated. " +
+                "Export a fresh cookie from a signed-in browser and update the connection.",
+              code: "gemini_web_signed_out",
+            }),
+            { status: 401, headers: { "Content-Type": "application/json" } }
+          ),
+          url: GEMINI_URL,
+          headers: {},
+          transformedBody: body,
+        };
+      }
+
       if (model) {
         const modelSelection = await selectGeminiModel(page, modelId);
         if (!modelSelection.confirmed) {

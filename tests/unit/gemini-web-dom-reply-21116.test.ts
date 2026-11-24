@@ -12,7 +12,7 @@ import { JSDOM } from "jsdom";
 
 const playwright = await import("playwright");
 const { GeminiWebExecutor } = await import("../../open-sse/executors/gemini-web.ts");
-const { readGeminiDomReply, waitForGeminiDomReply, toInPageExpression } =
+const { readGeminiDomReply, waitForGeminiDomReply, toInPageExpression, isGeminiSignedOutInPage } =
   await import("../../open-sse/executors/gemini-web/domReply.ts");
 const { selectGeminiModel, findMenuOptionInPage, GEMINI_WEB_MODE_MENU_BUTTON } =
   await import("../../open-sse/executors/gemini-web/modeSelection.ts");
@@ -232,4 +232,41 @@ test("the in-page reader runs inside a real page context, where transpiler helpe
     toInPageExpression(findMenuOptionInPage, { selector: "x-none", sublabel: "4 Neon" })
   );
   assert.equal(option, null);
+});
+
+test("signed-out detection: the mode picker's sign-in button marks an expired session", () => {
+  const signedOut = new JSDOM(
+    `<body><button data-test-id="mode-picker-sign-in-button">Sign in</button></body>`
+  ).window.document;
+  const signedIn = new JSDOM(`<body>${LIVE_LIKE_REPLY}</body>`).window.document;
+  assert.equal(isGeminiSignedOutInPage(signedOut), true);
+  assert.equal(isGeminiSignedOutInPage(signedIn), false);
+});
+
+test("a signed-out page answers 401 gemini_web_signed_out instead of a mode error", async () => {
+  playwright.chromium.launch = (async () => ({
+    newContext: async () => ({
+      addCookies: async () => {},
+      cookies: async () => [],
+      newPage: async () => ({
+        on: () => {},
+        goto: async () => {},
+        waitForTimeout: async () => {},
+        waitForSelector: async () => ({ click: async () => {} }),
+        evaluate: async (expression: string) => /mode-picker-sign-in-button/.test(expression),
+        keyboard: { type: async () => {}, insertText: async () => {}, press: async () => {} },
+      }),
+    }),
+    close: async () => {},
+  })) as unknown as typeof playwright.chromium.launch;
+  const result = await new GeminiWebExecutor().execute({
+    model: "gemini-4-hydrogen",
+    body: { messages: [{ role: "user", content: "hello" }], stream: false },
+    stream: false,
+    credentials: { apiKey: "__Secure-1PSID=test-psid" },
+    signal: AbortSignal.timeout(5000),
+    log: null,
+  });
+  assert.equal(result.response.status, 401);
+  assert.equal((await result.response.json()).code, "gemini_web_signed_out");
 });
