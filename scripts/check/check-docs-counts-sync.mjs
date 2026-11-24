@@ -103,14 +103,6 @@ export {
   readCoverageRatchetFloors,
 } from "../release/facts.mjs";
 
-// Isolate DATA_DIR before loading application modules so the check never opens the
-// operator database (tests/unit/repo-checks-isolate-datadir.test.ts). The catalog module only
-// lends the public token formatter, but every app import goes through the same door.
-if (!process.env.DATA_DIR?.trim()) delete process.env.DATA_DIR;
-if (process.env.OMNIROUTE_ALLOW_DEFAULT_DATA_DIR !== "1") {
-  await import("../../tests/_setup/isolateDataDir.ts");
-}
-const { formatTokenHeadline } = await import("../../open-sse/config/freeModelCatalog.ts");
 export {
   DERIVED_VALUE_WRITER_BRANCHES,
   evaluatePrDiff,
@@ -119,6 +111,18 @@ export {
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "..", "..");
+
+// A parity test keeps this copy of the catalog formatter in sync so the gate can skip app imports.
+export function formatTokenHeadline(tokens) {
+  if (!Number.isFinite(tokens) || tokens < 0) {
+    throw new RangeError(
+      `formatTokenHeadline: expected a non-negative finite number, got ${tokens}`
+    );
+  }
+  const millions = Math.round(tokens / 1e6);
+  if (millions < 1000) return `~${millions}M`;
+  return `~${(tokens / 1e9).toFixed(1)}B`;
+}
 
 // PURE: the reference document must NAME every shipped pack. Reporting which one is
 // missing is the point — "6 packs" tells a doc it is stale, "chaos-mode is missing"
