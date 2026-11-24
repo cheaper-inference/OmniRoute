@@ -3,6 +3,21 @@
  * Pure data literal; re-exported by the providers.ts barrel. No behavior change.
  */
 export const NOAUTH_PROVIDERS = {
+  "kiro-cli": {
+    id: "kiro-cli",
+    alias: "kiro-cli",
+    name: "Kiro CLI (local ACP)",
+    icon: "terminal",
+    color: "#7755AA",
+    textIcon: "KC",
+    website: "https://kiro.dev/docs/cli/acp/",
+    noAuth: true,
+    hasFree: false,
+    serviceKinds: ["llm"],
+    isLocalCli: true,
+    authHint:
+      "Requires an operator-configured official Kiro CLI with a separate private login. Text-only; no agent tools.",
+  },
   "devin-cli-agentic": {
     id: "devin-cli-agentic",
     alias: "dva",

@@ -27,10 +27,32 @@ const ctx = (env: NodeJS.ProcessEnv = {}) => ({
   homedir: home,
 });
 
-test("both gated providers are unavailable when nothing is installed", () => {
+test("gated providers are unavailable when nothing is installed", () => {
   const keys = getUnavailableLocalCliProviderKeys(ctx());
-  assert.deepEqual([...keys].sort(), ["aug", "auggie", "zc", "zcode"]);
+  assert.deepEqual([...keys].sort(), ["aug", "auggie", "kiro-cli", "zc", "zcode"]);
 });
+
+test(
+  "Kiro CLI discovery needs an explicitly configured private login and executable",
+  { skip: process.platform !== "linux" },
+  () => {
+    const dir = fs.mkdtempSync(path.join(root, "kiro-"));
+    const cli = path.join(dir, "kiro-cli");
+    touch(cli);
+    const env = {
+      OMNIROUTE_KIRO_CLI_BIN: cli,
+      OMNIROUTE_KIRO_CLI_DATA_DIR: dir,
+      REQUIRE_API_KEY: "true",
+    };
+    assert.equal(getUnavailableLocalCliProviderKeys(ctx(env)).has("kiro-cli"), false);
+    assert.equal(
+      getUnavailableLocalCliProviderKeys(ctx({ ...env, REQUIRE_API_KEY: "false" })).has("kiro-cli"),
+      true
+    );
+    fs.chmodSync(dir, 0o755);
+    assert.equal(getUnavailableLocalCliProviderKeys(ctx(env)).has("kiro-cli"), true);
+  }
+);
 
 test("auggie: PATH lookup, installer path and AUGGIE_BIN override each make it available", () => {
   touch(path.join(bin, "auggie"));

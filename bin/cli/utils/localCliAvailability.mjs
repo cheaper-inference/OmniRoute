@@ -17,7 +17,7 @@
  * available, and callers offer `--include-local` to opt back in.
  */
 
-import { existsSync, statSync } from "node:fs";
+import { accessSync, constants, existsSync, statSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
@@ -110,6 +110,33 @@ function detectAuggie({ env, platform, homedir }) {
 }
 
 const DETECTORS = {
+  "kiro-cli": ({ env, platform }) => {
+    const bin = env.OMNIROUTE_KIRO_CLI_BIN ?? "";
+    const data = env.OMNIROUTE_KIRO_CLI_DATA_DIR ?? "";
+    const unavailable = {
+      available: false,
+      reason: "official Kiro CLI or private login not configured",
+    };
+    if (
+      platform !== "linux" ||
+      env.REQUIRE_API_KEY !== "true" ||
+      !path.isAbsolute(bin) ||
+      !path.isAbsolute(data)
+    )
+      return unavailable;
+    try {
+      accessSync(bin, constants.X_OK);
+      const dir = statSync(data);
+      return isFile(bin) &&
+        dir.isDirectory() &&
+        dir.uid === process.getuid?.() &&
+        (dir.mode & 0o077) === 0
+        ? { available: true }
+        : unavailable;
+    } catch {
+      return unavailable;
+    }
+  },
   zcode: detectZcode,
   auggie: detectAuggie,
 };

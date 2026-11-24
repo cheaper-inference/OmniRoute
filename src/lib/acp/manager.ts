@@ -6,7 +6,7 @@ import { getRegisteredAgentById } from "./registry";
 import { appendCapped } from "./buffers";
 import { withDeadline } from "./deadline";
 import { buildAcpChildEnv, parseSpawnOptions, type AcpSpawnOptions } from "./launchConfig";
-import { NativeAcpClient } from "./nativeClient";
+import { NativeAcpClient } from "@omniroute/open-sse/services/nativeAcpClient.ts";
 
 export type { AcpSpawnOptions } from "./launchConfig";
 

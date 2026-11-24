@@ -4,6 +4,33 @@ title: "Kiro Setup Guide"
 
 # Kiro Setup Guide
 
+## Optional official CLI transport (Linux)
+
+`kiro-cli/<model>` is separate from `kr/<model>`. It uses the official CLI's
+ACP stdio interface, not the HTTP adapter or credentials saved in the Kiro
+dashboard. It never installs a CLI or falls back to the HTTP provider.
+
+Run the gateway as an unprivileged user in a dedicated environment. Install
+and sign in to the official CLI separately, under a dedicated Linux account
+or profile. Set `OMNIROUTE_KIRO_CLI_BIN` to the absolute path of its
+ACP-capable executable and `OMNIROUTE_KIRO_CLI_DATA_DIR` to the absolute
+path of that login's `.local/share/kiro-cli` directory. The latter must be
+private (0700) and owned by the gateway user. Do not mount an entire home
+directory or a Docker socket. `REQUIRE_API_KEY=true` is required. Grant
+inference access to this provider only to clients entitled to use that login.
+The setup does not change the shipped image.
+
+Send one user text message through `/v1/chat/completions`, with an explicit
+`kiro-cli/` model ID supported by that CLI account. The CLI must confirm both
+the requested model and the generated tool-less agent before OmniRoute
+forwards the prompt. Old CLI builds that cannot confirm selection fail closed.
+No files, terminal capabilities or MCP servers are advertised. Each request
+uses a fresh workspace and private home, with only the dedicated CLI login
+directory linked into it. Caller tools, multimodal and multi-turn messages
+are not supported. For streaming clients the completed text is returned as
+buffered SSE, not as live token deltas. CLI invocations are bounded to two
+concurrent turns and a 60-second deadline.
+
 This guide covers adding Kiro (AWS-hosted AI coding assistant) accounts to OmniRoute,
 with a focus on running multiple accounts simultaneously without session conflicts.
 
