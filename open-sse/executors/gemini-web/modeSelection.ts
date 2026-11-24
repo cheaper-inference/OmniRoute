@@ -38,7 +38,12 @@ import {
 
 /** Reasons `selectGeminiUiMode`/`selectGeminiModel` can fail closed. */
 export type GeminiModeSelectionFailureReason =
-  "control_not_found" | "indicator_not_found" | "indicator_mismatch" | "unknown_model";
+  | "control_not_found"
+  | "indicator_not_found"
+  | "indicator_mismatch"
+  | "unknown_model"
+  | "mode_not_offered"
+  | "mode_locked";
 
 export interface GeminiWebModeDescriptor {
   /** The advertised `gweb/<model>` id, or a synthetic label for non-model controls. */
@@ -54,7 +59,26 @@ export interface GeminiWebModeDescriptor {
   readonly activeIndicatorSelector?: string;
   /** Text the active-mode indicator must contain once the switch is confirmed. */
   readonly expectedIndicatorPattern?: RegExp;
+  /**
+   * Model-menu selection (#21116): the exact, non-localized sublabel of the
+   * option in the mode menu (e.g. "4 Hydrogen"). When set, the menu path is
+   * used instead of the toggle/indicator selectors above.
+   */
+  readonly menuSublabel?: string;
 }
+
+/**
+ * Model menu, checked live 2026-11-24 (consumer Pro account, pt-BR UI):
+ *   button[data-test-id="bard-mode-menu-button"]           opens the menu
+ *   gem-menu-item[role="menuitemradio"][data-test-id^="bard-mode-option-"]
+ *     title (localized, e.g. "Ajuda no dia a dia") + sublabel ("4 Hydrogen")
+ *     aria-checked="true" on the active option
+ *     data-test-id contains "upsell" when the tier does not include it (locked)
+ * The menu also lists a reasoning-level group whose items have no
+ * `bard-mode-option-` id, so they never match.
+ */
+export const GEMINI_WEB_MODE_MENU_BUTTON = '[data-test-id="bard-mode-menu-button"]';
+const GEMINI_WEB_MODE_OPTION = '[role="menuitemradio"][data-test-id^="bard-mode-option-"]';
 
 /**
  * Model -> Gemini UI mode map for the `gweb/<model>` ids advertised by
@@ -66,6 +90,9 @@ export interface GeminiWebModeDescriptor {
  */
 export const GEMINI_WEB_MODEL_MODES: Readonly<Record<string, GeminiWebModeDescriptor>> = {
   "gemini-3.1-pro": { id: "gemini-3.1-pro", isDefault: true },
+  "gemini-4-hydrogen": { id: "gemini-4-hydrogen", isDefault: false, menuSublabel: "4 Hydrogen" },
+  "gemini-4-neon": { id: "gemini-4-neon", isDefault: false, menuSublabel: "4 Neon" },
+  "gemini-4-carbon": { id: "gemini-4-carbon", isDefault: false, menuSublabel: "4 Carbon" },
   "gemini-4-argon": {
     id: "gemini-4-argon",
     isDefault: false,
@@ -120,6 +147,97 @@ export interface GeminiAutomationPage {
     selector: string,
     opts?: { timeout?: number }
   ): Promise<GeminiAutomationElement | null>;
+  /** Real Playwright pages have these; the menu path needs them. */
+  evaluate?: (fn: (arg: never) => unknown, arg?: unknown) => Promise<unknown>;
+  click?: (selector: string, opts?: { timeout?: number }) => Promise<void>;
+  waitForTimeout?: (ms: number) => Promise<void>;
+  keyboard?: { press(key: string): Promise<void> };
+}
+
+interface GeminiMenuOptionState {
+  testId: string;
+  checked: boolean;
+  locked: boolean;
+}
+
+/** Runs in the page: find the open mode menu's option whose sublabel is exactly `sublabel`. */
+function findMenuOptionInPage(args: {
+  selector: string;
+  sublabel: string;
+}): GeminiMenuOptionState | null {
+  const options = Array.from(document.querySelectorAll(args.selector));
+  for (const opt of options) {
+    const leaves = Array.from(opt.querySelectorAll("*")).filter((e) => e.children.length === 0);
+    if (!leaves.some((e) => (e.textContent || "").trim() === args.sublabel)) continue;
+    const testId = opt.getAttribute("data-test-id") || "";
+    return {
+      testId,
+      checked: opt.getAttribute("aria-checked") === "true",
+      locked: /upsell/i.test(testId) || opt.getAttribute("aria-disabled") === "true",
+    };
+  }
+  return null;
+}
+
+async function readMenuOption(
+  page: GeminiAutomationPage,
+  sublabel: string,
+  timeoutMs: number
+): Promise<GeminiMenuOptionState | null> {
+  const end = Date.now() + timeoutMs;
+  while (Date.now() < end) {
+    const state = (await page.evaluate!(findMenuOptionInPage, {
+      selector: GEMINI_WEB_MODE_OPTION,
+      sublabel,
+    }).catch(() => null)) as GeminiMenuOptionState | null;
+    if (state) return state;
+    await page.waitForTimeout?.(200);
+  }
+  return null;
+}
+
+/**
+ * Model-menu path (#21116): open the mode menu, pick the option whose sublabel
+ * matches exactly, then reopen the menu and require `aria-checked="true"` on it.
+ * A locked (upsell) or missing option fails closed instead of answering with
+ * whatever model the account currently has selected.
+ */
+export async function selectGeminiMenuMode(
+  page: GeminiAutomationPage,
+  descriptor: GeminiWebModeDescriptor,
+  timeoutMs = 5000
+): Promise<GeminiModeSelectionResult> {
+  const sublabel = descriptor.menuSublabel;
+  if (!sublabel || typeof page.evaluate !== "function" || typeof page.click !== "function") {
+    return { confirmed: false, reason: "control_not_found", descriptor };
+  }
+  const closeMenu = async () => {
+    await page.keyboard?.press("Escape").catch(() => {});
+  };
+  const button = await page
+    .waitForSelector(GEMINI_WEB_MODE_MENU_BUTTON, { timeout: timeoutMs })
+    .catch(() => null);
+  if (!button) return { confirmed: false, reason: "control_not_found", descriptor };
+
+  await page.click(GEMINI_WEB_MODE_MENU_BUTTON, { timeout: timeoutMs });
+  let option = await readMenuOption(page, sublabel, timeoutMs);
+  if (!option) {
+    await closeMenu();
+    return { confirmed: false, reason: "mode_not_offered", descriptor };
+  }
+  if (option.locked) {
+    await closeMenu();
+    return { confirmed: false, reason: "mode_locked", descriptor };
+  }
+  if (!option.checked) {
+    await page.click(`[data-test-id="${option.testId}"]`, { timeout: timeoutMs });
+    await page.waitForTimeout?.(500);
+    await page.click(GEMINI_WEB_MODE_MENU_BUTTON, { timeout: timeoutMs });
+    option = await readMenuOption(page, sublabel, timeoutMs);
+  }
+  await closeMenu();
+  if (!option?.checked) return { confirmed: false, reason: "indicator_mismatch", descriptor };
+  return { confirmed: true, descriptor };
 }
 
 export interface GeminiModeSelectionResult {
@@ -155,6 +273,7 @@ export async function selectGeminiUiMode(
   timeoutMs = 5000
 ): Promise<GeminiModeSelectionResult> {
   if (descriptor.isDefault) return { confirmed: true, descriptor };
+  if (descriptor.menuSublabel) return selectGeminiMenuMode(page, descriptor, timeoutMs);
 
   const { toggleSelector, activeIndicatorSelector, expectedIndicatorPattern } = descriptor;
   if (!toggleSelector || !activeIndicatorSelector || !expectedIndicatorPattern) {
@@ -212,6 +331,8 @@ const REASON_DETAIL: Record<GeminiModeSelectionFailureReason, string> = {
   control_not_found: "the Gemini UI control used to switch modes was not found",
   indicator_not_found: "the active-mode indicator used to confirm the switch was not found",
   indicator_mismatch: "the active-mode indicator did not confirm the switch after attempting it",
+  mode_not_offered: "this account's Gemini mode menu does not offer it",
+  mode_locked: "this account's Gemini plan does not include it (the option is locked)",
 };
 
 /**

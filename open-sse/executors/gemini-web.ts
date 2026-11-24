@@ -23,6 +23,12 @@ import {
   resolveResponseTimeoutMs,
 } from "./gemini-web/browserErrors.ts";
 import { getStableLauncher } from "./gemini-web/browserLease.ts";
+import {
+  canReadGeminiDom,
+  snapshotGeminiDom,
+  waitForGeminiDomReply,
+  waitForGeminiPromptSubmitted,
+} from "./gemini-web/domReply.ts";
 import { normalizeGeminiCookieInput } from "../utils/geminiCookies.ts";
 import { prepareToolMessages } from "../translator/webTools.ts";
 import { buildToolModeResponse } from "./chatgptWebTools.ts";
@@ -744,11 +750,25 @@ export class GeminiWebExecutor extends BaseExecutor {
         }
       }
 
-      // Type and send message
-      const inputEl = await page.waitForSelector(".ql-editor, [contenteditable='true']", {
-        timeout: 10000,
-      });
-      await inputEl.click();
+      // Type and send message. The composer is re-rendered shortly after load
+      // (#21116), so a handle taken too early can be detached by the time it is
+      // clicked: re-query and retry instead of failing the request.
+      for (let attempt = 1; ; attempt++) {
+        const inputEl = await page.waitForSelector(".ql-editor, [contenteditable='true']", {
+          timeout: 10000,
+        });
+        try {
+          await inputEl.click();
+          break;
+        } catch (clickError) {
+          const msg = clickError instanceof Error ? clickError.message : String(clickError);
+          if (attempt >= 3 || !/not attached|detached/i.test(msg)) throw clickError;
+          await page.waitForTimeout(500);
+        }
+      }
+      // #21116: remember how many prompts/answers the page already shows, so the
+      // DOM fallback below only accepts an answer to THIS prompt.
+      const domBaseline = canReadGeminiDom(page) ? await snapshotGeminiDom(page) : null;
       // insertText() dispatches a DOM `input` event atomically instead of a
       // per-character keydown/keypress/keyup sequence (#13380) — an embedded
       // `\n` in `prompt` (produced by the multi-turn transcript format above,
@@ -761,7 +781,37 @@ export class GeminiWebExecutor extends BaseExecutor {
       promptSubmitted = true;
       await page.keyboard.press("Enter");
 
-      await Promise.race([responsePromise, page.waitForTimeout(resolveResponseTimeoutMs(modelId))]);
+      const responseTimeoutMs = resolveResponseTimeoutMs(modelId);
+      let domReplyText = "";
+      let domWaitDone = false;
+      let domPromise: Promise<void> = new Promise<void>(() => {});
+      if (domBaseline) {
+        // #21116: an Enter pressed while the composer was still settling is dropped
+        // silently. Confirm a new user-query appeared; press Enter once more if not.
+        if (!(await waitForGeminiPromptSubmitted(page, domBaseline.queries))) {
+          await page.keyboard.press("Enter");
+          await waitForGeminiPromptSubmitted(page, domBaseline.queries);
+        }
+        // Read the answer from the rendered page as well: some accounts no longer
+        // receive it through a StreamGenerate response (geminiweb-pa processSession).
+        domPromise = waitForGeminiDomReply(page, {
+          baselineResponses: domBaseline.responses,
+          timeoutMs: responseTimeoutMs,
+          isCancelled: () => domWaitDone,
+        }).then((text) => {
+          domReplyText = text;
+          // An empty result (timeout) must not win the race against StreamGenerate.
+          if (!text) return new Promise<void>(() => {});
+        });
+      }
+      // StreamGenerate wins only when it produced text; a captured-but-unreadable
+      // body keeps waiting for the DOM answer instead of failing early.
+      const streamPromise = responsePromise.then(() =>
+        responseText || !domBaseline ? undefined : new Promise<void>(() => {})
+      );
+      await Promise.race([streamPromise, domPromise, page.waitForTimeout(responseTimeoutMs)]);
+      domWaitDone = true;
+      if (!responseText && domReplyText) responseText = domReplyText;
       if (signal?.aborted) {
         throw signal.reason instanceof Error ? signal.reason : new Error("Request aborted");
       }

@@ -46,6 +46,22 @@ export const gemini_webProvider: RegistryEntry = {
       toolCalling: false,
       supportsReasoning: false,
     },
+    // #21116: Gemini 4 modes picked from the model menu by their sublabel
+    // ("4 Hydrogen", "4 Neon", "4 Carbon"); see executors/gemini-web/modeSelection.ts.
+    // A mode the account's menu lacks or locks fails closed with a 400.
+    {
+      id: "gemini-4-hydrogen",
+      name: "Gemini 4 Hydrogen",
+      toolCalling: false,
+      supportsReasoning: false,
+    },
+    { id: "gemini-4-neon", name: "Gemini 4 Neon", toolCalling: false, supportsReasoning: false },
+    {
+      id: "gemini-4-carbon",
+      name: "Gemini 4 Carbon",
+      toolCalling: false,
+      supportsReasoning: false,
+    },
     ...(isGeminiWebArgonEnabled() ? [GEMINI_WEB_ARGON_MODEL] : []),
     {
       id: "gemini-3.7-flash",

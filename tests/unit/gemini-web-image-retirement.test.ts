@@ -117,7 +117,14 @@ test("Gemini Web chat and legitimate Gemini image providers remain available", a
   assert.equal(REGISTRY["gemini-web"]?.executor, "gemini-web");
   assert.deepEqual(
     REGISTRY["gemini-web"]?.models.map(({ id }) => id),
-    ["gemini-3.1-pro", "gemini-3.7-flash", "gemini-3.1-flash-lite"]
+    [
+      "gemini-3.1-pro",
+      "gemini-4-hydrogen",
+      "gemini-4-neon",
+      "gemini-4-carbon",
+      "gemini-3.7-flash",
+      "gemini-3.1-flash-lite",
+    ]
   );
 
   assert.deepEqual(parseImageModel("nano-banana"), {
