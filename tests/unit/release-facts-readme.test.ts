@@ -180,14 +180,15 @@ describe("README generators follow the facts snapshot", () => {
     const text = flat(bumped.pillars);
     assert.ok(text.includes("987 providers."));
     assert.ok(text.includes("across 987 providers"));
-    assert.ok(text.includes("free tier, 98 free"));
+    assert.ok(text.includes("980+ with a free offer, 98 free"));
+    assert.ok(!text.includes("150+"), "the free-offer label follows hasFreeProviders");
     assert.ok(text.includes("65 CLI/agent integrations"));
     assert.ok(text.includes("MCP (321"));
     assert.ok(flat(base.pillars).includes(`MCP (${snapshot.code.mcpTools}`));
   });
 
   it("comparison table: OmniRoute's own cells", () => {
-    for (const v of ["987", "76", "32 eng", "321", "43"])
+    for (const v of ["987", "980+", "76", "32 eng", "321", "43"])
       assert.ok(bumped.comparison.values.includes(v), v);
     assert.ok(!bumped.comparison.values.includes(String(snapshot.providers)));
     // competitors' cells are copy, not facts
