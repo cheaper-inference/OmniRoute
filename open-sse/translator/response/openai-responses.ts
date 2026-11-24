@@ -3,7 +3,11 @@
  * Converts streaming chunks from Chat Completions to Responses API events
  */
 import { register } from "../registry.ts";
-import { cacheCreationFields, mergeCacheCreationFields } from "../../utils/cacheWriteUsage.ts";
+import {
+  cacheCreationFields,
+  mergeCacheCreationFields,
+  readCacheWriteUsage,
+} from "../../utils/cacheWriteUsage.ts";
 import { FORMATS } from "../formats.ts";
 import { appendToolCallArgumentDelta } from "../../utils/toolCallArguments.ts";
 import { translatorToolCallLifecycle } from "./openai-responses/toolCallLifecycle.ts";
@@ -14,7 +18,10 @@ import { shouldParseTextualReasoningTags } from "../../handlers/responseSanitize
 import { getReadableReasoningValue } from "../../utils/reasoningFields.ts";
 import { resolveResponsesCacheUsageDetails } from "../../utils/resolveResponsesCacheUsageDetails.ts";
 import { normalizeResponsesContextUsage } from "../../utils/normalizeResponsesContextUsage.ts";
-import { pickCacheCreationInPrompt } from "../../utils/pickCacheCreationTokens.ts";
+import {
+  isTopLevelCacheWriteOnly,
+  resolveCacheCreationInPrompt,
+} from "../../utils/pickCacheCreationTokens.ts";
 import {
   isInternalReasoningPlaceholder,
   stripInternalReasoningPlaceholder,
@@ -1547,7 +1554,9 @@ function openaiResponsesToOpenAIResponseStream(chunk, state) {
         responseUsage.input_tokens_details?.cached_tokens ||
         responseUsage.prompt_tokens_details?.cached_tokens ||
         0;
-      const cacheCreationTokens = responseUsage.cache_creation_input_tokens || 0;
+      const cacheCreationTokens = isTopLevelCacheWriteOnly(responseUsage)
+        ? null
+        : readCacheWriteUsage(responseUsage).total;
       const reasoningTokens =
         responseUsage.output_tokens_details?.reasoning_tokens ||
         responseUsage.completion_tokens_details?.reasoning_tokens ||
@@ -1555,15 +1564,18 @@ function openaiResponsesToOpenAIResponseStream(chunk, state) {
         0;
 
       const anthropicKeys = "cache_read_input_tokens" in responseUsage;
-      const sourceWriteInPrompt = pickCacheCreationInPrompt(responseUsage);
+      const sourceWriteInPrompt = resolveCacheCreationInPrompt(responseUsage);
       const promptTokens =
         inputTokens +
         (anthropicKeys
-          ? cacheReadTokens + (sourceWriteInPrompt === true ? 0 : cacheCreationTokens)
+          ? cacheReadTokens + (sourceWriteInPrompt === true ? 0 : (cacheCreationTokens ?? 0))
           : 0);
 
       state.usage = {
         ...mergeCacheCreationFields(state.usage, responseUsage),
+        ...(cacheCreationTokens !== null
+          ? { cache_creation_input_tokens: cacheCreationTokens }
+          : {}),
         ...(responseUsage.provider_credits !== undefined && {
           provider_credits: responseUsage.provider_credits,
         }),
@@ -1576,12 +1588,12 @@ function openaiResponsesToOpenAIResponseStream(chunk, state) {
       };
 
       // Add prompt_tokens_details if cache tokens exist
-      if (cacheReadTokens > 0 || cacheCreationTokens > 0) {
+      if (cacheReadTokens > 0 || cacheCreationTokens !== null) {
         state.usage.prompt_tokens_details = { ...cacheCreationFields(state.usage) };
         if (cacheReadTokens > 0) {
           state.usage.prompt_tokens_details.cached_tokens = cacheReadTokens;
         }
-        if (cacheCreationTokens > 0) {
+        if (cacheCreationTokens !== null) {
           state.usage.prompt_tokens_details.cache_creation_tokens = cacheCreationTokens;
           state.usage.prompt_tokens_details.cache_creation_in_prompt =
             anthropicKeys || sourceWriteInPrompt !== false;
