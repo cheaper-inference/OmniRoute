@@ -47,6 +47,10 @@ import { reconcileCodexUsageHistory } from "./providers/usageIdentityReconciliat
 import { isRuntimeRetiredProviderId } from "@/shared/constants/providerRetirement";
 import { applyCodexChildCooldownClearOnUpdate } from "./providers/codexAccountState";
 import { sameM365Account } from "@/lib/providers/m365Identity";
+import {
+  notifyOnExpiredTransition,
+  type ConnectionAuthFailureContext,
+} from "@/lib/webhooks/connectionAuthFailed";
 
 import {
   withNullableMaxConcurrent,
@@ -1003,6 +1007,8 @@ function _updateConnectionRow(db: DbLike, id: string, data: JsonRecord) {
 export type ProviderConnectionUpdateOpts = UpdateOpts & {
   /** #16190: this isActive:false write is the permanent-ban auto-disable (never retested). */
   permanentBan?: boolean;
+  /** Stage/status of the auth failure behind a write that may park the account as expired. */
+  authFailure?: ConnectionAuthFailureContext;
   expectedCodexFence?: CodexConnectionFence;
   /** Internal token rotation: the exact version committed by this write, never a later reread. */
   onCodexFenceCommitted?: (fence: CodexConnectionFence) => void;
@@ -1124,11 +1130,12 @@ export async function updateProviderConnection(
     });
     _updateConnectionRow(db, id, encryptConnectionFields({ ...merged }));
     const committedFence = opts?.onCodexFenceCommitted ? readCodexConnectionFence(id) : null;
-    return { existing, merged, committedFence };
+    return { existing, existingCamel, merged, committedFence };
   })();
   if (!applied) return null;
-  const { existing, merged, committedFence } = applied;
+  const { existing, existingCamel, merged, committedFence } = applied;
   if (committedFence) opts?.onCodexFenceCommitted?.(committedFence);
+  notifyOnExpiredTransition(existingCamel, merged, data, opts?.authFailure);
   backupDbFile("pre-write");
   invalidateConnectionUpdate(id, data, opts);
   bumpProxyConfigGeneration();

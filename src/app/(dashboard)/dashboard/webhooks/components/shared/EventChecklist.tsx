@@ -2,16 +2,10 @@
 
 import { CheckboxGroup } from "@omniroute/ui-kit/checkbox";
 import Checkbox from "@/shared/components/Checkbox";
+import { WEBHOOK_EVENT_VALUES } from "@/lib/webhooks/eventDescriptions";
 
-const WEBHOOK_EVENTS = [
-  "request.completed",
-  "request.failed",
-  "provider.error",
-  "provider.recovered",
-  "quota.exceeded",
-  "combo.switched",
-  "test.ping",
-] as const;
+// The API accepts exactly these names; a hand-kept list drifted and offered removed events.
+const WEBHOOK_EVENTS = WEBHOOK_EVENT_VALUES;
 
 interface EventChecklistProps {
   label?: string;

@@ -6,6 +6,7 @@ export type WebhookEvent =
   | "proxy.pool.exhausted"
   | "provider.reset_redeemed"
   | "provider.exhausted"
+  | "connection.auth_failed"
   | "test.ping";
 
 export const WEBHOOK_EVENT_VALUES = [
@@ -16,6 +17,7 @@ export const WEBHOOK_EVENT_VALUES = [
   "proxy.pool.exhausted",
   "provider.reset_redeemed",
   "provider.exhausted",
+  "connection.auth_failed",
   "test.ping",
 ] as const;
 
@@ -102,6 +104,21 @@ export const EVENT_DESCRIPTIONS: Record<WebhookEvent, EventDescription> = {
       provider: "openai",
       connectionsCount: 3,
       retryAfter: "2026-11-08T12:40:00.000Z",
+    },
+  },
+  "connection.auth_failed": {
+    label: "Connection Auth Failed",
+    emoji: "🔑",
+    description:
+      "Triggered when one account fails authentication: a request got a 401/403 for it (at most once per account every 10 minutes), or it now needs re-authentication (once per episode). A refresh that fixes the token in time sends nothing.",
+    exampleData: {
+      provider: "codex",
+      connectionId: "conn-a",
+      account: "ali*******@*******com",
+      stage: "refresh",
+      status: null,
+      code: "refresh_token_reused",
+      needsReauth: true,
     },
   },
   "test.ping": {

@@ -18,7 +18,7 @@ keep failing.
 
 ## Supported Events
 
-The `WebhookEvent` type (`src/lib/webhooks/eventDescriptions.ts`, consumed by `src/lib/webhookDispatcher.ts`) currently models eight events:
+The `WebhookEvent` type (`src/lib/webhooks/eventDescriptions.ts`, consumed by `src/lib/webhookDispatcher.ts`) currently models nine events:
 
 | Event                     | Fires when                                                                               |
 | ------------------------- | ---------------------------------------------------------------------------------------- |
@@ -29,6 +29,7 @@ The `WebhookEvent` type (`src/lib/webhooks/eventDescriptions.ts`, consumed by `s
 | `proxy.pool.exhausted`    | Every member of a proxy pool scope is set aside                                          |
 | `provider.reset_redeemed` | Auto-apply banked resets redeemed a reset credit or the Claude weekly session reset      |
 | `provider.exhausted`      | Every account of a provider is cooling down (at most once per provider every 10 minutes) |
+| `connection.auth_failed`  | One account failed authentication or now needs re-authentication (see below)             |
 | `test.ping`               | Synthetic event used by the test endpoint                                                |
 
 Subscriptions accept the literal `"*"` to receive every event. Unknown event
@@ -37,6 +38,36 @@ names in `events` are ignored at dispatch time.
 > Note: the dispatcher API is wired, but production call sites for some of the
 > non-`test.ping` events are still landing. Check `grep dispatchEvent` to see
 > which paths currently invoke the dispatcher in your release.
+
+### `connection.auth_failed`
+
+Names the one account (connection) of a provider pool that failed authentication, so an
+operator learns about a revoked login while the router keeps serving clients from the
+other accounts. Two sources send it:
+
+- `stage: "request"`: a live request got a 401/403 auth verdict for this account and the
+  router moved on. At most once per account every 10 minutes. A request whose token was
+  refreshed in time and whose retry succeeded sends nothing.
+- `needsReauth: true`: the account's status moved to `expired` (a rejected refresh token,
+  a missing refresh token, a revoked login). Sent once per episode, never deduped; `stage`
+  is `"request"` when a live request parked the account and `"refresh"` for background
+  refreshes and health checks. A retired provider is not reported.
+
+```json
+{
+  "provider": "codex",
+  "connectionId": "conn-a",
+  "account": "ali*******@*******com",
+  "stage": "refresh",
+  "status": null,
+  "code": "refresh_token_reused",
+  "needsReauth": true
+}
+```
+
+`account` is the connection's display name, or its masked email. `code` is a short machine
+code (an upstream error code or OmniRoute's error class); free text is dropped. The payload
+never carries tokens, refresh tokens or upstream response bodies.
 
 ## Architecture
 
