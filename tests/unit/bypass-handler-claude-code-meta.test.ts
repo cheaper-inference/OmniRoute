@@ -3,6 +3,8 @@ import assert from "node:assert/strict";
 import { CLAUDE_CODE_META_FLAGS } from "../../open-sse/utils/claudeCodeMetaRequests.ts";
 import { FEATURE_FLAG_DEFINITIONS } from "../../src/shared/constants/featureFlagDefinitions.ts";
 
+const { handleBypassRequest } = await import("../../open-sse/utils/bypassHandler.ts");
+
 test("as três chaves existem, são booleanas, da categoria cli e nascem desligadas", () => {
   const expectedWarning = {
     [CLAUDE_CODE_META_FLAGS.commandPrefix]: "caution",
@@ -19,8 +21,6 @@ test("as três chaves existem, são booleanas, da categoria cli e nascem desliga
     assert.equal(def.warningLevel, expectedWarning[key]);
   }
 });
-
-const { handleBypassRequest } = await import("../../open-sse/utils/bypassHandler.ts");
 
 const UA = "claude-cli/2.1.89";
 const KEYS = Object.values(CLAUDE_CODE_META_FLAGS);
