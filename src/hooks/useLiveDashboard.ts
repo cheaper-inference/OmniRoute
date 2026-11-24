@@ -17,7 +17,16 @@ import { deriveLiveWsPath, resolveLiveWsUrl, sanitizeLiveWsPort } from "@/shared
 
 // ── Config ────────────────────────────────────────────────────────────────
 
-const WS_RECONNECT_DELAYS = [1000, 2000, 4000, 8000, 16000, 30000];
+const WS_RECONNECT_DELAYS = [1000, 2000, 4000, 8000];
+
+// Consecutive sockets that may fail (no accepted session) before the hook stops dialling.
+// Each failed attempt makes the browser log its own "WebSocket connection to ... failed"
+// line, which page code cannot suppress; dialling forever filled the console of every
+// install whose live socket is unreachable (KEA-9514). reconnect() starts a new round.
+const MAX_CONSECUTIVE_FAILED_ATTEMPTS = 5;
+
+/** `connection.error` once the hook stopped dialling, or when there is nothing to dial. */
+export const LIVE_WS_UNAVAILABLE_ERROR = "Live updates unavailable";
 
 // Must stay <= the server's HEARTBEAT_TIMEOUT_MS (35s in src/server/ws/liveServer.ts) so a
 // healthy, connected-but-idle client is never force-terminated by the server's heartbeat sweep.
@@ -40,10 +49,11 @@ function getDefaultWsUrl(): string {
   if (typeof window === "undefined") return `ws://localhost:20132${BUILD_TIME_WS_PATH}`;
   const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
   const { hostname } = window.location;
-  // The WS server's own port, for loopback and non-loopback alike: the HTTP
-  // port has no upgrade handler in src/proxy.ts. This is only the starting
-  // point - the handshake below replaces the port when the server reports a
-  // different one, and a caller can always pass `wsUrl` outright.
+  // The WS server's own port. Used on loopback (`next dev` has no upgrade handler on the
+  // HTTP port) and when the handshake says the HTTP port cannot relay; off loopback,
+  // resolveLiveWsUrl() dials the page's own origin instead (KEA-9514). The handshake
+  // replaces the port when the server reports a different one, and a caller can always
+  // pass `wsUrl` outright.
   return `${protocol}//${hostname}:20132${BUILD_TIME_WS_PATH}`;
 }
 
@@ -68,7 +78,10 @@ export interface DashboardConnectionState {
 // ── Core Hook ─────────────────────────────────────────────────────────────
 
 export interface UseLiveDashboardOptions {
-  /** WebSocket URL (default: ws://hostname:20132) */
+  /**
+   * WebSocket URL. Default: the page's own origin + `/live-ws` off loopback, the live
+   * server's port (ws://hostname:20132) on loopback; the handshake can adjust either.
+   */
   wsUrl?: string;
   /** Whether the WebSocket connection should be active (default: true) */
   enabled?: boolean;
@@ -110,6 +123,8 @@ export function useLiveDashboard({
   const [handshakeUrl, setHandshakeUrl] = useState<string | null>(null);
   const [handshakePath, setHandshakePath] = useState<string | null>(null);
   const [handshakePort, setHandshakePort] = useState<number | null>(null);
+  const [handshakeEnabled, setHandshakeEnabled] = useState<boolean | null>(null);
+  const [handshakeSameOrigin, setHandshakeSameOrigin] = useState<boolean | null>(null);
   const [wsUrlResolved, setWsUrlResolved] = useState(!needsHandshake);
 
   useEffect(() => {
@@ -129,6 +144,12 @@ export function useLiveDashboard({
         // overruled by the compiled-in default (#11331).
         const port = sanitizeLiveWsPort(body?.live?.port);
         if (port !== null) setHandshakePort(port);
+        // KEA-9514: a server that is off is never dialled, and a server whose HTTP port
+        // cannot relay the upgrade is dialled on its own port, not on the page's origin.
+        if (typeof body?.live?.enabled === "boolean") setHandshakeEnabled(body.live.enabled);
+        if (typeof body?.live?.sameOrigin === "boolean") {
+          setHandshakeSameOrigin(body.live.sameOrigin);
+        }
       })
       .catch(() => {
         // Handshake unavailable — fall back to the default URL.
@@ -142,10 +163,14 @@ export function useLiveDashboard({
   }, [needsHandshake, wsUrlResolved]);
 
   const effectiveWsUrl = resolveLiveWsUrl({
-    explicit: wsUrl,
+    // A build-time public URL is as explicit as a caller's: no handshake ran for it.
+    explicit: wsUrl || BUILD_TIME_PUBLIC_WS_URL,
     handshakeUrl,
     handshakePort,
     handshakePath: handshakePath !== BUILD_TIME_WS_PATH ? handshakePath : null,
+    handshakeEnabled,
+    handshakeSameOrigin,
+    location: typeof window === "undefined" ? null : window.location,
     defaultUrl: DEFAULT_WS_URL,
   });
 
@@ -185,6 +210,15 @@ export function useLiveDashboard({
   const connect = useCallback(() => {
     if (!mountedRef.current) return;
     if (wsRef.current?.readyState === WebSocket.OPEN) return;
+    if (!effectiveWsUrl) {
+      // The handshake said the live server is off: nothing to dial.
+      setConnection((prev) => ({
+        ...prev,
+        isConnecting: false,
+        error: LIVE_WS_UNAVAILABLE_ERROR,
+      }));
+      return;
+    }
 
     setConnection((prev) => ({
       ...prev,
@@ -199,6 +233,9 @@ export function useLiveDashboard({
 
       const ws = new WebSocket(wsUrlWithAuth);
       wsRef.current = ws;
+      // Set by this socket's "welcome": a session that was accepted and later dropped is
+      // not a failed attempt.
+      let accepted = false;
 
       ws.onopen = () => {
         if (!mountedRef.current || wsRef.current !== ws) return;
@@ -247,6 +284,7 @@ export function useLiveDashboard({
             // Heartbeat response
           } else if (msg.type === "welcome") {
             // First frame of an accepted session: the backoff starts over.
+            accepted = true;
             failedAttemptsRef.current = 0;
             setConnection((prev) => ({ ...prev, reconnectAttempt: 0 }));
             // Send backlog
@@ -266,7 +304,11 @@ export function useLiveDashboard({
               }
             }
           } else if (msg.type === "error") {
-            console.error("[LiveWS] Server error:", msg.code, msg.message);
+            // Once per failing streak: a server that rejects every attempt would otherwise
+            // log again on each one.
+            if (failedAttemptsRef.current === 0) {
+              console.error("[LiveWS] Server error:", msg.code, msg.message);
+            }
           }
         } catch {
           // Ignore parse errors
@@ -286,11 +328,18 @@ export function useLiveDashboard({
         }));
 
         if (autoReconnect) {
-          const attempt = failedAttemptsRef.current;
-          failedAttemptsRef.current = attempt + 1;
-          const delay = WS_RECONNECT_DELAYS[Math.min(attempt, WS_RECONNECT_DELAYS.length - 1)];
+          const failures = accepted ? 0 : failedAttemptsRef.current + 1;
+          failedAttemptsRef.current = failures;
+          if (failures >= MAX_CONSECUTIVE_FAILED_ATTEMPTS) {
+            // Stop dialling; reconnect() starts a new round (KEA-9514).
+            setConnection((prev) => ({ ...prev, error: LIVE_WS_UNAVAILABLE_ERROR }));
+            return;
+          }
+          // 1s after an accepted session dropped or the first failure, then 2s, 4s, 8s.
+          const step = Math.min(Math.max(failures - 1, 0), WS_RECONNECT_DELAYS.length - 1);
+          const delay = WS_RECONNECT_DELAYS[step];
           reconnectTimeoutRef.current = setTimeout(() => {
-            setConnection((prev) => ({ ...prev, reconnectAttempt: attempt + 1 }));
+            setConnection((prev) => ({ ...prev, reconnectAttempt: Math.max(failures, 1) }));
             setReconnectTick((tick) => tick + 1);
           }, delay);
         }
@@ -354,6 +403,12 @@ export function useLiveDashboard({
 
   // Connect (for manual retry)
   const reconnect = useCallback(() => {
+    // A manual retry gets a full round of attempts, also after the hook gave up.
+    failedAttemptsRef.current = 0;
+    if (reconnectTimeoutRef.current) {
+      clearTimeout(reconnectTimeoutRef.current);
+      reconnectTimeoutRef.current = null;
+    }
     const ws = wsRef.current;
     wsRef.current = null;
     ws?.close();
