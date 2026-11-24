@@ -1,0 +1,1 @@
+- **fix(sse):** Kilo `PAID_MODEL_AUTH_REQUIRED` now locks only the refused model on that connection instead of banning the connection or marking it exhausted, so the free models on the same Kilo connection keep routing.
