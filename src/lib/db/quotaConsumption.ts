@@ -12,28 +12,19 @@
  * Part of: Group B — Quota Sharing Engine (plan 22, frente F2).
  */
 
-import { getDbInstance } from "./core";
+import type { QuotaConsumptionRepository } from "@/domain/persistence/quotaCounterRepository";
+import { quotaCounterRepositories } from "./repositories/quotaCounterRepositories";
 
-// ---------------------------------------------------------------------------
-// Internal helpers
-// ---------------------------------------------------------------------------
+/**
+ * Bucket storage lives behind QuotaConsumptionRepository. The exports below stay
+ * synchronous (SQLite-only legacy access) because the quota-share store and the
+ * pool log route call them without awaiting.
+ */
+const buckets = quotaCounterRepositories.legacySync.quotaConsumption;
 
-interface StatementLike<TRow = unknown> {
-  all: (...params: unknown[]) => TRow[];
-  get: (...params: unknown[]) => TRow | undefined;
-  run: (...params: unknown[]) => { changes: number };
-}
-
-interface DbLike {
-  prepare: <TRow = unknown>(sql: string) => StatementLike<TRow>;
-}
-
-function getDb(): DbLike {
-  return getDbInstance() as unknown as DbLike;
-}
-
-interface BucketRow {
-  consumed: number;
+/** Async bucket storage contract. */
+export function getQuotaConsumptionRepository(): QuotaConsumptionRepository {
+  return quotaCounterRepositories.quotaConsumption;
 }
 
 // ---------------------------------------------------------------------------
@@ -67,18 +58,8 @@ export interface ConsumptionEvent {
 /**
  * Read the consumed value for a single bucket. Returns 0 if no row exists.
  */
-export function getBucket(
-  apiKeyId: string,
-  dimensionKey: string,
-  bucketIndex: number
-): number {
-  const row = getDb()
-    .prepare<BucketRow>(
-      `SELECT consumed FROM quota_consumption
-       WHERE api_key_id = ? AND dimension_key = ? AND bucket_index = ?`
-    )
-    .get(apiKeyId, dimensionKey, bucketIndex);
-  return row?.consumed ?? 0;
+export function getBucket(apiKeyId: string, dimensionKey: string, bucketIndex: number): number {
+  return buckets.read(apiKeyId, dimensionKey, bucketIndex);
 }
 
 /**
@@ -99,16 +80,7 @@ export function incrementBucket(
   delta: number,
   nowMs: number
 ): void {
-  getDb()
-    .prepare(
-      `INSERT INTO quota_consumption (api_key_id, dimension_key, bucket_index, consumed, updated_at)
-       VALUES (?, ?, ?, ?, ?)
-       ON CONFLICT(api_key_id, dimension_key, bucket_index)
-       DO UPDATE SET
-         consumed = consumed + excluded.consumed,
-         updated_at = excluded.updated_at`
-    )
-    .run(apiKeyId, dimensionKey, bucketIndex, delta, nowMs);
+  buckets.add(apiKeyId, dimensionKey, bucketIndex, delta, nowMs);
 }
 
 /**
@@ -127,37 +99,15 @@ export function getPair(
 ): { curr: number; prev: number } {
   const prevBucket = currentBucket - 1;
 
-  const currRow = getDb()
-    .prepare<BucketRow>(
-      `SELECT consumed FROM quota_consumption
-       WHERE api_key_id = ? AND dimension_key = ? AND bucket_index = ?`
-    )
-    .get(apiKeyId, dimensionKey, currentBucket);
+  const curr = buckets.read(apiKeyId, dimensionKey, currentBucket);
+  const prev = buckets.read(apiKeyId, dimensionKey, prevBucket);
 
-  const prevRow = getDb()
-    .prepare<BucketRow>(
-      `SELECT consumed FROM quota_consumption
-       WHERE api_key_id = ? AND dimension_key = ? AND bucket_index = ?`
-    )
-    .get(apiKeyId, dimensionKey, prevBucket);
-
-  return {
-    curr: currRow?.consumed ?? 0,
-    prev: prevRow?.consumed ?? 0,
-  };
+  return { curr, prev };
 }
 
 // ---------------------------------------------------------------------------
 // List recent consumption for a pool
 // ---------------------------------------------------------------------------
-
-interface ConsumptionRow {
-  api_key_id: string;
-  dimension_key: string;
-  bucket_index: number;
-  consumed: number;
-  updated_at: number;
-}
 
 /**
  * Return the most-recent consumption rows for a given pool, ordered by
@@ -170,32 +120,21 @@ interface ConsumptionRow {
  */
 export function listConsumptionForPool(poolId: string, limit: number): ConsumptionEvent[] {
   const safeLimit = Math.max(1, Math.min(limit, 500));
-  // dimension_key format: "<poolId>:<unit>:<window>"
-  // The LIKE pattern uses "%" — escape literal "%" or "_" in poolId defensively.
-  const prefix = poolId.replace(/[%_\\]/g, "\\$&") + ":%";
-  const rows = getDb()
-    .prepare<ConsumptionRow>(
-      `SELECT api_key_id, dimension_key, bucket_index, consumed, updated_at
-       FROM quota_consumption
-       WHERE dimension_key LIKE ? ESCAPE '\\'
-       ORDER BY updated_at DESC
-       LIMIT ?`
-    )
-    .all(prefix, safeLimit);
+  const rows = buckets.listRecentForPool(poolId, safeLimit);
 
   return rows.map((r) => {
-    const parts = r.dimension_key.split(":");
+    const parts = r.dimensionKey.split(":");
     // parts[0] = poolId, parts[1] = unit, parts[2..] = window (rejoin in case window has colons)
     const unit = parts[1] ?? "";
     const window = parts.slice(2).join(":") ?? "";
     return {
-      apiKeyId: r.api_key_id,
-      dimensionKey: r.dimension_key,
+      apiKeyId: r.apiKeyId,
+      dimensionKey: r.dimensionKey,
       unit,
       window,
-      bucketIndex: r.bucket_index,
+      bucketIndex: r.bucketIndex,
       consumed: r.consumed,
-      updatedAt: r.updated_at,
+      updatedAt: r.updatedAt,
     };
   });
 }
@@ -226,30 +165,10 @@ export function sumPoolDimension(
 ): { currTotal: number; prevTotal: number } {
   const prevBucket = currentBucket - 1;
 
-  interface SumRow {
-    total: number;
-  }
+  const currTotal = buckets.sumAcrossKeys(dimensionKey, currentBucket);
+  const prevTotal = buckets.sumAcrossKeys(dimensionKey, prevBucket);
 
-  const currRow = getDb()
-    .prepare<SumRow>(
-      `SELECT COALESCE(SUM(consumed), 0) AS total
-       FROM quota_consumption
-       WHERE dimension_key = ? AND bucket_index = ?`
-    )
-    .get(dimensionKey, currentBucket);
-
-  const prevRow = getDb()
-    .prepare<SumRow>(
-      `SELECT COALESCE(SUM(consumed), 0) AS total
-       FROM quota_consumption
-       WHERE dimension_key = ? AND bucket_index = ?`
-    )
-    .get(dimensionKey, prevBucket);
-
-  return {
-    currTotal: currRow?.total ?? 0,
-    prevTotal: prevRow?.total ?? 0,
-  };
+  return { currTotal, prevTotal };
 }
 
 // ---------------------------------------------------------------------------
@@ -267,8 +186,5 @@ export function sumPoolDimension(
  * @returns              Number of rows deleted.
  */
 export function gcOlderThan(maxUpdatedAtMs: number): number {
-  const result = getDb()
-    .prepare("DELETE FROM quota_consumption WHERE updated_at < ?")
-    .run(maxUpdatedAtMs);
-  return result.changes;
+  return buckets.deleteUpdatedBefore(maxUpdatedAtMs);
 }

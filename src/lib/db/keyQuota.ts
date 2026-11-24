@@ -12,8 +12,10 @@
  * @module db/keyQuota
  */
 
+import type { KeyQuotaCounterRepository } from "@/domain/persistence/quotaCounterRepository";
 import { getDbInstance } from "./core";
 import { aggregateLedgerThisMonth } from "./costLedger";
+import { quotaCounterRepositories } from "./repositories/quotaCounterRepositories";
 import { toNumber } from "@/shared/utils/numeric";
 
 // ---------------------------------------------------------------------------
@@ -166,7 +168,7 @@ export function clearKeyQuotaLimits(apiKeyId: string): void {
   if (!apiKeyId) return;
   const db = getDbInstance();
   db.prepare("DELETE FROM api_key_quota_limits WHERE api_key_id = ?").run(apiKeyId);
-  db.prepare("DELETE FROM api_key_quota_counters WHERE api_key_id = ?").run(apiKeyId);
+  counters.deleteForKey(apiKeyId);
   deleteUnpricedQuotaMonthStart(apiKeyId);
 }
 
@@ -208,19 +210,24 @@ export function deleteUnpricedQuotaMonthStart(apiKeyId: string): void {
 // Counters
 // ---------------------------------------------------------------------------
 
+/**
+ * Counter storage lives behind KeyQuotaCounterRepository. The exports below stay
+ * synchronous (SQLite-only legacy access) because the pre-request gate and the
+ * post-response increment run synchronously on the request path.
+ */
+const counters = quotaCounterRepositories.legacySync.keyQuotaCounters;
+
+/** Async counter storage contract. */
+export function getKeyQuotaCounterRepository(): KeyQuotaCounterRepository {
+  return quotaCounterRepositories.keyQuotaCounters;
+}
+
 function bucketIndex(nowMs: number): number {
   return Math.floor(nowMs / KEY_QUOTA_WINDOW_MS);
 }
 
 function getBucketCount(apiKeyId: string, dimensionKey: string, bucket: number): number {
-  const db = getDbInstance();
-  const row = db
-    .prepare(
-      `SELECT consumed FROM api_key_quota_counters
-       WHERE api_key_id = ? AND dimension_key = ? AND bucket_index = ?`
-    )
-    .get(apiKeyId, dimensionKey, bucket) as { consumed?: number } | undefined;
-  return toNumber(row?.consumed);
+  return counters.read(apiKeyId, dimensionKey, bucket);
 }
 
 /**
@@ -249,24 +256,11 @@ export function incrementKeyQuotaCounter(
   if (!apiKeyId || delta <= 0) return;
   const dimensionKey = dimension === "tpm" ? DIMENSION_TPM : DIMENSION_RPM;
   const bucket = bucketIndex(nowMs);
-  const db = getDbInstance();
-  db.prepare(
-    `INSERT INTO api_key_quota_counters (api_key_id, dimension_key, bucket_index, consumed, updated_at)
-     VALUES (?, ?, ?, ?, ?)
-     ON CONFLICT(api_key_id, dimension_key, bucket_index) DO UPDATE SET
-       consumed = consumed + excluded.consumed,
-       updated_at = excluded.updated_at`
-  ).run(apiKeyId, dimensionKey, bucket, delta, nowMs);
+  counters.add(apiKeyId, dimensionKey, bucket, delta, nowMs);
   // Reads use the current and the previous bucket only; older rows never count again. Normal use
   // leaves one stale row per minute. A capped delete keeps one request from stalling on an old
   // backlog; later writes drain the rest.
-  db.prepare(
-    `DELETE FROM api_key_quota_counters WHERE rowid IN (
-       SELECT rowid FROM api_key_quota_counters
-       WHERE api_key_id = ? AND dimension_key = ? AND bucket_index < ?
-       LIMIT ?
-     )`
-  ).run(apiKeyId, dimensionKey, bucket - 1, STALE_COUNTER_DELETE_LIMIT);
+  counters.pruneBefore(apiKeyId, dimensionKey, bucket - 1, STALE_COUNTER_DELETE_LIMIT);
 }
 
 /**
