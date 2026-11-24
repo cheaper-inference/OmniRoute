@@ -18,6 +18,8 @@ export interface BunSqliteDatabaseLike {
     (...args: unknown[]): T;
     immediate?: (...args: unknown[]) => T;
   };
+  /** Driver transaction state; bun:sqlite throws when read after close. */
+  inTransaction: boolean;
   close(): void;
 }
 
@@ -68,6 +70,12 @@ export function createBunSqliteAdapter(db: BunSqliteDatabaseLike, filePath: stri
 
     get open() {
       return isOpen;
+    },
+
+    get inTransaction() {
+      // The driver throws "Database has closed" here, so the adapter's own
+      // flag, not the driver, decides whether the read is safe.
+      return isOpen ? db.inTransaction : false;
     },
 
     get name() {

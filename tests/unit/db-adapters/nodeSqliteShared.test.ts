@@ -40,6 +40,10 @@ class FakeDb {
   closed = false;
   execCalls: string[] = [];
   statements: FakeStatement[] = [];
+  // The adapter's transaction getter reads these two; a real node:sqlite
+  // handle exposes both.
+  isOpen = true;
+  isTransaction = false;
 
   prepare(sql: string) {
     const statement = new FakeStatement(sql, [{ value: "ok" }]);
@@ -53,6 +57,7 @@ class FakeDb {
 
   close() {
     this.closed = true;
+    this.isOpen = false;
   }
 }
 
