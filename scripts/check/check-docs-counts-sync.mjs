@@ -1277,7 +1277,15 @@ function freeCatalogCountClaims(f, claim) {
         : what === "pools with a published quota" || what === "catalog rows with free access"
           ? [...FREE_COUNT_DOCS, FREE_COUNT_CARD]
           : FREE_COUNT_DOCS;
-    return claim(expected, what, { pattern }, files);
+    const check = claim(expected, what, { pattern }, files);
+    if (Number.isFinite(expected)) return check;
+    // A facts document without this count (pr mode, an older snapshot) leaves the claim
+    // unjudged instead of comparing it with `undefined` or planning a rewrite to it.
+    return {
+      ...check,
+      validate: () => ({ ok: true, detail: `no ${what} fact — not judged` }),
+      plan: () => ({ edits: [], manual: [] }),
+    };
   });
 }
 

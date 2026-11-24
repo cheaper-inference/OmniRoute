@@ -135,3 +135,18 @@ test("the checks build without facts (pr mode)", () => {
     assert.equal(typeof c.extract, "function", label);
   }
 });
+
+test("a facts document without the counts leaves them unjudged", () => {
+  const legacy = gate.buildChecks({
+    facts: {
+      ...snapshot,
+      code: { ...(snapshot.code ?? {}), freeProviders: undefined, freeAccessRows: undefined },
+    },
+  });
+  const rows = legacy.find((c) => c.label === "catalog rows with free access (live code)");
+  assert.ok(rows?.validate && rows.plan);
+  assert.equal(rows.validate("We keep 214 catalog rows with free access.").ok, true);
+  assert.deepEqual(rows.plan("We keep 214 catalog rows with free access.").edits, []);
+  const providers = legacy.find((c) => c.label === "providers with free access (live code)");
+  assert.equal(providers?.validate?.("50 with free access").ok, true);
+});

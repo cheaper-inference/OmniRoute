@@ -127,6 +127,11 @@ const FACTS = {
   },
 };
 
+// Every README carries the big free-token figure with its label and the real one (D47/D48; the
+// "Row-sum figure required" invariant runs in both modes). Fixture READMEs carry the short pair so
+// the tests keep judging what they are about; ~1.4B matches FACTS.code.headlineSteady.
+const PAIR = "~9.9B as others count · ~1.4B real\n";
+
 const mem =
   (files: Record<string, string | null>): Reader =>
   (file) =>
@@ -327,8 +332,8 @@ test("pr: a deleted file and an unchanged file are not judged", () => {
 
 test("pr: writer branches may write managed numbers", () => {
   const files = {
-    readBase: mem({ "README.md": "OmniRoute routes 392 providers.\n" }),
-    readHead: mem({ "README.md": "OmniRoute routes 393 providers.\n" }),
+    readBase: mem({ "README.md": "OmniRoute routes 392 providers.\n" + PAIR }),
+    readHead: mem({ "README.md": "OmniRoute routes 393 providers.\n" + PAIR }),
     changedFiles: ["README.md"],
   };
   for (const branch of [
@@ -428,7 +433,7 @@ test("release: code facts that cannot be collected exit 2 as infrastructure, not
     mode: "release",
     facts: { ...FACTS, code: null },
     factsError: { kind: "exit", detail: "probe exited 1" },
-    readHead: mem({ ...locales, "README.md": "OmniRoute routes 392 providers.\n" }),
+    readHead: mem({ ...locales, "README.md": "OmniRoute routes 392 providers.\n" + PAIR }),
   });
   assert.equal(both.exitCode, 1);
   assert.equal(both.strict, 1);
@@ -602,7 +607,7 @@ function prRepo(
   const origin = path.join(dir, "origin");
   fs.mkdirSync(origin);
   git(origin, "init", "-q");
-  commitFile(origin, "README.md", "OmniRoute routes 392 providers.\n", "c1");
+  commitFile(origin, "README.md", "OmniRoute routes 392 providers.\n" + PAIR, "c1");
   const eventBase = commitFile(origin, "notes.txt", "base\n", "c2");
   git(origin, "switch", "-q", "-c", "feat/x");
   commitFile(origin, feature.file, feature.content, "feature");
@@ -638,7 +643,7 @@ const prEnv = (baseSha: string) => ({
 });
 
 test("fetch-depth 2 + BASE_SHA: the base resolves on GitHub's PR merge commit", () => {
-  const repo = prRepo({ file: "README.md", content: "OmniRoute routes 393 providers.\n" });
+  const repo = prRepo({ file: "README.md", content: "OmniRoute routes 393 providers.\n" + PAIR });
   try {
     const ci = ciCheckout(repo, 2);
     assert.equal(
@@ -666,7 +671,7 @@ test("a base that moved after the event: the merge commit's first parent is the 
   // The release refresh rewrote README.md on main after the PR event; the PR touched notes only.
   const repo = prRepo(
     { file: "notes.txt", content: "feature\n" },
-    { file: "README.md", content: "OmniRoute routes 395 providers.\n" }
+    { file: "README.md", content: "OmniRoute routes 395 providers.\n" + PAIR }
   );
   try {
     for (const depth of [2, null]) {
@@ -685,7 +690,7 @@ test("pr base: unresolvable in CI is exit 2; local, no-PR and queue runs skip th
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "docs-counts-nobase-"));
   try {
     git(dir, "init", "-q");
-    commitFile(dir, "README.md", "OmniRoute routes 392 providers.\n", "only");
+    commitFile(dir, "README.md", "OmniRoute routes 392 providers.\n" + PAIR, "only");
 
     const ci = gate.runCountsGate({ mode: "pr", root: dir, env: prEnv("0".repeat(40)) });
     assert.equal(ci.exitCode, 2, ci.lines.join("\n"));
@@ -802,9 +807,9 @@ test("pr: a declared batch (the merge train) skips the managed-value diff", () =
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "docs-counts-batch-"));
   try {
     git(dir, "init", "-q");
-    commitFile(dir, "README.md", "OmniRoute routes 392 providers.\n", "base");
+    commitFile(dir, "README.md", "OmniRoute routes 392 providers.\n" + PAIR, "base");
     const baseSha = git(dir, "rev-parse", "HEAD");
-    commitFile(dir, "README.md", "OmniRoute routes 395 providers.\n", "nightly refresh");
+    commitFile(dir, "README.md", "OmniRoute routes 395 providers.\n" + PAIR, "nightly refresh");
     // Detached, as the train's worktree is: no branch name tells a writer from a feature.
     git(dir, "checkout", "-q", "--detach");
 
