@@ -95,5 +95,36 @@ export function orchStateBadgeBg(state: OrchState): string {
   return `color-mix(in srgb, ${STATE_VAR[state]} 13%, transparent)`;
 }
 
+/**
+ * Kit status tone of a state: the `FlowNode` frame and state line, and the `Badge` of a count.
+ * `waiting_approval` is the accent tone (it is a pending decision, not a warning).
+ */
+const STATE_TONE = {
+  queued: "neutral",
+  running: "warning",
+  waiting_approval: "accent",
+  succeeded: "success",
+  failed: "danger",
+  cancelled: "neutral",
+} as const satisfies Record<OrchState, string>;
+
+export function orchStateTone(state: OrchState): (typeof STATE_TONE)[OrchState] {
+  return STATE_TONE[state];
+}
+
+/** The same tone in the Badge adapter's variant vocabulary. */
+const STATE_BADGE_VARIANT = {
+  queued: "default",
+  running: "warning",
+  waiting_approval: "primary",
+  succeeded: "success",
+  failed: "error",
+  cancelled: "default",
+} as const satisfies Record<OrchState, string>;
+
+export function orchStateBadgeVariant(state: OrchState): (typeof STATE_BADGE_VARIANT)[OrchState] {
+  return STATE_BADGE_VARIANT[state];
+}
+
 export const STALE_COMPLETED_MS = 600_000; // completed >10 min ago drop out of the live view
 export const MAX_WORK_NODES = 40; // beyond this, per-source overflow nodes take over

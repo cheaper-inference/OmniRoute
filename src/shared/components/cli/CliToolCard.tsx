@@ -62,7 +62,7 @@ export default function CliToolCard({
           <span className="font-semibold text-text-main text-sm leading-tight truncate">
             {tool.name}
           </span>
-          <span className="text-[11px] text-text-muted font-mono bg-bg-subtle px-1.5 py-0.5 rounded">
+          <span className="text-2xs text-text-muted font-mono bg-bg-subtle px-1.5 py-0.5 rounded">
             {version}
           </span>
         </div>
@@ -92,7 +92,7 @@ export default function CliToolCard({
         {/* Detection */}
         <span
           className={cn(
-            "inline-flex items-center gap-1 text-[11px] font-medium px-1.5 py-0.5 rounded",
+            "inline-flex items-center gap-1 text-2xs font-medium px-1.5 py-0.5 rounded",
             installed ? "text-success" : "text-text-muted"
           )}
         >
@@ -111,7 +111,7 @@ export default function CliToolCard({
 
         {/* Endpoint */}
         {endpoint && (
-          <span className="text-[10px] text-text-muted font-mono truncate max-w-[140px]">
+          <span className="text-3xs text-text-muted font-mono truncate max-w-[140px]">
             {endpoint}
           </span>
         )}
@@ -143,10 +143,7 @@ export default function CliToolCard({
           {installed ? t("card.configure") : t("card.howToInstall")}
         </span>
         {!hasActiveProviders && (
-          <span
-            className="text-[10px] text-text-muted italic"
-            title={t("card.connectProviderHint")}
-          >
+          <span className="text-3xs text-text-muted italic" title={t("card.connectProviderHint")}>
             {t("card.connectProviderHint")}
           </span>
         )}

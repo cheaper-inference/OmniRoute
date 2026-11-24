@@ -9,6 +9,8 @@
 import { CORS_HEADERS, handleCorsOptions } from "@/shared/utils/cors";
 import { stripSensitiveResponseHeaders } from "@omniroute/open-sse/utils/upstreamResponseHeaders";
 import { handleChat } from "@/sse/handlers/chat";
+import { wouldRefuseAgent } from "@/lib/guardrails/agentGuard/enforcement";
+import * as log from "@/sse/utils/logger";
 import { withChatAdmission } from "@/shared/middleware/withChatAdmission";
 import { createInjectionGuard } from "@/middleware/promptInjectionGuard";
 import { getRelayTokenByHash, checkRateLimit, recordRelayUsage } from "@/lib/db/relayProxies";
@@ -355,7 +357,7 @@ async function postHandler(request: Request) {
     if (bifrostDecision.fallbackReason) {
       bifrostFallbackReason = bifrostDecision.fallbackReason;
     }
-    if (bifrostDecision.tryBifrost) {
+    if (bifrostDecision.tryBifrost && !wouldRefuseAgent({ headers: request.headers, log })) {
       const cooldown = backend === "auto" ? getActiveBifrostCooldown(bifrostConfig.baseUrl) : null;
       if (cooldown) {
         bifrostFallbackReason = `bifrost-cooldown; remaining=${cooldown.remainingMs}`;

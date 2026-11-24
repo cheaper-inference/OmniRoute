@@ -96,3 +96,24 @@ test("a throwing hook → fail-open pass-through (blocked:false)", async () => {
   const gate = await runPluginOnRequestHook(baseArgs());
   assert.equal(gate.blocked, false);
 });
+
+test("a blocking hook whose response cannot be serialized still blocks", async () => {
+  registerHook("onRequest", PLUGIN, async () => ({
+    blocked: true,
+    response: { count: BigInt(1) },
+  }));
+  const gate = await runPluginOnRequestHook(baseArgs());
+  assert.equal(gate.blocked, true, "an unserializable block response must not become an allow");
+  if (!gate.blocked) return;
+  assert.equal(gate.response.status, 403);
+  const payload = (await gate.response.json()) as { error?: { type?: string } };
+  assert.equal(payload.error?.type, "plugin_block");
+});
+
+test("a blocking hook whose response is cyclic still blocks", async () => {
+  const cyclic: Record<string, unknown> = {};
+  cyclic.self = cyclic;
+  registerHook("onRequest", PLUGIN, async () => ({ blocked: true, response: cyclic }));
+  const gate = await runPluginOnRequestHook(baseArgs());
+  assert.equal(gate.blocked, true);
+});

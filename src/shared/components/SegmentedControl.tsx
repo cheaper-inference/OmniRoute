@@ -1,6 +1,7 @@
 "use client";
 
-import type { KeyboardEvent, ReactNode } from "react";
+import type { ReactNode } from "react";
+import { SegmentedControl as KitSegmentedControl } from "@omniroute/ui-kit/segmented-control";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@omniroute/ui-kit/tabs";
 import { cn } from "@/shared/utils/cn";
 import Icon from "./Icon";
@@ -13,7 +14,8 @@ interface SegmentedOption {
 
 interface SegmentedCommonProps {
   options?: SegmentedOption[];
-  size?: "sm" | "md" | "lg";
+  /** `md` lines up with 36px controls; `sm` is the 24px segment for dense toolbars. */
+  size?: "sm" | "md";
   className?: string;
   "aria-label"?: string;
   "aria-labelledby"?: string;
@@ -24,6 +26,8 @@ interface SegmentedRadioProps extends SegmentedCommonProps {
   semantics: "radio";
   value?: string;
   onChange?: (value: string) => void;
+  /** The id of a hint that describes the group. */
+  "aria-describedby"?: string;
 }
 
 interface SegmentedTabsListProps extends SegmentedCommonProps {
@@ -48,41 +52,26 @@ interface SegmentedPanelProps {
   children: ReactNode;
 }
 
-// On the triggers: the kit's `.ci-tabs__trigger` sets the `font` shorthand, so a size on the
-// Tabs root would never reach them (utilities win over the kit's components layer).
-const SIZES = {
-  // min-h-7: the kit capsule trigger's min-height (~30px) would otherwise beat h-7; lg's h-10
-  // is already above it.
-  sm: "h-7 min-h-7 px-2 text-xs",
+// Tabs branch, on the triggers: the kit's `.ci-tabs__trigger` sets the `font` shorthand, so a
+// size on the Tabs root would never reach them (utilities win over the kit's components layer).
+const TAB_SIZES = {
+  // 24px with 12px text, the kit `sm` segment (and its `Tabs size="sm"`), so a tab set and a
+  // radio set are the same height. min-h-6: the kit capsule trigger's min-height (~30px) would
+  // otherwise beat h-6.
+  sm: "h-6 min-h-6 px-2 text-xs",
   md: "",
-  lg: "h-10 px-4 text-base",
 };
 
-// Phones: full width, segments share the line; from sm up, natural width (legacy). A set too
-// long for the line scrolls sideways inside the capsule instead of wrapping it.
+// Tabs branch. Phones: full width, segments share the line; from sm up, natural width (legacy).
+// A set too long for the line scrolls sideways inside the capsule instead of wrapping it.
 const LIST_CLASS = "w-full flex-nowrap overflow-x-auto sm:w-auto [&>*]:flex-1 sm:[&>*]:flex-none";
 
-const NEXT_KEYS = new Set(["ArrowRight", "ArrowDown"]);
-const PREVIOUS_KEYS = new Set(["ArrowLeft", "ArrowUp"]);
+// Radio branch. Phones: the capsule takes the line and the kit lets the segments share it; from
+// sm up the kit default applies (it hugs its segments). A caller width (`w-full`) wins everywhere.
+const RADIO_CLASS = "max-sm:w-full";
 
-/** Radio pattern: the arrows move the selection, not just the focus, and wrap around. */
-function onRadioKeyDown(event: KeyboardEvent<HTMLButtonElement>) {
-  // Alt/Ctrl/Cmd + arrow belong to the browser (history, word jumps): leave them alone.
-  if (event.altKey || event.ctrlKey || event.metaKey) return;
-  const group = event.currentTarget.closest('[role="radiogroup"]');
-  if (!group) return;
-  const radios = Array.from(group.querySelectorAll<HTMLButtonElement>('[role="radio"]'));
-  const index = radios.indexOf(event.currentTarget);
-  let next = -1;
-  if (NEXT_KEYS.has(event.key)) next = (index + 1) % radios.length;
-  else if (PREVIOUS_KEYS.has(event.key)) next = (index - 1 + radios.length) % radios.length;
-  else if (event.key === "Home") next = 0;
-  else if (event.key === "End") next = radios.length - 1;
-  if (next < 0) return;
-  event.preventDefault();
-  radios[next].focus();
-  radios[next].click();
-}
+/** The kit asks for one of the two names in its type; the adapter keeps both optional. */
+type KitName = { "aria-label": string; "aria-labelledby"?: string };
 
 function SegmentedLabel({ option }: { option: SegmentedOption }) {
   return (
@@ -121,11 +110,12 @@ export function SegmentedPanel({ value, className, children }: SegmentedPanelPro
 }
 
 /**
- * Segmented control over the kit capsule `Tabs` (KEA-7886). `semantics` says what it is:
+ * Segmented control. `semantics` says what it is:
  *
- * - `"radio"`: a `radiogroup` of `radio`s with `aria-checked`, for filters and single-choice
- *   fields. The arrows move the selection.
- * - `"tabs"`: the `tablist` of a `SegmentedTabs`, whose triggers point at `SegmentedPanel`s.
+ * - `"radio"`: the kit `SegmentedControl`, a `radiogroup` of `radio`s with `aria-checked`, for
+ *   filters and single-choice fields. The arrows move the selection.
+ * - `"tabs"`: the `tablist` of a `SegmentedTabs` (kit capsule `Tabs`), whose triggers point at
+ *   `SegmentedPanel`s.
  */
 export default function SegmentedControl(props: SegmentedControlProps) {
   const {
@@ -135,9 +125,9 @@ export default function SegmentedControl(props: SegmentedControlProps) {
     "aria-label": ariaLabel,
     "aria-labelledby": ariaLabelledBy,
   } = props;
-  const triggerClass = cn("gap-1.5 whitespace-nowrap", SIZES[size]);
 
   if (props.semantics === "tabs") {
+    const triggerClass = cn("gap-1.5 whitespace-nowrap", TAB_SIZES[size]);
     return (
       // Same box the kit Tabs root gave the list before panels moved under SegmentedTabs.
       <div className={cn("flex max-w-full min-w-0 flex-col", className)}>
@@ -152,44 +142,21 @@ export default function SegmentedControl(props: SegmentedControlProps) {
     );
   }
 
-  const { value, onChange } = props;
-  // Roving tabindex: with no match (or no value yet) the group must still be reachable.
-  const hasChecked = options.some((option) => option.value === value);
+  const { value, onChange, "aria-describedby": ariaDescribedBy } = props;
+  const name = { "aria-label": ariaLabel, "aria-labelledby": ariaLabelledBy } as KitName;
   return (
-    <Tabs
-      variant="capsule"
+    <KitSegmentedControl
+      {...name}
+      options={options.map((option) => ({
+        value: option.value,
+        label: option.label,
+        icon: option.icon ? <Icon name={option.icon} size={16} /> : undefined,
+      }))}
       value={value}
       onValueChange={(next) => onChange?.(next)}
-      className={cn("max-w-full", className)}
-    >
-      <TabsList
-        role="radiogroup"
-        aria-orientation={undefined}
-        aria-label={ariaLabel}
-        aria-labelledby={ariaLabelledBy}
-        className={LIST_CLASS}
-      >
-        {options.map((option, index) => {
-          const checked = option.value === value;
-          return (
-            <TabsTrigger
-              key={option.value}
-              value={option.value}
-              role="radio"
-              aria-checked={checked}
-              // The kit trigger is a tab: these two do not exist on a radio.
-              aria-selected={undefined}
-              aria-controls={undefined}
-              tabIndex={checked || (!hasChecked && index === 0) ? 0 : -1}
-              onKeyDown={onRadioKeyDown}
-              // The kit keys the selected weight on aria-selected, which a radio cannot carry.
-              className={cn(triggerClass, checked && "font-semibold")}
-            >
-              <SegmentedLabel option={option} />
-            </TabsTrigger>
-          );
-        })}
-      </TabsList>
-    </Tabs>
+      aria-describedby={ariaDescribedBy}
+      size={size === "sm" ? "sm" : "default"}
+      className={cn(RADIO_CLASS, className)}
+    />
   );
 }
