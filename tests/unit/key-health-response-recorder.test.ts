@@ -1,12 +1,11 @@
 // The key-health callback preserves dispatch order even when responses arrive out of order.
 import test from "node:test";
 import assert from "node:assert/strict";
-import { resolveResilienceSettings } from "../../src/lib/resilience/settings.ts";
+import { makeRequestDeps } from "../helpers/executeProviderRequestFixture.ts";
 
 import {
   executeProviderRequest,
   makeResponseKeyHealthRecorder,
-  type ExecuteProviderRequestDeps,
 } from "../../open-sse/handlers/chatCore/executeProviderRequest.ts";
 
 type Recorded = {
@@ -95,60 +94,6 @@ test("a successful response also carries the dispatch sequence", () => {
   assert.equal(calls[0].requestSeq, requestSeq);
 });
 
-function requestDeps(
-  response: Response,
-  record: ExecuteProviderRequestDeps["recordKeyHealthStatus"],
-  stream: boolean
-): ExecuteProviderRequestDeps {
-  const controller = new AbortController();
-  const credentials = { connectionId: "kh-real-dispatch", apiKey: "fixture" };
-  const body = { model: "fixture-model", messages: [{ role: "user", content: "offline" }] };
-  return {
-    agentGoalPolicy: {
-      detected: false,
-      readinessMaxTimeoutMs: 600_000,
-      streamRecoveryEnabled: false,
-    },
-    assertManagedLeaseFence: () => {},
-    buildUpstreamHeadersForExecute: () => ({}),
-    clientRawRequest: { headers: new Headers(), signal: controller.signal },
-    clientResponseFormat: "chat.completions",
-    connectionId: null,
-    correlationId: null,
-    credentials: null,
-    dedupEnabled: false,
-    dedupHash: null,
-    effectiveModel: body.model,
-    executor: { execute: async () => response },
-    extendedContext: false,
-    getExecutionCredentials: () => credentials,
-    getExecutorClientHeaders: () => ({}),
-    isModelScope: () => false,
-    isOpencodeClient: false,
-    log: null,
-    model: body.model,
-    onCredentialsRefreshed: null,
-    pendingScope: { id: null, model: body.model, provider: "openai", connectionId: null },
-    provider: "openai",
-    providerRequestCapture: { capture: () => {}, body: (fallback: unknown) => fallback },
-    rawBody: body,
-    recordKeyHealthStatus: record,
-    requestedModel: body.model,
-    resilienceSettings: resolveResilienceSettings(null),
-    settings: null,
-    skipUpstreamRetry: false,
-    stream,
-    streamController: { signal: controller.signal },
-    targetFormat: "openai",
-    trace: () => {},
-    traceId: "key-health-dispatch-test",
-    translatedBody: body,
-    trustedEffortContext: {},
-    upstreamStream: stream,
-    userAgent: "offline-key-health-test",
-  };
-}
-
 for (const stream of [true, false]) {
   for (const status of [403, 402, 429]) {
     test(`the ${stream ? "streaming" : "non-streaming"} ${status} dispatch records its own response and sequence`, async () => {
@@ -163,7 +108,7 @@ for (const stream of [true, false]) {
           ...(status === 429 ? { "retry-after": "2" } : {}),
         },
       });
-      const result = await executeProviderRequest(requestDeps(response, record, stream));
+      const result = await executeProviderRequest(makeRequestDeps(response, record, stream));
       assert.equal(result.response.status, status);
       assert.equal(await result.response.text(), body);
       assert.equal(calls.length, 1);
@@ -186,7 +131,7 @@ test("streaming auth-error classification uses the 64 KiB error cap, not the com
     status: 403,
     headers: { "content-type": "application/json" },
   });
-  const result = await executeProviderRequest(requestDeps(response, record, true));
+  const result = await executeProviderRequest(makeRequestDeps(response, record, true));
   assert.equal(calls.length, 1);
   assert.equal(
     calls[0].failureDetail,
@@ -215,7 +160,7 @@ for (const status of [200, 429]) {
           ? { "content-type": "text/event-stream" }
           : { "content-type": "text/plain", "retry-after": "2" },
     });
-    const deps = requestDeps(initial, record, true);
+    const deps = makeRequestDeps(initial, record, true);
     deps.getExecutionCredentials = () => ({ connectionId: "kh-redispatch-fixture" });
     deps.settings = { resilienceSettings: { streamRecovery: { enabled: true } } };
     let dispatches = 0;
