@@ -6,6 +6,7 @@ import { z } from "zod";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
 import { resolveProviderConnectionDetails } from "@/lib/cache/semanticCacheDbBridge";
 import { resolveEmbeddingCredentials } from "@omniroute/open-sse/services/cache/embeddingEndpoint";
+import { checkEmbeddingDimension } from "@omniroute/open-sse/config/semanticCacheConfig";
 import { getUserDatabaseSettings } from "@/lib/db/databaseSettings";
 import { CACHE_SECRET_MASK } from "@/lib/db/cacheSecrets";
 
@@ -77,10 +78,28 @@ export async function POST(request: Request) {
       );
     }
 
+    const dimensionCheck = checkEmbeddingDimension(
+      result.embedding.length,
+      stored.semanticCacheEmbeddingDimension
+    );
+    if (dimensionCheck.mismatch) {
+      console.warn(
+        `[semantic-cache] embedding dimension mismatch: configured ${dimensionCheck.configured} ` +
+          `(${dimensionCheck.source}) but ${provider}/${model} returned ${dimensionCheck.detected}; ` +
+          "keeping the configured value"
+      );
+    }
+
     return NextResponse.json({
       ok: true,
       latencyMs,
       dimensions: result.embedding.length,
+      // A configured dimension that disagrees with the probe is surfaced, never enforced: the
+      // vector stores silently skip mismatched lengths, which would turn the cache into a
+      // permanent miss. The operator keeps their configured value until they change it.
+      configuredDimensions: dimensionCheck.configured,
+      dimensionSource: dimensionCheck.source,
+      dimensionMismatch: dimensionCheck.mismatch,
       resolvedBaseUrl: effectiveBaseUrl,
     });
   } catch (error: unknown) {

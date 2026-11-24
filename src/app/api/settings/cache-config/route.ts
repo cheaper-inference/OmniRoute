@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
+  getPersistedCacheSetting,
   getUserDatabaseSettings,
   updateDatabaseSettings,
   type UserDatabaseSettings,
@@ -15,6 +16,7 @@ import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
 import { redactCacheSecrets, CacheCredentialEndpointError } from "@/lib/db/cacheSecrets";
 import { validateEmbeddingEndpoint } from "@omniroute/open-sse/services/cache/embeddingEndpoint";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
+import { resolveSemanticCacheEmbeddingDimension } from "@omniroute/open-sse/config/semanticCacheConfig";
 
 ensureSemanticCacheDbBridge();
 
@@ -27,7 +29,10 @@ const cacheConfigUpdateSchema = z.object({
   semanticCacheThreshold: z.number().min(0).max(1).optional(),
   semanticCacheEmbeddingProvider: z.string().trim().optional(),
   semanticCacheEmbeddingModel: z.string().trim().optional(),
-  semanticCacheEmbeddingDimension: z.number().positive().nullable().optional(),
+  // A vector length is a positive whole number. Rejecting fractions/non-positive values here
+  // keeps `embeddingDimension` comparable to a real vector length (the test-embedding probe
+  // reports `embedding.length`); 65,536 is far above any current embedding model.
+  semanticCacheEmbeddingDimension: z.number().int().positive().max(65_536).nullable().optional(),
   semanticCacheEmbeddingBaseUrl: z.string().trim().nullable().optional(),
   semanticCacheEmbeddingApiKey: z.string().trim().nullable().optional(),
   semanticCacheRedisUrl: z.string().trim().nullable().optional(),
@@ -114,6 +119,25 @@ export async function GET(request: NextRequest) {
       }
     }
     config.embeddingOptions = embeddingOptions;
+
+    // The runtime resolves the embedding dimension env-first (semanticCacheConfig.ts), so
+    // echoing the raw merged DB value alone could show a dimension the runtime never uses
+    // (env 768 vs settings 1024). Report the effective value plus its source, and the persisted
+    // value separately. The environment value is reported only — never written to the database.
+    const effectiveDimension = resolveSemanticCacheEmbeddingDimension(
+      cache.semanticCacheEmbeddingDimension
+    );
+    const persistedDimension = getPersistedCacheSetting("semanticCacheEmbeddingDimension");
+    config.semanticCacheEmbeddingDimension = effectiveDimension.dimension;
+    config.semanticCacheEmbeddingDimensionSource =
+      effectiveDimension.source === "env"
+        ? "env"
+        : persistedDimension !== undefined
+          ? "db"
+          : "default";
+    config.semanticCacheEmbeddingDimensionConfigured =
+      typeof persistedDimension === "number" ? persistedDimension : null;
+
     return NextResponse.json(redactCacheSecrets(config));
   } catch (error) {
     return NextResponse.json({ error: sanitizeErrorMessage(error) }, { status: 500 });
