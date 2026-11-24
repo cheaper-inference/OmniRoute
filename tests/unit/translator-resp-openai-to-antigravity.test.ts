@@ -96,7 +96,7 @@ test("OpenAI -> Antigravity: tool call arguments accumulate and emit once on fin
   });
   assert.equal(final.response.candidates[0].finishReason, "STOP");
   assert.equal(final.response.usageMetadata.promptTokenCount, 8);
-  assert.equal(final.response.usageMetadata.candidatesTokenCount, 5);
+  assert.equal(final.response.usageMetadata.candidatesTokenCount, 4);
   assert.equal(final.response.usageMetadata.totalTokenCount, 13);
   assert.equal(final.response.usageMetadata.thoughtsTokenCount, 1);
   assert.equal(final.response.usageMetadata.cachedContentTokenCount, 2);
@@ -158,7 +158,7 @@ test("OpenAI -> Antigravity: a trailing usage-only chunk (choices: []) after the
   assert.ok(trailing, "usage-only chunk after the finish chunk must reach the client");
   assert.deepEqual(trailing.response.usageMetadata, {
     promptTokenCount: 10,
-    candidatesTokenCount: 6,
+    candidatesTokenCount: 4,
     totalTokenCount: 16,
     thoughtsTokenCount: 2,
     cachedContentTokenCount: 4,

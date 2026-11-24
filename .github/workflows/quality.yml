@@ -165,6 +165,14 @@ jobs:
     # With this pinned, USE_VPS_RUNNER governs ONLY build-like jobs — one variable, one coherent
     # purpose. That is what gap 19 asked for; a second variable turned out to be unnecessary.
     runs-on: ubuntu-latest
+    # Hard ceiling. Without it a stuck step holds the hosted runner until GitHub's 360 min
+    # default: on 2026-11-20 check:cycles printed its verdict and its node process never
+    # exited (run 44821771451, 118 min until it was cancelled by hand). The longest job this
+    # limit must leave room for is the merge queue's base check: an omni-queue/** base-check
+    # candidate runs the whole unsharded unit suite in this job (94 min measured on
+    # basecheck-07a790f5c158), so 150 leaves about 50% headroom and stays below the queue's
+    # checksTimeoutMinutes (240, config/merge-queue/config.json).
+    timeout-minutes: 150
     # tsx gates (known-symbols, route-guard-membership) import modules that open
     # SQLite on load; provide DB env so a fresh CI DB initializes cleanly.
     env:
@@ -301,6 +309,24 @@ jobs:
           ratchet_gates=(
             secrets vuln-ratchet workflows openapi-breaking cycles boundary
           )
+          # Wall-clock limit per gate. A gate that finished its work can still fail to exit:
+          # in run 44821771451 check:cycles printed "RATCHET OK" and its node process was still
+          # alive 113 min later, when the run was cancelled by hand. The slowest gate takes about
+          # 90 s and the whole loop under 10 min. `timeout` (GNU, or the uutils one Ubuntu 26.04
+          # ships: same contract) signals the whole process group (npm, sh, node) and sends KILL
+          # 30 s after TERM. A gate cut by the limit runs once more: the known case is a hang
+          # after a green verdict, and a second timeout counts as a failed gate.
+          GATE_TIMEOUT=10m
+          run_gate() {
+            local rc=0
+            timeout --kill-after=30s "$GATE_TIMEOUT" "$@" || rc=$?
+            if [ "$rc" -eq 124 ] || [ "$rc" -eq 137 ]; then
+              echo "::warning::gate hit the $GATE_TIMEOUT limit and was terminated (exit $rc), retrying once: $*"
+              rc=0
+              timeout --kill-after=30s "$GATE_TIMEOUT" "$@" || rc=$?
+            fi
+            return "$rc"
+          }
           failed=()
           for g in "${gates[@]}"; do
             echo "::group::check:$g"
@@ -313,9 +339,9 @@ jobs:
             # release. See scripts/check/newCodeMode.mjs.
             case "$g" in file-size|complexity-ratchets|dead-code) NEW_CODE=1 ;; *) NEW_CODE= ;; esac
             if [ -n "$NEW_CODE" ] && [ -n "${PR_BASE_SHA:-}" ]; then
-              npm run "check:$g" -- --base-ref "$PR_BASE_SHA" || failed+=("$g")
+              run_gate npm run "check:$g" -- --base-ref "$PR_BASE_SHA" || failed+=("$g")
             else
-              npm run "check:$g" || failed+=("$g")
+              run_gate npm run "check:$g" || failed+=("$g")
             fi
             echo "::endgroup::"
           done
@@ -327,20 +353,20 @@ jobs:
             # PR adds block. workflow_dispatch (no PR base) keeps the absolute ceiling.
             case "$g" in boundary) BASE_RELATIVE=1 ;; *) BASE_RELATIVE= ;; esac
             if [ -n "$BASE_RELATIVE" ] && [ -n "${PR_BASE_SHA:-}" ]; then
-              npm run "check:$g" -- --ratchet --base-ref "$PR_BASE_SHA" || failed+=("$g")
+              run_gate npm run "check:$g" -- --ratchet --base-ref "$PR_BASE_SHA" || failed+=("$g")
             else
-              npm run "check:$g" -- --ratchet || failed+=("$g")
+              run_gate npm run "check:$g" -- --ratchet || failed+=("$g")
             fi
             echo "::endgroup::"
           done
           echo "::group::typecheck:core"
-          npm run typecheck:core || failed+=("typecheck:core")
+          run_gate npm run typecheck:core || failed+=("typecheck:core")
           echo "::endgroup::"
           echo "::group::check:dashboard-typecheck"
-          npm run check:dashboard-typecheck || failed+=("check:dashboard-typecheck")
+          run_gate npm run check:dashboard-typecheck || failed+=("check:dashboard-typecheck")
           echo "::endgroup::"
           echo "::group::check:build-typecheck"
-          npm run check:build-typecheck || failed+=("check:build-typecheck")
+          run_gate npm run check:build-typecheck || failed+=("check:build-typecheck")
           echo "::endgroup::"
           # #10134: TS7 zero-new-diagnostics ratchet — folded into this non-fail-fast
           # loop (never a separate blocking step) so an earlier red gate cannot abort
@@ -348,7 +374,7 @@ jobs:
           # the base-relative comparison needs a base SHA (empty on workflow_dispatch).
           if [ -n "${PR_BASE_SHA:-}" ]; then
             echo "::group::check:ts7-diagnostics-ratchet"
-            npm run check:ts7-diagnostics-ratchet -- --base-ref "$PR_BASE_SHA" || failed+=("ts7-diagnostics-ratchet")
+            run_gate npm run check:ts7-diagnostics-ratchet -- --base-ref "$PR_BASE_SHA" || failed+=("ts7-diagnostics-ratchet")
             echo "::endgroup::"
           fi
           # A failed gate named in EXTERNAL_STATE_GATES (filled on an omni-queue candidate only)

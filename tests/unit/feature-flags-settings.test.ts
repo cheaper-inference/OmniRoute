@@ -78,7 +78,10 @@ const {
 // and COMBO_JEV_STRATEGY_ENABLED (#15279), all default off, take it to 126.
 // PLUGIN_PERMISSION_MODEL_ENABLED (opt-in plugin sandbox, default off) takes it to 127, and
 // COMBO_DECISION_ROUTER_ENABLED (unified decision routing, default off) to 128.
-const EXPECTED_FEATURE_FLAG_COUNT = 128;
+// AGENT_GUARD_MODE (client-agent observation mode, default off) takes it to 129.
+// AGENT_GUARD_STRICT (agent guard strict mode, default off) takes it to 130.
+// QUOTA_SELF_PANEL (self-service quota API, default off) takes it to 131.
+const EXPECTED_FEATURE_FLAG_COUNT = 131;
 // tool_call wrapper repair, default on) to 86; OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED
 // (#16571, OpenCode v2 client fingerprint, default off) to 87.
 // tool_call wrapper repair, default on) to 86; CLAUDE_OAUTH_SUMMARIZED_THINKING_UNREDACTED
