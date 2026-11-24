@@ -38,6 +38,12 @@ test("keeps the first organization when none advertises chat, and handles bad in
   assert.equal(pickClaudeChatOrganization([]), null);
   assert.equal(pickClaudeChatOrganization({ not: "a list" }), null);
   assert.equal(pickClaudeChatOrganization([null, { uuid: "  " }, CHAT_ORG]), "org-chat");
+  // Wrong field types are skipped per record; bad capabilities count as none.
+  assert.equal(
+    pickClaudeChatOrganization([{ uuid: 42 }, { uuid: "org-x", capabilities: "chat" }, CHAT_ORG]),
+    "org-chat"
+  );
+  assert.equal(pickClaudeChatOrganization([{ uuid: "org-x", capabilities: "chat" }]), "org-x");
 });
 
 test("claude-web advertises Claude Haiku 5.5", () => {
