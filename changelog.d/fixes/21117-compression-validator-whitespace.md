@@ -1,0 +1,1 @@
+- **fix(compression):** Accept preserved code blocks and inline code in `validateCompression()` when surrounding or operator whitespace is normalized during Caveman compression instead of rejecting the prompt and falling back to 0% savings ([#21117](https://github.com/cheaper-inference/OmniRoute/issues/21117))

@@ -140,4 +140,37 @@ describe("compression preservation and validation", () => {
     const output = result.body.messages[0].content as string;
     assert.match(output, /`the exact token`/);
   });
+
+  it("accepts preserved fenced and inline code blocks after whitespace normalization (#21117)", () => {
+    const phpPrompt =
+      "Here is the loader:\n```php\n<?php require __DIR__ . '/app.php';\n```\nExplain it.";
+    const result = cavemanCompress(
+      { messages: [{ role: "user", content: phpPrompt }] },
+      {
+        enabled: true,
+        compressRoles: ["user"],
+        skipRules: [],
+        minMessageLength: 0,
+        preservePatterns: [],
+        intensity: "full",
+      }
+    );
+    assert.equal(result.stats?.fallbackApplied, undefined);
+    assert.equal(result.stats?.validationErrors, undefined);
+
+    const inlineOrig = "Please check `require __DIR__ . '/app.php'` in the loader.";
+    const inlineCompressed = "Check `require __DIR__. '/app.php'` in loader.";
+    const inlineValidation = validateCompression(inlineOrig, inlineCompressed);
+    assert.equal(inlineValidation.valid, true);
+    assert.equal(inlineValidation.fallbackApplied, false);
+    assert.deepEqual(inlineValidation.errors, []);
+
+    const mutatedValidation = validateCompression(
+      phpPrompt,
+      "Here is loader:\n```php\n<?php require __DIR__ . '/other.php';\n```\nExplain it."
+    );
+    assert.equal(mutatedValidation.valid, false);
+    assert.equal(mutatedValidation.fallbackApplied, true);
+    assert.match(mutatedValidation.errors[0] ?? "", /fenced code block changed or missing/);
+  });
 });
