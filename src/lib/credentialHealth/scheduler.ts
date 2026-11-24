@@ -298,7 +298,7 @@ async function testConnection(
       nextAttemptAt: Date.now() + nextBackoff,
     });
 
-    setCredentialHealth(connectionId, provider, "error", message);
+    setCredentialHealth(connectionId, provider, "error", message, "runtime_error", "scheduler");
 
     if (currentFailures <= 2) {
       console.log(

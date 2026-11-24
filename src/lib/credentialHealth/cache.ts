@@ -109,19 +109,25 @@ export const NON_CREDENTIAL_PROBE_DIAGNOSES: ReadonlySet<string> = new Set([
 ]);
 
 /**
- * Default-off flag: when on, only a cached `error` carrying one of the
+ * On by default flag (#20256): when on, only a cached `error` carrying one of the
  * INVALID_CREDENTIAL_DIAGNOSES blocks dispatch; inconclusive failures (timeouts, quota,
  * outages, and the scheduler's untyped catch-path errors) fall through as "unknown".
- * Off (default): other cached `error` diagnoses block, except known transport
- * failures which never prove bad credentials (#18037).
+ * Set to false to restore strict legacy behavior where other cached probe errors
+ * block dispatch for the cache TTL (5 minutes).
  */
 export const CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY_FLAG = "CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY";
+/** Must match the flag's `defaultValue` in featureFlagDefinitions.ts. */
+const CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY_DEFAULT = true;
 
 function isAuthDiagnosesOnlyGateEnabled(): boolean {
   try {
-    return resolveRegisteredFeatureFlag(CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY_FLAG);
+    return resolveRegisteredFeatureFlag(
+      CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY_FLAG,
+      CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY_DEFAULT
+    );
   } catch {
-    return false; // fail closed for non-transport probe errors
+    // A resolver that throws falls back to the flag default, like an unset flag.
+    return CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY_DEFAULT;
   }
 }
 

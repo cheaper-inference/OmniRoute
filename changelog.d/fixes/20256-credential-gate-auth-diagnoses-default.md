@@ -1,0 +1,1 @@
+- Make `CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY` default to `true` so transient health-probe timeouts (such as 504 on `/models`) and inconclusive errors no longer block healthy combo targets for 5 minutes with `503 Credential gate blocked`, while continuing to immediately block proven invalid credentials (#20256).
