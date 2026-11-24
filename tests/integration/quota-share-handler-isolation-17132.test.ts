@@ -241,3 +241,107 @@ test("a real closed quota schedule preserves its Retry-After through handleChat"
   assert.deepEqual(dispatchedModels, []);
   assert.deepEqual(await health(connection.id), before);
 });
+
+/** Key a has used its whole hourly share in a consent pool where nobody lends. */
+async function shareFixture() {
+  const connection = await providers.createProviderConnection({
+    provider: "claude",
+    authType: "oauth",
+    name: `quota-share-fixture-${crypto.randomUUID()}`,
+    accessToken: "synthetic-claude-access-token",
+    refreshToken: "synthetic-claude-refresh-token",
+    expiresAt: new Date(Date.now() + 86_400_000).toISOString(),
+    isActive: true,
+    testStatus: "active",
+  });
+  const a = await harness.seedApiKey({ allowedConnections: [connection.id] });
+  const b = await harness.seedApiKey({ allowedConnections: [connection.id] });
+  plans.upsertPlan(
+    connection.id,
+    "claude",
+    [{ unit: "tokens", window: "hourly", limit: 10000 }],
+    "manual"
+  );
+  const pool = pools.createPool({
+    connectionId: connection.id,
+    name: `quota-share-pool-${connection.id}`,
+    borrowMode: "consent",
+    allocations: [
+      { apiKeyId: a.id, weight: 50, policy: "hard" },
+      { apiKeyId: b.id, weight: 50, policy: "hard" },
+    ],
+  });
+  const store = await getQuotaStore();
+  await store.consume(a.id, { poolId: pool.id, unit: "tokens", window: "hourly" }, 5000);
+  quotaCache.setQuotaCache(connection.id, "claude", {});
+  return { connection, a, b };
+}
+
+test("a share refusal sends Retry-After to the client and leaves the shared connection alone", async () => {
+  const { connection, a, b } = await shareFixture();
+  const before = await health(connection.id);
+  const response = await request(a.key, connection.id, `claude/${MODEL}`);
+  assert.equal(response.status, 429);
+  const body = await response.json();
+  assert.equal(body.error.code, "quota_share_blocked");
+  assert.match(
+    body.error.message,
+    /^Quota share limit reached for your API key on claude\. Enough hourly usage is expected to clear by /
+  );
+  const retryAfter = Number(response.headers.get("retry-after"));
+  assert.ok(retryAfter > 0 && retryAfter <= 2 * 3600, `Retry-After was ${retryAfter}`);
+  assert.deepEqual(dispatchedModels, [], "blocked key must never reach upstream");
+  assert.deepEqual(await health(connection.id), before);
+  assert.equal(isModelLocked("claude", connection.id, MODEL), false);
+  assert.equal(getCircuitBreaker("claude").getStatus().failureCount, 0);
+
+  const allowed = await request(b.key, connection.id, `claude/${MODEL}`);
+  assert.equal(allowed.status, 200, await allowed.clone().text());
+  assert.deepEqual(dispatchedModels, [MODEL]);
+});
+
+test("a combo whose targets all refuse the key for its share answers 429 without waiting", async () => {
+  await harness.settingsDb.updateSettings({
+    resilienceSettings: {
+      comboCooldownWait: { enabled: true, maxWaitMs: 90000, maxAttempts: 5, budgetMs: 300000 },
+    },
+  });
+  const { connection, a, b } = await shareFixture();
+  const name = `quota-share-all-refused-${connection.id}`;
+  await harness.combosDb.createCombo({
+    name,
+    strategy: "priority",
+    models: [MODEL, SECOND_MODEL].map((model) => ({
+      kind: "model",
+      providerId: "claude",
+      model: `claude/${model}`,
+      connectionId: connection.id,
+      weight: 1,
+    })),
+  });
+  const before = await health(connection.id);
+  const startedAt = Date.now();
+  const response = await request(a.key, connection.id, name);
+  const elapsedMs = Date.now() - startedAt;
+  const text = await response.text();
+  assert.equal(response.status, 429, text);
+  // No model lock exists, so the cooldown wait has no barrier to wait on.
+  assert.ok(elapsedMs < 5000, `the combo took ${elapsedMs} ms`);
+  // Today the combo takes the share reset as its retry hint, as it does for a schedule refusal.
+  const body = JSON.parse(text);
+  const clearBy = /clear by (\S+Z)\./.exec(body.error.message)?.[1];
+  assert.ok(clearBy, body.error.message);
+  const retryAfter = Number(response.headers.get("retry-after"));
+  assert.ok(retryAfter > 0, `Retry-After was ${response.headers.get("retry-after")}`);
+  assert.equal(body.error.retry_after, retryAfter);
+  const resetLagMs = Date.parse(body.error.reset_at) - Date.parse(clearBy);
+  assert.ok(resetLagMs >= 0 && resetLagMs < 2000, `reset_at lags the instant by ${resetLagMs} ms`);
+  assert.match(body.error.message, /\(reset after \d+m \d+s\)$/);
+  assert.deepEqual(dispatchedModels, []);
+  assert.deepEqual(await health(connection.id), before);
+  assert.equal(isModelLocked("claude", connection.id, MODEL), false);
+  assert.equal(isModelLocked("claude", connection.id, SECOND_MODEL), false);
+  assert.equal(getCircuitBreaker("claude").getStatus().failureCount, 0);
+  const allowed = await request(b.key, connection.id, `claude/${MODEL}`);
+  assert.equal(allowed.status, 200, await allowed.clone().text());
+});

@@ -9,6 +9,8 @@ vi.mock("next-intl", () => ({
 
 const { default: PoolWizard } =
   await import("../../../../src/app/(dashboard)/dashboard/costs/quota-share/components/PoolWizard");
+const { default: MemberBreakdownField } =
+  await import("../../../../src/app/(dashboard)/dashboard/costs/quota-share/components/MemberBreakdownField");
 
 type WizardProps = React.ComponentProps<typeof PoolWizard>;
 
@@ -60,6 +62,9 @@ function currentStep() {
 function pickConnection() {
   fireEvent.click(screen.getByRole("checkbox"));
 }
+
+const memberBreakdownBox = () =>
+  screen.getByRole("checkbox", { name: /memberBreakdownLabel/ }) as HTMLInputElement;
 
 function goToKeysStep() {
   pickConnection();
@@ -129,7 +134,94 @@ describe("PoolWizard on the kit Wizard", () => {
     expect(JSON.parse(requestsTo("PATCH")[0][1].body)).toEqual({
       allocations: [],
       exclusive: false,
+      memberBreakdown: false,
     });
+  });
+
+  it("create sends the member breakdown off by default", async () => {
+    const onClose = vi.fn();
+    render(<PoolWizard {...props({ onClose })} />);
+    goToKeysStep();
+
+    expect(memberBreakdownBox().checked).toBe(false);
+    fireEvent.click(nextButton("wizardCreatePool"));
+
+    await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
+    expect(JSON.parse(requestsTo("PATCH")[0][1].body).memberBreakdown).toBe(false);
+  });
+
+  it("ticking the member usage option sends it", async () => {
+    const onClose = vi.fn();
+    render(<PoolWizard {...props({ onClose })} />);
+    goToKeysStep();
+
+    fireEvent.click(memberBreakdownBox());
+    fireEvent.click(nextButton("wizardCreatePool"));
+
+    await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
+    expect(JSON.parse(requestsTo("PATCH")[0][1].body).memberBreakdown).toBe(true);
+  });
+
+  it("edit starts from the pool's setting", async () => {
+    const onSaved = vi.fn();
+    const base = props({ open: false, onSaved });
+    const pool = {
+      id: "pool-1",
+      name: "Existing",
+      connectionId: "conn-1",
+      connectionIds: ["conn-1"],
+      groupId: "group-1",
+      allocations: [{ apiKeyId: "key-1", weight: 100, policy: "hard" }],
+    } as unknown as WizardProps["editPool"];
+    const { rerender } = render(<PoolWizard {...base} />);
+    rerender(<PoolWizard {...base} open editPool={pool} editPoolMemberBreakdown />);
+
+    fireEvent.click(nextButton());
+    fireEvent.click(nextButton());
+    expect(memberBreakdownBox().checked).toBe(true);
+    fireEvent.click(nextButton("saveChanges"));
+
+    await waitFor(() => expect(onSaved).toHaveBeenCalledTimes(1));
+    expect(JSON.parse(requestsTo("PATCH")[0][1].body).memberBreakdown).toBe(true);
+  });
+
+  it("a pool with fewer than three keys is told the bars stay hidden", () => {
+    render(
+      <PoolWizard
+        {...props({
+          apiKeys: [
+            { id: "key-1", name: "Key one" },
+            { id: "key-2", name: "Key two" },
+            { id: "key-3", name: "Key three" },
+          ],
+        })}
+      />
+    );
+    goToKeysStep();
+    const addKey = () =>
+      fireEvent.change(screen.getByRole("combobox", { name: "addKey" }), {
+        target: {
+          value: (screen.getByRole("combobox", { name: "addKey" }) as HTMLSelectElement).options[1]
+            .value,
+        },
+      });
+
+    addKey();
+    addKey();
+    fireEvent.click(memberBreakdownBox());
+    expect(screen.getByText("memberBreakdownTooFew")).toBeTruthy();
+
+    addKey();
+    expect(screen.queryByText("memberBreakdownTooFew")).toBeNull();
+  });
+
+  it("the warning is always shown next to the option", () => {
+    render(<PoolWizard {...props()} />);
+    goToKeysStep();
+
+    expect(screen.getByText("memberBreakdownWarning")).toBeTruthy();
+    fireEvent.click(memberBreakdownBox());
+    expect(screen.getByText("memberBreakdownWarning")).toBeTruthy();
   });
 
   it("keeps the wizard open and shows the failure next to the actions", async () => {
@@ -220,5 +312,98 @@ describe("PoolWizard on the kit Wizard", () => {
     expect(mockFetch).toHaveBeenCalledTimes(1);
     expect(mockFetch.mock.calls[0][0]).toBe("/api/quota/pools/pool-1");
     expect(requestsTo("PATCH")).toHaveLength(1);
+  });
+
+  it("create sends the default borrow mode", async () => {
+    const onClose = vi.fn();
+    render(<PoolWizard {...props({ onClose })} />);
+    pickConnection();
+    expect(
+      (
+        screen.getByRole("radio", { name: "borrowModeSaturation" }) as HTMLInputElement
+      ).getAttribute("aria-checked")
+    ).toBe("true");
+    expect(screen.getByText("borrowModeSaturationHint")).toBeTruthy();
+    fireEvent.click(nextButton());
+    fireEvent.click(nextButton());
+    fireEvent.click(nextButton("wizardCreatePool"));
+
+    await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
+    expect(JSON.parse(requestsTo("POST")[0][1].body).borrowMode).toBe("saturation");
+  });
+
+  it("links the borrow mode group to the hint of the chosen mode", () => {
+    render(<PoolWizard {...props()} />);
+    pickConnection();
+    const group = () => screen.getByRole("radiogroup", { name: "borrowModeLabel" });
+    const saturationHint = screen.getByText("borrowModeSaturationHint");
+    expect(saturationHint.id).not.toBe("");
+    expect(group().getAttribute("aria-describedby")).toBe(saturationHint.id);
+    fireEvent.click(screen.getByRole("radio", { name: "borrowModeConsent" }));
+    expect(group().getAttribute("aria-describedby")).toBe(
+      screen.getByText("borrowModeConsentHint").id
+    );
+  });
+
+  it("choosing By consent sends it", async () => {
+    const onClose = vi.fn();
+    render(<PoolWizard {...props({ onClose })} />);
+    pickConnection();
+    fireEvent.click(screen.getByRole("radio", { name: "borrowModeConsent" }));
+    expect(screen.getByText("borrowModeConsentHint")).toBeTruthy();
+    fireEvent.click(nextButton());
+    fireEvent.click(nextButton());
+    fireEvent.click(nextButton("wizardCreatePool"));
+
+    await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
+    expect(JSON.parse(requestsTo("POST")[0][1].body).borrowMode).toBe("consent");
+  });
+
+  it("edit starts from the pool's mode and sends it back", async () => {
+    const onSaved = vi.fn();
+    const base = props({ open: false, onSaved });
+    const pool = {
+      id: "pool-1",
+      name: "Existing",
+      connectionId: "conn-1",
+      connectionIds: ["conn-1"],
+      groupId: "group-1",
+      borrowMode: "consent",
+      allocations: [{ apiKeyId: "key-1", weight: 100, policy: "hard" }],
+    } as unknown as WizardProps["editPool"];
+    const { rerender } = render(<PoolWizard {...base} />);
+    rerender(<PoolWizard {...base} open editPool={pool} />);
+
+    expect(
+      screen.getByRole("radio", { name: "borrowModeConsent" }).getAttribute("aria-checked")
+    ).toBe("true");
+    fireEvent.click(nextButton());
+    fireEvent.click(nextButton());
+    fireEvent.click(nextButton("saveChanges"));
+
+    await waitFor(() => expect(onSaved).toHaveBeenCalledTimes(1));
+    expect(JSON.parse(requestsTo("PATCH")[0][1].body).borrowMode).toBe("consent");
+  });
+});
+
+describe("MemberBreakdownField", () => {
+  afterEach(() => cleanup());
+
+  const field = (checked: boolean, keyCount: number) =>
+    render(<MemberBreakdownField checked={checked} onChange={() => {}} keyCount={keyCount} />);
+
+  it("says the bars stay hidden above 20 keys, only when the option is on", () => {
+    field(true, 21);
+    expect(screen.getByText("memberBreakdownTooMany")).toBeTruthy();
+    expect(screen.queryByText("memberBreakdownTooFew")).toBeNull();
+    cleanup();
+
+    field(true, 20);
+    expect(screen.queryByText("memberBreakdownTooMany")).toBeNull();
+    expect(screen.queryByText("memberBreakdownTooFew")).toBeNull();
+    cleanup();
+
+    field(false, 21);
+    expect(screen.queryByText("memberBreakdownTooMany")).toBeNull();
   });
 });

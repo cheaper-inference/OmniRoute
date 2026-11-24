@@ -391,6 +391,11 @@ reproducible. `n` is capped at 10. The request fails as a whole if any call fail
 of fan-out formats is `SINGLE_IMAGE_FANOUT_FORMATS` in
 `open-sse/handlers/imageGeneration/fanOut.ts`.
 
+Codex GPT Image models (`codex/gpt-image-*`) return PNG only: the upstream answers `200` with
+PNG bytes even when `jpeg` or `webp` is requested. A request with any other `output_format`
+(`webp`, `jpeg`, ...) is rejected with HTTP 400 instead of being silently ignored; omit it or
+send `png`. `output_compression` is not forwarded.
+
 ZenMux reuses the existing API-key connection and accepts `zenmux/` or `zm/` prefixes:
 
 - `zenmux/openai/gpt-image-2` uses ZenMux's OpenAI Images API. Options include `size`,
@@ -442,11 +447,11 @@ Content-Type: application/json
 `mistral-ocr-latest`) resolves to its registered provider, and an omitted `model` defaults to
 Mistral (`mistral-ocr-latest`). Registered providers (`open-sse/config/ocrRegistry.ts`):
 
-| Provider id                   | Model id             | `model` value                                               | Notes                                                                                              |
-| ----------------------------- | -------------------- | ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| `mistral`                     | `mistral-ocr-latest` | `mistral/mistral-ocr-latest` (or bare `mistral-ocr-latest`) | Synchronous — the response is returned directly from the single upstream call.                     |
-| `azure-document-intelligence` | `prebuilt-read`      | `azure-document-intelligence/prebuilt-read`                 | Asynchronous upstream (`analyze` + poll) — see below.                                              |
-| `vertex-deepseek-ocr`         | `deepseek-ocr-maas`  | `vertex-deepseek-ocr/deepseek-ocr-maas`                     | Synchronous, via Vertex AI's `openapi/chat/completions` partner endpoint — see below for auth/URL. |
+| Provider id                   | Model id                          | `model` value                                               | Notes                                                                                                                                                                                                     |
+| ----------------------------- | --------------------------------- | ----------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mistral`                     | `mistral-ocr-latest`              | `mistral/mistral-ocr-latest` (or bare `mistral-ocr-latest`) | Synchronous — the response is returned directly from the single upstream call.                                                                                                                            |
+| `azure-document-intelligence` | `prebuilt-read`                   | `azure-document-intelligence/prebuilt-read`                 | Asynchronous upstream (`analyze` + poll) — see below.                                                                                                                                                     |
+| `vertex-deepseek-ocr`         | self-deployed (no built-in model) | `vertex-deepseek-ocr/<your-deployed-model-id>`              | Synchronous, via your own Vertex AI Model Garden DeepSeek-OCR endpoint (`openapi/chat/completions` shape); Google retired the managed `deepseek-ocr-maas` on 2026-10-21 (#20423), so that id returns 400. |
 
 All three providers respond in the same Mistral-shaped body:
 

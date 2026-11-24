@@ -6,7 +6,7 @@ description: "Regional provider design for Alibaba Model Studio and Qwen Cloud p
 # Alibaba and Qwen provider families
 
 This document records the implementation decision for
-[Issue #7854](https://github.com/diegosouzapw/OmniRoute/issues/7854). The public products are
+[Issue #7854](https://github.com/cheaper-inference/OmniRoute/issues/7854). The public products are
 represented as four provider families. Region is connection data, not a separate product.
 
 ## Decision
@@ -32,7 +32,7 @@ different endpoint families, so all four products remain separate provider IDs.
 | Provider family         | `global-sg`                                                              | `china-beijing`                                                      | Wire format |
 | ----------------------- | ------------------------------------------------------------------------ | -------------------------------------------------------------------- | ----------- |
 | `alibaba`               | `https://dashscope-intl.aliyuncs.com/compatible-mode/v1`                 | `https://dashscope.aliyuncs.com/compatible-mode/v1`                  | OpenAI      |
-| `bailian-coding-plan`   | `https://token-plan.ap-southeast-1.maas.aliyuncs.com/apps/anthropic/v1` | `https://token-plan.cn-beijing.maas.aliyuncs.com/apps/anthropic/v1`  | Anthropic   |
+| `bailian-coding-plan`   | `https://token-plan.ap-southeast-1.maas.aliyuncs.com/apps/anthropic/v1`  | `https://token-plan.cn-beijing.maas.aliyuncs.com/apps/anthropic/v1`  | Anthropic   |
 | `qwen-cloud`            | `https://dashscope-intl.aliyuncs.com/compatible-mode/v1`                 | `https://dashscope.aliyuncs.com/compatible-mode/v1`                  | OpenAI      |
 | `qwen-cloud-token-plan` | `https://token-plan.ap-southeast-1.maas.aliyuncs.com/compatible-mode/v1` | `https://token-plan.cn-beijing.maas.aliyuncs.com/compatible-mode/v1` | OpenAI      |
 

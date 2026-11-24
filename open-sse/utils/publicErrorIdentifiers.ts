@@ -54,6 +54,7 @@ const SAFE_PUBLIC_ERROR_IDENTIFIERS = new Set([
   "chatgpt_web_codex_turn_failed",
   "claude_web_protocol_error",
   "cli_not_found",
+  "client_agent_not_allowed",
   "client_cancelled",
   "client_closed_request",
   "client_disconnected",
