@@ -607,8 +607,8 @@ export function makeInstructionCountFreeValidator(file) {
 // carry no token figure at all; MCP/A2A outputs carry the real figure only. These rules are
 // invariants: they run in both modes.
 
-/** Files that must carry the big figure (filled by the PR that writes the D47 block). */
-export const ROW_SUM_REQUIRED_FILES = [];
+/** Files that must carry the big figure: the two pages that print the D47 block (Radar v2, plan 02). */
+export const ROW_SUM_REQUIRED_FILES = ["README.md", "docs/reference/FREE_TIERS.md"];
 // Trees whose *.ts sources produce MCP/A2A output text. Test files are not outputs: a test that
 // pins "the output never says ~11.4B as others count" has to spell the string.
 const ROW_SUM_FORBIDDEN_TREES = ["open-sse/mcp-server", "src/lib/a2a"];

@@ -461,7 +461,7 @@ const invariants = () =>
     .filter((c) => c.scope === "invariant");
 
 test("row-sum file lists follow the owner's decision of 2026-11-21", () => {
-  assert.deepEqual(gate.ROW_SUM_REQUIRED_FILES, []);
+  assert.deepEqual(gate.ROW_SUM_REQUIRED_FILES, ["README.md", "docs/reference/FREE_TIERS.md"]);
   assert.deepEqual(gate.TOKEN_FIGURE_FREE_FILES, ["package.json", "llm.txt"]);
   assert.equal(gate.ROW_SUM_TOTAL_PUBLIC, true);
   for (const file of ["package.json", "llm.txt"]) {
@@ -507,7 +507,7 @@ test("the row-sum invariants pass on today's tree", () => {
     }
   }
   const required = rowSum.find((c) => /^Row-sum figure required/.test(c.label));
-  assert.deepEqual(required?.files, []);
+  assert.deepEqual(required?.files, ["README.md", "docs/reference/FREE_TIERS.md"]);
   assert.equal(required?.validate?.("~93M real today").ok, false);
   assert.equal(required?.validate?.(SHORT_PAIR).ok, true);
 });
@@ -521,4 +521,29 @@ test("the big figure leaves every surface when the owner retires it", () => {
   assert.equal(place(SHORT_PAIR, shown).ok, true);
   assert.equal(place("98.6% from offers that no longer exist", shown).ok, true);
   assert.equal(place("~93M real today", shown).ok, true);
+});
+
+test("the README and FREE_TIERS must keep the row-sum figure", () => {
+  assert.ok(gate.ROW_SUM_REQUIRED_FILES.includes("README.md"));
+  assert.ok(gate.ROW_SUM_REQUIRED_FILES.includes("docs/reference/FREE_TIERS.md"));
+  const required = invariants().find((c) => /^Row-sum figure required/.test(c.label));
+  assert.ok(required?.validate);
+  const readme = readFileSync(path.join(ROOT, "README.md"), "utf8");
+  const freeTiers = readFileSync(path.join(ROOT, "docs/reference/FREE_TIERS.md"), "utf8");
+  assert.equal(required.validate(readme).ok, true);
+  assert.equal(required.validate(freeTiers).ok, true);
+  // The README with every big figure removed (block, title, alt texts keep only the real one).
+  const withoutBig = readme
+    .replace(/~\d+(?:\.\d+)?B free tokens \/ month/g, "free tokens / month")
+    .replace(/~\d+(?:\.\d+)?B as [Oo]thers [Cc]ount · /g, "");
+  assert.equal(required.validate(withoutBig).ok, false);
+  assert.equal(place(readme, { methodPage: false }).ok, true);
+  assert.equal(place(freeTiers, { methodPage: true }).ok, true);
+  // The hero alt that lost its real figure breaks the pair (D48).
+  const heroAt = readme.indexOf("readme-hero.svg");
+  const lineEnd = readme.indexOf("\n", heroAt);
+  const heroLine = readme.slice(readme.lastIndexOf("\n", heroAt) + 1, lineEnd);
+  const broken = readme.replace(heroLine, heroLine.replace(/ · ~\d+(?:\.\d+)?M real/, ""));
+  assert.notEqual(broken, readme);
+  assert.equal(place(broken, { methodPage: false }).ok, false);
 });
