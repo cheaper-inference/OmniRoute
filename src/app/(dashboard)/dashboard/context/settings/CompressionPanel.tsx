@@ -200,10 +200,16 @@ function AutoTriggerInput({
   value,
   onCommit,
   ariaLabel,
+  min = AUTO_TRIGGER_MIN,
+  max = AUTO_TRIGGER_MAX,
+  disabled = false,
 }: {
   value: number;
   onCommit: (tokens: number) => void;
   ariaLabel: string;
+  min?: number;
+  max?: number;
+  disabled?: boolean;
 }) {
   // The edit not saved yet, or null while the field shows the current value.
   const [draft, setDraft] = useState<string | null>(null);
@@ -211,7 +217,7 @@ function AutoTriggerInput({
     const tokens = Number(text);
     // Keep a value the field itself rejects (non-integer, negative, over max) in the box
     // rather than coercing it; an empty box still means 0.
-    if (!Number.isInteger(tokens) || tokens < AUTO_TRIGGER_MIN || tokens > AUTO_TRIGGER_MAX) {
+    if (!Number.isInteger(tokens) || tokens < min || tokens > max) {
       return;
     }
     setDraft(null);
@@ -222,8 +228,9 @@ function AutoTriggerInput({
       type="number"
       aria-label={ariaLabel}
       inputClassName="h-8 min-h-8 w-24"
-      min={AUTO_TRIGGER_MIN}
-      max={AUTO_TRIGGER_MAX}
+      min={min}
+      max={max}
+      disabled={disabled}
       value={draft ?? String(value)}
       onChange={(e) => setDraft(e.target.value)}
       onBlur={(e) => commit(e.currentTarget.value)}
@@ -251,8 +258,45 @@ function AdaptiveContextBudgetDial({
   // Representative window for the preview label (D-C1). Not the live model limit —
   // the panel has no selected-model context here; 200k is Claude-class default.
   const target = getAdaptiveTargetSummary(contextBudget, 200000);
+  const automaticUltra =
+    contextBudget.mode === "floor" &&
+    contextBudget.policy === "percentage" &&
+    contextBudget.ladderOverride?.length === 1 &&
+    contextBudget.ladderOverride[0].engine === "ultra";
   return (
     <div className="mb-4 space-y-2 rounded-md border border-border bg-bg-subtle px-3 py-2">
+      <Toggle
+        label={t("compressionAdaptiveUltra")}
+        description={t("compressionAdaptiveUltraHint")}
+        data-testid="adaptive-ultra-toggle"
+        checked={automaticUltra}
+        disabled={saving}
+        onChange={(enabled) =>
+          onChange(
+            enabled
+              ? {
+                  mode: "floor",
+                  policy: "percentage",
+                  pct: contextBudget.policy === "percentage" ? contextBudget.pct : 0.8,
+                  ladderOverride: [{ engine: "ultra" }],
+                }
+              : { mode: "off" }
+          )
+        }
+      />
+      {automaticUltra && (
+        <label className="flex items-center justify-between gap-4">
+          <span className="text-sm text-text-muted">{t("compressionAdaptiveUltraThreshold")}</span>
+          <AutoTriggerInput
+            value={Math.round(contextBudget.pct * 100)}
+            min={1}
+            max={100}
+            disabled={saving}
+            ariaLabel={t("compressionAdaptiveUltraThreshold")}
+            onCommit={(percent) => onChange({ pct: percent / 100 })}
+          />
+        </label>
+      )}
       <Select
         compact
         label={t("compressionAdaptiveMode")}

@@ -107,6 +107,88 @@ function setupFetchMock(
 }
 
 describe("CompressionPanel adaptive context-budget dial", () => {
+  it("enables threshold-only Ultra at 80% and disables it without changing the engine map", async () => {
+    const { puts } = setupFetchMock();
+    const { default: CompressionPanel } =
+      await import("../../../src/app/(dashboard)/dashboard/context/settings/CompressionPanel");
+    let container!: HTMLElement;
+    await act(async () => {
+      container = mount(<CompressionPanel />);
+    });
+    await flush();
+    const toggle = container.querySelector(
+      '[data-testid="adaptive-ultra-toggle"]'
+    ) as HTMLInputElement;
+    expect(toggle).toBeTruthy();
+    expect(toggle.checked).toBe(false);
+    await act(async () => {
+      toggle.click();
+    });
+    await flush();
+    expect(puts.at(-1)?.body.contextBudget).toMatchObject({
+      mode: "floor",
+      policy: "percentage",
+      pct: 0.8,
+      ladderOverride: [{ engine: "ultra" }],
+    });
+    expect(puts.at(-1)?.body).not.toHaveProperty("engines");
+    const threshold = container.querySelector(
+      '[aria-label="compressionAdaptiveUltraThreshold"]'
+    ) as HTMLInputElement;
+    expect(threshold.value).toBe("80");
+    await act(async () => {
+      toggle.click();
+    });
+    await flush();
+    expect(puts.at(-1)?.body.contextBudget).toMatchObject({
+      mode: "off",
+      pct: 0.8,
+      ladderOverride: [{ engine: "ultra" }],
+    });
+  });
+
+  it("persists a custom Ultra percentage and rejects out-of-range values", async () => {
+    const { puts } = setupFetchMock({
+      contextBudget: {
+        ...DEFAULT_CONTEXT_BUDGET,
+        mode: "floor",
+        policy: "percentage",
+        pct: 0.8,
+        ladderOverride: [{ engine: "ultra" }],
+      },
+    });
+    const { default: CompressionPanel } =
+      await import("../../../src/app/(dashboard)/dashboard/context/settings/CompressionPanel");
+    let container!: HTMLElement;
+    await act(async () => {
+      container = mount(<CompressionPanel />);
+    });
+    await flush();
+    const input = container.querySelector(
+      '[aria-label="compressionAdaptiveUltraThreshold"]'
+    ) as HTMLInputElement;
+    expect(input).toBeTruthy();
+    await act(async () => {
+      input.value = "70";
+      input.dispatchEvent(new FocusEvent("focusout", { bubbles: true }));
+    });
+    await flush();
+    expect(puts.at(-1)?.body.contextBudget).toMatchObject({
+      pct: 0.7,
+      mode: "floor",
+      ladderOverride: [{ engine: "ultra" }],
+    });
+    const count = puts.length;
+    for (const value of ["0", "101", "70.5"]) {
+      await act(async () => {
+        input.value = value;
+        input.dispatchEvent(new FocusEvent("focusout", { bubbles: true }));
+      });
+      await flush();
+    }
+    expect(puts).toHaveLength(count);
+  });
+
   it("renders the mode select defaulting to off (legacy auto-trigger)", async () => {
     setupFetchMock();
     const { default: CompressionPanel } =
