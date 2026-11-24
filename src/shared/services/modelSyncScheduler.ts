@@ -238,11 +238,15 @@ async function getAutoSyncConnections(): Promise<
 export async function syncConnectionModels(
   connectionId: string,
   provider: string,
-  baseUrl: string
+  baseUrl: string,
+  options: { mode?: "import" | "sync" } = {}
 ): Promise<boolean> {
   try {
+    // `mode=import` keeps the catalog-import semantics the API-key create path
+    // had before it moved to this shared helper.
+    const query = options.mode === "import" ? "?mode=import" : "";
     const res = await fetchModelSyncInternal(
-      `${baseUrl}/api/providers/${connectionId}/sync-models`,
+      `${baseUrl}/api/providers/${connectionId}/sync-models${query}`,
       {
         method: "POST",
         redirect: "error",
@@ -270,8 +274,12 @@ export async function syncConnectionModels(
     );
     return true;
   } catch (err) {
+    // Constant format: the provider id stays a plain argument, so a "%s" in it is not a
+    // format directive (CodeQL #1407).
     console.warn(
-      `[ModelSync] ${provider} (${connectionId.slice(0, 8)}): fetch failed —`,
+      "[ModelSync] %s (%s): fetch failed — %s",
+      provider,
+      connectionId.slice(0, 8),
       (err as Error).message
     );
     return false;

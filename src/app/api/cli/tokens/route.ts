@@ -6,6 +6,7 @@ import { resolveOperatorCredential } from "@/lib/api/operatorCredential";
 import { createAccessToken, listAccessTokens } from "@/lib/db/accessTokens";
 import { ACCESS_SCOPES, scopeSatisfies, type AccessScope } from "@/lib/accessTokens/scopes";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
+import { ACCESS_TOKEN_NAME_MAX_LENGTH } from "@/shared/constants/formLimits";
 
 /**
  * /api/cli/tokens — manage scoped CLI access tokens. Admin-only: the path is in
@@ -29,7 +30,7 @@ export async function GET(request: Request) {
 }
 
 const createSchema = z.object({
-  name: z.string().min(1).max(100),
+  name: z.string().min(1).max(ACCESS_TOKEN_NAME_MAX_LENGTH),
   scope: z.enum(ACCESS_SCOPES).optional(),
   expiresInDays: z.number().int().positive().max(3650).optional(),
 });

@@ -30,6 +30,11 @@ export function getModelCap(poolId: string, apiKeyId: string, model: string): Mo
   return quotaDefinitionRepositories.legacySync.modelCaps.getModelCap(poolId, apiKeyId, model);
 }
 
+/** Caps of one key in one pool, ordered by model. */
+export function listModelCapsForApiKey(poolId: string, apiKeyId: string): ModelCap[] {
+  return quotaDefinitionRepositories.legacySync.modelCaps.listModelCapsForApiKey(poolId, apiKeyId);
+}
+
 export function setModelCap(cap: ModelCap): void {
   quotaDefinitionRepositories.legacySync.modelCaps.setModelCap(cap);
 }

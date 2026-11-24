@@ -65,6 +65,19 @@ function getModelCap(poolId: string, apiKeyId: string, model: string): ModelCap 
   return row ? rowToModelCap(row) : null;
 }
 
+/** Caps of one key in one pool, ordered by model. */
+function listModelCapsForApiKey(poolId: string, apiKeyId: string): ModelCap[] {
+  return getDb()
+    .prepare<ModelCapRow>(
+      `SELECT pool_id, api_key_id, model, cap_value, cap_unit
+       FROM quota_allocation_model_caps
+       WHERE pool_id = ? AND api_key_id = ?
+       ORDER BY model`
+    )
+    .all(poolId, apiKeyId)
+    .map(rowToModelCap);
+}
+
 function setModelCap(cap: ModelCap): void {
   getDb()
     .prepare(
@@ -86,5 +99,6 @@ export const sqliteQuotaModelCapRepository: QuotaModelCapRepository = {
 /** Synchronous compatibility is SQLite-only, not part of the portable contract. */
 export const sqliteQuotaModelCapLegacySync = {
   getModelCap,
+  listModelCapsForApiKey,
   setModelCap,
 };
