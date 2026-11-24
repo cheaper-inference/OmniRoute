@@ -5,7 +5,6 @@ import { AGENT_GUARD_FLAG_DEFINITIONS } from "./featureFlagDefinitionsAgentGuard
 import { PLUGIN_PERMISSION_MODEL_ENABLED_FLAG } from "./featureFlagDefinitionsPlugins";
 import { CODE_ASSIST_LEGACY_TIER_FLAG } from "./featureFlagDefinitionsCodeAssist";
 import { SYSTEM_ONE_FEATURE_FLAG_DEFINITIONS } from "./featureFlagDefinitionsSystemOne";
-import { QUOTA_SELF_PANEL_FLAG } from "./featureFlagDefinitionsQuotaSelf";
 import { EXTRA_FEATURE_FLAG_DEFINITIONS } from "./featureFlagDefinitionsExtras";
 import {
   PII_RESPONSE_SANITIZATION_MODE_FLAG,
@@ -1436,6 +1435,5 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
   ...SEARCH_FEATURE_FLAG_DEFINITIONS,
   CODE_ASSIST_LEGACY_TIER_FLAG,
   ...SYSTEM_ONE_FEATURE_FLAG_DEFINITIONS,
-  QUOTA_SELF_PANEL_FLAG,
   ...EXTRA_FEATURE_FLAG_DEFINITIONS,
 ];
