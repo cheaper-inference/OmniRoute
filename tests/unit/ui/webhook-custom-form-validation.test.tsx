@@ -113,6 +113,27 @@ describe("Custom webhook URL guidance (KEA-9517)", () => {
   });
 });
 
+describe("Custom webhook name guidance (KEA-9518)", () => {
+  it("explains the default name and allows Finish with the name left empty", async () => {
+    await openCustomStep();
+    type(urlField(), "https://example.com");
+    fireEvent.click(next());
+
+    const name = await screen.findByLabelText("Name (optional)", {}, { timeout: 10_000 });
+    expect(name.getAttribute("placeholder")).toBe("Leave empty to list it as “Unnamed webhook”");
+    expect(name).toHaveProperty("value", "");
+    expect(button("Finish")?.disabled).toBe(false);
+
+    fireEvent.click(button("Finish")!);
+    const updates = () => callsTo("/api/webhooks/wh-1", "PUT");
+    await waitFor(() => expect(updates()).toHaveLength(1));
+    expect(JSON.parse(String(updates()[0][1]?.body))).toMatchObject({
+      kind: "custom",
+      description: "",
+    });
+  });
+});
+
 describe("Custom webhook step validation (KEA-9386)", () => {
   it("explains an empty Endpoint URL inline when Next is clicked, instead of a silent disabled button", async () => {
     await openCustomStep();

@@ -1618,6 +1618,8 @@
       "invalidUrl": "Enter a valid URL that starts with https:// or http://"
     },
     "custom": {
+      "name": "Name (optional)",
+      "namePlaceholder": "Leave empty to list it as “{defaultName}”",
       "endpointUrl": "Endpoint URL",
       "endpointUrlPlaceholder": "http:// or https://",
       "unencryptedHttpWarning": "HTTP is unencrypted. The payload and signature are sent in clear text. Use https:// when possible.",
