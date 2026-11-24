@@ -35,6 +35,7 @@ import {
   GEMINI_WEB_ARGON_MODEL,
   isGeminiWebArgonEnabled,
 } from "../../config/providers/registry/gemini/web/index.ts";
+import { toInPageExpression } from "./domReply.ts";
 
 /** Reasons `selectGeminiUiMode`/`selectGeminiModel` can fail closed. */
 export type GeminiModeSelectionFailureReason =
@@ -148,7 +149,7 @@ export interface GeminiAutomationPage {
     opts?: { timeout?: number }
   ): Promise<GeminiAutomationElement | null>;
   /** Real Playwright pages have these; the menu path needs them. */
-  evaluate?: (fn: (arg: never) => unknown, arg?: unknown) => Promise<unknown>;
+  evaluate?: (expression: string) => Promise<unknown>;
   click?: (selector: string, opts?: { timeout?: number }) => Promise<void>;
   waitForTimeout?: (ms: number) => Promise<void>;
   keyboard?: { press(key: string): Promise<void> };
@@ -161,7 +162,7 @@ interface GeminiMenuOptionState {
 }
 
 /** Runs in the page: find the open mode menu's option whose sublabel is exactly `sublabel`. */
-function findMenuOptionInPage(args: {
+export function findMenuOptionInPage(args: {
   selector: string;
   sublabel: string;
 }): GeminiMenuOptionState | null {
@@ -186,10 +187,9 @@ async function readMenuOption(
 ): Promise<GeminiMenuOptionState | null> {
   const end = Date.now() + timeoutMs;
   while (Date.now() < end) {
-    const state = (await page.evaluate!(findMenuOptionInPage, {
-      selector: GEMINI_WEB_MODE_OPTION,
-      sublabel,
-    }).catch(() => null)) as GeminiMenuOptionState | null;
+    const state = (await page.evaluate!(
+      toInPageExpression(findMenuOptionInPage, { selector: GEMINI_WEB_MODE_OPTION, sublabel })
+    ).catch(() => null)) as GeminiMenuOptionState | null;
     if (state) return state;
     await page.waitForTimeout?.(200);
   }

@@ -195,9 +195,24 @@ export function readGeminiDomReply(doc?: Document): GeminiDomReplySnapshot {
   };
 }
 
+/**
+ * Build a string expression that runs `fn(arg)` inside the page.
+ *
+ * Passing the function object to `page.evaluate` serializes it with
+ * `Function.prototype.toString`, which carries whatever the transpiler put in
+ * the body. esbuild/tsx (keepNames) wraps named inner functions in
+ * `__name(...)` calls; that helper does not exist in the page, so the
+ * evaluation threw and the DOM path silently never ran. A local no-op
+ * `__name` makes the serialized source self-contained under any transpiler.
+ */
+export function toInPageExpression(fn: (arg: never) => unknown, arg?: unknown): string {
+  const argSource = arg === undefined ? "undefined" : JSON.stringify(arg);
+  return `(() => { const __name = (f) => f; return (${fn.toString()})(${argSource}); })()`;
+}
+
 /** Minimal Playwright-shaped page the DOM reader needs. */
 export interface GeminiDomPage {
-  evaluate?: (fn: (arg: never) => unknown, arg?: unknown) => Promise<unknown>;
+  evaluate?: (expression: string) => Promise<unknown>;
   waitForTimeout(ms: number): Promise<void>;
 }
 
@@ -213,7 +228,7 @@ export async function snapshotGeminiDom(
 ): Promise<GeminiDomReplySnapshot | null> {
   if (!canReadGeminiDom(page)) return null;
   try {
-    return (await page.evaluate(readGeminiDomReply)) as GeminiDomReplySnapshot;
+    return (await page.evaluate(toInPageExpression(readGeminiDomReply))) as GeminiDomReplySnapshot;
   } catch {
     return null;
   }

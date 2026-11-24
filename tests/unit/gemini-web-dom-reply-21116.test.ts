@@ -12,9 +12,9 @@ import { JSDOM } from "jsdom";
 
 const playwright = await import("playwright");
 const { GeminiWebExecutor } = await import("../../open-sse/executors/gemini-web.ts");
-const { readGeminiDomReply, waitForGeminiDomReply } =
+const { readGeminiDomReply, waitForGeminiDomReply, toInPageExpression } =
   await import("../../open-sse/executors/gemini-web/domReply.ts");
-const { selectGeminiModel, GEMINI_WEB_MODE_MENU_BUTTON } =
+const { selectGeminiModel, findMenuOptionInPage, GEMINI_WEB_MODE_MENU_BUTTON } =
   await import("../../open-sse/executors/gemini-web/modeSelection.ts");
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -115,8 +115,10 @@ function menuPage(options: Record<string, { testId: string; checked: boolean }>,
         }
       }
     },
-    evaluate: async (_fn: unknown, arg: { sublabel: string }) => {
-      const opt = state[arg.sublabel];
+    // The production code evaluates a self-contained expression string; recover the sublabel.
+    evaluate: async (expression: string) => {
+      const sublabel = JSON.parse(/"sublabel":("(?:[^"\\]|\\.)*")/.exec(expression)![1]);
+      const opt = state[sublabel];
       return opt
         ? { testId: opt.testId, checked: opt.checked, locked: /upsell/.test(opt.testId) }
         : null;
@@ -183,8 +185,9 @@ function stubDomOnlyLaunch(answer: string) {
         // at 4 s so the DOM answer (stable after 2 s) wins the race.
         waitForTimeout: async (ms: number) => sleep(ms >= 10_000 ? 4000 : 5),
         waitForSelector: async () => ({ click: async () => {} }),
-        evaluate: async (fn: unknown) => {
-          assert.equal(fn, readGeminiDomReply);
+        evaluate: async (expression: string) => {
+          assert.match(expression, /model-response/);
+          assert.match(expression, /const __name = \(f\) => f/);
           if (!sent) return { queries: 0, responses: 0, busy: false, text: "" };
           polls++;
           return polls < 3
@@ -217,4 +220,16 @@ test("no StreamGenerate response: the answer is read from the rendered page", as
   assert.equal(result.response.status, 200);
   const body = await result.response.json();
   assert.equal(body.choices[0].message.content, "pineapple");
+});
+
+test("the in-page reader runs inside a real page context, where transpiler helpers do not exist", () => {
+  // jsdom's window.eval is a separate global: no __name or other tsx/esbuild helpers.
+  const dom = new JSDOM(`<body>${LIVE_LIKE_REPLY}</body>`, { runScripts: "outside-only" });
+  assert.equal(typeof (dom.window as unknown as Record<string, unknown>).__name, "undefined");
+  const snap = dom.window.eval(toInPageExpression(readGeminiDomReply)) as { text: string };
+  assert.match(snap.text, /^Here is the \*\*requested\*\* JSON\./);
+  const option = dom.window.eval(
+    toInPageExpression(findMenuOptionInPage, { selector: "x-none", sublabel: "4 Neon" })
+  );
+  assert.equal(option, null);
 });
