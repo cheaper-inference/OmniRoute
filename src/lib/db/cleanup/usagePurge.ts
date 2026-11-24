@@ -78,7 +78,7 @@ export async function deleteAllFromTable(
 export async function deleteFromTableBefore(
   target: DeleteByPeriodTarget,
   cutoffIso: string,
-  options: { batchSize?: number; progress?: DeleteProgress } = {}
+  options: { batchSize?: number; progress?: DeleteProgress; deleteArtifacts?: boolean } = {}
 ): Promise<number> {
   return deleteFromTableBeforeInBatches(target, cutoffIso, options);
 }
@@ -128,7 +128,7 @@ export async function deleteWhereInBatches(
 export async function deleteFromTableBeforeInBatches(
   target: DeleteByPeriodTarget,
   cutoffIso: string,
-  options: { batchSize?: number; progress?: DeleteProgress } = {}
+  options: { batchSize?: number; progress?: DeleteProgress; deleteArtifacts?: boolean } = {}
 ): Promise<number> {
   const batchSize = options.batchSize ?? DELETE_BATCH_SIZE;
   // LIMIT 0 deletes nothing and LIMIT -1 means no limit; either would never
@@ -151,7 +151,7 @@ export async function deleteFromTableBeforeInBatches(
   // rowids, then remove their files: an idle gateway no longer keeps expired bodies until the
   // request-driven orphan scanner finds them. No ORDER BY, so the pick costs what the delete did.
   const pickBatch =
-    target.table === "call_logs"
+    target.table === "call_logs" && options.deleteArtifacts !== false
       ? db.prepare<{ rowid: number; artifact_relpath: string | null }>(
           `SELECT rowid, artifact_relpath FROM call_logs WHERE ${target.column} < ? LIMIT ?`
         )
@@ -286,6 +286,10 @@ export interface UsageResetResultBase {
 export type UsageResetTarget<T extends UsageResetResultBase> = DeleteByPeriodTarget & {
   resultKey: keyof T;
   allOnly?: boolean;
+  deleteBefore?: (
+    cutoffIso: string,
+    options: { batchSize?: number; progress?: DeleteProgress }
+  ) => Promise<number>;
 };
 
 function createTargetProgress<T>(result: T, key: keyof T): DeleteProgress {
@@ -367,7 +371,15 @@ async function runResetTargetsLoop<T extends UsageResetResultBase>(
     if (period === "all") {
       await deleteAllFromTable(target.table, { batchSize, progress });
     } else if (cutoffIso) {
-      await deleteFromTableBefore(target, cutoffIso, { batchSize, progress });
+      if (target.deleteBefore) {
+        await target.deleteBefore(cutoffIso, { batchSize, progress });
+      } else {
+        await deleteFromTableBefore(target, cutoffIso, {
+          batchSize,
+          progress,
+          deleteArtifacts: false,
+        });
+      }
     }
     if (target.table === "call_logs") callLogsCompleted = true;
   }

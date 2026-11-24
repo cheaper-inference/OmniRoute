@@ -28,7 +28,8 @@ import {
   deleteWholeDaysBefore,
   executeUsageReset,
   tableExists,
-  type DeleteByPeriodTarget,
+  type DeleteProgress,
+  type UsageResetTarget,
 } from "./cleanup/usagePurge";
 import { ensureCompressionRunTelemetryTable } from "./compressionRunTelemetry";
 import { WINDOW_MS } from "@/lib/quota/dimensions";
@@ -953,13 +954,7 @@ function isResetUsageHistoryPeriod(period: string): period is ResetUsageHistoryP
  *   value deletes only time-scoped usage/log rows older than `now - period`.
  *   Throws on an invalid period.
  */
-const RESET_TARGETS: Array<
-  DeleteByPeriodTarget & {
-    resultKey: keyof ResetUsageHistoryResult;
-    allOnly?: boolean;
-    keptWhileBooked?: boolean;
-  }
-> = [
+const RESET_TARGETS: Array<UsageResetTarget<ResetUsageHistoryResult>> = [
   { table: "usage_history", column: "timestamp", cutoff: "iso", resultKey: "deletedUsageHistory" },
   {
     table: "daily_usage_summary",
@@ -1034,7 +1029,7 @@ const RESET_TARGETS: Array<
     column: "updated_at",
     cutoff: "epochMs",
     resultKey: "deletedQuotaPercentLedgerTokens",
-    keptWhileBooked: true,
+    deleteBefore: deleteUnbookedPercentCountersBefore,
   },
   {
     table: "conversation_turn_nodes",
@@ -1057,20 +1052,22 @@ const RESET_TARGETS: Array<
  * connection that still has a book. A kept book marks each key against its counter, so the
  * counter stays with it. The reset runs this after the books, so it sees what is left.
  */
-function deleteUnbookedPercentCountersBefore(cutoffIso: string): number {
+async function deleteUnbookedPercentCountersBefore(
+  cutoffIso: string,
+  options: { batchSize?: number; progress?: DeleteProgress } = {}
+): Promise<number> {
   // One migration creates both tables, so the counters never exist without the books.
-  if (!tableExists("quota_percent_ledger_tokens")) return 0;
-  return getDbInstance()
-    .prepare(
-      `DELETE FROM quota_percent_ledger_tokens
-       WHERE updated_at < ?
-         AND NOT EXISTS (
-           SELECT 1 FROM quota_percent_ledger book
-           WHERE book.pool_id = quota_percent_ledger_tokens.pool_id
-             AND book.connection_id = quota_percent_ledger_tokens.connection_id
-         )`
-    )
-    .run(new Date(cutoffIso).getTime()).changes;
+  return deleteWhereInBatches(
+    "quota_percent_ledger_tokens",
+    `updated_at < ?
+      AND NOT EXISTS (
+        SELECT 1 FROM quota_percent_ledger book
+        WHERE book.pool_id = quota_percent_ledger_tokens.pool_id
+          AND book.connection_id = quota_percent_ledger_tokens.connection_id
+      )`,
+    [new Date(cutoffIso).getTime()],
+    options
+  );
 }
 
 export async function resetUsageHistory(period: string): Promise<ResetUsageHistoryResult> {
