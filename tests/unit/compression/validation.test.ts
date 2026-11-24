@@ -140,4 +140,31 @@ describe("compression preservation and validation", () => {
     const output = result.body.messages[0].content as string;
     assert.match(output, /`the exact token`/);
   });
+
+  it("#21117: allows preserved code blocks and inline code after whitespace normalization", () => {
+    const originalFence = [
+      "Here is the loader:",
+      "```php",
+      "<?php require __DIR__ . '/app.php';",
+      "```",
+      "Explain it.",
+    ].join("\n");
+    const compressedFence = [
+      "Here loader:",
+      "```php",
+      "<?php require __DIR__ .'/app.php';",
+      "```",
+      "Explain.",
+    ].join("\n");
+
+    const fenceValidation = validateCompression(originalFence, compressedFence);
+    assert.equal(fenceValidation.valid, true);
+    assert.equal(fenceValidation.errors.length, 0);
+
+    const originalInline = "Check `__DIR__ . '/app.php'` carefully.";
+    const compressedInline = "Check `__DIR__ .'/app.php'` carefully.";
+    const inlineValidation = validateCompression(originalInline, compressedInline);
+    assert.equal(inlineValidation.valid, true);
+    assert.equal(inlineValidation.errors.length, 0);
+  });
 });
