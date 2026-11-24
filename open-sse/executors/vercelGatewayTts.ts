@@ -17,7 +17,7 @@
 import { buildAuthHeaders, type BaseProvider } from "../config/registryUtils.ts";
 import { CORS_HEADERS } from "../utils/cors.ts";
 import { errorResponse } from "../utils/error.ts";
-import { upstreamErrorResponse } from "../utils/audioResponse.ts";
+import { audioErrorResponse, upstreamErrorResponse } from "../utils/audioResponse.ts";
 
 export const VERCEL_GATEWAY_PROTOCOL_VERSION = "0.0.1";
 export const VERCEL_GATEWAY_SPEECH_SPEC_VERSION = "4";
@@ -85,7 +85,10 @@ export async function handleVercelGatewaySpeech(
     );
   }
   const outputFormat = outputFormatOf(body.response_format);
-  const contentType = VERCEL_GATEWAY_SPEECH_CONTENT_TYPES[outputFormat];
+  // Own keys only: "constructor" or "__proto__" must not pass as a format.
+  const contentType = Object.hasOwn(VERCEL_GATEWAY_SPEECH_CONTENT_TYPES, outputFormat)
+    ? VERCEL_GATEWAY_SPEECH_CONTENT_TYPES[outputFormat]
+    : undefined;
   if (!contentType) {
     return errorResponse(
       400,
@@ -93,20 +96,26 @@ export async function handleVercelGatewaySpeech(
     );
   }
 
-  const res = await fetch(providerConfig.baseUrl, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...buildAuthHeaders(providerConfig, token),
-      "ai-gateway-protocol-version": VERCEL_GATEWAY_PROTOCOL_VERSION,
-      "ai-gateway-auth-method": "api-key",
-      "ai-speech-model-specification-version": VERCEL_GATEWAY_SPEECH_SPEC_VERSION,
-      "ai-model-id": modelId,
-    },
-    body: JSON.stringify(buildVercelGatewaySpeechBody(body, outputFormat)),
-  });
-
-  const rawText = await res.text();
+  let res: Response;
+  let rawText: string;
+  try {
+    res = await fetch(providerConfig.baseUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...buildAuthHeaders(providerConfig, token),
+        "ai-gateway-protocol-version": VERCEL_GATEWAY_PROTOCOL_VERSION,
+        "ai-gateway-auth-method": "api-key",
+        "ai-speech-model-specification-version": VERCEL_GATEWAY_SPEECH_SPEC_VERSION,
+        "ai-model-id": modelId,
+      },
+      body: JSON.stringify(buildVercelGatewaySpeechBody(body, outputFormat)),
+    });
+    rawText = await res.text();
+  } catch {
+    // A transport failure is answered here, never thrown past the speech handler.
+    return audioErrorResponse(502, "Vercel AI Gateway speech request failed");
+  }
   // Keep the upstream status (401/402/403/429 …) so connection health and fallback
   // see the real cause of a failure on one account.
   if (!res.ok) return upstreamErrorResponse(res, rawText);

@@ -1060,7 +1060,7 @@ export async function handleAudioSpeech({
     }
 
     if (providerConfig.format === "vercel-ai-gateway-speech") {
-      return handleVercelGatewaySpeech(providerConfig, body, modelId, token);
+      return await handleVercelGatewaySpeech(providerConfig, body, modelId, token);
     }
 
     if (providerConfig.format === "minimax-tts") {

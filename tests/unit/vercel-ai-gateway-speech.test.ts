@@ -121,6 +121,19 @@ test("handleAudioSpeech rejects an unsupported format or a model without creator
     assert.equal(badFormat.status, 400);
     assert.match(((await badFormat.json()) as ErrorBody).error.message, /response_format/);
 
+    // Inherited object keys are not formats either.
+    for (const format of ["constructor", "__proto__", "toString"]) {
+      const inherited = await handleAudioSpeech({
+        body: {
+          model: "vercel-ai-gateway/spacexai/grok-tts",
+          input: "hi",
+          response_format: format,
+        },
+        credentials: { apiKey: "vck-test" },
+      });
+      assert.equal(inherited.status, 400, `format ${format}`);
+    }
+
     const badModel = await handleAudioSpeech({
       body: { model: "vercel-ai-gateway/grok-tts", input: "hi" },
       credentials: { apiKey: "vck-test" },
@@ -175,4 +188,21 @@ test("handleAudioSpeech needs a credential for the gateway", async () => {
   });
   assert.equal(response.status, 401);
   assert.equal(getSpeechProvider("vercel-ai-gateway")?.format, "vercel-ai-gateway-speech");
+});
+
+test("handleAudioSpeech answers a gateway transport failure with 502 instead of throwing", async () => {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = (async () => {
+    throw new TypeError("fetch failed");
+  }) as typeof fetch;
+  try {
+    const response = await handleAudioSpeech({
+      body: { model: "vercel-ai-gateway/spacexai/grok-tts", input: "hi" },
+      credentials: { apiKey: "vck-test" },
+    });
+    assert.equal(response.status, 502);
+    assert.match(((await response.json()) as ErrorBody).error.message, /Vercel AI Gateway/);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
 });
