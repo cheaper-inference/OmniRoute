@@ -287,6 +287,7 @@ export async function getUnifiedModelsResponse(
           settingsForAuth?.hideAutoCombos === true || settingsForAuth?.autoRoutingEnabled === false,
         hideNoThinkVariants: settingsForAuth?.hideNoThinkVariants === true,
         exposeCombosOnly: buildFlags.combosOnly,
+        providerInName: settingsForAuth?.catalogProviderInName === true,
         scheduleBackgroundRefresh: options.scheduleBackgroundRefresh,
         revealHidden: buildFlags.revealHidden,
       }
@@ -994,10 +995,17 @@ async function buildUnifiedModelsResponseCore(
         (c) => buildComboCatalogMetadata(c, getVisibleComboTargets(c))
       );
       const quotaFinal = await applyCatalogPostFilters(request, quotaModels, postFilterContext);
-      return finalizeCatalogResponse(request, quotaFinal, () => undefined, {
-        ...corsHeaders,
-        ...diagnosticHeaders,
-      });
+      return finalizeCatalogResponse(
+        request,
+        quotaFinal,
+        () => undefined,
+        {
+          ...corsHeaders,
+          ...diagnosticHeaders,
+        },
+        undefined,
+        { providerInName: settings.catalogProviderInName === true }
+      );
     }
 
     // #4164: advertise the built-in zero-setup `auto/*` combos at the very top.
@@ -2360,7 +2368,8 @@ async function buildUnifiedModelsResponseCore(
         ...corsHeaders,
         ...diagnosticHeaders,
       },
-      enrichmentSnapshot
+      enrichmentSnapshot,
+      { providerInName: settings.catalogProviderInName === true }
     );
   } catch (error) {
     console.log("Error fetching models:", error);

@@ -1,0 +1,1 @@
+- **feat(api):** Opt-in `catalogProviderInName` setting that ends each provider row's name in `/v1/models` with ` · <Provider>`, so name-only clients can tell routes apart. Ids and routing are unchanged. ([#21064](https://github.com/cheaper-inference/OmniRoute/pull/21064) — thanks @Rahulsharma0810)
