@@ -2,27 +2,7 @@
   "version": 1,
   "base": "release/v3.8.55",
   "paused": null,
-  "inFlight": {
-    "batchId": "b27",
-    "kind": "batch",
-    "candidateRef": "omni-queue/release-v3.8.55/b27-cc9b69b491b0",
-    "candidateSha": "cc9b69b491b08dcbd11ba9d042e696e0a54a9c14",
-    "baseSha": "0488355a73ed9cd70400f616403c38d5f8d4c17b",
-    "treeSha": "a12360ef96490575f6c318b5b18779b5812e9ce9",
-    "prs": [
-      {
-        "n": 20938,
-        "head": "c3b5673c2da298af162547400640b4c1a4b47d34",
-        "title": "fix(db): run the migration-numbering gate in the pre-commit hook when a migration is staged",
-        "author": "diegosouzapw",
-        "labeledAt": "2026-11-23T21:58:26Z"
-      }
-    ],
-    "stage": "testing",
-    "startedAt": "2026-11-24T00:28:29.882Z",
-    "attempts": 0,
-    "bisect": null
-  },
+  "inFlight": null,
   "baseChecks": [
     {
       "baseSha": "0563eb2ec52bfd20ca39b3d4444df3cbd2316944",
@@ -98,6 +78,7 @@
       "19167": "5a3523ee5d9dc3a3fe610ed93b4c5ccb048bbca0",
       "19305": "1f33f0e10883549e4374ac38d47e87c94936bc5c",
       "19306": "4afb0ca62e19eb94155c5b9c2b78bf4b91ae1dee",
+      "20938": "c3b5673c2da298af162547400640b4c1a4b47d34",
       "20967": "2e51ed76710ee5b12e9d1d22117eeed8e8c53e94"
     }
   },
@@ -1914,8 +1895,29 @@
         "20938": "2026-11-23T21:58:26Z"
       },
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45297316047"
+    },
+    {
+      "at": "2026-11-24T01:30:34.573Z",
+      "type": "checks-green",
+      "batchId": "b27",
+      "prs": [
+        20938
+      ],
+      "sha": "cc9b69b491b08dcbd11ba9d042e696e0a54a9c14",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45305500129"
+    },
+    {
+      "at": "2026-11-24T01:30:45.113Z",
+      "type": "would-land",
+      "batchId": "b27",
+      "prs": [
+        20938
+      ],
+      "sha": "cc9b69b491b08dcbd11ba9d042e696e0a54a9c14",
+      "detail": "shadow mode: would merge-ff onto 0488355a73ed",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45305500129"
     }
   ],
-  "updatedAt": "2026-11-24T00:30:38.404Z",
+  "updatedAt": "2026-11-24T01:30:59.104Z",
   "batchWindow": 4
 }
