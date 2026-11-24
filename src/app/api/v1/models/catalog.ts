@@ -105,7 +105,6 @@ import {
   getTokenLimit,
   hasContextLengthEnvOverride,
 } from "@omniroute/open-sse/services/contextManager";
-import { extractApiKey } from "@/sse/services/auth";
 import type { ComboModelStep } from "@/lib/combos/steps";
 import {
   type CustomModelEntry,
@@ -150,6 +149,7 @@ import {
 } from "./catalogNodeModality";
 import { createComboPricingTargetResolver } from "./catalogPricing";
 import {
+  extractCatalogApiKey,
   getModelCatalogAuthRejection,
   isCodexModelCatalogClient,
   isCcDiscoveryModelCatalogClient,
@@ -918,7 +918,7 @@ async function buildUnifiedModelsResponseCore(
     const listedIds = new Set<string>();
     // The per-key metadata (quota pools, allowAutoCombos, allowCcDiscoveryAliases) must be
     // resolved before the post-filter context below reads it.
-    const earlyApiKey = extractApiKey(request);
+    const earlyApiKey = extractCatalogApiKey(request);
     let earlyKeyMeta: Awaited<
       ReturnType<typeof import("@/lib/db/apiKeys").getApiKeyMetadata>
     > | null = null;
@@ -2271,7 +2271,7 @@ async function buildUnifiedModelsResponseCore(
     }
 
     // Filter by API key permissions if requested
-    const apiKey = extractApiKey(request);
+    const apiKey = extractCatalogApiKey(request);
     // exposeCombosOnly: same row test as the per-key `catalogScope: "combos"`; the
     // per-key filter below then intersects with it.
     let finalModels = combosOnly ? models.filter((m) => m.owned_by === "combo") : models;

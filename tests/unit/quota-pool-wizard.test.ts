@@ -65,8 +65,8 @@ test("PoolWizard.tsx: PATCH body includes the exclusive flag", () => {
   );
   // More specifically, the PATCH body object literal must pass exclusive
   assert.ok(
-    wizardSrc.includes("body: JSON.stringify({ allocations, exclusive })"),
-    "Expected PATCH body to serialize { allocations, exclusive }"
+    wizardSrc.includes("body: JSON.stringify({ allocations, exclusive, memberBreakdown })"),
+    "Expected PATCH body to serialize { allocations, exclusive, memberBreakdown }"
   );
 });
 
