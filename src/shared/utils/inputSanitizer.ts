@@ -371,7 +371,7 @@ function decodePercentOnce(text) {
  * @returns {Buffer[]}
  */
 function byteCandidates(text) {
-  const candidates = [];
+  const candidates: Buffer[] = [];
   for (const run of text.match(HEX_RUN_RE) ?? []) {
     candidates.push(Buffer.from(run, "hex"));
   }
@@ -389,7 +389,7 @@ function byteCandidates(text) {
  * @returns {string[]}
  */
 function decodeOneLayer(layer, budget) {
-  const next = [];
+  const next: string[] = [];
   for (const source of layer) {
     const unescaped = decodePercentOnce(source);
     if (unescaped) next.push(unescaped);
@@ -411,7 +411,7 @@ function decodeOneLayer(layer, budget) {
  * @returns {string[]}
  */
 function decodeEncodedLayers(text) {
-  const found = [];
+  const found: string[] = [];
   const budget = { left: MAX_DECODE_BYTES };
   let layer = [text];
   for (let depth = 0; depth < MAX_DECODE_DEPTH && layer.length > 0; depth++) {
