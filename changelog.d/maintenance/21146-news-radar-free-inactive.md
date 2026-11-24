@@ -1,0 +1,1 @@
+- **chore(news):** the in-app news feed carries the free Radar catalog item, inactive until the launch ([#21146](https://github.com/cheaper-inference/OmniRoute/pull/21146))

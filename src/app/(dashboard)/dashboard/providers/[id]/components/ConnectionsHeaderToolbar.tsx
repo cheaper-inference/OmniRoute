@@ -158,7 +158,7 @@ export default function ConnectionsHeaderToolbar({
                     )
               }
             />
-            <span className="text-[11px] text-text-muted/70">
+            <span className="text-2xs text-text-muted/70">
               {preferClaudeCodeForUnprefixedClaudeModels
                 ? providerText(t, "toggleOnShort", "On")
                 : providerText(t, "toggleOffShort", "Off")}
@@ -166,9 +166,8 @@ export default function ConnectionsHeaderToolbar({
             {claudeRoutingSettingsLoadError ? (
               <Button
                 variant="outline"
-                size="sm"
+                size="2xs"
                 onClick={() => void loadClaudeRoutingSettings()}
-                className="h-6 min-h-0 px-2 text-[11px]"
                 title={claudeRoutingSettingsLoadError}
               >
                 {providerText(t, "retry", "Retry")}
@@ -206,9 +205,8 @@ export default function ConnectionsHeaderToolbar({
             {codexSettingsLoadError ? (
               <Button
                 variant="outline"
-                size="sm"
+                size="2xs"
                 onClick={() => void loadCodexSettings()}
-                className="h-6 min-h-0 px-2 text-[11px]"
                 title={codexSettingsLoadError}
               >
                 {providerText(t, "retry", "Retry")}
@@ -219,7 +217,7 @@ export default function ConnectionsHeaderToolbar({
         {/* Provider-level proxy indicator/button */}
         <Button
           variant="ghost"
-          size="sm"
+          size="2xs"
           icon="vpn_lock"
           onClick={() =>
             onSetProxyTarget({
@@ -228,11 +226,11 @@ export default function ConnectionsHeaderToolbar({
               label: providerInfo?.name || providerId,
             })
           }
-          className={`h-auto min-h-0 gap-1 rounded px-2 py-1 text-xs ${
+          className={
             proxyConfig?.providers?.[providerId]
               ? "bg-warning/15 text-warning hover:bg-warning/25"
               : "bg-bg-subtle text-text-muted/50 hover:text-text-muted hover:bg-bg-subtle"
-          }`}
+          }
           title={
             proxyConfig?.providers?.[providerId]
               ? t("providerProxyTitleConfigured", {

@@ -2,11 +2,11 @@
 
 import { memo, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { buttonVariants } from "@omniroute/ui-kit/button";
+
 import { Field } from "@omniroute/ui-kit/field";
 import { Progress } from "@omniroute/ui-kit/progress";
+import Badge from "@/shared/components/Badge";
 import {
-  Card,
   Button,
   EmptyState,
   DataTable,
@@ -16,7 +16,12 @@ import {
   Select,
   Textarea,
 } from "@/shared/components";
+import Card from "@/shared/components/Card";
 import Icon from "@/shared/components/Icon";
+import IconChip from "@/shared/components/IconChip";
+
+import { FileTrigger } from "@/shared/components/FileInput";
+
 import { useNotificationStore } from "@/store/notificationStore";
 import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
 import { matchesSearch } from "@/shared/utils/turkishText";
@@ -1020,25 +1025,25 @@ export default function EvalsTab() {
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <Card className="px-4 py-3 text-center">
-          <span className="text-xs text-text-muted uppercase font-semibold tracking-wide">
+          <span className="ci-eyebrow" data-weight="medium">
             {t("statsSuites")}
           </span>
           <div className="text-2xl font-semibold mt-1 text-chart-3-ink">{suites.length}</div>
         </Card>
         <Card className="px-4 py-3 text-center">
-          <span className="text-xs text-text-muted uppercase font-semibold tracking-wide">
+          <span className="ci-eyebrow" data-weight="medium">
             {t("statsTestCases")}
           </span>
           <div className="text-2xl font-semibold mt-1 text-info">{totalCases}</div>
         </Card>
         <Card className="px-4 py-3 text-center">
-          <span className="text-xs text-text-muted uppercase font-semibold tracking-wide">
+          <span className="ci-eyebrow" data-weight="medium">
             {t("statsModels")}
           </span>
           <div className="text-2xl font-semibold mt-1 text-success">{uniqueModels.length}</div>
         </Card>
         <Card className="px-4 py-3 text-center">
-          <span className="text-xs text-text-muted uppercase font-semibold tracking-wide">
+          <span className="ci-eyebrow" data-weight="medium">
             {t("statsCoverage")}
           </span>
           <div className="text-2xl font-semibold mt-1 text-warning">
@@ -1049,11 +1054,13 @@ export default function EvalsTab() {
 
       <Card className="p-6">
         <div className="flex items-center gap-3 mb-4">
-          <div className="p-2 rounded-lg bg-primary/10 text-primary">
+          <IconChip tone="accent">
             <Icon name="route" size={20} />
-          </div>
+          </IconChip>
           <div>
-            <h3 className="text-lg">{t("evalControlsTitle")}</h3>
+            <h3 className="ci-heading" data-size="lg">
+              {t("evalControlsTitle")}
+            </h3>
             <p className="text-xs text-text-muted">{t("evalControlsHint")}</p>
           </div>
         </div>
@@ -1115,38 +1122,32 @@ export default function EvalsTab() {
       {scorecard && (
         <Card className="p-6">
           <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 rounded-lg bg-success/10 text-success">
+            <IconChip tone="success">
               <Icon name="analytics" size={20} />
-            </div>
+            </IconChip>
             <div>
-              <h3 className="text-lg">{t("scorecardTitle")}</h3>
+              <h3 className="ci-heading" data-size="lg">
+                {t("scorecardTitle")}
+              </h3>
               <p className="text-xs text-text-muted">{t("scorecardHint")}</p>
             </div>
           </div>
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             <Card className="px-4 py-3">
-              <p className="text-xs uppercase tracking-wide text-text-muted">
-                {t("scorecardSuites")}
-              </p>
+              <p className="ci-eyebrow">{t("scorecardSuites")}</p>
               <p className="text-2xl font-semibold text-chart-3-ink mt-1">{scorecard.suites}</p>
             </Card>
             <Card className="px-4 py-3">
-              <p className="text-xs uppercase tracking-wide text-text-muted">
-                {t("scorecardCases")}
-              </p>
+              <p className="ci-eyebrow">{t("scorecardCases")}</p>
               <p className="text-2xl font-semibold text-info mt-1">{scorecard.totalCases}</p>
             </Card>
             <Card className="px-4 py-3">
-              <p className="text-xs uppercase tracking-wide text-text-muted">
-                {t("scorecardPassed")}
-              </p>
+              <p className="ci-eyebrow">{t("scorecardPassed")}</p>
               <p className="text-2xl font-semibold text-success mt-1">{scorecard.totalPassed}</p>
             </Card>
             <Card className="px-4 py-3">
-              <p className="text-xs uppercase tracking-wide text-text-muted">
-                {t("scorecardPassRate")}
-              </p>
+              <p className="ci-eyebrow">{t("scorecardPassRate")}</p>
               <p className="text-2xl font-semibold text-warning mt-1">
                 {scorecard.overallPassRate}%
               </p>
@@ -1156,17 +1157,14 @@ export default function EvalsTab() {
           {scorecard.perSuite.length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 mt-4">
               {scorecard.perSuite.slice(0, 6).map((entry) => (
-                <div
-                  key={entry.id}
-                  className="rounded-lg border border-border/20 bg-surface/20 px-4 py-3"
-                >
+                <Card.Section key={entry.id}>
                   <div className="flex items-center justify-between gap-3">
                     <span className="text-sm font-medium text-text-main truncate">
                       {entry.name}
                     </span>
                     <span className="text-xs font-semibold text-primary">{entry.passRate}%</span>
                   </div>
-                </div>
+                </Card.Section>
               ))}
             </div>
           )}
@@ -1181,11 +1179,13 @@ export default function EvalsTab() {
           className="h-auto min-h-0 w-full justify-between rounded-none px-6 py-4 text-left whitespace-normal"
         >
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-primary/10 text-primary">
+            <IconChip tone="accent">
               <Icon name="help" size={20} />
-            </div>
+            </IconChip>
             <div>
-              <h3 className="text-sm text-text-main">{t("howItWorks")}</h3>
+              <h3 className="ci-heading" data-size="sm">
+                {t("howItWorks")}
+              </h3>
               <p className="text-xs text-text-muted">{t("howItWorksSubtitle")}</p>
             </div>
           </div>
@@ -1205,27 +1205,33 @@ export default function EvalsTab() {
                 <div className="w-10 h-10 rounded-full bg-chart-3/20 flex items-center justify-center mb-3">
                   <span className="text-lg font-semibold text-chart-3-ink">1</span>
                 </div>
-                <h4 className="text-sm text-text-main mb-1">{t("define")}</h4>
+                <h4 className="ci-heading mb-1" data-size="sm">
+                  {t("define")}
+                </h4>
                 <p className="text-xs text-text-muted">{t("defineStepDescription")}</p>
               </div>
               <div className="flex flex-col items-center text-center p-4 rounded-lg bg-info/5 border border-info/10">
                 <div className="w-10 h-10 rounded-full bg-info/20 flex items-center justify-center mb-3">
                   <span className="text-lg font-semibold text-info">2</span>
                 </div>
-                <h4 className="text-sm text-text-main mb-1">{t("run")}</h4>
+                <h4 className="ci-heading mb-1" data-size="sm">
+                  {t("run")}
+                </h4>
                 <p className="text-xs text-text-muted">{t("runStepDescription")}</p>
               </div>
               <div className="flex flex-col items-center text-center p-4 rounded-lg bg-success/5 border border-success/10">
                 <div className="w-10 h-10 rounded-full bg-success/20 flex items-center justify-center mb-3">
                   <span className="text-lg font-semibold text-success">3</span>
                 </div>
-                <h4 className="text-sm text-text-main mb-1">{t("evaluate")}</h4>
+                <h4 className="ci-heading mb-1" data-size="sm">
+                  {t("evaluate")}
+                </h4>
                 <p className="text-xs text-text-muted">{t("evaluateStepDescription")}</p>
               </div>
             </div>
 
             <div className="mt-6">
-              <h4 className="text-xs text-text-muted uppercase mb-3">
+              <h4 className="ci-eyebrow mb-3" data-weight="medium">
                 {t("evaluationStrategies")}
               </h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
@@ -1251,11 +1257,13 @@ export default function EvalsTab() {
 
       <Card className="p-6">
         <div className="flex items-center gap-3 mb-4">
-          <div className="p-2 rounded-lg bg-info/10 text-info">
+          <IconChip tone="info">
             <Icon name="history" size={20} />
-          </div>
+          </IconChip>
           <div>
-            <h3 className="text-lg">{t("recentRunsTitle")}</h3>
+            <h3 className="ci-heading" data-size="lg">
+              {t("recentRunsTitle")}
+            </h3>
             <p className="text-xs text-text-muted">{t("recentRunsHint")}</p>
           </div>
         </div>
@@ -1314,43 +1322,30 @@ export default function EvalsTab() {
       <Card className="p-6">
         <div className="flex flex-col gap-3 mb-4 md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-chart-3/10 text-chart-3">
+            <IconChip tone="chart-3">
               <Icon name="science" size={20} />
-            </div>
+            </IconChip>
             <div>
-              <h3 className="text-lg">{t("evalSuites")}</h3>
+              <h3 className="ci-heading" data-size="lg">
+                {t("evalSuites")}
+              </h3>
               <p className="text-xs text-text-muted">{t("evalSuitesHint")}</p>
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            {/* A hidden native file input driven by its label (styled as a kit outline button):
-                the only way to open the OS file picker without a second click target. */}
-            <label
-              className={buttonVariants({
-                variant: "outline",
-                className: `cursor-pointer gap-2 ${
-                  running !== null || runningAll ? "pointer-events-none opacity-50" : ""
-                }`,
-              })}
+            {/* The pick imports at once: the kit FileTrigger opens the file picker from the button. */}
+            <FileTrigger
+              accept="application/json,.json"
+              disabled={running !== null || runningAll}
+              onFilesChange={(files) => {
+                const file = files[0];
+                if (file) void handleImportSuite(file);
+              }}
             >
-              <Icon name="upload_file" size={18} />
-              {t("importSuite")}
-              {/* kit-exception: Hidden picker in a toolbar import button; the pick imports at once, so the
-                  kit FileInput status line would only add noise beside Run all / New suite. */}
-              <input
-                type="file"
-                accept="application/json,.json"
-                className="hidden"
-                disabled={running !== null || runningAll}
-                onChange={(event) => {
-                  const file = event.currentTarget.files?.[0];
-                  if (file) {
-                    void handleImportSuite(file);
-                  }
-                  event.currentTarget.value = "";
-                }}
-              />
-            </label>
+              <Button variant="outline" icon="upload_file">
+                {t("importSuite")}
+              </Button>
+            </FileTrigger>
             <Button
               icon="play_arrow"
               variant="secondary"
@@ -1448,29 +1443,24 @@ export default function EvalsTab() {
                         <p className="text-sm font-medium text-text-main">
                           {suite.name || suite.id}
                         </p>
-                        <span
-                          className={`px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide ${
-                            suite.source === "custom"
-                              ? "bg-info/10 text-info"
-                              : "bg-text-muted/10 text-text-muted"
-                          }`}
-                        >
+                        <Badge size="sm" variant={suite.source === "custom" ? "info" : "default"}>
                           {suite.source === "custom"
                             ? t("suiteBuilderCustomBadge")
                             : t("suiteBuilderBuiltInBadge")}
-                        </span>
+                        </Badge>
                         {typeof latestScore === "number" && (
-                          <span
-                            className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
+                          <Badge
+                            size="sm"
+                            variant={
                               latestScore === 100
-                                ? "bg-success/10 text-success"
+                                ? "success"
                                 : latestScore >= 80
-                                  ? "bg-warning/10 text-warning"
-                                  : "bg-error/10 text-error"
-                            }`}
+                                  ? "warning"
+                                  : "error"
+                            }
                           >
                             {latestScore}% {t("passSuffix")}
-                          </span>
+                          </Badge>
                         )}
                       </div>
                       <p className="text-xs text-text-muted">
@@ -1489,7 +1479,7 @@ export default function EvalsTab() {
                           {suiteModels.map((model) => (
                             <span
                               key={model}
-                              className="px-1.5 py-0.5 rounded text-[10px] font-mono text-text-muted bg-surface-2"
+                              className="px-1.5 py-0.5 rounded text-3xs font-mono text-text-muted bg-surface-2"
                             >
                               {model}
                             </span>
@@ -1571,10 +1561,12 @@ export default function EvalsTab() {
                 {isExpanded && (
                   <div className="border-t border-border/20 p-4 flex flex-col gap-4">
                     {liveResult?.scorecard && liveResult.runs.length > 1 && (
-                      <div className="rounded-lg border border-border/20 bg-surface/20 px-4 py-3">
+                      <Card.Section>
                         <div className="flex items-center justify-between gap-3">
                           <div>
-                            <h4 className="text-sm text-text-main">{t("targetComparisonTitle")}</h4>
+                            <h4 className="ci-heading" data-size="sm">
+                              {t("targetComparisonTitle")}
+                            </h4>
                             <p className="text-xs text-text-muted">{t("targetComparisonHint")}</p>
                           </div>
                           <span className="text-lg font-semibold text-primary">
@@ -1583,10 +1575,7 @@ export default function EvalsTab() {
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
                           {liveResult.runs.map((run) => (
-                            <div
-                              key={run.id}
-                              className="rounded-lg border border-border/20 px-3 py-3"
-                            >
+                            <Card.Section key={run.id}>
                               <div className="flex items-center justify-between gap-3">
                                 <span className="text-sm font-medium text-text-main">
                                   {getTargetLabel(run.target, t)}
@@ -1598,10 +1587,10 @@ export default function EvalsTab() {
                               <p className="text-xs text-text-muted mt-1">
                                 {t("historyLatency", { value: run.avgLatencyMs })}
                               </p>
-                            </div>
+                            </Card.Section>
                           ))}
                         </div>
-                      </div>
+                      </Card.Section>
                     )}
 
                     {liveResult?.runs?.length ? (
@@ -1614,7 +1603,7 @@ export default function EvalsTab() {
                           <Card key={run.id} className="p-4">
                             <div className="flex items-center justify-between gap-3 mb-3">
                               <div>
-                                <h4 className="text-sm text-text-main">
+                                <h4 className="ci-heading" data-size="sm">
                                   {getTargetLabel(run.target, t)}
                                 </h4>
                                 <p className="text-xs text-text-muted">
@@ -1622,12 +1611,12 @@ export default function EvalsTab() {
                                   {t("historyLatency", { value: run.avgLatencyMs })}
                                 </p>
                               </div>
-                              <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary">
+                              <Badge variant="primary">
                                 {run.summary.passRate}% {t("passSuffix")}
-                              </span>
+                              </Badge>
                             </div>
 
-                            <div className="flex items-center gap-4 mb-4 p-3 rounded-lg bg-surface/30 border border-border/20">
+                            <Card.Section className="flex items-center gap-4 mb-4">
                               <div className="flex items-center gap-2">
                                 <span className="text-lg font-semibold text-success">
                                   {run.summary.passRate}%
@@ -1641,7 +1630,7 @@ export default function EvalsTab() {
                                   total: run.summary.total,
                                 })}
                               </div>
-                            </div>
+                            </Card.Section>
 
                             {run.results.length > 0 ? (
                               <div className="flex max-h-[420px] flex-col gap-2 overflow-auto pr-1">
@@ -1678,21 +1667,18 @@ export default function EvalsTab() {
                                             <span className="truncate text-sm font-medium text-text-main">
                                               {result.caseName || result.caseId || "—"}
                                             </span>
-                                            <span
-                                              className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${
-                                                result.passed
-                                                  ? "bg-success/10 text-success"
-                                                  : "bg-error/10 text-error"
-                                              }`}
+                                            <Badge
+                                              size="sm"
+                                              variant={result.passed ? "success" : "error"}
                                             >
                                               {result.passed
                                                 ? t("resultPassed")
                                                 : t("resultFailed")}
-                                            </span>
+                                            </Badge>
                                             {result.error ? (
-                                              <span className="rounded-full bg-error/10 px-2 py-0.5 text-[10px] font-semibold text-error">
+                                              <Badge size="sm" variant="error">
                                                 {t("errorBadge")}
-                                              </span>
+                                              </Badge>
                                             ) : null}
                                           </div>
                                           <p className="mt-1 truncate text-xs text-text-muted">
@@ -1709,7 +1695,11 @@ export default function EvalsTab() {
                                       {isResultExpanded && (
                                         <div className="grid grid-cols-1 gap-3 border-t border-border/20 p-3 lg:grid-cols-2">
                                           <div>
-                                            <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-text-muted">
+                                            <p
+                                              className="ci-eyebrow mb-1"
+                                              data-size="2xs"
+                                              data-weight="medium"
+                                            >
                                               {t("expectedOutputLabel")}
                                             </p>
                                             <pre className="max-h-48 overflow-auto whitespace-pre-wrap rounded-md border border-border/20 bg-surface-2 p-3 text-xs text-text-main">
@@ -1717,7 +1707,11 @@ export default function EvalsTab() {
                                             </pre>
                                           </div>
                                           <div>
-                                            <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-text-muted">
+                                            <p
+                                              className="ci-eyebrow mb-1"
+                                              data-size="2xs"
+                                              data-weight="medium"
+                                            >
                                               {t("actualOutputLabel")}
                                             </p>
                                             <pre className="max-h-48 overflow-auto whitespace-pre-wrap rounded-md border border-border/20 bg-surface-2 p-3 text-xs text-text-main">
@@ -1744,19 +1738,18 @@ export default function EvalsTab() {
                         ))}
                       </div>
                     ) : suiteHistory.length > 0 ? (
-                      <div className="rounded-lg border border-border/20 bg-surface/20 px-4 py-4">
+                      <Card.Section>
                         <div className="flex items-center justify-between gap-3 mb-3">
                           <div>
-                            <h4 className="text-sm text-text-main">{t("suiteLatestRuns")}</h4>
+                            <h4 className="ci-heading" data-size="sm">
+                              {t("suiteLatestRuns")}
+                            </h4>
                             <p className="text-xs text-text-muted">{t("suiteLatestRunsHint")}</p>
                           </div>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                           {suiteHistory.slice(0, 4).map((run) => (
-                            <div
-                              key={run.id}
-                              className="rounded-lg border border-border/20 px-4 py-3"
-                            >
+                            <Card.Section key={run.id}>
                               <div className="flex items-center justify-between gap-3">
                                 <span className="text-sm font-medium text-text-main">
                                   {getTargetLabel(run.target, t)}
@@ -1771,10 +1764,10 @@ export default function EvalsTab() {
                               <p className="text-xs text-text-muted mt-1">
                                 {t("historyLatency", { value: run.avgLatencyMs })}
                               </p>
-                            </div>
+                            </Card.Section>
                           ))}
                         </div>
-                      </div>
+                      </Card.Section>
                     ) : null}
 
                     <div className="flex items-center gap-2 mb-1">
@@ -1885,11 +1878,13 @@ const HeroSection = memo(function HeroSection({
         }}
       >
         <div className="flex items-start gap-4">
-          <div className="p-3 rounded-xl bg-chart-3/10 text-chart-3">
+          <IconChip tone="chart-3" size="lg">
             <Icon name="science" size={28} />
-          </div>
+          </IconChip>
           <div className="flex-1">
-            <h2 className="text-xl text-text-main mb-1">{t("modelEvals")}</h2>
+            <h2 className="ci-heading mb-1" data-size="xl">
+              {t("modelEvals")}
+            </h2>
             <p className="text-sm text-text-muted leading-relaxed max-w-2xl">
               {t("evalsHeroDescription")}
             </p>
@@ -2031,17 +2026,19 @@ function SuiteBuilderModal({
           />
         </div>
 
-        <div className="rounded-xl border border-border/20 bg-surface/20 p-4">
+        <Card.Section>
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div>
-              <h4 className="text-sm text-text-main">{t("suiteBuilderCasesTitle")}</h4>
+              <h4 className="ci-heading" data-size="sm">
+                {t("suiteBuilderCasesTitle")}
+              </h4>
               <p className="text-xs text-text-muted">{t("suiteBuilderCasesHint")}</p>
             </div>
             <Button icon="add" variant="secondary" onClick={addCase}>
               {t("suiteBuilderAddCase")}
             </Button>
           </div>
-        </div>
+        </Card.Section>
 
         {draft.cases.map((draftCase, index) => {
           const selectedStrategy = editableStrategies.find(
@@ -2054,7 +2051,7 @@ function SuiteBuilderModal({
             <Card key={draftCase.id} className="p-4">
               <div className="mb-4 flex items-center justify-between gap-3">
                 <div>
-                  <h4 className="text-sm text-text-main">
+                  <h4 className="ci-heading" data-size="sm">
                     {t("suiteBuilderCaseCardTitle", { index: index + 1 })}
                   </h4>
                   <p className="text-xs text-text-muted">

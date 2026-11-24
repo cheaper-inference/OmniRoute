@@ -2,7 +2,8 @@
 
 import { useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
-import { Input } from "@/shared/components";
+import { NumberInput } from "@/shared/components";
+import { numberToText, textToNumber } from "../../../numberFieldText";
 import {
   GITHUB_CREDIT_LIMIT_FIELD,
   parseGitHubCreditLimitInput,
@@ -13,6 +14,9 @@ type CreditLimitConnection = {
   provider?: string;
   providerSpecificData?: Record<string, unknown>;
 } | null;
+
+// The limit is in AI Credits and can be fractional; the field takes up to six decimal places.
+const CREDIT_LIMIT_DECIMALS = 6;
 
 function initialDraft(connection: CreditLimitConnection): string {
   const value = connection?.providerSpecificData?.[GITHUB_CREDIT_LIMIT_FIELD];
@@ -41,13 +45,12 @@ export function useGitHubCreditLimitDraft(connection: CreditLimitConnection): {
   }
 
   const field = isGithub ? (
-    <Input
+    <NumberInput
       label={t("aiCreditsLimit")}
-      type="number"
       min={0}
-      step="any"
-      value={draft.value}
-      onChange={(e) => setDraft({ id: connection?.id, value: e.target.value })}
+      precision={CREDIT_LIMIT_DECIMALS}
+      value={textToNumber(draft.value)}
+      onValueChange={(value) => setDraft({ id: connection?.id, value: numberToText(value) })}
       placeholder={t("aiCreditsLimitPlaceholder")}
       hint={t("aiCreditsLimitHint")}
     />

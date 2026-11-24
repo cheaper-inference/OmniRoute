@@ -487,6 +487,33 @@ export interface RowSumMirror {
 
 const isoDate = (d: Date): string => d.toISOString().slice(0, 10);
 
+/** Row-sum counts a quota only in tokens, unless asked to count the other units too. */
+function unitCounter(countNonTokenUnits: boolean) {
+  return (r: { provider: string; poolKey: string | null }): boolean => {
+    const unit = resolveFreeQuotaUnit(r);
+    return unit === "tokens" || (countNonTokenUnits && unit !== undefined);
+  };
+}
+
+/** A live row that grants recurring free access with a positive monthly quota. */
+function isLiveRecurringQuotaRow(m: FreeModelBudget & { enabled?: boolean }): boolean {
+  return (
+    m.enabled !== false &&
+    grantsFreeAccess(m.freeType) &&
+    STEADY_MONTHLY.has(m.freeType) &&
+    m.monthlyTokens > 0
+  );
+}
+
+/** True for a retirement date inside the 12 calendar months that end at `asOf` (UTC). */
+function retiredWindow(asOf: Date): (retiredAt: string) => boolean {
+  const upper = isoDate(asOf);
+  const floorDate = new Date(asOf.getTime());
+  floorDate.setUTCFullYear(floorDate.getUTCFullYear() - 1);
+  const lower = isoDate(floorDate);
+  return (retiredAt) => retiredAt > lower && retiredAt <= upper;
+}
+
 /**
  * Sums the monthly quota of every live row that grants recurring free access, with or without
  * gates and whatever its ToS verdict, WITHOUT pool dedup — the way catalogs that add every row
@@ -507,10 +534,7 @@ export function computeRowSumMirror(
     opts.entries ?? FREE_MODEL_BUDGETS;
   const retired = opts.retired ?? RETIRED_FREE_ROWS;
   const asOf = opts.asOf ?? new Date(`${FREE_CATALOG_CURATED_AT}T00:00:00Z`);
-  const counts = (r: { provider: string; poolKey: string | null }) => {
-    const unit = resolveFreeQuotaUnit(r);
-    return unit === "tokens" || (opts.countNonTokenUnits === true && unit !== undefined);
-  };
+  const counts = unitCounter(opts.countNonTokenUnits === true);
 
   const byProvider = new Map<string, { liveRows: number; retiredRows: number; tokens: number }>();
   const bump = (provider: string, field: "liveRows" | "retiredRows", tokens: number) => {
@@ -522,20 +546,15 @@ export function computeRowSumMirror(
 
   let liveTokens = 0;
   for (const m of entries) {
-    if (m.enabled === false || !grantsFreeAccess(m.freeType)) continue;
-    if (!STEADY_MONTHLY.has(m.freeType) || !(m.monthlyTokens > 0) || !counts(m)) continue;
+    if (!isLiveRecurringQuotaRow(m) || !counts(m)) continue;
     liveTokens += m.monthlyTokens;
     bump(m.provider, "liveRows", m.monthlyTokens);
   }
 
-  const upper = isoDate(asOf);
-  const floorDate = new Date(asOf.getTime());
-  floorDate.setUTCFullYear(floorDate.getUTCFullYear() - 1);
-  const lower = isoDate(floorDate);
+  const inWindow = retiredWindow(asOf);
   let retiredTokens = 0;
   for (const r of retired) {
-    if (!(r.retiredAt > lower && r.retiredAt <= upper)) continue;
-    if (!(r.lastListedMonthlyTokens > 0) || !counts(r)) continue;
+    if (!inWindow(r.retiredAt) || !(r.lastListedMonthlyTokens > 0) || !counts(r)) continue;
     retiredTokens += r.lastListedMonthlyTokens;
     bump(r.provider, "retiredRows", r.lastListedMonthlyTokens);
   }
