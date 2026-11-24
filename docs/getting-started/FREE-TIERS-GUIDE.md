@@ -1,7 +1,7 @@
 ---
 title: "Free Tiers Guide: Understand and Combine Free AI Access"
-version: 3.8.52
-lastUpdated: 2026-10-11
+version: 3.8.55
+lastUpdated: 2026-11-18
 ---
 
 # Free Tiers Guide: Understand and Combine Free AI Access
@@ -112,6 +112,46 @@ For a `NOAUTH` provider, OmniRoute does not request an upstream credential. This
 ### Step 6: Repeat
 
 Connect several providers whose terms and privacy model fit your use case.
+
+---
+
+## Coming From dsh "Our Free Model"
+
+The [dsh-our-free-model](https://github.com/Ebony-Vinyl/dsh-our-free-model) plugin for the
+dsh agent host reaches two upstreams. OmniRoute already has a provider for each, but only
+one of them is a free path in OmniRoute:
+
+| Plugin lane  | Upstream                                    | OmniRoute provider          | Free in OmniRoute? | How to connect                                                            |
+| ------------ | ------------------------------------------- | --------------------------- | ------------------ | ------------------------------------------------------------------------- |
+| Kilo channel | Kilo AI gateway (`api.kilo.ai/api/gateway`) | `kilo-gateway` (alias `kg`) | Yes                | API key optional: leave it empty to use the gateway's free pool           |
+| Free lane    | OpenCode Zen (`opencode.ai`)                | `opencode-zen`              | No                 | Your own OpenCode API key from [opencode.ai/zen](https://opencode.ai/zen) |
+
+**Kilo.** Call the free pool as `kilo-gateway/<model>` or `kg/<model>`, for example
+`kg/kilo-auto/free` (Kilo's free auto-router) or one of the gateway's `:free` models. The
+free set rotates; `kilo-gateway` passes through model ids that are not in OmniRoute's
+built-in list, so a model the gateway lists today can be called before the catalog includes
+it. Kilo's free model cards say prompts may be logged by the upstream provider and used to
+improve its services, so do not send sensitive data.
+
+**OpenCode.** The plugin's free lane is OpenCode's key-free offer. OmniRoute does not
+provide that offer as free access:
+
+- OmniRoute's keyless OpenCode provider was removed at the request of OpenCode's operator
+  (see [Removed Providers](../reference/REMOVED_PROVIDERS.md)).
+- OpenCode's [endpoint documentation](https://opencode.ai/v2/docs/console/models/#endpoints)
+  ties its free chat offers to OpenCode's own client, so OmniRoute does not count or badge
+  them as free.
+
+The model ids the plugin shows, such as `deepseek-v4.1-flash-free`, `mimo-v2.6-flash-free`
+and `nemotron-3.5-lightning-free`, are in the `opencode-zen` catalog. Connect `opencode-zen`
+with your own OpenCode key to use them under your OpenCode account's terms.
+
+**The plugin's local port.** The plugin can expose its models on a local OpenAI-compatible
+port (default `18899`). Any such endpoint can be added as a
+[custom OpenAI-compatible provider](../guides/USER_GUIDE.md#custom-openai-compatible-providers),
+but OmniRoute does not install, start or update the plugin, and the plugin decides which
+upstream serves each request. The OpenCode restrictions above apply to OpenCode's offer
+whichever client sends the request.
 
 ---
 

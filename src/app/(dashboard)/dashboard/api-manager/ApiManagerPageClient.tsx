@@ -27,6 +27,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { matchesSearch } from "@/shared/utils/turkishText";
 import ApiKeyFilterBar from "./components/ApiKeyFilterBar";
 import KeyPolicySixTabEditor from "./components/KeyPolicySixTabEditor";
+import KeyExpiryQuickPicker from "./components/KeyExpiryQuickPicker";
 import SaveKeyAsTemplateModal from "./components/SaveKeyAsTemplateModal";
 import KeyTemplatesLibrarySection from "./components/KeyTemplatesLibrarySection";
 import { summarizeKeyTemplatePolicy, type KeyTemplate } from "./keyTemplatePolicyUtils";
@@ -171,6 +172,8 @@ export default function ApiManagerPageClient() {
     setNewKeyAccountQuotaEnabled,
     newKeyAllowUsageCommand,
     setNewKeyAllowUsageCommand,
+    newKeyExpiryEndOfDay,
+    setNewKeyExpiryEndOfDay,
     nameError,
     setNameError,
     createError,
@@ -1269,6 +1272,14 @@ export default function ApiManagerPageClient() {
               />
             </div>
           </Card.Section>
+
+          <KeyExpiryQuickPicker
+            formState={createKeyFormState}
+            onFormStateChange={setCreateKeyFormState}
+            endOfDay={newKeyExpiryEndOfDay}
+            onEndOfDayChange={setNewKeyExpiryEndOfDay}
+            disabled={isSubmitting || loadingTemplatePolicy}
+          />
 
           {/* Expandable Full 6-Tab Policy Editor */}
           <Card.Section className="flex flex-col gap-3">

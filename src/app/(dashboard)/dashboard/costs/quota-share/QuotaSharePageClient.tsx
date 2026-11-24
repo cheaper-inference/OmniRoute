@@ -130,6 +130,11 @@ function PoolCardWithUsage({
   );
 }
 
+// Hoisted so the page component's complexity budget stays flat.
+function showsMemberBreakdown(pool: QuotaPool | null): boolean {
+  return pool?.memberBreakdown === true;
+}
+
 // ────────────────────────────────────────────────────────────────────────────
 // Main component
 // ────────────────────────────────────────────────────────────────────────────
@@ -720,6 +725,7 @@ export default function QuotaSharePageClient() {
         }}
         editPool={editing ?? undefined}
         editPoolExclusive={editingExclusive}
+        editPoolMemberBreakdown={showsMemberBreakdown(editing)}
         connections={connections}
         apiKeys={apiKeys}
         plans={plans}

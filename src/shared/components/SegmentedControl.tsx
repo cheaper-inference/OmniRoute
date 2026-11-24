@@ -26,6 +26,8 @@ interface SegmentedRadioProps extends SegmentedCommonProps {
   semantics: "radio";
   value?: string;
   onChange?: (value: string) => void;
+  /** The id of a hint that describes the group. */
+  "aria-describedby"?: string;
 }
 
 interface SegmentedTabsListProps extends SegmentedCommonProps {
@@ -140,7 +142,7 @@ export default function SegmentedControl(props: SegmentedControlProps) {
     );
   }
 
-  const { value, onChange } = props;
+  const { value, onChange, "aria-describedby": ariaDescribedBy } = props;
   const name = { "aria-label": ariaLabel, "aria-labelledby": ariaLabelledBy } as KitName;
   return (
     <KitSegmentedControl
@@ -152,6 +154,7 @@ export default function SegmentedControl(props: SegmentedControlProps) {
       }))}
       value={value}
       onValueChange={(next) => onChange?.(next)}
+      aria-describedby={ariaDescribedBy}
       size={size === "sm" ? "sm" : "default"}
       className={cn(RADIO_CLASS, className)}
     />

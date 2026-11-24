@@ -1,0 +1,1 @@
+- fix(security): model-sync failure logs use a constant format string, so a provider id is never read as a format directive (CodeQL #1407)

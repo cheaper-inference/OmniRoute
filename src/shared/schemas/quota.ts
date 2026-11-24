@@ -1,5 +1,9 @@
 import { z } from "zod";
-import { PoolAllocationSchema, QuotaDimensionSchema } from "@/lib/quota/dimensions";
+import {
+  BorrowModeSchema,
+  PoolAllocationSchema,
+  QuotaDimensionSchema,
+} from "@/lib/quota/dimensions";
 
 export const GroupCreateSchema = z.object({
   name: z.string().min(1).max(120),
@@ -16,6 +20,7 @@ export const PoolCreateSchema = z
     name: z.string().min(1).max(120),
     allocations: z.array(PoolAllocationSchema).default([]),
     groupId: z.string().optional(),
+    borrowMode: BorrowModeSchema.optional(),
   })
   .refine(
     (data) => {
@@ -29,8 +34,10 @@ export const PoolUpdateSchema = z.object({
   name: z.string().min(1).max(120).optional(),
   allocations: z.array(PoolAllocationSchema).optional(),
   exclusive: z.boolean().optional(),
+  memberBreakdown: z.boolean().optional(),
   groupId: z.string().optional(),
   connectionIds: z.array(z.string().min(1)).min(1).optional(),
+  borrowMode: BorrowModeSchema.optional(),
 });
 
 export const PlanUpsertSchema = z.object({
