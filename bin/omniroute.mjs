@@ -447,13 +447,10 @@ if (process.argv.includes("reset-password")) {
 }
 
 try {
-  const { createProgram } = await import(
+  const { createProgram, loadCliPlugins } = await import(
     pathToFileURL(join(ROOT, "bin", "cli", "program.mjs")).href
   );
   const program = createProgram();
-  const { loadCliPlugins } = await import(
-    pathToFileURL(join(ROOT, "bin", "cli", "plugins.mjs")).href
-  );
   await loadCliPlugins(program);
   await program.parseAsync(process.argv);
 } catch (err) {
