@@ -6,6 +6,7 @@ import { PLUGIN_PERMISSION_MODEL_ENABLED_FLAG } from "./featureFlagDefinitionsPl
 import { CODE_ASSIST_LEGACY_TIER_FLAG } from "./featureFlagDefinitionsCodeAssist";
 import { SYSTEM_ONE_FEATURE_FLAG_DEFINITIONS } from "./featureFlagDefinitionsSystemOne";
 import { EXTRA_FEATURE_FLAG_DEFINITIONS } from "./featureFlagDefinitionsExtras";
+import { PROXY_REEGRESS_ON_QUOTA_429_FLAG } from "./featureFlagDefinitionsProxyEgress";
 import {
   PII_RESPONSE_SANITIZATION_MODE_FLAG,
   PII_REVERSIBLE_VAULT_FLAG,
@@ -1436,4 +1437,5 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
   CODE_ASSIST_LEGACY_TIER_FLAG,
   ...SYSTEM_ONE_FEATURE_FLAG_DEFINITIONS,
   ...EXTRA_FEATURE_FLAG_DEFINITIONS,
+  PROXY_REEGRESS_ON_QUOTA_429_FLAG,
 ];
