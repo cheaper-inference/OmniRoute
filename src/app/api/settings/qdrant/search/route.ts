@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
   } catch {
     return NextResponse.json(
       { error: { message: "Invalid JSON body", details: [] } },
-      { status: 400 },
+      { status: 400 }
     );
   }
 
@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
   const { query, topK } = validation.data;
 
   try {
-    const result = await searchSemanticMemory(query, topK);
+    const result = await searchSemanticMemory(query, topK, undefined, { allowDisabled: true });
     return NextResponse.json({
       ok: result.ok,
       results: result.results ?? [],
