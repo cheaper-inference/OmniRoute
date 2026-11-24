@@ -140,7 +140,17 @@ function buildSelfHostedRuntime(sources: SelfHostedSources): SelfHostedRuntime {
 async function loadSelfHostedRuntime(
   options: SelfHostedOptions
 ): Promise<SelfHostedRuntime | null> {
-  const sources = await resolveSelfHostedSources(options);
+  // The config/strategy file read can fail (missing file, permissions, ...). A
+  // configured entry must then answer with its 500 instead of rejecting, which
+  // would let the caller fall through to the cloud pipeline. The message is
+  // fixed so the configured file path never reaches the client.
+  let sources: SelfHostedSources | null;
+  try {
+    sources = await resolveSelfHostedSources(options);
+  } catch {
+    failedConfigLoad = "config file unreadable";
+    return null;
+  }
   if (!sources) return null;
 
   const signature = signatureFor(sources);
