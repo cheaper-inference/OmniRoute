@@ -67,6 +67,7 @@ import {
 } from "./providerLimits/quotaNormalize";
 import { getCachedLiveModelIds, refreshLiveModelIds } from "./providerLimits/liveModelIds";
 import { syncInChunksWithSpacing } from "./providerLimits/chunkedSpacingSync";
+import { ARGON_EXCLUSION, dropLegacyGemini4Exclusion } from "./providerLimits/argonExclusions";
 import {
   currentQuotaBatchEntries,
   refreshedCodexFence,
@@ -734,9 +735,7 @@ async function syncClaudeExtraUsageStateIfNeeded(
   };
 }
 
-const AUTO_MANAGED_ARGON_EXCLUSION_PATTERNS = ["gemini-4*", "*argon*"] as const;
-
-/** Ineligible: flag the account and append the auto-managed Argon exclusions (keeps operator ones). */
+/** Ineligible: flag the account and add the auto-managed Argon exclusion (keeps operator ones). */
 function markArgonIneligible(
   psd: Record<string, unknown>,
   nextPsd: Record<string, unknown>
@@ -747,20 +746,20 @@ function markArgonIneligible(
     changed = true;
   }
 
-  const existing = Array.isArray(psd.excludedModels)
+  const stored = Array.isArray(psd.excludedModels)
     ? psd.excludedModels.filter((m): m is string => typeof m === "string")
     : [];
-  const missing = AUTO_MANAGED_ARGON_EXCLUSION_PATTERNS.filter(
-    (pattern) => !existing.includes(pattern)
-  );
-  if (missing.length > 0) {
-    nextPsd.excludedModels = [...existing, ...missing];
+  const kept = dropLegacyGemini4Exclusion(stored);
+  const missing = !kept.includes(ARGON_EXCLUSION);
+  if (missing || kept.length !== stored.length) {
+    // Prepended: right after an operator's gemini-4* it would read as the legacy pair.
+    nextPsd.excludedModels = missing ? [ARGON_EXCLUSION, ...kept] : kept;
     changed = true;
   }
   return changed;
 }
 
-/** Eligible: flag the account and strip only the auto-managed Argon exclusions. */
+/** Eligible: flag the account and strip only the auto-managed Argon exclusion. */
 function markArgonEligible(
   psd: Record<string, unknown>,
   nextPsd: Record<string, unknown>
@@ -772,8 +771,9 @@ function markArgonEligible(
   }
 
   if (!Array.isArray(psd.excludedModels)) return changed;
-  const autoSet = new Set<string>(AUTO_MANAGED_ARGON_EXCLUSION_PATTERNS);
-  const filtered = psd.excludedModels.filter((m) => typeof m !== "string" || !autoSet.has(m));
+  const filtered = dropLegacyGemini4Exclusion(psd.excludedModels).filter(
+    (m) => m !== ARGON_EXCLUSION
+  );
   if (filtered.length !== psd.excludedModels.length) {
     nextPsd.excludedModels = filtered;
     changed = true;
