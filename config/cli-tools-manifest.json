@@ -507,14 +507,24 @@
     },
     "omp": {
       "displayName": "Oh My Pi",
-      "aliases": [],
+      "aliases": ["oh-my-pi", "ohmypi"],
       "binaries": ["omp"],
       "surfaces": {
         "catalog": true,
         "detect": true,
-        "run": false,
-        "configure": false,
-        "generate": false
+        "run": true,
+        "configure": true,
+        "generate": true
+      },
+      "configureRecipe": {
+        "mode": "module",
+        "module": "./setup-omp.mjs",
+        "exportName": "runSetupOmpCommand"
+      },
+      "runModel": {
+        "flag": "--model",
+        "prefix": "omniroute/",
+        "required": false
       }
     },
     "openclaude": {

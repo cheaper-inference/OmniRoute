@@ -11,6 +11,7 @@ import { generateHermesConfig } from "./hermes";
 import { generateHermesAgentConfig } from "./hermes-agent";
 import { generateKilocodeConfig } from "./kilocode";
 import { generateOpencodeConfig } from "./opencode";
+import { generateOmpConfig } from "./omp";
 import { generateWhyCodesConfig } from "./whycodes";
 import { resolveOpencodeConfigPath } from "../../../shared/services/opencodeConfigPath";
 import { normalizeCliToolId } from "../../../shared/services/cliRuntime";
@@ -51,6 +52,7 @@ const STATIC_TOOL_CONFIG_PATHS: Record<string, string> = {
   // VS Code extension owns that settings namespace.
   kilo: path.join(os.homedir(), ".config", "kilocode", "settings.json"),
   continue: path.join(os.homedir(), ".continue", "config.yaml"),
+  omp: path.join(os.homedir(), ".omp", "agent", "models.yml"),
 };
 
 /**
@@ -82,6 +84,7 @@ const GENERATORS: Record<string, ConfigGenerator> = {
   cline: generateClineConfig,
   kilo: generateKilocodeConfig,
   continue: generateContinueConfig,
+  omp: generateOmpConfig as ConfigGenerator,
   hermes: generateHermesConfig,
   "hermes-agent": generateHermesAgentConfig as any, // rich multi-role version
   whycodes: generateWhyCodesConfig,
