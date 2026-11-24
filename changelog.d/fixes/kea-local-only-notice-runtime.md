@@ -1,1 +1,1 @@
-- **fix(dashboard):** Show the local-only notice when a dashboard request is rejected.
+- **fix(dashboard):** Show the local-only notice up front for remote sessions behind a proxy and after a local-only request is rejected.
