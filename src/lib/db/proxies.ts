@@ -168,21 +168,17 @@ function insertProxyRow(
   );
 }
 
-function updateProxyRow(
-  db: ReturnType<typeof getDbInstance>,
-  id: string,
-  existing: ProxyRegistryRecord,
-  payload: Partial<ProxyPayload>,
-  now: string
-) {
+/**
+ * Resolve the fields an update must preserve when the caller omits them: credentials,
+ * subscription link and the rotating-egress flag.
+ */
+function mergePreservedProxyFields(existing: ProxyRegistryRecord, payload: Partial<ProxyPayload>) {
   const incomingUsername =
     typeof payload.username === "string" ? payload.username.trim() : undefined;
   const incomingPassword =
     typeof payload.password === "string" ? payload.password.trim() : undefined;
 
-  const merged = {
-    ...existing,
-    ...payload,
+  return {
     // Omitted credentials mean preserve; explicitly provided blanks clear stored auth.
     username: incomingUsername === undefined ? existing.username : incomingUsername,
     password: incomingPassword === undefined ? existing.password : incomingPassword,
@@ -192,6 +188,20 @@ function updateProxyRow(
       payload.subscriptionId === undefined ? existing.subscriptionId : payload.subscriptionId,
     rotatingEgress:
       payload.rotatingEgress === undefined ? existing.rotatingEgress : payload.rotatingEgress,
+  };
+}
+
+function updateProxyRow(
+  db: ReturnType<typeof getDbInstance>,
+  id: string,
+  existing: ProxyRegistryRecord,
+  payload: Partial<ProxyPayload>,
+  now: string
+) {
+  const merged = {
+    ...existing,
+    ...payload,
+    ...mergePreservedProxyFields(existing, payload),
     updatedAt: now,
   };
 
