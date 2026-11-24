@@ -68,6 +68,10 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // #13987: System One decisions (/v1/systemone), same
     // scoped quota-preflight credential lookup as /v1/classify (class B).
     "src/app/api/v1/_shared/systemOneRoute.ts": 1,
+    // #18838 (salvage): native OpenAI Decisions (/v1/decisions), the same scoped
+    // quota-preflight lookup as /v1/systemone, handed to the decision credential resolver
+    // inside the key's connection scope; it posts a typed decision, never chat (class B).
+    "src/app/api/v1/_shared/decisionsRoute.ts": 1,
     // GHSA-3w2r: keyless providers (local zero-config defaults, keyless
     // remotes) look up an in-scope connection for a connection-scoped API key
     // before running (chat's #9057 rule) — one extra scoped lookup per site.
