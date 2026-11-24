@@ -141,6 +141,43 @@ async function verifyCookieValidity(
   }
 }
 
+function readCookieValue(cookieHeader: string, name: string): string {
+  for (const part of cookieHeader.split(";")) {
+    const eq = part.indexOf("=");
+    if (eq > 0 && part.slice(0, eq).trim() === name) return part.slice(eq + 1).trim();
+  }
+  return "";
+}
+
+/**
+ * Choose the organization that can actually chat (#claude-web permission_denied).
+ *
+ * `/api/organizations` lists every organization the session belongs to, and an
+ * account that also has an Anthropic Console (API) organization often gets that
+ * one FIRST: `capabilities: ["api", ...]` with no "chat". Posting a conversation
+ * there answers 403 `permission_denied` for every model. Prefer, in order:
+ *   1. the `lastActiveOrg` cookie, i.e. the organization claude.ai itself uses;
+ *   2. the first organization whose capabilities include "chat";
+ *   3. the first organization (previous behavior).
+ */
+export function pickClaudeChatOrganization(parsed: unknown, cookieHeader = ""): string | null {
+  if (!Array.isArray(parsed)) return null;
+  const orgs = parsed
+    .filter((o): o is Record<string, unknown> => !!o && typeof o === "object" && !Array.isArray(o))
+    .map((o) => {
+      const id = o.uuid ?? o.id;
+      const capabilities = Array.isArray(o.capabilities) ? o.capabilities : [];
+      return { id: typeof id === "string" ? id.trim() : "", capabilities };
+    })
+    .filter((o) => o.id);
+  if (!orgs.length) return null;
+  const lastActive = readCookieValue(cookieHeader, "lastActiveOrg");
+  const byCookie = lastActive ? orgs.find((o) => o.id === lastActive) : undefined;
+  if (byCookie) return byCookie.id;
+  const chat = orgs.find((o) => o.capabilities.includes("chat"));
+  return (chat ?? orgs[0]).id;
+}
+
 async function getOrganizationId(
   cookieHeader: string,
   deviceId: string | undefined,
@@ -176,17 +213,9 @@ async function getOrganizationId(
       return { organizationId: null, failure: "unavailable" };
     }
     const parsed = JSON.parse(response.text ?? "[]") as unknown;
-    if (!Array.isArray(parsed) || parsed.length === 0) {
-      return { organizationId: null, failure: "unavailable" };
-    }
-    const organization = parsed[0];
-    if (!organization || typeof organization !== "object" || Array.isArray(organization)) {
-      return { organizationId: null, failure: "unavailable" };
-    }
-    const record = organization as Record<string, unknown>;
-    const identifier = record.uuid ?? record.id;
-    return typeof identifier === "string" && identifier.trim()
-      ? { organizationId: identifier.trim(), failure: null }
+    const organizationId = pickClaudeChatOrganization(parsed, cookieHeader);
+    return organizationId
+      ? { organizationId, failure: null }
       : { organizationId: null, failure: "unavailable" };
   } catch {
     return { organizationId: null, failure: "unavailable" };
