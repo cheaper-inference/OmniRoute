@@ -602,3 +602,30 @@ test("syncConnectionModels logs removed synced and custom models separately", as
   assert.equal(logged[0], "[ModelSync] demo (conn-1): ✓ 40 models (removed: 110 synced, 3 custom)");
   assert.equal(logged[1], "[ModelSync] demo (conn-2): ✓ 40 models");
 });
+
+test("CodeQL #1407: a failed sync logs with a constant format, so a provider id cannot act as one", async () => {
+  const { syncConnectionModels, getModelSyncInternalBaseUrl } = await loadScheduler("log-format");
+  const originalFetch = globalThis.fetch;
+  const originalWarn = console.warn;
+  const warned: unknown[][] = [];
+  globalThis.fetch = async () => {
+    throw new Error("socket hang up");
+  };
+  console.warn = (...args: unknown[]) => {
+    warned.push(args);
+  };
+  try {
+    assert.equal(
+      await syncConnectionModels("conn-fmt-1", "evil%s%o%c", getModelSyncInternalBaseUrl()),
+      false
+    );
+  } finally {
+    globalThis.fetch = originalFetch;
+    console.warn = originalWarn;
+  }
+  const entry = warned.find((args) => args.includes("evil%s%o%c"));
+  assert.ok(entry, "the provider id is logged as a plain argument");
+  assert.equal(typeof entry[0], "string");
+  assert.ok(!String(entry[0]).includes("evil"), "the format string carries no caller data");
+  assert.ok(entry.includes("socket hang up"), "the error message is still logged");
+});
