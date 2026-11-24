@@ -35,57 +35,32 @@ npm run test:e2e           # không bắt buộc nhưng được khuyến nghị
 /capture-release-evidences-cc
 ```
 
-## npm Trusted Publishing (mặc định kể từ v3.8.51) — staged theo yêu cầu, direct làm phương án dự phòng
+## npm Xuất bản đáng tin cậy (mặc định kể từ v3.8.51) — được tổ chức theo yêu cầu, trực tiếp dưới dạng dự phòng
 
-Theo mặc định, `npm-publish.yml` phát hành thông qua **npm Trusted Publishing (OIDC)**: job
-`stage-npm` (do GitHub lưu trữ) trao đổi id-token của GitHub để lấy thông tin xác thực npm
-ngắn hạn cho lần chạy đó — không có token npm dài hạn trong các secret của kho lưu trữ, không có lời nhắc 2FA, và có kèm chứng thực nguồn gốc.
-Đây là cơ chế bỏ qua được npm chấp thuận trong bối cảnh các token bỏ qua 2FA đang dần bị loại bỏ;
-nó khôi phục quy trình hoàn toàn tự động mà dự án đã có cho đến v3.8.48, đồng thời duy trì
-đảm bảo WS1.3 (một token bị rò rỉ không thể tự phát hành — vì không tồn tại token nào).
+`npm-publish.yml` xuất bản thông qua** npm Xuất bản đáng tin cậy (OIDC)** theo mặc định: công việc `stage-npm` (được lưu trữ trên github) trao đổi mã thông báo id của GitHub để lấy thông tin xác thực npm tồn tại trong thời gian ngắn cho lần chạy đó — không có mã thông báo npm tồn tại lâu trong bí mật kho lưu trữ, không có lời nhắc 2FA, xuất xứ kèm theo. Đó là biện pháp trừng phạt bỏ qua npm hiện nay khi các mã thông báo bỏ qua 2FA đang bị ngừng hoạt động; nó khôi phục luồng hoàn toàn tự động mà dự án có lên tới v3.8.48 trong khi vẫn đảm bảo WS1.3 (mã thông báo bị rò rỉ không thể xuất bản một mình — vì không có mã thông báo).
 
-**Thiết lập một lần (chủ sở hữu):** npmjs.com → package `omniroute` → Settings → _Trusted
-Publisher_ → GitHub: owner `diegosouzapw`, repo `OmniRoute`, workflow `npm-publish.yml`
-(environment: none). Cho đến khi cấu hình này tồn tại, bước tự động sẽ thất bại với `ENEEDAUTH`:
-kích hoạt lại với `publish_mode=staged` (bên dưới) hoặc `direct`.
+**Thiết lập một lần (chủ sở hữu):** npmjs.com gói → `omniroute` → Cài đặt → _Nhà xuất bản đáng tin cậy_ → GitHub: chủ sở hữu `diegosouzapw`, repo `OmniRoute`, quy trình làm việc `npm-publish.yml` (môi trường: không có). Cho đến khi điều đó tồn tại, bước tự động không thành công với `ENEEDAUTH`: gửi lại với `publish_mode=staged` (bên dưới) hoặc `direct`.
 
-### Phát hành staged (theo yêu cầu — `publish_mode=staged`)
+### Xuất bản theo giai đoạn (theo yêu cầu — `publish_mode=staged`)
 
-Workflow npm-publish không còn phát hành trực tiếp: nó khởi động tarball đã đóng gói
-(`check:pack-boot`) rồi chạy `npm stage publish` — các byte chính xác được lưu tạm trên
-registry, **không thể cài đặt** cho đến khi chủ sở hữu phê duyệt. Cổng 2FA do con người thực hiện đã được chuyển
-sang SAU bước xác minh, thay vì trước đó.
+Quy trình công việc npm-publish không còn xuất bản trực tiếp nữa: nó khởi động tarball đã đóng gói (`check:pack-boot`) rồi chạy `npm stage publish` — các byte chính xác được đặt trên sổ đăng ký,** không thể cài đặt được** cho đến khi được chủ sở hữu chấp thuận. Cổng 2FA của con người đã chuyển sang AFTER bằng chứng chứ không phải trước đó.
 
-**Quy trình của chủ sở hữu sau khi workflow chuyển sang trạng thái xanh:**
+**Luồng chủ sở hữu sau khi quy trình làm việc chuyển sang màu xanh:**
 
-1. `npm stage list omniroute` — tìm stage id (cũng được in trong phần tóm tắt workflow).
-2. Xác minh các byte đã được staged (khuyến nghị): `npm stage download <id>`, sau đó cài đặt
-   tarball đã tải xuống vào một prefix tạm thời và khởi động nó (`npm run check:pack-boot` tự động hóa
-   cùng kết luận pack→install→boot trong CI).
-3. `npm stage approve <id>` — lời nhắc 2FA CHÍNH LÀ thao tác phát hành. `npm stage reject <id>` sẽ loại bỏ.
-4. Lưới an toàn sau phát hành: trình xác minh sau phát hành (WS1.4 của kế hoạch v3.8.49) cài đặt
-   phiên bản đã phát hành từ registry công khai trong một container sạch và khởi động nó.
+1. `npm stage list omniroute` — tìm id giai đoạn (cũng được in trong bản tóm tắt quy trình làm việc).
+2. Xác minh các byte được phân loại (được khuyến nghị): `npm stage download <id>`, sau đó cài đặt tarball đã tải xuống vào tiền tố tạm thời và khởi động nó (`npm run check:pack-boot` tự động hóa cùng một gói → install → boot phán quyết trong CI).
+3. `npm stage approve <id>` — nhắc nhở 2FA IS xuất bản. `npm stage reject <id>` loại bỏ.
+4. Mạng sau xuất bản: trình xác minh sau xuất bản (WS1.4 của gói v3.8.49) cài đặt phiên bản đã xuất bản từ sổ đăng ký công khai trong một thùng chứa sạch và khởi động nó.
 
-**Phương án dự phòng khẩn cấp:** `workflow_dispatch` với `publish_mode=direct` khôi phục
-`npm publish` tức thì theo cơ chế cũ (chỉ sử dụng nếu chính quy trình staging gặp lỗi; ghi lại lý do).
+**Dự phòng khẩn cấp:** `workflow_dispatch` với `publish_mode=direct` khôi phục `npm publish` kế thừa ngay lập tức (chỉ sử dụng nếu dàn dựng hoạt động sai; ghi lại lý do).
 
-**Gia cố một lần (chủ sở hữu, npmjs.com):** cấu hình Trusted Publisher cho
-`omniroute` ở chế độ chỉ stage để một token dài hạn bị rò rỉ không thể chạy `npm publish`
-trực tiếp từ bất kỳ đâu — CI chỉ có thể stage; chỉ 2FA của chủ sở hữu mới có thể phát hành.
+**Làm cứng một lần (chủ sở hữu, npmjs.com):** định cấu hình Nhà xuất bản đáng tin cậy cho `omniroute` ở chế độ chỉ giai đoạn để mã thông báo tồn tại lâu dài bị rò rỉ không thể `npm publish` trực tiếp từ bất kỳ đâu — CI chỉ có thể tạo giai đoạn; chỉ các bản phát hành 2FA của chủ sở hữu.
 
-**Quy trình xử lý artifact bị lỗi (không thay đổi):** `npm deprecate omniroute@<bad> "<reason> — use <fixed>"`
-là phản xạ mặc định (chỉ mất vài phút, có thể đảo ngược); chỉ dùng `npm unpublish` trong khoảng thời gian 72 giờ/không có gói phụ thuộc
-và không bao giờ dùng làm bước đầu tiên. Docker: không bao giờ ghi đè một thẻ phiên bản — rollback nghĩa là
-trỏ lại `latest` đến digest tốt gần nhất.
+**Sách hướng dẫn về hiện vật bị hỏng (không thay đổi):** `npm deprecate omniroute@<bad> "<reason> — use <fixed>"` là phản xạ mặc định (phút, có thể đảo ngược); `npm unpublish` chỉ bên trong cửa sổ 72h/no-dependents và không bao giờ là bước đi đầu tiên. Docker: không bao giờ viết lại thẻ phiên bản — rollback đang bổ sung `latest` vào thông báo tốt cuối cùng.
 
-**Docker Hub `latest` (bắt buộc đối với mọi lần phát hành SemVer ổn định):** workflow
-`docker-publish` phải gắn thẻ **cả** `X.Y.Z` và, khi
-`should-promote-latest.sh` xác nhận đây là SemVer ổn định cao nhất, `:latest`
-với **cùng một digest**. Sau khi job hoàn tất: digest `latest` trên Hub phải bằng digest SemVer mới
-và `last_updated` phải được cập nhật. Không được để `:latest` trỏ đến một
-bản build cũ hơn trong khi ghi chú phát hành đề cập đến các bản sửa lỗi chỉ tồn tại trên git. Các cấu hình Compose
-khởi động nhanh sử dụng `:latest`; GitOps nên tiếp tục ghim vào `X.Y.Z`. Xem
-[Các kênh phát hành Docker](../guides/DOCKER_GUIDE.md#release-channels) và #10317.
+**Docker Hub `latest` (bắt buộc trên mỗi lần xuất bản SemVer ổn định):** quy trình làm việc `docker-publish` phải gắn thẻ** cả hai** `X.Y.Z` và khi `should-promote-latest.sh` đồng ý thì đây là SemVer ổn định cao nhất, `:latest` với** cùng một thông báo** . Sau công việc: Thông báo Hub `latest` bằng thông báo SemVer mới và `last_updated` đã được di chuyển. Đừng để `:latest` trên bản dựng cũ hơn trong khi ghi chú phát hành nói về các bản sửa lỗi chỉ tồn tại trên git. Soạn khởi động nhanh sử dụng `:latest`; GitOps nên tiếp tục ghim `X.Y.Z`. Xem [các kênh phát hành Docker](../guides/DOCKER_GUIDE.md#release-channels) và #10317.
+
+**Kho lưu trữ tổ chức Docker Hub (`cheaperinference/omniroute`):** Docker Hub không thể di chuyển kho lưu trữ giữa các không gian tên, vì vậy `diegosouzapw/omniroute` giữ lịch sử kéo và mọi bản phát hành, đồng thời công việc `mirror-org-dockerhub` của `docker-publish` sao chép từng phiên bản đã phát hành (và `:latest` khi được quảng bá) từ `ghcr.io/cheaper-inference/omniroute` sang kho lưu trữ của tổ chức. Nó cần những bí mật `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` ; không có chúng, công việc vẫn xanh với cảnh báo "Docker Hub org mirror bị bỏ qua" và các cơ quan đăng ký khác xuất bản bình thường. Để xuất bản phiên bản đã phát hành sau đó, hãy chạy** Hành động → Phản chiếu hình ảnh Docker tới Docker Hub org → Quy trình chạy** với `version=X.Y.Z` (và `promote_latest` cho phiên bản ổn định cao nhất): nó sao chép các hình ảnh hiện có, không xây dựng lại.
 
 ## Luồng Nhanh Hotfix (nhãn `hotfix`)
 
@@ -111,163 +86,160 @@ mà không cần bất kỳ nhãn nào.
 
 ## Danh sách kiểm tra chi tiết
 
-### Trước khi phát hành
+### Phát hành trước
 
-- [ ] Tất cả PR dành cho bản phát hành này đã được hợp nhất vào `release/vX.Y.0`
-- [ ] Tất cả mục Linear/vấn đề còn mở cho phiên bản này đã được đóng hoặc chuyển sang mốc tiếp theo
-- [ ] CI đạt trạng thái xanh trên nhánh `release/vX.Y.0`
-- [ ] Không có dấu `TODO(release)` trong mã: `grep -r "TODO(release)" src/ open-sse/`
-- [ ] Ảnh nền Docker đã được cập nhật (hiện tại là `node:24.15.0-trixie-slim`)
+- [ ] Tất cả PRs được nhắm mục tiêu cho bản phát hành này sẽ được hợp nhất thành `release/vX.Y.0`
+- [ ] Tất cả các mục Linear/issue đang mở cho phiên bản này đều bị đóng hoặc đẩy sang cột mốc tiếp theo
+- [ ] CI xanh trên nhánh `release/vX.Y.0`
+- [ ] Không có điểm đánh dấu `TODO(release)` trong mã: `grep -r "TODO(release)" src/ open-sse/`
+- [ ] hình ảnh cơ sở Docker được cập nhật (hiện tại `node:24.15.0-trixie-slim`)
 
 ### Phiên bản & Nhật ký thay đổi
 
-- [ ] Chạy `/version-bump-cc <patch|minor|major>` (kỹ năng Claude Code)
-  - Tăng phiên bản trong `package.json`, `electron/package.json`
-  - Tạo lại `CHANGELOG.md` từ các commit git kể từ thẻ gần nhất
-  - Cập nhật các huy hiệu trong README.md
-- [ ] Xem xét thủ công CHANGELOG.md và chỉnh sửa nội dung commit nếu cần
-- [ ] Đảm bảo phần semver mới nhất trong `CHANGELOG.md` khớp với phiên bản trong `package.json`
-- [ ] Giữ `## [Unreleased]` làm phần đầu tiên của nhật ký thay đổi cho công việc sắp tới
-- [ ] Cập nhật `docs/openapi.yaml` → `info.version` phải khớp với phiên bản trong `package.json`
+- [ ] Chạy `/version-bump-cc <patch|minor|major>` (kỹ năng mã Claude )
+  - Va chạm `package.json`, `electron/package.json`
+  - Tạo lại `CHANGELOG.md` từ các cam kết git kể từ thẻ cuối cùng
+  - Cập nhật huy hiệu README.md
+- [ ] Xem lại CHANGELOG.md theo cách thủ công và dọn sạch các thông báo cam kết nếu cần
+- [ ] Đảm bảo phần học kỳ mới nhất trong `CHANGELOG.md` bằng phiên bản `package.json`
+- [ ] Giữ `## [Unreleased]` làm phần nhật ký thay đổi đầu tiên cho công việc sắp tới
+- [ ] Cập nhật `docs/openapi.yaml` → `info.version` phải bằng phiên bản `package.json`
 
 ### Chất lượng mã
 
-- [ ] `npm run lint` — 0 lỗi (các cảnh báo đã tồn tại từ trước)
-- [ ] `npm run typecheck:core` — không có lỗi
-- [ ] `npm run typecheck:noimplicit:core` — không có lỗi (nghiêm ngặt)
-- [ ] `npm run check:cycles:ratchet` — nằm trong giới hạn trần `metrics.cycles` đã cố định (`check:cycles` đơn lẻ thoát với mã 1 khi có bất kỳ chu trình nào, #15281)
-- [ ] `npm run check:any-budget:t11` — nằm trong ngân sách
-- [ ] `npm run check:route-validation:t06` — không có lỗi
-- [ ] `npm run check:node-runtime` — đáp ứng phiên bản runtime tối thiểu được hỗ trợ (`>=22.22.2 <23`, `>=24.0.0 <27`, theo `SUPPORTED_NODE_RANGE` trong `src/shared/utils/nodeRuntimeSupport.ts`; đồng bộ với `engines` trong `package.json`)
+- [ ] lỗi `npm run lint` — 0 (cảnh báo đã có sẵn)
+- [ ] `npm run typecheck:core` — sạch sẽ
+- [ ] `npm run typecheck:noimplicit:core` — sạch (nghiêm ngặt)
+- [ ] `npm run check:cycles:ratchet` — trong trần `metrics.cycles` cố định ( `check:cycles` trần thoát ra 1 trên bất kỳ chu kỳ nào, #15281)
+- [ ] `npm run check:any-budget:t11` — trong ngân sách
+- [ ] `npm run check:route-validation:t06` — sạch sẽ
+- [ ] đã đáp ứng sàn thời gian chạy được hỗ trợ `npm run check:node-runtime` — (`>=22.22.2 <23`, `>=24.0.0 <27`, per `SUPPORTED_NODE_RANGE` in `src/shared/utils/nodeRuntimeSupport.ts`; căn chỉnh với `package.json` `engines`)
 
-### Kiểm thử
+### Kiểm tra
 
-- [ ] `npm run test:unit` — đạt
-- [ ] `npm run test:vitest` — đạt (máy chủ MCP, autoCombo, bộ nhớ đệm)
-- [ ] `npm run test:coverage` — đáp ứng ngưỡng 60/60/60/60 (câu lệnh/dòng/hàm/nhánh)
-- [ ] `npm run test:integration` — đạt (nếu thay đổi liên quan đến DB / trình xử lý)
-- [ ] `npm run test:combo:matrix` — đạt (ma trận chiến lược combo: chứng minh một cách xác định các quyết định lựa chọn của cả 19 chiến lược định tuyến công khai; chạy khi thay đổi định tuyến combo, phân giải chiến lược hoặc logic dự phòng)
-- [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` — **tùy chọn/thủ công** (kiểm thử nhanh có cổng kiểm soát với upstream thực; lấy ảnh chụp nhanh DB chỉ đọc từ VPS `root@192.168.0.15`; gọi các nhà cung cấp thực, tiêu tốn tín dụng; không bao giờ chạy trong CI; bỏ qua một cách an toàn nếu không có cổng kiểm soát)
-- [ ] `npm run test:combo:live:vps` — **tùy chọn/thủ công** (kiểm thử nhanh trực tiếp trên VPS Giai đoạn 3: 7 kịch bản HTTP với máy chủ `.15` đang hoạt động qua Node ESM thuần; yêu cầu `ssh root@192.168.0.15`; chỉ tạo/xóa các combo `__live_test__*`; gọi các nhà cung cấp thực; không bao giờ chạy trong CI)
-- [ ] `npm run test:e2e` — đạt (các thay đổi UI)
-- [ ] `npm run test:protocols:e2e` — đạt (các thay đổi MCP/A2A)
-- [ ] `npm run test:ecosystem` — đạt
+- [ ] vượt qua `npm run test:unit` —
+- [ ] `npm run test:vitest` — pass (máy chủ MCP, autoCombo, bộ đệm)
+- [ ] cổng `npm run test:coverage` — 60/60/60/60 hài lòng (statements/lines/functions/branches)
+- [ ] `npm run test:integration` — pass (nếu thay đổi chạm vào DB / trình xử lý)
+- [ ] `npm run test:combo:matrix` — pass (ma trận chiến lược kết hợp: chứng minh tất cả 22 quyết định lựa chọn chiến lược định tuyến công cộng một cách xác định; chạy khi chạm vào định tuyến kết hợp, giải quyết chiến lược hoặc logic dự phòng)
+- [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` —**optional/manual** (khói ngược dòng thực được kiểm soát; lấy ảnh chụp nhanh DB chỉ đọc từ VPS `root@192.168.0.15`; truy cập các nhà cung cấp thực sự, tính phí tín dụng; không bao giờ chạy trong CI; bỏ qua hoàn toàn mà không cần cổng)
+- [ ] `npm run test:combo:live:vps` —**optional/manual** (Phase-3 VPS khói trực tiếp: 7 kịch bản HTTP đối với máy chủ `.15` trực tiếp thông qua Node ESM đơn giản; yêu cầu `ssh root@192.168.0.15`; creates/deletes chỉ kết hợp `__live_test__*` ; đánh vào các nhà cung cấp thực sự; không bao giờ chạy trong CI)
+- [ ] `npm run test:e2e` — pass (UI thay đổi)
+- [ ] `npm run test:protocols:e2e` — pass (MCP/A2A thay đổi)
+- [ ] vượt qua `npm run test:ecosystem` —
 
-### Hook (được Husky xác thực)
+### Móc (Husky xác nhận)
 
-Các hook Husky nằm trong `.husky/` và tự động chạy khi thực hiện các thao tác git.
+Husky hook sống trong `.husky/` và chạy tự động trên các hoạt động git.
 
-- **pre-commit:** `npx lint-staged + node scripts/check/check-docs-sync.mjs + npm run check:any-budget:t11`
-- **pre-push:** các cổng kiểm tra nhanh và xác định — `npm run check:any-budget:t11 && npm run check:tracked-artifacts` (được kích hoạt ngày 2026-06-13). Cố ý loại trừ `test:unit` (chậm; đã được tác vụ CI `test-unit` đảm nhiệm).
-  - Chạy thủ công `npm run test:unit` trước khi đẩy các nhánh phát hành.
+- **cam kết trước:** `npx lint-staged + node scripts/check/check-docs-sync.mjs + npm run check:any-budget:t11`
+- **đẩy trước:** cổng xác định nhanh — `npm run check:any-budget:t11 && npm run check:tracked-artifacts` (kích hoạt 2026-06-13). Cố ý loại trừ `test:unit` (chậm; được bao phủ bởi công việc CI `test-unit` ).
+  - Chạy `npm run test:unit` theo cách thủ công trước khi đẩy các nhánh phát hành.
 
-Nếu một hook thất bại: hãy khắc phục vấn đề gốc, không bỏ qua bằng `--no-verify`.
+Nếu hook không thành công: hãy khắc phục sự cố cơ bản, đừng bỏ qua bằng `--no-verify`.
 
-### Conventional Commits
+### Cam kết thông thường
 
-Tất cả commit dành cho bản phát hành phải tuân theo định dạng `type(scope): subject`.
+Tất cả các cam kết ràng buộc phát hành phải tuân theo định dạng `type(scope): subject`.
 
 **Các loại hợp lệ:** `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `style`, `ci`
 
-**Các phạm vi hợp lệ:** `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, `mcp`, `a2a`, `memory`, `skills`, `cloud-agent`, `guardrails`, `compression`, `auto-combo`, `resilience`, `providers`, `executors`, `translator`, `domain`, `authz`
+**Phạm vi hợp lệ:** `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, `mcp`, `a2a`, `memory`, `skills`, `cloud-agent`, `guardrails`, `compression`, `auto-combo`, `resilience`, `providers`, `executors`, `translator`, `domain`, `authz`
 
-Thay đổi phá vỡ khả năng tương thích: thêm phần cuối `BREAKING CHANGE:` hoặc `!` sau phạm vi (ví dụ: `feat(api)!: drop /v0`).
+Những thay đổi mang tính đột phá: thêm chân trang `BREAKING CHANGE:` hoặc `!` sau phạm vi (ví dụ `feat(api)!: drop /v0`).
 
 ### Tài liệu
 
-- [ ] `npm run check:docs-sync` đạt (tự động chạy bởi pre-commit)
-- [ ] `npm run check:docs-all` đạt (tổng hợp: docs-sync + docs-counts + env-doc-sync + deprecated-versions + doc-links)
-- [ ] `npm run check:env-doc-sync` thoát với mã 0 — hợp đồng môi trường giữa mã ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` vẫn nguyên vẹn
-- [ ] `npm run check:doc-links` thoát với mã 0 — không có tham chiếu markdown nội bộ bị hỏng sau khi tái cấu trúc
-- [ ] `docs/architecture/ARCHITECTURE.md` đã được xem xét để phát hiện sai lệch về lưu trữ/runtime
-- [ ] `docs/guides/TROUBLESHOOTING.md` đã được xem xét để phát hiện sai lệch về biến môi trường và vận hành
-- [ ] Nếu `.env.example` thay đổi: đã cập nhật `docs/reference/ENVIRONMENT.md`
-- [ ] Nếu tính năng mới có UI: `docs/guides/USER_GUIDE.md` có đề cập đến tính năng đó
-- [ ] Nếu tính năng mới có API: đã cập nhật `docs/reference/API_REFERENCE.md` + `docs/openapi.yaml`
-- [ ] Nếu tính năng mới là một mô-đun: có tài liệu chuyên biệt `docs/<MODULE>.md`
-- [ ] Nếu có thay đổi phá vỡ khả năng tương thích: `docs/guides/TROUBLESHOOTING.md` có ghi chú di chuyển
+- [ ] thẻ `npm run check:docs-sync` (tự động chạy bằng cách xác nhận trước)
+- [ ] thẻ `npm run check:docs-all` (ô: docs-sync + docs-counts + env-doc-sync + phiên bản không dùng nữa + doc-links)
+- [ ] `npm run check:env-doc-sync` thoát 0 mã — ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` hợp đồng env còn nguyên vẹn
+- [ ] `npm run check:doc-links` thoát 0 — không có tham chiếu đánh dấu nội bộ bị hỏng sau khi tái cấu trúc
+- [ ] `docs/architecture/ARCHITECTURE.md` được xem xét cho storage/runtime trôi dạt
+- [ ] `docs/guides/TROUBLESHOOTING.md` đã được xem xét về env var và độ lệch hoạt động
+- [ ] Nếu `.env.example` thay đổi: `docs/reference/ENVIRONMENT.md` đã cập nhật
+- [ ] Nếu tính năng mới có UI: `docs/guides/USER_GUIDE.md` đề cập đến nó
+- [ ] Nếu tính năng mới có API: `docs/reference/API_REFERENCE.md` + `docs/openapi.yaml` đã cập nhật
+- [ ] Nếu tính năng mới là một mô-đun: `docs/<MODULE>.md` chuyên dụng tồn tại
+- [ ] Nếu vi phạm thay đổi: `docs/guides/TROUBLESHOOTING.md` có ghi chú di chuyển
 
 ### i18n
 
-- [ ] `npm run i18n:check` thoát với mã 0 — trạng thái bản dịch (`.i18n-state.json`) đồng bộ với tài liệu nguồn (không có nguồn bị sai lệch trong chế độ nghiêm ngặt; cảnh báo ở chế độ cảnh báo có thể chấp nhận được đối với các chỉnh sửa tài liệu vào phút chót, nhưng phải bằng 0 trước khi gắn thẻ)
-- [ ] `npm run i18n:check-ui-coverage` thoát với mã 0 — mọi ngôn ngữ UI đều đạt hoặc vượt ngưỡng bao phủ 80%
-- [ ] `npm run i18n:sync-ui:dry` báo cáo 0 khóa bị thiếu trên tất cả 66 ngôn ngữ đích (mọi ngôn ngữ ngoại trừ nguồn `en`)
+- [ ] `npm run i18n:check` thoát khỏi trạng thái dịch 0 — (`.i18n-state.json`) đồng bộ với tài liệu nguồn (không có nguồn nào bị trôi trong chế độ nghiêm ngặt; tư vấn về chế độ cảnh báo có thể được chấp nhận đối với các lần chỉnh sửa tài liệu vào phút cuối, nhưng phải bằng 0 trước khi gắn thẻ)
+- [ ] `npm run i18n:check-ui-coverage` thoát 0 — mỗi địa điểm UI bằng hoặc cao hơn mức sàn bao phủ 80%
+- [ ] `npm run i18n:sync-ui:dry` báo cáo 0 khóa bị thiếu trên tất cả 66 ngôn ngữ đích (mọi ngôn ngữ ngoại trừ nguồn `en` )
 - [ ] Nếu tài liệu tiếng Anh nguồn thay đổi, hãy chạy `npm run i18n:run` (yêu cầu `OMNIROUTE_TRANSLATION_API_KEY` trong `.env`) trước khi gắn thẻ
-- [ ] Các đóng góp bản dịch có thể được hoãn sang bản phát hành tiếp theo nếu không đáng kể (theo dõi trong CHANGELOG)
+- [ ] Đóng góp bản dịch có thể được hoãn lại cho bản phát hành tiếp theo nếu nhỏ (theo dõi trong CHANGELOG)
 
 ### Di chuyển cơ sở dữ liệu
 
 - [ ] Nếu `src/lib/db/migrations/` có tệp mới:
-  - [ ] Mỗi lần di chuyển đều có tính lũy đẳng (`CREATE TABLE IF NOT EXISTS`, v.v.)
-  - [ ] Các lần di chuyển được bao bọc trong giao dịch
-  - [ ] Được đánh số chính xác (không có khoảng trống trong trình tự)
-- [ ] Kiểm thử trên bản cài đặt mới: xóa `~/.omniroute/omniroute.db` và chạy `npm run dev`
-- [ ] Kiểm thử trên bản cài đặt hiện có: sao lưu DB, chạy di chuyển, xác minh lược đồ
-- [ ] Các tệp WAL (`-wal`, `-shm`) được xử lý chính xác nếu quá trình di chuyển ghi lại bảng
+  - [ ] Mỗi lần di chuyển là bình thường (`CREATE TABLE IF NOT EXISTS`, v.v.)
+  - [ ] Di chuyển được bao bọc trong các giao dịch
+  - [ ] Đánh số chính xác (không có khoảng trống trong chuỗi)
+- [ ] Kiểm tra cài đặt mới: xóa `~/.omniroute/omniroute.db` và chạy `npm run dev`
+- [ ] Kiểm tra cài đặt hiện có: sao lưu DB, chạy di chuyển, xác minh lược đồ
+- [ ] các tệp WAL (`-wal`, `-shm`) được xử lý chính xác nếu quá trình di chuyển ghi lại các bảng
 
-### Danh mục nhà cung cấp (được xác thực bằng Zod)
+### Danh mục nhà cung cấp (được Zod xác thực)
 
-- [ ] Lược đồ Zod trong `src/shared/constants/providers.ts` hợp lệ tại thời điểm nạp
-  - [ ] Tất cả nhà cung cấp đều có các trường bắt buộc (`id`, `label`, `kind`, v.v.)
-  - [ ] Có `freeNote` cho các nhà cung cấp miễn phí mới
-  - [ ] Các nhà cung cấp OAuth có `oauthConfig` được đăng ký trong `src/lib/oauth/constants/oauth.ts`
-- [ ] Nếu thêm nhà cung cấp mới: có bộ thực thi tương ứng trong `open-sse/executors/`
-- [ ] Nếu không sử dụng định dạng OpenAI: có bộ chuyển đổi trong `open-sse/translator/`
-- [ ] Các mô hình được đăng ký trong `open-sse/config/providerRegistry.ts`
-- [ ] Các bài kiểm thử đơn vị trong `tests/unit/` bao quát việc phân loại và định tuyến nhà cung cấp
+- [ ] lược đồ `src/shared/constants/providers.ts` Zod hợp lệ tại thời điểm tải
+  - [ ] Tất cả các nhà cung cấp đều có các trường bắt buộc (`id`, `label`, `kind`, v.v.)
+  - [ ] `freeNote` được cung cấp cho các nhà cung cấp miễn phí mới
+  - [ ] nhà cung cấp OAuth đã đăng ký `oauthConfig` trong `src/lib/oauth/constants/oauth.ts`
+- [ ] Nếu nhà cung cấp mới được thêm: người thực thi tương ứng trong `open-sse/executors/`
+- [ ] Nếu định dạng không phải OpenAI: trình dịch trong `open-sse/translator/`
+- [ ] Người mẫu đã đăng ký tại `open-sse/config/providerRegistry.ts`
+- [ ] Kiểm tra đơn vị trong phân loại và định tuyến nhà cung cấp trang bìa `tests/unit/`
 
-### Ứng dụng desktop (Electron)
+### Máy tính để bàn (Electron)
 
-Nếu `electron/` đã thay đổi:
+Nếu `electron/` thay đổi:
 
-- [ ] `npm run electron:smoke:packaged` chạy thành công
-- [ ] Đã kiểm thử bản build cho ít nhất một trong các nền tảng `:win`, `:mac`, `:linux`
-- [ ] Chứng chỉ ký mã chưa hết hạn (nếu có ký)
-- [ ] Phiên bản trong `electron/package.json` khớp với `package.json` gốc
-- [ ] Con trỏ kênh tự động cập nhật đã được cập nhật nếu phát hành lên `stable`
+- [ ] vượt qua `npm run electron:smoke:packaged`
+- [ ] Các bản dựng đã được thử nghiệm cho ít nhất một trong số `:win`, `:mac`, `:linux`
+- [ ] Chứng chỉ ký mã chưa hết hạn (nếu ký)
+- [ ] phiên bản `electron/package.json` khớp với `package.json` gốc
+- [ ] Con trỏ kênh tự động cập nhật được cập nhật nếu phát hành lên `stable`
 
-### Bố cục bản build
+### Xây dựng bố cục
 
-Kho lưu trữ sử dụng ba thư mục đầu ra riêng biệt — tuyệt đối không nhầm lẫn chúng:
+Kho lưu trữ sử dụng ba thư mục đầu ra riêng biệt — không bao giờ trộn lẫn chúng:
 
-| Thư mục   | Mục đích                                                            | Được theo dõi?       |
-| --------- | ------------------------------------------------------------------- | -------------------- |
-| `src/`    | Mã nguồn ứng dụng (TypeScript / TSX)                                | Có                   |
-| `.build/` | Sản phẩm trung gian của bản build — đầu ra `next build` (`distDir`) | Không (bị gitignore) |
-| `dist/`   | Gói npm có thể phát hành — được tạo bởi `assembleStandalone`        | Không (bị gitignore) |
+| Thư mục   | Mục đích                                                         | Đã theo dõi?        |
+| --------- | ---------------------------------------------------------------- | ------------------- |
+| `src/`    | Nguồn ứng dụng (TypeScript / TSX)                                | Đúng                |
+| `.build/` | Xây dựng đầu ra trung gian — `next build` (`distDir`)            | Không (được bỏ qua) |
+| `dist/`   | Gói npm có thể vận chuyển được — do `assembleStandalone` lắp ráp | Không (được bỏ qua) |
 
-> **Lưu ý cho người vận hành:** thư mục image trên VPS từ xa vẫn là `/usr/lib/node_modules/omniroute/app/`.
-> Chỉ đầu ra build **trong kho lưu trữ** được di chuyển (`app/` → `dist/`). Các skill triển khai sẽ rsync
-> nội dung của `dist/` vào thư mục `app/` từ xa — không cần thay đổi đường dẫn trên VPS.
+> **Lưu ý của nhà điều hành:** thư mục hình ảnh VPS từ xa vẫn là `/usr/lib/node_modules/omniroute/app/`. Chỉ có** trong kho** đầu ra bản dựng đã được di chuyển (`app/` → `dist/`). Triển khai các kỹ năng rsync nội dung `dist/` vào `app/` dir — từ xa mà không cần thay đổi đường dẫn VPS.
 
-**Quy trình build một lần:**
+**Luồng xây dựng đơn:**
 
 ```
 npm run build:release
-  └─ rm -rf .build dist          (dọn sạch)
-  └─ next build → .build/next/   (sản phẩm trung gian)
-  └─ assembleStandalone          (sao chép standalone + static + public + natives → dist/)
-  └─ ghi dist/BUILD_SHA          (tệp chỉ dấu HEAD)
+  └─ rm -rf .build dist          (clean)
+  └─ next build → .build/next/   (intermediates)
+  └─ assembleStandalone          (copies standalone + static + public + natives → dist/)
+  └─ writes dist/BUILD_SHA       (HEAD sentinel)
 ```
 
-KHÔNG chạy `npm run build` rồi chạy riêng `npm run build:cli` để triển khai — hãy dùng
-`npm run build:release`, lệnh này thực hiện build sạch lại từ đầu và tạo tệp chỉ dấu trong một lệnh duy nhất.
+Do NOT chạy `npm run build`, theo sau là một `npm run build:cli` riêng để triển khai — hãy sử dụng `npm run build:release` để xây dựng lại + trọng điểm trong một lệnh.
 
-### Xác thực artifact
+### Xác thực hiện vật
 
-- [ ] `npm run build:release` chạy thành công và `dist/BUILD_SHA` == `git rev-parse --short HEAD`
-- [ ] `npm run check:pack-artifact` sạch — không có `app.__qa_backup`, `scripts/scratch`, `package-lock.json` hoặc dữ liệu cục bộ còn sót lại khác
-- [ ] `dist/server.js` tồn tại sau khi build
-- [ ] Kiểm thử nhanh runtime đã đóng gói cục bộ, không bắt buộc: `npm run dev:candidate -- validate` sau khi `npm run dev:candidate -- build` khởi động tarball đã đóng gói trên một `DATA_DIR` biệt lập và kiểm tra `/api/health` + `/v1/models` (xem [Quy trình chuẩn để đóng góp](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop))
+- [ ] `npm run build:release` thành công và `dist/BUILD_SHA` == `git rev-parse --short HEAD`
+- [ ] `npm run check:pack-artifact` clean — no `app.__qa_backup`, `scripts/scratch`, `package-lock.json` hoặc cặn cục bộ khác
+- [ ] `dist/server.js` tồn tại sau khi xây dựng
+- [ ] Khói thời gian chạy đóng gói cục bộ tùy chọn: `npm run dev:candidate -- validate` sau khi `npm run dev:candidate -- build` khởi động tarball được đóng gói trên một `DATA_DIR` bị cô lập và kiểm tra `/api/health` + `/v1/models` (xem [Con đường vàng đóng góp](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop) )
 
-### Gắn thẻ & phát hành
+### Gắn thẻ và phát hành
 
-- [ ] Chạy `/generate-release-cc` (skill Claude Code):
+- [ ] Chạy `/generate-release-cc` (kỹ năng Mã Claude ):
   - Tạo thẻ `vX.Y.Z`
   - Đẩy thẻ và nhánh
-  - Mở GitHub Release với nội dung nhật ký thay đổi
-  - Đính kèm các trình cài đặt Electron (nếu đã build)
-- [ ] Hoặc thực hiện thủ công:
+  - Mở bản phát hành GitHub với nội dung thay đổi
+  - Đính kèm trình cài đặt Electron (nếu được xây dựng)
+- [ ] Hoặc bằng tay:
   ```bash
   git tag -a vX.Y.Z -m "Release vX.Y.Z"
   git push origin vX.Y.Z
@@ -276,44 +248,43 @@ KHÔNG chạy `npm run build` rồi chạy riêng `npm run build:cli` để tri�
 
 ### Triển khai
 
-Các skill triển khai sử dụng quy trình rsync gọn nhẹ — không dùng `npm pack`, không dùng `npm i -g`:
+Triển khai các kỹ năng sử dụng luồng rsync nhẹ — no `npm pack`, no `npm i -g`:
 
-- [ ] Sử dụng skill triển khai phù hợp với đích:
+- [ ] Sử dụng kỹ năng triển khai phù hợp với mục tiêu:
   - `/deploy-vps-local-cc` — VPS cục bộ (192.168.0.15)
-  - `/deploy-vps-akamai-cc` — VPS Akamai (69.164.221.35)
+  - `/deploy-vps-akamai-cc` — Akamai VPS (69.164.221.35)
   - `/deploy-vps-both-cc` — cả hai
-- [ ] Trước khi triển khai, xác nhận `dist/BUILD_SHA` == `git rev-parse --short HEAD`
-- [ ] Bản build phải chạy ở nơi `node_modules` là thư mục thật (checkout chính hoặc worktree đã chạy `npm ci` — KHÔNG phải worktree dùng liên kết tượng trưng)
-- [ ] Kiểm thử nhanh instance đã triển khai:
+- [ ] Trước khi triển khai, hãy xác nhận `dist/BUILD_SHA` == `git rev-parse --short HEAD`
+- [ ] Bản dựng phải chạy ở nơi `node_modules` là có thật (thanh toán chính hoặc cây làm việc của `npm ci` — NOT một cây làm việc được liên kết tượng trưng)
+- [ ] Phiên bản triển khai thử nghiệm khói:
   - Mở `/dashboard/health` → kiểm tra chuỗi phiên bản khớp với bản phát hành
-  - Chạy một yêu cầu `/v1/chat/completions` với một nhà cung cấp đã biết
-  - Xác minh `/api/monitoring/health` trả về các bộ ngắt mạch ở trạng thái `CLOSED`
-  - Xác nhận các phương thức truyền tải MCP phản hồi (`/mcp` HTTP, `/mcp-sse` SSE)
+  - Chạy yêu cầu `/v1/chat/completions` đối với nhà cung cấp đã biết
+  - Xác minh `/api/monitoring/health` trả về bộ ngắt mạch `CLOSED`
+  - Xác nhận việc vận chuyển MCP phản hồi (`/mcp` HTTP, `/mcp-sse` SSE)
 
-### Sau khi phát hành
+### Sau phát hành
 
-- [ ] Chạy `/capture-release-evidences-cc` (skill Claude Code)
-  - Chụp ảnh/quay video WebP về các tính năng mới
-  - Đính kèm vào ghi chú phát hành / bài đăng blog
-- [ ] Cập nhật GitHub Discussions / Discord với thông báo phát hành
-- [ ] Mở milestone cho phiên bản tiếp theo
-- [ ] Nếu quan trọng: ghim thảo luận hoặc đăng trong `news.json` để hiển thị biểu ngữ trong ứng dụng
+- [ ] Chạy `/capture-release-evidences-cc` (kỹ năng mã Claude )
+  - Ghi lại WebP screenshots/recordings các tính năng mới
+  - Đính kèm ghi chú phát hành/bài viết blog
+- [ ] Cập nhật GitHub Thảo luận / Discord với thông báo phát hành
+- [ ] Cột mốc mở cho phiên bản tiếp theo
+- [ ] Nếu quan trọng: ghim thảo luận hoặc đăng trong `news.json` để có biểu ngữ trong ứng dụng
 
-### Cổng kiểm soát ra mắt công khai Radar
+### Cổng phóng radar công cộng
 
-Thông báo Radar được chủ ý commit với `active: false`. Việc kích hoạt là một thay đổi riêng biệt
-sau khi có bằng chứng cho mọi mục bên dưới:
+Thông báo Radar được thực hiện có chủ ý với `active: false`. Kích hoạt là một thay đổi riêng biệt sau khi mỗi mục dưới đây được chứng minh:
 
-- [ ] Tất cả các Radar PR xếp chồng đã được hợp nhất và CI tại đầu mút phát hành đang xanh
-- [ ] Triển khai và kiểm thử nhanh các route OSS Radar với `RADAR_ENABLED` vẫn tắt theo mặc định
-- [ ] Kiểm thử nhanh `GET /planos`, `/termos`, `/privacidade` và `/reembolso` trên host Radar được chỉ định
-- [ ] Ghi nhận danh tính/thông tin liên hệ/địa chỉ của người vận hành và nội dung rà soát pháp lý đã được chủ sở hữu phê duyệt trong dịch vụ riêng tư
-- [ ] Chỉ kiểm thử Stripe Checkout và webhook đã ký ở chế độ thử nghiệm
-- [ ] Thực hiện một lần gửi email giao dịch được mã hóa bằng người gửi/tên miền đã được phê duyệt
-- [ ] Chứng minh khả năng khôi phục bản sao lưu và thực hiện một lần chạy nghiên cứu có giám sát, với ngân sách được giới hạn
-- [ ] Phê duyệt chính sách rà soát BRL/PIX trước khi chấp nhận bằng chứng quyên góp
-- [ ] Chỉ bật Checkout công khai sau khi đáp ứng các cổng kiểm soát nêu trên, rồi kích hoạt ID mới trong `news.json`
-- [ ] Xác minh biểu ngữ Trang chủ sử dụng nội dung đã bản địa hóa và ID mới sẽ xuất hiện lại sau khi một ID cũ bị loại bỏ
+- [ ] Tất cả Radar PRs xếp chồng lên nhau được hợp nhất và CI ở đầu phát hành có màu xanh lục
+- [ ] Triển khai và hút các tuyến Radar OSS với `RADAR_ENABLED` vẫn tắt theo mặc định
+- [ ] Khói `GET /planos`, `/termos`, `/privacidade` và `/reembolso` trên máy chủ Radar được đặt tên
+- [ ] Ghi lại nhà điều hành identity/contact/address và đánh giá pháp lý được chủ sở hữu phê duyệt trong dịch vụ tư nhân
+- [ ] Thực hiện Stripe Checkout và webhook đã ký chỉ ở chế độ thử nghiệm
+- [ ] Thực hiện một lần gửi email giao dịch được mã hóa với sender/domain đã được phê duyệt
+- [ ] Chứng minh khôi phục sao lưu và một lần chạy nghiên cứu được giám sát, giới hạn ngân sách
+- [ ] Phê duyệt chính sách xem xét BRL/PIX trước khi chấp nhận bằng chứng quyên góp
+- [ ] Chỉ bật Checkout công khai sau các cổng trước, sau đó kích hoạt ID `news.json`
+- [ ] Xác minh biểu ngữ Trang chủ sử dụng bản sao đã bản địa hóa và ID mới xuất hiện lại sau khi ID cũ hơn bị loại bỏ
 
 ## Kiểm tra nhanh Dịch vụ Nhúng (v3.8.4+)
 
@@ -384,111 +355,70 @@ Trước khi phát hành bất kỳ bản phát hành v3.8.x nào, hãy xác min
 
 ---
 
-## Cắt bản 3.9.0 LTS (đã diễn tập trong 3.8.58)
+## Cắt LTS 3.9.0 (diễn tập trong 3.8.58)
 
-Sau v3.8.59, phiên bản tiếp theo là 3.9.0 và đầu nhánh của phiên bản này trở thành hai nhánh tồn tại lâu dài:
-`stable/v3` (dòng v3 LTS, npm `latest`) và `develop` (v4, được tăng lên 4.0.0, npm
-`nightly`). Mô hình nhánh/kênh, quy trình forward-port và các nhãn được mô tả trong
-[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md); kế hoạch nằm trong [ROADMAP](../../ROADMAP.md) (Giai đoạn 3). Việc cắt bản chỉ chạy một lần;
-3.8.58 diễn tập toàn bộ quy trình trên một fork, còn 3.8.59 kết thúc bằng
-[danh sách kiểm tra GO/NO-GO](./LTS_GO_NO_GO.md).
+Sau v3.8.59, phiên bản tiếp theo là 3.9.0 và phần đầu của nó trở thành hai nhánh tồn tại lâu dài: `stable/v3` (dòng v3 LTS, npm `latest`) và `develop` (v4, tăng lên 4.0.0, npm `nightly`). Mô hình branch/channel, cổng chuyển tiếp và nhãn nằm trong [RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md) ; kế hoạch đang ở giai đoạn [ROADMAP](../../ROADMAP.md) (Giai đoạn 3). Quá trình cắt chạy một lần; 3.8.58 diễn tập từ đầu đến cuối trên một ngã ba và 3.8.59 kết thúc với [danh sách kiểm tra GO/NO-GO](./LTS_GO_NO_GO.md).
 
-### Chạy thử (chỉ đọc, luôn an toàn)
+### Chạy khô (chỉ đọc, an toàn mọi lúc)
 
 ```bash
-npm run release:dry-run-lts-cut                       # lần cắt bản thực tế: 3.9.0 từ HEAD, thẻ trước đó là v3.8.59
-npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # cố định commit nguồn
+npm run release:dry-run-lts-cut                       # the real cut: 3.9.0 from HEAD, previous tag v3.8.59
+npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # pin the source commit
 ```
 
-`scripts/release/dry-run-lts-cut.mjs` không thực thi bất kỳ thao tác nào: nó đọc git và `gh`, rồi in ra
-toàn bộ trình tự — các điều kiện tiên quyết (nguồn có thể được phân giải, kho lưu trữ nguồn có đầy đủ lịch sử —
-một bản sao nông không thể đẩy `stable/v3`, phía nhận sẽ từ chối gói tại phần tử cha ghép đầu tiên,
-vì vậy trước hết hãy cắt bản từ một bản sao đầy đủ hoặc chạy `git fetch --unshallow origin` — thẻ trước đó
-tồn tại, `package.json` có phiên bản đích, một issue `release-freeze` đang mở, không có issue
-`Release branch not green` đang mở
-trên một nhánh phát hành hiện có — một nhánh không tồn tại sẽ báo `?` không xác định, không bao giờ
-là xanh — hàng đợi `release` của Mergify đã được cấu hình (G11: `queue_rules`, `checks_timeout`,
-nhãn `queue`), bộ quy tắc `release/*` vẫn chặn việc xóa và force-push, đồng thời
-`stable/v3` và `develop` chưa tồn tại), hai bước tạo nhánh, những trình kích hoạt workflow đang bất hoạt
-và điều kiện `if:` nào trở thành đúng (cũng như những điều kiện nào vẫn bị chặn bởi một biến kho lưu trữ hoặc
-được ghim vào kho lưu trữ chuẩn), các dist-tag dự kiến (`latest` → 3.9.0, `next` và
-`nightly` trống) và quy trình hoàn tác. Mã thoát `0` = `RESULT: READY`, `1` = một điều kiện tiên quyết
-có tính chặn đã thất bại (`✗`), `2` = lỗi sử dụng. `--advisory <id,...>` hạ cấp một lượt kiểm tra thành cảnh báo (`!`)
-mà không ẩn nó.
+`scripts/release/dry-run-lts-cut.mjs` không thực hiện gì: nó đọc git và `gh` và in toàn bộ chuỗi các điều kiện tiên quyết — (nguồn giải quyết, kho lưu trữ nguồn có lịch sử đầy đủ — một bản sao nông không thể đẩy `stable/v3`, bên nhận từ chối gói ở cha mẹ được ghép đầu tiên, vì vậy hãy cắt từ một bản sao đầy đủ hoặc `git fetch --unshallow origin` trước đó. Thẻ — trước đó tồn tại, `package.json` là phiên bản đích, vấn đề `release-freeze` đang mở, không có vấn đề `Release branch not green` mở nào trên nhánh phát hành hiện có — một nhánh không tồn tại báo cáo `?` không xác định, không bao giờ hàng đợi — màu xanh lá cây đưa ra bản phát hành PRs (G11: `config/merge-queue/config.json` hợp lệ, `bases` của nó quản lý nhánh phát hành, `mode` `live`, nhãn của nó tồn tại), bộ quy tắc `release/*` vẫn chặn việc xóa và ép buộc, và `stable/v3` và `develop` chưa tồn tại), hai bước nhánh mà trình kích hoạt quy trình làm việc không hoạt động và các điều kiện `if:` trở thành đúng (và được kiểm soát bởi một biến kho lưu trữ hoặc được ghim vào kho lưu trữ chuẩn), các thẻ phân phối dự kiến (`latest` → 3.9.0, `next` và `nightly` trống) và khôi phục. Thoát `0` = `RESULT: READY`, `1` = điều kiện tiên quyết chặn không thành công (`✗`), lỗi sử dụng `2` =. `--advisory <id,...>` hạ cấp kiểm tra xuống cảnh báo (`!`) mà không ẩn nó.
 
-Hãy chạy thử lần cắt bản thực tế trong khi thời gian đóng băng phát hành 3.9.0 vẫn còn hiệu lực — các nhánh được
-tạo sau thẻ và trước khi Giai đoạn 12c dỡ bỏ trạng thái đóng băng.
+Chạy thử phần cắt thực trong khi bản đóng băng của bản phát hành 3.9.0 vẫn mở — các nhánh được tạo sau thẻ và trước khi Giai đoạn 12c gỡ bỏ phần đóng băng.
 
-### Diễn tập 3.8.58 (chỉ trên fork)
+### Diễn tập 3.8.58 (chỉ dùng nĩa)
 
 ```bash
-# 1. Chạy thử trên đầu nhánh hiện tại với các tham số diễn tập
+# 1. Dry-run on the current tip with rehearsal parameters
 npm run release:dry-run-lts-cut -- --target-version 3.8.58 --previous-tag v3.8.57 \
   --advisory freeze,base-green
 
-# 2. Thực thi với một remote FORK (origin hoặc bất kỳ remote nào có URL là kho lưu trữ
-#    chuẩn đều bị từ chối; mỗi bước đều yêu cầu xác nhận trong terminal)
+# 2. Execute against a FORK remote (origin, or any remote whose URL is the canonical
+#    repository, is refused; every step asks for confirmation on the terminal)
 git remote add rehearsal https://github.com/<you>/OmniRoute.git
 node scripts/release/dry-run-lts-cut.mjs --execute --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 
-# 3. Chạy thử các workflow đang bất hoạt trong fork (workflow_dispatch tại nơi kết quả chạy thử
-#    báo có ghim vào kho lưu trữ chuẩn), sau đó hoàn tác
+# 3. Exercise the dormant workflows in the fork (workflow_dispatch where the dry-run
+#    reports a canonical-repository pin), then roll back
 node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 ```
 
-Commit tăng phiên bản develop được tạo bằng hệ thống lệnh plumbing của git (không tác động đến cây làm việc) và tăng phiên bản
-cho cùng năm tệp như một commit mở chu kỳ: `package.json`, `open-sse/package.json`,
-`electron/package.json`, `package-lock.json` và `docs/openapi.yaml`. Sau đó, mục `[4.0.0]`
-trong CHANGELOG và các bản sao i18n của mục này được mở trên `develop`, trước PR đầu tiên của nhánh.
-Script không bao giờ thay đổi các dist-tag của npm — hãy diễn tập chúng trên một gói thử nghiệm.
+Cam kết phát triển được xây dựng bằng hệ thống ống nước git (không có cây làm việc nào được chạm vào) và va chạm năm tệp giống như một cam kết mở chu kỳ: `package.json`, `open-sse/package.json`, `electron/package.json`, `package-lock.json` và `docs/openapi.yaml`. Phần `[4.0.0]` CHANGELOG và các gương i18n của nó được mở vào `develop` sau đó, trước PR đầu tiên của nó. Tập lệnh không bao giờ thay đổi npm dist-tags — diễn tập những tập lệnh đó trên gói đầu.
 
-### Artifact xem trước của PR (build một lần, quảng bá đúng các byte đó)
+### tạo phẩm xem trước PR (xây dựng một lần, quảng bá cùng một byte)
 
-`.github/workflows/preview-artifact.yml` build một tarball production từ đầu nhánh PR và
-xác thực chính xác bản build đó (phần (a) của #8084). Chỉ dành cho các PR trong cùng kho lưu trữ; không có nội dung nào được phát hành.
+`.github/workflows/preview-artifact.yml` xây dựng một tarball sản xuất từ đầu PR và xác thực bản dựng chính xác đó (#8084 slice (a)). Chỉ PRs cùng một kho lưu trữ; không có gì được công bố
 
 ```bash
-gh workflow run preview-artifact.yml -f pr_number=<N>   # hoặc thêm nhãn `preview-artifact`
+gh workflow run preview-artifact.yml -f pr_number=<N>   # or add the `preview-artifact` label
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
 gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
-npm install -g ./omniroute-*.tgz                          # cài đặt bản xem trước
+npm install -g ./omniroute-*.tgz                          # preview install
 ```
 
-Lượt chạy thực hiện `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, đóng gói
-tarball, chạy `npm run check:pack-boot` (secret giả, thư mục dữ liệu tạm thời), đóng gói lại và
-thất bại nếu digest không giống hệt, sau đó ghi lại `artifact-identity.json` (SHA đầu nhánh, SHA cơ sở,
-hash của lockfile, nền tảng, kiến trúc, ABI của node, bundler, chính sách build —
-`scripts/release/artifact-identity.mjs`) và chứng thực tarball trong một job riêng biệt. Việc quảng bá
-một bản xem trước có nghĩa là cài đặt tarball đó: tuyệt đối không build lại từ mã nguồn.
+Quá trình chạy thực hiện `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, đóng gói tarball, chạy `npm run check:pack-boot` (bí mật giả, thư mục dữ liệu phù du), đóng gói lại và thất bại trừ khi bản tóm tắt giống hệt nhau, sau đó ghi lại `artifact-identity.json` (đầu SHA, SHA cơ sở, hàm băm lockfile, nền tảng, Arch, nút ABI, bộ đóng gói, chính sách xây dựng — `scripts/release/artifact-identity.mjs`) và chứng thực tarball trong một công việc riêng biệt. Quảng bá bản xem trước có nghĩa là cài đặt tarball đó: không bao giờ xây dựng lại từ nguồn.
 
-### Cắt bản (3.9.0, sau GO)
+### Phần cắt (3.9.0, sau GO)
 
-1. GO được ghi lại trong [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md).
-2. `npm run release:dry-run-lts-cut -- --from v3.9.0` in ra `RESULT: READY`.
-3. Tạo thủ công các nhánh trên `origin` bằng các lệnh do lượt chạy thử in ra — script
-   từ chối đẩy lên `origin`. Để tái sử dụng một commit develop đã được rà soát, trước tiên hãy chạy
-   diễn tập `--execute` trên đầu nhánh 3.9.0 với fork của bạn; thao tác này in ra cả hai SHA và
-   có thể đẩy chính các commit đó:
+1. GO được ghi trong [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md).
+2. `npm run release:dry-run-lts-cut -- --from v3.9.0` `RESULT: READY`.
+3. Tạo các nhánh trên `origin` bằng tay bằng các lệnh chạy khô in — tập lệnh từ chối đẩy tới `origin`. Để sử dụng lại cam kết phát triển đã được đánh giá, trước tiên hãy chạy buổi diễn tập `--execute` trên mẹo 3.9.0 đối với ngã ba của bạn; nó in cả hai SHAs và có thể đẩy các cam kết tương tự:
 
    ```bash
    git push origin <stable-sha>:refs/heads/stable/v3 <develop-sha>:refs/heads/develop
    ```
 
-4. Bảo vệ `stable/v3` và `develop` (ruleset + hàng đợi hợp nhất) trước khi PR đầu tiên được hợp nhất.
-5. Các workflow không hoạt động sẽ được bật khi nhánh tồn tại: `forward-port.yml` (push đến
-   `stable/v3`), `validate-stable-pr.yml` (các PR đến `stable/v3`) và `nightly-v4-build.yml`
-   (build `develop`). Trước khi chính thức vận hành, hãy thiết lập repository secret `secrets.FORWARD_PORT_TOKEN` (để CI chạy trên
-   các PR forward-port); việc phát hành hằng đêm vẫn bị tắt cho đến khi chủ sở hữu đặt repository
-   variable `vars.NIGHTLY_PUBLISH` thành `true` và npm Trusted Publishing chấp nhận
-   `nightly-v4-build.yml`. Việc phân giải kênh nằm trong `scripts/release/dist-tag.mjs`, cũng là
-   trình phân giải mà `npm-publish.yml` sử dụng.
-6. Xác minh các kênh: `npm view omniroute dist-tags --json` hiển thị `latest` = 3.9.0 và không có
-   `next` / `nightly` cho đến khi v4 được phát hành.
-7. Khôi phục nếu cần: `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
-   và `npm dist-tag add omniroute@3.8.59 latest`.
+4. Bảo vệ `stable/v3` và `develop` (quy tắc hàng đợi hợp nhất + ) trước khi PR đầu tiên hạ cánh.
+5. Quy trình làm việc không hoạt động được bật theo sự tồn tại của nhánh: `forward-port.yml` (đẩy tới `stable/v3`), `validate-stable-pr.yml` (PRs đến `stable/v3`) và `nightly-v4-build.yml` (xây dựng `develop`). Trước khi đưa vào hoạt động, hãy đặt bí mật kho lưu trữ `secrets.FORWARD_PORT_TOKEN` (để CI chạy trên cổng chuyển tiếp PRs); việc xuất bản hàng đêm sẽ tắt cho đến khi chủ sở hữu đặt biến kho lưu trữ `vars.NIGHTLY_PUBLISH` thành `true` và npm Trusted Publishing chấp nhận `nightly-v4-build.yml`. Độ phân giải kênh là `scripts/release/dist-tag.mjs`, cùng một trình phân giải mà `npm-publish.yml` sử dụng.
+6. Xác minh các kênh: `npm view omniroute dist-tags --json` hiển thị `latest` = 3.9.0 và không có `next` / `nightly` cho đến khi v4 xuất bản.
+7. Khôi phục, nếu cần: `git push origin --delete refs/heads/stable/v3 refs/heads/develop` và `npm dist-tag add omniroute@3.8.59 latest`.
 
 ---
 

@@ -71,6 +71,27 @@ describe("compact model names", () => {
     assert.equal(name, "🆓 opencode-go - beam");
   });
 
+  it("strips an upstream free glyph wherever it sits, keeping one leading marker", () => {
+    const trailing = buildModelDisplayName({
+      rawId: "cloudflare-ai/@cf/qwen/qwq-32b",
+      enrichmentName: "QwQ 32B (🆓)",
+      providerDisplayName: "Cloudflare-ai",
+      isFree: true,
+    });
+    assert.equal(trailing, "🆓 Cloudflare-ai - QwQ 32B");
+    assert.equal((trailing.match(/🆓/g) ?? []).length, 1);
+
+    const inline = buildModelDisplayName({
+      rawId: "cloudflare-ai/@cf/meta/llama-3.3-70b",
+      enrichmentName: "Llama 3.3 70B (FP8 Fast 🆓 ~150 resp/day)",
+      providerDisplayName: "Cloudflare-ai",
+      isFree: true,
+    });
+    assert.ok(inline.startsWith("🆓 Cloudflare-ai - Llama 3.3 70B"), inline);
+    assert.equal((inline.match(/🆓/g) ?? []).length, 1);
+    assert.ok(!inline.includes("(FP8 Fast 🆓"), inline);
+  });
+
   it("keeps colliding entries distinct with a route suffix", async () => {
     const raw = await entriesThroughReader([
       { id: "opencode-go/claude-haiku-5-5", owned_by: "opencode-go", context_length: 1000 },
@@ -127,6 +148,21 @@ describe("compact model names", () => {
       providerDisplayName: "Nvidia",
     });
     assert.equal(m.name, "🆓 Nvidia - Nemotron 3 Ultra");
+  });
+
+  it("keeps a free marker carried on the provider prefix (CodeRabbit R4)", () => {
+    assert.equal(
+      buildModelDisplayName({
+        rawId: "cf/open-m",
+        enrichmentName: "[Free] Cloudflare - Open Model",
+      }),
+      "🆓 Cloudflare - Open Model"
+    );
+    const m = applyEnrichment(model("cf/open-m", "cf/open-m"), {
+      name: "[Free] Cloudflare - Open Model",
+      providerDisplayName: "Cloudflare",
+    });
+    assert.equal(m.name, "🆓 Cloudflare - Open Model");
   });
 
   it("uses a suffix marker for free entries and none otherwise", () => {

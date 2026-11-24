@@ -4,10 +4,9 @@
 
 ---
 
-Desde a v3.8.49 (WS3.2/WS3.4 do plano de qualidade/velocidade), o caminho de integração predefinido para
-PRs revistos em `release/vX.Y.Z` é a **fila de integração do Mergify** (`.mergify.yml`);
-o **comboio de integração manual** documentado abaixo é a ALTERNATIVA — utilizado durante incidentes,
-congelamentos de versões ou caso o plano Open Source do Mergify venha a mudar.
+> **19/11/2026: a fila de fusão do Mergify foi desativada** (decisão do proprietário). `.mergify.yml` já não define uma fila e recusa os comandos Mergify que fundem ou reescrevem um pull request. A versão PRs é fundida manualmente sob o conjunto de regras do repositório "Exigir portões verdes na versão ativa" (`Gate / CI` + `Gate / Quality`) até que a omni-queue seja executada no modo ao vivo, e através da omni-queue depois disso ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). As secções do Mergify abaixo descrevem a fila tal como estava.
+
+Desde a v3.8.49 (WS3.2/WS3.4 do plano quality/velocity ), o caminho de fusão padrão para PRs revisto no `release/vX.Y.Z` é o** Mergify fila de fusão** (`.mergify.yml`); o** trem de fusão manual** documentado abaixo está o FALLBACK — utilizado durante incidentes, congelamentos de lançamento ou se o plano Mergify Open Source for alterado.
 
 ## Caminho predefinido: a fila do Mergify
 

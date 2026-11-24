@@ -49,7 +49,7 @@ const RESPONSES_REASONING_ENCRYPTED_CONTENT_INCLUDE = "reasoning.encrypted_conte
 // include on this path. This compatibility policy makes no claim about the cause
 // or resolution of upstream safety rejections.
 const CODEX_MODEL_PATTERN =
-  /^(?:(?:codex|cx)\/)?(?:gpt-6(?:\.1)?-(?:astra|sol|luna)|gpt-5\.6-(?:sol|terra|luna))(?:-(?:none|low|medium|high|xhigh|max|ultra))?$/;
+  /^(?:(?:codex|cx)\/)?(?:gpt-6(?:\.1)?-(?:astra|sol|terra|luna)|gpt-5\.6-(?:sol|terra|luna))(?:-(?:none|low|medium|high|xhigh|max|ultra))?$/;
 function isCodexModel(model: unknown): boolean {
   if (typeof model !== "string") return false;
   return CODEX_MODEL_PATTERN.test(model.trim().toLowerCase());
@@ -166,9 +166,9 @@ function repairToolHistory(input: JsonRecord[]): JsonRecord[] {
   const knownCallIds = new Set(
     input.filter((item) => item.type === "function_call" && item.call_id).map((i) => i.call_id)
   );
+  // A blank call_id matches no call, so it is an orphan like any other unmatched id.
   const kept = input.filter(
-    (item) =>
-      item.type !== "function_call_output" || !item.call_id || knownCallIds.has(item.call_id)
+    (item) => item.type !== "function_call_output" || knownCallIds.has(item.call_id)
   );
   const pairedCallIds = new Set(
     kept
@@ -516,7 +516,8 @@ export function openaiToOpenAIResponsesRequest(
           type: "function",
           name,
           description: toString(fn.description),
-          parameters: fn.parameters,
+          // Responses requires `parameters`; Chat lets a zero-argument tool omit it.
+          parameters: fn.parameters ?? { type: "object", properties: {} },
           // Omitted strict is non-strict on Chat but strict-normalized on Responses.
           strict: chatStrictForResponses(fn),
           ...(credentialRecord._provider === "codex" && typeof fn.defer_loading === "boolean"

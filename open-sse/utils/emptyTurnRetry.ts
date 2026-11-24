@@ -135,6 +135,84 @@ export function isMuteDirectTurn(summary: EmptyTurnSummary): boolean {
   return !hasUsableContentText(summary.contentText);
 }
 
+/**
+ * True when the request's latest turn carries submitted tool results — i.e.
+ * this turn is a post-tool continuation, the case where a degenerate empty
+ * upstream turn silently breaks an agentic loop (#13600). Only tool results
+ * AFTER the most recent assistant turn count: an earlier, already-answered tool
+ * exchange in the history must not arm the retry (and its buffering) on every
+ * later follow-up. Messages appended after the tool results (a user or system
+ * note) keep the turn a continuation. The client body is the reliable signal:
+ * it holds the results the client submitted even when a translation step
+ * mangled them upstream. Format-agnostic markers: OpenAI `role:"tool"`/
+ * `"function"` messages, Claude `tool_result` content blocks, Responses
+ * `function_call_output` input items, Gemini `functionResponse` parts.
+ */
+export function requestFollowsToolCalls(body: unknown): boolean {
+  if (!body || typeof body !== "object") return false;
+  const messages = (body as { messages?: unknown }).messages;
+  if (Array.isArray(messages)) {
+    return hasToolResultAfterLatestAssistant(messages, isChatAssistantTurn, isChatToolResult);
+  }
+  const input = (body as { input?: unknown }).input;
+  if (Array.isArray(input)) {
+    return hasToolResultAfterLatestAssistant(
+      input,
+      isResponsesAssistantItem,
+      (item) => readField(item, "type") === "function_call_output"
+    );
+  }
+  const contents = (body as { contents?: unknown }).contents;
+  if (Array.isArray(contents)) {
+    return hasToolResultAfterLatestAssistant(
+      contents,
+      (entry) => readField(entry, "role") === "model",
+      isGeminiFunctionResponse
+    );
+  }
+  return false;
+}
+
+function readField(value: unknown, key: string): unknown {
+  return value && typeof value === "object" ? (value as Record<string, unknown>)[key] : undefined;
+}
+
+/** Walk back from the newest entry: a tool result before any assistant turn wins. */
+function hasToolResultAfterLatestAssistant(
+  entries: unknown[],
+  isAssistantTurn: (entry: unknown) => boolean,
+  isToolResult: (entry: unknown) => boolean
+): boolean {
+  for (let index = entries.length - 1; index >= 0; index--) {
+    const entry = entries[index];
+    if (isToolResult(entry)) return true;
+    if (isAssistantTurn(entry)) return false;
+  }
+  return false;
+}
+
+function isChatAssistantTurn(message: unknown): boolean {
+  return readField(message, "role") === "assistant";
+}
+
+function isChatToolResult(message: unknown): boolean {
+  const role = readField(message, "role");
+  if (role === "tool" || role === "function") return true;
+  const content = readField(message, "content");
+  return (
+    Array.isArray(content) && content.some((part) => readField(part, "type") === "tool_result")
+  );
+}
+
+function isResponsesAssistantItem(item: unknown): boolean {
+  return readField(item, "role") === "assistant" || readField(item, "type") === "function_call";
+}
+
+function isGeminiFunctionResponse(entry: unknown): boolean {
+  const parts = readField(entry, "parts");
+  return Array.isArray(parts) && parts.some((part) => readField(part, "functionResponse") != null);
+}
+
 /** A read that outlived the idle budget, kept distinct from a real chunk. */
 const IDLE_READ = Symbol("idle-read");
 

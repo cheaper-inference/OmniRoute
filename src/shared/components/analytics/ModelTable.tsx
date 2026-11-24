@@ -52,6 +52,17 @@ const COLUMNS: Column[] = [
   { field: "cost", labelKey: "chartCost", align: "right" },
 ];
 
+// Rows are per (provider, model) since #20453: the same model name can appear once per
+// provider, so the provider takes part in the React key and is shown next to the name.
+function modelRowKey(m: ModelBreakdownRow, index: number): string {
+  const model = String(m.model ?? index);
+  return m.provider ? `${m.provider}:${model}` : model;
+}
+
+function ProviderLabel({ provider }: { provider?: string | null }) {
+  return provider ? <span className="text-xs text-text-muted">{provider}</span> : null;
+}
+
 export function ModelTable({ byModel, summary, displayMode = "compact" }: ModelTableProps) {
   const t = useTranslations("analytics");
   const [sort, setSort] = useState<{
@@ -79,9 +90,7 @@ export function ModelTable({ byModel, summary, displayMode = "compact" }: ModelT
   return (
     <Card className="overflow-hidden">
       <div className="p-4 border-b border-border">
-        <h3 className="text-sm font-semibold text-text-muted uppercase tracking-wider">
-          {t("chartModelBreakdown")}
-        </h3>
+        <h3 className="text-sm text-text-muted uppercase">{t("chartModelBreakdown")}</h3>
       </div>
       <Table
         containerClassName="rounded-none border-0"
@@ -108,7 +117,7 @@ export function ModelTable({ byModel, summary, displayMode = "compact" }: ModelT
         </TableHeader>
         <TableBody>
           {sorted.map((m, i) => (
-            <TableRow key={String(m.model ?? i)}>
+            <TableRow key={modelRowKey(m, i)}>
               <TableCell className="px-4 py-2.5">
                 <div className="flex items-center gap-2">
                   <span
@@ -116,6 +125,7 @@ export function ModelTable({ byModel, summary, displayMode = "compact" }: ModelT
                     style={{ backgroundColor: getSeriesColor(i) }}
                   />
                   <span className="font-medium">{m.model}</span>
+                  <ProviderLabel provider={m.provider} />
                 </div>
               </TableCell>
               <TableCell className="px-4 py-2.5 text-right font-mono text-text-muted">
@@ -146,7 +156,7 @@ export function ModelTable({ byModel, summary, displayMode = "compact" }: ModelT
                 {displayMode === "exact" ? fmtFull(m.completionTokens) : fmt(m.completionTokens)}
               </TableCell>
               <TableCell
-                className="px-4 py-2.5 text-right font-mono font-semibold"
+                className="px-4 py-2.5 text-right font-mono"
                 title={displayMode === "exact" ? `~${fmt(m.totalTokens)}` : fmtFull(m.totalTokens)}
               >
                 {displayMode === "exact" ? fmtFull(m.totalTokens) : fmt(m.totalTokens)}
@@ -156,7 +166,14 @@ export function ModelTable({ byModel, summary, displayMode = "compact" }: ModelT
               </TableCell>
               <TableCell className="px-4 py-2.5 text-right">
                 <div className="flex items-center gap-2 justify-end">
-                  <div className="w-16 h-1.5 rounded-full bg-surface-2 overflow-hidden">
+                  <div
+                    role="progressbar"
+                    aria-label={String(m.model ?? "")}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-valuenow={Number(m.pct ?? 0)}
+                    className="w-16 h-1.5 rounded-full bg-surface-2 overflow-hidden"
+                  >
                     <div
                       className="h-full rounded-full transition-all"
                       style={{

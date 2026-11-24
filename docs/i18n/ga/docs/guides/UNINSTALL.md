@@ -68,6 +68,8 @@ docker rm omniroute
 docker volume rm omniroute-data
 
 # (Roghach) Bain an íomhá
+docker rmi cheaperinference/omniroute:latest
+# Tharraing suiteálacha níos sine an t-ainm oidhreachta:
 docker rmi diegosouzapw/omniroute:latest
 ```
 

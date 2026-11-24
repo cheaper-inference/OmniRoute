@@ -1,15 +1,20 @@
+import { serializeUsageEvidence } from "./storedUsageEvidence";
+import { resolveUsageProvenance } from "./callContentProvenance";
 /**
  * Deferred retry for usage writes blocked by a locked database.
  *
  * The hot-path writers here are best-effort: the database caps a contended
  * write at 2 s (`busy_timeout = 2000` in `src/lib/db/core.ts`) so a busy disk
  * cannot freeze the event loop. When a write still meets a lock, the first
- * failure is swallowed silently and the entry is attempted once more after a
- * short delay, off the request path (`setTimeout`, never awaited). If the
- * second attempt fails the existing log line is written and the row is
- * dropped. Any other error keeps the current behaviour: logged at once,
- * never retried. If the server stops during the wait the row is lost as
- * before, on a best-effort basis (the timer never keeps the loop alive).
+ * failure is swallowed silently and the entry is attempted again after a
+ * short delay, off the request path (`setTimeout`, never awaited). The generic
+ * scheduler runs one retry. A usage row is billing data, so its writer keeps
+ * retrying on a backoff (`USAGE_RETRY_DELAYS_MS`, about 31 s in all, for a
+ * second writer process that holds the lock longer than one retry). After the
+ * last retry the existing log line is written and the row is dropped. Any
+ * other error keeps the current behaviour: logged at once, never retried. If
+ * the server stops during the wait the row is lost as before, on a
+ * best-effort basis (the timer never keeps the loop alive).
  *
  * @module lib/usage/usageWriteRetry
  */
@@ -27,8 +32,8 @@ import { emitUsageRecorded } from "./usageEvents";
 import {
   getLoggedInputTokens,
   getLoggedOutputTokens,
-  getPromptCacheCreationTokens,
-  getPromptCacheReadTokens,
+  getPromptCacheCreationTokensOrNull,
+  getPromptCacheReadTokensOrNull,
   getReasoningTokens,
 } from "./tokenAccounting";
 import { backfillDuplicateUsageEntry } from "./usageHistory/duplicateEntry";
@@ -38,6 +43,9 @@ import type { UsageEntry } from "./usageHistory";
 
 /** Delay before the single deferred attempt. Internal, not user-facing. */
 const RETRY_DELAY_MS = 1000;
+
+/** Waits before each retry of a locked usage write: 5 retries, about 31 s in all. */
+export const USAGE_RETRY_DELAYS_MS: readonly number[] = [1000, 2000, 4000, 8000, 16000];
 
 /**
  * True when the error is a database lock, in any shape the supported drivers
@@ -191,8 +199,8 @@ function insertEntry(db: ReturnType<typeof getDbInstance>, prepared: PreparedEnt
       tokens_input, tokens_output, tokens_cache_read, tokens_cache_creation, tokens_reasoning,
       service_tier, status, success, latency_ms, ttft_ms, error_code, combo_strategy, endpoint,
       cpa_auth_index, agent_session_id, timestamp, provider_credits, provider_cost_usd,
-      calculated_cost_usd, billing_unit, billing_quantity, billing_unit_price_usd)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      calculated_cost_usd, billing_unit, billing_quantity, billing_unit_price_usd, usage_evidence, usage_provenance)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `
   ).run(
     entry.provider ? resolveProviderId(entry.provider) : null,
@@ -206,8 +214,8 @@ function insertEntry(db: ReturnType<typeof getDbInstance>, prepared: PreparedEnt
     billingTeamId,
     tokensInput,
     tokensOutput,
-    getPromptCacheReadTokens(entry.tokens),
-    getPromptCacheCreationTokens(entry.tokens),
+    getPromptCacheReadTokensOrNull(entry.tokens),
+    getPromptCacheCreationTokensOrNull(entry.tokens),
     getReasoningTokens(entry.tokens),
     serviceTier,
     entry.status || null,
@@ -225,7 +233,13 @@ function insertEntry(db: ReturnType<typeof getDbInstance>, prepared: PreparedEnt
     nonNegativeOrNull(entry.calculatedCostUsd),
     entry.billingUnit || null,
     nonNegativeOrNull(entry.billingQuantity),
-    nonNegativeOrNull(entry.billingUnitPriceUsd)
+    nonNegativeOrNull(entry.billingUnitPriceUsd),
+    serializeUsageEvidence(entry.tokens),
+    resolveUsageProvenance({
+      tokens: entry.tokens,
+      usageEstimated: false,
+      isSuccess: entry.success !== false,
+    })
   );
 }
 
@@ -243,25 +257,24 @@ function toFirstToken(entry: UsageEntry): number {
 }
 
 /**
- * Schedule the single deferred retry, off the request path. Never chained:
- * the retry attempts the write once and, on failure, writes the existing log
- * line and stops.
+ * Schedule a deferred retry, off the request path. The task form runs once
+ * and, on failure, reports to `onFinalFailure` and stops. The entry form is
+ * the usage writer: it retries a lock on the `USAGE_RETRY_DELAYS_MS` backoff
+ * and writes the existing log line after the last retry.
  */
 export function scheduleWriteRetry(
   task: () => void,
-  onFinalFailure: (error: unknown) => void
+  onFinalFailure: (error: unknown) => void,
+  delayMs?: number
 ): Promise<void>;
 export function scheduleWriteRetry(entry: UsageEntry, options?: UsageWriteOptions): void;
 export function scheduleWriteRetry(
   taskOrEntry: (() => void) | UsageEntry,
-  optionsOrFailure?: UsageWriteOptions | ((error: unknown) => void)
+  optionsOrFailure?: UsageWriteOptions | ((error: unknown) => void),
+  delayMs: number = RETRY_DELAY_MS
 ): Promise<void> | void {
   if (typeof taskOrEntry !== "function") {
-    const entry = taskOrEntry;
-    void scheduleWriteRetry(
-      () => attemptWrite(entry, typeof optionsOrFailure === "object" ? optionsOrFailure : {}),
-      (retryError) => console.error("Failed to save usage stats:", retryError)
-    );
+    retryUsageWrite(taskOrEntry, typeof optionsOrFailure === "object" ? optionsOrFailure : {}, 0);
     return;
   }
   const task = taskOrEntry;
@@ -275,11 +288,25 @@ export function scheduleWriteRetry(
       } finally {
         resolve();
       }
-    }, RETRY_DELAY_MS);
+    }, delayMs);
     // Allow Node.js to exit naturally even if the timer is still pending
     // (avoids keeping the event loop alive for a stray retry).
     detachTimer(timer);
   });
+}
+
+function retryUsageWrite(entry: UsageEntry, options: UsageWriteOptions, attempt: number): void {
+  void scheduleWriteRetry(
+    () => attemptWrite(entry, options),
+    (retryError) => {
+      if (isWriteLockError(retryError) && attempt + 1 < USAGE_RETRY_DELAYS_MS.length) {
+        retryUsageWrite(entry, options, attempt + 1);
+        return;
+      }
+      console.error("Failed to save usage stats:", retryError);
+    },
+    USAGE_RETRY_DELAYS_MS[attempt]
+  );
 }
 
 type DetachableTimer = { unref?: () => void };

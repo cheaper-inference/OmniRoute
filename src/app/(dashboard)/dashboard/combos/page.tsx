@@ -121,6 +121,7 @@ import {
   normalizeIntelligentRoutingFilter,
   normalizeIntelligentRoutingConfig,
 } from "@/lib/combos/intelligentRouting";
+import { toDecisionPreviewModels } from "@/lib/combos/decisionModelDraft";
 import { getComboStepTarget } from "@/lib/combos/steps";
 import {
   findComboStepConnectionLabel,
@@ -1765,7 +1766,7 @@ function ComboUsageGuide({ onHide, onHideForever, onCreateCombo }) {
             <Icon name="tips_and_updates" size={16} className="text-primary" />
           </div>
           <div className="min-w-0">
-            <h2 className="text-sm font-semibold">
+            <h2 className="text-sm">
               {getI18nOrFallback(t, "wizardGuideTitle", "Getting Started with Combos")}
             </h2>
             <p className="text-xs text-text-muted mt-0.5">
@@ -2591,6 +2592,7 @@ function ComboFormModal({
   );
   const usesIntelligentBuilderStage = isIntelligentBuilderStrategy(strategy);
   const intelligentConfig = useMemo(() => normalizeIntelligentRoutingConfig(config), [config]);
+  const decisionStepModels = useMemo(() => toDecisionPreviewModels(models), [models]);
 
   const resetFormForCombo = useCallback(
     (nextCombo, comboDefaults = null) => {
@@ -2739,6 +2741,10 @@ function ComboFormModal({
         .filter((provider) => provider.models.length > 0),
     [activeEndpoint, builderOptions.providers]
   );
+  // Manual entry (expert mode) is how a model the catalog does not list gets added, so the typed
+  // prefix resolves against every configured provider — `builderProviders` drops a provider that
+  // has no catalog model for the active capability tab, which is right for the pickers only.
+  const manualEntryProviders = builderOptions.providers || [];
 
   const allGlobalModels = useMemo(() => buildGlobalModelList(builderProviders), [builderProviders]);
 
@@ -2791,7 +2797,7 @@ function ComboFormModal({
     builderCandidateStep && hasExactModelStepDuplicate(models, builderCandidateStep);
   const manualModelStep = buildManualComboModelStep({
     value: manualModelInput,
-    providers: builderProviders,
+    providers: manualEntryProviders,
   });
   const manualModelHasDuplicate =
     manualModelStep && hasExactModelStepDuplicate(models, manualModelStep);
@@ -3165,7 +3171,7 @@ function ComboFormModal({
 
     const resolvedProviderId = resolveComboBuilderProviderId(
       parsedManualModel.providerId,
-      builderProviders
+      manualEntryProviders
     );
     if (!resolvedProviderId) {
       setManualModelError(
@@ -3176,7 +3182,7 @@ function ComboFormModal({
 
     const nextStep = buildManualComboModelStep({
       value: manualModelInput,
-      providers: builderProviders,
+      providers: manualEntryProviders,
     });
 
     if (!nextStep) {
@@ -3912,6 +3918,7 @@ function ComboFormModal({
               strategy={strategy}
               config={config}
               activeProviders={builderProviders}
+              stepModels={decisionStepModels}
               onChange={(nextIntelligentConfig: any) =>
                 setConfig((previousConfig) => ({
                   ...previousConfig,
@@ -3929,7 +3936,7 @@ function ComboFormModal({
           {showStepsSection && (
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <h3 className="text-sm font-medium">{t("models")}</h3>
+                <h3 className="text-sm">{t("models")}</h3>
                 {strategy === "weighted" && models.length > 1 && (
                   <Button size="sm" variant="ghost" icon="balance" onClick={handleAutoBalance}>
                     {t("autoBalance")}
@@ -4355,7 +4362,14 @@ function ComboFormModal({
                       {pricedModelCount}/{models.length} ({pricingCoveragePercent}%)
                     </span>
                   </div>
-                  <div className="h-1.5 mt-1 rounded-full bg-bg-subtle overflow-hidden">
+                  <div
+                    role="progressbar"
+                    aria-label={getI18nOrFallback(t, "pricingCoverage", "Pricing coverage")}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-valuenow={pricingCoveragePercent}
+                    className="h-1.5 mt-1 rounded-full bg-bg-subtle overflow-hidden"
+                  >
                     <div
                       className={`h-full transition-all duration-300 ${
                         pricingCoveragePercent === 100
@@ -4939,7 +4953,7 @@ function ComboFormModal({
                       </div>
                       {!isExpertMode && (
                         <div className="md:col-span-3 rounded-md border border-chart-3/20 bg-chart-3/5 px-2 py-1.5">
-                          <p className="text-[10px] text-chart-3">
+                          <p className="text-[10px] text-chart-3-ink">
                             {getI18nOrFallback(
                               t,
                               "contextRelayProviderNote",

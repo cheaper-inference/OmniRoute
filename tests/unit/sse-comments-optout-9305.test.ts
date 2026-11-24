@@ -22,6 +22,12 @@ const EXPECTED_USAGE = {
 const EXPECTED_RESPONSE_USAGE = {
   ...EXPECTED_USAGE,
   total_tokens: 3,
+  usage_evidence: {
+    input: { source: "reported" },
+    output: { source: "reported" },
+    cacheRead: { source: "unknown" },
+    cacheCreation: { source: "unknown" },
+  },
 };
 
 type CompletionPayload = {
@@ -143,7 +149,7 @@ for (const upstreamDone of [true, false]) {
       assert.equal(countOccurrences(result.output, finishMarker), 1);
       assert.equal(countOccurrences(result.output, doneMarker), 1);
       assert.equal(result.completion?.status, 200);
-      assert.deepEqual(result.completion?.usage, EXPECTED_USAGE);
+      assert.deepEqual(result.completion?.usage, EXPECTED_RESPONSE_USAGE);
       assert.deepEqual(result.completion?.responseBody?.usage, EXPECTED_RESPONSE_USAGE);
       assert.equal(result.finalized, true, "onComplete should finalize usage accounting");
       assert.equal(

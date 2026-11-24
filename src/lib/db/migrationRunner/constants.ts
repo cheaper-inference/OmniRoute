@@ -15,6 +15,51 @@ export const RENAMED_MIGRATION_COMPATIBILITY = [
     toVersion: "025",
     toName: "call_logs_summary_storage",
   },
+  // #20054 builds ran its two evidence migrations as 238/239 (earlier heads) and then
+  // 239/240; all four slots are canonical base migrations now. Move those rows to the
+  // timestamped files so the canonical 238-241 run and the evidence files never re-run.
+  {
+    fromVersion: "238",
+    fromName: "truthful_usage_evidence",
+    toVersion: "20261115112344",
+    toName: "truthful_usage_evidence",
+  },
+  {
+    fromVersion: "239",
+    fromName: "truthful_usage_evidence",
+    toVersion: "20261115112344",
+    toName: "truthful_usage_evidence",
+  },
+  {
+    fromVersion: "239",
+    fromName: "daily_usage_evidence",
+    toVersion: "20261115112345",
+    toName: "daily_usage_evidence",
+  },
+  {
+    fromVersion: "240",
+    fromName: "daily_usage_evidence",
+    toVersion: "20261115112345",
+    toName: "daily_usage_evidence",
+  },
+  {
+    fromVersion: "238",
+    fromName: "call_logs_artifact_overflow_order_index",
+    toVersion: "20261115151606",
+    toName: "call_logs_artifact_overflow_order_index",
+  },
+  {
+    fromVersion: "239",
+    fromName: "xp_audit_log_created_at_index",
+    toVersion: "20261115153452",
+    toName: "xp_audit_log_created_at_index",
+  },
+  {
+    fromVersion: "240",
+    fromName: "skills_unique_owner_name_version",
+    toVersion: "20261115153725",
+    toName: "skills_unique_owner_name_version",
+  },
   {
     // Earlier revisions used 228, 231, 233 or 236; canonical upstream rows stay put.
     // Match the name too: canonical cleanup/cache rows must never be rehomed.
@@ -711,6 +756,17 @@ export const LEGACY_VERSION_SLOT_MIGRATIONS = [
   { version: "033", name: "add_batch_id_to_call_logs" },
   { version: "046", name: "remove_status_from_files" },
   { version: "051", name: "remove_status_from_files" },
+  // Downstream builds recorded two quota-allocation lending migrations at
+  // 123/124 and, later, at 134/135. Here those versions belong to
+  // quota_auto_ping, generic_session_affinity_ttl, proxy_logs_egress_ip and
+  // migrate_model_capability_max_token, which the runner would treat as applied
+  // and skip forever. All four are safe to replay late: 123 and 134 only add
+  // columns (an existing column is skipped), 124 is INSERT OR IGNORE, 135 is an
+  // ON CONFLICT DO NOTHING promotion followed by deleting the retired key.
+  { version: "123", name: "quota_allocation_lending" },
+  { version: "124", name: "quota_allocation_lending_percent" },
+  { version: "134", name: "quota_allocation_lending" },
+  { version: "135", name: "quota_allocation_lending_percent" },
   // A renumbering shifted 140-143 in pairs, leaving the ledger holding the old
   // arrangement: ccr_blocks at 139 and 140, api_key_cache_default_mode at 141
   // and 143. In each pair exactly one row still matches a file (ccr_blocks at

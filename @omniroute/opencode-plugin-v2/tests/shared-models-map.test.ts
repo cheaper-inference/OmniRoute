@@ -91,4 +91,12 @@ describe("mapRawModelToModelV2", () => {
     );
     assert.ok(!("variants" in without));
   });
+  it("omits limit.output when the gateway does not publish max_output_tokens", () => {
+    const m = mapRawModelToModelV2(
+      { id: "ovh-free/gpt-oss-120b", context_length: 128000 },
+      { providerId: "omniroute", baseURL: "https://gw.example.com" }
+    );
+    assert.equal(m.limit.context, 128000);
+    assert.ok(!("output" in m.limit));
+  });
 });

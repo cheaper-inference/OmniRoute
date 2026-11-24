@@ -4,593 +4,627 @@
 
 ---
 
-> **Beskrivelse på én linje af hver mappe og fil i roden.**
-> Senest opdateret: 2026-06-28 — OmniRoute v3.8.40
+> **Hvad bor hvor: hver sporet mappe på øverste niveau og rodfil med et enkelt-linje formål.** Sidst opdateret: 2026-11-13 (OmniRoute v3.8.54)
 >
-> Brug dette kort til hurtigt at navigere i kodebasen. Følg links til dedikeret dokumentation for mere dybdegående oplysninger.
+> Brug dette kort til at finde rundt i kodebasen, og følg derefter linkene til de dedikerede dokumenter. Filantal blev målt med `git ls-files` på ovenstående dato. De ændrer sig med næsten hver udgivelse, så behandl dem som størrelsesordener.
 
 ## Træ på øverste niveau
 
 ```
 OmniRoute/
-├── src/                  # Next.js 16-applikation (brugergrænseflade + API-ruter + biblioteker + domæne + server)
-├── open-sse/             # Arbejdsområde til streamingmotoren (håndteringsfunktioner, eksekveringskomponenter, oversætter, MCP-server)
-├── packages/            # npm-arbejdsområder: ui-kit (integreret Keak CI UI Kit) og browser-pool
-├── electron/             # Desktop-wrapper (Electron 41 + electron-builder 26.10)
-├── bin/                  # CLI-startpunkt og kommandohåndteringsfunktioner
-├── scripts/              # Scripts til build, kontrol, synkronisering og enkeltstående opgaver
-├── docs/                 # Offentlig dokumentation (du er her)
-├── tests/                # Alle testsuiter (enheds-, integrations- og e2e-tests samt protokolklienter)
-├── public/               # Statiske Next.js-aktiver, PWA-manifest, service worker og ikoner
-├── config/               # Statisk konfiguration + tilstand for kvalitetskontrol (i18n, payloadRules, quality/)
-├── images/               # Billedaktiver til markedsføring og README
-├── @omniroute/           # Publicerbare ledsagepakker (opencode-plugin, opencode-provider)
-├── skills/               # Færdighedspakker til CLI/agenter (cli-* + omni-* + config-codex-cli)
-├── examples/             # Eksempelplugins + omniroute-cmd-hello-startskabelon
-├── contrib/              # Bidrag fra fællesskabet (podman/)
-├── .source/              # Fumadocs-kildekonfiguration (source.config.mjs + server/browser/dynamic)
-├── .github/              # GitHub Actions-workflows + issueskabeloner + PR-skabelon
-├── .husky/               # Git-hooks (pre-commit, pre-push)
-├── .claude/              # Claude Code-skråstregskommandoer (projektspecifikke)
-├── .agents/              # Workflows + færdigheder til Codex/generiske agenter (spejling af .claude/)
-├── .vscode/              # Indstillinger for VS Code-arbejdsområdet
-├── _ideia/               # Planlægningsnoter (uformelle; distribueres ikke)
-├── _mono_repo/           # Historiske delprojekter (cloud, site, vscode-extension)
-├── _references/          # Skrivebeskyttede referencekloner fra relaterede OSS-projekter
-├── _tasks/               # Filer til opgavesporing pr. udgivelse (uformelle)
-├── .build/ .worktrees/ dist/   # Lokalt build-/git-worktree-/build-output-arbejdsområde (ignoreres af git)
-├── .issues/              # Lokal issue-cache (ignoreres af git)
-├── .playwright-mcp/      # Playwright MCP-testartefakter
-├── coverage/             # c8-dækningsoutput (ignoreres af git)
-├── logs/                 # Kørselslogfiler (ignoreres af git)
-├── node_modules/         # Afhængigheder (ignoreres af git)
-├── package/              # Midlertidigt område til npm pack (buildartefakt)
-├── .next/                # Next.js-buildoutput (ignoreres af git)
-└── (filer i roden — se nedenfor)
+├── src/              # Next.js 16 app: dashboard, /api and /v1 routes, server libs, domain, i18n
+├── open-sse/         # Streaming engine workspace (@omniroute/open-sse): handlers, executors, translator, services, MCP server
+├── packages/         # npm workspaces: ui-kit (vendored Keak CI UI Kit) and browser-pool
+├── @omniroute/       # Separately published npm packages (OpenCode plugins and provider)
+├── bin/              # Published `omniroute` CLI, MCP/bridge entry points, self-host ops scripts (*.sh)
+├── electron/         # Desktop app (Electron main/preload + helpers + icons)
+├── public/           # Static assets served by Next.js (provider logos, PWA icons, sw.js, openapi.yaml copy)
+├── skills/           # Agent Skills (SKILL.md) served by /api/agent-skills, MCP and A2A
+├── tests/            # All test suites: unit, integration, e2e, homolog, fixtures, snapshots
+├── scripts/          # Build, quality gates, i18n, release, ops, perf and one-off scripts (allow-listed subfolders)
+├── config/           # Versioned config: i18n, payload rules, CLI manifest, quality-gate baselines, release inventories
+├── changelog.d/      # Per-PR changelog fragments, aggregated into CHANGELOG.md at release time
+├── docs/             # Public documentation (served at /docs via Fumadocs) + translated mirrors in docs/i18n/
+├── examples/         # Example plugins and quickstart clients
+├── deploy/           # Kubernetes deployment: Helm chart + Kustomize base/overlays
+├── docker/           # Auxiliary container images (not the main image, which is the root Dockerfile)
+├── contrib/          # Community recipes: Podman quadlets, VPS compose, Windows launchers, session-sync note
+├── .github/          # GitHub Actions workflows, composite actions, issue/PR templates, CODEOWNERS, labels
+├── .husky/           # Tracked git hooks: commit-msg, pre-commit, pre-push
+├── .vale/            # Vale prose-lint vocabulary (styles/Vocab/OmniRoute/accept.txt)
+├── .vscode/          # Shared VS Code workspace settings (settings.json)
+└── (root files — see below)
+```
+
+Lokale, genererede eller private stier (alle gitignored, aldrig forpligtet, ikke beskrevet yderligere):
+
+```
+node_modules/            # npm dependencies
+.build/                  # Next.js build output (default distDir .build/next, see next.config.mjs)
+dist/                    # npm staging directory assembled by scripts/build/prepublish.ts
+.source/                 # fumadocs-mdx output that feeds the /docs viewer
+.husky/_/                # Husky runtime generated on install (core.hooksPath target)
+coverage/ logs/ test-results/ playwright-report/   # coverage, runtime logs, Playwright output
+.env                     # local secrets generated from .env.example
+_*/                      # private local-only folders (anchored /_* ignore); never tracked
+.claude/ .agents/        # local AI-assistant state and skills; never tracked
 ```
 
 ---
 
-## Filer i roden
+## Root-filer
 
-| Fil                                         | Formål                                                                                 |
-| ------------------------------------------- | -------------------------------------------------------------------------------------- |
-| **README.md**                               | Marketinglandingsside + hurtig start + funktionsmatrix (se også `llm.txt`)             |
-| **CHANGELOG.md**                            | Ændringslog pr. udgivelse (automatisk genereret af færdigheden `/version-bump-cc`)     |
-| **LICENSE**                                 | MIT-licenstekst                                                                        |
-| **CLAUDE.md**                               | Projektregler for Claude Code-agenter (ufravigelige regler, konventioner, scenarier)   |
-| **AGENTS.md**                               | Samme som CLAUDE.md, men for AI-agenter, der ikke er Claude (Codex, Cursor osv.)       |
-| **GEMINI.md**                               | Kortfattede regler for Gemini-baserede agenter (delmængde af CLAUDE.md)                |
-| **CONTRIBUTING.md**                         | Bidragydervejledning: opsætning, konventionelle commits, test og PR-flow               |
-| **SECURITY.md**                             | Politik for rapportering af sårbarheder, understøttede versioner og trusselsmodel      |
-| **CODE_OF_CONDUCT.md**                      | Contributor Covenant — forventninger til adfærd i fællesskabet                         |
-| **llm.txt**                                 | Landingsside i ren tekst optimeret til LLM-crawlere (SEO til AI-assistenter)           |
-| **package.json**                            | npm-manifest, scripts, afhængigheder, engines og c8-dækningskrav                       |
-| **package-lock.json**                       | Låst afhængighedstræ                                                                   |
-| **tsconfig.json**                           | TypeScript-rodconfig                                                                   |
-| **tsconfig.typecheck-core.json**            | Typecheck-config til kernen i `src/`                                                   |
-| **tsconfig.typecheck-noimplicit-core.json** | Streng typecheck (`noImplicitAny`)                                                     |
-| **tsconfig.tsbuildinfo**                    | Cache til inkrementel TS-build (ignoreret af git)                                      |
-| **next.config.mjs**                         | Next.js 16-buildkonfiguration (selvstændigt output)                                    |
-| **next-env.d.ts**                           | Automatisk genererede miljøtyper fra Next.js                                           |
-| **eslint.config.mjs**                       | Flad ESLint-config (regler pr. projektområde)                                          |
-| **prettier.config.mjs**                     | Formateringsregler for Prettier                                                        |
-| **postcss.config.mjs**                      | PostCSS-config til Tailwind/CSS-pipeline                                               |
-| **playwright.config.ts**                    | Playwright-config til E2E-test                                                         |
-| **vitest.config.ts**                        | Vitest-config (standardsuite)                                                          |
-| **vitest.mcp.config.ts**                    | Vitest-config til MCP-server-/autoCombo-/cachesuiter                                   |
-| **sonar-project.properties**                | SonarQube-/SonarCloud-config (kodekvalitet)                                            |
-| **Dockerfile**                              | Docker-build i flere faser (builder → runner-base → runner-cli)                        |
-| **docker-compose.yml**                      | Udviklings-compose med 4 profiler (base, cli, host, cliproxyapi) + redis-sidecar       |
-| **docker-compose.prod.yml**                 | Produktions-compose (port 20130, redis, navngivne volumes)                             |
-| **.dockerignore**                           | Filer udeladt fra Docker-konteksten                                                    |
-| **fly.toml**                                | Fly.io-udrulningsconfig (region `sin`, port 20128, /data-volume)                       |
-| **.env.example**                            | Skabelon til miljøfil (kopieres automatisk til `.env` ved første installation)         |
-| **.gitignore**                              | Git-ignore-mønstre                                                                     |
-| **.npmignore**                              | Eksklusionsliste til npm-udgivelse                                                     |
-| **.npmrc**                                  | npm-config (registry, lockfile-politik)                                                |
-| **.node-version**                           | Fastlåst Node-version (bruges af nvm-kompatible værktøjer)                             |
-| **.nvmrc**                                  | Fastlåst Node-version til nvm                                                          |
-| **eslint.complexity.config.mjs**            | ESLint-config til kompleksitetsratchet (`scripts/check/check-complexity.mjs --config`) |
-| **eslint.sonarjs.config.mjs**               | ESLint-config til SonarJS-regler (kognitiv kompleksitet/duplikering)                   |
-| **source.config.ts**                        | Fumadocs-`defineDocs`-kildeconfig (leverer data til `.source/`)                        |
-| **knip.json**                               | Knip-config — ubrugte filer/exports/afhængigheder (leverer data til dead code-kravet)  |
-| **stryker.conf.json**                       | Stryker-config til mutationstest                                                       |
-| **.size-limit.json**                        | Konfiguration af bundlebudget for size-limit                                           |
-| **promptfooconfig.yaml**                    | Konfiguration af promptfoo-evaluering                                                  |
-| **.gitleaks.toml**                          | Regelsæt til hemmelighedsscanning med gitleaks                                         |
-| **.zizmor.yml**                             | Konfiguration af zizmor-sikkerhedslintning for GitHub Actions                          |
-| **socket.yml**                              | Konfiguration af forsyningskæde for Socket.dev                                         |
-| **news.json**                               | Lokaliseret v2-meddelelsesfeed; Radar-lanceringselementet leveres inaktivt             |
-| **flake.nix** / **flake.lock**              | Definition og låsning af Nix-udviklingsshell                                           |
-| **.env**                                    | Lokale hemmeligheder (ignoreres af git — genereret fra `.env.example`)                 |
+Alle sporede filer ved lagerroden (`git ls-files | grep -v /`), grupperet efter funktion.
 
-> **Flyttet ud af roden i v3.8.26 (oprydning):**
->
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` og den genererede `quality-metrics.json` (ignoreres af git). Se [`## config/`](#config--static-configs--quality-gate-state).
+### Projektdokumentation
+
+| Fil                      | Formål                                                                      |
+| ------------------------ | --------------------------------------------------------------------------- |
+| `README.md`              | Landingsside: funktionsoversigt, hurtig start, installationsmetoder         |
+| `CHANGELOG.md`           | Ændringslog pr. udgivelse (fragmenter fra `changelog.d/` er foldet ind her) |
+| `ROADMAP.md`             | Offentlig køreplan                                                          |
+| `LICENSE`                | MIT licens                                                                  |
+| `THIRD_PARTY_NOTICES.md` | Meddelelser om bundtet tredjepartskode (for eksempel wreq-js-bindingerne)   |
+| `CONTRIBUTING.md`        | Bidragyderguide: opsætning, konventionelle commits, testmatrix, PR flow     |
+| `SECURITY.md`            | Sårbarhedsrapporteringspolitik                                              |
+| `CODE_OF_CONDUCT.md`     | Forventninger til fællesskabets adfærd                                      |
+| `llm.txt`                | Projektoversigt i almindelig tekst for LLM crawlere og assistenter          |
+
+### AI-assistent instruktioner
+
+| Fil         | Formål                                                                                        |
+| ----------- | --------------------------------------------------------------------------------------------- |
+| `AGENTS.md` | En enkelt kilde til sandhed for hver AI assistent: konventioner, kvalitetsporte, hårde regler |
+| `CLAUDE.md` | Claude Kode-specifikke deltaer; importerer `AGENTS.md`                                        |
+| `GEMINI.md` | Gemini-specifikke deltaer; peger tilbage på `AGENTS.md`                                       |
+
+Indlejrede guider findes også ved siden af den kode, de beskriver: `open-sse/services/AGENTS.md` og `src/lib/db/AGENTS.md`.
+
+### Pakkemanifester og Node-værktøjskæde
+
+| Fil                        | Formål                                                                              |
+| -------------------------- | ----------------------------------------------------------------------------------- |
+| `package.json`             | npm-manifest: scripts, afhængigheder, `engines`, `workspaces`, publiceret `files`   |
+| `package-lock.json`        | Låst afhængighedstræ                                                                |
+| `pnpm-workspace.yaml`      | pnpm-arbejdsområdeliste (`packages/*`, `open-sse`) og native-build-tilladelsesliste |
+| `.npmrc` / `.npmignore`    | npm-konfiguration og udgiv ekskluderinger                                           |
+| `.node-version` / `.nvmrc` | Nodeversionsstifter til versionsadministratorer                                     |
+| `flake.nix` / `flake.lock` | Nix dev shell og dens lås                                                           |
+| `Makefile`                 | `make` -genveje, der uddelegerer til npm-scripts                                    |
+
+### TypeScript, Next.js og docs build
+
+| Fil                                       | Formål                                                                        |
+| ----------------------------------------- | ----------------------------------------------------------------------------- |
+| `tsconfig.json`                           | Base TypeScript config og sti aliaser (`@/*`, `@omniroute/open-sse`)          |
+| `tsconfig.typecheck-core.json`            | `npm run typecheck:core` skive                                                |
+| `tsconfig.typecheck-noimplicit-core.json` | `npm run typecheck:noimplicit:core` (streng `noImplicitAny`) skive            |
+| `tsconfig.typecheck-api.json`             | API-rute typecheck udsnit (`scripts/check/check-api-typecheck.mjs`)           |
+| `tsconfig.typecheck-dashboard.json`       | Dashboard typecheck udsnit (`npm run check:dashboard-typecheck`)              |
+| `tsconfig.build.json`                     | Produktionstypekontrol (`npm run typecheck:build`, `check:build-typecheck`)   |
+| `tsconfig.mitm.json`                      | MITM build config brugt af `scripts/build/buildMitm.mjs`                      |
+| `next.config.mjs`                         | Next.js 16 config (standalone output, build-profil aliaser)                   |
+| `source.config.ts`                        | Fumadocs `defineDocs` config: hvilke `docs/` sektioner kompilerer til `/docs` |
+| `postcss.config.mjs`                      | PostCSS / Tailwind rørledning                                                 |
+
+### Lint og formatering
+
+| Fil                                       | Formål                                                                                                       |
+| ----------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `eslint.config.mjs`                       | Main ESLint flat config (`npm run lint`, med `config/quality/eslint-suppressions.json`)                      |
+| `eslint.complexity-ratchets.config.mjs`   | Standalone konfiguration, der bruges af skralderne for kompleksitet og kognitiv kompleksitet i én ESLint pas |
+| `eslint.complexity.config.mjs`            | Standalone konfiguration med kun kerne `complexity` + `max-lines-per-function` (bruges af test)              |
+| `prettier.config.mjs` / `.prettierignore` | Prettier regler og undtagelser                                                                               |
+| `.editorconfig`                           | Editorstandarder (indrykning med 2 mellemrum)                                                                |
+| `.markdownlint.json`                      | Rådgivende markdown fnug (`npm run lint:md`)                                                                 |
+| `.vale.ini`                               | Rådgivende prosa lint (`npm run lint:prose`), ordforråd i `.vale/`                                           |
+
+### Tests, evaluering og dækning
+
+| Fil                           | Formål                                                                                          |
+| ----------------------------- | ----------------------------------------------------------------------------------------------- |
+| `vitest.config.ts`            | jsdom Vitest suite: `npm run test:vitest:ui` (dashboard `.tsx`, kroge, memory/skills tests)     |
+| `vitest.mcp.config.ts`        | Node Vitest suite: `npm run test:vitest` (MCP server, autoCombo, combo, API `.spec.ts`)         |
+| `vitest.quarantine.config.ts` | Kører de filer i karantæne, der er angivet i `config/quality/vitest-exclusions.json`            |
+| `vitest.e2e-live.config.ts`   | Live-server Vitest suiter (`tests/e2e/ecosystem.test.ts`, `tests/e2e/protocol-clients.test.ts`) |
+| `playwright.config.ts`        | Playwright E2E (`tests/e2e/**/*.spec.ts`, `npm run test:e2e`)                                   |
+| `stryker.conf.mjs`            | Stryker mutationstest (`npm run test:mutation`; beregner `tap.testFiles` fra `mutate`)          |
+| `stryker.disablebail.mjs`     | Stryker-variant uden kaution, til test-redundansmåling                                          |
+| `promptfooconfig.yaml`        | promptfoo LLM-sikkerhedspakke                                                                   |
+| `codecov.yml`                 | Indstillinger for Codecov patch-dækning                                                         |
+
+### Docker og udrulning
+
+| Fil                               | Formål                                                                              |
+| --------------------------------- | ----------------------------------------------------------------------------------- |
+| `Dockerfile`                      | Flertrinsbillede (`builder` → `runner-base` → `runner-web` / `runner-cli*`)         |
+| `Dockerfile.bun`                  | Alternativt billede på Bun runtime (bygget af `docker-publish.yml`)                 |
+| `docker-compose.yml`              | Standardkomponering med profiler (base, web, cli, vært, hukommelse, cliproxyapi, …) |
+| `docker-compose.prod.yml`         | Separat produktions-snapshot-instans på port 20130                                  |
+| `docker-compose.selfhost.yml`     | En-kommando loopback selvvært (par med `.env.selfhost.example`)                     |
+| `docker-compose.ollama-local.yml` | Docker OmniRoute taler med en værtsindfødt Ollama                                   |
+| `.dockerignore`                   | Docker build-kontekst ekskluderinger                                                |
+| `fly.toml`                        | Fly.io app config (port 20128, `/data` volumen)                                     |
+
+### Sikkerheds-, forsyningskæde- og repository-bots
+
+| Fil                                          | Formål                                                                           |
+| -------------------------------------------- | -------------------------------------------------------------------------------- |
+| `.gitleaks.toml`                             | gitleaks hemmelige scanningsregler og tilladelseslister                          |
+| `.trivyignore`                               | Accepteret risikoundertrykkelse for beholderbilledescanningen                    |
+| `.zizmor.yml`                                | zizmor GitHub Handlinger security-audit config                                   |
+| `socket.yml`                                 | Socket.dev app config (sti ignorerer; ikke en CI gate)                           |
+| `sonar-project.properties`                   | SonarQube/SonarCloud projekt konfiguration                                       |
+| `knip.json`                                  | Knip ubrugt files/exports/deps config (feeds `npm run check:dead-code`)          |
+| `.size-limit.json`                           | Budgetter i bundtstørrelse                                                       |
+| `.mergify.yml`                               | Mergify merge-queue config                                                       |
+| `.coderabbit.yaml`                           | CodeRabbit review config                                                         |
+| `.cbmignore`                                 | Ignorer listen for codebase-memory-mcp kodeindekset                              |
+| `.gitignore` / `.gitattributes` / `.mailmap` | Ignorer regler, LF linjeafslutninger for scripts, kanoniske forfatteridentiteter |
+
+### Miljøskabeloner, tilstand og feeds
+
+| Fil                         | Formål                                                                             |
+| --------------------------- | ---------------------------------------------------------------------------------- |
+| `.env.example`              | Skabelon kopieret til `.env` ved første installation; referenceliste over env vars |
+| `.env.selfhost.example`     | Skabelon til `docker-compose.selfhost.yml`                                         |
+| `.env.homolog.example`      | Skabelon til homologeringsløberen (`npm run homolog`)                              |
+| `.env.devin-bridge.example` | Eksempel på env-fil til Devin bridge-opsætningen                                   |
+| `.i18n-state.json`          | Inkrementel oversættelsestilstand (kildehashes pr. dokument og landestandard)      |
+| `news.json`                 | Lokaliseret meddelelsesfeed (skema v2) læst af betjeningspanelet                   |
 
 ---
 
 ## `src/` — Next.js applikation
 
+Omkring 4.550 sporede filer. Sti alias `@/*` → `src/*`.
+
 ```
 src/
-├── app/                 # App Router (pages + API routes + status pages + landing)
-├── lib/                 # Core libraries / domain modules (80 subdirs + ~70 top-level files)
-├── domain/              # Pure domain logic (policy engine, fallback, cost, lockout, comboResolver, assessment)
-├── server/              # Server-only modules (authz pipeline, cors, auth middleware) — cannot import from client
-├── shared/              # Shared between server and client where safe (constants, types, validation, contracts, utils)
-├── i18n/                # next-intl config + per-locale message JSON (67 locales)
-├── middleware/          # Next.js middleware (request enrichment, locale detection)
-├── mitm/                # MITM proxy core: cert gen/install, handlers, targets, inspector, masks, passthrough
-│   ├── handlers/        # 9 IDE-agent handler classes extending MitmHandlerBase (antigravity, kiro, copilot, codex, cursor, zed, claudeCode, openCode, trae)
-│   └── inspector/       # Traffic capture layer: buffer (in-memory ring), sseMerger, conversationNormalizer, kindDetector, contextKey, httpProxyServer, systemProxyConfig
-├── models/              # Model adapter glue (legacy shim)
-├── scripts/             # In-tree maintenance scripts (e.g., backfillAggregation)
-├── sse/                 # Legacy SSE handlers/services (chat.ts, chatHelpers.ts, services/auth.ts)
-├── store/               # Legacy in-memory store (being phased out for src/lib/db)
-├── types/               # Shared TS type files
-├── instrumentation.ts   # Next.js telemetry hook (browser + edge)
-├── instrumentation-node.ts  # Node-only instrumentation
-└── proxy.ts             # HTTP-proxy entry shim
+├── app/                  # App Router: pages, layouts and route handlers (file-convention loaded)
+│   ├── (dashboard)/      # Route group for the dashboard: dashboard/<section>/ pages + home widgets
+│   ├── api/              # HTTP routes: v1/ (OpenAI-compatible), v1beta/ (Gemini-style), management routes
+│   ├── docs/             # Embedded docs viewer (lib/openapi.generated.ts is generated)
+│   ├── a2a/ .well-known/ # A2A JSON-RPC entry point and Agent Card discovery
+│   ├── healthz/ livez/ readyz/ status/   # Health probes and status page
+│   ├── landing/ login/ auth/ authorize/ callback/ connect/   # Public, auth and OAuth pages
+│   ├── miniapp/          # Telegram Mini App page
+│   └── 400/ … 503/       # Static HTTP error pages
+├── lib/                  # Server-side libraries and domain modules (largest folder)
+├── shared/               # Code shared by server and client: components, constants, validation, utils
+├── sse/                  # Next.js side of the SSE pipeline: handlers/ (chat*), services/ (auth, leases, quotas)
+├── mitm/                 # MITM / TPROXY capture: cert/, dns/, handlers/, targets/, inspector/, tproxy/ (C addon)
+├── server/               # Server-only: authz/ (route guard pipeline), auth/, cors/, origin/, ws/
+├── domain/               # Policy engine, fallback, cost rules, lockout, quota cache, assessment/
+├── i18n/                 # next-intl: messages/ (67 locales), global-error-messages/ (generated), routeNamespaces.generated.json
+├── store/                # Zustand client stores (theme, notifications, …)
+├── hooks/                # Client hooks (live dashboard, compression preview, breaker health)
+├── types/                # Ambient and shared type declarations
+├── models/               # Compatibility barrel re-exporting db functions
+├── middleware/           # promptInjectionGuard.ts (facade over the guardrail system)
+├── scripts/              # backfillAggregation.ts (`npm run backfill-aggregation`)
+├── proxy.ts              # Next.js 16 proxy: headless gate + authz pipeline for dashboard, /api and /v1-style paths
+├── instrumentation.ts    # Next.js instrumentation hook (delegates Node-only work)
+└── instrumentation-node.ts   # Node-only startup work
 ```
 
-### `src/app/` — App Router (Next.js 16)
+### `src/app/` — App Router
 
-| Sti                                                                          | Formål                                                                                                                                                                                                                                                                                                              |
-| ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `app/api/v1/`                                                                | Offentlig OpenAI-compat API (~ 25 underruter: chat, fuldførelser, indlejringer, filer, batches, lyd, billeder, videoer, musik, omrangering, moderering, søgning, ws, agenter, konti, udbydere osv.)                                                                                                                 |
-| `app/api/v1beta/`                                                            | API endepunkter i Gemini-stil                                                                                                                                                                                                                                                                                       |
-| `app/api/playground/`                                                        | Playground Studio-ruter: `improve-prompt/` (POST — LLM prompt rewriter), `presets/` (GET list / POST create), `presets/[id]/` (GET / PUT / DELETE) — `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                                                         |
-| `app/api/` (non-v1)                                                          | Management/admin -ruter (~ 60 mapper: udbydere, kombinationer, indstillinger, mcp, a2a, evals, hukommelse, færdigheder, webhooks, compliance, modstandsdygtighed, overvågning, tunneler, cli-værktøjer osv.)                                                                                                        |
-| `app/api/tools/agent-bridge/`                                                | AgentBridge REST API — 12 ruter (serverkontrol, agent state/DNS/mappings, bypass, cert, upstream-CA). LOCAL_ONLY + SPAWN_CAPABLE. Se `docs/frameworks/AGENTBRIDGE.md §7`.                                                                                                                                           |
-| `app/api/tools/traffic-inspector/`                                           | Trafikinspektør REST + WS API — 16 + ruter (anmodninger, sessioner, værter, optagelsestilstande, eksport, ws). LOCAL_ONLY + SPAWN_CAPABLE. Se `docs/frameworks/TRAFFIC_INSPECTOR.md §8`.                                                                                                                            |
-| `app/a2a/`                                                                   | A2A JSON-RPC 2.0 indgangspunkt (`POST /a2a`)                                                                                                                                                                                                                                                                        |
-| `app/.well-known/agent.json/`                                                | A2A agentkort (opdagelse)                                                                                                                                                                                                                                                                                           |
-| `app/(dashboard)/dashboard/`                                                 | Dashboard UI sider (50 + sektioner, ~ 118 page.tsx -filer: udbydere, kombinationer, indstillinger, hukommelse, færdigheder, webhooks, evals, revision, batch, cache, omkostninger, sundhed, system, aktivitet osv.)                                                                                                 |
-| `app/(dashboard)/dashboard/search-tools/`                                    | Søgeværktøjer Studio UI (3 faner: Search/Scrape/Compare + SearchConceptCard + ProviderCatalog) — se `docs/frameworks/SEARCH_TOOLS_STUDIO.md`                                                                                                                                                                        |
-| `app/(dashboard)/dashboard/memory/`                                          | Memory Studio (plan 21): `page.tsx` (3-tabs shell), `components/` (MemoryConceptCard, MemoryEngineStatus, EmbeddingSourceSelector, EditMemoryModal, RetrievePreview, QdrantConfigCard, RerankConfigCard), `components/tabs/` (MemoriesTab, PlaygroundTab, EngineTab), `hooks/` (useEngineStatus, useMemorySettings) |
-| `app/(dashboard)/dashboard/tools/agent-bridge/`                              | AgentBridge dashboard side — serverkort, 9 agentkort, opsætningsguide, modelkortlægning, bypass-liste. i18n PT-BR + EN. Se `docs/frameworks/AGENTBRIDGE.md`.                                                                                                                                                        |
-| `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Traffic Inspector dashboard side — DevTools split, 7 detalje faner, 4 capture mode switches, session recorder, kontekstfarvning. i18n PT-BR + EN. Se `docs/frameworks/TRAFFIC_INSPECTOR.md`.                                                                                                                        |
-| `app/(dashboard)/dashboard/activity/`                                        | Aktivitetsfeedside (gruppe B): `page.tsx` (server) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — `docs/architecture/MONITORING_SECTIONS.md`                                                                                                                 |
-| `app/(dashboard)/dashboard/costs/quota-share/`                               | Kvotedelingsside (gruppe B): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                            |
-| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | Konfigurationsside for udbyderplan (gruppe B): `page.tsx` + `ProviderPlanConfigClient.tsx` — kvotedimensioner pr. forbindelsestilsidesættelse                                                                                                                                                                       |
-| `app/docs/`                                                                  | Indlejret dokumentationsfremviser (gengiver `docs/*.md`)                                                                                                                                                                                                                                                            |
-| `app/landing/`                                                               | Marketing landingsside                                                                                                                                                                                                                                                                                              |
-| `app/login/`, `forgot-password/`, `forbidden/`                               | Auth-relaterede sider                                                                                                                                                                                                                                                                                               |
-| `app/{400,401,403,408,429,500,502,503}/`                                     | HTTP fejlsider                                                                                                                                                                                                                                                                                                      |
-| `app/maintenance/`, `offline/`, `status/`, `privacy/`, `terms/`, `callback/` | Static/status sider                                                                                                                                                                                                                                                                                                 |
-| `app/layout.tsx`, `page.tsx`, `manifest.ts`, `globals.css`                   | Rodlayout, hjem, PWA -manifest, global CSS                                                                                                                                                                                                                                                                          |
-| `app/error.tsx`, `global-error.tsx`, `not-found.tsx`, `loading.tsx`          | Fejlgrænser                                                                                                                                                                                                                                                                                                         |
+| Sti                                                                 | Formål                                                                                                                                                                                                    |
+| ------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `app/api/v1/`                                                       | Offentlig OpenAI-kompatibel API: chat, fuldførelser, svar, beskeder, indlejringer, billeder, lyd, videoer, musik, omrangering, moderering, søgning, filer, batches, ws, modeller, …                       |
+| `app/api/v1beta/`                                                   | Slutpunkter i Gemini-stil                                                                                                                                                                                 |
+| `app/api/` (andre mapper)                                           | Administrations- og administrationsruter: udbydere, kombinationer, indstillinger, nøgler, brug, logfiler, mcp, a2a, acp, hukommelse, færdigheder, evals, webhooks, tunneler, plugins, radar, værktøjer, … |
+| `app/api/tools/agent-bridge/`                                       | AgentBridge REST API — se [AGENTBRIDGE.md](../frameworks/AGENTBRIDGE.md)                                                                                                                                  |
+| `app/api/tools/traffic-inspector/`                                  | Trafikinspektør REST API — se [TRAFFIC_INSPECTOR.md](../frameworks/TRAFFIC_INSPECTOR.md)                                                                                                                  |
+| `app/(dashboard)/dashboard/`                                        | Én mappe pr. dashboardsektion (udbydere, kombinationer, logfiler, brug, omkostninger, cache, komprimering, hukommelse, legeplads, søgeværktøjer, indstillinger, værktøjer, …)                             |
+| `app/(dashboard)/home/`                                             | Startskærmen og dens widgets                                                                                                                                                                              |
+| `app/docs/`                                                         | Dokumentfremviser, der gengiver Fumadocs-sektionerne opført i `source.config.ts`                                                                                                                          |
+| `app/layout.tsx`, `page.tsx`, `manifest.ts`, `globals.css`          | Rodlayout, root-indtastning (omdirigeringer), PWA -manifest, global CSS                                                                                                                                   |
+| `app/error.tsx`, `global-error.tsx`, `not-found.tsx`, `loading.tsx` | Fejlgrænser og tilbagefald                                                                                                                                                                                |
 
-### `src/lib/` — kernebiblioteker (~ 50 moduler)
+API -ruter følger `Route → CORS → Zod validation → optional auth → policy → handler`; se [ARCHITECTURE.md](ARCHITECTURE.md) og [API_REFERENCE.md](../reference/API_REFERENCE.md).
 
-| modul                                    | Formål                                                                                                                                                                                                                                                                                                             |
-| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `a2a/`                                   | A2A protokol task manager, færdigheder (5), streaming                                                                                                                                                                                                                                                              |
-| `acp/`                                   | CLI Agent Registry (lokal CLI -opdagelse — se `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md`)                                                                                                                                                                                                                          |
-| `api/`                                   | Delte API hjælpere (`requireManagementAuth`, validering)                                                                                                                                                                                                                                                           |
-| `auth/`                                  | Session, hashing af adgangskode, token-validering                                                                                                                                                                                                                                                                  |
-| `batches/`                               | OpenAI Batches API handlere                                                                                                                                                                                                                                                                                        |
-| `catalog/`                               | Udbyder katalog Zod validering + kapacitet opløsning                                                                                                                                                                                                                                                               |
-| `cloudAgent/`                            | Cloud-agenter (Codex Cloud, Devin, Jules) — se `docs/frameworks/CLOUD_AGENT.md`                                                                                                                                                                                                                                    |
-| `combos/`                                | Combo resolution + genbestilling hjælpere                                                                                                                                                                                                                                                                          |
-| `audit/`                                 | Aktivitetsfeedhjælpere: `highLevelActions.ts` (tilladelsesliste + `isHighLevelAction()`), `activityIcons.ts` (action → icon/verb map), `timeline.ts` (groupByDay/relativeTime) — se `docs/architecture/MONITORING_SECTIONS.md`                                                                                     |
-| `compliance/`                            | Revisionslog + udbyder revision — se `docs/security/COMPLIANCE.md`                                                                                                                                                                                                                                                 |
-| `compression/`                           | Kompressionsmotorlim (motorer lever i `open-sse/services/compression/`)                                                                                                                                                                                                                                            |
-| `config/`                                | Runtime config hjælpere                                                                                                                                                                                                                                                                                            |
-| `db/`                                    | 120 + domæne DB moduler + 168 migreringer (gå altid igennem her for SQLite)                                                                                                                                                                                                                                        |
-| `quota/`                                 | Kvotedelingsmotor: `dimensions.ts` (types/Zod), `types.ts` (QuotaStore grænseflade), `sqliteQuotaStore.ts`, `redisQuotaStore.ts`, `storeFactory.ts`, `fairShare.ts`, `burnRate.ts`, `planResolver.ts`, `planRegistry.ts`, `saturationSignals.ts`, `enforce.ts`, `spendRecorder.ts` — `docs/routing/QUOTA_SHARE.md` |
-| `radar/`                                 | Radar fri-model katalog klient: `feedSchema.ts`, `pinnedKeys.ts`, `verify.ts`, `sync.ts`, `applyFeed.ts`, `index.ts` (`getRadarCatalog()`) — `docs/frameworks/RADAR.md`                                                                                                                                            |
-| `display/`                               | UI -formateringshjælpere (omkostninger, ventetid osv.)                                                                                                                                                                                                                                                             |
-| `embeddings/`                            | Indstøbningsservice hjælpere                                                                                                                                                                                                                                                                                       |
-| `env/`                                   | Env variabel parsing + validering                                                                                                                                                                                                                                                                                  |
-| `evals/`                                 | Eval framework (suiter, runner, runtime) — se `docs/frameworks/EVALS.md`                                                                                                                                                                                                                                           |
-| `guardrails/`                            | PII masker, hurtig indsprøjtning, synsbro — se `docs/security/GUARDRAILS.md`                                                                                                                                                                                                                                       |
-| `jobs/`                                  | Baggrundsjob (cron-lignende)                                                                                                                                                                                                                                                                                       |
-| `memory/`                                | Samtalehukommelse (SQLite FTS5 + sqlite-vec hybrid RRF + Qdrant tier 2) — `docs/frameworks/MEMORY.md`                                                                                                                                                                                                              |
-| `memory/embedding/`                      | Indlejringslag med flere kilder: `index.ts` (resolver), `remote.ts`, `staticPotion.ts`, `transformersLocal.ts`, `cache.ts`, `types.ts` (plan 21)                                                                                                                                                                   |
-| `memory/vectorStore.ts`                  | sqlite-vec v0.1.9 wrapper — KNN brute-force + hybrid RRF (FTS5 + vektor, k = 60). Lazy-init, nedbrydes elegant, når sqlite-vec ikke er tilgængelig. (plan 21)                                                                                                                                                      |
-| `memory/reindex.ts`                      | `runReindexBatch()` — behandler minder med `needs_reindex=1` i baggrunden; kaldet af `POST /api/memory/reindex` og lazy-backfill-sti. (plan 21)                                                                                                                                                                    |
-| `monitoring/`                            | Sundhedstjek, metriske emissioner                                                                                                                                                                                                                                                                                  |
-| `oauth/`                                 | OAuth/import flows for 22 udbydermoduler (agy, antigravity, claude, cline, codebuddy-cn, codex, cursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-coding, kiro, qoder- traference, zed)                                                                             |
-| `plugins/`                               | Plugin-registrering                                                                                                                                                                                                                                                                                                |
-| `promptCache/`                           | Prompt-cache-breakpoints i antropisk stil                                                                                                                                                                                                                                                                          |
-| `skills/`                                | Skills framework (indbygget + markedsplads + SkillsSH) — se `docs/frameworks/SKILLS.md`                                                                                                                                                                                                                            |
-| `playground/`                            | Playground Studio delte hjælpere: `codeExport.ts` (curl/Python/TS generator), `promptImprover.ts` (meta-prompt builder), `streamMetrics.ts` (ren TTFT/TPS), `types.ts` (pristabel) — se `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                     |
-| `webhookDispatcher.ts`                   | HMAC webhook levering — se `docs/frameworks/WEBHOOKS.md`                                                                                                                                                                                                                                                           |
-| `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | Tunnelledere — se `docs/ops/TUNNELS_GUIDE.md`                                                                                                                                                                                                                                                                      |
-| `cloudSync.ts`, `initCloudSync.ts`       | Valgfri skysynkronisering af staten                                                                                                                                                                                                                                                                                |
-| `localDb.ts`                             | Re-eksport tønde til db-moduler (ingen logic — re-eksport kun)                                                                                                                                                                                                                                                     |
-| `cacheLayer.ts`, `idempotencyLayer.ts`   | Anmod om caching + idempotens                                                                                                                                                                                                                                                                                      |
-| (~ 30 flere filer på øverste niveau)     | Specialiserede hjælpere (logEnv, modelsDevSync, piiSanitizer, etc.)                                                                                                                                                                                                                                                |
+### `src/lib/` — serverbiblioteker
 
-### `src/lib/db/` — database (147 moduler + 208-migreringer)
+Omtrent 90 undermapper plus omkring 90 moduler på øverste niveau. Hovedgrupper:
 
-| Underdir                  | Formål                                                                                                                                                                                      |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `db/core.ts`              | `getDbInstance()` singleton med WAL journaling                                                                                                                                              |
-| `db/migrations/`          | Versionerede SQL filer (idempotente, transaktionelle). `073_memory_vec.sql` tilføjer `memory_vec_meta` + `needs_reindex` kolonne (plan 21).                                                 |
-| `db/playgroundPresets.ts` | CRUD modul til Playground Studio forudindstillinger (`listPlaygroundPresets`, `getPlaygroundPreset`, `createPlaygroundPreset`, `updatePlaygroundPreset`, `deletePlaygroundPreset`)          |
-| `db/memoryVec.ts`         | CRUD for `memory_vec_meta` (active_dim, embedding_signature, last_reset_at, vec_loaded) + `markMemoryNeedsReindex`, `getMemoryReindexQueue` osv. (plan 21)                                  |
-| `db/<domain>.ts`          | Et modul pr. domæne: udbydere, kombinationer, apiKeys, brugere, sessioner, brug, revisionslog, webhooks, færdigheder, memory_entries, cloud_agent_tasks, evals* \* , ræsonnement_cache osv. |
+| Areal                             | Mapper / filer                                                                                                      | Dybt dyk                                                                                                                                    |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| Database                          | `db/` — domænemoduler, `migrations/`, `adapters/`, `repositories/`, `migrationRunner/`                              | [`src/lib/db/AGENTS.md`](../../src/lib/db/AGENTS.md), [DATABASE_GUIDE.md](../ops/DATABASE_GUIDE.md)                                         |
+| Brug, kvote og forbrug            | `usage/`, `quota/`, `spend/`                                                                                        | [QUOTA_SHARE.md](../routing/QUOTA_SHARE.md), [COST_TRACKING.md](../guides/COST_TRACKING.md)                                                 |
+| Udbydere og modeller              | `providers/`, `providerModels/`, `modelValidation/`, `catalog/`, `radar/`, `freeProxyProviders/`                    | [RADAR.md](../frameworks/RADAR.md), [MODEL-VALIDATION.md](../guides/MODEL-VALIDATION.md)                                                    |
+| OAuth og legitimationsoplysninger | `oauth/` (udbydere/, services/, utils/), `zed-oauth/`, `copilot/`, `cursor/`, `credentialHealth/`                   | `resolvePublicCred()` (operatørdokument, ikke vist offentligt)                                                                              |
+| Sikkerhed og styring              | `guardrails/`, `compliance/`, `pii/`, `security/`                                                                   | [GUARDRAILS.md](../security/GUARDRAILS.md), [COMPLIANCE.md](../security/COMPLIANCE.md)                                                      |
+| Agent funktioner                  | `a2a/`, `acp/`, `cloudAgent/`, `memory/`, `skills/`, `agentSkills/`                                                 | [AGENT_PROTOCOLS_GUIDE](../frameworks/AGENT_PROTOCOLS_GUIDE.md), [MEMORY.md](../frameworks/MEMORY.md), [SKILLS.md](../frameworks/SKILLS.md) |
+| Plugins og tjenester              | `plugins/`, `services/` (embedded-service installatører og supervisor)                                              | [PLUGINS.md](../frameworks/PLUGINS.md), [EMBEDDED-SERVICES.md](../frameworks/EMBEDDED-SERVICES.md)                                          |
+| Routing og robusthed              | `combos/`, `routing/`, `resilience/`, `reasoningRouting/`, `promptCache/`                                           | [RESILIENCE_GUIDE.md](RESILIENCE_GUIDE.md)                                                                                                  |
+| Fuldmagter og netværk             | `proxyHealth/`, `proxySubscription/`, `proxyRelay/`, `proxyEvents/`, tunnelmoduler                                  | [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md), [TUNNELS_GUIDE.md](../ops/TUNNELS_GUIDE.md)                                                        |
+| Job og planlægning                | `jobs/`, `jobRegistry/`, `warmupScheduler/`                                                                         |                                                                                                                                             |
+| Observerbarhed og eksport         | `monitoring/`, `logExport/`, `webhooks/`, `audit/`, `events/`                                                       | [LOG-EXPORT.md](../frameworks/LOG-EXPORT.md), [WEBHOOKS.md](../frameworks/WEBHOOKS.md)                                                      |
+| CLI og IDE integration            | `cliTools/`, `cli-helper/`, `vscode/`, `inspector/`, `versionManager/`                                              | [CLI-TOOLS.md](../reference/CLI-TOOLS.md), [VSCODE-COPILOT.md](../guides/VSCODE-COPILOT.md)                                                 |
+| Kontekstkilder                    | `localCorpus/`, `notion/`, `obsidian/`                                                                              | [LOCAL_CORPUS_CONTEXT.md](../frameworks/LOCAL_CORPUS_CONTEXT.md)                                                                            |
+| Andre funktioner                  | `evals/`, `playground/`, `gamification/`, `telegram/`, `conductor/`, `batches/`, `deploy/`, `transfer/`, `sync/`, … | [EVALS.md](../frameworks/EVALS.md), [PLAYGROUND_STUDIO.md](../frameworks/PLAYGROUND_STUDIO.md)                                              |
 
-### `src/domain/`
+Top-niveau moduler værd at vide:
 
-| modul                  | Formål                                              |
-| ---------------------- | --------------------------------------------------- |
-| `policy.ts`            | Politik motor                                       |
-| `fallbackPolicy.ts`    | Fallback beslutningstræ                             |
-| `costRules.ts`         | Regler for omkostningsberegning                     |
-| `lockoutPolicy.ts`     | Model/connection lockout politik                    |
-| `tagRouter.ts`         | Tag-baseret routing                                 |
-| `comboResolver.ts`     | Kombinationsopløsning (bruges af kombinationsmotor) |
-| `modelAvailability.ts` | Kontrol af tilgængelighed pr. model                 |
-| `assessment/`          | Modelvurdering (Fase 1 af RFC-AUTO-ASSESSMENT )     |
+| Fil                                                            | Formål                                                                   |
+| -------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| `cacheLayer.ts`, `idempotencyLayer.ts`, `semanticCache.ts`     | Responscaching og idempotens                                             |
+| `webhookDispatcher.ts`                                         | HMAC-signeret webhook levering                                           |
+| `cloudflaredTunnel.ts`, `ngrokTunnel.ts`, `tailscaleTunnel.ts` | Tunnelledere                                                             |
+| `tokenHealthCheck*.ts`, `tokenRefreshCircuit.ts`               | Sundhedstjek af baggrundslegitimationsoplysninger og opdateringskredsløb |
+| `streamingPiiTransform.ts`, `streamingCredentialTransform.ts`  | Streaming af desinfektionsmidler                                         |
+| `gracefulShutdown.ts`, `serverLifecycle.ts`                    | Proces livscyklus                                                        |
+| `*.stub.ts`                                                    | Build-profil stubbe byttet ind med aliaser i `next.config.mjs`           |
 
-### `src/server/`
+### `src/lib/db/` — database
 
-| modul    | Formål                                                                                          |
-| -------- | ----------------------------------------------------------------------------------------------- |
-| `authz/` | Autorisationspipeline: `classify` → `policies` → `enforce` — `docs/architecture/AUTHZ_GUIDE.md` |
-| `cors/`  | CORS konfiguration                                                                              |
-| `auth/`  | Session middleware                                                                              |
+| Sti                   | Formål                                                                                                                       |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `db/core.ts`          | `getDbInstance()` singleton (WAL journaling)                                                                                 |
+| `db/migrations/`      | Nummererede, idempotente `.sql` -migreringer (236 filer i skrivende stund; `check-migration-numbering.mjs` -vagtnummerering) |
+| `db/migrationRunner/` | Migrationsløber                                                                                                              |
+| `db/adapters/`        | SQLite driver adaptere (better-sqlite3, node:sqlite, bun:sqlite, sql.js)                                                     |
+| `db/repositories/`    | SQLite -depotimplementeringer (kombinationer, legepladsforudindstillinger, routingkonfiguration)                             |
+| `db/<domain>.ts`      | Omkring 175 domænemoduler (udbydere, kombinationer, apiKeys, indstillinger, brug, …) — importerer altid disse direkte        |
 
-### `src/shared/`
+### `src/domain/`, `src/server/`, `src/shared/`
 
-| modul                            | Formål                                                                                             |
-| -------------------------------- | -------------------------------------------------------------------------------------------------- |
-| `components/`                    | Dashboard komponent API: adaptere over `packages/ui-kit` — se `docs/architecture/DESIGN_SYSTEM.md` |
-| `constants/iconMap.ts`           | `ICON_MAP`: ikonnavne, der bruges af skærmene → Lucide-komponenter (`<Icon>`)                      |
-| `constants/providers.ts`         | **381 udbydere** med Zod -validering (sandhedens kilde)                                            |
-| `constants/cliTools.ts`          | Ekstern CLI -værktøjsregistrering                                                                  |
-| `constants/routingStrategies.ts` | **20 routingstrategier** med prioriteringer                                                        |
-| `constants/publicApiRoutes.ts`   | Ruter, der kræver bærer (vs. ledelse) godkendelse                                                  |
-| `constants/upstreamHeaders.ts`   | Header afvisningsliste til upstream-anmodninger                                                    |
-| `validation/schemas.ts`          | ~ 80 Zod skemaer (enkelt kilde til sandhed for API kontrakter)                                     |
-| `validation/helpers.ts`          | Zod -valideringshjælpere (`validateBody` osv.)                                                     |
-| `types/`                         | Delte TS typer                                                                                     |
-| `contracts/`                     | Offentlige API kontrakter (forbruges af `files:` i `package.json`)                                 |
-| `utils/circuitBreaker.ts`        | Udbyder afbryder (se `docs/architecture/RESILIENCE_GUIDE.md`)                                      |
-| `utils/apiAuth.ts`               | API nøglevalidering, kontrol af omfang                                                             |
-| `utils/fetchTimeout.ts`          | Timeout/abort indpakninger til opstrømshentning                                                    |
-| `utils/releaseNotes.ts`          | Lukket v2/legacy -meddelelsesparser, lokalisering og ID afvisning                                  |
+| Sti                                                            | Formål                                                                                                                                              |
+| -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `domain/policyEngine.ts`                                       | Politik motor                                                                                                                                       |
+| `domain/fallbackPolicy.ts`, `lockoutPolicy.ts`, `costRules.ts` | Fallback-beslutninger, lockoutpolitik, omkostningsregler                                                                                            |
+| `domain/quotaCache*.ts`, `quotaSnapshot*.ts`                   | Kvotecache og øjebliksbilledepersistens                                                                                                             |
+| `domain/assessment/`                                           | Modelvurdering (bedømmer, kategoriserer, selvhelbredende)                                                                                           |
+| `server/authz/`                                                | Autorisationspipeline og rutevagt (`routeGuard.ts`) — se [AUTHZ_GUIDE.md](AUTHZ_GUIDE.md), [ROUTE_GUARD_TIERS.md](../security/ROUTE_GUARD_TIERS.md) |
+| `server/origin/`, `server/cors/`                               | Public/MCP/WS oprindelse opløsning og CORS — se [CORS.md](../security/CORS.md)                                                                      |
+| `server/ws/`                                                   | Live dashboard WebSocket server                                                                                                                     |
+| `shared/components/`                                           | Dashboard komponenter og adaptere over `packages/ui-kit` — se [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md)                                                  |
+| `shared/constants/`                                            | Udbyderkatalog (`providers.ts`), routingstrategier, CLI værktøjer, ikonkort, upstream-header-afvisningsliste, …                                     |
+| `shared/validation/`                                           | Zod -skemaer og valideringshjælpere                                                                                                                 |
+| `shared/utils/`                                                | Circuit breaker, API-nøglegodkendelse, hente timeouts, feature flag, …                                                                              |
+| `shared/middleware/`, `network/`, `services/`, `hooks/`        | Chatadgangsmiddleware, netværkshjælpere, klienttjenester, React hooks                                                                               |
 
 ---
 
-## `open-sse/` — arbejdsområde til streamingmotor
+## `open-sse/` — streaming engine arbejdsområde
 
-Separat npm-arbejdsområde (`@omniroute/open-sse`). Håndterer behandling af anmodninger + kørsel hos udbydere.
+npm workspace `@omniroute/open-sse` (ca. 2.390 sporede filer). Det udfører anmodningsbehandlingen og udbyderens udførelse. Oversigt: [OPEN_SSE_ARCHITECTURE.md](../frameworks/OPEN_SSE_ARCHITECTURE.md).
 
 ```
 open-sse/
-├── handlers/            # 16 filer (12 handlere + 4 hjælpefunktioner): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search osv.
-├── executors/           # 150 eksekveringsmoduler (klasser, der udvider BaseExecutor + hjælpefunktioner pr. udbyder)
-├── translator/          # Formatkonvertere (9 til anmodninger, 9 til svar, 9 hjælpefunktioner)
-├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
-├── services/            # ~80+ tjenestemoduler (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM osv.)
-├── mcp-server/          # MCP-server (110 værktøjer, 3 transporter, 33 scopes)
-├── config/              # Udbyder-/modelregistre, headerkonfiguration, modelaliasser
-├── utils/               # TLS-klient, proxy-fetch/-dispatcher, netværkshjælpefunktioner
-├── index.ts             # Indgangspunkt for arbejdsområdet
-├── package.json         # Arbejdsområdets manifest
-├── tsconfig.json        # Arbejdsområdets TS-konfiguration
-└── types.d.ts           # Arbejdsområdets typedeklarationer
+├── handlers/       # Request handlers: chatCore.ts + chatCore/, responses, embeddings, audio, imageGeneration/,
+│                   #   videoGeneration/, search/, fal/, mediaGeneration/, sseParser/, responseSanitizer/, …
+├── executors/      # Provider-specific HTTP dispatch, registered in executors/registry.ts; base/ holds shared recovery helpers
+├── translator/     # Format conversion: request/, response/, helpers/, image/, registry.ts, bootstrap.ts
+├── transformer/    # responsesTransformer.ts (Responses API ↔ Chat Completions TransformStream)
+├── services/       # Combo routing, rate limits, fallback, caching, usage, token refresh, compression (see below)
+├── config/         # Provider registry (config/providers/registry/<id>/), constants, model/media registries
+├── mcp-server/     # MCP server: tools/, schemas/, toolSearch/, transports, audit, scopes, __tests__/
+├── utils/          # Stream, error, TLS, proxy-fetch and logging utilities
+├── vendor/         # codex-chatgpt-web/ — vendored adapter (provenance in vendor.json)
+├── lib/            # DeepSeek proof-of-work worker and hash
+├── shared/         # zedAuth.ts
+├── index.ts        # Workspace entry
+└── package.json · tsconfig.json · types.d.ts
 ```
+
+### `open-sse/services/`
+
+| Sti                                                                                            | Formål                                                                                                                                                      |
+| ---------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `combo.ts` + `combo/`                                                                          | Combo routingstrategier — se [AUTO-COMBO.md](../routing/AUTO-COMBO.md)                                                                                      |
+| `autoCombo/`                                                                                   | Auto-Combo scoring og mode-pakker                                                                                                                           |
+| `accountFallback.ts` + `accountFallback/`                                                      | Tilslutningsafkøling og modelspærring — se [RESILIENCE_GUIDE.md](RESILIENCE_GUIDE.md)                                                                       |
+| `rateLimitManager.ts` + `rateLimitManager/`                                                    | Rate-limit sporing og header parsing                                                                                                                        |
+| `compression/`                                                                                 | Kompressionsmotorer (`engines/`), regelpakker (`rules/`), `eval/`, `harness/`, `riskGate/` — se [COMPRESSION_GUIDE.md](../compression/COMPRESSION_GUIDE.md) |
+| `tokenRefresh/`, `usage/`, `cache/`, `admission/`, `sessionPool/`, `codexAccount/`, `routing/` | Token-opdatering, brugsregnskab, caching, adgangsbaner, sessionspuljer, Codex konti, routing-hjælpere                                                       |
+| `__tests__/`                                                                                   | Samlokaliserede Vitest suiter (samlet af Vitest konfigurationerne)                                                                                          |
+| `AGENTS.md`                                                                                    | Agentguide til denne mappe                                                                                                                                  |
+
+Mønster: et stort modul `X.ts` ved siden af en mappe `X/` betyder, at modulet blev opdelt i mindre filer (`handlers/chatCore.ts` + `handlers/chatCore/`, `services/combo.ts` + `services/combo/`).
 
 ### `open-sse/mcp-server/`
 
-| Sti                         | Formål                                                                            |
-| --------------------------- | --------------------------------------------------------------------------------- |
-| `server.ts`                 | MCP-serverens livscyklus (stdio- + HTTP-transporter)                              |
-| `httpTransport.ts`          | HTTP Streamable- + SSE-transporter (`/api/mcp/sse`, `/api/mcp/stream`)            |
-| `audit.ts`                  | Revisionslogning til tabellen `mcp_tool_audit`                                    |
-| `scopeEnforcement.ts`       | Scopevalidering pr. værktøj                                                       |
-| `runtimeHeartbeat.ts`       | Sundheds-heartbeat til `DATA_DIR/runtime/mcp-heartbeat.json`                      |
-| `descriptionCompressor.ts`  | Komprimerer metadata for værktøjsbeskrivelser for at spare kontekst               |
-| `schemas/tools.ts`          | 36 grundlæggende værktøjsdefinitioner + scopes                                    |
-| `tools/advancedTools.ts`    | Avancerede værktøjsimplementeringer                                               |
-| `tools/memoryTools.ts`      | 3 hukommelsesværktøjer (søg/tilføj/ryd)                                           |
-| `tools/skillTools.ts`       | 4 færdighedsværktøjer (vis/aktivér/kør/kørsler)                                   |
-| `tools/compressionTools.ts` | 5 komprimeringsværktøjer                                                          |
-| `README.md`                 | Intern README til MCP-serveren (krydshenvist fra `docs/frameworks/MCP-SERVER.md`) |
+| Sti                   | Formål                                                                                         |
+| --------------------- | ---------------------------------------------------------------------------------------------- |
+| `server.ts`           | MCP server livscyklus                                                                          |
+| `httpTransport.ts`    | Streambare HTTP og SSE -transporter                                                            |
+| `scopeEnforcement.ts` | Kontrol af omfang pr. værktøj                                                                  |
+| `audit.ts`            | Værktøj-opkald revisionslogning                                                                |
+| `schemas/`            | Værktøjsdefinitioner og omfang                                                                 |
+| `tools/`              | Værktøjsimplementeringer (hukommelse, færdigheder, komprimering, …)                            |
+| `toolSearch/`         | Værktøjssøgning                                                                                |
+| `README.md`           | Notater om intern arkitektur; hele kataloget er i [MCP-SERVER.md](../frameworks/MCP-SERVER.md) |
 
 ---
 
-## `packages/` — arbejdsområder
+## `packages/` — npm-arbejdsområder
 
-| Sti                      | Formål                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `packages/ui-kit/`       | `@omniroute/ui-kit` — leverandørintegreret øjebliksbillede af Keak CI UI Kit (`private`, `UNLICENSED`), anvendt som kildekode (ingen build). `UPSTREAM.md` fastlåser upstream-committet og dokumenterer licensgodkendelsen; `PATCHES.md` viser lokale patches (ingen); `src/` synkroniseres kun af `scripts/dev/sync-ui-kit.sh` og beskyttes af `npm run check:ui-kit-snapshot`. Se `docs/architecture/DESIGN_SYSTEM.md` |
-| `packages/browser-pool/` | `@omniroute/browser-pool` — valgfri browserpooltjeneste (CloakBrowser- og Playwright-baseret chat)                                                                                                                                                                                                                                                                                                                       |
+| Sti                      | Formål                                                                                                                                                                                                                                                                                                        |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `packages/ui-kit/`       | `@omniroute/ui-kit`: Sælgeret øjebliksbillede af Keak CI UI sættet, brugt som kilde. `UPSTREAM.md` pins upstream commit, `PATCHES.md` viser lokale patches. `src/` synkroniseres kun af `scripts/dev/sync-ui-kit.sh` og beskyttes af `npm run check:ui-kit-snapshot`. Se [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md) |
+| `packages/browser-pool/` | `@omniroute/browser-pool`: browser-pool-grænseflader og implementering (`packages/browser-pool/src/index.ts`, `packages/browser-pool/src/interfaces.ts`). Opført i `workspaces`; runtime-browserpuljen, der bruges af gatewayen, bor i `open-sse/services/`                                                   |
 
----
+## `@omniroute/` — separat offentliggjorte pakker
 
-## `electron/` — Desktop-wrapper
+Disse er ikke npm-arbejdsområder. Hver har sin egen `package.json` og låsefil; mappen sendes i `omniroute` tarball (`files: ["@omniroute/"]`).
 
-| Fil              | Formål                                                                                               |
-| ---------------- | ---------------------------------------------------------------------------------------------------- |
-| `main.js`        | Electrons hovedproces (BrowserWindow, integreret Next.js-server, systembakke, automatisk opdatering) |
-| `preload.js`     | IPC-bro (contextBridge → `window.omniroute`)                                                         |
-| `package.json`   | electron-builder-konfiguration + Electron 41 + electron-builder 26.10-afhængigheder                  |
-| `assets/`        | Appikoner (Windows .ico, macOS .icns, Linux .png)                                                    |
-| `dist-electron/` | Buildoutput (ignoreres af git)                                                                       |
-| `types.d.ts`     | Typedeklarationer til renderer-broen                                                                 |
-| `README.md`      | Intern Electron-README (se også `docs/guides/ELECTRON_GUIDE.md`)                                     |
+| Sti                              | Formål                                                                                                                               |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `@omniroute/opencode-plugin/`    | OpenCode plugin (modelopdagelse, `/connect` auth); brugt af `omniroute setup-opencode` — se [OPENCODE.md](../frameworks/OPENCODE.md) |
+| `@omniroute/opencode-plugin-v2/` | OpenCode plugin til v2 Promise API — se [OPENCODE-V2-PLUGIN.md](../guides/OPENCODE-V2-PLUGIN.md)                                     |
+| `@omniroute/opencode-provider/`  | Statisk konfigurationsgenerator; markeret forældet i sin egen `package.json` til fordel for `opencode-plugin`                        |
 
 ---
 
-## `bin/` — CLI
+## `bin/` — CLI og ops scripts
 
-| Fil                                                                                                         | Formål                                                                                                                            |
-| ----------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| `omniroute.mjs`                                                                                             | Primært CLI-entrypoint — `omniroute serve`, `omniroute setup`, `omniroute doctor`, `omniroute providers`, `omniroute combos` osv. |
-| `reset-password.mjs`                                                                                        | Selvstændig CLI til nulstilling af adgangskode                                                                                    |
-| `cli/commands/setup.mjs`                                                                                    | Interaktiv + ikke-interaktiv opsætningsguide                                                                                      |
-| `cli/commands/doctor.mjs`                                                                                   | Diagnosticering af systemtilstand (8+ kontroller)                                                                                 |
-| `cli/commands/providers.mjs`                                                                                | Liste over/test/validering af udbydere                                                                                            |
-| `cli/{args,data-dir,encryption,io,provider-catalog,provider-store,provider-test,settings-store,sqlite}.mjs` | CLI-hjælpemoduler                                                                                                                 |
-| `cli/tray/tray.ts`                                                                                          | Integration med systembakken (på tværs af platforme: NotifyIcon på Windows, systray2 på macOS/Linux)                              |
-| `cli/tray/tray.ps1`                                                                                         | PowerShell NotifyIcon-backend (Windows, ingen nye binære filer)                                                                   |
-| `cli/tray/autostart.ts`                                                                                     | Automatisk start på tværs af platforme (LaunchAgent / .desktop / registreringsdatabase)                                           |
-| `cli/runtime/sqliteRuntime.mjs`                                                                             | 5-trins resolveringskæde for SQLite-driver (medfølgende → runtime → forsinket installation → node:sqlite → sql.js)                |
-| `cli/runtime/magicBytes.mjs`                                                                                | Validering af binære magic bytes (ELF / Mach-O / Mach-O fat / PE)                                                                 |
-| `cli/runtime/index.mjs`                                                                                     | `warmUpRuntimes()` — forhåndsresolverer drivere ved postinstall / første opstart                                                  |
-| `nodeRuntimeSupport.mjs`                                                                                    | Validerer den understøttede Node.js-version ved installation                                                                      |
+| Sti                                                                         | Formål                                                                                      |
+| --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `omniroute.mjs`                                                             | Hoved CLI -indgang (`omniroute serve`, `setup`, `doctor`, `providers`, `combo`, …)          |
+| `reset-password.mjs`                                                        | `omniroute-reset-password` binær                                                            |
+| `mcp-server.mjs`                                                            | MCP stdio indgangspunkt                                                                     |
+| `antigravity-bridge.mjs`, `chatgpt-web-codex-mcp.mjs`                       | Hjælpebro / MCP -indgangspunkter                                                            |
+| `aliasResolver.mjs`, `aliasResolverHook.mjs`                                | ESM resolve hook, der kortlægger tsconfig-stialiasser til globale installationer            |
+| `nodeRuntimeSupport.mjs`                                                    | Understøttet Node.js version check                                                          |
+| `snapshot-data.sh`, `restore-data.sh`, `restore-policies.sh`, `rollback.sh` | Selvvært-hændelsesgendannelsesscripts (del `_ops-common.sh`)                                |
+| `cold-start-bench.sh`                                                       | Koldstart benchmark — se [PERF_BASELINE.md](../ops/PERF_BASELINE.md)                        |
+| `cli/commands/`                                                             | Et modul pr. CLI -kommando (ca. 100, inklusive `setup-*` integrationerne)                   |
+| `cli/api-commands/`                                                         | Genereret fra `docs/openapi.yaml` af `npm run build:cli-api` — må ikke redigeres            |
+| `cli/locales/`                                                              | CLI -meddelelseskataloger (67 lokaliteter)                                                  |
+| `cli/tui/`, `cli/tui-components/`                                           | Terminal UI                                                                                 |
+| `cli/tray/`                                                                 | Systembakke og autostart (Windows PowerShell backend, systray på macOS/Linux)               |
+| `cli/runtime/`                                                              | Native runtime resolution (`sqliteRuntime.mjs`, `magicBytes.mjs`), proces supervisor        |
+| `cli/*.mjs`                                                                 | Delte hjælpere (args, API klient, data dir, kryptering, udbyderbutik, indstillingslager, …) |
+| `cli/README.md`, `cli/CONVENTIONS.md`                                       | CLI internals og konventioner                                                               |
 
----
+Se [CLI-TOOLS.md](../reference/CLI-TOOLS.md) og [CLI-COMPANION.md](../guides/CLI-COMPANION.md).
 
-## `skills/` — Offentlige agentfærdigheder
+## `electron/` — desktop app
 
-| Fil                          | Formål                                                                                      |
-| ---------------------------- | ------------------------------------------------------------------------------------------- |
-| `skills/omniroute*/SKILL.md` | 10 færdighedsmanifestfiler til eksterne AI-agenter (Claude Desktop, ChatGPT, Cursor, Cline) |
+| Sti                                                        | Formål                                                                           |
+| ---------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| `main.js`                                                  | Electron hovedproces (vindue, indlejret server, bakke, opdateringer)             |
+| `preload.js`                                               | IPC broen udsat for rendereren                                                   |
+| `lib/`                                                     | Vindues livscyklus, serverberedskab, sundhedsovervågning, fjernserverpræferencer |
+| `remoteServerPrompt*.js`, `assets/remoteServerPrompt.html` | Remote-server prompt vindue                                                      |
+| `processTree.js`, `sqlite-inspection.js`                   | Hjælpere til oprydning af børneprocesser og SQLite inspektion                    |
+| `package.json` / `package-lock.json`                       | elektron-builder-konfiguration og Electron afhængigheder                         |
+| `assets/`                                                  | App- og bakkeikoner (`.ico`, `.icns`, `.png`)                                    |
+| `README.md`                                                | Interne noter — se [ELECTRON_GUIDE.md](../guides/ELECTRON_GUIDE.md)              |
 
----
+## `public/` — statiske aktiver
 
-## `scripts/` — Build- og kontrolscripts
+| Sti                                         | Formål                                                                                                            |
+| ------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `providers/`                                | Udbyderlogoer indlæst af id (`/providers/<id>.svg`); herkomst i `config/quality/provider-assets-provenance.jsonl` |
+| `favicon.*`, `apple-touch-icon.*`, `icon-*` | Browser og PWA ikoner                                                                                             |
+| `sw.js`                                     | Servicemedarbejder — se [PWA_GUIDE.md](../guides/PWA_GUIDE.md)                                                    |
+| `openapi.yaml`                              | Kopi af `docs/openapi.yaml` genereret af `npm run gen:public-openapi`                                             |
+| `images/`, `sponsors/`, `deyin.svg`         | Tier-flow diagrammer, sponsor banner, README kunstværk                                                            |
 
-| Script                              | Formål                                                                                              |
-| ----------------------------------- | --------------------------------------------------------------------------------------------------- |
-| `run-next.mjs`                      | Udviklings-/startkørsel med indlæsning af miljøvariabler                                            |
-| `build-next-isolated.mjs`           | Selvstændigt build (selvstændig Next.js 16)                                                         |
-| `prepublish.ts`                     | Klargøring af pakke før `npm pack`                                                                  |
-| `postinstall.mjs`                   | Opret automatisk `.env` ud fra `.env.example` ved første installation                               |
-| `sync-env.mjs`                      | Synkroniser nøgler i `.env` med `.env.example` igen                                                 |
-| `check-cycles.mjs`                  | Registrer cirkulære afhængigheder                                                                   |
-| `check-route-validation.mjs`        | Kontrollér, at alle API-ruter har Zod-validering                                                    |
-| `check-t11-any-budget.mjs`          | Håndhæv eksplicit budget for `any` pr. fil                                                          |
-| `check-docs-sync.mjs`               | Kontrollér synkronisering af dokumentationsversioner (eksisterende pre-commit)                      |
-| **`check-env-doc-sync.mjs`**        | NYT: Krydstjek miljøvariabler i kode mod `.env.example` og `ENVIRONMENT.md`                         |
-| **`check-docs-counts-sync.mjs`**    | NYT: Kontrollér, at antal (eksekutorer, strategier, OAuth, A2A-færdigheder) matcher dokumentationen |
-| **`check-deprecated-versions.mjs`** | NYT: Markér forældede versioner/datoer i dokumentationen                                            |
-| `check-supported-node-runtime.ts`   | Kontrollér, at den aktuelle Node-version understøttes                                               |
-| `check-pr-test-policy.mjs`          | Håndhæv reglen om "påkrævede tests" ved ændringer i produktionskode                                 |
-| **`gen-provider-reference.ts`**     | NYT: Generér automatisk `docs/reference/PROVIDER_REFERENCE.md` fra kataloget                        |
-| `i18n/generate-multilang.mjs`       | Oversæt UI-strenge og dokumentation via Google Translate                                            |
-| `i18n_autotranslate.py`             | LLM-baseret pipeline til oversættelse af dokumentation                                              |
-| `validate_translation.py`           | Validering af oversættelser pr. landestandard                                                       |
-| `check_translations.py`             | Kontrol af i18n-nøgler på kodesiden                                                                 |
-| `run-playwright-tests.mjs`          | Playwright E2E-testkørsel                                                                           |
-| `run-protocol-clients-tests.mjs`    | MCP/A2A E2E-testkørsel                                                                              |
-| `run-ecosystem-tests.mjs`           | Test af økosystemet (providerintegration)                                                           |
-| `test-report-summary.mjs`           | Generér oversigt over testdækning i Markdown                                                        |
-| `smoke-electron-packaged.mjs`       | Røgtest af pakket Electron-build                                                                    |
-| `native-binary-compat.mjs`          | Kontrollér, at native afhængigheder (`better-sqlite3`) matcher Electrons Node                       |
-| `validate-pack-artifact.ts`         | Kontrollér output fra npm-pakke                                                                     |
-| `responses-ws-proxy.mjs`            | WebSocket-bro til Codex Responses API                                                               |
-| `v1-ws-bridge.mjs`                  | WebSocket-bro til `/api/v1/ws`-slutpunktet                                                          |
-| `standalone-server-ws.mjs`          | Kørsel af selvstændig WS-server                                                                     |
-| `system-info.mjs`                   | Udskriv system-/kørselsmiljøoplysninger til support                                                 |
-| `healthcheck.mjs`                   | Engangssundhedstjek (bruges af Docker HEALTHCHECK)                                                  |
-| `uninstall.mjs`                     | Script til fuldstændig afinstallation                                                               |
-| `dev/sync-ui-kit.sh`                | Kopiér CI UI Kit `src/` fra en fastgjort commit til `packages/ui-kit/src`                           |
-| `check/check-ui-kit-snapshot.mjs`   | Pre-commit-kontrol: `packages/ui-kit/src` matcher den fastgjorte upstream-commit                    |
-| `dev/gen-icon-map.mjs`              | `npm run gen:icon-map` — ikonnavne i brug, som `ICON_MAP` ikke tilknytter                           |
-| `dev/codemod-material-icons.mjs`    | Omskriv bogstavelige Material Symbols-spans til `<Icon>` (migreringsværktøj)                        |
+## `skills/` — Agentfærdigheder
+
+46 færdigheder, en mappe hver med en `SKILL.md` (`cli-*`, `omni-*`, `config-codex-cli`, `ponytail`), plus `skills/README.md`. `src/lib/agentSkills/catalog.ts` læser dem under kørsel og eksponerer dem gennem `/api/agent-skills`, MCP og A2A. De fleste manifester genereres af `src/lib/agentSkills/generator.ts` (`scripts/skills/generate-agent-skills.mjs`; `npm run check:agent-skills-sync` kontrollerer for drift). Se [AGENT-SKILLS.md](../frameworks/AGENT-SKILLS.md).
 
 ---
 
-## `docs/` — offentlig dokumentation (7 rodfiler + 17 underkataloger)
+## `scripts/` — konstruktion, porte og værktøj
 
-### Guider på øverste niveau
+Omkring 435 sporede filer. Nye scripts går i en af undermapperne tilladt af `AGENTS.md`; engangskode går i `scripts/ad-hoc/`.
 
-| Dok                         | Formål                                                                                |
-| --------------------------- | ------------------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | Arkitektur på højt niveau, undersystemkort, dashboardoverflade                        |
-| `CODEBASE_DOCUMENTATION.md` | Teknisk reference: mapper, moduler, konventioner                                      |
-| `FEATURES.md`               | Feature matrix med v3.8 højdepunkter                                                  |
-| `USER_GUIDE.md`             | Slutbrugervejledning (opsætning, modeller, kombinationer, CLIs, lyd osv.)             |
-| `API_REFERENCE.md`          | API -endepunktsreference med godkendelsesmodel                                        |
-| `openapi.yaml`              | OpenAPI 3.0 spec (121 stier)                                                          |
-| `SETUP_GUIDE.md`            | Installationsmetoder (npm, npx, Docker, Electron, Termux, source)                     |
-| `ENVIRONMENT.md`            | Alle env vars (~ 800 dokumenteret, ~ 3.050 linjer `.env.example`)                     |
-| `TROUBLESHOOTING.md`        | Almindelige fejl + v3.8.0 kendte problemer                                            |
-| `RELEASE_CHECKLIST.md`      | Fuld frigivelsesflow (færdigheder, husky, konventionelle commits, implementering)     |
-| `COVERAGE_PLAN.md`          | Dækningsmål og nuværende tilstand                                                     |
-| `FREE_TIERS.md`             | Kurerede free-tier-udbydere (48 + gratis + 11 OAuth)                                  |
-| `CLI-TOOLS.md`              | Eksterne CLI integrationer + Intern OmniRoute CLI                                     |
-| `I18N.md`                   | i18n-arkitektur, tilføjelse af et sprog, 67 lokaliteter                               |
-| `UNINSTALL.md`              | Rengør afinstallationstrinene                                                         |
-| `PROVIDER_REFERENCE.md`     | **Autogenereret** katalog over 381 udbydere (regen: `npm run gen:provider-reference`) |
+```
+scripts/
+├── check-permissions.sh   # Container ENTRYPOINT (copied to /app by the Dockerfile)
+├── postinstall.mjs        # Native-runtime warm-up run after scripts/build/postinstall.mjs
+├── start-ws-server.mjs    # Starts the live-dashboard WebSocket server as a separate process
+├── build/                 # Build, standalone assembly, npm pack/publish, postinstall, MITM, Electron prep
+├── check/                 # Quality gates behind most `npm run check:*` scripts; lib/ holds shared helpers
+├── quality/               # Ratchets, gate manifest, impact map, mutation tooling, release acceptance
+├── ci/                    # Steps invoked only by workflows (Docker publish, Release-Green, scanners)
+├── dev/                   # Dev runners (run-next, Playwright/protocol/ecosystem runners) and runtime helpers shipped in the package
+├── docs/                  # README SVG/diagram generators, OpenAPI module, provider reference, wiki sync
+├── i18n/                  # UI and docs translation pipeline, coverage checks, glossary/, lib/
+├── release/               # Changelog aggregation, contributors, merge train, LTS cut, publish verification
+├── ops/                   # Canary deploy, OpenCode free relay, runner janitor, allowlist sync
+├── perf/                  # Benchmarks and one-off performance A/B scripts
+├── cli/                   # CLI tooling (API-command generator, SSO, CLI smoke tests, media MCP)
+├── homolog/               # Homologation against a running instance + promptfoo config generation
+├── features/              # Feature-triage engine and its lib/
+├── router-eval/           # Offline router evaluation (`npm run eval:router*`)
+├── compression/           # Compression benchmark (`npm run bench:compression`, runs on Bun)
+├── compression-eval/      # Compression quality evaluation (`npm run eval:compression`)
+├── devin-bridge/          # Shell entry points for the Devin bridge (build, launch, tests)
+├── docker/                # Base-path patching for the standalone server inside containers
+├── integrations/          # MarkItDown MCP launchers — see docs/integrations/MARKITDOWN_MCP.md
+├── launchers/             # Double-click launchers and desktop-shortcut creators (Windows/macOS/Linux)
+├── packs/                 # Optional-pack manifest and installer (shipped in the npm package)
+├── test/                  # Live smoke scripts (combo-live, OpenCode/ChatGPT Web)
+├── sre/                   # On-call rotation, log redaction, TCP close analyzer
+├── vps/                   # Start/stop the release runner
+├── skills/                # Agent Skills generator CLI
+├── research/              # Free-tier budget card SVG generator
+└── ad-hoc/                # One-shot diagnostics and migrations
+```
 
-### Dybdyk i undersystemet
+Ofte brugte indgangspunkter:
 
-| Dok                                        | Formål                                                                      |
-| ------------------------------------------ | --------------------------------------------------------------------------- |
-| `MCP-SERVER.md`                            | MCP server: 110 værktøjer, 3 transporter, 33 scopes, REST endepunkter       |
-| `A2A-SERVER.md`                            | A2A v0.3: JSON-RPC, 6 færdigheder, REST hjælpere, agentkort                 |
-| `AGENT_PROTOCOLS_GUIDE.md`                 | Samlet guide: A2A vs ACP vs Cloud Agents                                    |
-| `CLOUD_AGENT.md`                           | Codex Cloud / Devin / Jules orkestrering                                    |
-| `SKILLS.md`                                | Skills framework (indbygget + marketplace + SkillsSH + sandbox)             |
-| `RADAR.md`                                 | Radar fri-model katalog overlay (`RADAR_ENABLED`, deaktiveret som standard) |
-| `MEMORY.md`                                | Hukommelsessystem (SQLite FTS5 + Qdrant)                                    |
-| `EVALS.md`                                 | Eval framework (suiter, runs, rubrikker)                                    |
-| `GUARDRAILS.md`                            | PII masker, hurtig injektion, synsbro                                       |
-| `COMPLIANCE.md`                            | Revisionslog, fastholdelse, noLog opt-out                                   |
-| `WEBHOOKS.md`                              | HMAC-signeret webhook levering                                              |
-| `REASONING_REPLAY.md`                      | Hybrid memory/SQLite cache til `reasoning_content`                          |
-| `AUTHZ_GUIDE.md`                           | Autorisationspipeline (`classify` → `policies` → `enforce`)                 |
-| `RESILIENCE_GUIDE.md`                      | Circuit breaker + cooldown + model lockout                                  |
-| `docs/security/STEALTH_GUIDE.md` (kun git) | TLS fingeraftryk (JA3/JA4), Claude Code CCH, MITM cert                      |
-| `AUTO-COMBO.md`                            | Auto Combo-motor (16-faktor scoring, 6 mode-pakker, virtuel fabrik)         |
+| Manuskript                                                          | Formål                                                                                               |
+| ------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `dev/run-next.mjs`                                                  | `npm run dev` / `npm start` løber                                                                    |
+| `build/build-next-isolated.mjs`                                     | `npm run build` (Next.js selvstændig build)                                                          |
+| `build/prepublish.ts`                                               | `npm run build:cli`: samler npm `dist/`                                                              |
+| `build/postinstall.mjs`                                             | npm `postinstall` krog                                                                               |
+| `build/publicOpenApi.mjs`                                           | `npm run gen:public-openapi`                                                                         |
+| `docs/gen-provider-reference.ts`                                    | `npm run gen:provider-reference` (genskaber PROVIDER_REFERENCE.md)                                   |
+| `docs/gen-openapi-module.mjs`                                       | `prebuild:docs` (genererer `src/app/docs/lib/openapi.generated.ts`)                                  |
+| `i18n/run-translation.mjs`                                          | `npm run i18n:run` (dokumenter spejle)                                                               |
+| `i18n/generate-route-namespaces.mjs`                                | `npm run gen:i18n-routes`                                                                            |
+| `release/aggregate-changelog.mjs`                                   | Folder `changelog.d/` -fragmenter til `CHANGELOG.md`                                                 |
+| `check/check-fabricated-docs.mjs`                                   | `npm run check:fabricated-docs` (doc nøjagtighedsport)                                               |
+| `check/check-tracked-artifacts.mjs`                                 | `npm run check:tracked-artifacts` (blokerer sporede `_*` rodstier)                                   |
+| `quality/check-quality-ratchet.mjs`                                 | `npm run quality:ratchet` (metrisk skralde mod `config/quality/`)                                    |
+| `dev/run-playwright-tests.mjs`                                      | `npm run test:e2e`                                                                                   |
+| `dev/run-protocol-clients-tests.mjs`, `dev/run-ecosystem-tests.mjs` | `npm run test:protocols:e2e`, `npm run test:ecosystem`                                               |
+| `dev/new-worktree.sh`                                               | Opretter et isoleret udviklingsarbejdstræ — se [WORKTREE_ISOLATION.md](../ops/WORKTREE_ISOLATION.md) |
+| `dev/sync-ui-kit.sh`                                                | Synkroniserer `packages/ui-kit/src` med en fastgjort upstream-commit                                 |
 
-### Kompression
+Gatebeholdning og politikker: [QUALITY_GATES.md](QUALITY_GATES.md).
 
-| Dok                             | Formål                                         |
-| ------------------------------- | ---------------------------------------------- |
-| `COMPRESSION_GUIDE.md`          | Oversigt over kompressionstilstande + køreplan |
-| `COMPRESSION_ENGINES.md`        | Caveman + RTK motorer, registreringskontrakt   |
-| `COMPRESSION_RULES_FORMAT.md`   | Caveman rule pack JSON skema                   |
-| `COMPRESSION_LANGUAGE_PACKS.md` | Beholdning af regelpakke pr. sprog             |
-| `RTK_COMPRESSION.md`            | RTK deklarative pipeline (56 filtre)           |
+## `config/` — versioneret konfiguration og gate-tilstand
 
-### Implementering
+| Sti                                      | Formål                                                                                                                  |
+| ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `i18n.json` / `i18n-schema.json`         | Understøttede lokaliteter (kilde til lokalitetsantal) og deres skema                                                    |
+| `payloadRules.json`                      | Regler for opstrøms nyttelast (`open-sse/services/payloadRules.ts`)                                                     |
+| `cli-tools-manifest.json`                | Manifest af integrerbare CLI værktøjer (`bin/cli/cli-manifest.mjs`)                                                     |
+| `alibaba-free-tier-allowlist.json`       | Alibaba free-tier model tilladelsesliste                                                                                |
+| `ci/toolchain.json`                      | CI værktøjskæde versioner                                                                                               |
+| `quality/quality-baseline.json`          | Multimetrisk skraldebasislinje (dækning, advarsler, duplikering, …)                                                     |
+| `quality/*-baseline.json`                | Frosne basislinjer for individuelle porte (kompleksitet, duplikering, filstørrelse, typecheck-udsnit, testopdagelse, …) |
+| `quality/*-allowlist.json`               | Gate-tilladelseslister (afhængigheder, licenser, AI tilskrivning, tests for glemte søskende, …)                         |
+| `quality/eslint-suppressions.json`       | Frosne ESLint undertrykkelser anvendt af `npm run lint`                                                                 |
+| `quality/gate-manifest.json`             | Portmanifest kontrolleret af `scripts/quality/gate-manifest.mjs`                                                        |
+| `quality/vitest-exclusions.json`         | Karantænebeholdning for `vitest.quarantine.config.ts`                                                                   |
+| `quality/skill-templates/`               | Kanoniske SKILL.md skabeloner kontrolleret af `scripts/quality/check-skill-contract.mjs`                                |
+| `quality/release-acceptance.schema.json` | Udgivelses-accept bevisskema — se [QUALITY_EVIDENCE_CONTRACT.md](QUALITY_EVIDENCE_CONTRACT.md)                          |
+| `release/`                               | Ændringslogafstemninger og wreq-js native manifest, licensbeholdning og meddelelser                                     |
 
-| Dok                          | Formål                                                             |
-| ---------------------------- | ------------------------------------------------------------------ |
-| `DOCKER_GUIDE.md`            | Docker build, profiler (base/cli/host/cliproxyapi), Redis sidevogn |
-| `VM_DEPLOYMENT_GUIDE.md`     | Generisk VM/VPS -implementering (Ubuntu/Debian + nginx + systemd)  |
-| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io-implementering (i øjeblikket kun kinesisk)                  |
-| `TERMUX_GUIDE.md`            | Android hovedløs via Termux                                        |
-| `PWA_GUIDE.md`               | Progressive Web App installer + service worker                     |
-| `ELECTRON_GUIDE.md`          | Desktop app build + sign + distribuere                             |
-| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale tragt                              |
-| `PROXY_GUIDE.md`             | 4-niveau udgående proxy + 1proxy markedsplads                      |
+## `changelog.d/` — changelog fragmenter
 
-### Undermapper
-
-| Underdir              | Formål                                                                                                                                                                                           |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `docs/i18n/`          | Lokaliserede dokumentoversættelser (41 lokaliteter)                                                                                                                                              |
-| `docs/screenshots/`   | Billedaktiver til guider                                                                                                                                                                         |
-| `_tasks/superpowers/` | Plans/specs fra supermagter (`writing-plans`/`brainstorming`) + research — isoleret, separat versioneret repo, gitignoreret af hovedtræet. Se CLAUDE.md → "Planlægning og forskning artefakter". |
-
----
-
-## `tests/` — Testpakker
-
-| Undermappe                           | Type                                           | Testkørsel                                  |
-| ------------------------------------ | ---------------------------------------------- | ------------------------------------------- |
-| `tests/unit/`                        | Enhedstest (~4.800 filer, hurtigst)            | Nodes indbyggede testkørsel                 |
-| `tests/integration/`                 | Integrations­test med flere moduler + database | Nodes indbyggede testkørsel (samtidighed 1) |
-| `tests/e2e/`                         | E2E for brugergrænseflade + arbejdsgang        | Playwright                                  |
-| `tests/e2e/protocol-clients.test.ts` | E2E med rigtige MCP- og A2A-klienter           | Brugerdefinerede protokolklienter           |
-| `tests/e2e/ecosystem.test.ts`        | Udbyderintegration (med netværksadgang)        | Nodes indbyggede testkørsel                 |
+En PR tilføjer et fragment i stedet for at redigere `CHANGELOG.md`: `features/`, `fixes/` eller `maintenance/`, kaldet `<PR-number>-<slug>.md`. Ved udgivelsestidspunktet folder `scripts/release/aggregate-changelog.mjs` dem til `CHANGELOG.md` og sletter dem; `npm run check:changelog-integrity` validerer dem. Detaljer i `changelog.d/README.md`.
 
 ---
 
-## `public/` — Statiske aktiver
+## `docs/` — offentlig dokumentation
 
-| Sti                 | Formål                                                                   |
-| ------------------- | ------------------------------------------------------------------------ |
-| `public/` (rod)     | Favicons, robots.txt, manifest, service worker og markedsføringsbilleder |
-| `public/providers/` | Udbyderlogoer i PNG/SVG-format (bruges i kontrolpanelet)                 |
+Sektioner, der er angivet i `source.config.ts` kompileres til `/docs` webstedet (med nogle få sikkerhedssider kun for operatører udelukket); `docs/meta.json` indstiller rækkefølgen på sidebjælken. Start ved [README.md](../README.md).
 
----
+| Sti                | Indhold                                                                                                                                                    |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `getting-started/` | Hurtig start, selvvært, udbydere, gratis niveauer, Auto-Combo og web-cookie-guider                                                                         |
+| `guides/`          | Operatør- og udviklervejledninger: opsætning, Docker, Electron, PWA, Termux, CLIs, i18n, fejlfinding, brugervejledning                                     |
+| `architecture/`    | Arkitektur, kodebasereference, modifikationsopskrifter, authz, modstandsdygtighed, kvalitetsporte, designsystem, dette kort                                |
+| `reference/`       | API -reference, miljøvariabler, featureflag, CLI værktøjer, gratis niveauer, genereret udbyderreference, fjernede udbydere                                 |
+| `frameworks/`      | MCP, A2A, ACP, færdigheder, hukommelse, plugins, cloud-agenter, webhooks, evals, logeksport, Radar, Playground, …                                          |
+| `routing/`         | Auto-Combo, ræsonnement replay/routing, kvoteandel, abonnementsstige, strenge nulomkostninger, …                                                           |
+| `security/`        | Autoværn, fejlsanering, CORS, SSO, udgangspolitik, ruteafskærmningsniveauer, forsyningskæde, …                                                             |
+| `compression/`     | Kompressionsguide, motorer, RTK, regelformat, sprogpakker, kontekstredigering                                                                              |
+| `ops/`             | Frigivelsesflow, forgrening, flettog, implementering (VM, Fly.io, Kubernetes), database, proxyer, arbejdstræer, detaljer om hårde regler                   |
+| `providers/`       | Vejledninger pr. udbyder (Claude Code, ChatGPT Web, Cursor, GitHub Copilot, …)                                                                             |
+| `comparison/`      | OmniRoute sammenlignet med alternativer                                                                                                                    |
+| `integrations/`    | Integrationsnoter (fal.ai native, MarkItDown MCP); ikke kompileret i `/docs`                                                                               |
+| `openapi.yaml`     | OpenAPI kilde; feeds `src/app/docs/lib/openapi.generated.ts`, `public/openapi.yaml` og `bin/cli/api-commands/`                                             |
+| `diagrams/`        | Havfruekilder (`.mmd`), gengivet SVGs (`exported/`) og README SVGs fra `scripts/docs/gen-readme-*`                                                         |
+| `assets/`          | Sprog-flag SVGs og andre README aktiver                                                                                                                    |
+| `screenshots/`     | Skærmbilleder brugt af README og guider                                                                                                                    |
+| `i18n/`            | Oversatte spejle: én mappe pr. lokalitet (66) med roddokumenter og et `docs/` undersæt; produceret af `npm run i18n:run` — se [I18N.md](../guides/I18N.md) |
+| topniveau `*.md`   | `README.md` (doc-indeks), `DEVELOPER-ENVIRONMENT.md` og et par enkeltstående noter                                                                         |
 
-## `config/` — Statiske konfigurationer + tilstand for kvalitetskontrol
-
-Leverede konfigurationsskabeloner samt de versionsstyrede baselines for kvalitetskontrol
-(flyttet hertil fra repositoryets rod i v3.8.26 for at holde roden enkel).
-
-| Sti                                           | Formål                                                                                         |
-| --------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| `config/i18n.json`                            | Liste over lokaliteter + metadata (kanonisk kilde til antallet på 42 lokaliteter)              |
-| `config/i18n-schema.json`                     | JSON-skema, der validerer `i18n.json`                                                          |
-| `config/payloadRules.json`                    | Regler for oprensning af upstream-payloads                                                     |
-| `config/quality/quality-baseline.json`        | Ratchet-baseline med flere målepunkter (`scripts/quality/check-quality-ratchet.mjs`)           |
-| `config/quality/complexity-baseline.json`     | Fastfrosset baseline for ESLint-kompleksitet (`check-complexity.mjs`)                          |
-| `config/quality/duplication-baseline.json`    | Fastfrosset baseline for jscpd-duplikering (`check-duplication.mjs`)                           |
-| `config/quality/file-size-baseline.json`      | Fastfrosset baseline for størrelse pr. fil (`check-file-size.mjs`)                             |
-| `config/quality/test-discovery-baseline.json` | Fastfrosset baseline for forældreløse test (`check-test-discovery.mjs`)                        |
-| `config/quality/dependency-allowlist.json`    | Tilladelsesliste over godkendte afhængigheder (`check-deps.mjs`)                               |
-| `config/quality/.license-allowlist.json`      | Tilladelsesliste over SPDX-licenser (`check-licenses.mjs`)                                     |
-| `config/quality/quality-metrics.json`         | Midlertidigt indsamlede målepunkter (genereret af `collect-metrics.mjs`; **ignoreres af Git**) |
-
----
-
-## `.github/` — GitHub-integration
-
-| Sti                                | Formål                                                           |
-| ---------------------------------- | ---------------------------------------------------------------- |
-| `.github/workflows/`               | GitHub Actions CI/CD-workflows (linting, test, dækning, release) |
-| `.github/ISSUE_TEMPLATE/`          | Skabeloner til fejl-/funktions-issues                            |
-| `.github/pull_request_template.md` | PR-skabelon                                                      |
-| `.github/dependabot.yml`           | Konfiguration af afhængighedsopdateringer                        |
+Vigtige indgangspunkter: [ARCHITECTURE.md](ARCHITECTURE.md), [CODEBASE_DOCUMENTATION.md](CODEBASE_DOCUMENTATION.md), [MODIFICATION_SCENARIOS.md](MODIFICATION_SCENARIOS.md), [ENVIRONMENT.md](../reference/ENVIRONMENT.md), [PROVIDER_REFERENCE.md](../reference/PROVIDER_REFERENCE.md) (genereret af `npm run gen:provider-reference`).
 
 ---
 
-## `.husky/` — Git-hooks
+## `tests/` — test suiter
 
-| Fil          | Formål                                                                     |
-| ------------ | -------------------------------------------------------------------------- |
-| `pre-commit` | Kører `lint-staged + check-docs-sync + check:any-budget:t11`               |
-| `pre-push`   | Deaktiveret i øjeblikket (udkommenteret). Kør `npm run test:unit` manuelt. |
-| `_/`         | Interne Husky-filer                                                        |
+Omkring 9.670 sporede filer. Testfiler hører hjemme her, ikke i projektroden. Undtagelser: de co-placerede `__tests__/` mapper i `src/` og `open-sse/`, som Vitest konfigurationerne indsamler.
 
----
+| Sti                                                    | Indhold                                                                                                                                                                | Løber                                                                                   |
+| ------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `tests/unit/`                                          | Enhedstest (over 9.000 filer): mange på topniveau plus domænemapper (`ui/`, `compression/`, `build/`, `guardrails/`, `db/`, `cli/`, `api/`, `dashboard/`, `combo/`, …) | Node testløber (`npm run test:unit`); `*.tsx` via `test:vitest:ui`                      |
+| `tests/unit/serial/`                                   | CPU-følsomme tests kører med samtidighed 1                                                                                                                             | `npm run test:unit:serial`                                                              |
+| `tests/unit/autoCombo/`, `tests/unit/api/**/*.spec.ts` | Vitest suiter inde i enhedstræet                                                                                                                                       | `npm run test:vitest`                                                                   |
+| `tests/integration/`                                   | Multi-modul og DB integration test; `combo-matrix/`, `combo-live/`, `services/`                                                                                        | `npm run test:integration`, `test:combo:matrix`, `test:combo:live`, `test:services:int` |
+| `tests/e2e/`                                           | Playwright `*.spec.ts` + live suiter `ecosystem.test.ts`, `protocol-clients.test.ts`                                                                                   | `npm run test:e2e`, `test:ecosystem`, `test:protocols:e2e`                              |
+| `tests/boundary/`                                      | `*.live.test.ts` mod en kørende instans                                                                                                                                | `npm run test:boundary:live`                                                            |
+| `tests/homolog/`                                       | Homologeringssuiter (`api/`, `ui/` med sin egen Playwright -konfiguration)                                                                                             | `npm run homolog` — se [HOMOLOGATION.md](../ops/HOMOLOGATION.md)                        |
+| `tests/load/`                                          | Indlæs og gennemblød scripts (k6)                                                                                                                                      | Natlig robust arbejdsgang                                                               |
+| `tests/_setup/`                                        | `--import` / opsætningsfiler (isoleret data dir, egress guard, Vitest UI polyfills)                                                                                    | Belastet af løberne                                                                     |
+| `tests/_helpers/`, `tests/helpers/`                    | Delte testhjælpere (gyldne øjebliksbilleder, ledelsessession, …)                                                                                                       | Importeret ved test                                                                     |
+| `tests/fixtures/`                                      | Fixturdata og underordnede processer                                                                                                                                   | Importeret ved test                                                                     |
+| `tests/snapshots/`                                     | Gyldne filer til `tests/helpers/goldenSnapshot.ts`                                                                                                                     | Importeret ved test                                                                     |
+| `tests/manual/`                                        | `.http` filer til manuelle REST -opkald                                                                                                                                | Manuel                                                                                  |
+| `tests/security/`                                      | Sikkerhedsskal-scripts                                                                                                                                                 | Manual / enhed-test armaturer                                                           |
+| `tests/types/`                                         | Kontraktinventar på typeniveau                                                                                                                                         | —                                                                                       |
 
-## `.claude/` — Claude Code-slash-kommandoer
-
-| Fil                                                 | Formål                                                        |
-| --------------------------------------------------- | ------------------------------------------------------------- |
-| `commands/version-bump-cc.md`                       | `/version-bump-cc` — opdater version + automatisk ændringslog |
-| `commands/generate-release-cc.md`                   | `/generate-release-cc` — komplet release-workflow             |
-| `commands/deploy-vps-{local,akamai,both}-cc.md`     | Udrul til VPS                                                 |
-| `commands/capture-release-evidences-cc.md`          | Optag nye funktioner i browseren som WebP                     |
-| `commands/review-{prs,discussions}-cc.md`           | Triager GitHub-PR'er/-diskussioner                            |
-| `commands/{review-issues,implement-features}-cc.md` | Issue-workflows                                               |
-| `settings.local.json`                               | Projektspecifikke Claude Code-indstillinger                   |
-
----
-
-## `.agents/` — Generiske agent-workflows (Codex / Cursor / osv.)
-
-| Sti                      | Formål                                                    |
-| ------------------------ | --------------------------------------------------------- |
-| `workflows/*-ag.md`      | 11 workflowdefinitioner (spejling af `.claude/commands/`) |
-| `skills/<name>/SKILL.md` | 9 færdighedsdefinitioner med Codex Execution Notes        |
-
-> **Bemærk:** Workflows og kommandoer er i øjeblikket identiske byte for byte. Hvis `.agents/` er beregnet til et andet agent-runtime-miljø (Codex), skal varianterne adskille sig på en meningsfuld måde.
+Fuld matrix: `CONTRIBUTING.md` → "Running Tests" og [COVERAGE_PLAN.md](../ops/COVERAGE_PLAN.md).
 
 ---
 
-## `_ideia/`, `_mono_repo/`, `_references/`, `_tasks/` — Uden for træet
+## `deploy/` — Kubernetes
 
-Disse mapper med understregningspræfiks indeholder indhold, der ikke distribueres:
+| Sti                                                | Formål                                                                                                              |
+| -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `deploy/helm/omniroute/`                           | Styrediagram (`Chart.yaml`, `values.yaml`, skabeloner til implementering, service, ingress, PVC, secret, configmap) |
+| `deploy/kubernetes/base/`                          | Tilpas base (navneområde, implementering, service, PVC, configmap, `secret.example.yaml`)                           |
+| `deploy/kubernetes/overlays/k3s/`, `overlays/k8s/` | Klyngespecifikke overlejringer (indgang, lagerklasse, ressourcer, sonder)                                           |
 
-- **`_ideia/`** — designnoter (kategorierne defer / notfit / viable)
-- **`_mono_repo/`** — historiske underprojekter (omnirouteCloud, omnirouteSite, vscode-extension)
-- **`_references/`** — skrivebeskyttede kloner af relaterede OSS-projekter (LiteLLM, 9router, ClawRouter, CLIProxyAPI, modelrelay, new-api osv.) til krydsreference under udvikling
-- **`_tasks/`** — filer til uformel opgavesporing pr. release
+Se [KUBERNETES_DEPLOYMENT_GUIDE.md](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
 
-Ikke inkluderet i outputtet fra `npm pack`. Se `.npmignore`.
+## `docker/` — hjælpebilleder
+
+| Sti                                 | Formål                                                                                                                |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `docker/chatgpt-web-codex-browser/` | Hovedløst browserbillede med en CDP proxy til ChatGPT web-executor — se [CHATGPT_WEB.md](../providers/CHATGPT_WEB.md) |
+| `docker/devin-bridge/`              | Devin brobillede, komponer-fil, håner og netværksvagt                                                                 |
+| `docker/vnc-browser/`               | Chromium med VNC til interaktive browsersessioner                                                                     |
+
+Hovedbilledet er roden `Dockerfile`; se [DOCKER_GUIDE.md](../guides/DOCKER_GUIDE.md).
+
+## `contrib/` — fællesskabsopskrifter (ikke officielt understøttet)
+
+| Sti                     | Formål                                                                                                                        |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `contrib/podman/`       | Podman-quadletter (container, volumen, netværk, Redis)                                                                        |
+| `contrib/vps/`          | VPS `compose.yaml` + `.env.example`                                                                                           |
+| `contrib/windows/`      | `.bat` launchers til at køre fra en Windows -kasse                                                                            |
+| `contrib/session-sync/` | README for en tredjeparts session-sync browserudvidelse — se [SESSION-SYNC-EXTENSION.md](../guides/SESSION-SYNC-EXTENSION.md) |
+
+## `examples/`
+
+| Sti                             | Formål                                                                         |
+| ------------------------------- | ------------------------------------------------------------------------------ |
+| `examples/omniroute-cmd-hello/` | Minimalt kommandoplugin. Se [PLUGINS.md](../frameworks/PLUGINS.md).            |
+| `examples/plugins/`             | Eksempelplugins som langfuse, request-logger, theme-manager og welcome-banner. |
+| `examples/quickstart/`          | Klienteksempler til curl, Node.js (axios), PHP og Python.                      |
 
 ---
 
-## Genereret / ignoreret af Git
+## `.github/` — GitHub integration
 
-| Sti                    | Formål                        |
-| ---------------------- | ----------------------------- |
-| `node_modules/`        | npm-afhængigheder             |
-| `.next/`               | Next.js-buildoutput           |
-| `coverage/`            | c8-dækningsrapporter          |
-| `logs/`                | Kørselslogfiler               |
-| `package/`             | Klargøring til npm pack       |
-| `.playwright-mcp/`     | Playwright MCP-testartefakter |
-| `.issues/`             | Lokal issue-cache             |
-| `tsconfig.tsbuildinfo` | Inkrementel TS-cache          |
+| Sti                                                          | Formål                                                                                                                                                                                                                                                                                       |
+| ------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `.github/workflows/`                                         | CI (`ci.yml`, `quality.yml`, `build.yml`), sikkerhedsscanninger (`codeql.yml`, `semgrep.yml`, `scorecard.yml`, `dast-smoke.yml`), planlagte `nightly-*.yml` suiter, udgivelse (`npm-publish.yml`, `docker-publish.yml`, `electron-release.yml`), udgivelses- og vedligeholdelsesarbejdsgange |
+| `.github/actions/npm-ci-retry/`                              | Sammensat handling: `npm ci` med cache og prøv igen                                                                                                                                                                                                                                          |
+| `.github/actions/prepare-unit-storage/`                      | Sammensat handling: frigør runner diskplads og installerer derefter afhængigheder                                                                                                                                                                                                            |
+| `.github/ISSUE_TEMPLATE/`                                    | Formularer til fejl, funktion og testdækning                                                                                                                                                                                                                                                 |
+| `.github/pull_request_template.md`, `PULL_REQUEST_TEMPLATE/` | Standard PR skabelon plus bugfix/feature varianter                                                                                                                                                                                                                                           |
+| `.github/CODEOWNERS`, `FUNDING.yml`, `dependabot.yml`        | Kodeejere, sponsorlinks, afhængighedsopdateringer                                                                                                                                                                                                                                            |
+| `.github/labels.yml`                                         | Etiketdefinitioner anvendt af `npm run labels:sync`                                                                                                                                                                                                                                          |
+| `.github/copilot-instructions.md`                            | GitHub Copilot instruktioner (en agent-instruktions overflade)                                                                                                                                                                                                                               |
+
+CI job kort: [QUALITY_GATES.md](QUALITY_GATES.md).
+
+## `.husky/` — git hooks
+
+| Fil          | Formål                                                                                                                                              |
+| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pre-commit` | Git-identitetstjek, lint-stadium, gate-manifest, docs-synkronisering, ethvert budget, typeskala-ratchet, tracked-artefakter og ui-kit snapshot-tjek |
+| `commit-msg` | `scripts/check/check-ai-attribution.mjs` på commit-beskeden                                                                                         |
+| `pre-push`   | Med vilje lys: en PATH/npm -sindskontrol, der afslutter 0                                                                                           |
+
+Hook runtime i `.husky/_/` genereres ved installation og spores ikke.
 
 ---
 
 ## Navigationstips
 
-- **Ny bidragyder?** Læs `CONTRIBUTING.md` → `CLAUDE.md` → `docs/architecture/ARCHITECTURE.md` → `docs/architecture/CODEBASE_DOCUMENTATION.md`.
-- **Tilføjer du en provider?** Følg `docs/architecture/ARCHITECTURE.md § Adding a New Provider`, og krydstjek med `docs/reference/PROVIDER_REFERENCE.md`.
-- **Tilføjer du en route?** Se `docs/architecture/ARCHITECTURE.md § Adding a New API Route` og `src/shared/validation/schemas.ts`.
-- **Tilføjer du et MCP-værktøj?** Se `docs/frameworks/MCP-SERVER.md § Adding a Tool`.
-- **Tilføjer du en A2A-skill?** Se `docs/frameworks/A2A-SERVER.md § Adding a New Skill`.
-- **Kører du lokalt?** Se `docs/guides/SETUP_GUIDE.md`.
-- **Implementerer du?** Se `docs/guides/DOCKER_GUIDE.md` / `docs/ops/VM_DEPLOYMENT_GUIDE.md` / `docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md`.
-- **Udgiver du en version?** Se `docs/ops/RELEASE_CHECKLIST.md` (og Claude Code-skillen `/generate-release-cc`).
+- **Ny bidragyder?** `CONTRIBUTING.md` → `AGENTS.md` → [ARCHITECTURE.md](ARCHITECTURE.md) → [CODEBASE_DOCUMENTATION.md](CODEBASE_DOCUMENTATION.md).
+- **Ændre noget almindeligt** (udbyder, rute, DB modul, MCP værktøj, A2A færdighed)? Følg [MODIFICATION_SCENARIOS.md](MODIFICATION_SCENARIOS.md).
+- **Vil du tilføje en udbyder?** Tjek først [REMOVED_PROVIDERS.md](../reference/REMOVED_PROVIDERS.md), og krydskryds derefter [PROVIDER_REFERENCE.md](../reference/PROVIDER_REFERENCE.md).
+- **Kører du lokalt?** [SETUP_GUIDE.md](../guides/SETUP_GUIDE.md).
+- **Implementerer?** [DOCKER_GUIDE.md](../guides/DOCKER_GUIDE.md), [SELF_HOST_GUIDE.md](../getting-started/SELF_HOST_GUIDE.md), [VM_DEPLOYMENT_GUIDE.md](../ops/VM_DEPLOYMENT_GUIDE.md), [FLY_IO_DEPLOYMENT_GUIDE.md](../ops/FLY_IO_DEPLOYMENT_GUIDE.md), [KUBERNETES_DEPLOYMENT_GUIDE.md](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+- **Frigive?** [RELEASE_CHECKLIST.md](../ops/RELEASE_CHECKLIST.md).
+- **En kvalitetsport fejlede?** [QUALITY_GATES.md](QUALITY_GATES.md) og [QUALITY_GATE_PLAYBOOK.md](../ops/QUALITY_GATE_PLAYBOOK.md).

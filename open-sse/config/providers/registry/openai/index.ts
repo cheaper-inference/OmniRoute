@@ -10,6 +10,8 @@ export const openaiProvider: RegistryEntry = {
   reasoningTransport: "opaque",
   authType: "apikey",
   authHeader: "bearer",
+  // OpenAI Chat Completions rejects function names over 64 chars (MCP tool names hit this).
+  toolNameMaxLength: 64,
   defaultContextLength: 128000,
   models: [
     // https://developers.openai.com/api/docs/models/gpt-6.1-sol
@@ -19,6 +21,16 @@ export const openaiProvider: RegistryEntry = {
       name: "GPT-6.1 Sol",
       ...GPT_5_6_API_CAPABILITIES,
       unsupportedParams: ["temperature", "top_p", "top_logprobs", "logprobs"],
+    },
+    // https://developers.openai.com/api/docs/models/gpt-6.1-terra
+    {
+      id: "gpt-6.1-terra",
+      name: "GPT-6.1 Terra",
+      ...GPT_5_6_API_CAPABILITIES,
+      // Unlike Sol/Astra, Terra accepts sampling with reasoning.effort="none".
+      // The effort-aware GPT sampling guard strips these fields only with
+      // active reasoning; static unsupportedParams would strip them always.
+      supportedThinkingEfforts: ["none", "low", "medium", "high", "xhigh", "max"],
     },
     // Astra shares the public GPT-5.6 limits; tool calling requires Responses.
     // https://developers.openai.com/api/docs/guides/latest-model

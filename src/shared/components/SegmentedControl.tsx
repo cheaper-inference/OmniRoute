@@ -24,6 +24,8 @@ interface SegmentedRadioProps extends SegmentedCommonProps {
   semantics: "radio";
   value?: string;
   onChange?: (value: string) => void;
+  /** The id of a hint that describes the group. */
+  "aria-describedby"?: string;
 }
 
 interface SegmentedTabsListProps extends SegmentedCommonProps {
@@ -152,7 +154,7 @@ export default function SegmentedControl(props: SegmentedControlProps) {
     );
   }
 
-  const { value, onChange } = props;
+  const { value, onChange, "aria-describedby": ariaDescribedBy } = props;
   // Roving tabindex: with no match (or no value yet) the group must still be reachable.
   const hasChecked = options.some((option) => option.value === value);
   return (
@@ -167,6 +169,7 @@ export default function SegmentedControl(props: SegmentedControlProps) {
         aria-orientation={undefined}
         aria-label={ariaLabel}
         aria-labelledby={ariaLabelledBy}
+        aria-describedby={ariaDescribedBy}
         className={LIST_CLASS}
       >
         {options.map((option, index) => {

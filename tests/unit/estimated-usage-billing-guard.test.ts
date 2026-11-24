@@ -49,6 +49,25 @@ function jsonCompletion(usage: Record<string, unknown>): Response {
   );
 }
 
+// A 2xx JSON reply whose body has no `usage` object at all.
+function jsonCompletionNoUsage(): Response {
+  return new Response(
+    JSON.stringify({
+      id: "chatcmpl-estimated",
+      object: "chat.completion",
+      model: MODEL,
+      choices: [
+        {
+          index: 0,
+          message: { role: "assistant", content: "hello from the model" },
+          finish_reason: "stop",
+        },
+      ],
+    }),
+    { status: 200, headers: { "content-type": "application/json" } }
+  );
+}
+
 function sseCompletion(events: unknown[]): Response {
   const body = events.map((e) => `data: ${JSON.stringify(e)}\n\n`).join("") + "data: [DONE]\n\n";
   return new Response(body, { status: 200, headers: { "content-type": "text/event-stream" } });
@@ -104,27 +123,57 @@ async function spend(apiKeyId: string): Promise<number> {
   return total;
 }
 
+type UsageRow = { tokens_input: number; tokens_output: number; success: number };
+
+async function usageRows(apiKeyId: string): Promise<UsageRow[]> {
+  const deadline = Date.now() + 5_000;
+  for (;;) {
+    const rows = core
+      .getDbInstance()
+      .prepare(
+        "SELECT tokens_input, tokens_output, success FROM usage_history WHERE api_key_id = ?"
+      )
+      .all(apiKeyId) as UsageRow[];
+    if (rows.length > 0 || Date.now() > deadline) return rows;
+    await new Promise((r) => setTimeout(r, 50));
+  }
+}
+
 function usageEstimatedMeta(entry: unknown): unknown {
   const responseBody = (entry as { responseBody?: { _omniroute?: Record<string, unknown> } })
     ?.responseBody;
   return responseBody?._omniroute?.usageEstimated;
 }
 
-test("extraction keeps an internal estimated marker that never serializes or spreads", () => {
-  const estimatedChunk = { choices: [], usage: { ...USAGE, estimated: true } };
-  const reportedChunk = { choices: [], usage: { ...USAGE } };
-  const estimated = extractUsage(estimatedChunk);
-  const reported = extractUsage(reportedChunk);
+test("extraction preserves serializable field evidence and estimates through copies", () => {
+  const estimated = extractUsage({ choices: [], usage: { ...USAGE, estimated: true } });
+  const reported = extractUsage({ choices: [], usage: { ...USAGE } });
+  const tokenFields = { prompt_tokens: 1200, completion_tokens: 800 };
+  const evidence = {
+    input: { source: "estimated", method: "legacy_estimate" },
+    output: { source: "estimated", method: "legacy_estimate" },
+    cacheRead: { source: "unknown" },
+    cacheCreation: { source: "unknown" },
+  };
+  assert.deepStrictEqual(estimated, { ...tokenFields, usage_evidence: evidence, estimated: true });
+  assert.deepStrictEqual(reported, {
+    ...tokenFields,
+    usage_evidence: {
+      input: { source: "reported" },
+      output: { source: "reported" },
+      cacheRead: { source: "unknown" },
+      cacheCreation: { source: "unknown" },
+    },
+  });
   assert.equal(isEstimatedUsage(estimated), true);
   assert.equal(isEstimatedUsage(reported), false);
-  assert.deepStrictEqual(estimated, reported, "token fields are untouched");
-  assert.equal(JSON.stringify(estimated), JSON.stringify(reported));
-  assert.equal(isEstimatedUsage({ ...estimated }), false, "spread copies never carry it");
-  assert.equal(isEstimatedUsage(filterUsageForFormat(estimated, "openai")), false);
-
+  assert.equal(isEstimatedUsage({ ...estimated }), true);
+  assert.equal(isEstimatedUsage(JSON.parse(JSON.stringify(estimated))), true);
+  assert.equal(isEstimatedUsage(filterUsageForFormat(estimated, "openai")), true);
   const fromResponse = extractUsageFromResponse({ usage: { ...USAGE, estimated: true } }, "x");
   assert.equal(isEstimatedUsage(fromResponse), true);
-  assert.equal(JSON.stringify(fromResponse).includes("estimated"), false);
+  assert.deepEqual(fromResponse.usage_evidence, evidence);
+  assert.equal(JSON.parse(JSON.stringify(fromResponse)).estimated, true);
   assert.equal(isEstimatedUsage(extractUsageFromResponse({ usage: { ...USAGE } }, "x")), false);
 });
 
@@ -145,6 +194,27 @@ test("non-streaming provider-reported usage carries no estimated marker", async 
   assert.ok((await spend("key-json-reported")) > 0);
   const entry = await persistedLog("key-json-reported");
   assert.equal(usageEstimatedMeta(entry), undefined);
+});
+
+test("non-streaming body with no usage persists the estimate to usage_history and the call log", async () => {
+  const clientText = await runChat("key-json-no-usage", false, jsonCompletionNoUsage);
+  assert.match(clientText, /hello from the model/);
+  const rows = await usageRows("key-json-no-usage");
+  assert.equal(rows.length, 1, "one usage_history row, so per-key USD limits see the spend");
+  assert.ok(rows[0].tokens_input > 0);
+  assert.ok(rows[0].tokens_output > 0);
+  const entry = await persistedLog("key-json-no-usage");
+  assert.ok((entry?.tokens?.out ?? 0) > 0);
+  assert.equal(usageEstimatedMeta(entry), true);
+  assert.doesNotMatch(clientText, /usageEstimated/);
+});
+
+test("non-streaming provider-reported usage is persisted as reported, not replaced by an estimate", async () => {
+  await runChat("key-json-reported-row", false, () => jsonCompletion({ ...USAGE }));
+  const rows = await usageRows("key-json-reported-row");
+  assert.equal(rows.length, 1);
+  assert.equal(rows[0].tokens_input, USAGE.prompt_tokens);
+  assert.equal(rows[0].tokens_output, USAGE.completion_tokens);
 });
 
 test("a stream without upstream usage is billed on the estimate and marked in the call log", async () => {

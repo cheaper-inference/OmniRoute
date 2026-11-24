@@ -10,6 +10,7 @@ import Input from "@/shared/components/Input";
 import { ENDPOINT_CATEGORIES } from "@/shared/constants/endpointCategories";
 import { toLocalDateTimeInputValue } from "@/app/(dashboard)/dashboard/api-manager/apiManagerPageUtils";
 import RoutingEntryLink from "@/shared/components/routing/RoutingEntryLink";
+import { KEY_EXPIRY_PRESET_DAYS, endOfLocalDayAfterDays } from "@/shared/utils/keyExpiry";
 import {
   MAX_KEY_NAME_LENGTH,
   type ApiKeyAccessData,
@@ -75,11 +76,11 @@ function ExclusiveLeaseNotice({ apiKey }: Pick<GeneralTabProps, "apiKey">) {
       {/* Exclusive Lease Notice */}
       {hasExclusiveLeaseScope && (
         <div className="flex flex-col gap-1 p-3 rounded-lg border border-chart-3/30 bg-chart-3/10">
-          <div className="flex items-center gap-1.5 text-chart-3 font-medium text-sm">
+          <div className="flex items-center gap-1.5 text-chart-3-ink font-medium text-sm">
             <Icon name="key_vertical" size={16} />
             {t("exclusiveLeaseNoticeTitle")}
           </div>
-          <p className="text-xs text-chart-3/80">{t("exclusiveLeaseNoticeDesc")}</p>
+          <p className="text-xs text-chart-3-ink/80">{t("exclusiveLeaseNoticeDesc")}</p>
         </div>
       )}
     </>
@@ -170,6 +171,19 @@ function ExpirationDateField({ formState, setExpiresAt }: GeneralSectionProps<"s
           {tc("clear")}
         </Button>
       </div>
+      <div className="flex flex-wrap gap-2">
+        {KEY_EXPIRY_PRESET_DAYS.map((days) => (
+          <Button
+            key={days}
+            variant="outline"
+            size="sm"
+            onClick={() => setExpiresAt(endOfLocalDayAfterDays(days, new Date()).toISOString())}
+          >
+            {t("keyExpiryPresetPlusDays", { days })}
+          </Button>
+        ))}
+      </div>
+      <p className="text-xs text-text-muted">{t("keyExpiryPresetsHint")}</p>
     </div>
   );
 }

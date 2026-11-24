@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import type { QuotaDimension } from "@/lib/quota/dimensions";
+import QuotaBar from "@/shared/components/quota/QuotaBar";
 
 interface DimensionBarProps {
   dimension: QuotaDimension;
@@ -28,36 +29,22 @@ export default function DimensionBar({ dimension, consumedTotal, resetAt }: Dime
   const [now] = useState(() => Date.now());
   const usedPct = dimension.limit > 0 ? Math.min((consumedTotal / dimension.limit) * 100, 100) : 0;
 
-  const barColor = usedPct >= 90 ? "bg-error" : usedPct >= 70 ? "bg-warning" : "bg-primary";
-
   const resetMs = resetAt ? new Date(resetAt).getTime() - now : null;
   const countdown = resetMs !== null && resetMs > 0 ? fmtCountdown(resetMs) : null;
 
   return (
-    <div className="flex flex-col gap-1 min-w-0">
-      <div className="flex items-center justify-between text-[10px] text-text-muted">
-        <span className="font-semibold uppercase tracking-wide">
-          {dimension.unit} / {dimension.window}
-        </span>
-        <span
-          className={`tabular-nums font-semibold ${
-            usedPct >= 90 ? "text-error" : usedPct >= 70 ? "text-warning" : ""
-          }`}
-        >
-          {Math.round(usedPct)}%
-        </span>
-      </div>
-      <div className="h-1.5 overflow-hidden rounded-sm bg-border/60" aria-hidden="true">
-        <div
-          className={`h-full rounded-sm transition-all ${barColor}`}
-          style={{ width: `${usedPct}%` }}
-        />
-      </div>
-      {countdown && (
-        <div className="text-[10px] text-text-muted">
-          {t("dimensionResetIn")} {countdown}
-        </div>
-      )}
-    </div>
+    <QuotaBar
+      size="sm"
+      label={`${dimension.unit} / ${dimension.window}`}
+      percent={usedPct}
+      valueLabel={`${Math.round(usedPct)}%`}
+      caption={
+        countdown ? (
+          <>
+            {t("dimensionResetIn")} {countdown}
+          </>
+        ) : null
+      }
+    />
   );
 }

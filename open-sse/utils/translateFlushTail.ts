@@ -1,3 +1,4 @@
+import { mergeUsageEvidence } from "./usageEvidence.ts";
 /**
  * Shared per-line drain for translate-mode flush.
  *
@@ -12,7 +13,11 @@
  */
 import { parseSSELine } from "./streamHelpers.ts";
 import { mergeCacheCreationFields } from "./cacheWriteUsage.ts";
-import { extractUsage, sanitizeUsagePayloadForRequest } from "./usageTracking.ts";
+import {
+  extractUsage,
+  sanitizeUsagePayloadForRequest,
+  type RequestUsageBasis,
+} from "./usageTracking.ts";
 import { normalizeArrayContentChunk } from "./arrayContentDelta.ts";
 import { markToolFinish } from "../services/sessionManager.ts";
 
@@ -23,6 +28,7 @@ export type TranslateFlushTailContext = {
   openaiFormat: string;
   openaiResponsesFormat: string;
   body: unknown;
+  usageBasis?: RequestUsageBasis;
   state: { usage?: unknown } & JsonRecord;
   sessionId: string | null;
   now: () => number;
@@ -46,7 +52,11 @@ function mergeUsage(state: { usage?: unknown }, extracted: unknown): void {
   }
   const current = state.usage as Record<string, number>;
   const incoming = extracted as Record<string, number>;
-  Object.assign(current, mergeCacheCreationFields(current, extracted));
+  Object.assign(
+    current,
+    { usage_evidence: mergeUsageEvidence(current, extracted) },
+    mergeCacheCreationFields(current, extracted)
+  );
   if (incoming.prompt_tokens > 0) current.prompt_tokens = incoming.prompt_tokens;
   if (incoming.completion_tokens > 0) current.completion_tokens = incoming.completion_tokens;
   if (incoming.total_tokens > 0) current.total_tokens = incoming.total_tokens;
@@ -87,7 +97,7 @@ function drainOneTailLine(
   if (context.emitFailureAndAbort(controller, parsed)) return true;
   if (isSkippedTailLine(parsed, context)) return false;
   context.pushProviderPayload(parsed);
-  sanitizeUsagePayloadForRequest(parsed, context.body, context.targetFormat);
+  sanitizeUsagePayloadForRequest(parsed, context.body, context.targetFormat, context.usageBasis);
   trackTailToolTiming(parsed as JsonRecord, context);
   mergeUsage(context.state, extractUsage(parsed));
   context.translateAndEmit(controller, parsed);

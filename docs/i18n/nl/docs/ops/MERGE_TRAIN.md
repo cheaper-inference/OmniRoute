@@ -4,10 +4,9 @@
 
 ---
 
-Sinds v3.8.49 (WS3.2/WS3.4 van het kwaliteits-/snelheidsplan) is het standaard mergepad voor
-beoordeelde PR's naar `release/vX.Y.Z` de **Mergify-mergewachtrij** (`.mergify.yml`);
-de hieronder gedocumenteerde **handmatige merge-train** is de TERUGVALOPTIE — gebruikt tijdens incidenten,
-release-freezes of als het Mergify Open Source-abonnement ooit verandert.
+> **19-11-2026: de samenvoegwachtrij voor samenvoegen is buiten gebruik gesteld** (beslissing van de eigenaar). `.mergify.yml` definieert niet langer een wachtrij en weigert de Mergify-opdrachten die een pull-verzoek samenvoegen of herschrijven. Release PRs wordt met de hand samengevoegd onder de repository-regelset "Vereist groene poorten voor de actieve release" (`Gate / CI` + `Gate / Quality`) totdat de omni-queue in de live-modus draait, en daarna via de omni-queue ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). In de onderstaande secties Samenvoegen wordt de wachtrij beschreven zoals deze was.
+
+Sinds v3.8.49 (WS3.2/WS3.4 van het quality/velocity -plan) is het standaard samenvoegpad voor beoordeelde PRs naar `release/vX.Y.Z` de** Samenvoegwachtrij samenvoegen** (`.mergify.yml`); de** handmatige samenvoegtrein** Hieronder wordt de FALLBACK — gedocumenteerd die wordt gebruikt tijdens incidenten, bevriezing van releases of als het Mergify Open Source-plan ooit verandert.
 
 ## Standaardpad: de Mergify-wachtrij
 

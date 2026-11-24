@@ -99,6 +99,26 @@ export async function readConnectionForCooldownGate(
   return (await getProviderConnectionById(connectionId)) as Record<string, unknown> | null;
 }
 
+/**
+ * An agent guard refusal is a policy refusal of this request. The target is skipped without a
+ * provider failure, without a protected-priority stop, and the last known good stays.
+ */
+function skipAgentGuardRefusal(
+  deps: AttemptLoopDeps,
+  target: ResolvedComboTarget,
+  bumpFallback: () => void
+): GateDecision {
+  deps.log.debug?.("COMBO", `Skipping ${target.modelStr}: refused by the agent guard`);
+  recordComboDecision(deps.traceInvocationId, {
+    step: target.executionKey,
+    target: target.modelStr,
+    decision: "skipped_before_dispatch",
+    reason: "agent_guard_refused",
+  });
+  bumpFallback();
+  return { kind: "skip", result: null };
+}
+
 export async function evaluateExecuteTargetGates(opts: {
   index: number;
   state: AttemptLoopState;
@@ -350,6 +370,8 @@ export async function evaluateExecuteTargetGates(opts: {
 
   if (deps.isModelAvailable) {
     const available = await deps.isModelAvailable(modelStr, targetForAttempt);
+    if (available === "agent_guard_refused")
+      return skipAgentGuardRefusal(deps, target, bumpFallback);
     const skipReason = modelAvailabilitySkipReason(available);
     if (skipReason) {
       recordSkippedConnectionCooldown(state, available);

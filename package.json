@@ -1,6 +1,6 @@
 {
   "name": "omniroute",
-  "version": "3.8.54",
+  "version": "3.8.55",
   "description": "Unified AI router with hundreds of providers, RTK+Caveman compression, auto fallback, MCP/A2A, desktop, PWA, and OpenAI-compatible APIs.",
   "type": "module",
   "bin": {
@@ -107,7 +107,6 @@
     "bench:heap-body": "node --expose-gc --import tsx/esm scripts/perf/request-body-heap.ts",
     "bench:routing-events": "node --import tsx/esm scripts/perf/routing-events-bench.ts",
     "bench:egress-quota-rotation": "node --import tsx/esm scripts/perf/egress-quota-rotation-bench.ts",
-    "bench:highwatermark": "node --import tsx/esm scripts/perf/benchmark-highwatermark.ts",
     "perf:lts-baseline": "node scripts/perf/lts-baseline.mjs",
     "eval:compression": "node --import tsx scripts/compression-eval/index.ts",
     "eval:router": "node --import tsx scripts/router-eval/index.ts",
@@ -160,7 +159,7 @@
     "test:plan3": "cross-env DISABLE_SQLITE_AUTO_BACKUP=true node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --test tests/unit/plan3-p0.test.ts",
     "test:fixes": "cross-env DISABLE_SQLITE_AUTO_BACKUP=true node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --test tests/unit/fixes-p1.test.ts",
     "test:security": "cross-env DISABLE_SQLITE_AUTO_BACKUP=true node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --test tests/unit/security-fase01.test.ts",
-    "test:property": "cross-env DISABLE_SQLITE_AUTO_BACKUP=true node --import tsx/esm --test --test-force-exit tests/unit/correctness/*.property.test.ts",
+    "test:property": "cross-env DISABLE_SQLITE_AUTO_BACKUP=true node --import tsx/esm --import ./tests/_setup/isolateDataDir.ts --test --test-force-exit tests/unit/correctness/*.property.test.ts",
     "check:boundary": "node scripts/quality/measure-boundary.mjs",
     "check:boundary:ratchet": "node scripts/quality/measure-boundary.mjs --ratchet",
     "check:cycles": "node scripts/check/check-cycles.mjs",
@@ -407,7 +406,7 @@
     "marked-terminal": "^7.3.0",
     "mermaid": "^11.17.2",
     "monaco-editor": "^0.56.0",
-    "next": "16.4.2",
+    "next": "16.4.6",
     "next-intl": "^4.14.0",
     "next-themes": "^0.4.6",
     "node-machine-id": "^1.1.12",
@@ -461,6 +460,7 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",
+    "@bcoe/v8-coverage": "1.0.2",
     "@cyclonedx/cyclonedx-npm": "6.0.1",
     "@eslint/compat": "^2.1.1",
     "@playwright/test": "1.62.1",
@@ -490,7 +490,7 @@
     "dpdm": "^4.3.0",
     "esbuild": "0.28.2",
     "eslint": "^10.10.0",
-    "eslint-config-next": "16.4.5",
+    "eslint-config-next": "16.4.6",
     "eslint-plugin-react-hooks": "7.1.1",
     "eslint-plugin-sonarjs": "^4.1.0",
     "espree": "^11.2.0",
@@ -608,14 +608,10 @@
     "socket.io-parser": "^4.2.7",
     "tar": "^7.5.21",
     "libxmljs2": {
-      "minimatch": {
-        "brace-expansion": "^2.1.4"
-      }
+      "minimatch": "^11.0.4"
     },
     "rimraf": {
-      "minimatch@9": {
-        "brace-expansion": "^2.1.4"
-      }
+      "minimatch@9": "^11.0.4"
     },
     "@apidevtools/json-schema-ref-parser": {
       "js-yaml": "^5.4.2"
@@ -639,6 +635,8 @@
     },
     "get-uri": {
       "basic-ftp": "^6.2.3"
-    }
+    },
+    "glob": "$glob",
+    "minimatch@>=9.0.0": "^11.0.4"
   }
 }

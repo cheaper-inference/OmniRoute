@@ -40,7 +40,7 @@ the same volume corrupt the database. Everything below follows from that:
 
 If you need more capacity, run **N independent releases**, each with its own PVC
 — see [Scale-out](#scale-out) below. Multi-writer HA is tracked upstream in
-[#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075) and is not a
+[#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075) and is not a
 supported path today.
 
 ---
@@ -354,7 +354,7 @@ Helm:
 
 ```bash
 # Kustomize: pin a real tag rather than relying on :latest
-kubectl -n omniroute set image deploy/omniroute omniroute=diegosouzapw/omniroute:3.8.51
+kubectl -n omniroute set image deploy/omniroute omniroute=cheaperinference/omniroute:3.8.54
 
 # Helm
 helm upgrade omniroute deploy/helm/omniroute -n omniroute --reuse-values \
@@ -390,7 +390,7 @@ Never put `DATA_DIR` on NFS or CIFS. SQLite WAL journaling corrupts there.
 plane is small — provider connections, keys, combos are hundreds of rows — but
 `conversation_turn_nodes` and `agentic_conversations` currently have no retention
 path and grow with traffic (a reported ~190 MB/day under agentic load). Until
-[#12453](https://github.com/diegosouzapw/OmniRoute/issues/12453) lands, treat the
+[#12453](https://github.com/cheaper-inference/OmniRoute/issues/12453) lands, treat the
 PVC as sized by your retention window, and watch actual growth before trusting
 the 10Gi/20Gi defaults here.
 
@@ -422,7 +422,7 @@ the database behind. Delete it deliberately.
 
 One Node process is one V8 heap. Two overlapping large `/v1/responses` requests
 (~3 MiB / ~750k tokens) can abort a heap at ~12 GiB — see
-[#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849).
+[#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849).
 
 | Workload                 | requests     | limits   | `config.maxOldSpaceSizeMb` |
 | ------------------------ | ------------ | -------- | -------------------------- |

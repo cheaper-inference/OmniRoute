@@ -31,7 +31,10 @@ import { sanitizeToolId } from "../translator/helpers/schemaCoercion.ts";
 import { stripGeminiPlaceholderArgs } from "../translator/helpers/geminiPlaceholderArgs.ts";
 import { stripEmptyOptionalToolArgs } from "../translator/response/openai-responses/pureHelpers.ts";
 import { toNumber as toFiniteNumber } from "../utils/numeric.ts";
-import { geminiExtraUsageCounts } from "../translator/response/geminiUsageMetadata.ts";
+import {
+  geminiCandidatesTokenCount,
+  geminiExtraUsageCounts,
+} from "../translator/response/geminiUsageMetadata.ts";
 import {
   extractThinkingFromContent,
   shouldParseTextualReasoningTags,
@@ -863,6 +866,7 @@ function convertOpenAINonStreamingToClaude(
     content.push({
       type: "thinking",
       thinking: reasoningText,
+      signature: "",
     });
   }
 
@@ -1048,8 +1052,10 @@ function convertOpenAINonStreamingToGeminiFamily(openaiResponse: JsonRecord): Js
     OPENAI_TO_GEMINI_FINISH_REASON[toString(choice.finish_reason, "stop")] ?? "STOP";
 
   const usageSrc = toRecord(openaiResponse.usage);
-  const promptTokens = toFiniteNumber(usageSrc.prompt_tokens, 0);
-  const completionTokens = toFiniteNumber(usageSrc.completion_tokens, 0);
+  // Some OpenAI-compatible upstreams report the Responses names (input/output_tokens).
+  const promptTokens = toFiniteNumber(usageSrc.prompt_tokens ?? usageSrc.input_tokens, 0);
+  const completionTokens = toFiniteNumber(usageSrc.completion_tokens ?? usageSrc.output_tokens, 0);
+  const extraUsage = geminiExtraUsageCounts(usageSrc);
 
   const geminiResponse: JsonRecord = {
     response: {
@@ -1062,9 +1068,12 @@ function convertOpenAINonStreamingToGeminiFamily(openaiResponse: JsonRecord): Js
       ],
       usageMetadata: {
         promptTokenCount: promptTokens,
-        candidatesTokenCount: completionTokens,
+        candidatesTokenCount: geminiCandidatesTokenCount(
+          completionTokens,
+          extraUsage.thoughtsTokenCount
+        ),
         totalTokenCount: toFiniteNumber(usageSrc.total_tokens, promptTokens + completionTokens),
-        ...geminiExtraUsageCounts(usageSrc),
+        ...extraUsage,
       },
       modelVersion: toString(openaiResponse.model, "unknown"),
       responseId: toString(openaiResponse.id, `resp_${Date.now()}`),
