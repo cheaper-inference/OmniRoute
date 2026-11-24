@@ -32,6 +32,10 @@ export interface SharedRefusalStore {
   listenerKeys: Map<string, ProxyTransitionListener>;
   /** True once any entry was written with a model. Lets model-less readers skip the scan. */
   modelScopedSeen?: boolean;
+  /** Egress keys of rotating endpoints: never set aside for a per-IP quota refusal. */
+  quotaExemptKeys?: Set<string>;
+  /** Registry generation the exempt set was read at; absent until the first sync. */
+  quotaExemptStamp?: number;
 }
 
 export type RefusalState = { streak: number; until: number; seq: number };
