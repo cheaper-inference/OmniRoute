@@ -70,6 +70,49 @@ async function openCustomStep() {
   await screen.findByLabelText(/^Endpoint URL/);
 }
 
+describe("Custom webhook URL guidance (KEA-9517)", () => {
+  it("advertises both URL schemes in the integration picker and the endpoint field", async () => {
+    render(<AddWebhookWizard isOpen onClose={vi.fn()} onCreated={vi.fn()} t={t} />);
+    await screen.findByText("Add Webhook — Select Integration");
+    expect(button("Custom Webhook")?.textContent).toContain(
+      "Deliver system event payloads to an http:// or https:// endpoint"
+    );
+
+    fireEvent.click(button("Custom Webhook")!);
+    fireEvent.click(next());
+    expect(urlField().placeholder).toBe("http:// or https://");
+  });
+
+  it("warns that HTTP is unencrypted while keeping the URL valid and allowing Next", async () => {
+    await openCustomStep();
+    type(urlField(), "http://example.com");
+
+    expect(
+      screen.getByText(
+        "HTTP is unencrypted. The payload and signature are sent in clear text. Use https:// when possible."
+      )
+    ).toBeTruthy();
+    await screen.findByText("URL is valid", {}, { timeout: 10_000 });
+    expect(urlField().getAttribute("aria-invalid")).toBeNull();
+    expect(next().disabled).toBe(false);
+
+    fireEvent.click(next());
+    await screen.findByText("Add Webhook — Events & Test");
+    expect(JSON.parse(String(creates()[0][1]?.body))).toEqual({
+      kind: "custom",
+      url: "http://example.com",
+    });
+  });
+
+  it("shows HTTPS as valid without the unencrypted HTTP warning", async () => {
+    await openCustomStep();
+    type(urlField(), "https://example.com");
+
+    await screen.findByText("URL is valid", {}, { timeout: 10_000 });
+    expect(screen.queryByText(/HTTP is unencrypted/)).toBeNull();
+  });
+});
+
 describe("Custom webhook step validation (KEA-9386)", () => {
   it("explains an empty Endpoint URL inline when Next is clicked, instead of a silent disabled button", async () => {
     await openCustomStep();
