@@ -732,3 +732,11 @@ export function isPluginPermissionModelEnabled(): boolean {
     return false;
   }
 }
+
+export function isAgentSessionMessagesEnabled(): boolean {
+  try {
+    return isFeatureFlagEnabled("AGENT_SESSION_MESSAGES_ENABLED");
+  } catch {
+    return false;
+  }
+}
