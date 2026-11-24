@@ -97,6 +97,7 @@ import { isCommonChatGptWebRetirementError } from "@/shared/constants/chatgptWeb
 import { isChatGptWebCodexModel } from "@/shared/constants/chatgptWebCodex";
 import { deleteHandoff, getHandoff } from "@/lib/db/contextHandoffs";
 import { scopeHandoffSessionId } from "@omniroute/open-sse/services/combo/handoffSessionScope.ts";
+import { isReservedComboName } from "@/lib/combos/autoNames";
 import { getComboByName, updateCombo } from "@/lib/db/combos";
 import { isModelAllowedForKey } from "@/lib/db/apiKeys";
 import { promoteSuccessfulComboModel } from "@/lib/combos/autoPromote";
@@ -739,7 +740,8 @@ async function handleChatImplementation(
   // Models such as Codex GPT-5.5 support both chat and image generation, so an
   // image-registry match is only image-only when the same provider/model pair is
   // absent from the chat catalog.
-  const imageModel = getImageModelEntry(modelStr);
+  const isReservedModel = isReservedComboName(modelStr);
+  const imageModel = isReservedModel ? null : getImageModelEntry(modelStr);
   // Exact stored combo names take precedence over colliding bare image aliases.
   // Keep this narrower than getComboForModel() so mappings and synthetic aliases
   // retain their existing resolution order.
@@ -764,7 +766,9 @@ async function handleChatImplementation(
 
   // A trusted endpoint-tag mismatch is a local client error, not a provider or
   // connection health failure. Exact combo names are exempt in the resolver.
-  const endpointMismatch = await getRequestedModelEndpointMismatch(modelStr, "chat");
+  const endpointMismatch = isReservedModel
+    ? null
+    : await getRequestedModelEndpointMismatch(modelStr, "chat");
   if (endpointMismatch) {
     return logHandlerRejection(errorResponse(HTTP_STATUS.BAD_REQUEST, endpointMismatch), {
       path: new URL(request.url).pathname,
@@ -1125,21 +1129,9 @@ async function handleChatImplementation(
 
   // Check if model is a combo (has multiple models with fallback)
   telemetry.startPhase("resolve");
-  let combo: any = await getComboForModel(resolvedModelStr);
-  if (reasoningDecision?.targetCombo) combo = reasoningDecision.targetCombo;
-
-  // "auto" prefix fuzzy matching: "auto/fast" → "auto/best-fast", etc.
-  // parseModel splits "auto/fast" into provider="auto" which isn't a real provider.
-  if (!combo && resolvedModelStr.startsWith("auto/")) {
-    const suffix = resolvedModelStr.slice(5);
-    for (const candidate of [`auto/best-${suffix}`, `auto/${suffix}`]) {
-      combo = await getComboForModel(candidate);
-      if (combo) {
-        log.info("ROUTING", `"${resolvedModelStr}" → combo "${candidate}" (auto fuzzy)`);
-        break;
-      }
-    }
-  }
+  let combo: any = autoRouting.isAutoRouting
+    ? null
+    : (reasoningDecision?.targetCombo ?? (await getComboForModel(resolvedModelStr)));
 
   const virtualCombo = await createVirtualAutoCombo(autoRouting, combo, apiKeyInfo?.id);
   if (virtualCombo instanceof Response) return virtualCombo;
@@ -1343,6 +1335,7 @@ async function handleChatImplementation(
             forceLiveComboTest: isComboLiveTest,
             automatedProbe: isAutomatedProbe,
             ...resolvedPolicy.comboAuthorizationOptions(apiKeyInfo, resolvedModelStr),
+            isVirtualAutoCombo: autoRouting.isAutoRouting,
             forcedConnectionId: target?.connectionId ?? null,
             allowedConnectionIds: target?.allowedConnectionIds ?? null,
             emptyTurnConnectionId: target?.emptyTurnConnectionId ?? null,
@@ -1514,7 +1507,7 @@ async function handleChatImplementation(
   let routingComboId: string | null = null;
   if (!combo) {
     const providerPrefix = resolvedModelStr.split("/")[0];
-    if (providerPrefix) {
+    if (providerPrefix && !autoRouting.isAutoRouting) {
       try {
         const { getComboByName } = await import("@/lib/db/combos");
         const routingCombo = await getComboByName(providerPrefix);
@@ -1644,6 +1637,7 @@ async function handleSingleModelChat(
     reasoningRequestTags?: string[];
     reasoningTransportFallback?: "skip" | "drop";
     authorizationContextModel?: string | null; // admitted combo/alias (resolvedModelPolicy.ts)
+    isVirtualAutoCombo?: boolean;
     comboGrantsTargets?: boolean; // server-computed allowedCombos grant (#14197)
     managedLease?: ManagedLeaseDispatchContext | null;
     /** #12150 P1b: video-bridge log/Memory shadow — undefined on every non-video request. */
@@ -2450,6 +2444,7 @@ async function handleSingleModelChat(
             comboName,
             comboStrategy,
             isCombo,
+            isVirtualAutoCombo: runtimeOptions.isVirtualAutoCombo ?? false,
             comboStepId: runtimeOptions.comboStepId ?? null,
             comboExecutionKey:
               runtimeOptions.comboExecutionKey ?? runtimeOptions.comboStepId ?? null,

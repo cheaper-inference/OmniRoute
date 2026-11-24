@@ -1,0 +1,1 @@
+- **fix(combos):** Reserve `auto` and `auto/*` for built-in automatic routing and prompt users to rename existing combos with reserved names.

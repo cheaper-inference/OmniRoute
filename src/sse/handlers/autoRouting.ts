@@ -15,6 +15,7 @@ import {
   isValidModelFamily,
   type ModelFamily,
 } from "@omniroute/open-sse/services/autoCombo/modelFamily.ts";
+import { isReservedComboName } from "@/lib/combos/autoNames";
 import { getCachedSettings } from "@/lib/db/readCache";
 import { isAutoRequestResolvedCapabilitiesEnabled } from "@/shared/utils/featureFlags";
 import {
@@ -98,7 +99,8 @@ async function applyAutoPrefix(
 }
 
 export async function resolveAutoRoutingState(model: string): Promise<AutoRoutingState> {
-  const isAutoRouting = model === "auto" || model.startsWith("auto/");
+  const isAutoRouting = isReservedComboName(model);
+  if (isAutoRouting) model = model.toLowerCase();
   const classified = classifyAutoModel(model);
 
   if (!isAutoRouting) {
@@ -127,7 +129,7 @@ export async function createVirtualAutoCombo(
   combo: any,
   apiKeyId?: string
 ): Promise<any | Response> {
-  if (!state.isAutoRouting || combo !== null) return combo;
+  if (!state.isAutoRouting) return combo;
   if (!state.recognizedBuiltInAuto) {
     return errorResponse(
       HTTP_STATUS.BAD_REQUEST,

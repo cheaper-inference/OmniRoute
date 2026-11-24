@@ -102,7 +102,7 @@ test("resolveModelOrError rejects unknown built-in auto catalog ids", async () =
   assert.match(json.error.message, /Unknown built-in auto combo/i);
 });
 
-test("resolveModelOrError preserves persisted fuzzy auto combos before virtual catalog ids", async () => {
+test("resolveModelOrError rejects an unknown suffix even when a fuzzy legacy combo exists", async () => {
   await combosDb.createCombo({
     id: "persisted-auto-best-legacy",
     name: "auto/best-legacy",
@@ -116,12 +116,14 @@ test("resolveModelOrError preserves persisted fuzzy auto combos before virtual c
     "/v1/chat/completions"
   );
 
-  assert.equal(result.error, undefined);
-  assert.ok(result.combo);
-  assert.equal(result.combo.id, "persisted-auto-best-legacy");
-  assert.equal(result.combo.name, "auto/best-legacy");
-  assert.equal(result.provider, "auto");
-  assert.equal(result.model, "legacy");
+  assert.ok(result.error);
+  assert.equal(result.error.status, 400);
+  const json = (await result.error.json()) as ApiErrorJson;
+  assert.match(json.error.message, /Unknown built-in auto combo/i);
+  assert.equal(
+    (await combosDb.getComboByName("auto/best-legacy"))?.id,
+    "persisted-auto-best-legacy"
+  );
 });
 
 test("resolveModelOrError rejects ambiguous aliases without a provider prefix", async () => {

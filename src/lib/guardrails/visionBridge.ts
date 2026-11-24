@@ -9,6 +9,7 @@
  */
 
 import { BaseGuardrail, type GuardrailContext, type GuardrailResult } from "./base";
+import { isReservedComboName } from "@/lib/combos/autoNames";
 import { getSettings as defaultGetSettings } from "@/lib/db/settings";
 import { getResolvedModelCapabilities } from "@/lib/modelCapabilities";
 import { getProviderNodePrefixSync } from "@/lib/db/providers/nodePrefix";
@@ -351,7 +352,7 @@ export class VisionBridgeGuardrail extends BaseGuardrail {
     // does NOT currently filter models by vision capability, so without the
     // guardrail an image-bearing request assigned to a text-only model will
     // fail upstream with "does not support images".
-    const isAuto = model === "auto" || model.startsWith("auto/");
+    const isAuto = isReservedComboName(model);
 
     // Declare before the conditional so they're available to the rest of preCall
     let forceVisionBridge = false;

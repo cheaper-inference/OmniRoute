@@ -1,4 +1,5 @@
 // Re-export from open-sse with localDb integration
+import { isReservedComboName } from "@/lib/combos/autoNames";
 import { getModelAliases, getCustomModels } from "@/lib/db/models";
 import { getComboById, getComboByNameInsensitive } from "@/lib/db/combos";
 import { getCachedComboByName } from "@/lib/db/readCache";
@@ -691,6 +692,7 @@ export async function getModelInfoOrRetirementResponse(modelId: string) {
  * @returns {Promise<Object|null>} Full combo object or null if not a combo
  */
 export async function getCombo(modelStr) {
+  if (typeof modelStr !== "string" || isReservedComboName(modelStr)) return null;
   // Try exact match first (supports combos actually named "combo/ANY")
   let combo = await getCachedComboByName(modelStr);
   if (combo && Array.isArray(combo.models) && combo.models.length > 0) {
@@ -795,6 +797,7 @@ async function getComboByClientNamespacedName(modelStr: unknown) {
  * 3. null (no combo — single-model request)
  */
 export async function getComboForModel(modelStr) {
+  if (typeof modelStr !== "string" || isReservedComboName(modelStr)) return null;
   // 1. Existing behavior — exact combo name match
   let combo = await getCombo(modelStr);
   if (combo) return combo;
@@ -803,6 +806,7 @@ export async function getComboForModel(modelStr) {
   // combo names such as "Claude [1m]" while allowing "Claude[500k]" to use "Claude".
   const baseModelStr = stripContextWindowSuffix(modelStr);
   if (baseModelStr && baseModelStr !== modelStr) {
+    if (isReservedComboName(baseModelStr)) return null;
     combo = await getCombo(baseModelStr);
     if (combo) return combo;
   }

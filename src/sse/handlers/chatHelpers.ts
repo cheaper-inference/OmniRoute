@@ -41,6 +41,8 @@ import { isRequestScopedUpstreamFailure } from "./comboFailureLogging";
 import { isCodexNativeResponsesRequest } from "./requestShapeGuards";
 import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
 import { getRegistryEntry } from "@omniroute/open-sse/config/providerRegistry.ts";
+import { isReservedComboName } from "@/lib/combos/autoNames";
+import { createVirtualAutoCombo, resolveAutoRoutingState } from "./autoRouting";
 import { getCachedProviderNodes } from "@/lib/db/readCache";
 import {
   runWithProxyContext,
@@ -128,6 +130,19 @@ export async function resolveModelOrError(
   endpointPath: string = "",
   requestHeaders: Record<string, unknown> | null | undefined = null
 ) {
+  const isReservedModel = isReservedComboName(modelStr);
+  if (isReservedModel) modelStr = modelStr.toLowerCase();
+  if (modelStr === "auto") {
+    const state = await resolveAutoRoutingState(modelStr);
+    if (state.response) return { error: state.response };
+    const combo = await createVirtualAutoCombo(state, null);
+    if (combo instanceof Response) return { error: combo };
+    if (combo?.models?.length) return { combo, provider: "auto", model: "" };
+    return {
+      error: errorResponse(HTTP_STATUS.SERVICE_UNAVAILABLE, "No connected providers match 'auto'."),
+    };
+  }
+
   const modelInfo = await getModelInfoOrRetirementResponse(modelStr);
   if ("error" in modelInfo) return modelInfo;
   const sourceFormat = detectFormatFromEndpoint(body, endpointPath);
@@ -195,23 +210,13 @@ export async function resolveModelOrError(
 
   // "auto" is a built-in virtual combo prefix, not a provider. parseModel("auto/fast")
   // splits it into provider="auto" model="fast", so resolve it before credential lookup.
-  if (modelInfo.provider === "auto") {
-    const suffix = modelInfo.model || "";
+  if (isReservedModel || modelInfo.provider === "auto") {
+    const suffix = isReservedModel ? modelStr.slice("auto/".length) : modelInfo.model || "";
     const fuzzyCandidates = [`auto/best-${suffix}`, `auto/${suffix}`];
 
-    const exactCombo = await getComboForModel(modelStr);
-    if (exactCombo) {
-      log.info("ROUTING", `"auto" provider → combo "${modelStr}"`);
-      return { combo: exactCombo, provider: "auto", model: suffix };
-    }
-
-    // Preserve persisted fuzzy combo behavior before falling back to built-in virtual catalog ids.
-    for (const candidate of fuzzyCandidates) {
-      const fuzzyCombo = await getComboForModel(candidate);
-      if (fuzzyCombo) {
-        log.info("ROUTING", `"auto/${suffix}" → combo "${candidate}" (fuzzy)`);
-        return { combo: fuzzyCombo, provider: "auto", model: suffix };
-      }
+    if (!isReservedModel) {
+      const combo = await getComboForModel(modelStr);
+      if (combo) return { combo, provider: "auto", model: suffix };
     }
 
     // One pool preparation shared by the attempt below and the fuzzy fallbacks,
@@ -453,6 +458,7 @@ export async function executeChatWithBreaker({
   comboName,
   comboStrategy,
   isCombo,
+  isVirtualAutoCombo = false,
   comboStepId,
   comboExecutionKey,
   extendedContext,
@@ -540,6 +546,7 @@ export async function executeChatWithBreaker({
             comboName,
             comboStrategy,
             isCombo,
+            isVirtualAutoCombo,
             comboStepId,
             comboExecutionKey,
             cachedSettings,

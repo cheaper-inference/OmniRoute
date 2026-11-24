@@ -1,0 +1,107 @@
+import assert from "node:assert/strict";
+import { mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import test from "node:test";
+
+const originalDataDir = process.env.DATA_DIR;
+const dataDir = mkdtempSync(join(tmpdir(), "omniroute-reserved-auto-"));
+process.env.DATA_DIR = dataDir;
+
+const { resetDbInstance } = await import("@/lib/db/core");
+const { createCombo, getComboByName } = await import("@/lib/db/combos");
+const { getModelsByProviderId } = await import("@omniroute/open-sse/config/providerModels");
+const { NOAUTH_PROVIDERS } = await import("@/shared/constants/providers");
+const { updateSettings } = await import("@/lib/db/settings");
+const { createProviderConnection } = await import("@/lib/db/providers");
+const { POST } = await import("@/app/api/v1/chat/completions/route");
+
+test.before(async () => {
+  // Keep the candidate pool confined to one model on the mocked upstream.
+  await updateSettings({ blockedProviders: Object.keys(NOAUTH_PROVIDERS) });
+  const candidate = "gpt-4o-mini";
+  const excludedModels = getModelsByProviderId("openai")
+    .map((model) => model.id)
+    .filter((id) => id !== candidate);
+  await createProviderConnection({
+    provider: "openai",
+    authType: "apikey",
+    name: "Built-in router candidate",
+    apiKey: "sk-test-auto",
+    isActive: true,
+    testStatus: "active",
+    defaultModel: candidate,
+    providerSpecificData: { excludedModels },
+  });
+  for (const name of ["auto", "auto/coding", "auto/best-legacy"]) {
+    await createCombo({
+      name,
+      strategy: "priority",
+      models: ["anthropic/claude-sonnet-4-6"],
+      context_length: 1000,
+    });
+  }
+});
+
+test.after(() => {
+  resetDbInstance();
+  rmSync(dataDir, { recursive: true, force: true });
+  if (originalDataDir === undefined) delete process.env.DATA_DIR;
+  else process.env.DATA_DIR = originalDataDir;
+});
+
+async function chat(model: string) {
+  return POST(
+    new Request("http://localhost/v1/chat/completions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model,
+        messages: [{ role: "user", content: "Reply with OK." }],
+        max_tokens: 2000,
+        stream: false,
+      }),
+    })
+  );
+}
+
+for (const [model, storedName] of [
+  ["auto", "auto"],
+  ["auto/coding", "auto/coding"],
+  ["AUTO", "auto"],
+  ["Auto/Coding", "auto/coding"],
+]) {
+  test(`chat dispatches "${model}" through the built-in router despite the legacy combo`, async (t) => {
+    assert.equal((await getComboByName(storedName))?.strategy, "priority");
+    let sentMaxTokens: number | undefined;
+    const upstream = t.mock.method(
+      globalThis,
+      "fetch",
+      async (input: RequestInfo | URL, init?: RequestInit) => {
+        assert.equal(new URL(String(input)).hostname, "api.openai.com");
+        const payload = JSON.parse(String(init?.body));
+        assert.equal(payload.model, "gpt-4o-mini");
+        sentMaxTokens = payload.max_tokens;
+        return Response.json({
+          id: "chatcmpl-reserved-auto",
+          choices: [{ message: { role: "assistant", content: "OK" }, finish_reason: "stop" }],
+        });
+      }
+    );
+
+    const response = await chat(model);
+    const body = await response.text();
+
+    assert.equal(response.status, 200, body);
+    assert.match(body, /"content":"OK"/);
+    assert.ok(upstream.mock.callCount() > 0);
+    assert.equal(sentMaxTokens, 2000, "the saved combo's 1000-token context limit must not apply");
+    assert.equal((await getComboByName(storedName))?.strategy, "priority");
+  });
+}
+
+test("an unknown auto suffix cannot dispatch a fuzzy legacy combo", async () => {
+  const response = await chat("auto/legacy");
+  assert.equal(response.status, 400);
+  assert.match(await response.text(), /Unknown built-in auto combo/);
+});

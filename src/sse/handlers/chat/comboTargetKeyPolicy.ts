@@ -3,12 +3,13 @@
  *
  * Policy already admitted the requested combo. Per-target
  * `isModelAllowedForKey` must not then skip every member just because the
- * allow-list is the combo name. auto/* / disableNonPublic still check the
+ * allow-list is the combo name. Built-in auto routes and disableNonPublic still check the
  * inner target so #9057 holds. blockedModels applies to every inner target,
  * including targets granted by the default `combo/*`; only a combo named in
  * allowedCombos overrides it.
  */
 
+import { isReservedComboName } from "@/lib/combos/autoNames";
 import { isModelBlockedByPatterns } from "@/lib/db/apiKeys";
 import { ALL_COMBOS_ACCESS_RULE } from "@/shared/constants/comboAccess";
 import { isComboNameAllowedForKey } from "@/shared/utils/apiKeyPolicy";
@@ -46,8 +47,8 @@ function allowListCoversRequestedCombo(
 }
 
 /**
- * A stored (non-`auto/*`) combo admitted by the key's `allowedCombos` grants its
- * own targets past `allowedModels` (#14197). `auto/*` combos keep per-candidate
+ * A stored combo admitted by the key's `allowedCombos` grants its own targets
+ * past `allowedModels` (#14197). Built-in auto routes keep per-candidate
  * model checks (#9057).
  */
 export function isExplicitlyAllowedComboForKey(
@@ -56,7 +57,7 @@ export function isExplicitlyAllowedComboForKey(
 ): boolean {
   if (!apiKeyInfo || !requestedModelStr) return false;
   return (
-    !requestedModelStr.startsWith("auto/") &&
+    !isReservedComboName(requestedModelStr) &&
     Array.isArray(apiKeyInfo.allowedCombos) &&
     isComboNameAllowedForKey(apiKeyInfo.allowedCombos, requestedModelStr)
   );

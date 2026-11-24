@@ -15,6 +15,7 @@ import {
   getApiKeySelfServiceSettings,
   type AnthropicRateLimitHeaderMode,
 } from "@/lib/db/apiKeySelfServiceSettings";
+import { isReservedComboName } from "@/lib/combos/autoNames";
 import { getCachedComboByName, getCachedComboForModel } from "@/lib/db/readCache";
 import { isDashboardSessionAuthenticated } from "./apiAuth";
 import { isAnthropicMessagesRequest } from "./anthropicErrorEnvelope";
@@ -264,6 +265,8 @@ function policyErrorResponse(
 }
 
 async function resolveRequestedComboName(modelStr: string): Promise<string | null> {
+  if (isReservedComboName(modelStr)) return modelStr.toLowerCase();
+
   const exact = await getCachedComboByName(modelStr);
   if (exact && typeof exact.name === "string") return exact.name;
 
@@ -279,14 +282,14 @@ async function resolveRequestedComboName(modelStr: string): Promise<string | nul
 }
 
 /**
- * Built-in virtual routes (`auto/*`, `qtSd/*`) dispatch like combos but are not
+ * Quota virtual routes (`qtSd/*`) dispatch like combos but are not
  * persisted combo rows, so `resolveRequestedComboName` cannot find them. They
  * must still be matched against the key's combo allow-list; otherwise a key
  * restricted to one named combo could reach every provider through them
  * (GHSA-7j4q-6gx6-pg77).
  */
-function isVirtualComboModel(modelStr: string): boolean {
-  return modelStr.startsWith("auto/") || modelStr.startsWith("qtSd/");
+function isQuotaVirtualComboModel(modelStr: string): boolean {
+  return modelStr.startsWith("qtSd/");
 }
 
 async function isComboAllowedForKey(
@@ -295,7 +298,7 @@ async function isComboAllowedForKey(
 ): Promise<{ allowed: boolean; comboName: string | null }> {
   const comboName =
     (await resolveRequestedComboName(modelStr)) ??
-    (isVirtualComboModel(modelStr) ? modelStr : null);
+    (isQuotaVirtualComboModel(modelStr) ? modelStr : null);
   if (!comboName) return { allowed: true, comboName: null };
 
   const allowed = allowedCombos.some((rule) => matchesComboAccessRule(comboName, modelStr, rule));
@@ -385,9 +388,6 @@ async function validateStandardRoutingTarget(
   }
 
   const hasModelRestrictions = hasApiKeyModelRestrictions(apiKeyInfo);
-  if (!requestedComboName && hasModelRestrictions && modelStr.startsWith("auto/")) {
-    requestedComboName = modelStr;
-  }
   if (!requestedComboName && hasModelRestrictions) {
     try {
       requestedComboName = await resolveRequestedComboName(modelStr);
@@ -431,6 +431,9 @@ export async function validateApiKeyRoutingTarget(
   const allowedQuotas = Array.isArray(apiKeyInfo.allowedQuotas) ? apiKeyInfo.allowedQuotas : [];
   const quotaRejection = await validateQuotaRoutingTarget(modelStr, allowedQuotas);
   if (quotaRejection || allowedQuotas.length > 0) return quotaRejection;
+  if (isAutoComboDeniedForKey(apiKeyInfo, modelStr)) {
+    return autoComboDeniedResponse(request, modelStr);
+  }
   return validateStandardRoutingTarget(request, apiKey, apiKeyInfo, modelStr);
 }
 
@@ -634,23 +637,12 @@ async function validateQuotaAccess(context: PolicyContext): Promise<Response | n
   }
 }
 
-/**
- * Whether this key is barred from the built-in `auto` / `auto/*` combos.
- *
- * Built-in auto ids are virtual, so they resolve to no stored combo and
- * `isComboAllowedForKey()` fails open on them; `validateModelAccess()` then
- * returns before the allow/deny model lists are consulted. This flag is the
- * only per-key gate that reaches them. It defaults to allowed (undefined) so
- * existing keys are unaffected.
- */
+/** Whether this key opted out of built-in automatic routes. */
 export function isAutoComboDeniedForKey(
   apiKeyInfo: { allowAutoCombos?: boolean } | null | undefined,
-  modelStr: string | null | undefined,
-  resolvedComboName: string | null = null
+  modelStr: string | null | undefined
 ): boolean {
-  if (!modelStr || (modelStr !== "auto" && !modelStr.startsWith("auto/"))) return false;
-  if (modelStr === "auto" && resolvedComboName === "auto") return false;
-  return apiKeyInfo?.allowAutoCombos === false;
+  return apiKeyInfo?.allowAutoCombos === false && !!modelStr && isReservedComboName(modelStr);
 }
 
 function autoComboDeniedResponse(request: Request, modelStr: string): Response {
@@ -664,54 +656,19 @@ function autoComboDeniedResponse(request: Request, modelStr: string): Response {
   );
 }
 
-/**
- * Bare `auto` falls through to the built-in router only when no persisted
- * combo literally named "auto" exists, so resolve the combo before deciding
- * whether `allowAutoCombos=false` applies. Resolution failure fails closed.
- */
-async function resolveBareAutoPolicy(
-  context: PolicyContext,
-  requestedComboName: string | null
-): Promise<{ comboName: string | null; rejection: Response | null }> {
-  const { request, apiKeyInfo, modelStr } = context;
-  let comboName = requestedComboName;
-  if (!comboName && isAutoComboDeniedForKey(apiKeyInfo, modelStr)) {
-    try {
-      comboName = await resolveRequestedComboName(String(modelStr));
-    } catch (error) {
-      log.error("API_POLICY", "Bare auto combo resolution failed. Request blocked.", { error });
-      return {
-        comboName: null,
-        rejection: errorResponse(
-          HTTP_STATUS.SERVICE_UNAVAILABLE,
-          "API key combo policy unavailable"
-        ),
-      };
-    }
-  }
-  if (isAutoComboDeniedForKey(apiKeyInfo, modelStr, comboName)) {
-    return { comboName, rejection: autoComboDeniedResponse(request, String(modelStr)) };
-  }
-  return { comboName, rejection: null };
-}
-
 async function validateModelAccess(context: PolicyContext): Promise<Response | null> {
   const { request, apiKey, apiKeyInfo, modelStr } = context;
   if (!modelStr || apiKeyInfo.allowedQuotas?.length) return null;
-  // `auto/*` always denotes the built-in virtual router; bare `auto` is
-  // resolved against persisted combos in resolveBareAutoPolicy() below.
-  if (modelStr !== "auto" && isAutoComboDeniedForKey(apiKeyInfo, modelStr)) {
+  if (isAutoComboDeniedForKey(apiKeyInfo, modelStr)) {
     return autoComboDeniedResponse(request, modelStr);
   }
   const comboAccess = await validateComboAccess(apiKeyInfo.allowedCombos, modelStr);
   if (comboAccess.rejection) return comboAccess.rejection;
-  const autoPolicy = await resolveBareAutoPolicy(context, comboAccess.comboName);
-  if (autoPolicy.rejection) return autoPolicy.rejection;
-  let requestedComboName = autoPolicy.comboName;
+  let requestedComboName = comboAccess.comboName;
 
   const hasModelRestrictions = hasApiKeyModelRestrictions(apiKeyInfo);
   if (!requestedComboName && hasModelRestrictions) {
-    if (isVirtualComboModel(modelStr)) {
+    if (isQuotaVirtualComboModel(modelStr)) {
       requestedComboName = modelStr;
     } else {
       try {
