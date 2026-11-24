@@ -325,6 +325,25 @@ async function persistTokens(
   }
 }
 
+function publishRefreshedSession(
+  connectionId: string,
+  session: SensenovaSession,
+  expiresIn: number,
+  outcome: "written" | "failed"
+): SensenovaSession {
+  if (outcome === "failed") {
+    // The token is valid, only the write failed. Keep both halves in memory so
+    // this process can keep using them, and let a later exchange retry the write.
+    rememberAccessToken(connectionId, session.accessToken, Date.now() + expiresIn * 1000);
+  }
+  if (session.refreshToken) rememberRefreshToken(connectionId, session.refreshToken);
+  if (outcome === "written") {
+    // The row now carries these tokens; the memory-only copy would only shadow them.
+    memoryAccessTokens.delete(connectionId);
+  }
+  return session;
+}
+
 async function exchangeRefreshToken(
   connectionId: string,
   psd: Record<string, unknown>,
@@ -388,11 +407,13 @@ async function exchangeRefreshToken(
   // old account, so they must not reach the row.
   if (seqAtStart !== currentSeq(connectionId)) return null;
 
+  const expiresIn =
+    Number(payload.expires_in) > 0 ? Number(payload.expires_in) : DEFAULT_ACCESS_TTL_SECONDS;
   const outcome = await persistTokens(
     connectionId,
     psd,
     payload.access_token,
-    Number(payload.expires_in) > 0 ? Number(payload.expires_in) : DEFAULT_ACCESS_TTL_SECONDS,
+    expiresIn,
     payload.refresh_token,
     expected
   );
@@ -405,19 +426,12 @@ async function exchangeRefreshToken(
     // re-reads the connection instead of acting on a superseded session.
     return null;
   }
-  if (outcome === "failed") {
-    // The token is valid, only the write failed. Keep both halves in memory so
-    // this process can keep using them, and let a later exchange retry the write.
-    const expiresIn =
-      Number(payload.expires_in) > 0 ? Number(payload.expires_in) : DEFAULT_ACCESS_TTL_SECONDS;
-    rememberAccessToken(connectionId, payload.access_token, Date.now() + expiresIn * 1000);
-    if (payload.refresh_token) rememberRefreshToken(connectionId, payload.refresh_token);
-    return { accessToken: payload.access_token, refreshToken: payload.refresh_token };
-  }
-  if (payload.refresh_token) rememberRefreshToken(connectionId, payload.refresh_token);
-  // The row now carries these tokens; the memory-only copy would only shadow them.
-  memoryAccessTokens.delete(connectionId);
-  return { accessToken: payload.access_token, refreshToken: payload.refresh_token };
+  return publishRefreshedSession(
+    connectionId,
+    { accessToken: payload.access_token, refreshToken: payload.refresh_token },
+    expiresIn,
+    outcome
+  );
 }
 
 /**
