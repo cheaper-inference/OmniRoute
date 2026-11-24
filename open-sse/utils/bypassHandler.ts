@@ -11,6 +11,20 @@ import {
 import { isRegisteredFeatureFlagEnabled } from "./registeredFeatureFlag.ts";
 
 /**
+ * Reply text for the bypass response: `undefined` keeps the default reply (one of the five
+ * patterns matched), a string is a local Claude Code helper reply, `null` means no bypass.
+ */
+function resolveBypassReplyText(body: unknown, shouldBypass: boolean): string | undefined | null {
+  if (shouldBypass) return undefined;
+  const reply = detectClaudeCodeMetaReply(body, {
+    commandPrefix: isRegisteredFeatureFlagEnabled(CLAUDE_CODE_LOCAL_COMMAND_PREFIX_FLAG),
+    suggestion: isRegisteredFeatureFlagEnabled(CLAUDE_CODE_LOCAL_SUGGESTION_FLAG),
+    filepaths: isRegisteredFeatureFlagEnabled(CLAUDE_CODE_LOCAL_FILEPATHS_FLAG),
+  });
+  return reply ? reply.text : null;
+}
+
+/**
  * Check for bypass patterns — return fake response without calling provider.
  *
  * Intentionally limited to Claude CLI requests only because:
@@ -85,16 +99,8 @@ export function handleBypassRequest(body, model, userAgent = "") {
     shouldBypass = userText.includes("quota");
   }
 
-  let replyText: string | undefined;
-  if (!shouldBypass) {
-    const reply = detectClaudeCodeMetaReply(body, {
-      commandPrefix: isRegisteredFeatureFlagEnabled(CLAUDE_CODE_LOCAL_COMMAND_PREFIX_FLAG),
-      suggestion: isRegisteredFeatureFlagEnabled(CLAUDE_CODE_LOCAL_SUGGESTION_FLAG),
-      filepaths: isRegisteredFeatureFlagEnabled(CLAUDE_CODE_LOCAL_FILEPATHS_FLAG),
-    });
-    if (!reply) return null;
-    replyText = reply.text;
-  }
+  const replyText = resolveBypassReplyText(body, shouldBypass);
+  if (replyText === null) return null;
 
   const sourceFormat = detectFormat(body);
   const stream = body.stream !== false;

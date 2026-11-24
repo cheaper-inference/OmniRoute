@@ -174,52 +174,87 @@ function filepathsForCommand(command: string): string[] | null {
   return null;
 }
 
+/** The single user turn (no tools) the prefix and filepaths shapes require. */
+interface SingleTurnPrompt {
+  turnText: string;
+  /** System text (top-level `system` plus system/developer messages) followed by the turn. */
+  promptText: string;
+}
+
+/**
+ * Result of one shape detector: `undefined` means the request is not this shape (try the
+ * next one); `null` means it is this shape but gets no local reply (stop, send upstream).
+ */
+type ShapeResult = ClaudeCodeMetaReply | null | undefined;
+
+function isSystemRole(m: MetaMessage): boolean {
+  return m.role === "system" || m.role === "developer";
+}
+
+function singleTurnPrompt(
+  body: Record<string, unknown>,
+  messages: MetaMessage[]
+): SingleTurnPrompt | null {
+  const conversation = messages.filter((m) => !isSystemRole(m));
+  if (conversation.length !== 1 || conversation[0].role !== "user") return null;
+  if (Array.isArray(body.tools) && body.tools.length > 0) return null;
+  const systemText = [
+    contentText(body.system),
+    ...messages.filter(isSystemRole).map((m) => contentText(m.content)),
+  ].join("\n");
+  const turnText = contentText(conversation[0].content);
+  return { turnText, promptText: `${systemText}\n${turnText}` };
+}
+
+/** Shape "filepaths": the turn is `Command: <cmd>\nOutput: <out>` and someone asked for <filepaths>. */
+function detectFilepathsShape(prompt: SingleTurnPrompt | null, enabled: boolean): ShapeResult {
+  if (!prompt) return undefined;
+  const trimmed = prompt.turnText.trimStart();
+  const outputIdx = trimmed.indexOf("\nOutput:");
+  if (!trimmed.startsWith("Command:") || outputIdx <= 0) return undefined;
+  if (!prompt.promptText.includes("<filepaths>")) return undefined;
+  if (!enabled) return null;
+  const paths = filepathsForCommand(trimmed.slice("Command:".length, outputIdx).trim());
+  if (!paths) return null;
+  return { kind: "filepaths", text: ["<filepaths>", ...paths, "</filepaths>"].join("\n") };
+}
+
+/** Shape "command prefix": a <policy_spec> plus a `Command:` line in the turn. */
+function detectPrefixShape(prompt: SingleTurnPrompt | null, enabled: boolean): ShapeResult {
+  if (!prompt) return undefined;
+  const { turnText, promptText } = prompt;
+  if (!promptText.includes("<policy_spec>") || !turnText.includes("Command:")) return undefined;
+  if (!enabled) return null;
+  const command = turnText.slice(turnText.lastIndexOf("Command:") + "Command:".length).trim();
+  const prefix = command ? extractCommandPrefix(command) : "";
+  return prefix ? { kind: "command-prefix", text: prefix } : null;
+}
+
+/** Shape "suggestion": the last message is the user's and one of its text blocks opens with the marker. */
+function detectSuggestionShape(messages: MetaMessage[], enabled: boolean): ShapeResult {
+  const last = messages[messages.length - 1];
+  if (last?.role !== "user") return undefined;
+  const marked = textBlocks(last.content).some((t) => t.trimStart().startsWith(SUGGESTION_MARKER));
+  if (!marked) return undefined;
+  return enabled ? { kind: "suggestion", text: "" } : null;
+}
+
 export function detectClaudeCodeMetaReply(
   body: unknown,
   toggles: ClaudeCodeMetaToggles
 ): ClaudeCodeMetaReply | null {
   if (!isRecord(body) || !Array.isArray(body.messages)) return null;
   const messages = body.messages.filter(isRecord) as MetaMessage[];
-  const isSystemRole = (m: MetaMessage) => m.role === "system" || m.role === "developer";
-  const conversation = messages.filter((m) => !isSystemRole(m));
-  const singleTurn = conversation.length === 1 && conversation[0].role === "user";
-  const hasTools = Array.isArray(body.tools) && body.tools.length > 0;
-  const systemText = [
-    contentText(body.system),
-    ...messages.filter(isSystemRole).map((m) => contentText(m.content)),
-  ].join("\n");
-
-  if (singleTurn && !hasTools) {
-    const turnText = contentText(conversation[0].content);
-    const promptText = `${systemText}\n${turnText}`;
-
-    // Shape "filepaths": the turn is `Command: <cmd>\nOutput: <out>` and someone asked for <filepaths>.
-    const trimmed = turnText.trimStart();
-    const outputIdx = trimmed.indexOf("\nOutput:");
-    if (trimmed.startsWith("Command:") && outputIdx > 0 && promptText.includes("<filepaths>")) {
-      if (!toggles.filepaths) return null;
-      const paths = filepathsForCommand(trimmed.slice("Command:".length, outputIdx).trim());
-      if (!paths) return null;
-      return { kind: "filepaths", text: ["<filepaths>", ...paths, "</filepaths>"].join("\n") };
-    }
-
-    // Shape "command prefix": a <policy_spec> plus a `Command:` line in the turn.
-    if (promptText.includes("<policy_spec>") && turnText.includes("Command:")) {
-      if (!toggles.commandPrefix) return null;
-      const command = turnText.slice(turnText.lastIndexOf("Command:") + "Command:".length).trim();
-      const prefix = command ? extractCommandPrefix(command) : "";
-      return prefix ? { kind: "command-prefix", text: prefix } : null;
-    }
+  const prompt = singleTurnPrompt(body, messages);
+  // Order matters: a filepaths turn also carries `Command:`, so it is checked before the prefix shape.
+  const detectors: Array<() => ShapeResult> = [
+    () => detectFilepathsShape(prompt, toggles.filepaths),
+    () => detectPrefixShape(prompt, toggles.commandPrefix),
+    () => detectSuggestionShape(messages, toggles.suggestion),
+  ];
+  for (const detect of detectors) {
+    const result = detect();
+    if (result !== undefined) return result;
   }
-
-  // Shape "suggestion": the last message is the user's and one of its text blocks opens with the marker.
-  const last = messages[messages.length - 1];
-  if (
-    last?.role === "user" &&
-    textBlocks(last.content).some((t) => t.trimStart().startsWith(SUGGESTION_MARKER))
-  ) {
-    return toggles.suggestion ? { kind: "suggestion", text: "" } : null;
-  }
-
   return null;
 }
