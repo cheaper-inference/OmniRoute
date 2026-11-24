@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { extractApiErrorMessage } from "@/shared/http/apiErrorMessage";
+import { alignTtlSecondsToEndOfLocalDay } from "@/shared/utils/keyExpiry";
 import { buildApiKeyCreateScopes } from "./apiManagerScopes";
 import { anchorReferenceIssues } from "./keyTemplateReferenceIssues";
 import { validateKeyName, type KeyTemplatePolicy } from "./keyTemplatePolicyUtils";
@@ -47,6 +48,18 @@ function policyWithQuickPermissions(draft: CreateDraft): KeyTemplatePolicy {
   };
 }
 
+/** With "until end of day" on, a whole-day TTL is stretched to 23:59 local on its last day. */
+function withEndOfDayExpiry(draft: CreateDraft, policy: KeyTemplatePolicy): KeyTemplatePolicy {
+  if (!draft.newKeyExpiryEndOfDay || policy.expiry.mode !== "relative") return policy;
+  return {
+    ...policy,
+    expiry: {
+      mode: "relative",
+      ttlSeconds: alignTtlSecondsToEndOfLocalDay(policy.expiry.ttlSeconds, new Date()),
+    },
+  };
+}
+
 function sanitizeKeyName(name: string) {
   return name
     .replace(/[<>"']/g, "")
@@ -74,7 +87,7 @@ export function useCreateKeySubmission(
     options.setIsSubmitting(true);
     draft.setNameError(null);
     draft.setCreateError(null);
-    const policy = policyWithQuickPermissions(draft);
+    const policy = withEndOfDayExpiry(draft, policyWithQuickPermissions(draft));
     try {
       const res = await fetch("/api/keys", {
         method: "POST",

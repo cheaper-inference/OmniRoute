@@ -274,8 +274,12 @@ export async function syncConnectionModels(
     );
     return true;
   } catch (err) {
+    // Constant format: the provider id stays a plain argument, so a "%s" in it is not a
+    // format directive (CodeQL #1407).
     console.warn(
-      `[ModelSync] ${provider} (${connectionId.slice(0, 8)}): fetch failed —`,
+      "[ModelSync] %s (%s): fetch failed — %s",
+      provider,
+      connectionId.slice(0, 8),
       (err as Error).message
     );
     return false;

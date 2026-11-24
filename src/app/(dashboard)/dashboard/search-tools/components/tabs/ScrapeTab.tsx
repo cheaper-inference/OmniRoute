@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import Button from "@/shared/components/Button";
 import { Spinner } from "@/shared/components/Loading";
 import Input from "@/shared/components/Input";
+import Notice from "@/shared/components/Notice";
 import { useScrapeFetch } from "../../hooks/useScrapeFetch";
 import ScrapeResult from "../ScrapeResult";
 import type { ConfigState } from "../SearchToolsConfigPane";
@@ -91,7 +92,7 @@ export default function ScrapeTab({ configState, onMetrics }: ScrapeTabProps) {
         </div>
 
         {/* Options summary */}
-        <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-text-muted">
+        <div className="flex flex-wrap gap-x-4 gap-y-1 text-2xs text-text-muted">
           <span>
             Format: <span className="text-text-main font-medium">{configState.fetchFormat}</span>
           </span>
@@ -114,12 +115,9 @@ export default function ScrapeTab({ configState, onMetrics }: ScrapeTabProps) {
 
       {/* Error state */}
       {error && !loading && (
-        <div
-          className="p-4 bg-error/10 border border-error/30 rounded-lg text-sm text-error"
-          data-testid="scrape-error"
-        >
+        <Notice variant="critical" data-testid="scrape-error">
           {error}
-        </div>
+        </Notice>
       )}
 
       {/* Loading spinner */}

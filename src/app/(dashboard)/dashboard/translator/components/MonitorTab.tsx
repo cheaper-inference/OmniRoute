@@ -1,6 +1,9 @@
 "use client";
 
 import Icon from "@/shared/components/Icon";
+import Notice from "@/shared/components/Notice";
+import { Alert } from "@omniroute/ui-kit/alert";
+import IconChip, { type IconChipTone } from "@/shared/components/IconChip";
 import { Spinner } from "@/shared/components/Loading";
 
 import { useTranslations } from "next-intl";
@@ -48,28 +51,28 @@ interface StatCardProps {
   color: "blue" | "green" | "red" | "purple" | "amber" | "cyan";
 }
 
-// Stat accents on kit status/chart tokens (theme-aware).
-const COLOR_MAP: Record<StatCardProps["color"], { shell: string; icon: string }> = {
-  blue: { shell: "bg-info/10", icon: "text-info" },
-  green: { shell: "bg-success/10", icon: "text-success" },
-  red: { shell: "bg-error/10", icon: "text-error" },
-  purple: { shell: "bg-chart-3/10", icon: "text-chart-3" },
-  amber: { shell: "bg-warning/10", icon: "text-warning" },
-  cyan: { shell: "bg-chart-2/10", icon: "text-chart-2" },
+// Stat accents as kit IconChip tones (status and chart tokens, theme-aware).
+const COLOR_TONE: Record<StatCardProps["color"], IconChipTone> = {
+  blue: "info",
+  green: "success",
+  red: "danger",
+  purple: "chart-3",
+  amber: "warning",
+  cyan: "chart-2",
 };
 
 function StatCard({ icon, label, value, color }: StatCardProps) {
-  const resolved = COLOR_MAP[color] ?? COLOR_MAP.blue;
-
   return (
     <Card>
       <div className="p-4 flex items-center gap-3">
-        <div className={`flex items-center justify-center w-10 h-10 rounded-lg ${resolved.shell}`}>
-          <Icon name={icon} size={22} className={resolved.icon} />
-        </div>
+        <IconChip tone={COLOR_TONE[color] ?? "info"}>
+          <Icon name={icon} />
+        </IconChip>
         <div>
           <p className="text-lg font-semibold text-text-main">{value}</p>
-          <p className="text-[10px] text-text-muted uppercase tracking-wider">{label}</p>
+          <p className="ci-eyebrow" data-size="3xs">
+            {label}
+          </p>
         </div>
       </div>
     </Card>
@@ -154,18 +157,16 @@ export default function MonitorTab({ onGoToTranslate }: MonitorTabProps) {
   return (
     <div className="space-y-5 min-w-0">
       {/* Origin hint — always visible (monitorOriginHint) */}
-      <div
-        className="flex items-start gap-3 px-4 py-3 rounded-lg bg-primary/5 border border-primary/10 text-sm text-text-muted"
+      <Alert
+        variant="info"
+        dismissible={false}
         data-testid="monitor-origin-hint"
-      >
-        <Icon name="info" size={20} className="text-primary mt-0.5" />
-        <p>
-          {translateOrFallback(
-            "monitorOriginHint",
-            "Eventos gerados pelo Translate ou pelo pipeline principal aparecem aqui em tempo real."
-          )}
-        </p>
-      </div>
+        icon={<Icon name="info" size={18} />}
+        description={translateOrFallback(
+          "monitorOriginHint",
+          "Eventos gerados pelo Translate ou pelo pipeline principal aparecem aqui em tempo real."
+        )}
+      />
 
       {/* Stat Cards — 6 cards: total, success, errors, avg latency, combo-routed, unique endpoints */}
       <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
@@ -198,13 +199,10 @@ export default function MonitorTab({ onGoToTranslate }: MonitorTabProps) {
       </div>
 
       {/* Memory note */}
-      <div className="flex items-center gap-2 rounded-lg border border-warning/20 bg-warning-bg px-3 py-2 text-xs text-warning">
-        <Icon name="memory" size={14} />
-        <p>
-          {t("liveMonitorMemoryNote")}{" "}
-          <span className="text-text-muted">{t("liveMonitorMemoryCapNote")}</span>
-        </p>
-      </div>
+      <Notice variant="warning" icon="memory">
+        {t("liveMonitorMemoryNote")}{" "}
+        <span className="text-text-muted">{t("liveMonitorMemoryCapNote")}</span>
+      </Notice>
 
       {/* Auto-refresh controls */}
       <Card>
@@ -245,7 +243,9 @@ export default function MonitorTab({ onGoToTranslate }: MonitorTabProps) {
       {/* Events table */}
       <Card>
         <div className="p-4">
-          <h3 className="text-sm text-text-main mb-3">{t("recentTranslations")}</h3>
+          <h3 className="ci-heading mb-3" data-size="sm">
+            {t("recentTranslations")}
+          </h3>
 
           {loading ? (
             <div role="status" className="flex items-center justify-center py-12 text-text-muted">
@@ -271,8 +271,7 @@ export default function MonitorTab({ onGoToTranslate }: MonitorTabProps) {
               <Table
                 scrollbarLabel={t("recentTranslations")}
                 scrollLabel={t("recentTranslations")}
-                className="text-sm"
-                containerClassName="rounded-none border-0"
+                variant="plain"
               >
                 <TableHeader>
                   <TableRow>
@@ -282,7 +281,7 @@ export default function MonitorTab({ onGoToTranslate }: MonitorTabProps) {
                     <TableHead>{t("target")}</TableHead>
                     <TableHead>{t("model")}</TableHead>
                     <TableHead>{t("status")}</TableHead>
-                    <TableHead className="text-right">{t("latency")}</TableHead>
+                    <TableHead numeric>{t("latency")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -315,7 +314,7 @@ export default function MonitorTab({ onGoToTranslate }: MonitorTabProps) {
                                 </Badge>
                               ) : null}
                             </div>
-                            <div className="flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-text-muted">
+                            <div className="flex flex-wrap gap-x-3 gap-y-1 text-2xs text-text-muted">
                               <span>
                                 {translateOrFallback("routeEndpointLabel", "Endpoint")}:{" "}
                                 {event.routeEndpoint ?? event.endpoint ?? notAvailable}
@@ -353,7 +352,7 @@ export default function MonitorTab({ onGoToTranslate }: MonitorTabProps) {
                             </Badge>
                           )}
                         </TableCell>
-                        <TableCell className="text-right text-xs text-text-muted">
+                        <TableCell numeric className="text-xs text-text-muted">
                           {event.latency ? formatLatency(event.latency) : notAvailable}
                         </TableCell>
                       </TableRow>
