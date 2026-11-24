@@ -1,0 +1,1 @@
+- **fix(call-logs):** the resumable orphan-artifact scan no longer holds directory descriptors between bounded passes, so the call-log base directory and the active day directory do not stay open in `/proc/<pid>/fd` ([#21166](https://github.com/cheaper-inference/OmniRoute/pull/21166))
