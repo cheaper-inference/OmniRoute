@@ -203,13 +203,23 @@ describe("README generators follow the facts snapshot", () => {
     assert.deepEqual(bumped.grid.kicker, base.grid.kicker);
   });
 
-  it("free-tier budget card: drawn from code.freeTierBudget, not the live catalog", () => {
-    const b = snapshot.code.freeTierBudget;
-    assert.ok(base.budget.heroMeta.includes(`${b.poolCount} recurring pools`));
-    assert.ok(base.budget.heroMeta.includes(`${b.modelCount} catalog entries`));
-    assert.deepEqual(bumped.budget.hero, ["~3.33B"]);
-    assert.ok(bumped.budget.heroMeta.includes("77 recurring pools"));
-    assert.ok(bumped.budget.heroMeta.includes("888 catalog entries"));
+  it("free-tier budget card: drawn from the public facts, not the live catalog", () => {
+    const c = snapshot.code;
+    assert.ok(
+      base.budget.heroMeta.join("").includes(`${c.freePublishedPools} pools with a published quota`)
+    );
+    assert.ok(
+      base.budget.heroMeta.join("").includes(`${c.freeAccessRows} catalog rows with free access`)
+    );
+    const text = flat(bumped.budget);
+    assert.deepEqual(bumped.budget.hero, ["~2.5B"]);
+    assert.equal(bumped.budget.big[0], "~77.7B");
+    assert.ok(text.indexOf("~77.7B") < text.indexOf("~2.5B"), "the big figure comes first");
+    assert.ok(bumped.budget.heroSub.join("").includes("~4.4B in your first month"));
+    assert.ok(bumped.budget.heroMeta.join("").includes("66 pools with a published quota"));
+    assert.ok(bumped.budget.heroMeta.join("").includes("555 catalog rows with free access"));
+    assert.ok(bumped.budget.ladder.join("").includes("~333M summed per live row"));
+    assert.ok(bumped.budget.ladder.join("").includes("2099-01-02"));
     assert.deepEqual(bumped.budget.poolNames, ["ZZ Test "]);
   });
 
