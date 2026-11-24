@@ -1245,6 +1245,42 @@ function freeTierHeadlineChecks(f) {
   ];
 }
 
+const FREE_COUNT_DOCS = ["README.md", "docs/reference/FREE_TIERS.md"];
+const FREE_COUNT_CARD = "docs/diagrams/free-tier-budget.svg";
+const FREE_PROVIDER_COUNT_DOCS = [
+  ...FREE_COUNT_DOCS,
+  "docs/getting-started/SELF_HOST_GUIDE.md",
+  "docs/guides/FREE_PROVIDER_RANKINGS.md",
+  "docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md",
+];
+
+/** The public free-catalog counts, one claim per published sentence. */
+function freeCatalogCountClaims(f, claim) {
+  const p = f.freeProviders ?? {};
+  return [
+    [p.total, "providers with free access", /(\d+) (?:providers )?with free access\b/gi],
+    [p.apiKey, "free providers with an API key", /(\d+) with an API key\b/gi],
+    [p.keyless, "free providers without a key", /(\d+) without a key\b/gi],
+    [p.toolAccount, "free providers through a tool account", /(\d+) through a tool account\b/gi],
+    [p.webChat, "free providers through a web chat", /(\d+) through a web chat\b/gi],
+    [
+      f.freePublishedPools,
+      "pools with a published quota",
+      /(\d+) pools with a published quota\b/gi,
+    ],
+    [f.freeAccessRows, "catalog rows with free access", /(\d+) catalog rows with free access\b/gi],
+    [f.freeModels, "distinct free models", /(\d+) distinct free models?\b/gi],
+  ].map(([expected, what, pattern]) => {
+    const files =
+      what === "providers with free access"
+        ? FREE_PROVIDER_COUNT_DOCS
+        : what === "pools with a published quota" || what === "catalog rows with free access"
+          ? [...FREE_COUNT_DOCS, FREE_COUNT_CARD]
+          : FREE_COUNT_DOCS;
+    return claim(expected, what, { pattern }, files);
+  });
+}
+
 function buildCodeFactChecks(facts) {
   const f = facts.code;
   if (!f)
@@ -1425,6 +1461,11 @@ function buildCodeFactChecks(facts) {
       },
       ["README.md", "docs/diagrams/free-tier-budget.svg", "docs/reference/FREE_TIERS.md"]
     ),
+    // Public free-catalog counts (Radar v2, plan 02): providers with free access by access type,
+    // catalog rows with free access, pools with a published quota and distinct free models. Each
+    // sentence spells its unit, so one count can never be read as another ("214 catalog rows with
+    // free access" is not a provider count). Facts come from computeFreeCatalogCounts().
+    ...freeCatalogCountClaims(f, claim),
     // The reference page says what an entry vouches for. These two facts are
     // curated by hand rather than inferred, so the page quotes their counts —
     // and quoting a count is how a page goes stale. The patterns are deliberately
