@@ -746,6 +746,19 @@ export function validateProviderSpecificData(
     }
   }
 
+  const hasArgonOverride = data.hasArgonOverride;
+  if (
+    hasArgonOverride !== undefined &&
+    hasArgonOverride !== null &&
+    typeof hasArgonOverride !== "boolean"
+  ) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "providerSpecificData.hasArgonOverride must be a boolean",
+      path: ["hasArgonOverride"],
+    });
+  }
+
   const newApiAggregatorBalance = data.newApiAggregatorBalance;
   if (
     newApiAggregatorBalance !== undefined &&

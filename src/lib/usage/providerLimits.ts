@@ -781,11 +781,17 @@ function markArgonEligible(
   return changed;
 }
 
+/**
+ * A boolean psd.hasArgonOverride (set by the operator) replaces the detected eligibility: Google's
+ * quota summary lists no Argon group for Pro accounts that still serve Gemini 4. null/absent = auto.
+ */
 export function applyAntigravityArgonEligibilityToPsd(
   psd: Record<string, unknown>,
-  hasArgon: unknown
+  detectedHasArgon: unknown
 ): { nextPsd: Record<string, unknown>; changed: boolean } {
   const nextPsd: Record<string, unknown> = { ...psd };
+  const hasArgon =
+    typeof psd.hasArgonOverride === "boolean" ? psd.hasArgonOverride : detectedHasArgon;
   if (typeof hasArgon !== "boolean") return { nextPsd, changed: false };
   const changed = hasArgon ? markArgonEligible(psd, nextPsd) : markArgonIneligible(psd, nextPsd);
   return { nextPsd, changed };

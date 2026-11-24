@@ -147,3 +147,46 @@ test("isModelExcludedByConnection: integrates correctly with applyAntigravityArg
 
   assert.equal(isModelExcludedByConnection("claude-3-haiku-20240307", eligiblePsd), true);
 });
+
+// An operator can pin the eligibility per account (hasArgonOverride) when Google's quota
+// summary under-reports it: Pro accounts list no separate Argon group yet serve Gemini 4.
+test("applyAntigravityArgonEligibilityToPsd: hasArgonOverride true wins over a detected false", () => {
+  const psd = {
+    hasArgonOverride: true,
+    hasArgon: false,
+    excludedModels: ["claude-3-haiku*", "gemini-4*", "*argon*"],
+  };
+  const result = applyAntigravityArgonEligibilityToPsd(psd, false);
+
+  assert.equal(result.changed, true);
+  assert.equal(result.nextPsd.hasArgon, true);
+  assert.deepEqual(result.nextPsd.excludedModels, ["claude-3-haiku*"]);
+  assert.equal(result.nextPsd.hasArgonOverride, true);
+  assert.equal(isModelExcludedByConnection("gemini-4-neon-high", result.nextPsd), false);
+  assert.equal(isModelExcludedByConnection("gemini-4-argon-high", result.nextPsd), false);
+});
+
+test("applyAntigravityArgonEligibilityToPsd: hasArgonOverride true on an eligible account is a no-op", () => {
+  const psd = { hasArgonOverride: true, hasArgon: true, excludedModels: ["gpt-4*"] };
+  const result = applyAntigravityArgonEligibilityToPsd(psd, false);
+
+  assert.equal(result.changed, false);
+  assert.deepEqual(result.nextPsd.excludedModels, ["gpt-4*"]);
+});
+
+test("applyAntigravityArgonEligibilityToPsd: hasArgonOverride false wins over a detected true", () => {
+  const psd = { hasArgonOverride: false };
+  const result = applyAntigravityArgonEligibilityToPsd(psd, true);
+
+  assert.equal(result.changed, true);
+  assert.equal(result.nextPsd.hasArgon, false);
+  assert.deepEqual(result.nextPsd.excludedModels, ["gemini-4*", "*argon*"]);
+});
+
+test("applyAntigravityArgonEligibilityToPsd: a cleared (null) hasArgonOverride follows detection again", () => {
+  const psd = { hasArgonOverride: null, hasArgon: true };
+  const result = applyAntigravityArgonEligibilityToPsd(psd, false);
+
+  assert.equal(result.nextPsd.hasArgon, false);
+  assert.deepEqual(result.nextPsd.excludedModels, ["gemini-4*", "*argon*"]);
+});
