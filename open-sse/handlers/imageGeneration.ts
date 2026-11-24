@@ -1792,7 +1792,7 @@ async function handleFalAIImageGeneration({
 }) {
   const startTime = Date.now();
   const token = credentials.apiKey || credentials.accessToken;
-  let falModel = model.startsWith("fal-ai/") ? model : `fal-ai/${model}`;
+  let falModel = /^(?:fal-ai|openai)\//.test(model) ? model : `fal-ai/${model}`;
   const { imageUrl, imageUrls } = extractImageInputs(body);
   let upstreamBody: Record<string, unknown> = {
     prompt: body.prompt,
