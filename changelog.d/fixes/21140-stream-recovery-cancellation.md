@@ -1,0 +1,1 @@
+- **fix(sse):** Stream recovery closes retry and continuation bodies when the downstream stream is cancelled, including bodies that arrive after cancellation. ([#21140](https://github.com/cheaper-inference/OmniRoute/pull/21140)) — thanks @jonxsong
