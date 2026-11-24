@@ -24,6 +24,7 @@ import {
 } from "@/lib/db/providerLimits";
 import { syncToCloud } from "@/lib/cloudSync";
 import { setQuotaCache } from "@/domain/quotaCache";
+import { normalizeExcludedModelPatterns } from "@/domain/connectionModelRules";
 import { trackCapAndBuildClaudeExtraUsageUpdate } from "@/domain/claudeExtraUsageCap";
 import { clearRecoveredProviderState } from "@/sse/services/auth";
 import { hasObservedClaudeQuotaResetAfter } from "@/lib/db/quotaResetEvents";
@@ -66,6 +67,7 @@ import {
   sanitizeUsageQuotasForProvider,
 } from "./providerLimits/quotaNormalize";
 import { getCachedLiveModelIds, refreshLiveModelIds } from "./providerLimits/liveModelIds";
+import { hasArgonDecision, resolveArgonEligibility } from "./providerLimits/argonOverride";
 import { syncInChunksWithSpacing } from "./providerLimits/chunkedSpacingSync";
 import {
   currentQuotaBatchEntries,
@@ -749,7 +751,7 @@ function markArgonIneligible(
 
   const existing = Array.isArray(psd.excludedModels)
     ? psd.excludedModels.filter((m): m is string => typeof m === "string")
-    : [];
+    : normalizeExcludedModelPatterns(psd.excludedModels);
   const missing = AUTO_MANAGED_ARGON_EXCLUSION_PATTERNS.filter(
     (pattern) => !existing.includes(pattern)
   );
@@ -781,17 +783,13 @@ function markArgonEligible(
   return changed;
 }
 
-/**
- * A boolean psd.hasArgonOverride (set by the operator) replaces the detected eligibility: Google's
- * quota summary lists no Argon group for Pro accounts that still serve Gemini 4. null/absent = auto.
- */
+/** psd.hasArgonOverride (see providerLimits/argonOverride.ts) replaces the detected value. */
 export function applyAntigravityArgonEligibilityToPsd(
   psd: Record<string, unknown>,
   detectedHasArgon: unknown
 ): { nextPsd: Record<string, unknown>; changed: boolean } {
   const nextPsd: Record<string, unknown> = { ...psd };
-  const hasArgon =
-    typeof psd.hasArgonOverride === "boolean" ? psd.hasArgonOverride : detectedHasArgon;
+  const hasArgon = resolveArgonEligibility(psd, detectedHasArgon);
   if (typeof hasArgon !== "boolean") return { nextPsd, changed: false };
   const changed = hasArgon ? markArgonEligible(psd, nextPsd) : markArgonIneligible(psd, nextPsd);
   return { nextPsd, changed };
@@ -842,9 +840,8 @@ async function syncAntigravitySubscriptionIfNeeded(
   usage: JsonRecord
 ): Promise<ProviderConnectionLike> {
   if (connection.provider !== "antigravity" && connection.provider !== "agy") return connection;
-  if (!usage.subscriptionInfo && typeof usage.hasArgon !== "boolean") return connection;
-
   const psd = (connection.providerSpecificData || {}) as JsonRecord;
+  if (!usage.subscriptionInfo && !hasArgonDecision(psd, usage.hasArgon)) return connection;
   let nextPsd: JsonRecord = { ...psd };
   const subscriptionResult = usage.subscriptionInfo
     ? applyAntigravitySubscriptionInfoToPsd(connection, usage, psd, nextPsd)
@@ -852,12 +849,10 @@ async function syncAntigravitySubscriptionIfNeeded(
   let changed = subscriptionResult.changed;
   const nextProjectId = subscriptionResult.nextProjectId;
 
-  if (typeof usage.hasArgon === "boolean") {
-    const argonResult = applyAntigravityArgonEligibilityToPsd(nextPsd, usage.hasArgon);
-    if (argonResult.changed) {
-      nextPsd = argonResult.nextPsd;
-      changed = true;
-    }
+  const argonResult = applyAntigravityArgonEligibilityToPsd(nextPsd, usage.hasArgon);
+  if (argonResult.changed) {
+    nextPsd = argonResult.nextPsd;
+    changed = true;
   }
 
   if (!changed) return connection;
