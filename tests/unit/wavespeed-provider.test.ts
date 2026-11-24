@@ -31,7 +31,7 @@ const dbCore = await import("../../src/lib/db/core.ts");
 
 // Image requests write call logs through the DB singleton; release it so the runner can exit.
 test.after(() => {
-  dbCore.closeDbInstance();
+  dbCore.resetDbInstance();
   rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
@@ -141,8 +141,16 @@ test("slash-separated model ids survive routing and become the submit path", () 
   assert.equal(buildWavespeedResultUrl(API, "pred/1"), `${API}/api/v3/predictions/pred%2F1/result`);
 });
 
-test("dot segments in a model id are rejected before any request", async () => {
-  for (const model of ["../../balance", "a/./b", "x/%2e%2E/balance", "x/.%2e"]) {
+test("dot and empty segments in a model id are rejected before any request", async () => {
+  for (const model of [
+    "../../balance",
+    "a/./b",
+    "x/%2e%2E/balance",
+    "x/.%2e",
+    "a//b",
+    "/a/b",
+    "a/b/",
+  ]) {
     assert.throws(() => buildWavespeedSubmitUrl(API, model), /Invalid WaveSpeedAI model id/);
   }
   assert.equal(buildWavespeedSubmitUrl(API, "a/v1.5/b"), `${API}/api/v3/a/v1.5/b`);
@@ -453,6 +461,31 @@ test("a stalled status read is cut off at the deadline with 504", async () => {
     assert.equal(result.success, false);
     assert.equal(result.status, 504);
     assert.equal(posts, 1);
+    assert.ok(Date.now() - started < 3000);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("a stalled submit is cut off at the deadline with 504 and sent once", async () => {
+  const originalFetch = globalThis.fetch;
+  let posts = 0;
+  let reads = 0;
+  globalThis.fetch = (async (_input: unknown, init: RequestInit = {}) => {
+    if (init.method !== "POST") reads += 1;
+    else posts += 1;
+    return new Promise<Response>((_resolve, reject) => {
+      init.signal?.addEventListener("abort", () => reject(init.signal?.reason));
+    });
+  }) as typeof fetch;
+
+  try {
+    const started = Date.now();
+    const result = await generateImage({ prompt: "a red kite", timeout_ms: 1000 });
+    assert.equal(result.success, false);
+    assert.equal(result.status, 504);
+    assert.equal(posts, 1);
+    assert.equal(reads, 0);
     assert.ok(Date.now() - started < 3000);
   } finally {
     globalThis.fetch = originalFetch;

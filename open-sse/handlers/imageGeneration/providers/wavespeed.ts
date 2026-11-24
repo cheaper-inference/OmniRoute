@@ -10,6 +10,7 @@ import { mapImageSize } from "../../../translator/image/sizeMapper.ts";
 import { sleep } from "../../../utils/sleep.ts";
 import { clampPollIntervalMs, clampPollTimeoutMs } from "../../../utils/pollBounds.ts";
 import { sanitizeErrorMessage } from "../../../utils/error.ts";
+import { getConfiguredTimeout } from "../../../utils/fetchTimeout.ts";
 import {
   normalizeProviderImagePayload,
   saveImageErrorResult,
@@ -89,18 +90,35 @@ function upstreamErrorText(payload: unknown, fallback: string): string {
   return typeof message === "string" && message ? message : fallback;
 }
 
-async function submitWavespeedPrediction({ url, token, input, signal }): Promise<string> {
-  const response = await fetch(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(input),
-    ...(signal ? { signal } : {}),
-  });
-  const payload = await readJson(response);
+async function submitWavespeedPrediction({
+  url,
+  token,
+  input,
+  timeoutMs,
+  signal,
+}): Promise<string> {
+  // Sent once, never retried; the timeout bounds both the response headers and the body read.
+  const deadlineSignal = AbortSignal.timeout(timeoutMs);
+  let response: Response;
+  let payload: unknown;
+  try {
+    response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(input),
+      signal: signal ? AbortSignal.any([signal, deadlineSignal]) : deadlineSignal,
+    });
+    payload = await readJson(response);
+  } catch (err) {
+    if (!signal?.aborted && deadlineSignal.aborted) {
+      throw new WavespeedImageError(504, `WaveSpeedAI request timed out after ${timeoutMs}ms`);
+    }
+    throw err;
+  }
 
   if (!response.ok) {
     throw new WavespeedImageError(
@@ -229,6 +247,10 @@ export async function handleWavespeedImageGeneration({
       url: submitUrl,
       token,
       input,
+      timeoutMs: Math.min(
+        getConfiguredTimeout(),
+        clampPollTimeoutMs(body.timeout_ms, DEFAULT_TIMEOUT_MS)
+      ),
       signal,
     });
     const outputs = await pollWavespeedPrediction({

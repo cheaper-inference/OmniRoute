@@ -31,10 +31,11 @@ export const WAVESPEED_FAILED_STATUSES = ["failed", "cancelled", "timeout", "del
 
 /** A model id as a URL path: every segment encoded, the slashes between them kept. */
 export function encodeWavespeedModelPath(model: string): string {
-  const segments = model.split("/").filter((segment) => segment.length > 0);
+  const segments = model.split("/");
   // URL parsing resolves "." and ".." segments (encoded or not), which would move the
-  // authenticated request out of /api/v3/.
-  if (segments.some((segment) => /^(\.|%2e){1,2}$/i.test(segment))) {
+  // authenticated request out of /api/v3/. Empty segments are rejected rather than dropped, so
+  // the id sent upstream is exactly the id that model policy and usage records saw.
+  if (segments.some((segment) => segment === "" || /^(\.|%2e){1,2}$/i.test(segment))) {
     throw new Error(`Invalid WaveSpeedAI model id: ${model}`);
   }
   return segments.map((segment) => encodeURIComponent(segment)).join("/");
