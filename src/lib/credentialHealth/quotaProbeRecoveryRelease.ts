@@ -17,10 +17,8 @@
  * recovery into an error, and it must never touch the connection's other models or
  * either provider's account-level state.
  */
-import {
-  clearAntigravityFamilyCooldown,
-  type AntigravityQuotaFamily,
-} from "@omniroute/open-sse/services/antigravityFamilyCooldown.ts";
+import { clearAntigravityFamilyCooldown } from "@omniroute/open-sse/services/antigravityFamilyCooldown.ts";
+import type { AntigravityQuotaFamily } from "@omniroute/open-sse/services/antigravityQuotaFamily.ts";
 import type { DailyRevalidationCandidate } from "@omniroute/open-sse/services/quotaDailyRevalidation.ts";
 
 import { parseQuotaFamilyBucket } from "@/lib/credentialHealth/quotaProbeModelResolution";
