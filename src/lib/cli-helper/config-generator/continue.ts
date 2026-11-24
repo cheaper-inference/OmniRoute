@@ -1,5 +1,8 @@
 import path from "node:path";
 import os from "node:os";
+import fs from "node:fs";
+
+import { readPrivateConfigFile } from "../privateConfigFile";
 
 let yaml: typeof import("js-yaml") | null = null;
 async function loadYaml() {
@@ -15,6 +18,7 @@ export async function generateContinueConfig(options: {
   baseUrl: string;
   apiKey: string;
   model?: string;
+  configPath?: string;
 }): Promise<string> {
   const y = await loadYaml();
   let base = options.baseUrl;
@@ -23,15 +27,33 @@ export async function generateContinueConfig(options: {
   base = end < base.length ? base.slice(0, end) : base;
   if (base.endsWith("/v1")) base = base.slice(0, -3);
 
-  const config = {
-    models: [
-      {
-        title: "OmniRoute",
-        apiKey: options.apiKey,
-        apiBase: `${base}/v1`,
-      },
-    ],
-  };
+  // Keep the user's other keys and models; replace only the OmniRoute entry.
+  let config: Record<string, unknown> = {};
+  if (options.configPath && fs.existsSync(options.configPath)) {
+    // Read errors (e.g. the symlink guard) propagate as they are; a file that does not parse
+    // aborts Apply like the JSON generators do, instead of being replaced by a fresh document.
+    const text = readPrivateConfigFile(options.configPath);
+    let loaded: unknown;
+    try {
+      loaded = y.load(text);
+    } catch {
+      throw new Error(
+        `Existing ${options.configPath} is not valid YAML; refusing to overwrite it.`
+      );
+    }
+    if (loaded === null || loaded === undefined) loaded = {};
+    if (typeof loaded !== "object" || Array.isArray(loaded)) {
+      throw new Error(
+        `Existing ${options.configPath} is not a valid YAML mapping; refusing to overwrite it.`
+      );
+    }
+    config = loaded as Record<string, unknown>;
+  }
+  const entry = { title: "OmniRoute", apiKey: options.apiKey, apiBase: `${base}/v1` };
+  const models = Array.isArray(config.models) ? (config.models as Array<{ title?: unknown }>) : [];
+  const at = models.findIndex((m) => m?.title === "OmniRoute");
+  config.models =
+    at >= 0 ? models.map((m, i) => (i === at ? { ...m, ...entry } : m)) : [...models, entry];
 
   return y.dump(config, { lineWidth: -1 });
 }

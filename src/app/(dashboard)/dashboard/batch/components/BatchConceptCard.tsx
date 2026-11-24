@@ -53,7 +53,8 @@ export default function BatchConceptCard({ className = "" }: Props) {
           variant="ghost"
           size="sm"
           onClick={toggle}
-          className="gap-1 text-xs text-text-muted hover:text-text-main"
+          tone="muted"
+          className="gap-1 text-xs"
           aria-expanded={!collapsed}
         >
           {t("batchConceptHowItWorks")}

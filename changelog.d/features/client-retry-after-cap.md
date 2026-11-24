@@ -1,0 +1,1 @@
+- **feat(resilience):** opt-in `CLIENT_RETRY_AFTER_MAX_SECONDS` caps the Retry-After header sent to clients on error responses, while the account rest stays full length, so clients with fallback chains do not wait hours (off by default).

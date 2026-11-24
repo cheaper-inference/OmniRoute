@@ -4,6 +4,8 @@ import { CLIPROXY_DEFAULT_PORT } from "@/lib/services/installers/cliproxy";
 
 const DEFAULT_TIMEOUT_MS = 5_000;
 const AUTH_FILES_PATH = "/v0/management/auth-files";
+// CPA marks the v0 management routes deprecated; v8 serves the same list here.
+const CREDENTIALS_PATH_V8 = "/v8/management/credentials";
 
 export type CliproxyAccountHealthState =
   | "ready"
@@ -261,13 +263,13 @@ export async function getCliproxyAccountHealth(
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), options.timeoutMs ?? DEFAULT_TIMEOUT_MS);
   try {
-    const response = await (options.fetchImpl ?? fetch)(
-      `http://${connection.host}:${connection.port}${AUTH_FILES_PATH}`,
-      {
+    const request = (path: string) =>
+      (options.fetchImpl ?? fetch)(`http://${connection.host}:${connection.port}${path}`, {
         headers: { Authorization: `Bearer ${connection.managementKey}` },
         signal: controller.signal,
-      }
-    );
+      });
+    let response = await request(AUTH_FILES_PATH);
+    if (response.status === 404) response = await request(CREDENTIALS_PATH_V8);
     const version = response.headers.get("x-cpa-version");
     if (response.status === 401 || response.status === 403) {
       return { state: "unauthorized", accounts: [], version };

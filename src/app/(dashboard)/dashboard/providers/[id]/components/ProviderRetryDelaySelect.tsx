@@ -8,7 +8,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Card } from "@/shared/components";
+import { Card, IconChip } from "@/shared/components";
 import Icon from "@/shared/components/Icon";
 import Select from "@/shared/components/Select";
 import { useNotificationStore } from "@/store/notificationStore";
@@ -153,9 +153,9 @@ export default function ProviderRetryDelaySelect({ providerId }: ProviderRetryDe
   return (
     <Card>
       <div className="flex items-center gap-3">
-        <div className="inline-flex shrink-0 items-center justify-center w-10 h-10 rounded-full bg-warning/10 text-warning">
-          <Icon name="timer" size={20} />
-        </div>
+        <IconChip tone="warning" shape="circle" className="shrink-0">
+          <Icon name="timer" />
+        </IconChip>
         <div className="flex-1 min-w-0">
           <h2 className="text-sm">{title}</h2>
           <p className="text-sm text-text-muted">

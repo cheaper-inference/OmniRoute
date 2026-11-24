@@ -296,7 +296,7 @@ export default function AgentsPage() {
                   {agent.protocol}
                 </Badge>
                 {agent.installed && (
-                  <p className="mt-1 text-[10px] text-text-muted">{t("agentUseCaseHint")}</p>
+                  <p className="mt-1 text-xs text-text-muted">{t("agentUseCaseHint")}</p>
                 )}
               </div>
               {agent.isCustom && (

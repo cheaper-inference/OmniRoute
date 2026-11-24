@@ -141,6 +141,8 @@ export const ciTokens = {
     display: '"Switzer", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif',
     mono: '"Switzer", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif',
     size: {
+      10: "0.625rem",
+      11: "0.6875rem",
       12: "0.75rem",
       14: "0.875rem",
       16: "1rem",
@@ -194,6 +196,7 @@ export const ciTokens = {
     full: "9999px",
   },
   size: {
+    controlXs: "1.5rem",
     controlSm: "2rem",
     controlMd: "2.25rem",
     controlLg: "2.5rem",
@@ -253,6 +256,13 @@ export const ciTokenReferences = {
     live: "var(--ci-color-live)",
     focus: "var(--ci-color-focus)",
   },
+  /** Stroke of a flow-canvas connector, per state; 3:1 or better on the canvas and every content surface. */
+  flowEdge: {
+    active: "var(--ci-flow-edge-active)",
+    warning: "var(--ci-flow-edge-warning)",
+    error: "var(--ci-flow-edge-error)",
+    idle: "var(--ci-flow-edge-idle)",
+  },
   font: {
     ui: "var(--ci-font-ui)",
     display: "var(--ci-font-display)",
@@ -262,6 +272,7 @@ export const ciTokenReferences = {
   radius: {
     control: "var(--ci-radius-control)",
     surface: "var(--ci-radius-surface)",
+    surfaceNested: "var(--ci-radius-surface-nested)",
     pill: "var(--ci-radius-pill)",
   },
 } as const;
