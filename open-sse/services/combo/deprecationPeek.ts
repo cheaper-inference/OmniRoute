@@ -8,6 +8,18 @@ export const MODEL_UNAVAILABLE_CONTENT_PATTERN =
   /\b(?:(?:this\s+)?model|(?:claude|gpt|gemini|opus|sonnet|haiku|deepseek|qwen|llama|mistral|grok|glm|minimax|kimi|o[134])(?:-[a-z0-9._:/-]+)?)(?:\s+[a-z0-9._:/-]+){0,4}\s+is\s+no\s+longer\s+available\.\s*Please\s+switch\s+to\b/i;
 export const MODEL_UNAVAILABLE_PEEK_CHAR_CAP = 512;
 
+// #20941: Antigravity answers an outdated client version with HTTP 200 and an assistant
+// message ("This version of Antigravity is no longer supported. Please download and
+// install the latest version..."). Anchored at the start of the completion and limited to
+// the first-party client names, so an ordinary answer such as "This version of Python is no
+// longer supported, so upgrade to 3.12." stays valid.
+export const CLIENT_VERSION_UNSUPPORTED_CONTENT_PATTERN =
+  /^\s*this\s+version\s+of\s+(?:antigravity|agy)\s+is\s+no\s+longer\s+supported\b/i;
+const CLIENT_VERSION_NOTICE_PHRASES = [
+  "this version of antigravity is no longer supported",
+  "this version of agy is no longer supported",
+] as const;
+
 const MODEL_FAMILY_PREFIXES = [
   "claude",
   "gpt",
@@ -96,16 +108,31 @@ export function contentBlockStartIsRealSignal(parsed: Record<string, unknown>): 
   return blockType === "tool_use" || blockType === "redacted_thinking";
 }
 
-export function buildModelUnavailableFailure(text: string): StreamingUpstreamFailure {
+export function buildModelUnavailableFailure(
+  text: string,
+  code: "model_deprecated" | "client_version_unsupported" = "model_deprecated"
+): StreamingUpstreamFailure {
   const message = sanitizeErrorMessage(text).slice(0, 300);
   return {
     status: 410,
     type: "model_unavailable",
-    code: "model_deprecated",
+    code,
     ...(message ? { message } : {}),
     requestScoped: false,
     retryable: false,
   };
+}
+
+/**
+ * #20941: the client-version notice is a property of the connection/client build, not of
+ * one model, but the quality-failure branch of executeTargetAttempt.ts only knows a
+ * per-(provider, connection, model) lockout. We accept that: the notice fails over to the
+ * next target immediately, and the lockout is recorded for the single model that returned
+ * it (other models of the same connection are probed on their own turn). requestScoped
+ * stays false so the failure still counts against the connection.
+ */
+function buildClientVersionUnsupportedFailure(text: string): StreamingUpstreamFailure {
+  return buildModelUnavailableFailure(text, "client_version_unsupported");
 }
 
 function extractTextFromParts(parts: unknown): string {
@@ -191,7 +218,15 @@ export function checkNonStreamingModelUnavailable(json: Record<string, unknown>)
   upstreamFailure: StreamingUpstreamFailure;
 } | null {
   const assistantText = extractNonStreamingAssistantText(json);
-  if (!assistantText || !MODEL_UNAVAILABLE_CONTENT_PATTERN.test(assistantText)) return null;
+  if (!assistantText) return null;
+  if (CLIENT_VERSION_UNSUPPORTED_CONTENT_PATTERN.test(assistantText)) {
+    return {
+      valid: false,
+      reason: "upstream client version unsupported in 200 body",
+      upstreamFailure: buildClientVersionUnsupportedFailure(assistantText),
+    };
+  }
+  if (!MODEL_UNAVAILABLE_CONTENT_PATTERN.test(assistantText)) return null;
   return {
     valid: false,
     reason: "upstream model unavailable in 200 body",
@@ -260,7 +295,9 @@ function extractResponsesContentPartSignal(part: unknown): StreamingAssistantSig
   return { text: "", nonTextSignal: !isTextOrRefusal };
 }
 
-function extractResponsesCompletedSignal(parsed: Record<string, unknown>): StreamingAssistantSignal {
+function extractResponsesCompletedSignal(
+  parsed: Record<string, unknown>
+): StreamingAssistantSignal {
   const resp = isRecord(parsed.response) ? parsed.response : null;
   const output = Array.isArray(resp?.output) ? resp.output : [];
   const hasNonMessage = output.some((item) => isRecord(item) && item.type !== "message");
@@ -428,6 +465,13 @@ export function couldBeDeprecationPrefix(rawText: string): boolean {
   return matchesModifierTail(subject.rest);
 }
 
+/** True while `rawText` can still grow into the #20941 client-version notice. */
+export function couldBeClientVersionNoticePrefix(rawText: string): boolean {
+  const normalized = rawText.trimStart().toLowerCase().replace(/\s+/g, " ");
+  if (!normalized) return true;
+  return CLIENT_VERSION_NOTICE_PHRASES.some((phrase) => phrase.startsWith(normalized));
+}
+
 export function evaluateDeprecationTextChunk(
   assistantText: string,
   state: DeprecationPeekState
@@ -441,9 +485,15 @@ export function evaluateDeprecationTextChunk(
   if (MODEL_UNAVAILABLE_CONTENT_PATTERN.test(state.textBuffer)) {
     return { outcome: "error", failure: buildModelUnavailableFailure(state.textBuffer) };
   }
+  if (CLIENT_VERSION_UNSUPPORTED_CONTENT_PATTERN.test(state.textBuffer)) {
+    return { outcome: "error", failure: buildClientVersionUnsupportedFailure(state.textBuffer) };
+  }
   if (
     state.textBuffer.length >= MODEL_UNAVAILABLE_PEEK_CHAR_CAP ||
-    !couldBeDeprecationPrefix(state.textBuffer)
+    !(
+      couldBeDeprecationPrefix(state.textBuffer) ||
+      couldBeClientVersionNoticePrefix(state.textBuffer)
+    )
   ) {
     state.checkDone = true;
     return { outcome: "content", failure: null };
