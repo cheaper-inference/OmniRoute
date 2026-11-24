@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Input, Select } from "@/shared/components";
+import { Card, NumberInput, Select } from "@/shared/components";
+import { fieldNumber, fieldText } from "./numberFieldText";
 import { useTranslations } from "next-intl";
 import { ACCOUNT_FALLBACK_STRATEGY_VALUES } from "@/shared/constants/routingStrategies";
 
@@ -122,7 +123,7 @@ export default function ProviderAccountRoutingCard({ providerKey, connectionCoun
   if (connectionCount < 2) return null;
 
   return (
-    <div className="mb-4 rounded-lg border border-border bg-bg-subtle p-3">
+    <Card.Section className="mb-4">
       <p className="text-sm font-medium">{t("providerAccountRoutingTitle")}</p>
       <p className="text-xs text-text-muted mb-3">{t("providerAccountRoutingDesc")}</p>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -142,18 +143,19 @@ export default function ProviderAccountRoutingCard({ providerKey, connectionCoun
           ]}
         />
         {strategy === "round-robin" && (
-          <Input
+          <NumberInput
             label={t("stickyLimit")}
-            type="number"
             min={1}
             max={1000}
             disabled={busy}
-            value={stickyLimit || "3"}
-            onChange={(e) => setStickyLimit(e.target.value)}
-            onBlur={() => save(strategy, stickyLimit).catch(console.error)}
+            value={fieldNumber(stickyLimit || "3")}
+            onValueChange={(value) => setStickyLimit(fieldText(value))}
+            onValueCommit={(value) =>
+              save(strategy, stickyLimit === "" ? "" : fieldText(value)).catch(console.error)
+            }
           />
         )}
       </div>
-    </div>
+    </Card.Section>
   );
 }

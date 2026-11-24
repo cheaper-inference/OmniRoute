@@ -125,7 +125,10 @@ describe("CacheTrends", () => {
     // Reachable by keyboard.
     expect(bar.tabIndex).toBe(0);
 
+    // Tab to it: the kit tooltip opens on a focus the keyboard moved, not on a bare focus (kit #317).
+    fireEvent.keyDown(document, { key: "Tab" });
     act(() => bar.focus());
+    fireEvent.keyUp(document, { key: "Tab" });
     const tooltip = document.querySelector<HTMLElement>('[role="tooltip"]')!;
     expect(tooltip).not.toBeNull();
     expect(container.contains(tooltip)).toBe(false);

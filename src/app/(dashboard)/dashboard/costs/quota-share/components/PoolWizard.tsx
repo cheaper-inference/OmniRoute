@@ -24,15 +24,19 @@ import ModalWizard, { MODAL_WIZARD_BODY_CLASS } from "@/shared/components/ModalW
 import Badge from "@/shared/components/Badge";
 import Checkbox from "@/shared/components/Checkbox";
 import Input from "@/shared/components/Input";
+import NumberInput from "@/shared/components/NumberInput";
+
 import SegmentedControl from "@/shared/components/SegmentedControl";
 import Select from "@/shared/components/Select";
 import { getSeriesColor } from "@/shared/components/analytics/chartColors";
 import Icon from "@/shared/components/Icon";
+import MemberBreakdownField from "./MemberBreakdownField";
 import useEmailPrivacyStore from "@/store/emailPrivacyStore";
 import { maskEmailLikeValue } from "@/shared/utils/maskEmail";
 import { getKnownPlan } from "@/lib/quota/planRegistry";
 import { quotaModelName } from "@/lib/quota/quotaModelNaming";
 import type {
+  BorrowMode,
   Policy,
   PoolAllocation,
   QuotaDimension,
@@ -40,6 +44,8 @@ import type {
   QuotaWindow,
 } from "@/lib/quota/dimensions";
 import type { QuotaPool } from "@/lib/db/quotaPools";
+import Card from "@/shared/components/Card";
+import BorrowModeField from "./BorrowModeField";
 
 // ────────────────────────────────────────────────────────────────────────────
 // Types (mirror what CreatePoolModal/EditAllocationsModal expect)
@@ -83,6 +89,8 @@ export interface PoolWizardProps {
   editPool?: QuotaPool;
   /** Whether the pool being edited is currently exclusive. Used to pre-fill the exclusive checkbox in edit mode. */
   editPoolExclusive?: boolean;
+  /** Whether the pool being edited shows member usage bars. Pre-fills that checkbox in edit mode. */
+  editPoolMemberBreakdown?: boolean;
   /** connectionId → name of the pool it already belongs to, for the "already used" hint. */
   connectionPoolName?: Record<string, string>;
 }
@@ -150,10 +158,17 @@ type WizardSetters = {
   setDimensionsEdited: Dispatch<SetStateAction<boolean>>;
   setAllocations: Dispatch<SetStateAction<PoolAllocation[]>>;
   setExclusive: Dispatch<SetStateAction<boolean>>;
+  setMemberBreakdown: Dispatch<SetStateAction<boolean>>;
   setError: Dispatch<SetStateAction<string | null>>;
   setSaving: Dispatch<SetStateAction<boolean>>;
   setGroupId: Dispatch<SetStateAction<string>>;
+  setBorrowMode: Dispatch<SetStateAction<BorrowMode>>;
 };
+
+/** The edited pool's borrow mode. A pool read without one is in saturation mode. */
+function poolBorrowMode(pool: QuotaPool): BorrowMode {
+  return pool.borrowMode === "consent" ? "consent" : "saturation";
+}
 
 // Render-time state adjustment (react-hooks/set-state-in-effect): reload the editable
 // dimensions when the primary connection changes. Lives in a hook so the component's
@@ -186,6 +201,7 @@ function useWizardOpenCloseAdjustment({
   open,
   editPool,
   editPoolExclusive,
+  editPoolMemberBreakdown,
   initialGroupId,
   plans,
   ...set
@@ -193,6 +209,7 @@ function useWizardOpenCloseAdjustment({
   open: boolean;
   editPool?: QuotaPool;
   editPoolExclusive?: boolean;
+  editPoolMemberBreakdown?: boolean;
   initialGroupId: string;
   plans: Record<string, { dimensions: QuotaDimension[] } | undefined>;
 } & WizardSetters) {
@@ -212,9 +229,11 @@ function useWizardOpenCloseAdjustment({
     set.setDimensionsEdited(false);
     set.setAllocations([]);
     set.setExclusive(false);
+    set.setMemberBreakdown(false);
     set.setError(null);
     set.setSaving(false);
     set.setGroupId(initialGroupId);
+    set.setBorrowMode("saturation");
   }
   if (changed && open && editPool) {
     // Opening in edit mode: pre-fill from the existing pool. Preserves the pool's
@@ -230,6 +249,8 @@ function useWizardOpenCloseAdjustment({
     set.setGroupId(editPool.groupId ?? initialGroupId);
     set.setAllocations(editPool.allocations ?? []);
     set.setExclusive(editPoolExclusive ?? false);
+    set.setBorrowMode(poolBorrowMode(editPool));
+    set.setMemberBreakdown(editPoolMemberBreakdown === true);
     set.setEditDimensions(
       existingPlan && existingPlan.dimensions.length > 0 ? [...existingPlan.dimensions] : []
     );
@@ -253,6 +274,7 @@ export default function PoolWizard({
   selectedGroupId: initialGroupId = "group-demo",
   editPool,
   editPoolExclusive,
+  editPoolMemberBreakdown,
   connectionPoolName = {},
 }: PoolWizardProps) {
   const t = useTranslations("quotaShare");
@@ -267,6 +289,7 @@ export default function PoolWizard({
   const [connectionIds, setConnectionIds] = useState<string[]>([]);
   const [poolName, setPoolName] = useState("");
   const [defaultPolicy, setDefaultPolicy] = useState<Policy>("hard");
+  const [borrowMode, setBorrowMode] = useState<BorrowMode>("saturation");
 
   // ── Step 2 state ──────────────────────────────────────────────────────────
   const [editDimensions, setEditDimensions] = useState<QuotaDimension[]>([]);
@@ -275,6 +298,7 @@ export default function PoolWizard({
   // ── Step 3 state ──────────────────────────────────────────────────────────
   const [allocations, setAllocations] = useState<PoolAllocation[]>([]);
   const [exclusive, setExclusive] = useState(false);
+  const [memberBreakdown, setMemberBreakdown] = useState(false);
 
   // ── Group selection ───────────────────────────────────────────────────────
   const [groupId, setGroupId] = useState<string>(initialGroupId);
@@ -328,6 +352,7 @@ export default function PoolWizard({
     open,
     editPool,
     editPoolExclusive,
+    editPoolMemberBreakdown,
     initialGroupId,
     plans,
     setStep,
@@ -338,9 +363,11 @@ export default function PoolWizard({
     setDimensionsEdited,
     setAllocations,
     setExclusive,
+    setMemberBreakdown,
     setError,
     setSaving,
     setGroupId,
+    setBorrowMode,
   });
   // Keep the group Select on a real, selectable option (create mode) — self-
   // extinguishing state adjustment during render (react-hooks/set-state-in-effect).
@@ -475,6 +502,7 @@ export default function PoolWizard({
             name: effectivePoolName,
             allocations: [],
             groupId: resolvedGroupId,
+            borrowMode,
           }),
         });
         if (!createRes.ok) {
@@ -501,11 +529,11 @@ export default function PoolWizard({
           }
         }
 
-        // 3. PATCH /api/quota/pools/[id] — allocations + exclusive flag
+        // 3. PATCH /api/quota/pools/[id] — allocations, exclusive flag and member breakdown
         const patchRes = await fetch(`/api/quota/pools/${newPoolId}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ allocations, exclusive }),
+          body: JSON.stringify({ allocations, exclusive, memberBreakdown }),
         });
         if (!patchRes.ok) {
           const errBody = await patchRes.json().catch(() => null);
@@ -527,6 +555,8 @@ export default function PoolWizard({
             connectionIds,
             allocations,
             exclusive,
+            borrowMode,
+            memberBreakdown,
           }),
         });
         if (!editPatchRes.ok) {
@@ -618,12 +648,14 @@ export default function PoolWizard({
             <div>
               <span
                 id="pool-wizard-connections-label"
-                className="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-text-muted"
+                className="ci-eyebrow mb-1 block"
+                data-size="2xs"
+                data-weight="medium"
               >
                 {t("wizardConnectionsLabel")}
               </span>
               {lockedProvider && (
-                <p className="text-[10px] text-warning mb-1.5">
+                <p className="text-xs text-warning mb-1.5">
                   {t("wizardSingleProviderNote")} ({lockedProvider})
                 </p>
               )}
@@ -682,7 +714,7 @@ export default function PoolWizard({
                   ))}
               </div>
               {connections.length === 0 && (
-                <p className="text-[10px] text-warning mt-1">{t("noEligibleConnections")}</p>
+                <p className="text-xs text-warning mt-1">{t("noEligibleConnections")}</p>
               )}
             </div>
 
@@ -721,7 +753,7 @@ export default function PoolWizard({
             {/* Default policy */}
             {connectionIds.length > 0 && (
               <div>
-                <span className="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-text-muted">
+                <span className="ci-eyebrow mb-1 block" data-size="2xs" data-weight="medium">
                   {t("policyLabel")}
                 </span>
                 <SegmentedControl
@@ -742,6 +774,11 @@ export default function PoolWizard({
                 />
               </div>
             )}
+
+            {/* Borrow mode */}
+            {connectionIds.length > 0 && (
+              <BorrowModeField value={borrowMode} onChange={setBorrowMode} />
+            )}
           </div>
         )}
 
@@ -749,9 +786,9 @@ export default function PoolWizard({
         {step === 2 && (
           <div className="space-y-4">
             {/* Dimensions editor (ported from ProviderPlanConfigClient) */}
-            <div className="rounded-lg border border-border bg-bg-subtle p-3">
+            <Card.Section>
               <div className="flex items-center justify-between mb-2">
-                <span className="text-[11px] uppercase tracking-wide font-semibold text-text-muted">
+                <span className="ci-eyebrow" data-size="2xs" data-weight="medium">
                   {tPlans("dimensionLabel")}
                 </span>
                 <Button variant="ghost" size="sm" icon="add" onClick={addDimension}>
@@ -800,36 +837,38 @@ export default function PoolWizard({
                         </option>
                       ))}
                     </Select>
-                    <Input
-                      type="number"
+                    <NumberInput
+                      size="xs"
                       min={0}
+                      precision={6}
                       aria-label={tPlans("limitLabel")}
                       value={dim.limit}
-                      onChange={(e) => updateDimension(i, { limit: Number(e.target.value) })}
+                      onValueChange={(limit) => updateDimension(i, { limit: limit ?? 0 })}
                       placeholder={tPlans("limitLabel")}
-                      inputClassName="h-8 min-h-8 text-right text-xs tabular-nums"
+                      inputClassName="text-right"
                     />
                     <Button
                       variant="ghost"
-                      size="icon-sm"
+                      size="icon-2xs"
+                      tone="muted"
                       onClick={() => removeDimension(i)}
                       aria-label={t("wizardRemoveDimension")}
-                      className="size-6 min-h-6 text-text-muted hover:bg-error/10 hover:text-error"
+                      className="hover:bg-error/10 hover:text-error"
                     >
                       <Icon name="close" size={16} />
                     </Button>
                   </div>
                 ))}
               </div>
-            </div>
+            </Card.Section>
 
             {dimensionsEdited && (
-              <p className="text-[10px] text-warning">{t("wizardDimensionsEditedNotice")}</p>
+              <p className="text-xs text-warning">{t("wizardDimensionsEditedNotice")}</p>
             )}
 
             {/* Helper note when pool has multiple connections */}
             {connectionIds.length > 1 && (
-              <p className="rounded border border-border bg-bg-subtle px-3 py-2 text-[10px] text-text-muted">
+              <p className="rounded border border-border bg-bg-subtle px-3 py-2 text-xs text-text-muted">
                 {t("wizardAdditionalConnectionsNote")}
               </p>
             )}
@@ -859,28 +898,24 @@ export default function PoolWizard({
                         style={{ background: color }}
                       />
                       <span className="text-[12px] font-mono truncate">{keyLabel(a.apiKeyId)}</span>
-                      <Input
-                        type="number"
+                      <NumberInput
+                        size="xs"
                         min={0}
                         max={100}
+                        precision={6}
                         value={a.weight}
-                        onChange={(e) => updateWeight(a.apiKeyId, Number(e.target.value))}
-                        inputClassName="h-8 min-h-8 px-2 text-right tabular-nums"
+                        onValueChange={(weight) => updateWeight(a.apiKeyId, weight ?? 0)}
+                        inputClassName="text-right"
                         title={t("weightPercent")}
                         aria-label={t("weightPercent")}
                       />
-                      <Input
-                        type="number"
+                      <NumberInput
+                        size="xs"
                         min={0}
-                        value={a.capValue ?? ""}
-                        onChange={(e) =>
-                          updateCapValue(
-                            a.apiKeyId,
-                            e.target.value ? Number(e.target.value) : undefined
-                          )
-                        }
+                        precision={6}
+                        value={a.capValue ?? null}
+                        onValueChange={(cap) => updateCapValue(a.apiKeyId, cap ?? undefined)}
                         placeholder={t("policyCapAbsolutePlaceholder")}
-                        inputClassName="h-8 min-h-8 px-2 text-xs tabular-nums"
                         title={t("policyCapAbsoluteLabel")}
                         aria-label={t("policyCapAbsoluteLabel")}
                       />
@@ -899,10 +934,11 @@ export default function PoolWizard({
                       </Select>
                       <Button
                         variant="ghost"
-                        size="icon-sm"
+                        size="icon-2xs"
+                        tone="muted"
                         onClick={() => removeAllocation(a.apiKeyId)}
                         aria-label={t("wizardRemoveKey")}
-                        className="size-6 min-h-6 text-text-muted hover:bg-error/10 hover:text-error"
+                        className="hover:bg-error/10 hover:text-error"
                       >
                         <Icon name="close" size={16} />
                       </Button>
@@ -913,7 +949,7 @@ export default function PoolWizard({
             )}
 
             {/* Add key + equal split controls */}
-            <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border pt-1 text-[11px]">
+            <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border pt-1 text-2xs">
               <span
                 className={`font-semibold tabular-nums ${
                   totalWeight === 100
@@ -964,7 +1000,7 @@ export default function PoolWizard({
                     <span className="text-sm font-semibold text-text-main">
                       {t("wizardExclusiveLabel")}
                     </span>
-                    <span className="mt-0.5 text-[11px] text-text-muted">
+                    <span className="mt-0.5 text-2xs text-text-muted">
                       {t("wizardExclusiveHint")}
                     </span>
                   </span>
@@ -972,10 +1008,16 @@ export default function PoolWizard({
               />
             </div>
 
+            <MemberBreakdownField
+              checked={memberBreakdown}
+              onChange={setMemberBreakdown}
+              keyCount={allocations.length}
+            />
+
             {/* quotaModelName preview — grouped by provider */}
             {previewByProvider.length > 0 && (
-              <div className="rounded-md border border-border bg-bg-subtle p-3 text-[11px]">
-                <div className="font-semibold text-text-muted uppercase tracking-wide mb-1.5 text-[10px]">
+              <Card.Section className="text-2xs">
+                <div className="ci-eyebrow mb-1.5" data-size="3xs" data-weight="medium">
                   {t("wizardPreviewLabel")}
                 </div>
                 <div className="space-y-2">
@@ -984,7 +1026,7 @@ export default function PoolWizard({
                     return (
                       <div key={provider}>
                         {previewByProvider.length > 1 && (
-                          <div className="text-[10px] uppercase tracking-wide text-text-muted font-semibold mb-0.5">
+                          <div className="ci-eyebrow mb-0.5" data-size="3xs" data-weight="medium">
                             {provider}
                           </div>
                         )}
@@ -1004,7 +1046,7 @@ export default function PoolWizard({
                     );
                   })}
                 </div>
-              </div>
+              </Card.Section>
             )}
           </div>
         )}

@@ -313,7 +313,7 @@ export default function AuthzSection() {
                   <div className="flex flex-col">
                     <code className="text-xs font-mono">{prefix}</code>
                     {locked && (
-                      <span className="text-[10px] text-error mt-1">
+                      <span className="text-xs text-error mt-1">
                         {t("authz.bypass.cli_tools_runtime_note")}
                       </span>
                     )}
@@ -341,7 +341,7 @@ export default function AuthzSection() {
                 >
                   <div className="flex flex-col">
                     <code className="text-xs font-mono">{prefix}</code>
-                    <span className="text-[10px] text-error mt-1">
+                    <span className="text-xs text-error mt-1">
                       {t("authz.bypass.cli_tools_runtime_note")}
                     </span>
                   </div>
@@ -395,7 +395,7 @@ export default function AuthzSection() {
       <Card title={t("authz.title")} subtitle={t("authz.description")} icon="shield_lock">
         <div className="flex flex-col gap-4">
           {inventory.tiers.map((tier) => (
-            <div key={tier.name} className="rounded-lg border border-border bg-bg-subtle p-4">
+            <Card.Section key={tier.name}>
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-3">
                   <h4>{t(`authz.tier.${tier.name}`)}</h4>
@@ -429,7 +429,7 @@ export default function AuthzSection() {
                   );
                 })}
               </ul>
-            </div>
+            </Card.Section>
           ))}
         </div>
       </Card>

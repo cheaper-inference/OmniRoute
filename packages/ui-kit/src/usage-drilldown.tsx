@@ -7,6 +7,7 @@ import { Card } from "./card";
 import { Skeleton } from "./skeleton";
 import { Table } from "./table";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./tooltip";
+import { resolveLabels } from "./lib/labels";
 import { cn } from "./lib/utils";
 
 /** Values are already formatted by the dashboard. Null means unavailable, never zero. */
@@ -39,6 +40,22 @@ export function UsageDrilldownHeader({ eyebrow, title, status, description, endp
   </div>;
 }
 
+/** Interface text of UsageRequestIdentity. `help` stays a separate prop. */
+export interface UsageRequestIdentityLabels {
+  requestId: string;
+  /** Copy button accessible name. */
+  copy: string;
+  /** Copy button accessible name and status after a copy. */
+  copied: string;
+  /** Help button accessible name. */
+  about: string;
+}
+export const defaultUsageRequestIdentityLabels: UsageRequestIdentityLabels = {
+  requestId: "Request ID",
+  copy: "Copy request ID",
+  copied: "Request ID copied",
+  about: "About request ID",
+};
 export interface UsageRequestIdentityProps extends ComponentProps<"div"> {
   requestId: string;
   /** Clipboard access, success and failure state remain controlled by the caller. */
@@ -47,14 +64,17 @@ export interface UsageRequestIdentityProps extends ComponentProps<"div"> {
   copyError?: ReactNode;
   help?: ReactNode;
   timestamp?: ReactNode;
+  /** Localized interface text; missing or `undefined` keys fall back to defaultUsageRequestIdentityLabels. */
+  labels?: Partial<UsageRequestIdentityLabels>;
 }
-export function UsageRequestIdentity({ requestId, onCopy, copied = false, copyError, help = "Include this ID when contacting support so we can locate this exact request.", timestamp, className, ...props }: UsageRequestIdentityProps) {
+export function UsageRequestIdentity({ requestId, onCopy, copied = false, copyError, help = "Include this ID when contacting support so we can locate this exact request.", timestamp, labels: labelOverrides, className, ...props }: UsageRequestIdentityProps) {
+  const labels = resolveLabels(defaultUsageRequestIdentityLabels, labelOverrides);
   return <div data-slot="usage-request-identity" className={cn("ci-usage-request-identity", className)} {...props}>
-    <span className="ci-usage-request-identity__label"><Hash size={14} aria-hidden="true" />Request ID</span><code>{requestId}</code>
-    {onCopy && <Button type="button" variant="ghost" size="icon-xs" aria-label={copied ? "Request ID copied" : "Copy request ID"} onClick={onCopy}>{copied ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}</Button>}
-    {help != null && <UsageInfoTooltip label="About request ID">{help}</UsageInfoTooltip>}
+    <span className="ci-usage-request-identity__label"><Hash size={14} aria-hidden="true" />{labels.requestId}</span><code>{requestId}</code>
+    {onCopy && <Button type="button" variant="ghost" size="icon-xs" aria-label={copied ? labels.copied : labels.copy} onClick={onCopy}>{copied ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}</Button>}
+    {help != null && <UsageInfoTooltip label={labels.about}>{help}</UsageInfoTooltip>}
     {timestamp != null && <span className="ci-usage-request-identity__timestamp">{timestamp}</span>}
-    <span className="ci-usage-request-identity__feedback" role="status">{copyError ?? (copied ? "Request ID copied" : null)}</span>
+    <span className="ci-usage-request-identity__feedback" role="status">{copyError ?? (copied ? labels.copied : null)}</span>
   </div>;
 }
 
@@ -68,12 +88,26 @@ export interface UsageReceiptRow {
   strong?: boolean;
   tone?: "default" | "muted" | "positive";
 }
-function ReceiptRow({ label, value, help, helpLabel, indent, strong, tone = "default" }: UsageReceiptRow) {
+function ReceiptRow({ label, value, help, helpLabel, indent, strong, tone = "default", about }: UsageReceiptRow & { about: (label?: string) => string }) {
   return <div className={cn("ci-usage-receipt__row", indent && "ci-usage-receipt__row--indent", strong && "ci-usage-receipt__row--strong")}>
-    <dt>{label}{help != null && <UsageInfoTooltip label={helpLabel ?? `About ${typeof label === "string" ? label.toLowerCase() : "this amount"}`}>{help}</UsageInfoTooltip>}</dt>
+    <dt>{label}{help != null && <UsageInfoTooltip label={helpLabel ?? about(typeof label === "string" ? label : undefined)}>{help}</UsageInfoTooltip>}</dt>
     <span className="ci-usage-receipt__leader" aria-hidden="true" /><dd data-tone={tone}>{value ?? "—"}</dd>
   </div>;
 }
+/** Interface text of UsageCostBreakdown. `title` and `label` stay separate props. */
+export interface UsageCostBreakdownLabels {
+  /** Heading of the optimization rows. */
+  optimizations: string;
+  /** Help button name of the retention line. */
+  aboutRetention: string;
+  /** Help button name of a row without `helpLabel`; `label` is the row label when it is a string. */
+  about: (label?: string) => string;
+}
+export const defaultUsageCostBreakdownLabels: UsageCostBreakdownLabels = {
+  optimizations: "Optimizations",
+  aboutRetention: "About data retention",
+  about: (label) => `About ${label ? label.toLowerCase() : "this amount"}`,
+};
 export interface UsageCostBreakdownProps extends Omit<ComponentProps<"div">, "title"> {
   title?: ReactNode;
   badge?: ReactNode;
@@ -86,17 +120,20 @@ export interface UsageCostBreakdownProps extends Omit<ComponentProps<"div">, "ti
   retention?: ReactNode;
   retentionHelp?: ReactNode;
   label?: string;
+  /** Localized interface text; missing or `undefined` keys fall back to defaultUsageCostBreakdownLabels. */
+  labels?: Partial<UsageCostBreakdownLabels>;
 }
 /** Receipt presentation only: no currency conversion, discount calculation or clamping. */
-export function UsageCostBreakdown({ title = "Cost breakdown", badge, rows, optimizations, optimizationTotal, totals, note, retention, retentionHelp, label = "Savings breakdown for this request", className, ...props }: UsageCostBreakdownProps) {
+export function UsageCostBreakdown({ title = "Cost breakdown", badge, rows, optimizations, optimizationTotal, totals, note, retention, retentionHelp, label = "Savings breakdown for this request", labels: labelOverrides, className, ...props }: UsageCostBreakdownProps) {
+  const labels = resolveLabels(defaultUsageCostBreakdownLabels, labelOverrides);
   return <Card data-slot="usage-cost-breakdown" aria-label={label} className={cn("ci-usage-receipt", className)} {...props}>
     <div className="ci-usage-receipt__heading"><h3><ReceiptText aria-hidden="true" />{title}</h3>{badge}</div>
-    <dl className="ci-usage-receipt__lines">{rows.map(row => <ReceiptRow key={row.id} {...row} />)}</dl>
-    {optimizations && optimizations.length > 0 && <><p className="ci-usage-receipt__group-label">Optimizations</p><dl className="ci-usage-receipt__lines">{optimizations.map(row => <ReceiptRow key={row.id} {...row} indent />)}</dl></>}
-    {optimizationTotal && <dl className="ci-usage-receipt__lines"><ReceiptRow {...optimizationTotal} /></dl>}
-    <dl className="ci-usage-receipt__totals">{totals.map(row => <ReceiptRow key={row.id} {...row} strong />)}</dl>
+    <dl className="ci-usage-receipt__lines">{rows.map(row => <ReceiptRow key={row.id} {...row} about={labels.about} />)}</dl>
+    {optimizations && optimizations.length > 0 && <><p className="ci-usage-receipt__group-label">{labels.optimizations}</p><dl className="ci-usage-receipt__lines">{optimizations.map(row => <ReceiptRow key={row.id} {...row} indent about={labels.about} />)}</dl></>}
+    {optimizationTotal && <dl className="ci-usage-receipt__lines"><ReceiptRow {...optimizationTotal} about={labels.about} /></dl>}
+    <dl className="ci-usage-receipt__totals">{totals.map(row => <ReceiptRow key={row.id} {...row} strong about={labels.about} />)}</dl>
     {note != null && <p className="ci-usage-receipt__note">{note}</p>}
-    {retention != null && <div className="ci-usage-receipt__retention"><Shield aria-hidden="true" />{retention}{retentionHelp != null && <UsageInfoTooltip label="About data retention">{retentionHelp}</UsageInfoTooltip>}</div>}
+    {retention != null && <div className="ci-usage-receipt__retention"><Shield aria-hidden="true" />{retention}{retentionHelp != null && <UsageInfoTooltip label={labels.aboutRetention}>{retentionHelp}</UsageInfoTooltip>}</div>}
   </Card>;
 }
 
@@ -107,22 +144,51 @@ export interface UsageTokenUsageProps extends ComponentProps<"div"> {
   cachedInput?: UsageDetailValue;
   showOriginal?: boolean;
   showCached?: boolean;
+  /** Localized interface text; missing or `undefined` keys fall back to defaultUsageTokenUsageLabels. */
+  labels?: Partial<UsageTokenUsageLabels>;
 }
-const tokenHelp = {
-  original: "Prompt tokens recorded before request optimization.",
-  input: "Prompt tokens recorded for the model request after processing. This can differ from the original count because of formatting or token accounting.",
-  cached: "Cached input is included in sent-to-model input tokens. Do not add it to the total again.",
-  output: "Completion tokens reported for the generated response.",
+/** Interface text of UsageTokenUsage: the title, the four rows and their help. */
+export interface UsageTokenUsageLabels {
+  title: string;
+  original: string;
+  input: string;
+  cached: string;
+  output: string;
+  originalHelp: string;
+  inputHelp: string;
+  cachedHelp: string;
+  outputHelp: string;
+  /** Help button name of the original, input and output rows, from the row label. */
+  about: (label: string) => string;
+  /** Help button name of the cached row. */
+  aboutCached: string;
+  /** Sentence added to a row's help when its value is null. */
+  unavailable: string;
+}
+export const defaultUsageTokenUsageLabels: UsageTokenUsageLabels = {
+  title: "Token usage",
+  original: "Original input",
+  input: "Sent to model",
+  cached: "Of which cached",
+  output: "Output",
+  originalHelp: "Prompt tokens recorded before request optimization.",
+  inputHelp: "Prompt tokens recorded for the model request after processing. This can differ from the original count because of formatting or token accounting.",
+  cachedHelp: "Cached input is included in sent-to-model input tokens. Do not add it to the total again.",
+  outputHelp: "Completion tokens reported for the generated response.",
+  about: (label) => `About ${label.toLowerCase()}`,
+  aboutCached: "About cached input",
+  unavailable: "This value is unavailable; it does not mean zero.",
 };
-export function UsageTokenUsage({ originalInput, input, output, cachedInput, showOriginal = true, showCached = false, className, ...props }: UsageTokenUsageProps) {
+export function UsageTokenUsage({ originalInput, input, output, cachedInput, showOriginal = true, showCached = false, labels: labelOverrides, className, ...props }: UsageTokenUsageProps) {
+  const labels = resolveLabels(defaultUsageTokenUsageLabels, labelOverrides);
   const rows = [
-    ...(showOriginal ? [{ id: "original", label: "Original input", value: originalInput, help: tokenHelp.original }] : []),
-    { id: "input", label: "Sent to model", value: input, help: tokenHelp.input },
-    ...(showCached || cachedInput !== undefined ? [{ id: "cached", label: "Of which cached", value: cachedInput, help: tokenHelp.cached }] : []),
-    { id: "output", label: "Output", value: output, help: tokenHelp.output },
+    ...(showOriginal ? [{ id: "original", label: labels.original, value: originalInput, help: labels.originalHelp }] : []),
+    { id: "input", label: labels.input, value: input, help: labels.inputHelp },
+    ...(showCached || cachedInput !== undefined ? [{ id: "cached", label: labels.cached, value: cachedInput, help: labels.cachedHelp }] : []),
+    { id: "output", label: labels.output, value: output, help: labels.outputHelp },
   ];
-  return <Card data-slot="usage-token-usage" className={cn("ci-usage-section", className)} title={<h3 className="ci-usage-section__title"><Layers3 aria-hidden="true" />Token usage</h3>} {...props}>
-    <dl className="ci-usage-token-rows">{rows.map(row => <div key={row.id} className={cn("ci-usage-token-row", row.id === "cached" && "ci-usage-token-row--cached")}><dt>{row.label}<UsageInfoTooltip label={`About ${row.id === "cached" ? "cached input" : row.label.toLowerCase()}`}>{row.help}{row.value == null && " This value is unavailable; it does not mean zero."}</UsageInfoTooltip></dt><dd>{row.value ?? "—"}</dd></div>)}</dl>
+  return <Card data-slot="usage-token-usage" className={cn("ci-usage-section", className)} title={<h3 className="ci-usage-section__title"><Layers3 aria-hidden="true" />{labels.title}</h3>} {...props}>
+    <dl className="ci-usage-token-rows">{rows.map(row => <div key={row.id} className={cn("ci-usage-token-row", row.id === "cached" && "ci-usage-token-row--cached")}><dt>{row.label}<UsageInfoTooltip label={row.id === "cached" ? labels.aboutCached : labels.about(row.label)}>{row.help}{row.value == null && ` ${labels.unavailable}`}</UsageInfoTooltip></dt><dd>{row.value ?? "—"}</dd></div>)}</dl>
   </Card>;
 }
 
@@ -140,17 +206,23 @@ export interface UsageDetailSectionProps extends Omit<ComponentProps<"div">, "ti
   description?: ReactNode;
   rows: UsageDetailRow[];
   secondaryRows?: UsageDetailRow[];
+  /** Help button name of a row without `helpLabel`; `label` is the row label when it is a string. Defaults to "About …". */
+  aboutLabel?: (label?: string) => string;
 }
-function DetailRows({ rows }: { rows: UsageDetailRow[] }) {
-  return <dl className="ci-usage-detail-rows">{rows.map(row => <div key={row.id}><dt>{row.icon}{row.label}{row.help != null && <UsageInfoTooltip label={row.helpLabel ?? `About ${typeof row.label === "string" ? row.label.toLowerCase() : "this detail"}`}>{row.help}</UsageInfoTooltip>}</dt><dd>{row.value ?? "—"}</dd></div>)}</dl>;
+const defaultUsageDetailAboutLabel = (label?: string) => `About ${label ? label.toLowerCase() : "this detail"}`;
+function DetailRows({ rows, about }: { rows: UsageDetailRow[]; about: (label?: string) => string }) {
+  return <dl className="ci-usage-detail-rows">{rows.map(row => <div key={row.id}><dt>{row.icon}{row.label}{row.help != null && <UsageInfoTooltip label={row.helpLabel ?? about(typeof row.label === "string" ? row.label : undefined)}>{row.help}</UsageInfoTooltip>}</dt><dd>{row.value ?? "—"}</dd></div>)}</dl>;
 }
 /** Also supports approved optional Pricing rows. Caller supplies customer-safe fields. */
-export function UsageDetailSection({ title, icon, description, rows, secondaryRows, className, ...props }: UsageDetailSectionProps) {
-  return <Card data-slot="usage-detail-section" className={cn("ci-usage-section", className)} title={<h3 className="ci-usage-section__title">{icon}{title}</h3>} description={description} {...props}><DetailRows rows={rows} />{secondaryRows && secondaryRows.length > 0 && <div className="ci-usage-detail-rows__secondary"><DetailRows rows={secondaryRows} /></div>}</Card>;
+export function UsageDetailSection({ title, icon, description, rows, secondaryRows, aboutLabel = defaultUsageDetailAboutLabel, className, ...props }: UsageDetailSectionProps) {
+  return <Card data-slot="usage-detail-section" className={cn("ci-usage-section", className)} title={<h3 className="ci-usage-section__title">{icon}{title}</h3>} description={description} {...props}><DetailRows rows={rows} about={aboutLabel} />{secondaryRows && secondaryRows.length > 0 && <div className="ci-usage-detail-rows__secondary"><DetailRows rows={secondaryRows} about={aboutLabel} /></div>}</Card>;
 }
-export type UsageTimingDeliveryProps = Omit<UsageDetailSectionProps, "title" | "icon">;
-export function UsageTimingDelivery(props: UsageTimingDeliveryProps) {
-  return <UsageDetailSection title="Timing & delivery" icon={<Timer aria-hidden="true" />} {...props} />;
+export type UsageTimingDeliveryProps = Omit<UsageDetailSectionProps, "title" | "icon"> & {
+  /** Section heading. Defaults to "Timing & delivery". */
+  title?: ReactNode;
+};
+export function UsageTimingDelivery({ title = "Timing & delivery", ...props }: UsageTimingDeliveryProps) {
+  return <UsageDetailSection title={title} icon={<Timer aria-hidden="true" />} {...props} />;
 }
 
 export interface UsageModelRow {
@@ -162,13 +234,31 @@ export interface UsageModelRow {
   onSelect?: () => void;
   selectLabel?: string;
 }
+/** Interface text of UsageModelsUsed: the title (also the table name) and the column headers. */
+export interface UsageModelsUsedLabels {
+  title: string;
+  model: string;
+  requests: string;
+  spend: string;
+  total: string;
+}
+export const defaultUsageModelsUsedLabels: UsageModelsUsedLabels = {
+  title: "Models used",
+  model: "Model",
+  requests: "Requests",
+  spend: "Spend",
+  total: "Total",
+};
 export interface UsageModelsUsedProps extends ComponentProps<"div"> {
   models: UsageModelRow[];
   total?: { requests: UsageDetailValue; spend: UsageDetailValue };
+  /** Localized interface text; missing or `undefined` keys fall back to defaultUsageModelsUsedLabels. */
+  labels?: Partial<UsageModelsUsedLabels>;
 }
-export function UsageModelsUsed({ models, total, className, ...props }: UsageModelsUsedProps) {
-  return <Card data-slot="usage-models-used" className={cn("ci-usage-section", className)} title={<h3 className="ci-usage-section__title"><Boxes aria-hidden="true" />Models used</h3>} {...props}>
-    <div className="ci-usage-models-scroll"><Table className="ci-usage-models" containerClassName="ci-usage-models-container" scrollbarLabel="Models used" aria-label="Models used"><thead><tr><th scope="col">Model</th><th scope="col">Requests</th><th scope="col">Spend</th></tr></thead><tbody>{models.map(model => <tr key={model.id}><th scope="row">{model.onSelect ? <Button variant="ghost" size="sm" aria-label={model.selectLabel} onClick={model.onSelect}>{model.model}</Button> : model.model}</th><td>{model.requests ?? "—"}</td><td>{model.spend ?? "—"}</td></tr>)}</tbody>{total && <tfoot><tr><th scope="row">Total</th><td>{total.requests ?? "—"}</td><td>{total.spend ?? "—"}</td></tr></tfoot>}</Table></div>
+export function UsageModelsUsed({ models, total, labels: labelOverrides, className, ...props }: UsageModelsUsedProps) {
+  const labels = resolveLabels(defaultUsageModelsUsedLabels, labelOverrides);
+  return <Card data-slot="usage-models-used" className={cn("ci-usage-section", className)} title={<h3 className="ci-usage-section__title"><Boxes aria-hidden="true" />{labels.title}</h3>} {...props}>
+    <div className="ci-usage-models-scroll"><Table className="ci-usage-models" containerClassName="ci-usage-models-container" scrollbarLabel={labels.title} aria-label={labels.title}><thead><tr><th scope="col">{labels.model}</th><th scope="col">{labels.requests}</th><th scope="col">{labels.spend}</th></tr></thead><tbody>{models.map(model => <tr key={model.id}><th scope="row">{model.onSelect ? <Button variant="ghost" size="sm" aria-label={model.selectLabel} onClick={model.onSelect}>{model.model}</Button> : model.model}</th><td>{model.requests ?? "—"}</td><td>{model.spend ?? "—"}</td></tr>)}</tbody>{total && <tfoot><tr><th scope="row">{labels.total}</th><td>{total.requests ?? "—"}</td><td>{total.spend ?? "—"}</td></tr></tfoot>}</Table></div>
   </Card>;
 }
 

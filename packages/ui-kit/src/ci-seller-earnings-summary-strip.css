@@ -1,0 +1,91 @@
+.ci-seller-earnings-summary-strip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0;
+  margin: 0;
+  padding: 0 0 20px;
+  border-bottom: 1px solid var(--ci-color-border-subtle);
+  color: var(--ci-color-foreground);
+  font-family: var(--ci-font-ui);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.45;
+}
+
+.ci-seller-earnings-summary-strip[data-variant="payments"] {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: normal;
+  margin-bottom: 28px;
+  padding: 16px 0 20px;
+  border-block: 1px solid var(--ci-color-border-subtle);
+}
+
+.ci-seller-earnings-summary-strip > div {
+  border-inline-end: 1px solid var(--ci-color-border-subtle);
+  padding: 0 28px;
+}
+
+.ci-seller-earnings-summary-strip > div:first-child {
+  padding-inline-start: 0;
+}
+
+.ci-seller-earnings-summary-strip > div > strong {
+  display: block;
+  margin: 4px 0;
+  font-size: 28px;
+  font-weight: 550;
+  line-height: 1.2;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.ci-seller-earnings-summary-strip > div:first-child > strong {
+  color: var(--ci-color-success);
+}
+
+.ci-seller-earnings-summary-strip > div > :is(small, span) {
+  color: var(--ci-color-text-muted);
+  font-size: 12px;
+}
+
+.ci-seller-earnings-summary-strip > div > small {
+  line-height: 1.3;
+}
+
+@media (max-width: 1100px) {
+  .ci-seller-earnings-summary-strip:is([data-variant="overview"], [data-variant="payments"]) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+  }
+  .ci-seller-earnings-summary-strip > div {
+    padding: 0 0 20px;
+    border-inline-end: 0;
+    border-bottom: 1px solid var(--ci-color-border-subtle);
+  }
+}
+
+@media (max-width: 700px) {
+  .ci-seller-earnings-summary-strip[data-variant="payments"] {
+    grid-template-columns: 1fr;
+  }
+
+  .ci-seller-earnings-summary-strip[data-variant="payments"] > div {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 4px;
+  }
+
+  .ci-seller-earnings-summary-strip[data-variant="payments"] > div > strong {
+    grid-column: 2;
+    grid-row: 1 / 3;
+  }
+
+  .ci-seller-earnings-summary-strip[data-variant="payments"] > div > span {
+    grid-column: 1;
+  }
+}
+
+.ci-seller-earnings-summary-strip > div:last-child {
+  border: 0;
+}

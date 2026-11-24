@@ -13,6 +13,8 @@ import { useTranslations } from "next-intl";
 import CompressionTokenSaverCard, {
   type CompressionTokenSaverConfig,
 } from "./CompressionTokenSaverCard";
+import SavedNumberInput from "./SavedNumberInput";
+import IconChip from "@/shared/components/IconChip";
 
 type CompressionMode =
   "off" | "lite" | "standard" | "aggressive" | "ultra" | "rtk" | "codex-responses" | "stacked";
@@ -389,11 +391,13 @@ export default function CompressionSettingsTab() {
   return (
     <Card className="p-6">
       <div className="flex items-center gap-3 mb-5">
-        <div className="p-2 rounded-lg bg-info/10 text-info">
+        <IconChip tone="info">
           <Icon name="compress" size={20} />
-        </div>
+        </IconChip>
         <div>
-          <h3 className="text-lg">{t("compressionTitle")}</h3>
+          <h3 className="ci-heading" data-size="lg">
+            {t("compressionTitle")}
+          </h3>
           <p className="text-sm text-text-muted">{t("compressionDesc")}</p>
         </div>
         {status === "saved" && (
@@ -413,7 +417,9 @@ export default function CompressionSettingsTab() {
 
         {config.enabled && (
           <div className="space-y-3">
-            <h4 className="text-sm text-text-main">{t("compressionMode")}</h4>
+            <h4 className="ci-heading text-text-main" data-size="sm">
+              {t("compressionMode")}
+            </h4>
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-7 gap-2">
               {MODES.map((m) => {
                 const active = config.defaultMode === m.value;
@@ -438,17 +444,18 @@ export default function CompressionSettingsTab() {
 
         {config.enabled && (
           <div className="space-y-3 pt-4 border-t border-border/30">
-            <h4 className="text-sm text-text-main">{t("compressionGeneral")}</h4>
+            <h4 className="ci-heading text-text-main" data-size="sm">
+              {t("compressionGeneral")}
+            </h4>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Input
+              <SavedNumberInput
                 label={t("compressionAutoTrigger")}
                 hint={t("tokens")}
-                type="number"
                 min={0}
                 max={100000}
                 value={config.autoTriggerTokens}
-                onChange={(e) => save({ autoTriggerTokens: parseInt(e.target.value) || 0 })}
+                onSave={(value) => save({ autoTriggerTokens: value })}
               />
               <Select
                 label={t("compressionSettingsAutoTriggerMode")}
@@ -461,14 +468,13 @@ export default function CompressionSettingsTab() {
                   </option>
                 ))}
               </Select>
-              <Input
+              <SavedNumberInput
                 label={t("compressionCacheTTL")}
                 hint={t("minutes")}
-                type="number"
                 min={1}
                 max={60}
                 value={config.cacheMinutes}
-                onChange={(e) => save({ cacheMinutes: parseInt(e.target.value) || 5 })}
+                onSave={(value) => save({ cacheMinutes: value })}
               />
               <Select
                 label={t("compressionPreserveSystem")}
@@ -511,7 +517,9 @@ export default function CompressionSettingsTab() {
                   the panel's `engines.caveman.enabled` is authoritative (planResolution.ts). This tab
                   keeps only the advanced caveman tuning the panel does not expose. */}
               <div data-testid="caveman-panel-note">
-                <h4 className="text-sm text-text-main">{t("compressionCavemanConfig")}</h4>
+                <h4 className="ci-heading text-text-main" data-size="sm">
+                  {t("compressionCavemanConfig")}
+                </h4>
                 <p className="text-xs text-text-muted mt-0.5">
                   {t("compressionCavemanConfigDesc")} {t("compressionCavemanPanelHint")}{" "}
                   <code className="text-text-muted">/dashboard/context/settings</code>
@@ -539,19 +547,12 @@ export default function CompressionSettingsTab() {
                   </div>
                 </div>
 
-                <Input
+                <SavedNumberInput
                   label={t("compressionMinLength")}
-                  type="number"
                   min={0}
                   max={100000}
                   value={config.cavemanConfig.minMessageLength}
-                  onChange={(e) =>
-                    save({
-                      cavemanConfig: {
-                        minMessageLength: parseInt(e.target.value) || 50,
-                      },
-                    })
-                  }
+                  onSave={(value) => save({ cavemanConfig: { minMessageLength: value || 50 } })}
                   className="sm:max-w-xs"
                 />
 
@@ -600,7 +601,8 @@ export default function CompressionSettingsTab() {
                       });
                     }}
                     placeholder="https?://\S+\n```[\s\S]*?```"
-                    className="w-full min-h-[80px] font-mono resize-y"
+                    mono
+                    className="w-full min-h-[80px] resize-y"
                   />
                 </div>
               </>
@@ -610,7 +612,9 @@ export default function CompressionSettingsTab() {
         {config.enabled && config.defaultMode === "aggressive" && config.aggressive && (
           <div className="space-y-3 pt-4 border-t border-border/30">
             <div>
-              <h4 className="text-sm text-text-main">{t("compressionAggressiveConfig")}</h4>
+              <h4 className="ci-heading text-text-main" data-size="sm">
+                {t("compressionAggressiveConfig")}
+              </h4>
               <p className="text-xs text-text-muted mt-0.5">
                 {t("compressionAggressiveConfigDesc")}
               </p>
@@ -629,36 +633,22 @@ export default function CompressionSettingsTab() {
             />
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Input
+              <SavedNumberInput
                 label={t("compressionMaxTokensPerMessage")}
                 hint={t("tokens")}
-                type="number"
                 min={256}
                 max={32768}
                 value={config.aggressive.maxTokensPerMessage}
-                onChange={(e) =>
-                  save({
-                    aggressive: {
-                      maxTokensPerMessage: parseInt(e.target.value) || 2048,
-                    },
-                  })
-                }
+                onSave={(value) => save({ aggressive: { maxTokensPerMessage: value } })}
               />
-              <Input
+              <SavedNumberInput
                 label={t("compressionMinSavings")}
                 hint="%"
-                type="number"
                 min={0}
                 max={1}
                 step={0.01}
                 value={config.aggressive.minSavingsThreshold}
-                onChange={(e) =>
-                  save({
-                    aggressive: {
-                      minSavingsThreshold: parseFloat(e.target.value) || 0.05,
-                    },
-                  })
-                }
+                onSave={(value) => save({ aggressive: { minSavingsThreshold: value || 0.05 } })}
               />
             </div>
 
@@ -669,22 +659,13 @@ export default function CompressionSettingsTab() {
               <p className="text-xs text-text-muted">{t("compressionAgingThresholdsDesc")}</p>
               <div className="grid grid-cols-2 gap-2">
                 {(["fullSummary", "moderate", "light", "verbatim"] as const).map((tier) => (
-                  <Input
+                  <SavedNumberInput
                     key={tier}
                     label={tier.replace(/([A-Z])/g, " $1").trim()}
-                    type="number"
                     min={1}
                     max={100}
                     value={config.aggressive!.thresholds[tier]}
-                    onChange={(e) =>
-                      save({
-                        aggressive: {
-                          thresholds: {
-                            [tier]: parseInt(e.target.value) || 2,
-                          },
-                        },
-                      })
-                    }
+                    onSave={(value) => save({ aggressive: { thresholds: { [tier]: value } } })}
                     className="rounded border border-border/50 p-2 capitalize"
                   />
                 ))}
@@ -727,7 +708,9 @@ export default function CompressionSettingsTab() {
         {config.enabled && config.defaultMode === "ultra" && config.ultra && (
           <div className="space-y-3 pt-4 border-t border-border/30">
             <div>
-              <h4 className="text-sm text-text-main">{t("compressionUltraConfig")}</h4>
+              <h4 className="ci-heading text-text-main" data-size="sm">
+                {t("compressionUltraConfig")}
+              </h4>
               <p className="text-xs text-text-muted mt-0.5">{t("compressionUltraConfigDesc")}</p>
             </div>
 
@@ -744,50 +727,29 @@ export default function CompressionSettingsTab() {
             />
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Input
+              <SavedNumberInput
                 label={t("compressionUltraRate")}
-                type="number"
                 min={0}
                 max={1}
                 step={0.05}
                 value={config.ultra.compressionRate}
-                onChange={(e) =>
-                  save({
-                    ultra: {
-                      compressionRate: parseFloat(e.target.value) || 0,
-                    },
-                  })
-                }
+                onSave={(value) => save({ ultra: { compressionRate: value } })}
               />
-              <Input
+              <SavedNumberInput
                 label={t("compressionUltraMinScore")}
-                type="number"
                 min={0}
                 max={1}
                 step={0.05}
                 value={config.ultra.minScoreThreshold}
-                onChange={(e) =>
-                  save({
-                    ultra: {
-                      minScoreThreshold: parseFloat(e.target.value) || 0,
-                    },
-                  })
-                }
+                onSave={(value) => save({ ultra: { minScoreThreshold: value } })}
               />
-              <Input
+              <SavedNumberInput
                 label={t("compressionMaxTokensPerMessage")}
                 hint={t("tokens")}
-                type="number"
                 min={0}
                 max={32768}
                 value={config.ultra.maxTokensPerMessage}
-                onChange={(e) =>
-                  save({
-                    ultra: {
-                      maxTokensPerMessage: parseInt(e.target.value) || 0,
-                    },
-                  })
-                }
+                onSave={(value) => save({ ultra: { maxTokensPerMessage: value } })}
               />
             </div>
 
@@ -815,7 +777,7 @@ export default function CompressionSettingsTab() {
                 })
               }
               placeholder="/path/to/model.onnx"
-              inputClassName="font-mono"
+              mono
             />
           </div>
         )}

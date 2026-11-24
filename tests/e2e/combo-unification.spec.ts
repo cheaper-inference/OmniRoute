@@ -169,8 +169,10 @@ test.describe("Combo Unification", () => {
     await gotoDashboardRoute(page, "/dashboard/combos");
 
     await page.getByRole("button", { name: /create combo/i }).click();
-    await page.getByLabel(/combo name/i).waitFor({ state: "visible" });
-    await page.getByLabel(/combo name/i).fill("e2e-auto-builder");
+    // By role: the "Copy combo name" buttons on the combo cards also match a label lookup.
+    const comboName = page.getByRole("textbox", { name: /combo name/i });
+    await comboName.waitFor({ state: "visible" });
+    await comboName.fill("e2e-auto-builder");
     await page.getByTestId("combo-builder-next").click();
 
     await page.getByTestId("combo-builder-provider").waitFor({ state: "visible" });

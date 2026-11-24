@@ -24,7 +24,7 @@ test("cria e revoga uma API key pela UI", async ({ page }) => {
   await expect(row).toHaveCount(1);
 
   // revoga a mesma key (cleanup — a suíte não deixa lixo na VPS)
-  await row.getByTitle("Delete key").click();
+  await row.getByRole("button", { name: "Delete key", exact: true }).click();
   await page.getByRole("alertdialog").getByRole("button", { name: "Delete" }).click();
   await expect(page.locator("div.grid-cols-12", { hasText: KEY_NAME })).toHaveCount(0);
 });

@@ -1,5 +1,6 @@
 // Pure shared primitives for the OpenAI Responses <-> Chat Completions request
 // translators. Extracted verbatim from openai-responses.ts (no host imports).
+import { createHash } from "node:crypto";
 import { getProviderModels, supportsClaudeMaxEffort } from "../../../config/providerModels.ts";
 
 export type JsonRecord = Record<string, unknown>;
@@ -38,8 +39,12 @@ export function toRecord(value: unknown): JsonRecord {
 // Clamp deterministically so a function_call and its matching function_call_output keep
 // the same id and stay paired through the orphaned-output filter below.
 export const MAX_CALL_ID_LEN = 64;
+// A cut alone would merge ids that differ only at the end (`name:0`, `name:1`), so an over-long
+// id keeps 55 characters plus `_` plus 8 hex of its hash. Same id in, same id out.
 export function clampCallId(id: string): string {
-  return id.length > MAX_CALL_ID_LEN ? id.slice(0, MAX_CALL_ID_LEN) : id;
+  if (id.length <= MAX_CALL_ID_LEN) return id;
+  const hash = createHash("sha256").update(id).digest("hex").slice(0, 8);
+  return `${id.slice(0, MAX_CALL_ID_LEN - 9)}_${hash}`;
 }
 
 export function toArray(value: unknown): unknown[] {

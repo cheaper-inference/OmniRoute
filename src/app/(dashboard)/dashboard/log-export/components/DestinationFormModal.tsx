@@ -7,6 +7,8 @@ import Button from "@/shared/components/Button";
 import Checkbox from "@/shared/components/Checkbox";
 import Input from "@/shared/components/Input";
 import Modal from "@/shared/components/Modal";
+import NumberInput from "@/shared/components/NumberInput";
+
 import Select from "@/shared/components/Select";
 import Textarea from "@/shared/components/Textarea";
 import {
@@ -217,19 +219,19 @@ function DestinationForm({
       {(descriptor?.fields ?? []).map(renderField)}
 
       <div className="grid grid-cols-2 gap-3">
-        <Input
+        <NumberInput
           label="Batch size"
-          type="number"
+          min={0}
           hint="Rows per cursor batch"
-          value={batchSize}
-          onChange={(event) => setBatchSize(event.target.value)}
+          value={batchSize === "" ? null : Number(batchSize)}
+          onValueChange={(value) => setBatchSize(value === null ? "" : String(value))}
         />
-        <Input
+        <NumberInput
           label="Max rows per run"
-          type="number"
+          min={0}
           hint="Caps a single hourly run"
-          value={maxRowsPerRun}
-          onChange={(event) => setMaxRowsPerRun(event.target.value)}
+          value={maxRowsPerRun === "" ? null : Number(maxRowsPerRun)}
+          onValueChange={(value) => setMaxRowsPerRun(value === null ? "" : String(value))}
         />
       </div>
 
@@ -253,12 +255,12 @@ function DestinationForm({
             client and provider views of each call. Content is PII-sanitised and secret-redacted the
             same way the dashboard shows it, and calls made with a no-log API key carry none.
           </span>
-          <Input
+          <NumberInput
             label="Max payload bytes per field"
-            type="number"
+            min={0}
             hint="Longer payloads are truncated, not dropped"
-            value={maxBodyBytes}
-            onChange={(event) => setMaxBodyBytes(event.target.value)}
+            value={maxBodyBytes === "" ? null : Number(maxBodyBytes)}
+            onValueChange={(value) => setMaxBodyBytes(value === null ? "" : String(value))}
           />
         </div>
       ) : null}
