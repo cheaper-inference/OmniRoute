@@ -190,3 +190,62 @@ test("streaming auth-error classification uses the 64 KiB error cap, not the com
   );
   assert.equal(await result.response.text(), body, "the client error body remains intact");
 });
+
+for (const status of [200, 429]) {
+  test(`stream redispatch records its ${status} response once without replacing the initial observation`, async () => {
+    const { record, calls } = recorderSpy();
+    const content = "data: [DONE]\n\n";
+    const initial = new Response(
+      new ReadableStream<Uint8Array>({
+        start(controller) {
+          controller.error(new TypeError("terminated"));
+        },
+      }),
+      { headers: { "content-type": "text/event-stream" } }
+    );
+    const retry = new Response(status === 200 ? content : "Rate limited", {
+      status,
+      headers:
+        status === 200
+          ? { "content-type": "text/event-stream" }
+          : { "content-type": "text/plain", "retry-after": "2" },
+    });
+    const deps = requestDeps(initial, record, true);
+    deps.getExecutionCredentials = () => ({ connectionId: "kh-redispatch-fixture" });
+    deps.settings = { resilienceSettings: { streamRecovery: { enabled: true } } };
+    let dispatches = 0;
+    deps.executor.execute = async () => {
+      dispatches++;
+      assert.ok(dispatches <= 2, "only one redispatch is expected");
+      return {
+        response: dispatches === 1 ? initial : retry,
+        transport: dispatches === 1 ? "initial" : "redispatch",
+        url: "",
+        headers: {},
+        transformedBody: null,
+      };
+    };
+
+    const result = await executeProviderRequest(deps);
+    assert.equal(await result.response.text(), status === 200 ? content : "");
+    assert.equal(dispatches, 2);
+    assert.deepEqual(
+      calls.map(({ status, transport, failureDetail, retryAfterMs }) => ({
+        status,
+        transport,
+        failureDetail,
+        retryAfterMs,
+      })),
+      [
+        { status: 200, transport: "initial", failureDetail: "", retryAfterMs: null },
+        {
+          status,
+          transport: "redispatch",
+          failureDetail: status === 429 ? "Rate limited" : "",
+          retryAfterMs: status === 429 ? 2_000 : null,
+        },
+      ]
+    );
+    assert.ok(calls[1].requestSeq > calls[0].requestSeq);
+  });
+}

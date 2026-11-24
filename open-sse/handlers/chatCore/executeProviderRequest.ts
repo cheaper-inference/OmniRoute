@@ -212,6 +212,35 @@ export function makeResponseKeyHealthRecorder(
   };
 }
 
+function isStreamKeyHealthStatus(response: Response): boolean {
+  return (
+    response.ok ||
+    response.status === HTTP_STATUS.UNAUTHORIZED ||
+    response.status === HTTP_STATUS.FORBIDDEN ||
+    response.status === HTTP_STATUS.PAYMENT_REQUIRED ||
+    response.status === HTTP_STATUS.RATE_LIMITED
+  );
+}
+
+async function recordRedispatchedStreamKeyHealth(
+  record: ReturnType<typeof makeResponseKeyHealthRecorder> | undefined,
+  response: Response,
+  credentials: Record<string, unknown>,
+  transport: string | undefined,
+  ownerFence: ReturnType<typeof captureCodexConnectionFence>
+): Promise<void> {
+  if (!record || !isStreamKeyHealthStatus(response)) return;
+  try {
+    bindCodexResponseFence(response, ownerFence);
+    const failureDetail = response.ok
+      ? ""
+      : await readErrorBodyText(response.clone()).catch(() => "");
+    record(response, credentials, transport, failureDetail);
+  } catch {
+    // Health reporting must not prevent delivery or cancellation of this body.
+  }
+}
+
 // Resolve early (the loop's own signal checks then end the request) when the client leaves.
 function sleepUnlessAborted(ms: number, signal: AbortSignal): Promise<void> {
   return new Promise((resolve) => {
@@ -537,16 +566,14 @@ export async function executeProviderRequest(
               stage: "provider_response_started",
             });
 
-            if (
+            // Stream pulls can run in a different async context. Keep the probe-isolation
+            // decision from the original request context for its subsequent redispatches.
+            const recordStreamKeyHealth =
               stream &&
-              (res.response.ok ||
-                res.response.status === HTTP_STATUS.UNAUTHORIZED ||
-                res.response.status === HTTP_STATUS.FORBIDDEN ||
-                res.response.status === HTTP_STATUS.PAYMENT_REQUIRED ||
-                res.response.status === HTTP_STATUS.RATE_LIMITED) &&
+              isStreamKeyHealthStatus(res.response) &&
               executionConnectionId &&
-              !(await shouldIsolateProbeFailures())
-            ) {
+              !(await shouldIsolateProbeFailures());
+            if (recordStreamKeyHealth) {
               const failureDetail = res.response.ok
                 ? ""
                 : await readErrorBodyText(res.response.clone()).catch(() => "");
@@ -636,6 +663,8 @@ export async function executeProviderRequest(
                   try {
                     assertManagedLeaseFence(attemptConnectionId);
                     if (ownerFence && !isCodexConnectionFenceCurrent(ownerFence)) return null;
+                    let recordRedispatchKeyHealth:
+                      ReturnType<typeof makeResponseKeyHealthRecorder> | undefined;
                     const retryRaw = await executeWithUpstreamStartTimeout({
                       executor,
                       provider,
@@ -649,8 +678,7 @@ export async function executeProviderRequest(
                       execute: (signal) =>
                         runWithCapture(providerRequestCapture, () => {
                           noteUpstreamDispatch();
-                          // Captured immediately before dispatch, after the concurrency gates.
-                          recordResponseKeyHealth = makeResponseKeyHealthRecorder(
+                          recordRedispatchKeyHealth = makeResponseKeyHealthRecorder(
                             recordKeyHealthStatus,
                             nextRequestSeq()
                           );
@@ -673,6 +701,15 @@ export async function executeProviderRequest(
                         }),
                     });
                     const retryRes = normalizeExecutorResult(retryRaw);
+                    if (recordStreamKeyHealth) {
+                      await recordRedispatchedStreamKeyHealth(
+                        recordRedispatchKeyHealth,
+                        retryRes.response,
+                        execCreds,
+                        retryRes.transport,
+                        ownerFence
+                      );
+                    }
                     const retryOk =
                       retryRes.response.status >= 200 && retryRes.response.status < 300;
                     if (retryOk && retryRes.response.body) {
