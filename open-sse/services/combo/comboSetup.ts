@@ -33,6 +33,7 @@ export interface ComboSetup {
   effectiveSessionId: string | null;
   pinnedModel: string | null;
   pinnedModelUsedAtMs: number | null;
+  pinnedModelSinceMs: number | null;
   clientRequestedStream: boolean;
   config: ReturnType<typeof resolveComboSetupConfig>;
   comboTargetTimeoutMs: number;
@@ -57,6 +58,7 @@ function resolveContextCachePin(ctx: ComboContext): {
   effectiveSessionId: string | null;
   pinnedModel: string | null;
   pinnedModelUsedAtMs: number | null;
+  pinnedModelSinceMs: number | null;
 } {
   const { combo, relayOptions, log } = ctx;
   const effectiveSessionId: string | null = combo.context_cache_protection
@@ -67,6 +69,7 @@ function resolveContextCachePin(ctx: ComboContext): {
     : null;
   let pinnedModel: string | null = null;
   let pinnedModelUsedAtMs: number | null = null;
+  let pinnedModelSinceMs: number | null = null;
   if (
     combo.context_cache_protection &&
     effectiveSessionId &&
@@ -78,10 +81,11 @@ function resolveContextCachePin(ctx: ComboContext): {
       ctx.body = { ...ctx.body, model: pinned };
       pinnedModel = pinned;
       pinnedModelUsedAtMs = usage?.usedAtMs ?? null;
+      pinnedModelSinceMs = usage?.sinceMs ?? null;
       log.info("COMBO", `[#401] Context cache: pinned model=${pinned} (server-side)`);
     }
   }
-  return { effectiveSessionId, pinnedModel, pinnedModelUsedAtMs };
+  return { effectiveSessionId, pinnedModel, pinnedModelUsedAtMs, pinnedModelSinceMs };
 }
 
 export function phaseComboSetup(ctx: ComboContext): ComboSetup {
@@ -103,7 +107,8 @@ export function phaseComboSetup(ctx: ComboContext): ComboSetup {
   );
 
   // Server-side context cache pinning (rewrites ctx.body when a model is pinned).
-  const { effectiveSessionId, pinnedModel, pinnedModelUsedAtMs } = resolveContextCachePin(ctx);
+  const { effectiveSessionId, pinnedModel, pinnedModelUsedAtMs, pinnedModelSinceMs } =
+    resolveContextCachePin(ctx);
 
   // ── Combo Agent Middleware (#399 + #401) ────────────────────────────────
   // Apply system_message override, tool_filter_regex.
@@ -137,6 +142,7 @@ export function phaseComboSetup(ctx: ComboContext): ComboSetup {
     effectiveSessionId,
     pinnedModel,
     pinnedModelUsedAtMs,
+    pinnedModelSinceMs,
     clientRequestedStream,
     config,
     comboTargetTimeoutMs,

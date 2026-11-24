@@ -226,6 +226,10 @@ const ORDERED_PIN_STRATEGIES = new Set(["priority", "fill-first"]);
 // opt into 24h retention with `prompt_cache_retention`. Anthropic's default (5 minutes) is shorter.
 const PIN_CACHE_IDLE_RETENTION_MS = 10 * 60_000;
 const PIN_CACHE_EXTENDED_RETENTION_MS = 24 * 60 * 60_000;
+// Ceiling on how long a session may stay pinned to a fallback while a higher-priority target is
+// ready, however warm the cache is: a busy session never idles past the window above, so without
+// this it would stay on the (often paid) fallback for good.
+export const PIN_FALLBACK_MAX_DWELL_MS = 30 * 60_000;
 
 /**
  * Pure decision: has the provider-side prompt cache behind a pin expired? An unknown last-use
@@ -244,6 +248,18 @@ export function pinCacheExpired(
       ? PIN_CACHE_EXTENDED_RETENTION_MS
       : PIN_CACHE_IDLE_RETENTION_MS;
   return now - pinnedModelUsedAtMs > retentionMs;
+}
+
+/**
+ * Pure decision: has the session been on its pinned fallback longer than
+ * {@link PIN_FALLBACK_MAX_DWELL_MS}? An unknown start counts as within the ceiling.
+ */
+export function pinFallbackDwellExceeded(
+  pinnedModelSinceMs: number | null | undefined,
+  now: number
+): boolean {
+  if (typeof pinnedModelSinceMs !== "number" || !Number.isFinite(pinnedModelSinceMs)) return false;
+  return now - pinnedModelSinceMs > PIN_FALLBACK_MAX_DWELL_MS;
 }
 
 /**
@@ -548,6 +564,8 @@ export async function tryPinnedModelDispatch(args: {
   pinnedModel: string;
   /** When the pinned model last served this session (epoch ms). */
   pinnedModelUsedAtMs?: number | null;
+  /** When the session's current unbroken run on the pinned model began (epoch ms). */
+  pinnedModelSinceMs?: number | null;
   allCombos?: ComboCollectionLike;
   config: ComboSetupConfig;
   clientRequestedStream: boolean;
@@ -562,6 +580,7 @@ export async function tryPinnedModelDispatch(args: {
     combo,
     pinnedModel,
     pinnedModelUsedAtMs,
+    pinnedModelSinceMs,
     allCombos,
     config,
     clientRequestedStream,
@@ -622,18 +641,20 @@ export async function tryPinnedModelDispatch(args: {
     }
   }
   // A pin on a fallback outlives the failover that created it. Once its prompt cache has
-  // expired there is nothing left to protect, so an ordered combo goes back to its order.
+  // expired (idle session) or the session has been on the fallback for the dwell ceiling (busy
+  // session), an ordered combo goes back to its order.
   if (
     pinInCombo &&
     haveFullCombos &&
     ORDERED_PIN_STRATEGIES.has(normalizeRoutingStrategy(combo.strategy || "priority")) &&
-    pinCacheExpired(body, pinnedModelUsedAtMs, Date.now())
+    (pinCacheExpired(body, pinnedModelUsedAtMs, Date.now()) ||
+      pinFallbackDwellExceeded(pinnedModelSinceMs, Date.now()))
   ) {
     const preferred = await findReadyHigherPriorityTarget(comboTargets, pinnedModel);
     if (preferred) {
       log.info(
         "COMBO",
-        `Context pin ${pinnedModel} is a fallback whose prompt cache has expired and ${preferred} is ready; following the combo order`
+        `Context pin ${pinnedModel} is a fallback whose prompt cache has expired or whose dwell ceiling passed, and ${preferred} is ready; following the combo order`
       );
       return null;
     }

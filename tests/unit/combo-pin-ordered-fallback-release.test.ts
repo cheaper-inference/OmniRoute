@@ -17,8 +17,13 @@ const ORIGINAL_API_KEY_SECRET = process.env.API_KEY_SECRET;
 process.env.DATA_DIR = TEST_DATA_DIR;
 process.env.API_KEY_SECRET = process.env.API_KEY_SECRET || "pin-ordered-test-secret";
 
-const { tryPinnedModelDispatch, connectionsReadyNow, pinCacheExpired } =
-  await import("../../open-sse/services/combo/dispatchPrelude.ts");
+const {
+  tryPinnedModelDispatch,
+  connectionsReadyNow,
+  pinCacheExpired,
+  pinFallbackDwellExceeded,
+  PIN_FALLBACK_MAX_DWELL_MS,
+} = await import("../../open-sse/services/combo/dispatchPrelude.ts");
 const { resolveComboSetupConfig } = await import("../../open-sse/services/comboConfig.ts");
 const { createProviderConnection, updateProviderConnection } =
   await import("../../src/lib/db/providers.ts");
@@ -89,7 +94,8 @@ async function dispatch(
   combo: Record<string, unknown>,
   pinnedModel: string,
   pinnedModelUsedAtMs: number | null = Date.now() - 30 * MINUTE,
-  extraBody: Record<string, unknown> = {}
+  extraBody: Record<string, unknown> = {},
+  pinnedModelSinceMs: number | null = null
 ) {
   const { log, records } = testLog();
   const calls: string[] = [];
@@ -98,6 +104,7 @@ async function dispatch(
     combo,
     pinnedModel,
     pinnedModelUsedAtMs,
+    pinnedModelSinceMs,
     allCombos: [combo],
     config: resolveComboSetupConfig(combo, {}),
     clientRequestedStream: false,
@@ -122,6 +129,64 @@ test("fill-first: a fallback pin with a warm cache stands even when the primary 
   const { combo, fallbackModel } = await setup("pinord-e", "fill-first");
   const { res, calls } = await dispatch(combo, fallbackModel, Date.now() - 2 * MINUTE);
   assert.ok(res, "the pin must be served to keep the cache");
+  assert.deepEqual(calls, [fallbackModel]);
+});
+
+test("fill-first: #20829 repro - a busy session (fresh pin) goes back to a ready primary after the 30 minute ceiling", async () => {
+  const { combo, fallbackModel } = await setup("pinord-h", "fill-first");
+  // Last turn 2 s ago (cache warm, session active), but on the fallback for 31 minutes.
+  const { res, calls, records } = await dispatch(
+    combo,
+    fallbackModel,
+    Date.now() - 2_000,
+    {},
+    Date.now() - 31 * MINUTE
+  );
+  assert.equal(res, null, "must fall through to the combo order");
+  assert.deepEqual(calls, []);
+  assert.ok(records.some((m) => m.includes("dwell ceiling")));
+});
+
+test("fill-first: a busy session under the 30 minute ceiling keeps the warm fallback pin", async () => {
+  const { combo, fallbackModel } = await setup("pinord-i", "fill-first");
+  const { res, calls } = await dispatch(
+    combo,
+    fallbackModel,
+    Date.now() - 2_000,
+    {},
+    Date.now() - 25 * MINUTE
+  );
+  assert.ok(res);
+  assert.deepEqual(calls, [fallbackModel]);
+});
+
+test("fill-first: the 30 minute ceiling also beats 24h prompt_cache_retention", async () => {
+  const { combo, fallbackModel } = await setup("pinord-j", "fill-first");
+  const { res, calls } = await dispatch(
+    combo,
+    fallbackModel,
+    Date.now() - 2_000,
+    { prompt_cache_retention: "24h" },
+    Date.now() - 31 * MINUTE
+  );
+  assert.equal(res, null);
+  assert.deepEqual(calls, []);
+});
+
+test("fill-first: past the ceiling the fallback pin stands while the primary is rate limited", async () => {
+  const { combo, primary, fallbackModel } = await setup("pinord-k", "fill-first");
+  await updateProviderConnection(primary.id, {
+    rateLimitedUntil: new Date(Date.now() + 10 * 60_000).toISOString(),
+  });
+  invalidateDbCache();
+  const { res, calls } = await dispatch(
+    combo,
+    fallbackModel,
+    Date.now() - 2_000,
+    {},
+    Date.now() - 31 * MINUTE
+  );
+  assert.ok(res, "no ready primary, so the pin must be served");
   assert.deepEqual(calls, [fallbackModel]);
 });
 
@@ -190,6 +255,41 @@ test("pinCacheExpired: default 10-minute idle window, 24h opt-in, unknown counts
   );
   assert.equal(pinCacheExpired({}, null, now), false);
   assert.equal(pinCacheExpired(undefined, undefined, now), false);
+});
+
+test("pinFallbackDwellExceeded: 30 minute ceiling, unknown start counts as within it", () => {
+  const now = Date.now();
+  assert.equal(PIN_FALLBACK_MAX_DWELL_MS, 30 * MINUTE);
+  assert.equal(pinFallbackDwellExceeded(now - 29 * MINUTE, now), false);
+  assert.equal(pinFallbackDwellExceeded(now - 31 * MINUTE, now), true);
+  assert.equal(pinFallbackDwellExceeded(null, now), false);
+  assert.equal(pinFallbackDwellExceeded(undefined, now), false);
+});
+
+test("getLastSessionModelUsage sinceMs is the start of the current unbroken run on the model", () => {
+  const db = core.getDbInstance();
+  const ins = db.prepare(
+    "INSERT INTO session_model_history (session_id, combo_name, model_str, provider, used_at) VALUES (?, ?, ?, ?, ?)"
+  );
+  ins.run("pinord-run", "pinord-run-combo", "b/sol", "b", "2026-01-01 09:00:00");
+  ins.run("pinord-run", "pinord-run-combo", "a/sol", "a", "2026-01-01 10:00:00");
+  ins.run("pinord-run", "pinord-run-combo", "b/sol", "b", "2026-01-01 10:05:00");
+  ins.run("pinord-run", "pinord-run-combo", "b/sol", "b", "2026-01-01 10:10:00");
+  ins.run("pinord-run", "pinord-run-combo", "b/sol", "b", "2026-01-01 10:40:00");
+  const usage = getLastSessionModelUsage("pinord-run", "pinord-run-combo");
+  assert.equal(usage?.modelStr, "b/sol");
+  assert.equal(usage?.usedAtMs, Date.parse("2026-01-01T10:40:00Z"));
+  assert.equal(
+    usage?.sinceMs,
+    Date.parse("2026-01-01T10:05:00Z"),
+    "run began after the a/sol turn"
+  );
+  ins.run("pinord-solo", "pinord-run-combo", "c/sol", "c", "2026-01-01 08:00:00");
+  ins.run("pinord-solo", "pinord-run-combo", "c/sol", "c", "2026-01-01 08:30:00");
+  assert.equal(
+    getLastSessionModelUsage("pinord-solo", "pinord-run-combo")?.sinceMs,
+    Date.parse("2026-01-01T08:00:00Z")
+  );
 });
 
 test("getLastSessionModelUsage returns the latest pin with its SQLite UTC timestamp", () => {
