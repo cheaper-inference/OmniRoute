@@ -132,10 +132,14 @@ for (const profile of ["ci", "quality"]) {
     assert.equal(run(needs, queueContext, profile).verdict, "PASS");
     for (const [id, rule] of Object.entries(policy.profiles[profile].jobs)) {
       if (rule.disposition !== "required") continue;
+      // The merge queue's base-check shards never apply to a pull request (a Mergify draft
+      // included): there a skip passes, and a failure, a cancel or a missing result still fail.
+      const applicable = rule.when !== "omni-queue-base-check";
       for (const status of ["failure", "cancelled", "skipped", "pending"]) {
         const changed = structuredClone(needs);
         changed[id].result = status;
-        assert.equal(run(changed, queueContext, profile).verdict, "FAIL", `${id}: ${status}`);
+        const expected = !applicable && status === "skipped" ? "PASS" : "FAIL";
+        assert.equal(run(changed, queueContext, profile).verdict, expected, `${id}: ${status}`);
       }
       const missing = structuredClone(needs);
       delete missing[id];

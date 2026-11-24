@@ -25,7 +25,7 @@ import {
 import { syncToCloud } from "@/lib/cloudSync";
 import { getProviderLimitsSyncSpacingMs } from "@/lib/usage/providerLimitsSync";
 import { setQuotaCache } from "@/domain/quotaCache";
-import { buildClaudeExtraUsageConnectionUpdate } from "@/lib/providers/claudeExtraUsage";
+import { trackCapAndBuildClaudeExtraUsageUpdate } from "@/domain/claudeExtraUsageCap";
 import { clearRecoveredProviderState } from "@/sse/services/auth";
 import { hasObservedClaudeQuotaResetAfter } from "@/lib/db/quotaResetEvents";
 import { isSensenovaQuotaConnection } from "../../../open-sse/services/usage/sensenovaTokenPlan.ts";
@@ -730,7 +730,7 @@ async function syncClaudeExtraUsageStateIfNeeded(
   connection: ProviderConnectionLike,
   usage: JsonRecord
 ): Promise<ProviderConnectionLike> {
-  const update = buildClaudeExtraUsageConnectionUpdate(connection, usage);
+  const update = trackCapAndBuildClaudeExtraUsageUpdate(connection, usage);
   if (!update) return connection;
 
   await updateProviderConnection(connection.id, update);

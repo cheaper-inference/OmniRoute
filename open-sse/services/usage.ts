@@ -44,7 +44,9 @@ import { getCursorUsage } from "./usage/cursor.ts";
 import { getKimiUsage } from "./usage/kimi.ts";
 import { getCodexUsage } from "./usage/codex.ts";
 import { getClaudeUsage, getClaudePlanLabel } from "./usage/claude.ts";
-import { getKiroUsage } from "./usage/kiro.ts";
+// Re-exported for the quota saturation cache, which dates Claude plan-window readings.
+export { getClaudeUsageEndpointReadAt } from "./usage/claude.ts";
+import { getKiroUsage, buildKiroUsageResult, discoverKiroProfileArn } from "./usage/kiro.ts";
 // Re-exported para os testes kiro-* (importam de services/usage).
 export { buildKiroUsageResult, discoverKiroProfileArn } from "./usage/kiro.ts";
 import { getAdobeFireflyUsage } from "./usage/adobeFirefly.ts";
@@ -137,7 +139,7 @@ export async function getUsageForProvider(
   connection: UsageProviderConnection,
   options: { forceRefresh?: boolean; includePlan?: boolean } = {}
 ) {
-  const { id, provider, accessToken, apiKey, providerSpecificData, projectId } = connection;
+  const { id, provider, accessToken, apiKey, providerSpecificData, projectId, email } = connection;
 
   if (isKimiCodingConnection(connection)) {
     return await getKimiUsage(accessToken, apiKey, providerSpecificData, options);
@@ -147,11 +149,6 @@ export async function getUsageForProvider(
     return await getMoonshotOpenPlatformUsage(connection);
   }
 
-  // openai-/anthropic-compatible-* ids are generated per connection, so they can never
-  // appear in the switch below or in USAGE_FETCHER_PROVIDERS. The connection
-  // itself declares where its quota lives (#13616); without that declaration
-  // this returns a message and the sync treats it as "nothing to show", exactly
-  // as it did before.
   // A SenseNova custom node keeps a console session instead of a declared
   // endpoint, so it is read by its own fetcher before the generic path below.
   if (
@@ -168,6 +165,11 @@ export async function getUsageForProvider(
     });
   }
 
+  // openai-/anthropic-compatible-* ids are generated per connection, so they can never
+  // appear in the switch below or in USAGE_FETCHER_PROVIDERS. The connection
+  // itself declares where its quota lives (#13616); without that declaration
+  // this returns a message and the sync treats it as "nothing to show", exactly
+  // as it did before.
   if (
     typeof provider === "string" &&
     (provider.startsWith("openai-compatible-") || provider.startsWith("anthropic-compatible-"))

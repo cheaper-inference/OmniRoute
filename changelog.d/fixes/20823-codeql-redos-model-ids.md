@@ -1,0 +1,1 @@
+- **fix(security):** GitHub Copilot Responses-only inference, model display names and the Context7 library id check use linear regexes, so a long crafted model or library id no longer blocks the event loop for seconds (CodeQL js/polynomial-redos #1325, #1324, #1296)

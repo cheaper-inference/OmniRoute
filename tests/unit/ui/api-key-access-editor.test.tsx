@@ -150,6 +150,7 @@ describe("ApiKeyAccessEditorClient", () => {
 
   afterEach(() => {
     cleanup();
+    vi.useRealTimers();
     vi.restoreAllMocks();
     vi.unstubAllGlobals();
   });
@@ -465,6 +466,31 @@ describe("ApiKeyAccessEditorClient", () => {
       chaosModeEnabled: false,
       forcedModel: null,
     });
+  });
+
+  it("an expiry preset sets 23:59 local, that many days from today, even for an expired key", async () => {
+    installFetch({}, {
+      ...sampleKey,
+      expiresAt: "2020-01-01T00:00:00.000Z",
+    } as unknown as KeyRecord);
+    await renderLoaded();
+    // Pin only Date (waitFor still needs real timers) so the test cannot straddle local midnight.
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date(2026, 10, 19, 15, 30));
+    fireEvent.click(screen.getByRole("button", { name: "+7 days" }));
+    fireEvent.click(screen.getByRole("button", { name: /save changes/i }));
+    await waitFor(() => expect(patchCalls.length).toBe(1));
+    const expiresAt = new Date(patchCalls[0].body.expiresAt as string);
+    const day = new Date();
+    day.setDate(day.getDate() + 7);
+    expect([expiresAt.getFullYear(), expiresAt.getMonth(), expiresAt.getDate()]).toEqual([
+      day.getFullYear(),
+      day.getMonth(),
+      day.getDate(),
+    ]);
+    expect([expiresAt.getHours(), expiresAt.getMinutes(), expiresAt.getSeconds()]).toEqual([
+      23, 59, 0,
+    ]);
   });
 
   it("a failed refetch after a successful PATCH leaves the form clean without an error toast", async () => {
