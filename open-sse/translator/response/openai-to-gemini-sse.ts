@@ -27,7 +27,12 @@
  * Ported from upstream decolua/9router#225 by @SteelMorgan.
  */
 
-import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
+import { buildErrorBody, sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
+import {
+  chargeRetained,
+  isRetainedBudgetExceeded,
+  RETAINED_BUDGET_EXCEEDED_MESSAGE,
+} from "../../utils/streamRetainedBudget.ts";
 import {
   buildGeminiUsageMetadata,
   convertChunkWithUsage,
@@ -167,6 +172,8 @@ export function openAIChunkToGeminiChunk(
       const idx = resolveToolCallIndex(accum, tc);
       const entry = (accum[idx] ??= { id: "", name: "", arguments: "" });
       if (tc.id) entry.id = tc.id;
+      const grown = (tc.function?.name?.length ?? 0) + (tc.function?.arguments?.length ?? 0);
+      if (!chargeRetained(state, grown)) continue;
       if (tc.function?.name) entry.name += tc.function.name;
       if (tc.function?.arguments) entry.arguments += tc.function.arguments;
     }
@@ -237,6 +244,13 @@ export function transformOpenAISSEToGeminiSSE(upstreamResponse: Response, model:
 
   // Per-stream tool-call accumulator (shared across transform + flush).
   const toolCallState: GeminiToolCallState = {};
+  const budgetErrorFrame = () => {
+    const errorBody = buildErrorBody(502, RETAINED_BUDGET_EXCEEDED_MESSAGE, undefined, {
+      type: "server_error",
+      code: "invalid_sse_payload",
+    });
+    return encoder.encode("data: " + JSON.stringify(errorBody) + "\r\n\r\n");
+  };
 
   const transform = new TransformStream<Uint8Array, Uint8Array>({
     transform(chunk, controller) {
@@ -268,6 +282,12 @@ export function transformOpenAISSEToGeminiSSE(upstreamResponse: Response, model:
           toolCallState,
           openAIChunkToGeminiChunk
         );
+        if (isRetainedBudgetExceeded(toolCallState)) {
+          // One error frame, then end the stream (terminate also cancels the upstream body).
+          controller.enqueue(budgetErrorFrame());
+          controller.terminate();
+          return;
+        }
         if (!geminiChunk) continue;
 
         controller.enqueue(encoder.encode("data: " + JSON.stringify(geminiChunk) + "\r\n\r\n"));
@@ -293,6 +313,7 @@ export function transformOpenAISSEToGeminiSSE(upstreamResponse: Response, model:
         toolCallState,
         openAIChunkToGeminiChunk
       );
+      if (isRetainedBudgetExceeded(toolCallState)) return controller.enqueue(budgetErrorFrame());
       if (!geminiChunk) return;
       controller.enqueue(encoder.encode("data: " + JSON.stringify(geminiChunk) + "\r\n\r\n"));
     },

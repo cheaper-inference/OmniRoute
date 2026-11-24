@@ -90,6 +90,11 @@ import {
   type StreamToolCall as ToolCall,
 } from "./streamSummaryHelpers.ts";
 import {
+  chargeRetained,
+  isRetainedBudgetExceeded,
+  RETAINED_BUDGET_EXCEEDED_MESSAGE,
+} from "./streamRetainedBudget.ts";
+import {
   generateSessionId,
   markToolFinish,
   consumeToolFinishTime,
@@ -931,6 +936,8 @@ export function createSSEStream(options: StreamOptions = {}) {
   let outcomeRecorded = false;
   /** Passthrough: accumulate tool_calls deltas for call log responseBody */
   const passthroughToolCalls = new Map<string, ToolCall>();
+  // Retained-size budget owner for the passthrough tool-call log above.
+  const passthroughRetained = {};
   let passthroughToolCallSeq = 0;
   /** Passthrough: native Claude tool_use blocks, kept apart so the wire never sees them as textual calls */
   const passthroughNativeToolCalls = new Map<string, ToolCall>();
@@ -1579,6 +1586,10 @@ export function createSSEStream(options: StreamOptions = {}) {
       "invalid_sse_payload"
     );
   };
+
+  // Translators (or the passthrough tool-call log) refused to keep more text for this stream.
+  const abortRetainedBudget = (controller: TransformStreamDefaultController<Uint8Array>) =>
+    abortWithPublicStreamError(controller, RETAINED_BUDGET_EXCEEDED_MESSAGE, "invalid_sse_payload");
 
   const emitTranslatedFailureAndAbort = (
     controller: TransformStreamDefaultController<Uint8Array>,
@@ -2446,6 +2457,11 @@ export function createSSEStream(options: StreamOptions = {}) {
                       const existing = passthroughToolCalls.get(key);
                       const deltaArgs =
                         typeof tc?.function?.arguments === "string" ? tc.function.arguments : "";
+                      const nameLength =
+                        typeof tc?.function?.name === "string" ? tc.function.name.length : 0;
+                      if (!chargeRetained(passthroughRetained, deltaArgs.length + nameLength)) {
+                        return abortRetainedBudget(controller);
+                      }
                       if (!existing) {
                         // A fragment that opens a new slot must carry an id — strict
                         // OpenAI-compatible clients (@ai-sdk/openai-compatible) throw
@@ -2889,6 +2905,7 @@ export function createSSEStream(options: StreamOptions = {}) {
             );
           }
           const translated = translateResponse(targetFormat, sourceFormat, parsed, state);
+          if (isRetainedBudgetExceeded(state)) return abortRetainedBudget(controller);
           if (state?.cacheEvidence !== lastPropagatedCacheEvidence) {
             usage = { ...usage, cache_evidence: state?.cacheEvidence };
             lastPropagatedCacheEvidence = state?.cacheEvidence;
@@ -3584,6 +3601,8 @@ export function createSSEStream(options: StreamOptions = {}) {
               }
             }
           }
+
+          if (isRetainedBudgetExceeded(state)) return abortRetainedBudget(controller);
 
           if (state?.upstreamError) {
             const err = state.upstreamError;

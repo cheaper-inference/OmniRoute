@@ -2,6 +2,7 @@ import { register } from "../registry.ts";
 import { FORMATS } from "../formats.ts";
 import { buildGeminiUsageMetadata } from "./geminiUsageMetadata.ts";
 import { resolveToolCallIndex } from "./openai-to-gemini-sse.ts";
+import { chargeRetained } from "../../utils/streamRetainedBudget.ts";
 
 type AntigravityCandidate = {
   content: {
@@ -58,6 +59,8 @@ export function openaiToAntigravityResponse(chunk, state) {
       }
       const accum = state._toolCallAccum[idx];
       if (tc.id) accum.id = tc.id;
+      const grown = (tc.function?.name?.length ?? 0) + (tc.function?.arguments?.length ?? 0);
+      if (!chargeRetained(state, grown)) continue;
       if (tc.function?.name) accum.name += tc.function.name;
       if (tc.function?.arguments) accum.arguments += tc.function.arguments;
     }
