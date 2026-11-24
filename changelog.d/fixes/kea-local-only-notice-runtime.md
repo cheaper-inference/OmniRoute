@@ -1,0 +1,1 @@
+- **fix(dashboard):** Show the local-only notice when a dashboard request is rejected.

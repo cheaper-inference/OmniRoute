@@ -19,6 +19,7 @@ import { LOCAL_ONLY_DASHBOARD_PATHS } from "../../src/shared/constants/localOnly
 import {
   __resetLocalOnlyRejectionsForTests,
   detectLocalOnlyRejection,
+  getLocalOnlyRejections,
   isLocalOnlyErrorBody,
   isLocalOnlyPathBlocked,
   isLocalOnlyResponse,
@@ -167,38 +168,50 @@ describe("isLocalOnlyPathBlocked (client)", () => {
 
   test("a remote session is blocked up front, before any request", () => {
     const access = { locality: "remote" as const, remoteBlockedPaths: blockedPaths };
-    assert.equal(isLocalOnlyPathBlocked(access, "/api/plugins"), true);
-    assert.equal(isLocalOnlyPathBlocked(access, "/api/services/cliproxy/status"), false);
+    assert.equal(isLocalOnlyPathBlocked(access, "/api/plugins", getLocalOnlyRejections()), true);
+    assert.equal(
+      isLocalOnlyPathBlocked(access, "/api/services/cliproxy/status", getLocalOnlyRejections()),
+      false
+    );
   });
 
   test("local and unknown sessions are not blocked up front", () => {
     for (const locality of ["local", "unknown"] as const) {
       const access = { locality, remoteBlockedPaths: blockedPaths };
-      assert.equal(isLocalOnlyPathBlocked(access, "/api/plugins"), false);
+      assert.equal(isLocalOnlyPathBlocked(access, "/api/plugins", getLocalOnlyRejections()), false);
     }
   });
 
   test("the first rejection blocks that path and every other registered path", async () => {
     const access = { locality: "unknown" as const, remoteBlockedPaths: blockedPaths };
 
+    const before = getLocalOnlyRejections();
     assert.equal(await detectLocalOnlyRejection(localOnlyResponse(), "/api/plugins"), true);
+    const after = getLocalOnlyRejections();
 
-    assert.equal(isLocalOnlyPathBlocked(access, "/api/plugins"), true);
-    assert.equal(isLocalOnlyPathBlocked(access, "/api/db/health"), true);
-    assert.equal(isLocalOnlyPathBlocked(access, "/api/services/cliproxy/status"), false);
+    assert.equal(isLocalOnlyPathBlocked(access, "/api/plugins", before), false);
+    assert.equal(isLocalOnlyPathBlocked(access, "/api/plugins", after), true);
+    assert.equal(isLocalOnlyPathBlocked(access, "/api/db/health", after), true);
+    assert.equal(isLocalOnlyPathBlocked(access, "/api/services/cliproxy/status", after), false);
+
+    reportLocalOnlyRejection("/api/plugins");
+    assert.equal(getLocalOnlyRejections(), after);
   });
 
   test("a rejected path is blocked even when the server list does not carry it", () => {
     const access = { locality: "unknown" as const, remoteBlockedPaths: [] };
     reportLocalOnlyRejection("/api/skills/executions");
-    assert.equal(isLocalOnlyPathBlocked(access, "/api/skills/executions"), true);
-    assert.equal(isLocalOnlyPathBlocked(access, "/api/plugins"), false);
+    assert.equal(
+      isLocalOnlyPathBlocked(access, "/api/skills/executions", getLocalOnlyRejections()),
+      true
+    );
+    assert.equal(isLocalOnlyPathBlocked(access, "/api/plugins", getLocalOnlyRejections()), false);
   });
 
   test("a response that is not a local-only rejection changes nothing", async () => {
     const access = { locality: "unknown" as const, remoteBlockedPaths: blockedPaths };
     const res = new Response("{}", { status: 500 });
     assert.equal(await detectLocalOnlyRejection(res, "/api/plugins"), false);
-    assert.equal(isLocalOnlyPathBlocked(access, "/api/plugins"), false);
+    assert.equal(isLocalOnlyPathBlocked(access, "/api/plugins", getLocalOnlyRejections()), false);
   });
 });
