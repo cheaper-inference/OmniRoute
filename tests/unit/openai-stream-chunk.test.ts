@@ -1,11 +1,14 @@
 // The last OpenAI-style stream chunk is normalised in place before it is forwarded: a numeric chunk id
 // or tool-call id becomes a string, tool names that were aliased on the way in are restored from the
-// alias map, and the result reports whether anything changed and whether the first choice carries a
+// alias map, and the result reports whether anything changed and whether any choice carries a
 // finish reason.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { normalizeFinalOpenAIStreamChunk } from "../../open-sse/utils/openAIStreamChunk.ts";
+import {
+  findFinishReason,
+  normalizeFinalOpenAIStreamChunk,
+} from "../../open-sse/utils/openAIStreamChunk.ts";
 
 test("a chunk that needs no change reports nothing changed", () => {
   const chunk = { id: "chatcmpl-1", choices: [{ delta: { content: "hi" } }] };
@@ -60,13 +63,29 @@ test("aliased tool names are restored from the alias map", () => {
   assert.equal(chunk.choices[0].delta.tool_calls[0].function.name, "Lookup");
 });
 
-test("a finish reason on the first choice is reported", () => {
+test("a finish reason on any choice is reported", () => {
   const stop = { choices: [{ finish_reason: "stop" }, {}] };
   assert.equal(normalizeFinalOpenAIStreamChunk(stop, null).hasFinishReason, true);
   const second = { choices: [{}, { finish_reason: "stop" }] };
-  assert.equal(normalizeFinalOpenAIStreamChunk(second, null).hasFinishReason, false);
+  assert.equal(normalizeFinalOpenAIStreamChunk(second, null).hasFinishReason, true);
   const none = { choices: [{ finish_reason: null }] };
   assert.equal(normalizeFinalOpenAIStreamChunk(none, null).hasFinishReason, false);
+});
+
+test("findFinishReason returns the first non-empty reason across all choices", () => {
+  assert.equal(findFinishReason([{}, { finish_reason: "stop" }]), "stop");
+  assert.equal(findFinishReason([{ finish_reason: null }, { finish_reason: "length" }]), "length");
+  assert.equal(findFinishReason([{ finish_reason: "stop" }, { finish_reason: "length" }]), "stop");
+});
+
+test("findFinishReason returns undefined for empty, missing or null reasons", () => {
+  assert.equal(findFinishReason([]), undefined);
+  assert.equal(findFinishReason(undefined), undefined);
+  assert.equal(findFinishReason(null), undefined);
+  assert.equal(findFinishReason("not an array"), undefined);
+  assert.equal(findFinishReason([{ finish_reason: null }]), undefined);
+  assert.equal(findFinishReason([null, {}]), undefined);
+  assert.equal(findFinishReason([{ finish_reason: "" }]), undefined);
 });
 
 test("a chunk without choices has no finish reason", () => {
