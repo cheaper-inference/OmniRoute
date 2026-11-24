@@ -167,8 +167,10 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     "open-sse/handlers/cursorCliProxy.ts": 1,
     "open-sse/services/alibabaFreeTier.ts": 1,
     "open-sse/services/alibabaFreeTierQuotaFetcher.ts": 1,
-    // Family cooldown persist looks the row up to write PSD, not dispatch.
-    "open-sse/services/antigravityFamilyCooldown.ts": 1,
+    // Family cooldown persist looks the row up to write PSD, not dispatch. #20481 adds
+    // clearAntigravityFamilyCooldown, which reads the row to drop one saved family deadline
+    // after a passing quota probe: a PSD state write as well, no dispatch.
+    "open-sse/services/antigravityFamilyCooldown.ts": 2,
     // #12864: on the first REQUEST_REJECTED refusal seen by this process the
     // streak seeder reads the row's lastErrorType/lastErrorAt so a crash loop
     // cannot reset the backoff count on every boot — a state read, not dispatch.

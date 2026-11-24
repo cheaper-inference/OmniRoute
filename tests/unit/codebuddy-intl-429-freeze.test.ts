@@ -92,7 +92,10 @@ test("a dated 429 freezes codebuddy-intl until the stated date, not 5 seconds", 
 
   assert.equal(result.shouldFallback, true);
   assert.equal(result.usedUpstreamRetryHint, true);
-  assert.equal(result.retryHintSource, "body");
+  // The release reads the prose "reset at YYYY-MM-DD HH:MM:SS" as an absolute reset
+  // instant (`body_iso_reset`, parseIsoDateTimeResetMs in accountFallback.ts), which is
+  // authoritative on its own.
+  assert.equal(result.retryHintSource, "body_iso_reset");
 
   const freezeEndsAt = Date.now() + result.cooldownMs;
   assert.ok(
