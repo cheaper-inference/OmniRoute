@@ -90,6 +90,26 @@ function turnsFromClientResponse(clientResponse: unknown): CanonicalTurnLike[] {
   return Array.isArray(output) ? extractCanonicalTurns({ input: output }) : [];
 }
 
+/**
+ * Top-level artifact.responseBody fallback for artifacts written with detailed pipeline logging
+ * off (#20623/#20988): assistant turns are no longer reachable through pipeline.clientResponse.
+ * Accepts the Responses shape (`output`, same as clientResponse) and the Chat Completions shape
+ * (`choices[].message`, including a tool-calling message whose `content` is null).
+ */
+function turnsFromResponseBody(responseBody: unknown): CanonicalTurnLike[] {
+  const turns = turnsFromClientResponse(responseBody);
+  const choices = asRecord(responseBody)?.choices;
+  if (!Array.isArray(choices)) return turns;
+  const messages = choices
+    .map((choice) => asRecord(asRecord(choice)?.message))
+    .filter((message): message is JsonRecord => !!message);
+  return [
+    ...turns,
+    ...turnsFromBody({ messages }),
+    ...extractChatCompletionsToolUseTurns(messages),
+  ];
+}
+
 function turnsFromProviderRequest(body: unknown): CanonicalTurnLike[] {
   const rec = asRecord(body);
   return [...turnsFromBody(rec), ...extractChatCompletionsToolUseTurns(rec?.messages)];
@@ -157,6 +177,10 @@ export function resolveTurnDisplayContent(
       turnsFromBody(asRecord(pipeline?.clientRawRequest)?.body ?? artifact?.requestBody)
     );
     indexTurns(result, turnsFromClientResponse(pipeline?.clientResponse));
+    // Assistant-side fallback: only when the pipeline carries no client response (#20988).
+    if (!pipeline?.clientResponse) {
+      indexTurns(result, turnsFromResponseBody(artifact?.responseBody));
+    }
     indexTurns(result, turnsFromProviderRequest(asRecord(pipeline?.providerRequest)?.body));
   }
   return result;
