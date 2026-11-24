@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { runNonStreamingProviderLeg } from "../../../open-sse/handlers/chatCore/nonStreamingProviderLeg.ts";
 import { sumBuyerCostMicro } from "../../../open-sse/utils/buyerCostMicro.ts";
+import { HttpAttemptCollector } from "../../../open-sse/utils/providerHttpAttempts.ts";
 import { baseInput, makeExecutorResult } from "../_helpers/nonStreamingProviderLegFixtures.ts";
 
 function emptyBody(cost: unknown) {
@@ -88,5 +89,51 @@ for (const status of [200, 503]) {
     assert.equal(result.receipt.buyerCostMicro, null);
     assert.equal(result.buyerCostMicro ?? null, null);
     assert.equal(sumBuyerCostMicro([{ buyerCostMicro: 23 }, result.receipt]), null);
+  });
+}
+
+for (const [fallback, expectedStatus] of [
+  ["tracked", 503],
+  ["untracked", null],
+  ["throws", 200],
+] as const) {
+  test(`empty-content retry selects the correct HTTP attempt when fallback is ${fallback}`, async () => {
+    const attempts = new HttpAttemptCollector();
+    let calls = 0;
+    const result = await runNonStreamingProviderLeg(
+      baseInput({
+        provider: "gemini",
+        model: "gemini-3-pro",
+        clientHeaders: { "x-omniroute-allow-cross-version-fallback": "true" },
+        executeProviderRequest: async (model) => {
+          const isFallback = ++calls > 1;
+          if (isFallback && fallback === "throws") throw new Error("fallback unavailable");
+          const attempt = isFallback
+            ? makeExecutorResult({ error: { message: "unavailable" } }, 503)
+            : makeExecutorResult(emptyBody(17));
+          if (isFallback && fallback === "untracked") return attempt;
+          const ref = attempts.begin({
+            provider: "gemini",
+            model,
+            connectionId: "conn-test",
+            endpoint: "generate_content",
+          });
+          assert.ok(ref);
+          attempts.complete(ref, attempt.response);
+          return { ...attempt, upstreamHttpSelection: attempts.selection(attempt.response) };
+        },
+      })
+    );
+    assert.equal(calls, 2);
+    assert.equal(result.kind, "error");
+    assert.equal(result.receipt.errorType, "empty_content");
+    assert.equal(result.receipt.httpStatus, 502);
+    const logged = attempts.drain(result.upstreamHttpSelection ?? null, result.receipt.httpStatus);
+    assert.ok(logged);
+    assert.equal(logged.summary.send?.status ?? null, expectedStatus);
+    assert.equal(
+      logged.summary.send?.model ?? null,
+      expectedStatus === null ? null : result.receipt.model
+    );
   });
 }
