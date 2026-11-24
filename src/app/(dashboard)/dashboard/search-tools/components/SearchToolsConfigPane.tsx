@@ -46,7 +46,7 @@ export default function SearchToolsConfigPane({
       aria-label={t("configurationPane")}
     >
       <div className="p-3 border-b border-border">
-        <span className="text-[10px] font-semibold text-text-muted uppercase tracking-wider">
+        <span className="ci-eyebrow" data-size="3xs" data-weight="medium">
           {t("configuration")}
         </span>
       </div>
@@ -68,7 +68,7 @@ export default function SearchToolsConfigPane({
 
         {/* Provider metadata inline */}
         {selectedProvider && (
-          <div className="text-[10px] text-text-muted space-y-0.5">
+          <div className="text-3xs text-text-muted space-y-0.5">
             <div>
               {`${t("cost")}: `}
               <span className="text-text-main font-medium">
@@ -154,7 +154,7 @@ export default function SearchToolsConfigPane({
       {/* Compare tab options */}
       {activeTab === "compare" && (
         <div className="p-3 border-b border-border">
-          <div className="text-[10px] text-text-muted">{t("compareProviderHint")}</div>
+          <div className="text-xs text-text-muted">{t("compareProviderHint")}</div>
         </div>
       )}
 
@@ -177,11 +177,11 @@ export default function SearchToolsConfigPane({
       <div className="p-3 flex-1">
         <Disclosure open={historyExpanded} onOpenChange={setHistoryExpanded}>
           <DisclosureTrigger>
-            <span className="text-[10px] font-semibold text-text-muted uppercase tracking-wider">
+            <span className="ci-eyebrow" data-size="3xs" data-weight="medium">
               {t("history")}
             </span>
           </DisclosureTrigger>
-          <DisclosureContent className="mt-2 text-[10px] text-text-muted">
+          <DisclosureContent className="mt-2 text-xs text-text-muted">
             {t("historyHint")}
           </DisclosureContent>
         </Disclosure>

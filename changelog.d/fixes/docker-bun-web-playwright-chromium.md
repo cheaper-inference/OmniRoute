@@ -1,0 +1,1 @@
+- **fix(docker):** The `-web-bun` image installs Playwright's own Chromium and Xvfb, like the `-web` image, instead of Debian's `chromium` package. Browser providers that launch through Playwright found no browser in 3.8.54-web-bun, and the image's HIGH scanner findings drop from 866 to about 150; `/usr/bin/chromium` stays as a link to the same browser

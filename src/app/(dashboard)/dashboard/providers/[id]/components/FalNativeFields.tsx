@@ -154,7 +154,8 @@ export function FalInputs({ c }: Props) {
       <label className="block text-sm">
         {c.t("input")}
         <Textarea
-          className="min-h-40 w-full rounded border bg-transparent p-2 font-mono"
+          mono
+          className="min-h-40 w-full rounded border bg-transparent p-2"
           value={c.input}
           onChange={(e) => c.patch({ input: e.target.value, error: "" })}
           spellCheck={false}
@@ -248,7 +249,8 @@ export function FalRegistration({ c }: Props) {
       <label className="block">
         {c.t("schema")}
         <Textarea
-          className="min-h-40 w-full rounded border bg-transparent p-2 font-mono"
+          mono
+          className="min-h-40 w-full rounded border bg-transparent p-2"
           value={c.schema}
           onChange={(e) => c.patch({ schema: e.target.value })}
         />

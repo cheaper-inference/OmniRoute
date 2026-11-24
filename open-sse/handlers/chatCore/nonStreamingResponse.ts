@@ -33,6 +33,7 @@ import {
 
 import { maybeSyncClaudeExtraUsageState } from "../chatCore/telemetryHelpers.ts";
 import { recordFinalInputCalibration } from "./contextEstimation.ts";
+import { isEmptyUsage, isEstimatedUsage } from "../../utils/usageTracking.ts";
 
 export {
   shouldUseNativeCodexPassthrough,
@@ -459,6 +460,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
       persistAttemptLogs({
         upstreamHttpSelection,
         status: err.status,
+        buyerCostMicro: legResult.buyerCostMicro,
         error: err.error || "Provider request failed",
         providerRequest: finalBody || translatedBody,
         providerResponse: persistedProviderErrorBody,
@@ -726,7 +728,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
     // cost/credit fields. After a server-owned tool loop the initial leg's value is
     // stale, so only the loop's cumulative usage or a re-extraction applies there.
     const legBillingUsage = toolLoopRan ? null : okLeg.billingUsage;
-    const usage =
+    let usage =
       toolLoopUsage ?? legBillingUsage ?? extractUsageFromResponse(responseBody, provider);
     recordFinalInputCalibration(
       body,
@@ -755,6 +757,12 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
         if (promptTokens > 0) incrementTokenUsage(model, promptTokens);
       }
     }
+    // A 2xx with no usable usage gets an estimate on the client body
+    // (applyClientUsageBuffer). Bill and log that same estimate, as the stream path does,
+    // so usage_history, per-key limits and the call log agree with what the client saw.
+    if (isEmptyUsage(usage) && isEstimatedUsage(translatedResponse?.usage)) {
+      usage = translatedResponse.usage;
+    }
     recordContextEditingTelemetryHook({
       contextEditingEnabled,
       provider,
@@ -782,24 +790,6 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
       endpoint: endpointPath,
       cpaAuthIndex: readCpaAuthIndex(providerResponse),
       agentContext,
-    });
-
-    // #12150 P1b surface 3 (fix round 1): a video-bridge-observed request's
-    // request- AND response-derived text both carry the full transcript (the
-    // flattened description on the request side, the model's own reply on
-    // the response side) — neither may populate durable Memory. See
-    // runMemoryExtractionGate for the shared gate + extraction wiring, unit
-    // tested directly in tests/unit/video-bridge-memory-suppression.test.ts.
-    runMemoryExtractionGate({
-      memoryOwnerId,
-      memorySettings,
-      videoBridgeObserved,
-      piiTokensMinted,
-      pipelineSessionId,
-      requestBody: body as Record<string, unknown>,
-      responseBody: memoryExtractionResponse as Record<string, unknown> | null,
-      extractFacts,
-      log,
     });
 
     const customSkillExecutionEnabled =
@@ -865,6 +855,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
         upstreamHttpSelection,
         status: HTTP_STATUS.BAD_REQUEST,
         tokens: usage,
+        buyerCostMicro: okLeg.buyerCostMicro,
         responseBody,
         providerRequest: finalBody || translatedBody,
         providerResponse: looksLikeSSE
@@ -971,6 +962,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
         error: malformedDiagnostic,
         upstreamHttpSelection,
         tokens: usage,
+        buyerCostMicro: okLeg.buyerCostMicro,
         responseBody: sanitizedMalformedResponse,
         providerRequest: finalBody || translatedBody,
         providerResponse: sanitizedMalformedProviderResponse,
@@ -1033,6 +1025,26 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
       };
     }
 
+    // Durable Memory only learns from a reply the client receives: a guardrail-blocked (400) or
+    // malformed (502) reply returned above never reaches this point.
+    // #12150 P1b surface 3 (fix round 1): a video-bridge-observed request's
+    // request- AND response-derived text both carry the full transcript (the
+    // flattened description on the request side, the model's own reply on
+    // the response side) — neither may populate durable Memory. See
+    // runMemoryExtractionGate for the shared gate + extraction wiring, unit
+    // tested directly in tests/unit/video-bridge-memory-suppression.test.ts.
+    runMemoryExtractionGate({
+      memoryOwnerId,
+      memorySettings,
+      videoBridgeObserved,
+      piiTokensMinted,
+      pipelineSessionId,
+      requestBody: body as Record<string, unknown>,
+      responseBody: memoryExtractionResponse as Record<string, unknown> | null,
+      extractFacts,
+      log,
+    });
+
     // ── Phase 9.1: Cache store (non-streaming, temp=0) ──
     storeSemanticCacheResponse({
       enabled: semanticCacheEnabled,
@@ -1060,6 +1072,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
       upstreamHttpSelection,
       status: 200,
       tokens: usage,
+      buyerCostMicro: okLeg.buyerCostMicro,
       responseBody,
       providerRequest: finalBody || translatedBody,
       providerResponse: looksLikeSSE

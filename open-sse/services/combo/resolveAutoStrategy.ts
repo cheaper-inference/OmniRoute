@@ -11,6 +11,7 @@ import {
   parseRequestBudgetFallback,
 } from "../autoCombo/requestControls.ts";
 import { selectWithStrategyAsync } from "../autoCombo/routerStrategy.ts";
+import { buildDecisionRoutingContext, type DecisionRuntime } from "../decision/factory.ts";
 import { buildComplexityRoutingHint } from "../autoCombo/complexityRouter";
 import { getModePack } from "../autoCombo/modePacks.ts";
 import { recordComboIntent } from "../comboMetrics.ts";
@@ -91,6 +92,8 @@ export interface ResolveAutoStrategyDeps {
   log: ComboLogger;
   buildAutoCandidates: BuildAutoCandidates;
   apiKeyAllowedConnections?: string[] | null;
+  /** Request seams for the `decision` router (signal, handleSingleModel, combos). */
+  decisionRuntime?: DecisionRuntime | null;
 }
 
 export type ResolveAutoStrategyResult =
@@ -331,6 +334,7 @@ export async function resolveAutoStrategyOrder(
     resetWindowConfig,
     slaPolicy,
     nadirConfig,
+    decisionConfig,
     accountPreferences,
   } = parseAutoConfig(combo, eligibleTargets);
 
@@ -524,6 +528,12 @@ export async function resolveAutoStrategyOrder(
             manifestHint: autoManifestHint,
             messages: body.messages,
             nadir: nadirConfig,
+            decision: buildDecisionRoutingContext(
+              decisionConfig,
+              deps.decisionRuntime,
+              body,
+              deps.apiKeyAllowedConnections
+            ),
           },
           routingStrategy
         );

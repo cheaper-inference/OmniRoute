@@ -134,15 +134,13 @@ export default function RerankPanel({ query, results, onClose }: RerankPanelProp
                   <div key={r.index} className="flex items-start gap-3 p-2 bg-bg-alt rounded-lg">
                     <div className="flex flex-col items-center min-w-[32px]">
                       <span className="text-xs font-medium text-text-main">#{r.index + 1}</span>
-                      <span className="text-[10px]">{getDeltaDisplay(r.delta)}</span>
+                      <span className="text-3xs">{getDeltaDisplay(r.delta)}</span>
                     </div>
                     <div className="flex-1">
                       <div className="text-xs font-medium text-text-main">{r.title}</div>
-                      <div className="text-[10px] text-text-muted mt-0.5 line-clamp-2">
-                        {r.snippet}
-                      </div>
+                      <div className="text-xs text-text-muted mt-0.5 line-clamp-2">{r.snippet}</div>
                     </div>
-                    <span className="text-[10px] text-accent whitespace-nowrap">
+                    <span className="text-3xs text-accent whitespace-nowrap">
                       {r.score.toFixed(4)}
                     </span>
                   </div>

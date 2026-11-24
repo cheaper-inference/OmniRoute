@@ -132,7 +132,7 @@ function RangeForm({
     <>
       {/* Quick presets */}
       <div className="mb-3">
-        <p className="text-[10px] font-semibold uppercase tracking-wider text-text-muted mb-1.5">
+        <p className="text-3xs font-semibold uppercase tracking-wider text-text-muted mb-1.5">
           {t("rangeQuickSelect")}
         </p>
         <div className="flex flex-wrap gap-1">
@@ -142,7 +142,7 @@ function RangeForm({
               variant="outline"
               size="sm"
               onClick={() => handlePreset(p.key)}
-              className="h-7 min-h-7 px-2.5 text-[11px]"
+              className="h-7 min-h-7 px-2.5 text-2xs"
             >
               {p.label}
             </Button>

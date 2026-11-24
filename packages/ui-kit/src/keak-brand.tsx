@@ -68,12 +68,14 @@ export interface ProductSwitcherItem { product: KeakProduct; href: string; descr
 export interface ProductSwitcherProps extends HTMLAttributes<HTMLElement> {
   items: ProductSwitcherItem[];
   activeProduct?: KeakProduct;
+  /** Trigger text while no product is active. Defaults to "Our products". The nav name is the native `aria-label`. */
+  triggerLabel?: string;
 }
 
 /** Native disclosure and links remain usable without client-side JavaScript; once hydrated, Escape and outside presses close the list. */
-export function ProductSwitcher({ items, activeProduct, className, ...props }: ProductSwitcherProps) {
+export function ProductSwitcher({ items, activeProduct, triggerLabel = "Our products", className, ...props }: ProductSwitcherProps) {
   return <nav aria-label="Keak products" className={cn("ci-keak-switcher", className)} {...props}>
-    <details><summary>{activeProduct && <ProductIcon product={activeProduct} />}{activeProduct ? `Keak ${keakProductNames[activeProduct]}` : "Our products"}
+    <details><summary>{activeProduct && <ProductIcon product={activeProduct} />}{activeProduct ? `Keak ${keakProductNames[activeProduct]}` : triggerLabel}
       <span className="ci-keak-switcher-caret" aria-hidden="true">+</span></summary>
       <ul>{items.map(item => <li key={item.product}><a href={item.href}
         aria-current={activeProduct === item.product ? "true" : undefined}>

@@ -1,8 +1,8 @@
 "use client";
 
-import { Button } from "@/shared/components";
+import { Button, FileTrigger } from "@/shared/components";
 
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import {
   extractM365CredentialFromHar,
@@ -45,7 +45,6 @@ export interface HarImportButtonProps {
 export default function HarImportButton({ provider, onImport }: HarImportButtonProps) {
   const t = useTranslations("providers") as ProviderMessageTranslator;
   const importer = HAR_IMPORTERS[provider];
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [state, setState] = useState<
     | { phase: "idle" }
     | { phase: "reading" }
@@ -110,18 +109,25 @@ export default function HarImportButton({ provider, onImport }: HarImportButtonP
   return (
     <div className="flex flex-col gap-1.5">
       <div className="flex items-center gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          icon="upload_file"
-          onClick={() => fileInputRef.current?.click()}
-          disabled={state.phase === "reading"}
-          data-testid="har-import-button"
+        {/* A file the picker filter would hide is read too: the parser says what is wrong. */}
+        <FileTrigger
+          accept=".har,application/json"
+          data-testid="har-import-input"
+          onFilesChange={(files) => void handleFile(files[0])}
+          onFilesRejected={(rejected) => void handleFile(rejected[0]?.file)}
         >
-          {state.phase === "reading"
-            ? providerText(t, "harImportButtonBusy", "Importing…")
-            : providerText(t, "harImportButtonLabel", "Import .har file")}
-        </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            icon="upload_file"
+            disabled={state.phase === "reading"}
+            data-testid="har-import-button"
+          >
+            {state.phase === "reading"
+              ? providerText(t, "harImportButtonBusy", "Importing…")
+              : providerText(t, "harImportButtonLabel", "Import .har file")}
+          </Button>
+        </FileTrigger>
         <span className="text-xs text-text-muted">
           {providerText(
             t,
@@ -129,18 +135,6 @@ export default function HarImportButton({ provider, onImport }: HarImportButtonP
             "Export from DevTools Network tab after sending at least one chat message."
           )}
         </span>
-        {/* kit-exception: Hidden native file input, opened by the Button above (no visible raw control). */}
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".har,application/json"
-          data-testid="har-import-input"
-          className="hidden"
-          onChange={(event) => {
-            void handleFile(event.target.files?.[0]);
-            event.target.value = "";
-          }}
-        />
       </div>
       {state.phase === "error" && (
         <p className="text-xs text-error" data-testid="har-import-error">

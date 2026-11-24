@@ -580,7 +580,7 @@ export default function ConnectionsListPanel({
               {tag && (
                 <div className="flex items-center gap-2 px-3 pt-2 pb-1">
                   <Icon name="label" size={13} className="text-text-muted/50" />
-                  <span className="text-[11px] font-semibold uppercase tracking-widest text-text-muted/60 select-none">
+                  <span className="ci-eyebrow select-none" data-size="2xs" data-weight="medium">
                     {tag}
                   </span>
                   <div className="flex-1 h-px bg-bg-subtle" />
@@ -591,7 +591,7 @@ export default function ConnectionsListPanel({
                     disabled={batchTesting || !!retestingId}
                     size="sm"
                   />
-                  <span className="text-[10px] text-text-muted/40">{groupTotal}</span>
+                  <span className="text-3xs text-text-muted/40">{groupTotal}</span>
                 </div>
               )}
               <div className="flex flex-col divide-y divide-border">

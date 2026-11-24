@@ -7,6 +7,7 @@ import {
 } from "./helpers/toolCallHelper.ts";
 import {
   NON_ANTHROPIC_THINKING_PLACEHOLDER,
+  enforceCacheControlBlockLimit,
   prepareClaudeRequest,
 } from "./helpers/claudeHelper.ts";
 import { filterToOpenAIFormat } from "./helpers/openaiHelper.ts";
@@ -40,6 +41,7 @@ import { normalizeRoles, resolvePreserveDeveloperRole } from "../services/roleNo
 import { hoistLeadingSystemMessage } from "./helpers/strictSystemHoist.ts";
 import { ensurePoeUserTurnHasText } from "./helpers/poeImageOnlyUserTurn.ts";
 import { acceptsInlineToolAdditions, hoistToolAdditions } from "./helpers/claudeDeferredTools.ts";
+import { ownMessages } from "./helpers/callerMessages.ts";
 import { isStrictResponsesToolHistoryEnabled } from "./helpers/responsesToolHistory.ts";
 import {
   buildAssistantMessageCacheKey,
@@ -409,9 +411,8 @@ export function translateRequest(
   const hoistDeferredTools =
     sourceFormat === FORMATS.CLAUDE &&
     !(targetFormat === FORMATS.CLAUDE && acceptsInlineToolAdditions(provider));
-  let result = normalizeReasoningRequest(
-    hoistDeferredTools ? hoistToolAdditions(body) : body,
-    provider
+  let result = ownMessages(
+    normalizeReasoningRequest(hoistDeferredTools ? hoistToolAdditions(body) : body, provider)
   );
   const use9CharId = options?.normalizeToolCallId === true;
   const preserveDeveloperRole = options?.preserveDeveloperRole;
@@ -606,7 +607,7 @@ export function translateRequest(
           // stripped.
           const preserveCacheControl =
             options?.preserveCacheControl === true &&
-            providerHonorsOpenAIFormatCacheControl(provider, connectionCacheOverride);
+            providerHonorsOpenAIFormatCacheControl(provider, connectionCacheOverride, model);
           // Routed provider id lets claudeToOpenAIRequest keep service_tier only for
           // targets that accept it.
           const hasStep1Provider = provider != null;
@@ -752,11 +753,12 @@ export function translateRequest(
     // #2069 — preserve client cache_control breakpoints only for providers that
     // honor explicit OpenAI-format markers (DashScope/alibaba, Xiaomi MiMo) when
     // requested upstream; generic/implicit-cache OpenAI providers stay stripped.
+    const preserveOpenAICacheControl =
+      options?.preserveCacheControl === true &&
+      providerHonorsOpenAIFormatCacheControl(provider, connectionCacheOverride, model);
     result = filterToOpenAIFormat(result, {
       normalizeFileUrls: normalizedProvider === "cheaperinference" || normalizedProvider === "cinf",
-      preserveCacheControl:
-        options?.preserveCacheControl === true &&
-        providerHonorsOpenAIFormatCacheControl(provider, connectionCacheOverride),
+      preserveCacheControl: preserveOpenAICacheControl,
       preservePromptCacheBreakpoint: providerAcceptsPromptCacheBreakpoint(provider),
       // #4849 regression guard: keep client reasoning_content for replay providers.
       preserveReasoningContent: isReasoner,
@@ -771,6 +773,11 @@ export function translateRequest(
       // Same decision normalizeRoles made above — never undo it here.
       preserveDeveloperRole: resolvePreserveDeveloperRole(preserveDeveloperRole, provider),
     });
+    // OpenRouter relays explicit breakpoints to Anthropic, which allows 4 at most. The Claude
+    // path enforces this in prepareClaudeRequest; this OpenAI-format path had no cap.
+    if (preserveOpenAICacheControl && normalizedProvider === "openrouter") {
+      enforceCacheControlBlockLimit(result);
+    }
   }
 
   // Final step: prepare request for Claude format endpoints

@@ -82,7 +82,9 @@ function EconomicsCard() {
   const t = useTranslations("omniglyph");
   return (
     <Card className="p-6">
-      <h2 className="mb-4 text-lg">{t("economicsTitle")}</h2>
+      <h2 className="ci-heading mb-4" data-size="lg">
+        {t("economicsTitle")}
+      </h2>
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         {ECONOMICS.map((e) => (
           <div key={e.id} className="flex flex-col gap-1">
@@ -100,7 +102,9 @@ function BeforeAfterCard() {
   return (
     <Card className="p-6">
       <div className="mb-1 flex items-baseline justify-between">
-        <h2 className="text-lg">{t("beforeAfterTitle")}</h2>
+        <h2 className="ci-heading" data-size="lg">
+          {t("beforeAfterTitle")}
+        </h2>
         <span className="text-sm font-medium text-success">
           {t("blockSavings", { percent: SAMPLE_METRICS.savingsPct })}
         </span>
@@ -110,15 +114,15 @@ function BeforeAfterCard() {
       </p>
       <div className="grid gap-4 md:grid-cols-2">
         <div className="flex flex-col gap-2">
-          <span className="text-xs font-medium uppercase tracking-wide text-text-muted">
+          <span className="ci-eyebrow" data-weight="medium">
             {t("textTokens", { tokens: SAMPLE_METRICS.textTokens })}
           </span>
-          <pre className="max-h-60 overflow-auto rounded border border-border bg-bg-subtle p-3 text-[11px] leading-relaxed">
+          <pre className="max-h-60 overflow-auto rounded border border-border bg-bg-subtle p-3 text-xs leading-relaxed">
             {SAMPLE_BEFORE_TEXT}
           </pre>
         </div>
         <div className="flex flex-col gap-2">
-          <span className="text-xs font-medium uppercase tracking-wide text-text-muted">
+          <span className="ci-eyebrow" data-weight="medium">
             {t("renderedTokens", { tokens: SAMPLE_METRICS.imageTokens })}
           </span>
           {/* White paper behind the rendered page image (its own background), in both themes. */}
@@ -145,7 +149,9 @@ function GatesCard() {
   const t = useTranslations("omniglyph");
   return (
     <Card className="p-6">
-      <h2 className="mb-1 text-lg">{t("gatesTitle")}</h2>
+      <h2 className="ci-heading mb-1" data-size="lg">
+        {t("gatesTitle")}
+      </h2>
       <p className="mb-4 text-xs text-text-muted">
         {t.rich("gatesDescription", {
           code: (chunks) => <code>{chunks}</code>,
@@ -181,7 +187,9 @@ function ProfileCard(props: {
   return (
     <Card className="p-6">
       <div className="flex flex-col gap-3">
-        <h2 className="text-lg">{t("profileTitle")}</h2>
+        <h2 className="ci-heading" data-size="lg">
+          {t("profileTitle")}
+        </h2>
         <p className="max-w-xl text-sm text-text-muted">{t("profileDescription")}</p>
         <Select
           className="w-full max-w-sm"
@@ -216,7 +224,9 @@ function EnableCard(props: {
     <Card className="p-6">
       <div className="flex items-start justify-between gap-4">
         <div className="flex flex-col gap-1">
-          <h2 className="text-lg">{t("enableTitle")}</h2>
+          <h2 className="ci-heading" data-size="lg">
+            {t("enableTitle")}
+          </h2>
           <p className="max-w-xl text-sm text-text-muted">
             {t.rich("enableDescription", {
               code: (chunks) => <code>{chunks}</code>,

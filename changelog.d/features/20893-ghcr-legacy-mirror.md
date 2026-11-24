@@ -1,0 +1,1 @@
+- **feat(docker):** releases are also copied to the legacy GHCR package `ghcr.io/diegosouzapw/omniroute` until 2027-06-30, so installs still pinned to it keep updating, and the Docker Hub description step that failed on every release with an Organization Access Token is removed ([#20893](https://github.com/cheaper-inference/OmniRoute/pull/20893))
