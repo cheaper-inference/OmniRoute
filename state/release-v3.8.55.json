@@ -3,30 +3,23 @@
   "base": "release/v3.8.55",
   "paused": null,
   "inFlight": {
-    "batchId": "b26",
+    "batchId": "b27",
     "kind": "batch",
-    "candidateRef": "omni-queue/release-v3.8.55/b26-1cdc2ab9bbea",
-    "candidateSha": "1cdc2ab9bbea4ccb55a95a15f36983b8ef2f2a63",
-    "baseSha": "e49d1e94fd65fef8b856a64a9532fd86f5c4e29a",
-    "treeSha": "840c58413f8f66a27156c16872fd55def346bb8c",
+    "candidateRef": "omni-queue/release-v3.8.55/b27-cc9b69b491b0",
+    "candidateSha": "cc9b69b491b08dcbd11ba9d042e696e0a54a9c14",
+    "baseSha": "0488355a73ed9cd70400f616403c38d5f8d4c17b",
+    "treeSha": "a12360ef96490575f6c318b5b18779b5812e9ce9",
     "prs": [
       {
-        "n": 20967,
-        "head": "2e51ed76710ee5b12e9d1d22117eeed8e8c53e94",
-        "title": "fix(ci): run the merge queue's base-check unit suite in 4 parallel shards",
+        "n": 20938,
+        "head": "c3b5673c2da298af162547400640b4c1a4b47d34",
+        "title": "fix(db): run the migration-numbering gate in the pre-commit hook when a migration is staged",
         "author": "diegosouzapw",
-        "labeledAt": "2026-11-23T21:41:55Z"
-      },
-      {
-        "n": 21079,
-        "head": "0eb6aa9f9e25c0e5c045677d8c4805d9ba9147a5",
-        "title": "fix(security): constant format string in the model-sync failure log (CodeQL #1407)",
-        "author": "diegosouzapw",
-        "labeledAt": "2026-11-23T23:11:43Z"
+        "labeledAt": "2026-11-23T21:58:26Z"
       }
     ],
     "stage": "testing",
-    "startedAt": "2026-11-23T23:12:55.774Z",
+    "startedAt": "2026-11-24T00:28:29.882Z",
     "attempts": 0,
     "bisect": null
   },
@@ -104,12 +97,14 @@
       "19149": "ce0f2e3b64d51c480eccfd4c21b4ebeeaa0c2a0b",
       "19167": "5a3523ee5d9dc3a3fe610ed93b4c5ccb048bbca0",
       "19305": "1f33f0e10883549e4374ac38d47e87c94936bc5c",
-      "19306": "4afb0ca62e19eb94155c5b9c2b78bf4b91ae1dee"
+      "19306": "4afb0ca62e19eb94155c5b9c2b78bf4b91ae1dee",
+      "20967": "2e51ed76710ee5b12e9d1d22117eeed8e8c53e94",
+      "21079": "0eb6aa9f9e25c0e5c045677d8c4805d9ba9147a5"
     }
   },
   "counters": {
-    "batchSeq": 26,
-    "ciRuns": 30,
+    "batchSeq": 27,
+    "ciRuns": 31,
     "landedPrs": 0,
     "landedBatches": 0,
     "redBatches": 8,
@@ -1883,8 +1878,45 @@
         "21079": "2026-11-23T23:11:43Z"
       },
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45286652380"
+    },
+    {
+      "at": "2026-11-24T00:27:56.401Z",
+      "type": "checks-green",
+      "batchId": "b26",
+      "prs": [
+        20967,
+        21079
+      ],
+      "sha": "1cdc2ab9bbea4ccb55a95a15f36983b8ef2f2a63",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45297316047"
+    },
+    {
+      "at": "2026-11-24T00:28:06.225Z",
+      "type": "would-land",
+      "batchId": "b26",
+      "prs": [
+        20967,
+        21079
+      ],
+      "sha": "1cdc2ab9bbea4ccb55a95a15f36983b8ef2f2a63",
+      "detail": "shadow mode: would merge-ff onto e49d1e94fd65",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45297316047"
+    },
+    {
+      "at": "2026-11-24T00:28:34.127Z",
+      "type": "batch-started",
+      "batchId": "b27",
+      "prs": [
+        20938
+      ],
+      "sha": "cc9b69b491b08dcbd11ba9d042e696e0a54a9c14",
+      "detail": "1 PR(s) on 0488355a73ed; window 4",
+      "labeledAt": {
+        "20938": "2026-11-23T21:58:26Z"
+      },
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45297316047"
     }
   ],
-  "updatedAt": "2026-11-24T00:18:49.282Z",
+  "updatedAt": "2026-11-24T00:28:35.792Z",
   "batchWindow": 4
 }
