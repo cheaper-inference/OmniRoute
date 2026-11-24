@@ -1,8 +1,4 @@
-/**
- * True when `id` addresses a built-in virtual auto combo rather than a
- * persisted combo row — either the bare default `auto` or an `auto/<suffix>` id
- * (variants, `auto/<category>[:<tier>]`, `auto/<family>`).
- */
+/** Whether the ID uses the automatic routing namespace. */
 export function isAutoComboId(id: string): boolean {
   return id === "auto" || id.startsWith("auto/");
 }

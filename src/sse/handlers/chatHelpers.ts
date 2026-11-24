@@ -20,6 +20,7 @@ import { clearRequestRejectedStreak } from "@omniroute/open-sse/services/request
 import { clearAntigravityVerificationUrl } from "@omniroute/open-sse/handlers/chatCore/antigravityVerificationState.ts";
 import {
   createBuiltinAutoCombo,
+  isBuiltInAutoRoute,
   prepareBuiltinAutoComboInputs,
 } from "@omniroute/open-sse/services/autoCombo/builtinCatalog.ts";
 import * as log from "../utils/logger";
@@ -42,7 +43,12 @@ import { isCodexNativeResponsesRequest } from "./requestShapeGuards";
 import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
 import { getRegistryEntry } from "@omniroute/open-sse/config/providerRegistry.ts";
 import { isReservedComboName } from "@/lib/combos/autoNames";
-import { createVirtualAutoCombo, resolveAutoRoutingState } from "./autoRouting";
+import { resolveStoredAutoCombo } from "@/lib/combos/storedAutoCombo";
+import {
+  createVirtualAutoCombo,
+  resolveAutoRoutingState,
+  unknownAutoComboResponse,
+} from "./autoRouting";
 import { getCachedProviderNodes } from "@/lib/db/readCache";
 import {
   runWithProxyContext,
@@ -131,13 +137,21 @@ export async function resolveModelOrError(
   requestHeaders: Record<string, unknown> | null | undefined = null
 ) {
   const isReservedModel = isReservedComboName(modelStr);
+  if (isReservedModel && !isBuiltInAutoRoute(modelStr)) {
+    const combo = await resolveStoredAutoCombo(modelStr);
+    const model = modelStr.toLowerCase();
+    return combo
+      ? { combo, provider: "auto", model: model.slice("auto/".length), isVirtualAutoCombo: false }
+      : { error: unknownAutoComboResponse(model) };
+  }
   if (isReservedModel) modelStr = modelStr.toLowerCase();
   if (modelStr === "auto") {
     const state = await resolveAutoRoutingState(modelStr);
     if (state.response) return { error: state.response };
     const combo = await createVirtualAutoCombo(state, null);
     if (combo instanceof Response) return { error: combo };
-    if (combo?.models?.length) return { combo, provider: "auto", model: "" };
+    if (combo?.models?.length)
+      return { combo, provider: "auto", model: "", isVirtualAutoCombo: true };
     return {
       error: errorResponse(HTTP_STATUS.SERVICE_UNAVAILABLE, "No connected providers match 'auto'."),
     };
@@ -216,7 +230,7 @@ export async function resolveModelOrError(
 
     if (!isReservedModel) {
       const combo = await getComboForModel(modelStr);
-      if (combo) return { combo, provider: "auto", model: suffix };
+      if (combo) return { combo, provider: "auto", model: suffix, isVirtualAutoCombo: false };
     }
 
     // One pool preparation shared by the attempt below and the fuzzy fallbacks,
@@ -246,7 +260,7 @@ export async function resolveModelOrError(
         log.warn("AUTO", msg, { model: modelStr });
         return { error: errorResponse(HTTP_STATUS.SERVICE_UNAVAILABLE, msg) };
       }
-      return { combo: virtualCombo, provider: "auto", model: suffix };
+      return { combo: virtualCombo, provider: "auto", model: suffix, isVirtualAutoCombo: true };
     } catch (err) {
       log.warn("CHAT", `Failed to create built-in auto combo "${modelStr}"`, { err });
     }
@@ -263,15 +277,13 @@ export async function resolveModelOrError(
           "AUTO",
           `"auto/${suffix}" → built-in virtual combo "${candidate}" (fuzzy, ${virtualCombo.candidatePool?.length || 0} candidates)`
         );
-        return { combo: virtualCombo, provider: "auto", model: suffix };
+        return { combo: virtualCombo, provider: "auto", model: suffix, isVirtualAutoCombo: true };
       } catch {
         /* Try next fuzzy candidate */
       }
     }
 
-    const message = `Model '${modelStr}' is not a valid combo or provider. Unknown built-in auto combo.`;
-    log.warn("CHAT", message, { model: modelStr });
-    return { error: errorResponse(HTTP_STATUS.BAD_REQUEST, message) };
+    return { error: unknownAutoComboResponse(modelStr) };
   }
 
   if (!modelInfo.provider) {

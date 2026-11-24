@@ -27,6 +27,7 @@ export type ComboTargetKeyPolicyOptions = {
   apiKey: string | null | undefined;
   apiKeyInfo: ComboTargetKeyPolicyInfo | null | undefined;
   requestedModelStr: string;
+  isVirtualAutoCombo?: boolean;
   targetModelStr: string;
   isModelAllowedForKey: (key: string, model: string) => Promise<boolean>;
 };
@@ -53,11 +54,12 @@ function allowListCoversRequestedCombo(
  */
 export function isExplicitlyAllowedComboForKey(
   apiKeyInfo: ComboTargetKeyPolicyInfo | null | undefined,
-  requestedModelStr: string | null | undefined
+  requestedModelStr: string | null | undefined,
+  isVirtualAutoCombo?: boolean
 ): boolean {
   if (!apiKeyInfo || !requestedModelStr) return false;
   return (
-    !isReservedComboName(requestedModelStr) &&
+    !(isVirtualAutoCombo ?? isReservedComboName(requestedModelStr)) &&
     Array.isArray(apiKeyInfo.allowedCombos) &&
     isComboNameAllowedForKey(apiKeyInfo.allowedCombos, requestedModelStr)
   );
@@ -70,11 +72,13 @@ export function isExplicitlyAllowedComboForKey(
  */
 export function isComboNamedForKey(
   apiKeyInfo: ComboTargetKeyPolicyInfo | null | undefined,
-  requestedModelStr: string | null | undefined
+  requestedModelStr: string | null | undefined,
+  isVirtualAutoCombo?: boolean
 ): boolean {
   const rules = apiKeyInfo?.allowedCombos;
   if (!rules || !requestedModelStr) return false;
-  if (!isExplicitlyAllowedComboForKey(apiKeyInfo, requestedModelStr)) return false;
+  if (!isExplicitlyAllowedComboForKey(apiKeyInfo, requestedModelStr, isVirtualAutoCombo))
+    return false;
   const namedRules = rules.filter((rule) => rule !== ALL_COMBOS_ACCESS_RULE);
   return isComboNameAllowedForKey(namedRules, requestedModelStr);
 }
@@ -82,16 +86,24 @@ export function isComboNamedForKey(
 export async function comboTargetPassesKeyModelPolicy(
   opts: ComboTargetKeyPolicyOptions
 ): Promise<boolean> {
-  const { apiKey, apiKeyInfo, requestedModelStr, targetModelStr, isModelAllowedForKey } = opts;
+  const {
+    apiKey,
+    apiKeyInfo,
+    requestedModelStr,
+    targetModelStr,
+    isModelAllowedForKey,
+    isVirtualAutoCombo,
+  } = opts;
   if (!apiKey || !apiKeyInfo) return true;
 
   if (!hasApiKeyModelRestrictions(apiKeyInfo)) return true;
 
-  if (isComboNamedForKey(apiKeyInfo, requestedModelStr)) return true;
+  if (isComboNamedForKey(apiKeyInfo, requestedModelStr, isVirtualAutoCombo)) return true;
 
   if (await isModelBlockedByPatterns(apiKeyInfo.blockedModels, targetModelStr)) return false;
 
-  if (isExplicitlyAllowedComboForKey(apiKeyInfo, requestedModelStr)) return true;
+  if (isExplicitlyAllowedComboForKey(apiKeyInfo, requestedModelStr, isVirtualAutoCombo))
+    return true;
 
   if (allowListCoversRequestedCombo(apiKeyInfo.allowedModels, requestedModelStr)) {
     return true;

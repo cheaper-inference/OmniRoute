@@ -215,7 +215,10 @@ import { resolveForcedConnectionForCredentialPool } from "../services/sessionAff
 import { RequestTelemetry, recordTelemetry } from "../../shared/utils/requestTelemetry";
 import { generateRequestId } from "../../shared/utils/requestId";
 import { logAuditEvent } from "../../lib/compliance/index";
-import { enforceApiKeyPolicy } from "../../shared/utils/apiKeyPolicy";
+import {
+  enforceApiKeyPolicy,
+  validateResolvedAutoComboAccess,
+} from "../../shared/utils/apiKeyPolicy";
 import { rejectIfMeteredBudgetExceeded } from "@/lib/usage/meteredBudgetPolicy";
 import { hasProviderQuotaBypassScope } from "../../shared/constants/apiKeyPolicyScopes";
 import { isMicrosoftDesignerWebProviderRetiredError } from "../../shared/constants/designerWebRetirement";
@@ -1129,14 +1132,24 @@ async function handleChatImplementation(
 
   // Check if model is a combo (has multiple models with fallback)
   telemetry.startPhase("resolve");
-  let combo: any = autoRouting.isAutoRouting
+  const isVirtualAutoCombo = autoRouting.recognizedBuiltInAuto;
+  const routingCombo = autoRouting.isAutoRouting ? null : reasoningDecision?.targetCombo;
+  const storedCombo = isVirtualAutoCombo
     ? null
-    : (reasoningDecision?.targetCombo ?? (await getComboForModel(resolvedModelStr)));
+    : (routingCombo ?? (await getComboForModel(resolvedModelStr)));
 
-  const virtualCombo = await createVirtualAutoCombo(autoRouting, combo, apiKeyInfo?.id);
-  if (virtualCombo instanceof Response) return virtualCombo;
-  combo = virtualCombo;
+  let combo = await createVirtualAutoCombo(autoRouting, storedCombo, apiKeyInfo?.id);
+  if (combo instanceof Response) return combo;
   if (combo) {
+    const comboRejection = validateResolvedAutoComboAccess(
+      request,
+      apiKeyInfo,
+      resolvedModelStr,
+      combo.name
+    );
+    if (comboRejection) return comboRejection;
+    const comboPolicyName =
+      autoRouting.isAutoRouting && !isVirtualAutoCombo ? combo.name : resolvedModelStr;
     if (reasoningDecision) {
       const filtered = filterReasoningCombo(combo, reasoningDecision);
       if (filtered instanceof Response) return filtered;
@@ -1184,7 +1197,8 @@ async function handleChatImplementation(
       const preflightDecision = await evaluateComboTargetPreflight({
         apiKey,
         apiKeyInfo,
-        requestedModelStr: resolvedModelStr,
+        requestedModelStr: comboPolicyName,
+        isVirtualAutoCombo,
         targetModelStr: modelString,
         isComboLiveTest,
         isModelAllowedForKey,
@@ -1334,8 +1348,12 @@ async function handleChatImplementation(
             sessionAffinityKey,
             forceLiveComboTest: isComboLiveTest,
             automatedProbe: isAutomatedProbe,
-            ...resolvedPolicy.comboAuthorizationOptions(apiKeyInfo, resolvedModelStr),
-            isVirtualAutoCombo: autoRouting.isAutoRouting,
+            ...resolvedPolicy.comboAuthorizationOptions(
+              apiKeyInfo,
+              comboPolicyName,
+              isVirtualAutoCombo
+            ),
+            isVirtualAutoCombo,
             forcedConnectionId: target?.connectionId ?? null,
             allowedConnectionIds: target?.allowedConnectionIds ?? null,
             emptyTurnConnectionId: target?.emptyTurnConnectionId ?? null,
@@ -1434,6 +1452,7 @@ async function handleChatImplementation(
                 sessionId,
                 sessionAffinityKey,
                 emergencyFallbackTried: true,
+                isVirtualAutoCombo,
                 forceLiveComboTest: isComboLiveTest,
                 automatedProbe: isAutomatedProbe,
                 conversationId,
@@ -1679,8 +1698,19 @@ async function handleSingleModelChat(
   // Safety net: if auto-combo resolution returned a combo object, redirect
   // to combo flow. This handles the case where the auto-fuzzy match in
   // resolveModelOrError found a combo but the main handler's combo lookup missed it.
-  if ((resolved as any).combo) {
-    const redirectCombo = (resolved as any).combo;
+  if ("combo" in resolved && resolved.combo) {
+    const redirectCombo = resolved.combo;
+    const isReservedModel = isReservedComboName(modelStr);
+    const autoModel =
+      resolved.isVirtualAutoCombo && !isReservedModel ? redirectCombo.name : modelStr;
+    const comboRejection = validateResolvedAutoComboAccess(
+      request,
+      apiKeyInfo,
+      autoModel,
+      redirectCombo.name
+    );
+    if (comboRejection) return comboRejection;
+    const isStoredAutoCombo = isReservedModel && !resolved.isVirtualAutoCombo;
     if (runtimeOptions.managedLease) return managedComboRejection();
     log.info(
       "ROUTING",
@@ -1740,6 +1770,9 @@ async function handleSingleModelChat(
             // A probe stays a probe through the redirect, so each target is gated as one.
             automatedProbe: runtimeOptions.automatedProbe === true,
             authorizationContextModel: runtimeOptions.authorizationContextModel ?? modelStr,
+            ...(isStoredAutoCombo &&
+              resolvedPolicy.comboAuthorizationOptions(apiKeyInfo, redirectCombo.name, false)),
+            isVirtualAutoCombo: resolved.isVirtualAutoCombo,
             // The redirected combo's own target pin and allow-list win over the caller's pin.
             forcedConnectionId:
               resolvedTarget?.connectionId ?? runtimeOptions?.forcedConnectionId ?? null,
@@ -1762,7 +1795,7 @@ async function handleSingleModelChat(
             fallbackAttempts: target?.fallbackAttempts,
           },
           resolvedTarget?.effectiveComboStrategy ?? redirectCombo.strategy ?? "priority",
-          false
+          isStoredAutoCombo
         );
       },
       isModelAvailable: async () => true,

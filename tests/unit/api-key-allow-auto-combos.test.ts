@@ -58,7 +58,7 @@ test("R2: the row parser defaults to allowed and opts out only on an explicit fa
   assert.equal(parseAllowAutoCombos(false), false);
 });
 
-test("R3: the deny predicate classifies bare auto and auto/* for an opted-out key", () => {
+test("R3: an opted-out key denies only recognized built-in auto IDs", () => {
   const optedOut = { allowAutoCombos: false };
   const optedIn = { allowAutoCombos: true };
   const legacy = {}; // flag absent entirely
@@ -68,6 +68,8 @@ test("R3: the deny predicate classifies bare auto and auto/* for an opted-out ke
   assert.equal(isAutoComboDeniedForKey(optedOut, "auto/best-coding"), true);
   assert.equal(isAutoComboDeniedForKey(optedOut, "Auto/Best-Coding"), true);
   assert.equal(isAutoComboDeniedForKey(optedOut, "auto/coding:fast"), true);
+  assert.equal(isAutoComboDeniedForKey(optedOut, "Auto/Claude-Sonnet"), true);
+  assert.equal(isAutoComboDeniedForKey(optedOut, "auto/legado-x"), false);
 
   // Opted in, or never configured — never denied.
   assert.equal(isAutoComboDeniedForKey(optedIn, "auto"), false);
@@ -121,7 +123,11 @@ test("R3b: a persisted auto combo cannot bypass the key opt-out", async () => {
   assert.equal(explicitStored.rejection, null, "combo/auto must remain ordinary combo syntax");
 
   const virtualPrefixed = await enforceApiKeyPolicy(request(), "auto/best-coding");
-  assert.equal(virtualPrefixed.rejection?.status, 403, "auto/* must remain denied");
+  assert.equal(
+    virtualPrefixed.rejection?.status,
+    403,
+    "a recognized built-in auto variant must remain denied"
+  );
 
   const blockedKey = await apiKeysDb.createApiKey("Bare auto blocked combo", "machine-auto-2");
   await apiKeysDb.updateApiKeyPermissions(blockedKey.id, {
@@ -136,6 +142,42 @@ test("R3b: a persisted auto combo cannot bypass the key opt-out", async () => {
     "auto"
   );
   assert.equal(blocked.rejection?.status, 403, "auto remains denied for a key that opted out");
+});
+
+test("R3c: saved auto routes obey the key's combo list, including fuzzy matches", async () => {
+  for (const name of ["auto/legado-x", "auto/best-foo"]) {
+    await combosDb.createCombo({ name, strategy: "priority", models: ["openai/gpt-4.1"] });
+  }
+
+  const { key, id } = await apiKeysDb.createApiKey("Legacy auto combos", "machine-auto-legacy");
+  const request = () =>
+    new Request("http://localhost/api/v1/chat/completions", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${key}` },
+    });
+  await apiKeysDb.updateApiKeyPermissions(id, {
+    allowAutoCombos: false,
+    allowedCombos: ["auto/legado-x", "auto/best-foo"],
+  });
+
+  for (const model of ["auto/legado-x", "AUTO/LEGADO-X", "auto/foo"]) {
+    assert.equal((await enforceApiKeyPolicy(request(), model)).rejection, null, model);
+  }
+
+  await apiKeysDb.updateApiKeyPermissions(id, { allowedCombos: ["auto/foo"] });
+  for (const [model, savedName] of [
+    ["auto/legado-x", "auto/legado-x"],
+    ["auto/foo", "auto/best-foo"],
+  ]) {
+    const { rejection } = await enforceApiKeyPolicy(request(), model);
+    assert.equal(rejection?.status, 403);
+    const body = await rejection.json();
+    assert.ok(body.error.message.includes(`Combo "${savedName}" is not allowed`));
+  }
+
+  await apiKeysDb.updateApiKeyPermissions(id, { allowAutoCombos: true });
+  const { rejection } = await enforceApiKeyPolicy(request(), "Auto/Best-Coding");
+  assert.equal(rejection?.status, 403, "a built-in auto id still requires combo access");
 });
 
 test("R4: the PATCH schema preserves allowAutoCombos and counts it as a real update", () => {

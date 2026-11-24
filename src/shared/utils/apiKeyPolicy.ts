@@ -16,6 +16,8 @@ import {
   type AnthropicRateLimitHeaderMode,
 } from "@/lib/db/apiKeySelfServiceSettings";
 import { isReservedComboName } from "@/lib/combos/autoNames";
+import { resolveStoredAutoCombo } from "@/lib/combos/storedAutoCombo";
+import { isBuiltInAutoRoute } from "@omniroute/open-sse/services/autoCombo/builtinCatalog";
 import { getCachedComboByName, getCachedComboForModel } from "@/lib/db/readCache";
 import { isDashboardSessionAuthenticated } from "./apiAuth";
 import { isAnthropicMessagesRequest } from "./anthropicErrorEnvelope";
@@ -265,7 +267,11 @@ function policyErrorResponse(
 }
 
 async function resolveRequestedComboName(modelStr: string): Promise<string | null> {
-  if (isReservedComboName(modelStr)) return modelStr.toLowerCase();
+  if (isBuiltInAutoRoute(modelStr)) return modelStr.toLowerCase();
+  if (isReservedComboName(modelStr)) {
+    const combo = await resolveStoredAutoCombo(modelStr);
+    return typeof combo?.name === "string" ? combo.name : null;
+  }
 
   const exact = await getCachedComboByName(modelStr);
   if (exact && typeof exact.name === "string") return exact.name;
@@ -301,8 +307,19 @@ async function isComboAllowedForKey(
     (isQuotaVirtualComboModel(modelStr) ? modelStr : null);
   if (!comboName) return { allowed: true, comboName: null };
 
-  const allowed = allowedCombos.some((rule) => matchesComboAccessRule(comboName, modelStr, rule));
+  const allowed = matchesRequestedComboAccess(allowedCombos, comboName, modelStr);
   return { allowed, comboName };
+}
+
+function matchesRequestedComboAccess(
+  allowedCombos: string[],
+  comboName: string,
+  modelStr: string
+): boolean {
+  // A fuzzy legacy request only grants the saved combo the key actually permits.
+  const requestedName =
+    isReservedComboName(modelStr) && !isBuiltInAutoRoute(modelStr) ? comboName : modelStr;
+  return allowedCombos.some((rule) => matchesComboAccessRule(comboName, requestedName, rule));
 }
 
 function quotaPolicyResponse(message: string, code: string): Response {
@@ -642,7 +659,7 @@ export function isAutoComboDeniedForKey(
   apiKeyInfo: { allowAutoCombos?: boolean } | null | undefined,
   modelStr: string | null | undefined
 ): boolean {
-  return apiKeyInfo?.allowAutoCombos === false && !!modelStr && isReservedComboName(modelStr);
+  return apiKeyInfo?.allowAutoCombos === false && !!modelStr && isBuiltInAutoRoute(modelStr);
 }
 
 function autoComboDeniedResponse(request: Request, modelStr: string): Response {
@@ -654,6 +671,21 @@ function autoComboDeniedResponse(request: Request, modelStr: string): Response {
     "invalid_request_error",
     HTTP_STATUS.BAD_REQUEST
   );
+}
+
+/** Authorize the selected combo even if a routing override or combo edit changed the target. */
+export function validateResolvedAutoComboAccess(
+  request: Request,
+  apiKeyInfo: ApiKeyMetadata | null | undefined,
+  modelStr: string,
+  comboName: string
+): Response | null {
+  if (!apiKeyInfo || !isReservedComboName(modelStr)) return null;
+  if (isAutoComboDeniedForKey(apiKeyInfo, modelStr))
+    return autoComboDeniedResponse(request, modelStr);
+  const rules = apiKeyInfo.allowedCombos;
+  if (!Array.isArray(rules) || matchesRequestedComboAccess(rules, comboName, modelStr)) return null;
+  return errorResponse(HTTP_STATUS.FORBIDDEN, comboCannotBeUsedMessage(modelStr, comboName));
 }
 
 async function validateModelAccess(context: PolicyContext): Promise<Response | null> {

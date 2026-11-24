@@ -1,1 +1,1 @@
-- **fix(combos):** Reserve `auto` and `auto/*` for built-in automatic routing and prompt users to rename existing combos with reserved names.
+- **fix(combos):** Reserve `auto` and `auto/*` for new or edited combos. The built-in router takes precedence for recognized names, and existing combos on other `auto/*` names keep working with a rename warning.

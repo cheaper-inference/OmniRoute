@@ -33,12 +33,20 @@ test.before(async () => {
     defaultModel: candidate,
     providerSpecificData: { excludedModels },
   });
-  for (const name of ["auto", "auto/coding", "auto/best-legacy"]) {
+  for (const name of ["auto", "auto/coding"]) {
     await createCombo({
       name,
       strategy: "priority",
       models: ["anthropic/claude-sonnet-4-6"],
       context_length: 1000,
+    });
+  }
+  for (const name of ["auto/legado-x", "auto/best-foo", "auto/best-legado-x"]) {
+    await createCombo({
+      name,
+      strategy: "priority",
+      models: ["openai/gpt-4o-mini"],
+      context_length: name === "auto/best-legado-x" ? 1500 : 1000,
     });
   }
 });
@@ -100,8 +108,34 @@ for (const [model, storedName] of [
   });
 }
 
-test("an unknown auto suffix cannot dispatch a fuzzy legacy combo", async () => {
-  const response = await chat("auto/legacy");
+for (const model of ["auto/legado-x", "Auto/LEGADO-X", "auto/foo"]) {
+  test(`chat serves "${model}" through the saved combo and applies its context limit`, async (t) => {
+    let sentMaxTokens: number | undefined;
+    t.mock.method(globalThis, "fetch", async (input: RequestInfo | URL, init?: RequestInit) => {
+      assert.equal(new URL(String(input)).hostname, "api.openai.com");
+      const payload = JSON.parse(String(init?.body));
+      assert.equal(payload.model, "gpt-4o-mini");
+      sentMaxTokens = payload.max_tokens;
+      return Response.json({
+        id: "chatcmpl-legacy-auto",
+        choices: [{ message: { role: "assistant", content: "OK" }, finish_reason: "stop" }],
+      });
+    });
+
+    const response = await chat(model);
+    const body = await response.text();
+    assert.equal(response.status, 200, body);
+    assert.match(body, /"content":"OK"/);
+    // The 1000-token window also has to fit the input messages.
+    assert.ok(
+      typeof sentMaxTokens === "number" && sentMaxTokens > 0 && sentMaxTokens < 1000,
+      `the saved combo's 1000-token window must cap output, got ${sentMaxTokens}`
+    );
+  });
+}
+
+test("an unknown auto suffix without a saved combo returns 400", async () => {
+  const response = await chat("auto/inexistente");
   assert.equal(response.status, 400);
   assert.match(await response.text(), /Unknown built-in auto combo/);
 });
