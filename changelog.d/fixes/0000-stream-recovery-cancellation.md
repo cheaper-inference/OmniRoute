@@ -1,0 +1,1 @@
+- **fix(sse):** Stream recovery closes retry and continuation bodies when the downstream stream is cancelled, including bodies that arrive after cancellation.
