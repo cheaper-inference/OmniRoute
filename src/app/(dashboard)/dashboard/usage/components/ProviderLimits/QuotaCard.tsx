@@ -25,6 +25,11 @@ import QuotaCardExpanded from "./parts/QuotaCardExpanded";
 import { useQuotaClock } from "./useQuotaClock";
 import ProviderUsdCostModal from "./ProviderUsdCostModal";
 import type { CodexPaidCredits } from "@/lib/providers/codexPaidCredits";
+import {
+  antigravityGroupVisibilityRow,
+  antigravityQuotaBelongsToGroup,
+  resolveAntigravityQuotaGroups,
+} from "./AntigravityQuotaGroups";
 
 const STATUS_BORDER: Record<CardStatus, string> = {
   critical: "var(--color-error)",
@@ -104,11 +109,30 @@ export default function QuotaCard({
     () => filterQuotasByVisibility(visibilityScope, rawQuotas, quotaVisibility),
     [visibilityScope, rawQuotas, quotaVisibility]
   );
-  const hiddenQuotaRows = useMemo(
-    () => getHiddenQuotaRows(visibilityScope, rawQuotas, quotaVisibility),
-    [visibilityScope, rawQuotas, quotaVisibility]
-  );
-  const cardStatus = useMemo<CardStatus>(() => worstStatus(quotas), [quotas]);
+  const hiddenQuotaRows = useMemo(() => {
+    const groupRows =
+      connection.provider === "antigravity" || connection.provider === "agy"
+        ? resolveAntigravityQuotaGroups(quota?.raw?.quotaGroups, rawQuotas).map(
+            antigravityGroupVisibilityRow
+          )
+        : [];
+    return getHiddenQuotaRows(visibilityScope, [...rawQuotas, ...groupRows], quotaVisibility);
+  }, [visibilityScope, rawQuotas, quotaVisibility, connection.provider, quota?.raw?.quotaGroups]);
+  const cardStatus = useMemo<CardStatus>(() => {
+    if (connection.provider !== "antigravity" && connection.provider !== "agy")
+      return worstStatus(quotas);
+    const hiddenGroups = resolveAntigravityQuotaGroups(quota?.raw?.quotaGroups, rawQuotas).filter(
+      (group) =>
+        hiddenQuotaRows.some(
+          (row) => row.modelKey === antigravityGroupVisibilityRow(group).modelKey
+        )
+    );
+    return worstStatus(
+      quotas.filter(
+        (row) => !hiddenGroups.some((group) => antigravityQuotaBelongsToGroup(row, group))
+      )
+    );
+  }, [quotas, hiddenQuotaRows, connection.provider, quota?.raw?.quotaGroups, rawQuotas]);
   const tierMeta = useMemo(
     () =>
       normalizePlanTier(
