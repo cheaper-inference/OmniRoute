@@ -79,7 +79,19 @@ test("gemini-web bridges a provider-scope authenticated SOCKS5 proxy and release
   }
 
   const server = contextOptions[0]?.proxy?.server ?? "";
-  assert.match(server, /^http:\/\/127\.0\.0\.1:\d+$/);
+  // Parse only after checking validity so a failed assertion never prints the bridge credential.
+  assert.ok(URL.canParse(server), "the browser must receive a valid proxy URL");
+  const local = new URL(server);
+  assert.ok(
+    local.protocol === "http:" && local.hostname === "127.0.0.1" && Number(local.port) > 1,
+    "the browser must receive the bridge's allocated loopback HTTP address"
+  );
+  assert.ok(
+    local.pathname === "/" && local.search === "" && local.hash === "",
+    "the bridge URL must contain only its authority"
+  );
+  assert.ok(local.username.length > 0, "the loopback bridge needs its own username");
+  assert.ok(local.password.length > 0, "the loopback bridge needs its own password");
   assert.equal(server.includes("alice"), false);
   assert.equal(server.includes("secret"), false);
   assert.equal(contextClosed, true);
