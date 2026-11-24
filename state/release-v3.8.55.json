@@ -97,8 +97,7 @@
       "19149": "ce0f2e3b64d51c480eccfd4c21b4ebeeaa0c2a0b",
       "19167": "5a3523ee5d9dc3a3fe610ed93b4c5ccb048bbca0",
       "19305": "1f33f0e10883549e4374ac38d47e87c94936bc5c",
-      "19306": "4afb0ca62e19eb94155c5b9c2b78bf4b91ae1dee",
-      "21142": "802e635b7b74f10c1e7a289809ad6151f76edd49"
+      "19306": "4afb0ca62e19eb94155c5b9c2b78bf4b91ae1dee"
     }
   },
   "counters": {
@@ -2146,6 +2145,6 @@
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45495530004"
     }
   ],
-  "updatedAt": "2026-11-24T21:54:05.468Z",
+  "updatedAt": "2026-11-24T22:09:08.225Z",
   "batchWindow": 5
 }
