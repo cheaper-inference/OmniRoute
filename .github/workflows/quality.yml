@@ -165,6 +165,17 @@ jobs:
     # With this pinned, USE_VPS_RUNNER governs ONLY build-like jobs — one variable, one coherent
     # purpose. That is what gap 19 asked for; a second variable turned out to be unnecessary.
     runs-on: ubuntu-latest
+    # Hard ceiling. Without it a stuck step holds the hosted runner until GitHub's 360 min
+    # default: on 2026-11-20 check:cycles printed its verdict and its node process never
+    # exited (run 44821771451, 118 min until it was cancelled by hand). The merge queue's base
+    # check no longer runs the unit suite here (it moved to the base-check-unit shards below);
+    # what this limit must still leave room for is a large TIA subset, which runs unsharded in
+    # this job. Across the 80 most recent green pull-request runs (2026-11-21) the job took a
+    # median of 11.3 min and at most 92.5 min (run 44909506327: 6,014 impacted test files, 80.8
+    # min in that step), and batch candidates b18-b20 took 55-91 min the same way, while
+    # everything except that step never exceeded 12.4 min. 150 leaves about 60% headroom over
+    # 92.5 and stays below the queue's checksTimeoutMinutes (240, config/merge-queue/config.json).
+    timeout-minutes: 150
     # tsx gates (known-symbols, route-guard-membership) import modules that open
     # SQLite on load; provide DB env so a fresh CI DB initializes cleanly.
     env:
@@ -301,6 +312,24 @@ jobs:
           ratchet_gates=(
             secrets vuln-ratchet workflows openapi-breaking cycles boundary
           )
+          # Wall-clock limit per gate. A gate that finished its work can still fail to exit:
+          # in run 44821771451 check:cycles printed "RATCHET OK" and its node process was still
+          # alive 113 min later, when the run was cancelled by hand. The slowest gate takes about
+          # 90 s and the whole loop under 10 min. `timeout` (GNU, or the uutils one Ubuntu 26.04
+          # ships: same contract) signals the whole process group (npm, sh, node) and sends KILL
+          # 30 s after TERM. A gate cut by the limit runs once more: the known case is a hang
+          # after a green verdict, and a second timeout counts as a failed gate.
+          GATE_TIMEOUT=10m
+          run_gate() {
+            local rc=0
+            timeout --kill-after=30s "$GATE_TIMEOUT" "$@" || rc=$?
+            if [ "$rc" -eq 124 ] || [ "$rc" -eq 137 ]; then
+              echo "::warning::gate hit the $GATE_TIMEOUT limit and was terminated (exit $rc), retrying once: $*"
+              rc=0
+              timeout --kill-after=30s "$GATE_TIMEOUT" "$@" || rc=$?
+            fi
+            return "$rc"
+          }
           failed=()
           for g in "${gates[@]}"; do
             echo "::group::check:$g"
@@ -313,9 +342,9 @@ jobs:
             # release. See scripts/check/newCodeMode.mjs.
             case "$g" in file-size|complexity-ratchets|dead-code) NEW_CODE=1 ;; *) NEW_CODE= ;; esac
             if [ -n "$NEW_CODE" ] && [ -n "${PR_BASE_SHA:-}" ]; then
-              npm run "check:$g" -- --base-ref "$PR_BASE_SHA" || failed+=("$g")
+              run_gate npm run "check:$g" -- --base-ref "$PR_BASE_SHA" || failed+=("$g")
             else
-              npm run "check:$g" || failed+=("$g")
+              run_gate npm run "check:$g" || failed+=("$g")
             fi
             echo "::endgroup::"
           done
@@ -327,20 +356,20 @@ jobs:
             # PR adds block. workflow_dispatch (no PR base) keeps the absolute ceiling.
             case "$g" in boundary) BASE_RELATIVE=1 ;; *) BASE_RELATIVE= ;; esac
             if [ -n "$BASE_RELATIVE" ] && [ -n "${PR_BASE_SHA:-}" ]; then
-              npm run "check:$g" -- --ratchet --base-ref "$PR_BASE_SHA" || failed+=("$g")
+              run_gate npm run "check:$g" -- --ratchet --base-ref "$PR_BASE_SHA" || failed+=("$g")
             else
-              npm run "check:$g" -- --ratchet || failed+=("$g")
+              run_gate npm run "check:$g" -- --ratchet || failed+=("$g")
             fi
             echo "::endgroup::"
           done
           echo "::group::typecheck:core"
-          npm run typecheck:core || failed+=("typecheck:core")
+          run_gate npm run typecheck:core || failed+=("typecheck:core")
           echo "::endgroup::"
           echo "::group::check:dashboard-typecheck"
-          npm run check:dashboard-typecheck || failed+=("check:dashboard-typecheck")
+          run_gate npm run check:dashboard-typecheck || failed+=("check:dashboard-typecheck")
           echo "::endgroup::"
           echo "::group::check:build-typecheck"
-          npm run check:build-typecheck || failed+=("check:build-typecheck")
+          run_gate npm run check:build-typecheck || failed+=("check:build-typecheck")
           echo "::endgroup::"
           # #10134: TS7 zero-new-diagnostics ratchet — folded into this non-fail-fast
           # loop (never a separate blocking step) so an earlier red gate cannot abort
@@ -348,7 +377,7 @@ jobs:
           # the base-relative comparison needs a base SHA (empty on workflow_dispatch).
           if [ -n "${PR_BASE_SHA:-}" ]; then
             echo "::group::check:ts7-diagnostics-ratchet"
-            npm run check:ts7-diagnostics-ratchet -- --base-ref "$PR_BASE_SHA" || failed+=("ts7-diagnostics-ratchet")
+            run_gate npm run check:ts7-diagnostics-ratchet -- --base-ref "$PR_BASE_SHA" || failed+=("ts7-diagnostics-ratchet")
             echo "::endgroup::"
           fi
           # A failed gate named in EXTERNAL_STATE_GATES (filled on an omni-queue candidate only)
@@ -403,14 +432,14 @@ jobs:
         run: |
           # omni-queue base-check (the bare base, its own base): a base-relative selection is
           # empty, so a test that fails in a red batch's subset could never fail here and the
-          # queue's base-red comparison (same check, same test) would blame the batch. Run the
-          # whole unit suite instead.
+          # queue's base-red comparison (same check, same test) would blame the batch. The whole
+          # unit suite runs instead, in the `base-check-unit` shards below: their check names
+          # ("Fast Quality Gates (N/4)") normalize to this job's name in the queue's classifier.
           if [ "${CANDIDATE_SOURCE:-}" = "self" ]; then
             echo "__OMNI_QUEUE_BASE_CHECK__" > tia-selection.txt
-            echo "TIA selection: omni-queue base-check — full unit suite" >> "$GITHUB_STEP_SUMMARY"
-            RC=0
-            npm run test:unit:ci || RC=$?
-            exit $RC
+            echo "TIA selection: omni-queue base-check — full unit suite in the base-check-unit shards (Fast Quality Gates (N/4))" >> "$GITHUB_STEP_SUMMARY"
+            echo "omni-queue base-check: the full unit suite runs in the Fast Quality Gates (N/4) shard jobs, not here."
+            exit 0
           fi
           git fetch --no-tags origin "$GITHUB_BASE_REF" || true
           # The advisory sibling-test step generates the same map earlier in this job.
@@ -468,6 +497,64 @@ jobs:
           path: tia-selection.txt
           if-no-files-found: ignore
           retention-days: 30
+
+  # The merge queue's base check: on an omni-queue/** base-check candidate (the bare base,
+  # candidateSource "self") the whole unit suite runs here, in parallel shards, instead of
+  # unsharded inside fast-gates' TIA step. Unsharded it was the long pole of every base check
+  # (83-90 min of a 94-101 min job on basecheck-07a790f5c158 and basecheck-6d3f1d3f70e1-r1),
+  # and one stuck test held the whole queue: run 44902746432 sat in that step from 12:27Z until
+  # the queue's own 240-min limit gave up at 16:17Z.
+  #
+  # The name is load-bearing. The queue calls a red batch "base-red" only when the bare base
+  # fails THE SAME CHECK (scripts/merge-queue/classify.mjs; names only, node:test emits no
+  # annotations), and a batch whose TIA subset fails is red on "Fast Quality Gates".
+  # normalizeCheckName drops the "(N/4)" shard suffix, so every shard reads as that check.
+  #
+  # Same predicate as the TIA step's base-check branch (CANDIDATE_SOURCE == self), so on every
+  # event where that step skips the suite these shards run it. Every other event skips the
+  # job, and the admission verdict accepts the skip (config/quality/admission-policy.json:
+  # "omni-queue-base-check"). Hosted only: omni-queue candidates contain fork code.
+  base-check-unit:
+    name: Fast Quality Gates (${{ matrix.shard }}/4)
+    needs: changes
+    if: ${{ startsWith(github.ref, 'refs/heads/omni-queue/') && needs.changes.outputs.candidateSource == 'self' }}
+    runs-on: ubuntu-latest
+    # Unsharded the suite took 75-90 min in that step (basecheck-cc59ad70b2e9 75.3,
+    # basecheck-07a790f5c158 83.1, basecheck-6d3f1d3f70e1-r1 89.9), so a quarter is ~23 min.
+    # node --test-shard splits by file, not by duration: ci.yml's 8 unit shards run 1.26x their
+    # mean on the slowest one (mean 19, max 24), which puts the slowest shard here near 29 min,
+    # plus ~2 min of checkout and npm ci. 45 keeps ci.yml's margin for its shards (35 over a
+    # 24-min maximum, ~1.45x) over that ~31 min, and a hung test now costs 45 min, not 240.
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
+    # The environment the unsharded run had in fast-gates (job env + the TIA step's env).
+    env:
+      JWT_SECRET: ci-lint-secret-with-sufficient-length-for-validation
+      API_KEY_SECRET: ci-lint-api-key-secret-long
+      DISABLE_SQLITE_AUTO_BACKUP: "true"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          package-manager-cache: false
+          node-version: ${{ env.CI_NODE_VERSION }}
+      - uses: ./.github/actions/npm-ci-retry
+        with:
+          # PR acceleration is not release-candidate provenance.
+          cache: ${{ github.event_name == 'pull_request' }}
+      - name: Unit tests (shard ${{ matrix.shard }}/4)
+        env:
+          TEST_SHARD: ${{ matrix.shard }}/4
+          GITHUB_BASE_REF: ${{ github.base_ref }}
+          GITHUB_BASE_SHA: ${{ needs.changes.outputs.candidateBase }}
+          CANDIDATE_SOURCE: ${{ needs.changes.outputs.candidateSource }}
+        run: npm run test:unit:ci:shard
 
   # ── Pacote 4 (plano mestre testes+CI, aprovado 2026-07-04) ─────────────────────────
   # No-new-warnings por PR via ESLint bulk suppressions nativo (>=9.24). O baseline
@@ -606,6 +693,7 @@ jobs:
       - changes
       - docs-gates
       - fast-gates
+      - base-check-unit
       - lint-guard
       - merge-integrity
     steps:

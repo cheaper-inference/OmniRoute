@@ -4,7 +4,9 @@
  * Resolves the pool's provider plan to get dimensions, scales each dimension
  * limit by the pool's member-connection count (the same summed budget
  * enforce.ts applies), then calls poolUsageWithDimensions on the QuotaStore
- * interface.
+ * interface. Percent dimensions are then filled with the per-key attribution
+ * the quota-share gate uses (each account's attribution book), one entry per
+ * pool connection.
  *
  * Auth: requireManagementAuth
  * Sanitization: all error responses via buildErrorBody (Hard Rule #12, B25)
@@ -19,6 +21,7 @@ import { getPool } from "@/lib/db/quotaPools";
 import { getQuotaStore } from "@/lib/quota/QuotaStore";
 import { resolvePlan } from "@/lib/quota/planResolver";
 import { resolveConnectionProvider } from "@/lib/quota/connectionProvider";
+import { withPercentAttribution } from "@/lib/quota/poolUsageSnapshot";
 import type { PoolUsageSnapshot } from "@/lib/quota/types";
 
 export const dynamic = "force-dynamic";
@@ -70,6 +73,10 @@ export async function GET(request: Request, { params }: RouteParams): Promise<Re
       // Fallback: no plan dimensions configured — return minimal snapshot
       snapshot = await store.poolUsage(id);
     }
+
+    // 5. Percent dimensions: report, per pool connection, the per-key numbers
+    //    the quota-share gate uses (the account bar split by its attribution book).
+    snapshot = await withPercentAttribution(snapshot, pool, provider, store);
 
     return NextResponse.json({ usage: snapshot });
   } catch (err) {

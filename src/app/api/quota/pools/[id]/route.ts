@@ -16,6 +16,7 @@ import { buildErrorBody } from "@omniroute/open-sse/utils/error";
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 import { PoolUpdateSchema } from "@/shared/schemas/quota";
 import { getPool, updatePool, deletePool } from "@/lib/db/quotaPools";
+import { setPoolMemberBreakdown, withMemberBreakdown } from "@/lib/db/quotaMemberBreakdown";
 import { logAuditEvent, getAuditRequestContext } from "@/lib/compliance/index";
 import { reconcilePoolExclusivity } from "@/lib/quota/quotaKey";
 
@@ -33,11 +34,26 @@ export async function GET(request: Request, { params }: RouteParams): Promise<Re
     if (!pool) {
       return NextResponse.json(buildErrorBody(404, "Pool not found"), { status: 404 });
     }
-    return NextResponse.json({ pool });
+    return NextResponse.json({ pool: withMemberBreakdown([pool])[0] });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Failed to get pool";
     return NextResponse.json(buildErrorBody(500, message), { status: 500 });
   }
+}
+
+/**
+ * The audit metadata of an update. The wizard always sends `borrowMode`, so the stored mode is
+ * added as `previousBorrowMode` when the request changes it, and only then. Read before the write.
+ */
+function updateAuditMetadata<T extends { borrowMode?: string }>(
+  id: string,
+  data: T
+): T & { previousBorrowMode?: string } {
+  if (data.borrowMode === undefined) return data;
+  const previous = getPool(id)?.borrowMode;
+  return previous !== undefined && previous !== data.borrowMode
+    ? { ...data, previousBorrowMode: previous }
+    : data;
 }
 
 export async function PATCH(request: Request, { params }: RouteParams): Promise<Response> {
@@ -51,19 +67,7 @@ export async function PATCH(request: Request, { params }: RouteParams): Promise<
     if (!parsed.success) {
       return NextResponse.json(buildErrorBody(400, parsed.error.message), { status: 400 });
     }
-
-    // Capture prev allocations BEFORE the update so we know which keys are leaving.
-    // Only needed when `exclusive` is explicitly present in the request body.
     const exclusivePresent = body !== null && typeof body === "object" && "exclusive" in body;
-    const prevApiKeyIds: string[] = [];
-    if (exclusivePresent) {
-      const existingPool = getPool(id);
-      if (existingPool) {
-        for (const alloc of existingPool.allocations) {
-          prevApiKeyIds.push(alloc.apiKeyId);
-        }
-      }
-    }
 
     // Combos must be reconciled when the pool's group OR connection set changes,
     // since the qtSd/ combo name embeds <groupSlug>/<provider>. Each provider in a
@@ -83,9 +87,20 @@ export async function PATCH(request: Request, { params }: RouteParams): Promise<
       }
     }
 
+    // The previous mode and the previous keys are read with no await before the synchronous
+    // write, so no other request can change the pool in between.
+    const auditMetadata = updateAuditMetadata(id, parsed.data);
+    // Keys allocated before the update, to know which keys are leaving.
+    // Only needed when `exclusive` is explicitly present in the request body.
+    const prevApiKeyIds: string[] = exclusivePresent
+      ? (getPool(id)?.allocations ?? []).map((alloc) => alloc.apiKeyId)
+      : [];
     const pool = updatePool(id, parsed.data);
     if (!pool) {
       return NextResponse.json(buildErrorBody(404, "Pool not found"), { status: 404 });
+    }
+    if (parsed.data.memberBreakdown !== undefined) {
+      setPoolMemberBreakdown(id, parsed.data.memberBreakdown);
     }
 
     if (combosNeedResync) {
@@ -112,12 +127,12 @@ export async function PATCH(request: Request, { params }: RouteParams): Promise<
     logAuditEvent({
       action: "quota.pool.updated",
       target: id,
-      metadata: parsed.data,
+      metadata: auditMetadata,
       ipAddress: ctx.ipAddress ?? undefined,
       requestId: ctx.requestId,
     });
 
-    return NextResponse.json({ pool });
+    return NextResponse.json({ pool: withMemberBreakdown([pool])[0] });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Failed to update pool";
     return NextResponse.json(buildErrorBody(500, message), { status: 500 });

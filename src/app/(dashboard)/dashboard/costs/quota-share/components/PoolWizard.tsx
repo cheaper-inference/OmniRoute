@@ -28,11 +28,13 @@ import SegmentedControl from "@/shared/components/SegmentedControl";
 import Select from "@/shared/components/Select";
 import { getSeriesColor } from "@/shared/components/analytics/chartColors";
 import Icon from "@/shared/components/Icon";
+import MemberBreakdownField from "./MemberBreakdownField";
 import useEmailPrivacyStore from "@/store/emailPrivacyStore";
 import { maskEmailLikeValue } from "@/shared/utils/maskEmail";
 import { getKnownPlan } from "@/lib/quota/planRegistry";
 import { quotaModelName } from "@/lib/quota/quotaModelNaming";
 import type {
+  BorrowMode,
   Policy,
   PoolAllocation,
   QuotaDimension,
@@ -40,6 +42,7 @@ import type {
   QuotaWindow,
 } from "@/lib/quota/dimensions";
 import type { QuotaPool } from "@/lib/db/quotaPools";
+import BorrowModeField from "./BorrowModeField";
 
 // ────────────────────────────────────────────────────────────────────────────
 // Types (mirror what CreatePoolModal/EditAllocationsModal expect)
@@ -83,6 +86,8 @@ export interface PoolWizardProps {
   editPool?: QuotaPool;
   /** Whether the pool being edited is currently exclusive. Used to pre-fill the exclusive checkbox in edit mode. */
   editPoolExclusive?: boolean;
+  /** Whether the pool being edited shows member usage bars. Pre-fills that checkbox in edit mode. */
+  editPoolMemberBreakdown?: boolean;
   /** connectionId → name of the pool it already belongs to, for the "already used" hint. */
   connectionPoolName?: Record<string, string>;
 }
@@ -150,10 +155,17 @@ type WizardSetters = {
   setDimensionsEdited: Dispatch<SetStateAction<boolean>>;
   setAllocations: Dispatch<SetStateAction<PoolAllocation[]>>;
   setExclusive: Dispatch<SetStateAction<boolean>>;
+  setMemberBreakdown: Dispatch<SetStateAction<boolean>>;
   setError: Dispatch<SetStateAction<string | null>>;
   setSaving: Dispatch<SetStateAction<boolean>>;
   setGroupId: Dispatch<SetStateAction<string>>;
+  setBorrowMode: Dispatch<SetStateAction<BorrowMode>>;
 };
+
+/** The edited pool's borrow mode. A pool read without one is in saturation mode. */
+function poolBorrowMode(pool: QuotaPool): BorrowMode {
+  return pool.borrowMode === "consent" ? "consent" : "saturation";
+}
 
 // Render-time state adjustment (react-hooks/set-state-in-effect): reload the editable
 // dimensions when the primary connection changes. Lives in a hook so the component's
@@ -186,6 +198,7 @@ function useWizardOpenCloseAdjustment({
   open,
   editPool,
   editPoolExclusive,
+  editPoolMemberBreakdown,
   initialGroupId,
   plans,
   ...set
@@ -193,6 +206,7 @@ function useWizardOpenCloseAdjustment({
   open: boolean;
   editPool?: QuotaPool;
   editPoolExclusive?: boolean;
+  editPoolMemberBreakdown?: boolean;
   initialGroupId: string;
   plans: Record<string, { dimensions: QuotaDimension[] } | undefined>;
 } & WizardSetters) {
@@ -212,9 +226,11 @@ function useWizardOpenCloseAdjustment({
     set.setDimensionsEdited(false);
     set.setAllocations([]);
     set.setExclusive(false);
+    set.setMemberBreakdown(false);
     set.setError(null);
     set.setSaving(false);
     set.setGroupId(initialGroupId);
+    set.setBorrowMode("saturation");
   }
   if (changed && open && editPool) {
     // Opening in edit mode: pre-fill from the existing pool. Preserves the pool's
@@ -230,6 +246,8 @@ function useWizardOpenCloseAdjustment({
     set.setGroupId(editPool.groupId ?? initialGroupId);
     set.setAllocations(editPool.allocations ?? []);
     set.setExclusive(editPoolExclusive ?? false);
+    set.setBorrowMode(poolBorrowMode(editPool));
+    set.setMemberBreakdown(editPoolMemberBreakdown === true);
     set.setEditDimensions(
       existingPlan && existingPlan.dimensions.length > 0 ? [...existingPlan.dimensions] : []
     );
@@ -253,6 +271,7 @@ export default function PoolWizard({
   selectedGroupId: initialGroupId = "group-demo",
   editPool,
   editPoolExclusive,
+  editPoolMemberBreakdown,
   connectionPoolName = {},
 }: PoolWizardProps) {
   const t = useTranslations("quotaShare");
@@ -267,6 +286,7 @@ export default function PoolWizard({
   const [connectionIds, setConnectionIds] = useState<string[]>([]);
   const [poolName, setPoolName] = useState("");
   const [defaultPolicy, setDefaultPolicy] = useState<Policy>("hard");
+  const [borrowMode, setBorrowMode] = useState<BorrowMode>("saturation");
 
   // ── Step 2 state ──────────────────────────────────────────────────────────
   const [editDimensions, setEditDimensions] = useState<QuotaDimension[]>([]);
@@ -275,6 +295,7 @@ export default function PoolWizard({
   // ── Step 3 state ──────────────────────────────────────────────────────────
   const [allocations, setAllocations] = useState<PoolAllocation[]>([]);
   const [exclusive, setExclusive] = useState(false);
+  const [memberBreakdown, setMemberBreakdown] = useState(false);
 
   // ── Group selection ───────────────────────────────────────────────────────
   const [groupId, setGroupId] = useState<string>(initialGroupId);
@@ -328,6 +349,7 @@ export default function PoolWizard({
     open,
     editPool,
     editPoolExclusive,
+    editPoolMemberBreakdown,
     initialGroupId,
     plans,
     setStep,
@@ -338,9 +360,11 @@ export default function PoolWizard({
     setDimensionsEdited,
     setAllocations,
     setExclusive,
+    setMemberBreakdown,
     setError,
     setSaving,
     setGroupId,
+    setBorrowMode,
   });
   // Keep the group Select on a real, selectable option (create mode) — self-
   // extinguishing state adjustment during render (react-hooks/set-state-in-effect).
@@ -475,6 +499,7 @@ export default function PoolWizard({
             name: effectivePoolName,
             allocations: [],
             groupId: resolvedGroupId,
+            borrowMode,
           }),
         });
         if (!createRes.ok) {
@@ -501,11 +526,11 @@ export default function PoolWizard({
           }
         }
 
-        // 3. PATCH /api/quota/pools/[id] — allocations + exclusive flag
+        // 3. PATCH /api/quota/pools/[id] — allocations, exclusive flag and member breakdown
         const patchRes = await fetch(`/api/quota/pools/${newPoolId}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ allocations, exclusive }),
+          body: JSON.stringify({ allocations, exclusive, memberBreakdown }),
         });
         if (!patchRes.ok) {
           const errBody = await patchRes.json().catch(() => null);
@@ -527,6 +552,8 @@ export default function PoolWizard({
             connectionIds,
             allocations,
             exclusive,
+            borrowMode,
+            memberBreakdown,
           }),
         });
         if (!editPatchRes.ok) {
@@ -741,6 +768,11 @@ export default function PoolWizard({
                   }))}
                 />
               </div>
+            )}
+
+            {/* Borrow mode */}
+            {connectionIds.length > 0 && (
+              <BorrowModeField value={borrowMode} onChange={setBorrowMode} />
             )}
           </div>
         )}
@@ -971,6 +1003,12 @@ export default function PoolWizard({
                 }
               />
             </div>
+
+            <MemberBreakdownField
+              checked={memberBreakdown}
+              onChange={setMemberBreakdown}
+              keyCount={allocations.length}
+            />
 
             {/* quotaModelName preview — grouped by provider */}
             {previewByProvider.length > 0 && (
