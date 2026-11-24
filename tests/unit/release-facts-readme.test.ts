@@ -83,6 +83,20 @@ describe("README generators follow the facts snapshot", () => {
       cliTotal: 65,
       engines: 32,
       freeSteady: 2.5e9,
+      headlineSteady: 2.5e9,
+      headlineSteadyLabel: "~2.5B",
+      headlineFirstLabel: "~4.4B",
+      hasFreeProviders: 987,
+      rowSumLiveLabel: "~333M",
+      rowSumTotalLabel: "~77.7B",
+      freePublishedPools: 66,
+      freeAccessRows: 555,
+      catalogDate: "2099-01-02",
+      publicFreeTierBudget: {
+        ...snapshot.code.publicFreeTierBudget,
+        steady: 3.33e9,
+        pools: [{ provider: "zz-test", name: "ZZ Test", tokens: 5e8, caps: 0 }],
+      },
       freeTierBudget: {
         ...snapshot.code.freeTierBudget,
         steady: 3.33e9,
@@ -148,7 +162,17 @@ describe("README generators follow the facts snapshot", () => {
     assert.ok(text.includes("Every AI tool → 987 providers"));
     assert.ok(bumped.hero.stats.includes("987"));
     assert.ok(bumped.hero.stats.includes("76"));
-    assert.ok(bumped.hero.stats.includes("~2.50B"));
+    assert.ok(text.includes("980+"), "the free-offer label follows hasFreeProviders");
+    // D48: the big figure and the real one travel as one string, never split across entries.
+    const pair = Object.values(bumped.hero)
+      .flat()
+      .filter((s) => /~77\.7B as others count · ~2\.5B real/i.test(s));
+    assert.ok(pair.length > 0, "the short pair is one string of the hero copy");
+    assert.ok(!text.includes("~333M"), "the live row sum stays off the hero");
+    assert.ok(!/row by row|per live row/i.test(text));
+    // D51: the tool line at the top of the README does not change.
+    assert.match(bumped.hero.tools[0], /Antigravity/);
+    assert.match(bumped.hero.tools[0], /FREE Claude \/ GPT \/ Gemini/);
     assert.ok(!text.includes(String(snapshot.providers)), "no stale provider total left");
   });
 
