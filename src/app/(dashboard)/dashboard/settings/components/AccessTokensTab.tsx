@@ -17,12 +17,15 @@ import {
   Card,
   Button,
   Input,
+  NumberInput,
   Select,
   Badge,
   ConfirmModal,
   EmptyState,
   Modal,
 } from "@/shared/components";
+import { fieldNumber, fieldText } from "./numberFieldText";
+import Notice from "@/shared/components/Notice";
 import { ACCESS_TOKEN_NAME_MAX_LENGTH } from "@/shared/constants/formLimits";
 
 interface AccessTokenRow {
@@ -223,13 +226,14 @@ export default function AccessTokensTab() {
               { value: "admin", label: t("accessTokensScopeAdmin") },
             ]}
           />
-          <Input
-            type="number"
+          <NumberInput
             min={1}
+            // 0 or empty means "never expires": the field must not turn it into 1 day.
+            clamp={false}
             label={t("accessTokensColExpires")}
             placeholder={t("accessTokensExpiresPlaceholder")}
-            value={expires}
-            onChange={(e) => setExpires(e.target.value)}
+            value={fieldNumber(expires)}
+            onValueChange={(value) => setExpires(fieldText(value))}
           />
           <Button className="sm:mt-7" onClick={createToken} disabled={creating}>
             {creating ? t("accessTokensCreating") : t("accessTokensCreate")}
@@ -268,14 +272,7 @@ export default function AccessTokensTab() {
         </div>
       </Modal>
 
-      {error && (
-        <div
-          role="alert"
-          className="rounded-control border border-error/40 bg-error-bg px-4 py-3 text-sm text-error"
-        >
-          {error}
-        </div>
-      )}
+      {error && <Notice variant="critical">{error}</Notice>}
 
       {/* List */}
       <Card title={t("accessTokensExisting")}>
@@ -287,7 +284,7 @@ export default function AccessTokensTab() {
           <Table
             scrollbarLabel={t("accessTokensExisting")}
             scrollLabel={t("accessTokensExisting")}
-            containerClassName="rounded-none border-0"
+            variant="plain"
           >
             <TableHeader>
               <TableRow>

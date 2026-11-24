@@ -1,8 +1,11 @@
 "use client";
 
-import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { ChevronDown, ChevronLeft, ChevronRight, Megaphone, Minus } from "lucide-react";
+import { brandTintVars } from "./brand-tint";
 import { Button } from "./button";
+import { inertProps } from "./lib/inert";
+import { resolveLabels } from "./lib/labels";
 
 export interface AnnouncementMediaState {
   /** Pause timers/animations for dialogs and hidden/offscreen cards. */
@@ -18,9 +21,43 @@ export interface AnnouncementItem {
   icon?: ReactNode;
   actions?: ReactNode;
   tone?: "neutral" | "accent" | "info" | "success" | "warning" | "violet";
+  /** A third-party brand as the slide's tint: `#rgb` or `#rrggbb`. Replaces `tone`; other values are ignored. */
+  brandColor?: string;
   /** Decorative media only; the carousel makes this subtree inert and hides it from AT. */
   media?: ReactNode | ((state: AnnouncementMediaState) => ReactNode);
 }
+/** Interface text of the carousel controls. The section name stays the `label` prop. */
+export interface AnnouncementCarouselLabels {
+  /** Previous button accessible name. */
+  previous: string;
+  /** Next button accessible name. */
+  next: string;
+  /** Minimize button accessible name and tooltip. */
+  minimize: string;
+  /** Restore button accessible name and tooltip. */
+  restore: string;
+  /** Visible position counter. */
+  position: (current: number, total: number) => string;
+  /** Accessible name of the active slide, from the item's `label`. */
+  slide: (current: number, total: number, label: string) => string;
+  /** Accessible name of a dot, from the item's `label`. */
+  show: (label: string) => string;
+  /** `aria-roledescription` of the section. */
+  carousel: string;
+  /** `aria-roledescription` of the active slide. */
+  slideRole: string;
+}
+export const defaultAnnouncementCarouselLabels: AnnouncementCarouselLabels = {
+  previous: "Previous announcement",
+  next: "Next announcement",
+  minimize: "Minimize announcements",
+  restore: "Show announcements",
+  position: (current, total) => `${current} / ${total}`,
+  slide: (current, total, label) => `${current} of ${total}: ${label}`,
+  show: (label) => `Show ${label} announcement`,
+  carousel: "carousel",
+  slideRole: "slide",
+};
 export interface AnnouncementCarouselProps {
   items: readonly AnnouncementItem[];
   /** Minimize/restore is available by default. Set false to keep the section expanded. */
@@ -35,6 +72,8 @@ export interface AnnouncementCarouselProps {
   label?: string;
   /** The media variant places illustration/UI media beside copy, then above it on mobile. */
   variant?: "compact" | "media";
+  /** Localized interface text; missing or `undefined` keys fall back to defaultAnnouncementCarouselLabels. */
+  labels?: Partial<AnnouncementCarouselLabels>;
 }
 
 /** Links, dialogs, eligibility and decorative scenes remain consumer-owned. */
@@ -47,7 +86,9 @@ export function AnnouncementCarousel({
   interval = 5000,
   label = "Announcements",
   variant = "compact",
+  labels: labelOverrides,
 }: AnnouncementCarouselProps) {
+  const labels = resolveLabels(defaultAnnouncementCarouselLabels, labelOverrides);
   const root = useRef<HTMLElement>(null);
   const contentId = useId();
   const [internalCollapsed, setInternalCollapsed] = useState(false);
@@ -110,18 +151,22 @@ export function AnnouncementCarousel({
   const move = (delta: number) =>
     setActiveId(items[(active + delta + items.length) % items.length].id);
   const rich = variant === "media";
+  // The restore button is a neutral surface, so the tint belongs to the expanded slide only.
+  const brand = minimized ? undefined : brandTintVars(current.brandColor);
+  const toggleLabel = minimized ? labels.restore : labels.minimize;
   return (
     <section
       ref={root}
-      className={minimized ? "ci-announcements-collapsed" : "ci-announcements"}
+      className={minimized ? "ci-announcements-collapsed" : brand ? "ci-announcements ci-brand-tint" : "ci-announcements"}
+      style={brand as CSSProperties | undefined}
       data-variant={variant}
-      data-tone={current.tone || "info"}
+      data-tone={brand ? "brand" : current.tone || "info"}
       data-controls={
         items.length > 1 || minimizable || undefined
       }
       data-collapsible={minimizable || undefined}
       aria-label={label}
-      aria-roledescription={minimized ? undefined : "carousel"}
+      aria-roledescription={minimized ? undefined : labels.carousel}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       onFocusCapture={() => setFocused(true)}
@@ -133,14 +178,12 @@ export function AnnouncementCarousel({
       <div className="ci-announcements__controls">
         {!minimized && items.length > 1 && (
           <>
-            <span>
-              {active + 1} / {items.length}
-            </span>
+            <span>{labels.position(active + 1, items.length)}</span>
             <Button
               type="button"
               variant="ghost"
               size="icon-xs"
-              aria-label="Previous announcement"
+              aria-label={labels.previous}
               onClick={() => move(-1)}
             >
               <ChevronLeft aria-hidden />
@@ -149,7 +192,7 @@ export function AnnouncementCarousel({
               type="button"
               variant="ghost"
               size="icon-xs"
-              aria-label="Next announcement"
+              aria-label={labels.next}
               onClick={() => move(1)}
             >
               <ChevronRight aria-hidden />
@@ -163,10 +206,8 @@ export function AnnouncementCarousel({
             type="button"
             variant="ghost"
             size={minimized ? "sm" : "icon-xs"}
-            aria-label={
-              minimized ? "Show announcements" : "Minimize announcements"
-            }
-            title={minimized ? "Show announcements" : "Minimize announcements"}
+            aria-label={toggleLabel}
+            title={toggleLabel}
             aria-expanded={!minimized}
             aria-controls={contentId}
             onClick={() => changeCollapsed(!minimized)}
@@ -187,8 +228,8 @@ export function AnnouncementCarousel({
             <div
               className="ci-announcements__slide"
               role="group"
-              aria-roledescription="slide"
-              aria-label={`${active + 1} of ${items.length}: ${current.label}`}
+              aria-roledescription={labels.slideRole}
+              aria-label={labels.slide(active + 1, items.length, current.label)}
             >
               {!rich && current.icon && (
                 <span className="ci-announcements__icon" aria-hidden>
@@ -199,7 +240,7 @@ export function AnnouncementCarousel({
                 <div
                   className="ci-announcements__media"
                   aria-hidden="true"
-                  inert
+                  {...inertProps(true)}
                   key={current.id}
                   data-paused={mediaPaused}
                   data-reduced-motion={reducedMotion}
@@ -230,7 +271,7 @@ export function AnnouncementCarousel({
                   <button
                     key={item.id}
                     type="button"
-                    aria-label={`Show ${item.label} announcement`}
+                    aria-label={labels.show(item.label)}
                     aria-current={index === active ? "true" : undefined}
                     onClick={() => setActiveId(item.id)}
                   />
