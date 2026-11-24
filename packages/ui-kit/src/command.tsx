@@ -15,6 +15,7 @@ import {
   useState,
 } from "react";
 import type { ComponentProps, KeyboardEvent, ReactNode } from "react";
+import { foldSearchText } from "./lib/search-fold";
 import { cn } from "./lib/utils";
 
 // React 18 warns about useLayoutEffect during server rendering.
@@ -31,14 +32,10 @@ export interface CommandFilterItem {
 /** Decides whether an item stays for a non-blank query. */
 export type CommandFilter = (query: string, item: CommandFilterItem) => boolean;
 
-// Accents are dropped so that "configuracoes" finds "Configurações".
-function fold(text: string) {
-  return text.normalize("NFD").replace(/\p{M}/gu, "").toLocaleLowerCase();
-}
-
+// Accents are dropped so that "configuracoes" finds "Configurações", in any browser language.
 function matchesEveryWord(query: string, { value, keywords }: CommandFilterItem) {
-  const text = fold([value, ...keywords].join(" "));
-  return fold(query).trim().split(/\s+/).every((word) => text.includes(word));
+  const text = foldSearchText([value, ...keywords].join(" "));
+  return foldSearchText(query).trim().split(/\s+/).every((word) => text.includes(word));
 }
 
 interface CommandContextValue {
@@ -316,5 +313,36 @@ export const CommandEmpty = forwardRef<HTMLDivElement, CommandEmptyProps>(functi
     <div {...props} ref={ref} role="status" data-slot="command-empty" data-empty={empty || undefined} className={cn("ci-command__empty", className)}>
       {empty ? children : null}
     </div>
+  );
+});
+
+// What takes focus or text input on a press, so a press on it must not be cancelled.
+const FOOTER_CONTROL = 'a[href], button, input, select, textarea, summary, [tabindex], [contenteditable=""], [contenteditable="true"], [contenteditable="plaintext-only"]';
+
+export interface CommandFooterProps extends ComponentProps<"div"> {}
+
+/**
+ * A row under the list for key hints, such as `<Kbd>` plus a label per hint. Render it after
+ * `CommandList` and `CommandEmpty`. It is not part of the listbox, so the arrows never reach it,
+ * and a press on a hint keeps focus in `CommandInput`. To have the hints read with the input,
+ * give the footer an `id` and pass it to `CommandInput` as `aria-describedby`.
+ */
+export const CommandFooter = forwardRef<HTMLDivElement, CommandFooterProps>(function CommandFooter({ className, onMouseDown, ...props }, ref) {
+  useCommand();
+  return (
+    <div
+      {...props}
+      ref={ref}
+      data-slot="command-footer"
+      className={cn("ci-command__footer", className)}
+      onMouseDown={(event) => {
+        onMouseDown?.(event);
+        // A press React bubbled from a portal did not happen in the footer: it is left alone.
+        if (!(event.target instanceof Node) || !event.currentTarget.contains(event.target)) return;
+        // Keeps focus in the input, except for a control the host put in the footer.
+        const control = event.target instanceof Element ? event.target.closest(FOOTER_CONTROL) : null;
+        if (!control || control === event.currentTarget || !event.currentTarget.contains(control)) event.preventDefault();
+      }}
+    />
   );
 });

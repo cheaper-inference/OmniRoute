@@ -9,6 +9,7 @@ import SubscriptionTab from "@/app/(dashboard)/dashboard/settings/components/pro
 const translate = (key: string) => key;
 vi.mock("next-intl", () => ({
   useTranslations: () => translate,
+  useLocale: () => "en",
 }));
 
 describe("Proxy subscription form: selector-only (feedless) subscription", () => {

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Badge, Card, Button, Input } from "@/shared/components";
 import Icon from "@/shared/components/Icon";
+import { InlineCode } from "@omniroute/ui-kit/inline-code";
 
 interface MfaStatus {
   enabled: boolean;
@@ -196,9 +197,7 @@ function BackupCodesPanel({ flow, t }: { flow: MfaFlow; t: Translate }) {
       <p className="text-sm text-text-muted">{t("mfaBackupCodesDesc")}</p>
       <div className="grid grid-cols-2 gap-2 font-mono text-sm">
         {flow.backupCodes.map((backupCode) => (
-          <code key={backupCode} className="px-2 py-1 rounded bg-surface">
-            {backupCode}
-          </code>
+          <InlineCode key={backupCode}>{backupCode}</InlineCode>
         ))}
       </div>
       <div className="flex gap-2">

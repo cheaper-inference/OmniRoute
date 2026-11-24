@@ -166,9 +166,9 @@ function repairToolHistory(input: JsonRecord[]): JsonRecord[] {
   const knownCallIds = new Set(
     input.filter((item) => item.type === "function_call" && item.call_id).map((i) => i.call_id)
   );
+  // A blank call_id matches no call, so it is an orphan like any other unmatched id.
   const kept = input.filter(
-    (item) =>
-      item.type !== "function_call_output" || !item.call_id || knownCallIds.has(item.call_id)
+    (item) => item.type !== "function_call_output" || knownCallIds.has(item.call_id)
   );
   const pairedCallIds = new Set(
     kept
@@ -516,7 +516,8 @@ export function openaiToOpenAIResponsesRequest(
           type: "function",
           name,
           description: toString(fn.description),
-          parameters: fn.parameters,
+          // Responses requires `parameters`; Chat lets a zero-argument tool omit it.
+          parameters: fn.parameters ?? { type: "object", properties: {} },
           // Omitted strict is non-strict on Chat but strict-normalized on Responses.
           strict: chatStrictForResponses(fn),
           ...(credentialRecord._provider === "codex" && typeof fn.defer_loading === "boolean"

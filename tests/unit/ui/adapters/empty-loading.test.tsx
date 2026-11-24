@@ -40,6 +40,72 @@ describe("EmptyState / Loading adapters", () => {
     expect(screen.getByRole("heading").textContent!.length).toBeGreaterThan(0);
   });
 
+  // Kit `alert-compact-empty-inline`: the adapter used to drop every prop but the legacy five.
+  it("EmptyState forwards compact, layout and border to the kit", () => {
+    const { container, rerender } = render(<EmptyState title="Nothing" compact />);
+    const root = () => container.querySelector<HTMLElement>("[data-slot=empty-state]")!;
+    expect(root().getAttribute("data-compact")).toBe("true");
+    expect(root().hasAttribute("data-layout")).toBe(false);
+    expect(root().hasAttribute("data-border")).toBe(false);
+    rerender(<EmptyState title="Nothing" border="none" />);
+    expect(root().getAttribute("data-border")).toBe("none");
+    rerender(<EmptyState title="No rules yet" layout="inline" border="dashed" />);
+    expect(root().getAttribute("data-layout")).toBe("inline");
+    expect(root().getAttribute("data-border")).toBe("dashed");
+  });
+
+  it("EmptyState inline is one line of text: a paragraph, and no icon unless one is named", () => {
+    const { container, rerender } = render(<EmptyState title="No rules yet" layout="inline" />);
+    // Not a heading: an inline empty state sits inside a list, a field or a table cell.
+    expect(screen.queryByRole("heading")).toBeNull();
+    expect(screen.getByText("No rules yet").tagName).toBe("P");
+    expect(container.querySelector(".ci-empty-state__icon")).toBeNull();
+    rerender(<EmptyState title="No rules yet" layout="inline" icon="filter_list" />);
+    expect(container.querySelector(".ci-empty-state__icon svg.oi-icon")).not.toBeNull();
+    // The stacked panel keeps its default icon.
+    rerender(<EmptyState title="No rules yet" />);
+    expect(container.querySelector(".ci-empty-state__icon svg.oi-icon")).not.toBeNull();
+    expect(screen.getByRole("heading").textContent).toBe("No rules yet");
+  });
+
+  it("EmptyState takes ready-made actions, which win over actionLabel/onAction", () => {
+    const onAction = vi.fn();
+    const onSecond = vi.fn();
+    const { container } = render(
+      <EmptyState
+        title="Nothing"
+        actionLabel="Legacy"
+        onAction={onAction}
+        actions={
+          <>
+            <button type="button">First</button>
+            <button type="button" onClick={onSecond}>
+              Second
+            </button>
+          </>
+        }
+      />
+    );
+    const actions = container.querySelector(".ci-empty-state__actions")!;
+    expect(actions.querySelectorAll("button")).toHaveLength(2);
+    expect(screen.queryByRole("button", { name: "Legacy" })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Second" }));
+    expect(onSecond).toHaveBeenCalledTimes(1);
+    expect(onAction).not.toHaveBeenCalled();
+  });
+
+  it("EmptyState inline keeps the legacy action as a small button at the end of the line", () => {
+    const onAction = vi.fn();
+    render(
+      <EmptyState title="No keys" layout="inline" actionLabel="Add key" onAction={onAction} />
+    );
+    const button = screen.getByRole("button", { name: "Add key" });
+    expect(button.closest(".ci-empty-state__actions")).not.toBeNull();
+    expect(button.getAttribute("data-size")).toBe("sm");
+    fireEvent.click(button);
+    expect(onAction).toHaveBeenCalledTimes(1);
+  });
+
   it("Spinner/PageLoading expose role=status with a label; Skeleton is aria-hidden", () => {
     render(
       <>
