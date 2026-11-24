@@ -1,5 +1,5 @@
-import { escapePathSegment, type FieldCategory } from "./sseTextTransform";
 import { IN_PLACE_METADATA_KEYS } from "./sseMetadataKeys";
+import { escapePathSegment, type FieldCategory } from "./sseTextFields";
 
 type JsonObject = Record<string, unknown>;
 type Processor = (

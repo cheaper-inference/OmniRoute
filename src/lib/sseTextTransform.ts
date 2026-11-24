@@ -3,7 +3,10 @@ import { resolveStreamIndices } from "./streamIndices";
 import { createResponsesSseText } from "./responsesSseText";
 import { IN_PLACE_METADATA_KEYS } from "./sseMetadataKeys";
 import { createMetadataHold, type MetadataHold, type MetadataWindow } from "./sseMetadataHold";
-export type FieldCategory = "content" | "reasoning" | "toolArgs" | "partialJson";
+import { escapePathSegment, type FieldCategory } from "./sseTextFields";
+
+export { escapePathSegment };
+export type { FieldCategory };
 
 // Keys that always map to a fixed category, regardless of where they appear in the chunk.
 const FIXED_CATEGORY_MAP: Record<string, FieldCategory> = {
@@ -119,15 +122,9 @@ function claudeStreamedPaths(json: any): ClaudeStreamedPath[] {
 // Protocol tokens of Claude frames that METADATA_KEYS does not cover: a redaction hit on
 // one would corrupt it (`tool_use_id` links a result to its call, `encrypted_index` and a
 // `redacted_thinking` block are opaque blobs the client sends back verbatim).
-// Paths are joined with "/", so a key that itself contains one would forge a different path
-// and share another field's redaction window. Escape with the JSON-pointer pair instead.
 // The deferred-bytes ceiling has to fail closed even when the caller supplies a window but no
 // number: an unbounded queue is the failure this cap exists to prevent.
 const DEFAULT_MAX_DEFERRED_BYTES = 64 * 1024;
-
-export function escapePathSegment(key: string): string {
-  return key.replace(/~/g, "~0").replace(/\//g, "~1");
-}
 
 const CLAUDE_OPAQUE_KEYS = new Set(["tool_use_id", "encrypted_index"]);
 
