@@ -13,6 +13,8 @@ import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
+import { nativeCoverageArgs } from "../../../_helpers/nativeCoverageArgs.ts";
+
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(HERE, "../../../..");
 const ENTRY = join(ROOT, "bin/omniroute.mjs");
@@ -20,16 +22,24 @@ const ENTRY = join(ROOT, "bin/omniroute.mjs");
 const work = mkdtempSync(join(tmpdir(), "olx-perf-lazy-"));
 test.after(() => rmSync(work, { recursive: true, force: true }));
 
+// Records resolved module URLs (each once). A resolve hook, not a load hook: in the coverage shard
+// run the CLI's tsx bridge registers a short-circuiting load hook after this one, which would hide
+// every module loaded after it; nothing short-circuits the resolution of these modules.
 const HOOK = join(work, "record-loads.mjs");
 writeFileSync(
   HOOK,
   `import { registerHooks } from "node:module";
 import { appendFileSync } from "node:fs";
 const out = process.env.OLX_RECORD_LOADS;
+const seen = new Set();
 registerHooks({
-  load(url, context, next) {
-    if (out) appendFileSync(out, url + "\\n");
-    return next(url, context);
+  resolve(specifier, context, next) {
+    const result = next(specifier, context);
+    if (out && !seen.has(result.url)) {
+      seen.add(result.url);
+      appendFileSync(out, result.url + "\\n");
+    }
+    return result;
   },
 });
 `
@@ -65,7 +75,9 @@ function runEntry(argv: string[]): Promise<Run> {
     OMNIROUTE_CLI_SKIP_REPO_ENV: "1",
     OLX_RECORD_LOADS: loadsFile,
   };
-  const args = ["--import", pathToFileURL(HOOK).href, ENTRY, ...argv];
+  // The filtered env drops NODE_OPTIONS; restore the coverage layout preload in the shard run so
+  // the entry's modules keep the same V8 layout as every other process (a no-op elsewhere).
+  const args = [...nativeCoverageArgs(), "--import", pathToFileURL(HOOK).href, ENTRY, ...argv];
   return new Promise((resolveRun, reject) => {
     const child = spawn(process.execPath, args, { cwd: home, env, stdio: "pipe" });
     let stdout = "";

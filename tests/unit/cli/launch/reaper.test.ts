@@ -29,6 +29,7 @@ import {
   gatewayChildEnv,
   parseReaperSpec,
 } from "../../../../bin/cli/launch/core/reaper.mjs";
+import { nativeCoverageArgs } from "../../../_helpers/nativeCoverageArgs.ts";
 
 const gw = await import(pathToFileURL(join(CORE, "gateway.mjs")).href);
 const reaper = await import(pathToFileURL(join(CORE, "reaper.mjs")).href);
@@ -38,6 +39,11 @@ const leaseMod = await import(pathToFileURL(join(CORE, "lease.mjs")).href);
 const GATEWAY_URL = pathToFileURL(join(CORE, "gateway.mjs")).href;
 const CRASH_LAUNCHER = join(HERE, "crash-launcher.mjs");
 const FAKE_PATH = join(HERE, "fake-gateway.mjs");
+// The launcher fixture imports core/gateway.mjs, whose contract re-exports a .ts file. In the
+// coverage shard run, load it through the same tsx bridge as the CLI so its V8 layout matches.
+const LAUNCHER_ARGS = nativeCoverageArgs().length
+  ? ["--import", new URL("../../../../scripts/ci/native-cli-v8-tsx.mjs", import.meta.url).href]
+  : [];
 
 const allPids = createPidTracker();
 const usedPorts = new Set<number>();
@@ -123,7 +129,7 @@ test("a crashed launcher is swept: gateway stops once its lease is dead", async 
   const { dir, port, tracker } = await setup(t);
   const launcher = spawn(
     process.execPath,
-    [CRASH_LAUNCHER, GATEWAY_URL, dir, String(port), FAKE_PATH],
+    [...LAUNCHER_ARGS, CRASH_LAUNCHER, GATEWAY_URL, dir, String(port), FAKE_PATH],
     { stdio: ["ignore", "pipe", "inherit"] }
   );
   tracker.track(launcher.pid);
@@ -154,7 +160,7 @@ test("a frozen launcher (live pid, no heartbeat) is swept once its lease goes st
   const { dir, port, tracker } = await setup(t);
   const launcher = spawn(
     process.execPath,
-    [CRASH_LAUNCHER, GATEWAY_URL, dir, String(port), FAKE_PATH],
+    [...LAUNCHER_ARGS, CRASH_LAUNCHER, GATEWAY_URL, dir, String(port), FAKE_PATH],
     { stdio: ["ignore", "pipe", "inherit"] }
   );
   tracker.track(launcher.pid);

@@ -25,7 +25,10 @@ import {
 } from "node:fs";
 import { join } from "node:path";
 import { isPidRunning, sleep } from "../../../utils/pid.mjs";
-import { LaunchError } from "../../contract.mjs";
+// The contract part, not ../../contract.mjs: the reaper (core/reaper.mjs) imports this module
+// under bare `node`, and contract.mjs re-exports src/shared/launch/viewSelect.ts, which Node
+// refuses to type-strip inside node_modules (ERR_UNSUPPORTED_NODE_MODULES_TYPE_STRIPPING).
+import { LaunchError } from "../../contract/errors.mjs";
 import { launchRoot, readJson, writeJsonAtomic } from "../state.mjs";
 
 /** Default lock wait before StateLocked. */

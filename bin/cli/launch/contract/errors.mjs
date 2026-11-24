@@ -1,5 +1,7 @@
 // bin/cli/launch/contract/errors.mjs: error codes, exit codes and LaunchError.
-// Part of the launcher contract; import it through ../contract.mjs (pure: no I/O).
+// Part of the launcher contract; import it through ../contract.mjs (pure: no I/O). The one
+// exception is the reaper's import graph (core/state.mjs, core/gateway/state.mjs), which must
+// stay .ts-free.
 
 /** @typedef {import("../contract.d.ts").LaunchErrorCode} LaunchErrorCode */
 

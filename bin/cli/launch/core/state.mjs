@@ -4,7 +4,9 @@ import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-import { LaunchError } from "../contract.mjs";
+// The contract part, not ../contract.mjs: the bare-node reaper imports this module (see
+// core/gateway/state.mjs), and contract.mjs re-exports a .ts file.
+import { LaunchError } from "../contract/errors.mjs";
 import { resolveDataDir } from "../../data-dir.mjs";
 import { writePrivateFileAtomic } from "../../private-file.mjs";
 
