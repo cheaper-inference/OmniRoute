@@ -2625,8 +2625,6 @@
     "restrictedComboCount": "Ristrett għal {count, plural, one {# kombinazzjoni} other {# kombinazzjonijiet}}.",
     "preservedComboRules": "{count, plural, one {# daħla maħżuna mhijiex} other {# daħliet maħżuna mhumiex}} f’din il-lista ta’ kombinazzjonijiet (pereżempju, regoli tal-instradar) u se jinżammu kif ġew issejvjati.",
     "preservedComboRuleHint": "Miżmuma kif maħżuna. Din id-daħla mhijiex kombinazzjoni fil-lista ta’ hawn fuq, għalhekk tista’ tinbidel biss permezz tal-API.",
-    "namedCombosSkipBlockedModels": "{count, plural, one {# combo msemmi huwa eżentat mill-} few {# combos imsemmija huma eżentati mill-} many {#-il combo msemmija huma eżentati mill-} other {# combo msemmija huma eżentati mill-}}mudelli mblukkati ta' din iċ-ċavetta. Neħħi combo biex tapplika l-mudelli mblukkati għalih.",
-    "removeNamedCombo": "Neħħi {name}",
     "apiManagerCustomRateLimits": "Limiti Personalizzati tar-Rata",
     "apiManagerCustomRateLimitsDesc": "Issostitwixxi l-limiti predefiniti globali. Ħalli vojt biex tuża l-valuri predefiniti.",
     "apiManagerRateLimitRequestsPlaceholder": "Talbiet",

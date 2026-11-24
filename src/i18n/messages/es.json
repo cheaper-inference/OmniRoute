@@ -2625,8 +2625,6 @@
     "restrictedComboCount": "Restringida a {count, plural, one {# combinación} other {# combinaciones}}.",
     "preservedComboRules": "{count, plural, one {# entrada almacenada no está en esta lista de combinaciones (por ejemplo, reglas de enrutamiento) y se conservará tal como se guardó} other {# entradas almacenadas no están en esta lista de combinaciones (por ejemplo, reglas de enrutamiento) y se conservarán tal como se guardaron}}.",
     "preservedComboRuleHint": "Se conserva tal como está almacenada. Esta entrada no es una combinación de la lista anterior, por lo que solo se puede modificar mediante la API.",
-    "namedCombosSkipBlockedModels": "{count, plural, one {# combo con nombre está exento de} other {# combos con nombre están exentos de}} los modelos bloqueados de esta clave. Elimina un combo para aplicarle los modelos bloqueados.",
-    "removeNamedCombo": "Eliminar {name}",
     "apiManagerCustomRateLimits": "Límites de tarifas personalizadas",
     "apiManagerCustomRateLimitsDesc": "Anule los límites predeterminados globales. Déjelo vacío para usar los valores predeterminados.",
     "apiManagerRateLimitRequestsPlaceholder": "Solicitudes",

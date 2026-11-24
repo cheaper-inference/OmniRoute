@@ -2625,8 +2625,6 @@
     "restrictedComboCount": "Restricționat la {count, plural, one {# combinație} few {# combinații} other {# de combinații}}.",
     "preservedComboRules": "{count, plural, one {# intrare stocată nu se află în această listă de combinații (de exemplu, reguli de rutare) și va fi păstrată așa cum a fost salvată.} other {# intrări stocate nu se află în această listă de combinații (de exemplu, reguli de rutare) și vor fi păstrate așa cum au fost salvate.}}",
     "preservedComboRuleHint": "Păstrată așa cum a fost stocată. Această intrare nu este o combinație din lista de mai sus, așadar poate fi modificată doar prin API.",
-    "namedCombosSkipBlockedModels": "{count, plural, one {# combinație denumită este scutită de} few {# combinații denumite sunt scutite de} other {# de combinații denumite sunt scutite de}} modelele blocate ale acestei chei. Eliminați o combinație pentru a-i aplica modelele blocate.",
-    "removeNamedCombo": "Eliminați {name}",
     "apiManagerCustomRateLimits": "Limite de tarif personalizate",
     "apiManagerCustomRateLimitsDesc": "Înlocuiți limitele globale implicite. Lăsați gol pentru a utiliza valorile implicite.",
     "apiManagerRateLimitRequestsPlaceholder": "Cereri",

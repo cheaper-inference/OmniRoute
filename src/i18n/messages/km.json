@@ -2625,8 +2625,6 @@
     "restrictedComboCount": "បានដាក់កម្រិតត្រឹម {count, plural, one {# បន្សំ} other {# បន្សំ}}។",
     "preservedComboRules": "{count, plural, one {ធាតុដែលបានរក្សាទុកចំនួន # មិនស្ថិតនៅ} other {ធាតុដែលបានរក្សាទុកចំនួន # មិនស្ថិតនៅ}} ក្នុងបញ្ជីបន្សំនេះទេ (ឧទាហរណ៍ ច្បាប់កំណត់ផ្លូវ) ហើយនឹងត្រូវរក្សាទុកដដែល។",
     "preservedComboRuleHint": "បានរក្សាទុកដដែល។ ធាតុនេះមិនមែនជាបន្សំក្នុងបញ្ជីខាងលើទេ ដូច្នេះវាអាចផ្លាស់ប្ដូរបានតែតាមរយៈ API ប៉ុណ្ណោះ។",
-    "namedCombosSkipBlockedModels": "{count, plural, other {បន្សំដែលមានឈ្មោះចំនួន # ត្រូវបានលើកលែងពី}}ម៉ូដែលដែលត្រូវបានរារាំងនៃសោនេះ។ លុបបន្សំដើម្បីអនុវត្តម៉ូដែលដែលត្រូវបានរារាំងចំពោះវា។",
-    "removeNamedCombo": "លុប {name}",
     "apiManagerCustomRateLimits": "ដែនកំណត់អត្រាតាមបំណង",
     "apiManagerCustomRateLimitsDesc": "កំណត់ជំនួសដែនកំណត់លំនាំដើមសកល។ ទុកឱ្យទទេ ដើម្បីប្រើតម្លៃលំនាំដើម។",
     "apiManagerRateLimitRequestsPlaceholder": "សំណើ",

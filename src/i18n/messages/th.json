@@ -2625,8 +2625,6 @@
     "restrictedComboCount": "จำกัดไว้ที่ {count, plural, one {# คอมโบ} other {# คอมโบ}}.",
     "preservedComboRules": "{count, plural, one {รายการที่จัดเก็บไว้ # รายการ} other {รายการที่จัดเก็บไว้ # รายการ}}ไม่ได้อยู่ในรายการแบบผสมนี้ (เช่น กฎการกำหนดเส้นทาง) และจะถูกเก็บไว้ตามที่บันทึก",
     "preservedComboRuleHint": "เก็บไว้ตามที่บันทึก รายการนี้ไม่ใช่รายการแบบผสมในรายการด้านบน จึงสามารถเปลี่ยนแปลงได้ผ่าน API เท่านั้น",
-    "namedCombosSkipBlockedModels": "{count, plural, other {คอมโบที่มีชื่อ # รายการได้รับการยกเว้นจาก}}โมเดลที่ถูกบล็อกของคีย์นี้ นำคอมโบออกเพื่อใช้โมเดลที่ถูกบล็อกกับคอมโบนั้น",
-    "removeNamedCombo": "นำ {name} ออก",
     "apiManagerCustomRateLimits": "ขีดจำกัดอัตราที่กำหนดเอง",
     "apiManagerCustomRateLimitsDesc": "แทนที่ขีดจำกัดเริ่มต้นส่วนกลาง เว้นว่างไว้เพื่อใช้ค่าเริ่มต้น",
     "apiManagerRateLimitRequestsPlaceholder": "คำขอ",

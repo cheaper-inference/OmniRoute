@@ -2625,8 +2625,6 @@
     "restrictedComboCount": "An taƙaita zuwa {count, plural, one {haɗi #} other {haɗe-haɗe #}}.",
     "preservedComboRules": "{count, plural, one {Shigarwa # da aka adana ba ta} other {Shigarwa # da aka adana ba su}} cikin wannan jerin haɗe-haɗe (misali, dokokin turawa) kuma za a bar su yadda aka adana.",
     "preservedComboRuleHint": "An bar shi yadda aka adana. Wannan shigarwar ba haɗi ba ce a jerin da ke sama, don haka za a iya canza ta ta API kawai.",
-    "namedCombosSkipBlockedModels": "{count, plural, one {# haɗi mai suna an keɓe shi daga} other {# haɗe-haɗe masu suna an keɓe su daga}} tosassun samfuran wannan maɓalli. Cire haɗi domin aiwatar da tosassun samfuran a kansa.",
-    "removeNamedCombo": "Cire {name}",
     "apiManagerCustomRateLimits": "Iyakokin Yawan Amfani na Musamman",
     "apiManagerCustomRateLimitsDesc": "Maye gurbin iyakokin tsoho na gaba ɗaya. Bar shi babu komai don amfani da tsoffin saituna.",
     "apiManagerRateLimitRequestsPlaceholder": "Buƙatu",

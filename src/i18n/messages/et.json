@@ -2625,8 +2625,6 @@
     "restrictedComboCount": "Piiratud {count, plural, one {# kombinatsiooniga} other {# kombinatsiooniga}}.",
     "preservedComboRules": "{count, plural, one {# salvestatud kirje ei ole} other {# salvestatud kirjet ei ole}} selles kombinatsioonide loendis (näiteks marsruutimisreeglid) ning säilitatakse salvestatud kujul.",
     "preservedComboRuleHint": "Säilitatakse salvestatud kujul. See kirje ei ole ülalolevas loendis olev kombinatsioon, seega saab seda muuta ainult API kaudu.",
-    "namedCombosSkipBlockedModels": "{count, plural, one {# nimega kombo on vabastatud} other {# nimega kombot on vabastatud}} selle võtme blokeeritud mudelitest. Eemalda kombo, et rakendada sellele blokeeritud mudelid.",
-    "removeNamedCombo": "Eemalda {name}",
     "apiManagerCustomRateLimits": "Kohandatud päringusageduse piirangud",
     "apiManagerCustomRateLimitsDesc": "Alista globaalsed vaikepiirangud. Vaikeväärtuste kasutamiseks jäta tühjaks.",
     "apiManagerRateLimitRequestsPlaceholder": "Päringud",

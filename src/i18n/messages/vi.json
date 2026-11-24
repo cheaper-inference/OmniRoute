@@ -2625,8 +2625,6 @@
     "restrictedComboCount": "Giới hạn ở {count, plural, one {# tổ hợp} other {# tổ hợp}}.",
     "preservedComboRules": "{count, plural, one {# mục đã lưu} other {# mục đã lưu}} không có trong danh sách combo này (ví dụ: quy tắc định tuyến) và sẽ được giữ nguyên như đã lưu.",
     "preservedComboRuleHint": "Được giữ nguyên như đã lưu. Mục này không phải là combo trong danh sách ở trên, nên chỉ có thể thay đổi thông qua API.",
-    "namedCombosSkipBlockedModels": "{count, plural, other {# combo được đặt tên được miễn trừ khỏi}} các mô hình bị chặn của khóa này. Xóa một combo để áp dụng các mô hình bị chặn cho combo đó.",
-    "removeNamedCombo": "Xóa {name}",
     "apiManagerCustomRateLimits": "Giới hạn tốc độ tùy chỉnh",
     "apiManagerCustomRateLimitsDesc": "Ghi đè giới hạn mặc định toàn cục. Để trống để sử dụng mặc định.",
     "apiManagerRateLimitRequestsPlaceholder": "Yêu cầu",

@@ -2625,8 +2625,6 @@
     "restrictedComboCount": "Ribojama iki {count, plural, one {# derinio} other {# derinių}}.",
     "preservedComboRules": "{count, plural, one {# įrašas nėra šiame derinių sąraše (pvz., maršruto parinkimo taisyklė) ir bus paliktas toks, koks išsaugotas} other {# įrašai nėra šiame derinių sąraše (pvz., maršruto parinkimo taisyklės) ir bus palikti tokie, kokie išsaugoti}}.",
     "preservedComboRuleHint": "Paliekamas toks, koks išsaugotas. Šis įrašas nėra derinys aukščiau esančiame sąraše, todėl jį galima pakeisti tik per API.",
-    "namedCombosSkipBlockedModels": "{count, plural, one {# įvardytam deriniui netaikomi} few {# įvardytiems deriniams netaikomi} other {# įvardytų derinių netaikomi}} šio rakto užblokuoti modeliai. Pašalinkite derinį, kad jam būtų taikomi užblokuoti modeliai.",
-    "removeNamedCombo": "Pašalinti {name}",
     "apiManagerCustomRateLimits": "Individualūs užklausų dažnio apribojimai",
     "apiManagerCustomRateLimitsDesc": "Pakeiskite bendrąsias numatytąsias ribas. Palikite tuščią, jei norite naudoti numatytąsias reikšmes.",
     "apiManagerRateLimitRequestsPlaceholder": "Užklausos",

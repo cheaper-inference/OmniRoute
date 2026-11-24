@@ -2625,8 +2625,6 @@
     "restrictedComboCount": "Begrænset til {count, plural, one {# kombination} other {# kombinationer}}.",
     "preservedComboRules": "{count, plural, one {# gemt post er} other {# gemte poster er}} ikke på denne kombinationsliste (f.eks. routingregler) og bevares som gemt.",
     "preservedComboRuleHint": "Bevares som gemt. Denne post er ikke en kombination på listen ovenfor og kan derfor kun ændres via API'et.",
-    "namedCombosSkipBlockedModels": "{count, plural, one {# navngiven kombination er undtaget fra} other {# navngivne kombinationer er undtaget fra}} denne nøgles blokerede modeller. Fjern en kombination for at anvende de blokerede modeller på den.",
-    "removeNamedCombo": "Fjern {name}",
     "apiManagerCustomRateLimits": "Brugerdefinerede satsgrænser",
     "apiManagerCustomRateLimitsDesc": "Tilsidesæt globale standardgrænser. Lad være tom for at bruge standardindstillinger.",
     "apiManagerRateLimitRequestsPlaceholder": "Forespørgsler",

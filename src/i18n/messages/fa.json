@@ -2625,8 +2625,6 @@
     "restrictedComboCount": "محدود به {count, plural, one {# ترکیب} other {# ترکیب}}.",
     "preservedComboRules": "{count, plural, one {# ورودی ذخیرهشده} other {# ورودی ذخیرهشده}} در این فهرست ترکیبی وجود ندارد (برای مثال، قوانین مسیریابی) و بهشکل ذخیرهشده حفظ خواهد شد.",
     "preservedComboRuleHint": "بهشکل ذخیرهشده حفظ شد. این ورودی یکی از گزینههای فهرست ترکیبی بالا نیست، بنابراین فقط از طریق API قابل تغییر است.",
-    "namedCombosSkipBlockedModels": "{count, plural, one {# ترکیب نام‌گذاری‌شده مستثنی است از} other {# ترکیب نام‌گذاری‌شده مستثنی هستند از}} مدل‌های مسدودشده این کلید. یک ترکیب را حذف کنید تا مدل‌های مسدودشده روی آن اعمال شوند.",
-    "removeNamedCombo": "حذف {name}",
     "apiManagerCustomRateLimits": "محدودیت های نرخ سفارشی",
     "apiManagerCustomRateLimitsDesc": "محدودیت های پیش فرض جهانی را لغو کنید. برای استفاده از پیش فرض ها خالی بگذارید.",
     "apiManagerRateLimitRequestsPlaceholder": "درخواست ها",

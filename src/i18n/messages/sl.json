@@ -2625,8 +2625,6 @@
     "restrictedComboCount": "Omejeno na {count, plural, one {# kombinacijo} two {# kombinaciji} few {# kombinacije} other {# kombinacij}}.",
     "preservedComboRules": "{count, plural, one {# shranjeni vnos ni na tem seznamu kombinacij (na primer pravila usmerjanja) in bo ohranjen v shranjeni obliki.} two {# shranjena vnosa nista na tem seznamu kombinacij (na primer pravila usmerjanja) in bosta ohranjena v shranjeni obliki.} few {# shranjeni vnosi niso na tem seznamu kombinacij (na primer pravila usmerjanja) in bodo ohranjeni v shranjeni obliki.} other {# shranjenih vnosov ni na tem seznamu kombinacij (na primer pravila usmerjanja) in bodo ohranjeni v shranjeni obliki.}}",
     "preservedComboRuleHint": "Ohranjeno v shranjeni obliki. Ta vnos ni kombinacija z zgornjega seznama, zato ga je mogoče spremeniti samo prek API-ja.",
-    "namedCombosSkipBlockedModels": "{count, plural, one {# poimenovana kombinacija je izvzeta iz} two {# poimenovani kombinaciji sta izvzeti iz} few {# poimenovane kombinacije so izvzete iz} other {# poimenovanih kombinacij je izvzetih iz}} blokiranih modelov tega ključa. Odstranite kombinacijo, da zanjo uveljavite blokirane modele.",
-    "removeNamedCombo": "Odstrani {name}",
     "apiManagerCustomRateLimits": "Omejitve hitrosti po meri",
     "apiManagerCustomRateLimitsDesc": "Preglasite globalne privzete omejitve. Če želite uporabiti privzete vrednosti, pustite prazno.",
     "apiManagerRateLimitRequestsPlaceholder": "Zahteve",

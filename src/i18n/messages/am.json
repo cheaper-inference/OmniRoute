@@ -2625,8 +2625,6 @@
     "restrictedComboCount": "ለ{count, plural, one {# ጥምረት} other {# ጥምረቶች}} የተገደበ።",
     "preservedComboRules": "{count, plural, one {# የተቀመጠ ግቤት} other {# የተቀመጡ ግቤቶች}} በዚህ የጥምረት ዝርዝር ውስጥ የሉም (ለምሳሌ፣ የማዞሪያ ደንቦች) እና በተቀመጡበት ሁኔታ ይቆያሉ።",
     "preservedComboRuleHint": "በተቀመጠበት ሁኔታ ተይዟል። ይህ ግቤት ከላይ ባለው ዝርዝር ውስጥ ያለ ጥምረት ስላልሆነ፣ ሊቀየር የሚችለው በAPI በኩል ብቻ ነው።",
-    "namedCombosSkipBlockedModels": "{count, plural, one {# የሚባል ጥምር ከ ነፃ ነው።} other {# የተሰየሙ combos ከ ነፃ ናቸው።}} የዚህ ቁልፍ የታገዱ ሞዴሎች። የታገዱትን ሞዴሎች በእሱ ላይ ለመተግበር ጥምርን ያስወግዱ።",
-    "removeNamedCombo": "{name}ን አስወግድ",
     "apiManagerCustomRateLimits": "ብጁ የፍጥነት ገደቦች",
     "apiManagerCustomRateLimitsDesc": "አጠቃላይ ነባሪ ገደቦችን ይተኩ። ነባሪዎቹን ለመጠቀም ባዶ ይተዉት።",
     "apiManagerRateLimitRequestsPlaceholder": "ጥያቄዎች",

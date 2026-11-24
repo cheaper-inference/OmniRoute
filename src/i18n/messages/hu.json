@@ -2625,8 +2625,6 @@
     "restrictedComboCount": "{count, plural, one {# kombinációra korlátozva} other {# kombinációra korlátozva}}.",
     "preservedComboRules": "{count, plural, one {# tárolt bejegyzés nem szerepel} other {# tárolt bejegyzés nem szerepel}} ebben a kombinációs listában (például útválasztási szabályok), ezért mentett formában marad.",
     "preservedComboRuleHint": "Tárolt formában marad. Ez a bejegyzés nem szerepel kombinációként a fenti listában, ezért csak az API-n keresztül módosítható.",
-    "namedCombosSkipBlockedModels": "{count, plural, one {# elnevezett kombináció mentesül} other {# elnevezett kombináció mentesül}} ennek a kulcsnak a letiltott modelljei alól. Távolítson el egy kombinációt, hogy alkalmazza rá a letiltott modelleket.",
-    "removeNamedCombo": "{name} eltávolítása",
     "apiManagerCustomRateLimits": "Egyéni díjkorlátok",
     "apiManagerCustomRateLimitsDesc": "A globális alapértelmezett korlátok felülbírálása. Hagyja üresen az alapértelmezett értékek használatához.",
     "apiManagerRateLimitRequestsPlaceholder": "Kérések",

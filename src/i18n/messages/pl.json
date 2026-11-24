@@ -2625,8 +2625,6 @@
     "restrictedComboCount": "Ograniczono do {count, plural, one {# kombinacji} few {# kombinacji} many {# kombinacji} other {# kombinacji}}.",
     "preservedComboRules": "{count, plural, one {# zapisany wpis nie znajduje się na tej liście kombinacji (na przykład reguła routingu) i zostanie zachowany w zapisanej postaci.} few {# zapisane wpisy nie znajdują się na tej liście kombinacji (na przykład reguły routingu) i zostaną zachowane w zapisanej postaci.} many {# zapisanych wpisów nie znajduje się na tej liście kombinacji (na przykład reguły routingu) i zostanie zachowanych w zapisanej postaci.} other {# zapisanego wpisu nie znajduje się na tej liście kombinacji (na przykład reguły routingu) i zostanie zachowanych w zapisanej postaci.}}",
     "preservedComboRuleHint": "Zachowano w zapisanej postaci. Ten wpis nie jest kombinacją z powyższej listy, dlatego można go zmienić tylko za pośrednictwem API.",
-    "namedCombosSkipBlockedModels": "{count, plural, one {# nazwana kombinacja jest zwolniona z} few {# nazwane kombinacje są zwolnione z} many {# nazwanych kombinacji jest zwolnionych z} other {# nazwanej kombinacji jest zwolnione z}} zablokowanych modeli tego klucza. Usuń kombinację, aby zastosować do niej zablokowane modele.",
-    "removeNamedCombo": "Usuń {name}",
     "apiManagerCustomRateLimits": "Niestandardowe rate limits",
     "apiManagerCustomRateLimitsDesc": "Zastąp globalne limity domyślne. Pozostaw puste, aby użyć domyślnych.",
     "apiManagerRateLimitRequestsPlaceholder": "Żądania",

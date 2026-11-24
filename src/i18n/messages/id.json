@@ -2625,8 +2625,6 @@
     "restrictedComboCount": "Dibatasi hingga {count, plural, one {# kombo} other {# kombo}}.",
     "preservedComboRules": "{count, plural, one {# entri tersimpan} other {# entri tersimpan}} tidak ada dalam daftar kombo ini (misalnya aturan perutean) dan akan dipertahankan sesuai yang tersimpan.",
     "preservedComboRuleHint": "Dipertahankan seperti yang tersimpan. Entri ini bukan kombo dalam daftar di atas, sehingga hanya dapat diubah melalui API.",
-    "namedCombosSkipBlockedModels": "{count, plural, one {# kombo bernama dikecualikan dari} other {# kombo bernama dikecualikan dari}} model yang diblokir kunci ini. Hapus kombo untuk menerapkan model yang diblokir padanya.",
-    "removeNamedCombo": "Hapus {name}",
     "apiManagerCustomRateLimits": "Batas Tarif Khusus",
     "apiManagerCustomRateLimitsDesc": "Ganti batas default global. Biarkan kosong untuk menggunakan default.",
     "apiManagerRateLimitRequestsPlaceholder": "Permintaan",

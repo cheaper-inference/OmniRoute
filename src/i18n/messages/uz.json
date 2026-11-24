@@ -2625,8 +2625,6 @@
     "restrictedComboCount": "{count, plural, one {# ta kombinatsiya bilan cheklangan} other {# ta kombinatsiya bilan cheklangan}}.",
     "preservedComboRules": "{count, plural, one {# ta saqlangan yozuv} other {# ta saqlangan yozuv}} ushbu kombinatsiyalar roʻyxatida yoʻq (masalan, yoʻnaltirish qoidalari) va saqlangan holicha qoladi.",
     "preservedComboRuleHint": "Saqlangan holicha qoldirildi. Bu yozuv yuqoridagi roʻyxatda kombinatsiya sifatida mavjud emas, shuning uchun uni faqat API orqali oʻzgartirish mumkin.",
-    "namedCombosSkipBlockedModels": "{count, plural, one {# ta nomlangan kombo bu kalitning bloklangan modellaridan mustasno} other {# ta nomlangan kombo bu kalitning bloklangan modellaridan mustasno}}. Bloklangan modellarni unga qo‘llash uchun komboni olib tashlang.",
-    "removeNamedCombo": "{name}ni olib tashlash",
     "apiManagerCustomRateLimits": "Maxsus tezlik cheklovlari",
     "apiManagerCustomRateLimitsDesc": "Global standart cheklovlarni almashtiring. Standart qiymatlardan foydalanish uchun boʻsh qoldiring.",
     "apiManagerRateLimitRequestsPlaceholder": "Soʻrovlar",

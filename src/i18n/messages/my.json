@@ -2625,8 +2625,6 @@
     "restrictedComboCount": "{count, plural, one {# combo} other {# combos}} ကိုသာ အသုံးပြုရန် ကန့်သတ်ထားသည်။",
     "preservedComboRules": "{count, plural, one {သိမ်းဆည်းထားသည့် entry # ခုသည်} other {သိမ်းဆည်းထားသည့် entry # ခုသည်}} ဤ combo စာရင်းတွင် မပါဝင်ပါ (ဥပမာ routing rules)၊ ထို့ကြောင့် သိမ်းဆည်းထားသည့်အတိုင်း ဆက်လက်ထားရှိမည်။",
     "preservedComboRuleHint": "သိမ်းဆည်းထားသည့်အတိုင်း ဆက်လက်ထားရှိသည်။ ဤ entry သည် အထက်ပါစာရင်းရှိ combo မဟုတ်သောကြောင့် API မှတစ်ဆင့်သာ ပြောင်းလဲနိုင်သည်။",
-    "namedCombosSkipBlockedModels": "{count, plural, other {# ခုသော အမည်ပေးထားသည့် ပေါင်းစပ်မှုသည်}} ဤကီး၏ ပိတ်ဆို့ထားသော မော်ဒယ်များမှ ကင်းလွတ်ခွင့်ရှိသည်။ ပိတ်ဆို့ထားသော မော်ဒယ်များကို ၎င်းတွင် အသုံးပြုရန် ပေါင်းစပ်မှုကို ဖယ်ရှားပါ။",
-    "removeNamedCombo": "{name} ကို ဖယ်ရှားပါ",
     "apiManagerCustomRateLimits": "စိတ်ကြိုက် Rate Limits",
     "apiManagerCustomRateLimitsDesc": "ကမ္ဘာလုံးဆိုင်ရာ မူလကန့်သတ်ချက်များကို အစားထိုးသတ်မှတ်ပါ။ မူလသတ်မှတ်ချက်များကို အသုံးပြုရန် ဗလာထားပါ။",
     "apiManagerRateLimitRequestsPlaceholder": "တောင်းဆိုမှုများ",

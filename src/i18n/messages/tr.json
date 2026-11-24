@@ -2625,8 +2625,6 @@
     "restrictedComboCount": "{count, plural, one {# kombinasyon} other {# kombinasyon}} ile sınırlandırıldı.",
     "preservedComboRules": "{count, plural, one {# kayıtlı girdi} other {# kayıtlı girdi}} bu birleşik seçim listesinde değil (örneğin yönlendirme kuralları) ve kaydedildiği şekilde korunacak.",
     "preservedComboRuleHint": "Kaydedildiği şekilde korundu. Bu girdi yukarıdaki listede bir birleşik seçim olmadığından yalnızca API üzerinden değiştirilebilir.",
-    "namedCombosSkipBlockedModels": "{count, plural, one {# adlandırılmış kombinasyon bu anahtarın engellenen modellerinden muaftır} other {# adlandırılmış kombinasyon bu anahtarın engellenen modellerinden muaftır}}. Engellenen modelleri uygulamak için bir kombinasyonu kaldırın.",
-    "removeNamedCombo": "{name} öğesini kaldır",
     "apiManagerCustomRateLimits": "Özel Fiyat Limitleri",
     "apiManagerCustomRateLimitsDesc": "Genel varsayılan sınırları geçersiz kılın. Varsayılanları kullanmak için boş bırakın.",
     "apiManagerRateLimitRequestsPlaceholder": "İstekler",

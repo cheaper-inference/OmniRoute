@@ -2625,8 +2625,6 @@
     "restrictedComboCount": "{count, plural, one {#টি কম্বোতে} other {#টি কম্বোতে}} সীমাবদ্ধ।",
     "preservedComboRules": "{count, plural, one {#টি সংরক্ষিত এন্ট্রি} other {#টি সংরক্ষিত এন্ট্রি}} এই কম্বো তালিকায় নেই (যেমন রাউটিং নিয়ম) এবং সংরক্ষিত অবস্থাতেই রাখা হবে।",
     "preservedComboRuleHint": "সংরক্ষিত অবস্থাতেই রাখা হয়েছে। এই এন্ট্রিটি ওপরের তালিকার কোনো কম্বো নয়, তাই এটি শুধু API-এর মাধ্যমে পরিবর্তন করা যাবে।",
-    "namedCombosSkipBlockedModels": "{count, plural, one {#টি নামযুক্ত কম্বো অব্যাহতি পেয়েছে} other {#টি নামযুক্ত কম্বো অব্যাহতি পেয়েছে}} এই কী-এর ব্লক করা মডেলগুলো থেকে। এতে ব্লক করা মডেলগুলো প্রয়োগ করতে একটি কম্বো সরান।",
-    "removeNamedCombo": "{name} অপসারণ করুন",
     "apiManagerCustomRateLimits": "কাস্টম হার সীমা",
     "apiManagerCustomRateLimitsDesc": "বিশ্বব্যাপী ডিফল্ট সীমা ওভাররাইড করুন। ডিফল্ট ব্যবহার করতে খালি ছেড়ে দিন।",
     "apiManagerRateLimitRequestsPlaceholder": "অনুরোধ",

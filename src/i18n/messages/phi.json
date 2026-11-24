@@ -2625,8 +2625,6 @@
     "restrictedComboCount": "Limitado sa {count, plural, one {# combo} other {# na combo}}.",
     "preservedComboRules": "Ang {count, plural, one {# nakaimbak na entry ay} other {# nakaimbak na entry ay}} wala sa listahan ng combo na ito (halimbawa, mga panuntunan sa routing) at pananatilihin ayon sa pagkaka-save.",
     "preservedComboRuleHint": "Pinanatili ayon sa pagkakaimbak. Ang entry na ito ay hindi isang combo sa listahan sa itaas, kaya maaari lamang itong baguhin sa pamamagitan ng API.",
-    "namedCombosSkipBlockedModels": "{count, plural, one {# pinangalanang combo ang exempt sa} other {# na pinangalanang combo ang exempt sa}} mga naka-block na modelo ng key na ito. Mag-alis ng combo para ilapat dito ang mga naka-block na modelo.",
-    "removeNamedCombo": "Alisin ang {name}",
     "apiManagerCustomRateLimits": "Mga Limitasyon ng Custom na Rate",
     "apiManagerCustomRateLimitsDesc": "I-override ang mga pandaigdigang default na limitasyon. Iwanang walang laman upang gamitin ang mga default.",
     "apiManagerRateLimitRequestsPlaceholder": "Mga kahilingan",

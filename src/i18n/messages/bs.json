@@ -2625,8 +2625,6 @@
     "restrictedComboCount": "Ograničeno na {count, plural, one {# kombinaciju} other {# kombinacija}}.",
     "preservedComboRules": "{count, plural, one {# spremljeni unos je} other {# spremljeni unosi su}} izvan ove liste kombinacija (na primjer pravila rutiranja) i ostat će sačuvani.",
     "preservedComboRuleHint": "Zadržano kao spremljeno. Ovaj unos nije kombinacija na gornjoj listi, stoga se može promijeniti samo putem API-ja.",
-    "namedCombosSkipBlockedModels": "{count, plural, one {# imenovana kombinacija je izuzeta iz} few {# imenovane kombinacije su izuzete iz} other {# imenovanih kombinacija je izuzeto iz}} blokiranih modela ovog ključa. Uklonite kombinaciju kako biste na nju primijenili blokirane modele.",
-    "removeNamedCombo": "Ukloni {name}",
     "apiManagerCustomRateLimits": "Prilagođena ograničenja brzine",
     "apiManagerCustomRateLimitsDesc": "Prepišite globalna zadana ograničenja. Ostavite prazno za korištenje zadanih vrijednosti.",
     "apiManagerRateLimitRequestsPlaceholder": "Zahtjevi",

@@ -2625,8 +2625,6 @@
     "restrictedComboCount": "Obmedzené na {count, plural, one {# kombináciu} few {# kombinácie} other {# kombinácií}}.",
     "preservedComboRules": "{count, plural, one {# uložená položka nie je v tomto zozname kombinácií (napríklad pravidlo smerovania) a zostane uložená.} few {# uložené položky nie sú v tomto zozname kombinácií (napríklad pravidlá smerovania) a zostanú uložené.} other {# uložených položiek nie je v tomto zozname kombinácií (napríklad pravidlá smerovania) a zostane uložených.}}",
     "preservedComboRuleHint": "Ponechané v uloženom stave. Táto položka nie je kombináciou v zozname vyššie, takže ju možno zmeniť iba prostredníctvom API.",
-    "namedCombosSkipBlockedModels": "{count, plural, one {# pomenovaná kombinácia je vyňatá z} few {# pomenované kombinácie sú vyňaté z} many {# pomenovaných kombinácií je vyňatých z} other {# pomenovaných kombinácií je vyňatých z}} blokovaných modelov tohto kľúča. Odstráňte kombináciu, ak na ňu chcete použiť blokované modely.",
-    "removeNamedCombo": "Odstrániť {name}",
     "apiManagerCustomRateLimits": "Vlastné limity sadzieb",
     "apiManagerCustomRateLimitsDesc": "Prepísať globálne predvolené limity. Ak chcete použiť predvolené hodnoty, nechajte prázdne.",
     "apiManagerRateLimitRequestsPlaceholder": "Žiadosti",

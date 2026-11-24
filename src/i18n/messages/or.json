@@ -2625,8 +2625,6 @@
     "restrictedComboCount": "{count, plural, one {#ଟି କମ୍ବୋ} other {#ଟି କମ୍ବୋ}}ରେ ସୀମିତ।",
     "preservedComboRules": "{count, plural, one {#ଟି ସଞ୍ଚିତ ଏଣ୍ଟ୍ରି} other {#ଟି ସଞ୍ଚିତ ଏଣ୍ଟ୍ରି}} ଏହି କମ୍ବୋ ତାଲିକାରେ ନାହିଁ (ଉଦାହରଣ ସ୍ୱରୂପ, ରାଉଟିଂ ନିୟମ) ଏବଂ ସଞ୍ଚିତ ଅବସ୍ଥାରେ ରଖାଯିବ।",
     "preservedComboRuleHint": "ସଞ୍ଚିତ ଅବସ୍ଥାରେ ରଖାଯାଇଛି। ଏହି ଏଣ୍ଟ୍ରିଟି ଉପରୋକ୍ତ ତାଲିକାରେ ଥିବା କମ୍ବୋ ନୁହେଁ, ତେଣୁ ଏହାକୁ କେବଳ API ମାଧ୍ୟମରେ ପରିବର୍ତ୍ତନ କରାଯାଇପାରିବ।",
-    "namedCombosSkipBlockedModels": "{count, plural, one {#ଟି ନାମିତ କମ୍ବୋ ଏହି କୀର ବ୍ଲକ୍ କରାଯାଇଥିବା ମଡେଲଗୁଡ଼ିକରୁ ବାଦ୍ ପଡ଼ିଛି।} other {#ଟି ନାମିତ କମ୍ବୋ ଏହି କୀର ବ୍ଲକ୍ କରାଯାଇଥିବା ମଡେଲଗୁଡ଼ିକରୁ ବାଦ୍ ପଡ଼ିଛି।}} ଏଥିରେ ବ୍ଲକ୍ କରାଯାଇଥିବା ମଡେଲଗୁଡ଼ିକୁ ଲାଗୁ କରିବା ପାଇଁ ଏକ କମ୍ବୋ ହଟାନ୍ତୁ।",
-    "removeNamedCombo": "{name} ହଟାନ୍ତୁ",
     "apiManagerCustomRateLimits": "କଷ୍ଟମ୍ ହାର ସୀମା",
     "apiManagerCustomRateLimitsDesc": "ବୈଶ୍ୱିକ ଡିଫଲ୍ଟ ସୀମାଗୁଡ଼ିକୁ ଓଭରରାଇଡ୍ କରନ୍ତୁ। ଡିଫଲ୍ଟ ବ୍ୟବହାର କରିବାକୁ ଖାଲି ଛାଡ଼ନ୍ତୁ।",
     "apiManagerRateLimitRequestsPlaceholder": "ଅନୁରୋଧ",

@@ -2625,8 +2625,6 @@
     "restrictedComboCount": "{count, plural, one {# ಕಾಂಬೋಗೆ} other {# ಕಾಂಬೋಗಳಿಗೆ}} ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ.",
     "preservedComboRules": "{count, plural, one {# ಸಂಗ್ರಹಿತ ಎಂಟ್ರಿಯು} other {# ಸಂಗ್ರಹಿತ ಎಂಟ್ರಿಗಳು}} ಈ ಕಾಂಬೋ ಪಟ್ಟಿಯಲ್ಲಿಲ್ಲ (ಉದಾಹರಣೆಗೆ, ರೂಟಿಂಗ್ ನಿಯಮಗಳು) ಮತ್ತು ಉಳಿಸಿದಂತೆಯೇ ಇರಿಸಲಾಗುತ್ತದೆ.",
     "preservedComboRuleHint": "ಸಂಗ್ರಹಿಸಿದಂತೆಯೇ ಇರಿಸಲಾಗಿದೆ. ಈ ಎಂಟ್ರಿಯು ಮೇಲಿನ ಪಟ್ಟಿಯಲ್ಲಿರುವ ಕಾಂಬೋ ಅಲ್ಲ, ಆದ್ದರಿಂದ ಇದನ್ನು API ಮೂಲಕ ಮಾತ್ರ ಬದಲಾಯಿಸಬಹುದು.",
-    "namedCombosSkipBlockedModels": "{count, plural, one {# ಹೆಸರಿಸಲಾದ ಕಾಂಬೊಗೆ} other {# ಹೆಸರಿಸಲಾದ ಕಾಂಬೊಗಳಿಗೆ}} ಈ ಕೀಯ ನಿರ್ಬಂಧಿಸಲಾದ ಮಾಡೆಲ್‌ಗಳಿಂದ ವಿನಾಯಿತಿ ನೀಡಲಾಗಿದೆ. ನಿರ್ಬಂಧಿಸಲಾದ ಮಾಡೆಲ್‌ಗಳನ್ನು ಅನ್ವಯಿಸಲು ಕಾಂಬೊವನ್ನು ತೆಗೆದುಹಾಕಿ.",
-    "removeNamedCombo": "{name} ತೆಗೆದುಹಾಕಿ",
     "apiManagerCustomRateLimits": "ಕಸ್ಟಮ್ ದರ ಮಿತಿಗಳು",
     "apiManagerCustomRateLimitsDesc": "ಜಾಗತಿಕ ಡೀಫಾಲ್ಟ್ ಮಿತಿಗಳನ್ನು ಅತಿಕ್ರಮಿಸಿ. ಡೀಫಾಲ್ಟ್ಗಳನ್ನು ಬಳಸಲು ಖಾಲಿ ಬಿಡಿ.",
     "apiManagerRateLimitRequestsPlaceholder": "ವಿನಂತಿಗಳು",

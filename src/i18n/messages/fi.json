@@ -2625,8 +2625,6 @@
     "restrictedComboCount": "Rajoitettu {count, plural, one {# yhdistelmään} other {# yhdistelmään}}.",
     "preservedComboRules": "{count, plural, one {# tallennettu kohde ei ole} other {# tallennettua kohdetta ei ole}} tässä yhdistelmäluettelossa (esimerkiksi reitityssäännöt), ja tiedot säilytetään tallennetussa muodossa.",
     "preservedComboRuleHint": "Säilytetään tallennetussa muodossa. Tämä kohde ei ole yllä olevassa yhdistelmäluettelossa, joten sitä voi muuttaa vain API:n kautta.",
-    "namedCombosSkipBlockedModels": "{count, plural, one {# nimetty yhdistelmä on vapautettu} other {# nimettyä yhdistelmää on vapautettu}} tämän avaimen estetyistä malleista. Poista yhdistelmä soveltaaksesi estettyjä malleja siihen.",
-    "removeNamedCombo": "Poista {name}",
     "apiManagerCustomRateLimits": "Mukautetut hintarajat",
     "apiManagerCustomRateLimitsDesc": "Ohita globaalit oletusrajat. Jätä tyhjäksi, jos haluat käyttää oletusasetuksia.",
     "apiManagerRateLimitRequestsPlaceholder": "Pyynnöt",

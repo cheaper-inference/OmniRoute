@@ -2625,8 +2625,6 @@
     "restrictedComboCount": "{count, plural, one {# 個の組み合わせ} other {# 個の組み合わせ}}に制限されています。",
     "preservedComboRules": "{count, plural, one {保存済みの#件のエントリは} other {保存済みの#件のエントリは}}このコンボリストに含まれていないため（ルーティングルールなど）、保存された状態のまま保持されます。",
     "preservedComboRuleHint": "保存された状態のまま保持されます。このエントリは上記リストのコンボではないため、API経由でのみ変更できます。",
-    "namedCombosSkipBlockedModels": "{count, plural, one {# 件の名前付きコンボが} other {# 件の名前付きコンボが}}このキーのブロックされたモデルから除外されています。ブロックされたモデルを適用するには、コンボを削除してください。",
-    "removeNamedCombo": "{name}を削除",
     "apiManagerCustomRateLimits": "カスタムレート制限",
     "apiManagerCustomRateLimitsDesc": "グローバルなデフォルト制限をオーバーライドします。デフォルトを使用する場合は空のままにしてください。",
     "apiManagerRateLimitRequestsPlaceholder": "リクエスト",

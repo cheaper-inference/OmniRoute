@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import Icon from "@/shared/components/Icon";
+import Button from "@/shared/components/Button";
 import { AllowedCombosSection } from "@/app/(dashboard)/dashboard/api-manager/components/AllowedCombosSection";
 import { ApiKeyAutoCombosToggle } from "@/app/(dashboard)/dashboard/api-manager/components/ApiKeyAutoCombosToggle";
 import { ApiKeyCcDiscoveryAliasesToggle } from "@/app/(dashboard)/dashboard/api-manager/components/ApiKeyCcDiscoveryAliasesToggle";
@@ -54,14 +54,14 @@ function NamedCombosUnderAll({
             <span data-testid="named-combo-under-all" className="truncate max-w-[16rem]">
               {name}
             </span>
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="icon-sm"
+              icon="close"
               onClick={() => onRemove(name)}
               aria-label={t("removeNamedCombo", { name })}
-              className="p-0.5 rounded text-text-muted hover:text-text-main"
-            >
-              <Icon name="close" size={12} />
-            </button>
+            />
           </span>
         ))}
       </div>
