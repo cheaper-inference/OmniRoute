@@ -270,3 +270,86 @@ test("a signed-out page answers 401 gemini_web_signed_out instead of a mode erro
   assert.equal(result.response.status, 401);
   assert.equal((await result.response.json()).code, "gemini_web_signed_out");
 });
+
+// ── Review follow-ups (#21119) ───────────────────────────────────────────────
+
+const replyDoc = (inner: string) =>
+  new JSDOM(
+    `<body><model-response><message-content><div class="markdown" aria-busy="false">${inner}</div></message-content></model-response></body>`
+  ).window.document;
+
+const codeBlockHtml = (code: string, lang = "Markdown") =>
+  `<code-block><div class="code-block-decoration"><span>${lang}</span></div><pre><code data-test-id="code-content">${code}</code></pre></code-block>`;
+
+test("a ``` line inside the code gets a longer outer fence", () => {
+  const text = readGeminiDomReply(replyDoc(codeBlockHtml("before\n```js\nx()\n```\nafter"))).text;
+  assert.equal(text, "````markdown\nbefore\n```js\nx()\n```\nafter\n````");
+});
+
+test("blank lines inside code are kept exactly", () => {
+  const text = readGeminiDomReply(replyDoc(codeBlockHtml('s = """a\n\n\nb"""', "Python"))).text;
+  assert.equal(text, '```python\ns = """a\n\n\nb"""\n```');
+});
+
+test("a code block inside a list item keeps its lines, indented as continuation", () => {
+  const html = `<ol><li><p>Run:</p>${codeBlockHtml("if ready:\n    run()", "Python")}</li><li>Done</li></ol>`;
+  assert.equal(
+    readGeminiDomReply(replyDoc(html)).text,
+    "1. Run:\n   ```python\n   if ready:\n       run()\n   ```\n2. Done"
+  );
+});
+
+test("a late, unreadable StreamGenerate body cannot replace the DOM answer", async () => {
+  let onResponse: ((r: unknown) => Promise<void>) | null = null;
+  let sent = 0;
+  playwright.chromium.launch = (async () => ({
+    newContext: async () => ({
+      addCookies: async () => {},
+      // persistRotatedCookies() awaits this; the late StreamGenerate body lands meanwhile.
+      cookies: async () => {
+        await sleep(400);
+        return [];
+      },
+      newPage: async () => ({
+        on: (event: string, handler: (r: unknown) => Promise<void>) => {
+          if (event === "response") onResponse = handler;
+        },
+        goto: async () => {},
+        waitForTimeout: async (ms: number) => sleep(ms >= 10_000 ? 4000 : 5),
+        waitForSelector: async () => ({ click: async () => {} }),
+        evaluate: async (expression: string) => {
+          if (/mode-picker-sign-in-button/.test(expression)) return false;
+          return sent
+            ? { queries: 1, responses: 1, busy: false, text: "pineapple" }
+            : { queries: 0, responses: 0, busy: false, text: "" };
+        },
+        keyboard: {
+          type: async () => {},
+          insertText: async () => {},
+          press: async () => {
+            sent++;
+            void onResponse?.({
+              url: () => "https://gemini.google.com/_/BardChatUi/data/x/StreamGenerate?rt=c",
+              text: async () => {
+                await sleep(2300); // after the DOM answer is accepted (~2 s stable)
+                return "garbage";
+              },
+            });
+          },
+        },
+      }),
+    }),
+    close: async () => {},
+  })) as unknown as typeof playwright.chromium.launch;
+  const result = await new GeminiWebExecutor().execute({
+    model: "gemini-3.1-pro",
+    body: { messages: [{ role: "user", content: "hello" }], stream: false },
+    stream: false,
+    credentials: { apiKey: "__Secure-1PSID=test-psid" },
+    signal: AbortSignal.timeout(15_000),
+    log: null,
+    onCredentialsRefreshed: async () => {},
+  } as never);
+  assert.equal(result.response.status, 200);
+  assert.equal((await result.response.json()).choices[0].message.content, "pineapple");
+});

@@ -81,6 +81,14 @@ export function readGeminiDomReply(doc?: Document): GeminiDomReplySnapshot {
     }
   };
 
+  // A fence longer than any backtick run in the body, so a ``` line inside the code
+  // (e.g. a Markdown example) cannot close the block early.
+  const fenced = (lang: string, body: string): string => {
+    const longestRun = Math.max(0, ...(body.match(/`+/g) || []).map((r) => r.length));
+    const fence = "`".repeat(Math.max(3, longestRun + 1));
+    return fence + lang + "\n" + body + "\n" + fence;
+  };
+
   const codeBlock = (el: Element): string => {
     const code = el.querySelector("pre code") || el.querySelector("pre") || el;
     const label = el.querySelector(".code-block-decoration span");
@@ -89,7 +97,7 @@ export function readGeminiDomReply(doc?: Document): GeminiDomReplySnapshot {
       .toLowerCase()
       .replace(/[^a-z0-9+#.-]/g, "");
     const body = (code.textContent || "").replace(/\n$/, "");
-    return "```" + lang + "\n" + body + "\n```";
+    return fenced(lang, body);
   };
 
   const block = (node: Node, indent: string): string[] => {
@@ -102,7 +110,7 @@ export function readGeminiDomReply(doc?: Document): GeminiDomReplySnapshot {
     if (SKIP.has(el.tagName) || el.classList.contains("code-block-decoration")) return [];
     const tag = el.tagName;
     if (tag === "CODE-BLOCK") return [codeBlock(el)];
-    if (tag === "PRE") return ["```\n" + (el.textContent || "").replace(/\n$/, "") + "\n```"];
+    if (tag === "PRE") return [fenced("", (el.textContent || "").replace(/\n$/, ""))];
     if (tag === "P") {
       const t = inline(el).trim();
       return t ? [t] : [];
@@ -117,14 +125,33 @@ export function readGeminiDomReply(doc?: Document): GeminiDomReplySnapshot {
         if (li.tagName !== "LI") continue;
         const marker = tag === "OL" ? `${n++}. ` : "- ";
         const own: string[] = [];
+        // Block content (code blocks, tables, quotes) goes through block() so its
+        // line breaks survive, indented as list-item continuation.
+        const continuation: string[] = [];
         const nested: string[] = [];
+        const contIndent = indent + " ".repeat(marker.length);
         for (const child of Array.from(li.childNodes)) {
-          const childTag = child.nodeType === 1 ? (child as Element).tagName : "";
+          const childEl = child.nodeType === 1 ? (child as Element) : null;
+          const childTag = childEl ? childEl.tagName : "";
           if (childTag === "UL" || childTag === "OL") nested.push(...block(child, indent + "  "));
-          else if (childTag === "P") own.push(inline(child).trim());
+          else if (
+            childEl &&
+            (["CODE-BLOCK", "PRE", "TABLE", "BLOCKQUOTE", "RESPONSE-ELEMENT"].includes(childTag) ||
+              childEl.querySelector("pre, code-block, table, blockquote"))
+          ) {
+            for (const part of block(child, "")) {
+              continuation.push(
+                part
+                  .split("\n")
+                  .map((l) => (l ? contIndent + l : l))
+                  .join("\n")
+              );
+            }
+          } else if (childTag === "P") own.push(inline(child).trim());
           else own.push(inline(child));
         }
         lines.push(indent + marker + own.join(" ").replace(/\s+/g, " ").trim());
+        lines.push(...continuation);
         lines.push(...nested);
       }
       return [lines.join("\n")];
@@ -183,10 +210,8 @@ export function readGeminiDomReply(doc?: Document): GeminiDomReplySnapshot {
     return out;
   };
 
-  const text = block(panel, "")
-    .join("\n\n")
-    .replace(/\n{3,}/g, "\n\n")
-    .trim();
+  // No newline squashing here: it would also rewrite blank lines inside code blocks.
+  const text = block(panel, "").join("\n\n").trim();
   return {
     queries,
     responses: responses.length,

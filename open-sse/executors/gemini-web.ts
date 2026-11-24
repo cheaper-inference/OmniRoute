@@ -832,12 +832,14 @@ export class GeminiWebExecutor extends BaseExecutor {
       );
       await Promise.race([streamPromise, domPromise, page.waitForTimeout(responseTimeoutMs)]);
       domWaitDone = true;
-      if (!responseText && domReplyText) responseText = domReplyText;
+      // Fix the answer now: a StreamGenerate body read still in flight could otherwise
+      // overwrite it (e.g. with "") while persistRotatedCookies() is awaited below.
+      const answerText = responseText || domReplyText;
       if (signal?.aborted) {
         throw signal.reason instanceof Error ? signal.reason : new Error("Request aborted");
       }
 
-      if (!responseText) {
+      if (!answerText) {
         return {
           response: new Response(
             JSON.stringify({
@@ -864,7 +866,7 @@ export class GeminiWebExecutor extends BaseExecutor {
         const cid = `chatcmpl-gwe-${crypto.randomUUID().slice(0, 12)}`;
         const created = Math.floor(Date.now() / 1000);
         const toolResponse = await buildGeminiToolResponse(
-          responseText,
+          answerText,
           requestedTools,
           Boolean(stream),
           modelId,
@@ -883,7 +885,7 @@ export class GeminiWebExecutor extends BaseExecutor {
             start(controller) {
               controller.enqueue(
                 encoder.encode(
-                  `data: ${JSON.stringify(formatStreamChunk(responseText, modelId))}\n\n`
+                  `data: ${JSON.stringify(formatStreamChunk(answerText, modelId))}\n\n`
                 )
               );
               controller.enqueue(
@@ -913,7 +915,7 @@ export class GeminiWebExecutor extends BaseExecutor {
       }
 
       return {
-        response: new Response(JSON.stringify(formatChatCompletion(responseText, modelId)), {
+        response: new Response(JSON.stringify(formatChatCompletion(answerText, modelId)), {
           status: 200,
           headers: { "Content-Type": "application/json" },
         }),
