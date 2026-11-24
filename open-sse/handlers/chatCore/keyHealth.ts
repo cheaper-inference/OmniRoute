@@ -284,7 +284,7 @@ function persistConnectionHealth(
   });
 }
 
-/** Publish the derived verdict when the connection has no usable key left. */
+/** Publish the derived verdict and report whether the cache was updated. */
 function publishConnectionUnusable(
   connId: string,
   creds: Record<string, unknown>,
@@ -292,8 +292,8 @@ function publishConnectionUnusable(
   storedHealth: Record<string, KeyHealth>,
   message: string,
   errorType: string
-): void {
-  if (connectionUsable(connId, keyIds, storedHealth)) return;
+): boolean {
+  if (connectionUsable(connId, keyIds, storedHealth)) return false;
   setCredentialHealth(
     connId,
     connectionProvider(creds, connId),
@@ -302,6 +302,7 @@ function publishConnectionUnusable(
     errorType,
     "inference"
   );
+  return true;
 }
 
 /**
@@ -359,13 +360,14 @@ function recordAuthFailure(
 
     // The verdict is recorded as soon as the wording proves it, not when the failure
     // ladder reaches "invalid": a later response may no longer carry the wording.
+    let publishedVerdict = false;
     if (verdict) {
       markKeyRejected(ctx.connId, ctx.currentKeyId, new Date().toISOString());
       if (isDecisiveVerdict(status, failureDetail)) {
         // The derived predicate exists to answer "can this connection serve at all" — ask
         // it now, not only when the ladder reaches `invalid`, or a key the wording proved
         // dead keeps the connection selectable for another round.
-        publishConnectionUnusable(
+        publishedVerdict = publishConnectionUnusable(
           ctx.connId,
           ctx.creds,
           ctx.keyIds,
@@ -378,7 +380,7 @@ function recordAuthFailure(
 
     persistConnectionHealth(ctx.connId, ctx.currentKeyId, ctx.log);
 
-    if (updatedHealth.status === "invalid") {
+    if (!publishedVerdict && updatedHealth.status === "invalid") {
       publishConnectionUnusable(
         ctx.connId,
         ctx.creds,

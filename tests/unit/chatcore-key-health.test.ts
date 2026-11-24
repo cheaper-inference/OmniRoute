@@ -643,6 +643,23 @@ test("a wording-proven failure closes the connection before the ladder reaches i
   );
 });
 
+test("a decisive rejection increases the cache counter only once per response", () => {
+  const conn = "kh-single-cache-verdict";
+  const countsAtPersistence: Array<number | undefined> = [];
+  __setKeyHealthPersistenceSink(() => {
+    countsAtPersistence.push(getCredentialHealth(conn)?.consecutiveFailures);
+  });
+
+  recordKeyHealthStatus(401, creds(conn), noopLog, undefined, workspaceDenied, null, 1);
+  assert.equal(getCredentialHealth(conn)?.status, "error", "the first decisive response blocks");
+  assert.equal(getCredentialHealth(conn)?.consecutiveFailures, 1);
+
+  recordKeyHealthStatus(403, creds(conn), noopLog, undefined, workspaceDenied, null, 2);
+  assert.equal(getAllKeyHealth()[`${conn}:primary`]?.status, "invalid");
+  assert.deepEqual(countsAtPersistence, [1, 2], "publish before each unchanged persistence write");
+  assert.equal(getCredentialHealth(conn)?.consecutiveFailures, 2, "count two observed failures");
+});
+
 test("a stored entry that is not key-shaped is ignored", () => {
   const conn = "kh-stored-prototype";
   const psd = {
