@@ -4,6 +4,7 @@ import { useId, useState } from "react";
 import { Modal, Button, Input, Select } from "@/shared/components";
 import { useTranslations } from "next-intl";
 import { Field } from "@omniroute/ui-kit/field";
+import Notice from "@/shared/components/Notice";
 import Textarea from "@/shared/components/Textarea";
 
 interface Memory {
@@ -114,11 +115,7 @@ export default function EditMemoryModal({ memory, isOpen, onClose, onSaved }: Pr
       }
     >
       <div className="space-y-4">
-        {error && (
-          <div className="p-3 rounded-lg bg-error/10 border border-error/20 text-xs text-error">
-            {error}
-          </div>
-        )}
+        {error && <Notice variant="critical">{error}</Notice>}
         <Select
           label={t("type")}
           value={type}
@@ -159,7 +156,8 @@ export default function EditMemoryModal({ memory, isOpen, onClose, onSaved }: Pr
             rows={4}
             spellCheck={false}
             error={Boolean(metadataError)}
-            className="resize-y font-mono text-xs"
+            mono
+            className="resize-y"
           />
         </Field>
       </div>

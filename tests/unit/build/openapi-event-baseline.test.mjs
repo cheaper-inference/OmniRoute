@@ -111,13 +111,43 @@ test("a base advance cannot invent a removal in an unchanged PR spec", (t) => {
   assert.match(r.stdout, new RegExp(`openapiBaseSha=${f.original}`));
 });
 
-test("PR synthetic merge compares the merged tree to its pinned event base", (t) => {
+test("PR synthetic merge compares the merged tree to its verified first parent", (t) => {
   const f = fixture(t);
-  f.git("-c", "core.hooksPath=/dev/null", "merge", "--no-ff", "-qm", "candidate", f.advanced);
+  f.git("checkout", "-q", "base");
+  f.git("-c", "core.hooksPath=/dev/null", "merge", "--no-ff", "-qm", "candidate", f.head);
   const r = f.run("pull_request", {
     pull_request: { base: { sha: f.advanced }, head: { sha: f.head } },
   });
   assert.equal(r.status, 0, r.stdout + r.stderr);
+  assert.match(r.stdout, new RegExp(`openapiBaseSha=${f.advanced}`));
+});
+
+test("a stale PR event base cannot charge an upstream endpoint removal to the PR", (t) => {
+  const f = fixture(t);
+  f.git("checkout", "-q", "base");
+  f.spec({ "/new-on-base": {} });
+  const liveBase = f.commit();
+  f.git("-c", "core.hooksPath=/dev/null", "merge", "--no-ff", "-qm", "candidate", f.head);
+  const r = f.run("pull_request", {
+    pull_request: { base: { sha: f.original }, head: { sha: f.head } },
+  });
+  assert.equal(r.status, 0, r.stdout + r.stderr);
+  assert.match(r.stdout, /openapiBreaking=0/);
+  assert.match(r.stdout, new RegExp(`openapiBaseSha=${liveBase}`));
+});
+
+test("a stale PR event base still blocks an endpoint removed by the contribution", (t) => {
+  const f = fixture(t);
+  f.git("checkout", "-qb", "new-contribution", f.advanced);
+  f.spec({ "/new-on-base": {} });
+  const head = f.commit();
+  f.git("checkout", "-q", "base");
+  f.git("-c", "core.hooksPath=/dev/null", "merge", "--no-ff", "-qm", "candidate", head);
+  const r = f.run("pull_request", {
+    pull_request: { base: { sha: f.original }, head: { sha: head } },
+  });
+  assert.equal(r.status, 1, r.stdout + r.stderr);
+  assert.match(r.stdout, /openapiBreaking=1/);
   assert.match(r.stdout, new RegExp(`openapiBaseSha=${f.advanced}`));
 });
 

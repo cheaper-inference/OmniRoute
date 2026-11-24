@@ -71,7 +71,7 @@ export default function ImageResultsInline({ images }: { images: PlaygroundImage
 
   return (
     <div className="p-4 space-y-3">
-      <p className="text-xs text-text-muted font-medium uppercase tracking-wider">
+      <p className="ci-eyebrow" data-weight="medium">
         {t("imagesGenerated", { count: safeImages.length })}
       </p>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

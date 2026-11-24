@@ -9,14 +9,16 @@ const { runBackupCommand, runRestoreCommand } = await import("../../bin/cli/comm
 // `omniroute restore` looked only for the plain payload names. An encrypted
 // backup holds `<name>.enc` files, so nothing matched, no file was restored, and
 // the command still printed "Restore complete." and returned 0. A restore that
-// restores nothing must fail, and an encrypted backup it cannot decrypt must be
-// refused before it touches the live data.
+// restores nothing must fail, and an encrypted backup it cannot decrypt (here: a
+// wrong key) must fail before it touches the live data.
 
 const ORIGINAL_DATA_DIR = process.env.DATA_DIR;
+const ORIGINAL_BASE_URL = process.env.OMNIROUTE_BASE_URL;
 
 async function withDataDir(fn: (dataDir: string) => Promise<void>) {
   const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-cli-restore-"));
   process.env.DATA_DIR = dataDir;
+  process.env.OMNIROUTE_BASE_URL = "http://127.0.0.1:9"; // nothing listens: restore needs the server down
   const { log, error } = console;
   console.log = () => {};
   console.error = () => {};
@@ -28,10 +30,12 @@ async function withDataDir(fn: (dataDir: string) => Promise<void>) {
     fs.rmSync(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
     if (ORIGINAL_DATA_DIR === undefined) delete process.env.DATA_DIR;
     else process.env.DATA_DIR = ORIGINAL_DATA_DIR;
+    if (ORIGINAL_BASE_URL === undefined) delete process.env.OMNIROUTE_BASE_URL;
+    else process.env.OMNIROUTE_BASE_URL = ORIGINAL_BASE_URL;
   }
 }
 
-test("restore of an encrypted backup fails and leaves the live data untouched", async () => {
+test("restore of an encrypted backup with the wrong key fails and leaves the live data untouched", async () => {
   await withDataDir(async (dataDir) => {
     const settings = path.join(dataDir, "settings.json");
     const keyFile = path.join(dataDir, "key.txt");
@@ -43,7 +47,9 @@ test("restore of an encrypted backup fails and leaves the live data untouched", 
     );
 
     fs.writeFileSync(settings, '{"from":"live"}');
-    const code = await runRestoreCommand("enc", { yes: true });
+    const wrongKey = path.join(dataDir, "wrong-key.txt");
+    fs.writeFileSync(wrongKey, "not the backup passphrase");
+    const code = await runRestoreCommand("enc", { yes: true, keyFile: wrongKey });
 
     assert.equal(code, 1, "an encrypted backup the restore cannot decrypt must not report success");
     assert.equal(fs.readFileSync(settings, "utf8"), '{"from":"live"}');

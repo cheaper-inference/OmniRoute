@@ -98,7 +98,14 @@ to the organization repository. It needs the `DOCKERHUB_ORG_USERNAME` /
 mirror skipped" warning and the other registries publish normally. To publish a released
 version there later, run **Actions → Mirror Docker image to the Docker Hub org → Run
 workflow** with `version=X.Y.Z` (and `promote_latest` for the highest stable version): it
-copies the existing images, no rebuild.
+copies the existing images, no rebuild. That repository's Docker Hub overview is set by hand:
+the API that edits it rejects Organization Access Tokens.
+
+The same workflow also copies every release to the legacy GHCR package
+`ghcr.io/diegosouzapw/omniroute` until 2027-06-30, so installs still pinned to it keep updating;
+its index carries a "moved to `ghcr.io/cheaper-inference/omniroute`" description. It needs the
+`GHCR_LEGACY_TOKEN` secret (a classic personal access token of `diegosouzapw` with
+`write:packages`); without it that job skips with a "Legacy GHCR mirror skipped" warning.
 
 ## Hotfix Fast-Lane (label `hotfix`)
 
