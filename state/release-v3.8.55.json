@@ -3,23 +3,23 @@
   "base": "release/v3.8.55",
   "paused": null,
   "inFlight": {
-    "batchId": "b31",
+    "batchId": "b32",
     "kind": "batch",
-    "candidateRef": "omni-queue/release-v3.8.55/b31-4dcc7e401999",
-    "candidateSha": "4dcc7e40199983a9e84faf722001c670dd45ff11",
-    "baseSha": "3f2f256c163ced00e94c025ce8f0281c87782a88",
-    "treeSha": "9807d9142ed5a1d9479b627980d842fa3d9cfb74",
+    "candidateRef": "omni-queue/release-v3.8.55/b32-0cfbb0e6ab7e",
+    "candidateSha": "0cfbb0e6ab7e96a1ffb35d191255dac609c38b73",
+    "baseSha": "0d4443c4d406a0dddb4fcaceafd9519b5d163679",
+    "treeSha": "dc8f91470f5bd6abe8bf93755d40a1e99ff22273",
     "prs": [
       {
-        "n": 21093,
-        "head": "0bfd7c75912f28bff00e3afa5bd72b9e42deff01",
-        "title": "feat(sse): free catalog headline functions, counting gates and the row-sum reading",
+        "n": 21142,
+        "head": "802e635b7b74f10c1e7a289809ad6151f76edd49",
+        "title": "chore(docs): refresh the published migration count (base-red #21099)",
         "author": "diegosouzapw",
-        "labeledAt": "2026-11-24T17:54:46Z"
+        "labeledAt": "2026-11-24T18:59:29Z"
       }
     ],
     "stage": "testing",
-    "startedAt": "2026-11-24T18:56:52.620Z",
+    "startedAt": "2026-11-24T20:38:36.984Z",
     "attempts": 0,
     "bisect": null
   },
@@ -97,12 +97,13 @@
       "19149": "ce0f2e3b64d51c480eccfd4c21b4ebeeaa0c2a0b",
       "19167": "5a3523ee5d9dc3a3fe610ed93b4c5ccb048bbca0",
       "19305": "1f33f0e10883549e4374ac38d47e87c94936bc5c",
-      "19306": "4afb0ca62e19eb94155c5b9c2b78bf4b91ae1dee"
+      "19306": "4afb0ca62e19eb94155c5b9c2b78bf4b91ae1dee",
+      "21093": "0bfd7c75912f28bff00e3afa5bd72b9e42deff01"
     }
   },
   "counters": {
-    "batchSeq": 31,
-    "ciRuns": 35,
+    "batchSeq": 32,
+    "ciRuns": 36,
     "landedPrs": 0,
     "landedBatches": 0,
     "redBatches": 8,
@@ -2073,8 +2074,43 @@
         "21093": "2026-11-24T17:54:46Z"
       },
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45464816195"
+    },
+    {
+      "at": "2026-11-24T20:38:10.327Z",
+      "type": "checks-green",
+      "batchId": "b31",
+      "prs": [
+        21093
+      ],
+      "sha": "4dcc7e40199983a9e84faf722001c670dd45ff11",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45482808475"
+    },
+    {
+      "at": "2026-11-24T20:38:19.193Z",
+      "type": "would-land",
+      "batchId": "b31",
+      "prs": [
+        21093
+      ],
+      "sha": "4dcc7e40199983a9e84faf722001c670dd45ff11",
+      "detail": "shadow mode: would merge-ff onto 3f2f256c163c",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45482808475"
+    },
+    {
+      "at": "2026-11-24T20:38:39.990Z",
+      "type": "batch-started",
+      "batchId": "b32",
+      "prs": [
+        21142
+      ],
+      "sha": "0cfbb0e6ab7e96a1ffb35d191255dac609c38b73",
+      "detail": "1 PR(s) on 0d4443c4d406; window 5",
+      "labeledAt": {
+        "21142": "2026-11-24T18:59:29Z"
+      },
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45482808475"
     }
   ],
-  "updatedAt": "2026-11-24T20:03:54.513Z",
+  "updatedAt": "2026-11-24T20:38:41.587Z",
   "batchWindow": 5
 }
