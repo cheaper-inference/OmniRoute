@@ -46,7 +46,7 @@ A boolean flag is considered **enabled** when its effective value is `"true"`,
 
 ## Flag Catalog
 
-131 flags across 6 categories. **Default** is the definition default — the value
+134 flags across 6 categories. **Default** is the definition default — the value
 used when neither a DB override nor an environment variable is present.
 
 ### Security (16)
@@ -198,15 +198,18 @@ same effective policy.
 | `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`           | boolean | `false` |         | Let an automatic web search (no explicit `provider`) use a connected Codex (ChatGPT) account through `codex-search`: as the last resort ahead of the keyless providers when no credentialed search provider is usable, and as the failover alternate (#17933). Each such search spends ChatGPT subscription quota and takes about 10–40 s. Off by default: `codex-search` runs only when a request names it explicitly.                                                                                                                                                                                                                         |
 | `CODE_ASSIST_INELIGIBLE_ONBOARD_LEGACY_TIER`   | boolean | `false` |         | For Antigravity / Code Assist onboarding, an account whose `loadCodeAssist` answer lists `ineligibleTiers` and marks no allowed tier as default onboards with `legacy-tier` instead of its `currentTier` (#18060), matching the Antigravity-Manager `fetch_project_id` order. Not yet confirmed on a real restricted account. Off by default: such an account keeps onboarding with its `currentTier`.                                                                                                                                                                                                                                          |
 
-### CLI (5)
+### CLI (8)
 
-| Key                                   | Type    | Default | Restart | Description                                                                                                                                                                                              |
-| ------------------------------------- | ------- | ------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `CLI_COMPAT_ALL`                      | boolean | `false` | ✓       | Enable compatibility mode for all CLI clients.                                                                                                                                                           |
-| `MODEL_ALIAS_COMPAT_ENABLED`          | boolean | `false` |         | Enable model alias compatibility layer.                                                                                                                                                                  |
-| `PRICING_SYNC_ENABLED`                | boolean | `false` |         | Enable automatic pricing data synchronization (also requires the `PRICING_SYNC_ENABLED` environment variable).                                                                                           |
-| `OMNIROUTE_AUTO_SYNC_CODEX_PROFILES`  | boolean | `false` |         | After a provider model sync, automatically (re)write ~/.codex/*.config.toml profile files from the live catalog. Never changes the active/default Codex config. Off by default.                          |
-| `OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES` | boolean | `false` |         | After a provider model sync, automatically (re)write ~/.claude/profiles/<name>/settings.json Claude Code profiles from the live catalog. Never changes the active/default Claude config. Off by default. |
+| Key                                        | Type    | Default | Restart | Description                                                                                                                                                                                                                                                                                                            |
+| ------------------------------------------ | ------- | ------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `CLI_COMPAT_ALL`                           | boolean | `false` | ✓       | Enable compatibility mode for all CLI clients.                                                                                                                                                                                                                                                                         |
+| `MODEL_ALIAS_COMPAT_ENABLED`               | boolean | `false` |         | Enable model alias compatibility layer.                                                                                                                                                                                                                                                                                |
+| `PRICING_SYNC_ENABLED`                     | boolean | `false` |         | Enable automatic pricing data synchronization (also requires the `PRICING_SYNC_ENABLED` environment variable).                                                                                                                                                                                                         |
+| `OMNIROUTE_AUTO_SYNC_CODEX_PROFILES`       | boolean | `false` |         | After a provider model sync, automatically (re)write ~/.codex/*.config.toml profile files from the live catalog. Never changes the active/default Codex config. Off by default.                                                                                                                                        |
+| `OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES`      | boolean | `false` |         | After a provider model sync, automatically (re)write ~/.claude/profiles/<name>/settings.json Claude Code profiles from the live catalog. Never changes the active/default Claude config. Off by default.                                                                                                               |
+| `CLAUDE_CODE_LOCAL_COMMAND_PREFIX_ENABLED` | boolean | `false` |         | Answer Claude Code's bash command-prefix classification request (single user turn with a `<policy_spec>` and a `Command:` line, no tools) locally with a rule-based prefix. `claude-cli` client only. Off by default: the live client request format is not yet confirmed, and the prefix feeds the permission prompt. |
+| `CLAUDE_CODE_LOCAL_SUGGESTION_ENABLED`     | boolean | `false` |         | Answer Claude Code's next-prompt suggestion request (last user message opens a text block with `[SUGGESTION MODE:`) locally with an empty reply. `claude-cli` client only. Off by default: the live client request format is not yet confirmed.                                                                        |
+| `CLAUDE_CODE_LOCAL_FILEPATHS_ENABLED`      | boolean | `false` |         | Answer Claude Code's file-path extraction request (single user turn `Command:` / `Output:` asking for `<filepaths>`, no tools) locally for plain readers, listings and simple `grep` only. `claude-cli` client only. Off by default: the live client request format is not yet confirmed.                              |
 
 ### Health (7)
 
@@ -294,10 +297,10 @@ Returns every flag with its effective value, source, and a summary.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... all 131 flags
+    // ... all 134 flags
   ],
   "summary": {
-    "total": 131,
+    "total": 134,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,
