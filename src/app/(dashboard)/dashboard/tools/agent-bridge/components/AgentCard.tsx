@@ -192,12 +192,12 @@ export function AgentCard({
 
             {/* Investigating notice */}
             {isInvestigating && (
-              <div className="rounded-control border border-border bg-bg-subtle p-3">
+              <Card.Section>
                 <p className="text-xs text-text-muted">
                   {t("investigatingNotice") ||
                     "This agent is under investigation. Hosts and API surface are still being confirmed. Setup will be available once the upstream API is documented."}
                 </p>
-              </div>
+              </Card.Section>
             )}
 
             {/* Model mappings */}

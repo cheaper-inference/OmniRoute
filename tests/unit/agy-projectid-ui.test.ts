@@ -29,7 +29,8 @@ describe("agy Project ID UI support", () => {
 
   it("uses isAntigravityFamily for antigravityClientProfile UI", () => {
     assert.ok(
-      source.includes("{isAntigravityFamily && (\n          <div") &&
+      // The block is the kit inset panel (Card.Section) since the UI kit 0.43.0 adoption.
+      source.includes("{isAntigravityFamily && (\n          <Card.Section") &&
         source.includes('label={t("antigravityClientProfileLabel")}'),
       "client profile Select must render for isAntigravityFamily"
     );

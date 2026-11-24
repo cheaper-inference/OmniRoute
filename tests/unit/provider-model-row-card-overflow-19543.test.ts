@@ -26,7 +26,7 @@ test("model card line 2 wraps instead of overflowing into the next card", () => 
 });
 
 test("alias keeps a small basis so the actions wrap before the alias takes its own row", () => {
-  assert.match(source, /className="flex min-w-0 flex-1 basis-16 items-center text-\[10px\] gap-1"/);
+  assert.match(source, /className="flex min-w-0 flex-1 basis-16 items-center text-3xs gap-1"/);
 });
 
 test("a long combo name truncates inside its pill instead of widening the card", () => {

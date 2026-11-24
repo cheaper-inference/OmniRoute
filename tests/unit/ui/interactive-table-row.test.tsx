@@ -1,12 +1,16 @@
 // @vitest-environment jsdom
 // Review of 2026-11-15, defect 5 (finding A5-03): a table row that answers a click must answer
-// the keyboard too. `InteractiveTableRow` is the one place that knows how: the DataTable adapter
-// and every hand-assembled kit Table with a clickable row render it instead of `TableRow`.
+// the keyboard too. The kit row knows how since its #238: the DataTable adapter and every
+// hand-assembled kit Table with a clickable row render `<TableRow onActivate selected>`. This
+// file pinned the local `InteractiveTableRow` adapter until the kit took the behaviour over; it
+// now pins the same contract on the vendored kit row, plus what the kit row adds (a click that
+// ends a text selection and an event from a portal do not activate; the other rows of a table
+// with a selection state `aria-selected="false"`).
 import React, { act } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { TableBody, TableCell } from "@omniroute/ui-kit/table";
-import InteractiveTableRow from "../../../src/shared/components/InteractiveTableRow";
+import { createPortal } from "react-dom";
+import { TableBody, TableCell, TableRow } from "@omniroute/ui-kit/table";
 
 const cleanups: Array<() => void> = [];
 
@@ -18,13 +22,14 @@ function renderRow(props: { onActivate?: () => void; selected?: boolean }) {
     root.render(
       <table>
         <TableBody>
-          <InteractiveTableRow {...props} className="cursor-pointer" data-cid="row-1">
+          <TableRow {...props} className="transition-colors" data-cid="row-1">
             <TableCell>Alpha</TableCell>
             <TableCell>
               <button type="button">Delete</button>
               <a href="/somewhere">Open</a>
+              {createPortal(<div data-testid="row-panel">panel</div>, document.body)}
             </TableCell>
-          </InteractiveTableRow>
+          </TableRow>
         </TableBody>
       </table>
     );
@@ -54,7 +59,7 @@ afterEach(() => {
   while (cleanups.length) cleanups.pop()!();
 });
 
-describe("InteractiveTableRow", () => {
+describe("kit TableRow with onActivate (the dashboard's interactive row)", () => {
   it.each(["Enter", " "])("puts the row in the tab order and activates it with %j", (key) => {
     const onActivate = vi.fn();
     const row = renderRow({ onActivate });
@@ -115,8 +120,40 @@ describe("InteractiveTableRow", () => {
 
     expect(row.getAttribute("data-slot")).toBe("table-row");
     expect(row.classList.contains("ci-table__row")).toBe(true);
-    expect(row.classList.contains("cursor-pointer")).toBe(true);
+    expect(row.classList.contains("transition-colors")).toBe(true);
     expect(row.getAttribute("data-cid")).toBe("row-1");
+    // The kit marker that carries the pointer cursor and the focus ring: no host class needed.
+    expect(row.hasAttribute("data-interactive")).toBe(true);
+    expect(renderRow({}).hasAttribute("data-interactive")).toBe(false);
+  });
+
+  it("does not activate on a click that ends a text selection in the row", () => {
+    const onActivate = vi.fn();
+    const row = renderRow({ onActivate });
+    const cell = row.querySelector("td")!;
+    const selection = document.getSelection()!;
+    const range = document.createRange();
+    range.selectNodeContents(cell);
+    selection.removeAllRanges();
+    selection.addRange(range);
+
+    act(() => cell.click());
+    expect(onActivate).not.toHaveBeenCalled();
+
+    selection.removeAllRanges();
+    act(() => cell.click());
+    expect(onActivate).toHaveBeenCalledOnce();
+  });
+
+  it("does not activate on an event that reaches the row through a portal", () => {
+    const onActivate = vi.fn();
+    renderRow({ onActivate });
+    const panel = document.querySelector<HTMLElement>("[data-testid=row-panel]")!;
+
+    act(() => panel.click());
+    press(panel, "Enter");
+
+    expect(onActivate).not.toHaveBeenCalled();
   });
 
   it("marks the selected row for assistive tech and for the kit style", () => {
@@ -124,8 +161,9 @@ describe("InteractiveTableRow", () => {
     expect(selected.getAttribute("aria-selected")).toBe("true");
     expect(selected.getAttribute("data-state")).toBe("selected");
 
+    // `selected={false}`: a row of a table with a selection that is not the selected one.
     const unselected = renderRow({ onActivate: () => {}, selected: false });
-    expect(unselected.hasAttribute("aria-selected")).toBe(false);
+    expect(unselected.getAttribute("aria-selected")).toBe("false");
     expect(unselected.hasAttribute("data-state")).toBe(false);
 
     const noSelection = renderRow({ onActivate: () => {} });

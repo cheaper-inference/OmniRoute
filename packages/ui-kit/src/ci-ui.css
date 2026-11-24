@@ -60,6 +60,46 @@
     color: var(--ci-color-selection-foreground);
     background: var(--ci-color-selection);
   }
+
+  /* Opt-in scrollbars: class="ci-scrollbars" on the document root or on a container styles the
+     scrollbars of that element and of everything inside it. Nothing here applies without the
+     class. Forced colours keep the system scrollbar, which already follows the user's palette. */
+  @media (forced-colors: none) {
+    .ci-scrollbars::-webkit-scrollbar,
+    .ci-scrollbars *::-webkit-scrollbar {
+      width: var(--ci-scrollbar-size);
+      height: var(--ci-scrollbar-size);
+    }
+    .ci-scrollbars::-webkit-scrollbar-track,
+    .ci-scrollbars *::-webkit-scrollbar-track {
+      background: var(--ci-scrollbar-track);
+    }
+    .ci-scrollbars::-webkit-scrollbar-corner,
+    .ci-scrollbars *::-webkit-scrollbar-corner {
+      background: var(--ci-scrollbar-track);
+    }
+    .ci-scrollbars::-webkit-scrollbar-thumb,
+    .ci-scrollbars *::-webkit-scrollbar-thumb {
+      border-radius: var(--ci-radius-full);
+      background: var(--ci-scrollbar-thumb);
+    }
+    .ci-scrollbars::-webkit-scrollbar-thumb:hover,
+    .ci-scrollbars *::-webkit-scrollbar-thumb:hover,
+    .ci-scrollbars::-webkit-scrollbar-thumb:active,
+    .ci-scrollbars *::-webkit-scrollbar-thumb:active {
+      background: var(--ci-scrollbar-thumb-hover);
+    }
+    /* Firefox has no ::-webkit-scrollbar-thumb and takes the standard properties. Chromium and
+       Safari must not get them: they ignore the pseudo-elements above on any element that sets
+       scrollbar-color or scrollbar-width. */
+    @supports not selector(::-webkit-scrollbar-thumb) {
+      .ci-scrollbars,
+      .ci-scrollbars * {
+        scrollbar-color: var(--ci-scrollbar-thumb) var(--ci-scrollbar-track);
+        scrollbar-width: thin;
+      }
+    }
+  }
 }
 
 @layer components {
@@ -81,6 +121,12 @@
     line-height: var(--ci-type-heading-leading);
     letter-spacing: var(--ci-type-heading-tracking);
   }
+  /* Interface heading sizes. Without data-size the size stays with the host. */
+  .ci-heading[data-size="xs"] { font-size: var(--ci-type-heading-size-xs); }
+  .ci-heading[data-size="sm"] { font-size: var(--ci-type-heading-size-sm); }
+  .ci-heading[data-size="md"] { font-size: var(--ci-type-heading-size-md); }
+  .ci-heading[data-size="lg"] { font-size: var(--ci-type-heading-size-lg); }
+  .ci-heading[data-size="xl"] { font-size: var(--ci-type-heading-size-xl); }
 
   .ci-dashboard-display {
     margin: 0;
@@ -101,6 +147,9 @@
     line-height: var(--ci-type-caption-leading);
     text-transform: uppercase;
   }
+  .ci-eyebrow[data-size="2xs"] { font-size: var(--ci-font-size-2xs); }
+  .ci-eyebrow[data-size="3xs"] { font-size: var(--ci-font-size-3xs); }
+  .ci-eyebrow[data-weight="medium"] { font-weight: var(--ci-font-weight-medium); }
 
   .ci-button {
     display: inline-flex;
@@ -157,6 +206,56 @@
   .ci-button[data-blocked="true"]:not(:disabled) {
     pointer-events: auto;
     cursor: help;
+  }
+
+  /* A Button with `tooltip` stays hoverable and focusable while inactive (aria-disabled, not
+     disabled), so the tooltip can still be read. It keeps its resting look under the pointer:
+     the shared `.ci-button:hover` paints every variant, so each hover below restates that
+     variant's resting colours, and there is no press nudge. */
+  .ci-button[data-soft-disabled="true"] {
+    pointer-events: auto;
+    cursor: default;
+  }
+
+  .ci-button[data-soft-disabled="true"]:active {
+    transform: none;
+  }
+
+  .ci-button--default[data-soft-disabled="true"]:hover {
+    color: var(--ci-button-primary-fg);
+    background: var(--ci-button-primary-bg);
+  }
+
+  .ci-button--secondary[data-soft-disabled="true"]:hover {
+    color: var(--ci-color-foreground);
+    background: var(--ci-color-surface);
+  }
+
+  .ci-button--ghost[data-soft-disabled="true"]:hover,
+  .ci-button--outline[data-soft-disabled="true"]:hover,
+  .ci-button--link[data-soft-disabled="true"]:hover {
+    color: var(--ci-color-foreground);
+    background: transparent;
+  }
+
+  .ci-button--destructive[data-soft-disabled="true"]:hover {
+    color: var(--ci-color-danger-foreground);
+    background: var(--ci-color-danger);
+  }
+
+  .ci-button--destructive-ghost[data-soft-disabled="true"]:hover {
+    color: var(--ci-button-danger-ghost-fg);
+    background: transparent;
+  }
+
+  .ci-button--warning[data-soft-disabled="true"]:hover {
+    color: var(--ci-color-warning);
+    background: var(--ci-color-warning-bg);
+  }
+
+  /* The assistant fill is already held by its own inactive hover rule; only the ink needs restating. */
+  .ci-button--assistant[data-soft-disabled="true"]:hover {
+    color: var(--ci-color-accent-foreground);
   }
 
   .ci-button--secondary {
@@ -339,6 +438,91 @@
     background: var(--ci-color-control-active-bg);
   }
 
+  /* SegmentedControl sets data-size and opts into the capsule Tabs grid (36px, or 30px for
+     "sm"); markup that carries only the classes keeps the rules above. The 2px padding holds
+     the 2px focus ring, so the sideways scroll never clips it. The capsule hugs its segments
+     even in a stretching grid or column; give it a width and the segments share it. */
+  .ci-segmented[data-size] {
+    width: fit-content;
+    max-width: 100%;
+    gap: var(--ci-space-0-5);
+    padding: var(--ci-space-0-5);
+    border-color: var(--ci-field-border);
+    box-shadow: var(--ci-shadow-xs);
+    overflow: auto hidden;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+  }
+
+  .ci-segmented[data-size] .ci-segmented__item {
+    flex: 1 0 auto;
+    min-height: calc(
+      var(--ci-control-height-md) - var(--ci-space-1) -
+      var(--ci-border-default) - var(--ci-border-default)
+    );
+    justify-content: center;
+    gap: var(--ci-space-1-5);
+    white-space: nowrap;
+    transition:
+      background var(--ci-duration-fast) var(--ci-ease-standard),
+      color var(--ci-duration-fast) var(--ci-ease-standard);
+  }
+
+  .ci-segmented[data-size="sm"] .ci-segmented__item {
+    min-height: var(--ci-badge-height);
+    gap: var(--ci-space-1);
+    padding-inline: var(--ci-space-2);
+    font-size: var(--ci-font-size-xs);
+  }
+
+  .ci-segmented[data-size] .ci-segmented__item:hover:not(:disabled, [data-active="true"]) {
+    color: var(--ci-color-heading);
+  }
+
+  .ci-segmented[data-size] .ci-segmented__item:disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
+  }
+
+  .ci-segmented__icon {
+    display: inline-flex;
+    flex: none;
+  }
+
+  .ci-segmented__icon > svg {
+    width: var(--ci-icon-size-sm);
+    height: var(--ci-icon-size-sm);
+    stroke-width: var(--ci-icon-stroke-width);
+  }
+
+  .ci-segmented[data-size="sm"] .ci-segmented__icon > svg {
+    width: var(--ci-icon-size-xs);
+    height: var(--ci-icon-size-xs);
+  }
+
+  /* Forced colours drop backgrounds and box-shadows: the checked segment and the focus
+     indicator move to system colours and an inset outline. */
+  @media (forced-colors: active) {
+    .ci-segmented[data-size] .ci-segmented__item[data-active="true"] {
+      color: HighlightText;
+      background: Highlight;
+    }
+
+    .ci-segmented[data-size] .ci-segmented__item:focus-visible {
+      outline: var(--ci-focus-ring-width) solid CanvasText;
+      outline-offset: calc(0px - var(--ci-focus-ring-width));
+    }
+
+    .ci-segmented[data-size] .ci-segmented__item[data-active="true"]:focus-visible {
+      outline-color: HighlightText;
+    }
+
+    .ci-segmented[data-size] .ci-segmented__item:disabled {
+      color: GrayText;
+      opacity: 1;
+    }
+  }
+
   .ci-icon {
     width: var(--ci-icon-size-md);
     height: var(--ci-icon-size-md);
@@ -364,6 +548,12 @@
     color: var(--ci-color-foreground);
     border-color: var(--ci-color-border);
     background: transparent;
+  }
+
+  /* Muted tone: quieter resting ink for secondary actions in rows and toolbars.
+     `:where()` keeps it at one class, so the hover rule below restores the variant's ink. */
+  .ci-button--tone-muted:where(.ci-button--ghost, .ci-button--outline, .ci-button--secondary) {
+    color: var(--ci-color-text-muted);
   }
 
   .ci-button--outline:hover,
@@ -424,6 +614,19 @@
     background: transparent;
   }
 
+  /* Dense 24px size for row and inline actions: the smallest target WCAG 2.2 (2.5.8) allows.
+     The max() floor keeps it at 24px when a host shrinks the root font size. */
+  .ci-button--size-2xs,
+  .ci-button--size-icon-2xs {
+    min-height: max(24px, var(--ci-control-height-xs));
+    gap: var(--ci-space-1);
+    padding-inline: var(--ci-space-2);
+    font-size: var(--ci-font-size-xs);
+    font-weight: var(--ci-font-weight-medium);
+    line-height: var(--ci-type-control-leading);
+    letter-spacing: var(--ci-type-control-tracking);
+  }
+
   .ci-button--size-xs,
   .ci-button--size-icon-xs {
     min-height: var(--ci-control-height-sm);
@@ -451,6 +654,7 @@
   }
 
   .ci-button--size-icon,
+  .ci-button--size-icon-2xs,
   .ci-button--size-icon-xs,
   .ci-button--size-icon-sm,
   .ci-button--size-icon-lg {
@@ -458,6 +662,7 @@
     padding-inline: 0;
   }
 
+  .ci-button--size-icon-2xs { width: max(24px, var(--ci-control-height-xs)); }
   .ci-button--size-icon-xs { width: var(--ci-control-height-sm); }
   .ci-button--size-icon-sm { width: var(--ci-control-height-md); }
   .ci-button--size-icon-lg { width: var(--ci-control-height-xl); }
@@ -467,6 +672,13 @@
     width: var(--ci-icon-size-sm);
     height: var(--ci-icon-size-sm);
     flex: none;
+  }
+
+  /* 14px icon and spinner, as in the kit's own 24px buttons (ScopeChip and chat attachment remove). */
+  .ci-button--size-2xs > svg,
+  .ci-button--size-icon-2xs > svg {
+    width: 0.875rem;
+    height: 0.875rem;
   }
 
   .ci-button__spinner {
@@ -531,6 +743,25 @@
     height: var(--ci-icon-size-xs);
   }
 
+  /* Small size for dense tables and card headers: a lower box, never smaller text. Half
+     the block padding keeps the 12px line inside 20px with the outline border too, and
+     still leaves wrapped text an inset. It follows the base rule, which it overrides at
+     the same specificity. */
+  .ci-badge--sm {
+    min-height: var(--ci-badge-height-sm);
+    padding-block: calc(var(--ci-space-0-5) / 2);
+  }
+
+  .ci-badge--sm.ci-badge--circle {
+    width: var(--ci-badge-height-sm);
+    min-width: var(--ci-badge-height-sm);
+    height: var(--ci-badge-height-sm);
+  }
+
+  .ci-badge--sm.ci-badge--live {
+    font-size: var(--ci-font-size-xs);
+  }
+
   /* Status tones: AA ink on a subtle tint. They follow every variant rule, so a tone
      recolours any variant; border-color only shows on outline, which keeps its border. */
   .ci-badge--tone-neutral {
@@ -567,6 +798,56 @@
     border-color: var(--ci-badge-accent-ink);
     color: var(--ci-badge-accent-ink);
     background: var(--ci-color-accent-surface-strong);
+  }
+
+  /* Chart-series tones: the series ink on its opaque subtle tint, to name in a badge the
+     series a chart draws. Same rules as the status tones above. */
+  .ci-badge--tone-chart-1 {
+    border-color: var(--ci-chart-1-ink);
+    color: var(--ci-chart-1-ink);
+    background: var(--ci-chart-1-subtle);
+  }
+
+  .ci-badge--tone-chart-2 {
+    border-color: var(--ci-chart-2-ink);
+    color: var(--ci-chart-2-ink);
+    background: var(--ci-chart-2-subtle);
+  }
+
+  .ci-badge--tone-chart-3 {
+    border-color: var(--ci-chart-3-ink);
+    color: var(--ci-chart-3-ink);
+    background: var(--ci-chart-3-subtle);
+  }
+
+  .ci-badge--tone-chart-4 {
+    border-color: var(--ci-chart-4-ink);
+    color: var(--ci-chart-4-ink);
+    background: var(--ci-chart-4-subtle);
+  }
+
+  .ci-badge--tone-chart-5 {
+    border-color: var(--ci-chart-5-ink);
+    color: var(--ci-chart-5-ink);
+    background: var(--ci-chart-5-subtle);
+  }
+
+  .ci-badge--tone-chart-6 {
+    border-color: var(--ci-chart-6-ink);
+    color: var(--ci-chart-6-ink);
+    background: var(--ci-chart-6-subtle);
+  }
+
+  .ci-badge--tone-chart-7 {
+    border-color: var(--ci-chart-7-ink);
+    color: var(--ci-chart-7-ink);
+    background: var(--ci-chart-7-subtle);
+  }
+
+  .ci-badge--tone-chart-8 {
+    border-color: var(--ci-chart-8-ink);
+    color: var(--ci-chart-8-ink);
+    background: var(--ci-chart-8-subtle);
   }
 
   .ci-card__header {
@@ -616,8 +897,88 @@
   .ci-card__footer--between { justify-content: space-between; }
   .ci-card__footer--end { justify-content: flex-end; }
 
+  /* Inset: a flat panel nested one level inside a card or dialog. The panel owns the
+     padding, so children with no slot need no wrapper; the slots only space themselves. */
+  .ci-card[data-surface="inset"] {
+    padding: var(--ci-space-4);
+    border-color: var(--ci-color-border-subtle);
+    border-radius: var(--ci-radius-surface-nested);
+    background: var(--ci-color-surface-subtle);
+    box-shadow: none;
+  }
+
+  .ci-card.ci-brand-tint[data-surface="inset"] {
+    border-color: var(--ci-card-border);
+    background: var(--ci-card-bg);
+  }
+
+  .ci-card[data-surface="inset"] > .ci-card__header {
+    align-items: center;
+    gap: var(--ci-space-0-5) var(--ci-space-3);
+    padding: 0;
+  }
+
+  .ci-card[data-surface="inset"] > .ci-card__header > .ci-card__title {
+    font-size: var(--ci-font-size-sm);
+  }
+
+  .ci-card[data-surface="inset"] > .ci-card__header > .ci-card__description {
+    font-size: var(--ci-font-size-xs);
+  }
+
+  .ci-card[data-surface="inset"] > .ci-card__content {
+    padding: 0;
+  }
+
+  /* Padded insets only: a flush header already carries this gap in its own padding. */
+  .ci-card[data-surface="inset"]:not([data-flush]) > .ci-card__header + .ci-card__content {
+    padding-block-start: var(--ci-space-3);
+  }
+
+  /* A titled inset with no children is a single row: no trailing gap. */
+  .ci-card[data-surface="inset"] > .ci-card__content:empty {
+    display: none;
+  }
+
+  .ci-card[data-surface="inset"] > .ci-card__footer {
+    padding: var(--ci-space-3) 0 0;
+  }
+
+  .ci-card[data-surface="inset"]:not([data-flush]) > .ci-section-header {
+    padding: 0 0 var(--ci-space-3);
+  }
+
+  /* `flush` hands the edges to the children (a table, a list): the header and footer pad themselves. */
+  .ci-card[data-surface="inset"][data-flush] {
+    padding: 0;
+  }
+
+  .ci-card[data-surface="inset"][data-flush] > .ci-card__header {
+    padding: var(--ci-space-4) var(--ci-space-4) var(--ci-space-3);
+  }
+
+  .ci-card[data-surface="inset"][data-flush] > .ci-card__footer {
+    padding: var(--ci-space-3) var(--ci-space-4) var(--ci-space-4);
+  }
+
   .ci-input--sm {
     min-height: var(--ci-control-height-md);
+  }
+
+  /* The height, inline padding and text size of Select and NativeSelect xs, so the
+     three line up in a filter bar or a table row. */
+  .ci-input--xs {
+    min-height: var(--ci-control-height-sm);
+    padding-inline: var(--ci-space-2);
+    font-size: var(--ci-font-size-xs);
+  }
+
+  /* Keys, JSON, code and URLs. The family is repeated in ci-typography.css,
+     outside the layers: the input default there is unlayered and would win. */
+  .ci-input--mono {
+    font-family: var(--ci-font-code);
+    font-variant-numeric: tabular-nums;
+    font-variant-ligatures: none;
   }
 
   .ci-input--error,
@@ -660,6 +1021,28 @@
   .ci-input-shell--sm .ci-input { min-height: calc(var(--ci-control-height-md) - 2px); }
   .ci-input-shell__icon { display: inline-flex; flex: none; }
   .ci-input-shell__icon > svg { width: var(--ci-icon-size-sm); height: var(--ci-icon-size-sm); }
+  .ci-input-shell--xs { min-height: var(--ci-control-height-sm); gap: var(--ci-space-1-5); padding-inline: var(--ci-space-2); }
+  .ci-input-shell--xs .ci-input { min-height: calc(var(--ci-control-height-sm) - 2px); }
+  .ci-input-shell--xs .ci-input-shell__icon > svg { width: var(--ci-icon-size-xs); height: var(--ci-icon-size-xs); }
+
+  /* NumberInput: the unit is field text at the inline end, in the shell's muted ink. */
+  .ci-number-input__unit {
+    font: var(--ci-font-weight-regular) var(--ci-font-size-sm) / var(--ci-type-data-leading) var(--ci-font-ui);
+    letter-spacing: var(--ci-type-data-tracking);
+    white-space: nowrap;
+  }
+  .ci-number-input__unit:not(:last-child) { margin-inline-end: var(--ci-space-2); }
+  /* Digits run left to right in every script. Without this a right-to-left document puts the
+     minus sign after the number; the text still starts at the inline start of the field. */
+  .ci-number-input:dir(rtl) { direction: ltr; text-align: right; }
+  .ci-number-input:disabled,
+  .ci-input-shell:has(.ci-number-input:disabled) {
+    border-color: var(--ci-field-border);
+    background: var(--ci-color-surface-muted);
+    cursor: not-allowed;
+    opacity: 0.56;
+  }
+  .ci-input-shell .ci-number-input:disabled { background: transparent; opacity: 1; }
 
   /* Browser autofill paints its own background above the author background.
      An opaque inset surface preserves the normal field tokens without disabling
@@ -833,6 +1216,17 @@
   .ci-textarea--error,
   .ci-textarea[aria-invalid="true"] { border-color: var(--ci-color-danger); }
   .ci-textarea:disabled { cursor: not-allowed; background: var(--ci-color-surface-muted); opacity: 0.56; }
+  /* The editable counterpart of CodePreview: its family, size, leading and tab
+     width. Family and leading are repeated in ci-typography.css, outside the
+     layers: the textarea default there is unlayered and would win. */
+  .ci-textarea--mono {
+    font-family: var(--ci-font-code);
+    font-size: var(--ci-font-size-xs);
+    line-height: var(--ci-type-reading-leading);
+    font-variant-numeric: tabular-nums;
+    font-variant-ligatures: none;
+    tab-size: 2;
+  }
 
   .ci-checkbox,
   .ci-radio {
@@ -966,7 +1360,7 @@
     font: var(--ci-font-weight-regular) var(--ci-font-size-sm) /
       var(--ci-line-height-ui) var(--ci-font-ui);
     letter-spacing: var(--ci-type-data-tracking);
-    text-align: left;
+    text-align: start;
     outline: none;
     cursor: pointer;
     transition:
@@ -1107,7 +1501,7 @@
     min-height: var(--ci-control-height-md);
     align-items: center;
     padding: var(--ci-space-2) var(--ci-space-3);
-    padding-right: var(--ci-space-8);
+    padding-inline-end: var(--ci-space-8);
     border-radius: var(--ci-radius-md);
     font-size: var(--ci-font-size-sm);
     cursor: pointer;
@@ -1123,7 +1517,7 @@
   .ci-select__content[data-size="xs"] .ci-select__item {
     min-height: var(--ci-control-height-sm);
     padding: var(--ci-space-1) var(--ci-space-2);
-    padding-right: var(--ci-space-8);
+    padding-inline-end: var(--ci-space-8);
     font-size: var(--ci-font-size-xs);
     font-weight: var(--ci-font-weight-medium);
     line-height: var(--ci-type-control-leading);
@@ -1141,7 +1535,7 @@
   .ci-select__item[data-highlighted] { background: var(--ci-color-surface-muted); }
   .ci-select__item[data-state="checked"] { color: var(--ci-color-heading); font-weight: var(--ci-font-weight-semibold); }
   .ci-select__item[data-disabled] { cursor: not-allowed; opacity: 0.42; }
-  .ci-select__indicator { position: absolute; right: var(--ci-space-3); display: grid; width: var(--ci-icon-size-sm); height: var(--ci-icon-size-sm); place-items: center; }
+  .ci-select__indicator { position: absolute; inset-inline-end: var(--ci-space-3); display: grid; width: var(--ci-icon-size-sm); height: var(--ci-icon-size-sm); place-items: center; }
   .ci-select__indicator svg { width: var(--ci-icon-size-sm); height: var(--ci-icon-size-sm); stroke-width: var(--ci-icon-stroke-width); }
   .ci-select__separator { height: var(--ci-border-hairline); margin: var(--ci-space-2); background: var(--ci-color-border); }
   .ci-select__scroll { display: grid; height: 1.5rem; place-items: center; color: var(--ci-color-text-muted); }
@@ -1164,7 +1558,7 @@
     border-radius: var(--ci-radius-sm);
     background: var(--ci-color-surface);
     color: var(--ci-color-heading);
-    font-size: 0.625rem;
+    font-size: var(--ci-font-size-3xs);
     font-weight: var(--ci-font-weight-semibold);
   }
 
@@ -1188,7 +1582,7 @@
   .ci-field--width-full { max-width: 100%; }
   /* The marker owns its spacing; avoid adding Label's flex gap a second time. */
   .ci-field > .ci-label:has(> .ci-field__required) { gap: 0; }
-  .ci-field__required { margin-left: var(--ci-space-1); color: var(--ci-color-danger); }
+  .ci-field__required { margin-inline-start: var(--ci-space-1); color: var(--ci-color-danger); }
   .ci-field__msg { color: var(--ci-color-text-muted); font-size: var(--ci-font-size-xs); line-height: var(--ci-type-caption-leading); font-weight: var(--ci-font-weight-regular); letter-spacing: var(--ci-type-caption-tracking); }
   .ci-field__msg--error { color: var(--ci-color-danger); }
   .ci-field__msg--success { color: var(--ci-color-success); }
@@ -1311,7 +1705,7 @@
     border-radius: var(--ci-radius-surface);
     background: var(--ci-color-surface);
     color: var(--ci-color-heading);
-    text-align: left;
+    text-align: start;
     white-space: normal;
   }
   .ci-tabs--card .ci-tabs__trigger:hover:not(:disabled):not([data-state="active"]) {
@@ -1416,6 +1810,13 @@
     border-radius: var(--ci-radius-surface);
     background: var(--ci-color-surface);
   }
+  /* variant="plain": the host (a Card, a panel) is the frame and the surface. */
+  .ci-table-container[data-variant="plain"] { border: 0; border-radius: 0; background: transparent; }
+  /* density sets the cell size tokens that the cells read. Every value sets all four, so a table
+     nested in a dense one can return to the default; with none set, the fallbacks apply. */
+  .ci-table-container[data-density="compact"] { --ci-table-cell-height: 2rem; --ci-table-cell-padding-block: var(--ci-space-1); --ci-table-cell-padding-inline: var(--ci-space-2); --ci-table-font-size: var(--ci-font-size-xs); }
+  .ci-table-container[data-density="default"] { --ci-table-cell-height: initial; --ci-table-cell-padding-block: initial; --ci-table-cell-padding-inline: initial; --ci-table-font-size: initial; }
+  .ci-table-container[data-density="comfortable"] { --ci-table-cell-height: 3rem; --ci-table-cell-padding-block: var(--ci-space-3); --ci-table-cell-padding-inline: var(--ci-space-4); --ci-table-font-size: initial; }
   /* Table makes an overflowing container focusable so the keyboard can scroll it. The inset
      outline stays visible when a parent card clips its overflow. */
   .ci-table-container:focus-visible {
@@ -1440,6 +1841,16 @@
     z-index: 4;
     box-shadow: -1px 0 0 var(--ci-color-border-subtle), inset 0 calc(-1 * var(--ci-border-default)) 0 var(--ci-color-border-subtle);
   }
+  .ci-table-container[data-capped] > .ci-table > .ci-table__header .ci-table__head--sticky-start {
+    z-index: 4;
+    box-shadow: 1px 0 0 var(--ci-color-border-subtle), inset 0 calc(-1 * var(--ci-border-default)) 0 var(--ci-color-border-subtle);
+  }
+  .ci-table-container[data-capped] > .ci-table > .ci-table__header .ci-table__head--sticky-end:dir(rtl) {
+    box-shadow: 1px 0 0 var(--ci-color-border-subtle), inset 0 calc(-1 * var(--ci-border-default)) 0 var(--ci-color-border-subtle);
+  }
+  .ci-table-container[data-capped] > .ci-table > .ci-table__header .ci-table__head--sticky-start:dir(rtl) {
+    box-shadow: -1px 0 0 var(--ci-color-border-subtle), inset 0 calc(-1 * var(--ci-border-default)) 0 var(--ci-color-border-subtle);
+  }
 
   .ci-table-scroll-area { width: 100%; min-width: 0; }
   /* The top scrollbar replaces the native one, except on a capped container: its bottom edge stays
@@ -1448,6 +1859,22 @@
   .ci-table-scroll-area > .ci-table-loading-region > [data-slot="table-loading-content"] > .ci-table-container:not([data-capped]) { scrollbar-width: none; }
   .ci-table-scroll-area > .ci-table-container:not([data-capped])::-webkit-scrollbar,
   .ci-table-scroll-area > .ci-table-loading-region > [data-slot="table-loading-content"] > .ci-table-container:not([data-capped])::-webkit-scrollbar { display: none; }
+  /* fill: the container takes the block size its parent gives it. Table marks it data-capped as
+     well, so the capped rules bound its scrolling and pin its header row. Under a parent with no
+     definite block size the percentage is auto, and the table keeps its own height. */
+  .ci-table-container[data-fill] { box-sizing: border-box; block-size: 100%; min-block-size: 0; }
+  /* The wrappers between that parent and the container (the loading region, the top scrollbar
+     area) pass the size on, whether Table rendered them or the consumer did. Each one is a flex
+     column, so the container also shrinks to a parent that only has a maximum block size. */
+  .ci-table-loading-region:has(> [data-slot="table-loading-content"] > .ci-table-container[data-fill]),
+  .ci-table-loading-region:has(> [data-slot="table-loading-content"] > .ci-table-scroll-area > .ci-table-container[data-fill]),
+  [data-slot="table-loading-content"]:has(> .ci-table-container[data-fill]),
+  [data-slot="table-loading-content"]:has(> .ci-table-scroll-area > .ci-table-container[data-fill]),
+  .ci-table-scroll-area:has(> .ci-table-container[data-fill]),
+  .ci-table-scroll-area:has(> .ci-table-loading-region > [data-slot="table-loading-content"] > .ci-table-container[data-fill]) { display: flex; flex-direction: column; block-size: 100%; min-block-size: 0; }
+  /* The top scrollbar keeps its height, and the container below it takes what is left. */
+  .ci-table-scroll-area:has(> .ci-table-container[data-fill]) > .ci-table-scrollbar,
+  .ci-table-scroll-area:has(> .ci-table-loading-region > [data-slot="table-loading-content"] > .ci-table-container[data-fill]) > .ci-table-scrollbar { flex: none; }
   .ci-table-scrollbar {
     position: relative;
     display: block;
@@ -1470,11 +1897,12 @@
   .ci-table-scrollbar__thumb {
     height: 100%;
     border-radius: var(--ci-radius-full);
-    background: var(--ci-neutral-400);
+    background: var(--ci-scrollbar-thumb);
     cursor: grab;
     touch-action: none;
   }
-  .ci-table-scrollbar__thumb:active { cursor: grabbing; }
+  .ci-table-scrollbar__thumb:hover { background: var(--ci-scrollbar-thumb-hover); }
+  .ci-table-scrollbar__thumb:active { background: var(--ci-scrollbar-thumb-hover); cursor: grabbing; }
 
   .ci-table {
     width: 100%;
@@ -1482,7 +1910,7 @@
     border-collapse: collapse;
     caption-side: bottom;
     color: var(--ci-color-foreground);
-    font-size: var(--ci-font-size-sm);
+    font-size: var(--ci-table-font-size, var(--ci-font-size-sm));
     font-weight: var(--ci-font-weight-regular);
     line-height: var(--ci-type-body-leading);
     letter-spacing: var(--ci-type-body-tracking);
@@ -1493,17 +1921,59 @@
   .ci-table__body .ci-table__row:last-child { border-bottom: 0; }
   .ci-table__body .ci-table__row:hover { background: linear-gradient(90deg, var(--ci-color-accent-surface-subtle), var(--ci-color-surface)); }
   .ci-table__row[data-state="selected"] { background: var(--ci-color-accent-surface-strong); }
+  /* TableRow onActivate: the row is a tab stop that a click, Enter and Space activate. The outline
+     is inset like the container's, so neither a clipping parent nor the next row can cut it. */
+  .ci-table__row[data-interactive] { cursor: pointer; }
+  .ci-table__row[data-interactive]:focus-visible {
+    outline: var(--ci-focus-ring-width) solid var(--ci-color-focus);
+    outline-offset: calc(-1 * var(--ci-focus-ring-width));
+  }
+  /* A sticky end cell paints over the outline of its row, so it draws its own three edges. */
+  .ci-table__row[data-interactive]:focus-visible > .ci-table__cell--sticky-end {
+    box-shadow:
+      -1px 0 0 var(--ci-color-border-subtle),
+      inset 0 var(--ci-focus-ring-width) 0 var(--ci-color-focus),
+      inset 0 calc(-1 * var(--ci-focus-ring-width)) 0 var(--ci-color-focus),
+      inset calc(-1 * var(--ci-focus-ring-width)) 0 0 var(--ci-color-focus);
+  }
+  /* A sticky start cell covers the other end of the outline and draws the mirror image. In
+     right-to-left the two cells swap physical sides, so each one takes the edges of the other. */
+  .ci-table__row[data-interactive]:focus-visible > .ci-table__cell--sticky-start,
+  .ci-table__row[data-interactive]:focus-visible > .ci-table__cell--sticky-end:dir(rtl) {
+    box-shadow:
+      1px 0 0 var(--ci-color-border-subtle),
+      inset 0 var(--ci-focus-ring-width) 0 var(--ci-color-focus),
+      inset 0 calc(-1 * var(--ci-focus-ring-width)) 0 var(--ci-color-focus),
+      inset var(--ci-focus-ring-width) 0 0 var(--ci-color-focus);
+  }
+  .ci-table__row[data-interactive]:focus-visible > .ci-table__cell--sticky-start:dir(rtl) {
+    box-shadow:
+      -1px 0 0 var(--ci-color-border-subtle),
+      inset 0 var(--ci-focus-ring-width) 0 var(--ci-color-focus),
+      inset 0 calc(-1 * var(--ci-focus-ring-width)) 0 var(--ci-color-focus),
+      inset calc(-1 * var(--ci-focus-ring-width)) 0 0 var(--ci-color-focus);
+  }
+  /* A selected row keeps its fill under the pointer, with or without onActivate. */
+  .ci-table__body .ci-table__row[data-state="selected"]:hover { background: var(--ci-color-accent-surface-strong); }
+  /* Focus scrolls a row into view; this keeps it clear of the pinned header of a capped table. */
+  .ci-table-container[data-capped] .ci-table__row[data-interactive] { scroll-margin-block-start: calc(var(--ci-table-cell-height, 2.75rem) + var(--ci-border-default)); }
   .ci-table__head,
-  .ci-table__cell { height: 2.75rem; padding: var(--ci-space-2) var(--ci-space-3); text-align: left; vertical-align: middle; white-space: nowrap; }
+  .ci-table__cell { height: var(--ci-table-cell-height, 2.75rem); padding: var(--ci-table-cell-padding-block, var(--ci-space-2)) var(--ci-table-cell-padding-inline, var(--ci-space-3)); text-align: start; vertical-align: middle; white-space: nowrap; }
   .ci-table__head { color: var(--ci-color-text-muted); font-size: var(--ci-font-size-xs); font-weight: var(--ci-font-weight-medium); line-height: var(--ci-type-control-leading); letter-spacing: var(--ci-type-control-tracking); }
   .ci-table__cell--numeric,
-  .ci-table__head--numeric { text-align: right; font-variant-numeric: tabular-nums; }
+  .ci-table__head--numeric { text-align: end; font-variant-numeric: tabular-nums; }
   .ci-table__cell--action,
   .ci-table__head--action { width: 3rem; padding-inline: var(--ci-space-2); text-align: center; }
+  /* An explicit align: after numeric and action, so it wins over the alignment they imply
+     (center sits with the DataTable rules further down). */
+  .ci-table__head--start,
+  .ci-table__cell--start { text-align: start; }
+  .ci-table__head--end,
+  .ci-table__cell--end { text-align: end; }
   .ci-table__head--sticky-end,
   .ci-table__cell--sticky-end {
     position: sticky;
-    right: 0;
+    inset-inline-end: 0;
     z-index: 2;
     box-shadow: -1px 0 0 var(--ci-color-border-subtle);
   }
@@ -1516,12 +1986,34 @@
   .ci-table__row[data-state="selected"] > .ci-table__cell--sticky-end {
     background: var(--ci-color-surface-muted);
   }
+  /* sticky="start" mirrors the end edge. Each edge line is on the scrolling side of its cell,
+     which is the other physical side in right-to-left. */
+  .ci-table__head--sticky-start,
+  .ci-table__cell--sticky-start {
+    position: sticky;
+    inset-inline-start: 0;
+    z-index: 2;
+    box-shadow: 1px 0 0 var(--ci-color-border-subtle);
+  }
+  .ci-table__head--sticky-start {
+    z-index: 3;
+    background: var(--ci-color-surface-subtle);
+  }
+  .ci-table__cell--sticky-start { background: var(--ci-color-surface); }
+  .ci-table__body .ci-table__row:hover > .ci-table__cell--sticky-start,
+  .ci-table__row[data-state="selected"] > .ci-table__cell--sticky-start {
+    background: var(--ci-color-surface-muted);
+  }
+  .ci-table__head--sticky-end:dir(rtl),
+  .ci-table__cell--sticky-end:dir(rtl) { box-shadow: 1px 0 0 var(--ci-color-border-subtle); }
+  .ci-table__head--sticky-start:dir(rtl),
+  .ci-table__cell--sticky-start:dir(rtl) { box-shadow: -1px 0 0 var(--ci-color-border-subtle); }
   .ci-table__footer { border-top: var(--ci-border-default) solid var(--ci-color-border); background: var(--ci-color-surface-subtle); font-weight: var(--ci-font-weight-regular); line-height: var(--ci-type-caption-leading); letter-spacing: var(--ci-type-caption-tracking); }
   .ci-table__caption {
-    padding: var(--ci-space-3);
+    padding: var(--ci-space-3) var(--ci-table-cell-padding-inline, var(--ci-space-3));
     color: var(--ci-color-text-muted);
     font-size: var(--ci-font-size-xs);
-    text-align: left;
+    text-align: start;
     font-weight: var(--ci-font-weight-regular);
     line-height: var(--ci-type-caption-leading);
     letter-spacing: var(--ci-type-caption-tracking);
@@ -1531,7 +2023,7 @@
     color: var(--ci-color-text-muted);
     font-size: var(--ci-font-size-xs);
     line-height: var(--ci-line-height-body);
-    text-align: left;
+    text-align: start;
   }
   .ci-table-action-link {
     display: inline-grid;
@@ -1575,6 +2067,21 @@
     font-weight: var(--ci-font-weight-semibold);
   }
   .ci-model-identity__name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ci-model-identity[data-size="sm"] { gap: var(--ci-space-1-5); }
+  .ci-model-identity[data-size="sm"] .ci-model-identity__mark { width: 1.25rem; height: 1.25rem; }
+  .ci-model-identity[data-size="lg"] { gap: var(--ci-space-3); }
+  .ci-model-identity[data-size="lg"] .ci-model-identity__mark { width: 2rem; height: 2rem; font-size: var(--ci-font-size-sm); }
+  .ci-model-identity__text { display: grid; min-width: 0; }
+  .ci-model-identity__description {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--ci-color-text-muted);
+    font-size: var(--ci-font-size-xs);
+    font-weight: var(--ci-font-weight-regular);
+    line-height: var(--ci-type-caption-leading);
+    letter-spacing: var(--ci-type-caption-tracking);
+  }
 
   .ci-stat-row {
     display: grid;
@@ -1668,22 +2175,55 @@
   .ci-stat--positive .ci-stat__value { color: var(--ci-color-success); }
   .ci-stat--critical .ci-stat__value { color: var(--ci-color-danger); }
   .ci-stat--warning .ci-stat__value { color: var(--ci-color-warning); }
+  .ci-stat--info .ci-stat__value { color: var(--ci-color-info); }
+  .ci-stat--accent .ci-stat__value { color: var(--ci-color-accent-ink); }
+  .ci-stat--muted .ci-stat__value { color: var(--ci-color-text-muted); }
   .ci-stat__hint { margin-top: var(--ci-space-2); color: var(--ci-color-text-subtle); font-size: var(--ci-font-size-xs); font-weight: var(--ci-font-weight-regular); line-height: var(--ci-type-caption-leading); letter-spacing: var(--ci-type-caption-tracking); }
+
+  /* Compact size: key-value tiles inside cards and dense panels. A StatRow passes its size down,
+   * and a Stat that asks for the default size keeps it. The Stat inside a MetricCard belongs to
+   * the card: it takes its size from stat.size only, and the padding rule stays a plain selector
+   * so the card's own padding still wins. */
+  .ci-stat[data-size="sm"],
+  .ci-stat-row[data-size="sm"] .ci-stat:not([data-size="md"]):not(.ci-metric-card__stat) { padding: var(--ci-space-3); }
+  :is(.ci-stat[data-size="sm"], .ci-stat-row[data-size="sm"] .ci-stat:not([data-size="md"]):not(.ci-metric-card__stat)) .ci-stat__label { gap: var(--ci-space-1); }
+  :is(.ci-stat[data-size="sm"], .ci-stat-row[data-size="sm"] .ci-stat:not([data-size="md"]):not(.ci-metric-card__stat)):not([data-label-variant="eyebrow"]) .ci-stat__label {
+    color: var(--ci-color-text-muted);
+    font-size: var(--ci-font-size-xs);
+  }
+  :is(.ci-stat[data-size="sm"], .ci-stat-row[data-size="sm"] .ci-stat:not([data-size="md"]):not(.ci-metric-card__stat)) .ci-stat__icon { width: var(--ci-icon-size-sm); height: var(--ci-icon-size-sm); }
+  :is(.ci-stat[data-size="sm"], .ci-stat-row[data-size="sm"] .ci-stat:not([data-size="md"]):not(.ci-metric-card__stat)) .ci-stat__value {
+    min-height: 0;
+    margin-top: var(--ci-space-1);
+    font-family: var(--ci-font-ui);
+    font-size: var(--ci-font-size-md);
+    font-weight: var(--ci-font-weight-semibold);
+    font-variant-numeric: tabular-nums;
+    line-height: var(--ci-type-body-leading);
+    letter-spacing: var(--ci-type-body-tracking);
+  }
+  :is(.ci-stat[data-size="sm"], .ci-stat-row[data-size="sm"] .ci-stat:not([data-size="md"]):not(.ci-metric-card__stat)) .ci-stat__hint { margin-top: var(--ci-space-1); }
 
   .ci-progress { display: grid; gap: var(--ci-space-2); }
   .ci-progress__header { display: flex; align-items: center; justify-content: space-between; gap: var(--ci-space-3); color: var(--ci-color-text-muted); font-size: var(--ci-font-size-sm); }
   .ci-progress__value { color: var(--ci-color-heading); font-weight: var(--ci-font-weight-semibold); font-variant-numeric: tabular-nums; }
   .ci-progress__track { width: 100%; height: 0.5rem; overflow: hidden; border-radius: var(--ci-radius-pill); background: var(--ci-color-surface-muted); }
+  /* Thinner tracks for table cells and dense cards. The default size (md) keeps the 0.5rem above and adds no attribute. */
+  .ci-progress[data-size="sm"] .ci-progress__track { height: 0.375rem; }
+  .ci-progress[data-size="xs"] .ci-progress__track { height: 0.25rem; }
   .ci-progress__indicator { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--ci-color-accent-active), var(--ci-color-accent)); transition: width 900ms var(--ci-ease-emphasized); }
   .ci-progress__indicator[data-tone="success"] { background: var(--ci-color-success); }
   .ci-progress__indicator[data-tone="warning"] { background: var(--ci-color-warning); }
   .ci-progress__indicator[data-tone="danger"] { background: var(--ci-color-danger); }
   .ci-progress__indicator[data-tone="info"] { background: var(--ci-color-info); }
+  /* Any CSS colour, set inline by the `color` prop: a chart series or a colour the caller owns.
+     It only reaches colour properties, so a value that is not a colour (a url(), a gradient) paints nothing. */
+  .ci-progress__indicator[data-color] { background-image: none; background-color: var(--ci-progress-color); }
   /* Stacked parts: square inner ends (the pill track clips the outer ones) and a 2px track-coloured seam.
      Every rendered part is non-zero and keeps at least 2px of its own colour; larger parts shrink to make room. */
   .ci-progress__track[data-segmented] { display: flex; }
   .ci-progress__segment { flex: 0 1 auto; min-width: 0.125rem; box-sizing: border-box; border-radius: 0; }
-  .ci-progress__segment + .ci-progress__segment { min-width: 0.25rem; border-left: 0.125rem solid var(--ci-color-surface-muted); }
+  .ci-progress__segment + .ci-progress__segment { min-width: 0.25rem; border-inline-start: 0.125rem solid var(--ci-color-surface-muted); }
   .ci-progress[data-state="indeterminate"] .ci-progress__indicator { width: 40%; animation: ci-progress-indeterminate 1.4s var(--ci-ease-standard) infinite; }
   /* Allocation bands: each band has its own track, sized by its capacity (inline flex-grow), and its own fill.
      The 1px edge in the band ink shows the capacity on any surface; the fill shows the used part inside it. */
@@ -1693,13 +2233,50 @@
   .ci-progress__band[data-tone="warning"] { --ci-progress-band-ink: var(--ci-color-warning); }
   .ci-progress__band[data-tone="danger"] { --ci-progress-band-ink: var(--ci-color-danger); }
   .ci-progress__band[data-tone="info"] { --ci-progress-band-ink: var(--ci-color-info); }
+  .ci-progress__band[data-color] { --ci-progress-band-ink: var(--ci-progress-color); }
   .ci-progress__band .ci-progress__track { box-sizing: border-box; height: 0.625rem; border: 1px solid var(--ci-progress-band-ink); }
+  /* The 1px edge sits around the fill, so a band is 2px taller than a plain bar of the same size. */
+  .ci-progress[data-size="sm"] .ci-progress__band .ci-progress__track { height: 0.5rem; }
+  .ci-progress[data-size="xs"] .ci-progress__band .ci-progress__track { height: 0.375rem; }
   .ci-progress__band .ci-progress__indicator { background: var(--ci-progress-band-ink); }
+  /* :where() keeps this at the specificity of the forced-colours fill rule below, which has to win. */
+  .ci-progress__band:where([data-color]) .ci-progress__indicator { background-image: none; background-color: var(--ci-progress-color); }
   .ci-progress__band-legend { min-width: 0; overflow-wrap: anywhere; color: var(--ci-color-text-muted); font-size: var(--ci-font-size-xs); font-variant-numeric: tabular-nums; line-height: var(--ci-type-caption-leading); letter-spacing: var(--ci-type-caption-tracking); }
   @media (forced-colors: active) {
     .ci-progress__track { outline: 1px solid CanvasText; outline-offset: -1px; }
     .ci-progress__band .ci-progress__track { outline: none; border-color: CanvasText; }
     .ci-progress__track .ci-progress__indicator { forced-color-adjust: none; background: Highlight; }
+  }
+
+  /* Radial meter: one value in a known range, as a ring on the Progress track fill. The arc runs clockwise
+     from 12 o'clock in every writing direction, as a clock does. Strokes are in the 100-unit viewBox. */
+  .ci-radial-meter { display: inline-grid; justify-items: center; gap: var(--ci-space-2); min-width: 0; color: var(--ci-color-text-muted); font-size: var(--ci-font-size-sm); text-align: center; }
+  .ci-radial-meter__gauge { position: relative; display: grid; place-items: center; width: var(--ci-space-20); height: var(--ci-space-20); }
+  .ci-radial-meter[data-size="sm"] .ci-radial-meter__gauge { width: var(--ci-space-12); height: var(--ci-space-12); }
+  .ci-radial-meter[data-size="lg"] .ci-radial-meter__gauge { width: var(--ci-space-30); height: var(--ci-space-30); }
+  .ci-radial-meter__ring { position: absolute; inset: 0; display: block; width: 100%; height: 100%; overflow: visible; transform: rotate(-90deg); }
+  .ci-radial-meter__track { fill: none; stroke: var(--ci-color-surface-muted); stroke-width: 10; }
+  .ci-radial-meter__arc { fill: none; stroke: var(--ci-color-accent-ink); stroke-width: 10; transition: stroke-dashoffset 900ms var(--ci-ease-emphasized); }
+  .ci-radial-meter[data-tone="success"] .ci-radial-meter__arc { stroke: var(--ci-color-success); }
+  .ci-radial-meter[data-tone="warning"] .ci-radial-meter__arc { stroke: var(--ci-color-warning); }
+  .ci-radial-meter[data-tone="danger"] .ci-radial-meter__arc { stroke: var(--ci-color-danger); }
+  .ci-radial-meter[data-tone="info"] .ci-radial-meter__arc { stroke: var(--ci-color-info); }
+  .ci-radial-meter[data-animate] .ci-radial-meter__arc { animation: ci-radial-meter-draw 900ms var(--ci-ease-emphasized) backwards; }
+  /* The centre stays inside the ring: the hole is 80% of the diameter. */
+  .ci-radial-meter__center { position: relative; display: grid; justify-items: center; min-width: 0; max-width: 72%; color: var(--ci-color-heading); font-size: var(--ci-font-size-lg); font-weight: var(--ci-font-weight-semibold); font-variant-numeric: tabular-nums; line-height: 1.1; overflow-wrap: anywhere; }
+  .ci-radial-meter[data-size="sm"] .ci-radial-meter__center { font-size: var(--ci-font-size-xs); }
+  .ci-radial-meter[data-size="lg"] .ci-radial-meter__center { font-size: var(--ci-font-size-3xl); }
+  .ci-radial-meter__label { min-width: 0; overflow-wrap: anywhere; }
+  .ci-radial-meter[data-size="sm"] .ci-radial-meter__label { font-size: var(--ci-font-size-xs); }
+  @keyframes ci-radial-meter-draw { from { stroke-dashoffset: 100; } }
+  @media (prefers-reduced-motion: reduce) {
+    .ci-radial-meter__arc, .ci-radial-meter[data-animate] .ci-radial-meter__arc { animation: none; transition: none; }
+  }
+  /* SVG keeps its author colours in forced colours, so both strokes take system colours here. The track thins
+     to a hairline, so the arc differs from it by width as well as by colour. */
+  @media (forced-colors: active) {
+    .ci-radial-meter__track { stroke: CanvasText; stroke-width: 1px; vector-effect: non-scaling-stroke; }
+    .ci-radial-meter__arc, .ci-radial-meter[data-tone] .ci-radial-meter__arc { stroke: Highlight; }
   }
 
   /* Data visualization */
@@ -1710,7 +2287,7 @@
   .ci-chart__grid-line line { stroke: var(--ci-color-border-subtle); stroke-width: var(--ci-border-hairline); vector-effect: non-scaling-stroke; }
   .ci-chart__tooltip strong,
   .ci-chart__grid-line text,
-  .ci-chart__x-label { fill: var(--ci-color-text-subtle); font-family: var(--ci-font-ui); font-size: 11px; letter-spacing: var(--ci-type-caption-tracking); font-weight: var(--ci-font-weight-regular); line-height: var(--ci-type-caption-leading); }
+  .ci-chart__x-label { fill: var(--ci-color-text-subtle); font-family: var(--ci-font-ui); font-size: var(--ci-font-size-2xs); letter-spacing: var(--ci-type-caption-tracking); font-weight: var(--ci-font-weight-regular); line-height: var(--ci-type-caption-leading); }
   .ci-chart__grid-line text { text-anchor: end; }
   .ci-chart__x-label { text-anchor: middle; }
   .ci-chart__line { fill: none; stroke: var(--ci-chart-color); stroke-linecap: round; stroke-linejoin: round; stroke-width: 2; vector-effect: non-scaling-stroke; }
@@ -1792,7 +2369,7 @@
     width: 2rem;
     height: 2rem;
     flex: none;
-    margin: -0.25rem -0.25rem 0 0;
+    margin-block: -0.25rem 0; margin-inline: 0 -0.25rem;
     place-items: center;
     border: 0;
     border-radius: var(--ci-radius-full);
@@ -1817,9 +2394,29 @@
   .ci-alert[data-layout="inline"] .ci-alert__body { display: flex; flex-wrap: wrap; align-items: center; gap: var(--ci-space-2) var(--ci-space-4); }
   .ci-alert[data-layout="inline"] .ci-alert__message { display: flex; flex: 1 1 20rem; flex-wrap: wrap; align-items: baseline; gap: var(--ci-space-1) var(--ci-space-2); }
   .ci-alert[data-layout="inline"] .ci-alert__description { margin-top: 0; }
-  .ci-alert[data-layout="inline"] .ci-alert__actions { flex: none; margin-top: 0; margin-left: auto; }
+  .ci-alert[data-layout="inline"] .ci-alert__actions { flex: none; margin-top: 0; margin-inline-start: auto; }
   .ci-alert[data-layout="inline"] .ci-alert__icon { width: var(--ci-icon-size-sm); height: var(--ci-icon-size-sm); background: transparent; }
   .ci-alert[data-layout="inline"].ci-alert--warning { background: var(--ci-color-warning-bg); }
+
+  /* Compact size for dialogs, table rows and nested panels. Declared after the inline layout so
+     it also resizes the inline icon. Text stays at 12px, the dismiss button at 24px. */
+  .ci-alert[data-size="sm"] { gap: var(--ci-space-2); padding: var(--ci-space-2) var(--ci-space-3); }
+  /* A single line centres on the icon and the dismiss button; taller content keeps them at the top. */
+  .ci-alert[data-size="sm"] .ci-alert__body { align-self: center; font-size: var(--ci-font-size-xs); line-height: var(--ci-type-body-leading); }
+  .ci-alert[data-size="sm"] :is(.ci-alert__title, .ci-alert__description) { font-size: var(--ci-font-size-xs); }
+  .ci-alert[data-size="sm"] .ci-alert__title { line-height: var(--ci-type-body-leading); }
+  .ci-alert[data-size="sm"] .ci-alert__description { margin-block-start: var(--ci-space-0-5); }
+  .ci-alert[data-size="sm"] .ci-alert__description:first-child { margin-block-start: 0; }
+  .ci-alert[data-size="sm"] .ci-alert__actions { margin-block-start: var(--ci-space-2); }
+  .ci-alert[data-size="sm"] .ci-alert__icon { width: var(--ci-space-5); height: var(--ci-space-5); }
+  .ci-alert[data-size="sm"] :is(.ci-alert__icon, .ci-alert__dismiss) svg { width: var(--ci-icon-size-xs); height: var(--ci-icon-size-xs); }
+  .ci-alert[data-size="sm"] .ci-alert__dismiss { width: var(--ci-space-6); height: var(--ci-space-6); margin: calc(var(--ci-space-0-5) * -1); margin-inline-start: 0; }
+  .ci-alert[data-size="sm"][data-layout="inline"] { padding-block: var(--ci-space-1-5); }
+  .ci-alert[data-size="sm"][data-layout="inline"] .ci-alert__icon { width: var(--ci-icon-size-xs); height: var(--ci-icon-size-xs); }
+  .ci-alert[data-size="sm"][data-layout="inline"] :is(.ci-alert__description, .ci-alert__actions) { margin-block-start: 0; }
+  /* 12px text needs less room before the actions wrap, so the line also holds inside a dialog. */
+  .ci-alert[data-size="sm"][data-layout="inline"] .ci-alert__body { gap: var(--ci-space-1) var(--ci-space-3); }
+  .ci-alert[data-size="sm"][data-layout="inline"] .ci-alert__message { flex-basis: var(--ci-space-40); }
 
   .ci-tooltip { position: relative; display: inline-flex; }
   .ci-tooltip__content {
@@ -1837,6 +2434,10 @@
     line-height: var(--ci-type-caption-leading);
     letter-spacing: var(--ci-type-caption-tracking);
   }
+  /* The tooltip has no exit animation. A closed one drops its animation so that it unmounts at
+     once: otherwise a tooltip closed just after opening can wait for an animation end that
+     never comes, and stay on screen. */
+  .ci-tooltip__content[data-state="closed"] { animation: none; }
   .ci-dialog__overlay {
     position: fixed;
     z-index: var(--ci-z-modal);
@@ -1852,7 +2453,10 @@
     left: 50%;
     width: calc(100vw - 3rem);
     max-width: 30rem;
+    /* dvh is the visible viewport: on a phone with the browser toolbar showing, 100vh is taller than
+       the screen. The vh line stays first for browsers without dvh. Same for full and the sheets. */
     max-height: min(42rem, calc(100vh - 3rem));
+    max-height: min(42rem, calc(100dvh - 3rem));
     overflow-y: auto;
     border: var(--ci-border-default) solid var(--ci-color-border-strong);
     border-radius: var(--ci-radius-surface);
@@ -1865,14 +2469,14 @@
     transform: translate(-50%, -50%);
     animation: ci-dialog-in var(--ci-duration-base) var(--ci-ease-emphasized);
   }
-  .ci-dialog__header { display: grid; gap: var(--ci-space-2); padding-right: var(--ci-space-8); }
+  .ci-dialog__header { display: grid; gap: var(--ci-space-2); padding-inline-end: var(--ci-space-8); }
   .ci-dialog__title { margin: 0; color: var(--ci-color-heading); font-family: var(--ci-font-display); font-size: var(--ci-font-size-3xl); font-weight: var(--ci-font-weight-medium); line-height: var(--ci-type-heading-leading); letter-spacing: var(--ci-type-heading-tracking); }
   .ci-dialog__description { margin: 0; color: var(--ci-color-text-muted); font-size: var(--ci-font-size-sm); line-height: var(--ci-type-body-leading); font-weight: var(--ci-font-weight-regular); letter-spacing: var(--ci-type-body-tracking); }
   .ci-dialog__footer { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--ci-space-2); margin-top: var(--ci-space-6); }
   .ci-dialog__close {
     position: absolute;
     top: var(--ci-space-4);
-    right: var(--ci-space-4);
+    inset-inline-end: var(--ci-space-4);
     display: grid;
     width: var(--ci-control-height-md);
     height: var(--ci-control-height-md);
@@ -1887,7 +2491,13 @@
   .ci-dialog__close:focus-visible { outline: none; box-shadow: var(--ci-ring-focus); }
   .ci-dialog__close svg { width: var(--ci-icon-size-sm); height: var(--ci-icon-size-sm); stroke-width: var(--ci-icon-stroke-width); }
   /* No close button to clear, on either side. */
-  .ci-dialog[role="alertdialog"] .ci-dialog__header { padding-right: 0; }
+  .ci-dialog[role="alertdialog"] .ci-dialog__header { padding-inline-end: 0; }
+  /* Larger content sizes move the cap only. The width stays the viewport minus the margin, so no
+     size overflows a small screen, and :where() leaves them at the specificity of .ci-dialog.
+     full also takes the whole height, so it does not resize with its content. */
+  .ci-dialog:where([data-size="lg"]) { max-width: 48rem; }
+  .ci-dialog:where([data-size="xl"]) { max-width: 64rem; }
+  .ci-dialog:where([data-size="full"]) { max-width: none; height: calc(100vh - 3rem); height: calc(100dvh - 3rem); max-height: calc(100vh - 3rem); max-height: calc(100dvh - 3rem); }
 
   .ci-popover {
     z-index: var(--ci-z-dropdown);
@@ -1951,7 +2561,7 @@
   .ci-menu__indicator svg { width: 100%; height: 100%; stroke-width: var(--ci-icon-stroke-width); }
   .ci-menu__indicator svg { width: 0.875rem; height: 0.875rem; fill: none; stroke-width: 2.4; }
   .ci-menu__item[role="menuitemradio"] .ci-menu__indicator svg { width: 0.5rem; height: 0.5rem; fill: currentColor; stroke: none; }
-  .ci-menu__shortcut { margin-left: var(--ci-space-4); color: var(--ci-color-text-subtle); font-size: var(--ci-font-size-xs); font-weight: var(--ci-font-weight-regular); line-height: var(--ci-type-caption-leading); letter-spacing: var(--ci-type-caption-tracking); }
+  .ci-menu__shortcut { margin-inline-start: var(--ci-space-4); color: var(--ci-color-text-subtle); font-size: var(--ci-font-size-xs); font-weight: var(--ci-font-weight-regular); line-height: var(--ci-type-caption-leading); letter-spacing: var(--ci-type-caption-tracking); }
   .ci-menu__section-label { padding: var(--ci-space-2) var(--ci-space-3) var(--ci-space-1); color: var(--ci-color-text-subtle); font-size: var(--ci-font-size-xs); font-weight: var(--ci-font-weight-medium); text-transform: uppercase; line-height: var(--ci-type-control-leading); letter-spacing: var(--ci-type-control-tracking); }
   .ci-menu__separator { height: 1px; margin: var(--ci-space-1) calc(var(--ci-space-1) * -1); background: var(--ci-color-border-subtle); }
 
@@ -2020,8 +2630,8 @@
   .ci-feature-notice__content { position: absolute; z-index: var(--ci-z-toast); width: min(var(--ci-feature-notice-width, 384px), calc(100vw - 2rem)); }
   .ci-feature-notice[data-side="bottom"] > .ci-feature-notice__content { top: calc(100% + var(--ci-space-3)); }
   .ci-feature-notice[data-side="top"] > .ci-feature-notice__content { bottom: calc(100% + var(--ci-space-3)); }
-  .ci-feature-notice[data-align="start"] > .ci-feature-notice__content { left: 0; right: auto; }
-  .ci-feature-notice[data-align="end"] > .ci-feature-notice__content { right: 0; left: auto; }
+  .ci-feature-notice[data-align="start"] > .ci-feature-notice__content { inset-inline-start: 0; inset-inline-end: auto; }
+  .ci-feature-notice[data-align="end"] > .ci-feature-notice__content { inset-inline-end: 0; inset-inline-start: auto; }
   /* Brand tints: brandTintVars() supplies the brand and a per-scheme ink and border on the element.
      Headings and secondary text move to the ink because the neutrals are not guaranteed on an
      arbitrary tint; body text stays on the neutral foreground, which is. */
@@ -2039,8 +2649,8 @@
   .ci-feature-notice__leading { display: inline-flex; flex-shrink: 0; }
   .ci-feature-notice__title-text { min-width: 0; overflow-wrap: anywhere; }
   @media (max-width: 639px) {
-    .ci-feature-notice[data-mobile-align="start"] > .ci-feature-notice__content { left: 0; right: auto; }
-    .ci-feature-notice[data-mobile-align="end"] > .ci-feature-notice__content { right: 0; left: auto; }
+    .ci-feature-notice[data-mobile-align="start"] > .ci-feature-notice__content { inset-inline-start: 0; inset-inline-end: auto; }
+    .ci-feature-notice[data-mobile-align="end"] > .ci-feature-notice__content { inset-inline-end: 0; inset-inline-start: auto; }
   }
 
   .ci-toast__title { color: var(--ci-color-heading); font-size: var(--ci-font-size-sm); font-weight: var(--ci-font-weight-medium); line-height: var(--ci-type-heading-leading); letter-spacing: var(--ci-type-heading-tracking); }
@@ -2077,9 +2687,60 @@
   .ci-avatar__fallback { position: absolute; inset: 0; width: 100%; height: 100%; }
   .ci-avatar__image { z-index: 1; object-fit: cover; }
   .ci-avatar__fallback { display: grid; place-items: center; }
-  .ci-avatar-group { display: flex; align-items: center; padding-left: var(--ci-space-2); }
-  .ci-avatar-group__item { display: inline-flex; margin-left: calc(var(--ci-space-2) * -1); }
+  .ci-avatar-group { display: flex; align-items: center; padding-inline-start: var(--ci-space-2); }
+  .ci-avatar-group__item { display: inline-flex; margin-inline-start: calc(var(--ci-space-2) * -1); }
   .ci-avatar-group__item .ci-avatar { box-shadow: 0 0 0 2px var(--ci-color-background); }
+
+  /* IconChip: an icon on a tinted square or circle. The tones are the Badge pairs (ink on
+     tint), neutral being the base rule; the sizes are the Avatar scale, with the icon at half
+     the chip. font-size carries the icon size to an icon font or a single character. */
+  .ci-icon-chip {
+    --ci-icon-chip-size: 2.5rem;
+    --ci-icon-chip-icon-size: var(--ci-icon-size-md);
+    display: inline-grid;
+    box-sizing: border-box;
+    width: var(--ci-icon-chip-size);
+    height: var(--ci-icon-chip-size);
+    flex: none;
+    place-items: center;
+    border-radius: var(--ci-radius-control);
+    color: var(--ci-color-foreground);
+    background: var(--ci-color-surface-muted);
+    font-family: var(--ci-font-ui);
+    font-size: var(--ci-icon-chip-icon-size);
+    font-weight: var(--ci-font-weight-medium);
+    line-height: 1;
+    vertical-align: middle;
+  }
+  /* Any depth: an icon component may wrap its svg in an element of its own. Only the outermost
+     svg is sized, so one nested in the drawing keeps its geometry. */
+  .ci-icon-chip svg:not(svg svg) { width: var(--ci-icon-chip-icon-size); height: var(--ci-icon-chip-icon-size); stroke-width: var(--ci-icon-stroke-width); }
+  .ci-icon-chip[data-size="xs"] { --ci-icon-chip-size: 1.5rem; --ci-icon-chip-icon-size: var(--ci-icon-size-xs); }
+  .ci-icon-chip[data-size="sm"] { --ci-icon-chip-size: 2rem; --ci-icon-chip-icon-size: var(--ci-icon-size-sm); }
+  .ci-icon-chip[data-size="lg"] { --ci-icon-chip-size: 3rem; --ci-icon-chip-icon-size: var(--ci-icon-size-lg); }
+  .ci-icon-chip[data-size="xl"] { --ci-icon-chip-size: 4rem; --ci-icon-chip-icon-size: var(--ci-space-8); }
+  .ci-icon-chip[data-shape="circle"] { border-radius: var(--ci-radius-full); }
+  .ci-icon-chip[data-tone="success"] { color: var(--ci-color-success); background: var(--ci-color-success-bg); }
+  .ci-icon-chip[data-tone="warning"] { color: var(--ci-color-warning); background: var(--ci-color-warning-bg); }
+  .ci-icon-chip[data-tone="info"] { color: var(--ci-color-info); background: var(--ci-color-info-bg); }
+  .ci-icon-chip[data-tone="danger"] { color: var(--ci-color-danger); background: var(--ci-color-danger-bg); }
+  .ci-icon-chip[data-tone="accent"] { color: var(--ci-badge-accent-ink); background: var(--ci-color-accent-surface-strong); }
+  .ci-icon-chip[data-tone="chart-1"] { color: var(--ci-chart-1-ink); background: var(--ci-chart-1-subtle); }
+  .ci-icon-chip[data-tone="chart-2"] { color: var(--ci-chart-2-ink); background: var(--ci-chart-2-subtle); }
+  .ci-icon-chip[data-tone="chart-3"] { color: var(--ci-chart-3-ink); background: var(--ci-chart-3-subtle); }
+  .ci-icon-chip[data-tone="chart-4"] { color: var(--ci-chart-4-ink); background: var(--ci-chart-4-subtle); }
+  .ci-icon-chip[data-tone="chart-5"] { color: var(--ci-chart-5-ink); background: var(--ci-chart-5-subtle); }
+  .ci-icon-chip[data-tone="chart-6"] { color: var(--ci-chart-6-ink); background: var(--ci-chart-6-subtle); }
+  .ci-icon-chip[data-tone="chart-7"] { color: var(--ci-chart-7-ink); background: var(--ci-chart-7-subtle); }
+  .ci-icon-chip[data-tone="chart-8"] { color: var(--ci-chart-8-ink); background: var(--ci-chart-8-subtle); }
+  /* As the icon of an EmptyState the chip stands alone: the slot drops its own bordered box
+     and stops sizing the icon, which follows the chip. */
+  .ci-empty-state__icon:has(> .ci-icon-chip) { width: auto; height: auto; border: 0; background: none; }
+  .ci-empty-state__icon > .ci-icon-chip svg:not(svg svg) { width: var(--ci-icon-chip-icon-size); height: var(--ci-icon-chip-icon-size); }
+  /* Forced colours drop the tint, so a system-colour edge keeps the shape of the chip. */
+  @media (forced-colors: active) {
+    .ci-icon-chip { border: var(--ci-border-default) solid CanvasText; }
+  }
 
   .ci-accordion { width: 100%; font-family: var(--ci-font-ui); }
   .ci-accordion--bordered { overflow: hidden; border: var(--ci-border-default) solid var(--ci-color-border); border-radius: var(--ci-radius-surface); background: var(--ci-color-surface); }
@@ -2100,7 +2761,7 @@
     font-family: var(--ci-font-ui);
     font-size: var(--ci-font-size-sm);
     font-weight: var(--ci-font-weight-medium);
-    text-align: left;
+    text-align: start;
     cursor: pointer;
     line-height: var(--ci-type-control-leading);
     letter-spacing: var(--ci-type-control-tracking);
@@ -2129,7 +2790,7 @@
   .ci-loading__content { display: grid; gap: var(--ci-space-0-5); }
   .ci-loading__label { color: var(--ci-color-heading); font-size: var(--ci-font-size-sm); font-weight: var(--ci-font-weight-medium); line-height: var(--ci-type-control-leading); letter-spacing: var(--ci-type-control-tracking); }
   .ci-loading__description { color: var(--ci-color-text-muted); font-size: var(--ci-font-size-xs); font-weight: var(--ci-font-weight-regular); line-height: var(--ci-type-body-leading); letter-spacing: var(--ci-type-body-tracking); }
-  .ci-loading__elapsed { margin-left: auto; color: var(--ci-color-text-subtle); font-size: var(--ci-font-size-xs); font-variant-numeric: tabular-nums; font-weight: var(--ci-font-weight-regular); line-height: var(--ci-type-caption-leading); letter-spacing: var(--ci-type-caption-tracking); }
+  .ci-loading__elapsed { margin-inline-start: auto; color: var(--ci-color-text-subtle); font-size: var(--ci-font-size-xs); font-variant-numeric: tabular-nums; font-weight: var(--ci-font-weight-regular); line-height: var(--ci-type-caption-leading); letter-spacing: var(--ci-type-caption-tracking); }
 
   .ci-empty-state {
     display: grid;
@@ -2147,11 +2808,39 @@
   }
   .ci-empty-state[data-compact="true"] { min-height: 10rem; padding: var(--ci-space-5); }
   .ci-empty-state__icon { display: grid; width: 2.5rem; height: 2.5rem; place-items: center; border: var(--ci-border-default) solid var(--ci-color-border); border-radius: var(--ci-radius-control); background: var(--ci-color-surface); color: var(--ci-color-heading); }
-  .ci-empty-state__icon svg { width: var(--ci-icon-size-md); height: var(--ci-icon-size-md); stroke-width: var(--ci-icon-stroke-width); }
+  /* An IconChip in the slot sizes its own icon; :where() keeps the specificity this rule always had. */
+  .ci-empty-state__icon svg:where(:not(.ci-icon-chip svg)) { width: var(--ci-icon-size-md); height: var(--ci-icon-size-md); stroke-width: var(--ci-icon-stroke-width); }
   .ci-empty-state__content { display: grid; max-width: 28rem; gap: var(--ci-space-1); }
   .ci-empty-state__title { margin: 0; color: var(--ci-color-heading); font-family: var(--ci-font-display); font-size: var(--ci-font-size-2xl); font-weight: var(--ci-font-weight-medium); line-height: var(--ci-type-heading-leading); letter-spacing: var(--ci-type-heading-tracking); }
   .ci-empty-state__description { margin: 0; color: var(--ci-color-text-muted); font-size: var(--ci-font-size-sm); line-height: var(--ci-type-body-leading); font-weight: var(--ci-font-weight-regular); letter-spacing: var(--ci-type-body-tracking); }
   .ci-empty-state__actions { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--ci-space-2); }
+  /* One line for the empty state of a short list, a field or a table cell. Declared after
+     [data-compact] so the panel's minimum height never applies to it. */
+  .ci-empty-state[data-layout="inline"] {
+    display: flex;
+    min-height: 0;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-start;
+    gap: var(--ci-space-2) var(--ci-space-3);
+    border-style: none;
+    border-radius: var(--ci-radius-control);
+    padding: var(--ci-space-3) var(--ci-space-4);
+    background: transparent;
+    text-align: start;
+  }
+  /* The slot hugs its content: a bare icon is 16px, and any other node (a chip, an avatar, a spinner) keeps its own size. */
+  .ci-empty-state[data-layout="inline"] .ci-empty-state__icon { width: auto; height: auto; flex: none; border: 0; border-radius: 0; background: transparent; color: var(--ci-color-text-muted); }
+  .ci-empty-state[data-layout="inline"] .ci-empty-state__icon > svg { width: var(--ci-icon-size-sm); height: var(--ci-icon-size-sm); }
+  .ci-empty-state[data-layout="inline"] .ci-empty-state__content { display: flex; min-width: 0; max-width: none; flex: 1 1 12rem; flex-wrap: wrap; align-items: baseline; gap: var(--ci-space-1) var(--ci-space-2); }
+  .ci-empty-state[data-layout="inline"] .ci-empty-state__title { font-family: var(--ci-font-ui); font-size: var(--ci-font-size-sm); line-height: var(--ci-type-body-leading); letter-spacing: var(--ci-type-body-tracking); }
+  /* A title on its own is a note, so it reads as muted body text; with a description it stays the heading colour. */
+  .ci-empty-state[data-layout="inline"] .ci-empty-state__title:only-child { color: var(--ci-color-text-muted); font-weight: var(--ci-font-weight-regular); }
+  .ci-empty-state[data-layout="inline"] .ci-empty-state__actions { flex: none; justify-content: flex-start; margin-inline-start: auto; }
+  /* The box is a prop in both layouts. Without it the empty state sits on the surface of its parent. */
+  .ci-empty-state[data-border="solid"] { border-style: solid; }
+  .ci-empty-state[data-border="dashed"] { border-style: dashed; border-color: var(--ci-color-border-strong); }
+  .ci-empty-state[data-border="none"] { border-style: none; background: transparent; }
 
   .ci-sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; padding: 0; border: 0; margin: -1px; clip: rect(0, 0, 0, 0); white-space: nowrap; }
 
@@ -2187,6 +2876,7 @@
   .ci-command__shortcut { display: inline-flex; flex: none; align-items: center; gap: var(--ci-space-1); margin-inline-start: auto; color: var(--ci-color-text-muted); }
   .ci-command__empty { color: var(--ci-color-text-muted); font-size: var(--ci-font-size-sm); line-height: var(--ci-type-body-leading); text-align: center; }
   .ci-command__empty[data-empty] { padding: var(--ci-space-6) var(--ci-space-4); }
+  .ci-command__footer { display: flex; flex: none; flex-wrap: wrap; align-items: center; gap: var(--ci-space-1) var(--ci-space-4); min-height: var(--ci-control-height-md); padding: var(--ci-space-1-5) var(--ci-space-3); border-block-start: var(--ci-border-default) solid var(--ci-color-border-subtle); color: var(--ci-color-text-muted); font-size: var(--ci-font-size-xs); font-weight: var(--ci-font-weight-regular); line-height: var(--ci-type-caption-leading); letter-spacing: var(--ci-type-caption-tracking); }
   @media (forced-colors: active) {
     .ci-command__item[data-active] { background: Highlight; color: HighlightText; forced-color-adjust: none; }
     .ci-command__item[data-active] :is(.ci-command__icon, .ci-command__description, .ci-command__shortcut) { color: HighlightText; }
@@ -2211,6 +2901,15 @@
   .ci-page-header__content { display: grid; min-width: 0; gap: var(--ci-space-2); }
   .ci-page-header__title { margin: 0; color: var(--ci-color-heading); font-family: var(--ci-font-display); font-size: var(--ci-page-title-size); font-weight: var(--ci-page-title-weight); line-height: var(--ci-page-title-leading); letter-spacing: var(--ci-type-heading-tracking); }
   .ci-page-header[data-compact="true"] .ci-page-header__title { font-size: var(--ci-page-title-compact-size); font-weight: var(--ci-page-title-weight); line-height: var(--ci-page-title-leading); letter-spacing: var(--ci-type-heading-tracking); }
+  /* The icon box takes the title's font size and leading, so it is one title line tall (1lh) and the
+     icon, 3/4 of the title size, follows every title size and stays on the first line of a wrapped
+     title. The leading token is a number or an em length, so the height reads it through lh. */
+  .ci-page-header__heading { --page-header-title-size: var(--ci-page-title-size); display: flex; min-width: 0; align-items: flex-start; gap: var(--ci-space-3); }
+  .ci-page-header[data-compact="true"] .ci-page-header__heading { --page-header-title-size: var(--ci-page-title-compact-size); }
+  .ci-page-header__heading > .ci-page-header__title { min-width: 0; }
+  .ci-page-header__icon { display: inline-flex; flex: none; width: 0.75em; height: 1.1em; height: 1lh; align-items: center; justify-content: center; color: var(--ci-color-text-muted); font-size: var(--page-header-title-size); line-height: var(--ci-page-title-leading); }
+  .ci-page-header__icon > :is(svg, img) { width: 0.75em; height: 0.75em; flex: none; object-fit: contain; }
+  .ci-page-header__icon > svg { stroke-width: var(--ci-icon-stroke-width); }
   .ci-page-header__description { max-width: 42rem; margin: 0; color: var(--ci-color-text-muted); font-size: var(--ci-font-size-sm); line-height: var(--ci-type-body-leading); font-weight: var(--ci-font-weight-regular); letter-spacing: var(--ci-type-body-tracking); }
   .ci-page-header__actions,
   .ci-section-header__actions { display: flex; flex: none; flex-wrap: wrap; align-items: center; gap: var(--ci-space-2); }
@@ -2218,10 +2917,18 @@
   .ci-section-header--plain { padding-bottom: 0; border-bottom: 0; }
   .ci-section-header__title { margin: 0; color: var(--ci-color-heading); font-size: var(--ci-font-size-lg); font-weight: var(--ci-font-weight-medium); line-height: var(--ci-type-heading-leading); letter-spacing: var(--ci-type-heading-tracking); }
   .ci-section-header__description { margin: var(--ci-space-1) 0 0; color: var(--ci-color-text-muted); font-size: var(--ci-font-size-sm); font-weight: var(--ci-font-weight-regular); line-height: var(--ci-type-body-leading); letter-spacing: var(--ci-type-body-tracking); }
+  .ci-section-header[data-size="xs"] .ci-section-header__title { font-size: var(--ci-type-heading-size-xs); }
+  .ci-section-header[data-size="sm"] .ci-section-header__title { font-size: var(--ci-type-heading-size-sm); }
+  .ci-section-header[data-size="md"] .ci-section-header__title { font-size: var(--ci-type-heading-size-md); }
+  .ci-section-header[data-size="lg"] .ci-section-header__title { font-size: var(--ci-type-heading-size-lg); }
+  .ci-section-header[data-size="xl"] .ci-section-header__title { font-size: var(--ci-type-heading-size-xl); }
+  .ci-section-header:is([data-size="xs"], [data-size="sm"]) .ci-section-header__description { font-size: var(--ci-font-size-xs); }
   .ci-card > .ci-section-header { padding: var(--ci-space-5) var(--ci-space-6) var(--ci-space-4); }
 
   .ci-pagination { display: flex; width: 100%; justify-content: center; font-family: var(--ci-font-ui); }
   .ci-pagination__content { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: var(--ci-space-1); padding: 0; margin: 0; list-style: none; }
+  /* Button mode (asChild): a <button> first inherits what the link inherits; the link rules below then style both. */
+  :where(button).ci-pagination__link { margin: 0; font: inherit; text-rendering: inherit; cursor: pointer; appearance: none; }
   .ci-pagination__link,
   .ci-pagination__ellipsis { display: inline-flex; min-width: var(--ci-control-height-md); height: var(--ci-control-height-md); align-items: center; justify-content: center; gap: var(--ci-space-1); padding: 0 var(--ci-space-2); border: var(--ci-border-default) solid transparent; border-radius: var(--ci-radius-control); color: var(--ci-color-foreground); background: transparent; font-size: var(--ci-font-size-sm); font-weight: var(--ci-font-weight-medium); text-decoration: none; transition: background-color var(--ci-duration-fast) var(--ci-ease-standard), border-color var(--ci-duration-fast) var(--ci-ease-standard); line-height: var(--ci-type-control-leading); letter-spacing: var(--ci-type-control-tracking); }
   .ci-pagination__link:hover { background: var(--ci-color-surface-muted); }
@@ -2234,15 +2941,22 @@
   .ci-pagination__link--edge { padding-inline: var(--ci-space-3); }
   .ci-pagination__link:not(.ci-pagination__link--edge) { padding-inline: 0; border-radius: var(--ci-radius-full); letter-spacing: 0em; }
   .ci-pagination__ellipsis { color: var(--ci-color-text-muted); }
+  .ci-pagination__summary { display: inline-flex; min-height: var(--ci-control-height-md); align-items: center; padding-inline: var(--ci-space-2); color: var(--ci-color-text-muted); font-size: var(--ci-font-size-sm); font-variant-numeric: tabular-nums; line-height: var(--ci-type-control-leading); white-space: nowrap; }
+  @media (forced-colors: active) {
+    /* The focus ring is a box-shadow, which forced colours drop, and every item already draws its transparent edge. */
+    .ci-pagination__link:focus-visible { outline: 2px solid Highlight; outline-offset: 2px; }
+    .ci-pagination__link[data-active="true"] { border-color: Highlight; }
+    .ci-pagination__link[data-disabled="true"] { color: GrayText; }
+  }
 
   .ci-sidebar-provider { display: flex; width: 100%; min-height: 32rem; align-items: stretch; border-top: var(--ci-border-default) solid var(--ci-color-border); background: var(--ci-color-background); }
   .ci-dashboard-shell { min-height: 100vh; border-top: 0; }
-  .ci-sidebar { position: relative; z-index: 1; display: flex; width: var(--ci-layout-sidebar); min-width: var(--ci-layout-sidebar); flex-direction: column; overflow: hidden; border-right: var(--ci-border-default) solid var(--ci-color-border); background: var(--ci-color-background); color: var(--ci-color-foreground); font-family: var(--ci-font-ui); transition: width var(--ci-duration-base) var(--ci-ease-emphasized), min-width var(--ci-duration-base) var(--ci-ease-emphasized), opacity var(--ci-duration-fast) var(--ci-ease-standard), transform var(--ci-duration-base) var(--ci-ease-emphasized); }
-  .ci-sidebar[data-side="right"] { order: 2; border-right: 0; border-left: var(--ci-border-default) solid var(--ci-color-border); }
+  .ci-sidebar { position: relative; z-index: 1; display: flex; width: var(--ci-layout-sidebar); min-width: var(--ci-layout-sidebar); flex-direction: column; overflow: hidden; border-inline-end: var(--ci-border-default) solid var(--ci-color-border); background: var(--ci-color-background); color: var(--ci-color-foreground); font-family: var(--ci-font-ui); transition: width var(--ci-duration-base) var(--ci-ease-emphasized), min-width var(--ci-duration-base) var(--ci-ease-emphasized), opacity var(--ci-duration-fast) var(--ci-ease-standard), transform var(--ci-duration-base) var(--ci-ease-emphasized); }
+  .ci-sidebar[data-side="right"] { order: 2; border-inline-end: 0; border-inline-start: var(--ci-border-default) solid var(--ci-color-border); }
   .ci-sidebar[data-variant="floating"] { margin: var(--ci-space-2); border: var(--ci-border-default) solid var(--ci-color-border); border-radius: var(--ci-radius-surface); box-shadow: var(--ci-shadow-sm); }
   .ci-sidebar[data-state="collapsed"][data-collapsible="icon"] { width: 4.25rem; min-width: 4.25rem; }
-  .ci-sidebar[data-state="collapsed"][data-collapsible="offcanvas"] { width: 0; min-width: 0; border-right-width: 0; opacity: 0; transform: translateX(-0.75rem); }
-  .ci-sidebar[data-state="collapsed"][data-collapsible="offcanvas"][data-side="right"] { border-left-width: 0; transform: translateX(0.75rem); }
+  .ci-sidebar[data-state="collapsed"][data-collapsible="offcanvas"] { width: 0; min-width: 0; border-inline-end-width: 0; opacity: 0; transform: translateX(-0.75rem); }
+  .ci-sidebar[data-state="collapsed"][data-collapsible="offcanvas"][data-side="right"] { border-inline-start-width: 0; transform: translateX(0.75rem); }
   /* minmax(0, 1fr), not the implicit `auto` track: an `auto` track is floored by
      its items' minimum contribution, and a grid item that is itself a flex
      container (the account row) keeps `min-width: auto`, so an unbreakable
@@ -2257,9 +2971,24 @@
   .ci-sidebar__group { display: grid; gap: var(--ci-space-1); }
   .ci-sidebar__group-label { height: 2rem; display: flex; align-items: center; padding: 0 var(--ci-space-2); color: var(--ci-color-text-muted); font-size: var(--ci-font-size-xs); font-weight: var(--ci-font-weight-medium); letter-spacing: var(--ci-type-control-tracking); text-transform: uppercase; white-space: nowrap; transition: opacity var(--ci-duration-fast) var(--ci-ease-standard); line-height: var(--ci-type-control-leading); }
   .ci-sidebar[data-state="collapsed"] .ci-sidebar__group-label { height: var(--ci-space-2); overflow: hidden; opacity: 0; }
+  /* Collapsible group: the label holds the trigger, which takes over the label's inline padding so its
+     hover fill and focus ring span the header row. With a group action the label keeps its flex row
+     (the trigger's own text ellipsizes) and does not clip the ring. */
+  .ci-sidebar__group-label[data-collapsible="true"] { padding-inline: 0; }
+  .ci-sidebar__group:has(> .ci-sidebar__group-action) > .ci-sidebar__group-label[data-collapsible="true"] { display: flex; overflow: visible; line-height: var(--ci-type-control-leading); }
+  .ci-sidebar__group-trigger { display: flex; min-width: 0; height: 100%; flex: 1; align-items: center; gap: var(--ci-space-2); padding: 0 var(--ci-space-2); border: 0; border-radius: var(--ci-radius-control); color: inherit; background: transparent; font: inherit; letter-spacing: inherit; text-align: start; text-transform: inherit; cursor: pointer; transition: color var(--ci-duration-fast) var(--ci-ease-standard), background-color var(--ci-duration-fast) var(--ci-ease-standard); }
+  .ci-sidebar__group-trigger:hover { color: var(--ci-color-heading); background: var(--ci-color-surface-muted); }
+  /* The transparent outline is what forced colours paint; the ring is the box-shadow everywhere else. */
+  .ci-sidebar__group-trigger:focus-visible { outline: var(--ci-focus-ring-width) solid transparent; box-shadow: var(--ci-ring-focus); }
+  .ci-sidebar__group-trigger-label { min-width: 0; flex: 1; overflow: hidden; text-overflow: ellipsis; }
+  .ci-sidebar__group-chevron { width: var(--ci-icon-size-sm); height: var(--ci-icon-size-sm); flex: none; stroke-width: var(--ci-icon-stroke-width); transform: rotate(-90deg); transition: transform var(--ci-duration-base) var(--ci-ease-emphasized); }
+  .ci-sidebar__group-indicator { display: inline-flex; flex: none; align-items: center; }
+  .ci-sidebar__group-trigger:not([aria-expanded="true"]) .ci-sidebar__group-chevron:dir(rtl) { transform: rotate(90deg); }
+  .ci-sidebar__group-trigger[aria-expanded="true"] .ci-sidebar__group-chevron { transform: rotate(0deg); }
+  .ci-sidebar__group-content[hidden] { display: none; }
   .ci-sidebar__menu { display: grid; gap: var(--ci-space-1); padding: 0; margin: 0; list-style: none; }
   .ci-sidebar__menu-item { position: relative; min-width: 0; }
-  .ci-sidebar__menu-button { display: flex; width: 100%; min-width: 0; min-height: 2.625rem; align-items: center; gap: var(--ci-space-3); overflow: hidden; padding: 0 var(--ci-space-3); border: 0; border-radius: var(--ci-radius-control); color: var(--ci-color-text-muted); background: transparent; font-family: var(--ci-font-ui); font-size: var(--ci-font-size-sm); font-weight: var(--ci-font-weight-medium); text-align: left; text-decoration: none; white-space: nowrap; cursor: pointer; transition: color var(--ci-duration-fast) var(--ci-ease-standard), background-color var(--ci-duration-fast) var(--ci-ease-standard); line-height: var(--ci-type-control-leading); letter-spacing: var(--ci-type-control-tracking); }
+  .ci-sidebar__menu-button { display: flex; width: 100%; min-width: 0; min-height: 2.625rem; align-items: center; gap: var(--ci-space-3); overflow: hidden; padding: 0 var(--ci-space-3); border: 0; border-radius: var(--ci-radius-control); color: var(--ci-color-text-muted); background: transparent; font-family: var(--ci-font-ui); font-size: var(--ci-font-size-sm); font-weight: var(--ci-font-weight-medium); text-align: start; text-decoration: none; white-space: nowrap; cursor: pointer; transition: color var(--ci-duration-fast) var(--ci-ease-standard), background-color var(--ci-duration-fast) var(--ci-ease-standard); line-height: var(--ci-type-control-leading); letter-spacing: var(--ci-type-control-tracking); }
   .ci-sidebar__menu-button:hover { color: var(--ci-color-heading); background: linear-gradient(100deg, var(--ci-color-accent-surface-subtle), transparent); }
   .ci-sidebar__menu-button[data-active="true"] { color: var(--ci-color-accent-foreground); background: var(--ci-color-accent); font-weight: var(--ci-font-weight-semibold); }
   .ci-sidebar__menu-button:focus-visible,
@@ -2267,7 +2996,10 @@
   .ci-sidebar__menu-button > svg { width: var(--ci-icon-size-sm); height: var(--ci-icon-size-sm); flex: none; stroke-width: var(--ci-icon-stroke-width); }
   .ci-sidebar[data-state="collapsed"] .ci-sidebar__menu-button { width: 2.625rem; justify-content: center; padding: 0; margin-inline: auto; }
   .ci-sidebar[data-state="collapsed"] .ci-sidebar__menu-button > :not(svg) { display: none; }
-  .ci-sidebar__menu-badge { position: absolute; top: 50%; right: var(--ci-space-2); transform: translateY(-50%); color: var(--ci-color-heading); font-size: var(--ci-font-size-xs); font-variant-numeric: tabular-nums; }
+  /* A tooltip box around a rail control (SidebarBranch has one) shrink-wraps it at the inline start,
+     off the rail's centre line. As a full-width flex row it lets the control's auto margins centre it. */
+  .ci-sidebar[data-state="collapsed"] .ci-sidebar__menu-item > .ci-tooltip { display: flex; }
+  .ci-sidebar__menu-badge { position: absolute; top: 50%; inset-inline-end: var(--ci-space-2); transform: translateY(-50%); color: var(--ci-color-heading); font-size: var(--ci-font-size-xs); font-variant-numeric: tabular-nums; }
   .ci-sidebar[data-state="collapsed"] .ci-sidebar__menu-badge { display: none; }
   .ci-sidebar__branch-heading { display: flex; align-items: center; gap: var(--ci-space-1); }
   .ci-sidebar__branch-heading > .ci-sidebar__menu-button { flex: 1; }
@@ -2279,18 +3011,18 @@
   .ci-sidebar__branch-toggle:focus-visible { outline: none; box-shadow: var(--ci-ring-focus); }
   .ci-sidebar__branch-toggle svg { width: var(--ci-icon-size-sm); height: var(--ci-icon-size-sm); transform: rotate(-90deg); }
   .ci-sidebar__branch-toggle[aria-expanded="true"] svg { transform: rotate(0); }
-  .ci-sidebar__submenu { display: grid; gap: var(--ci-space-1); margin: var(--ci-space-1) 0 var(--ci-space-2) var(--ci-space-4); padding: 0 0 0 var(--ci-space-2); border-left: var(--ci-border-default) solid var(--ci-color-border-subtle); list-style: none; }
+  .ci-sidebar__submenu { display: grid; gap: var(--ci-space-1); margin-block: var(--ci-space-1) var(--ci-space-2); margin-inline: var(--ci-space-4) 0; padding-block: 0; padding-inline: var(--ci-space-2) 0; border-inline-start: var(--ci-border-default) solid var(--ci-color-border-subtle); list-style: none; }
   .ci-sidebar__submenu[hidden] { display: none; }
   .ci-sidebar__branch .ci-sidebar__menu-button[data-active="true"] { color: var(--ci-sidebar-active-fg); background: var(--ci-sidebar-active-bg); }
   .ci-sidebar-inset { min-width: 0; flex: 1; overflow: auto; background: var(--ci-color-background); }
   .ci-sidebar-shell-header { display: flex; height: calc(4rem + var(--ci-border-default)); align-items: center; gap: var(--ci-space-3); padding: 0 var(--ci-space-6); border-bottom: var(--ci-border-default) solid var(--ci-color-border); }
   .ci-sidebar-trigger { display: inline-grid; width: var(--ci-control-height-md); height: var(--ci-control-height-md); place-items: center; border: var(--ci-border-default) solid var(--ci-color-border); border-radius: var(--ci-radius-control); color: var(--ci-color-heading); background: var(--ci-color-surface); cursor: pointer; }
   .ci-sidebar-trigger:hover { background: var(--ci-color-surface-muted); }
-  .ci-sidebar-shell-header .ci-sidebar-trigger { width: auto; padding: 0 var(--ci-space-3) 0 0; border: 0; border-right: var(--ci-border-default) solid var(--ci-color-border-subtle); border-radius: 0; background: transparent; }
+  .ci-sidebar-shell-header .ci-sidebar-trigger { width: auto; padding-block: 0; padding-inline: 0 var(--ci-space-3); border: 0; border-inline-end: var(--ci-border-default) solid var(--ci-color-border-subtle); border-radius: 0; background: transparent; }
   .ci-sidebar-shell-header .ci-sidebar-trigger:hover { background: transparent; color: var(--ci-color-text-muted); }
   .ci-sidebar-trigger svg { width: var(--ci-icon-size-sm); height: var(--ci-icon-size-sm); stroke-width: var(--ci-icon-stroke-width); }
-  .ci-sidebar__rail { position: absolute; z-index: 2; top: 0; right: -0.25rem; bottom: 0; width: 0.5rem; border: 0; background: transparent; cursor: col-resize; }
-  .ci-sidebar__rail:hover::after { content: ""; position: absolute; top: 0; right: 0.2rem; bottom: 0; width: 1px; background: var(--ci-color-heading); }
+  .ci-sidebar__rail { position: absolute; z-index: 2; top: 0; inset-inline-end: -0.25rem; bottom: 0; width: 0.5rem; border: 0; background: transparent; cursor: col-resize; }
+  .ci-sidebar__rail:hover::after { content: ""; position: absolute; top: 0; inset-inline-end: 0.2rem; bottom: 0; width: 1px; background: var(--ci-color-heading); }
   .ci-sidebar__brand { display: flex; min-width: 0; align-items: center; gap: var(--ci-space-3); overflow: hidden; }
   .ci-sidebar__brand-mark { display: grid; width: 2.5rem; height: 2.5rem; flex: none; place-items: center; border: var(--ci-border-default) solid var(--ci-color-border); border-radius: var(--ci-radius-control); background: var(--ci-color-background); color: var(--ci-color-heading); font-weight: var(--ci-font-weight-semibold); }
   .ci-sidebar__brand-copy { display: grid; min-width: 0; gap: 1px; }
@@ -2300,15 +3032,18 @@
 
   .ci-data-table { width: 100%; font-family: var(--ci-font-ui); }
   .ci-data-table__frame { overflow: hidden; border: var(--ci-border-default) solid var(--ci-color-border-subtle); border-radius: var(--ci-radius-surface); background: var(--ci-color-surface); }
+  /* variant="plain" on DataTable and DataTableShell: the host is the frame and the surface. */
+  .ci-data-table[data-variant="plain"] > .ci-data-table__frame { border: 0; border-radius: 0; background: transparent; }
+  .ci-data-table[data-variant="plain"] .ci-table-container { background: transparent; }
   .ci-data-table__toolbar { display: flex; min-height: 3.75rem; align-items: center; gap: var(--ci-space-3); padding: var(--ci-space-3) var(--ci-space-4); border-bottom: var(--ci-border-hairline) solid var(--ci-color-border-subtle); }
   .ci-data-table__search { position: relative; width: min(22rem, 100%); }
-  .ci-data-table__search > svg { position: absolute; z-index: 1; top: 50%; left: var(--ci-space-3); width: var(--ci-icon-size-sm); height: var(--ci-icon-size-sm); color: var(--ci-color-text-muted); transform: translateY(-50%); pointer-events: none; stroke-width: var(--ci-icon-stroke-width); }
-  .ci-data-table__search .ci-input { padding-left: 2.5rem; padding-right: 2.25rem; }
-  .ci-data-table__search > button { position: absolute; top: 50%; right: var(--ci-space-2); display: grid; width: 1.75rem; height: 1.75rem; place-items: center; border: 0; border-radius: var(--ci-radius-full); background: transparent; color: var(--ci-color-text-muted); transform: translateY(-50%); cursor: pointer; }
+  .ci-data-table__search > svg { position: absolute; z-index: 1; top: 50%; inset-inline-start: var(--ci-space-3); width: var(--ci-icon-size-sm); height: var(--ci-icon-size-sm); color: var(--ci-color-text-muted); transform: translateY(-50%); pointer-events: none; stroke-width: var(--ci-icon-stroke-width); }
+  .ci-data-table__search .ci-input { padding-inline-start: 2.5rem; padding-inline-end: 2.25rem; }
+  .ci-data-table__search > button { position: absolute; top: 50%; inset-inline-end: var(--ci-space-2); display: grid; width: 1.75rem; height: 1.75rem; place-items: center; border: 0; border-radius: var(--ci-radius-full); background: transparent; color: var(--ci-color-text-muted); transform: translateY(-50%); cursor: pointer; }
   .ci-data-table__search > button:hover { background: var(--ci-color-surface-muted); color: var(--ci-color-heading); }
   .ci-data-table__search > button:focus-visible { outline: none; box-shadow: var(--ci-ring-focus); }
   .ci-data-table__search > button svg { width: var(--ci-icon-size-xs); height: var(--ci-icon-size-xs); stroke-width: var(--ci-icon-stroke-width); }
-  .ci-data-table__count { margin-left: auto; color: var(--ci-color-text-subtle); font-size: var(--ci-font-size-xs); font-variant-numeric: tabular-nums; font-weight: var(--ci-font-weight-regular); line-height: var(--ci-type-caption-leading); letter-spacing: var(--ci-type-caption-tracking); }
+  .ci-data-table__count { margin-inline-start: auto; color: var(--ci-color-text-subtle); font-size: var(--ci-font-size-xs); font-variant-numeric: tabular-nums; font-weight: var(--ci-font-weight-regular); line-height: var(--ci-type-caption-leading); letter-spacing: var(--ci-type-caption-tracking); }
   .ci-data-table .ci-table-container { overflow: auto; border: 0; border-radius: 0; }
   .ci-data-table__sort { display: inline-flex; align-items: center; justify-content: inherit; gap: var(--ci-space-1); padding: 0; border: 0; background: transparent; color: inherit; font: inherit; cursor: pointer; }
   .ci-data-table__sort:hover { color: var(--ci-color-heading); }
@@ -2319,6 +3054,12 @@
   .ci-data-table__empty { padding: var(--ci-space-8); color: var(--ci-color-text-muted); text-align: center; }
   .ci-data-table__note { margin: var(--ci-space-2) 0 0; padding: 0 var(--ci-space-1); color: var(--ci-color-text-subtle); font-size: var(--ci-font-size-xs); font-weight: var(--ci-font-weight-regular); line-height: var(--ci-type-caption-leading); letter-spacing: var(--ci-type-caption-tracking); }
   .ci-data-table__pagination { padding: var(--ci-space-3) var(--ci-space-4); border-top: var(--ci-border-hairline) solid var(--ci-color-border-subtle); }
+  /* fill: the root takes the block size of its parent, the frame takes what the note leaves, and
+     in the frame the toolbar and the pagination keep their height while the fill table
+     container (see .ci-table-container[data-fill]) shrinks to the rest and scrolls. */
+  .ci-data-table[data-fill] { display: flex; flex-direction: column; block-size: 100%; min-block-size: 0; }
+  .ci-data-table[data-fill] > .ci-data-table__frame { display: flex; flex: 1 1 auto; flex-direction: column; min-block-size: 0; }
+  .ci-data-table[data-fill] > .ci-data-table__frame > :is(.ci-data-table__toolbar, .ci-data-table__pagination) { flex: none; }
   .ci-table__head--center,
   .ci-table__cell--center { text-align: center; }
 
@@ -2351,7 +3092,7 @@
     flex-wrap: wrap;
     align-items: flex-end;
     gap: var(--ci-space-3);
-    margin-left: auto;
+    margin-inline-start: auto;
   }
   .ci-data-table-shell__toolbar-actions {
     display: inline-flex;
@@ -2365,7 +3106,7 @@
     display: inline-flex;
     min-height: var(--ci-control-height-md);
     align-items: center;
-    margin-left: auto;
+    margin-inline-start: auto;
     color: var(--ci-color-text-subtle);
     font-size: var(--ci-font-size-xs);
     font-variant-numeric: tabular-nums;
@@ -2375,10 +3116,10 @@
     letter-spacing: var(--ci-type-caption-tracking);
   }
   .ci-data-table-shell__toolbar-end .ci-data-table-shell__count {
-    margin-left: 0;
+    margin-inline-start: 0;
   }
   .ci-data-table-shell__frame .ci-table__body .ci-table__cell {
-    font-size: var(--ci-font-size-xs);
+    font-size: var(--ci-table-font-size, var(--ci-font-size-xs));
     font-weight: var(--ci-font-weight-regular);
     line-height: var(--ci-type-data-leading);
     letter-spacing: var(--ci-type-data-tracking);
@@ -2699,19 +3440,19 @@
   }
   .ci-date-range-trigger span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .ci-date-range-popover { display: grid; width: min(54rem, calc(100vw - 1rem)); grid-template-columns: 10rem minmax(0, 1fr); padding: var(--ci-space-3); max-height: min(calc(100dvh - 1rem), var(--radix-popover-content-available-height, calc(100dvh - 1rem))); overflow: auto; }
-  .ci-date-range-presets { display: grid; align-content: start; gap: var(--ci-space-1); padding-right: var(--ci-space-3); border-right: var(--ci-border-hairline) solid var(--ci-color-border-subtle); }
-  .ci-date-range-presets button { min-height: 2.25rem; padding: 0 var(--ci-space-3); border: 0; border-radius: var(--ci-radius-control); color: var(--ci-color-text-muted); background: transparent; font: inherit; font-size: var(--ci-font-size-sm); text-align: left; cursor: pointer; font-weight: var(--ci-font-weight-medium); line-height: var(--ci-type-control-leading); letter-spacing: var(--ci-type-control-tracking); }
+  .ci-date-range-presets { display: grid; align-content: start; gap: var(--ci-space-1); padding-inline-end: var(--ci-space-3); border-inline-end: var(--ci-border-hairline) solid var(--ci-color-border-subtle); }
+  .ci-date-range-presets button { min-height: 2.25rem; padding: 0 var(--ci-space-3); border: 0; border-radius: var(--ci-radius-control); color: var(--ci-color-text-muted); background: transparent; font: inherit; font-size: var(--ci-font-size-sm); text-align: start; cursor: pointer; font-weight: var(--ci-font-weight-medium); line-height: var(--ci-type-control-leading); letter-spacing: var(--ci-type-control-tracking); }
   .ci-date-range-presets button:hover { color: var(--ci-color-heading); background: linear-gradient(100deg, var(--ci-color-accent-surface-subtle), transparent); }
   .ci-date-range-presets button[data-active] { color: var(--ci-color-accent-foreground); background: var(--ci-color-accent); font-weight: var(--ci-font-weight-semibold); }
   .ci-date-range-presets button:focus-visible { outline: none; box-shadow: var(--ci-ring-focus); }
-  .ci-range-calendars { position: relative; min-width: 0; padding-left: var(--ci-space-3); }
+  .ci-range-calendars { position: relative; min-width: 0; padding-inline-start: var(--ci-space-3); }
   .ci-range-calendar-picker { position: relative; min-width: 0; }
   .ci-range-calendar__months { display: grid; grid-template-columns: repeat(2, minmax(15rem, 1fr)); gap: var(--ci-space-3); }
   .ci-range-calendar-picker:not([data-multiple-months]) .ci-range-calendar__months { grid-template-columns: minmax(15rem, 1fr); }
   .ci-range-calendar { min-width: 0; padding-top: var(--ci-space-9); }
   .ci-range-calendar__caption { display: flex; min-height: var(--ci-control-height-sm); align-items: center; justify-content: center; margin-bottom: var(--ci-space-3); }
   .ci-range-calendar__month { color: var(--ci-color-heading); font-size: var(--ci-font-size-sm); font-weight: var(--ci-font-weight-medium); text-align: center; line-height: var(--ci-type-control-leading); letter-spacing: var(--ci-type-control-tracking); }
-  .ci-range-calendar__nav { position: absolute; z-index: 2; top: 0; right: 0; left: 0; display: flex; align-items: center; justify-content: space-between; pointer-events: none; }
+  .ci-range-calendar__nav { position: absolute; z-index: 2; top: 0; inset-inline-end: 0; inset-inline-start: 0; display: flex; align-items: center; justify-content: space-between; pointer-events: none; }
   .ci-range-calendar__nav button { display: grid; width: var(--ci-control-height-sm); height: var(--ci-control-height-sm); padding: 0; place-items: center; border: var(--ci-border-default) solid var(--ci-color-border-subtle); border-radius: var(--ci-radius-control); color: var(--ci-color-text-muted); background: var(--ci-color-surface); cursor: pointer; pointer-events: auto; }
   .ci-range-calendar__nav button:hover { color: var(--ci-color-heading); background: var(--ci-color-surface-muted); }
   .ci-range-calendar__nav button:focus-visible { outline: none; box-shadow: var(--ci-ring-focus); }
@@ -2727,13 +3468,13 @@
   .ci-range-calendar__day--range-start .ci-range-calendar__day-button,
   .ci-range-calendar__day--range-end .ci-range-calendar__day-button,
   .ci-range-calendar__day--selected:not(.ci-range-calendar__day--range-middle) .ci-range-calendar__day-button { color: var(--ci-color-accent-foreground); background: var(--ci-color-accent); font-weight: var(--ci-font-weight-semibold); }
-  .ci-range-calendar__day--range-start .ci-range-calendar__day-button { border-radius: var(--ci-radius-control) 0 0 var(--ci-radius-control); }
-  .ci-range-calendar__day--range-end .ci-range-calendar__day-button { border-radius: 0 var(--ci-radius-control) var(--ci-radius-control) 0; }
+  .ci-range-calendar__day--range-start .ci-range-calendar__day-button { border-start-start-radius: var(--ci-radius-control); border-start-end-radius: 0; border-end-end-radius: 0; border-end-start-radius: var(--ci-radius-control); }
+  .ci-range-calendar__day--range-end .ci-range-calendar__day-button { border-start-start-radius: 0; border-start-end-radius: var(--ci-radius-control); border-end-end-radius: var(--ci-radius-control); border-end-start-radius: 0; }
   .ci-range-calendar__day--range-start.ci-range-calendar__day--range-end .ci-range-calendar__day-button,
   .ci-range-calendar__day--selected:not(.ci-range-calendar__day--range-start):not(.ci-range-calendar__day--range-middle):not(.ci-range-calendar__day--range-end) .ci-range-calendar__day-button { border-radius: var(--ci-radius-control); }
   .ci-range-calendar__day--disabled .ci-range-calendar__day-button { opacity: 0.25; cursor: not-allowed; }
   .ci-range-calendar__day-button:focus-visible { z-index: 2; outline: none; box-shadow: var(--ci-ring-focus); }
-  .ci-range-calendar__day--today:not(.ci-range-calendar__day--selected) .ci-range-calendar__day-button::after { position: absolute; right: calc(50% - 0.125rem); bottom: 0.2rem; width: 0.25rem; height: 0.25rem; border-radius: var(--ci-radius-full); background: var(--ci-color-accent); content: ""; }
+  .ci-range-calendar__day--today:not(.ci-range-calendar__day--selected) .ci-range-calendar__day-button::after { position: absolute; inset-inline-end: calc(50% - 0.125rem); bottom: 0.2rem; width: 0.25rem; height: 0.25rem; border-radius: var(--ci-radius-full); background: var(--ci-color-accent); content: ""; }
   .ci-range-calendar__day--hidden,
   .ci-range-calendar-picker > [role="status"] { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
   .ci-date-range-popover__actions { display: flex; grid-column: 1 / -1; align-items: center; justify-content: flex-end; gap: var(--ci-space-2); padding-top: var(--ci-space-3); margin-top: var(--ci-space-3); border-top: var(--ci-border-hairline) solid var(--ci-color-border-subtle); }
@@ -2749,25 +3490,25 @@
   @media (max-width: 850px) {
     .ci-date-range-popover--timestamp[data-calendar-months="2"] .ci-range-calendar__months { grid-template-columns: minmax(0, 1fr); }
   }
-  .ci-date-range-popover--timestamp .ci-date-range-presets { display: flex; flex-direction: column; gap: var(--ci-space-1); padding-right: var(--ci-space-4); }
+  .ci-date-range-popover--timestamp .ci-date-range-presets { display: flex; flex-direction: column; gap: var(--ci-space-1); padding-inline-end: var(--ci-space-4); }
   .ci-date-range-popover--timestamp .ci-date-range-presets button { display: flex; min-height: 40px; align-items: center; justify-content: flex-start; gap: var(--ci-space-3); padding: var(--ci-space-2); }
   .ci-date-range-popover--timestamp .ci-date-range-presets button[data-active] { color: var(--ci-color-text); background: color-mix(in srgb, var(--ci-color-accent) 18%, var(--ci-color-surface)); }
-  .ci-date-range-popover--timestamp .ci-date-range-presets button > svg:last-child { margin-left: auto; }
+  .ci-date-range-popover--timestamp .ci-date-range-presets button > svg:last-child { margin-inline-start: auto; }
   .ci-date-range-preset__duration { min-width: 40px; justify-content: center; padding: 1px 5px; font-weight: var(--ci-font-weight-regular); }
-  .ci-date-range-popover--timestamp .ci-range-calendars { padding-left: 0; }
+  .ci-date-range-popover--timestamp .ci-range-calendars { padding-inline-start: 0; }
   .ci-date-range-popover--timestamp .ci-range-calendar { padding-top: 0; }
   .ci-date-range-popover--timestamp .ci-range-calendar__caption { min-height: 40px; margin-bottom: var(--ci-space-4); }
   @media (max-width: 600px) {
     .ci-date-range-popover.ci-date-range-popover--timestamp { grid-template-columns: minmax(0, 1fr); }
-    .ci-date-range-popover--timestamp .ci-date-range-presets { padding: 0 0 var(--ci-space-3); border-right: 0; border-bottom: var(--ci-border-hairline) solid var(--ci-color-border-subtle); }
+    .ci-date-range-popover--timestamp .ci-date-range-presets { padding: 0 0 var(--ci-space-3); border-inline-end: 0; border-bottom: var(--ci-border-hairline) solid var(--ci-color-border-subtle); }
   }
   .ci-date-range-popover__summary { min-width: 0; padding-top: var(--ci-space-5); color: var(--ci-color-text-muted); font-size: var(--ci-font-size-xs); overflow-wrap: anywhere; }
   .ci-date-range-popover__summary p { margin: 0; }
   .ci-date-range-popover__summary > :not(:first-child) { margin-top: var(--ci-space-2); }
   .ci-date-range-popover--timestamp:not([data-presets]) { grid-template-columns: minmax(0, 1fr); }
-  .ci-date-range-popover--timestamp:not([data-presets]) .ci-range-calendars { padding-left: 0; }
+  .ci-date-range-popover--timestamp:not([data-presets]) .ci-range-calendars { padding-inline-start: 0; }
   .ci-date-range-presets button:disabled { opacity: 0.5; cursor: not-allowed; }
-  .ci-date-range-popover__actions > button:not(.ci-button) { margin-right: auto; border: 0; background: transparent; color: var(--ci-color-text-muted); font: inherit; font-size: var(--ci-font-size-xs); cursor: pointer; font-weight: var(--ci-font-weight-medium); line-height: var(--ci-type-control-leading); letter-spacing: var(--ci-type-control-tracking); }
+  .ci-date-range-popover__actions > button:not(.ci-button) { margin-inline-end: auto; border: 0; background: transparent; color: var(--ci-color-text-muted); font: inherit; font-size: var(--ci-font-size-xs); cursor: pointer; font-weight: var(--ci-font-weight-medium); line-height: var(--ci-type-control-leading); letter-spacing: var(--ci-type-control-tracking); }
 
   .ci-sheet__overlay { position: fixed; z-index: var(--ci-z-modal); inset: 0; border: 0; background: var(--ci-color-overlay); animation: ci-overlay-in var(--ci-duration-base) var(--ci-ease-standard); }
   .ci-sheet { position: fixed; z-index: var(--ci-z-modal); display: flex; flex-direction: column; border: 0 solid var(--ci-color-border); background: var(--ci-color-background); box-shadow: var(--ci-shadow-xl); font-family: var(--ci-font-ui); outline: none; }
@@ -2775,13 +3516,13 @@
   .ci-sidebar-sheet > .ci-sidebar { width: 100%; min-width: 0; height: 100%; border: 0; }
   .ci-sheet:where([data-side="right"]) { top: 0; right: 0; bottom: 0; width: min(26rem, 88vw); border-left-width: var(--ci-border-default); animation: ci-sheet-right-in var(--ci-duration-base) var(--ci-ease-emphasized); }
   .ci-sheet:where([data-side="left"]) { top: 0; bottom: 0; left: 0; width: min(26rem, 88vw); border-right-width: var(--ci-border-default); animation: ci-sheet-left-in var(--ci-duration-base) var(--ci-ease-emphasized); }
-  .ci-sheet:where([data-side="top"]) { top: 0; right: 0; left: 0; max-height: 85vh; border-bottom-width: var(--ci-border-default); animation: ci-sheet-top-in var(--ci-duration-base) var(--ci-ease-emphasized); }
-  .ci-sheet:where([data-side="bottom"]) { right: 0; bottom: 0; left: 0; max-height: 85vh; border-top-width: var(--ci-border-default); animation: ci-sheet-bottom-in var(--ci-duration-base) var(--ci-ease-emphasized); }
-  .ci-sheet__close { position: absolute; top: var(--ci-space-4); right: var(--ci-space-4); display: grid; width: var(--ci-control-height-sm); height: var(--ci-control-height-sm); place-items: center; border: 0; border-radius: var(--ci-radius-full); background: transparent; color: var(--ci-color-text-muted); cursor: pointer; }
+  .ci-sheet:where([data-side="top"]) { top: 0; inset-inline-end: 0; inset-inline-start: 0; max-height: 85vh; max-height: 85dvh; border-bottom-width: var(--ci-border-default); animation: ci-sheet-top-in var(--ci-duration-base) var(--ci-ease-emphasized); }
+  .ci-sheet:where([data-side="bottom"]) { inset-inline-end: 0; bottom: 0; inset-inline-start: 0; max-height: 85vh; max-height: 85dvh; border-top-width: var(--ci-border-default); animation: ci-sheet-bottom-in var(--ci-duration-base) var(--ci-ease-emphasized); }
+  .ci-sheet__close { position: absolute; top: var(--ci-space-4); inset-inline-end: var(--ci-space-4); display: grid; width: var(--ci-control-height-sm); height: var(--ci-control-height-sm); place-items: center; border: 0; border-radius: var(--ci-radius-full); background: transparent; color: var(--ci-color-text-muted); cursor: pointer; }
   .ci-sheet__close:hover { color: var(--ci-color-heading); background: var(--ci-color-surface-muted); }
   .ci-sheet__close:focus-visible { outline: none; box-shadow: var(--ci-ring-focus); }
   .ci-sheet__close svg { width: var(--ci-icon-size-sm); height: var(--ci-icon-size-sm); stroke-width: var(--ci-icon-stroke-width); }
-  .ci-sheet__header { display: grid; gap: var(--ci-space-1); padding: var(--ci-space-6); padding-right: 4rem; border-bottom: var(--ci-border-hairline) solid var(--ci-color-border-subtle); }
+  .ci-sheet__header { display: grid; gap: var(--ci-space-1); padding: var(--ci-space-6); padding-inline-end: 4rem; border-bottom: var(--ci-border-hairline) solid var(--ci-color-border-subtle); }
   .ci-sheet__title { margin: 0; color: var(--ci-color-heading); font-family: var(--ci-font-display); font-size: var(--ci-font-size-3xl); font-weight: var(--ci-font-weight-medium); line-height: var(--ci-type-heading-leading); letter-spacing: var(--ci-type-heading-tracking); }
   .ci-sheet__description { margin: 0; color: var(--ci-color-text-muted); font-size: var(--ci-font-size-sm); font-weight: var(--ci-font-weight-regular); line-height: var(--ci-type-body-leading); letter-spacing: var(--ci-type-body-tracking); }
   .ci-sheet__body { min-height: 0; flex: 1; overflow: auto; padding: var(--ci-space-6); }
@@ -2801,17 +3542,17 @@
   .ci-code-preview__meta { display: inline-flex; min-width: 0; align-items: center; gap: var(--ci-space-3); font-size: var(--ci-font-size-xs); }
   .ci-code-preview__meta strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .ci-code-preview__meta > span { color: rgb(241 247 247 / 0.58); }
-  .ci-code-preview__endpoint { padding-left: var(--ci-space-3); border-left: var(--ci-border-hairline) solid rgb(255 255 255 / 0.14); font-family: var(--ci-font-mono); color: rgb(241 247 247 / 0.48) !important; }
+  .ci-code-preview__endpoint { padding-inline-start: var(--ci-space-3); border-inline-start: var(--ci-border-hairline) solid rgb(255 255 255 / 0.14); font-family: var(--ci-font-mono); color: rgb(241 247 247 / 0.48) !important; }
   .ci-code-preview__copy { display: inline-flex; min-height: var(--ci-control-height-sm); align-items: center; gap: var(--ci-space-2); padding: 0 var(--ci-space-3); border: 0; border-radius: var(--ci-radius-control); color: rgb(241 247 247 / 0.72); background: transparent; font: inherit; font-size: var(--ci-font-size-xs); cursor: pointer; font-weight: var(--ci-font-weight-medium); line-height: var(--ci-type-control-leading); letter-spacing: var(--ci-type-control-tracking); }
   .ci-code-preview__copy:hover { color: var(--ci-color-text-inverse); background: rgb(255 255 255 / 0.1); }
   .ci-code-preview__copy:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--ci-color-accent); }
   .ci-code-preview__copy svg { width: var(--ci-icon-size-sm); height: var(--ci-icon-size-sm); }
   .ci-code-preview__copy[data-copied] { color: var(--ci-color-accent); }
   .ci-code-preview__pre { max-height: 28rem; overflow: auto; padding: var(--ci-space-4) 0; margin: 0; font-family: var(--ci-font-code); font-size: var(--ci-font-size-xs); line-height: var(--ci-type-reading-leading); tab-size: 2; font-weight: var(--ci-font-weight-regular); letter-spacing: var(--ci-type-reading-tracking); }
-  .ci-code-preview__line { display: grid; grid-template-columns: 3.25rem minmax(max-content, 1fr); min-width: max-content; padding-right: var(--ci-space-5); }
+  .ci-code-preview__line { display: grid; grid-template-columns: 3.25rem minmax(max-content, 1fr); min-width: max-content; padding-inline-end: var(--ci-space-5); }
   .ci-code-preview__line:hover { background: rgb(255 255 255 / 0.04); }
-  .ci-code-preview__number { padding-right: var(--ci-space-3); color: rgb(241 247 247 / 0.3); text-align: right; user-select: none; }
-  .ci-code-preview__source { padding-left: var(--ci-space-3); border-left: var(--ci-border-hairline) solid rgb(255 255 255 / 0.1); white-space: pre; }
+  .ci-code-preview__number { padding-inline-end: var(--ci-space-3); color: rgb(241 247 247 / 0.3); text-align: end; user-select: none; }
+  .ci-code-preview__source { padding-inline-start: var(--ci-space-3); border-inline-start: var(--ci-border-hairline) solid rgb(255 255 255 / 0.1); white-space: pre; }
   .ci-code-preview__source [data-tone="keyword"] { color: var(--ci-code-inverse-keyword); }
   .ci-code-preview__source [data-tone="string"] { color: var(--ci-code-inverse-string); }
   .ci-code-preview__source [data-tone="number"] { color: var(--ci-code-inverse-number); }
@@ -2823,7 +3564,7 @@
   .ci-code-preview__error { margin: 0; padding: var(--ci-space-3) var(--ci-space-4); font-size: var(--ci-font-size-sm); font-weight: var(--ci-font-weight-regular); line-height: var(--ci-type-caption-leading); letter-spacing: var(--ci-type-caption-tracking); }
   .ci-code-preview__pre:focus-visible { outline: none; box-shadow: inset 0 0 0 2px var(--ci-color-focus); }
   .ci-code-preview[data-line-numbers="false"] .ci-code-preview__line { grid-template-columns: minmax(max-content, 1fr); padding-inline: var(--ci-space-5); }
-  .ci-code-preview[data-line-numbers="false"] .ci-code-preview__source { padding-left: 0; border-left: 0; }
+  .ci-code-preview[data-line-numbers="false"] .ci-code-preview__source { padding-inline-start: 0; border-inline-start: 0; }
   .ci-code-preview[data-variant="surface"] { border-color: var(--ci-color-border); color: var(--ci-color-foreground); background: var(--ci-color-surface-subtle); }
   .ci-code-preview[data-variant="surface"] .ci-code-preview__header { min-height: 3.5rem; border-color: var(--ci-color-border-subtle); background: var(--ci-color-surface); }
   .ci-code-preview[data-variant="surface"] .ci-code-preview__meta strong { color: var(--ci-color-text-muted); font-weight: var(--ci-font-weight-semibold); }
@@ -2838,6 +3579,13 @@
   .ci-code-preview[data-variant="surface"] .ci-code-preview__source [data-tone] { color: inherit; }
   .ci-code-preview[data-variant="surface"] .ci-code-preview__source [data-tone="comment"],
   .ci-code-preview[data-variant="surface"] .ci-code-preview__source [data-tone="dim"] { color: var(--ci-color-text-muted); }
+  /* Headerless CodePreview, for one command or URL: the code, then the copy button at the inline end. One line is as tall as the button plus its margin. */
+  .ci-code-preview[data-header="false"] { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: start; }
+  .ci-code-preview[data-header="false"] .ci-code-preview__pre { padding-block: calc((var(--ci-control-height-sm) + var(--ci-space-1) * 2 - var(--ci-font-size-xs) * var(--ci-type-reading-leading)) / 2); }
+  .ci-code-preview[data-header="false"] .ci-code-preview__copy { margin: var(--ci-space-1); }
+  .ci-code-preview[data-header="false"] .ci-code-preview__error { grid-column: 1 / -1; }
+  /* InlineCode: the .ci-prose code chip for use outside prose. The fill is opaque, so the text ratio holds on any surface. */
+  .ci-inline-code { padding: 0.125em 0.375em; border: var(--ci-border-default) solid var(--ci-color-border-subtle); border-radius: var(--ci-radius-sm); color: var(--ci-color-heading); background: var(--ci-color-surface-subtle); font-family: var(--ci-font-code); font-size: max(0.875em, var(--ci-font-size-xs)); line-height: 1; overflow-wrap: anywhere; direction: ltr; unicode-bidi: isolate; }
 
   /* JsonTree: rows paint no background, so the tone ratios hold on any surface and on hover. */
   .ci-json-tree { display: flex; flex-direction: column; gap: var(--ci-space-2); min-width: 0; min-height: 0; color: var(--ci-color-foreground); font-family: var(--ci-font-code); font-size: var(--ci-font-size-xs); line-height: var(--ci-type-reading-leading); }
@@ -2904,13 +3652,13 @@
     }
     .ci-data-table-shell__count {
       min-height: 0;
-      margin-left: 0;
+      margin-inline-start: 0;
     }
     .ci-data-table-shell__toolbar-end {
       width: 100%;
       align-items: center;
       justify-content: flex-end;
-      margin-left: 0;
+      margin-inline-start: 0;
     }
     .ci-data-table-shell__footer { grid-template-columns: minmax(0, 1fr) auto; }
     .ci-data-table-shell__pagination {
@@ -2933,8 +3681,8 @@
       grid-row: 1;
     }
     .ci-date-range-popover { grid-template-columns: 1fr; }
-    .ci-date-range-presets { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 0 0 var(--ci-space-3); border-right: 0; border-bottom: var(--ci-border-hairline) solid var(--ci-color-border-subtle); }
-    .ci-range-calendars { padding-left: 0; }
+    .ci-date-range-presets { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 0 0 var(--ci-space-3); border-inline-end: 0; border-bottom: var(--ci-border-hairline) solid var(--ci-color-border-subtle); }
+    .ci-range-calendars { padding-inline-start: 0; }
     .ci-range-calendar__months { grid-template-columns: minmax(0, 1fr); }
     .ci-range-calendars[data-months="responsive"] .ci-range-calendar[data-secondary] { display: none; }
     .ci-range-calendar { padding-top: var(--ci-space-9); }
@@ -2947,6 +3695,7 @@
     .ci-page-header__row,
     .ci-section-header { align-items: flex-start; flex-direction: column; }
     .ci-page-header__title { font-size: 3rem; font-weight: var(--ci-page-title-weight); line-height: var(--ci-page-title-leading); letter-spacing: var(--ci-type-heading-tracking); }
+    .ci-page-header__heading { --page-header-title-size: 3rem; }
     .ci-pagination__link--edge span { display: none; }
   }
 
@@ -2991,10 +3740,10 @@
 .ci-searchable-select__trigger:focus-visible { outline: 2px solid var(--ci-color-accent); outline-offset: 2px; }
 .ci-searchable-select__trigger:disabled { opacity: 0.5; cursor: not-allowed; }
 .ci-searchable-select__label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.ci-searchable-select__trigger--field { width: 100%; min-width: 0; min-height: var(--ci-control-height-lg); padding: 0 var(--ci-space-3); border: var(--ci-border-default) solid var(--ci-field-border); border-radius: var(--ci-radius-control); background: var(--ci-field-bg); color: var(--ci-field-fg); font-size: var(--ci-font-size-sm); text-align: left; font-weight: var(--ci-font-weight-regular); line-height: var(--ci-type-data-leading); letter-spacing: var(--ci-type-data-tracking); }
+.ci-searchable-select__trigger--field { width: 100%; min-width: 0; min-height: var(--ci-control-height-lg); padding: 0 var(--ci-space-3); border: var(--ci-border-default) solid var(--ci-field-border); border-radius: var(--ci-radius-control); background: var(--ci-field-bg); color: var(--ci-field-fg); font-size: var(--ci-font-size-sm); text-align: start; font-weight: var(--ci-font-weight-regular); line-height: var(--ci-type-data-leading); letter-spacing: var(--ci-type-data-tracking); }
 .ci-searchable-select__trigger--field:hover:not(:disabled) { border-color: var(--ci-color-border-strong); }
 .ci-searchable-select__trigger--field .ci-searchable-select__label { flex: 1; }
-.ci-searchable-select__trigger--field > svg { flex-shrink: 0; margin-left: auto; }
+.ci-searchable-select__trigger--field > svg { flex-shrink: 0; margin-inline-start: auto; }
 .ci-searchable-select__icon { display: inline-flex; align-items: center; justify-content: center; width: 1.125rem; height: 1.125rem; flex-shrink: 0; }
 .ci-searchable-select__icon > * { width: 100%; height: 100%; object-fit: contain; }
 .ci-searchable-select__popover { width: max(19rem, var(--radix-popover-trigger-width)); max-width: calc(100vw - 1rem); padding: 0; overflow: hidden; }
@@ -3032,7 +3781,7 @@
   .ci-overview-card__actions { display: grid; gap: var(--ci-space-1-5); margin-top: auto; }
 
   .ci-metric-chart { display: flex; flex: 1; flex-direction: column; justify-content: center; gap: var(--ci-space-4); min-width: 0; min-height: 18.75rem; margin: 0; padding: var(--ci-space-4); border: 1px solid var(--ci-color-border-subtle); border-radius: var(--ci-radius-control); background: var(--ci-color-surface); color: var(--ci-color-heading); font-size: var(--ci-font-size-sm); line-height: var(--ci-type-body-leading); font-weight: var(--ci-font-weight-regular); letter-spacing: var(--ci-type-body-tracking); }
-  .ci-metric-chart__note { width: 100%; margin: 0; font-size: var(--ci-font-size-xs); line-height: var(--ci-type-caption-leading); text-align: left; color: var(--ci-color-text-muted); font-weight: var(--ci-font-weight-regular); letter-spacing: var(--ci-type-caption-tracking); }
+  .ci-metric-chart__note { width: 100%; margin: 0; font-size: var(--ci-font-size-xs); line-height: var(--ci-type-caption-leading); text-align: start; color: var(--ci-color-text-muted); font-weight: var(--ci-font-weight-regular); letter-spacing: var(--ci-type-caption-tracking); }
   .ci-metric-funnel__label { display: flex; align-items: baseline; justify-content: space-between; gap: var(--ci-space-3); padding-bottom: var(--ci-space-2); }
   .ci-metric-funnel__label strong { font-variant-numeric: tabular-nums; flex-shrink: 0; }
   .ci-metric-funnel__track { display: flex; justify-content: center; height: var(--ci-space-6); background: var(--ci-color-surface-subtle); border-radius: var(--ci-radius-sm); }
@@ -3052,7 +3801,7 @@
   .ci-metric-donut__legend > div { display: flex; align-items: center; gap: var(--ci-space-1); padding: var(--ci-space-2); border-radius: var(--ci-radius-sm); background: var(--ci-color-surface-subtle); min-width: 0; }
   .ci-metric-donut__legend i { width: 0.5rem; height: 0.5rem; border-radius: 2px; flex-shrink: 0; }
   .ci-metric-donut__legend span { overflow-wrap: anywhere; }
-  .ci-metric-donut__legend strong { margin-left: auto; font-variant-numeric: tabular-nums; }
+  .ci-metric-donut__legend strong { margin-inline-start: auto; font-variant-numeric: tabular-nums; }
 
   .ci-status-matrix__grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--ci-space-3); width: 100%; list-style: none; padding: 0; margin: 0; }
   .ci-status-matrix__grid li { display: grid; place-items: center; }
@@ -3142,10 +3891,10 @@
 }
 
 /* Grouped catalog variant; compact Playground rows in a rectangular form field. */
-.ci-searchable-select__group-label { padding: 0.75rem 0.75rem 0.375rem; color: var(--ci-color-text-muted); font-size: 0.6875rem; line-height: var(--ci-type-control-leading); letter-spacing: var(--ci-type-control-tracking); text-transform: uppercase; font-weight: var(--ci-font-weight-medium); }
+.ci-searchable-select__group-label { padding: 0.75rem 0.75rem 0.375rem; color: var(--ci-color-text-muted); font-size: var(--ci-font-size-2xs); line-height: var(--ci-type-control-leading); letter-spacing: var(--ci-type-control-tracking); text-transform: uppercase; font-weight: var(--ci-font-weight-medium); }
 .ci-searchable-select__identity { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.25rem 0.5rem; min-width: 0; }
 .ci-searchable-select__name { overflow-wrap: anywhere; }
-.ci-searchable-select__trailing { margin-left: auto; color: var(--ci-color-text-muted); font-size: 0.75rem; white-space: nowrap; font-weight: var(--ci-font-weight-regular); line-height: var(--ci-type-caption-leading); letter-spacing: var(--ci-type-caption-tracking); }
+.ci-searchable-select__trailing { margin-inline-start: auto; color: var(--ci-color-text-muted); font-size: 0.75rem; white-space: nowrap; font-weight: var(--ci-font-weight-regular); line-height: var(--ci-type-caption-leading); letter-spacing: var(--ci-type-caption-tracking); }
 .ci-searchable-select__option > svg { flex-shrink: 0; }
 .ci-searchable-select__trigger--model { gap: 0.5rem; }
 .ci-searchable-select__trigger--model .ci-searchable-select__label { font-family: var(--ci-font-mono); font-size: var(--ci-font-size-xs); line-height: var(--ci-type-control-leading); font-weight: var(--ci-font-weight-medium); letter-spacing: var(--ci-type-control-tracking); }
@@ -3155,12 +3904,12 @@
 .ci-searchable-select__popover--model { width: min(32rem, 90vw); min-width: var(--radix-popover-trigger-width); }
 .ci-searchable-select__popover--model .ci-searchable-select__options { padding: 0.25rem 0; }
 .ci-searchable-select__popover--model [role="group"] { padding-block: 0.25rem; }
-.ci-searchable-select__popover--model .ci-searchable-select__group-label { padding: 0.25rem 0.75rem; font-family: var(--ci-font-mono); font-size: 0.625rem; line-height: var(--ci-type-control-leading); font-weight: var(--ci-font-weight-medium); letter-spacing: var(--ci-type-control-tracking); }
+.ci-searchable-select__popover--model .ci-searchable-select__group-label { padding: 0.25rem 0.75rem; font-family: var(--ci-font-mono); font-size: var(--ci-font-size-3xs); line-height: var(--ci-type-control-leading); font-weight: var(--ci-font-weight-medium); letter-spacing: var(--ci-type-control-tracking); }
 .ci-searchable-select__popover--model .ci-searchable-select__option { gap: 0.5rem; padding: 0.375rem 0.75rem; border-radius: 0; font-size: var(--ci-font-size-xs); line-height: var(--ci-type-control-leading); font-weight: var(--ci-font-weight-medium); letter-spacing: var(--ci-type-control-tracking); }
 .ci-searchable-select__popover--model .ci-searchable-select__option[aria-selected="true"] { background: var(--ci-color-surface-muted); }
 .ci-searchable-select__popover--model .ci-searchable-select__identity { flex-wrap: nowrap; align-items: center; gap: 0.5rem; }
 .ci-searchable-select__popover--model .ci-searchable-select__name { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-.ci-searchable-select__popover--model .ci-searchable-select__identity small { flex-shrink: 0; font-size: 0.6875rem; font-weight: var(--ci-font-weight-regular); line-height: var(--ci-type-caption-leading); letter-spacing: var(--ci-type-caption-tracking); white-space: nowrap; }
+.ci-searchable-select__popover--model .ci-searchable-select__identity small { flex-shrink: 0; font-size: var(--ci-font-size-2xs); font-weight: var(--ci-font-weight-regular); line-height: var(--ci-type-caption-leading); letter-spacing: var(--ci-type-caption-tracking); white-space: nowrap; }
 .ci-searchable-select__popover--model .ci-searchable-select__trailing { flex-shrink: 0; line-height: var(--ci-type-caption-leading); font-weight: var(--ci-font-weight-regular); letter-spacing: var(--ci-type-caption-tracking); }
 .ci-searchable-select__popover--model .ci-searchable-select__icon { width: 1rem; height: 1rem; }
 .ci-searchable-select__popover--model .ci-searchable-select__search { padding: 0; }
@@ -3214,6 +3963,7 @@
 /* Keep code typography stable inside the application typography scope. */
 .ci-code-preview__pre { font-family:var(--ci-font-code); }
 .ci-code-preview__pre code { font-family:inherit; font-size:inherit; line-height:inherit; letter-spacing:inherit; }
+.ci-inline-code { font-family:var(--ci-font-code); line-height:1; }
 .ci-code-preview .ci-code-preview__source [data-syntax-color] { color:var(--ci-code-token-light); }
 [data-theme="dark"] .ci-code-preview .ci-code-preview__source [data-syntax-color] { color:var(--ci-code-token-dark); }
 
@@ -3253,6 +4003,45 @@
 .ci-field__label-row { display:flex;align-items:center;gap:6px; }
 
 .ci-dialog[data-size="wide"] { max-width:36rem; }
+.ci-dialog[data-size="checkout"] { max-width:64rem; }
+
+/* The onboarding action row, adapted for a bounded dialog. The body owns
+   scrolling so form fields never pass behind the header or payment action. */
+.ci-dialog[data-layout="fixed-footer"] {
+  display:flex;
+  flex-direction:column;
+  /* The visible viewport, as for every dialog size; vh for browsers without dvh. */
+  max-height:calc(100vh - 3rem);
+  max-height:calc(100dvh - 3rem);
+  overflow-x:hidden;
+  overflow-y:auto;
+}
+.ci-dialog[data-layout="fixed-footer"] > .ci-dialog__header,
+.ci-dialog[data-layout="fixed-footer"] > .ci-dialog__footer { flex:none; }
+.ci-dialog[data-layout="fixed-footer"] > .ci-dialog__body {
+  min-height:0;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  scrollbar-width:thin;
+  margin-block:var(--ci-space-6) var(--ci-space-4);
+  margin-inline:-.375rem;
+  padding:.375rem;
+}
+.ci-dialog[data-layout="fixed-footer"] > .ci-dialog__footer {
+  margin-top:0;
+  padding-top:var(--ci-space-4);
+  padding-bottom:env(safe-area-inset-bottom, 0px);
+  border-top:1px solid var(--ci-color-border-subtle);
+  align-items:center;
+}
+/* Very short windows cannot fit fixed chrome plus a useful form viewport.
+   Let the complete dialog scroll so every field and the action stay reachable. */
+@media (max-height:400px) {
+  .ci-dialog[data-layout="fixed-footer"] > .ci-dialog__body {
+    flex-shrink:0;
+    overflow:visible;
+  }
+}
 
 /* Opt-in usage workspace foundations. Existing controls retain their defaults. */
 @layer components {
@@ -3268,17 +4057,22 @@
     background-clip: border-box;
     background-repeat: no-repeat;
   }
+  /* `.ci-button:hover` outranks the resting rule and paints the primary foreground, which is near-white
+     in the Classic light theme, so every state restates the accent ink. */
   .ci-button--assistant:not(:disabled):not([aria-disabled="true"]):hover {
     --assistant-edge-tint: var(--ci-color-accent-hover);
     --assistant-center-tint: color-mix(in srgb, var(--ci-color-accent-hover) 90%, var(--ci-neutral-0) 10%);
+    color: var(--ci-color-accent-foreground);
     background-image: linear-gradient(120deg, var(--assistant-edge-tint) 0%, var(--assistant-center-tint) 50%, var(--assistant-edge-tint) 100%);
   }
   .ci-button--assistant:not(:disabled):not([aria-disabled="true"]):active {
     --assistant-edge-tint: var(--ci-color-accent);
     --assistant-center-tint: var(--ci-color-accent-hover);
+    color: var(--ci-color-accent-foreground);
     background-image: linear-gradient(120deg, var(--assistant-edge-tint) 0%, var(--assistant-center-tint) 50%, var(--assistant-edge-tint) 100%);
   }
   .ci-button--assistant:is(:disabled, [aria-disabled="true"]):hover {
+    color: var(--ci-color-accent-foreground);
     background: var(--ci-color-accent);
     background-image: linear-gradient(120deg, var(--assistant-edge-tint) 0%, var(--assistant-center-tint) 50%, var(--assistant-edge-tint) 100%);
   }
@@ -3318,7 +4112,7 @@
     max-width: 100%;
     min-width: 0;
     min-height: 0;
-    border-left: var(--ci-border-default) solid var(--ci-color-border);
+    border-inline-start: var(--ci-border-default) solid var(--ci-color-border);
     background: var(--ci-color-surface);
     color: var(--ci-color-foreground);
     box-shadow: -8px 0 24px #0001;
@@ -3361,7 +4155,7 @@
     padding: 0;
     color: inherit;
     font: inherit;
-    text-align: left;
+    text-align: start;
     border: 0;
     border-radius: var(--ci-radius-md);
     background: transparent;
@@ -3375,16 +4169,20 @@
   .ci-scope-chip__icon, .ci-scope-chip__count, .ci-scope-chip__chevron { flex: none; }
   .ci-scope-chip__icon { display: inline-flex; align-items: center; }
   .ci-scope-chip__icon svg, .ci-scope-chip__chevron { width: 14px; height: 14px; }
-  .ci-scope-chip__remove.ci-button { flex: none; width: 32px; min-height: 32px; margin-right: -2px; color: inherit; }
+  .ci-scope-chip__remove.ci-button { flex: none; width: 32px; min-height: 32px; margin-inline-end: -2px; color: inherit; }
   .ci-scope-chip__remove.ci-button > svg { width: 14px; height: 14px; }
   .ci-scope-chip[data-expanded] { align-items: flex-start; }
   .ci-scope-chip[data-expanded] .ci-scope-chip__summary { align-items: flex-start; padding-block: 5px; }
-  .ci-scope-chip[data-expanded] .ci-scope-chip__text { max-height: 220px; overflow-y: auto; white-space: normal; overflow-wrap: anywhere; line-height: 1.7; text-align: left; }
+  .ci-scope-chip[data-expanded] .ci-scope-chip__text { max-height: 220px; overflow-y: auto; white-space: normal; overflow-wrap: anywhere; line-height: 1.7; text-align: start; }
   .ci-scope-chip[data-expanded] .ci-scope-chip__icon,
   .ci-scope-chip[data-expanded] .ci-scope-chip__chevron { margin-top: 2px; }
   .ci-scope-chip[data-expanded] .ci-scope-chip__chevron { transform: rotate(180deg); }
   .ci-scope-chip[data-variant="outline"] {
-    gap: 4px; padding: 2px 8px 2px 14px; background: transparent; border-color: var(--ci-color-border-subtle);
+    gap: 4px; padding-block: 2px; padding-inline: 14px 8px;
+  }
+  /* A toned outline chip keeps its Badge tone instead: the tint, with the border in the tone. */
+  .ci-scope-chip[data-variant="outline"]:not([data-tone]) {
+    background: transparent; border-color: var(--ci-color-border-subtle);
   }
   .ci-scope-chip[data-variant="outline"] .ci-scope-chip__summary { min-height: 24px; }
   .ci-scope-chip[data-variant="outline"][data-expanded] .ci-scope-chip__summary { padding-block: 2px; }
@@ -3392,8 +4190,10 @@
   .ci-scope-chip[data-variant="outline"][data-expanded] .ci-scope-chip__icon,
   .ci-scope-chip[data-variant="outline"][data-expanded] .ci-scope-chip__chevron { margin-top: 3px; }
   .ci-scope-chip[data-variant="outline"] .ci-scope-chip__remove.ci-button {
-    width: 24px; height: 24px; min-height: 24px; margin-right: 0;
+    width: 24px; height: 24px; min-height: 24px; margin-inline-end: 0;
   }
+  /* On a tone the remove button hovers on a wash of the ink, not on the neutral ghost fill. */
+  .ci-scope-chip[data-tone] .ci-scope-chip__remove.ci-button:hover { background: color-mix(in srgb, currentColor 18%, transparent); }
 }
 
 @media (forced-colors: active) {
@@ -3405,33 +4205,53 @@
   .ci-docked-rail { border-color: CanvasText; box-shadow: none; }
 }
 
+/* Forced colours repaint an author background as Canvas, which would hide the thumb of the
+   persistent Table scrollbar. A system colour is kept, and outside the layers it also outranks
+   the hover and active backgrounds. */
+@media (forced-colors: active) {
+  .ci-table-scrollbar__thumb { background: CanvasText; }
+}
+
 /* Its own block after the component layers: the focusable Table container keeps a system-colour
    ring in forced colours. */
 @media (forced-colors: active) {
   .ci-table-container:focus-visible { outline-color: Highlight; }
+  .ci-table__row[data-interactive]:focus-visible { outline-color: Highlight; }
+  /* A sticky cell covers that outline and loses its box-shadow here, so it outlines itself. */
+  .ci-table__row[data-interactive]:focus-visible > .ci-table__cell--sticky-start,
+  .ci-table__row[data-interactive]:focus-visible > .ci-table__cell--sticky-end { outline: var(--ci-focus-ring-width) solid Highlight; outline-offset: calc(-1 * var(--ci-focus-ring-width)); }
+  /* Forced colours drop the selected fill, so the row gets a marker on its leading edge. */
+  .ci-table__row[data-state="selected"] > :first-child { border-inline-start: var(--ci-space-1) solid Highlight; }
 }
 
 @layer components {
 /* Promoted from the approved Reports/Requests preview: dimensions are unchanged. */
 .ci-stacked-chart { width:100%; min-width:0; margin:0; color:var(--ci-color-text-muted); }
 .ci-stacked-chart__plot { position:relative; min-width:0; width:100%; }
-.ci-stacked-chart__zone { fill:transparent; outline:none; pointer-events:all; }
+/* Keyboard hit areas: HTML over the plot, inside the element recharts listens on. Only the areas take the pointer. */
+.ci-stacked-chart__zones { position:absolute; inset:0; pointer-events:none; }
+.ci-stacked-chart__zone { position:absolute; top:8px; bottom:30px; outline:none; pointer-events:auto; }
 .ci-stacked-chart__zone[role="button"] { cursor:pointer; }
-.ci-stacked-chart__zone:focus-visible { stroke:var(--ci-color-foreground); stroke-width:2; stroke-dasharray:3 3; }
+.ci-stacked-chart__zone:focus-visible { outline:2px dotted var(--ci-color-foreground); outline-offset:-1px; }
 .ci-stacked-chart__keyboard-tooltip { position:absolute; z-index:4; width:220px; max-width:100%; pointer-events:none; overflow-wrap:anywhere; }
-.ci-stacked-chart__legend { display:flex; flex-wrap:wrap; align-items:center; gap:8px 20px; margin-top:16px; padding:10px 6px 2px; font:10px/1.5 var(--ci-font-ui); }
+.ci-stacked-chart__legend { display:flex; flex-wrap:wrap; align-items:center; gap:8px 20px; margin-top:16px; padding:10px 6px 2px; font:var(--ci-font-size-3xs)/1.5 var(--ci-font-ui); }
 .ci-stacked-chart__legend > span { display:flex; align-items:center; gap:6px; min-width:0; white-space:nowrap; color:var(--ci-color-foreground); }
 .ci-stacked-chart__series { display:inline-flex; align-items:center; gap:4px; }
 .ci-stacked-chart__series > span { display:inline-flex; flex-shrink:0; }
 .ci-stacked-chart__legend svg, .ci-stacked-chart__legend img { width:18px; height:18px; }
 .ci-stacked-chart__legend i { display:inline-block; flex:0 0 8px; width:8px; height:8px; border-radius:50%; }
+/* The line series of a StackedBarChart is keyed by a stroke, the bars by a dot. */
+.ci-stacked-chart__legend > span[data-kind="line"] i { flex-basis:14px; inline-size:14px; block-size:2px; border-radius:1px; }
 .ci-line-chart { width:100%; min-width:0; margin:0; color:var(--ci-color-text-muted); }
 .ci-line-chart__plot { position:relative; min-width:0; width:100%; }
 /* Recharts always lays the plot out left to right, so anchors and overlay coordinates stay physical. */
 .ci-line-chart__plot svg { direction:ltr; }
 .ci-line-chart__zone { position:absolute; top:8px; bottom:30px; outline:none; }
 .ci-line-chart__zone:focus-visible { outline:2px solid var(--ci-color-focus); outline-offset:-2px; }
+.ci-line-chart__zone[role="button"] { cursor:pointer; }
 .ci-line-chart__guide { position:absolute; top:8px; bottom:30px; border-inline-start:1px solid var(--ci-color-text-muted); pointer-events:none; }
+/* The selected point of a StackedAreaChart: a heavier guide in the text colour, so it survives forced colours. */
+.ci-line-chart__guide[data-selected] { border-inline-start:2px solid var(--ci-color-foreground); }
 .ci-line-chart__tooltip { --ci-line-chart-tooltip-width:min(220px, 100%); position:absolute; z-index:4; top:12px; display:grid; gap:var(--ci-space-1); box-sizing:border-box; width:var(--ci-line-chart-tooltip-width); padding:var(--ci-space-2) var(--ci-space-3); border:1px solid var(--ci-color-border); border-radius:8px; background:var(--ci-color-surface); color:var(--ci-color-foreground); font-size:12px; overflow-wrap:anywhere; pointer-events:none; }
 .ci-line-chart__tooltip[data-side="end"] { left:clamp(0px, calc(var(--ci-line-chart-x) + 12px), calc(100% - var(--ci-line-chart-tooltip-width))); }
 .ci-line-chart__tooltip[data-side="start"] { left:clamp(0px, calc(var(--ci-line-chart-x) - var(--ci-line-chart-tooltip-width) - 12px), calc(100% - var(--ci-line-chart-tooltip-width))); }
@@ -3439,10 +4259,11 @@
 .ci-line-chart__tooltip ul { display:grid; gap:var(--ci-space-1); margin:0; padding:0; list-style:none; }
 .ci-line-chart__tooltip li { display:flex; align-items:baseline; justify-content:space-between; gap:var(--ci-space-3); min-width:0; }
 .ci-line-chart__tooltip strong { flex:none; font-weight:var(--ci-font-weight-medium); font-variant-numeric:tabular-nums; }
+.ci-line-chart__tooltip-total { padding-block-start:var(--ci-space-1); border-block-start:1px solid var(--ci-color-border); }
 .ci-line-chart__legend { display:flex; flex-wrap:wrap; align-items:center; gap:var(--ci-space-2) var(--ci-space-5); margin-top:var(--ci-space-4); padding-block:var(--ci-space-2) 2px; padding-inline:6px; }
 .ci-calendar-heatmap { --ci-calendar-heatmap-cell:14px; position:relative; width:100%; min-width:0; margin:0; color:var(--ci-color-text-muted); font-size:var(--ci-font-size-xs); }
 .ci-calendar-heatmap__scroll { overflow-x:auto; padding:var(--ci-space-0-5); }
-.ci-calendar-heatmap__grid { border-collapse:separate; border-spacing:2px; font-size:10px; line-height:1; }
+.ci-calendar-heatmap__grid { border-collapse:separate; border-spacing:2px; font-size:var(--ci-font-size-3xs); line-height:1; }
 .ci-calendar-heatmap__grid th { padding:0; color:inherit; font-weight:var(--ci-font-weight-regular); white-space:nowrap; text-align:start; }
 .ci-calendar-heatmap__grid tbody th { padding-inline-end:var(--ci-space-1); }
 .ci-calendar-heatmap__grid td { padding:0; }
@@ -3465,18 +4286,35 @@
 .ci-calendar-heatmap__tooltip span, .ci-calendar-heatmap__tooltip small { color:var(--ci-color-text-muted); font-size:inherit; }
 .ci-calendar-heatmap__tooltip strong { font-weight:var(--ci-font-weight-medium); font-variant-numeric:tabular-nums; }
 @media (forced-colors:active) { .ci-calendar-heatmap__mark { forced-color-adjust:none; } }
+/* Heat cell: one step of the --ci-scale-seq ramp outside the calendar, with the calendar's marks. The mark is a
+   share of the cell and grows with the level, so the level is never colour alone. sm is the calendar's 14px cell. */
+.ci-heat-cell { box-sizing:border-box; display:inline-grid; flex:none; place-items:center; width:var(--ci-space-6); height:var(--ci-space-6); vertical-align:middle; }
+.ci-heat-cell[data-size="sm"] { width:14px; height:14px; }
+.ci-heat-cell[data-size="lg"] { width:var(--ci-space-9); height:var(--ci-space-9); }
+.ci-heat-cell__mark { box-sizing:border-box; display:block; width:45%; height:45%; border-radius:var(--ci-radius-sm); }
+.ci-heat-cell[data-size="sm"] .ci-heat-cell__mark { border-radius:2px; }
+.ci-heat-cell__mark[data-level="0"] { border:1px solid var(--ci-color-text-muted); }
+.ci-heat-cell__mark[data-unavailable] { border:1px dashed var(--ci-color-text-muted); }
+.ci-heat-cell__mark[data-level="1"] { width:55%; height:55%; background:var(--ci-scale-seq-1); }
+.ci-heat-cell__mark[data-level="2"] { width:62%; height:62%; background:var(--ci-scale-seq-2); }
+.ci-heat-cell__mark[data-level="3"] { width:70%; height:70%; background:var(--ci-scale-seq-3); }
+.ci-heat-cell__mark[data-level="4"] { width:77%; height:77%; background:var(--ci-scale-seq-4); }
+.ci-heat-cell__mark[data-level="5"] { width:85%; height:85%; background:var(--ci-scale-seq-5); }
+.ci-heat-cell__mark[data-level="6"] { width:92%; height:92%; background:var(--ci-scale-seq-6); }
+.ci-heat-cell__mark[data-level="7"] { width:100%; height:100%; background:var(--ci-scale-seq-7); }
+@media (forced-colors:active) { .ci-heat-cell__mark { forced-color-adjust:none; } }
 .ci-sparkline { display:block; width:100%; height:52px; min-width:0; }
 .ci-metric-trend { display:flex; flex-direction:column; gap:6px; color:var(--ci-color-foreground); }
 .ci-metric-trend__value { display:flex; align-items:center; gap:5px; font-size:15px; line-height:1.2; font-weight:var(--ci-font-weight-semibold); font-variant-numeric:tabular-nums; }
 .ci-metric-trend[data-tone="positive"] .ci-metric-trend__value { color:var(--ci-color-success); }
 .ci-metric-trend[data-tone="negative"] .ci-metric-trend__value { color:var(--ci-color-danger); }
-.ci-metric-trend__comparison { color:var(--ci-color-text-muted); font-size:11px; }
+.ci-metric-trend__comparison { color:var(--ci-color-text-muted); font-size:var(--ci-font-size-2xs); }
 .ci-metric-card { container:ci-metric-card / inline-size; position:relative; min-width:0; padding:20px 18px 14px; gap:0; font-family:var(--ci-font-ui); font-size:14px; }
 .ci-metric-card__head { display:flex; flex-wrap:wrap; align-items:flex-start; justify-content:space-between; gap:16px; }
 .ci-metric-card .ci-metric-card__stat { flex:1 1 170px; min-width:0; padding:0; border:0; background:transparent; --ci-font-size-5xl:32px; --ci-font-display:var(--ci-font-ui); }
 .ci-metric-card__stat .ci-stat__value { white-space:normal; overflow-wrap:anywhere; }
 .ci-metric-card__side { display:flex; flex-direction:column; align-items:flex-end; gap:14px; min-width:0; }
-.ci-metric-card__side .ci-metric-trend { margin-left:auto; align-items:flex-end; text-align:right; }
+.ci-metric-card__side .ci-metric-trend { margin-inline-start:auto; align-items:flex-end; text-align:end; }
 .ci-metric-card__side .ci-metric-trend__value { justify-content:flex-end; }
 .ci-metric-card__controls { position:relative; z-index:2; max-width:100%; }
 .ci-metric-card__body { position:relative; margin-top:22px; min-width:0; }
@@ -3494,15 +4332,15 @@
 .ci-metric-card[data-presentation="secondary"] { padding:14px 16px; }
 .ci-metric-card[data-presentation="secondary"] .ci-metric-card__head { display:grid; grid-template-columns:minmax(0,1.4fr) minmax(100px,1fr) 56px; align-items:start; gap:10px; }
 .ci-metric-card[data-presentation="secondary"] .ci-metric-card__stat { display:contents; }
-.ci-metric-card[data-presentation="secondary"] .ci-stat__label { grid-column:1 / -1; min-height:24px; padding-right:100px; }
+.ci-metric-card[data-presentation="secondary"] .ci-stat__label { grid-column:1 / -1; min-height:24px; padding-inline-end:100px; }
 .ci-metric-card[data-presentation="secondary"] .ci-stat__value { grid-column:1; grid-row:2; margin:0; font-size:32px; }
 .ci-metric-card[data-presentation="secondary"] .ci-stat__hint { grid-column:1; grid-row:3; margin:0; }
 .ci-metric-card[data-presentation="secondary"] .ci-metric-card__side { display:block; grid-column:2; grid-row:2 / span 2; padding-top:3px; }
 .ci-metric-card[data-presentation="secondary"] .ci-metric-card__sparkline { grid-column:3; grid-row:2 / span 2; }
-.ci-metric-card[data-presentation="secondary"] .ci-metric-trend { border-left:1px solid var(--ci-color-border); padding-left:10px; gap:4px; align-items:flex-start; text-align:left; }
+.ci-metric-card[data-presentation="secondary"] .ci-metric-trend { border-inline-start:1px solid var(--ci-color-border); padding-inline-start:10px; gap:4px; align-items:flex-start; text-align:start; }
 .ci-metric-card[data-presentation="secondary"] .ci-metric-trend__value { justify-content:flex-start; }
 .ci-metric-card__sparkline { min-width:0; }
-.ci-metric-card .ci-metric-card__view { position:absolute; z-index:2; top:10px; right:12px; margin:0; padding:0 8px; height:24px; min-height:24px; font-size:10px; }
+.ci-metric-card .ci-metric-card__view { position:absolute; z-index:2; top:10px; inset-inline-end:12px; margin:0; padding:0 8px; height:24px; min-height:24px; font-size:var(--ci-font-size-3xs); }
 @media (hover:hover) { .ci-metric-card:has(.ci-metric-card__select:not(:disabled)):hover { border-color:var(--ci-color-text-muted); box-shadow:var(--ci-shadow-sm); } }
 @container ci-metric-card (max-width:360px) { .ci-metric-card[data-presentation="primary"] .ci-metric-card__side { flex-direction:row; flex-wrap:wrap; align-items:center; justify-content:space-between; width:100%; } }
 @container ci-metric-card (max-width:360px) {
@@ -3510,10 +4348,10 @@
   .ci-metric-card[data-presentation="secondary"] .ci-stat__value,
   .ci-metric-card[data-presentation="secondary"] .ci-stat__hint { grid-column:1 / -1; }
   .ci-metric-card[data-presentation="secondary"] .ci-metric-card__side { grid-column:1; grid-row:4; padding-top:4px; align-self:center; }
-  .ci-metric-card[data-presentation="secondary"] .ci-metric-trend { border-left:0; padding-left:0; }
+  .ci-metric-card[data-presentation="secondary"] .ci-metric-trend { border-inline-start:0; padding-inline-start:0; }
   .ci-metric-card[data-presentation="secondary"] .ci-metric-card__sparkline { grid-column:2; grid-row:4; align-self:center; }
 }
-@media (max-width:320px) { .ci-metric-card__head { gap:12px; } .ci-metric-card__footer { font-size:11px; } }
+@media (max-width:320px) { .ci-metric-card__head { gap:12px; } .ci-metric-card__footer { font-size:var(--ci-font-size-2xs); } }
 @media (forced-colors:active) { .ci-stacked-chart__legend i { forced-color-adjust:none; } .ci-metric-card[data-selected] { border-color:Highlight; } }
 }
 
@@ -3544,10 +4382,10 @@
 .ci-chat-composer .ci-chat-composer__input { display:block; box-sizing:border-box; width:100%; min-width:0; min-height:56px; max-height:240px; border:0; border-radius:8px; box-shadow:none; resize:none; background:transparent; font-size:14px; line-height:1.5; padding:6px; }
 .ci-chat-composer__footer { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:4px; padding-top:2px; }
 .ci-chat-composer__tools { display:flex; align-items:center; gap:4px; }
-.ci-chat-composer__hint { flex:1; min-width:0; font-size:10px; text-align:center; overflow-wrap:anywhere; color:var(--ci-color-text-muted); }
+.ci-chat-composer__hint { flex:1; min-width:0; font-size:var(--ci-font-size-3xs); text-align:center; overflow-wrap:anywhere; color:var(--ci-color-text-muted); }
 .ci-chat-composer__attachments { list-style:none; padding:0; margin:0 0 8px; display:flex; flex-wrap:wrap; gap:6px; }
 .ci-chat-composer__attachments > li { min-width:0; max-width:100%; }
-.ci-chat-composer__attachment { max-width:100%; gap:4px; padding:2px 8px 2px 14px; border-radius:var(--ci-radius-lg); border-color:var(--ci-color-border-subtle); background:transparent; }
+.ci-chat-composer__attachment { max-width:100%; gap:4px; padding-block:2px;padding-inline:14px 8px; border-radius:var(--ci-radius-lg); border-color:var(--ci-color-border-subtle); background:transparent; }
 .ci-chat-composer__attachment > .ci-button { flex:none; width:24px; height:24px; min-height:24px; padding:0; }
 .ci-chat-composer__attachment > .ci-button > svg { width:14px; height:14px; }
 .ci-chat-composer__filename { min-width:0; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
@@ -3561,7 +4399,7 @@
 .ci-chat-message__content { min-width:0; overflow-wrap:anywhere; font-size:14px; line-height:1.6; }
 .ci-chat-message__content > :first-child { margin-top:0; }
 .ci-chat-message__content > :last-child { margin-bottom:0; }
-.ci-chat-message[data-kind="user"] { align-self:flex-end; width:fit-content; max-width:85%; margin-left:auto; }
+.ci-chat-message[data-kind="user"] { align-self:flex-end; width:fit-content; max-width:85%; margin-inline-start:auto; }
 .ci-chat-message[data-kind="user"] .ci-chat-message__content { padding:10px 14px; border:1px solid var(--ci-color-border); border-radius:16px; background:transparent; line-height:1.5; }
 .ci-chat-message__evidence { min-width:0; overflow-x:auto; }
 .ci-chat-message-actions { display:flex; align-items:center; flex-wrap:wrap; gap:2px; color:var(--ci-color-text-muted); }
@@ -3585,7 +4423,7 @@
 .ci-chat-activity__summary { min-width:0; max-width:100%; padding-top:10px; overflow-wrap:anywhere; color:var(--ci-color-text-muted); font-size:13px; line-height:1.6; }
 .ci-chat-activity__summary p { margin:0; }
 .ci-chat-activity__summary ol { padding-inline-start:20px; margin:8px 0; font-size:13px; }
-.ci-chat-activity__note { display:block; color:var(--ci-color-text-muted); font-size:11px; }
+.ci-chat-activity__note { display:block; color:var(--ci-color-text-muted); font-size:var(--ci-font-size-2xs); }
 .ci-chat-activity[data-has-summary] .ci-chat-activity__action { align-self:flex-start; }
 .ci-chat-activity .ci-chat-activity__retry { gap:5px; min-height:28px; padding:2px 0; border:0; border-radius:4px; background:transparent; color:var(--ci-color-text-muted); }
 .ci-chat-activity .ci-chat-activity__retry:hover { color:var(--ci-color-foreground); background:transparent; }
@@ -3604,7 +4442,7 @@
 .ci-chat-history__feedback { display:flex; justify-content:space-between; align-items:center; gap:8px; font-size:13px; }
 .ci-chat-history__group > h3 { margin:0 8px 8px; font-size:12px; line-height:1.4; font-weight:400; color:var(--chat-history-muted); }
 .ci-chat-history__group > ul { display:flex; flex-direction:column; gap:4px; list-style:none; padding:0; margin:0; }
-.ci-chat-history__item { display:flex; align-items:center; gap:2px; padding-right:4px; border-radius:999px; min-width:0; }
+.ci-chat-history__item { display:flex; align-items:center; gap:2px; padding-inline-end:4px; border-radius:999px; min-width:0; }
 .ci-chat-history__item[data-active], .ci-chat-history__item:hover, .ci-chat-history__item:focus-within { background:var(--chat-history-selected); }
 .ci-chat-history .ci-chat-history__row { flex:1; display:flex; align-items:center; justify-content:flex-start; gap:12px; min-width:0; padding:8px 12px; height:auto; min-height:52px; border-radius:999px; background:transparent; color:var(--chat-history-ink); font-weight:400; text-align:start; }
 .ci-chat-history__icon { display:inline-flex; flex:none; color:var(--chat-history-muted); }
@@ -3631,7 +4469,7 @@
   /* Approved Reports/Requests detail presentation. All amounts and actions are caller-owned. */
   .ci-usage-drilldown-header { flex: none; min-width: 0; padding: 16px 20px 20px; border-bottom: 1px solid var(--ci-color-border); }
   .ci-usage-drilldown-header__top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 4px; }
-  .ci-usage-drilldown-header__eyebrow { margin: 0; color: var(--ci-color-text-muted); font-size: 11px; line-height: 1.4; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
+  .ci-usage-drilldown-header__eyebrow { margin: 0; color: var(--ci-color-text-muted); font-size: var(--ci-font-size-2xs); line-height: 1.4; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
   .ci-usage-drilldown-header__title-line { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; min-width: 0; }
   .ci-usage-drilldown-header__title-line h2 { min-width: 0; margin: 0; color: var(--ci-color-heading); font-family: var(--ci-font-display); font-size: 28px; font-weight: var(--ci-font-weight-medium); line-height: var(--ci-type-heading-leading); letter-spacing: var(--ci-type-heading-tracking); overflow-wrap: anywhere; }
   .ci-usage-drilldown-header__title-line h2:focus { outline: none; }
@@ -3665,13 +4503,13 @@
   .ci-usage-receipt__lines, .ci-usage-receipt__totals, .ci-usage-token-rows, .ci-usage-detail-rows { margin: 0; }
   .ci-usage-receipt__row { display: grid; grid-template-columns: auto minmax(12px, 1fr) auto; align-items: baseline; column-gap: 8px; padding: 4px 0; font-size: 14px; line-height: var(--ci-type-body-leading); }
   .ci-usage-receipt__row dt { display: inline-flex; min-width: 0; align-items: center; gap: 6px; color: var(--ci-color-text-muted); }
-  .ci-usage-receipt__row--indent dt { padding-left: 12px; }
+  .ci-usage-receipt__row--indent dt { padding-inline-start: 12px; }
   .ci-usage-receipt__row dd { margin: 0; white-space: nowrap; color: var(--ci-color-foreground); }
   .ci-usage-receipt__row--strong dt, .ci-usage-receipt__row--strong dd { color: var(--ci-color-foreground); font-weight: 500; }
   .ci-usage-receipt__row dd[data-tone="positive"] { color: var(--ci-color-success); }
   .ci-usage-receipt__row dd[data-tone="muted"] { color: var(--ci-color-text-muted); }
   .ci-usage-receipt__leader { border-bottom: 1px dotted var(--ci-color-border); transform: translateY(-.25em); }
-  .ci-usage-receipt__group-label { margin: 12px 0 4px; color: var(--ci-color-text-muted); font: 500 10px var(--ci-font-mono); text-transform: uppercase; letter-spacing: .1em; }
+  .ci-usage-receipt__group-label { margin: 12px 0 4px; color: var(--ci-color-text-muted); font: 500 var(--ci-font-size-3xs) var(--ci-font-mono); text-transform: uppercase; letter-spacing: .1em; }
   .ci-usage-receipt__totals { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--ci-color-border); }
   .ci-usage-receipt__note { margin: 12px 0 0; color: var(--ci-color-text-muted); font-size: 12px; line-height: 1.6; }
   .ci-usage-receipt__retention { display: flex; align-items: center; gap: 6px; margin-top: 12px; color: var(--ci-color-text-muted); font-size: 12px; }
@@ -3680,22 +4518,22 @@
   .ci-usage-token-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; font-size: 14px; }
   .ci-usage-token-row dt { display: flex; align-items: center; gap: 6px; min-width: 0; }
   .ci-usage-token-row dd { margin: 0; flex: none; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--ci-color-foreground); }
-  .ci-usage-token-row--cached { padding-left: 12px; border-left: 2px solid var(--ci-color-border); font-size: 12px; color: var(--ci-color-text-muted); }
+  .ci-usage-token-row--cached { padding-inline-start: 12px; border-inline-start: 2px solid var(--ci-color-border); font-size: 12px; color: var(--ci-color-text-muted); }
   .ci-usage-detail-rows > div { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 6px 0; font-size: 14px; line-height: var(--ci-type-body-leading); }
   .ci-usage-detail-rows dt { display: inline-flex; align-items: center; min-width: 0; flex: 1; gap: 6px; color: var(--ci-color-text-muted); }
   .ci-usage-detail-rows dt > svg { width: 14px; height: 14px; flex: none; }
-  .ci-usage-detail-rows dd { min-width: 0; max-width: 55%; flex: none; margin: 0; text-align: right; font-weight: 500; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+  .ci-usage-detail-rows dd { min-width: 0; max-width: 55%; flex: none; margin: 0; text-align: end; font-weight: 500; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
   .ci-usage-detail-rows__secondary { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--ci-color-border); }
   .ci-usage-models-container { border: 0; border-radius: 0; background: transparent; }
   .ci-usage-models-scroll .ci-table-scrollbar:has([data-overflowing="false"]) { display: none; }
   .ci-usage-models { width: 100%; min-width: 320px; border-collapse: collapse; table-layout: fixed; font-size: 13px; }
-  .ci-usage-models th, .ci-usage-models td { padding: 10px 0; border-bottom: 1px solid var(--ci-color-border); text-align: right; font-weight: 400; }
-  .ci-usage-models th:first-child { width: auto; padding-right: 8px; text-align: left; }
+  .ci-usage-models th, .ci-usage-models td { padding: 10px 0; border-bottom: 1px solid var(--ci-color-border); text-align: end; font-weight: 400; }
+  .ci-usage-models th:first-child { width: auto; padding-inline-end: 8px; text-align: start; }
   .ci-usage-models th:nth-child(2) { width: 68px; }
   .ci-usage-models th:nth-child(3) { width: 80px; }
   .ci-usage-models thead th { padding-top: 0; color: var(--ci-color-text-muted); font-size: 12px; }
   .ci-usage-models tfoot th, .ci-usage-models tfoot td { border-bottom: 0; font-weight: 600; }
-  .ci-usage-models .ci-button { justify-content: flex-start; width: 100%; height: auto; padding: 0; white-space: normal; text-align: left; }
+  .ci-usage-models .ci-button { justify-content: flex-start; width: 100%; height: auto; padding: 0; white-space: normal; text-align: start; }
   .ci-usage-models .ci-model-identity { display: inline-flex; min-width: 0; max-width: 100%; }
   .ci-usage-models .ci-model-identity__name { white-space: normal; overflow-wrap: anywhere; font-weight: 400; }
   .ci-usage-drilldown-actions { display: flex; flex-direction: column; gap: 12px; }
@@ -3713,14 +4551,14 @@
 @media (max-width: 360px) {
   .ci-usage-receipt__row { grid-template-columns: minmax(0, 1fr) auto; }
   .ci-usage-receipt__leader { display: none; }
-  .ci-usage-receipt__row dd { white-space: normal; overflow-wrap: anywhere; text-align: right; }
+  .ci-usage-receipt__row dd { white-space: normal; overflow-wrap: anywhere; text-align: end; }
   .ci-usage-section > .ci-card__header { padding: 16px 16px 0; }
   .ci-usage-section > .ci-card__content { padding: 16px; }
 }
 @media (max-width: 600px) {
   .ci-usage-models th:nth-child(2) { width: 56px; }
   .ci-usage-models th:nth-child(3) { width: 64px; }
-  .ci-usage-models th:first-child { padding-right: 6px; }
+  .ci-usage-models th:first-child { padding-inline-end: 6px; }
 }
 
 @layer components {
@@ -3795,6 +4633,66 @@
   .ci-disclosure__content[hidden] { display: none; }
 }
 
+/* ItemList and Item: a short list of rows (leading mark, title, description, meta, actions). */
+@layer components {
+  .ci-item-list { display: flex; min-width: 0; flex-direction: column; gap: var(--ci-space-2); padding: 0; margin: 0; list-style: none; }
+  .ci-item { position: relative; display: flex; box-sizing: border-box; min-width: 0; min-height: var(--ci-control-height-xl); flex-wrap: wrap; align-items: center; gap: var(--ci-space-2) var(--ci-space-3); padding: var(--ci-space-3) var(--ci-item-padding-inline, var(--ci-space-4)); border: var(--ci-border-default) solid var(--ci-color-border); border-radius: var(--ci-radius-control); color: var(--ci-color-foreground); background: var(--ci-color-surface); font-family: var(--ci-font-ui); font-size: var(--ci-font-size-sm); transition: border-color var(--ci-duration-fast) var(--ci-ease-standard), background-color var(--ci-duration-fast) var(--ci-ease-standard); }
+  .ci-item-list[data-density="compact"] > .ci-item { min-height: var(--ci-control-height-md); gap: var(--ci-space-1) var(--ci-space-2); padding: var(--ci-space-1-5) var(--ci-item-padding-inline, var(--ci-space-3)); }
+  /* variant="divided": the host (a Card, a panel) is the frame and the surface. */
+  .ci-item-list[data-variant="divided"] { gap: 0; }
+  .ci-item-list[data-variant="divided"] > .ci-item { border: 0; border-radius: 0; background: transparent; }
+  .ci-item-list[data-variant="divided"] > .ci-item + .ci-item { border-block-start: var(--ci-border-default) solid var(--ci-color-border-subtle); }
+  .ci-item__leading { display: inline-flex; flex: none; align-items: center; justify-content: center; color: var(--ci-color-text-muted); }
+  .ci-item__leading > svg { width: var(--ci-icon-size-md); height: var(--ci-icon-size-md); stroke-width: var(--ci-icon-stroke-width); }
+  .ci-item-list[data-density="compact"] .ci-item__leading > svg { width: var(--ci-icon-size-sm); height: var(--ci-icon-size-sm); }
+  /* The copy keeps 10rem beside the trailing group; under that the group moves to its own line. */
+  .ci-item__content { display: grid; min-width: 0; flex: 1 1 10rem; gap: var(--ci-space-0-5); }
+  .ci-item__title { min-width: 0; color: var(--ci-color-heading); font-size: var(--ci-font-size-sm); font-weight: var(--ci-font-weight-medium); line-height: var(--ci-type-control-leading); letter-spacing: var(--ci-type-control-tracking); overflow-wrap: anywhere; }
+  .ci-item__description { min-width: 0; color: var(--ci-color-text-muted); font-size: var(--ci-font-size-xs); font-weight: var(--ci-font-weight-regular); line-height: var(--ci-type-body-leading); letter-spacing: var(--ci-type-body-tracking); overflow-wrap: anywhere; }
+  .ci-item__body { min-width: 0; }
+  .ci-item__trailing { display: flex; max-width: 100%; min-width: 0; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: var(--ci-space-2) var(--ci-space-3); margin-inline-start: auto; }
+  .ci-item__meta { display: inline-flex; min-width: 0; align-items: center; gap: var(--ci-space-2); color: var(--ci-color-text-muted); font-size: var(--ci-font-size-xs); font-variant-numeric: tabular-nums; line-height: var(--ci-type-caption-leading); letter-spacing: var(--ci-type-caption-tracking); }
+  /* The actions sit above the hit area of the row's control, so they keep their own clicks. They
+     wrap inside their group when they are wider than the row (text buttons in a narrow container). */
+  .ci-item__actions { position: relative; z-index: 1; display: inline-flex; min-width: 0; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: var(--ci-space-1); }
+  /* truncate: one line each, cut with an ellipsis. The copy can go down to 6rem beside the trailing
+     group; under that the group moves to its own line, as it does without truncate. */
+  .ci-item[data-truncate] > .ci-item__content { flex-basis: 6rem; }
+  .ci-item[data-truncate] :is(.ci-item__title, .ci-item__description, .ci-item__primary) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  /* The row's control (a link or a button around the title). Its ::after is the hit area: it covers
+     the row, border included, so no control is nested in another and the focus ring is drawn on the
+     row. The ring is inset, so neither a clipping parent nor the next row can cut it. */
+  .ci-item__primary { display: block; max-width: 100%; padding: 0; border: 0; margin: 0; border-radius: 0; color: inherit; background: none; font: inherit; letter-spacing: inherit; text-align: start; text-decoration: none; overflow-wrap: anywhere; cursor: pointer; appearance: none; }
+  .ci-item__primary::after { position: absolute; inset: calc(-1 * var(--ci-border-default)); border-radius: var(--ci-radius-control); content: ""; }
+  .ci-item__primary:focus-visible { outline: none; }
+  .ci-item__primary:focus-visible::after { outline: var(--ci-focus-ring-width) solid var(--ci-color-focus); outline-offset: calc(-1 * var(--ci-focus-ring-width)); }
+  /* A divided row has no border of its own: its hit area ends at the divider above it. */
+  .ci-item-list[data-variant="divided"] > .ci-item .ci-item__primary::after { inset: 0; border-radius: 0; }
+  /* Hover follows the control, so the row does not light up under a pointer that is on an action. */
+  .ci-item:has(.ci-item__primary:hover):not([data-disabled], [data-state="selected"]) { background: var(--ci-color-surface-muted); }
+  /* Selected: the fill of a selected table row, laid over the row surface so it stays opaque. */
+  .ci-item[data-state="selected"] { border-color: var(--ci-color-accent-active); background: linear-gradient(var(--ci-color-accent-surface-strong), var(--ci-color-accent-surface-strong)), var(--ci-color-surface); }
+  .ci-item-list[data-variant="divided"] > .ci-item[data-state="selected"] { background: var(--ci-color-accent-surface-strong); }
+  .ci-item[data-state="selected"] .ci-item__title { font-weight: var(--ci-font-weight-semibold); }
+  /* The muted ink is under 4.5:1 on the selected fill in Editions, so the muted slots take the body ink. */
+  .ci-item[data-state="selected"] :is(.ci-item__leading, .ci-item__description, .ci-item__meta) { color: var(--ci-color-foreground); }
+  /* Disabled dims the row but not its actions: "Enable" on a disabled row stays a live control.
+     The title is dimmed through its ink and not with opacity: a disabled link stays focusable, and
+     opacity on the title or on the copy would also dim the focus ring its control draws on the row. */
+  .ci-item[data-disabled] > .ci-item__leading,
+  .ci-item[data-disabled] :is(.ci-item__description, .ci-item__body, .ci-item__meta) { opacity: 0.56; }
+  .ci-item[data-disabled] .ci-item__title { color: color-mix(in srgb, var(--ci-color-heading) 56%, transparent); }
+  .ci-item[data-disabled] .ci-item__primary { cursor: not-allowed; }
+  @media (forced-colors: active) {
+    .ci-item__primary:focus-visible::after { outline-color: Highlight; }
+    /* Forced colours drop the fills, so the selected row gets a marker on its leading edge. */
+    :is(.ci-item, .ci-item-list[data-variant="divided"] > .ci-item)[data-state="selected"] { border-inline-start: var(--ci-space-1) solid Highlight; }
+    .ci-item[data-disabled] > .ci-item__leading,
+    .ci-item[data-disabled] :is(.ci-item__description, .ci-item__body, .ci-item__meta) { opacity: 1; }
+    .ci-item[data-disabled] :is(.ci-item__leading, .ci-item__title, .ci-item__description, .ci-item__body, .ci-item__meta, .ci-item__primary) { color: GrayText; }
+  }
+}
+
 @layer components {
   .ci-hover-card { width: min(20rem, calc(100vw - 1rem)); }
 }
@@ -3815,6 +4713,25 @@
   .ci-toggle-chip[data-size="sm"] .ci-toggle-chip__icon > svg { width: var(--ci-icon-size-xs); height: var(--ci-icon-size-xs); }
   .ci-toggle-chip__count { flex: none; min-width: 1.25rem; padding: 0 var(--ci-space-1-5); border-radius: var(--ci-radius-pill); color: var(--ci-color-heading); background: var(--ci-color-surface-muted); font-size: var(--ci-font-size-xs); font-variant-numeric: tabular-nums; letter-spacing: 0em; text-align: center; }
   .ci-toggle-chip[aria-pressed="true"] .ci-toggle-chip__count { color: inherit; background: color-mix(in srgb, currentColor 18%, transparent); }
+  /* tone: the pressed state takes a Badge tone (its ink on its tint) and the border takes
+     the ink, which keeps 3:1 against the surface around a pale tint. Unpressed chips ignore it. */
+  .ci-toggle-chip[data-tone="neutral"][aria-pressed="true"] { border-color: var(--ci-color-foreground); color: var(--ci-color-foreground); background: var(--ci-color-surface-muted); }
+  .ci-toggle-chip[data-tone="success"][aria-pressed="true"] { border-color: var(--ci-color-success); color: var(--ci-color-success); background: var(--ci-color-success-bg); }
+  .ci-toggle-chip[data-tone="warning"][aria-pressed="true"] { border-color: var(--ci-color-warning); color: var(--ci-color-warning); background: var(--ci-color-warning-bg); }
+  .ci-toggle-chip[data-tone="info"][aria-pressed="true"] { border-color: var(--ci-color-info); color: var(--ci-color-info); background: var(--ci-color-info-bg); }
+  .ci-toggle-chip[data-tone="danger"][aria-pressed="true"] { border-color: var(--ci-color-danger); color: var(--ci-color-danger); background: var(--ci-color-danger-bg); }
+  .ci-toggle-chip[data-tone="accent"][aria-pressed="true"] { border-color: var(--ci-badge-accent-ink); color: var(--ci-badge-accent-ink); background: var(--ci-color-accent-surface-strong); }
+  .ci-toggle-chip[data-tone="chart-1"][aria-pressed="true"] { border-color: var(--ci-chart-1-ink); color: var(--ci-chart-1-ink); background: var(--ci-chart-1-subtle); }
+  .ci-toggle-chip[data-tone="chart-2"][aria-pressed="true"] { border-color: var(--ci-chart-2-ink); color: var(--ci-chart-2-ink); background: var(--ci-chart-2-subtle); }
+  .ci-toggle-chip[data-tone="chart-3"][aria-pressed="true"] { border-color: var(--ci-chart-3-ink); color: var(--ci-chart-3-ink); background: var(--ci-chart-3-subtle); }
+  .ci-toggle-chip[data-tone="chart-4"][aria-pressed="true"] { border-color: var(--ci-chart-4-ink); color: var(--ci-chart-4-ink); background: var(--ci-chart-4-subtle); }
+  .ci-toggle-chip[data-tone="chart-5"][aria-pressed="true"] { border-color: var(--ci-chart-5-ink); color: var(--ci-chart-5-ink); background: var(--ci-chart-5-subtle); }
+  .ci-toggle-chip[data-tone="chart-6"][aria-pressed="true"] { border-color: var(--ci-chart-6-ink); color: var(--ci-chart-6-ink); background: var(--ci-chart-6-subtle); }
+  .ci-toggle-chip[data-tone="chart-7"][aria-pressed="true"] { border-color: var(--ci-chart-7-ink); color: var(--ci-chart-7-ink); background: var(--ci-chart-7-subtle); }
+  .ci-toggle-chip[data-tone="chart-8"][aria-pressed="true"] { border-color: var(--ci-chart-8-ink); color: var(--ci-chart-8-ink); background: var(--ci-chart-8-subtle); }
+  /* The 18% wash above would take the count under 4.5:1 on the paler tints, so a toned
+     count stays on the tint and keeps its shape with a hairline. */
+  .ci-toggle-chip[data-tone][aria-pressed="true"] .ci-toggle-chip__count { background: transparent; box-shadow: inset 0 0 0 var(--ci-border-default) currentColor; }
 }
 
 /* Sidebar item/group actions and rendered Markdown/HTML prose. */
@@ -3902,6 +4819,77 @@
   .ci-status-matrix__legend i[data-tone="neutral"] { border-style: dashed; border-color: var(--ci-color-text-muted); }
 }
 
+/* FlowNode: the frame of a node on a flow canvas, and .ci-flow-edge for a connector path the host
+   draws. Presentation only: no position, no overflow and no role, so the host's canvas library
+   places the node and anchors its handles. --ci-flow-node-tone is the graphic colour (frame, dot,
+   halo) and --ci-flow-node-ink the state text; neutral is the base rule. */
+@layer components {
+  .ci-flow-node {
+    --ci-flow-node-tone: var(--ci-flow-edge-idle);
+    --ci-flow-node-ink: var(--ci-color-text-muted);
+    --ci-flow-node-border-width: var(--ci-border-default);
+    --ci-flow-node-padding-block: var(--ci-space-2);
+    --ci-flow-node-padding-inline: var(--ci-space-3);
+    display: grid;
+    box-sizing: border-box;
+    min-inline-size: 0;
+    gap: var(--ci-space-1-5);
+    padding: calc(var(--ci-flow-node-padding-block) - var(--ci-flow-node-border-width)) calc(var(--ci-flow-node-padding-inline) - var(--ci-flow-node-border-width));
+    border: var(--ci-flow-node-border-width) solid var(--ci-color-border);
+    border-radius: var(--ci-radius-control);
+    background: var(--ci-color-surface);
+    color: var(--ci-color-foreground);
+    font-family: var(--ci-font-ui);
+    font-size: var(--ci-font-size-xs);
+    font-weight: var(--ci-font-weight-regular);
+    line-height: var(--ci-type-caption-leading);
+    letter-spacing: var(--ci-type-caption-tracking);
+    text-align: start;
+  }
+  .ci-flow-node[data-size="sm"] { --ci-flow-node-padding-block: var(--ci-space-1-5); --ci-flow-node-padding-inline: var(--ci-space-2); gap: var(--ci-space-1); }
+  .ci-flow-node[data-status="success"] { --ci-flow-node-tone: var(--ci-color-success); --ci-flow-node-ink: var(--ci-color-success); }
+  .ci-flow-node[data-status="warning"] { --ci-flow-node-tone: var(--ci-color-warning); --ci-flow-node-ink: var(--ci-color-warning); }
+  .ci-flow-node[data-status="info"] { --ci-flow-node-tone: var(--ci-color-info); --ci-flow-node-ink: var(--ci-color-info); }
+  .ci-flow-node[data-status="danger"] { --ci-flow-node-tone: var(--ci-color-danger); --ci-flow-node-ink: var(--ci-color-danger); }
+  .ci-flow-node[data-status="accent"] { --ci-flow-node-tone: var(--ci-badge-accent-ink); --ci-flow-node-ink: var(--ci-badge-accent-ink); }
+  .ci-flow-node[data-status] { border-color: var(--ci-flow-node-tone); }
+  /* An active node with no status of its own takes the colour of the active edges. */
+  .ci-flow-node[data-active]:not([data-status]) { --ci-flow-node-tone: var(--ci-flow-edge-active); }
+  /* Active is a thicker frame and a halo, selected a ring outside it: neither is colour alone,
+     and the two can be on at once. The padding gives back what the border takes. */
+  .ci-flow-node[data-active] { --ci-flow-node-border-width: var(--ci-border-strong); border-color: var(--ci-flow-node-tone); box-shadow: 0 0 0 var(--ci-space-1) color-mix(in srgb, var(--ci-flow-node-tone) 24%, transparent); }
+  .ci-flow-node[data-selected] { outline: var(--ci-focus-ring-width) solid var(--ci-color-foreground); outline-offset: var(--ci-focus-ring-offset); }
+  .ci-flow-node__header { display: flex; min-inline-size: 0; align-items: center; gap: var(--ci-space-2); }
+  .ci-flow-node__icon { display: inline-grid; flex: none; place-items: center; color: var(--ci-color-text-muted); }
+  .ci-flow-node__icon > :where(svg, img) { inline-size: var(--ci-icon-size-sm); block-size: var(--ci-icon-size-sm); }
+  .ci-flow-node__icon > svg { stroke-width: var(--ci-icon-stroke-width); }
+  .ci-flow-node__heading { display: grid; min-inline-size: 0; flex: 1; gap: var(--ci-space-0-5); }
+  .ci-flow-node__title { overflow: hidden; color: var(--ci-color-heading); font-size: var(--ci-font-size-sm); font-weight: var(--ci-font-weight-medium); line-height: var(--ci-type-control-leading); text-overflow: ellipsis; white-space: nowrap; }
+  .ci-flow-node[data-size="sm"] .ci-flow-node__title { font-size: var(--ci-font-size-xs); font-weight: var(--ci-font-weight-semibold); }
+  .ci-flow-node__description { overflow: hidden; color: var(--ci-color-text-muted); text-overflow: ellipsis; white-space: nowrap; }
+  .ci-flow-node__meta { display: inline-flex; flex: none; align-items: center; gap: var(--ci-space-1); color: var(--ci-color-text-muted); }
+  .ci-flow-node__status { display: flex; min-inline-size: 0; align-items: center; overflow-wrap: anywhere; gap: var(--ci-space-1-5); color: var(--ci-flow-node-ink); font-weight: var(--ci-font-weight-medium); }
+  .ci-flow-node__status-dot { flex: none; inline-size: var(--ci-space-2); block-size: var(--ci-space-2); border-radius: var(--ci-radius-full); background: var(--ci-flow-node-tone); }
+  .ci-flow-node__body { min-inline-size: 0; }
+  /* A connector the host draws as an SVG path or line. Idle is the base rule. The states differ
+     in width and dash as well as colour: active is the widest, warning dotted, error dashed. */
+  /* No dash pattern of its own, so a host group that sets one does not dash an idle or active edge. */
+  .ci-flow-edge { fill: none; stroke: var(--ci-flow-edge-idle); stroke-width: 1.5; stroke-linecap: round; stroke-dasharray: none; }
+  .ci-flow-edge[data-state="active"] { stroke: var(--ci-flow-edge-active); stroke-width: 2.5; }
+  .ci-flow-edge[data-state="warning"] { stroke: var(--ci-flow-edge-warning); stroke-width: 2; stroke-dasharray: 0.5 5; }
+  .ci-flow-edge[data-state="error"] { stroke: var(--ci-flow-edge-error); stroke-width: 2; stroke-dasharray: 7 5; }
+  /* Forced colours keep the border and the outline but drop the halo and the dot's fill, and
+     leave an SVG stroke as authored: system colours keep every state apart there. */
+  @media (forced-colors: active) {
+    .ci-flow-node[data-active] { border-color: Highlight; }
+    .ci-flow-node[data-selected] { outline-color: CanvasText; }
+    .ci-flow-node__status-dot { forced-color-adjust: none; background: CanvasText; }
+    .ci-flow-edge { stroke: GrayText; }
+    .ci-flow-edge[data-state="active"] { stroke: Highlight; }
+    .ci-flow-edge:is([data-state="warning"], [data-state="error"]) { stroke: CanvasText; }
+  }
+}
+
 /* A measured fit keeps the whole sticky region, including its controls, reachable. */
 @layer components {
   .ci-sticky-region { min-width: 0; align-self: start; position: static; }
@@ -3922,7 +4910,7 @@
   .ci-notification-card__history summary::-webkit-details-marker { display: none; }
   .ci-notification-card__history summary svg { width: 16px; height: 16px; flex-shrink: 0; }
   .ci-notification-card__history[open] summary svg { transform: rotate(180deg); }
-  .ci-notification-card__history ol { list-style: none; margin: 12px 0 0; padding: 0 0 0 16px; border-left: 1px solid var(--ci-color-border-subtle); display: grid; gap: 16px; }
+  .ci-notification-card__history ol { list-style: none; margin: 12px 0 0; padding-block: 0; padding-inline: 16px 0; border-inline-start: 1px solid var(--ci-color-border-subtle); display: grid; gap: 16px; }
   .ci-notification-card__update-heading { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px; }
   .ci-notification-card__update-heading time { font-size: 12px; color: var(--ci-color-text-muted); }
   .ci-notification-card__footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--ci-color-border-subtle); }
@@ -3970,10 +4958,10 @@
   .ci-notification-feed__body h3 { margin:0; font-size:14px; font-weight:600; line-height:24px; }
   .ci-notification-feed__message { margin-top:4px; font-size:14px; line-height:24px; color:var(--ci-color-text-muted); overflow-wrap:anywhere; }
   .ci-notification-feed__meta { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:10px; }
-  .ci-notification-feed__meta time { font-size:12px; color:var(--ci-color-text-muted); margin-left:4px; }
+  .ci-notification-feed__meta time { font-size:12px; color:var(--ci-color-text-muted); margin-inline-start:4px; }
   .ci-notification-feed__action { flex-shrink:0; display:grid; place-items:center; min-width:32px; min-height:32px; }
   .ci-notification-feed__history { font-size:13px; }
-  .ci-notification-feed__history ol { margin-left:7px; gap:14px; }
+  .ci-notification-feed__history ol { margin-inline-start:7px; gap:14px; }
   .ci-notification-feed__empty { padding:32px; font-size:14px; color:var(--ci-color-text-muted); }
   @container notification-feed (max-width:800px) {
     .ci-notification-feed__filters { align-items:flex-start; flex-direction:column; gap:12px; padding-bottom:12px; }
@@ -3986,3 +4974,51 @@
     .ci-notification-feed__meta time { width:100%; margin:0; }
   }
 }
+
+@media(max-width:640px) {
+  .ci-table-container[data-mobile-layout="settings"] > table { display:block; min-width:0 !important; width:100%; }
+  .ci-table-container[data-mobile-layout="settings"] thead { position:absolute; width:1px; height:1px; clip-path:inset(50%); overflow:hidden; }
+  .ci-table-container[data-mobile-layout="settings"] tbody { display:block; }
+  .ci-table-container[data-mobile-layout="settings"] tbody tr { display:grid; grid-template-columns:minmax(0,1fr) auto; padding:1rem; gap:.75rem; }
+  .ci-table-container[data-mobile-layout="settings"] tbody td { display:block; height:auto; padding:0 !important; min-width:0; border:0; white-space:normal; overflow-wrap:anywhere; }
+  .ci-table-container[data-mobile-layout="settings"] tbody td:first-child { grid-column:1; grid-row:1; }
+  .ci-table-container[data-mobile-layout="settings"] tbody td:nth-child(2) { grid-column:1 / -1; grid-row:2; }
+  .ci-table-container[data-mobile-layout="settings"] tbody td:last-child { grid-column:2; grid-row:1; }
+}
+
+.ci-workflow-animation { position:relative; width:100%; min-width:0; height:210px; }
+.ci-workflow-animation[data-placement="analysis"] { height:96px; }
+.ci-workflow-animation[data-placement="panel"] { height:100%; min-height:200px; }
+.ci-workflow-animation__art { height:100%; width:100%; }
+.ci-workflow-animation__art > svg { display:block; width:100%; height:100%; }
+.ci-workflow-animation__art--light { display:var(--ci-scheme-dark, block) var(--ci-scheme-light, none); }
+.ci-workflow-animation__art--dark { display:var(--ci-scheme-dark, none) var(--ci-scheme-light, block); }
+:is(.dark,[data-theme="dark"]) .ci-workflow-animation__art--light { display:none; }
+:is(.dark,[data-theme="dark"]) .ci-workflow-animation__art--dark { display:block; }
+.ci-workflow-animation[data-ready="false"] .ci-workflow-animation__art { visibility:hidden; }
+
+/* Application-owned targets with a decorative simulated pointer. */
+.ci-theme.ci-guided-walkthrough { background: transparent; position: fixed; inset: 0; z-index: 100; pointer-events: none; }
+.ci-guided-walkthrough__highlight { position: fixed; border: 2px solid var(--ci-color-accent, #dca67f); border-radius: var(--ci-radius-control, 10px); box-shadow: 0 0 0 4px color-mix(in srgb, var(--ci-color-accent, #dca67f) 20%, transparent); }
+.ci-guided-walkthrough__pointer { position: absolute; inset-inline-end: -18px; bottom: -22px; color: var(--ci-color-heading); fill: var(--ci-color-accent, #dca67f); filter: drop-shadow(0 2px 2px #0005); }
+.ci-guided-walkthrough__panel { position: fixed; inset-inline-end: 16px; bottom: 16px; width: min(352px, calc(100vw - 32px)); height: max-content; max-height: calc(100dvh - 32px); overflow: auto; padding: 16px; pointer-events: auto; border: 1px solid var(--ci-color-border-subtle); border-radius: var(--ci-radius-surface, 16px); background: var(--ci-color-surface); color: var(--ci-color-heading); box-shadow: var(--ci-shadow-lg, 0 8px 32px #0003); font-family: var(--ci-font-ui); font-size: 14px; line-height: 1.5; }
+.ci-guided-walkthrough__heading { display: flex; align-items: center; justify-content: space-between; color: var(--ci-color-text-muted); font-size: 12px; }
+.ci-guided-walkthrough__panel h2 { margin: 8px 0; font-size: 16px; font-weight: 600; }
+.ci-guided-walkthrough__actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+@media (forced-colors: active) { .ci-guided-walkthrough__highlight { border-color: Highlight; } .ci-guided-walkthrough__panel { border-color: CanvasText; background: Canvas; color: CanvasText; } }
+
+/* A prominent walkthrough invitation and acknowledged answer feedback. */
+.ci-chat-guide-card { min-width:0; padding:var(--ci-space-4); border:var(--ci-border-hairline) solid color-mix(in srgb, var(--ci-color-accent) 36%, var(--ci-color-border)); border-radius:var(--ci-radius-surface); background:color-mix(in srgb, var(--ci-color-accent) 5%, var(--ci-color-surface)); color:var(--ci-color-foreground); font-family:var(--ci-font-ui); }
+.ci-chat-guide-card__heading { display:flex; align-items:center; gap:var(--ci-space-3); }
+.ci-chat-guide-card__heading > div { min-width:0; }
+.ci-chat-guide-card__icon { display:grid; place-items:center; flex-shrink:0; width:36px; height:36px; border-radius:var(--ci-radius-control); color:var(--ci-color-heading); background:var(--ci-color-accent-surface-strong); }
+.ci-chat-guide-card__eyebrow { margin:0 0 4px; color:var(--ci-color-text-muted); font-size:var(--ci-font-size-xs); line-height:1.5; }
+.ci-chat-guide-card h2 { margin:0; color:var(--ci-color-heading); font-size:var(--ci-font-size-md); font-weight:var(--ci-font-weight-semibold); line-height:1.4; overflow-wrap:anywhere; }
+.ci-chat-guide-card__description { margin:var(--ci-space-3) 0; font-size:var(--ci-font-size-sm); line-height:1.55; color:var(--ci-color-text-muted); }
+.ci-chat-guide-card__action { width:100%; justify-content:center; gap:var(--ci-space-2); }
+.ci-chat-guide-card__note { margin:var(--ci-space-2) 0 0; font-size:var(--ci-font-size-xs); line-height:1.5; text-align:center; color:var(--ci-color-text-muted); }
+.ci-chat-feedback { display:flex; align-items:center; flex-wrap:wrap; gap:var(--ci-space-2); min-width:0; }
+.ci-chat-feedback__button { color:var(--ci-color-text-muted); }
+.ci-chat-feedback__button[data-selected] { color:var(--ci-color-heading); background:var(--ci-color-accent-surface-strong); }
+.ci-chat-feedback__message { display:inline-flex; align-items:center; gap:4px; color:var(--ci-color-text-muted); font-size:var(--ci-font-size-xs); line-height:1.5; }
+.ci-chat-feedback__message[data-error] { color:var(--ci-color-danger); }
