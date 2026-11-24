@@ -214,6 +214,9 @@ export function computeUsageRowCost(
 
   if (flatRateAsZero && isFlatRateProvider(provider)) return 0;
   if (isAggregated) {
+    // Endpoint detail is gone after retention. Preserve Cortecs' archived
+    // snapshot (including zero/unknown), rather than inventing a token bill.
+    if (provider.trim().toLowerCase() === "cortecs") return storedCost;
     // New rollups preserve the exact API-equivalent value calculated before
     // cache/reasoning token dimensions are discarded. Legacy zero-cost rows
     // fall through to the best available input/output-token estimate.

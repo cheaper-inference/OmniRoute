@@ -24,9 +24,10 @@
  */
 
 /**
- * Provider ids billed by credit rather than by token. Kept explicit (not derived)
- * because these providers sit in the oauth category next to genuinely
- * token-metered ones and carry real per-token pricing rows.
+ * Provider ids whose normalized bill is credit-metered. Keep this explicit:
+ * neither the auth category nor a token-pricing row determines billing units.
+ * Cortecs is endpoint-specific and is deliberately not classified globally:
+ * custom chat/embedding nodes may use that prefix with their own token tariffs.
  */
 const CREDIT_METERED_PROVIDER_IDS: Readonly<Record<string, true>> = {
   kiro: true, // Kiro reports `credit` metering events; KIRO_CREDIT_PRICE_USD converts them
