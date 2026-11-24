@@ -13,11 +13,7 @@
 
 </div>
 
-<div align="center">
-
 ## ~1.62B Tokens / Month Across Third-Party Free Tiers
-
-</div>
 
 > **Bring your own provider accounts.** This is an estimated aggregate across separately eligible third-party free tiers, not a token grant from OmniRoute. Sign up, obtain credentials where required, and connect the providers you can use; each provider controls its limits, availability, and terms.
 >
@@ -58,6 +54,8 @@
 [![Website](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white&color=e5ac82&labelColor=20211c)](https://omniroute.online)
 
 **Questions, provider tips, roadmap & support → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 Global](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 Brasil](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [📢 Official Channel](https://whatsapp.com/channel/0029VbDwC7A3wtb5PN6a5t2R) / [Portal](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
+
+</div>
 
 <br/>
 
@@ -191,13 +189,9 @@ Every section of this README, grouped by what you want to do.
 <br/>
 <br/>
 
-<div align="center">
-
 <a id="first-run"></a>
 
 ## Install, connect a provider, then route through one endpoint
-
-</div>
 
 <img src="./docs/diagrams/works-zero-config.svg" width="100%" alt="Four steps to use OmniRoute. Install with npm install -g omniroute, run omniroute, connect a provider and create an API key in the dashboard, then call http://localhost:20128/v1 with model auto."/>
 
@@ -217,22 +211,14 @@ curl http://localhost:20128/v1/chat/completions \
 
 <br/>
 
-<div align="center">
-
 # The Promise
-
-</div>
 
 <img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 394 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 394 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ providers with a free offer and 51 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 65,000+ static test declarations across 9,500+ tracked test files."/>
 
 <br/>
 <br/>
 
-<div align="center">
-
 # Why OmniRoute?
-
-</div>
 
 <img src="./docs/diagrams/why-pain-fix.svg" width="100%" alt="Why OmniRoute — stop juggling 10 dashboards, dead API keys and surprise bills. Ten daily pains vs fixes: quota expiring unused → maximize subscriptions; rate limits mid-coding → 4-tier auto-fallback (Subscription → API → Cheap → Free); tool outputs burning tokens → RTK + Caveman compression (15–95%); expensive APIs → cost-optimized routing that tries lower input-token prices first; every tool its own setup → one endpoint, one dashboard; AI blocked → 3-level proxy + TLS stealth; dead keys → 3-layer resilience (circuit breakers, key cooldown, model lockout); team sharing one subscription → key pools with fair-share quotas; prompts through someone's cloud → local-first with AES-256-GCM encrypted keys; no spend visibility → live analytics (usage, quota, savings, p95 latency)."/>
 
@@ -323,11 +309,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 <br/>
 
-<div align="center">
-
 ## Combos: the flagship
-
-</div>
 
 <img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="Animated grid showing how all 22 public OmniRoute combo routing strategies select, order, or chain targets."/>
 
@@ -348,14 +330,14 @@ Swap `auto` for a variant when you want a different trade-off. Variants change t
 
 #### If you just want it to work
 
-| Model ID    | What it does                                                                                    |
+| Model ID    | <img width="2000" height="0" alt=""> What it does                                               |
 | ----------- | ----------------------------------------------------------------------------------------------- |
 | `auto`      | Balanced default weights. Keeps the last provider that succeeded until it fails, then rescores. |
 | `auto/lkgp` | Names the last-known-good behavior explicitly. Same weights as `auto`.                          |
 
 #### If you care about speed, price or quality
 
-| Model ID      | What it does                                                    |
+| Model ID      | <img width="2000" height="0" alt=""> What it does               |
 | ------------- | --------------------------------------------------------------- |
 | `auto/fast`   | Favors low latency and healthy providers.                       |
 | `auto/cheap`  | Favors lower catalog prices.                                    |
@@ -366,7 +348,7 @@ Swap `auto` for a variant when you want a different trade-off. Variants change t
 
 #### If you already pay for subscriptions
 
-| Model ID            | What it does                                                                                                                                                           |
+| Model ID            | <img width="2000" height="0" alt=""> What it does                                                                                                                      |
 | ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `auto/subscription` | Plan-included quota only, verified live. When none is left, the request fails with HTTP 503 instead of falling back to billed capacity.                                |
 | `auto/thrifty`      | Plan quota first, then keyless, free, cheap and premium options, one rung at a time. It can reach billed models and returns to the plan when quota and cooldown allow. |
@@ -376,7 +358,7 @@ How the rungs work: [Subscription-first routing](./docs/routing/SUBSCRIPTION_LAD
 
 #### If you want several models to answer
 
-| Model ID     | What it does                                                                                                                                                                                                                             |
+| Model ID     | <img width="2000" height="0" alt=""> What it does                                                                                                                                                                                        |
 | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `auto/chaos` | Sends the request in parallel to a panel, one model per provider, five by default (up to 10). Each panel model costs one upstream call. Your client gets one answer: the top-ranked model's, or the last one that succeeded if it fails. |
 
@@ -399,7 +381,7 @@ The CLI accepts 15 of the strategies. The dashboard and the combos API accept al
 
 #### If you want a fixed order
 
-| Strategy     | What it does                                                                    |
+| Strategy     | <img width="2000" height="0" alt=""> What it does                               |
 | ------------ | ------------------------------------------------------------------------------- |
 | `priority`   | Try targets in the order you set. Session stickiness never reorders that list.  |
 | `fill-first` | Keep using the first available target until it runs out or fails, then move on. |
@@ -407,7 +389,7 @@ The CLI accepts 15 of the strategies. The dashboard and the combos API accept al
 
 #### If you want to spread the load
 
-| Strategy        | What it does                                                                                   |
+| Strategy        | <img width="2000" height="0" alt=""> What it does                                              |
 | --------------- | ---------------------------------------------------------------------------------------------- |
 | `weighted`      | Draw one target per request in proportion to its weight. The others become the fallback chain. |
 | `round-robin`   | Rotate in order, staying on each target for a batch of successes (3 by default).               |
@@ -420,7 +402,7 @@ The CLI accepts 15 of the strategies. The dashboard and the combos API accept al
 
 #### If you want to spend less
 
-| Strategy         | What it does                                                            |
+| Strategy         | <img width="2000" height="0" alt=""> What it does                       |
 | ---------------- | ----------------------------------------------------------------------- |
 | `cost-optimized` | Try the lowest catalog input-token price first. Unknown prices go last. |
 
@@ -428,7 +410,7 @@ It sorts by the input price in the catalog, not by the final cost of the request
 
 #### If you want to respect quota
 
-| Strategy         | What it does                                                                                       |
+| Strategy         | <img width="2000" height="0" alt=""> What it does                                                  |
 | ---------------- | -------------------------------------------------------------------------------------------------- |
 | `headroom`       | Use the account with the most free capacity across its 5-hour and weekly windows.                  |
 | `quota-weighted` | Skip exhausted accounts, then draw in proportion to leftover quota and in-flight load.             |
@@ -440,7 +422,7 @@ These read live quota for providers that report it, such as subscription account
 
 #### If you work with long context or prompt caching
 
-| Strategy            | What it does                                                                               |
+| Strategy            | <img width="2000" height="0" alt=""> What it does                                          |
 | ------------------- | ------------------------------------------------------------------------------------------ |
 | `context-relay`     | Keep your order. When a conversation moves to another account, a summary of it goes along. |
 | `context-optimized` | Try the model with the largest known context window first.                                 |
@@ -448,7 +430,7 @@ These read live quota for providers that report it, such as subscription account
 
 #### If you want a scorer or a model to decide
 
-| Strategy | What it does                                                                                                                                                                                                                  |
+| Strategy | <img width="2000" height="0" alt=""> What it does                                                                                                                                                                             |
 | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `auto`   | Rank the candidates live with the 16-factor Auto-Combo scorer.                                                                                                                                                                |
 | `jev`    | Keep your ranked list and let TypeSafe Jev pick which entries run. Off until `COMBO_JEV_STRATEGY_ENABLED` is on; then each request sends an excerpt to TypeSafe and uses paid TypeSafe calls. Without it, your order is used. |
@@ -457,7 +439,7 @@ The scorer uses 16 declared factors, including health, quota, cost, latency, tas
 
 #### If you want several models for one answer
 
-| Strategy   | What it does                                                                                                |
+| Strategy   | <img width="2000" height="0" alt=""> What it does                                                           |
 | ---------- | ----------------------------------------------------------------------------------------------------------- |
 | `fusion`   | Ask a panel of models in parallel. A judge model writes one answer from their replies.                      |
 | `pipeline` | Run targets in sequence. Each step's output is the next step's input, and only the last answer is returned. |
@@ -490,11 +472,7 @@ Banned, expired and out-of-credit connections are terminal states, not cooldowns
 
 <br/>
 
-<div align="center">
-
 ## What Sets OmniRoute Apart
-
-</div>
 
 <img src="./docs/diagrams/comparison-table.svg" width="100%" alt="What sets OmniRoute apart — a dated feature snapshot vs 9router, OpenRouter, CLIProxyAPI and LiteLLM across 13 capabilities. OmniRoute: 394 providers, 150+ providers with a free offer, 22 routing strategies, 12-engine token compression, built-in MCP server with 110 tools, A2A agent protocol, persistent memory, guardrails, cloud agents, TLS fingerprint stealth, Desktop/Termux/PWA and 67 i18n UI locales. OmniRoute is MIT-licensed and self-hostable. Competitor capabilities and counts may change; see the linked methodology."/>
 
@@ -542,7 +520,7 @@ Pix copia-e-cola:
 ### Crypto
 
 <table>
-  <tr><th align="left">Coin</th><th align="left">Network</th><th align="left">Address</th></tr>
+  <tr><th align="left">Coin</th><th align="left">Network</th><th align="left"><img width="2000" height="0" alt=""> Address</th></tr>
   <tr><td nowrap><b>BTC</b></td><td nowrap>Bitcoin (SegWit)</td><td><code>bc1qh00smz004sy85wyl28v77tenkt3ckl6eaep7fd</code></td></tr>
   <tr><td nowrap><b>ETH</b></td><td nowrap>Ethereum (ERC20)</td><td><code>0x64Cf6B68A6Ff34288e89172950a2d00102337a84</code></td></tr>
   <tr><td nowrap><b>USDT</b></td><td nowrap>Tron (TRC20)</td><td><code>TKAF41JpuQrHbKTnsQa9svJE2T192Hvsc2</code></td></tr>
@@ -571,194 +549,49 @@ The numbers above come from the catalog shipped with this release. Radar can sho
 
 ## What's New
 
-Everything user-facing that shipped from v3.8.50 through the current development line.
-
-> [!NOTE]
-> The latest published release is v3.8.54 (17 November 2026). New work lands in v3.8.55. Dates are GitHub release dates (UTC).
-
-Bug fixes, internal refactors and CI changes are left out. They are listed per version in [`CHANGELOG.md`](CHANGELOG.md) and in each version's GitHub release notes. Links named **PR #N** point to the merged pull request when no guide covers the feature yet.
-
-| Version           | Status                     | Highlights                                                                                                                              | Full notes                                                                           |
-| ----------------- | -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
-| [v3.8.54](#v3854) | latest release, 2026-11-17 | Account-level routing control, agentic pipeline safeguards, reusable key policies and new providers.                                    | [Release notes](https://github.com/cheaper-inference/OmniRoute/releases/tag/v3.8.54) |
-| [v3.8.53](#v3853) | released 2026-11-06        | A redesigned dashboard, team cost centers, Entra ID and two-factor sign-in, Kubernetes manifests and many provider and media additions. | [Release notes](https://github.com/cheaper-inference/OmniRoute/releases/tag/v3.8.53) |
-| [v3.8.52](#v3852) | released, 2026-10-19       | Headless mode, model discovery filters, per-key model pinning, the Nadir router and the LLMLingua compression sidecar.                  | [Release notes](https://github.com/cheaper-inference/OmniRoute/releases/tag/v3.8.52) |
-| [v3.8.51](#v3851) | released, 2026-09-30       | Subscription-first routing, the quota-weighted strategy, the orchestration view, 25 new interface languages and the OpenCode v2 plugin. | [Release notes](https://github.com/cheaper-inference/OmniRoute/releases/tag/v3.8.51) |
-| [v3.8.50](#v3850) | released, 2026-08-26       | The Modality Bridge, the opt-in Radar catalog, OmniConductor fleet delegation and desktop attachment to a running server.               | [Release notes](https://github.com/cheaper-inference/OmniRoute/releases/tag/v3.8.50) |
-
 <a id="v3854"></a>
 
-### v3.8.54 — latest release, 2026-11-17
+### v3.8.54 (2026-11-17)
 
-Account-level routing control, agentic pipeline safeguards, reusable key policies and new providers. Full notes: [Release notes](https://github.com/cheaper-inference/OmniRoute/releases/tag/v3.8.54).
+Latest release. [Release notes](https://github.com/cheaper-inference/OmniRoute/releases/tag/v3.8.54).
 
-| Feature                                           | What it does                                                                                                                                                                             | Read more                                                                                                                                                                                                                                                                                                                                  |
-| ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Preferred and reserve accounts in Auto combos** | Mark each connection Preferred, Normal, Reserve or Excluded; Auto tries preferred accounts first and reserves last.                                                                      | [Auto-Combo](docs/routing/AUTO-COMBO.md) · [PR #18430](https://github.com/cheaper-inference/OmniRoute/pull/18430)                                                                                                                                                                                                                          |
-| **Preferred-account start failover**              | Opt-in hop to one eligible sibling account when the preferred account is slow to start answering. Defaults and per-provider overrides live in Settings → Resilience.                     | [PR #19259](https://github.com/cheaper-inference/OmniRoute/pull/19259)                                                                                                                                                                                                                                                                     |
-| **`expiry-first` combo strategy**                 | The 21st strategy orders targets by the quota that is closest to expiring, per model family.                                                                                             | [Auto-Combo](docs/routing/AUTO-COMBO.md) · [PR #17829](https://github.com/cheaper-inference/OmniRoute/pull/17829)                                                                                                                                                                                                                          |
-| **`jev` combo strategy**                          | You order the providers; one TypeSafe System One call picks the winner plus up to four fallbacks per request.                                                                            | [Auto-Combo](docs/routing/AUTO-COMBO.md) · [PR #15279](https://github.com/cheaper-inference/OmniRoute/pull/15279)                                                                                                                                                                                                                          |
-| **Endpoint-specific combos**                      | Separate targets, strategies and settings for chat, search and fetch, embeddings, rerank, images, video, music, OCR and audio.                                                           | [Auto-Combo](docs/routing/AUTO-COMBO.md) · [PR #18731](https://github.com/cheaper-inference/OmniRoute/pull/18731)                                                                                                                                                                                                                          |
-| **Agentic loop detection**                        | Pipelines notice repeated tool rounds with unchanged results, or consecutive failed rounds, and hand control back to the planner.                                                        | [PR #19318](https://github.com/cheaper-inference/OmniRoute/pull/19318)                                                                                                                                                                                                                                                                     |
-| **Deadline-failure budget for combos**            | `OMNIROUTE_COMBO_MAX_DEADLINE_FAILURES` ends a combo with a clean 504 instead of trying every target against a stalled upstream.                                                         | [Environment](docs/reference/ENVIRONMENT.md) · [PR #18721](https://github.com/cheaper-inference/OmniRoute/pull/18721)                                                                                                                                                                                                                      |
-| **Sign in with ChatGPT**                          | Official `chatgpt` provider: PKCE sign-in, live account model discovery and inference through the public Responses API.                                                                  | [Provider Reference](docs/reference/PROVIDER_REFERENCE.md) · [PR #15201](https://github.com/cheaper-inference/OmniRoute/pull/15201)                                                                                                                                                                                                        |
-| **Microsoft 365 Copilot sign-in**                 | Work or school PKCE sign-in, the documented model catalog, native turns and conversation continuation.                                                                                   | [Microsoft 365 Copilot](docs/providers/COPILOT-M365.md) · [PR #19122](https://github.com/cheaper-inference/OmniRoute/pull/19122)                                                                                                                                                                                                           |
-| **Key policy templates**                          | Save an API key's settings as a reusable, secret-free template and create keys from it in one step.                                                                                      | [Key Templates](docs/guides/KEY-TEMPLATES.md) · [PR #19311](https://github.com/cheaper-inference/OmniRoute/pull/19311)                                                                                                                                                                                                                     |
-| **Rolling 5-hour USD budget per key**             | Enforced next to the daily and weekly limits and reported on the API key endpoints.                                                                                                      | [API Reference](docs/reference/API_REFERENCE.md) · [PR #18362](https://github.com/cheaper-inference/OmniRoute/pull/18362)                                                                                                                                                                                                                  |
-| **Self-service key endpoints**                    | `/v1/me/status` reports a key's own usage and limits; `/v1/me/sessions` lists its agent sessions with project and client filters.                                                        | [PR #14771](https://github.com/cheaper-inference/OmniRoute/pull/14771) · [PR #14840](https://github.com/cheaper-inference/OmniRoute/pull/14840)                                                                                                                                                                                            |
-| **Import existing API keys**                      | `POST /api/keys/import` registers caller-supplied keys with atomic duplicate checks and masked responses.                                                                                | [PR #18010](https://github.com/cheaper-inference/OmniRoute/pull/18010)                                                                                                                                                                                                                                                                     |
-| **Anthropic rate-limit header policy per key**    | Forward or strip upstream Anthropic account and quota headers on streaming and non-streaming responses.                                                                                  | [PR #14862](https://github.com/cheaper-inference/OmniRoute/pull/14862)                                                                                                                                                                                                                                                                     |
-| **Agent session and project attribution**         | Requests are attributed to coding-agent sessions and projects (token counters, priced cost, working directory, repository) for team reports.                                             | [PR #14833](https://github.com/cheaper-inference/OmniRoute/pull/14833)                                                                                                                                                                                                                                                                     |
-| **Cached and uncached input in analytics**        | Totals split into all input, input without cache reads, and cached input, with partial-coverage markers for older history.                                                               | [Cached Input Reporting](docs/ops/CACHED_INPUT_REPORTING.md) · [PR #16452](https://github.com/cheaper-inference/OmniRoute/pull/16452)                                                                                                                                                                                                      |
-| **Cache-write tier diagnostics**                  | Provider-reported 5-minute and 1-hour cache writes are kept through call logs and Cache Health.                                                                                          | [PR #17307](https://github.com/cheaper-inference/OmniRoute/pull/17307)                                                                                                                                                                                                                                                                     |
-| **Proxy payload traffic**                         | Per-proxy and total upload and download payload, including retries and incomplete transfers.                                                                                             | [Proxy Payload Traffic](docs/ops/PROXY_PAYLOAD_TRAFFIC.md) · [PR #16455](https://github.com/cheaper-inference/OmniRoute/pull/16455)                                                                                                                                                                                                        |
-| **Account fallback response headers**             | Bounded headers report fallback count and reasons, same-account retries and routing wait.                                                                                                | [PR #19163](https://github.com/cheaper-inference/OmniRoute/pull/19163)                                                                                                                                                                                                                                                                     |
-| **More quota cards**                              | Cursor per-model tokens and billed cost, Zed hosted credit balance, an explicit Codex quota query, and `/credits` balance checks for compatible nodes.                                   | [PR #18346](https://github.com/cheaper-inference/OmniRoute/pull/18346) · [PR #19065](https://github.com/cheaper-inference/OmniRoute/pull/19065) · [PR #16191](https://github.com/cheaper-inference/OmniRoute/pull/16191) · [PR #18350](https://github.com/cheaper-inference/OmniRoute/pull/18350)                                          |
-| **Use banked resets automatically**               | Opt-in auto-apply of Codex credits, Claude grants and Claude session resets, and auto-spend of Codex reset credits that are about to expire.                                             | [PR #19267](https://github.com/cheaper-inference/OmniRoute/pull/19267) · [PR #18630](https://github.com/cheaper-inference/OmniRoute/pull/18630)                                                                                                                                                                                            |
-| **Compare a model's price across providers**      | Costs → Pricing lists every provider offering a model, cheapest first, plus a "Configured only" filter.                                                                                  | [PR #18775](https://github.com/cheaper-inference/OmniRoute/pull/18775) · [PR #18651](https://github.com/cheaper-inference/OmniRoute/pull/18651)                                                                                                                                                                                            |
-| **New providers**                                 | opencode-server, MiniMax Code, EmpirioLabs AI, ParalonCloud, deAPI, RenderHour, MegaBrain, Replicate chat, Cerebrium, Hetzner Inference and Grokified.                                   | [Provider Reference](docs/reference/PROVIDER_REFERENCE.md) · [MiniMax Code](docs/providers/MINIMAX_CODE.md) · [Replicate and Cerebrium](docs/providers/REPLICATE-CEREBRIUM.md)                                                                                                                                                             |
-| **Custom JSON API provider nodes**                | Connect a JSON endpoint that does not speak the OpenAI format by filling a request template, from the dashboard or the API.                                                              | [Custom JSON API](docs/guides/CUSTOM_JSON_API.md) · [PR #18353](https://github.com/cheaper-inference/OmniRoute/pull/18353)                                                                                                                                                                                                                 |
-| **Codex and Keenable search**                     | `codex-search` searches through connected Codex accounts; Keenable adds keyless web search and fetch.                                                                                    | [Search Tools Studio](docs/frameworks/SEARCH_TOOLS_STUDIO.md) · [PR #17933](https://github.com/cheaper-inference/OmniRoute/pull/17933) · [PR #17920](https://github.com/cheaper-inference/OmniRoute/pull/17920)                                                                                                                            |
-| **System One on local and Cloudflare backends**   | `POST /v1/systemone` can run decisions on your local Ollama connection or on Cloudflare Workers AI.                                                                                      | [PR #14667](https://github.com/cheaper-inference/OmniRoute/pull/14667) · [PR #16676](https://github.com/cheaper-inference/OmniRoute/pull/16676)                                                                                                                                                                                            |
-| **Media additions**                               | Gemini Lyria 3 music on `/v1/music/generations`, an opt-in fal gateway, Cloudflare Deepgram Nova-3 transcription, multi-reference Antigravity image edits and GitHub Copilot embeddings. | [fal](docs/integrations/FAL_NATIVE.md) · [PR #18797](https://github.com/cheaper-inference/OmniRoute/pull/18797) · [PR #18352](https://github.com/cheaper-inference/OmniRoute/pull/18352) · [PR #16731](https://github.com/cheaper-inference/OmniRoute/pull/16731) · [PR #18291](https://github.com/cheaper-inference/OmniRoute/pull/18291) |
-| **Image input controls**                          | Per-image Gemini `media_resolution`, and opt-in image normalization for Qwen2-VL-style vision pipelines.                                                                                 | [PR #18844](https://github.com/cheaper-inference/OmniRoute/pull/18844) · [PR #18740](https://github.com/cheaper-inference/OmniRoute/pull/18740)                                                                                                                                                                                            |
-| **Codex Ultrafast defaults**                      | Global and per-connection Ultrafast defaults for GPT-6 Astra and GPT-6.1 Sol.                                                                                                            | [PR #16678](https://github.com/cheaper-inference/OmniRoute/pull/16678)                                                                                                                                                                                                                                                                     |
-| **Agentic context compaction**                    | Opt-in compaction for agentic pipelines, with a character budget per planner and executor model.                                                                                         | [Auto-Combo](docs/routing/AUTO-COMBO.md) · [PR #19317](https://github.com/cheaper-inference/OmniRoute/pull/19317)                                                                                                                                                                                                                          |
-| **New models inbox**                              | Model sync records each provider's list and the Providers toolbar shows newly added models with an unread badge.                                                                         | [PR #16864](https://github.com/cheaper-inference/OmniRoute/pull/16864)                                                                                                                                                                                                                                                                     |
-| **Model and combo editing**                       | Set a context window when adding a model, import only free models from compatible nodes, and configure Nadir inside the combo builder.                                                   | [PR #16178](https://github.com/cheaper-inference/OmniRoute/pull/16178) · [PR #18320](https://github.com/cheaper-inference/OmniRoute/pull/18320) · [PR #18846](https://github.com/cheaper-inference/OmniRoute/pull/18846)                                                                                                                   |
-| **Antigravity account tools**                     | One-click import of the local Antigravity CLI login and a "Needs verification" filter for accounts that need Google verification.                                                        | [Antigravity onboarding](docs/guides/ANTIGRAVITY-ONBOARDING.md) · [PR #18181](https://github.com/cheaper-inference/OmniRoute/pull/18181) · [PR #18662](https://github.com/cheaper-inference/OmniRoute/pull/18662)                                                                                                                          |
-| **Operator error cooldown rules**                 | Edit error cooldown rules in the dashboard, with an optional per-provider catch-all that never shortens an upstream reset hint.                                                          | [PR #16734](https://github.com/cheaper-inference/OmniRoute/pull/16734)                                                                                                                                                                                                                                                                     |
-| **Reversible PII vault**                          | Opt-in and off by default: request PII becomes per-request tokens that are restored in the response. Requires PII redaction to be enabled.                                               | [Guardrails](docs/security/GUARDRAILS.md) · [PR #19326](https://github.com/cheaper-inference/OmniRoute/pull/19326)                                                                                                                                                                                                                         |
-| **Remote skill sandbox**                          | Opt-in `agent-sandbox` runtime runs skill commands in a remote Kubernetes sandbox instead of a local container.                                                                          | [PR #19130](https://github.com/cheaper-inference/OmniRoute/pull/19130)                                                                                                                                                                                                                                                                     |
-| **Docker Hub organization image**                 | Releases are also published to `cheaperinference/omniroute`; `diegosouzapw/omniroute` keeps its history and images.                                                                      | [Release Checklist](docs/ops/RELEASE_CHECKLIST.md) · [PR #20344](https://github.com/cheaper-inference/OmniRoute/pull/20344)                                                                                                                                                                                                                |
-| **`provider.exhausted` webhook**                  | Alerts when every account of a provider is cooling down, at most once per provider every 10 minutes.                                                                                     | [Webhooks](docs/frameworks/WEBHOOKS.md) · [PR #19566](https://github.com/cheaper-inference/OmniRoute/pull/19566)                                                                                                                                                                                                                           |
-| **Runtime tuning**                                | Configurable session TTL (`OMNIROUTE_SESSION_TTL_MIN`), opt-in V8 heap diagnostics, and gzip for large request bodies sent to api.anthropic.com.                                         | [Environment](docs/reference/ENVIRONMENT.md) · [PR #18394](https://github.com/cheaper-inference/OmniRoute/pull/18394) · [PR #19054](https://github.com/cheaper-inference/OmniRoute/pull/19054) · [PR #18889](https://github.com/cheaper-inference/OmniRoute/pull/18889)                                                                    |
-| **Timestamped migrations and Omni Queue**         | New migrations use UTC timestamp names so parallel PRs stop colliding; pull requests merge through the project's own queue.                                                              | [Database Guide](docs/ops/DATABASE_GUIDE.md) · [Omni Queue](docs/ops/OMNI_QUEUE.md)                                                                                                                                                                                                                                                        |
+- **Account routing.** Mark Auto combo accounts Preferred, Normal, Reserve or Excluded. Enable failover to a sibling account when the preferred one is slow to respond. [Auto-Combo](docs/routing/AUTO-COMBO.md#account-preferences-for-saved-auto-combos) · [PR #19259](https://github.com/cheaper-inference/OmniRoute/pull/19259)
+- **New combo strategies.** `expiry-first` prioritizes quota near expiry. `jev` uses System One to pick a target and its fallbacks. [Auto-Combo](docs/routing/AUTO-COMBO.md)
+- **Combos by endpoint.** Set separate targets and strategies for chat, search and fetch, embeddings, rerank, images, video, music, OCR and audio. [PR #18731](https://github.com/cheaper-inference/OmniRoute/pull/18731)
+- **Agentic pipelines.** Repeated tool rounds with unchanged results or consecutive failures return control to the planner. [PR #19318](https://github.com/cheaper-inference/OmniRoute/pull/19318)
+- **API key controls.** Save reusable policies without secrets and set rolling five-hour spending limits per key. [Key Templates](docs/guides/KEY-TEMPLATES.md) · [PR #18362](https://github.com/cheaper-inference/OmniRoute/pull/18362)
+- **Provider sign-in.** Use Sign in with ChatGPT for the public Responses API or sign in to Microsoft 365 Copilot with a work or school account. [PR #15201](https://github.com/cheaper-inference/OmniRoute/pull/15201) · [Microsoft 365 Copilot](docs/providers/COPILOT-M365.md)
+- **New providers.** Replicate adds chat, alongside new connectors for Cerebrium, Hetzner Inference and Grokified. [PR #19206](https://github.com/cheaper-inference/OmniRoute/pull/19206)
 
 <a id="v3853"></a>
 
-### v3.8.53 — released 2026-11-06
+### v3.8.53 (2026-11-06)
 
-A redesigned dashboard, team cost centers, Entra ID and two-factor sign-in, Kubernetes manifests and many provider and media additions. Full notes: [Release notes](https://github.com/cheaper-inference/OmniRoute/releases/tag/v3.8.53).
-
-| Feature                                    | What it does                                                                                                                                                                  | Read more                                                                                                                                                                                                                                                                                         |
-| ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Resilience options**                     | Opt-in agentic-stall failover, anti-avalanche failover guard, latency signal for p2c account selection and a per-provider retry delay.                                        | [Resilience Guide](docs/architecture/RESILIENCE_GUIDE.md) · [Environment](docs/reference/ENVIRONMENT.md)                                                                                                                                                                                          |
-| **Quota-aware strategy refinements**       | `quota-weighted` gains `pace` scoring, and `expiry-first` account rotation is scoped by quota family.                                                                         | [Auto-Combo](docs/routing/AUTO-COMBO.md)                                                                                                                                                                                                                                                          |
-| **Quota session recovery**                 | Opt-in: a turn that hits a terminal quota error can be parked and polled later instead of failing.                                                                            | [API Reference](docs/reference/API_REFERENCE.md)                                                                                                                                                                                                                                                  |
-| **Shared session affinity**                | Optional Redis store lets several instances share session-to-account affinity.                                                                                                | [Redis configuration](docs/ops/REDIS_PRODUCTION_CONFIG.md)                                                                                                                                                                                                                                        |
-| **Team cost centers**                      | Group API keys under one billing owner with shared soft budgets and team usage reports.                                                                                       | [Team Cost Centers](docs/guides/TEAM_COST_CENTERS.md)                                                                                                                                                                                                                                             |
-| **Preferred account per API key**          | Each project's key can pin an ordered list of provider accounts, with quota-aware fallback to the next one.                                                                   | [API-key connection preference](docs/routing/API_KEY_CONNECTION_PREFERENCE.md)                                                                                                                                                                                                                    |
-| **Microsoft Entra ID for the client API**  | Clients such as Claude Code can call `/v1/*` with an Entra ID token; Entra groups map to OmniRoute key groups.                                                                | [Entra SSO](docs/security/ENTRA_SSO.md)                                                                                                                                                                                                                                                           |
-| **Two-factor login**                       | Opt-in TOTP with recovery codes for the dashboard; `omniroute connect --totp` when it is on.                                                                                  | [Remote Mode](docs/guides/REMOTE-MODE.md) · [Authorization Guide](docs/architecture/AUTHZ_GUIDE.md)                                                                                                                                                                                               |
-| **Model and combo access per key**         | Assign models and combos to keys from the catalog, expose only combos on `/v1/models`, and choose how unpriced usage counts against USD limits.                               | [Feature Flags](docs/reference/FEATURE_FLAGS.md) · [Model exposure list](docs/routing/MODEL_EXPOSURE_LIST.md)                                                                                                                                                                                     |
-| **Trace export and request detail**        | Export call logs as OTLP traces with optional Langfuse mapping; logs record the client's session id, queue wait and separate generation and end-to-end rates.                 | [Log Export](docs/frameworks/LOG-EXPORT.md)                                                                                                                                                                                                                                                       |
-| **Richer `/v1/models`**                    | OpenRouter-compatible `pricing` objects, readable model names and per-limit provenance with `withLimits=1`.                                                                   | [API Reference](docs/reference/API_REFERENCE.md)                                                                                                                                                                                                                                                  |
-| **System One decisions**                   | Typed-decision models as a model kind, with a public `POST /v1/systemone` route.                                                                                              | [Feature Flags](docs/reference/FEATURE_FLAGS.md) · [PR #17994](https://github.com/cheaper-inference/OmniRoute/pull/17994)                                                                                                                                                                         |
-| **Bifrost fast path and sing-box service** | A Bifrost sidecar fast path for chat and messages with native fallback, and a supervised sing-box TPROXY sidecar.                                                             | [Relay backend strategy](docs/reference/RELAY_BACKEND_STRATEGY.md) · [Embedded Services](docs/frameworks/EMBEDDED-SERVICES.md)                                                                                                                                                                    |
-| **Account sign-in and imports**            | Freebuff and Devin Desktop browser sign-in, Antigravity Manager exports, GitHub Copilot plan and AI Credits tracking, and Claude reset credits.                               | [Provider Reference](docs/reference/PROVIDER_REFERENCE.md) · [GitHub Copilot](docs/providers/GITHUB-COPILOT.md)                                                                                                                                                                                   |
-| **Grok Build media**                       | Video, speech and transcription through the existing Grok Build OAuth connection; images when the opt-in flag is on.                                                          | [Grok Build OAuth media](docs/providers/grok-cli-media.md)                                                                                                                                                                                                                                        |
-| **Models and providers**                   | Kimi K3.1 Pro, Claude Haiku 5.5, the GPT-6 family on the ChatGPT Web adapter, MiniMax-M3.1-Flash; new providers ainetcafe, Token Harbor, Runcrate and Gisoo; Kimi web search. | [Provider Reference](docs/reference/PROVIDER_REFERENCE.md)                                                                                                                                                                                                                                        |
-| **Audio and embeddings**                   | ElevenLabs sound effects and music, Gemini Live transcription, Gemini 3.8 TTS styles, transcription from a URL, and Amazon Bedrock embeddings.                                | [API Reference](docs/reference/API_REFERENCE.md) · [PR #16869](https://github.com/cheaper-inference/OmniRoute/pull/16869)                                                                                                                                                                         |
-| **Compression and cache controls**         | Compression combos choose output styles, an RTK filter for PHPUnit, and an opt-in Gemini implicit prompt-cache mode.                                                          | [Compression Guide](docs/compression/COMPRESSION_GUIDE.md) · [RTK Compression](docs/compression/RTK_COMPRESSION.md) · [PR #12775](https://github.com/cheaper-inference/OmniRoute/pull/12775)                                                                                                      |
-| **WhyCodes, Pi and OpenClaude**            | WhyCodes becomes a first-class CLI agent (`setup-whycodes`, `configure`, `run`); the Pi setup writes Pi's current format; an OpenClaude guide card.                           | [CLI Integrations](docs/guides/CLI-INTEGRATIONS.md)                                                                                                                                                                                                                                               |
-| **OpenCode v2 plugin options**             | Optional free-model signals, one catalog branch with a prefix wildcard, and a switch to hide every combo.                                                                     | [OpenCode v2 plugin](docs/guides/OPENCODE-V2-PLUGIN.md)                                                                                                                                                                                                                                           |
-| **CLIProxyAPI-compatible endpoints**       | Management endpoints for clients built for a CLIProxyAPI hub, plus an opt-in Perplexity research MCP tool.                                                                    | [MCP Server](docs/frameworks/MCP-SERVER.md)                                                                                                                                                                                                                                                       |
-| **Redesigned dashboard**                   | The dashboard and standalone pages run on the Keak CI UI Kit. The theme follows the system; the Editions palette is the default and Classic stays available.                  | [Design System](docs/architecture/DESIGN_SYSTEM.md)                                                                                                                                                                                                                                               |
-| **Home page metrics**                      | Host and process CPU and memory cards, live per-model nodes in the Provider Topology, and an account-availability quota overview.                                             | [PR #18393](https://github.com/cheaper-inference/OmniRoute/pull/18393) · [PR #16739](https://github.com/cheaper-inference/OmniRoute/pull/16739) · [PR #17026](https://github.com/cheaper-inference/OmniRoute/pull/17026)                                                                          |
-| **Catalog and combo editing**              | Hide or show models across providers, see which combos use a model, flag combo steps no longer in the live catalog, and test one combo step at a time.                        | [PR #16749](https://github.com/cheaper-inference/OmniRoute/pull/16749) · [PR #16307](https://github.com/cheaper-inference/OmniRoute/pull/16307) · [PR #15923](https://github.com/cheaper-inference/OmniRoute/pull/15923) · [PR #16748](https://github.com/cheaper-inference/OmniRoute/pull/16748) |
-| **More PII patterns**                      | Opt-in PII masking covers GDPR and POPIA identifiers, each checked by a validator.                                                                                            | [Guardrails](docs/security/GUARDRAILS.md)                                                                                                                                                                                                                                                         |
-| **Kubernetes and Helm**                    | Kustomize base with k3s and generic k8s overlays, plus a Helm chart.                                                                                                          | [Kubernetes guide](docs/ops/KUBERNETES_DEPLOYMENT_GUIDE.md)                                                                                                                                                                                                                                       |
-| **Lighter and self-maintaining runtime**   | Lower background resource use, SQLite planner statistics, bounded semantic-cache pruning, an Electron health watchdog and translated docs pages in npm and Docker installs.   | [Environment](docs/reference/ENVIRONMENT.md) · [PR #18396](https://github.com/cheaper-inference/OmniRoute/pull/18396) · [PR #17015](https://github.com/cheaper-inference/OmniRoute/pull/17015) · [PR #18869](https://github.com/cheaper-inference/OmniRoute/pull/18869)                           |
+Redesigned dashboard, team cost centers, Entra ID for API access, two-factor dashboard sign-in and Kubernetes manifests. [Release notes](https://github.com/cheaper-inference/OmniRoute/releases/tag/v3.8.53).
 
 <a id="v3852"></a>
 
-### v3.8.52 — released, 2026-10-19
+### v3.8.52 (2026-10-19)
 
-Headless mode, model discovery filters, per-key model pinning, the Nadir router and the LLMLingua compression sidecar. Full notes: [Release notes](https://github.com/cheaper-inference/OmniRoute/releases/tag/v3.8.52).
-
-| Feature                                         | What it does                                                                                                                                                                             | Read more                                                                                                                                                                                          |
-| ----------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Nadir router and concurrency caps**           | Opt-in `nadir` auto-router strategy and per-model concurrency limits on each connection.                                                                                                 | [Auto-Combo](docs/routing/AUTO-COMBO.md) · [Resilience Guide](docs/architecture/RESILIENCE_GUIDE.md)                                                                                               |
-| **Combo maintenance**                           | Executor backups for agentic pipelines, rerank combos with fallback, and flagging or optional pruning of combo steps whose model disappeared.                                            | [Feature Flags](docs/reference/FEATURE_FLAGS.md) · [PR #15419](https://github.com/cheaper-inference/OmniRoute/pull/15419) · [PR #14286](https://github.com/cheaper-inference/OmniRoute/pull/14286) |
-| **Per-key model pinning and access editing**    | `forcedModel` sends every request of a key to one model or combo; models and combos can be added or removed atomically in a full-page editor.                                            | [API Reference](docs/reference/API_REFERENCE.md) · [PR #16921](https://github.com/cheaper-inference/OmniRoute/pull/16921) · [PR #14885](https://github.com/cheaper-inference/OmniRoute/pull/14885) |
-| **Key limits**                                  | Per-key service-tier overrides, an optional calendar week for weekly USD limits, and a flag to ignore unpriced models.                                                                   | [Feature Flags](docs/reference/FEATURE_FLAGS.md) · [PR #13554](https://github.com/cheaper-inference/OmniRoute/pull/13554)                                                                          |
-| **Claude Code setup token**                     | Add a Claude Code connection from a `claude setup-token` token.                                                                                                                          | [Claude Code setup token](docs/providers/CLAUDE_CODE_SETUP_TOKEN.md)                                                                                                                               |
-| **Model discovery filters**                     | `/v1/models` filters by capability, context, kind and text; `POST /v1/models/query` returns a short deterministic list.                                                                  | [API Reference](docs/reference/API_REFERENCE.md)                                                                                                                                                   |
-| **Claude Opus 5.5, Sonnet 5.5 and GPT-6.1 Sol** | New models across the native catalogs, plus Gemini 4 Argon on the Gemini API and the GitHub Copilot `auto` model.                                                                        | [Provider Reference](docs/reference/PROVIDER_REFERENCE.md)                                                                                                                                         |
-| **New providers**                               | BigModel.cn, NoTrack, Twinmind, WorkBuddy, onomeo, Apmix, BeatAPI, Y-API, CodeBuddy International, NaN.Builders, DaoXE, Demon Route, ChatPlayground, SYNTX, Token Market and Unifically. | [Provider Reference](docs/reference/PROVIDER_REFERENCE.md) · [Demon Route](docs/providers/DEMON_ROUTE.md) · [ChatPlayground](docs/providers/CHATPLAYGROUND.md)                                     |
-| **Search and media**                            | Parallel search and fetch, Firecrawl Map, ZenMux images, MiniMax Hailuo video, Muse Image, Qwen TTS and Deepgram speaker diarization.                                                    | [Search Tools Studio](docs/frameworks/SEARCH_TOOLS_STUDIO.md)                                                                                                                                      |
-| **LLMLingua sidecar and new output styles**     | A supervised LLMLingua prompt-compression service, plus `antislop-ui` and `antislop-copy` output styles.                                                                                 | [Compression Engines](docs/compression/COMPRESSION_ENGINES.md) · [Embedded Services](docs/frameworks/EMBEDDED-SERVICES.md)                                                                         |
-| **claude-mem memory backend**                   | Opt-in backend so OmniRoute memory and the claude-mem Claude Code plugin share one store.                                                                                                | [Memory](docs/frameworks/MEMORY.md)                                                                                                                                                                |
-| **Model validation and Zed setup**              | `omniroute models test-add` validates a model before adding it; `omniroute setup-zed` adds OmniRoute to Zed.                                                                             | [Model Validation](docs/guides/MODEL-VALIDATION.md) · [CLI Integrations](docs/guides/CLI-INTEGRATIONS.md)                                                                                          |
-| **Operations pages**                            | A Cooldown Manager page, per-account test messages, decode speed on quota cards and a Docker-aware update flow.                                                                          | [Resilience Guide](docs/architecture/RESILIENCE_GUIDE.md) · [Docker Guide](docs/guides/DOCKER_GUIDE.md)                                                                                            |
-| **Finer PII controls**                          | Per-type selection, custom masking patterns and detection counters for the opt-in PII masking.                                                                                           | [Guardrails](docs/security/GUARDRAILS.md)                                                                                                                                                          |
-| **Headless mode**                               | `omniroute serve --headless` or `OMNIROUTE_HEADLESS=1` runs only the `/v1/*` proxy, without the dashboard.                                                                               | [Headless Mode](docs/guides/HEADLESS.md)                                                                                                                                                           |
-| **Move accounts between installations**         | Selective, passphrase-sealed transfer of provider accounts and the custom nodes they use.                                                                                                | [PR #16877](https://github.com/cheaper-inference/OmniRoute/pull/16877)                                                                                                                             |
+Headless mode, model discovery filters, per-key model pinning, the Nadir router and the LLMLingua compression sidecar. [Release notes](https://github.com/cheaper-inference/OmniRoute/releases/tag/v3.8.52).
 
 <a id="v3851"></a>
 
-### v3.8.51 — released, 2026-09-30
+### v3.8.51 (2026-09-30)
 
-Subscription-first routing, the quota-weighted strategy, the orchestration view, 25 new interface languages and the OpenCode v2 plugin. Full notes: [Release notes](https://github.com/cheaper-inference/OmniRoute/releases/tag/v3.8.51).
-
-| Feature                                    | What it does                                                                                                                                                                                                                                                                                      | Read more                                                                                                                                                                                                                                                                                         |
-| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Subscription-first routing**             | `auto/subscription` uses only plan-included connections; `auto/thrifty` prefers them before paid ones.                                                                                                                                                                                            | [Subscription-first routing](docs/routing/SUBSCRIPTION_LADDER.md)                                                                                                                                                                                                                                 |
-| **`quota-weighted` combo strategy**        | Skips exhausted accounts, then draws among the rest by leftover quota and in-flight load.                                                                                                                                                                                                         | [Auto-Combo](docs/routing/AUTO-COMBO.md)                                                                                                                                                                                                                                                          |
-| **`expiry-first` account fallback**        | A per-provider account strategy that spends the quota closest to being lost first.                                                                                                                                                                                                                | [Auto-Combo](docs/routing/AUTO-COMBO.md)                                                                                                                                                                                                                                                          |
-| **Smarter Auto choices**                   | A `score` router strategy, adaptive reasoning effort (`auto`), success-rate weighting and two-model planner/executor pipelines.                                                                                                                                                                   | [Auto-Combo](docs/routing/AUTO-COMBO.md) · [Reasoning Routing](docs/routing/REASONING_ROUTING.md)                                                                                                                                                                                                 |
-| **Self-hosted OpenAI entry**               | Route `/v1/chat/completions` to your own OpenAI-compatible servers with deterministic strategies.                                                                                                                                                                                                 | [Self-hosted entry](docs/routing/SELF_HOSTED_OPENAI_ENTRY.md) · [Deterministic routing](docs/routing/DETERMINISTIC_ROUTING.md)                                                                                                                                                                    |
-| **Continuous log export**                  | Call logs exported to external analytics stores through pluggable destinations.                                                                                                                                                                                                                   | [Log Export](docs/frameworks/LOG-EXPORT.md)                                                                                                                                                                                                                                                       |
-| **Free provider rankings by real traffic** | Rankings can sort by what each provider actually served, not only by ELO.                                                                                                                                                                                                                         | [Free Provider Rankings](docs/guides/FREE_PROVIDER_RANKINGS.md)                                                                                                                                                                                                                                   |
-| **Video analysis**                         | Focused analysis, optional audio extraction and transcription, and a controlled frame drill-down for the Video Bridge.                                                                                                                                                                            | [Guardrails](docs/security/GUARDRAILS.md)                                                                                                                                                                                                                                                         |
-| **Speech additions**                       | Gemini batch text-to-speech and Fish Audio S2.1 Pro voices.                                                                                                                                                                                                                                       | [API Reference](docs/reference/API_REFERENCE.md)                                                                                                                                                                                                                                                  |
-| **New providers and models**               | MaxAI, Opper, Perplexity Agent API, UC, 1min.ai, Lyceum, EURouter, GreenPT, Agnes CN and SeekAi; GPT-6 Astra, GPT-6 Sol and Luna, Gemini 3.8 Flash and GLM-5.3-Flash.                                                                                                                             | [Provider Reference](docs/reference/PROVIDER_REFERENCE.md)                                                                                                                                                                                                                                        |
-| **Search providers**                       | Xquik X search, AnySearch and Nimble join the search gateway.                                                                                                                                                                                                                                     | [Search Tools Studio](docs/frameworks/SEARCH_TOOLS_STUDIO.md)                                                                                                                                                                                                                                     |
-| **Isolated compression workers**           | RTK and Caveman compression run in a bounded worker-thread pool; Hungarian Caveman pack and output styles in more languages.                                                                                                                                                                      | [Compression Engines](docs/compression/COMPRESSION_ENGINES.md) · [Language packs](docs/compression/COMPRESSION_LANGUAGE_PACKS.md)                                                                                                                                                                 |
-| **Dual-layer semantic cache**              | Configurable semantic cache with Redis or in-memory vector stores.                                                                                                                                                                                                                                | [Redis configuration](docs/ops/REDIS_PRODUCTION_CONFIG.md)                                                                                                                                                                                                                                        |
-| **OpenCode v2 plugin**                     | `@omniroute/opencode-plugin-v2` publishes the OmniRoute catalog to OpenCode v2 installs.                                                                                                                                                                                                          | [OpenCode v2 plugin](docs/guides/OPENCODE-V2-PLUGIN.md)                                                                                                                                                                                                                                           |
-| **CLI companion and model commands**       | A copy-only dashboard companion, remote-aware manual model CRUD, 5dive and oh-my-pi targets, and real-binary smoke tests.                                                                                                                                                                         | [CLI Companion](docs/guides/CLI-COMPANION.md) · [CLI manual models](docs/guides/CLI-MANUAL-MODELS.md) · [CLI smoke tests](docs/guides/CLI-SMOKE-TESTS.md)                                                                                                                                         |
-| **Orchestration view**                     | A live graph of Cloud Agent, A2A and Conductor work, with a History grid, run comparison and repeat.                                                                                                                                                                                              | [PR #12261](https://github.com/cheaper-inference/OmniRoute/pull/12261) · [PR #12479](https://github.com/cheaper-inference/OmniRoute/pull/12479) · [PR #12677](https://github.com/cheaper-inference/OmniRoute/pull/12677)                                                                          |
-| **Catalog, keys and timeline**             | A searchable model catalog across providers, a full-width API-key routing editor, MCP calls on the request timeline and scheduled quota pools.                                                                                                                                                    | [PR #14684](https://github.com/cheaper-inference/OmniRoute/pull/14684) · [PR #13555](https://github.com/cheaper-inference/OmniRoute/pull/13555) · [PR #13941](https://github.com/cheaper-inference/OmniRoute/pull/13941) · [PR #14466](https://github.com/cheaper-inference/OmniRoute/pull/14466) |
-| **25 new interface languages**             | Greek, Croatian, Serbian, Lithuanian, Estonian, Latvian, Slovenian, Maltese, Irish, Kannada, Malayalam, Odia, Punjabi, Nepali, Sinhala, Burmese, Khmer, Hausa, Yoruba, Igbo, Amharic, Uzbek, Georgian, Armenian and Bosnian. `npm run i18n:add-locale` adds a language everywhere in one command. | [i18n Guide](docs/guides/I18N.md)                                                                                                                                                                                                                                                                 |
-| **Exposed-port warning**                   | OmniRoute warns at boot when `/v1` listens beyond loopback without `REQUIRE_API_KEY`.                                                                                                                                                                                                             | [Inference auth posture](docs/security/INFERENCE_AUTH_POSTURE.md)                                                                                                                                                                                                                                 |
-| **Deployment helpers**                     | Self-host compose recipe, named cloudflared tunnels, an open-wa embedded service and npm Trusted Publishing.                                                                                                                                                                                      | [Self-Host Guide](docs/getting-started/SELF_HOST_GUIDE.md) · [Tunnels](docs/ops/TUNNELS_GUIDE.md)                                                                                                                                                                                                 |
+Subscription-first routing, the `quota-weighted` strategy, the orchestration dashboard, expanded language support and the OpenCode v2 plugin. [Release notes](https://github.com/cheaper-inference/OmniRoute/releases/tag/v3.8.51).
 
 <a id="v3850"></a>
 
-### v3.8.50 — released, 2026-08-26
+### v3.8.50 (2026-08-26)
 
-The Modality Bridge, the opt-in Radar catalog, OmniConductor fleet delegation and desktop attachment to a running server. Full notes: [Release notes](https://github.com/cheaper-inference/OmniRoute/releases/tag/v3.8.50).
+Modality Bridge, the opt-in Radar catalog, OmniConductor fleet delegation and support for connecting the desktop app to a running server. [Release notes](https://github.com/cheaper-inference/OmniRoute/releases/tag/v3.8.50).
 
-| Feature                                  | What it does                                                                                                                                                                      | Read more                                                                                                                                       |
-| ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Strict zero-cost policy**              | Opt-in `STRICT_ZERO_COST` refuses any target that is not verifiably free.                                                                                                         | [STRICT_ZERO_COST](docs/routing/STRICT_ZERO_COST.md)                                                                                            |
-| **Adaptive admission**                   | Overload and pressure controls across the LLM routes, plus a decision trace for priority fallbacks.                                                                               | [Admission lanes](docs/architecture/admission-lanes.md) · [Resilience Guide](docs/architecture/RESILIENCE_GUIDE.md)                             |
-| **Modality Bridge**                      | Vision, audio and video bridging lets text-only models receive images, speech and video through a compatible representation.                                                      | [Guardrails](docs/security/GUARDRAILS.md)                                                                                                       |
-| **Radar catalog**                        | Opt-in, signed free-model catalog overlay with local catalog controls.                                                                                                            | [Radar](docs/frameworks/RADAR.md)                                                                                                               |
-| **Model aliases and limits**             | Provider-scoped model aliases that survive rediscovery, exact per-model context and output overrides, and custom upstream headers per connection.                                 | [API Reference](docs/reference/API_REFERENCE.md)                                                                                                |
-| **Search, OCR and media**                | X Search and context7 search, multi-provider `/v1/ocr`, native ElevenLabs routes, Soniox speech, Gemini Web images and combo fallback for image generation.                       | [API Reference](docs/reference/API_REFERENCE.md)                                                                                                |
-| **New providers**                        | DeepAI, Naga.ac, ChatAnywhere, UnoRouter, Regolo, Raycast Pro, Conol, Cheaper Inference, Openference, Volcengine Ark plans and Token Kiosk; NanoGPT and Novita catalogs expanded. | [Provider Reference](docs/reference/PROVIDER_REFERENCE.md)                                                                                      |
-| **Responses API continuity**             | `previous_response_id` works even when the upstream lacks it, and encrypted reasoning replay is available as an opt-in.                                                           | [API Reference](docs/reference/API_REFERENCE.md) · [Reasoning Replay](docs/routing/REASONING_REPLAY.md)                                         |
-| **Compression updates**                  | omniglyph 1.4.0 semantic profiles, a Russian Caveman pack and the `i-have-adhd` output style.                                                                                     | [Compression Engines](docs/compression/COMPRESSION_ENGINES.md)                                                                                  |
-| **Memory embeddings**                    | Memory can use custom OpenAI-compatible embedding endpoints, with guided Qdrant setup.                                                                                            | [Memory](docs/frameworks/MEMORY.md)                                                                                                             |
-| **OmniConductor and Faro voice**         | Inbound A2A delegation to an OmniConductor fleet, Conductor skills on the Agent Card, and a dashboard panel with Faro voice chat.                                                 | [A2A Server](docs/frameworks/A2A-SERVER.md)                                                                                                     |
-| **A2A v1.0 clients and MCP tools**       | A2A v1.0 client compatibility, an `omniroute_create_combo` MCP tool and tool lists that drop blocked providers.                                                                   | [A2A Server](docs/frameworks/A2A-SERVER.md) · [MCP Server](docs/frameworks/MCP-SERVER.md)                                                       |
-| **Plugin marketplace installs**          | Install plugins with checksum verification; plugins see request headers and a stream-complete event.                                                                              | [Plugin Marketplace](docs/frameworks/PLUGIN_MARKETPLACE.md) · [Plugin SDK](docs/frameworks/PLUGIN_SDK.md)                                       |
-| **Onboarding and conversations**         | One-click setup for eligible no-auth providers, a beginner-oriented UX pass and agentic conversation tracking.                                                                    | [PR #10014](https://github.com/cheaper-inference/OmniRoute/pull/10014) · [PR #10263](https://github.com/cheaper-inference/OmniRoute/pull/10263) |
-| **Desktop attaches to a running server** | The Electron app can connect to an OmniRoute that already runs, for example in Docker.                                                                                            | [Electron Guide](docs/guides/ELECTRON_GUIDE.md)                                                                                                 |
-| **Health probes and service managers**   | `/livez`, `/readyz` and `/api/health` probes, a Linux systemd unit with watchdog, Redis key prefixes and a Telegram Mini App bridge.                                              | [Monitoring Guide](docs/ops/MONITORING_GUIDE.md) · [Docker Guide](docs/guides/DOCKER_GUIDE.md)                                                  |
-
-Older releases, from v3.8.49 back: [`CHANGELOG.md`](CHANGELOG.md). Planned milestones up to v3.9.0 LTS: [`ROADMAP.md`](ROADMAP.md).
+See [CHANGELOG.md](CHANGELOG.md) for all changes and [ROADMAP.md](ROADMAP.md) for planned work.
 
 <br/>
 
-<div align="center">
-
 ## Compatible CLIs & Coding Agents
-
-</div>
 
 The dashboard catalog lists **39 integrations** (28 coding tools and 11 agents). The CLI manifest adds Gemini CLI, which launches with `omniroute run`, and four tools it can only detect. Of all of them, **8** launch with `omniroute run`, **12** can be set up with `omniroute configure`, and **16** have a dedicated `setup-*` command. Pick the path that matches what you want.
 
@@ -812,7 +645,7 @@ Every command honors the active remote context (`omniroute connect <host>`). `--
   </tr>
 </table>
 
-| Tool                                                                                         | Command                        | What it writes                            |
+| <img width="2000" height="0" alt=""> Tool                                                    | Command                        | What it writes                            |
 | -------------------------------------------------------------------------------------------- | ------------------------------ | ----------------------------------------- |
 | [Claude Code](https://github.com/anthropics/claude-code)                                     | `omniroute configure claude`   | ~/.claude/settings.json                   |
 | [Codex CLI](https://github.com/openai/codex)                                                 | `omniroute configure codex`    | ~/.codex/config.toml                      |
@@ -901,31 +734,11 @@ deyin.ai and Zoo Code are not in the catalog or the CLI manifest. Configure them
 
 <sub>Gray text tiles mark tools whose icon is not stored in this repository; they are placeholders, not the projects' logos. Per-tool setup → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · OpenCode packages: [`@omniroute/opencode-plugin`](https://www.npmjs.com/package/@omniroute/opencode-plugin) (OpenCode v1, installed by `omniroute setup opencode`) and [`@omniroute/opencode-plugin-v2`](https://www.npmjs.com/package/@omniroute/opencode-plugin-v2) (OpenCode v2). The older `@omniroute/opencode-provider` is deprecated.</sub>
 
-<div align="center">
-
 ## 394 AI Providers — 51 With Recurring Free Access
-
-</div>
 
 Each number counts something different. None of them is added to another.
 
-<table>
-  <tr>
-    <td valign="top" width="25%"><b>394</b><br/><sub><b>Registered providers</b></sub><br/><sub>API key 262, web cookie 37, OAuth 31, search 21, local 15, audio-only 12, no-auth 10, cloud agents 3, upstream proxies 2, system 1.</sub></td>
-    <td valign="top" width="25%"><b>160</b><br/><sub><b>Flagged with a free offer</b></sub><br/><sub>The <code>hasFree</code> flag. Trials, signup credits and limited plans count.</sub></td>
-    <td valign="top" width="25%"><b>74</b><br/><sub><b>In the free-tier catalog</b></sub><br/><sub>Free access documented per model, signup credits included.</sub></td>
-    <td valign="top" width="25%"><b>51</b><br/><sub><b>Recurring or keyless</b></sub><br/><sub>No trial, no eligibility gate. Free every day or month, or without a key.</sub></td>
-  </tr>
-</table>
-
-<table>
-  <tr>
-    <td valign="top" width="25%"><b>458</b><br/><sub><b>Active free model entries</b></sub><br/><sub>Provider/model rows; 465 minus 7 discontinued.</sub></td>
-    <td valign="top" width="25%"><b>367</b><br/><sub><b>Distinct free model IDs</b></sub><br/><sub>The 458 entries deduplicated by model ID.</sub></td>
-    <td valign="top" width="25%"><b>34</b><br/><sub><b>Recurring free pools</b></sub><br/><sub>Shared quotas, each counted once.</sub></td>
-    <td valign="top" width="25%"><b>~1.62B</b><br/><sub><b>Recurring free tokens / month</b></sub><br/><sub>Pool-deduplicated estimate across provider accounts; ~2.22B in the first month with signup credits. Not an OmniRoute allowance.</sub></td>
-  </tr>
-</table>
+<img src="./docs/diagrams/provider-numbers.svg" width="100%" alt="What each number counts. 394 registered providers across ten categories. 160 have a free offer, including trials, signup credits and limited plans. 74 have documented free access per model. 51 offer recurring or keyless access without a trial or eligibility gate. The catalog has 458 active provider-model entries, 367 distinct model IDs and 34 shared recurring pools. The pool-deduplicated estimate is about 1.62 billion tokens per month, or 2.22 billion in the first month with signup credits. Not an OmniRoute allowance. None of the figures are added together.">
 
 <sub>Chat catalog: static model lists from 250 of the providers, 3,186 provider/model pairs, 1,539 distinct raw model IDs.</sub>
 
@@ -966,51 +779,45 @@ Each number counts something different. None of them is added to another.
 
 ### Free every day or month
 
+These providers offer recurring or keyless free access.
+
 <table>
   <tr>
-    <td valign="top" width="25%"><img src="./docs/assets/provider-icons/kilo-gateway-tile.svg" width="32" height="32" alt="Kilo Gateway"/><br/><b>Kilo Gateway</b><br/><sub>Recurring</sub><br/><sub>Kilo Auto Free, Tencent Hy3</sub><br/><sub>12 free models, no published token cap</sub></td>
-    <td valign="top" width="25%"><img src="./public/providers/requesty.svg" width="32" height="32" alt="Requesty"/><br/><b>Requesty</b><br/><sub>Recurring</sub><br/><sub>GPT-OSS 120B, Nemotron 3 Nano 30B</sub><br/><sub>About 200 requests/day</sub></td>
-    <td valign="top" width="25%"><img src="./public/providers/zhipu.svg" width="32" height="32" alt="Z.AI GLM"/><br/><b>Z.AI GLM</b><br/><sub>Recurring</sub><br/><sub>GLM-4.7-Flash, GLM-4.5-Flash</sub><br/><sub>No published token cap</sub></td>
-    <td valign="top" width="25%"><img src="./public/providers/baidu.svg" width="32" height="32" alt="Baidu ERNIE"/><br/><b>Baidu ERNIE</b><br/><sub>Recurring</sub><br/><sub>ERNIE 4.0 8K</sub><br/><sub>No published token cap</sub></td>
+    <td align="center" width="150"><img src="./docs/assets/provider-icons/kilo-gateway-tile.svg" width="42" alt="Kilo Gateway"/><br/><b>Kilo Gateway</b><br/><sub>Recurring<br/>Kilo Auto Free, Tencent Hy3<br/>12 free models, no published token cap</sub></td>
+    <td align="center" width="150"><img src="./public/providers/requesty.svg" width="42" alt="Requesty"/><br/><b>Requesty</b><br/><sub>Recurring<br/>GPT-OSS 120B, Nemotron 3 Nano 30B<br/>About 200 requests/day</sub></td>
+    <td align="center" width="150"><img src="./public/providers/zhipu.svg" width="42" alt="Z.AI GLM"/><br/><b>Z.AI GLM</b><br/><sub>Recurring<br/>GLM-4.7-Flash, GLM-4.5-Flash<br/>No published token cap</sub></td>
+    <td align="center" width="150"><img src="./public/providers/baidu.svg" width="42" alt="Baidu ERNIE"/><br/><b>Baidu ERNIE</b><br/><sub>Recurring<br/>ERNIE 4.0 8K<br/>No published token cap</sub></td>
+    <td align="center" width="150"><img src="./public/providers/pollinations.svg" width="42" alt="Pollinations"/><br/><b>Pollinations</b><br/><sub>Keyless<br/>24 models, no key<br/>Anonymous access is best-effort</sub></td>
+    <td align="center" width="150"><img src="./public/providers/cloudflare.svg" width="42" alt="Cloudflare Workers AI"/><br/><b>Cloudflare Workers AI</b><br/><sub>Daily<br/>9 models<br/>10K Neurons/day</sub></td>
   </tr>
   <tr>
-    <td valign="top" width="25%"><img src="./public/providers/pollinations.svg" width="32" height="32" alt="Pollinations"/><br/><b>Pollinations</b><br/><sub>Keyless</sub><br/><sub>24 models, no key</sub><br/><sub>Anonymous access is best-effort</sub></td>
-    <td valign="top" width="25%"><img src="./public/providers/cloudflare.svg" width="32" height="32" alt="Cloudflare Workers AI"/><br/><b>Cloudflare Workers AI</b><br/><sub>Daily</sub><br/><sub>9 models</sub><br/><sub>10K Neurons/day</sub></td>
-    <td valign="top" width="25%"><img src="./public/providers/nvidia.svg" width="32" height="32" alt="NVIDIA NIM"/><br/><b>NVIDIA NIM</b><br/><sub>Recurring</sub><br/><sub>Gemma 4 31B, Nemotron 3.5 Super</sub><br/><sub>About 40 RPM</sub></td>
-    <td valign="top" width="25%"><img src="./public/providers/openrouter.svg" width="32" height="32" alt="OpenRouter"/><br/><b>OpenRouter</b><br/><sub>Daily</sub><br/><sub><code>:free</code> models</sub><br/><sub>A one-time $10 top-up raises the cap to 1,000 requests/day</sub></td>
-  </tr>
-  <tr>
-    <td valign="top" width="25%"><img src="./public/providers/gemini.svg" width="32" height="32" alt="Gemini"/><br/><b>Gemini</b><br/><sub>Recurring</sub><br/><sub>Gemini 2.5 Flash, Gemini 3 Flash Preview</sub><br/><sub>Rate-limited, no published token cap</sub></td>
-    <td valign="top" width="25%"><img src="./public/providers/groq.svg" width="32" height="32" alt="Groq"/><br/><b>Groq</b><br/><sub>Daily</sub><br/><sub>GPT-OSS 120B, GPT-OSS 20B</sub><br/><sub>Daily cap per model</sub></td>
-    <td valign="top" width="25%"><img src="./public/providers/mistral.svg" width="32" height="32" alt="Mistral"/><br/><b>Mistral</b><br/><sub>Monthly</sub><br/><sub>Mistral Large 3, Mistral Medium 3.5</sub><br/><sub>About 1B tokens/month, shared pool</sub></td>
-    <td valign="top" width="25%"><img src="./public/providers/cohere.svg" width="32" height="32" alt="Cohere"/><br/><b>Cohere</b><br/><sub>Monthly</sub><br/><sub>Command A family</sub><br/><sub>About 800K tokens/month</sub></td>
+    <td align="center" width="150"><img src="./public/providers/nvidia.svg" width="42" alt="NVIDIA NIM"/><br/><b>NVIDIA NIM</b><br/><sub>Recurring<br/>Gemma 4 31B, Nemotron 3.5 Super<br/>About 40 RPM</sub></td>
+    <td align="center" width="150"><img src="./public/providers/openrouter.svg" width="42" alt="OpenRouter"/><br/><b>OpenRouter</b><br/><sub>Daily<br/><code>:free</code> models<br/>A one-time $10 top-up raises the cap to 1,000 requests/day</sub></td>
+    <td align="center" width="150"><img src="./public/providers/gemini.svg" width="42" alt="Gemini"/><br/><b>Gemini</b><br/><sub>Recurring<br/>Gemini 2.5 Flash, Gemini 3 Flash Preview<br/>Rate-limited, no published token cap</sub></td>
+    <td align="center" width="150"><img src="./public/providers/groq.svg" width="42" alt="Groq"/><br/><b>Groq</b><br/><sub>Daily<br/>GPT-OSS 120B, GPT-OSS 20B<br/>Daily cap per model</sub></td>
+    <td align="center" width="150"><img src="./public/providers/mistral.svg" width="42" alt="Mistral"/><br/><b>Mistral</b><br/><sub>Monthly<br/>Mistral Large 3, Mistral Medium 3.5<br/>About 1B tokens/month, shared pool</sub></td>
+    <td align="center" width="150"><img src="./public/providers/cohere.svg" width="42" alt="Cohere"/><br/><b>Cohere</b><br/><sub>Monthly<br/>Command A family<br/>About 800K tokens/month</sub></td>
   </tr>
 </table>
 
 ### Trial and signup credits
 
-These are one-time offers. They are listed apart so they are not read as free forever.
+These trials and signup credits are one-time offers that run out or expire.
 
 <table>
   <tr>
-    <td valign="top" width="33%"><img src="./public/providers/cerebras.svg" width="32" height="32" alt="Cerebras"/><br/><b>Cerebras</b><br/><sub>GLM 4.7, GPT-OSS 120B</sub><br/><sub>One-time $5 credit, valid 30 days. Card required.</sub></td>
-    <td valign="top" width="33%"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/qoder-color.svg" width="32" height="32" alt="Qoder"/><br/><b>Qoder</b><br/><sub>Qwen3.8-Max-Preview, Kimi-K3</sub><br/><sub>Signup credits on 9 models</sub></td>
-    <td valign="top" width="33%"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/siliconcloud-color.svg" width="32" height="32" alt="SiliconFlow"/><br/><b>SiliconFlow</b><br/><sub>$0 models listed by SiliconFlow</sub><br/><sub>$1 credit, plus $0 models after identity verification</sub></td>
-  </tr>
-  <tr>
-    <td valign="top" width="33%"><img src="./public/providers/deepseek.svg" width="32" height="32" alt="DeepSeek"/><br/><b>DeepSeek</b><br/><sub>DeepSeek V4 Pro, V4 Flash</sub><br/><sub>5M tokens on signup, no card</sub></td>
-    <td valign="top" width="33%"><img src="./public/providers/fireworks.svg" width="32" height="32" alt="Fireworks"/><br/><b>Fireworks</b><br/><sub>DeepSeek V4, GLM 5.1</sub><br/><sub>$1 starter credit</sub></td>
-    <td valign="top" width="33%"><img src="./public/providers/hyperbolic.svg" width="32" height="32" alt="Hyperbolic"/><br/><b>Hyperbolic</b><br/><sub>QwQ 32B, DeepSeek R1</sub><br/><sub>$1–5 trial credit</sub></td>
+    <td align="center" width="150"><img src="./public/providers/cerebras.svg" width="42" alt="Cerebras"/><br/><b>Cerebras</b><br/><sub>GLM 4.7, GPT-OSS 120B<br/>One-time $5 credit, valid 30 days. Card required.</sub></td>
+    <td align="center" width="150"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/qoder-color.svg" width="42" alt="Qoder"/><br/><b>Qoder</b><br/><sub>Qwen3.8-Max-Preview, Kimi-K3<br/>Signup credits on 9 models</sub></td>
+    <td align="center" width="150"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/siliconcloud-color.svg" width="42" alt="SiliconFlow"/><br/><b>SiliconFlow</b><br/><sub>$0 models listed by SiliconFlow<br/>$1 credit, plus $0 models after identity verification</sub></td>
+    <td align="center" width="150"><img src="./public/providers/deepseek.svg" width="42" alt="DeepSeek"/><br/><b>DeepSeek</b><br/><sub>DeepSeek V4 Pro, V4 Flash<br/>5M tokens on signup, no card</sub></td>
+    <td align="center" width="150"><img src="./public/providers/fireworks.svg" width="42" alt="Fireworks"/><br/><b>Fireworks</b><br/><sub>DeepSeek V4, GLM 5.1<br/>$1 starter credit</sub></td>
+    <td align="center" width="150"><img src="./public/providers/hyperbolic.svg" width="42" alt="Hyperbolic"/><br/><b>Hyperbolic</b><br/><sub>QwQ 32B, DeepSeek R1<br/>$1–5 trial credit</sub></td>
   </tr>
 </table>
 
 Provider limits and eligibility change; check the provider before you rely on a quota. Full catalog → [Provider Reference](docs/reference/PROVIDER_REFERENCE.md) · Limits, pools and the budget math → [Free Tiers](docs/reference/FREE_TIERS.md) · Live usage → <code>/dashboard/free-tiers</code>
 
-<div align="center">
-
 ## Where OmniRoute Runs
-
-</div>
 
 > One server, many homes: a global npm install, a container, a desktop app, the macOS menu bar or an Android phone. Clients then connect to it from the browser, VS Code or OpenCode.
 
@@ -1071,11 +878,7 @@ Provider limits and eligibility change; check the provider before you rely on a 
 
 <a id="omnicopilot"></a>
 
-<div align="center">
-
 ### OmniCopilot: OmniRoute inside VS Code's native Copilot Chat
-
-</div>
 
 > No new sidebar and no new chat UI. Every chat model your OmniRoute serves appears in the **Copilot Chat model picker you already use**, and Copilot's agent mode, tool calling, MCP servers and custom instructions keep working on the model you pick.
 
@@ -1111,11 +914,7 @@ Install **OmniCopilot**, start your OmniRoute server (the extension defaults to 
 
 <a id="omniroutetray"></a>
 
-<div align="center">
-
 ### OmniRouteTray: OmniRoute in the macOS menu bar
-
-</div>
 
 > **[OmniRouteTray](https://github.com/zoispag/omniroute-tray)** keeps `omniroute serve` running from the menu bar: it starts the server, keeps it alive across reboots and updates it in place, with no terminal left open. Built with [Tauri v2](https://v2.tauri.app/), it ships its own signed Node 24 runtime and an app-owned OmniRoute install, and shares your existing `~/.omniroute/` config and database.
 
@@ -1138,11 +937,7 @@ brew install --cask zoispag/tap/omniroute-tray
 
 <br/>
 
-<div align="center">
-
 ## Private & Local-First
-
-</div>
 
 <img src="./docs/diagrams/privacy-local.svg" width="100%" alt="Private and local-first — OmniRoute's gateway and control plane run on your machine. Prompts are sent to the upstream provider selected for each request; OmniRoute adds no hosted prompt-processing hop and telemetry is disabled by default. Credentials are encrypted at rest with AES-256-GCM; controls include API-key scoping, IP filtering, rate limits, prompt-injection guards, upstream-header scrubbing, opt-in PII redaction, sanitized errors and a local SQLite audit trail. OmniRoute is MIT-licensed and self-hostable."/>
 
@@ -1153,11 +948,7 @@ brew install --cask zoispag/tap/omniroute-tray
 <a id="-full-cli--a2a--mcp"></a>
 <a id="cli-protocols"></a>
 
-<div align="center">
-
 ## Full CLI, MCP and A2A
-
-</div>
 
 > OmniRoute ships a command-line client with **91 top-level commands and command groups** (754 commands counting subcommands), an **MCP server with 110 tools and 33 scopes**, and an **A2A agent with 6 skills**. Scripts, terminals and AI agents can all operate the same gateway.
 
@@ -1185,7 +976,7 @@ omniroute tokens create --name ci --scope read   # mint a narrower token for ano
 omniroute contexts use default                   # switch back to the local server
 ```
 
-| Token scope | What it allows                                              |
+| Token scope | <img width="2000" height="0" alt=""> What it allows         |
 | ----------- | ----------------------------------------------------------- |
 | `read`      | List and inspect: models, status, logs, usage               |
 | `write`     | `read` plus configure and apply: client setup, keys, config |
@@ -1234,11 +1025,7 @@ claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream 
 
 <br/>
 
-<div align="center">
-
 ## Save 15–95% Tokens — Automatically
-
-</div>
 
 ### How it works — pipeline, architecture & savings math
 
@@ -1279,7 +1066,7 @@ Engines run in pipeline order; each is independently toggleable and configurable
 Code blocks, URLs and structured data are **always preserved** byte-perfect. **One-click presets** combine the engines:
 
 <table>
-  <tr><th align="left">Mode</th><th align="left">Savings</th><th align="left">Best for</th></tr>
+  <tr><th align="left">Mode</th><th align="left">Savings</th><th align="left"><img width="2000" height="0" alt=""> Best for</th></tr>
   <tr><td align="left" nowrap>🪶 <b>Lite</b></td><td align="left" nowrap>~15%</td><td align="left">Always-on safe default</td></tr>
   <tr><td align="left" nowrap>🪨 <b>Standard (Caveman)</b></td><td align="left" nowrap>~30%</td><td align="left">Daily coding</td></tr>
   <tr><td align="left" nowrap>⚡ <b>Aggressive</b></td><td align="left" nowrap>~50%</td><td align="left">Long tool-heavy sessions</td></tr>
@@ -1308,75 +1095,53 @@ Code blocks, URLs and structured data are **always preserved** byte-perfect. **O
 
 ### Beyond the engines — output styles, the adaptive dial & per-request control
 
-The 12 engines above shrink what goes **in**. Three more layers shape **how**, **when**, and what comes **out**:
+Shape the reply, target the model's context window, or choose a compression plan per request.
 
-- **🪄 Output Styles** _(output-axis steering)_ — inject deterministic, cache-safe response-shaping instructions; combinable, each at `lite` / `full` / `ultra` intensity. Adding a style is a one-line registry entry:
-  - **Terse prose** — drop filler / articles / hedging; keep technical substance exact.
-  - **Less code** — "lazy senior dev" YAGNI: smallest working change, no unrequested scaffolding.
-  - **Ponytail (lazy senior dev)** — climb the YAGNI ladder, fix the root cause, smallest working diff.
-  - **I have ADHD (action-first)** — next action leads, steps numbered, one concrete next step, no preamble.
-  - **Terse CJK (文言)** — classical-Chinese ultra-terse style (locale-gated to `zh`).
-- **🎯 Adaptive context-budget** _(the dial)_ — instead of one on/off token threshold, escalate the cheapest, most-lossless engines only as far as needed to **fit the model's context window**. Policy: `reserve-output` (default, model-aware) · `percentage` · `absolute`. Mode: `floor` (guarantee fit) · `replace-autotrigger` (your explicit choice wins) · `off` (legacy threshold).
-- **🎛️ Where compression is decided** _(precedence, high → low)_ — per-request `x-omniroute-compression` header › routing-combo override › active named profile › adaptive / auto-trigger › panel default › off. The applied plan echoes back in the `X-OmniRoute-Compression: <mode>; source=<source>` response header.
+#### Output styles
 
-Auto-trigger by token threshold, flip on the adaptive dial, pin a named profile, set a one-off per request, or assign a pipeline per routing combo — whichever fits the workload. An opt-in offline **eval harness** (`npm run eval:compression`) scores fidelity vs. savings on a pinned corpus before you promote a change.
+| Style                      | <img width="2000" height="0" alt=""> What it does                              |
+| -------------------------- | ------------------------------------------------------------------------------ |
+| Terse prose                | Cuts filler and hedging while preserving technical detail.                     |
+| Less code                  | Asks for the smallest working change and reuses existing code.                 |
+| Ponytail (lazy senior dev) | Checks what can be reused or removed and asks for a root-cause fix.            |
+| I have ADHD (action-first) | Leads with the action, numbers the steps and ends with one concrete next step. |
+| Terse CJK (文言)           | Uses concise classical Chinese. Available for `zh`.                            |
 
-📖 [`COMPRESSION_GUIDE.md`](docs/compression/COMPRESSION_GUIDE.md) · [`RTK_COMPRESSION.md`](docs/compression/RTK_COMPRESSION.md) · [`COMPRESSION_ENGINES.md`](docs/compression/COMPRESSION_ENGINES.md)
+Each style has `lite`, `full` and `ultra` intensities. Add a style with an entry in the output style registry.
+
+#### Adaptive context budget
+
+| Setting | Options                                                                                                                                                                         |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Policy  | `reserve-output` (default) sets aside room for the reply and a safety margin. `percentage` uses a share of the context window. `absolute` sets a fixed token target.            |
+| Mode    | `floor` can escalate the selected plan to fit the context window. `replace-autotrigger` uses the budget for automatic escalation. `off` keeps the token-threshold auto-trigger. |
+
+#### Where compression is decided
+
+| Order | <img width="2000" height="0" alt=""> Source             |
+| ----- | ------------------------------------------------------- |
+| 1     | Recognized `x-omniroute-compression` request header     |
+| 2     | Routing combo override                                  |
+| 3     | Active named profile                                    |
+| 4     | Adaptive context budget or token-threshold auto-trigger |
+| 5     | Compression panel default                               |
+| 6     | Off when no plan applies                                |
+
+The global compression switch takes priority over this table. The `X-OmniRoute-Compression` response header reports `<mode>; source=<source>`.
+
+[Compression guide](docs/compression/COMPRESSION_GUIDE.md) · [RTK compression](docs/compression/RTK_COMPRESSION.md) · [Compression engines](docs/compression/COMPRESSION_ENGINES.md)
+
+The opt-in eval harness (`npm run eval:compression`) compares response fidelity and token savings on a fixed corpus.
 
 <br/>
-
-<div align="center">
 
 <a id="quick-start"></a>
 
 # Quick Start
 
-</div>
+<img src="./docs/diagrams/quick-start-steps.svg" width="100%" alt="OmniRoute Quick Start in six steps. Check with node --version for Node.js 22.22.2 or later in 22.x, or 24.x, 25.x or 26.x. Run npm install -g omniroute, then omniroute. Open the dashboard at http://localhost:20128, set a password and connect a provider. In API Keys, create an OmniRoute key and save it when shown. Send a POST to /v1/chat/completions with model auto. GET /v1/models lists what your key can reach. Run omniroute configure codex or omniroute run claude --model auto to connect your coding tool.">
 
-<table>
-  <tr>
-    <td valign="top" width="33%">
-      <sub>1 · Before you install</sub><br/>
-      <b>Supported Node.js</b><br/>
-      22.22.2 and later 22.x, or 24.x, 25.x, 26.x.<br/>
-      <sub>From <code>engines.node</code> in <a href="package.json">package.json</a>: <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code>. Check with <code>node --version</code>.</sub>
-    </td>
-    <td valign="top" width="33%">
-      <sub>2 · Terminal</sub><br/>
-      <b>Install and start</b><br/>
-      <code>npm install -g omniroute</code><br/>
-      <code>omniroute</code><br/>
-      <sub>Runs <code>omniroute serve</code>. Dashboard <code>http://localhost:20128</code>, API <code>http://localhost:20128/v1</code>.</sub>
-    </td>
-    <td valign="top" width="33%">
-      <sub>3 · Browser</sub><br/>
-      <b>Password and provider</b><br/>
-      Set a dashboard password in first-run setup, then Dashboard → <b>Providers</b> → add an API key or sign in.<br/>
-      <sub>Without a password you cannot add providers during setup.</sub>
-    </td>
-  </tr>
-  <tr>
-    <td valign="top" width="33%">
-      <sub>4 · Browser</sub><br/>
-      <b>Create an OmniRoute key</b><br/>
-      Dashboard → <b>API Keys</b> → <b>Create API Key</b>.<br/>
-      <sub>The full key is shown once. It is for your tools, not a provider key.</sub>
-    </td>
-    <td valign="top" width="33%">
-      <sub>5 · Terminal</sub><br/>
-      <b>First request</b><br/>
-      <code>POST /v1/chat/completions</code> with <code>"model": "auto"</code> (full command below).<br/>
-      <sub><code>GET /v1/models</code> lists what your key can reach.</sub>
-    </td>
-    <td valign="top" width="33%">
-      <sub>6 · Your coding tool</sub><br/>
-      <b>Point it at OmniRoute</b><br/>
-      <code>omniroute configure codex</code><br/>
-      <code>omniroute run claude --model auto</code><br/>
-      <sub>Or set base URL, key and model by hand. See <a href="docs/guides/CLI-INTEGRATIONS.md">CLI Integrations</a>.</sub>
-    </td>
-  </tr>
-</table>
+<sub>Node.js range from <code>engines.node</code> in <a href="package.json">package.json</a>. Without a dashboard password you cannot add providers during setup. Tool setup by hand: <a href="docs/guides/CLI-INTEGRATIONS.md">CLI Integrations</a>.</sub>
 
 **First request**
 
@@ -1469,11 +1234,11 @@ docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
 
 `:latest` follows the highest **published** stable SemVer. It does not track git `main`. Pin `:X.Y.Z` for GitOps. See [Docker Release Channels](docs/guides/DOCKER_GUIDE.md#release-channels).The image pins **`OMNIROUTE_MEMORY_MB=1024`**. That is enough for the dashboard and a light chat. **Coding agents** (`POST /v1/responses` from Claude Code, Codex, Grok, …) need a much larger V8 heap or the process `FATAL ERROR`s at ~12 GiB under two overlapping long contexts. Size the container above the heap (native buffers sit outside V8):
 
-| Workload                            | Heap (`-e OMNIROUTE_MEMORY_MB`) | Container (`--memory`) |
-| ----------------------------------- | ------------------------------- | ---------------------- |
-| Dashboard / light chat              | `1024` (image default)          | ≥2 g                   |
-| One coding agent                    | `8192`                          | ≥10 g                  |
-| Two concurrent long `/v1/responses` | `10240`–`12288`                 | ≥12–16 g               |
+| <img width="2000" height="0" alt=""> Workload | Heap (`-e OMNIROUTE_MEMORY_MB`) | Container (`--memory`) |
+| --------------------------------------------- | ------------------------------- | ---------------------- |
+| Dashboard / light chat                        | `1024` (image default)          | ≥2 g                   |
+| One coding agent                              | `8192`                          | ≥10 g                  |
+| Two concurrent long `/v1/responses`           | `10240`–`12288`                 | ≥12–16 g               |
 
 ```bash
 docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
@@ -1577,11 +1342,7 @@ same process on one port, so there is no separate CLI-only package today.
 
 <br/>
 
-<div align="center">
-
 # OmniRoute in Action
-
-</div>
 
 ## Video Guides
 
@@ -1624,7 +1385,7 @@ Recent walkthroughs. Each link was checked against YouTube's oEmbed endpoint on 
   </tr>
 </table>
 
-|   # | Creator                                                                          | Platform       | Published  | Known views |
+|   # | <img width="2000" height="0" alt=""> Creator                                     | Platform       | Published  | Known views |
 | --: | -------------------------------------------------------------------------------- | -------------- | ---------- | ----------: |
 |   1 | [nick_saraev](https://www.instagram.com/reel/Da8ZthUPK98/)                       | Instagram      | 2026-07-18 |   3,042,474 |
 |   2 | [nnapier7](https://www.instagram.com/reel/Dbp7wv_CIO0/)                          | Instagram      | 2026-08-05 |   1,454,535 |
@@ -1641,13 +1402,13 @@ Creator titles and captions are their own. Some promise more than OmniRoute guar
 
 ### If you want the numbers
 
-| Platform          |    Videos |    Known views |
-| ----------------- | --------: | -------------: |
-| YouTube long-form |       928 |     10,340,464 |
-| YouTube Shorts    |       774 |      2,793,933 |
-| Instagram         |       290 |      8,054,601 |
-| TikTok            |       334 |      3,515,835 |
-| **Total**         | **2,326** | **24,704,833** |
+| <img width="2000" height="0" alt=""> Platform |    Videos |    Known views |
+| --------------------------------------------- | --------: | -------------: |
+| YouTube long-form                             |       928 |     10,340,464 |
+| YouTube Shorts                                |       774 |      2,793,933 |
+| Instagram                                     |       290 |      8,054,601 |
+| TikTok                                        |       334 |      3,515,835 |
+| **Total**                                     | **2,326** | **24,704,833** |
 
 Snapshot of 2026-11-16: **2,326 unique videos** (YouTube 1,702 = 928 long-form + 774 Shorts · TikTok 334 · Instagram 290), **24,704,833 known views**, **1,395 channels and profiles**. Duplicates are merged by canonical URL, keeping the highest count; 79 videos have no view count yet and are not counted. YouTube is collected up to videos published on 2026-11-15; TikTok and Instagram collection has been frozen since 2026-09-02, so their counts are older.
 
@@ -1686,11 +1447,7 @@ Snapshot of 2026-11-16: **2,326 unique videos** (YouTube 1,702 = 928 long-form +
 
 <br/>
 <br/>
-<div align="center">
-
 ## Tech Stack
-
-</div>
 
 What OmniRoute is built with, as declared in [`package.json`](package.json) on `release/v3.8.55`.
 
@@ -1715,17 +1472,13 @@ What OmniRoute is built with, as declared in [`package.json`](package.json) on `
   <tr><td nowrap><b>Links</b></td><td><a href="https://omniroute.online">Website</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/cheaperinference/omniroute">Docker Hub</a></td></tr>
 </table>
 
-<div align="center">
-
 <br/>
 
 ## Documentation
 
-</div>
-
 Every Markdown file in [`docs/`](docs/) outside the translations is linked below, plus the documents that live elsewhere in the repository (contributing guide, changelog, package READMEs, the OpenAPI file). The searchable index is [`docs/README.md`](docs/README.md). Translations into 66 languages are in [`docs/i18n/`](docs/i18n/README.md).
 
-| If you…                                       | Read first                                                  | Then browse                       |
+| If you…                                       | <img width="2000" height="0" alt=""> Read first             | Then browse                       |
 | --------------------------------------------- | ----------------------------------------------------------- | --------------------------------- |
 | are new to OmniRoute                          | [Documentation index](docs/README.md)                       | [13 documents](#docs-start)       |
 | are deploying or operating a server           | [Docker Guide](docs/guides/DOCKER_GUIDE.md)                 | [24 documents](#docs-deploy)      |
@@ -1748,7 +1501,7 @@ Every Markdown file in [`docs/`](docs/) outside the translations is linked below
 
 Install, connect a first provider and learn the dashboard. Subject: **Getting started**.
 
-| Document                                                         | What it answers                                                                | File                                       |
+| Document                                                         | <img width="2000" height="0" alt=""> What it answers                           | File                                       |
 | ---------------------------------------------------------------- | ------------------------------------------------------------------------------ | ------------------------------------------ |
 | [Documentation index](docs/README.md)                            | Navigable index of the whole documentation set, grouped by intent              | `docs/README.md`                           |
 | [Quick Start guide](docs/getting-started/QUICK-START.md)         | Install, connect an eligible provider and point your IDE at OmniRoute          | `docs/getting-started/QUICK-START.md`      |
@@ -1770,7 +1523,7 @@ Install, connect a first provider and learn the dashboard. Subject: **Getting st
 
 Run OmniRoute on a laptop, VPS, container platform or phone, and configure it. Subject: **Install, deploy and configure**.
 
-| Document                                                              | What it answers                                                      | File                                      |
+| <img width="2000" height="0" alt=""> Document                         | What it answers                                                      | File                                      |
 | --------------------------------------------------------------------- | -------------------------------------------------------------------- | ----------------------------------------- |
 | [Docker Guide](docs/guides/DOCKER_GUIDE.md)                           | Docker run, Compose profiles, Caddy HTTPS, tunnels and image tags    | `docs/guides/DOCKER_GUIDE.md`             |
 | [Podman Guide](contrib/podman/README.md)                              | Podman compose and Quadlet systemd integration, SELinux notes        | `contrib/podman/README.md`                |
@@ -1803,7 +1556,7 @@ Run OmniRoute on a laptop, VPS, container platform or phone, and configure it. S
 
 Combos, strategies, fallbacks and the three resilience mechanisms. Subject: **Routing, combos and resilience**.
 
-| Document                                                                       | What it answers                                                          | File                                            |
+| <img width="2000" height="0" alt=""> Document                                  | What it answers                                                          | File                                            |
 | ------------------------------------------------------------------------------ | ------------------------------------------------------------------------ | ----------------------------------------------- |
 | [Auto-Combo Engine](docs/routing/AUTO-COMBO.md)                                | Scoring factors, strategies, mode packs and self-healing                 | `docs/routing/AUTO-COMBO.md`                    |
 | [Subscription-first routing](docs/routing/SUBSCRIPTION_LADDER.md)              | Prefer plan-included connections before paid ones                        | `docs/routing/SUBSCRIPTION_LADDER.md`           |
@@ -1832,7 +1585,7 @@ Combos, strategies, fallbacks and the three resilience mechanisms. Subject: **Ro
 
 Cost estimation, quota tracking, team budgets and free-tier data. Subject: **Usage, quota and cost**.
 
-| Document                                                                  | What it answers                                                    | File                                       |
+| <img width="2000" height="0" alt=""> Document                             | What it answers                                                    | File                                       |
 | ------------------------------------------------------------------------- | ------------------------------------------------------------------ | ------------------------------------------ |
 | [Cost & Spend Tracking](docs/guides/COST_TRACKING.md)                     | How request cost is estimated, recorded and reported               | `docs/guides/COST_TRACKING.md`             |
 | [Usage, Quota & Spend](docs/guides/USAGE_QUOTA_GUIDE.md)                  | Usage analytics, quota cards and per-key limits                    | `docs/guides/USAGE_QUOTA_GUIDE.md`         |
@@ -1851,7 +1604,7 @@ Cost estimation, quota tracking, team budgets and free-tier data. Subject: **Usa
 
 Provider catalog plus guides for providers with special setup. Subject: **Providers**.
 
-| Document                                                                        | What it answers                                                         | File                                               |
+| <img width="2000" height="0" alt=""> Document                                   | What it answers                                                         | File                                               |
 | ------------------------------------------------------------------------------- | ----------------------------------------------------------------------- | -------------------------------------------------- |
 | [Provider Reference](docs/reference/PROVIDER_REFERENCE.md)                      | Generated catalog of every registered provider                          | `docs/reference/PROVIDER_REFERENCE.md`             |
 | [Removed providers](docs/reference/REMOVED_PROVIDERS.md)                        | Providers removed at their operator's request                           | `docs/reference/REMOVED_PROVIDERS.md`              |
@@ -1893,7 +1646,7 @@ Provider catalog plus guides for providers with special setup. Subject: **Provid
 
 Prompt compression engines, context sources and persistent memory. Subject: **Compression, context and memory**.
 
-| Document                                                                     | What it answers                                                    | File                                             |
+| <img width="2000" height="0" alt=""> Document                                | What it answers                                                    | File                                             |
 | ---------------------------------------------------------------------------- | ------------------------------------------------------------------ | ------------------------------------------------ |
 | [Compression Guide](docs/compression/COMPRESSION_GUIDE.md)                   | Modes, triggers and the proactive compression pipeline             | `docs/compression/COMPRESSION_GUIDE.md`          |
 | [Compression Engines](docs/compression/COMPRESSION_ENGINES.md)               | Engine contracts, stacked pipelines and dashboard/API/MCP surfaces | `docs/compression/COMPRESSION_ENGINES.md`        |
@@ -1913,7 +1666,7 @@ Prompt compression engines, context sources and persistent memory. Subject: **Co
 
 Configure coding CLIs and editors, and use the `omniroute` command. Subject: **CLI tools and coding agents**.
 
-| Document                                                                 | What it answers                                                | File                                          |
+| <img width="2000" height="0" alt=""> Document                            | What it answers                                                | File                                          |
 | ------------------------------------------------------------------------ | -------------------------------------------------------------- | --------------------------------------------- |
 | [CLI Integrations](docs/guides/CLI-INTEGRATIONS.md)                      | `setup-*`, `configure` and `run` for each supported tool       | `docs/guides/CLI-INTEGRATIONS.md`             |
 | [CLI Tools reference](docs/reference/CLI-TOOLS.md)                       | Per-tool setup notes for coding CLIs and editors               | `docs/reference/CLI-TOOLS.md`                 |
@@ -1939,7 +1692,7 @@ Configure coding CLIs and editors, and use the `omniroute` command. Subject: **C
 
 HTTP API, OpenAPI, MCP, A2A, ACP and cloud agents. Subject: **APIs and agent protocols**.
 
-| Document                                                           | What it answers                                             | File                                       |
+| <img width="2000" height="0" alt=""> Document                      | What it answers                                             | File                                       |
 | ------------------------------------------------------------------ | ----------------------------------------------------------- | ------------------------------------------ |
 | [API Reference](docs/reference/API_REFERENCE.md)                   | Public `/v1` surface and the most-used management endpoints | `docs/reference/API_REFERENCE.md`          |
 | [OpenAPI spec](docs/openapi.yaml)                                  | Machine-readable OpenAPI 3.1 specification                  | `docs/openapi.yaml`                        |
@@ -1965,7 +1718,7 @@ HTTP API, OpenAPI, MCP, A2A, ACP and cloud agents. Subject: **APIs and agent pro
 
 Plugins, skills, embedded services, webhooks, exports and studios. Subject: **Extend and observe**.
 
-| Document                                                       | What it answers                                           | File                                     |
+| <img width="2000" height="0" alt=""> Document                  | What it answers                                           | File                                     |
 | -------------------------------------------------------------- | --------------------------------------------------------- | ---------------------------------------- |
 | [Plugin Marketplace](docs/frameworks/PLUGIN_MARKETPLACE.md)    | Self-contained server plugins and how to install them     | `docs/frameworks/PLUGIN_MARKETPLACE.md`  |
 | [CLI Plugin System](docs/frameworks/PLUGINS.md)                | Extend the `omniroute` CLI with `omniroute-cmd-*` plugins | `docs/frameworks/PLUGINS.md`             |
@@ -1990,7 +1743,7 @@ Plugins, skills, embedded services, webhooks, exports and studios. Subject: **Ex
 
 Outbound proxies, proxy pools and egress controls. Subject: **Proxies and network**.
 
-| Document                                                            | What it answers                                     | File                                 |
+| <img width="2000" height="0" alt=""> Document                       | What it answers                                     | File                                 |
 | ------------------------------------------------------------------- | --------------------------------------------------- | ------------------------------------ |
 | [Proxy Guide](docs/ops/PROXY_GUIDE.md)                              | HTTP, HTTPS and SOCKS5 proxies for upstream traffic | `docs/ops/PROXY_GUIDE.md`            |
 | [Named bulk proxy import](docs/ops/PROXY_BULK_IMPORT.md)            | Paste many named proxies at once                    | `docs/ops/PROXY_BULK_IMPORT.md`      |
@@ -2005,7 +1758,7 @@ Outbound proxies, proxy pools and egress controls. Subject: **Proxies and networ
 
 Authentication, guardrails, hardening and supply chain. Subject: **Security and compliance**.
 
-| Document                                                          | What it answers                                              | File                                      |
+| <img width="2000" height="0" alt=""> Document                     | What it answers                                              | File                                      |
 | ----------------------------------------------------------------- | ------------------------------------------------------------ | ----------------------------------------- |
 | [Security Policy](SECURITY.md)                                    | Vulnerability reporting and supported versions               | `SECURITY.md`                             |
 | [Guardrails](docs/security/GUARDRAILS.md)                         | PII, prompt-injection and modality guardrails                | `docs/security/GUARDRAILS.md`             |
@@ -2031,7 +1784,7 @@ Authentication, guardrails, hardening and supply chain. Subject: **Security and 
 
 How the system is put together and how to change it. Subject: **Architecture and internals**.
 
-| Document                                                                      | What it answers                                   | File                                                |
+| <img width="2000" height="0" alt=""> Document                                 | What it answers                                   | File                                                |
 | ----------------------------------------------------------------------------- | ------------------------------------------------- | --------------------------------------------------- |
 | [Architecture](docs/architecture/ARCHITECTURE.md)                             | System architecture, data flow and internals      | `docs/architecture/ARCHITECTURE.md`                 |
 | [Codebase Documentation](docs/architecture/CODEBASE_DOCUMENTATION.md)         | Walkthrough of what exists in the repository      | `docs/architecture/CODEBASE_DOCUMENTATION.md`       |
@@ -2050,7 +1803,7 @@ How the system is put together and how to change it. Subject: **Architecture and
 
 How work gets into the project and how releases are cut. Subject: **Contributing, quality and releases**.
 
-| Document                                                                    | What it answers                                           | File                                             |
+| <img width="2000" height="0" alt=""> Document                               | What it answers                                           | File                                             |
 | --------------------------------------------------------------------------- | --------------------------------------------------------- | ------------------------------------------------ |
 | [Contributing](CONTRIBUTING.md)                                             | Development setup and guidelines                          | `CONTRIBUTING.md`                                |
 | [Code of Conduct](CODE_OF_CONDUCT.md)                                       | Contributor Covenant                                      | `CODE_OF_CONDUCT.md`                             |
@@ -2084,9 +1837,9 @@ How work gets into the project and how releases are cut. Subject: **Contributing
 
 Notes about the image assets kept in `docs/`. Subject: **Working records**.
 
-| Document                                  | What it answers                             | File                          |
-| ----------------------------------------- | ------------------------------------------- | ----------------------------- |
-| [Flag icons](docs/assets/flags/README.md) | Country flags used by the language selector | `docs/assets/flags/README.md` |
+| Document                                  | <img width="2000" height="0" alt=""> What it answers | File                          |
+| ----------------------------------------- | ---------------------------------------------------- | ----------------------------- |
+| [Flag icons](docs/assets/flags/README.md) | Country flags used by the language selector          | `docs/assets/flags/README.md` |
 
 <br/>
 
@@ -2309,8 +2062,6 @@ A heartfelt thank-you to the people who fund OmniRoute out of their own pocket �
       </a><br/>
       <sub>💛 Active one-time sponsor</sub>
     </td>
-  </tr>
-  <tr>
     <td align="center" width="160">
       <a href="https://github.com/drewbitt">
         <img src="https://github.com/drewbitt.png?size=140" width="72" style="border-radius:50%" alt="Andrew"/><br/>
@@ -2318,6 +2069,8 @@ A heartfelt thank-you to the people who fund OmniRoute out of their own pocket �
       </a><br/>
       <sub>💛 Past monthly supporter</sub>
     </td>
+  </tr>
+  <tr>
     <td align="center" width="160">
       <a href="https://github.com/Guilsc">
         <img src="https://github.com/Guilsc.png?size=140" width="72" style="border-radius:50%" alt="Guilherme Costa"/><br/>
@@ -2346,8 +2099,6 @@ A heartfelt thank-you to the people who fund OmniRoute out of their own pocket �
       </a><br/>
       <sub>💛 Past one-time supporter</sub>
     </td>
-  </tr>
-  <tr>
     <td align="center" width="160">
       <a href="https://github.com/igormorais123">
         <img src="https://github.com/igormorais123.png?size=140" width="72" style="border-radius:50%" alt="Professor Igor Morais Vasconcelos"/><br/>
@@ -2355,6 +2106,11 @@ A heartfelt thank-you to the people who fund OmniRoute out of their own pocket �
       </a><br/>
       <sub>💛 Past one-time supporter</sub>
     </td>
+  </tr>
+</table>
+
+<table>
+  <tr>
     <td align="center" width="160">
       <a href="https://github.com/PixmaNts">
         <img src="https://github.com/PixmaNts.png?size=140" width="72" style="border-radius:50%" alt="Pixma"/><br/>
@@ -2432,6 +2188,8 @@ gh release create "v${VERSION}" --title "v${VERSION}" --generate-notes
  </picture>
 </a>
 
+</div>
+
 <br/>
 
 <div align="center">
@@ -2449,11 +2207,7 @@ gh release create "v${VERSION}" --title "v${VERSION}" --generate-notes
 
 <br/>
 
-<div align="center">
-
 ## Acknowledgments
-
-</div>
 
 OmniRoute stands on the shoulders of giants. It started as a fork of **[9router](https://github.com/decolua/9router)** and a TypeScript port of the Go project **[CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)** — and from there, every subsystem below was inspired by an open-source project that got there first. Each one shaped a concrete piece of OmniRoute. This is our thank-you to all of them. 🙏
 
