@@ -252,6 +252,18 @@ function claimLaunchSessionRetry(err: unknown, request: Request): boolean {
 }
 
 /**
+ * Model id whose token limit fills a missing `context_length`: the routed model of a
+ * `no-think/` alias, else the entry's root, else the last segment of its id.
+ */
+function contextFallbackModelId(model: any): string | undefined {
+  return (
+    catalogMetadataLookup(model)?.model ||
+    model.root ||
+    (typeof model.id === "string" ? model.id.split("/").pop() : undefined)
+  );
+}
+
+/**
  * Build unified OpenAI-compatible model catalog response.
  * Reused by `/api/v1/models` and `/api/v1` to avoid semantic drift (T09).
  *
@@ -2368,10 +2380,7 @@ async function buildUnifiedModelsResponseCore(
       if (registry?.passthroughModels) return undefined;
       if (registry?.defaultContextLength) return registry.defaultContextLength;
 
-      const modelId =
-        catalogMetadataLookup(model)?.model ||
-        model.root ||
-        (typeof model.id === "string" ? model.id.split("/").pop() : undefined);
+      const modelId = contextFallbackModelId(model);
       return modelId
         ? getTokenLimit(canonicalId, modelId, capabilityResolutionSnapshot)
         : getTokenLimit(canonicalId, null, capabilityResolutionSnapshot);
