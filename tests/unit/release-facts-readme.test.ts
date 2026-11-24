@@ -136,7 +136,7 @@ describe("README generators follow the facts snapshot", () => {
     assert.ok(flat(bumped.cascade).includes("76 routing strategies"));
     assert.ok(flat(bumped.grid).includes("live 54-factor scoring"));
     assert.ok(flat(base.grid).includes(`live ${snapshot.scoringFactors}-factor scoring`));
-    // the grid's strategy total is curated with its tiles (the title names the missing ones)
+    // The grid's strategy total counts the tiles drawn in the SVG.
     assert.deepEqual(bumped.grid.kicker, base.grid.kicker);
   });
 

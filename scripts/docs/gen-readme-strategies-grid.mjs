@@ -1,4 +1,4 @@
-// README strategies grid (18 of the 22 combo routing strategies, one animated tile each) in the
+// README strategies grid (one animated tile per public combo routing strategy) in the
 // Cheaper Inference UI Kit style (KEA-6307). The output is committed as
 // docs/diagrams/strategies-grid.svg; tests/unit/docs/readme-strategies-grid-svg.test.ts fails
 // when the committed file no longer matches this generator, so a stale picture cannot ship.
@@ -9,11 +9,8 @@
 // request dots and their windows); STRATEGIES_GRID_COPY (derived from it) is both the drawn text
 // and what the outlining step shapes. The "16-factor" claim stays in <text> because
 // scripts/check/check-docs-counts-sync.mjs reads it from the raw file; the factor count comes
-// from the facts snapshot (./readmeFacts.mjs). The strategy total (22) stays literal: the title
-// names the strategies the grid leaves out, so it is curated together with TILES. The grid
-// shows 18 of the 22 strategies by design — the README table next to it carries
-// cache-optimized, quota-weighted, expiry-first and jev; do not add or remove tiles here.
-// `--all` renders the 22-tile design alternative (EXTRA_TILES), which is not committed.
+// from the facts snapshot (./readmeFacts.mjs). A test checks tile coverage against the public
+// ROUTING_STRATEGY_VALUES list.
 import { writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { outlineSvg } from "./readme-outline.mjs";
@@ -151,6 +148,19 @@ const TILES = [
     dots: [[1, null, null]],
   },
   {
+    name: "quota-weighted",
+    caption: "split by quota and load",
+    dur: 3.6,
+    tracks: [["solid", 2.4, 0.45], ["solid", 1.2, 0.3], "faint", ["solid", 1.8, 0.38]],
+    picks: [0],
+    bars: [17.6, 8.8, 2.2, 13.2],
+    dots: [
+      [0, 0.04, 0.3],
+      [3, 0.4, 0.62],
+      [0, 0.7, 0.92],
+    ],
+  },
+  {
     name: "reset-window",
     caption: "resets soonest → use it",
     dur: 3.6,
@@ -170,6 +180,16 @@ const TILES = [
       [1, 0.05, 0.28],
       [2, 0.42, 0.62],
     ],
+  },
+  {
+    name: "expiry-first",
+    caption: "spend quota before reset",
+    dur: 3.6,
+    tracks: ["", "solid", "", ""],
+    picks: [1],
+    bars: [6.6, 17.6, 15.4, 4.4],
+    tags: ["6h", "1h!", "9d", "2h"],
+    dots: [[1, null, null]],
   },
   {
     name: "context-relay",
@@ -196,6 +216,18 @@ const TILES = [
     picks: [1],
     tags: ["8K", "200K", "32K", "128K"],
     dots: [[1, null, null, "ink", 3.4]],
+  },
+  {
+    name: "cache-optimized",
+    caption: "prefer the warm cache",
+    dur: 3.6,
+    tracks: ["", "solid", "", ""],
+    picks: [1],
+    tags: ["", "hit", "", ""],
+    dots: [
+      [1, 0.05, 0.28],
+      [1, 0.45, 0.68],
+    ],
   },
   {
     name: "lkgp",
@@ -253,47 +285,6 @@ const TILES = [
       [`M ${SLOT_X},67.5 C 92,67.5 92,91.5 ${SLOT_X},91.5`, 0.51, 0.68],
     ],
   },
-];
-
-// The four strategies the default 18-tile grid leaves to the README table. They are drawn only by
-// the full 22-tile variant (renderStrategiesGridAll, `--all`), a design alternative; the default
-// grid above stays the committed README picture.
-const EXTRA_TILES = [
-  {
-    name: "quota-weighted",
-    caption: "split by quota and load",
-    dur: 3.6,
-    tracks: [["solid", 2.4, 0.45], ["solid", 1.2, 0.3], "faint", ["solid", 1.8, 0.38]],
-    picks: [0],
-    bars: [17.6, 8.8, 2.2, 13.2],
-    dots: [
-      [0, 0.04, 0.3],
-      [3, 0.4, 0.62],
-      [0, 0.7, 0.92],
-    ],
-  },
-  {
-    name: "expiry-first",
-    caption: "spend quota before reset",
-    dur: 3.6,
-    tracks: ["", "solid", "", ""],
-    picks: [1],
-    bars: [6.6, 17.6, 15.4, 4.4],
-    tags: ["6h", "1h!", "9d", "2h"],
-    dots: [[1, null, null]],
-  },
-  {
-    name: "cache-optimized",
-    caption: "prefer the warm cache",
-    dur: 3.6,
-    tracks: ["", "solid", "", ""],
-    picks: [1],
-    tags: ["", "hit", "", ""],
-    dots: [
-      [1, 0.05, 0.28],
-      [1, 0.45, 0.68],
-    ],
-  },
   {
     name: "jev",
     caption: "opt-in: Jev picks a rank",
@@ -306,36 +297,8 @@ const EXTRA_TILES = [
   },
 ];
 
-// Full-grid order: grouped by what the strategy optimizes, with the four extra tiles beside
-// their closest relatives (quota-weighted by headroom, expiry-first by the reset pair,
-// cache-optimized by the context pair, jev last).
-const ALL_ORDER = [
-  "priority",
-  "fill-first",
-  "weighted",
-  "round-robin",
-  "p2c",
-  "least-used",
-  "random",
-  "strict-random",
-  "cost-optimized",
-  "headroom",
-  "quota-weighted",
-  "reset-window",
-  "reset-aware",
-  "expiry-first",
-  "context-relay",
-  "context-optimized",
-  "cache-optimized",
-  "lkgp",
-  "auto",
-  "fusion",
-  "pipeline",
-  "jev",
-];
-
 export const STRATEGIES_GRID_COPY = {
-  kicker: ["COMBO ROUTING · 18 OF 22 STRATEGY FLOWS"],
+  kicker: [`COMBO ROUTING · ALL ${TILES.length} STRATEGIES`],
   legend: [
     "● request → ▮ targets — each tile animates the path its strategy takes · ",
     "green outline = the pick",
@@ -375,11 +338,11 @@ function dot([where, start, end, t = "ink", r = 2.8], begin, dur) {
   );
 }
 
-function tile(T, i, rowWidths = null) {
+function tile(T, i) {
   const col = i % 6;
   const row = Math.floor(i / 6);
   // A short last row (the 22-tile grid ends with 4) is centered under the full rows.
-  const inRow = rowWidths ? rowWidths[row] : 6;
+  const inRow = Math.min(6, TILES.length - row * 6);
   const x0 = 40 + ((6 - inRow) * 189) / 2;
   const begin = n(0.22 * i);
   const dur = T.dur.toFixed(1);
@@ -442,54 +405,21 @@ function tile(T, i, rowWidths = null) {
 
 export async function renderStrategiesGrid() {
   const C = STRATEGIES_GRID_COPY;
-  return outlineSvg(
-    svgOpen({
-      viewBox: "0 0 1200 644",
-      title:
-        "Animated examples for 18 of OmniRoute's 22 combo routing strategies. The cache-optimized, quota-weighted, expiry-first and jev strategies are documented in the adjacent routing table.",
-      desc: "Animated grid of 18 routing-strategy tiles; static tracks show each flow on the first frame while a small dot repeatedly travels the path each illustrated strategy takes. Light and dark follow the viewer's color scheme.",
-    }) +
-      gridDefs("sg-grid") +
-      `  <rect class="bg" x="0" y="0" width="1200" height="644"/>\n` +
-      `  <rect x="0" y="0" width="1200" height="644" fill="url(#sg-grid)"/>\n` +
-      `  <text x="40" y="52" class="kicker">${esc(C.kicker[0])}</text>\n` +
-      `  <line x1="${afterKicker(40, C.kicker[0])}" y1="47" x2="1160" y2="47" class="rule" stroke-width="1"/>\n` +
-      `  <text x="40" y="80" class="body">${esc(C.legend[0])}<tspan style="fill:var(--ok)">${esc(C.legend[1])}</tspan></text>\n` +
-      TILES.map((t, i) => tile(t, i)).join("") +
-      "</svg>\n"
-  );
-}
-
-/** Design alternative: every public strategy (22), one tile each, in ALL_ORDER. */
-export async function renderStrategiesGridAll() {
-  const byName = new Map([...TILES, ...EXTRA_TILES].map((t) => [t.name, t]));
-  const tiles = ALL_ORDER.map((name) => {
-    const t = byName.get(name);
-    if (!t) throw new Error(`strategies-grid: no tile for ${name}`);
-    return t;
-  });
-  if (tiles.length !== RF.routingStrategies || byName.size !== tiles.length) {
-    throw new Error(
-      `strategies-grid --all: ${tiles.length} tiles for ${RF.routingStrategies} routing strategies`
-    );
-  }
-  const rows = Math.ceil(tiles.length / 6);
-  const rowWidths = Array.from({ length: rows }, (_, r) => Math.min(6, tiles.length - r * 6));
-  const H = 104 + rows * 176;
-  const kicker = `COMBO ROUTING · ALL ${tiles.length} STRATEGIES`;
+  const H = 104 + Math.ceil(TILES.length / 6) * 176;
+  const kicker = C.kicker[0];
   return outlineSvg(
     svgOpen({
       viewBox: `0 0 1200 ${H}`,
-      title: `Animated examples for all ${tiles.length} of OmniRoute's combo routing strategies: ${ALL_ORDER.join(", ")}.`,
-      desc: `Animated grid of ${tiles.length} routing-strategy tiles; static tracks show each flow on the first frame while a small dot repeatedly travels the path each strategy takes. Light and dark follow the viewer's color scheme.`,
+      title: `Animated examples for all ${TILES.length} of OmniRoute's combo routing strategies: ${C.names.join(", ")}.`,
+      desc: `Animated grid of ${TILES.length} routing-strategy tiles; static tracks show each flow on the first frame while a small dot repeatedly travels the path each strategy takes. Light and dark follow the viewer's color scheme.`,
     }) +
       gridDefs("sg-grid") +
       `  <rect class="bg" x="0" y="0" width="1200" height="${H}"/>\n` +
       `  <rect x="0" y="0" width="1200" height="${H}" fill="url(#sg-grid)"/>\n` +
       `  <text x="40" y="52" class="kicker">${esc(kicker)}</text>\n` +
       `  <line x1="${afterKicker(40, kicker)}" y1="47" x2="1160" y2="47" class="rule" stroke-width="1"/>\n` +
-      `  <text x="40" y="80" class="body">${esc(STRATEGIES_GRID_COPY.legend[0])}<tspan style="fill:var(--ok)">${esc(STRATEGIES_GRID_COPY.legend[1])}</tspan></text>\n` +
-      tiles.map((t, i) => tile(t, i, rowWidths)).join("") +
+      `  <text x="40" y="80" class="body">${esc(C.legend[0])}<tspan style="fill:var(--ok)">${esc(C.legend[1])}</tspan></text>\n` +
+      TILES.map(tile).join("") +
       "</svg>\n"
   );
 }
@@ -497,9 +427,8 @@ export async function renderStrategiesGridAll() {
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   const i = process.argv.indexOf("--out");
   if (i >= 0 && !process.argv[i + 1]) throw new Error("--out requires a path");
-  const all = process.argv.includes("--all");
   const out = i >= 0 ? process.argv[i + 1] : "docs/diagrams/strategies-grid.svg";
-  const svg = all ? await renderStrategiesGridAll() : await renderStrategiesGrid();
+  const svg = await renderStrategiesGrid();
   writeFileSync(out, svg);
   console.log(`strategies-grid → ${out} (${Math.round(Buffer.byteLength(svg) / 1024)} KB)`);
 }

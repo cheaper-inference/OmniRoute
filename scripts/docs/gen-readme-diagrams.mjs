@@ -26,6 +26,7 @@ import { renderReadmePromisePillars } from "./gen-readme-promise-pillars.mjs";
 import { renderReadmeWhyPainFix } from "./gen-readme-why-pain-fix.mjs";
 import { renderTierCascade } from "./gen-readme-tier-cascade.mjs";
 import { renderStrategiesGrid } from "./gen-readme-strategies-grid.mjs";
+import { renderAutoRouterStrategies } from "./gen-readme-auto-router-strategies.mjs";
 import { renderResilienceLayers } from "./gen-readme-resilience-layers.mjs";
 import { renderComparisonTable } from "./gen-readme-comparison-table.mjs";
 import { renderPrivacyLocal } from "./gen-readme-privacy-local.mjs";
@@ -63,6 +64,11 @@ export const README_DIAGRAMS = [
     name: "strategies-grid",
     render: renderStrategiesGrid,
     out: "docs/diagrams/strategies-grid.svg",
+  },
+  {
+    name: "auto-router-strategies",
+    render: renderAutoRouterStrategies,
+    out: "docs/diagrams/auto-router-strategies.svg",
   },
   {
     name: "resilience-layers",

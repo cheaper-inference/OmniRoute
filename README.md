@@ -199,7 +199,7 @@ Every section of this README, grouped by what you want to do.
 
 </div>
 
-<img src="./docs/diagrams/works-zero-config.svg" width="100%" alt="Three steps: install and start OmniRoute, connect an eligible provider with your own account or API key, then point your tool at localhost:20128/v1 using an OmniRoute API key and model auto. Routing depends on available eligible connections and provider limits."/>
+<img src="./docs/diagrams/works-zero-config.svg" width="100%" alt="Four steps to use OmniRoute. Install with npm install -g omniroute, run omniroute, connect a provider and create an API key in the dashboard, then call http://localhost:20128/v1 with model auto."/>
 
 ```bash
 # After connecting a provider, create your OmniRoute key in Dashboard → API Keys:
@@ -329,7 +329,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="Animated examples for 18 of the 22 combo routing strategies, one tile per strategy: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. quota-weighted, expiry-first, cache-optimized and jev are not animated; the tables below describe all 22."/>
+<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="Animated grid showing how all 22 public OmniRoute combo routing strategies select, order, or chain targets."/>
 
 > A **combo** is a list of models that OmniRoute routes across automatically. When quota runs out, a provider fails or a model is locked, the request moves to the next eligible, healthy target.
 
@@ -385,8 +385,6 @@ For a judge that merges the panel's answers into one, use a `fusion` combo (belo
 #### If you need a specific kind of model
 
 Combine a category with a tier: `auto/coding:fast`, `auto/coding:free`, `auto/reasoning:pro`, `auto/vision`. If nothing you have connected matches, the request fails with HTTP 503 instead of silently widening the pool. Full list: [Auto-Combo guide](./docs/routing/AUTO-COMBO.md).
-
-##
 
 ### Or build your own: 22 routing strategies
 
@@ -466,7 +464,7 @@ The scorer uses 16 declared factors, including health, quota, cost, latency, tas
 
 Both make more than one upstream call per request.
 
-##
+<img src="./docs/diagrams/auto-router-strategies.svg" width="100%" alt="Eight auto router strategies with example picks and aliases grouped. Nadir and decision fall back to rules when their deciders are unavailable."/>
 
 ### Resilience is built in: 3 independent layers
 
