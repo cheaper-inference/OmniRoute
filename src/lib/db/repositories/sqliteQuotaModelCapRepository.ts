@@ -93,6 +93,7 @@ function setModelCap(cap: ModelCap): void {
 
 export const sqliteQuotaModelCapRepository: QuotaModelCapRepository = {
   find: async (poolId, apiKeyId, model) => getModelCap(poolId, apiKeyId, model),
+  listForApiKey: async (poolId, apiKeyId) => listModelCapsForApiKey(poolId, apiKeyId),
   upsert: async (cap) => setModelCap(cap),
 };
 

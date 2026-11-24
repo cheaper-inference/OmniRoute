@@ -40,6 +40,8 @@ export interface QuotaGroupRepository {
 /** Per-(pool, API key, model) budget caps. */
 export interface QuotaModelCapRepository {
   find(poolId: string, apiKeyId: string, model: string): Promise<ModelCap | null>;
+  /** Caps of one API key in one pool, model ascending. */
+  listForApiKey(poolId: string, apiKeyId: string): Promise<ModelCap[]>;
   /** Inserts or replaces value and unit for the (pool, key, model) triple. */
   upsert(cap: ModelCap): Promise<void>;
 }

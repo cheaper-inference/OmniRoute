@@ -109,6 +109,15 @@ test("model cap and schedule facades stay synchronous and share data with the re
   assert.deepEqual(await modelCaps.find("p", "k", "m"), cap);
   await modelCaps.upsert({ ...cap, capValue: 3 });
   assert.deepEqual(synchronous(capsFacade.getModelCap("p", "k", "m")), { ...cap, capValue: 3 });
+  await modelCaps.upsert({ ...cap, model: "a" });
+  assert.deepEqual(
+    synchronous(capsFacade.listModelCapsForApiKey("p", "k")),
+    await modelCaps.listForApiKey("p", "k")
+  );
+  assert.deepEqual(
+    capsFacade.listModelCapsForApiKey("p", "k").map((c) => c.model),
+    ["a", "m"]
+  );
 
   const input = {
     id: "s",

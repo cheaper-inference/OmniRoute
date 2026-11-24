@@ -115,6 +115,29 @@ export function registerQuotaDefinitionRepositoryConformance(
     assert.equal(await modelCaps.find("p", "other", "m"), null);
   });
 
+  test("model cap repository: lists one key's caps in one pool, model ascending", async () => {
+    const harness = await createHarness();
+    await harness.reset();
+    const { modelCaps } = harness;
+    const cap = (poolId: string, apiKeyId: string, model: string, capValue: number) => ({
+      poolId,
+      apiKeyId,
+      model,
+      capValue,
+      capUnit: "requests" as const,
+    });
+
+    assert.deepEqual(await promised(modelCaps.listForApiKey("p", "k")), []);
+    await modelCaps.upsert(cap("p", "k", "zeta", 1));
+    await modelCaps.upsert(cap("p", "k", "alpha", 2));
+    await modelCaps.upsert(cap("p", "other", "beta", 3));
+    await modelCaps.upsert(cap("q", "k", "gamma", 4));
+    assert.deepEqual(await promised(modelCaps.listForApiKey("p", "k")), [
+      cap("p", "k", "alpha", 2),
+      cap("p", "k", "zeta", 1),
+    ]);
+  });
+
   test("schedule repository: whole-set replace, resolution order and field round-trip", async () => {
     const harness = await createHarness();
     await harness.reset();
