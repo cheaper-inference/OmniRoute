@@ -1967,8 +1967,7 @@ async function handleSingleModelChat(
   let accountFallbacks = 0;
   let selectedConnectionPlan: string | null = null;
   let sameAccountRetries = 0;
-  // PROXY_REEGRESS_ON_QUOTA_429: re-sends through another pool member, per request.
-  let egressRetries = 0;
+  let egressRetries = 0; // PROXY_REEGRESS_ON_QUOTA_429 (see sameAccountEgressRetry.ts)
   const egressTriedKeys = new Set<string>();
   let pendingEgress: reEgress.PendingEgress | null = null;
   let routingWaitMs = 0;
@@ -2915,10 +2914,7 @@ async function handleSingleModelChat(
         continue;
       }
 
-      // PROXY_REEGRESS_ON_QUOTA_429: a per-IP 429 through a pool member is re-sent with the same
-      // account through a member not tried yet, before the account is marked. Only reached with
-      // a failed result, so no response byte went to the client; a pool with nothing new to
-      // offer (one member, all tried or set aside) falls through to the handling below.
+      // Per-IP 429 through a pool member: same account, untried member (sameAccountEgressRetry.ts).
       const reEgressTo = await reEgress.nextReEgress({
         status: result.status,
         upstreamStatus: appliedProxySink.upstreamStatus,
@@ -2935,10 +2931,7 @@ async function handleSingleModelChat(
       if (reEgressTo) {
         egressRetries += 1;
         sameAccountRetries += 1;
-        log.info(
-          "PROXY",
-          `${provider}/${model} per-IP 429 through a pool member — re-sending through another member (${egressRetries})`
-        );
+        log.info("PROXY", `${provider}/${model} per-IP 429, re-egress #${egressRetries}`);
         pendingEgress = { connectionId: credentials.connectionId, proxyInfo: reEgressTo.proxyInfo };
         preselectedCredentials = credentials;
         continue;
