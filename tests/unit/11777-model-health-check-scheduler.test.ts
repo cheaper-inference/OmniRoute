@@ -307,3 +307,193 @@ test("start/stop scheduler arms and clears its timers", () => {
   // A second stop is a harmless no-op.
   scheduler.stopModelHealthCheckScheduler();
 });
+
+// --- #21062 review: unattended hiding must not follow connection-level failures ---
+
+type RunnerResult = Parameters<typeof scheduler.mapSingleModelTestResult>[0];
+
+/** The exact shape the runner's generic upstream-error branch returns (no isTransient). */
+function runnerHttpError(statusCode: number, error: string): RunnerResult {
+  return {
+    modelId: "prov/m",
+    status: "error",
+    latencyMs: 12,
+    statusCode,
+    httpStatus: statusCode,
+    error,
+  };
+}
+
+const applyDeps = () => {
+  const hidden = new Set<string>();
+  return {
+    hidden,
+    isHidden: (_p: string, m: string) => hidden.has(m),
+    setHidden: (_p: string, m: string, v: boolean) => {
+      if (v) hidden.add(m);
+      else hidden.delete(m);
+    },
+  };
+};
+
+for (const [code, message] of [
+  [503, "upstream unavailable"],
+  [502, "bad gateway"],
+  [500, "internal error"],
+  [401, "invalid api key"],
+  [402, "payment required"],
+  [403, "forbidden"],
+] as const) {
+  test(`runner-shaped ${code} outcome never hides a model`, () => {
+    const outcome = scheduler.mapSingleModelTestResult(runnerHttpError(code, message));
+    const deps = applyDeps();
+    const action = scheduler.applyHealthCheckOutcome(
+      `prov-mapped-${code}`,
+      "m",
+      outcome,
+      deps,
+      "conn-a"
+    );
+    assert.equal(action, "skipped");
+    assert.equal(deps.hidden.has("m"), false);
+    assert.equal(marks.isHiddenByHealthCheck(`prov-mapped-${code}`, "m"), false);
+  });
+}
+
+test("a thrown runner error (no upstream status, httpStatus 500) never hides a model", () => {
+  const outcome = scheduler.mapSingleModelTestResult({
+    modelId: "prov/m",
+    status: "error",
+    latencyMs: 3,
+    httpStatus: 500,
+    error: "fetch failed",
+  });
+  const deps = applyDeps();
+  assert.equal(
+    scheduler.applyHealthCheckOutcome("prov-thrown", "m", outcome, deps, "c"),
+    "skipped"
+  );
+  assert.equal(deps.hidden.size, 0);
+});
+
+test("runner-shaped model-level failures (404 / 400) still hide", () => {
+  for (const code of [404, 400]) {
+    const outcome = scheduler.mapSingleModelTestResult(runnerHttpError(code, "model not found"));
+    const deps = applyDeps();
+    const provider = `prov-model-level-${code}`;
+    assert.equal(scheduler.applyHealthCheckOutcome(provider, "m", outcome, deps, "c"), "hidden");
+    assert.equal(deps.hidden.has("m"), true);
+  }
+});
+
+test("a provider outage (every probe 503) hides nothing and stops the pass early", async () => {
+  const down = scheduler.mapSingleModelTestResult(runnerHttpError(503, "upstream unavailable"));
+  const models = ["a", "b", "c", "d", "e"];
+  const deps = makeDeps({ a: down, b: down, c: down, d: down, e: down }, new Set(), models);
+  const result = await scheduler.runHealthCheckForConnection(conn("prov-outage"), deps);
+
+  assert.deepEqual(result.hidden, []);
+  assert.deepEqual(deps.setCalls, []);
+  assert.equal(result.stoppedEarly, "connection_level_failures");
+  assert.equal(result.tested, classification.CONSECUTIVE_CONNECTION_FAILURE_STOP_THRESHOLD);
+  assert.equal(marks.getHealthCheckHiddenModelIds("prov-outage").size, 0);
+});
+
+test("an expired key (every probe 401) hides nothing and stops the pass early", async () => {
+  const unauthorized = scheduler.mapSingleModelTestResult(runnerHttpError(401, "invalid api key"));
+  const deps = makeDeps({ a: unauthorized, b: unauthorized, c: unauthorized, d: { status: "ok" } });
+  const result = await scheduler.runHealthCheckForConnection(conn("prov-expired"), deps);
+
+  assert.equal(result.stoppedEarly, "connection_level_failures");
+  assert.deepEqual(result.hidden, []);
+  assert.equal(deps.probed.includes("d"), false);
+});
+
+test("mixed-class or interrupted connection-level failures do not stop the pass", async () => {
+  const s503: ProbeOutcome = { status: "error", statusCode: 503 };
+  const s401: ProbeOutcome = { status: "error", statusCode: 401 };
+  const deps = makeDeps({
+    a: s503,
+    b: s401,
+    c: s503,
+    d: { status: "ok" },
+    e: s503,
+    f: s503,
+    g: { status: "ok" },
+  });
+  const result = await scheduler.runHealthCheckForConnection(conn("prov-mixed"), deps);
+  assert.equal(result.stoppedEarly, undefined);
+  assert.equal(result.tested, 7);
+});
+
+test("a genuine model-level failure still hides next to connection-level ones", async () => {
+  const deps = makeDeps({
+    gone: { status: "error", statusCode: 404, error: "model not found" },
+    flaky: { status: "error", statusCode: 503 },
+  });
+  const result = await scheduler.runHealthCheckForConnection(conn("prov-both"), deps);
+  assert.deepEqual(result.hidden, ["gone"]);
+  assert.equal(deps.hidden.has("flaky"), false);
+});
+
+// --- ownership is per connection ---
+
+test("a connection restores only what its own probe hid", async () => {
+  const provider = "prov-multi";
+  const bad: ProbeOutcome = { status: "error", statusCode: 404, error: "no access" };
+  const shared = new Set<string>();
+
+  const hideByA = makeDeps({ m: bad }, shared);
+  const a = { id: "conn-A", provider };
+  const b = { id: "conn-B", provider };
+  await scheduler.runHealthCheckForConnection(a, hideByA);
+  assert.equal(shared.has("m"), true);
+  assert.equal(marks.isHiddenByHealthCheck(provider, "m", "conn-A"), true);
+  assert.equal(marks.isHiddenByHealthCheck(provider, "m", "conn-B"), false);
+
+  // The healthy connection B passes the same model: it must NOT flip A's hide.
+  const passByB = makeDeps({ m: { status: "ok" } }, shared);
+  const resultB = await scheduler.runHealthCheckForConnection(b, passByB);
+  assert.deepEqual(resultB.restored, []);
+  assert.deepEqual(passByB.setCalls, []);
+  assert.equal(shared.has("m"), true);
+  assert.equal(marks.isHiddenByHealthCheck(provider, "m", "conn-A"), true);
+
+  // A itself recovering restores it.
+  const passByA = makeDeps({ m: { status: "ok" } }, shared);
+  const resultA = await scheduler.runHealthCheckForConnection(a, passByA);
+  assert.deepEqual(resultA.restored, ["m"]);
+  assert.equal(shared.has("m"), false);
+  assert.equal(marks.isHiddenByHealthCheck(provider, "m"), false);
+});
+
+test("a second connection failing an already-hidden model does not steal ownership", async () => {
+  const provider = "prov-no-steal";
+  const bad: ProbeOutcome = { status: "error", statusCode: 404 };
+  const shared = new Set<string>();
+  await scheduler.runHealthCheckForConnection(
+    { id: "conn-A", provider },
+    makeDeps({ m: bad }, shared)
+  );
+  await scheduler.runHealthCheckForConnection(
+    { id: "conn-B", provider },
+    makeDeps({ m: bad }, shared)
+  );
+  assert.equal(marks.isHiddenByHealthCheck(provider, "m", "conn-A"), true);
+  assert.equal(marks.isHiddenByHealthCheck(provider, "m", "conn-B"), false);
+});
+
+test("legacy unowned marks (bare id array) are still restorable by any connection", async () => {
+  const provider = "prov-legacy";
+  core
+    .getDbInstance()
+    .prepare("INSERT OR REPLACE INTO key_value (namespace, key, value) VALUES (?, ?, ?)")
+    .run("modelHealthAutoHidden", provider, JSON.stringify(["old-model"]));
+  assert.equal(marks.isHiddenByHealthCheck(provider, "old-model"), true);
+  assert.equal(marks.isHiddenByHealthCheck(provider, "old-model", "any-conn"), true);
+
+  const deps = makeDeps({ "old-model": { status: "ok" } }, new Set(["old-model"]));
+  const result = await scheduler.runHealthCheckForConnection({ id: "any-conn", provider }, deps);
+  assert.deepEqual(result.restored, ["old-model"]);
+  assert.equal(marks.getHealthCheckHiddenModelIds(provider).size, 0);
+});

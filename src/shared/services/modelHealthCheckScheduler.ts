@@ -5,13 +5,15 @@
  * (`providerSpecificData.autoHealthCheck === true`) and keeps `GET /v1/models`
  * honest without an operator babysitting "Test all models":
  *
- *   - a hard, non-transient failure hides the model and records that the health
- *     check hid it (`modelHealthAutoHidden` marks);
- *   - a passing probe restores a model ONLY when the health check hid it. A model
- *     the user hid (no mark, or the user touched it afterwards and the mark was
- *     cleared) is never un-hidden;
- *   - rate limits, timeouts, transient errors, quota exhaustion and skipped probes
- *     change nothing.
+ *   - a hard, model-level failure (e.g. 404 / 400) hides the model and records which
+ *     connection's probe hid it (`modelHealthAutoHidden` marks);
+ *   - a passing probe restores a model ONLY when that same connection's health check
+ *     hid it. A model the user hid (no mark, or the user touched it afterwards and
+ *     the mark was cleared) or another connection hid is never un-hidden;
+ *   - rate limits, timeouts, transient errors, quota exhaustion, skipped probes and
+ *     connection-level failures (401/402/403, 5xx, thrown runner errors) change
+ *     nothing: an expired key or a provider outage must not blank a catalog;
+ *   - a pass stops early after a run of same-class connection-level failures.
  *
  * Probes run in-process through `runSingleModelTest()` with the connection id, so
  * they go through the same per-connection rate limiter as live traffic and need no
@@ -35,7 +37,10 @@ import {
   SLOW_PROBE_PROVIDERS,
   isBotBlockedOutcome,
   isHealthyOutcome,
-  isHideWorthyFailure,
+  isSchedulerHideWorthyFailure,
+  advanceConnectionFailureStreak,
+  CONSECUTIVE_CONNECTION_FAILURE_STOP_THRESHOLD,
+  type ConnectionFailureStreak,
   type ProbeOutcome,
 } from "@/lib/api/modelHealthClassification";
 import {
@@ -65,7 +70,7 @@ export interface ConnectionHealthCheckResult {
   tested: number;
   hidden: string[];
   restored: string[];
-  stoppedEarly?: "consecutive_rate_limits" | "consecutive_bot_blocks";
+  stoppedEarly?: "consecutive_rate_limits" | "consecutive_bot_blocks" | "connection_level_failures";
 }
 
 /** Injected seams — production defaults below, tests pass fakes. */
@@ -112,6 +117,7 @@ export function mapSingleModelTestResult(result: SingleModelTestResult): ProbeOu
   return {
     status: result.status === "ok" ? "ok" : result.status === "slow" ? "slow" : "error",
     ...(result.statusCode !== undefined ? { statusCode: result.statusCode } : {}),
+    ...(result.httpStatus !== undefined ? { httpStatus: result.httpStatus } : {}),
     ...(result.error !== undefined ? { error: result.error } : {}),
     ...(result.rateLimited === true ? { rateLimited: true } : {}),
     ...(result.isTransient === true ? { isTransient: true } : {}),
@@ -153,17 +159,20 @@ async function buildDefaultDeps(): Promise<HealthCheckDeps> {
  * tests; the ownership rule lives here. Ownership is read live from the marks
  * table on every call, so a manual hide/unhide that lands while a long pass is
  * running (and clears the mark) is respected instead of being overwritten.
+ * Marks are per connection: visibility is stored per provider/model, so a
+ * connection restores only what its own probe hid.
  */
 export function applyHealthCheckOutcome(
   provider: string,
   modelId: string,
   outcome: ProbeOutcome,
-  deps: Pick<HealthCheckDeps, "isHidden" | "setHidden">
+  deps: Pick<HealthCheckDeps, "isHidden" | "setHidden">,
+  connectionId?: string
 ): HealthCheckAction {
   const currentlyHidden = deps.isHidden(provider, modelId);
 
   if (isHealthyOutcome(outcome)) {
-    const ownedByHealthCheck = isHiddenByHealthCheck(provider, modelId);
+    const ownedByHealthCheck = isHiddenByHealthCheck(provider, modelId, connectionId);
     // Restore only what the health check itself hid. A user-hidden model has no mark.
     if (currentlyHidden && ownedByHealthCheck) {
       deps.setHidden(provider, modelId, false);
@@ -177,15 +186,16 @@ export function applyHealthCheckOutcome(
     return "unchanged";
   }
 
-  if (isHideWorthyFailure(outcome)) {
+  if (isSchedulerHideWorthyFailure(outcome)) {
     // Already hidden (by the user or by us): leave ownership as it is.
     if (currentlyHidden) return "unchanged";
     deps.setHidden(provider, modelId, true);
-    markHiddenByHealthCheck(provider, modelId);
+    markHiddenByHealthCheck(provider, modelId, connectionId);
     return "hidden";
   }
 
-  // Rate-limited, timeout, transient, quota or skipped: not evidence either way.
+  // Rate-limited, timeout, transient, quota, skipped or connection-level (auth/5xx):
+  // not evidence about this model either way.
   return "skipped";
 }
 
@@ -229,7 +239,7 @@ function applySafely(
   result: ConnectionHealthCheckResult
 ): void {
   try {
-    const action = applyHealthCheckOutcome(conn.provider, modelId, outcome, deps);
+    const action = applyHealthCheckOutcome(conn.provider, modelId, outcome, deps, conn.id);
     if (action === "hidden") result.hidden.push(modelId);
     if (action === "restored") result.restored.push(modelId);
   } catch (error: unknown) {
@@ -237,6 +247,25 @@ function applySafely(
       `failed to update visibility for ${conn.provider}/${modelId}: ${sanitizeErrorMessage(error)}`
     );
   }
+}
+
+/**
+ * Early-stop rules for one connection's pass. The same-class connection-level run
+ * (every probe 401, or every probe 5xx) means the key or the provider is the
+ * problem, not the individual models: stop probing instead of hammering it.
+ */
+function pickStopReason(
+  rateLimits: number,
+  botBlocks: number,
+  failureStreak: ConnectionFailureStreak,
+  slowProbe: boolean
+): ConnectionHealthCheckResult["stoppedEarly"] {
+  if (rateLimits >= CONSECUTIVE_RATE_LIMIT_STOP_THRESHOLD) return "consecutive_rate_limits";
+  if (slowProbe && botBlocks >= CONSECUTIVE_BOT_STOP_THRESHOLD) return "consecutive_bot_blocks";
+  if (failureStreak.count >= CONSECUTIVE_CONNECTION_FAILURE_STOP_THRESHOLD) {
+    return "connection_level_failures";
+  }
+  return undefined;
 }
 
 /** Probe every model of one opted-in connection and apply the results. */
@@ -255,6 +284,7 @@ export async function runHealthCheckForConnection(
   const slowProbe = SLOW_PROBE_PROVIDERS.has(conn.provider);
   let consecutiveRateLimits = 0;
   let consecutiveBotBlocks = 0;
+  let failureStreak: ConnectionFailureStreak = { failureClass: null, count: 0 };
 
   for (const modelId of modelIds) {
     if (slowProbe && result.tested > 0 && SLOW_PROBE_DELAY_MS > 0) {
@@ -267,14 +297,18 @@ export async function runHealthCheckForConnection(
     if (isBotBlockedOutcome(outcome)) consecutiveBotBlocks += 1;
     else if (outcome.status === "ok") consecutiveBotBlocks = 0;
 
+    failureStreak = advanceConnectionFailureStreak(failureStreak, outcome);
+
     applySafely(conn, modelId, outcome, deps, result);
 
-    if (consecutiveRateLimits >= CONSECUTIVE_RATE_LIMIT_STOP_THRESHOLD) {
-      result.stoppedEarly = "consecutive_rate_limits";
-      break;
-    }
-    if (slowProbe && consecutiveBotBlocks >= CONSECUTIVE_BOT_STOP_THRESHOLD) {
-      result.stoppedEarly = "consecutive_bot_blocks";
+    const stop = pickStopReason(
+      consecutiveRateLimits,
+      consecutiveBotBlocks,
+      failureStreak,
+      slowProbe
+    );
+    if (stop) {
+      result.stoppedEarly = stop;
       break;
     }
   }
