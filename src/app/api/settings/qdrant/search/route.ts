@@ -28,10 +28,11 @@ export async function POST(request: NextRequest) {
   const { query, topK } = validation.data;
 
   try {
-    const result = await searchSemanticMemory(query, topK);
+    const result = await searchSemanticMemory(query, topK, { allowDisabled: true });
     return NextResponse.json({
       ok: result.ok,
       results: result.results ?? [],
+      ...(result.error ? { error: result.error } : {}),
     });
   } catch (err: unknown) {
     const message = sanitizeErrorMessage(err instanceof Error ? err.message : String(err));
