@@ -45,6 +45,10 @@ interface CacheConfigResponse {
   semanticCacheEmbeddingProvider?: string;
   semanticCacheEmbeddingModel?: string;
   semanticCacheEmbeddingDimension?: number;
+  /** Layer that wins for the effective dimension: env override, stored setting, or default. */
+  semanticCacheEmbeddingDimensionSource?: "env" | "db" | "default";
+  /** Raw stored value, when the DB has one (the env override may mask it). */
+  semanticCacheEmbeddingDimensionConfigured?: number | null;
   semanticCacheEmbeddingBaseUrl?: string;
   semanticCacheEmbeddingApiKey?: string;
   semanticCacheRedisUrl?: string;
@@ -86,6 +90,14 @@ export default function CacheSettingsTab() {
   const [semProvider, setSemProvider] = useState("lemonade");
   const [semModel, setSemModel] = useState("harrier-oss-v1-0.6b");
   const [semDimension, setSemDimension] = useState<number | undefined>(1024);
+  // The runtime resolves the dimension env-first (env → DB → default); the source decides
+  // whether the field may be persisted at all — writing an environment override into the DB
+  // would hide the real stored value behind the same number.
+  const [semDimensionSource, setSemDimensionSource] = useState<"env" | "db" | "default">("default");
+  // True once the operator typed a dimension: a catalog model without `dimensions` metadata
+  // must not silently overwrite that choice.
+  const [dimensionUserSet, setDimensionUserSet] = useState(false);
+  const [detectedDimension, setDetectedDimension] = useState<number | null>(null);
   const [semBaseUrl, setSemBaseUrl] = useState("");
   const [semApiKey, setSemApiKey] = useState("");
   const [semRedisUrl, setSemRedisUrl] = useState("");
@@ -106,6 +118,9 @@ export default function CacheSettingsTab() {
     ok: boolean;
     latencyMs?: number;
     dimensions?: number;
+    configuredDimensions?: number;
+    dimensionSource?: "env" | "db" | "default";
+    dimensionMismatch?: boolean;
     resolvedBaseUrl?: string;
     error?: string;
   } | null>(null);
@@ -157,6 +172,13 @@ export default function CacheSettingsTab() {
         }
         if (typeof config.semanticCacheEmbeddingDimension === "number") {
           setSemDimension(config.semanticCacheEmbeddingDimension);
+        }
+        if (
+          config.semanticCacheEmbeddingDimensionSource === "env" ||
+          config.semanticCacheEmbeddingDimensionSource === "db" ||
+          config.semanticCacheEmbeddingDimensionSource === "default"
+        ) {
+          setSemDimensionSource(config.semanticCacheEmbeddingDimensionSource);
         }
         if (typeof config.semanticCacheEmbeddingBaseUrl === "string") {
           setSemBaseUrl(config.semanticCacheEmbeddingBaseUrl);
@@ -242,7 +264,9 @@ export default function CacheSettingsTab() {
     (m) => m.rawId === semModel || m.id === semModel
   );
 
-  // Sync dimensions when model selection changes
+  // Sync dimensions when model selection changes. Only a model that really declares its
+  // vector size may set the field: catalog-absent models (e.g. a local EmbeddingGemma at 768
+  // dims) report no `dimensions`, and the previous value must survive that.
   const handleModelChange = (modelIdOrRaw: string) => {
     setSemModel(modelIdOrRaw);
     const m = availableModelsForProvider.find(
@@ -250,6 +274,8 @@ export default function CacheSettingsTab() {
     );
     if (m?.dimensions) {
       setSemDimension(m.dimensions);
+      setDimensionUserSet(false);
+      setDetectedDimension(null);
     }
     setTestResult(null);
   };
@@ -262,10 +288,19 @@ export default function CacheSettingsTab() {
       setSemModel(firstModel.rawId || firstModel.id);
       if (firstModel.dimensions) {
         setSemDimension(firstModel.dimensions);
+        setDimensionUserSet(false);
+        setDetectedDimension(null);
       }
     }
     setTestResult(null);
   };
+
+  const dimensionHint =
+    semDimensionSource === "env"
+      ? t("semanticCacheDimensionEnvHint", { count: semDimension ?? 0 })
+      : detectedDimension !== null && detectedDimension === semDimension
+        ? t("semanticCacheDimensionDetected", { count: detectedDimension })
+        : t("semanticCacheEmbeddingDimensionHint");
 
   // Save Semantic Cache Config
   const saveSemanticCache = async () => {
@@ -281,7 +316,11 @@ export default function CacheSettingsTab() {
       semanticCacheMaxSize: Number(semMaxSize),
       semanticCacheEmbeddingProvider: semProvider,
       semanticCacheEmbeddingModel: semModel,
-      semanticCacheEmbeddingDimension: semDimension ? Number(semDimension) : null,
+      // The environment layer outranks the DB, so an env-derived value is never persisted: it
+      // would conceal the stored setting behind a number the UI cannot change.
+      ...(semDimensionSource === "env"
+        ? {}
+        : { semanticCacheEmbeddingDimension: semDimension ? Number(semDimension) : null }),
       semanticCacheEmbeddingBaseUrl: semBaseUrl.trim() || selectedProviderOption?.baseUrl || null,
       semanticCacheEmbeddingApiKey: semApiKey.trim() || null,
       semanticCacheRedisUrl: semRedisUrl.trim() || null,
@@ -298,6 +337,7 @@ export default function CacheSettingsTab() {
 
       if (!res.ok) throw new Error(`Save failed with status ${res.status}`);
 
+      if (semDimensionSource !== "env") setSemDimensionSource("db");
       setSemMessage({ type: "success", text: t("semanticCacheSaveSuccess") });
     } catch (err) {
       console.error("Failed to save semantic cache settings:", err);
@@ -327,6 +367,22 @@ export default function CacheSettingsTab() {
 
       const data = await res.json();
       setTestResult(data);
+      if (data?.ok && typeof data.dimensions === "number") {
+        setDetectedDimension(data.dimensions);
+        const configured =
+          typeof data.configuredDimensions === "number" ? data.configuredDimensions : semDimension;
+        if (typeof configured === "number" && configured !== data.dimensions) {
+          console.warn(
+            `[semantic-cache] embedding dimension mismatch: configured ${configured} but the ` +
+              `endpoint returned ${data.dimensions}`
+          );
+        }
+        // Offer the probe result when the operator has not pinned a dimension and the
+        // environment does not override the stored value anyway.
+        if (!dimensionUserSet && semDimensionSource !== "env") {
+          setSemDimension(data.dimensions);
+        }
+      }
     } catch {
       setTestResult({ ok: false, error: t("semanticCacheConnectionError") });
     } finally {
@@ -452,11 +508,6 @@ export default function CacheSettingsTab() {
 
                   {/* Model Metadata Badges */}
                   <div className="flex flex-wrap gap-2 mt-2">
-                    {semDimension ? (
-                      <Badge variant="primary" size="sm">
-                        {t("semanticCacheDimensions", { count: semDimension })}
-                      </Badge>
-                    ) : null}
                     {selectedModelOption?.maxTokens ? (
                       <Badge variant="info" size="sm">
                         {t("semanticCacheMaxTokens", { count: selectedModelOption.maxTokens })}
@@ -473,6 +524,29 @@ export default function CacheSettingsTab() {
                         })}
                       </Badge>
                     ) : null}
+                  </div>
+
+                  {/* Vector size carries no catalog metadata for many local models (a catalog
+                      miss left 1024 stuck for a 768-dim model), so it is editable and its
+                      effective source is spelled out instead of inferred. */}
+                  <div className="mt-3">
+                    <NumberInput
+                      id="sem-dimension"
+                      label={t("semanticCacheEmbeddingDimension")}
+                      hint={dimensionHint}
+                      min={1}
+                      max={65536}
+                      step={1}
+                      precision={0}
+                      value={semDimension ?? null}
+                      onValueChange={(value) => {
+                        setSemDimension(value ?? undefined);
+                        setDimensionUserSet(true);
+                        setDetectedDimension(null);
+                      }}
+                      inputClassName="w-32"
+                      disabled={semSaving || semDimensionSource === "env"}
+                    />
                   </div>
                 </div>
               </div>
@@ -682,6 +756,18 @@ export default function CacheSettingsTab() {
                   )}
                 </div>
               )}
+
+              {/* Mismatch Guard — surfaced, never enforced: the configured value is kept. */}
+              {testResult?.ok &&
+                testResult.dimensionMismatch &&
+                (dimensionUserSet || semDimensionSource === "env") && (
+                  <p className="text-xs text-warning">
+                    {t("semanticCacheDimensionMismatch", {
+                      detected: testResult.dimensions ?? 0,
+                      configured: testResult.configuredDimensions ?? 0,
+                    })}
+                  </p>
+                )}
 
               {/* Clear Message */}
               {clearMessage && <p className="text-xs text-text-muted italic">{clearMessage}</p>}

@@ -81,7 +81,7 @@ describe("cache settings with real Chinese catalogs", () => {
       modelOptions.find((option) => option.label === "text-embedding-3-small（1,536 维）")?.value
     ).toBe(model.rawId);
     expect(screen.getByText("使用已配置的连接（默认 URL）")).toBeTruthy();
-    expect(screen.getByText("维度：1,536")).toBeTruthy();
+    expect(screen.getByLabelText("嵌入维度")).toHaveProperty("value", "1536");
     expect(screen.getByText("词元上限：8,191")).toBeTruthy();
     expect(screen.getByText("输入：文本和图像")).toBeTruthy();
     fireEvent.click(screen.getByRole("radio", { name: "Redis 向量存储" }));
