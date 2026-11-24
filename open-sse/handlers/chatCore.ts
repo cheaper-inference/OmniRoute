@@ -268,6 +268,7 @@ import {
   redactPendingBody,
 } from "@/lib/guardrails/videoBridgeSnapshotRedaction";
 import {
+  normalizeGeminiPromptCacheMode,
   shouldPreserveCacheControl,
   resolveConnectionCacheOverride,
 } from "../utils/cacheControlPolicy.ts";
@@ -955,7 +956,7 @@ async function handleChatCoreInner({
   }
   // Consolidate settings reads — fetch once, reuse throughout the request
   const settings = cachedSettings ?? (await getCachedSettings());
-  const geminiPromptCacheMode = settings.geminiPromptCacheMode === "implicit" ? "implicit" : "off";
+  const geminiPromptCacheMode = normalizeGeminiPromptCacheMode(settings.geminiPromptCacheMode);
   const isScopedGeminiCacheTarget =
     (provider === "antigravity" || provider === "agy") &&
     effectiveModel
