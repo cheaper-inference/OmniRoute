@@ -10,6 +10,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { HERO_COPY } from "../../../scripts/docs/gen-readme-hero.mjs";
 import { buildFreeTierBudgetCopy } from "../../../scripts/docs/gen-readme-free-tier-budget.mjs";
+import { RF } from "../../../scripts/docs/readmeFacts.mjs";
 import {
   locateFreeTokenClaims,
   locateGatedClaims,
@@ -75,6 +76,7 @@ type Section = { name: string; text: string };
 
 const README = readFileSync("README.md", "utf8");
 const FREE_TIERS = readFileSync("docs/reference/FREE_TIERS.md", "utf8");
+const GUIDE = readFileSync("docs/getting-started/FREE-TIERS-GUIDE.md", "utf8");
 const snapshot = loadFactsSnapshot() as { code: Record<string, unknown> };
 const code = snapshot.code;
 const BIG = String(code.rowSumTotalLabel);
@@ -137,10 +139,18 @@ const section = (name: string) => {
   return found.text;
 };
 
+// Figures that are legitimately not claims, with the reason. A new one needs an entry here.
+const NOT_A_CLAIM: Record<string, string> = {
+  "+~24M": "the one-time deposit boost (OpenRouter $10), reported apart from every headline",
+  "+~6M":
+    "the TL;DR cell of the regional-identity row; the gate reads the same figure in that row's sentence",
+};
+
 function assertEveryFigureClassified(text: string, where: string) {
   const claims = [...locateFreeTokenClaims(text), ...locateGatedClaims(text)] as Claim[];
   for (const m of text.matchAll(/~\d+(?:[.,]\d+)?\s?[MB]\b/g)) {
     const start = m.index + 1;
+    if (NOT_A_CLAIM[text.slice(m.index - 1, m.index + m[0].length)]) continue;
     const covered = claims.some((c) => start >= c.start - 2 && start < c.end + 1);
     assert.ok(
       covered,
@@ -310,4 +320,80 @@ test("stable anchors exist and every table-of-contents link resolves", () => {
 
 test("the AgentRouter referral link stays (D53)", () => {
   assert.ok(README.includes("agentrouter.org/register?aff="));
+});
+
+// --- Tasks 12 and 13: the reference page and the guide -----------------------------------------
+
+const ftSections = freeTierSections(FREE_TIERS, "FREE_TIERS.md");
+const ftSection = (name: string) => {
+  const found = ftSections.find((x) => x.name === name);
+  assert.ok(found, `FREE_TIERS section ${name} not found`);
+  return found.text;
+};
+
+test("FREE_TIERS.md states the method under stable anchors", () => {
+  assert.match(FREE_TIERS, /^## What counts$/m);
+  assert.match(FREE_TIERS, /^## How we count$/m);
+  assert.ok(README.includes("docs/reference/FREE_TIERS.md#how-we-count"));
+});
+
+test("the method page shows the three figures", () => {
+  const how = ftSection("How we count");
+  const claims = locateFreeTokenClaims(how) as Claim[];
+  const kind = (text: string) => claims.find((c) => c.text === text)?.key;
+  assert.equal(kind(BIG), "rowSum:total");
+  assert.equal(kind(LIVE), "rowSum:live");
+  assert.ok(how.includes(`${LIVE} summed per live row`));
+  assert.equal(kind(REAL), "headline:steady");
+  assert.ok(how.includes(`${RF.rowSumRetiredPct} from offers that no longer exist`));
+  assert.equal(checkRowSumPlacement(FREE_TIERS, { methodPage: true }).ok, true);
+});
+
+test("the old per-row paragraph and the ceiling are gone", () => {
+  for (const s of ["~7.4B", "~1.47B", "not CI-gated", "~10B"])
+    assert.ok(!FREE_TIERS.includes(s), s);
+});
+
+test("every ~N figure in the FREE_TIERS sections is classified", () => {
+  assert.ok(ftSections.length >= 3, ftSections.map((x) => x.name).join(", "));
+  for (const { name, text } of ftSections) assertEveryFigureClassified(text, `FREE_TIERS ${name}`);
+});
+
+test("historical figures are spelled out", () => {
+  let outside = FREE_TIERS;
+  for (const { text } of ftSections) outside = outside.replace(text, "");
+  assert.doesNotMatch(outside, /~?\d\.\d{2}B\b/);
+  assert.doesNotMatch(GUIDE, /~?\d\.\d{2}B\b/);
+});
+
+test("the per-provider table lists only live pools with a tilde", () => {
+  const at = FREE_TIERS.indexOf("## Per-provider free-tier");
+  const table = upToHeading(FREE_TIERS, at, 1);
+  const pools = (code.publicFreeTierBudget as { pools: Array<{ provider: string }> }).pools.map(
+    (p) => p.provider
+  );
+  const rows = table.split("\n").filter((l) => /^\| `/.test(l));
+  assert.ok(rows.length > pools.length);
+  for (const row of rows.filter((l) => l.includes("~"))) {
+    const id = /^\| `([^`]+)`/.exec(row)?.[1] ?? "";
+    assert.ok(pools.includes(id), `${id} carries a tilde but has no live pool`);
+  }
+  for (const id of pools) {
+    assert.ok(
+      rows.some((l) => l.startsWith(`| \`${id}\``)),
+      `pool ${id} has no row`
+    );
+  }
+});
+
+test("the gate's required sentences survive", () => {
+  assert.match(
+    FREE_TIERS,
+    /\d+ entr(?:y|ies) (?:that )?(?:carry|carries) an? independently documented hard stop/i
+  );
+  assert.match(
+    FREE_TIERS,
+    /\d+ entr(?:y|ies) (?:that )?(?:carry|carries) a (?:prompt-)?training disclosure/i
+  );
+  assert.match(FREE_TIERS, /\+~\d+M behind regional identity verification/);
 });

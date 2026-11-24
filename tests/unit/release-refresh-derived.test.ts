@@ -137,10 +137,10 @@ describe("argument parsing", () => {
 describe("mirror propagation (conservative)", () => {
   it("finds whole numbers only", () => {
     assert.deepEqual(
-      findNumberOccurrences("393 a3930 1,393 v393 3.393 393.5 (393) ~1.62B", "393"),
+      findNumberOccurrences("393 a3930 1,393 v393 3.393 393.5 (393) ~4.56B", "393"),
       [0, 34]
     );
-    assert.deepEqual(findNumberOccurrences("~1.62B free", "1.62"), [1]);
+    assert.deepEqual(findNumberOccurrences("~4.56B free", "4.56"), [1]);
   });
 
   it("carries a number when source and mirror hold the same occurrences", () => {

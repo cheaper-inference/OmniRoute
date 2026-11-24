@@ -47,9 +47,9 @@ const isDigit = (ch) => ch !== undefined && ch >= "0" && ch <= "9";
 const isWordish = (ch) => ch !== undefined && /[0-9A-Za-z_]/.test(ch);
 
 /**
- * PURE. Start offsets of `literal` (a plain number such as "393" or "1.62") where it stands as a
+ * PURE. Start offsets of `literal` (a plain number such as "393" or "4.56") where it stands as a
  * whole number: not glued to a letter/digit before it, not the tail of "3.8.54" or "1,393", and
- * not the head of a longer number ("3930", "393.5"). A unit letter after it ("1.62B") is fine.
+ * not the head of a longer number ("3930", "393.5"). A unit letter after it ("4.56B") is fine.
  */
 export function findNumberOccurrences(text, literal) {
   const out = [];
