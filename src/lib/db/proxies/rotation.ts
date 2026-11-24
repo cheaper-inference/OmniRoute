@@ -6,7 +6,7 @@
 // dependency back on ../proxies.ts — mutators that also need to bump the registry
 // generation counter (addProxyToScopePool, removeProxyFromScopePool,
 // setScopeRotationStrategy) stay in ../proxies.ts and import the pure helpers here.
-import { createHash, randomInt } from "crypto";
+import { randomInt } from "crypto";
 import { getDbInstance } from "../core";
 import { pickByLatency } from "../proxyLatency";
 import {
@@ -672,11 +672,30 @@ function sessionMemberIdentity(row: unknown, index: number): string {
 }
 
 /**
+ * 53-bit non-cryptographic string hash (cyrb53). Rendezvous selection only needs an even,
+ * deterministic spread over a handful of pool members, not a cryptographic digest, and the
+ * value never leaves the process.
+ */
+function rendezvousScore(text: string): number {
+  let h1 = 0xdeadbeef;
+  let h2 = 0x41c6ce57;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text.charCodeAt(i);
+    h1 = Math.imul(h1 ^ ch, 2654435761);
+    h2 = Math.imul(h2 ^ ch, 1597334677);
+  }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  return 4294967296 * (2097151 & h2) + (h1 >>> 0);
+}
+
+/**
  * `session` strategy: rendezvous (highest-random-weight) hash of the session key over the
  * allowed members (every member when `eligible` is null). Each member scores
- * sha256(sessionKey NUL identity); the highest score wins. The pick depends on neither the
- * position nor the cursor and writes nothing; a member set aside moves only the conversations
- * it was serving, and they return to it once it is eligible again.
+ * rendezvousScore(sessionKey NUL identity); the highest score wins, ties go to the earlier
+ * member. The pick depends on neither the position nor the cursor and writes nothing; a
+ * member set aside moves only the conversations it was serving, and they return to it once
+ * it is eligible again.
  */
 export function pickSessionCandidate<T>(
   candidates: T[],
@@ -685,11 +704,11 @@ export function pickSessionCandidate<T>(
 ): T {
   const allowed = eligible ?? candidates.map((_, index) => index);
   let best = allowed[0];
-  let bestScore = "";
+  let bestScore = -1;
   for (const index of allowed) {
-    const score = createHash("sha256")
-      .update(`${sessionKey}\u0000${sessionMemberIdentity(candidates[index], index)}`)
-      .digest("hex");
+    const score = rendezvousScore(
+      `${sessionKey}\u0000${sessionMemberIdentity(candidates[index], index)}`
+    );
     if (score > bestScore) {
       best = index;
       bestScore = score;
