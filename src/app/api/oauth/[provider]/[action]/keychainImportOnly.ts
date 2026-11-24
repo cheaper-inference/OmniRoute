@@ -1,4 +1,7 @@
 import { NextResponse } from "next/server";
+import { KEYCHAIN_IMPORT_ONLY_PROVIDERS } from "@/shared/constants/keychainImportOnly";
+
+export { KEYCHAIN_IMPORT_ONLY_PROVIDERS };
 
 /**
  * Providers that have NO browser OAuth flow at all — their credentials are read
@@ -12,8 +15,6 @@ import { NextResponse } from "next/server";
  * Extracted from the OAuth route handler into this leaf module so the route
  * stays under its frozen file-size cap (#6155 base-red follow-up).
  */
-export const KEYCHAIN_IMPORT_ONLY_PROVIDERS = new Set(["zed"]);
-
 /** GET/POST OAuth actions that don't apply to keychain-import-only providers. */
 export const OAUTH_FLOW_ACTIONS = new Set([
   "authorize",

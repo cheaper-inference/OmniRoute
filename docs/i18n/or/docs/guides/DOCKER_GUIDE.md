@@ -27,14 +27,9 @@
 
 ---
 
-## ଶୀଘ୍ର ଚାଳନ
+## ଶୀଘ୍ର ଚଲାନ୍ତୁ।
 
-> **ଗୋଟିଏ କମାଣ୍ଡରେ ସ୍ୱୟଂ-ହୋଷ୍ଟ କରିବେ?**
-> [ସ୍ୱୟଂ-ହୋଷ୍ଟ ଗାଇଡ୍](../getting-started/SELF_HOST_GUIDE.md) ଦେଖନ୍ତୁ —
-> `docker compose -f docker-compose.selfhost.yml up -d` (ପ୍ରକାଶିତ ଇମେଜ୍ +
-> Redis, କେବଳ loopback, କୌଣସି ପ୍ରୋଫାଇଲ୍ ବିକଳ୍ପ ନାହିଁ)। ନିମ୍ନରେ ଥିବା ଶୀଘ୍ର ଚାଳନଟି
-> ଅନ୍ୟତ୍ର ପୂର୍ବରୁ Redis ଚଳାଉଥିବା ବ୍ୟବହାରକାରୀଙ୍କ ପାଇଁ
-> ଏକକ-କଣ୍ଟେନର୍ ପଥ ଅଟେ।
+> **ଗୋଟିଏ ନିର୍ଦ୍ଦେଶରେ ସ୍ୱୟଂ ହୋଷ୍ଟ?** [ସେଲ୍ଫ୍ ହୋଷ୍ଟ ଗାଇଡ୍](../getting-started/SELF_HOST_GUIDE.md) — `docker compose -f docker-compose.selfhost.yml up -d` ଦେଖନ୍ତୁ (ପ୍ରକାଶିତ ପ୍ରତିଛବି + Redis, କେବଳ ଲୁପ୍ ବ୍ୟାକ୍, କ profile ଣସି ପ୍ରୋଫାଇଲ୍ ପସନ୍ଦ ନାହିଁ)। ନିମ୍ନରେ ଦ୍ରୁତ ଚାଲିବା ହେଉଛି ଉପଭୋକ୍ତାମାନଙ୍କ ପାଇଁ ଏକକ-ଧାରଣକାରୀ ପଥ ଯାହାକି ପୂର୍ବରୁ Redis ଅନ୍ୟତ୍ର ଚଲାଇଥାଏ।
 
 ```bash
 docker run -d \
@@ -43,13 +38,13 @@ docker run -d \
   --stop-timeout 40 \
   -p 20128:20128 \
   -v omniroute-data:/app/data \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
-## ପରିବେଶ ଫାଇଲ୍ ସହିତ
+## ପରିବେଶ ଫାଇଲ୍ ସହିତ।
 
 ```bash
-# ପ୍ରଥମେ .env କପି ଏବଂ ସମ୍ପାଦନା କରନ୍ତୁ
+# Copy and edit .env first
 cp .env.example .env
 
 docker run -d \
@@ -59,7 +54,7 @@ docker run -d \
   --env-file .env \
   -p 20128:20128 \
   -v omniroute-data:/app/data \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
 ## Docker Compose
@@ -237,18 +232,18 @@ docker compose -f docker-compose.prod.yml down
 
 ପ୍ରଡକ୍ସନ୍ ଷ୍ଟାକ୍ଟି ଡେଭ୍ compose ସହିତ ସମାନ୍ତରାଳ ଭାବେ ଚାଲେ (ଭିନ୍ନ କଣ୍ଟେନର୍ ନାମ, ପୋର୍ଟ ଏବଂ ଭଲ୍ୟୁମ୍), ତେଣୁ ପ୍ରଡକ୍ସନ୍ ଚାଲୁ ରହିଥିବାବେଳେ ଆପଣ ସ୍ଥାନୀୟ ଭାବେ ପୁନରାବୃତ୍ତିମୂଳକ ବିକାଶ ଜାରି ରଖିପାରିବେ।
 
-## Dockerfile ପର୍ଯ୍ୟାୟଗୁଡ଼ିକ
+## ଡକର୍ଫାଇଲ୍ ପର୍ଯ୍ୟାୟ।
 
-ରିପୋଜିଟୋରୀଟି ଏକ ବହୁ-ପର୍ଯ୍ୟାୟ Dockerfile (`Dockerfile`) ସହିତ ଆସେ। ଚାରିଟି ପର୍ଯ୍ୟାୟ ଉପଲବ୍ଧ କରାଯାଇଛି; ଆପଣଙ୍କ ବ୍ୟବହାର ପାଇଁ ଉପଯୁକ୍ତ `target` ବାଛନ୍ତୁ।
+ସଂଗ୍ରହାଳୟ ଏକ ମଲ୍ଟି-ଷ୍ଟେଜ୍ ଡକର୍ଫାଇଲ୍ (`Dockerfile`) ପଠାଇଥାଏ। ଚାରୋଟି ପର୍ଯ୍ୟାୟ ଉନ୍ମୋଚିତ ହୋଇଛି; ଆପଣଙ୍କର ବ୍ୟବହାର ମାମଲା ପାଇଁ ସଠିକ୍ `target` ବାଛନ୍ତୁ।
 
-| ପର୍ଯ୍ୟାୟ      | ମୂଳ ଇମେଜ୍             | ଉଦ୍ଦେଶ୍ୟ                                                                                                                                                                                                                                                                                                |
-| ------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `builder`     | `node:26-trixie-slim` | ନିର୍ଭରତାଗୁଡ଼ିକ ସଂସ୍ଥାପନ କରେ (`npm ci --legacy-peer-deps`) ଏବଂ `npm run build` ଚଲାଏ (ଡିଫଲ୍ଟ ଭାବରେ Turbopack — ନିମ୍ନରେ ଥିବା ବିଲ୍ଡ-ସମୟ ସମ୍ବଳଗୁଡ଼ିକ ଦେଖନ୍ତୁ)                                                                                                                                                |
-| `runner-base` | `node:26-trixie-slim` | Next.js-ର ସ୍ୱତନ୍ତ୍ର ଆଉଟପୁଟ୍ ସହିତ ପ୍ରଡକ୍ସନ୍ ରନ୍ଟାଇମ୍। **କୌଣସି ପ୍ରଦାତା CLI ବଣ୍ଡଲ୍ କରାଯାଇନାହିଁ।**                                                                                                                                                                                                          |
-| `runner-cli`  | `runner-base`         | `git`, `docker.io`, `docker-compose` ଏବଂ ଗ୍ଲୋବାଲ୍ CLI-ଗୁଡ଼ିକ ଯୋଡ଼େ: `@openai/codex`, `@anthropic-ai/claude-code`, `droid`, `openclaw`। **ଏଜେଣ୍ଟିକ୍ କାର୍ଯ୍ୟପ୍ରବାହ ପାଇଁ ଏହା ବାଛନ୍ତୁ।**                                                                                                                    |
-| `runner-web`  | `runner-base`         | ୱେବ୍-ସେସନ୍ ପ୍ରଦାତାମାନଙ୍କ ପାଇଁ Playwright + ଏକ Chromium ବ୍ରାଉଜର୍ (`--with-deps`) ଯୋଡ଼େ: `gemini-web`, `claude-web`, `claude-turnstile`। **ଆପଣ ସେହି ପ୍ରଦାତାଗୁଡ଼ିକ ବ୍ୟବହାର କରୁଥିଲେ ଏହା ବାଛନ୍ତୁ** — ଏହା ବିନା ସାଧାରଣ ଇମେଜ୍ ଅନୁରୋଧ ସମୟରେ ବିଫଳ ହୁଏ (ରିଲିଜ୍ ଚ୍ୟାନେଲ୍ଗୁଡ଼ିକ ଅଧୀନରେ ଥିବା `-web` ଟିପ୍ପଣୀ ଦେଖନ୍ତୁ)। |
+| ପର୍ଯ୍ୟାୟ      | ମୂଳ ପ୍ରତିଛବି।         | ଉଦ୍ଦେଶ୍ୟ                                                                                                                                                                                                                                                                                                     |
+| ------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `builder`     | `node:26-trixie-slim` | Installs deps (`npm ci --legacy-peer-deps`) and runs `npm run build` (Turbopack by default — see Build-time resources below)                                                                                                                                                                                 |
+| `runner-base` | `node:26-trixie-slim` | Next.js ଷ୍ଟାଣ୍ଡାଲୋନ ଆଉଟପୁଟ୍ ସହିତ ଉତ୍ପାଦନ ରନ୍ ସମୟ।** କ pr ଣସି ପ୍ରଦାନକାରୀ CLIs ବଣ୍ଡଲ୍ ହୋଇନାହିଁ।**                                                                                                                                                                                                              |
+| `runner-cli`  | `runner-base`         | `git`, `docker.io`, `docker-compose` ଏବଂ ଗ୍ଲୋବାଲ୍ CLIs ଯୋଗ କରେ: `@openai/codex`, `@anthropic-ai/claude-code`, `droid`, `openclaw`।** ଏଜେଣ୍ଟିକ୍ ୱାର୍କଫ୍ଲୋ ପାଇଁ ଏହାକୁ ବାଛନ୍ତୁ।**                                                                                                                               |
+| `runner-web`  | `runner-base`         | ୱେବ୍ ଅଧିବେଶନ ପ୍ରଦାନକାରୀଙ୍କ ପାଇଁ Playwright + ଏକ କ୍ରୋମିୟମ୍ ବ୍ରାଉଜର୍ (`--with-deps`) ଯୋଗ କରେ: `gemini-web`, `claude-web`, `claude-turnstile`।** ଯେତେବେଳେ ଆପଣ ସେହି ପ୍ରଦାନକାରୀଙ୍କୁ ବ୍ୟବହାର କରନ୍ତି ଏହାକୁ ବାଛନ୍ତୁ।** — ସାଧା ପ୍ରତିଛବି ଏହା ବିନା ଅନୁରୋଧ ସମୟରେ ବିଫଳ ହୁଏ (ରିଲିଜ୍ ଚ୍ୟାନେଲ ଅନ୍ତର୍ଗତ `-web` ନୋଟ୍ ଦେଖନ୍ତୁ)। |
 
-ନିର୍ଦ୍ଦିଷ୍ଟ ଏକ ଟାର୍ଗେଟ୍କୁ ହସ୍ତକୃତ ଭାବରେ ବିଲ୍ଡ କରନ୍ତୁ:
+ହସ୍ତକୃତ ଭାବରେ ଏକ ନିର୍ଦ୍ଦିଷ୍ଟ ଲକ୍ଷ୍ୟ ନିର୍ମାଣ କରନ୍ତୁ:
 
 ```bash
 docker build --target runner-base -t omniroute:base .
@@ -256,20 +251,19 @@ docker build --target runner-cli  -t omniroute:cli  .
 docker build --target runner-web  -t omniroute:web  .
 ```
 
-### ବିଲ୍ଡ-ସମୟ ସମ୍ବଳଗୁଡ଼ିକ
+### ନିର୍ମାଣ ସମୟ ଉତ୍ସଗୁଡିକ।
 
-ତିନୋଟି ବିଲ୍ଡ ଆର୍ଗୁମେଣ୍ଟ୍ `builder` ପର୍ଯ୍ୟାୟର ସମ୍ବଳ ବ୍ୟୟକୁ ନିୟନ୍ତ୍ରଣ କରେ। ସେଗୁଡ଼ିକ କେବଳ ବିଲ୍ଡ-ସମୟ ପାଇଁ —
-`OMNIROUTE_MEMORY_MB` (ନିମ୍ନରେ) ଏକ ପୃଥକ ରନ୍ଟାଇମ୍ ନିୟନ୍ତ୍ରକ।
+ତିନୋଟି ବିଲ୍ଡ ଆର୍ଗସ୍ `builder` ପର୍ଯ୍ୟାୟ ମୂଲ୍ୟ କ’ଣ ନିୟନ୍ତ୍ରଣ କରେ। ସେଗୁଡ଼ିକ ବିଲ୍ଡ-ଟାଇମ୍ କେବଳ — `OMNIROUTE_MEMORY_MB` (ନିମ୍ନରେ) ଏକ ଅଲଗା, ଚାଲିବା ସମୟ।
 
-| ବିଲ୍ଡ ଆର୍ଗୁମେଣ୍ଟ୍           | ଡିଫଲ୍ଟ | ପ୍ରଭାବ                                                                                                   |
-| --------------------------- | ------ | -------------------------------------------------------------------------------------------------------- |
-| `OMNIROUTE_USE_TURBOPACK`   | `0`    | `0` webpack ସହିତ ବିଲ୍ଡ କରେ: ସର୍ବାଧିକ ମେମୋରି ବ୍ୟବହାର କମ୍, କିନ୍ତୁ ଧୀର। `1` Turbopack ବ୍ୟବହାରକୁ ସକ୍ରିୟ କରେ। |
-| `OMNIROUTE_BUILD_MEMORY_MB` | `6144` | ଆରମ୍ଭ କରାଯାଇଥିବା `next build` ପାଇଁ V8 heap ସୀମା (`--max-old-space-size`)।                                |
-| `OMNIROUTE_BUILD_WORKERS`   | `2`    | `CIRCLE_NODE_TOTAL`କୁ ମୂଲ୍ୟ ପ୍ରଦାନ କରେ; ପୃଷ୍ଠା-ଡାଟା ସଂଗ୍ରହ ପାଇଁ Next `workers = N - 1` ନିର୍ଦ୍ଧାରଣ କରେ।   |
+| ଆର୍ଗ ନିର୍ମାଣ କରନ୍ତୁ।        | ଡିଫଲ୍ଟ। | ପ୍ରଭାବ                                                                                         |
+| --------------------------- | ------- | ---------------------------------------------------------------------------------------------- |
+| `OMNIROUTE_USE_TURBOPACK`   | `0`     | `0` ୱେବପ୍ୟାକ୍ ସହିତ ନିର୍ମାଣ କରେ: ନିମ୍ନ ଶିଖର ସ୍ମୃତି, ଧୀର। `1` Turbopack କୁ ବାଛିଥାଏ।              |
+| `OMNIROUTE_BUILD_MEMORY_MB` | `6144`  | Spawned `next build` ପାଇଁ V8 ହିପ୍ ଛାତ (`--max-old-space-size`)।                                |
+| `OMNIROUTE_BUILD_WORKERS`   | `2`     | `CIRCLE_NODE_TOTAL` ଫିଡ୍ କରେ; ପରବର୍ତ୍ତୀ ପୃଷ୍ଠା-ତଥ୍ୟ ସଂଗ୍ରହ ପାଇଁ `workers = N - 1` ପ୍ରାପ୍ତ କରେ। |
 
-ଏକ ବଡ଼ builder-ରେ `OMNIROUTE_BUILD_WORKERS` ହେଉଛି ବୃଦ୍ଧି କରିବାକୁ ଥିବା ପାରାମିଟର୍ ଏବଂ ସୀମିତ ସମ୍ବଳର ବିଲ୍ଡ `✓ Compiled successfully` **ପରେ** ବନ୍ଦ ହୋଇଗଲେ ପ୍ରଥମେ ଏହାକୁ ସନ୍ଦେହ କରିବା ଉଚିତ। ପ୍ରତ୍ୟେକ ପୃଷ୍ଠା-ଡାଟା worker ଏକ ସ୍ୱତନ୍ତ୍ର ପ୍ରକ୍ରିୟା, ଏବଂ ମୂଳ `next build` ମଧ୍ୟ ସେହିପରି; ଏକ ସକ୍ରିୟ VPS ପୁନରୁତ୍ପାଦନରେ (issue #7518) `NODE_OPTIONS` heap ଫ୍ଲାଗ୍ଠାରୁ ସ୍ୱାଧୀନ ଭାବରେ ପ୍ରତ୍ୟେକ ପ୍ରକ୍ରିୟାର ସର୍ବାଧିକ RSS ~4.5 GB ମାପ କରାଯାଇଥିଲା (Turbopack V8 heap ବାହାରେ native/Rust ମେମୋରିରେ କମ୍ପାଇଲ୍ କରେ)। `2`-ର ଡିଫଲ୍ଟ (→ 1 worker, ମୋଟ 2ଟି ପ୍ରକ୍ରିୟା) ପ୍ରକାଶନ ପାଇପ୍ଲାଇନ୍ ବ୍ୟବହାର କରୁଥିବା 16 GB / 4 vCPU GitHub-hosted runner ପାଇଁ ନିର୍ଦ୍ଧାରିତ। `8`ରେ (→ 7 workers) ସେହି runner-ର ମେମୋରି ଶେଷ ହୋଇଗଲା ଏବଂ buildkit `ResourceExhausted: ... cannot allocate memory` ସହିତ ପଦକ୍ଷେପଟିକୁ ବିଫଳ କଲା; ପ୍ରତି-ପ୍ରକ୍ରିୟା RSSକୁ ଅନୁମାନ କରିବା ପରିବର୍ତ୍ତେ ସିଧାସଳଖ ମାପିବା ପରେ `3` (→ 2 workers) ମଧ୍ୟ ଉପଲବ୍ଧ ମେମୋରିରେ ଫିଟ୍ ହେଲା ନାହିଁ। `tests/unit/docker-build-memory-budget.test.ts` ମାପ କରାଯାଇଥିବା ମୂଲ୍ୟ ଆଧାରରେ ହିସାବ କରେ ଏବଂ ଯେକୌଣସି ନିୟନ୍ତ୍ରକ runner-ର କ୍ଷମତା ଅତିକ୍ରମ କଲେ ବିଫଳ ହୁଏ।
+`OMNIROUTE_BUILD_WORKERS` ହେଉଛି ଏକ ବଡ ବିଲଡର୍ ଉପରେ ଉଠାଇବା ଏବଂ ଏକ ବାଧ୍ୟତାମୂଳକ ନିର୍ମାଣ ମରିଗଲେ ସନ୍ଦେହ କରିବା।** ପରେ** `✓ Compiled successfully` ପ୍ରତ୍ୟେକ ପୃଷ୍ଠା-ତଥ୍ୟ କର୍ମକର୍ତ୍ତା ଏହାର ନିଜସ୍ୱ ପ୍ରକ୍ରିୟା, ଏବଂ ପିତାମାତା `next build` ନିଜେ ମଧ୍ୟ; ଏକ ଜୀବନ୍ତ VPS ପ୍ରଜନନ (ଇସ୍ୟୁ #7518) ପ୍ରତ୍ୟେକ ପ୍ରକ୍ରିୟାର ଶିଖ RSS ~ 4.5 GB ରେ `NODE_OPTIONS` ହିପ୍ ପତାକା ଠାରୁ ସ୍ independent ାଧୀନ ଭାବରେ ମାପ କଲା (V8 ରାଶି ବାହାରେ native/Rust ମେମୋରୀରେTurbopack ସଙ୍କଳନ କରେ)। `2` ର ଡିଫଲ୍ଟ (→ 1 କର୍ମୀ, ସମୁଦାୟ 2 ପ୍ରକ୍ରିୟା) 16 GB / 4 vCPU GitHub- ହୋଷ୍ଟ ରନର୍ସ ପ୍ରକାଶନ ପାଇପଲାଇନ ବ୍ୟବହାର ପାଇଁ ଆକାରିତ। `8` ରେ (→ 7 କର୍ମୀ) ସେହି ରନର୍ ସ୍ମୃତିର ସରିଗଲା ଏବଂ ବିଲ୍ଡକିଟ୍ `ResourceExhausted: ... cannot allocate memory` ସହିତ ପଦକ୍ଷେପକୁ ବିଫଳ କଲା; `3` (→ 2 କର୍ମୀ) ତଥାପି ପ୍ରତି ପ୍ରକ୍ରିୟା RSS ଅନୁମାନ କରାଯିବା ପରିବର୍ତ୍ତେ ସିଧାସଳଖ ମାପ କରାଯିବା ପରେ ମଧ୍ୟ ଫିଟ୍ ହୋଇନଥିଲା। `tests/unit/docker-build-memory-budget.test.ts` ମାପ ହୋଇଥିବା ଚିତ୍ର ବିରୁଦ୍ଧରେ ଗାଣିତିକ କରେ ଏବଂ ଯଦି କ kn ଣସି ଗାଡ଼ି ଚାଳକକୁ ବ gr ାଏ ତେବେ ବିଫଳ ହୁଏ।
 
-Turbopack V8 heap-ର **ବାହାରେ** ଅବସ୍ଥିତ native Rust ମେମୋରିରେ କମ୍ପାଇଲ୍ କରେ, ତେଣୁ `OMNIROUTE_BUILD_MEMORY_MB` ଏହାକୁ ସୀମିତ କରେନାହିଁ। ମେମୋରି ସୀମା ଥିବା ଏକ ହୋଷ୍ଟ୍ରେ ବିଲ୍ଡଟି କୌଣସି ତ୍ରୁଟି ସନ୍ଦେଶ ବିନା OOM killer ଦ୍ୱାରା SIGKILL କରାଯାଏ — ଏହା କେବଳ `Creating an optimized production build` ମଝିରେ ବନ୍ଦ ହୋଇଯାଏ, ଯାହା ମେମୋରି ଶେଷ ହେବା ପରିବର୍ତ୍ତେ ହ୍ୟାଙ୍ଗ୍ ହୋଇଥିବା ଭଳି ଦେଖାଯାଏ। ଏହି କାରଣରୁ `npm run dev` / `npm run build`ରେ Turbopack କୋଡ୍ ଡିଫଲ୍ଟ ହୋଇଥିଲେ ମଧ୍ୟ `Dockerfile` webpack (`OMNIROUTE_USE_TURBOPACK=0`)କୁ ଡିଫଲ୍ଟ କରେ: କୌଣସି ବିଲ୍ଡ ଆର୍ଗୁମେଣ୍ଟ୍ ବିନା ଏକ ସାଧାରଣ `docker build .` (ଯାହା Railway ଏବଂ ଅନ୍ୟ ଏକ-କ୍ଲିକ୍ ହୋଷ୍ଟ୍ଗୁଡ଼ିକ ଚଲାନ୍ତି) ମେମୋରି-ସୀମିତ builder-ରେ ନିରବରେ ବନ୍ଦ ହେବା ଉଚିତ୍ ନୁହେଁ। ପ୍ରକାଶିତ ଇମେଜ୍ଗୁଡ଼ିକ ପୂର୍ବରୁ `docker-publish.yml`ରେ ସ୍ପଷ୍ଟ ଭାବରେ `OMNIROUTE_USE_TURBOPACK=0` ପାସ୍ କରନ୍ତି। ପ୍ରଚୁର RAM ଥିବା builder-ରେ ଦ୍ରୁତ ବିଲ୍ଡ ପାଇଁ Turbopack ସକ୍ରିୟ କରନ୍ତୁ:
+Turbopack ବାସ କରୁଥିବା ଦେଶୀ ରୁଷ୍ଟ ସ୍ମୃତିରେ ସଂକଳନ କରେ।** ବାହାରେ** V8 ରାଶି, ତେଣୁ `OMNIROUTE_BUILD_MEMORY_MB` ଏହାକୁ ବାନ୍ଧେ ନାହିଁ। ଏକ ମେମୋରୀ ଛାତ ସହିତ ଏକ ହୋଷ୍ଟରେ, OOM କିଲର୍ ଦ୍ୱାରା SIGKILLed ହେଉଛି — କ error ଣସି ତ୍ରୁଟି ପାଠ୍ୟ ବିନା ଏହା କେବଳ `Creating an optimized production build` କୁ ବନ୍ଦ କରିଦିଏ, ଯାହା ମେମୋରୀ ବାହାରେ ଏକ ହ୍ୟାଙ୍ଗ ପରି ପ read େ। ସେଥିପାଇଁ `Dockerfile` ୱେବପ୍ୟାକ୍ (`OMNIROUTE_USE_TURBOPACK=0`) କୁ ଡିଫଲ୍ଟ କରେ, `npm run dev` / `npm run build` ପରି, ଯେଉଁଠାରେ Turbopack ହେଉଛି କୋଡ୍ ଡିଫଲ୍ଟ: ବିନା ବିଲ୍ଡ ଆର୍ଗସ୍ ସହିତ ଏକ ଖାଲି `docker build .` (ରେଲୱେ ଏବଂ ଅନ୍ୟ ଏକ କ୍ଲିକ୍ ହୋଷ୍ଟଗୁଡିକ ଚଲାଇଥାଏ) ଏକ ସ୍ମୃତି-କ୍ୟାପ୍ ବିଲ୍ଡର୍ ଉପରେ ଚୁପଚାପ୍ ମରିବା ଉଚିତ୍ ନୁହେଁ। ପ୍ରକାଶିତ ପ୍ରତିଛବିଗୁଡ଼ିକ `docker-publish.yml` ରେ ସ୍ପଷ୍ଟ ଭାବରେ `OMNIROUTE_USE_TURBOPACK=0` ପାସ୍ କରିସାରିଛି। ପ୍ରଚୁର RAM ସହିତ ଏକ ବିଲଡର୍ ଉପରେ, ଏକ ଶୀଘ୍ର ନିର୍ମାଣ ପାଇଁ Turbopack କୁ ବାଛ:
 
 ```bash
 docker build --target runner-base \
@@ -277,46 +271,46 @@ docker build --target runner-base \
   -t omniroute:base .
 ```
 
-`webpackBuildWorker` ସକ୍ରିୟ ଅଛି, ତେଣୁ `next build` ଏକ ମୂଳ ପ୍ରକ୍ରିୟା **ଏବଂ** ଏକ worker ପ୍ରକ୍ରିୟା ଚଲାଏ ଏବଂ ପ୍ରତ୍ୟେକଟି ପୃଥକ ଭାବରେ `OMNIROUTE_BUILD_MEMORY_MB`କୁ ସମ୍ମାନ କରେ। କଣ୍ଟେନର୍ ସୀମାକୁ ସେହି ମୂଲ୍ୟର ପ୍ରାୟ ଦୁଇଗୁଣାଠାରୁ ଅଧିକ ରଖନ୍ତୁ, କେବଳ ଥରେ ନୁହେଁ।
+`webpackBuildWorker` ସକ୍ଷମ ହୋଇଛି, ତେଣୁ `next build` ଏକ ପିତାମାତା ଚଲାଇଥାଏ।** ଏବଂ** ଏକ ଶ୍ରମିକ ପ୍ରକ୍ରିୟା ଏବଂ ପ୍ରତ୍ୟେକ `OMNIROUTE_BUILD_MEMORY_MB` ପୃଥକ ଭାବରେ ସମ୍ମାନ କରନ୍ତି। କଣ୍ଟେନର ଛାତକୁ ସେହି ମୂଲ୍ୟର ପ୍ରାୟ ଦୁଇଗୁଣ ଉପରେ ଆକାର କରନ୍ତୁ, ଥରେ ନୁହେଁ।
 
-ଏହି ଟ୍ରିରେ ମାପ କରାଯାଇଛି (`--target runner-base`, `OMNIROUTE_BUILD_MEMORY_MB=6144`):
+ଏହି ଗଛରେ ମାପ କରାଯାଇଛି (`--target runner-base`, `OMNIROUTE_BUILD_MEMORY_MB=6144`):
 
-| ବଣ୍ଡଲର୍   | କଣ୍ଟେନର୍ ସୀମା  | ଫଳାଫଳ                                   |
-| --------- | -------------- | --------------------------------------- |
-| Turbopack | 8 GiB / 16 GiB | ଉଭୟରେ ନିରବରେ OOM-killed ହୋଇଛି           |
-| webpack   | 8 GiB          | build worker SIGKILLed ହୋଇଛି            |
-| webpack   | 12 GiB         | ସଫଳ ହୋଇଛି, ସର୍ବାଧିକ 11.1 GiBରେ ପହଞ୍ଚିଛି |
+| ବଣ୍ଡଲର୍।   | ପାତ୍ରର ଛାତ।    | ଫଳାଫଳ                            |
+| ---------- | -------------- | -------------------------------- |
+| Turbopack  | 8 GiB / 16 GiB | ଉଭୟେ OOM- ନିରବରେ।                |
+| ୱେବପ୍ୟାକ୍। | 8 GiB          | ଶ୍ରମିକ SIGKILLed ନିର୍ମାଣ କରନ୍ତୁ। |
+| ୱେବପ୍ୟାକ୍। | 12 GiB         | ସଫଳ ହୋଇଛି, 11.1 GiB ରେ ପହଞ୍ଚିଛି। |
 
-### ରନ୍ଟାଇମ୍ ଡିଫଲ୍ଟଗୁଡ଼ିକ
+### ଚାଲିବା ସମୟ ଡିଫଲ୍ଟ।
 
-`runner-base` ଦ୍ୱାରା ଏକ୍ସପୋର୍ଟ୍ କରାଯାଇଥିବା ଡିଫଲ୍ଟଗୁଡ଼ିକ: `PORT=20128`, `HOSTNAME=0.0.0.0`, `OMNIROUTE_MEMORY_MB=1024`, `NODE_OPTIONS=--max-old-space-size=1024`, `DATA_DIR=/app/data`, `OMNIROUTE_MIGRATIONS_DIR=/app/migrations`।
+`runner-base` ଦ୍ୱାରା ରପ୍ତାନି ହୋଇଥିବା ଡିଫଲ୍ଟ: `PORT=20128`, `HOSTNAME=0.0.0.0`, `OMNIROUTE_MEMORY_MB=1024`, `NODE_OPTIONS=--max-old-space-size=1024`, `DATA_DIR=/app/data`, `OMNIROUTE_MIGRATIONS_DIR=/app/migrations`
 
-Dockerରେ ମେମୋରି ଆଚରଣ:
+Docker ରେ ସ୍ମୃତି ଆଚରଣ:
 
-- ଇମେଜ୍ଟି `OMNIROUTE_MEMORY_MB=1024` ସେଟ୍ କରେ ଏବଂ ଏଥିରୁ `NODE_OPTIONS=--max-old-space-size=1024` ନିର୍ଦ୍ଧାରଣ କରେ।
-- ପ୍ରକୃତ ସର୍ଭର ପ୍ରକ୍ରିୟାଟି standalone launcher ଦ୍ୱାରା ଆରମ୍ଭ ହୁଏ, ଯାହା `OMNIROUTE_MEMORY_MB` ପଢ଼େ ଏବଂ `--max-old-space-size=<OMNIROUTE_MEMORY_MB>` ଯୋଡ଼େ।
-- Node ପୁନରାବୃତ୍ତ `--max-old-space-size` ମୂଲ୍ୟଗୁଡ଼ିକ ମଧ୍ୟରୁ ଶେଷ ମୂଲ୍ୟଟି ବ୍ୟବହାର କରେ, ତେଣୁ `OMNIROUTE_MEMORY_MB` ସେଟ୍ କରିବା ଦ୍ୱାରା କାର୍ଯ୍ୟକାରୀ Docker heap ସୀମା ନିୟନ୍ତ୍ରିତ ହୁଏ।
-- ଇମେଜ୍ଟି ଏହାକୁ ସର୍ବଦା ସେଟ୍ କରୁଥିବାରୁ, Docker ଅଧୀନରେ launcher-ର ନିଜସ୍ୱ RAM-ଅନୁକୂଳିତ fallback କେବେ ଲାଗୁ ହୁଏନାହିଁ। କାର୍ଯ୍ୟଭାର ପାଇଁ ଏହାକୁ ସ୍ପଷ୍ଟ ଭାବରେ ବଢ଼ାନ୍ତୁ (ତଳେ ଥିବା ସାରଣୀ)। coding-agent `/v1/responses` ପାଇଁ `2048` ଏବେ ମଧ୍ୟ ଅତ୍ୟନ୍ତ କମ୍।
+- ପ୍ରତିଛବି `OMNIROUTE_MEMORY_MB=1024` ସେଟ୍ କରେ ଏବଂ ଏଥିରୁ `NODE_OPTIONS=--max-old-space-size=1024` ପ୍ରାପ୍ତ କରେ।
+- ପ୍ରକୃତ ସର୍ଭର ପ୍ରକ୍ରିୟା ସ୍ୱତନ୍ତ୍ର ଲଞ୍ଚର୍ ଦ୍ୱାରା ଆରମ୍ଭ ହୋଇଥାଏ, ଯାହାକି `OMNIROUTE_MEMORY_MB` ପ read ିଥାଏ ଏବଂ `--max-old-space-size=<OMNIROUTE_MEMORY_MB>` ଯୋଡିଥାଏ।
+- ନୋଡ୍ ଶେଷ ପୁନରାବୃତ୍ତି `--max-old-space-size` ମୂଲ୍ୟ ବ୍ୟବହାର କରେ, ତେଣୁ `OMNIROUTE_MEMORY_MB` ସେଟିଂ ପ୍ରଭାବଶାଳୀ Docker ହିପ୍ ସୀମାକୁ ନିୟନ୍ତ୍ରଣ କରେ।
+- କାରଣ ପ୍ରତିଛବି ଏହାକୁ ସର୍ବଦା ସେଟ୍ କରିଥାଏ, ଲଞ୍ଚରର ନିଜସ୍ୱ RAM- କାଲିବ୍ରେଟେଡ୍ ଫଲବ୍ୟାକ୍ Docker ଅଧୀନରେ କଦାପି ପ୍ରଯୁଜ୍ୟ ନୁହେଁ। କାର୍ଯ୍ୟଭାର ପାଇଁ (ନିମ୍ନରେ ସାରଣୀ) ଏହାକୁ ସ୍ପଷ୍ଟ ଭାବରେ ବ .ାନ୍ତୁ। `2048` କୋଡିଂ-ଏଜେଣ୍ଟ `/v1/responses` ପାଇଁ ଏପର୍ଯ୍ୟନ୍ତ ବହୁତ ଛୋଟ।
 
-### coding agent-ମାନଙ୍କ ପାଇଁ runtime RAM
+### କୋଡିଂ ଏଜେଣ୍ଟମାନଙ୍କ ପାଇଁ ଚାଲିବା ସମୟ RAM
 
-1 GiB Docker ଡିଫଲ୍ଟ ହେଉଛି dashboard/ହାଲୁକା chat ପାଇଁ ସର୍ବନିମ୍ନ ସୀମା, production ଆକାର ନୁହେଁ। ଦୀର୍ଘ `POST /v1/responses` body-ଗୁଡ଼ିକ (ଶତାଧିକ message, ଦଶ-ଦଶଟି tool) compression ସମୟରେ ଏକାଧିକ in-memory graph ଧରି ରଖନ୍ତି। ପରସ୍ପରକୁ overlap କରୁଥିବା ପ୍ରାୟ ~3 MiB / ~750k-token ର ଦୁଇଟି request **12 GiB** old-space-ରେ V8 କୁ ବନ୍ଦ କରିଦେଇଛି (`FATAL ERROR: Reached heap limit`) ଏବଂ 16 GiB cgroup OOM ମଧ୍ୟ ସୃଷ୍ଟି କରିଛି। [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849) ଦେଖନ୍ତୁ।
+1 GiB Docker ଡିଫଲ୍ଟ ହେଉଛି ଏକ dashboard/light-chat ଚଟାଣ, ଉତ୍ପାଦନ ଆକାର ନୁହେଁ। ଲମ୍ବା `POST /v1/responses` ଶରୀର (ଶହ ଶହ ବାର୍ତ୍ତା, ଦଶ ଉପକରଣ) ସଙ୍କୋଚନ ସମୟରେ ଏକାଧିକ ଇନ-ମେମୋରୀ ଗ୍ରାଫ୍ ରଖେ। ଦୁଇଟି ଓଭରଲିପ୍ ~ 3 MiB / ~ 750k- ଟୋକେନ୍ ଅନୁରୋଧଗୁଡ଼ିକ V8 କୁ a ରେ ଛାଡି ଦେଇଛି।** 12 GiB** ପୁରୁଣା-ସ୍ପେସ୍ (`FATAL ERROR: Reached heap limit`) ଏବଂ ଏକ 16 GiB cgroup OOM ମଧ୍ୟ ହିଟ୍ କରନ୍ତୁ। [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849) ଦେଖନ୍ତୁ।
 
-**heap ଠାରୁ ଅଧିକ cgroup `--memory` ଆକାର ନିର୍ଦ୍ଧାରଣ କରନ୍ତୁ** — native buffer, SQLite ଏବଂ compression intermediate-ଗୁଡ଼ିକ V8 ବାହାରେ ରହେ।
+ଆକାର।** ଗଦା ଉପରେ cgroup `--memory`** — ଦେଶୀ ବଫର୍, SQLite, ଏବଂ ସଙ୍କୋଚନ ମଧ୍ୟସ୍ଥିମାନେ V8 ବାହାରେ ବସନ୍ତି।
 
-| କାର୍ଯ୍ୟଭାର                             | `OMNIROUTE_MEMORY_MB`         | Container / cgroup          | ଟିପ୍ପଣୀ                                                                                                          |
-| -------------------------------------- | ----------------------------- | --------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| Dashboard, ଗୋଟିଏ ହାଲୁକା chat           | `1024` (ଇମେଜ୍ ଡିଫଲ୍ଟ)         | ≥2 GiB                      |                                                                                                                  |
-| ଗୋଟିଏ coding agent (Claude/Codex/Grok) | `8192`                        | ≥10 GiB                     | ସାଧାରଣ single-session `/v1/responses`                                                                            |
-| ଦୁଇଟି ସମକାଳୀନ ଦୀର୍ଘ `/v1/responses`    | `10240`–`12288`               | ≥12–16 GiB                  | ~12 GiB heap-ରେ V8 ବନ୍ଦ ହେବା ମାପ କରାଯାଇଛି                                                                        |
-| ତିନି କିମ୍ବା ଅଧିକ ସମକାଳୀନ ଦୀର୍ଘ context | ଗୋଟିଏ process-ରେ କରନ୍ତୁ ନାହିଁ | serialize କରନ୍ତୁ / ଅଧିକ RAM | ଡିଫଲ୍ଟ heavyweight admission ହେଉଛି 1 in-flight; RAM ବଢ଼ାଇବା ବିନା ଏହାକୁ ବଢ଼ାଇଲେ ପୁଣି ବନ୍ଦ ହେବାର ସମସ୍ୟା ସୃଷ୍ଟି ହୁଏ |
+| କାର୍ଯ୍ୟଭାର                             | `OMNIROUTE_MEMORY_MB`       | ଧାରଣକାରୀ / cgroup | ଟିପ୍ପଣୀ।                                                                                    |
+| -------------------------------------- | --------------------------- | ----------------- | ------------------------------------------------------------------------------------------- |
+| ଡ୍ୟାସବୋର୍ଡ, ଗୋଟିଏ ହାଲୁକା ଚାଟ୍।         | `1024` (ପ୍ରତିଛବି ଡିଫଲ୍ଟ)    | ≥2 GiB            |                                                                                             |
+| ଗୋଟିଏ କୋଡିଂ ଏଜେଣ୍ଟ (Claude/Codex/Grok) | `8192`                      | ≥10 GiB           | ସାଧାରଣ ଏକକ ଅଧିବେଶନ `/v1/responses`                                                          |
+| ଦୁଇଟି ସମକାଳୀନ ଲମ୍ବା `/v1/responses`    | `10240`–`12288`             | ≥12–16 GiB        | ~ 12 GiB ରାଶିରେ ମାପାଯାଇଥିବା V8 ଗର୍ଭପାତ।                                                     |
+| ତିନୋଟି+ ଏକକାଳୀନ ଲମ୍ବା ପ୍ରସଙ୍ଗ।         | ଗୋଟିଏ ପ୍ରକ୍ରିୟାରେ କର ନାହିଁ। | କ୍ରମିକ / ଅଧିକ RAM | ଡିଫଲ୍ଟ ହେଭିୱେଟ୍ ଆଡମିଶନ ହେଉଛି 1 ବିମାନରେ; RAM ବିନା ଏହାକୁ ଉଠାଇବା ଗର୍ଭପାତକୁ ପୁନ tr ଉତ୍ପାଦନ କରେ। |
 
-bare metal-ରେ `omniroute serve`, `OMNIROUTE_MEMORY_MB` **ସେଟ୍ ହୋଇନଥିବା** ସମୟରେ RAM-ର ପ୍ରାୟ ~35% ଅନୁକୂଳନ କରେ (`[512, 4096]` ମଧ୍ୟରେ ସୀମିତ)। Docker ସର୍ବଦା `1024` ସେଟ୍ କରେ, ତେଣୁ official image-ରେ ସେହି ଅନୁକୂଳନ କେବେ ଚାଲେନାହିଁ।
+`omniroute serve` on bare metal calibrates ~35% of RAM (clamped `[512, 4096]`) when `OMNIROUTE_MEMORY_MB` is **unset**. Docker always sets `1024`, so that calibration never runs in the official image.
 
 ```bash
 docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
   -e OMNIROUTE_MEMORY_MB=8192 --memory=10g \
-  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
 ```
 
 ## ଗୁରୁତ୍ୱପୂର୍ଣ୍ଣ ପରିବେଶ ଭେରିଏବଲ୍ଗୁଡ଼ିକ
@@ -340,22 +334,13 @@ docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
 | `PROD_DASHBOARD_PORT`         | `docker-compose.prod.yml` ପାଇଁ ହୋଷ୍ଟ-ପାର୍ଶ୍ୱ ଡ୍ୟାସ୍ବୋର୍ଡ୍ ପୋର୍ଟ                                                                                                                                                                                                                           | `20130`                             |
 | `CLIPROXYAPI_PORT`            | `cliproxyapi` ସାଇଡ୍କାର୍ ପାଇଁ ହୋଷ୍ଟ-ପାର୍ଶ୍ୱ ପୋର୍ଟ                                                                                                                                                                                                                                          | `8317`                              |
 
-## ଉପପଥରେ Reverse Proxy (Traefik / nginx)
+## ଏକ ଉପପଥରେ ଓଲଟା ପ୍ରକ୍ସି (ଟ୍ରାଫିକ୍ / nginx)
 
-Next.js `basePath` standalone bundle ମଧ୍ୟରେ କମ୍ପାଇଲ୍ ହୋଇଥାଏ। OmniRoute ଆପ୍ ରୁଟ୍ରେ ଥିବା ଏକ sentinel ଫାଇଲ୍ରେ ଅନ୍ତର୍ନିହିତ
-ମୂଲ୍ୟକୁ ରେକର୍ଡ କରେ (`npm run build` ସମୟରେ ଲେଖାଯାଏ; `scripts/docker/ensure-docker-base-path.mjs` ଦ୍ୱାରା
-ପଢ଼ାଯାଏ) ଏବଂ କଣ୍ଟେନର୍ ଆରମ୍ଭ ହେବାବେଳେ ଏହାକୁ
-`OMNIROUTE_BASE_PATH` ସହିତ ତୁଳନା କରେ। ସେଗୁଡ଼ିକ ଭିନ୍ନ ହେଲେ ଏବଂ imageଟି
-ଡୋମେନ୍ ରୁଟ୍ ପାଇଁ build ହୋଇଥିଲେ, entrypoint standalone manifests,
-ଅନ୍ତର୍ନିହିତ `basePath`/`assetPrefix` literals (Next 16 କେବଳ
-`assetPrefix`ରୁ SSR asset URLଗୁଡ଼ିକୁ render କରେ — patcher ଉପପଥଟିକୁ ଏଥିରେ ମଧ୍ୟ ପ୍ରତିଫଳିତ କରେ),
-ଅନ୍ତର୍ନିହିତ `/_next/static` asset URLଗୁଡ଼ିକ (client-reference manifests, media imports, prerendered
-error pages) ଏବଂ client `process.env` shimକୁ ପୁନଃଲେଖନ କରେ, ତା’ପରେ `node dev/run-standalone.mjs`
-ଚାଲେ।
+Next.js `basePath` ଷ୍ଟାଣ୍ଡାଲୋନ୍ ବଣ୍ଡଲରେ ସଂକଳିତ। OmniRoute ଆପ୍ ରୁଟରେ ଏକ ସେଣ୍ଟିନେଲ ଫାଇଲରେ ପାକ ହୋଇଥିବା ମୂଲ୍ୟକୁ ରେକର୍ଡ କରିଥାଏ ( `npm run build` ସମୟରେ ଲିଖିତ; `scripts/docker/ensure-docker-base-path.mjs` ଦ୍ୱାରା ପ read ଼ାଯାଇଥାଏ) ଏବଂ ପାତ୍ରଟି ଆରମ୍ଭ ହେବାବେଳେ ଏହାକୁ `OMNIROUTE_BASE_PATH` ସହିତ ତୁଳନା କରିଥାଏ। ଯେତେବେଳେ ସେମାନେ ଭିନ୍ନ ହୁଅନ୍ତି ଏବଂ ପ୍ରତିଛବି ଡୋମେନ୍ ରୁଟ୍ ପାଇଁ ନିର୍ମିତ ହୋଇଥିଲା, ଏଣ୍ଟ୍ରିପଏଣ୍ଟ ଷ୍ଟାଣ୍ଡାଲୋନ୍ ମନିଫେଷ୍ଟ୍, ଏମ୍ବେଡ୍ ହୋଇଥିବା `basePath`/`assetPrefix` ଲିଟେରାଲ୍ (ପରବର୍ତ୍ତୀ 16 `assetPrefix` ରୁ SSR ଆସେଟ୍ URLs — ପ୍ୟାଚର୍ ଏଥିରେ ସବପାଥ୍ ଦର୍ପଣ କରିଥାଏ), ପାକ ହୋଇଥିବା `/_next/static` ଆସେଟ୍ URLs (କ୍ଲାଏଣ୍ଟ-ରେଫରେନ୍ସ ମନିଫେଷ୍ଟ୍, କ୍ଲାଏଣ୍ଟ-ରେଫରେନ୍ସ ମନିଫେଷ୍ଟ୍, କ୍ଲାଏଣ୍ଟ- `process.env` ମନିଫେଷ୍ଟ୍, ମିଡିଆ ଆମଦାନୀ, `node dev/run-standalone.mjs` )
 
-### Compose build (ସୁପାରିଶକୃତ)
+### ନିର୍ମାଣ ରଚନା (ପରାମର୍ଶିତ)
 
-`.env`ରେ ଉଭୟ variable ସେଟ୍ କରନ୍ତୁ, ତା’ପରେ image ଏବଂ runtime ମେଳ ଖାଇବା ପାଇଁ ପୁନଃ build କରନ୍ତୁ:
+`.env` ରେ ଉଭୟ ଭେରିଏବଲ୍ ସେଟ୍ କରନ୍ତୁ, ତାପରେ ପୁନ build ନିର୍ମାଣ କରନ୍ତୁ ତେଣୁ ପ୍ରତିଛବି ଏବଂ ଚାଲିବା ସମୟ ସହମତ:
 
 ```bash
 # .env
@@ -367,69 +352,52 @@ NEXT_PUBLIC_BASE_URL=https://myhostname.example.com/omniroute
 docker compose --profile base up -d --build
 ```
 
-`docker-compose.yml`, `OMNIROUTE_BASE_PATH`କୁ Docker build-arg ଏବଂ
-runtime environment variable ଭାବରେ ପଠାଏ।
+`docker-compose.yml` `OMNIROUTE_BASE_PATH` କୁ Docker ବିଲ୍ଡ-ଆର୍ଗ ଏବଂ ଚାଲିବା ସମୟ ପରିବେଶ ଭେରିଏବଲ୍ ଭାବରେ।
 
-### ପୂର୍ବରୁ build ହୋଇଥିବା root image + runtime ଉପପଥ
+### ପୂର୍ବ-ନିର୍ମିତ ମୂଳ ପ୍ରତିଛବି + ଚାଲିବା ସମୟ ଉପପଥ।
 
-ପ୍ରକାଶିତ `diegosouzapw/omniroute:*` imageଗୁଡ଼ିକ ଡୋମେନ୍ ରୁଟ୍ ପାଇଁ build ହୋଇଛି। ତଥାପି ଆପଣ
-runtimeରେ `OMNIROUTE_BASE_PATH` ସେଟ୍ କରିପାରିବେ; କଣ୍ଟେନର୍ startup ସମୟରେ bundleକୁ ଥରେ patch କରେ।
-ଏହା ସହିତ ମେଳ ଖାଉଥିବା public originକୁ ଯୋଡ଼ନ୍ତୁ:
+ପ୍ରକାଶିତ `cheaperinference/omniroute:*` ପ୍ରତିଛବିଗୁଡ଼ିକ ଡୋମେନ୍ ମୂଳ ପାଇଁ ନିର୍ମିତ। ଆପଣ ତଥାପି ଚାଲିବା ସମୟରେ `OMNIROUTE_BASE_PATH` ସେଟ୍ କରିପାରିବେ; କଣ୍ଟେନର୍ ଷ୍ଟାର୍ଟଅପ୍ ରେ ଥରେ ବଣ୍ଡଲ୍ ପ୍ୟାଚ୍ କରେ। ଏହାକୁ ମେଳ ଖାଉଥିବା ଜନସାଧାରଣ ଉତ୍ପତ୍ତି ସହିତ ଯୋଡନ୍ତୁ:
 
 ```yaml
 services:
   omniroute:
-    image: diegosouzapw/omniroute:latest
+    image: cheaperinference/omniroute:latest
     environment:
       OMNIROUTE_BASE_PATH: /omniroute
       NEXT_PUBLIC_BASE_URL: https://myhostname.example.com/omniroute
 ```
 
-**ସମ୍ପୂର୍ଣ୍ଣ** ବାହ୍ୟ pathକୁ forward କରିବା ପାଇଁ reverse proxyକୁ configure କରନ୍ତୁ (prefixକୁ
-ହଟାନ୍ତୁ ନାହିଁ)। Traefik, `StripPrefix` ବିନା `PathPrefix(`/omniroute`)`କୁ କଣ୍ଟେନର୍କୁ
-route କରିବା ଉଚିତ୍, ଯାହାଦ୍ୱାରା Next.js `/omniroute/...` ଗ୍ରହଣ କରିବ ଏବଂ
-`/omniroute/_next/...`ରୁ assets ପରିବେଷଣ କରିବ।
+ଅଗ୍ରଗାମୀ କରିବାକୁ ଓଲଟା ପ୍ରକ୍ସି ବିନ୍ୟାସ କରନ୍ତୁ।** ପୂର୍ଣ୍ଣ** ବାହ୍ୟ ପଥ (ଉପସର୍ଗକୁ ଛଡ଼ାନ୍ତୁ ନାହିଁ)। ଟ୍ରାଫିକ୍ `StripPrefix` ବିନା ପାତ୍ରରେ `PathPrefix(`/ omniroute `)` କୁ ମାର୍ଗ କରିବା ଉଚିତ, ତେଣୁ Next.js `/omniroute/...` ଗ୍ରହଣ କରେ ଏବଂ `/omniroute/_next/...` ରୁ ସମ୍ପତ୍ତି ସେବା କରେ।
 
-Docker healthcheck, ସକ୍ରିୟ `OMNIROUTE_BASE_PATH` prefix ଥିବା ହାଲୁକା
-`/healthz` lifecycle endpointକୁ probe କରେ। ମାନବ/dashboard diagnostics ପାଇଁ
-`/api/monitoring/health` ଉପଲବ୍ଧ ରହେ; କଣ୍ଟେନର୍ HEALTHCHECKକୁ ପୁଣି ସେହି pathକୁ ନିର୍ଦ୍ଦେଶ କରିବାକୁ
-(ଉଦାହରଣ ସ୍ୱରୂପ deep health enforcement ପାଇଁ), `OMNIROUTE_HEALTHCHECK_PATH=/api/monitoring/health`
-ସେଟ୍ କରନ୍ତୁ। ସେହି path ଏକ **ଗଭୀର** ଯାଞ୍ଚ (DB + monitoring summary) — ଆପଣ ପୁଣି ଏହାକୁ ସକ୍ରିୟ କଲେ
-Dockerର ବିରଳ `HEALTHCHECK` ପାଇଁ ଉପଯୁକ୍ତ, କିନ୍ତୁ Kubernetes `livenessProbe`
-intervals ପାଇଁ **ନୁହେଁ**।
+Docker che ାସ୍ଥ୍ୟ ଯାଞ୍ଚ ସକ୍ରିୟ `OMNIROUTE_BASE_PATH` ସହିତ ଉପସର୍ଗ ହୋଇଥିବା ହାଲୁକା `/healthz` ଲାଇଫ୍ ସାଇକେଲ ଏଣ୍ଡପଏଣ୍ଟ ଯାଞ୍ଚ କରେ। human/dashboard ନିଦାନ ପାଇଁ `/api/monitoring/health` ଉପଲବ୍ଧ; ପାତ୍ରକୁ HEALTHCHECK ଏହା ଉପରେ ସୂଚାଇବା ପାଇଁ (ଉଦାହରଣ ସ୍ୱରୂପ ଗଭୀର ସ୍ୱାସ୍ଥ୍ୟ ପ୍ରୟୋଗ ପାଇଁ), `OMNIROUTE_HEALTHCHECK_PATH=/api/monitoring/health` ସେଟ୍ କରନ୍ତୁ। ସେହି ପଥ ହେଉଛି a** ଗଭୀର** ଯାଞ୍ଚ କରନ୍ତୁ (DB + ମନିଟରିଂ ସାରାଂଶ) — Docker ର ବାରମ୍ବାର `HEALTHCHECK` ପାଇଁ ଉପଯୁକ୍ତ ଯଦି ଆପଣ ପୁନର୍ବାର ଚୟନ କରନ୍ତି, କିନ୍ତୁ** ନୁହେଁ।** କୁବେରନେଟସ୍ `livenessProbe` ବ୍ୟବଧାନ ପାଇଁ।
 
-orchestratorଗୁଡ଼ିକ ପାଇଁ (Kubernetes, Nomad, ଇତ୍ୟାଦି):
+ଅର୍କେଷ୍ଟେଟରମାନଙ୍କ ପାଇଁ (କୁବର୍ନେଟସ୍, ନୋମାଡ୍, ଇତ୍ୟାଦି):
 
-| Probe           | ପସନ୍ଦ କରନ୍ତୁ                                                         | ଏଡ଼ାନ୍ତୁ                                                |
-| --------------- | -------------------------------------------------------------------- | ------------------------------------------------------- |
-| Liveness        | HTTP `GET /livez`, କିମ୍ବା ମୁଖ୍ୟ portରେ TCP (`PORT`, default `20128`) | liveness ଭାବରେ `/api/monitoring/health`                 |
-| Readiness       | HTTP `GET /healthz`                                                  | event-loop ବ୍ୟସ୍ତ ଥିବାକୁ ବନ୍ଦ ଭାବେ ଧରୁଥିବା କଠୋର timeout |
-| Deep / blackbox | `/api/monitoring/health`                                             | —                                                       |
+| ଅନୁସନ୍ଧାନ।          | ପସନ୍ଦ କରନ୍ତୁ।                                                       | ଏଡ଼ାନ୍ତୁ।                                              |
+| ------------------- | ------------------------------------------------------------------- | ------------------------------------------------------ |
+| ଜୀବନ୍ତତା।           | ମୁଖ୍ୟ ପୋର୍ଟରେHTTP `GET /livez`, କିମ୍ବା TCP (`PORT`, ଡିଫଲ୍ଟ `20128`) | `/api/monitoring/health` ଜୀବନ୍ତ ଭାବରେ।                 |
+| ପ୍ରସ୍ତୁତି           | HTTP `GET /healthz`                                                 | ଟାଇଟ୍ ଟାଇମଆଉଟ୍ ଯାହା ଇଭେଣ୍ଟ-ଲୁପ୍ କୁ ମୃତ ପରି ବ୍ୟସ୍ତ କରେ। |
+| ଗଭୀର / ବ୍ଲାକ୍ ବକ୍ସ। | `/api/monitoring/health`                                            | —                                                      |
 
-`/healthz` process lifecycle (`ok` / `starting` / `stopping`) ରିପୋର୍ଟ କରେ। `/livez` କେବଳ
-processଟି ସଚଳ ଅଛି କି ନାହିଁ ଜଣାଏ (handler ଚାଲିପାରିଲେ ସର୍ବଦା 200; ଏହା
-readiness ପାଇଁ ଅପେକ୍ଷା କରେ ନାହିଁ)। ଉଭୟ ଏବେ ମଧ୍ୟ request handling ସହିତ ସମାନ Node event loopରେ
-ଚାଲେ, ତେଣୁ CPU-bound catalog କିମ୍ବା compression କାର୍ଯ୍ୟ ସେଗୁଡ଼ିକୁ ବିଳମ୍ବିତ କରିପାରେ — ବ୍ୟସ୍ତ ≠ ବନ୍ଦ।
-HTTP probeଗୁଡ଼ିକ time out ହେଲେ TCP livenessକୁ ପସନ୍ଦ କରନ୍ତୁ। ସମ୍ପୂର୍ଣ୍ଣ probe ମାର୍ଗଦର୍ଶନ:
-[Monitoring ମାର୍ଗଦର୍ଶିକା — Kubernetes probe ସୁପାରିଶଗୁଡ଼ିକ](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations).
+`/healthz` ପ୍ରକ୍ରିୟା ଜୀବନଚକ୍ର (`ok` / `starting` / `stopping`) ରିପୋର୍ଟ କରେ। `/livez` କେବଳ ପ୍ରକ୍ରିୟା-ଜୀବନ୍ତ ଅଟେ (ଯେତେବେଳେ ବି ହ୍ୟାଣ୍ଡଲର୍ ଚଲାଇପାରେ; ଏହା ପ୍ରସ୍ତୁତତା ପାଇଁ ଅପେକ୍ଷା କରେ ନାହିଁ)। ଅନୁରୋଧ ନିୟନ୍ତ୍ରଣ ପରି ଉଭୟ ତଥାପି ସମାନ ନୋଡ ଇଭେଣ୍ଟ ଲୁପରେ ଚାଲିଥାଏ, ତେଣୁ CPU- ବନ୍ଧିତ କାଟାଲଗ୍ କିମ୍ବା ସଙ୍କୋଚନ କାର୍ଯ୍ୟ ସେମାନଙ୍କୁ — ବ୍ୟସ୍ତ ≠ ମୃତ ବିଳମ୍ବ କରିପାରେ। ଯଦି HTTP ସମୟ ସମାପ୍ତ କରେ ତେବେ TCP ଜୀବନ୍ତତାକୁ ପସନ୍ଦ କରନ୍ତୁ। ପୂର୍ଣ୍ଣ ଅନୁସନ୍ଧାନ ନିର୍ଦ୍ଦେଶାବଳୀ: [ମନିଟରିଂ ଗାଇଡ୍ — କୁବେରନେଟସ୍ ଅନୁସନ୍ଧାନ ସୁପାରିଶ](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations)।
 
-## Caddy ସହିତ Docker Compose (HTTPS Auto-TLS)
+## Docker କ୍ୟାଡି ସହିତ ରଚନା କରନ୍ତୁ (HTTPS ଅଟୋ- TLS)
 
-Caddyର ସ୍ୱୟଂଚାଳିତ SSL ବ୍ୟବସ୍ଥା ବ୍ୟବହାର କରି OmniRouteକୁ ସୁରକ୍ଷିତ ଭାବରେ ପ୍ରକାଶ କରାଯାଇପାରେ। ଆପଣଙ୍କ ଡୋମେନ୍ର DNS A ରେକର୍ଡ ଆପଣଙ୍କ ସର୍ଭର୍ର IPକୁ ସୂଚିତ କରୁଛି ବୋଲି ନିଶ୍ଚିତ କରନ୍ତୁ।
+OmniRoute କ୍ୟାଡିର ସ୍ୱୟଂଚାଳିତ SSL ପ୍ରୋଭିଜନିଂ ବ୍ୟବହାର କରି ସୁରକ୍ଷିତ ଭାବରେ ଉନ୍ମୋଚିତ ହୋଇପାରିବ। ନିଶ୍ଚିତ କରନ୍ତୁ ଯେ ଆପଣଙ୍କର ଡୋମେନ୍ ର DNS ଏକ ରେକର୍ଡ ଆପଣଙ୍କ ସର୍ଭରର IP କୁ ସୂଚିତ କରେ।
 
 ```yaml
 services:
   omniroute:
-    image: diegosouzapw/omniroute:latest
+    image: cheaperinference/omniroute:latest
     container_name: omniroute
     restart: unless-stopped
     volumes:
       - omniroute-data:/app/data
     environment:
       - PORT=20128
-      # OAuth କଲ୍ବ୍ୟାକ୍, ଡ୍ୟାସ୍ବୋର୍ଡ ଲିଙ୍କ ଏବଂ ସୃଷ୍ଟି ହୋଇଥିବା ସାର୍ବଜନୀନ URLଗୁଡ଼ିକ ପାଇଁ ବ୍ରାଉଜର୍ମୁଖୀ ଉତ୍ସ।
+      # Browser-facing origin for OAuth callbacks, dashboard links, and generated public URLs.
       - NEXT_PUBLIC_BASE_URL=https://your-domain.com
-      # ନିର୍ଦ୍ଧାରିତ କାର୍ଯ୍ୟ / ସ୍ୱୟଂ-ଫେଚ୍ ପାଇଁ ଆଭ୍ୟନ୍ତରୀଣ ସର୍ଭର୍ରୁ-ସର୍ଭର୍ URL।
+      # Internal server-to-server URL for scheduled jobs / self-fetches.
       - BASE_URL=http://omniroute:20128
       - AUTH_COOKIE_SECURE=true
 
@@ -446,10 +414,7 @@ volumes:
   omniroute-data:
 ```
 
-Caddy ଅପ୍ଷ୍ଟ୍ରିମ୍ କଣ୍ଟେନର୍ ପାଇଁ ମାନକ ଫରୱାର୍ଡିଂ ହେଡର୍ଗୁଡ଼ିକ ସେଟ୍ କରେ। OAuth କଲ୍ବ୍ୟାକ୍ ଏବଂ ସୃଷ୍ଟି ହୋଇଥିବା ସାର୍ବଜନୀନ ଲିଙ୍କଗୁଡ଼ିକ ପାଇଁ OmniRoute
-`NEXT_PUBLIC_BASE_URL`କୁ ପ୍ରାମାଣିକ ସାର୍ବଜନୀନ ଉତ୍ସ ଭାବରେ ବ୍ୟବହାର କରେ; ପ୍ରମାଣୀକୃତ ଡ୍ୟାସ୍ବୋର୍ଡ ଲିଖନଗୁଡ଼ିକ ସମାନ-ଉତ୍ସ ଅନୁରୋଧ ସହିତ ସେସନ୍-ବାଉଣ୍ଡ CSRF
-ସୁରକ୍ଷା ବ୍ୟବହାର କରେ। କେବଳ ଉନ୍ନତ ଡିପ୍ଲୟମେଣ୍ଟଗୁଡ଼ିକ ପାଇଁ `OMNIROUTE_TRUST_PROXY` ସକ୍ଷମ କରନ୍ତୁ, ଯେଉଁଠାରେ ଆପଣ ସ୍ପଷ୍ଟ
-ବିନ୍ୟାସ ପରିବର୍ତ୍ତେ ବିଶ୍ୱସ୍ତ ଫରୱାର୍ଡ ହେଡର୍ଗୁଡ଼ିକରୁ ସାର୍ବଜନୀନ ଉତ୍ସ ନିର୍ଣ୍ଣୟ କରିବାକୁ OmniRouteକୁ ଉଦ୍ଦେଶ୍ୟମୂଳକ ଭାବରେ ଚାହାନ୍ତି।
+କ୍ୟାଡି ଅପଷ୍ଟ୍ରିମ୍ ପାତ୍ର ପାଇଁ ଷ୍ଟାଣ୍ଡାର୍ଡ ଫରୱାର୍ଡିଂ ହେଡର୍ ସେଟ୍ କରେ। OmniRoute `NEXT_PUBLIC_BASE_URL` OAuth କଲବ୍ୟାକ୍ ଏବଂ ଜେନେରିକ୍ ପବ୍ଲିକ୍ ଲିଙ୍କ୍ ପାଇଁ କାନୋନିକାଲ୍ ଜନସାଧାରଣ ଭାବରେ ବ୍ୟବହାର କରେ। ପ୍ରାମାଣିକ ଡ୍ୟାସବୋର୍ଡ ଲେଖେ ସମାନ-ମୂଳ ଅନୁରୋଧ ଏବଂ ଅଧିବେଶନ-ବନ୍ଧିତ CSRF ସୁରକ୍ଷା ବ୍ୟବହାର କରନ୍ତୁ। ଉନ୍ନତ ନିୟୋଜନ ପାଇଁ କେବଳ `OMNIROUTE_TRUST_PROXY` ସକ୍ଷମ କର ଯେଉଁଠାରେ ତୁମେ ଉଦ୍ଦେଶ୍ୟମୂଳକ ଭାବରେ OmniRoute ସ୍ପଷ୍ଟ ବିନ୍ୟାସ ପରିବର୍ତ୍ତେ ବିଶ୍ୱସ୍ତ ଅଗ୍ରଗାମୀ ହେଡର୍ ଠାରୁ ସର୍ବସାଧାରଣ ଉତ୍ପତ୍ତି ପାଇବାକୁ ଚାହୁଁଛ।
 
 ## Cloudflare Quick Tunnel
 
@@ -466,49 +431,51 @@ Docker ଡିପ୍ଲୟମେଣ୍ଟଗୁଡ଼ିକ ପାଇଁ ଡ୍�
 - Docker ଇମେଜ୍ଗୁଡ଼ିକ ସିଷ୍ଟମ୍ CA ରୁଟ୍ଗୁଡ଼ିକୁ ବଣ୍ଡଲ୍ କରି ପରିଚାଳିତ `cloudflared`କୁ ପ୍ରଦାନ କରେ, ଯାହା କଣ୍ଟେନର୍ ଭିତରେ ଟନେଲ୍ ବୁଟ୍ଷ୍ଟ୍ରାପ୍ ହେବା ସମୟରେ TLS ବିଶ୍ୱାସ ବିଫଳତାକୁ ଏଡ଼ାଇଥାଏ।
 - OmniRoute ଡାଉନ୍ଲୋଡ୍ କରିବା ପରିବର୍ତ୍ତେ ଏକ ବିଦ୍ୟମାନ ବାଇନାରି ବ୍ୟବହାର କରୁ ବୋଲି ଚାହୁଁଥିଲେ `CLOUDFLARED_BIN=/absolute/path/to/cloudflared` ସେଟ୍ କରନ୍ତୁ।
 
-## ଇମେଜ୍ ଟ୍ୟାଗ୍ଗୁଡ଼ିକ
+## ପ୍ରତିଛବି ଟ୍ୟାଗ୍ସ।
 
-| ଇମେଜ୍                    | ଟ୍ୟାଗ୍   | ଆକାର   | ବର୍ଣ୍ଣନା                                              |
-| ------------------------ | -------- | ------ | ----------------------------------------------------- |
-| `diegosouzapw/omniroute` | `latest` | ~250MB | ସର୍ବୋଚ୍ଚ **ପ୍ରକାଶିତ** ସ୍ଥିର SemVer (git `main` ନୁହେଁ) |
-| `diegosouzapw/omniroute` | `3.8.0`  | ~250MB | GitOps ପାଇଁ ଏହି ଶ୍ରେଣୀର ଟ୍ୟାଗ୍କୁ ପିନ୍ କରନ୍ତୁ          |
+| ପ୍ରତିଛବି।                    | ଟ୍ୟାଗ୍ କରନ୍ତୁ। | ଆକାର।   | ବର୍ଣ୍ଣନା                                               |
+| ---------------------------- | -------------- | ------- | ------------------------------------------------------ |
+| `cheaperinference/omniroute` | `latest`       | ~ 250MB | ସର୍ବୋଚ୍ଚ** ପ୍ରକାଶିତ।** ସ୍ଥିର SemVer (git `main` ନୁହେଁ) |
+| `cheaperinference/omniroute` | `3.8.54`       | ~ 250MB | GitOps ପାଇଁ ଏହି ଶ୍ରେଣୀର ଟ୍ୟାଗ୍ ପିନ୍ କରନ୍ତୁ।            |
 
-ବହୁ-ପ୍ଲାଟଫର୍ମ ମ୍ୟାନିଫେଷ୍ଟ: `linux/amd64` + `linux/arm64` ନେଟିଭ୍ (Apple Silicon, AWS Graviton, Raspberry Pi)। Docker ସ୍ୱୟଂଚାଳିତ ଭାବରେ ମେଳ ଖାଉଥିବା ଆର୍କିଟେକ୍ଚର୍ ବାଛେ; ARM ହୋଷ୍ଟରେ AMD64 ଇମ୍ୟୁଲେସନ୍ ବାଧ୍ୟତାମୂଳକ କରିବାକୁ ହେଲେ `--platform linux/amd64` ପ୍ରଦାନ କରନ୍ତୁ।
+ସମାନ ଚିତ୍ରଗୁଡ଼ିକ ତିନୋଟି ସଂଗ୍ରହାଳୟରେ ପ୍ରକାଶିତ ହୋଇଛି, ସମାନ ପ୍ରତି ସ୍ଥାପତ୍ୟ ହଜମ ସହିତ: `cheaperinference/omniroute` (Docker ହବ୍, ଶସ୍ତା ଇନଫେରେନ୍ସ ସଂଗଠନ, 3.8.53 ରୁ), `ghcr.io/cheaper-inference/omniroute` ଏବଂ ଉତ୍ତରାଧିକାରୀ `diegosouzapw/omniroute`, ଯାହା ଏହାର ଇତିହାସକୁ ବଜାୟ ରଖିଥାଏ ଏବଂ ତଥାପି ପ୍ରତ୍ୟେକ ପ୍ରକାଶନ ଗ୍ରହଣ କରିଥାଏ। ବିଦ୍ୟମାନ `diegosouzapw/omniroute` ନିୟୋଜନଗୁଡ଼ିକ ଅଦ୍ୟତନ ଜାରି ରଖେ; ପ୍ରତିଛବି ନାମ ପରିବର୍ତ୍ତନ କରିବା ଇଚ୍ଛାଧୀନ ଅଟେ। ନିମ୍ନରେ `:next` / `:next-web` ପ୍ରି-ରିଲିଜ୍ ଚ୍ୟାନେଲ୍ କେବଳ `diegosouzapw/omniroute` ଏବଂ GHCR ରେ ପ୍ରକାଶିତ।
 
-### ରିଲିଜ୍ ଚ୍ୟାନେଲ୍ଗୁଡ଼ିକ
+ମଲ୍ଟି ପ୍ଲାଟଫର୍ମ ମନିଫେଷ୍ଟ: `linux/amd64` + `linux/arm64` ଦେଶୀ (ଆପଲ୍ ସିଲିକନ୍, AWS ଗ୍ରାଭିଟନ୍, ରାସବେରୀ ପି)। Docker ସ୍ୱୟଂଚାଳିତ ଭାବରେ ମେଳ ଖାଉଥିବା ସ୍ଥାପତ୍ୟକୁ ବାଛିଥାଏ; `--platform linux/amd64` ପାସ୍ କର ଯଦି ତୁମେ ARM ହୋଷ୍ଟ ଉପରେ AMD64 ଏମୁଲେସନକୁ ବାଧ୍ୟ କରିବାକୁ ପଡିବ।
 
-OmniRoute ସ୍ଥିର ରିଲିଜ୍, ସକ୍ରିୟ ରିଲିଜ୍-ବ୍ରାଞ୍ଚ ପରୀକ୍ଷଣ ଏବଂ ଡେଭଲପମେଣ୍ଟ ବିଲ୍ଡ ପାଇଁ ପୃଥକ Docker ଚ୍ୟାନେଲ୍ ପ୍ରକାଶ କରେ।
+### ଚ୍ୟାନେଲଗୁଡିକ ମୁକ୍ତ କରନ୍ତୁ।
 
-| ଚ୍ୟାନେଲ୍                        | ଉତ୍ସ                                   | ପରିବର୍ତ୍ତନଶୀଳତା                   | ସୁପାରିଶ କରାଯାଇଥିବା ବ୍ୟବହାର                                                                                                                |
-| ------------------------------- | -------------------------------------- | --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `:<version>` / `:<version>-web` | ସ୍ୱାକ୍ଷରିତ/ସଂସ୍କରଣଯୁକ୍ତ ରିଲିଜ୍         | ଅପରିବର୍ତ୍ତନୀୟ                     | ଏକ ସଠିକ୍ ରିଲିଜ୍କୁ ପିନ୍ କରୁଥିବା ପ୍ରଡକ୍ସନ୍ ଡିପ୍ଲୟମେଣ୍ଟ                                                                                      |
-| `:latest` / `:latest-web`       | ସର୍ବୋଚ୍ଚ **ପ୍ରକାଶିତ** ସ୍ଥିର SemVer     | ପରିବର୍ତ୍ତନଶୀଳ ସ୍ଥିର ପଏଣ୍ଟର୍       | ଏକ SemVer ପ୍ରକାଶନ କାର୍ଯ୍ୟ **ପରେ** ସ୍ଥିର ରିଲିଜ୍ଗୁଡ଼ିକୁ ଅନୁସରଣ କରେ — `main` କିମ୍ବା ଅପ୍ରକାଶିତ `release/v*` କମିଟ୍ଗୁଡ଼ିକୁ ଟ୍ରାକ୍ କରେ **ନାହିଁ** |
-| `:next` / `:next-web`           | ବର୍ତ୍ତମାନର ଡିଫଲ୍ଟ `release/v*` ବ୍ରାଞ୍ଚ | ପରିବର୍ତ୍ତନଶୀଳ ପ୍ରି-ରିଲିଜ୍ ପଏଣ୍ଟର୍ | ସକ୍ରିୟ ରିଲିଜ୍ ବ୍ରାଞ୍ଚରେ ସାମିଲ୍ ହୋଇଥିବା କିନ୍ତୁ ଏପର୍ଯ୍ୟନ୍ତ ସ୍ଥିର ରିଲିଜ୍ରେ ନଥିବା ସମାଧାନଗୁଡ଼ିକର ପରୀକ୍ଷଣ                                       |
-| `:main` / `:main-web`           | `main` ବ୍ରାଞ୍ଚ                         | ପରିବର୍ତ୍ତନଶୀଳ ଡେଭଲପମେଣ୍ଟ ପଏଣ୍ଟର୍  | କେବଳ ଡେଭଲପମେଣ୍ଟ ଏବଂ ଇଣ୍ଟିଗ୍ରେସନ୍ ପରୀକ୍ଷଣ ପାଇଁ                                                                                             |
+OmniRoute ସ୍ଥିର ପ୍ରକାଶନ, ସକ୍ରିୟ ପ୍ରକାଶନ-ଶାଖା ପରୀକ୍ଷଣ ଏବଂ ବିକାଶ ନିର୍ମାଣ ପାଇଁ ପୃଥକ Docker ଚ୍ୟାନେଲଗୁଡିକ ପ୍ରକାଶ କରେ।
 
-#### ୱେବ୍-ସେସନ୍ ପ୍ରଦାନକାରୀ: `-web` ଇମେଜ୍ଗୁଡ଼ିକ
+| ଚ୍ୟାନେଲ୍।                       | ଉତ୍ସ                                 | ପରିବର୍ତ୍ତନଶୀଳତା।                  | ପରାମର୍ଶିତ ବ୍ୟବହାର                                                                                                                                 |
+| ------------------------------- | ------------------------------------ | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `:<version>` / `:<version>-web` | Signed/versioned ପ୍ରକାଶନ             | ଅକ୍ଷୟ                             | ଉତ୍ପାଦନ ନିୟୋଜନ ଯାହା ଏକ ସଠିକ୍ ପ୍ରକାଶନକୁ ପିନ୍ କରେ।                                                                                                  |
+| `:latest` / `:latest-web`       | ସର୍ବୋଚ୍ଚ** ପ୍ରକାଶିତ।** ସ୍ଥିର SemVer  | ପରିବର୍ତ୍ତନଶୀଳ ସ୍ଥିର ସୂଚକ।         | ସ୍ଥିର ପ୍ରକାଶନକୁ ଅନୁସରଣ କରେ।** ପରେ** ଏକ SemVer ପ୍ରକାଶନ କାର୍ଯ୍ୟ — କରେ।** ନୁହେଁ।** `main` କିମ୍ବା ପ୍ରକାଶିତ `release/v*` କାର୍ଯ୍ୟଗୁଡ଼ିକୁ ଟ୍ରାକ୍ କରନ୍ତୁ। |
+| `:next` / `:next-web`           | ସାମ୍ପ୍ରତିକ ଡିଫଲ୍ଟ `release/v*` ଶାଖା। | ପରିବର୍ତ୍ତନଶୀଳ ପୂର୍ବ-ପ୍ରକାଶନ ସୂଚକ। | ପରୀକ୍ଷଣ ଫିକ୍ସ ଯାହା ସକ୍ରିୟ ରିଲିଜ୍ ଶାଖାରେ ଅବତରଣ କରିଛି କିନ୍ତୁ ଏପର୍ଯ୍ୟନ୍ତ ଏକ ସ୍ଥିର ପ୍ରକାଶନରେ ନାହିଁ।                                                   |
+| `:main` / `:main-web`           | `main` ଶାଖା।                         | ପରିବର୍ତ୍ତନଶୀଳ ବିକାଶ ସୂଚକ।         | କେବଳ ବିକାଶ ଏବଂ ଏକୀକରଣ ପରୀକ୍ଷା।                                                                                                                    |
 
-ଉପରୋକ୍ତ ପ୍ରତ୍ୟେକ ଚ୍ୟାନେଲ୍ ଏକ `-web` ଟ୍ୟାଗ୍ (`:latest-web`, `:<version>-web`, `:next-web`, `:main-web`) ଭାବରେ ମଧ୍ୟ ଉପଲବ୍ଧ, ଯାହା `runner-web` ଷ୍ଟେଜ୍ରୁ ନିର୍ମିତ — Playwright ଏବଂ ଏକ Chromium ବ୍ରାଉଜର୍ ସହିତ ସମାନ ଇମେଜ୍। ସାଧାରଣ ଇମେଜ୍ Chromium **ବିନା** ପ୍ରଦାନ କରାଯାଏ; `gemini-web`, `claude-web` ଏବଂ `claude-turnstile` ପାଇଁ ଏହା ଆବଶ୍ୟକ।
+#### ୱେବ୍ ଅଧିବେଶନ ପ୍ରଦାନକାରୀ: `-web` ପ୍ରତିଛବିଗୁଡ଼ିକ।
 
-ବିଫଳତା ଷ୍ଟାର୍ଟଅପ୍ ସମୟରେ ନୁହେଁ, ପରେ ଘଟେ: ସେହି ପ୍ରଦାନକାରୀମାନେ ସେମାନଙ୍କ ମଡେଲ୍ଗୁଡ଼ିକୁ ତାଲିକାଭୁକ୍ତ କରନ୍ତି ଏବଂ ଡ୍ୟାସ୍ବୋର୍ଡରେ ସଂଯୁକ୍ତ ଭାବେ ଦେଖାଯାନ୍ତି, ଏବଂ କେବଳ ପ୍ରଥମ ଅନୁରୋଧ ଏହି ସନ୍ଦେଶ ସହିତ ବିଫଳ ହୁଏ
+ଉପରୋକ୍ତ ପ୍ରତ୍ୟେକ ଚ୍ୟାନେଲ `-web` ଟ୍ୟାଗ୍ (`:latest-web`, `:<version>-web`, `:next-web`, `:main-web`) ଭାବରେ ଦ୍ୱିଗୁଣିତ ହୁଏ, `runner-web` ପର୍ଯ୍ୟାୟ — ରୁ ସମାନ ପ୍ରତିଛବି ପ୍ଲସ୍ Playwright ଏବଂ କ୍ରୋମିୟମ୍ ବ୍ରାଉଜର୍। ସାଧା ପ୍ରତିଛବି ଜାହାଜ।** ବିନା** କ୍ରୋମିୟମ୍; `gemini-web`, `claude-web` ଏବଂ `claude-turnstile` ଏହାକୁ ଆବଶ୍ୟକ କରନ୍ତି।
+
+ବିଫଳତା ସ୍ଥଗିତ, ଷ୍ଟାର୍ଟଅପ୍ ସମୟ ନୁହେଁ: ସେହି ପ୍ରଦାନକାରୀମାନେ ସେମାନଙ୍କର ମଡେଲଗୁଡିକ ତାଲିକାଭୁକ୍ତ କରନ୍ତି ଏବଂ ଡ୍ୟାସବୋର୍ଡରେ ସଂଯୁକ୍ତ ଭାବରେ ପ୍ରଦର୍ଶନ କରନ୍ତି, ଏବଂ କେବଳ ପ୍ରଥମ ଅନୁରୋଧ ବିଫଳ ହୁଏ।
 
 ```
 [500]: Failed to load external module playwright: Error: Cannot find module
 '/app/node_modules/playwright/node_modules/playwright-core/browsers.json'
 ```
 
-ଆପଣ ସେହି ପ୍ରଦାନକାରୀମାନଙ୍କୁ ବ୍ୟବହାର କରୁଥିଲେ, ଆପଣ ବର୍ତ୍ତମାନ ବ୍ୟବହାର କରୁଥିବା ଚ୍ୟାନେଲ୍ର `-web` ଟ୍ୟାଗ୍ ପୁଲ୍ କରନ୍ତୁ — ଅନ୍ୟ କିଛି ପରିବର୍ତ୍ତନ ହୁଏ ନାହିଁ। ଏକ npm/CLI ଇନ୍ଷ୍ଟଲ୍ରେ (Docker ଇମେଜ୍ ବିନା), ସମତୁଲ୍ୟ ଅନୁପସ୍ଥିତ ଅଂଶ ହେଉଛି ବ୍ରାଉଜର୍ ବାଇନାରି: ହୋଷ୍ଟରେ `npx playwright install chromium` ଚଲାନ୍ତୁ।
+ଯଦି ଆପଣ ସେହି ପ୍ରଦାନକାରୀଙ୍କୁ ବ୍ୟବହାର କରନ୍ତି, ଆପଣ ପୂର୍ବରୁ — ରେ ଥିବା ଚ୍ୟାନେଲର `-web` ଟ୍ୟାଗ୍ ଟାଣନ୍ତୁ, ଅନ୍ୟ କିଛି ପରିବର୍ତ୍ତନ ହୁଏ ନାହିଁ। ଏକ npm/CLI ସଂସ୍ଥାପନରେ ( Docker ପ୍ରତିଛବି ନାହିଁ), ସମାନ ଅନୁପସ୍ଥିତ ଖଣ୍ଡ ହେଉଛି ବ୍ରାଉଜର୍ ବାଇନାରୀ: ହୋଷ୍ଟରେ `npx playwright install chromium` ଚଲାନ୍ତୁ।
 
-#### ପ୍ରି-ରିଲିଜ୍ ଚ୍ୟାନେଲ୍ର ବ୍ୟବହାର
+#### ପ୍ରି-ରିଲିଜ୍ ଚ୍ୟାନେଲ୍ ବ୍ୟବହାର କରି।
 
-`next` ଚ୍ୟାନେଲ୍ଟି ବର୍ତ୍ତମାନର ଡିଫଲ୍ଟ `release/v*` ବ୍ରାଞ୍ଚକୁ ପ୍ରତ୍ୟେକ push ସମୟରେ ପୁନଃନିର୍ମାଣ କରାଯାଏ ଏବଂ AMD64 ଓ ARM64 ଉଭୟ ପାଇଁ ପ୍ରକାଶିତ ହୁଏ। ପୁରୁଣା maintenance ବ୍ରାଞ୍ଚଗୁଡ଼ିକ ଏହାକୁ overwrite କରିପାରିବେ ନାହିଁ। ପରବର୍ତ୍ତୀ stable tag ସୃଷ୍ଟି ହେବା ପୂର୍ବରୁ ସକ୍ରିୟ release ବ୍ରାଞ୍ଚରେ merge ହୋଇଥିବା ସଂଶୋଧନଗୁଡ଼ିକ ପାଇଁ ଏହି ଚ୍ୟାନେଲ୍ ଗୋଟିଏ pull କରାଯୋଗ୍ୟ image ପ୍ରଦାନ କରେ।
+`next` ଚ୍ୟାନେଲଟି ବର୍ତ୍ତମାନର ଡିଫଲ୍ଟ `release/v*` ଶାଖାର ପ୍ରତ୍ୟେକ ଧକ୍କା ଉପରେ ପୁନ ilt ନିର୍ମାଣ ହୋଇଛି ଏବଂ ଉଭୟ AMD64 ଏବଂ ARM64 ପାଇଁ ପ୍ରକାଶିତ। ପୁରାତନ ରକ୍ଷଣାବେକ୍ଷଣ ଶାଖା ଏହାକୁ ନବଲିଖନ କରିପାରିବ ନାହିଁ। ପରବର୍ତ୍ତୀ ସ୍ଥିର ଟ୍ୟାଗ୍ କାଟିବା ପୂର୍ବରୁ ସକ୍ରିୟ ରିଲିଜ୍ ଶାଖାରେ ମିଶ୍ରିତ ହୋଇଥିବା ଫିକ୍ସଗୁଡିକ ପାଇଁ ଚ୍ୟାନେଲ ଏକ ଆକର୍ଷଣୀୟ ଚିତ୍ର ପ୍ରଦାନ କରିଥାଏ।
 
 ```bash
 docker pull diegosouzapw/omniroute:next
 docker pull diegosouzapw/omniroute:next-web
 ```
 
-Docker Compose ପାଇଁ, ଚୟନିତ profile ଦ୍ୱାରା ବ୍ୟବହୃତ image tagକୁ override କରନ୍ତୁ, ତା’ପରେ serviceକୁ pull କରି ପୁନଃସୃଷ୍ଟି କରନ୍ତୁ:
+Docker ରଚନା ପାଇଁ, ମନୋନୀତ ପ୍ରୋଫାଇଲ୍ ଦ୍ୱାରା ବ୍ୟବହୃତ ଇମେଜ୍ ଟ୍ୟାଗ୍ କୁ ନବଲିଖନ କରନ୍ତୁ, ତାପରେ ସେବାକୁ ଟାଣନ୍ତୁ ଏବଂ ପୁନ re ନିର୍ମାଣ କରନ୍ତୁ:
 
 ```yaml
 services:
@@ -521,32 +488,32 @@ docker compose pull
 docker compose up -d
 ```
 
-#### ସୁରକ୍ଷା ଏବଂ rollback
+#### ସୁରକ୍ଷା ଏବଂ ରୋଲବ୍ୟାକ୍।
 
-`next` ହେଉଛି ଏକ ପରିବର୍ତ୍ତନଶୀଳ pre-release ଚ୍ୟାନେଲ୍। ସକ୍ରିୟ release ବ୍ରାଞ୍ଚକୁ ହେଉଥିବା ଯେକୌଣସି pushରେ ଏହା ପରିବର୍ତ୍ତିତ ହୋଇପାରେ ଏବଂ ଏହା **production ବ୍ୟବହାର ପାଇଁ ସମର୍ଥିତ ନୁହେଁ**। ଏକ ନିର୍ଦ୍ଦିଷ୍ଟ buildର ମୂଲ୍ୟାୟନ କରୁଥିବାବେଳେ image digestକୁ pin କରନ୍ତୁ:
+`next` ହେଉଛି ଏକ ଭାସମାନ ପ୍ରି-ରିଲିଜ୍ ଚ୍ୟାନେଲ୍। ଏହା ସକ୍ରିୟ ରିଲିଜ୍ ଶାଖାକୁ ଯେକ push ଣସି ଧକ୍କାରେ ପରିବର୍ତ୍ତନ ହୋଇପାରେ ଏବଂ ଅଟେ।** ଉତ୍ପାଦନ ବ୍ୟବହାର ପାଇଁ ସମର୍ଥିତ ନୁହେଁ।** । ଏକ ନିର୍ଦ୍ଦିଷ୍ଟ ନିର୍ମାଣର ମୂଲ୍ୟାଙ୍କନ କରିବା ସମୟରେ ପ୍ରତିଛବି ହଜମକୁ ପିନ୍ କରନ୍ତୁ:
 
 ```bash
 docker pull diegosouzapw/omniroute:next
 docker image inspect diegosouzapw/omniroute:next --format '{{index .RepoDigests 0}}'
 ```
 
-ପରୀକ୍ଷା କରିବା ପୂର୍ବରୁ OmniRoute data volume କିମ୍ବା bind-mounted data directoryର backup ନିଅନ୍ତୁ। rollback କରିବା ପାଇଁ, ପୂର୍ବରୁ ବ୍ୟବହୃତ stable version କିମ୍ବା digestକୁ ପୁନଃସ୍ଥାପନ କରନ୍ତୁ ଏବଂ containerକୁ ପୁନଃସୃଷ୍ଟି କରନ୍ତୁ:
+ପରୀକ୍ଷଣ ପୂର୍ବରୁ, OmniRoute ଡାଟା ଭଲ୍ୟୁମ୍ କିମ୍ବା ବାଇଣ୍ଡ-ମାଉଣ୍ଟେଡ୍ ଡାଟା ଡିରେକ୍ଟୋରୀକୁ ବ୍ୟାକଅପ୍ କରନ୍ତୁ। ପଛକୁ ଗଡ଼ିବା ପାଇଁ, ପୂର୍ବରୁ ବ୍ୟବହୃତ ସ୍ଥିର ସଂସ୍କରଣକୁ ପୁନ restore ସ୍ଥାପନ କରନ୍ତୁ କିମ୍ବା ପାତ୍ରକୁ ହଜମ କରନ୍ତୁ ଏବଂ ପୁନ ate ନିର୍ମାଣ କରନ୍ତୁ:
 
 ```bash
-docker pull diegosouzapw/omniroute:<stable-version>
+docker pull cheaperinference/omniroute:<stable-version>
 docker compose up -d
 ```
 
-ଏକ release-branch build କେବେବି `latest`କୁ ଆଗକୁ ବଢ଼ାଇପାରିବ ନାହିଁ; କେବଳ ଏକ ଯୋଗ୍ୟ stable semantic version ହିଁ stable pointerକୁ promote କରିପାରିବ। `next` imagesରେ release image inspection ଏବଂ CRITICAL vulnerabilityକୁ ଅବରୋଧ କରୁଥିବା gate ବଜାୟ ରହେ।
+ଏକ ପ୍ରକାଶନ-ଶାଖା ନିର୍ମାଣ `latest` କେବେବି ଘୁଞ୍ଚାଇ ପାରିବ ନାହିଁ। କେବଳ ଏକ ଯୋଗ୍ୟ ସ୍ଥିର ଅର୍ଥଗତ ସଂସ୍କରଣ ସ୍ଥିର ସୂଚକକୁ ପ୍ରୋତ୍ସାହନ ଦେଇପାରେ। `next` ପ୍ରତିଛବିଗୁଡ଼ିକ ରିଲିଜ୍ ପ୍ରତିଛବି ଯାଞ୍ଚ ଏବଂ CRITICAL- ଦୁର୍ବଳତା ଗେଟ୍ ଅବରୋଧ କରିଥାଏ।
 
-**`latest`, git ପାଇଁ ସଦ୍ୟତାର କୌଣସି ନିଶ୍ଚିତତା ନୁହେଁ।** `main` କିମ୍ବା ସକ୍ରିୟ `release/v*` ବ୍ରାଞ୍ଚରେ merge ହୋଇଥିବା ସଂଶୋଧନଗୁଡ଼ିକ ଏକ stable SemVer image ପ୍ରକାଶିତ ହୋଇ publish job ଦ୍ୱାରା `:latest` promote ନହେବା ପର୍ଯ୍ୟନ୍ତ `:latest`ରେ ରହିବେ **ନାହିଁ** (ସେହି SemVer ସହ ସମାନ digest)। GitHubରେ ସଂଶୋଧନଟି ପୂର୍ବରୁ ଦେଖାଯାଉଥିବା ସତ୍ତ୍ୱେ `latest` ସ୍ଥିର ଥିବା ପରି ଦେଖାଗଲେ, release ବ୍ରାଞ୍ଚକୁ ପରୀକ୍ଷା କରିବା ପାଇଁ `:next` pull କରନ୍ତୁ କିମ୍ବା SemVer tag ପାଇଁ ଅପେକ୍ଷା କରନ୍ତୁ।
+**`latest` git ପାଇଁ ଏକ ମୁଦ୍ରା ଗ୍ୟାରେଣ୍ଟି ନୁହେଁ।** `main` କିମ୍ବା ସକ୍ରିୟ `release/v*` ଶାଖାରେ ମିଶ୍ରିତ ଫିକ୍ସଗୁଡ଼ିକ ହେଉଛି।** ନୁହେଁ।** `:latest` ରେ ଏକ ସ୍ଥିର SemVer ପ୍ରତିଛବି ପ୍ରକାଶିତ ନହେବା ପର୍ଯ୍ୟନ୍ତ ଏବଂ ପ୍ରକାଶନ କାର୍ଯ୍ୟ `:latest` ପ୍ରୋତ୍ସାହିତ କରେ (ସେହି SemVer ସହିତ ସମାନ ହଜମ)। ଯଦି `latest` ପୂର୍ବରୁ ଫିକ୍ସ ଦେଖାଉଥିବାବେଳେ GitHub ଫ୍ରିଜ୍ ଦେଖାଯାଏ, ରିଲିଜ୍ ଶାଖା ପରୀକ୍ଷା କରିବାକୁ `:next` ଟାଣନ୍ତୁ କିମ୍ବା SemVer ଟ୍ୟାଗ୍ ପାଇଁ ଅପେକ୍ଷା କରନ୍ତୁ।
 
-| ଆପଣ ଯାହା ଚାହୁଁଛନ୍ତି                                                                 | ବ୍ୟବହାର କରନ୍ତୁ                                |
-| ----------------------------------------------------------------------------------- | --------------------------------------------- |
-| ବିଚ୍ୟୁତ ହେବା ଅନୁଚିତ ଥିବା GitOps / production                                        | `:X.Y.Z`କୁ pin କରନ୍ତୁ (କିମ୍ବା image digestକୁ) |
-| ପ୍ରକାଶିତ stableଗୁଡ଼ିକୁ ଅନୁସରଣ କରିବା ଏବଂ ପ୍ରତ୍ୟେକ releaseରେ ପୁନଃସୃଷ୍ଟିକୁ ଗ୍ରହଣ କରିବା | `:latest`                                     |
-| ଅପ୍ରକାଶିତ `release/v*` commitଗୁଡ଼ିକୁ ପରୀକ୍ଷା କରିବା                                  | `:next` (production ନୁହେଁ)                    |
-| `main`କୁ ପରୀକ୍ଷା କରିବା                                                              | `:main` (production ନୁହେଁ)                    |
+| ଆପଣ ଚାହାଁନ୍ତି।                                                                           | ବ୍ୟବହାର କରନ୍ତୁ।                     |
+| ---------------------------------------------------------------------------------------- | ----------------------------------- |
+| GitOps / ଉତ୍ପାଦନ ଯାହା ଡ୍ରାଇଫ୍ ହେବା ଉଚିତ୍ ନୁହେଁ।                                          | `:X.Y.Z` ପିନ୍ (କିମ୍ବା ପ୍ରତିଛବି ହଜମ) |
+| ପ୍ରକାଶିତ ଷ୍ଟଲଗୁଡିକ ଅନୁସରଣ କରନ୍ତୁ ଏବଂ ପ୍ରତ୍ୟେକ ପ୍ରକାଶନରେ ଏକ ପୁନ ate ନିର୍ମାଣ ଗ୍ରହଣ କରନ୍ତୁ। | `:latest`                           |
+| ଅଣ ପ୍ରକାଶିତ `release/v*` କାର୍ଯ୍ୟଗୁଡିକ ପରୀକ୍ଷା କରନ୍ତୁ।                                    | `:next` (ଉତ୍ପାଦନ ନୁହେଁ)             |
+| `main` ପରୀକ୍ଷା କରନ୍ତୁ।                                                                   | `:main` (ଉତ୍ପାଦନ ନୁହେଁ)             |
 
 ## Dockerରେ ଡ୍ୟାସବୋର୍ଡ ଅପଡେଟ୍
 
@@ -619,27 +586,27 @@ sudo systemctl enable --now omniroute-update.path
 ସେବାଟି pull କରିବା ପୂର୍ବରୁ ଅନୁରୋଧକୁ ହଟାଏ, ଯାହାଦ୍ୱାରା ଏକ ବିଫଳ ରନ୍ ପୁନରାବୃତ୍ତି ହୁଏ ନାହିଁ।
 `DOCKER_UPDATE_TRIGGER_FILE` ନଥିଲେ ଡ୍ୟାସବୋର୍ଡ ମାନୁଆଲ୍ କମାଣ୍ଡ ପ୍ରବାହକୁ ବଜାୟ ରଖେ।
 
-## ଉପଲବ୍ଧତା: ଡିଫଲ୍ଟ SQLite ହେଉଛି ଏକକ-ପ୍ରତିକୃତି \|
+## ଉପଲବ୍ଧତା: ଡିଫଲ୍ଟ SQLite ହେଉଛି ଏକକ-ପ୍ରତିକୃତି।
 
-ଷ୍ଟକ୍ Docker / Kubernetes OmniRoute ହେଉଛି \|** ଗୋଟିଏ ନୋଡ୍ ପ୍ରକ୍ରିୟା + ଗୋଟିଏ SQLite ଲେଖକ \|** । ଉଚ୍ଚ ଉପଲବ୍ଧତା ହେଉଛି \|** ସମର୍ଥିତ ନୁହେଁ** ସେହି ଟପୋଲୋଜି ଉପରେ \|
+ଷ୍ଟକ୍ Docker / Kubernetes OmniRoute ହେଉଛି।** ଗୋଟିଏ ନୋଡ୍ ପ୍ରକ୍ରିୟା + ଗୋଟିଏ SQLite ଲେଖକ।** । ଉଚ୍ଚ ଉପଲବ୍ଧତା ହେଉଛି।** ସମର୍ଥିତ ନୁହେଁ** ସେହି ଟପୋଲୋଜି ଉପରେ।
 
-| ପ୍ରତିବନ୍ଧକ \|                                        | ପରିଣାମ                                                                                                                                                                                                                                                                                                                     |
-| ---------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ଏକକ ଲେଖକ \|                                          | କର \|** ନୁହେଁ** ସମାନ SQLite ଫାଇଲ୍ ବିରୁଦ୍ଧରେ ଏକାଧିକ ପ୍ରତିକୃତି ଚଲାନ୍ତୁ \| ଯାହାକି DB ଖରାପ କରିଥାଏ \|                                                                                                                                                                                                                           |
-| ପୁନ / ନିର୍ମାଣ / ପୁନ art ଆରମ୍ଭ / HEALTHCHECK ହତ୍ୟା \| | **ପୂର୍ଣ୍ଣ ଅଘଟଣ \|** ଫ୍ଲାଇଟ୍ SSE, ଡ୍ୟାସବୋର୍ଡ ଅଧିବେଶନ, ଏବଂ ମେମୋରୀ ସ୍ଥିତିର \| ପ୍ରତ୍ୟେକ ସଂଯୁକ୍ତ କ୍ଲାଏଣ୍ଟ ଡ୍ରପ୍ ହୁଏ \| ଖାଲି-ଏଣ୍ଡପଏଣ୍ଟ ୱିଣ୍ଡୋ ସମୟରେ ନୂତନ ଅନୁରୋଧଗୁଡ଼ିକ ଏକ ଓଲଟା-ପ୍ରକ୍ସି ପାଇଥାଏ \|**`502 Bad Gateway: Unknown error`** , OmniRoute JSON ନୁହେଁ - ଗ୍ରାହକ ଏହାକୁ ପ୍ରଦାନକାରୀ ବିଫଳତା (# 11015) ରୁ ପୃଥକ କରିପାରିବେ ନାହିଁ \| |
-| `/healthz` ପରି ସମାନ ଇଭେଣ୍ଟ ଲୁପ୍ \|                   | ଏକ ବ୍ୟସ୍ତ କାଟାଲଗ୍ କିମ୍ବା ସଙ୍କୋଚନ ଟିକ୍ ଅନୁସନ୍ଧାନକୁ ବିଳମ୍ବ କରିପାରେ \| ଏକ ସ୍ୱଳ୍ପ ସମୟ ସମାପ୍ତି ପରେ ପୁନ rest ଆରମ୍ଭ କରେ \|** କେବଳ** ପ୍ରତିକୃତି                                                                                                                                                                                     |
+| ପ୍ରତିବନ୍ଧକ।                                        | ପରିଣାମ                                                                                                                                                                                                                                                                                                        |
+| -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ଏକକ ଲେଖକ।                                          | କର।** ନୁହେଁ।** ସମାନ SQLite ଫାଇଲ୍ ବିରୁଦ୍ଧରେ ଏକାଧିକ ପ୍ରତିକୃତି ଚଲାନ୍ତୁ। ଯାହାକି DB ଖରାପ କରିଥାଏ।                                                                                                                                                                                                                   |
+| ପୁନ / ନିର୍ମାଣ / ପୁନ art ଆରମ୍ଭ / HEALTHCHECK ହତ୍ୟା। | **ପୂର୍ଣ୍ଣ ଅଘଟଣ।** ଫ୍ଲାଇଟ୍ SSE, ଡ୍ୟାସବୋର୍ଡ ଅଧିବେଶନ, ଏବଂ ମେମୋରୀ ସ୍ଥିତିର। ପ୍ରତ୍ୟେକ ସଂଯୁକ୍ତ କ୍ଲାଏଣ୍ଟ ଡ୍ରପ୍ ହୁଏ। ଖାଲି-ଏଣ୍ଡପଏଣ୍ଟ ୱିଣ୍ଡୋ ସମୟରେ ନୂତନ ଅନୁରୋଧଗୁଡ଼ିକ ଏକ ଓଲଟା-ପ୍ରକ୍ସି ପାଇଥାଏ।**`502 Bad Gateway: Unknown error`** , OmniRoute JSON — ଗ୍ରାହକମାନେ ଏହାକୁ ପ୍ରଦାନକାରୀ ବିଫଳତା (#11015) ରୁ ପୃଥକ କରିପାରିବେ ନାହିଁ। |
+| `/healthz` ପରି ସମାନ ଇଭେଣ୍ଟ ଲୁପ୍।                   | ଏକ ବ୍ୟସ୍ତ କାଟାଲଗ୍ କିମ୍ବା ସଙ୍କୋଚନ ଟିକ୍ ଅନୁସନ୍ଧାନକୁ ବିଳମ୍ବ କରିପାରେ। ଏକ ସ୍ୱଳ୍ପ ସମୟ ସମାପ୍ତି ପରେ ପୁନ rest ଆରମ୍ଭ କରେ।** କେବଳ** ପ୍ରତିକୃତି                                                                                                                                                                            |
 
-**ପ୍ରୋବ ମ୍ୟାଟ୍ରିକ୍ସ \|** ( [କୁବେରନେଟସ୍ ଅନୁସନ୍ଧାନ ସୁପାରିଶଗୁଡିକ](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations) ମଧ୍ୟ ଦେଖନ୍ତୁ):
+**ପ୍ରୋବ ମ୍ୟାଟ୍ରିକ୍ସ।** ( [କୁବେରନେଟସ୍ ଅନୁସନ୍ଧାନ ସୁପାରିଶଗୁଡିକ](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations) ମଧ୍ୟ ଦେଖନ୍ତୁ):
 
-| ଅନୁସନ୍ଧାନ \|   | ଲକ୍ଷ୍ୟ                                                       | ବ୍ୟବହାର କରନ୍ତୁ ନାହିଁ \|                                  |
-| -------------- | ------------------------------------------------------------ | -------------------------------------------------------- |
-| ଜୀବନ୍ତତା \|    | TCP ଉପରେ `PORT` (ଡିଫଲ୍ଟ `20128`), କିମ୍ବା ନରମ HTTP `/healthz` | `/api/monitoring/health`                                 |
-| ପ୍ରସ୍ତୁତି      | HTTP `GET /healthz`                                          | ଟାଇଟ୍ ଟାଇମଆଉଟ୍ ଯାହା ଇଭେଣ୍ଟ-ଲୁପ୍ କୁ ମୃତ ପରି ବ୍ୟସ୍ତ କରେ \| |
-| ଗଭୀର / ମଣିଷ \| | `/api/monitoring/health`                                     | ସ୍ୱୟଂଚାଳିତ କୁବେଲେଟ୍ ଜୀବନ୍ତତା \|                          |
+| ଅନୁସନ୍ଧାନ।   | ଲକ୍ଷ୍ୟ                                                       | ବ୍ୟବହାର କରନ୍ତୁ ନାହିଁ।                                  |
+| ------------ | ------------------------------------------------------------ | ------------------------------------------------------ |
+| ଜୀବନ୍ତତା।    | TCP ଉପରେ `PORT` (ଡିଫଲ୍ଟ `20128`), କିମ୍ବା ନରମ HTTP `/healthz` | `/api/monitoring/health`                               |
+| ପ୍ରସ୍ତୁତି    | HTTP `GET /healthz`                                          | ଟାଇଟ୍ ଟାଇମଆଉଟ୍ ଯାହା ଇଭେଣ୍ଟ-ଲୁପ୍ କୁ ମୃତ ପରି ବ୍ୟସ୍ତ କରେ। |
+| ଗଭୀର / ମଣିଷ। | `/api/monitoring/health`                                     | ସ୍ୱୟଂଚାଳିତ କୁବେଲେଟ୍ ଜୀବନ୍ତତା।                          |
 
-**ନବୀକରଣ:** ପ୍ରତ୍ୟେକ ଅଧିବେଶନ ହ୍ରାସ ପାଇବ ବୋଲି ଆଶା କରନ୍ତୁ \| ଯଦି ତୁମେ ପାରିବ ଗ୍ରାହକମାନଙ୍କୁ ନିଷ୍କାସନ କର; ଡିଫଲ୍ଟ SQLite ରେ କ roll ଣସି ଗାଡ଼ି ଅପଡେଟ୍ ନାହିଁ \| `restart: unless-stopped` ପ୍ଲସ୍ Docker `HEALTHCHECK` ରଚନା ମଧ୍ୟ ଏକମାତ୍ର ପ୍ରକ୍ରିୟାକୁ ବଦଳାଇବ ଯେତେବେଳେ ପାତ୍ରଟି ଅସ୍ୱାସ୍ଥ୍ୟକର - ସମାନ ବିସ୍ଫୋରଣ ରେଡିଓ \|
+**ନବୀକରଣ:** ପ୍ରତ୍ୟେକ ଅଧିବେଶନ ହ୍ରାସ ପାଇବ ବୋଲି ଆଶା କରନ୍ତୁ। ଯଦି ତୁମେ ପାରିବ ଗ୍ରାହକମାନଙ୍କୁ ନିଷ୍କାସନ କର; ଡିଫଲ୍ଟ SQLite ରେ କ roll ଣସି ଗାଡ଼ି ଅପଡେଟ୍ ନାହିଁ। `restart: unless-stopped` ପ୍ଲସ୍ Docker `HEALTHCHECK` ରଚନା ମଧ୍ୟ ଏକମାତ୍ର ପ୍ରକ୍ରିୟାକୁ ବଦଳାଇବ ଯେତେବେଳେ ପାତ୍ରଟି ଅସ୍ୱାସ୍ଥ୍ୟକର — ସମାନ ବିସ୍ଫୋରଣ ରେଡିଓ ଅଟେ।
 
-ପ୍ରସ୍ତୁତ ପ୍ରସ୍ତୁତ ମନିଫେଷ୍ଟସ୍ ଏବଂ ଏକ ହେଲମ୍ ଚାର୍ଟ `deploy/kubernetes/` ଏବଂ `deploy/helm/omniroute/` ରେ ଲାଇଭ୍ - [କୁବେରନେଟସ୍ ନିୟୋଜନ ଗାଇଡ୍](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md) ଦେଖନ୍ତୁ \|
+ପ୍ରସ୍ତୁତ-ପ୍ରସ୍ତୁତ ମନିଫେଷ୍ଟସ୍ ଏବଂ ଏକ ହେଲମ୍ ଚାର୍ଟ `deploy/kubernetes/` ଏବଂ `deploy/helm/omniroute/` — ରେ ଲାଇଭ୍ [କୁବେରନେଟସ୍ ନିୟୋଜନ ଗାଇଡ୍](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md) ଦେଖନ୍ତୁ।
 
 କୁବେରନେଟସ୍ ସ୍ନିପେଟ୍ a** ଏକକ ପ୍ରତିକୃତି** (ପୁନ re ନିର୍ମାଣ ଆବଶ୍ୟକ; ଗୋଟିଏ SQLite ଫାଇଲ ବିରୁଦ୍ଧରେ `replicas` ଉଠାନ୍ତୁ ନାହିଁ):
 
@@ -668,37 +635,37 @@ spec:
             periodSeconds: 20
 ```
 
-`preStop` ଶୋଇବା SIGTERM ପୂର୍ବରୁ kube ଡ୍ରପ୍ ସର୍ଭିସ୍ ଏଣ୍ଡପଏଣ୍ଟଗୁଡ଼ିକୁ ଛାଡିଦିଏ \|** ନୂତନ** ଟ୍ରାଫିକ୍ ମରିବା ପ୍ରକ୍ରିୟାକୁ ବନ୍ଦ କରିଦିଏ \| ଫ୍ଲାଇଟ୍ `/v1/responses` SSE ହେଭିୱେଟ୍ ଆଡମିଶନ ଲିଜ୍ (# 11015) ମାଧ୍ୟମରେ `SHUTDOWN_TIMEOUT_MS` (ଡିଫଲ୍ଟ 30s) ପର୍ଯ୍ୟନ୍ତ ନିଷ୍କାସିତ ହୋଇଛି \| ନୂତନ ଅନୁରୋଧ ଯାହାକି ଏପର୍ଯ୍ୟନ୍ତ ପ୍ରକ୍ରିୟାରେ ପହଞ୍ଚେ `503` + `Retry-After: 5`\| ଖାଲି-ଏଣ୍ଡପଏଣ୍ଟ ଫାଙ୍କ ସୃଷ୍ଟି କରନ୍ତୁ ଯେପର୍ଯ୍ୟନ୍ତ ପ୍ରତିସ୍ଥାପନ ପ୍ରସ୍ତୁତ ନହେବା ପର୍ଯ୍ୟନ୍ତ ଏକ କଠିନ ଅଘଟଣ ରହିଥାଏ - ତାହା ହେଉଛି SQLite ଟପୋଲୋଜି, ଏକ ଅନୁସନ୍ଧାନ ଭୁଲ୍ ନୁହେଁ \|
+`preStop` ଶୋଇବା SIGTERM ପୂର୍ବରୁ kube ଡ୍ରପ୍ ସର୍ଭିସ୍ ଏଣ୍ଡପଏଣ୍ଟଗୁଡ଼ିକୁ ଛାଡିଦିଏ।** ନୂତନ** ଟ୍ରାଫିକ୍ ମରିବା ପ୍ରକ୍ରିୟାକୁ ବନ୍ଦ କରିଦିଏ। ଫ୍ଲାଇଟ୍ `/v1/responses` SSE ହେଭିୱେଟ୍ ଆଡମିଶନ ଲିଜ୍ (#11015) ମାଧ୍ୟମରେ `SHUTDOWN_TIMEOUT_MS` (ଡିଫଲ୍ଟ 30s) ପର୍ଯ୍ୟନ୍ତ ନିଷ୍କାସିତ ହୁଏ। ନୂତନ ଅନୁରୋଧ ଯାହାକି ଏପର୍ଯ୍ୟନ୍ତ ପ୍ରକ୍ରିୟାରେ ପହଞ୍ଚେ `503` + `Retry-After: 5` ପାଇଥାଏ। ଖାଲି-ଏଣ୍ଡପଏଣ୍ଟ ଫାଙ୍କ ସୃଷ୍ଟି କରନ୍ତୁ ଯେପର୍ଯ୍ୟନ୍ତ ପ୍ରତିସ୍ଥାପନ ପ୍ରସ୍ତୁତ ନହେବା ପର୍ଯ୍ୟନ୍ତ ଏକ କଠିନ ଆଉଟେଜ୍ — ରହିଥାଏ ଯାହାକି SQLite ଟପୋଲୋଜି ଅଟେ, ଏକ ଅନୁସନ୍ଧାନ ଭୁଲ୍ ନୁହେଁ।
 
-ବାହ୍ୟ Postgres / ବହୁ-ଲେଖକ HA ହେଉଛି \|** ନୁହେଁ** ଏକ ଡକ୍ୟୁମେଣ୍ଟ୍ ଷ୍ଟକ୍ ପଥ \| ଯଦି ଆପଣ HA ଆବଶ୍ୟକ କରନ୍ତି, ଗୋଟିଏ ପ୍ରତିକୃତି ରଖନ୍ତୁ କିମ୍ବା ଏକ ଟପୋଲୋଜି ଚଲାନ୍ତୁ, ପ୍ରୋଜେକ୍ଟ ପୃଥକ ଭାବରେ ପରୀକ୍ଷଣ ଏବଂ ଡକ୍ୟୁମେଣ୍ଟ୍ ହୋଇଛି \| Postgres/MySQL କାର୍ଯ୍ୟ [# #8075](https://github.com/diegosouzapw/OmniRoute/issues/8075) ରେ ବାସ କରେ \| ସେହି ଜାହାଜ ପର୍ଯ୍ୟନ୍ତ, ଗୁଣନ କରିବାର ଏକମାତ୍ର ସମର୍ଥିତ ଉପାୟ \|** ବଡ** `/v1/responses` କ୍ଷମତା ହେଉଛି N ସ୍ independent ାଧୀନ ପ୍ରକ୍ରିୟା (ପରବର୍ତ୍ତୀ ବିଭାଗ), ଗୋଟିଏ ଭଲ୍ୟୁମରେ `replicas > 1` ନୁହେଁ \|
+ବାହ୍ୟ Postgres / ବହୁ-ଲେଖକ HA ହେଉଛି।** ନୁହେଁ।** ଏକ ଡକ୍ୟୁମେଣ୍ଟ୍ ହୋଇଥିବା ଷ୍ଟକ୍ ପଥ। ଯଦି ଆପଣ HA ଆବଶ୍ୟକ କରନ୍ତି, ଗୋଟିଏ ପ୍ରତିକୃତି ରଖନ୍ତୁ କିମ୍ବା ଏକ ଟପୋଲୋଜି ଚଲାନ୍ତୁ, ପ୍ରୋଜେକ୍ଟ ପୃଥକ ଭାବରେ ପରୀକ୍ଷଣ ଏବଂ ଡକ୍ୟୁମେଣ୍ଟ୍ ହୋଇଛି। Postgres/MySQL କାର୍ଯ୍ୟ [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075) ରେ ରୁହେ। ସେହି ଜାହାଜ ପର୍ଯ୍ୟନ୍ତ, ଗୁଣନ କରିବାର ଏକମାତ୍ର ସମର୍ଥିତ ଉପାୟ।** ବଡ** `/v1/responses` କ୍ଷମତା ହେଉଛି N ସ୍ independent ାଧୀନ ପ୍ରକ୍ରିୟା (ପରବର୍ତ୍ତୀ ବିଭାଗ), ଗୋଟିଏ ଭଲ୍ୟୁମରେ `replicas > 1` ନୁହେଁ।
 
-## ମାପକାଠି: N ସ୍ independent ାଧୀନ ପ୍ରକ୍ରିୟା \|
+## ମାପକାଠି: N ସ୍ independent ାଧୀନ ପ୍ରକ୍ରିୟା।
 
-### Codex ଟୋକେନ୍ ଘୂର୍ଣ୍ଣନ ମାଲିକାନା \|
+### Codex ଟୋକେନ୍ ଘୂର୍ଣ୍ଣନ ମାଲିକାନା।
 
-ଗୋଟିଏ Codex ଖାତାର ନକଲଗୁଡିକ ସ୍ independ ାଧୀନ ଭାବରେ ଏହାର ଏକକ-ବ୍ୟବହାର ସତେଜ ଟୋକେନ୍ ଖାଇବା ଉଚିତ୍ ନୁହେଁ \| ଯେଉଁ ପରିସ୍ଥିତିରେ କେବଳ ସିଙ୍କ୍ରୋନାଇଜଡ୍ ପରିଚୟପତ୍ର ଖାଏ, `OMNIROUTE_TOKEN_REFRESH_PASSIVE_PROVIDERS=codex` (ଛଦ୍ମନାମ `cx`) ସେଟ୍ କରନ୍ତୁ \| ଏହାକୁ ଏକକ ଘୂର୍ଣ୍ଣନ ମାଲିକ ଉପରେ ସେଟ୍ କରନ୍ତୁ \| ପ୍ରତ୍ୟେକ ପ୍ରକ୍ରିୟା ତଥାପି ନିଜସ୍ୱ `DATA_DIR` ଆବଶ୍ୟକ କରେ; ଏହି ବିକଳ୍ପ SQLite ଅଂଶୀଦାର କରେ ନାହିଁ କିମ୍ବା ଟୋକେନ୍ ସିଙ୍କ୍ରୋନାଇଜେସନ୍ କିମ୍ବା ବଣ୍ଟିତ ଲକ୍ ଯୋଗାଏ ନାହିଁ \|
+ଗୋଟିଏ Codex ଖାତାର ନକଲଗୁଡିକ ନିରପେକ୍ଷ ଭାବରେ ଏହାର ଏକକ-ବ୍ୟବହାର ସତେଜ ଟୋକେନ୍ ଖାଇବା ଉଚିତ୍ ନୁହେଁ। ଯେଉଁ ପରିସ୍ଥିତିରେ କେବଳ ସିଙ୍କ୍ରୋନାଇଜଡ୍ ପରିଚୟପତ୍ର ଖାଏ, `OMNIROUTE_TOKEN_REFRESH_PASSIVE_PROVIDERS=codex` (ଛଦ୍ମନାମ `cx`) ସେଟ୍ କରନ୍ତୁ। ଏହାକୁ ଏକକ ଘୂର୍ଣ୍ଣନ ମାଲିକ ଉପରେ ସେଟ୍ କରନ୍ତୁ। ପ୍ରତ୍ୟେକ ପ୍ରକ୍ରିୟା ତଥାପି ନିଜସ୍ୱ `DATA_DIR` ଆବଶ୍ୟକ କରେ; ଏହି ବିକଳ୍ପ SQLite ଅଂଶୀଦାର କରେ ନାହିଁ କିମ୍ବା ଟୋକେନ୍ ସିଙ୍କ୍ରୋନାଇଜେସନ୍ କିମ୍ବା ବଣ୍ଟିତ ଲକ୍ ଯୋଗାଏ ନାହିଁ।
 
-ଯେତେବେଳେ ଏକ ସତେଜ ଆବଶ୍ୟକ ହୁଏ ଏବଂ କେବଳ ଏକ ଭିନ୍ନ, ଅପ୍ରତ୍ୟାଶିତ ଆକ୍ସେସ୍ ଟୋକେନ୍ ଗ୍ରହଣ କରେ, ପାସ୍ ଇନଷ୍ଟାଣ୍ଟ ସଂଯୋଗକୁ ପୁନ ere ପ ads ଼ିଥାଏ \| ଅନ୍ୟଥା ସଂଯୋଗର ଅବଧି ସମାପ୍ତ କିମ୍ବା ନିଷ୍କ୍ରିୟ ନକରି କିମ୍ବା ସତେଜ-ବ୍ରେକର୍ ବିଫଳତାକୁ ଗଣନା ନକରି ସତେଜ ଅକ୍ଷମ ହୋଇଥାଏ \| ପ୍ରକୃତ ଅପଷ୍ଟ୍ରିମ୍ ପ୍ରାମାଣିକିକରଣ ବିଫଳତା ତଥାପି ସାଧାରଣ ବିଫଳତା ଆକାଉଣ୍ଟିଂ, ଏକ୍ସପୋନ୍ସନାଲ କୁଲଡାଉନ୍ ଏବଂ ସାଧାରଣ କ୍ଲାଏଣ୍ଟ ତ୍ରୁଟି ବ୍ୟବହାର କରେ \| ଖାତା ନିଷ୍କ୍ରିୟତା ସ୍ଥାୟୀ ରହିଥାଏ \| ଆକ୍ସେସ୍ ଟୋକେନ୍ ସମାପ୍ତ ହେବା ପୂର୍ବରୁ ମାଲିକଙ୍କ ଘୂର୍ଣ୍ଣିତ ଟୋକେନ୍ଗୁଡ଼ିକୁ ସିଙ୍କ୍ରୋନାଇଜ୍ କରନ୍ତୁ (ଡିଫଲ୍ଟ ସକ୍ରିୟ ରିଫ୍ରେସ୍ ଲିଡ୍ ପାଞ୍ଚ ମିନିଟ୍), କିମ୍ବା Codex auth ଫାଇଲ୍ ପୁନ - ଆମଦାନୀ କରନ୍ତୁ \| ପାସିଭ୍ ଆମଦାନୀଗୁଡିକ ଟୋକେନ୍ ଶେଷ ପଏଣ୍ଟରେ ବ ating ଧ ନକରି ଯୋଗାଇ ଦିଆଯାଇଥିବା ଟୋକେନ୍ ଗୁଡ଼ିକୁ ଗଚ୍ଛିତ କରେ \| ମାନୁଆଲ୍ dashboard/API ସତେଜ `409 refresh_disabled` ରିଟର୍ନ କରେ \| ନୂତନ OAuth ଲଗଇନ୍ ଗୁଡିକ ଅପରିବର୍ତ୍ତିତ \| [ପରିବେଶ ସନ୍ଦର୍ଭ](../reference/ENVIRONMENT.md#passive-codex-token-refresh) ଦେଖନ୍ତୁ \|
+ଯେତେବେଳେ ଏକ ସତେଜ ଆବଶ୍ୟକ ହୁଏ ଏବଂ କେବଳ ଏକ ଭିନ୍ନ, ଅପ୍ରତ୍ୟାଶିତ ଆକ୍ସେସ୍ ଟୋକେନ୍ ଗ୍ରହଣ କରେ, ପାସ୍ ଇନଷ୍ଟାଣ୍ଟ ସଂଯୋଗକୁ ପୁନ ere ପ ads ଼ିଥାଏ। ଅନ୍ୟଥା ସଂଯୋଗର ଅବଧି ସମାପ୍ତ କିମ୍ବା ନିଷ୍କ୍ରିୟ ନକରି କିମ୍ବା ସତେଜ-ବ୍ରେକର୍ ବିଫଳତାକୁ ଗଣନା ନକରି ସତେଜ ଅକ୍ଷମ ହୋଇଥାଏ। ପ୍ରକୃତ ଅପଷ୍ଟ୍ରିମ ପ୍ରାମାଣିକିକରଣ ବିଫଳତା ତଥାପି ସାଧାରଣ ବିଫଳତା ଆକାଉଣ୍ଟିଂ, ଏକ୍ସପୋନ୍ସନାଲ କୁଲଡାଉନ୍ ଏବଂ ସାଧାରଣ କ୍ଲାଏଣ୍ଟ ତ୍ରୁଟି ବ୍ୟବହାର କରେ। ଖାତା ନିଷ୍କ୍ରିୟତା ସ୍ଥାୟୀ ରହିଥାଏ। ଆକ୍ସେସ୍ ଟୋକେନ୍ ସମାପ୍ତ ହେବା ପୂର୍ବରୁ ମାଲିକଙ୍କ ଘୂର୍ଣ୍ଣିତ ଟୋକେନ୍ଗୁଡ଼ିକୁ ସିଙ୍କ୍ରୋନାଇଜ୍ କରନ୍ତୁ (ଡିଫଲ୍ଟ ସକ୍ରିୟ ରିଫ୍ରେସ୍ ଲିଡ୍ ପାଞ୍ଚ ମିନିଟ୍), କିମ୍ବା Codex auth ଫାଇଲ୍ ପୁନ - ଆମଦାନୀ କରନ୍ତୁ। ପାସିଭ୍ ଆମଦାନୀଗୁଡିକ ଟୋକେନ୍ ଶେଷ ପଏଣ୍ଟରେ ବ ating ଧ ନକରି ଯୋଗାଇ ଦିଆଯାଇଥିବା ଟୋକେନ୍ ଗୁଡ଼ିକୁ ଗଚ୍ଛିତ କରେ। ମାନୁଆଲ୍ dashboard/API ସତେଜ `409 refresh_disabled` ରିଟର୍ନ କରେ। ନୂତନ OAuth ଲଗଇନ୍ ଗୁଡିକ ଅପରିବର୍ତ୍ତିତ। [ପରିବେଶ ସନ୍ଦର୍ଭ](../reference/ENVIRONMENT.md#passive-codex-token-refresh) ଦେଖନ୍ତୁ।
 
-ଗୋଟିଏ ନୋଡ୍ ପ୍ରକ୍ରିୟା ହେଉଛି \|** ଗୋଟିଏ V8 ରାଶି \|** । ଦୁଇଟି ଓଭରଲିପିଂ ~ 3 MiB / ~ 750k- ଟୋକେନ୍ କୋଡିଂ-ଏଜେଣ୍ଟ `POST /v1/responses` (RTK + ଗୁମ୍ଫା) ~ 12 Gi (`FATAL ERROR: Reached heap limit`) ରେ ଗଦା ହୋଇ ଛାଡିଦିଏ ଏବଂ OOM ଏକ 16 Gi cgroup କରିପାରିବ \| [# #7849](https://github.com/diegosouzapw/OmniRoute/issues/7849) ଦେଖନ୍ତୁ \| ସେହି ମାପ ହେଉଛି** ସ୍ମୃତି-ବଜେଟ୍** ଚେତାବନୀ, ଦୁଇଟି ସମାନ ଲମ୍ବା `/v1/responses` ର ଏକ ଉତ୍ପାଦ ହାର୍ଡ-ମ୍ୟାକ୍ସ ନୁହେଁ \| ହେଭିୱେଟ୍ ଚାଟ୍ ଆଡମିଶନ ଏକ ଅଟୋ-ଉତ୍ପାଦିତ ଇନେଜ୍ ବାଇଟ୍ ବଜେଟ୍ (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) ଦ୍ z ାରା ସମାନ V8/cgroup ଛାତ — ରୁ ଏହାକୁ ଆକାରକୁ ଅତିକ୍ରମ କରି (କିମ୍ବା ଉତ୍ତରାଧିକାରୀ `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` ଅନୁରୋଧ-ଗଣନା କ୍ୟାପ୍ ସେଟିଂ) ପୂର୍ବରୁ ଆକାରର ପ୍ରକ୍ରିୟାରେ ଗର୍ଭପାତକୁ ପୁନ tr ଉତ୍ପାଦନ କରିଥାଏ \| ଛୋଟ ଚାଟ୍, `/healthz`, `/v1/models`, ଏବଂ MCP ହେଉଛି \|** ନୁହେଁ** ସେହି କ୍ୟାପ୍ ରେ \|
+ଗୋଟିଏ ନୋଡ୍ ପ୍ରକ୍ରିୟା ହେଉଛି।** ଗୋଟିଏ V8 ରାଶି।** । ଦୁଇଟି ଓଭରଲିପିଂ ~ 3 MiB / ~ 750k- ଟୋକେନ୍ କୋଡିଂ-ଏଜେଣ୍ଟ `POST /v1/responses` (RTK + ଗୁମ୍ଫା) ~ 12 Gi (`FATAL ERROR: Reached heap limit`) ରେ ଗଦା ହୋଇ ଛାଡିଦିଏ ଏବଂ OOM ଏକ 16 Gi cgroup କରିପାରିବ। [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849) ଦେଖନ୍ତୁ। ସେହି ମାପ ହେଉଛି a** ସ୍ମୃତି-ବଜେଟ୍** ଚେତାବନୀ, ଦୁଇଟି ସମାନ ଲମ୍ବା `/v1/responses` ର ଏକ ଉତ୍ପାଦ ହାର୍ଡ-ମ୍ୟାକ୍ସ ନୁହେଁ। ହେଭିୱେଟ୍ ଚାଟ୍ ଆଡମିଶନ ଏକ ଅଟୋ-ଉତ୍ପାଦିତ ଇଙ୍ଗେଷ୍ଟ ବାଇଟ୍ ବଜେଟ୍ (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) ଦ୍ z ାରା ସମାନ V8/cgroup ସିଲିଂ — ରୁ ଏହାକୁ ଆକାରକୁ ଅତିକ୍ରମ କରି (କିମ୍ବା ଉତ୍ତରାଧିକାରୀ `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` ଅନୁରୋଧ-ଗଣନା କ୍ୟାପ୍ ସେଟିଂ) ପୂର୍ବରୁ ଆକାରର ପ୍ରକ୍ରିୟାରେ ଗର୍ଭପାତକୁ ପୁନ tr ଉତ୍ପାଦନ କରିଥାଏ। ଛୋଟ ଚାଟ୍, `/healthz`, `/v1/models`, ଏବଂ MCP ହେଉଛି।** ନୁହେଁ।** ସେହି କ୍ୟାପ୍ ରେ।
 
 ### ଗୋଟିଏ ପ୍ରକ୍ରିୟା: ଦୁଇଟିରୁ ଅଧିକ ଲମ୍ବା `/v1/responses`
 
-କ** ସୁସ୍ଥ** ପ୍ରକ୍ରିୟା ( `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO` ତଳେ ରାଶି, ଡିଫଲ୍ଟ `0.75`)** ହୋଇପାରେ \|** ଦୁଇଟି ସମକାଳୀନ ଲମ୍ବା `POST /v1/responses` ରୁ ଅଧିକ ଚଲାନ୍ତୁ ଯେତେବେଳେ ପ୍ରକ୍ରିୟା-ପ୍ରଶସ୍ତ ଇନଫ୍ଲାଇଟ୍-ବାଇଟ୍ ବଜେଟ୍ (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / # #10110) ରେ ରୁମ୍ ଅଛି \| `OMNIROUTE_CHAT_LARGE_BODY_BYTES` କିମ୍ବା ତା’ଠାରୁ ଅଧିକ ସଂସ୍ଥାଗୁଡ଼ିକ (ଡିଫଲ୍ଟ 256 KiB) ସଂରଚନା-ଭାରୀ ଅନୁରୋଧ ପରି ସମାନ ହେଭିୱେଟ୍ ଲିଜ୍ ନେଇଥାଏ ଏବଂ ସମାନ [# #10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` ଏସ୍କେପ୍ (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`) ବ୍ୟବହାର କରେ \| ଦଶଟି ସମନ୍ୱିତ ଲମ୍ବା SSE କ୍ଲାଏଣ୍ଟ (ଅପରେଟରମାନେ ପ୍ରାୟତ 40 40-50 ଆବଶ୍ୟକ କରନ୍ତି) ହେଉଛି a** ସ୍ମୃତି-ବଜେଟ୍** ପ୍ରଶ୍ନ — ଆକାର ହିପ୍ + primary/headroom ସ୍ଲଟ୍ + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — କଠିନ “ସର୍ବାଧିକ 2” ଉତ୍ପାଦ ସୀମା ନୁହେଁ \| ଏକ ଚାପିତ ରାଶି ପୁନ ry ଚେଷ୍ଟା ଯୋଗ୍ୟ `503` ସହିତ s ାଳିଛି ତେଣୁ # #7849 ଫେରିବ ନାହିଁ \|
+କ** ସୁସ୍ଥ** ପ୍ରକ୍ରିୟା ( `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO` ତଳେ ରାଶି, ଡିଫଲ୍ଟ `0.75`)** ହୋଇପାରେ।** ଦୁଇଟି ସମକକ୍ଷ ଲମ୍ବା `POST /v1/responses` ରୁ ଅଧିକ ଚଲାନ୍ତୁ ଯେତେବେଳେ ପ୍ରକ୍ରିୟା-ପ୍ରଶସ୍ତ ଇନଫ୍ଲାଇଟ୍-ବାଇଟ୍ ବଜେଟ୍ (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) ରେ ରୁମ୍ ଅଛି। `OMNIROUTE_CHAT_LARGE_BODY_BYTES` କିମ୍ବା ତା’ଠାରୁ ଅଧିକ ସଂସ୍ଥାଗୁଡ଼ିକ (ଡିଫଲ୍ଟ 256 KiB) ସଂରଚନା-ଭାରୀ ଅନୁରୋଧ ପରି ସମାନ ହେଭିୱେଟ୍ ଲିଜ୍ ନେଇଥାଏ ଏବଂ ସମାନ [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` ଏସ୍କେପ୍ (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`) ବ୍ୟବହାର କରେ। ଦଶଟି ସମନ୍ୱିତ ଲମ୍ବା SSE କ୍ଲାଏଣ୍ଟ (ଅପରେଟରମାନେ ପ୍ରାୟତ 40 40-50 ଆବଶ୍ୟକ କରନ୍ତି) ହେଉଛି a** ସ୍ମୃତି-ବଜେଟ୍** ପ୍ରଶ୍ନ — ଆକାର ରାଶି + primary/headroom ସ୍ଲଟ୍ + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — କଠିନ “ସର୍ବାଧିକ 2” ଉତ୍ପାଦ ସୀମା ନୁହେଁ। ଏକ ଚାପିତ ରାଶି ଏପର୍ଯ୍ୟନ୍ତ ପୁନ ry ଚେଷ୍ଟା ଯୋଗ୍ୟ `503` ସହିତ s ାଳିଥାଏ ତେଣୁ #7849 ଫେରି ନଥାଏ।
 
-କୁ** ଗଦା ବ ly ାନ୍ତୁ \|** (ସ୍ independent ାଧୀନ V8 ପୁରୁଣା ସ୍ଥାନଗୁଡିକ)** ଆଜି** :
+କୁ** ଗଦା ବ ly ାନ୍ତୁ।** (ସ୍ independent ାଧୀନ V8 ପୁରୁଣା ସ୍ଥାନଗୁଡିକ)** ଆଜି** :
 
-| କର \|                                                                                                                                 | କରନ୍ତୁ ନାହିଁ \|                                             |
-| ------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
-| ଚଲାନ୍ତୁ \|** N containers/pods** , ପ୍ରତ୍ୟେକ ସହିତ ଏହାର \|** ନିଜର** `DATA_DIR` / ଭଲ୍ୟୁମ୍                                                | ଗୋଟିଏ SQLite ଫାଇଲ୍ ବିରୁଦ୍ଧରେ `replicas > 1` ସେଟ୍ କରନ୍ତୁ \|  |
-| ରାଶି / ଇନଫ୍ଲାଇଟ୍-ବାଇଟ୍ ବଜେଟ୍ ରୁ ଭାରୀ ଇନ୍-ଫ୍ଲାଇଟ୍ + ସୁସ୍ଥ-ହେଡରୁମ୍; 1-2 ହେଉଛି ରକ୍ଷଣଶୀଳ # #7849 ଡିଫଲ୍ଟ, ଏକ କଠିନ ଉତ୍ପାଦ ସର୍ବାଧିକ ନୁହେଁ \| | ଗୋଟିଏ ପ୍ରକ୍ରିୟା 8 × RAM ଏବଂ ଏକ ସୀମାହୀନ ଗଣନା କ୍ୟାପ୍ ଦିଅ \|   |
-| ବ tion କଳ୍ପିକ: `QUOTA_STORE_DRIVER=redis` + `QUOTA_STORE_REDIS_URL` ପାଇଁ \|** ଅଂଶୀଦାର କୋଟା କାଉଣ୍ଟରଗୁଡିକ \|**                          | Redis ଅଂଶୀଦାର SQLite — ପରି ବ୍ୟବହାର କରନ୍ତୁ ଏହା ନୁହେଁ \|      |
-| ପ୍ରତ୍ୟେକ ଉଦାହରଣରେ ନକଲ ପ୍ରଦାନକାରୀ ରହସ୍ୟ (କିମ୍ବା ବିଭାଜିତ ଡ୍ୟାସବୋର୍ଡ ଗ୍ରହଣ କରନ୍ତୁ)                                                       | ଗୋଟିଏ ଡ୍ୟାସବୋର୍ଡ / ଗୋଟିଏ କଲ-ଲଗ୍ ପରିସ୍ଥିତିରେ ଆଶାକରନ୍ତୁ \|    |
-| ଯେକ any ଣସି ଲୋଡ୍ ବାଲାନ୍ସର୍ ସହିତ ସାମ୍ନା; API କି କିମ୍ବା ଅଧିବେଶନ ଦ୍ୱାରା ଷ୍ଟିକ୍ ଯଥେଷ୍ଟ \|                                                 | ଏକ ବିକ୍ରେତା-ନିର୍ଦ୍ଦିଷ୍ଟ ଆକାର-ସଚେତନ ମଧ୍ୟମ ସଫ୍ଟୱେର୍ ଆବଶ୍ୟକ \| |
+| କର।                                                                                                                               | କରନ୍ତୁ ନାହିଁ।                                             |
+| --------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| ଚଲାନ୍ତୁ।** N containers/pods** , ପ୍ରତ୍ୟେକ ସହିତ ଏହାର।** ନିଜର** `DATA_DIR` / ଭଲ୍ୟୁମ୍                                                | ଗୋଟିଏ SQLite ଫାଇଲ୍ ବିରୁଦ୍ଧରେ `replicas > 1` ସେଟ୍ କରନ୍ତୁ।  |
+| ରାଶି / ଇନଫ୍ଲାଇଟ୍-ବାଇଟ୍ ବଜେଟ୍ ରୁ ଭାରୀ ଇନ୍-ଫ୍ଲାଇଟ୍ + ସୁସ୍ଥ-ହେଡରୁମ୍; 1-2 ହେଉଛି ରକ୍ଷଣଶୀଳ #7849 ଡିଫଲ୍ଟ, ଏକ କଠିନ ଉତ୍ପାଦ ସର୍ବାଧିକ ନୁହେଁ। | ଗୋଟିଏ ପ୍ରକ୍ରିୟା 8 × RAM ଏବଂ ଏକ ସୀମାହୀନ ଗଣନା କ୍ୟାପ୍ ଦିଅ।   |
+| ବ tion କଳ୍ପିକ: `QUOTA_STORE_DRIVER=redis` + `QUOTA_STORE_REDIS_URL` ପାଇଁ।** ଅଂଶୀଦାର କୋଟା କାଉଣ୍ଟରଗୁଡିକ।**                          | Redis ଅଂଶୀଦାର SQLite — ପରି ବ୍ୟବହାର କରନ୍ତୁ ଏହା ନୁହେଁ।      |
+| ପ୍ରତ୍ୟେକ ଉଦାହରଣରେ ନକଲ ପ୍ରଦାନକାରୀ ରହସ୍ୟ (କିମ୍ବା ବିଭାଜିତ ଡ୍ୟାସବୋର୍ଡ ଗ୍ରହଣ କରନ୍ତୁ)                                                   | ଗୋଟିଏ ଡ୍ୟାସବୋର୍ଡ / ଗୋଟିଏ କଲ-ଲଗ୍ ପରିସ୍ଥିତିରେ ଆଶାକରନ୍ତୁ।    |
+| ଯେକ any ଣସି ଲୋଡ୍ ବାଲାନ୍ସର୍ ସହିତ ସାମ୍ନା; API କି କିମ୍ବା ଅଧିବେଶନ ଦ୍ୱାରା ଷ୍ଟିକ୍ ଯଥେଷ୍ଟ।                                               | ଏକ ବିକ୍ରେତା-ନିର୍ଦ୍ଦିଷ୍ଟ ଆକାର-ସଚେତନ ମଧ୍ୟମ ସଫ୍ଟୱେର୍ ଆବଶ୍ୟକ। |
 
-ସମାନ `REDIS_KEY_PREFIX` ଏବଂ ଏକ ସକାରାତ୍ମକ `sessionAffinityTtlMs` ସେଟିଂ ସହିତ ପ୍ରତ୍ୟେକ ପ୍ରକ୍ରିୟାରେ `OMNIROUTE_SESSION_AFFINITY_STORE=redis` ଏବଂ `REDIS_URL` ସେଟ୍ କରନ୍ତୁ Redis ପିନଗୁଡିକ ପ୍ରତ୍ୟେକ ପ୍ରକ୍ରିୟାର ଯୋଗ୍ୟ ସ୍ଥାନୀୟ ସଂଯୋଗକୁ ହ୍ୟାଶ୍ ବ୍ୟବହାର-ଆକାଉଣ୍ଟ୍ ପରିଚୟ ସମାଧାନ କରେ, ତେଣୁ ମେଳ ଖାଉଥିବା ପରିଚୟ ମେଟାଡାଟା ସହିତ OAuth ଖାତାଗୁଡ଼ିକର IDs ସହିତ ମେଳ ଖାଇବା ଆବଶ୍ୟକ ନାହିଁ \| ଜଣାଶୁଣା ଆକାଉଣ୍ଟ୍ ପରିଚୟଗୁଡିକ ପିନ ରିଜୋଲ୍ୟୁସନ୍ ଏବଂ ଜଗାଯାଇଥିବା ବହିଷ୍କାରରେ ପରସ୍ପର ବିରୋଧୀ ସ୍ଥାନୀୟ IDs ଉପରେ ପ୍ରାଧାନ୍ୟ ଦେଇଥାଏ \| ପରିଚୟ ବିନା ରେକର୍ଡଗୁଡିକ (କିମ୍ବା ପରିଚୟ ବିନା ବହିଷ୍କାରକାରୀ) ଉତ୍ତରାଧିକାରୀ ID ଗାର୍ଡକୁ ବଜାୟ ରଖନ୍ତି \| ସ୍ଥିର ବ୍ୟବହାର ପରିଚୟ ବିନା ଖାତାଗୁଡ଼ିକ IDs ସହିତ ମେଳ ଖାଇବାକୁ ଆବଶ୍ୟକ କରେ \| Redis ତ୍ରୁଟି କିମ୍ବା 100 ମିସରୁ ଅଧିକ କଲ୍ ସ୍ଥାନୀୟ SQLite କୁ ଫେରିଯାଏ \| ପ୍ରତ୍ୟେକ Redis ଆଫିନିଟି ଷ୍ଟୋର 8 ରେ ବକେୟା ଅପରେସନ୍ କ୍ୟାପ୍ କରେ, Redis ପୂର୍ଣ୍ଣ ହେଲେ ତୁରନ୍ତ ବାଇପାସ୍ କରେ, ଏବଂ ସ୍ଲଟ୍ ମୁକ୍ତ କରେ ଯେତେବେଳେ ଅନ୍ତର୍ନିହିତ କାର୍ଯ୍ୟ ସ୍ଥିର ହୁଏ, କଲର୍ ଡେଡଲାଇନରେ ନୁହେଁ \| Redis ଆଉଟେଜ୍ ସମୟରେ କ shared ଣସି ସହଭାଗୀ ସତ୍ୟ ନାହିଁ: ପ୍ରତ୍ୟେକ ଉଦାହରଣ ନିଜ ନିଜ ସ୍ଥାନୀୟ ସମ୍ପର୍କକୁ ଫେରିଯାଏ, ଅଧିବେଶନଗୁଡିକ ପ୍ରତି ଥରେ ଥରେ ପୁନ pin- ପିନ୍ ହୋଇପାରେ, ଏବଂ ଉଦାହରଣଗୁଡିକ ଭିନ୍ନ ହୋଇପାରେ \| ସ୍ଥିରତା Redis ମାଧ୍ୟମରେ ପୁନ con- ଏକତ୍ର ହୋଇଯାଏ \| ସମୟ ସୀମା ଅପେକ୍ଷା କରିଛି, ପଠାଯାଇଥିବା EVAL ନୁହେଁ, ଯାହା ଫଲବ୍ୟାକ୍ ପରେ ଅବତରଣ କରିପାରେ \| ରାଉଟିଙ୍ଗ୍ ଲେଖାଗୁଡ଼ିକ ରାଉଟିଙ୍ଗ୍ ନିଷ୍ପତ୍ତି ଦ୍ୱାରା ଦେଖାଯାଇଥିବା ସଠିକ୍ ମୂଲ୍ୟ ତୁଳନା କରନ୍ତୁ, ଏକ ନୂତନ ପରିବର୍ତ୍ତନ-ସମୟ ପ read ଼ା ନୁହେଁ; ଏକ ଅନୁପସ୍ଥିତ ମିସ୍ କିମ୍ବା SQLite ଫଲବ୍ୟାକ୍ ପର୍ଯ୍ୟବେକ୍ଷଣ ଏକ ଅନୁପସ୍ଥିତ Redis ଚାବି ସହିତ ତୁଳନା କରେ \| ପୁରୁଣା ପିନଗୁଡିକ ଗୋଟିଏ CAS ରେ ସ୍ଥାନାନ୍ତରିତ ହୋଇଛି, ତେଣୁ ଏକ ବିଳମ୍ବ ନିର୍ଦ୍ଦେଶ ଏକ ନୂତନ, ଭିନ୍ନ ପିନକୁ ବଦଳାଇ କିମ୍ବା ବିଲୋପ କରିପାରିବ ନାହିଁ \| Redis ପ atom ଼ି ପରମାଣୁ ଭାବରେ ମୂଲ୍ୟ ଏବଂ ଅବଶିଷ୍ଟ ସର୍ଭର TTL ଫେରସ୍ତ କରେ; ସକରାତ୍ମକ PTTL (କିମ୍ବା କ exp ଣସି ମିଆଦ ପୂର୍ଣ୍ଣତା) ଜୀବନ୍ତତା ନିର୍ଣ୍ଣୟ କରେ, ଲେଖକର JSON ଟାଇମଷ୍ଟ୍ୟାମ୍ପ କିମ୍ବା ପାଠକଙ୍କ ଘଣ୍ଟା ନୁହେଁ \| ସ୍ଥାନୀୟ ସ୍ନାପସଟ୍ ମାନଚିତ୍ର ଯାହାକି TTL ଏକ ସ୍ଥାନୀୟ ସମୟସୀମା ପର୍ଯ୍ୟନ୍ତ ରହିଥାଏ; ବିଦ୍ୟମାନ JSON କିଗୁଡ଼ିକ ପଠନୀୟ ରହିଥାଏ ଏବଂ CAS ପାଇଁ ସେମାନଙ୍କର କଞ୍ଚା ବାଇଟ୍ ରଖାଯାଇଥାଏ \| Redis ହେଉଛି ସତ୍ୟର ଏକମାତ୍ର ଉତ୍ସ ଯେତେବେଳେ ଏହା ଉତ୍ତର ଦିଏ \| ନିଶ୍ଚିତ ହୋଇଥିବା ଅଂଶୀଦାର ଅପସର୍ଟ, ସ୍ପର୍ଶ ଏବଂ ଡିଲିଟ୍ ସ୍ଥାନୀୟ ଏଣ୍ଟ୍ରି ଅପସାରଣ କରେ, ଏହାକୁ କେବେ ବି ସଂସ୍ଥାପନ କିମ୍ବା ସତେଜ କର ନାହିଁ \| Redis ପଥରେ SQLite କେବଳ ଏହି ଉଦାହରଣର Redis ତ୍ରୁଟି, ସମୟ ସମାପ୍ତି କିମ୍ବା ଆଡମିଶନ ସାଚୁରେଚର, TTL- ପୂର୍ବ ପରି ସୀମିତ ଅଟେ \| ପରବର୍ତ୍ତୀ ଅଘଟଣରେ ଏକ ନିଖୋଜ ସ୍ଥାନୀୟ ପିନ୍ ଗୋଟିଏ ତାଜା ପିକ୍ (ଗୋଟିଏ ପ୍ରମ୍ପ୍ଟ-କ୍ୟାଚ୍ ମିସ୍) ଖର୍ଚ୍ଚ କରେ, ଭୁଲ୍ କିମ୍ବା ବହିଷ୍କୃତ ଆକାଉଣ୍ଟ ନୁହେଁ \| ପ୍ରତ୍ୟାଖ୍ୟାନ ଅପସର୍ଟ ଅଂଶୀଦାର ବିଜେତା ଏବଂ ଏହାର ଅବଶିଷ୍ଟ TTL ପରମାଣୁ ଭାବରେ ଫେରସ୍ତ କରେ: ସାଧାରଣ ଚୟନ ମ୍ୟାପ୍ ହୋଇଥିବା ସ୍ଥାନୀୟ ସମୟସୀମାକୁ ପୁନ he ଯାଞ୍ଚ କରେ ଏବଂ ଏକ ଜୀବନ୍ତ ଯୋଗ୍ୟ ବିଜେତା ବ୍ୟବହାର କରେ, ବ୍ୟବହାରକୁ ସ୍ପର୍ଶ କରେ ଏବଂ ଅନ୍ୟ ଏକ ଅଂଶୀଦାର ଲେଖା ବିନା ସେହି ଆକାଉଣ୍ଟ ପାଇଁ ଲଗ୍ କରେ \| ଯଦି ଏହା ଉପଲବ୍ଧ ନଥାଏ, ଚୟନ ସ୍ଥାନୀୟ ପ୍ରାର୍ଥୀକୁ ରଖେ, ଅଂଶୀଦାର ପିନକୁ ଅପରିବର୍ତ୍ତିତ ରଖେ ଏବଂ ଗୋଟିଏ ଡିବଗ୍ ବାର୍ତ୍ତା ନିର୍ଗତ କରେ \| ପ୍ରତ୍ୟାଖ୍ୟାନ CAS SQLite ଲେଖେ ନାହିଁ; Redis ତ୍ରୁଟି, ସମୟ ସମାପ୍ତ କିମ୍ବା ଆଡମିଶନ ସାଚୁଚରେସନ୍ ଏହା ବଦଳରେ ବିଦ୍ୟମାନ ସ୍ଥାନୀୟ ଅପରେସନ୍ ପ୍ରୟୋଗ କରେ \| ଯଦି ପଠାଯାଇଥିବା ମ୍ୟୁଟେସନ୍ ର ଉତ୍ତର ସମୟ ସମାପ୍ତ ହେବା ପରେ ଆସେ (ଗ୍ରହଣ, ପ୍ରତ୍ୟାଖ୍ୟାନ କିମ୍ବା ତ୍ରୁଟି), ଏକ ସିଙ୍କ୍ରୋନସ୍ ସଠିକ୍ କ୍ରମିକ-ମୂଲ୍ୟ ତୁଳନା-ଏବଂ-ଡିଲିଟ୍ କେବଳ ବାଇଟ୍-ସମାନ ସମୟ ସମାପ୍ତ ଫଲବ୍ୟାକ୍ ଧାଡି ଅପସାରଣ କରେ \| ସେହି ତୁଳନା ଏବଂ ବିଲୋପ ମଧ୍ୟରେ କ wait ଣସି ଅପେକ୍ଷା ନାହିଁ; ଏକ ନୂତନ ଆଉଟେଜ୍ ଲେଖା ସଂରକ୍ଷିତ \| ରାକ୍ଷୀ ବହିଷ୍କାର ବିଫଳ ଆକାଉଣ୍ଟର ନିଜସ୍ୱ ସ୍ଥାନୀୟ ପିନକୁ Redis ଡାଉନ୍ ସହିତ ମଧ୍ୟ ଅପସାରଣ କରିଥାଏ, ଏବଂ ଅଂଶୀଦାର ବହିଷ୍କାର ନିଶ୍ଚିତ ହେବା ପରେ ଏହାକୁ ପୁନର୍ବାର ସଫା କରିଥାଏ \| ପୂର୍ବରୁ ଅଂଶୀଦାରିତ ଉତ୍ତରଗୁଡିକ ବିଚାରାଧୀନ ସ୍ଥାନୀୟ ପିନ୍ ପୁନ restore ସ୍ଥାପନ କରିପାରିବ ନାହିଁ କାରଣ ଅଂଶୀଦାରିତ ସଫଳତା SQLite ଲେଖେ ନାହିଁ \| ପରବର୍ତ୍ତୀ ଅଘଟଣ ଫଲବ୍ୟାକ୍ ଏକ ଆକାଉଣ୍ଟକୁ ପୁନ in ନିର୍ମାଣ କରିପାରିବ; ପରବର୍ତ୍ତୀ ଗ୍ରହଣୀୟ ଅଂଶୀଦାର ଲେଖା କେବଳ Redis ରେ ବିଦ୍ୟମାନ \| Redis ମିସ୍ ସ୍ଥାନୀୟ ପତନ ଅବସ୍ଥା ସହିତ ପରାମର୍ଶ କରେ ନାହିଁ \| ଡ୍ରାଇଭର ବନ୍ଦ ହେବା ସହିତ, ନୂତନ ଭାବେ ମନୋନୀତ ପିନଗୁଡ଼ିକ ପୁରୁଣା ଚାରି-କ୍ଷେତ୍ର SQLite JSON ଆକୃତି ରଖେ; କେବଳ Redis ରାଉଟିଙ୍ଗ୍ ହ୍ୟାସ୍ ଆକାଉଣ୍ଟ୍ ପରିଚୟ ଯୋଗ କରେ \| ପୂର୍ବ ନିର୍ଦ୍ଧାରିତ ପିନଗୁଡିକ ସେମାନଙ୍କର ସମାପ୍ତି ସୀମାରେ ପୁନ he ଯାଞ୍ଚ କରାଯାଏ \| Redis ଅଣ-ଲିଜ୍ ଚୟନ ଷ୍ଟୋର୍କୁ ପୁନ s ପ s େ, କିନ୍ତୁ ସିଙ୍କ୍ରୋନସ୍ ଲିଜ୍ ଯୋଜନା ପ୍ରିଫେଚ୍ ଏବଂ ଯୋଜନା (ଏକ ଗ୍ରହଣୀୟ ସର୍ବୋତ୍ତମ ପ୍ରୟାସ ୱିଣ୍ଡୋ) ମଧ୍ୟରେ ବହିଷ୍କୃତ ଏକ ପିନ୍ ବ୍ୟବହାର କରିପାରିବ \| ଏକ ଲିଜ୍ ପ୍ରତିଶ୍ରୁତି ଏକ ସ୍ଥାୟୀ ଦାବି ପରେ ଆକାଉଣ୍ଟ୍ ସୁଇଚ୍ କରିପାରିବ ନାହିଁ: ପ୍ରତ୍ୟାଖ୍ୟାନ ଅପ୍ସର୍ଟରେ ଏହା କେବଳ ସେହି ଅନୁରୋଧ ପାଇଁ ଦାବି ହୋଇଥିବା ପ୍ରାର୍ଥୀକୁ ରଖେ ଏବଂ ଅଂଶୀଦାର ବିଜେତାଙ୍କୁ ଛୁଇଁ ନଥାଏ, ତେଣୁ ଉଦାହରଣଗୁଡିକ ମଧ୍ୟରେ ଚୁକ୍ତିନାମା ସେହି ପଥରେ ସୀମିତ \| ବାକି ଟେବୁଲ୍ ତଥାପି ପ୍ରଯୁଜ୍ୟ: ଏହା କମ୍ବୋ ଅଧିବେଶନ ଷ୍ଟିକିନ୍ସି, ଦେଶୀ Codex ଟର୍ନ୍ ପିନ୍, ଆକାଉଣ୍ଟ୍ ସେମାଫୋରସ୍, ଲକଆଉଟ୍, ସୀମା, ବିନ୍ୟାସ କିମ୍ବା କଲ୍ ଲଗ୍ ଅଂଶୀଦାର କରେ ନାହିଁ \|
+ସମାନ `REDIS_KEY_PREFIX` ଏବଂ ଏକ ସକାରାତ୍ମକ `sessionAffinityTtlMs` ସେଟିଂ ସହିତ ପ୍ରତ୍ୟେକ ପ୍ରକ୍ରିୟାରେ `OMNIROUTE_SESSION_AFFINITY_STORE=redis` ଏବଂ `REDIS_URL` ସେଟ୍ କରନ୍ତୁ Redis ପିନଗୁଡିକ ପ୍ରତ୍ୟେକ ପ୍ରକ୍ରିୟାର ଯୋଗ୍ୟ ସ୍ଥାନୀୟ ସଂଯୋଗକୁ ହ୍ୟାଶ୍ ବ୍ୟବହାର-ଆକାଉଣ୍ଟ୍ ପରିଚୟ ସମାଧାନ କରେ, ତେଣୁ ମେଳ ଖାଉଥିବା ପରିଚୟ ମେଟାଡାଟା ସହିତ OAuth ଖାତାଗୁଡ଼ିକର IDs ସହିତ ମେଳ ଖାଇବା ଆବଶ୍ୟକ ନାହିଁ। ଜଣାଶୁଣା ଆକାଉଣ୍ଟ୍ ପରିଚୟଗୁଡିକ ପିନ ରିଜୋଲ୍ୟୁସନ୍ ଏବଂ ଜଗାଯାଇଥିବା ବହିଷ୍କାରରେ ପରସ୍ପର ବିରୋଧୀ ସ୍ଥାନୀୟ IDs ଉପରେ ପ୍ରାଧାନ୍ୟ ଦେଇଥାଏ। ପରିଚୟ ବିନା ରେକର୍ଡଗୁଡିକ (କିମ୍ବା ପରିଚୟ ବିନା ବହିଷ୍କାରକାରୀ) ଉତ୍ତରାଧିକାରୀ ID ଗାର୍ଡକୁ ବଜାୟ ରଖନ୍ତି। ସ୍ଥିର ବ୍ୟବହାର ପରିଚୟ ବିନା ଖାତାଗୁଡ଼ିକ IDs ସହିତ ମେଳ ଖାଇବାକୁ ଆବଶ୍ୟକ କରେ। Redis ତ୍ରୁଟି କିମ୍ବା 100 ମିସରୁ ଅଧିକ କଲ୍ ସ୍ଥାନୀୟ SQLite କୁ ଫେରିଯାଏ। ପ୍ରତ୍ୟେକ Redis ଆଫିନିଟି ଷ୍ଟୋର 8 ରେ ବକେୟା ଅପରେସନ୍ କ୍ୟାପ୍ କରେ, Redis ପୂର୍ଣ୍ଣ ହେଲେ ତୁରନ୍ତ ବାଇପାସ୍ କରେ, ଏବଂ ସ୍ଲଟ୍ ମୁକ୍ତ କରେ ଯେତେବେଳେ ଅନ୍ତର୍ନିହିତ କାର୍ଯ୍ୟ ସ୍ଥିର ହୁଏ, କଲର୍ ଡେଡଲାଇନରେ ନୁହେଁ। Redis ଆଉଟେଜ୍ ସମୟରେ କ shared ଣସି ସହଭାଗୀ ସତ୍ୟ ନାହିଁ: ପ୍ରତ୍ୟେକ ଉଦାହରଣ ନିଜ ନିଜ ସ୍ଥାନୀୟ ସମ୍ପର୍କକୁ ଫେରିଯାଏ, ଅଧିବେଶନଗୁଡିକ ପ୍ରତି ଥରେ ଥରେ ପୁନ pin- ପିନ୍ ହୋଇପାରେ, ଏବଂ ଉଦାହରଣଗୁଡିକ ଭିନ୍ନ ହୋଇପାରେ। ସ୍ଥିରତା Redis ମାଧ୍ୟମରେ ପୁନ con- ଏକତ୍ର ହୋଇଯାଏ। ସମୟ ସୀମା ଅପେକ୍ଷା କରିଛି, ପଠାଯାଇଥିବା EVAL ନୁହେଁ, ଯାହା ଫଲବ୍ୟାକ୍ ପରେ ଅବତରଣ କରିପାରେ। ରାଉଟିଙ୍ଗ୍ ଲେଖାଗୁଡ଼ିକ ରାଉଟିଙ୍ଗ୍ ନିଷ୍ପତ୍ତି ଦ୍ୱାରା ଦେଖାଯାଇଥିବା ସଠିକ୍ ମୂଲ୍ୟ ତୁଳନା କରନ୍ତୁ, ଏକ ନୂତନ ପରିବର୍ତ୍ତନ-ସମୟ ପ read ଼ା ନୁହେଁ; ଏକ ଅନୁପସ୍ଥିତ ମିସ୍ କିମ୍ବା SQLite ଫଲବ୍ୟାକ୍ ପର୍ଯ୍ୟବେକ୍ଷଣ ଏକ ଅନୁପସ୍ଥିତ Redis ଚାବି ସହିତ ତୁଳନା କରେ। ପୁରୁଣା ପିନଗୁଡିକ ଗୋଟିଏ CAS ରେ ସ୍ଥାନାନ୍ତରିତ ହୋଇଛି, ତେଣୁ ଏକ ବିଳମ୍ବ ନିର୍ଦ୍ଦେଶ ଏକ ନୂତନ, ଭିନ୍ନ ପିନକୁ ବଦଳାଇ କିମ୍ବା ବିଲୋପ କରିପାରିବ ନାହିଁ। Redis ପ atom ଼ି ପରମାଣୁ ଭାବରେ ମୂଲ୍ୟ ଏବଂ ଅବଶିଷ୍ଟ ସର୍ଭର TTL ଫେରସ୍ତ କରେ; ସକରାତ୍ମକ PTTL (କିମ୍ବା କ exp ଣସି ମିଆଦ ପୂର୍ଣ୍ଣତା) ଜୀବନ୍ତତା ନିର୍ଣ୍ଣୟ କରେ, ଲେଖକର JSON ଟାଇମଷ୍ଟ୍ୟାମ୍ପ କିମ୍ବା ପାଠକଙ୍କ ଘଣ୍ଟା ନୁହେଁ। ସ୍ଥାନୀୟ ସ୍ନାପସଟ୍ ମାନଚିତ୍ର ଯାହାକି TTL ଏକ ସ୍ଥାନୀୟ ସମୟସୀମା ପର୍ଯ୍ୟନ୍ତ ରହିଥାଏ; ବିଦ୍ୟମାନ JSON କିଗୁଡ଼ିକ ପଠନୀୟ ରହିଥାଏ ଏବଂ CAS ପାଇଁ ସେମାନଙ୍କର କଞ୍ଚା ବାଇଟ୍ ରଖାଯାଇଥାଏ। Redis ହେଉଛି ସତ୍ୟର ଏକମାତ୍ର ଉତ୍ସ ଯେତେବେଳେ ଏହା ଉତ୍ତର ଦିଏ। ନିଶ୍ଚିତ ହୋଇଥିବା ଅଂଶୀଦାର ଅପସର୍ଟ, ସ୍ପର୍ଶ ଏବଂ ଡିଲିଟ୍ ସ୍ଥାନୀୟ ଏଣ୍ଟ୍ରି ଅପସାରଣ କରେ, ଏହାକୁ କେବେ ବି ସଂସ୍ଥାପନ କିମ୍ବା ସତେଜ କର ନାହିଁ। Redis ପଥରେ SQLite କେବଳ ଏହି ଉଦାହରଣର Redis ତ୍ରୁଟି, ସମୟ ସମାପ୍ତି କିମ୍ବା ଆଡମିଶନ ସାଚୁରେଚର, TTL- ପୂର୍ବ ପରି ସୀମିତ ଅଟେ। ପରବର୍ତ୍ତୀ ଅଘଟଣରେ ଏକ ନିଖୋଜ ସ୍ଥାନୀୟ ପିନ୍ ଗୋଟିଏ ତାଜା ପିକ୍ (ଗୋଟିଏ ପ୍ରମ୍ପ୍ଟ-କ୍ୟାଚ୍ ମିସ୍) ଖର୍ଚ୍ଚ କରେ, ଭୁଲ୍ କିମ୍ବା ବହିଷ୍କୃତ ଆକାଉଣ୍ଟ ନୁହେଁ। ପ୍ରତ୍ୟାଖ୍ୟାନ ଅପସର୍ଟ ଅଂଶୀଦାର ବିଜେତା ଏବଂ ଏହାର ଅବଶିଷ୍ଟ TTL ପରମାଣୁ ଭାବରେ ଫେରସ୍ତ କରେ: ସାଧାରଣ ଚୟନ ମ୍ୟାପ୍ ହୋଇଥିବା ସ୍ଥାନୀୟ ସମୟସୀମାକୁ ପୁନ he ଯାଞ୍ଚ କରେ ଏବଂ ଏକ ଜୀବନ୍ତ ଯୋଗ୍ୟ ବିଜେତା ବ୍ୟବହାର କରେ, ବ୍ୟବହାରକୁ ସ୍ପର୍ଶ କରେ ଏବଂ ଅନ୍ୟ ଏକ ଅଂଶୀଦାର ଲେଖା ବିନା ସେହି ଆକାଉଣ୍ଟ ପାଇଁ ଲଗ୍ କରେ। ଯଦି ଏହା ଉପଲବ୍ଧ ନଥାଏ, ଚୟନ ସ୍ଥାନୀୟ ପ୍ରାର୍ଥୀକୁ ରଖେ, ଅଂଶୀଦାର ପିନକୁ ଅପରିବର୍ତ୍ତିତ ରଖେ ଏବଂ ଗୋଟିଏ ଡିବଗ୍ ବାର୍ତ୍ତା ନିର୍ଗତ କରେ। ପ୍ରତ୍ୟାଖ୍ୟାନ CAS SQLite ଲେଖେ ନାହିଁ; Redis ତ୍ରୁଟି, ସମୟ ସମାପ୍ତ କିମ୍ବା ଆଡମିଶନ ସାଚୁଚରେସନ୍ ଏହା ବଦଳରେ ବିଦ୍ୟମାନ ସ୍ଥାନୀୟ ଅପରେସନ୍ ପ୍ରୟୋଗ କରେ। ଯଦି ପଠାଯାଇଥିବା ମ୍ୟୁଟେସନ୍ ର ଉତ୍ତର ସମୟ ସମାପ୍ତ ହେବା ପରେ ଆସେ (ଗ୍ରହଣ, ପ୍ରତ୍ୟାଖ୍ୟାନ କିମ୍ବା ତ୍ରୁଟି), ଏକ ସିଙ୍କ୍ରୋନସ୍ ସଠିକ୍ କ୍ରମିକ-ମୂଲ୍ୟ ତୁଳନା-ଏବଂ-ଡିଲିଟ୍ କେବଳ ବାଇଟ୍-ସମାନ ସମୟ ସମାପ୍ତ ଫଲବ୍ୟାକ୍ ଧାଡି ଅପସାରଣ କରେ। ସେହି ତୁଳନା ଏବଂ ବିଲୋପ ମଧ୍ୟରେ କ wait ଣସି ଅପେକ୍ଷା ନାହିଁ; ଏକ ନୂତନ ଆଉଟେଜ୍ ଲେଖା ସଂରକ୍ଷିତ। ରାକ୍ଷୀ ବହିଷ୍କାର ବିଫଳ ଆକାଉଣ୍ଟର ନିଜସ୍ୱ ସ୍ଥାନୀୟ ପିନକୁ Redis ଡାଉନ୍ ସହିତ ମଧ୍ୟ ଅପସାରଣ କରିଥାଏ, ଏବଂ ଅଂଶୀଦାର ବହିଷ୍କାର ନିଶ୍ଚିତ ହେବା ପରେ ଏହାକୁ ପୁନର୍ବାର ସଫା କରିଥାଏ। ପୂର୍ବରୁ ଅଂଶୀଦାରିତ ଉତ୍ତରଗୁଡିକ ବିଚାରାଧୀନ ସ୍ଥାନୀୟ ପିନ୍ ପୁନ restore ସ୍ଥାପନ କରିପାରିବ ନାହିଁ କାରଣ ଅଂଶୀଦାରିତ ସଫଳତା SQLite ଲେଖେ ନାହିଁ। ପରବର୍ତ୍ତୀ ଅଘଟଣ ଫଲବ୍ୟାକ୍ ଏକ ଆକାଉଣ୍ଟକୁ ପୁନ in ନିର୍ମାଣ କରିପାରିବ; ପରବର୍ତ୍ତୀ ଗ୍ରହଣୀୟ ଅଂଶୀଦାର ଲେଖା କେବଳ Redis ରେ ବିଦ୍ୟମାନ। Redis ମିସ୍ ସ୍ଥାନୀୟ ପତନ ଅବସ୍ଥା ସହିତ ପରାମର୍ଶ କରେ ନାହିଁ। ଡ୍ରାଇଭର ବନ୍ଦ ହେବା ସହିତ, ନୂତନ ଭାବେ ମନୋନୀତ ପିନଗୁଡ଼ିକ ପୁରୁଣା ଚାରି-କ୍ଷେତ୍ର SQLite JSON ଆକୃତି ରଖେ; କେବଳ Redis ରାଉଟିଙ୍ଗ୍ ହ୍ୟାସ୍ ଆକାଉଣ୍ଟ୍ ପରିଚୟ ଯୋଗ କରେ। ପୂର୍ବ ନିର୍ଦ୍ଧାରିତ ପିନଗୁଡିକ ସେମାନଙ୍କର ସମାପ୍ତି ସୀମାରେ ପୁନ he ଯାଞ୍ଚ କରାଯାଏ। Redis ଅଣ-ଲିଜ୍ ଚୟନ ଷ୍ଟୋର୍କୁ ପୁନ s ପ s େ, କିନ୍ତୁ ସିଙ୍କ୍ରୋନସ୍ ଲିଜ୍ ଯୋଜନା ପ୍ରିଫେଚ୍ ଏବଂ ଯୋଜନା (ଏକ ଗ୍ରହଣୀୟ ସର୍ବୋତ୍ତମ ପ୍ରୟାସ ୱିଣ୍ଡୋ) ମଧ୍ୟରେ ବହିଷ୍କୃତ ଏକ ପିନ୍ ବ୍ୟବହାର କରିପାରିବ। ଏକ ଲିଜ୍ ପ୍ରତିଶ୍ରୁତି ଏକ ସ୍ଥାୟୀ ଦାବି ପରେ ଆକାଉଣ୍ଟ୍ ସୁଇଚ୍ କରିପାରିବ ନାହିଁ: ପ୍ରତ୍ୟାଖ୍ୟାନ ଅପ୍ସର୍ଟରେ ଏହା କେବଳ ସେହି ଅନୁରୋଧ ପାଇଁ ଦାବି ହୋଇଥିବା ପ୍ରାର୍ଥୀକୁ ରଖେ ଏବଂ ଅଂଶୀଦାର ବିଜେତାଙ୍କୁ ଛୁଇଁ ନଥାଏ, ତେଣୁ ଉଦାହରଣଗୁଡିକ ମଧ୍ୟରେ ଚୁକ୍ତିନାମା ସେହି ପଥରେ ସୀମିତ। ବାକି ଟେବୁଲ୍ ତଥାପି ପ୍ରଯୁଜ୍ୟ: ଏହା କମ୍ବୋ ଅଧିବେଶନ ଷ୍ଟିକିନ୍ସି, ଦେଶୀ Codex ଟର୍ନ୍ ପିନ୍, ଆକାଉଣ୍ଟ୍ ସେମାଫୋରସ୍, ଲକଆଉଟ୍, ସୀମା, ବିନ୍ୟାସ କିମ୍ବା କଲ୍ ଲଗ୍ ଅଂଶୀଦାର କରେ ନାହିଁ।
 
-ହାର୍ଡୱେର୍: ପ୍ରତି-ସମାନ୍ତରାଳ ଲମ୍ବା `/v1/responses` ହେଉଛି a** ସ୍ମୃତି-ବଜେଟ୍** ପ୍ରଶ୍ନ (ହିପ୍ + ଇନଫ୍ଲାଇଟ୍-ବାଇଟ୍ / # #10110) \| `N` independent ାଧୀନ `DATA_DIR` s ତଥାପି ବହୁଗୁଣିତ ଗଦା: ହୋଷ୍ଟ RAM ନିଶ୍ଚିତ ଭାବରେ `N × cgroup` ଆବୃତ କରିବ, “N = 8 ସହିତ ଗୋଟିଏ 16 Gi ପୋଡ୍ ନୁହେଁ \|” ଗୋଟିଏ SQLite ଫାଇଲରେ କେବେବି `replicas > 1` ନାହିଁ \|
+ହାର୍ଡୱେର୍: ପ୍ରତି-ସମାନ୍ତରାଳ ଲମ୍ବା `/v1/responses` ହେଉଛି a** ସ୍ମୃତି-ବଜେଟ୍** ପ୍ରଶ୍ନ (ହିପ୍ + ଇନଫ୍ଲାଇଟ୍-ବାଇଟ୍ / #10110)। `N` independent ାଧୀନ `DATA_DIR` ଗୁଡିକ ଏପର୍ଯ୍ୟନ୍ତ ବହୁଗୁଣିତ ଗଦା: ହୋଷ୍ଟ RAM ନିଶ୍ଚିତ ଭାବରେ `N × cgroup` ଆବୃତ କରିବ, “N = 8 ସହିତ ଗୋଟିଏ 16 Gi pod ନୁହେଁ।” ଗୋଟିଏ SQLite ଫାଇଲରେ କେବେବି `replicas > 1` ନାହିଁ।
 
 ସ୍କେଚ୍ ରଚନା କରନ୍ତୁ (ଦୁଇଟି ରାଶି, ଦୁଇଟି ଭଲ୍ୟୁମ୍ — ନୁହେଁ `deploy.replicas: 2`):
 
@@ -727,7 +694,7 @@ volumes:
   omniroute-b-data:
 ```
 
-ଇନ୍-ପ୍ରୋସେସ୍ ସାନ୍ଧ୍ରତା ( HTTP ପୃଥକ ଭାବରେ ସଙ୍କୋଚନ) ହେଉଛି [# #11023](https://github.com/diegosouzapw/OmniRoute/issues/11023) \| ଅଂଶୀଦାର ସ୍ଥାୟୀ ଅବସ୍ଥାରେ ଗୋଟିଏ ଲଜିକାଲ୍ କ୍ଲଷ୍ଟର ହେଉଛି [# #8075](https://github.com/diegosouzapw/OmniRoute/issues/8075) \|
+ଇନ୍-ପ୍ରୋସେସ୍ ସାନ୍ଧ୍ରତା ( HTTP ପୃଥକ ଭାବରେ ସଙ୍କୋଚନ) ହେଉଛି [#11023](https://github.com/diegosouzapw/OmniRoute/issues/11023)। ଅଂଶୀଦାର ସ୍ଥାୟୀ ଅବସ୍ଥାରେ ଗୋଟିଏ ଲଜିକାଲ୍ କ୍ଲଷ୍ଟର ହେଉଛି [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075)।
 
 ## Docker ଭିତରେ Gemini ଆଞ୍ଚଳିକ ତ୍ରୁଟିଗୁଡ଼ିକ
 

@@ -2,6 +2,8 @@
 
 import { Disclosure, DisclosureContent, DisclosureTrigger } from "@omniroute/ui-kit/disclosure";
 import Icon from "@/shared/components/Icon";
+import Notice from "@/shared/components/Notice";
+import { Alert } from "@omniroute/ui-kit/alert";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
@@ -106,7 +108,9 @@ function MiniStat({ label, value }: { label: string; value: number }) {
     <Card>
       <div className="p-4">
         <p className="text-lg font-semibold text-text-main">{value}</p>
-        <p className="text-[10px] uppercase tracking-wider text-text-muted">{label}</p>
+        <p className="ci-eyebrow" data-size="3xs">
+          {label}
+        </p>
       </div>
     </Card>
   );
@@ -263,20 +267,16 @@ export default function StreamTransformerAccordion({
         <div className="p-4">
           <div className="space-y-5 min-w-0">
             {/* Info banner */}
-            <div className="flex items-start gap-3 px-4 py-3 rounded-lg bg-primary/5 border border-primary/10 text-sm text-text-muted">
-              <Icon name="swap_horiz" size={20} className="text-primary mt-0.5" />
-              <div>
-                <p className="font-medium text-text-main mb-0.5">
-                  {translateOrFallback("streamTransformerTitle", "Responses Stream Transformer")}
-                </p>
-                <p>
-                  {translateOrFallback(
-                    "streamTransformerDescription",
-                    "Paste a chat completions SSE stream, run it through OmniRoute's Responses transformer, and inspect the emitted response.* events before wiring a client."
-                  )}
-                </p>
-              </div>
-            </div>
+            <Alert
+              variant="info"
+              dismissible={false}
+              icon={<Icon name="swap_horiz" size={18} />}
+              title={translateOrFallback("streamTransformerTitle", "Responses Stream Transformer")}
+              description={translateOrFallback(
+                "streamTransformerDescription",
+                "Paste a chat completions SSE stream, run it through OmniRoute's Responses transformer, and inspect the emitted response.* events before wiring a client."
+              )}
+            />
 
             <Card>
               <div className="p-4 flex flex-col gap-4">
@@ -314,13 +314,9 @@ export default function StreamTransformerAccordion({
 
                 {/* Error display — Hard Rule #12: never show raw err.stack */}
                 {error && (
-                  <div
-                    role="alert"
-                    data-testid="error-display"
-                    className="rounded-lg border border-error/30 bg-error/10 px-3 py-2 text-sm text-error"
-                  >
+                  <Notice variant="critical" data-testid="error-display">
                     {error}
-                  </div>
+                  </Notice>
                 )}
 
                 {/* Input / Output panels */}
@@ -328,7 +324,7 @@ export default function StreamTransformerAccordion({
                   {/* Raw SSE input */}
                   <div className="space-y-2">
                     <div className="flex items-center justify-between gap-2">
-                      <h3 className="text-sm text-text-main">
+                      <h3 className="ci-heading" data-size="sm">
                         {translateOrFallback("rawChatSseInput", "Raw chat completions SSE")}
                       </h3>
                       <Button
@@ -344,7 +340,8 @@ export default function StreamTransformerAccordion({
                       value={rawSse}
                       onChange={(e) => setRawSse(e.target.value)}
                       data-testid="raw-sse-input"
-                      className="min-h-[360px] w-full font-mono text-xs"
+                      mono
+                      className="min-h-[360px] w-full"
                       spellCheck={false}
                       aria-label={translateOrFallback(
                         "rawChatSseInput",
@@ -356,7 +353,7 @@ export default function StreamTransformerAccordion({
                   {/* Transformed SSE output */}
                   <div className="space-y-2">
                     <div className="flex items-center justify-between gap-2">
-                      <h3 className="text-sm text-text-main">
+                      <h3 className="ci-heading" data-size="sm">
                         {translateOrFallback(
                           "transformedResponsesSse",
                           "Transformed Responses API SSE"
@@ -409,7 +406,7 @@ export default function StreamTransformerAccordion({
             {/* Event timeline */}
             <Card>
               <div className="p-4 space-y-3">
-                <h3 className="text-sm text-text-main">
+                <h3 className="ci-heading" data-size="sm">
                   {translateOrFallback("transformedEventTimeline", "Transformed event timeline")}
                 </h3>
 
@@ -424,8 +421,7 @@ export default function StreamTransformerAccordion({
                   <Table
                     scrollbarLabel={translateOrFallback("eventType", "Event type")}
                     scrollLabel={translateOrFallback("eventType", "Event type")}
-                    className="text-sm"
-                    containerClassName="rounded-none border-0"
+                    variant="plain"
                   >
                     <TableHeader>
                       <TableRow>

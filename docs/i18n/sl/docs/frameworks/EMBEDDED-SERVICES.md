@@ -557,6 +557,8 @@ Ta proxy:
 
 nadgradnje WebSocket za vdelano nadzorno ploščo upravlja spremljevalni strežnik na namenskih vratih (glejte `src/lib/services/embedWsProxy.ts`).
 
+Vsaka nadgradnja je avtorizirana, preden se predor odpre, z enakimi pravili kot za vdelano pot HTTP : vrstnik mora imeti povratno zanko brez glave za posredovanje povratnega proxyja, `Origin` brskalnika mora biti izvor nadzorne plošče (`LIVE_WS_ALLOWED_ORIGINS` / `LIVE_WS_ALLOWED_HOSTS` razširita privzete nastavitve povratne zanke) in klicatelj potrebuje sejo nadzorne plošče ali ključ API za področje upravljanja, razen če je prijava na nadzorno ploščo onemogočena.
+
 **Varnost:** Vdelane proxy poti so razvrščene pod `LOCAL_ONLY_API_PREFIXES` in jih je mogoče doseči samo s povratno zanko. Napadalec, ki pridobi JWT prek tunela Cloudflare/Ngrok ne more posredovati v vgrajene storitve.
 
 ---

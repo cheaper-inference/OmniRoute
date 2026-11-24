@@ -2,6 +2,7 @@
 import React, { act } from "react";
 import { createRoot } from "react-dom/client";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { readButtonTooltip } from "../../_helpers/buttonTooltip";
 
 // ── Import component + pure resolver ─────────────────────────────────────────
 
@@ -290,10 +291,32 @@ async function waitForCondition(fn: () => boolean, timeoutMs = 2000) {
 const grid = (el: HTMLElement) =>
   el.querySelector<HTMLElement>("[data-testid='noauth-account-grid']");
 
+// The proxy shield is the chip's only button with a title. The Button adapter shows a title
+// through the kit tooltip, so the button is a tooltip trigger (Radix `data-state`) and carries
+// no native `title` attribute.
 const firstShield = (el: HTMLElement) =>
   grid(el)
     ?.querySelector<HTMLElement>("[data-account-id]")
-    ?.querySelector<HTMLButtonElement>("button[title]") ?? null;
+    ?.querySelector<HTMLButtonElement>("button[data-state]") ?? null;
+
+/** The shield's title, read from its tooltip. */
+const shieldTitle = async (el: HTMLElement) => {
+  const shield = firstShield(el);
+  return shield ? readButtonTooltip(shield) : "";
+};
+
+/** Waits until the shield's title contains `text` and returns the whole title. */
+async function waitForShieldTitle(el: HTMLElement, text: string, timeoutMs = 2000) {
+  const start = Date.now();
+  for (;;) {
+    const title = await shieldTitle(el);
+    if (title.includes(text)) return title;
+    if (Date.now() - start > timeoutMs) {
+      throw new Error(`the shield title never contained "${text}" (last: "${title}")`);
+    }
+    await new Promise((r) => setTimeout(r, 20));
+  }
+}
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -320,11 +343,9 @@ describe("NoAuthAccountCard effective egress", () => {
       ],
     });
     const el = renderCard();
-    await waitForCondition(
-      () => firstShield(el)?.getAttribute("title")?.includes("Inherits connection pool") ?? false
-    );
+    const title = await waitForShieldTitle(el, "Inherits connection pool");
     const shield = firstShield(el)!;
-    expect(shield.getAttribute("title")).toBe("Inherits connection pool (2)");
+    expect(title).toBe("Inherits connection pool (2)");
     expect(shield.className).toContain("text-info");
   });
 
@@ -335,11 +356,8 @@ describe("NoAuthAccountCard effective egress", () => {
       assignmentRows: [assignment("provider", PROVIDER_ID, "a")],
     });
     const el = renderCard();
-    await waitForCondition(
-      () => firstShield(el)?.getAttribute("title")?.includes("Pool empty") ?? false
-    );
-    const shield = firstShield(el)!;
-    expect(shield.getAttribute("title")).not.toContain("Direct");
+    const title = await waitForShieldTitle(el, "Pool empty");
+    expect(title).not.toContain("Direct");
   });
 
   it("a combo-scope row alone keeps the neutral shield, never 'requests fail'", async () => {
@@ -353,9 +371,10 @@ describe("NoAuthAccountCard effective egress", () => {
     // Give the assignments fetch time to land before asserting the steady state.
     await new Promise((r) => setTimeout(r, 100));
     const shield = firstShield(el)!;
-    expect(shield.getAttribute("title")).toBe("Configure proxy");
-    expect(shield.getAttribute("title")).not.toContain("Pool empty");
-    expect(shield.getAttribute("title")).not.toContain("Direct");
+    const title = await readButtonTooltip(shield);
+    expect(title).toBe("Configure proxy");
+    expect(title).not.toContain("Pool empty");
+    expect(title).not.toContain("Direct");
     expect(shield.className).not.toContain("text-error");
   });
 

@@ -187,8 +187,17 @@ export function registerResilience(program) {
     .option("--threshold <n>", t("resilience.config.threshold"), parseInt)
     .option("--reset-timeout <ms>", t("resilience.config.resetTimeout"), parseInt)
     .option("--base-cooldown <ms>", t("resilience.config.baseCooldown"), parseInt)
+    .option("--p2c-latency-weight <0-20>", t("resilience.config.p2cLatencyWeight"), parseInt)
     .action(async (opts, cmd) => {
       const body = {};
+      if (opts.p2cLatencyWeight != null) {
+        const w = opts.p2cLatencyWeight;
+        if (!Number.isInteger(w) || w < 0 || w > 20) {
+          process.stderr.write("Error: --p2c-latency-weight must be an integer from 0 to 20\n");
+          process.exit(1);
+        }
+        body.p2cLatency = { weight: w };
+      }
       if (opts.threshold != null) body.threshold = opts.threshold;
       if (opts.resetTimeout != null) body.resetTimeoutMs = opts.resetTimeout;
       if (opts.baseCooldown != null) body.baseCooldownMs = opts.baseCooldown;

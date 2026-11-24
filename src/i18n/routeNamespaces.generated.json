@@ -8,7 +8,8 @@
     "header",
     "landing",
     "miniapp",
-    "publicSystem"
+    "publicSystem",
+    "quotaSelf"
   ],
   "chrome": [
     "agentSkills",
@@ -205,6 +206,7 @@
       "common",
       "costs",
       "cursorAuthModal",
+      "formValidation",
       "header",
       "kiroAuthModal",
       "kiroSocialOAuthModal",
@@ -1638,6 +1640,7 @@
       "cursorAuthModal",
       "endpoint",
       "featureFlags",
+      "formValidation",
       "header",
       "health",
       "kiroAuthModal",
@@ -1797,6 +1800,7 @@
       "connectionTest",
       "costs",
       "cursorAuthModal",
+      "formValidation",
       "freeBudget",
       "header",
       "kiroAuthModal",
@@ -1829,6 +1833,7 @@
       "common",
       "costs",
       "cursorAuthModal",
+      "formValidation",
       "header",
       "kiroAuthModal",
       "kiroSocialOAuthModal",

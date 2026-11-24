@@ -1,7 +1,9 @@
 "use client";
 
+import Card from "@/shared/components/Card";
 import { useTranslations } from "next-intl";
 import Icon from "@/shared/components/Icon";
+import { Progress } from "@omniroute/ui-kit/progress";
 import { Badge } from "@/shared/components";
 import type { RetrievePreviewResult } from "@/shared/schemas/memory";
 
@@ -23,7 +25,7 @@ export default function RetrievePreview({ result }: Props) {
   return (
     <div className="space-y-4">
       {/* Resolution panel */}
-      <div className="p-3 rounded-lg bg-surface/30 border border-border/60 text-xs text-text-muted space-y-1">
+      <Card.Section className="text-xs text-text-muted space-y-1">
         <p className="font-medium text-text-main text-sm">{t("playground.resolutionTitle")}</p>
         <p>
           {t("playground.resolutionEmbedding")}:{" "}
@@ -51,7 +53,7 @@ export default function RetrievePreview({ result }: Props) {
             {t("playground.fallback")}: {resolution.fallbackReason}
           </p>
         )}
-      </div>
+      </Card.Section>
 
       {/* Results list */}
       {memories.length === 0 ? (
@@ -59,10 +61,7 @@ export default function RetrievePreview({ result }: Props) {
       ) : (
         <div className="space-y-2">
           {memories.map((m) => (
-            <div
-              key={m.id}
-              className="p-3 rounded-lg border border-border/60 bg-surface/30 space-y-1"
-            >
+            <Card.Section key={m.id} className="space-y-1">
               <div className="flex items-center gap-2 flex-wrap">
                 <Badge variant={TIER_VARIANT[m.tier] ?? "default"} size="sm">
                   {m.tier}
@@ -74,11 +73,11 @@ export default function RetrievePreview({ result }: Props) {
                 <span className="text-xs text-text-muted">{m.tokens} tok</span>
               </div>
               <p className="text-xs text-text-muted truncate">{m.content}</p>
-              <div className="flex gap-3 text-[10px] text-text-muted/70 font-mono">
+              <div className="flex gap-3 text-3xs text-text-muted/70 font-mono">
                 {m.vecScore !== null && <span>vec: {m.vecScore.toFixed(3)}</span>}
                 {m.ftsScore !== null && <span>fts: {m.ftsScore.toFixed(3)}</span>}
               </div>
-            </div>
+            </Card.Section>
           ))}
         </div>
       )}
@@ -89,21 +88,15 @@ export default function RetrievePreview({ result }: Props) {
           {totalTokensUsed.toLocaleString()} / {budgetMaxTokens.toLocaleString()}{" "}
           {t("playground.tokensUsed")}
         </span>
-        <div
-          role="progressbar"
+        <Progress
+          size="sm"
+          semantics="meter"
+          animate={false}
           aria-label={t("playground.tokensUsed")}
-          aria-valuemin={0}
-          aria-valuemax={Math.max(1, budgetMaxTokens)}
-          aria-valuenow={Math.min(totalTokensUsed, Math.max(1, budgetMaxTokens))}
-          className="h-1.5 w-24 rounded-full bg-border overflow-hidden"
-        >
-          <div
-            className="h-full rounded-full bg-primary"
-            style={{
-              width: `${Math.min(100, (totalTokensUsed / Math.max(1, budgetMaxTokens)) * 100).toFixed(1)}%`,
-            }}
-          />
-        </div>
+          value={totalTokensUsed}
+          max={Math.max(1, budgetMaxTokens)}
+          className="w-24"
+        />
       </div>
     </div>
   );

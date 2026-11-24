@@ -23,6 +23,7 @@ const workflow = YAML.parse(readFileSync(join(root, ".github/workflows/npm-publi
 const PLUGIN_JOBS = {
   "publish-opencode-plugin": "@omniroute/opencode-plugin",
   "publish-opencode-plugin-v2": "@omniroute/opencode-plugin-v2",
+  "publish-opencode-provider": "@omniroute/opencode-provider",
 };
 
 function bumpStep(jobName) {

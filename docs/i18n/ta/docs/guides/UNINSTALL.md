@@ -70,6 +70,8 @@ docker rm omniroute
 docker volume rm omniroute-data
 
 # (விருப்பத்திற்குரியது) படிமத்தை அகற்றவும்
+docker rmi cheaperinference/omniroute:latest
+# பழைய நிறுவல்கள் மரபுப் பெயரை இழுத்தன:
 docker rmi diegosouzapw/omniroute:latest
 ```
 

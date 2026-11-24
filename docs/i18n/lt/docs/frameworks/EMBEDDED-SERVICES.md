@@ -557,6 +557,8 @@ GET|POST|... /dashboard/providers/services/9router/embed/[...path]
 
 WebSocket naujinimus, skirtus įterptajam prietaisų skydeliui, tvarko papildomas serveris, esantis tam skirtame prievade (žr. `src/lib/services/embedWsProxy.ts`).
 
+Kiekvienas naujinimas patvirtinamas prieš atidarant tunelį, laikantis tos pačios taisyklės kaip ir HTTP įterpimo maršrutas: lygiavertis partneris turi būti grįžtamasis ryšys be atvirkštinio tarpinio serverio persiuntimo antraštės, naršyklės `Origin` turi būti informacijos suvestinės kilmė (`LIVE_WS_ALLOWED_ORIGINS` / `LIVE_WS_ALLOWED_HOSTS` išplėsti atgalinio ciklo numatytuosius nustatymus), o skambinančiajam reikia išjungti prietaisų skydelio seansą arba API keyboard.
+
 **Saugumas:** Įterpti tarpinio serverio maršrutai yra klasifikuojami kaip `LOCAL_ONLY_API_PREFIXES` ir juos galima pasiekti tik per kilpą. Užpuolikas, gavęs JWT per Cloudflare/Ngrok tunelį, negali prisijungti prie įterptųjų paslaugų.
 
 ---

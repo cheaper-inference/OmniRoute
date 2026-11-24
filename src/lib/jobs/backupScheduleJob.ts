@@ -42,6 +42,8 @@ type BackupSchedule = {
   retention?: number | null;
   updatedAt?: string;
   lastRunAt?: string;
+  keyFile?: string;
+  lastError?: string | null;
 };
 
 function readSchedule(): BackupSchedule | null {
@@ -54,10 +56,35 @@ function readSchedule(): BackupSchedule | null {
   }
 }
 
-function writeLastRunAt(schedule: BackupSchedule, at: Date) {
+function writeLastRunAt(schedule: BackupSchedule, at: Date, lastError?: string | null) {
   const schedulePath = getSchedulePath();
-  const updated = { ...schedule, lastRunAt: at.toISOString() };
+  const updated = { ...schedule, lastRunAt: at.toISOString(), lastError: lastError ?? null };
   writeFileSync(schedulePath, JSON.stringify(updated, null, 2), "utf8");
+}
+
+function alreadyRanThisMinute(schedule: BackupSchedule, now: Date): boolean {
+  if (!schedule.lastRunAt) return false;
+  const lastRun = new Date(schedule.lastRunAt);
+  return !Number.isNaN(lastRun.getTime()) && minuteKey(lastRun) === minuteKey(now);
+}
+
+async function runScheduledBackup(schedule: BackupSchedule, now: Date): Promise<void> {
+  try {
+    // runBackupCommand reports failure through its exit code, not by throwing.
+    const exitCode = await runBackupCommand({
+      cloud: !!schedule.cloud,
+      encrypt: !!schedule.encrypt,
+      keyFile: schedule.encrypt ? schedule.keyFile : undefined,
+      retention: schedule.retention || undefined,
+    });
+    if (exitCode !== 0) {
+      console.error(`[BackupSchedule] Backup failed (exit ${exitCode})`);
+      writeLastRunAt(schedule, now, `backup failed (exit ${exitCode})`);
+    }
+  } catch (error) {
+    console.error("[BackupSchedule] Job failed:", error);
+    writeLastRunAt(schedule, now, error instanceof Error ? error.message : String(error));
+  }
 }
 
 /**
@@ -71,18 +98,13 @@ export async function runBackupScheduleTick(now: Date = new Date()): Promise<boo
   if (!schedule || !schedule.enabled || !schedule.cron) return false;
   if (!matchesCron(schedule.cron, now)) return false;
 
-  // `runBackupCommand({ encrypt: true })` without a key file prompts for a
-  // passphrase on stdin (`promptPassphrase()`) — fine for an interactive CLI
-  // run, but this tick has no TTY to read from and would hang forever. And
-  // `backup auto enable` doesn't even expose `--key-file` today, so there is
-  // currently no way to configure a non-interactive passphrase for a
-  // scheduled encrypted backup. Refuse rather than hang; --encrypt on the
-  // schedule needs a follow-up (`--key-file` on `auto enable`) before this
-  // can run unattended.
-  if (schedule.encrypt) {
+  // A scheduled run has no TTY, so an encrypted schedule needs a key file
+  // (`backup auto enable --encrypt --key-file <path>`); without one, skip
+  // rather than block on a stdin passphrase prompt.
+  if (schedule.encrypt && !schedule.keyFile) {
     console.error(
-      "[BackupSchedule] Schedule has encrypt:true but no non-interactive passphrase source exists yet " +
-        "(backup auto enable has no --key-file) — skipping this run rather than blocking on stdin."
+      "[BackupSchedule] Schedule has encrypt:true but no keyFile — re-run " +
+        "`omniroute backup auto enable --encrypt --key-file <path>`; skipping this run."
     );
     return false;
   }
@@ -90,23 +112,10 @@ export async function runBackupScheduleTick(now: Date = new Date()): Promise<boo
   // A tick shorter than 60s means multiple ticks can land inside the same
   // matching minute — without this guard the backup would fire once per
   // tick for the whole minute instead of once for the whole day.
-  if (schedule.lastRunAt) {
-    const lastRun = new Date(schedule.lastRunAt);
-    if (!Number.isNaN(lastRun.getTime()) && minuteKey(lastRun) === minuteKey(now)) {
-      return false;
-    }
-  }
+  if (alreadyRanThisMinute(schedule, now)) return false;
 
   writeLastRunAt(schedule, now);
-  try {
-    await runBackupCommand({
-      cloud: !!schedule.cloud,
-      encrypt: !!schedule.encrypt,
-      retention: schedule.retention || undefined,
-    });
-  } catch (error) {
-    console.error("[BackupSchedule] Job failed:", error);
-  }
+  await runScheduledBackup(schedule, now);
   return true;
 }
 

@@ -12,7 +12,8 @@
     "dryRun": "[simulácia] by vykonalo: {action}",
     "cancelled": "Zrušené.",
     "jsonOpt": "Výstup ako JSON",
-    "yesOpt": "Preskočiť potvrdenie"
+    "yesOpt": "Preskočiť potvrdenie",
+    "positiveIntegerRequired": "Limit musí byť kladné celé číslo."
   },
   "setup": {
     "title": "Nastavenie OmniRoute",

@@ -70,13 +70,19 @@ LABEL org.opencontainers.image.title="omniroute" \
 
 WORKDIR /app
 
+# `apt-get upgrade` pulls the trixie security fixes published since the oven/bun base image
+# was built, as the Node base stage does; without it 3.8.54-bun shipped apt, libapt-pkg7.0
+# and zlib1g with a fix available. Only what the runtime uses is installed, matching the
+# Node runner: the healthcheck is `bun healthcheck.mjs` and the database is bun:sqlite, so
+# curl (which pulled the Kerberos libraries) and the sqlite3 CLI are not.
 RUN apt-get update \
+  && apt-get upgrade -y \
   && apt-get install -y --no-install-recommends \
      libsecret-1-0 \
      ca-certificates \
-     curl \
-     sqlite3 \
   && rm -rf /var/lib/apt/lists/*
+
+RUN bun -e "import { Database } from 'bun:sqlite'; const db = new Database(':memory:'); db.query('SELECT 1 AS ok').get(); db.close(); console.log('bun:sqlite runtime smoke: OK');"
 
 ENV NODE_ENV=production
 ENV PORT=20128
@@ -117,50 +123,30 @@ FROM runner-base AS runner-web
 
 USER root
 
+# Chromium comes from Playwright, exactly as in the Node runner-web (Dockerfile), not
+# from apt:
+#   - Playwright's own chromium.launch() looks for its managed build under
+#     PLAYWRIGHT_BROWSERS_PATH. The apt `chromium` left that path empty, so in
+#     3.8.54-web-bun every provider that launches through Playwright without an
+#     explicit executablePath failed with "Executable doesn't exist at
+#     /home/bun/.cache/ms-playwright/…".
+#   - The Debian chromium, chromium-common and chromium-driver packages carried ~720
+#     HIGH scanner findings with no Debian fix; chromium-driver was never used.
+# The browser version follows the bundled playwright package (Dependabot npm group),
+# not Debian's chromium.
+# xvfb (#15300): zai-web needs a headed Chromium and the browser pool starts a private
+# Xvfb when the container has no DISPLAY.
+# /usr/bin/chromium stays, as a symlink to Playwright's build, for the code paths that
+# look for a system browser there (ChatGPT Web, Codex Web, Adobe Firefly login).
+ENV PLAYWRIGHT_BROWSERS_PATH=/home/bun/.cache/ms-playwright
 RUN apt-get update \
-  && apt-get install -y --no-install-recommends \
-     chromium \
-     chromium-driver \
-     fonts-liberation \
-     libasound2t64 \
-     libatk-bridge2.0-0 \
-     libatk1.0-0 \
-     libc6 \
-     libcairo2 \
-     libcups2 \
-     libdbus-1-3 \
-     libexpat1 \
-     libfontconfig1 \
-     libgbm1 \
-     libgcc-s1 \
-     libglib2.0-0 \
-     libgtk-3-0 \
-     libnspr4 \
-     libnss3 \
-     libpango-1.0-0 \
-     libpangocairo-1.0-0 \
-     libstdc++6 \
-     libx11-6 \
-     libx11-xcb1 \
-     libxcb1 \
-     libxcomposite1 \
-     libxcursor1 \
-     libxdamage1 \
-     libxext6 \
-     libxfixes3 \
-     libxi6 \
-     libxrandr2 \
-     libxrender1 \
-     libxss1 \
-     libxtst6 \
-     ca-certificates \
-     fonts-gargi \
-     fonts-ipafont-gothic \
-     fonts-thai-tlwg \
-     fonts-wqy-zenhei \
+  && bun node_modules/playwright/cli.js install chromium --with-deps \
+  && apt-get install -y --no-install-recommends xvfb \
+  && ln -sf "$(bun -e 'process.stdout.write(require("playwright-core").chromium.executablePath())')" /usr/bin/chromium \
+  && /usr/bin/chromium --version \
+  && chown -R bun:bun /home/bun/.cache \
   && rm -rf /var/lib/apt/lists/*
 
-ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
 ENV PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium
 
 # Drop back to default non-root user
