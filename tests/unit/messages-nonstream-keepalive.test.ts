@@ -130,3 +130,49 @@ test("/v1/messages non-streaming: a slow upstream gets keepalive bytes, then the
   assert.equal(message.content?.[0]?.text, "OK");
   assert.equal(response.headers.get("x-correlation-id"), "slow-json-123");
 });
+
+test("/v1/messages non-streaming: the keepalive also covers a slow Bifrost attempt before the native fallback", async () => {
+  process.env.OMNIROUTE_NONSTREAM_KEEPALIVE_MS = "50";
+  const bifrostEnv = [
+    "BIFROST_BASE_URL",
+    "OMNIROUTE_RELAY_BACKEND",
+    "BIFROST_ENABLED",
+    "BIFROST_TIMEOUT_MS",
+  ];
+  const savedEnv = Object.fromEntries(bifrostEnv.map((name) => [name, process.env[name]]));
+  Object.assign(process.env, {
+    BIFROST_BASE_URL: "http://127.0.0.1:8080",
+    OMNIROUTE_RELAY_BACKEND: "bifrost",
+    BIFROST_ENABLED: "1",
+    BIFROST_TIMEOUT_MS: "5000",
+  });
+  try {
+    globalThis.fetch = async (url) => {
+      if (String(url).startsWith("http://127.0.0.1:8080")) {
+        await delay(300);
+        return new Response(JSON.stringify({ error: "not found" }), { status: 404 });
+      }
+      return harness.buildOpenAIResponse("OK", "gpt-4.1");
+    };
+    const response = await POST(
+      harness.buildRequest({
+        url: "http://localhost/v1/messages",
+        body: {
+          model: "openai/gpt-4.1",
+          max_tokens: 16,
+          messages: [{ role: "user", content: "hi" }],
+          stream: false,
+        },
+      })
+    );
+    const wire = await response.text();
+    assert.equal(response.status, 200, wire);
+    assert.ok(wire.startsWith(" "), "keepalive bytes must flow during the slow Bifrost attempt");
+    assert.equal(JSON.parse(wire).content?.[0]?.text, "OK");
+  } finally {
+    for (const name of bifrostEnv) {
+      if (savedEnv[name] === undefined) delete process.env[name];
+      else process.env[name] = savedEnv[name];
+    }
+  }
+});

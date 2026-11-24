@@ -50,7 +50,74 @@ export type EarlyJsonKeepaliveOptions = {
   extraHeaders?: Record<string, string>;
 };
 
-type Settled = { ok: true; response: Response } | { ok: false };
+type Settled = { ok: true; response: Response } | { ok: false; error: unknown };
+
+/** Shared between the committed stream's start() and cancel(). */
+type KeepaliveStreamState = {
+  interval?: ReturnType<typeof setInterval>;
+  reader?: ReadableStreamDefaultReader<Uint8Array>;
+  cancelled: boolean;
+};
+
+/** The settled handler result, or null when the threshold passes first. */
+async function raceThreshold(settled: Promise<Settled>, thresholdMs: number) {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const raced = await Promise.race([
+    settled,
+    new Promise<null>((resolve) => {
+      timer = setTimeout(() => resolve(null), thresholdMs);
+    }),
+  ]);
+  clearTimeout(timer);
+  return raced;
+}
+
+function startKeepaliveBytes(
+  controller: ReadableStreamDefaultController<Uint8Array>,
+  state: KeepaliveStreamState,
+  intervalMs: number
+) {
+  controller.enqueue(KEEPALIVE_BYTE);
+  state.interval = setInterval(() => {
+    try {
+      controller.enqueue(KEEPALIVE_BYTE);
+    } catch {
+      clearInterval(state.interval);
+    }
+  }, intervalMs);
+}
+
+function closeWithFallbackError(controller: ReadableStreamDefaultController<Uint8Array>) {
+  controller.enqueue(FALLBACK_ERROR_BODY);
+  controller.close();
+}
+
+/** Copy the handler body after the keepalive bytes. */
+async function forwardHandlerBody(
+  body: ReadableStream<Uint8Array>,
+  controller: ReadableStreamDefaultController<Uint8Array>,
+  state: KeepaliveStreamState
+) {
+  let forwarded = false;
+  try {
+    state.reader = body.getReader();
+    for (;;) {
+      const { done, value } = await state.reader.read();
+      if (done) break;
+      if (!value?.length) continue;
+      controller.enqueue(value);
+      forwarded = true;
+    }
+    if (forwarded) controller.close();
+    else closeWithFallbackError(controller);
+  } catch {
+    if (state.cancelled) return;
+    // Appending to a half-written body would produce invalid JSON; fail the
+    // response instead so the client sees a broken transfer, not a wrong answer.
+    if (forwarded) controller.error(new Error("upstream body failed"));
+    else closeWithFallbackError(controller);
+  }
+}
 
 export async function withEarlyJsonKeepalive(
   handlerPromise: Promise<Response>,
@@ -60,80 +127,36 @@ export async function withEarlyJsonKeepalive(
   const intervalMs = Math.max(MIN_INTERVAL_MS, options.intervalMs ?? DEFAULT_INTERVAL_MS);
 
   // Settle into a tagged result so the losing race branch never leaves an unhandled rejection.
-  let handlerError: unknown;
   const settled: Promise<Settled> = handlerPromise.then(
     (response) => ({ ok: true, response }),
-    (error) => {
-      handlerError = error;
-      return { ok: false };
-    }
+    (error: unknown) => ({ ok: false, error })
   );
-  let timer: ReturnType<typeof setTimeout> | undefined;
-  const raced = await Promise.race([
-    settled,
-    new Promise<null>((resolve) => {
-      timer = setTimeout(() => resolve(null), options.thresholdMs);
-    }),
-  ]);
-  clearTimeout(timer);
+  const raced = await raceThreshold(settled, options.thresholdMs);
   if (raced) {
     if (raced.ok) return raced.response;
-    throw handlerError;
+    throw raced.error;
   }
 
-  let interval: ReturnType<typeof setInterval> | undefined;
-  let reader: ReadableStreamDefaultReader<Uint8Array> | undefined;
-  let cancelled = false;
+  const state: KeepaliveStreamState = { cancelled: false };
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
-      controller.enqueue(KEEPALIVE_BYTE);
-      interval = setInterval(() => {
-        try {
-          controller.enqueue(KEEPALIVE_BYTE);
-        } catch {
-          clearInterval(interval);
-        }
-      }, intervalMs);
+      startKeepaliveBytes(controller, state, intervalMs);
       const result = await settled;
-      clearInterval(interval);
-      if (cancelled) {
+      clearInterval(state.interval);
+      if (state.cancelled) {
         if (result.ok) result.response.body?.cancel().catch(() => {});
         return;
       }
-      if (!result.ok || !result.response.body) {
-        controller.enqueue(FALLBACK_ERROR_BODY);
-        controller.close();
-        return;
-      }
-      let forwarded = false;
-      try {
-        reader = result.response.body.getReader();
-        for (;;) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          if (value?.length) {
-            controller.enqueue(value);
-            forwarded = true;
-          }
-        }
-        if (!forwarded) controller.enqueue(FALLBACK_ERROR_BODY);
-        controller.close();
-      } catch {
-        if (cancelled) return;
-        // Appending to a half-written body would produce invalid JSON; fail the
-        // response instead so the client sees a broken transfer, not a wrong answer.
-        if (forwarded) {
-          controller.error(new Error("upstream body failed"));
-        } else {
-          controller.enqueue(FALLBACK_ERROR_BODY);
-          controller.close();
-        }
+      if (result.ok && result.response.body) {
+        await forwardHandlerBody(result.response.body, controller, state);
+      } else {
+        closeWithFallbackError(controller);
       }
     },
     cancel() {
-      cancelled = true;
-      clearInterval(interval);
-      reader?.cancel().catch(() => {});
+      state.cancelled = true;
+      clearInterval(state.interval);
+      state.reader?.cancel().catch(() => {});
     },
   });
 
