@@ -81,8 +81,8 @@ describe("migrationRunner/constants — exact small-table snapshots", () => {
 // ── large tables — count + shape + spot-checks (corruption guard) ─────────────
 
 describe("migrationRunner/constants — large-table integrity", () => {
-  it("RENAMED_MIGRATION_COMPATIBILITY has 122 well-formed entries", () => {
-    assert.equal(RENAMED_MIGRATION_COMPATIBILITY.length, 122);
+  it("RENAMED_MIGRATION_COMPATIBILITY has 124 well-formed entries", () => {
+    assert.equal(RENAMED_MIGRATION_COMPATIBILITY.length, 124);
     assert.deepEqual(
       RENAMED_MIGRATION_COMPATIBILITY.filter(
         (entry) => entry.fromName === "agent_session_messages"
@@ -92,6 +92,15 @@ describe("migrationRunner/constants — large-table integrity", () => {
         fromName: "agent_session_messages",
         toVersion: "20261115231913",
         toName: "agent_session_messages",
+      }))
+    );
+    assert.deepEqual(
+      RENAMED_MIGRATION_COMPATIBILITY.filter((entry) => entry.fromName === "launch_sessions"),
+      ["240", "242"].map((fromVersion) => ({
+        fromVersion,
+        fromName: "launch_sessions",
+        toVersion: "20261116102450",
+        toName: "launch_sessions",
       }))
     );
     assert.deepEqual(
