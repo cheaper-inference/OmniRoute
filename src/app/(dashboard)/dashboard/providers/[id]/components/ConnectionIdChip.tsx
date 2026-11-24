@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/shared/components";
+import { Button, InfoTooltip } from "@/shared/components";
 
 import { useTranslations } from "next-intl";
 import { useCopyToClipboard } from "@/shared/hooks/useCopyToClipboard";
@@ -40,8 +40,8 @@ export default function ConnectionIdChip({ connectionId }: { connectionId?: stri
 export function ConnectionPinTip() {
   const t = useTranslations("providers");
   return (
-    <p className="-mt-2 mb-3 text-xs text-text-muted">
-      {t("connectionPinTip", { header: CONNECTION_PIN_HEADER })}
-    </p>
+    <span className="mb-3 inline-flex">
+      <InfoTooltip text={t("connectionPinTip", { header: CONNECTION_PIN_HEADER })} />
+    </span>
   );
 }

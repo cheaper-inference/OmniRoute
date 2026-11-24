@@ -4,6 +4,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { createRoot } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { fireEvent, screen } from "@testing-library/react";
 
 import ConnectionRow, {
   type ConnectionRowProps,
@@ -109,11 +110,17 @@ describe("ConnectionRow connection-id chip", () => {
 });
 
 describe("ConnectionPinTip", () => {
-  it("documents the x-omniroute-connection header and the copy chip", () => {
+  it("documents the x-omniroute-connection header and the copy chip", async () => {
     const el = render(<ConnectionPinTip />);
-    const text = el.textContent || "";
+    // The kit InfoTooltip gives its trigger a short name; the tip is the tooltip description.
+    const trigger = el.querySelector("button")!;
+    fireEvent.focus(trigger);
+    await act(async () => {});
+    const tooltip = await screen.findByRole("tooltip");
+    const text = tooltip.textContent || "";
     expect(text).toContain("x-omniroute-connection");
     expect(text).not.toContain("x-connection-id");
+    expect(trigger.getAttribute("aria-describedby")).toBe(tooltip.id);
   });
 });
 
