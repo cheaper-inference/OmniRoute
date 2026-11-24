@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { CheckboxGroup } from "@omniroute/ui-kit/checkbox";
+import type { WakeupProvider } from "@/shared/validation/codexWakeupSchemas";
 import { Button, Checkbox, Input, Select, Toggle } from "@/shared/components";
 
 type Schedule =
@@ -20,7 +21,7 @@ type WakeupTask = {
 
 type WakeupRun = { id: string; taskId: string; status: string; startedAt: string };
 
-export type WakeupAccount = { id: string; label: string };
+export type WakeupAccount = { id: string; label: string; inactive?: boolean };
 
 type Notice = { tone: "ok" | "error"; text: string } | null;
 
@@ -44,9 +45,9 @@ function browserTimeZone(): string {
 
 type WakeupState = { tasks: WakeupTask[]; runs: WakeupRun[] };
 
-async function loadWakeups(): Promise<WakeupState | null> {
+async function loadWakeups(api: string): Promise<WakeupState | null> {
   try {
-    const res = await fetch(API);
+    const res = await fetch(api);
     if (!res.ok) return null;
     const data = await res.json();
     return {
@@ -59,35 +60,39 @@ async function loadWakeups(): Promise<WakeupState | null> {
   }
 }
 
-function useCodexWakeups() {
+function useCodexWakeups(provider: WakeupProvider) {
+  const api = provider === "claude" ? API + "?provider=claude" : API;
   const [state, setState] = useState<WakeupState>({ tasks: [], runs: [] });
 
   useEffect(() => {
     let cancelled = false;
-    loadWakeups().then((next) => {
+    loadWakeups(api).then((next) => {
       if (!cancelled && next) setState(next);
     });
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [api]);
 
-  const send = useCallback(async (body: Record<string, unknown>): Promise<boolean> => {
-    let ok = false;
-    try {
-      const res = await fetch(API, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-      ok = res.ok;
-    } catch {
-      ok = false;
-    }
-    const next = await loadWakeups();
-    if (next) setState(next);
-    return ok;
-  }, []);
+  const send = useCallback(
+    async (body: Record<string, unknown>): Promise<boolean> => {
+      let ok = false;
+      try {
+        const res = await fetch(api, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        ok = res.ok;
+      } catch {
+        ok = false;
+      }
+      const next = await loadWakeups(api);
+      if (next) setState(next);
+      return ok;
+    },
+    [api]
+  );
 
   return { tasks: state.tasks, runs: state.runs, send };
 }
@@ -162,12 +167,13 @@ function AccountPicker({
   onChange: (next: string[]) => void;
 }) {
   const t = useTranslations("settings");
+  const common = useTranslations("common");
   return (
     <CheckboxGroup label={t("codexWakeups.accounts")}>
       {accounts.map((account) => (
         <Checkbox
           key={account.id}
-          label={account.label}
+          label={account.inactive ? `${account.label} (${common("inactive")})` : account.label}
           checked={selected.includes(account.id)}
           onChange={() => onChange(toggleIn(selected, account.id))}
         />
@@ -178,22 +184,32 @@ function AccountPicker({
 
 function WakeupForm({
   accounts,
-  onCreate,
+  task,
+  onSave,
+  onCancel,
 }: {
   accounts: WakeupAccount[];
-  onCreate: (task: Record<string, unknown>) => Promise<boolean>;
+  task?: WakeupTask;
+  onSave: (task: Omit<WakeupTask, "id" | "nextRunAt">) => Promise<boolean>;
+  onCancel?: () => void;
 }) {
   const t = useTranslations("settings");
-  const [name, setName] = useState("");
-  const [selected, setSelected] = useState<string[]>([]);
-  const [kind, setKind] = useState<"daily" | "interval">("daily");
-  const [daily, setDaily] = useState<DailyDraft>(() => ({
-    time: "08:00",
-    timezone: browserTimeZone(),
-    days: [1, 2, 3, 4, 5],
-  }));
-  const [minutes, setMinutes] = useState(300);
+  const common = useTranslations("common");
+  const [name, setName] = useState(task?.name ?? "");
+  const [selected, setSelected] = useState<string[]>(task?.connectionIds ?? []);
+  const [kind, setKind] = useState<"daily" | "interval">(task?.schedule.kind ?? "daily");
+  const [daily, setDaily] = useState<DailyDraft>(() =>
+    task?.schedule.kind === "daily"
+      ? task.schedule
+      : { time: "08:00", timezone: browserTimeZone(), days: [1, 2, 3, 4, 5] }
+  );
+  const [minutes, setMinutes] = useState(
+    task?.schedule.kind === "interval" ? task.schedule.minutes : 300
+  );
   const [saving, setSaving] = useState(false);
+  const availableIds = new Set(accounts.map(({ id }) => id));
+  const missing = selected.filter((id) => !availableIds.has(id));
+  const accountOptions = [...accounts, ...missing.map((id) => ({ id, label: id, inactive: true }))];
 
   const submit = async () => {
     setSaving(true);
@@ -201,7 +217,12 @@ function WakeupForm({
       kind === "interval"
         ? { kind, minutes }
         : { kind, time: daily.time, timezone: daily.timezone.trim(), days: daily.days };
-    const ok = await onCreate({ name, connectionIds: selected, enabled: true, schedule });
+    const ok = await onSave({
+      name,
+      connectionIds: selected,
+      enabled: task?.enabled ?? true,
+      schedule,
+    });
     setSaving(false);
     if (ok) {
       setName("");
@@ -217,7 +238,7 @@ function WakeupForm({
         maxLength={80}
         onChange={(e) => setName(e.target.value)}
       />
-      <AccountPicker accounts={accounts} selected={selected} onChange={setSelected} />
+      <AccountPicker accounts={accountOptions} selected={selected} onChange={setSelected} />
       <Select
         label={t("codexWakeups.scheduleKind")}
         value={kind}
@@ -239,16 +260,21 @@ function WakeupForm({
           onChange={(e) => setMinutes(Number(e.target.value))}
         />
       )}
-      <div>
+      <div className="flex gap-2">
         <Button
           size="sm"
-          icon="alarm_add"
+          icon={task ? undefined : "alarm_add"}
           loading={saving}
-          disabled={saving || !name.trim() || selected.length === 0}
+          disabled={saving || !name.trim() || selected.length === 0 || missing.length > 0}
           onClick={submit}
         >
-          {t("codexWakeups.add")}
+          {task ? common("save") : t("codexWakeups.add")}
         </Button>
+        {onCancel && (
+          <Button size="sm" variant="ghost" disabled={saving} onClick={onCancel}>
+            {common("cancel")}
+          </Button>
+        )}
       </div>
     </div>
   );
@@ -256,23 +282,37 @@ function WakeupForm({
 
 function WakeupRow({
   task,
+  accounts,
   lastRun,
+  onEdit,
   onSend,
 }: {
   task: WakeupTask;
+  accounts: ReadonlyMap<string, WakeupAccount>;
+  onEdit: () => void;
   lastRun: WakeupRun | undefined;
   onSend: (body: Record<string, unknown>) => Promise<boolean>;
 }) {
   const t = useTranslations("settings");
+  const common = useTranslations("common");
   const locale = useLocale();
   const dayNames = weekdayNames(locale);
   const { id, name, connectionIds, schedule } = task;
+  const accountLabels = connectionIds.map((connectionId) => {
+    const account = accounts.get(connectionId);
+    return !account || account.inactive
+      ? `${account?.label ?? connectionId} (${common("inactive")})`
+      : account.label;
+  });
   const status = lastRun && RUN_STATUSES.includes(lastRun.status) ? lastRun.status : null;
 
   return (
     <div className="flex flex-wrap items-center justify-between gap-2 py-1">
       <div className="min-w-0">
         <p className="text-sm font-medium truncate">{task.name}</p>
+        <p className="text-xs text-text-muted break-words">
+          {t("codexWakeups.accounts")} · {accountLabels.join(", ")}
+        </p>
         <p className="text-xs text-text-muted">
           {scheduleLabel(task.schedule, t, dayNames)}
           {task.nextRunAt &&
@@ -293,6 +333,9 @@ function WakeupRow({
           }
           ariaLabel={t("codexWakeups.toggleAria", { name: task.name })}
         />
+        <Button size="sm" variant="ghost" icon="edit" onClick={onEdit}>
+          {common("edit")}
+        </Button>
         <Button
           size="sm"
           variant="ghost"
@@ -319,10 +362,18 @@ function WakeupRow({
  * Each run sends one tiny request per selected account at the chosen time so the
  * account's quota window starts then. Consumes real quota; off until a task exists.
  */
-export default function CodexWakeupsSection({ accounts }: { accounts: WakeupAccount[] }) {
+export default function CodexWakeupsSection({
+  accounts,
+  provider = "codex",
+}: {
+  accounts: WakeupAccount[];
+  provider?: WakeupProvider;
+}) {
   const t = useTranslations("settings");
-  const { tasks, runs, send } = useCodexWakeups();
+  const { tasks, runs, send } = useCodexWakeups(provider);
   const [notice, setNotice] = useState<Notice>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const accountsById = new Map(accounts.map((account) => [account.id, account]));
 
   const lastRunByTask = useMemo(() => {
     const map = new Map<string, WakeupRun>();
@@ -343,25 +394,50 @@ export default function CodexWakeupsSection({ accounts }: { accounts: WakeupAcco
   return (
     <section
       className="flex flex-col gap-3 border-t border-border pt-3 mt-3"
-      aria-labelledby="codex-wakeups-title"
+      aria-labelledby={`${provider}-wakeups-title`}
     >
       <div>
-        <h4 id="codex-wakeups-title" className="text-sm">
+        <h4 id={`${provider}-wakeups-title`} className="text-sm">
           {t("codexWakeups.title")}
         </h4>
-        <p className="text-xs text-text-muted">{t("codexWakeups.desc")}</p>
+        <p className="text-xs text-text-muted">
+          {t(provider === "claude" ? "claudeWakeupsDesc" : "codexWakeups.desc")}
+        </p>
       </div>
       {tasks.map((task) => (
-        <WakeupRow
-          key={task.id}
-          task={task}
-          lastRun={lastRunByTask.get(task.id)}
-          onSend={(body) =>
-            act(body, body.action === "run" ? t("codexWakeups.runStarted") : undefined)
-          }
-        />
+        <div key={task.id} className="flex flex-col gap-2">
+          <WakeupRow
+            task={task}
+            accounts={accountsById}
+            lastRun={lastRunByTask.get(task.id)}
+            onEdit={() => {
+              setNotice(null);
+              setEditingId(task.id);
+            }}
+            onSend={(body) =>
+              act(body, body.action === "run" ? t("codexWakeups.runStarted") : undefined)
+            }
+          />
+          {editingId === task.id && (
+            <WakeupForm
+              accounts={accounts}
+              task={task}
+              onCancel={() => {
+                setNotice(null);
+                setEditingId(null);
+              }}
+              onSave={async (updated) => {
+                const ok = await act({ action: "update", id: task.id, task: updated });
+                if (ok) setEditingId(null);
+                return ok;
+              }}
+            />
+          )}
+        </div>
       ))}
-      <WakeupForm accounts={accounts} onCreate={(task) => act({ action: "create", task })} />
+      {!tasks.some(({ id }) => id === editingId) && (
+        <WakeupForm accounts={accounts} onSave={(task) => act({ action: "create", task })} />
+      )}
       {notice && (
         <p
           role={notice.tone === "ok" ? "status" : "alert"}
