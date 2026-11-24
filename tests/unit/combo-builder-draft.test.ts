@@ -360,7 +360,11 @@ test("addGlobalModelStep appends a new step and skips an exact provider/model/ac
   assert.deepEqual(afterFirstAdd[0], opusStep);
 
   const afterDuplicateAdd = builderDraft.addGlobalModelStep(afterFirstAdd, opusStep);
-  assert.equal(afterDuplicateAdd, afterFirstAdd, "duplicate add must return the same array reference");
+  assert.equal(
+    afterDuplicateAdd,
+    afterFirstAdd,
+    "duplicate add must return the same array reference"
+  );
   assert.equal(afterDuplicateAdd.length, 1);
 });
 
@@ -391,4 +395,199 @@ test("addAllGlobalSearchMatches returns the original array reference when nothin
 
   const result = builderDraft.addAllGlobalSearchMatches(existing, list);
   assert.equal(result, existing);
+});
+
+test("getComboStepAccountDetails resolves pinned accounts", () => {
+  const providers = [
+    {
+      providerId: "google",
+      connections: [
+        { id: "conn-1", label: "my-key-1" },
+        { id: "conn-2", label: "my-key-2" },
+      ],
+    },
+  ];
+
+  const step = {
+    kind: "model",
+    providerId: "google",
+    model: "google/gemini-2.5-flash",
+    connectionId: "conn-1",
+  };
+
+  const details = builderDraft.getComboStepAccountDetails(step, providers);
+  assert.equal(details.type, "pinned");
+  assert.equal(details.accountNames.length, 1);
+  assert.equal(details.accountNames[0], "my-key-1");
+  assert.match(details.summary, /my-key-1/);
+});
+
+test("getComboStepAccountDetails resolves dynamic account with allowedConnectionIds", () => {
+  const providers = [
+    {
+      providerId: "google",
+      connections: [
+        { id: "conn-1", label: "key-alpha" },
+        { id: "conn-2", label: "key-beta" },
+        { id: "conn-3", label: "key-gamma" },
+      ],
+    },
+  ];
+
+  const step = {
+    kind: "model",
+    providerId: "google",
+    model: "google/gemini-2.5-flash",
+    allowedConnectionIds: ["conn-1", "conn-3"],
+  };
+
+  const details = builderDraft.getComboStepAccountDetails(step, providers);
+  assert.equal(details.type, "dynamic-restricted");
+  assert.equal(details.restrictedCount, 2);
+  assert.equal(details.totalPoolCount, 3);
+  assert.deepEqual(details.accountNames, ["key-alpha", "key-gamma"]);
+  assert.match(details.summary, /key-alpha, key-gamma/);
+  assert.match(details.tooltip || "", /key-alpha/);
+  assert.match(details.tooltip || "", /key-gamma/);
+});
+
+test("getComboStepAccountDetails resolves dynamic account with all pool accounts", () => {
+  const providers = [
+    {
+      providerId: "google",
+      connections: [
+        { id: "conn-1", label: "key-alpha" },
+        { id: "conn-2", label: "key-beta" },
+      ],
+    },
+  ];
+
+  const step = {
+    kind: "model",
+    providerId: "google",
+    model: "google/gemini-2.5-flash",
+  };
+
+  const details = builderDraft.getComboStepAccountDetails(step, providers);
+  assert.equal(details.type, "dynamic-all");
+  assert.equal(details.totalPoolCount, 2);
+  assert.deepEqual(details.accountNames, ["key-alpha", "key-beta"]);
+  assert.match(details.summary, /All active accounts \(2\)/);
+  assert.match(details.tooltip || "", /key-alpha/);
+  assert.match(details.tooltip || "", /key-beta/);
+});
+
+test("getComboStepAccountDetails applies custom formatConnectionLabel", () => {
+  const providers = [
+    {
+      providerId: "google",
+      connections: [{ id: "conn-1", label: "alice@example.com" }],
+    },
+  ];
+
+  const step = {
+    kind: "model",
+    providerId: "google",
+    model: "google/gemini-2.5-flash",
+    connectionId: "conn-1",
+  };
+
+  const details = builderDraft.getComboStepAccountDetails(step, providers, {
+    formatConnectionLabel: (label) => label.replace(/@.*/, "@..."),
+  });
+  assert.equal(details.accountNames[0], "alice@...");
+  assert.match(details.summary, /alice@\.\.\./);
+});
+
+test("getComboStepAccountDetails counts only eligible connections as all active accounts", () => {
+  const providers = [
+    {
+      providerId: "google",
+      connections: [
+        { id: "conn-1", label: "key-alpha" },
+        { id: "conn-2", label: "key-off", isActive: false },
+        { id: "conn-3", label: "key-error", testStatus: "error" },
+      ],
+    },
+  ];
+
+  for (const step of [
+    { kind: "model", providerId: "google", model: "google/gemini-2.5-flash" },
+    { kind: "provider-wildcard", providerId: "google", modelPattern: "*" },
+  ]) {
+    const details = builderDraft.getComboStepAccountDetails(step, providers);
+    assert.equal(details.type, "dynamic-all");
+    assert.equal(details.totalPoolCount, 1);
+    assert.deepEqual(details.accountNames, ["key-alpha"]);
+    assert.match(details.summary, /All active accounts \(1\)/);
+    assert.doesNotMatch(details.tooltip || "", /key-off|key-error/);
+  }
+});
+
+test("getComboStepAccountDetails passes the restricted count to a label function", () => {
+  const providers = [
+    {
+      providerId: "google",
+      connections: [
+        { id: "conn-1", label: "key-alpha" },
+        { id: "conn-2", label: "key-beta" },
+      ],
+    },
+  ];
+  const step = {
+    kind: "model",
+    providerId: "google",
+    model: "google/gemini-2.5-flash",
+    allowedConnectionIds: ["conn-1", "conn-2"],
+  };
+
+  const details = builderDraft.getComboStepAccountDetails(step, providers, {
+    labels: { restricted: (count: number) => `${count} restricted` },
+  });
+  assert.match(details.summary, /2 restricted: key-alpha, key-beta/);
+});
+
+test("mergeEditedComboStep replaces the account scope as a unit and keeps the rest", () => {
+  const prevStep = {
+    id: "step-1",
+    kind: "model",
+    providerId: "google",
+    model: "google/gemini-2.5-flash",
+    connectionId: "conn-1",
+    label: "key-alpha",
+    weight: 40,
+    tags: ["fast"],
+  };
+  const autoStep = builderDraft.buildPrecisionComboModelStep({
+    providerId: "google",
+    modelId: "gemini-2.5-pro",
+  });
+  const merged = builderDraft.mergeEditedComboStep(prevStep, autoStep);
+  assert.equal(merged.model, "google/gemini-2.5-pro");
+  assert.equal("connectionId" in merged, false);
+  assert.equal("label" in merged, false);
+  assert.equal(merged.id, "step-1");
+  assert.equal(merged.weight, 40);
+  assert.deepEqual(merged.tags, ["fast"]);
+
+  const restricted = builderDraft.mergeEditedComboStep(
+    { ...prevStep, connectionId: undefined, label: undefined, allowedConnectionIds: ["conn-1"] },
+    autoStep
+  );
+  assert.equal("allowedConnectionIds" in restricted, false);
+});
+
+test("remapEditingStepIndex follows the edited step through reorders and removals", () => {
+  const a = { model: "p/a" };
+  const b = { model: "p/b" };
+  const c = { model: "p/c" };
+  const x = { model: "p/x" };
+  // drag A to the end
+  assert.equal(builderDraft.remapEditingStepIndex([a, b, c], [b, c, a], 0), 2);
+  // a step before the edited one is deselected
+  assert.equal(builderDraft.remapEditingStepIndex([x, a, c], [a, c], 1), 0);
+  // the edited step itself is removed
+  assert.equal(builderDraft.remapEditingStepIndex([a, b], [b], 0), null);
+  // nothing is being edited
+  assert.equal(builderDraft.remapEditingStepIndex([a, b], [b, a], null), null);
 });
