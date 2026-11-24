@@ -52,7 +52,7 @@ Until this release, this page and the README said 1.62 billion free tokens a mon
 | What changed at the provider (date, source)                                                                       | What we got wrong (what, since when)                                                                      |
 | ----------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
 | Mistral: the free mode no longer includes API access (docs.mistral.ai, read on 2026-11-18)                        | We kept counting 1 billion tokens a month from a console reading of 2026-09-02 and never checked it again |
-| Nara: the Free plan lists no models (the provider's `/api/plans`, read on 2026-11-18)                             | We counted 210 million tokens a month                                                                     |
+| Nara: the Free plan lists no models (the provider's `router.bynara.id/api/plans`, read on 2026-11-18)             | We counted 210 million tokens a month                                                                     |
 | xKiro: 500K tokens a day per account (xkiro.com, read on 2026-11-18)                                              | 30 model IDs that no longer exist stayed in the catalog                                                   |
 | LLM7: the limits page is gone and no official page publishes a free quota (2026-11-23)                            | We counted 150 million tokens a month without dated evidence                                              |
 | Groq: one model in the free pool was retired (2026-09-14)                                                         | The pool kept its old size                                                                                |
@@ -108,10 +108,10 @@ Providers whose free offer ended or could not be confirmed. They stay in the reg
 | Provider                 | Since      | Why                                                                          | Source                                       |
 | ------------------------ | ---------- | ---------------------------------------------------------------------------- | -------------------------------------------- |
 | `mistral`                | 2026-11-23 | The free mode no longer includes API access                                  | docs.mistral.ai (usage limits)               |
-| `nara`                   | 2026-11-23 | The free plan lists no models                                                | router.bynara.id `/api/plans`                |
+| `nara`                   | 2026-11-23 | The free plan lists no models                                                | `router.bynara.id/api/plans`                 |
 | `llm7`                   | 2026-11-23 | No official page publishes a free quota                                      | provider site                                |
 | `navy`                   | 2026-11-23 | No free quota could be confirmed on the official pages                       | api.navy                                     |
-| `bluesminds`             | 2026-11-23 | Usage needs credit bought from the provider                                  | api.bluesminds.com `/api/status`             |
+| `bluesminds`             | 2026-11-23 | Usage needs credit bought from the provider                                  | `api.bluesminds.com/api/status`              |
 | `arcee-ai`               | 2026-11-23 | Paid pricing only                                                            | docs.arcee.ai (pricing)                      |
 | `huggingface`            | 2026-11-23 | Free accounts must buy credits or upgrade to PRO                             | huggingface.co (Inference Providers pricing) |
 | `huggingchat`            | 2026-11-23 | Hugging Face inference needs purchased credits or PRO                        | huggingface.co (Inference Providers pricing) |
