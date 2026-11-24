@@ -18,6 +18,9 @@ process.env.DISABLE_SQLITE_AUTO_BACKUP = "true";
 const core = await import("../../../src/lib/db/core.ts");
 const qp = await import("../../../src/lib/db/quotaPools.ts");
 const { getDbInstance } = await import("../../../src/lib/db/core.ts");
+const schedules = await import("../../../src/lib/db/quotaSchedules.ts");
+
+type ScheduleInput = Parameters<typeof schedules.replaceSchedules>[1][number];
 
 function resetDb() {
   core.resetDbInstance();
@@ -146,4 +149,108 @@ test("batchBuildPools loads allocations in single query", () => {
   const pool = result.items[0];
   assert.equal(pool.name, "PoolA");
   assert.ok(pool.allocations !== undefined);
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// updatePool / ensurePool — schedules and member order
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** A weekday 09:00 to 18:00 UTC allow window. */
+function weekdayWindow(): ScheduleInput {
+  return {
+    id: "w1",
+    days: [1, 2, 3, 4, 5],
+    startMinute: 9 * 60,
+    endMinute: 18 * 60,
+    timezone: "UTC",
+    mode: "allow",
+    reserves: [],
+    budgetWindow: "daily",
+    priority: 0,
+    enabled: true,
+  };
+}
+
+function scheduledPool(name: string, connectionIds: string[]) {
+  const pool = qp.createPool({ name, connectionId: connectionIds[0], connectionIds });
+  schedules.replaceSchedules(pool.id, [weekdayWindow()]);
+  assert.equal(schedules.listSchedules(pool.id).length, 1);
+  return pool;
+}
+
+test("updatePool with the same members in another order and a new borrow mode keeps the schedules", () => {
+  const pool = scheduledPool("Kept", ["conn-a", "conn-b"]);
+  const updated = qp.updatePool(pool.id, {
+    name: "Kept renamed",
+    connectionIds: ["conn-b", "conn-a"],
+    borrowMode: "consent",
+  });
+  assert.equal(updated?.borrowMode, "consent");
+  assert.deepEqual(
+    schedules.listSchedules(pool.id).map((s) => s.id),
+    ["w1"]
+  );
+  assert.deepEqual(qp.getPool(pool.id)?.connectionIds, ["conn-b", "conn-a"]);
+  assert.equal(qp.getPool(pool.id)?.connectionId, "conn-b");
+});
+
+test("ensurePool with the same members keeps the schedules", () => {
+  const pool = scheduledPool("Ensured", ["conn-a", "conn-b"]);
+  const result = qp.ensurePool({
+    name: "Ensured",
+    connectionId: "conn-a",
+    connectionIds: ["conn-a", "conn-b"],
+    borrowMode: "consent",
+  });
+  assert.equal(result.updated, true);
+  assert.equal(result.pool.id, pool.id);
+  assert.deepEqual(
+    schedules.listSchedules(pool.id).map((s) => s.id),
+    ["w1"]
+  );
+});
+
+test("updatePool with a different set of members deletes the schedules", () => {
+  const pool = scheduledPool("Changed", ["conn-a", "conn-b"]);
+  qp.updatePool(pool.id, { connectionIds: ["conn-a", "conn-c"] });
+  assert.deepEqual(schedules.listSchedules(pool.id), []);
+  assert.deepEqual(qp.getPool(pool.id)?.connectionIds, ["conn-a", "conn-c"]);
+});
+
+test("the primary connection stays first when its id sorts after the second member", () => {
+  const created = qp.createPool({
+    name: "Primary first",
+    connectionId: "conn-z",
+    connectionIds: ["conn-z", "conn-a"],
+  });
+  assert.deepEqual(qp.getPool(created.id)?.connectionIds, ["conn-z", "conn-a"]);
+  assert.deepEqual(qp.listPools().items.find((pool) => pool.id === created.id)?.connectionIds, [
+    "conn-z",
+    "conn-a",
+  ]);
+
+  qp.updatePool(created.id, { connectionIds: ["conn-y", "conn-b"] });
+  assert.deepEqual(qp.getPool(created.id)?.connectionIds, ["conn-y", "conn-b"]);
+  assert.equal(qp.getPool(created.id)?.connectionId, "conn-y");
+});
+
+test("the member order does not depend on which index the query uses", () => {
+  // Without the pool_id index, SQLite scans the (pool_id, connection_id) key.
+  // Members that share a created_at then come back sorted by id unless rowid breaks the tie.
+  getDbInstance().prepare("DROP INDEX IF EXISTS idx_quota_pool_connections_pool").run();
+  const created = qp.createPool({
+    name: "Primary first without index",
+    connectionId: "conn-z",
+    connectionIds: ["conn-z", "conn-a"],
+  });
+  const db = getDbInstance();
+  db.prepare("UPDATE quota_pool_connections SET created_at = ? WHERE pool_id = ?").run(
+    "2026-01-01 00:00:00",
+    created.id
+  );
+  assert.deepEqual(qp.getPool(created.id)?.connectionIds, ["conn-z", "conn-a"]);
+  assert.deepEqual(qp.listPools().items.find((pool) => pool.id === created.id)?.connectionIds, [
+    "conn-z",
+    "conn-a",
+  ]);
 });
