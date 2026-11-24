@@ -1350,7 +1350,7 @@ function ProvidersPageContent() {
                 />
                 {llmProviderEntries.length > 0 && (
                   <div className="flex flex-col gap-3">
-                    <h3 className="text-xs uppercase text-text-muted">{t("llmProviders")}</h3>
+                    <h3 className="ci-eyebrow">{t("llmProviders")}</h3>
                     <ProviderCardGrid>
                       {llmProviderEntries.map(
                         ({ providerId, provider, stats, displayAuthType, toggleAuthType }) => (

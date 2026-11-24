@@ -1,9 +1,10 @@
 "use client";
 
-import { useId, useRef, useState } from "react";
+import { useId, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Field } from "@omniroute/ui-kit/field";
 import Button from "@/shared/components/Button";
+import { FileTrigger, type FileRejection } from "@/shared/components/FileInput";
 import Select from "@/shared/components/Select";
 import { useApiKey } from "../../providers/hooks/useApiKey";
 import { useProviderModels } from "../../providers/hooks/useProviderModels";
@@ -63,7 +64,6 @@ export function SttExampleCard({ providerId }: Props) {
   const [running, setRunning] = useState<boolean>(false);
   const [result, setResult] = useState<{ data: unknown; latencyMs: number } | undefined>();
   const [error, setError] = useState<string | null>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
 
   const effectiveModel = model || firstModel;
 
@@ -88,15 +88,16 @@ export function SttExampleCard({ providerId }: Props) {
     },
   });
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selected = e.target.files?.[0] ?? null;
+  const handleFilesChange = (files: File[]) => {
     setFileError(null);
-    if (selected && selected.size > MAX_FILE_SIZE_BYTES) {
-      setFileError(t("fileTooLarge25Mb"));
-      setFile(null);
-      return;
-    }
-    setFile(selected);
+    setFile(files[0] ?? null);
+  };
+
+  // The kit FileTrigger filters by `accept` and `maxSize` and reports what it left out.
+  const handleFilesRejected = (rejections: FileRejection[]) => {
+    const tooLarge = rejections.some((rejection) => rejection.reason === "size");
+    setFileError(tooLarge ? t("fileTooLarge25Mb") : t("audioFormats25Mb"));
+    setFile(null);
   };
 
   const handleRun = async () => {
@@ -167,27 +168,21 @@ export function SttExampleCard({ providerId }: Props) {
         error={fileError || undefined}
       >
         <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            icon="upload_file"
-            onClick={() => inputRef.current?.click()}
+          <FileTrigger
+            id={fileInputId}
+            accept="audio/mp3,audio/wav,audio/m4a,audio/ogg,audio/flac,audio/*"
+            maxSize={MAX_FILE_SIZE_BYTES}
+            onFilesChange={handleFilesChange}
+            onFilesRejected={handleFilesRejected}
           >
-            {file ? file.name : t("chooseFile")}
-          </Button>
+            <Button variant="outline" size="sm" icon="upload_file">
+              {file ? file.name : t("chooseFile")}
+            </Button>
+          </FileTrigger>
           {file && (
             <span className="text-xs text-text-muted">{Math.round(file.size / 1024)}KB</span>
           )}
         </div>
-        {/* kit-exception: The native picker stays hidden behind the kit Button above (it opens it). */}
-        <input
-          ref={inputRef}
-          id={fileInputId}
-          type="file"
-          accept="audio/mp3,audio/wav,audio/m4a,audio/ogg,audio/flac,audio/*"
-          className="hidden"
-          onChange={handleFileChange}
-        />
       </Field>
     </PlaygroundCard>
   );

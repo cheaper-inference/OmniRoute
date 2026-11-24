@@ -272,6 +272,7 @@ import {
   redactPendingBody,
 } from "@/lib/guardrails/videoBridgeSnapshotRedaction";
 import {
+  normalizeGeminiPromptCacheMode,
   shouldPreserveCacheControl,
   resolveConnectionCacheOverride,
 } from "../utils/cacheControlPolicy.ts";
@@ -478,6 +479,7 @@ async function handleChatCoreInner({
   comboExecutionKey = null,
   cachedSettings = null,
   skipUpstreamRetry = false,
+  nonReplayableRequest = false,
   createPiiTransform = null,
   correlationId = null,
   conversationId = null,
@@ -959,7 +961,7 @@ async function handleChatCoreInner({
   }
   // Consolidate settings reads — fetch once, reuse throughout the request
   const settings = cachedSettings ?? (await getCachedSettings());
-  const geminiPromptCacheMode = settings.geminiPromptCacheMode === "implicit" ? "implicit" : "off";
+  const geminiPromptCacheMode = normalizeGeminiPromptCacheMode(settings.geminiPromptCacheMode);
   const isScopedGeminiCacheTarget =
     (provider === "antigravity" || provider === "agy") &&
     effectiveModel
@@ -2758,6 +2760,7 @@ async function handleChatCoreInner({
     resilienceSettings,
     settings,
     skipUpstreamRetry,
+    nonReplayableRequest,
     requestUpstreamStartTimeoutMs,
     stream,
     streamController,
@@ -3005,7 +3008,7 @@ async function handleChatCoreInner({
     retryAfterMs?: number | null;
     targetModel: string;
   }) => {
-    let errorType = classifyProviderError(statusCode, message, provider);
+    let errorType = classifyProviderError(statusCode, message, provider, upstreamErrorBody);
     if (statusCode === 429 && isModelScope()) {
       const decision = classifyModelScope429(message, normalizeHeaders(headers));
       errorType =

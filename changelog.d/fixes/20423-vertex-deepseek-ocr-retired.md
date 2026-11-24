@@ -1,0 +1,1 @@
+- fix(ocr): `vertex-deepseek-ocr` no longer advertises or sends the `deepseek-ocr-maas` model Google retired on 2026-10-21; it now takes a self-deployed Model Garden model id and endpoint (#20423)

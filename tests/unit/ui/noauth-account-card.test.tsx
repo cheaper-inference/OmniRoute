@@ -2,6 +2,12 @@
 import React, { act } from "react";
 import { createRoot } from "react-dom/client";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { readButtonTooltip } from "../../_helpers/buttonTooltip";
+
+// The proxy shield is the chip's only button with a title. The Button adapter shows a title
+// through the kit tooltip, so the button is a tooltip trigger (Radix `data-state`) and carries
+// no native `title` attribute.
+const TITLED_BUTTON = "button[data-state]";
 
 // ── Import component (no module-level mocks needed) ──────────────────────────
 
@@ -121,7 +127,7 @@ describe("NoAuthAccountCard compact grid", () => {
     await waitForCondition(() => grid(el)?.querySelectorAll("[data-account-id]").length === 3);
     const chips = Array.from(grid(el)!.querySelectorAll<HTMLElement>("[data-account-id]"));
     for (const chip of chips) {
-      const proxyBtn = chip.querySelector("button[title]");
+      const proxyBtn = chip.querySelector(TITLED_BUTTON);
       expect(proxyBtn).toBeTruthy();
       expect(proxyBtn!.querySelector('svg.oi-icon[data-icon="shield"]')).toBeTruthy();
     }
@@ -132,7 +138,7 @@ describe("NoAuthAccountCard compact grid", () => {
     const el = renderCard();
     await waitForCondition(() => grid(el)?.querySelectorAll("[data-account-id]").length === 3);
     const firstChip = grid(el)!.querySelector<HTMLElement>("[data-account-id]")!;
-    const proxyBtn = firstChip.querySelector<HTMLButtonElement>("button[title]")!;
+    const proxyBtn = firstChip.querySelector<HTMLButtonElement>(TITLED_BUTTON)!;
     act(() => {
       proxyBtn.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
@@ -191,7 +197,7 @@ describe("NoAuthAccountCard proxy pool dropdown (#5217 Gap 1)", () => {
     await waitForCondition(() => grid(el)?.querySelectorAll("[data-account-id]").length === 2);
     const proxyBtn = grid(el)!
       .querySelector<HTMLElement>("[data-account-id]")!
-      .querySelector<HTMLButtonElement>("button[title]")!;
+      .querySelector<HTMLButtonElement>(TITLED_BUTTON)!;
     act(() => proxyBtn.dispatchEvent(new MouseEvent("click", { bubbles: true })));
     await waitForCondition(
       () => document.body.textContent?.includes("Proxy for Account 1") ?? false
@@ -211,7 +217,7 @@ describe("NoAuthAccountCard proxy pool dropdown (#5217 Gap 1)", () => {
     await waitForCondition(() => grid(el)?.querySelectorAll("[data-account-id]").length === 2);
     const proxyBtn = grid(el)!
       .querySelector<HTMLElement>("[data-account-id]")!
-      .querySelector<HTMLButtonElement>("button[title]")!;
+      .querySelector<HTMLButtonElement>(TITLED_BUTTON)!;
     act(() => proxyBtn.dispatchEvent(new MouseEvent("click", { bubbles: true })));
     await waitForCondition(() => document.body.querySelector("[role=dialog] select") !== null);
 
@@ -243,9 +249,9 @@ describe("NoAuthAccountCard proxy pool dropdown (#5217 Gap 1)", () => {
     await waitForCondition(() => grid(el)?.querySelectorAll("[data-account-id]").length === 2);
     const firstShield = grid(el)!
       .querySelector<HTMLElement>("[data-account-id]")!
-      .querySelector<HTMLButtonElement>("button[title]")!;
+      .querySelector<HTMLButtonElement>(TITLED_BUTTON)!;
     // Tooltip is resolved from the referenced pool record, not an inline proxy.
-    expect(firstShield.getAttribute("title")).toContain("1.2.3.4");
+    expect(await readButtonTooltip(firstShield)).toContain("1.2.3.4");
     expect(firstShield.className).toContain("text-info");
   });
 });
