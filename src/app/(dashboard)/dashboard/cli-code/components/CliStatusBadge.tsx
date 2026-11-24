@@ -65,20 +65,20 @@ export default function CliStatusBadge({
   return (
     <>
       {badge && (
-        <Badge variant={badge.variant} size="sm" dot className="text-[11px]">
+        <Badge variant={badge.variant} size="sm" dot>
           {badge.text}
         </Badge>
       )}
       {lastConfiguredAt ? (
         <span
-          className="inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] text-text-muted"
+          className="inline-flex items-center gap-1 px-1.5 py-0.5 text-3xs text-text-muted"
           title={t("lastSavedAt", { date: new Date(lastConfiguredAt).toLocaleString(locale) })}
         >
           <Icon name="schedule" size={12} />
           {formatRelativeTime(lastConfiguredAt, t)}
         </span>
       ) : status && status !== "not_installed" ? (
-        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] text-text-muted">
+        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 text-3xs text-text-muted">
           <Icon name="schedule" size={12} />
           {t("never")}
         </span>

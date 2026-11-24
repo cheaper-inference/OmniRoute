@@ -53,12 +53,7 @@ function Breakdown({
 }) {
   if (!report.byApiKey.length) return <p className="text-sm text-text-muted">{t("noUsage")}</p>;
   return (
-    <Table
-      className="text-sm"
-      containerClassName="rounded-none border-0"
-      scrollbarLabel={t("breakdown")}
-      scrollLabel={t("breakdown")}
-    >
+    <Table variant="plain" scrollbarLabel={t("breakdown")} scrollLabel={t("breakdown")}>
       <TableHeader>
         <TableRow>
           {["keyName", "requests", "tokens", "reportSpend"].map((key) => (

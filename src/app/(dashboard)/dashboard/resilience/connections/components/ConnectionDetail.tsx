@@ -84,7 +84,7 @@ export default function ConnectionDetail({
         </DetailRow>
       </dl>
 
-      <h3 className="ci-heading mt-4 mb-2 border-t border-border pt-4 text-sm">
+      <h3 className="ci-heading mt-4 mb-2 border-t border-border pt-4" data-size="sm">
         {t("detail.cooldown")}
       </h3>
       <dl className="flex flex-col gap-1">
@@ -97,7 +97,7 @@ export default function ConnectionDetail({
         </DetailRow>
       </dl>
 
-      <h3 className="ci-heading mt-4 mb-2 border-t border-border pt-4 text-sm">
+      <h3 className="ci-heading mt-4 mb-2 border-t border-border pt-4" data-size="sm">
         {t("detail.breaker")}
       </h3>
       {connection.breaker ? (
@@ -126,7 +126,7 @@ export default function ConnectionDetail({
         <p className="text-sm text-text-muted">{t("detail.never")}</p>
       )}
 
-      <h3 className="ci-heading mt-4 mb-2 border-t border-border pt-4 text-sm">
+      <h3 className="ci-heading mt-4 mb-2 border-t border-border pt-4" data-size="sm">
         {t("detail.lockouts")}
       </h3>
       {connection.lockouts.length > 0 ? (

@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import {
   Command,
   CommandEmpty,
+  CommandFooter,
   CommandGroup,
   CommandInput,
   CommandItem,
@@ -333,7 +334,7 @@ function CommandPaletteDialog({ onClose }: { onClose: () => void }) {
               </>
             }
           />
-          <CommandList aria-label={t("commandPalette.title")} className="custom-scrollbar">
+          <CommandList aria-label={t("commandPalette.title")}>
             {grouped.map((group) => (
               <CommandGroup key={group.sectionId} heading={group.sectionLabel}>
                 {group.subgroups.map((subgroup) => {
@@ -352,25 +353,25 @@ function CommandPaletteDialog({ onClose }: { onClose: () => void }) {
             ))}
           </CommandList>
           <CommandEmpty>{t("noResults")}</CommandEmpty>
+          {/* Key hints: part of the Command, outside the listbox; a press keeps focus in the input. */}
+          <CommandFooter>
+            <span className="flex items-center gap-1">
+              <KbdGroup>
+                <Kbd>↑</Kbd>
+                <Kbd>↓</Kbd>
+              </KbdGroup>
+              {t("commandPalette.navigate")}
+            </span>
+            <span className="flex items-center gap-1">
+              <Kbd>↵</Kbd>
+              {t("commandPalette.open")}
+            </span>
+            <span className="flex items-center gap-1">
+              <Kbd>Esc</Kbd>
+              {t("commandPalette.close")}
+            </span>
+          </CommandFooter>
         </Command>
-
-        <div className="flex items-center gap-4 border-t border-border px-5 py-2 text-[11px] text-text-muted">
-          <span className="flex items-center gap-1">
-            <KbdGroup>
-              <Kbd>↑</Kbd>
-              <Kbd>↓</Kbd>
-            </KbdGroup>
-            {t("commandPalette.navigate")}
-          </span>
-          <span className="flex items-center gap-1">
-            <Kbd>↵</Kbd>
-            {t("commandPalette.open")}
-          </span>
-          <span className="flex items-center gap-1">
-            <Kbd>Esc</Kbd>
-            {t("commandPalette.close")}
-          </span>
-        </div>
       </DialogContent>
     </Dialog>
   );

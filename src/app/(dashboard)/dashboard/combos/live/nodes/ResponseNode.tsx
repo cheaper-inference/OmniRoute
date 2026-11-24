@@ -66,7 +66,9 @@ export function ResponseNode({ data }: NodeProps) {
 
       {/* Outcome indicator */}
       <span
-        className="text-[10px] font-semibold uppercase tracking-wide"
+        className="ci-eyebrow"
+        data-size="3xs"
+        data-weight="medium"
         style={{ color }}
         data-testid="response-outcome"
       >
@@ -75,7 +77,7 @@ export function ResponseNode({ data }: NodeProps) {
 
       {/* Finished timestamp */}
       {finishedAt != null && (
-        <span className="text-[9px] text-text-muted font-mono" data-testid="response-finished-at">
+        <span className="text-3xs text-text-muted font-mono" data-testid="response-finished-at">
           {new Date(finishedAt as number).toLocaleTimeString()}
         </span>
       )}

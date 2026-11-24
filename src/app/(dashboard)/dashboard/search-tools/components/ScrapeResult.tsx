@@ -4,6 +4,7 @@ import { useState, lazy, Suspense } from "react";
 import { useTranslations } from "next-intl";
 import Button from "@/shared/components/Button";
 import Modal from "@/shared/components/Modal";
+import Notice from "@/shared/components/Notice";
 import Textarea from "@/shared/components/Textarea";
 import type { ScrapeResult as ScrapeResultType } from "@/shared/schemas/searchTools";
 
@@ -110,21 +111,23 @@ export default function ScrapeResult({ result, latencyMs }: ScrapeResultProps) {
 
       {/* Truncation warning */}
       {isTruncated && (
-        <div
-          className="flex items-center justify-between p-3 bg-warning/10 border border-warning/30 rounded-lg text-xs text-warning"
+        <Notice
+          variant="warning"
+          layout="inline"
           data-testid="truncation-warning"
+          actions={
+            <Button
+              variant="warning"
+              size="sm"
+              onClick={() => setRawModalOpen(true)}
+              data-testid="view-raw-button"
+            >
+              {t("viewFullRaw")}
+            </Button>
+          }
         >
-          <span>{t("contentTruncated", { size: formatBytes(contentSize) })}</span>
-          <Button
-            variant="warning"
-            size="sm"
-            className="ml-3"
-            onClick={() => setRawModalOpen(true)}
-            data-testid="view-raw-button"
-          >
-            {t("viewFullRaw")}
-          </Button>
-        </div>
+          {t("contentTruncated", { size: formatBytes(contentSize) })}
+        </Notice>
       )}
 
       {/* Content area */}
@@ -145,7 +148,8 @@ export default function ScrapeResult({ result, latencyMs }: ScrapeResultProps) {
         <Textarea
           readOnly
           value={displayContent}
-          className="h-64 font-mono text-xs resize-none"
+          mono
+          className="h-64 resize-none"
           data-testid="raw-content"
           aria-label={t("rawScrapedContent")}
         />
@@ -164,7 +168,8 @@ export default function ScrapeResult({ result, latencyMs }: ScrapeResultProps) {
             readOnly
             value={result.content}
             aria-label={t("rawScrapedContent")}
-            className="flex-1 font-mono text-xs resize-none"
+            mono
+            className="flex-1 resize-none"
             data-testid="raw-modal-content"
           />
           <div className="flex justify-end">
