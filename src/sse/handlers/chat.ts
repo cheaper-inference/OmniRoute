@@ -175,6 +175,10 @@ import {
   isNoReplayResponse,
   markCustomJsonNoReplay,
 } from "./chat/responsePolicies.ts";
+import {
+  isCustomOpenAICompatibleProvider,
+  markAmbiguousCustomNodeFailure,
+} from "./chat/customNodeReplayPolicy.ts";
 import { resolveProviderId } from "@/shared/constants/providers";
 import {
   extractReasoningIntent,
@@ -1798,6 +1802,9 @@ async function handleSingleModelChat(
     if (modelStr.startsWith(runtimeOptions.providerId + "/")) return resolvedProvider;
     return runtimeOptions.providerId;
   })();
+  // Custom OpenAI-compatible node: a POST with an ambiguous outcome is never replayed
+  // (see chat/customNodeReplayPolicy.ts); definite rejections keep normal fallback.
+  const customProviderNoReplay = isCustomOpenAICompatibleProvider(provider);
   const resolvedModelGate = resolvedPolicy.createVisibleResolvedModelGate({
     apiKeyInfo,
     request,
@@ -2416,6 +2423,7 @@ async function handleSingleModelChat(
           hasForcedConnection ||
           runtimeOptions.managedLease ||
           museOwner ||
+          customProviderNoReplay ||
           isCombo
           ? { ...preferredFailoverSettings, enabled: false }
           : preferredFailoverSettings
@@ -2457,6 +2465,7 @@ async function handleSingleModelChat(
             providerProfile,
             cachedSettings: runtimeOptions.cachedSettings,
             skipUpstreamRetry: runtimeOptions.skipUpstreamRetry ?? false,
+            nonReplayableRequest: customProviderNoReplay,
             correlationId: runtimeOptions?.correlationId ?? null,
             conversationId: runtimeOptions?.conversationId ?? null,
             modelPinned: runtimeOptions?.modelPinned ?? false,
@@ -2487,6 +2496,7 @@ async function handleSingleModelChat(
       }
       const { result, tlsFingerprintUsed, wasProviderProbe } = execution;
       markCustomJsonNoReplay(result.response, credentials?.providerSpecificData);
+      markAmbiguousCustomNodeFailure(provider, result);
       if (!result.success) releaseOAuthSession();
       if (result.success && agyLease.isStreamingAntigravityResponse(result.response))
         result.response = inheritProviderProbeResponse(
