@@ -18,10 +18,8 @@ function traceLive(live: LiveAgent | undefined): string {
 }
 
 /**
- * Delay before reconnecting the watch stream. A failed upstream read otherwise
- * tears down and immediately rebuilds the stream, so a persistent 5xx or a
- * refused connection spins as fast as the socket can fail. Backs off from 250ms
- * and caps at 4s, well inside the turn's own deadline.
+ * Delay before reconnecting the watch stream after an error or clean EOF.
+ * Backs off from 250ms to 4s; the caller caps each wait at the turn deadline.
  */
 export function grokReconnectDelayMs(attempt: number): number {
   if (attempt <= 0) return 0;
@@ -29,7 +27,7 @@ export function grokReconnectDelayMs(attempt: number): number {
 }
 
 function sleepUnlessAborted(ms: number, signal: AbortSignal | null): Promise<void> {
-  if (ms <= 0) return Promise.resolve();
+  if (ms <= 0 || signal?.aborted) return Promise.resolve();
   return new Promise((resolve) => {
     const timer = setTimeout(finish, ms);
     function finish(): void {
@@ -83,10 +81,14 @@ class GrokWatchSession {
 
   async run(): Promise<string> {
     try {
+      this.signal?.throwIfAborted();
       while (Date.now() < this.deadline) {
         const answer = await this.readStream();
         if (answer !== null) return answer;
-        await sleepUnlessAborted(grokReconnectDelayMs(this.reconnectAttempt), this.signal);
+        // Charge every unfinished read once, including an empty clean EOF.
+        const delay = grokReconnectDelayMs(++this.reconnectAttempt);
+        await sleepUnlessAborted(Math.min(delay, this.deadline - Date.now()), this.signal);
+        this.signal?.throwIfAborted();
       }
       if (!this.seenRunning) throw new Error("watch stream ended before the agent started running");
       throw incompleteTurn("turn ended without explicit completion");
@@ -117,7 +119,7 @@ class GrokWatchSession {
   }
 
   private watchSignal(): AbortSignal {
-    const remaining = this.deadline - Date.now();
+    const remaining = Math.max(0, this.deadline - Date.now());
     const timeout = AbortSignal.timeout(Math.min(WATCH_READ_TIMEOUT_MS, remaining));
     if (!this.staleTimer) this.staleAbort = new AbortController();
     return this.signal
@@ -187,7 +189,6 @@ class GrokWatchSession {
       this.frames.resetRows(generation !== this.generation);
       this.generation = generation;
       this.cursor.ack = "0";
-      this.reconnectAttempt += 1;
       return null;
     }
     if (this.signal?.aborted) throw error;
@@ -195,7 +196,6 @@ class GrokWatchSession {
       this.stopStale();
       return this.submitted;
     }
-    this.reconnectAttempt += 1;
     return null;
   }
 
