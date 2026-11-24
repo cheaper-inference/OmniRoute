@@ -89,7 +89,8 @@ describe("feature-flags-settings count update", () => {
     // QUOTA_SELF_PANEL (self-service quota API, default off) to 131.
     // CLAUDE_CODE_LOCAL_{COMMAND_PREFIX,SUGGESTION,FILEPATHS}_ENABLED (default off) to 134.
     // PROXY_REEGRESS_ON_QUOTA_429 (pool re-send after a per-IP 429, default off) to 135.
-    assert.equal(FEATURE_FLAG_DEFINITIONS.length, 135);
+    // QUOTA_DAILY_REVALIDATION (#20343, default off) to 136.
+    assert.equal(FEATURE_FLAG_DEFINITIONS.length, 136);
     // COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE (#17114, default off) to 114.
     // CURSOR_GROK_47_DROP_MAX_EFFORT (#17386, default off) to 112.
     // UNPRICED_USAGE_BUDGET_POLICY (#14604, default fail_closed) to 113.

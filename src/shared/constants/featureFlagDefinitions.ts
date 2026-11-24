@@ -4,6 +4,7 @@ import { FAL_NATIVE_ENABLED_FLAG } from "./featureFlagDefinitionsFal";
 import { AGENT_GUARD_FLAG_DEFINITIONS } from "./featureFlagDefinitionsAgentGuard";
 import { PLUGIN_PERMISSION_MODEL_ENABLED_FLAG } from "./featureFlagDefinitionsPlugins";
 import { CODE_ASSIST_LEGACY_TIER_FLAG } from "./featureFlagDefinitionsCodeAssist";
+import { QUOTA_DAILY_REVALIDATION_FLAG } from "./featureFlagDefinitionsQuotaRevalidation";
 import { SYSTEM_ONE_FEATURE_FLAG_DEFINITIONS } from "./featureFlagDefinitionsSystemOne";
 import { EXTRA_FEATURE_FLAG_DEFINITIONS } from "./featureFlagDefinitionsExtras";
 import {
@@ -1348,6 +1349,7 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     requiresRestart: false,
     warningLevel: "caution",
   },
+  QUOTA_DAILY_REVALIDATION_FLAG,
   {
     key: "CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY",
     label: "Credential Gate: Auth Diagnoses Only",
