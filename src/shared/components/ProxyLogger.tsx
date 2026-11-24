@@ -3,7 +3,7 @@
 import Icon from "@/shared/components/Icon";
 
 import { useState, useEffect, useCallback, useId, useMemo, useRef } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import {
   Table,
   TableBody,
@@ -29,7 +29,8 @@ import {
   neutralBadge,
 } from "@/shared/constants/colors";
 import {
-  formatTime,
+  formatLogTimestamp,
+  formatLogTimestampTitle,
   formatDuration as formatLatency,
   maskAccount,
   maskSegment,
@@ -87,6 +88,7 @@ export default function ProxyLogger() {
   // The family of an egress address is labelled in the proxyLog namespace, the
   // one the line detail uses too.
   const tProxyLog = useTranslations("proxyLog");
+  const locale = useLocale();
   const { emailsVisible } = useEmailPrivacyStore();
   const rowKeysHintId = useId();
   const [logs, setLogs] = useState([]);
@@ -718,8 +720,11 @@ export default function ProxyLogger() {
                       </TableCell>
                     )}
                     {visibleColumns.time && (
-                      <TableCell className="px-3 py-2 text-right text-text-muted">
-                        {formatTime(log.timestamp)}
+                      <TableCell
+                        className="px-3 py-2 text-right text-text-muted"
+                        title={formatLogTimestampTitle(log.timestamp, locale)}
+                      >
+                        {formatLogTimestamp(log.timestamp, new Date(), locale)}
                       </TableCell>
                     )}
                   </TableRow>
