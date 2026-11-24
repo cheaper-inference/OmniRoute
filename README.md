@@ -77,62 +77,6 @@
   </tr>
 </table>
 
-<table>
-  <tr>
-    <th align="left">Prepare</th>
-    <th colspan="3" align="left">Validate: fixes, docs, translations and provider updates only</th>
-  </tr>
-  <tr>
-    <td valign="top" width="25%">
-      <b>v3.8.54</b> · released 17 November 2026<br/>
-      Release infrastructure for the LTS channels and the public feature-freeze announcement. The dormant channel infrastructure shipped early, in v3.8.52.
-    </td>
-    <td valign="top" width="25%">
-      <b>v3.8.55</b> · in development, groundwork merged<br/>
-      Characterization tests for every extraction candidate, module-boundary re-measurement and wider end-to-end journeys. The boundary ratchet runs in CI.
-    </td>
-    <td valign="top" width="25%">
-      <b>v3.8.56</b> · baseline pending<br/>
-      Extended canary and performance baselines: heap, time to first byte, build time and load on critical routes. Script and preliminary report are in.
-    </td>
-    <td valign="top" width="25%">
-      <b>v3.8.57</b> · sweep merged<br/>
-      Security and compliance sweep and the LTS support policy. The publish-provenance (OIDC) rehearsal is pending.
-    </td>
-  </tr>
-  <tr>
-    <td valign="top">
-      <b>v3.8.58</b> · rehearsed<br/>
-      Full dry run of the 3.9.0 cut: branches, channels, forward-port and PR preview artifacts. Rehearsed on a private scratch remote in October 2026.
-    </td>
-    <td valign="top">
-      <b>v3.8.59</b> · pending<br/>
-      Final freeze, full-suite audit run twice and the owner's GO/NO-GO decision. The checklist is ready.
-    </td>
-    <td valign="top" colspan="2">
-      <b>v3.9.0 LTS</b> · after GO<br/>
-      <code>stable/v3</code> becomes the long-term support line and <code>npm install omniroute</code> stays on it during the whole v4 cycle. <code>develop</code> opens the v4 nightly channel. There is no v3.8.60.
-    </td>
-  </tr>
-</table>
-
-<table>
-  <tr>
-    <th colspan="4" align="left">Shipped on the rail so far</th>
-  </tr>
-  <tr>
-    <td valign="top" width="25%"><b>Modality Bridge</b><br/>Vision, audio and video input for text-only models.<br/><sub>v3.8.50</sub></td>
-    <td valign="top" width="25%"><b>Radar</b><br/>Signed free-model catalog, opt-in.<br/><sub>v3.8.50</sub></td>
-    <td valign="top" width="25%"><b>Quota-aware scheduling</b><br/>Provider scheduling that reads remaining quota.<br/><sub>v3.8.50</sub></td>
-    <td valign="top" width="25%"><b>Quota telemetry</b><br/>Live provider quota readings.<br/><sub>v3.8.50</sub></td>
-  </tr>
-  <tr>
-    <td valign="top"><b>Headless mode</b><br/><code>omniroute serve --headless</code><br/><sub>v3.8.52</sub></td>
-    <td valign="top"><b>Model discovery API</b><br/><code>POST /v1/models/query</code><br/><sub>v3.8.52</sub></td>
-    <td valign="top" colspan="2"><b>LTS release infrastructure</b><br/>Channels, labels and forward-port workflows, dormant until 3.9.0.<br/><sub>v3.8.52</sub></td>
-  </tr>
-</table>
-
 Provider and model totals for v3.8.55 to v3.8.59 are measured when each release is cut. There are no targets.
 
 <p align="center"><b><a href="ROADMAP.md">Roadmap</a></b> · <a href="docs/ops/RELEASE_STRATEGY.md">Release strategy</a> · <a href="docs/ops/LTS_GO_NO_GO.md">LTS GO/NO-GO checklist</a> · <a href="SECURITY.md#lts-support-window-v39x">LTS support window</a></p>
@@ -257,16 +201,8 @@ Every section of this README, grouped by what you want to do.
 
 <img src="./docs/diagrams/works-zero-config.svg" width="100%" alt="Three steps: install and start OmniRoute, connect an eligible provider with your own account or API key, then point your tool at localhost:20128/v1 using an OmniRoute API key and model auto. Routing depends on available eligible connections and provider limits."/>
 
-<table>
-  <tr>
-    <td valign="top" width="25%"><sub>Step 1</sub><br/><b>Install</b><br/><code>npm install -g omniroute</code><br/><sub>Node.js 22.22.2+ (22.x) or 24.x–26.x</sub></td>
-    <td valign="top" width="25%"><sub>Step 2</sub><br/><b>Start</b><br/><code>omniroute</code><br/><sub>Dashboard and API on port 20128</sub></td>
-    <td valign="top" width="25%"><sub>Step 3</sub><br/><b>Connect and get a key</b><br/>Dashboard → <b>Providers</b>, then Dashboard → <b>API Keys</b></td>
-    <td valign="top" width="25%"><sub>Step 4</sub><br/><b>Call <code>/v1</code></b><br/>Base URL <code>http://localhost:20128/v1</code>, model <code>auto</code></td>
-  </tr>
-</table>
-
 ```bash
+# After connecting a provider, create your OmniRoute key in Dashboard → API Keys:
 curl http://localhost:20128/v1/chat/completions \
   -H "Authorization: Bearer YOUR_OMNIROUTE_KEY" \
   -H "Content-Type: application/json" \
@@ -627,20 +563,11 @@ Found a bug or have feedback? Open a [Discussion](https://github.com/cheaper-inf
 
 ## OmniRoute Radar
 
-The main free-tier headline remains **~1.62B tokens/month** from the documented,
-pool-deduplicated catalog above. Temporary provider signup credits can separately lift the first
-month to **~2.22B**. Radar is an optional, signed catalog overlay for people who want fresher
-free-model availability between OmniRoute releases; the community catalog and every existing free
-feature remain free.
+Radar is the live, signed copy of the free-tier catalog above, and it is free for everyone. There is no paywall and no waiting period. It is opt-in and GET-only. The OmniRoute client sends nothing to Radar: no prompts, traffic, provider configuration or usage telemetry.
 
-Supporters can receive the live catalog and additional provider opportunities. Its separate,
-mutable ceiling is **approximately 3B tokens/month at most**, depending on provider availability.
-That ceiling is not a guarantee: providers can change quotas, eligibility, models, or regions at
-any time.
+The numbers above come from the catalog shipped with this release. Radar can show newer data between releases. New free offers and promotions are added every week. Watch the real number grow on the Radar.
 
-Radar is opt-in and GET-only. The OmniRoute client does not upload prompts, traffic, provider
-configuration, usage telemetry, or local announcement-dismiss state. Learn about eligibility and
-the current catalog at **[radar.omniroute.online/planos](https://radar.omniroute.online/planos)**.
+**[OmniRoute Radar →](docs/frameworks/RADAR.md)**
 
 <br/>
 
@@ -1774,7 +1701,7 @@ What OmniRoute is built with, as declared in [`package.json`](package.json) on `
   <tr><td nowrap><b>Runtime</b></td><td>Node.js <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code> (22.x from 22.22.2, and 24.x to 26.x). Bun 1.4.2 is pinned only to run a few build scripts and a best-effort compatibility path; it is not a supported runtime</td></tr>
   <tr><td nowrap><b>Language</b></td><td>TypeScript 6 for the app and the streaming engine (<code>src/</code> and <code>open-sse/</code>); the <code>omniroute</code> CLI in <code>bin/</code> is ES-module JavaScript</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4, with the vendored Keak CI UI Kit (<code>packages/ui-kit</code>)</td></tr>
-  <tr><td nowrap><b>Database</b></td><td>SQLite with WAL journaling through better-sqlite3, with a driver fallback chain — 178 modules in <code>src/lib/db/</code>, 244 migrations</td></tr>
+  <tr><td nowrap><b>Database</b></td><td>SQLite with WAL journaling through better-sqlite3, with a driver fallback chain — 178 modules in <code>src/lib/db/</code>, 252 migrations</td></tr>
   <tr><td nowrap><b>Memory</b></td><td>SQLite FTS5 full-text search + int8-quantized vector embeddings with typed decay; optional Qdrant</td></tr>
   <tr><td nowrap><b>Schemas</b></td><td>Zod 4 — API contracts and MCP tool input/output validation</td></tr>
   <tr><td nowrap><b>Protocols</b></td><td>MCP (stdio / SSE / Streamable HTTP, 110 tools) + A2A v0.3 (JSON-RPC 2.0 + SSE) with A2A v1.0 client compatibility</td></tr>

@@ -77,7 +77,7 @@ const PROVIDER_COLLECTIONS = [
 ];
 
 async function main() {
-  const { computeFreeModelTotals, FREE_MODEL_BUDGETS } = await load(
+  const { computeFreeModelTotals, FREE_MODEL_BUDGETS, isCountingGated, isSocialGated } = await load(
     "open-sse/config/freeModelCatalog.ts"
   );
   const { FREE_TIER_PROVIDER_SET } = await load("open-sse/config/freeTierProviders.ts");
@@ -122,7 +122,9 @@ async function main() {
 
   const freeForever = new Set();
   for (const m of totals.perModel) {
-    if (FOREVER.has(m.freeType) && !m.eligibilityGate) freeForever.add(m.provider);
+    if (FOREVER.has(m.freeType) && !isCountingGated(m) && !isSocialGated(m)) {
+      freeForever.add(m.provider);
+    }
   }
 
   const facts = {

@@ -7,10 +7,13 @@
  */
 
 import {
+  isAntigravityGeminiCacheTarget,
   isOpenCodeLane,
+  normalizeGeminiPromptCacheMode,
   providerSupportsCaching,
   providerUsesAutomaticPrefixCaching,
   type ConnectionCacheOverride,
+  type GeminiPromptCacheMode,
 } from "../../utils/cacheControlPolicy.ts";
 
 type JsonRecord = Record<string, unknown>;
@@ -19,7 +22,7 @@ export interface CachingDetectionContext {
   provider?: string | null;
   targetFormat?: string | null;
   model?: string | null;
-  geminiPromptCacheMode?: "off" | "implicit" | null;
+  geminiPromptCacheMode?: GeminiPromptCacheMode | null;
   connectionCacheOverride?: ConnectionCacheOverride | null;
 }
 
@@ -28,7 +31,7 @@ export interface CachingContext {
   provider: string | null;
   targetFormat: string | null;
   isCachingProvider: boolean;
-  /** True when the provider caches a prefix without cache_control markers (OpenAI, Codex, Azure).
+  /** True when the provider caches a prefix without cache_control markers.
    * It describes cache ELIGIBILITY only; it says nothing about an observed cache hit. */
   usesAutomaticPrefixCaching: boolean;
 }
@@ -100,27 +103,24 @@ export function detectCachingContext(
     inferProviderFromModel(bodyRecord.model);
   const targetFormat = normalizeString(context.targetFormat)?.toLowerCase() ?? null;
   const resolvedModel = context.model ?? normalizeString(bodyRecord.model);
-  const isAntigravityTarget = provider === "antigravity" || provider === "agy";
-  const geminiPromptCacheMode = context.geminiPromptCacheMode === "implicit" ? "implicit" : "off";
+  const { connectionCacheOverride } = context;
+  const geminiPromptCacheMode = normalizeGeminiPromptCacheMode(context.geminiPromptCacheMode);
+  const usesAutomaticPrefixCaching = providerUsesAutomaticPrefixCaching(
+    provider,
+    connectionCacheOverride,
+    resolvedModel,
+    geminiPromptCacheMode
+  );
 
   return {
     hasCacheControl: hasCacheControl(body),
     provider,
     targetFormat,
     isCachingProvider:
-      isAntigravityTarget && geminiPromptCacheMode === "off"
-        ? false
-        : providerSupportsCaching(
-            provider,
-            targetFormat,
-            context.connectionCacheOverride,
-            resolvedModel
-          ),
-    usesAutomaticPrefixCaching: providerUsesAutomaticPrefixCaching(
-      provider,
-      context.connectionCacheOverride,
-      resolvedModel
-    ),
+      (geminiPromptCacheMode === "implicit" ||
+        !isAntigravityGeminiCacheTarget(provider, resolvedModel)) &&
+      providerSupportsCaching(provider, targetFormat, connectionCacheOverride, resolvedModel),
+    usesAutomaticPrefixCaching,
   };
 }
 

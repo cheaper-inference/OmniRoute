@@ -144,6 +144,7 @@ import {
 } from "./accountFallback/creditsExhaustedForStatus.ts";
 export { CREDITS_EXHAUSTED_SIGNALS } from "./accountFallback/creditExhaustionSignals.ts";
 import { isMistralAmbiguous401 } from "./accountFallback/mistralAmbiguousAuth.ts";
+import { parseClineTryAgainInMs } from "./accountFallback/clineTryAgainIn.ts";
 import { isRegisteredFeatureFlagEnabled } from "../utils/registeredFeatureFlag.ts";
 import { boundedMap } from "@/lib/quota/boundedMap";
 // #16797: providerErrorRules.ts stays free of src/ imports; its opt-in flags
@@ -1650,6 +1651,10 @@ export function parseDetailedRetryFromErrorText(
   if (isoMs !== null) {
     return { retryAfterMs: isoMs, provenance: "body_iso_reset" };
   }
+
+  // Cline free tier: "Try again in 19h 39m" — `body` provenance, so the operator cap applies.
+  const clineMs = parseClineTryAgainInMs(msg, provider, MAX_PROVIDER_COOLDOWN_MS);
+  if (clineMs !== null) return bodyHint(clineMs);
 
   const countdownMs = parseRelativeCountdownProseMs(msg);
   if (countdownMs !== undefined) return bodyHint(countdownMs);
