@@ -2,7 +2,48 @@
   "version": 1,
   "base": "release/v3.8.55",
   "paused": null,
-  "inFlight": null,
+  "inFlight": {
+    "batchId": "b28",
+    "kind": "batch",
+    "candidateRef": "omni-queue/release-v3.8.55/b28-d85f136e2bb0",
+    "candidateSha": "d85f136e2bb05d33e327b510a58c29222cfb3f35",
+    "baseSha": "b47ecc93c8101d5fcc9188cde7e2a3b84c0eca1b",
+    "treeSha": "568c7a9e8ea48c9b54cca6121cb8efbfd83233fd",
+    "prs": [
+      {
+        "n": 21080,
+        "head": "b1ace531875a5640ead3ff1dd2d188b9c163b985",
+        "title": "fix(sse): honor Cline daily free-limit countdown as a model lockout hint",
+        "author": "diegosouzapw",
+        "labeledAt": "2026-11-24T14:27:30Z"
+      },
+      {
+        "n": 21081,
+        "head": "da5d88d59c593136c49a37754042f13f7e7f7349",
+        "title": "fix(sse): keep error tool results out of RTK compression",
+        "author": "diegosouzapw",
+        "labeledAt": "2026-11-24T14:27:35Z"
+      },
+      {
+        "n": 21082,
+        "head": "56d1842a74c48b49b7e2487114350b1eb91bf12a",
+        "title": "fix(sse): lock only the model on Kilo PAID_MODEL_AUTH_REQUIRED",
+        "author": "diegosouzapw",
+        "labeledAt": "2026-11-24T14:27:42Z"
+      },
+      {
+        "n": 21090,
+        "head": "aab9612b49532165cdcd06f730604878ea371309",
+        "title": "feat(sse): declare live OpenCode Zen/Go model ids in the registry",
+        "author": "diegosouzapw",
+        "labeledAt": "2026-11-24T14:27:47Z"
+      }
+    ],
+    "stage": "testing",
+    "startedAt": "2026-11-24T14:28:36.736Z",
+    "attempts": 0,
+    "bisect": null
+  },
   "baseChecks": [
     {
       "baseSha": "0563eb2ec52bfd20ca39b3d4444df3cbd2316944",
@@ -82,8 +123,8 @@
     }
   },
   "counters": {
-    "batchSeq": 27,
-    "ciRuns": 31,
+    "batchSeq": 28,
+    "ciRuns": 32,
     "landedPrs": 0,
     "landedBatches": 0,
     "redBatches": 8,
@@ -1915,8 +1956,28 @@
       "sha": "cc9b69b491b08dcbd11ba9d042e696e0a54a9c14",
       "detail": "shadow mode: would merge-ff onto 0488355a73ed",
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45305500129"
+    },
+    {
+      "at": "2026-11-24T14:28:40.286Z",
+      "type": "batch-started",
+      "batchId": "b28",
+      "prs": [
+        21080,
+        21081,
+        21082,
+        21090
+      ],
+      "sha": "d85f136e2bb05d33e327b510a58c29222cfb3f35",
+      "detail": "4 PR(s) on b47ecc93c810; window 4",
+      "labeledAt": {
+        "21080": "2026-11-24T14:27:30Z",
+        "21081": "2026-11-24T14:27:35Z",
+        "21082": "2026-11-24T14:27:42Z",
+        "21090": "2026-11-24T14:27:47Z"
+      },
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45414318488"
     }
   ],
-  "updatedAt": "2026-11-24T13:42:32.929Z",
+  "updatedAt": "2026-11-24T14:28:41.937Z",
   "batchWindow": 4
 }
