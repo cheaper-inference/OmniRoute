@@ -5,6 +5,8 @@
  * Rules:
  *   - connections = key.allowedConnections when non-empty, else every active
  *     connection; inactive connections are skipped.
+ *   - model-scoped windows (`modelQuotas`, e.g. Claude's per-model weekly windows) are carried
+ *     only for a caller that asks for them (the self-service quota view).
  *   - only providers in settings.sharedQuotaProviders are kept (null = all,
  *     [] = none).
  *   - label = masked account display name; a raw email is never returned.
@@ -39,6 +41,7 @@ export const ACCOUNT_QUOTA_REFRESH_FLOOR_MS = 60_000;
 
 export interface ProviderLimitsCacheLike {
   quotas: JsonRecord | null;
+  modelQuotas?: JsonRecord | null;
   plan: unknown;
   fetchedAt: string;
 }
@@ -49,7 +52,14 @@ export interface ProviderLimitsFetchResultLike {
 }
 
 type RefreshOutcome =
-  | { ok: true; quotas: unknown; plan: unknown; fetchedAt: string | null; stale: boolean }
+  | {
+      ok: true;
+      quotas: unknown;
+      modelQuotas: unknown;
+      plan: unknown;
+      fetchedAt: string | null;
+      stale: boolean;
+    }
   | { ok: false };
 
 export interface QuotaRefreshTracker {
@@ -67,6 +77,11 @@ export interface AccountQuotaDeps {
     source: "manual" | "scheduled"
   ) => Promise<ProviderLimitsFetchResultLike>;
   quotaRefreshTracker: QuotaRefreshTracker;
+}
+
+export interface AccountQuotaEntryOptions {
+  /** Also return the normalized model-scoped windows of each account as `modelQuotas`. */
+  includeModelQuotas?: boolean;
 }
 
 export interface AccountQuotaMetadata {
@@ -166,7 +181,10 @@ async function listReachableConnections(
   return connections;
 }
 
-function isProviderShared(provider: string, sharedQuotaProviders: string[] | null | undefined) {
+export function isProviderShared(
+  provider: string,
+  sharedQuotaProviders: string[] | null | undefined
+) {
   if (sharedQuotaProviders === null || sharedQuotaProviders === undefined) return true;
   return sharedQuotaProviders.includes(provider);
 }
@@ -260,7 +278,14 @@ function toRefreshOutcome(
   const fetchedAt = stale
     ? isoOrNull((usage._staleSince ?? result?.cache?.fetchedAt) as DateLike)
     : (isoOrNull(result?.cache?.fetchedAt as DateLike) ?? new Date(attemptAt).toISOString());
-  return { ok: true, quotas: usage.quotas, plan: usage.plan, fetchedAt, stale };
+  return {
+    ok: true,
+    quotas: usage.quotas,
+    modelQuotas: usage.modelQuotas,
+    plan: usage.plan,
+    fetchedAt,
+    stale,
+  };
 }
 
 function refreshConnectionQuota(
@@ -298,6 +323,7 @@ function refreshConnectionQuota(
 
 interface QuotaSnapshot {
   quotas: unknown;
+  modelQuotas: unknown;
   plan: unknown;
   fetchedAt: string | null;
   stale: boolean;
@@ -318,6 +344,7 @@ async function readQuotaSnapshot(
   if (cached && cachedAtMs !== null && deps.now() - cachedAtMs < ACCOUNT_QUOTA_STALE_AFTER_MS) {
     return {
       quotas: cached.quotas,
+      modelQuotas: cached.modelQuotas,
       plan: cached.plan,
       fetchedAt: isoOrNull(cachedAtMs),
       stale: false,
@@ -328,6 +355,7 @@ async function readQuotaSnapshot(
   if (outcome.ok) {
     return {
       quotas: outcome.quotas,
+      modelQuotas: outcome.modelQuotas,
       plan: outcome.plan,
       fetchedAt: outcome.fetchedAt,
       stale: outcome.stale,
@@ -336,6 +364,7 @@ async function readQuotaSnapshot(
   if (cached) {
     return {
       quotas: cached.quotas,
+      modelQuotas: cached.modelQuotas,
       plan: cached.plan,
       fetchedAt: isoOrNull(cachedAtMs),
       stale: true,
@@ -346,7 +375,8 @@ async function readQuotaSnapshot(
 
 async function resolveConnectionAccountQuota(
   connection: AccountQuotaConnection,
-  deps: AccountQuotaDeps
+  deps: AccountQuotaDeps,
+  options: AccountQuotaEntryOptions
 ) {
   const base = {
     provider: connection.provider,
@@ -369,8 +399,11 @@ async function resolveConnectionAccountQuota(
   if (!snapshot) return unavailable("fetch_failed");
 
   const quotas = normalizeQuotaWindows(snapshot.quotas);
+  const modelQuotas = options.includeModelQuotas
+    ? normalizeQuotaWindows(snapshot.modelQuotas)
+    : null;
   const plan = normalizePlan(snapshot.plan);
-  if (!quotas && plan === undefined) {
+  if (!quotas && !modelQuotas && plan === undefined) {
     return unavailable("not_available", snapshot.fetchedAt, snapshot.stale);
   }
 
@@ -378,6 +411,7 @@ async function resolveConnectionAccountQuota(
     ...base,
     ...(plan !== undefined && { plan }),
     ...(quotas && { quotas }),
+    ...(modelQuotas && { modelQuotas }),
     fetchedAt: snapshot.fetchedAt,
     ...(snapshot.stale && { stale: true }),
   };
@@ -386,12 +420,13 @@ async function resolveConnectionAccountQuota(
 /** accountQuotas entries for the key, filtered by its shared-provider setting. */
 export async function resolveAccountQuotaEntries(
   metadata: AccountQuotaMetadata,
-  deps: AccountQuotaDeps
+  deps: AccountQuotaDeps,
+  options: AccountQuotaEntryOptions = {}
 ) {
   const connections = (await listReachableConnections(metadata.allowedConnections, deps)).filter(
     (connection) => isProviderShared(connection.provider, metadata.sharedQuotaProviders)
   );
   return Promise.all(
-    connections.map((connection) => resolveConnectionAccountQuota(connection, deps))
+    connections.map((connection) => resolveConnectionAccountQuota(connection, deps, options))
   );
 }

@@ -1,0 +1,1 @@
+- **fix(codex):** Codex connections on a Business Premium seat (`self_serve_business_prolite`) are no longer filtered out as plan-ineligible for the paid-only Sol and Astra models; the paid-plan allow-list now includes that plan, while Free and Go stay blocked ([#20359](https://github.com/cheaper-inference/OmniRoute/pull/20359))

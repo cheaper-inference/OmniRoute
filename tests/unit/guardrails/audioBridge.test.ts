@@ -241,7 +241,7 @@ test("default registry places Audio Bridge after Vision Bridge", () => {
   const names = registerDefaultGuardrails()
     .list()
     .map((guardrail) => guardrail.name);
-  assert.deepEqual(names.slice(0, 2), ["vision-bridge", "audio-bridge"]);
+  assert.deepEqual(names.slice(0, 3), ["agent-guard", "vision-bridge", "audio-bridge"]);
   resetGuardrailsForTests();
 });
 

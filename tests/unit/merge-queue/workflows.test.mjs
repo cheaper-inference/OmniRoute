@@ -21,7 +21,11 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
 import { load } from "js-yaml";
-import { botIdentity, candidateRef } from "../../../scripts/merge-queue/contracts.mjs";
+import {
+  baseCheckRef,
+  botIdentity,
+  candidateRef,
+} from "../../../scripts/merge-queue/contracts.mjs";
 import { signingKeyPath } from "../../../scripts/merge-queue/compose.mjs";
 import { TICK_ACTIONS } from "../../../scripts/merge-queue/tick.mjs";
 import { evaluateAdmission } from "../../../scripts/quality/admission-verdict.mjs";
@@ -1608,6 +1612,10 @@ for (const [profile, file] of Object.entries(PROFILES)) {
     for (const [id, rule] of Object.entries(rules)) {
       if (rule.when === "pr") {
         assert.equal(scheduled[id], false, `${id} is pull-request only`);
+      } else if (rule.when === "omni-queue-base-check") {
+        // This context is a batch candidate (candidateSource "trailer"): the base-check shards
+        // skip, and the admission below passes with them skipped.
+        assert.equal(scheduled[id], false, `${id} runs on a base-check candidate only`);
       } else if (rule.disposition === "required") {
         assert.equal(scheduled[id], true, `${profile}:${id} must run on a candidate push`);
       }
@@ -1845,26 +1853,45 @@ test("quality.yml: merge integrity and impact selection compare against the cand
   assert.equal(render(tia.env.GITHUB_BASE_SHA, pr), "", "PRs keep GITHUB_BASE_REF");
 });
 
-test("quality.yml: a base-check candidate runs the whole unit suite in the TIA step", (t) => {
+test("quality.yml: a base-check candidate runs the whole unit suite in the shards, not the TIA step", (t) => {
   const wf = loadWorkflow("quality.yml");
   assert.equal(wf.jobs.changes.outputs.candidateSource, "${{ steps.candidate.outputs.SOURCE }}");
   const tia = wf.jobs["fast-gates"].steps.find(
     (s) => s.name === "Impacted unit tests (TIA subset; blocking)"
   );
   assert.equal(tia.env.CANDIDATE_SOURCE, "${{ needs.changes.outputs.candidateSource }}");
-  // Base-check (SOURCE=self): no base-relative selection (it would be empty), the full suite.
+  // Base-check (SOURCE=self): no base-relative selection (it would be empty) and no unsharded
+  // suite either: the selection marker, and a pointer to the base-check-unit shards.
   const baseCheck = runStep(t, tia, { CANDIDATE_SOURCE: "self", GITHUB_BASE_SHA: CANDIDATE_SHA });
   assert.equal(baseCheck.code, 0, baseCheck.stderr);
-  assert.deepEqual(baseCheck.npmArgs, ["run", "test:unit:ci"]);
+  assert.equal(baseCheck.npmArgs, null, "the unsharded suite never runs in fast-gates");
   assert.equal(baseCheck.args, null, "the selector never runs on a base-check");
   assert.equal(
     readFileSync(join(baseCheck.dir, "tia-selection.txt"), "utf8"),
     "__OMNI_QUEUE_BASE_CHECK__\n"
   );
-  assert.match(baseCheck.summary, /omni-queue base-check — full unit suite/);
-  // A failing test on the bare base fails this same check (what classify compares).
-  const red = runStep(t, tia, { CANDIDATE_SOURCE: "self", FAKE_NPM_RC: "3" });
+  assert.match(baseCheck.summary, /omni-queue base-check — full unit suite in the base-check-unit/);
+  // The shards run the suite: a failing test on the bare base fails a shard, which is the same
+  // check for classify ("Fast Quality Gates (N/4)" → "Fast Quality Gates").
+  const shards = wf.jobs["base-check-unit"];
+  const shardStep = shards.steps.find((s) => s.env?.TEST_SHARD);
+  const green = runStep(t, shardStep, { TEST_SHARD: "2/4" });
+  assert.equal(green.code, 0, green.stderr);
+  assert.deepEqual(green.npmArgs, ["run", "test:unit:ci:shard"]);
+  const red = runStep(t, shardStep, { TEST_SHARD: "2/4", FAKE_NPM_RC: "3" });
   assert.equal(red.code, 3);
+  const base = pushContext(`refs/heads/${baseCheckRef("release/v3.8.54", CANDIDATE_SHA)}`);
+  base.__outputs.changes = {
+    ...base.__outputs.changes,
+    candidateBase: CANDIDATE_SHA,
+    candidateSource: "self",
+  };
+  assert.equal(scheduledJobs(wf, base)["base-check-unit"], true, "a base check runs the shards");
+  assert.equal(
+    scheduledJobs(wf, pushContext(CANDIDATE_REF))["base-check-unit"],
+    false,
+    "a batch does not"
+  );
   // Control: a batch candidate (or a PR) still selects, and an empty selection skips.
   for (const source of ["trailer", ""]) {
     const batch = runStep(t, tia, { CANDIDATE_SOURCE: source, GITHUB_BASE_SHA: BASE_SHA });

@@ -95,6 +95,10 @@ const PATH_AWARE_GENERATORS: Record<
   opencode: generateOpencodeConfig,
   codex: generateCodexConfig,
   whycodes: generateWhyCodesConfig,
+  claude: generateClaudeConfig,
+  cline: generateClineConfig,
+  kilo: generateKilocodeConfig,
+  continue: generateContinueConfig,
 };
 
 export async function generateConfig(
