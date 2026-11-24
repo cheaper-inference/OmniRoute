@@ -21,7 +21,7 @@ const REEGRESS_MAX_ATTEMPTS_MIN = 1;
 const REEGRESS_MAX_ATTEMPTS_MAX = 8;
 
 /** PROXY_REEGRESS_MAX_ATTEMPTS, bounded to 1..8; anything else falls back to the default. */
-export function reEgressLimit(env: { PROXY_REEGRESS_MAX_ATTEMPTS?: string } = process.env): number {
+export function reEgressLimit(env: Record<string, string | undefined> = process.env): number {
   const raw = env.PROXY_REEGRESS_MAX_ATTEMPTS;
   if (raw == null || raw.trim() === "") return REEGRESS_MAX_ATTEMPTS_DEFAULT;
   const parsed = Math.floor(Number(raw));
