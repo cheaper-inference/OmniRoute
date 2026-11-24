@@ -22,6 +22,11 @@ import type { RoutingStrategyValue } from "../../src/shared/constants/routingStr
 export type CacheControlMode = "auto" | "always" | "never";
 export type GeminiPromptCacheMode = "off" | "implicit";
 
+/** Antigravity Gemini implicit caching is an operator opt-in: anything but "implicit" is off. */
+export function normalizeGeminiPromptCacheMode(value: unknown): GeminiPromptCacheMode {
+  return value === "implicit" ? "implicit" : "off";
+}
+
 /**
  * Cache control settings from the database
  */
@@ -275,6 +280,21 @@ function isClaudeTargetFormat(targetFormat?: string | null): boolean {
   return targetFormat?.toLowerCase() === "claude";
 }
 
+/** Antigravity's implicit policy covers Gemini models, not its Claude/GPT lanes. */
+export function isAntigravityGeminiCacheTarget(
+  provider: string | null | undefined,
+  model?: string | null
+): boolean {
+  const providerId = provider?.toLowerCase();
+  return (
+    (providerId === "antigravity" || providerId === "agy") &&
+    String(model ?? "")
+      .toLowerCase()
+      .split("/")
+      .some((segment) => segment.startsWith("gemini-"))
+  );
+}
+
 /**
  * Check if a provider supports prompt caching
  * Supports caching if:
@@ -292,11 +312,7 @@ export function providerSupportsCaching(
   if (providerId === "antigravity" || providerId === "agy") {
     // Antigravity carries Gemini, Claude, and GPT models. Only Gemini models
     // are in this release's implicit-cache scope.
-    const modelSegments = String(model ?? "")
-      .toLowerCase()
-      .split("/")
-      .filter(Boolean);
-    if (!modelSegments.some((segment) => segment.startsWith("gemini-"))) return false;
+    if (!isAntigravityGeminiCacheTarget(providerId, model)) return false;
     if (typeof connectionCacheOverride?.supportsPromptCaching === "boolean") {
       return connectionCacheOverride.supportsPromptCaching;
     }
@@ -317,18 +333,37 @@ export function providerSupportsCaching(
   return isClaudeTargetFormat(targetFormat);
 }
 
+function allowsAutomaticPrefixCaching(override?: ConnectionCacheOverride | null): boolean {
+  const passthrough = override?.cacheControlPassthrough;
+  return (
+    override?.supportsPromptCaching !== false &&
+    passthrough !== "openai-format" &&
+    passthrough !== "claude-format"
+  );
+}
+
 /** Whether a marker-free request can still participate in the provider cache.
  * A custom connection must declare marker stripping to opt into this stronger
  * semantic; `supportsPromptCaching` alone does not say how caching is requested. */
 export function providerUsesAutomaticPrefixCaching(
   provider: string | null | undefined,
   connectionCacheOverride?: ConnectionCacheOverride | null,
-  model?: string | null
+  model?: string | null,
+  geminiPromptCacheMode?: GeminiPromptCacheMode | null
 ): boolean {
-  if (connectionCacheOverride?.supportsPromptCaching === false) return false;
-  const passthrough = connectionCacheOverride?.cacheControlPassthrough;
-  if (passthrough === "openai-format" || passthrough === "claude-format") return false;
-  if (connectionCacheOverride?.supportsPromptCaching === true && passthrough === "strip") {
+  if (!allowsAutomaticPrefixCaching(connectionCacheOverride)) return false;
+  // Opting into implicit Gemini caching makes the cacheable prefix worth protecting during
+  // compression. With the mode off, an Antigravity request keeps the generic rules below.
+  if (
+    isAntigravityGeminiCacheTarget(provider, model) &&
+    normalizeGeminiPromptCacheMode(geminiPromptCacheMode) === "implicit"
+  ) {
+    return true;
+  }
+  if (
+    connectionCacheOverride?.supportsPromptCaching === true &&
+    connectionCacheOverride.cacheControlPassthrough === "strip"
+  ) {
     return true;
   }
   if (!provider) return false;

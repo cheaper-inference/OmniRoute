@@ -29,6 +29,11 @@ export interface ProxyRegistryRecord {
   family: string;
   /** Set when this registry row was synced from a proxy subscription (#subscription-feature). */
   subscriptionId: string | null;
+  /**
+   * Rotating endpoint: the gateway hands out a new exit address per connection, so a
+   * per-IP quota refusal through it is never set aside and it never shares an address.
+   */
+  rotatingEgress: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -57,6 +62,8 @@ export interface ProxyPayload {
   family?: string;
   /** Optional link to a proxy subscription that created this row (#subscription-feature). */
   subscriptionId?: string | null;
+  /** Rotating endpoint mark; omitted on update keeps the stored value. */
+  rotatingEgress?: boolean;
 }
 
 export interface ProxyAssignmentPayload {
