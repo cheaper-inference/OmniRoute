@@ -19,7 +19,7 @@ const combosDb = await import("../../src/lib/db/combos.ts");
 const catalog = await import("../../src/app/api/v1/models/catalog.ts");
 
 const LLAMA_FP8_FAST = "@cf/meta/llama-3.3-70b-instruct-fp8-fast";
-const KIMI = "@cf/moonshotai/kimi-k2.6";
+const QWEN = "@cf/qwen/qwen3.8-27b";
 
 async function getComboEntry(name: string): Promise<Record<string, unknown> | undefined> {
   catalog.__resetCatalogBuilderRunsForTest();
@@ -62,15 +62,15 @@ describe("Cloudflare Workers AI combo context window (#17881)", () => {
 
   it("mixed combo advertises the smallest member window, not the larger sibling's", async () => {
     await combosDb.createCombo({
-      name: "cf-llama-kimi-combo",
+      name: "cf-llama-qwen-combo",
       strategy: "priority",
       models: [
         { model: `cf/${LLAMA_FP8_FAST}`, providerId: "cloudflare-ai" },
-        { model: `cf/${KIMI}`, providerId: "cloudflare-ai" },
+        { model: `cf/${QWEN}`, providerId: "cloudflare-ai" },
       ],
     });
 
-    const combo = await getComboEntry("cf-llama-kimi-combo");
+    const combo = await getComboEntry("cf-llama-qwen-combo");
     assert.ok(combo, "combo should exist in models list");
     assert.equal(combo?.context_length, 24000);
     assert.equal(combo?.max_input_tokens, 24000);
