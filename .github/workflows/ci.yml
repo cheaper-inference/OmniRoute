@@ -216,6 +216,20 @@ jobs:
       - run: npm run check:deps
       - run: npm run check:file-size
       - run: npm run check:error-helper
+      - name: PR detector wiring - new violations
+        if: github.event_name == 'pull_request'
+        env:
+          BASE: ${{ needs.changes.outputs.candidateBase || github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          PR_BODY_FILE: ${{ runner.temp }}/pr-body-volume-alerts.md
+        run: |
+          printf '%s' "$PR_BODY" > "$PR_BODY_FILE"
+          npm run --silent check:ci-alert-volume
+      - name: check:error-helper with PR base scope
+        if: github.event_name == 'pull_request'
+        env:
+          BASE: ${{ needs.changes.outputs.candidateBase || github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
+        run: npm run check:error-helper
       - name: Migration numbering and commutation
         # Runs even if an earlier gate in this job failed: it is the check that keeps a
         # migration from being re-applied or skipped on a user's database.

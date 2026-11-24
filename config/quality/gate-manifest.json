@@ -219,6 +219,30 @@
       "disposition": "separately-invoked"
     },
     {
+      "name": "check:doc-code-parity",
+      "command": "node scripts/check/check-doc-code-parity.mjs",
+      "disposition": "pr-dependent",
+      "scope": "Check that release-note claims are backed by evidence derived from the PR diff."
+    },
+    {
+      "name": "check:identity-bounds",
+      "command": "node scripts/check/check-identity-bounds.mjs",
+      "disposition": "pr-dependent",
+      "scope": "Check numeric bounds and ownership invariants against the PR diff."
+    },
+    {
+      "name": "check:functional-invariants",
+      "command": "node scripts/check/check-functional-invariants.mjs",
+      "disposition": "pr-dependent",
+      "scope": "Check functional invariants against the PR diff."
+    },
+    {
+      "name": "check:ci-alert-volume",
+      "command": "bash scripts/quality/ci-alert-volume.sh",
+      "disposition": "pr-dependent",
+      "scope": "Run the base-scoped detectors and fail closed when the base is incomplete."
+    },
+    {
       "name": "check:install-upgrade",
       "command": "node scripts/check/check-install-upgrade.mjs",
       "disposition": "separately-invoked"
