@@ -22,24 +22,31 @@ const instructions = (body) =>
     .join("\n");
 
 const bunWeb = instructions(stageBody(read("Dockerfile.bun"), "runner-web"));
+const webCommands = bunWeb.replace(/\\\n/g, " ");
+const apkPackages = [...webCommands.matchAll(/\bapk add\s+([^&;|\n]+)/g)].flatMap((match) =>
+  match[1]
+    .trim()
+    .split(/\s+/)
+    .filter((word) => !word.startsWith("-"))
+);
 
-test("Bun runner-web does not install Chromium from apt", () => {
-  // The Debian chromium / chromium-common / chromium-driver packages carried ~720 HIGH
-  // findings with no Debian fix in 3.8.54-web-bun, and chromium-driver was never used.
+test("Bun runner-web does not install Wolfi Chromium packages", () => {
   assert.doesNotMatch(bunWeb, /\bchromium-driver\b/);
-  assert.doesNotMatch(bunWeb, /apt-get install[^\n]*\\\n(?:[^\n]*\\\n)*\s*chromium\s*\\/);
-  assert.doesNotMatch(bunWeb, /^\s+chromium\s*\\?$/m);
+  for (const pkg of apkPackages) {
+    assert.doesNotMatch(pkg, /^(?:chromium|chromium-driver)(?:$|[=<>~@])/);
+  }
 });
 
-test("Bun runner-web installs Playwright's own Chromium, like the Node runner-web", () => {
+test("Bun runner-web installs Playwright's own Chromium without installing OS dependencies through Playwright", () => {
   // 3.8.54-web-bun: chromium.launch() failed with "Executable doesn't exist at
   // /home/bun/.cache/ms-playwright/…" because nothing populated Playwright's browser path.
   assert.match(bunWeb, /^ENV PLAYWRIGHT_BROWSERS_PATH=\/home\/bun\/\.cache\/ms-playwright$/m);
-  assert.match(bunWeb, /\bbun node_modules\/playwright\/cli\.js install chromium --with-deps\b/);
+  assert.match(webCommands, /\bbun node_modules\/playwright\/cli\.js install chromium\s*(?:&&|$)/m);
+  assert.doesNotMatch(bunWeb, /--with-deps\b/);
   assert.match(bunWeb, /chown -R bun:bun \/home\/bun\/\.cache/);
   assert.doesNotMatch(bunWeb, /PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD/);
   const browsersEnv = bunWeb.indexOf("ENV PLAYWRIGHT_BROWSERS_PATH=");
-  const install = bunWeb.indexOf("install chromium --with-deps");
+  const install = bunWeb.indexOf("bun node_modules/playwright/cli.js install chromium");
   assert.ok(
     browsersEnv !== -1 && browsersEnv < install,
     "browsers path must be set before install"
@@ -47,7 +54,22 @@ test("Bun runner-web installs Playwright's own Chromium, like the Node runner-we
 });
 
 test("Bun runner-web ships Xvfb for headed Chromium (#15300)", () => {
-  assert.match(bunWeb, /apt-get install -y --no-install-recommends xvfb/);
+  for (const pkg of ["xvfb", "xkbcomp", "xkeyboard-config"]) {
+    assert.ok(apkPackages.includes(pkg), `apk must install ${pkg}`);
+  }
+  assert.match(webCommands, /mkdir -p \/tmp\/\.X11-unix && chmod 1777 \/tmp\/\.X11-unix/);
+});
+
+test("Bun runner-web fails the build if either Chromium executable is missing libraries", () => {
+  assert.match(
+    webCommands,
+    /for bin in "\$PLAYWRIGHT_BROWSERS_PATH"\/\*\/\*\/chrome "\$PLAYWRIGHT_BROWSERS_PATH"\/\*\/\*\/chrome-headless-shell; do/
+  );
+  assert.match(
+    webCommands,
+    /missing="\$\(\/lib\/ld-linux-\*\.so\.\* --list "\$bin" 2>&1 \| grep 'not found' \|\| true\)"/
+  );
+  assert.match(webCommands, /if \[ -n "\$missing" \]; then [^\n]*exit 1; fi;/);
 });
 
 test("Bun runner-web keeps /usr/bin/chromium for the system-browser lookups", () => {
@@ -78,9 +100,23 @@ test("Bun runner-web drops back to the bun user", () => {
 
 test("the release preflight smoke builds the real runner-web stage and launches Chromium", () => {
   const smoke = read("scripts/release/preflight-bun-apt-smoke.sh");
-  // It must replay the stage itself, not a hand-kept copy of the package list.
-  assert.match(smoke, /FROM runner-base AS runner-web/);
+  assert.match(smoke, /\^FROM .* AS base\$/);
+  assert.match(smoke, /\^FROM .* AS runtime-os\$/);
+  assert.match(smoke, /\^FROM runner-base AS runner-web\$/);
+  assert.match(smoke, /stage && !\/\^ENTRYPOINT \/ \{ print \}/);
+  assert.match(
+    smoke,
+    /echo "FROM \$BASE AS base"\s+printf '%s\\n' "\$RUNTIME_OS"\s+echo "FROM runtime-os"\s+echo "WORKDIR \/app"\s+echo "COPY node_modules\/ \/app\/node_modules\/"\s+printf '%s\\n' "\$STAGE"/
+  );
   assert.match(smoke, /node_modules\/playwright-core/);
-  assert.match(smoke, /headless: false/);
-  assert.match(smoke, /Xvfb/);
+  assert.match(smoke, /await launch\("headless", \{ headless: true \}\)/);
+  assert.match(smoke, /spawn\("Xvfb", \[":99",/);
+  assert.match(
+    smoke,
+    /await launch\("headed under Xvfb", \{ headless: false, env: \{ \.\.\.process\.env, DISPLAY: ":99" \} \}\)/
+  );
+  assert.match(
+    smoke,
+    /await launch\("\/usr\/bin\/chromium", \{ headless: true, executablePath: "\/usr\/bin\/chromium" \}\)/
+  );
 });
