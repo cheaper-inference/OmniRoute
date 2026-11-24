@@ -14,7 +14,7 @@
 import { canonicalStreamingUsage } from "./streamAccountingUsage.ts";
 import { normalizeUsage, hasValidUsage, type UsageLike } from "./usageTracking.ts";
 import { cacheCreationFields } from "./cacheWriteUsage.ts";
-import { carryUsageEvidence, type UsageEvidence } from "./usageEvidence.ts";
+import { carryUsageEvidence, usableTokenCounter, type UsageEvidence } from "./usageEvidence.ts";
 import { finalizeStreamingUsage } from "./finalizeStreamingUsage.ts";
 
 export type PartialStreamUsage = {
@@ -74,6 +74,29 @@ export function trackStreamPartialUsage<T extends object>(
   });
 }
 
+function normalizePartialUsage(record: UsageLike | null): UsageLike | null {
+  const canonical = canonicalStreamingUsage(record);
+  if (canonical?.cachedContentTokenCount === undefined) return normalizeUsage(canonical);
+
+  const { cachedContentTokenCount, ...usage } = canonical;
+  const prompt = usage.prompt_tokens ?? usage.input_tokens;
+  const geminiCacheRead =
+    usableTokenCounter(cachedContentTokenCount) &&
+    usableTokenCounter(prompt) &&
+    cachedContentTokenCount <= prompt &&
+    usage.cache_evidence !== "invalid"
+      ? cachedContentTokenCount
+      : undefined;
+  return normalizeUsage({
+    ...usage,
+    cached_tokens:
+      usage.cached_tokens ??
+      usage.prompt_tokens_details?.cached_tokens ??
+      usage.input_tokens_details?.cached_tokens ??
+      geminiCacheRead,
+  });
+}
+
 /**
  * Resolve the usage to record for a stream that ended before its terminal event.
  *
@@ -94,7 +117,7 @@ export function resolvePartialStreamUsage({
 }): PartialStreamUsage | null {
   const record = reported && typeof reported === "object" ? (reported as UsageLike) : null;
   if (!hasValidUsage(record) && !(contentLength > 0)) return null;
-  const normalized = normalizeUsage(canonicalStreamingUsage(record));
+  const normalized = normalizePartialUsage(record);
   const result = finalizeStreamingUsage(normalized, body, contentLength);
   if (!(Number(result.prompt_tokens) > 0 || Number(result.completion_tokens) > 0)) return null;
   const partial: PartialStreamUsage = {

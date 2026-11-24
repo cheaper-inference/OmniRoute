@@ -1,0 +1,1 @@
+- **fix(usage):** Keep reported Gemini cache-read counts when recording a partial stream.
