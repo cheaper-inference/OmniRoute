@@ -689,6 +689,10 @@ export async function getModelInfoOrRetirementResponse(modelId: string) {
   }
 }
 
+function hasComboModels(models: unknown): boolean {
+  return Array.isArray(models) && models.length > 0;
+}
+
 /**
  * Check if model is a combo and return the full combo object
  * @returns {Promise<Object|null>} Full combo object or null if not a combo
@@ -698,7 +702,7 @@ export async function getCombo(modelStr) {
   if (isReservedComboName(modelStr)) return getStoredAutoComboByName(modelStr);
   // Try exact match first (supports combos actually named "combo/ANY")
   let combo = await getCachedComboByName(modelStr);
-  if (combo && Array.isArray(combo.models) && combo.models.length > 0) {
+  if (hasComboModels(combo?.models)) {
     return combo;
   }
 
@@ -706,7 +710,7 @@ export async function getCombo(modelStr) {
   if (modelStr.startsWith("combo/")) {
     const nameToSearch = modelStr.substring(6);
     combo = await getCachedComboByName(nameToSearch);
-    if (combo && Array.isArray(combo.models) && combo.models.length > 0) {
+    if (hasComboModels(combo?.models)) {
       return combo;
     }
   }
@@ -718,12 +722,12 @@ export async function getCombo(modelStr) {
   // a combo named "MASTER-LIGHT"). These two fallbacks only run after the exact
   // match fails, so they never re-route a combo that already resolves today.
   combo = await getComboById(modelStr);
-  if (combo && Array.isArray(combo.models) && combo.models.length > 0) {
+  if (hasComboModels(combo?.models)) {
     return combo;
   }
 
   combo = await getComboByNameInsensitive(modelStr);
-  if (combo && Array.isArray(combo.models) && combo.models.length > 0) {
+  if (hasComboModels(combo?.models)) {
     return combo;
   }
 
