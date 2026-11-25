@@ -1,7 +1,7 @@
 /**
  * KEA-9357 / KEA-9358 / KEA-9359 / KEA-9360 / KEA-9385 — the dashboard must know which
  * local-only features a remote session cannot use, from one source of truth:
- *   - the server tells the page up front (trusted peer-locality stamp + the real guard),
+ *   - the server tells the page up front (trusted LOCAL_ONLY verdict + the real guard),
  *   - the client recognises the guard's 403 body and remembers it for the session.
  */
 
@@ -14,32 +14,26 @@ import {
 } from "../../src/lib/config/runtimeSettings.ts";
 import { resolveDashboardLocalAccess } from "../../src/lib/security/dashboardLocalAccess.ts";
 import { isLocalOnlyPath } from "../../src/server/authz/routeGuard.ts";
-import { AUTHZ_HEADER_PEER_LOCALITY } from "../../src/server/authz/headers.ts";
+import { AUTHZ_HEADER_DASHBOARD_LOCAL_ACCESS } from "../../src/server/authz/headers.ts";
 import { LOCAL_ONLY_DASHBOARD_PATHS } from "../../src/shared/constants/localOnlyFeatures.ts";
 import {
   __resetLocalOnlyRejectionsForTests,
   detectLocalOnlyRejection,
+  getLocalOnlyRejections,
   isLocalOnlyErrorBody,
   isLocalOnlyPathBlocked,
   isLocalOnlyResponse,
   reportLocalOnlyRejection,
 } from "../../src/shared/utils/localOnlyAccess.ts";
 
-const ENV_KEYS = ["OMNIROUTE_PEER_STAMP_TOKEN", "OMNIROUTE_TRUST_PROXY"] as const;
-const savedEnv = Object.fromEntries(ENV_KEYS.map((key) => [key, process.env[key]]));
-
 afterEach(() => {
-  for (const key of ENV_KEYS) {
-    if (savedEnv[key] === undefined) delete process.env[key];
-    else process.env[key] = savedEnv[key];
-  }
   __resetLocalOnlyRejectionsForTests();
   resetRuntimeSettingsStateForTests();
 });
 
 /** The page request as a server component sees it: the pipeline already stamped the verdict. */
-function pageHeaders(locality: string): Headers {
-  return new Headers({ [AUTHZ_HEADER_PEER_LOCALITY]: locality, host: "example.test" });
+function pageHeaders(locality: "local" | "remote"): Headers {
+  return new Headers({ [AUTHZ_HEADER_DASHBOARD_LOCAL_ACCESS]: locality, host: "example.test" });
 }
 
 /** The exact body `rejectionResponse()` builds for the guard's LOCAL_ONLY verdict. */
@@ -58,9 +52,6 @@ function localOnlyResponse(): Response {
 
 describe("resolveDashboardLocalAccess (server)", () => {
   test("a remote session is told which dashboard features the guard rejects", () => {
-    process.env.OMNIROUTE_PEER_STAMP_TOKEN = "stamp-token";
-    delete process.env.OMNIROUTE_TRUST_PROXY;
-
     const access = resolveDashboardLocalAccess(pageHeaders("remote"));
 
     assert.equal(access.locality, "remote");
@@ -79,8 +70,6 @@ describe("resolveDashboardLocalAccess (server)", () => {
   });
 
   test("a path the guard serves remotely for GET is never reported as blocked", () => {
-    process.env.OMNIROUTE_PEER_STAMP_TOKEN = "stamp-token";
-
     const access = resolveDashboardLocalAccess(pageHeaders("remote"));
 
     // GET /api/services/cliproxy/status sits in LOCAL_ONLY_API_GET_EXEMPTIONS.
@@ -89,8 +78,6 @@ describe("resolveDashboardLocalAccess (server)", () => {
   });
 
   test("a path stops being reported when the manage-scope bypass opens it", async () => {
-    process.env.OMNIROUTE_PEER_STAMP_TOKEN = "stamp-token";
-    delete process.env.OMNIROUTE_TRUST_PROXY;
     const path = "/api/resilience/connections";
     const reported = () =>
       resolveDashboardLocalAccess(pageHeaders("remote")).remoteBlockedPaths.includes(path);
@@ -109,24 +96,11 @@ describe("resolveDashboardLocalAccess (server)", () => {
     assert.equal(reported(), false, `${path} must not be reported once the bypass lists it`);
   });
 
-  test("loopback and private-LAN sessions are local", () => {
-    process.env.OMNIROUTE_PEER_STAMP_TOKEN = "stamp-token";
-
-    assert.equal(resolveDashboardLocalAccess(pageHeaders("loopback")).locality, "local");
-    assert.equal(resolveDashboardLocalAccess(pageHeaders("lan")).locality, "local");
-  });
-
-  test("behind a trusted private proxy the stamp cannot tell LAN from remote: unknown", () => {
-    process.env.OMNIROUTE_PEER_STAMP_TOKEN = "stamp-token";
-    process.env.OMNIROUTE_TRUST_PROXY = "private";
-
-    assert.equal(resolveDashboardLocalAccess(pageHeaders("remote")).locality, "unknown");
+  test("a local verdict from the guard is read as local", () => {
+    assert.equal(resolveDashboardLocalAccess(pageHeaders("local")).locality, "local");
   });
 
   test("without the pipeline's stamp on the page request the answer is unknown, never remote", () => {
-    process.env.OMNIROUTE_PEER_STAMP_TOKEN = "stamp-token";
-    delete process.env.OMNIROUTE_TRUST_PROXY;
-
     // A local operator must not lose the feature because a header did not reach the page.
     const access = resolveDashboardLocalAccess(new Headers({ host: "example.test" }));
 
@@ -167,38 +141,50 @@ describe("isLocalOnlyPathBlocked (client)", () => {
 
   test("a remote session is blocked up front, before any request", () => {
     const access = { locality: "remote" as const, remoteBlockedPaths: blockedPaths };
-    assert.equal(isLocalOnlyPathBlocked(access, "/api/plugins"), true);
-    assert.equal(isLocalOnlyPathBlocked(access, "/api/services/cliproxy/status"), false);
+    assert.equal(isLocalOnlyPathBlocked(access, "/api/plugins", getLocalOnlyRejections()), true);
+    assert.equal(
+      isLocalOnlyPathBlocked(access, "/api/services/cliproxy/status", getLocalOnlyRejections()),
+      false
+    );
   });
 
   test("local and unknown sessions are not blocked up front", () => {
     for (const locality of ["local", "unknown"] as const) {
       const access = { locality, remoteBlockedPaths: blockedPaths };
-      assert.equal(isLocalOnlyPathBlocked(access, "/api/plugins"), false);
+      assert.equal(isLocalOnlyPathBlocked(access, "/api/plugins", getLocalOnlyRejections()), false);
     }
   });
 
   test("the first rejection blocks that path and every other registered path", async () => {
     const access = { locality: "unknown" as const, remoteBlockedPaths: blockedPaths };
 
+    const before = getLocalOnlyRejections();
     assert.equal(await detectLocalOnlyRejection(localOnlyResponse(), "/api/plugins"), true);
+    const after = getLocalOnlyRejections();
 
-    assert.equal(isLocalOnlyPathBlocked(access, "/api/plugins"), true);
-    assert.equal(isLocalOnlyPathBlocked(access, "/api/db/health"), true);
-    assert.equal(isLocalOnlyPathBlocked(access, "/api/services/cliproxy/status"), false);
+    assert.equal(isLocalOnlyPathBlocked(access, "/api/plugins", before), false);
+    assert.equal(isLocalOnlyPathBlocked(access, "/api/plugins", after), true);
+    assert.equal(isLocalOnlyPathBlocked(access, "/api/db/health", after), true);
+    assert.equal(isLocalOnlyPathBlocked(access, "/api/services/cliproxy/status", after), false);
+
+    reportLocalOnlyRejection("/api/plugins");
+    assert.equal(getLocalOnlyRejections(), after);
   });
 
   test("a rejected path is blocked even when the server list does not carry it", () => {
     const access = { locality: "unknown" as const, remoteBlockedPaths: [] };
     reportLocalOnlyRejection("/api/skills/executions");
-    assert.equal(isLocalOnlyPathBlocked(access, "/api/skills/executions"), true);
-    assert.equal(isLocalOnlyPathBlocked(access, "/api/plugins"), false);
+    assert.equal(
+      isLocalOnlyPathBlocked(access, "/api/skills/executions", getLocalOnlyRejections()),
+      true
+    );
+    assert.equal(isLocalOnlyPathBlocked(access, "/api/plugins", getLocalOnlyRejections()), false);
   });
 
   test("a response that is not a local-only rejection changes nothing", async () => {
     const access = { locality: "unknown" as const, remoteBlockedPaths: blockedPaths };
     const res = new Response("{}", { status: 500 });
     assert.equal(await detectLocalOnlyRejection(res, "/api/plugins"), false);
-    assert.equal(isLocalOnlyPathBlocked(access, "/api/plugins"), false);
+    assert.equal(isLocalOnlyPathBlocked(access, "/api/plugins", getLocalOnlyRejections()), false);
   });
 });

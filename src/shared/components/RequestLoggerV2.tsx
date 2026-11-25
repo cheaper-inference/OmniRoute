@@ -16,7 +16,7 @@ import {
 } from "react";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import {
   Table,
   TableBody,
@@ -41,7 +41,8 @@ import RequestLogThroughput from "./RequestLogThroughput";
 import { copyToClipboard } from "@/shared/utils/clipboard";
 import { PROVIDER_COLORS, getProtocolColor, neutralBadge } from "@/shared/constants/colors";
 import {
-  formatTime,
+  formatLogTimestamp,
+  formatLogTimestampTitle,
   formatDuration,
   maskAccount,
   stableAccountSuffix,
@@ -134,6 +135,7 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
     const t = useTranslations("requestLogger");
     const tEvidence = useTranslations("common.usageEvidence");
     const tCommon = useTranslations("common");
+    const locale = useLocale();
     const { emailsVisible } = useEmailPrivacyStore();
 
     // Get translated status filters
@@ -1687,8 +1689,11 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
                         </TableCell>
                       )}
                       {visibleColumns.time && (
-                        <TableCell className="px-3 py-2 text-right text-text-muted">
-                          {formatTime(log.timestamp)}
+                        <TableCell
+                          className="px-3 py-2 text-right text-text-muted"
+                          title={formatLogTimestampTitle(log.timestamp, locale)}
+                        >
+                          {formatLogTimestamp(log.timestamp, new Date(), locale)}
                         </TableCell>
                       )}
                       {visibleColumns.conversation && (

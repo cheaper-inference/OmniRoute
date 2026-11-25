@@ -37,7 +37,7 @@ function percentPool(share: SelfQuotaShare) {
   });
 }
 
-const shareBar = () => screen.queryByRole("progressbar", { name: "Your share" });
+const shareBar = () => screen.queryByRole("meter", { name: "Your share" });
 const segmentWidths = (bar: HTMLElement) =>
   [...bar.children].map((element) => (element as HTMLElement).style.width);
 
@@ -55,9 +55,9 @@ describe("percent share", () => {
         })}
       />
     );
-    expect(
-      screen.getByRole("progressbar", { name: "Your share" }).getAttribute("aria-valuenow")
-    ).toBe("70");
+    expect(screen.getByRole("meter", { name: "Your share" }).getAttribute("aria-valuenow")).toBe(
+      "70"
+    );
     expect(screen.getByText(ESTIMATE)).toBeTruthy();
     expect(
       screen.getByText(
@@ -134,9 +134,9 @@ describe("percent share", () => {
         })}
       />
     );
-    expect(
-      screen.getByRole("progressbar", { name: "Your share" }).getAttribute("aria-valuenow")
-    ).toBe("40");
+    expect(screen.getByRole("meter", { name: "Your share" }).getAttribute("aria-valuenow")).toBe(
+      "40"
+    );
     expect(screen.getByText("May be out of date")).toBeTruthy();
     expect(screen.getByText(ESTIMATE)).toBeTruthy();
     expect(
