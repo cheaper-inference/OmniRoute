@@ -1,4 +1,8 @@
 import { SignJWT, importPKCS8 } from "jose";
+import {
+  isGeminiTrailingModelTurnRejectingModel,
+  stripTrailingGeminiModelTurns,
+} from "../translator/helpers/geminiTrailingModelTurn.ts";
 import { BaseExecutor, ExecuteInput } from "./base.ts";
 import { PROVIDERS } from "../config/constants.ts";
 import {
@@ -471,6 +475,16 @@ export class VertexExecutor extends BaseExecutor {
       // one (the openai→claude request translator copies the client's model field over).
       delete body.model;
       downgradeUnsupportedVertexClaudeTtl(body, model);
+    }
+    if (
+      isGeminiTrailingModelTurnRejectingModel(model) &&
+      input.body &&
+      typeof input.body === "object"
+    ) {
+      const bodyRecord = input.body as Record<string, unknown>;
+      if (Array.isArray(bodyRecord.contents)) {
+        stripTrailingGeminiModelTurns(bodyRecord.contents);
+      }
     }
 
     const result = await super.execute(input);
