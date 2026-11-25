@@ -2,7 +2,48 @@
   "version": 1,
   "base": "release/v3.8.55",
   "paused": null,
-  "inFlight": null,
+  "inFlight": {
+    "batchId": "b39",
+    "kind": "batch",
+    "candidateRef": "omni-queue/release-v3.8.55/b39-6534fbfae0fe",
+    "candidateSha": "6534fbfae0fef60c0c62af1e8091294f29d00e3d",
+    "baseSha": "b4ff3daa62a5a707c4ca92ad17052898ee7b5db1",
+    "treeSha": "ab950cd7488dc023354481c3123cd08418185325",
+    "prs": [
+      {
+        "n": 20991,
+        "head": "bd3195a975d0bd3c786595f0b51cc8c2961717af",
+        "title": "test(usage): stabilize the modal ledger quota window fixture",
+        "author": "KiaroSama",
+        "labeledAt": "2026-11-25T13:27:07Z"
+      },
+      {
+        "n": 21192,
+        "head": "2d55d78dc1574c778bb5fe93761334ca76e3af20",
+        "title": "chore: merge train for the 2026-11-24 dashboard QA fixes (6 PRs)",
+        "author": "diegosouzapw",
+        "labeledAt": "2026-11-25T13:27:07Z"
+      },
+      {
+        "n": 21175,
+        "head": "b1fdbded0caa6826a6ac5805418c5785f659b31d",
+        "title": "fix(dashboard): connect the live socket on the same origin behind a proxy (KEA-9514)",
+        "author": "diegosouzapw",
+        "labeledAt": "2026-11-25T13:27:11Z"
+      },
+      {
+        "n": 20421,
+        "head": "2f3fa84a367d73ff45dd37f5a085f34fde56639a",
+        "title": "docs(readme): rebuild README from the approved round-2 section designs",
+        "author": "diegosouzapw",
+        "labeledAt": "2026-11-25T13:34:37Z"
+      }
+    ],
+    "stage": "testing",
+    "startedAt": "2026-11-25T13:38:29.360Z",
+    "attempts": 0,
+    "bisect": null
+  },
   "baseChecks": [
     {
       "baseSha": "ae94881fcf543d1ee91d6af11f18b274280e0c53",
@@ -104,8 +145,8 @@
     }
   },
   "counters": {
-    "batchSeq": 38,
-    "ciRuns": 43,
+    "batchSeq": 39,
+    "ciRuns": 44,
     "landedPrs": 0,
     "landedBatches": 0,
     "redBatches": 10,
@@ -2487,8 +2528,28 @@
       "sha": "a3f02f39d8741d851cf85f91975f9fba6f26fd49",
       "detail": "batch changed before landing: #21168 queue label removed; #21169 queue label removed; #21172 queue label removed; #21174 queue label removed",
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45619671982"
+    },
+    {
+      "at": "2026-11-25T13:38:33.868Z",
+      "type": "batch-started",
+      "batchId": "b39",
+      "prs": [
+        20991,
+        21192,
+        21175,
+        20421
+      ],
+      "sha": "6534fbfae0fef60c0c62af1e8091294f29d00e3d",
+      "detail": "4 PR(s) on b4ff3daa62a5; window 5",
+      "labeledAt": {
+        "20421": "2026-11-25T13:34:37Z",
+        "20991": "2026-11-25T13:27:07Z",
+        "21175": "2026-11-25T13:27:11Z",
+        "21192": "2026-11-25T13:27:07Z"
+      },
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45625506082"
     }
   ],
-  "updatedAt": "2026-11-25T13:03:41.023Z",
+  "updatedAt": "2026-11-25T13:38:35.657Z",
   "batchWindow": 5
 }
