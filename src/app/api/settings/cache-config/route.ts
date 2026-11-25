@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
+  clearPersistedCacheSetting,
   getPersistedCacheSetting,
   getUserDatabaseSettings,
   updateDatabaseSettings,
@@ -98,7 +99,7 @@ export async function GET(request: NextRequest) {
 
   try {
     const dbSettings = getUserDatabaseSettings();
-    const cache = dbSettings.cache ?? {};
+    const cache: UserDatabaseSettings["cache"] = dbSettings.cache;
     // idempotencyWindowMs is not part of the databaseSettings "cache" section —
     // it lives in the flat general settings (src/lib/db/settings.ts), which is
     // where src/lib/idempotencyLayer.ts actually reads it from.
@@ -132,7 +133,7 @@ export async function GET(request: NextRequest) {
     config.semanticCacheEmbeddingDimensionSource =
       effectiveDimension.source === "env"
         ? "env"
-        : persistedDimension !== undefined
+        : effectiveDimension.source === "db" && typeof persistedDimension === "number"
           ? "db"
           : "default";
     config.semanticCacheEmbeddingDimensionConfigured =
@@ -199,8 +200,9 @@ export async function PUT(request: NextRequest) {
     if (body.semanticCacheEmbeddingModel !== undefined) {
       updates.semanticCacheEmbeddingModel = body.semanticCacheEmbeddingModel;
     }
-    if (body.semanticCacheEmbeddingDimension !== undefined) {
-      updates.semanticCacheEmbeddingDimension = body.semanticCacheEmbeddingDimension ?? undefined;
+    const clearEmbeddingDimension = body.semanticCacheEmbeddingDimension === null;
+    if (body.semanticCacheEmbeddingDimension !== undefined && !clearEmbeddingDimension) {
+      updates.semanticCacheEmbeddingDimension = body.semanticCacheEmbeddingDimension;
     }
     if (body.semanticCacheEmbeddingBaseUrl !== undefined) {
       updates.semanticCacheEmbeddingBaseUrl = body.semanticCacheEmbeddingBaseUrl ?? undefined;
@@ -230,7 +232,7 @@ export async function PUT(request: NextRequest) {
     // updateDatabaseSettings() calls invalidateDbCache("settings") internally,
     // which bumps the model-catalog cache version so in-flight responses pick
     // up the fresh TTL — no separate version bump needed here.
-    if (Object.keys(updates).length > 0) {
+    if (Object.keys(updates).length > 0 || clearEmbeddingDimension) {
       // Snapshot the state BEFORE the write and wait for it. A failed routine snapshot is logged
       // and does not block the write.
       await backupDbFileAwaited("pre-write").catch((error: unknown) => {
@@ -239,7 +241,12 @@ export async function PUT(request: NextRequest) {
           error instanceof Error ? error.message : error
         );
       });
-      updateDatabaseSettings({ cache: updates });
+      if (Object.keys(updates).length > 0) {
+        updateDatabaseSettings({ cache: updates });
+      }
+      if (clearEmbeddingDimension) {
+        clearPersistedCacheSetting("semanticCacheEmbeddingDimension");
+      }
       // Drop the in-memory semantic cache manager so the next request rebuilds it
       // from the freshly-persisted databaseSettings (dual-layer cache work).
       resetSemanticCacheManager();

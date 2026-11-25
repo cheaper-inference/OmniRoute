@@ -483,20 +483,50 @@ export function getPersistedCacheSetting<K extends keyof UserDatabaseSettings["c
   const aliases = (LEGACY_FLAT_KEYS.cache as Partial<Record<string, string[]>>)[String(key)] ?? [];
 
   for (const name of [`cache.${String(key)}`, ...aliases]) {
-    if (rows[name] !== undefined) return rows[name] as UserDatabaseSettings["cache"][K];
+    if (rows[name] !== undefined && rows[name] !== null) {
+      return rows[name] as UserDatabaseSettings["cache"][K];
+    }
   }
 
   const flatCache = mainSettings.cache;
-  if (isRecord(flatCache) && flatCache[String(key)] !== undefined) {
+  if (
+    isRecord(flatCache) &&
+    flatCache[String(key)] !== undefined &&
+    flatCache[String(key)] !== null
+  ) {
     return flatCache[String(key)] as UserDatabaseSettings["cache"][K];
   }
 
   const nestedCache = nestedSettings?.cache;
-  if (isRecord(nestedCache) && nestedCache[String(key)] !== undefined) {
+  if (
+    isRecord(nestedCache) &&
+    nestedCache[String(key)] !== undefined &&
+    nestedCache[String(key)] !== null
+  ) {
     return nestedCache[String(key)] as UserDatabaseSettings["cache"][K];
   }
 
   return undefined;
+}
+
+/**
+ * Deletes a persisted cache setting (and any legacy flat aliases) so the runtime falls back to
+ * defaults instead of retaining a previously saved number.
+ */
+export function clearPersistedCacheSetting<K extends keyof UserDatabaseSettings["cache"]>(
+  key: K
+): void {
+  const db = getDbInstance();
+  const aliases = (LEGACY_FLAT_KEYS.cache as Partial<Record<string, string[]>>)[String(key)] ?? [];
+  const del = db.prepare("DELETE FROM key_value WHERE namespace = ? AND key = ?");
+  const tx = db.transaction(() => {
+    for (const name of [`cache.${String(key)}`, ...aliases]) {
+      del.run(DATABASE_SETTINGS_NAMESPACE, name);
+    }
+  });
+  tx();
+  clearSemanticCacheFlagCache();
+  invalidateDbCache("settings");
 }
 
 export function isSemanticCacheDbEnabled(): boolean {

@@ -189,6 +189,24 @@ test("cache-config reports the effective dimension and its source", async (t) =>
     );
   });
 
+  await t.test("PUT null clears the persisted dimension back to default", async () => {
+    await cacheConfigRoute.PUT(
+      makeJsonRequest("PUT", { semanticCacheEmbeddingDimension: 768 }) as never
+    );
+    assert.equal(getPersistedCacheSetting("semanticCacheEmbeddingDimension"), 768);
+
+    const clearResponse = await cacheConfigRoute.PUT(
+      makeJsonRequest("PUT", { semanticCacheEmbeddingDimension: null }) as never
+    );
+    assert.equal(clearResponse.status, 200);
+    assert.equal(getPersistedCacheSetting("semanticCacheEmbeddingDimension"), undefined);
+
+    const response = await cacheConfigRoute.GET(makeJsonRequest("GET") as never);
+    const body = await response.json();
+    assert.equal(body.semanticCacheEmbeddingDimensionSource, "default");
+    assert.equal(body.semanticCacheEmbeddingDimensionConfigured, null);
+  });
+
   await t.test("PUT rejects dimensions that cannot be a vector length", async () => {
     for (const invalid of [512.5, 0, -7, 65_537]) {
       const response = await cacheConfigRoute.PUT(

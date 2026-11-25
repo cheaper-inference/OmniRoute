@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useFormatter, useTranslations } from "next-intl";
 import { Slider } from "@omniroute/ui-kit/slider";
 import {
@@ -97,6 +97,7 @@ export default function CacheSettingsTab() {
   // True once the operator typed a dimension: a catalog model without `dimensions` metadata
   // must not silently overwrite that choice.
   const [dimensionUserSet, setDimensionUserSet] = useState(false);
+  const dimensionUserSetRef = useRef(false);
   const [detectedDimension, setDetectedDimension] = useState<number | null>(null);
   const [semBaseUrl, setSemBaseUrl] = useState("");
   const [semApiKey, setSemApiKey] = useState("");
@@ -272,9 +273,10 @@ export default function CacheSettingsTab() {
     const m = availableModelsForProvider.find(
       (item) => item.rawId === modelIdOrRaw || item.id === modelIdOrRaw
     );
-    if (m?.dimensions) {
+    if (m?.dimensions && semDimensionSource !== "env") {
       setSemDimension(m.dimensions);
       setDimensionUserSet(false);
+      dimensionUserSetRef.current = false;
       setDetectedDimension(null);
     }
     setTestResult(null);
@@ -286,9 +288,10 @@ export default function CacheSettingsTab() {
     if (provider && provider.models.length > 0) {
       const firstModel = provider.models[0];
       setSemModel(firstModel.rawId || firstModel.id);
-      if (firstModel.dimensions) {
+      if (firstModel.dimensions && semDimensionSource !== "env") {
         setSemDimension(firstModel.dimensions);
         setDimensionUserSet(false);
+        dimensionUserSetRef.current = false;
         setDetectedDimension(null);
       }
     }
@@ -337,7 +340,9 @@ export default function CacheSettingsTab() {
 
       if (!res.ok) throw new Error(`Save failed with status ${res.status}`);
 
-      if (semDimensionSource !== "env") setSemDimensionSource("db");
+      if (semDimensionSource !== "env") {
+        setSemDimensionSource(semDimension ? "db" : "default");
+      }
       setSemMessage({ type: "success", text: t("semanticCacheSaveSuccess") });
     } catch (err) {
       console.error("Failed to save semantic cache settings:", err);
@@ -379,7 +384,7 @@ export default function CacheSettingsTab() {
         }
         // Offer the probe result when the operator has not pinned a dimension and the
         // environment does not override the stored value anyway.
-        if (!dimensionUserSet && semDimensionSource !== "env") {
+        if (!dimensionUserSetRef.current && semDimensionSource !== "env") {
           setSemDimension(data.dimensions);
         }
       }
@@ -542,6 +547,7 @@ export default function CacheSettingsTab() {
                       onValueChange={(value) => {
                         setSemDimension(value ?? undefined);
                         setDimensionUserSet(true);
+                        dimensionUserSetRef.current = true;
                         setDetectedDimension(null);
                       }}
                       inputClassName="w-32"
@@ -758,16 +764,25 @@ export default function CacheSettingsTab() {
               )}
 
               {/* Mismatch Guard — surfaced, never enforced: the configured value is kept. */}
-              {testResult?.ok &&
-                testResult.dimensionMismatch &&
-                (dimensionUserSet || semDimensionSource === "env") && (
+              {(() => {
+                const effectiveConfigured = semDimension ?? testResult?.configuredDimensions;
+                const hasMismatch =
+                  testResult?.ok &&
+                  typeof testResult.dimensions === "number" &&
+                  typeof effectiveConfigured === "number" &&
+                  testResult.dimensions !== effectiveConfigured;
+                if (!hasMismatch || !(dimensionUserSet || semDimensionSource === "env")) {
+                  return null;
+                }
+                return (
                   <p className="text-xs text-warning">
                     {t("semanticCacheDimensionMismatch", {
                       detected: testResult.dimensions ?? 0,
-                      configured: testResult.configuredDimensions ?? 0,
+                      configured: effectiveConfigured,
                     })}
                   </p>
-                )}
+                );
+              })()}
 
               {/* Clear Message */}
               {clearMessage && <p className="text-xs text-text-muted italic">{clearMessage}</p>}
