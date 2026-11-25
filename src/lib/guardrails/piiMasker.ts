@@ -16,7 +16,7 @@ type JsonRecord = Record<string, unknown>;
 /** Reversible-vault minter; only set when the request runs under the vault scope. */
 type Tokenize = (type: string, value: string) => string | null;
 
-function isRequestPiiMaskingEnabled() {
+export function isRequestPiiMaskingEnabled() {
   // Request PII redaction is controlled by PII_REDACTION_ENABLED feature flag (DB > env > default).
   // INPUT_SANITIZER_MODE only governs prompt-injection policy (warn/block/log).
   return isFeatureFlagEnabled("PII_REDACTION_ENABLED");

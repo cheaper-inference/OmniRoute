@@ -1,6 +1,12 @@
 import type { TosVerdict } from "./freeTierCatalog.ts";
 export { FREE_MODEL_BUDGETS } from "./freeModelCatalog.data.ts";
-import { FREE_MODEL_BUDGETS } from "./freeModelCatalog.data.ts";
+import { FREE_CATALOG_CURATED_AT, FREE_MODEL_BUDGETS } from "./freeModelCatalog.data.ts";
+import { RETIRED_FREE_ROWS, type RetiredFreeRow } from "./freeModelCatalog.retired.data.ts";
+export {
+  RETIRED_FREE_ROWS,
+  RETIRED_LEDGER_SINCE,
+  type RetiredFreeRow,
+} from "./freeModelCatalog.retired.data.ts";
 
 export type FreeModelFreeType =
   | "recurring-daily"
@@ -17,6 +23,43 @@ export type FreeModelFreeType =
  * union when a second kind of gate is catalogued.
  */
 export type FreeEligibilityGate = "regional-identity";
+
+/**
+ * What a user must do or have before a free row opens. Affects COUNTING only, like
+ * `eligibilityGate`: routing, `isFreeModel` and STRICT_ZERO_COST read `freeType` alone.
+ * - card, deposit, kyc, region, invite, waitlist: identity or payment — the row leaves the real
+ *   figure and lands in `gatedRecurringTokens`. A one-time deposit that raises a quota is a
+ *   `FREE_TIER_BOOSTS` entry, never a `deposit` gate on a catalog row.
+ * - phone, telegram, discord: social — the row leaves the real figure and lands in
+ *   `socialGatedRecurringTokens`.
+ * - new-accounts-only: informational; the row stays in the real figure.
+ */
+export type FreeGate =
+  | "card"
+  | "deposit"
+  | "kyc"
+  | "phone"
+  | "telegram"
+  | "discord"
+  | "region"
+  | "invite"
+  | "waitlist"
+  | "new-accounts-only";
+
+export const IDENTITY_OR_PAYMENT_GATES: ReadonlySet<FreeGate> = new Set<FreeGate>([
+  "card",
+  "deposit",
+  "kyc",
+  "region",
+  "invite",
+  "waitlist",
+]);
+
+export const SOCIAL_GATES: ReadonlySet<FreeGate> = new Set<FreeGate>([
+  "phone",
+  "telegram",
+  "discord",
+]);
 
 export interface FreeModelBudget {
   provider: string;
@@ -55,6 +98,23 @@ export interface FreeModelBudget {
    * Put the gate's source in a comment next to the entry.
    */
   eligibilityGate?: FreeEligibilityGate;
+  /**
+   * Gates in front of this row (see `FreeGate`). Affects COUNTING only. Put the source of
+   * each gate in a comment next to the entry.
+   */
+  gates?: FreeGate[];
+}
+
+/** True when the row sits behind an identity or payment gate (legacy `eligibilityGate` included). */
+export function isCountingGated(m: Pick<FreeModelBudget, "eligibilityGate" | "gates">): boolean {
+  if (m.eligibilityGate !== undefined) return true;
+  return (m.gates ?? []).some((g) => IDENTITY_OR_PAYMENT_GATES.has(g));
+}
+
+/** True when the row sits behind a social gate only (an identity/payment gate wins). */
+export function isSocialGated(m: Pick<FreeModelBudget, "eligibilityGate" | "gates">): boolean {
+  if (isCountingGated(m)) return false;
+  return (m.gates ?? []).some((g) => SOCIAL_GATES.has(g));
 }
 
 export interface FreeModelTotals {
@@ -90,6 +150,11 @@ export interface FreeModelTotals {
   gatedRecurringTokens: number;
   /** Providers (sorted) contributing to `gatedRecurringTokens`. */
   gatedProviders: string[];
+  /**
+   * Pool-deduped tokens/month behind a social gate (phone, Telegram, Discord), plus the
+   * socially-gated boosts whose pool is live. Never summed into `steadyRecurringTokens`.
+   */
+  socialGatedRecurringTokens: number;
   modelCount: number;
   poolCount: number;
   perModel: FreeModelBudget[];
@@ -203,7 +268,13 @@ const UNCAPPED = freeTypesInBucket("uncapped");
  */
 export const FREE_TIER_BOOSTS: Record<
   string,
-  { provider: string; boostMonthlyTokens: number; note: string }
+  {
+    provider: string;
+    boostMonthlyTokens: number;
+    note: string;
+    /** What unlocks the boost. Absent = "deposit" (summed in `boostMonthlyTokens`). */
+    gate?: "deposit" | "telegram" | "discord" | "phone";
+  }
 > = {
   "openrouter-free": {
     provider: "openrouter",
@@ -253,12 +324,15 @@ export function computeFreeModelTotals(
     (m) => !(opts.excludeTosAvoid && m.tos === "avoid") && m.enabled !== false
   );
 
-  const isGated = (m: FreeModelBudget) => m.eligibilityGate !== undefined;
+  // Identity/payment gates move a row to `gatedRecurringTokens`; social gates to
+  // `socialGatedRecurringTokens`. Either way the row leaves every public figure.
+  const isGated = (m: FreeModelBudget) => isCountingGated(m);
+  const isOut = (m: FreeModelBudget) => isCountingGated(m) || isSocialGated(m);
 
   const steadyRecurringTokens = dedupedSum(
     models,
     (m) => m.monthlyTokens,
-    (m) => STEADY_MONTHLY.has(m.freeType) && !isGated(m)
+    (m) => STEADY_MONTHLY.has(m.freeType) && !isOut(m)
   );
   const gatedRecurringTokens = dedupedSum(
     models,
@@ -273,40 +347,46 @@ export function computeFreeModelTotals(
   const recurringCredits = dedupedSum(
     models,
     (m) => m.creditTokens,
-    (m) => RECURRING_CREDIT.has(m.freeType) && !isGated(m)
+    (m) => RECURRING_CREDIT.has(m.freeType) && !isOut(m)
   );
   const oneTimeCredits = dedupedSum(
     models,
     (m) => m.creditTokens,
-    (m) => ONE_TIME_CREDIT.has(m.freeType) && !isGated(m)
+    (m) => ONE_TIME_CREDIT.has(m.freeType) && !isOut(m)
   );
 
   const steadyWithRecurringCreditsTokens = steadyRecurringTokens + recurringCredits;
   const firstMonthRealisticTokens = steadyWithRecurringCreditsTokens + oneTimeCredits;
 
-  const poolCount = new Set(
-    models
-      .filter((m) => STEADY_MONTHLY.has(m.freeType) && m.poolKey && !isGated(m))
-      .map((m) => m.poolKey)
-  ).size;
-
-  // Deposit-unlock boost: sum the FREE_TIER_BOOSTS whose pool still has a live
-  // recurring model in the (optionally ToS-filtered) set.
+  // Live pools: a recurring pool anyone can open without a gate. Boosts attach to them.
   const livePools = new Set(
     models
-      .filter((m) => STEADY_MONTHLY.has(m.freeType) && m.poolKey && !isGated(m))
+      .filter((m) => STEADY_MONTHLY.has(m.freeType) && m.poolKey && !isOut(m))
       .map((m) => m.poolKey)
   );
-  const boostMonthlyTokens = Object.entries(FREE_TIER_BOOSTS)
-    .filter(([pool]) => livePools.has(pool))
+  const poolCount = livePools.size;
+
+  // Deposit-unlock boost: sum the deposit boosts whose pool still has a live recurring model
+  // in the (optionally ToS-filtered) set. A boost behind a social gate is never a deposit boost.
+  const liveBoosts = Object.entries(FREE_TIER_BOOSTS).filter(([pool]) => livePools.has(pool));
+  const boostMonthlyTokens = liveBoosts
+    .filter(([, b]) => (b.gate ?? "deposit") === "deposit")
     .reduce((s, [, b]) => s + b.boostMonthlyTokens, 0);
+
+  const socialGatedRecurringTokens =
+    dedupedSum(
+      models,
+      (m) => m.monthlyTokens,
+      (m) => STEADY_MONTHLY.has(m.freeType) && isSocialGated(m)
+    ) +
+    liveBoosts
+      .filter(([, b]) => (b.gate ?? "deposit") !== "deposit")
+      .reduce((s, [, b]) => s + b.boostMonthlyTokens, 0);
 
   // Permanently-free-but-uncapped providers (real access, no published cap).
   // Gated rows are excluded: the list is read as "anyone can use this, forever".
   const uncappedProviders = [
-    ...new Set(
-      models.filter((m) => UNCAPPED.has(m.freeType) && !isGated(m)).map((m) => m.provider)
-    ),
+    ...new Set(models.filter((m) => UNCAPPED.has(m.freeType) && !isOut(m)).map((m) => m.provider)),
   ].sort();
 
   return {
@@ -317,9 +397,178 @@ export function computeFreeModelTotals(
     uncappedProviders,
     gatedRecurringTokens,
     gatedProviders,
+    socialGatedRecurringTokens,
     modelCount: models.length,
     poolCount,
     perModel: models.slice().sort((a, b) => b.monthlyTokens - a.monthlyTokens),
     headline: `~${fmt(steadyRecurringTokens)} documented free tokens/month (steady), up to ~${fmt(firstMonthRealisticTokens)} in your first month with signup credits`,
+  };
+}
+
+/**
+ * The public "real" free-token figure: the same catalog read without ToS-`avoid` rows. Every
+ * public surface prints this, never `computeFreeModelTotals()` with defaults.
+ */
+export function computePublicFreeHeadline(
+  opts: { entries?: Array<FreeModelBudget & { enabled?: boolean }> } = {}
+): FreeModelTotals {
+  return computeFreeModelTotals({ excludeTosAvoid: true, entries: opts.entries });
+}
+
+/**
+ * The single public token formatter: whole millions below 1B (`~93M`), billions with one
+ * decimal from there (`~11.4B`). Negative or non-finite input is a caller bug.
+ */
+export function formatTokenHeadline(tokens: number): string {
+  if (!Number.isFinite(tokens) || tokens < 0) {
+    throw new RangeError(
+      `formatTokenHeadline: expected a non-negative finite number, got ${tokens}`
+    );
+  }
+  const millions = Math.round(tokens / 1e6);
+  if (millions < 1000) return `~${millions}M`;
+  return `~${(tokens / 1e9).toFixed(1)}B`;
+}
+
+/** Unit a provider publishes its free quota in. */
+export type FreeQuotaUnit = "tokens" | "requests" | "credits" | "neurons";
+
+/**
+ * Unit the provider publishes its free quota in. Every provider with a positive row in the
+ * catalog or the retired ledger must be listed; there is no default. Only `tokens` is summed
+ * by the row-sum reading; the other units count as zero there.
+ */
+export const FREE_QUOTA_UNIT: Record<string, FreeQuotaUnit> = {
+  xkiro: "tokens",
+  mistral: "tokens",
+  nara: "tokens",
+  llm7: "tokens",
+  groq: "tokens",
+  navy: "tokens",
+  sambanova: "tokens",
+  "cloudflare-ai": "neurons",
+  "api-airforce": "requests",
+  bluesminds: "requests",
+  "arcee-ai": "requests",
+  bazaarlink: "requests",
+  cohere: "requests",
+  openrouter: "requests",
+  morph: "requests",
+  modelscope: "requests",
+  huggingchat: "credits",
+  huggingface: "credits",
+  kiro: "credits",
+};
+
+/** Per-pool override of `FREE_QUOTA_UNIT`, for a pool published in a different unit. */
+export const FREE_QUOTA_UNIT_BY_POOL: Record<string, FreeQuotaUnit> = {};
+
+/** Pool override first, then the provider; `undefined` when nobody recorded a unit. */
+export function resolveFreeQuotaUnit(row: {
+  provider: string;
+  poolKey: string | null;
+}): FreeQuotaUnit | undefined {
+  if (row.poolKey && Object.hasOwn(FREE_QUOTA_UNIT_BY_POOL, row.poolKey)) {
+    return FREE_QUOTA_UNIT_BY_POOL[row.poolKey];
+  }
+  return Object.hasOwn(FREE_QUOTA_UNIT, row.provider) ? FREE_QUOTA_UNIT[row.provider] : undefined;
+}
+
+/** The row-sum reading of the catalog (method `row-sum-v1`). */
+export interface RowSumMirror {
+  method: "row-sum-v1";
+  liveTokens: number;
+  retiredTokens: number;
+  totalTokens: number;
+  realSteadyTokens: number;
+  retiredShare: number;
+  byProvider: Array<{ provider: string; liveRows: number; retiredRows: number; tokens: number }>;
+}
+
+const isoDate = (d: Date): string => d.toISOString().slice(0, 10);
+
+/** Row-sum counts a quota only in tokens, unless asked to count the other units too. */
+function unitCounter(countNonTokenUnits: boolean) {
+  return (r: { provider: string; poolKey: string | null }): boolean => {
+    const unit = resolveFreeQuotaUnit(r);
+    return unit === "tokens" || (countNonTokenUnits && unit !== undefined);
+  };
+}
+
+/** A live row that grants recurring free access with a positive monthly quota. */
+function isLiveRecurringQuotaRow(m: FreeModelBudget & { enabled?: boolean }): boolean {
+  return (
+    m.enabled !== false &&
+    grantsFreeAccess(m.freeType) &&
+    STEADY_MONTHLY.has(m.freeType) &&
+    m.monthlyTokens > 0
+  );
+}
+
+/** True for a retirement date inside the 12 calendar months that end at `asOf` (UTC). */
+function retiredWindow(asOf: Date): (retiredAt: string) => boolean {
+  const upper = isoDate(asOf);
+  const floorDate = new Date(asOf.getTime());
+  floorDate.setUTCFullYear(floorDate.getUTCFullYear() - 1);
+  const lower = isoDate(floorDate);
+  return (retiredAt) => retiredAt > lower && retiredAt <= upper;
+}
+
+/**
+ * Sums the monthly quota of every live row that grants recurring free access, with or without
+ * gates and whatever its ToS verdict, WITHOUT pool dedup — the way catalogs that add every row
+ * up count. Rows published in requests, credits or neurons count 0 unless `countNonTokenUnits`;
+ * signup credits, boosts and `enabled: false` rows never count. Retired ledger rows count their
+ * last listed quota for 12 calendar months after `retiredAt`. Never feeds routing or the real
+ * figure; it is printed next to the real figure, labelled.
+ */
+export function computeRowSumMirror(
+  opts: {
+    entries?: Array<FreeModelBudget & { enabled?: boolean }>;
+    retired?: RetiredFreeRow[];
+    asOf?: Date;
+    countNonTokenUnits?: boolean;
+  } = {}
+): RowSumMirror {
+  const entries: ReadonlyArray<FreeModelBudget & { enabled?: boolean }> =
+    opts.entries ?? FREE_MODEL_BUDGETS;
+  const retired = opts.retired ?? RETIRED_FREE_ROWS;
+  const asOf = opts.asOf ?? new Date(`${FREE_CATALOG_CURATED_AT}T00:00:00Z`);
+  const counts = unitCounter(opts.countNonTokenUnits === true);
+
+  const byProvider = new Map<string, { liveRows: number; retiredRows: number; tokens: number }>();
+  const bump = (provider: string, field: "liveRows" | "retiredRows", tokens: number) => {
+    const cur = byProvider.get(provider) ?? { liveRows: 0, retiredRows: 0, tokens: 0 };
+    cur[field] += 1;
+    cur.tokens += tokens;
+    byProvider.set(provider, cur);
+  };
+
+  let liveTokens = 0;
+  for (const m of entries) {
+    if (!isLiveRecurringQuotaRow(m) || !counts(m)) continue;
+    liveTokens += m.monthlyTokens;
+    bump(m.provider, "liveRows", m.monthlyTokens);
+  }
+
+  const inWindow = retiredWindow(asOf);
+  let retiredTokens = 0;
+  for (const r of retired) {
+    if (!inWindow(r.retiredAt) || !(r.lastListedMonthlyTokens > 0) || !counts(r)) continue;
+    retiredTokens += r.lastListedMonthlyTokens;
+    bump(r.provider, "retiredRows", r.lastListedMonthlyTokens);
+  }
+
+  const totalTokens = liveTokens + retiredTokens;
+  return {
+    method: "row-sum-v1",
+    liveTokens,
+    retiredTokens,
+    totalTokens,
+    realSteadyTokens: computePublicFreeHeadline({ entries: opts.entries }).steadyRecurringTokens,
+    retiredShare: totalTokens === 0 ? 0 : retiredTokens / totalTokens,
+    byProvider: [...byProvider.entries()]
+      .map(([provider, v]) => ({ provider, ...v }))
+      .sort((a, b) => b.tokens - a.tokens || a.provider.localeCompare(b.provider)),
   };
 }

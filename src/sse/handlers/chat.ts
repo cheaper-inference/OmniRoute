@@ -106,6 +106,7 @@ import {
   evictSessionAccountAffinityForConnectionAsync as evictSessionAccountAffinityForConnection,
 } from "@/lib/db/sessionAccountAffinity";
 import { dispatchChatWithAffinityEviction } from "./chatDispatch";
+import { expandChatPromptTemplates } from "@/lib/promptTemplateExpand";
 import { getCachedSettings, getCombosCacheVersion } from "@/lib/db/readCache";
 import { isManagedComboUnsupported } from "./chat/managedComboSupport.ts";
 import * as muse from "./chat/museOwnership.ts";
@@ -174,6 +175,10 @@ import {
   isNoReplayResponse,
   markCustomJsonNoReplay,
 } from "./chat/responsePolicies.ts";
+import {
+  isCustomOpenAICompatibleProvider,
+  markAmbiguousCustomNodeFailure,
+} from "./chat/customNodeReplayPolicy.ts";
 import { resolveProviderId } from "@/shared/constants/providers";
 import {
   extractReasoningIntent,
@@ -200,6 +205,7 @@ import { classify429FromError, type FailureKind } from "@/shared/utils/classify4
 import { isSubscriptionQuotaText } from "@omniroute/open-sse/services/quotaTextCooldowns.ts";
 import { resolveUseUpstream429BreakerHints } from "@/shared/utils/providerHints";
 import { isFeatureFlagEnabled, isRotationAttributionEnabled } from "@/shared/utils/featureFlags";
+import * as reEgress from "../services/sameAccountEgressRetry";
 import * as agyLease from "../services/antigravityLeaseLifecycle";
 import { shouldIsolateProbeFailures } from "@/shared/utils/probeOrigin";
 import { getCircuitBreaker, isLocalStreamLifecycleError } from "../../shared/utils/circuitBreaker";
@@ -539,6 +545,11 @@ async function handleChatImplementation(
       }
     );
   }
+
+  // Opt-in prompt templates (OMNIROUTE_PROMPT_TEMPLATES=1): expand `template://slug` messages.
+  const templated = expandChatPromptTemplates(body);
+  if (templated instanceof Response) return templated;
+  body = templated;
 
   // Reject non-string `model` before it reaches downstream code that calls
   // `.toLowerCase()` / `.split()` / `.startsWith()` on it (crash-then-500 with an
@@ -1792,6 +1803,9 @@ async function handleSingleModelChat(
     if (modelStr.startsWith(runtimeOptions.providerId + "/")) return resolvedProvider;
     return runtimeOptions.providerId;
   })();
+  // Custom OpenAI-compatible node: a POST with an ambiguous outcome is never replayed
+  // (see chat/customNodeReplayPolicy.ts); definite rejections keep normal fallback.
+  const customProviderNoReplay = isCustomOpenAICompatibleProvider(provider);
   const resolvedModelGate = resolvedPolicy.createVisibleResolvedModelGate({
     apiKeyInfo,
     request,
@@ -1953,6 +1967,9 @@ async function handleSingleModelChat(
   let accountFallbacks = 0;
   let selectedConnectionPlan: string | null = null;
   let sameAccountRetries = 0;
+  let egressRetries = 0; // PROXY_REEGRESS_ON_QUOTA_429 (see sameAccountEgressRetry.ts)
+  const egressTriedKeys = new Set<string>();
+  let pendingEgress: reEgress.PendingEgress | null = null;
   let routingWaitMs = 0;
   const accountFallbackReasons: string[] = [];
   let pendingFallback: { reason: string; previousConnectionId: string } | null = null;
@@ -2378,13 +2395,18 @@ async function handleSingleModelChat(
         );
       }
       let proxyInfo;
+      const preResolvedEgress = reEgress.takePendingEgress(pendingEgress, credentials.connectionId);
+      pendingEgress = null;
       try {
-        proxyInfo = await safeResolveProxy(
-          credentials.connectionId,
-          apiKeyInfo?.id,
-          provider,
-          comboName
-        ).catch(agyLease.releasingRethrow(leaseId));
+        proxyInfo = preResolvedEgress
+          ? preResolvedEgress.proxyInfo
+          : await safeResolveProxy(
+              credentials.connectionId,
+              apiKeyInfo?.id,
+              provider,
+              comboName,
+              runtimeOptions.sessionAffinityKey ?? null
+            ).catch(agyLease.releasingRethrow(leaseId));
       } catch (error) {
         releaseOAuthSession();
         throw error;
@@ -2410,6 +2432,7 @@ async function handleSingleModelChat(
           hasForcedConnection ||
           runtimeOptions.managedLease ||
           museOwner ||
+          customProviderNoReplay ||
           isCombo
           ? { ...preferredFailoverSettings, enabled: false }
           : preferredFailoverSettings
@@ -2451,6 +2474,7 @@ async function handleSingleModelChat(
             providerProfile,
             cachedSettings: runtimeOptions.cachedSettings,
             skipUpstreamRetry: runtimeOptions.skipUpstreamRetry ?? false,
+            nonReplayableRequest: customProviderNoReplay,
             correlationId: runtimeOptions?.correlationId ?? null,
             conversationId: runtimeOptions?.conversationId ?? null,
             modelPinned: runtimeOptions?.modelPinned ?? false,
@@ -2481,6 +2505,7 @@ async function handleSingleModelChat(
       }
       const { result, tlsFingerprintUsed, wasProviderProbe } = execution;
       markCustomJsonNoReplay(result.response, credentials?.providerSpecificData);
+      markAmbiguousCustomNodeFailure(provider, result);
       if (!result.success) releaseOAuthSession();
       if (result.success && agyLease.isStreamingAntigravityResponse(result.response))
         result.response = inheritProviderProbeResponse(
@@ -2887,6 +2912,29 @@ async function handleSingleModelChat(
         lastStatus = result.status;
         requestRetryLastError = result.error;
         requestRetryLastStatus = result.status;
+        continue;
+      }
+
+      // Per-IP 429 through a pool member: same account, untried member (sameAccountEgressRetry.ts).
+      const reEgressTo = await reEgress.nextReEgress({
+        status: result.status,
+        upstreamStatus: appliedProxySink.upstreamStatus,
+        provider,
+        proxyInfo,
+        appliedProxy: appliedProxySink.proxy,
+        quotaText: String(result.rawMessage ?? result.error ?? ""),
+        attempt: egressRetries,
+        aborted: requestSignal?.aborted === true,
+        triedKeys: egressTriedKeys,
+        resolveNext: () =>
+          safeResolveProxy(credentials.connectionId, apiKeyInfo?.id, provider, comboName),
+      });
+      if (reEgressTo) {
+        egressRetries += 1;
+        sameAccountRetries += 1;
+        log.info("PROXY", `${provider}/${model} per-IP 429, re-egress #${egressRetries}`);
+        pendingEgress = { connectionId: credentials.connectionId, proxyInfo: reEgressTo.proxyInfo };
+        preselectedCredentials = credentials;
         continue;
       }
 

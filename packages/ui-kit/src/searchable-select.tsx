@@ -4,6 +4,7 @@ import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { Check, ChevronDown, Search } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger, type PopoverAlign } from "./popover";
 import { Input } from "./input";
+import { foldSearchText } from "./lib/search-fold";
 import { cn } from "./lib/utils";
 
 export interface SearchableSelectOption {
@@ -18,6 +19,20 @@ export interface SearchableSelectOption {
   /** Compact secondary information beside a model ID. */
   metadata?: string;
   trailingLabel?: string;
+}
+
+/** Decides whether an option stays for a non-blank query. */
+export type SearchableSelectFilter = (query: string, option: SearchableSelectOption) => boolean;
+
+function matchesEveryWord(query: string, option: SearchableSelectOption) {
+  const text = foldSearchText(`${option.label} ${option.description ?? ""} ${option.keywords ?? ""} ${option.group ?? ""}`);
+  return foldSearchText(query).trim().split(/\s+/).every((word) => text.includes(word));
+}
+
+// Enter, Escape and the arrows belong to an input method while it composes. Key code 229 covers the
+// browsers that end the composition before they send the keydown that confirmed it.
+function fromInputMethod(event: { isComposing: boolean; keyCode: number }) {
+  return event.isComposing || event.keyCode === 229;
 }
 
 export interface SearchableSelectProps {
@@ -39,6 +54,11 @@ export interface SearchableSelectProps {
   optionLayout?: "default" | "model";
   /** Always available at the end of the results, including an empty search. */
   action?: { label: string; icon?: ReactNode; disabled?: boolean; onSelect: () => void };
+  /**
+   * Replaces the default filter, which keeps an option when every word of the query appears in its
+   * `label`, `description`, `keywords` or `group`, ignoring case and accents in any browser language.
+   */
+  filter?: SearchableSelectFilter;
 }
 
 /** Single selection with searchable labels, descriptions, and aliases. */
@@ -46,21 +66,18 @@ export function SearchableSelect({
   id, value, onValueChange, options, label = "Choose an option",
   placeholder = "Select…", searchPlaceholder = "Search options…",
   emptyMessage = "No matching options", disabled, className,
-  variant = "capsule", align = "start", optionLayout = "default", action,
+  variant = "capsule", align = "start", optionLayout = "default", action, filter = matchesEveryWord,
 }: SearchableSelectProps) {
   const listId = useId();
   const input = useRef<HTMLInputElement>(null);
   const actionSelected = useRef(false);
   const list = useRef<HTMLDivElement>(null);
+  const composing = useRef(false);
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [active, setActive] = useState(0);
   const selected = options.find((option) => option.value === value);
-  const terms = query.toLocaleLowerCase().trim().split(/\s+/);
-  const matches = options.filter((option) => {
-    const text = `${option.label} ${option.description ?? ""} ${option.keywords ?? ""} ${option.group ?? ""}`.toLocaleLowerCase();
-    return terms.every((term) => text.includes(term));
-  });
+  const matches = query.trim() === "" ? options : options.filter((option) => filter(query, option));
   const actionOption: SearchableSelectOption | undefined = action ? {
     value: `${listId}-action`, label: action.label, icon: action.icon, disabled: action.disabled,
   } : undefined;
@@ -83,6 +100,8 @@ export function SearchableSelect({
 
   function changeOpen(next: boolean) {
     setOpen(next);
+    // A composition cut short by closing never reports its end.
+    composing.current = false;
     if (next) {
       actionSelected.current = false;
       setQuery("");
@@ -144,6 +163,7 @@ export function SearchableSelect({
     </PopoverTrigger>
     <PopoverContent className={cn("ci-searchable-select__popover", `ci-searchable-select__popover--${variant}`, optionLayout === "model" && "ci-searchable-select__popover--model")} align={align}
       onCloseAutoFocus={(event) => { if (actionSelected.current) event.preventDefault(); }}
+      onEscapeKeyDown={(event) => { if (composing.current || fromInputMethod(event)) event.preventDefault(); }}
       onOpenAutoFocus={(event) => { event.preventDefault(); input.current?.focus(); }}>
       <div className="ci-searchable-select__search">
         <Input ref={input} type="search" name="option-query" autoComplete="off" autoCorrect="off"
@@ -152,7 +172,10 @@ export function SearchableSelect({
           aria-activedescendant={activeOption ? optionId(active) : undefined}
           leadingIcon={<Search size={16} />} value={query} placeholder={searchPlaceholder}
           onChange={(event) => { setQuery(event.target.value); setActive(0); }}
+          onCompositionStart={() => { composing.current = true; }}
+          onCompositionEnd={() => { composing.current = false; }}
           onKeyDown={(event) => {
+            if (composing.current || fromInputMethod(event.nativeEvent)) return;
             if (event.key === "ArrowDown" || event.key === "ArrowUp") {
               event.preventDefault(); move(event.key === "ArrowDown" ? 1 : -1);
             } else if (event.key === "Enter") {

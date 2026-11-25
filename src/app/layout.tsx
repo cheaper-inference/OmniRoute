@@ -79,7 +79,7 @@ export default async function RootLayout({ children }) {
     <html
       lang={locale}
       dir={isRtl ? "rtl" : "ltr"}
-      className="ci-theme"
+      className="ci-theme ci-scrollbars"
       data-ci-appearance={EDITIONS_APPEARANCE_VALUE}
       suppressHydrationWarning
     >

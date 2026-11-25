@@ -818,7 +818,7 @@ How it fits into a multi-proxy chain:
    set to `dead`.
 3. `dead` is one of the statuses the alive-status filter used by pool/rotation
    resolution excludes, so a scope's rotation (round-robin / random / sticky /
-   latency — see [Rotation Strategy Decision Tree](#rotation-strategy-decision-tree))
+   latency / session — see [Rotation Strategy Decision Tree](#rotation-strategy-decision-tree))
    immediately stops handing that proxy to new requests. No other proxies in the
    pool are affected, and the whole pool never silently falls back to a direct
    connection — see the [4-Level Proxy System](#4-level-proxy-system) fail-closed
