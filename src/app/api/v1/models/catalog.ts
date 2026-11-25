@@ -48,7 +48,10 @@ import {
   getModelAliases,
   getHiddenModelsByProvider,
 } from "@/lib/db/models";
-import { getAllActiveSyncedModels } from "@/lib/db/models/activeSyncedCatalog";
+import {
+  getAllActiveSyncedModels,
+  reconcileProvidersWithActiveSyncedCatalog,
+} from "@/lib/db/models/activeSyncedCatalog";
 import {
   getModelCatalogCacheVersion,
   getCachedRawProviderConnections,
@@ -168,6 +171,23 @@ import { isModelExposureAllowed } from "@/shared/utils/modelExposureList";
 import { collapseProviderPrefix, resolveProviderNodePrefix } from "@/shared/utils/modelIdPrefix";
 import { isCodexDiscoveryModelExcluded } from "@/shared/services/codexDiscoveryPolicy";
 import { buildErrorBody } from "@omniroute/open-sse/utils/error";
+
+/**
+ * True when the provider has a fresh, authoritative synced catalog that no longer
+ * lists `modelId`. Fail-open: no catalog, a stale catalog (#12849) or a provider that
+ * opts out of authoritative catalogs all keep the model listed. Reuses the call-time
+ * reconcile so `/v1/models` never advertises an id dispatch would reject.
+ */
+async function isAliasTargetMissingFromLiveCatalog(
+  providerId: string,
+  modelId: string
+): Promise<boolean> {
+  const { excludedProviders } = await reconcileProvidersWithActiveSyncedCatalog(
+    [providerId],
+    modelId
+  );
+  return excludedProviders.length > 0;
+}
 
 // Public API of this module is preserved after the catalog helper extraction:
 // `isVisionModelId` (vision-detection-consistency.test.ts) and
@@ -2165,7 +2185,6 @@ async function buildUnifiedModelsResponseCore(
         ) {
           continue;
         }
-
         // #8958/#9034: honor the compatible-provider node prefix (as the synced/custom
         // loops do) so an alias-backed entry publishes `prefix/model` instead of the
         // raw provider-node UUID. Without the providerIdToPrefix lookup, `alias` fell
@@ -2176,6 +2195,15 @@ async function buildUnifiedModelsResponseCore(
         const nodePrefix =
           providerIdToPrefix[providerKey] || providerIdToPrefix[canonicalProviderId];
         const alias = nodePrefix || providerIdToAlias[canonicalProviderId] || providerKey;
+        // Same live-catalog check dispatch applies: skip built-in provider targets the
+        // fresh synced catalog no longer lists (e.g. retired models). Custom nodes keep
+        // their explicitly aliased ids.
+        if (
+          !nodePrefix &&
+          (await isAliasTargetMissingFromLiveCatalog(canonicalProviderId, modelId))
+        ) {
+          continue;
+        }
         if (
           !activeAliases.has(alias) &&
           !activeAliases.has(canonicalProviderId) &&
