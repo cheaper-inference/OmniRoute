@@ -219,7 +219,8 @@ export async function POST(request) {
           if (isSelfHostedEntryConfigured()) {
             const keyPolicy = await enforceApiKeyPolicy(
               request,
-              typeof parsedBody.model === "string" ? parsedBody.model : null
+              typeof parsedBody.model === "string" ? parsedBody.model : null,
+              { directModelDispatch: true }
             );
             if (keyPolicy.rejection) {
               return finishAdmission(keyPolicy.rejection);
