@@ -55,6 +55,10 @@ export type AttemptLoopState = {
   earliestCircuitOpenRetryMs: number;
   /** Mutable attempt budget shared with dispatchWithCooldownRetry (Task 4). */
   globalAttempts: number;
+  /** Target indices skipped only because of cached quota exhaustion in this set try. */
+  cachedQuotaFallbackCandidates?: Set<number>;
+  /** The single bounded cached-quota recovery attempt has been dispatched. */
+  cachedQuotaFallbackUsed?: boolean;
   /** Quota-trust accumulators; persist across set retries and cooldown re-dispatch. */
   observedFailure: boolean;
   allObservedFailuresQuota: boolean;

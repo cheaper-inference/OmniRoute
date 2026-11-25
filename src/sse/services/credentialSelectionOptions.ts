@@ -9,6 +9,8 @@ export interface CredentialSelectionOptions {
   allowSuppressedConnections?: boolean;
   allowRateLimitedConnections?: boolean;
   bypassQuotaPolicy?: boolean;
+  /** Internal combo recovery: ignore cached quota exhaustion only; configured quota policy and other gates still apply. */
+  ignoreCachedQuotaExhaustion?: boolean;
   /** Image operations on Codex require a paid workspace; do not choose a free plan first. */
   requirePaidCodexPlan?: boolean;
   forcedConnectionId?: string | null;

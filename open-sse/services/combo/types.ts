@@ -82,12 +82,18 @@ export type HandleSingleModel = (
  * `false` is the generic availability bucket (credentials, key policy, hidden).
  * `"model_not_in_catalog"` is the live-catalog miss, recorded separately.
  * `"agent_guard_refused"` is a request-scoped agent guard refusal, not a provider failure.
+ * `cachedQuotaExhausted` marks a cooldown that comes only from a cached quota snapshot.
  */
 export type ModelAvailabilityResult =
   | boolean
   | "model_not_in_catalog"
   | "agent_guard_refused"
-  | { available: false; reason: "connection_cooldown"; retryAfterMs: number };
+  | {
+      available: false;
+      reason: "connection_cooldown";
+      retryAfterMs: number;
+      cachedQuotaExhausted?: true;
+    };
 
 export type IsModelAvailable = (
   modelStr: string,
@@ -253,6 +259,12 @@ export type ResolvedComboTarget = {
    * were pinned to one specific account.
    */
   pinnedFingerprint?: string;
+  /**
+   * Set by the attempt loop only for its bounded cached-quota recovery attempt:
+   * credential selection may then ignore a cached quota-exhaustion snapshot.
+   * Configured quota policy and every other gate still apply.
+   */
+  ignoreCachedQuotaExhaustion?: boolean;
 };
 
 export type ShadowRoutingConfig = {
