@@ -198,7 +198,7 @@ export default function PipelineView({
                 <span>
                   {tr(
                     "pipelineVisualizationHint",
-                    "Envie um request pelo Chat Tester para ver o pipeline em tempo real. Abaixo: exemplo estático."
+                    "Send a message to see how your request flows through detection → translation → provider call."
                   )}
                 </span>
               </div>
