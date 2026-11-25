@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 
 const HOUR_MS = 60 * 60 * 1000;
 const MAX_FEED_BYTES = 10 * 1024 * 1024; // Same cap as the Radar sync clients.
+const FETCH_TIMEOUT_MS = 30_000;
 const VERSION = /^\d{4}\.\d{2}\.\d{2}\.\d+$/;
 const TIMESTAMP = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?Z$/;
 const SIGNATURE_HEADER = "x-omniroute-feed-signature";
@@ -22,13 +23,19 @@ export function readCuratedAtFromSource(text) {
   const date = text.match(
     /^export const FREE_CATALOG_CURATED_AT\s*=\s*"(\d{4}-\d{2}-\d{2})";/m
   )?.[1];
-  if (!date) throw new Error("No Radar catalog curation date found.");
+  if (!isCurationDate(date)) throw new Error("No valid Radar catalog curation date found.");
   return date;
 }
 
+function isCurationDate(date) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date ?? "")) return false;
+  const parsed = new Date(date);
+  return Number.isFinite(parsed.getTime()) && parsed.toISOString().slice(0, 10) === date;
+}
+
 function verifiesSignature(bytes, signature, pinnedKeys) {
-  if (!/^[A-Za-z0-9+/]{86}(?:==)?$/.test(signature)) return false;
   const signatureBytes = Buffer.from(signature, "base64");
+  if (bytes.length === 0 || signatureBytes.length === 0) return false;
   return pinnedKeys.some((encodedKey) => {
     try {
       const key = createPublicKey({
@@ -92,7 +99,7 @@ export function evaluateFeedHealth({
       generatedAt = timestamp;
       // The static publisher sets referrals' generatedAt from the run clock on each publish.
       // A stale referrals feed means the publisher stopped.
-      if (new Date(now).getTime() - generatedMs > maxAgeHours * HOUR_MS) problems.push("stale");
+      if (new Date(now).getTime() - generatedMs >= maxAgeHours * HOUR_MS) problems.push("stale");
       if (generatedMs < Date.parse(curatedAt)) problems.push("before-curation");
     }
   }
@@ -120,7 +127,7 @@ export async function fetchFeedHealth(base, kind, context, { maxFeedBytes = MAX_
   try {
     response = await fetch(url, {
       headers: { "x-omniroute-radar-schema": "2" },
-      signal: AbortSignal.timeout(20_000),
+      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
     });
     if (response.status !== 200) {
       await response.body?.cancel();
@@ -158,16 +165,11 @@ export async function fetchFeedHealth(base, kind, context, { maxFeedBytes = MAX_
   });
 }
 
-async function monitor(baseUrl) {
+async function monitor(baseUrl, curatedAt, pinnedKeysPath) {
   const base = new URL(baseUrl);
   if (!["https:", "http:"].includes(base.protocol)) throw new Error("Invalid Radar feed URL.");
 
-  const pinnedKeys = readPinnedKeysFromSource(
-    readFileSync(new URL("../../src/lib/radar/pinnedKeys.ts", import.meta.url), "utf8")
-  );
-  const curatedAt = readCuratedAtFromSource(
-    readFileSync(new URL("../../open-sse/config/freeModelCatalog.data.ts", import.meta.url), "utf8")
-  );
+  const pinnedKeys = readPinnedKeysFromSource(readFileSync(pinnedKeysPath, "utf8"));
   const context = { now: Date.now(), pinnedKeys, curatedAt };
   const [catalog, referrals] = await Promise.all([
     fetchFeedHealth(base, "catalog", context),
@@ -186,12 +188,25 @@ async function main(args) {
     console.log(decideReportAction(input));
     return 0;
   }
-  if (args.length === 2 && args[0] === "--url") {
-    const report = await monitor(args[1]);
-    console.log(JSON.stringify(report));
-    return report.healthy ? 0 : 1;
+  if (args.length === 2 && args[0] === "--read-curated-at") {
+    console.log(readCuratedAtFromSource(readFileSync(args[1], "utf8")));
+    return 0;
   }
-  console.error("Usage: node scripts/ops/radar-monitor.mjs --url <base> | --decide");
+  if (args[0] === "--url") {
+    const [, baseUrl, dateFlag, curatedAt, keysFlag, pinnedKeysPath] = args;
+    if (dateFlag !== "--curated-at" || !isCurationDate(curatedAt)) {
+      console.error("curation-date-unavailable");
+      return 2;
+    }
+    if (args.length === 6 && baseUrl && keysFlag === "--pinned-keys" && pinnedKeysPath) {
+      const report = await monitor(baseUrl, curatedAt, pinnedKeysPath);
+      console.log(JSON.stringify(report));
+      return report.healthy ? 0 : 1;
+    }
+  }
+  console.error(
+    "Usage: node scripts/ops/radar-monitor.mjs --url <base> --curated-at <date> --pinned-keys <path> | --read-curated-at <path> | --decide"
+  );
   return 2;
 }
 

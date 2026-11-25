@@ -5,7 +5,7 @@ on:
     - cron: "37 * * * *"
   workflow_dispatch:
 
-permissions: {}
+permissions: { contents: read }
 
 concurrency:
   group: radar-monitor
@@ -27,6 +27,24 @@ jobs:
           sparse-checkout-cone-mode: false
           sparse-checkout: |
             scripts/ops/radar-monitor.mjs
+      - name: Resolve the highest stable release
+        id: release
+        run: |
+          set -euo pipefail
+          if ! release_sha=$(git ls-remote --heads origin 'refs/heads/release/v*' |
+            awk '$1 ~ /^[0-9a-f]+$/ && length($1) == 40 && $2 ~ /^refs\/heads\/release\/v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$/ { print $2, $1 }' |
+            sort -V -k1,1 | tail -n 1 | cut -d ' ' -f2) || [[ -z "$release_sha" ]]; then
+            echo '::error title=release-ref-unavailable::No stable release branch could be resolved.'
+            exit 2
+          fi
+          printf 'sha=%s\n' "$release_sha" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ steps.release.outputs.sha }}
+          path: radar-release
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
             src/lib/radar/pinnedKeys.ts
             open-sse/config/freeModelCatalog.data.ts
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
@@ -37,8 +55,13 @@ jobs:
         id: probe
         run: |
           set -euo pipefail
+          if ! curated_at=$(node scripts/ops/radar-monitor.mjs --read-curated-at radar-release/open-sse/config/freeModelCatalog.data.ts); then
+            echo '::error title=curation-date-unavailable::The release catalog curation date could not be read.'
+            exit 2
+          fi
           status=0
-          result=$(node scripts/ops/radar-monitor.mjs --url https://radar.omniroute.online) || status=$?
+          result=$(node scripts/ops/radar-monitor.mjs --url https://radar.omniroute.online \
+            --curated-at "$curated_at" --pinned-keys radar-release/src/lib/radar/pinnedKeys.ts) || status=$?
           if (( status > 1 )); then
             exit "$status"
           fi
@@ -68,7 +91,7 @@ jobs:
           package-manager-cache: false
       - name: Reconcile the tracking issue
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
           REPORT: ${{ needs.probe.outputs.result }}
         run: |
           set -euo pipefail
