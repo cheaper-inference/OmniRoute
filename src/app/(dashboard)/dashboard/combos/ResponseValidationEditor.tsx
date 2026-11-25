@@ -98,7 +98,7 @@ export function ResponseValidationEditor({
           onChange={(e) => emit({ ...v, forbiddenSubstrings: linesToArray(e.target.value) })}
           placeholder={"I cannot help\nas an AI"}
           data-testid="rv-forbidden"
-          className="font-mono"
+          mono
         />
       </Field>
 
@@ -112,7 +112,7 @@ export function ResponseValidationEditor({
           value={arrayToLines(v.requiredSubstrings)}
           onChange={(e) => emit({ ...v, requiredSubstrings: linesToArray(e.target.value) })}
           data-testid="rv-required"
-          className="font-mono"
+          mono
         />
       </Field>
 
@@ -148,7 +148,7 @@ export function ResponseValidationEditor({
                 aria-label={`${tr(t, "responseValidationPath", "JSON path")} ${index + 1}`}
                 data-testid="rv-predicate-path"
                 className="min-w-[140px] flex-1"
-                inputClassName="font-mono"
+                mono
               />
               <Select
                 value={predicate.condition}

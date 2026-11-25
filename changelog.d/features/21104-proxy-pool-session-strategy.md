@@ -1,0 +1,1 @@
+- **feat(db):** proxy pools gain a `session` rotation strategy: each conversation keeps one pool member (rendezvous hash of the session key, so setting a member aside moves only its own conversations and they return when it recovers); without a session key it behaves like round-robin, and the default strategy stays `round-robin`

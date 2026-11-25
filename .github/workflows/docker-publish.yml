@@ -897,6 +897,116 @@ jobs:
           short-description: "OmniRoute — Unified AI proxy. Route any LLM through one endpoint."
           readme-filepath: ./README.md
 
+  # Every published variant is scanned, not only the base image the merge job gates: the -web,
+  # -bun and -web-bun images were never scanned before, and 3.8.54-web-bun carried 866 HIGH
+  # findings nobody saw in CI. One rule for all four: a CRITICAL or HIGH that already has a
+  # published fix fails this job (ignore-unfixed, honouring .trivyignore). Findings with no fix
+  # yet (mostly Debian trixie packages) are only counted in the job summary.
+  # Results stay out of the Security tab: only the base image uploads SARIF (category
+  # trivy-image, merge job), and the code-scanning panel is triaged by its security owner.
+  # A separate job on purpose: it runs after the manifests are published and never holds back
+  # the Docker Hub org mirror. A red run is a release-acceptance failure; fix it by rebuilding on
+  # a patched base, bumping the dependency or a justified .trivyignore entry.
+  scan-variants:
+    name: Trivy scan (${{ matrix.variant }})
+    needs: [prepare, merge]
+    if: >-
+      !cancelled() && github.event_name != 'schedule' &&
+      needs.merge.result == 'success' && needs.prepare.outputs.version != 'main' &&
+      (github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute')
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      packages: read
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: [base, web, bun, web-bun]
+    env:
+      GHCR_IMAGE_NAME: ghcr.io/cheaper-inference/omniroute
+      VERSION: ${{ needs.prepare.outputs.version }}
+      VARIANT: ${{ matrix.variant }}
+    steps:
+      - name: Checkout (.trivyignore)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@81c6f93d4bc991e510b342a00b419b3bb4efc5c6 # v4.7.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Resolve the image of this variant
+        id: image
+        run: |
+          set -euo pipefail
+          case "$VARIANT" in
+            base) suffix="" ;;
+            web | bun | web-bun) suffix="-$VARIANT" ;;
+            *) echo "::error::unknown variant $VARIANT"; exit 1 ;;
+          esac
+          ref="${GHCR_IMAGE_NAME}:${VERSION}${suffix}"
+          echo "ref=$ref" >> "$GITHUB_OUTPUT"
+          if docker buildx imagetools inspect "$ref" >/dev/null 2>&1; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          elif [ "$VARIANT" = "bun" ] || [ "$VARIANT" = "web-bun" ]; then
+            # The Bun images are best-effort (continue-on-error builds), so a missing tag is not a failure.
+            echo "::notice::$ref was not published (Bun images are best-effort); nothing to scan."
+            echo "present=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "::error::$ref is missing although the merge job succeeded"; exit 1
+          fi
+
+      - name: Trivy report (all findings, JSON)
+        if: steps.image.outputs.present == 'true'
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: ${{ steps.image.outputs.ref }}
+          scanners: vuln
+          format: json
+          output: trivy-report.json
+          trivyignores: .trivyignore
+          exit-code: "0"
+
+      - name: Job summary (total and fixable findings)
+        if: steps.image.outputs.present == 'true'
+        env:
+          IMAGE_REF: ${{ steps.image.outputs.ref }}
+        run: |
+          set -euo pipefail
+          count() {
+            jq -r --arg s "$1" '[.Results[]?.Vulnerabilities[]? | select(.Severity == $s)]
+              | "\(length) | \([.[] | select((.FixedVersion // "") != "")] | length)"' trivy-report.json
+          }
+          {
+            echo "### Trivy: \`${IMAGE_REF}\`"
+            echo
+            echo "| Severity | Findings | With a published fix |"
+            echo "| --- | ---: | ---: |"
+            for severity in CRITICAL HIGH MEDIUM LOW; do
+              echo "| ${severity} | $(count "$severity") |"
+            done
+            echo
+            echo "The gate below fails on CRITICAL or HIGH findings with a published fix."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Trivy gate, fixable CRITICAL/HIGH (blocking)
+        if: steps.image.outputs.present == 'true'
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: ${{ steps.image.outputs.ref }}
+          scanners: vuln
+          format: table
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          trivyignores: .trivyignore
+          exit-code: "1"
+
   # Second Docker Hub repository, owned by the Cheaper Inference organization. Docker Hub cannot
   # move a repository between namespaces, so diegosouzapw/omniroute (and its pull history) keeps
   # receiving every image above and the release is copied here from GHCR, same manifests.
@@ -920,6 +1030,7 @@ jobs:
     secrets:
       DOCKERHUB_ORG_USERNAME: ${{ secrets.DOCKERHUB_ORG_USERNAME }}
       DOCKERHUB_ORG_TOKEN: ${{ secrets.DOCKERHUB_ORG_TOKEN }}
+      GHCR_LEGACY_TOKEN: ${{ secrets.GHCR_LEGACY_TOKEN }}
 
   # #14560: alert when the only omni-build runner goes offline. Mirrors the
   # nightly-release-green issue loop: open a deduplicated tracking issue when

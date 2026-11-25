@@ -290,7 +290,7 @@ git push -u origin feat/your-feature
 
 **Husky hooks**:
 
-- **pre-commit**: lint-staged + `check-docs-sync` + `check:any-budget:t11` + `check:tracked-artifacts`
+- **pre-commit**: lint-staged + `check-docs-sync` + `check:any-budget:t11` + `check:tracked-artifacts` + `check:migration-numbering` (only when the commit stages a file under `src/lib/db/migrations/`; names only, the comparison with the base stays in CI)
 - **commit-msg**: `check:ai-attribution` — rejects AI/bot `Co-Authored-By` trailers and AI-generation footers in the message (Hard Rule #16; human co-authors allowed; also in the `quality.yml` fast-gates loop (PR→`release/**`) and a PR-only `ci.yml` lint step (PR→`main`) — #14436)
 - **pre-push**: intentionally light (PATH/npm sanity only) — `any-budget` + `tracked-artifacts` already run on pre-commit and CI still enforces both; re-running them per push was pure double-pay (was Fase 6A.12 full pre-push gate; folded into pre-commit in #6716).
 
@@ -326,12 +326,33 @@ If red: never treat or "fix" the inherited failures in your branch (a base-red f
 freeze-gated `fix/release-vX.Y.Z-basereds` PR); a PR opened anyway carries
 `⚠️ base-red inherited: #<issue>` in its body. Full procedure: `docs/ops/WORKTREE_ISOLATION.md`.
 
-### Sync-back landings are fast-forward, never squash
+### Landing on a release branch: omni-queue
 
-A `main → release/vX+1` sync-back lands as the merge commit it already is
-(`git push origin <head>:refs/heads/release/vX+1`), never squashed — a squash drops `main` from
-the release ancestry and the next sync-back re-conflicts on every file (551 on v3.8.50 → v3.8.51).
-After landing, `git merge-base --is-ancestor origin/main origin/release/vX+1` must be true.
+`release/vX.Y.Z` branches are served by the project's merge queue (runbook:
+[`docs/ops/OMNI_QUEUE.md`](docs/ops/OMNI_QUEUE.md)). Read its `mode` in
+`config/merge-queue/config.json` on the default branch before landing anything:
+
+- **`shadow`** — the queue tests but lands nothing; merges are manual. Green checks on a PR head
+  prove the PR against the base they ran on, not against today's base, so before a manual merge
+  apply the `omni-queue` label at the PR's final head and wait for the queue's verdict on that
+  head (`npm run queue -- why <PR>`, `npm run queue -- history --base <branch>`): `would-land` →
+  merge; `culprit-found` / `would-dequeue` → do not merge, fix first. A merge train whose full CI
+  is green on the current base tip, or a head that already contains the base tip, needs no
+  separate verdict.
+- **`live`** — the `omni-queue` label is the landing. Never run a merge command or push against
+  the branch: its ruleset refuses both.
+
+Apply the label only to a PR the owner authorized you to land; a PR that touches a protected path
+also needs `protected-approved`, which is the owner's decision per PR. Never push to
+`omni-queue-state` or `omni-queue/**`.
+
+### Sync-back landings are merge commits, never squash
+
+A `main → release/vX+1` sync-back lands through a pull request merged with a merge commit
+(`scripts/release/sync-next-cycle.mjs` opens it; the default branch refuses a direct push), never
+squashed — a squash drops `main` from the release ancestry and the next sync-back re-conflicts on
+every file (551 on v3.8.50 → v3.8.51). After landing,
+`git merge-base --is-ancestor origin/main origin/release/vX+1` must be true.
 Steps + baseline-freeze check: `docs/ops/WORKTREE_ISOLATION.md` → "Sync-back landings".
 
 ---

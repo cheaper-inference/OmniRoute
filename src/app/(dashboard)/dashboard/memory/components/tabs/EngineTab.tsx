@@ -90,7 +90,9 @@ export default function EngineTab() {
       <Card>
         <div className="p-4">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm text-text-main">{t("engine.statusTitle")}</h3>
+            <h3 className="ci-heading" data-size="sm">
+              {t("engine.statusTitle")}
+            </h3>
             <Button
               data-testid="reindex-now-button"
               size="sm"
@@ -114,7 +116,9 @@ export default function EngineTab() {
       {settings && (
         <Card>
           <div id="engine-config-embedding" className="p-4 scroll-mt-4">
-            <h3 className="text-sm text-text-main mb-4">{t("engine.embeddingTitle")}</h3>
+            <h3 className="ci-heading mb-4" data-size="sm">
+              {t("engine.embeddingTitle")}
+            </h3>
             <EmbeddingSourceSelector
               settings={settings}
               providers={providers}
@@ -134,7 +138,9 @@ export default function EngineTab() {
       {settings && (
         <Card>
           <div id="engine-config-rerank" className="p-4 scroll-mt-4">
-            <h3 className="text-sm text-text-main mb-4">{t("engine.rerankTitle")}</h3>
+            <h3 className="ci-heading mb-4" data-size="sm">
+              {t("engine.rerankTitle")}
+            </h3>
             <RerankConfigCard
               settings={settings}
               providers={rerankProviders}

@@ -1,5 +1,6 @@
 "use client";
 
+import Card from "@/shared/components/Card";
 import Icon from "@/shared/components/Icon";
 
 import { useTranslations } from "next-intl";
@@ -30,7 +31,7 @@ export function ApiKeyCatalogScopeSelect({
   const tSettings = useTranslations("settings");
 
   return (
-    <div className="flex flex-col gap-2 p-3 rounded-lg border border-border bg-surface/40">
+    <Card.Section className="flex flex-col gap-2">
       <div className="flex flex-col gap-1">
         <p className="text-sm font-medium text-text-main">{tSettings("catalogScopeTitle")}</p>
         <p className="text-xs text-text-muted">{tSettings("catalogScopeDesc")}</p>
@@ -54,6 +55,6 @@ export function ApiKeyCatalogScopeSelect({
           />
         ))}
       </RadioGroup>
-    </div>
+    </Card.Section>
   );
 }

@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { RadioGroup, RadioGroupItem } from "@omniroute/ui-kit/radio-group";
-import { Card, Button, Input, Badge } from "@/shared/components";
+import { ScopeChip } from "@omniroute/ui-kit/scope-chip";
+import { Card, Button, Input } from "@/shared/components";
 import Icon from "@/shared/components/Icon";
 
 const MODES = [
@@ -147,23 +148,20 @@ export default function IPFilterSection() {
           {/* Blacklist */}
           {config.blacklist.length > 0 && (
             <div>
-              <p className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2">
+              <p className="ci-eyebrow mb-2" data-weight="medium">
                 {t("blocked", { count: config.blacklist.length })}
               </p>
               <div className="flex flex-wrap gap-1.5">
                 {config.blacklist.map((ip) => (
-                  <Badge key={ip} variant="error" className="gap-1 pr-1 font-mono">
+                  <ScopeChip
+                    key={ip}
+                    tone="danger"
+                    className="font-mono"
+                    onRemove={() => removeIP(ip, "blacklist")}
+                    removeLabel={`${t("remove")} ${ip}`}
+                  >
                     {ip}
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      className="size-5"
-                      onClick={() => removeIP(ip, "blacklist")}
-                      aria-label={`${t("remove")} ${ip}`}
-                    >
-                      <Icon name="close" size={14} />
-                    </Button>
-                  </Badge>
+                  </ScopeChip>
                 ))}
               </div>
             </div>
@@ -172,23 +170,20 @@ export default function IPFilterSection() {
           {/* Whitelist */}
           {config.whitelist.length > 0 && (
             <div>
-              <p className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2">
+              <p className="ci-eyebrow mb-2" data-weight="medium">
                 {t("allowed", { count: config.whitelist.length })}
               </p>
               <div className="flex flex-wrap gap-1.5">
                 {config.whitelist.map((ip) => (
-                  <Badge key={ip} variant="success" className="gap-1 pr-1 font-mono">
+                  <ScopeChip
+                    key={ip}
+                    tone="success"
+                    className="font-mono"
+                    onRemove={() => removeIP(ip, "whitelist")}
+                    removeLabel={`${t("remove")} ${ip}`}
+                  >
                     {ip}
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      className="size-5"
-                      onClick={() => removeIP(ip, "whitelist")}
-                      aria-label={`${t("remove")} ${ip}`}
-                    >
-                      <Icon name="close" size={14} />
-                    </Button>
-                  </Badge>
+                  </ScopeChip>
                 ))}
               </div>
             </div>
@@ -197,7 +192,7 @@ export default function IPFilterSection() {
           {/* Temp Bans */}
           {config.tempBans.length > 0 && (
             <div>
-              <p className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2">
+              <p className="ci-eyebrow mb-2" data-weight="medium">
                 {t("temporaryBans", { count: config.tempBans.length })}
               </p>
               <div className="flex flex-col gap-1.5">

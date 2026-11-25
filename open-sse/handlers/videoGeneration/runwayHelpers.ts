@@ -86,12 +86,6 @@ function clampRunwayDuration(value) {
   return Math.min(10, Math.max(2, duration));
 }
 
-export function resolvePositiveInteger(value, fallback) {
-  const numeric = Number(value);
-  if (!Number.isFinite(numeric) || numeric <= 0) return fallback;
-  return Math.floor(numeric);
-}
-
 function extractRunwayOutputUrls(task) {
   const rawOutput = Array.isArray(task?.output)
     ? task.output

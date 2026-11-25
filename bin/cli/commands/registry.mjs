@@ -61,6 +61,7 @@ import { registerTray } from "./tray.mjs";
 import { registerAutostart } from "./autostart.mjs";
 import { registerRepl } from "./repl.mjs";
 import { registerLaunch } from "./launch.mjs";
+import { registerGateway } from "./gateway.mjs";
 import { registerLaunchCodex } from "./launch-codex.mjs";
 import { registerFccClaude } from "./fcc-claude.mjs";
 import { registerRun } from "./run.mjs";
@@ -154,6 +155,7 @@ export function registerCommands(program) {
   registerAutostart(program);
   registerRepl(program);
   registerLaunch(program);
+  registerGateway(program);
   registerLaunchCodex(program);
   registerFccClaude(program);
   registerRun(program);
