@@ -67,6 +67,7 @@ jobs:
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: 24
+          package-manager-cache: false
       - run: npm ci
         env:
           ONNXRUNTIME_NODE_INSTALL: "skip"
@@ -133,6 +134,7 @@ jobs:
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: 24
+          package-manager-cache: false
       - run: npm ci
         env:
           ONNXRUNTIME_NODE_INSTALL: "skip"
@@ -165,6 +167,7 @@ jobs:
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: 24
+          package-manager-cache: false
       - name: Send scoreboard reminder
         if: ${{ vars.CATALOG_DRIFT_ISSUES == 'true' }}
         env:

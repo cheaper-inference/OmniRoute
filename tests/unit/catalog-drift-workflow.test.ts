@@ -100,6 +100,11 @@ test("never restores the npm cache after checking out a release branch", () => {
     for (const step of job.steps) {
       if (step.uses?.startsWith("actions/setup-node@")) {
         assert.equal(step.with?.cache, undefined, `${name}: setup-node must not use a cache`);
+        assert.equal(
+          step.with?.["package-manager-cache"],
+          false,
+          `${name}: package-manager-cache must be false`
+        );
       }
     }
   }
