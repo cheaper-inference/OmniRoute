@@ -3163,12 +3163,12 @@ export async function markAccountUnavailable(
     // connection-wide cooldown. NVIDIA was the first case (#9833); the OpenCode
     // family retires free models the same way (Zen/Go answer 410 for a delisted
     // model id) and used to cool the whole connection for 24h, taking every
-    // healthy sibling model down with it (#17472). Status-only, like the NVIDIA
-    // case: an empty body still means the model is gone.
-    const isModelGone =
-      status === 410 &&
-      (provider === "nvidia" ||
-        (typeof provider === "string" && provider.toLowerCase().startsWith("opencode")));
+    // healthy sibling model down with it (#17472). #21202 shows the same
+    // failure on cloudflare-ai: a 410 names a retired model, which is retired
+    // for every account of the provider — so the provider list was the wrong
+    // gate. Status-only, for every provider: an empty body still means the
+    // model is gone.
+    const isModelGone = status === 410;
     const modelLockoutOptions = { maxCooldownMs: effectiveProviderProfile?.maxCooldownMs };
     // Same persisted reason the agentrouter 403 model-scope branch hard-codes
     // ("forbidden"): the lock key is the getModelLockKey tuple shared with the
@@ -3321,8 +3321,13 @@ export async function markAccountUnavailable(
         cooldownMs: lockout.cooldownMs,
         reason,
       });
+      // #21202: a retired model is retired for every account of the provider,
+      // so trying the sibling accounts only replays the same guaranteed 410
+      // (observed: a 55-account walk taking ~52s before the client saw the
+      // error). The first 410 goes straight back to the client.
+      const modelGoneNoFallback = status === 410 && isModelGone;
       return {
-        shouldFallback: options.suppressFallback ? false : true,
+        shouldFallback: modelGoneNoFallback ? false : options.suppressFallback ? false : true,
         cooldownMs: lockout.cooldownMs,
       };
     }

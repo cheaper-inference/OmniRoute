@@ -9,6 +9,10 @@
  * for as long as the model stayed in the registry — all day, every day — sending
  * guaranteed-to-fail requests to the provider. At volume this looks like abusive
  * traffic and was implicated in a Gemini free-tier API key getting banned.
+ *
+ * Since #21202 the lockout is per-model (operator-capped, ~30min) instead of a
+ * 24h connection-wide cooldown, and the first 410 returns without fallback so
+ * the request never walks the provider's other accounts.
  */
 import test from "node:test";
 import assert from "node:assert/strict";
@@ -26,8 +30,15 @@ const core = await import("../../src/lib/db/core.ts");
 const providersDb = await import("../../src/lib/db/providers.ts");
 const auth = await import("../../src/sse/services/auth.ts");
 
-const { checkFallbackError, isModelPermanentlyUnavailable, clearAllModelLockouts } =
-  await import("../../open-sse/services/accountFallback.ts");
+const {
+  checkFallbackError,
+  isModelPermanentlyUnavailable,
+  clearAllModelLockouts,
+  isModelLocked,
+  getModelLockoutInfo,
+} = await import("../../open-sse/services/accountFallback.ts");
+const readCache = await import("../../src/lib/db/readCache.ts");
+const modelLockoutSettings = await import("../../src/lib/resilience/modelLockoutSettings.ts");
 
 const GEMINI_DEPRECATED_404 =
   "[404]: This model models/gemini-2.5-flash is no longer available to new users. " +
@@ -188,14 +199,20 @@ test("the 24h lockout lasts exactly 24h on a 25-hour day", () => {
   }
 });
 
-test("five connections all answering 410 are each cooled once and never retried", async () => {
+test("five connections all answering 410 lock only the model and stay usable (#21202)", async () => {
   const ids: string[] = [];
   for (let i = 0; i < 5; i++) {
     const connection = await seedConnection("openai", `openai-410-retired-${i}`);
     ids.push(connection.id);
   }
 
-  const firstMarks = [];
+  const { maxCooldownMs } = modelLockoutSettings.resolveModelLockoutSettings(
+    await readCache.getCachedSettings()
+  );
+
+  // The first 410 returns shouldFallback: false, so in production the request
+  // never walks the other four accounts — but each connection that does answer
+  // 410 must lock only the retired model, never cool itself.
   for (const id of ids) {
     const result = await auth.markAccountUnavailable(
       id,
@@ -204,42 +221,58 @@ test("five connections all answering 410 are each cooled once and never retried"
       "openai",
       RETIRED_MODEL
     );
-    assert.equal(result.shouldFallback, true);
-    assert.equal(result.cooldownMs, DAY_MS);
-    firstMarks.push(result);
-    void firstMarks;
+    assert.equal(
+      result.shouldFallback,
+      false,
+      "a retired model is retired for every account, so the first 410 must not walk sibling accounts"
+    );
+    assert.ok(
+      typeof result.cooldownMs === "number" &&
+        result.cooldownMs > 0 &&
+        result.cooldownMs <= maxCooldownMs,
+      `reported cooldown must be bounded by maxCooldownMs (${maxCooldownMs}ms), got ${result.cooldownMs}ms`
+    );
   }
 
-  const cooledUntil: Array<string | null> = [];
   for (const id of ids) {
     const after = await providersDb.getProviderConnectionById(id);
-    assert.equal(after?.testStatus, "unavailable");
-    assert.ok(after?.rateLimitedUntil, "each 410 connection must carry a rateLimitedUntil");
-    assert.ok(
-      new Date(String(after?.rateLimitedUntil)).getTime() - Date.now() > DAY_MS - 60_000,
-      "each 410 connection must be cooled for about 24h"
+    assert.equal(after?.testStatus, "active");
+    assert.equal(after?.rateLimitedUntil ?? null, null, "a 410 must not cool the whole connection");
+    assert.equal(
+      isModelLocked("openai", id, RETIRED_MODEL),
+      true,
+      "the retired model itself should be locked"
     );
-    cooledUntil.push(after?.rateLimitedUntil ?? null);
+    const lock = getModelLockoutInfo("openai", id, RETIRED_MODEL);
+    assert.ok(lock && lock.remainingMs > 0, "the retired model lock must still be active");
+    assert.ok(
+      lock.remainingMs <= maxCooldownMs,
+      `lock must be bounded by maxCooldownMs (${maxCooldownMs}ms), got ${lock.remainingMs}ms`
+    );
   }
 
-  for (let i = 0; i < ids.length; i++) {
+  // Re-marking a locked model must not escalate it into a connection cooldown.
+  for (const id of ids) {
     const again = await auth.markAccountUnavailable(
-      ids[i],
+      id,
       410,
       RETIRED_WITHOUT_MODEL_WORD_410,
       "openai",
       RETIRED_MODEL
     );
-    assert.equal(again.shouldFallback, true);
+    assert.equal(again.shouldFallback, false);
     assert.ok(
-      again.cooldownMs < DAY_MS,
-      "re-marking a cooled connection must return the remaining time, not a fresh 24h"
+      typeof again.cooldownMs === "number" &&
+        again.cooldownMs > 0 &&
+        again.cooldownMs <= maxCooldownMs,
+      `re-marking must stay bounded by maxCooldownMs (${maxCooldownMs}ms), got ${again.cooldownMs}ms`
     );
-    const after = await providersDb.getProviderConnectionById(ids[i]);
+    const after = await providersDb.getProviderConnectionById(id);
+    assert.equal(after?.testStatus, "active");
     assert.equal(
       after?.rateLimitedUntil ?? null,
-      cooledUntil[i],
-      "re-marking a cooled connection must not move its cooldown"
+      null,
+      "re-marking a model lockout must not cool the connection"
     );
   }
 });

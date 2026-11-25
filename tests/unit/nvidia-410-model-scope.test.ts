@@ -70,7 +70,11 @@ test("NVIDIA 410 Gone stays model-scoped and leaves the connection usable", asyn
     DEAD_MODEL
   );
 
-  assert.equal(result.shouldFallback, true);
+  assert.equal(
+    result.shouldFallback,
+    false,
+    "a retired model is retired for every account, so the first 410 must not walk sibling accounts (#21202)"
+  );
 
   const after = await providersDb.getProviderConnectionById(connection.id);
 
@@ -107,7 +111,7 @@ test("NVIDIA 410 Gone stays model-scoped and leaves the connection usable", asyn
   );
 });
 
-test("non-per-model provider keeps 410 connection-scoped", async () => {
+test("a 410 is model-scoped for non-per-model providers too (#21202)", async () => {
   assert.equal(
     fallback.hasPerModelQuota("openai", DEAD_MODEL),
     false,
@@ -117,8 +121,8 @@ test("non-per-model provider keeps 410 connection-scoped", async () => {
   const connection = await providersDb.createProviderConnection({
     provider: "openai",
     authType: "apikey",
-    name: "openai-410-connection-scope",
-    apiKey: "sk-openai-410-connection-scope",
+    name: "openai-410-model-scope",
+    apiKey: "sk-openai-410-model-scope",
     isActive: true,
     testStatus: "active",
     providerSpecificData: {},
@@ -132,23 +136,48 @@ test("non-per-model provider keeps 410 connection-scoped", async () => {
     DEAD_MODEL
   );
 
-  assert.equal(result.shouldFallback, true);
+  assert.equal(
+    result.shouldFallback,
+    false,
+    "a retired model is retired for every account, so the first 410 must not walk sibling accounts (#21202)"
+  );
 
   const after = await providersDb.getProviderConnectionById(connection.id);
 
-  assert.ok(
-    after?.rateLimitedUntil,
-    "non-per-model providers should retain the existing connection-level 410 behavior"
+  assert.equal(
+    after?.rateLimitedUntil ?? null,
+    null,
+    "410 for one retired model must not apply a connection-wide cooldown even when the provider has no per-model quota (#21202)"
   );
 
   assert.equal(
     after?.testStatus,
-    "unavailable",
-    "410 model scoping must not be applied globally to every provider"
+    "active",
+    "410 for one retired model must leave the connection active"
+  );
+
+  assert.equal(
+    fallback.isModelLocked("openai", connection.id, DEAD_MODEL),
+    true,
+    "the retired model itself should be locked"
+  );
+
+  assert.equal(
+    fallback.isModelLocked("openai", connection.id, "gpt-4o"),
+    false,
+    "a healthy sibling model must remain unlocked"
+  );
+
+  const healthyCredentials = await auth.getProviderCredentials("openai", null, null, "gpt-4o");
+
+  assert.equal(
+    healthyCredentials?.connectionId,
+    connection.id,
+    "the same connection must remain selectable for healthy sibling models"
   );
 });
 
-test("other per-model providers retain existing 410 connection scope", async () => {
+test("a 410 is model-scoped for other per-model providers too (#21202)", async () => {
   assert.equal(
     fallback.hasPerModelQuota("gemini", DEAD_MODEL),
     true,
@@ -158,8 +187,8 @@ test("other per-model providers retain existing 410 connection scope", async () 
   const connection = await providersDb.createProviderConnection({
     provider: "gemini",
     authType: "apikey",
-    name: "gemini-410-control",
-    apiKey: "sk-gemini-410-control",
+    name: "gemini-410-model-scope",
+    apiKey: "sk-gemini-410-model-scope",
     isActive: true,
     testStatus: "active",
     providerSpecificData: {},
@@ -173,24 +202,48 @@ test("other per-model providers retain existing 410 connection scope", async () 
     DEAD_MODEL
   );
 
-  assert.equal(result.shouldFallback, true);
+  assert.equal(
+    result.shouldFallback,
+    false,
+    "a retired model is retired for every account, so the first 410 must not walk sibling accounts (#21202)"
+  );
 
   const after = await providersDb.getProviderConnectionById(connection.id);
 
-  assert.ok(
-    after?.rateLimitedUntil,
-    "410 must remain connection-scoped for per-model providers without an explicit 410 contract"
+  assert.equal(
+    after?.rateLimitedUntil ?? null,
+    null,
+    "410 for one retired model must not apply a connection-wide cooldown (#21202)"
   );
 
   assert.equal(
     after?.testStatus,
-    "unavailable",
-    "the NVIDIA-specific 410 fix must not change other provider semantics"
+    "active",
+    "410 for one retired model must leave the connection active"
   );
 
   assert.equal(
     fallback.isModelLocked("gemini", connection.id, DEAD_MODEL),
+    true,
+    "the retired model itself should be locked"
+  );
+
+  assert.equal(
+    fallback.isModelLocked("gemini", connection.id, "gemini-2.5-flash"),
     false,
-    "a generic per-model provider must not inherit NVIDIA's 410 model lock"
+    "a healthy sibling model must remain unlocked"
+  );
+
+  const healthyCredentials = await auth.getProviderCredentials(
+    "gemini",
+    null,
+    null,
+    "gemini-2.5-flash"
+  );
+
+  assert.equal(
+    healthyCredentials?.connectionId,
+    connection.id,
+    "the same connection must remain selectable for healthy sibling models"
   );
 });
