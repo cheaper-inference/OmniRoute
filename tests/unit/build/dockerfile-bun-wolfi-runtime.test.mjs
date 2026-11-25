@@ -37,3 +37,9 @@ test("Bun runtime stages contain no apt-get commands", () => {
     assert.doesNotMatch(stage(name), /\bapt-get\b/, `${name} must not use apt-get`);
   }
 });
+
+test("Bun runner-web gives the runtime user exclusive write access to the Xvfb socket directory", () => {
+  const webCommands = stage("runner-web").replace(/\\\n/g, " ");
+  assert.match(webCommands, /&&\s+install -d -o bun -g bun -m 0755 \/tmp\/\.X11-unix\s+&&/);
+  assert.doesNotMatch(webCommands, /\bchmod\s+1?7{3}\b/);
+});

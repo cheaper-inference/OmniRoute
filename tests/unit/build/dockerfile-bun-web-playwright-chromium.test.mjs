@@ -57,7 +57,8 @@ test("Bun runner-web ships Xvfb for headed Chromium (#15300)", () => {
   for (const pkg of ["xvfb", "xkbcomp", "xkeyboard-config"]) {
     assert.ok(apkPackages.includes(pkg), `apk must install ${pkg}`);
   }
-  assert.match(webCommands, /mkdir -p \/tmp\/\.X11-unix && chmod 1777 \/tmp\/\.X11-unix/);
+  assert.match(webCommands, /&&\s+install -d -o bun -g bun -m 0755 \/tmp\/\.X11-unix\s+&&/);
+  assert.doesNotMatch(webCommands, /\bchmod\s+1?7{3}\b/);
 });
 
 test("Bun runner-web fails the build if either Chromium executable is missing libraries", () => {
