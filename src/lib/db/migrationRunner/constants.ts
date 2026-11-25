@@ -42,6 +42,21 @@ export const RENAMED_MIGRATION_COMPATIBILITY = [
     toVersion: "20261115112345",
     toName: "daily_usage_evidence",
   },
+  // #20170 builds ran launch_sessions as 240 (earlier heads, now the canonical
+  // provider_node_custom_json_config slot) and then 242 (a slot that stays empty). Move both
+  // rows to the timestamped file so the canonical 240 runs and launch_sessions never re-runs.
+  {
+    fromVersion: "240",
+    fromName: "launch_sessions",
+    toVersion: "20261116102450",
+    toName: "launch_sessions",
+  },
+  {
+    fromVersion: "242",
+    fromName: "launch_sessions",
+    toVersion: "20261116102450",
+    toName: "launch_sessions",
+  },
   {
     fromVersion: "238",
     fromName: "call_logs_artifact_overflow_order_index",

@@ -22,6 +22,13 @@ function renderPool(over: Partial<SelfQuotaPool> = {}) {
 
 const bar = (name: string) => screen.getByRole("progressbar", { name });
 const noBar = (name: string) => expect(screen.queryByRole("progressbar", { name })).toBeNull();
+/** A stale reading draws the kit fill in the neutral border colour, never with a status tone. */
+const expectNeutralFill = (element: HTMLElement) => {
+  const fill = element.firstElementChild as HTMLElement;
+  expect(fill.hasAttribute("data-color")).toBe(true);
+  expect(fill.hasAttribute("data-tone")).toBe(false);
+  expect(fill.style.getPropertyValue("--ci-progress-color")).toBe("var(--color-border-strong)");
+};
 
 const SHARE_OVER = {
   hard: "You have used your share. While the account is busy, new requests are blocked until this window resets.",
@@ -154,8 +161,7 @@ describe("self-service quota windows", () => {
     renderPool({
       accounts: [account({ dimensions: [accountDim({ account: { used: 40, status: "stale" } })] })],
     });
-    const fill = bar("Account (everyone)").firstElementChild;
-    expect(fill?.className).toContain("bg-border-strong");
+    expectNeutralFill(bar("Account (everyone)"));
     expect(screen.getByText("May be out of date")).toBeTruthy();
     expect(
       screen.getByText("This reading is older than usual. A newer one has not arrived yet.")
@@ -171,7 +177,7 @@ describe("self-service quota windows", () => {
         }),
       ],
     });
-    expect(bar("Your share").firstElementChild?.className).toContain("bg-border-strong");
+    expectNeutralFill(bar("Your share"));
     expect(screen.getByText("May be out of date")).toBeTruthy();
     expect(screen.getByText("380 requests left")).toBeTruthy();
   });
