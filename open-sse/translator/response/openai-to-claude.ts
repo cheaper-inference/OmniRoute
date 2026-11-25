@@ -752,7 +752,7 @@ export function openaiToClaudeResponse(chunk, state) {
           // corrected JSON at stop time.
           const existingArgs = toolInfo.argBuffer || "";
           const incomingArgs = tc.function.arguments;
-          const nextArgs = appendToolCallArgumentDelta(existingArgs, incomingArgs);
+          const nextArgs = appendToolCallArgumentDelta(existingArgs, incomingArgs, state);
           // The new bytes are the tail of the short incoming fragment. Slicing the grown
           // buffer would flatten it, and each slice would then pin the whole old prefix.
           let deltaStr =
