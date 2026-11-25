@@ -31,6 +31,18 @@ export function claudeModelSupportsThinking(specId: string): boolean {
   return getModelSpec(specId)?.supportsThinking === true;
 }
 
+// A Bedrock model id wraps the Claude id in a region, a provider and a version
+// (us.anthropic.claude-sonnet-4-5-20250929-v1:0); the model specs know the inner
+// one. Shared by the Bedrock Converse executor (thinking gate) and chatCore's
+// final-output-budget gate, which must mirror the executor's fitting exactly.
+export const BEDROCK_CLAUDE_MODEL = /anthropic\.claude/i;
+
+export function bedrockClaudeSpecId(model: string): string {
+  return String(model)
+    .replace(/^.*anthropic\./i, "")
+    .replace(/-v\d+(?::.*)?$/i, "");
+}
+
 export interface ClaudeThinkingConfig {
   /** Claude `thinking` object, when the request asks for extended thinking. */
   thinking?: Record<string, unknown>;

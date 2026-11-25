@@ -83,6 +83,83 @@ test("forced Claude tools do not reserve suppressed thinking output", () => {
   }
 });
 
+test("Responses reasoning effort is reserved before the pivot promotes it", () => {
+  // #21057 review: the headroom gate reads the pre-pivot Responses body, where the
+  // effort still lives in `reasoning.effort`; the Responses→Chat pivot promotes it
+  // to `reasoning_effort` only later, after the last-resort compaction decision.
+  const body = {
+    input: [{ role: "user", content: "history" }],
+    // sanitizeChatRequestBody renames Responses `max_output_tokens` → `max_tokens`
+    // for non-Responses targets before the gate runs.
+    max_tokens: 32_768,
+    reasoning: { effort: "medium" },
+  };
+  const headroom = requiredOutputHeadroom(
+    body,
+    "openai-responses",
+    "claude",
+    "claude-sonnet-4-5",
+    "claude"
+  );
+  assert.equal(headroom, 43_008, "32,768 response + 10,240 medium thinking");
+  assert.equal(
+    162_000 >= 200_000 - headroom,
+    true,
+    "the review repro (162k input, effort medium) must trigger last-resort compaction"
+  );
+  assert.equal(
+    requiredOutputHeadroom(
+      { ...body, reasoning: undefined },
+      "openai-responses",
+      "claude",
+      "claude-sonnet-4-5",
+      "claude"
+    ),
+    0,
+    "without Responses reasoning the explicit limit reserves nothing extra"
+  );
+});
+
+test("Bedrock's OpenAI-format path reserves the executor's fitted thinking budget", () => {
+  // #21057 review: Bedrock declares registry format "openai", but its Converse
+  // executor (claudeThinkingFields → fitThinkingToMaxTokens) raises
+  // inferenceConfig.maxTokens above the response limit after the budget gate.
+  const body = {
+    messages: [{ role: "user", content: "history" }],
+    max_tokens: 32_768,
+    thinking: { type: "enabled", budget_tokens: 16_384 },
+  };
+  const headroom = requiredOutputHeadroom(
+    body,
+    "openai",
+    "openai",
+    "anthropic.claude-sonnet-4-5",
+    "bedrock"
+  );
+  assert.equal(headroom, 49_152, "the executor sends 49,152 output tokens for this body");
+  assert.equal(
+    162_000 >= 200_000 - headroom,
+    true,
+    "the review repro (162k input) must trigger last-resort compaction"
+  );
+  assert.equal(
+    requiredOutputHeadroom(
+      { ...body, thinking: undefined, reasoning_effort: "medium" },
+      "openai",
+      "openai",
+      "anthropic.claude-sonnet-4-5",
+      "bedrock"
+    ),
+    43_008,
+    "an OpenAI reasoning_effort is reserved the same way"
+  );
+  assert.equal(
+    requiredOutputHeadroom(body, "openai", "openai", "meta.llama4-scout-17b", "bedrock"),
+    0,
+    "non-Claude Bedrock models get no thinking reserve"
+  );
+});
+
 test("Anthropic Messages clients get the compactable 'prompt is too long' message", () => {
   const result = enforceFinalOutputTokenBudget({ ...base, sourceFormat: "claude" });
 
