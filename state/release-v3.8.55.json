@@ -2,48 +2,7 @@
   "version": 1,
   "base": "release/v3.8.55",
   "paused": null,
-  "inFlight": {
-    "batchId": "b38",
-    "kind": "batch",
-    "candidateRef": "omni-queue/release-v3.8.55/b38-a3f02f39d874",
-    "candidateSha": "a3f02f39d8741d851cf85f91975f9fba6f26fd49",
-    "baseSha": "e7729b07ad30021137985522383b189dcbe8eaf1",
-    "treeSha": "68ae491e47e7b4e3f1818ffcae5961cb818ac6cb",
-    "prs": [
-      {
-        "n": 21168,
-        "head": "737b51001973ce7515621b9d755b8b691ec0cc4d",
-        "title": "fix(pwa): never leave a rejected fetch in the service worker (KEA-9524)",
-        "author": "diegosouzapw",
-        "labeledAt": "2026-11-25T05:25:56Z"
-      },
-      {
-        "n": 21169,
-        "head": "1b25808a6aaecce78050efa5eae4915e5e24bbbe",
-        "title": "fix(dashboard): cap the eval suite name in the New suite form (KEA-9519)",
-        "author": "diegosouzapw",
-        "labeledAt": "2026-11-25T05:25:59Z"
-      },
-      {
-        "n": 21172,
-        "head": "287d78b5c39f3d8af083ef9d75339aad8f8667cf",
-        "title": "fix(dashboard): show the date in the request log time column (KEA-9522)",
-        "author": "diegosouzapw",
-        "labeledAt": "2026-11-25T05:26:02Z"
-      },
-      {
-        "n": 21174,
-        "head": "d9ea082ecf3416320481a65ec352428c2cdd8db6",
-        "title": "fix(webhooks): accurate copy for http endpoints and the optional name (KEA-9517, KEA-9518)",
-        "author": "diegosouzapw",
-        "labeledAt": "2026-11-25T05:26:07Z"
-      }
-    ],
-    "stage": "testing",
-    "startedAt": "2026-11-25T11:46:16.493Z",
-    "attempts": 0,
-    "bisect": null
-  },
+  "inFlight": null,
   "baseChecks": [
     {
       "baseSha": "ae94881fcf543d1ee91d6af11f18b274280e0c53",
@@ -2501,8 +2460,35 @@
       "sha": "26d576676d1f343cd6817785268ca2aac07524f6",
       "detail": "head-changed-after-label, pr-checks-not-green",
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45607504277"
+    },
+    {
+      "at": "2026-11-25T13:03:26.920Z",
+      "type": "checks-green",
+      "batchId": "b38",
+      "prs": [
+        21168,
+        21169,
+        21172,
+        21174
+      ],
+      "sha": "a3f02f39d8741d851cf85f91975f9fba6f26fd49",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45619671982"
+    },
+    {
+      "at": "2026-11-25T13:03:35.020Z",
+      "type": "land-rejected",
+      "batchId": "b38",
+      "prs": [
+        21168,
+        21169,
+        21172,
+        21174
+      ],
+      "sha": "a3f02f39d8741d851cf85f91975f9fba6f26fd49",
+      "detail": "batch changed before landing: #21168 queue label removed; #21169 queue label removed; #21172 queue label removed; #21174 queue label removed",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45619671982"
     }
   ],
-  "updatedAt": "2026-11-25T12:53:15.232Z",
+  "updatedAt": "2026-11-25T13:03:41.023Z",
   "batchWindow": 5
 }
