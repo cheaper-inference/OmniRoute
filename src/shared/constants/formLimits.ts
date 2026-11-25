@@ -21,3 +21,6 @@ export const EVAL_SUITE_DESCRIPTION_MAX_LENGTH = 2000;
 
 /** `cases[].name` of the same eval suite save routes. */
 export const EVAL_CASE_NAME_MAX_LENGTH = 200;
+
+/** `url` of POST /v1/web/fetch and POST /v1/web/map (Search Tools › Scrape). */
+export const WEB_FETCH_URL_MAX_LENGTH = 2000;
