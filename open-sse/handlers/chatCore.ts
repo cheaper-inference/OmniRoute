@@ -123,7 +123,13 @@ import { resolveAgentGoalPolicy } from "../utils/agentGoalPolicy.ts";
 import { createChatStreamController } from "./chatCore/chatStreamController.ts";
 import * as streamFailure from "../utils/streamFailureFinalization.ts";
 import { normalizeUsage } from "../utils/usageTracking.ts";
-import { refreshWithRetry, runWithOnPersist, runWithCasGuard } from "../services/tokenRefresh.ts";
+import {
+  refreshWithRetry,
+  runWithOnPersist,
+  runWithCasGuard,
+  isUnrecoverableRefreshError,
+} from "../services/tokenRefresh.ts";
+import { wasRefreshTokenRotated } from "../services/refreshSerializer.ts";
 import { createRequestLogger } from "../utils/requestLogger.ts";
 import { createPreparedRequestLogger } from "../utils/providerRequestLogging.ts";
 import { summarizeToolSources } from "../utils/toolSources.ts";
@@ -2965,7 +2971,46 @@ async function handleChatCoreInner({
       }
       return newCredentials;
     }
+    await deactivateOnRevokedRefresh(newCredentials, casConnectionId, attemptedRefreshToken);
     return null;
+  };
+
+  // The pipeline path drops a non-token refresh result, so a revoked refresh token
+  // (refresh_token_invalidated / _reused / invalid_grant) never reached the legacy
+  // "park as expired" branch: the connection stayed active and every short cooldown
+  // re-selected it for another guaranteed 401. Park it here, unless a concurrent
+  // refresh or a re-login already replaced the token we presented.
+  const deactivateOnRevokedRefresh = async (
+    result: unknown,
+    targetConnectionId: string,
+    attemptedRefreshToken: string | null
+  ) => {
+    if (!targetConnectionId || !isUnrecoverableRefreshError(result)) return;
+    if ((result as { error?: string }).error === "no_refresh_needed") return;
+    if (isPassiveCodex(provider)) return;
+    if (await shouldIsolateProbeFailures()) return;
+    try {
+      const latest = await readLatestRefreshToken(targetConnectionId);
+      if (wasRefreshTokenRotated(attemptedRefreshToken, latest)) return;
+      const code = String((result as { code?: unknown }).code ?? "unrecoverable_refresh_error");
+      await writeTerminalStatus(
+        targetConnectionId,
+        {
+          testStatus: "expired",
+          isActive: false,
+          lastError: `Refresh token rejected (${code}); re-authentication required`,
+          lastErrorType: "unauthorized",
+          errorCode: "401",
+        },
+        "production"
+      );
+      log?.warn?.(
+        "TOKEN",
+        `${provider?.toUpperCase()} | refresh token rejected (${code}) — connection ${targetConnectionId.slice(0, 8)} deactivated, re-authentication required`
+      );
+    } catch (error) {
+      log?.warn?.("TOKEN", `Revoked-refresh deactivation failed (non-fatal): ${error}`);
+    }
   };
 
   const handleCredentialsRefreshed = async (refreshed: Record<string, unknown>) => {
