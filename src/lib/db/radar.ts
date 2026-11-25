@@ -159,6 +159,11 @@ export function setRadarCache(entry: {
   );
 }
 
+/** Record a successful check of the cached catalog version. */
+export function touchRadarCacheFetchedAt(fetchedAt: string): void {
+  getDbInstance().prepare("UPDATE radar_feed_cache SET fetched_at = ? WHERE id = 1").run(fetchedAt);
+}
+
 // ---------------------------------------------------------------------------
 // radar_settings
 // ---------------------------------------------------------------------------
@@ -185,9 +190,23 @@ export function getRadarSettings(): RadarSettings {
  */
 export function setRadarOptIn(optIn: boolean): void {
   const db = getDbInstance();
-  db.prepare("UPDATE radar_settings SET opt_in = ?, updated_at = datetime('now') WHERE id = 1").run(
-    optIn ? 1 : 0
-  );
+  db.transaction(() => {
+    db.prepare(
+      "UPDATE radar_settings SET opt_in = ?, updated_at = datetime('now') WHERE id = 1"
+    ).run(optIn ? 1 : 0);
+    if (!optIn) clearRadarFeedCaches();
+  })();
+}
+
+/** Clear the signed feeds while preserving local Radar model state. */
+export function clearRadarFeedCaches(): void {
+  const db = getDbInstance();
+  db.transaction(() => {
+    db.prepare("DELETE FROM radar_feed_cache WHERE id = 1").run();
+    db.prepare("DELETE FROM radar_referrals_cache WHERE id = 1").run();
+    db.prepare("DELETE FROM radar_offers_cache WHERE id = 1").run();
+    db.prepare("DELETE FROM radar_intel_cache WHERE id = 1").run();
+  })();
 }
 
 /**
@@ -201,20 +220,12 @@ export function setRadarKey(key: string | null): void {
   const updateKey = db.prepare(
     "UPDATE radar_settings SET supporter_key_encrypted = ?, updated_at = datetime('now') WHERE id = 1"
   );
-  const clearCatalogCache = db.prepare("DELETE FROM radar_feed_cache WHERE id = 1");
-  const clearReferralsCache = db.prepare("DELETE FROM radar_referrals_cache WHERE id = 1");
-  const clearOffersCache = db.prepare("DELETE FROM radar_offers_cache WHERE id = 1");
-  const clearIntelCache = db.prepare("DELETE FROM radar_intel_cache WHERE id = 1");
-
   db.transaction(() => {
     updateKey.run(encrypted);
     // All signed feeds are entitlement-sensitive. Clearing their cached
     // variants forces the next sync/read to resolve the new key server-side
     // instead of serving data fetched under the previous entitlement.
-    clearCatalogCache.run();
-    clearReferralsCache.run();
-    clearOffersCache.run();
-    clearIntelCache.run();
+    clearRadarFeedCaches();
   })();
 }
 

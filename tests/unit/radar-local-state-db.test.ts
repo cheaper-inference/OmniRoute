@@ -9,6 +9,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { FREE_CATALOG_CURATED_AT } from "../../open-sse/config/freeModelCatalog.data.ts";
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-radar-local-state-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
@@ -22,6 +23,7 @@ const {
   setRadarLocalModelOverride,
   setRadarModelTombstone,
   setRadarCache,
+  setRadarOptIn,
 } = await import("../../src/lib/db/radar.ts");
 const { getRadarCatalog } = await import("../../src/lib/radar/index.ts");
 
@@ -167,8 +169,10 @@ test("production getRadarCatalog loads persisted overrides and tombstones", () =
   );
   assert.ok(visible && hidden, "fixture must contain two enabled models");
 
+  setRadarOptIn(true);
   setRadarCache({
     version: fixture.version,
+    generatedAt: `${FREE_CATALOG_CURATED_AT}T12:00:00.000Z`,
     tier: fixture.tier,
     payload,
     signature: "test-signature",
