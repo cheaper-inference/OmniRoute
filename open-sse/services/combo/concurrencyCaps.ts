@@ -14,19 +14,19 @@
  *
  * Both deduplicate DB reads per connectionId (the same connection can repeat
  * across combo steps) so at most one lookup happens per distinct connection, and
- * both fail open: a null/<=0 cap or a lookup error means "no per-connection
- * limit" and never blocks routing. Extracted from combo.ts to keep that god-file
+ * both fail open: an unset cap without a provider default or a lookup error
+ * means "no per-connection limit". Extracted from combo.ts to keep that god-file
  * shrinking (Quality Gate / #3501).
  */
 
-import { getCachedProviderConnectionById } from "@/lib/db/readCache";
 import { buildAccountSemaphoreKey } from "../accountSemaphore.ts";
 import { resolveConnectionConcurrencyCap } from "../adaptiveConnectionConcurrency.ts";
+import { getCachedProviderConnectionById } from "../providerConnectionPool.ts";
 import { getProviderDefaultConnectionConcurrency } from "../providerDefaultRateLimit.ts";
 import { effectiveMaxConcurrency } from "./comboPredicates.ts";
 import type { ResolvedComboTarget } from "./types.ts";
 
-/** Read a connection's positive `maxConcurrent`, or null when unset / <= 0 / on error. */
+/** Read the effective per-connection cap, or null when uncapped or on lookup error. */
 export async function lookupPositiveCap(connectionId: string): Promise<number | null> {
   try {
     const conn = await getCachedProviderConnectionById(connectionId);
