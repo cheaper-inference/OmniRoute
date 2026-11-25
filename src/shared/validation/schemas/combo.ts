@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { isReservedComboName } from "@/lib/combos/autoNames";
+import { isReservedComboName } from "@/shared/constants/autoComboNames";
 import {
   ACCOUNT_FALLBACK_STRATEGY_VALUES,
   ROUTING_STRATEGY_VALUES,

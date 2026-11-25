@@ -94,7 +94,7 @@ import {
   resolveComboBuilderProviderId,
   type ComboBuilderStage,
 } from "@/lib/combos/builderDraft";
-import { isReservedComboName } from "@/lib/combos/autoNames";
+import { isReservedComboName } from "@/shared/constants/autoComboNames";
 import { buildDuplicateComboPayload } from "@/lib/combos/duplicatePayload";
 import { normalizeComboConfigMode } from "@/shared/constants/comboConfigMode";
 import type { z } from "zod";
