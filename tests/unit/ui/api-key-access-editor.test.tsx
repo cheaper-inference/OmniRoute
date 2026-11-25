@@ -7,6 +7,7 @@ import { NextIntlClientProvider } from "next-intl";
 import messages from "../../../src/i18n/messages/en.json";
 import ApiKeyAccessEditorClient from "../../../src/app/(dashboard)/dashboard/api-manager/[id]/access/ApiKeyAccessEditorClient";
 import { useNotificationStore } from "../../../src/store/notificationStore";
+import { findButtonByTooltip } from "../../_helpers/buttonTooltip";
 
 const mockRouter = {
   push: vi.fn(),
@@ -599,9 +600,13 @@ describe("ApiKeyAccessEditorClient", () => {
     currentSearch = "tab=models";
     await renderLoaded();
 
-    const modelButton = (id: string) =>
-      screen.queryAllByTitle(id).find((element) => element.tagName === "BUTTON") ?? null;
-    expect(modelButton("openai/gpt-4o-mini")).toBeNull();
+    // A model chip is named after the model; its id is the chip's kit tooltip (its title), which
+    // is no longer an attribute.
+    const modelButton = (id: string) => findButtonByTooltip(document.body, id);
+    // The chips are the pressed-state buttons that carry a tooltip.
+    const chipCount = () => document.querySelectorAll("button[aria-pressed][data-state]").length;
+    expect(await modelButton("openai/gpt-4o-mini")).toBeNull();
+    const chipsBeforeCatalog = chipCount();
 
     modelsGate.resolve(
       jsonResponse({
@@ -614,19 +619,22 @@ describe("ApiKeyAccessEditorClient", () => {
     );
 
     await waitFor(() => {
-      expect(modelButton("openai/gpt-4o-mini")).not.toBeNull();
-      expect(modelButton("anthropic/claude-3-5-sonnet")).not.toBeNull();
+      expect(chipCount()).toBeGreaterThan(chipsBeforeCatalog);
     });
+    expect(await modelButton("openai/gpt-4o-mini")).not.toBeNull();
+    expect(await modelButton("anthropic/claude-3-5-sonnet")).not.toBeNull();
+    const chipsWithCatalog = chipCount();
 
     // Only once: a group the user collapses afterwards stays collapsed.
-    const openaiGroup = modelButton("openai/gpt-4o-mini")?.closest(".group");
+    const openaiGroup = (await modelButton("openai/gpt-4o-mini"))?.closest(".group");
     const expandToggle = openaiGroup?.querySelector("button");
     expect(expandToggle).toBeTruthy();
     fireEvent.click(expandToggle as HTMLButtonElement);
     await waitFor(() => {
-      expect(modelButton("openai/gpt-4o-mini")).toBeNull();
+      expect(chipCount()).toBeLessThan(chipsWithCatalog);
     });
-    expect(modelButton("anthropic/claude-3-5-sonnet")).not.toBeNull();
+    expect(await modelButton("openai/gpt-4o-mini")).toBeNull();
+    expect(await modelButton("anthropic/claude-3-5-sonnet")).not.toBeNull();
   });
 
   it("shows the model selection cap inline on the Models tab", async () => {

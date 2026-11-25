@@ -28,7 +28,9 @@ export default function CompanionCommand({
   return (
     <li className="min-w-0 space-y-2 border-t border-border py-3 first:border-t-0">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h3 className="text-sm text-text-main">{title}</h3>
+        <h3 className="ci-heading text-text-main" data-size="sm">
+          {title}
+        </h3>
         <Button
           variant="secondary"
           icon="content_copy"

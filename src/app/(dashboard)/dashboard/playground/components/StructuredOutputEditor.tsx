@@ -1,5 +1,6 @@
 "use client";
 
+import Card from "@/shared/components/Card";
 // src/app/(dashboard)/dashboard/playground/components/StructuredOutputEditor.tsx
 
 import Button from "@/shared/components/Button";
@@ -79,7 +80,7 @@ export default function StructuredOutputEditor({ structuredOutput }: StructuredO
 
       {/* Schema editor (shown only when enabled) */}
       {enabled && (
-        <div className="flex flex-col gap-2 border border-border rounded-lg p-3 bg-surface">
+        <Card.Section className="flex flex-col gap-2">
           {/* Schema name */}
           <Input
             label={t("schemaName")}
@@ -87,15 +88,12 @@ export default function StructuredOutputEditor({ structuredOutput }: StructuredO
             value={nameField}
             onChange={(e) => setNameField(e.target.value)}
             placeholder="my_schema"
-            inputClassName="text-xs"
+            size="xs"
           />
 
           {/* Schema JSON textarea */}
           <div className="flex flex-col gap-1">
-            <span
-              className="text-[10px] text-text-muted uppercase tracking-wider"
-              aria-hidden="true"
-            >
+            <span className="ci-eyebrow" data-size="3xs" aria-hidden="true">
               {t("jsonSchema")}
             </span>
             <Textarea
@@ -103,7 +101,8 @@ export default function StructuredOutputEditor({ structuredOutput }: StructuredO
               onChange={(e) => setSchemaRaw(e.target.value)}
               rows={8}
               aria-label={t("jsonSchemaEditor")}
-              className="text-xs font-mono resize-y"
+              mono
+              className="resize-y"
             />
           </div>
 
@@ -119,7 +118,7 @@ export default function StructuredOutputEditor({ structuredOutput }: StructuredO
           <Button variant="outline" size="sm" onClick={handleValidate} className="self-start">
             {t("validateSchema")}
           </Button>
-        </div>
+        </Card.Section>
       )}
     </div>
   );

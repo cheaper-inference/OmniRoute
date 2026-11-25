@@ -295,7 +295,45 @@ test("STATUS_HEX mirrors the kit status palette (ReactFlow/SVG need hex)", async
 });
 
 test("<html> opts into the kit theme surface", () => {
-  assert.match(read("src/app/layout.tsx"), /<html[^>]*className="ci-theme"/);
+  assert.match(read("src/app/layout.tsx"), /<html[^>]*className="ci-theme ci-scrollbars"/);
+});
+
+// Scrollbars are the kit's opt-in `ci-scrollbars` (tokens `--ci-scrollbar-*`, 8px, forced-colours
+// aware). The kit rule sits in `@layer base`: a host rule outside any layer would beat it, and in
+// Chromium and Safari an element that sets `scrollbar-width` or `scrollbar-color` itself drops the
+// kit's `::-webkit-scrollbar` styling and shows the browser's colours.
+test("scrollbars come from the kit's ci-scrollbars class, with no host rule on top", () => {
+  const kit = read("packages/ui-kit/src/ci-ui.css");
+  assert.match(kit, /\.ci-scrollbars \*::-webkit-scrollbar-thumb \{/, "the kit ships the class");
+
+  for (const root of ["src/app/layout.tsx", "src/app/global-error.tsx"]) {
+    const html = read(root).match(/<html[\s\S]*?>/)?.[0] ?? "";
+    assert.match(html, /\bci-theme\b/, `${root}: <html> keeps ci-theme`);
+    assert.match(html, /\bci-scrollbars\b/, `${root}: <html> opts into the kit scrollbars`);
+  }
+
+  assert.doesNotMatch(css, /::-webkit-scrollbar/, "globals.css restyles the scrollbar parts");
+  assert.doesNotMatch(css, /scrollbar-(width|color)\s*:/, "globals.css sets scrollbar-width/color");
+
+  const offenders: string[] = [];
+  const walk = (dir: string) => {
+    for (const entry of fs.readdirSync(path.join(ROOT, dir), { withFileTypes: true })) {
+      const rel = `${dir}/${entry.name}`;
+      if (entry.isDirectory()) walk(rel);
+      else if (/\.(tsx?|css)$/.test(entry.name) && rel !== "src/app/globals.css") {
+        const text = read(rel);
+        // `custom-scrollbar` was the host alias for the removed rules: it styles nothing now.
+        for (const m of text.matchAll(
+          /custom-scrollbar|scrollbar-(?:width|color)\s*:|scrollbar(?:Width|Color)\s*:|::-webkit-scrollbar/g
+        )) {
+          offenders.push(`${rel}:${text.slice(0, m.index).split("\n").length} ${m[0]}`);
+        }
+      }
+    }
+  };
+  walk("src/app");
+  walk("src/shared");
+  assert.deepEqual(offenders, []);
 });
 
 // Guards kept from design-grid-background.test.ts that are still true after the bridge
@@ -305,9 +343,11 @@ test("flow surfaces still express state with --orch-status-* tokens, not fixed h
   const engine = read("src/app/(dashboard)/dashboard/compression/studio/nodes/EngineNode.tsx");
   const edges = read("src/shared/components/flow/edgeStyles.ts");
   const badge = read("src/shared/components/TokenHealthBadge.tsx");
-  for (const [name, src] of Object.entries({ engine, edges })) {
-    assert.ok(src.includes("var(--orch-status-"), `${name} reads the status tokens`);
-  }
+  assert.ok(engine.includes("var(--orch-status-"), "engine reads the status tokens");
+  // The shared edge palette is the kit's flow-edge tokens (kit #287), read through the kit's
+  // token references, never a literal.
+  assert.ok(edges.includes("ciTokenReferences.flowEdge."), "edges read the kit flow-edge tokens");
+  assert.doesNotMatch(edges, /#[0-9a-fA-F]{6}\b/);
   // The Combo Studio run outcome is a kit Stat: its state colour is the Stat tone (kit status
   // tokens), mapped per outcome, never a literal.
   assert.match(
@@ -357,12 +397,14 @@ test("DataTable is theme-aware via --table-* tokens, no color literal, no dead f
   // KEA-7886: rows, borders, hover and selection come from the kit table (ci-ui.css tokens);
   // the selected row is the kit's data-state="selected" instead of a zebra/selected inline mix.
   assert.ok(dt.includes('from "@omniroute/ui-kit/table"'), "rows render through the kit table");
-  // The row itself (keyboard activation and selection) lives in the InteractiveTableRow adapter.
-  const row = read("src/shared/components/InteractiveTableRow.tsx");
-  assert.ok(dt.includes("selected={selected}"), "the adapter passes the selection to the row");
-  assert.ok(row.includes('from "@omniroute/ui-kit/table"'), "the row is the kit TableRow");
-  assert.ok(row.includes('data-state={selected ? "selected" : undefined}'), "kit row selection");
-  assert.ok(!/rgba\(|#[0-9a-fA-F]{3,6}/.test(row), "the row hardcodes no color literal");
+  // The row itself (keyboard activation and selection) is the kit TableRow: `onActivate` and
+  // `selected`, which sets `aria-selected` and the kit `data-state="selected"`.
+  assert.match(dt, /<TableRow\s+key=\{[^}]+\}\s+onActivate=\{[^\n]+\}\s+selected=\{selected\}/);
+  assert.ok(!dt.includes("InteractiveTableRow"), "no local row adapter next to the kit row");
+  assert.ok(
+    !/onClick=|onKeyDown=|tabIndex=|aria-selected=|data-state=/.test(dt),
+    "the adapter adds no row handler or state attribute of its own"
+  );
   assert.ok(!/rgba\(|#[0-9a-fA-F]{3,6}/.test(dt), "DataTable hardcodes no color literal");
   assert.ok(
     !dt.includes("--text-secondary") && !dt.includes("--bg-table-header"),
@@ -396,10 +438,11 @@ test("every flow surface expresses state with --orch-status-* tokens; categorica
     "engine savings>=15 / running = warning"
   );
   assert.ok(engine.includes('"var(--orch-status-muted)"'), "engine no-savings = muted token");
-  assert.ok(
-    engine.includes("flowColorAlpha("),
-    "engine glow uses color-mix, not a hex alpha suffix"
-  );
+  // The frame is the kit FlowNode: its tone is the same ramp as a kit status, and the halo of a
+  // running step is the kit's (`active`), so the node draws no glow of its own.
+  assert.match(engine, /<FlowNode\b/, "engine frame is the kit FlowNode");
+  assert.match(engine, /active=\{running\}/, "a running engine step is the active FlowNode");
+  assert.ok(!engine.includes("boxShadow"), "engine draws no hand-made glow");
   assert.ok(!engine.includes("#f59e0b40"), "the 8-bit alpha suffix is gone (invalid on a var())");
 
   // Waterfall inspector: same ramp + the skipped/idle state + the total savings.
@@ -412,7 +455,11 @@ test("every flow surface expresses state with --orch-status-* tokens; categorica
   // Cockpit header + IoNode savings readout.
   assert.ok(cockpit.includes('"var(--orch-status-success)"'), "cockpit savings = success token");
   assert.ok(!cockpit.includes('"#22c55e"'), "cockpit hardcodes no success hex");
-  assert.ok(io.includes('"var(--orch-status-success)"'), "IoNode savings = success token");
+  assert.match(
+    io,
+    /status=\{hasSavings \? "success" : undefined\}/,
+    "IoNode savings = the kit success tone of its FlowNode"
+  );
 
   // Categorical palettes (not state) ride the kit chart tokens, never hex (KEA-7886, P8).
   assert.ok(
@@ -437,6 +484,39 @@ test("@theme inline still exposes bg-surface-2 and rounded-card", () => {
   assert.match(theme, /--radius-control:\s*var\(--radius-control\);/);
 });
 
+// The kit's two sub-12px label sizes (11px and 10px). The utilities exist so a small label can
+// name a token instead of `text-[11px]` / `text-[10px]`; the type-scale ratchet counts those.
+test("@theme inline exposes the kit 2xs and 3xs font sizes as text-2xs / text-3xs", async () => {
+  const tokens = read("packages/ui-kit/src/ci-tokens.css");
+  assert.match(tokens, /--ci-font-size-2xs:\s*0\.6875rem;/);
+  assert.match(tokens, /--ci-font-size-3xs:\s*0\.625rem;/);
+
+  // Compiled by the Tailwind of this checkout, from the real @theme block.
+  const { compile } = await import("tailwindcss");
+  const start = css.indexOf("@theme inline {");
+  const theme = css.slice(start, css.indexOf("\n}", start) + 2);
+  const compiled = await compile(`${theme}\n@tailwind utilities;`);
+  const out = compiled.build(["text-2xs", "text-3xs", "text-4xs"]).replace(/\s+/g, " ");
+  assert.ok(out.includes(".text-2xs { font-size: var(--ci-font-size-2xs); }"), out.slice(-400));
+  assert.ok(out.includes(".text-3xs { font-size: var(--ci-font-size-3xs); }"), out.slice(-400));
+  assert.ok(!out.includes(".text-4xs"), "an unknown size still generates nothing");
+
+  // cn() reads them as font sizes: they replace another size and leave a text colour alone.
+  const { cn } = await import("../../src/shared/utils/cn.ts");
+  assert.equal(cn("text-sm", "text-2xs"), "text-2xs");
+  assert.equal(cn("text-3xs", "text-xs"), "text-xs");
+  assert.equal(cn("text-text-muted", "text-3xs"), "text-text-muted text-3xs");
+});
+
+test("@theme inline exposes rounded-card-nested on the kit nested-surface radius", () => {
+  // A panel nested in a card that stays a plain <div> takes the same radius as the kit's
+  // `Card surface="inset"` (Card.Section): Classic 4px, Editions 8px, never above the card's.
+  const theme = block("@theme inline {");
+  assert.match(theme, /--radius-card-nested:\s*var\(--ci-radius-surface-nested\);/);
+  const tokens = fs.readFileSync(path.join(ROOT, "packages/ui-kit/src/ci-tokens.css"), "utf8");
+  assert.match(tokens, /--ci-radius-surface-nested:/, "the kit defines the token");
+});
+
 test("bg-alt, muted and surface-secondary have @theme entries so their utilities paint (KEA-7886 P4)", () => {
   // Before P4 these three had a :root value but no @theme entry: `bg-bg-alt` (41 uses),
   // `bg-muted/50` and `bg-surface-secondary/30` generated no CSS at all.
@@ -456,9 +536,13 @@ test("bg-alt, muted and surface-secondary have @theme entries so their utilities
 test("cn() still dedupes via tailwind-merge and DataTable paints an opaque surface", () => {
   assert.match(read("src/shared/utils/cn.ts"), /twMerge\(clsx\(/);
   // Kit 0.0.116: the kit Table container is the DataTable scroll viewport, and the kit paints it
-  // with the opaque surface; the adapter must not make it transparent.
+  // with the opaque surface; the adapter must not make it transparent by a class of its own.
+  // The one case without that surface is the kit's own `variant="plain"` (`framed={false}`):
+  // the Card around the table is then the frame and the surface.
   const dt = read("src/shared/components/DataTable.tsx");
   assert.ok(dt.includes("maxHeight={maxHeight}") && !dt.includes("bg-transparent"));
+  assert.ok(dt.includes('variant={framed ? undefined : "plain"}'));
+  assert.ok(!dt.includes("containerClassName"), "no host class repeats the kit variant");
   assert.match(
     read("packages/ui-kit/src/ci-ui.css"),
     /\.ci-table-container \{[^}]*background: var\(--ci-color-surface\);/

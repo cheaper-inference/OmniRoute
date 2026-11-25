@@ -23,4 +23,11 @@ export const OPENCODE_ZEN_GO_SHARED_MODELS = Object.freeze([
     supportsReasoning: true,
     supportedThinkingEfforts: ["high", "max"],
   },
+  // GLM-5.3 and GLM-5.3 Flash were served by both tiers through passthrough only.
+  // Reasoning and vision flags match the Z.AI rows for the same models
+  // (glmProvider.ts). Effort vocabulary and limits stay undeclared until measured
+  // against the OpenCode upstream: the GLM-5.2 rows show its effort set can be
+  // narrower than Z.AI's own.
+  { id: "glm-5.3", name: "GLM-5.3", supportsReasoning: true, supportsVision: false },
+  { id: "glm-5.3-flash", name: "GLM-5.3 Flash", supportsReasoning: true, supportsVision: true },
 ]);

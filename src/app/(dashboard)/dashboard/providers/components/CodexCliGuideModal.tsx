@@ -1,5 +1,6 @@
 "use client";
 
+import { InlineCode } from "@omniroute/ui-kit/inline-code";
 import Icon from "@/shared/components/Icon";
 import { Spinner } from "@/shared/components/Loading";
 
@@ -45,10 +46,14 @@ const markdownComponents: Components = {
     );
   },
   h3({ children }) {
-    return <h3 className="mt-4 mb-2 text-sm text-text-main/80">{children}</h3>;
+    return (
+      <h3 className="ci-heading mt-4 mb-2 text-text-main/80" data-size="sm">
+        {children}
+      </h3>
+    );
   },
   h4({ children }) {
-    return <h4 className="mt-3 mb-1 text-xs uppercase text-text-muted">{children}</h4>;
+    return <h4 className="ci-eyebrow mt-3 mb-1">{children}</h4>;
   },
   p({ children }) {
     return <p className="mb-2 text-sm leading-relaxed text-text-muted">{children}</p>;
@@ -74,16 +79,12 @@ const markdownComponents: Components = {
     const isBlock = className?.includes("language-");
     if (isBlock) {
       return (
-        <code className="block w-full whitespace-pre-wrap font-mono text-[12px] text-text-main">
+        <code className="block w-full whitespace-pre-wrap font-mono text-xs text-text-main">
           {children}
         </code>
       );
     }
-    return (
-      <code className="rounded border border-border bg-bg-subtle px-1 py-0.5 font-mono text-[12px] text-text-main">
-        {children}
-      </code>
-    );
+    return <InlineCode>{children}</InlineCode>;
   },
   pre({ children }) {
     return (
