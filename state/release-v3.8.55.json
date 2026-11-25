@@ -2491,8 +2491,18 @@
         "21174": "2026-11-25T05:26:07Z"
       },
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45607328408"
+    },
+    {
+      "at": "2026-11-25T11:47:07.764Z",
+      "type": "would-dequeue",
+      "prs": [
+        21095
+      ],
+      "sha": "26d576676d1f343cd6817785268ca2aac07524f6",
+      "detail": "head-changed-after-label, pr-checks-not-green",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45607504277"
     }
   ],
-  "updatedAt": "2026-11-25T11:46:21.704Z",
+  "updatedAt": "2026-11-25T11:47:12.237Z",
   "batchWindow": 5
 }
