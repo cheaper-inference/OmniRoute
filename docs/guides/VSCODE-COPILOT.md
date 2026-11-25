@@ -16,10 +16,10 @@ and vision when supported by the selected model.
 | **Install (Open VSX)** | [Open VSX](https://open-vsx.org/extension/diegosouzapw/omnicopilot) — requires compatible language-model provider and chat APIs |
 | **Source / issues**    | [github.com/cheaper-inference/OmniCopilot](https://github.com/cheaper-inference/OmniCopilot) (MIT)                              |
 | **Requires**           | VS Code 1.104+ (1.122+ to use it without a GitHub sign-in or Copilot plan)                                                      |
-| **Current release**    | OmniCopilot v1.5 on both stores (released 2026-11-15)                                                                           |
+| **Current release**    | OmniCopilot v1.5.1 on both stores (released 2026-11-24)                                                                         |
 
-Store snapshot on **2026-11-17 (00:11 UTC)**, current release: **49,189 Marketplace
-installs** and **18,948 Open VSX downloads**. These are different store metrics, not a
+Store snapshot on **2026-11-25 (01:43 UTC)**, current release: **52,081 Marketplace
+installs** and **20,989 Open VSX downloads**. These are different store metrics, not a
 combined user count. Sources: [Marketplace](https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot)
 and [Open VSX API](https://open-vsx.org/api/diegosouzapw/omnicopilot/latest).
 
@@ -165,14 +165,15 @@ asks for confirmation first.
 
 ## Troubleshooting
 
-| Symptom                                              | Cause / fix                                                                                                                                                                                                                                              |
-| ---------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| No OmniRoute models in the picker                    | Server unreachable. The status-bar dot goes grey; run `OmniRoute: Check Connection`. Discovery is silent by design and contributes no models rather than prompting.                                                                                      |
-| Every model appears twice                            | You are on an OmniCopilot older than 1.0.1 — update. The extension now requests `?prefix=alias`.                                                                                                                                                         |
-| An image/audio model used to be listed and is gone   | Intentional since 1.0.1 — it could never answer a chat request.                                                                                                                                                                                          |
-| Panel missing from the Activity Bar                  | VS Code moves extra view containers into the **"…"** overflow at the bottom of the Activity Bar, and a container hidden via right-click stays hidden. Right-click the Activity Bar → tick **OmniRoute**, or open it with `OmniRoute: Manage Connection`. |
-| Dashboard opens in the browser despite `editor` mode | The server was not **built** with `DASHBOARD_ALLOW_EMBED=vscode` (see above) — setting it at startup on a prebuilt install does nothing. The fallback is deliberate.                                                                                     |
-| Models list is stale after changing providers        | `OmniRoute: Refresh Models`, or the ↻ link in the panel.                                                                                                                                                                                                 |
+| Symptom                                              | Cause / fix                                                                                                                                                                                                                                                     |
+| ---------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| No OmniRoute models in the picker                    | Server unreachable. The status-bar dot goes grey; run `OmniRoute: Check Connection`. Discovery is silent by design and contributes no models rather than prompting.                                                                                             |
+| Every model appears twice                            | You are on an OmniCopilot older than 1.0.1 — update. The extension now requests `?prefix=alias`.                                                                                                                                                                |
+| An image/audio model used to be listed and is gone   | Intentional since 1.0.1 — it could never answer a chat request.                                                                                                                                                                                                 |
+| Panel missing from the Activity Bar                  | VS Code moves extra view containers into the **"…"** overflow at the bottom of the Activity Bar, and a container hidden via right-click stays hidden. Right-click the Activity Bar → tick **OmniRoute**, or open it with `OmniRoute: Manage Connection`.        |
+| Dashboard opens in the browser despite `editor` mode | The server was not **built** with `DASHBOARD_ALLOW_EMBED=vscode` (see above) — setting it at startup on a prebuilt install does nothing. The fallback is deliberate.                                                                                            |
+| Models list is stale after changing providers        | `OmniRoute: Refresh Models`, or the ↻ link in the panel.                                                                                                                                                                                                        |
+| Panel says _Online (models blocked)_, picker empty   | The server rejects the key. Save the right key with **Save & Test**. If the key was fixed on the server instead (enabled, or given access to the models), the extension does not notice by itself: run `OmniRoute: Refresh Models` or open the OmniRoute panel. |
 
 ---
 
