@@ -137,3 +137,27 @@ export function acquireConnectionSlot(
     },
   };
 }
+
+/**
+ * Runs `run` while holding a connection slot, and returns its response, or the 429 when the cap
+ * is full.  The slot is held until the response is delivered, not until `run` returns, and is
+ * released if `run` throws.
+ */
+export async function runWithConnectionSlot(
+  signal: AbortSignal | null,
+  run: () => Promise<Response>,
+  log: { warn(tag: string, message: string): void }
+): Promise<Response> {
+  const slot = acquireConnectionSlot(signal);
+  // `in` narrows the union under the API typecheck config too, which has no strictNullChecks.
+  if (!("releaseAfter" in slot)) {
+    log.warn("BACKPRESSURE", "Rejecting request: at connection limit");
+    return slot.response;
+  }
+  try {
+    return slot.releaseAfter(await run());
+  } catch (error) {
+    slot.release();
+    throw error;
+  }
+}

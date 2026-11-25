@@ -267,7 +267,7 @@ import {
   sameAccountTransportRetryDelayMs,
 } from "../services/sameAccountTransportRetry";
 import { constrainConnectionsToQuota, resolveQuotaKeyScope } from "../../lib/quota/quotaKey";
-import { acquireConnectionSlot } from "../utils/backpressure";
+import { runWithConnectionSlot } from "../utils/backpressure";
 import {
   buildManagedLeaseErrorResponse,
   buildManagedLeaseSelectionErrorResponse,
@@ -430,18 +430,7 @@ async function handleChatImplementation(...args: Parameters<typeof handleAdmitte
   const peerRejection = rejectPeerRequest(request?.headers, log.warn, errorResponse);
   if (peerRejection) return peerRejection;
 
-  // The slot is held until the response is delivered, not until this function returns.
-  const connectionSlot = acquireConnectionSlot(signal);
-  if (connectionSlot.shouldReject) {
-    log.warn("BACKPRESSURE", "Rejecting request: at connection limit");
-    return connectionSlot.response;
-  }
-  try {
-    return connectionSlot.releaseAfter(await handleAdmittedChat(...args));
-  } catch (error) {
-    connectionSlot.release();
-    throw error;
-  }
+  return runWithConnectionSlot(signal, () => handleAdmittedChat(...args), log);
 }
 
 async function handleAdmittedChat(

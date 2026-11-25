@@ -1,6 +1,10 @@
 import { test, beforeEach } from "node:test";
 import assert from "node:assert/strict";
-import { acquireConnectionSlot, evalCapacity } from "../../src/sse/utils/backpressure.ts";
+import {
+  acquireConnectionSlot,
+  evalCapacity,
+  runWithConnectionSlot,
+} from "../../src/sse/utils/backpressure.ts";
 import type { CapacityResult, ConnectionSlot } from "../../src/sse/utils/backpressure.ts";
 
 // ---------------------------------------------------------------------------
@@ -236,6 +240,35 @@ test("backpressure: a request whose signal is already aborted takes no slot for 
   const lifecycle = new AbortController();
   lifecycle.abort();
   admitFor(lifecycle.signal);
+  admit().release();
+});
+
+test("backpressure: runWithConnectionSlot answers 429 at the cap and logs it", async () => {
+  setCap(1);
+  const held = admit();
+  const warnings: string[] = [];
+  let ran = false;
+  const response = await runWithConnectionSlot(
+    null,
+    async () => {
+      ran = true;
+      return Response.json({ ok: true });
+    },
+    { warn: (tag, message) => warnings.push(`${tag}: ${message}`) }
+  );
+  assert.equal(response.status, 429);
+  assert.equal(ran, false);
+  assert.deepEqual(warnings, ["BACKPRESSURE: Rejecting request: at connection limit"]);
+  held.release();
+});
+
+test("backpressure: runWithConnectionSlot frees the slot when the handler throws", async () => {
+  setCap(1);
+  const quiet = { warn: () => {} };
+  await assert.rejects(
+    runWithConnectionSlot(null, async () => Promise.reject(new Error("handler failed")), quiet),
+    /handler failed/
+  );
   admit().release();
 });
 
