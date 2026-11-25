@@ -216,3 +216,34 @@ test("a client that cancels its stream frees its slot", async () => {
   await (await readFirstChunk(admitted)).cancel();
   await second.cancel();
 });
+
+test("a request aborted while its body is still being read frees its slot", async () => {
+  process.env[CAP_ENV] = "1";
+  globalThis.fetch = (async () => sseResponse(`${FIRST_FRAME}${LAST_FRAMES}`)) as typeof fetch;
+
+  // The first request's body never finishes arriving, so handleChat waits on it.
+  let bodyController!: ReadableStreamDefaultController<Uint8Array>;
+  const pendingBody = new ReadableStream<Uint8Array>({
+    start(controller) {
+      bodyController = controller;
+    },
+  });
+  const slow = new Request("http://localhost/v1/chat/completions", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Accept: "text/event-stream" },
+    body: pendingBody,
+    duplex: "half",
+  } as RequestInit);
+  const lifecycle = new AbortController();
+  const slowResponse = handleChat(slow, null, null, undefined, lifecycle.signal);
+  await flushBackgroundWork();
+
+  lifecycle.abort();
+  const next = await handleChat(chatRequest(true));
+  const text = await next.text();
+  assert.equal(next.status, 200, `the aborted request still held the only slot: ${text}`);
+
+  bodyController.enqueue(encoder.encode("{}"));
+  bodyController.close();
+  await (await slowResponse).text();
+});

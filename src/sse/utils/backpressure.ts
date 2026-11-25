@@ -15,6 +15,9 @@
  * an operator explicitly opts in.
  */
 
+import { transformStreamWithCancel } from "@omniroute/open-sse/utils/cancelableTransformStream.ts";
+import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/errorSanitization.ts";
+
 type CapacityOk = { shouldReject: false };
 type CapacityExceeded = { shouldReject: true; response: Response };
 export type CapacityResult = CapacityOk | CapacityExceeded;
@@ -24,9 +27,9 @@ export type ConnectionSlot = CapacityOk & {
   release(): void;
   /**
    * Free the slot when `response` has been delivered, and return the response
-   * to send in its place.  `signal` frees the slot of a stream nobody reads.
+   * to send in its place.
    */
-  releaseAfter(response: Response, signal?: AbortSignal | null): Response;
+  releaseAfter(response: Response): Response;
 };
 
 /** A slot of a disabled cap: nothing is counted and the response is not wrapped. */
@@ -54,7 +57,9 @@ export function evalCapacity(active: number, cap: number): CapacityResult {
     response: new Response(
       JSON.stringify({
         error: {
-          message: `Server busy — ${active} active connections (limit ${cap}). Retry after ${retryAfter}s.`,
+          message: sanitizeErrorMessage(
+            `Server busy — ${active} active connections (limit ${cap}). Retry after ${retryAfter}s.`
+          ),
           type: "rate_limit",
           retry_after: retryAfter,
         },
@@ -88,8 +93,12 @@ function isSseResponse(response: Response): boolean {
  * Returns `{ shouldReject: true, response }` when the cap is reached, or a
  * slot the caller must release when the request is over.  The check and the
  * count are one synchronous step, so two requests cannot take the last slot.
+ * `signal` frees the slot as soon as the request is aborted, including while
+ * the handler is still reading its body, long before any response exists.
  */
-export function acquireConnectionSlot(): CapacityExceeded | ConnectionSlot {
+export function acquireConnectionSlot(
+  signal: AbortSignal | null = null
+): CapacityExceeded | ConnectionSlot {
   const cap = readCap();
   if (cap === 0) return UNCOUNTED_SLOT;
 
@@ -98,30 +107,25 @@ export function acquireConnectionSlot(): CapacityExceeded | ConnectionSlot {
 
   inFlight++;
   let released = false;
-  let abortSignal: AbortSignal | null = null;
   const release = (): void => {
     if (released) return;
     released = true;
     inFlight--;
-    abortSignal?.removeEventListener("abort", release);
+    signal?.removeEventListener("abort", release);
   };
+  if (signal?.aborted) release();
+  else signal?.addEventListener("abort", release, { once: true });
 
   return {
     shouldReject: false,
     release,
-    releaseAfter(response, signal = null) {
+    releaseAfter(response) {
       if (!response.body || !isSseResponse(response)) {
         release();
         return response;
       }
-      if (signal?.aborted) {
-        release();
-      } else if (signal && !released) {
-        abortSignal = signal;
-        signal.addEventListener("abort", release, { once: true });
-      }
       // flush: the stream ended.  cancel: the client went away or the stream failed.
-      const delivered = new TransformStream<Uint8Array, Uint8Array>({
+      const delivered = transformStreamWithCancel<Uint8Array, Uint8Array>({
         flush: release,
         cancel: release,
       });

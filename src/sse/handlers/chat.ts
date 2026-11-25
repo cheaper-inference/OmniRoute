@@ -426,13 +426,13 @@ async function handleChatImplementation(...args: Parameters<typeof handleAdmitte
   if (peerRejection) return peerRejection;
 
   // The slot is held until the response is delivered, not until this function returns.
-  const connectionSlot = acquireConnectionSlot();
+  const connectionSlot = acquireConnectionSlot(signal);
   if (connectionSlot.shouldReject) {
     log.warn("BACKPRESSURE", "Rejecting request: at connection limit");
     return connectionSlot.response;
   }
   try {
-    return connectionSlot.releaseAfter(await handleAdmittedChat(...args), signal);
+    return connectionSlot.releaseAfter(await handleAdmittedChat(...args));
   } catch (error) {
     connectionSlot.release();
     throw error;

@@ -201,13 +201,54 @@ test("backpressure: a cancelled stream frees its slot", async () => {
   admit().release();
 });
 
+function admitFor(signal: AbortSignal): ConnectionSlot {
+  const slot = acquireConnectionSlot(signal);
+  if (slot.shouldReject) throw new Error("expected a free connection slot");
+  return slot;
+}
+
 test("backpressure: an aborted request frees the slot of a stream nobody reads", () => {
   setCap(1);
   const lifecycle = new AbortController();
-  admit().releaseAfter(sse(openStream()), lifecycle.signal);
+  admitFor(lifecycle.signal).releaseAfter(sse(openStream()));
   assertFull();
 
   lifecycle.abort();
-  admit().releaseAfter(sse(openStream()), lifecycle.signal);
   admit().release();
+});
+
+test("backpressure: a request aborted before its response exists frees its slot", () => {
+  setCap(1);
+  const lifecycle = new AbortController();
+  const slot = admitFor(lifecycle.signal);
+  assertFull();
+
+  lifecycle.abort();
+  const next = admit();
+  // The handler still answers the aborted request later; that must not free a second slot.
+  slot.releaseAfter(Response.json({ ok: false }));
+  assertFull();
+  next.release();
+});
+
+test("backpressure: a request whose signal is already aborted takes no slot for long", () => {
+  setCap(1);
+  const lifecycle = new AbortController();
+  lifecycle.abort();
+  admitFor(lifecycle.signal);
+  admit().release();
+});
+
+test("backpressure: the sanitized busy response keeps its contract", async () => {
+  const r = evalCapacity(2, 2);
+  if (!r.shouldReject) throw new Error("expected a rejection");
+  assert.equal(r.response.status, 429);
+  assert.equal(r.response.headers.get("Retry-After"), "30");
+  assert.deepEqual(await r.response.json(), {
+    error: {
+      message: "Server busy — 2 active connections (limit 2). Retry after 30s.",
+      type: "rate_limit",
+      retry_after: 30,
+    },
+  });
 });
