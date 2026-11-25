@@ -15,7 +15,7 @@
       "email": "8016841+diegosouzapw@users.noreply.github.com"
     },
     "statusContext": "omni-queue/land",
-    "signing": "none"
+    "signing": "ssh"
   },
   "requiredChecks": [
     "Gate / CI",
@@ -53,5 +53,5 @@
     ".mergify.yml"
   ],
   "mode": "shadow",
-  "voice": "app"
+  "voice": "owner"
 }
