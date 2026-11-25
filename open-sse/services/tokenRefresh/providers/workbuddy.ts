@@ -2,7 +2,7 @@
 // Mirrors tokenRefresh/providers/codebuddyCn.ts — same plugin-auth protocol
 // shape, WorkBuddy's own host. See src/lib/oauth/constants/oauth.ts
 // (WORKBUDDY_CONFIG) for the live verification notes.
-import { runWithProxyContext } from "../../../utils/proxyFetch.ts";
+import { runCommittedWithProxyContext } from "../../../utils/proxyFetch.ts";
 import { sanitizeErrorMessage } from "../../../utils/errorSanitization.ts";
 import type { RefreshLogger } from "../shared.ts";
 
@@ -19,7 +19,7 @@ import type { RefreshLogger } from "../shared.ts";
  * a credential from one is not valid on the other.
  */
 function postRefreshRequest(url: string, refreshToken: string, proxyConfig: unknown) {
-  return runWithProxyContext(proxyConfig, () =>
+  return runCommittedWithProxyContext(proxyConfig, () =>
     fetch(url, {
       method: "POST",
       headers: {

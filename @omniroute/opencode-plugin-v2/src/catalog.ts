@@ -70,7 +70,7 @@ import {
   SHOWCASE_PER_OWNER,
   baseIdOf,
   freshWindowDaysToMs,
-  isFlatTierId,
+  isFlatVariantOf,
   passesWhatServes,
   readEntryStatus,
   selectFreshKeptIds,
@@ -86,6 +86,7 @@ export {
   compareByRecency,
   freshWindowDaysToMs,
   isFlatTierId,
+  isFlatVariantOf,
   isFreshModel,
   ownerKeyOf,
   passesWhatServes,
@@ -311,10 +312,14 @@ async function resolveUsageIds(
  * base entry: the base restores in place of its flat, never the flat
  * itself (flats stay excluded by the `restorable` filter above).
  */
-function matchesUsage(id: string, used: ReadonlySet<string>): boolean {
+function matchesUsage(
+  id: string,
+  used: ReadonlySet<string>,
+  allIds?: ReadonlySet<string>
+): boolean {
   const lower = id.toLowerCase();
   if (used.has(lower)) return true;
-  if (isFlatTierId(id)) return false;
+  if (isFlatVariantOf(id, allIds)) return false;
   for (const name of used) {
     if (baseIdOf(name) === lower) return true;
   }
@@ -906,6 +911,8 @@ export async function collectCatalog(
   const presetPool = catalogAll
     ? []
     : filterRawPoolByPreset(rawModels, enrichment, canonicalToAlias, presetFlags, isFreeInferred);
+  // A flat effort id only counts as a variant when its base is served.
+  const allRawIds = new Set(rawModels.map((e) => String(e.id ?? "").toLowerCase()));
   const showcasePool = catalogAll
     ? []
     : presetPool.filter(
@@ -916,7 +923,7 @@ export async function collectCatalog(
           passesModelAllowlist(entry.id, visibleFilter, hiddenFilter) &&
           passesProviderFilter(entry.id, providerFilter, providerResolve, providerAllUnknown) &&
           readEntryStatus(entry) !== "deprecated" &&
-          !isFlatTierId(entry.id)
+          !isFlatVariantOf(entry.id, allRawIds)
       );
   const showcased = catalogAll
     ? new Set<string>()
@@ -930,7 +937,8 @@ export async function collectCatalog(
         opts.freshPerOwner ?? FRESH_PER_OWNER,
         nowMs,
         visibleFilter,
-        windowMs
+        windowMs,
+        allRawIds
       );
   const staticallyDropped: OmniRouteRawModelEntry[] = [];
   // Stage counters for the refresh summary line. Frozen at the end of the
@@ -964,7 +972,7 @@ export async function collectCatalog(
     if (
       !catalogAll &&
       !servedCombo &&
-      !passesWhatServes(entry, showcased, visibleFilter, nowMs, freshKept, windowMs)
+      !passesWhatServes(entry, showcased, visibleFilter, nowMs, freshKept, windowMs, allRawIds)
     ) {
       staticallyDropped.push(entry);
       continue;
@@ -1018,10 +1026,10 @@ export async function collectCatalog(
     // entry, a flat effort-variant id or an id past the fresh cap is
     // never restored — filter before resolving.
     const restorable = staticallyDropped.filter(
-      (entry) => !staysDropped(entry, freshKept, nowMs, windowMs)
+      (entry) => !staysDropped(entry, freshKept, nowMs, windowMs, allRawIds)
     );
     const used = await resolveUsageIds(restorable, opts, fetchers, log);
-    const toRestore = restorable.filter((entry) => matchesUsage(entry.id, used));
+    const toRestore = restorable.filter((entry) => matchesUsage(entry.id, used, allRawIds));
     for (const entry of toRestore) {
       const mapped = mapRawModelToModelV2(entry, {
         providerId: X,

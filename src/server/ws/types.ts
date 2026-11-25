@@ -54,4 +54,6 @@ export interface WsAuthResult {
   authorized: boolean;
   sessionId: string;
   error?: string;
+  /** True when authorized only by the open/anonymous mode, with no credential checked. */
+  anonymous?: boolean;
 }

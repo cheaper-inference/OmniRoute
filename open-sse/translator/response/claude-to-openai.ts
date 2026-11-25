@@ -3,6 +3,7 @@ import { cacheCreationFields, mergeCacheCreationFields } from "../../utils/cache
 import { FORMATS } from "../formats.ts";
 import { initThinkState, applyThinkTag, flushThinkBuffer } from "../../utils/thinkTagParser.ts";
 import { storeClaudeThinkingBlocks } from "../../services/claudeThinkingStore.ts";
+import { chargeRetained } from "../../utils/streamRetainedBudget.ts";
 
 type OpenAIUsage = {
   prompt_tokens: number;
@@ -193,17 +194,21 @@ export function claudeToOpenAIResponse(chunk, state) {
         }
       } else if (delta?.type === "thinking_delta" && delta.thinking) {
         const tracked = thinkingBlocksOf(state).get(chunk.index);
-        if (tracked?.type === "thinking") tracked.thinking += delta.thinking;
+        if (tracked?.type === "thinking" && chargeRetained(state, delta.thinking.length)) {
+          tracked.thinking += delta.thinking;
+        }
         // Map Claude thinking_delta → OpenAI reasoning_content
         // Clients (Claude Code, Cursor, etc.) display reasoning_content as the thinking panel
         results.push(createChunk(state, { reasoning_content: delta.thinking }));
       } else if (delta?.type === "signature_delta" && typeof delta.signature === "string") {
         // Never emitted to the client; kept only for continuity.
         const tracked = thinkingBlocksOf(state).get(chunk.index);
-        if (tracked?.type === "thinking") tracked.signature += delta.signature;
+        if (tracked?.type === "thinking" && chargeRetained(state, delta.signature.length)) {
+          tracked.signature += delta.signature;
+        }
       } else if (delta?.type === "input_json_delta" && delta.partial_json) {
         const toolCall = state.toolCalls.get(chunk.index);
-        if (toolCall) {
+        if (toolCall && chargeRetained(state, delta.partial_json.length)) {
           toolCall.function.arguments += delta.partial_json;
           results.push(
             createChunk(state, {
