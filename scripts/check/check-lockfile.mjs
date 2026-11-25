@@ -19,7 +19,8 @@
 import { execFileSync } from "node:child_process";
 import path from "node:path";
 import fs from "node:fs";
-import { pathToFileURL } from "node:url";
+
+import { isMainModule } from "../lib/is-main-module.mjs";
 
 const ROOT = process.cwd();
 
@@ -183,4 +184,4 @@ function main() {
   }
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1] || "").href) main();
+if (isMainModule(import.meta.url)) main();

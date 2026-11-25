@@ -1,0 +1,1 @@
+- **feat(sse):** canonical free-catalog counts by access type (API key, keyless, tool account, web chat) and twenty new facts in `npm run facts`: the public real figure, the row-sum reading, the counts, the hasFree provider counts and the printed labels ([#21094](https://github.com/cheaper-inference/OmniRoute/pull/21094))

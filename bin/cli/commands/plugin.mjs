@@ -1,29 +1,28 @@
-import { spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { t } from "../i18n.mjs";
 import { emit } from "../output.mjs";
 import { discoverPlugins } from "../plugins.mjs";
+import { getPluginPrefix, resolvePluginSpec, runPluginNpm } from "../pluginNpm.mjs";
+import { readFileSync } from "node:fs";
+import { dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 
-// Run npm with an explicit argument array and no shell. Passing args this way
-// (instead of string-interpolating into `execSync`) prevents a malicious plugin
-// name like `foo; rm -rf ~` or `` foo`id` `` from being interpreted by the shell.
-function runNpm(args) {
-  const isBun = Boolean(process.versions.bun);
-  const pm = isBun ? "bun" : "npm";
-  const cmdArgs = isBun && args[0] === "install" ? ["add", ...args.slice(1)] : args;
-  const res = spawnSync(pm, cmdArgs, { stdio: "inherit", shell: false });
-  if (res.error) throw res.error;
-  if (typeof res.status === "number" && res.status !== 0) {
-    throw new Error(`${pm} exited with code ${res.status}`);
-  }
-}
+const HOST_MAJOR = Number(
+  JSON.parse(
+    readFileSync(
+      join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..", "package.json"),
+      "utf8"
+    )
+  ).version.split(".")[0]
+);
+const HOST_RANGE = `>=${HOST_MAJOR}.0.0`;
 
 const TEMPLATE_INDEX = `export const meta = {
   name: "PLUGIN_NAME",
   version: "0.1.0",
   description: "OmniRoute plugin",
-  omnirouteApi: ">=4.0.0",
+  omnirouteApi: "HOST_RANGE",
 };
 
 export function register(program, ctx) {
@@ -65,8 +64,7 @@ export function registerPlugin(program) {
     .description(t("plugin.install") || "Install a plugin")
     .option("-y, --yes", "Skip confirmation prompt")
     .action(async (name, opts) => {
-      const isLocal = name.startsWith("./") || name.startsWith("/") || name.startsWith("../");
-      const pkgName = isLocal ? name : `omniroute-cmd-${name}`;
+      const pkgName = resolvePluginSpec(name);
 
       if (!opts.yes) {
         process.stderr.write(
@@ -83,10 +81,10 @@ export function registerPlugin(program) {
       }
 
       try {
-        runNpm(["install", "-g", pkgName]);
+        runPluginNpm(["install", "--prefix", getPluginPrefix(), pkgName]);
         process.stdout.write(`\n✓ Installed: ${pkgName}\n`);
-      } catch {
-        process.stderr.write(`✗ Failed to install ${pkgName}\n`);
+      } catch (err) {
+        process.stderr.write(`✗ Failed to install ${pkgName}: ${err.message}\n`);
         process.exit(1);
       }
     });
@@ -105,10 +103,10 @@ export function registerPlugin(program) {
         }
       }
       try {
-        runNpm(["uninstall", "-g", pkgName]);
+        runPluginNpm(["uninstall", "--prefix", getPluginPrefix(), pkgName]);
         process.stdout.write(`✓ Removed: ${pkgName}\n`);
-      } catch {
-        process.stderr.write(`✗ Failed to remove ${pkgName}\n`);
+      } catch (err) {
+        process.stderr.write(`✗ Failed to remove ${pkgName}: ${err.message}\n`);
         process.exit(1);
       }
     });
@@ -161,7 +159,7 @@ export function registerPlugin(program) {
       try {
         if (name) {
           const pkg = `omniroute-cmd-${name}`;
-          runNpm(["update", "-g", pkg]);
+          runPluginNpm(["update", "--prefix", getPluginPrefix(), pkg]);
           process.stdout.write(`✓ Updated: ${pkg}\n`);
           return;
         }
@@ -176,10 +174,10 @@ export function registerPlugin(program) {
           process.stdout.write("No plugins installed to update.\n");
           return;
         }
-        runNpm(["update", "-g", ...names]);
+        runPluginNpm(["update", "--prefix", getPluginPrefix(), ...names]);
         process.stdout.write(`✓ Updated: ${names.join(", ")}\n`);
-      } catch {
-        process.stderr.write(`✗ Update failed\n`);
+      } catch (err) {
+        process.stderr.write(`✗ Update failed: ${err.message}\n`);
         process.exit(1);
       }
     });
@@ -204,14 +202,17 @@ export function registerPlugin(program) {
             type: "module",
             main: "index.mjs",
             description: `OmniRoute CLI plugin: ${safeName}`,
-            engines: { omniroute: ">=4.0.0" },
+            engines: { omniroute: HOST_RANGE },
             keywords: ["omniroute-plugin", "omniroute-cmd"],
           },
           null,
           2
         ) + "\n"
       );
-      writeFileSync(join(dir, "index.mjs"), TEMPLATE_INDEX.replace(/PLUGIN_NAME/g, safeName));
+      writeFileSync(
+        join(dir, "index.mjs"),
+        TEMPLATE_INDEX.replace(/PLUGIN_NAME/g, safeName).replace(/HOST_RANGE/g, HOST_RANGE)
+      );
       writeFileSync(
         join(dir, "README.md"),
         `# omniroute-cmd-${safeName}\n\nAn OmniRoute CLI plugin.\n\n## Install\n\n\`\`\`bash\nomniroute plugin install ${safeName}\n\`\`\`\n`

@@ -48,24 +48,26 @@ describe("QuotaBar", () => {
   });
 
   it("tone follows the thresholds, and muted ignores them", () => {
-    const cases: Array<[number, string]> = [
-      [69, "bg-primary"],
-      [70, "bg-warning"],
-      [90, "bg-error"],
+    const cases: Array<[number, string | null]> = [
+      [69, null],
+      [70, "warning"],
+      [90, "danger"],
     ];
     for (const [percent, expected] of cases) {
       const { unmount } = render(<QuotaBar label="Bar" percent={percent} valueLabel="x" />);
-      const classes = fill(screen.getByRole("progressbar", { name: "Bar" })).className;
-      expect(classes).toContain(expected);
+      const indicator = fill(screen.getByRole("progressbar", { name: "Bar" }));
+      expect(indicator.getAttribute("data-tone")).toBe(expected);
+      expect(indicator.hasAttribute("data-color")).toBe(false);
       unmount();
     }
 
     render(<QuotaBar label="Bar" percent={95} valueLabel="95%" tone="muted" />);
-    const classes = fill(screen.getByRole("progressbar", { name: "Bar" })).className;
-    expect(classes).toContain("bg-border-strong");
-    for (const tone of ["bg-primary", "bg-warning", "bg-error"]) {
-      expect(classes).not.toContain(tone);
-    }
+    const indicator = fill(screen.getByRole("progressbar", { name: "Bar" }));
+    expect(indicator.hasAttribute("data-tone")).toBe(false);
+    expect(indicator.hasAttribute("data-color")).toBe(true);
+    expect(indicator.style.getPropertyValue("--ci-progress-color")).toBe(
+      "var(--color-border-strong)"
+    );
   });
 
   it("keeps the dashboard colouring of the value label under the auto tone only", () => {
@@ -96,12 +98,31 @@ describe("QuotaBar", () => {
     }
   });
 
-  it("size md is taller than the dashboard bar", () => {
-    const { rerender } = render(<QuotaBar label="Bar" percent={10} valueLabel="10%" size="md" />);
-    expect(screen.getByRole("progressbar", { name: "Bar" }).className).toContain("h-2.5");
+  it("size md is taller than the dashboard bar and uses larger text", () => {
+    const root = (name: string) =>
+      screen.getByRole("progressbar", { name }).parentElement as HTMLElement;
+    const { rerender } = render(
+      <QuotaBar label="Bar" percent={10} valueLabel="10%" caption="Note" size="md" />
+    );
+    expect(root("Bar").hasAttribute("data-size")).toBe(false);
+    expect(screen.getByText("Bar").hasAttribute("data-size")).toBe(false);
+    expect(screen.getByText("Note").className).toContain("text-xs");
 
-    rerender(<QuotaBar label="Bar" percent={10} valueLabel="10%" />);
-    expect(screen.getByRole("progressbar", { name: "Bar" }).className).toContain("h-1.5");
+    rerender(<QuotaBar label="Bar" percent={10} valueLabel="10%" caption="Note" />);
+    expect(root("Bar").getAttribute("data-size")).toBe("sm");
+    expect(screen.getByText("Bar").getAttribute("data-size")).toBe("3xs");
+    expect(screen.getByText("Note").className).toContain("text-3xs");
+  });
+
+  it("draws the label as the kit eyebrow and the bar without animation", () => {
+    render(<QuotaBar label="Bar" percent={30} valueLabel="30%" />);
+    const label = screen.getByText("Bar");
+    expect(label.className).toContain("ci-eyebrow");
+    expect(label.getAttribute("data-weight")).toBe("medium");
+    expect(screen.getByText("30%").className).toContain("tabular-nums");
+    const bar = screen.getByRole("progressbar", { name: "Bar" });
+    expect(bar.className).toContain("ci-progress__track");
+    expect(fill(bar).style.width).toBe("30%");
   });
 
   it("passes axe's progressbar rules", async () => {

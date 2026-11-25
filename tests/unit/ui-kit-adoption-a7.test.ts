@@ -89,7 +89,15 @@ const SHARED_SCREEN_COMPONENTS = [
   "UsageOverview",
   "UsageStats",
 ];
-const SHARED_SCREEN_FOLDERS = ["analytics", "flow", "cli", "compression", "routing", "oauthModal"];
+const SHARED_SCREEN_FOLDERS = [
+  "analytics",
+  "flow",
+  "cli",
+  "compression",
+  "routing",
+  "oauthModal",
+  "quota",
+];
 
 function walk(dir: string, out: string[] = []): string[] {
   for (const entry of readdirSync(dir)) {
