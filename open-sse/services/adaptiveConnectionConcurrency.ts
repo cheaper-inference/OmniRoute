@@ -1,10 +1,11 @@
 import { buildAccountSemaphoreKey } from "./accountSemaphore.ts";
 
 /** Process-local AIMD limits. No persistence or cross-instance coordination. */
-const limits = new Map<string, { limit: number; successes: number }>();
+const limits = new Map<string, { limit: number; successes: number; nextDecreaseAt: number }>();
 const INITIAL_LIMIT = 4;
 const CEILING = 32;
 const SUCCESS_WINDOW = 16;
+const DECREASE_COOLDOWN_MS = 1_000;
 
 export function adaptiveConnectionKey(provider: string, connectionId: string): string {
   return buildAccountSemaphoreKey({ provider, accountKey: connectionId });
@@ -13,7 +14,7 @@ export function adaptiveConnectionKey(provider: string, connectionId: string): s
 export function getAdaptiveConnectionLimit(key: string, initial = INITIAL_LIMIT): number {
   let state = limits.get(key);
   if (!state) {
-    state = { limit: Math.max(1, Math.min(CEILING, initial)), successes: 0 };
+    state = { limit: Math.max(1, Math.min(CEILING, initial)), successes: 0, nextDecreaseAt: 0 };
     limits.set(key, state);
   }
   return state.limit;
@@ -24,8 +25,11 @@ export function recordAdaptiveConnectionResponse(key: string, status: number): v
   const state = limits.get(key);
   if (!state) return;
   if (status === 429) {
+    const now = performance.now();
+    if (now < state.nextDecreaseAt) return;
     state.limit = Math.max(1, Math.floor(state.limit / 2));
     state.successes = 0;
+    state.nextDecreaseAt = now + DECREASE_COOLDOWN_MS;
   } else if (status >= 200 && status < 300) {
     state.successes++;
     if (state.successes >= SUCCESS_WINDOW) {

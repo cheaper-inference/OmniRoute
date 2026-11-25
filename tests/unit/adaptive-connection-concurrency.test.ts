@@ -22,13 +22,28 @@ test("default applies only to unset connection; explicit and adaptive win", () =
   assert.notEqual(key, adaptiveConnectionKey("codex", "connection-b"));
 });
 
-test("429 halves adaptive cap with floor one; successes add one after sixteen, ceiling 32", () => {
+test("429 burst halves the adaptive cap once", (t) => {
+  t.mock.method(performance, "now", () => 0);
+  resetAdaptiveConnectionLimitsForTest();
+  const key = adaptiveConnectionKey("codex", "connection-a");
+  assert.equal(getAdaptiveConnectionLimit(key, 8), 8);
+
+  for (let i = 0; i < 4; i++) recordAdaptiveConnectionResponse(key, 429);
+
+  assert.equal(getAdaptiveConnectionLimit(key), 4);
+});
+
+test("429 halves adaptive cap with floor one; successes add one after sixteen, ceiling 32", (t) => {
+  let now = 0;
+  t.mock.method(performance, "now", () => now);
   resetAdaptiveConnectionLimitsForTest();
   const key = adaptiveConnectionKey("codex", "connection-a");
   assert.equal(getAdaptiveConnectionLimit(key, 8), 8);
   recordAdaptiveConnectionResponse(key, 429);
   assert.equal(getAdaptiveConnectionLimit(key), 4);
+  now += 1_000;
   recordAdaptiveConnectionResponse(key, 429);
+  now += 1_000;
   recordAdaptiveConnectionResponse(key, 429);
   assert.equal(getAdaptiveConnectionLimit(key), 1);
   recordAdaptiveConnectionResponse(key, 499);
