@@ -1,55 +1,28 @@
 {
   "version": 1,
   "base": "release/v3.8.55",
-  "paused": null,
-  "inFlight": {
-    "batchId": "basecheck-ae94881fcf54",
-    "kind": "base-check",
-    "candidateRef": "omni-queue/release-v3.8.55/basecheck-ae94881fcf54",
-    "candidateSha": "ae94881fcf543d1ee91d6af11f18b274280e0c53",
+  "paused": {
+    "reason": "base-red",
+    "since": "2026-11-25T08:03:41.469Z",
     "baseSha": "ae94881fcf543d1ee91d6af11f18b274280e0c53",
-    "treeSha": null,
-    "prs": [],
-    "stage": "testing",
-    "startedAt": "2026-11-25T07:29:20.396Z",
-    "attempts": 0,
-    "bisect": null,
-    "pendingRed": {
-      "batchId": "b37",
-      "candidateSha": "dbd1bf7fb797898d338a0f7b26b4bce44cb0ecca",
-      "prs": [
-        {
-          "n": 21168,
-          "head": "737b51001973ce7515621b9d755b8b691ec0cc4d",
-          "title": "fix(pwa): never leave a rejected fetch in the service worker (KEA-9524)",
-          "author": "diegosouzapw",
-          "labeledAt": "2026-11-25T05:25:56Z"
-        },
-        {
-          "n": 21169,
-          "head": "1b25808a6aaecce78050efa5eae4915e5e24bbbe",
-          "title": "fix(dashboard): cap the eval suite name in the New suite form (KEA-9519)",
-          "author": "diegosouzapw",
-          "labeledAt": "2026-11-25T05:25:59Z"
-        },
-        {
-          "n": 21172,
-          "head": "287d78b5c39f3d8af083ef9d75339aad8f8667cf",
-          "title": "fix(dashboard): show the date in the request log time column (KEA-9522)",
-          "author": "diegosouzapw",
-          "labeledAt": "2026-11-25T05:26:02Z"
-        },
-        {
-          "n": 21174,
-          "head": "d9ea082ecf3416320481a65ec352428c2cdd8db6",
-          "title": "fix(webhooks): accurate copy for http endpoints and the optional name (KEA-9517, KEA-9518)",
-          "author": "diegosouzapw",
-          "labeledAt": "2026-11-25T05:26:07Z"
-        }
-      ],
+    "detail": "all 1 failure(s) also fail on base ae94881fcf54 (1 matched by check name only: no test-level key)",
+    "issue": 21193
+  },
+  "inFlight": null,
+  "baseChecks": [
+    {
+      "baseSha": "ae94881fcf543d1ee91d6af11f18b274280e0c53",
+      "ref": "omni-queue/release-v3.8.55/basecheck-ae94881fcf54",
+      "status": "red",
+      "startedAt": "2026-11-25T07:29:20.396Z",
       "signatures": [
         {
-          "check": "Gate / CI",
+          "check": "Gate / Quality",
+          "key": "",
+          "infra": false
+        },
+        {
+          "check": "Fast Quality Gates",
           "key": "",
           "infra": false
         },
@@ -58,11 +31,8 @@
           "key": "",
           "infra": false
         }
-      ],
-      "bisect": null
-    }
-  },
-  "baseChecks": [
+      ]
+    },
     {
       "baseSha": "0563eb2ec52bfd20ca39b3d4444df3cbd2316944",
       "ref": "omni-queue/release-v3.8.55/b23-0563eb2ec52b",
@@ -2421,8 +2391,30 @@
       "sha": "ae94881fcf543d1ee91d6af11f18b274280e0c53",
       "detail": "b37 red on a base with no verdict: testing the bare base",
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45568467628"
+    },
+    {
+      "at": "2026-11-25T08:03:41.106Z",
+      "type": "checks-red",
+      "batchId": "basecheck-ae94881fcf54",
+      "sha": "ae94881fcf543d1ee91d6af11f18b274280e0c53",
+      "detail": "base-check red: Gate / Quality, Fast Quality Gates (1/4), Unit Tests (1/8)",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45572983016"
+    },
+    {
+      "at": "2026-11-25T08:03:41.469Z",
+      "type": "base-red-paused",
+      "batchId": "b37",
+      "prs": [
+        21168,
+        21169,
+        21172,
+        21174
+      ],
+      "sha": "ae94881fcf543d1ee91d6af11f18b274280e0c53",
+      "detail": "all 1 failure(s) also fail on base ae94881fcf54 (1 matched by check name only: no test-level key)",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45572983016"
     }
   ],
-  "updatedAt": "2026-11-25T07:30:00.974Z",
+  "updatedAt": "2026-11-25T08:04:14.993Z",
   "batchWindow": 5
 }
