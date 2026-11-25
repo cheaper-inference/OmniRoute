@@ -467,6 +467,8 @@ type PolicyValidationStage =
   "validateEndpointAccess" | "validateTeamUsage" | "validateQuotaAccess" | "validateModelAccess";
 
 export interface EnforceApiKeyPolicyOptions {
+  /** The caller can dispatch without running the native combo router. */
+  directModelDispatch?: boolean;
   /** Existing fal jobs do not dispatch inference. Authorization still applies after spend limits. */
   existingFalJob?: boolean;
   /**
@@ -541,6 +543,7 @@ type PolicyContext = {
   apiKey: string;
   apiKeyInfo: ApiKeyMetadata;
   modelStr: string | null;
+  directModelDispatch?: boolean;
 };
 
 function validateKeyStatus(context: PolicyContext): Response | null {
@@ -688,6 +691,15 @@ export function validateResolvedAutoComboAccess(
   return errorResponse(HTTP_STATUS.FORBIDDEN, comboCannotBeUsedMessage(modelStr, comboName));
 }
 
+function shouldDeferAutoComboModelCheck(context: PolicyContext, modelStr: string): boolean {
+  if (context.directModelDispatch || !isReservedComboName(modelStr)) return false;
+  const pathname = resolveCanonicalEndpointPath(new URL(context.request.url).pathname);
+  return (
+    resolveEndpointCategory(pathname) === "chat" &&
+    pathname.replace(/\/+$/, "") !== "/v1/responses/input_tokens"
+  );
+}
+
 async function validateModelAccess(context: PolicyContext): Promise<Response | null> {
   const { request, apiKey, apiKeyInfo, modelStr } = context;
   if (!modelStr || apiKeyInfo.allowedQuotas?.length) return null;
@@ -696,6 +708,8 @@ async function validateModelAccess(context: PolicyContext): Promise<Response | n
   }
   const comboAccess = await validateComboAccess(apiKeyInfo.allowedCombos, modelStr);
   if (comboAccess.rejection) return comboAccess.rejection;
+  // The native chat router reports unknown reserved IDs after combo authorization.
+  if (shouldDeferAutoComboModelCheck(context, modelStr)) return null;
   let requestedComboName = comboAccess.comboName;
 
   const hasModelRestrictions = hasApiKeyModelRestrictions(apiKeyInfo);
@@ -1131,7 +1145,13 @@ export async function enforceApiKeyPolicy(
   }
   apiKeyInfo = withSelfServiceSettings(apiKeyInfo);
 
-  const context = { request, apiKey, apiKeyInfo, modelStr };
+  const context = {
+    request,
+    apiKey,
+    apiKeyInfo,
+    modelStr,
+    directModelDispatch: options?.directModelDispatch,
+  };
   const statusRejection = validateKeyStatus(context);
   if (statusRejection) return { apiKey, apiKeyInfo, rejection: statusRejection };
   if (isFalReceiptRead(request, options)) {

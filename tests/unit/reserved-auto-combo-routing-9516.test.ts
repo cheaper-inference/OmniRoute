@@ -5,11 +5,14 @@ import { join } from "node:path";
 import test from "node:test";
 
 const originalDataDir = process.env.DATA_DIR;
+const originalApiKeySecret = process.env.API_KEY_SECRET;
 const dataDir = mkdtempSync(join(tmpdir(), "omniroute-reserved-auto-"));
 process.env.DATA_DIR = dataDir;
+process.env.API_KEY_SECRET ||= "reserved-auto-9516-test-secret";
 
 const { resetDbInstance } = await import("@/lib/db/core");
 const { createCombo, getComboByName } = await import("@/lib/db/combos");
+const { createApiKey, updateApiKeyPermissions } = await import("@/lib/db/apiKeys");
 const { getModelsByProviderId } = await import("@omniroute/open-sse/config/providerModels");
 const { NOAUTH_PROVIDERS } = await import("@/shared/constants/providers");
 const { updateSettings } = await import("@/lib/db/settings");
@@ -56,13 +59,18 @@ test.after(() => {
   rmSync(dataDir, { recursive: true, force: true });
   if (originalDataDir === undefined) delete process.env.DATA_DIR;
   else process.env.DATA_DIR = originalDataDir;
+  if (originalApiKeySecret === undefined) delete process.env.API_KEY_SECRET;
+  else process.env.API_KEY_SECRET = originalApiKeySecret;
 });
 
-async function chat(model: string) {
+async function chat(model: string, apiKey?: string) {
   return POST(
     new Request("http://localhost/v1/chat/completions", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        ...(apiKey ? { Authorization: `Bearer ${apiKey}` } : {}),
+      },
       body: JSON.stringify({
         model,
         messages: [{ role: "user", content: "Reply with OK." }],
@@ -136,6 +144,15 @@ for (const model of ["auto/legado-x", "Auto/LEGADO-X", "auto/foo"]) {
 
 test("an unknown auto suffix without a saved combo returns 400", async () => {
   const response = await chat("auto/inexistente");
+  assert.equal(response.status, 400);
+  assert.match(await response.text(), /Unknown built-in auto combo/);
+});
+
+test("an unknown auto suffix reaches the router with a published-model-only API key", async () => {
+  const { key, id } = await createApiKey("Published models only", "reserved-auto-9516");
+  await updateApiKeyPermissions(id, { disableNonPublicModels: true, allowAutoCombos: false });
+
+  const response = await chat("auto/inexistente", key);
   assert.equal(response.status, 400);
   assert.match(await response.text(), /Unknown built-in auto combo/);
 });
