@@ -38,6 +38,7 @@ import {
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 import { getRegisteredEndpointAdapterStatuses } from "@/lib/providerModels/endpointAdapterAvailability";
 import { isHiddenForModality } from "@/shared/utils/modelVisibility";
+import { clearHealthCheckHiddenMarks } from "@/lib/db/modelHealthAutoHidden";
 export const dynamic = "force-dynamic";
 import { providerModelMutationSchema } from "@/shared/validation/schemas";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
@@ -94,6 +95,11 @@ async function setHiddenByStoredIds(
     if (!updatedModel) {
       mergeModelCompatOverride(provider, modelId, { isHidden, modality });
     }
+    // #11777: a manual hide/unhide makes the user the owner of the visibility state,
+    // so the scheduled health check must never restore this model on its own. Clear
+    // the mark per completed write: if a later model in the batch throws, the ones
+    // already written keep their user ownership.
+    clearHealthCheckHiddenMarks(provider, [requestedId, modelId]);
   }
   return Array.from(new Set([...modelIds, ...normalizedIds]));
 }
