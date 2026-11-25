@@ -7,11 +7,17 @@ import { cn } from "./lib/utils";
 
 export type AlertVariant = "default" | "info" | "success" | "warning" | "critical";
 export type AlertPersistence = "temporary" | "persistent";
+export type AlertSize = "sm" | "md";
 
 export interface AlertProps extends Omit<ComponentProps<"div">, "title"> {
   variant?: AlertVariant;
   /** Compact banner with inline messages and actions that wrap on small screens. */
   layout?: "stacked" | "inline";
+  /**
+   * `sm` is the compact notice for dialogs, table rows and nested panels: 12px text, a smaller icon,
+   * a reduced padding and a 24px dismiss button, in both layouts. The role does not change. Default `md`.
+   */
+  size?: AlertSize;
   icon?: ReactNode;
   title?: ReactNode;
   description?: ReactNode;
@@ -29,6 +35,7 @@ export function Alert({
   className,
   variant = "default",
   layout = "stacked",
+  size = "md",
   icon,
   title,
   description,
@@ -69,6 +76,7 @@ export function Alert({
       data-slot="alert"
       data-variant={variant}
       data-layout={layout}
+      data-size={size === "sm" ? "sm" : undefined}
       data-persistence={persistence}
       className={cn("ci-alert", `ci-alert--${variant}`, className)}
       {...props}

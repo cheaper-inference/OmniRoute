@@ -31,7 +31,11 @@ import { sanitizeToolId } from "../translator/helpers/schemaCoercion.ts";
 import { stripGeminiPlaceholderArgs } from "../translator/helpers/geminiPlaceholderArgs.ts";
 import { stripEmptyOptionalToolArgs } from "../translator/response/openai-responses/pureHelpers.ts";
 import { toNumber as toFiniteNumber } from "../utils/numeric.ts";
-import { geminiExtraUsageCounts } from "../translator/response/geminiUsageMetadata.ts";
+import {
+  geminiCandidatesTokenCount,
+  geminiExtraUsageCounts,
+} from "../translator/response/geminiUsageMetadata.ts";
+import { firstReportedCounter } from "../utils/reportedCounter.ts";
 import {
   extractThinkingFromContent,
   shouldParseTextualReasoningTags,
@@ -358,6 +362,11 @@ export function translateNonStreamingResponse(
       );
       // `cache_write_tokens` is the alias emitted by the codex-chatgpt-web bridge
       // (input_tokens_details) and by OpenRouter/Devin Desktop (top level).
+      const reportedCachedInputTokens = firstReportedCounter(
+        inputTokensDetails.cached_tokens,
+        promptTokensDetails.cached_tokens,
+        usage.cache_read_input_tokens
+      );
       const cacheCreationInputTokens = firstPositiveNumber(
         inputTokensDetails.cache_creation_tokens,
         promptTokensDetails.cache_creation_tokens,
@@ -391,10 +400,14 @@ export function translateNonStreamingResponse(
           reasoning_tokens: reasoningTokens,
         };
       }
-      if (cachedInputTokens > 0 || cacheCreationInputTokens > 0) {
+      if (
+        reportedCachedInputTokens !== undefined ||
+        cachedInputTokens > 0 ||
+        cacheCreationInputTokens > 0
+      ) {
         (result.usage as JsonRecord).prompt_tokens_details = {};
         const promptDetails = (result.usage as JsonRecord).prompt_tokens_details as JsonRecord;
-        if (cachedInputTokens > 0) {
+        if (cachedInputTokens > 0 || reportedCachedInputTokens !== undefined) {
           promptDetails.cached_tokens = cachedInputTokens;
         }
         if (cacheCreationInputTokens > 0) {
@@ -1049,8 +1062,10 @@ function convertOpenAINonStreamingToGeminiFamily(openaiResponse: JsonRecord): Js
     OPENAI_TO_GEMINI_FINISH_REASON[toString(choice.finish_reason, "stop")] ?? "STOP";
 
   const usageSrc = toRecord(openaiResponse.usage);
-  const promptTokens = toFiniteNumber(usageSrc.prompt_tokens, 0);
-  const completionTokens = toFiniteNumber(usageSrc.completion_tokens, 0);
+  // Some OpenAI-compatible upstreams report the Responses names (input/output_tokens).
+  const promptTokens = toFiniteNumber(usageSrc.prompt_tokens ?? usageSrc.input_tokens, 0);
+  const completionTokens = toFiniteNumber(usageSrc.completion_tokens ?? usageSrc.output_tokens, 0);
+  const extraUsage = geminiExtraUsageCounts(usageSrc);
 
   const geminiResponse: JsonRecord = {
     response: {
@@ -1063,9 +1078,12 @@ function convertOpenAINonStreamingToGeminiFamily(openaiResponse: JsonRecord): Js
       ],
       usageMetadata: {
         promptTokenCount: promptTokens,
-        candidatesTokenCount: completionTokens,
+        candidatesTokenCount: geminiCandidatesTokenCount(
+          completionTokens,
+          extraUsage.thoughtsTokenCount
+        ),
         totalTokenCount: toFiniteNumber(usageSrc.total_tokens, promptTokens + completionTokens),
-        ...geminiExtraUsageCounts(usageSrc),
+        ...extraUsage,
       },
       modelVersion: toString(openaiResponse.model, "unknown"),
       responseId: toString(openaiResponse.id, `resp_${Date.now()}`),

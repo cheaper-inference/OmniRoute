@@ -43,8 +43,9 @@
 // suprime nenhuma anomalia real → gate falha com instrução de remoção.
 import fs from "node:fs";
 import path from "node:path";
-import { pathToFileURL } from "node:url";
+
 import { assertNoStale } from "./lib/allowlist.mjs";
+import { isMainModule } from "../lib/is-main-module.mjs";
 import {
   APPLIED_AGAIN_PHRASE,
   classifyRemovals,
@@ -676,4 +677,4 @@ function main() {
   }
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1] || "").href) main();
+if (isMainModule(import.meta.url)) main();

@@ -153,7 +153,7 @@ export default function FlowAnimation() {
           {providers.map((provider, idx) => (
             <div
               key={provider.id}
-              className={`px-3 py-2 rounded-lg ${provider.color} flex items-center justify-center font-semibold text-[11px] leading-tight text-center shadow-lg hover:scale-110 transition-all cursor-help min-w-[110px] max-w-[140px] ${
+              className={`px-3 py-2 rounded-lg ${provider.color} flex items-center justify-center font-semibold text-2xs leading-tight text-center shadow-lg hover:scale-110 transition-all cursor-help min-w-[110px] max-w-[140px] ${
                 activeFlow === idx ? "ring-2 ring-[var(--ci-color-accent-ink)] scale-110" : ""
               }`}
               title={provider.name}

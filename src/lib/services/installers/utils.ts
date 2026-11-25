@@ -51,7 +51,7 @@ function classifyError(
   if (err.code === "ENOENT" && err.message.includes("npm")) {
     return new InstallError(
       raw,
-      "Node.js/npm não está disponível no PATH. Instale Node ≥22.22.2.",
+      "Node.js/npm is not available on PATH. Install Node ≥22.22.2.",
       500
     );
   }
@@ -146,9 +146,8 @@ export function runNpm(
 ): Promise<NpmRunResult> {
   const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
   const isBun = Boolean(process.versions.bun);
-  const npmBin = process.platform === "win32"
-    ? (isBun ? "bun.exe" : "npm.cmd")
-    : (isBun ? "bun" : "npm");
+  const npmBin =
+    process.platform === "win32" ? (isBun ? "bun.exe" : "npm.cmd") : isBun ? "bun" : "npm";
   const execArgs = isBun && args[0] === "install" ? ["add", ...args.slice(1)] : args;
 
   return new Promise((resolve, reject) => {

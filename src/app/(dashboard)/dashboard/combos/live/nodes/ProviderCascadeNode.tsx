@@ -118,7 +118,7 @@ function ConnectionLabel({ connectionId }: { connectionId: string }) {
   const shortId = connectionId.length > 8 ? `${connectionId.slice(0, 8)}...` : connectionId;
   return (
     <span
-      className="text-[9px] text-text-muted font-mono truncate"
+      className="text-3xs text-text-muted font-mono truncate"
       title={t("liveAccountTooltip", { id: connectionId })}
       data-testid="connection-id"
     >
@@ -182,7 +182,7 @@ export function ProviderCascadeNode({ data }: NodeProps) {
         {isAttempting && <StatusDot color={FLOW_EDGE_COLORS.last} sizeClass="size-1.5" />}
         {isFailed && <StatusDot color={FLOW_EDGE_COLORS.error} error sizeClass="size-1.5" />}
         {isSucceeded && (
-          <span className="text-[9px] font-semibold" style={{ color: FLOW_EDGE_COLORS.active }}>
+          <span className="text-3xs font-semibold" style={{ color: FLOW_EDGE_COLORS.active }}>
             ✓
           </span>
         )}
@@ -191,7 +191,7 @@ export function ProviderCascadeNode({ data }: NodeProps) {
       {/* Body: model + latency + account */}
       <div className="px-2.5 py-1.5 flex flex-col gap-0.5">
         <span
-          className="text-[10px] text-text-muted font-mono truncate"
+          className="text-3xs text-text-muted font-mono truncate"
           title={model as string}
           data-testid="model-name"
         >
@@ -199,7 +199,7 @@ export function ProviderCascadeNode({ data }: NodeProps) {
         </span>
         {connectionId && <ConnectionLabel connectionId={connectionId as string} />}
         {latencyMs != null && (
-          <span className="text-[10px] text-text-muted">{(latencyMs as number).toFixed(0)}ms</span>
+          <span className="text-3xs text-text-muted">{(latencyMs as number).toFixed(0)}ms</span>
         )}
       </div>
 
@@ -207,7 +207,7 @@ export function ProviderCascadeNode({ data }: NodeProps) {
       {isFailed && failKind && (
         <div className="px-2.5 pb-2">
           <span
-            className="text-[9px] font-semibold px-1.5 py-0.5 rounded"
+            className="text-3xs font-semibold px-1.5 py-0.5 rounded"
             style={{
               backgroundColor: flowColorAlpha(FLOW_EDGE_COLORS.error, 13),
               color: FLOW_EDGE_COLORS.error,
@@ -224,7 +224,7 @@ export function ProviderCascadeNode({ data }: NodeProps) {
       {cbState && CB_BADGE_COLORS[cbState] && (
         <div className="px-2.5 pb-2">
           <span
-            className="text-[9px] font-semibold px-1.5 py-0.5 rounded"
+            className="text-3xs font-semibold px-1.5 py-0.5 rounded"
             style={{
               backgroundColor: flowColorAlpha(CB_BADGE_COLORS[cbState], 13),
               color: CB_BADGE_COLORS[cbState],
@@ -242,7 +242,7 @@ export function ProviderCascadeNode({ data }: NodeProps) {
       {typeof cooldownCount === "number" && cooldownCount > 0 && (
         <div className="px-2.5 pb-2">
           <span
-            className="text-[9px] font-semibold px-1.5 py-0.5 rounded"
+            className="text-3xs font-semibold px-1.5 py-0.5 rounded"
             style={{
               backgroundColor: flowColorAlpha(COOLDOWN_BADGE_COLOR, 13),
               color: COOLDOWN_BADGE_COLOR,

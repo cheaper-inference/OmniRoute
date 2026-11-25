@@ -587,7 +587,8 @@ test.describe("Combos flow", () => {
     await expect(comboCards).toHaveCount(24);
     await expect(page.locator('[data-testid^="combo-drag-handle-"]')).toHaveCount(0);
 
-    await page.getByTestId("combo-pagination-next").click();
+    // The pager is the kit one now: the next button is found by its role inside the nav.
+    await page.getByTestId("combo-pagination").getByRole("button", { name: /next/i }).click();
     await expect(page.getByTestId("combo-card-combo-25")).toBeVisible();
     await expect(page.getByTestId("combo-card-combo-30")).toBeVisible();
     await expect(comboCards).toHaveCount(6);

@@ -34,6 +34,7 @@ import { resolveUcCredential } from "../../../executors/uc/credentials.ts";
 import { mintUcSessionToken } from "../../../executors/uc/clerkAuth.ts";
 import { UC_ORIGIN } from "../../../executors/uc/constants.ts";
 import { sanitizeErrorMessage } from "../../../utils/error.ts";
+import { clampPollIntervalMs, clampPollTimeoutMs } from "../../../utils/pollBounds.ts";
 import { saveImageErrorResult, saveImageSuccessResult } from "../../imageGeneration.ts";
 
 /** Persona web image-gen endpoint (immediate response + result-URL polling). */
@@ -308,11 +309,11 @@ async function handleUcPersonaImage(
     });
   }
 
-  const timeoutMs = normalizePositiveNumber(
+  const timeoutMs = clampPollTimeoutMs(
     body.timeout_ms,
     normalizePositiveNumber(process.env.UC_IMAGE_POLL_TIMEOUT_MS, UC_POLL_TIMEOUT_MS_DEFAULT)
   );
-  const pollIntervalMs = normalizePositiveNumber(
+  const pollIntervalMs = clampPollIntervalMs(
     body.poll_interval_ms,
     normalizePositiveNumber(process.env.UC_IMAGE_POLL_INTERVAL_MS, UC_POLL_INTERVAL_MS_DEFAULT)
   );

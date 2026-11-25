@@ -1,0 +1,68 @@
+{
+  "argv": [
+    "session",
+    "--with-builtin",
+    "developer",
+    "--model",
+    "x"
+  ],
+  "cleanup": {
+    "removeTempDir": true,
+    "revokeSession": true
+  },
+  "env": {
+    "set": {
+      "GOOSE_CONTEXT_LIMIT": "200000",
+      "GOOSE_DISABLE_KEYRING": "1",
+      "GOOSE_MODEL": "anthropic/claude-sonnet-4-6",
+      "GOOSE_PATH_ROOT": "${TMP}",
+      "GOOSE_PROVIDER": "openai",
+      "GOOSE_TELEMETRY_OFF": "1",
+      "OPENAI_API_KEY": "${TOKEN}",
+      "OPENAI_BASE_PATH": "/v1/chat/completions",
+      "OPENAI_BASE_URL": "http://127.0.0.1:20128/v1"
+    },
+    "unset": [
+      "ANTHROPIC_API_KEY",
+      "GOOSE_ADDITIONAL_CONFIG_FILES",
+      "GOOSE_CACHE_TTL",
+      "GOOSE_LEAD_FAILURE_THRESHOLD",
+      "GOOSE_LEAD_FALLBACK_TURNS",
+      "GOOSE_LEAD_MODEL",
+      "GOOSE_LEAD_PROVIDER",
+      "GOOSE_LEAD_TURNS",
+      "GOOSE_MAX_TOKENS",
+      "GOOSE_MODE",
+      "GOOSE_TOOLSHIM",
+      "GOOSE_TOOLSHIM_FOO",
+      "GOOSE_TOOLSHIM_OLLAMA_MODEL",
+      "OPENAI_CUSTOM_HEADERS",
+      "OPENAI_HOST",
+      "OPENAI_ORGANIZATION",
+      "OPENAI_PROJECT",
+      "OPENAI_TIMEOUT"
+    ]
+  },
+  "modelList": {
+    "injected": 0,
+    "strategy": "server-view",
+    "viewHash": "7f4f4066aebfbb84189d2f7f8adeb0a75a997acf4cbeb61c10b01800b593bba3"
+  },
+  "needsTempDir": true,
+  "notes": [
+    "goose runs with GOOSE_PATH_ROOT in the temp dir: your goose config, sessions and keyring are untouched."
+  ],
+  "planVersion": 1,
+  "postExitChecks": [],
+  "preflight": [],
+  "secretSites": [
+    {
+      "key": "OPENAI_API_KEY",
+      "kind": "env"
+    }
+  ],
+  "teardown": [],
+  "tempFiles": [],
+  "tool": "goose",
+  "warnings": []
+}
