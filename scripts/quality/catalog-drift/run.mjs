@@ -1,5 +1,6 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { join } from "node:path";
+import { randomUUID } from "node:crypto";
+import { mkdir, readFile, rename, rm, writeFile } from "node:fs/promises";
+import { dirname, join } from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
 import { parseArgs } from "node:util";
 
@@ -10,6 +11,13 @@ import { FETCH_DEFAULTS, createHostThrottle, fetchSource } from "./fetchSource.m
 import { loadManifest, probeUrlErrors } from "./manifest.mjs";
 import { backsFindings, classifyResponse, evaluateProbe, measureText } from "./probes.mjs";
 import { buildReport, renderMarkdown } from "./report.mjs";
+import {
+  FETCH_FAILURE_THRESHOLD,
+  emptyState,
+  loadState,
+  recordFetch,
+  recordProviderRun,
+} from "./state.mjs";
 
 const RETRY_FAILURES = new Set(["network", "timeout", "http", "gone"]);
 const REDIRECT_STATUSES = new Set([301, 302, 303, 307, 308]);
@@ -31,7 +39,7 @@ const catalogSnapshot = z.object({
 
 /** @typedef {import("./manifest.mjs").Manifest} Manifest */
 /** @typedef {import("./report.mjs").ProbeResult} ProbeResult */
-/** @typedef {{ schemaVersion: 1, probes: Record<string, object>, providers: Record<string, object> }} DriftState */
+/** @typedef {import("./state.mjs").DriftState} DriftState */
 
 async function readReplay(probe, { dir, tag }) {
   const extensions = probe.type === "page-text" ? ["html", "txt"] : ["json"];
@@ -66,31 +74,35 @@ function createLiveFetch({ allowedHosts, fetchImpl, now, sleep }) {
   };
 }
 
-async function fetchWithRetry(probe, fetchImpl, sleep) {
-  const result = await fetchSource(probe.url, { fetchImpl });
-  if (result.ok || !RETRY_FAILURES.has(result.failure)) return result;
+async function fetchWithRetry(probe, fetchImpl, sleep, remainingMs) {
+  const attempt = () =>
+    fetchSource(probe.url, {
+      fetchImpl,
+      timeoutMs: Math.max(1, Math.min(FETCH_DEFAULTS.timeoutMs, remainingMs())),
+    });
+  const result = await attempt();
+  if (
+    result.ok ||
+    !RETRY_FAILURES.has(result.failure) ||
+    remainingMs() <= FETCH_DEFAULTS.retryDelayMs
+  )
+    return result;
 
   await sleep(FETCH_DEFAULTS.retryDelayMs);
-  return fetchSource(probe.url, { fetchImpl });
+  return remainingMs() > 0 ? attempt() : result;
+}
+
+function probeResultBase({ id, provider, type, url }) {
+  return { id, provider, type, url, httpStatus: null, textChars: null, findings: [], stats: null };
 }
 
 /** @returns {ProbeResult} */
-function resultForSource(probe, source, catalogRows) {
-  const { id, provider, type, url } = probe;
-  const base = {
-    id,
-    provider,
-    type,
-    url,
-    httpStatus: source.status,
-    textChars: null,
-    findings: [],
-    stats: null,
-  };
-  if (!source.ok) return { ...base, status: "fetch-failed" };
+function resultForSource(probe, source, catalogRows, prevTextChars) {
+  const base = { ...probeResultBase(probe), httpStatus: source.status };
+  if (!source.ok) return { ...base, status: "fetch-failed", detail: source.detail };
 
   const textChars = measureText(probe, source);
-  if (classifyResponse(probe, source) === "invalid-response") {
+  if (classifyResponse(probe, source, prevTextChars) === "invalid-response") {
     return { ...base, textChars, status: "invalid-response" };
   }
   const evaluation = evaluateProbe(probe, source, { catalogRows });
@@ -101,6 +113,27 @@ function resultForSource(probe, source, catalogRows) {
     findings,
     stats: evaluation.stats,
     status: findings.some(({ severity }) => severity === "drift") ? "drift" : "ok",
+  };
+}
+
+function failureFinding(result, source) {
+  const kind =
+    result.status === "invalid-response"
+      ? "invalid-response"
+      : source.failure === "gone"
+        ? "gone"
+        : "unreachable";
+  const message =
+    result.status === "invalid-response"
+      ? "The probe received an invalid response in consecutive runs"
+      : "The probe could not read the source in consecutive runs";
+  return {
+    provider: result.provider,
+    probeId: result.id,
+    kind,
+    severity: "drift",
+    message,
+    details: { status: result.httpStatus, ...(result.detail && { detail: result.detail }) },
   };
 }
 
@@ -116,27 +149,69 @@ export async function runDrift({
   catalogCuratedAt,
   replay = null,
   only = null,
-  state = { schemaVersion: 1, probes: {}, providers: {} },
+  state = emptyState(),
   now = Date.now,
   fetchImpl = globalThis.fetch,
   sleep = delay,
+  deadlineMs = FETCH_DEFAULTS.deadlineMs,
 }) {
   if (replay && !REPLAY_TAG.test(replay.tag)) throw new Error("Invalid replay tag");
-  const runAt = new Date(now()).toISOString();
+  const startedAt = now();
+  const runAt = new Date(startedAt).toISOString();
+  const remainingMs = () => deadlineMs - (now() - startedAt);
   const liveFetch = createLiveFetch({ allowedHosts: manifest.allowedHosts, fetchImpl, now, sleep });
   const probeResults = [];
   for (const probe of manifest.probes) {
     if (only !== null && probe.provider !== only) continue;
+    if (remainingMs() <= 0) {
+      probeResults.push({ ...probeResultBase(probe), status: "skipped", detail: "deadline" });
+      continue;
+    }
+
     const source = replay
       ? await readReplay(probe, replay)
-      : await fetchWithRetry(probe, liveFetch, sleep);
-    probeResults.push(resultForSource(probe, source, catalogRows));
+      : await fetchWithRetry(probe, liveFetch, sleep, remainingMs);
+    const result = resultForSource(probe, source, catalogRows, state.probes[probe.id]?.textChars);
+    const failed = result.status === "fetch-failed" || result.status === "invalid-response";
+    const recorded = recordFetch(
+      state,
+      probe.id,
+      failed ? "failed" : "ok",
+      runAt,
+      result.textChars
+    );
+    state = recorded.state;
+    if (failed && recorded.consecutiveFailures >= FETCH_FAILURE_THRESHOLD) {
+      result.findings.push(failureFinding(result, source));
+    }
+    probeResults.push(result);
   }
 
-  return {
-    report: buildReport({ runAt, catalogCuratedAt, manifest, probeResults, catalogRows, only }),
-    state,
-  };
+  const report = buildReport({
+    runAt,
+    catalogCuratedAt,
+    manifest,
+    probeResults,
+    catalogRows,
+    only,
+  });
+  for (const [provider, result] of Object.entries(report.providers)) {
+    const recorded = recordProviderRun(state, provider, result.fingerprint, runAt);
+    state = recorded.state;
+    result.consecutiveRuns = recorded.consecutiveRuns;
+  }
+  return { report, state };
+}
+
+async function saveState(file, state) {
+  await mkdir(dirname(file), { recursive: true });
+  const temporary = file + "." + randomUUID() + ".tmp";
+  try {
+    await writeFile(temporary, JSON.stringify(state, null, 2) + "\n");
+    await rename(temporary, file);
+  } finally {
+    await rm(temporary, { force: true });
+  }
 }
 
 async function readCatalog(file) {
@@ -155,7 +230,6 @@ async function main() {
       catalog: { type: "string" },
       replay: { type: "string" },
       "replay-tag": { type: "string" },
-      // The state file is reserved for consecutive-run tracking.
       state: { type: "string" },
       only: { type: "string" },
     },
@@ -168,12 +242,14 @@ async function main() {
 
   const manifest = loadManifest(values.manifest ?? new URL("./manifest.json", import.meta.url));
   const catalog = await readCatalog(values.catalog);
-  const { report } = await runDrift({
+  const { report, state } = await runDrift({
     manifest,
     ...catalog,
     only: values.only,
+    state: values.state ? loadState(values.state) : emptyState(),
     replay: values.replay ? { dir: values.replay, tag } : null,
   });
+  if (values.state) await saveState(values.state, state);
   const markdown = renderMarkdown(report);
   await mkdir(values.out, { recursive: true });
   await Promise.all([

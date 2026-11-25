@@ -5,7 +5,7 @@ import { shortHash } from "./normalize.mjs";
 /** @typedef {import("./probes.mjs").ProbeStats} ProbeStats */
 /** @typedef {{ id: string, provider: string, type: string, url: string,
  *   status: "ok"|"drift"|"fetch-failed"|"invalid-response"|"skipped",
- *   httpStatus: number|null, textChars: number|null, findings: Finding[], stats: ProbeStats|null }} ProbeResult */
+ *   httpStatus: number|null, textChars: number|null, detail?: string, findings: Finding[], stats: ProbeStats|null }} ProbeResult */
 /** @typedef {{ findings: Finding[], fingerprint: string|null, allProbesFetched: boolean, consecutiveRuns: number,
  *   notInCatalog: boolean, catalogRows: Array<{ modelId: string, poolKey: string|null, monthlyTokens: number, freeType: string }> }} ProviderReport */
 /** @typedef {{ schemaVersion: 1, runAt: string, catalogCuratedAt: string, manifestReviewedAt: string,
