@@ -73,6 +73,8 @@ async function syncNodeConnections(
     apiType?: string;
     customJsonConfig: unknown;
     quotaCheck?: Parameters<typeof applyCompatibleQuotaCheck>[1]["setting"];
+    /** Whether the request carried `customHeaders`; otherwise each connection keeps its own. */
+    customHeadersSent: boolean;
   }
 ) {
   const connections = await getProviderConnections({ provider: id });
@@ -88,8 +90,10 @@ async function syncNodeConnections(
         baseUrl: node.baseUrl,
         nodeName: updated.name,
         chatPath: updated.chatPath || undefined,
-        customHeaders: updated.customHeaders || undefined,
       } as JsonRecord;
+      if (node.customHeadersSent) {
+        providerSpecificData.customHeaders = updated.customHeaders || undefined;
+      }
       if (updated.modelsPath) {
         providerSpecificData.modelsPath = updated.modelsPath;
       } else {
@@ -193,7 +197,9 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       // #2166: explicit null (not omission) so an empty submission clears a
       // previously stored custom icon.
       iconUrl: iconUrl?.trim() || null,
-      customHeaders: customHeaders || null,
+      // #21227: the Edit node modal has no header editor and omits the field; omission keeps
+      // the stored headers (updateProviderNode preserves them), only null or a value replaces them.
+      ...(customHeaders !== undefined ? { customHeaders: customHeaders || null } : {}),
       dailyQuotaResetTimezone: dailyQuotaResetTimezone?.trim() || null,
       dailyQuotaResetHour:
         dailyQuotaResetHour === 0 || dailyQuotaResetHour != null ? dailyQuotaResetHour : null,
@@ -214,6 +220,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       apiType: node.type === "openai-compatible" ? apiType : undefined,
       customJsonConfig: customJsonNode.config,
       quotaCheck,
+      customHeadersSent: customHeaders !== undefined,
     });
 
     return NextResponse.json({ node: updated });

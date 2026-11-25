@@ -235,6 +235,69 @@ test("provider nodes route update can clear customHeaders by passing null", asyn
   assert.equal(updated.node.customHeaders, null);
 });
 
+async function connectionHeaders(connectionId: string) {
+  const connection = (await providersDb.getProviderConnectionById(connectionId)) as {
+    providerSpecificData: { customHeaders?: Record<string, string> };
+  };
+  return connection.providerSpecificData.customHeaders;
+}
+
+// #21227: the dashboard Edit node modal has no header editor, so its payload omits customHeaders.
+const EDIT_MODAL_BODY = {
+  name: "Gateway",
+  prefix: "gw21227",
+  baseUrl: "https://gw.example.com/v1",
+};
+
+test("a node save without customHeaders keeps the node's and its connections' headers", async () => {
+  const id = "anthropic-compatible-headers21227a";
+  await providersDb.createProviderNode({
+    id,
+    type: "anthropic-compatible",
+    ...EDIT_MODAL_BODY,
+    customHeaders: { "X-Node": "node-value" },
+  });
+  const connection = await providersDb.createProviderConnection({
+    provider: id,
+    authType: "apikey",
+    name: "conn",
+    apiKey: "sk-1",
+    providerSpecificData: { customHeaders: { "X-Node": "node-value" } },
+  });
+
+  const response = await providerNodesIdRoute.PUT(makeUpdateRequest(id, EDIT_MODAL_BODY), {
+    params: Promise.resolve({ id }),
+  });
+  const body = (await response.json()) as { node: { customHeaders: unknown } };
+
+  assert.equal(response.status, 200);
+  assert.deepEqual(body.node.customHeaders, { "X-Node": "node-value" });
+  assert.deepEqual(await connectionHeaders(connection.id), { "X-Node": "node-value" });
+});
+
+test("a node save without customHeaders keeps connection-level headers", async () => {
+  const id = "anthropic-compatible-headers21227b";
+  await providersDb.createProviderNode({ id, type: "anthropic-compatible", ...EDIT_MODAL_BODY });
+  const connection = await providersDb.createProviderConnection({
+    provider: id,
+    authType: "apikey",
+    name: "conn",
+    apiKey: "sk-1",
+    providerSpecificData: { customHeaders: { "x-test": "1" } },
+  });
+  const put = (body: Record<string, unknown>) =>
+    providerNodesIdRoute.PUT(makeUpdateRequest(id, body), { params: Promise.resolve({ id }) });
+
+  assert.equal((await put(EDIT_MODAL_BODY)).status, 200);
+  assert.deepEqual(await connectionHeaders(connection.id), { "x-test": "1" });
+
+  // An explicit customHeaders value still reaches every connection, and null still clears it.
+  assert.equal((await put({ ...EDIT_MODAL_BODY, customHeaders: { "X-New": "v" } })).status, 200);
+  assert.deepEqual(await connectionHeaders(connection.id), { "X-New": "v" });
+  assert.equal((await put({ ...EDIT_MODAL_BODY, customHeaders: null })).status, 200);
+  assert.equal(await connectionHeaders(connection.id), undefined);
+});
+
 test("DefaultExecutor.buildHeaders applies customHeaders from providerSpecificData", () => {
   const executor = new DefaultExecutor("openai-compatible-test");
 
