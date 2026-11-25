@@ -99,7 +99,7 @@ export async function GET(request: NextRequest) {
 
   try {
     const dbSettings = getUserDatabaseSettings();
-    const cache: UserDatabaseSettings["cache"] = dbSettings.cache;
+    const cache: Partial<UserDatabaseSettings["cache"]> = dbSettings.cache ?? {};
     // idempotencyWindowMs is not part of the databaseSettings "cache" section —
     // it lives in the flat general settings (src/lib/db/settings.ts), which is
     // where src/lib/idempotencyLayer.ts actually reads it from.
