@@ -18,10 +18,29 @@ function sessionToken(cookies: Cookie[]): string {
     .join("");
 }
 
+// `_puid` is `user-<id>:<timestamp>-<sig>`; the user part stays fixed while ChatGPT rotates the
+// session token, so a pasted cookie can be matched to the dedicated browser's account.
+function puidUser(cookies: Cookie[]): string {
+  const value = cookies.find(
+    (cookie) =>
+      cookie.name === "_puid" &&
+      (cookie.domain === "chatgpt.com" || cookie.domain === ".chatgpt.com")
+  )?.value;
+  const user = value ? decodeURIComponent(value).split(":")[0] : "";
+  return /^user-[A-Za-z0-9]+$/.test(user) ? user : "";
+}
+
+function sameSecret(left: string, right: string): boolean {
+  const a = Buffer.from(left);
+  const b = Buffer.from(right);
+  return a.length > 0 && a.length === b.length && timingSafeEqual(a, b);
+}
+
 export function assertMatchingChatGptSession(expected: Cookie[], actual: Cookie[]): void {
-  const a = Buffer.from(sessionToken(expected));
-  const b = Buffer.from(sessionToken(actual));
-  if (!a.length || a.length !== b.length || !timingSafeEqual(a, b)) {
+  const sameToken = sameSecret(sessionToken(expected), sessionToken(actual));
+  const sameUser =
+    Boolean(sessionToken(actual)) && sameSecret(puidUser(expected), puidUser(actual));
+  if (!sameToken && !sameUser) {
     throw new Error(
       "ChatGPT dedicated browser account does not match this connection. Import the current session from that browser before retrying."
     );
