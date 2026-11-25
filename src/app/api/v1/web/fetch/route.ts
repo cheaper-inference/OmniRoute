@@ -307,7 +307,8 @@ export async function POST(request: Request) {
   // Optional auth check — when REQUIRE_API_KEY=false, ignore presented
   // invalid keys so anonymous access works the same as all other client
   // APIs (#7785).
-  const { apiKey: apiKeyRaw, valid: apiKeyValid } = await resolveClientApiKey(request);
+  const { apiKey: apiKeyRaw, valid: apiKeyValid, rejection } = await resolveClientApiKey(request);
+  if (rejection) return rejection;
   if (isRequireApiKeyEnabled() && !apiKeyRaw) {
     return errorResponse(HTTP_STATUS.UNAUTHORIZED, "Authentication required");
   }

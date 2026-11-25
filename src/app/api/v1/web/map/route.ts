@@ -63,7 +63,8 @@ export async function POST(request: Request) {
   if (isValidationFailure(validation))
     return errorResponse(400, formatValidationMessage(validation.error));
 
-  const { apiKey, valid: apiKeyValid } = await resolveClientApiKey(request);
+  const { apiKey, valid: apiKeyValid, rejection } = await resolveClientApiKey(request);
+  if (rejection) return rejection;
   if (isRequireApiKeyEnabled() && !apiKey) return errorResponse(401, "Authentication required");
   if (isRequireApiKeyEnabled() && apiKey && !apiKeyValid) {
     return errorResponse(401, "Invalid API key");

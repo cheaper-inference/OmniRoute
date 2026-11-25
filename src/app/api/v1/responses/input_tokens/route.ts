@@ -178,7 +178,8 @@ async function postHandler(request: Request): Promise<Response> {
   // Preserve the same API-key and model-policy boundary as the catch-all
   // Responses route this static route shadows. Token counting is local, but it
   // must not turn into an unauthenticated model-catalog/policy side channel.
-  const { apiKey, valid: apiKeyValid } = await resolveClientApiKey(request);
+  const { apiKey, valid: apiKeyValid, rejection } = await resolveClientApiKey(request);
+  if (rejection) return rejection;
   if (isRequireApiKeyEnabled() && !apiKey) {
     return errorResponse(HTTP_STATUS.UNAUTHORIZED, "Authentication required");
   }
