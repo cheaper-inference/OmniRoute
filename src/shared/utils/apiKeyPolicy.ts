@@ -1101,6 +1101,19 @@ async function runAccessValidators(
   return null;
 }
 
+async function runLimitValidators(
+  context: PolicyContext,
+  options?: EnforceApiKeyPolicyOptions
+): Promise<Response | null> {
+  const budgetRejection = validateBudgetUnlessDeferred(context, options);
+  if (budgetRejection) return budgetRejection;
+  const keyQuotaRejection = validateKeyQuota(context);
+  if (keyQuotaRejection) return keyQuotaRejection;
+  const tokenRejection = validateTokenLimit(context);
+  if (tokenRejection) return tokenRejection;
+  return await validateRateLimitAndThrottle(context);
+}
+
 /**
  * Internal sub-request of a parent request that already passed the full policy
  * (schedule, budget, limits): re-check authorization only, so the key's
@@ -1181,14 +1194,8 @@ export async function enforceApiKeyPolicy(
   const accessRejection = await runAccessValidators(context, options);
   if (accessRejection) return { apiKey, apiKeyInfo, rejection: accessRejection };
 
-  const budgetRejection = validateBudgetUnlessDeferred(context, options);
-  if (budgetRejection) return { apiKey, apiKeyInfo, rejection: budgetRejection };
-  const keyQuotaRejection = validateKeyQuota(context);
-  if (keyQuotaRejection) return { apiKey, apiKeyInfo, rejection: keyQuotaRejection };
-  const tokenRejection = validateTokenLimit(context);
-  if (tokenRejection) return { apiKey, apiKeyInfo, rejection: tokenRejection };
-  const rateRejection = await validateRateLimitAndThrottle(context);
-  if (rateRejection) return { apiKey, apiKeyInfo, rejection: rateRejection };
+  const limitRejection = await runLimitValidators(context, options);
+  if (limitRejection) return { apiKey, apiKeyInfo, rejection: limitRejection };
 
   return { apiKey, apiKeyInfo, rejection: null };
 }
