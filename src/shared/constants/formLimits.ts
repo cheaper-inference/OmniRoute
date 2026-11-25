@@ -12,3 +12,12 @@ export const WEBHOOK_URL_MAX_LENGTH = 2000;
 
 /** `secret` of POST/PUT /api/webhooks (the HMAC signing key of a custom webhook). */
 export const WEBHOOK_SECRET_MAX_LENGTH = 500;
+
+/** `name` of POST /api/evals/suites and PUT /api/evals/suites/:id (Quality › New suite). */
+export const EVAL_SUITE_NAME_MAX_LENGTH = 200;
+
+/** `description` of the same eval suite save routes. */
+export const EVAL_SUITE_DESCRIPTION_MAX_LENGTH = 2000;
+
+/** `cases[].name` of the same eval suite save routes. */
+export const EVAL_CASE_NAME_MAX_LENGTH = 200;
