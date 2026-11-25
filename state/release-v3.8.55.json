@@ -3,58 +3,63 @@
   "base": "release/v3.8.55",
   "paused": null,
   "inFlight": {
-    "batchId": "b37",
-    "kind": "batch",
-    "candidateRef": "omni-queue/release-v3.8.55/b37-dbd1bf7fb797",
-    "candidateSha": "dbd1bf7fb797898d338a0f7b26b4bce44cb0ecca",
+    "batchId": "basecheck-ae94881fcf54",
+    "kind": "base-check",
+    "candidateRef": "omni-queue/release-v3.8.55/basecheck-ae94881fcf54",
+    "candidateSha": "ae94881fcf543d1ee91d6af11f18b274280e0c53",
     "baseSha": "ae94881fcf543d1ee91d6af11f18b274280e0c53",
-    "treeSha": "4772ac834be2f7945bb71873cb6f4a588b712bfb",
-    "prs": [
-      {
-        "n": 21168,
-        "head": "737b51001973ce7515621b9d755b8b691ec0cc4d",
-        "title": "fix(pwa): never leave a rejected fetch in the service worker (KEA-9524)",
-        "author": "diegosouzapw",
-        "labeledAt": "2026-11-25T05:25:56Z"
-      },
-      {
-        "n": 21169,
-        "head": "1b25808a6aaecce78050efa5eae4915e5e24bbbe",
-        "title": "fix(dashboard): cap the eval suite name in the New suite form (KEA-9519)",
-        "author": "diegosouzapw",
-        "labeledAt": "2026-11-25T05:25:59Z"
-      },
-      {
-        "n": 21172,
-        "head": "287d78b5c39f3d8af083ef9d75339aad8f8667cf",
-        "title": "fix(dashboard): show the date in the request log time column (KEA-9522)",
-        "author": "diegosouzapw",
-        "labeledAt": "2026-11-25T05:26:02Z"
-      },
-      {
-        "n": 21174,
-        "head": "d9ea082ecf3416320481a65ec352428c2cdd8db6",
-        "title": "fix(webhooks): accurate copy for http endpoints and the optional name (KEA-9517, KEA-9518)",
-        "author": "diegosouzapw",
-        "labeledAt": "2026-11-25T05:26:07Z"
-      }
-    ],
+    "treeSha": null,
+    "prs": [],
     "stage": "testing",
-    "startedAt": "2026-11-25T06:13:27.033Z",
+    "startedAt": "2026-11-25T07:29:20.396Z",
     "attempts": 0,
     "bisect": null,
-    "rerun": {
-      "ref": "omni-queue/release-v3.8.55/b37-dbd1bf7fb797",
-      "requestedAt": "2026-11-25T06:54:57.251Z",
-      "afterMs": 1795589672000,
-      "runIds": [
-        45559019175
+    "pendingRed": {
+      "batchId": "b37",
+      "candidateSha": "dbd1bf7fb797898d338a0f7b26b4bce44cb0ecca",
+      "prs": [
+        {
+          "n": 21168,
+          "head": "737b51001973ce7515621b9d755b8b691ec0cc4d",
+          "title": "fix(pwa): never leave a rejected fetch in the service worker (KEA-9524)",
+          "author": "diegosouzapw",
+          "labeledAt": "2026-11-25T05:25:56Z"
+        },
+        {
+          "n": 21169,
+          "head": "1b25808a6aaecce78050efa5eae4915e5e24bbbe",
+          "title": "fix(dashboard): cap the eval suite name in the New suite form (KEA-9519)",
+          "author": "diegosouzapw",
+          "labeledAt": "2026-11-25T05:25:59Z"
+        },
+        {
+          "n": 21172,
+          "head": "287d78b5c39f3d8af083ef9d75339aad8f8667cf",
+          "title": "fix(dashboard): show the date in the request log time column (KEA-9522)",
+          "author": "diegosouzapw",
+          "labeledAt": "2026-11-25T05:26:02Z"
+        },
+        {
+          "n": 21174,
+          "head": "d9ea082ecf3416320481a65ec352428c2cdd8db6",
+          "title": "fix(webhooks): accurate copy for http endpoints and the optional name (KEA-9517, KEA-9518)",
+          "author": "diegosouzapw",
+          "labeledAt": "2026-11-25T05:26:07Z"
+        }
       ],
-      "jobs": [
-        "Gate / CI",
-        "Unit Tests (1/8)",
-        "Unit Tests (5/8)"
-      ]
+      "signatures": [
+        {
+          "check": "Gate / CI",
+          "key": "",
+          "infra": false
+        },
+        {
+          "check": "Unit Tests",
+          "key": "",
+          "infra": false
+        }
+      ],
+      "bisect": null
     }
   },
   "baseChecks": [
@@ -136,7 +141,7 @@
   },
   "counters": {
     "batchSeq": 37,
-    "ciRuns": 41,
+    "ciRuns": 42,
     "landedPrs": 0,
     "landedBatches": 0,
     "redBatches": 10,
@@ -2388,8 +2393,36 @@
       "sha": "dbd1bf7fb797898d338a0f7b26b4bce44cb0ecca",
       "detail": "re-running the failed jobs of b37 once (Gate / CI, Unit Tests (1/8), Unit Tests (5/8)) before a base check",
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45564095571"
+    },
+    {
+      "at": "2026-11-25T07:29:20.395Z",
+      "type": "checks-red",
+      "batchId": "b37",
+      "prs": [
+        21168,
+        21169,
+        21172,
+        21174
+      ],
+      "sha": "dbd1bf7fb797898d338a0f7b26b4bce44cb0ecca",
+      "detail": "Gate / CI, Unit Tests (1/8)",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45568467628"
+    },
+    {
+      "at": "2026-11-25T07:29:28.955Z",
+      "type": "base-check-started",
+      "batchId": "basecheck-ae94881fcf54",
+      "prs": [
+        21168,
+        21169,
+        21172,
+        21174
+      ],
+      "sha": "ae94881fcf543d1ee91d6af11f18b274280e0c53",
+      "detail": "b37 red on a base with no verdict: testing the bare base",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45568467628"
     }
   ],
-  "updatedAt": "2026-11-25T06:55:29.327Z",
+  "updatedAt": "2026-11-25T07:30:00.974Z",
   "batchWindow": 5
 }
