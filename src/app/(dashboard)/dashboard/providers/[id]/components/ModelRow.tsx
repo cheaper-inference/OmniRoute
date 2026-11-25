@@ -20,7 +20,7 @@ import {
 } from "@/shared/utils/modelCatalogSearch";
 import { providerText } from "../providerPageHelpers";
 import { Input as KitInput } from "@omniroute/ui-kit/input";
-import { Button, Checkbox, FilterPills } from "@/shared/components";
+import { Badge, Button, Checkbox, FilterPills } from "@/shared/components";
 import ModelComboBadge from "./ModelComboBadge";
 import ModelCompatPopover from "./ModelCompatPopover";
 import {
@@ -54,31 +54,36 @@ export type ModelCompatSavePatch = {
 // ModelSourceBadge
 // ---------------------------------------------------------------------------
 
-function getModelSourceBadgeClass(source?: string): string {
+type ModelSourceBadgeTone = {
+  variant?: "default" | "info" | "success" | "warning";
+  tone?: "chart-3";
+};
+
+function getModelSourceBadgeTone(source?: string): ModelSourceBadgeTone {
   switch (normalizeModelCatalogSource(source)) {
     case "imported":
-      return "border-info/30 bg-info/10 text-info";
+      return { variant: "info" };
     case "custom":
-      return "border-success/30 bg-success/10 text-success";
+      return { variant: "success" };
     case "fallback":
-      return "border-warning/30 bg-warning/10 text-warning";
+      return { variant: "warning" };
     case "alias":
-      return "border-chart-3/30 bg-chart-3/10 text-chart-3-ink";
+      return { tone: "chart-3" };
     case "system":
     default:
-      return "border-border bg-sidebar/70 text-text-muted";
+      return { variant: "default" };
   }
 }
 
 export function ModelSourceBadge({ source }: { source?: string }) {
   return (
-    <span
-      className={`shrink-0 whitespace-nowrap rounded-full border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide ${getModelSourceBadgeClass(
-        source
-      )}`}
+    <Badge
+      size="sm"
+      {...getModelSourceBadgeTone(source)}
+      className="shrink-0 whitespace-nowrap uppercase"
     >
       {getModelCatalogSourceLabel(source)}
-    </span>
+    </Badge>
   );
 }
 
@@ -372,10 +377,11 @@ export default function ModelRow({
       </div>
       <Button
         variant="ghost"
-        size="icon-sm"
+        size="icon-2xs"
+        tone="muted"
         icon={copied === `model-${model.id}` ? "check" : "content_copy"}
         onClick={() => onCopy(fullModel, `model-${model.id}`)}
-        className="absolute right-2 top-2 rounded p-0.5 size-6 min-h-6 text-text-muted"
+        className="absolute right-2 top-2"
         title={t("copyModel")}
         aria-label={t("copyModel")}
       />
@@ -392,7 +398,7 @@ export default function ModelRow({
           />
         )}
         {onSetAlias && (
-          <span className="flex min-w-0 flex-1 basis-16 items-center text-[10px] gap-1">
+          <span className="flex min-w-0 flex-1 basis-16 items-center text-3xs gap-1">
             {editing ? (
               <KitInput
                 ref={inputRef}
@@ -404,11 +410,11 @@ export default function ModelRow({
                 onKeyDown={handleKeyDown}
                 placeholder={providerText(t, "aliasInputPlaceholder", "alias name")}
                 aria-label={providerText(t, "aliasInputPlaceholder", "alias name")}
-                className="h-5 min-h-0 w-24 px-1 text-[9px]"
+                className="h-5 min-h-0 w-24 px-1 text-3xs"
               />
             ) : (
               <span
-                className={`min-w-0 truncate text-[10px] italic cursor-pointer hover:text-primary transition-colors ${alias ? "text-primary/80" : "text-text-muted/70"}`}
+                className={`min-w-0 truncate text-3xs italic cursor-pointer hover:text-primary transition-colors ${alias ? "text-primary/80" : "text-text-muted/70"}`}
                 onClick={startEditing}
                 title={
                   alias
@@ -427,12 +433,12 @@ export default function ModelRow({
           {onToggleHidden && testStatus === "error" && (
             <Button
               variant="ghost"
-              size="sm"
+              size="2xs"
               icon="block"
               loading={!!togglingHidden}
               onClick={() => onToggleHidden(model.id, true)}
               disabled={togglingHidden}
-              className="h-6 min-h-0 gap-1 rounded px-1 text-[11px] text-error"
+              className="text-error"
               title={providerText(
                 t,
                 "blacklistModelTooltip",
@@ -448,10 +454,19 @@ export default function ModelRow({
           {onTestModel && (
             <Button
               variant="ghost"
-              size="icon-sm"
+              size="icon-2xs"
+              tone="muted"
               onClick={() => onTestModel(model.id, fullModel)}
               disabled={testingModel}
-              className={`size-6 min-h-6 rounded ${testStatus === "ok" ? "text-success" : testStatus === "quota" ? "text-warning" : testStatus === "error" ? "text-error" : "text-text-muted"}`}
+              className={
+                testStatus === "ok"
+                  ? "text-success"
+                  : testStatus === "quota"
+                    ? "text-warning"
+                    : testStatus === "error"
+                      ? "text-error"
+                      : undefined
+              }
               title={
                 testingModel
                   ? t("testingModel")
@@ -491,11 +506,11 @@ export default function ModelRow({
           {onToggleHidden && (
             <Button
               variant="ghost"
-              size="icon-sm"
+              size="icon-2xs"
+              tone="muted"
               icon={isHidden ? "visibility_off" : "visibility"}
               onClick={() => onToggleHidden(model.id, !isHidden)}
               disabled={togglingHidden}
-              className="size-6 min-h-6 rounded text-text-muted"
               title={
                 isHidden
                   ? providerText(t, "showModel", "Show model")

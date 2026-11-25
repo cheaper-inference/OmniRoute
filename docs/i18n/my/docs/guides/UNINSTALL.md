@@ -70,6 +70,8 @@ docker rm omniroute
 docker volume rm omniroute-data
 
 # (ရွေးချယ်နိုင်သည်) Image ကို ဖယ်ရှားပါ
+docker rmi cheaperinference/omniroute:latest
+# အဟောင်းများ ထည့်သွင်းမှုများသည် အမွေအနှစ်အမည်ကို ဆွဲထုတ်ခဲ့သည်-
 docker rmi diegosouzapw/omniroute:latest
 ```
 

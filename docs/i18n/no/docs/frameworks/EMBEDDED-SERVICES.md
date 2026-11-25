@@ -557,6 +557,8 @@ Denne proxyen:
 
 WebSocket oppgraderinger for det innebygde dashbordet håndteres av en følgeserver på en dedikert port (se `src/lib/services/embedWsProxy.ts`).
 
+Hver oppgradering er autorisert før tunnelen åpnes, med de samme reglene som HTTP innbyggingsruten: peeren må være loopback uten omvendt proxy-videresendingsoverskrift, en nettleser `Origin` må være en dashboard-opprinnelse (`LIVE_WS_ALLOWED_ORIGINS` / `LIVE_WS_ALLOWED_HOSTS` extend the loopback standards), og den som ringer trenger en dashbord-økt eller en API -påloggingsnøkkel med administrasjonsomfang med mindre dashboard kan deaktiveres.
+
 **Sikkerhet:** Embed proxy-rutene er klassifisert under `LOCAL_ONLY_API_PREFIXES` og kan bare nås fra loopback. En angriper som skaffer seg en JWT via en Cloudflare/Ngrok tunnel kan ikke proxy til innebygde tjenester.
 
 ---

@@ -2,6 +2,7 @@ import React from "react";
 import "@testing-library/jest-dom/vitest";
 import { afterEach, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { hoverHoverCardTrigger, waitForHoverCardToClose } from "../_helpers/sharedHoverCard";
 import { NextIntlClientProvider } from "next-intl";
 import en from "../../src/i18n/messages/en.json";
 import zh from "../../src/i18n/messages/zh-CN.json";
@@ -14,7 +15,7 @@ afterEach(cleanup);
 
 for (const provider of ["antigravity", "agy"])
   for (const locale of ["en", "zh-CN"]) {
-    it(`${provider} ${locale} shows a partial cap and the cooling family on hover without quota groups`, () => {
+    it(`${provider} ${locale} shows a partial cap and the cooling family on hover without quota groups`, async () => {
       const now = Date.now();
       const messages = locale === "en" ? en : zh;
       const until = new Date(now + 600_000).toISOString();
@@ -84,11 +85,11 @@ for (const provider of ["antigravity", "agy"])
       const capsule = document.querySelector(`[data-account="${connection.id}"]`)!;
       expect(capsule).toHaveAttribute("data-kind", "ok");
       expect(capsule.querySelector("[data-partial]")).toHaveClass("bg-warning");
-      fireEvent.mouseEnter(capsule);
-      const tooltip = screen.getByRole("tooltip");
+      const tooltip = await hoverHoverCardTrigger(capsule);
       expect(tooltip).toHaveTextContent(messages.usage.modelLockouts);
       expect(tooltip).toHaveTextContent("gemini-3-flash");
-      fireEvent.mouseLeave(capsule);
+      fireEvent.pointerLeave(capsule);
+      await waitForHoverCardToClose();
       expect(screen.queryByRole("tooltip")).toBeNull();
     });
   }

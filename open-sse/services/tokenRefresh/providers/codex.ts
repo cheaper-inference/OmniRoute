@@ -2,7 +2,7 @@
 // Extracted from open-sse/services/tokenRefresh.ts — see ../shared.ts for
 // provenance notes (ported idea from KooshaPari's PR #7338, redone on tip).
 import { PROVIDERS, OAUTH_ENDPOINTS } from "../../../config/constants.ts";
-import { runWithProxyContext } from "../../../utils/proxyFetch.ts";
+import { runCommittedWithProxyContext } from "../../../utils/proxyFetch.ts";
 import { sanitizeErrorMessage } from "../../../utils/errorSanitization.ts";
 import { buildFormParams } from "../shared.ts";
 import { isPassiveCodex } from "../passiveCodex.ts";
@@ -16,7 +16,7 @@ import { isPassiveCodex } from "../passiveCodex.ts";
 export async function refreshCodexToken(refreshToken, log, proxyConfig: unknown = null) {
   if (isPassiveCodex("codex")) return { error: "refresh_disabled" };
   try {
-    const response = await runWithProxyContext(proxyConfig, () =>
+    const response = await runCommittedWithProxyContext(proxyConfig, () =>
       fetch(OAUTH_ENDPOINTS.openai.token, {
         method: "POST",
         headers: {

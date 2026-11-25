@@ -1,0 +1,538 @@
+{
+  "am": {
+    "auth": {
+      "traeAuthorizationSuccess": "የTrae ፍቃድ መስጠት ✓",
+      "traeAuthorizationFailed": "የTrae ፈቃድ ማረጋገጥ አልተሳካም",
+      "closeAuthorizationWindow": "ይህን መስኮት መዝጋት ይችላሉ።",
+      "returnToDashboard": "ወደ ዳሽቦርዱ ይመለሱ።"
+    }
+  },
+  "ar": {
+    "auth": {
+      "traeAuthorizationSuccess": "تفويض Trae ✓",
+      "traeAuthorizationFailed": "فشل تفويض Trae",
+      "closeAuthorizationWindow": "يمكنك إغلاق هذه النافذة.",
+      "returnToDashboard": "العودة إلى لوحة التحكم."
+    }
+  },
+  "az": {
+    "auth": {
+      "traeAuthorizationSuccess": "Trae avtorizasiyası ✓",
+      "traeAuthorizationFailed": "Trae avtorizasiyası uğursuz oldu",
+      "closeAuthorizationWindow": "Bu pəncərəni bağlaya bilərsiniz.",
+      "returnToDashboard": "Gösteriş panelinə qayıt."
+    }
+  },
+  "bg": {
+    "auth": {
+      "traeAuthorizationSuccess": "Trae авторизация ✓",
+      "traeAuthorizationFailed": "Неуспешна авторизация на Trae",
+      "closeAuthorizationWindow": "Можете да затворите този прозорец.",
+      "returnToDashboard": "Върнете се на таблото."
+    }
+  },
+  "bn": {
+    "auth": {
+      "traeAuthorizationSuccess": "ট্রেই অথরাইজেশন ✓",
+      "traeAuthorizationFailed": "Trae অনুমোদন ব্যর্থ হয়েছে",
+      "closeAuthorizationWindow": "আপনি এই উইন্ডোটি বন্ধ করতে পারেন।",
+      "returnToDashboard": "ড্যাশবোর্ডে ফিরে যান।"
+    }
+  },
+  "bs": {
+    "auth": {
+      "traeAuthorizationSuccess": "Trae autorizacija ✓",
+      "traeAuthorizationFailed": "Trae autorizacija nije uspjela",
+      "closeAuthorizationWindow": "Možete zatvoriti ovaj prozor.",
+      "returnToDashboard": "Vratite se na kontrolnu tablu."
+    }
+  },
+  "cs": {
+    "auth": {
+      "traeAuthorizationSuccess": "Trae autorizace ✓",
+      "traeAuthorizationFailed": "Trae autorizace selhala",
+      "closeAuthorizationWindow": "Toto okno můžete zavřít.",
+      "returnToDashboard": "Vraťte se na řídicí panel."
+    }
+  },
+  "da": {
+    "auth": {
+      "traeAuthorizationSuccess": "Trae godkendelse ✓",
+      "traeAuthorizationFailed": "Trae godkendelse mislykkedes",
+      "closeAuthorizationWindow": "Du kan lukke dette vindue.",
+      "returnToDashboard": "Returner til instrumentbrættet."
+    }
+  },
+  "de": {
+    "auth": {
+      "traeAuthorizationSuccess": "Trae-Autorisierung ✓",
+      "traeAuthorizationFailed": "Trae-Autorisierung fehlgeschlagen",
+      "closeAuthorizationWindow": "Sie können dieses Fenster schließen.",
+      "returnToDashboard": "Zurück zum Dashboard."
+    }
+  },
+  "el": {
+    "auth": {
+      "traeAuthorizationSuccess": "Εξουσιοδότηση Trae ✓",
+      "traeAuthorizationFailed": "Η εξουσιοδότηση του Trae απέτυχε",
+      "closeAuthorizationWindow": "Μπορείτε να κλείσετε αυτό το παράθυρο.",
+      "returnToDashboard": "Επιστρέψτε στον πίνακα ελέγχου."
+    }
+  },
+  "en": {
+    "auth": {
+      "traeAuthorizationSuccess": "Trae authorization ✓",
+      "traeAuthorizationFailed": "Trae authorization failed",
+      "closeAuthorizationWindow": "You can close this window.",
+      "returnToDashboard": "Return to the dashboard."
+    }
+  },
+  "es": {
+    "auth": {
+      "traeAuthorizationSuccess": "Trae autorización ✓",
+      "traeAuthorizationFailed": "Trae autorización fallida",
+      "closeAuthorizationWindow": "Puedes cerrar esta ventana.",
+      "returnToDashboard": "Regresar al panel de control."
+    }
+  },
+  "et": {
+    "auth": {
+      "traeAuthorizationSuccess": "Trae autoriseerimine ✓",
+      "traeAuthorizationFailed": "Trae autoriseerimine nurjus",
+      "closeAuthorizationWindow": "Võite selle akna sulgeda.",
+      "returnToDashboard": "Naaske juhtpaneelile."
+    }
+  },
+  "fa": {
+    "auth": {
+      "traeAuthorizationSuccess": "مجوز Trae ✓",
+      "traeAuthorizationFailed": "مجوز Trae ناموفق بود",
+      "closeAuthorizationWindow": "شما می‌توانید این پنجره را ببندید.",
+      "returnToDashboard": "به داشبورد بازگردید."
+    }
+  },
+  "fi": {
+    "auth": {
+      "traeAuthorizationSuccess": "Trae-valtuutus ✓",
+      "traeAuthorizationFailed": "Trae-valtuutus epäonnistui",
+      "closeAuthorizationWindow": "Voit sulkea tämän ikkunan.",
+      "returnToDashboard": "Palaa ohjauspaneeliin."
+    }
+  },
+  "fr": {
+    "auth": {
+      "traeAuthorizationSuccess": "Autorisation Trae ✓",
+      "traeAuthorizationFailed": "Échec de l’autorisation Trae",
+      "closeAuthorizationWindow": "Vous pouvez fermer cette fenêtre.",
+      "returnToDashboard": "Retournez au tableau de bord."
+    }
+  },
+  "ga": {
+    "auth": {
+      "traeAuthorizationSuccess": "D'éirigh le húdarú Trae ✓",
+      "traeAuthorizationFailed": "Theip ar údarú Trae",
+      "closeAuthorizationWindow": "Is féidir leat an fhuinneog seo a dhúnadh.",
+      "returnToDashboard": "Fill ar an bpainéal."
+    }
+  },
+  "gu": {
+    "auth": {
+      "traeAuthorizationSuccess": "ટ્રે અધિકૃતતા ✓",
+      "traeAuthorizationFailed": "ટ્રે અધિકૃતતા નિષ્ફળ ગઈ",
+      "closeAuthorizationWindow": "તમે આ વિન્ડોને બંધ કરી શકો છો.",
+      "returnToDashboard": "ડેશબોર્ડ પર પાછા જાઓ."
+    }
+  },
+  "ha": {
+    "auth": {
+      "traeAuthorizationSuccess": "An ba Trae izini ✓",
+      "traeAuthorizationFailed": "Ba da izinin Trae ya gaza",
+      "closeAuthorizationWindow": "Za ku iya rufe wannan taga.",
+      "returnToDashboard": "Koma zuwa dashboard."
+    }
+  },
+  "he": {
+    "auth": {
+      "traeAuthorizationSuccess": "אישור Trae ✓",
+      "traeAuthorizationFailed": "אישור Trae נכשל",
+      "closeAuthorizationWindow": "אתה יכול לסגור את החלון הזה.",
+      "returnToDashboard": "חזור ללוח המחוונים."
+    }
+  },
+  "hi": {
+    "auth": {
+      "traeAuthorizationSuccess": "ट्राए अधिकृत ✓",
+      "traeAuthorizationFailed": "Trae प्राधिकरण विफल हुआ",
+      "closeAuthorizationWindow": "आप इस विंडो को बंद कर सकते हैं।",
+      "returnToDashboard": "डैशबोर्ड पर वापस जाएं।"
+    }
+  },
+  "hr": {
+    "auth": {
+      "traeAuthorizationSuccess": "Autorizacija za Trae ✓",
+      "traeAuthorizationFailed": "Autorizacija za Trae nije uspjela",
+      "closeAuthorizationWindow": "Možete zatvoriti ovaj prozor.",
+      "returnToDashboard": "Vratite se na nadzornu ploču."
+    }
+  },
+  "hu": {
+    "auth": {
+      "traeAuthorizationSuccess": "Trae engedélyezés ✓",
+      "traeAuthorizationFailed": "Trae engedélyezés sikertelen",
+      "closeAuthorizationWindow": "Ezt az ablakot bezárhatja.",
+      "returnToDashboard": "Térjen vissza a műszerfalra."
+    }
+  },
+  "hy": {
+    "auth": {
+      "traeAuthorizationSuccess": "Trae-ի լիազորումը հաջողվեց ✓",
+      "traeAuthorizationFailed": "Trae-ի լիազորումը ձախողվեց",
+      "closeAuthorizationWindow": "Կարող եք փակել այս պատուհանը։",
+      "returnToDashboard": "Վերադառնալ կառավարման վահանակ։"
+    }
+  },
+  "id": {
+    "auth": {
+      "traeAuthorizationSuccess": "Trae otorisasi ✓",
+      "traeAuthorizationFailed": "Trae otorisasi gagal",
+      "closeAuthorizationWindow": "Anda dapat menutup jendela ini.",
+      "returnToDashboard": "Kembali ke dasbor."
+    }
+  },
+  "ig": {
+    "auth": {
+      "traeAuthorizationSuccess": "Enyela Trae ikike ✓",
+      "traeAuthorizationFailed": "Nkwenye ikike Trae dara ada",
+      "closeAuthorizationWindow": "Ị nwere ike imechi windo a.",
+      "returnToDashboard": "Laghachi na dashboard."
+    }
+  },
+  "it": {
+    "auth": {
+      "traeAuthorizationSuccess": "Autorizzazione Trae ✓",
+      "traeAuthorizationFailed": "Autorizzazione Trae non riuscita",
+      "closeAuthorizationWindow": "Puoi chiudere questa finestra.",
+      "returnToDashboard": "Torna al cruscotto."
+    }
+  },
+  "ja": {
+    "auth": {
+      "traeAuthorizationSuccess": "Trae 認証 ✓",
+      "traeAuthorizationFailed": "Traeの認証に失敗しました",
+      "closeAuthorizationWindow": "このウィンドウを閉じることができます。",
+      "returnToDashboard": "ダッシュボードに戻る。"
+    }
+  },
+  "ka": {
+    "auth": {
+      "traeAuthorizationSuccess": "Trae-ის ავტორიზაცია ✓",
+      "traeAuthorizationFailed": "Trae-ის ავტორიზაცია ვერ მოხერხდა",
+      "closeAuthorizationWindow": "შეგიძლიათ დახუროთ ეს ფანჯარა.",
+      "returnToDashboard": "დაბრუნდით მართვის პანელზე."
+    }
+  },
+  "km": {
+    "auth": {
+      "traeAuthorizationSuccess": "ការផ្តល់សិទ្ធិ Trae ✓",
+      "traeAuthorizationFailed": "ការផ្តល់សិទ្ធិ Trae បានបរាជ័យ",
+      "closeAuthorizationWindow": "អ្នកអាចបិទបង្អួចនេះបាន។",
+      "returnToDashboard": "ត្រឡប់ទៅផ្ទាំងគ្រប់គ្រង។"
+    }
+  },
+  "kn": {
+    "auth": {
+      "traeAuthorizationSuccess": "Trae ದೃಢೀಕರಣ ✓",
+      "traeAuthorizationFailed": "Trae ಅಧಿಕಾರ ನೀಡುವಿಕೆ ವಿಫಲವಾಗಿದೆ",
+      "closeAuthorizationWindow": "ನೀವು ಈ ವಿಂಡೋವನ್ನು ಮುಚ್ಚಬಹುದು.",
+      "returnToDashboard": "ಡ್ಯಾಶ್ಬೋರ್ಡ್ಗೆ ಹಿಂತಿರುಗಿ."
+    }
+  },
+  "ko": {
+    "auth": {
+      "traeAuthorizationSuccess": "Trae 권한 부여 ✓",
+      "traeAuthorizationFailed": "Trae 권한 부여 실패",
+      "closeAuthorizationWindow": "이 창을 닫을 수 있습니다.",
+      "returnToDashboard": "대시보드로 돌아가기."
+    }
+  },
+  "lt": {
+    "auth": {
+      "traeAuthorizationSuccess": "Trae autorizavimas ✓",
+      "traeAuthorizationFailed": "Nepavyko atlikti Trae autorizavimo",
+      "closeAuthorizationWindow": "Galite uždaryti šį langą.",
+      "returnToDashboard": "Grįžkite į valdymo skydą."
+    }
+  },
+  "lv": {
+    "auth": {
+      "traeAuthorizationSuccess": "Trae autorizācija ✓",
+      "traeAuthorizationFailed": "Trae autorizācija neizdevās",
+      "closeAuthorizationWindow": "Jūs varat aizvērt šo logu.",
+      "returnToDashboard": "Atgriezties informācijas panelī."
+    }
+  },
+  "ml": {
+    "auth": {
+      "traeAuthorizationSuccess": "Trae അംഗീകാരം ✓",
+      "traeAuthorizationFailed": "Trae അംഗീകാരം പരാജയപ്പെട്ടു",
+      "closeAuthorizationWindow": "നിങ്ങൾക്ക് ഈ വിൻഡോ അടയ്ക്കാം.",
+      "returnToDashboard": "ഡാഷ്ബോർഡിലേക്ക് മടങ്ങുക."
+    }
+  },
+  "mr": {
+    "auth": {
+      "traeAuthorizationSuccess": "Trae अधिकृतता ✓",
+      "traeAuthorizationFailed": "Trae अधिकृतता अयशस्वी झाली",
+      "closeAuthorizationWindow": "तुम्ही हा विंडो बंद करू शकता.",
+      "returnToDashboard": "डॅशबोर्डवर परत जा."
+    }
+  },
+  "ms": {
+    "auth": {
+      "traeAuthorizationSuccess": "Kebenaran Trae ✓",
+      "traeAuthorizationFailed": "Kegagalan pengesahan Trae",
+      "closeAuthorizationWindow": "Anda boleh menutup tetingkap ini.",
+      "returnToDashboard": "Kembali ke papan pemuka."
+    }
+  },
+  "mt": {
+    "auth": {
+      "traeAuthorizationSuccess": "Awtorizzazzjoni ta' Trae ✓",
+      "traeAuthorizationFailed": "L-awtorizzazzjoni ta' Trae falliet",
+      "closeAuthorizationWindow": "Tista' tagħlaq din it-tieqa.",
+      "returnToDashboard": "Erġa' lura għall-pannell."
+    }
+  },
+  "my": {
+    "auth": {
+      "traeAuthorizationSuccess": "Trae ခွင့်ပြုမှု ✓",
+      "traeAuthorizationFailed": "Trae ခွင့်ပြုမှု မအောင်မြင်ပါ",
+      "closeAuthorizationWindow": "ဤဝင်းဒိုးကို ပိတ်နိုင်ပါသည်။",
+      "returnToDashboard": "ဒက်ရှ်ဘုတ်သို့ ပြန်သွားပါ။"
+    }
+  },
+  "ne": {
+    "auth": {
+      "traeAuthorizationSuccess": "Trae बाट अनुमति प्राप्त भयो ✓",
+      "traeAuthorizationFailed": "Trae प्राधिकरण असफल भयो",
+      "closeAuthorizationWindow": "तपाईं यो विन्डो बन्द गर्न सक्नुहुन्छ।",
+      "returnToDashboard": "ड्यासबोर्डमा फर्कनुहोस्।"
+    }
+  },
+  "nl": {
+    "auth": {
+      "traeAuthorizationSuccess": "Trae autorisatie ✓",
+      "traeAuthorizationFailed": "Trae-autorisatie mislukt",
+      "closeAuthorizationWindow": "Je kunt dit venster sluiten.",
+      "returnToDashboard": "Terug naar het dashboard."
+    }
+  },
+  "no": {
+    "auth": {
+      "traeAuthorizationSuccess": "Trae autorisasjon ✓",
+      "traeAuthorizationFailed": "Trae autorisasjon mislyktes",
+      "closeAuthorizationWindow": "Du kan lukke dette vinduet.",
+      "returnToDashboard": "Gå tilbake til dashbordet."
+    }
+  },
+  "or": {
+    "auth": {
+      "traeAuthorizationSuccess": "Trae ଅନୁମୋଦନ ✓",
+      "traeAuthorizationFailed": "Trae ଅନୁମୋଦନ ବିଫଳ ହୋଇଛି",
+      "closeAuthorizationWindow": "ଆପଣ ଏହି ୱିଣ୍ଡୋ ବନ୍ଦ କରିପାରିବେ।",
+      "returnToDashboard": "ଡ୍ୟାସ୍ବୋର୍ଡକୁ ଫେରନ୍ତୁ।"
+    }
+  },
+  "pa": {
+    "auth": {
+      "traeAuthorizationSuccess": "Trae ਪ੍ਰਮਾਣੀਕਰਨ ✓",
+      "traeAuthorizationFailed": "Trae ਅਧਿਕਾਰਕਰਨ ਅਸਫਲ ਰਿਹਾ",
+      "closeAuthorizationWindow": "ਤੁਸੀਂ ਇਹ ਵਿੰਡੋ ਬੰਦ ਕਰ ਸਕਦੇ ਹੋ।",
+      "returnToDashboard": "ਡੈਸ਼ਬੋਰਡ 'ਤੇ ਵਾਪਸ ਜਾਓ।"
+    }
+  },
+  "phi": {
+    "auth": {
+      "traeAuthorizationSuccess": "Trae awtorisasyon ✓",
+      "traeAuthorizationFailed": "Nabigong awtorisasyon ng Trae",
+      "closeAuthorizationWindow": "Maaari mong isara ang bintanang ito.",
+      "returnToDashboard": "Bumalik sa dashboard."
+    }
+  },
+  "pl": {
+    "auth": {
+      "traeAuthorizationSuccess": "Autoryzacja Trae ✓",
+      "traeAuthorizationFailed": "Autoryzacja Trae nie powiodła się",
+      "closeAuthorizationWindow": "Możesz zamknąć to okno.",
+      "returnToDashboard": "Wróć do pulpitu nawigacyjnego."
+    }
+  },
+  "pt": {
+    "auth": {
+      "traeAuthorizationSuccess": "Trae autorização ✓",
+      "traeAuthorizationFailed": "Falha na autorização do Trae",
+      "closeAuthorizationWindow": "Pode fechar esta janela.",
+      "returnToDashboard": "Voltar ao painel."
+    }
+  },
+  "pt-BR": {
+    "auth": {
+      "traeAuthorizationSuccess": "Trae autorização ✓",
+      "traeAuthorizationFailed": "Falha na autorização do Trae",
+      "closeAuthorizationWindow": "Você pode fechar esta janela.",
+      "returnToDashboard": "Voltar ao painel."
+    }
+  },
+  "ro": {
+    "auth": {
+      "traeAuthorizationSuccess": "Trae autorizare ✓",
+      "traeAuthorizationFailed": "Autorizarea Trae a eșuat",
+      "closeAuthorizationWindow": "Puteți închide această fereastră.",
+      "returnToDashboard": "Întoarce-te la tabloul de bord."
+    }
+  },
+  "ru": {
+    "auth": {
+      "traeAuthorizationSuccess": "Авторизация Trae ✓",
+      "traeAuthorizationFailed": "Ошибка авторизации Trae",
+      "closeAuthorizationWindow": "Вы можете закрыть это окно.",
+      "returnToDashboard": "Вернуться на панель управления."
+    }
+  },
+  "si": {
+    "auth": {
+      "traeAuthorizationSuccess": "Trae අවසර දීම ✓",
+      "traeAuthorizationFailed": "Trae අවසරකරණය අසාර්ථක විය",
+      "closeAuthorizationWindow": "ඔබට මෙම කවුළුව වසා දැමිය හැක.",
+      "returnToDashboard": "උපකරණ පුවරුව වෙත ආපසු යන්න."
+    }
+  },
+  "sk": {
+    "auth": {
+      "traeAuthorizationSuccess": "Trae autorizácia ✓",
+      "traeAuthorizationFailed": "Trae autorizácia zlyhala",
+      "closeAuthorizationWindow": "Toto okno môžete zavrieť.",
+      "returnToDashboard": "Vrátiť sa na ovládací panel."
+    }
+  },
+  "sl": {
+    "auth": {
+      "traeAuthorizationSuccess": "Avtorizacija Trae ✓",
+      "traeAuthorizationFailed": "Avtorizacija za Trae ni uspela",
+      "closeAuthorizationWindow": "To okno lahko zaprete.",
+      "returnToDashboard": "Vrnite se na nadzorno ploščo."
+    }
+  },
+  "sr": {
+    "auth": {
+      "traeAuthorizationSuccess": "Ауторизација Trae ✓",
+      "traeAuthorizationFailed": "Ауторизација Trae није успела",
+      "closeAuthorizationWindow": "Можете затворити овај прозор.",
+      "returnToDashboard": "Вратите се на контролну таблу."
+    }
+  },
+  "sv": {
+    "auth": {
+      "traeAuthorizationSuccess": "Trae auktorisering ✓",
+      "traeAuthorizationFailed": "Trae auktorisering misslyckades",
+      "closeAuthorizationWindow": "Du kan stänga det här fönstret.",
+      "returnToDashboard": "Återgå till instrumentpanelen."
+    }
+  },
+  "sw": {
+    "auth": {
+      "traeAuthorizationSuccess": "Idhini ya Trae ✓",
+      "traeAuthorizationFailed": "Trae ruhusa imekosa",
+      "closeAuthorizationWindow": "Unaweza kufunga dirisha hili.",
+      "returnToDashboard": "Rudi kwenye dashibodi."
+    }
+  },
+  "ta": {
+    "auth": {
+      "traeAuthorizationSuccess": "Trae அங்கீகாரம் ✓",
+      "traeAuthorizationFailed": "Trae அங்கீகாரம் தோல்வி அடைந்தது",
+      "closeAuthorizationWindow": "நீங்கள் இந்த ஜன்னலை மூடலாம்.",
+      "returnToDashboard": "டாஷ்போர்டுக்கு திரும்பவும்."
+    }
+  },
+  "te": {
+    "auth": {
+      "traeAuthorizationSuccess": "Trae అనుమతి ✓",
+      "traeAuthorizationFailed": "Trae అనుమతి విఫలమైంది",
+      "closeAuthorizationWindow": "మీరు ఈ విండోను మూసివేయవచ్చు.",
+      "returnToDashboard": "డాష్‌బోర్డుకు తిరిగి వెళ్లండి."
+    }
+  },
+  "th": {
+    "auth": {
+      "traeAuthorizationSuccess": "การอนุญาต Trae ✓",
+      "traeAuthorizationFailed": "การอนุญาต Trae ล้มเหลว",
+      "closeAuthorizationWindow": "คุณสามารถปิดหน้าต่างนี้ได้แล้ว",
+      "returnToDashboard": "กลับไปที่แดชบอร์ด."
+    }
+  },
+  "tr": {
+    "auth": {
+      "traeAuthorizationSuccess": "Trae yetkilendirmesi ✓",
+      "traeAuthorizationFailed": "Trae yetkilendirmesi başarısız oldu",
+      "closeAuthorizationWindow": "Bu pencereyi kapatabilirsiniz.",
+      "returnToDashboard": "Gösterge paneline dön."
+    }
+  },
+  "uk-UA": {
+    "auth": {
+      "traeAuthorizationSuccess": "Авторизація Trae ✓",
+      "traeAuthorizationFailed": "Не вдалося авторизувати Trae",
+      "closeAuthorizationWindow": "Ви можете закрити це вікно.",
+      "returnToDashboard": "Повернутися до інформаційної панелі."
+    }
+  },
+  "ur": {
+    "auth": {
+      "traeAuthorizationSuccess": "ٹری آتھورائزیشن ✓",
+      "traeAuthorizationFailed": "ٹری آتھورائزیشن ناکام ہوگئی",
+      "closeAuthorizationWindow": "آپ اس ونڈو کو بند کر سکتے ہیں۔",
+      "returnToDashboard": "ڈیش بورڈ پر واپس جائیں۔"
+    }
+  },
+  "uz": {
+    "auth": {
+      "traeAuthorizationSuccess": "Trae avtorizatsiyasi ✓",
+      "traeAuthorizationFailed": "Trae avtorizatsiyasi amalga oshmadi",
+      "closeAuthorizationWindow": "Bu oynani yopishingiz mumkin.",
+      "returnToDashboard": "Boshqaruv paneliga qaytish."
+    }
+  },
+  "vi": {
+    "auth": {
+      "traeAuthorizationSuccess": "Ủy quyền Trae ✓",
+      "traeAuthorizationFailed": "Ủy quyền Trae không thành công",
+      "closeAuthorizationWindow": "Bạn có thể đóng cửa sổ này.",
+      "returnToDashboard": "Quay lại bảng điều khiển."
+    }
+  },
+  "yo": {
+    "auth": {
+      "traeAuthorizationSuccess": "Ìfúniláṣẹ Trae ✓",
+      "traeAuthorizationFailed": "Ìfúniláṣẹ Trae kùnà",
+      "closeAuthorizationWindow": "O lè pa fèrèsé yìí.",
+      "returnToDashboard": "Padà sí pánẹ́ẹ̀lì ìdarí."
+    }
+  },
+  "zh-CN": {
+    "auth": {
+      "traeAuthorizationSuccess": "Trae 授权 ✓",
+      "traeAuthorizationFailed": "Trae 授权失败",
+      "closeAuthorizationWindow": "您可以关闭此窗口。",
+      "returnToDashboard": "返回仪表板。"
+    }
+  },
+  "zh-TW": {
+    "auth": {
+      "traeAuthorizationSuccess": "Trae 授權 ✓",
+      "traeAuthorizationFailed": "Trae 授權失敗",
+      "closeAuthorizationWindow": "您可以關閉此視窗。",
+      "returnToDashboard": "返回儀表板。"
+    }
+  }
+}

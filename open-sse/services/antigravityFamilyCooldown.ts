@@ -13,6 +13,14 @@ type JsonRecord = Record<string, unknown>;
 
 const FAMILY_PSD_KEY = "antigravityFamilyRateLimitedUntil";
 
+/**
+ * Every provider spelling one Antigravity family lock is installed under. A connection
+ * answers to one of them, but the family lock has to exist for both: a request routed
+ * through the other spelling must see the same parked family. Any reader that clears or
+ * refreshes a family lock has to touch the whole list, or half the lock survives.
+ */
+export const ANTIGRAVITY_LOCK_PROVIDERS = ["agy", "antigravity"] as const;
+
 function asRecord(value: unknown): JsonRecord {
   return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
 }
@@ -36,8 +44,9 @@ function lockAntigravityFamilyModel(
   reason: string,
   cooldownMs: number
 ): void {
-  lockModel("agy", connectionId, model, reason, cooldownMs);
-  lockModel("antigravity", connectionId, model, reason, cooldownMs);
+  for (const provider of ANTIGRAVITY_LOCK_PROVIDERS) {
+    lockModel(provider, connectionId, model, reason, cooldownMs);
+  }
 }
 
 export async function persistAntigravityFamilyCooldown(params: {
@@ -105,6 +114,42 @@ export async function persistAntigravityPreflightFamilyLock(params: {
     model: params.model,
     rateLimitedUntil: params.unavailableUntil,
   });
+}
+
+/**
+ * Drop one family's SAVED deadline. The family locks are rehydrated from
+ * `providerSpecificData` on the next credential read (`auth.ts`), so clearing only
+ * the in-memory lock would park the family again on the very next request: a probe
+ * that proved the quota is back has to release both records.
+ *
+ * Returns true only when a stored deadline was actually removed.
+ */
+export async function clearAntigravityFamilyCooldown(
+  connectionId: string,
+  family: AntigravityQuotaFamily
+): Promise<boolean> {
+  if (family === "other" || !connectionId) return false;
+
+  const { getProviderConnectionById, updateProviderConnection } =
+    await import("@/lib/db/providers");
+  const conn = (await getProviderConnectionById(connectionId)) as {
+    provider?: string;
+    providerSpecificData?: JsonRecord | null;
+  } | null;
+  if (!conn || !isAntigravityQuotaProvider(conn.provider ?? null)) return false;
+
+  const psd = asRecord(conn.providerSpecificData);
+  const untils = asRecord(psd[FAMILY_PSD_KEY]);
+  if (!(family in untils)) return false;
+
+  const nextUntils = { ...untils };
+  delete nextUntils[family];
+  const nextPsd: JsonRecord = { ...psd, [FAMILY_PSD_KEY]: nextUntils };
+  // Never leave an empty record behind: an absent key and `{}` read the same, and the
+  // absent one keeps the row clean.
+  if (Object.keys(nextUntils).length === 0) delete nextPsd[FAMILY_PSD_KEY];
+  await updateProviderConnection(connectionId, { providerSpecificData: nextPsd });
+  return true;
 }
 
 /** Read the saved deadline without installing any process-local model locks. */

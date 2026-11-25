@@ -1,0 +1,1 @@
+- Advance round-robin combo counter in the initial target index space, scope promptCacheAffinity to model level, and read `promptCacheAffinityEnabled` from both `settings` and `databaseSettings` namespaces (#20191).

@@ -91,6 +91,10 @@ curl http://localhost:20128/api/settings/obsidian/webdav
 curl -X DELETE http://localhost:20128/api/settings/obsidian/webdav
 ```
 
+### Nchekwa & Ụgbọ njem
+
+Nyocha WebDAV na-amanye nleba anya ọdịda na mkpochi IP ọ bụla (mgbalị 10 dara ada n'ime windo 60 nke abụọ na-ebute mkpọchi nkeji 5 na `429 Too Many Requests` na `Retry-After`). N'ihi na WebDAV na-ebufe nzere nzere Basic, ịkwụsị TLS (ma ọ bụ ịfegharị n'ọwara echekwara dị ka Tailscale ma ọ bụ Cloudflare Tunnel) ka akwadoro nke ukwuu mgbe ị na-abanye ebe njedebe WebDAV na mpụga loopback.
+
 ### Context source nke API key ọ bụla (nhọrọ)
 
 Enwere ike ịkpa ókè nhazi Obsidian **n'ogo API key ọ bụla** site na tebụl `api_key_context_sources`

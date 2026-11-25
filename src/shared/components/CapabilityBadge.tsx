@@ -26,7 +26,7 @@ export default function CapabilityBadge({
       title={title}
       icon={icon ? <Icon name={icon} size={12} /> : undefined}
       className={cn(
-        "min-h-0 gap-0.5 whitespace-nowrap px-1.5 py-0.5 text-[10px] font-medium leading-none",
+        "min-h-0 gap-0.5 whitespace-nowrap px-1.5 py-0.5 text-3xs font-medium leading-none",
         className
       )}
     >

@@ -27,14 +27,9 @@
 
 ---
 
-## Tezkor ishga tushirish
+## Tez yugurish
 
-> **Bitta buyruq bilan o‘zingiz joylashtirmoqchimisiz?**
-> [Mustaqil joylashtirish qo‘llanmasi](../getting-started/SELF_HOST_GUIDE.md) bilan tanishing —
-> `docker compose -f docker-compose.selfhost.yml up -d` (e’lon qilingan tasvir +
-> Redis, faqat loopback interfeysi, profil tanlash talab qilinmaydi). Quyidagi tezkor ishga tushirish
-> usuli Redis’ni boshqa joyda allaqachon ishga tushirgan foydalanuvchilar uchun
-> bitta konteynerli variantdir.
+> **O'z-o'zidan mezbon bitta buyruqdami?** See the [Self-Host Guide](../getting-started/SELF_HOST_GUIDE.md) — `docker compose -f docker-compose.selfhost.yml up -d` (published image + Redis, loopback-only, no profile choice). The Quick Run below is the single-container path for users who already run Redis elsewhere.
 
 ```bash
 docker run -d \
@@ -43,13 +38,13 @@ docker run -d \
   --stop-timeout 40 \
   -p 20128:20128 \
   -v omniroute-data:/app/data \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
-## Muhit fayli bilan
+## Atrof-muhit fayli bilan
 
 ```bash
-# Avval .env faylidan nusxa oling va uni tahrirlang
+# Copy and edit .env first
 cp .env.example .env
 
 docker run -d \
@@ -59,7 +54,7 @@ docker run -d \
   --env-file .env \
   -p 20128:20128 \
   -v omniroute-data:/app/data \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
 ## Docker Compose
@@ -240,18 +235,18 @@ docker compose -f docker-compose.prod.yml down
 
 Ishlab chiqarish steki dasturlash compose muhiti bilan parallel ravishda ishlaydi (konteyner nomlari, portlari va jildlari turlicha), shu sababli ishlab chiqarish muhiti ishlab turgan paytda mahalliy tarzda ishni davom ettirishingiz mumkin.
 
-## Dockerfile bosqichlari
+## Dockerfayl bosqichlari
 
-Repozitoriy ko‘p bosqichli Dockerfile (`Dockerfile`) bilan taqdim etiladi. To‘rtta bosqich mavjud; foydalanish holatingiz uchun mos `target`ni tanlang.
+Repozitoriy ko'p bosqichli Dockerfile (`Dockerfile`) ni yuboradi. To'rt bosqich ochiladi; foydalanish holatlaringiz uchun to'g'ri `target` tanlang.
 
-| Bosqich       | Asosiy obraz          | Maqsad                                                                                                                                                                                                                                                                                             |
-| ------------- | --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `builder`     | `node:26-trixie-slim` | Bog‘liqliklarni o‘rnatadi (`npm ci --legacy-peer-deps`) va `npm run build`ni ishga tushiradi (sukut bo‘yicha Turbopack — quyidagi Yig‘ish vaqtidagi resurslar bo‘limiga qarang)                                                                                                                    |
-| `runner-base` | `node:26-trixie-slim` | Next.js mustaqil chiqishi bilan ishlab chiqarish muhiti. **Hech qanday provayder CLI vositalari kiritilmagan.**                                                                                                                                                                                    |
-| `runner-cli`  | `runner-base`         | `git`, `docker.io`, `docker-compose` va global CLI vositalarini qo‘shadi: `@openai/codex`, `@anthropic-ai/claude-code`, `droid`, `openclaw`. **Agentli ish jarayonlari uchun shuni tanlang.**                                                                                                      |
-| `runner-web`  | `runner-base`         | Veb-sessiya provayderlari uchun Playwright + Chromium brauzerini (`--with-deps`) qo‘shadi: `gemini-web`, `claude-web`, `claude-turnstile`. **Ushbu provayderlardan foydalansangiz, shuni tanlang** — oddiy obraz busiz so‘rov vaqtida ishlamaydi (Reliz kanallari ostidagi `-web` izohiga qarang). |
+| Bosqich       | Asosiy rasm           | Maqsad                                                                                                                                                                                                                                                                                               |
+| ------------- | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `builder`     | `node:26-trixie-slim` | Deps (`npm ci --legacy-peer-deps`) ni o'rnatadi va `npm run build` ishga tushiradi ( sukut bo'yicha Turbopack — quyida Qurilish vaqti resurslariga qarang)                                                                                                                                           |
+| `runner-base` | `node:26-trixie-slim` | Next.js mustaqil chiqishi bilan ishlab chiqarish muddati.** Hech qanday CLIs provayderi to'plamlanmagan.**                                                                                                                                                                                           |
+| `runner-cli`  | `runner-base`         | `git`, `docker.io`, `docker-compose` va global CLIs qo'shadi : `@openai/codex`, `@anthropic-ai/claude-code`, `droid`, `openclaw`.** Agentlik ish oqimlari uchun buni tanlang.**                                                                                                                      |
+| `runner-web`  | `runner-base`         | Veb-sessiya provayderlari uchun Playwright + Chromium brauzerini (`--with-deps`) qo‘shadi: `gemini-web`, `claude-web`, `claude-turnstile`.** Ushbu provayderlardan foydalanganda buni tanlang** — oddiy tasvir so'rov vaqtida bajarilmaydi (chiqarish kanallari ostidagi `-web` eslatmasiga qarang). |
 
-Muayyan targetni qo‘lda yig‘ish:
+Muayyan maqsadni qo'lda yarating:
 
 ```bash
 docker build --target runner-base -t omniroute:base .
@@ -259,47 +254,19 @@ docker build --target runner-cli  -t omniroute:cli  .
 docker build --target runner-web  -t omniroute:web  .
 ```
 
-### Yig‘ish vaqtidagi resurslar
+### Qurilish vaqti resurslari
 
-Uchta yig‘ish argumenti `builder` bosqichining resurs sarfini boshqaradi. Ular faqat yig‘ish vaqtida amal qiladi —
-`OMNIROUTE_MEMORY_MB` (quyida) esa alohida, bajarilish vaqtiga oid sozlamadir.
+Uchta qurilish arglari `builder` bosqichining narxini nazorat qiladi. Ular faqat qurilish vaqti — `OMNIROUTE_MEMORY_MB` (pastda) alohida, ish vaqti tugmasi.
 
-| Yig‘ish argumenti           | Standart | Ta’siri                                                                                                            |
-| --------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------ |
-| `OMNIROUTE_USE_TURBOPACK`   | `0`      | `0` webpack bilan yig‘adi: xotira cho‘qqisi pastroq, ammo sekinroq. `1` Turbopackni yoqadi.                        |
-| `OMNIROUTE_BUILD_MEMORY_MB` | `6144`   | Ishga tushirilgan `next build` uchun V8 heap chegarasi (`--max-old-space-size`).                                   |
-| `OMNIROUTE_BUILD_WORKERS`   | `2`      | `CIRCLE_NODE_TOTAL`ga uzatiladi; Next sahifa ma’lumotlarini to‘plash uchun `workers = N - 1`ni hisoblab chiqaradi. |
+| arg ni yarating             | Standart | Effekt                                                                                                         |
+| --------------------------- | -------- | -------------------------------------------------------------------------------------------------------------- |
+| `OMNIROUTE_USE_TURBOPACK`   | `0`      | `0` veb-paket bilan tuziladi: eng past xotira, sekinroq. `1` Turbopack ni tanlaydi.                            |
+| `OMNIROUTE_BUILD_MEMORY_MB` | `6144`   | V8 to'p ship (`--max-old-space-size`) yumurtlamaya `next build` uchun.                                         |
+| `OMNIROUTE_BUILD_WORKERS`   | `2`      | `CIRCLE_NODE_TOTAL` oziqlantiradi; Keyingi sahifa ma'lumotlarini yig'ish uchun `workers = N - 1` hosil qiladi. |
 
-`OMNIROUTE_BUILD_WORKERS` — kuchli builderda oshiriladigan va resurslari
-cheklangan yig‘ish **`✓ Compiled successfully`dan keyin** to‘xtab qolsa, gumon
-qilinadigan parametrdir. Har bir sahifa ma’lumotlari workeri alohida jarayon
-bo‘lib, asosiy `next build`ning o‘zi ham alohida jarayondir; real VPSdagi
-takroriy sinov (issue #7518) har bir jarayonning eng yuqori RSS ko‘rsatkichi
-`NODE_OPTIONS` heap bayrog‘idan qat’i nazar ~4.5 GB ekanini o‘lchadi (Turbopack
-V8 heapidan tashqaridagi mahalliy/Rust xotirasida kompilyatsiya qiladi).
-Standart `2` qiymati (→ 1 worker, jami 2 jarayon) nashr qilish pipeline’i
-foydalanadigan 16 GB / 4 vCPU GitHub-hosted runnerlar uchun moslangan. `8`
-qiymatida (→ 7 worker) o‘sha runner xotirasi tugadi va buildkit bosqichni
-`ResourceExhausted: ... cannot allocate memory` xatosi bilan yakunladi;
-har bir jarayon RSS ko‘rsatkichi taxmin qilinmay, to‘g‘ridan-to‘g‘ri
-o‘lchanganida `3` (→ 2 worker) ham sig‘madi.
-`tests/unit/docker-build-memory-budget.test.ts` o‘lchangan qiymat asosida
-hisob-kitob qiladi va parametrlardan biri runner imkoniyatidan oshsa, test
-muvaffaqiyatsiz tugaydi.
+`OMNIROUTE_BUILD_WORKERS` - bu katta quruvchiga ko'tariladigan va cheklangan qurilish o'lganida shubhalanadigan kishi** keyin** `✓ Compiled successfully`. Har bir sahifa-ma'lumotlar ishchisi o'ziga xos jarayondir va ota `next build` o'zi ham shunday; jonli VPS reproduktsiyasi ( #7518 muammosi) har bir jarayonning RSS cho'qqisini `NODE_OPTIONS` uyasi bayrog'idan mustaqil ~ 4,5 GB da o'lchadi (Turbopack V8 uyasidan tashqari native/Rust xotirasida kompilyatsiya qiladi). Birlamchi `2` (→ 1 ishchi, jami 2 jarayon) nashr qilish quvuri ishlatadigan 16 GB / 4 vCPU GitHub-hostlangan yuguruvchilar uchun o‘lchamli. `8` da (→ 7 ishchi) bu yuguruvchining xotirasi tugab qoldi va buildkit `ResourceExhausted: ... cannot allocate memory` bilan qadamni bajara olmadi; `3` (→ 2 ishchi) har bir jarayon uchun RSS xulosa chiqarish o'rniga to'g'ridan-to'g'ri o'lchanganidan keyin ham mos kelmadi. `tests/unit/docker-build-memory-budget.test.ts` o'lchangan raqamga qarshi arifmetikani bajaradi va agar tugma yuguruvchidan kattaroq bo'lsa, muvaffaqiyatsiz bo'ladi.
 
-Turbopack V8 heapidan **tashqarida** joylashgan mahalliy Rust xotirasida
-kompilyatsiya qiladi, shu sababli `OMNIROUTE_BUILD_MEMORY_MB` uni cheklamaydi.
-Xotira chegarasi mavjud hostda yig‘ish OOM killer tomonidan hech qanday xato
-matnisiz SIGKILL qilinadi — u shunchaki `Creating an optimized production build`
-jarayonining o‘rtasida to‘xtaydi va bu xotira yetishmovchiligi emas, osilib
-qolishdek ko‘rinadi. Shu sababli `Dockerfile` sukut bo‘yicha webpackdan
-(`OMNIROUTE_USE_TURBOPACK=0`) foydalanadi; bu borada u `npm run dev` /
-`npm run build`dan farq qiladi, chunki ularda kod bo‘yicha standart Turbopackdir:
-hech qanday yig‘ish argumentlarisiz oddiy `docker build .` (Railway va boshqa
-bir marta bosish orqali ishga tushiruvchi hostlar bajaradigan buyruq) xotirasi
-cheklangan builderda indamay to‘xtab qolmasligi kerak. Nashr qilingan obrazlar
-allaqachon `docker-publish.yml` ichida `OMNIROUTE_USE_TURBOPACK=0`ni aniq
-uzatadi. Yetarlicha RAMga ega builderda tezroq yig‘ish uchun Turbopackni yoqing:
+Turbopack yashaydigan mahalliy Rust xotirasida kompilyatsiya qiladi** tashqarida** V8 to'plami, shuning uchun `OMNIROUTE_BUILD_MEMORY_MB` uni bog'lamaydi. Xotira shiftiga ega bo'lgan xostda konstruktsiya OOM killer tomonidan SIGKILLed bo'lib, hech qanday xato matni yo'q — u shunchaki o'rta `Creating an optimized production build` to'xtatadi, bu esa xotiradan ko'ra osilgan kabi o'qiladi. Shuning uchun `Dockerfile` sukut bo'yicha webpack (`OMNIROUTE_USE_TURBOPACK=0`) ga o'rnatiladi, `npm run dev` / `npm run build` dan farqli o'laroq, bu erda Turbopack sukut bo'yicha kod hisoblanadi: qurish arglari bo'lmagan yalang'och `docker build .` (Temir yo'l va boshqa bir marta bosiladigan xostlar ishlaydi) xotirasi cheklangan quruvchida jimgina o'lib ketmasligi kerak. Chop etilgan tasvirlar allaqachon `OMNIROUTE_USE_TURBOPACK=0` `docker-publish.yml` aniq o'tadi. Ko'p RAM bo'lgan quruvchida tezroq qurish uchun Turbopack tanlang:
 
 ```bash
 docker build --target runner-base \
@@ -307,49 +274,46 @@ docker build --target runner-base \
   -t omniroute:base .
 ```
 
-`webpackBuildWorker` yoqilgan, shu sababli `next build` asosiy **va** worker
-jarayonini ishga tushiradi hamda ularning har biri `OMNIROUTE_BUILD_MEMORY_MB`
-qiymatiga alohida rioya qiladi. Konteyner chegarasini bu qiymatdan bir emas,
-taxminan ikki baravar yuqori qilib belgilang.
+`webpackBuildWorker` yoqilgan, shuning uchun `next build` ota-onani boshqaradi** va** bir ishchi jarayoni va har biri alohida `OMNIROUTE_BUILD_MEMORY_MB` hurmat qiladi. Idishning shiftini bir marta emas, balki ikki baravar kattaroq o'lchamda.
 
-Ushbu daraxtda o‘lchangan (`--target runner-base`, `OMNIROUTE_BUILD_MEMORY_MB=6144`):
+Ushbu daraxtda o'lchangan (`--target runner-base`, `OMNIROUTE_BUILD_MEMORY_MB=6144`):
 
-| Bundler   | Konteyner chegarasi | Natija                                             |
-| --------- | ------------------- | -------------------------------------------------- |
-| Turbopack | 8 GiB / 16 GiB      | har ikkala holatda OOM sababli indamay to‘xtatildi |
-| webpack   | 8 GiB               | build worker SIGKILL qilindi                       |
-| webpack   | 12 GiB              | muvaffaqiyatli, cho‘qqisi 11.1 GiB                 |
+| Bundler   | Konteyner shifti | Natija                                              |
+| --------- | ---------------- | --------------------------------------------------- |
+| Turbopack | 8 GiB / 16 GiB   | OOM ikkalasida ham jimgina o'ldirilgan              |
+| veb-paket | 8 GiB            | ishchi SIGKILLed qurish                             |
+| veb-paket | 12 GiB           | muvaffaqiyatga erishdi, 11,1 GiB cho'qqisiga chiqdi |
 
-### Bajarilish vaqtidagi standart qiymatlar
+### Ish vaqti standartlari
 
-`runner-base` tomonidan eksport qilinadigan standart qiymatlar: `PORT=20128`, `HOSTNAME=0.0.0.0`, `OMNIROUTE_MEMORY_MB=1024`, `NODE_OPTIONS=--max-old-space-size=1024`, `DATA_DIR=/app/data`, `OMNIROUTE_MIGRATIONS_DIR=/app/migrations`.
+`runner-base` tomonidan eksport qilingan standart qiymatlar: `PORT=20128`, `HOSTNAME=0.0.0.0`, `OMNIROUTE_MEMORY_MB=1024`, `NODE_OPTIONS=--max-old-space-size=1024`, `DATA_DIR=/app/data`, `OMNIROUTE_MIGRATIONS_DIR=/app/migrations`.
 
-Docker ichidagi xotira xatti-harakati:
+Docker-da xotira harakati:
 
-- Tasvir `OMNIROUTE_MEMORY_MB=1024` qiymatini o‘rnatadi va undan `NODE_OPTIONS=--max-old-space-size=1024` qiymatini hosil qiladi.
-- Amaldagi server jarayoni mustaqil ishga tushirgich tomonidan boshlanadi; u `OMNIROUTE_MEMORY_MB` qiymatini o‘qiydi va `--max-old-space-size=<OMNIROUTE_MEMORY_MB>` parametrini qo‘shadi.
-- Node takrorlangan `--max-old-space-size` qiymatlarining oxirgisidan foydalanadi, shuning uchun `OMNIROUTE_MEMORY_MB` ni sozlash Docker uchun amaldagi heap cheklovini boshqaradi.
-- Tasvir bu qiymatni doim o‘rnatgani sababli, ishga tushirgichning RAM hajmiga moslangan zaxira qiymati Docker ostida hech qachon qo‘llanmaydi. Ish yukiga qarab uni aniq oshiring (quyidagi jadvalga qarang). `2048` coding-agent `/v1/responses` uchun hamon juda kichik.
+- Rasm `OMNIROUTE_MEMORY_MB=1024` o'rnatadi va undan `NODE_OPTIONS=--max-old-space-size=1024` hosil qiladi.
+- Haqiqiy server jarayoni `OMNIROUTE_MEMORY_MB` o'qiydi va `--max-old-space-size=<OMNIROUTE_MEMORY_MB>` qo'shadigan mustaqil ishga tushirgich tomonidan boshlanadi.
+- Tugun oxirgi takrorlangan `--max-old-space-size` qiymatidan foydalanadi, shuning uchun `OMNIROUTE_MEMORY_MB` o'rnatilishi samarali Docker yig'ish chegarasini boshqaradi.
+- Tasvir har doim uni o'rnatganligi sababli, ishga tushirgichning o'z RAM-kalibrlangan zaxirasi hech qachon Docker ostida qo'llanilmaydi. Ish yuki uchun uni aniq ko'taring (quyidagi jadval). `2048` kodlash agenti `/v1/responses` uchun hali juda kichik.
 
-### Coding agentlari uchun ish vaqtidagi RAM
+### Kodlash agentlari uchun ish vaqti RAM
 
-Docker uchun standart 1 GiB — ishlab chiqarish muhiti hajmi emas, balki boshqaruv paneli/yengil chat uchun minimal darajadir. Uzun `POST /v1/responses` tanalari (yuzlab xabarlar, o‘nlab vositalar) siqish vaqtida bir nechta xotira ichidagi grafiklarni saqlab turadi. Bir-biriga ustma-ust kelgan taxminan 3 MiB / 750 ming tokenli ikkita so‘rov **12 GiB** old-space hajmida V8 ishini to‘xtatgan (`FATAL ERROR: Reached heap limit`) va 16 GiB cgroup OOM holatiga ham olib kelgan. [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849) ga qarang.
+1 GiB Docker standarti ishlab chiqarish hajmi emas, balki dashboard/light-chat qavatdir. Uzoq `POST /v1/responses` jismlar (yuzlab xabarlar, o'nlab vositalar) siqish vaqtida bir nechta xotiradagi grafiklarni saqlaydi. Ikkita bir-biriga o'xshash ~ 3 MiB / ~ 750k token so'rovlari V8ni bir vaqtning o'zida bekor qildi.** 12 GiB** old-space (`FATAL ERROR: Reached heap limit`) va shuningdek, 16 GiB cgroup OOM urdi. [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849) ga qarang.
 
-**cgroup `--memory` hajmini heap hajmidan kattaroq qilib belgilang** — mahalliy buferlar, SQLite va siqishning oraliq ma’lumotlari V8 dan tashqarida joylashadi.
+Hajmi** cgroup `--memory` to'pning ustida** — mahalliy buferlari, SQLite va siqish vositachilari V8 dan tashqarida joylashgan.
 
-| Ish yuki                                         | `OMNIROUTE_MEMORY_MB`               | Konteyner / cgroup               | Izohlar                                                                                                                                                               |
-| ------------------------------------------------ | ----------------------------------- | -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Boshqaruv paneli, bitta yengil chat              | `1024` (tasvirdagi standart qiymat) | ≥2 GiB                           |                                                                                                                                                                       |
-| Bitta coding agenti (Claude/Codex/Grok)          | `8192`                              | ≥10 GiB                          | Odatdagi bitta seansli `/v1/responses`                                                                                                                                |
-| Bir vaqtdagi ikkita uzun `/v1/responses`         | `10240`–`12288`                     | ≥12–16 GiB                       | Taxminan 12 GiB heap hajmida V8 to‘xtashi kuzatilgan                                                                                                                  |
-| Bir vaqtdagi uchta yoki undan ko‘p uzun kontekst | bitta jarayonda ishlatmang          | ketma-ket bajaring / ko‘proq RAM | Standart og‘ir so‘rovlar cheklovi bir vaqtda 1 ta bajarilayotgan so‘rovdir; RAM hajmini oshirmasdan bu cheklovni ko‘tarish to‘xtash holatini qayta keltirib chiqaradi |
+| Ish yuki                                        | `OMNIROUTE_MEMORY_MB`   | Konteyner / guruh            | Eslatmalar                                                                                       |
+| ----------------------------------------------- | ----------------------- | ---------------------------- | ------------------------------------------------------------------------------------------------ |
+| Boshqaruv paneli, bitta yorug'lik suhbati       | `1024` (asl rasm)       | ≥2 GiB                       |                                                                                                  |
+| Bitta kodlash agenti (Claude/Codex/Grok)        | `8192`                  | ≥10 GiB                      | Oddiy bir seansli `/v1/responses`                                                                |
+| Bir vaqtning o'zida ikkita uzun `/v1/responses` | `10240`–`12288`         | ≥12–16 GiB                   | ~ 12 GiB uyasida o'lchangan V8 bekor qilish                                                      |
+| Uch + bir vaqtda uzoq kontekst                  | bitta jarayonda qilmang | serializatsiya / ko'proq RAM | Birlamchi og'ir vazn toifasiga kirish - 1 ta parvoz; uni RAM ko'tarish abortni qaytadan kiritadi |
 
-Oddiy tizimda `omniroute serve`, `OMNIROUTE_MEMORY_MB` **o‘rnatilmagan** bo‘lsa, RAM hajmining taxminan 35% ini hisoblab belgilaydi (`[512, 4096]` oralig‘i bilan cheklanadi). Docker har doim `1024` ni o‘rnatadi, shuning uchun bu moslash jarayoni rasmiy tasvirda hech qachon bajarilmaydi.
+Yalang'och metalldagi `omniroute serve` `OMNIROUTE_MEMORY_MB` bo'lganda ~ ning 35% RAM (qisqichli `[512, 4096]`) ni kalibrlaydi** sozlanmagan** . Docker har doim `1024` o'rnatadi, shuning uchun kalibrlash hech qachon rasmiy tasvirda ishlamaydi.
 
 ```bash
 docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
   -e OMNIROUTE_MEMORY_MB=8192 --memory=10g \
-  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
 ```
 
 ## Muhim muhit o‘zgaruvchilari
@@ -373,23 +337,13 @@ docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
 | `PROD_DASHBOARD_PORT`         | `docker-compose.prod.yml` uchun xost tomonidagi boshqaruv paneli porti                                                                                                                                                                                                             | `20130`                         |
 | `CLIPROXYAPI_PORT`            | `cliproxyapi` yordamchi konteyneri uchun xost tomonidagi port                                                                                                                                                                                                                      | `8317`                          |
 
-## Quyi yoʻlda teskari proksi (Traefik / nginx)
+## Subpathdagi teskari proksi (Traefik / nginx)
 
-Next.js `basePath` qiymati standalone toʻplamiga kompilyatsiya qilinadi. OmniRoute oʻrnatilgan
-qiymatni ilova ildizidagi sentinel faylga yozib qoʻyadi (`npm run build` vaqtida yoziladi;
-`scripts/docker/ensure-docker-base-path.mjs` tomonidan oʻqiladi) va konteyner ishga
-tushganda uni `OMNIROUTE_BASE_PATH` bilan taqqoslaydi. Agar ular farq qilsa va tasvir
-domen ildizi uchun yaratilgan boʻlsa, kirish nuqtasi `node dev/run-standalone.mjs`
-ishga tushishidan oldin standalone manifestlarini, ichki `basePath`/`assetPrefix`
-literallarini (Next 16 SSR resurs URL manzillarini faqat `assetPrefix` asosida hosil
-qiladi — yamovchi quyi yoʻlni unga ham aks ettiradi), oʻrnatilgan `/_next/static`
-resurs URL manzillarini (mijoz havolalari manifestlari, media importlari, oldindan
-renderlangan xato sahifalari) va mijoz `process.env` moslashtiruvchisini qayta yozadi.
+Next.js `basePath` mustaqil to'plamga tuzilgan. OmniRoute pishirilgan qiymatni ilova ildizidagi sentinel faylida qayd etadi ( `npm run build` davomida yozilgan; `scripts/docker/ensure-docker-base-path.mjs` tomonidan o‘qiladi) va konteyner ishga tushganda uni `OMNIROUTE_BASE_PATH` bilan solishtiradi. Ular bir-biridan farq qilganda va tasvir domen ildizi uchun qurilgan bo‘lsa, kirish nuqtasi mustaqil manifestlarni, o‘rnatilgan `basePath`/`assetPrefix` literallarini qayta yozadi (Keyingi 16 SSR asset URLs `assetPrefix` dan faqat — ko‘rsatadi, `/_next/static` unga pastki yo‘lni aks ettiradi), pishgan media URLs, importz-manifests, oldindan berilgan xato sahifalari) va mijoz `process.env` shim `node dev/run-standalone.mjs` ishga tushishidan oldin.
 
-### Compose orqali yaratish (tavsiya etiladi)
+### Qurilish yaratish (tavsiya etiladi)
 
-Tasvir va bajarilish muhiti bir-biriga mos kelishi uchun `.env` faylida ikkala
-oʻzgaruvchini ham belgilang, soʻng tasvirni qayta yarating:
+Ikkala o'zgaruvchini `.env` ga o'rnating, so'ngra tasvir va ish vaqti mos kelishi uchun qayta tiklang:
 
 ```bash
 # .env
@@ -401,74 +355,52 @@ NEXT_PUBLIC_BASE_URL=https://myhostname.example.com/omniroute
 docker compose --profile base up -d --build
 ```
 
-`docker-compose.yml` fayli `OMNIROUTE_BASE_PATH` qiymatini Docker yaratish argumenti
-va bajarilish muhiti oʻzgaruvchisi sifatida uzatadi.
+`docker-compose.yml` `OMNIROUTE_BASE_PATH` Docker build-arg va ish vaqti muhiti o‘zgaruvchisi sifatida oldinga siljitadi.
 
-### Oldindan yaratilgan ildiz tasviri + bajarilish vaqtidagi quyi yoʻl
+### Oldindan yaratilgan ildiz tasviri + ish vaqti subpath
 
-Eʼlon qilingan `diegosouzapw/omniroute:*` tasvirlari domen ildizi uchun yaratilgan.
-Shunga qaramay, bajarilish vaqtida `OMNIROUTE_BASE_PATH` qiymatini belgilashingiz
-mumkin; konteyner ishga tushishda toʻplamga bir marta yamoq qoʻllaydi. Uni mos ommaviy
-origin bilan birga sozlang:
+Chop etilgan `cheaperinference/omniroute:*` tasvirlari domen ildizi uchun qurilgan. Siz hali ham ish vaqtida `OMNIROUTE_BASE_PATH` o'rnatishingiz mumkin; konteyner ishga tushirilganda paketni bir marta yamaladi. Uni mos keladigan umumiy manba bilan bog'lang:
 
 ```yaml
 services:
   omniroute:
-    image: diegosouzapw/omniroute:latest
+    image: cheaperinference/omniroute:latest
     environment:
       OMNIROUTE_BASE_PATH: /omniroute
       NEXT_PUBLIC_BASE_URL: https://myhostname.example.com/omniroute
 ```
 
-Teskari proksini tashqi yoʻlni **toʻliq** uzatadigan qilib sozlang (prefiksni olib
-tashlamang). Traefik `PathPrefix(`/omniroute`)` yoʻnalishini konteynerga `StripPrefix`
-siz yoʻnaltirishi kerak, shunda Next.js `/omniroute/...` yoʻlini qabul qiladi va
-resurslarni `/omniroute/_next/...` manzilidan taqdim etadi.
+Yo‘naltirish uchun teskari proksi-serverni sozlang** to'la** tashqi yo'l (prefiksni olib tashlamang). Traefik `PathPrefix(`/omniroute `)` `StripPrefix` holda konteynerga yo'naltirishi kerak, shuning uchun Next.js `/omniroute/...` oladi va `/omniroute/_next/...` dan aktivlarga xizmat qiladi.
 
-Docker sogʻliq tekshiruvi faol `OMNIROUTE_BASE_PATH` prefiksi qoʻshilgan yengil
-`/healthz` hayot sikli endpointini tekshiradi. `/api/monitoring/health` foydalanuvchi
-yoki boshqaruv paneli diagnostikasi uchun mavjud boʻlib qoladi; konteyner
-HEALTHCHECK tekshiruvini yana unga yoʻnaltirish uchun (masalan, chuqur sogʻliq
-nazoratini taʼminlash maqsadida) `OMNIROUTE_HEALTHCHECK_PATH=/api/monitoring/health`
-qiymatini belgilang. Bu yoʻl **chuqur** tekshiruvdir (maʼlumotlar bazasi + monitoring
-xulosasi) — qayta yoqishni tanlasangiz, Docker'ning kamdan-kam bajariladigan
-`HEALTHCHECK` tekshiruvi uchun mos, ammo Kubernetes `livenessProbe` intervallari
-uchun **mos emas**.
+Docker Healthcheck faol `OMNIROUTE_BASE_PATH` prefiksli engil `/healthz` hayotiy tsiklining yakuniy nuqtasini tekshiradi. `/api/monitoring/health` human/dashboard diagnostikasi uchun mavjud bo'lib qoladi; HEALTHCHECK konteynerini unga qaratish uchun (masalan, chuqur sog'liqni saqlashni ta'minlash uchun), `OMNIROUTE_HEALTHCHECK_PATH=/api/monitoring/health` o'rnating. Bu yo'l a** chuqur** tekshiring (DB + monitoringi xulosasi) — Docker ning kamdan-kam uchraydigan `HEALTHCHECK` uchun mos keladi, lekin agar siz qaytadan kirsangiz** emas** Kubernetes `livenessProbe` oraliqlari uchun.
 
-Orkestratorlar uchun (Kubernetes, Nomad va boshqalar):
+Orkestrlar uchun (Kubernetes, Nomad va boshqalar):
 
-| Tekshiruv       | Afzal                                                                 | Saqlaning                                                                         |
-| --------------- | --------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
-| Faollik         | HTTP `GET /livez` yoki asosiy portdagi TCP (`PORT`, standart `20128`) | Faollik tekshiruvi sifatida `/api/monitoring/health`                              |
-| Tayyorlik       | HTTP `GET /healthz`                                                   | Voqealar sikli bandligini ishlamay qolish deb hisoblaydigan qisqa kutish vaqtlari |
-| Chuqur / tashqi | `/api/monitoring/health`                                              | —                                                                                 |
+| Prob               | Afzal                                                                 | Qochish                                                        |
+| ------------------ | --------------------------------------------------------------------- | -------------------------------------------------------------- |
+| Jonlilik           | HTTP `GET /livez` yoki asosiy portdagi TCP (`PORT`, standart `20128`) | `/api/monitoring/health` tiriklik sifatida                     |
+| Tayyorlik          | HTTP `GET /healthz`                                                   | Hodisa-loop bandini o'lik deb hisoblaydigan qattiq taym-autlar |
+| Chuqur / qora quti | `/api/monitoring/health`                                              | —                                                              |
 
-`/healthz` jarayonning hayot sikli holatini (`ok` / `starting` / `stopping`) xabar
-qiladi. `/livez` faqat jarayon ishlayotganini tekshiradi (ishlov beruvchi ishga tusha
-olganida har doim 200 qaytaradi; u tayyorlikni kutmaydi). Har ikkisi ham soʻrovlarga
-ishlov berish bilan bir xil Node voqealar siklida bajariladi, shu sababli CPU talab
-qiladigan katalog yoki siqish ishlari ularni kechiktirishi mumkin — band ≠ ishlamayapti.
-HTTP tekshiruvlari vaqti tugab qolsa, TCP faollik tekshiruvini afzal koʻring. Tekshiruvlar
-boʻyicha toʻliq koʻrsatmalar:
-[Monitoring qoʻllanmasi — Kubernetes tekshiruvlari boʻyicha tavsiyalar](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations).
+`/healthz` jarayonning hayot aylanishi haqida hisobot beradi (`ok` / `starting` / `stopping`). `/livez` faqat jarayon uchun jonli (ishlovchi har doim ishga tushishi mumkin bo'lganda 200 ta; u tayyor bo'lishini kutmaydi). Ikkalasi ham so'rovni ko'rib chiqish kabi bir xil Node hodisalar tsiklida ishlaydi, shuning uchun protsessor bilan bog'langan katalog yoki siqish ishi ularni — band ≠ o'lik bilan kechiktirishi mumkin. Agar HTTP problari vaqti tugasa, TCP jonliligiga ustunlik bering. To'liq tekshiruv yo'riqnomasi: [Monitoring qo'llanmasi — Kubernetes prob tavsiyalari](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations).
 
-## Caddy bilan Docker Compose (HTTPS Auto-TLS)
+## Docker Caddy bilan yozish (HTTPS Auto-TLS)
 
-OmniRoute’ni Caddy’ning avtomatik SSL taʼminoti yordamida xavfsiz tarzda tashqi tarmoqqa ochish mumkin. Domeningizning DNS A yozuvi serveringiz IP manziliga yoʻnaltirilganiga ishonch hosil qiling.
+OmniRoute Caddy ning avtomatik SSL provayderi yordamida xavfsiz tarzda ochilishi mumkin. Domeningizning DNS A yozuvi serveringiz IP ga ishora qilishiga ishonch hosil qiling.
 
 ```yaml
 services:
   omniroute:
-    image: diegosouzapw/omniroute:latest
+    image: cheaperinference/omniroute:latest
     container_name: omniroute
     restart: unless-stopped
     volumes:
       - omniroute-data:/app/data
     environment:
       - PORT=20128
-      # OAuth qayta chaqiruvlari, boshqaruv paneli havolalari va yaratilgan ommaviy URL manzillari uchun brauzerga moʻljallangan origin.
+      # Browser-facing origin for OAuth callbacks, dashboard links, and generated public URLs.
       - NEXT_PUBLIC_BASE_URL=https://your-domain.com
-      # Rejalashtirilgan vazifalar / oʻziga yuboriladigan soʻrovlar uchun ichki serverlararo URL.
+      # Internal server-to-server URL for scheduled jobs / self-fetches.
       - BASE_URL=http://omniroute:20128
       - AUTH_COOKIE_SECURE=true
 
@@ -485,12 +417,7 @@ volumes:
   omniroute-data:
 ```
 
-Caddy yuqori oqimdagi konteyner uchun standart yoʻnaltirish sarlavhalarini oʻrnatadi. OmniRoute OAuth qayta chaqiruvlari va yaratilgan ommaviy havolalar uchun
-`NEXT_PUBLIC_BASE_URL` qiymatidan kanonik ommaviy origin sifatida foydalanadi;
-autentifikatsiyalangan boshqaruv panelidagi yozish amallari bir xil origin soʻrovlari hamda seansga bogʻlangan CSRF
-himoyasidan foydalanadi. `OMNIROUTE_TRUST_PROXY` parametrini faqat OmniRoute ommaviy origin’ni aniq
-konfiguratsiya oʻrniga ishonchli yoʻnaltirilgan sarlavhalardan ataylab aniqlashini istaydigan ilgʻor
-joylashtirishlarda yoqing.
+Caddy yuqoridagi konteyner uchun standart uzatish sarlavhalarini o'rnatadi. OmniRoute OAuth qayta qo'ng'iroqlari va yaratilgan umumiy havolalar uchun kanonik ommaviy manba sifatida `NEXT_PUBLIC_BASE_URL` foydalanadi; autentifikatsiya qilingan asboblar paneli yozuvlari bir xil kelib chiqish so'rovlaridan va seansga bog'langan CSRF himoyasidan foydalanadi. `OMNIROUTE_TRUST_PROXY` OmniRoute aniq konfiguratsiya oʻrniga ishonchli yoʻnaltirilgan sarlavhalardan umumiy manba olishini ataylab xohlaganingizda kengaytirilgan oʻrnatishlar uchun yoqing.
 
 ## Cloudflare Quick Tunnel
 
@@ -507,49 +434,51 @@ Endpoint tunnel panellarini (Cloudflare, Tailscale, ngrok) faol tunnel holatini 
 - Docker tasvirlari tizim CA ildiz sertifikatlarini oʻz ichiga oladi va ularni boshqariladigan `cloudflared` jarayoniga uzatadi, bu tunnel konteyner ichida ishga tushirilganda TLS ishonch xatolarining oldini oladi.
 - OmniRoute yangi nusxani yuklab olish oʻrniga mavjud bajariladigan fayldan foydalanishini istasangiz, `CLOUDFLARED_BIN=/absolute/path/to/cloudflared` qiymatini oʻrnating.
 
-## Tasvir teglari
+## Rasm teglari
 
-| Tasvir                   | Teg      | Hajmi  | Tavsif                                                          |
-| ------------------------ | -------- | ------ | --------------------------------------------------------------- |
-| `diegosouzapw/omniroute` | `latest` | ~250MB | Eng yuqori **nashr qilingan** barqaror SemVer (git `main` emas) |
-| `diegosouzapw/omniroute` | `3.8.0`  | ~250MB | GitOps uchun ushbu turdagi tegni qatʼiy belgilang               |
+| Rasm                         | teg      | Hajmi    | Tavsif                                                         |
+| ---------------------------- | -------- | -------- | -------------------------------------------------------------- |
+| `cheaperinference/omniroute` | `latest` | ~ 250 MB | Eng yuqori** nashr etilgan** barqaror SemVer (git `main` emas) |
+| `cheaperinference/omniroute` | `3.8.54` | ~ 250 MB | GitOps uchun ushbu teg sinfini mahkamlang                      |
 
-Koʻp platformali manifest: mahalliy `linux/amd64` + `linux/arm64` (Apple Silicon, AWS Graviton, Raspberry Pi). Docker mos arxitekturani avtomatik ravishda tanlaydi; ARM xostlarida AMD64 emulyatsiyasini majburan ishlatish kerak boʻlsa, `--platform linux/amd64` parametrini uzating.
+Xuddi shu tasvirlar uchta repozitoriyda, bir xil arxitektura dayjestlari bilan chop etiladi: `cheaperinference/omniroute` (Docker Hub, Arzon xulosalar tashkiloti, 3.8.53 dan boshlab), `ghcr.io/cheaper-inference/omniroute` va eskirgan `diegosouzapw/omniroute` oʻzining tortishish tarixini saqlaydi va hali ham har bir nashrni oladi. Mavjud `diegosouzapw/omniroute` joylashtirishlari yangilanib turadi; tasvir nomini almashtirish ixtiyoriy. Quyidagi `:next` / `:next-web` pre-reliz kanali faqat `diegosouzapw/omniroute` va GHCR uchun nashr etiladi.
 
-### Reliz kanallari
+Ko'p platformali manifest: `linux/amd64` + `linux/arm64` mahalliy (Apple Silicon, AWS Graviton, Raspberry Pi). Docker mos keladigan arxitekturani avtomatik ravishda tanlaydi; ARM xostlarida AMD64 emulyatsiyasini majburlash kerak bo'lsa, `--platform linux/amd64` dan o'ting.
 
-OmniRoute barqaror relizlar, faol reliz tarmogʻini sinash va ishlab chiqish tuzilmalari uchun alohida Docker kanallarini nashr qiladi.
+### Kanallarni chiqarish
 
-| Kanal                           | Manba                                         | Oʻzgaruvchanlik                          | Tavsiya etilgan foydalanish                                                                                                          |
-| ------------------------------- | --------------------------------------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `:<version>` / `:<version>-web` | Imzolangan/versiyalangan reliz                | Oʻzgarmas                                | Aniq relizga qatʼiy bogʻlangan ishlab chiqarish joylashtirishlari                                                                    |
-| `:latest` / `:latest-web`       | Eng yuqori **nashr qilingan** barqaror SemVer | Oʻzgaruvchan barqaror koʻrsatkich        | SemVer nashr vazifasidan **keyin** barqaror relizlarni kuzatadi — `main` yoki nashr qilinmagan `release/v*` commit’larini kuzatmaydi |
-| `:next` / `:next-web`           | Joriy standart `release/v*` tarmogʻi          | Oʻzgaruvchan pre-reliz koʻrsatkichi      | Faol reliz tarmogʻiga kiritilgan, ammo hali barqaror relizga qoʻshilmagan tuzatishlarni sinash                                       |
-| `:main` / `:main-web`           | `main` tarmogʻi                               | Oʻzgaruvchan ishlab chiqish koʻrsatkichi | Faqat ishlab chiqish va integratsion sinovlar uchun                                                                                  |
+OmniRoute barqaror relizlar, faol relizlar-tarmoq sinovlari va ishlab chiqish tuzilmalari uchun alohida Docker kanallarini nashr etadi.
 
-#### Veb-seans provayderlari: `-web` tasvirlari
+| Kanal                           | Manba                                        | O'zgaruvchanlik                                 | Tavsiya etilgan foydalanish                                                                                                                                       |
+| ------------------------------- | -------------------------------------------- | ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `:<version>` / `:<version>-web` | Signed/versioned nashri                      | O'zgarmas                                       | Aniq relizni o'rnatadigan ishlab chiqarishni joylashtirish                                                                                                        |
+| `:latest` / `:latest-web`       | Eng yuqori** nashr etilgan** barqaror SemVer | O'zgaruvchan barqaror ko'rsatkich               | Barqaror nashrlarni kuzatib boradi** keyin** a SemVer nashr qilish ishni — qiladi** emas** `main` yoki chiqarilmagan `release/v*` majburiyatlarini kuzatib boring |
+| `:next` / `:next-web`           | Hozirgi standart `release/v*` filiali        | Chiqarilishdan oldingi o'zgaruvchan ko'rsatgich | Faol reliz bo'limiga tushgan, ammo hali barqaror versiyada bo'lmagan tuzatishlar sinovdan o'tkazilmoqda                                                           |
+| `:main` / `:main-web`           | `main` filiali                               | O'zgaruvchan rivojlanish ko'rsatkichi           | Faqat ishlab chiqish va integratsiya testlari                                                                                                                     |
 
-Yuqoridagi har bir kanal `runner-web` bosqichidan yaratilgan `-web` tegiga (`:latest-web`, `:<version>-web`, `:next-web`, `:main-web`) ham ega — bu Playwright va Chromium brauzeri qoʻshilgan ayni tasvirdir. Oddiy tasvir Chromium’siz yetkazib beriladi; `gemini-web`, `claude-web` va `claude-turnstile` undan foydalanishni talab qiladi.
+#### Veb-sessiya provayderlari: `-web` tasvirlari
 
-Xatolik ishga tushirish vaqtida emas, keyinroq yuz beradi: bu provayderlar oʻz modellarini roʻyxatda koʻrsatadi va boshqaruv panelida ulangan holatda koʻrinadi, faqat birinchi soʻrov quyidagi xato bilan yakunlanadi:
+Yuqoridagi har bir kanal `-web` yorlig'i (`:latest-web`, `:<version>-web`, `:next-web`, `:main-web`) sifatida ishlaydi, `runner-web` bosqichidan — bir xil tasvir va Playwright va Chromium brauzeri bilan qurilgan. Oddiy tasvir yuboriladi** holda** Chromium; `gemini-web`, `claude-web` va `claude-turnstile` ga kerak.
+
+Muvaffaqiyatsizlik kechiktirildi, ishga tushirish vaqti emas: bu provayderlar o'z modellarini ro'yxatga oladi va asboblar panelida ulanganini ko'rsatadi va faqat birinchi so'rov bajarilmaydi.
 
 ```
 [500]: Failed to load external module playwright: Error: Cannot find module
 '/app/node_modules/playwright/node_modules/playwright-core/browsers.json'
 ```
 
-Agar ushbu provayderlardan foydalansangiz, hozir foydalanayotgan kanalingizning `-web` tegini yuklab oling — boshqa hech narsa oʻzgarmaydi. npm/CLI orqali oʻrnatishda (Docker tasvirisiz) unga teng keladigan yetishmayotgan qism brauzerning bajariladigan faylidir: xostda `npx playwright install chromium` buyrugʻini ishga tushiring.
+Agar siz ushbu provayderlardan foydalansangiz, — da bo'lgan kanalingizning `-web` tegini torting, boshqa hech narsa o'zgarmaydi. npm/CLI o'rnatishda ( Docker tasviri yo'q) ekvivalent etishmayotgan bo'lak brauzerning binari hisoblanadi: hostda `npx playwright install chromium` ishga tushiring.
 
-#### Pre-reliz kanalidan foydalanish
+#### Chiqarishdan oldingi kanaldan foydalanish
 
-`next` kanali joriy standart `release/v*` tarmogʻiga har bir push amalga oshirilganda qayta yigʻiladi va AMD64 hamda ARM64 uchun eʼlon qilinadi. Eski texnik xizmat tarmoqlari uning ustiga yozolmaydi. Bu kanal keyingi barqaror teg yaratilishidan oldin faol reliz tarmogʻiga birlashtirilgan tuzatishlarni yuklab olish mumkin boʻlgan obraz sifatida taqdim etadi.
+`next` kanali joriy standart `release/v*` bo'limiga har bir surishda qayta quriladi va AMD64 va ARM64 uchun chop etiladi. Eski texnik xizmat ko'rsatish shoxlari uni qayta yoza olmaydi. Kanal keyingi barqaror teg kesilgunga qadar faol reliz filialiga birlashtirilgan tuzatishlar uchun tortiladigan tasvirni taqdim etadi.
 
 ```bash
 docker pull diegosouzapw/omniroute:next
 docker pull diegosouzapw/omniroute:next-web
 ```
 
-Docker Compose uchun tanlangan profil ishlatadigan obraz tegini almashtiring, soʻng servis obrazini yuklab olib, servisni qayta yarating:
+Docker Compose uchun tanlangan profil tomonidan ishlatiladigan rasm tegini bekor qiling, keyin torting va xizmatni qayta yarating:
 
 ```yaml
 services:
@@ -562,32 +491,32 @@ docker compose pull
 docker compose up -d
 ```
 
-#### Xavfsizlik va oldingi holatga qaytarish
+#### Xavfsizlik va orqaga qaytish
 
-`next` — oʻzgaruvchan dastlabki reliz kanali. U faol reliz tarmogʻiga har qanday push amalga oshirilganda oʻzgarishi mumkin va **ishlab chiqarish muhitida foydalanish uchun qoʻllab-quvvatlanmaydi**. Muayyan yigʻilishni baholash vaqtida obraz dayjestini qatʼiy belgilang:
+`next` - suzuvchi pre-reliz kanali. U faol reliz bo'limiga har qanday surishda o'zgarishi mumkin va shunday bo'ladi** ishlab chiqarish uchun qo'llab-quvvatlanmaydi** . Muayyan tuzilishni baholashda tasvir dayjestini mahkamlang:
 
 ```bash
 docker pull diegosouzapw/omniroute:next
 docker image inspect diegosouzapw/omniroute:next --format '{{index .RepoDigests 0}}'
 ```
 
-Sinovdan oldin OmniRoute maʼlumotlar tomi yoki bind-mount qilingan maʼlumotlar katalogining zaxira nusxasini yarating. Oldingi holatga qaytarish uchun avval ishlatilgan barqaror versiya yoki dayjestni tiklang va konteynerni qayta yarating:
+Sinovdan oldin OmniRoute ma'lumotlar hajmi yoki bog'langan ma'lumotlar katalogining zaxira nusxasini yarating. Orqaga qaytarish uchun avval ishlatilgan barqaror versiyani tiklang yoki konteynerni hazm qiling va qayta yarating:
 
 ```bash
-docker pull diegosouzapw/omniroute:<stable-version>
+docker pull cheaperinference/omniroute:<stable-version>
 docker compose up -d
 ```
 
-Reliz tarmogʻidagi yigʻilish hech qachon `latest` koʻrsatkichini siljita olmaydi; barqaror koʻrsatkichni faqat talablarga javob beradigan barqaror semantik versiya yangilashi mumkin. `next` obrazlarida reliz obrazini tekshirish va CRITICAL darajadagi zaifliklar aniqlanganda bloklash mexanizmi saqlanadi.
+Reliz filiali qurilishi hech qachon `latest` ko'chira olmaydi; faqat tegishli barqaror semantik versiya barqaror ko'rsatkichni targ'ib qilishi mumkin. `next` tasvirlari reliz tasvirini tekshirishni va CRITICAL zaiflik eshigini bloklashni saqlaydi.
 
-**`latest` git uchun dolzarblik kafolati emas.** `main` yoki faol `release/v*` tarmogʻiga birlashtirilgan tuzatishlar barqaror SemVer obrazi eʼlon qilinib, eʼlon qilish vazifasi `:latest` tegini yangilamaguncha (uning dayjesti shu SemVer bilan bir xil boʻladi) `:latest` tarkibiga kirmaydi. GitHub tuzatish allaqachon mavjudligini koʻrsatayotgan boʻlsa-yu, `latest` oʻzgarmagandek koʻrinsa, reliz tarmogʻini sinash uchun `:next` obrazini yuklab oling yoki SemVer tegini kuting.
+**`latest` git uchun valyuta kafolati emas.** `main` yoki faol `release/v*` filialida birlashtirilgan tuzatishlar mavjud** emas** `:latest` ichida barqaror SemVer tasviri nashr etilgunga qadar va nashr qilish ishi `:latest` targ‘ib qilmaguncha (bu SemVer bilan bir xil digest). Agar GitHub allaqachon tuzatishni ko'rsatayotganda `latest` muzlatib ko'rinsa, chiqarish novdasini sinab ko'rish uchun `:next` torting yoki SemVer tegini kuting.
 
-| Maqsadingiz                                                                               | Ishlatiladigan variant                        |
-| ----------------------------------------------------------------------------------------- | --------------------------------------------- |
-| Oʻzgarmasligi shart boʻlgan GitOps / ishlab chiqarish muhiti                              | `:X.Y.Z` ni (yoki obraz dayjestini) belgilang |
-| Eʼlon qilingan barqaror versiyalarni kuzatish va har bir relizda qayta yaratishga rozilik | `:latest`                                     |
-| Eʼlon qilinmagan `release/v*` commitlarini sinash                                         | `:next` (ishlab chiqarish uchun emas)         |
-| `main` tarmogʻini sinash                                                                  | `:main` (ishlab chiqarish uchun emas)         |
+| Siz xohlaysiz                                                                             | Foydalanish                         |
+| ----------------------------------------------------------------------------------------- | ----------------------------------- |
+| GitOps / drift bo'lmasligi kerak bo'lgan ishlab chiqarish                                 | Pin `:X.Y.Z` (yoki tasvir dayjesti) |
+| Nashr etilgan otxonalarni kuzatib boring va har bir nashrda qayta yaratishni qabul qiling | `:latest`                           |
+| Chiqarilmagan `release/v*` majburiyatlarini sinab ko'ring                                 | `:next` (ishlab chiqarish emas)     |
+| Test `main`                                                                               | `:main` (ishlab chiqarish emas)     |
 
 ## Dockerʼda boshqaruv paneli yangilanishlari
 

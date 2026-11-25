@@ -45,8 +45,12 @@ const OWNER = "cheaper-inference";
  * parallel (docker-org-mirror.yml).
  */
 const DOCKERHUB_OWNERS = ["diegosouzapw", "cheaperinference"];
+/**
+ * GHCR: the organization package, plus the legacy personal package ghcr.io/diegosouzapw/omniroute
+ * that keeps receiving releases until 2027-06-30 (docker-org-mirror.yml, mirror-legacy-ghcr).
+ */
 const REGISTRY_OWNERS: Record<string, string[]> = {
-  "ghcr.io": [OWNER],
+  "ghcr.io": [OWNER, "diegosouzapw"],
   "docker.io": DOCKERHUB_OWNERS,
   "index.docker.io": DOCKERHUB_OWNERS,
 };

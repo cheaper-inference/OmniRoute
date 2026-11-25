@@ -393,108 +393,70 @@ change ಆಗಿ ಮಾಡಬೇಕು:
 
 ---
 
-## 3.9.0 LTS ಬಿಡುಗಡೆ (3.8.58 ರಲ್ಲಿ ಪೂರ್ವಾಭ್ಯಾಸ ಮಾಡಲಾಗಿದೆ)
+## 3.9.0 LTS ಕಟ್ (3.8.58 ರಲ್ಲಿ ಪೂರ್ವಾಭ್ಯಾಸ)
 
-v3.8.59 ನಂತರದ ಆವೃತ್ತಿ 3.9.0 ಆಗಿರುತ್ತದೆ ಮತ್ತು ಅದರ ಟಿಪ್ ಎರಡು ದೀರ್ಘಕಾಲಿಕ ಶಾಖೆಗಳಾಗಿ ಪರಿಣಮಿಸುತ್ತದೆ:
-`stable/v3` (v3 LTS ಸಾಲು, npm `latest`) ಮತ್ತು `develop` (v4, 4.0.0 ಗೆ ಹೆಚ್ಚಿಸಲಾಗುತ್ತದೆ, npm
-`nightly`). ಶಾಖೆ/ಚಾನೆಲ್ ಮಾದರಿ, ಫಾರ್ವರ್ಡ್-ಪೋರ್ಟ್ ಮತ್ತು ಲೇಬಲ್ಗಳು
-[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md) ನಲ್ಲಿ ಇವೆ; ಯೋಜನೆಯು [ROADMAP](../../ROADMAP.md) ನಲ್ಲಿ
-(ಹಂತ 3) ಇದೆ. ಈ ಬಿಡುಗಡೆ-ವಿಭಜನೆ ಒಮ್ಮೆ ಮಾತ್ರ ನಡೆಯುತ್ತದೆ;
-3.8.58 ಇದನ್ನು ಫೋರ್ಕ್ನಲ್ಲಿ ಆರಂಭದಿಂದ ಅಂತ್ಯದವರೆಗೆ ಪೂರ್ವಾಭ್ಯಾಸ ಮಾಡುತ್ತದೆ, ಮತ್ತು 3.8.59
-[GO/NO-GO checklist](./LTS_GO_NO_GO.md) ಮೂಲಕ ಮುಕ್ತಾಯಗೊಳ್ಳುತ್ತದೆ.
+v3.8.59 ನಂತರ ಮುಂದಿನ ಆವೃತ್ತಿಯು 3.9.0 ಆಗಿದೆ, ಮತ್ತು ಅದರ ತುದಿಯು ಎರಡು ದೀರ್ಘಾವಧಿಯ ಶಾಖೆಗಳಾಗುತ್ತದೆ: `stable/v3` (v3 LTS ಲೈನ್, npm `latest`) ಮತ್ತು `develop` (v4, 4.0.0 ಗೆ ಬಂಪ್ಡ್, npm `nightly`). branch/channel ಮಾದರಿ, ಫಾರ್ವರ್ಡ್-ಪೋರ್ಟ್ ಮತ್ತು ಲೇಬಲ್ಗಳು [RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md) ನಲ್ಲಿವೆ; ಯೋಜನೆಯು [ROADMAP](../../ROADMAP.md) ನಲ್ಲಿದೆ (ಹಂತ 3). ಕಟ್ ಒಮ್ಮೆ ಸಾಗುತ್ತದೆ; 3.8.58 ಫೋರ್ಕ್ನಲ್ಲಿ ಅಂತ್ಯದಿಂದ ಅಂತ್ಯಕ್ಕೆ ಪೂರ್ವಾಭ್ಯಾಸ ಮಾಡುತ್ತದೆ ಮತ್ತು 3.8.59 [GO/NO-GO ಪರಿಶೀಲನಾಪಟ್ಟಿಯೊಂದಿಗೆ](./LTS_GO_NO_GO.md) ಮುಚ್ಚುತ್ತದೆ.
 
-### ಡ್ರೈ-ರನ್ (ಓದಲು ಮಾತ್ರ, ಯಾವಾಗ ಬೇಕಾದರೂ ಸುರಕ್ಷಿತ)
+### ಡ್ರೈ-ರನ್ (ಓದಲು-ಮಾತ್ರ, ಯಾವುದೇ ಸಮಯದಲ್ಲಿ ಸುರಕ್ಷಿತ)
 
 ```bash
-npm run release:dry-run-lts-cut                       # ನಿಜವಾದ ಬಿಡುಗಡೆ-ವಿಭಜನೆ: HEAD ನಿಂದ 3.9.0, ಹಿಂದಿನ ಟ್ಯಾಗ್ v3.8.59
-npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # ಮೂಲ ಕಮಿಟ್ ಅನ್ನು ನಿಗದಿಪಡಿಸಿ
+npm run release:dry-run-lts-cut                       # the real cut: 3.9.0 from HEAD, previous tag v3.8.59
+npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # pin the source commit
 ```
 
-`scripts/release/dry-run-lts-cut.mjs` ಯಾವುದನ್ನೂ ಕಾರ್ಯಗತಗೊಳಿಸುವುದಿಲ್ಲ: ಇದು git ಮತ್ತು `gh` ಅನ್ನು ಓದಿ,
-ಸಂಪೂರ್ಣ ಕ್ರಮವನ್ನು ಮುದ್ರಿಸುತ್ತದೆ — ಪೂರ್ವಶರತ್ತುಗಳು (ಮೂಲವು ಪರಿಹರಿಸುತ್ತದೆ, ಮೂಲ ರೆಪೊಸಿಟರಿಯಲ್ಲಿ ಸಂಪೂರ್ಣ ಇತಿಹಾಸವಿದೆ —
-shallow clone ಗೆ `stable/v3` ಅನ್ನು push ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ, ಸ್ವೀಕರಿಸುವ ಬದಿಯು ಮೊದಲ grafted parent ನಲ್ಲೇ pack ಅನ್ನು
-ನಿರಾಕರಿಸುತ್ತದೆ, ಆದ್ದರಿಂದ ಸಂಪೂರ್ಣ clone ನಿಂದ cut ಮಾಡಿ ಅಥವಾ ಮೊದಲು `git fetch --unshallow origin` ಚಲಾಯಿಸಿ — ಹಿಂದಿನ
-ಟ್ಯಾಗ್ ಅಸ್ತಿತ್ವದಲ್ಲಿದೆ, `package.json` ಗುರಿ ಆವೃತ್ತಿಯಲ್ಲಿದೆ, `release-freeze` issue ತೆರೆದಿದೆ, ಈಗಿರುವ release branch ನಲ್ಲಿ
-ತೆರೆದ `Release branch not green` issue ಇಲ್ಲ — ಅಸ್ತಿತ್ವದಲ್ಲಿಲ್ಲದ branch `?` unknown ಎಂದು ವರದಿ ಮಾಡುತ್ತದೆ, ಎಂದಿಗೂ
-green ಎಂದು ಅಲ್ಲ — Mergify `release` queue ಅನ್ನು ಸಂರಚಿಸಲಾಗಿದೆ (G11: `queue_rules`, `checks_timeout`,
-ಲೇಬಲ್ `queue`), `release/*` ruleset ಇನ್ನೂ deletion ಮತ್ತು force-push ಅನ್ನು ತಡೆಯುತ್ತದೆ, ಮತ್ತು
-`stable/v3` ಹಾಗೂ `develop` ಇನ್ನೂ ಅಸ್ತಿತ್ವದಲ್ಲಿಲ್ಲ), ಎರಡು branch ಹಂತಗಳು, ಯಾವ dormant-workflow
-triggers ಮತ್ತು `if:` conditions ಸತ್ಯವಾಗುತ್ತವೆ (ಮತ್ತು ಯಾವವು repository variable ನಿಂದ gated ಆಗಿರುತ್ತವೆ ಅಥವಾ
-canonical repository ಗೆ pinned ಆಗಿರುತ್ತವೆ), ನಿರೀಕ್ಷಿತ dist-tags (`latest` → 3.9.0, `next` ಮತ್ತು
-`nightly` ಖಾಲಿ) ಹಾಗೂ rollback. Exit `0` = `RESULT: READY`, `1` = blocking precondition
-ವಿಫಲವಾಗಿದೆ (`✗`), `2` = usage error. `--advisory <id,...>` ಒಂದು check ಅನ್ನು warning (`!`) ಆಗಿ
-ಕಡಿಮೆಗೊಳಿಸುತ್ತದೆ, ಆದರೆ ಅದನ್ನು ಮರೆಮಾಡುವುದಿಲ್ಲ.
+`scripts/release/dry-run-lts-cut.mjs` executes nothing: it reads git and `gh` and prints the whole sequence — preconditions (source resolves, the source repository has full history — a shallow clone cannot push `stable/v3`, the receiving side rejects the pack at the first grafted parent, so cut from a full clone or `git fetch --unshallow origin` first — previous tag exists, `package.json` is the target version, a `release-freeze` issue is open, no open `Release branch not green` issue on an existing release branch — a branch that does not exist reports `?` unknown, never green — omni-queue lands the release PRs (G11: `config/merge-queue/config.json` valid, its `bases` manage the release branch, `mode` `live`, its label exists), the `release/*` ruleset still blocks deletion and force-push, and `stable/v3` and `develop` do not exist yet), the two branch steps, which dormant-workflow triggers and `if:` conditions turn true (and which stay gated by a repository variable or pinned to the canonical repository), the expected dist-tags (`latest` → 3.9.0, `next` and `nightly` empty) and the rollback. Exit `0` = `RESULT: READY`, `1` = a blocking precondition failed (`✗`), `2` = usage error. `--advisory <id,...>` downgrades a check to a warning (`!`) without hiding it.
 
-3.9.0 release freeze ಇನ್ನೂ ತೆರೆದಿರುವಾಗ ನಿಜವಾದ cut ನ dry-run ಅನ್ನು ಚಲಾಯಿಸಿ — ಟ್ಯಾಗ್ ನಂತರ ಮತ್ತು ಹಂತ 12c
-freeze ಅನ್ನು ತೆಗೆದುಹಾಕುವ ಮೊದಲು branches ರಚಿಸಲಾಗುತ್ತವೆ.
+3.9.0 ಬಿಡುಗಡೆಯ ಫ್ರೀಜ್ ಇನ್ನೂ — ನಿಜವಾದ ಕಟ್ನ ಡ್ರೈ-ರನ್ ಅನ್ನು ರನ್ ಮಾಡಿ ಟ್ಯಾಗ್ ನಂತರ ಶಾಖೆಗಳನ್ನು ರಚಿಸಲಾಗುತ್ತದೆ ಮತ್ತು ಹಂತ 12c ಫ್ರೀಜ್ ಅನ್ನು ಎತ್ತುವ ಮೊದಲು.
 
-### 3.8.58 ಪೂರ್ವಾಭ್ಯಾಸ (ಫೋರ್ಕ್ನಲ್ಲಿ ಮಾತ್ರ)
+### 3.8.58 ಪೂರ್ವಾಭ್ಯಾಸ (ಫೋರ್ಕ್ ಮಾತ್ರ)
 
 ```bash
-# 1. ಪೂರ್ವಾಭ್ಯಾಸದ ನಿಯತಾಂಕಗಳೊಂದಿಗೆ ಪ್ರಸ್ತುತ tip ನಲ್ಲಿ dry-run
+# 1. Dry-run on the current tip with rehearsal parameters
 npm run release:dry-run-lts-cut -- --target-version 3.8.58 --previous-tag v3.8.57 \
   --advisory freeze,base-green
 
-# 2. FORK remote ವಿರುದ್ಧ ಕಾರ್ಯಗತಗೊಳಿಸಿ (origin, ಅಥವಾ canonical
-#    repository ಆಗಿರುವ URL ಹೊಂದಿರುವ ಯಾವುದೇ remote ಅನ್ನು ನಿರಾಕರಿಸಲಾಗುತ್ತದೆ; ಪ್ರತಿಯೊಂದು ಹಂತವೂ terminal ನಲ್ಲಿ ದೃಢೀಕರಣ ಕೇಳುತ್ತದೆ)
+# 2. Execute against a FORK remote (origin, or any remote whose URL is the canonical
+#    repository, is refused; every step asks for confirmation on the terminal)
 git remote add rehearsal https://github.com/<you>/OmniRoute.git
 node scripts/release/dry-run-lts-cut.mjs --execute --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 
-# 3. ಫೋರ್ಕ್ನಲ್ಲಿ dormant workflows ಅನ್ನು ಪ್ರಯೋಗಿಸಿ (dry-run canonical-repository pin ಅನ್ನು ವರದಿ ಮಾಡುವಲ್ಲಿ workflow_dispatch),
-#    ನಂತರ rollback ಮಾಡಿ
+# 3. Exercise the dormant workflows in the fork (workflow_dispatch where the dry-run
+#    reports a canonical-repository pin), then roll back
 node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 ```
 
-develop bump commit ಅನ್ನು git plumbing ಬಳಸಿ ನಿರ್ಮಿಸಲಾಗುತ್ತದೆ (working tree ಅನ್ನು ಮುಟ್ಟುವುದಿಲ್ಲ) ಮತ್ತು
-cycle-open commit ನಂತೆಯೇ ಈ ಐದು files ಅನ್ನು bump ಮಾಡುತ್ತದೆ: `package.json`, `open-sse/package.json`,
-`electron/package.json`, `package-lock.json` ಮತ್ತು `docs/openapi.yaml`. `[4.0.0]`
-CHANGELOG section ಮತ್ತು ಅದರ i18n mirrors ಅನ್ನು ನಂತರ `develop` ನಲ್ಲಿ ತೆರೆಯಲಾಗುತ್ತದೆ, ಅದರ ಮೊದಲ
-PR ಕ್ಕಿಂತ ಮೊದಲು. ಸ್ಕ್ರಿಪ್ಟ್ npm dist-tags ಅನ್ನು ಎಂದಿಗೂ ಬದಲಾಯಿಸುವುದಿಲ್ಲ — ಅವುಗಳನ್ನು scratch package ನಲ್ಲಿ
-ಪೂರ್ವಾಭ್ಯಾಸ ಮಾಡಿ.
+ಅಭಿವೃದ್ಧಿ ಬಂಪ್ ಕಮಿಟ್ ಅನ್ನು ಜಿಟ್ ಪ್ಲಂಬಿಂಗ್ನೊಂದಿಗೆ ನಿರ್ಮಿಸಲಾಗಿದೆ (ಯಾವುದೇ ಕೆಲಸ ಮಾಡುವ ಮರವನ್ನು ಮುಟ್ಟಲಾಗುವುದಿಲ್ಲ) ಮತ್ತು ಸೈಕಲ್-ಓಪನ್ ಕಮಿಟ್ನಂತೆ ಅದೇ ಐದು ಫೈಲ್ಗಳನ್ನು ಉಬ್ಬುತ್ತದೆ: `package.json`, `open-sse/package.json`, `electron/package.json`, `package-lock.json` ಮತ್ತು `docs/openapi.yaml`. `[4.0.0]` CHANGELOG ವಿಭಾಗ ಮತ್ತು ಅದರ i18n ಕನ್ನಡಿಗಳನ್ನು ಅದರ ಮೊದಲ PR ಗಿಂತ ಮೊದಲು `develop` ನಂತರ ತೆರೆಯಲಾಗುತ್ತದೆ. ಸ್ಕ್ರಿಪ್ಟ್ ಎಂದಿಗೂ npm ಡಿಸ್ಟ್-ಟ್ಯಾಗ್ಗಳನ್ನು ಬದಲಾಯಿಸುವುದಿಲ್ಲ — ಸ್ಕ್ರ್ಯಾಚ್ ಪ್ಯಾಕೇಜ್ನಲ್ಲಿರುವವುಗಳನ್ನು ಪೂರ್ವಾಭ್ಯಾಸ ಮಾಡುತ್ತದೆ.
 
-### PR preview artifact (ಒಮ್ಮೆ build ಮಾಡಿ, ಅದೇ bytes ಅನ್ನು promote ಮಾಡಿ)
+### PR ಪೂರ್ವವೀಕ್ಷಣೆ ಕಲಾಕೃತಿ (ಒಮ್ಮೆ ನಿರ್ಮಿಸಿ, ಅದೇ ಬೈಟ್ಗಳನ್ನು ಪ್ರಚಾರ ಮಾಡಿ)
 
-`.github/workflows/preview-artifact.yml` ಒಂದು PR head ನಿಂದ ಒಂದು production tarball ಅನ್ನು build ಮಾಡುತ್ತದೆ ಮತ್ತು
-ಅದೇ ನಿಖರ build ಅನ್ನು validate ಮಾಡುತ್ತದೆ (#8084 slice (a)). ಅದೇ repository ಯ PR ಗಳು ಮಾತ್ರ; ಯಾವುದನ್ನೂ publish ಮಾಡಲಾಗುವುದಿಲ್ಲ.
+`.github/workflows/preview-artifact.yml` PR ಹೆಡ್ನಿಂದ ಒಂದು ಉತ್ಪಾದನಾ ಟಾರ್ಬಾಲ್ ಅನ್ನು ನಿರ್ಮಿಸುತ್ತದೆ ಮತ್ತು ನಿಖರವಾದ ನಿರ್ಮಾಣವನ್ನು ಮೌಲ್ಯೀಕರಿಸುತ್ತದೆ (#8084 ಸ್ಲೈಸ್ (a)). ಅದೇ-ರೆಪೊಸಿಟರಿ PRs ಮಾತ್ರ; ಏನನ್ನೂ ಪ್ರಕಟಿಸಲಾಗಿಲ್ಲ.
 
 ```bash
-gh workflow run preview-artifact.yml -f pr_number=<N>   # ಅಥವಾ `preview-artifact` label ಸೇರಿಸಿ
+gh workflow run preview-artifact.yml -f pr_number=<N>   # or add the `preview-artifact` label
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
 gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
 npm install -g ./omniroute-*.tgz                          # preview install
 ```
 
-Run `npm ci`, `npm run build:release`, `npm run check:pack-artifact` ಅನ್ನು ನಡೆಸುತ್ತದೆ, tarball ಅನ್ನು pack ಮಾಡುತ್ತದೆ,
-`npm run check:pack-boot` ಅನ್ನು ನಡೆಸುತ್ತದೆ (ನಕಲಿ secrets, ತಾತ್ಕಾಲಿಕ data dir), ಮತ್ತೆ pack ಮಾಡಿ digest ಒಂದೇ ಆಗಿರದಿದ್ದರೆ
-ವಿಫಲಗೊಳ್ಳುತ್ತದೆ, ನಂತರ `artifact-identity.json` ಅನ್ನು ದಾಖಲಿಸುತ್ತದೆ (head SHA, base SHA, lockfile hash, platform, arch,
-node ABI, bundler, build policy — `scripts/release/artifact-identity.mjs`) ಮತ್ತು ಪ್ರತ್ಯೇಕ job ನಲ್ಲಿ tarball ಗೆ attest ಮಾಡುತ್ತದೆ.
-Preview ಅನ್ನು promote ಮಾಡುವುದು ಆ tarball ಅನ್ನು install ಮಾಡುವುದೆಂದರ್ಥ: source ನಿಂದ ಎಂದಿಗೂ ಮರುbuild ಮಾಡಬೇಡಿ.
+ರನ್ `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, ಟಾರ್ಬಾಲ್ ಅನ್ನು ಪ್ಯಾಕ್ ಮಾಡುತ್ತದೆ, `npm run check:pack-boot` ಅನ್ನು ರನ್ ಮಾಡುತ್ತದೆ (ನಕಲಿ ರಹಸ್ಯಗಳು, ಅಲ್ಪಕಾಲಿಕ ಡೇಟಾ ಡಿರ್), ಮರು-ಪ್ಯಾಕ್ ಮಾಡುತ್ತದೆ ಮತ್ತು ಡೈಜೆಸ್ಟ್ ಒಂದೇ ಆಗದ ಹೊರತು ವಿಫಲಗೊಳ್ಳುತ್ತದೆ, ನಂತರ `artifact-identity.json` ರೆಕಾರ್ಡ್ ಮಾಡುತ್ತದೆ (ಹೆಡ್ SHA, ಬೇಸ್ SHA, ಲಾಕ್ಫೈಲ್, ಪ್ಲಾಟ್ಫಾರ್ಮ್ ABI, ಪ್ಲಾಟ್ಫಾರ್ಮ್ ಬಿಲ್ಡ್, ಬ್ಲಾಕ್ಫೈಲ್ ಹ್ಯಾಶ್, — `scripts/release/artifact-identity.mjs`) ಮತ್ತು ಟಾರ್ಬಾಲ್ ಅನ್ನು ಪ್ರತ್ಯೇಕ ಕೆಲಸದಲ್ಲಿ ದೃಢೀಕರಿಸುತ್ತದೆ. ಪೂರ್ವವೀಕ್ಷಣೆಯನ್ನು ಪ್ರಚಾರ ಮಾಡುವುದು ಎಂದರೆ ಆ ಟಾರ್ಬಾಲ್ ಅನ್ನು ಸ್ಥಾಪಿಸುವುದು: ಮೂಲದಿಂದ ಎಂದಿಗೂ ಮರುನಿರ್ಮಾಣ ಮಾಡಬೇಡಿ.
 
-### Cut (3.9.0, GO ನಂತರ)
+### ಕಟ್ (3.9.0, GO ನಂತರ)
 
-1. GO ಅನ್ನು [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md) ನಲ್ಲಿ ದಾಖಲಿಸಲಾಗಿದೆ.
+1. GO [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md) ನಲ್ಲಿ ದಾಖಲಿಸಲಾಗಿದೆ.
 2. `npm run release:dry-run-lts-cut -- --from v3.9.0` `RESULT: READY` ಅನ್ನು ಮುದ್ರಿಸುತ್ತದೆ.
-3. Dry-run ಮುದ್ರಿಸುವ commands ಬಳಸಿ `origin` ನಲ್ಲಿ branches ಅನ್ನು ಕೈಯಾರೆ ರಚಿಸಿ — ಸ್ಕ್ರಿಪ್ಟ್
-   `origin` ಗೆ push ಮಾಡಲು ನಿರಾಕರಿಸುತ್ತದೆ. ಪರಿಶೀಲಿಸಲಾದ develop commit ಅನ್ನು ಮರುಬಳಸಲು, ಮೊದಲು 3.9.0 tip ವಿರುದ್ಧ ನಿಮ್ಮ
-   fork ನಲ್ಲಿ `--execute` rehearsal ಅನ್ನು ಚಲಾಯಿಸಿ; ಅದು ಎರಡೂ SHAs ಅನ್ನು ಮುದ್ರಿಸುತ್ತದೆ, ಮತ್ತು ಅದೇ commits ಅನ್ನು push ಮಾಡಬಹುದು:
+3. ಡ್ರೈ-ರನ್ ಪ್ರಿಂಟ್ಗಳು — ಆಜ್ಞೆಗಳೊಂದಿಗೆ ಕೈಯಿಂದ `origin` ನಲ್ಲಿ ಶಾಖೆಗಳನ್ನು ರಚಿಸಿ ಸ್ಕ್ರಿಪ್ಟ್ `origin` ಗೆ ತಳ್ಳಲು ನಿರಾಕರಿಸುತ್ತದೆ. ಪರಿಶೀಲಿಸಿದ ಡೆವಲಪ್ ಕಮಿಟ್ ಅನ್ನು ಮರುಬಳಕೆ ಮಾಡಲು, ಮೊದಲು ನಿಮ್ಮ ಫೋರ್ಕ್ ವಿರುದ್ಧ 3.9.0 ಟಿಪ್ನಲ್ಲಿ `--execute` ರಿಹರ್ಸಲ್ ಅನ್ನು ರನ್ ಮಾಡಿ; ಇದು SHAs ಎರಡನ್ನೂ ಮುದ್ರಿಸುತ್ತದೆ ಮತ್ತು ಅದೇ ಕಮಿಟ್ಗಳನ್ನು ತಳ್ಳಬಹುದು:
 
    ```bash
    git push origin <stable-sha>:refs/heads/stable/v3 <develop-sha>:refs/heads/develop
    ```
 
-4. ಮೊದಲ PR ವಿಲೀನಗೊಳ್ಳುವ ಮೊದಲು `stable/v3` ಮತ್ತು `develop` ಅನ್ನು ರಕ್ಷಿಸಿ (ನಿಯಮಸೆಟ್ಗಳು + ವಿಲೀನ ಸರದಿ).
-5. ನಿಷ್ಕ್ರಿಯ ವರ್ಕ್ಫ್ಲೋಗಳು ಶಾಖೆಯ ಅಸ್ತಿತ್ವದ ಆಧಾರದ ಮೇಲೆ ಸಕ್ರಿಯಗೊಳ್ಳುತ್ತವೆ: `forward-port.yml` (`stable/v3` ಗೆ push), `validate-stable-pr.yml` (`stable/v3` ಗೆ PRಗಳು) ಮತ್ತು `nightly-v4-build.yml`
-   (`develop` ಅನ್ನು build ಮಾಡುತ್ತದೆ). Go-live ಗೂ ಮೊದಲು, ರೆಪೊಸಿಟರಿ ಸೀಕ್ರೆಟ್ ಆಗಿ `secrets.FORWARD_PORT_TOKEN` ಅನ್ನು ಸೆಟ್ ಮಾಡಿ (ಇದರಿಂದ CI
-   forward-port PRಗಳಲ್ಲಿ ನಡೆಯುತ್ತದೆ); ಮಾಲೀಕರು ರೆಪೊಸಿಟರಿ ವೇರಿಯಬಲ್ `vars.NIGHTLY_PUBLISH` ಅನ್ನು `true` ಗೆ ಸೆಟ್ ಮಾಡುವವರೆಗೆ ಮತ್ತು npm Trusted Publishing `nightly-v4-build.yml` ಅನ್ನು ಸ್ವೀಕರಿಸುವವರೆಗೆ nightly publishing
-   ಆಫ್ನಲ್ಲೇ ಇರುತ್ತದೆ. ಚಾನೆಲ್ ಪರಿಹಾರಕವು `scripts/release/dist-tag.mjs` ಆಗಿದ್ದು, ಅದನ್ನೇ
-   `npm-publish.yml` ಬಳಸುತ್ತದೆ.
-6. ಚಾನೆಲ್ಗಳನ್ನು ಪರಿಶೀಲಿಸಿ: `npm view omniroute dist-tags --json` ನಲ್ಲಿ v4 ಪ್ರಕಟವಾಗುವವರೆಗೆ
-   `latest` = 3.9.0 ಮತ್ತು `next` / `nightly` ಇಲ್ಲವೆಂದು ತೋರಿಸಬೇಕು.
-7. ಅಗತ್ಯವಿದ್ದರೆ, ರೋಲ್ಬ್ಯಾಕ್ ಮಾಡಿ: `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
-   ಮತ್ತು `npm dist-tag add omniroute@3.8.59 latest`.
+4. ಮೊದಲ PR ಇಳಿಯುವ ಮೊದಲು `stable/v3` ಮತ್ತು `develop` (ರೂಲ್ಸೆಟ್ಗಳು + ವಿಲೀನ ಕ್ಯೂ) ಅನ್ನು ರಕ್ಷಿಸಿ.
+5. ನಿಷ್ಕ್ರಿಯ ಕೆಲಸದ ಹರಿವು ಶಾಖೆಯ ಅಸ್ತಿತ್ವದಿಂದ ಸ್ವಿಚ್ ಆನ್ ಆಗುತ್ತದೆ: `forward-port.yml` ( `stable/v3` ಗೆ ತಳ್ಳುತ್ತದೆ), `validate-stable-pr.yml` (PRs ನಿಂದ `stable/v3`) ಮತ್ತು `nightly-v4-build.yml` ( `develop` ನಿರ್ಮಿಸುತ್ತದೆ). ಗೋ-ಲೈವ್ ಮೊದಲು, `secrets.FORWARD_PORT_TOKEN` ರೆಪೊಸಿಟರಿ ರಹಸ್ಯವನ್ನು ಹೊಂದಿಸಿ (ಆದ್ದರಿಂದ CI ಫಾರ್ವರ್ಡ್-ಪೋರ್ಟ್ PRs ನಲ್ಲಿ ಚಲಿಸುತ್ತದೆ); ಮಾಲೀಕರು ರೆಪೊಸಿಟರಿ ವೇರಿಯೇಬಲ್ `vars.NIGHTLY_PUBLISH` `true` ಗೆ ಹೊಂದಿಸುವವರೆಗೆ ರಾತ್ರಿಯ ಪ್ರಕಟಣೆಯು ಆಫ್ ಆಗಿರುತ್ತದೆ ಮತ್ತು npm ವಿಶ್ವಾಸಾರ್ಹ ಪ್ರಕಾಶನವು `nightly-v4-build.yml` ಸ್ವೀಕರಿಸುತ್ತದೆ. ಚಾನಲ್ ರೆಸಲ್ಯೂಶನ್ `scripts/release/dist-tag.mjs` ಆಗಿದೆ, ಅದೇ ಪರಿಹಾರಕ `npm-publish.yml` ಬಳಸುತ್ತದೆ.
+6. ಚಾನಲ್ಗಳನ್ನು ಪರಿಶೀಲಿಸಿ: `npm view omniroute dist-tags --json` `latest` = 3.9.0 ಅನ್ನು ತೋರಿಸುತ್ತದೆ ಮತ್ತು v4 ಪ್ರಕಟಿಸುವವರೆಗೆ `next` / `nightly` ಇಲ್ಲ.
+7. ರೋಲ್ಬ್ಯಾಕ್, ಅಗತ್ಯವಿದ್ದರೆ: `git push origin --delete refs/heads/stable/v3 refs/heads/develop` ಮತ್ತು `npm dist-tag add omniroute@3.8.59 latest`.
 
 ---
 

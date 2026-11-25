@@ -169,5 +169,6 @@ test("model card: icon + full name on top, copy pinned top-right, details below"
     read(`${providerComponents}/ModelCompatPopover.tsx`),
     /<span className="hidden sm:inline">\{t\("compatButtonLabel"\)\}<\/span>/
   );
-  assert.match(row, /absolute right-2 top-2 rounded p-0\.5/);
+  // The copy button is the kit 24px icon size, pinned to the card corner.
+  assert.match(row, /size="icon-2xs"[\s\S]{0,200}?className="absolute right-2 top-2"/);
 });

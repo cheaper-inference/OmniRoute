@@ -10,6 +10,7 @@ import { VisionBridgeGuardrail } from "./visionBridge";
 import { AudioBridgeGuardrail } from "./audioBridge";
 import { VideoBridgeGuardrail } from "./videoBridge";
 import { CredentialMaskerGuardrail } from "./credentialMasker";
+import { AgentGuardGuardrail } from "./agentGuard/guardrail";
 
 /**
  * `preCall`/`postCall` may legitimately return nothing — that is the documented
@@ -305,6 +306,7 @@ let defaultGuardrailsRegistered = false;
 export function registerDefaultGuardrails() {
   if (defaultGuardrailsRegistered) return guardrailRegistry;
 
+  guardrailRegistry.register(new AgentGuardGuardrail());
   guardrailRegistry.register(new VisionBridgeGuardrail());
   guardrailRegistry.register(new AudioBridgeGuardrail());
   guardrailRegistry.register(new VideoBridgeGuardrail());

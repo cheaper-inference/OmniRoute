@@ -43,6 +43,8 @@ export const opencode_goProvider: RegistryEntry = {
     ...OPENCODE_ZEN_GO_SHARED_MODELS,
     // models[0] (glm-5.2) is the dashboard default (LlmChatCard/ProviderTestSlideOver take models[0]).
 
+    // glm-5.3 / glm-5.3-flash declared identically on opencode-zen — see
+    // OPENCODE_ZEN_GO_SHARED_MODELS.
     { id: "glm-5.1", name: "GLM-5.1" },
     { id: "glm-5", name: "GLM-5" },
     // kimi-k2.7-code declared identically on opencode-zen — see OPENCODE_ZEN_GO_SHARED_MODELS.
@@ -478,6 +480,8 @@ export const opencode_goProvider: RegistryEntry = {
       name: "DeepSeek V4.1 Flash",
       contextLength: 1000000,
       maxOutputTokens: 384000,
+      supportsReasoning: true,
+      supportedThinkingEfforts: ["low", "high", "max"],
     },
     // Go exposes deepseek-flash as an alias of the same 1M DeepSeek V4.1 Flash.
     // This ID is imported from live catalogs and needs its own metadata row.
@@ -486,6 +490,8 @@ export const opencode_goProvider: RegistryEntry = {
       name: "DeepSeek V4.1 Flash",
       contextLength: 1000000,
       maxOutputTokens: 384000,
+      supportsReasoning: true,
+      supportedThinkingEfforts: ["low", "high", "max"],
     },
     {
       id: "claude-haiku-5-5",

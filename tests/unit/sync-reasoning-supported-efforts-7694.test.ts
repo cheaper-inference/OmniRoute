@@ -14,6 +14,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { getSettledModelCatalogResponse } from "../_setup/modelCatalogFixture.ts";
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-7694-effort-sync-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
@@ -136,9 +137,7 @@ test("#7694 catalog: GET /api/v1/models surfaces capabilities.effort_tiers for a
     },
   ]);
 
-  const response = await v1ModelsCatalog.getUnifiedModelsResponse(
-    new Request("http://localhost/api/v1/models")
-  );
+  const response = await getSettledModelCatalogResponse(v1ModelsCatalog);
   assert.equal(response.status, 200);
 
   const body = (await response.json()) as {
@@ -156,9 +155,7 @@ test("#7694 catalog: a synced model with no supportedThinkingEfforts gets no cap
     { id: "some-org/no-reasoning-model-7694", name: "No Reasoning Model 7694" },
   ]);
 
-  const response = await v1ModelsCatalog.getUnifiedModelsResponse(
-    new Request("http://localhost/api/v1/models")
-  );
+  const response = await getSettledModelCatalogResponse(v1ModelsCatalog);
   const body = (await response.json()) as {
     data: Array<{ id: string; capabilities?: { effort_tiers?: string[] } }>;
   };
@@ -182,9 +179,7 @@ test("#7694 catalog: GET /api/v1/models advertises a <model>-<tier> alias id per
     },
   ]);
 
-  const response = await v1ModelsCatalog.getUnifiedModelsResponse(
-    new Request("http://localhost/api/v1/models")
-  );
+  const response = await getSettledModelCatalogResponse(v1ModelsCatalog);
   const body = (await response.json()) as { data: Array<{ id: string }> };
   const baseEntry = body.data.find((m) => m.id.endsWith("some-org/reasoning-model-alias-7694"));
   assert.ok(baseEntry, "base model must appear in the catalog");

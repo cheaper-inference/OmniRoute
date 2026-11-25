@@ -66,6 +66,7 @@ import {
 } from "../../services/adaptiveConnectionConcurrency.ts";
 import { rethrowAdmissionError, remainingQueueBudgetMs } from "./queueBudget.ts";
 import { deduplicate } from "../../services/requestDedup.ts";
+import { isLocalStreamLifecycleError } from "@/shared/utils/circuitBreaker";
 import {
   classifyModelScope429,
   getModelScopeRetryDelayMs,
@@ -163,6 +164,7 @@ export type ExecuteProviderRequestDeps = {
   settings: Record<string, unknown> | null | undefined;
   toolDisclosure?: ToolDisclosureConfig | null;
   skipUpstreamRetry: boolean;
+  nonReplayableRequest?: boolean;
   requestUpstreamStartTimeoutMs?: number;
   stream: boolean;
   streamController: { signal: AbortSignal };
@@ -174,6 +176,20 @@ export type ExecuteProviderRequestDeps = {
   upstreamStream: boolean;
   userAgent: string | undefined;
 };
+
+// Resolve early (the loop's own signal checks then end the request) when the client leaves.
+function sleepUnlessAborted(ms: number, signal: AbortSignal): Promise<void> {
+  return new Promise((resolve) => {
+    if (signal.aborted) return resolve();
+    const done = () => {
+      clearTimeout(timer);
+      signal.removeEventListener("abort", done);
+      resolve();
+    };
+    const timer = setTimeout(done, ms);
+    signal.addEventListener("abort", done, { once: true });
+  });
+}
 
 export async function executeProviderRequest(
   deps: ExecuteProviderRequestDeps,
@@ -211,6 +227,7 @@ export async function executeProviderRequest(
     resilienceSettings,
     settings,
     skipUpstreamRetry,
+    nonReplayableRequest = false,
     requestUpstreamStartTimeoutMs,
     stream,
     streamController,
@@ -423,6 +440,7 @@ export async function executeProviderRequest(
                         clientResponseFormat,
                         onCredentialsRefreshed: fencedCredentialsRefreshed,
                         skipUpstreamRetry,
+                        nonReplayableRequest,
                         contextEditing: { enabled: contextEditingEnabled },
                         correlationId,
                       });
@@ -541,7 +559,7 @@ export async function executeProviderRequest(
                   `429 ${decision.kind}; retrying in ${delay}ms (model remaining: ${decision.snapshot.modelRemaining ?? "unknown"})`
                 );
                 releaseAccountSemaphore();
-                await new Promise((r) => setTimeout(r, delay));
+                await sleepUnlessAborted(delay, streamController.signal);
                 attempts++;
                 continue;
               }
@@ -637,6 +655,7 @@ export async function executeProviderRequest(
                             clientResponseFormat,
                             onCredentialsRefreshed: fencedCredentialsRefreshed,
                             skipUpstreamRetry,
+                            nonReplayableRequest,
                             contextEditing: { enabled: contextEditingEnabled },
                             correlationId,
                           });
@@ -773,7 +792,8 @@ export async function executeProviderRequest(
       // failures stay in routing telemetry; authoritative success only recovers this key.
       if (
         rawResult._executionCredentials?.connectionId &&
-        (rawResult._executionCredentials.apiKey || rawResult._executionCredentials.accessToken)
+        (rawResult._executionCredentials.apiKey || rawResult._executionCredentials.accessToken) &&
+        !(await shouldIsolateProbeFailures())
       ) {
         recordResponseKeyHealth(
           rawResult.response,
@@ -812,7 +832,16 @@ export async function executeProviderRequest(
   };
 
   if (allowDedup && dedupEnabled && dedupHash) {
-    const dedupResult = await deduplicate(dedupHash, execute);
+    // The shared call is tied to the FIRST caller's client signal. When that client leaves, the
+    // shared promise rejects with its abort. A joiner whose own client is still connected must
+    // not inherit it: it runs its own call once, outside the dedup map.
+    let dedupResult;
+    try {
+      dedupResult = await deduplicate(dedupHash, execute);
+    } catch (error) {
+      if (streamController.signal.aborted || !isLocalStreamLifecycleError(error)) throw error;
+      return execute();
+    }
     if (dedupResult.wasDeduplicated) {
       log?.debug?.("DEDUP", `Joined in-flight request hash=${dedupHash}`);
     }

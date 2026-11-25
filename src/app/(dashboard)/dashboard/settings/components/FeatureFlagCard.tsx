@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { Badge, Button, Card, Select, Spinner, Toggle } from "@/shared/components";
 import Icon from "@/shared/components/Icon";
 import Tooltip from "@/shared/components/Tooltip";
+import Notice from "@/shared/components/Notice";
 
 interface FeatureFlagCardProps {
   flag: {
@@ -68,9 +69,9 @@ function EnvPrecedenceWarning({
 }) {
   if (flag.key !== "EXPOSE_CC_DISCOVERY_ALIASES" || flag.source !== "env") return null;
   return (
-    <p className="mb-3 rounded border border-warning/30 bg-warning-bg px-2 py-1 text-xs text-warning">
+    <Notice variant="warning" className="mb-3">
       {text}
-    </p>
+    </Notice>
   );
 }
 

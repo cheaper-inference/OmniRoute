@@ -309,6 +309,7 @@ CREATE TABLE IF NOT EXISTS proxy_registry (
 3. **ውሂብ በጥንቃቄ ይሙሉ** ነባር ረድፎችን ለማስተናገድ `UPDATE ... WHERE ...` ይጠቀሙ
 4. **ትዕዛዙን እና ስያሜውን ያረጋግጡ** `npm run test:migrations:fresh` (በባዶ ዳታቤዝ ላይ ያሉ ሁሉም ፍልሰቶች) እና `npm run check:migration-numbering`
 5. **በአንድ ቅጂ ላይ ይሞክሩት** - በምርት ላይ ያልተሞከሩ ፍልሰትን በጭራሽ አያካሂዱ
+6. **ከኮድ የተፈጠረ ሠንጠረዥ እንዲሁ ፍልሰት ያስፈልገዋል** : ሞጁል እንዲሁ በሰንጠረዡ ላይ ያለውን ጠረጴዛ ከፈጠረው (`CREATE TABLE IF NOT EXISTS`, እንደ እራስ-ፈውስ መንገድ ተይዟል), ፍልሰት በተመሳሳይ DDL መፍጠር አለበት. ያለበለዚያ ንጹህ ጫኝ እና የተሻሻለ ጫኝ በተለያዩ መርሃግብሮች ያበቃል፣ ይህም የኮድ ዱካ እየሰራ እንደሆነ ይወሰናል። `tests/unit/db/lazy-table-migration-guard.test.ts` `src/` እና `open-sse/` ይቃኛል እና ያለ ስደት (#20557) በሰነፍ `CREATE` ላይ ይወድቃል። ምሳሌ `src/lib/db/migrations/20261118120853_compression_run_telemetry.sql`.
 
 ለምሳሌ፥
 
