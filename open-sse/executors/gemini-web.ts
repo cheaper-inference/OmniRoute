@@ -696,7 +696,9 @@ export class GeminiWebExecutor extends BaseExecutor {
       // for why the selectors involved are UNVALIDATED and why that is safe here.
       // A signed-out page still has a composer, so the readiness check above passes;
       // without this the mode menu's disabled options read as "locked by the plan".
-      if (await isGeminiSignedOut(page)) {
+      // The "Sign in" item lives inside the mode menu, so the menu path also reports
+      // `signed_out` once it has opened the menu (live, 2026-11-25).
+      const signedOutResult = () => {
         log?.warn?.("GEMINI-WEB", "Rejected request: the Gemini cookie no longer signs in");
         return {
           response: new Response(
@@ -712,10 +714,14 @@ export class GeminiWebExecutor extends BaseExecutor {
           headers: {},
           transformedBody: body,
         };
-      }
+      };
+      if (await isGeminiSignedOut(page)) return signedOutResult();
 
       if (model) {
         const modelSelection = await selectGeminiModel(page, modelId);
+        if (!modelSelection.confirmed && modelSelection.reason === "signed_out") {
+          return signedOutResult();
+        }
         if (!modelSelection.confirmed) {
           log?.warn?.(
             "GEMINI-WEB",

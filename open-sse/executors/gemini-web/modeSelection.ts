@@ -36,7 +36,7 @@ import {
   GEMINI_WEB_ARGON_MODEL,
   isGeminiWebArgonEnabled,
 } from "../../config/providers/registry/gemini/web/index.ts";
-import { toInPageExpression } from "./domReply.ts";
+import { isGeminiSignedOutInPage, toInPageExpression } from "./domReply.ts";
 
 /** Reasons `selectGeminiUiMode`/`selectGeminiModel` can fail closed. */
 export type GeminiModeSelectionFailureReason =
@@ -45,7 +45,8 @@ export type GeminiModeSelectionFailureReason =
   | "indicator_mismatch"
   | "unknown_model"
   | "mode_not_offered"
-  | "mode_locked";
+  | "mode_locked"
+  | "signed_out";
 
 export interface GeminiWebModeDescriptor {
   /** The advertised `gweb/<model>` id, or a synthetic label for non-model controls. */
@@ -199,6 +200,14 @@ async function readMenuOption(
   return null;
 }
 
+async function isMenuSignedOut(page: GeminiAutomationPage): Promise<boolean> {
+  try {
+    return Boolean(await page.evaluate!(toInPageExpression(isGeminiSignedOutInPage)));
+  } catch {
+    return false;
+  }
+}
+
 /**
  * Model-menu path (#21116): open the mode menu, pick the option whose sublabel
  * matches exactly, then reopen the menu and require `aria-checked="true"` on it.
@@ -224,6 +233,12 @@ export async function selectGeminiMenuMode(
 
   await page.click(GEMINI_WEB_MODE_MENU_BUTTON, { timeout: timeoutMs });
   let option = await readMenuOption(page, sublabel, timeoutMs);
+  // The signed-out "Sign in" item only exists inside the open menu (live, 2026-11-25),
+  // and there the Gemini 4 options are aria-disabled, which would read as mode_locked.
+  if (await isMenuSignedOut(page)) {
+    await closeMenu();
+    return { confirmed: false, reason: "signed_out", descriptor };
+  }
   if (!option) {
     await closeMenu();
     return { confirmed: false, reason: "mode_not_offered", descriptor };
@@ -335,6 +350,7 @@ const REASON_DETAIL: Record<GeminiModeSelectionFailureReason, string> = {
   indicator_mismatch: "the active-mode indicator did not confirm the switch after attempting it",
   mode_not_offered: "this account's Gemini mode menu does not offer it",
   mode_locked: "this account's Gemini plan does not include it (the option is locked)",
+  signed_out: "the stored cookie no longer signs in to Gemini",
 };
 
 /**

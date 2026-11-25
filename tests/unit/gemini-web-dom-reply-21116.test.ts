@@ -477,3 +477,66 @@ test("signed-out detection does not fire on a signed-in page that carries Google
   ).window.document;
   assert.equal(isGeminiSignedOutInPage(signedIn), false);
 });
+
+// ── Signed-out "Sign in" item lives inside the open mode menu (live, 2026-11-25) ─────
+// With the menu closed the page has no sign-in button; once the menu is open it lists
+// "Sign in · Get more access" and the Gemini 4 options carry aria-disabled="true".
+
+function signedOutMenuPage(calls: string[]) {
+  let menuOpen = false;
+  return {
+    on: () => {},
+    goto: async () => {},
+    waitForTimeout: async () => {},
+    waitForSelector: async () => ({ click: async () => {} }),
+    click: async (selector: string) => {
+      calls.push(`click ${selector}`);
+      if (selector === GEMINI_WEB_MODE_MENU_BUTTON) menuOpen = true;
+    },
+    evaluate: async (expression: string) => {
+      if (/"sublabel":/.test(expression)) {
+        return menuOpen ? { testId: "bard-mode-option-", checked: false, locked: true } : null;
+      }
+      if (/mode-picker-sign-in-button/.test(expression)) return menuOpen;
+      return null;
+    },
+    keyboard: {
+      type: async (t: string) => void calls.push(`type ${t}`),
+      insertText: async (t: string) => void calls.push(`type ${t}`),
+      press: async (key: string) => {
+        calls.push(`press ${key}`);
+        if (key === "Escape") menuOpen = false;
+      },
+    },
+  };
+}
+
+test("menu path: a sign-in item in the open menu is reported as signed_out, not mode_locked", async () => {
+  const calls: string[] = [];
+  const r = await selectGeminiModel(signedOutMenuPage(calls), "gemini-4-hydrogen", 200);
+  assert.deepEqual([r.confirmed, r.reason], [false, "signed_out"]);
+  assert.ok(calls.includes("press Escape"), "the menu is closed again");
+});
+
+test("executor: a session that is only visibly signed out inside the menu answers 401", async () => {
+  const calls: string[] = [];
+  playwright.chromium.launch = (async () => ({
+    newContext: async () => ({
+      addCookies: async () => {},
+      cookies: async () => [],
+      newPage: async () => signedOutMenuPage(calls),
+    }),
+    close: async () => {},
+  })) as unknown as typeof playwright.chromium.launch;
+  const result = await new GeminiWebExecutor().execute({
+    model: "gemini-4-hydrogen",
+    body: { messages: [{ role: "user", content: "hello" }], stream: false },
+    stream: false,
+    credentials: { apiKey: "__Secure-1PSID=test-psid" },
+    signal: AbortSignal.timeout(5000),
+    log: null,
+  });
+  assert.equal(result.response.status, 401);
+  assert.equal((await result.response.json()).code, "gemini_web_signed_out");
+  assert.ok(!calls.some((c) => c.startsWith("type ")), "the prompt is never typed");
+});
