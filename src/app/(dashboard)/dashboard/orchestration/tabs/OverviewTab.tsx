@@ -54,11 +54,13 @@ function Card({
     >
       <div className="flex items-center justify-between gap-2">
         <span className="font-medium truncate">{node.label}</span>
-        <span className="text-[9px] uppercase text-text-muted shrink-0">{node.source}</span>
+        <span className="ci-eyebrow shrink-0" data-size="3xs">
+          {node.source}
+        </span>
       </div>
-      {node.sublabel && <div className="text-[10px] text-text-muted truncate">{node.sublabel}</div>}
+      {node.sublabel && <div className="text-3xs text-text-muted truncate">{node.sublabel}</div>}
       <div className="flex items-center justify-between mt-1.5">
-        <span className="text-[10px]" style={{ color }}>
+        <span className="text-3xs" style={{ color }}>
           {node.state && t(STATE_KEY[node.state])}
           {node.startedAt &&
             !node.endedAt &&
@@ -67,8 +69,7 @@ function Card({
         </span>
         <Button
           variant="ghost"
-          size="sm"
-          className="h-6 min-h-6 px-1.5 text-[10px]"
+          size="2xs"
           onClick={(e) => {
             e.stopPropagation();
             onSeeInGraph();
@@ -129,7 +130,7 @@ export function OverviewTab({
                 <span className="block text-lg font-semibold" style={{ color: orchStateColor(s) }}>
                   {counts[s]}
                 </span>{" "}
-                <span className="block text-[10px] font-normal text-text-muted">
+                <span className="block text-3xs font-normal text-text-muted">
                   {t(STATE_KEY[s])}
                 </span>
               </>
@@ -140,7 +141,7 @@ export function OverviewTab({
       <div className="grid grid-cols-1 md:grid-cols-4 gap-3 items-start">
         {(["queued", "running", "waiting_approval", "done"] as const).map((col) => (
           <div key={col} className="flex flex-col gap-2">
-            <div className="text-[10px] font-semibold uppercase text-text-muted">
+            <div className="ci-eyebrow" data-size="3xs" data-weight="medium">
               {col === "done"
                 ? `${t("stateSucceeded")} / ${t("stateFailed")} / ${t("stateCancelled")}`
                 : t(STATE_KEY[col])}

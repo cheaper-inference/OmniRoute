@@ -1,5 +1,6 @@
 "use client";
 
+import Card from "@/shared/components/Card";
 import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
 import Input from "@/shared/components/Input";
@@ -31,10 +32,10 @@ export default function KeyPolicyLimitsTab() {
       <UsageBudgets />
 
       {/* Related: Domain Budget */}
-      <div className="flex flex-col gap-3 p-3.5 rounded-lg border border-border bg-surface/40">
+      <Card.Section className="flex flex-col gap-3">
         <DomainBudgetToggle />
         {formState.domainBudgetEnabled && <DomainBudgetAmounts />}
-      </div>
+      </Card.Section>
 
       {/* Related: TPM / RPM / Monthly Quota Limits */}
       <QuotaLimits />
@@ -51,7 +52,7 @@ export default function KeyPolicyLimitsTab() {
 function QuotaLimits() {
   const { t, formState, updateState } = useKeyPolicyEditor();
   return (
-    <div className="flex flex-col gap-3 p-3.5 rounded-lg border border-border bg-surface/40">
+    <Card.Section className="flex flex-col gap-3">
       <div className="flex items-start justify-between gap-3">
         <div className="flex flex-col gap-1">
           <p className="text-sm font-medium text-text-main">{t("templateQuotaLimitsTitle")}</p>
@@ -97,14 +98,14 @@ function QuotaLimits() {
           />
         </div>
       )}
-    </div>
+    </Card.Section>
   );
 }
 
 function SessionAndRequestLimits() {
   const { t, formState, updateState } = useKeyPolicyEditor();
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3.5 rounded-lg border border-border bg-surface/40">
+    <Card.Section className="grid grid-cols-1 sm:grid-cols-2 gap-3">
       <Input
         label={t("maxActiveSessions")}
         hint={t("maxActiveSessionsDescription")}
@@ -148,7 +149,7 @@ function SessionAndRequestLimits() {
         value={formState.maxRequestsPerDay}
         onChange={(e) => updateState((p) => ({ ...p, maxRequestsPerDay: e.target.value }))}
       />
-    </div>
+    </Card.Section>
   );
 }
 
@@ -212,7 +213,7 @@ function RateLimitRow({
 function AccessSchedule() {
   const { t, formState, updateState } = useKeyPolicyEditor();
   return (
-    <div className="flex flex-col gap-3 p-3.5 rounded-lg border border-border bg-surface/40">
+    <Card.Section className="flex flex-col gap-3">
       <div className="flex items-start justify-between gap-3">
         <div className="flex flex-col gap-1">
           <p className="text-sm font-medium text-text-main">{t("accessSchedule")}</p>
@@ -247,7 +248,7 @@ function AccessSchedule() {
           />
         </div>
       )}
-    </div>
+    </Card.Section>
   );
 }
 
@@ -290,7 +291,7 @@ function TokenLimitHeading() {
 function RateLimitWindows() {
   const { t, formState, updateState } = useKeyPolicyEditor();
   return (
-    <div className="flex flex-col gap-2 p-3.5 rounded-lg border border-border bg-surface/40">
+    <Card.Section className="flex flex-col gap-2">
       <div className="flex items-center justify-between gap-2">
         <div>
           <p className="text-sm font-medium text-text-main">{t("apiManagerCustomRateLimits")}</p>
@@ -314,7 +315,7 @@ function RateLimitWindows() {
       {formState.rateLimits.map((rl, idx) => (
         <RateLimitRow key={idx} rl={rl} idx={idx} />
       ))}
-    </div>
+    </Card.Section>
   );
 }
 
@@ -352,7 +353,7 @@ function QuotaPoolChoices() {
 function QuotaPoolRestrictions() {
   const { t, formState, updateState, allQuotaPools } = useKeyPolicyEditor();
   return (
-    <div className="flex flex-col gap-2 p-3.5 rounded-lg border border-border bg-surface/40">
+    <Card.Section className="flex flex-col gap-2">
       <p className="text-sm font-medium text-text-main">{t("templateAllowedQuotaPools")}</p>
       <p className="text-xs text-text-muted">{t("templateAllowedQuotaPoolsDesc")}</p>
       {allQuotaPools.length > 0 && <QuotaPoolChoices />}
@@ -383,7 +384,7 @@ function QuotaPoolRestrictions() {
           ))}
         </div>
       )}
-    </div>
+    </Card.Section>
   );
 }
 
@@ -445,7 +446,7 @@ function DomainBudgetToggle() {
 function UsageBudgets() {
   const { formState, updateState } = useKeyPolicyEditor();
   return (
-    <div className="p-3.5 rounded-lg border border-border bg-surface/40">
+    <Card.Section>
       <UsageLimitSettings
         enabled={formState.usageLimitEnabled}
         dailyLimitUsd={formState.dailyUsageLimitUsd}
@@ -458,7 +459,7 @@ function UsageBudgets() {
           updateState((p) => ({ ...p, fiveHourUsageLimitUsd: val }))
         }
       />
-    </div>
+    </Card.Section>
   );
 }
 
@@ -523,7 +524,7 @@ function TokenLimitAmount({
 function TokenLimits() {
   const { t, tc, formState, updateState } = useKeyPolicyEditor();
   return (
-    <div className="flex flex-col gap-2 p-3.5 rounded-lg border border-border bg-surface/40">
+    <Card.Section className="flex flex-col gap-2">
       <TokenLimitHeading />
       {formState.tokenLimits.map((tl, idx) => (
         <div
@@ -573,7 +574,7 @@ function TokenLimits() {
           </Button>
         </div>
       ))}
-    </div>
+    </Card.Section>
   );
 }
 

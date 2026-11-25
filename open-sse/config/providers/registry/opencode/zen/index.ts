@@ -62,20 +62,36 @@ export const opencode_zenProvider: RegistryEntry = {
       targetFormat: "openai-responses",
       maxOutputTokens: 128000,
     },
+    // Rows below without targetFormat were served through passthrough only and
+    // keep its wire format (/chat/completions) until each endpoint is measured
+    // with a live key; the GPT-5.6 rows above show this host can be
+    // /responses-only for a GPT family.
+    { id: "gpt-6-astra", name: "GPT 6 Astra" },
+    { id: "gpt-5.5", name: "GPT 5.5" },
+    { id: "gpt-5.5-pro", name: "GPT 5.5 Pro" },
     { id: "gpt-5.4", name: "GPT 5.4" },
+    { id: "gpt-5.4-pro", name: "GPT 5.4 Pro" },
     { id: "gpt-5.4-mini", name: "GPT 5.4 Mini" },
     { id: "gpt-5.4-nano", name: "GPT 5.4 Nano" },
+    { id: "gpt-5.3-codex", name: "GPT 5.3 Codex" },
     { id: "gpt-5.3-codex-spark", name: "GPT 5.3 Codex Spark" },
     { id: "gpt-5.1", name: "GPT 5.1" },
 
     // ── Claude ─────────────────────────────────────────────────
+    { id: "claude-fable-5-1", name: "Claude Fable 5.1" },
     { id: "claude-fable-5", name: "Claude Fable 5" },
     { id: "claude-opus-5", name: "Claude Opus 5" },
+    { id: "claude-opus-4-8", name: "Claude Opus 4.8" },
+    { id: "claude-opus-4-7", name: "Claude Opus 4.7" },
     { id: "claude-sonnet-5", name: "Claude Sonnet 5" },
+    { id: "claude-sonnet-4-6", name: "Claude Sonnet 4.6" },
     { id: "claude-haiku-4-5", name: "Claude Haiku 4.5" },
 
     // ── Gemini ─────────────────────────────────────────────────
+    { id: "gemini-3.8-flash", name: "Gemini 3.8 Flash" },
     { id: "gemini-3.7-flash", name: "Gemini 3.7 Flash" },
+    { id: "gemini-3.6-flash", name: "Gemini 3.6 Flash" },
+    { id: "gemini-3.5-flash", name: "Gemini 3.5 Flash" },
     { id: "gemini-3.5-flash-lite", name: "Gemini 3.5 Flash Lite" },
     { id: "gemini-3.1-pro", name: "Gemini 3.1 Pro" },
     { id: "gemini-3-flash", name: "Gemini 3 Flash" },
@@ -164,6 +180,8 @@ export const opencode_zenProvider: RegistryEntry = {
       supportsReasoning: true,
       supportedThinkingEfforts: ["high", "max"],
     },
+    // glm-5.3 / glm-5.3-flash declared identically on opencode-go — see
+    // OPENCODE_ZEN_GO_SHARED_MODELS.
 
     // ── MiniMax ────────────────────────────────────────────────
     // #3110: MiniMax M3 — frontier coding model with 1M context

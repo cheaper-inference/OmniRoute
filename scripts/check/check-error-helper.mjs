@@ -26,8 +26,9 @@
 // client. See SANITIZED_CALL below for the replacement.
 import fs from "node:fs";
 import path from "node:path";
-import { pathToFileURL } from "node:url";
+
 import { assertNoStale } from "./lib/allowlist.mjs";
+import { isMainModule } from "../lib/is-main-module.mjs";
 
 const cwd = process.cwd();
 
@@ -668,4 +669,4 @@ function main() {
   );
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1] || "").href) main();
+if (isMainModule(import.meta.url)) main();

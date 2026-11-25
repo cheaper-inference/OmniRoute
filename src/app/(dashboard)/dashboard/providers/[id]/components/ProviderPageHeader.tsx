@@ -146,7 +146,7 @@ export default function ProviderPageHeader({
         <span className="flex flex-wrap items-center gap-2">
           <span>{t("connectionCountLabel", { count: connectionsCount })}</span>
           {showPartnerNote && providerInfo.website && (
-            <span className="text-[10px] font-medium uppercase tracking-wide text-text-muted/70">
+            <span className="ci-eyebrow" data-size="3xs" data-weight="medium">
               {kimiPartnerLinkNote}
             </span>
           )}

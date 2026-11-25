@@ -42,6 +42,21 @@ export const RENAMED_MIGRATION_COMPATIBILITY = [
     toVersion: "20261115112345",
     toName: "daily_usage_evidence",
   },
+  // #20170 builds ran launch_sessions as 240 (earlier heads, now the canonical
+  // provider_node_custom_json_config slot) and then 242 (a slot that stays empty). Move both
+  // rows to the timestamped file so the canonical 240 runs and launch_sessions never re-runs.
+  {
+    fromVersion: "240",
+    fromName: "launch_sessions",
+    toVersion: "20261116102450",
+    toName: "launch_sessions",
+  },
+  {
+    fromVersion: "242",
+    fromName: "launch_sessions",
+    toVersion: "20261116102450",
+    toName: "launch_sessions",
+  },
   {
     fromVersion: "238",
     fromName: "call_logs_artifact_overflow_order_index",
@@ -59,6 +74,22 @@ export const RENAMED_MIGRATION_COMPATIBILITY = [
     fromName: "skills_unique_owner_name_version",
     toVersion: "20261115153725",
     toName: "skills_unique_owner_name_version",
+  },
+  {
+    // An earlier #14864 build kept agent_session_messages at 237. Free that slot before the
+    // usage_history_calculated_cost entries below rehome a legacy 236 row into it.
+    fromVersion: "237",
+    fromName: "agent_session_messages",
+    toVersion: "20261115231913",
+    toName: "agent_session_messages",
+  },
+  {
+    // The last numbered #14864 build kept agent_session_messages at 238, which the base gives
+    // to codex_connection_fences. Move it to the timestamped file so 238 runs there.
+    fromVersion: "238",
+    fromName: "agent_session_messages",
+    toVersion: "20261115231913",
+    toName: "agent_session_messages",
   },
   {
     // Earlier revisions used 228, 231, 233 or 236; canonical upstream rows stay put.
@@ -743,6 +774,45 @@ export const RENAMED_MIGRATION_COMPATIBILITY = [
     fromName: "usage_history_agent_session_id",
     toVersion: "235",
     toName: "usage_history_agent_session_id",
+  },
+  // Message-capture builds (#14864) shipped agent_session_messages as 199, 200, 210, 216, 231,
+  // 232, 237 and 238 (the 237 and 238 entries sit near the top of this list). Upstream owns all
+  // of those slots; the migration now lives at 20261115231913. Name-locked.
+  {
+    fromVersion: "199",
+    fromName: "agent_session_messages",
+    toVersion: "20261115231913",
+    toName: "agent_session_messages",
+  },
+  {
+    fromVersion: "200",
+    fromName: "agent_session_messages",
+    toVersion: "20261115231913",
+    toName: "agent_session_messages",
+  },
+  {
+    fromVersion: "210",
+    fromName: "agent_session_messages",
+    toVersion: "20261115231913",
+    toName: "agent_session_messages",
+  },
+  {
+    fromVersion: "216",
+    fromName: "agent_session_messages",
+    toVersion: "20261115231913",
+    toName: "agent_session_messages",
+  },
+  {
+    fromVersion: "231",
+    fromName: "agent_session_messages",
+    toVersion: "20261115231913",
+    toName: "agent_session_messages",
+  },
+  {
+    fromVersion: "232",
+    fromName: "agent_session_messages",
+    toVersion: "20261115231913",
+    toName: "agent_session_messages",
   },
 ] as const;
 

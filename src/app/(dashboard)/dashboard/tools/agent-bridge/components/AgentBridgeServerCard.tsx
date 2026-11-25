@@ -11,6 +11,7 @@ import { CertStatusIcon } from "./shared/CertStatusIcon";
 import { UpstreamCaField } from "./UpstreamCaField";
 import { BypassListEditor } from "./BypassListEditor";
 import type { AgentBridgeServerState } from "../AgentBridgePageClient";
+import IconChip from "@/shared/components/IconChip";
 
 interface AgentBridgeServerCardProps {
   serverState: AgentBridgeServerState;
@@ -56,11 +57,11 @@ export function AgentBridgeServerCard({
       {/* Header row */}
       <div className="flex items-center justify-between gap-3 px-5 py-4">
         <div className="flex min-w-0 items-center gap-3">
-          <div className="rounded-control bg-bg-subtle p-2 text-text-main">
-            <Icon name="link" size={20} />
-          </div>
+          <IconChip>
+            <Icon name="link" />
+          </IconChip>
           <div className="min-w-0">
-            <h2 className="ci-heading flex flex-wrap items-center gap-2 text-sm">
+            <h2 className="ci-heading flex flex-wrap items-center gap-2" data-size="sm">
               {t("serverCardTitle") || "AgentBridge Server"}
               <Badge variant={isRunning ? "success" : "default"} size="sm" dot>
                 {isRunning ? t("statusRunning") || "Running" : t("statusStopped") || "Stopped"}
@@ -179,7 +180,9 @@ export function AgentBridgeServerCard({
         <div className="flex flex-col gap-5 border-t border-border px-5 pt-4 pb-5">
           <UpstreamCaField value={upstreamCa} onChange={setUpstreamCa} onSave={onUpstreamCaSave} />
           <div>
-            <h3 className="ci-heading mb-2 text-xs">{t("bypassSectionTitle") || "Bypass List"}</h3>
+            <h3 className="ci-heading mb-2" data-size="xs">
+              {t("bypassSectionTitle") || "Bypass List"}
+            </h3>
             <p className="mb-3 text-xs text-text-muted">
               {t("bypassSectionDesc") ||
                 "Hosts matching these patterns are tunneled directly (no TLS decryption). Defaults include banks, .gov, and corporate SSO."}
