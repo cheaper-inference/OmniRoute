@@ -1,5 +1,6 @@
 "use client";
 
+import Card from "@/shared/components/Card";
 import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
 import Input from "@/shared/components/Input";
@@ -30,7 +31,7 @@ export default function KeyPolicyCombosTab() {
       <ComboAccessMode />
 
       {/* Auto-Combo Candidate Overrides */}
-      <div className="flex flex-col gap-2 p-3.5 rounded-lg border border-border bg-surface/40">
+      <Card.Section className="flex flex-col gap-2">
         <p className="text-sm font-medium text-text-main">
           {t("templateAutoCandidateOverridesTitle")}
         </p>
@@ -69,7 +70,7 @@ export default function KeyPolicyCombosTab() {
             ))}
           </div>
         )}
-      </div>
+      </Card.Section>
     </div>
   );
 }
@@ -135,7 +136,7 @@ function SelectedComboChips() {
 function ComboAccessMode() {
   const { t, formState, updateState } = useKeyPolicyEditor();
   return (
-    <div className="flex flex-col gap-2 p-3.5 rounded-lg border border-border bg-surface/40">
+    <Card.Section className="flex flex-col gap-2">
       <div className="flex items-center justify-between">
         <div className="flex flex-col gap-0.5">
           <p className="text-sm font-medium text-text-main">{t("allowedCombos")}</p>
@@ -174,7 +175,7 @@ function ComboAccessMode() {
       </div>
 
       {!formState.allowAllCombos && <SelectedComboChips />}
-    </div>
+    </Card.Section>
   );
 }
 

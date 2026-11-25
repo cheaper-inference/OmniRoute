@@ -46,14 +46,17 @@ function optionsResponse() {
   });
 }
 
+/** A unified-catalog row served by /v1/systemone (type "decisions"). */
+export function isSystemOneCatalogModel(model: Record<string, unknown>): boolean {
+  if (model.type === "decisions") return true;
+  const endpoints = model.supported_endpoints;
+  return Array.isArray(endpoints) && endpoints.includes("decisions");
+}
+
 /** Decisions models advertised by the unified catalog (type "decisions"). */
 export function systemOneModelsGet(pathname: string) {
   return (request?: Request) =>
-    getSpecialtyModelsResponse(request, pathname, (model) => {
-      if (model.type === "decisions") return true;
-      const endpoints = model.supported_endpoints;
-      return Array.isArray(endpoints) && endpoints.includes("decisions");
-    });
+    getSpecialtyModelsResponse(request, pathname, isSystemOneCatalogModel);
 }
 
 /**

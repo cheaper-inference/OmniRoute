@@ -210,7 +210,8 @@ export default function SimpleControls({
           value={inputText}
           onChange={(e) => onInputChange(e.target.value)}
           placeholder={tr("simpleInputPanelHint", "Free-text message or ready-made example")}
-          className="w-full resize-y font-mono text-sm"
+          mono
+          className="w-full resize-y text-sm"
         />
       </div>
 

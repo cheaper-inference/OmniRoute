@@ -17,6 +17,8 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { formatTokenHeadline as formatCatalogTokenHeadline } from "@omniroute/open-sse/config/freeModelCatalog.ts";
+
 type TokenKind =
   "headline:steady" | "headline:first" | "rowSum:live" | "rowSum:total" | "retiredShare";
 type TokenClaim = {
@@ -49,6 +51,7 @@ const claimsLib = (await import("../../scripts/check/lib/derivedClaims.mjs")) as
   locateHeadlineClaims: (content: string) => TokenClaim[];
 };
 const gate = (await import("../../scripts/check/check-docs-counts-sync.mjs")) as unknown as {
+  formatTokenHeadline: (tokens: number) => string;
   checkFreeTierHeadline: (content: string, totals: Totals) => Verdict;
   checkRowSumPlacement: (
     content: string,
@@ -68,6 +71,20 @@ const factsLib = (await import("../../scripts/release/facts.mjs")) as unknown as
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const locate = (content: string) => claimsLib.locateFreeTokenClaims(content);
 const kinds = (content: string) => locate(content).map((c) => [c.key, c.value]);
+
+test("the gate formats token figures exactly like the catalog", () => {
+  for (const tokens of [
+    0, 1, 499_999, 500_000, 92_780_000, 89_780_000, 162_000_000, 999_400_000, 999_600_000,
+    11_349_500_000, 11_352_500_000, 11_502_500_000,
+  ]) {
+    assert.equal(gate.formatTokenHeadline(tokens), formatCatalogTokenHeadline(tokens), `${tokens}`);
+  }
+
+  for (const tokens of [-1, NaN, Infinity]) {
+    assert.throws(() => gate.formatTokenHeadline(tokens), RangeError, `${tokens}`);
+    assert.throws(() => formatCatalogTokenHeadline(tokens), RangeError, `${tokens}`);
+  }
+});
 
 // --- Task 9: the typed locator ------------------------------------------------------------
 

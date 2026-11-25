@@ -1,3 +1,4 @@
+import { validateBuyerCostMicro } from "./buyerCostMicro.ts";
 import {
   finalizeMostRecentPendingRequest,
   finalizePendingRequestById,
@@ -31,6 +32,7 @@ function toPartialFailureAggregate(usage: PartialStreamUsage): PartialFailureUsa
 export type { StreamFailurePayload } from "./streamErrorFormat.ts";
 
 export type StreamCompletionPayload = {
+  buyerCostMicro?: number | null;
   status: number;
   usage: unknown;
   responseBody?: unknown;
@@ -280,6 +282,7 @@ export function createStreamFailureFinalizers({
   onStreamFailure,
   hasEmittedOutput = () => false,
   readPartialUsage = () => null,
+  readBuyerCostMicro = () => null,
 }: {
   isFailureCompletionRecorded: () => boolean;
   isStreamCompletionRecorded?: () => boolean;
@@ -293,6 +296,7 @@ export function createStreamFailureFinalizers({
   hasEmittedOutput?: () => boolean;
   /** Usage the stream accumulated before it ended early (see streamPartialUsage.ts). */
   readPartialUsage?: () => PartialStreamUsage | null;
+  readBuyerCostMicro?: () => number | null;
 }) {
   const readPartialUsageSafely = (): PartialStreamUsage | null => {
     try {
@@ -302,6 +306,13 @@ export function createStreamFailureFinalizers({
     }
   };
 
+  const readBuyerCostSafely = (): number | null => {
+    try {
+      return validateBuyerCostMicro(readBuyerCostMicro());
+    } catch {
+      return null;
+    }
+  };
   const completeFailure = (failure: StreamFailurePayload) => {
     // The client hung up / the upstream died mid-answer: the provider already generated (and
     // billed) these tokens. Status and success semantics stay as they are — only the token
@@ -318,6 +329,7 @@ export function createStreamFailureFinalizers({
       onStreamComplete({
         status,
         usage: null,
+        buyerCostMicro: readBuyerCostSafely(),
         responseBody: errorBody,
         providerPayload: buildFailureProviderPayload(errorBody, failure),
         clientPayload: errorBody,

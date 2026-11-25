@@ -1795,6 +1795,84 @@ paths:
         "401":
           $ref: "#/components/responses/Unauthorized"
 
+  /api/v1/decisions:
+    post:
+      tags: [Decisions]
+      summary: Native OpenAI Decisions
+      description: >-
+        Forwards one request in the OpenAI Decisions wire format (`input` plus an
+        ordered `questions` array of `predicate` / `choice` / `score`) to the
+        Decisions endpoint of an `openai` connection and returns its ordered
+        `answers` untouched. Model: `openai/gpt-6-luna` (or bare `gpt-6-luna`).
+        Never translated to or from chat or System One. The API key's model
+        allowlist, `decisions` endpoint category, budget and connection scope are
+        checked before any credential is read. The upstream call uses the guarded
+        decision transport: provider outbound guard, no retries, no redirects, a
+        5 s timeout and a 64 KB answer cap. Request bodies are limited to 4 MiB.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [model, input, questions]
+              additionalProperties: false
+              properties:
+                model:
+                  type: string
+                  example: openai/gpt-6-luna
+                input:
+                  description: A string or an array of message / tool items.
+                questions:
+                  type: array
+                  minItems: 1
+                  maxItems: 400
+                  items:
+                    type: object
+                    required: [type, instructions]
+                    properties:
+                      type:
+                        type: string
+                        enum: [predicate, choice, score]
+                      name:
+                        type: string
+                      instructions:
+                        description: A string or an array of input parts.
+                prompt_cache_key:
+                  type: string
+                  maxLength: 64
+                prompt_cache_options:
+                  type: object
+                  nullable: true
+                safety_identifier:
+                  type: string
+                  maxLength: 128
+                  nullable: true
+      responses:
+        "200":
+          description: >-
+            Upstream `{ model, answers[], usage }`. Carries the `X-OmniRoute-*`
+            telemetry headers.
+        "400":
+          description: Invalid body, unknown Decisions model or unusable connection base URL.
+        "401":
+          description: Missing or invalid gateway API key / provider credentials.
+        "403":
+          description: Model, endpoint category or connection scope not allowed for the API key.
+        "413":
+          description: Request body over 4 MiB.
+        "502":
+          description: Upstream error, oversized or malformed answer.
+        "504":
+          description: Upstream timeout.
+    options:
+      tags: [Decisions]
+      summary: CORS preflight for native Decisions
+      responses:
+        "200":
+          description: CORS headers.
   /api/v1/embeddings:
     post:
       tags: [Embeddings]
@@ -16375,6 +16453,197 @@ paths:
           description: The key lacks the self:usage scope
         "500":
           description: Status could not be built
+  /api/v1/me/quota/{provider}:
+    get:
+      tags:
+        - V1 Me
+      summary: "GET me › quota"
+      description: >-
+        Self-service quota view for the calling API key (also served at /v1/me/quota/{provider}):
+        the key's position in the Quota Share pools of one provider, plus the schedule windows
+        and per-model caps it is under. Off unless the `QUOTA_SELF_PANEL` feature flag is on
+        (a request that reaches the route gets 404 otherwise). Authenticate with `Authorization: Bearer <key>` or `x-api-key: <key>`;
+        the key is never read from the query string or a cookie. Requires scope `self:usage`.
+        Account-level readings (`total`, `accounts[].dimensions[].account`, `modelWindows`) are
+        included only with scope `self:account-quota` and only for providers in the key's
+        `sharedQuotaProviders` setting. Member usage slices (`members`) also need the pool's
+        `memberBreakdown` option. Account bars and model windows are further limited to
+        the connections the key may use when it has a list of allowed connections. Pools are
+        identified by an opaque per-key `ref`. The pool's display name and schedule labels are
+        returned as the administrator wrote them. No pool id, connection id or account identity
+        is returned. A key outside every pool of the provider gets 200 with `pools: []`. Every
+        response of this route carries `Cache-Control: no-store`; a refusal before the route runs,
+        for example by the client API policy or the IP filter, does not.
+      security:
+        - BearerAuth: []
+        - XApiKeyAuth: []
+      parameters:
+        - name: provider
+          in: path
+          required: true
+          description: >-
+            Provider id or registry alias (for example `claude`, `anthropic`, `cc`, `codex`).
+            Trimmed and lower-cased; must then match `^[a-z0-9][a-z0-9._-]{0,63}$`.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Quota view for the calling key
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum: [no-store]
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SelfQuotaView"
+        "400":
+          description: Invalid provider
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Missing or invalid API key, or the server's environment key
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: The key lacks the self:usage scope
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: The QUOTA_SELF_PANEL feature flag is off
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: The quota view could not be built (fixed message, no detail)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    patch:
+      tags:
+        - V1 Me
+      summary: "PATCH me › quota"
+      description: >-
+        Records the calling API key's own lending consent for one Quota Share pool of the
+        provider (also served at /v1/me/quota/{provider}). The pool is named by the `ref` the GET
+        returns. A consent above 0 needs a pool in `consent` borrow mode, and 0 withdraws the
+        consent in either mode. Same feature flag, headers and provider
+        rules as the GET. The `self:usage` scope authorizes this write. Checks run in this order:
+        flag (404), key (401), scope (403), provider (400), per-key limit (429), body (400),
+        deadline (400), pool reference (404), borrow mode (403). A refusal by a check writes
+        nothing. A change of the stored consent is audited as `quota.pool.lending.updated`. The
+        same body twice writes and audits once. Limit: 20 requests per 60 seconds per key, counted
+        apart from the key's request rate limit.
+      security:
+        - BearerAuth: []
+        - XApiKeyAuth: []
+      parameters:
+        - name: provider
+          in: path
+          required: true
+          description: >-
+            Provider id or registry alias (for example `claude`, `anthropic`, `cc`, `codex`).
+            Trimmed and lower-cased; must then match `^[a-z0-9][a-z0-9._-]{0,63}$`.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SelfLendingPatch"
+      responses:
+        "200":
+          description: The consent is stored. The body is the full quota view, built after the write.
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum: [no-store]
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SelfQuotaView"
+        "400":
+          description: Invalid provider, a body that is not JSON, too long (over 4096 bytes) or outside the schema, or a deadline in seconds or not in the future
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum: [no-store]
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Missing or invalid API key, or the server's environment key
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum: [no-store]
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: The key lacks the self:usage scope, or the pool is not in consent mode and lendingPercent is above 0
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum: [no-store]
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: The QUOTA_SELF_PANEL feature flag is off, or the ref names no pool of this key for this provider
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum: [no-store]
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "429":
+          description: The key passed its limit of lending changes
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum: [no-store]
+            Retry-After:
+              description: Seconds until the limit window ends (60 when that time is not known)
+              schema:
+                type: integer
+                minimum: 1
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: The request failed (fixed message, no detail)
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum: [no-store]
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /api/v1/me/sessions:
     get:
       tags:
@@ -16470,7 +16739,11 @@ paths:
       tags:
         - V1 Me
       summary: "GET me › sessions › <id>"
-      description: Get details and recent requests of a session owned by the calling API key.
+      description: >-
+        Get details and recent requests of a session owned by the calling API key.
+        Authenticate with `Authorization: Bearer <key>`; requires scope `self:usage`.
+      security:
+        - BearerAuth: []
       parameters:
         - $ref: "#/components/parameters/ResourceId"
       responses:
@@ -16498,8 +16771,170 @@ paths:
                         latencyMs: { type: integer }
                         status: { type: [string, "null"] }
                         success: { type: boolean }
+        "400":
+          description: Missing session id
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          description: The key lacks the self:usage scope
         "404":
           description: Session not found
+        "500":
+          description: The session could not be read
+  /api/v1/me/usage:
+    get:
+      tags:
+        - V1 Me
+      summary: "GET me › usage"
+      description: >-
+        Usage and cost series of the calling API key's own requests (also served at
+        /v1/me/usage): totals, one entry per UTC day, per day and model, per model and per
+        provider. Rows are selected by the calling key's id. The key name is never matched and
+        rows without a key id are never counted. Off unless the `QUOTA_SELF_PANEL` feature flag
+        is on (a request that reaches the route gets 404 otherwise). Authenticate with
+        `Authorization: Bearer <key>` or `x-api-key: <key>`; the key is never read from the query
+        string or a cookie. Requires scope `self:usage`. The key is checked before `range`.
+        Provider is returned as recorded. Model is the recorded name after its last `/`, and
+        rows are grouped by it. A combo request whose every target was
+        refused is recorded with the routing label as provider (the combo name, `auto` or
+        `combo`) and the model string the client sent. `costUsd` is the billed cost, where
+        flat-rate subscription providers count $0. `listPriceUsd` prices the same usage at list
+        price, subscriptions included. A request whose model has no price row counts its stored
+        cost (reported by the provider or calculated when recorded); only a request with neither
+        counts 0, with no marker, so a total can be partial. A built series is reused for 60
+        seconds per key and range; `generatedAt` gives its age. Every response
+        of this route carries `Cache-Control: no-store`; a refusal before the route runs, for
+        example by the client API policy or the IP filter, does not.
+      security:
+        - BearerAuth: []
+        - XApiKeyAuth: []
+      parameters:
+        - name: range
+          in: query
+          required: false
+          description: >-
+            Window ending when the series is built. The set stops at `90d` to bound the cost of
+            a call. The view reads raw usage history only, never the daily summaries. Any other
+            value, an empty value or a repeated parameter is a 400.
+          schema:
+            type: string
+            enum: [1d, 7d, 30d, 90d]
+            default: 30d
+      responses:
+        "200":
+          description: Usage series of the calling key
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum: [no-store]
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SelfUsageSeries"
+        "400":
+          description: Invalid range
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Missing or invalid API key, or the server's environment key
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: The key lacks the self:usage scope
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: The QUOTA_SELF_PANEL feature flag is off
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: The usage series could not be built (fixed message, no detail)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/v1/me/sessions/{id}/messages:
+    get:
+      tags:
+        - V1 Me
+      summary: "GET me › sessions › <id> › messages"
+      description: >-
+        Simplified conversation turns (user prompt, assistant reply, tool names) of a session
+        owned by the calling API key (also served at /v1/me/sessions/{id}/messages). Turns are
+        stored only while the AGENT_SESSION_MESSAGES_ENABLED feature flag is on, and never for
+        `noLog` keys. Authenticate with `Authorization: Bearer <key>`; requires scope
+        `self:usage`.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/ResourceId"
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+        - name: cursor
+          in: query
+          description: Message id to continue after, taken from `nextCursor`.
+          schema:
+            type: integer
+            minimum: 1
+        - name: order
+          in: query
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: asc
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sessionId: { type: string }
+                  capturing:
+                    type: boolean
+                    description: Whether turn capture is currently enabled.
+                  messages:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id: { type: integer }
+                        timestamp: { type: string, format: date-time }
+                        provider: { type: [string, "null"] }
+                        model: { type: [string, "null"] }
+                        success: { type: boolean }
+                        user: { type: [string, "null"] }
+                        assistant: { type: [string, "null"] }
+                        tools: { type: array, items: { type: string } }
+                        truncated:
+                          type: boolean
+                          description: The prompt or reply was cut to the stored length.
+                  nextCursor: { type: [integer, "null"] }
+        "400":
+          description: Invalid query parameters or missing session id
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          description: The key lacks the self:usage scope
+        "404":
+          description: Session not found
+        "500":
+          description: Session messages could not be read
   /api/v1/models/{model}:
     parameters:
       - name: model
@@ -16821,6 +17256,35 @@ paths:
       responses:
         "200":
           description: Model list (same shape as GET /api/v1/models).
+  /api/v1/systemone/models:
+    get:
+      tags: [Decisions]
+      summary: Decision-model catalog (System One and native Decisions)
+      description: >-
+        The decision models of the caller's authorized model catalog, one list for
+        both wire formats. Each row carries `api_format`: `systemone` rows are
+        served by POST /api/v1/systemone, `decisions` rows (`openai/gpt-6-luna`)
+        by POST /api/v1/decisions. `limit` and `after` page the final list
+        (`has_more`, `last_id`). Reads no credential and calls no upstream. The
+        `X-OmniRoute-Catalog-Status` header is `complete`, `partial` (stale or
+        degraded catalog) or `unavailable` (HTTP 503, nothing survived).
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: query
+          name: limit
+          schema: { type: integer, minimum: 1 }
+        - in: query
+          name: after
+          schema: { type: string }
+          description: Id of the last row of the previous page.
+      responses:
+        "200":
+          description: Model list with `api_format` per row.
+        "403":
+          description: The API key's endpoint allowlist does not include `decisions`.
+        "503":
+          description: Decision model catalog unavailable.
   /api/v1/video-bridge/drilldown:
     get:
       tags: [System]
@@ -17901,7 +18365,7 @@ components:
       type: apiKey
       in: header
       name: x-api-key
-      description: Inference API key sent in the x-api-key header (accepted by /v1/me/status).
+      description: Inference API key sent in the x-api-key header (accepted by /v1/me/status, /v1/me/quota/{provider} and /v1/me/usage).
     ManagementSessionAuth:
       type: apiKey
       in: cookie
@@ -18171,12 +18635,30 @@ components:
         windowStartIso: { type: string, format: date-time }
         resetAtIso: { type: string, format: date-time }
         estimatedListCostUsd: { type: number }
+        accountedCostUsd:
+          type: number
+          description: Known successful-use amount used for enforcement. Each request uses its recorded provider USD cost, otherwise its stored calculated USD cost, otherwise a catalog estimate; never their sum.
         hasUnpricedUsage: { type: boolean }
+        hasUnpricedListUsage: { type: boolean }
+        hasPricingFailure: { type: boolean }
+        unpricedModels:
+          type: array
+          items: { type: string }
+        unpricedUsagePolicy:
+          type: string
+          enum: [fail_closed, count_as_zero]
+        blockReason:
+          type: string
+          nullable: true
+          enum: [cap_exceeded, unpriced_usage, pricing_unavailable, null]
         hasPartialRetainedUsage:
           type: boolean
           description: Retained daily buckets overlap a rolling-window boundary. Displayed spend is incomplete; the existing soft-budget enforcement policy is unchanged.
         exceeded: { type: boolean }
-        actualProviderCostUsd: { nullable: true }
+        actualProviderCostUsd:
+          type: number
+          nullable: true
+          description: Sum of recorded provider USD charges, including explicit zero; null if none were recorded. May cover only part of the usage and is not an invoice.
         subscriptionQuotaUsed: { nullable: true }
         compressionSavingsUsd: { nullable: true }
 
@@ -19067,9 +19549,20 @@ components:
           type: string
         name:
           type: string
+        memberBreakdown:
+          type: boolean
+          description: >-
+            Whether key holders see member usage bars on the self-service page. Off by default.
+            Reported by the list, read and update routes.
         createdAt:
           type: string
           format: date-time
+        borrowMode:
+          type: string
+          enum: [saturation, consent]
+          description: >-
+            How a key may pass its share: on account headroom (saturation, the default) or only
+            within capacity other keys agreed to lend (consent).
         allocations:
           type: array
           items:
@@ -19097,6 +19590,20 @@ components:
         policy:
           type: string
           enum: [hard, soft, burst]
+        lendingPercent:
+          type: integer
+          minimum: 1
+          maximum: 100
+          readOnly: true
+          description: >-
+            Present only when the key holder lends. Set by the key holder through
+            PATCH /api/v1/me/quota/{provider}. Admin writes ignore it.
+        lendingUntil:
+          type: integer
+          readOnly: true
+          description: >-
+            Present only when a lending deadline is stored (epoch milliseconds). Admin writes
+            ignore it.
 
     PoolCreate:
       type: object
@@ -19107,6 +19614,10 @@ components:
         name:
           type: string
           maxLength: 120
+        borrowMode:
+          type: string
+          enum: [saturation, consent]
+          default: saturation
         allocations:
           type: array
           items:
@@ -19119,10 +19630,19 @@ components:
         name:
           type: string
           maxLength: 120
+        borrowMode:
+          type: string
+          enum: [saturation, consent]
+          description: Changes the pool's borrow mode. Stored lending consents are kept.
         allocations:
           type: array
           items:
             $ref: "#/components/schemas/PoolAllocation"
+        memberBreakdown:
+          type: boolean
+          description: >-
+            Turns the member usage bars of the self-service page on or off for this pool. Left
+            unchanged when omitted.
 
     PoolUsageSnapshot:
       type: object
@@ -19164,6 +19684,43 @@ components:
                       description: "Negative = surplus; positive = over-allocation"
                     borrowing:
                       type: boolean
+              accounts:
+                type: array
+                description: "Present for percent dimensions: one entry per pool connection, from that account's attribution book. globalUsedPercent is 0..1. The other amounts are in the dimension's units. internal + external can differ from consumedTotal when there is no usable plan-window reading or a lower figure is not applied."
+                items:
+                  type: object
+                  properties:
+                    connectionId:
+                      type: string
+                    globalUsedPercent:
+                      type: number
+                    consumedTotal:
+                      type: number
+                    internal:
+                      type: number
+                      description: "Sum of the parts attributed to keys. They split the growth of the account figure since the book's baseline, as far as the keys' tokens since then explain it."
+                    external:
+                      type: number
+                      description: "Part of the account figure not attributed to any key. It is the baseline (the figure when the book opened or the window last turned), plus the growth the keys' tokens do not explain."
+                    externalCharged:
+                      type: number
+                      description: "External part charged to the keys by weight, after the capacity no allocation claims."
+                    perKey:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          apiKeyId:
+                            type: string
+                          consumed:
+                            type: number
+                          fairShare:
+                            type: number
+                          deficit:
+                            type: number
+                            description: "Negative = surplus; positive = over-allocation"
+                          borrowing:
+                            type: boolean
         burnRate:
           type: object
           nullable: true
@@ -19316,6 +19873,23 @@ components:
           type: string
           minLength: 1
 
+    PayloadRuleCondition:
+      type: object
+      additionalProperties: false
+      required: [path, op]
+      description: |
+        One guard on a payload rule, read from the request body at the point the rule is reached.
+        `eq`, `neq` and `in` need `value` (`in` needs a list); `exists` and `missing` take none.
+        A missing path never equals anything, and always satisfies `neq` and `missing`.
+      properties:
+        path:
+          type: string
+          minLength: 1
+        op:
+          type: string
+          enum: [eq, neq, in, exists, missing]
+        value: {}
+
     PayloadMutationRule:
       type: object
       additionalProperties: false
@@ -19330,6 +19904,12 @@ components:
           type: object
           minProperties: 1
           additionalProperties: true
+        when:
+          type: array
+          minItems: 1
+          description: Optional. The rule applies only when every condition holds.
+          items:
+            $ref: "#/components/schemas/PayloadRuleCondition"
 
     PayloadFilterRule:
       type: object
@@ -19347,6 +19927,12 @@ components:
           items:
             type: string
             minLength: 1
+        when:
+          type: array
+          minItems: 1
+          description: Optional. The rule applies only when every condition holds.
+          items:
+            $ref: "#/components/schemas/PayloadRuleCondition"
 
     PayloadRulesConfig:
       type: object
@@ -20051,6 +20637,548 @@ components:
             $ref: "#/components/schemas/ApiKeySelfServiceAccountQuota"
         accountQuota:
           $ref: "#/components/schemas/ApiKeySelfServiceAccountQuota"
+    SelfQuotaStatus:
+      type: string
+      enum: [ok, stale, unavailable]
+    SelfQuotaWindow:
+      type: string
+      enum: ["5h", hourly, daily, weekly, monthly]
+    SelfQuotaBar:
+      type: object
+      additionalProperties: false
+      required: [used, status]
+      properties:
+        used:
+          type: [number, "null"]
+        status:
+          $ref: "#/components/schemas/SelfQuotaStatus"
+        reason:
+          type: string
+        resetAt:
+          type: [string, "null"]
+    SelfQuotaShare:
+      type: object
+      additionalProperties: false
+      required: [fairShare, consumed, remaining, status]
+      properties:
+        fairShare:
+          type: number
+        consumed:
+          type: [number, "null"]
+        remaining:
+          type: [number, "null"]
+          description: >-
+            The part of `fairShare` the key has not used, floored at 0. Not a guarantee: the
+            pool can be exhausted first, and the allocation's `cap` is not taken into account.
+        status:
+          $ref: "#/components/schemas/SelfQuotaStatus"
+        reason:
+          type: string
+          description: >-
+            Set when `status` is `unavailable`. On a `percent` window it is one of
+            `percent_attribution_unavailable`, `percent_window_ended`, `account_not_used_by_key`
+            or `store_unavailable`.
+        attributed:
+          type: number
+          description: >-
+            `percent` windows with status `ok` or `stale` only, sent only with the account scope
+            (`self:account-quota`, the pool's `accountVisible`). The part of the attribution book
+            given to the key for the tokens it routed. `attributed + external` equals `consumed`.
+        external:
+          type: number
+          description: >-
+            `percent` windows with status `ok` or `stale` only, sent only with the account scope
+            (`self:account-quota`, the pool's `accountVisible`). The key's part of the account's use
+            that the pool's keys do not account for.
+        borrowAvailable:
+          type: [number, "null"]
+          description: >-
+            Countable dimensions of a pool in consent mode only: what the key may use above its
+            share now, lent by the other keys, as one figure for all of them. In a pool of two
+            keys it is the other key's own figure. Null for a soft or burst key, and null when a
+            read fails. Not reported for percent windows or in accounts[].
+    SelfQuotaMemberSlice:
+      type: object
+      description: >-
+        One member's use of a window, with no name, id or weight. Slot 1 is the asking key. The
+        other slots are ranks of a keyed hash per asking key, so they do not line up between
+        holders.
+      additionalProperties: false
+      required: [slot, consumed, isYou]
+      properties:
+        slot:
+          type: integer
+          minimum: 1
+        consumed:
+          type: number
+          minimum: 0
+          description: >-
+            The member's counter in a countable window, or its attributed part in a `percent`
+            window.
+        isYou:
+          type: boolean
+    SelfQuotaSharedDimension:
+      type: object
+      description: Pool bucket of a countable unit; `limit` is the plan limit times the pool's accounts.
+      additionalProperties: false
+      required: [unit, window, limit, yourShare]
+      properties:
+        unit:
+          type: string
+          enum: [requests, tokens, usd]
+        window:
+          $ref: "#/components/schemas/SelfQuotaWindow"
+        limit:
+          type: number
+        total:
+          $ref: "#/components/schemas/SelfQuotaBar"
+        yourShare:
+          $ref: "#/components/schemas/SelfQuotaShare"
+        members:
+          type: array
+          minItems: 3
+          maxItems: 20
+          description: >-
+            Present only when the pool's `memberBreakdown` option is on, the pool has from 3 to 20
+            allocated keys with at least 3 that can make requests, `accountVisible` is true and the
+            key's own share was read. Never an empty list.
+          items:
+            $ref: "#/components/schemas/SelfQuotaMemberSlice"
+    SelfQuotaAccountDimension:
+      type: object
+      description: A `percent` window of one account; `limit` is the plan limit.
+      additionalProperties: false
+      required: [unit, window, limit, yourShare]
+      properties:
+        unit:
+          type: string
+          enum: [percent]
+        window:
+          $ref: "#/components/schemas/SelfQuotaWindow"
+        limit:
+          type: number
+        account:
+          $ref: "#/components/schemas/SelfQuotaBar"
+        yourShare:
+          $ref: "#/components/schemas/SelfQuotaShare"
+        members:
+          type: array
+          minItems: 3
+          maxItems: 20
+          description: >-
+            Present only when the pool's `memberBreakdown` option is on, the pool has from 3 to 20
+            allocated keys with at least 3 that can make requests, `accountVisible` is true, the
+            account's connection is one the key may use and the key's own share was read. Never an
+            empty list.
+          items:
+            $ref: "#/components/schemas/SelfQuotaMemberSlice"
+    SelfQuotaAccount:
+      type: object
+      additionalProperties: false
+      required: [slot, label, dimensions]
+      properties:
+        slot:
+          type: integer
+          minimum: 1
+        label:
+          type: string
+          description: Neutral label by pool order ("Account 1", ...).
+        dimensions:
+          type: array
+          items:
+            $ref: "#/components/schemas/SelfQuotaAccountDimension"
+        modelWindows:
+          type: object
+          additionalProperties: false
+          required: [status, windows]
+          properties:
+            status:
+              $ref: "#/components/schemas/SelfQuotaStatus"
+            reason:
+              type: string
+            windows:
+              type: array
+              items:
+                type: object
+                additionalProperties: false
+                required: [label, usedPercent, resetAt]
+                properties:
+                  label:
+                    type: string
+                  usedPercent:
+                    type: number
+                  resetAt:
+                    type: [string, "null"]
+    SelfQuotaPool:
+      type: object
+      additionalProperties: false
+      required:
+        [
+          ref,
+          name,
+          provider,
+          borrowMode,
+          lendingPercent,
+          lendingUntil,
+          lendingActive,
+          policy,
+          weight,
+          cap,
+          accountVisible,
+          dimensions,
+          accounts,
+        ]
+      properties:
+        ref:
+          type: string
+          description: >-
+            Opaque reference to the pool, bound to the calling key and derived with the server's
+            API-key secret. Do not persist it: it changes if that secret is rotated.
+        name:
+          type: string
+          description: The pool's display name, as the administrator wrote it.
+        provider:
+          type: string
+        borrowMode:
+          type: string
+          enum: [saturation, consent]
+        lendingPercent:
+          type: integer
+          minimum: 0
+          maximum: 100
+          default: 0
+          description: The key's own stored lending percentage.
+        lendingUntil:
+          type: [integer, "null"]
+          default: null
+          description: The key's own lending deadline in epoch milliseconds, or null for none.
+        lendingActive:
+          type: boolean
+          default: false
+          description: >-
+            True only in a consent pool, with a percentage above 0 and the deadline not reached.
+        policy:
+          type: string
+          enum: [hard, soft, burst]
+        weight:
+          type: number
+          description: The weight the quota gate applies (equal split when every weight is 0).
+        cap:
+          type: [object, "null"]
+          additionalProperties: false
+          required: [unit, value]
+          properties:
+            unit:
+              type: string
+              enum: [percent, requests, tokens, usd]
+            value:
+              type: number
+        accountVisible:
+          type: boolean
+        dimensions:
+          type: array
+          items:
+            $ref: "#/components/schemas/SelfQuotaSharedDimension"
+        accounts:
+          type: array
+          items:
+            $ref: "#/components/schemas/SelfQuotaAccount"
+    SelfLendingPatch:
+      type: object
+      additionalProperties: false
+      required: [pool, lendingPercent]
+      properties:
+        pool:
+          type: string
+          pattern: "^qpr_[0-9a-f]{32}$"
+          description: The pool's `ref`, as the GET returns it.
+        lendingPercent:
+          type: integer
+          minimum: 0
+          maximum: 100
+          description: Share of the key's idle capacity it lends. 0 clears the consent and its deadline.
+        lendingUntil:
+          type: [integer, "null"]
+          maximum: 8640000000000000
+          description: >-
+            Epoch milliseconds, in the future, or null (or absent) for no deadline. A value below
+            100000000000 reads as seconds and is refused. Not checked when lendingPercent is 0.
+    SelfQuotaBlocks:
+      type: object
+      additionalProperties: false
+      required: [schedules, modelCaps]
+      properties:
+        schedules:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required: [pool, state, reason, label, retryAfterSeconds, reserves, budget]
+            properties:
+              pool:
+                type: string
+                description: The pool's `ref`.
+              state:
+                type: string
+                enum: [open, closed]
+              reason:
+                type: [string, "null"]
+                enum: [blackout, outside-window, null]
+              label:
+                type: [string, "null"]
+                description: The schedule's label, as the administrator wrote it.
+              retryAfterSeconds:
+                type: [number, "null"]
+              reserves:
+                type: array
+                items:
+                  type: object
+                  additionalProperties: false
+                  required: [window, percent]
+                  properties:
+                    window:
+                      type: string
+                      enum: ["5h", hourly, daily, weekly, monthly, any]
+                    percent:
+                      type: number
+              budget:
+                type: [object, "null"]
+                additionalProperties: false
+                required: [unit, window, exhausted]
+                properties:
+                  unit:
+                    type: string
+                    enum: [requests, tokens, usd]
+                  window:
+                    $ref: "#/components/schemas/SelfQuotaWindow"
+                  exhausted:
+                    type: [boolean, "null"]
+        modelCaps:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required: [pool, model, unit, window, cap, consumed, reached]
+            properties:
+              pool:
+                type: string
+                description: The pool's `ref`.
+              model:
+                type: string
+              unit:
+                type: string
+                enum: [percent, requests, tokens, usd]
+              window:
+                type: string
+                enum: [hourly]
+              cap:
+                type: number
+              consumed:
+                type: [number, "null"]
+              reached:
+                type: [boolean, "null"]
+    SelfQuotaView:
+      type: object
+      description: >-
+        Self-service quota view of one API key for one provider. Optional fields are omitted
+        when absent, never sent as null unless the field is nullable.
+      additionalProperties: false
+      required: [provider, generatedAt, pools, availableModels, expiresAt, apiBaseUrl, blocks]
+      properties:
+        provider:
+          type: string
+        generatedAt:
+          type: string
+          format: date-time
+        pools:
+          type: array
+          items:
+            $ref: "#/components/schemas/SelfQuotaPool"
+        availableModels:
+          type: array
+          description: The `qtSd/` model ids the key sees in /v1/models.
+          items:
+            type: string
+        expiresAt:
+          type: [string, "null"]
+        apiBaseUrl:
+          type: [string, "null"]
+          description: Configured public API origin, never the request's origin.
+        blocks:
+          $ref: "#/components/schemas/SelfQuotaBlocks"
+    SelfUsageSeries:
+      type: object
+      description: >-
+        Usage and cost series of one API key. Days are UTC days. Every cost is summed row by row
+        and rounded to 6 decimals. `costUsd` is the billed cost, where flat-rate subscription
+        providers count $0. `listPriceUsd` is the same usage priced at list price,
+        subscriptions included. A request whose model has no price row counts its stored cost,
+        and only a request with neither counts 0, with no marker.
+      additionalProperties: false
+      required:
+        [
+          range,
+          generatedAt,
+          coverage,
+          summary,
+          daily,
+          dailyByModel,
+          byModel,
+          byModelTruncated,
+          byProvider,
+        ]
+      properties:
+        range:
+          type: string
+          enum: [1d, 7d, 30d, 90d]
+        generatedAt:
+          type: string
+          format: date-time
+        coverage:
+          type: object
+          additionalProperties: false
+          required: [from, to, retentionDays, truncatedByRetention]
+          properties:
+            from:
+              type: string
+              format: date-time
+            to:
+              type: string
+              format: date-time
+            retentionDays:
+              type: number
+              description: The operator's raw usage-history retention setting, in days.
+            truncatedByRetention:
+              type: boolean
+              description: >-
+                True when the requested range is longer than the retention setting. It compares
+                the two numbers and does not check whether rows are actually missing.
+        summary:
+          type: object
+          additionalProperties: false
+          required:
+            [
+              requests,
+              promptTokens,
+              completionTokens,
+              totalTokens,
+              costUsd,
+              listPriceUsd,
+              successfulRequests,
+              successRatePct,
+              uniqueModels,
+              avgLatencyMs,
+              firstRequest,
+              lastRequest,
+            ]
+          properties:
+            requests: { type: number }
+            promptTokens: { type: number }
+            completionTokens: { type: number }
+            totalTokens: { type: number }
+            costUsd: { type: number }
+            listPriceUsd: { type: number }
+            successfulRequests: { type: number }
+            successRatePct: { type: number }
+            uniqueModels:
+              type: number
+              description: Distinct model names as recorded, every spelling counted.
+            avgLatencyMs: { type: number }
+            firstRequest: { type: [string, "null"], format: date-time }
+            lastRequest: { type: [string, "null"], format: date-time }
+        daily:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required:
+              [date, requests, promptTokens, completionTokens, totalTokens, costUsd, listPriceUsd]
+            properties:
+              date: { type: string, format: date }
+              requests: { type: number }
+              promptTokens: { type: number }
+              completionTokens: { type: number }
+              totalTokens: { type: number }
+              costUsd: { type: number }
+              listPriceUsd: { type: number }
+        dailyByModel:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required: [date, model, totalTokens, costUsd, listPriceUsd]
+            properties:
+              date: { type: string, format: date }
+              model: { type: string }
+              totalTokens: { type: number }
+              costUsd: { type: number }
+              listPriceUsd: { type: number }
+        byModel:
+          type: array
+          description: >-
+            The 50 provider-and-model pairs with the most requests. With more pairs the entries
+            do not add up to `summary`.
+          items:
+            type: object
+            additionalProperties: false
+            required:
+              [
+                model,
+                provider,
+                requests,
+                promptTokens,
+                completionTokens,
+                totalTokens,
+                costUsd,
+                listPriceUsd,
+                avgLatencyMs,
+                successRatePct,
+                lastUsed,
+              ]
+            properties:
+              model: { type: string }
+              provider: { type: string }
+              requests: { type: number }
+              promptTokens: { type: number }
+              completionTokens: { type: number }
+              totalTokens: { type: number }
+              costUsd: { type: number }
+              listPriceUsd: { type: number }
+              avgLatencyMs: { type: number }
+              successRatePct: { type: number }
+              lastUsed: { type: [string, "null"], format: date-time }
+        byModelTruncated:
+          type: boolean
+          description: >-
+            True when more provider-and-model pairs existed than `byModel` keeps, so a model's
+            totals there may be partial.
+        byProvider:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required:
+              [
+                provider,
+                requests,
+                promptTokens,
+                completionTokens,
+                totalTokens,
+                costUsd,
+                listPriceUsd,
+                avgLatencyMs,
+                successRatePct,
+              ]
+            properties:
+              provider: { type: string }
+              requests: { type: number }
+              promptTokens: { type: number }
+              completionTokens: { type: number }
+              totalTokens: { type: number }
+              costUsd: { type: number }
+              listPriceUsd: { type: number }
+              avgLatencyMs: { type: number }
+              successRatePct: { type: number }
     ApiKey:
       type: object
       properties:

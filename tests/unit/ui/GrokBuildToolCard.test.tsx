@@ -209,7 +209,8 @@ describe("GrokBuildToolCard", () => {
       button.textContent?.includes("Apply")
     );
     await act(async () => apply?.click());
-    expect(container.querySelector("[role='status']")?.textContent).toContain("Conflict");
+    // An API error is the critical Notice, announced as an alert.
+    expect(container.querySelector("[role='alert']")?.textContent).toContain("Conflict");
   });
 
   it("uses the standard CLI card rows and restores backups", async () => {

@@ -98,7 +98,8 @@ function CatalogItemActions({
           size="icon-sm"
           onClick={() => onTestCombo({ name: item.id })}
           disabled={testing}
-          className="text-text-muted hover:text-success"
+          className="hover:text-success"
+          tone="muted"
           title={t("testCombo")}
           aria-label={t("testCombo")}
         >
@@ -111,7 +112,7 @@ function CatalogItemActions({
           size="icon-sm"
           onClick={() => onDuplicate(item)}
           disabled={duplicatingName !== null}
-          className="text-text-muted hover:text-text-main"
+          tone="muted"
           title={t("duplicateAutoComboTitle", { name: item.id })}
           aria-label={t("duplicateAutoComboTitle", { name: item.id })}
         >
@@ -157,7 +158,7 @@ function CatalogItemCard({
           {item.template?.strategy ?? t(KIND_LABEL_KEYS[item.kind])}
         </Badge>
       </div>
-      <p className="mt-1 text-[11px] font-semibold text-text-main">{item.displayName}</p>
+      <p className="mt-1 text-2xs font-semibold text-text-main">{item.displayName}</p>
       <div className="mt-2 flex flex-wrap gap-1">
         {item.template ? (
           <>
@@ -183,7 +184,7 @@ function CatalogItemCard({
         )}
       </div>
       {item.template?.systemMessage && (
-        <p className="mt-2 text-[10px] italic text-text-muted line-clamp-2">
+        <p className="mt-2 text-xs italic text-text-muted line-clamp-2">
           {item.template.systemMessage}
         </p>
       )}
@@ -319,7 +320,9 @@ export default function AutoComboCatalog({
           <span className="block min-w-0">
             <div className="flex items-center gap-2">
               <Icon name="auto_awesome" size={20} className="text-primary" />
-              <h2 className="text-base text-text-main">{t("autoCatalogTitle")}</h2>
+              <h2 className="ci-heading" data-size="md">
+                {t("autoCatalogTitle")}
+              </h2>
               <Badge size="sm" variant="primary" className="font-semibold">
                 {liveItems
                   ? t("autoCatalogComboCount", { count: liveItems.length })
