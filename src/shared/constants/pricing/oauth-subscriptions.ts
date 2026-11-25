@@ -4,6 +4,7 @@
  */
 import {
   GPT_6_ASTRA_PRICING,
+  GPT_6_TERRA_PRICING,
   CLAUDE_FABLE_5_1_PRICING,
   CLAUDE_HAIKU_5_PRICING,
   CLAUDE_OPUS_5_5_PRICING,
@@ -12,6 +13,8 @@ import {
   GEMINI_3_7_FLASH_PROMO_PRICING,
   GEMINI_3_8_FLASH_PROMO_PRICING,
   GEMINI_4_ARGON_PROMO_PRICING,
+  GEMINI_4_CARBON_PROMO_PRICING,
+  GEMINI_4_HYDROGEN_PRICING,
   GPT_5_3_CODEX_PRICING,
   GPT_5_5_PRICING,
   GPT_5_6_LUNA_PRICING,
@@ -48,6 +51,15 @@ const ANTIGRAVITY_PRICING = {
   "gemini-4-argon-low": GEMINI_4_ARGON_PROMO_PRICING,
   "gemini-4-argon-medium": GEMINI_4_ARGON_PROMO_PRICING,
   "gemini-4-argon-high": GEMINI_4_ARGON_PROMO_PRICING,
+  "gemini-4-carbon": GEMINI_4_CARBON_PROMO_PRICING,
+  "gemini-4-carbon-low": GEMINI_4_CARBON_PROMO_PRICING,
+  "gemini-4-carbon-medium": GEMINI_4_CARBON_PROMO_PRICING,
+  "gemini-4-carbon-high": GEMINI_4_CARBON_PROMO_PRICING,
+  "gemini-4-hydrogen": GEMINI_4_HYDROGEN_PRICING,
+  "gemini-4-hydrogen-low": GEMINI_4_HYDROGEN_PRICING,
+  "gemini-4-hydrogen-medium": GEMINI_4_HYDROGEN_PRICING,
+  "gemini-4-hydrogen-high": GEMINI_4_HYDROGEN_PRICING,
+  "gemini-4-hydrogen-xhigh": GEMINI_4_HYDROGEN_PRICING,
   "gemini-3.5-flash-lite": {
     input: 0.3,
     output: 2.5,
@@ -117,16 +129,10 @@ const GPT_6_1_SOL_CODEX_PRICING = {
   ...GPT_6_SOL_CODEX_PRICING,
   cached: 0.1,
 };
-// GPT-6.1 Terra Standard: 25 / 1.25 / 125 credits per MTok (input / cached / output), the same
-// 25 credits/USD convention. Matches the API pricing table row $1.00 / $0.05 / $5.00, cache write $1.25.
+// GPT-6.1 Terra shares its API price with the Codex credit-equivalent rate:
+// 25 / 1.25 / 125 credits per MTok at 25 credits/USD.
 // https://learn.chatgpt.com/docs/pricing#token-rates (checked 2026-11-09)
-const GPT_6_1_TERRA_CODEX_PRICING = {
-  input: 1.0,
-  output: 5.0,
-  cached: 0.05,
-  reasoning: 5.0,
-  cache_creation: 1.25,
-};
+const GPT_6_1_TERRA_CODEX_PRICING = GPT_6_TERRA_PRICING;
 const GPT_6_LUNA_CODEX_PRICING = {
   input: 0.1,
   output: 0.5,

@@ -47,7 +47,7 @@ docker run -d --name omniroute \
   -p 20128:20128 \
   -v omniroute-data:/app/data \
   -e ENABLE_CC_COMPATIBLE_PROVIDER=true \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
 पुन्हा सुरू केल्यानंतर, विद्यमान OpenAI-सुसंगत आणि Anthropic-सुसंगत प्रक्रियांव्यतिरिक्त डॅशबोर्डमध्ये **Claude Code सुसंगत प्रदाता जोडा** हा पर्याय दिसतो.

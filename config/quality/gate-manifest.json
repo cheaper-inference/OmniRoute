@@ -499,6 +499,11 @@
       "disposition": "separately-invoked"
     },
     {
+      "name": "quality:launch",
+      "command": "node scripts/quality/launch-quality.mjs",
+      "disposition": "separately-invoked"
+    },
+    {
       "name": "quality:ratchet",
       "command": "node scripts/quality/check-quality-ratchet.mjs",
       "disposition": "separately-invoked"
@@ -614,6 +619,11 @@
       "disposition": "separately-invoked"
     },
     {
+      "name": "test:launch:smoke",
+      "command": "node tests/launch-smoke/run.mjs",
+      "disposition": "separately-invoked"
+    },
+    {
       "name": "test:migrations:fresh",
       "command": "cross-env DISABLE_SQLITE_AUTO_BACKUP=true node --max-old-space-size=8192 --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --test --test-force-exit tests/unit/db/migrations-fresh-database.test.ts",
       "disposition": "separately-invoked"
@@ -635,7 +645,7 @@
     },
     {
       "name": "test:property",
-      "command": "cross-env DISABLE_SQLITE_AUTO_BACKUP=true node --import tsx/esm --test --test-force-exit tests/unit/correctness/*.property.test.ts",
+      "command": "cross-env DISABLE_SQLITE_AUTO_BACKUP=true node --import tsx/esm --import ./tests/_setup/isolateDataDir.ts --test --test-force-exit tests/unit/correctness/*.property.test.ts",
       "disposition": "separately-invoked"
     },
     {

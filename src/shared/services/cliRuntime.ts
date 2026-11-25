@@ -14,6 +14,11 @@ import { buildHealthcheckPath } from "./cliRuntimeHealthcheckPath";
 import { appendWindowsKnownBinPaths, mergeWindowsLookupPath } from "./cliRuntimeWindowsNode";
 import { getNpmGlobalPrefix } from "./cliRuntimeNpmPrefix";
 import {
+  findRunnableAlternate,
+  listPosixPathCandidates,
+  parseWhereCandidates,
+} from "./cliRuntimeFallthrough";
+import {
   describeContainerTarget,
   hasBindMountAt,
   isRunningInContainer,
@@ -34,7 +39,9 @@ const CLI_TOOLS: Record<string, any> = {
     defaultCommand: "claude",
     envBinKey: "CLI_CLAUDE_BIN",
     requiresBinary: true,
-    healthcheckTimeoutMs: 4000,
+    // `claude --version` is a full Node CLI boot and takes ~5s warm on Windows,
+    // past the 4s default, which reported a working install as healthcheck_failed.
+    healthcheckTimeoutMs: 15000,
     paths: {
       settings: ".claude/settings.json",
       auth: [".claude/.credentials.json", ".config/claude/credentials.json"],
@@ -1211,6 +1218,44 @@ export const getCliPrimaryConfigPath = (toolId: string) => {
   return firstKey ? paths[firstKey] : null;
 };
 
+const listAlternateCandidates = async (
+  command: string,
+  env: Record<string, string | undefined>
+): Promise<string[]> => {
+  if (command.includes("/") || command.includes("\\")) return [];
+  if (!isWindows()) return listPosixPathCandidates(command, env.PATH || "");
+  const located = await runProcess("where.exe", [command], {
+    env,
+    timeoutMs: 3000,
+    useShell: false,
+  });
+  return located.ok ? parseWhereCandidates(located.stdout, normalizeMsys2Path) : [];
+};
+
+// #20452: a stale shim must not hide a working binary later on PATH.
+const healthcheckWithFallthrough = async (
+  command: string | null | undefined,
+  commandPath: string | null | undefined,
+  env: Record<string, string | undefined>,
+  healthTimeout: number
+) => {
+  let healthcheck = await checkRunnable(commandPath || command || "", env, healthTimeout);
+  let resolvedPath = commandPath;
+  if (!healthcheck.runnable && command) {
+    const alt = await findRunnableAlternate(
+      await listAlternateCandidates(command, env),
+      commandPath ?? null,
+      isSafePath,
+      (candidate) => checkRunnable(candidate, env, healthTimeout)
+    );
+    if (alt) {
+      healthcheck = alt.healthcheck as typeof healthcheck;
+      resolvedPath = alt.commandPath;
+    }
+  }
+  return { healthcheck, resolvedPath };
+};
+
 export const getCliRuntimeStatus = async (toolId: string) => {
   toolId = normalizeCliToolId(toolId);
   const tool = CLI_TOOLS[toolId];
@@ -1273,8 +1318,9 @@ export const getCliRuntimeStatus = async (toolId: string) => {
     };
   }
 
-  const healthcheck = await checkRunnable(
-    located.commandPath || command || "", // located + executable ⇒ commandPath set
+  const { healthcheck, resolvedPath } = await healthcheckWithFallthrough(
+    command,
+    located.commandPath,
     env,
     Number(tool.healthcheckTimeoutMs || 4000)
   );
@@ -1283,7 +1329,7 @@ export const getCliRuntimeStatus = async (toolId: string) => {
     runnable: healthcheck.runnable,
     version: healthcheck.version,
     command,
-    commandPath: located.commandPath,
+    commandPath: resolvedPath,
     reason: healthcheck.reason,
     runtimeMode,
     requiresBinary,

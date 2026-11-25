@@ -70,6 +70,8 @@ docker rm omniroute
 docker volume rm omniroute-data
 
 # (ഐച്ഛികം) ഇമേജ് നീക്കംചെയ്യുക
+docker rmi cheaperinference/omniroute:latest
+# പഴയ ഇൻസ്റ്റാളുകൾ ലെഗസി നാമം പിൻവലിച്ചു:
 docker rmi diegosouzapw/omniroute:latest
 ```
 

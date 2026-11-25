@@ -26,6 +26,7 @@ import {
   resolveProviderName,
   type ProviderNodeEntry,
 } from "@/lib/display/useProviderNodeMap";
+import Badge from "@/shared/components/Badge";
 
 type KnownBreakerState = "CLOSED" | "OPEN" | "HALF_OPEN" | "DEGRADED";
 type BreakerState = KnownBreakerState | (string & {});
@@ -543,16 +544,12 @@ export default function RuntimePageClient() {
       {/* Header */}
       <PageHeader
         compact
-        title={
-          <span className="inline-flex items-center gap-2">
-            <Icon name="bolt" size={24} className="text-primary" />
-            {t("title")}
-          </span>
-        }
+        icon={<Icon name="bolt" className="text-primary" />}
+        title={t("title")}
         description={t("description")}
         actions={
           <>
-            <span className="text-[11px] text-text-muted tabular-nums">
+            <span className="text-2xs text-text-muted tabular-nums">
               {lastUpdated ? `↻ ${fmtClock(lastUpdated)}` : "—"}
             </span>
             <Button
@@ -641,7 +638,7 @@ export default function RuntimePageClient() {
             title={t("resilienceTitle")}
             subtitle={t("resilienceSubtitle")}
             trailing={
-              <div className="flex items-center gap-3 text-[11px]">
+              <div className="flex items-center gap-3 text-2xs">
                 <span className="text-success">✓ {overallHealthy}</span>
                 <span className="text-warning">
                   ⚠ {counts.halfCircuits + counts.degradedCircuits + counts.unknownCircuits}
@@ -665,7 +662,7 @@ export default function RuntimePageClient() {
               }
               animate={false}
             />
-            <div className="mt-1 text-[11px] text-text-muted tabular-nums">
+            <div className="mt-1 text-2xs text-text-muted tabular-nums">
               {t("providersHealthy", { percent: overallPercent })}
             </div>
           </div>
@@ -701,16 +698,16 @@ export default function RuntimePageClient() {
                       style={{ borderColor: tone.ring, background: tone.bg }}
                       title={`${resolveProviderName(b.provider, nodeMap)} · ${state || "UNKNOWN"} · failures ${b.failureCount}`}
                     >
-                      <div className="flex items-center gap-1.5 text-[11px] font-semibold text-text-main">
+                      <div className="flex items-center gap-1.5 text-2xs font-semibold text-text-main">
                         <ProviderIcon providerId={b.provider} size={14} />
                         <span className="truncate flex-1">
                           {resolveProviderName(b.provider, nodeMap)}
                         </span>
-                        <span style={{ color: tone.dot }} className="text-[10px] font-semibold">
+                        <span style={{ color: tone.dot }} className="text-3xs font-semibold">
                           {tone.label}
                         </span>
                       </div>
-                      <div className="text-[10px] text-text-muted tabular-nums">
+                      <div className="text-3xs text-text-muted tabular-nums">
                         {state === "OPEN"
                           ? `retry ${fmtMs(b.retryAfterMs)}`
                           : `${b.failureCount} failures`}
@@ -748,31 +745,29 @@ export default function RuntimePageClient() {
                       <div className="flex items-center gap-2 min-w-0">
                         <ProviderIcon providerId={c.provider} size={18} />
                         <div className="min-w-0">
-                          <div className="text-[12px] text-text-main truncate font-medium">
+                          <div className="text-xs text-text-main truncate font-medium">
                             {resolveProviderName(c.provider, nodeMap)}/{label}
                           </div>
                           {c.lastErrorType && (
-                            <div className="text-[10px] text-text-muted truncate">
+                            <div className="text-3xs text-text-muted truncate">
                               {c.lastErrorType}
                             </div>
                           )}
                         </div>
                       </div>
-                      <div className="text-[11px] tabular-nums text-info">{fmtMs(remaining)}</div>
-                      <div className="text-[10px] text-text-muted truncate">
-                        {c.lastError || "—"}
-                      </div>
-                      <div className="text-[10px] text-text-muted tabular-nums">
+                      <div className="text-2xs tabular-nums text-info">{fmtMs(remaining)}</div>
+                      <div className="text-3xs text-text-muted truncate">{c.lastError || "—"}</div>
+                      <div className="text-3xs text-text-muted tabular-nums">
                         L{c.backoffLevel ?? 0}
                       </div>
-                      <div className="text-[10px] text-text-muted tabular-nums text-right">
+                      <div className="text-3xs text-text-muted tabular-nums text-right">
                         {c.errorCode ?? ""}
                       </div>
                     </div>
                   );
                 })}
                 {cooldowns.length > 8 && (
-                  <div className="pt-2 text-[10px] text-text-muted">
+                  <div className="pt-2 text-3xs text-text-muted">
                     {t("moreCooldowns", { count: cooldowns.length - 8 })}
                   </div>
                 )}
@@ -803,21 +798,19 @@ export default function RuntimePageClient() {
                     >
                       <div className="flex items-center gap-2 min-w-0">
                         <Icon name="lock" size={14} className="text-warning" />
-                        <span className="text-[12px] text-text-main truncate font-medium">
-                          {key}
-                        </span>
+                        <span className="text-xs text-text-main truncate font-medium">{key}</span>
                       </div>
-                      <div className="text-[10px] text-text-muted truncate">
+                      <div className="text-3xs text-text-muted truncate">
                         {lk.reason || "rate limit"}
                       </div>
-                      <div className="text-[11px] tabular-nums text-warning text-right">
+                      <div className="text-2xs tabular-nums text-warning text-right">
                         {remaining > 0 ? fmtMs(remaining) : "—"}
                       </div>
                     </div>
                   );
                 })}
                 {lockoutEntries.length > 8 && (
-                  <div className="pt-2 text-[10px] text-text-muted">
+                  <div className="pt-2 text-3xs text-text-muted">
                     {t("moreLockouts", { count: lockoutEntries.length - 8 })}
                   </div>
                 )}
@@ -877,14 +870,14 @@ export default function RuntimePageClient() {
                     </span>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-2">
-                        <div className="text-[11px] font-medium text-text-main truncate">
+                        <div className="text-2xs font-medium text-text-main truncate">
                           {ev.title}
                         </div>
-                        <span className="text-[9px] text-text-muted tabular-nums shrink-0">
+                        <span className="text-3xs text-text-muted tabular-nums shrink-0">
                           {fmtClock(ev.ts)}
                         </span>
                       </div>
-                      <div className="text-[10px] text-text-muted truncate">{ev.detail}</div>
+                      <div className="text-xs text-text-muted truncate">{ev.detail}</div>
                     </div>
                   </div>
                 );
@@ -902,7 +895,7 @@ export default function RuntimePageClient() {
             title={t("sessionsTitle")}
             subtitle={t("sessionsSubtitle")}
             trailing={
-              <span className="text-[11px] text-text-muted">
+              <span className="text-2xs text-text-muted">
                 {t("sessionsActive", { count: counts.sessions })}
               </span>
             }
@@ -917,17 +910,17 @@ export default function RuntimePageClient() {
           ) : (
             <div className="mt-2">
               <Table
-                className="text-sm"
+                variant="plain"
+                density="compact"
                 scrollbarLabel={t("sessionsTitle")}
                 scrollLabel={t("sessionsTitle")}
-                containerClassName="rounded-none border-0"
               >
                 <TableHeader>
                   <TableRow>
                     <TableHead>{t("tblSession")}</TableHead>
-                    <TableHead className="text-right">{t("tblAge")}</TableHead>
-                    <TableHead className="text-right">{t("tblIdle")}</TableHead>
-                    <TableHead className="text-right">{t("tblReqs")}</TableHead>
+                    <TableHead numeric>{t("tblAge")}</TableHead>
+                    <TableHead numeric>{t("tblIdle")}</TableHead>
+                    <TableHead numeric>{t("tblReqs")}</TableHead>
                     <TableHead>{t("tblBoundTo")}</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -935,24 +928,22 @@ export default function RuntimePageClient() {
                   {(health?.sessions?.top ?? []).map((s) => (
                     <TableRow key={s.sessionId}>
                       <TableCell>
-                        <span className="font-mono text-[11px] text-text-muted">
+                        <span className="font-mono text-text-muted">
                           {shortId(s.sessionId, 14)}
                         </span>
                       </TableCell>
-                      <TableCell className="text-right text-[11px] text-text-muted tabular-nums">
+                      <TableCell numeric className="text-text-muted">
                         {fmtMs(s.ageMs)}
                       </TableCell>
-                      <TableCell className="text-right text-[11px] text-text-muted tabular-nums">
+                      <TableCell numeric className="text-text-muted">
                         {fmtMs(s.idleMs)}
                       </TableCell>
-                      <TableCell className="text-right">
-                        <span className="text-[11px] font-semibold tabular-nums">
-                          {s.requestCount}
-                        </span>
+                      <TableCell numeric>
+                        <span className="font-semibold">{s.requestCount}</span>
                       </TableCell>
                       <TableCell>
                         {s.connectionId ? (
-                          <span className="font-mono text-[10px] text-chart-2-ink">
+                          <span className="font-mono text-chart-2-ink">
                             {shortId(s.connectionId, 12)}
                           </span>
                         ) : (
@@ -964,7 +955,7 @@ export default function RuntimePageClient() {
                 </TableBody>
               </Table>
               {Object.keys(health?.sessions?.byApiKey ?? {}).length > 0 && (
-                <div className="mt-2 pt-2 border-t border-border/40 text-[10px] text-text-muted">
+                <div className="mt-2 pt-2 border-t border-border/40 text-xs text-text-muted">
                   {t("topApiKeys")}:{" "}
                   {Object.entries(health?.sessions?.byApiKey ?? {})
                     .sort((a, b) => b[1] - a[1])
@@ -983,7 +974,7 @@ export default function RuntimePageClient() {
             title={t("quotaMonitorsTitle")}
             subtitle={t("quotaMonitorsSubtitle")}
             trailing={
-              <Link href="/dashboard/quota" className="text-[11px] text-primary hover:underline">
+              <Link href="/dashboard/quota" className="text-xs text-primary hover:underline">
                 {t("openQuota")} →
               </Link>
             }
@@ -1073,7 +1064,7 @@ function KpiCard({
       }
       title={
         <>
-          <span className="block text-[11px] uppercase tracking-wider font-semibold text-text-muted">
+          <span className="ci-eyebrow block" data-size="2xs" data-weight="medium">
             {label}
           </span>{" "}
           <span className="mt-1 block text-2xl font-semibold tabular-nums" style={{ color: tone }}>
@@ -1111,6 +1102,14 @@ function SectionHeader({
   );
 }
 
+const LAYER_BADGE_VARIANT = {
+  red: "error",
+  amber: "warning",
+  orange: "warning",
+  green: "success",
+  blue: "info",
+} as const;
+
 function LayerSection({
   id,
   title,
@@ -1126,44 +1125,20 @@ function LayerSection({
   badgeTone: "red" | "amber" | "green" | "blue" | "orange";
   children: React.ReactNode;
 }) {
-  const toneMap = {
-    red: {
-      bg: "color-mix(in srgb, var(--color-error) 10%, transparent)",
-      text: "var(--color-error)",
-    },
-    amber: {
-      bg: "color-mix(in srgb, var(--color-warning) 10%, transparent)",
-      text: "var(--color-warning)",
-    },
-    green: {
-      bg: "color-mix(in srgb, var(--color-success) 10%, transparent)",
-      text: "var(--color-success)",
-    },
-    blue: {
-      bg: "color-mix(in srgb, var(--color-info) 10%, transparent)",
-      text: "var(--color-info)",
-    },
-    orange: {
-      bg: "color-mix(in srgb, var(--color-warning) 10%, transparent)",
-      text: "var(--color-warning)",
-    },
-  } as const;
-  const tone = toneMap[badgeTone];
   return (
     <div className="mt-4 border-t border-border/40 pt-3 first-of-type:border-t-0 first-of-type:pt-0">
       <div className="flex items-center justify-between gap-2 mb-2">
         <div className="flex items-center gap-2">
-          <span className="text-[10px] uppercase tracking-wider font-semibold text-text-muted">
+          <span className="ci-eyebrow" data-size="3xs" data-weight="medium">
             Layer {id}
           </span>
-          <h3 className="text-[13px] text-text-main">{title}</h3>
+          <h3 className="ci-heading text-text-main" data-size="sm">
+            {title}
+          </h3>
         </div>
-        <span
-          className="text-[10px] font-semibold px-2 py-0.5 rounded-full tabular-nums"
-          style={{ background: tone.bg, color: tone.text }}
-        >
+        <Badge variant={LAYER_BADGE_VARIANT[badgeTone]} size="sm" className="tabular-nums">
           {badge}
-        </span>
+        </Badge>
       </div>
       <p className="text-xs text-text-muted mb-2">{description}</p>
       {children}
@@ -1173,7 +1148,7 @@ function LayerSection({
 
 function EmptyHint({ text }: { text: string }) {
   return (
-    <div className="text-[11px] text-text-muted italic py-3 text-center bg-bg-subtle/40 rounded-md">
+    <div className="text-xs text-text-muted italic py-3 text-center bg-bg-subtle/40 rounded-md">
       {text}
     </div>
   );
@@ -1212,7 +1187,9 @@ function QuotaGroup({
   return (
     <div>
       <div
-        className="text-[10px] font-semibold uppercase tracking-wider mb-1.5"
+        className="ci-eyebrow mb-1.5"
+        data-size="3xs"
+        data-weight="medium"
         style={{ color: tc.text }}
       >
         {label}
@@ -1225,21 +1202,21 @@ function QuotaGroup({
             style={{ background: tc.bg, borderColor: tc.border }}
           >
             <div className="min-w-0">
-              <div className="text-[11px] font-medium text-text-main truncate">
+              <div className="text-2xs font-medium text-text-main truncate">
                 {m.accountId ?? "—"}
                 {m.provider ? ` / ${resolveProviderName(m.provider, nodeMap)}` : ""}
               </div>
-              <div className="text-[10px] text-text-muted">{m.window ?? ""}</div>
+              <div className="text-3xs text-text-muted">{m.window ?? ""}</div>
             </div>
             {typeof m.remainingPercent === "number" && (
-              <span className="text-[11px] font-semibold tabular-nums" style={{ color: tc.text }}>
+              <span className="text-2xs font-semibold tabular-nums" style={{ color: tc.text }}>
                 {Math.round(m.remainingPercent)}%
               </span>
             )}
           </div>
         ))}
         {items.length > 6 && (
-          <div className="text-[10px] text-text-muted text-center pt-1">
+          <div className="text-3xs text-text-muted text-center pt-1">
             {t("moreSuffix", { count: items.length - 6 })}
           </div>
         )}

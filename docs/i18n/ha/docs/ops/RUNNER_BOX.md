@@ -136,36 +136,22 @@ kowane lokaci, sai lokacin da ba ya aiki**, tare da binciken rashin aiki da sake
   kafin saukarsa zuwa tmpfs, amma minti 2 kawai don ɗora shi daga faifai.
 - VPS na `.15` na homologation ne kawai — ba ya taɓa gudanar da CI runners.
 
-## Layin da aka masauƙanta (masu gudanarwa da GitHub ke masauƙanta)
+## Hanyar da aka shirya (GitHub-hosted runners)
 
-Ma'ajiyar tana ƙarƙashin ƙungiyar `cheaper-inference`, a kan shirin **Team**: **ayyukan da aka masauƙanta 60
-masu gudana a lokaci guda**, waɗanda kowace ma'ajiya a cikin ƙungiyar, kowace duba ta PR,
-kowace workflow da turawa ke kunna wa da kuma saitin tsoho na CodeQL suke amfani da su tare. An auna alkaluman da ke ƙasa
-a kan shirin **Pro** (ayyukan da aka masauƙanta 40 masu gudana a lokaci guda). An auna a 2026-10-18 yayin
-gangamin haɗewa (~haɗewa 10/awa a kan `release/v3.8.52`): **an ƙirƙiri gudanarwar workflow 2,500 cikin
-sa'o'i 24**, turawa 44 zuwa reshen cikin sa'o'i 6, **ayyukan da aka masauƙanta 106 suna jiran layi** yayin da dubawar PR ke jira na
-sa'o'i kuma aka haɗe PR ba tare da su ba. Workflow tara ne suka kunna a duk lokacin turawa zuwa reshen:
+Wurin ajiya na ƙungiyar `cheaper-inference` ne, akan** Tawaga** shirin:** Ayyuka 60 da aka shirya a lokaci guda** , wanda aka raba ta kowane ma'ajiya a cikin ƙungiyar, kowane rajistan PR, kowane tursasawa aiki aiki da saitin tsoho na CodeQL. An auna alkalumman da ke ƙasa akan** Pro** shirin (40 ayyukan da aka shirya a lokaci guda). An auna a kan 2026-10-18 yayin yaƙin neman zaɓe (~ 10 merges/hour akan `release/v3.8.52`):** 2,500 aikin gudu da aka ƙirƙira a cikin sa'o'i 24** , 44 turawa zuwa reshe a cikin sa'o'i 6,** Ayyuka 106 da aka shirya sun yi layi** yayin da PR cak aka jira na sa'o'i kuma aka haɗa PRs ba tare da su ba. Gudun ayyuka tara sun harba akan kowane tura zuwa reshe:
 
-| ga kowace turawa zuwa `release/v*`          | ayyukan da aka masauƙanta | sakamako yayin cunkoson                                                  | tun daga 2026-10-18                                                                  |
-| ------------------------------------------- | ------------------------: | ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------ |
-| `ci.yml` (cikakkiyar matrix)                |               har zuwa 30 | turawa ta gaba ta soke shi, 24 cikin 24 a rana                           | ba a fara shi kan turawar `release/**` ba (gudanarwar PR + Release-Green)            |
-| `quality.yml`                               |                        ~6 | an soke, 23 cikin 23                                                     | ba a fara shi kan turawar `release/**` ba                                            |
-| `Release-Green` `--quick`                   |                         0 | ya gudana a kan `omni-build`, an soke 97 cikin 100                       | gurbin `omni-release`, ba a taɓa sokewa ba, ana haɗe gudanarwar da ke jira           |
-| `Lock released branch`, `OpenSSF Scorecard` |                         2 | gudanarwa ɗaya a layin jira ga kowace turawa                             | gudanarwa ɗaya ga kowane ref (`tests/unit/build/hosted-lane-concurrency.test.ts`)    |
-| `Release acceptance` (rahoton inuwa)        |                         1 | `npm ci` ɗaya da aka masauƙanta ga kowace turawa, ba a taɓa sokewa ba    | bai canza ba — ya dace a yi masa matatar `paths:`                                    |
-| `Publish to Docker Hub` → `Deploy to VPS`   |                         2 | ana sokewa ga kowace turawa; ɓangaren amd64 yana gasa a kan `omni-build` | bai canza ba — tashar tura tsarin ta mai shi                                         |
-| Saitin tsoho na CodeQL (`dynamic`)          |                         4 | `javascript-typescript`, `actions`, `c-cpp`, `python` ga kowace turawa   | bai canza ba — Settings → Code security; `c-cpp`/`python` ba sa binciken komai a nan |
+| duk tura zuwa `release/v*`                  | ayyuka da aka shirya | sakamako a karkashin hadari                                        | daga 2026-10-18                                                             |
+| ------------------------------------------- | -------------------: | ------------------------------------------------------------------ | --------------------------------------------------------------------------- |
+| `ci.yml` (cikakken matrix)                  |          har zuwa 30 | soke ta hanyar turawa na gaba, 24 na 24 a rana guda                | ba'a farawa akan turawa `release/**` (PR run + Release-Green)               |
+| `quality.yml`                               |                   ~6 | soke, 23 cikin 23                                                  | ba a fara turawa `release/**` ba                                            |
+| `Release-Green` `--quick`                   |                    0 | ya yi gudu a `omni-build`, soke 97 na 100                          | ramin `omni-release`, ba a soke ba, yana jiran gudu ya ruguje               |
+| `Lock released branch`, `OpenSSF Scorecard` |                    2 | gudu daya a layi daya a turawa                                     | gudu daya a kowane ref (`tests/unit/build/hosted-lane-concurrency.test.ts`) |
+| `Release acceptance` (rahoton inuwa)        |                    1 | mai masaukin `npm ci` guda ɗaya a kowane tura, ba a taɓa sokewa ba | dan takarar — mara canzawa don tace `paths:`                                |
+| `Publish to Docker Hub` → `Deploy to VPS`   |                    2 | soke kowane tura; amd64 kafa na gasar a kan `omni-build`           | tashar tura mai shi — mara canzawa                                          |
+| saitin CodeQL (`dynamic`)                   |                    4 | `javascript-typescript`, `actions`, `c-cpp`, `python` kowane tura  | ba canzawa — Saituna → Tsaro na lamba; `c-cpp`/`python` duba kome a nan     |
 
-`tests/unit/build/push-storm-diet.test.ts` yana tabbatar da cewa turawa zuwa `main` kaɗai ke kunna `ci.yml` da
-`quality.yml`. Sakamakon gefe: Codecov ba ya ƙara karɓar lodawar tushe ga kowace turawar fitarwa (matakin
-na bayar da bayani ne kuma yana da `continue-on-error`); shingen coverage da ke cikin repo da sharhin PR
-ba su shafa ba.
+`tests/unit/build/push-storm-diet.test.ts` tana maƙala `main` -only tura tsokar `ci.yml` da `quality.yml`. Tasirin gefe: Codecov ba ya karɓar ƙaddamar da tushe a kowane turawa (matakin bayani ne da `continue-on-error`); Ƙofar ɗaukar hoto ta in-repo da sharhin PR ba su da tasiri.
 
-**Ƙarin ƙarfin self-hosted ba zai gyara layin jiran hosted ba.** Devbox ɗin
-(`devbox-vm-06-dev002`, 24 vCPU / 54 GB) zai iya ɗaukar runner, amma zaman agent ɗin sun riga sun
-riƙe load ɗinsa a 20–26, container ɗin agent ba shi da Docker daemon, kuma layin da ya cika
-shi ne hosted. Akwatin `.113` yana da 71 GB na sarari kuma load 5–8 a lokaci guda; ƙuntatawarsa
-ita ce kasafin ƙwaƙwalwa na kowane listener da aka ambata a sama (iyaka listener 6), ba CPU ba. Sauran hanyoyin
-su ne na tsari: a haɗa PR na gangami ta layin jiran Mergify (`label=queue`, rukuni-rukuni suna amfani da
-gudanarwar CI ta `merge_group` guda ɗaya maimakon gudanarwa ɗaya ga kowane PR tare da ɗaya ga kowace turawa), a rage harsunan
-saitin-tsoho na CodeQL, sannan a tace `release-acceptance.yml` bisa fayilolin da yake karantawa.
+**Ƙarin ƙarfin sarrafa kansa baya gyara jerin gwano.** Devbox (`devbox-vm-06-dev002`, 24 vCPU / 54 GB) na iya karbar bakuncin mai gudu, amma zaman wakilai sun riga sun kiyaye nauyinsa a 20-26, kwandon wakili ba shi da Docker daemon, kuma cikakken layin shine wanda aka shirya. Akwatin `.113` yana da 71 GB kyauta kuma yana ɗaukar nauyin 5-8 a lokaci guda; ƙuntatawarsa shine kasafin ƙwaƙwalwar ajiyar mai sauraro a sama (masu sauraro na rufin 6), ba CPU ba. Ragowar levers su ne waɗanda ake aiwatarwa: yakin neman ƙasa PRs ta hanyar layin Mergify (`label=queue`, batches raba `merge_group` CI gudu maimakon guda ɗaya a kowace PR da ɗaya kowace turawa), datsa harsunan saiti na CodeQL, sannan tace `release-acceptance.yml` ta fayilolin da yake karantawa.
+
+> **2026-11-19: layin Mergify ya yi ritaya** (shawarar mai gida). `.mergify.yml` baya bayyana jerin gwano kuma ya ƙi umarnin Mergify waɗanda ke haɗa ko sake rubuta buƙatun ja. Ana haɗe PRs ta hannu da hannu ƙarƙashin ƙa'idodin ma'ajin "Bukatar kofofin kore akan sakin aiki" (`Gate / CI` + `Gate / Quality`) har sai omni-queue yana gudana cikin yanayin rayuwa, kuma ta hanyar layin-kowane bayan haka ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). The Mergify lever a sama babu kuma.

@@ -468,7 +468,7 @@ Connection ដែលបាន import _មុន_ v3.8.0 មិនមានកា
 2. **ដំណោះស្រាយអចិន្ត្រៃយ៍៖** Bind ទៅ IPv4 ជាក់លាក់ដោយប្រើ `-p 127.0.0.1:20128:20128` នៅក្នុង command `docker run` របស់អ្នក៖
    ```bash
    docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
-     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
    ```
    វាបង្ខំឱ្យ bind ទៅ IPv4 ហើយក៏ជៀសវាងការបង្ហាញ proxy នៅលើ interface ទាំងអស់របស់ host ផងដែរ។
 

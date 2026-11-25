@@ -15,6 +15,14 @@ export const DEFAULT_CONFIG_PATH = join(ROOT, "config", "merge-queue", "config.j
 export const LANDING_MODES = Object.freeze(["merge-ff", "squash-api"]);
 export const LANDING_ACTORS = Object.freeze(["app", "owner"]);
 export const QUEUE_MODES = Object.freeze(["shadow", "live"]);
+/**
+ * Who performs the queue's human-visible writes (comments and label removals on pull requests,
+ * the dashboard issue and its comments, comments on the base-red issue, the tree-divergence
+ * issue): the App's token, or the owner's (OMNI_QUEUE_LAND_TOKEN), see voice.mjs.
+ */
+export const VOICES = Object.freeze(["app", "owner"]);
+/** `landing.signing`: "ssh" signs every merge commit the queue composes (compose.mjs). */
+export const SIGNING_MODES = Object.freeze(["none", "ssh"]);
 
 const CONFIG_KEYS = [
   "schemaVersion",
@@ -38,7 +46,8 @@ const CONFIG_KEYS = [
 ];
 
 /** Keys that may be left out: each one has a default (applied by validateConfig). */
-const OPTIONAL_CONFIG_KEYS = ["flakyReruns", "prChecksRequired", "lanes"];
+const OPTIONAL_CONFIG_KEYS = ["flakyReruns", "prChecksRequired", "lanes", "voice"];
+const DEFAULT_VOICE = "app";
 /** Keys of `lanes` (both required when `lanes` is present). */
 const LANE_KEYS = ["hotfixLabel", "baseRepairLabel"];
 /** Re-runs of a red candidate's failed jobs before it is classified (tick onRed): once. */
@@ -60,8 +69,9 @@ const STATUS_CONTEXT_RE = /^[A-Za-z0-9._/-]{1,100}$/;
  */
 const LAND_STATUS_PREFIX = "omni-queue/";
 const NOREPLY_EMAIL_RE = /^[^\s@]+@users\.noreply\.github\.com$/;
-const LANDING_KEYS = ["mode", "actor", "identity", "statusContext"];
+const LANDING_KEYS = ["mode", "actor", "identity", "statusContext", "signing"];
 const DEFAULT_LANDING_ACTOR = "app";
+const DEFAULT_SIGNING = "none";
 const DEFAULT_LAND_STATUS_CONTEXT = "omni-queue/land";
 
 function stringList(value, path, errors, { min = 0, item = nonEmptyString } = {}) {
@@ -80,8 +90,10 @@ function positiveInt(value, path, errors, { min = 1, max = Number.MAX_SAFE_INTEG
 
 /**
  * Validate the `landing` block, push every problem onto `errors` and return the block with its
- * defaults applied (`actor: "app"`, `statusContext: "omni-queue/land"`), or null when `raw` is not
- * an object. The returned block is only used when `errors` stays empty.
+ * defaults applied (`actor: "app"`, `statusContext: "omni-queue/land"`, `signing: "none"`), or
+ * null when `raw` is not an object. The returned block is only used when `errors` stays empty.
+ * `signing: "ssh"` needs `actor: "owner"`: the signed commits carry `landing.identity`, and only
+ * that account can hold the key GitHub verifies them with (an App's bot user has no signing keys).
  */
 function validateLanding(raw, errors) {
   if (!isRecord(raw)) {
@@ -126,7 +138,15 @@ function validateLanding(raw, errors) {
   // An approval context as the land status would make a label approval a blessing.
   else if (Object.values(APPROVAL_CONTEXTS).includes(statusContext))
     errors.push("landing.statusContext: must not equal an approval context");
-  return { ...raw, actor, statusContext };
+  const signing = Object.hasOwn(raw, "signing") ? raw.signing : DEFAULT_SIGNING;
+  if (!SIGNING_MODES.includes(signing))
+    errors.push(`landing.signing: expected one of ${SIGNING_MODES.join(", ")}`);
+  else if (signing === "ssh" && actor !== "owner")
+    errors.push(
+      'landing.signing: "ssh" needs landing.actor "owner" (the signed merge commits carry ' +
+        "landing.identity, whose account holds the signing key)"
+    );
+  return { ...raw, actor, statusContext, signing };
 }
 
 /**
@@ -183,9 +203,11 @@ function validateLanes(raw, errors) {
  *                                             startSize (optional, default maxSize), halves after
  *                                             a red root batch and grows by one after a full one
  *                                             lands; without it every batch is up to maxSize
- * @property {{mode: "merge-ff"|"squash-api", actor: "app"|"owner", identity?: {name: string, email: string}, statusContext: string}} landing
+ * @property {{mode: "merge-ff"|"squash-api", actor: "app"|"owner", identity?: {name: string, email: string}, statusContext: string, signing: "none"|"ssh"}} landing
  *                                             actor "owner" lands with `identity` (a noreply address);
- *                                             statusContext is the commit status the queue publishes
+ *                                             statusContext is the commit status the queue publishes;
+ *                                             signing (optional, default "none"): "ssh" signs every
+ *                                             merge commit the queue composes (owner actor only)
  * @property {string[]} requiredChecks         check names that must be `success` on the candidate
  * @property {string[]} advisoryChecks         check names whose failure is tolerated
  * @property {string[]} aggregateChecks        always() gate checks that fail whenever a job they
@@ -205,6 +227,8 @@ function validateLanes(raw, errors) {
  *                                             FIFO; a base-repair PR alone too, and it is the
  *                                             only thing a base-red pause processes
  * @property {"shadow"|"live"} mode
+ * @property {"app"|"owner"} voice             optional, default "app": whose token posts the queue's
+ *                                             comments, removes its labels and writes its issues
  */
 
 /**
@@ -320,6 +344,8 @@ export function validateConfig(raw) {
   const lanes = validateLanes(raw, errors);
   if (!QUEUE_MODES.includes(raw.mode))
     errors.push(`mode: expected one of ${QUEUE_MODES.join(", ")}`);
+  const voice = Object.hasOwn(raw, "voice") ? raw.voice : DEFAULT_VOICE;
+  if (!VOICES.includes(voice)) errors.push(`voice: expected one of ${VOICES.join(", ")}`);
   return errors.length
     ? { ok: false, config: null, errors }
     : {
@@ -331,6 +357,7 @@ export function validateConfig(raw) {
           flakyReruns,
           prChecksRequired,
           lanes,
+          voice,
         }),
         errors: [],
       };

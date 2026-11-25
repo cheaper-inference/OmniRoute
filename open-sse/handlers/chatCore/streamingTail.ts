@@ -1,3 +1,4 @@
+import { readStreamBuyerCost } from "../../utils/buyerCostMicro.ts";
 import { inheritEmptyTurnPolicy } from "../../utils/emptyTurnPolicy.ts";
 import { getCodexClientSessionId } from "../../config/codexIdentity.ts";
 import { modelAfterFamilyFallback } from "../../services/modelFamilyFallbackPolicy.ts";
@@ -20,6 +21,7 @@ import { clearPostOutputFailureStreak } from "../../services/accountFallback/pos
 import { FORMATS } from "../../translator/formats.ts";
 import { needsTranslation } from "../../translator/index.ts";
 import { runEmptyTurnRetryLoop } from "./emptyTurnRetryLoop.ts";
+import { requestFollowsToolCalls } from "../../utils/emptyTurnRetry.ts";
 import { buildErrorBody } from "../../utils/error.ts";
 import {
   createPassthroughStreamWithLogger,
@@ -52,6 +54,7 @@ import { storeStreamingSemanticCacheResponse } from "./streamingSemanticCacheSto
 import { recordFinalInputCalibration } from "./contextEstimation.ts";
 import { emitStreamingRoutingEvent } from "./streamingRoutingEvent.ts";
 import { recordStreamingUsageStats } from "./streamingUsageStats.ts";
+import { resolveSessionTurn } from "./agentContext.ts";
 import { maybeSyncClaudeExtraUsageState } from "./telemetryHelpers.ts";
 import {
   getExecutorTimeoutMs,
@@ -323,9 +326,13 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
   if (stream && providerResponse.ok && providerResponse.body) {
     let flushEmptyRetryArmed = false;
     try {
+      // #20092: post-tool continuations arm the retry by default — an empty
+      // continuation silently breaks an agentic loop, and the probe cost only
+      // lands on turns that already carry submitted tool results.
       // A custom JSON business call may already have taken effect: an empty reply is final.
       flushEmptyRetryArmed =
-        isRegisteredFeatureFlagEnabled("FLUSH_EMPTY_RETRY_ENABLED") &&
+        (isRegisteredFeatureFlagEnabled("FLUSH_EMPTY_RETRY_ENABLED") ||
+          requestFollowsToolCalls(body)) &&
         !isCustomJsonProviderData(credentials?.providerSpecificData);
     } catch {
       flushEmptyRetryArmed = false;
@@ -417,6 +424,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
   const onStreamComplete = ({
     status: streamStatus,
     usage: streamUsage,
+    buyerCostMicro,
     responseBody: streamResponseBody,
     providerPayload,
     clientPayload,
@@ -551,6 +559,14 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
       endpoint: endpointPath,
       cpaAuthIndex: readCpaAuthIndex(providerResponse),
       agentContext,
+      sessionTurn: resolveSessionTurn({
+        clientRawRequest,
+        body,
+        responses: [clientPayload?.summary, streamResponseBody],
+        streamStatus: normalizedStreamStatus,
+        agentContext,
+        apiKeyInfo,
+      }),
       partialUsage: streamPartialUsage,
       emittedOutput: streamEmittedOutput(transformStream),
     });
@@ -585,6 +601,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
       // A stream that ended early (499 / mid-stream failure) has no `usage`, but its call log
       // still shows the tokens already generated (estimates are flagged via `estimated`).
       tokens: streamUsage || streamPartialUsage || {},
+      buyerCostMicro,
       responseBody: streamResponseBody ?? undefined,
       providerRequest: finalBody || translatedBody,
       providerResponse: providerPayload,
@@ -693,6 +710,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
     onStreamFailure,
     hasEmittedOutput: () => streamEmittedOutput(transformStream),
     readPartialUsage: () => readStreamPartialUsage(transformStream),
+    readBuyerCostMicro: () => readStreamBuyerCost(transformStream),
   });
   const handleStreamFailure = streamFailureFinalizers.handleStreamFailure;
   onPipelineStreamError = streamFailureFinalizers.onPipelineStreamError;

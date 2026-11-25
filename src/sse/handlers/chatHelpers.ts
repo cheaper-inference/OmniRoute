@@ -505,6 +505,7 @@ export async function executeChatWithBreaker({
       connectionId: credentials?.connectionId,
       apiKeyId: (apiKeyInfo as { id?: unknown } | null)?.id,
       provider,
+      sessionKey: sessionAffinityKey,
     });
     return runWithAppliedProxyCapture(appliedProxySink, fn);
   };
@@ -576,21 +577,26 @@ export async function executeChatWithBreaker({
             },
             onRequestSuccess: async () => {
               if (isShadowTraffic) return;
+              // An in-pipeline account rotation rewrites refreshedCredentials; the account
+              // that served is the one whose error state a success clears.
+              const served = refreshedCredentials?.connectionId
+                ? refreshedCredentials
+                : credentials;
               // Only a real success ends the per-request refusal streak (#12859), and only for
               // the model that succeeded: a sibling model's success must not reset another
               // model's refusal count (the streak is keyed by connection + model).
-              if (credentials.connectionId) {
-                clearRequestRejectedStreak(credentials.connectionId, model);
+              if (served.connectionId) {
+                clearRequestRejectedStreak(served.connectionId, model);
               }
-              await clearAccountError(credentials.connectionId, credentials);
+              await clearAccountError(served.connectionId, served);
               await clearAntigravityVerificationUrl(
                 provider,
-                credentials.connectionId,
-                credentials.providerSpecificData
+                served.connectionId,
+                served.providerSpecificData
               );
               await maybeReactivateAfterExplicitProbe({
-                connectionId: credentials.connectionId,
-                reactivatedFromInactive: credentials.reactivatedFromInactive,
+                connectionId: served.connectionId,
+                reactivatedFromInactive: served.reactivatedFromInactive,
                 isShadowTraffic,
                 requestedModel: model,
                 provider,
@@ -1037,10 +1043,13 @@ export async function safeResolveProxy(
   connectionId: string,
   apiKeyId?: string,
   providerId?: string,
-  comboName?: string | null
+  comboName?: string | null,
+  sessionKey?: string | null
 ) {
   try {
-    const resolved = await resolveProxyForConnection(connectionId, apiKeyId, providerId);
+    const resolved = await resolveProxyForConnection(connectionId, apiKeyId, providerId, {
+      sessionKey,
+    });
     // #6246: a connection that resolves to DIRECT only because its assigned proxy
     // is dead/inactive must fail closed — egressing on the real IP leaks it. Reuse
     // the existing proxy-resolution-failure policy (blocks by default; PROXY_FAIL_OPEN
@@ -1109,7 +1118,7 @@ export function withUpstreamStatus<T extends object>(
 export function publishPoolReselectResolver(
   sink: AppliedProxySink | null | undefined,
   proxyInfo: { proxy?: unknown; source?: unknown } | null | undefined,
-  ids: { connectionId?: unknown; apiKeyId?: unknown; provider?: unknown }
+  ids: { connectionId?: unknown; apiKeyId?: unknown; provider?: unknown; sessionKey?: unknown }
 ): void {
   try {
     if (!sink || proxyInfo?.source !== "registry" || proxyInfo?.proxy == null) return;
@@ -1120,8 +1129,11 @@ export function publishPoolReselectResolver(
     if (!connectionId) return;
     const apiKeyId = typeof ids.apiKeyId === "string" ? ids.apiKeyId : undefined;
     const providerId = typeof ids.provider === "string" ? ids.provider : undefined;
+    const sessionKey = typeof ids.sessionKey === "string" ? ids.sessionKey : null;
     (sink as { reselectPoolMember?: () => Promise<unknown> }).reselectPoolMember = async () => {
-      const next = await resolveProxyForConnection(connectionId, apiKeyId, providerId);
+      const next = await resolveProxyForConnection(connectionId, apiKeyId, providerId, {
+        sessionKey,
+      });
       return (next as { proxy?: unknown } | null)?.proxy ?? null;
     };
   } catch {

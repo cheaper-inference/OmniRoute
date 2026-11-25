@@ -17,20 +17,21 @@ Keep one API key per person, agent, or application. Per-key model access, revoca
 
 Team APIs use distinct fields rather than treating every dollar-looking value as an invoice:
 
-- `estimatedListCostUsd`: token usage evaluated against OmniRoute's model pricing catalog. This is the phase-1 Team budget metric.
-- `actualProviderCostUsd`: provider-reported or invoiced cost when available. Phase 1 returns `null` rather than substituting an estimate.
+- `accountedCostUsd`: known amount used for enforcement. Each request uses its recorded provider USD charge first (including explicit zero), otherwise its stored calculated USD snapshot, otherwise a current catalog estimate. These are alternatives, never added together for one request.
+- `estimatedListCostUsd`: token usage evaluated against the current catalog, separately from recorded costs. Missing catalog prices set `hasUnpricedListUsage`; they do not invalidate a recorded charge.
+- `actualProviderCostUsd`: sum of recorded provider USD charges, including explicit zero; `null` when none were recorded. May cover only part of the usage and is not a complete invoice. Stored estimates are never labelled actual.
 - `subscriptionQuotaUsed`: provider subscription quota units, when available. Phase 1 returns `null`.
 - `compressionSavingsUsd`: estimated savings caused by compression. Phase 1 returns `null` in Team reports; existing compression analytics remain authoritative.
 
 For subscription-backed providers, `estimatedListCostUsd` is useful for allocation and comparison but is not necessarily an invoiceable provider cost.
 
-Reports estimate all recorded attempts, including failed attempts with token usage, and show their request and token totals. An unknown price on a failed attempt therefore sets the report's `hasUnpricedUsage`. The shared budget evaluates successful requests only: a failed-only unknown price does not block the next request. Both values use current catalog prices and can change when prices change; neither is a historical invoice.
+Reports cover all recorded attempts, including failed attempts, and show their request and token totals. A missing charge with no usable price on a failed attempt sets the report's `hasUnpricedUsage`. Budgets count successful requests only: a failed-only unknown charge does not block the next request. Recorded charges and calculated snapshots are not repriced when the catalog changes; only the fallback and separate list estimate use current catalog prices.
 
 ## Immutable attribution
 
 When the terminal usage row is written, OmniRoute resolves the API key's billing Team at the effective `UsageEntry.timestamp` and stores the resulting Team ID on the row. The timestamp defaults to the current wall clock only when the caller omits it; callers may supply it, so it is not an independent persistence-time clock. Reassigning a key never rewrites rows that are already stored. Operators should avoid transferring a key while it has in-flight requests: phase 1 does not persist a separate request-start ownership reservation, and attribution follows that effective usage-entry timestamp.
 
-Before raw usage retention cleanup, Team usage is rolled into `daily_team_usage_summary`, preserving Team, API key, provider, model, service tier, token classes, successful-request counters, and counts of distinct per-request token shapes. Missing provider or model is stored in an explicit unknown bucket and successful usage fails closed in the budget. Previously retained rows without token-shape counts cannot recover precise nonlinear prices: the report shows an aggregate estimate marked unpriced, while a successful legacy bucket makes the budget fail closed. The retention rollup is one bucket per UTC day. For an arbitrary timestamp range that cuts through an already rolled-up day, phase 1 excludes that whole boundary bucket rather than attributing usage outside the requested range; complete UTC-day reports remain exact when token-shape counts are available.
+Before raw usage retention cleanup, Team usage is rolled into `daily_team_usage_summary`, preserving Team, API key, provider, model, service tier, token classes, successful-request counters, and counts of distinct per-request billing shapes. New shapes retain provider/calculated USD amounts and billing units alongside tokens; legacy five-field token shapes still work. Older buckets without complete shape counts remain explicitly unpriced, while later recorded costs in the same bucket remain usable without fabricating historical amounts. JSON history export/import preserves these shapes without a schema migration. A non-token billing unit without a recorded amount is unknown, not a free zero-token request. Daily rollups still exclude partial boundary days rather than attributing usage outside the requested range.
 
 ## Shared budget behavior
 
@@ -39,7 +40,20 @@ A Team may define:
 - `maxBudgetUsd`
 - `budgetDuration`: `1d`, `7d`, or `30d`
 
-Phase 1 enforcement mode is explicitly `soft_committed_usage`. Before a request, OmniRoute sums committed successful usage in the active Team window using `estimatedListCostUsd` and rejects new traffic after the cap is reached. Usage without a matching local catalog price is reported as unpriced and makes an enabled Team budget fail closed rather than silently counting it as zero. A budget's reset cadence begins when it is first enabled; later amount, duration, or metadata edits preserve the established reset instant. Stale windows advance by whole durations with a compare-and-swap update, so a stale concurrent writer cannot move the cadence backward. After raw rows age out, only complete UTC-day rollup buckets contained inside that rolling window are counted; partial boundary days are conservatively omitted because a daily bucket cannot be split without fabricating precision.
+Phase 1 enforcement mode is explicitly `soft_committed_usage`. Before a request, OmniRoute sums committed successful usage using `accountedCostUsd` and rejects new traffic after the known amount reaches the cap. Budget edits preserve the established reset cadence; stale windows advance by whole durations with a compare-and-swap update. After retention, only complete UTC-day buckets inside the window count; partial boundary days are conservatively omitted.
+
+### Missing pricing: explicit availability policy
+
+Teams use the existing installation-wide `UNPRICED_USAGE_BUDGET_POLICY` resolver, shared with per-key limits:
+
+- `fail_closed` (unchanged default): unknown successful-use costs block new requests.
+- `count_as_zero` (explicit opt-in): continue inference when only prices are missing. Unknown requests contribute no known amount but keep `hasUnpricedUsage=true` and `unpricedModels` visible; they are **not known-free usage**. `unpricedUsagePolicy` exposes the effective policy, and the dashboard warns that the total is incomplete.
+
+Management overrides precede environment values. The legacy `USAGE_LIMIT_IGNORE_UNPRICED=true` alias applies only without an explicit policy. Invalid explicit policies fail closed. This is not a new per-Team setting; enabling it also affects per-key limits.
+
+The opt-in policy can exceed the nominal cap because the unknown portion cannot be measured. Known cap exhaustion and fallback pricing failures still block. Usage-store failures are not converted into zero spend.
+
+Status distinguishes `blockReason=cap_exceeded`, `unpriced_usage`, and `pricing_unavailable`; a permitted request has `blockReason=null` even with unknown usage. The existing HTTP 400 rejection supports both OpenAI and Anthropic envelopes. OpenAI errors additionally carry `team_budget_exceeded`, `team_usage_unpriced`, or `team_pricing_unavailable` codes. Missing-price errors name affected models and an administrator action instead of claiming a cap overage or recommending waiting for a reset.
 
 This is not a strict no-overshoot financial ledger. Concurrent requests can pass the preflight check before either request commits usage. Strict enforcement would require an atomic, idempotent request ledger:
 

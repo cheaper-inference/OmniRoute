@@ -1,14 +1,16 @@
 "use client";
 
-import { cloneElement, createContext, forwardRef, isValidElement, useCallback, useContext, useEffect, useId, useMemo, useRef, useState, version as reactVersion } from "react";
+import { cloneElement, createContext, forwardRef, isValidElement, useCallback, useContext, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { ComponentProps, ForwardedRef, MouseEvent as ReactMouseEvent, MutableRefObject, ReactElement, ReactNode } from "react";
-import { PanelLeft } from "lucide-react";
+import { ChevronDown, PanelLeft } from "lucide-react";
 import { Sheet, SheetContent, SheetTitle } from "./sheet";
-import { Tooltip, TooltipContent, TooltipTrigger } from "./tooltip";
+import { Slot } from "@radix-ui/react-slot";
+import { TooltipContent, TooltipTrigger } from "./tooltip";
+import { TooltipRoot } from "./lib/tooltip-root";
+import { inertProps } from "./lib/inert";
 import { cn } from "./lib/utils";
 
 const DEFAULT_MOBILE_BREAKPOINT = 768;
-const SUPPORTS_BOOLEAN_INERT = Number.parseInt(reactVersion, 10) >= 19;
 
 export type SidebarState = "expanded" | "collapsed";
 export type SidebarSide = "left" | "right";
@@ -28,6 +30,39 @@ export interface SidebarContextProps {
 const SidebarContext = createContext<SidebarContextProps | null>(null);
 const SidebarFocusContext = createContext<MutableRefObject<HTMLButtonElement | null> | null>(null);
 const SidebarScopeContext = createContext<string | null>(null);
+/** True while the enclosing `Sidebar` shows as the collapsed icon rail. */
+const SidebarRailContext = createContext(false);
+
+interface SidebarGroupContextValue {
+  open: boolean;
+  setOpen: (open: boolean) => void;
+  contentId: string;
+  /** On the collapsed icon rail the group shows its content and no trigger. */
+  rail: boolean;
+}
+
+/** Set by a collapsible `SidebarGroup`; null in a plain group. */
+const SidebarGroupContext = createContext<SidebarGroupContextValue | null>(null);
+
+const useIsomorphicLayoutEffect = typeof document === "undefined" ? useEffect : useLayoutEffect;
+
+/**
+ * Hands focus to what replaced a focused control of a collapsible group. Call it from a layout
+ * effect cleanup of the part being removed or hidden: React runs that before the element leaves
+ * the document, whatever caused the change (the shortcut, a controlled `open`, a resize).
+ */
+function refocusInGroup(from: Element, selector: string) {
+  const group = from.closest(SIDEBAR_GROUP);
+  if (!group) return;
+  queueMicrotask(() => {
+    const active = document.activeElement;
+    // Focus is on another control: it moved on its own, or the element was kept. Leave it there.
+    if (!group.isConnected || (active && active !== document.body && active !== from)) return;
+    group.querySelector<HTMLElement>(selector)?.focus({ preventScroll: true });
+  });
+}
+
+const SIDEBAR_GROUP = '[data-slot="sidebar-group"]';
 
 export function useSidebar() {
   const context = useContext(SidebarContext);
@@ -175,13 +210,11 @@ export function Sidebar({
   const mobileTriggerRef = useContext(SidebarFocusContext);
   const scopeId = useContext(SidebarScopeContext);
   const hiddenOffcanvas = !isMobile && collapsible === "offcanvas" && state === "collapsed";
-  const inertProps = hiddenOffcanvas || inertProp
-    ? ({ inert: SUPPORTS_BOOLEAN_INERT ? true : "" } as unknown as ComponentProps<"aside">)
-    : {};
+  const rail = !isMobile && collapsible === "icon" && state === "collapsed";
   const aside = (
     <aside
       {...props}
-      {...inertProps}
+      {...inertProps(hiddenOffcanvas || Boolean(inertProp))}
       data-slot="sidebar"
       data-state={isMobile || collapsible === "none" ? "expanded" : state}
       data-side={side}
@@ -192,7 +225,7 @@ export function Sidebar({
       aria-hidden={hiddenOffcanvas || ariaHidden || undefined}
       className={cn("ci-sidebar", className)}
     >
-      {children}
+      <SidebarRailContext.Provider value={rail}>{children}</SidebarRailContext.Provider>
     </aside>
   );
 
@@ -228,15 +261,129 @@ export function SidebarFooter({ className, ...props }: ComponentProps<"div">) {
 export function SidebarSeparator({ className, ...props }: ComponentProps<"hr">) {
   return <hr data-slot="sidebar-separator" className={cn("ci-sidebar__separator", className)} {...props} />;
 }
-export function SidebarGroup({ className, ...props }: ComponentProps<"section">) {
-  return <section data-slot="sidebar-group" className={cn("ci-sidebar__group", className)} {...props} />;
+
+export interface SidebarGroupProps extends ComponentProps<"section"> {
+  /**
+   * Make `SidebarGroupLabel` a trigger that shows and hides `SidebarGroupContent`.
+   * On the collapsed icon rail the group shows its content and no trigger, as a plain group does.
+   */
+  collapsible?: boolean;
+  /** Controlled open state of a collapsible group. */
+  open?: boolean;
+  /** Initial open state of an uncontrolled collapsible group. Default: open. */
+  defaultOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
-export function SidebarGroupLabel({ className, ...props }: ComponentProps<"div">) {
-  return <div data-slot="sidebar-group-label" className={cn("ci-sidebar__group-label", className)} {...props} />;
+
+export function SidebarGroup({ className, collapsible = false, open: controlled, defaultOpen = true, onOpenChange, ...props }: SidebarGroupProps) {
+  const contentId = `${useId()}-content`;
+  const rail = useContext(SidebarRailContext);
+  const [uncontrolled, setUncontrolled] = useState(defaultOpen);
+  const open = controlled ?? uncontrolled;
+  const setOpen = useCallback((next: boolean) => {
+    if (controlled === undefined) setUncontrolled(next);
+    onOpenChange?.(next);
+  }, [controlled, onOpenChange]);
+  const group = useMemo<SidebarGroupContextValue | null>(
+    () => (collapsible ? { open, setOpen, contentId, rail } : null),
+    [collapsible, contentId, open, rail, setOpen],
+  );
+  return (
+    <SidebarGroupContext.Provider value={group}>
+      <section
+        data-slot="sidebar-group"
+        data-collapsible={collapsible || undefined}
+        data-state={collapsible ? (open ? "open" : "closed") : undefined}
+        className={cn("ci-sidebar__group", className)}
+        {...props}
+      />
+    </SidebarGroupContext.Provider>
+  );
 }
-export function SidebarGroupContent({ className, ...props }: ComponentProps<"div">) {
-  return <div data-slot="sidebar-group-content" className={cn("ci-sidebar__group-content", className)} {...props} />;
+
+export interface SidebarGroupLabelProps extends ComponentProps<"div"> {
+  /** In a collapsible group: replaces the chevron; `null` hides it. Decorative: it is hidden from assistive technology, so the trigger is named by the label alone. */
+  indicator?: ReactNode;
 }
+
+/** The label's button in a collapsible group. Removed on the icon rail; a focused one passes focus to the group's first item. */
+function SidebarGroupTrigger({ group, indicator, children }: { group: SidebarGroupContextValue; indicator: ReactNode; children: ReactNode }) {
+  const { contentId } = group;
+  useIsomorphicLayoutEffect(() => () => {
+    const focused = document.activeElement;
+    if (focused?.getAttribute("data-slot") !== "sidebar-group-trigger" || focused.getAttribute("aria-controls") !== contentId) return;
+    refocusInGroup(focused, '[data-slot="sidebar-menu-button"]:not(:disabled)');
+  }, [contentId]);
+  return (
+    <button
+      type="button"
+      data-slot="sidebar-group-trigger"
+      data-state={group.open ? "open" : "closed"}
+      aria-expanded={group.open}
+      aria-controls={contentId}
+      className="ci-sidebar__group-trigger"
+      onClick={() => group.setOpen(!group.open)}
+    >
+      <span className="ci-sidebar__group-trigger-label">{children}</span>
+      {indicator === undefined
+        ? <ChevronDown className="ci-sidebar__group-chevron" aria-hidden="true" />
+        : indicator != null && <span data-slot="sidebar-group-indicator" className="ci-sidebar__group-indicator" aria-hidden="true">{indicator}</span>}
+    </button>
+  );
+}
+
+/**
+ * Heading of a `SidebarGroup`. In a collapsible group its content becomes the trigger
+ * button (`aria-expanded`, `aria-controls`), named by that content; the props stay on the label.
+ */
+export function SidebarGroupLabel({ className, indicator, children, ...props }: SidebarGroupLabelProps) {
+  const group = useContext(SidebarGroupContext);
+  if (!group || group.rail) return <div data-slot="sidebar-group-label" className={cn("ci-sidebar__group-label", className)} {...props}>{children}</div>;
+  return (
+    <div data-slot="sidebar-group-label" data-collapsible="true" className={cn("ci-sidebar__group-label", className)} {...props}>
+      <SidebarGroupTrigger group={group} indicator={indicator}>{children}</SidebarGroupTrigger>
+    </div>
+  );
+}
+
+export interface SidebarGroupContentProps extends ComponentProps<"div"> {
+  /** In a collapsible group: keep closed children mounted (hidden). Default: render them only while open. */
+  keepMounted?: boolean;
+}
+
+/**
+ * The children of a collapsible group's content. When the group removes them, or hides them with
+ * `keepMounted`, a focused item passes focus to the group's trigger.
+ */
+function SidebarGroupItems({ contentId, hidden, children }: { contentId: string; hidden: boolean; children: ReactNode }) {
+  useIsomorphicLayoutEffect(() => () => {
+    // Runs when these items go away or `hidden` changes, before the content element is updated.
+    const focused = hidden ? null : document.activeElement;
+    if (focused?.closest('[data-slot="sidebar-group-content"]')?.id === contentId) refocusInGroup(focused, '[data-slot="sidebar-group-trigger"]');
+  }, [contentId, hidden]);
+  return <>{children}</>;
+}
+
+/** Body of a `SidebarGroup`, and the region a collapsible group shows and hides (it sets the `id`). */
+export function SidebarGroupContent({ className, keepMounted = false, children, ...props }: SidebarGroupContentProps) {
+  const group = useContext(SidebarGroupContext);
+  if (!group) return <div data-slot="sidebar-group-content" className={cn("ci-sidebar__group-content", className)} {...props}>{children}</div>;
+  // On the icon rail the content is always shown, as in a plain group.
+  const open = group.open || group.rail;
+  return (
+    <div
+      {...props}
+      id={group.contentId}
+      data-slot="sidebar-group-content"
+      data-state={group.rail ? undefined : open ? "open" : "closed"}
+      hidden={!open}
+      className={cn("ci-sidebar__group-content", className)}
+    >
+      {open || keepMounted ? <SidebarGroupItems contentId={group.contentId} hidden={!open}>{children}</SidebarGroupItems> : null}
+    </div>
+  );
+}
+
 export function SidebarMenu({ className, ...props }: ComponentProps<"ul">) {
   return <ul data-slot="sidebar-menu" className={cn("ci-sidebar__menu", className)} {...props} />;
 }
@@ -250,8 +397,68 @@ export interface SidebarMenuButtonProps extends ComponentProps<"button"> {
   asChild?: boolean;
 }
 
+
+/** What a tooltip trigger puts on its element: the handlers that drive the tooltip, and its state. */
+type MenuTooltipHandlers = Pick<ComponentProps<"button">, "onPointerMove" | "onPointerLeave" | "onPointerDown" | "onFocus" | "onBlur" | "onClick">;
+interface MenuTooltipState { "data-state"?: string; "aria-describedby"?: string }
+
+interface SidebarMenuTooltipAnchorProps extends MenuTooltipHandlers, MenuTooltipState {
+  control: MutableRefObject<HTMLElement | null>;
+  handlers: MutableRefObject<MenuTooltipHandlers | null>;
+  setState: (update: (current: MenuTooltipState | null) => MenuTooltipState | null) => void;
+}
+
+function assignRef(ref: ForwardedRef<HTMLElement>, element: HTMLElement | null) {
+  if (typeof ref === "function") ref(element);
+  else if (ref) ref.current = element;
+}
+
+/** Handlers for the control that call whatever the mounted tooltip trigger currently has, and nothing without one. */
+function delegateTo(handlers: MutableRefObject<MenuTooltipHandlers | null>): MenuTooltipHandlers {
+  const to = <Name extends keyof MenuTooltipHandlers>(name: Name) => ((event: never) => handlers.current?.[name]?.(event)) as MenuTooltipHandlers[Name];
+  return { onPointerMove: to("onPointerMove"), onPointerLeave: to("onPointerLeave"), onPointerDown: to("onPointerDown"), onFocus: to("onFocus"), onBlur: to("onBlur"), onClick: to("onClick") };
+}
+
+/**
+ * The rail tooltip's trigger, rendered beside the control instead of around it, so that mounting
+ * and unmounting the tooltip never remounts the control. It renders nothing and hands on what a
+ * trigger receives: the ref goes to the control's element, the handlers and the state attributes
+ * to `SidebarMenuButton`, which puts them on the control.
+ */
+const SidebarMenuTooltipAnchor = forwardRef<HTMLElement, SidebarMenuTooltipAnchorProps>(function SidebarMenuTooltipAnchor(
+  { control, handlers, setState, "data-state": dataState, "aria-describedby": describedBy, onPointerMove, onPointerLeave, onPointerDown, onFocus, onBlur, onClick },
+  ref,
+) {
+  const bound = useRef<{ ref: ForwardedRef<HTMLElement>; element: HTMLElement | null } | null>(null);
+  // After every commit: the trigger's handlers are new on each render, and an `asChild` control can change element.
+  useEffect(() => {
+    handlers.current = { onPointerMove, onPointerLeave, onPointerDown, onFocus, onBlur, onClick };
+    const element = control.current;
+    if (bound.current?.ref === ref && bound.current.element === element) return;
+    if (bound.current && bound.current.ref !== ref) assignRef(bound.current.ref, null);
+    bound.current = { ref, element };
+    assignRef(ref, element);
+  });
+  useEffect(() => {
+    // A closed tooltip is the resting state the button already renders, so it is not stored.
+    const next = dataState === "closed" && describedBy === undefined ? null : { "data-state": dataState, "aria-describedby": describedBy };
+    setState((current) => (current?.["data-state"] === next?.["data-state"] && current?.["aria-describedby"] === next?.["aria-describedby"] ? current : next));
+  }, [dataState, describedBy, setState]);
+  useEffect(() => () => {
+    if (bound.current) assignRef(bound.current.ref, null);
+    bound.current = null;
+    handlers.current = null;
+    setState(() => null);
+  }, [handlers, setState]);
+  return null;
+});
+
 export function SidebarMenuButton({ className, isActive = false, tooltip, asChild = false, children, onClick, ...props }: SidebarMenuButtonProps) {
   const { state, isMobile, setOpenMobile } = useSidebar();
+  const tooltipActive = tooltip != null && state === "collapsed" && !isMobile;
+  const controlRef = useRef<HTMLElement | null>(null);
+  const tooltipHandlers = useRef<MenuTooltipHandlers | null>(null);
+  const [tooltipState, setTooltipState] = useState<MenuTooltipState | null>(null);
   const classes = cn("ci-sidebar__menu-button", className);
   const fallbackLabel = state === "collapsed" && !isMobile && typeof tooltip === "string" ? tooltip : undefined;
   const finishInteraction = (event: ReactMouseEvent<HTMLElement>) => {
@@ -281,10 +488,24 @@ export function SidebarMenuButton({ className, isActive = false, tooltip, asChil
     const hasSuppliedName = props["aria-label"] != null || props["aria-labelledby"] != null;
     control = <button type="button" data-slot="sidebar-menu-button" data-active={isActive || undefined} aria-current={isActive ? "page" : undefined} aria-label={!hasSuppliedName ? fallbackLabel : undefined} className={classes} onClick={finishInteraction} {...props}>{children}</button>;
   }
-  if (tooltip != null && state === "collapsed" && !isMobile) {
-    return <Tooltip><TooltipTrigger asChild>{control}</TooltipTrigger><TooltipContent side="right">{tooltip}</TooltipContent></Tooltip>;
-  }
-  return control;
+  if (tooltip == null) return control;
+  // The control keeps its place in every sidebar state; the tooltip mounts beside it on the collapsed
+  // rail only. Wrapping the control in the tooltip there would remount it and drop its focus.
+  const trigger = tooltipActive
+    ? { "data-state": tooltipState?.["data-state"] ?? "closed", "aria-describedby": tooltipState?.["aria-describedby"], ...delegateTo(tooltipHandlers) }
+    : undefined;
+  return (
+    <>
+      <Slot ref={controlRef} {...(trigger as ComponentProps<typeof Slot> | undefined)}>{control}</Slot>
+      {tooltipActive ? (
+        // TooltipRoot joins a shared TooltipProvider when there is one, as every kit tooltip does.
+        <TooltipRoot>
+          <TooltipTrigger asChild><SidebarMenuTooltipAnchor control={controlRef} handlers={tooltipHandlers} setState={setTooltipState} /></TooltipTrigger>
+          <TooltipContent side="right">{tooltip}</TooltipContent>
+        </TooltipRoot>
+      ) : null}
+    </>
+  );
 }
 
 export function SidebarMenuBadge({ className, ...props }: ComponentProps<"span">) {

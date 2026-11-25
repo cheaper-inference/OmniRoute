@@ -281,7 +281,8 @@ export function recordLearnedProbeReasoningEffort(
 // Matches prose shapes: OVH's "@ai-sdk/openai-compatible" deserializer
 // ("expected one of `a`, `b`"), generic ("Supported types are a, b, and c"),
 // and "please use a, b, or c".
-const LIST_INTRO = /(?:expected one of|supported (?:types|values) are|please use)[:\s]*([^.]+)/i;
+const LIST_INTRO =
+  /(?:expected one of|supported (?:types|values) are|please use|use (?=['"`]))[:\s]*([^.]+?)(?:\s+instead\b|\.|$)/i;
 
 /**
  * Extract the upstream-advertised accepted reasoning_effort values from a 4xx

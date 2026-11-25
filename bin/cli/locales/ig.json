@@ -12,7 +12,8 @@
     "dryRun": "[dry-run] a ga-eme {action}",
     "cancelled": "Akagbuola.",
     "jsonOpt": "Wepụta dị ka JSON",
-    "yesOpt": "Mafee ajụjụ nkwenye"
+    "yesOpt": "Mafee ajụjụ nkwenye",
+    "positiveIntegerRequired": "Oke ga-abụrịrị ọnụọgụ zuru ezu karịrị efu."
   },
   "setup": {
     "title": "Ntọala OmniRoute",

@@ -1,18 +1,12 @@
 "use client";
 
-import {
-  CartesianGrid,
-  Legend,
-  Line,
-  LineChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
-import { chartTheme } from "@omniroute/ui-kit/chart-theme";
+import { useMemo } from "react";
+import { LineChart } from "@omniroute/ui-kit/reporting-charts";
+import Card from "@/shared/components/Card";
 
 interface ProviderChartsProps {
+  /** Accessible name of the chart. */
+  ariaLabel: string;
   chartData: Array<Record<string, unknown>>;
   providers: string[];
   providerColors: Map<string, string>;
@@ -24,7 +18,13 @@ interface ProviderChartsProps {
   formatTooltipTimestamp: (value: string, _range: string) => string;
 }
 
+/**
+ * Remaining quota per provider over time: the kit LineChart on a fixed 0–100 % axis. A provider
+ * with no sample at a point has no measurement there; the line is drawn across the gap and the
+ * tooltip still reads it as unavailable.
+ */
 export default function ProviderCharts({
+  ariaLabel,
   chartData,
   providers,
   providerColors,
@@ -35,37 +35,45 @@ export default function ProviderCharts({
   formatPercent,
   formatTooltipTimestamp,
 }: ProviderChartsProps) {
+  const data = useMemo(
+    () =>
+      chartData.map((row, index) => {
+        const timestamp = String(row.timestamp ?? "");
+        return {
+          id: `${timestamp}#${index}`,
+          label: formatTimestamp(timestamp, range),
+          tooltipLabel: formatTooltipTimestamp(timestamp, range),
+          values: Object.fromEntries(
+            providers.map((provider) => {
+              const value = row[provider];
+              return [provider, typeof value === "number" ? value : null];
+            })
+          ),
+        };
+      }),
+    [chartData, providers, range, formatTimestamp, formatTooltipTimestamp]
+  );
+  const series = useMemo(
+    () =>
+      providers.map((provider) => ({
+        key: provider,
+        label: resolveProviderName(provider, nodeMap),
+        color: providerColors.get(provider),
+      })),
+    [providers, providerColors, resolveProviderName, nodeMap]
+  );
+
   return (
-    <div className="h-80 w-full rounded-xl border border-border bg-surface-2 px-3 py-4">
-      <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={chartData} margin={chartTheme.margin}>
-          <CartesianGrid {...chartTheme.grid} />
-          <XAxis
-            {...chartTheme.xAxis}
-            dataKey="timestamp"
-            tickFormatter={(value) => formatTimestamp(String(value), range)}
-          />
-          <YAxis {...chartTheme.yAxis} domain={[0, 100]} tickFormatter={formatPercent} />
-          <Legend />
-          <Tooltip
-            {...chartTheme.tooltip}
-            wrapperStyle={{ zIndex: 1000, pointerEvents: "none" }}
-            labelFormatter={(value) => formatTooltipTimestamp(String(value), range)}
-            formatter={(value: number, name: string) => [formatPercent(value), name]}
-          />
-          {providers.map((provider) => (
-            <Line
-              {...chartTheme.line}
-              key={provider}
-              dataKey={provider}
-              name={resolveProviderName(provider, nodeMap)}
-              stroke={providerColors.get(provider) ?? "var(--color-primary)"}
-              activeDot={{ r: 4, strokeWidth: 0 }}
-              connectNulls
-            />
-          ))}
-        </LineChart>
-      </ResponsiveContainer>
-    </div>
+    <Card.Section>
+      <LineChart
+        ariaLabel={ariaLabel}
+        data={data}
+        series={series}
+        yDomain={[0, 100]}
+        connectNulls
+        valueFormatter={formatPercent}
+        height={264}
+      />
+    </Card.Section>
   );
 }

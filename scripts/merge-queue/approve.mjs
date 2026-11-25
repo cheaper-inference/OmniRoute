@@ -17,7 +17,9 @@
 //     `success` on pull_request.head.sha, context APPROVAL_CONTEXTS[kind],
 //     description "approved by <login>" (App token, so the creator is `<appSlug>[bot]`);
 //   labeled by a non-approver → comment once (key "not-approver"), no status
-//     (in shadow mode no comment either: shadow writes nothing on a pull request);
+//     (in shadow mode no comment either: shadow writes nothing on a pull request). Always the
+//     App's, whatever config.voice says: this job never receives the owner's token (the tick's
+//     own "not-approver" comment then finds this one by its marker and posts nothing);
 //   unlabeled → status `failure` "approval withdrawn by <login>" on the same head/context;
 //     in shadow mode (config.mode) nothing at all is written for a removal.
 //

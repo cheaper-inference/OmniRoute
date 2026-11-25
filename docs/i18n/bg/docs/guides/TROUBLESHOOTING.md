@@ -470,7 +470,7 @@ OmniRoute автоматично опреснява токените. Ако п�
 2. **Трайно решение:** Обвържете изрично с IPv4, като използвате `-p 127.0.0.1:20128:20128` във вашата команда `docker run`:
    ```bash
    docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
-     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
    ```
    Това налага обвързване с IPv4 и също така предотвратява излагането на прокси сървъра на всички мрежови интерфейси на хоста.
 

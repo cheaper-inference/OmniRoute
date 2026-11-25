@@ -161,7 +161,9 @@ test.after(async () => {
   fs.rmSync(TEST_PLUGINS_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
-test("zed-hosted pre-content status.failed becomes a sanitized 502 readiness failure", async () => {
+test("zed-hosted pre-content status.failed becomes a sanitized 502 readiness failure", async (t) => {
+  // The in-memory stream already has its failure. This test exercises readiness classification.
+  t.mock.timers.enable({ apis: ["Date", "setTimeout"], now: Date.now() });
   const readiness = await ensureStreamReadiness(wrapOpenFailedNdjson(), {
     timeoutMs: 100,
     provider: "zed-hosted",
