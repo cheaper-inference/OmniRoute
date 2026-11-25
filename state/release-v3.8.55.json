@@ -1,14 +1,49 @@
 {
   "version": 1,
   "base": "release/v3.8.55",
-  "paused": {
-    "reason": "base-red",
-    "since": "2026-11-25T08:03:41.469Z",
-    "baseSha": "ae94881fcf543d1ee91d6af11f18b274280e0c53",
-    "detail": "all 1 failure(s) also fail on base ae94881fcf54 (1 matched by check name only: no test-level key)",
-    "issue": 21193
+  "paused": null,
+  "inFlight": {
+    "batchId": "b38",
+    "kind": "batch",
+    "candidateRef": "omni-queue/release-v3.8.55/b38-a3f02f39d874",
+    "candidateSha": "a3f02f39d8741d851cf85f91975f9fba6f26fd49",
+    "baseSha": "e7729b07ad30021137985522383b189dcbe8eaf1",
+    "treeSha": "68ae491e47e7b4e3f1818ffcae5961cb818ac6cb",
+    "prs": [
+      {
+        "n": 21168,
+        "head": "737b51001973ce7515621b9d755b8b691ec0cc4d",
+        "title": "fix(pwa): never leave a rejected fetch in the service worker (KEA-9524)",
+        "author": "diegosouzapw",
+        "labeledAt": "2026-11-25T05:25:56Z"
+      },
+      {
+        "n": 21169,
+        "head": "1b25808a6aaecce78050efa5eae4915e5e24bbbe",
+        "title": "fix(dashboard): cap the eval suite name in the New suite form (KEA-9519)",
+        "author": "diegosouzapw",
+        "labeledAt": "2026-11-25T05:25:59Z"
+      },
+      {
+        "n": 21172,
+        "head": "287d78b5c39f3d8af083ef9d75339aad8f8667cf",
+        "title": "fix(dashboard): show the date in the request log time column (KEA-9522)",
+        "author": "diegosouzapw",
+        "labeledAt": "2026-11-25T05:26:02Z"
+      },
+      {
+        "n": 21174,
+        "head": "d9ea082ecf3416320481a65ec352428c2cdd8db6",
+        "title": "fix(webhooks): accurate copy for http endpoints and the optional name (KEA-9517, KEA-9518)",
+        "author": "diegosouzapw",
+        "labeledAt": "2026-11-25T05:26:07Z"
+      }
+    ],
+    "stage": "testing",
+    "startedAt": "2026-11-25T11:46:16.493Z",
+    "attempts": 0,
+    "bisect": null
   },
-  "inFlight": null,
   "baseChecks": [
     {
       "baseSha": "ae94881fcf543d1ee91d6af11f18b274280e0c53",
@@ -110,8 +145,8 @@
     }
   },
   "counters": {
-    "batchSeq": 37,
-    "ciRuns": 42,
+    "batchSeq": 38,
+    "ciRuns": 43,
     "landedPrs": 0,
     "landedBatches": 0,
     "redBatches": 10,
@@ -2419,19 +2454,45 @@
       "type": "queue-stalled",
       "detail": "paused (reason `base-red`) since 2026-11-25 08:03Z, for more than 120 min",
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45592847942"
+    },
+    {
+      "at": "2026-11-25T11:45:40.460Z",
+      "type": "resumed",
+      "sha": "e7729b07ad30021137985522383b189dcbe8eaf1",
+      "detail": "base moved ae94881fcf54 → e7729b07ad30 after a base-red pause",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45607328408"
+    },
+    {
+      "at": "2026-11-25T11:46:16.492Z",
+      "type": "pr-skipped-conflict",
+      "batchId": "b38",
+      "prs": [
+        21173
+      ],
+      "detail": "conflicts with an earlier PR of the batch; stays queued",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45607328408"
+    },
+    {
+      "at": "2026-11-25T11:46:19.855Z",
+      "type": "batch-started",
+      "batchId": "b38",
+      "prs": [
+        21168,
+        21169,
+        21172,
+        21174
+      ],
+      "sha": "a3f02f39d8741d851cf85f91975f9fba6f26fd49",
+      "detail": "4 PR(s) on e7729b07ad30; window 5; excluded #21173 batch-conflict",
+      "labeledAt": {
+        "21168": "2026-11-25T05:25:56Z",
+        "21169": "2026-11-25T05:25:59Z",
+        "21172": "2026-11-25T05:26:02Z",
+        "21174": "2026-11-25T05:26:07Z"
+      },
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45607328408"
     }
   ],
-  "updatedAt": "2026-11-25T11:14:42.165Z",
-  "batchWindow": 5,
-  "stalled": {
-    "since": "2026-11-25T08:03:41.469Z",
-    "reasons": [
-      "paused (reason `base-red`) since 2026-11-25 08:03Z, for more than 120 min"
-    ],
-    "openedAt": "2026-11-25T10:14:00.379Z",
-    "kinds": [
-      "paused:base-red"
-    ],
-    "notified": true
-  }
+  "updatedAt": "2026-11-25T11:46:21.704Z",
+  "batchWindow": 5
 }
