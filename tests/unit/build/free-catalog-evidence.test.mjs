@@ -211,24 +211,29 @@ test("real catalog has a precise disposition for every identity that needs evide
   );
 });
 
+// The CLI imports the catalog .ts files natively (no tsx loader). Its V8 coverage would carry a
+// second source layout for those files and break the merged coverage report, so the child
+// processes run without NODE_V8_COVERAGE. The assertions below are unchanged.
+function cliEnv(extra = {}) {
+  const env = { ...process.env, ...extra };
+  delete env.NODE_V8_COVERAGE;
+  return env;
+}
+
 test("CLI refuses unavailable baseline and missing PR base; neither is a successful bootstrap", () => {
   const script = new URL("../../../scripts/check/check-free-catalog-evidence.mjs", import.meta.url);
   const cwd = new URL("../../../", import.meta.url);
   const invalid = spawnSync(
     process.execPath,
     [fileURLToPath(script), "--base-ref", "refs/heads/nonexistent-free-catalog-test"],
-    { cwd, encoding: "utf8" }
+    { cwd, encoding: "utf8", env: cliEnv() }
   );
   assert.equal(invalid.status, 1);
   assert.match(invalid.stderr, /FAIL/);
   const missing = spawnSync(process.execPath, [fileURLToPath(script)], {
     cwd,
     encoding: "utf8",
-    env: {
-      ...process.env,
-      GITHUB_EVENT_NAME: "pull_request",
-      BASE_SHA: "",
-    },
+    env: cliEnv({ GITHUB_EVENT_NAME: "pull_request", BASE_SHA: "" }),
   });
   assert.equal(missing.status, 1);
   assert.match(missing.stderr, /FAIL/);
@@ -242,7 +247,7 @@ test("CLI requires an event baseline for PR, merge-group and push checks", () =>
     const result = spawnSync(process.execPath, [script], {
       cwd: new URL("../../../", import.meta.url),
       encoding: "utf8",
-      env: { ...process.env, GITHUB_EVENT_NAME: event, BASE_SHA: "" },
+      env: cliEnv({ GITHUB_EVENT_NAME: event, BASE_SHA: "" }),
     });
     assert.equal(result.status, 1, event);
   }
@@ -314,11 +319,7 @@ test(
             timeout: 30000,
             killSignal: "SIGKILL",
             windowsHide: true,
-            env: {
-              ...process.env,
-              GITHUB_EVENT_NAME: event,
-              BASE_SHA: base,
-            },
+            env: cliEnv({ GITHUB_EVENT_NAME: event, BASE_SHA: base }),
           });
         const rejected = run(audited);
         assert.equal(rejected.status, 1, event + rejected.stdout + rejected.stderr);
