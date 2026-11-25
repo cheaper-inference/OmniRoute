@@ -120,6 +120,20 @@ export function isFlatTierId(id: string): boolean {
 }
 
 /**
+ * Catalog-aware variant check: an id is a flat effort variant only when
+ * its base id is actually served. Product ids that merely end in an effort
+ * word (`qwen3.8-max`, `gemini-3.8-flash-high` with no base row) stay
+ * regular models. Without a catalog (`allIds` undefined) it falls back to
+ * the lexical `isFlatTierId`. `allIds` holds lowercase raw ids.
+ */
+export function isFlatVariantOf(id: string, allIds?: ReadonlySet<string>): boolean {
+  const base = baseIdOf(id);
+  if (base === undefined) return false;
+  if (allIds === undefined) return true;
+  return allIds.has(base.toLowerCase());
+}
+
+/**
  * The bare master auto router (`auto`, served as `owned_by: "combo"`).
  * It is a routing entry point, not a ranked model: it always publishes
  * and never takes a per-owner showcase slot. The `auto/*` variants stay
@@ -172,7 +186,8 @@ export function passesWhatServes(
   visibleFilter: ModelListFilter | undefined,
   nowMs: number = Date.now(),
   freshKept?: ReadonlySet<string>,
-  windowMs: number = FRESHNESS_WINDOW_MS
+  windowMs: number = FRESHNESS_WINDOW_MS,
+  allIds?: ReadonlySet<string>
 ): boolean {
   if (visibleFilter !== undefined) {
     if (matchesModelFilter(entry.id, visibleFilter)) return true;
@@ -181,7 +196,7 @@ export function passesWhatServes(
   // not declare (it already flows through the fetcher untouched).
   if (readEntryStatus(entry) === "deprecated") return false;
   if (isMasterAutoRouter(entry)) return true;
-  if (isFlatTierId(entry.id)) return false;
+  if (isFlatVariantOf(entry.id, allIds)) return false;
   if (isFreshModel(entry, nowMs, windowMs)) {
     if (freshKept !== undefined) return freshKept.has(entry.id);
     return true;
@@ -201,14 +216,15 @@ export function selectFreshKeptIds(
   perOwner: number = FRESH_PER_OWNER,
   nowMs: number = Date.now(),
   visibleFilter?: ModelListFilter,
-  windowMs: number = FRESHNESS_WINDOW_MS
+  windowMs: number = FRESHNESS_WINDOW_MS,
+  allIds?: ReadonlySet<string>
 ): Set<string> {
   const perOwnerCount = Number.isFinite(perOwner) && perOwner > 0 ? perOwner : FRESH_PER_OWNER;
   const groups = new Map<string, OmniRouteRawModelEntry[]>();
   for (const entry of entries) {
     if (!entry || typeof entry.id !== "string" || entry.id.length === 0) continue;
     if (readEntryStatus(entry) === "deprecated") continue;
-    if (isFlatTierId(entry.id)) continue;
+    if (isFlatVariantOf(entry.id, allIds)) continue;
     if (isMasterAutoRouter(entry)) continue;
     if (visibleFilter !== undefined) {
       if (matchesModelFilter(entry.id, visibleFilter)) continue;
@@ -237,10 +253,11 @@ export function staysDropped(
   entry: OmniRouteRawModelEntry,
   freshKept: ReadonlySet<string>,
   nowMs: number = Date.now(),
-  windowMs: number = FRESHNESS_WINDOW_MS
+  windowMs: number = FRESHNESS_WINDOW_MS,
+  allIds?: ReadonlySet<string>
 ): boolean {
   if (readEntryStatus(entry) === "deprecated") return true;
-  if (isFlatTierId(entry.id)) return true;
+  if (isFlatVariantOf(entry.id, allIds)) return true;
   if (isFreshModel(entry, nowMs, windowMs) && !freshKept.has(entry.id)) return true;
   return false;
 }

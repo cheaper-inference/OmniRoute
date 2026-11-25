@@ -473,6 +473,8 @@ async function handleChatCoreInner({
   comboName,
   comboStrategy = null,
   isCombo = false,
+  // Virtual routes have no persisted combo settings, even if a legacy row shares the name.
+  isVirtualAutoCombo = false,
   routingComboId = null,
   sessionAffinityKey = null,
   comboStepId = null,
@@ -1072,6 +1074,7 @@ async function handleChatCoreInner({
       pendingRequestId,
       pendingRequestGeneration,
       clientRawRequest,
+      agentContext, // identifies the attempt whose session turn a failure drops (#14864)
       requestedModel,
       credentials,
       startTime,
@@ -1492,7 +1495,7 @@ async function handleChatCoreInner({
         compressionComboApplied = true;
         return true;
       };
-      if ((isCombo && comboName) || routingComboId) {
+      if (!isVirtualAutoCombo && ((isCombo && comboName) || routingComboId)) {
         try {
           const { getComboByName } = await import("@/lib/db/combos");
           let comboConfig = await getComboByName(comboName);
@@ -1994,7 +1997,7 @@ async function handleChatCoreInner({
           : "Prompt Compression engines disabled; reactive context compaction is ALSO disabled — large histories will NOT be trimmed before reaching the upstream provider"
       );
     }
-    if (isCombo && comboName) {
+    if (isCombo && comboName && !isVirtualAutoCombo) {
       log?.info?.("CONTEXT", `Attempting to resolve combo limits for comboName=${comboName}`);
       try {
         const { getComboByName } = await import("@/lib/db/combos");

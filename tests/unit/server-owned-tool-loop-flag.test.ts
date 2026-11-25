@@ -87,7 +87,12 @@ describe("feature-flags-settings count update", () => {
     // AGENT_GUARD_MODE (client-agent observation mode, default off) takes it to 129.
     // AGENT_GUARD_STRICT (agent guard strict mode, default off) takes it to 130.
     // QUOTA_SELF_PANEL (self-service quota API, default off) to 131.
-    assert.equal(FEATURE_FLAG_DEFINITIONS.length, 131);
+    // CLAUDE_CODE_LOCAL_{COMMAND_PREFIX,SUGGESTION,FILEPATHS}_ENABLED (default off) to 134.
+    // PROXY_REEGRESS_ON_QUOTA_429 (pool re-send after a per-IP 429, default off) to 135.
+    // QUOTA_DAILY_REVALIDATION (#20343, default off) to 136.
+    // CODEBUDDY_TELEMETRY_ENABLED (#18398, codebuddy-intl turn reports, default off) to 137.
+    // AGENT_SESSION_MESSAGES_ENABLED (#14864, opt-in session turn capture, default off) to 138.
+    assert.equal(FEATURE_FLAG_DEFINITIONS.length, 138);
     // COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE (#17114, default off) to 114.
     // CURSOR_GROK_47_DROP_MAX_EFFORT (#17386, default off) to 112.
     // UNPRICED_USAGE_BUDGET_POLICY (#14604, default fail_closed) to 113.
