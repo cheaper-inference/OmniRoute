@@ -11,8 +11,9 @@
 # This smoke takes Bun from the build base image, replays the full runtime-os stage, then runs the
 # runner-web instructions without its ENTRYPOINT. It builds a throwaway image on a Docker host
 # (default: the .113 build VPS over ssh; set PREFLIGHT_DOCKER_HOST="" to build locally). The checkout's
-# playwright and playwright-core packages stand in for the standalone build's node_modules. As the
-# bun user it launches Chromium headless, headed under a private Xvfb, and through /usr/bin/chromium.
+# complete Playwright packages populate a mock builder. The runtime gets only the traced Playwright
+# files and playwright-core. As the bun user it launches Chromium headless, headed under a private
+# Xvfb, and through /usr/bin/chromium.
 #
 # Usage: scripts/release/preflight-bun-apt-smoke.sh [Dockerfile.bun]
 # Env:   PREFLIGHT_DOCKER_HOST  ssh target with Docker (default root@192.168.0.113); "" = local docker
@@ -84,10 +85,14 @@ PROBE
 
 {
   echo "FROM $BASE AS base"
+  echo "FROM scratch AS builder"
+  echo "COPY node_modules/playwright /opt/playwright/node_modules/playwright"
+  echo "COPY node_modules/playwright-core /opt/playwright/node_modules/playwright-core"
   printf '%s\n' "$RUNTIME_OS"
   echo "FROM runtime-os"
   echo "WORKDIR /app"
-  echo "COPY node_modules/ /app/node_modules/"
+  echo "COPY node_modules/playwright/index.js node_modules/playwright/index.mjs node_modules/playwright/package.json /app/node_modules/playwright/"
+  echo "COPY node_modules/playwright-core /app/node_modules/playwright-core"
   printf '%s\n' "$STAGE"
   echo "COPY probe.cjs /tmp/probe.cjs"
   echo "RUN bun /tmp/probe.cjs"

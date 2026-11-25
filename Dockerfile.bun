@@ -31,6 +31,12 @@ COPY scripts/dev/sync-env.mjs ./scripts/dev/sync-env.mjs
 # Fast Bun native package install
 RUN bun install --include=optional --quiet
 
+# Next standalone traces only Playwright's index.js, index.mjs and package.json.
+# Runner-web needs the complete installer at the same lockfile version.
+RUN mkdir -p /opt/playwright/node_modules \
+  && cp -RL node_modules/playwright node_modules/playwright-core /opt/playwright/node_modules/ \
+  && test -f /opt/playwright/node_modules/playwright/cli.js
+
 # Fail the build if wreq-js cannot resolve its current platform binding.
 RUN bun -e "const wreq = require('wreq-js'); if (typeof wreq.createTransport !== 'function') process.exit(1)"
 
@@ -123,8 +129,9 @@ FROM runner-base AS runner-web
 
 USER root
 
-# Chromium comes from Playwright. Wolfi supplies the shared libraries. The free
-# Wolfi chromium channel stopped at 149, so the chromium package is omitted.
+# The builder supplies the full Playwright installer for Chromium.
+# Wolfi supplies the shared libraries. The free Wolfi chromium channel stopped
+# at 149, so the chromium package is omitted.
 # NSS/NSPR libraries are requested by soname because `nss` does not ship libnss3.so.
 # The loader check catches missing libraries at build time.
 # Xvfb (#15300) needs xkbcomp and xkeyboard-config to start. The build creates
@@ -133,6 +140,7 @@ USER root
 # /usr/bin/chromium stays, as a symlink to Playwright's build, for the code paths that
 # look for a system browser there (ChatGPT Web, Codex Web, Adobe Firefly login).
 ENV PLAYWRIGHT_BROWSERS_PATH=/home/bun/.cache/ms-playwright
+COPY --from=builder /opt/playwright /opt/playwright
 RUN apk add --no-cache fontconfig font-liberation font-opensans gtk-3 mesa mesa-glx \
      so:libnss3.so so:libnssutil3.so so:libsmime3.so so:libnspr4.so \
      so:libX11.so.6 so:libXcomposite.so.1 so:libXdamage.so.1 so:libXext.so.6 so:libXfixes.so.3 \
@@ -141,7 +149,7 @@ RUN apk add --no-cache fontconfig font-liberation font-opensans gtk-3 mesa mesa-
      so:libglib-2.0.so.0 so:libpango-1.0.so.0 so:libxcb.so.1 so:libxkbcommon.so.0 so:libudev.so.1 \
      xvfb xkbcomp xkeyboard-config \
   && install -d -o bun -g bun -m 0755 /tmp/.X11-unix \
-  && bun node_modules/playwright/cli.js install chromium \
+  && bun /opt/playwright/node_modules/playwright/cli.js install chromium \
   && for bin in "$PLAYWRIGHT_BROWSERS_PATH"/*/*/chrome "$PLAYWRIGHT_BROWSERS_PATH"/*/*/chrome-headless-shell; do \
        missing="$(/lib/ld-linux-*.so.* --list "$bin" 2>&1 | grep 'not found' || true)"; \
        if [ -n "$missing" ]; then echo "$bin is missing libraries:"; echo "$missing"; exit 1; fi; \
