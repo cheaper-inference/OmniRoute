@@ -15,7 +15,7 @@ export { isPassiveCodex } from "./tokenRefresh/passiveCodex.ts";
 import { isPassiveCodex, resolvePassiveCodex } from "./tokenRefresh/passiveCodex.ts";
 import { PROVIDERS } from "../config/constants.ts";
 import { getCodexAuthIdentityHeaders } from "../config/codexClient.ts";
-import { runWithProxyContext } from "../utils/proxyFetch.ts";
+import { runCommittedWithProxyContext } from "../utils/proxyFetch.ts";
 import { sanitizeErrorMessage } from "../utils/errorSanitization.ts";
 import { serializeRefresh, rotationGroupFor } from "./refreshSerializer.ts";
 import { parseTokenExpiryMs } from "@/lib/tokenHealthCheckExpiry";
@@ -296,7 +296,7 @@ async function refreshActiveAccessToken(
     if (config.clientId) params.set("client_id", config.clientId);
     if (config.clientSecret) params.set("client_secret", config.clientSecret);
 
-    const response = await runWithProxyContext(proxyConfig, () =>
+    const response = await runCommittedWithProxyContext(proxyConfig, () =>
       fetch(refreshEndpoint, {
         method: "POST",
         headers: {
