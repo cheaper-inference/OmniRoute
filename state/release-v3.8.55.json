@@ -2,7 +2,41 @@
   "version": 1,
   "base": "release/v3.8.55",
   "paused": null,
-  "inFlight": null,
+  "inFlight": {
+    "batchId": "b43",
+    "kind": "batch",
+    "candidateRef": "omni-queue/release-v3.8.55/b43-d7137ce56c19",
+    "candidateSha": "d7137ce56c198968d09015754f09901b50237afd",
+    "baseSha": "176919ddb80754ad24922790dde53a85f21249d5",
+    "treeSha": "597515c52e76f7f4bb2054d016b32bb1e90e7b60",
+    "prs": [
+      {
+        "n": 20421,
+        "head": "b9a106948defc7a2d2455a2d6b097fbf7a92bf6e",
+        "title": "docs(readme): rebuild README from the approved round-2 section designs",
+        "author": "diegosouzapw",
+        "labeledAt": "2026-11-25T23:34:25Z"
+      },
+      {
+        "n": 21198,
+        "head": "6cd7c23e0049742da3cd5402573b259577559657",
+        "title": "feat(api): bind a server-resolved API key to a request context (KEA-9523)",
+        "author": "diegosouzapw",
+        "labeledAt": "2026-11-25T23:40:06Z"
+      },
+      {
+        "n": 20599,
+        "head": "5e5437d0dcc5a375945b435461072881dcb01c04",
+        "title": "fix(ci): re-run PR checks on a base change only, not on a text edit",
+        "author": "diegosouzapw",
+        "labeledAt": "2026-11-25T23:43:52Z"
+      }
+    ],
+    "stage": "testing",
+    "startedAt": "2026-11-25T23:44:35.180Z",
+    "attempts": 0,
+    "bisect": null
+  },
   "baseChecks": [
     {
       "baseSha": "176919ddb80754ad24922790dde53a85f21249d5",
@@ -111,8 +145,8 @@
     }
   },
   "counters": {
-    "batchSeq": 42,
-    "ciRuns": 47,
+    "batchSeq": 43,
+    "ciRuns": 48,
     "landedPrs": 1,
     "landedBatches": 1,
     "redBatches": 10,
@@ -120,17 +154,6 @@
     "culprits": 1
   },
   "history": [
-    {
-      "at": "2026-11-19T16:42:25.009Z",
-      "type": "would-land",
-      "batchId": "b2",
-      "prs": [
-        20630
-      ],
-      "sha": "f6acc51b3eedd601dd5c47ef036169a26f002bee",
-      "detail": "shadow mode: would merge-ff onto 3de17c8a2a32",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44569016721"
-    },
     {
       "at": "2026-11-19T16:42:47.801Z",
       "type": "batch-started",
@@ -2544,8 +2567,26 @@
       ],
       "sha": "176919ddb80754ad24922790dde53a85f21249d5",
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45716621959"
+    },
+    {
+      "at": "2026-11-25T23:44:39.139Z",
+      "type": "batch-started",
+      "batchId": "b43",
+      "prs": [
+        20421,
+        21198,
+        20599
+      ],
+      "sha": "d7137ce56c198968d09015754f09901b50237afd",
+      "detail": "3 PR(s) on 176919ddb807; window 5",
+      "labeledAt": {
+        "20421": "2026-11-25T23:34:25Z",
+        "20599": "2026-11-25T23:43:52Z",
+        "21198": "2026-11-25T23:40:06Z"
+      },
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45723570850"
     }
   ],
-  "updatedAt": "2026-11-25T22:51:23.124Z",
+  "updatedAt": "2026-11-25T23:44:41.140Z",
   "batchWindow": 5
 }
