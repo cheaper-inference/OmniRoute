@@ -3,6 +3,7 @@ import { isDeepStrictEqual } from "node:util";
 import { activeCatalogIds, catalogPoolValue } from "./catalog.mjs";
 import { selectPath } from "./jsonPath.mjs";
 import { extractExcerpt, htmlToText, normalizeForMatch, shortHash } from "./normalize.mjs";
+import { byCodeUnit } from "./order.mjs";
 
 /** @typedef {"ids-missing"|"ids-added"|"assertion-failed"|"phrase-missing"|"phrase-present"
  *   |"excerpt-changed"|"anchor-missing"|"unreachable"|"gone"|"invalid-response"|"manifest-out-of-sync"} FindingKind */
@@ -44,7 +45,7 @@ function readId(entry) {
 
 function readIds(entries) {
   if (!Array.isArray(entries)) return [];
-  return [...new Set(entries.map(readId).filter((id) => id !== undefined))].sort();
+  return [...new Set(entries.map(readId).filter((id) => id !== undefined))].sort(byCodeUnit);
 }
 
 function isZeroPrice(value) {
@@ -79,7 +80,7 @@ function expectedIds(rows, probe) {
             (stripPrefix && id.startsWith(stripPrefix) ? id.slice(stripPrefix.length) : id)
         )
     ),
-  ].sort();
+  ].sort(byCodeUnit);
 }
 
 function compareIds(catalogIds, liveIds) {

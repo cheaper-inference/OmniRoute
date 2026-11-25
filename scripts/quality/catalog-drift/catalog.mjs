@@ -1,3 +1,5 @@
+import { byCodeUnit } from "./order.mjs";
+
 export function activeCatalogIds(rows, provider) {
   const ids = rows
     .filter(
@@ -7,7 +9,7 @@ export function activeCatalogIds(rows, provider) {
         row.freeType !== "one-time-initial"
     )
     .map((row) => row.modelId);
-  return [...new Set(ids)].sort();
+  return [...new Set(ids)].sort(byCodeUnit);
 }
 
 export function catalogPoolValue(rows, back) {

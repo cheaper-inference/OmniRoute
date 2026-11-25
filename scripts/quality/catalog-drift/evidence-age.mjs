@@ -6,6 +6,7 @@ import { z } from "zod";
 
 import { FREE_MODEL_BUDGETS } from "../../../open-sse/config/freeModelCatalog.data.ts";
 import { isMainModule } from "../../lib/is-main-module.mjs";
+import { byCodeUnit } from "./order.mjs";
 
 export const EVIDENCE_MAX_AGE_DAYS = 30;
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -70,12 +71,12 @@ export function computeEvidenceAges({ rows, evidence, today }) {
       const dates = members
         .map((row) => latest.get(modelKey(row)))
         .filter(Boolean)
-        .sort();
+        .sort(byCodeUnit);
       const freshestCheckedAt = dates.at(-1) ?? null;
       const ageDays = freshestCheckedAt === null ? null : ageInDays(freshestCheckedAt);
       return {
         pool,
-        providers: [...new Set(members.map(({ provider }) => provider))].sort(),
+        providers: [...new Set(members.map(({ provider }) => provider))].sort(byCodeUnit),
         monthlyTokens: Math.max(...members.map(({ monthlyTokens }) => monthlyTokens)),
         rowsWithValue: members.length,
         rowsWithEvidence: dates.length,

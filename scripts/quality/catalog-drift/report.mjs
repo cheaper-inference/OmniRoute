@@ -1,5 +1,6 @@
 import { summarizeCatalogRows } from "./catalog.mjs";
 import { shortHash } from "./normalize.mjs";
+import { byCodeUnit } from "./order.mjs";
 
 /** @typedef {import("./probes.mjs").Finding} Finding */
 /** @typedef {import("./probes.mjs").ProbeStats} ProbeStats */
@@ -12,7 +13,7 @@ import { shortHash } from "./normalize.mjs";
  *   only: string|null, probes: ProbeResult[], providers: Record<string, ProviderReport> }} DriftReport */
 
 function stableKey({ kind, details }) {
-  if (Array.isArray(details.ids)) return JSON.stringify([...details.ids].sort());
+  if (Array.isArray(details.ids)) return JSON.stringify([...details.ids].sort(byCodeUnit));
   if (kind === "assertion-failed") return JSON.stringify([details.path, details.op]);
   if (kind === "excerpt-changed") return details.actual;
   if (kind === "anchor-missing") return details.anchor;
@@ -33,7 +34,7 @@ export function providerFingerprint(findings) {
   const keys = findings
     .filter(({ severity }) => severity === "drift")
     .map((finding) => [finding.kind, finding.probeId, stableKey(finding)].join("|"))
-    .sort();
+    .sort(byCodeUnit);
   return keys.length ? shortHash(keys.join("\n")) : null;
 }
 
@@ -103,7 +104,7 @@ export function renderMarkdown(report) {
     "| provider | probes | drift | info | fetch failures |",
     "| --- | ---: | ---: | ---: | ---: |",
   ];
-  const providers = Object.keys(report.providers).sort();
+  const providers = Object.keys(report.providers).sort(byCodeUnit);
   for (const provider of providers) {
     const probes = report.probes.filter((probe) => probe.provider === provider);
     const { findings } = report.providers[provider];
