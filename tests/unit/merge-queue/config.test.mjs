@@ -138,7 +138,9 @@ test("the shipped config speaks as the owner and signs merge commits", () => {
   assert.deepEqual(VOICES, ["app", "owner"]);
   assert.equal(raw.voice, "owner");
   assert.equal(raw.landing.signing, "ssh");
-  assert.equal(raw.mode, "shadow");
+  // live since the cut-over (docs/ops/OMNI_QUEUE.md → "Cut-over and rollback", step 9)
+  assert.equal(raw.mode, "live");
+  assert.deepEqual(validateConfig(raw).errors, [], "the shipped config validates");
 });
 
 test("voice: app (the default) or owner; anything else is refused", () => {
@@ -297,7 +299,7 @@ test("flakyReruns: 0 or 1, default 1, anything else refused with a clear message
   }
 });
 
-test("owner decisions D-Q1..D-Q3 and the shadow start are pinned", () => {
+test("owner decisions D-Q1..D-Q3 and the live mode are pinned", () => {
   assert.equal(raw.landing.mode, "merge-ff");
   // the batch window starts at 6 and may grow to 12 (owner, cut-over part 2)
   assert.deepEqual(raw.batch, {
@@ -308,8 +310,9 @@ test("owner decisions D-Q1..D-Q3 and the shadow start are pinned", () => {
     startSize: 6,
   });
   assert.equal(raw.label, "omni-queue");
-  assert.notEqual(raw.label, "queue", "must not collide with the Mergify label during shadow");
-  assert.equal(raw.mode, "shadow");
+  assert.notEqual(raw.label, "queue", "must not collide with the retired Mergify label");
+  assert.equal(raw.mode, "live");
+  assert.deepEqual(validateConfig(raw).errors, [], "the shipped config validates");
   assert.deepEqual(raw.approvers, ["diegosouzapw"]);
 });
 
@@ -318,7 +321,7 @@ test("prChecksRequired: the three PR gates shipped; default []; distinct non-emp
   // (.github/workflows/api-route-typecheck.yml): a check that blocks a merge today blocks here.
   assert.deepEqual(raw.prChecksRequired, ["Gate / CI", "Gate / Quality", "API Route Typecheck"]);
   assert.deepEqual(validateConfig(raw).errors, [], "the shipped config validates");
-  assert.equal(raw.mode, "shadow");
+  assert.equal(raw.mode, "live");
   const absent = clone();
   delete absent.prChecksRequired;
   const ok = validateConfig(absent);
