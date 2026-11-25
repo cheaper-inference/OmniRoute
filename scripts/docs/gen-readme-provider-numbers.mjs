@@ -125,7 +125,7 @@ export async function renderReadmeProviderNumbers() {
       `  <rect width="${W}" height="${H}" fill="url(#provider-numbers-grid)"/>\n` +
       `  <text x="32" y="62" class="h2" style="font-size:32px">${TITLE}</text>\n` +
       `  <text x="1168" y="62" text-anchor="end" class="sub" style="font-size:17px">${SUBTITLE}</text>\n` +
-      cards.map(card).join("") +
+      cards.map((c, i) => card(c, i)).join("") +
       "</svg>\n"
   );
 }

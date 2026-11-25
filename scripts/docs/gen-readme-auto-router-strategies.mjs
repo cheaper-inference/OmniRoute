@@ -126,7 +126,7 @@ export async function renderAutoRouterStrategies() {
       `  <text x="40" y="52" class="kicker">${esc(kicker)}</text>\n` +
       `  <line x1="${afterKicker(40, kicker)}" y1="47" x2="1160" y2="47" class="rule"/>\n` +
       `  <text x="40" y="80" class="body">${esc(AUTO_ROUTER_STRATEGIES_COPY.legend[0])}</text>\n` +
-      TILES.map(tile).join("") +
+      TILES.map((t, i) => tile(t, i)).join("") +
       "</svg>\n"
   );
 }

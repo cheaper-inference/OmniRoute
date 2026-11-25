@@ -157,8 +157,10 @@ export async function renderReadmeWorksZeroConfig() {
       `  <text x="40" y="56" class="kicker">${esc(C.kicker[0])}</text>\n` +
       `  <line x1="${afterKicker(40, C.kicker[0])}" y1="51" x2="1160" y2="51" class="rule" stroke-width="1"/>\n` +
       `  <text x="40" y="98" class="sub">${esc(C.headline[0])}<tspan font-weight="600" style="fill:var(--ok)">${esc(C.headline[1])}</tspan></text>\n` +
-      STEPS.slice(1).map(connector).join("") +
-      STEPS.map(tile).join("\n") +
+      STEPS.slice(1)
+        .map((s, i) => connector(s, i))
+        .join("") +
+      STEPS.map((s, i) => tile(s, i)).join("\n") +
       "\n" +
       // "your ___" chips
       `  <g opacity="0">\n` +

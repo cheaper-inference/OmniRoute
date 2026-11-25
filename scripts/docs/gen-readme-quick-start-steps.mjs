@@ -129,7 +129,7 @@ export async function renderReadmeQuickStartSteps() {
       gridDefs("quick-start-grid") +
       `  <rect width="${W}" height="${H}" class="bg"/>\n` +
       `  <rect width="${W}" height="${H}" fill="url(#quick-start-grid)"/>\n` +
-      steps.map(card).join("") +
+      steps.map((s, i) => card(s, i)).join("") +
       "</svg>\n"
   );
 }
