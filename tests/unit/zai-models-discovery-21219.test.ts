@@ -21,6 +21,9 @@ const providerModelsRoute = await import("../../src/app/api/providers/[id]/model
 const { PROVIDER_MODELS_CONFIG } =
   await import("../../src/app/api/providers/[id]/models/discovery/providerModelsConfig.ts");
 const { getDiscoveryClass } = await import("../../src/lib/providerModels/discoveryClass.ts");
+const { replaceSyncedAvailableModelsForConnection } = await import("../../src/lib/db/models.ts");
+const { getModelInfo } = await import("../../src/sse/services/model.ts");
+const { zaiProvider } = await import("../../open-sse/config/providers/registry/zai/index.ts");
 
 const originalFetch = globalThis.fetch;
 
@@ -102,6 +105,49 @@ test("provider models route imports the live z.ai catalog instead of the local f
   assert.equal(authorization, "Bearer zai-test-key");
   const ids = body.models.map((m) => m.id);
   assert.ok(ids.includes("glm-5.4"), "a live model missing from the static registry is imported");
+});
+
+test("a partial live catalog keeps the omitted glm-4.7-flash available without changing its format", async () => {
+  // Snapshot returned by /api/paas/v4/models on 2026-11-25. The coding-plan
+  // chat endpoint served glm-4.7-flash even though this list omitted it.
+  const ids = [
+    "glm-4.5",
+    "glm-4.5-air",
+    "glm-4.6",
+    "glm-4.7",
+    "glm-5",
+    "glm-5-turbo",
+    "glm-5.1",
+    "glm-5.2",
+    "glm-5.3",
+    "glm-5.3-flash",
+    "glm-5.3-flashx",
+    "glm-5.3-flashx-legal",
+    "glm-5.4",
+  ];
+  const db = core.getDbInstance();
+  const now = new Date().toISOString();
+  db.prepare(
+    `INSERT OR REPLACE INTO provider_connections (id, provider, is_active, created_at, updated_at)
+     VALUES (?, ?, 1, ?, ?)`
+  ).run("zai-partial-live-list", "zai", now, now);
+  await replaceSyncedAvailableModelsForConnection(
+    "zai",
+    "zai-partial-live-list",
+    ids.map((id) => ({ id, name: id, source: "imported" }))
+  );
+
+  const resolved = await getModelInfo("zai/glm-4.7-flash");
+  assert.equal(resolved.provider, "zai");
+  assert.equal(resolved.targetFormat, zaiProvider.format);
+  assert.equal(zaiProvider.format, "claude");
+  const { getActiveSyncedCatalog, getAllActiveSyncedModels } =
+    await import("../../src/lib/db/models/activeSyncedCatalog.ts");
+  assert.equal((await getActiveSyncedCatalog("zai")).authoritative, true);
+  const listed = (await getAllActiveSyncedModels()).zai?.find(
+    (model) => model.id === "glm-4.7-flash"
+  );
+  assert.equal(listed?.catalogOrigin, "registry");
 });
 
 test("provider models route falls back to the local z.ai catalog when the live fetch fails", async () => {

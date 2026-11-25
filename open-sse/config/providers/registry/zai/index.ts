@@ -47,7 +47,13 @@ export const zaiProvider: RegistryEntry = {
     { id: "glm-5.1", name: "GLM 5.1" },
     { id: "glm-5", name: "GLM 5" },
     { id: "glm-5-turbo", name: "GLM 5 Turbo" },
-    { id: "glm-4.7-flash", name: "GLM 4.7 Flash" },
+    // Tagged with an explicit dispatch intent so the authoritative live catalog
+    // cannot veto it: the live /models list (13 ids, 2026-11-25) omits
+    // glm-4.7-flash, while the coding-plan chat endpoint answered it with 200.
+    // The value equals this provider's default format, so the wire format and
+    // endpoint are unchanged; the tag only keeps the model admitted. Same
+    // mechanism as glm-5.3-flash (partial-discovery incident, 2026-10-05).
+    { id: "glm-4.7-flash", name: "GLM 4.7 Flash", targetFormat: "claude" },
     { id: "glm-4.7", name: "GLM 4.7" },
     // #21219: glm-5.4 answers as itself on the coding-plan chat surface (200,
     // model=glm-5.4, live probe 2026-11-25); keep it as a static fallback next to
