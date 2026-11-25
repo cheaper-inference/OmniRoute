@@ -1,0 +1,1 @@
+- **docs(readme):** dark-theme polish to match the site: the two card diagrams highlight in the kit copper instead of green, the Pollinations, Roo Code and Qoder icons follow the reader's theme, the remaining shields.io badges use copper on ink (partner tags keep their own colors) and the video placeholders use the site surface color.

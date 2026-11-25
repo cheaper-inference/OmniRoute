@@ -76,6 +76,13 @@ test("the provider figure SVG shows two rows of four outlined cards and embeds t
     (await buildProviderNumbersCards()).map(({ label }) => label)
   );
   assert.equal(doc.querySelector("text.mono")?.textContent, "hasFree");
+  const budgetCard = cards.at(-1);
+  assert.equal(doc.querySelectorAll("rect.accent").length, 1);
+  assert.equal(budgetCard?.querySelector("rect.accent")?.getAttribute("width"), "6");
+  const metric = budgetCard?.querySelector("g.num");
+  assert.ok(metric);
+  assert.equal(metric.hasAttribute("style"), false, "the metric inherits the kit's ink");
+  assert.match(svg, /\.num\{[^}]*fill:var\(--ink\)/);
   assert.match(svg, /@font-face\{font-family:"CI Mono"/);
   assert.match(svg, /<use href="#g[0-9a-z]+"/);
   assert.match(doc.querySelector("desc")?.textContent ?? "", /None of them is added to another\./);

@@ -8,7 +8,7 @@
 .sub{fill:var(--body)}
 .mono{font-family: "CI Mono", "IBM Plex Mono", Consolas, "Liberation Mono", monospace;font-weight:500;font-size:13px;fill:var(--body)}
 .num{fill:var(--ink)}
-.bg{fill:var(--bg)} .surface{fill:var(--surface);stroke:var(--border)} .grid{stroke:var(--grid)}
+.bg{fill:var(--bg)} .surface{fill:var(--surface);stroke:var(--border)} .accent{fill:var(--accent)} .grid{stroke:var(--grid)}
 .h2{fill:var(--ink)}
 .h3{fill:var(--ink)}
 .definition{fill:var(--body)}
@@ -218,7 +218,8 @@
   </g>
   <g class="provider-stat" transform="translate(896,328)">
     <rect width="272" height="184" rx="12" class="surface"/>
-    <g class="num" style="fill:var(--ok)" transform="translate(20 64) scale(.052 -.052)"><use href="#g2r"/><use href="#g1u" x="556"/><use href="#g2s" x="1112"/><use href="#g1v" x="1328"/><use href="#g2t" x="1884"/><use href="#g2u" x="2440"/></g>
+    <rect width="6" height="184" rx="3" class="accent"/>
+    <g class="num" transform="translate(20 64) scale(.052 -.052)"><use href="#g2r"/><use href="#g1u" x="556"/><use href="#g2s" x="1112"/><use href="#g1v" x="1328"/><use href="#g2t" x="1884"/><use href="#g2u" x="2440"/></g>
   <text x="20" y="64" class="ol">~1.62B</text>
     <g class="h3" transform="translate(20 96) scale(.018 -.018)"><use href="#gu"/><use href="#gv" x="618"/><use href="#g29" x="1179"/><use href="#g2c" x="1716"/><use href="#g10" x="2275"/><use href="#g10" x="2650"/><use href="#gx" x="3025"/><use href="#g27" x="3250"/><use href="#gw" x="3815"/><use href="#g22" x="4555"/><use href="#g10" x="4837"/><use href="#gv" x="5202"/><use href="#gv" x="5763"/><use href="#gz" x="6496"/><use href="#g13" x="6809"/><use href="#g2d" x="7370"/><use href="#gv" x="7864"/><use href="#g27" x="8425"/><use href="#gy" x="8990"/><use href="#g2v" x="9674"/><use href="#g2i" x="10191"/><use href="#g13" x="11049"/><use href="#g27" x="11610"/><use href="#gz" x="12175"/><use href="#g21" x="12488"/></g>
   <text x="20" y="96" class="ol">Recurring free tokens / month</text>

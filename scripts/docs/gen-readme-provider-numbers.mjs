@@ -93,12 +93,14 @@ export async function buildProviderNumbersCards() {
 function card({ value, label, code, lines, highlight }, i) {
   const x = 32 + (i % COLUMNS) * 288;
   const firstRow = i < COLUMNS;
+  const height = firstRow ? 216 : 184;
   const rows = code ? [["mono", code]] : [];
   rows.push(...lines.map((line) => ["definition", line]));
   return [
     `  <g class="provider-stat" transform="translate(${x},${firstRow ? 96 : 328})">`,
-    `    <rect width="${CARD_W}" height="${firstRow ? 216 : 184}" rx="12" class="surface"/>`,
-    `    <text x="20" y="64" class="num" style="font-size:52px${highlight ? ";fill:var(--ok)" : ""}">${value}</text>`,
+    `    <rect width="${CARD_W}" height="${height}" rx="12" class="surface"/>`,
+    ...(highlight ? [`    <rect width="6" height="${height}" rx="3" class="accent"/>`] : []),
+    `    <text x="20" y="64" class="num" style="font-size:52px">${value}</text>`,
     `    <text x="20" y="96" class="h3">${esc(label)}</text>`,
     ...rows.map(
       ([role, line], j) =>

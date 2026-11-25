@@ -1,16 +1,17 @@
-// Neutral initials tiles for the README's CLI-tool and provider grids: one 52×52 SVG per tool or
-// provider that has no icon asset stored in the repository. Same stroke and gray as
+// Icons for the README's CLI-tool and provider grids. Tools without an icon asset get a 52×52
+// neutral initials tile with the same stroke and gray as
 // public/providers/cli-generic.svg; initials only, never a brand color or shape, and the <title>
-// says it is a text tile, not the project's logo. Output is committed under
+// says it is a text tile, not the project's logo. Icons drawn in currentColor get a copy with
+// theme-aware ink for README embeds. Output is committed under
 // docs/assets/cli-icons/ and docs/assets/provider-icons/;
-// tests/unit/docs/readme-cli-icons-svg.test.ts fails when a committed tile no longer matches.
+// tests/unit/docs/readme-cli-icons-svg.test.ts keeps both kinds in sync with the generator.
 //
 //   node scripts/docs/gen-cli-icon-tiles.mjs [--out-root dir]
 //
 // Not a gen-readme-*.mjs module on purpose: that glob is the README diagram driver's inventory
 // (tests/unit/docs/readme-diagrams-driver.test.ts), and these tiles are not diagrams. When a real
 // icon for one of these lands in the repo, point the README at it and drop the entry here.
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -65,6 +66,31 @@ export const CLI_ICON_TILES = [
   })),
 ];
 
+export const README_THEMED_ICONS = [
+  {
+    path: "docs/assets/cli-icons/roocode-themed.svg",
+    source: "public/providers/roocode.svg",
+    name: "Roo Code",
+  },
+  {
+    path: "docs/assets/provider-icons/pollinations-themed.svg",
+    source: "public/providers/pollinations.svg",
+    name: "Pollinations",
+  },
+];
+
+export function renderReadmeThemedIcon({ source, name }) {
+  const svg = readFileSync(join(ROOT, source), "utf8");
+  const root = svg.match(/^<svg\b[^>]*\bfill="currentColor"[^>]*>/)?.[0];
+  if (!root) throw new Error(`${source}: expected an SVG root with fill="currentColor"`);
+  return svg.replace(
+    root,
+    `${root.slice(0, -1)} role="img">\n` +
+      `  <desc>${name} logo.</desc>\n` +
+      "  <style>:root{color:#20211c}@media (prefers-color-scheme: dark){:root{color:#f2f0e8}}</style>"
+  );
+}
+
 /**
  * One tile. Three-letter initials drop to 14px so they fit the 44px frame; the baseline sits at
  * 26 + 0.36·size, which centers Arial's cap height in the tile.
@@ -87,10 +113,14 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   const i = process.argv.indexOf("--out-root");
   if (i >= 0 && !process.argv[i + 1]) throw new Error("--out-root requires a directory");
   const outRoot = i >= 0 ? resolve(process.argv[i + 1]) : ROOT;
-  for (const tile of CLI_ICON_TILES) {
-    const out = join(outRoot, tile.path);
+  const icons = [
+    ...CLI_ICON_TILES.map((tile) => [tile.path, renderCliIconTile(tile)]),
+    ...README_THEMED_ICONS.map((icon) => [icon.path, renderReadmeThemedIcon(icon)]),
+  ];
+  for (const [path, svg] of icons) {
+    const out = join(outRoot, path);
     mkdirSync(dirname(out), { recursive: true });
-    writeFileSync(out, renderCliIconTile(tile));
+    writeFileSync(out, svg);
   }
-  console.log(`cli icon tiles → ${CLI_ICON_TILES.length} files under ${outRoot}`);
+  console.log(`README icons → ${icons.length} files under ${outRoot}`);
 }
