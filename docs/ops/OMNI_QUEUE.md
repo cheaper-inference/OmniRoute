@@ -8,16 +8,20 @@ title: "omni-queue — OmniRoute's own merge queue"
 the Mergify queue described in [MERGE_TRAIN.md](MERGE_TRAIN.md). It ships **inert**: nothing runs
 until the repository variable OMNI_QUEUE_ENABLED is `true` (set it only after the `omni-queue`
 environment exists, see [Before OMNI_QUEUE_ENABLED is set](#before-omni_queue_enabled-is-set)), and
-the default `mode` in `config/merge-queue/config.json` is `shadow` (compose and test, never land).
-Until the owner approves the cut-over (see [Cut-over and rollback](#cut-over-and-rollback)), Mergify
-and the `queue` label stay the default merge path.
+the `mode` in `config/merge-queue/config.json` ships as `live` (green candidates land). Since the
+cut-over (see [Cut-over and rollback](#cut-over-and-rollback)) the queue label is how a pull
+request lands on a release branch, and the status door of the [Ruleset](#ruleset) refuses any
+commit there without the land status. `shadow` (compose and test, never land) is still a supported
+mode: the queue ran in it before the cut-over, and a switch back to it is a way to stop landing
+without stopping the queue (see [Shadow mode and live mode](#shadow-mode-and-live-mode) and
+[Before a mode change or a stop](#before-a-mode-change-or-a-stop)).
 
 > **2026-11-19: the Mergify merge queue is retired** (owner's decision; step 1 of
 > [Cut-over and rollback](#cut-over-and-rollback)). `.mergify.yml` no longer defines a queue and
-> refuses the Mergify commands that merge or rewrite a pull request. Until omni-queue runs in live
-> mode, release PRs are merged by hand under the repository ruleset "Require green gates on the
-> active release" (`Gate / CI` + `Gate / Quality`); mentions below of Mergify as the current merge
-> path describe the state before that date.
+> refuses the Mergify commands that merge or rewrite a pull request. From then until omni-queue ran
+> in live mode, release PRs were merged by hand under the repository ruleset "Require green gates on
+> the active release" (`Gate / CI` + `Gate / Quality`); mentions below of Mergify as the current
+> merge path describe the state before 2026-11-19.
 
 ## Why
 
@@ -455,7 +459,7 @@ reason codes come from `INELIGIBLE_REASONS` in `scripts/merge-queue/contracts.mj
 | --------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
 | open and not a draft                                                                                                                    | `not-open`, `draft`                            |
 | base matches `bases` (default `^release/v\d+\.\d+\.\d+$`)                                                                               | `base-mismatch`                                |
-| carries `label` (`omni-queue` during shadow)                                                                                            | `no-label`                                     |
+| carries `label` (shipped `omni-queue`)                                                                                                  | `no-label`                                     |
 | no label from `blockLabels` (`hold`, `hold-vps`, `do-not-merge`, `wip`)                                                                 | `blocked-label`                                |
 | no open `release-freeze` issue citing the base (Hard Rule #21)                                                                          | `base-frozen`                                  |
 | the label was applied by a login in `approvers`                                                                                         | `label-not-by-approver`                        |
@@ -1206,7 +1210,7 @@ differ.
 | Key                      | Type                                                         | Default                                                                    | Effect                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | ------------------------ | ------------------------------------------------------------ | -------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `schemaVersion`          | `1`                                                          | none; shipped `1`                                                          | Version of the config format.                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| `mode`                   | `shadow` or `live`                                           | none; shipped `shadow`                                                     | `shadow` composes and tests but never lands or changes a PR; `live` lands (see [Shadow mode and live mode](#shadow-mode-and-live-mode)).                                                                                                                                                                                                                                                                                                                  |
+| `mode`                   | `shadow` or `live`                                           | none; shipped `live`                                                       | `shadow` composes and tests but never lands or changes a PR; `live` lands (see [Shadow mode and live mode](#shadow-mode-and-live-mode)).                                                                                                                                                                                                                                                                                                                  |
 | `label`                  | label name                                                   | none; shipped `omni-queue`                                                 | The queue label. Repeated as a literal in the job filters of `omni-queue.yml` (see [Eligibility](#eligibility)).                                                                                                                                                                                                                                                                                                                                          |
 | `protectedApprovalLabel` | label name, different from `label`                           | none; shipped `protected-approved`                                         | Second label a PR that touches `protectedPaths` needs. Also repeated in the job filters.                                                                                                                                                                                                                                                                                                                                                                  |
 | `approvers`              | list of logins, at least one                                 | none; shipped `["diegosouzapw"]`                                           | Whose queue, protected-approval and lane labels count; also who may dispatch a `bless`.                                                                                                                                                                                                                                                                                                                                                                   |
@@ -1334,12 +1338,12 @@ is written](#before-the-land-status-is-written) runs again.
 
 ## Shadow mode and live mode
 
-- **`shadow`** (default): the queue composes candidates, runs the full CI on them, bisects and
+- **`shadow`**: the queue composes candidates, runs the full CI on them, bisects and
   classifies exactly as in live mode, but never lands and never changes a pull request. A green
   candidate produces a `would-land` event; each PR head settled that way is skipped until it
   changes. Use it to compare the batches the queue would land with the merges Mergify actually
   performs.
-- **`live`**: green candidates land through `landing.mode`.
+- **`live`** (the shipped mode): green candidates land through `landing.mode`.
 - During shadow, the queue label is `omni-queue`, distinct from Mergify's `queue`, so the two
   never act on the same PR by accident.
 

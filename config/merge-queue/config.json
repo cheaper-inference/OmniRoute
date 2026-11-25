@@ -52,6 +52,6 @@
     "config/merge-queue/**",
     ".mergify.yml"
   ],
-  "mode": "shadow",
+  "mode": "live",
   "voice": "owner"
 }
