@@ -553,6 +553,18 @@ once the flag is on, an unauthenticated request gets `401` before any DB read or
 write. `GET /api/radar/settings` never returns the raw supporter key regardless of
 auth state — only the masked form and a `hasSupporterKey` boolean.
 
+### How to send a promotion lead
+
+Use the [Radar promotion lead form on GitHub](https://github.com/cheaper-inference/OmniRoute/issues/new?template=promotion_lead.yml)
+to tell us about a provider offer. Enter the provider name, the offer link on its own site, and
+what the offer includes. If the provider has no offer page, link to its homepage and explain
+where you saw the offer in the details.
+
+Add the end date if you know it, where you saw the offer, and a separate source link if you
+have one. Complete both confirmations. The reward checkbox is optional.
+
+A person checks each lead before any offer is published.
+
 ---
 
 ## Supporter offers
