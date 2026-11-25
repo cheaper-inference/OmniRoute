@@ -38,6 +38,7 @@ const REGEX_SPAWN_SAMPLES: ReadonlyArray<string> = [
   "/api/providers/volcengine-plan/connect",
   "/api/providers/acct-1/refresh-cursor",
   "/api/providers/cursor/agent-availability",
+  "/api/providers/devin-cli-agentic/auth-status",
   "/api/providers/agy-auth/apply-local",
   "/api/providers/acct-1/chatgpt-web-codex-doctor",
   "/api/providers/validate",
@@ -259,4 +260,25 @@ test("GET /api/cli-tools/runtime/[toolId] requires credentials even when require
     404,
     "authenticated caller passes auth gate and hits toolId validation"
   );
+});
+
+test("GET /api/providers/devin-cli-agentic/auth-status is rejected on private LAN and requires credentials on loopback in open mode", async () => {
+  await settingsDb.updateSettings({ requireLogin: false, setupComplete: true });
+  const path = "/api/providers/devin-cli-agentic/auth-status";
+
+  assert.equal(isSpawnCapablePath(path, "GET"), true);
+
+  const anonLan = await managementPolicy.evaluate(policyCtx(path, "GET", "192.168.1.50"));
+  assert.equal(anonLan.allow, false);
+  if (!anonLan.allow) {
+    assert.equal(anonLan.status, 403);
+    assert.equal(anonLan.code, "LOCAL_ONLY");
+  }
+
+  const anonLoopback = await managementPolicy.evaluate(policyCtx(path, "GET", "127.0.0.1"));
+  assert.equal(anonLoopback.allow, false);
+  if (!anonLoopback.allow) {
+    assert.equal(anonLoopback.status, 401);
+    assert.equal(anonLoopback.code, "AUTH_001");
+  }
 });
