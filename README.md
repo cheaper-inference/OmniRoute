@@ -311,13 +311,12 @@ curl http://localhost:20128/v1/chat/completions \
 
 ## Combos: the flagship
 
-<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="Animated grid showing how all 22 public OmniRoute combo routing strategies select, order, or chain targets."/>
+1. **Start with `auto`.** Set the model in your OpenAI-compatible client. OmniRoute builds a virtual combo from connected providers and scores candidates live.
+2. **Save a combo for more control.** Choose a name, target list and strategy, then use that name as the model. The strategy sets which target goes first and how the rest are tried.
 
-> A **combo** is a list of models that OmniRoute routes across automatically. When quota runs out, a provider fails or a model is locked, the request moves to the next eligible, healthy target.
+A combo routes across models automatically. On quota exhaustion, provider failure or model lockout, it tries the next eligible, healthy target.
 
 ### Zero-config: just use `auto`
-
-You don't need to create a combo. Point any OpenAI-compatible client at OmniRoute and set the model to `auto`. OmniRoute builds a virtual combo from the providers you have connected and scores the candidates live.
 
 ```bash
 curl http://localhost:20128/v1/chat/completions \
@@ -326,125 +325,64 @@ curl http://localhost:20128/v1/chat/completions \
   -d '{"model": "auto", "messages": [{"role": "user", "content": "Hello"}]}'
 ```
 
-Swap `auto` for a variant when you want a different trade-off. Variants change the scoring weights. They are preferences, not guarantees: every variant keeps last-known-good stickiness, so it stays on the provider that last succeeded until that provider fails.
+Variants tune the weights. Last-known-good routing stays with the last successful provider until it fails, then rescores. `auto/fast` and `auto/cheap` express preferences without guaranteeing the fastest or cheapest model.
 
-#### If you just want it to work
+| Model ID            | Behavior                                                                                                                                                                                                                                                |
+| :------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `auto`              | Balanced default weights.                                                                                                                                                                                                                               |
+| `auto/fast`         | Favors low latency and provider health.                                                                                                                                                                                                                 |
+| `auto/cheap`        | Favors lower catalog prices.                                                                                                                                                                                                                            |
+| `auto/coding`       | Quality-first weights for code generation.                                                                                                                                                                                                              |
+| `auto/smart`        | Quality-first weights with 10% exploration (default 5%).                                                                                                                                                                                                |
+| `auto/lkgp`         | Explicit last-known-good routing with the same weights as `auto`.                                                                                                                                                                                       |
+| `auto/subscription` | Uses only live-verified plan quota. Returns HTTP 503 when none is available and avoids billed fallback.                                                                                                                                                 |
+| `auto/thrifty`      | Plan → keyless → free → cheap → premium. May reach billed models and returns to the plan when quota and cooldown allow.                                                                                                                                 |
+| `auto/offline`      | Favors quota and rate-limit headroom. Requests still go to your providers.                                                                                                                                                                              |
+| `auto/chaos`        | One model per provider in parallel, up to five by default or ten when configured. One upstream call per model. Returns the top-ranked reply or the last successful panel reply if the top model fails. Use `fusion` to synthesize replies with a judge. |
 
-| Model ID    | <img width="2000" height="0" alt=""> What it does                                               |
-| ----------- | ----------------------------------------------------------------------------------------------- |
-| `auto`      | Balanced default weights. Keeps the last provider that succeeded until it fails, then rescores. |
-| `auto/lkgp` | Names the last-known-good behavior explicitly. Same weights as `auto`.                          |
-
-#### If you care about speed, price or quality
-
-| Model ID      | <img width="2000" height="0" alt=""> What it does               |
-| ------------- | --------------------------------------------------------------- |
-| `auto/fast`   | Favors low latency and healthy providers.                       |
-| `auto/cheap`  | Favors lower catalog prices.                                    |
-| `auto/coding` | Quality-first weights, tuned for code generation.               |
-| `auto/smart`  | Quality-first weights with 10% exploration (the default is 5%). |
-
-`auto/fast` and `auto/cheap` lean toward speed or price. They do not promise the fastest or cheapest model on every request.
-
-#### If you already pay for subscriptions
-
-| Model ID            | <img width="2000" height="0" alt=""> What it does                                                                                                                      |
-| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `auto/subscription` | Plan-included quota only, verified live. When none is left, the request fails with HTTP 503 instead of falling back to billed capacity.                                |
-| `auto/thrifty`      | Plan quota first, then keyless, free, cheap and premium options, one rung at a time. It can reach billed models and returns to the plan when quota and cooldown allow. |
-| `auto/offline`      | Favors quota and rate-limit headroom. Not an offline mode: requests still go to your providers.                                                                        |
-
-How the rungs work: [Subscription-first routing](./docs/routing/SUBSCRIPTION_LADDER.md).
-
-#### If you want several models to answer
-
-| Model ID     | <img width="2000" height="0" alt=""> What it does                                                                                                                                                                                        |
-| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `auto/chaos` | Sends the request in parallel to a panel, one model per provider, five by default (up to 10). Each panel model costs one upstream call. Your client gets one answer: the top-ranked model's, or the last one that succeeded if it fails. |
-
-For a judge that merges the panel's answers into one, use a `fusion` combo (below).
-
-#### If you need a specific kind of model
-
-Combine a category with a tier: `auto/coding:fast`, `auto/coding:free`, `auto/reasoning:pro`, `auto/vision`. If nothing you have connected matches, the request fails with HTTP 503 instead of silently widening the pool. Full list: [Auto-Combo guide](./docs/routing/AUTO-COMBO.md).
+Category and optional tier examples include `auto/coding:fast`, `auto/coding:free`, `auto/reasoning:pro` and `auto/vision`. If no connected candidate matches, the request returns HTTP 503 and the pool stays narrow. [Auto-Combo guide](./docs/routing/AUTO-COMBO.md) · [Subscription-first routing](./docs/routing/SUBSCRIPTION_LADDER.md)
 
 ### Or build your own: 22 routing strategies
-
-A saved combo has a name, a list of targets and one strategy. The strategy decides which target goes first and the order of the fallbacks. Clients then call the combo by its name, like any model.
 
 ```bash
 omniroute combo create my-pool --strategy fill-first \
   --models "provider-a/model-1,provider-b/model-2"
 ```
 
-The CLI accepts 15 of the strategies. The dashboard and the combos API accept all 22. Pick by goal:
+The CLI accepts 15 of 22 strategies. The dashboard and combos API accept all 22.
 
-#### If you want a fixed order
+| Strategy            | Behavior                                                                                                                                                                                    |
+| :------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `auto`              | Rank candidates live with the 16-factor Auto-Combo scorer.                                                                                                                                  |
+| `cache-optimized`   | Prefer the account likely to hold the prompt prefix in cache.                                                                                                                               |
+| `context-optimized` | Try the largest known context window first.                                                                                                                                                 |
+| `context-relay`     | Keep your order and pass a conversation summary when switching accounts.                                                                                                                    |
+| `cost-optimized`    | Sort by catalog input-token price, unknowns last. Final request cost can differ.                                                                                                            |
+| `expiry-first`      | Spend quota likely to expire, highest leftover per hour until reset first.                                                                                                                  |
+| `fill-first`        | Stay on the first available target until it runs out or fails, then move on.                                                                                                                |
+| `fusion`            | Query a panel in parallel and have a judge synthesize one answer.                                                                                                                           |
+| `headroom`          | Choose the most free capacity across 5-hour and weekly windows.                                                                                                                             |
+| `jev`               | TypeSafe Jev picks which entries in your ranked list run. Turn on `COMBO_JEV_STRATEGY_ENABLED` to send an excerpt per request and use paid TypeSafe calls. With it off, your order applies. |
+| `least-used`        | Pick the target with the fewest recorded requests in this combo.                                                                                                                            |
+| `lkgp`              | Try the last successful provider first, otherwise keep your order.                                                                                                                          |
+| `p2c`               | Sample two targets and pick by success rate and latency.                                                                                                                                    |
+| `pipeline`          | Feed each step's output into the next target in sequence and return only the final answer.                                                                                                  |
+| `priority`          | Try targets in your order. Session stickiness preserves it.                                                                                                                                 |
+| `quota-weighted`    | Skip exhausted accounts and draw by leftover quota and in-flight load.                                                                                                                      |
+| `random`            | Shuffle for each request. The same first target can repeat.                                                                                                                                 |
+| `reset-aware`       | Score remaining quota and time to reset across session and weekly windows.                                                                                                                  |
+| `reset-window`      | Try the account whose quota window resets soonest.                                                                                                                                          |
+| `round-robin`       | Rotate in order, three successes per target by default.                                                                                                                                     |
+| `strict-random`     | Deal from a shuffled deck so each target leads once before repeats.                                                                                                                         |
+| `weighted`          | Draw a first target by weight and keep the rest as fallbacks. The split is statistical. Use `round-robin` for strict rotation.                                                              |
 
-| Strategy     | <img width="2000" height="0" alt=""> What it does                               |
-| ------------ | ------------------------------------------------------------------------------- |
-| `priority`   | Try targets in the order you set. Session stickiness never reorders that list.  |
-| `fill-first` | Keep using the first available target until it runs out or fails, then move on. |
-| `lkgp`       | Put the last provider that succeeded first. Otherwise keep your order.          |
+Quota strategies use live data where providers report it, including 5-hour and weekly subscription windows. `fusion` and `pipeline` make multiple upstream calls per request.
 
-#### If you want to spread the load
+The 16-factor scorer uses quota, health, cost, latency, task fit, stability, tier priority, tier affinity, specificity match, context affinity, cache affinity, session availability, reset-window affinity, connection density, quality and reliability. Weights vary by profile. Cache affinity, reset-window affinity and reliability have zero weight by default. [Scoring factors](./docs/routing/AUTO-COMBO.md#how-it-works-persisted-auto-combos)
 
-| Strategy        | <img width="2000" height="0" alt=""> What it does                                              |
-| --------------- | ---------------------------------------------------------------------------------------------- |
-| `weighted`      | Draw one target per request in proportion to its weight. The others become the fallback chain. |
-| `round-robin`   | Rotate in order, staying on each target for a batch of successes (3 by default).               |
-| `p2c`           | Sample two targets and use the one with the better success rate and latency.                   |
-| `least-used`    | Use the target with the fewest recorded requests in this combo.                                |
-| `random`        | Shuffle for every request. The same target can come first twice in a row.                      |
-| `strict-random` | Deal from a shuffled deck: every target is used once before any repeats.                       |
+<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="Animated grid showing how all 22 public OmniRoute combo routing strategies select, order, or chain targets."/>
 
-`weighted` gives statistical balance, not an exact split. For strict rotation, use `round-robin`.
-
-#### If you want to spend less
-
-| Strategy         | <img width="2000" height="0" alt=""> What it does                       |
-| ---------------- | ----------------------------------------------------------------------- |
-| `cost-optimized` | Try the lowest catalog input-token price first. Unknown prices go last. |
-
-It sorts by the input price in the catalog, not by the final cost of the request.
-
-#### If you want to respect quota
-
-| Strategy         | <img width="2000" height="0" alt=""> What it does                                                  |
-| ---------------- | -------------------------------------------------------------------------------------------------- |
-| `headroom`       | Use the account with the most free capacity across its 5-hour and weekly windows.                  |
-| `quota-weighted` | Skip exhausted accounts, then draw in proportion to leftover quota and in-flight load.             |
-| `reset-window`   | Use the account whose quota window resets soonest.                                                 |
-| `reset-aware`    | Score each account on the quota it has left plus how soon its session and weekly windows reset.    |
-| `expiry-first`   | Spend the quota that would otherwise expire unused: most leftover per hour until reset goes first. |
-
-These read live quota for providers that report it, such as subscription accounts with 5-hour and weekly windows.
-
-#### If you work with long context or prompt caching
-
-| Strategy            | <img width="2000" height="0" alt=""> What it does                                          |
-| ------------------- | ------------------------------------------------------------------------------------------ |
-| `context-relay`     | Keep your order. When a conversation moves to another account, a summary of it goes along. |
-| `context-optimized` | Try the model with the largest known context window first.                                 |
-| `cache-optimized`   | Prefer the account most likely to already hold this prompt prefix in its cache.            |
-
-#### If you want a scorer or a model to decide
-
-| Strategy | <img width="2000" height="0" alt=""> What it does                                                                                                                                                                             |
-| -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `auto`   | Rank the candidates live with the 16-factor Auto-Combo scorer.                                                                                                                                                                |
-| `jev`    | Keep your ranked list and let TypeSafe Jev pick which entries run. Off until `COMBO_JEV_STRATEGY_ENABLED` is on; then each request sends an excerpt to TypeSafe and uses paid TypeSafe calls. Without it, your order is used. |
-
-The scorer uses 16 declared factors, including health, quota, cost, latency, task fit, quality and session availability. Weights depend on the profile; three factors are zero in the default profile. Details: [`docs/routing/AUTO-COMBO.md`](docs/routing/AUTO-COMBO.md).
-
-#### If you want several models for one answer
-
-| Strategy   | <img width="2000" height="0" alt=""> What it does                                                           |
-| ---------- | ----------------------------------------------------------------------------------------------------------- |
-| `fusion`   | Ask a panel of models in parallel. A judge model writes one answer from their replies.                      |
-| `pipeline` | Run targets in sequence. Each step's output is the next step's input, and only the last answer is returned. |
-
-Both make more than one upstream call per request.
+In a saved combo with `strategy: "auto"`, `config.routerStrategy` selects `rules`, `score`, `cost` (`eco`), `latency` (`fast`), `sla-aware` (`sla`), `lkgp`, `nadir` or `decision`. [Auto router strategies](./docs/routing/AUTO-COMBO.md#auto-router-strategies)
 
 <img src="./docs/diagrams/auto-router-strategies.svg" width="100%" alt="Eight auto router strategies with example picks and aliases grouped. Nadir and decision fall back to rules when their deciders are unavailable."/>
 
