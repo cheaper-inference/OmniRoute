@@ -55,8 +55,7 @@ import {
 import { applyNoThinkingAlias } from "@omniroute/open-sse/utils/noThinkingAlias.ts";
 import { resolveCcDiscoveryAliasStrip } from "@/lib/ccDiscoveryAliasResolve";
 import { handleComboChat, shouldSkipConnDisable } from "@omniroute/open-sse/services/combo.ts";
-import { registerSyncedAvailableModelsReader } from "@omniroute/open-sse/services/combo/quotaStrategies.ts";
-import { getSyncedAvailableModelsByConnection } from "@/lib/db/models";
+import "./chat/syncedModelsReader";
 import type { ComboLike, SingleModelTarget } from "@omniroute/open-sse/services/combo/types.ts";
 import { mergeAbortSignals } from "@omniroute/open-sse/executors/base.ts";
 import { resolveRequestAutoControls } from "@omniroute/open-sse/services/autoCombo/requestControls.ts";
@@ -207,6 +206,7 @@ import { classify429FromError, type FailureKind } from "@/shared/utils/classify4
 import { isSubscriptionQuotaText } from "@omniroute/open-sse/services/quotaTextCooldowns.ts";
 import { resolveUseUpstream429BreakerHints } from "@/shared/utils/providerHints";
 import { isFeatureFlagEnabled, isRotationAttributionEnabled } from "@/shared/utils/featureFlags";
+import * as reEgress from "../services/sameAccountEgressRetry";
 import * as agyLease from "../services/antigravityLeaseLifecycle";
 import { shouldIsolateProbeFailures } from "@/shared/utils/probeOrigin";
 import { getCircuitBreaker, isLocalStreamLifecycleError } from "../../shared/utils/circuitBreaker";
@@ -282,7 +282,6 @@ import {
 import { resolveConnectionRestrictions } from "../services/connectionRestrictions.ts";
 
 registerCodexQuotaFetcher();
-registerSyncedAvailableModelsReader(getSyncedAvailableModelsByConnection);
 registerQuotaTrackersBatch();
 // Register Bailian Coding Plan quota fetcher at module load (once per server start).
 // This hooks into the quotaPreflight + quotaMonitor systems so that combos
@@ -1969,6 +1968,9 @@ async function handleSingleModelChat(
   let accountFallbacks = 0;
   let selectedConnectionPlan: string | null = null;
   let sameAccountRetries = 0;
+  let egressRetries = 0; // PROXY_REEGRESS_ON_QUOTA_429 (see sameAccountEgressRetry.ts)
+  const egressTriedKeys = new Set<string>();
+  let pendingEgress: reEgress.PendingEgress | null = null;
   let routingWaitMs = 0;
   const accountFallbackReasons: string[] = [];
   let pendingFallback: { reason: string; previousConnectionId: string } | null = null;
@@ -2394,14 +2396,18 @@ async function handleSingleModelChat(
         );
       }
       let proxyInfo;
+      const preResolvedEgress = reEgress.takePendingEgress(pendingEgress, credentials.connectionId);
+      pendingEgress = null;
       try {
-        proxyInfo = await safeResolveProxy(
-          credentials.connectionId,
-          apiKeyInfo?.id,
-          provider,
-          comboName,
-          runtimeOptions.sessionAffinityKey ?? null
-        ).catch(agyLease.releasingRethrow(leaseId));
+        proxyInfo = preResolvedEgress
+          ? preResolvedEgress.proxyInfo
+          : await safeResolveProxy(
+              credentials.connectionId,
+              apiKeyInfo?.id,
+              provider,
+              comboName,
+              runtimeOptions.sessionAffinityKey ?? null
+            ).catch(agyLease.releasingRethrow(leaseId));
       } catch (error) {
         releaseOAuthSession();
         throw error;
@@ -2907,6 +2913,29 @@ async function handleSingleModelChat(
         lastStatus = result.status;
         requestRetryLastError = result.error;
         requestRetryLastStatus = result.status;
+        continue;
+      }
+
+      // Per-IP 429 through a pool member: same account, untried member (sameAccountEgressRetry.ts).
+      const reEgressTo = await reEgress.nextReEgress({
+        status: result.status,
+        upstreamStatus: appliedProxySink.upstreamStatus,
+        provider,
+        proxyInfo,
+        appliedProxy: appliedProxySink.proxy,
+        quotaText: String(result.rawMessage ?? result.error ?? ""),
+        attempt: egressRetries,
+        aborted: requestSignal?.aborted === true,
+        triedKeys: egressTriedKeys,
+        resolveNext: () =>
+          safeResolveProxy(credentials.connectionId, apiKeyInfo?.id, provider, comboName),
+      });
+      if (reEgressTo) {
+        egressRetries += 1;
+        sameAccountRetries += 1;
+        log.info("PROXY", `${provider}/${model} per-IP 429, re-egress #${egressRetries}`);
+        pendingEgress = { connectionId: credentials.connectionId, proxyInfo: reEgressTo.proxyInfo };
+        preselectedCredentials = credentials;
         continue;
       }
 
