@@ -10,7 +10,23 @@
 
 const JSON_NUMBER_RE = /^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$/;
 const NUMERIC_LIKE_RE = /^[+-]\.?\d|^\.\d|^0\d/;
-const INLINE_ARRAY_RE = /\[[^\]]*\]\s*:/;
+const WHITESPACE = /\s/;
+
+function containsInlineArray(s: string): boolean {
+  let open = s.indexOf("[");
+  while (open !== -1) {
+    const close = s.indexOf("]", open + 1);
+    if (close === -1) return false;
+    let next = close + 1;
+    while (next < s.length && WHITESPACE.test(s[next])) {
+      next += 1;
+    }
+    if (s[next] === ":") return true;
+    // Open brackets before this close share it. Continue at the next token.
+    open = s.indexOf("[", next);
+  }
+  return false;
+}
 
 /** Check if a string value must be quoted per Section 2.4. */
 export function needsQuote(s: string): boolean {
@@ -20,7 +36,7 @@ export function needsQuote(s: string): boolean {
   if (NUMERIC_LIKE_RE.test(s)) return true;
   if (s[0] === " " || s[s.length - 1] === " ") return true;
   if (s[0] === "#" || s[0] === "@" || s[0] === ".") return true;
-  if (INLINE_ARRAY_RE.test(s)) return true;
+  if (containsInlineArray(s)) return true;
   for (let i = 0; i < s.length; i++) {
     const c = s.charCodeAt(i);
     if (

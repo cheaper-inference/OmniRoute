@@ -18,6 +18,7 @@ import {
 } from "./passthroughHelpers.ts";
 import { recoverAnthropicThinkingSignature } from "../chatCore/thinkingSignatureRecovery.ts";
 import { runProviderExecutionPipeline } from "../chatCore/providerExecutionPipeline.ts";
+import { admitQuotaShareRotation } from "../chatCore/quotaSharePreHook.ts";
 import { markCodexScopeRateLimited } from "../chatCore/codexFailover.ts";
 import { deleteSessionAccountAffinityBestEffort } from "@/lib/db/sessionAccountAffinity";
 import { buildStreamingResponseHeaders, stripStaleForwardingHeaders } from "./responseHeaders.ts";
@@ -274,6 +275,13 @@ async function runStreamingResponseInner(deps: StreamingDeps) {
         getProviderCredentials,
         getProviderCredentialsWithQuotaPreflight,
         allowedConnections: deps.allowedConnections ?? null,
+        admitRotation: (nextConnectionId) =>
+          admitQuotaShareRotation({
+            apiKeyInfo,
+            connectionId: nextConnectionId,
+            provider,
+            model,
+          }),
       },
       wire: {
         body: translatedBody as Record<string, unknown>,
@@ -399,11 +407,7 @@ async function runStreamingResponseInner(deps: StreamingDeps) {
     try {
       const { storeRateLimitHeaders } = await import("@/lib/quota/saturationSignals");
       if (isCodexResponseCurrent(providerResponse, providerResponse.ok))
-        storeRateLimitHeaders(
-          responseConnectionId,
-          provider,
-          providerResponse.headers as Record<string, string>
-        );
+        storeRateLimitHeaders(responseConnectionId, provider, providerResponse.headers);
     } catch {
       // fail-open: saturation signal is best-effort
     }

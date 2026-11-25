@@ -1,0 +1,1 @@
+- **fix(cursor):** with a Cursor agent session, the assistant tool call id now matches the tool result id when the id has a newline. ([#20224](https://github.com/cheaper-inference/OmniRoute/pull/20224))

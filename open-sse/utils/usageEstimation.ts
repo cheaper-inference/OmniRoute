@@ -34,6 +34,11 @@ function estimateTokenCount(text: unknown) {
   return cjkCount + estimatedNonCJK;
 }
 
+// #20086: callers outside the stream (cursor executor, finalizeStreamingUsage, estimateUsage)
+// re-estimated the whole request body on every call. Memoize per body object; entries go
+// away with the body.
+const estimatedInputTokensCache = new WeakMap<object, number>();
+
 /**
  * Estimate input tokens from request body.
  * Separates tool definitions (JSON schemas) from message content
@@ -42,6 +47,9 @@ function estimateTokenCount(text: unknown) {
  */
 export function estimateInputTokens(body: unknown) {
   if (!body || typeof body !== "object") return 0;
+  const cached = estimatedInputTokensCache.get(body);
+  if (cached !== undefined) return cached;
+
   const record = body as Record<string, unknown>;
 
   try {
@@ -59,9 +67,12 @@ export function estimateInputTokens(body: unknown) {
       messageTokens = estimateTokenCount(JSON.stringify(record));
     }
 
-    return messageTokens + toolTokens;
+    const result = messageTokens + toolTokens;
+    estimatedInputTokensCache.set(body, result);
+    return result;
   } catch {
     // Fallback if stringify fails
+    estimatedInputTokensCache.set(body, 0);
     return 0;
   }
 }

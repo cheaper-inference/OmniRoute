@@ -1,5 +1,6 @@
 "use client";
 
+import Card from "@/shared/components/Card";
 import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
 import Toggle from "@/shared/components/Toggle";
@@ -32,7 +33,7 @@ function PayloadPrivacyToggle({ formState, setNoLog }: BehaviourSectionProps<"se
   const t = useTranslations("apiManager");
 
   return (
-    <div className="flex items-start justify-between gap-3 p-4 rounded-lg border border-border bg-surface/40">
+    <Card.Section className="flex items-start justify-between gap-3">
       <div className="flex flex-col gap-1">
         <p className="text-sm font-medium text-text-main">{t("noLogPayloadPrivacy")}</p>
         <p className="text-xs text-text-muted">
@@ -46,7 +47,7 @@ function PayloadPrivacyToggle({ formState, setNoLog }: BehaviourSectionProps<"se
         onChange={() => setNoLog(!formState.noLog)}
         ariaLabel={t("noLogPayloadPrivacy")}
       />
-    </div>
+    </Card.Section>
   );
 }
 
@@ -54,7 +55,7 @@ function AutoResolveToggle({ formState, setAutoResolve }: BehaviourSectionProps<
   const t = useTranslations("apiManager");
 
   return (
-    <div className="flex items-start justify-between gap-3 p-4 rounded-lg border border-border bg-surface/40">
+    <Card.Section className="flex items-start justify-between gap-3">
       <div className="flex flex-col gap-1">
         <p className="text-sm font-medium text-text-main">{t("autoResolve")}</p>
         <p className="text-xs text-text-muted">{t("autoResolveDesc")}</p>
@@ -66,7 +67,7 @@ function AutoResolveToggle({ formState, setAutoResolve }: BehaviourSectionProps<
         onChange={() => setAutoResolve(!formState.autoResolve)}
         ariaLabel={t("autoResolve")}
       />
-    </div>
+    </Card.Section>
   );
 }
 
@@ -77,7 +78,7 @@ function StreamDefaultModeSelector({
   const t = useTranslations("apiManager");
 
   return (
-    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 p-4 rounded-lg border border-border bg-surface/40">
+    <Card.Section className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
       <div className="flex flex-col gap-1 min-w-0">
         <p className="text-sm font-medium text-text-main">{t("streamDefaultMode")}</p>
         <p className="text-xs text-text-muted">{t("streamDefaultModeDesc")}</p>
@@ -104,7 +105,7 @@ function StreamDefaultModeSelector({
           {t("streamDefaultJson")}
         </Button>
       </div>
-    </div>
+    </Card.Section>
   );
 }
 
@@ -150,7 +151,7 @@ export default function BehaviourTab({
       />
 
       {/* Local Usage Command Toggle */}
-      <div className="flex items-start justify-between gap-3 p-4 rounded-lg border border-border bg-surface/40">
+      <Card.Section className="flex items-start justify-between gap-3">
         <div className="flex flex-col gap-1">
           <p className="text-sm font-medium text-text-main">{t("localUsageCommand")}</p>
           <p className="text-xs text-text-muted">{t("localUsageCommandDesc")}</p>
@@ -162,7 +163,7 @@ export default function BehaviourTab({
           onChange={() => setAllowUsageCommand(!formState.allowUsageCommand)}
           ariaLabel={t("localUsageCommand")}
         />
-      </div>
+      </Card.Section>
 
       {/* Advanced Provider Quota Policy Override */}
       <BypassProviderQuotaToggle

@@ -72,7 +72,8 @@ export default function ImprovePromptButton({
           }}
           disabled={loading}
           reason={hasModel ? undefined : t("setModelFirst")}
-          className="gap-1.5 self-start text-xs text-text-muted"
+          tone="muted"
+          className="gap-1.5 self-start text-xs"
           aria-label={t("improvePromptAria")}
           title={t("improvePromptTitle")}
         >

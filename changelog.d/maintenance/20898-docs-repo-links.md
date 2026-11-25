@@ -1,0 +1,1 @@
+- **docs:** repository links in 21 English docs point at `github.com/cheaper-inference/OmniRoute` instead of relying on the rename redirect (part 1 of 2) ([#20898](https://github.com/cheaper-inference/OmniRoute/pull/20898))

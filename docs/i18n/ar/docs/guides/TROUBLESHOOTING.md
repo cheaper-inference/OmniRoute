@@ -459,7 +459,7 @@ OIDC مخصصًا له. وبذلك يكون الاتصال معزولًا بال
 2. **إصلاح دائم:** اربط بـ IPv4 صراحةً باستخدام `-p 127.0.0.1:20128:20128` في أمر `docker run`:
    ```bash
    docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
-     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
    ```
    يفرض هذا الربط عبر IPv4، كما يمنع تعريض الوكيل على جميع واجهات المضيف.
 

@@ -57,7 +57,9 @@ export default function BreakerTimeline({ breakers, onWindowChange }: BreakerTim
     <Card className="flex flex-col gap-4">
       {currentBreakers.length > 0 && (
         <div className="flex flex-col gap-2">
-          <h3 className="ci-heading text-sm">{t("timeline.currentState")}</h3>
+          <h3 className="ci-heading" data-size="sm">
+            {t("timeline.currentState")}
+          </h3>
           <div className="flex flex-wrap gap-2">
             {currentBreakers.map((b) => (
               <span key={b.name}>

@@ -414,8 +414,7 @@ npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # ソースコミットを
 タグが存在すること、`package.json` が対象バージョンであること、`release-freeze` Issue が
 オープンであること、既存のリリースブランチ上にオープンな `Release branch not green` Issue
 がないこと — 存在しないブランチは `?` unknown と報告され、green になることは決してない —
-Mergify の `release` キューが設定されていること（G11：`queue_rules`、`checks_timeout`、
-ラベル `queue`）、`release/*` ルールセットが引き続き削除と force-push をブロックしていること、
+omni-queue がリリースブランチにプルリクエストをマージすること（G11：`config/merge-queue/config.json` が有効で、`bases` がリリースブランチを管理し、`mode` が `live` に設定され、ラベルが存在すること）、`release/*` ルールセットが引き続き削除と force-push をブロックしていること、
 `stable/v3` と `develop` がまだ存在しないこと）、2 つのブランチ手順、どの dormant-workflow
 トリガーと `if:` 条件が true になり、どれがリポジトリ変数によるゲートのままになるか、または
 正規リポジトリに固定されるか、想定される dist-tag（`latest` → 3.9.0、`next` と `nightly` は

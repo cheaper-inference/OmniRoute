@@ -14,6 +14,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("next-intl", () => ({
   useTranslations: () => (key: string) => key,
+  // The NumberInput adapter reads the app locale for its decimal separator.
+  useLocale: () => "en",
 }));
 
 const { default: QuotaCutoffModal } =
@@ -68,7 +70,7 @@ describe("QuotaCutoffModal draft lifetime (#7889)", () => {
       root.render(<QuotaCutoffModal {...props("connection-a", 2)} />);
     });
 
-    const input = document.body.querySelector<HTMLInputElement>('input[type="number"]')!;
+    const input = document.body.querySelector<HTMLInputElement>('[role="dialog"] input')!;
     expect(input.value).toBe("2");
     setInputValue(input, "10");
     expect(input.value).toBe("10");

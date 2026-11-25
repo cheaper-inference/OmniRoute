@@ -1,0 +1,52 @@
+{
+  "argv": [
+    "-p",
+    "Reply OK",
+    "--yolo"
+  ],
+  "cleanup": {
+    "removeTempDir": true,
+    "revokeSession": true
+  },
+  "env": {
+    "set": {
+      "KIMI_CODE_NO_AUTO_UPDATE": "1",
+      "KIMI_DISABLE_TELEMETRY": "1",
+      "KIMI_MODEL_API_KEY": "${TOKEN}",
+      "KIMI_MODEL_BASE_URL": "http://127.0.0.1:20128/v1",
+      "KIMI_MODEL_CAPABILITIES": "tool_use,image_in,thinking",
+      "KIMI_MODEL_DISPLAY_NAME": "OmniRoute anthropic/claude-sonnet-4-6",
+      "KIMI_MODEL_MAX_CONTEXT_SIZE": "200000",
+      "KIMI_MODEL_NAME": "anthropic/claude-sonnet-4-6",
+      "KIMI_MODEL_PROVIDER_TYPE": "openai"
+    },
+    "unset": [
+      "KIMI_API_KEY",
+      "KIMI_BASE_URL",
+      "KIMI_CODE_BASE_URL",
+      "KIMI_CODE_PROVIDER_NAME"
+    ]
+  },
+  "modelList": {
+    "injected": 1,
+    "strategy": "inject",
+    "viewHash": "7f4f4066aebfbb84189d2f7f8adeb0a75a997acf4cbeb61c10b01800b593bba3"
+  },
+  "needsTempDir": false,
+  "notes": [
+    "Your own config.toml models stay visible in /model (merged with the overlay)."
+  ],
+  "planVersion": 1,
+  "postExitChecks": [],
+  "preflight": [],
+  "secretSites": [
+    {
+      "key": "KIMI_MODEL_API_KEY",
+      "kind": "env"
+    }
+  ],
+  "teardown": [],
+  "tempFiles": [],
+  "tool": "kimi",
+  "warnings": []
+}

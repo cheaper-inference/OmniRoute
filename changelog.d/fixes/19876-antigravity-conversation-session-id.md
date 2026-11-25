@@ -1,0 +1,1 @@
+- **fix(antigravity):** parallel conversations on one account no longer share a single Cloud Code session and evict each other's prompt cache — the upstream `sessionId` is now derived from account + conversation ([#19876](https://github.com/cheaper-inference/OmniRoute/pull/19876)) — thanks @adevwithpurpose

@@ -42,25 +42,23 @@ flowchart LR
 `main` kì í ṣe ẹ̀ka ìṣọ̀kan ojoojúmọ́. Àwọn PR tí a ṣí sí `main`
 máa ń nílò kí a tún ibi tí wọ́n dojú kọ ṣe kí a tó dapọ̀ wọn.
 
-## Dídì ìtújáde (àwọn yípo tó ń lọ ní ìrẹ́pọ̀)
+## Tu silẹ didi (awọn iyipo ti o jọra)
 
-Nígbà tí a bá ń mú ìtújáde kan bára mu, a máa ń ṣí issue àmì kan tí a fi label `release-freeze`
-sí. Èyí **kò dá ìdàgbàsókè dúró**:
+Nigbati itusilẹ ba n ṣe atunṣe, ọrọ asami kan ti a samisi `release-freeze` yoo ṣii. Iyẹn** ko da idagbasoke** :
 
-- `release/vX.Y.Z` tí a dì náà jẹ́ ti balógun ìtújáde fún ìtújáde yẹn.
-- A máa ń ṣẹ̀dá `release/vX+1` ti yípo tó tẹ̀lé láti tip tí a dì náà, kí àwọn olùkópa lè máa
-  fi iṣẹ́ wọn wọlé.
-- Àwọn PR tó ṣì dojú kọ ẹ̀ka tí a dì náà yẹ kí a **tún tọ́ka** sí ẹ̀ka
-  `release/v*` tó ń ṣiṣẹ́ (tó ga jù lọ).
+- `release/vX.Y.Z` tio tutunini jẹ ti oludari idasilẹ fun ọkọ oju-omi yẹn.
+- `release/vX+1` ọmọ t’okan ti ge lati ori didi ti o tutu ki awọn oluranlọwọ tọju iṣẹ ibalẹ.
+- Ṣii PRs ti o tun fojusi ẹka ti o tutuni yẹ ki o jẹ** atunbere** si ẹka `release/v*` ti nṣiṣe lọwọ (ti o ga julọ).
 
-Ṣàyẹ̀wò bóyá freeze kan wà ní ṣíṣí kí o tó gbà pé ẹ̀ka tí o fẹ́ lè gba ìdapọ̀:
+Ṣayẹwo fun didi ṣiṣi ṣaaju ro pe ẹka ti o fẹ jẹ idapọ:
 
 ```bash
 gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
 ```
 
-A ṣàkọsílẹ̀ ìlànà ìdapọ̀ (label `queue` ti owner → Mergify) nínú
-[MERGE_TRAIN.md](./MERGE_TRAIN.md).
+Mekaniki dapọ (onini `queue` aami → Mergify) jẹ akọsilẹ ni [MERGE_TRAIN.md](./MERGE_TRAIN.md).
+
+> **2026-11-19: ti isinyi Mergify àkópọ ti fẹyìntì** (ipinnu eni). `.mergify.yml` ko ṣe alaye ti isinyi mọ ati kọ awọn aṣẹ Mergify ti o dapọ tabi tunkọ ibeere fa. Tu PRs ti wa ni dapọ nipa ọwọ labẹ awọn ibi ipamọ awọn ofinet "Beere alawọ ewe ibode lori awọn ti nṣiṣe lọwọ Tu" (`Gate / CI` + `Gate / Quality`) titi omni-isinyi gbalaye ni ifiwe mode, ati nipasẹ omni-isinyi lẹhin ti ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Aami `queue` ko dapọ mọ ohunkohun.
 
 ## Kí nìdí tí ẹ̀ka àti táàgì fi wà?
 

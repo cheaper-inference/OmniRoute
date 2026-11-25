@@ -123,26 +123,32 @@ test("scanRange + main: flags only the commits in the range that carry AI attrib
 test("inputsFromGithubEvent: pull_request payload → range + title + body; other events → null", () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "ai-attr-ev-"));
   try {
+    git(dir, "init", "-q", "-b", "main");
+    git(dir, "commit", "-q", "--allow-empty", "-m", "root");
+    const base = git(dir, "rev-parse", "HEAD");
+    git(dir, "commit", "-q", "--allow-empty", "-m", "feature");
+    const head = git(dir, "rev-parse", "HEAD");
+    const options = { cwd: dir, env: { GITHUB_SHA: head } };
     const ev = path.join(dir, "event.json");
     fs.writeFileSync(
       ev,
       JSON.stringify({
         pull_request: {
-          base: { sha: "a".repeat(40) },
-          head: { sha: "b".repeat(40) },
+          base: { sha: base },
+          head: { sha: head },
           title: "t",
           body: "b",
         },
       })
     );
-    assert.deepEqual(inputsFromGithubEvent(ev), {
-      range: `${"a".repeat(40)}..${"b".repeat(40)}`,
+    assert.deepEqual(inputsFromGithubEvent(ev, options), {
+      range: `${base}..${head}`,
       prTitle: "t",
       prBody: "b",
     });
     fs.writeFileSync(ev, JSON.stringify({ workflow_dispatch: {} }));
-    assert.equal(inputsFromGithubEvent(ev), null);
-    assert.equal(inputsFromGithubEvent(path.join(dir, "missing.json")), undefined);
+    assert.equal(inputsFromGithubEvent(ev, options), null);
+    assert.equal(inputsFromGithubEvent(path.join(dir, "missing.json"), options), undefined);
   } finally {
     fs.rmSync(dir, { recursive: true, force: true });
   }

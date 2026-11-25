@@ -469,7 +469,7 @@ féach [`docs/guides/KIRO_SETUP.md`](./KIRO_SETUP.md).
 2. **Réiteach buan:** Ceangail le IPv4 go sainráite trí `-p 127.0.0.1:20128:20128` a úsáid i do ordú `docker run`:
    ```bash
    docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
-     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
    ```
    Cuireann sé seo an ceangal IPv4 i bhfeidhm agus seachnaíonn sé freisin an seachfhreastalaí a nochtadh ar chomhéadain uile an óstaigh.
 

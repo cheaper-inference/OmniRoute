@@ -1,12 +1,22 @@
 "use client";
 
+import Card from "@/shared/components/Card";
 import Icon from "@/shared/components/Icon";
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import ConnectionTestModelField from "@/shared/components/ConnectionTestModelField";
 import { useConnectionTestModelDraft } from "@/shared/components/useConnectionTestModelDraft";
-import { Button, Badge, Input, Modal, Toggle, Select } from "@/shared/components";
+import {
+  Button,
+  Badge,
+  Input,
+  Modal,
+  NumberInput,
+  Toggle,
+  Select,
+  Notice,
+} from "@/shared/components";
 import { CHATGPT_WEB_CODEX_CONNECTOR_NAME } from "@/shared/constants/chatgptWebCodex";
 import {
   isOpenAICompatibleProvider,
@@ -19,6 +29,7 @@ import {
   normalizeAntigravityClientProfileSetting,
 } from "@/shared/constants/antigravityClientProfile";
 import { parseExtraApiKeys } from "@/shared/utils/parseApiKeys";
+import { formatApiKeyLast4, looksLikeMaskedApiKey } from "@/shared/utils/apiKeyMask";
 import { freeOnlyImportHintKey, providerSupportsFreeOnlyImport } from "@/shared/utils/freeModels";
 import { useNotificationStore } from "@/store/notificationStore";
 import { type CodexServiceTier } from "@/lib/providers/requestDefaults";
@@ -29,6 +40,7 @@ import {
   modelConcurrencyFormValue,
 } from "./rateLimitOverridesFromForm";
 import { resolveDashboardProviderInfo } from "../../../providerPageUtils";
+import { numberToText, textToNumber } from "../../../numberFieldText";
 import {
   isBaseUrlConfigurableProvider,
   isBaseUrlOverrideEligibleProvider,
@@ -188,6 +200,7 @@ export default function EditConnectionModal({
     disableCooling: connectionProviderSpecificData?.disableCooling === true,
     requireUserLastMessage: connectionProviderSpecificData?.requireUserLastMessage === true,
     keepMidConversationSystem: connectionProviderSpecificData?.keepMidConversationSystem === true,
+    strictChatHistory: connectionProviderSpecificData?.strictChatHistory === true,
     importFreeModelsOnly: connectionProviderSpecificData?.importFreeModelsOnly === true,
     commandCodeZdrEnabled: connectionProviderSpecificData?.zdrEnabled === true,
     tunnelId: stringField(connectionProviderSpecificData?.tunnelId),
@@ -266,17 +279,26 @@ export default function EditConnectionModal({
     providerAllowsOptionalApiKey(provider) || Boolean(isNoAuthWebSessionCredential);
   const isCcCompatible = isClaudeCodeCompatibleProvider(provider);
   const isPlainAnthropicCompatible = isAnthropicCompatibleProvider(provider) && !isCcCompatible;
-  const isCompatible =
-    isOpenAICompatibleProvider(provider) || isAnthropicCompatibleProvider(provider);
+  const isOpenAICompatible = isOpenAICompatibleProvider(provider);
+  const isCompatible = isOpenAICompatible || isAnthropicCompatibleProvider(provider);
+  // Sequence repair only rewrites a Chat Completions `messages` array, so the
+  // option is inert (and hidden) on Responses-API connections, which send `input`.
+  const supportsStrictChatHistory = isOpenAICompatible && !isResponsesConnection;
   const vertexCopy = isVertex ? getVertexCredentialCopy(t) : null;
   const apiCredentialLabel = webSessionCredential
     ? getWebSessionCredentialLabel(t, webSessionCredential, apiKeyOptional)
     : isAwsPolly
       ? providerText(t, "awsPollySecretAccessKeyLabel", "AWS Secret Access Key")
       : (vertexCopy?.label ?? (apiKeyOptional ? t("apiKeyOptionalLabel") : t("apiKeyLabel")));
+  const maskedSavedKey = connection?.apiKey ? formatApiKeyLast4(connection.apiKey) : null;
+  // A key revealed by the API (ALLOW_API_KEY_REVEAL) is shown as returned; only the
+  // default stored mask is reformatted to its last 4 characters.
+  const primaryKeyDisplay = looksLikeMaskedApiKey(connection?.apiKey)
+    ? maskedSavedKey
+    : connection?.apiKey;
   const apiCredentialPlaceholder = isWebSessionCredential
     ? webSessionCredential.placeholder
-    : (vertexCopy?.placeholder ?? t("enterNewApiKey"));
+    : (vertexCopy?.placeholder ?? (maskedSavedKey || t("enterNewApiKey")));
   const apiCredentialHint = isWebSessionCredential
     ? getWebSessionCredentialHint(t, webSessionCredential, providerDisplayName, true)
     : (vertexCopy?.hint ??
@@ -421,6 +443,7 @@ export default function EditConnectionModal({
         requireUserLastMessage: connection?.providerSpecificData?.requireUserLastMessage === true,
         keepMidConversationSystem:
           connection?.providerSpecificData?.keepMidConversationSystem === true,
+        strictChatHistory: connection?.providerSpecificData?.strictChatHistory === true,
         importFreeModelsOnly: connection?.providerSpecificData?.importFreeModelsOnly === true,
         commandCodeZdrEnabled: connection.providerSpecificData?.zdrEnabled === true,
         tunnelId: stringField(connection.providerSpecificData?.tunnelId),
@@ -733,6 +756,11 @@ export default function EditConnectionModal({
           updates.providerSpecificData.keepMidConversationSystem =
             formData.keepMidConversationSystem ? true : undefined;
         }
+        if (supportsStrictChatHistory) {
+          // Explicit boolean, not `undefined`: the PUT route merges
+          // { ...existing, ...incoming }, so dropping the key would keep a stored `true`.
+          updates.providerSpecificData.strictChatHistory = formData.strictChatHistory === true;
+        }
         updates.providerSpecificData.peakHourProtection = normalizePeakHourProtectionForSave(
           formData.peakHourProtection
         );
@@ -828,6 +856,18 @@ export default function EditConnectionModal({
       )}
     />
   ) : null;
+  const strictChatHistoryToggle = supportsStrictChatHistory ? (
+    <Toggle
+      checked={formData.strictChatHistory}
+      onChange={(checked) => setFormData({ ...formData, strictChatHistory: checked })}
+      label={providerText(t, "strictChatHistoryLabel", "Strict chat history repair")}
+      description={providerText(
+        t,
+        "strictChatHistoryDescription",
+        "Repair interrupted tool-call sequences and coalesce adjacent assistant turns before sending to strict OpenAI-compatible upstreams."
+      )}
+    />
+  ) : null;
   const openaiResponsesStoreToggle = isResponsesConnection ? (
     <Toggle
       checked={formData.openaiResponsesStoreEnabled}
@@ -891,7 +931,7 @@ export default function EditConnectionModal({
           />
         )}
         {(isCcCompatible || openRouterPreset.input) && (
-          <div className="flex flex-col gap-4 rounded-lg border border-border bg-bg-subtle p-4">
+          <Card.Section className="flex flex-col gap-4">
             {isCcCompatible && (
               <CcCompatibleRequestDefaultsFields
                 values={formData}
@@ -899,9 +939,9 @@ export default function EditConnectionModal({
               />
             )}
             {openRouterPreset.input}
-          </div>
+          </Card.Section>
         )}
-        <div className="flex flex-col gap-4 rounded-lg border border-border bg-bg-subtle p-4">
+        <Card.Section className="flex flex-col gap-4">
           {showFreeModelsToggle && (
             <Toggle
               checked={formData.importFreeModelsOnly}
@@ -914,6 +954,7 @@ export default function EditConnectionModal({
           {openaiResponsesStoreToggle}
           {requireUserLastMessageToggle}
           {keepMidConversationSystemToggle}
+          {strictChatHistoryToggle}
           <CommandCodeZdrToggle
             provider={provider}
             checked={formData.commandCodeZdrEnabled}
@@ -935,7 +976,7 @@ export default function EditConnectionModal({
               {formatPeakHourSummary(formData.peakHourProtection)}
             </p>
           )}
-        </div>
+        </Card.Section>
         <QuotaScrapingFields
           provider={provider}
           values={formData}
@@ -944,7 +985,7 @@ export default function EditConnectionModal({
           editMode
         />
         {isAntigravityFamily && (
-          <div className="flex flex-col gap-4 rounded-lg border border-border bg-bg-subtle p-4">
+          <Card.Section className="flex flex-col gap-4">
             <Select
               label={t("antigravityClientProfileLabel")}
               value={formData.antigravityClientProfile}
@@ -965,60 +1006,48 @@ export default function EditConnectionModal({
               hint={t("antigravityProjectIdHint")}
               inputClassName="text-xs"
             />
-          </div>
+          </Card.Section>
         )}
         {isOAuth && <ConnectionEmailCard email={connection.email} label={t("email")} />}
-        <Input
+        <NumberInput
           label={t("healthCheckMinutes")}
-          type="number"
           min={0}
           max={1440}
-          value={formData.healthCheckInterval}
-          onChange={(e) => {
-            const parsed = Number.parseInt(e.target.value, 10);
-            const next = Number.isNaN(parsed) ? 0 : Math.min(1440, Math.max(0, parsed));
-            setFormData({ ...formData, healthCheckInterval: next });
-          }}
+          value={textToNumber(formData.healthCheckInterval)}
+          onValueChange={(value) =>
+            setFormData({
+              ...formData,
+              healthCheckInterval: Math.min(1440, Math.max(0, value ?? 0)),
+            })
+          }
           hint={t("healthCheckHint")}
         />
-        <Input
+        <NumberInput
           label={t("priorityLabel")}
-          type="number"
+          min={1}
           value={formData.priority}
-          onChange={(e) =>
-            setFormData({ ...formData, priority: Number.parseInt(e.target.value) || 1 })
-          }
+          onValueChange={(value) => setFormData({ ...formData, priority: value || 1 })}
         />
         <div className="flex flex-col gap-2 rounded-lg border border-primary/30 bg-primary/5 p-4">
           <div className="flex items-center gap-1.5 text-sm font-semibold text-primary">
             <Icon name="dynamic_feed" size={18} />
             {t("accountConcurrencyCapLabel")}
           </div>
-          <Input
-            type="number"
+          <NumberInput
             min={0}
             step={1}
             aria-label={t("accountConcurrencyCapLabel")}
-            value={formData.maxConcurrent}
-            onChange={(e) => {
-              const nextValue = e.target.value;
-              setFormData({ ...formData, maxConcurrent: nextValue });
-              if (saveError && nextValue.trim()) {
-                const numericValue = Number(nextValue);
-                if (Number.isInteger(numericValue) && numericValue >= 0) {
-                  setSaveError(null);
-                }
-              }
+            value={textToNumber(formData.maxConcurrent)}
+            onValueChange={(value) => {
+              setFormData({ ...formData, maxConcurrent: numberToText(value) });
+              // The field only lets a whole number of 0 or more through.
+              if (saveError && value !== null) setSaveError(null);
             }}
             placeholder="0"
             hint={t("accountConcurrencyCapHint")}
           />
         </div>
-        {saveError && (
-          <div className="text-sm text-error bg-error/10 border border-error/20 rounded-lg px-3 py-2">
-            {saveError}
-          </div>
-        )}
+        {saveError && <Notice variant="critical">{saveError}</Notice>}
         {!isOAuth && (
           <>
             {webSessionCredential && (
@@ -1071,7 +1100,7 @@ export default function EditConnectionModal({
               </div>
             )}
             {isChatGptWebCodex && (
-              <div className="space-y-3 rounded-lg border border-border bg-bg-subtle p-3">
+              <Card.Section className="space-y-3">
                 <p className="text-sm font-medium text-text-main">{t("codexTunnelTitle")}</p>
                 <Input
                   label={t("tunnelIdLabel")}
@@ -1118,35 +1147,38 @@ export default function EditConnectionModal({
                   <div className="grid grid-cols-2 gap-2 text-xs text-text-muted">
                     {[
                       ["Browser", doctorStatus.browser?.ready],
-                      ["Storage-State", doctorStatus.storageState?.ready],
-                      ["ChatGPT-Anmeldung", doctorStatus.login?.ready],
+                      [t("doctorStorageStateLabel"), doctorStatus.storageState?.ready],
+                      [t("doctorLoginLabel"), doctorStatus.login?.ready],
                       ["Temporary Chat", doctorStatus.temporaryChats?.ready],
-                      ["Tunnel-Binary", doctorStatus.tunnelBinary?.ready],
+                      [t("doctorTunnelBinaryLabel"), doctorStatus.tunnelBinary?.ready],
                       ["Tunnel", doctorStatus.tunnel?.ready],
                       ["Connector", doctorStatus.connector?.ready],
-                      ["Tool-Roundtrip", doctorStatus.toolRoundtrip?.ready],
-                      ["Aktive Turns", doctorStatus.runtime?.activeTurns],
-                      ["Wartende Turns", doctorStatus.runtime?.waitingTurns],
+                      [t("doctorToolRoundtripLabel"), doctorStatus.toolRoundtrip?.ready],
+                      [t("doctorActiveTurnsLabel"), doctorStatus.runtime?.activeTurns],
+                      [t("doctorWaitingTurnsLabel"), doctorStatus.runtime?.waitingTurns],
                     ].map(([label, ready]) => (
                       <div key={String(label)}>
                         {label}:{" "}
-                        {typeof ready === "number" ? ready : ready ? "bereit" : "nicht bereit"}
+                        {typeof ready === "number"
+                          ? ready
+                          : ready
+                            ? t("doctorReady")
+                            : t("doctorNotReady")}
                       </div>
                     ))}
                     {doctorStatus.recovery?.interactiveLoginRequired && (
                       <div className="col-span-2 text-warning">
-                        Interaktive Anmeldung erforderlich. Nutze den geschützten
-                        Browser-/VNC-Recovery-Pfad.
+                        {t("doctorInteractiveLoginRequired")}
                       </div>
                     )}
                     {doctorStatus.lastError && (
                       <div className="col-span-2 break-words text-error">
-                        Letzter Fehler: {String(doctorStatus.lastError)}
+                        {t("doctorLastError")} {String(doctorStatus.lastError)}
                       </div>
                     )}
                   </div>
                 )}
-              </div>
+              </Card.Section>
             )}
             {isGooglePse && (
               <Input
@@ -1304,67 +1336,72 @@ export default function EditConnectionModal({
                     {t("rateLimitOverridesSection")}
                   </p>
                   <div className="grid grid-cols-2 gap-3">
-                    <Input
+                    <NumberInput
                       label={t("rateLimitOverridesRpmLabel")}
-                      type="number"
                       min={0}
-                      value={formData.rpm}
-                      onChange={(e) => setFormData({ ...formData, rpm: e.target.value })}
+                      value={textToNumber(formData.rpm)}
+                      onValueChange={(value) =>
+                        setFormData({ ...formData, rpm: numberToText(value) })
+                      }
                       placeholder={t("inherit")}
                       hint={t("rateLimitOverridesRpmHint")}
                     />
-                    <Input
+                    <NumberInput
                       label={t("rateLimitOverridesRpdLabel")}
-                      type="number"
                       min={0}
-                      value={formData.rpd}
-                      onChange={(e) => setFormData({ ...formData, rpd: e.target.value })}
+                      value={textToNumber(formData.rpd)}
+                      onValueChange={(value) =>
+                        setFormData({ ...formData, rpd: numberToText(value) })
+                      }
                       placeholder={t("inherit")}
                       hint={t("rateLimitOverridesRpdHint")}
                     />
-                    <Input
+                    <NumberInput
                       label={t("rateLimitOverridesTpmLabel")}
-                      type="number"
                       min={0}
-                      value={formData.tpm}
-                      onChange={(e) => setFormData({ ...formData, tpm: e.target.value })}
+                      value={textToNumber(formData.tpm)}
+                      onValueChange={(value) =>
+                        setFormData({ ...formData, tpm: numberToText(value) })
+                      }
                       placeholder={t("inherit")}
                       hint={t("rateLimitOverridesTpmHint")}
                     />
-                    <Input
+                    <NumberInput
                       label={t("rateLimitOverridesTpdLabel")}
-                      type="number"
                       min={0}
-                      value={formData.tpd}
-                      onChange={(e) => setFormData({ ...formData, tpd: e.target.value })}
+                      value={textToNumber(formData.tpd)}
+                      onValueChange={(value) =>
+                        setFormData({ ...formData, tpd: numberToText(value) })
+                      }
                       placeholder={t("inherit")}
                       hint={t("rateLimitOverridesTpdHint")}
                     />
-                    <Input
+                    <NumberInput
                       label={t("rateLimitOverridesMinTimeLabel")}
-                      type="number"
                       min={0}
-                      value={formData.minTime}
-                      onChange={(e) => setFormData({ ...formData, minTime: e.target.value })}
+                      value={textToNumber(formData.minTime)}
+                      onValueChange={(value) =>
+                        setFormData({ ...formData, minTime: numberToText(value) })
+                      }
                       placeholder={t("inherit")}
                       hint={t("rateLimitOverridesMinTimeHint")}
                     />
-                    <Input
+                    <NumberInput
                       label={t("rateLimitOverridesMaxWaitMsLabel")}
-                      type="number"
                       min={0}
-                      value={formData.maxWaitMs}
-                      onChange={(e) => setFormData({ ...formData, maxWaitMs: e.target.value })}
+                      value={textToNumber(formData.maxWaitMs)}
+                      onValueChange={(value) =>
+                        setFormData({ ...formData, maxWaitMs: numberToText(value) })
+                      }
                       placeholder={t("inherit")}
                       hint={t("rateLimitOverridesMaxWaitMsHint")}
                     />
-                    <Input
+                    <NumberInput
                       label={t("rateLimitOverridesMaxConcurrentLabel")}
-                      type="number"
                       min={0}
-                      value={formData.rateLimitMaxConcurrent}
-                      onChange={(e) =>
-                        setFormData({ ...formData, rateLimitMaxConcurrent: e.target.value })
+                      value={textToNumber(formData.rateLimitMaxConcurrent)}
+                      onValueChange={(value) =>
+                        setFormData({ ...formData, rateLimitMaxConcurrent: numberToText(value) })
                       }
                       placeholder={t("inherit")}
                       hint={t("rateLimitOverridesMaxConcurrentHint")}
@@ -1511,11 +1548,11 @@ export default function EditConnectionModal({
                     <span
                       className={`flex-1 min-w-0 break-all font-mono text-xs bg-bg-subtle px-3 py-2 rounded border border-border ${statusColor}`}
                     >
-                      {statusIcon} {t("primaryKey")}: {connection.apiKey}
+                      {statusIcon} {t("primaryKey")}: {primaryKeyDisplay}
                     </span>
                     {health && (
                       <span
-                        className="text-[10px] text-text-muted whitespace-nowrap"
+                        className="text-3xs text-text-muted whitespace-nowrap"
                         title={statusLabel}
                       >
                         {health.failures}x
@@ -1586,7 +1623,7 @@ export default function EditConnectionModal({
                       <div className="flex items-center gap-1">
                         {health && (
                           <span
-                            className="text-[10px] text-text-muted whitespace-nowrap"
+                            className="text-3xs text-text-muted whitespace-nowrap"
                             title={statusLabel}
                           >
                             {health.failures}x

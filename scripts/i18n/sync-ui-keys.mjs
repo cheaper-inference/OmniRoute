@@ -53,7 +53,12 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { execFileSync } from "node:child_process";
 
 import { findStaleTranslations, flattenLeaves } from "./check-ui-value-drift.mjs";
-import { renderGlobalErrorCatalog } from "./generate-global-error-messages.mjs";
+import {
+  ROUTE_HANDLER_MESSAGES_PATH,
+  ROUTE_HANDLER_MESSAGE_KEYS,
+  renderGlobalErrorCatalog,
+  renderRouteHandlerMessages,
+} from "./generate-global-error-messages.mjs";
 import {
   backendConfig,
   translateBatch,
@@ -894,7 +899,9 @@ export async function processLocale(locale, source, config, opts, backend) {
  * (`OMNIROUTE_TRANSLATION_*`, see lib/translate-backend.mjs — throws when it is not configured).
  * A dashboard (`ui`) run that changed a catalog also regenerates the compact error-boundary
  * catalogs under src/i18n/global-error-messages (renderGlobalErrorCatalog in
- * generate-global-error-messages.mjs); they are rendered in memory, so a dry run lists in
+ * generate-global-error-messages.mjs) and the route-handler catalog
+ * src/i18n/route-handler-messages.json (renderRouteHandlerMessages, same module); they are
+ * rendered in memory, so a dry run lists in
  * `changedFiles` exactly the files a real run writes.
  *
  * @param {object} [options]
@@ -1044,6 +1051,30 @@ export async function syncUiKeys(options = {}) {
       const next = renderGlobalErrorCatalog(source, full);
       const previous = existsSync(file) ? await fs.readFile(file, "utf8") : null;
       if (next === previous) continue;
+      changedFiles.push(rel(file));
+      if (!dryRun) await fs.writeFile(file, next, "utf8");
+    }
+  }
+
+  // Same for the route-handler catalog (one file, every locale): regenerated from the merged
+  // catalogs whenever this run changed one, and only when en.json has any of its keys.
+  const routeHandlerKeysInSource = ROUTE_HANDLER_MESSAGE_KEYS.some(
+    (key) => typeof key.split(".").reduce((node, part) => node?.[part], source) === "string"
+  );
+  if (catalog.name === "ui" && changedFiles.length && routeHandlerKeysInSource) {
+    const catalogsByCode = [];
+    for (const { code } of config.locales) {
+      const full =
+        code === SOURCE_LOCALE
+          ? source
+          : (mergedByCode.get(code) ??
+            (onDisk.has(code) ? await loadJson(path.join(dir, `${code}.json`)) : null));
+      catalogsByCode.push([code, full]);
+    }
+    const file = path.join(root, ROUTE_HANDLER_MESSAGES_PATH);
+    const next = renderRouteHandlerMessages(source, catalogsByCode);
+    const previous = existsSync(file) ? await fs.readFile(file, "utf8") : null;
+    if (next !== previous) {
       changedFiles.push(rel(file));
       if (!dryRun) await fs.writeFile(file, next, "utf8");
     }
