@@ -11,9 +11,10 @@
 #
 # This smoke replays the stage itself (FROM runner-base AS runner-web, every instruction up to the
 # next FROM) in a throwaway image on a Docker host (default: the .113 build VPS, which the devbox
-# reaches over ssh; set PREFLIGHT_DOCKER_HOST="" to build locally). The checkout's playwright and
-# playwright-core packages stand in for the standalone build's node_modules. As the bun user it then
-# launches Chromium through Playwright headless, headed under a private Xvfb, and through the
+# reaches over ssh; set PREFLIGHT_DOCKER_HOST="" to build locally). A scratch builder supplies the
+# full packages. The simulated Next standalone includes only Playwright's traced files, so a
+# missing installer cannot be masked by a full playwright package in /app/node_modules. As the bun
+# user the probe launches Chromium headless, headed under a private Xvfb, and through the
 # /usr/bin/chromium path the system-browser lookups use.
 #
 # Usage: scripts/release/preflight-bun-apt-smoke.sh [Dockerfile.bun]
@@ -44,8 +45,10 @@ for pkg in playwright playwright-core; do
 done
 
 rm -rf "$CTX"
-mkdir -p "$CTX/node_modules"
+mkdir -p "$CTX/node_modules" "$CTX/standalone/node_modules/playwright"
 cp -rL "$ROOT/node_modules/playwright" "$ROOT/node_modules/playwright-core" "$CTX/node_modules/"
+cp -L "$ROOT/node_modules/playwright/"{index.js,index.mjs,package.json} "$CTX/standalone/node_modules/playwright/"
+cp -R "$CTX/node_modules/playwright-core" "$CTX/standalone/node_modules/"
 
 cat > "$CTX/probe.cjs" <<'PROBE'
 // Launches Chromium the three ways the app does; any failure exits 1.
@@ -78,9 +81,12 @@ async function launch(label, options) {
 PROBE
 
 {
+  echo "FROM scratch AS builder"
+  echo "COPY node_modules/playwright /opt/playwright/node_modules/playwright"
+  echo "COPY node_modules/playwright-core /opt/playwright/node_modules/playwright-core"
   echo "FROM $BASE"
   echo "WORKDIR /app"
-  echo "COPY node_modules/ /app/node_modules/"
+  echo "COPY standalone/node_modules/ /app/node_modules/"
   printf '%s\n' "$STAGE"
   echo "COPY probe.cjs /tmp/probe.cjs"
   echo "RUN bun /tmp/probe.cjs"

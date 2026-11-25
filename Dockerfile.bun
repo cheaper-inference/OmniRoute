@@ -31,6 +31,12 @@ COPY scripts/dev/sync-env.mjs ./scripts/dev/sync-env.mjs
 # Fast Bun native package install
 RUN bun install --include=optional --quiet
 
+# Next standalone traces only Playwright's entry points and package.json.
+# Bundle the complete installer for runner-web from the same lockfile install.
+RUN mkdir -p /opt/playwright/node_modules \
+  && cp -RL node_modules/playwright node_modules/playwright-core /opt/playwright/node_modules/ \
+  && test -f /opt/playwright/node_modules/playwright/cli.js
+
 # Fail the build if wreq-js cannot resolve its current platform binding.
 RUN bun -e "const wreq = require('wreq-js'); if (typeof wreq.createTransport !== 'function') process.exit(1)"
 
@@ -132,15 +138,16 @@ USER root
 #     /home/bun/.cache/ms-playwright/…".
 #   - The Debian chromium, chromium-common and chromium-driver packages carried ~720
 #     HIGH scanner findings with no Debian fix; chromium-driver was never used.
-# The browser version follows the bundled playwright package (Dependabot npm group),
-# not Debian's chromium.
+# The installer comes from the builder, so the browser version follows the bundled
+# playwright package (Dependabot npm group).
 # xvfb (#15300): zai-web needs a headed Chromium and the browser pool starts a private
 # Xvfb when the container has no DISPLAY.
 # /usr/bin/chromium stays, as a symlink to Playwright's build, for the code paths that
 # look for a system browser there (ChatGPT Web, Codex Web, Adobe Firefly login).
 ENV PLAYWRIGHT_BROWSERS_PATH=/home/bun/.cache/ms-playwright
+COPY --from=builder /opt/playwright /opt/playwright
 RUN apt-get update \
-  && bun node_modules/playwright/cli.js install chromium --with-deps \
+  && bun /opt/playwright/node_modules/playwright/cli.js install chromium --with-deps \
   && apt-get install -y --no-install-recommends xvfb \
   && ln -sf "$(bun -e 'process.stdout.write(require("playwright-core").chromium.executablePath())')" /usr/bin/chromium \
   && /usr/bin/chromium --version \
