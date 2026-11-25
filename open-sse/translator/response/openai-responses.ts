@@ -1155,6 +1155,16 @@ function synthesizeResponsesReasoningSnapshot(
   }
 
   const text = replayableReasoning || getVisibleResponsesReasoningSummaryText(item);
+  return recoverUnseenReasoningSnapshot(state, itemId, outputIndex, text, fromCompleted);
+}
+
+function recoverUnseenReasoningSnapshot(
+  state,
+  itemId: string,
+  outputIndex: unknown,
+  text: string,
+  fromCompleted?: boolean
+) {
   if (!text || isInternalReasoningPlaceholder(text)) return null;
   if (fromCompleted && consumeAnonymousReasoningSnapshot(state, text)) {
     markResponsesReasoningIdentity(state, itemId, outputIndex);
