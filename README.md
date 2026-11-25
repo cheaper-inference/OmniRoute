@@ -339,7 +339,7 @@ curl http://localhost:20128/v1/chat/completions \
       <br/><sub><b>AgentRouter</b></sub><br/><sub>agentrouter.org</sub>
     </td>
     <td>
-      <sub><b><a href="https://agentrouter.org/register?aff=70LM">AgentRouter</a></b> — affiliate signup · <b>daily $25 check-in credit</b>, and sign-ups with an invite code get $50 more (checked 2026-11-23; free server, expect higher latency — best for testing, not production). First-class support in OmniRoute since <b>v3.8.50</b>: Chat Completions, the Anthropic-compatible wire format and the OpenAI-compatible path. Its public model list currently shows <code>gpt-6.1-sol</code> and <code>gpt-5.6-sol</code>. <b><a href="https://agentrouter.org/register?aff=70LM">Sign up →</a></b></sub>
+      <sub><b><a href="https://agentrouter.org/register?aff=70LM">AgentRouter</a></b> — Referral link (official site: <a href="https://agentrouter.org">agentrouter.org</a>) · <b>daily $25 check-in credit</b>, and sign-ups with an invite code get $50 more (checked 2026-11-23; free server, expect higher latency — best for testing, not production). First-class support in OmniRoute since <b>v3.8.50</b>: Chat Completions, the Anthropic-compatible wire format and the OpenAI-compatible path. Its public model list currently shows <code>gpt-6.1-sol</code> and <code>gpt-5.6-sol</code>. <b><a href="https://agentrouter.org/register?aff=70LM">Sign up →</a></b></sub>
       <br/><br/>
       <sub>⚠️ <i>Affiliate link — OmniRoute has no sponsorship or partnership with this provider.</i></sub>
     </td>
