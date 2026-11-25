@@ -3,16 +3,20 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import Button from "@/shared/components/Button";
+import GuardedAction from "@/shared/components/GuardedAction";
 import { Spinner } from "@/shared/components/Loading";
 import Input from "@/shared/components/Input";
 import Notice from "@/shared/components/Notice";
 import { useScrapeFetch } from "../../hooks/useScrapeFetch";
 import ScrapeResult from "../ScrapeResult";
 import type { ConfigState } from "../SearchToolsConfigPane";
+import type { SearchProviderCatalogItem } from "@/shared/schemas/searchTools";
+import { WEB_FETCH_URL_MAX_LENGTH } from "@/shared/constants/formLimits";
 
 interface ScrapeTabProps {
   configState: ConfigState;
+  /** The /api/search/providers catalog; null/undefined while it is unknown (not loaded). */
+  catalogProviders?: SearchProviderCatalogItem[] | null;
   /** Callback to report latency/cost to parent Studio */
   onMetrics?: (latencyMs: number | null, costUsd: number | null) => void;
 }
@@ -26,13 +30,36 @@ function isValidUrl(value: string): boolean {
   }
 }
 
-export default function ScrapeTab({ configState, onMetrics }: ScrapeTabProps) {
+/**
+ * True when the catalog lists a fetch provider with credentials: the same "connected" set the
+ * config pane offers on this tab (status `configured` or `rate_limited`, never `missing`).
+ */
+export function hasConnectedFetchProvider(providers: SearchProviderCatalogItem[]): boolean {
+  return providers.some((p) => p.kind === "fetch" && p.status !== "missing");
+}
+
+function getFetchProviderBlockReason(
+  providers: ScrapeTabProps["catalogProviders"],
+  translateReason: () => string
+): string | null {
+  // Only a loaded catalog can say "none connected"; while it is unknown the route decides.
+  return Array.isArray(providers) && !hasConnectedFetchProvider(providers)
+    ? translateReason()
+    : null;
+}
+
+export default function ScrapeTab({ configState, catalogProviders, onMetrics }: ScrapeTabProps) {
   const t = useTranslations("search");
   const [url, setUrl] = useState("");
   const [urlError, setUrlError] = useState<string | null>(null);
   const { result, loading, error, latencyMs, fetch: doFetch, reset } = useScrapeFetch();
+  const fetchProviderBlockReason = getFetchProviderBlockReason(catalogProviders, () =>
+    t("scrapeNoFetchProvider")
+  );
+  const noFetchProvider = fetchProviderBlockReason !== null;
 
   const handleSubmit = async () => {
+    if (noFetchProvider) return;
     setUrlError(null);
     if (!url.trim()) {
       setUrlError(t("scrapeUrlRequired"));
@@ -70,6 +97,7 @@ export default function ScrapeTab({ configState, onMetrics }: ScrapeTabProps) {
             className="flex-1"
             error={urlError ? <span data-testid="url-error">{urlError}</span> : undefined}
             type="url"
+            maxLength={WEB_FETCH_URL_MAX_LENGTH}
             value={url}
             onChange={(e) => {
               setUrl(e.target.value);
@@ -81,15 +109,26 @@ export default function ScrapeTab({ configState, onMetrics }: ScrapeTabProps) {
             }}
             data-testid="url-input"
           />
-          <Button
+          <GuardedAction
             variant="primary"
             onClick={() => void handleSubmit()}
             disabled={loading}
+            reason={fetchProviderBlockReason}
             data-testid="scrape-button"
           >
             {loading ? t("scrapeExtracting") : t("scrapeExtract")}
-          </Button>
+          </GuardedAction>
         </div>
+
+        {noFetchProvider && (
+          <p className="text-xs text-text-muted" data-testid="scrape-no-fetch-provider">
+            {fetchProviderBlockReason}
+            {" · "}
+            <Link href="/dashboard/providers" className="text-accent hover:underline">
+              {t("configureProvider")}
+            </Link>
+          </p>
+        )}
 
         {/* Options summary */}
         <div className="flex flex-wrap gap-x-4 gap-y-1 text-2xs text-text-muted">
