@@ -1478,6 +1478,25 @@ async function handleChatCoreInner({
       let compressionComboKey = comboName ?? null;
       let compressionComboApplied = false;
       let defaultCompressionComboApplied = false;
+      // Resolved before any combo is merged: the lossy-request policy needs the header to tell
+      // an opt-in from operator configuration, and every combo path (routing-assigned, active
+      // profile, seeded default) has to reach it (#21083).
+      const compressionHeader = resolveCompressionHeader(clientRawRequest?.headers ?? null);
+      if (compressionHeader) {
+        log?.debug?.("COMPRESSION", `x-omniroute-compression header: ${compressionHeader}`);
+      }
+      // Loaded before any combo is merged: the merge asks the header resolver whether the
+      // request chose a plan of its own, and that lookup needs the named-combo map (#21083).
+      let namedCombos: Record<string, CompressionPipelineStep[]> = {};
+      try {
+        const { listCompressionCombos } = await import("../../src/lib/db/compressionCombos.ts");
+        namedCombos = buildNamedComboLookup(listCompressionCombos());
+      } catch (err) {
+        log?.debug?.(
+          "COMPRESSION",
+          "Named combos load skipped: " + (err instanceof Error ? err.message : String(err))
+        );
+      }
       // Combo → config merge extracted to chatCore/compressionComboConfig.ts (chatCore slice 2).
       const applyCompressionComboConfig = (
         compressionCombo: RuntimeCompressionCombo | null,
@@ -1486,7 +1505,9 @@ async function handleChatCoreInner({
         const mergedConfig = mergeCompressionComboIntoConfig(
           config,
           compressionCombo,
-          routingOverrideIds
+          routingOverrideIds,
+          compressionHeader,
+          namedCombos
         );
         if (!mergedConfig) return false;
         config = mergedConfig;
@@ -1559,16 +1580,6 @@ async function handleChatCoreInner({
           );
         }
       }
-      let namedCombos: Record<string, CompressionPipelineStep[]> = {};
-      try {
-        const { listCompressionCombos } = await import("../../src/lib/db/compressionCombos.ts");
-        namedCombos = buildNamedComboLookup(listCompressionCombos());
-      } catch (err) {
-        log?.debug?.(
-          "COMPRESSION",
-          "Named combos load skipped: " + (err instanceof Error ? err.message : String(err))
-        );
-      }
       // The ACTIVE profile (activeComboId) reaches the resolver only as a PIPELINE:
       // buildNamedComboLookup keeps `pipeline` and drops the combo's outputMode, outputStyles
       // and language packs — so a combo the operator selected as active silently injected no
@@ -1591,10 +1602,7 @@ async function handleChatCoreInner({
         }
       }
       // Phase 3: per-request override. Unknown values fall through in the resolver (never error).
-      const compressionHeader = resolveCompressionHeader(clientRawRequest?.headers ?? null);
-      if (compressionHeader) {
-        log?.debug?.("COMPRESSION", `x-omniroute-compression header: ${compressionHeader}`);
-      }
+      // The header itself is resolved above, before any combo is merged (#21083).
       const connectionCacheOverride = resolveConnectionCacheOverride(
         credentials?.providerSpecificData
       );
