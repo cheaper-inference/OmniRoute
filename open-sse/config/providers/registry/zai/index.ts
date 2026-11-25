@@ -49,5 +49,9 @@ export const zaiProvider: RegistryEntry = {
     { id: "glm-5-turbo", name: "GLM 5 Turbo" },
     { id: "glm-4.7-flash", name: "GLM 4.7 Flash" },
     { id: "glm-4.7", name: "GLM 4.7" },
+    // #21219: glm-5.4 answers as itself on the coding-plan chat surface (200,
+    // model=glm-5.4, live probe 2026-11-25); keep it as a static fallback next to
+    // discovery so a fresh install shows the current flagship.
+    { id: "glm-5.4", name: "GLM 5.4" },
   ],
 };

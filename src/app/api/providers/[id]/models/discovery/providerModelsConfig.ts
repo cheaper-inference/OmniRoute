@@ -1053,6 +1053,20 @@ export const PROVIDER_MODELS_CONFIG: Record<string, ProviderModelsConfigEntry> =
   // without x-opencode-session are what OpenCode's operator warning names).
   "opencode-zen": buildOpencodeModelsDiscoveryEntry("https://opencode.ai/zen/v1/models"),
   "opencode-go": buildOpencodeModelsDiscoveryEntry("https://opencode.ai/zen/go/v1/models"),
+  // #21219 — z.ai's API-key provider serves an OpenAI-shaped model list on the
+  // general /api/paas/v4/models surface (verified live 2026-11-25, Bearer auth,
+  // 13 glm ids). Same key family as the coding-plan endpoints; the Anthropic-compat
+  // /api/anthropic/v1/models surface returns the same ids, but this entry keeps the
+  // general surface so both pay-as-you-go and coding-plan keys work. Mirror of the
+  // working glm-cn entry (open.bigmodel.cn).
+  zai: {
+    url: "https://api.z.ai/api/paas/v4/models",
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+    authHeader: "Authorization",
+    authPrefix: "Bearer ",
+    parseResponse: (data) => data.data || data.models || [],
+  },
   "glm-cn": {
     url: "https://open.bigmodel.cn/api/coding/paas/v4/models",
     method: "GET",

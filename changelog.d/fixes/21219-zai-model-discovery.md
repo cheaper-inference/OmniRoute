@@ -1,0 +1,1 @@
+- **fix(providers):** enable live model discovery for the Z.AI API-key provider and add GLM 5.4 to its static fallback catalog ([#21219](https://github.com/cheaper-inference/OmniRoute/issues/21219)).
