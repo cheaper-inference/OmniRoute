@@ -33,7 +33,10 @@ export function addTeamCosts(total: TeamCostTotals, value: TeamCostTotals) {
   total.hasUnpricedUsage ||= value.hasUnpricedUsage;
   total.hasUnpricedListUsage ||= value.hasUnpricedListUsage;
   total.hasPricingFailure ||= value.hasPricingFailure;
-  total.unpricedModels = [...new Set([...total.unpricedModels, ...value.unpricedModels])].sort();
+  // Code-unit order, the same as the default sort, with an explicit comparator (Sonar S2871).
+  total.unpricedModels = [...new Set([...total.unpricedModels, ...value.unpricedModels])].sort(
+    (a, b) => (a < b ? -1 : a > b ? 1 : 0)
+  );
 }
 async function listCost(row: TeamCostRow, shape: TeamCostShape, memo: TeamPricingMemo) {
   if (
