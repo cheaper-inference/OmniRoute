@@ -4,13 +4,15 @@ export type ProxyScope = "global" | "provider" | "account" | "combo";
 // Rotation strategy applied when a scope has a POOL of proxies (#6365). Defaults
 // to `round-robin` (monotonic persisted cursor — never Math.random). `random`
 // picks uniformly from the alive set; `sticky` holds the same member for a
-// configurable window before advancing the cursor.
-export type ProxyRotationStrategy = "round-robin" | "random" | "sticky" | "latency";
+// configurable window before advancing the cursor. `session` keeps one conversation on
+// one member (rendezvous hash of the session key; round-robin when there is no key).
+export type ProxyRotationStrategy = "round-robin" | "random" | "sticky" | "latency" | "session";
 export const PROXY_ROTATION_STRATEGIES: readonly ProxyRotationStrategy[] = [
   "round-robin",
   "random",
   "sticky",
   "latency",
+  "session",
 ];
 export const DEFAULT_PROXY_ROTATION_STRATEGY: ProxyRotationStrategy = "round-robin";
 
