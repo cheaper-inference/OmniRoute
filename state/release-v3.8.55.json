@@ -2,27 +2,7 @@
   "version": 1,
   "base": "release/v3.8.55",
   "paused": null,
-  "inFlight": {
-    "batchId": "b41",
-    "kind": "batch",
-    "candidateRef": "omni-queue/release-v3.8.55/b41-db34be497bb1",
-    "candidateSha": "db34be497bb1c125a235f4116116fc21a9516b6b",
-    "baseSha": "e6476f01a9fd0a76df12326cc742aeef00ffa63a",
-    "treeSha": "c28878672c0b56bd0e5c2bf4ad4f59578d064987",
-    "prs": [
-      {
-        "n": 21205,
-        "head": "8741ef3d0905867e193751adec82b1f92651283f",
-        "title": "feat(merge-queue): the queue speaks as the owner and signs its merge commits",
-        "author": "diegosouzapw",
-        "labeledAt": "2026-11-25T13:13:58Z"
-      }
-    ],
-    "stage": "testing",
-    "startedAt": "2026-11-25T16:17:06.316Z",
-    "attempts": 0,
-    "bisect": null
-  },
+  "inFlight": null,
   "baseChecks": [
     {
       "baseSha": "ae94881fcf543d1ee91d6af11f18b274280e0c53",
@@ -121,7 +101,8 @@
       "19305": "1f33f0e10883549e4374ac38d47e87c94936bc5c",
       "19306": "4afb0ca62e19eb94155c5b9c2b78bf4b91ae1dee",
       "21095": "1b7aac58720e39f7915eaf09a0f3ffc1a5a33b95",
-      "21192": "2d55d78dc1574c778bb5fe93761334ca76e3af20"
+      "21192": "2d55d78dc1574c778bb5fe93761334ca76e3af20",
+      "21205": "8741ef3d0905867e193751adec82b1f92651283f"
     }
   },
   "counters": {
@@ -134,36 +115,6 @@
     "culprits": 1
   },
   "history": [
-    {
-      "at": "2026-11-19T08:20:09.712Z",
-      "type": "checks-red",
-      "batchId": "b1",
-      "prs": [
-        20553,
-        20565,
-        20561,
-        20566,
-        20567
-      ],
-      "sha": "bb946ced17fddc311cc45d045d3d324d9e85d2a9",
-      "detail": "Gate / CI, Unit Tests (6/8)",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44486661826"
-    },
-    {
-      "at": "2026-11-19T08:20:09.712Z",
-      "type": "flaky-rerun",
-      "batchId": "b1",
-      "prs": [
-        20553,
-        20565,
-        20561,
-        20566,
-        20567
-      ],
-      "sha": "bb946ced17fddc311cc45d045d3d324d9e85d2a9",
-      "detail": "re-running the failed jobs of b1 once (Gate / CI, Unit Tests (6/8)) before a base check",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44486661826"
-    },
     {
       "at": "2026-11-19T08:46:23.492Z",
       "type": "checks-red",
@@ -2587,8 +2538,29 @@
         "21205": "2026-11-25T13:13:58Z"
       },
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45652212248"
+    },
+    {
+      "at": "2026-11-25T17:23:03.752Z",
+      "type": "checks-green",
+      "batchId": "b41",
+      "prs": [
+        21205
+      ],
+      "sha": "db34be497bb1c125a235f4116116fc21a9516b6b",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45664112411"
+    },
+    {
+      "at": "2026-11-25T17:23:14.203Z",
+      "type": "would-land",
+      "batchId": "b41",
+      "prs": [
+        21205
+      ],
+      "sha": "db34be497bb1c125a235f4116116fc21a9516b6b",
+      "detail": "shadow mode: would merge-ff onto e6476f01a9fd",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45664112411"
     }
   ],
-  "updatedAt": "2026-11-25T16:25:51.758Z",
+  "updatedAt": "2026-11-25T17:23:26.343Z",
   "batchWindow": 5
 }
