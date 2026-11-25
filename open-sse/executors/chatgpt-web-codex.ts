@@ -1,4 +1,4 @@
-import { existsSync } from "node:fs";
+import { existsSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
 import {
@@ -103,17 +103,40 @@ function configuredString(data: Record<string, unknown>, ...keys: string[]): str
   return undefined;
 }
 
+// Chromium installed by `playwright install chromium` (the runner-web image); the image sets
+// PLAYWRIGHT_BROWSERS_PATH, so the directory is the operator's choice.
+function playwrightChromiumExecutables(): string[] {
+  const root = process.env.PLAYWRIGHT_BROWSERS_PATH?.trim();
+  if (!root || !existsSync(root)) return [];
+  let entries: string[];
+  try {
+    entries = readdirSync(root);
+  } catch {
+    return [];
+  }
+  return entries
+    .filter((entry) => /^chromium-\d+$/.test(entry))
+    .sort((a, b) => Number(b.slice(9)) - Number(a.slice(9)))
+    .flatMap((entry) => [
+      join(root, entry, "chrome-linux64", "chrome"),
+      join(root, entry, "chrome-linux", "chrome"),
+      join(root, entry, "chrome-win64", "chrome.exe"),
+      join(root, entry, "chrome-win", "chrome.exe"),
+    ]);
+}
+
 /**
  * The browser to launch. Only the operator chooses it: the server's own environment
- * (CHATGPT_WEB_CODEX_CHROME_PATH, CHROME_PATH) or the known install locations. `explicit`
- * comes from the connection's providerSpecificData — caller input on remote management
- * requests, stored and read again by health checks and inference — so it may only pick
- * one of those, never name another program on the host.
+ * (CHATGPT_WEB_CODEX_CHROME_PATH, CHROME_PATH, PLAYWRIGHT_BROWSERS_PATH) or the known install
+ * locations. `explicit` comes from the connection's providerSpecificData — caller input on
+ * remote management requests, stored and read again by health checks and inference — so it
+ * may only pick one of those, never name another program on the host.
  */
 export function detectChromeExecutable(explicit?: string): string | undefined {
   const operatorChoices = [
     process.env.CHATGPT_WEB_CODEX_CHROME_PATH,
     process.env.CHROME_PATH,
+    ...playwrightChromiumExecutables(),
     "/usr/bin/google-chrome",
     "/usr/bin/google-chrome-stable",
     "/usr/bin/chromium",

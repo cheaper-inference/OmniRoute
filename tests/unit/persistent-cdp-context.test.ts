@@ -31,6 +31,24 @@ test("rejects absent or different account sessions without exposing values", () 
     );
   }
 });
+const puid = (user: string) => ({
+  name: "_puid",
+  value: `${user}:1795616119-sig%3D`,
+  domain: "chatgpt.com",
+});
+test("accepts a rotated session token when the _puid user matches", () => {
+  assertMatchingChatGptSession(
+    [cookie("old-token"), puid("user-AbC123")],
+    [cookie("rotated-token"), puid("user-AbC123")]
+  );
+});
+test("rejects a different _puid user, or a matching user with no browser session", () => {
+  for (const actual of [[cookie("rotated-token"), puid("user-Other9")], [puid("user-AbC123")]]) {
+    assert.throws(() =>
+      assertMatchingChatGptSession([cookie("old-token"), puid("user-AbC123")], actual)
+    );
+  }
+});
 test("persistent connection reuses the authenticated context without injecting cookies", async () => {
   const context = { cookies: async () => [cookie("same")] } as unknown as BrowserContext;
   const browser = {

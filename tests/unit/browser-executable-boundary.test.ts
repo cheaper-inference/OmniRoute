@@ -25,6 +25,7 @@ const ENV_KEYS = [
   "PROGRAMFILES",
   "PROGRAMFILES(X86)",
   "LOCALAPPDATA",
+  "PLAYWRIGHT_BROWSERS_PATH",
 ];
 const savedEnv = Object.fromEntries(ENV_KEYS.map((k) => [k, process.env[k]]));
 for (const k of ENV_KEYS) delete process.env[k];
@@ -113,4 +114,21 @@ test("codex validation honours allowLocalSpawn=false: a remote caller never reac
   });
   assert.equal(result.valid, false);
   assert.match(String(result.error), /local/i, "must say the browser check needs a local request");
+});
+
+test("codex: Chromium installed under PLAYWRIGHT_BROWSERS_PATH is an operator browser", () => {
+  const root = path.join(TEST_DATA_DIR, "ms-playwright");
+  const binary = path.join(root, "chromium-1234", "chrome-linux64", "chrome");
+  fs.mkdirSync(path.dirname(binary), { recursive: true });
+  fs.mkdirSync(path.join(root, "chromium_headless_shell-1234", "chrome-linux64"), {
+    recursive: true,
+  });
+  fs.writeFileSync(binary, "");
+  process.env.PLAYWRIGHT_BROWSERS_PATH = root;
+  try {
+    assert.equal(detectChromeExecutable(), binary);
+    assert.notEqual(detectChromeExecutable(NOT_A_BROWSER), NOT_A_BROWSER);
+  } finally {
+    delete process.env.PLAYWRIGHT_BROWSERS_PATH;
+  }
 });
