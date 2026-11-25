@@ -672,6 +672,17 @@ export const AUDIO_SPEECH_PROVIDERS: Record<string, AudioProvider> = {
     format: "minimax-tts",
     models: [{ id: "speech-2.8-hd", name: "Speech 2.8 HD" }],
   },
+  "minimax-cn": {
+    id: "minimax-cn",
+    baseUrl: "https://api.minimaxi.com/v1/t2a_v2",
+    authType: "apikey",
+    authHeader: "bearer",
+    format: "minimax-tts",
+    models: [
+      { id: "speech-2.8-turbo", name: "Speech 2.8 Turbo" },
+      { id: "speech-2.8-hd", name: "Speech 2.8 HD" },
+    ],
+  },
 
   // deAPI maps the OpenAI stock voices (alloy, nova, ...) onto each model's own
   // voices, so the default "alloy" works on every model; native ids (af_bella,

@@ -11,7 +11,7 @@ import assert from "node:assert/strict";
 // the registries (single source of truth) and unions it with declared serviceKinds.
 //
 // MiniMax was the flagged case: its international endpoint serves TTS/video/music/image,
-// the China variant (minimax-cn) has no media registry entries.
+// the China variant (minimax-cn) has its own TTS endpoint.
 
 const { getRegistryMediaKinds, resolveProviderServiceKinds, REGISTRY_MEDIA_KINDS } =
   await import("../../open-sse/config/mediaServiceKinds.ts");
@@ -22,8 +22,8 @@ test("minimax (international) derives image/tts/video/music from the registries"
   assert.deepEqual(kinds, ["image", "music", "tts", "video"]);
 });
 
-test("minimax-cn derives no media kinds (China endpoint has no media registry entries)", () => {
-  assert.deepEqual(getRegistryMediaKinds("minimax-cn"), []);
+test("minimax-cn derives TTS from its regional speech registry entry", () => {
+  assert.deepEqual(getRegistryMediaKinds("minimax-cn"), ["tts"]);
 });
 
 test("representative media providers derive the expected kinds", () => {
@@ -79,7 +79,7 @@ test("media listing filter surfaces minimax where the old declared-only filter m
       `precondition (bug): old filter missed minimax under ${kind}`
     );
     assert.ok(newListFor(kind).includes("minimax"), `fix: minimax now listed under ${kind}`);
-    assert.ok(!newListFor(kind).includes("minimax-cn"), `minimax-cn must not appear under ${kind}`);
+    assert.equal(newListFor(kind).includes("minimax-cn"), kind === "tts");
   }
 
   // The fix is systemic, not minimax-only: many providers were invisible before.

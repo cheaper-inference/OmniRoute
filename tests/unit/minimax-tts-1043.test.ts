@@ -57,6 +57,24 @@ test("handleAudioSpeech routes MiniMax format to T2A v2 with hex output", async 
   }
 });
 
+test("MiniMax China sends the unprefixed Turbo model to the mainland T2A endpoint", async (t) => {
+  const upstream = t.mock.method(globalThis, "fetch", async () =>
+    Response.json({ data: { audio: HEX_AUDIO }, base_resp: { status_code: 0 } })
+  );
+  const response = await handleAudioSpeech({
+    body: { model: "minimax-cn/speech-2.8-turbo", input: "你好", voice: "male-qn-qingse" },
+    credentials: { apiKey: "test-cn-key" },
+  });
+
+  assert.equal(response.status, 200);
+  assert.equal(upstream.mock.callCount(), 1);
+  const [url, init] = upstream.mock.calls[0].arguments;
+  assert.equal(String(url), "https://api.minimaxi.com/v1/t2a_v2");
+  assert.equal(new Headers(init?.headers).get("authorization"), "Bearer test-cn-key");
+  assert.equal(JSON.parse(String(init?.body)).model, "speech-2.8-turbo");
+  assert.equal(Buffer.from(await response.arrayBuffer()).toString("hex"), HEX_AUDIO);
+});
+
 test("handleAudioSpeech surfaces MiniMax base_resp error", async () => {
   const originalFetch = globalThis.fetch;
   globalThis.fetch = async () =>
