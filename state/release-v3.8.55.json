@@ -3,30 +3,23 @@
   "base": "release/v3.8.55",
   "paused": null,
   "inFlight": {
-    "batchId": "b34",
+    "batchId": "b35",
     "kind": "batch",
-    "candidateRef": "omni-queue/release-v3.8.55/b34-b05619f054e7",
-    "candidateSha": "b05619f054e7408211402d21101220a00cf43d0f",
+    "candidateRef": "omni-queue/release-v3.8.55/b35-046cba6aa30f",
+    "candidateSha": "046cba6aa30fc9e6df70098f466b6de942bfe39f",
     "baseSha": "c2944cc03feeb87572227315ae52c015ada722b3",
-    "treeSha": "2600be100cf2e7251ded971ad09ed3b2397e83aa",
+    "treeSha": "c1289d584b11775249282099d34b5cf7c9010c19",
     "prs": [
       {
-        "n": 21158,
-        "head": "76355c77af7edceac5677b086ea63a8105409a45",
-        "title": "refactor(dashboard): draw the shared quota bar with the UI Kit Progress",
+        "n": 21095,
+        "head": "b1c914c467debeeaadf1e7433dccad69d8e1e453",
+        "title": "fix(ci): read free-token figures by kind and keep the row-sum figure paired with the real one",
         "author": "diegosouzapw",
-        "labeledAt": "2026-11-24T22:01:36Z"
-      },
-      {
-        "n": 21094,
-        "head": "47d3d9d306c851b3a512c69de578f1feb6d15973",
-        "title": "feat(sse): canonical free-catalog counts and the free-catalog facts",
-        "author": "diegosouzapw",
-        "labeledAt": "2026-11-24T22:41:01Z"
+        "labeledAt": "2026-11-25T00:07:49Z"
       }
     ],
     "stage": "testing",
-    "startedAt": "2026-11-24T23:13:11.974Z",
+    "startedAt": "2026-11-25T00:28:58.692Z",
     "attempts": 0,
     "bisect": null
   },
@@ -104,12 +97,14 @@
       "19149": "ce0f2e3b64d51c480eccfd4c21b4ebeeaa0c2a0b",
       "19167": "5a3523ee5d9dc3a3fe610ed93b4c5ccb048bbca0",
       "19305": "1f33f0e10883549e4374ac38d47e87c94936bc5c",
-      "19306": "4afb0ca62e19eb94155c5b9c2b78bf4b91ae1dee"
+      "19306": "4afb0ca62e19eb94155c5b9c2b78bf4b91ae1dee",
+      "21094": "47d3d9d306c851b3a512c69de578f1feb6d15973",
+      "21158": "76355c77af7edceac5677b086ea63a8105409a45"
     }
   },
   "counters": {
-    "batchSeq": 34,
-    "ciRuns": 38,
+    "batchSeq": 35,
+    "ciRuns": 39,
     "landedPrs": 0,
     "landedBatches": 0,
     "redBatches": 8,
@@ -2187,8 +2182,45 @@
         "21158": "2026-11-24T22:01:36Z"
       },
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45507945239"
+    },
+    {
+      "at": "2026-11-25T00:28:25.796Z",
+      "type": "checks-green",
+      "batchId": "b34",
+      "prs": [
+        21158,
+        21094
+      ],
+      "sha": "b05619f054e7408211402d21101220a00cf43d0f",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45518307843"
+    },
+    {
+      "at": "2026-11-25T00:28:37.117Z",
+      "type": "would-land",
+      "batchId": "b34",
+      "prs": [
+        21158,
+        21094
+      ],
+      "sha": "b05619f054e7408211402d21101220a00cf43d0f",
+      "detail": "shadow mode: would merge-ff onto c2944cc03fee",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45518307843"
+    },
+    {
+      "at": "2026-11-25T00:29:01.876Z",
+      "type": "batch-started",
+      "batchId": "b35",
+      "prs": [
+        21095
+      ],
+      "sha": "046cba6aa30fc9e6df70098f466b6de942bfe39f",
+      "detail": "1 PR(s) on c2944cc03fee; window 5",
+      "labeledAt": {
+        "21095": "2026-11-25T00:07:49Z"
+      },
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45518307843"
     }
   ],
-  "updatedAt": "2026-11-24T23:13:16.840Z",
+  "updatedAt": "2026-11-25T00:29:03.632Z",
   "batchWindow": 5
 }
