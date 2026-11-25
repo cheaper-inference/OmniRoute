@@ -1,0 +1,1 @@
+- **chore(merge-queue):** OmniRoute ships with the owner's voice for queue messages and SSH signing for queue merge commits.

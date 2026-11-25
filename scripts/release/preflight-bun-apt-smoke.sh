@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 # scripts/release/preflight-bun-apt-smoke.sh — proves Dockerfile.bun's `runner-web` stage installs
-# on the Bun base image and that its Chromium launches, WITHOUT the 12 GB Next build the real stage
-# sits on.
+# on the Wolfi runtime and that its Chromium launches, skipping the 12 GB Next build.
 #
 # The stage is `continue-on-error` in docker-publish.yml, so a broken install (dead apt packages
 # such as gconf-service, stdc++6, fonts-kacst on v3.8.52 — #17236) never fails the build job; it
@@ -9,12 +8,12 @@
 # stage that installs fine can still ship a browser Playwright cannot find: 3.8.54-web-bun had
 # Debian's chromium but nothing under PLAYWRIGHT_BROWSERS_PATH, so chromium.launch() failed.
 #
-# This smoke replays the stage itself (FROM runner-base AS runner-web, every instruction up to the
-# next FROM) in a throwaway image on a Docker host (default: the .113 build VPS, which the devbox
-# reaches over ssh; set PREFLIGHT_DOCKER_HOST="" to build locally). The checkout's playwright and
-# playwright-core packages stand in for the standalone build's node_modules. As the bun user it then
-# launches Chromium through Playwright headless, headed under a private Xvfb, and through the
-# /usr/bin/chromium path the system-browser lookups use.
+# This smoke takes Bun from the build base image, replays the full runtime-os stage, then runs the
+# runner-web instructions without its ENTRYPOINT. It builds a throwaway image on a Docker host
+# (default: the .113 build VPS over ssh; set PREFLIGHT_DOCKER_HOST="" to build locally). The checkout's
+# complete Playwright packages populate a mock builder. The runtime gets only the traced Playwright
+# files and playwright-core. As the bun user it launches Chromium headless, headed under a private
+# Xvfb, and through /usr/bin/chromium.
 #
 # Usage: scripts/release/preflight-bun-apt-smoke.sh [Dockerfile.bun]
 # Env:   PREFLIGHT_DOCKER_HOST  ssh target with Docker (default root@192.168.0.113); "" = local docker
@@ -26,8 +25,15 @@ OUT="$ROOT/_artifacts/preflight"
 CTX="$OUT/bun-web-smoke"
 REMOTE_CTX=/tmp/omniroute-bun-web-smoke
 
-BASE=$(awk '/^FROM .* AS runner-base$/ { print $2; exit }' "$DOCKERFILE")
-[ -n "$BASE" ] || { echo "runner-base FROM line not found in $DOCKERFILE" >&2; exit 2; }
+BASE=$(awk '/^FROM .* AS base$/ { print $2; exit }' "$DOCKERFILE")
+[ -n "$BASE" ] || { echo "base FROM line not found in $DOCKERFILE" >&2; exit 2; }
+# Copy runtime-os with its FROM so the smoke uses the same Wolfi digest and packages.
+RUNTIME_OS=$(awk '
+  /^FROM .* AS runtime-os$/ { stage = 1; print; next }
+  stage && /^FROM / { exit }
+  stage { print }
+' "$DOCKERFILE")
+[ -n "$RUNTIME_OS" ] || { echo "runtime-os stage not found in $DOCKERFILE" >&2; exit 2; }
 # Every instruction of the runner-web stage, verbatim, minus its ENTRYPOINT.
 STAGE=$(awk '
   /^FROM runner-base AS runner-web$/ { stage = 1; next }
@@ -78,16 +84,22 @@ async function launch(label, options) {
 PROBE
 
 {
-  echo "FROM $BASE"
+  echo "FROM $BASE AS base"
+  echo "FROM scratch AS builder"
+  echo "COPY node_modules/playwright /opt/playwright/node_modules/playwright"
+  echo "COPY node_modules/playwright-core /opt/playwright/node_modules/playwright-core"
+  printf '%s\n' "$RUNTIME_OS"
+  echo "FROM runtime-os"
   echo "WORKDIR /app"
-  echo "COPY node_modules/ /app/node_modules/"
+  echo "COPY node_modules/playwright/index.js node_modules/playwright/index.mjs node_modules/playwright/package.json /app/node_modules/playwright/"
+  echo "COPY node_modules/playwright-core /app/node_modules/playwright-core"
   printf '%s\n' "$STAGE"
   echo "COPY probe.cjs /tmp/probe.cjs"
   echo "RUN bun /tmp/probe.cjs"
 } > "$CTX/Dockerfile"
 
 FILTER='\[probe\]|^#[0-9]+ (DONE|ERROR)|E: |Package .* (is not|has no)'
-echo "[bun-web-smoke] base=$BASE host=${HOST:-local}"
+echo "[bun-web-smoke] bun_source=$BASE host=${HOST:-local}"
 # The build's exit status decides; grep only trims the log (and finds nothing on some failures).
 set +e
 if [ -z "$HOST" ]; then
@@ -102,5 +114,5 @@ else
   status=$?
 fi
 set -e
-[ "$status" -eq 0 ] || { echo "[bun-web-smoke] ❌ runner-web failed on $BASE" >&2; exit "$status"; }
-echo "[bun-web-smoke] ✅ runner-web installs on $BASE and its Chromium launches"
+[ "$status" -eq 0 ] || { echo "[bun-web-smoke] ❌ runner-web failed on the Wolfi runtime" >&2; exit "$status"; }
+echo "[bun-web-smoke] ✅ runner-web installs on the Wolfi runtime and its Chromium launches"
