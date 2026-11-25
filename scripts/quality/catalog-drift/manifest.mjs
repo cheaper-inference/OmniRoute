@@ -86,7 +86,7 @@ const probeShape = z.object({
     .optional(),
 });
 
-function urlErrors(id, rawUrl, allowedHosts) {
+export function probeUrlErrors(id, rawUrl, allowedHosts) {
   const url = typeof rawUrl === "string" ? URL.parse(rawUrl) : null;
   if (!url) return [`${id}: invalid url`];
 
@@ -151,7 +151,7 @@ export function validateManifest(manifest) {
     seen.add(id);
     if (typeof id !== "string" || !PROBE_ID.test(id)) errors.push(`invalid probe id: ${id}`);
 
-    errors.push(...urlErrors(id, probe.url, allowedHosts), ...typeErrors(probe));
+    errors.push(...probeUrlErrors(id, probe.url, allowedHosts), ...typeErrors(probe));
     if (Array.isArray(assertions)) {
       for (const assertion of assertions) {
         if (!ASSERTION_OPS.has(assertion?.op))

@@ -41,7 +41,12 @@ export function selectPath(root, path) {
     if (filterField !== undefined) {
       const matching = selected.find((item) => {
         const actual = ownField(item, filterField);
-        return actual !== undefined && String(actual) === filterValue;
+        if (actual === undefined) return false;
+        try {
+          return String(actual) === filterValue;
+        } catch {
+          return false;
+        }
       });
       return visit(matching, next);
     }

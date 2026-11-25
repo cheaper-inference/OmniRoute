@@ -47,6 +47,13 @@ test("shortHash is stable", () => {
 });
 
 test("selectPath", () => {
+  assert.equal(
+    selectPath(
+      { data: [{ code: { toString: null } }, { code: "free", n: 1 }] },
+      "data[code=free].n"
+    ),
+    1
+  );
   assert.deepEqual(selectPath({ data: [{ id: "a" }, { id: "b" }] }, "data[].id"), ["a", "b"]);
   assert.deepEqual(
     selectPath([{ code: "paid" }, { code: "free", models: [] }], "[code=free].models"),
