@@ -59,6 +59,9 @@ The active HTTP transport (`sse` or `streamable-http`) is selected by the `mcpTr
 
 ### Remote access (manage-scope bypass)
 
+The [Rosebud asset and game tools](../providers/ROSEBUD.md) require a management credential
+and a local or LAN caller. API key connection restrictions also apply.
+
 `/api/mcp/*` is in the LOCAL_ONLY tier (`src/server/authz/routeGuard.ts`) — by default only loopback hosts (`localhost`, `127.0.0.1`, `::1`) can reach it. Since v3.8.2, non-loopback clients may connect if they present an `Authorization: Bearer <api-key>` whose key carries the `manage` scope. This is the only way to reach the remote MCP server through a tunnel, reverse proxy, or public hostname.
 
 ```bash

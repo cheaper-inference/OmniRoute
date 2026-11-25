@@ -23,6 +23,8 @@ Live count: `ls open-sse/services/*.ts | wc -l` (currently 293). More including 
 
 ### Account & Token Management
 
+- **`rosebud/`** — Local CLI profiles, credit-backed asset jobs, account-bound retries, artifacts, and game publishing.
+
 - **`providerConnectionPool.ts`** — Shared alias/custom-node connection pools for direct authentication and combo discovery; preserves node ownership and leaves caller ACL/pin filtering in place.
 - **`tokenRefresh.ts`** — OAuth token expiration detection and refresh.
 - **`accountFallback.ts`** — Account switching on quota/rate-limit. Also houses model lockout.
