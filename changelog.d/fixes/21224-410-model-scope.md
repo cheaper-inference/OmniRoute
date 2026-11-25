@@ -1,0 +1,1 @@
+- **fix(resilience):** a 410 from a retired model is now model-scoped for every provider instead of cooling the whole provider connection for 24h ([#21224](https://github.com/cheaper-inference/OmniRoute/pull/21224)) — thanks @Huyvux12
