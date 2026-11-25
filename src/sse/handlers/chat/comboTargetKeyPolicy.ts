@@ -3,12 +3,13 @@
  *
  * Policy already admitted the requested combo. Per-target
  * `isModelAllowedForKey` must not then skip every member just because the
- * allow-list is the combo name. auto/* / disableNonPublic still check the
+ * allow-list is the combo name. Built-in auto routes and disableNonPublic still check the
  * inner target so #9057 holds. blockedModels applies to every inner target,
  * including targets granted by the default `combo/*`; only a combo named in
  * allowedCombos overrides it.
  */
 
+import { isReservedComboName } from "@/lib/combos/autoNames";
 import { isModelBlockedByPatterns } from "@/lib/db/apiKeys";
 import { ALL_COMBOS_ACCESS_RULE } from "@/shared/constants/comboAccess";
 import { isComboNameAllowedForKey } from "@/shared/utils/apiKeyPolicy";
@@ -26,6 +27,7 @@ export type ComboTargetKeyPolicyOptions = {
   apiKey: string | null | undefined;
   apiKeyInfo: ComboTargetKeyPolicyInfo | null | undefined;
   requestedModelStr: string;
+  isVirtualAutoCombo?: boolean;
   targetModelStr: string;
   isModelAllowedForKey: (key: string, model: string) => Promise<boolean>;
 };
@@ -46,17 +48,18 @@ function allowListCoversRequestedCombo(
 }
 
 /**
- * A stored (non-`auto/*`) combo admitted by the key's `allowedCombos` grants its
- * own targets past `allowedModels` (#14197). `auto/*` combos keep per-candidate
+ * A stored combo admitted by the key's `allowedCombos` grants its own targets
+ * past `allowedModels` (#14197). Built-in auto routes keep per-candidate
  * model checks (#9057).
  */
 export function isExplicitlyAllowedComboForKey(
   apiKeyInfo: ComboTargetKeyPolicyInfo | null | undefined,
-  requestedModelStr: string | null | undefined
+  requestedModelStr: string | null | undefined,
+  isVirtualAutoCombo?: boolean
 ): boolean {
   if (!apiKeyInfo || !requestedModelStr) return false;
   return (
-    !requestedModelStr.startsWith("auto/") &&
+    !(isVirtualAutoCombo ?? isReservedComboName(requestedModelStr)) &&
     Array.isArray(apiKeyInfo.allowedCombos) &&
     isComboNameAllowedForKey(apiKeyInfo.allowedCombos, requestedModelStr)
   );
@@ -69,11 +72,13 @@ export function isExplicitlyAllowedComboForKey(
  */
 export function isComboNamedForKey(
   apiKeyInfo: ComboTargetKeyPolicyInfo | null | undefined,
-  requestedModelStr: string | null | undefined
+  requestedModelStr: string | null | undefined,
+  isVirtualAutoCombo?: boolean
 ): boolean {
   const rules = apiKeyInfo?.allowedCombos;
   if (!rules || !requestedModelStr) return false;
-  if (!isExplicitlyAllowedComboForKey(apiKeyInfo, requestedModelStr)) return false;
+  if (!isExplicitlyAllowedComboForKey(apiKeyInfo, requestedModelStr, isVirtualAutoCombo))
+    return false;
   const namedRules = rules.filter((rule) => rule !== ALL_COMBOS_ACCESS_RULE);
   return isComboNameAllowedForKey(namedRules, requestedModelStr);
 }
@@ -81,16 +86,24 @@ export function isComboNamedForKey(
 export async function comboTargetPassesKeyModelPolicy(
   opts: ComboTargetKeyPolicyOptions
 ): Promise<boolean> {
-  const { apiKey, apiKeyInfo, requestedModelStr, targetModelStr, isModelAllowedForKey } = opts;
+  const {
+    apiKey,
+    apiKeyInfo,
+    requestedModelStr,
+    targetModelStr,
+    isModelAllowedForKey,
+    isVirtualAutoCombo,
+  } = opts;
   if (!apiKey || !apiKeyInfo) return true;
 
   if (!hasApiKeyModelRestrictions(apiKeyInfo)) return true;
 
-  if (isComboNamedForKey(apiKeyInfo, requestedModelStr)) return true;
+  if (isComboNamedForKey(apiKeyInfo, requestedModelStr, isVirtualAutoCombo)) return true;
 
   if (await isModelBlockedByPatterns(apiKeyInfo.blockedModels, targetModelStr)) return false;
 
-  if (isExplicitlyAllowedComboForKey(apiKeyInfo, requestedModelStr)) return true;
+  if (isExplicitlyAllowedComboForKey(apiKeyInfo, requestedModelStr, isVirtualAutoCombo))
+    return true;
 
   if (allowListCoversRequestedCombo(apiKeyInfo.allowedModels, requestedModelStr)) {
     return true;

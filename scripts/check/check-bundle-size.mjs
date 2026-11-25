@@ -43,7 +43,8 @@
 import fs from "node:fs";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
-import { pathToFileURL, fileURLToPath } from "node:url";
+import { fileURLToPath } from "node:url";
+import { isMainModule } from "../lib/is-main-module.mjs";
 import {
   resolveLocalBinEntry,
   isNativeExecutable,
@@ -377,4 +378,4 @@ function main() {
   applyRatchet(totalBytes);
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1] || "").href) main();
+if (isMainModule(import.meta.url)) main();

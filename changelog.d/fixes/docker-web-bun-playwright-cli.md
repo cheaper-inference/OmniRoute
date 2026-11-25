@@ -1,0 +1,1 @@
+- **fix(docker):** The `-web-bun` image builds again. Next.js standalone omits the Playwright installer, so the Docker builder now supplies the full package. The install step previously failed with "Module not found", leaving the release without the `-web-bun` tag.
