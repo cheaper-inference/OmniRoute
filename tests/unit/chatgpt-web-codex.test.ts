@@ -362,6 +362,14 @@ test("current ChatGPT turn identity selector supports search-unit identities", (
   );
 });
 
+test("a search-unit identity survives the render-id swap when ChatGPT remounts the conversation", () => {
+  // `<render id>:<index>:<role>`: the render id changes from local-chatgpt:* to the server id.
+  assert.equal(
+    chatGptTurnIdentitySelector("search-unit:1:assistant"),
+    '[data-chatgpt-search-unit-key$=":1:assistant"]'
+  );
+});
+
 test("current ChatGPT effort selector includes the keyboard slider control", () => {
   assert.match(CHATGPT_EFFORT_SLIDER_SELECTOR, /data-reasoning-slider/);
 });
