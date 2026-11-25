@@ -34,6 +34,7 @@ import type {
   CodexProviderConfig,
 } from "../vendor/codex-chatgpt-web/types.ts";
 import { BaseExecutor, type ExecuteInput, type ExecutorExecuteResult } from "./base.ts";
+import type { ChatProbeIsolatingExecutor } from "./chatProbeIsolation.ts";
 import { reasoningEffortOf, requireChatGptWebCodexRoute } from "./chatgpt-web-codex/models.ts";
 import {
   connectionRuntimePaths,
@@ -268,7 +269,10 @@ function toolMaps(parsed: CodexParsedRequest) {
   return { namespace, freeform, toolSearch };
 }
 
-export class ChatGptWebCodexExecutor extends BaseExecutor {
+export class ChatGptWebCodexExecutor extends BaseExecutor implements ChatProbeIsolatingExecutor {
+  // Every turn runs on CHATGPT_TEMPORARY_CHAT_URL and assertTemporaryChatPage checks it.
+  readonly chatProbeIsolation = "temporary-chat" as const;
+
   constructor() {
     super("chatgpt-web-codex", {
       id: "chatgpt-web-codex",
