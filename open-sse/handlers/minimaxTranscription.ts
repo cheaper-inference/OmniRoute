@@ -30,6 +30,31 @@ export function webmConversionErrorResponse(error: GeminiLiveError): Response {
   return audioErrorResponse(error.status, messages[error.status] ?? "WebM conversion failed");
 }
 
+function buildMiniMaxTranscriptionBody(
+  upload: Blob & { name?: unknown },
+  model: string,
+  form: FormData
+) {
+  const responseFormat = form.get("response_format");
+  return buildMultipartBody(upload, {
+    model,
+    response_format: typeof responseFormat === "string" && responseFormat ? responseFormat : "json",
+  });
+}
+
+function buildMiniMaxTranscriptionHeaders(
+  provider: AudioProvider,
+  token: string | null | undefined,
+  contentType: string,
+  language: FormDataEntryValue | null
+): Record<string, string> {
+  return {
+    ...buildAuthHeaders(provider, token ?? null),
+    "Content-Type": contentType,
+    ...(typeof language === "string" && language ? { language } : {}),
+  };
+}
+
 export async function handleMiniMaxTranscription(
   provider: AudioProvider,
   file: Blob & { name?: unknown },
@@ -59,19 +84,10 @@ export async function handleMiniMaxTranscription(
       });
       upload = new File([pcmToWav(pcm, 16_000)], "recording.wav", { type: "audio/wav" });
     }
-    const responseFormat = form.get("response_format");
-    const { body, contentType } = await buildMultipartBody(upload, {
-      model,
-      response_format:
-        typeof responseFormat === "string" && responseFormat ? responseFormat : "json",
-    });
+    const { body, contentType } = await buildMiniMaxTranscriptionBody(upload, model, form);
     const res = await fetch(provider.baseUrl, {
       method: "POST",
-      headers: {
-        ...buildAuthHeaders(provider, token ?? null),
-        "Content-Type": contentType,
-        ...(typeof language === "string" && language ? { language } : {}),
-      },
+      headers: buildMiniMaxTranscriptionHeaders(provider, token, contentType, language),
       body,
       signal: signal ?? undefined,
       redirect: "error",
