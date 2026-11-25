@@ -11,6 +11,8 @@ import {
 } from "../../open-sse/executors/codebuddy-intl.ts";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+// CLI/2.175.0 sends the request and message ids as bare 32-hex ids (#18398).
+const HEX32_RE = /^[0-9a-f]{32}$/;
 
 function build(
   connectionId: string | undefined,
@@ -54,8 +56,8 @@ test("caller-supplied X-Conversation-* ids are forwarded", async (t) => {
       "x-conversation-message-id": " ",
     });
     assert.match(h["X-Conversation-ID"], UUID_RE);
-    assert.match(h["X-Conversation-Request-ID"], UUID_RE);
-    assert.match(h["X-Conversation-Message-ID"], UUID_RE);
+    assert.match(h["X-Conversation-Request-ID"], HEX32_RE);
+    assert.match(h["X-Conversation-Message-ID"], HEX32_RE);
   });
 
   await t.test("accepts a fetch Headers instance as the client header source", () => {
@@ -63,7 +65,7 @@ test("caller-supplied X-Conversation-* ids are forwarded", async (t) => {
       clientHeaders: new Headers({ "x-conversation-id": "from-headers" }),
     });
     assert.equal(out["X-Conversation-ID"], "from-headers");
-    assert.match(out["X-Conversation-Request-ID"], UUID_RE);
+    assert.match(out["X-Conversation-Request-ID"], HEX32_RE);
   });
 
   await t.test("does not duplicate the header under a second casing", () => {

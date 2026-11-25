@@ -1,0 +1,1 @@
+- **fix(dashboard):** Show the local-only notice up front for remote sessions behind a proxy and after a local-only request is rejected.

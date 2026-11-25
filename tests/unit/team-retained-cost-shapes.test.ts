@@ -101,11 +101,15 @@ test("legacy retained bucket stays unpriced after later exact-shape rollup", asy
       "SELECT total_requests,token_shapes_json,successful_token_shapes_json FROM daily_team_usage_summary"
     )
     .get();
-  assert.deepEqual(row, {
-    total_requests: 2,
-    token_shapes_json: null,
-    successful_token_shapes_json: null,
-  });
+  assert.equal(row.total_requests, 2);
+  for (const map of [row.token_shapes_json, row.successful_token_shapes_json]) {
+    const parsed = shapes.parseBillingShapeCounts(map, 2);
+    assert.equal(parsed.unpricedRequests, 1);
+    assert.equal(
+      parsed.entries.reduce((n, entry) => n + entry.count, 0),
+      1
+    );
+  }
   const status = await limits.getTeamUsageLimitStatusForApiKey(a.id, at);
   assert.equal(status?.hasUnpricedUsage, true);
   assert.equal(status.exceeded, true);

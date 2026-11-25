@@ -75,7 +75,8 @@ export const WEB_COOKIE_PROVIDERS = {
     color: "#20808D",
     textIcon: "PW",
     website: "https://www.perplexity.ai",
-    authHint: "Paste your __Secure-next-auth.session-token cookie value from perplexity.ai",
+    authHint:
+      "Paste the current Perplexity session cookie header (__Secure-pplx.session.<UUID> and pplx.session-id), or the legacy __Secure-next-auth.session-token, from perplexity.ai",
     subscriptionRisk: true,
     riskNoticeVariant: "webCookie",
     toolCalling: "emulated",

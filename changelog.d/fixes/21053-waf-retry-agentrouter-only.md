@@ -1,0 +1,1 @@
+- fix(executors): scope the 400 content-blocked WAF intra-URL retry to the agentrouter provider so other providers no longer replay permanent policy 400s (#21053)

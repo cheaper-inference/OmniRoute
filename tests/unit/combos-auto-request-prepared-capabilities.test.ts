@@ -2,8 +2,8 @@
  * #16419 — the `auto/*` request path shares one pool preparation.
  *
  * Default path (AUTO_REQUEST_RESOLVED_CAPABILITIES off): `resolveModelOrError`
- * prepares the pool once, lazily, and hands it to the primary attempt and the
- * fuzzy fallbacks. It must serve exactly what `createBuiltinAutoCombo(id, suffix)`
+ * prepares the pool once, lazily, for built-in IDs. It must serve exactly what
+ * `createBuiltinAutoCombo(id, suffix)`
  * (the release-tip code path, which prepares inside `createVirtualAutoCombo`)
  * serves: same members, same order, same snapshot weights, same advertised limits.
  * Unknown ids must not prepare a pool at all.
@@ -25,6 +25,7 @@ process.env.API_KEY_SECRET = process.env.API_KEY_SECRET ?? "auto-req-test-secret
 delete process.env.AUTO_REQUEST_RESOLVED_CAPABILITIES;
 
 const core = await import("../../src/lib/db/core.ts");
+const { createCombo } = await import("../../src/lib/db/combos.ts");
 const settingsDb = await import("../../src/lib/db/settings.ts");
 const providersDb = await import("../../src/lib/db/providers.ts");
 const { resolveModelOrError } = await import("../../src/sse/handlers/chatHelpers.ts");
@@ -90,6 +91,7 @@ for (const [modelStr, suffix] of [
   ["auto/vision", "vision"],
   ["auto/reasoning", "reasoning"],
   ["auto/best-chat", "best-chat"],
+  ["auto/best-coding-fast", "best-coding-fast"],
 ] as const) {
   test(`default path: ${modelStr} serves the same members, order and weights as the tip path`, async () => {
     await seedProviders();
@@ -102,17 +104,31 @@ for (const [modelStr, suffix] of [
   });
 }
 
-test("default path: a fuzzy fallback serves the same combo as the tip path", async () => {
+test("default path: an unrecognized ID can fuzzy-match a saved combo sharing a built-in name", async () => {
   await seedProviders();
-  // `auto/coding-fast` is not a built-in id; `auto/best-coding-fast` is.
-  const result = await resolveModelOrError("auto/coding-fast", BODY, "/v1/chat/completions");
-  assert.equal(result.error, undefined);
-  assert.ok(result.combo, "expected the fuzzy built-in combo");
-  const tipPath = await builtinCatalog.createBuiltinAutoCombo(
-    "auto/best-coding-fast",
-    "best-coding-fast"
-  );
-  assert.deepEqual(routingView(result.combo), routingView(tipPath));
+  const legacyRequest = "auto/coding-fast";
+  const builtInId = "auto/best-coding-fast";
+
+  const missing = await resolveModelOrError(legacyRequest, BODY, "/v1/chat/completions");
+  assert.ok(missing.error);
+  assert.equal(missing.error.status, 400);
+  assert.match((await missing.error.json()).error.message, /Unknown built-in auto combo/);
+
+  const saved = await createCombo({
+    name: builtInId,
+    strategy: "priority",
+    models: ["openai/gpt-4o-mini"],
+  });
+  const legacy = await resolveModelOrError(legacyRequest, BODY, "/v1/chat/completions");
+  assert.equal(legacy.error, undefined);
+  assert.equal(legacy.combo?.id, saved.id);
+  assert.equal(legacy.isVirtualAutoCombo, false);
+
+  const builtIn = await resolveModelOrError(builtInId, BODY, "/v1/chat/completions");
+  assert.equal(builtIn.error, undefined);
+  assert.equal(builtIn.isVirtualAutoCombo, true);
+  const tipPath = await builtinCatalog.createBuiltinAutoCombo(builtInId, "best-coding-fast");
+  assert.deepEqual(routingView(builtIn.combo), routingView(tipPath));
 });
 
 test("prepared loader runs only when a combo materializes, once per attempt", async () => {

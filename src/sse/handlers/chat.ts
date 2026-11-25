@@ -1,5 +1,4 @@
 import { requiresQoderHttpTransport } from "@omniroute/open-sse/services/qoderCapabilities";
-import { getRequestedModelEndpointMismatch } from "@/lib/providerModels/modelEndpointGuard";
 import { randomUUID } from "crypto";
 import { resolveChatRequestBody } from "./requestBody";
 import { getComboCredentialAvailability } from "./comboCredentialAvailability.ts";
@@ -39,13 +38,12 @@ import {
 } from "@omniroute/open-sse/services/accountFallback/antiAvalanche.ts";
 import { estimateTokens } from "@omniroute/open-sse/services/contextManager.ts";
 import { getCodexPlanType } from "@omniroute/open-sse/services/codexPlanEligibility.ts";
-import { getCombo, getComboForModel, getModelInfo } from "../services/model";
+import { getCombo, getModelInfo } from "../services/model";
 import { stripContextWindowSuffix } from "@omniroute/open-sse/services/model.ts";
 import { resolveBareModelToConnectionDefault } from "@omniroute/open-sse/services/model.ts";
 import { errorResponse } from "@omniroute/open-sse/utils/error.ts";
 import { trustedInternalTestMark } from "@omniroute/open-sse/utils/selfHop.ts";
 import { ASSESSMENT_PROBE_MARK, refuseUnisolatedChatProbe } from "@/lib/providers/chatProbePolicy";
-import { getImageModelEntry, isImageOnlyModel } from "@omniroute/open-sse/config/imageRegistry.ts";
 import { acceptHeaderForcesStream } from "@omniroute/open-sse/utils/aiSdkCompat.ts";
 import { normalizeVisionImagesInBody } from "@omniroute/open-sse/utils/visionImageNormalization.ts";
 import {
@@ -97,7 +95,7 @@ import { isCommonChatGptWebRetirementError } from "@/shared/constants/chatgptWeb
 import { isChatGptWebCodexModel } from "@/shared/constants/chatgptWebCodex";
 import { deleteHandoff, getHandoff } from "@/lib/db/contextHandoffs";
 import { scopeHandoffSessionId } from "@omniroute/open-sse/services/combo/handoffSessionScope.ts";
-import { getComboByName, updateCombo } from "@/lib/db/combos";
+import { updateCombo } from "@/lib/db/combos";
 import { isModelAllowedForKey } from "@/lib/db/apiKeys";
 import { promoteSuccessfulComboModel } from "@/lib/combos/autoPromote";
 import {
@@ -175,6 +173,10 @@ import {
   isNoReplayResponse,
   markCustomJsonNoReplay,
 } from "./chat/responsePolicies.ts";
+import {
+  isCustomOpenAICompatibleProvider,
+  markAmbiguousCustomNodeFailure,
+} from "./chat/customNodeReplayPolicy.ts";
 import { resolveProviderId } from "@/shared/constants/providers";
 import {
   extractReasoningIntent,
@@ -186,7 +188,13 @@ import {
   applyReasoningRouting,
   filterReasoningCombo,
 } from "./reasoningRouting";
-import { createVirtualAutoCombo, resolveAutoRoutingState } from "./autoRouting";
+import { resolveAutoRoutingState } from "./autoRouting";
+import {
+  getChatEndpointMismatch,
+  getRedirectComboPolicy,
+  isChatImageOnlyModel,
+  resolveChatCombo,
+} from "./chat/reservedAutoComboRouting.ts";
 import { dispatchWithProviderFailover } from "./chat/providerFailover.ts";
 import { getComboFailureLogError } from "./comboFailureLogging";
 import {
@@ -201,6 +209,7 @@ import { classify429FromError, type FailureKind } from "@/shared/utils/classify4
 import { isSubscriptionQuotaText } from "@omniroute/open-sse/services/quotaTextCooldowns.ts";
 import { resolveUseUpstream429BreakerHints } from "@/shared/utils/providerHints";
 import { isFeatureFlagEnabled, isRotationAttributionEnabled } from "@/shared/utils/featureFlags";
+import * as reEgress from "../services/sameAccountEgressRetry";
 import * as agyLease from "../services/antigravityLeaseLifecycle";
 import { shouldIsolateProbeFailures } from "@/shared/utils/probeOrigin";
 import { getCircuitBreaker, isLocalStreamLifecycleError } from "../../shared/utils/circuitBreaker";
@@ -728,19 +737,7 @@ async function handleChatImplementation(
     });
   }
 
-  // Reject image-generation models routed to /v1/chat/completions (#6457).
-  // Image-only models live in IMAGE_PROVIDERS (open-sse/config/imageRegistry.ts)
-  // and are served by /v1/images/generations. Forwarding them to a chat upstream
-  // yielded confusing raw provider 400s (e.g. HuggingFace: "not a chat model").
-  // Models such as Codex GPT-5.5 support both chat and image generation, so an
-  // image-registry match is only image-only when the same provider/model pair is
-  // absent from the chat catalog.
-  const imageModel = getImageModelEntry(modelStr);
-  // Exact stored combo names take precedence over colliding bare image aliases.
-  // Keep this narrower than getComboForModel() so mappings and synthetic aliases
-  // retain their existing resolution order.
-  const isExactStoredCombo = imageModel ? Boolean(await getComboByName(modelStr)) : false;
-  if (imageModel && !isExactStoredCombo && isImageOnlyModel(modelStr)) {
+  if (await isChatImageOnlyModel(modelStr)) {
     log.warn("CHAT", `Rejecting image-generation model on chat endpoint: ${modelStr}`);
     return logHandlerRejection(
       errorResponse(
@@ -760,7 +757,7 @@ async function handleChatImplementation(
 
   // A trusted endpoint-tag mismatch is a local client error, not a provider or
   // connection health failure. Exact combo names are exempt in the resolver.
-  const endpointMismatch = await getRequestedModelEndpointMismatch(modelStr, "chat");
+  const endpointMismatch = await getChatEndpointMismatch(modelStr);
   if (endpointMismatch) {
     return logHandlerRejection(errorResponse(HTTP_STATUS.BAD_REQUEST, endpointMismatch), {
       path: new URL(request.url).pathname,
@@ -1121,26 +1118,11 @@ async function handleChatImplementation(
 
   // Check if model is a combo (has multiple models with fallback)
   telemetry.startPhase("resolve");
-  let combo: any = await getComboForModel(resolvedModelStr);
-  if (reasoningDecision?.targetCombo) combo = reasoningDecision.targetCombo;
-
-  // "auto" prefix fuzzy matching: "auto/fast" → "auto/best-fast", etc.
-  // parseModel splits "auto/fast" into provider="auto" which isn't a real provider.
-  if (!combo && resolvedModelStr.startsWith("auto/")) {
-    const suffix = resolvedModelStr.slice(5);
-    for (const candidate of [`auto/best-${suffix}`, `auto/${suffix}`]) {
-      combo = await getComboForModel(candidate);
-      if (combo) {
-        log.info("ROUTING", `"${resolvedModelStr}" → combo "${candidate}" (auto fuzzy)`);
-        break;
-      }
-    }
-  }
-
-  const virtualCombo = await createVirtualAutoCombo(autoRouting, combo, apiKeyInfo?.id);
-  if (virtualCombo instanceof Response) return virtualCombo;
-  combo = virtualCombo;
+  const comboRouting = await resolveChatCombo(request, apiKeyInfo, autoRouting, reasoningRouting);
+  if (comboRouting instanceof Response) return comboRouting;
+  let { combo } = comboRouting;
   if (combo) {
+    const { comboPolicyName, isVirtualAutoCombo } = comboRouting;
     if (reasoningDecision) {
       const filtered = filterReasoningCombo(combo, reasoningDecision);
       if (filtered instanceof Response) return filtered;
@@ -1188,7 +1170,8 @@ async function handleChatImplementation(
       const preflightDecision = await evaluateComboTargetPreflight({
         apiKey,
         apiKeyInfo,
-        requestedModelStr: resolvedModelStr,
+        requestedModelStr: comboPolicyName,
+        isVirtualAutoCombo,
         targetModelStr: modelString,
         isComboLiveTest,
         isModelAllowedForKey,
@@ -1338,7 +1321,12 @@ async function handleChatImplementation(
             sessionAffinityKey,
             forceLiveComboTest: isComboLiveTest,
             automatedProbe: isAutomatedProbe,
-            ...resolvedPolicy.comboAuthorizationOptions(apiKeyInfo, resolvedModelStr),
+            ...resolvedPolicy.comboAuthorizationOptions(
+              apiKeyInfo,
+              comboPolicyName,
+              isVirtualAutoCombo
+            ),
+            isVirtualAutoCombo,
             forcedConnectionId: target?.connectionId ?? null,
             allowedConnectionIds: target?.allowedConnectionIds ?? null,
             emptyTurnConnectionId: target?.emptyTurnConnectionId ?? null,
@@ -1437,6 +1425,7 @@ async function handleChatImplementation(
                 sessionId,
                 sessionAffinityKey,
                 emergencyFallbackTried: true,
+                isVirtualAutoCombo,
                 forceLiveComboTest: isComboLiveTest,
                 automatedProbe: isAutomatedProbe,
                 conversationId,
@@ -1510,7 +1499,7 @@ async function handleChatImplementation(
   let routingComboId: string | null = null;
   if (!combo) {
     const providerPrefix = resolvedModelStr.split("/")[0];
-    if (providerPrefix) {
+    if (providerPrefix && !autoRouting.isAutoRouting) {
       try {
         const { getComboByName } = await import("@/lib/db/combos");
         const routingCombo = await getComboByName(providerPrefix);
@@ -1640,6 +1629,7 @@ async function handleSingleModelChat(
     reasoningRequestTags?: string[];
     reasoningTransportFallback?: "skip" | "drop";
     authorizationContextModel?: string | null; // admitted combo/alias (resolvedModelPolicy.ts)
+    isVirtualAutoCombo?: boolean;
     comboGrantsTargets?: boolean; // server-computed allowedCombos grant (#14197)
     managedLease?: ManagedLeaseDispatchContext | null;
     /** #12150 P1b: video-bridge log/Memory shadow — undefined on every non-video request. */
@@ -1681,8 +1671,11 @@ async function handleSingleModelChat(
   // Safety net: if auto-combo resolution returned a combo object, redirect
   // to combo flow. This handles the case where the auto-fuzzy match in
   // resolveModelOrError found a combo but the main handler's combo lookup missed it.
-  if ((resolved as any).combo) {
-    const redirectCombo = (resolved as any).combo;
+  if ("combo" in resolved && resolved.combo) {
+    const redirectCombo = resolved.combo;
+    const redirectPolicy = getRedirectComboPolicy(request, apiKeyInfo, modelStr, resolved);
+    if (redirectPolicy.rejection) return redirectPolicy.rejection;
+    const { isStoredAutoCombo } = redirectPolicy;
     if (runtimeOptions.managedLease) return managedComboRejection();
     log.info(
       "ROUTING",
@@ -1742,6 +1735,9 @@ async function handleSingleModelChat(
             // A probe stays a probe through the redirect, so each target is gated as one.
             automatedProbe: runtimeOptions.automatedProbe === true,
             authorizationContextModel: runtimeOptions.authorizationContextModel ?? modelStr,
+            ...(isStoredAutoCombo &&
+              resolvedPolicy.comboAuthorizationOptions(apiKeyInfo, redirectCombo.name, false)),
+            isVirtualAutoCombo: resolved.isVirtualAutoCombo,
             // The redirected combo's own target pin and allow-list win over the caller's pin.
             forcedConnectionId:
               resolvedTarget?.connectionId ?? runtimeOptions?.forcedConnectionId ?? null,
@@ -1764,7 +1760,7 @@ async function handleSingleModelChat(
             fallbackAttempts: target?.fallbackAttempts,
           },
           resolvedTarget?.effectiveComboStrategy ?? redirectCombo.strategy ?? "priority",
-          false
+          isStoredAutoCombo
         );
       },
       isModelAvailable: async () => true,
@@ -1798,6 +1794,9 @@ async function handleSingleModelChat(
     if (modelStr.startsWith(runtimeOptions.providerId + "/")) return resolvedProvider;
     return runtimeOptions.providerId;
   })();
+  // Custom OpenAI-compatible node: a POST with an ambiguous outcome is never replayed
+  // (see chat/customNodeReplayPolicy.ts); definite rejections keep normal fallback.
+  const customProviderNoReplay = isCustomOpenAICompatibleProvider(provider);
   const resolvedModelGate = resolvedPolicy.createVisibleResolvedModelGate({
     apiKeyInfo,
     request,
@@ -1959,6 +1958,9 @@ async function handleSingleModelChat(
   let accountFallbacks = 0;
   let selectedConnectionPlan: string | null = null;
   let sameAccountRetries = 0;
+  let egressRetries = 0; // PROXY_REEGRESS_ON_QUOTA_429 (see sameAccountEgressRetry.ts)
+  const egressTriedKeys = new Set<string>();
+  let pendingEgress: reEgress.PendingEgress | null = null;
   let routingWaitMs = 0;
   const accountFallbackReasons: string[] = [];
   let pendingFallback: { reason: string; previousConnectionId: string } | null = null;
@@ -2384,13 +2386,18 @@ async function handleSingleModelChat(
         );
       }
       let proxyInfo;
+      const preResolvedEgress = reEgress.takePendingEgress(pendingEgress, credentials.connectionId);
+      pendingEgress = null;
       try {
-        proxyInfo = await safeResolveProxy(
-          credentials.connectionId,
-          apiKeyInfo?.id,
-          provider,
-          comboName
-        ).catch(agyLease.releasingRethrow(leaseId));
+        proxyInfo = preResolvedEgress
+          ? preResolvedEgress.proxyInfo
+          : await safeResolveProxy(
+              credentials.connectionId,
+              apiKeyInfo?.id,
+              provider,
+              comboName,
+              runtimeOptions.sessionAffinityKey ?? null
+            ).catch(agyLease.releasingRethrow(leaseId));
       } catch (error) {
         releaseOAuthSession();
         throw error;
@@ -2416,6 +2423,7 @@ async function handleSingleModelChat(
           hasForcedConnection ||
           runtimeOptions.managedLease ||
           museOwner ||
+          customProviderNoReplay ||
           isCombo
           ? { ...preferredFailoverSettings, enabled: false }
           : preferredFailoverSettings
@@ -2442,6 +2450,7 @@ async function handleSingleModelChat(
             comboName,
             comboStrategy,
             isCombo,
+            isVirtualAutoCombo: runtimeOptions.isVirtualAutoCombo ?? false,
             comboStepId: runtimeOptions.comboStepId ?? null,
             comboExecutionKey:
               runtimeOptions.comboExecutionKey ?? runtimeOptions.comboStepId ?? null,
@@ -2457,6 +2466,7 @@ async function handleSingleModelChat(
             providerProfile,
             cachedSettings: runtimeOptions.cachedSettings,
             skipUpstreamRetry: runtimeOptions.skipUpstreamRetry ?? false,
+            nonReplayableRequest: customProviderNoReplay,
             correlationId: runtimeOptions?.correlationId ?? null,
             conversationId: runtimeOptions?.conversationId ?? null,
             modelPinned: runtimeOptions?.modelPinned ?? false,
@@ -2487,6 +2497,7 @@ async function handleSingleModelChat(
       }
       const { result, tlsFingerprintUsed, wasProviderProbe } = execution;
       markCustomJsonNoReplay(result.response, credentials?.providerSpecificData);
+      markAmbiguousCustomNodeFailure(provider, result);
       if (!result.success) releaseOAuthSession();
       if (result.success && agyLease.isStreamingAntigravityResponse(result.response))
         result.response = inheritProviderProbeResponse(
@@ -2893,6 +2904,29 @@ async function handleSingleModelChat(
         lastStatus = result.status;
         requestRetryLastError = result.error;
         requestRetryLastStatus = result.status;
+        continue;
+      }
+
+      // Per-IP 429 through a pool member: same account, untried member (sameAccountEgressRetry.ts).
+      const reEgressTo = await reEgress.nextReEgress({
+        status: result.status,
+        upstreamStatus: appliedProxySink.upstreamStatus,
+        provider,
+        proxyInfo,
+        appliedProxy: appliedProxySink.proxy,
+        quotaText: String(result.rawMessage ?? result.error ?? ""),
+        attempt: egressRetries,
+        aborted: requestSignal?.aborted === true,
+        triedKeys: egressTriedKeys,
+        resolveNext: () =>
+          safeResolveProxy(credentials.connectionId, apiKeyInfo?.id, provider, comboName),
+      });
+      if (reEgressTo) {
+        egressRetries += 1;
+        sameAccountRetries += 1;
+        log.info("PROXY", `${provider}/${model} per-IP 429, re-egress #${egressRetries}`);
+        pendingEgress = { connectionId: credentials.connectionId, proxyInfo: reEgressTo.proxyInfo };
+        preselectedCredentials = credentials;
         continue;
       }
 

@@ -20,8 +20,15 @@ function renderPool(over: Partial<SelfQuotaPool> = {}) {
   return renderQuota(<PoolSection pool={parsedPool(over)} />);
 }
 
-const bar = (name: string) => screen.getByRole("progressbar", { name });
-const noBar = (name: string) => expect(screen.queryByRole("progressbar", { name })).toBeNull();
+const bar = (name: string) => screen.getByRole("meter", { name });
+const noBar = (name: string) => expect(screen.queryByRole("meter", { name })).toBeNull();
+/** A stale reading draws the kit fill in the neutral border colour, never with a status tone. */
+const expectNeutralFill = (element: HTMLElement) => {
+  const fill = element.firstElementChild as HTMLElement;
+  expect(fill.hasAttribute("data-color")).toBe(true);
+  expect(fill.hasAttribute("data-tone")).toBe(false);
+  expect(fill.style.getPropertyValue("--ci-progress-color")).toBe("var(--color-border-strong)");
+};
 
 const SHARE_OVER = {
   hard: "You have used your share. While the account is busy, new requests are blocked until this window resets.",
@@ -71,7 +78,7 @@ describe("self-service quota windows", () => {
       accountVisible: false,
       dimensions: [sharedDim({ total: undefined })],
     });
-    expect(screen.getAllByRole("progressbar")).toHaveLength(1);
+    expect(screen.getAllByRole("meter")).toHaveLength(1);
     expect(screen.getAllByText("Account-level usage is not shared with this key.")).toHaveLength(1);
   });
 
@@ -154,8 +161,7 @@ describe("self-service quota windows", () => {
     renderPool({
       accounts: [account({ dimensions: [accountDim({ account: { used: 40, status: "stale" } })] })],
     });
-    const fill = bar("Account (everyone)").firstElementChild;
-    expect(fill?.className).toContain("bg-border-strong");
+    expectNeutralFill(bar("Account (everyone)"));
     expect(screen.getByText("May be out of date")).toBeTruthy();
     expect(
       screen.getByText("This reading is older than usual. A newer one has not arrived yet.")
@@ -171,7 +177,7 @@ describe("self-service quota windows", () => {
         }),
       ],
     });
-    expect(bar("Your share").firstElementChild?.className).toContain("bg-border-strong");
+    expectNeutralFill(bar("Your share"));
     expect(screen.getByText("May be out of date")).toBeTruthy();
     expect(screen.getByText("380 requests left")).toBeTruthy();
   });
@@ -328,7 +334,7 @@ describe("self-service quota windows", () => {
     expect(screen.getByText("This pool has no usage windows set up yet.")).toBeTruthy();
   });
 
-  it("every bar is a named progressbar with a range", async () => {
+  it("every quota reading is a named meter with a range", async () => {
     const { container } = renderPool({
       dimensions: [sharedDim()],
       accounts: [
@@ -340,7 +346,7 @@ describe("self-service quota windows", () => {
         }),
       ],
     });
-    const bars = screen.getAllByRole("progressbar");
+    const bars = screen.getAllByRole("meter");
     expect(bars.length).toBeGreaterThan(2);
     for (const element of bars) {
       expect(element.getAttribute("aria-label")).toBeTruthy();
@@ -349,7 +355,7 @@ describe("self-service quota windows", () => {
       expect(element.getAttribute("aria-valuenow")).toBeTruthy();
     }
     const result = await axe.run(container, {
-      runOnly: { type: "rule", values: ["aria-progressbar-name", "aria-valid-attr-value"] },
+      runOnly: { type: "rule", values: ["aria-meter-name", "aria-valid-attr-value"] },
     });
     expect(result.violations.map((violation) => violation.id)).toEqual([]);
   });

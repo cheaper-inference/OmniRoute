@@ -1,6 +1,8 @@
 "use client";
 
 import type React from "react";
+import { Progress } from "@omniroute/ui-kit/progress";
+import type { ProgressTone } from "@omniroute/ui-kit/progress";
 
 export interface QuotaBarProps {
   /** Visible label and accessible name of the bar. */
@@ -20,19 +22,22 @@ export interface QuotaBarProps {
 }
 
 const SIZE_CLASSES = {
-  sm: { text: "text-[10px]", track: "h-1.5", header: "" },
-  md: { text: "text-xs", track: "h-2.5", header: " gap-2" },
+  sm: { text: "text-3xs", eyebrow: "3xs", header: "" },
+  md: { text: "text-xs", eyebrow: undefined, header: " gap-2" },
 } as const;
+
+/** Neutral fill for a stale reading. It is the same token as the border-strong utility. */
+const MUTED_FILL = "var(--color-border-strong)";
 
 function clampPercent(percent: number): number {
   if (Number.isNaN(percent)) return 0;
   return Math.min(Math.max(percent, 0), 100);
 }
 
-function autoFill(percent: number): string {
-  if (percent >= 90) return "bg-error";
-  if (percent >= 70) return "bg-warning";
-  return "bg-primary";
+function autoTone(percent: number): ProgressTone {
+  if (percent >= 90) return "danger";
+  if (percent >= 70) return "warning";
+  return "default";
 }
 
 function autoValueColor(percent: number): string {
@@ -43,7 +48,8 @@ function autoValueColor(percent: number): string {
 
 /**
  * A labelled percentage bar with no text of its own. Every visible word comes from the props, so
- * the bar can be shared by pages that load different translation namespaces.
+ * the bar can be shared by pages that load different translation namespaces. The track and fill
+ * are the kit Progress, exposed as a named meter from 0 to 100.
  */
 export default function QuotaBar({
   label,
@@ -56,31 +62,34 @@ export default function QuotaBar({
 }: QuotaBarProps): React.JSX.Element {
   const pct = clampPercent(percent);
   const sizes = SIZE_CLASSES[size];
-  const fillColor = tone === "muted" ? "bg-border-strong" : autoFill(pct);
-  const valueColor = tone === "muted" ? "" : autoValueColor(pct);
+  const muted = tone === "muted";
+  const valueColor = muted ? "" : autoValueColor(pct);
 
   return (
     <div className="flex flex-col gap-1 min-w-0">
       <div
         className={`flex items-center justify-between${sizes.header} ${sizes.text} text-text-muted`}
       >
-        <span className="min-w-0 break-words font-semibold uppercase tracking-wide">{label}</span>
+        <span
+          className="ci-eyebrow min-w-0 break-words"
+          data-size={sizes.eyebrow}
+          data-weight="medium"
+        >
+          {label}
+        </span>
         <span className={`shrink-0 tabular-nums font-semibold ${valueColor}`}>{valueLabel}</span>
       </div>
-      <div
-        role="progressbar"
+      <Progress
+        value={Math.round(pct)}
+        max={100}
+        size={size}
+        semantics="meter"
+        animate={false}
+        tone={muted ? "default" : autoTone(pct)}
+        color={muted ? MUTED_FILL : undefined}
         aria-label={label}
-        aria-valuemin={0}
-        aria-valuemax={100}
-        aria-valuenow={Math.round(pct)}
         aria-valuetext={valueText ?? valueLabel}
-        className={`${sizes.track} overflow-hidden rounded-sm bg-border/60`}
-      >
-        <div
-          className={`h-full rounded-sm transition-all ${fillColor}`}
-          style={{ width: `${pct}%` }}
-        />
-      </div>
+      />
       {caption ? <div className={`${sizes.text} text-text-muted`}>{caption}</div> : null}
     </div>
   );

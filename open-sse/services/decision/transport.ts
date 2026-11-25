@@ -52,9 +52,12 @@ class DecisionTransportError extends Error {
   }
 }
 
-/** Parse a JSON body of at most `maxBytes`; throws `oversized` / `invalid_json`. */
+/**
+ * Parse a JSON body of at most `maxBytes`; throws `oversized` / `invalid_json`. Takes a
+ * Request too: the native `/v1/decisions` route (#18838) reads its inbound body with it.
+ */
 export async function readBoundedJson(
-  response: Response,
+  response: Pick<Response, "body">,
   maxBytes = MAX_DECISION_RESPONSE_BYTES
 ): Promise<unknown> {
   if (!response.body) throw new Error("invalid_json");

@@ -61,9 +61,12 @@ async function startBatch(h, prs) {
   return (await h.state()).inFlight;
 }
 
-test("voice app (the default): every write is the App's, as before", async () => {
+test("voice app: every write is the App's, as before", async () => {
   const h = createHarness({ mode: "live" });
-  assert.equal(h.config.voice, "app", "shipped default");
+  // The shipped file speaks as the owner; the harness pins the App's voice (helpers/tick-fakes.mjs).
+  assert.equal(loadConfig().voice, "owner", "shipped default");
+  assert.equal(h.config.voice, "app", "harness default");
+  h.config.voice = "app";
   realDashboard(h);
   const f = await startBatch(h, [1, 2]);
   h.runCi(f.candidateSha);
@@ -298,6 +301,7 @@ test("signing on: a fully signed batch records nothing; signing off passes nothi
   );
 
   const off = createHarness({ mode: "shadow" });
+  off.config.landing.signing = "none";
   const seen = signingReport(off, () => assert.fail("no signing report without signing"));
   await startBatch(off, [1]);
   assert.deepEqual(seen, [undefined], "composeCandidate is not given `signing`");
@@ -330,15 +334,21 @@ test("createTickDeps: voice owner gets the owner's client and login reader; sign
     createTickDeps({ ...env, ...extra, OMNI_QUEUE_CONFIG: writeConfig("c.json", patch) });
 
   const shipped = deps({}, { OMNI_QUEUE_LAND_TOKEN: "github_pat_owner" });
-  assert.equal(shipped.voiceGh, null, "voice app: no owner client for the voice");
-  assert.equal(shipped.ownerLogin, null);
-  assert.equal(shipped.signing, null, "signing none");
-
-  const voiced = deps({ voice: "owner" }, { OMNI_QUEUE_LAND_TOKEN: "github_pat_owner" });
-  assert.ok(voiced.voiceGh, "the owner's client");
-  assert.equal(await voiced.ownerLogin(), OWNER, "resolved from the token itself");
-  assert.equal(await voiced.ownerLogin(), OWNER);
+  assert.deepEqual(shipped.signing, {
+    keyPath: join(dir, "omni-queue-signing", "signing-key"),
+  });
+  assert.ok(shipped.voiceGh, "the owner's client");
+  assert.equal(await shipped.ownerLogin(), OWNER, "resolved from the token itself");
+  assert.equal(await shipped.ownerLogin(), OWNER);
   assert.equal(fake.requests.filter((r) => r.path === "!/user").length, 1, "read once");
+
+  const off = deps(
+    { voice: "app", landing: { ...owner, signing: "none" } },
+    { OMNI_QUEUE_LAND_TOKEN: "github_pat_owner" }
+  );
+  assert.equal(off.voiceGh, null, "voice app: no owner client for the voice");
+  assert.equal(off.ownerLogin, null);
+  assert.equal(off.signing, null, "signing none");
 
   const tokenless = deps({ voice: "owner" });
   assert.equal(tokenless.voiceGh, null, "no token: the voice falls back to the App");
