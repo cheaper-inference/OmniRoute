@@ -1,0 +1,1 @@
+- **docs(ops):** The merge-train runbook describes the current practice: the train pull request with merge commits, the queue verdict before a manual merge, and the local validator as diagnostic evidence only.

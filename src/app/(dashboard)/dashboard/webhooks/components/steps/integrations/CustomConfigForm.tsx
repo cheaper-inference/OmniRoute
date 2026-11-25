@@ -29,6 +29,7 @@ export function CustomConfigForm({
 }: CustomConfigFormProps) {
   const tv = useTranslations("formValidation");
   const urlState = useWebhookUrlCheck(value.endpointUrl);
+  const usesHttp = /^http:\/\//i.test(value.endpointUrl.trimStart());
   const url = webhookUrlFieldFeedback(value.endpointUrl, urlState, {
     label: t("custom.endpointUrl"),
     showRequired,
@@ -54,6 +55,11 @@ export function CustomConfigForm({
             {url.status && (
               <span className={`block ${urlState === "ok" ? "text-success" : ""}`}>
                 {url.status}
+              </span>
+            )}
+            {usesHttp && (
+              <span className="block text-warning" role="status">
+                {t("custom.unencryptedHttpWarning")}
               </span>
             )}
           </>
