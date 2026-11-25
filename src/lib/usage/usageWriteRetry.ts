@@ -259,7 +259,8 @@ function toFinite(value: unknown): number {
   return Number.isFinite(Number(value)) ? Number(value) : 0;
 }
 
-function toFirstToken(entry: UsageEntry): number {
+function toFirstToken(entry: UsageEntry): number | null {
+  if (entry.timeToFirstTokenMs === null) return null;
   if (Number.isFinite(Number(entry.timeToFirstTokenMs))) return Number(entry.timeToFirstTokenMs);
   return toFinite(entry.latencyMs);
 }

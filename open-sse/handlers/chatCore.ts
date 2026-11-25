@@ -648,12 +648,14 @@ async function handleChatCoreInner({
   const persistFailureUsage = (
     statusCode: number,
     errorCode?: string | null,
-    aggregate?: FailureUsageAggregate | null
+    aggregate?: FailureUsageAggregate | null,
+    // The model that answered, when a family fallback moved the request to a sibling.
+    servedModel?: string | null
   ) => {
     saveRequestUsage(
       buildFailureUsageRecord({
         provider,
-        model,
+        model: servedModel || model,
         connectionId: getCurrentConnectionId(),
         apiKeyInfo,
         effectiveServiceTier,

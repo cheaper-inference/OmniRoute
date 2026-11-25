@@ -19,6 +19,7 @@ interface CompletionState {
   toolCallIndex?: number;
   currentToolCallId?: unknown;
   incompleteReason?: unknown;
+  toolCallCut?: boolean;
   roleEmitted?: boolean;
   finishReasonSent?: boolean;
   finishReason?: FinishReason;
@@ -45,7 +46,9 @@ interface AssistantRoleChunk {
  * state coupling at all.
  */
 export function computeFinishReason(state: CompletionState): FinishReason {
-  if ((state.toolCallIndex || 0) > 0 || state.currentToolCallId) return "tool_calls";
+  // A call still open at max_output_tokens / content_filter has partial arguments: report the cut.
+  const callCut = state.toolCallCut === true;
+  if (!callCut && ((state.toolCallIndex || 0) > 0 || state.currentToolCallId)) return "tool_calls";
   // #15489: a `response.incomplete` terminal is a truncated turn, not a clean stop.
   if (state.incompleteReason === "max_output_tokens") return "length";
   if (state.incompleteReason === "content_filter") return "content_filter";
@@ -178,6 +181,107 @@ function buildToolCallChunks(
   state.currentToolCallArgsBuffer = "";
   state.currentToolCallId = null;
 
+  return chunks;
+}
+
+interface OpenCallEntry {
+  index: number | null;
+  name?: string;
+  argsBuffer?: string;
+  needsNormalization?: boolean;
+  deferred?: boolean;
+}
+
+interface OpenCallState extends CompletionState {
+  toolCallByCallId?: unknown;
+  toolSchemas?: ReadonlyMap<string, unknown>;
+}
+
+type SnapshotCall = { arguments?: unknown; name?: unknown } | undefined;
+
+function findSnapshotCall(snapshotOutput: unknown[], callId: string): SnapshotCall {
+  return snapshotOutput.find(
+    (item) => (item as { call_id?: unknown } | null)?.call_id === callId
+  ) as SnapshotCall;
+}
+
+/** A deferred call claims its index once the snapshot names it; false while it stays unnamed. */
+function releaseDeferredCall(
+  state: OpenCallState,
+  entry: OpenCallEntry,
+  snapshot: SnapshotCall
+): boolean {
+  const resolvedName = normalizeToolName(snapshot?.name);
+  if (!resolvedName) return false;
+  entry.index = state.toolCallIndex ?? 0;
+  state.toolCallIndex = entry.index + 1;
+  entry.name = resolvedName;
+  entry.deferred = false;
+  return true;
+}
+
+function snapshotArgsOf(snapshot: SnapshotCall): string {
+  return typeof snapshot?.arguments === "string" && snapshot.arguments.length > 0
+    ? snapshot.arguments
+    : "";
+}
+
+function openCallArgsStr(state: OpenCallState, toolName: string, raw: string): string {
+  const stripped = raw
+    ? stripEmptyOptionalToolArgs(raw, toolName, state.toolSchemas?.get(toolName))
+    : "";
+  return typeof stripped === "string" ? stripped : JSON.stringify(stripped ?? {});
+}
+
+/** The chunk that closes one open call, or null when there is nothing to send for it. */
+function drainOpenCall(
+  state: OpenCallState,
+  callId: string,
+  entry: OpenCallEntry,
+  snapshotOutput: unknown[]
+): Record<string, unknown> | null {
+  const snapshot = findSnapshotCall(snapshotOutput, callId);
+  const header = entry.index == null;
+  if (header && !releaseDeferredCall(state, entry, snapshot)) return null;
+  const raw = snapshotArgsOf(snapshot) || entry.argsBuffer || "";
+  if (!raw && !header) return null;
+  const toolName = entry.name ?? "";
+  const argsStr = openCallArgsStr(state, toolName, raw);
+  const toolCall = header
+    ? {
+        index: entry.index,
+        id: callId,
+        type: "function",
+        function: { name: toolName, arguments: argsStr },
+      }
+    : { index: entry.index, function: { arguments: argsStr } };
+  entry.argsBuffer = "";
+  entry.needsNormalization = false;
+  return {
+    ...baseChunk(state),
+    choices: [{ index: 0, delta: { tool_calls: [toolCall] }, finish_reason: null }],
+  };
+}
+
+/**
+ * Arguments chunks for every call still open (no `output_item.done`), taken from the matching
+ * item of a terminal snapshot or, when it has none, from the call's argument buffer (arguments
+ * are held back until the call closes, so a complete snapshot value replaces a partial buffer).
+ * A deferred call (no name yet, so nothing was sent for it) is released only when the snapshot
+ * names it: it then claims an index and gets its header with the arguments, as `.done` would.
+ * Used at end of stream and on `response.completed` / `response.incomplete`, so a call that
+ * never got its `.done` does not reach the client with empty arguments.
+ */
+export function drainOpenToolCallArgs(
+  state: OpenCallState,
+  snapshotOutput: unknown[] = []
+): Record<string, unknown>[] {
+  if (!(state.toolCallByCallId instanceof Map)) return [];
+  const chunks: Record<string, unknown>[] = [];
+  for (const [callId, entry] of state.toolCallByCallId as Map<string, OpenCallEntry>) {
+    const chunk = drainOpenCall(state, callId, entry, snapshotOutput);
+    if (chunk) chunks.push(chunk);
+  }
   return chunks;
 }
 

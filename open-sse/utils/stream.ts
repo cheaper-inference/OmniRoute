@@ -127,6 +127,7 @@ import { buildUsageOnlyChunk } from "./usageOnlyChunk.ts";
 import { createSSEOutputSink } from "./sseOutputSink.ts";
 import { normalizeArrayContentChunk } from "./arrayContentDelta.ts";
 import { drainTranslateFlushTail } from "./translateFlushTail.ts";
+import { isTerminalStreamPayload, markUpstreamDone } from "./streamTerminalHelpers.ts";
 import { restoreResponsesToolNames } from "../translator/helpers/responsesToolNameRestore.ts";
 import { withBuyerCostMicro, type StreamCompletePayload } from "./streamCompletePayload.ts";
 import { readBuyerCostMicro, registerStreamBuyerCost } from "./buyerCostMicro.ts";
@@ -229,6 +230,7 @@ type StreamOptions = {
    */
   requestToolIdentityMap?: Map<string, { namespace: string; name: string }> | null;
   pendingRequestId?: StreamPendingRequestIdentity | null;
+  dropUnrequestedUsageChunk?: boolean; // passthrough only: client sent no include_usage, send no usage-only chunk
 };
 
 type TranslateState = ReturnType<typeof initState> & {
@@ -265,32 +267,13 @@ type TranslateState = ReturnType<typeof initState> & {
     message: string;
     streamSnapshot?: import("./streamErrorFormat.ts").StreamFailureSnapshot;
   } | null;
+  doneMarkerSeen?: boolean; // see DoneMarkerState (streamTerminalHelpers.ts)
 };
 
 type UsageTokenRecord = Record<string, number>;
 
 function asRecord(value: unknown): JsonRecord {
   return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
-}
-
-const TERMINAL_STREAM_EVENT_TYPES = new Set([
-  "message_stop",
-  "response.completed",
-  "response.incomplete",
-  "response.failed",
-  "response.done",
-  "response.cancelled",
-  "response.canceled",
-]);
-
-/** True for a parsed upstream payload that ends its turn: `[DONE]`, a finish reason or a terminal event. */
-function isTerminalStreamPayload(payload: unknown): boolean {
-  const record = asRecord(payload);
-  if (record.done === true) return true;
-  if (typeof record.type === "string" && TERMINAL_STREAM_EVENT_TYPES.has(record.type)) return true;
-  const finished = (list: unknown, key: string) =>
-    Array.isArray(list) && list.some((entry) => asRecord(entry)[key] != null);
-  return finished(record.choices, "finish_reason") || finished(record.candidates, "finishReason");
 }
 
 /** True for a `data:` line whose payload is neither `[DONE]` nor JSON. Empty `data:` is not counted. */
@@ -2306,6 +2289,7 @@ export function createSSEStream(options: StreamOptions = {}) {
                       );
                       passthroughForwardedUsage = true;
                       passthroughForwardedUsageSummary = true;
+                      if (options.dropUnrequestedUsageChunk) continue;
                       parsed.usage = timing.withTps(
                         filterUsageForFormat(usage, sourceFormat || FORMATS.OPENAI)
                       );
@@ -2708,9 +2692,7 @@ export function createSSEStream(options: StreamOptions = {}) {
 
           if (shouldDropResponsesCommentary && dropCommentary(parsed as JsonRecord)) continue;
           observeProviderPayload(parsed);
-          if (parsed && parsed.done) {
-            continue;
-          }
+          if (markUpstreamDone(parsed, state)) continue;
           sanitizeUsagePayloadForRequest(parsed, body, targetFormat, usageGuard.basis);
           if (parsed.choices?.[0]?.delta?.tool_calls) {
             lastToolCallChunkTime = now;
@@ -3296,7 +3278,12 @@ export function createSSEStream(options: StreamOptions = {}) {
               // [DONE], so metered clients still see token counts. When the
               // upstream DID send usage (trailing or in-band), it was forwarded
               // already and passthroughForwardedUsage guards this off.
-              if (shouldEmitDoneTerminator && !passthroughForwardedUsage && hasValidUsage(usage)) {
+              if (
+                shouldEmitDoneTerminator &&
+                !passthroughForwardedUsage &&
+                !options.dropUnrequestedUsageChunk &&
+                hasValidUsage(usage)
+              ) {
                 const usageOnlyChunk = buildUsageOnlyChunk(
                   passthroughLastChatId ?? passthroughResponsesId,
                   model,
@@ -3532,7 +3519,7 @@ export function createSSEStream(options: StreamOptions = {}) {
             return;
           if (buffer.trim()) {
             const parsed = parseSSELine(buffer.trim());
-            if (parsed && !parsed.done) {
+            if (parsed && !markUpstreamDone(parsed, state)) {
               if (emitTranslatedFailureAndAbort(controller, parsed)) return;
               if (targetFormat === FORMATS.OPENAI) normalizeArrayContentChunk(parsed);
               observeProviderPayload(parsed);
@@ -3965,7 +3952,8 @@ export function createPassthroughStreamWithLogger(
   clientResponseFormat: string | null = null,
   requestToolIdentityMap: Map<string, { namespace: string; name: string }> | null = null,
   clientTools: unknown = null,
-  pendingRequestId: StreamPendingRequestIdentity | null = null
+  pendingRequestId: StreamPendingRequestIdentity | null = null,
+  dropUnrequestedUsageChunk = false
 ) {
   return createSSEStream({
     mode: STREAM_MODE.PASSTHROUGH,
@@ -3982,6 +3970,7 @@ export function createPassthroughStreamWithLogger(
     requestToolIdentityMap,
     clientTools,
     pendingRequestId,
+    dropUnrequestedUsageChunk,
   });
 }
 

@@ -1,0 +1,1 @@
+- **fix(usage):** Record billed token usage on failed non-streaming requests instead of zeros. ([#20232](https://github.com/cheaper-inference/OmniRoute/pull/20232))

@@ -1,0 +1,1 @@
+- **fix(sse):** Keep streamed tool calls when an upstream reuses an index or omits a call id. ([#20232](https://github.com/cheaper-inference/OmniRoute/pull/20232))
