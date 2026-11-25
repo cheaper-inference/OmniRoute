@@ -1,0 +1,252 @@
+[
+  {
+    "id": "p01",
+    "class": "C",
+    "sourceUrl": "https://p01.example.invalid/plan",
+    "checkedAt": "2026-12-01"
+  },
+  {
+    "id": "p02",
+    "class": "C",
+    "sourceUrl": "https://p02.example.invalid/plan",
+    "checkedAt": "2026-12-01"
+  },
+  {
+    "id": "p03",
+    "class": "C",
+    "sourceUrl": "https://p03.example.invalid/plan",
+    "checkedAt": "2026-12-01"
+  },
+  {
+    "id": "p04",
+    "class": "C",
+    "sourceUrl": "https://p04.example.invalid/plan",
+    "checkedAt": "2026-12-01"
+  },
+  {
+    "id": "p05",
+    "class": "C",
+    "sourceUrl": "https://p05.example.invalid/plan",
+    "checkedAt": "2026-12-01"
+  },
+  {
+    "id": "p06",
+    "class": "C",
+    "sourceUrl": "https://p06.example.invalid/plan",
+    "checkedAt": "2026-12-01"
+  },
+  {
+    "id": "p07",
+    "class": "C",
+    "sourceUrl": "https://p07.example.invalid/plan",
+    "checkedAt": "2026-12-01"
+  },
+  {
+    "id": "p08",
+    "class": "C",
+    "sourceUrl": "https://p08.example.invalid/plan",
+    "checkedAt": "2026-12-01"
+  },
+  {
+    "id": "p09",
+    "class": "C",
+    "sourceUrl": "https://p09.example.invalid/plan",
+    "checkedAt": "2026-12-01"
+  },
+  {
+    "id": "p10",
+    "class": "C",
+    "sourceUrl": "https://p10.example.invalid/plan",
+    "checkedAt": "2026-12-01"
+  },
+  {
+    "id": "p11",
+    "class": "C",
+    "sourceUrl": "https://p11.example.invalid/plan",
+    "checkedAt": "2026-12-01"
+  },
+  {
+    "id": "p12",
+    "class": "C",
+    "sourceUrl": "https://p12.example.invalid/plan",
+    "checkedAt": "2026-12-01"
+  },
+  {
+    "id": "p13",
+    "class": "C",
+    "sourceUrl": "https://p13.example.invalid/plan",
+    "checkedAt": "2026-12-01"
+  },
+  {
+    "id": "p14",
+    "class": "C",
+    "sourceUrl": "https://p14.example.invalid/plan",
+    "checkedAt": "2026-12-01"
+  },
+  {
+    "id": "p15",
+    "class": "C",
+    "sourceUrl": "https://p15.example.invalid/plan",
+    "checkedAt": "2026-12-01"
+  },
+  {
+    "id": "p16",
+    "class": "C",
+    "sourceUrl": "https://p16.example.invalid/plan",
+    "checkedAt": "2026-12-01"
+  },
+  {
+    "id": "p17",
+    "class": "C",
+    "sourceUrl": "https://p17.example.invalid/plan",
+    "checkedAt": "2026-12-01"
+  },
+  {
+    "id": "p18",
+    "class": "C",
+    "sourceUrl": "https://p18.example.invalid/plan",
+    "checkedAt": "2026-12-01"
+  },
+  {
+    "id": "p19",
+    "class": "C",
+    "sourceUrl": "https://p19.example.invalid/plan",
+    "checkedAt": "2026-12-01"
+  },
+  {
+    "id": "p20",
+    "class": "C",
+    "sourceUrl": "https://p20.example.invalid/plan",
+    "checkedAt": "2026-12-01"
+  },
+  {
+    "id": "p21",
+    "class": "C",
+    "sourceUrl": "https://p21.example.invalid/plan",
+    "checkedAt": "2026-12-01"
+  },
+  {
+    "id": "p22",
+    "class": "C",
+    "sourceUrl": "https://p22.example.invalid/plan",
+    "checkedAt": "2026-12-01"
+  },
+  {
+    "id": "p23",
+    "class": "C",
+    "sourceUrl": "https://p23.example.invalid/plan",
+    "checkedAt": "2026-12-01"
+  },
+  {
+    "id": "p24",
+    "class": "C",
+    "sourceUrl": "https://p24.example.invalid/plan",
+    "checkedAt": "2026-12-01"
+  },
+  {
+    "id": "p25",
+    "class": "C",
+    "sourceUrl": "https://p25.example.invalid/plan",
+    "checkedAt": "2026-12-01"
+  },
+  {
+    "id": "p26",
+    "class": "C",
+    "sourceUrl": "https://p26.example.invalid/plan",
+    "checkedAt": "2026-12-01"
+  },
+  {
+    "id": "p27",
+    "class": "C",
+    "sourceUrl": "https://p27.example.invalid/plan",
+    "checkedAt": "2026-12-01"
+  },
+  {
+    "id": "p28",
+    "class": "C",
+    "sourceUrl": "https://p28.example.invalid/plan",
+    "checkedAt": "2026-12-01"
+  },
+  {
+    "id": "p29",
+    "class": "C",
+    "sourceUrl": "https://p29.example.invalid/plan",
+    "checkedAt": "2026-12-01"
+  },
+  {
+    "id": "p30",
+    "class": "C",
+    "sourceUrl": "https://p30.example.invalid/plan",
+    "checkedAt": "2026-12-01"
+  },
+  {
+    "id": "p31",
+    "class": "D",
+    "sourceUrl": "https://p31.example.invalid/plan",
+    "checkedAt": "2026-12-01",
+    "note": "Synthetic classification D."
+  },
+  {
+    "id": "p32",
+    "class": "D",
+    "sourceUrl": "https://p32.example.invalid/plan",
+    "checkedAt": "2026-12-01",
+    "note": "Synthetic classification D."
+  },
+  {
+    "id": "p33",
+    "class": "D",
+    "sourceUrl": "https://p33.example.invalid/plan",
+    "checkedAt": "2026-12-01",
+    "note": "Synthetic classification D."
+  },
+  {
+    "id": "p34",
+    "class": "E",
+    "sourceUrl": "https://p34.example.invalid/plan",
+    "checkedAt": "2026-12-01",
+    "note": "Synthetic classification E."
+  },
+  {
+    "id": "p35",
+    "class": "E",
+    "sourceUrl": "https://p35.example.invalid/plan",
+    "checkedAt": "2026-12-01",
+    "note": "Synthetic classification E."
+  },
+  {
+    "id": "p36",
+    "class": "S",
+    "sourceUrl": "https://p36.example.invalid/plan",
+    "checkedAt": "2026-12-01",
+    "note": "Synthetic classification S."
+  },
+  {
+    "id": "p37",
+    "class": "S",
+    "sourceUrl": "https://p37.example.invalid/plan",
+    "checkedAt": "2026-12-01",
+    "note": "Synthetic classification S."
+  },
+  {
+    "id": "p38",
+    "class": "I",
+    "sourceUrl": "https://p38.example.invalid/plan",
+    "checkedAt": "2026-12-01",
+    "note": "Synthetic classification I."
+  },
+  {
+    "id": "p39",
+    "class": "I",
+    "sourceUrl": "https://p39.example.invalid/plan",
+    "checkedAt": "2026-12-01",
+    "note": "Synthetic classification I."
+  },
+  {
+    "id": "p40",
+    "class": "I",
+    "sourceUrl": "https://p40.example.invalid/plan",
+    "checkedAt": "2026-12-01",
+    "note": "Synthetic classification I."
+  }
+]

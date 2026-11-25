@@ -484,6 +484,11 @@
       "disposition": "separately-invoked"
     },
     {
+      "name": "quality:catalog-scoreboard",
+      "command": "node --import tsx/esm scripts/quality/catalog-drift/scoreboard.mjs",
+      "disposition": "separately-invoked"
+    },
+    {
       "name": "quality:collect",
       "command": "node scripts/quality/collect-metrics.mjs",
       "disposition": "separately-invoked"

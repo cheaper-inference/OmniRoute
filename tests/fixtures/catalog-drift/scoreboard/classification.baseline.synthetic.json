@@ -1,0 +1,270 @@
+[
+  {
+    "id": "p01",
+    "class": "C",
+    "sourceUrl": "https://p01.example.invalid/plan",
+    "checkedAt": "2026-12-01"
+  },
+  {
+    "id": "p02",
+    "class": "C",
+    "sourceUrl": "https://p02.example.invalid/plan",
+    "checkedAt": "2026-12-01"
+  },
+  {
+    "id": "p03",
+    "class": "C",
+    "sourceUrl": "https://p03.example.invalid/plan",
+    "checkedAt": "2026-12-01"
+  },
+  {
+    "id": "p04",
+    "class": "C",
+    "sourceUrl": "https://p04.example.invalid/plan",
+    "checkedAt": "2026-12-01"
+  },
+  {
+    "id": "p05",
+    "class": "C",
+    "sourceUrl": "https://p05.example.invalid/plan",
+    "checkedAt": "2026-12-01"
+  },
+  {
+    "id": "p06",
+    "class": "C",
+    "sourceUrl": "https://p06.example.invalid/plan",
+    "checkedAt": "2026-12-01"
+  },
+  {
+    "id": "p07",
+    "class": "C",
+    "sourceUrl": "https://p07.example.invalid/plan",
+    "checkedAt": "2026-12-01"
+  },
+  {
+    "id": "p08",
+    "class": "C",
+    "sourceUrl": "https://p08.example.invalid/plan",
+    "checkedAt": "2026-12-01"
+  },
+  {
+    "id": "p09",
+    "class": "C",
+    "sourceUrl": "https://p09.example.invalid/plan",
+    "checkedAt": "2026-12-01"
+  },
+  {
+    "id": "p10",
+    "class": "C",
+    "sourceUrl": "https://p10.example.invalid/plan",
+    "checkedAt": "2026-12-01"
+  },
+  {
+    "id": "p11",
+    "class": "C",
+    "sourceUrl": "https://p11.example.invalid/plan",
+    "checkedAt": "2026-12-01"
+  },
+  {
+    "id": "p12",
+    "class": "C",
+    "sourceUrl": "https://p12.example.invalid/plan",
+    "checkedAt": "2026-12-01"
+  },
+  {
+    "id": "p13",
+    "class": "D",
+    "sourceUrl": "https://p13.example.invalid/plan",
+    "checkedAt": "2026-12-01",
+    "note": "Synthetic classification D."
+  },
+  {
+    "id": "p14",
+    "class": "D",
+    "sourceUrl": "https://p14.example.invalid/plan",
+    "checkedAt": "2026-12-01",
+    "note": "Synthetic classification D."
+  },
+  {
+    "id": "p15",
+    "class": "D",
+    "sourceUrl": "https://p15.example.invalid/plan",
+    "checkedAt": "2026-12-01",
+    "note": "Synthetic classification D."
+  },
+  {
+    "id": "p16",
+    "class": "D",
+    "sourceUrl": "https://p16.example.invalid/plan",
+    "checkedAt": "2026-12-01",
+    "note": "Synthetic classification D."
+  },
+  {
+    "id": "p17",
+    "class": "D",
+    "sourceUrl": "https://p17.example.invalid/plan",
+    "checkedAt": "2026-12-01",
+    "note": "Synthetic classification D."
+  },
+  {
+    "id": "p18",
+    "class": "D",
+    "sourceUrl": "https://p18.example.invalid/plan",
+    "checkedAt": "2026-12-01",
+    "note": "Synthetic classification D."
+  },
+  {
+    "id": "p19",
+    "class": "E",
+    "sourceUrl": "https://p19.example.invalid/plan",
+    "checkedAt": "2026-12-01",
+    "note": "Synthetic classification E."
+  },
+  {
+    "id": "p20",
+    "class": "E",
+    "sourceUrl": "https://p20.example.invalid/plan",
+    "checkedAt": "2026-12-01",
+    "note": "Synthetic classification E."
+  },
+  {
+    "id": "p21",
+    "class": "E",
+    "sourceUrl": "https://p21.example.invalid/plan",
+    "checkedAt": "2026-12-01",
+    "note": "Synthetic classification E."
+  },
+  {
+    "id": "p22",
+    "class": "E",
+    "sourceUrl": "https://p22.example.invalid/plan",
+    "checkedAt": "2026-12-01",
+    "note": "Synthetic classification E."
+  },
+  {
+    "id": "p23",
+    "class": "E",
+    "sourceUrl": "https://p23.example.invalid/plan",
+    "checkedAt": "2026-12-01",
+    "note": "Synthetic classification E."
+  },
+  {
+    "id": "p24",
+    "class": "E",
+    "sourceUrl": "https://p24.example.invalid/plan",
+    "checkedAt": "2026-12-01",
+    "note": "Synthetic classification E."
+  },
+  {
+    "id": "p25",
+    "class": "E",
+    "sourceUrl": "https://p25.example.invalid/plan",
+    "checkedAt": "2026-12-01",
+    "note": "Synthetic classification E."
+  },
+  {
+    "id": "p26",
+    "class": "S",
+    "sourceUrl": "https://p26.example.invalid/plan",
+    "checkedAt": "2026-12-01",
+    "note": "Synthetic classification S."
+  },
+  {
+    "id": "p27",
+    "class": "S",
+    "sourceUrl": "https://p27.example.invalid/plan",
+    "checkedAt": "2026-12-01",
+    "note": "Synthetic classification S."
+  },
+  {
+    "id": "p28",
+    "class": "S",
+    "sourceUrl": "https://p28.example.invalid/plan",
+    "checkedAt": "2026-12-01",
+    "note": "Synthetic classification S."
+  },
+  {
+    "id": "p29",
+    "class": "S",
+    "sourceUrl": "https://p29.example.invalid/plan",
+    "checkedAt": "2026-12-01",
+    "note": "Synthetic classification S."
+  },
+  {
+    "id": "p30",
+    "class": "S",
+    "sourceUrl": "https://p30.example.invalid/plan",
+    "checkedAt": "2026-12-01",
+    "note": "Synthetic classification S."
+  },
+  {
+    "id": "p31",
+    "class": "S",
+    "sourceUrl": "https://p31.example.invalid/plan",
+    "checkedAt": "2026-12-01",
+    "note": "Synthetic classification S."
+  },
+  {
+    "id": "p32",
+    "class": "S",
+    "sourceUrl": "https://p32.example.invalid/plan",
+    "checkedAt": "2026-12-01",
+    "note": "Synthetic classification S."
+  },
+  {
+    "id": "p33",
+    "class": "S",
+    "sourceUrl": "https://p33.example.invalid/plan",
+    "checkedAt": "2026-12-01",
+    "note": "Synthetic classification S."
+  },
+  {
+    "id": "p34",
+    "class": "S",
+    "sourceUrl": "https://p34.example.invalid/plan",
+    "checkedAt": "2026-12-01",
+    "note": "Synthetic classification S."
+  },
+  {
+    "id": "p35",
+    "class": "I",
+    "sourceUrl": "https://p35.example.invalid/plan",
+    "checkedAt": "2026-12-01",
+    "note": "Synthetic classification I."
+  },
+  {
+    "id": "p36",
+    "class": "I",
+    "sourceUrl": "https://p36.example.invalid/plan",
+    "checkedAt": "2026-12-01",
+    "note": "Synthetic classification I."
+  },
+  {
+    "id": "p37",
+    "class": "I",
+    "sourceUrl": "https://p37.example.invalid/plan",
+    "checkedAt": "2026-12-01",
+    "note": "Synthetic classification I."
+  },
+  {
+    "id": "p38",
+    "class": "I",
+    "sourceUrl": "https://p38.example.invalid/plan",
+    "checkedAt": "2026-12-01",
+    "note": "Synthetic classification I."
+  },
+  {
+    "id": "p39",
+    "class": "I",
+    "sourceUrl": "https://p39.example.invalid/plan",
+    "checkedAt": "2026-12-01",
+    "note": "Synthetic classification I."
+  },
+  {
+    "id": "p40",
+    "class": "I",
+    "sourceUrl": "https://p40.example.invalid/plan",
+    "checkedAt": "2026-12-01",
+    "note": "Synthetic classification I."
+  }
+]

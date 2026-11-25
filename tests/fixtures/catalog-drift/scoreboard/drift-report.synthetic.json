@@ -1,0 +1,881 @@
+{
+  "schemaVersion": 1,
+  "runAt": "2026-12-01T08:00:00.000Z",
+  "catalogCuratedAt": "2026-11-25",
+  "manifestReviewedAt": "2026-11-25",
+  "only": null,
+  "probes": [
+    {
+      "id": "p01-models",
+      "provider": "p01",
+      "type": "model-list",
+      "url": "https://p01.example.invalid/models",
+      "status": "drift",
+      "httpStatus": 200,
+      "textChars": null,
+      "findings": [
+        {
+          "provider": "p01",
+          "probeId": "p01-models",
+          "kind": "ids-missing",
+          "severity": "drift",
+          "message": "3 catalog model ids are no longer listed as free",
+          "details": {
+            "ids": ["model-01", "model-02", "model-03"]
+          }
+        }
+      ],
+      "stats": {
+        "liveIds": 1,
+        "catalogIds": 3,
+        "aliveCatalogIds": 0
+      }
+    },
+    {
+      "id": "p02-models",
+      "provider": "p02",
+      "type": "model-list",
+      "url": "https://p02.example.invalid/models",
+      "status": "drift",
+      "httpStatus": 200,
+      "textChars": null,
+      "findings": [
+        {
+          "provider": "p02",
+          "probeId": "p02-models",
+          "kind": "ids-missing",
+          "severity": "drift",
+          "message": "8 catalog model ids are no longer listed as free",
+          "details": {
+            "ids": [
+              "model-01",
+              "model-02",
+              "model-03",
+              "model-04",
+              "model-05",
+              "model-06",
+              "model-07",
+              "model-08"
+            ]
+          }
+        }
+      ],
+      "stats": {
+        "liveIds": 1,
+        "catalogIds": 8,
+        "aliveCatalogIds": 0
+      }
+    },
+    {
+      "id": "p03-models",
+      "provider": "p03",
+      "type": "model-list",
+      "url": "https://p03.example.invalid/models",
+      "status": "drift",
+      "httpStatus": 200,
+      "textChars": null,
+      "findings": [
+        {
+          "provider": "p03",
+          "probeId": "p03-models",
+          "kind": "ids-missing",
+          "severity": "drift",
+          "message": "8 catalog model ids are no longer listed as free",
+          "details": {
+            "ids": [
+              "model-02",
+              "model-03",
+              "model-04",
+              "model-05",
+              "model-06",
+              "model-07",
+              "model-08",
+              "model-09"
+            ]
+          }
+        }
+      ],
+      "stats": {
+        "liveIds": 1,
+        "catalogIds": 9,
+        "aliveCatalogIds": 1
+      }
+    },
+    {
+      "id": "p04-models",
+      "provider": "p04",
+      "type": "model-list",
+      "url": "https://p04.example.invalid/models",
+      "status": "drift",
+      "httpStatus": 200,
+      "textChars": null,
+      "findings": [
+        {
+          "provider": "p04",
+          "probeId": "p04-models",
+          "kind": "ids-missing",
+          "severity": "drift",
+          "message": "30 catalog model ids are no longer listed as free",
+          "details": {
+            "ids": [
+              "model-10",
+              "model-11",
+              "model-12",
+              "model-13",
+              "model-14",
+              "model-15",
+              "model-16",
+              "model-17",
+              "model-18",
+              "model-19",
+              "model-20",
+              "model-21",
+              "model-22",
+              "model-23",
+              "model-24",
+              "model-25",
+              "model-26",
+              "model-27",
+              "model-28",
+              "model-29",
+              "model-30",
+              "model-31",
+              "model-32",
+              "model-33",
+              "model-34",
+              "model-35",
+              "model-36",
+              "model-37",
+              "model-38",
+              "model-39"
+            ]
+          }
+        }
+      ],
+      "stats": {
+        "liveIds": 9,
+        "catalogIds": 39,
+        "aliveCatalogIds": 9
+      }
+    },
+    {
+      "id": "p05-models",
+      "provider": "p05",
+      "type": "json-assert",
+      "url": "https://p05.example.invalid/models",
+      "status": "drift",
+      "httpStatus": 200,
+      "textChars": null,
+      "findings": [
+        {
+          "provider": "p05",
+          "probeId": "p05-models",
+          "kind": "ids-missing",
+          "severity": "drift",
+          "message": "8 catalog model ids are no longer listed as free",
+          "details": {
+            "ids": [
+              "model-01",
+              "model-02",
+              "model-03",
+              "model-04",
+              "model-05",
+              "model-06",
+              "model-07",
+              "model-08"
+            ]
+          }
+        }
+      ],
+      "stats": {
+        "liveIds": 1,
+        "catalogIds": 8,
+        "aliveCatalogIds": 0
+      }
+    },
+    {
+      "id": "p06-models",
+      "provider": "p06",
+      "type": "model-list",
+      "url": "https://p06.example.invalid/models",
+      "status": "drift",
+      "httpStatus": 200,
+      "textChars": null,
+      "findings": [
+        {
+          "provider": "p06",
+          "probeId": "p06-models",
+          "kind": "ids-missing",
+          "severity": "drift",
+          "message": "4 catalog model ids are no longer listed as free",
+          "details": {
+            "ids": ["model-01", "model-02", "model-03", "model-04"]
+          }
+        }
+      ],
+      "stats": {
+        "liveIds": 1,
+        "catalogIds": 4,
+        "aliveCatalogIds": 0
+      }
+    },
+    {
+      "id": "p07-models",
+      "provider": "p07",
+      "type": "model-list",
+      "url": "https://p07.example.invalid/models",
+      "status": "drift",
+      "httpStatus": 200,
+      "textChars": null,
+      "findings": [
+        {
+          "provider": "p07",
+          "probeId": "p07-models",
+          "kind": "ids-missing",
+          "severity": "drift",
+          "message": "1 catalog model ids are no longer listed as free",
+          "details": {
+            "ids": ["model-01"]
+          }
+        }
+      ],
+      "stats": {
+        "liveIds": 1,
+        "catalogIds": 1,
+        "aliveCatalogIds": 0
+      }
+    }
+  ],
+  "providers": {
+    "p01": {
+      "findings": [
+        {
+          "provider": "p01",
+          "probeId": "p01-models",
+          "kind": "ids-missing",
+          "severity": "drift",
+          "message": "3 catalog model ids are no longer listed as free",
+          "details": {
+            "ids": ["model-01", "model-02", "model-03"]
+          }
+        }
+      ],
+      "fingerprint": "1fbab2fd1ddaaa1f",
+      "allProbesFetched": true,
+      "consecutiveRuns": 2,
+      "notInCatalog": false,
+      "catalogRows": [
+        {
+          "modelId": "model-01",
+          "poolKey": "p01",
+          "monthlyTokens": 100000,
+          "freeType": "recurring-daily"
+        },
+        {
+          "modelId": "model-02",
+          "poolKey": "p01",
+          "monthlyTokens": 100000,
+          "freeType": "recurring-daily"
+        },
+        {
+          "modelId": "model-03",
+          "poolKey": "p01",
+          "monthlyTokens": 100000,
+          "freeType": "recurring-daily"
+        }
+      ]
+    },
+    "p02": {
+      "findings": [
+        {
+          "provider": "p02",
+          "probeId": "p02-models",
+          "kind": "ids-missing",
+          "severity": "drift",
+          "message": "8 catalog model ids are no longer listed as free",
+          "details": {
+            "ids": [
+              "model-01",
+              "model-02",
+              "model-03",
+              "model-04",
+              "model-05",
+              "model-06",
+              "model-07",
+              "model-08"
+            ]
+          }
+        }
+      ],
+      "fingerprint": "99850d17e3de2939",
+      "allProbesFetched": true,
+      "consecutiveRuns": 2,
+      "notInCatalog": false,
+      "catalogRows": [
+        {
+          "modelId": "model-01",
+          "poolKey": "p02",
+          "monthlyTokens": 100000,
+          "freeType": "recurring-daily"
+        },
+        {
+          "modelId": "model-02",
+          "poolKey": "p02",
+          "monthlyTokens": 100000,
+          "freeType": "recurring-daily"
+        },
+        {
+          "modelId": "model-03",
+          "poolKey": "p02",
+          "monthlyTokens": 100000,
+          "freeType": "recurring-daily"
+        },
+        {
+          "modelId": "model-04",
+          "poolKey": "p02",
+          "monthlyTokens": 100000,
+          "freeType": "recurring-daily"
+        },
+        {
+          "modelId": "model-05",
+          "poolKey": "p02",
+          "monthlyTokens": 100000,
+          "freeType": "recurring-daily"
+        },
+        {
+          "modelId": "model-06",
+          "poolKey": "p02",
+          "monthlyTokens": 100000,
+          "freeType": "recurring-daily"
+        },
+        {
+          "modelId": "model-07",
+          "poolKey": "p02",
+          "monthlyTokens": 100000,
+          "freeType": "recurring-daily"
+        },
+        {
+          "modelId": "model-08",
+          "poolKey": "p02",
+          "monthlyTokens": 100000,
+          "freeType": "recurring-daily"
+        }
+      ]
+    },
+    "p03": {
+      "findings": [
+        {
+          "provider": "p03",
+          "probeId": "p03-models",
+          "kind": "ids-missing",
+          "severity": "drift",
+          "message": "8 catalog model ids are no longer listed as free",
+          "details": {
+            "ids": [
+              "model-02",
+              "model-03",
+              "model-04",
+              "model-05",
+              "model-06",
+              "model-07",
+              "model-08",
+              "model-09"
+            ]
+          }
+        }
+      ],
+      "fingerprint": "72e7273b118c4ead",
+      "allProbesFetched": true,
+      "consecutiveRuns": 2,
+      "notInCatalog": false,
+      "catalogRows": [
+        {
+          "modelId": "model-01",
+          "poolKey": "p03",
+          "monthlyTokens": 100000,
+          "freeType": "recurring-daily"
+        },
+        {
+          "modelId": "model-02",
+          "poolKey": "p03",
+          "monthlyTokens": 100000,
+          "freeType": "recurring-daily"
+        },
+        {
+          "modelId": "model-03",
+          "poolKey": "p03",
+          "monthlyTokens": 100000,
+          "freeType": "recurring-daily"
+        },
+        {
+          "modelId": "model-04",
+          "poolKey": "p03",
+          "monthlyTokens": 100000,
+          "freeType": "recurring-daily"
+        },
+        {
+          "modelId": "model-05",
+          "poolKey": "p03",
+          "monthlyTokens": 100000,
+          "freeType": "recurring-daily"
+        },
+        {
+          "modelId": "model-06",
+          "poolKey": "p03",
+          "monthlyTokens": 100000,
+          "freeType": "recurring-daily"
+        },
+        {
+          "modelId": "model-07",
+          "poolKey": "p03",
+          "monthlyTokens": 100000,
+          "freeType": "recurring-daily"
+        },
+        {
+          "modelId": "model-08",
+          "poolKey": "p03",
+          "monthlyTokens": 100000,
+          "freeType": "recurring-daily"
+        },
+        {
+          "modelId": "model-09",
+          "poolKey": "p03",
+          "monthlyTokens": 100000,
+          "freeType": "recurring-daily"
+        }
+      ]
+    },
+    "p04": {
+      "findings": [
+        {
+          "provider": "p04",
+          "probeId": "p04-models",
+          "kind": "ids-missing",
+          "severity": "drift",
+          "message": "30 catalog model ids are no longer listed as free",
+          "details": {
+            "ids": [
+              "model-10",
+              "model-11",
+              "model-12",
+              "model-13",
+              "model-14",
+              "model-15",
+              "model-16",
+              "model-17",
+              "model-18",
+              "model-19",
+              "model-20",
+              "model-21",
+              "model-22",
+              "model-23",
+              "model-24",
+              "model-25",
+              "model-26",
+              "model-27",
+              "model-28",
+              "model-29",
+              "model-30",
+              "model-31",
+              "model-32",
+              "model-33",
+              "model-34",
+              "model-35",
+              "model-36",
+              "model-37",
+              "model-38",
+              "model-39"
+            ]
+          }
+        }
+      ],
+      "fingerprint": "14a59d0b6b186034",
+      "allProbesFetched": true,
+      "consecutiveRuns": 2,
+      "notInCatalog": false,
+      "catalogRows": [
+        {
+          "modelId": "model-01",
+          "poolKey": "p04",
+          "monthlyTokens": 100000,
+          "freeType": "recurring-daily"
+        },
+        {
+          "modelId": "model-02",
+          "poolKey": "p04",
+          "monthlyTokens": 100000,
+          "freeType": "recurring-daily"
+        },
+        {
+          "modelId": "model-03",
+          "poolKey": "p04",
+          "monthlyTokens": 100000,
+          "freeType": "recurring-daily"
+        },
+        {
+          "modelId": "model-04",
+          "poolKey": "p04",
+          "monthlyTokens": 100000,
+          "freeType": "recurring-daily"
+        },
+        {
+          "modelId": "model-05",
+          "poolKey": "p04",
+          "monthlyTokens": 100000,
+          "freeType": "recurring-daily"
+        },
+        {
+          "modelId": "model-06",
+          "poolKey": "p04",
+          "monthlyTokens": 100000,
+          "freeType": "recurring-daily"
+        },
+        {
+          "modelId": "model-07",
+          "poolKey": "p04",
+          "monthlyTokens": 100000,
+          "freeType": "recurring-daily"
+        },
+        {
+          "modelId": "model-08",
+          "poolKey": "p04",
+          "monthlyTokens": 100000,
+          "freeType": "recurring-daily"
+        },
+        {
+          "modelId": "model-09",
+          "poolKey": "p04",
+          "monthlyTokens": 100000,
+          "freeType": "recurring-daily"
+        },
+        {
+          "modelId": "model-10",
+          "poolKey": "p04",
+          "monthlyTokens": 100000,
+          "freeType": "recurring-daily"
+        },
+        {
+          "modelId": "model-11",
+          "poolKey": "p04",
+          "monthlyTokens": 100000,
+          "freeType": "recurring-daily"
+        },
+        {
+          "modelId": "model-12",
+          "poolKey": "p04",
+          "monthlyTokens": 100000,
+          "freeType": "recurring-daily"
+        },
+        {
+          "modelId": "model-13",
+          "poolKey": "p04",
+          "monthlyTokens": 100000,
+          "freeType": "recurring-daily"
+        },
+        {
+          "modelId": "model-14",
+          "poolKey": "p04",
+          "monthlyTokens": 100000,
+          "freeType": "recurring-daily"
+        },
+        {
+          "modelId": "model-15",
+          "poolKey": "p04",
+          "monthlyTokens": 100000,
+          "freeType": "recurring-daily"
+        },
+        {
+          "modelId": "model-16",
+          "poolKey": "p04",
+          "monthlyTokens": 100000,
+          "freeType": "recurring-daily"
+        },
+        {
+          "modelId": "model-17",
+          "poolKey": "p04",
+          "monthlyTokens": 100000,
+          "freeType": "recurring-daily"
+        },
+        {
+          "modelId": "model-18",
+          "poolKey": "p04",
+          "monthlyTokens": 100000,
+          "freeType": "recurring-daily"
+        },
+        {
+          "modelId": "model-19",
+          "poolKey": "p04",
+          "monthlyTokens": 100000,
+          "freeType": "recurring-daily"
+        },
+        {
+          "modelId": "model-20",
+          "poolKey": "p04",
+          "monthlyTokens": 100000,
+          "freeType": "recurring-daily"
+        },
+        {
+          "modelId": "model-21",
+          "poolKey": "p04",
+          "monthlyTokens": 100000,
+          "freeType": "recurring-daily"
+        },
+        {
+          "modelId": "model-22",
+          "poolKey": "p04",
+          "monthlyTokens": 100000,
+          "freeType": "recurring-daily"
+        },
+        {
+          "modelId": "model-23",
+          "poolKey": "p04",
+          "monthlyTokens": 100000,
+          "freeType": "recurring-daily"
+        },
+        {
+          "modelId": "model-24",
+          "poolKey": "p04",
+          "monthlyTokens": 100000,
+          "freeType": "recurring-daily"
+        },
+        {
+          "modelId": "model-25",
+          "poolKey": "p04",
+          "monthlyTokens": 100000,
+          "freeType": "recurring-daily"
+        },
+        {
+          "modelId": "model-26",
+          "poolKey": "p04",
+          "monthlyTokens": 100000,
+          "freeType": "recurring-daily"
+        },
+        {
+          "modelId": "model-27",
+          "poolKey": "p04",
+          "monthlyTokens": 100000,
+          "freeType": "recurring-daily"
+        },
+        {
+          "modelId": "model-28",
+          "poolKey": "p04",
+          "monthlyTokens": 100000,
+          "freeType": "recurring-daily"
+        },
+        {
+          "modelId": "model-29",
+          "poolKey": "p04",
+          "monthlyTokens": 100000,
+          "freeType": "recurring-daily"
+        },
+        {
+          "modelId": "model-30",
+          "poolKey": "p04",
+          "monthlyTokens": 100000,
+          "freeType": "recurring-daily"
+        },
+        {
+          "modelId": "model-31",
+          "poolKey": "p04",
+          "monthlyTokens": 100000,
+          "freeType": "recurring-daily"
+        },
+        {
+          "modelId": "model-32",
+          "poolKey": "p04",
+          "monthlyTokens": 100000,
+          "freeType": "recurring-daily"
+        },
+        {
+          "modelId": "model-33",
+          "poolKey": "p04",
+          "monthlyTokens": 100000,
+          "freeType": "recurring-daily"
+        },
+        {
+          "modelId": "model-34",
+          "poolKey": "p04",
+          "monthlyTokens": 100000,
+          "freeType": "recurring-daily"
+        },
+        {
+          "modelId": "model-35",
+          "poolKey": "p04",
+          "monthlyTokens": 100000,
+          "freeType": "recurring-daily"
+        },
+        {
+          "modelId": "model-36",
+          "poolKey": "p04",
+          "monthlyTokens": 100000,
+          "freeType": "recurring-daily"
+        },
+        {
+          "modelId": "model-37",
+          "poolKey": "p04",
+          "monthlyTokens": 100000,
+          "freeType": "recurring-daily"
+        },
+        {
+          "modelId": "model-38",
+          "poolKey": "p04",
+          "monthlyTokens": 100000,
+          "freeType": "recurring-daily"
+        },
+        {
+          "modelId": "model-39",
+          "poolKey": "p04",
+          "monthlyTokens": 100000,
+          "freeType": "recurring-daily"
+        }
+      ]
+    },
+    "p05": {
+      "findings": [
+        {
+          "provider": "p05",
+          "probeId": "p05-models",
+          "kind": "ids-missing",
+          "severity": "drift",
+          "message": "8 catalog model ids are no longer listed as free",
+          "details": {
+            "ids": [
+              "model-01",
+              "model-02",
+              "model-03",
+              "model-04",
+              "model-05",
+              "model-06",
+              "model-07",
+              "model-08"
+            ]
+          }
+        }
+      ],
+      "fingerprint": "a2d92b47df8c8f90",
+      "allProbesFetched": true,
+      "consecutiveRuns": 2,
+      "notInCatalog": false,
+      "catalogRows": [
+        {
+          "modelId": "model-01",
+          "poolKey": "p05",
+          "monthlyTokens": 100000,
+          "freeType": "recurring-daily"
+        },
+        {
+          "modelId": "model-02",
+          "poolKey": "p05",
+          "monthlyTokens": 100000,
+          "freeType": "recurring-daily"
+        },
+        {
+          "modelId": "model-03",
+          "poolKey": "p05",
+          "monthlyTokens": 100000,
+          "freeType": "recurring-daily"
+        },
+        {
+          "modelId": "model-04",
+          "poolKey": "p05",
+          "monthlyTokens": 100000,
+          "freeType": "recurring-daily"
+        },
+        {
+          "modelId": "model-05",
+          "poolKey": "p05",
+          "monthlyTokens": 100000,
+          "freeType": "recurring-daily"
+        },
+        {
+          "modelId": "model-06",
+          "poolKey": "p05",
+          "monthlyTokens": 100000,
+          "freeType": "recurring-daily"
+        },
+        {
+          "modelId": "model-07",
+          "poolKey": "p05",
+          "monthlyTokens": 100000,
+          "freeType": "recurring-daily"
+        },
+        {
+          "modelId": "model-08",
+          "poolKey": "p05",
+          "monthlyTokens": 100000,
+          "freeType": "recurring-daily"
+        }
+      ]
+    },
+    "p06": {
+      "findings": [
+        {
+          "provider": "p06",
+          "probeId": "p06-models",
+          "kind": "ids-missing",
+          "severity": "drift",
+          "message": "4 catalog model ids are no longer listed as free",
+          "details": {
+            "ids": ["model-01", "model-02", "model-03", "model-04"]
+          }
+        }
+      ],
+      "fingerprint": "c0d05b3b6efe136e",
+      "allProbesFetched": true,
+      "consecutiveRuns": 2,
+      "notInCatalog": false,
+      "catalogRows": [
+        {
+          "modelId": "model-01",
+          "poolKey": "p06",
+          "monthlyTokens": 100000,
+          "freeType": "recurring-daily"
+        },
+        {
+          "modelId": "model-02",
+          "poolKey": "p06",
+          "monthlyTokens": 100000,
+          "freeType": "recurring-daily"
+        },
+        {
+          "modelId": "model-03",
+          "poolKey": "p06",
+          "monthlyTokens": 100000,
+          "freeType": "recurring-daily"
+        },
+        {
+          "modelId": "model-04",
+          "poolKey": "p06",
+          "monthlyTokens": 100000,
+          "freeType": "recurring-daily"
+        }
+      ]
+    },
+    "p07": {
+      "findings": [
+        {
+          "provider": "p07",
+          "probeId": "p07-models",
+          "kind": "ids-missing",
+          "severity": "drift",
+          "message": "1 catalog model ids are no longer listed as free",
+          "details": {
+            "ids": ["model-01"]
+          }
+        }
+      ],
+      "fingerprint": "b2e1a3ff57a401dc",
+      "allProbesFetched": true,
+      "consecutiveRuns": 2,
+      "notInCatalog": false,
+      "catalogRows": [
+        {
+          "modelId": "model-01",
+          "poolKey": "p07",
+          "monthlyTokens": 100000,
+          "freeType": "recurring-daily"
+        }
+      ]
+    }
+  }
+}
