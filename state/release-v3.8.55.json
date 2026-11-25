@@ -3,12 +3,12 @@
   "base": "release/v3.8.55",
   "paused": null,
   "inFlight": {
-    "batchId": "b39",
+    "batchId": "b40",
     "kind": "batch",
-    "candidateRef": "omni-queue/release-v3.8.55/b39-6534fbfae0fe",
-    "candidateSha": "6534fbfae0fef60c0c62af1e8091294f29d00e3d",
+    "candidateRef": "omni-queue/release-v3.8.55/b40-7a2e81529f01",
+    "candidateSha": "7a2e81529f01c3ba696e8a822da5cb95de5e16ac",
     "baseSha": "b4ff3daa62a5a707c4ca92ad17052898ee7b5db1",
-    "treeSha": "ab950cd7488dc023354481c3123cd08418185325",
+    "treeSha": "dab9174bd28d5d39dc0abcd50e88324d8b0e0b82",
     "prs": [
       {
         "n": 20991,
@@ -30,17 +30,10 @@
         "title": "fix(dashboard): connect the live socket on the same origin behind a proxy (KEA-9514)",
         "author": "diegosouzapw",
         "labeledAt": "2026-11-25T13:27:11Z"
-      },
-      {
-        "n": 20421,
-        "head": "2f3fa84a367d73ff45dd37f5a085f34fde56639a",
-        "title": "docs(readme): rebuild README from the approved round-2 section designs",
-        "author": "diegosouzapw",
-        "labeledAt": "2026-11-25T13:34:37Z"
       }
     ],
     "stage": "testing",
-    "startedAt": "2026-11-25T13:38:29.360Z",
+    "startedAt": "2026-11-25T15:00:35.924Z",
     "attempts": 0,
     "bisect": null
   },
@@ -145,8 +138,8 @@
     }
   },
   "counters": {
-    "batchSeq": 39,
-    "ciRuns": 44,
+    "batchSeq": 40,
+    "ciRuns": 45,
     "landedPrs": 0,
     "landedBatches": 0,
     "redBatches": 10,
@@ -2548,8 +2541,50 @@
         "21192": "2026-11-25T13:27:07Z"
       },
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45625506082"
+    },
+    {
+      "at": "2026-11-25T15:00:17.803Z",
+      "type": "checks-green",
+      "batchId": "b39",
+      "prs": [
+        20991,
+        21192,
+        21175,
+        20421
+      ],
+      "sha": "6534fbfae0fef60c0c62af1e8091294f29d00e3d",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45640149323"
+    },
+    {
+      "at": "2026-11-25T15:00:29.439Z",
+      "type": "land-rejected",
+      "batchId": "b39",
+      "prs": [
+        20421
+      ],
+      "sha": "6534fbfae0fef60c0c62af1e8091294f29d00e3d",
+      "detail": "batch changed before landing: #20421 head moved to f37ddf5691d1",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45640149323"
+    },
+    {
+      "at": "2026-11-25T15:00:42.245Z",
+      "type": "batch-started",
+      "batchId": "b40",
+      "prs": [
+        20991,
+        21192,
+        21175
+      ],
+      "sha": "7a2e81529f01c3ba696e8a822da5cb95de5e16ac",
+      "detail": "3 PR(s) on b4ff3daa62a5; window 5",
+      "labeledAt": {
+        "20991": "2026-11-25T13:27:07Z",
+        "21175": "2026-11-25T13:27:11Z",
+        "21192": "2026-11-25T13:27:07Z"
+      },
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45640149323"
     }
   ],
-  "updatedAt": "2026-11-25T14:40:00.171Z",
+  "updatedAt": "2026-11-25T15:01:16.220Z",
   "batchWindow": 5
 }
