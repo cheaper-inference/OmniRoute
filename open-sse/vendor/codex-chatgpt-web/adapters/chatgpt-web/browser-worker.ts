@@ -1086,6 +1086,10 @@ export async function setChatGptThinkMode(
 }
 
 export function chatGptTurnIdentitySelector(identity: string): string {
+  const searchUnit = identity.match(/^search-unit:(\d+):(user|assistant)$/);
+  if (searchUnit) {
+    return `[data-chatgpt-search-unit-key$=${JSON.stringify(`:${searchUnit[1]}:${searchUnit[2]}`)}]`;
+  }
   const encoded = JSON.stringify(identity);
   return `[data-testid=${encoded}], [data-chatgpt-search-unit-key=${encoded}]`;
 }
@@ -2406,11 +2410,17 @@ export class ChatGptBrowserWorker {
         })());
         const observerKey = `${observerState.id}:${observerState.revision}`;
         if (options.knownKey === observerKey) return { key: observerKey };
+        // ChatGPT prefixes search-unit keys with a render id that changes when the
+        // conversation remounts (local-chatgpt:* to the server id); the index and role do not.
+        const stableKey = (key: string | null): string | null => {
+          const match = key?.match(/:(\d+):(user|assistant)$/);
+          return match ? `search-unit:${match[1]}:${match[2]}` : key;
+        };
         const identities = (selector: string): string[] => {
           const values = [...document.querySelectorAll(selector)].map(
             (element) =>
               element.getAttribute("data-testid") ||
-              element.getAttribute("data-chatgpt-search-unit-key")
+              stableKey(element.getAttribute("data-chatgpt-search-unit-key"))
           );
           if (
             values.some(
