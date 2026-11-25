@@ -53,9 +53,8 @@ OmniRoute has three distinct but related resilience mechanisms. Each has a diffe
 | ------- | ----------- | ----------- | ------------- |
 | OAuth   | 5 failures  | 8 failures  | 60s           |
 | API-key | 7 failures  | 12 failures | 30s           |
-| Local   | derived     | 2 failures  | 15s           |
 
-`degradationThreshold` controls when a provider enters `DEGRADED`; `failureThreshold` controls when it opens and is skipped. Local provider profiles are not exposed on the Resilience settings page yet.
+`degradationThreshold` controls when a provider enters `DEGRADED`; `failureThreshold` controls when it opens and is skipped. `PROVIDER_PROFILES.local` (2 failures / 15s) is defined in `open-sse/config/constants.ts` but **not wired yet**: `getProviderCategory()` returns only `oauth` or `apikey`, so local providers use the OAuth or API-key profile.
 
 **Trip codes:** only provider-level statuses `[408, 500, 502, 503, 504]`. Do NOT trip for account-level errors (most 401/403/429 — those belong to cooldown or lockout).
 
@@ -1085,10 +1084,16 @@ breaker runs on `circuitBreakerThreshold` / `circuitBreakerReset`:
 | ------- | ----------: | -----------------------------------: | ----------------------------: |
 | OAuth   |         `5` |                                  `8` |                         `60s` |
 | API key |         `7` |                                 `12` |                         `30s` |
-| Local   |   (derived) |                                  `2` |                         `15s` |
+
+A `local` profile (`2` failures / `15s`) also exists in `PROVIDER_PROFILES`, but it is not
+wired into the breaker: `buildProviderProfile()` (`open-sse/services/accountFallback.ts`) only
+accepts `oauth` or `apikey`, and `getProviderCategory()`
+(`open-sse/config/providerRegistry.ts`) returns one of those two (unregistered providers get
+`apikey`).
 
 `PROVIDER_PROFILES` also defines `providerFailureThreshold` (10/15/2),
-`providerFailureWindowMs` (15/30/5 min) and `providerCooldownMs` (5/10/1 min): these power the
+`providerFailureWindowMs` (15/30/5 min) and `providerCooldownMs` (5/10/1 min) — OAuth/API
+key/local, where the local values are inert for the same reason as above: these power the
 **window gate of the opt-in global Provider Cooldown** (`PROVIDER_COOLDOWN_ENABLED`, default
 off) — a provider-level entry in `open-sse/services/providerCooldownTracker.ts` only counts as
 cooling after `providerFailureThreshold` failures inside `providerFailureWindowMs`, and then
