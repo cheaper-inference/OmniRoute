@@ -94,6 +94,7 @@ import {
   resolveComboBuilderProviderId,
   type ComboBuilderStage,
 } from "@/lib/combos/builderDraft";
+import { isReservedComboName } from "@/shared/constants/autoComboNames";
 import { buildDuplicateComboPayload } from "@/lib/combos/duplicatePayload";
 import { normalizeComboConfigMode } from "@/shared/constants/comboConfigMode";
 import type { z } from "zod";
@@ -2249,6 +2250,11 @@ function ComboCardInner({
           </div>
         </div>
       </div>
+      {isReservedComboName(combo.name.trim()) && (
+        <Notice variant="warning" className="mt-2">
+          {t("reservedNameWarning")}
+        </Notice>
+      )}
     </Card>
   );
 }
@@ -2473,7 +2479,9 @@ function ComboFormModal({
   const capabilityDraftsRef = useRef<Partial<Record<ComboEndpoint, CapabilityDraft>>>({});
   const [showModelSelect, setShowModelSelect] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [nameError, setNameError] = useState("");
+  const [nameFormatError, setNameError] = useState("");
+  const hasReservedName = isReservedComboName(name.trim());
+  const nameError = hasReservedName ? t("nameReserved") : nameFormatError;
   const [pricingByProvider, setPricingByProvider] = useState({});
   const [modelAliases, setModelAliases] = useState({});
   const [providerNodes, setProviderNodes] = useState([]);
@@ -3506,7 +3514,7 @@ function ComboFormModal({
   };
 
   const handleSave = async () => {
-    if (!validateName(name)) return;
+    if (hasReservedName || !validateName(name)) return;
     if (models.length > 0 && (hasInvalidWeightedTotal || hasCostOptimizedWithoutPricing)) return;
     const drafts: Partial<Record<ComboEndpoint, CapabilityDraft>> = {
       ...capabilityDraftsRef.current,
