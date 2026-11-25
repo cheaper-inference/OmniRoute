@@ -1,5 +1,4 @@
 import { requiresQoderHttpTransport } from "@omniroute/open-sse/services/qoderCapabilities";
-import { getRequestedModelEndpointMismatch } from "@/lib/providerModels/modelEndpointGuard";
 import { randomUUID } from "crypto";
 import { resolveChatRequestBody } from "./requestBody";
 import { getComboCredentialAvailability } from "./comboCredentialAvailability.ts";
@@ -39,13 +38,12 @@ import {
 } from "@omniroute/open-sse/services/accountFallback/antiAvalanche.ts";
 import { estimateTokens } from "@omniroute/open-sse/services/contextManager.ts";
 import { getCodexPlanType } from "@omniroute/open-sse/services/codexPlanEligibility.ts";
-import { getCombo, getComboForModel, getModelInfo } from "../services/model";
+import { getCombo, getModelInfo } from "../services/model";
 import { stripContextWindowSuffix } from "@omniroute/open-sse/services/model.ts";
 import { resolveBareModelToConnectionDefault } from "@omniroute/open-sse/services/model.ts";
 import { errorResponse } from "@omniroute/open-sse/utils/error.ts";
 import { trustedInternalTestMark } from "@omniroute/open-sse/utils/selfHop.ts";
 import { ASSESSMENT_PROBE_MARK, refuseUnisolatedChatProbe } from "@/lib/providers/chatProbePolicy";
-import { getImageModelEntry, isImageOnlyModel } from "@omniroute/open-sse/config/imageRegistry.ts";
 import { acceptHeaderForcesStream } from "@omniroute/open-sse/utils/aiSdkCompat.ts";
 import { normalizeVisionImagesInBody } from "@omniroute/open-sse/utils/visionImageNormalization.ts";
 import {
@@ -97,7 +95,7 @@ import { isCommonChatGptWebRetirementError } from "@/shared/constants/chatgptWeb
 import { isChatGptWebCodexModel } from "@/shared/constants/chatgptWebCodex";
 import { deleteHandoff, getHandoff } from "@/lib/db/contextHandoffs";
 import { scopeHandoffSessionId } from "@omniroute/open-sse/services/combo/handoffSessionScope.ts";
-import { getComboByName, updateCombo } from "@/lib/db/combos";
+import { updateCombo } from "@/lib/db/combos";
 import { isModelAllowedForKey } from "@/lib/db/apiKeys";
 import { promoteSuccessfulComboModel } from "@/lib/combos/autoPromote";
 import {
@@ -190,7 +188,13 @@ import {
   applyReasoningRouting,
   filterReasoningCombo,
 } from "./reasoningRouting";
-import { createVirtualAutoCombo, resolveAutoRoutingState } from "./autoRouting";
+import { resolveAutoRoutingState } from "./autoRouting";
+import {
+  getChatEndpointMismatch,
+  getRedirectComboPolicy,
+  isChatImageOnlyModel,
+  resolveChatCombo,
+} from "./chat/reservedAutoComboRouting.ts";
 import { dispatchWithProviderFailover } from "./chat/providerFailover.ts";
 import { getComboFailureLogError } from "./comboFailureLogging";
 import {
@@ -733,19 +737,7 @@ async function handleChatImplementation(
     });
   }
 
-  // Reject image-generation models routed to /v1/chat/completions (#6457).
-  // Image-only models live in IMAGE_PROVIDERS (open-sse/config/imageRegistry.ts)
-  // and are served by /v1/images/generations. Forwarding them to a chat upstream
-  // yielded confusing raw provider 400s (e.g. HuggingFace: "not a chat model").
-  // Models such as Codex GPT-5.5 support both chat and image generation, so an
-  // image-registry match is only image-only when the same provider/model pair is
-  // absent from the chat catalog.
-  const imageModel = getImageModelEntry(modelStr);
-  // Exact stored combo names take precedence over colliding bare image aliases.
-  // Keep this narrower than getComboForModel() so mappings and synthetic aliases
-  // retain their existing resolution order.
-  const isExactStoredCombo = imageModel ? Boolean(await getComboByName(modelStr)) : false;
-  if (imageModel && !isExactStoredCombo && isImageOnlyModel(modelStr)) {
+  if (await isChatImageOnlyModel(modelStr)) {
     log.warn("CHAT", `Rejecting image-generation model on chat endpoint: ${modelStr}`);
     return logHandlerRejection(
       errorResponse(
@@ -765,7 +757,7 @@ async function handleChatImplementation(
 
   // A trusted endpoint-tag mismatch is a local client error, not a provider or
   // connection health failure. Exact combo names are exempt in the resolver.
-  const endpointMismatch = await getRequestedModelEndpointMismatch(modelStr, "chat");
+  const endpointMismatch = await getChatEndpointMismatch(modelStr);
   if (endpointMismatch) {
     return logHandlerRejection(errorResponse(HTTP_STATUS.BAD_REQUEST, endpointMismatch), {
       path: new URL(request.url).pathname,
@@ -1126,26 +1118,11 @@ async function handleChatImplementation(
 
   // Check if model is a combo (has multiple models with fallback)
   telemetry.startPhase("resolve");
-  let combo: any = await getComboForModel(resolvedModelStr);
-  if (reasoningDecision?.targetCombo) combo = reasoningDecision.targetCombo;
-
-  // "auto" prefix fuzzy matching: "auto/fast" → "auto/best-fast", etc.
-  // parseModel splits "auto/fast" into provider="auto" which isn't a real provider.
-  if (!combo && resolvedModelStr.startsWith("auto/")) {
-    const suffix = resolvedModelStr.slice(5);
-    for (const candidate of [`auto/best-${suffix}`, `auto/${suffix}`]) {
-      combo = await getComboForModel(candidate);
-      if (combo) {
-        log.info("ROUTING", `"${resolvedModelStr}" → combo "${candidate}" (auto fuzzy)`);
-        break;
-      }
-    }
-  }
-
-  const virtualCombo = await createVirtualAutoCombo(autoRouting, combo, apiKeyInfo?.id);
-  if (virtualCombo instanceof Response) return virtualCombo;
-  combo = virtualCombo;
+  const comboRouting = await resolveChatCombo(request, apiKeyInfo, autoRouting, reasoningRouting);
+  if (comboRouting instanceof Response) return comboRouting;
+  let { combo } = comboRouting;
   if (combo) {
+    const { comboPolicyName, isVirtualAutoCombo } = comboRouting;
     if (reasoningDecision) {
       const filtered = filterReasoningCombo(combo, reasoningDecision);
       if (filtered instanceof Response) return filtered;
@@ -1193,7 +1170,8 @@ async function handleChatImplementation(
       const preflightDecision = await evaluateComboTargetPreflight({
         apiKey,
         apiKeyInfo,
-        requestedModelStr: resolvedModelStr,
+        requestedModelStr: comboPolicyName,
+        isVirtualAutoCombo,
         targetModelStr: modelString,
         isComboLiveTest,
         isModelAllowedForKey,
@@ -1343,7 +1321,12 @@ async function handleChatImplementation(
             sessionAffinityKey,
             forceLiveComboTest: isComboLiveTest,
             automatedProbe: isAutomatedProbe,
-            ...resolvedPolicy.comboAuthorizationOptions(apiKeyInfo, resolvedModelStr),
+            ...resolvedPolicy.comboAuthorizationOptions(
+              apiKeyInfo,
+              comboPolicyName,
+              isVirtualAutoCombo
+            ),
+            isVirtualAutoCombo,
             forcedConnectionId: target?.connectionId ?? null,
             allowedConnectionIds: target?.allowedConnectionIds ?? null,
             emptyTurnConnectionId: target?.emptyTurnConnectionId ?? null,
@@ -1442,6 +1425,7 @@ async function handleChatImplementation(
                 sessionId,
                 sessionAffinityKey,
                 emergencyFallbackTried: true,
+                isVirtualAutoCombo,
                 forceLiveComboTest: isComboLiveTest,
                 automatedProbe: isAutomatedProbe,
                 conversationId,
@@ -1515,7 +1499,7 @@ async function handleChatImplementation(
   let routingComboId: string | null = null;
   if (!combo) {
     const providerPrefix = resolvedModelStr.split("/")[0];
-    if (providerPrefix) {
+    if (providerPrefix && !autoRouting.isAutoRouting) {
       try {
         const { getComboByName } = await import("@/lib/db/combos");
         const routingCombo = await getComboByName(providerPrefix);
@@ -1645,6 +1629,7 @@ async function handleSingleModelChat(
     reasoningRequestTags?: string[];
     reasoningTransportFallback?: "skip" | "drop";
     authorizationContextModel?: string | null; // admitted combo/alias (resolvedModelPolicy.ts)
+    isVirtualAutoCombo?: boolean;
     comboGrantsTargets?: boolean; // server-computed allowedCombos grant (#14197)
     managedLease?: ManagedLeaseDispatchContext | null;
     /** #12150 P1b: video-bridge log/Memory shadow — undefined on every non-video request. */
@@ -1686,8 +1671,11 @@ async function handleSingleModelChat(
   // Safety net: if auto-combo resolution returned a combo object, redirect
   // to combo flow. This handles the case where the auto-fuzzy match in
   // resolveModelOrError found a combo but the main handler's combo lookup missed it.
-  if ((resolved as any).combo) {
-    const redirectCombo = (resolved as any).combo;
+  if ("combo" in resolved && resolved.combo) {
+    const redirectCombo = resolved.combo;
+    const redirectPolicy = getRedirectComboPolicy(request, apiKeyInfo, modelStr, resolved);
+    if (redirectPolicy.rejection) return redirectPolicy.rejection;
+    const { isStoredAutoCombo } = redirectPolicy;
     if (runtimeOptions.managedLease) return managedComboRejection();
     log.info(
       "ROUTING",
@@ -1747,6 +1735,9 @@ async function handleSingleModelChat(
             // A probe stays a probe through the redirect, so each target is gated as one.
             automatedProbe: runtimeOptions.automatedProbe === true,
             authorizationContextModel: runtimeOptions.authorizationContextModel ?? modelStr,
+            ...(isStoredAutoCombo &&
+              resolvedPolicy.comboAuthorizationOptions(apiKeyInfo, redirectCombo.name, false)),
+            isVirtualAutoCombo: resolved.isVirtualAutoCombo,
             // The redirected combo's own target pin and allow-list win over the caller's pin.
             forcedConnectionId:
               resolvedTarget?.connectionId ?? runtimeOptions?.forcedConnectionId ?? null,
@@ -1769,7 +1760,7 @@ async function handleSingleModelChat(
             fallbackAttempts: target?.fallbackAttempts,
           },
           resolvedTarget?.effectiveComboStrategy ?? redirectCombo.strategy ?? "priority",
-          false
+          isStoredAutoCombo
         );
       },
       isModelAvailable: async () => true,
@@ -2459,6 +2450,7 @@ async function handleSingleModelChat(
             comboName,
             comboStrategy,
             isCombo,
+            isVirtualAutoCombo: runtimeOptions.isVirtualAutoCombo ?? false,
             comboStepId: runtimeOptions.comboStepId ?? null,
             comboExecutionKey:
               runtimeOptions.comboExecutionKey ?? runtimeOptions.comboStepId ?? null,

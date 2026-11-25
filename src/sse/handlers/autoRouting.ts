@@ -15,6 +15,7 @@ import {
   isValidModelFamily,
   type ModelFamily,
 } from "@omniroute/open-sse/services/autoCombo/modelFamily.ts";
+import { isReservedComboName } from "@/lib/combos/autoNames";
 import { getCachedSettings } from "@/lib/db/readCache";
 import { isAutoRequestResolvedCapabilitiesEnabled } from "@/shared/utils/featureFlags";
 import {
@@ -28,6 +29,7 @@ export type AutoRoutingState = {
   model: string;
   variant?: AutoVariant;
   spec?: { category?: AutoCategory; tier?: AutoTier; family?: ModelFamily };
+  /** The request uses the auto namespace, which can include a saved legacy route. */
   isAutoRouting: boolean;
   recognizedBuiltInAuto: boolean;
   response: Response | null;
@@ -98,14 +100,17 @@ async function applyAutoPrefix(
 }
 
 export async function resolveAutoRoutingState(model: string): Promise<AutoRoutingState> {
-  const isAutoRouting = model === "auto" || model.startsWith("auto/");
+  const isAutoRouting = isReservedComboName(model);
+  if (isAutoRouting) model = model.toLowerCase();
   const classified = classifyAutoModel(model);
 
   if (!isAutoRouting) {
     return { model, ...classified, isAutoRouting, response: null };
   }
 
-  const settings = await getCachedSettings().catch(() => ({}) as Record<string, unknown>);
+  const settings: Record<string, unknown> = classified.recognizedBuiltInAuto
+    ? await getCachedSettings().catch(() => ({}))
+    : {};
   if (settings?.autoRoutingEnabled === false) {
     return {
       model,
@@ -122,18 +127,20 @@ export async function resolveAutoRoutingState(model: string): Promise<AutoRoutin
   return { model, ...classified, ...resolved, isAutoRouting, response: null };
 }
 
+export function unknownAutoComboResponse(model: string): Response {
+  return errorResponse(
+    HTTP_STATUS.BAD_REQUEST,
+    `Model '${model}' is not a valid combo or provider. Unknown built-in auto combo.`
+  );
+}
+
 export async function createVirtualAutoCombo(
   state: AutoRoutingState,
   combo: any,
   apiKeyId?: string
 ): Promise<any | Response> {
-  if (!state.isAutoRouting || combo !== null) return combo;
-  if (!state.recognizedBuiltInAuto) {
-    return errorResponse(
-      HTTP_STATUS.BAD_REQUEST,
-      `Model '${state.model}' is not a valid combo or provider. Unknown built-in auto combo.`
-    );
-  }
+  if (!state.isAutoRouting) return combo;
+  if (!state.recognizedBuiltInAuto) return combo ?? unknownAutoComboResponse(state.model);
 
   try {
     const { createVirtualAutoCombo: createVirtual } =
