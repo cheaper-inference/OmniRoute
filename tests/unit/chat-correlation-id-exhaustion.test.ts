@@ -168,7 +168,7 @@ function assertChatSenders(source: string) {
   );
   const exhaustion = callsNamed(source, "handleNoCredentials");
   assert.equal(exhaustion.length, 1, "one exhaustion caller");
-  assert.equal(exhaustion[0].arguments.length, 10, "exhaustion argument count");
+  assert.equal(exhaustion[0].arguments.length, 11, "exhaustion argument count");
   assertExpression(exhaustion[0].arguments[0], "credentials", "exhaustion credentials");
   assertExpression(exhaustion[0].arguments[8], "shadowedNode", "shadowed node");
   assertExpression(
@@ -176,6 +176,8 @@ function assertChatSenders(source: string) {
     "runtimeOptions?.correlationId ?? null",
     "exhaustion request id"
   );
+  // #21119: the last upstream error code (e.g. gemini_web_signed_out) is kept.
+  assertExpression(exhaustion[0].arguments[10], "lastErrorCode", "exhaustion upstream code");
 }
 
 function assertStreamSender(source: string) {

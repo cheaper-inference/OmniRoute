@@ -406,6 +406,11 @@ const comboPromoteDeps = { updateCombo, info: log.info, warn: log.warn };
 // V8 context, so the breaker kept the last request's whole scope alive — its body included: a
 // 100k-token /v1/messages body survived forced GC through `onStateChange` (JON-562). The
 // callbacks the breaker stores therefore never close over request state.
+/** The upstream's own error code (from its JSON error body), when it sent one. */
+function upstreamErrorCodeOf(result: { errorCode?: unknown }): string | null {
+  return typeof result.errorCode === "string" && result.errorCode ? result.errorCode : null;
+}
+
 function breakerCountsAsFailure(error: unknown): boolean {
   return !isLocalStreamLifecycleError(error);
 }
@@ -1934,6 +1939,9 @@ async function handleSingleModelChat(
   // 3. Credential retry loop
   let requestRetryAttempt = 0;
   let requestRetryLastError = null;
+  // The upstream error code that goes with requestRetryLastError (e.g.
+  // gemini_web_signed_out), so credential exhaustion does not replace it.
+  let requestRetryLastErrorCode: string | null = null;
   let requestRetryLastStatus = null;
   let requestRetryLastCooldownMs = 0;
   // Bug #3758: per-request counter bounding the early-close (STREAM_EARLY_EOF)
@@ -2002,6 +2010,7 @@ async function handleSingleModelChat(
   requestAttemptLoop: while (true) {
     const excludedConnectionIds = new Set<string>(agy.on ? agy.attempted : []);
     let lastError = requestRetryLastError;
+    let lastErrorCode = requestRetryLastErrorCode;
     let lastStatus = requestRetryLastStatus;
     let lastCooldownMs = requestRetryLastCooldownMs;
     let preselectedCredentials = initialPreselectedCredentials;
@@ -2202,7 +2211,8 @@ async function handleSingleModelChat(
           candidateAliases,
           isCombo,
           shadowedNode,
-          runtimeOptions?.correlationId ?? null
+          runtimeOptions?.correlationId ?? null,
+          lastErrorCode
         );
         // #14360: log the synthesized quota-parking refusal (never for combo targets).
         const skip = { credentials, lastError, lastStatus, provider, model };
@@ -2828,8 +2838,10 @@ async function handleSingleModelChat(
           noteAccountFallback("stream_readiness", credentials.connectionId);
           excludedConnectionIds.add(credentials.connectionId);
           lastError = classificationError;
+          lastErrorCode = null;
           lastStatus = result.status;
           requestRetryLastError = classificationError;
+          requestRetryLastErrorCode = null;
           requestRetryLastStatus = result.status;
           continue;
         }
@@ -2878,8 +2890,10 @@ async function handleSingleModelChat(
           noteAccountFallback("pre_response_timeout", credentials.connectionId);
           excludedConnectionIds.add(credentials.connectionId);
           lastError = result.error;
+          lastErrorCode = null;
           lastStatus = result.status;
           requestRetryLastError = result.error;
+          requestRetryLastErrorCode = lastErrorCode;
           requestRetryLastStatus = result.status;
           continue;
         }
@@ -2901,8 +2915,10 @@ async function handleSingleModelChat(
         noteAccountFallback("capacity", credentials.connectionId);
         excludedConnectionIds.add(credentials.connectionId);
         lastError = result.error;
+        lastErrorCode = null;
         lastStatus = result.status;
         requestRetryLastError = result.error;
+        requestRetryLastErrorCode = lastErrorCode;
         requestRetryLastStatus = result.status;
         continue;
       }
@@ -3205,8 +3221,10 @@ async function handleSingleModelChat(
         );
         excludedConnectionIds.add(credentials.connectionId);
         lastError = result.error;
+        lastErrorCode = upstreamErrorCodeOf(result);
         lastStatus = result.status;
         requestRetryLastError = result.error;
+        requestRetryLastErrorCode = lastErrorCode;
         requestRetryLastStatus = result.status;
         continue;
       }
