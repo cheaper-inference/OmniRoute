@@ -26,6 +26,32 @@ export const PROVIDER_LABEL: Record<string, string> = {
   clinepass: "ClinePass",
 };
 
+
+/** A node the quota page can name: id plus whichever label the operator set. */
+export interface ProviderNodeLabel {
+  id?: unknown;
+  name?: unknown;
+  prefix?: unknown;
+}
+
+/**
+ * Labels for the quota page. Built-in providers come from PROVIDER_LABEL; a custom
+ * node's generated id is not in that table, so its name (then prefix) fills the gap.
+ * A node that sets neither is left out and the page shows the id, as before.
+ */
+export function providerLabelsWithNodes(
+  nodes: ProviderNodeLabel[] | null | undefined
+): Record<string, string> {
+  const labels: Record<string, string> = { ...PROVIDER_LABEL };
+  for (const node of nodes || []) {
+    const id = typeof node?.id === "string" ? node.id : "";
+    const name = typeof node?.name === "string" ? node.name.trim() : "";
+    const prefix = typeof node?.prefix === "string" ? node.prefix.trim() : "";
+    if (id && (name || prefix)) labels[id] = name || prefix;
+  }
+  return labels;
+}
+
 export const PROVIDER_ORDER: Record<string, number> = {
   antigravity: 1,
   github: 3,

@@ -53,7 +53,7 @@ import { useAutomaticQuotaRequests } from "./useAutomaticQuotaRequests";
 import CodexResetCreditsModal from "./CodexResetCreditsModal";
 import { useVisibleQuotaData } from "./useVisibleQuotaData";
 import { useCodexResetCreditRedemption } from "./useCodexResetCreditRedemption";
-import { PROVIDER_LABEL, PROVIDER_ORDER, TIER_FILTERS } from "./constants";
+import { providerLabelsWithNodes, PROVIDER_ORDER, TIER_FILTERS } from "./constants";
 import { formatAutoRefreshCountdown } from "./formatters";
 import { translateUsageOrFallback, type UsageTranslationValues } from "./i18nFallback";
 import { compareTr } from "@/shared/utils/turkishText";
@@ -297,6 +297,27 @@ export default function ProviderLimits({
     Record<string, Record<string, number>>
   >({});
   const [globalThresholdDefault, setGlobalThresholdDefault] = useState<number>(98);
+  // Custom provider nodes are keyed by their generated id, which is absent from the
+  // static PROVIDER_LABEL table, so the quota page fell back to printing the raw id.
+  const [providerLabels, setNodeLabels] = useState<Record<string, string>>(
+    providerLabelsWithNodes([])
+  );
+
+  useEffect(() => {
+    let alive = true;
+    fetch("/api/provider-nodes")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (!alive || !data) return;
+        setNodeLabels(providerLabelsWithNodes(data.nodes));
+      })
+      .catch(() => {
+        /* the static table still covers built-in providers */
+      });
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   useEffect(() => {
     let alive = true;
@@ -1039,7 +1060,7 @@ export default function ProviderLimits({
           errors={errors}
           lastRefreshedAt={lastRefreshedAt}
           emailsVisible={emailsVisible}
-          providerLabels={PROVIDER_LABEL}
+          providerLabels={providerLabels}
           renderInlineQuotaSummary={(quota) => renderInlineQuotaSummary(quota.quotas)}
           onRefresh={refreshProvider}
           onOpenCutoff={(conn) => {
