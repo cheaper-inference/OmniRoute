@@ -2,29 +2,15 @@
   "version": 1,
   "base": "release/v3.8.55",
   "paused": null,
-  "inFlight": {
-    "batchId": "b42",
-    "kind": "batch",
-    "candidateRef": "omni-queue/release-v3.8.55/b42-176919ddb807",
-    "candidateSha": "176919ddb80754ad24922790dde53a85f21249d5",
-    "baseSha": "e9fc8bcdf98596ceab4176f1172674e72c73e549",
-    "treeSha": "afc5ac684c17049bc175fdd8e625777b04582131",
-    "prs": [
-      {
-        "n": 21033,
-        "head": "2053851df4e9d359e149ac90260475a198d8bb97",
-        "title": "fix(security): remediate #20998 release gate — undici, Bun container auth, offline postinstall, and pinned CI markdownlint",
-        "author": "same7soliman",
-        "labeledAt": "2026-11-25T21:25:03Z"
-      }
-    ],
-    "stage": "landing",
-    "startedAt": "2026-11-25T21:40:20.857Z",
-    "attempts": 0,
-    "bisect": null,
-    "landAttempts": 1
-  },
+  "inFlight": null,
   "baseChecks": [
+    {
+      "baseSha": "176919ddb80754ad24922790dde53a85f21249d5",
+      "ref": "omni-queue/release-v3.8.55/b42-176919ddb807",
+      "status": "green",
+      "startedAt": "2026-11-25T21:40:20.857Z",
+      "signatures": []
+    },
     {
       "baseSha": "ae94881fcf543d1ee91d6af11f18b274280e0c53",
       "ref": "omni-queue/release-v3.8.55/basecheck-ae94881fcf54",
@@ -127,37 +113,13 @@
   "counters": {
     "batchSeq": 42,
     "ciRuns": 47,
-    "landedPrs": 0,
-    "landedBatches": 0,
+    "landedPrs": 1,
+    "landedBatches": 1,
     "redBatches": 10,
     "bisections": 2,
     "culprits": 1
   },
   "history": [
-    {
-      "at": "2026-11-19T15:34:22.229Z",
-      "type": "batch-started",
-      "batchId": "b2",
-      "prs": [
-        20630
-      ],
-      "sha": "f6acc51b3eedd601dd5c47ef036169a26f002bee",
-      "detail": "1 PR(s) on 3de17c8a2a32; window 6",
-      "labeledAt": {
-        "20630": "2026-11-19T15:24:12Z"
-      },
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44556139104"
-    },
-    {
-      "at": "2026-11-19T16:42:16.439Z",
-      "type": "checks-green",
-      "batchId": "b2",
-      "prs": [
-        20630
-      ],
-      "sha": "f6acc51b3eedd601dd5c47ef036169a26f002bee",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44569016721"
-    },
     {
       "at": "2026-11-19T16:42:25.009Z",
       "type": "would-land",
@@ -2561,12 +2523,29 @@
       ],
       "sha": "176919ddb80754ad24922790dde53a85f21249d5",
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45716621959"
+    },
+    {
+      "at": "2026-11-25T22:51:09.550Z",
+      "type": "land-blessed",
+      "batchId": "b42",
+      "prs": [
+        21033
+      ],
+      "sha": "176919ddb80754ad24922790dde53a85f21249d5",
+      "detail": "omni-queue/land success on 1 commit(s)",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45716621959"
+    },
+    {
+      "at": "2026-11-25T22:51:12.782Z",
+      "type": "landed",
+      "batchId": "b42",
+      "prs": [
+        21033
+      ],
+      "sha": "176919ddb80754ad24922790dde53a85f21249d5",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45716621959"
     }
   ],
-  "updatedAt": "2026-11-25T22:51:05.955Z",
-  "batchWindow": 5,
-  "landingsWithoutVerdict": {
-    "count": 1,
-    "since": "2026-11-25T22:51:05.955Z"
-  }
+  "updatedAt": "2026-11-25T22:51:23.124Z",
+  "batchWindow": 5
 }
