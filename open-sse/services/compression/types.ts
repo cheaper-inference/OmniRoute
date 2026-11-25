@@ -314,6 +314,17 @@ export interface CompressionConfig {
   exclusions?: string[];
 }
 
+/**
+ * Recorded when the cache-prefix guard (`cachePrefixGuard.ts`, homelab#297) narrowed or discarded
+ * a compression run. `skipReason` is set only when the run was discarded (`tail-shape-invalid`) or
+ * protection was lifted to keep the request inside the context limit (`overflow-unprotected`).
+ */
+export interface CachePrefixGuardStats {
+  /** Leading messages sent to the provider byte-identical to the client's. */
+  protectedMessages: number;
+  skipReason?: "tail-shape-invalid" | "overflow-unprotected";
+}
+
 export interface CompressionStats {
   originalTokens: number;
   compressedTokens: number;
@@ -384,6 +395,8 @@ export interface CompressionStats {
     frozenItems: number;
     liveItems: number;
   };
+  /** Present only when the cache-prefix guard protected a message prefix for this request. */
+  cachePrefixGuard?: CachePrefixGuardStats;
 }
 
 export interface CompressionResult {

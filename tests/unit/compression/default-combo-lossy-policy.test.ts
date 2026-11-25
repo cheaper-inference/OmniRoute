@@ -170,9 +170,14 @@ const LONG_TOOL_RESULT = Array.from({ length: 160 }, (_, i) => `row ${i}: value-
   "\n"
 );
 
-async function sendPastToolResult(compressionHeader?: string, toolResult = LONG_TOOL_RESULT) {
+async function sendPastToolResult(
+  compressionHeader?: string,
+  toolResult = LONG_TOOL_RESULT,
+  // openai caches its prompt prefix automatically (#297); groq does not.
+  target: { provider: string; model: string } = { provider: "openai", model: "gpt-4" }
+) {
   const connection = await providersDb.createProviderConnection({
-    provider: "openai",
+    provider: target.provider,
     apiKey: "sk-test-not-real",
     isActive: true,
   });
@@ -189,7 +194,7 @@ async function sendPastToolResult(compressionHeader?: string, toolResult = LONG_
   };
   const result = await handleChatCore({
     body: {
-      model: "gpt-4",
+      model: target.model,
       stream: false,
       messages: [
         { role: "user", content: "read the table" },
@@ -205,7 +210,7 @@ async function sendPastToolResult(compressionHeader?: string, toolResult = LONG_
         { role: "user", content: "what is in row 150?" },
       ],
     },
-    modelInfo: { provider: "openai", model: "gpt-4" },
+    modelInfo: { provider: target.provider, model: target.model },
     credentials: { apiKey: "sk-test-not-real" },
     log: { debug: () => {}, info: () => {}, warn: () => {}, error: () => {} },
     clientRawRequest: {
@@ -231,11 +236,19 @@ test("without an opt-in the default pipeline forwards past tool results untrunca
   assert.equal(toolContent, LONG_TOOL_RESULT);
 });
 
-test("allow-lossy still lets lite truncate past tool results", async () => {
+test("allow-lossy still lets lite truncate past tool results on a non-caching provider", async () => {
   await storeLegacyStackedSettings();
-  const toolContent = await sendPastToolResult("allow-lossy");
+  const toolContent = await sendPastToolResult("allow-lossy", LONG_TOOL_RESULT, {
+    provider: "groq",
+    model: "llama-3.3-70b-versatile",
+  });
   assert.match(toolContent, /\.\.\.\[truncated\]$/);
   assert.ok(toolContent.length < LONG_TOOL_RESULT.length);
+});
+
+test("allow-lossy leaves history an automatic-prefix-cache provider has already cached verbatim (#297)", async () => {
+  await storeLegacyStackedSettings();
+  assert.equal(await sendPastToolResult("allow-lossy"), LONG_TOOL_RESULT);
 });
 
 // openai/gpt-4 resolves to a 128,000-token window: the reserve-output target is 122,880.

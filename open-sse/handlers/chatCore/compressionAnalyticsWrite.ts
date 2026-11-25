@@ -136,7 +136,8 @@ export function writeCompressionSkip(opts: WriteOpts, skipReason: string): Promi
         tokens_saved: 0,
         duration_ms: stats.durationMs ?? null,
         request_id: opts.skillRequestId,
-        skip_reason: skipReason,
+        // The cache-prefix guard (#297) records why it discarded a run; that beats a generic reason.
+        skip_reason: stats.cachePrefixGuard?.skipReason ?? skipReason,
       });
     } catch (err) {
       opts.log?.warn?.(
