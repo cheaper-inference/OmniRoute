@@ -89,6 +89,12 @@ test("writes issues only behind the CATALOG_DRIFT_ISSUES variable", () => {
   );
 });
 
+test("checks out the resolved release commit by sha, never a branch name", () => {
+  const checkouts = steps.filter(({ uses }) => uses?.startsWith("actions/checkout@"));
+  assert.ok(checkouts.length > 0);
+  for (const step of checkouts) assert.equal(step.with?.ref, "${{ needs.resolve.outputs.sha }}");
+});
+
 test("never restores the npm cache after checking out a release branch", () => {
   for (const [name, job] of Object.entries(workflow.jobs)) {
     for (const step of job.steps) {

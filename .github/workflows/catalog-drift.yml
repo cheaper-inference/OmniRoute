@@ -26,13 +26,15 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  drift:
-    if: ${{ (github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute') && (github.event_name == 'workflow_dispatch' || github.event.schedule == '41 6 * * *') }}
+  resolve:
+    if: ${{ (github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute') && (github.event_name == 'workflow_dispatch' || github.event.schedule == '41 6 * * *' || github.event.schedule == '23 7 * * 1' || github.event.schedule == '11 8 1 * *') }}
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 5
     permissions:
       contents: read
-      issues: write
+    outputs:
+      branch: ${{ steps.release.outputs.branch }}
+      sha: ${{ steps.release.outputs.sha }}
     steps:
       - name: Resolve the latest release branch
         id: release
@@ -43,10 +45,24 @@ jobs:
           branch=$(gh api "repos/$GITHUB_REPOSITORY/branches" --paginate --jq '.[].name' \
             | grep -E '^release/v[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -1)
           [ -n "$branch" ] || { echo "No release/vX.Y.Z branch found" >&2; exit 1; }
+          sha=$(gh api "repos/$GITHUB_REPOSITORY/commits/$branch" --jq .sha)
+          [[ "$sha" =~ ^[0-9a-f]{40}$ ]] || { echo "Could not resolve $branch" >&2; exit 1; }
           echo "branch=$branch" >> "$GITHUB_OUTPUT"
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          echo "Checking $branch at $sha" >> "$GITHUB_STEP_SUMMARY"
+
+  drift:
+    needs: resolve
+    if: ${{ (github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute') && (github.event_name == 'workflow_dispatch' || github.event.schedule == '41 6 * * *') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      issues: write
+    steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ steps.release.outputs.branch }}
+          ref: ${{ needs.resolve.outputs.sha }}
           persist-credentials: false
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
@@ -103,25 +119,16 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
   evidence-age:
+    needs: resolve
     if: ${{ (github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute') && (github.event_name == 'workflow_dispatch' || github.event.schedule == '23 7 * * 1') }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
       contents: read
     steps:
-      - name: Resolve the latest release branch
-        id: release
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-          branch=$(gh api "repos/$GITHUB_REPOSITORY/branches" --paginate --jq '.[].name' \
-            | grep -E '^release/v[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -1)
-          [ -n "$branch" ] || { echo "No release/vX.Y.Z branch found" >&2; exit 1; }
-          echo "branch=$branch" >> "$GITHUB_OUTPUT"
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ steps.release.outputs.branch }}
+          ref: ${{ needs.resolve.outputs.sha }}
           persist-credentials: false
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
@@ -143,6 +150,7 @@ jobs:
           retention-days: 90
 
   scoreboard-due:
+    needs: resolve
     if: ${{ (github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute') && github.event.schedule == '11 8 1 * *' }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -150,19 +158,9 @@ jobs:
       contents: read
       issues: write
     steps:
-      - name: Resolve the latest release branch
-        id: release
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-          branch=$(gh api "repos/$GITHUB_REPOSITORY/branches" --paginate --jq '.[].name' \
-            | grep -E '^release/v[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -1)
-          [ -n "$branch" ] || { echo "No release/vX.Y.Z branch found" >&2; exit 1; }
-          echo "branch=$branch" >> "$GITHUB_OUTPUT"
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ steps.release.outputs.branch }}
+          ref: ${{ needs.resolve.outputs.sha }}
           persist-credentials: false
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
