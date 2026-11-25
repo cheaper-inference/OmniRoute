@@ -277,7 +277,7 @@ FROM runtime-os AS runner-base
 # Optional for MediaRecorder WebM uploads to MiniMax ASR. Keep the default image lean.
 ARG OMNIROUTE_INSTALL_FFMPEG=0
 RUN if [ "$OMNIROUTE_INSTALL_FFMPEG" = "1" ]; then \
-      apt-get update && apt-get install -y --no-install-recommends ffmpeg && rm -rf /var/lib/apt/lists/*; \
+      apk add --no-cache ffmpeg; \
     fi
 
 LABEL org.opencontainers.image.title="omniroute" \
