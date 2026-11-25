@@ -335,7 +335,7 @@ and rotate it before then.
 
 ### Signed merge commits (`landing.signing`)
 
-With `landing.signing: "ssh"` (shipped `none`) the queue signs every merge commit it composes:
+With the shipped `landing.signing: "ssh"`, the queue signs every merge commit it composes:
 batch candidates, bisection halves and recompositions, in shadow and in live mode
 (`composeCandidate` in `scripts/merge-queue/compose.mjs`, `git commit-tree -S`). The commits carry
 `landing.identity`, so `signing: "ssh"` is refused unless `landing.actor` is `owner`: GitHub
@@ -404,7 +404,7 @@ rotated, revoked". If the key leaks, remove it from the account and rotate at on
 
 ### Who speaks (`voice`)
 
-The top-level `voice` key (shipped `app`) chooses whose token performs the queue's writes that
+The top-level `voice` key (shipped `owner`) chooses whose token performs the queue's writes that
 people read on GitHub (`scripts/merge-queue/voice.mjs`). With `app`, every one is the App's
 (`omni-queue[bot]`). With `owner`, they go out with the owner's `OMNI_QUEUE_LAND_TOKEN`, the token the
 tick already holds for the landing (no second token secret), whatever `landing.actor` says. The
@@ -1221,7 +1221,7 @@ differ.
 | `landing.mode`           | `merge-ff` or `squash-api`                                   | none; shipped `merge-ff`                                                   | How a green batch lands (see [Landing modes](#landing-modes-landingmode)).                                                                                                                                                                                                                                                                                                                                                                                |
 | `landing.actor`          | `app` or `owner`                                             | `app`; shipped `owner`                                                     | Whose token lands: the App's, or `OMNI_QUEUE_LAND_TOKEN` (see [Who lands](#who-lands-landingactor)).                                                                                                                                                                                                                                                                                                                                                      |
 | `landing.identity`       | `{name, email}`, the email a `@users.noreply.github.com` one | none; required with `actor: "owner"`, refused otherwise                    | Identity of the queue's merge commits when the owner lands.                                                                                                                                                                                                                                                                                                                                                                                               |
-| `landing.signing`        | `none` or `ssh`                                              | `none`; shipped `none`                                                     | `ssh` signs every merge commit the queue composes with the key of the secret OMNI_QUEUE_SIGNING_KEY; refused unless `landing.actor` is `owner` (see [Signed merge commits](#signed-merge-commits-landingsigning)).                                                                                                                                                                                                                                        |
+| `landing.signing`        | `none` or `ssh`                                              | `none`; shipped `ssh`                                                      | `ssh` signs every merge commit the queue composes with the key of the secret OMNI_QUEUE_SIGNING_KEY; refused unless `landing.actor` is `owner` (see [Signed merge commits](#signed-merge-commits-landingsigning)).                                                                                                                                                                                                                                        |
 | `landing.statusContext`  | `omni-queue/<name>`, `[A-Za-z0-9._/-]{1,100}`                | `omni-queue/land`; shipped `omni-queue/land`                               | The land status the release ruleset requires. Must not be a required, aggregate or approval context.                                                                                                                                                                                                                                                                                                                                                      |
 | `requiredChecks`         | list of check names, at least one                            | none; shipped three checks                                                 | Checks that must conclude `success` on a candidate (see [Accepting a candidate](#accepting-a-candidate)).                                                                                                                                                                                                                                                                                                                                                 |
 | `advisoryChecks`         | list of check names, none in `requiredChecks`                | none; shipped `Build (advisory)`                                           | Checks whose failure does not make a candidate red.                                                                                                                                                                                                                                                                                                                                                                                                       |
@@ -1234,7 +1234,7 @@ differ.
 | `prChecksRequired`       | list of distinct check names                                 | `[]`; shipped `Gate / CI`, `Gate / Quality`, `API Route Typecheck`         | Green on a PR head to enter a batch: worst of the suites reporting it; if they disagree, a run superseded by a newer run of the same workflow and event drops ([Eligibility](#eligibility)).                                                                                                                                                                                                                                                              |
 | `protectedPaths`         | list of globs, at least one                                  | none; shipped the agent-instruction surfaces and the queue's control plane | A PR that touches one also needs `protectedApprovalLabel` (see [Eligibility](#eligibility)).                                                                                                                                                                                                                                                                                                                                                              |
 | `lanes.hotfixLabel`      | label name, distinct from every other label of the config    | no `lanes` = no lanes; shipped `omni-queue-hotfix`                         | Applied by an approver to an eligible PR: at the next batch start it is composed alone, ahead of the FIFO. Never replaces what is in flight. Repeated in the tick's job filter.                                                                                                                                                                                                                                                                           |
-| `voice`                  | `app` or `owner`                                             | `app`; shipped `app`                                                       | Whose token posts the queue's comments, removes its labels and writes its issues: the App's, or `OMNI_QUEUE_LAND_TOKEN`, with a fallback to the App's (see [Who speaks](#who-speaks-voice)).                                                                                                                                                                                                                                                              |
+| `voice`                  | `app` or `owner`                                             | `app`; shipped `owner`                                                     | Whose token posts the queue's comments, removes its labels and writes its issues: the App's, or `OMNI_QUEUE_LAND_TOKEN`, with a fallback to the App's (see [Who speaks](#who-speaks-voice)).                                                                                                                                                                                                                                                              |
 | `lanes.baseRepairLabel`  | label name, distinct from every other label of the config    | no `lanes` = no lanes; shipped `omni-queue-base-repair`                    | Applied by an approver: composed alone (PR gates not required), the only work of a `base-red` pause; its landing lifts the pause. Never in a FIFO batch. Repeated in the tick's job filter. A repair that fails like the base is not composed again at that head (`repairTried`): push a fix (a new head is tried again), or remove this label (anyone who can label the PR can): the PR rejoins the FIFO.                                                |
 
 ## CLI
@@ -2012,20 +2012,20 @@ and the event.
 
 ## What appears as the owner and what appears as the App
 
-With the shipped config (`landing.actor: "owner"`, `voice: "app"`, `landing.signing: "none"`):
+The table reflects the shipped config (`landing.actor: "owner"`, `voice: "owner"`,
+`landing.signing: "ssh"`).
 
-| On GitHub                                                       | Appears as                               |
-| --------------------------------------------------------------- | ---------------------------------------- |
-| "merged by" on a landed pull request (the `merge-ff` push)      | the owner (`OMNI_QUEUE_LAND_TOKEN`)      |
-| author and committer of the queue's merge commits               | `landing.identity` (the owner), unsigned |
-| every comment on a pull request, every label removal            | the App (`omni-queue[bot]`)              |
-| the dashboard issue, its body, its comments (the stalled alert) | the App                                  |
-| comments on the `base-red` issue, the tree-divergence issue     | the App                                  |
-| commit statuses (`omni-queue/land`, both approvals, a bless)    | the App, always                          |
+| On GitHub                                                    | Appears as                                      |
+| ------------------------------------------------------------ | ----------------------------------------------- |
+| "merged by" on a landed pull request (the `merge-ff` push)   | the owner (`OMNI_QUEUE_LAND_TOKEN`)             |
+| author and committer of the queue's merge commits            | `landing.identity` (the owner), signed with SSH |
+| comments the tick posts on pull requests and label removals  | the owner                                       |
+| new dashboard issues, dashboard body edits and comments      | the owner                                       |
+| comments on the `base-red` issue, the tree-divergence issue  | the owner                                       |
+| commit statuses (`omni-queue/land`, both approvals, a bless) | the App, always                                 |
 
-With `voice: "owner"` the third to fifth rows become the owner (each one the App's again when the
-owner's token is missing or refused), and with `landing.signing: "ssh"` the merge commits are
-signed with the owner's key.
+The tick uses the App for the third to fifth rows when `voice` is `app` or when the owner's token
+is missing or refused. With `landing.signing: "none"`, the merge commits are unsigned.
 
 **Always the App, whatever the config**, and why:
 
