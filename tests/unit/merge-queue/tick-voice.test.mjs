@@ -63,7 +63,9 @@ async function startBatch(h, prs) {
 
 test("voice app: every write is the App's, as before", async () => {
   const h = createHarness({ mode: "live" });
-  assert.equal(h.config.voice, "owner", "shipped default");
+  // The shipped file speaks as the owner; the harness pins the App's voice (helpers/tick-fakes.mjs).
+  assert.equal(loadConfig().voice, "owner", "shipped default");
+  assert.equal(h.config.voice, "app", "harness default");
   h.config.voice = "app";
   realDashboard(h);
   const f = await startBatch(h, [1, 2]);
