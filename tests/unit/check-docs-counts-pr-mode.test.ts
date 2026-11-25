@@ -519,14 +519,14 @@ test("planDerivedRewrites + release mode clear every rewritable STRICT drift (re
   assert.deepEqual(gate.planDerivedRewrites({ facts: shifted, readFile: overlay }).files, []);
 });
 
-test("planDerivedRewrites keeps a mirror's own digits and leaves the rounded headline to a human", () => {
+test("planDerivedRewrites keeps a mirror's own digits, refreshes the headline and reports gated drift", () => {
   const persian = mirrorRow("۲۳۹");
   const plan = gate.planDerivedRewrites({
     facts: { ...FACTS, migrations: 240 },
     readFile: mem({
       "docs/i18n/fa/README.md": persian,
       "docs/reference/FREE_TIERS.md":
-        "About ~9.9B free tokens a month, +~6M behind regional identity verification.\n",
+        "About ~9.9B free tokens a month, +~7M behind regional identity verification.\n",
     }),
   });
   const fa = plan.files.find((f) => f.path === "docs/i18n/fa/README.md");
@@ -547,10 +547,15 @@ test("planDerivedRewrites keeps a mirror's own digits and leaves the rounded hea
   assert.ok(
     plan.manual.some(
       (m) =>
-        m.path === "docs/reference/FREE_TIERS.md" && m.label === "Free-tier headline (live catalog)"
+        m.path === "docs/reference/FREE_TIERS.md" &&
+        m.label === "Free-tier headline (live catalog)" &&
+        /stale gated figure/.test(m.detail)
     )
   );
-  assert.ok(!plan.files.some((f) => f.path === "docs/reference/FREE_TIERS.md"));
+  assert.equal(
+    plan.files.find((f) => f.path === "docs/reference/FREE_TIERS.md")?.after,
+    "About ~1.4B free tokens a month, +~7M behind regional identity verification.\n"
+  );
 });
 
 // --- shared locators ---------------------------------------------------------------------
