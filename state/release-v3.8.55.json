@@ -3,37 +3,23 @@
   "base": "release/v3.8.55",
   "paused": null,
   "inFlight": {
-    "batchId": "b40",
+    "batchId": "b41",
     "kind": "batch",
-    "candidateRef": "omni-queue/release-v3.8.55/b40-7a2e81529f01",
-    "candidateSha": "7a2e81529f01c3ba696e8a822da5cb95de5e16ac",
-    "baseSha": "b4ff3daa62a5a707c4ca92ad17052898ee7b5db1",
-    "treeSha": "dab9174bd28d5d39dc0abcd50e88324d8b0e0b82",
+    "candidateRef": "omni-queue/release-v3.8.55/b41-db34be497bb1",
+    "candidateSha": "db34be497bb1c125a235f4116116fc21a9516b6b",
+    "baseSha": "e6476f01a9fd0a76df12326cc742aeef00ffa63a",
+    "treeSha": "c28878672c0b56bd0e5c2bf4ad4f59578d064987",
     "prs": [
       {
-        "n": 20991,
-        "head": "bd3195a975d0bd3c786595f0b51cc8c2961717af",
-        "title": "test(usage): stabilize the modal ledger quota window fixture",
-        "author": "KiaroSama",
-        "labeledAt": "2026-11-25T13:27:07Z"
-      },
-      {
-        "n": 21192,
-        "head": "2d55d78dc1574c778bb5fe93761334ca76e3af20",
-        "title": "chore: merge train for the 2026-11-24 dashboard QA fixes (6 PRs)",
+        "n": 21205,
+        "head": "8741ef3d0905867e193751adec82b1f92651283f",
+        "title": "feat(merge-queue): the queue speaks as the owner and signs its merge commits",
         "author": "diegosouzapw",
-        "labeledAt": "2026-11-25T13:27:07Z"
-      },
-      {
-        "n": 21175,
-        "head": "b1fdbded0caa6826a6ac5805418c5785f659b31d",
-        "title": "fix(dashboard): connect the live socket on the same origin behind a proxy (KEA-9514)",
-        "author": "diegosouzapw",
-        "labeledAt": "2026-11-25T13:27:11Z"
+        "labeledAt": "2026-11-25T13:13:58Z"
       }
     ],
     "stage": "testing",
-    "startedAt": "2026-11-25T15:00:35.924Z",
+    "startedAt": "2026-11-25T16:17:06.316Z",
     "attempts": 0,
     "bisect": null
   },
@@ -134,12 +120,15 @@
       "19167": "5a3523ee5d9dc3a3fe610ed93b4c5ccb048bbca0",
       "19305": "1f33f0e10883549e4374ac38d47e87c94936bc5c",
       "19306": "4afb0ca62e19eb94155c5b9c2b78bf4b91ae1dee",
-      "21095": "1b7aac58720e39f7915eaf09a0f3ffc1a5a33b95"
+      "20991": "bd3195a975d0bd3c786595f0b51cc8c2961717af",
+      "21095": "1b7aac58720e39f7915eaf09a0f3ffc1a5a33b95",
+      "21175": "b1fdbded0caa6826a6ac5805418c5785f659b31d",
+      "21192": "2d55d78dc1574c778bb5fe93761334ca76e3af20"
     }
   },
   "counters": {
-    "batchSeq": 40,
-    "ciRuns": 45,
+    "batchSeq": 41,
+    "ciRuns": 46,
     "landedPrs": 0,
     "landedBatches": 0,
     "redBatches": 10,
@@ -147,28 +136,6 @@
     "culprits": 1
   },
   "history": [
-    {
-      "at": "2026-11-19T07:47:23.431Z",
-      "type": "batch-started",
-      "batchId": "b1",
-      "prs": [
-        20553,
-        20565,
-        20561,
-        20566,
-        20567
-      ],
-      "sha": "bb946ced17fddc311cc45d045d3d324d9e85d2a9",
-      "detail": "5 PR(s) on cc59ad70b2e9; window 6",
-      "labeledAt": {
-        "20553": "2026-11-19T07:29:09Z",
-        "20561": "2026-11-19T07:29:14Z",
-        "20565": "2026-11-19T07:29:12Z",
-        "20566": "2026-11-19T07:29:17Z",
-        "20567": "2026-11-19T07:29:20Z"
-      },
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44482208781"
-    },
     {
       "at": "2026-11-19T08:20:09.712Z",
       "type": "checks-red",
@@ -2583,8 +2550,47 @@
         "21192": "2026-11-25T13:27:07Z"
       },
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45640149323"
+    },
+    {
+      "at": "2026-11-25T16:16:28.084Z",
+      "type": "checks-green",
+      "batchId": "b40",
+      "prs": [
+        20991,
+        21192,
+        21175
+      ],
+      "sha": "7a2e81529f01c3ba696e8a822da5cb95de5e16ac",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45652212248"
+    },
+    {
+      "at": "2026-11-25T16:16:41.667Z",
+      "type": "would-land",
+      "batchId": "b40",
+      "prs": [
+        20991,
+        21192,
+        21175
+      ],
+      "sha": "7a2e81529f01c3ba696e8a822da5cb95de5e16ac",
+      "detail": "shadow mode: would merge-ff onto b4ff3daa62a5",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45652212248"
+    },
+    {
+      "at": "2026-11-25T16:17:10.511Z",
+      "type": "batch-started",
+      "batchId": "b41",
+      "prs": [
+        21205
+      ],
+      "sha": "db34be497bb1c125a235f4116116fc21a9516b6b",
+      "detail": "1 PR(s) on e6476f01a9fd; window 5",
+      "labeledAt": {
+        "21205": "2026-11-25T13:13:58Z"
+      },
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45652212248"
     }
   ],
-  "updatedAt": "2026-11-25T15:01:16.220Z",
+  "updatedAt": "2026-11-25T16:17:13.594Z",
   "batchWindow": 5
 }
