@@ -74,12 +74,15 @@ Run this command once to freeze the sample from the reviewed catalog.
 
 export function mulberry32(seed) {
   return () => {
-    seed = (seed + 0x6d2b79f5) | 0;
+    seed = (seed + 0x6d2b79f5) >>> 0;
     let t = Math.imul(seed ^ (seed >>> 15), seed | 1);
     t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
 }
+
+// Code-unit order, the same order as Array.prototype.sort() on strings.
+const byCodeUnit = (a, b) => (a < b ? -1 : a > b ? 1 : 0);
 
 export function drawSample(names, seed, k) {
   const shuffled = names.slice();
@@ -96,11 +99,11 @@ export function freezeSample({ universe, poolValues, seed, largeCount, randomCou
   // Stable sorting keeps equal-value providers in ascending id order.
   const ranked = universe
     .slice()
-    .sort()
+    .sort(byCodeUnit)
     .sort((a, b) => poolValue(b) - poolValue(a));
   return {
     large: ranked.slice(0, largeCount),
-    random: drawSample(ranked.slice(largeCount).sort(), seed, randomCount),
+    random: drawSample(ranked.slice(largeCount).sort(byCodeUnit), seed, randomCount),
   };
 }
 
@@ -240,7 +243,7 @@ async function writeFrozenSample(path, frozenAt) {
       largestPools.set(provider, Math.max(largestPools.get(provider) ?? 0, monthlyTokens));
     }
   }
-  const universe = [...largestPools.keys()].sort();
+  const universe = [...largestPools.keys()].sort(byCodeUnit);
   if (universe.length < SAMPLE_SIZE) {
     throw new Error(
       `The sample requires at least ${SAMPLE_SIZE} providers; found ${universe.length}`
