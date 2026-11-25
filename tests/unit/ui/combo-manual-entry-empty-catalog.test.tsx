@@ -64,10 +64,18 @@ const builderOptions = {
   comboRefs: [],
 };
 
+const reservedCombo = {
+  id: "legacy-auto",
+  name: "Auto/coding",
+  strategy: "priority",
+  models: ["cx/gpt-5.5"],
+};
+let listedCombos: (typeof reservedCombo)[] = [];
+
 function payload(url: string): unknown {
   if (url.startsWith("/api/combos/metrics")) return { metrics: {} };
   if (url.startsWith("/api/combos/builder/options")) return builderOptions;
-  if (url.startsWith("/api/combos")) return { combos: [] };
+  if (url.startsWith("/api/combos")) return { combos: listedCombos };
   if (url.startsWith("/api/settings/proxy")) return { combos: {} };
   if (url.startsWith("/api/settings/compression")) return { enabled: false };
   if (url.startsWith("/api/settings")) return { comboConfigMode: "expert" };
@@ -97,6 +105,7 @@ beforeEach(() => {
 afterEach(() => {
   cleanup();
   vi.unstubAllGlobals();
+  listedCombos = [];
 });
 
 async function openExpertBuilder() {
@@ -164,5 +173,41 @@ describe("expert-mode manual model entry", { timeout: 90_000 }, () => {
     await addManualModel(dialog, "nope/gpt-5.5");
     expect(await within(dialog).findByText(/unknown provider prefix/i)).toBeInTheDocument();
     expect(within(dialog).getByTestId("combo-manual-model-input")).toHaveValue("nope/gpt-5.5");
+  });
+});
+
+describe("reserved automatic route names", { timeout: 90_000 }, () => {
+  it("shows an inline error and blocks creation after adding a valid model", async () => {
+    const dialog = await openExpertBuilder();
+    const name = within(dialog).getByTestId("combo-name-input");
+    fireEvent.change(name, { target: { value: "my-auto" } });
+    await addManualModel(dialog, "cx/gpt-5.5");
+    const create = within(dialog).getByRole("button", { name: "Create Combo" });
+    expect(create).toBeEnabled();
+
+    fireEvent.change(name, { target: { value: "auto" } });
+    expect(name).toHaveAccessibleDescription(/reserved for the built-in automatic routes/i);
+    expect(create).toBeDisabled();
+    fireEvent.click(create);
+    expect(vi.mocked(fetch).mock.calls.some(([, init]) => init?.method === "POST")).toBe(false);
+  });
+
+  it("warns on a saved reserved name and enables saving after renaming", async () => {
+    listedCombos = [reservedCombo];
+    render(<CombosPage />);
+    const card = await screen.findByTestId("combo-card-legacy-auto");
+    expect(within(card).getByText(/rename this combo/i)).toBeInTheDocument();
+    fireEvent.click(within(card).getByRole("button", { name: "Edit" }));
+
+    const dialog = await screen.findByRole("dialog");
+    const name = within(dialog).getByTestId("combo-name-input");
+    const save = await within(dialog).findByRole("button", { name: "Save" });
+    expect(name).toHaveValue("Auto/coding");
+    expect(name).toHaveAccessibleDescription(/reserved for the built-in automatic routes/i);
+    expect(save).toBeDisabled();
+    fireEvent.click(save);
+    expect(vi.mocked(fetch).mock.calls.some(([, init]) => init?.method === "PUT")).toBe(false);
+    fireEvent.change(name, { target: { value: "my-auto" } });
+    expect(save).toBeEnabled();
   });
 });
