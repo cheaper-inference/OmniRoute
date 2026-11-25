@@ -530,11 +530,11 @@ export function openaiToClaudeResponse(chunk, state) {
     reasoningContent =
       (typeof reasoningContent === "string" ? reasoningContent : "") + inlineThink.reasoning;
   }
-  const hasReasoning =
+  if (
     typeof reasoningContent === "string" &&
     reasoningContent !== "" &&
-    !isInternalReasoningPlaceholder(reasoningContent);
-  if (hasReasoning) {
+    !isInternalReasoningPlaceholder(reasoningContent)
+  ) {
     // Gate the thinking block EMISSION on requestedThinking, with the same
     // tri-state the non-streaming path documents (responseTranslator.ts):
     // `false` = client opted out, suppress; `true` = client opted in, relay;
@@ -542,14 +542,14 @@ export function openaiToClaudeResponse(chunk, state) {
     // "always a thinking block" relay (#12905). Opt-out turns retain reasoning
     // for the reasoning-only text fallback below.
     if (state.requestedThinking === false) {
-      if (chargeRetained(state, reasoningContent.length)) {
+      if (chargeRetained(state, reasoningContent.length, { optional: true })) {
         state._reasoningAccum = (state._reasoningAccum || "") + reasoningContent;
       }
     } else if (state.toolCalls?.size) {
       // A terminal summary may arrive before the open tool blocks finish.
       // Claude SDKs dispatch a block when it stops, so defer thinking until
       // after the tool's final input delta and stop.
-      if (chargeRetained(state, reasoningContent.length)) {
+      if (chargeRetained(state, reasoningContent.length, { optional: true })) {
         state.deferredClaudeThinking = (state.deferredClaudeThinking || "") + reasoningContent;
       }
     } else {

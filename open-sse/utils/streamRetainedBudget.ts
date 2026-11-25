@@ -24,12 +24,16 @@ export function getMaxStreamRetainedBytes(): number {
 }
 
 /**
- * Reserves `n` more retained units for the stream that owns `state`. Returns `false` (and marks
- * the stream as over budget) when the reservation would pass the cap: the caller must then drop
- * the fragment instead of keeping it. Without a `state` object there is nothing to account
- * against, so the charge always succeeds.
+ * Reserves `n` more retained units for the stream that owns `state`. Drop the fragment when
+ * the reservation returns `false`. A refused required reservation marks the stream as over
+ * budget. A refused optional reservation leaves the remaining budget available to later
+ * fragments. Without a `state` object there is nothing to account against.
  */
-export function chargeRetained(state: unknown, n: number): boolean {
+export function chargeRetained(
+  state: unknown,
+  n: number,
+  { optional = false }: { optional?: boolean } = {}
+): boolean {
   if (!state || typeof state !== "object") return true;
   let budget = budgets.get(state);
   if (!budget) {
@@ -39,14 +43,14 @@ export function chargeRetained(state: unknown, n: number): boolean {
   if (budget.exceeded) return false;
   if (!(n > 0)) return true;
   if (budget.used + n > budget.max) {
-    budget.exceeded = true;
+    if (!optional) budget.exceeded = true;
     return false;
   }
   budget.used += n;
   return true;
 }
 
-/** True once a charge against `state` was refused; the stream must end with an error. */
+/** True once a required charge was refused; the stream must end with an error. */
 export function isRetainedBudgetExceeded(state: unknown): boolean {
   return !!state && typeof state === "object" && budgets.get(state)?.exceeded === true;
 }

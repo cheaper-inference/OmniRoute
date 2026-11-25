@@ -4,6 +4,10 @@ import { createSSEStream } from "../../open-sse/utils/stream.ts";
 import { FORMATS } from "../../open-sse/translator/formats.ts";
 import { initState, translateResponse } from "../../open-sse/translator/index.ts";
 import { transformOpenAISSEToGeminiSSE } from "../../open-sse/translator/response/openai-to-gemini-sse.ts";
+import {
+  chargeRetained,
+  isRetainedBudgetExceeded,
+} from "../../open-sse/utils/streamRetainedBudget.ts";
 
 // Streaming translators keep tool-call arguments, reasoning text and thinking signatures in
 // memory until the block closes. Each SSE line is capped, but these buffers grow across lines,
@@ -23,7 +27,12 @@ type Failure = { status: number; message: string; code?: string };
 
 async function runStream(
   lines: string[],
-  opts: { mode: "translate" | "passthrough"; targetFormat: string; sourceFormat: string }
+  opts: {
+    mode: "translate" | "passthrough";
+    targetFormat: string;
+    sourceFormat: string;
+    requestedThinking?: boolean;
+  }
 ) {
   let failure: Failure | null = null;
   const source = new ReadableStream<Uint8Array>({
@@ -38,6 +47,7 @@ async function runStream(
         mode: opts.mode,
         targetFormat: opts.targetFormat,
         sourceFormat: opts.sourceFormat,
+        requestedThinking: opts.requestedThinking,
         ...(opts.mode === "passthrough" ? { clientResponseFormat: opts.sourceFormat } : {}),
         provider: "custom-upstream",
         model: "custom-model",
@@ -219,6 +229,66 @@ test("openai-to-claude: a normal-size stream is unchanged", async () => {
   });
   assertNoBudgetError(result);
   assert.match(result.output, /"stop_reason":"tool_use"/);
+});
+
+for (const requestedThinking of [true, false]) {
+  const mode = requestedThinking ? "deferred" : "opt-out";
+  test(`openai-to-claude: over-budget ${mode} reasoning leaves tool arguments intact`, async () => {
+    const chunk = (delta: object, finishReason: string | null = null) => ({
+      id: "chatcmpl_budget_fixture",
+      model: "m",
+      choices: [{ index: 0, delta, finish_reason: finishReason }],
+    });
+    const result = await runStream(
+      [
+        chunk({
+          tool_calls: [
+            { index: 0, id: "call_1", function: { name: "weather", arguments: '{"city":' } },
+          ],
+        }),
+        chunk({ reasoning_content: "Drop this over-budget summary.".padEnd(BUDGET, "x") }),
+        chunk({ reasoning_content: "This summary fits." }),
+        chunk({ tool_calls: [{ index: 0, function: { arguments: '"Paris"}' } }] }),
+        chunk({}, "tool_calls"),
+      ].map(data),
+      {
+        mode: "translate",
+        targetFormat: FORMATS.OPENAI,
+        sourceFormat: FORMATS.CLAUDE,
+        requestedThinking,
+      }
+    );
+
+    assertNoBudgetError(result);
+    assert.doesNotMatch(result.output, /Drop this over-budget summary/);
+    const events = [...result.output.matchAll(/^data: (\{.*\})$/gm)].map((match) =>
+      JSON.parse(match[1])
+    );
+    const args = events
+      .filter((event) => event.delta?.type === "input_json_delta")
+      .map((event) => event.delta.partial_json)
+      .join("");
+    assert.deepEqual(JSON.parse(args), { city: "Paris" });
+    assert.deepEqual(
+      events
+        .filter((event) => event.delta?.type === "thinking_delta")
+        .map((event) => event.delta.thinking),
+      requestedThinking ? ["This summary fits."] : []
+    );
+    assert.match(result.output, /"stop_reason":"tool_use"/);
+  });
+}
+
+test("admitted optional retention counts toward the hard cap and cannot clear a required failure", () => {
+  const state = {};
+  assert.equal(chargeRetained(state, BUDGET - 1, { optional: true }), true);
+  assert.equal(chargeRetained(state, 2, { optional: true }), false);
+  assert.equal(isRetainedBudgetExceeded(state), false);
+  assert.equal(chargeRetained(state, 1), true);
+  assert.equal(chargeRetained(state, 1), false);
+  assert.equal(isRetainedBudgetExceeded(state), true);
+  assert.equal(chargeRetained(state, 1, { optional: true }), false);
+  assert.equal(chargeRetained(state, 1), false);
 });
 
 test("openai-to-responses: buffered tool arguments stay under the retained budget", () => {

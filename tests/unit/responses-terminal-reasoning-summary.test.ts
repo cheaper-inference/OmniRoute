@@ -214,6 +214,45 @@ test("fragmented anonymous runs on either side of a named delta match their own 
   );
 });
 
+test("successive terminal items consume their own prefixes of one anonymous run", () => {
+  const partial = secondSummary.slice(0, 8);
+  assert.deepEqual(
+    translateReasoning([
+      reasoningDelta(summaryText.slice(0, 2)),
+      reasoningDelta(summaryText.slice(2) + partial),
+      completed(
+        summaryItem("rs_a", summaryText),
+        summaryItem("rs_b", secondSummary),
+        summaryItem("rs_c", "A new terminal summary.")
+      ),
+    ]),
+    [summaryText.slice(0, 2), summaryText.slice(2) + partial, "A new terminal summary."]
+  );
+});
+
+test("an ID match learns the output index before the terminal item rotates its ID", () => {
+  assert.deepEqual(
+    translateReasoning([
+      reasoningDelta(summaryText, "rs_a"),
+      reasoningDone(summaryItem("rs_a", summaryText), 0),
+      completed(summaryItem("rs_rotated", summaryText), summaryItem("rs_b", secondSummary)),
+    ]),
+    [summaryText, secondSummary]
+  );
+});
+
+test("an output-index match learns the ID before an index-less snapshot", () => {
+  assert.deepEqual(
+    translateReasoning([
+      reasoningDelta(summaryText, undefined, 0),
+      reasoningDone(summaryItem("rs_a", summaryText), 0),
+      reasoningDone(summaryItem("rs_a", summaryText)),
+      completed(summaryItem("rs_a", summaryText), summaryItem("rs_b", secondSummary)),
+    ]),
+    [summaryText, secondSummary]
+  );
+});
+
 test("identical text on distinct known items is emitted once per item", () => {
   assert.deepEqual(
     translateReasoning([

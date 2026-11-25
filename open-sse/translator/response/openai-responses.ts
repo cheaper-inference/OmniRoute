@@ -1036,22 +1036,35 @@ function recordResponsesReasoningDelta(state, data, text: string) {
 interface AnonymousReasoningRuns {
   texts: string[];
   next: number;
+  offset: number;
 }
 
 function closeAnonymousReasoningRun(state) {
   const text: string | undefined = state.anonymousReasoningDelta;
   if (!text) return;
-  const runs: AnonymousReasoningRuns = (state.anonymousReasoningRuns ??= { texts: [], next: 0 });
+  const runs: AnonymousReasoningRuns = (state.anonymousReasoningRuns ??= {
+    texts: [],
+    next: 0,
+    offset: 0,
+  });
   runs.texts.push(text);
   state.anonymousReasoningDelta = undefined;
 }
 
 function consumeAnonymousReasoningRun(state, text: string): boolean {
   const runs: AnonymousReasoningRuns | undefined = state.anonymousReasoningRuns;
-  const prefix = runs?.texts[runs.next];
-  if (!prefix || !text.startsWith(prefix)) return false;
+  if (!runs) return false;
+  const run = runs.texts[runs.next];
+  if (run.startsWith(text, runs.offset)) {
+    // A single run can contain several items when upstream omits their boundaries.
+    runs.offset += text.length;
+    if (runs.offset < run.length) return true;
+  } else if (!text.startsWith(run.slice(runs.offset))) {
+    return false;
+  }
   runs.texts[runs.next] = "";
   runs.next++;
+  runs.offset = 0;
   if (runs.next === runs.texts.length) state.anonymousReasoningRuns = undefined;
   return true;
 }
@@ -1132,9 +1145,14 @@ function synthesizeResponsesReasoningSnapshot(
   const itemId = "id" in item && item.id != null ? String(item.id) : "";
   const emittedIds = state.reasoningItemsWithDelta;
   const emittedIndexes = state.reasoningOutputIndexesWithDelta;
-  if (itemId && emittedIds?.has(itemId)) return null;
-  // An output index also identifies an item when a provider rotates or omits its ID.
-  if (typeof outputIndex === "number" && emittedIndexes?.has(outputIndex)) return null;
+  if (
+    (itemId && emittedIds?.has(itemId)) ||
+    (typeof outputIndex === "number" && emittedIndexes?.has(outputIndex))
+  ) {
+    // Learn the other identity now in case a later snapshot rotates or omits one.
+    markResponsesReasoningIdentity(state, itemId, outputIndex);
+    return null;
+  }
 
   const text = replayableReasoning || getVisibleResponsesReasoningSummaryText(item);
   if (!text || isInternalReasoningPlaceholder(text)) return null;
