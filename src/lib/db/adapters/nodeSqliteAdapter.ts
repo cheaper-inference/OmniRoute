@@ -48,11 +48,13 @@ export async function createNodeSqliteAdapter(filePath: string): Promise<SqliteA
     process.exit(0);
   };
 
-  function gracefulClose() {
+  function gracefulClose(checkpoint: boolean) {
     clearInterval(checkpointTimer as unknown as NodeJS.Timeout);
-    try {
-      db.exec("PRAGMA wal_checkpoint(TRUNCATE)");
-    } catch {}
+    if (checkpoint) {
+      try {
+        db.exec("PRAGMA wal_checkpoint(TRUNCATE)");
+      } catch {}
+    }
     process.removeListener("beforeExit", onBeforeExit);
     process.removeListener("SIGINT", onSignal);
     process.removeListener("SIGTERM", onSignal);

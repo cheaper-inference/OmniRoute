@@ -37,7 +37,8 @@ export interface SqliteAdapter {
   backup(destination: string): Promise<void>;
 
   checkpoint(mode?: string): void;
-  close(): void;
+  /** Set checkpoint to false to skip explicit pre-close checkpointing, not driver behavior. */
+  close(options?: { checkpoint?: boolean }): void;
 
   readonly raw: unknown;
 }

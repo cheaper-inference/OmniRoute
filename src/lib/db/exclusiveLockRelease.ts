@@ -62,7 +62,7 @@ export function releaseExclusiveLock(adapter: SqliteAdapter): ExclusiveLockRelea
 
   let failure: string | undefined;
   try {
-    adapter.close();
+    adapter.close({ checkpoint: false });
   } catch (error) {
     // The call threw, but a driver may close and then throw. Which of the two
     // happened is decided below by the state, not by the fact that it threw.

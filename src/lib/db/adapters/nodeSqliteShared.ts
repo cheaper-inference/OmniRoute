@@ -73,7 +73,7 @@ function normalizeBindParams(params: unknown[]): unknown[] {
 export function createNodeSqliteAdapterFromDatabase(
   db: NodeSqliteDatabaseLike,
   filePath: string,
-  onClose?: () => void
+  onClose?: (checkpoint: boolean) => void
 ): SqliteAdapter {
   let _isOpen = true;
   let transactionDepth = 0;
@@ -156,9 +156,9 @@ export function createNodeSqliteAdapterFromDatabase(
     }
   }
 
-  function close() {
+  function close(options?: { checkpoint?: boolean }) {
     try {
-      onClose?.();
+      onClose?.(options?.checkpoint !== false);
     } catch {}
     try {
       for (const entry of stmtCache.values()) {
