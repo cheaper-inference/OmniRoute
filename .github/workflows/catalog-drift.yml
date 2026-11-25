@@ -1,0 +1,101 @@
+name: Free-tier catalog drift
+
+# Check public provider sources once a day without provider credentials or an LLM.
+# The check never edits the catalog. A failed probe is reported after two consecutive
+# failures, and a new issue requires the same drift fingerprint in two consecutive runs.
+# Set the CATALOG_DRIFT_ISSUES repository variable to true to enable issue writing.
+
+on:
+  schedule:
+    - cron: "41 6 * * *"
+  workflow_dispatch:
+    inputs:
+      only:
+        description: Provider ID to check
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: catalog-drift
+  cancel-in-progress: false
+
+jobs:
+  drift:
+    if: ${{ (github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute') && (github.event_name == 'workflow_dispatch' || github.event.schedule == '41 6 * * *') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: Resolve the latest release branch
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          branch=$(gh api "repos/$GITHUB_REPOSITORY/branches" --paginate --jq '.[].name' \
+            | grep -E '^release/v[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -1)
+          [ -n "$branch" ] || { echo "No release/vX.Y.Z branch found" >&2; exit 1; }
+          echo "branch=$branch" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ steps.release.outputs.branch }}
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+        env:
+          ONNXRUNTIME_NODE_INSTALL: "skip"
+      - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ runner.temp }}/catalog-drift-state.json
+          key: catalog-drift-state-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: catalog-drift-state-
+      - name: Check public sources
+        env:
+          ONLY: ${{ inputs.only }}
+        run: |
+          node --import tsx/esm scripts/quality/catalog-drift/run.mjs \
+            --out "$RUNNER_TEMP/catalog-drift" --state "$RUNNER_TEMP/catalog-drift-state.json" ${ONLY:+--only "$ONLY"}
+          cat "$RUNNER_TEMP/catalog-drift/report.md" >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        if: always()
+        with:
+          name: catalog-drift
+          path: ${{ runner.temp }}/catalog-drift
+          retention-days: 30
+      - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        if: always()
+        with:
+          path: ${{ runner.temp }}/catalog-drift-state.json
+          key: catalog-drift-state-${{ github.run_id }}-${{ github.run_attempt }}
+      - name: Apply issue actions
+        if: ${{ vars.CATALOG_DRIFT_ISSUES == 'true' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh label create catalog-drift --color FBCA04 --description "Free-tier catalog may be out of date" \
+            --repo "$GITHUB_REPOSITORY" --force
+          node scripts/quality/catalog-drift/issues.mjs --report "$RUNNER_TEMP/catalog-drift/report.json" \
+            --repo "$GITHUB_REPOSITORY" --run-url "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" --apply
+      - name: Preview issue actions
+        if: ${{ vars.CATALOG_DRIFT_ISSUES != 'true' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          node scripts/quality/catalog-drift/issues.mjs --report "$RUNNER_TEMP/catalog-drift/report.json" \
+            --repo "$GITHUB_REPOSITORY" --run-url "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" --dry-run \
+            > "$RUNNER_TEMP/catalog-drift-issues.json"
+          {
+            echo 'Issue writing is off (CATALOG_DRIFT_ISSUES). Planned actions:'
+            echo
+            echo '````json'
+            cat "$RUNNER_TEMP/catalog-drift-issues.json"
+            echo '````'
+          } >> "$GITHUB_STEP_SUMMARY"
