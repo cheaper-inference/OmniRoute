@@ -6,6 +6,21 @@ export const APIKEY_PROVIDERS_GATEWAYS = {
   ...ainetcafeGateway,
   ...onomeoGateway,
   ...unificallyGateway,
+  uncloseai: {
+    id: "uncloseai",
+    alias: "unc",
+    name: "UncloseAI",
+    icon: "auto_awesome",
+    color: "#8B5CF6",
+    textIcon: "UN",
+    website: "https://uncloseai.com",
+    hasFree: false,
+    passthroughModels: true,
+    serviceKinds: ["llm"],
+    toolCalling: "emulated",
+    authHint:
+      "Use an existing UncloseAI API key. The public beta and new key registration are closed.",
+  },
   // 1min.ai (https://docs.1min.ai) — multi-model chat aggregator with its own
   // custom API (single `prompt` string + real SSE, not OpenAI-compatible).
   // OmniRoute's oneminai executor translates both directions.

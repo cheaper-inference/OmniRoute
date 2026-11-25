@@ -14,6 +14,7 @@
 // Deposit-unlock boosts (e.g. OpenRouter $10 -> 1000 RPD) live in FREE_TIER_BOOSTS, not per-record.
 // Bump FREE_CATALOG_CURATED_AT on every change to the entries below.
 import type { FreeModelBudget } from "./freeModelCatalog.ts";
+import { RETIRED_KEYLESS_OFFERS } from "./freeModelCatalog.retired.data.ts";
 
 /**
  * Date this catalog was last curated against provider documentation.
@@ -22,7 +23,7 @@ import type { FreeModelBudget } from "./freeModelCatalog.ts";
  * rewrites file timestamps on every deploy, which would report a months-old
  * catalog as "updated today". Bump this whenever the entries below change.
  */
-export const FREE_CATALOG_CURATED_AT = "2026-11-09";
+export const FREE_CATALOG_CURATED_AT = "2026-11-25";
 
 export const FREE_MODEL_BUDGETS: FreeModelBudget[] = [
   { provider: "agentrouter", modelId: "claude-opus-4-8", displayName: "Claude Opus 4.8", monthlyTokens: 0, creditTokens: 200000000, freeType: "one-time-initial", poolKey: "agentrouter", tos: "caution" },
@@ -440,10 +441,7 @@ export const FREE_MODEL_BUDGETS: FreeModelBudget[] = [
   { provider: "t3-web", modelId: "qwen3-32b", displayName: "Qwen3 32B (via t3.chat)", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-daily", poolKey: "t3-web", tos: "avoid" },
   { provider: "t3-web", modelId: "kimi-k2", displayName: "Kimi K2 (via t3.chat)", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-daily", poolKey: "t3-web", tos: "avoid" },
   // Tencent hunyuan-pro retired 2026-06-22: cloud.tencent.com/document/product/1729/131925.
-  // 2026-10-16 refresh: upstream /v1/models serves a single live model; the
-  // previously catalogued id 404s on /v1/chat/completions (see the matching
-  // comment in providers/registry/uncloseai/index.ts).
-  { provider: "uncloseai", modelId: "turboderp/Qwen3.8-27B-exl3", displayName: "Qwen3.8 27B exl3 (🆓 Free)", monthlyTokens: 0, creditTokens: 0, freeType: "keyless", poolKey: "uncloseai", tos: "caution" },
+  ...RETIRED_KEYLESS_OFFERS,
   { provider: "vertex", modelId: "gemini-3.1-pro-preview", displayName: "Gemini 3.1 Pro Preview (Vertex)", monthlyTokens: 0, creditTokens: 300000000, freeType: "one-time-initial", poolKey: "vertex", tos: "caution" },
   { provider: "vertex", modelId: "gemini-3.1-flash-lite", displayName: "Gemini 3.1 Flash Lite (Vertex)", monthlyTokens: 0, creditTokens: 300000000, freeType: "one-time-initial", poolKey: "vertex", tos: "caution" },
   { provider: "vertex", modelId: "gemini-3-flash-preview", displayName: "Gemini 3 Flash Preview (Vertex)", monthlyTokens: 0, creditTokens: 300000000, freeType: "one-time-initial", poolKey: "vertex", tos: "caution" },
