@@ -1,0 +1,1 @@
+- **fix(providers):** Route Cheaper Inference Claude models through the native `/v1/messages` endpoint to preserve prompt-cache breakpoints (KEA-9430).
