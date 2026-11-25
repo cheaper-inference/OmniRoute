@@ -4,7 +4,7 @@ import { cleanup, render, screen } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import en from "../../src/i18n/messages/en.json";
 import zh from "../../src/i18n/messages/zh-CN.json";
-import HealthAccountTooltip from "@/app/(dashboard)/dashboard/usage/components/ProviderLimits/HealthAccountTooltip";
+import { HealthAccountCardContent } from "@/app/(dashboard)/dashboard/usage/components/ProviderLimits/HealthAccountTooltip";
 import { buildHealthAccount } from "@/app/(dashboard)/dashboard/usage/components/ProviderLimits/healthOverview";
 import type { QuotaAvailabilityDecision } from "@/lib/usage/availabilityTypes";
 vi.unmock("next-intl");
@@ -44,12 +44,7 @@ for (const locale of ["en", "zh-CN"]) {
           timeZone="UTC"
           now={new Date(now)}
         >
-          <HealthAccountTooltip
-            id="synthetic-tooltip"
-            account={account}
-            label="Synthetic account"
-            anchor={document.body}
-          />
+          <HealthAccountCardContent account={account} label="Synthetic account" />
         </NextIntlClientProvider>
       );
       expect(screen.getByText(messages.usage[key])).toBeTruthy();

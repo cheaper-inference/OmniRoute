@@ -18,6 +18,7 @@ import os from "node:os";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { summarizeFreeTierBudget } from "../../docs/readmeFactsFreeTier.mjs";
+import { buildFreeCatalogFacts } from "./free-catalog-facts.mjs";
 
 // The tree being measured is the working directory (the parent sets `cwd`).
 const ROOT = process.cwd();
@@ -76,10 +77,26 @@ const PROVIDER_COLLECTIONS = [
   "SYSTEM_PROVIDERS",
 ];
 
+// A provider id is in a collection when it is a key there or the `id` of one of its entries.
+function inCollection(collection, id) {
+  if (!collection) return false;
+  if (Object.prototype.hasOwnProperty.call(collection, id)) return true;
+  return Object.values(collection).some((p) => p && p.id === id);
+}
+
+// Distinct provider ids with `hasFree === true` across the given collections.
+function hasFreeIn(collections) {
+  const ids = new Set();
+  for (const col of collections) {
+    for (const p of Object.values(col || {})) if (p && p.id && p.hasFree === true) ids.add(p.id);
+  }
+  return ids;
+}
+
 async function main() {
-  const { computeFreeModelTotals, FREE_MODEL_BUDGETS } = await load(
-    "open-sse/config/freeModelCatalog.ts"
-  );
+  const catalogModule = await load("open-sse/config/freeModelCatalog.ts");
+  const { computeFreeModelTotals, FREE_MODEL_BUDGETS, isCountingGated, isSocialGated } =
+    catalogModule;
   const { FREE_TIER_PROVIDER_SET } = await load("open-sse/config/freeTierProviders.ts");
   const { generateProviderPluginManifest } = await load(
     "open-sse/config/providerPluginManifestRegistry.ts"
@@ -122,7 +139,9 @@ async function main() {
 
   const freeForever = new Set();
   for (const m of totals.perModel) {
-    if (FOREVER.has(m.freeType) && !m.eligibilityGate) freeForever.add(m.provider);
+    if (FOREVER.has(m.freeType) && !isCountingGated(m) && !isSocialGated(m)) {
+      freeForever.add(m.provider);
+    }
   }
 
   const facts = {
@@ -155,6 +174,21 @@ async function main() {
     // The rows the README free-tier budget card draws (scripts/docs/gen-readme-free-tier-budget.mjs
     // reads them from the snapshot instead of loading the catalog itself).
     freeTierBudget: summarizeFreeTierBudget(totals, (id) => PROV.AI_PROVIDERS?.[id]?.name),
+    ...buildFreeCatalogFacts({
+      lib: {
+        catalog: catalogModule,
+        counts: await load("open-sse/config/freeModelCatalog.counts.ts"),
+      },
+      membershipOf: (id) => ({
+        noAuth: inCollection(PROV.NOAUTH_PROVIDERS, id),
+        oauth: inCollection(PROV.OAUTH_PROVIDERS, id),
+        webCookie: inCollection(PROV.WEB_COOKIE_PROVIDERS, id),
+      }),
+      hasFreeIds: hasFreeIn(PROVIDER_COLLECTIONS.map((name) => PROV[name])),
+      searchIds: hasFreeIn([PROV.SEARCH_PROVIDERS]),
+      audioIds: hasFreeIn([PROV.AUDIO_ONLY_PROVIDERS]),
+      displayName: (id) => PROV.AI_PROVIDERS?.[id]?.name,
+    }),
   };
   process.stdout.write("@@" + JSON.stringify(facts) + "\n");
 }

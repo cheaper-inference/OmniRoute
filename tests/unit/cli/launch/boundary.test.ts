@@ -1,0 +1,358 @@
+// Boundary test: adapter purity and the contract.mjs re-export boundary rules.
+// Static scan of bin/cli/launch/adapters/*.mjs, the shared adapter helpers in
+// bin/cli/launch/adapters/_shared/*.mjs, bin/cli/launch/contract.mjs and its sibling modules
+// bin/cli/launch/contract/*.mjs, plus runtime invariants on every adapter found (vacuous until
+// adapters exist).
+
+import { test } from "node:test";
+import assert from "node:assert/strict";
+import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { dirname, join, relative, resolve } from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
+
+import { fixtureCtx } from "./_helpers/fixtureCtx.mjs";
+import { checkPlanInvariants } from "./_helpers/golden.mjs";
+import type { LaunchPlan } from "../../../../bin/cli/launch/contract.d.ts";
+
+const HERE = dirname(fileURLToPath(import.meta.url));
+const ROOT = resolve(HERE, "../../../..");
+const LAUNCH_DIR = join(ROOT, "bin/cli/launch");
+const ADAPTERS_DIR = join(LAUNCH_DIR, "adapters");
+const SHARED_DIR = join(ADAPTERS_DIR, "_shared");
+const CONTRACT_FILE = join(LAUNCH_DIR, "contract.mjs");
+const CONTRACT_PARTS_DIR = join(LAUNCH_DIR, "contract");
+
+/** Number of launcher adapters; bump together with a new adapters/<id>.mjs. */
+const REGISTRY_SIZE = 19;
+
+const ADAPTER_ALLOWED_IMPORTS = new Set(["../contract.mjs"]);
+/** Adapters may also import the pure shared helpers in adapters/_shared/. */
+const ADAPTER_SHARED_IMPORT = /^\.\/_shared\/[a-z0-9][a-z0-9-]*\.mjs$/;
+/** A shared helper imports only the contract and its _shared/ siblings. */
+const SHARED_ALLOWED_IMPORTS = new Set(["../../contract.mjs"]);
+const SHARED_SIBLING_IMPORT = /^\.\/[a-z0-9][a-z0-9-]*\.mjs$/;
+
+type ImportRule = (spec: string) => boolean;
+const isAdapterImport: ImportRule = (spec) =>
+  ADAPTER_ALLOWED_IMPORTS.has(spec) || ADAPTER_SHARED_IMPORT.test(spec);
+const isSharedImport: ImportRule = (spec) =>
+  SHARED_ALLOWED_IMPORTS.has(spec) || SHARED_SIBLING_IMPORT.test(spec);
+/** The documented exceptions at the top of contract.mjs (the adapter purity rule). */
+const CONTRACT_ALLOWED_IMPORTS = new Set([
+  "../utils/claudeWindowEnv.mjs",
+  "../../../src/shared/launch/viewSelect.ts",
+]);
+
+/** contract.mjs may also re-export its own split-out parts, `./contract/<name>.mjs`. */
+const CONTRACT_PART_IMPORT = /^\.\/contract\/[a-z][a-z0-9-]*\.mjs$/;
+/** A contract part may import only other parts, `./<name>.mjs`. */
+const CONTRACT_PART_SIBLING = /^\.\/[a-z][a-z0-9-]*\.mjs$/;
+
+/**
+ * Replace comments with spaces and string/template contents with "x", keeping specifiers of
+ * import-like statements readable through a separate pass. Good enough for our own source
+ * (no regex literals containing quotes in adapters by convention).
+ */
+function stripComments(source: string): string {
+  let out = "";
+  let i = 0;
+  let quote: string | null = null;
+  while (i < source.length) {
+    const ch = source[i];
+    const next = source[i + 1];
+    if (quote) {
+      out += ch;
+      if (ch === "\\") {
+        out += next ?? "";
+        i += 2;
+        continue;
+      }
+      if (ch === quote) quote = null;
+      i++;
+      continue;
+    }
+    if (ch === "/" && next === "/") {
+      while (i < source.length && source[i] !== "\n") i++;
+      continue;
+    }
+    if (ch === "/" && next === "*") {
+      const end = source.indexOf("*/", i + 2);
+      const stop = end === -1 ? source.length : end + 2;
+      out += source.slice(i, stop).replace(/[^\n]/g, " ");
+      i = stop;
+      continue;
+    }
+    if (ch === '"' || ch === "'" || ch === "`") quote = ch;
+    out += ch;
+    i++;
+  }
+  return out;
+}
+
+/** Every module specifier: static import/export-from, side-effect import, import(), require(). */
+export function listImports(source: string): string[] {
+  const code = stripComments(source);
+  const specs: string[] = [];
+  const patterns = [
+    /\bimport\s+(?:[\w*{}\s,$]+?\s+from\s+)?["'`]([^"'`]+)["'`]/g,
+    /\bexport\s+(?:\*|\{[^}]*\})\s*(?:as\s+\w+\s+)?from\s+["'`]([^"'`]+)["'`]/g,
+    /\bimport\s*\(\s*["'`]?([^"'`)]*)["'`]?\s*\)/g,
+    /\brequire\s*\(\s*["'`]?([^"'`)]*)["'`]?\s*\)/g,
+  ];
+  for (const pattern of patterns) {
+    for (const match of code.matchAll(pattern)) specs.push(match[1]);
+  }
+  return specs;
+}
+
+/** Violations of the adapter purity rule in one adapter source. Empty array = clean. */
+export function adapterViolations(
+  source: string,
+  file = "adapter.mjs",
+  allowed: ImportRule = isAdapterImport
+): string[] {
+  const code = stripComments(source);
+  const problems: string[] = [];
+  for (const spec of listImports(source)) {
+    if (!allowed(spec)) {
+      problems.push(
+        `${file}: forbidden import ${JSON.stringify(spec)} (only ../contract.mjs and ./_shared/)`
+      );
+    }
+  }
+  if (/\bfetch\s*\(/.test(code)) problems.push(`${file}: fetch( is forbidden`);
+  if (/\bprocess\s*(?:\.|\[)/.test(code)) problems.push(`${file}: process.* reads are forbidden`);
+  if (/\bglobalThis\s*(?:\.|\[)\s*["'`]?(?:process|fetch)\b/.test(code)) {
+    problems.push(`${file}: globalThis.process / globalThis.fetch is forbidden`);
+  }
+  if (/\b(?:eval|Function)\s*\(/.test(code)) problems.push(`${file}: eval / Function is forbidden`);
+  return problems;
+}
+
+/** Violations of the re-export rule in contract.mjs: only the documented re-exports. */
+export function contractViolations(source: string): string[] {
+  return listImports(source)
+    .filter((spec) => !CONTRACT_ALLOWED_IMPORTS.has(spec) && !CONTRACT_PART_IMPORT.test(spec))
+    .map((spec) => `contract.mjs: undocumented import ${JSON.stringify(spec)}`);
+}
+
+/**
+ * Violations in one contract part (bin/cli/launch/contract/<name>.mjs): the adapter purity rule
+ * (no fetch, process, eval), and imports limited to sibling parts.
+ */
+export function contractPartViolations(source: string, file = "contract/part.mjs"): string[] {
+  const purity = adapterViolations(source, file).filter((p) => !p.includes("forbidden import"));
+  const imports = listImports(source)
+    .filter((spec) => !CONTRACT_PART_SIBLING.test(spec))
+    .map((spec) => `${file}: forbidden import ${JSON.stringify(spec)} (only ./<part>.mjs)`);
+  return [...imports, ...purity];
+}
+
+function adapterFiles(dir: string): string[] {
+  if (!existsSync(dir)) return [];
+  return readdirSync(dir)
+    .filter((name) => name.endsWith(".mjs"))
+    .sort()
+    .map((name) => join(dir, name));
+}
+
+function isRegistrationList(file: string): boolean {
+  return file.endsWith("index.mjs") || file.endsWith("all.mjs");
+}
+
+function scanDir(dir: string, allowed: ImportRule = isAdapterImport): string[] {
+  // adapters/index.mjs (lazy index) and adapters/all.mjs (eager list) import ./<id>.mjs;
+  // they are registration lists, not adapters.
+  return adapterFiles(dir)
+    .filter((file) => !isRegistrationList(file))
+    .flatMap((file) =>
+      adapterViolations(readFileSync(file, "utf8"), relative(ROOT, file), allowed)
+    );
+}
+
+test("every adapter imports only ../contract.mjs and reads no process/fetch (vacuous when none)", () => {
+  assert.deepEqual(scanDir(ADAPTERS_DIR), []);
+});
+
+test("every adapters/_shared helper imports only the contract or a sibling and stays pure", () => {
+  assert.ok(adapterFiles(SHARED_DIR).length > 0, "adapters/_shared holds the shared helpers");
+  assert.deepEqual(scanDir(SHARED_DIR, isSharedImport), []);
+});
+
+test("the import rules accept only the documented specifiers", () => {
+  assert.equal(isAdapterImport("../contract.mjs"), true);
+  assert.equal(isAdapterImport("./_shared/semver.mjs"), true);
+  assert.equal(isAdapterImport("./_shared/../codex.mjs"), false);
+  assert.equal(isAdapterImport("./_shared/nested/x.mjs"), false);
+  assert.equal(isAdapterImport("../../contract.mjs"), false);
+  assert.equal(isSharedImport("../../contract.mjs"), true);
+  assert.equal(isSharedImport("./semver.mjs"), true);
+  assert.equal(isSharedImport("../codex.mjs"), false);
+  assert.equal(isSharedImport("../contract.mjs"), false);
+  assert.equal(isSharedImport("node:fs"), false);
+  for (const [source, expected] of [
+    [`import fs from "node:fs";`, /forbidden import "node:fs"/],
+    [`const home = process.env.HOME;`, /process\.\* reads/],
+    [`const r = fetch("http://x");`, /fetch\( is forbidden/],
+  ] as Array<[string, RegExp]>) {
+    const problems = adapterViolations(
+      `import { createPlan } from "../../contract.mjs";\n${source}\n`,
+      "_shared/x.mjs",
+      isSharedImport
+    );
+    assert.ok(
+      problems.some((problem) => expected.test(problem)),
+      JSON.stringify(problems)
+    );
+  }
+});
+
+test("contract.mjs imports nothing beyond the documented exceptions", () => {
+  const source = readFileSync(CONTRACT_FILE, "utf8");
+  assert.deepEqual(contractViolations(source), []);
+  const imports = listImports(source)
+    .filter((spec) => !CONTRACT_PART_IMPORT.test(spec))
+    .sort();
+  assert.deepEqual(imports, [...CONTRACT_ALLOWED_IMPORTS].sort());
+  for (const spec of CONTRACT_ALLOWED_IMPORTS) {
+    assert.ok(source.includes(spec), `exception ${spec} is documented in the header`);
+  }
+});
+
+test("the scanner catches each forbidden pattern (inline fixtures)", () => {
+  const clean = `// mentions process.env and fetch( in a comment only
+import { defineAdapter, ensureV1 } from "../contract.mjs";
+/* import fs from "node:fs" inside a block comment */
+export default defineAdapter({ id: "x", plan: (ctx) => ensureV1(ctx.gateway.rootUrl) });
+`;
+  assert.deepEqual(adapterViolations(clean), []);
+
+  const cases: Array<[string, RegExp]> = [
+    [`import fs from "node:fs";`, /forbidden import "node:fs"/],
+    [`import { spawn } from "node:child_process";`, /node:child_process/],
+    [`import * as net from "node:net";`, /node:net/],
+    [`import http from "node:http";`, /node:http/],
+    [`import https from "node:https";`, /node:https/],
+    [`import os from "node:os";`, /node:os/],
+    [`import "node:fs";`, /node:fs/],
+    [`import other from "./codex.mjs";`, /\.\/codex\.mjs/],
+    [`import { x } from "../core/plan.mjs";`, /\.\.\/core\/plan\.mjs/],
+    [`export { y } from "../core/state.mjs";`, /\.\.\/core\/state\.mjs/],
+    [`const m = await import("node:os");`, /node:os/],
+    [`const m = require("fs");`, /"fs"/],
+    [`const r = fetch("http://x");`, /fetch\( is forbidden/],
+    [`const home = process.env.HOME;`, /process\.\* reads/],
+    [`const p = process["platform"];`, /process\.\* reads/],
+    [`const f = globalThis.fetch;`, /globalThis/],
+  ];
+  for (const [source, expected] of cases) {
+    const problems = adapterViolations(
+      `import { createPlan } from "../contract.mjs";\n${source}\n`
+    );
+    assert.ok(
+      problems.some((problem) => expected.test(problem)),
+      `expected ${expected} for ${JSON.stringify(source)}, got ${JSON.stringify(problems)}`
+    );
+  }
+});
+
+test("the directory scan catches a forbidden import in a temp adapters dir", () => {
+  const dir = mkdtempSync(join(tmpdir(), "olx-boundary-"));
+  try {
+    writeFileSync(join(dir, "good.mjs"), `import { createPlan } from "../contract.mjs";\n`);
+    writeFileSync(
+      join(dir, "bad.mjs"),
+      `import { createPlan } from "../contract.mjs";\nimport { readFileSync } from "node:fs";\n`
+    );
+    const problems = scanDir(dir);
+    assert.equal(problems.length, 1);
+    assert.match(problems[0], /bad\.mjs: forbidden import "node:fs"/);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("contract parts import only sibling parts, are pure, and are all re-exported", () => {
+  const parts = adapterFiles(CONTRACT_PARTS_DIR);
+  const problems = parts.flatMap((file) =>
+    contractPartViolations(readFileSync(file, "utf8"), relative(ROOT, file))
+  );
+  assert.deepEqual(problems, []);
+  const reexported = listImports(readFileSync(CONTRACT_FILE, "utf8"))
+    .filter((spec) => CONTRACT_PART_IMPORT.test(spec))
+    .sort();
+  const onDisk = parts.map((file) => `./contract/${relative(CONTRACT_PARTS_DIR, file)}`).sort();
+  assert.deepEqual(reexported, onDisk);
+});
+
+test("contract part scanner rejects outside imports and impure code", () => {
+  assert.deepEqual(contractPartViolations(`import { x } from "./errors.mjs";`), []);
+  assert.match(contractPartViolations(`import fs from "node:fs";`)[0], /forbidden import/);
+  assert.match(contractPartViolations(`import { y } from "../core/plan.mjs";`)[0], /forbidden/);
+  assert.match(contractPartViolations(`const e = process.env.X;`)[0], /process/);
+});
+
+test("contract scanner rejects an undocumented import", () => {
+  assert.deepEqual(
+    contractViolations(`export { claudeWindowEnv } from "../utils/claudeWindowEnv.mjs";`),
+    []
+  );
+  assert.match(contractViolations(`import fs from "node:fs";`)[0], /undocumented import/);
+  assert.deepEqual(contractViolations(`export { json } from "./contract/json.mjs";`), []);
+  assert.match(contractViolations(`export * from "./contract/../core/x.mjs";`)[0], /undocumented/);
+});
+
+test("adapters/index.mjs and adapters/all.mjs import only sibling adapters (./<id>.mjs)", () => {
+  for (const name of ["index.mjs", "all.mjs"]) {
+    const file = join(ADAPTERS_DIR, name);
+    if (!existsSync(file)) continue;
+    const specs = listImports(readFileSync(file, "utf8"));
+    assert.ok(specs.length > 0, `${name} registers adapters`);
+    for (const spec of specs) {
+      assert.match(spec, /^\.\/[a-z0-9][a-z0-9-]*\.mjs$/, `${name}: forbidden import ${spec}`);
+    }
+  }
+});
+
+test("every adapter satisfies the plan invariants under a throwing process/fetch proxy", async () => {
+  const files = adapterFiles(ADAPTERS_DIR).filter((file) => !isRegistrationList(file));
+  assert.equal(files.length, REGISTRY_SIZE, "adapters/ holds exactly the expected adapter files");
+  let checked = 0;
+  for (const file of files) {
+    const mod = await import(pathToFileURL(file).href);
+    const adapter = mod.default;
+    assert.ok(adapter && typeof adapter.plan === "function", `${file} default-exports an adapter`);
+    const gate = adapter.capabilities.versionGate;
+    const version = gate ? (gate.recommended ?? gate.min ?? "999.0.0") : "999.0.0";
+    const ctx = fixtureCtx({
+      tool: adapter.id,
+      viewSpec: adapter.capabilities.modelList.view,
+      version,
+    });
+    const realFetch = globalThis.fetch;
+    const realEnv = process.env;
+    const trap = new Proxy(
+      {},
+      {
+        get() {
+          throw new Error(`${adapter.id}: plan() read process.env`);
+        },
+      }
+    );
+    let plan: LaunchPlan;
+    try {
+      globalThis.fetch = (() => {
+        throw new Error(`${adapter.id}: plan() called fetch`);
+      }) as typeof fetch;
+      Object.defineProperty(process, "env", { value: trap, configurable: true, writable: true });
+      plan = adapter.plan(ctx);
+    } finally {
+      Object.defineProperty(process, "env", { value: realEnv, configurable: true, writable: true });
+      globalThis.fetch = realFetch;
+    }
+    checkPlanInvariants(plan, ctx, { adapter });
+    checked++;
+  }
+  assert.equal(checked, REGISTRY_SIZE, "every registered adapter was planned and checked");
+});

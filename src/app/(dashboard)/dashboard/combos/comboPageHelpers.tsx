@@ -90,7 +90,7 @@ export function ComboTestSummaryNote({ results }) {
         {configurationNote ? (
           <p className="text-xs font-medium text-warning">{configurationNote}</p>
         ) : null}
-        <p className="text-[10px] text-text-muted">
+        <p className="text-xs text-text-muted">
           {getI18nOrFallback(
             t,
             "jevTestSummaryFootnote",

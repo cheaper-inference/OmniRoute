@@ -37,11 +37,11 @@ export function RequestNode({ data }: NodeProps) {
         className="!bg-transparent !border-0 !w-0 !h-0"
       />
 
-      <div className="text-[10px] font-semibold uppercase tracking-wider mb-1" style={{ color }}>
+      <div className="ci-eyebrow mb-1" data-size="3xs" data-weight="medium" style={{ color }}>
         Request
       </div>
       <div
-        className="text-[11px] font-mono text-text-muted truncate max-w-[130px]"
+        className="text-2xs font-mono text-text-muted truncate max-w-[130px]"
         title={comboName as string}
       >
         {comboName as string}
