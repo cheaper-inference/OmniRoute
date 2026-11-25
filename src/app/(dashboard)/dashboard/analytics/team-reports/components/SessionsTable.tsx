@@ -129,35 +129,29 @@ export default function SessionsTable({
   return (
     <Table
       className="text-sm"
-      containerClassName="border-0"
+      variant="plain"
       scrollbarLabel={t("tab_sessions")}
       scrollLabel={t("tab_sessions")}
     >
       <TableHeader>
-        <TableRow className="text-left text-xs uppercase tracking-wider text-text-muted">
+        <TableRow>
           {columns.map((column) => (
-            <TableHead
-              key={column.key}
-              className={`py-2 px-3 ${column.numeric ? "text-right" : ""}`}
-            >
+            <TableHead key={column.key} numeric={column.numeric}>
               {column.header}
             </TableHead>
           ))}
-          <TableHead className="py-2 px-3" />
+          <TableHead />
         </TableRow>
       </TableHeader>
       <TableBody>
         {sessions.map((session) => (
           <TableRow key={session.id}>
             {columns.map((column) => (
-              <TableCell
-                key={column.key}
-                className={`py-2.5 px-3 ${column.numeric ? "text-right tabular-nums" : ""} ${column.cellClass ?? ""}`}
-              >
+              <TableCell key={column.key} numeric={column.numeric} className={column.cellClass}>
                 {column.cell(session)}
               </TableCell>
             ))}
-            <TableCell className="py-2.5 px-3 text-right">
+            <TableCell>
               <Button variant="ghost" size="sm" onClick={() => onSelect(session.id)}>
                 {t("details")}
               </Button>

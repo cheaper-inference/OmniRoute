@@ -86,7 +86,7 @@ function MatrixHeaderLabel({
   );
 }
 
-const STICKY_HEAD = "sticky left-0 z-10 bg-surface text-left";
+const STICKY_HEAD = "z-10 bg-surface";
 
 interface MatrixTableProps {
   matrix: ReportMatrix;
@@ -142,18 +142,13 @@ function MatrixCell({ view, i, j }: { view: MatrixParts; i: number; j: number })
   const other = row.other || col.other;
   const shade = other ? undefined : heatColor(metricValue(cell, metric) ?? 0, view.max);
   return (
-    <TableCell
-      title={title}
-      className={`p-0 text-right tabular-nums ${other ? "bg-surface-2 italic" : ""}`}
-      style={{ backgroundColor: shade }}
-    >
+    <TableCell title={title} numeric>
       {isClickable(matrix, i, j) ? (
-        // kit-exception: the whole shaded cell is the click target, so it needs no
-        // button padding, border or hover surface of its own.
         <button
           type="button"
           aria-label={`${title}. ${t("matrixApply")}`}
-          className="block w-full cursor-pointer px-3 py-2 text-right tabular-nums hover:underline focus-ring"
+          className={`block w-full cursor-pointer text-right tabular-nums hover:underline focus-ring ${other ? "bg-surface-2 italic" : ""}`}
+          style={{ backgroundColor: shade }}
           onClick={() =>
             handlers.onFilter([
               [DIMENSION_INFO[matrix.rowDimension].field, filterValueFor(row.key)],
@@ -164,7 +159,12 @@ function MatrixCell({ view, i, j }: { view: MatrixParts; i: number; j: number })
           {text}
         </button>
       ) : (
-        <span className="block px-3 py-2 text-text-muted">{text}</span>
+        <span
+          className={`block text-text-muted ${other ? "bg-surface-2 italic" : ""}`}
+          style={{ backgroundColor: shade }}
+        >
+          {text}
+        </span>
       )}
     </TableCell>
   );
@@ -183,7 +183,8 @@ function MatrixHeaderRow({ view }: { view: MatrixParts }) {
         <TableHead
           key={col.key + String(col.other)}
           scope="col"
-          className={`min-w-24 text-right ${col.other ? "bg-surface-2" : ""}`}
+          numeric
+          className={`min-w-24 ${col.other ? "bg-surface-2" : ""}`}
         >
           <MatrixHeaderLabel
             entry={col}
@@ -193,7 +194,7 @@ function MatrixHeaderRow({ view }: { view: MatrixParts }) {
           />
         </TableHead>
       ))}
-      <TableHead scope="col" className="min-w-24 text-right">
+      <TableHead scope="col" numeric className="min-w-24">
         {t("matrixTotal")}
       </TableHead>
     </TableRow>
@@ -208,11 +209,11 @@ function MatrixTotalsRow({ view }: { view: MatrixParts }) {
         {t("matrixTotal")}
       </TableHead>
       {view.matrix.cols.map((col) => (
-        <TableCell key={col.key + String(col.other)} className="px-3 py-2 text-right tabular-nums">
+        <TableCell key={col.key + String(col.other)} numeric>
           <span className="font-medium">{view.show(col)}</span>
         </TableCell>
       ))}
-      <TableCell className="px-3 py-2 text-right tabular-nums">
+      <TableCell numeric>
         <span className="font-semibold">{view.show(view.matrix.totals)}</span>
       </TableCell>
     </TableRow>
@@ -240,7 +241,7 @@ export default function MatrixTable({ matrix, metric, handlers }: MatrixTablePro
   return (
     <Table
       className="text-xs"
-      containerClassName="border-0"
+      variant="plain"
       scrollbarLabel={t("matrix")}
       scrollLabel={t("matrix")}
     >
@@ -261,7 +262,7 @@ export default function MatrixTable({ matrix, metric, handlers }: MatrixTablePro
             {matrix.cols.map((col, j) => (
               <MatrixCell key={col.key + String(col.other)} view={view} i={i} j={j} />
             ))}
-            <TableCell className="px-3 py-2 text-right tabular-nums">
+            <TableCell numeric>
               <span className="font-medium">{view.show(row)}</span>
             </TableCell>
           </TableRow>

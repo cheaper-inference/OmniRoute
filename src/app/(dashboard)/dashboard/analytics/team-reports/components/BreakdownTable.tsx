@@ -110,7 +110,6 @@ function SortableHeader({
       defaultDirection={column.key === "name" ? "asc" : "desc"}
       align={column.numeric ? "right" : "left"}
       onDirectionChange={(direction) => onSort(column.key, direction === "desc")}
-      className="py-2 px-3 text-xs uppercase text-text-muted"
     >
       {column.label}
     </SortableTableHead>
@@ -139,7 +138,7 @@ function BreakdownRow({
   const name = row.label || row.key || fallbackName;
   return (
     <TableRow>
-      <TableCell className="py-2.5 px-3">
+      <TableCell>
         <div className="font-medium text-text-main">
           {onOpen && row.key ? (
             <LinkButton
@@ -160,27 +159,21 @@ function BreakdownRow({
           </div>
         )}
       </TableCell>
-      <TableCell className="py-2.5 px-3 text-right tabular-nums">{row[extraCount]}</TableCell>
-      <TableCell className="py-2.5 px-3 text-right tabular-nums">{row.sessions}</TableCell>
-      <TableCell className="py-2.5 px-3 text-right tabular-nums">{row.requests}</TableCell>
-      <TableCell className="py-2.5 px-3 text-right tabular-nums">{row.errors}</TableCell>
-      <TableCell className="py-2.5 px-3 text-right tabular-nums">
-        {fmtCompact(tokens.input)}
-      </TableCell>
-      <TableCell className="py-2.5 px-3 text-right tabular-nums">
-        {fmtCompact(tokens.output)}
-      </TableCell>
-      <TableCell className="py-2.5 px-3 text-right tabular-nums">
+      <TableCell numeric>{row[extraCount]}</TableCell>
+      <TableCell numeric>{row.sessions}</TableCell>
+      <TableCell numeric>{row.requests}</TableCell>
+      <TableCell numeric>{row.errors}</TableCell>
+      <TableCell numeric>{fmtCompact(tokens.input)}</TableCell>
+      <TableCell numeric>{fmtCompact(tokens.output)}</TableCell>
+      <TableCell numeric>
         <CacheTokens split={tokens} />
       </TableCell>
-      <TableCell className="py-2.5 px-3 text-right font-mono tabular-nums text-success">
+      <TableCell numeric className="font-mono text-success">
         {formatCost(row.costUsd)}
       </TableCell>
-      <TableCell className="py-2.5 px-3 text-text-muted">
-        {formatDateTime(row.lastSeenAt)}
-      </TableCell>
+      <TableCell className="text-text-muted">{formatDateTime(row.lastSeenAt)}</TableCell>
       {onFilter && (
-        <TableCell className="py-2.5 px-3 text-right">
+        <TableCell>
           {(row.key || filterNone) && (
             <Button variant="ghost" size="sm" onClick={() => onFilter(row.key || FILTER_NONE)}>
               {t("filterBy")}
@@ -228,7 +221,8 @@ export default function BreakdownTable({
   return (
     <Table
       className="text-sm"
-      containerClassName="border-0"
+      density="comfortable"
+      variant="plain"
       scrollbarLabel={nameHeader}
       scrollLabel={nameHeader}
     >
@@ -237,7 +231,7 @@ export default function BreakdownTable({
           {columns.map((column) => (
             <SortableHeader key={column.key} column={column} sort={sort} onSort={changeSort} />
           ))}
-          {onFilter && <TableHead className="py-2 px-3" />}
+          {onFilter && <TableHead />}
         </TableRow>
       </TableHeader>
       <TableBody>

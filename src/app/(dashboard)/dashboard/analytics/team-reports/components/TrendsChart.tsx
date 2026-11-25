@@ -56,7 +56,7 @@ export default function TrendsChart({ days, series, metric }: TrendsChartProps) 
             if (!active || !payload?.length) return null;
             const rows = payload.filter((item) => Number(item.value) > 0).reverse();
             return (
-              <div className="rounded-lg border border-border bg-surface px-2.5 py-1.5 text-xs">
+              <div style={chartTheme.tooltip.contentStyle} className="px-2.5 py-1.5">
                 <p className="text-text-muted">{formatDay(String(label))}</p>
                 {rows.map((item) => (
                   <p key={String(item.dataKey)} className="flex items-center gap-1.5 tabular-nums">

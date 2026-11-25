@@ -92,7 +92,7 @@ export default function SessionTimelineChart({ series }: { series: TimelineSerie
             const point = payload?.[0]?.payload as TimelinePoint | undefined;
             if (!active || !point) return null;
             return (
-              <div className="rounded-lg border border-border bg-surface px-2.5 py-1.5 text-xs">
+              <div style={chartTheme.tooltip.contentStyle} className="px-2.5 py-1.5">
                 <p className="text-text-muted">{formatDateTime(new Date(point.t).toISOString())}</p>
                 <p className="font-mono">{point.model}</p>
                 <p className="tabular-nums">

@@ -24,7 +24,7 @@ function KpiGrid({ cards, className }: { cards: KpiCard[]; className: string }) 
     <div className={`grid grid-cols-2 gap-3 ${className}`}>
       {cards.map((card) => (
         <Card key={card.label} padding="sm">
-          <p className="text-xs font-medium uppercase tracking-wider text-text-muted">
+          <p className="ci-eyebrow" data-weight="medium">
             {card.label}
           </p>
           {card.figures ? (

@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 
 import type { AgentSessionTimeline } from "@/lib/db/agentSessionReportStats";
+import { Card } from "@/shared/components";
 import { categoricalSlot } from "@/shared/utils/categoricalPalette";
 
 import { formatLatency } from "./format";
@@ -63,13 +64,9 @@ export default function SessionTimeline({ timeline }: { timeline: AgentSessionTi
           {t("timelineCapped", { count: points.length })}
         </p>
       )}
-      <div
-        role="img"
-        aria-label={summary}
-        className="h-64 w-full rounded-xl border border-border bg-surface-2 px-3 py-4"
-      >
+      <Card.Section role="img" aria-label={summary} className="h-64 w-full px-3 py-4">
         <SessionTimelineChart series={series} />
-      </div>
+      </Card.Section>
       <ul className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-text-muted">
         {series.map((entry) => (
           <li key={entry.name} className="flex items-center gap-1.5">

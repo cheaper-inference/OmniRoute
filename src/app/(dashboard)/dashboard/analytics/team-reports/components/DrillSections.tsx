@@ -7,7 +7,7 @@ import type {
   ReportBreakdownRow,
   ReportSummaryTotals,
 } from "@/lib/usage/agentSessionReports";
-import { Button } from "@/shared/components";
+import { Button, Card } from "@/shared/components";
 import { fmtCompact, formatCost } from "@/shared/utils/formatting";
 
 import { NO_VALUE, formatDateTime, formatLatency, formatRatio, formatSpan } from "./format";
@@ -32,10 +32,10 @@ export function DrillKpis({ totals }: { totals: ReportSummaryTotals }) {
   return (
     <dl className="grid grid-cols-2 gap-2 sm:grid-cols-3">
       {figures.map(([term, value]) => (
-        <div key={term} className="rounded-lg border border-border bg-surface-2 px-3 py-2">
+        <Card.Section key={term} className="px-3 py-2">
           <dt className="text-xs text-text-muted">{term}</dt>
           <dd className="text-base font-semibold tabular-nums text-text-main">{value}</dd>
-        </div>
+        </Card.Section>
       ))}
     </dl>
   );
@@ -57,7 +57,9 @@ export function DrillTopList({
   const top = [...rows].sort((a, b) => b.costUsd - a.costUsd).slice(0, TOP_COUNT);
   return (
     <section className="space-y-1.5" aria-label={title}>
-      <h4 className="text-sm text-text-main">{title}</h4>
+      <h4 className="ci-heading text-text-main" data-size="sm">
+        {title}
+      </h4>
       {top.length === 0 ? (
         <p className="text-xs text-text-muted">{t("noData")}</p>
       ) : (
@@ -95,7 +97,9 @@ export function DrillSessions({
   const t = useTranslations("reports");
   return (
     <section className="space-y-1.5" aria-label={t("drillRecentSessions")}>
-      <h4 className="text-sm text-text-main">{t("drillRecentSessions")}</h4>
+      <h4 className="ci-heading text-text-main" data-size="sm">
+        {t("drillRecentSessions")}
+      </h4>
       {sessions.length === 0 ? (
         <p className="text-xs text-text-muted">{t("noData")}</p>
       ) : (

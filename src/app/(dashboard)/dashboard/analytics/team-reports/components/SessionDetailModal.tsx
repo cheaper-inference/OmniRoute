@@ -41,31 +41,30 @@ type SessionDetail = AgentSessionReportDetail & { session: AgentSessionRecord };
 function RecentRequestsTable({ requests }: { requests: PricedSessionRequest[] }) {
   const t = useTranslations("reports");
   const tokenLabels = useTokenLabels();
-  const head = "py-2 px-2";
-  const num = "py-1.5 px-2 text-right tabular-nums";
   return (
     <Table
       className="text-xs"
-      containerClassName="border-0"
+      density="compact"
+      variant="plain"
       maxHeight="50vh"
       scrollbarLabel={t("recentRequests")}
       scrollLabel={t("recentRequests")}
     >
       <TableHeader>
-        <TableRow className="text-left text-text-muted">
-          <TableHead className={head}>{t("colTime")}</TableHead>
-          <TableHead className={head}>{t("provider")}</TableHead>
-          <TableHead className={head}>{t("colModel")}</TableHead>
-          <TableHead className={head}>{t("serviceTier")}</TableHead>
-          <TableHead className={`${head} text-right`}>{tokenLabels.input}</TableHead>
-          <TableHead className={`${head} text-right`}>{tokenLabels.output}</TableHead>
-          <TableHead className={`${head} text-right`}>{tokenLabels.cache}</TableHead>
-          <TableHead className={`${head} text-right`}>{t("colReasoning")}</TableHead>
-          <TableHead className={`${head} text-right`}>{t("colLatency")}</TableHead>
-          <TableHead className={`${head} text-right`}>{t("colTtft")}</TableHead>
-          <TableHead className={head}>{t("colStatus")}</TableHead>
-          <TableHead className={head}>{t("errorCode")}</TableHead>
-          <TableHead className={`${head} text-right`}>{t("colCost")}</TableHead>
+        <TableRow>
+          <TableHead>{t("colTime")}</TableHead>
+          <TableHead>{t("provider")}</TableHead>
+          <TableHead>{t("colModel")}</TableHead>
+          <TableHead>{t("serviceTier")}</TableHead>
+          <TableHead numeric>{tokenLabels.input}</TableHead>
+          <TableHead numeric>{tokenLabels.output}</TableHead>
+          <TableHead numeric>{tokenLabels.cache}</TableHead>
+          <TableHead numeric>{t("colReasoning")}</TableHead>
+          <TableHead numeric>{t("colLatency")}</TableHead>
+          <TableHead numeric>{t("colTtft")}</TableHead>
+          <TableHead>{t("colStatus")}</TableHead>
+          <TableHead>{t("errorCode")}</TableHead>
+          <TableHead numeric>{t("colCost")}</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -73,27 +72,23 @@ function RecentRequestsTable({ requests }: { requests: PricedSessionRequest[] })
           const split = splitTokens(request.tokens);
           return (
             <TableRow key={request.id}>
-              <TableCell className="py-1.5 px-2 text-text-muted">
-                {formatDateTime(request.timestamp)}
-              </TableCell>
-              <TableCell className="py-1.5 px-2">{request.provider ?? "-"}</TableCell>
-              <TableCell className="py-1.5 px-2 font-mono">{request.model ?? "-"}</TableCell>
-              <TableCell className="py-1.5 px-2">{request.serviceTier}</TableCell>
-              <TableCell className={num}>{fmtCompact(split.input)}</TableCell>
-              <TableCell className={num}>{fmtCompact(split.output)}</TableCell>
-              <TableCell className={num}>
+              <TableCell className="text-text-muted">{formatDateTime(request.timestamp)}</TableCell>
+              <TableCell>{request.provider ?? "-"}</TableCell>
+              <TableCell className="font-mono">{request.model ?? "-"}</TableCell>
+              <TableCell>{request.serviceTier}</TableCell>
+              <TableCell numeric>{fmtCompact(split.input)}</TableCell>
+              <TableCell numeric>{fmtCompact(split.output)}</TableCell>
+              <TableCell numeric>
                 <CacheTokens split={split} />
               </TableCell>
-              <TableCell className={num}>{fmtCompact(request.tokens.reasoning)}</TableCell>
-              <TableCell className={num}>{formatLatency(request.latencyMs)}</TableCell>
-              <TableCell className={num}>{formatLatency(request.ttftMs)}</TableCell>
-              <TableCell
-                className={`py-1.5 px-2 ${request.success ? "text-success" : "text-error"}`}
-              >
+              <TableCell numeric>{fmtCompact(request.tokens.reasoning)}</TableCell>
+              <TableCell numeric>{formatLatency(request.latencyMs)}</TableCell>
+              <TableCell numeric>{formatLatency(request.ttftMs)}</TableCell>
+              <TableCell className={request.success ? "text-success" : "text-error"}>
                 {request.status ?? (request.success ? "ok" : "error")}
               </TableCell>
-              <TableCell className="py-1.5 px-2 font-mono">{request.errorCode ?? "-"}</TableCell>
-              <TableCell className={`${num} font-mono`}>
+              <TableCell className="font-mono">{request.errorCode ?? "-"}</TableCell>
+              <TableCell numeric className="font-mono">
                 {request.priced ? (
                   formatCost(request.costUsd)
                 ) : (
@@ -230,7 +225,7 @@ function SessionDetailBody({
       <dl className="grid grid-cols-2 gap-3 rounded-lg border border-border p-3 sm:grid-cols-4">
         {facts.map(([term, value]) => (
           <div key={term}>
-            <dt className="text-xs uppercase text-text-muted">{term}</dt>
+            <dt className="ci-eyebrow">{term}</dt>
             <dd className="font-medium text-text-main">{value}</dd>
           </div>
         ))}

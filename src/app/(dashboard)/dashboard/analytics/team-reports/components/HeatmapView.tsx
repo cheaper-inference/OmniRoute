@@ -46,17 +46,18 @@ function HeatmapTable({ grid, metric, max }: HeatmapTableProps) {
   return (
     <Table
       className="text-xs"
-      containerClassName="border-0"
+      density="compact"
+      variant="plain"
       scrollbarLabel={t("heatmap")}
       scrollLabel={t("heatmap")}
     >
       <TableHeader>
         <TableRow>
-          <TableHead scope="col" className="sticky left-0 z-10 bg-surface text-left">
+          <TableHead scope="col" sticky="start" align="start" className="z-10 bg-surface">
             <span className="ci-sr-only">{t("heatmapWeekday")}</span>
           </TableHead>
           {HOURS.map((hour) => (
-            <TableHead key={hour} scope="col" className="px-0 text-center tabular-nums">
+            <TableHead key={hour} scope="col" align="center" className="tabular-nums">
               {hour}
             </TableHead>
           ))}
@@ -67,7 +68,7 @@ function HeatmapTable({ grid, metric, max }: HeatmapTableProps) {
           const day = weekdayName(MONDAY_FIRST[index]);
           return (
             <TableRow key={day}>
-              <TableHead scope="row" className="sticky left-0 z-10 bg-surface text-left">
+              <TableHead scope="row" sticky="start" align="start" className="z-10 bg-surface">
                 {day}
               </TableHead>
               {HOURS.map((hour) => {
@@ -77,7 +78,7 @@ function HeatmapTable({ grid, metric, max }: HeatmapTableProps) {
                   <TableCell
                     key={hour}
                     title={`${day} ${String(hour).padStart(2, "0")}:00 - ${text} ${metricName}`}
-                    className="h-8 min-w-6 border border-border/30 p-0"
+                    className="min-w-6"
                     style={{ backgroundColor: heatColor(value, max) }}
                   >
                     <span className="ci-sr-only">{text}</span>

@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 
 import type { AgentSessionReportFacets } from "@/lib/db/agentSessionReports";
-import { Input, SegmentedControl, Select } from "@/shared/components";
+import { Card, Input, SegmentedControl, Select } from "@/shared/components";
 
 import {
   FILTER_DIMENSIONS,
@@ -90,7 +90,7 @@ export default function ReportFilters({
   };
 
   return (
-    <div className="space-y-3 rounded-xl border border-border bg-surface/30 p-4">
+    <Card.Section className="space-y-3">
       <SegmentedControl
         semantics="radio"
         size="sm"
@@ -129,6 +129,6 @@ export default function ReportFilters({
           />
         ))}
       </div>
-    </div>
+    </Card.Section>
   );
 }

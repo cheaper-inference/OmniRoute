@@ -144,7 +144,9 @@ export default function TrendsSection({
     <section className="space-y-3" aria-label={t("trends")}>
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
-          <h3 className="text-sm text-text-main">{t("trends")}</h3>
+          <h3 className="ci-heading text-text-main" data-size="sm">
+            {t("trends")}
+          </h3>
           <p className="text-xs text-text-muted">{t("trendsBy", { dimension: dimensionName })}</p>
         </div>
         <SegmentedControl
