@@ -21,7 +21,8 @@ const instructions = (body) =>
     .filter((line) => !/^\s*#/.test(line))
     .join("\n");
 
-const bunWeb = instructions(stageBody(read("Dockerfile.bun"), "runner-web"));
+const dockerfile = read("Dockerfile.bun");
+const bunWeb = instructions(stageBody(dockerfile, "runner-web"));
 
 test("Bun runner-web does not install Chromium from apt", () => {
   // The Debian chromium / chromium-common / chromium-driver packages carried ~720 HIGH
@@ -35,7 +36,11 @@ test("Bun runner-web installs Playwright's own Chromium, like the Node runner-we
   // 3.8.54-web-bun: chromium.launch() failed with "Executable doesn't exist at
   // /home/bun/.cache/ms-playwright/…" because nothing populated Playwright's browser path.
   assert.match(bunWeb, /^ENV PLAYWRIGHT_BROWSERS_PATH=\/home\/bun\/\.cache\/ms-playwright$/m);
-  assert.match(bunWeb, /\bbun node_modules\/playwright\/cli\.js install chromium --with-deps\b/);
+  assert.match(
+    bunWeb,
+    /\bbun \/opt\/playwright\/node_modules\/playwright\/cli\.js install chromium --with-deps\b/
+  );
+  assert.match(bunWeb, /^COPY --from=builder \/opt\/playwright \/opt\/playwright$/m);
   assert.match(bunWeb, /chown -R bun:bun \/home\/bun\/\.cache/);
   assert.doesNotMatch(bunWeb, /PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD/);
   const browsersEnv = bunWeb.indexOf("ENV PLAYWRIGHT_BROWSERS_PATH=");
@@ -44,6 +49,15 @@ test("Bun runner-web installs Playwright's own Chromium, like the Node runner-we
     browsersEnv !== -1 && browsersEnv < install,
     "browsers path must be set before install"
   );
+});
+
+test("Bun builder bundles the complete Playwright installer for runner-web", () => {
+  const builder = instructions(stageBody(dockerfile, "builder"));
+  assert.match(
+    builder,
+    /\bcp -RL node_modules\/playwright node_modules\/playwright-core \/opt\/playwright\/node_modules\//
+  );
+  assert.match(builder, /\btest -f \/opt\/playwright\/node_modules\/playwright\/cli\.js$/m);
 });
 
 test("Bun runner-web ships Xvfb for headed Chromium (#15300)", () => {
@@ -81,6 +95,17 @@ test("the release preflight smoke builds the real runner-web stage and launches 
   // It must replay the stage itself, not a hand-kept copy of the package list.
   assert.match(smoke, /FROM runner-base AS runner-web/);
   assert.match(smoke, /node_modules\/playwright-core/);
+  assert.match(smoke, /^\s*echo "FROM scratch AS builder"$/m);
+  assert.match(smoke, /COPY node_modules\/playwright \/opt\/playwright\/node_modules\/playwright"/);
+  assert.match(
+    smoke,
+    /COPY node_modules\/playwright-core \/opt\/playwright\/node_modules\/playwright-core"/
+  );
+  assert.match(smoke, /^\s*echo "COPY standalone\/node_modules\/ \/app\/node_modules\/"$/m);
+  assert.match(
+    smoke,
+    /^cp -L "\$ROOT\/node_modules\/playwright\/"\{index\.js,index\.mjs,package\.json\} "\$CTX\/standalone\/node_modules\/playwright\/"$/m
+  );
   assert.match(smoke, /headless: false/);
   assert.match(smoke, /Xvfb/);
 });
