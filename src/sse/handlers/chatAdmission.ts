@@ -13,6 +13,7 @@ import {
   type AdaptiveAdmissionRuntime,
 } from "@omniroute/open-sse/services/admission/runtime.ts";
 import type { PerTargetAdmissionHook } from "@omniroute/open-sse/services/admission/types.ts";
+import { capClientRetryAfter } from "@/shared/middleware/clientRetryAfterCap";
 
 /** Single fairness bucket for unauthenticated / keyless traffic. Opaque; never a raw key. */
 export const ANONYMOUS_ADMISSION_TENANT_KEY = "anonymous";
@@ -315,13 +316,15 @@ export function withChatAdmission(
     );
     const effectiveSignal = lifecycleSignal ?? request?.signal ?? undefined;
     try {
-      const response = await implementation(
-        request,
-        clientRawRequest,
-        preParsedBody,
-        correlationId,
-        admissionContext,
-        effectiveSignal
+      const response = capClientRetryAfter(
+        await implementation(
+          request,
+          clientRawRequest,
+          preParsedBody,
+          correlationId,
+          admissionContext,
+          effectiveSignal
+        )
       );
       const admittedState = admissionContext.getAdmittedState();
       if (!admittedState) return response;

@@ -5,6 +5,7 @@ import Badge from "@/shared/components/Badge";
 import Button from "@/shared/components/Button";
 import EmptyState from "@/shared/components/EmptyState";
 import Input from "@/shared/components/Input";
+import Pager from "@/shared/components/Pager";
 import Select from "@/shared/components/Select";
 import { Card } from "@/shared/components";
 import { OmniSkillCard } from "./OmniSkillCard";
@@ -111,27 +112,23 @@ export function OmniSkillsList({
           </div>
         )}
 
-        <div className="flex items-center justify-between pt-2 border-t border-border">
-          <span className="text-sm text-text-muted">
-            {t("pageInfo", {
-              page: skillsPage,
-              totalPages: skillsTotalPages,
-              total: skillsTotal,
-            })}
-          </span>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={onPagePrev} disabled={skillsPage === 1}>
-              {t("previous")}
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={onPageNext}
-              disabled={skillsPage === skillsTotalPages || skillsTotalPages === 0}
-            >
-              {t("next")}
-            </Button>
-          </div>
+        <div className="flex justify-end pt-2 border-t border-border">
+          <Pager
+            variant="summary"
+            page={skillsPage}
+            pageCount={Math.max(1, skillsTotalPages)}
+            onPageChange={(next) => (next < skillsPage ? onPagePrev() : onPageNext())}
+            labels={{
+              previous: t("previous"),
+              next: t("next"),
+              summary: () =>
+                t("pageInfo", {
+                  page: skillsPage,
+                  totalPages: skillsTotalPages,
+                  total: skillsTotal,
+                }),
+            }}
+          />
         </div>
       </div>
 

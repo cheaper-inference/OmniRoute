@@ -15,6 +15,7 @@ import { isProxySkipRecentlyFailedEnabled } from "@/shared/utils/featureFlags";
 import { invalidateDbCache } from "./readCache";
 import { encrypt, decrypt } from "./encryption";
 import { getProxyRegistryGeneration, resolveProxyForScopeFromRegistry } from "./proxies";
+import { syncRotatingEgressExemptions } from "./proxies/rotatingEgress";
 import { isEgressBucketedLockScope } from "@omniroute/open-sse/config/providerErrorRules.ts";
 import { getComboModelProvider as getComboEntryProvider } from "@/lib/combos/steps";
 import {
@@ -46,6 +47,8 @@ type ProxyResolutionResult = {
   level: string;
   levelId: string | null;
   source?: string;
+  // Present only when a pool's `session` strategy chose the member from a session key.
+  rotationStrategy?: "session";
 };
 // State observed when a resolution started; an entry is stored only if it still holds.
 type ProxyResolutionStamp = {
@@ -661,10 +664,14 @@ function requiresStableEgress(provider: string | null): boolean {
 // which re-invokes resolveProxyForScopeFromRegistry and applies the pool's own selection
 // strategy (round-robin advances, sticky holds until its window elapses, random reshuffles) —
 // no new strategy is introduced here.
+// One exception for an egress-bucketed provider: when its pool runs the `session` strategy
+// and the request carries a session key, each conversation already gets one stable member,
+// so the cascade re-runs to hash this key. grok-web stays pinned whatever the strategy.
 function isCachedPoolMemberDue(
   entry: ProxyResolutionCacheEntry,
   db: ReturnType<typeof getDbInstance>,
-  connectionId: string
+  connectionId: string,
+  sessionKey?: string | null
 ): boolean {
   const { result } = entry;
   if (result.source !== "registry" || result.proxy == null) return false;
@@ -672,14 +679,21 @@ function isCachedPoolMemberDue(
     .prepare("SELECT provider FROM provider_connections WHERE id = ?")
     .get(connectionId) as { provider?: string } | undefined;
   const provider = typeof row?.provider === "string" ? row.provider : null;
-  return !requiresStableEgress(provider);
+  if (!requiresStableEgress(provider)) return true;
+  return (
+    Boolean(sessionKey) &&
+    result.rotationStrategy === "session" &&
+    isEgressBucketedLockScope(provider)
+  );
 }
 
 export async function resolveProxyForConnection(
   connectionId: string,
   apiKeyId?: string,
-  providerId?: string
+  providerId?: string,
+  options?: { sessionKey?: string | null }
 ) {
+  const sessionKey = options?.sessionKey ?? null;
   const cacheKey = providerId
     ? `${connectionId}:${apiKeyId || ""}:${providerId}`
     : apiKeyId
@@ -691,13 +705,14 @@ export async function resolveProxyForConnection(
     refusalSeq: getProxyRefusalSeq(),
   };
   const db = getDbInstance();
+  syncRotatingEgressExemptions();
   const cached = proxyResolutionCache.get(cacheKey);
   if (
     cached &&
     cached.generation === stamp.generation &&
     cached.registryGeneration === stamp.registryGeneration &&
     !isCachedPoolMemberSetAside(cached) &&
-    !isCachedPoolMemberDue(cached, db, connectionId)
+    !isCachedPoolMemberDue(cached, db, connectionId, sessionKey)
   ) {
     return cached.result;
   }
@@ -818,7 +833,9 @@ export async function resolveProxyForConnection(
   }
 
   // Step 3: Account-level registry
-  const registryAccount = await resolveProxyForScopeFromRegistry("account", connectionId);
+  const registryAccount = await resolveProxyForScopeFromRegistry("account", connectionId, {
+    sessionKey,
+  });
   if (registryAccount?.proxy) {
     cacheProxyResolution(cacheKey, stamp, registryAccount);
     return registryAccount;
@@ -841,7 +858,8 @@ export async function resolveProxyForConnection(
     if (connectionProvider && connectionProxyEnabled) {
       const registryProvider = await resolveProxyForScopeFromRegistry(
         "provider",
-        connectionProvider
+        connectionProvider,
+        { sessionKey }
       );
       if (registryProvider?.proxy) {
         cacheProxyResolution(cacheKey, stamp, registryProvider);
@@ -872,7 +890,9 @@ export async function resolveProxyForConnection(
           );
           if (!usesProvider) continue;
 
-          const registryCombo = await resolveProxyForScopeFromRegistry("combo", comboId);
+          const registryCombo = await resolveProxyForScopeFromRegistry("combo", comboId, {
+            sessionKey,
+          });
           if (registryCombo?.proxy) {
             cacheProxyResolution(cacheKey, stamp, registryCombo);
             return registryCombo;
@@ -919,7 +939,7 @@ export async function resolveProxyForConnection(
   }
 
   // Step 9: Global registry
-  const registryGlobal = await resolveProxyForScopeFromRegistry("global");
+  const registryGlobal = await resolveProxyForScopeFromRegistry("global", null, { sessionKey });
   if (registryGlobal?.proxy) {
     cacheProxyResolution(cacheKey, stamp, registryGlobal);
     return registryGlobal;

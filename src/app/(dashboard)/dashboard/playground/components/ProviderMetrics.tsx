@@ -37,7 +37,7 @@ export default function ProviderMetrics({ metrics }: ProviderMetricsProps) {
   const { ttftMs, tps, tokensIn, tokensOut, costUsd } = metrics;
 
   return (
-    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-text-muted font-mono">
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-2xs text-text-muted font-mono">
       {/* TTFT */}
       <span title={t("ttftTitle")}>TTFT {formatMs(ttftMs)}</span>
 

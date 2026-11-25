@@ -1,3 +1,4 @@
+import { readStreamBuyerCost } from "../../utils/buyerCostMicro.ts";
 import { inheritEmptyTurnPolicy } from "../../utils/emptyTurnPolicy.ts";
 import { getCodexClientSessionId } from "../../config/codexIdentity.ts";
 import { modelAfterFamilyFallback } from "../../services/modelFamilyFallbackPolicy.ts";
@@ -53,6 +54,7 @@ import { storeStreamingSemanticCacheResponse } from "./streamingSemanticCacheSto
 import { recordFinalInputCalibration } from "./contextEstimation.ts";
 import { emitStreamingRoutingEvent } from "./streamingRoutingEvent.ts";
 import { recordStreamingUsageStats } from "./streamingUsageStats.ts";
+import { resolveSessionTurn } from "./agentContext.ts";
 import { maybeSyncClaudeExtraUsageState } from "./telemetryHelpers.ts";
 import {
   getExecutorTimeoutMs,
@@ -422,6 +424,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
   const onStreamComplete = ({
     status: streamStatus,
     usage: streamUsage,
+    buyerCostMicro,
     responseBody: streamResponseBody,
     providerPayload,
     clientPayload,
@@ -556,6 +559,14 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
       endpoint: endpointPath,
       cpaAuthIndex: readCpaAuthIndex(providerResponse),
       agentContext,
+      sessionTurn: resolveSessionTurn({
+        clientRawRequest,
+        body,
+        responses: [clientPayload?.summary, streamResponseBody],
+        streamStatus: normalizedStreamStatus,
+        agentContext,
+        apiKeyInfo,
+      }),
       partialUsage: streamPartialUsage,
       emittedOutput: streamEmittedOutput(transformStream),
     });
@@ -590,6 +601,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
       // A stream that ended early (499 / mid-stream failure) has no `usage`, but its call log
       // still shows the tokens already generated (estimates are flagged via `estimated`).
       tokens: streamUsage || streamPartialUsage || {},
+      buyerCostMicro,
       responseBody: streamResponseBody ?? undefined,
       providerRequest: finalBody || translatedBody,
       providerResponse: providerPayload,
@@ -698,6 +710,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
     onStreamFailure,
     hasEmittedOutput: () => streamEmittedOutput(transformStream),
     readPartialUsage: () => readStreamPartialUsage(transformStream),
+    readBuyerCostMicro: () => readStreamBuyerCost(transformStream),
   });
   const handleStreamFailure = streamFailureFinalizers.handleStreamFailure;
   onPipelineStreamError = streamFailureFinalizers.onPipelineStreamError;

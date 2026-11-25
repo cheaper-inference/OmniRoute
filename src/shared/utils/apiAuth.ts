@@ -23,6 +23,7 @@ import {
   DASHBOARD_SESSION_COOKIE,
 } from "@/shared/utils/dashboardSessionToken";
 import { extractApiKey } from "@/sse/services/auth";
+import { hasConfiguredOidc, hasConfiguredPassword } from "./credentialSurface";
 
 type RequestLike = {
   cookies?: {
@@ -55,20 +56,7 @@ export interface AuthRequiredOptions {
   ignorePublicRoute?: boolean;
 }
 
-export function hasConfiguredPassword(settings: Record<string, unknown>): boolean {
-  return typeof settings.password === "string" && settings.password.length > 0;
-}
-export function hasConfiguredOidc(settings: Record<string, unknown>): boolean {
-  return (
-    settings.oidcEnabled === true &&
-    typeof settings.oidcIssuer === "string" &&
-    settings.oidcIssuer.trim().length > 0 &&
-    typeof settings.oidcClientId === "string" &&
-    settings.oidcClientId.trim().length > 0 &&
-    typeof settings.oidcClientSecret === "string" &&
-    settings.oidcClientSecret.trim().length > 0
-  );
-}
+export { hasConfiguredOidc, hasConfiguredPassword };
 
 function getRequestPathname(request: RequestLike | Request | null | undefined): string | null {
   const nextPathname =
