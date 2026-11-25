@@ -59,10 +59,7 @@ export function openaiToAntigravityResponse(chunk, state) {
       }
       const accum = state._toolCallAccum[idx];
       if (tc.id) accum.id = tc.id;
-      const grown = (tc.function?.name?.length ?? 0) + (tc.function?.arguments?.length ?? 0);
-      if (!chargeRetained(state, grown)) continue;
-      if (tc.function?.name) accum.name += tc.function.name;
-      if (tc.function?.arguments) accum.arguments += tc.function.arguments;
+      appendToolCallFragment(state, accum, tc);
     }
     // Skip emit — wait for finish_reason
     if (parts.length === 0 && !finishReason) return null;
@@ -133,6 +130,17 @@ export function openaiToAntigravityResponse(chunk, state) {
   }
 
   return { response };
+}
+
+function appendToolCallFragment(
+  state: unknown,
+  accum: { name: string; arguments: string },
+  tc: { function?: { name?: string; arguments?: string } }
+): void {
+  const grown = (tc.function?.name?.length ?? 0) + (tc.function?.arguments?.length ?? 0);
+  if (!chargeRetained(state, grown)) return;
+  if (tc.function?.name) accum.name += tc.function.name;
+  if (tc.function?.arguments) accum.arguments += tc.function.arguments;
 }
 
 // OpenAI upstreams called with `stream_options.include_usage` send usage in a
