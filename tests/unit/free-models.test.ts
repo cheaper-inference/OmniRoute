@@ -88,6 +88,29 @@ test("selectModelsForImport: keeps only free models when importFreeOnly is true"
   assert.equal(result.freeFilterEmpty, false);
 });
 
+test("selectModelsForImport: keeps current Gemini Flash free-tier models", () => {
+  const fetched = [
+    { id: "gemini-3.5-flash" },
+    { id: "gemini-3.5-flash-lite" },
+    { id: "gemini-3.6-flash" },
+    { id: "gemini-3.7-flash" },
+    { id: "gemini-3.8-flash" },
+    { id: "gemini-3.1-pro-preview" },
+  ];
+  const result = selectModelsForImport("gemini", fetched, true);
+  assert.deepEqual(
+    result.models.map((m) => m.id),
+    [
+      "gemini-3.5-flash",
+      "gemini-3.5-flash-lite",
+      "gemini-3.6-flash",
+      "gemini-3.7-flash",
+      "gemini-3.8-flash",
+    ]
+  );
+  assert.equal(result.freeFilterEmpty, false);
+});
+
 test("selectModelsForImport: flags freeFilterEmpty when models exist but none are free", () => {
   const models = [{ id: "paid", pricing: { prompt: "0.01", completion: "0.02" } }];
   const result = selectModelsForImport("openrouter", models, true);
