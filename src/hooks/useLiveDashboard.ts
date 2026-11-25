@@ -39,6 +39,41 @@ function sanitizeWsPublicUrl(url: unknown): string | null {
   return url.startsWith("ws://") || url.startsWith("wss://") ? url : null;
 }
 
+function readLiveWsHandshake(
+  live?: {
+    publicUrl?: unknown;
+    path?: unknown;
+    port?: unknown;
+    enabled?: unknown;
+    sameOrigin?: unknown;
+  } | null
+) {
+  const publicUrl = sanitizeWsPublicUrl(live?.publicUrl);
+  const path = live?.path;
+  // Use the running server's port so a LIVE_WS_PORT override reaches prebuilt images (#11331).
+  const port = sanitizeLiveWsPort(live?.port);
+  // These flags tell the client whether to dial and whether the HTTP port can relay (KEA-9514).
+  const enabled = live?.enabled;
+  const sameOrigin = live?.sameOrigin;
+
+  return {
+    publicUrl,
+    path: typeof path === "string" && path.startsWith("/") ? path : null,
+    port,
+    enabled: typeof enabled === "boolean" ? enabled : null,
+    sameOrigin: typeof sameOrigin === "boolean" ? sameOrigin : null,
+  };
+}
+
+function getReconnectPlan(accepted: boolean, previousFailures: number) {
+  const failures = accepted ? 0 : previousFailures + 1;
+  if (failures >= MAX_CONSECUTIVE_FAILED_ATTEMPTS) return { failures, delay: null };
+
+  // 1s after an accepted session dropped or the first failure, then 2s, 4s, 8s.
+  const step = Math.min(Math.max(failures - 1, 0), WS_RECONNECT_DELAYS.length - 1);
+  return { failures, delay: WS_RECONNECT_DELAYS[step] };
+}
+
 // Build-time inlined value (Docker/npm prebuilt images won't have this — the
 // runtime value is discovered via the /api/v1/ws?handshake=1 handshake below).
 const BUILD_TIME_PUBLIC_WS_URL = sanitizeWsPublicUrl(process.env.NEXT_PUBLIC_LIVE_WS_PUBLIC_URL);
@@ -134,22 +169,12 @@ export function useLiveDashboard({
       .then((res) => (res.ok ? res.json() : null))
       .then((body) => {
         if (cancelled) return;
-        const publicUrl = sanitizeWsPublicUrl(body?.live?.publicUrl);
-        if (publicUrl) setHandshakeUrl(publicUrl);
-        if (typeof body?.live?.path === "string" && body.live.path.startsWith("/")) {
-          setHandshakePath(body.live.path);
-        }
-        // The live server reports the port it is actually listening on, so a
-        // LIVE_WS_PORT override reaches a prebuilt image instead of being
-        // overruled by the compiled-in default (#11331).
-        const port = sanitizeLiveWsPort(body?.live?.port);
+        const { publicUrl, path, port, enabled, sameOrigin } = readLiveWsHandshake(body?.live);
+        if (publicUrl !== null) setHandshakeUrl(publicUrl);
+        if (path !== null) setHandshakePath(path);
         if (port !== null) setHandshakePort(port);
-        // KEA-9514: a server that is off is never dialled, and a server whose HTTP port
-        // cannot relay the upgrade is dialled on its own port, not on the page's origin.
-        if (typeof body?.live?.enabled === "boolean") setHandshakeEnabled(body.live.enabled);
-        if (typeof body?.live?.sameOrigin === "boolean") {
-          setHandshakeSameOrigin(body.live.sameOrigin);
-        }
+        if (enabled !== null) setHandshakeEnabled(enabled);
+        if (sameOrigin !== null) setHandshakeSameOrigin(sameOrigin);
       })
       .catch(() => {
         // Handshake unavailable — fall back to the default URL.
@@ -328,16 +353,13 @@ export function useLiveDashboard({
         }));
 
         if (autoReconnect) {
-          const failures = accepted ? 0 : failedAttemptsRef.current + 1;
+          const { failures, delay } = getReconnectPlan(accepted, failedAttemptsRef.current);
           failedAttemptsRef.current = failures;
-          if (failures >= MAX_CONSECUTIVE_FAILED_ATTEMPTS) {
+          if (delay === null) {
             // Stop dialling; reconnect() starts a new round (KEA-9514).
             setConnection((prev) => ({ ...prev, error: LIVE_WS_UNAVAILABLE_ERROR }));
             return;
           }
-          // 1s after an accepted session dropped or the first failure, then 2s, 4s, 8s.
-          const step = Math.min(Math.max(failures - 1, 0), WS_RECONNECT_DELAYS.length - 1);
-          const delay = WS_RECONNECT_DELAYS[step];
           reconnectTimeoutRef.current = setTimeout(() => {
             setConnection((prev) => ({ ...prev, reconnectAttempt: Math.max(failures, 1) }));
             setReconnectTick((tick) => tick + 1);

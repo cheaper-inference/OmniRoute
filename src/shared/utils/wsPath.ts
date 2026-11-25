@@ -129,6 +129,23 @@ function pathOf(url: string): string {
   }
 }
 
+function applyLiveWsPortAndPath(
+  defaultUrl: string,
+  port: number | null,
+  path: string | null
+): string {
+  if (port === null && path === null) return defaultUrl;
+
+  try {
+    const url = new URL(defaultUrl);
+    if (port !== null) url.port = String(port);
+    if (path !== null) url.pathname = path;
+    return url.toString();
+  } catch {
+    return defaultUrl;
+  }
+}
+
 /**
  * Resolve the live dashboard WebSocket URL, or `null` when there is nothing to dial.
  *
@@ -172,14 +189,5 @@ export function resolveLiveWsUrl({
     return `${protocol}//${location.host}${path ?? pathOf(defaultUrl)}`;
   }
 
-  if (port === null && path === null) return defaultUrl;
-
-  try {
-    const url = new URL(defaultUrl);
-    if (port !== null) url.port = String(port);
-    if (path !== null) url.pathname = path;
-    return url.toString();
-  } catch {
-    return defaultUrl;
-  }
+  return applyLiveWsPortAndPath(defaultUrl, port, path);
 }
