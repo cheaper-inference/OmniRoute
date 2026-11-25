@@ -124,15 +124,20 @@ function writeStreamingCacheEntry(
   }
 }
 
-export function storeStreamingSemanticCacheResponse(
-  args: StreamingCacheArgs,
-  deps: StreamingSemanticCacheStoreDeps = DEFAULT_DEPS
-): void {
-  if (
+function skipsForPrivacy(args: StreamingCacheArgs): boolean {
+  return Boolean(
     args.provider === "muse-code" ||
     args.videoTranscriptSensitive ||
     args.piiTokensMinted ||
-    args.maskingActive ||
+    args.maskingActive
+  );
+}
+
+function isStorableStream(
+  args: StreamingCacheArgs,
+  deps: StreamingSemanticCacheStoreDeps
+): boolean {
+  return !(
     !args.enabled ||
     args.streamStatus !== 200 ||
     !args.streamResponseBody ||
@@ -144,8 +149,13 @@ export function storeStreamingSemanticCacheResponse(
       args.streamResponseBody
     ) ||
     responseCarriesToolCalls(args.streamResponseBody)
-  ) {
-    return;
-  }
+  );
+}
+
+export function storeStreamingSemanticCacheResponse(
+  args: StreamingCacheArgs,
+  deps: StreamingSemanticCacheStoreDeps = DEFAULT_DEPS
+): void {
+  if (skipsForPrivacy(args) || !isStorableStream(args, deps)) return;
   writeStreamingCacheEntry(args, deps);
 }
