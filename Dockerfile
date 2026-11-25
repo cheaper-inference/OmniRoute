@@ -274,6 +274,12 @@ RUN apk add --no-cache nodejs-26 npm-12 libsecret libstdc++ ca-certificates-bund
 # ── Runner base ────────────────────────────────────────────────────────────
 FROM runtime-os AS runner-base
 
+# Optional for MediaRecorder WebM uploads to MiniMax ASR. Keep the default image lean.
+ARG OMNIROUTE_INSTALL_FFMPEG=0
+RUN if [ "$OMNIROUTE_INSTALL_FFMPEG" = "1" ]; then \
+      apk add --no-cache ffmpeg; \
+    fi
+
 LABEL org.opencontainers.image.title="omniroute" \
   org.opencontainers.image.description="Unified AI proxy — route any LLM through one endpoint" \
   org.opencontainers.image.url="https://omniroute.online" \
