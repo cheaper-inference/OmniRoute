@@ -10,10 +10,10 @@ import {
 } from "../../../open-sse/services/compression/engines/rtk/smartTruncate.ts";
 import { applyLineFilter } from "../../../open-sse/services/compression/engines/rtk/lineFilter.ts";
 
-// Defect classes ported from the CLIProxyAPI Go port: (1) a lossy filter selected by a content
-// regex alone, (2) status/outcome lines dropped by the line stages, (3) a truncation marker that
-// keeps the pre-cap count ("0 lines"), (4) a multi-file result elided as one blob, (5) the hard
-// cap applied to a non-shell file read because its content matched a detector.
+// One case per defect class: (1) a lossy filter selected by a content regex alone, (2) status and
+// outcome lines dropped by the line stages, (3) a truncation marker that keeps the pre-cap count
+// ("0 lines"), (4) a multi-file result elided as one blob, (5) the hard cap applied to a non-shell
+// file read because its content matched a detector.
 
 const filter = (overrides: Record<string, unknown>) =>
   ({
