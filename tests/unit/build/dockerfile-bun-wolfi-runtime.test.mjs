@@ -32,6 +32,17 @@ test("Wolfi copies the builder's Bun binary and retains bun UID and GID 1000", (
   assert.match(runtime, /\badduser -u 1000 -G bun\b[^\n]*\bbun$/m);
 });
 
+test("Wolfi retains oven/bun's node fallback and runtime environment", () => {
+  const runtime = stage("runtime-os");
+  assert.match(
+    runtime,
+    /\bln -s \/usr\/local\/bin\/bun \/usr\/local\/bun-node-fallback-bin\/node(?=\s|$)/
+  );
+  assert.match(runtime, /^ENV PATH=[^\n]*:\/usr\/local\/bun-node-fallback-bin$/m);
+  assert.match(runtime, /^ENV BUN_RUNTIME_TRANSPILER_CACHE_PATH=0$/m);
+  assert.match(runtime, /^ENV BUN_INSTALL_BIN=\/usr\/local\/bin$/m);
+});
+
 test("Bun runtime stages contain no apt-get commands", () => {
   for (const name of ["runtime-os", "runner-base", "runner-web"]) {
     assert.doesNotMatch(stage(name), /\bapt-get\b/, `${name} must not use apt-get`);

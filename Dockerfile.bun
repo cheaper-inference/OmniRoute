@@ -75,7 +75,14 @@ RUN apk add --no-cache libsecret libstdc++ ca-certificates-bundle tzdata \
   && addgroup -g 1000 bun \
   && adduser -u 1000 -G bun -h /home/bun -s /bin/sh -D bun
 COPY --from=base /usr/local/bin/bun /usr/local/bin/bun
-RUN ln -s /usr/local/bin/bun /usr/local/bin/bunx && bun --version
+# Match oven/bun's environment and node fallback so scripts and tools that call node still work.
+RUN ln -s /usr/local/bin/bun /usr/local/bin/bunx \
+  && mkdir -p /usr/local/bun-node-fallback-bin \
+  && ln -s /usr/local/bin/bun /usr/local/bun-node-fallback-bin/node \
+  && bun --version
+ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/bun-node-fallback-bin
+ENV BUN_RUNTIME_TRANSPILER_CACHE_PATH=0
+ENV BUN_INSTALL_BIN=/usr/local/bin
 
 # ── Runner Base stage (100% Bun Native Production Runtime) ──────────────────
 FROM runtime-os AS runner-base
