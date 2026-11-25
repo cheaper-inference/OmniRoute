@@ -3,11 +3,14 @@ name: Free-tier catalog drift
 # Check public provider sources once a day without provider credentials or an LLM.
 # The check never edits the catalog. A failed probe is reported after two consecutive
 # failures, and a new issue requires the same drift fingerprint in two consecutive runs.
+# A weekly report measures evidence age, and a monthly reminder tracks the scoreboard.
 # Set the CATALOG_DRIFT_ISSUES repository variable to true to enable issue writing.
 
 on:
   schedule:
     - cron: "41 6 * * *"
+    - cron: "23 7 * * 1"
+    - cron: "11 8 1 * *"
   workflow_dispatch:
     inputs:
       only:
@@ -99,3 +102,94 @@ jobs:
             cat "$RUNNER_TEMP/catalog-drift-issues.json"
             echo '````'
           } >> "$GITHUB_STEP_SUMMARY"
+
+  evidence-age:
+    if: ${{ (github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute') && (github.event_name == 'workflow_dispatch' || github.event.schedule == '23 7 * * 1') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - name: Resolve the latest release branch
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          branch=$(gh api "repos/$GITHUB_REPOSITORY/branches" --paginate --jq '.[].name' \
+            | grep -E '^release/v[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -1)
+          [ -n "$branch" ] || { echo "No release/vX.Y.Z branch found" >&2; exit 1; }
+          echo "branch=$branch" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ steps.release.outputs.branch }}
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+        env:
+          ONNXRUNTIME_NODE_INSTALL: "skip"
+      - name: Report evidence age
+        run: |
+          node --import tsx/esm scripts/quality/catalog-drift/evidence-age.mjs \
+            --json "$RUNNER_TEMP/evidence-age.json" --md "$RUNNER_TEMP/evidence-age.md"
+          cat "$RUNNER_TEMP/evidence-age.md" >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: catalog-evidence-age
+          path: |
+            ${{ runner.temp }}/evidence-age.json
+            ${{ runner.temp }}/evidence-age.md
+          retention-days: 90
+
+  scoreboard-due:
+    if: ${{ (github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute') && github.event.schedule == '11 8 1 * *' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: Resolve the latest release branch
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          branch=$(gh api "repos/$GITHUB_REPOSITORY/branches" --paginate --jq '.[].name' \
+            | grep -E '^release/v[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -1)
+          [ -n "$branch" ] || { echo "No release/vX.Y.Z branch found" >&2; exit 1; }
+          echo "branch=$branch" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ steps.release.outputs.branch }}
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: 24
+          cache: npm
+      - name: Send scoreboard reminder
+        if: ${{ vars.CATALOG_DRIFT_ISSUES == 'true' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ ! -f scripts/quality/catalog-drift/scoreboard.mjs ]; then
+            echo "scoreboard script not in this release yet" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          node scripts/quality/catalog-drift/issues.mjs --scoreboard-reminder \
+            --month "$(date -u +%Y-%m)" --repo "$GITHUB_REPOSITORY" --apply
+      - name: Preview scoreboard reminder
+        if: ${{ vars.CATALOG_DRIFT_ISSUES != 'true' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ ! -f scripts/quality/catalog-drift/scoreboard.mjs ]; then
+            echo "scoreboard script not in this release yet" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          node scripts/quality/catalog-drift/issues.mjs --scoreboard-reminder \
+            --month "$(date -u +%Y-%m)" --repo "$GITHUB_REPOSITORY" --dry-run \
+            >> "$GITHUB_STEP_SUMMARY"

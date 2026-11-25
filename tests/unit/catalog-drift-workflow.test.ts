@@ -101,3 +101,24 @@ test("state cache key is unique per attempt", () => {
 test("never writes to the repository", () => {
   assert.doesNotMatch(source, /git push|gh pr create|contents:\s+write/);
 });
+
+test("the weekly job only reads and never opens issues", () => {
+  const weekly = workflow.jobs["evidence-age"];
+  assert.deepEqual(weekly?.permissions, { contents: "read" });
+  assert.ok(weekly.steps.every(({ run }) => !run?.includes("/issues.mjs")));
+  assert.deepEqual(workflow.on.schedule.map(({ cron }) => cron).sort(), [
+    "11 8 1 * *",
+    "23 7 * * 1",
+    "41 6 * * *",
+  ]);
+});
+
+test("the monthly reminder writes only behind the variable", () => {
+  const monthly = workflow.jobs["scoreboard-due"];
+  assert.deepEqual(monthly?.permissions, { contents: "read", issues: "write" });
+  const apply = monthly.steps.find(
+    ({ run }) => run?.includes("/issues.mjs") && run.includes("--apply")
+  );
+  assert.equal(apply?.if, "${{ vars.CATALOG_DRIFT_ISSUES == 'true' }}");
+  assert.deepEqual(findScheduledJobsWithoutGuard([workflowPath]), []);
+});
