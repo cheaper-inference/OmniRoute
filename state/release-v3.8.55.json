@@ -18,10 +18,11 @@
         "labeledAt": "2026-11-25T21:25:03Z"
       }
     ],
-    "stage": "testing",
+    "stage": "landing",
     "startedAt": "2026-11-25T21:40:20.857Z",
     "attempts": 0,
-    "bisect": null
+    "bisect": null,
+    "landAttempts": 1
   },
   "baseChecks": [
     {
@@ -133,13 +134,6 @@
     "culprits": 1
   },
   "history": [
-    {
-      "at": "2026-11-19T10:23:32.140Z",
-      "type": "resumed",
-      "sha": "b728fe2de5e72cc51b2f63b99f38a2304c71aa2f",
-      "detail": "base moved cc59ad70b2e9 → b728fe2de5e7 after a base-red pause",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44505143879"
-    },
     {
       "at": "2026-11-19T15:34:22.229Z",
       "type": "batch-started",
@@ -2557,8 +2551,22 @@
         "21033": "2026-11-25T21:25:03Z"
       },
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45706394194"
+    },
+    {
+      "at": "2026-11-25T22:50:56.540Z",
+      "type": "checks-green",
+      "batchId": "b42",
+      "prs": [
+        21033
+      ],
+      "sha": "176919ddb80754ad24922790dde53a85f21249d5",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45716621959"
     }
   ],
-  "updatedAt": "2026-11-25T22:48:22.062Z",
-  "batchWindow": 5
+  "updatedAt": "2026-11-25T22:51:05.955Z",
+  "batchWindow": 5,
+  "landingsWithoutVerdict": {
+    "count": 1,
+    "since": "2026-11-25T22:51:05.955Z"
+  }
 }
