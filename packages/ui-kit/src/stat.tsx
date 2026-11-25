@@ -4,7 +4,9 @@ import { InfoTooltip } from "./info-tooltip";
 import { cn } from "./lib/utils";
 import { NumberTicker } from "./number-ticker";
 
-export type StatTone = "default" | "positive" | "critical" | "warning";
+export type StatTone = "default" | "positive" | "critical" | "warning" | "info" | "accent" | "muted";
+/** `md` is the page summary size. `sm` is the compact size for key-value tiles inside cards and dense panels. */
+export type StatSize = "sm" | "md";
 export type StatAnimateFrom = "zero" | "previous";
 export type StatFormat = "number" | "compact" | "currency" | "percent" | "text";
 export type StatLabelVariant = "default" | "eyebrow";
@@ -21,7 +23,13 @@ interface StatBaseProps extends ComponentProps<"div"> {
   /** Accessible name prefix of the info icon; the stat label is appended. Defaults to "More information". */
   infoLabel?: string;
   suffix?: ReactNode;
+  /** Colors the value. `info`, `accent` and `muted` sit next to `positive`, `critical` and `warning`. */
   tone?: StatTone;
+  /**
+   * `sm` shrinks the tile: 16px value in the UI font, 12px label, tighter padding. Formatting,
+   * `suffix`, `hint`, `info`, `icon` and `animate` are unchanged. Omit it to follow the StatRow.
+   */
+  size?: StatSize;
   currency?: string;
   /** Locale used by both static and animated number formatting. */
   locale?: string;
@@ -65,6 +73,7 @@ export function Stat({
   infoLabel = "More information",
   suffix,
   tone = "default",
+  size,
   format = "number",
   currency = "USD",
   locale,
@@ -86,6 +95,7 @@ export function Stat({
     <div
       data-label-variant={labelVariant}
       data-value-format={format}
+      data-size={size}
       className={cn("ci-stat", `ci-stat--${tone}`, className)}
       {...props}
     >
@@ -124,8 +134,10 @@ export function Stat({
 
 export interface StatRowProps extends ComponentProps<"div"> {
   columns?: 2 | 3 | 4;
+  /** Size of every Stat inside the row. A Stat with its own `size` keeps it. */
+  size?: StatSize;
 }
 
-export function StatRow({ className, columns = 4, ...props }: StatRowProps) {
-  return <div data-columns={columns} className={cn("ci-stat-row", className)} {...props} />;
+export function StatRow({ className, columns = 4, size, ...props }: StatRowProps) {
+  return <div data-columns={columns} data-size={size} className={cn("ci-stat-row", className)} {...props} />;
 }

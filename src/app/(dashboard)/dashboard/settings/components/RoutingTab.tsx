@@ -5,7 +5,16 @@ import { useTranslations } from "next-intl";
 import { Checkbox, CheckboxGroup } from "@omniroute/ui-kit/checkbox";
 import { Field } from "@omniroute/ui-kit/field";
 import { RadioGroup, RadioGroupItem } from "@omniroute/ui-kit/radio-group";
-import { Button, Card, Collapsible, Input, Select, Textarea, Toggle } from "@/shared/components";
+import {
+  Button,
+  Card,
+  Collapsible,
+  Input,
+  NumberInput,
+  Select,
+  Textarea,
+  Toggle,
+} from "@/shared/components";
 import Icon from "@/shared/components/Icon";
 import ModelSelectField from "@/shared/components/ModelSelectField";
 import { useNotificationStore } from "@/store/notificationStore";
@@ -18,6 +27,8 @@ import { AI_PROVIDERS } from "@/shared/constants/providers";
 import { getClaudeCodeClientBuildRevision } from "@/shared/constants/claudeCodeClient";
 import { compareTr } from "@/shared/utils/turkishText";
 import { HERMES } from "./systemTransformsHermesDefaults";
+import IconChip from "@/shared/components/IconChip";
+import { InlineCode } from "@omniroute/ui-kit/inline-code";
 
 // Provider keys (mirror of open-sse/services/systemTransforms.ts).
 const PROVIDER_CLAUDE = "claude";
@@ -489,7 +500,7 @@ function OpEditor({
               value={op.text || ""}
               disabled={disabled}
               onChange={(e) => updateField("text", e.target.value)}
-              className="font-mono"
+              mono
             />
           </Field>
           <Input
@@ -911,11 +922,13 @@ export default function RoutingTab() {
       <Card>
         <div className="flex items-start justify-between gap-4">
           <div className="flex gap-3">
-            <div className="p-2 rounded-lg bg-bg-subtle text-text-muted h-fit">
+            <IconChip>
               <Icon name="auto_awesome" size={20} />
-            </div>
+            </IconChip>
             <div>
-              <h3 className="text-lg">{t("routingZeroConfigTitle")}</h3>
+              <h3 className="ci-heading" data-size="lg">
+                {t("routingZeroConfigTitle")}
+              </h3>
               <p className="text-sm text-text-muted mt-1">{t("routingZeroConfigDesc")}</p>
             </div>
           </div>
@@ -982,11 +995,13 @@ export default function RoutingTab() {
 
       <Card>
         <div className="flex items-start gap-3 mb-4">
-          <div className="p-2 rounded-lg bg-bg-subtle text-text-muted h-fit">
+          <IconChip>
             <Icon name="tune" size={20} />
-          </div>
+          </IconChip>
           <div>
-            <h3 className="text-lg">{t("systemTransforms")}</h3>
+            <h3 className="ci-heading" data-size="lg">
+              {t("systemTransforms")}
+            </h3>
             <p className="text-sm text-text-muted mt-1">{t("systemTransformsDesc")}</p>
           </div>
         </div>
@@ -1052,9 +1067,7 @@ export default function RoutingTab() {
                 defaultOpen={false}
                 title={
                   <div className="flex items-center gap-2 flex-wrap">
-                    <code className="text-xs font-mono rounded bg-surface px-1.5 py-0.5">
-                      {providerId}
-                    </code>
+                    <InlineCode>{providerId}</InlineCode>
                     <span className="text-sm font-medium">{displayName}</span>
                   </div>
                 }
@@ -1109,7 +1122,7 @@ export default function RoutingTab() {
                           defaultOpen={false}
                           title={
                             <div className="flex items-center gap-2">
-                              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[10px] font-semibold text-primary">
+                              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-3xs font-semibold text-primary">
                                 {index + 1}
                               </span>
                               <span className="font-mono text-primary text-xs">
@@ -1234,7 +1247,8 @@ export default function RoutingTab() {
                           aria-describedby={
                             errorMsg ? `routing-json-editor-${providerId}-error` : undefined
                           }
-                          className="resize-y font-mono text-[11px]"
+                          mono
+                          className="resize-y"
                         />
                       </Field>
                       <div className="flex flex-wrap items-center gap-2 mt-2">
@@ -1272,17 +1286,21 @@ export default function RoutingTab() {
 
       <Card>
         <div className="flex items-start gap-3 mb-4">
-          <div className="p-2 rounded-lg bg-bg-subtle text-text-muted h-fit">
+          <IconChip>
             <Icon name="security" size={20} />
-          </div>
+          </IconChip>
           <div>
-            <h3 className="text-lg">{t("cliFingerprint")}</h3>
+            <h3 className="ci-heading" data-size="lg">
+              {t("cliFingerprint")}
+            </h3>
             <p className="text-sm text-text-muted mt-1">{t("cliFingerprintDesc")}</p>
           </div>
         </div>
 
         <div className="mb-5">
-          <h4 className="text-sm mb-2">{t("routingHeaderFingerprintTitle")}</h4>
+          <h4 className="ci-heading mb-2" data-size="sm">
+            {t("routingHeaderFingerprintTitle")}
+          </h4>
           <p className="text-xs text-text-muted mb-2">
             {t("cliFingerprintEnabled", { count: cliCompatProviderSet.size })}
           </p>
@@ -1316,11 +1334,13 @@ export default function RoutingTab() {
 
       <Card>
         <div className="flex items-center gap-3 mb-4">
-          <div className="p-2 rounded-lg bg-bg-subtle text-text-muted">
+          <IconChip>
             <Icon name="cached" size={20} />
-          </div>
+          </IconChip>
           <div>
-            <h3 className="text-lg">{t("routingClientCacheControlTitle")}</h3>
+            <h3 className="ci-heading" data-size="lg">
+              {t("routingClientCacheControlTitle")}
+            </h3>
             <p className="text-sm text-text-muted">{t("routingClientCacheControlDesc")}</p>
           </div>
         </div>
@@ -1361,11 +1381,13 @@ export default function RoutingTab() {
 
       <Card>
         <div className="flex items-center gap-3 mb-4">
-          <div className="p-2 rounded-lg bg-bg-subtle text-text-muted">
+          <IconChip>
             <Icon name="fingerprint" size={20} />
-          </div>
+          </IconChip>
           <div>
-            <h3 className="text-lg">{t("routingAntigravitySignatureTitle")}</h3>
+            <h3 className="ci-heading" data-size="lg">
+              {t("routingAntigravitySignatureTitle")}
+            </h3>
             <p className="text-sm text-text-muted">{t("routingAntigravitySignatureDesc")}</p>
           </div>
         </div>
@@ -1407,11 +1429,13 @@ export default function RoutingTab() {
       <Card>
         <div className="flex items-start justify-between gap-4">
           <div className="flex gap-3">
-            <div className="p-2 rounded-lg bg-bg-subtle text-text-muted h-fit">
+            <IconChip>
               <Icon name="badge" size={20} />
-            </div>
+            </IconChip>
             <div>
-              <h3 className="text-lg">{t("echoRequestedModelTitle")}</h3>
+              <h3 className="ci-heading" data-size="lg">
+                {t("echoRequestedModelTitle")}
+              </h3>
               <p className="text-sm text-text-muted mt-1">{t("echoRequestedModelDesc")}</p>
             </div>
           </div>
@@ -1429,11 +1453,13 @@ export default function RoutingTab() {
       {/* #4481 layer 2 — Web-Search Routing (CCR-style Router.webSearch) */}
       <Card>
         <div className="flex gap-3">
-          <div className="p-2 rounded-lg bg-bg-subtle text-text-muted h-fit">
+          <IconChip>
             <Icon name="travel_explore" size={20} />
-          </div>
+          </IconChip>
           <div className="flex-1">
-            <h3 className="text-lg">{t("webSearchRouteTitle")}</h3>
+            <h3 className="ci-heading" data-size="lg">
+              {t("webSearchRouteTitle")}
+            </h3>
             <p className="text-sm text-text-muted mt-1">{t("webSearchRouteDesc")}</p>
             <div className="mt-3">
               <ModelSelectField
@@ -1461,47 +1487,39 @@ export default function RoutingTab() {
 
       <Card>
         <div className="flex gap-3">
-          <div className="p-2 rounded-lg bg-bg-subtle text-text-muted h-fit">
+          <IconChip>
             <Icon name="timer" size={20} />
-          </div>
+          </IconChip>
           <div className="flex-1">
-            <h3 className="text-lg">Search timeouts</h3>
+            <h3 className="ci-heading" data-size="lg">
+              Search timeouts
+            </h3>
             <p className="text-sm text-text-muted mt-1">
               How long a search waits before it is cut off. Leave a field empty to keep the default:
               15 seconds overall, and each provider&apos;s own limit.
             </p>
             <div className="mt-3 flex flex-wrap gap-3">
-              <Input
+              <NumberInput
                 label="Overall budget (ms)"
-                type="number"
                 min={1000}
                 max={120000}
-                defaultValue={settings.searchTimeoutMs ?? ""}
+                defaultValue={settings.searchTimeoutMs ?? null}
                 placeholder="15000"
-                onBlur={(e) => {
-                  const raw = e.target.value.trim();
-                  const parsed = raw === "" ? undefined : Number.parseInt(raw, 10);
-                  if (parsed !== undefined && Number.isNaN(parsed)) return;
-                  updateSetting({ searchTimeoutMs: parsed });
-                }}
+                onValueCommit={(value) => updateSetting({ searchTimeoutMs: value ?? undefined })}
                 className="w-32 shrink-0"
               />
               {["exa-search", "tavily-search", "firecrawl", "context7", "jina-search"].map((id) => (
-                <Input
+                <NumberInput
                   key={id}
                   label={`${id} (ms)`}
-                  type="number"
                   min={1}
                   max={120000}
-                  defaultValue={settings.searchProviderTimeoutsMs?.[id] ?? ""}
+                  defaultValue={settings.searchProviderTimeoutsMs?.[id] ?? null}
                   placeholder="default"
-                  onBlur={(e) => {
-                    const raw = e.target.value.trim();
-                    const parsed = raw === "" ? undefined : Number.parseInt(raw, 10);
-                    if (parsed !== undefined && Number.isNaN(parsed)) return;
+                  onValueCommit={(value) => {
                     const next = { ...(settings.searchProviderTimeoutsMs ?? {}) };
-                    if (parsed === undefined) delete next[id];
-                    else next[id] = parsed;
+                    if (value === null) delete next[id];
+                    else next[id] = value;
                     updateSetting({ searchProviderTimeoutsMs: next });
                   }}
                   className="w-32 shrink-0"
@@ -1515,11 +1533,13 @@ export default function RoutingTab() {
       <Card>
         <div className="flex items-start justify-between gap-4">
           <div className="flex gap-3">
-            <div className="p-2 rounded-lg bg-bg-subtle text-text-muted h-fit">
+            <IconChip>
               <Icon name="verified" size={20} />
-            </div>
+            </IconChip>
             <div>
-              <h3 className="text-lg">{t("lkgpToggleTitle")}</h3>
+              <h3 className="ci-heading" data-size="lg">
+                {t("lkgpToggleTitle")}
+              </h3>
               <p className="text-sm text-text-muted mt-1">{t("lkgpToggleDesc")}</p>
             </div>
           </div>
@@ -1580,11 +1600,13 @@ export default function RoutingTab() {
       <Card>
         <div className="flex items-start justify-between gap-4">
           <div className="flex gap-3">
-            <div className="p-2 rounded-lg bg-bg-subtle text-text-muted h-fit">
+            <IconChip>
               <Icon name="network_ping" size={20} />
-            </div>
+            </IconChip>
             <div>
-              <h3 className="text-lg">{t("adaptiveVolumeRouting")}</h3>
+              <h3 className="ci-heading" data-size="lg">
+                {t("adaptiveVolumeRouting")}
+              </h3>
               <p className="text-sm text-text-muted mt-1">{t("adaptiveVolumeRoutingDesc")}</p>
             </div>
           </div>

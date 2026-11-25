@@ -13,6 +13,11 @@ const plainText = (value: React.ReactNode) =>
  * The kit `CodePreview` with every text it draws or announces translated (`common`): the copy
  * button in its three states, the copy announcement, the copy error and the name of the code
  * region. A caller may still pass any of them.
+ *
+ * A one-line command or URL takes `showHeader={false}`: the code and the copy button share one
+ * row and the region is named by `codeLabel` (the translated "Code" when it is not passed).
+ *
+ *   <CodePreview showHeader={false} variant="surface" code={command} codeLabel={t("command")} />
  */
 export default function CodePreview({
   copyLabel,

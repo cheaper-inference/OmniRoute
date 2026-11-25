@@ -11,6 +11,7 @@ import ProviderIcon from "@/shared/components/ProviderIcon";
 import { CANONICAL_EFFORT_VALUES } from "@/shared/reasoning/effortStandardization";
 import { cn } from "@/shared/utils/cn";
 import { CARD_TOGGLE_CLASS, cardToggleProps } from "./cardToggle";
+import Notice from "@/shared/components/Notice";
 
 // Reasoning-effort override per Antigravity model row (ported from upstream
 // decolua/9router#2584). Empty value ("") means "Default" — preserve whatever
@@ -286,7 +287,9 @@ export default function AntigravityToolCard({
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <h3 className="text-sm">{tool.name}</h3>
+              <h3 className="ci-heading" data-size="sm">
+                {tool.name}
+              </h3>
               {isRunning ? (
                 <Badge variant="success" size="sm">
                   {t("active")}
@@ -330,10 +333,9 @@ export default function AntigravityToolCard({
           </div>
 
           {message?.type === "error" && (
-            <div className="flex items-center gap-2 px-2 py-1.5 rounded text-xs bg-error/10 text-error">
-              <Icon name="error" size={14} />
-              <span>{message.text}</span>
-            </div>
+            <Notice variant="critical" icon="error">
+              {message.text}
+            </Notice>
           )}
 
           {/* When running: API Key + Model Mappings */}
@@ -350,7 +352,7 @@ export default function AntigravityToolCard({
                     onChange={(e) => setSelectedApiKeyId(e.target.value)}
                     aria-label={t("apiKey")}
                     className="min-w-0 w-auto flex-1"
-                    selectClassName="text-xs"
+                    nativeSize="xs"
                   >
                     {apiKeys.map((key) => (
                       <option key={key.id} value={key.id}>
@@ -379,7 +381,7 @@ export default function AntigravityToolCard({
                       placeholder={t("modelPlaceholder")}
                       aria-label={model.name}
                       className="min-w-0 w-auto flex-1"
-                      inputClassName="text-xs"
+                      size="xs"
                     />
                     <Select
                       value={entry.reasoningEffort || ""}
@@ -387,7 +389,7 @@ export default function AntigravityToolCard({
                       title={t("reasoningEffortHint")}
                       aria-label={t("reasoningEffort", { model: model.name })}
                       className="w-28 shrink-0"
-                      selectClassName="text-xs"
+                      nativeSize="xs"
                     >
                       {REASONING_EFFORT_OPTIONS.map((tier) => (
                         <option key={tier || "default"} value={tier}>
@@ -448,10 +450,10 @@ export default function AntigravityToolCard({
                     <span className="font-medium text-text-main">{t("howItWorks")}</span>{" "}
                     {t("mitmHowWorksDesc", { toolName })}
                   </p>
-                  <div className="flex flex-col gap-0.5 text-[11px] text-text-muted">
+                  <div className="flex flex-col gap-0.5 text-xs text-text-muted">
                     <span>{t("mitmStep1")}</span>
                     <span>{t("mitmStep2Prefix")}</span>
-                    <ul className="list-none my-0.5 flex flex-col gap-0.5 font-mono text-[10px] text-text-muted break-all">
+                    <ul className="list-none my-0.5 flex flex-col gap-0.5 font-mono text-xs text-text-muted break-all">
                       {hosts.map((host) => (
                         <li key={host}>
                           <span className="text-primary">127.0.0.1</span> {host}
@@ -479,10 +481,9 @@ export default function AntigravityToolCard({
         size="sm"
       >
         <div className="flex flex-col gap-4">
-          <div className="flex items-start gap-3 p-3 bg-warning/10 border border-warning/30 rounded-lg">
-            <Icon name="warning" size={20} className="text-warning" />
-            <p className="text-xs text-text-muted">{t("sudoPasswordHint")}</p>
-          </div>
+          <Notice variant="warning" icon="warning">
+            {t("sudoPasswordHint")}
+          </Notice>
 
           <Input
             type="password"
@@ -495,12 +496,12 @@ export default function AntigravityToolCard({
           />
 
           {message && (
-            <div
-              className={`flex items-center gap-2 px-2 py-1.5 rounded text-xs ${message.type === "success" ? "bg-success/10 text-success" : "bg-error/10 text-error"}`}
+            <Notice
+              variant={message.type === "success" ? "success" : "critical"}
+              icon={message.type === "success" ? "check_circle" : "error"}
             >
-              <Icon name={message.type === "success" ? "check_circle" : "error"} size={14} />
-              <span>{message.text}</span>
-            </div>
+              {message.text}
+            </Notice>
           )}
 
           <div className="flex items-center justify-end gap-2">

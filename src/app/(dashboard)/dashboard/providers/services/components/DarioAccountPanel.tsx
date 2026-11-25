@@ -26,7 +26,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Button, Card, Input } from "@/shared/components";
+import { Button, Card, Input, ItemList, Item } from "@/shared/components";
 import Tooltip from "@/shared/components/Tooltip";
 
 interface DarioAccount {
@@ -285,30 +285,29 @@ export function DarioAccountPanel() {
           ) : accounts.length === 0 ? (
             <p className="text-xs text-text-muted">{t("noAccounts")}</p>
           ) : (
-            accounts.map((acc) => (
-              <div
-                key={acc.alias}
-                className="flex items-center justify-between gap-3 rounded-lg border border-border px-3 py-2"
-              >
-                <div className="min-w-0">
-                  <p className="text-sm font-mono truncate">{acc.alias}</p>
-                  <p className="text-xs text-text-muted truncate">
-                    {[
-                      formatExpiry(acc, t),
-                      acc.status,
-                      Array.isArray(acc.scopes) && acc.scopes.length
-                        ? t("scopes", { count: acc.scopes.length })
-                        : "",
-                    ]
-                      .filter(Boolean)
-                      .join(" · ")}
-                  </p>
-                </div>
-                <Button size="sm" variant="outline" onClick={() => removeAccount(acc.alias)}>
-                  {t("btnRemove")}
-                </Button>
-              </div>
-            ))
+            <ItemList>
+              {accounts.map((acc) => (
+                <Item
+                  key={acc.alias}
+                  truncate
+                  title={<span className="font-mono">{acc.alias}</span>}
+                  description={[
+                    formatExpiry(acc, t),
+                    acc.status,
+                    Array.isArray(acc.scopes) && acc.scopes.length
+                      ? t("scopes", { count: acc.scopes.length })
+                      : "",
+                  ]
+                    .filter(Boolean)
+                    .join(" · ")}
+                  actions={
+                    <Button size="sm" variant="outline" onClick={() => removeAccount(acc.alias)}>
+                      {t("btnRemove")}
+                    </Button>
+                  }
+                />
+              ))}
+            </ItemList>
           )}
         </div>
 
@@ -330,26 +329,27 @@ export function DarioAccountPanel() {
               </Tooltip>
             </div>
           ) : (
-            omniConnections.map((c) => (
-              <div
-                key={c.id}
-                className="flex items-center justify-between gap-3 rounded-lg border border-border px-3 py-2"
-              >
-                <div className="min-w-0">
-                  <p className="text-sm truncate">{c.name}</p>
-                  <p className="text-xs text-text-muted truncate">
-                    {[c.organizationType, c.organizationRateLimitTier].filter(Boolean).join(" · ")}
-                  </p>
-                </div>
-                <Button
-                  size="sm"
-                  disabled={importBusyId !== null}
-                  onClick={() => void importFromOmniroute(c.id)}
-                >
-                  {importBusyId === c.id ? t("btnImporting") : t("btnImport")}
-                </Button>
-              </div>
-            ))
+            <ItemList>
+              {omniConnections.map((c) => (
+                <Item
+                  key={c.id}
+                  truncate
+                  title={c.name}
+                  description={[c.organizationType, c.organizationRateLimitTier]
+                    .filter(Boolean)
+                    .join(" · ")}
+                  actions={
+                    <Button
+                      size="sm"
+                      disabled={importBusyId !== null}
+                      onClick={() => void importFromOmniroute(c.id)}
+                    >
+                      {importBusyId === c.id ? t("btnImporting") : t("btnImport")}
+                    </Button>
+                  }
+                />
+              ))}
+            </ItemList>
           )}
         </div>
 
@@ -401,12 +401,12 @@ export function DarioAccountPanel() {
             <p className="text-xs text-text-muted">{t("loginStep2")}</p>
             <div className="flex flex-wrap items-center gap-2">
               <Input
+                mono
                 placeholder={t("codePlaceholder")}
                 aria-label={t("codePlaceholder")}
                 value={codeInput}
                 onChange={(e) => setCodeInput(e.target.value)}
                 className="min-w-[180px] flex-1"
-                inputClassName="font-mono"
               />
               <Button
                 size="sm"

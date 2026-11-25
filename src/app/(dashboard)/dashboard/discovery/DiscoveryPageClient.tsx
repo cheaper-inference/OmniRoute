@@ -312,7 +312,7 @@ export function DiscoveryPageClient() {
       ) : d.results.length === 0 ? (
         <EmptyState title={d.t("emptyTitle")} description={d.t("emptyDescription")} />
       ) : (
-        <Table className="text-sm" scrollbarLabel={d.t("title")} scrollLabel={d.t("title")}>
+        <Table scrollbarLabel={d.t("title")} scrollLabel={d.t("title")}>
           <TableHeader>
             <TableRow>
               <TableHead>{d.t("provider")}</TableHead>
@@ -320,7 +320,7 @@ export function DiscoveryPageClient() {
               <TableHead>{d.t("risk")}</TableHead>
               <TableHead>{d.t("method")}</TableHead>
               <TableHead>{d.t("endpoint")}</TableHead>
-              <TableHead className="text-right">{d.t("actions")}</TableHead>
+              <TableHead align="end">{d.t("actions")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

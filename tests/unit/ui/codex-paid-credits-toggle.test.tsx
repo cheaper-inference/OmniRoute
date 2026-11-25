@@ -98,9 +98,10 @@ describe("Codex extra-credit account button", () => {
   }
 
   function button() {
-    return container.querySelector<HTMLButtonElement>(
-      "button[title='codexPaidCreditsToggleTitle']"
-    )!;
+    // Found by its label: the title is the kit tooltip now, not an attribute.
+    return ([...container.querySelectorAll<HTMLButtonElement>("button[aria-pressed]")].find((b) =>
+      b.textContent?.includes("codexPaidCreditsShort")
+    ) ?? null)!;
   }
 
   it("saves both directions without changing other settings, accounts or cooldowns", async () => {

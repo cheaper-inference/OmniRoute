@@ -5,16 +5,21 @@ import { createRoot } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("next-intl", () => ({
+  useLocale: () => "en",
   useTranslations: () => (key: string, values?: Record<string, unknown>) => {
     if (values) return `${key}:${JSON.stringify(values)}`;
     return key;
   },
 }));
 
-vi.mock("@/shared/components", () => ({
-  Card: ({ children }: { children: React.ReactNode }) =>
-    React.createElement("div", { className: "card" }, children),
-}));
+vi.mock("@/shared/components", () => {
+  // The card nests its groups in `Card.Section`, so the mock has both.
+  const Card = ({ children }: { children: React.ReactNode }) =>
+    React.createElement("div", { className: "card" }, children);
+  const Section = ({ children }: { children: React.ReactNode }) =>
+    React.createElement("div", { className: "card-section" }, children);
+  return { Card: Object.assign(Card, { Section }) };
+});
 
 const MOCK_QDRANT_SETTINGS = {
   enabled: false,

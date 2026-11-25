@@ -55,9 +55,13 @@ export interface AvatarGroupProps extends ComponentProps<"div"> {
   size?: AvatarSize;
   shape?: AvatarShape;
   max?: number;
+  /** Accessible name of the "+N" avatar shown past `max`. Defaults to "N more members". */
+  overflowLabel?: (count: number) => string;
 }
 
-export function AvatarGroup({ className, size = "md", shape = "circle", max, children, ...props }: AvatarGroupProps) {
+const defaultAvatarGroupOverflowLabel = (count: number) => `${count} more members`;
+
+export function AvatarGroup({ className, size = "md", shape = "circle", max, overflowLabel = defaultAvatarGroupOverflowLabel, children, ...props }: AvatarGroupProps) {
   const items = Children.toArray(children).filter(isValidElement);
   const shown = max != null ? items.slice(0, max) : items;
   const overflow = items.length - shown.length;
@@ -73,7 +77,7 @@ export function AvatarGroup({ className, size = "md", shape = "circle", max, chi
       ))}
       {overflow > 0 && (
         <span className="ci-avatar-group__item">
-          <Avatar size={size} shape={shape} fallback={`+${overflow}`} aria-label={`${overflow} more members`} />
+          <Avatar size={size} shape={shape} fallback={`+${overflow}`} aria-label={overflowLabel(overflow)} />
         </span>
       )}
     </div>
