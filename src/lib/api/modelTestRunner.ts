@@ -32,6 +32,8 @@ import { runAsProbe } from "@/shared/utils/probeOrigin";
 import { isConnectionUnavailableToAuxiliaryActivity } from "@/lib/exclusiveLeaseIsolation";
 import { resolveSelfLoopBearer } from "@/shared/middleware/chatAdmissionIdentity";
 import { ownListenerSelfHopToken, SELF_HOP_HEADER } from "@omniroute/open-sse/utils/selfHop";
+import { buildChatGptWebCodexProbe } from "@omniroute/open-sse/executors/chatgpt-web-codex/probe";
+import { DEFAULT_CONNECTION_TEST_PROMPT } from "@/shared/constants/connectionTest";
 
 const INTERNAL_ORIGIN = "http://omniroute.internal";
 export const DEFAULT_MODEL_TEST_TIMEOUT_MS = 30_000;
@@ -40,6 +42,7 @@ const DOUBAO_WEB_PROVIDER_ID = "doubao-web";
 const ZAI_WEB_PROVIDER_ID = "zai-web";
 const ZAI_WEB_TEST_TIMEOUT_MS = 60_000;
 const CHATGPT_WEB_PROVIDER_ID = "chatgpt-web";
+const CHATGPT_WEB_CODEX_PROVIDER_ID = "chatgpt-web-codex";
 const CHATGPT_WEB_TEST_TIMEOUT_MS = 90_000;
 const XIAOMI_MIMO_TOKEN_PLAN_PROVIDER_ID = "xiaomi-mimo-token-plan";
 const XIAOMI_MIMO_TOKEN_PLAN_TEST_TIMEOUT_MS = 60_000;
@@ -137,7 +140,10 @@ export function resolveModelTestTimeoutMs(
     return Math.max(requestedTimeoutMs, ZAI_WEB_TEST_TIMEOUT_MS);
   }
 
-  if (normalizedProviderId === CHATGPT_WEB_PROVIDER_ID) {
+  if (
+    normalizedProviderId === CHATGPT_WEB_PROVIDER_ID ||
+    normalizedProviderId === CHATGPT_WEB_CODEX_PROVIDER_ID
+  ) {
     return Math.max(requestedTimeoutMs, CHATGPT_WEB_TEST_TIMEOUT_MS);
   }
 
@@ -215,11 +221,13 @@ export function buildInternalChatRequest(
 export function buildInternalResponsesRequest(
   testBody: Record<string, unknown>,
   signal: AbortSignal,
-  connectionId?: string
+  connectionId?: string,
+  extraHeaders: Record<string, string> = {}
 ) {
   return new Request(`${INTERNAL_ORIGIN}/v1/responses`, {
     method: "POST",
     headers: {
+      ...extraHeaders,
       "Content-Type": "application/json",
       // Same in-process authentication and memory opt-out as buildInternalChatRequest.
       Authorization: `Bearer ${resolveSelfLoopBearer()}`,
@@ -640,7 +648,11 @@ export async function runSingleModelTest(
     };
   }
 
-  const testBody = isRerank
+  const codexProbe =
+    providerId === CHATGPT_WEB_CODEX_PROVIDER_ID
+      ? buildChatGptWebCodexProbe(fullModelStr, options.prompt ?? DEFAULT_CONNECTION_TEST_PROMPT)
+      : null;
+  const defaultTestBody = isRerank
     ? {
         model: fullModelStr,
         query: "What is OmniRoute?",
@@ -669,6 +681,7 @@ export async function runSingleModelTest(
             stream: !isEmbedding && streamChat,
             maxTokens: !isEmbedding && streamChat ? STREAMING_CHAT_TEST_MAX_TOKENS : undefined,
           });
+  const testBody: Record<string, unknown> = codexProbe?.body ?? defaultTestBody;
 
   if (options.prompt !== undefined && "messages" in testBody) {
     testBody.messages = [{ role: "user", content: options.prompt }];
@@ -701,6 +714,11 @@ export async function runSingleModelTest(
     if (isAudioTranscription) {
       return postAudioTranscription(
         buildInternalAudioTranscriptionRequest(fullModelStr, signal, connectionId)
+      );
+    }
+    if (codexProbe) {
+      return postResponses(
+        buildInternalResponsesRequest(testBody, signal, connectionId, codexProbe.headers)
       );
     }
     if (isResponses) {
@@ -812,7 +830,7 @@ export async function runSingleModelTest(
       const parsedResponse = await runAsProbe(() =>
         extractModelTestResponseText(
           res,
-          !isEmbedding && !isRerank && !isResponses && streamChat,
+          !isEmbedding && !isRerank && !isResponses && !codexProbe && streamChat,
           isAudioSpeech
         )
       );
