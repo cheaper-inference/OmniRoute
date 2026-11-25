@@ -9,7 +9,8 @@
  *            `role: "system"` message (2.1.28x, mid-conversation-system beta), "Working
  *            directory:" in the top-level `system` field (older builds), or Codex's `<cwd>` inside
  *            `<environment_context>`.
- *   session  x-omniroute-session-id, then the client's own session id exactly as call logs
+ *   session  x-omniroute-session-id, then the `omniroute launch` session id (olx_ bearer, see
+ *            withLaunchSession), then the client's own session id exactly as call logs
  *            record it (resolveClientSessionId in services/conversationTracker.ts:
  *            x-claude-code-session-id, x-opencode-session, Codex `session_id`, the Claude Code
  *            `metadata.user_id` JSON `session_id`), so agent_sessions.client_session_id joins
@@ -19,9 +20,24 @@
  * entries and the first MAX_SCAN_CHARS of each text, and uses indexOf rather than regexes.
  */
 
+import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
+
 import { resolveClientSessionId as resolveSharedClientSessionId } from "../../services/conversationTracker.ts";
+import { defaultLogger } from "../../utils/logger.ts";
+import {
+  extractAgentSessionTurn,
+  extractUserTurnText,
+  type AgentSessionTurn,
+} from "./agentSessionTurn.ts";
 import { clientSessionIdFromRawRequest } from "./clientSessionId.ts";
 import { getHeaderValueCaseInsensitive } from "./headers.ts";
+import { isFusionPanelCall } from "../../utils/fusionPanelContext.ts";
+import {
+  discardSessionTurnAttempt,
+  sessionTurnAttemptSeq,
+  sessionTurnRequestKey,
+  startSessionTurnAttempt,
+} from "./sessionTurnAttempts.ts";
 
 type HeaderSource = Record<string, unknown> | Headers | null | undefined;
 type JsonRecord = Record<string, unknown>;
@@ -219,6 +235,59 @@ export function withoutPromptDerivedFields(context: AgentContext): AgentContext 
   };
 }
 
+/** The launch session behind an `olx_` bearer, as resolved key metadata carries it. */
+export interface LaunchSessionIdentityInput {
+  id?: unknown;
+  toolId?: unknown;
+  sessionTag?: unknown;
+}
+
+type UsageKeyInfo = { noLog?: boolean; launchSession?: LaunchSessionIdentityInput | null };
+
+function hasExplicitSessionHeader(headers: HeaderSource): boolean {
+  return readHeader(headers, "x-omniroute-session-id", MAX_SESSION_ID_CHARS) !== null;
+}
+
+/**
+ * `omniroute launch`: the launch session id is the client session id
+ * with the same precedence as `x-omniroute-session-id` (an explicit header still wins), and the
+ * launched tool's id is the client, so one launch aggregates into one agent_sessions row.
+ */
+export function withLaunchSession(
+  context: AgentContext,
+  headers: HeaderSource,
+  launchSession: LaunchSessionIdentityInput | null | undefined
+): AgentContext {
+  const launchId = cleanValue(launchSession?.id, MAX_SESSION_ID_CHARS);
+  if (!launchId) return context;
+  return {
+    ...context,
+    client: cleanValue(launchSession?.toolId, 40) || context.client,
+    clientSessionId: hasExplicitSessionHeader(headers) ? context.clientSessionId : launchId,
+  };
+}
+
+/**
+ * Session tag of an `olx_` request: the launch session's tag unless the client sent an explicit
+ * `x-omniroute-session-id` header (which keeps its existing meaning). null without a session.
+ */
+export function resolveLaunchSessionTag(
+  headers: HeaderSource,
+  apiKeyInfo: UsageKeyInfo | null | undefined
+): string | null {
+  if (hasExplicitSessionHeader(headers)) return null;
+  return cleanValue(apiKeyInfo?.launchSession?.sessionTag, MAX_SESSION_ID_CHARS + 64);
+}
+
+/** call_logs.session_tag precedence: launch tag, then the resolved conversation, then header. */
+export function resolveCallLogSessionTag(
+  launchSessionTag: string | null | undefined,
+  conversationId: string | null | undefined,
+  explicitSessionIdHeader: string | null | undefined
+): string | null {
+  return launchSessionTag || conversationId || explicitSessionIdHeader || null;
+}
+
 /**
  * Agent context for usage attribution. Callers pass the effective no-log decision (the
  * per-key `no_log` flag OR the per-request `x-omniroute-no-log` header): when `noLog` is
@@ -228,14 +297,68 @@ export function withoutPromptDerivedFields(context: AgentContext): AgentContext 
 export function resolveUsageAgentContext(
   body: unknown,
   headers: HeaderSource,
-  apiKeyInfo: { noLog?: boolean } | null | undefined
+  apiKeyInfo: UsageKeyInfo | null | undefined,
+  /** Resolved no-log state (per-key flag OR `x-omniroute-no-log` header); overrides `apiKeyInfo.noLog`. */
+  noLog?: boolean
 ): AgentContext {
-  const context = extractAgentContext(body, headers);
-  return apiKeyInfo?.noLog === true ? withoutPromptDerivedFields(context) : context;
+  const extracted = withLaunchSession(
+    extractAgentContext(body, headers),
+    headers,
+    apiKeyInfo?.launchSession
+  );
+  const context =
+    (noLog ?? apiKeyInfo?.noLog) === true ? withoutPromptDerivedFields(extracted) : extracted;
+  startSessionTurnAttempt(context); // numbers this attempt at dispatch (see sessionTurnAttempts)
+  return context;
 }
 
 export function hasAgentIdentity(
   context: AgentContext | null | undefined
 ): context is AgentContext {
   return Boolean(context?.clientSessionId || context?.projectName);
+}
+
+export interface SessionTurnInput {
+  /** The client's request as received; its body is the prompt source and the attempt key. */
+  clientRawRequest?: { body?: unknown } | null;
+  /** Pipeline body, used when the raw client body has no prompt (log bounds can drop it). */
+  body: unknown;
+  /** Alternative representations of the client-visible reply (see extractAgentSessionTurn). */
+  responses: readonly unknown[];
+  /** Streaming completion status; a failed stream stores no turn and drops the earlier one. */
+  streamStatus?: number;
+  agentContext: AgentContext | null | undefined;
+  apiKeyInfo: { noLog?: boolean } | null | undefined;
+}
+
+/**
+ * Simplified conversation turn to store for the request's agent session, or null. Stored only
+ * when AGENT_SESSION_MESSAGES_ENABLED is on, the request has an agent identity, the key is not
+ * `noLog` and a streamed reply finished with 200. The prompt comes from the raw client body
+ * (compression and compaction rewrite the pipeline body), like call logs.
+ */
+export function resolveSessionTurn(input: SessionTurnInput): AgentSessionTurn | null {
+  if (isFusionPanelCall()) return null; // a panel reply never reaches the client
+  const rawBody = input.clientRawRequest?.body;
+  if (input.streamStatus !== undefined && input.streamStatus !== 200) {
+    discardSessionTurnAttempt(rawBody, input.agentContext);
+    return null;
+  }
+  if (!hasAgentIdentity(input.agentContext) || input.apiKeyInfo?.noLog === true) return null;
+  if (!isFeatureFlagEnabled("AGENT_SESSION_MESSAGES_ENABLED")) return null;
+  try {
+    const promptBody = rawBody && extractUserTurnText(rawBody).text ? rawBody : input.body;
+    const turn = extractAgentSessionTurn(promptBody, ...input.responses);
+    if (!turn) return null;
+    return {
+      ...turn,
+      requestKey: sessionTurnRequestKey(rawBody),
+      attemptSeq: sessionTurnAttemptSeq(input.agentContext),
+    };
+  } catch (error) {
+    defaultLogger.debug("AGENT_SESSION", "session turn extraction failed", {
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return null;
+  }
 }

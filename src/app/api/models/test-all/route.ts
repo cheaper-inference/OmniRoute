@@ -20,13 +20,14 @@ import { getSettings } from "@/lib/db/settings";
 import { getProviderConnections } from "@/lib/db/providers";
 import { isFreeModel, providerHasFreeModels } from "@/shared/utils/freeModels";
 import * as log from "@/sse/utils/logger";
-
-const CONSECUTIVE_RATE_LIMIT_STOP_THRESHOLD = 3;
-/** Web-session providers (esp. Arena/CF) ban burst probes — pause between models. */
-const SLOW_PROBE_PROVIDERS = new Set(["lmarena", "lma"]);
-/** Fixed inter-model delay for SLOW_PROBE_PROVIDERS (no env — avoids doc-sync drift). */
-const SLOW_PROBE_DELAY_MS = 3500;
-const CONSECUTIVE_BOT_STOP_THRESHOLD = 2;
+import {
+  CONSECUTIVE_BOT_STOP_THRESHOLD,
+  CONSECUTIVE_RATE_LIMIT_STOP_THRESHOLD,
+  SLOW_PROBE_DELAY_MS,
+  SLOW_PROBE_PROVIDERS,
+  isBotBlockedOutcome,
+  isHideWorthyFailure,
+} from "@/lib/api/modelHealthClassification";
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -97,8 +98,14 @@ export async function POST(request: Request) {
   }
   const { providerId, modelIds, connectionId, respectRateLimit, autoHideFailed } = validation.data;
   const providerConnections = await getProviderConnections({ provider: providerId });
-  if (providerConnections.length > 0 && providerConnections.every((connection) => connection.isActive === false)) {
-    return NextResponse.json({ error: { message: `Provider ${providerId} has no active connections` } }, { status: 409 });
+  if (
+    providerConnections.length > 0 &&
+    providerConnections.every((connection) => connection.isActive === false)
+  ) {
+    return NextResponse.json(
+      { error: { message: `Provider ${providerId} has no active connections` } },
+      { status: 409 }
+    );
   }
 
   // #6328 (follow-up to #6495): REMOVE — not just hide — paid Test-all dispatches
@@ -187,27 +194,15 @@ export async function POST(request: Request) {
 
     // #9511: quota entries (403 with "insufficient balance" etc.) are NOT
     // bot-blocks — they should not count toward the bot-block stop threshold.
-    const botBlocked =
-      !entry.isQuota &&
-      (entry.statusCode === 403 ||
-        (typeof entry.error === "string" &&
-          /cloudflare|bot management|recaptcha|cf-chl|just a moment/i.test(entry.error)));
+    const botBlocked = isBotBlockedOutcome(entry);
     if (botBlocked) {
       consecutiveBotBlocks += 1;
     } else if (entry.status === "ok") {
       consecutiveBotBlocks = 0;
     }
 
-    if (
-      autoHideFailed &&
-      entry.status === "error" &&
-      !entry.rateLimited &&
-      !entry.isTimeout &&
-      !entry.isTransient &&
-      !entry.isQuota &&
-      // #14780: a skipped probe (web-session provider) never ran — not a failure.
-      !entry.skipped
-    ) {
+    // #14780: a skipped probe (web-session provider) never ran — not a failure.
+    if (autoHideFailed && isHideWorthyFailure(entry)) {
       try {
         await setModelIsHidden(providerId, modelId, true);
         entry.hidden = true;

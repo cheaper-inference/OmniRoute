@@ -23,9 +23,11 @@ right env injected, without writing any config at all. Targets and their
 aliases come from the canonical manifest `bin/cli/cli-manifest.mjs`
 (`claude-code|cc|anthropic`, `codex-cli|openai-codex|openai`, `goose-cli`,
 `open-code`, `qwen-code`, `gemini-cli`, `why-codes|why`), and `omniroute completion` offers the
-same manifest-derived target words. The legacy per-tool launchers —
-`omniroute launch` (Claude Code) and `omniroute launch-codex` (Codex) — remain
-available.
+same manifest-derived target words. `omniroute launch <tool>` starts a supported
+coding tool with a per-launch session token and a model list built from the providers you
+connected, and auto-starts a local gateway when none runs (see [LAUNCH.md](./LAUNCH.md)).
+The legacy per-tool launchers — `omniroute launch` without a tool name (Claude Code) and
+`omniroute launch-codex` (Codex) — remain available.
 
 Provider onboarding is available from the same local/remote context. The
 API-first commands below keep management authentication separate from provider
@@ -88,6 +90,7 @@ server and writes the config locally.
 | `omniroute setup-whycodes` | WhyCodes                     | WhyCodes `config.toml` (`[providers.omniroute]` + `[default_model]`); path is `$WHYCODES_HOME/config.toml` or `~/.whycodes/config.toml`                           | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | Both            |
 | `omniroute run <target>`   | Runtime launch (generic)     | Nothing — spawn `claude`/`codex`/`aider`/`goose`/`opencode`/`qwen`/`gemini`/`whycodes` with the right env and args; Qwen and Gemini use a temporary isolated home | `--remote` `--base-url` `--context` `--provider` `--model` `--api-key` `--api-key-env` `--dry-run` `--json` `--port` `--profile` `--token` | Both            |
 | `omniroute launch`         | Claude Code                  | Nothing — spawns `claude` with `ANTHROPIC_BASE_URL`/`ANTHROPIC_AUTH_TOKEN` injected                                                                               | `--remote` `--api-key` `--token` `--profile` `--port`                                                                                      | Both            |
+| `omniroute launch <tool>`  | Any launchable tool          | Nothing in your own config: per-launch config in a private temp dir, a session token                                                                              | `--model` `--all-models` `--list` `--remote` `--port` `--api-key` `--profile` `--dry-run` `--json`                                         | Both            |
 | `omniroute launch-codex`   | OpenAI Codex CLI             | Nothing — spawns `codex` with the `omniroute` provider injected via `-c` flags                                                                                    | `--remote` `--api-key` `--profile` (`-p`) `--port`                                                                                         | Both            |
 
 Notes on flags (verified in the command source):

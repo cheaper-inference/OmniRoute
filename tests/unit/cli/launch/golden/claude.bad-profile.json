@@ -1,0 +1,7 @@
+{
+  "error": {
+    "code": "ConfigConflict",
+    "hint": "Use letters, digits, '.', '_' or '-' only.",
+    "message": "Invalid Claude profile name: \"../escape\""
+  }
+}
