@@ -1,7 +1,13 @@
 {
   "version": 1,
   "base": "release/v3.8.55",
-  "paused": null,
+  "paused": {
+    "reason": "manual",
+    "since": "2026-11-25T21:12:53.475Z",
+    "baseSha": null,
+    "detail": "cut-over to live (#20902), runbook step 9",
+    "issue": null
+  },
   "inFlight": null,
   "baseChecks": [
     {
@@ -100,8 +106,7 @@
       "19167": "5a3523ee5d9dc3a3fe610ed93b4c5ccb048bbca0",
       "19305": "1f33f0e10883549e4374ac38d47e87c94936bc5c",
       "19306": "4afb0ca62e19eb94155c5b9c2b78bf4b91ae1dee",
-      "21095": "1b7aac58720e39f7915eaf09a0f3ffc1a5a33b95",
-      "21205": "8741ef3d0905867e193751adec82b1f92651283f"
+      "21095": "1b7aac58720e39f7915eaf09a0f3ffc1a5a33b95"
     }
   },
   "counters": {
@@ -114,21 +119,6 @@
     "culprits": 1
   },
   "history": [
-    {
-      "at": "2026-11-19T08:46:23.492Z",
-      "type": "checks-red",
-      "batchId": "b1",
-      "prs": [
-        20553,
-        20565,
-        20561,
-        20566,
-        20567
-      ],
-      "sha": "bb946ced17fddc311cc45d045d3d324d9e85d2a9",
-      "detail": "Gate / CI, Unit Tests (6/8)",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44490384814"
-    },
     {
       "at": "2026-11-19T08:46:31.524Z",
       "type": "base-check-started",
@@ -2558,8 +2548,14 @@
       "sha": "db34be497bb1c125a235f4116116fc21a9516b6b",
       "detail": "shadow mode: would merge-ff onto e6476f01a9fd",
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45664112411"
+    },
+    {
+      "at": "2026-11-25T21:12:53.475Z",
+      "type": "paused",
+      "detail": "cut-over to live (#20902), runbook step 9",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45702217080"
     }
   ],
-  "updatedAt": "2026-11-25T18:17:29.819Z",
+  "updatedAt": "2026-11-25T21:13:02.237Z",
   "batchWindow": 5
 }
