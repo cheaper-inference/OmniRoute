@@ -89,6 +89,16 @@ test("writes issues only behind the CATALOG_DRIFT_ISSUES variable", () => {
   );
 });
 
+test("never restores the npm cache after checking out a release branch", () => {
+  for (const [name, job] of Object.entries(workflow.jobs)) {
+    for (const step of job.steps) {
+      if (step.uses?.startsWith("actions/setup-node@")) {
+        assert.equal(step.with?.cache, undefined, `${name}: setup-node must not use a cache`);
+      }
+    }
+  }
+});
+
 test("state cache key is unique per attempt", () => {
   const { drift } = workflow.jobs;
   const restore = drift.steps.find(({ uses }) => uses?.startsWith("actions/cache/restore@"));
