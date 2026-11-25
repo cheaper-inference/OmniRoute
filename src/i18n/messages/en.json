@@ -3947,6 +3947,8 @@
     "proxyConfig": "Proxy configuration",
     "nameRequired": "Name is required",
     "nameInvalid": "Only letters, numbers, -, _, / and . allowed",
+    "nameReserved": "auto and names starting with auto/ are reserved for the built-in automatic routes",
+    "reservedNameWarning": "This name is reserved for automatic routing. Rename this combo to save changes.",
     "nameHint": "Letters, numbers, -, _, / and . allowed",
     "priorityDesc": "Sequential fallback: tries model 1 first, then 2, etc.",
     "weightedDesc": "Distributes traffic by weight percentage with fallback",

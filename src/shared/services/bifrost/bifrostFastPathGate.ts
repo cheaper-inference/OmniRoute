@@ -47,7 +47,8 @@ export async function gateBifrostFastPath(
 
   const keyPolicy = await enforceApiKeyPolicy(
     request,
-    typeof body.model === "string" ? body.model : null
+    typeof body.model === "string" ? body.model : null,
+    { directModelDispatch: true }
   );
   if (keyPolicy.rejection) {
     return { rejection: keyPolicy.rejection, allow: false };

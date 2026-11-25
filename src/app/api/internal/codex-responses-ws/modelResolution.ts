@@ -15,6 +15,7 @@
  * See docs/reference/API_REFERENCE.md → "Responses over WebSocket (Codex)".
  */
 
+import { isReservedComboName } from "@/lib/combos/autoNames";
 import { isQuotaModelName, parseQuotaModelName } from "@/lib/quota/quotaModelNaming";
 
 export interface ResolvedModelInfo {
@@ -88,8 +89,8 @@ export async function resolveResponsesApiModel(
   // #3509: "auto" is OmniRoute's zero-config auto-routing keyword (handled by the
   // isAutoRouting path in chat.ts, not a DB combo). It must NEVER be rewritten to
   // "codex/auto" — ChatGPT rejects it with "The 'auto' model is not supported when using
-  // Codex with a ChatGPT account". ("auto/<strategy>" already returns via the slash guard above.)
-  if (requestedModel === "auto") {
+  // Codex with a ChatGPT account".
+  if (isReservedComboName(requestedModel)) {
     return { model: requestedModel, changed: false };
   }
 
