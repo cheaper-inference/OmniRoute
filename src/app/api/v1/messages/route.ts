@@ -193,31 +193,31 @@ async function postHandler(request: any, context: any, preParsedBody: any = null
   // Bifrost sidecar fast-path (falls back to the native pipeline below on 5xx / error).
   const relayBackend = resolveRelayRoutingBackend();
   const bifrostConfig = getBifrostRoutingConfig();
-  if (!wantsStreaming) {
-    return respondNonStreaming(request, body, bifrostConfig, relayBackend);
+  if (wantsStreaming) {
+    const fastPathResult = await tryBifrostFastPath(request, body, bifrostConfig, relayBackend);
+    if (fastPathResult.response) {
+      return fastPathResult.response;
+    }
+    // Single id for handler + keepalive bytes + deadline warn (matches the
+    // chat/completions convention: caller id preserved, generated when absent).
+    const correlationId =
+      resolveIncomingCorrelationId(request.headers.get("x-correlation-id")) ?? generateRequestId();
+    const { signal: streamSignal, deadlineController } = createStreamDeadlineSignal(request.signal);
+    return applyBifrostHeaders(
+      await withEarlyStreamKeepalive(handleChat(request, null, body, correlationId, streamSignal), {
+        signal: streamSignal,
+        thresholdMs: resolveKeepaliveThreshold(body?.model),
+        keepaliveFrame: ANTHROPIC_PING_FRAME,
+        correlationId,
+        extraHeaders: { "X-Correlation-Id": correlationId },
+        deadlineController,
+      }),
+      bifrostConfig,
+      relayBackend,
+      fastPathResult.fallbackHeader
+    );
   }
-  const fastPathResult = await tryBifrostFastPath(request, body, bifrostConfig, relayBackend);
-  if (fastPathResult.response) {
-    return fastPathResult.response;
-  }
-  const applyHeaders = (res: Response) =>
-    applyBifrostHeaders(res, bifrostConfig, relayBackend, fastPathResult.fallbackHeader);
-
-  // Single id for handler + keepalive bytes + deadline warn (matches the
-  // chat/completions convention: caller id preserved, generated when absent).
-  const correlationId =
-    resolveIncomingCorrelationId(request.headers.get("x-correlation-id")) ?? generateRequestId();
-  const { signal: streamSignal, deadlineController } = createStreamDeadlineSignal(request.signal);
-  return applyHeaders(
-    await withEarlyStreamKeepalive(handleChat(request, null, body, correlationId, streamSignal), {
-      signal: streamSignal,
-      thresholdMs: resolveKeepaliveThreshold(body?.model),
-      keepaliveFrame: ANTHROPIC_PING_FRAME,
-      correlationId,
-      extraHeaders: { "X-Correlation-Id": correlationId },
-      deadlineController,
-    })
-  );
+  return respondNonStreaming(request, body, bifrostConfig, relayBackend);
 }
 
 /**
