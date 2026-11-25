@@ -174,7 +174,7 @@ describe("Anthropic-keyed Responses usage reaches a Claude client exactly", () =
     );
     const state: Record<string, unknown> & { usage?: Usage } = { toolCalls: new Map() };
     openaiToClaudeResponse(openaiChunk, state);
-    assert.deepEqual(state.usage, expectedClaudeUsage(WRITE_HEAVY));
+    assert.deepEqual(state.usage, WRITE_HEAVY);
   });
 
   test("non-streaming: Responses -> OpenAI -> Claude", () => {
@@ -196,7 +196,7 @@ describe("Anthropic-keyed Responses usage reaches a Claude client exactly", () =
       FORMATS.OPENAI_RESPONSES,
       FORMATS.CLAUDE
     ) as { usage?: unknown };
-    assert.deepEqual(back.usage, expectedClaudeUsage(WRITE_HEAVY));
+    assert.deepEqual(back.usage, WRITE_HEAVY);
   });
 
   test("non-streaming: a read larger than the uncached input stays exact", () => {
