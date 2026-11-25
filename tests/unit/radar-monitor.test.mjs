@@ -149,6 +149,39 @@ for (const [description, options, problems, expectedVersion, expectedGeneratedAt
   });
 }
 
+test("cancels a signed feed when its streamed body exceeds the size limit", async (t) => {
+  const { fetchFeedHealth } = await importMonitor();
+  const { kind, status, headers, bodyBytes, ...context } = signedFeed();
+  let cancelled = false;
+  const body = new ReadableStream(
+    {
+      start(controller) {
+        controller.enqueue(bodyBytes.subarray(0, 1));
+        controller.enqueue(bodyBytes.subarray(1));
+      },
+      pull(controller) {
+        controller.close();
+      },
+      cancel() {
+        cancelled = true;
+      },
+    },
+    { highWaterMark: 0 }
+  );
+  t.mock.method(globalThis, "fetch", async () => new Response(body, { status, headers }));
+
+  const result = await fetchFeedHealth(new URL("http://127.0.0.1"), kind, context, {
+    maxFeedBytes: bodyBytes.byteLength - 1,
+  });
+  assert.deepEqual(result, {
+    ok: false,
+    problems: ["too-large"],
+    version: null,
+    generatedAt: null,
+  });
+  assert.equal(cancelled, true);
+});
+
 test("sorts the problem key independently of discovery order", async () => {
   const { problemsKey } = await importMonitor();
   const problems = ["stale", "bad-version"];

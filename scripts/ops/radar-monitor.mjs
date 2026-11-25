@@ -2,6 +2,7 @@ import { createPublicKey, verify } from "node:crypto";
 import { readFileSync } from "node:fs";
 
 const HOUR_MS = 60 * 60 * 1000;
+const MAX_FEED_BYTES = 10 * 1024 * 1024; // Same cap as the Radar sync clients.
 const VERSION = /^\d{4}\.\d{2}\.\d{2}\.\d+$/;
 const TIMESTAMP = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?Z$/;
 const SIGNATURE_HEADER = "x-omniroute-feed-signature";
@@ -89,6 +90,8 @@ export function evaluateFeedHealth({
       date.toISOString().slice(0, 10) === timestamp.slice(0, 10)
     ) {
       generatedAt = timestamp;
+      // The static publisher sets referrals' generatedAt from the run clock on each publish.
+      // A stale referrals feed means the publisher stopped.
       if (new Date(now).getTime() - generatedMs > maxAgeHours * HOUR_MS) problems.push("stale");
       if (generatedMs < Date.parse(curatedAt)) problems.push("before-curation");
     }
@@ -110,7 +113,7 @@ export function decideReportAction({ healthy, key, openIssue, now = Date.now() }
   return "comment";
 }
 
-async function fetchFeedHealth(base, kind, context) {
+export async function fetchFeedHealth(base, kind, context, { maxFeedBytes = MAX_FEED_BYTES } = {}) {
   const url = new URL(`/v1/${kind}/latest`, base);
   let response;
   let bodyBytes;
@@ -123,7 +126,26 @@ async function fetchFeedHealth(base, kind, context) {
       await response.body?.cancel();
       return unhealthy(`http-${response.status}`);
     }
-    bodyBytes = await response.arrayBuffer();
+    const chunks = [];
+    let totalBytes = 0;
+    const reader = response.body?.getReader();
+    if (reader) {
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          totalBytes += value.byteLength;
+          if (totalBytes > maxFeedBytes) {
+            await reader.cancel().catch(() => {});
+            return unhealthy("too-large");
+          }
+          chunks.push(value);
+        }
+      } finally {
+        reader.releaseLock();
+      }
+    }
+    bodyBytes = Buffer.concat(chunks, totalBytes);
   } catch {
     return unhealthy("network-error");
   }
