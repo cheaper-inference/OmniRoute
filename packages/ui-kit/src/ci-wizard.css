@@ -57,7 +57,7 @@
 .ci-wizard[data-variant="onboarding"] .ci-wizard__steps li { flex:1; min-width:0; gap:0; }
 .ci-wizard[data-variant="onboarding"] .ci-wizard__steps li:last-child { flex:0 0 auto; }
 .ci-wizard[data-variant="onboarding"] .ci-wizard__steps li:not(:last-child)::after { content:""; height:1px; flex:1; min-width:.5rem; margin-inline:.75rem; background:var(--ci-color-border); }
-.ci-wizard[data-variant="onboarding"] .ci-wizard__step-content { gap:8px; white-space:nowrap; text-align:left; }
+.ci-wizard[data-variant="onboarding"] .ci-wizard__step-content { gap:8px; white-space:nowrap; text-align:start; }
 .ci-wizard__steps [data-complete="true"]:not([aria-current="step"]) .ci-wizard__number { color:var(--ci-color-success); border-color:var(--ci-color-success); }
 .ci-wizard[data-variant="onboarding"] [aria-current="step"] .ci-wizard__number { border-color:var(--ci-color-accent); }
 .ci-wizard[data-variant="onboarding"] .ci-wizard__number { width:23px; height:23px; font-size:12px; }
@@ -74,7 +74,7 @@
   .ci-wizard[data-variant="onboarding"] .ci-wizard__steps { gap:.5rem; align-items:flex-start; }
   .ci-wizard[data-variant="onboarding"] .ci-wizard__steps li,.ci-wizard[data-variant="onboarding"] .ci-wizard__steps li:last-child { flex:1; justify-content:center; }
   .ci-wizard[data-variant="onboarding"] .ci-wizard__steps li:not(:last-child)::after { display:none; }
-  .ci-wizard[data-variant="onboarding"] .ci-wizard__step-content { flex-direction:column; min-height:2.75rem; white-space:normal; text-align:center; font-size:.6875rem; line-height: var(--ci-type-control-leading); font-weight: var(--ci-font-weight-medium); letter-spacing: var(--ci-type-control-tracking); }
+  .ci-wizard[data-variant="onboarding"] .ci-wizard__step-content { flex-direction:column; min-height:2.75rem; white-space:normal; text-align:center; font-size:var(--ci-font-size-2xs); line-height: var(--ci-type-control-leading); font-weight: var(--ci-font-weight-medium); letter-spacing: var(--ci-type-control-tracking); }
   .ci-wizard[data-variant="onboarding"] .ci-wizard__step-content > svg { display:none; }
   .ci-wizard[data-variant="onboarding"] .ci-wizard__title { font-size:1.875rem; margin-top:1.25rem; font-weight: var(--ci-font-weight-medium); line-height: var(--ci-type-heading-leading); letter-spacing: var(--ci-type-heading-tracking); }
   .ci-wizard[data-variant="onboarding"] .ci-wizard__actions { display:grid; grid-template-columns:1fr 1fr; gap:.5rem; }
@@ -91,7 +91,7 @@
 @media(max-width:640px) {
  .ci-wizard[data-variant="onboarding"] .ci-wizard__steps { padding:8px 0 12px; }
  .ci-wizard[data-variant="onboarding"] .ci-wizard__step-content { gap:6px; }
- .ci-wizard[data-variant="onboarding"] .ci-wizard__step-link { font-size:10px; font-weight: var(--ci-font-weight-medium); line-height: var(--ci-type-control-leading); letter-spacing: var(--ci-type-control-tracking); }
+ .ci-wizard[data-variant="onboarding"] .ci-wizard__step-link { font-size:var(--ci-font-size-3xs); font-weight: var(--ci-font-weight-medium); line-height: var(--ci-type-control-leading); letter-spacing: var(--ci-type-control-tracking); }
  .ci-wizard[data-variant="onboarding"] .ci-wizard__description { padding-bottom:20px; }
  .ci-wizard[data-variant="onboarding"][data-layout="sidebar"] .ci-wizard__body { padding-top:0; }
  .ci-wizard[data-variant="onboarding"] .ci-wizard__footer { padding:10px 0 max(10px,env(safe-area-inset-bottom)); }
@@ -99,7 +99,7 @@
 
 /* Content-sized setup: public Wizard layout, never dashboard internal overrides. */
 .ci-wizard[data-layout="sidebar"] { width:100%; max-width:76rem; margin-block:1.5rem; }
-.ci-wizard[data-layout="sidebar"] > .ci-wizard__content { display:grid; grid-template-columns:12rem minmax(0,1fr); column-gap:2rem; padding:2rem; }
+.ci-wizard[data-layout="sidebar"] > .ci-wizard__content { display:grid; grid-template-columns:var(--ci-wizard-sidebar-width, 12rem) minmax(0,1fr); column-gap:2rem; padding:2rem; }
 .ci-wizard[data-layout="sidebar"] .ci-wizard__top { grid-column:1; align-self:start; }
 .ci-wizard[data-layout="sidebar"] .ci-wizard__steps { grid-column:1; grid-row:2 / span 2; display:flex; flex-direction:column; align-self:start; gap:.625rem; padding:1rem 0; border:0; }
 .ci-wizard[data-layout="sidebar"] .ci-wizard__steps li { flex:none; width:100%; padding:.625rem 0; }
@@ -119,7 +119,7 @@
  .ci-wizard[data-layout="sidebar"] .ci-wizard__step-title { display:none; }
  .ci-wizard[data-layout="sidebar"] .ci-wizard__viewport { margin-top:.75rem; }
  .ci-wizard[data-layout="sidebar"] .ci-wizard__body { padding-block:1.25rem; }
- .ci-wizard[data-layout="sidebar"] .ci-wizard__steps [aria-current="step"] .ci-wizard__step-title { display:block; font-size:.6875rem; }
+ .ci-wizard[data-layout="sidebar"] .ci-wizard__steps [aria-current="step"] .ci-wizard__step-title { display:block; font-size:var(--ci-font-size-2xs); }
 }
 
 /* The public fill + sidebar composition keeps both navigation and actions in
@@ -253,4 +253,100 @@
 .ci-wizard[data-fill="true"][data-layout="sidebar"] { margin-block:0; }
 .ci-wizard[data-fill="true"][data-layout="sidebar"] > .ci-wizard__content { padding-top:2rem; padding-bottom:1rem; }
 .ci-wizard[data-fill="true"][data-layout="sidebar"] .ci-wizard__scroll { padding-top:.5rem; }
+}
+
+/* Nested sections share the parent step count; the caller owns their state. */
+.ci-wizard__steps > li[data-has-substeps] { flex-direction:column; align-items:flex-start; }
+.ci-wizard__substeps-desktop { width:100%; padding-inline-start:1.9375rem; padding-top:.5rem; }
+.ci-wizard__substeps { display:flex; flex-direction:column; gap:.25rem; }
+.ci-wizard__substep { touch-action:manipulation; -webkit-tap-highlight-color:transparent; appearance:none; border:0; background:transparent; color:var(--ci-color-text-muted); display:flex; align-items:center; gap:.5rem; min-height:2.5rem; padding:.5rem .625rem; border-radius:var(--ci-radius-control); text-align:start; font:inherit; font-size:.8125rem; cursor:pointer; }
+.ci-wizard__substep > svg { width:1rem; height:1rem; flex-shrink:0; }
+.ci-wizard__substep:hover:not(:disabled) { background:var(--ci-color-surface-muted); color:var(--ci-color-heading); }
+.ci-wizard__substep[aria-current="step"] { background:color-mix(in srgb,var(--ci-color-accent) 20%,var(--ci-card-bg)); color:var(--ci-color-heading); font-weight:var(--ci-font-weight-semibold); }
+.ci-wizard__substep:focus-visible { outline:2px solid var(--ci-color-focus); outline-offset:2px; }
+.ci-wizard__substep:disabled { opacity:.5; cursor:default; }
+.ci-wizard__substeps-mobile { display:none; }
+@media(max-width:760px), (hover:none) and (pointer:coarse) {
+  .ci-wizard__substeps-desktop { display:none; }
+  .ci-wizard__substeps-mobile { display:block; margin-bottom:.75rem; }
+  .ci-wizard__substeps-mobile .ci-wizard__substeps { flex-direction:row; flex-wrap:wrap; }
+  .ci-wizard__substeps-mobile .ci-wizard__substep { min-height:2.75rem; }
+}
+
+/* Optional public badge slots wrap without changing string-based navigation labels. */
+.ci-wizard__title[data-has-badge] { display:flex; flex-wrap:wrap; align-items:center; gap:.5rem .75rem; }
+.ci-wizard__title[data-has-badge] > span:first-child { min-width:0; overflow-wrap:anywhere; }
+.ci-wizard__title-badge { display:inline-flex; align-items:center; flex:none; min-width:0; max-width:100%; vertical-align:middle; }
+.ci-wizard__step-title[data-has-badge] { min-width:0; }
+.ci-wizard__step-title[data-has-badge] > .ci-wizard__title-badge { margin-inline-start:.375rem; }
+
+@media(min-width:761px) and (hover:hover) {
+  .ci-wizard[data-layout="sidebar"]:has(.ci-wizard__step-title[data-has-badge]) > .ci-wizard__content { grid-template-columns:var(--ci-wizard-sidebar-width, 15rem) minmax(0,1fr); }
+}
+
+/* Respond to the available panel, including beside a dashboard navigation rail. */
+.ci-wizard:has(.ci-wizard__substeps) { container-type: inline-size; container-name: ci-wizard; }
+@container ci-wizard (max-width: 760px) {
+  .ci-wizard[data-layout="sidebar"] > .ci-wizard__content { display:flex; flex-direction:column; padding:1.25rem; }
+  .ci-wizard[data-layout="sidebar"] .ci-wizard__steps { flex-direction:row; gap:.5rem; padding:.75rem 0 1rem; flex:none; max-height:none; overflow:visible; }
+  .ci-wizard[data-layout="sidebar"] .ci-wizard__steps li { width:auto; flex:1; padding:0; }
+  .ci-wizard[data-layout="sidebar"] .ci-wizard__step-content { flex-direction:column; min-height:2.75rem; text-align:center; gap:.375rem; }
+  .ci-wizard[data-layout="sidebar"] .ci-wizard__step-content > svg { display:none; }
+  .ci-wizard[data-layout="sidebar"] .ci-wizard__step-title { display:none; }
+  .ci-wizard[data-layout="sidebar"] .ci-wizard__steps [aria-current="step"] .ci-wizard__step-title { display:block; font-size:var(--ci-font-size-2xs); }
+  .ci-wizard__substeps-desktop { display:none; }
+  .ci-wizard__substeps-mobile { display:block; flex:none; margin-bottom:.75rem; }
+  .ci-wizard__substeps-mobile .ci-wizard__substeps { flex-direction:row; flex-wrap:wrap; }
+  .ci-wizard__substeps-mobile .ci-wizard__substep { min-height:2.75rem; }
+  .ci-wizard[data-layout="sidebar"] .ci-wizard__viewport { margin-top:.75rem; }
+  .ci-wizard[data-layout="sidebar"] .ci-wizard__body { padding-block:1.25rem; }
+  .ci-wizard[data-layout="sidebar"] .ci-wizard__footer { flex:none; }
+  .ci-wizard[data-variant="onboarding"] .ci-wizard__actions { display:grid; grid-template-columns:1fr 1fr; gap:.5rem; }
+  .ci-wizard[data-variant="onboarding"] .ci-wizard__actions > div { display:contents; }
+  .ci-wizard[data-variant="onboarding"] .ci-wizard__actions > div > .ci-button:last-child { grid-column:1 / -1; }
+  .ci-wizard[data-variant="onboarding"] .ci-wizard__actions .ci-button { min-height:2.75rem; white-space:normal; height:auto; }
+}
+
+/* Compact phone progress keeps the page heading as the single optional marker. */
+@media (max-width:640px) {
+  .ci-wizard[data-mobile-progress-detail="minimal"] .ci-wizard__substeps-mobile,
+  .ci-wizard[data-mobile-progress-detail="minimal"] .ci-wizard__step-title > .ci-wizard__title-badge { display:none; }
+  .ci-wizard[data-mobile-progress-detail="minimal"] .ci-wizard__title > .ci-wizard__title-badge .ci-badge {
+    font-size:.875rem;
+    padding:.375rem .625rem;
+    color:var(--ci-color-heading);
+    background:var(--ci-color-surface-muted);
+    font-weight:var(--ci-font-weight-semibold);
+  }
+}
+
+@media(max-width:640px) {
+ .ci-wizard[data-mobile-progress-detail="minimal"] .ci-wizard__title { text-wrap:wrap; }
+ .ci-wizard[data-mobile-progress-detail="minimal"] .ci-wizard__title > span:first-child { flex-basis:100%; }
+ .ci-wizard[data-mobile-progress-detail="minimal"] .ci-wizard__title-badge { gap:.5rem; flex-wrap:wrap; }
+}
+
+/* Explicit sticky actions also apply to sidebar and mobile document layouts.
+   Keep the footer in flow so the last form field can scroll clear of it. */
+.ci-wizard[data-footer-position="sticky"] .ci-wizard__footer,
+.ci-wizard[data-footer-position="sticky"][data-mobile-layout="document"] .ci-wizard__footer {
+  position:sticky;
+  bottom:0;
+}
+.ci-wizard[data-fill="true"][data-footer-position="sticky"] {
+  margin-block:0;
+}
+.ci-wizard[data-footer-position="sticky"] .ci-wizard__actions {
+  display:flex;
+}
+.ci-wizard[data-footer-position="sticky"] .ci-wizard__actions > div {
+  display:flex;
+  min-width:0;
+  justify-content:flex-end;
+}
+.ci-wizard[data-footer-position="sticky"] .ci-wizard__actions > .ci-button {
+  flex-shrink:0;
+}
+.ci-wizard[data-footer-position="sticky"] .ci-wizard__actions > div .ci-button {
+  min-width:0;
 }

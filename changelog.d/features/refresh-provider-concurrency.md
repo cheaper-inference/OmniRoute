@@ -1,0 +1,1 @@
+- **feat(auth):** Opt-in `HEALTHCHECK_PER_PROVIDER_CONCURRENCY` caps proactive token refreshes in flight per provider during the healthcheck sweep, so a large account sweep does not hammer one identity endpoint.

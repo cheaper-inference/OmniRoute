@@ -105,7 +105,9 @@ test("every raw <button>/<input> left in the dashboard tree carries a `kit-excep
           unexplained.push(`${rel(f)}:${i + 1}`);
       });
   }
-  assert.ok(sites > 10, `found only ${sites} raw controls; the scan is broken`);
+  // The count only goes down (the FileTrigger adoption removed the hidden file inputs), so the
+  // floor is "the scan still sees one"; the next test checks the scan on fixed samples.
+  assert.ok(sites > 0, `found only ${sites} raw controls; the scan is broken`);
   assert.deepEqual(unexplained, []);
 });
 

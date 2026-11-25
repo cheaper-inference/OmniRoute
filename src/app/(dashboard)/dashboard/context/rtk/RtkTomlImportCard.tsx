@@ -86,7 +86,8 @@ function RtkTomlEditor({
           placeholder={t("tomlImportPlaceholder")}
           aria-label={t("tomlImportTitle")}
           data-testid="rtk-toml-content"
-          className="h-56 w-full font-mono text-xs"
+          mono
+          className="h-56 w-full"
         />
       </div>
 
@@ -122,7 +123,7 @@ function RtkTomlEditor({
 function RtkTomlResult({ result }: { result: ImportResult }) {
   const t = useTranslations("contextRtk");
   return (
-    <div className="mt-4 rounded-lg border border-border bg-bg p-3" data-testid="rtk-toml-result">
+    <Card.Section className="mt-4" data-testid="rtk-toml-result">
       <p className="text-xs font-medium text-text-main">
         {result.installedPath
           ? t("tomlInstalled", { path: result.installedPath })
@@ -140,7 +141,7 @@ function RtkTomlResult({ result }: { result: ImportResult }) {
         <p className="mt-1 text-xs text-text-muted">{t("tomlBackupCreated")}</p>
       )}
       {result.filters.length > 0 && (
-        <ul className="mt-2 space-y-1 text-[11px] text-text-main">
+        <ul className="mt-2 space-y-1 text-xs text-text-main">
           {result.filters.map((filter) => (
             <li key={filter.id}>
               <code>{filter.id}</code> · {filter.category} ·{" "}
@@ -150,7 +151,7 @@ function RtkTomlResult({ result }: { result: ImportResult }) {
         </ul>
       )}
       {result.outcomes.length > 0 && (
-        <ul className="mt-2 space-y-1 text-[11px] text-text-main">
+        <ul className="mt-2 space-y-1 text-xs text-text-main">
           {result.outcomes.map((outcome) => (
             <li key={`${outcome.filterId}:${outcome.testName}`}>
               <span className={outcome.passed ? "text-success" : "text-error"}>
@@ -162,13 +163,13 @@ function RtkTomlResult({ result }: { result: ImportResult }) {
         </ul>
       )}
       {result.warnings.length > 0 && (
-        <ul className="mt-2 space-y-1 text-[11px] text-warning">
+        <ul className="mt-2 space-y-1 text-xs text-warning">
           {result.warnings.map((warning) => (
             <li key={warning}>{warning}</li>
           ))}
         </ul>
       )}
-    </div>
+    </Card.Section>
   );
 }
 

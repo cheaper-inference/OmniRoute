@@ -2,7 +2,7 @@
 // Extracted from open-sse/services/tokenRefresh.ts — see ../shared.ts for
 // provenance notes (ported idea from KooshaPari's PR #7338, redone on tip).
 import { getGitHubCopilotRefreshHeaders } from "../../../config/providerHeaderProfiles.ts";
-import { runWithProxyContext } from "../../../utils/proxyFetch.ts";
+import { runCommittedWithProxyContext, runWithProxyContext } from "../../../utils/proxyFetch.ts";
 import { stripTrailingSlashes } from "../../../utils/urlSanitize.ts";
 
 export interface CopilotRefreshResult {
@@ -105,7 +105,9 @@ export async function refreshCopilotToken(
     const normalizedBase = stripTrailingSlashes(baseUrl);
     const tokenUrl = `${normalizedBase}/copilot_internal/v2/token`;
     const headers = getGitHubCopilotRefreshHeaders(`token ${githubAccessToken}`);
-    const response = await runWithProxyContext(proxyConfig, () => fetch(tokenUrl, { headers }));
+    const response = await runCommittedWithProxyContext(proxyConfig, () =>
+      fetch(tokenUrl, { headers })
+    );
 
     if (!response.ok) {
       return await handleFailedCopilotTokenResponse(

@@ -258,7 +258,11 @@ import { runPluginOnResponseHook } from "./chatCore/pluginOnResponse.ts";
 import { applyPostTranslationCompression } from "./chatCore/postTranslationCompression.ts";
 import { isJsonRecord } from "./chatCore/nonStreamingResponseParse.ts";
 import { recordNonStreamingUsageStats } from "./chatCore/nonStreamingUsageStats.ts";
-import { resolveUsageAgentContext } from "./chatCore/agentContext.ts";
+import {
+  resolveCallLogSessionTag,
+  resolveLaunchSessionTag,
+  resolveUsageAgentContext,
+} from "./chatCore/agentContext.ts";
 import { getModelNormalizeToolCallId, getModelPreserveOpenAIDeveloperRole } from "@/lib/db/models";
 import { extractSessionAffinityKey } from "@/sse/services/auth";
 import { createManagedLeaseFence } from "./chatCore/managedLeaseFence.ts";
@@ -271,6 +275,7 @@ import {
   redactPendingBody,
 } from "@/lib/guardrails/videoBridgeSnapshotRedaction";
 import {
+  normalizeGeminiPromptCacheMode,
   shouldPreserveCacheControl,
   resolveConnectionCacheOverride,
 } from "../utils/cacheControlPolicy.ts";
@@ -479,6 +484,7 @@ async function handleChatCoreInner({
   comboExecutionKey = null,
   cachedSettings = null,
   skipUpstreamRetry = false,
+  nonReplayableRequest = false,
   createPiiTransform = null,
   correlationId = null,
   conversationId = null,
@@ -631,9 +637,15 @@ async function handleChatCoreInner({
   // before agent-context extraction so a header-only no-log request also drops
   // prompt-derived project/branch fields from usage attribution.
   const noLogEnabled = resolveNoLogEnabled(apiKeyInfo, clientRawRequest?.headers ?? null);
-  const agentContext = resolveUsageAgentContext(body, clientRawRequest?.headers, {
-    noLog: noLogEnabled,
-  });
+  const agentContext = resolveUsageAgentContext(
+    body,
+    clientRawRequest?.headers,
+    apiKeyInfo,
+    noLogEnabled
+  );
+  // `omniroute launch` session tag (olx_ bearer) unless an explicit x-omniroute-session-id
+  // header is present; null for every other request, so their session_tag is unchanged.
+  const launchSessionTag = resolveLaunchSessionTag(clientRawRequest?.headers, apiKeyInfo);
   // Failure usage record building extracted to chatCore/failureUsage.ts (#3501); the handler keeps
   // the fire-and-forget save + computes latencyMs, so the call sites stay byte-identical.
   const persistFailureUsage = (
@@ -886,7 +898,7 @@ async function handleChatCoreInner({
       providerRequest: initialPendingBody(body, effectiveModel, videoBridgeObserved),
       stage: "registered",
       correlationId,
-      sessionTag: conversationId || null,
+      sessionTag: resolveCallLogSessionTag(launchSessionTag, conversationId, null),
     }) || generateRequestId();
   // Capture before any await: retries can reuse the public preview ID.
   const pendingRequestGeneration = getPendingById().get(pendingRequestId)?.attemptGeneration;
@@ -960,7 +972,7 @@ async function handleChatCoreInner({
   }
   // Consolidate settings reads — fetch once, reuse throughout the request
   const settings = cachedSettings ?? (await getCachedSettings());
-  const geminiPromptCacheMode = settings.geminiPromptCacheMode === "implicit" ? "implicit" : "off";
+  const geminiPromptCacheMode = normalizeGeminiPromptCacheMode(settings.geminiPromptCacheMode);
   const isScopedGeminiCacheTarget =
     (provider === "antigravity" || provider === "agy") &&
     effectiveModel
@@ -1065,6 +1077,7 @@ async function handleChatCoreInner({
       pendingRequestId,
       pendingRequestGeneration,
       clientRawRequest,
+      agentContext, // identifies the attempt whose session turn a failure drops (#14864)
       requestedModel,
       credentials,
       startTime,
@@ -1083,7 +1096,12 @@ async function handleChatCoreInner({
       // present — it's populated for every request now, not just ones where the
       // client explicitly sent x-omniroute-session-id. The raw header remains a
       // fallback for any caller that somehow bypassed conversationId resolution.
-      sessionTag: conversationId || explicitSessionIdHeader,
+      // A launch session (olx_ bearer, no explicit header) tags every call of the launch.
+      sessionTag: resolveCallLogSessionTag(
+        launchSessionTag,
+        conversationId,
+        explicitSessionIdHeader
+      ),
       // #12150 P1b surface 1: undefined for every non-video request (byte-identical
       // to before this param existed) — see applyVideoBridgeLogRedaction.
       videoBridgeLogRedaction: (videoBridgeLog as VideoBridgeLogParam | undefined)?.redaction,
@@ -2781,6 +2799,7 @@ async function handleChatCoreInner({
     resilienceSettings,
     settings,
     skipUpstreamRetry,
+    nonReplayableRequest,
     requestUpstreamStartTimeoutMs,
     stream,
     streamController,
@@ -3027,7 +3046,7 @@ async function handleChatCoreInner({
     retryAfterMs?: number | null;
     targetModel: string;
   }) => {
-    let errorType = classifyProviderError(statusCode, message, provider);
+    let errorType = classifyProviderError(statusCode, message, provider, upstreamErrorBody);
     if (statusCode === 429 && isModelScope()) {
       const decision = classifyModelScope429(message, normalizeHeaders(headers));
       errorType =

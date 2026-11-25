@@ -51,6 +51,10 @@ import type { PoolConfig } from "../services/sessionPool/types.ts";
 import type { Session } from "../services/sessionPool/session.ts";
 import { SessionPool } from "../services/sessionPool/sessionPool.ts";
 import { PoolRegistry } from "../services/sessionPool/poolRegistry.ts";
+import {
+  PROXY_FETCH_NO_REPLAY,
+  type FetchWithDispatcherOptions,
+} from "../utils/proxyFetchTransportSupport.ts";
 import { resolveKeyForRequest } from "../services/apiKeyRotator.ts";
 import type { KeyHealth } from "../services/apiKeyRotator.ts";
 import {
@@ -240,6 +244,8 @@ export type ExecuteInput = {
   ) => Promise<void> | void;
   /** When true, skip the intra-URL 429 retry in execute() so the caller handles fallback. */
   skipUpstreamRetry?: boolean;
+  /** Custom OpenAI-compatible node: transport recovery resends only a pre-send failure. */
+  nonReplayableRequest?: boolean;
   /** In-process capability; never accepted from an HTTP body or client header. */
   validationDispatch?: StrictValidationDispatch;
   /** Request-scoped id for log attribution; absent off the chat path, never fabricated. */
@@ -778,6 +784,7 @@ export class BaseExecutor {
       upstreamExtraHeaders,
       clientHeaders,
       skipUpstreamRetry = false,
+      nonReplayableRequest = false,
       onCredentialsRefreshed,
       contextEditing,
     } = input;
@@ -1595,10 +1602,11 @@ export class BaseExecutor {
           }
         }
         copilotIdentity.pin(finalHeaders);
-        const fetchOptions: RequestInit = {
+        const fetchOptions: FetchWithDispatcherOptions = {
           method: "POST",
           headers: finalHeaders,
           body: bodyString,
+          ...(nonReplayableRequest ? { [PROXY_FETCH_NO_REPLAY]: true } : {}),
         };
 
         // OpenRouter `:free`-variant local window (#6842): record every dispatch
@@ -1819,6 +1827,7 @@ export class BaseExecutor {
         // same URL with exponential backoff before falling through to the
         // 429/401/fallback chain. See docs/security/AGENTROUTER_WAF.md.
         if (
+          this.provider === "agentrouter" &&
           !skipUpstreamRetry &&
           response.status === HTTP_STATUS.BAD_REQUEST &&
           (retryAttemptsByUrl[urlIndex] ?? 0) < BaseExecutor.WAF_RETRY_CONFIG.maxAttempts
