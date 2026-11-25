@@ -1,6 +1,6 @@
 import { MUSE_CODE_MINT_URL, isMuseDcaToken } from "../../../config/museCode.ts";
 import { MuseCodeMintError, mintMuseApiKey } from "../../museCodeAuth.ts";
-import { runWithProxyContext } from "../../../utils/proxyFetch.ts";
+import { runCommittedWithProxyContext } from "../../../utils/proxyFetch.ts";
 import type { RefreshLogger } from "../shared.ts";
 import { isTransientRefreshError } from "../transientError.ts";
 
@@ -33,7 +33,7 @@ export async function refreshMuseCodeToken(
   }
 
   try {
-    const minted = await runWithProxyContext(proxyConfig, () =>
+    const minted = await runCommittedWithProxyContext(proxyConfig, () =>
       mintMuseApiKey(dcaToken, MUSE_CODE_MINT_URL)
     );
     return {

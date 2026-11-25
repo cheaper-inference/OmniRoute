@@ -9,6 +9,9 @@
  */
 
 import { BaseGuardrail, type GuardrailContext, type GuardrailResult } from "./base";
+import { isReservedComboName } from "@/lib/combos/autoNames";
+import { resolveStoredAutoCombo } from "@/lib/combos/storedAutoCombo";
+import { isBuiltInAutoRoute } from "@omniroute/open-sse/services/autoCombo/builtinCatalog";
 import { getSettings as defaultGetSettings } from "@/lib/db/settings";
 import { getResolvedModelCapabilities } from "@/lib/modelCapabilities";
 import { getProviderNodePrefixSync } from "@/lib/db/providers/nodePrefix";
@@ -192,14 +195,15 @@ export async function getComboVisionBridgeDecision(
     // 1. Try to find combo by exact name match. The normal Combo resolver also
     // accepts `combo/<name>` for combos stored under their bare name; keep the
     // Vision Bridge capability check on the same lookup path.
-    let combo = await getComboByName(model);
+    const isReservedModel = isReservedComboName(model);
+    let combo = isReservedModel ? await resolveStoredAutoCombo(model) : await getComboByName(model);
 
     if (!combo && model.startsWith("combo/")) {
       combo = await getComboByName(model.slice("combo/".length));
     }
 
     // 2. If no exact match, try model-combo mapping
-    if (!combo) {
+    if (!combo && !isReservedModel) {
       const mapping = await resolveComboForModel(model);
       if (!mapping) return "not-combo";
       const comboName = resolveVisionComboName(mapping);
@@ -351,7 +355,7 @@ export class VisionBridgeGuardrail extends BaseGuardrail {
     // does NOT currently filter models by vision capability, so without the
     // guardrail an image-bearing request assigned to a text-only model will
     // fail upstream with "does not support images".
-    const isAuto = model === "auto" || model.startsWith("auto/");
+    const isAuto = isBuiltInAutoRoute(model);
 
     // Declare before the conditional so they're available to the rest of preCall
     let forceVisionBridge = false;

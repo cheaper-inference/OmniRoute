@@ -47,13 +47,18 @@ import { mergeResponseToolNameMap } from "./passthroughToolNames.ts";
 import { runPluginOnResponseHook, runPluginOnStreamCompleteHook } from "./pluginOnResponse.ts";
 import { wrapReadableStreamWithFinalize } from "./streamFinalize.ts";
 import { buildStreamLedgerDetails, recordStreamingCost } from "./streamingCost.ts";
-import { assembleStreamingPipeline, resolvePiiGate } from "./streamingPipeline.ts";
+import {
+  assembleStreamingPipeline,
+  isStreamMaskingActive,
+  resolvePiiGate,
+} from "./streamingPipeline.ts";
 import { scheduleStreamingQuotaShareConsumption } from "./streamingQuotaShare.ts";
 import { assembleStreamingResponseHeaders } from "./streamingResponseHeaders.ts";
 import { storeStreamingSemanticCacheResponse } from "./streamingSemanticCacheStore.ts";
 import { recordFinalInputCalibration } from "./contextEstimation.ts";
 import { emitStreamingRoutingEvent } from "./streamingRoutingEvent.ts";
 import { recordStreamingUsageStats } from "./streamingUsageStats.ts";
+import { resolveSessionTurn } from "./agentContext.ts";
 import { maybeSyncClaudeExtraUsageState } from "./telemetryHelpers.ts";
 import {
   getExecutorTimeoutMs,
@@ -170,6 +175,9 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
   finalBody = deps.finalBody;
   effectiveServiceTier = deps.effectiveServiceTier;
   let onPipelineStreamError = null;
+  // Set once the per-request masking gates resolve, before any stream bytes flow. Starts true so a
+  // completion that somehow lands earlier is never cached unmasked.
+  let streamMaskingActive = true;
   let onClientDisconnectFinalize = null;
   let turnExecutionHandedOffToStream = false;
 
@@ -558,6 +566,14 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
       endpoint: endpointPath,
       cpaAuthIndex: readCpaAuthIndex(providerResponse),
       agentContext,
+      sessionTurn: resolveSessionTurn({
+        clientRawRequest,
+        body,
+        responses: [clientPayload?.summary, streamResponseBody],
+        streamStatus: normalizedStreamStatus,
+        agentContext,
+        apiKeyInfo,
+      }),
       partialUsage: streamPartialUsage,
       emittedOutput: streamEmittedOutput(transformStream),
     });
@@ -676,6 +692,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
       log,
       videoTranscriptSensitive: videoBridgeObserved,
       piiTokensMinted,
+      maskingActive: streamMaskingActive,
     });
 
     // Plugin onStreamComplete hook — fire-and-forget, fail-open (#9571)
@@ -848,6 +865,12 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
     apiKeyInfo: deps.apiKeyInfo,
     body: deps.body,
     headers: deps.clientRawRequest?.headers,
+  });
+  streamMaskingActive = isStreamMaskingActive({
+    createPiiTransform,
+    credentialRedactionEnabled: credentialGate.credentialRedactionEnabled,
+    credentialDisabledGuardrails: credentialGate.credentialDisabledGuardrails,
+    piiDisabledGuardrails: piiGate.piiDisabledGuardrails,
   });
   const finalStream = assembleStreamingPipeline({
     providerResponse,

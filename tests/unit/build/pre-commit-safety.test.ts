@@ -129,6 +129,7 @@ function makeScratchRepo() {
     "scripts/check/lib/allowlist.mjs",
     "scripts/check/lib/migrationBaseDiff.mjs",
     "scripts/check/lib/migrationNaming.mjs",
+    "scripts/lib/is-main-module.mjs",
   ]) {
     mkdirSync(dirname(join(root, rel)), { recursive: true });
     cpSync(join(repoRoot, rel), join(root, rel));
