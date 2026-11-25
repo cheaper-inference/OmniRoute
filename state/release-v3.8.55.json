@@ -2413,8 +2413,25 @@
       "sha": "ae94881fcf543d1ee91d6af11f18b274280e0c53",
       "detail": "all 1 failure(s) also fail on base ae94881fcf54 (1 matched by check name only: no test-level key)",
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45572983016"
+    },
+    {
+      "at": "2026-11-25T10:14:00.379Z",
+      "type": "queue-stalled",
+      "detail": "paused (reason `base-red`) since 2026-11-25 08:03Z, for more than 120 min",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45592847942"
     }
   ],
-  "updatedAt": "2026-11-25T09:05:11.607Z",
-  "batchWindow": 5
+  "updatedAt": "2026-11-25T10:14:02.585Z",
+  "batchWindow": 5,
+  "stalled": {
+    "since": "2026-11-25T08:03:41.469Z",
+    "reasons": [
+      "paused (reason `base-red`) since 2026-11-25 08:03Z, for more than 120 min"
+    ],
+    "openedAt": "2026-11-25T10:14:00.379Z",
+    "kinds": [
+      "paused:base-red"
+    ],
+    "notified": true
+  }
 }
