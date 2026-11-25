@@ -12,7 +12,7 @@
  *   the kit border and radius unless the consumer zeroes them.
  */
 import React from "react";
-import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 
 beforeAll(() => {
@@ -62,16 +62,19 @@ const entry = (i: number) => ({
 
 describe("semantic cache entries: no frame of their own", () => {
   it("renders the entries as a borderless kit table, with search and pagination kept", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn(async () =>
-        Response.json({
+    const response = Promise.withResolvers<Pick<Response, "ok" | "json">>();
+    vi.stubGlobal("fetch", vi.fn().mockReturnValue(response.promise));
+    const { container } = render(<CacheEntriesTab />);
+
+    await act(async () => {
+      response.resolve({
+        ok: true,
+        json: async () => ({
           entries: [entry(1), entry(2)],
           pagination: { page: 1, limit: 20, total: 45, totalPages: 3 },
-        })
-      )
-    );
-    const { container } = render(<CacheEntriesTab />);
+        }),
+      });
+    });
     await waitFor(() => expect(screen.getAllByRole("row")).toHaveLength(3));
 
     expectBorderlessTable(container);
