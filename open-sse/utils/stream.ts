@@ -2,7 +2,7 @@ import { translateResponse, initState } from "../translator/index.ts";
 import { FORMATS } from "../translator/formats.ts";
 import { appendRequestLog } from "@/lib/usageDb";
 import { mergeUsageEvidence } from "./usageEvidence.ts";
-import { mergeUsageSnapshot, repairClaudeFinalWireUsage } from "./streamUsageMerge.ts";
+import { mergeUsageSnapshot } from "./streamUsageMerge.ts";
 import {
   resolveStreamAccountingUsage,
   projectStreamingClientUsage,
@@ -11,10 +11,8 @@ import { createGeneratedContentTracker } from "./streamGeneratedContent.ts";
 import { mergeCacheCreationFields } from "./cacheWriteUsage.ts";
 import type { PendingRequestIdentity } from "./pendingRequestCleanup.ts";
 import { clearPendingRequestOnce } from "./pendingRequestCleanup.ts";
-import {
-  resolveTrailingUsageSummary,
-  hasPriorInputForTrailingUsage,
-} from "./passthroughTrailingUsage.ts";
+import { resolveTrailingUsageSummary } from "./passthroughTrailingUsage.ts";
+import { createUsageGuard } from "./streamUsageGuard.ts";
 import { createByteLengthQueueStrategies } from "./byteQueueStrategy.ts";
 import { initTranslateStreamState } from "./streamTranslateState.ts";
 import { createNativeClaudeUsageTracker } from "./nativeClaudeUsage.ts";
@@ -117,7 +115,7 @@ import { applyThinkTag, flushThink, initThinkState } from "./thinkTagParser.ts";
 import { restoreOpenAIToolNames } from "../translator/helpers/toolCallHelper.ts";
 import { restoreClaudeToolName } from "../services/claudeCodeToolRemapper.ts";
 import { normalizeFinalOpenAIStreamChunk } from "./openAIStreamChunk.ts";
-import { collectClaudeDelta } from "./streamClaudeDelta.ts";
+import { collectClaudeDelta, collectToolUseName, withToolUseNames } from "./streamClaudeDelta.ts";
 import { createStreamTiming, registerStreamTiming, type StreamTiming } from "./streamTiming.ts";
 import { trackStreamPartialUsage } from "./streamPartialUsage.ts";
 import { buildUsageOnlyChunk } from "./usageOnlyChunk.ts";
@@ -125,6 +123,8 @@ import { createSSEOutputSink } from "./sseOutputSink.ts";
 import { normalizeArrayContentChunk } from "./arrayContentDelta.ts";
 import { drainTranslateFlushTail } from "./translateFlushTail.ts";
 import { restoreResponsesToolNames } from "../translator/helpers/responsesToolNameRestore.ts";
+import { withBuyerCostMicro, type StreamCompletePayload } from "./streamCompletePayload.ts";
+import { readBuyerCostMicro, registerStreamBuyerCost } from "./buyerCostMicro.ts";
 
 function isLateOutputProbeEnabled(): boolean {
   try {
@@ -134,10 +134,7 @@ function isLateOutputProbeEnabled(): boolean {
   }
 }
 
-/**
- * Race a response body read against a timeout.
- * Prevents indefinite hangs when the upstream sends headers but stalls on the body.
- */
+/** Race a body read against a timeout to prevent hanging after upstream headers arrive. */
 export function withBodyTimeout<T>(
   promise: Promise<T>,
   timeoutMs: number = FETCH_BODY_TIMEOUT_MS
@@ -171,37 +168,6 @@ type StreamLogger = {
   appendProviderChunk?: (value: string) => void;
   appendConvertedChunk?: (value: string) => void;
   appendOpenAIChunk?: (value: string) => void;
-};
-
-type StreamCompletePayload = {
-  status: number;
-  usage: unknown;
-  /** Minimal response body for call log (streaming: usage + note; non-streaming not used) */
-  responseBody?: unknown;
-  providerPayload?: unknown;
-  clientPayload?: unknown;
-  error?: string | null;
-  errorCode?: string | null;
-  /**
-   * Time-to-first-forwarded-SSE-chunk in ms, or null when nothing was forwarded.
-   * NOT token-level TTFT — see open-sse/utils/streamTiming.ts for what is measured.
-   */
-  ttft?: number | null;
-  firstOutputMs?: number | null; // StreamTiming.firstOutputMs(); the caller adds pre-stream time
-  /** Mean inter-chunk gap in ms (chunk-latency proxy for ITL), or null. */
-  itlMs?: number | null;
-  /** True when the stream was interrupted (timeout/abort/error) before a clean finish. */
-  interrupted?: boolean;
-  cacheEvidence?: "hit" | "miss" | "unreported" | "invalid";
-  /**
-   * Encrypted-reasoning observation (Responses opaque `reasoning` items):
-   * flag when seen, wall-clock added→done delta when paired. Efforts are
-   * read at the sink from the request bodies — never threaded here.
-   */
-  reasoningMeta?: {
-    encryptedSeen: boolean;
-    durationMs: number | null;
-  } | null;
 };
 
 /** Queue budget every provider used before `streamBufferBytes` existed. */
@@ -856,7 +822,7 @@ export function createSSEStream(options: StreamOptions = {}) {
     connectionId = null,
     apiKeyInfo = null,
     body = null,
-    onComplete = null,
+    onComplete: completionCallback = null,
     onFailure = null,
     dropResponsesCommentary,
     customToolNames = new Set<string>(),
@@ -864,6 +830,12 @@ export function createSSEStream(options: StreamOptions = {}) {
     streamBufferBytes = DEFAULT_STREAM_BUFFER_BYTES,
     pendingRequestId = null,
   } = options;
+  let buyerCostMicro: number | null = null;
+  const clientToolUseNames: string[] = []; // tool_use names the Claude client got, session turns only
+  const onComplete = withBuyerCostMicro(
+    withToolUseNames(completionCallback, clientToolUseNames),
+    () => buyerCostMicro
+  );
   // Request-body-size metric (for monitoring payload size distribution & correlation with TTFT).
   // The size is JSON-serialised byte count; stored as a performance mark detail so monitoring
   // tools can query performance.getEntriesByType("mark") filtered by name.
@@ -1004,7 +976,13 @@ export function createSSEStream(options: StreamOptions = {}) {
   const nativeClaudeUsage = createNativeClaudeUsageTracker(body);
   const nativeContent = createGeneratedContentTracker();
   const observedContentLength = () => nativeContent.getLength();
+  // Log metadata only: the payload (and so the client wire) is left as it was.
+  const observeBuyerCostMicro = (payload: unknown) => {
+    const reportedCost = readBuyerCostMicro(payload);
+    if (reportedCost !== undefined) buyerCostMicro = reportedCost;
+  };
   const observeProviderPayload = (payload: unknown) => {
+    observeBuyerCostMicro(payload);
     nativeClaudeUsage.observe(payload);
     nativeContent.observe(payload);
     providerPayloadCollector.push(payload);
@@ -1022,12 +1000,8 @@ export function createSSEStream(options: StreamOptions = {}) {
     });
   const getClientUsage = () =>
     projectStreamingClientUsage(getAccountingUsage(), targetFormat, sourceFormat);
-  const sanitizePassthroughUsage = (payload: unknown) => {
-    const changed =
-      !hasPriorInputForTrailingUsage(payload, usage) &&
-      sanitizeUsagePayloadForRequest(payload as UsageLike, body, clientResponseFormat);
-    return repairClaudeFinalWireUsage(payload, getAccountingUsage()) || changed;
-  };
+  // One usage basis per stream, so per-chunk usage does not redo the body work (#20086).
+  const usageGuard = createUsageGuard(body, clientResponseFormat, () => usage, getAccountingUsage);
   // Passthrough: accumulate content and reasoning separately for call log response body
   let passthroughAccumulatedContent = "";
   let passthroughAccumulatedReasoning = "";
@@ -1409,6 +1383,7 @@ export function createSSEStream(options: StreamOptions = {}) {
     }
 
     const output = formatSSE(itemSanitized, sourceFormat);
+    collectToolUseName(clientToolUseNames, itemSanitized);
     clientPayloadCollector.push(itemSanitized);
     reqLogger?.appendConvertedChunk?.(output);
     forwardedValuableChunk = true;
@@ -1613,6 +1588,7 @@ export function createSSEStream(options: StreamOptions = {}) {
   ): boolean => {
     const failure = prepareTranslatedStreamFailure(payload);
     if (!failure) return false;
+    observeBuyerCostMicro(payload);
     failure.internalFailure.streamSnapshot ??= buildStreamFailureSnapshot(providerPayloadCollector);
     providerPayloadCollector.push(failure.providerPayload);
     const output = formatTranslatedStreamError(failure.record, sourceFormat);
@@ -1849,7 +1825,7 @@ export function createSSEStream(options: StreamOptions = {}) {
                     parsed.type.startsWith("content_block") ||
                     parsed.type === "ping" ||
                     parsed.type === "error");
-                if (sanitizePassthroughUsage(parsed)) {
+                if (usageGuard.sanitizePassthrough(parsed)) {
                   output = `data: ${JSON.stringify(parsed)}\n\n`;
                   injectedUsage = true;
                 }
@@ -2256,6 +2232,7 @@ export function createSSEStream(options: StreamOptions = {}) {
                     toolNameMap,
                     clientTools ?? (body as JsonRecord | null)?.tools
                   );
+                  collectToolUseName(clientToolUseNames, parsed);
                   // Native tool_use blocks only feed the completion summary; the wire is unchanged.
                   trackClaudeNativeToolCall(passthroughNativeToolCalls, parsed);
                   // Track content length and accumulate from Claude format
@@ -2718,7 +2695,7 @@ export function createSSEStream(options: StreamOptions = {}) {
           if (parsed && parsed.done) {
             continue;
           }
-          sanitizeUsagePayloadForRequest(parsed, body, targetFormat);
+          sanitizeUsagePayloadForRequest(parsed, body, targetFormat, usageGuard.basis);
           if (parsed.choices?.[0]?.delta?.tool_calls) {
             lastToolCallChunkTime = now;
           }
@@ -3005,7 +2982,7 @@ export function createSSEStream(options: StreamOptions = {}) {
               },
               pushProviderPayload: observeProviderPayload,
               pushClientPayload: (payload: unknown) => clientPayloadCollector.push(payload),
-              sanitizeUsagePayload: sanitizePassthroughUsage,
+              sanitizeUsagePayload: usageGuard.sanitizePassthrough,
               setPassthroughResponsesId: (value: string) => {
                 passthroughResponsesId = value;
               },
@@ -3098,7 +3075,7 @@ export function createSSEStream(options: StreamOptions = {}) {
                     );
                   output = `data: ${JSON.stringify(bufferedPayload)}\n\n`;
                 }
-                if (sanitizePassthroughUsage(bufferedPayload))
+                if (usageGuard.sanitizePassthrough(bufferedPayload))
                   output = `data: ${JSON.stringify(bufferedPayload)}\n\n`;
                 mergePassthroughCacheCreationUsage(extractUsage(bufferedPayload));
                 if (
@@ -3474,6 +3451,7 @@ export function createSSEStream(options: StreamOptions = {}) {
               openaiFormat: FORMATS.OPENAI,
               openaiResponsesFormat: FORMATS.OPENAI_RESPONSES,
               body,
+              usageBasis: usageGuard.basis,
               state: state as TranslateState & Record<string, unknown>,
               sessionId,
               now: () => Date.now(),
@@ -3902,6 +3880,7 @@ export function createSSEStream(options: StreamOptions = {}) {
     }),
     ...createByteLengthQueueStrategies(streamBufferBytes)
   );
+  registerStreamBuyerCost(sseStream, () => buyerCostMicro);
   trackStreamPartialUsage(sseStream, body, () => [getAccountingUsage(), observedContentLength()]);
   return registerStreamTiming(sseStream, timing);
 }

@@ -276,7 +276,7 @@ test.describe("Providers management", () => {
     await expect(page.getByRole("dialog")).toHaveCount(0);
     expect((await readProviderMockState(page)).syncCalls).toBe(0);
 
-    await page.getByTitle(/^edit$/i).click();
+    await page.getByRole("button", { name: /^edit$/i }).click();
     const editDialog = page.getByRole("dialog");
     await editDialog.getByLabel(/name/i).fill("Primary OpenAI Edited");
     await editDialog.getByLabel(/priority/i).fill("3");
@@ -314,7 +314,7 @@ test.describe("Providers management", () => {
 
     // #7361 replaced the native window.confirm() with a ConfirmModal, so the old
     // page.once("dialog") handler never fires and the delete request was never sent.
-    await page.getByTitle(/^delete$/i).click();
+    await page.getByRole("button", { name: /^delete$/i }).click();
     const confirmDialog = page
       .getByRole("alertdialog")
       .filter({ hasText: /delete this connection/i });

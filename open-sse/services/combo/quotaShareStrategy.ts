@@ -7,10 +7,12 @@
  *
  * Three mechanisms are applied in sequence:
  *
- *   1. Per-model bucket gating (accountBuckets.isBucketSaturated):
- *      A connection whose 5h, 7d, or per-model 7d:<model> window is saturated
- *      for the requested model is moved to a DEPRIORITIZED tail rather than
- *      dropped. If EVERY connection is saturated, all are eligible again
+ *   1. Per-model bucket gating (accountBuckets.isBucketSaturated and
+ *      isModelWindowSaturated):
+ *      A connection whose 5h or 7d window is saturated, or whose model-scoped
+ *      weekly window covering the target's own model is exhausted (by the same
+ *      rule credential selection applies), is moved to a DEPRIORITIZED tail
+ *      rather than dropped. If EVERY connection is saturated, all are eligible again
  *      (fail-open: a quota-share combo is never hard-blocked here).
  *
  *   2. DRR (Deficit Round Robin):
@@ -31,7 +33,10 @@
  * Part of: Quota Sharing Engine — Phase 3 (#9 dedicated quota-share strategy).
  */
 
-import { isBucketSaturated } from "../../../src/lib/quota/accountBuckets.ts";
+import {
+  isBucketSaturated,
+  isModelWindowSaturated,
+} from "../../../src/lib/quota/accountBuckets.ts";
 import { incrementInflight, decrementInflight, getInflight } from "./quotaShareInflight.ts";
 import type { ResolvedComboTarget } from "./types.ts";
 
@@ -71,30 +76,21 @@ function getDrrDeficits(comboName: string): Map<string, number> {
 // Mechanism 1 — per-model bucket gating
 // ---------------------------------------------------------------------------
 
-/** Extract the bare model name from "<provider>/<model>" (or pass through). */
-function bareModelName(modelStr: string): string {
-  const slash = modelStr.indexOf("/");
-  return slash >= 0 ? modelStr.slice(slash + 1) : modelStr;
-}
-
 /**
  * Return the eligible (non-saturated) targets. Fail-open: when every target is
  * saturated, the original list is returned so the combo is never hard-blocked.
  */
 function filterEligibleBySaturation(
   targets: ResolvedComboTarget[],
-  modelStr: string,
   nowMs: number
 ): ResolvedComboTarget[] {
-  const modelName = bareModelName(modelStr);
-
   const eligible = targets.filter((target) => {
     const connId = target.connectionId ?? "";
     if (connId === "") return true; // no connection → cannot be saturation-scored
     const saturated =
       isBucketSaturated(connId, "5h", nowMs) ||
       isBucketSaturated(connId, "7d", nowMs) ||
-      (modelName !== "" && isBucketSaturated(connId, `7d:${modelName}`, nowMs));
+      isModelWindowSaturated(connId, target.modelStr, nowMs);
     return !saturated;
   });
 
@@ -277,14 +273,12 @@ export interface QuotaShareOptions {
  *
  * @param targets    Resolved combo targets (the combo's eligible step entries).
  * @param comboName  Combo name; used as the DRR state key.
- * @param modelStr   Requested model string, e.g. "anthropic/claude-opus-4".
  * @param nowMs      Current epoch ms for bucket/in-flight checks; defaults to Date.now().
  * @param options    Optional pre-resolved data (per-connection concurrency caps).
  */
 export function selectQuotaShareTarget(
   targets: ResolvedComboTarget[],
   comboName: string,
-  modelStr: string,
   nowMs: number = Date.now(),
   options?: QuotaShareOptions
 ): QuotaShareResult {
@@ -295,7 +289,7 @@ export function selectQuotaShareTarget(
   }
 
   // 1) Per-model bucket gating.
-  const eligible = filterEligibleBySaturation(targets, modelStr, nowMs);
+  const eligible = filterEligibleBySaturation(targets, nowMs);
   const saturatedDeprioritized = targets.filter((t) => !eligible.includes(t));
 
   // 1b) Per-connection concurrency gating: connections already at their

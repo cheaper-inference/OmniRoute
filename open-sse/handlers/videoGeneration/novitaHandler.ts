@@ -9,6 +9,7 @@
 
 import { sanitizeErrorMessage } from "../../utils/error.ts";
 import { sleep } from "../../utils/sleep.ts";
+import { clampVideoPollIntervalMs, clampPollTimeoutMs } from "../../utils/pollBounds.ts";
 import { abortedVideoResult } from "./abort.ts";
 import {
   buildNovitaPollUrl,
@@ -72,9 +73,8 @@ function resolveNovitaTiming(body: NovitaHandlerArgs["body"]): {
   timeoutMs: number;
   pollIntervalMs: number;
 } {
-  const timeoutMs = Number(body.timeout_ms) > 0 ? Number(body.timeout_ms) : DEFAULT_TIMEOUT_MS;
-  const pollIntervalMs =
-    Number(body.poll_interval_ms) > 0 ? Number(body.poll_interval_ms) : DEFAULT_POLL_INTERVAL_MS;
+  const timeoutMs = clampPollTimeoutMs(body.timeout_ms, DEFAULT_TIMEOUT_MS);
+  const pollIntervalMs = clampVideoPollIntervalMs(body.poll_interval_ms, DEFAULT_POLL_INTERVAL_MS);
   return { timeoutMs, pollIntervalMs };
 }
 

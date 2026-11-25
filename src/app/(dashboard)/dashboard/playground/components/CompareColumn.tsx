@@ -63,9 +63,9 @@ export default function CompareColumn({ column, onCancel, onRemove }: CompareCol
           {status === "streaming" && (
             <Button
               variant="outline"
-              size="sm"
+              size="2xs"
+              tone="muted"
               onClick={() => onCancel(id)}
-              className="h-auto min-h-0 px-1.5 py-0.5 text-[10px] text-text-muted"
               aria-label={t("cancelStream")}
             >
               {t("cancel")}
@@ -76,7 +76,7 @@ export default function CompareColumn({ column, onCancel, onRemove }: CompareCol
             size="icon-sm"
             onClick={() => void copy(response, id)}
             disabled={response === ""}
-            className="text-text-muted"
+            tone="muted"
             title={copied === id ? t("copiedCode") : t("copy")}
             aria-label={copied === id ? t("copiedCode") : t("copy")}
             icon={copied === id ? "check" : "content_copy"}

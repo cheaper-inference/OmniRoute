@@ -32,7 +32,9 @@
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { fileURLToPath } from "node:url";
+import { isMainModule } from "../lib/is-main-module.mjs";
+import { resolvePullRequestComparison } from "./pullRequestComparison.mjs";
 
 const DEFAULT_ALLOWLIST = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -150,18 +152,23 @@ function parseArgs(argv) {
 }
 
 /** In GitHub Actions with no CLI args: scan the pull_request of the event payload (null = not a PR). */
-export function inputsFromGithubEvent(eventPath = process.env.GITHUB_EVENT_PATH) {
-  if (!eventPath || !fs.existsSync(eventPath)) return undefined;
-  let ev;
-  try {
-    ev = JSON.parse(fs.readFileSync(eventPath, "utf8"));
-  } catch {
+export function inputsFromGithubEvent(
+  eventPath = process.env.GITHUB_EVENT_PATH,
+  { cwd = process.cwd(), env = process.env } = {}
+) {
+  if (!eventPath || !fs.existsSync(eventPath)) {
+    if (env.GITHUB_EVENT_NAME === "pull_request") throw new Error("Missing PR event payload");
     return undefined;
   }
+  const ev = JSON.parse(fs.readFileSync(eventPath, "utf8"));
   const pr = ev?.pull_request;
-  if (!pr?.base?.sha || !pr?.head?.sha) return null;
+  if (!pr) {
+    if (env.GITHUB_EVENT_NAME === "pull_request") throw new Error("Missing PR event identity");
+    return null;
+  }
+  const { baseSha, headSha } = resolvePullRequestComparison({ pr, cwd, env });
   return {
-    range: `${pr.base.sha}..${pr.head.sha}`,
+    range: `${baseSha}..${headSha}`,
     prTitle: typeof pr.title === "string" ? pr.title : "",
     prBody: typeof pr.body === "string" ? pr.body : "",
   };
@@ -170,13 +177,20 @@ export function inputsFromGithubEvent(eventPath = process.env.GITHUB_EVENT_PATH)
 export function main(argv = process.argv.slice(2)) {
   const a = parseArgs(argv);
   if (!a.range && !a.messageFile && !a.prTitle && !a.prBodyFile) {
-    const ev = inputsFromGithubEvent();
+    let ev;
+    try {
+      ev = inputsFromGithubEvent();
+    } catch (error) {
+      console.error(`[ai-attribution] INCOMPLETE — ${error.message}`);
+      return 2;
+    }
     if (ev === null) {
       console.log("[ai-attribution] OK — not a pull_request event, nothing to scan.");
       return 0;
     }
     if (ev) {
       a.range = ev.range;
+      console.log(`[ai-attribution] PR comparison range: ${a.range}`);
       a.prTitle = ev.prTitle;
       a.prBodyText = ev.prBody;
     }
@@ -220,6 +234,6 @@ export function main(argv = process.argv.slice(2)) {
   return 0;
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (isMainModule(import.meta.url)) {
   process.exit(main());
 }

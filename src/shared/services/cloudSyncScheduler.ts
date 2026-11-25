@@ -1,6 +1,7 @@
 import { getConsistentMachineId } from "@/shared/utils/machineId";
 import { isCloudEnabled } from "@/lib/db/settings";
 import { getRuntimePorts } from "@/lib/runtime/ports";
+import { getProcessStore } from "@/shared/utils/processSingleton";
 
 const { dashboardPort } = getRuntimePorts();
 
@@ -17,11 +18,13 @@ export class CloudSyncScheduler {
   machineId: string | null;
   intervalMinutes: number;
   intervalId: ReturnType<typeof setInterval> | null;
+  startupTimer: ReturnType<typeof setTimeout> | null;
 
   constructor(machineId: string | null = null, intervalMinutes = 15) {
     this.machineId = machineId;
     this.intervalMinutes = intervalMinutes;
     this.intervalId = null;
+    this.startupTimer = null;
   }
 
   /**
@@ -37,17 +40,25 @@ export class CloudSyncScheduler {
    * Start periodic sync (delays first sync to allow server to be ready)
    */
   async start() {
-    if (this.intervalId) {
+    if (this.intervalId || this.startupTimer) {
       return;
     }
 
     await this.initializeMachineId();
 
+    // The boot path and a first request can start this concurrently; the await
+    // above yields, so re-check before claiming the handles. Without this the
+    // second caller overwrites the first pair and stop() cannot reach it.
+    if (this.intervalId || this.startupTimer) {
+      return;
+    }
+
     // Delay first sync by 30 seconds to ensure server is ready
-    const startupTimer = setTimeout(() => {
+    this.startupTimer = setTimeout(() => {
+      this.startupTimer = null;
       this.syncWithRetry().catch(() => {});
     }, 30000);
-    startupTimer.unref?.();
+    this.startupTimer.unref?.();
 
     // Then sync periodically
     this.intervalId = setInterval(
@@ -63,6 +74,10 @@ export class CloudSyncScheduler {
    * Stop periodic sync
    */
   stop() {
+    if (this.startupTimer) {
+      clearTimeout(this.startupTimer);
+      this.startupTimer = null;
+    }
     if (this.intervalId) {
       clearInterval(this.intervalId);
       this.intervalId = null;
@@ -120,16 +135,19 @@ export class CloudSyncScheduler {
    * Check if scheduler is running
    */
   isRunning() {
-    return this.intervalId !== null;
+    return this.intervalId !== null || this.startupTimer !== null;
   }
 }
 
-// Export a singleton instance if needed
-let cloudSyncScheduler: CloudSyncScheduler | null = null;
-
+/**
+ * One scheduler per process, kept outside module scope: a bundled server chunk can
+ * load a second copy of this module, and a module-scope instance would be a second
+ * scheduler with its own interval, while a status read through the other copy
+ * reported "not running" for the one that is.
+ */
 export async function getCloudSyncScheduler(machineId: string | null = null, intervalMinutes = 15) {
-  if (!cloudSyncScheduler) {
-    cloudSyncScheduler = new CloudSyncScheduler(machineId, intervalMinutes);
-  }
-  return cloudSyncScheduler;
+  return getProcessStore<CloudSyncScheduler>(
+    "cloudSyncScheduler.instance",
+    () => new CloudSyncScheduler(machineId, intervalMinutes)
+  );
 }

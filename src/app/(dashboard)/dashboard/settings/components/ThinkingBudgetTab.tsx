@@ -6,6 +6,7 @@ import { RadioGroup, RadioGroupItem } from "@omniroute/ui-kit/radio-group";
 import { Slider } from "@omniroute/ui-kit/slider";
 import { Card } from "@/shared/components";
 import Icon from "@/shared/components/Icon";
+import IconChip from "@/shared/components/IconChip";
 
 // Dedicated i18n keys — do NOT reuse settings.auto / autoDesc (those are routing
 // "Auto Combo" strings and previously made Thinking Budget look like a routing mode).
@@ -91,11 +92,13 @@ export default function ThinkingBudgetTab() {
   return (
     <Card>
       <div className="flex items-center gap-3 mb-5">
-        <div className="p-2 rounded-lg bg-bg-subtle text-text-muted">
+        <IconChip>
           <Icon name="psychology" size={20} />
-        </div>
+        </IconChip>
         <div>
-          <h3 className="text-lg">{t("thinkingBudgetTitle")}</h3>
+          <h3 className="ci-heading" data-size="lg">
+            {t("thinkingBudgetTitle")}
+          </h3>
           <p className="text-sm text-text-muted">{t("thinkingBudgetDesc")}</p>
           <p className="text-xs text-text-muted mt-1 leading-relaxed">
             {t("thinkingBudgetIndependenceHint")}
@@ -135,7 +138,7 @@ export default function ThinkingBudgetTab() {
 
       {/* Custom budget slider */}
       {config.mode === "custom" && (
-        <div className="p-4 rounded-lg bg-surface/30 border border-border/30 mb-4">
+        <Card.Section className="mb-4">
           <Slider
             label={t("tokenBudget")}
             min={0}
@@ -145,12 +148,12 @@ export default function ThinkingBudgetTab() {
             onValueChange={(next) => save({ customBudget: next })}
             formatValue={(value) => `${value.toLocaleString()} ${t("tokens")}`}
           />
-        </div>
+        </Card.Section>
       )}
 
       {/* Adaptive effort level */}
       {config.mode === "adaptive" && (
-        <div className="p-4 rounded-lg bg-surface/30 border border-border/30">
+        <Card.Section>
           <p className="text-sm font-medium mb-3">{t("baseEffortLevel")}</p>
           <p className="text-xs text-text-muted mb-3">{t("adaptiveHint")}</p>
           <RadioGroup
@@ -165,7 +168,7 @@ export default function ThinkingBudgetTab() {
               <RadioGroupItem key={e.value} card value={e.value} label={t(e.labelKey)} />
             ))}
           </RadioGroup>
-        </div>
+        </Card.Section>
       )}
     </Card>
   );

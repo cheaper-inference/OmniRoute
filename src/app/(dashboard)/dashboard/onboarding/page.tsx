@@ -502,7 +502,7 @@ export default function OnboardingWizard() {
                 )}
                 {!skipSecurity && <FreeProviderOnboardingCard />}
                 {!skipSecurity && (
-                  <div className="flex items-center gap-3 text-[11px] text-text-muted">
+                  <div className="flex items-center gap-3 text-2xs text-text-muted">
                     <span className="h-px flex-1 bg-border" />
                     <span>{t("freeProviders.orUseApiKey")}</span>
                     <span className="h-px flex-1 bg-border" />

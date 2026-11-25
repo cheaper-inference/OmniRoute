@@ -100,7 +100,8 @@ export function RequestRow({ request, selected, onClick, onSameContext, style }:
         <Button
           variant="ghost"
           size="sm"
-          className="absolute bottom-1.5 start-[15px] h-4 min-h-0 px-1 py-0 font-mono text-[10px] text-text-muted"
+          tone="muted"
+          className="absolute bottom-1.5 start-[15px] h-4 min-h-0 px-1 py-0 font-mono text-3xs"
           // No aria-label: the visible "ctx #…" is the accessible name (WCAG 2.5.3 label in
           // name); the title describes what the chip does.
           title={t("filterByContext")}

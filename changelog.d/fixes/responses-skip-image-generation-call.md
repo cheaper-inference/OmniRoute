@@ -1,0 +1,1 @@
+- **fix(responses):** A follow-up Responses request that replays an `image_generation_call` item from an earlier turn no longer fails with a 400 on a Chat Completions target. The item is skipped, like `tool_search_call` and `web_search_call`. Other input item types without a Chat form (`item_reference`, `mcp_call`, `computer_call_output`) are still rejected.

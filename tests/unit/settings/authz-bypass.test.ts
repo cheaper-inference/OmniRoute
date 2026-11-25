@@ -33,11 +33,15 @@ const routeGuard = await import("../../../src/server/authz/routeGuard.ts");
 const settingsRoute = await import("../../../src/app/api/settings/route.ts");
 const apiKeysDb = await import("../../../src/lib/db/apiKeys.ts");
 
+// The default manage-scope bypass list: `/api/mcp/` plus the read-only
+// `/api/resilience/connections` (KEA-9357). An untouched install reports this.
+const DEFAULT_BYPASS_PREFIXES = ["/api/mcp/", "/api/resilience/connections"];
+
 test.beforeEach(async () => {
   await fixture.resetStorage();
   apiKeysDb.resetApiKeyState();
   // Force the route guard to start each test from cold-boot default
-  // (enabled=true, prefixes=["/api/mcp/"]).
+  // (enabled=true, prefixes=DEFAULT_BYPASS_PREFIXES).
   runtime.resetRuntimeSettingsStateForTests();
 });
 
@@ -192,7 +196,7 @@ test("AC-7: PATCH adds prefix → applyRuntimeSettings fires + getAuthzBypassSna
   await runtime.applyRuntimeSettings(seeded);
 
   const before = routeGuard.LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES;
-  assert.deepEqual([...before], ["/api/mcp/"]);
+  assert.deepEqual([...before], DEFAULT_BYPASS_PREFIXES);
 
   // Measure the snapshot-read latency (spec SLA: <50 ms).
   const t0 = process.hrtime.bigint();
@@ -264,7 +268,7 @@ test("AC-8: PATCH with /api/cli-tools/runtime/ in bypass list → 400 BYPASS_PRE
 
   // Persisted state untouched.
   const settings = await settingsDb.getSettings();
-  assert.deepEqual(settings.localOnlyManageScopeBypassPrefixes, ["/api/mcp/"]);
+  assert.deepEqual(settings.localOnlyManageScopeBypassPrefixes, DEFAULT_BYPASS_PREFIXES);
   // Runtime snapshot untouched.
   const snapshotAfter = runtime.getAuthzBypassSnapshot();
   assert.deepEqual(snapshotAfter.prefixes, snapshotBefore.prefixes);
@@ -311,7 +315,7 @@ test("PATCH with /api/providers/ in bypass list → 400 BYPASS_PREFIX_NOT_ALLOWE
   // rejection — no regression to the existing Layer-1 check: persisted state
   // stays at its prior valid value, not silently split-accepted.
   const settings = await settingsDb.getSettings();
-  assert.deepEqual(settings.localOnlyManageScopeBypassPrefixes, ["/api/mcp/"]);
+  assert.deepEqual(settings.localOnlyManageScopeBypassPrefixes, DEFAULT_BYPASS_PREFIXES);
   const snapshotAfter = runtime.getAuthzBypassSnapshot();
   assert.deepEqual(snapshotAfter.prefixes, snapshotBefore.prefixes);
   assert.equal(snapshotAfter.enabled, snapshotBefore.enabled);
@@ -396,7 +400,7 @@ for (const candidate of [KIRO_AUTO_IMPORT, "/api/oauth/kiro/"]) {
     assert.ok(offending, `expected BYPASS_PREFIX_NOT_ALLOWED in details: ${JSON.stringify(body)}`);
 
     const settings = await settingsDb.getSettings();
-    assert.deepEqual(settings.localOnlyManageScopeBypassPrefixes, ["/api/mcp/"]);
+    assert.deepEqual(settings.localOnlyManageScopeBypassPrefixes, DEFAULT_BYPASS_PREFIXES);
     assert.deepEqual(runtime.getAuthzBypassSnapshot().prefixes, snapshotBefore.prefixes);
   });
 }
