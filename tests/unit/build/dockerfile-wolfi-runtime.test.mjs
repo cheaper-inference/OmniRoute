@@ -81,8 +81,8 @@ test("runner-web installs Playwright Chromium with Wolfi libraries and Xvfb", ()
     packages.every((arg) => !/^chromium(?:[@=~<>]|$)/.test(arg)),
     "runner-web must use Playwright's Chromium without installing Wolfi's chromium package"
   );
-  assert.match(instructions, /\bmkdir -p \/tmp\/\.X11-unix(?=\s|$)/);
-  assert.match(instructions, /\bchmod 1777 \/tmp\/\.X11-unix(?=\s|$)/);
+  assert.match(instructions, /&&\s+install -d -o node -g node -m 0755 \/tmp\/\.X11-unix\s+&&/);
+  assert.doesNotMatch(instructions, /\bchmod\s+1?7{3}\b/);
   assert.match(instructions, /\bnode node_modules\/playwright\/cli\.js install chromium(?=\s|$)/);
   assert.doesNotMatch(instructions, /--with-deps\b/);
   assert.match(instructions, /\/lib\/ld-linux-\*\.so\.\* --list[^\n]*\bgrep 'not found'/);

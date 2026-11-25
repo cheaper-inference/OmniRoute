@@ -389,7 +389,8 @@ COPY --from=builder /app/node_modules/playwright ./node_modules/playwright
 # of fixed-upstream CVEs. The NSS/NSPR libraries are requested by soname because the `nss`
 # package does not ship libnss3.so. The ld-linux check fails the build if any library is
 # missing, instead of a launch failing at runtime. Xvfb needs xkbcomp + xkeyboard-config to
-# start, and /tmp/.X11-unix must exist because it runs as the non-root `node` user.
+# start. The build creates /tmp/.X11-unix owned by `node`, which runs Xvfb.
+# Mode 0755 grants write permission only to the owner.
 # PLAYWRIGHT_BROWSERS_PATH puts the browsers under /home/node, owned by the runtime user.
 ENV PLAYWRIGHT_BROWSERS_PATH=/home/node/.cache/ms-playwright
 RUN apk add --no-cache fontconfig font-liberation font-opensans gtk-3 mesa mesa-glx \
@@ -399,7 +400,7 @@ RUN apk add --no-cache fontconfig font-liberation font-opensans gtk-3 mesa mesa-
      so:libcairo.so.2 so:libcups.so.2 so:libdbus-1.so.3 so:libexpat.so.1 so:libgbm.so.1 \
      so:libglib-2.0.so.0 so:libpango-1.0.so.0 so:libxcb.so.1 so:libxkbcommon.so.0 so:libudev.so.1 \
      xvfb xkbcomp xkeyboard-config \
-  && mkdir -p /tmp/.X11-unix && chmod 1777 /tmp/.X11-unix \
+  && install -d -o node -g node -m 0755 /tmp/.X11-unix \
   && node node_modules/playwright/cli.js install chromium \
   && for bin in "$PLAYWRIGHT_BROWSERS_PATH"/*/*/chrome "$PLAYWRIGHT_BROWSERS_PATH"/*/*/chrome-headless-shell; do \
        missing="$(/lib/ld-linux-*.so.* --list "$bin" 2>&1 | grep 'not found' || true)"; \
