@@ -1602,7 +1602,7 @@
       "discord": "Discord",
       "discordDesc": "Deliver real-time updates directly to a Discord server",
       "custom": "Custom Webhook",
-      "customDesc": "Deliver system event payloads to any HTTPS endpoint",
+      "customDesc": "Deliver system event payloads to an http:// or https:// endpoint",
       "email": "Email Notification",
       "emailDesc": "Receive summary updates via email",
       "pagerduty": "PagerDuty",
@@ -1619,8 +1619,11 @@
       "invalidUrl": "Enter a valid URL that starts with https:// or http://"
     },
     "custom": {
+      "name": "Name (optional)",
+      "namePlaceholder": "Leave empty to list it as “{defaultName}”",
       "endpointUrl": "Endpoint URL",
-      "endpointUrlPlaceholder": "https://api.yourdomain.com/webhook",
+      "endpointUrlPlaceholder": "http:// or https://",
+      "unencryptedHttpWarning": "HTTP is unencrypted. The payload and signature are sent in clear text. Use https:// when possible.",
       "secretKey": "Secret Key",
       "secretKeyPlaceholder": "Enter secret key or leave blank to auto-generate",
       "secretKeyHint": "Used to sign the payload header for authentication."
