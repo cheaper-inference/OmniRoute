@@ -365,9 +365,10 @@ function isChatAutoComboNoAuthProvider(
   bypassAllowlist: boolean
 ): boolean {
   if (providerDef.noAuth !== true) return false;
-  if (!bypassAllowlist && !getAutoRoutableEmulatedNoAuthProviders().has(providerDef.id))
-    return false;
-  if (!isNoAuthProviderReadyForAutoRouting(providerDef.id)) return false;
+  const providerId = providerDef.id;
+  if (!providerId) return false;
+  if (!bypassAllowlist && !getAutoRoutableEmulatedNoAuthProviders().has(providerId)) return false;
+  if (!isNoAuthProviderReadyForAutoRouting(providerId)) return false;
   if (!Array.isArray(providerDef.serviceKinds) || providerDef.serviceKinds.length === 0)
     return true;
   return providerDef.serviceKinds.includes("llm");
@@ -919,7 +920,8 @@ export function computeSnapshotWeights(
 
     // reliability (#12792): the same failure-rate factor as scoring.ts; absent reads as
     // fully reliable. The snapshot path was the only one still ignoring it.
-    if (weights.reliability > 0) score += weights.reliability * reliabilityFactor(c);
+    const reliability = weights.reliability ?? 0;
+    if (reliability > 0) score += reliability * reliabilityFactor(c);
 
     // health: build-time breaker state (OPEN 0, CLOSED 1, else neutral 0.5); quota stays neutral
     score += weights.health * snapshotHealthFactor(breakerByProvider, c.provider);

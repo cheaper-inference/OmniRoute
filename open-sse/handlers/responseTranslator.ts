@@ -35,6 +35,7 @@ import {
   geminiCandidatesTokenCount,
   geminiExtraUsageCounts,
 } from "../translator/response/geminiUsageMetadata.ts";
+import { firstReportedCounter } from "../utils/reportedCounter.ts";
 import {
   extractThinkingFromContent,
   shouldParseTextualReasoningTags,
@@ -361,6 +362,11 @@ export function translateNonStreamingResponse(
       );
       // `cache_write_tokens` is the alias emitted by the codex-chatgpt-web bridge
       // (input_tokens_details) and by OpenRouter/Devin Desktop (top level).
+      const reportedCachedInputTokens = firstReportedCounter(
+        inputTokensDetails.cached_tokens,
+        promptTokensDetails.cached_tokens,
+        usage.cache_read_input_tokens
+      );
       const cacheCreationInputTokens = firstPositiveNumber(
         inputTokensDetails.cache_creation_tokens,
         promptTokensDetails.cache_creation_tokens,
@@ -394,10 +400,14 @@ export function translateNonStreamingResponse(
           reasoning_tokens: reasoningTokens,
         };
       }
-      if (cachedInputTokens > 0 || cacheCreationInputTokens > 0) {
+      if (
+        reportedCachedInputTokens !== undefined ||
+        cachedInputTokens > 0 ||
+        cacheCreationInputTokens > 0
+      ) {
         (result.usage as JsonRecord).prompt_tokens_details = {};
         const promptDetails = (result.usage as JsonRecord).prompt_tokens_details as JsonRecord;
-        if (cachedInputTokens > 0) {
+        if (cachedInputTokens > 0 || reportedCachedInputTokens !== undefined) {
           promptDetails.cached_tokens = cachedInputTokens;
         }
         if (cacheCreationInputTokens > 0) {
