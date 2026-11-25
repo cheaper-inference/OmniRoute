@@ -67,6 +67,7 @@
   },
   "overrides": {
     "esbuild": "^0.28.1",
+    "undici@8": "^8.12.4",
     "zod": "$zod"
   }
 }
