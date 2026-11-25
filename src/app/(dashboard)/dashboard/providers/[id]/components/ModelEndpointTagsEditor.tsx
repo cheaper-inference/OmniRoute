@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Checkbox } from "@/shared/components";
+import { Badge, Button, Checkbox } from "@/shared/components";
 
 import { useState } from "react";
 import { type ModelSupportedEndpoint } from "@/shared/constants/modelSupportedEndpoints";
@@ -102,39 +102,36 @@ export default function ModelEndpointTagsEditor({
   }
   return (
     <div
-      className="inline-flex max-w-full flex-wrap items-center gap-1 text-[10px]"
+      className="inline-flex max-w-full flex-wrap items-center gap-1 text-3xs"
       data-testid="model-endpoint-capabilities"
     >
       {effective.map((endpoint) => (
-        <span
+        <Badge
           key={endpoint}
+          size="sm"
+          variant={adapterStatuses[endpoint] === "unavailable" ? "error" : "primary"}
           title={
             adapterStatuses[endpoint] === "unavailable"
               ? t("endpointCapabilitiesNoAdapter")
               : undefined
           }
-          className={
-            adapterStatuses[endpoint] === "unavailable"
-              ? "rounded bg-error/15 px-1 py-0.5 text-error"
-              : "rounded bg-primary/10 px-1 py-0.5 text-primary"
-          }
         >
           {endpoint}
           {adapterStatuses[endpoint] === "unavailable" ? " ⚠" : ""}
-        </span>
+        </Badge>
       ))}
       <span className="text-text-muted" title={t("supportedEndpointsLabel")}>
         {provenance}
       </span>
       <Button
         variant="ghost"
-        size="icon-sm"
+        size="icon-2xs"
+        tone="muted"
         icon="edit"
         onClick={beginEdit}
         disabled={saving}
         title={t("endpointCapabilitiesEdit")}
         aria-label={t("endpointCapabilitiesEdit")}
-        className="size-6 min-h-6 rounded text-text-muted"
       />
       {editing && (
         <div className="flex w-full flex-wrap items-center gap-1 rounded border border-border p-1">

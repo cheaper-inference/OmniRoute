@@ -33,7 +33,7 @@ export default function ReasoningControls({ spec, params, setParams }: Reasoning
 
   return (
     <div className="flex flex-col gap-3">
-      <span className="text-xs font-medium text-text-muted uppercase tracking-wider">
+      <span className="ci-eyebrow" data-weight="medium">
         {t("reasoningLabel")}
       </span>
 
@@ -53,7 +53,7 @@ export default function ReasoningControls({ spec, params, setParams }: Reasoning
         label={t("effort")}
         value={params.effort}
         onChange={(e) => update("effort", e.target.value)}
-        selectClassName="text-xs"
+        nativeSize="xs"
       >
         <option value="">{t("effortDefault")}</option>
         {spec.effortOptions.map((opt) => (

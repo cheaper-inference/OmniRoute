@@ -1,7 +1,7 @@
 // Weight, tracking and leading utilities that cannot take effect must not come back.
 //
 // CAUSE: `packages/ui-kit/src/ci-typography.css` is imported by ci-ui.css WITHOUT a layer, and
-// its role defaults sit outside any `@layer`:
+// its tag defaults sit outside any `@layer`:
 //   :where(.ci-theme) :is(h1…h6, [role="heading"])        → weight 500, leading 1.1, tracking −0.02em
 //   :where(.ci-theme) :where(button, label, th, …)        → weight 500 (600 when selected)
 //   :where(.ci-theme) :is(input, textarea, td)            → weight 400
@@ -11,9 +11,21 @@
 // on 2026-11-15). The UI review found 702 such classes; they were removed without changing a
 // pixel, and this guard keeps them out so nobody reads them as working styles.
 //
-// REVIEW THIS GUARD when the kit changes that layering: if the vendored kit moves the role
-// defaults into `@layer base` (the fix requested upstream), these utilities start working
-// again and this guard has to be deleted, not obeyed. The first test below fails on that day.
+// WHAT THE KIT CHANGED (upstream #223, vendored 2026-11): the defaults stay unlayered, with two
+// exits, and the first test below pins both so a third one cannot arrive unnoticed.
+//   1. An element that carries a kit type class is skipped by the defaults. The role classes
+//      (`type-heading`, `type-body`, `type-reading`, `type-control`, `type-data`,
+//      `type-caption`) are unlayered rules themselves, so utilities stay dead next to them.
+//      `ci-eyebrow` is a `@layer components` rule: on an element that carries it the utilities
+//      DO apply, so the detector does not call them dead there (use the eyebrow's `data-weight`
+//      and `data-size` rather than overriding it, but that is a style choice, not a dead class).
+//      `ci-heading` is not an exit: an <h3 className="ci-heading"> keeps the tag default.
+//   2. `data-ci-type-roles="layered"` on a container moves the defaults of its descendants into
+//      `@layer utilities.ci-type-roles`, where host utilities win. OmniRoute does NOT set it.
+//
+// REVIEW THIS GUARD when the dashboard opts in (`data-ci-type-roles` anywhere under `src/`) or
+// when the kit changes the layering again: on that day these utilities start working and the
+// guard has to be deleted, not obeyed. The first test below fails on that day.
 //
 // What still works on these elements and is NOT flagged: sizes, colours, `uppercase`,
 // `font-mono`, anything with `!` (an important utility beats unlayered CSS), and a class behind
@@ -141,6 +153,43 @@ function classTokens(expr: ts.Node | undefined, sf: ts.SourceFile, out: string[]
   return out;
 }
 
+/**
+ * Classes the element always carries: plain strings, the literal parts of a template and the
+ * string arguments of `cn(…)`. A class behind a condition is left out on purpose, so an element
+ * that is an eyebrow only sometimes is still checked.
+ */
+function alwaysTokens(expr: ts.Node | undefined, sf: ts.SourceFile, out: string[] = []): string[] {
+  if (!expr) return out;
+  if (ts.isParenthesizedExpression(expr) || ts.isJsxExpression(expr)) {
+    return alwaysTokens(expr.expression, sf, out);
+  }
+  if (ts.isCallExpression(expr) && /^(cn|clsx|twMerge)$/.test(expr.expression.getText(sf))) {
+    for (const arg of expr.arguments) alwaysTokens(arg, sf, out);
+    return out;
+  }
+  if (
+    ts.isStringLiteral(expr) ||
+    ts.isNoSubstitutionTemplateLiteral(expr) ||
+    ts.isTemplateExpression(expr)
+  ) {
+    // `classTokens` already drops a token glued to a `${…}` hole; the holes themselves are
+    // conditions, so only the literal parts count here.
+    const holes = ts.isTemplateExpression(expr)
+      ? expr.templateSpans.flatMap((span) => classTokens(span.expression, sf))
+      : [];
+    const all = classTokens(expr, sf);
+    for (const hole of holes) {
+      const at = all.indexOf(hole);
+      if (at !== -1) all.splice(at, 1);
+    }
+    out.push(...all);
+  }
+  return out;
+}
+
+/** The one kit type class that is a layered rule: utilities beat it, so they are not dead there. */
+const LAYERED_KIT_TYPE_CLASS = "ci-eyebrow";
+
 function deadClassesIn(file: string, text: string): string[] {
   const sf = parse(file, text);
   const imports = importsOf(sf);
@@ -156,6 +205,10 @@ function deadClassesIn(file: string, text: string): string[] {
       const kind = attrOf("asChild") ? null : kindOf(tag, imports);
       if (kind) {
         const attr = attrOf("className");
+        if (alwaysTokens(attr?.initializer, sf).includes(LAYERED_KIT_TYPE_CLASS)) {
+          ts.forEachChild(node, visit);
+          return;
+        }
         for (const token of classTokens(attr?.initializer, sf)) {
           if (isDead(token, kind)) hits.push(`${rel(file)}:${lineOf(sf, node)} <${tag}> ${token}`);
         }
@@ -167,23 +220,89 @@ function deadClassesIn(file: string, text: string): string[] {
   return hits;
 }
 
-test("the kit typography roles are still unlayered (the reason these classes are dead)", () => {
+// The exits the kit writes into the `:not()` of every tag default.
+const UNLAYERED_ROLE_CLASSES = [
+  ".type-heading",
+  ".type-body",
+  ".type-reading",
+  ".type-control",
+  ".type-data",
+  ".type-caption",
+];
+const OPT_IN = '[data-ci-type-roles="layered"] *';
+const ROLE_DEFAULTS: { selector: string; kitInternal?: string[] }[] = [
+  { selector: ':where(.ci-theme) :is(h1, h2, h3, h4, h5, h6, [role="heading"])' },
+  {
+    selector:
+      ':where(.ci-theme) :where(button, label, th, [role="button"], [role="tab"], [role="menuitem"], [role="option"])',
+    // Two kit triggers that read as a field value, not as a control label.
+    kitInternal: [".ci-select__trigger", ".ci-searchable-select__trigger--field"],
+  },
+  { selector: ":where(.ci-theme) :is(input, textarea, td)" },
+];
+
+const stripCssComments = (css: string) => css.replace(/\/\*[\s\S]*?\*\//g, "");
+
+test("the kit tag defaults still beat host utilities, with only the two known exits", () => {
   const ui = read(path.join(ROOT, "packages/ui-kit/src/ci-ui.css"));
   assert.match(ui, /^@import "\.\/ci-typography\.css";$/m, "imported without layer(...)");
-  const typography = read(path.join(ROOT, "packages/ui-kit/src/ci-typography.css"));
-  const unlayered = typography.slice(0, typography.indexOf("@layer"));
-  for (const selector of [
-    ':where(.ci-theme) :is(h1, h2, h3, h4, h5, h6, [role="heading"])',
-    ":where(.ci-theme) :where(button, label, th,",
-    ":where(.ci-theme) :is(input, textarea, td)",
-  ]) {
-    assert.ok(
-      unlayered.includes(selector),
+
+  const typography = stripCssComments(
+    read(path.join(ROOT, "packages/ui-kit/src/ci-typography.css"))
+  );
+  const firstLayer = typography.search(/^@layer\s[^;{]*\{/m);
+  assert.notEqual(firstLayer, -1, "ci-typography.css no longer has a layered part");
+  const unlayered = typography.slice(0, firstLayer);
+
+  for (const { selector, kitInternal = [] } of ROLE_DEFAULTS) {
+    const at = unlayered.indexOf(`${selector}:where(:not(`);
+    assert.notEqual(
+      at,
+      -1,
       `${selector} left the unlayered part of ci-typography.css: weight/tracking utilities may work ` +
         "again on these elements, so review (and probably delete) this guard"
     );
+    const listStart = at + `${selector}:where(:not(`.length;
+    const exits = unlayered
+      .slice(listStart, unlayered.indexOf(")) {", listStart))
+      .split(",")
+      .map((exit) => exit.trim());
+    assert.deepEqual(
+      exits,
+      [...kitInternal, ...UNLAYERED_ROLE_CLASSES, `.${LAYERED_KIT_TYPE_CLASS}`, OPT_IN],
+      `${selector} skips a different set of elements now: review which of them make a utility ` +
+        "work, and teach the detector"
+    );
   }
-  assert.match(read(path.join(ROOT, "src/app/layout.tsx")), /className="ci-theme"/);
+
+  // Exit 1a: the role classes are unlayered rules too, so a utility next to one is still dead.
+  for (const roleClass of UNLAYERED_ROLE_CLASSES) {
+    assert.match(
+      unlayered,
+      new RegExp(`^\\${roleClass}(,| \\{)$`, "m"),
+      `${roleClass} is no longer an unlayered rule`
+    );
+  }
+  // Exit 1b: `.ci-eyebrow` is a `@layer components` rule and nothing unlayered restates it, so
+  // on an eyebrow the utilities apply. That is why the detector skips it.
+  assert.doesNotMatch(unlayered, /^\.ci-eyebrow\b/m);
+  const eyebrowAt = ui.search(/^ {2}\.ci-eyebrow \{$/m);
+  assert.notEqual(eyebrowAt, -1, "`.ci-eyebrow` is no longer a nested (layered) rule of ci-ui.css");
+  const enclosing = [...ui.slice(0, eyebrowAt).matchAll(/^(@layer [\w.-]+ \{|\})$/gm)].at(-1);
+  assert.equal(enclosing?.[0], "@layer components {");
+
+  // Exit 2: the opt-in exists in the kit, and the dashboard does not use it.
+  assert.match(typography, /^@layer utilities\.ci-type-roles \{$/m);
+  assert.match(read(path.join(ROOT, "src/app/layout.tsx")), /className="ci-theme[ "]/);
+  const optedIn = sourceFiles("src")
+    .filter((file) => read(file).includes("data-ci-type-roles"))
+    .map(rel);
+  assert.deepEqual(
+    optedIn,
+    [],
+    "`data-ci-type-roles` makes weight/tracking/leading utilities work under it: this guard (and " +
+      "rule 4 of docs/architecture/DESIGN_SYSTEM.md) has to be reviewed in the same change"
+  );
 });
 
 test("the detector flags dead classes and leaves working ones", () => {
@@ -226,6 +345,27 @@ test("the detector flags dead classes and leaves working ones", () => {
   assert.deepEqual(
     sample('<Button asChild className="font-semibold"><a href="/x">a</a></Button>'),
     []
+  );
+  // A kit type class on the element: only `ci-eyebrow` is a layered rule the utility can beat.
+  assert.deepEqual(sample('<h3 className="ci-eyebrow font-semibold tracking-wide">a</h3>'), []);
+  assert.deepEqual(
+    sample('<TableHead className={cn("ci-eyebrow", wide && "font-bold")}>a</TableHead>'),
+    []
+  );
+  assert.deepEqual(sample('<h3 className={`ci-eyebrow ${on ? "font-bold" : ""}`}>a</h3>'), []);
+  assert.deepEqual(sample('<h3 className="type-heading font-semibold">a</h3>'), [
+    "<h3> font-semibold",
+  ]);
+  assert.deepEqual(sample('<h3 className="ci-heading font-semibold">a</h3>'), [
+    "<h3> font-semibold",
+  ]);
+  // An eyebrow only sometimes: the other branch still falls under the tag default.
+  assert.deepEqual(sample('<h3 className={cn(compact && "ci-eyebrow", "font-semibold")}>a</h3>'), [
+    "<h3> font-semibold",
+  ]);
+  assert.deepEqual(
+    sample('<h3 className={`font-semibold ${compact ? "ci-eyebrow" : ""}`}>a</h3>'),
+    ["<h3> font-semibold"]
   );
   // The same classes work on p / span / div / a.
   assert.deepEqual(sample('<p className="font-semibold tracking-wide leading-6">a</p>'), []);
