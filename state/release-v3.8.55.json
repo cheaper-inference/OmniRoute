@@ -120,21 +120,6 @@
   },
   "history": [
     {
-      "at": "2026-11-19T08:46:31.524Z",
-      "type": "base-check-started",
-      "batchId": "basecheck-cc59ad70b2e9",
-      "prs": [
-        20553,
-        20565,
-        20561,
-        20566,
-        20567
-      ],
-      "sha": "cc59ad70b2e9a343f26860e0e040281cb433a37a",
-      "detail": "b1 red on a base with no verdict: testing the bare base",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44490384814"
-    },
-    {
       "at": "2026-11-19T09:16:58.131Z",
       "type": "checks-red",
       "batchId": "basecheck-cc59ad70b2e9",
@@ -2554,8 +2539,15 @@
       "type": "paused",
       "detail": "cut-over to live (#20902), runbook step 9",
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45702217080"
+    },
+    {
+      "at": "2026-11-25T21:14:53.896Z",
+      "type": "manual-bless",
+      "sha": "0dd6645a1e95b9d1b4041990e96832f5b787101b",
+      "detail": "by @diegosouzapw: cut-over: mode live (#20902), runbook step 9, owner approved 2026-11-25",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45702526902"
     }
   ],
-  "updatedAt": "2026-11-25T21:13:02.237Z",
+  "updatedAt": "2026-11-25T21:14:53.897Z",
   "batchWindow": 5
 }
