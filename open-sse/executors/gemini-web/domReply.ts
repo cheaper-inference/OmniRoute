@@ -124,35 +124,60 @@ export function readGeminiDomReply(doc?: Document): GeminiDomReplySnapshot {
       for (const li of Array.from(el.children)) {
         if (li.tagName !== "LI") continue;
         const marker = tag === "OL" ? `${n++}. ` : "- ";
-        const own: string[] = [];
-        // Block content (code blocks, tables, quotes) goes through block() so its
-        // line breaks survive, indented as list-item continuation.
-        const continuation: string[] = [];
-        const nested: string[] = [];
         const contIndent = indent + " ".repeat(marker.length);
+        // Children are rendered in DOM order: the first text run goes on the marker
+        // line, block content (code blocks, tables, quotes) is indented as list-item
+        // continuation, and text after a block becomes a continuation line of its own.
+        const item: string[] = [];
+        let run = "";
+        const append = (piece: string) => {
+          // Text nodes are already whitespace-normalized by inline(); only the seam
+          // between two pieces is collapsed, so spaces inside inline code survive.
+          if (/\s$/.test(run) && /^\s/.test(piece)) piece = piece.replace(/^\s+/, "");
+          run += piece;
+        };
+        const flush = () => {
+          const t = run.trim();
+          run = "";
+          if (!t) return;
+          const lines = t.split("\n");
+          if (!item.length) item.push(indent + marker + lines[0]);
+          else item.push(contIndent + lines[0]);
+          for (const l of lines.slice(1)) item.push(contIndent + l.trim());
+        };
+        const ensureMarker = () => {
+          if (!item.length) item.push(indent + marker);
+        };
         for (const child of Array.from(li.childNodes)) {
           const childEl = child.nodeType === 1 ? (child as Element) : null;
           const childTag = childEl ? childEl.tagName : "";
-          if (childTag === "UL" || childTag === "OL") nested.push(...block(child, indent + "  "));
-          else if (
+          if (childTag === "UL" || childTag === "OL") {
+            flush();
+            ensureMarker();
+            item.push(...block(child, indent + "  "));
+          } else if (
             childEl &&
             (["CODE-BLOCK", "PRE", "TABLE", "BLOCKQUOTE", "RESPONSE-ELEMENT"].includes(childTag) ||
               childEl.querySelector("pre, code-block, table, blockquote"))
           ) {
+            flush();
+            ensureMarker();
             for (const part of block(child, "")) {
-              continuation.push(
+              item.push(
                 part
                   .split("\n")
                   .map((l) => (l ? contIndent + l : l))
                   .join("\n")
               );
             }
-          } else if (childTag === "P") own.push(inline(child).trim());
-          else own.push(inline(child));
+          } else if (childTag === "P") {
+            const t = inline(child).trim();
+            if (t) append((run.trim() ? " " : "") + t);
+          } else append(inline(child));
         }
-        lines.push(indent + marker + own.join(" ").replace(/\s+/g, " ").trim());
-        lines.push(...continuation);
-        lines.push(...nested);
+        flush();
+        ensureMarker();
+        lines.push(...item);
       }
       return [lines.join("\n")];
     }
@@ -291,10 +316,13 @@ export async function waitForGeminiPromptSubmitted(
   page: GeminiDomPage,
   baselineQueries: number,
   timeoutMs = 5000,
-  pollMs = 250
+  pollMs = 250,
+  /** Other proof the prompt went out (e.g. StreamGenerate already answered). */
+  isSubmitted?: () => boolean
 ): Promise<boolean> {
   const end = Date.now() + timeoutMs;
   while (Date.now() < end) {
+    if (isSubmitted?.()) return true;
     const snap = await snapshotGeminiDom(page);
     if (!snap) return false;
     if (snap.queries > baselineQueries) return true;

@@ -274,7 +274,7 @@ test("a signed-out page answers 401 gemini_web_signed_out instead of a mode erro
     log: null,
   });
   assert.equal(result.response.status, 401);
-  assert.equal((await result.response.json()).code, "gemini_web_signed_out");
+  assert.equal((await result.response.json()).error.code, "gemini_web_signed_out");
 });
 
 // ── Review follow-ups (#21119) ───────────────────────────────────────────────
@@ -537,6 +537,177 @@ test("executor: a session that is only visibly signed out inside the menu answer
     log: null,
   });
   assert.equal(result.response.status, 401);
-  assert.equal((await result.response.json()).code, "gemini_web_signed_out");
+  assert.equal((await result.response.json()).error.code, "gemini_web_signed_out");
   assert.ok(!calls.some((c) => c.startsWith("type ")), "the prompt is never typed");
+});
+
+// ── Review round 2 (#21119) ──────────────────────────────────────────────────
+
+const { isGeminiMenuModeReplaced } =
+  await import("../../open-sse/executors/gemini-web/modeSelection.ts");
+
+const streamGenerateBody = (text: string) => {
+  const inner = new Array(80).fill(null);
+  inner[4] = [[null, [text]]];
+  return `)]}'\n10\n[["wrb.fr", null, ${JSON.stringify(JSON.stringify(inner))}]]`;
+};
+
+/**
+ * A page that answers through StreamGenerate right after Enter. `menuAfterAnswer`
+ * is what the requested option looks like once the answer is in (null = unreadable).
+ */
+function stubStreamLaunch(opts: {
+  menuAfterAnswer: { checked: boolean } | null;
+  userQueryAppears?: boolean;
+  enterPresses?: { count: number };
+}) {
+  let onResponse: ((r: unknown) => Promise<void>) | null = null;
+  let sent = 0;
+  playwright.chromium.launch = (async () => ({
+    newContext: async () => ({
+      addCookies: async () => {},
+      cookies: async () => [],
+      newPage: async () => ({
+        on: (event: string, handler: (r: unknown) => Promise<void>) => {
+          if (event === "response") onResponse = handler;
+        },
+        goto: async () => {},
+        waitForTimeout: async (ms: number) => sleep(ms >= 10_000 ? 4000 : 5),
+        waitForSelector: async () => ({ click: async () => {} }),
+        click: async () => {},
+        evaluate: async (expression: string) => {
+          if (/"sublabel":/.test(expression)) {
+            if (!sent) return CHECKED_PRO_OPTION;
+            return opts.menuAfterAnswer && { ...CHECKED_PRO_OPTION, ...opts.menuAfterAnswer };
+          }
+          if (/mode-picker-sign-in-button/.test(expression)) return false;
+          const shown = sent && opts.userQueryAppears !== false;
+          return { queries: shown ? 1 : 0, responses: 0, busy: false, text: "" };
+        },
+        keyboard: {
+          type: async () => {},
+          insertText: async () => {},
+          press: async (key: string) => {
+            if (key === "Escape") return;
+            sent++;
+            if (opts.enterPresses) opts.enterPresses.count++;
+            if (sent > 1) return; // a second Enter must not produce a second answer
+            void onResponse?.({
+              url: () => "https://gemini.google.com/_/BardChatUi/data/x/StreamGenerate?rt=c",
+              text: async () => streamGenerateBody("from the network"),
+            });
+          },
+        },
+      }),
+    }),
+    close: async () => {},
+  })) as unknown as typeof playwright.chromium.launch;
+}
+
+const runPro = () =>
+  new GeminiWebExecutor().execute({
+    model: "gemini-3.1-pro",
+    body: { messages: [{ role: "user", content: "hello" }], stream: false },
+    stream: false,
+    credentials: { apiKey: "__Secure-1PSID=test-psid" },
+    signal: AbortSignal.timeout(15_000),
+    log: null,
+    onCredentialsRefreshed: async () => {},
+  } as never);
+
+test("an answer Gemini gave with another model (high demand) is a 503, not a mislabeled 200", async () => {
+  stubStreamLaunch({ menuAfterAnswer: { checked: false } });
+  const result = await runPro();
+  assert.equal(result.response.status, 503);
+  assert.equal(result.response.headers.get("X-Omni-Fallback-Hint"), "connection_cooldown");
+  const err = (await result.response.json()).error;
+  assert.equal(err.code, "server_is_overloaded");
+  assert.match(err.message, /gemini-3\.1-pro/);
+});
+
+test("the answer is kept when the requested mode is still checked, or the menu cannot be read", async () => {
+  stubStreamLaunch({ menuAfterAnswer: { checked: true } });
+  let result = await runPro();
+  assert.equal(result.response.status, 200);
+  assert.equal((await result.response.json()).choices[0].message.content, "from the network");
+  stubStreamLaunch({ menuAfterAnswer: null });
+  result = await runPro();
+  assert.equal(result.response.status, 200);
+});
+
+test("isGeminiMenuModeReplaced: only a listed, unchecked option counts as replaced", async () => {
+  assert.equal(await isGeminiMenuModeReplaced(menuPage(MENU, []), "gemini-4-neon", 200), true);
+  assert.equal(await isGeminiMenuModeReplaced(menuPage(MENU, []), "gemini-4-hydrogen", 200), false);
+  assert.equal(await isGeminiMenuModeReplaced(menuPage({}, []), "gemini-4-neon", 200), false);
+  // Legacy toggle models have no menu entry to read back.
+  assert.equal(await isGeminiMenuModeReplaced(menuPage(MENU, []), "gemini-3.7-flash", 200), false);
+});
+
+test("a StreamGenerate answer counts as submitted: no second Enter while user-query lags", async () => {
+  const enterPresses = { count: 0 };
+  stubStreamLaunch({ menuAfterAnswer: { checked: true }, userQueryAppears: false, enterPresses });
+  const result = await runPro();
+  assert.equal(result.response.status, 200);
+  assert.equal((await result.response.json()).choices[0].message.content, "from the network");
+  assert.equal(enterPresses.count, 1);
+});
+
+test("legacy toggle path: a sign-in item in the opened menu is signed_out, not a mode error", async () => {
+  let menuOpen = false;
+  const pressed: string[] = [];
+  const page = {
+    waitForSelector: async () => ({
+      click: async () => {
+        menuOpen = true;
+      },
+      textContent: async () => "Auto",
+    }),
+    evaluate: async (expression: string) =>
+      /mode-picker-sign-in-button/.test(expression) ? menuOpen : null,
+    keyboard: { press: async (k: string) => void pressed.push(k) },
+  };
+  for (const model of ["gemini-3.7-flash", "gemini-3.1-flash-lite"]) {
+    menuOpen = false;
+    const r = await selectGeminiModel(page as never, model, 200);
+    assert.deepEqual([r.confirmed, r.reason], [false, "signed_out"], model);
+  }
+  assert.ok(pressed.includes("Escape"));
+});
+
+test("the 401 body uses the standard error shape, so the gateway keeps message and code", async () => {
+  playwright.chromium.launch = (async () => ({
+    newContext: async () => ({
+      addCookies: async () => {},
+      cookies: async () => [],
+      newPage: async () => signedOutMenuPage([]),
+    }),
+    close: async () => {},
+  })) as unknown as typeof playwright.chromium.launch;
+  const result = await new GeminiWebExecutor().execute({
+    model: "gemini-4-hydrogen",
+    body: { messages: [{ role: "user", content: "hello" }], stream: false },
+    stream: false,
+    credentials: { apiKey: "__Secure-1PSID=test-psid" },
+    signal: AbortSignal.timeout(5000),
+    log: null,
+  });
+  const body = await result.response.json();
+  assert.equal(body.error.code, "gemini_web_signed_out");
+  assert.equal(body.error.type, "authentication_error");
+  assert.match(body.error.message, /signed out/);
+});
+
+test("list item: instruction, code block and verification stay in DOM order", () => {
+  const html =
+    `<ol><li><p>Install it:</p>${codeBlockHtml("npm i x", "Bash")}` +
+    `<p>Then check <code>x --version</code>.</p></li><li>Done</li></ol>`;
+  assert.equal(
+    readGeminiDomReply(replyDoc(html)).text,
+    "1. Install it:\n   ```bash\n   npm i x\n   ```\n   Then check `x --version`.\n2. Done"
+  );
+});
+
+test("list item: spaces inside inline code are kept, plain text is still normalized", () => {
+  const html = `<ul><li>Use   <code>a  =  b</code>   here</li></ul>`;
+  assert.equal(readGeminiDomReply(replyDoc(html)).text, "- Use `a  =  b` here");
 });

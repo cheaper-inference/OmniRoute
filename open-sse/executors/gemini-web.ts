@@ -43,6 +43,7 @@ import {
   describeModeSelectionFailure,
   selectGeminiExtendedThinking,
   selectGeminiModel,
+  isGeminiMenuModeReplaced,
 } from "./gemini-web/modeSelection.ts";
 
 // ─── Constants ──────────────────────────────────────────────────────────────
@@ -701,13 +702,18 @@ export class GeminiWebExecutor extends BaseExecutor {
       const signedOutResult = () => {
         log?.warn?.("GEMINI-WEB", "Rejected request: the Gemini cookie no longer signs in");
         return {
+          // Standard error shape, so the gateway keeps the message and the code
+          // (a top-level string `error` was read as "upstream error" / invalid_api_key).
           response: new Response(
-            JSON.stringify({
-              error:
+            JSON.stringify(
+              buildErrorBody(
+                401,
                 "Gemini Web session is signed out: the stored cookie expired or was rotated. " +
-                "Export a fresh cookie from a signed-in browser and update the connection.",
-              code: "gemini_web_signed_out",
-            }),
+                  "Export a fresh cookie from a signed-in browser and update the connection.",
+                null,
+                { type: "authentication_error", code: "gemini_web_signed_out" }
+              )
+            ),
             { status: 401, headers: { "Content-Type": "application/json" } }
           ),
           url: GEMINI_URL,
@@ -815,9 +821,19 @@ export class GeminiWebExecutor extends BaseExecutor {
       if (domBaseline) {
         // #21116: an Enter pressed while the composer was still settling is dropped
         // silently. Confirm a new user-query appeared; press Enter once more if not.
-        if (!(await waitForGeminiPromptSubmitted(page, domBaseline.queries))) {
+        // A StreamGenerate answer already proves the prompt went out: never press
+        // Enter again on top of it (that would send the prompt a second time).
+        const networkAnswered = () => Boolean(responseText);
+        const submitted = await waitForGeminiPromptSubmitted(
+          page,
+          domBaseline.queries,
+          5000,
+          250,
+          networkAnswered
+        );
+        if (!submitted && !networkAnswered()) {
           await page.keyboard.press("Enter");
-          await waitForGeminiPromptSubmitted(page, domBaseline.queries);
+          await waitForGeminiPromptSubmitted(page, domBaseline.queries, 5000, 250, networkAnswered);
         }
         // Read the answer from the rendered page as well: some accounts no longer
         // receive it through a StreamGenerate response (geminiweb-pa processSession).
@@ -867,6 +883,36 @@ export class GeminiWebExecutor extends BaseExecutor {
       }
 
       await this.persistRotatedCookies(context, cookie, credentials, onCredentialsRefreshed, log);
+
+      // Under heavy demand Gemini answers with another model and switches the menu to
+      // it (#20842). Only a confirmed switch (the requested option is listed and no
+      // longer checked) discards the answer; an unreadable menu keeps it.
+      if (model && (await isGeminiMenuModeReplaced(page, modelId))) {
+        log?.warn?.("GEMINI-WEB", `"${modelId}" was replaced by Gemini (high demand)`);
+        return {
+          response: new Response(
+            JSON.stringify(
+              buildErrorBody(
+                503,
+                `Gemini answered with a different model because "${modelId}" is under high ` +
+                  "demand right now. The answer was discarded; retry later or use another model.",
+                null,
+                { type: "server_error", code: "server_is_overloaded" }
+              )
+            ),
+            {
+              status: 503,
+              headers: {
+                "Content-Type": "application/json",
+                "X-Omni-Fallback-Hint": "connection_cooldown",
+              },
+            }
+          ),
+          url: GEMINI_URL,
+          headers: {},
+          transformedBody: body,
+        };
+      }
 
       if (hasTools) {
         const cid = `chatcmpl-gwe-${crypto.randomUUID().slice(0, 12)}`;

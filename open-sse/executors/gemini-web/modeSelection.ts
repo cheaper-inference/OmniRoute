@@ -258,6 +258,36 @@ export async function selectGeminiMenuMode(
   return { confirmed: true, descriptor };
 }
 
+/**
+ * After the answer (#20842 review item on #21119): true only when the requested
+ * menu mode is listed and no longer checked, i.e. Gemini switched to another model
+ * while answering (high demand). A model without a menu entry, a page without
+ * in-page access, or an unreadable menu answers false: an unconfirmed switch never
+ * discards an answer.
+ */
+export async function isGeminiMenuModeReplaced(
+  page: GeminiAutomationPage,
+  modelId: string,
+  timeoutMs = 3000
+): Promise<boolean> {
+  const sublabel = GEMINI_WEB_MODEL_MODES[modelId]?.menuSublabel;
+  if (!sublabel || typeof page.evaluate !== "function" || typeof page.click !== "function") {
+    return false;
+  }
+  try {
+    const button = await page
+      .waitForSelector(GEMINI_WEB_MODE_MENU_BUTTON, { timeout: timeoutMs })
+      .catch(() => null);
+    if (!button) return false;
+    await page.click(GEMINI_WEB_MODE_MENU_BUTTON, { timeout: timeoutMs });
+    const option = await readMenuOption(page, sublabel, timeoutMs);
+    await page.keyboard?.press("Escape").catch(() => {});
+    return option !== null && !option.checked;
+  } catch {
+    return false;
+  }
+}
+
 export interface GeminiModeSelectionResult {
   confirmed: boolean;
   reason?: GeminiModeSelectionFailureReason;
@@ -303,6 +333,12 @@ export async function selectGeminiUiMode(
   if (!toggle) return { confirmed: false, reason: "control_not_found", descriptor };
 
   await toggle.click();
+  // The toggle is the mode-menu button on current pages; a signed-out session shows
+  // its "Sign in" item only now that the menu is open (live, 2026-11-25).
+  if (typeof page.evaluate === "function" && (await isMenuSignedOut(page))) {
+    await page.keyboard?.press("Escape").catch(() => {});
+    return { confirmed: false, reason: "signed_out", descriptor };
+  }
 
   const indicator = await page
     .waitForSelector(activeIndicatorSelector, { timeout: timeoutMs })
