@@ -22,8 +22,7 @@ import {
 } from "./directResponseStartTimeout.ts";
 import {
   getEffectiveSignal,
-  isDedicatedCodexImageRequest,
-  codexImageResponseStartTimeoutMs,
+  singleAttemptImageTimeoutMs,
   canResendAfterTransportError,
   isAmbiguousFailureReplaySafe,
   requestHasNonReplayableBody,
@@ -135,9 +134,8 @@ async function sendDirectWithRetry(
   const directOptions = { ...options, signal: getEffectiveSignal(input, options) };
   const nonReplayable = requestHasNonReplayableBody(input, options);
   const replayTimeout = isAmbiguousFailureReplaySafe(input, options);
-  const dedicatedCodexImageRequest = isDedicatedCodexImageRequest(input, target, options);
-  const imageTimeout = dedicatedCodexImageRequest ? codexImageResponseStartTimeoutMs() : 0;
-  const max = nonReplayable || dedicatedCodexImageRequest ? 1 : 2;
+  const imageTimeout = singleAttemptImageTimeoutMs(input, target, options);
+  const max = nonReplayable || imageTimeout ? 1 : 2;
   const raw = deps.undiciFetch ?? (undiciFetch as unknown as FetchWithDispatcher);
   const timeoutFor = directHeadersTimeoutResolver(directOptions, target);
   const hostname = targetPart(target, "hostname") || undefined;
@@ -148,27 +146,14 @@ async function sendDirectWithRetry(
         input,
         {
           ...directOptions,
-          dispatcher: directAttemptDispatcher(
-            connectGuard,
-            dedicatedCodexImageRequest,
-            imageTimeout,
-            hostname,
-            attempt
-          ),
+          dispatcher: directAttemptDispatcher(connectGuard, imageTimeout, hostname, attempt),
         },
         withPayloadTraffic(raw, null, deps.recordTraffic),
-        directAttemptTimeout(
-          dedicatedCodexImageRequest,
-          imageTimeout,
-          timeoutFor,
-          attempt,
-          replayTimeout
-        )
+        directAttemptTimeout(imageTimeout, timeoutFor, attempt, replayTimeout)
       );
     } catch (error) {
       // Validation tags errors, so inspect the original connection code first.
-      const canResend =
-        !dedicatedCodexImageRequest && canResendAfterTransportError(input, options, error);
+      const canResend = !imageTimeout && canResendAfterTransportError(input, options, error);
       validateDirectFailure(error, directOptions.signal);
       if (retryDirectFailure(error, attempt, max, replayTimeout, timeoutFor, target, canResend)) {
         await directRetryBackoff(error);
@@ -185,25 +170,23 @@ async function sendDirectWithRetry(
 }
 
 function directAttemptTimeout(
-  dedicatedCodexImageRequest: boolean,
   imageTimeout: number,
   timeoutFor: (attempt: number) => number,
   attempt: number,
   replayTimeout: boolean
 ): number {
-  if (dedicatedCodexImageRequest) return imageTimeout;
+  if (imageTimeout) return imageTimeout;
   return timeoutFor(attempt === 0 && replayTimeout ? 0 : 1);
 }
 
 function directAttemptDispatcher(
   connectGuard: ConnectGuardMode | undefined,
-  dedicatedCodexImageRequest: boolean,
   imageTimeout: number,
   hostname: string | undefined,
   attempt: number
 ) {
   if (connectGuard) return getGuardedDispatcher(connectGuard);
-  if (dedicatedCodexImageRequest) return getDedicatedCodexImageDispatcher(imageTimeout);
+  if (imageTimeout) return getDedicatedCodexImageDispatcher(imageTimeout);
   return attempt === 0 ? getDefaultDispatcher(hostname) : getRetryDispatcher(hostname);
 }
 

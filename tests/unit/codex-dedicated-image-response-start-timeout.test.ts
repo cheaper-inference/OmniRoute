@@ -223,7 +223,7 @@ test("proxied Codex image transport error does not resubmit", async () => {
   });
 });
 
-test("Codex paid image POST is submitted once through an edge relay", async () => {
+test("billable image POSTs submit once through an edge relay", async () => {
   await withTimeoutOverrides(async () => {
     const relay = { type: "vercel", host: "relay.test", relayAuth: "test-only" };
     const submissionsFor = async (url: string): Promise<number> => {
@@ -247,6 +247,7 @@ test("Codex paid image POST is submitted once through an edge relay", async () =
 
     assert.equal(await submissionsFor(CODEX_GENERATION), 1);
     assert.equal(await submissionsFor(CODEX_EDITS), 1);
+    assert.equal(await submissionsFor("https://api.minimax.cn/v1/images/generations"), 1);
     assert.equal(
       await submissionsFor("https://chatgpt.com/backend-api/codex/responses"),
       2,
@@ -304,4 +305,31 @@ test("a Request input is recognized as a Codex paid image POST", async () => {
     );
     assert.deepEqual(dispatchers, [getDedicatedCodexImageDispatcher(IMAGE_DEADLINE_MS)]);
   });
+});
+
+test("MiniMax H3 regional endpoints submit each billable POST exactly once on a socket failure", async () => {
+  for (const region of ["io", "cn"]) {
+    let attempts = 0;
+    let fallbacks = 0;
+    await assert.rejects(
+      proxyFetch(
+        `https://api.minimax.${region}/v1/images/generations`,
+        { method: "POST", body: '{"prompt":"a tree"}' },
+        {
+          undiciFetch: async (_input, options) => {
+            attempts++;
+            assert.equal(options?.dispatcher, getDedicatedCodexImageDispatcher(610_000));
+            throw Object.assign(new Error("fetch failed"), { code: "ECONNRESET" });
+          },
+          nativeFetch: async () => {
+            fallbacks++;
+            return new Response();
+          },
+        }
+      ),
+      /fetch failed/
+    );
+    assert.equal(attempts, 1);
+    assert.equal(fallbacks, 0);
+  }
 });

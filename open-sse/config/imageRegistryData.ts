@@ -24,6 +24,12 @@ import { COPILOT_M365_IMAGE_PROVIDER } from "./providers/registry/copilot-m365-w
 import { CODEX_IMAGE_PROVIDER } from "./providers/registry/codex/imageModels.ts";
 import { GROK_BUILD_PROXY_BASE_URL } from "./grokBuildEndpoints.ts";
 
+import {
+  MINIMAX_H3_CN_URL,
+  MINIMAX_H3_MODELS,
+  MINIMAX_H3_SIZES,
+} from "./providers/registry/minimax/imageModels.ts";
+
 export interface ImageModelEntry {
   id: string;
   catalogId?: string;
@@ -479,8 +485,18 @@ export const IMAGE_PROVIDERS: Record<string, ImageProviderConfig> = {
     models: [
       { id: "image-01", name: "MiniMax Image-01" },
       { id: "image-01-live", name: "MiniMax Image-01 Live" },
+      ...MINIMAX_H3_MODELS.map((model) => ({ ...model, supportedSizes: MINIMAX_H3_SIZES })),
     ],
     supportedSizes: ["1:1", "16:9", "9:16", "4:3", "3:4", "3:2", "2:3", "1024x1024"],
+  },
+  "minimax-cn": {
+    id: "minimax-cn",
+    baseUrl: MINIMAX_H3_CN_URL,
+    authType: "apikey",
+    authHeader: "bearer",
+    format: "minimax-image",
+    models: MINIMAX_H3_MODELS,
+    supportedSizes: MINIMAX_H3_SIZES,
   },
   leonardo: {
     id: "leonardo",
