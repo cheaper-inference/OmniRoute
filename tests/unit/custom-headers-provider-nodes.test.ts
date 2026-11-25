@@ -16,6 +16,19 @@ const { createProviderNodeSchema, updateProviderNodeSchema } =
   await import("../../src/shared/validation/schemas.ts");
 const { DefaultExecutor } = await import("../../open-sse/executors/default.ts");
 
+interface NodePayload {
+  node: {
+    id: string;
+    customHeaders: Record<string, string> | null;
+  };
+}
+
+interface ConnectionPayload {
+  providerSpecificData?: {
+    customHeaders?: Record<string, string>;
+  };
+}
+
 async function resetStorage() {
   core.resetDbInstance();
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
@@ -149,7 +162,7 @@ test("provider nodes route creates OpenAI-compatible nodes with customHeaders", 
       },
     })
   );
-  const body = (await response.json()) as any;
+  const body = (await response.json()) as unknown as NodePayload;
 
   assert.equal(response.status, 201);
   assert.match(body.node.id, new RegExp(`^${OPENAI_COMPATIBLE_PREFIX}chat-`));
@@ -168,7 +181,7 @@ test("provider nodes route creates nodes without customHeaders (null)", async ()
       baseUrl: "https://nocustom.example.com/v1",
     })
   );
-  const body = (await response.json()) as any;
+  const body = (await response.json()) as unknown as NodePayload;
 
   assert.equal(response.status, 201);
   assert.equal(body.node.customHeaders, null);
@@ -184,7 +197,7 @@ test("provider nodes route update modifies customHeaders", async () => {
       customHeaders: { "X-Original": "original-value" },
     })
   );
-  const created = (await createResponse.json()) as any;
+  const created = (await createResponse.json()) as unknown as NodePayload;
   const nodeId = created.node.id;
 
   const updateBody = {
@@ -197,7 +210,7 @@ test("provider nodes route update modifies customHeaders", async () => {
   const updateResponse = await providerNodesIdRoute.PUT(makeUpdateRequest(nodeId, updateBody), {
     params: Promise.resolve({ id: nodeId }),
   });
-  const updated = (await updateResponse.json()) as any;
+  const updated = (await updateResponse.json()) as unknown as NodePayload;
 
   assert.equal(updateResponse.status, 200);
   assert.deepEqual(updated.node.customHeaders, {
@@ -216,7 +229,7 @@ test("provider nodes route update can clear customHeaders by passing null", asyn
       customHeaders: { "X-Keep": "keep-value" },
     })
   );
-  const created = (await createResponse.json()) as any;
+  const created = (await createResponse.json()) as unknown as NodePayload;
   const nodeId = created.node.id;
 
   const clearBody = {
@@ -229,10 +242,58 @@ test("provider nodes route update can clear customHeaders by passing null", asyn
   const updateResponse = await providerNodesIdRoute.PUT(makeUpdateRequest(nodeId, clearBody), {
     params: Promise.resolve({ id: nodeId }),
   });
-  const updated = (await updateResponse.json()) as any;
+  const updated = (await updateResponse.json()) as unknown as NodePayload;
 
   assert.equal(updateResponse.status, 200);
   assert.equal(updated.node.customHeaders, null);
+});
+
+test("#21227: provider nodes route update preserves customHeaders on node and connection when omitted", async () => {
+  const createResponse = await providerNodesRoute.POST(
+    makeRequest({
+      name: "Node With Headers",
+      prefix: "with-headers-preserve",
+      apiType: "chat",
+      baseUrl: "https://withheaders.example.com/v1",
+      customHeaders: { "X-Node-Header": "node-val" },
+    })
+  );
+  const created = (await createResponse.json()) as unknown as NodePayload;
+  const nodeId = created.node.id;
+
+  const plain = await providersDb.createProviderConnection({
+    provider: nodeId,
+    authType: "apikey",
+    name: "plain",
+    apiKey: "sk-1",
+    providerSpecificData: {
+      prefix: "with-headers-preserve",
+      baseUrl: "https://withheaders.example.com/v1",
+      customHeaders: { "X-Conn-Header": "conn-val" },
+    },
+  });
+
+  const editModalBody = {
+    name: "Node Renamed",
+    prefix: "with-headers-preserve",
+    apiType: "chat",
+    baseUrl: "https://withheaders.example.com/v1",
+  };
+  const updateResponse = await providerNodesIdRoute.PUT(
+    makeUpdateRequest(nodeId, editModalBody),
+    {
+      params: Promise.resolve({ id: nodeId }),
+    }
+  );
+  const updated = (await updateResponse.json()) as unknown as NodePayload;
+
+  assert.equal(updateResponse.status, 200);
+  assert.deepEqual(updated.node.customHeaders, { "X-Node-Header": "node-val" });
+
+  const connAfter = (await providersDb.getProviderConnectionById(plain.id)) as unknown as ConnectionPayload;
+  const connHeaders = connAfter?.providerSpecificData?.customHeaders;
+  assert.equal(connHeaders?.["X-Conn-Header"], "conn-val");
+  assert.equal(connHeaders?.["X-Node-Header"], "node-val");
 });
 
 test("DefaultExecutor.buildHeaders applies customHeaders from providerSpecificData", () => {

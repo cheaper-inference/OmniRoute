@@ -82,13 +82,33 @@ async function syncNodeConnections(
       const connectionId = typeof connection.id === "string" ? connection.id : "";
       if (!connectionId) return [];
 
+      const existingConnHeaders = asRecord(asRecord(connection.providerSpecificData).customHeaders);
+      const nodeHeaders = asRecord(updated.customHeaders);
+      let mergedHeaders: Record<string, string> | undefined = undefined;
+      if (Object.keys(existingConnHeaders).length > 0 || Object.keys(nodeHeaders).length > 0) {
+        const merged: Record<string, string> = {};
+        for (const [k, v] of Object.entries(nodeHeaders)) {
+          if (typeof v === "string") merged[k] = v;
+        }
+        for (const [k, v] of Object.entries(existingConnHeaders)) {
+          if (typeof v === "string") {
+            const clashKey = Object.keys(merged).find((key) => key.toLowerCase() === k.toLowerCase());
+            if (clashKey && clashKey !== k) {
+              delete merged[clashKey];
+            }
+            merged[k] = v;
+          }
+        }
+        mergedHeaders = Object.keys(merged).length > 0 ? merged : undefined;
+      }
+
       const providerSpecificData = {
         ...asRecord(connection.providerSpecificData),
         prefix: node.prefix,
         baseUrl: node.baseUrl,
         nodeName: updated.name,
         chatPath: updated.chatPath || undefined,
-        customHeaders: updated.customHeaders || undefined,
+        customHeaders: mergedHeaders,
       } as JsonRecord;
       if (updated.modelsPath) {
         providerSpecificData.modelsPath = updated.modelsPath;
@@ -193,7 +213,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       // #2166: explicit null (not omission) so an empty submission clears a
       // previously stored custom icon.
       iconUrl: iconUrl?.trim() || null,
-      customHeaders: customHeaders || null,
+      ...(customHeaders !== undefined ? { customHeaders: customHeaders || null } : {}),
       dailyQuotaResetTimezone: dailyQuotaResetTimezone?.trim() || null,
       dailyQuotaResetHour:
         dailyQuotaResetHour === 0 || dailyQuotaResetHour != null ? dailyQuotaResetHour : null,
