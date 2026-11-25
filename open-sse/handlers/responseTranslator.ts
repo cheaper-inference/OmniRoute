@@ -72,6 +72,35 @@ function normalizeToolCallArgs(args: unknown): unknown {
   }
 }
 
+/**
+ * #21203 — a buffered Gemini/Antigravity SSE body (parseSSEToGeminiResponse,
+ * collectStreamToResponse) is already an OpenAI chat.completion, so the candidates
+ * mapping below never runs for it. Drop the synthetic `reason` from its tool calls here.
+ */
+function stripPlaceholderArgsFromChatCompletion(
+  body: unknown,
+  toolNameMap: Map<string, string> | null | undefined,
+  clientTools: unknown
+): void {
+  const choices = toRecord(body).choices;
+  if (!Array.isArray(choices)) return;
+  for (const choice of choices) {
+    const toolCalls = toRecord(toRecord(choice).message).tool_calls;
+    if (!Array.isArray(toolCalls)) continue;
+    for (const call of toolCalls) {
+      const fn = toRecord(toRecord(call).function);
+      const name = toString(fn.name);
+      const args = normalizeToolCallArgs(fn.arguments);
+      const stripped = stripGeminiPlaceholderArgs(
+        caseInsensitiveToolNameLookup(name, toolNameMap) ?? name,
+        args,
+        clientTools
+      );
+      if (stripped !== args) fn.arguments = JSON.stringify(stripped);
+    }
+  }
+}
+
 function parseTextualToolCall(text: unknown): { name: string; args: unknown } | null {
   if (typeof text !== "string") return null;
 
@@ -612,6 +641,8 @@ export function translateNonStreamingResponse(
       }
 
       intermediateOpenAI = result;
+    } else {
+      stripPlaceholderArgsFromChatCompletion(intermediateOpenAI, toolNameMap, clientTools);
     }
   }
 
