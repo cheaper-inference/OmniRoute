@@ -49,7 +49,7 @@ function autoValueColor(percent: number): string {
 /**
  * A labelled percentage bar with no text of its own. Every visible word comes from the props, so
  * the bar can be shared by pages that load different translation namespaces. The track and fill
- * are the kit Progress, exposed as a named progressbar from 0 to 100.
+ * are the kit Progress, exposed as a named meter from 0 to 100.
  */
 export default function QuotaBar({
   label,
@@ -83,7 +83,7 @@ export default function QuotaBar({
         value={Math.round(pct)}
         max={100}
         size={size}
-        semantics="progress"
+        semantics="meter"
         animate={false}
         tone={muted ? "default" : autoTone(pct)}
         color={muted ? MUTED_FILL : undefined}
