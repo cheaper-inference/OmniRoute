@@ -1,15 +1,9 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
-import React from "react";
-import { useTranslations } from "next-intl";
-import { PROVIDER_COLORS as CHART_SERIES_COLORS } from "@/shared/components/analytics/chartColors";
-import Select from "@/shared/components/Select";
-import Input from "@/shared/components/Input";
-import Checkbox from "@/shared/components/Checkbox";
-import Icon from "@/shared/components/Icon";
-import Badge from "@/shared/components/Badge";
-import { matchesSearch } from "@/shared/utils/turkishText";
+import React, { useState, useEffect, useMemo } from "react";
+import { useLocale, useTranslations } from "next-intl";
+import { Alert } from "@omniroute/ui-kit/alert";
+import { Button } from "@omniroute/ui-kit/button";
 import {
   Table,
   TableBody,
@@ -18,7 +12,14 @@ import {
   TableHeader,
   TableRow,
 } from "@omniroute/ui-kit/table";
+import { PROVIDER_COLORS as CHART_SERIES_COLORS } from "@/shared/components/analytics/chartColors";
+import Select from "@/shared/components/Select";
+import Input from "@/shared/components/Input";
+import Checkbox from "@/shared/components/Checkbox";
+import Icon from "@/shared/components/Icon";
+import Badge from "@/shared/components/Badge";
 import Card from "@/shared/components/Card";
+import { matchesSearch } from "@/shared/utils/turkishText";
 
 // ────────────────────────────────────────────────────────────────────────────
 // Types
@@ -53,8 +54,9 @@ export interface FreeBudgetData {
   /** Providers behind that check. */
   gatedProviders?: string[];
   headline?: string;
-  /** ISO timestamp of the last catalog update. Absent/null → freshness is not shown. */
+  /** ISO release curation date or Radar feed generation timestamp. */
   catalogUpdatedAt?: string | null;
+  catalogSource?: "baseline" | "radar-overlay";
   /**
    * Providers callable with nothing configured, derived server-side from real
    * routing behaviour (see shared/utils/providerCredentialRequirement). NOT the
@@ -77,25 +79,29 @@ function fmt(n: number): string {
   return String(n);
 }
 
-/**
- * Compact "N unit(s) ago" formatting for the catalog freshness indicator.
- * Returns null on unparsable input so callers can degrade to "show nothing".
- */
-export function relativeTimeFromNow(iso: string, now: number = Date.now()): string | null {
-  const ts = Date.parse(iso);
-  if (Number.isNaN(ts)) return null;
-  const diffMs = now - ts;
-  if (diffMs < 60_000) return "just now";
-  const min = Math.floor(diffMs / 60_000);
-  if (min < 60) return `${min}m ago`;
-  const hr = Math.floor(min / 60);
-  if (hr < 24) return `${hr}h ago`;
-  const day = Math.floor(hr / 24);
-  if (day < 30) return `${day}d ago`;
-  const month = Math.floor(day / 30);
-  if (month < 12) return `${month}mo ago`;
-  const year = Math.floor(month / 12);
-  return `${year}y ago`;
+export function formatRelativeAge(iso: string, nowMs: number, locale: string): string | null {
+  const timestamp = Date.parse(iso);
+  if (Number.isNaN(timestamp) || !Number.isFinite(nowMs)) return null;
+
+  const formatter = new Intl.RelativeTimeFormat(locale, { numeric: "auto" });
+  const minutes = Math.floor(Math.max(0, nowMs - timestamp) / 60_000);
+  if (minutes === 0) return formatter.format(0, "second");
+  if (minutes < 60) return formatter.format(-minutes, "minute");
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return formatter.format(-hours, "hour");
+  const days = Math.floor(hours / 24);
+  if (days < 30) return formatter.format(-days, "day");
+  const months = Math.floor(days / 30);
+  if (months < 12) return formatter.format(-months, "month");
+  return formatter.format(-Math.floor(months / 12), "year");
+}
+
+export function formatCuratedDate(isoDate: string, locale: string): string | null {
+  const timestamp = Date.parse(isoDate);
+  if (Number.isNaN(timestamp)) return null;
+  return new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeZone: "UTC" }).format(
+    timestamp
+  );
 }
 
 interface FreeBudgetLabels {
@@ -117,45 +123,54 @@ interface FreeBudgetLabels {
   freeTypes: Record<string, string>;
   tosTitles: Record<string, string>;
   noApiKey: string;
+  keylessCount: (models: number, providers: number) => string;
+  noMatches: string;
+  tosColumn: string;
+  updatedRelative: (age: string) => string;
+  curatedOn: (date: string) => string;
 }
 
-const DEFAULT_LABELS: FreeBudgetLabels = {
-  title: "Free-token budget",
-  remaining: (remaining, percent, total) => `${remaining} remaining · ${percent}% of ${total}`,
-  steadyMonth: "Steady / month",
-  firstMonth: "First month (+ credits)",
-  usedThisMonth: "Used this month",
-  segmentHint:
-    "Each segment = one free pool · pool-deduped, honest counting (no inflated rate-limit ceilings).",
-  boost: (tokens) =>
-    `Unlock ~${tokens} more/mo with a one-time $10 OpenRouter top-up (50 → 1000 req/day)`,
-  uncapped:
-    "Permanently free, no published cap (rate-limited) — real access, not counted in the headline:",
-  gated: (tokens) =>
-    `~${tokens}/mo more behind a regional identity check — real quota, not counted in the headline:`,
-  tosRestricted: (count) =>
-    `${count} model${count === 1 ? "" : "s"} flagged as ToS-restricted — you decide`,
-  provider: "Provider",
-  model: "Model",
-  type: "Type",
-  tokensMonth: "Tokens/mo",
-  credit: (tokens) => `${tokens} credit`,
-  noApiKey: "No API key required",
-  freeTypes: {
-    "recurring-daily": "daily",
-    "recurring-monthly": "monthly",
-    "recurring-credit": "credit/mo",
-    "recurring-uncapped": "uncapped",
-    "one-time-initial": "signup credit",
-    keyless: "keyless",
-    discontinued: "discontinued",
-  },
-  tosTitles: {
-    avoid: "ToS-restricted — review terms",
-    caution: "Caution — personal-use / proxy clauses",
-    ok: "Generally permissive",
-  },
-};
+export function getFreeBudgetLabels(
+  t: ReturnType<typeof useTranslations<"freeBudget">>
+): FreeBudgetLabels {
+  return {
+    title: t("title"),
+    remaining: (remaining, percent, total) => t("remaining", { remaining, percent, total }),
+    steadyMonth: t("steadyMonth"),
+    firstMonth: t("firstMonth"),
+    usedThisMonth: t("usedThisMonth"),
+    segmentHint: t("segmentHint"),
+    boost: (tokens) => t("boost", { tokens }),
+    uncapped: t("uncapped"),
+    gated: (tokens) => t("gated", { tokens }),
+    tosRestricted: (count) => t("tosRestricted", { count }),
+    provider: t("provider"),
+    model: t("model"),
+    type: t("type"),
+    tokensMonth: t("tokensMonth"),
+    credit: (tokens) => t("credit", { tokens }),
+    noApiKey: t("noApiKeyRequired"),
+    keylessCount: (models, providers) => t("keylessCount", { models, providers }),
+    noMatches: t("noMatches"),
+    tosColumn: t("tosColumn"),
+    updatedRelative: (age) => t("updatedRelative", { age }),
+    curatedOn: (date) => t("curatedOn", { date }),
+    freeTypes: {
+      "recurring-daily": t("freeType.daily"),
+      "recurring-monthly": t("freeType.monthly"),
+      "recurring-credit": t("freeType.creditMonthly"),
+      "recurring-uncapped": t("freeType.uncapped"),
+      "one-time-initial": t("freeType.signupCredit"),
+      keyless: t("freeType.keyless"),
+      discontinued: t("freeType.discontinued"),
+    },
+    tosTitles: {
+      avoid: t("tosTitle.avoid"),
+      caution: t("tosTitle.caution"),
+      ok: t("tosTitle.ok"),
+    },
+  };
+}
 
 // Distinct hues for stacked bar segments (cycling) — the shared analytics chart-token palette.
 const BAR_HUES = CHART_SERIES_COLORS;
@@ -332,7 +347,9 @@ export function FreeBudgetView({
   search = "",
   providerFilter = "all",
   keylessOnly = false,
-  labels = DEFAULT_LABELS,
+  labels,
+  nowMs,
+  locale = "en",
 }: {
   data: FreeBudgetData;
   sort?: FreeBudgetSort;
@@ -340,7 +357,9 @@ export function FreeBudgetView({
   search?: string;
   providerFilter?: string;
   keylessOnly?: boolean;
-  labels?: FreeBudgetLabels;
+  labels: FreeBudgetLabels;
+  nowMs?: number;
+  locale?: string;
 }) {
   const {
     steadyRecurringTokens,
@@ -353,6 +372,7 @@ export function FreeBudgetView({
     gatedRecurringTokens = 0,
     gatedProviders = [],
     catalogUpdatedAt,
+    catalogSource,
     noCredentialProviders = [],
   } = data;
 
@@ -378,7 +398,13 @@ export function FreeBudgetView({
   rows = filterRows(rows, { search, providerFilter, keylessOnly, noCredentialProviders });
   rows = sortRows(rows, sort);
 
-  const freshness = catalogUpdatedAt ? relativeTimeFromNow(catalogUpdatedAt) : null;
+  const isRadarOverlay = catalogSource === "radar-overlay";
+  let formattedCatalogDate: string | null = null;
+  if (catalogUpdatedAt && !isRadarOverlay) {
+    formattedCatalogDate = formatCuratedDate(catalogUpdatedAt, locale);
+  } else if (catalogUpdatedAt && nowMs !== undefined) {
+    formattedCatalogDate = formatRelativeAge(catalogUpdatedAt, nowMs, locale);
+  }
 
   return (
     <div className="rounded-lg border border-border bg-surface">
@@ -386,13 +412,15 @@ export function FreeBudgetView({
       <div className="flex items-center gap-2 px-3 py-2 border-b border-border">
         <Icon name="savings" size={14} className="text-text-muted" />
         <span className="text-[13px] font-semibold text-text-main">{labels.title}</span>
-        {freshness && (
+        {formattedCatalogDate && (
           <span
             data-testid="catalog-freshness"
             className="text-3xs text-text-muted"
             title={catalogUpdatedAt ?? undefined}
           >
-            · updated {freshness}
+            {isRadarOverlay
+              ? labels.updatedRelative(formattedCatalogDate)
+              : labels.curatedOn(formattedCatalogDate)}
           </span>
         )}
         <span className="ml-auto text-2xs text-text-muted tabular-nums">
@@ -451,7 +479,7 @@ export function FreeBudgetView({
             <Icon name="lock_open" size={14} className="text-success" />
             <span className="text-2xs font-semibold text-success">{labels.noApiKey}</span>
             <span className="text-2xs text-text-muted">
-              ({keylessModels.length}个模型 · {keylessProviders.length}个提供者)
+              {labels.keylessCount(keylessModels.length, keylessProviders.length)}
             </span>
           </div>
           <div className="mt-1 flex flex-wrap gap-1">
@@ -531,14 +559,14 @@ export function FreeBudgetView({
               <TableHead>{labels.model}</TableHead>
               <TableHead>{labels.type}</TableHead>
               <TableHead numeric>{labels.tokensMonth}</TableHead>
-              <TableHead align="center">ToS</TableHead>
+              <TableHead align="center">{labels.tosColumn}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {rows.length === 0 && (
               <TableRow>
                 <TableCell colSpan={5} className="py-3 text-center text-text-muted">
-                  No models match the current filters.
+                  {labels.noMatches}
                 </TableCell>
               </TableRow>
             )}
@@ -590,13 +618,51 @@ export function FreeBudgetView({
   );
 }
 
+export type FreeBudgetLoadState = "loading" | "error";
+
+export function FreeBudgetPlaceholder({
+  state,
+  labels,
+  onRetry,
+}: {
+  state: FreeBudgetLoadState;
+  labels: { loading: string; loadFailed: string; retry: string };
+  onRetry?: () => void;
+}): React.JSX.Element {
+  if (state === "loading") {
+    return (
+      <div role="status" className="rounded-lg border border-border bg-surface p-3 text-text-muted">
+        {labels.loading}
+      </div>
+    );
+  }
+
+  return (
+    <Alert
+      variant="warning"
+      dismissible={false}
+      actions={
+        onRetry ? (
+          <Button type="button" variant="outline" size="sm" onClick={onRetry}>
+            {labels.retry}
+          </Button>
+        ) : undefined
+      }
+    >
+      {labels.loadFailed}
+    </Alert>
+  );
+}
+
 // ────────────────────────────────────────────────────────────────────────────
 // Fetch + interactivity wrapper (client component)
 // ────────────────────────────────────────────────────────────────────────────
 
 export default function FreeBudgetCard() {
   const t = useTranslations("freeBudget");
-  const [data, setData] = useState<FreeBudgetData | null>(null);
+  const locale = useLocale();
+  const [loaded, setData] = useState<{ data: FreeBudgetData; nowMs: number } | null>(null);
+  const [loadState, setLoadState] = useState<FreeBudgetLoadState>("loading");
   const [sort, setSort] = useState<FreeBudgetSort>("tokens");
   const [hideAvoid, setHideAvoid] = useState(false);
   const [search, setSearch] = useState("");
@@ -607,19 +673,27 @@ export default function FreeBudgetCard() {
     fetch("/api/free-tier/summary")
       .then((r) => (r.ok ? r.json() : null))
       .then((json) => {
-        if (json) setData(json as FreeBudgetData);
+        if (json) setData({ data: json as FreeBudgetData, nowMs: Date.now() });
+        else setLoadState("error");
       })
       .catch(() => {
-        /* best-effort */
+        setLoadState("error");
       });
   }, []);
 
   const providers = useMemo(() => {
-    if (!data) return [];
-    return Array.from(new Set(data.perModel.map((m) => m.provider))).sort();
-  }, [data]);
+    if (!loaded) return [];
+    return Array.from(new Set(loaded.data.perModel.map((m) => m.provider))).sort();
+  }, [loaded]);
 
-  if (!data) return null;
+  if (!loaded) {
+    return (
+      <FreeBudgetPlaceholder
+        state={loadState}
+        labels={{ loading: t("loading"), loadFailed: t("loadFailed"), retry: t("retry") }}
+      />
+    );
+  }
 
   return (
     <div className="flex flex-col gap-2">
@@ -679,44 +753,15 @@ export default function FreeBudgetCard() {
         </span>
       </div>
       <FreeBudgetView
-        data={data}
+        data={loaded.data}
+        nowMs={loaded.nowMs}
+        locale={locale}
         sort={sort}
         hideAvoid={hideAvoid}
         search={search}
         providerFilter={providerFilter}
         keylessOnly={keylessOnly}
-        labels={{
-          title: t("title"),
-          remaining: (remaining, percent, total) => t("remaining", { remaining, percent, total }),
-          steadyMonth: t("steadyMonth"),
-          firstMonth: t("firstMonth"),
-          usedThisMonth: t("usedThisMonth"),
-          segmentHint: t("segmentHint"),
-          boost: (tokens) => t("boost", { tokens }),
-          uncapped: t("uncapped"),
-          gated: (tokens) => t("gated", { tokens }),
-          tosRestricted: (count) => t("tosRestricted", { count }),
-          provider: t("provider"),
-          model: t("model"),
-          type: t("type"),
-          tokensMonth: t("tokensMonth"),
-          credit: (tokens) => t("credit", { tokens }),
-          noApiKey: t("noApiKeyRequired"),
-          freeTypes: {
-            "recurring-daily": t("freeType.daily"),
-            "recurring-monthly": t("freeType.monthly"),
-            "recurring-credit": t("freeType.creditMonthly"),
-            "recurring-uncapped": t("freeType.uncapped"),
-            "one-time-initial": t("freeType.signupCredit"),
-            keyless: t("freeType.keyless"),
-            discontinued: t("freeType.discontinued"),
-          },
-          tosTitles: {
-            avoid: t("tosTitle.avoid"),
-            caution: t("tosTitle.caution"),
-            ok: t("tosTitle.ok"),
-          },
-        }}
+        labels={getFreeBudgetLabels(t)}
       />
     </div>
   );
