@@ -23,10 +23,11 @@ import { execFileSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import { readFileSync } from "node:fs";
 import { resolve, dirname } from "node:path";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { fileURLToPath } from "node:url";
 import os from "node:os";
 import path from "node:path";
 import fs from "node:fs";
+import { isMainModule } from "../lib/is-main-module.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const projectRoot = resolve(__dirname, "../..");
@@ -140,4 +141,4 @@ function main() {
 }
 
 // Permite que o módulo seja importado em testes sem executar main().
-if (import.meta.url === pathToFileURL(process.argv[1] || "").href) main();
+if (isMainModule(import.meta.url)) main();
