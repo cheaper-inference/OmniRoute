@@ -38,15 +38,25 @@ export function hasConnectedFetchProvider(providers: SearchProviderCatalogItem[]
   return providers.some((p) => p.kind === "fetch" && p.status !== "missing");
 }
 
+function getFetchProviderBlockReason(
+  providers: ScrapeTabProps["catalogProviders"],
+  translateReason: () => string
+): string | null {
+  // Only a loaded catalog can say "none connected"; while it is unknown the route decides.
+  return Array.isArray(providers) && !hasConnectedFetchProvider(providers)
+    ? translateReason()
+    : null;
+}
+
 export default function ScrapeTab({ configState, catalogProviders, onMetrics }: ScrapeTabProps) {
   const t = useTranslations("search");
   const [url, setUrl] = useState("");
   const [urlError, setUrlError] = useState<string | null>(null);
   const { result, loading, error, latencyMs, fetch: doFetch, reset } = useScrapeFetch();
-  // Only a loaded catalog can say "none connected"; while it is unknown the route decides.
-  const noFetchProvider = Array.isArray(catalogProviders)
-    ? !hasConnectedFetchProvider(catalogProviders)
-    : false;
+  const fetchProviderBlockReason = getFetchProviderBlockReason(catalogProviders, () =>
+    t("scrapeNoFetchProvider")
+  );
+  const noFetchProvider = fetchProviderBlockReason !== null;
 
   const handleSubmit = async () => {
     if (noFetchProvider) return;
@@ -103,7 +113,7 @@ export default function ScrapeTab({ configState, catalogProviders, onMetrics }: 
             variant="primary"
             onClick={() => void handleSubmit()}
             disabled={loading}
-            reason={noFetchProvider ? t("scrapeNoFetchProvider") : null}
+            reason={fetchProviderBlockReason}
             data-testid="scrape-button"
           >
             {loading ? t("scrapeExtracting") : t("scrapeExtract")}
@@ -112,7 +122,7 @@ export default function ScrapeTab({ configState, catalogProviders, onMetrics }: 
 
         {noFetchProvider && (
           <p className="text-xs text-text-muted" data-testid="scrape-no-fetch-provider">
-            {t("scrapeNoFetchProvider")}
+            {fetchProviderBlockReason}
             {" · "}
             <Link href="/dashboard/providers" className="text-accent hover:underline">
               {t("configureProvider")}
