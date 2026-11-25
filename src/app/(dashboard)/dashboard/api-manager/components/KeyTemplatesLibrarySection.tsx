@@ -9,6 +9,9 @@ import Icon from "@/shared/components/Icon";
 import Input from "@/shared/components/Input";
 import Modal from "@/shared/components/Modal";
 import { Spinner } from "@/shared/components/Loading";
+import Badge from "@/shared/components/Badge";
+import IconChip from "@/shared/components/IconChip";
+import EmptyState from "@/shared/components/EmptyState";
 import type { UnreadableKeyTemplate } from "@/shared/types/keyTemplates";
 import { anchorReferenceIssues, clearFieldValidationIssues } from "../keyTemplateReferenceIssues";
 import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
@@ -395,18 +398,18 @@ export default function KeyTemplatesLibrarySection(props: KeyTemplatesLibrarySec
 
       <TemplateLibraryStatus model={model} />
       {templates.length === 0 && unreadable.length === 0 && !loadError && !loading ? (
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-lg border border-dashed border-border bg-surface/20">
-          <div className="flex items-center gap-3">
-            <Icon name="inventory_2" size={24} className="text-text-muted shrink-0" />
-            <div>
-              <p className="text-sm font-medium text-text-main">{t("noTemplatesYet")}</p>
-              <p className="text-xs text-text-muted">{t("noTemplatesYetDesc")}</p>
-            </div>
-          </div>
-          <Button size="sm" variant="outline" icon="add" onClick={openCreateModal}>
-            {t("newTemplateAction")}
-          </Button>
-        </div>
+        <EmptyState
+          layout="inline"
+          border="dashed"
+          icon="inventory_2"
+          title={t("noTemplatesYet")}
+          description={t("noTemplatesYetDesc")}
+          actions={
+            <Button size="sm" variant="outline" icon="add" onClick={openCreateModal}>
+              {t("newTemplateAction")}
+            </Button>
+          }
+        />
       ) : (
         <TemplateCards model={model} />
       )}
@@ -424,10 +427,12 @@ function TemplateCardActions({ model, tpl }: { model: LibraryModel; tpl: KeyTemp
     <div className="flex items-start justify-between gap-2">
       <div className="min-w-0">
         <div className="flex items-center gap-2">
-          <h4 className="text-sm text-text-main truncate">{tpl.name}</h4>
-          <span className="px-1.5 py-0.5 rounded bg-surface-2 text-text-muted text-[10px] font-mono shrink-0">
+          <h4 className="ci-heading truncate" data-size="sm">
+            {tpl.name}
+          </h4>
+          <Badge size="sm" className="shrink-0 font-mono">
             v{tpl.revision}
-          </span>
+          </Badge>
         </div>
         {tpl.description && (
           <p className="text-xs text-text-muted line-clamp-2 mt-0.5">{tpl.description}</p>
@@ -484,23 +489,9 @@ function TemplateCards({ model }: { model: LibraryModel }) {
 
               <div className="flex flex-wrap gap-1.5 pt-1">
                 {badges.map((b) => (
-                  <span
-                    key={b.id}
-                    className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium ${
-                      b.tone === "success"
-                        ? "bg-success/10 text-success"
-                        : b.tone === "warning"
-                          ? "bg-warning/10 text-warning"
-                          : b.tone === "error"
-                            ? "bg-error/10 text-error"
-                            : b.tone === "info"
-                              ? "bg-info/10 text-info"
-                              : "bg-surface-2 text-text-muted"
-                    }`}
-                  >
-                    <Icon name={b.icon} size={12} />
+                  <Badge key={b.id} size="sm" variant={b.tone} icon={b.icon}>
                     {b.label}
-                  </span>
+                  </Badge>
                 ))}
               </div>
             </div>
@@ -665,9 +656,9 @@ function TemplateLibraryHeader({ model }: { model: LibraryModel }) {
   return (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
       <div className="flex items-center gap-3">
-        <div className="flex items-center justify-center size-10 rounded-lg bg-primary/10 shrink-0">
-          <Icon name="layers" className="text-xl text-primary" />
-        </div>
+        <IconChip tone="accent" className="shrink-0">
+          <Icon name="layers" />
+        </IconChip>
         <div>
           <h3>
             {t("keyTemplatesTitle")}

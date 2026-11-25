@@ -1,0 +1,98 @@
+{
+  "argv": [
+    "-P",
+    "omniroute",
+    "-m",
+    "anthropic/claude-sonnet-4-6",
+    "--timeout",
+    "60",
+    "fix the bug"
+  ],
+  "cleanup": {
+    "removeTempDir": true,
+    "revokeSession": true
+  },
+  "env": {
+    "set": {
+      "CLINE_DATA_DIR": "${TMP}",
+      "CLINE_DISABLE_CLINE_PASS_NOTICE": "1",
+      "CLINE_NO_AUTO_UPDATE": "1",
+      "CLINE_SANDBOX": "1",
+      "CLINE_SANDBOX_DATA_DIR": "${TMP}",
+      "NO_UPDATE_NOTIFIER": "1"
+    },
+    "unset": [
+      "CLINE_FORCE_ONBOARDING"
+    ]
+  },
+  "modelList": {
+    "injected": 5,
+    "strategy": "inject",
+    "viewHash": "7f4f4066aebfbb84189d2f7f8adeb0a75a997acf4cbeb61c10b01800b593bba3"
+  },
+  "needsTempDir": true,
+  "notes": [
+    "Cline runs in sandbox mode: task history, MCP servers and global settings are not kept.",
+    "Rules, skills, hooks and workflows under ~/.cline still load (CLINE_DIR is left unset)."
+  ],
+  "planVersion": 1,
+  "postExitChecks": [
+    {
+      "kind": "file-unchanged",
+      "message": "Cline changed providers.json in the real ~/.cline/data/settings; the sandbox should prevent that.",
+      "path": "/home/fixture/.cline/data/settings/providers.json"
+    },
+    {
+      "kind": "file-unchanged",
+      "message": "Cline changed models.json in the real ~/.cline/data/settings; the sandbox should prevent that.",
+      "path": "/home/fixture/.cline/data/settings/models.json"
+    },
+    {
+      "kind": "file-unchanged",
+      "message": "Cline changed global-settings.json in the real ~/.cline/data/settings; the sandbox should prevent that.",
+      "path": "/home/fixture/.cline/data/settings/global-settings.json"
+    }
+  ],
+  "preflight": [
+    {
+      "kind": "tool-version",
+      "min": "3.0.67",
+      "why": "Cline before 3.0.67 cannot use custom providers from providers.json / models.json"
+    },
+    {
+      "key": "CLINE_SANDBOX",
+      "kind": "env-equals",
+      "value": "1",
+      "why": "never touch ~/.cline"
+    }
+  ],
+  "secretSites": [
+    {
+      "key": "settings/providers.json",
+      "kind": "file"
+    }
+  ],
+  "teardown": [],
+  "tempFiles": [
+    {
+      "contents": "{\n  \"lastUsedProvider\": \"omniroute\",\n  \"modes\": {},\n  \"providers\": {\n    \"omniroute\": {\n      \"settings\": {\n        \"apiKey\": \"${TOKEN}\",\n        \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n        \"model\": \"anthropic/claude-sonnet-4-6\",\n        \"provider\": \"omniroute\"\n      },\n      \"tokenSource\": \"manual\",\n      \"updatedAt\": \"1970-01-01T00:00:00.000Z\"\n    }\n  },\n  \"version\": 1\n}",
+      "format": "json",
+      "mode": 384,
+      "path": "settings/providers.json"
+    },
+    {
+      "contents": "{\n  \"providers\": {\n    \"omniroute\": {\n      \"models\": {\n        \"anthropic/claude-sonnet-4-6\": {\n          \"contextWindow\": 200000,\n          \"id\": \"anthropic/claude-sonnet-4-6\",\n          \"maxTokens\": 64000,\n          \"name\": \"Claude Sonnet 4.6\"\n        },\n        \"fastest\": {\n          \"contextWindow\": 128000,\n          \"id\": \"fastest\",\n          \"maxTokens\": 16384,\n          \"name\": \"Combo fastest\"\n        },\n        \"mystery/unknown-context\": {\n          \"contextWindow\": 128000,\n          \"id\": \"mystery/unknown-context\",\n          \"maxTokens\": 16384,\n          \"name\": \"Unknown Context\"\n        },\n        \"openai/gpt-5.2\": {\n          \"contextWindow\": 400000,\n          \"id\": \"openai/gpt-5.2\",\n          \"maxTokens\": 128000,\n          \"name\": \"GPT-5.2\"\n        },\n        \"small/ctx-32k\": {\n          \"contextWindow\": 32768,\n          \"id\": \"small/ctx-32k\",\n          \"maxTokens\": 8192,\n          \"name\": \"Small 32k\"\n        }\n      },\n      \"provider\": {\n        \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n        \"defaultModelId\": \"anthropic/claude-sonnet-4-6\",\n        \"modelsSourceUrl\": \"http://127.0.0.1:20128/v1/models\",\n        \"name\": \"OmniRoute\",\n        \"protocol\": \"openai-chat\"\n      }\n    }\n  },\n  \"version\": 1\n}",
+      "format": "json",
+      "mode": 384,
+      "path": "settings/models.json"
+    },
+    {
+      "contents": "{\n  \"autoUpdateEnabled\": false,\n  \"telemetryOptOut\": true\n}",
+      "format": "json",
+      "mode": 384,
+      "path": "settings/global-settings.json"
+    }
+  ],
+  "tool": "cline",
+  "warnings": []
+}

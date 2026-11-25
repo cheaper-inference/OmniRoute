@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
-import Icon from "@/shared/components/Icon";
+import Badge from "@/shared/components/Badge";
 
 interface Props {
   expiresAt: number | null; // unix seconds
@@ -29,46 +29,36 @@ export default function ExpirationBadge({ expiresAt, variant = "default" }: Prop
   if (!expiresAt) return null;
   const remaining = expiresAt - now;
   if (remaining <= 0) {
-    return (
-      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-medium border bg-surface-2/15 text-text-muted border-border/25">
-        {t("expirationBadgeExpired")}
-      </span>
-    );
+    return <Badge size="sm">{t("expirationBadgeExpired")}</Badge>;
   }
   // D11 tiers: <1h critical (red) · <6h warning (yellow) · else normal (green).
   // Plan specifies "<24h normal" — in practice batches always expire ≤24h (OpenAI window),
   // so "else" maps to that case. If a provider (e.g. Gemini 48h) yields remaining >24h,
   // we still render normal — graceful, no separate tier needed.
-  let tone = "bg-success/15 text-success border-success/25";
+  let tone: "success" | "warning" | "error" = "success";
   let label = t("expirationBadgeNormal");
   if (remaining < 3600) {
-    tone = "bg-error/15 text-error border-error/25";
+    tone = "error";
     label = t("expirationBadgeCritical");
   } else if (remaining < 6 * 3600) {
-    tone = "bg-warning/15 text-warning border-warning/25";
+    tone = "warning";
     label = t("expirationBadgeWarning");
   }
   const display = formatRemaining(remaining);
   if (variant === "compact") {
     return (
-      <span
-        className={`inline-block px-1.5 py-0.5 rounded text-[11px] font-medium border ${tone}`}
-        title={label}
-      >
+      <Badge size="sm" variant={tone} title={label}>
         {/* P3 — sr-only label so screen-readers + colorblind users get the urgency
             tier (Critical/Soon/Pending) and aren't forced to rely on color alone. */}
         <span className="sr-only">{label}: </span>
         {display}
-      </span>
+      </Badge>
     );
   }
   return (
-    <span
-      className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-medium border ${tone}`}
-    >
-      <Icon name="schedule" size={12} />
+    <Badge size="sm" variant={tone} icon="schedule">
       <span className="sr-only">{label}: </span>
       {display}
-    </span>
+    </Badge>
   );
 }

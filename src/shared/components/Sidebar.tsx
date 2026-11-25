@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useState, useEffect, useCallback, useSyncExternalStore, useId } from "react";
+import { Fragment, useState, useEffect, useCallback, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/shared/utils/cn";
@@ -17,6 +17,7 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
+  SidebarGroupAction,
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarHeader,
@@ -134,7 +135,6 @@ function readStoredPinnedRaw() {
  * and `onClose` stay in the props type for older callers and are ignored.
  */
 export default function Sidebar({ isMacElectron = false }: SidebarProps) {
-  const navigationId = useId();
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
   const pathname = usePathname();
   const [groupPathname, setGroupPathname] = useState(pathname);
@@ -655,7 +655,7 @@ export default function Sidebar({ isMacElectron = false }: SidebarProps) {
         </div>
       </SidebarHeader>
 
-      <SidebarContent className="custom-scrollbar">
+      <SidebarContent>
         {/* Search at the top of the content (spec §3.7), sticky: SidebarContent is the scroll
             container, so the box stays in view while the 100+ items scroll under it. */}
         {!collapsed && (
@@ -717,55 +717,32 @@ export default function Sidebar({ isMacElectron = false }: SidebarProps) {
               );
             }
 
+            // The kit collapsible group: the label is the trigger (aria-expanded, aria-controls
+            // on the region the group names), the pin is its group action.
             return (
-              <SidebarGroup key={section.id}>
-                <SidebarGroupLabel className="group/header h-auto gap-1 px-0">
-                  {/* kit-exception: Native disclosure button on kit tokens (track F): a full-width section header
-                      inside the kit SidebarGroupLabel. The kit Disclosure wraps trigger and panel in its own
-                      element, which would split SidebarGroupLabel from SidebarGroup. */}
-                  <button
-                    type="button"
-                    onClick={() => toggleSection(sectionId)}
-                    aria-expanded={isExpanded}
-                    aria-controls={`${navigationId}-${section.id}`}
-                    className="flex min-h-9 min-w-0 flex-1 items-center justify-between gap-2 rounded-control px-2 text-start uppercase hover:bg-surface hover:text-text-main"
+              <SidebarGroup
+                key={section.id}
+                collapsible
+                open={isExpanded}
+                onOpenChange={() => toggleSection(sectionId)}
+              >
+                <SidebarGroupLabel>{section.title}</SidebarGroupLabel>
+                {sectionId !== "pinned" && (
+                  <SidebarGroupAction
+                    showOnHover
+                    onClick={() => togglePin(sectionId)}
+                    aria-label={`${isPinned ? t("unpinSection") : t("pinSectionOpen")}: ${section.title}`}
+                    aria-pressed={isPinned}
+                    title={isPinned ? t("unpinSection") : t("pinSectionOpen")}
                   >
-                    <span className="truncate">{section.title}</span>
-                    <Icon
-                      name="expand_more"
-                      size={16}
-                      className={cn("transition-transform", isExpanded && "rotate-180")}
-                    />
-                  </button>
-                  {sectionId !== "pinned" && (
-                    // kit-exception: Native button on kit tokens (track F): a hover-revealed pin inside the kit
-                    // SidebarGroupLabel. The kit SidebarGroupAction is positioned with a physical `right`
-                    // (wrong side in RTL) and turns the label into an ellipsized block.
-                    <button
-                      type="button"
-                      onClick={() => togglePin(sectionId)}
-                      aria-label={`${isPinned ? t("unpinSection") : t("pinSectionOpen")}: ${section.title}`}
-                      aria-pressed={isPinned}
-                      title={isPinned ? t("unpinSection") : t("pinSectionOpen")}
-                      className={cn(
-                        "flex size-8 shrink-0 items-center justify-center rounded-control transition-opacity hover:bg-surface focus-visible:opacity-100",
-                        isPinned
-                          ? "text-text-main"
-                          : "text-text-muted opacity-0 group-hover/header:opacity-100 group-focus-within/header:opacity-100"
-                      )}
-                    >
-                      <Icon name="push_pin" size={14} fill={isPinned} />
-                    </button>
-                  )}
-                </SidebarGroupLabel>
-
-                {isExpanded && (
-                  <SidebarGroupContent id={`${navigationId}-${section.id}`}>
-                    <SidebarMenu>
-                      {section.children.map((child: any) => renderGroupChild(child, section.id))}
-                    </SidebarMenu>
-                  </SidebarGroupContent>
+                    <Icon name="push_pin" size={14} fill={isPinned} />
+                  </SidebarGroupAction>
                 )}
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    {section.children.map((child: any) => renderGroupChild(child, section.id))}
+                  </SidebarMenu>
+                </SidebarGroupContent>
               </SidebarGroup>
             );
           })}

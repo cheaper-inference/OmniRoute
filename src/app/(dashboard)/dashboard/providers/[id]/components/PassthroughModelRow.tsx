@@ -1,5 +1,6 @@
 "use client";
 
+import { InlineCode } from "@omniroute/ui-kit/inline-code";
 import Icon from "@/shared/components/Icon";
 import { Spinner } from "@/shared/components/Loading";
 /**
@@ -175,14 +176,11 @@ export default function PassthroughModelRow({
     >
       <div className="flex min-w-0 items-center gap-2">
         <Icon name="smart_toy" size={16} className="text-text-muted" />
-        <code
-          className="min-w-0 truncate rounded bg-sidebar px-1.5 py-0.5 font-mono text-xs text-text-muted"
-          title={fullModel}
-        >
+        <InlineCode className="min-w-0 truncate text-text-muted" title={fullModel}>
           {fullModel}
-        </code>
+        </InlineCode>
         {onSetAlias && (
-          <span className="flex min-w-0 items-center text-[9px] gap-1">
+          <span className="flex min-w-0 items-center text-3xs gap-1">
             {editing ? (
               <KitInput
                 ref={inputRef}
@@ -194,11 +192,11 @@ export default function PassthroughModelRow({
                 onKeyDown={handleKeyDown}
                 placeholder={providerText(t, "aliasInputPlaceholder", "alias name")}
                 aria-label={providerText(t, "aliasInputPlaceholder", "alias name")}
-                className="h-5 min-h-0 w-24 px-1 text-[9px]"
+                className="h-5 min-h-0 w-24 px-1 text-3xs"
               />
             ) : (
               <span
-                className={`truncate text-[9px] italic cursor-pointer hover:text-primary transition-colors ${alias ? "text-primary/80" : "text-text-muted/70"}`}
+                className={`truncate text-3xs italic cursor-pointer hover:text-primary transition-colors ${alias ? "text-primary/80" : "text-text-muted/70"}`}
                 onClick={startEditing}
                 title={
                   alias
@@ -229,7 +227,7 @@ export default function PassthroughModelRow({
           )}
           {combos && combos.length > 0 && <ModelComboBadge combos={combos} t={t} />}
           {supportsVision === true && (
-            <Badge variant="success" className="shrink-0 px-1.5 py-0 text-[10px]">
+            <Badge variant="success" size="sm" className="shrink-0">
               {t("visionCapableLabel")}
             </Badge>
           )}
@@ -248,7 +246,7 @@ export default function PassthroughModelRow({
             t={t}
           />
           {isFree && (
-            <Badge variant="success" className="shrink-0 px-1.5 py-0 text-[10px]">
+            <Badge variant="success" size="sm" className="shrink-0">
               {providerText(t, "freeBadge", "Free")}
             </Badge>
           )}
@@ -265,12 +263,12 @@ export default function PassthroughModelRow({
           {onToggleHidden && testStatus === "error" && (
             <Button
               variant="ghost"
-              size="sm"
+              size="2xs"
               icon="block"
               loading={!!togglingHidden}
               onClick={() => onToggleHidden(modelId, true)}
               disabled={togglingHidden}
-              className="h-6 min-h-0 gap-1 rounded px-1 text-[11px] text-error"
+              className="text-error"
               title={providerText(
                 t,
                 "blacklistModelTooltip",
@@ -288,9 +286,9 @@ export default function PassthroughModelRow({
           )}
           <Button
             variant="ghost"
-            size="icon-sm"
+            size="icon-2xs"
+            tone="muted"
             onClick={() => onCopy(fullModel, `model-${modelId}`)}
-            className="size-6 min-h-6 rounded text-text-muted"
             title={t("copyModel")}
             aria-label={t("copyModel")}
           >
@@ -299,10 +297,19 @@ export default function PassthroughModelRow({
           {onTestModel && (
             <Button
               variant="ghost"
-              size="icon-sm"
+              size="icon-2xs"
+              tone="muted"
               onClick={() => onTestModel(modelId, fullModel)}
               disabled={testingModel}
-              className={`size-6 min-h-6 rounded ${testStatus === "ok" ? "text-success" : testStatus === "quota" ? "text-warning" : testStatus === "error" ? "text-error" : "text-text-muted"}`}
+              className={
+                testStatus === "ok"
+                  ? "text-success"
+                  : testStatus === "quota"
+                    ? "text-warning"
+                    : testStatus === "error"
+                      ? "text-error"
+                      : undefined
+              }
               title={
                 testingModel
                   ? t("testingModel")
@@ -342,11 +349,12 @@ export default function PassthroughModelRow({
           {onToggleHidden && (
             <Button
               variant="ghost"
-              size="icon-sm"
+              size="icon-2xs"
+              tone="muted"
               icon={isHidden ? "visibility_off" : "visibility"}
               onClick={() => onToggleHidden(modelId, !isHidden)}
               disabled={togglingHidden}
-              className="size-6 min-h-6 rounded text-text-muted disabled:cursor-not-allowed disabled:opacity-40"
+              className="aria-disabled:opacity-40"
               title={
                 isHidden
                   ? providerText(t, "showModel", "Show model")
@@ -376,10 +384,9 @@ export default function PassthroughModelRow({
           {onDeleteAlias && (
             <Button
               variant="destructive-ghost"
-              size="icon-sm"
+              size="icon-2xs"
               icon="delete"
               onClick={onDeleteAlias}
-              className="size-6 min-h-6 rounded"
               title={t("removeModel")}
               aria-label={t("removeModel")}
             />

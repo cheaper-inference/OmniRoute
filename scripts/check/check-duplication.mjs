@@ -9,7 +9,8 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
-import { pathToFileURL } from "node:url";
+
+import { isMainModule } from "../lib/is-main-module.mjs";
 
 const ROOT = process.cwd();
 const BASELINE_PATH = path.resolve(
@@ -72,4 +73,4 @@ function main() {
   console.log(`[duplication] OK — ${current}% (baseline ${baseline.percentage}%)`);
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1] || "").href) main();
+if (isMainModule(import.meta.url)) main();
