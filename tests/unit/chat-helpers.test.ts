@@ -129,6 +129,7 @@ for (const [requested, savedName, suffix] of [
     );
 
     assert.equal(result.error, undefined);
+    assert.ok(result.combo);
     assert.equal(result.combo?.id, "persisted-auto-combo");
     assert.equal(result.combo?.name, savedName);
     assert.equal(result.provider, "auto");
