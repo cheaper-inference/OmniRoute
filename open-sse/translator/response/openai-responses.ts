@@ -39,6 +39,7 @@ import {
 import { logger } from "../../utils/logger.ts";
 import { plaintextCollaborationFields } from "./openai-responses/collaborationPlaintextMarker.ts";
 import { resolveLocalToolCallIndex } from "./openai-responses/toolCallLocalIndex.ts";
+import { firstReportedCounter } from "../../utils/reportedCounter.ts";
 import {
   synthesizeCompletedToolItem,
   buildFinalChunk,
@@ -1547,6 +1548,11 @@ function openaiResponsesToOpenAIResponseStream(chunk, state) {
         responseUsage.input_tokens_details?.cached_tokens ||
         responseUsage.prompt_tokens_details?.cached_tokens ||
         0;
+      const reportedCacheRead = firstReportedCounter(
+        responseUsage.cache_read_input_tokens,
+        responseUsage.input_tokens_details?.cached_tokens,
+        responseUsage.prompt_tokens_details?.cached_tokens
+      );
       const cacheCreationTokens = responseUsage.cache_creation_input_tokens || 0;
       const reasoningTokens =
         responseUsage.output_tokens_details?.reasoning_tokens ||
@@ -1576,9 +1582,9 @@ function openaiResponsesToOpenAIResponseStream(chunk, state) {
       };
 
       // Add prompt_tokens_details if cache tokens exist
-      if (cacheReadTokens > 0 || cacheCreationTokens > 0) {
+      if (reportedCacheRead !== undefined || cacheReadTokens > 0 || cacheCreationTokens > 0) {
         state.usage.prompt_tokens_details = { ...cacheCreationFields(state.usage) };
-        if (cacheReadTokens > 0) {
+        if (cacheReadTokens > 0 || reportedCacheRead !== undefined) {
           state.usage.prompt_tokens_details.cached_tokens = cacheReadTokens;
         }
         if (cacheCreationTokens > 0) {
