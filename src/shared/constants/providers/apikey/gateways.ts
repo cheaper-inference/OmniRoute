@@ -1373,6 +1373,21 @@ export const APIKEY_PROVIDERS_GATEWAYS = {
     freeNote:
       "Selected :free model IDs listed at https://tokenharbor.ai/models?category=free use a personal rolling 7-day list-price allowance and never charge the wallet; free routes have 60 RPM and 1,800 requests/hour per account. Enable free routes first; prompts and responses may be retained after opting in. Model availability can change.",
   },
+  teamorouter: {
+    id: "teamorouter",
+    serviceKinds: ["llm"],
+    alias: "teamorouter",
+    name: "TeamoRouter",
+    icon: "router",
+    color: "#6D28D9",
+    textIcon: "TR",
+    passthroughModels: true,
+    website: "https://teamorouter.com",
+    authHint:
+      "Create a TeamoRouter account and copy an API key from https://teamorouter.com/dashboard?tab=api-keys.",
+    apiHint:
+      "TeamoRouter is OpenAI-compatible (GLM, Kimi, DeepSeek, Qwen, Claude, GPT, Gemini). Use the teamorouter provider prefix with the exact model ID from its live /v1/models catalog; API base URL: https://api.teamorouter.com/v1.",
+  },
   navy: {
     id: "navy",
     serviceKinds: ["llm"],

@@ -140,6 +140,9 @@ export const NAMED_OPENAI_STYLE_PROVIDERS = new Set([
   // served from its key-gated /v1/models endpoint; the registry seed stays as the
   // offline fallback.
   "tokenharbor",
+  // TeamoRouter — OpenAI-compatible API-key gateway; GET https://api.teamorouter.com/v1/models
+  // is key-gated and returns the live catalog.
+  "teamorouter",
   // ParalonCloud — GET https://paraloncloud.com/v1/models is key-gated; the registry
   // seed is only the offline fallback.
   "paraloncloud",
