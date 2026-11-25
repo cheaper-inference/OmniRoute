@@ -3,37 +3,46 @@
   "base": "release/v3.8.55",
   "paused": null,
   "inFlight": {
-    "batchId": "b36",
+    "batchId": "b37",
     "kind": "batch",
-    "candidateRef": "omni-queue/release-v3.8.55/b36-d81570b3206a",
-    "candidateSha": "d81570b3206aa398b3c4f090ae31ee484b145056",
-    "baseSha": "ff3e55cab2e1bc398ac46a7597528431b839b606",
-    "treeSha": "55d3e6b1e4a5c9456cb1501a83c1a4c3bda5c85e",
+    "candidateRef": "omni-queue/release-v3.8.55/b37-dbd1bf7fb797",
+    "candidateSha": "dbd1bf7fb797898d338a0f7b26b4bce44cb0ecca",
+    "baseSha": "ae94881fcf543d1ee91d6af11f18b274280e0c53",
+    "treeSha": "4772ac834be2f7945bb71873cb6f4a588b712bfb",
     "prs": [
       {
-        "n": 21095,
-        "head": "1b7aac58720e39f7915eaf09a0f3ffc1a5a33b95",
-        "title": "fix(ci): read free-token figures by kind and keep the row-sum figure paired with the real one",
+        "n": 21168,
+        "head": "737b51001973ce7515621b9d755b8b691ec0cc4d",
+        "title": "fix(pwa): never leave a rejected fetch in the service worker (KEA-9524)",
         "author": "diegosouzapw",
-        "labeledAt": "2026-11-25T04:16:27Z"
+        "labeledAt": "2026-11-25T05:25:56Z"
+      },
+      {
+        "n": 21169,
+        "head": "1b25808a6aaecce78050efa5eae4915e5e24bbbe",
+        "title": "fix(dashboard): cap the eval suite name in the New suite form (KEA-9519)",
+        "author": "diegosouzapw",
+        "labeledAt": "2026-11-25T05:25:59Z"
+      },
+      {
+        "n": 21172,
+        "head": "287d78b5c39f3d8af083ef9d75339aad8f8667cf",
+        "title": "fix(dashboard): show the date in the request log time column (KEA-9522)",
+        "author": "diegosouzapw",
+        "labeledAt": "2026-11-25T05:26:02Z"
+      },
+      {
+        "n": 21174,
+        "head": "d9ea082ecf3416320481a65ec352428c2cdd8db6",
+        "title": "fix(webhooks): accurate copy for http endpoints and the optional name (KEA-9517, KEA-9518)",
+        "author": "diegosouzapw",
+        "labeledAt": "2026-11-25T05:26:07Z"
       }
     ],
     "stage": "testing",
-    "startedAt": "2026-11-25T04:28:53.313Z",
+    "startedAt": "2026-11-25T06:13:27.033Z",
     "attempts": 0,
-    "bisect": null,
-    "rerun": {
-      "ref": "omni-queue/release-v3.8.55/b36-d81570b3206a",
-      "requestedAt": "2026-11-25T05:05:21.721Z",
-      "afterMs": 1795583094000,
-      "runIds": [
-        45547068409
-      ],
-      "jobs": [
-        "Gate / CI",
-        "Unit Tests (6/8)"
-      ]
-    }
+    "bisect": null
   },
   "baseChecks": [
     {
@@ -108,12 +117,13 @@
       "19149": "ce0f2e3b64d51c480eccfd4c21b4ebeeaa0c2a0b",
       "19167": "5a3523ee5d9dc3a3fe610ed93b4c5ccb048bbca0",
       "19305": "1f33f0e10883549e4374ac38d47e87c94936bc5c",
-      "19306": "4afb0ca62e19eb94155c5b9c2b78bf4b91ae1dee"
+      "19306": "4afb0ca62e19eb94155c5b9c2b78bf4b91ae1dee",
+      "21095": "1b7aac58720e39f7915eaf09a0f3ffc1a5a33b95"
     }
   },
   "counters": {
-    "batchSeq": 36,
-    "ciRuns": 40,
+    "batchSeq": 37,
+    "ciRuns": 41,
     "landedPrs": 0,
     "landedBatches": 0,
     "redBatches": 9,
@@ -2285,8 +2295,60 @@
       "sha": "d81570b3206aa398b3c4f090ae31ee484b145056",
       "detail": "re-running the failed jobs of b36 once (Gate / CI, Unit Tests (6/8)) before a base check",
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45551097887"
+    },
+    {
+      "at": "2026-11-25T06:12:41.798Z",
+      "type": "checks-green",
+      "batchId": "b36",
+      "prs": [
+        21095
+      ],
+      "sha": "d81570b3206aa398b3c4f090ae31ee484b145056",
+      "detail": "green after re-running Gate / CI, Unit Tests (6/8) (flaky)",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45558872383"
+    },
+    {
+      "at": "2026-11-25T06:12:50.195Z",
+      "type": "would-land",
+      "batchId": "b36",
+      "prs": [
+        21095
+      ],
+      "sha": "d81570b3206aa398b3c4f090ae31ee484b145056",
+      "detail": "shadow mode: would merge-ff onto ff3e55cab2e1",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45558872383"
+    },
+    {
+      "at": "2026-11-25T06:13:27.032Z",
+      "type": "pr-skipped-conflict",
+      "batchId": "b37",
+      "prs": [
+        21173
+      ],
+      "detail": "conflicts with an earlier PR of the batch; stays queued",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45558872383"
+    },
+    {
+      "at": "2026-11-25T06:13:31.003Z",
+      "type": "batch-started",
+      "batchId": "b37",
+      "prs": [
+        21168,
+        21169,
+        21172,
+        21174
+      ],
+      "sha": "dbd1bf7fb797898d338a0f7b26b4bce44cb0ecca",
+      "detail": "4 PR(s) on ae94881fcf54; window 5; excluded #21173 batch-conflict",
+      "labeledAt": {
+        "21168": "2026-11-25T05:25:56Z",
+        "21169": "2026-11-25T05:25:59Z",
+        "21172": "2026-11-25T05:26:02Z",
+        "21174": "2026-11-25T05:26:07Z"
+      },
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45558872383"
     }
   ],
-  "updatedAt": "2026-11-25T05:05:30.443Z",
+  "updatedAt": "2026-11-25T06:13:32.746Z",
   "batchWindow": 5
 }
