@@ -1671,11 +1671,16 @@ action.
       [Ruleset](#ruleset));
    2. make the new branch the default branch;
    3. replace the environment's branch rule with the new branch's exact name (replace it, never add
-      a second rule).
+      a second rule);
+   4. delete the door ruleset of the previous (frozen) release branch. With the environment
+      admitting only the new branch, even a manual `bless` cannot write `omni-queue/land` for the
+      frozen branch, so its door would block the release captain's closing commits. The ruleset
+      "Protect release branches" still prevents deletion and force-push, and only the release
+      captain merges there during the freeze.
 
-   In any other order the new branch is, for a while, the default branch or admitted by the
-   environment without a door: anyone with write access could push an edited `omni-queue.yml` there,
-   and the next scheduled run would read the App's private key.
+   The new branch must have its door before it becomes the default branch or is admitted by the
+   environment. Without the door, anyone with write access could push an edited `omni-queue.yml`
+   there, and the next scheduled run would read the App's private key.
 
 9. Create the labels if they do not exist yet: the queue label (`label`, `omni-queue`), the
    protected-paths approval label (`protectedApprovalLabel`, `protected-approved`), the two lane
@@ -1783,18 +1788,19 @@ Two consequences:
   candidate branches (see [Cut-over and rollback](#cut-over-and-rollback)) need the ruleset to be
   disabled first.
 
-Rulesets stack, and **a ruleset's bypass list only covers that ruleset's own rules**. Three
-existing repository rulesets also match release branches:
+Rulesets stack, and **a ruleset's bypass list only covers that ruleset's own rules**. Two other
+repository rulesets still match release branches. The table also records the former default-branch
+ruleset for rollback.
 
 | Ruleset (id)                                           | Matches                | Rules                                                                                                                                       | Effect on the landing push                                                                                                                                                                                                                  |
 | ------------------------------------------------------ | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | "Protect release branches" (15605329)                  | `refs/heads/release/*` | `deletion`, `non_fast_forward`                                                                                                              | None: nobody can delete or force-push a release branch, and the landing push is a fast-forward.                                                                                                                                             |
-| "Require PR on default branch" (21899981)              | `~DEFAULT_BRANCH`      | `pull_request`, no bypass actors                                                                                                            | **Rejects it** on whichever release branch is the default branch (the active release): it has no bypass actor, and a ruleset of ours cannot lift it for the landing actor.                                                                  |
+| "Require PR on default branch" (21899981)              | `~DEFAULT_BRANCH`      | `pull_request`, no bypass actors                                                                                                            | **Rejected it** on whichever release branch was the default branch (the active release): it had no bypass actor, and a ruleset of ours could not lift it for the landing actor.                                                             |
 | "Require green gates on the active release" (27616259) | `~DEFAULT_BRANCH`      | `required_status_checks`: `Gate / CI` and `Gate / Quality`, pinned to GitHub Actions (`integration_id` 15368), not strict; no bypass actors | None: the landing push (`merge-ff`) pushes the candidate itself, and the queue lands a candidate only after its verdict saw both checks green on it from GitHub Actions. The landing-path check accepts it and prints it as an `info` line. |
 
-The status door replaces "Require PR on default branch", so the cut-over removes it (see
-[Cut-over and rollback](#cut-over-and-rollback)). Until it is gone, the landing-path check below
-reports it.
+The status door replaced "Require PR on default branch" at cut-over (see
+[Cut-over and rollback](#cut-over-and-rollback)). If that ruleset is restored, the landing-path
+check below reports it.
 
 `apply-ruleset.mjs` creates the ruleset, updates it when its normalized content drifted, or leaves
 it alone, printing a readable diff:
@@ -2653,6 +2659,13 @@ began "Workflows are being blocked due to a scheduled brownout of the default
 `Approval` job that runs and fails prints `omni-queue approval failed: <message>`.
 
 ## Cut-over and rollback
+
+> **2026-11-25, `release/v3.8.55`.** With the owner's approval at each step, the cut-over applied
+> "omni-queue release protection: release/v3.8.55" (28108528, step 6) at 20:59Z, deleted "Require
+> PR on default branch" (21899981, step 7) at 21:00Z, and merged `mode: "live"` (#20902, step 9) at
+> 21:17Z, with `voice: "owner"` and `signing: "ssh"` from #21205. The first live landing was
+> #21033 at 22:51Z, with a Verified merge commit. The new dashboard is #21239. The owner evaluated step 10
+> and kept his local guard because it also covers release branches without a door.
 
 The cut-over is a separate owner decision, taken after the sandbox rehearsal and a few days of
 shadow mode on the real repository. In order:
