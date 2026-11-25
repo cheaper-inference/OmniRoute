@@ -12,6 +12,7 @@ import {
   SETTINGS_FALLBACK_STRATEGY_VALUES,
 } from "@/shared/constants/routingStrategies";
 import { useTranslations } from "next-intl";
+import type { GeminiPromptCacheMode } from "@omniroute/open-sse/utils/cacheControlPolicy";
 import IconChip from "@/shared/components/IconChip";
 
 const STRATEGY_LABEL_FALLBACKS: Record<string, string> = {
@@ -90,6 +91,28 @@ function toGlobalRoutingPatch(strategy: string | undefined, stickyRoundRobinLimi
   return patch;
 }
 
+function GeminiPromptCacheToggle({
+  mode,
+  saving,
+  onChange,
+}: {
+  mode?: GeminiPromptCacheMode;
+  saving: boolean;
+  onChange: (mode: GeminiPromptCacheMode) => void;
+}) {
+  const t = useTranslations("settings");
+  return (
+    <Toggle
+      checked={mode === "implicit"}
+      disabled={mode === undefined || saving}
+      label={t("geminiPromptCacheMode")}
+      description={t("geminiPromptCacheModeDesc")}
+      side="right"
+      onChange={(enabled) => onChange(enabled ? "implicit" : "off")}
+    />
+  );
+}
+
 export default function ComboDefaultsTab() {
   const [comboDefaults, setComboDefaults] = useState<any>({
     strategy: "priority",
@@ -109,6 +132,8 @@ export default function ComboDefaultsTab() {
   });
   const [sessionAffinityTtlMs, setSessionAffinityTtlMs] = useState(0);
   const [promptCacheAffinityEnabled, setPromptCacheAffinityEnabled] = useState(true);
+  const [geminiPromptCacheMode, setGeminiPromptCacheMode] = useState<GeminiPromptCacheMode>();
+  const savedGeminiPromptCacheMode = useRef<GeminiPromptCacheMode | undefined>(undefined);
   const [providerOverrides, setProviderOverrides] = useState<any>({});
   const [availableProviders, setAvailableProviders] = useState<{ id: string; provider: string }[]>(
     []
@@ -138,7 +163,10 @@ export default function ComboDefaultsTab() {
   useEffect(() => {
     Promise.all([
       fetch("/api/settings/combo-defaults").then((res) => res.json()),
-      fetch("/api/settings").then((res) => res.json()),
+      fetch("/api/settings").then((res) => {
+        if (!res.ok) throw new Error("Failed to load global routing settings");
+        return res.json();
+      }),
       fetch("/api/providers")
         .then((res) => res.json())
         .then((providers: any[]) => {
@@ -185,6 +213,10 @@ export default function ComboDefaultsTab() {
             : 0
         );
         setPromptCacheAffinityEnabled(settingsData.promptCacheAffinityEnabled !== false);
+        const loadedGeminiPromptCacheMode =
+          settingsData.geminiPromptCacheMode === "implicit" ? "implicit" : "off";
+        savedGeminiPromptCacheMode.current = loadedGeminiPromptCacheMode;
+        setGeminiPromptCacheMode(loadedGeminiPromptCacheMode);
       })
       .catch((err) => console.error("Failed to fetch combo defaults:", err));
   }, []);
@@ -231,6 +263,11 @@ export default function ComboDefaultsTab() {
         // (mirrors stickyRoundRobinLimit) so combo.ts resolution reads settings.disableSessionStickiness.
         disableSessionStickiness: disableSessionStickiness === true,
         promptCacheAffinityEnabled,
+        // An unchanged tab snapshot must not overwrite a newer choice from another client.
+        geminiPromptCacheMode:
+          geminiPromptCacheMode === savedGeminiPromptCacheMode.current
+            ? undefined
+            : geminiPromptCacheMode,
       };
 
       const comboDefaultsRes = await fetch("/api/settings/combo-defaults", {
@@ -247,6 +284,8 @@ export default function ComboDefaultsTab() {
       }
 
       await syncGlobalRoutingSettings(settingsPatch);
+      savedGeminiPromptCacheMode.current =
+        settingsPatch.geminiPromptCacheMode ?? savedGeminiPromptCacheMode.current;
       showStatus("success", t("savedSuccessfully"));
     } catch (err) {
       console.error("Failed to save combo defaults:", err);
@@ -644,6 +683,11 @@ export default function ComboDefaultsTab() {
               onChange={() => setPromptCacheAffinityEnabled((enabled) => !enabled)}
             />
           </div>
+          <GeminiPromptCacheToggle
+            mode={geminiPromptCacheMode}
+            saving={saving}
+            onChange={setGeminiPromptCacheMode}
+          />
           <div className="flex items-center justify-between gap-4">
             <div>
               <p className="font-medium text-sm">

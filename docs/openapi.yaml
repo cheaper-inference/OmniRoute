@@ -1795,6 +1795,84 @@ paths:
         "401":
           $ref: "#/components/responses/Unauthorized"
 
+  /api/v1/decisions:
+    post:
+      tags: [Decisions]
+      summary: Native OpenAI Decisions
+      description: >-
+        Forwards one request in the OpenAI Decisions wire format (`input` plus an
+        ordered `questions` array of `predicate` / `choice` / `score`) to the
+        Decisions endpoint of an `openai` connection and returns its ordered
+        `answers` untouched. Model: `openai/gpt-6-luna` (or bare `gpt-6-luna`).
+        Never translated to or from chat or System One. The API key's model
+        allowlist, `decisions` endpoint category, budget and connection scope are
+        checked before any credential is read. The upstream call uses the guarded
+        decision transport: provider outbound guard, no retries, no redirects, a
+        5 s timeout and a 64 KB answer cap. Request bodies are limited to 4 MiB.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [model, input, questions]
+              additionalProperties: false
+              properties:
+                model:
+                  type: string
+                  example: openai/gpt-6-luna
+                input:
+                  description: A string or an array of message / tool items.
+                questions:
+                  type: array
+                  minItems: 1
+                  maxItems: 400
+                  items:
+                    type: object
+                    required: [type, instructions]
+                    properties:
+                      type:
+                        type: string
+                        enum: [predicate, choice, score]
+                      name:
+                        type: string
+                      instructions:
+                        description: A string or an array of input parts.
+                prompt_cache_key:
+                  type: string
+                  maxLength: 64
+                prompt_cache_options:
+                  type: object
+                  nullable: true
+                safety_identifier:
+                  type: string
+                  maxLength: 128
+                  nullable: true
+      responses:
+        "200":
+          description: >-
+            Upstream `{ model, answers[], usage }`. Carries the `X-OmniRoute-*`
+            telemetry headers.
+        "400":
+          description: Invalid body, unknown Decisions model or unusable connection base URL.
+        "401":
+          description: Missing or invalid gateway API key / provider credentials.
+        "403":
+          description: Model, endpoint category or connection scope not allowed for the API key.
+        "413":
+          description: Request body over 4 MiB.
+        "502":
+          description: Upstream error, oversized or malformed answer.
+        "504":
+          description: Upstream timeout.
+    options:
+      tags: [Decisions]
+      summary: CORS preflight for native Decisions
+      responses:
+        "200":
+          description: CORS headers.
   /api/v1/embeddings:
     post:
       tags: [Embeddings]
@@ -16661,7 +16739,11 @@ paths:
       tags:
         - V1 Me
       summary: "GET me › sessions › <id>"
-      description: Get details and recent requests of a session owned by the calling API key.
+      description: >-
+        Get details and recent requests of a session owned by the calling API key.
+        Authenticate with `Authorization: Bearer <key>`; requires scope `self:usage`.
+      security:
+        - BearerAuth: []
       parameters:
         - $ref: "#/components/parameters/ResourceId"
       responses:
@@ -16689,8 +16771,16 @@ paths:
                         latencyMs: { type: integer }
                         status: { type: [string, "null"] }
                         success: { type: boolean }
+        "400":
+          description: Missing session id
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          description: The key lacks the self:usage scope
         "404":
           description: Session not found
+        "500":
+          description: The session could not be read
   /api/v1/me/usage:
     get:
       tags:
@@ -16772,6 +16862,79 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+  /api/v1/me/sessions/{id}/messages:
+    get:
+      tags:
+        - V1 Me
+      summary: "GET me › sessions › <id> › messages"
+      description: >-
+        Simplified conversation turns (user prompt, assistant reply, tool names) of a session
+        owned by the calling API key (also served at /v1/me/sessions/{id}/messages). Turns are
+        stored only while the AGENT_SESSION_MESSAGES_ENABLED feature flag is on, and never for
+        `noLog` keys. Authenticate with `Authorization: Bearer <key>`; requires scope
+        `self:usage`.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/ResourceId"
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+        - name: cursor
+          in: query
+          description: Message id to continue after, taken from `nextCursor`.
+          schema:
+            type: integer
+            minimum: 1
+        - name: order
+          in: query
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: asc
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sessionId: { type: string }
+                  capturing:
+                    type: boolean
+                    description: Whether turn capture is currently enabled.
+                  messages:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id: { type: integer }
+                        timestamp: { type: string, format: date-time }
+                        provider: { type: [string, "null"] }
+                        model: { type: [string, "null"] }
+                        success: { type: boolean }
+                        user: { type: [string, "null"] }
+                        assistant: { type: [string, "null"] }
+                        tools: { type: array, items: { type: string } }
+                        truncated:
+                          type: boolean
+                          description: The prompt or reply was cut to the stored length.
+                  nextCursor: { type: [integer, "null"] }
+        "400":
+          description: Invalid query parameters or missing session id
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          description: The key lacks the self:usage scope
+        "404":
+          description: Session not found
+        "500":
+          description: Session messages could not be read
   /api/v1/models/{model}:
     parameters:
       - name: model
@@ -17093,6 +17256,35 @@ paths:
       responses:
         "200":
           description: Model list (same shape as GET /api/v1/models).
+  /api/v1/systemone/models:
+    get:
+      tags: [Decisions]
+      summary: Decision-model catalog (System One and native Decisions)
+      description: >-
+        The decision models of the caller's authorized model catalog, one list for
+        both wire formats. Each row carries `api_format`: `systemone` rows are
+        served by POST /api/v1/systemone, `decisions` rows (`openai/gpt-6-luna`)
+        by POST /api/v1/decisions. `limit` and `after` page the final list
+        (`has_more`, `last_id`). Reads no credential and calls no upstream. The
+        `X-OmniRoute-Catalog-Status` header is `complete`, `partial` (stale or
+        degraded catalog) or `unavailable` (HTTP 503, nothing survived).
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: query
+          name: limit
+          schema: { type: integer, minimum: 1 }
+        - in: query
+          name: after
+          schema: { type: string }
+          description: Id of the last row of the previous page.
+      responses:
+        "200":
+          description: Model list with `api_format` per row.
+        "403":
+          description: The API key's endpoint allowlist does not include `decisions`.
+        "503":
+          description: Decision model catalog unavailable.
   /api/v1/video-bridge/drilldown:
     get:
       tags: [System]
@@ -18443,12 +18635,30 @@ components:
         windowStartIso: { type: string, format: date-time }
         resetAtIso: { type: string, format: date-time }
         estimatedListCostUsd: { type: number }
+        accountedCostUsd:
+          type: number
+          description: Known successful-use amount used for enforcement. Each request uses its recorded provider USD cost, otherwise its stored calculated USD cost, otherwise a catalog estimate; never their sum.
         hasUnpricedUsage: { type: boolean }
+        hasUnpricedListUsage: { type: boolean }
+        hasPricingFailure: { type: boolean }
+        unpricedModels:
+          type: array
+          items: { type: string }
+        unpricedUsagePolicy:
+          type: string
+          enum: [fail_closed, count_as_zero]
+        blockReason:
+          type: string
+          nullable: true
+          enum: [cap_exceeded, unpriced_usage, pricing_unavailable, null]
         hasPartialRetainedUsage:
           type: boolean
           description: Retained daily buckets overlap a rolling-window boundary. Displayed spend is incomplete; the existing soft-budget enforcement policy is unchanged.
         exceeded: { type: boolean }
-        actualProviderCostUsd: { nullable: true }
+        actualProviderCostUsd:
+          type: number
+          nullable: true
+          description: Sum of recorded provider USD charges, including explicit zero; null if none were recorded. May cover only part of the usage and is not an invoice.
         subscriptionQuotaUsed: { nullable: true }
         compressionSavingsUsd: { nullable: true }
 
