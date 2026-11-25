@@ -45,6 +45,7 @@ test("computeFreeTierTotals can exclude ToS-avoid providers", () => {
   const all = computeFreeTierTotals();
   const clean = computeFreeTierTotals({ excludeTosAvoid: true });
   assert.equal(all.documentedMonthlyTokens - clean.documentedMonthlyTokens, 25_000);
+  assert.equal(clean.documentedMonthlyTokens, 89_780_000);
   // 2026-11-23 re-audit: 10 legacy providers, minus kiro (ToS avoid) → 9.
   assert.equal(clean.providerCount, 9);
 });
