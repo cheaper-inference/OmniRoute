@@ -2,7 +2,27 @@
   "version": 1,
   "base": "release/v3.8.55",
   "paused": null,
-  "inFlight": null,
+  "inFlight": {
+    "batchId": "b36",
+    "kind": "batch",
+    "candidateRef": "omni-queue/release-v3.8.55/b36-d81570b3206a",
+    "candidateSha": "d81570b3206aa398b3c4f090ae31ee484b145056",
+    "baseSha": "ff3e55cab2e1bc398ac46a7597528431b839b606",
+    "treeSha": "55d3e6b1e4a5c9456cb1501a83c1a4c3bda5c85e",
+    "prs": [
+      {
+        "n": 21095,
+        "head": "1b7aac58720e39f7915eaf09a0f3ffc1a5a33b95",
+        "title": "fix(ci): read free-token figures by kind and keep the row-sum figure paired with the real one",
+        "author": "diegosouzapw",
+        "labeledAt": "2026-11-25T04:16:27Z"
+      }
+    ],
+    "stage": "testing",
+    "startedAt": "2026-11-25T04:28:53.313Z",
+    "attempts": 0,
+    "bisect": null
+  },
   "baseChecks": [
     {
       "baseSha": "0563eb2ec52bfd20ca39b3d4444df3cbd2316944",
@@ -80,8 +100,8 @@
     }
   },
   "counters": {
-    "batchSeq": 35,
-    "ciRuns": 39,
+    "batchSeq": 36,
+    "ciRuns": 40,
     "landedPrs": 0,
     "landedBatches": 0,
     "redBatches": 8,
@@ -2217,8 +2237,22 @@
       "sha": "046cba6aa30fc9e6df70098f466b6de942bfe39f",
       "detail": "batch changed before landing: #21095 head moved to 1b7aac58720e",
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45527769509"
+    },
+    {
+      "at": "2026-11-25T04:28:56.602Z",
+      "type": "batch-started",
+      "batchId": "b36",
+      "prs": [
+        21095
+      ],
+      "sha": "d81570b3206aa398b3c4f090ae31ee484b145056",
+      "detail": "1 PR(s) on ff3e55cab2e1; window 5",
+      "labeledAt": {
+        "21095": "2026-11-25T04:16:27Z"
+      },
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45547008717"
     }
   ],
-  "updatedAt": "2026-11-25T04:16:40.956Z",
+  "updatedAt": "2026-11-25T04:28:58.148Z",
   "batchWindow": 5
 }
