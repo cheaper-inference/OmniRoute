@@ -1,1 +1,0 @@
-- **feat(providers):** add TeamoRouter (`teamorouter`) as an OpenAI-compatible API-key gateway with Bearer-key authentication and live model discovery from `/v1/models`
