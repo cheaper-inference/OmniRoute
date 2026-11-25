@@ -26,6 +26,8 @@ const INGEST_PATH = "/api/tools/traffic-inspector/internal/ingest";
 let ingestStatus = 403;
 let ingestPosts = 0;
 let child: ChildProcess | null = null;
+let childClosed: Promise<void> | null = null;
+let proxyPort: number | null = null;
 // Keep the client socket open between requests. Otherwise the proxy's socket-close stats write
 // would publish the count and hide a missing write after the failed post.
 const clientAgent = new https.Agent({ keepAlive: true, maxSockets: 1 });
@@ -69,7 +71,9 @@ async function waitFor(done: () => boolean, ms: number): Promise<void> {
   while (!done() && Date.now() < deadline) await new Promise((r) => setTimeout(r, 50));
 }
 
-function sendIntercepted(port: number): Promise<void> {
+function sendIntercepted(port: number | null): Promise<void> {
+  if (port === null) return Promise.reject(new Error("test proxy did not start"));
+
   const body = JSON.stringify({ model: "gemini-x", request: { contents: [{ role: "user" }] } });
   return new Promise((resolve, reject) => {
     const req = https.request(
@@ -100,7 +104,6 @@ function sendIntercepted(port: number): Promise<void> {
 }
 
 const routerPort = await listen(router);
-const proxyPort = await freePort();
 
 fs.mkdirSync(path.join(dataDir, "mitm"), { recursive: true });
 fs.writeFileSync(
@@ -108,37 +111,65 @@ fs.writeFileSync(
   JSON.stringify({ mitmAlias: { antigravity: { "gemini-x": "openai/gpt-x" } } })
 );
 
-child = spawn(process.execPath, [serverPath], {
-  env: {
-    ...process.env,
-    DATA_DIR: dataDir,
-    ROUTER_API_KEY: "test-router-key",
-    INSPECTOR_INTERNAL_INGEST_TOKEN: "test-ingest-token",
-    OMNIROUTE_BASE_URL: `http://127.0.0.1:${routerPort}`,
-    MITM_LOCAL_PORT: String(proxyPort),
-    MITM_CERT_MODE: "root-ca",
-    MITM_VERBOSE: "0",
-  },
-  stdio: "ignore",
-});
-// A proxy that dies at start (port taken, cert setup failed) must fail the test at once, not
-// after the 30 s start timeout, and must say that it exited.
-let childExit: string | null = null;
-child.on("exit", (code, signal) => {
-  childExit = `code ${code}, signal ${signal}`;
-});
+async function startProxy() {
+  const stderrLimit = 4096;
+  for (let attempt = 1; ; attempt += 1) {
+    const port = await freePort();
+    fs.rmSync(statsFile, { force: true });
+    const proxy = spawn(process.execPath, [serverPath], {
+      env: {
+        ...process.env,
+        DATA_DIR: dataDir,
+        ROUTER_API_KEY: "test-router-key",
+        INSPECTOR_INTERNAL_INGEST_TOKEN: "test-ingest-token",
+        OMNIROUTE_BASE_URL: `http://127.0.0.1:${routerPort}`,
+        MITM_LOCAL_PORT: String(port),
+        MITM_CERT_MODE: "root-ca",
+        MITM_VERBOSE: "0",
+      },
+      stdio: ["ignore", "ignore", "pipe"],
+    });
+    child = proxy;
+    let stderrTail: Buffer = Buffer.alloc(0);
+    proxy.stderr.on("data", (chunk: Buffer) => {
+      stderrTail = Buffer.concat([stderrTail, chunk.subarray(-stderrLimit)]).subarray(-stderrLimit);
+    });
+    let childExit: string | null = null;
+    proxy.once("exit", (code, signal) => {
+      childExit = `code ${code}, signal ${signal}`;
+    });
+    proxy.once("error", (error) => {
+      childExit = error.message;
+    });
+    childClosed = new Promise<void>((resolve) => proxy.once("close", resolve));
+
+    await waitFor(() => typeof readStats().startedAt === "string" || childExit !== null, 30_000);
+    if (childExit === null) return { port, childExit, stderr: "" };
+
+    // Wait for stderr to drain before retrying on a fresh port or reporting the last failure.
+    await childClosed;
+    child = null;
+    if (attempt === 3) return { port, childExit, stderr: stderrTail.toString().trimEnd() };
+  }
+}
 
 test.after(async () => {
   clientAgent.destroy();
   child?.kill("SIGTERM");
+  await childClosed;
   await new Promise((resolve) => router.close(resolve));
   fs.rmSync(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 test("stats.json starts with a zero ingest failure count", async () => {
-  await waitFor(() => typeof readStats().startedAt === "string" || childExit !== null, 30_000);
-  assert.equal(childExit, null, `proxy exited before it started (${childExit})`);
+  const { port, childExit, stderr } = await startProxy();
+  assert.equal(
+    childExit,
+    null,
+    `proxy exited before it started (${childExit})${stderr ? `\n${stderr}` : ""}`
+  );
   assert.equal(typeof readStats().startedAt, "string", "proxy did not start");
+  proxyPort = port;
   assert.equal(readStats().ingestFailures, 0);
 });
 

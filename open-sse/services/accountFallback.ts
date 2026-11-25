@@ -83,6 +83,10 @@ import {
 } from "./retryAfterJson.ts";
 import { googleDailyQuotaCooldownMs } from "./googleDailyQuota.ts";
 import { isMoonshotAccountBalanceExhausted } from "./usage/moonshotOpenPlatform.ts";
+import {
+  isAnthropicAccountCreditExhausted,
+  isAnthropicCreditProvider,
+} from "./accountFallback/anthropicAccountCredit.ts";
 import { isTpdRateLimit, resolveTpdCooldownMs, nextConfiguredResetMs } from "./dailyQuotaReset.ts";
 
 // Pre-compiled regex constants for hot-path retry parsing (avoid per-call compilation)
@@ -2335,7 +2339,9 @@ export function checkFallbackError(
         reason: RateLimitReason.QUOTA_EXHAUSTED,
         // Only passthrough/aggregator + *-compatible-* keys stay model-scoped; per-model-lock
         // providers (codex, gemini, github, antigravity) keep account-level credits_exhausted.
-        ...(!isPassthroughCreditScope(provider) || isMoonshotAccountBalanceExhausted(errorStr)
+        ...(!isPassthroughCreditScope(provider) ||
+        isMoonshotAccountBalanceExhausted(errorStr) ||
+        (isAnthropicCreditProvider(provider) && isAnthropicAccountCreditExhausted(errorStr))
           ? { creditsExhausted: true }
           : {}),
       };

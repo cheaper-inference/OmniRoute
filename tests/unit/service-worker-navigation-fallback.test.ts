@@ -66,6 +66,7 @@ function createServiceWorkerHarness() {
 
   return {
     cacheEntries,
+    caches: caches as Record<string, (...args: unknown[]) => Promise<unknown>>,
     dispatchFetch: async (request: RequestLike) => {
       const listener = listeners.get("fetch");
       assert.ok(listener, "fetch listener must be registered");
@@ -174,6 +175,99 @@ test("#5165: static assets stay cache-first; navigations do not", async () => {
   const second = await harness.dispatchFetch(icon);
   assert.equal(second.intercepted, true);
   assert.equal(await (await second.response!).text(), "fresh icon");
+});
+
+test("KEA-9524: non-static same-origin requests (RSC / prefetch) are not intercepted", async () => {
+  const harness = createServiceWorkerHarness();
+  // A client-side navigation aborts the previous RSC fetch. When the worker
+  // wrapped it in respondWith, the rejected fetch surfaced as
+  // "Uncaught (in promise) TypeError: Failed to fetch" at sw.js.
+  harness.setFetch(async () => {
+    throw new TypeError("Failed to fetch");
+  });
+  for (const request of [
+    { url: "https://app.example/home?_rsc=1", method: "GET", mode: "cors", destination: "" },
+    { url: "https://app.example/home", method: "GET", mode: "cors", destination: "" },
+    {
+      url: "https://app.example/manifest.webmanifest",
+      method: "GET",
+      mode: "cors",
+      destination: "manifest",
+    },
+  ]) {
+    const result = await harness.dispatchFetch(request);
+    assert.equal(result.intercepted, false, `${request.url} must fall through to the browser`);
+  }
+  assert.equal(harness.cacheEntries.size, 0);
+});
+
+test("KEA-9524: a static cache miss whose fetch rejects resolves instead of rejecting", async () => {
+  const harness = createServiceWorkerHarness();
+  harness.setFetch(async () => {
+    throw new TypeError("Failed to fetch");
+  });
+
+  const missing = await harness.dispatchFetch({
+    url: "https://app.example/fonts/inter.woff2",
+    method: "GET",
+    mode: "cors",
+    destination: "font",
+  });
+  assert.equal(missing.intercepted, true);
+  const response = await missing.response!;
+  assert.ok(response instanceof Response, "respondWith must receive a Response, not a rejection");
+  assert.equal(response.type, "error");
+
+  // A cached copy of the same request still wins when the network is down.
+  harness.cacheEntries.set(
+    "https://app.example/icon-192.png",
+    new Response("cached icon", { status: 200 })
+  );
+  const cached = await harness.dispatchFetch({
+    url: "https://app.example/icon-192.png",
+    method: "GET",
+    mode: "no-cors",
+    destination: "image",
+  });
+  assert.equal(await (await cached.response!).text(), "cached icon");
+});
+
+test("KEA-9524: a failing Cache Storage never rejects the response or the cache write", async () => {
+  const harness = createServiceWorkerHarness();
+  const storageError = () => Promise.reject(new Error("QuotaExceededError"));
+  harness.caches.match = storageError;
+  harness.caches.open = storageError;
+  harness.setFetch(async () => new Response("fresh chunk", { status: 200 }));
+
+  const unhandled: unknown[] = [];
+  const onUnhandled = (reason: unknown) => unhandled.push(reason);
+  process.on("unhandledRejection", onUnhandled);
+  try {
+    // Network OK, cache write fails: the response still goes out and the
+    // failed write does not surface as an unhandled rejection.
+    const asset = await harness.dispatchFetch({
+      url: "https://app.example/_next/static/chunk.js",
+      method: "GET",
+      mode: "cors",
+      destination: "script",
+    });
+    assert.equal(await (await asset.response!).text(), "fresh chunk");
+
+    // Cache lookup itself fails: resolve to a network error, never reject.
+    const icon = await harness.dispatchFetch({
+      url: "https://app.example/icon-192.png",
+      method: "GET",
+      mode: "no-cors",
+      destination: "image",
+    });
+    const response = await icon.response!;
+    assert.equal(response.type, "error");
+
+    await new Promise((resolve) => setImmediate(resolve));
+    assert.deepEqual(unhandled, []);
+  } finally {
+    process.off("unhandledRejection", onUnhandled);
+  }
 });
 
 test("client-API aliases are never intercepted or cached, case-insensitively", async () => {

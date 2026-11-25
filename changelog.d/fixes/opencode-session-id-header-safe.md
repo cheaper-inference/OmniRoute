@@ -1,0 +1,1 @@
+- fix(security): a chat request whose body carries a session or thread id with non-Latin-1 characters (for example Chinese text or emoji) no longer fails while building upstream headers; the id now maps to a stable hashed value, so one conversation keeps one upstream session (based on #19703)

@@ -9,7 +9,7 @@ const REPO_ROOT = path.resolve(import.meta.dirname, "../..");
 // image has to copy it on its own or it is published without its license text.
 test("Dockerfile copies the root LICENSE into the runner-base runtime stage", () => {
   const dockerfile = fs.readFileSync(path.join(REPO_ROOT, "Dockerfile"), "utf8");
-  const start = dockerfile.indexOf("FROM base AS runner-base");
+  const start = dockerfile.search(/^FROM \S+ AS runner-base$/m);
   assert.ok(start >= 0, "runner-base stage");
   const next = dockerfile.indexOf("\nFROM ", start + 1);
   const stage = dockerfile.slice(start, next === -1 ? undefined : next);
