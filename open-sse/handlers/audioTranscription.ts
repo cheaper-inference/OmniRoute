@@ -36,6 +36,7 @@ import { errorResponse } from "../utils/error.ts";
 import { hasUnsafeModelIdSyntax } from "../utils/modelIdSafety.ts";
 import { isJsonObject } from "../utils/kieTask.ts";
 import { handleOpenRouterTranscription } from "./openrouterTranscription.ts";
+import { handleMiniMaxTranscription } from "./minimaxTranscription.ts";
 import {
   buildCloudflareTranscriptionUrl,
   cloudflareNova3ToVerboseJson,
@@ -1136,6 +1137,9 @@ export async function handleAudioTranscription({
   const file = resolvedFile.file;
 
   // Route to provider-specific handler
+  if (providerConfig.format === "minimax-asr") {
+    return handleMiniMaxTranscription(providerConfig, file, modelId, token, formData, signal);
+  }
   if (providerConfig.format === "gemini-live") {
     return handleGeminiLiveTranscription(
       providerConfig,

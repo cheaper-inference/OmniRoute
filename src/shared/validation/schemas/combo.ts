@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isReservedComboName } from "@/shared/constants/autoComboNames";
 import {
   ACCOUNT_FALLBACK_STRATEGY_VALUES,
   ROUTING_STRATEGY_VALUES,
@@ -381,6 +382,9 @@ export const comboRuntimeConfigSchema = z
     return config;
   });
 
+export const RESERVED_COMBO_NAME_MESSAGE =
+  "auto and names starting with auto/ are reserved for the built-in automatic routes";
+
 export const comboNameSchema = z
   .string()
   .trim()
@@ -389,7 +393,8 @@ export const comboNameSchema = z
   .regex(
     /^[a-zA-Z0-9_/.\-\[\] ]+$/,
     "Name can only contain letters, numbers, spaces, -, _, /, ., [ and ]."
-  );
+  )
+  .refine((name) => !isReservedComboName(name), RESERVED_COMBO_NAME_MESSAGE);
 
 export const comboCapabilityRouteSchema = z
   .object({

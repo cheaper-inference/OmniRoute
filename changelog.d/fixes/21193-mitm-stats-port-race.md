@@ -1,0 +1,1 @@
+- Retry the MITM stats test on a fresh port after an early proxy exit and report the last stderr output if startup still fails.

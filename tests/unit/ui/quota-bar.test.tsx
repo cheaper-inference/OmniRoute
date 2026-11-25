@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 /**
- * QuotaBar is the text-free progress bar shared by the dashboard quota card and the public quota
- * page. It renders without an i18n provider on purpose: every word on it comes from its props.
+ * QuotaBar renders the public quota page's readings without an i18n provider. Every word on it
+ * comes from its props.
  */
 import React from "react";
 import axe from "axe-core";
@@ -16,11 +16,11 @@ function fill(bar: HTMLElement): HTMLElement {
 }
 
 describe("QuotaBar", () => {
-  it("renders a named progressbar with its value and text alternative", () => {
+  it("renders a named meter with its value and text alternative", () => {
     render(
       <QuotaBar label="Your share" percent={24} valueLabel="24%" valueText="120 of 500 tokens" />
     );
-    const bar = screen.getByRole("progressbar", { name: "Your share" });
+    const bar = screen.getByRole("meter", { name: "Your share" });
     expect(bar.getAttribute("aria-valuenow")).toBe("24");
     expect(bar.getAttribute("aria-valuemin")).toBe("0");
     expect(bar.getAttribute("aria-valuemax")).toBe("100");
@@ -30,19 +30,19 @@ describe("QuotaBar", () => {
 
   it("uses the value label as the text alternative when no value text is given", () => {
     render(<QuotaBar label="Pool" percent={10} valueLabel="10%" caption="Resets soon" />);
-    const bar = screen.getByRole("progressbar", { name: "Pool" });
+    const bar = screen.getByRole("meter", { name: "Pool" });
     expect(bar.getAttribute("aria-valuetext")).toBe("10%");
     expect(screen.getByText("Resets soon")).toBeTruthy();
   });
 
   it("clamps the fill and survives NaN", () => {
     const { rerender } = render(<QuotaBar label="Bar" percent={250} valueLabel="250%" />);
-    let bar = screen.getByRole("progressbar", { name: "Bar" });
+    let bar = screen.getByRole("meter", { name: "Bar" });
     expect(bar.getAttribute("aria-valuenow")).toBe("100");
     expect(fill(bar).style.width).toBe("100%");
 
     rerender(<QuotaBar label="Bar" percent={Number.NaN} valueLabel="-" />);
-    bar = screen.getByRole("progressbar", { name: "Bar" });
+    bar = screen.getByRole("meter", { name: "Bar" });
     expect(bar.getAttribute("aria-valuenow")).toBe("0");
     expect(fill(bar).style.width).toBe("0%");
   });
@@ -55,14 +55,14 @@ describe("QuotaBar", () => {
     ];
     for (const [percent, expected] of cases) {
       const { unmount } = render(<QuotaBar label="Bar" percent={percent} valueLabel="x" />);
-      const indicator = fill(screen.getByRole("progressbar", { name: "Bar" }));
+      const indicator = fill(screen.getByRole("meter", { name: "Bar" }));
       expect(indicator.getAttribute("data-tone")).toBe(expected);
       expect(indicator.hasAttribute("data-color")).toBe(false);
       unmount();
     }
 
     render(<QuotaBar label="Bar" percent={95} valueLabel="95%" tone="muted" />);
-    const indicator = fill(screen.getByRole("progressbar", { name: "Bar" }));
+    const indicator = fill(screen.getByRole("meter", { name: "Bar" }));
     expect(indicator.hasAttribute("data-tone")).toBe(false);
     expect(indicator.hasAttribute("data-color")).toBe(true);
     expect(indicator.style.getPropertyValue("--ci-progress-color")).toBe(
@@ -99,8 +99,7 @@ describe("QuotaBar", () => {
   });
 
   it("size md is taller than the dashboard bar and uses larger text", () => {
-    const root = (name: string) =>
-      screen.getByRole("progressbar", { name }).parentElement as HTMLElement;
+    const root = (name: string) => screen.getByRole("meter", { name }).parentElement as HTMLElement;
     const { rerender } = render(
       <QuotaBar label="Bar" percent={10} valueLabel="10%" caption="Note" size="md" />
     );
@@ -120,17 +119,20 @@ describe("QuotaBar", () => {
     expect(label.className).toContain("ci-eyebrow");
     expect(label.getAttribute("data-weight")).toBe("medium");
     expect(screen.getByText("30%").className).toContain("tabular-nums");
-    const bar = screen.getByRole("progressbar", { name: "Bar" });
+    const bar = screen.getByRole("meter", { name: "Bar" });
     expect(bar.className).toContain("ci-progress__track");
     expect(fill(bar).style.width).toBe("30%");
   });
 
-  it("passes axe's progressbar rules", async () => {
+  it("passes axe's meter name and ARIA attribute value rules", async () => {
     const { container } = render(
       <QuotaBar label="Your share" percent={42} valueLabel="42%" valueText="42 of 100 requests" />
     );
+    expect(screen.getByRole("meter", { name: "Your share" }).getAttribute("aria-valuenow")).toBe(
+      "42"
+    );
     const results = await axe.run(container, {
-      runOnly: { type: "rule", values: ["aria-progressbar-name", "aria-valid-attr-value"] },
+      runOnly: { type: "rule", values: ["aria-meter-name", "aria-valid-attr-value"] },
     });
     expect(results.violations.map((violation) => violation.id)).toEqual([]);
   });

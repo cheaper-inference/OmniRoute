@@ -200,7 +200,7 @@ describe("per-model windows", () => {
       },
     });
     const list = modelList();
-    const bar = within(list).getByRole("progressbar", { name: "weekly fable (7d)" });
+    const bar = within(list).getByRole("meter", { name: "weekly fable (7d)" });
     expect(bar.getAttribute("aria-valuenow")).toBe("100");
     expect(bar.getAttribute("aria-valuetext")).toBe("100% used");
     expect(
@@ -218,7 +218,7 @@ describe("per-model windows", () => {
       },
     });
     const list = modelList();
-    expect(within(list).getByRole("progressbar", { name: "opus (5h)" })).toBeTruthy();
+    expect(within(list).getByRole("meter", { name: "opus (5h)" })).toBeTruthy();
     expect(within(list).getByText("May be out of date")).toBeTruthy();
     expect(within(list).getByText(/^Resets on /)).toBeTruthy();
   });
@@ -231,12 +231,12 @@ describe("per-model windows", () => {
       resetAt: null,
     }));
     renderAccount({ modelWindows: { status: "ok", windows } });
-    expect(within(modelList()).getAllByRole("progressbar")).toHaveLength(6);
+    expect(within(modelList()).getAllByRole("meter")).toHaveLength(6);
     const toggle = screen.getByRole("button", { name: "Show all 30 limits" });
     expect(toggle.getAttribute("aria-expanded")).toBe("false");
 
     fireEvent.click(toggle);
-    expect(within(modelList()).getAllByRole("progressbar")).toHaveLength(30);
+    expect(within(modelList()).getAllByRole("meter")).toHaveLength(30);
     const fewer = screen.getByRole("button", { name: "Show fewer" });
     expect(fewer.getAttribute("aria-expanded")).toBe("true");
     expect(screen.getByText(long).className).toContain("break-words");
