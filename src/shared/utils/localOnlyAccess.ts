@@ -33,15 +33,15 @@ export async function isLocalOnlyResponse(res: Response): Promise<boolean> {
   }
 }
 
-const rejectedPaths = new Set<string>();
+export const EMPTY_LOCAL_ONLY_REJECTIONS: readonly string[] = Object.freeze([]);
+
 const listeners = new Set<() => void>();
-let rejectionVersion = 0;
+let rejectedPaths = EMPTY_LOCAL_ONLY_REJECTIONS;
 
 /** Record that the guard rejected `path` as local-only in this session. */
 export function reportLocalOnlyRejection(path: string): void {
-  if (rejectedPaths.has(path)) return;
-  rejectedPaths.add(path);
-  rejectionVersion += 1;
+  if (rejectedPaths.includes(path)) return;
+  rejectedPaths = Object.freeze([...rejectedPaths, path]);
   for (const listener of listeners) listener();
 }
 
@@ -59,9 +59,9 @@ export function subscribeLocalOnlyRejections(listener: () => void): () => void {
   };
 }
 
-/** Changes whenever a new path is rejected (the `useSyncExternalStore` snapshot). */
-export function getLocalOnlyRejectionVersion(): number {
-  return rejectionVersion;
+/** The immutable store snapshot; its identity changes only when the paths change. */
+export function getLocalOnlyRejections(): readonly string[] {
+  return rejectedPaths;
 }
 
 /**
@@ -70,14 +70,18 @@ export function getLocalOnlyRejectionVersion(): number {
  *   - the session is known not to be local (the server said so, or any local-only request
  *     was rejected) and the server listed the path as blocked for such a session.
  */
-export function isLocalOnlyPathBlocked(access: LocalOnlyAccessSnapshot, path: string): boolean {
-  if (rejectedPaths.has(path)) return true;
-  const notLocal = access.locality === "remote" || rejectedPaths.size > 0;
+export function isLocalOnlyPathBlocked(
+  access: LocalOnlyAccessSnapshot,
+  path: string,
+  rejections: readonly string[]
+): boolean {
+  if (rejections.includes(path)) return true;
+  const notLocal = access.locality === "remote" || rejections.length > 0;
   return notLocal && access.remoteBlockedPaths.includes(path);
 }
 
 export function __resetLocalOnlyRejectionsForTests(): void {
-  rejectedPaths.clear();
-  rejectionVersion = 0;
+  if (rejectedPaths === EMPTY_LOCAL_ONLY_REJECTIONS) return;
+  rejectedPaths = EMPTY_LOCAL_ONLY_REJECTIONS;
   for (const listener of listeners) listener();
 }
