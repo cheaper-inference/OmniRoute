@@ -73,6 +73,7 @@ type ConnectionsListPanelProps = {
   handleToggleCodexPaidCredits: (id: string, enabled: boolean) => void;
   canAutoSync?: boolean;
   handleToggleConnectionAutoSync?: (connectionId: string, enabled: boolean) => void;
+  handleToggleConnectionHealthCheck?: (connectionId: string, enabled: boolean) => void;
   handleToggleCliproxyapiMode: (id: string, enabled: boolean) => void;
   handleSetUpstreamProxyMode: (
     mode: "native" | "cliproxyapi" | "dario" | "fallback",
@@ -116,6 +117,14 @@ function quotaVisibilityHandler(
   toggle: (id: string, visible: boolean) => void
 ) {
   return supported ? (visible: boolean) => toggle(connectionId, visible) : undefined;
+}
+
+// Extracted so the two ConnectionRow render sites don't each add a ternary decision point.
+function healthCheckToggleHandler(
+  toggle: ((connectionId: string, enabled: boolean) => void) | undefined,
+  connectionId: string
+) {
+  return toggle ? (enabled: boolean) => toggle(connectionId, enabled) : undefined;
 }
 
 // #7643 — extracted so the two ConnectionRow render call sites (already
@@ -164,6 +173,7 @@ export default function ConnectionsListPanel({
   handleToggleClaudeExtraUsage,
   handleToggleCodexPaidCredits,
   handleToggleConnectionAutoSync,
+  handleToggleConnectionHealthCheck,
   handleToggleCliproxyapiMode,
   handleSetUpstreamProxyMode,
   upstreamProxyMode,
@@ -426,6 +436,10 @@ export default function ConnectionsListPanel({
                     ? (enabled) => handleToggleConnectionAutoSync(conn.id, enabled)
                     : undefined
                 }
+                onToggleHealthCheck={healthCheckToggleHandler(
+                  handleToggleConnectionHealthCheck,
+                  conn.id
+                )}
                 isCodex={providerId === "codex" || providerId === "codex-app-server"}
                 isCcCompatible={isCcCompatible}
                 cliproxyapiEnabled={cpaProviderEnabled}
@@ -626,6 +640,10 @@ export default function ConnectionsListPanel({
                         ? (enabled) => handleToggleConnectionAutoSync(conn.id, enabled)
                         : undefined
                     }
+                    onToggleHealthCheck={healthCheckToggleHandler(
+                      handleToggleConnectionHealthCheck,
+                      conn.id
+                    )}
                     isCodex={providerId === "codex" || providerId === "codex-app-server"}
                     isCcCompatible={isCcCompatible}
                     cliproxyapiEnabled={cpaProviderEnabled}

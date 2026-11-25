@@ -1,5 +1,6 @@
 import initializeCloudSync from "@/shared/services/initializeCloudSync";
 import { startModelSyncScheduler } from "@/shared/services/modelSyncScheduler";
+import { startModelHealthCheckScheduler } from "@/shared/services/modelHealthCheckScheduler";
 import { isAutomatedTestProcess } from "@/shared/utils/testProcess";
 import { getJobRegistry } from "@/lib/jobRegistry";
 import { registerBudgetResetJob } from "@/lib/jobs/budgetResetJob";
@@ -35,6 +36,7 @@ export async function ensureCloudSyncInitialized() {
       await initializeCloudSync();
       await backfillVolcPlanAutoSync();
       startModelSyncScheduler();
+      startModelHealthCheckScheduler();
 
       // startAll() runs each interval job's first tick synchronously, so it has to
       // come after initializeCloudSync(). The old wiring got that ordering two
