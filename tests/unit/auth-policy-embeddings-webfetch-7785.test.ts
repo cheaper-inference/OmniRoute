@@ -34,6 +34,26 @@ const { createProviderNode } = await import("../../src/lib/db/providers/nodes.ts
 const { POST: embeddingsPOST } = await import("../../src/app/api/v1/embeddings/route.ts");
 const { POST: webFetchPOST } = await import("../../src/app/api/v1/web/fetch/route.ts");
 
+const { POST: webMapPOST } = await import("../../src/app/api/v1/web/map/route.ts");
+const { POST: inputTokensPOST } =
+  await import("../../src/app/api/v1/responses/input_tokens/route.ts");
+const { POST: improvePromptPOST } =
+  await import("../../src/app/api/playground/improve-prompt/route.ts");
+const { mintDashboardSessionToken, DASHBOARD_SESSION_COOKIE } =
+  await import("../../src/shared/utils/dashboardSessionToken.ts");
+const { resolveSelfLoopBearer } =
+  await import("../../src/shared/middleware/chatAdmissionIdentity.ts");
+const { WEB_FETCH_URL_MAX_LENGTH } = await import("../../src/shared/constants/formLimits.ts");
+const { v1WebFetchSchema } = await import("../../src/shared/validation/schemas/apiV1.ts");
+
+const validSessionCookie = `${DASHBOARD_SESSION_COOKIE}=${await mintDashboardSessionToken(
+  new TextEncoder().encode(process.env.JWT_SECRET)
+)}`;
+// Same shape, signed with a secret the server does not hold: what an external caller can mint.
+const forgedSessionCookie = `${DASHBOARD_SESSION_COOKIE}=${await mintDashboardSessionToken(
+  new TextEncoder().encode("not-the-server-secret")
+)}`;
+
 const INVALID_BEARER = "Bearer sk-invalid-key-that-does-not-exist-7785";
 
 test.after(() => {
@@ -125,26 +145,6 @@ test("#7785 web-fetch: REQUIRE_API_KEY=true + invalid key → 401", async () => 
 // Search Tools › Scrape tab (and the other dashboard callers) got 401 "Authentication
 // required". A session now passes; a caller with neither a session nor a key, an
 // invalid key, or a forged session cookie is still refused while REQUIRE_API_KEY=true.
-
-const { POST: webMapPOST } = await import("../../src/app/api/v1/web/map/route.ts");
-const { POST: inputTokensPOST } =
-  await import("../../src/app/api/v1/responses/input_tokens/route.ts");
-const { POST: improvePromptPOST } =
-  await import("../../src/app/api/playground/improve-prompt/route.ts");
-const { mintDashboardSessionToken, DASHBOARD_SESSION_COOKIE } =
-  await import("../../src/shared/utils/dashboardSessionToken.ts");
-const { resolveSelfLoopBearer } =
-  await import("../../src/shared/middleware/chatAdmissionIdentity.ts");
-const { WEB_FETCH_URL_MAX_LENGTH } = await import("../../src/shared/constants/formLimits.ts");
-const { v1WebFetchSchema } = await import("../../src/shared/validation/schemas/apiV1.ts");
-
-const validSessionCookie = `${DASHBOARD_SESSION_COOKIE}=${await mintDashboardSessionToken(
-  new TextEncoder().encode(process.env.JWT_SECRET)
-)}`;
-// Same shape, signed with a secret the server does not hold: what an external caller can mint.
-const forgedSessionCookie = `${DASHBOARD_SESSION_COOKIE}=${await mintDashboardSessionToken(
-  new TextEncoder().encode("not-the-server-secret")
-)}`;
 
 type Credential = { cookie?: string; authorization?: string };
 

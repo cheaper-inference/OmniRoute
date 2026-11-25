@@ -55,6 +55,7 @@ const MOCK_SCRAPE_RESPONSE = {
 
 const { default: ScrapeTab } =
   await import("../../../src/app/(dashboard)/dashboard/search-tools/components/tabs/ScrapeTab");
+const { WEB_FETCH_URL_MAX_LENGTH } = await import("../../../src/shared/constants/formLimits");
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -301,8 +302,6 @@ describe("ScrapeTab", () => {
 });
 
 // ── KEA-9515: Extract needs a connected fetch provider; the URL is capped ─────
-
-const { WEB_FETCH_URL_MAX_LENGTH } = await import("../../../src/shared/constants/formLimits");
 
 function catalogItem(
   id: string,
