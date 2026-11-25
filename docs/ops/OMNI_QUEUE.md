@@ -513,6 +513,24 @@ status and, in live mode, one comment (in shadow mode it is only logged).
   some other way) leaves the queue for good, with both labels removed and one comment (in shadow
   mode, a `would-dequeue` event).
 
+### Automatic labeling for the derived refresh
+
+Only the `derived-refresh-autoland` workflow may apply the `omni-queue` label automatically.
+It labels only the `chore/derived-refresh` robot PR in this repository, targeting the highest `release/vX.Y.Z` branch.
+Every changed file must belong to a derived family and have an unprotected path.
+Any open `release-freeze` issue blocks labeling. An open `base-red` issue blocks its target branch.
+`Gate / CI` and `Gate / Quality` must pass on the current head.
+The PR must be open and ready for review, with no queue or blocking label.
+Every other label application requires the owner's approval for that PR.
+No other session, script or loop may apply the label on its own.
+
+Set the repository Actions variable `DERIVED_REFRESH_AUTOLAND` to `true` to enable labeling.
+Clear it or set a different value to return to dry-run mode.
+Labeling requires a queue approver's token. See the [workflow configuration](../../.github/workflows/derived-refresh-autoland.yml).
+The workflow reports its decision in the run summary, including in dry-run mode.
+In `live` mode the queue can land the labeled PR after its usual checks.
+In `shadow` mode the queue reports its verdict and landing is manual.
+
 ### The PR's own gates (`prChecksRequired`)
 
 What the operator sees: a labeled, approved PR that stays on the dashboard with the reason
