@@ -1,7 +1,7 @@
 import { extractXmlInvokeBlocks } from "../helpers/xmlToolCalls.ts";
 import { register } from "../registry.ts";
 import { mergeCacheCreationFields } from "../../utils/cacheWriteUsage.ts";
-import { usableTokenCounter } from "../../utils/usageEvidence.ts";
+import { readChatCacheReadCounter } from "../helpers/chatCacheRead.ts";
 import { FORMATS } from "../formats.ts";
 import { CLAUDE_OAUTH_TOOL_PREFIX } from "../request/openai-to-claude.ts";
 import {
@@ -318,11 +318,7 @@ function readUsageCounters(usage) {
   return {
     promptTokens: firstNumber(usage.prompt_tokens, usage.input_tokens),
     outputTokens: firstNumber(usage.completion_tokens, usage.output_tokens),
-    reportedCacheReadTokens: [
-      promptDetails?.cached_tokens,
-      inputDetails?.cached_tokens,
-      usage.cache_read_input_tokens,
-    ].find(usableTokenCounter),
+    reportedCacheReadTokens: readChatCacheReadCounter(usage),
     cacheCreateTokens: firstNumber(
       promptDetails?.cache_creation_tokens ?? inputDetails?.cache_creation_tokens
     ),
