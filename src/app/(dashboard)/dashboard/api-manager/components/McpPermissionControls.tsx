@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import Card from "@/shared/components/Card";
 import Toggle from "@/shared/components/Toggle";
 
 export interface McpPermissionState {
@@ -20,7 +21,7 @@ export default function McpPermissionControls({
 }) {
   const t = useTranslations("apiManager");
   return (
-    <div className="flex flex-col gap-3 p-3.5 rounded-lg border border-border bg-surface/40">
+    <Card.Section className="flex flex-col gap-3">
       {(["mcpConnectEnabled", "compressionReadEnabled"] as const).map((field) => (
         <div key={field} className="flex items-start justify-between gap-3">
           <Toggle
@@ -33,6 +34,6 @@ export default function McpPermissionControls({
           />
         </div>
       ))}
-    </div>
+    </Card.Section>
   );
 }
