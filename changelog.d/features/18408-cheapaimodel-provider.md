@@ -1,0 +1,1 @@
+- **feat(providers):** Added cheapaimodel as an OpenAI-compatible API-key gateway (`https://api.cheapaimodel.ai/v1`; DeepSeek, GLM and Kimi open-weight models plus Grok), with live model discovery via `passthroughModels` ([#18408](https://github.com/diegosouzapw/OmniRoute/pull/18408)) — thanks @nicho810
