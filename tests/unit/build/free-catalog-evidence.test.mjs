@@ -39,7 +39,7 @@ test("grandfathering is restricted to exact seed entries, not a provider-wide wa
 });
 
 import { catalogFingerprint } from "../../../scripts/check/freeCatalogEvidence.mjs";
-import { readFileSync, mkdtempSync, writeFileSync, mkdirSync, rmSync } from "node:fs";
+import { readFileSync, readdirSync, mkdtempSync, writeFileSync, mkdirSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -212,12 +212,10 @@ test("real catalog has a precise disposition for every identity that needs evide
 });
 
 // The CLI imports the catalog .ts files natively (no tsx loader). Its V8 coverage would carry a
-// second source layout for those files and break the merged coverage report, so the child
-// processes run without NODE_V8_COVERAGE. The assertions below are unchanged.
+// second source layout for those files and break the merged coverage report. Node copies the
+// parent's NODE_V8_COVERAGE into a child env when the key is absent, so explicitly clear it.
 function cliEnv(extra = {}) {
-  const env = { ...process.env, ...extra };
-  delete env.NODE_V8_COVERAGE;
-  return env;
+  return { ...process.env, ...extra, NODE_V8_COVERAGE: "" };
 }
 
 test("CLI refuses unavailable baseline and missing PR base; neither is a successful bootstrap", () => {
@@ -251,6 +249,29 @@ test("CLI requires an event baseline for PR, merge-group and push checks", () =>
     });
     assert.equal(result.status, 1, event);
   }
+});
+
+test("the native CLI leaves the unit shard's V8 coverage directory untouched", (t) => {
+  const script = fileURLToPath(
+    new URL("../../../scripts/check/check-free-catalog-evidence.mjs", import.meta.url)
+  );
+  const coverage = mkdtempSync(join(tmpdir(), "catalog-cli-coverage-"));
+  t.after(() => rmSync(coverage, { recursive: true, force: true }));
+  const previousCoverage = process.env.NODE_V8_COVERAGE;
+  process.env.NODE_V8_COVERAGE = coverage;
+  try {
+    const result = spawnSync(process.execPath, [script], {
+      cwd: new URL("../../../", import.meta.url),
+      encoding: "utf8",
+      env: cliEnv({ GITHUB_EVENT_NAME: "pull_request", BASE_SHA: "" }),
+    });
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, /FAIL/);
+  } finally {
+    if (previousCoverage === undefined) delete process.env.NODE_V8_COVERAGE;
+    else process.env.NODE_V8_COVERAGE = previousCoverage;
+  }
+  assert.deepEqual(readdirSync(coverage), []);
 });
 
 test(
