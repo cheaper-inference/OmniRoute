@@ -1003,9 +1003,9 @@ export function extractUsage(chunk: UsagePayloadLike | null | undefined) {
       cached_tokens:
         chunk.usage.prompt_tokens_details?.cached_tokens ??
         chunk.usage.input_tokens_details?.cached_tokens ??
-        chunk.usage.prompt_cache_hit_tokens ??
         chunk.usage.cached_tokens,
       cache_read_input_tokens: chunk.usage.cache_read_input_tokens,
+      prompt_cache_hit_tokens: chunk.usage.prompt_cache_hit_tokens,
       cache_creation_input_tokens: pickCacheCreationTokens(chunk.usage),
       no_cache_tokens: chunk.usage.no_cache_tokens,
       reasoning_tokens:
