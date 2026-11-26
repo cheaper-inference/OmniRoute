@@ -1,5 +1,7 @@
 // @vitest-environment jsdom
 import "@testing-library/jest-dom/vitest";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { describe, it, expect, afterEach, beforeAll, vi } from "vitest";
 import { cleanup, fireEvent, render } from "@testing-library/react";
 import ComboReferencePicker from "@/app/(dashboard)/dashboard/combos/ComboReferencePicker";
@@ -85,5 +87,14 @@ describe("ComboReferencePicker", () => {
     fireEvent.change(query, { target: { value: "unmatched" } });
     fireEvent.click(view.getByRole("option", { name: "Select combo to reference" }));
     expect(onChange).toHaveBeenCalledExactlyOnceWith("");
+  });
+  it("stays hidden for jev combos in the combo builder", () => {
+    const source = readFileSync(
+      resolve(process.cwd(), "src/app/(dashboard)/dashboard/combos/page.tsx"),
+      "utf8"
+    );
+    const at = source.indexOf("<ComboReferencePicker");
+    expect(at).toBeGreaterThan(0);
+    expect(source.slice(Math.max(0, at - 60), at)).toContain('strategy !== "jev"');
   });
 });
