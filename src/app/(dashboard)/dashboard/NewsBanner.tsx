@@ -1,19 +1,21 @@
 "use client";
 
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useSyncExternalStore } from "react";
 import { useLocale, useTranslations } from "next-intl";
 
 import {
   NEWS_DISMISS_EVENT,
   NEWS_DISMISS_STORAGE_NAME,
-  fetchNewsPayload,
   parseDismissedNewsIds,
-  selectActiveNews,
+  selectVisibleNews,
   serializeDismissedNewsIds,
 } from "@/shared/utils/releaseNotes";
+import { useNewsFeed } from "@/shared/hooks/useNewsFeed";
+import { Alert } from "@omniroute/ui-kit/alert";
 import { buttonVariants } from "@omniroute/ui-kit/button";
 import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
+import NewsSeverityBadge from "./NewsSeverityBadge";
 
 function subscribeToDismissals(callback: () => void) {
   window.addEventListener("storage", callback);
@@ -43,24 +45,17 @@ function getServerDismissedIds(): string {
 export default function NewsBanner() {
   const locale = useLocale();
   const t = useTranslations("common");
-  const [payload, setPayload] = useState<unknown>(null);
+  const feed = useNewsFeed();
   const dismissedSnapshot = useSyncExternalStore(
     subscribeToDismissals,
     readDismissedIds,
     getServerDismissedIds
   );
   const dismissedIds = parseDismissedNewsIds(dismissedSnapshot);
-  const announcement = selectActiveNews(payload, locale, dismissedIds);
-
-  useEffect(() => {
-    const controller = new AbortController();
-
-    void fetchNewsPayload(fetch, controller.signal).then((value) => {
-      if (value !== null) setPayload(value);
-    });
-
-    return () => controller.abort();
-  }, []);
+  const announcement = selectVisibleNews(feed.payload, locale, dismissedIds, {
+    severityEnabled: feed.severityEnabled,
+    now: feed.now,
+  });
 
   if (!announcement) return null;
 
@@ -73,6 +68,42 @@ export default function NewsBanner() {
     }
     window.dispatchEvent(new Event(NEWS_DISMISS_EVENT));
   };
+
+  const link = announcement.link && (
+    <a
+      href={announcement.link}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={buttonVariants({ size: "sm", className: "gap-1.5 whitespace-nowrap" })}
+    >
+      {announcement.linkLabel ?? announcement.title}
+      <Icon name="open_in_new" size={14} />
+    </a>
+  );
+
+  // A warning or critical announcement is a highlighted, dismissible alert; a critical one is
+  // announced assertively. Informational announcements keep the plain banner.
+  if (announcement.severity !== "info") {
+    return (
+      <Alert
+        key={announcement.id}
+        variant={announcement.severity}
+        layout="inline"
+        className="mb-4"
+        icon={<Icon name={announcement.icon} size={18} />}
+        title={
+          <>
+            <NewsSeverityBadge severity={announcement.severity} className="mr-2 align-middle" />
+            {announcement.title}
+          </>
+        }
+        description={announcement.message}
+        actions={link}
+        dismissLabel={t("dismissNotification")}
+        onDismiss={dismiss}
+      />
+    );
+  }
 
   return (
     <div
@@ -91,17 +122,7 @@ export default function NewsBanner() {
       </div>
 
       <div className="flex shrink-0 items-center gap-3 self-end sm:self-auto">
-        {announcement.link && (
-          <a
-            href={announcement.link}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={buttonVariants({ size: "sm", className: "gap-1.5 whitespace-nowrap" })}
-          >
-            {announcement.linkLabel ?? announcement.title}
-            <Icon name="open_in_new" size={14} />
-          </a>
-        )}
+        {link}
         <Button
           variant="ghost"
           size="icon-sm"

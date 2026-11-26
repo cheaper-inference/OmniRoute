@@ -68,6 +68,38 @@ older forks can migrate without a broken Changelog view. Invalid feeds are inert
 entry ships with `active: false`; changing it to `true` is a separate post-merge, post-deploy
 release action and does not change `RADAR_ENABLED` or the independent feed-sync opt-in.
 
+### Severity and expiry (v3, opt-in)
+
+With the `ANNOUNCEMENT_SEVERITY_ENABLED` feature flag on (default off), the reader also understands
+a v3 representation of the same channel, published at `public/announcements/v3.json`
+(`NEWS_V3_JSON_URL` in `src/shared/utils/releaseNotes.ts`). With the flag off the dashboard reads
+only `news.json`, exactly as above, and never requests the v3 file.
+
+`parseSeverityNewsPayload()` validates the closed v3 schema:
+
+- `schemaVersion: 3`, the same item fields as v2, plus a required `severity` of `info`, `warning`
+  or `critical` and an optional `expiresAt` (ISO date-time, after `publishedAt`);
+- a `critical` entry must carry `expiresAt`; there is no blocking modal, a critical entry is a
+  highlighted, dismissible banner;
+- the same limits as v2: unique ids, credential-free HTTPS links, an allowlisted icon, English copy
+  required.
+
+Reading rules (`fetchNewsPayload()`, `listVisibleNews()`, `selectVisibleNews()`):
+
+- the v3 request is a credential-free `GET` with a byte limit (64 KiB) and a time limit (5 s);
+- a valid v3 feed is authoritative, including an empty one, so a retraction published in v3 does
+  not bring a v2 entry back; an unavailable, oversized or invalid v3 file falls back to `news.json`;
+- v2 and the former singular shape keep their behavior and read as `info`;
+- an entry is visible while `publishedAt <= now < expiresAt`; the dashboard re-evaluates at the next
+  publish or expiry instant (`nextNewsTransitionMs()`), so a time-limited announcement leaves an
+  open page without a reload or a new request;
+- Home shows one announcement, ranked by severity and then by date, skipping dismissed ids
+  (dismissal stays per id); the Changelog news tab keeps the chronological order and names each
+  entry's severity.
+
+The v3 file must keep the same ids and activation state as `news.json` (the Radar entries stay
+`active: false`); `tests/unit/news-feed-contract.test.ts` pins that.
+
 ---
 
 ## Flag: `RADAR_ENABLED` (default off)

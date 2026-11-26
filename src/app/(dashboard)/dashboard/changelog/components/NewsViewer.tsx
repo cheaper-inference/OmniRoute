@@ -1,42 +1,21 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 
 import { buttonVariants } from "@omniroute/ui-kit/button";
 import { Card } from "@/shared/components";
 import Icon from "@/shared/components/Icon";
 import { ViewerStatus } from "./ChangelogStates";
-import {
-  fetchNewsPayload,
-  listActiveNews,
-  type NewsAnnouncement,
-} from "@/shared/utils/releaseNotes";
+import { useNewsFeed } from "@/shared/hooks/useNewsFeed";
+import { listVisibleNews } from "@/shared/utils/releaseNotes";
+import NewsSeverityBadge from "../../NewsSeverityBadge";
 
 export default function NewsViewer() {
   const locale = useLocale();
   const t = useTranslations("changelogPage");
-  const [news, setNews] = useState<NewsAnnouncement[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-
-  useEffect(() => {
-    const controller = new AbortController();
-
-    void fetchNewsPayload(fetch, controller.signal)
-      .then((payload) => {
-        if (payload === null) {
-          if (!controller.signal.aborted) setError(true);
-          return;
-        }
-        setNews(listActiveNews(payload, locale));
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) setLoading(false);
-      });
-
-    return () => controller.abort();
-  }, [locale]);
+  const feed = useNewsFeed();
+  const loading = feed.status === "loading";
+  const error = feed.status === "error";
 
   if (loading) {
     return <ViewerStatus busy icon="sync" message={t("loadingNews")} />;
@@ -48,6 +27,11 @@ export default function NewsViewer() {
     );
   }
 
+  const news = listVisibleNews(feed.payload, locale, {
+    severityEnabled: feed.severityEnabled,
+    now: feed.now,
+  });
+
   if (news.length === 0) {
     return <ViewerStatus icon="notifications_off" message={t("noAnnouncements")} />;
   }
@@ -57,7 +41,12 @@ export default function NewsViewer() {
   return (
     <div className="flex flex-col gap-4">
       {news.map((announcement) => {
-        const published = Date.parse(announcement.publishedAt);
+        const publishedAt = Date.parse(announcement.publishedAt);
+        const published = Number.isFinite(publishedAt) && (
+          <time className="ci-eyebrow" dateTime={announcement.publishedAt}>
+            {dateFormat.format(publishedAt)}
+          </time>
+        );
         return (
           <Card key={announcement.id} padding="md">
             <article className="flex flex-col gap-6 md:flex-row md:items-center">
@@ -66,10 +55,13 @@ export default function NewsViewer() {
               </div>
 
               <div className="flex-1">
-                {Number.isFinite(published) && (
-                  <time className="ci-eyebrow" dateTime={announcement.publishedAt}>
-                    {dateFormat.format(published)}
-                  </time>
+                {feed.severityEnabled ? (
+                  <div className="flex flex-wrap items-center gap-2">
+                    <NewsSeverityBadge severity={announcement.severity} />
+                    {published}
+                  </div>
+                ) : (
+                  published
                 )}
                 <h2 className="ci-heading mt-1 mb-2 text-xl">{announcement.title}</h2>
                 <p className="max-w-2xl text-sm leading-relaxed text-text-muted">
