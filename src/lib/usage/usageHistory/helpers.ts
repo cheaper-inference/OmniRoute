@@ -9,6 +9,8 @@ import { storedUsageEvidence } from "../storedUsageEvidence";
 export { toNumber } from "@/shared/utils/numeric";
 // #13130: shared TPS math (generation-time denominator, reasoning-aware numerator).
 import { resolveGenerationMs, resolveTpsOutputTokens } from "@/shared/utils/logTps";
+// Same plausibility rules (minimum window, maximum rate) as the per-call tok/s.
+import { tokensPerSecond } from "@omniroute/open-sse/utils/generationThroughput";
 import { toNumber as toNumberValue } from "@/shared/utils/numeric";
 
 type JsonRecord = Record<string, unknown>;
@@ -97,6 +99,15 @@ export interface LatencySampleBuckets {
   allTtfts: number[];
   successfulTps: number[];
   allTps: number[];
+  /**
+   * Running totals over the plausible TPS samples, so the aggregate is
+   * Σ tokens ÷ Σ generation time instead of a mean of per-row ratios.
+   * Optional: callers may build the buckets as a literal without them.
+   */
+  successfulTpsTokens?: number;
+  successfulTpsWindowMs?: number;
+  allTpsTokens?: number;
+  allTpsWindowMs?: number;
 }
 
 /**
@@ -113,6 +124,9 @@ export interface LatencySampleBuckets {
  *   - numerator: max(tokensOutput, tokensReasoning) — providers are expected
  *     to fold reasoning into output tokens, but a provider that excludes them
  *     while still reporting tokens_reasoning would otherwise undercount.
+ * A sample whose window is shorter than MIN_GENERATION_WINDOW_MS or whose rate
+ * exceeds MAX_PLAUSIBLE_TOKENS_PER_SECOND (generationThroughput.ts) is not a
+ * measurement and stays out of the TPS buckets; its latency/TTFT still count.
  */
 export function accumulateLatencySample(
   buckets: LatencySampleBuckets,
@@ -127,15 +141,21 @@ export function accumulateLatencySample(
   if (ttftMs > 0) buckets.allTtfts.push(ttftMs);
   const tpsTokens = resolveTpsOutputTokens(tokensOutput, tokensReasoning);
   const generationMs = resolveGenerationMs(latencyMs, ttftMs);
-  const tps =
-    tpsTokens > 0 && generationMs !== null && generationMs > 0
-      ? tpsTokens / (generationMs / 1000)
-      : null;
-  if (tps !== null) buckets.allTps.push(tps);
+  const tps = tokensPerSecond(tpsTokens, generationMs);
+  const plausible = tps !== null && generationMs !== null;
+  if (plausible) {
+    buckets.allTps.push(tps);
+    buckets.allTpsTokens = (buckets.allTpsTokens ?? 0) + tpsTokens;
+    buckets.allTpsWindowMs = (buckets.allTpsWindowMs ?? 0) + generationMs;
+  }
   if (!isSuccess) return;
   buckets.successfulLatencies.push(latencyMs);
   if (ttftMs > 0) buckets.successfulTtfts.push(ttftMs);
-  if (tps !== null) buckets.successfulTps.push(tps);
+  if (plausible) {
+    buckets.successfulTps.push(tps);
+    buckets.successfulTpsTokens = (buckets.successfulTpsTokens ?? 0) + tpsTokens;
+    buckets.successfulTpsWindowMs = (buckets.successfulTpsWindowMs ?? 0) + generationMs;
+  }
 }
 
 /** Per-provider/model accumulator for getModelLatencyStats() (#6875). */
@@ -158,6 +178,10 @@ export function createLatencyBucket(provider: string, model: string): LatencyBuc
     allTtfts: [],
     successfulTps: [],
     allTps: [],
+    successfulTpsTokens: 0,
+    successfulTpsWindowMs: 0,
+    allTpsTokens: 0,
+    allTpsWindowMs: 0,
   };
 }
 
@@ -183,7 +207,10 @@ export interface ModelLatencyStatsEntry {
    * already represents the full request wall-clock time (#6875).
    */
   avgE2ELatencyMs: number;
-  /** Mean output tokens/sec across successful rows (tokens_output / (latency_ms/1000)). */
+  /**
+   * Output tokens/sec across successful rows: Σ tokens ÷ Σ generation seconds
+   * (latency_ms - ttft_ms) over the plausible samples; 0 when there is none.
+   */
   avgTokensPerSecond: number;
 }
 
@@ -204,7 +231,8 @@ export function buildLatencyStatsEntry(
   if (baseLatencies.length < minSamples) return null;
 
   const baseTtfts = useSuccessful ? bucket.successfulTtfts : bucket.allTtfts;
-  const baseTps = useSuccessful ? bucket.successfulTps : bucket.allTps;
+  const tpsTokens = (useSuccessful ? bucket.successfulTpsTokens : bucket.allTpsTokens) ?? 0;
+  const tpsWindowMs = (useSuccessful ? bucket.successfulTpsWindowMs : bucket.allTpsWindowMs) ?? 0;
 
   const sorted = [...baseLatencies].sort((a, b) => a - b);
   const avg = mean(sorted);
@@ -226,7 +254,8 @@ export function buildLatencyStatsEntry(
     windowHours,
     avgTtftMs: Math.round(mean(baseTtfts)),
     avgE2ELatencyMs: Math.round(avg),
-    avgTokensPerSecond: Math.round(mean(baseTps) * 100) / 100,
+    avgTokensPerSecond:
+      tpsWindowMs > 0 ? Math.round((tpsTokens / (tpsWindowMs / 1000)) * 100) / 100 : 0,
   };
 }
 

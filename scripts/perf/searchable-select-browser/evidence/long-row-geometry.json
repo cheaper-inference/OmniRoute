@@ -1,0 +1,145 @@
+{
+  "active": {
+    "bottom": 759.59375,
+    "height": 193.53125,
+    "left": 74,
+    "right": 336,
+    "top": 566.0625,
+    "width": 262,
+    "x": 74,
+    "y": 566.0625
+  },
+  "activeText": "Test Model 04999 · مدل آزمایشی بسیار طولانی · 日本語モデル · 中文模型 · Español · Deutsch · Test Model 04999 · مدل آزمایشی بسیار طولانی · 日本語モデル · 中文模型 · Español · Deutsch · model-04999 · Synthetic QA fixture · توضیح چندزبانه برای بررسی شکستن خط و نمایش کامل گزینه · Multilingual description with wrapping and an unbroken identifier long-model-identifierlong-model-identifierlong-model-identifier",
+  "list": {
+    "bottom": 764,
+    "height": 320,
+    "left": 60,
+    "right": 340,
+    "top": 444,
+    "width": 280,
+    "x": 60,
+    "y": 444
+  },
+  "noHorizontalOverflow": true,
+  "rows": [
+    {
+      "index": "4992",
+      "rect": {
+        "bottom": 193.75,
+        "height": 53.1875,
+        "left": 74,
+        "right": 336,
+        "top": 140.5625,
+        "width": 262,
+        "x": 74,
+        "y": 140.5625
+      }
+    },
+    {
+      "index": "4993",
+      "rect": {
+        "bottom": 246.9375,
+        "height": 53.1875,
+        "left": 74,
+        "right": 336,
+        "top": 193.75,
+        "width": 262,
+        "x": 74,
+        "y": 193.75
+      }
+    },
+    {
+      "index": "4994",
+      "rect": {
+        "bottom": 300.125,
+        "height": 53.1875,
+        "left": 74,
+        "right": 336,
+        "top": 246.9375,
+        "width": 262,
+        "x": 74,
+        "y": 246.9375
+      }
+    },
+    {
+      "index": "4995",
+      "rect": {
+        "bottom": 353.3125,
+        "height": 53.1875,
+        "left": 74,
+        "right": 336,
+        "top": 300.125,
+        "width": 262,
+        "x": 74,
+        "y": 300.125
+      }
+    },
+    {
+      "index": "4996",
+      "rect": {
+        "bottom": 406.5,
+        "height": 53.1875,
+        "left": 74,
+        "right": 336,
+        "top": 353.3125,
+        "width": 262,
+        "x": 74,
+        "y": 353.3125
+      }
+    },
+    {
+      "index": "4997",
+      "rect": {
+        "bottom": 459.6875,
+        "height": 53.1875,
+        "left": 74,
+        "right": 336,
+        "top": 406.5,
+        "width": 262,
+        "x": 74,
+        "y": 406.5
+      }
+    },
+    {
+      "index": "4998",
+      "rect": {
+        "bottom": 512.875,
+        "height": 53.1875,
+        "left": 74,
+        "right": 336,
+        "top": 459.6875,
+        "width": 262,
+        "x": 74,
+        "y": 459.6875
+      }
+    },
+    {
+      "index": "4999",
+      "rect": {
+        "bottom": 566.0625,
+        "height": 53.1875,
+        "left": 74,
+        "right": 336,
+        "top": 512.875,
+        "width": 262,
+        "x": 74,
+        "y": 512.875
+      }
+    },
+    {
+      "index": "5000",
+      "rect": {
+        "bottom": 759.59375,
+        "height": 193.53125,
+        "left": 74,
+        "right": 336,
+        "top": 566.0625,
+        "width": 262,
+        "x": 74,
+        "y": 566.0625
+      }
+    }
+  ],
+  "scrollHeight": 240259,
+  "top": 239939
+}

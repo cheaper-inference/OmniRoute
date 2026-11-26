@@ -1,0 +1,1 @@
+- **fix(usage):** Preserve an explicit zero cache-read count in Chat Completions → Claude responses without inventing a count when upstream did not report one.

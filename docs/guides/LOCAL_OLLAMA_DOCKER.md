@@ -81,4 +81,4 @@ Heavy agent sessions can also hit `RATE_LIMIT_EXECUTION_TIMEOUT` when concurrent
 ## Related
 
 - [DOCKER_GUIDE.md](./DOCKER_GUIDE.md) — full compose profiles
-- [OmniCopilot](https://github.com/diegosouzapw/OmniCopilot) — VS Code extension (no request timeout settings; errors come from OmniRoute)
+- [OmniCopilot](https://github.com/cheaper-inference/OmniCopilot) — VS Code extension (no request timeout settings; errors come from OmniRoute)

@@ -11,6 +11,7 @@ import {
   parseRequestBudgetFallback,
 } from "../autoCombo/requestControls.ts";
 import { selectWithStrategyAsync } from "../autoCombo/routerStrategy.ts";
+import { buildDecisionRoutingContext, type DecisionRuntime } from "../decision/factory.ts";
 import { buildComplexityRoutingHint } from "../autoCombo/complexityRouter";
 import { getModePack } from "../autoCombo/modePacks.ts";
 import { recordComboIntent } from "../comboMetrics.ts";
@@ -30,6 +31,7 @@ import {
   filterTargetsByRequestCompatibility,
   deriveRequestCompatibilityRequirements,
 } from "./comboStructure.ts";
+import { resolveOutputLimitPolicy } from "./outputLimitPolicy.ts";
 import { hasMediaRequirements } from "./mediaCompatibility.ts";
 import {
   calculatePromptCacheAffinityScores,
@@ -72,6 +74,7 @@ export interface ResolveAutoStrategyDeps {
   body: Record<string, unknown>;
   combo: ComboLike;
   settings: Record<string, unknown> | null | undefined;
+  sourceFormat?: string | null;
   // Index signature keeps this structurally assignable from the caller's much
   // wider `resolveComboSetupConfig()` return type — without it, TS2559 ("no
   // properties in common") fires now that `complexityAwareRouting` (the one
@@ -91,6 +94,8 @@ export interface ResolveAutoStrategyDeps {
   log: ComboLogger;
   buildAutoCandidates: BuildAutoCandidates;
   apiKeyAllowedConnections?: string[] | null;
+  /** Request seams for the `decision` router (signal, handleSingleModel, combos). */
+  decisionRuntime?: DecisionRuntime | null;
 }
 
 export type ResolveAutoStrategyResult =
@@ -297,7 +302,9 @@ export async function resolveAutoStrategyOrder(
   // Recheck before scoring so unsupported transports cannot consume the retry
   // budget, and retain this pool even when candidate telemetry is unavailable.
   if (hasMediaRequirements(deriveRequestCompatibilityRequirements(body))) {
-    eligibleTargets = filterTargetsByRequestCompatibility(eligibleTargets, body, log, combo.name);
+    eligibleTargets = filterTargetsByRequestCompatibility(eligibleTargets, body, log, combo.name, {
+      ...resolveOutputLimitPolicy(config, settings, deps.sourceFormat, "strict"),
+    });
     if (eligibleTargets.length === 0) {
       return {
         earlyResponse: errorResponse(
@@ -331,6 +338,7 @@ export async function resolveAutoStrategyOrder(
     resetWindowConfig,
     slaPolicy,
     nadirConfig,
+    decisionConfig,
     accountPreferences,
   } = parseAutoConfig(combo, eligibleTargets);
 
@@ -524,6 +532,12 @@ export async function resolveAutoStrategyOrder(
             manifestHint: autoManifestHint,
             messages: body.messages,
             nadir: nadirConfig,
+            decision: buildDecisionRoutingContext(
+              decisionConfig,
+              deps.decisionRuntime,
+              body,
+              deps.apiKeyAllowedConnections
+            ),
           },
           routingStrategy
         );

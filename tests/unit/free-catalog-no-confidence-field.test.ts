@@ -24,6 +24,8 @@ const CATALOG_ENTRY_KEYS = [
   // be trusted — the totals split it into its own gated bucket instead of rating it.
   "eligibilityGate",
   "freeType",
+  // Who may claim a quota (card, phone…), not how much the row can be trusted.
+  "gates",
   "hardStopGuaranteed",
   "modelId",
   "monthlyTokens",

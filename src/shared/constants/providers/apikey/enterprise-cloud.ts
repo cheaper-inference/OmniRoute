@@ -119,6 +119,8 @@ export const APIKEY_PROVIDERS_ENTERPRISE = {
     textIcon: "VA",
     website: "https://cloud.google.com/vertex-ai",
     hasFree: true,
+    freeNote:
+      "Google Cloud Free Trial: $300 credit for 90 days; a credit card or other payment method is required (checked 2026-11-23).",
     authHint:
       "Provide Service Account JSON, an OAuth access token, a Vertex Express API key, or a service-account-bound authorization key. Express mode supports Gemini only; partner models require project-scoped credentials.",
   },
@@ -219,6 +221,8 @@ export const APIKEY_PROVIDERS_ENTERPRISE = {
     apiHint:
       "Clarifai exposes OpenAI-compatible chat, responses and /models on /v2/ext/openai/v1. Public/community models typically require a PAT; app-scoped keys only work for resources inside that app.",
     passthroughModels: true,
+    deprecated: true,
+    deprecationReason: "API host no longer resolves (checked 2026-11-23)",
   },
   snowflake: {
     id: "snowflake",

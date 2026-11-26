@@ -8,11 +8,13 @@ import {
   GPT_6_TERRA_PRICING,
   GEMINI_3_7_FLASH_PROMO_PRICING,
   GEMINI_4_ARGON_PROMO_PRICING,
+  GEMINI_4_CARBON_PROMO_PRICING,
   GEMINI_4_HYDROGEN_PRICING,
   GPT_5_5_PRICING,
   GPT_5_6_LUNA_PRICING,
   GPT_5_6_SOL_PRICING,
   GPT_5_6_TERRA_PRICING,
+  CLAUDE_FABLE_5_2_PRICING,
   CLAUDE_FABLE_5_1_PRICING,
   CLAUDE_FABLE_5_PRICING,
   CLAUDE_OPUS_5_5_PRICING,
@@ -247,6 +249,7 @@ export const DEFAULT_PRICING_FRONTIER = {
     // Common model IDs (without dates) used across providers
     // Intentional duplicates of dot-notation variants (e.g. claude-opus-4.6)
     // to cover hyphen-notation IDs (claude-opus-4-6) used by some clients
+    "claude-fable-5-2": CLAUDE_FABLE_5_2_PRICING,
     "claude-fable-5-1": CLAUDE_FABLE_5_1_PRICING,
     "claude-fable-5": CLAUDE_FABLE_5_PRICING,
     "claude-opus-5-5": CLAUDE_OPUS_5_5_PRICING,
@@ -267,6 +270,7 @@ export const DEFAULT_PRICING_FRONTIER = {
   },
   gemini: {
     "gemini-4-argon": GEMINI_4_ARGON_PROMO_PRICING,
+    "gemini-4-carbon": GEMINI_4_CARBON_PROMO_PRICING,
     "gemini-4-hydrogen": GEMINI_4_HYDROGEN_PRICING,
     "gemini-3.7-flash": GEMINI_3_7_FLASH_PROMO_PRICING,
     // Gemini 3.1 Pro — novo flagship Google (2026-03-17)

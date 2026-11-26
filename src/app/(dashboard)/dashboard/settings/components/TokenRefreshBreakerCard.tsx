@@ -2,13 +2,12 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { Button, Card, Select } from "@/shared/components";
+import { Button, Card, NumberInput, Select, whenNumber } from "@/shared/components";
 import Icon from "@/shared/components/Icon";
 import type {
   TokenRefreshBreakerScope,
   TokenRefreshBreakerSettings,
 } from "@/lib/resilience/settings";
-import { NumberField } from "./ResilienceFields";
 
 // Alias of the canonical settings shape so the host re-export stays consumed.
 export type TokenRefreshBreakerValue = TokenRefreshBreakerSettings;
@@ -52,7 +51,9 @@ function CardHeader() {
     <div className="space-y-2">
       <div className="flex items-center gap-2">
         <Icon name="refresh" size={20} className="text-primary" />
-        <h2 className="text-lg">{t("resilienceTokenRefreshTitle")}</h2>
+        <h2 className="ci-heading" data-size="lg">
+          {t("resilienceTokenRefreshTitle")}
+        </h2>
       </div>
       <div className="grid grid-cols-1 gap-2 text-xs text-text-muted sm:grid-cols-3">
         <div>
@@ -96,20 +97,22 @@ function EditFields({
           { value: "connection", label: t("resilienceTokenRefreshScopeConnection") },
         ]}
       />
-      <NumberField
+      <NumberInput
         label={t("resilienceTokenRefreshThreshold")}
         value={editing.failureThreshold}
         min={1}
         max={100}
-        onChange={(failureThreshold) => onChange({ ...editing, failureThreshold })}
+        onValueChange={whenNumber((failureThreshold) => onChange({ ...editing, failureThreshold }))}
       />
-      <NumberField
+      <NumberInput
         label={t("resilienceTokenRefreshCooldown")}
         value={cooldownMinutes}
         min={1}
         max={1440}
         suffix="min"
-        onChange={(minutes) => onChange({ ...editing, cooldownMs: minutes * 60000 })}
+        onValueChange={whenNumber((minutes) =>
+          onChange({ ...editing, cooldownMs: minutes * 60000 })
+        )}
       />
     </>
   );
@@ -119,24 +122,24 @@ function ReadOnlyFields({ value }: { value: TokenRefreshBreakerValue }) {
   const t = useTranslations("settings");
   return (
     <>
-      <div className="rounded-xl border border-border bg-bg-subtle p-4">
+      <Card.Section>
         <div className="text-xs text-text-muted">{t("resilienceTokenRefreshScopeLabel")}</div>
         <div className="mt-1 text-sm font-semibold text-text-main">
           {value.scope === "connection"
             ? t("resilienceTokenRefreshScopeConnection")
             : t("resilienceTokenRefreshScopeProvider")}
         </div>
-      </div>
-      <div className="rounded-xl border border-border bg-bg-subtle p-4">
+      </Card.Section>
+      <Card.Section>
         <div className="text-xs text-text-muted">{t("resilienceTokenRefreshThreshold")}</div>
         <div className="mt-1 text-sm font-semibold text-text-main">{value.failureThreshold}</div>
-      </div>
-      <div className="rounded-xl border border-border bg-bg-subtle p-4">
+      </Card.Section>
+      <Card.Section>
         <div className="text-xs text-text-muted">{t("resilienceTokenRefreshCooldown")}</div>
         <div className="mt-1 text-sm font-semibold text-text-main">
           {Math.round(value.cooldownMs / 60000)} min
         </div>
-      </div>
+      </Card.Section>
     </>
   );
 }

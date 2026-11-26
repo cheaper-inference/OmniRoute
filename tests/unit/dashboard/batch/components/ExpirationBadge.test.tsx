@@ -64,8 +64,8 @@ describe("ExpirationBadge", () => {
     expect(span).not.toBeNull();
     // should display the i18n key for expired
     expect(span!.textContent).toContain("expirationBadgeExpired");
-    // gray color class
-    expect(span!.className).toContain("text-text-muted");
+    // neutral badge: no status tone
+    expect(span!.getAttribute("data-tone")).toBeNull();
   });
 
   it("shows critical badge (red) when expiresAt is within 1 hour", () => {
@@ -73,8 +73,8 @@ describe("ExpirationBadge", () => {
     const el = renderBadge({ expiresAt: nowPlusSec(30 * 60) });
     const span = el.querySelector("span");
     expect(span).not.toBeNull();
-    // The outer span should have red classes
-    expect(span!.className).toContain("text-error");
+    // The badge carries the danger tone
+    expect(span!.getAttribute("data-tone")).toBe("danger");
     // Icon should be present in default variant
     const iconSpan = el.querySelector("svg.oi-icon");
     expect(iconSpan).not.toBeNull();
@@ -86,7 +86,7 @@ describe("ExpirationBadge", () => {
     const el = renderBadge({ expiresAt: nowPlusSec(4 * 3600) });
     const span = el.querySelector("span");
     expect(span).not.toBeNull();
-    expect(span!.className).toContain("text-warning");
+    expect(span!.getAttribute("data-tone")).toBe("warning");
   });
 
   it("shows normal badge (emerald) when expiresAt is between 6h and 24h", () => {
@@ -94,7 +94,7 @@ describe("ExpirationBadge", () => {
     const el = renderBadge({ expiresAt: nowPlusSec(12 * 3600) });
     const span = el.querySelector("span");
     expect(span).not.toBeNull();
-    expect(span!.className).toContain("text-success");
+    expect(span!.getAttribute("data-tone")).toBe("success");
   });
 
   it("variant=compact renders without icon", () => {
@@ -120,7 +120,7 @@ describe("ExpirationBadge", () => {
     const expiresAt = nowPlusSec(3601);
     const el = renderBadge({ expiresAt });
     const spanBefore = el.querySelector("span");
-    expect(spanBefore!.className).toContain("text-warning"); // warning tier
+    expect(spanBefore!.getAttribute("data-tone")).toBe("warning"); // warning tier
 
     // Advance fake timers by 60s so setInterval fires
     act(() => {

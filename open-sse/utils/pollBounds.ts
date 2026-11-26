@@ -12,6 +12,12 @@
 /** Longest single wait between two polls; matches MAX_POLL_RETRY_DELAY_MS in pollRetry.ts. */
 export const MAX_CALLER_POLL_INTERVAL_MS = 30_000;
 
+/**
+ * Longest single wait between two polls of a VIDEO job. A video takes minutes to render, and
+ * providers such as Agnes document one-minute polling, so callers may ask for up to 2 minutes.
+ */
+export const MAX_CALLER_VIDEO_POLL_INTERVAL_MS = 120_000;
+
 /** Longest total polling window a caller may ask for (10 minutes). */
 export const MAX_CALLER_POLL_TIMEOUT_MS = 600_000;
 
@@ -35,6 +41,11 @@ export function clampCallerMs(value: unknown, fallback: number, ceiling: number)
 
 export function clampPollIntervalMs(value: unknown, fallback: number): number {
   return clampCallerMs(value, fallback, MAX_CALLER_POLL_INTERVAL_MS);
+}
+
+/** Same as clampPollIntervalMs with the video ceiling (MAX_CALLER_VIDEO_POLL_INTERVAL_MS). */
+export function clampVideoPollIntervalMs(value: unknown, fallback: number): number {
+  return clampCallerMs(value, fallback, MAX_CALLER_VIDEO_POLL_INTERVAL_MS);
 }
 
 export function clampPollTimeoutMs(value: unknown, fallback: number): number {

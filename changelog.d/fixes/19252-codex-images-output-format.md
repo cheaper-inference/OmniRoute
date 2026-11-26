@@ -1,0 +1,1 @@
+- fix(images): Codex GPT Image routes now reject a non-PNG `output_format` with a clear 400 instead of silently returning PNG (#19252)

@@ -253,9 +253,12 @@ test("planner uses the provider/timestamp indexes, no table scan", () => {
   );
 
   const modelPlan = queryPlan(stats.MODEL_CALL_STATS_SQL, params);
-  assert.ok(
-    modelPlan.includes("USING COVERING INDEX idx_cl_health_matrix_cover"),
-    `model query must use idx_cl_health_matrix_cover, got: ${modelPlan}`
+  // The wire-observation predicate reads request_type, which the covering index does not hold,
+  // so the planner bounds the window with a timestamp index and reads each row once.
+  assert.match(
+    modelPlan,
+    /SEARCH c USING (COVERING )?INDEX idx_cl_(timestamp|provider_timestamp|health_matrix_cover) \(/,
+    `model query must bound the window by an index, got: ${modelPlan}`
   );
   assert.ok(
     !modelPlan.includes("SCAN TABLE"),
@@ -331,4 +334,38 @@ test("a keyless search provider keeps its stats without a connection row", () =>
   assert.ok(m, "keyless search provider model row is present");
   assert.equal(m.requests, 1);
   assert.equal(m.model, "searxng-search/web");
+});
+
+test("model aggregate filters wire observations on the candidate row, without a self-lookup", () => {
+  const params = {
+    since: stats.buildProviderStatsSince(),
+    keylessProviderIds: JSON.stringify(Object.keys(NOAUTH_PROVIDERS)),
+  };
+  const plan = queryPlan(stats.MODEL_CALL_STATS_SQL, params);
+  // id is the primary key: a lookup by id on call_logs re-reads the row the scan already holds.
+  assert.ok(
+    !plan.includes("sqlite_autoindex_call_logs_1"),
+    `model query must not probe call_logs by primary key per row, got: ${plan}`
+  );
+});
+
+test("model aggregate counts NULL request_type and skips upstream_http_attempt rows", () => {
+  insertConnection("wire-conn", "openai");
+  insertCallLog({ id: "logical-null", model: "openai/gpt-4.1" });
+  insertCallLog({ id: "logical-typed", model: "openai/gpt-4.1" });
+  insertCallLog({ id: "wire-1", model: "openai/gpt-4.1" });
+  const db = core.getDbInstance();
+  db.prepare("UPDATE call_logs SET request_type = 'chat' WHERE id = 'logical-typed'").run();
+  db.prepare(
+    "UPDATE call_logs SET request_type = 'upstream_http_attempt' WHERE id = 'wire-1'"
+  ).run();
+
+  const rows = stats.getModelCallStats(stats.buildProviderStatsSince());
+  const row = rows.find((r) => r.provider === "openai" && r.model === "openai/gpt-4.1");
+
+  assert.equal(
+    row?.requests,
+    2,
+    "NULL and ordinary request types count; the wire attempt does not"
+  );
 });

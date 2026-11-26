@@ -112,8 +112,13 @@ test("embedded CLIProxyAPI uses public health and dedicated model credentials", 
   const status = await supervisor.start();
   assert.equal(status.state, "running", "the public /healthz probe must accept the fake service");
 
+  // Model sync is non-blocking. Observing the request does not mean its response
+  // has been consumed and persisted yet, especially on a busy CI runner.
   const deadline = Date.now() + 3_000;
-  while (modelAuthorizationHeaders.length === 0 && Date.now() < deadline) {
+  while (
+    !getServiceModels("cliproxy").some((model) => model.id === "cliproxy/fake-cpa-model") &&
+    Date.now() < deadline
+  ) {
     await new Promise((resolve) => setTimeout(resolve, 25));
   }
 

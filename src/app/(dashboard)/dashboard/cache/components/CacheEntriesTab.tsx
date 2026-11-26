@@ -13,6 +13,7 @@ import {
 } from "@omniroute/ui-kit/table";
 import Button from "@/shared/components/Button";
 import Input from "@/shared/components/Input";
+import Pager from "@/shared/components/Pager";
 
 interface CacheEntry {
   id: string;
@@ -125,12 +126,7 @@ export default function CacheEntriesTab() {
         ) : !loading && entries.length === 0 ? (
           <div className="py-8 text-center text-sm text-text-muted">{t("noEntries")}</div>
         ) : (
-          <Table
-            className="text-sm"
-            scrollbarLabel={t("entries")}
-            scrollLabel={t("entries")}
-            containerClassName="rounded-none border-0"
-          >
+          <Table scrollbarLabel={t("entries")} scrollLabel={t("entries")} variant="plain">
             <TableHeader>
               <TableRow>
                 <TableHead>{t("signature")}</TableHead>
@@ -177,27 +173,14 @@ export default function CacheEntriesTab() {
           </Table>
         )}
         {pagination.totalPages > 1 ? (
-          <div className="flex items-center justify-center gap-2 py-3">
-            <Button
-              variant="secondary"
-              size="sm"
-              icon="chevron_left"
-              aria-label={tc("previousPage")}
-              onClick={() => fetchEntries(pagination.page - 1)}
-              disabled={pagination.page <= 1}
-            />
-            <span className="text-sm text-text-muted">
-              {pagination.page} / {pagination.totalPages}
-            </span>
-            <Button
-              variant="secondary"
-              size="sm"
-              icon="chevron_right"
-              aria-label={tc("nextPage")}
-              onClick={() => fetchEntries(pagination.page + 1)}
-              disabled={pagination.page >= pagination.totalPages}
-            />
-          </div>
+          <Pager
+            variant="summary"
+            className="py-3"
+            page={pagination.page}
+            pageCount={pagination.totalPages}
+            onPageChange={(next) => fetchEntries(next)}
+            labels={{ summary: (current, count) => `${current} / ${count}` }}
+          />
         ) : null}
       </TableLoadingRegion>
     </div>

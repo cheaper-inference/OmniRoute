@@ -69,6 +69,19 @@ describe("OAuth response URL contracts", () => {
     );
   });
 
+  it("opens Cline's auth tab without an opener so the callback URL stays on screen (#20576)", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => response({ authUrl: "https://example.test/authorize" }))
+    );
+    await render("cline");
+    expect(window.open).toHaveBeenCalledExactlyOnceWith(
+      "https://example.test/authorize",
+      "oauth_auth",
+      "noopener"
+    );
+  });
+
   it("preserves valid browser authorization URLs", async () => {
     vi.stubGlobal(
       "fetch",

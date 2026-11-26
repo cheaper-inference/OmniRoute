@@ -21,7 +21,11 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
 import { load } from "js-yaml";
-import { botIdentity, candidateRef } from "../../../scripts/merge-queue/contracts.mjs";
+import {
+  baseCheckRef,
+  botIdentity,
+  candidateRef,
+} from "../../../scripts/merge-queue/contracts.mjs";
 import { signingKeyPath } from "../../../scripts/merge-queue/compose.mjs";
 import { TICK_ACTIONS } from "../../../scripts/merge-queue/tick.mjs";
 import { evaluateAdmission } from "../../../scripts/quality/admission-verdict.mjs";
@@ -1613,6 +1617,10 @@ for (const [profile, file] of Object.entries(PROFILES)) {
     for (const [id, rule] of Object.entries(rules)) {
       if (rule.when === "pr") {
         assert.equal(scheduled[id], false, `${id} is pull-request only`);
+      } else if (rule.when === "omni-queue-base-check") {
+        // This context is a batch candidate (candidateSource "trailer"): the base-check shards
+        // skip, and the admission below passes with them skipped.
+        assert.equal(scheduled[id], false, `${id} runs on a base-check candidate only`);
       } else if (rule.disposition === "required") {
         assert.equal(scheduled[id], true, `${profile}:${id} must run on a candidate push`);
       }
@@ -1814,7 +1822,7 @@ for (const [profile, file] of Object.entries(PROFILES)) {
 test("quality.yml: merge integrity and impact selection compare against the candidate base", () => {
   const wf = loadWorkflow("quality.yml");
   const mi = wf.jobs["merge-integrity"];
-  assert.equal(mi.needs, undefined, "merge-integrity keeps running on a queue-draft edit run");
+  assert.equal(mi.needs, undefined, "merge-integrity reads no classifier output");
   assert.equal(mi.steps[0].with["fetch-depth"], 0);
   const idx = mi.steps.findIndex((s) => s.id === "candidate");
   assert.equal(mi.steps[idx].if, "startsWith(github.ref, 'refs/heads/omni-queue/')");
@@ -1850,26 +1858,45 @@ test("quality.yml: merge integrity and impact selection compare against the cand
   assert.equal(render(tia.env.GITHUB_BASE_SHA, pr), "", "PRs keep GITHUB_BASE_REF");
 });
 
-test("quality.yml: a base-check candidate runs the whole unit suite in the TIA step", (t) => {
+test("quality.yml: a base-check candidate runs the whole unit suite in the shards, not the TIA step", (t) => {
   const wf = loadWorkflow("quality.yml");
   assert.equal(wf.jobs.changes.outputs.candidateSource, "${{ steps.candidate.outputs.SOURCE }}");
   const tia = wf.jobs["fast-gates"].steps.find(
     (s) => s.name === "Impacted unit tests (TIA subset; blocking)"
   );
   assert.equal(tia.env.CANDIDATE_SOURCE, "${{ needs.changes.outputs.candidateSource }}");
-  // Base-check (SOURCE=self): no base-relative selection (it would be empty), the full suite.
+  // Base-check (SOURCE=self): no base-relative selection (it would be empty) and no unsharded
+  // suite either: the selection marker, and a pointer to the base-check-unit shards.
   const baseCheck = runStep(t, tia, { CANDIDATE_SOURCE: "self", GITHUB_BASE_SHA: CANDIDATE_SHA });
   assert.equal(baseCheck.code, 0, baseCheck.stderr);
-  assert.deepEqual(baseCheck.npmArgs, ["run", "test:unit:ci"]);
+  assert.equal(baseCheck.npmArgs, null, "the unsharded suite never runs in fast-gates");
   assert.equal(baseCheck.args, null, "the selector never runs on a base-check");
   assert.equal(
     readFileSync(join(baseCheck.dir, "tia-selection.txt"), "utf8"),
     "__OMNI_QUEUE_BASE_CHECK__\n"
   );
-  assert.match(baseCheck.summary, /omni-queue base-check — full unit suite/);
-  // A failing test on the bare base fails this same check (what classify compares).
-  const red = runStep(t, tia, { CANDIDATE_SOURCE: "self", FAKE_NPM_RC: "3" });
+  assert.match(baseCheck.summary, /omni-queue base-check — full unit suite in the base-check-unit/);
+  // The shards run the suite: a failing test on the bare base fails a shard, which is the same
+  // check for classify ("Fast Quality Gates (N/4)" → "Fast Quality Gates").
+  const shards = wf.jobs["base-check-unit"];
+  const shardStep = shards.steps.find((s) => s.env?.TEST_SHARD);
+  const green = runStep(t, shardStep, { TEST_SHARD: "2/4" });
+  assert.equal(green.code, 0, green.stderr);
+  assert.deepEqual(green.npmArgs, ["run", "test:unit:ci:shard"]);
+  const red = runStep(t, shardStep, { TEST_SHARD: "2/4", FAKE_NPM_RC: "3" });
   assert.equal(red.code, 3);
+  const base = pushContext(`refs/heads/${baseCheckRef("release/v3.8.54", CANDIDATE_SHA)}`);
+  base.__outputs.changes = {
+    ...base.__outputs.changes,
+    candidateBase: CANDIDATE_SHA,
+    candidateSource: "self",
+  };
+  assert.equal(scheduledJobs(wf, base)["base-check-unit"], true, "a base check runs the shards");
+  assert.equal(
+    scheduledJobs(wf, pushContext(CANDIDATE_REF))["base-check-unit"],
+    false,
+    "a batch does not"
+  );
   // Control: a batch candidate (or a PR) still selects, and an empty selection skips.
   for (const source of ["trailer", ""]) {
     const batch = runStep(t, tia, { CANDIDATE_SOURCE: source, GITHUB_BASE_SHA: BASE_SHA });
@@ -3038,6 +3065,161 @@ test("T13-f: the test-masking probe ignores git configuration and templates pass
     assert.doesNotMatch(result.stderr, /hostile hook ran/);
   } finally {
     restore();
+  }
+});
+
+// ───────────────────────────── PR title/body edits and retargets ─────────────────────────────
+
+// `pull_request` `edited` fires for a title/body edit (CodeRabbit, the Blacksmith footer, Mergify's
+// queue summary: several per PR) and for a base change (a retarget, Hard Rule 21). A title/body
+// edit must run nothing and cancel nothing; a retarget must validate the head on its new base
+// exactly like `synchronize`, in the shared group (cancelling the stale run on the old base).
+// The three workflows whose checks a consumer reads by name on a PR head follow that rule.
+const EDIT_AWARE_WORKFLOWS = ["ci.yml", "quality.yml", "api-route-typecheck.yml"];
+const mergifyConfig = load(readText(".mergify.yml"));
+/**
+ * Every check name some consumer reads by name: the branch rules and the admission policy (the
+ * gates), omni-queue (PR gates, candidate checks) and Mergify's merge conditions.
+ */
+const CONSUMED_CHECKS = new Set([
+  ...Object.values(policy.profiles).map((profile) => profile.checkName),
+  ...queueConfig.prChecksRequired,
+  ...queueConfig.requiredChecks,
+  ...queueConfig.aggregateChecks,
+  // #20616 retired the Mergify queue, leaving only commands_restrictions in .mergify.yml.
+  ...(mergifyConfig.queue_rules ?? [])
+    .flatMap((rule) => rule.merge_conditions)
+    .filter((c) => typeof c === "string" && c.startsWith("check-success="))
+    .map((c) => c.slice("check-success=".length)),
+]);
+const RETARGET = { ref: { from: "release/v3.8.54" }, sha: { from: "c".repeat(40) } };
+const TITLE_BODY = {
+  body: { body: { from: "old body" } },
+  title: { title: { from: "old title" } },
+  "empty previous body": { body: { from: "" } },
+  "null previous body": { body: { from: null } },
+  "title and body": { title: { from: "t" }, body: { from: "b" } },
+};
+const EDITED_PRS = {
+  "a ready PR": () => prContext("fix/example"),
+  "an ordinary draft": () => prContext("fix/example", { draft: true }),
+  "a Mergify queue draft": () => prContext(MERGIFY_HEAD, { draft: true, user: MERGIFY_USER }),
+};
+
+/** `base` as an `edited` event explained by `changes` (run `runId`). */
+function editedContext(base, changes, runId = "4243") {
+  return {
+    ...base,
+    github: {
+      ...base.github,
+      action: "edited",
+      run_id: runId,
+      event: { ...base.github.event, action: "edited", changes },
+    },
+  };
+}
+
+/**
+ * The check name job `id` reports when it runs under `ctx`, its dependencies as `scheduled` says
+ * (a scheduledJobs result): success when scheduled, skipped otherwise.
+ */
+function jobName(wf, id, ctx, scheduled) {
+  const needs = Object.fromEntries(
+    [wf.jobs[id].needs ?? []]
+      .flat()
+      .map((dep) => [
+        dep,
+        { result: scheduled[dep] ? "success" : "skipped", outputs: ctx.__outputs?.[dep] ?? {} },
+      ])
+  );
+  return render(wf.jobs[id].name ?? id, { ...ctx, needs });
+}
+
+/** The check name GitHub gives job `id` when it is skipped: a `name:` expression is not evaluated. */
+function skippedCheckName(id, job) {
+  const name = job.name ?? id;
+  const whole = /^\s*\$\{\{([\s\S]*)\}\}\s*$/.exec(String(name));
+  return whole ? whole[1].trim() : String(name);
+}
+
+for (const file of EDIT_AWARE_WORKFLOWS) {
+  const wf = loadWorkflow(file);
+  const group = (ctx) => render(wf.concurrency.group, ctx);
+
+  test(`${file}: a PR title/body edit runs no job, in a group of its own, under no consumed name`, () => {
+    assert.ok(triggers(wf).pull_request.types.includes("edited"), "retargets stay observable");
+    assert.equal(wf.concurrency["cancel-in-progress"], true);
+    for (const [pr, make] of Object.entries(EDITED_PRS)) {
+      for (const [edit, changes] of Object.entries(TITLE_BODY)) {
+        const label = `${file}, ${pr}, ${edit}`;
+        // Every job is skipped, so `changes` (when there is one) exposes no outputs.
+        const ctx = { ...editedContext(make(), changes), __outputs: {} };
+        const scheduled = scheduledJobs(wf, ctx);
+        assert.deepEqual(
+          Object.keys(scheduled).filter((id) => scheduled[id]),
+          [],
+          `${label}: no job runs`
+        );
+        // Its own group: it cancels neither the real run nor another edit run.
+        assert.notEqual(group(ctx), group(make()), `${label}: shares the real run's group`);
+        assert.notEqual(group(ctx), group(editedContext(make(), changes, "4244")), label);
+        // Each skipped job leaves a check named by its unevaluated name: never a consumed name,
+        // and not one either if GitHub ever evaluated it.
+        for (const [id, job] of Object.entries(wf.jobs)) {
+          for (const name of [skippedCheckName(id, job), jobName(wf, id, ctx, scheduled)]) {
+            assert.ok(!CONSUMED_CHECKS.has(name), `${label}: skipped ${id} is named ${name}`);
+          }
+        }
+      }
+    }
+  });
+
+  test(`${file}: a retarget runs exactly what a push does, in the shared group`, () => {
+    assert.ok(triggers(wf).pull_request.types.includes("edited"), "a retarget starts a run");
+    for (const [pr, make] of Object.entries(EDITED_PRS)) {
+      const push = make();
+      const expected = scheduledJobs(wf, push);
+      const names = (ctx, scheduled) =>
+        Object.keys(wf.jobs)
+          .filter((id) => scheduled[id])
+          .map((id) => jobName(wf, id, ctx, scheduled));
+      for (const changes of [
+        { base: RETARGET },
+        { base: RETARGET, body: { from: "old body" } },
+        { base: RETARGET, title: { from: "old title" } },
+        {}, // an `edited` event with no known change: the stricter reading, run everything
+      ]) {
+        const label = `${file}, ${pr}, ${Object.keys(changes).join("+") || "no known change"}`;
+        const ctx = editedContext(push, changes);
+        const scheduled = scheduledJobs(wf, ctx);
+        assert.deepEqual(scheduled, expected, label);
+        assert.equal(group(ctx), group(push), `${label}: cancels the stale run on the old base`);
+        assert.deepEqual(names(ctx, scheduled), names(push, expected), label);
+      }
+    }
+    // The control: a ready PR's push does produce the consumed checks of this workflow.
+    const ready = prContext("fix/example");
+    const readyJobs = scheduledJobs(wf, ready);
+    const produced = Object.keys(wf.jobs)
+      .filter((id) => readyJobs[id])
+      .map((id) => jobName(wf, id, ready, readyJobs))
+      .filter((name) => CONSUMED_CHECKS.has(name));
+    assert.ok(produced.length > 0, `${file} produces a consumed check on a ready PR`);
+  });
+}
+
+test("every check omni-queue reads on a PR head comes from a workflow that handles `edited`", () => {
+  const produced = new Set();
+  for (const file of EDIT_AWARE_WORKFLOWS) {
+    const wf = loadWorkflow(file);
+    const ready = prContext("fix/example");
+    const scheduled = scheduledJobs(wf, ready);
+    for (const id of Object.keys(wf.jobs).filter((id) => scheduled[id])) {
+      produced.add(jobName(wf, id, ready, scheduled));
+    }
+  }
+  for (const name of queueConfig.prChecksRequired) {
+    assert.ok(produced.has(name), `${name}: add its workflow to EDIT_AWARE_WORKFLOWS`);
   }
 });
 

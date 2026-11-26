@@ -57,7 +57,7 @@ opened. That **does not stop development**:
 Check for an open freeze before assuming the branch you want is mergeable:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 Merge mechanics (owner `queue` label → Mergify) are documented in

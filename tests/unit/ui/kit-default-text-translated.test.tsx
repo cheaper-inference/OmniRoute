@@ -188,6 +188,35 @@ describe("CodePreview adapter", () => {
     expect(document.querySelector("pre")!.getAttribute("aria-label")).toBe("⟦common.code⟧");
   });
 
+  // Kit `inline-code`: a one-line command or URL is the headerless block, not a hand-made
+  // <code> + copy button with its own copied state and role="status".
+  it("draws a one-line command without the header and still translates what is left", async () => {
+    stubClipboard(async () => {});
+    const { rerender } = render(
+      <CodePreview showHeader={false} variant="surface" code="npx omniroute@latest" />
+    );
+    const block = document.querySelector<HTMLElement>(".ci-code-preview")!;
+    expect(block.getAttribute("data-header")).toBe("false");
+    expect(block.querySelector(".ci-code-preview__header")).toBeNull();
+    expect(block.querySelector(".ci-code-preview__number")).toBeNull();
+    // No file name or language to fall back on: the region gets the translated generic name.
+    expect(block.querySelector("pre")!.getAttribute("aria-label")).toBe("⟦common.code⟧");
+    // The copy button follows the code, so the tab order matches what is drawn.
+    expect(block.querySelector("pre")!.nextElementSibling).toBe(copyButton());
+    expect(copyButton().textContent).toBe("⟦common.copy⟧");
+    await act(async () => {
+      fireEvent.click(copyButton());
+    });
+    expect(copyButton().textContent).toBe("⟦common.copied⟧");
+    expect(block.querySelector("[aria-live=polite]")!.textContent).toBe(
+      "⟦common.codeCopiedAnnouncement⟧"
+    );
+    rerender(
+      <CodePreview showHeader={false} variant="surface" code="npx x" codeLabel="Update command" />
+    );
+    expect(document.querySelector("pre")!.getAttribute("aria-label")).toBe("Update command");
+  });
+
   it("shows the translated error when the copy fails", async () => {
     stubClipboard(async () => {
       throw new Error("denied");
