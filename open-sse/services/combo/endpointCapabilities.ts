@@ -105,7 +105,8 @@ export function targetSupportsEndpoint(
   const webSupport = webEndpointSupport(provider, endpoint);
   if (webSupport !== null) return webSupport;
   if (endpoint === "images" || endpoint === "image-edits") {
-    return Boolean(getImageModelEntry(modelStr));
+    const entry = getImageModelEntry(modelStr);
+    return entry !== null && (endpoint === "image-edits" || entry.editOnly !== true);
   }
   const modelId = modelStr.includes("/") ? modelStr.slice(modelStr.indexOf("/") + 1) : modelStr;
   const mediaCatalog = MEDIA_ENDPOINT_CATALOGS[endpoint];

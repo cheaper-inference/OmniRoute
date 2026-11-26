@@ -30,6 +30,8 @@ export interface ImageModelEntry {
   name: string;
   inputModalities?: string[];
   imageRequired?: boolean;
+  /** Only the image edits endpoint can serve this model. */
+  editOnly?: boolean;
   description?: string;
   isMarket?: boolean;
   kieFluxKontextModel?: "flux-kontext-pro" | "flux-kontext-max";
@@ -543,7 +545,20 @@ export const IMAGE_PROVIDERS: Record<string, ImageProviderConfig> = {
       { id: "openai/gpt-5.4-image-2", name: "GPT Image 2 (via OpenRouter)" },
       { id: "openai/gpt-5-image-mini", name: "GPT Image 1 Mini (via OpenRouter)" },
       { id: "google/gemini-3.1-flash-image-preview", name: "Nano Banana 2 (via OpenRouter)" },
+      {
+        id: "google/gemini-nano-banana-2.1",
+        name: "Nano Banana 2.1 (via OpenRouter)",
+        inputModalities: ["text", "image"],
+      },
       { id: "google/gemini-3-pro-image-preview", name: "Nano Banana Pro (via OpenRouter)" },
+      {
+        id: "krea/k3-edit",
+        name: "Krea K3 Edit (via OpenRouter)",
+        inputModalities: ["text", "image"],
+        imageRequired: true,
+        editOnly: true,
+        description: "Image editing only. Requires a reference image.",
+      },
       { id: "black-forest-labs/flux.2-max", name: "FLUX.2 Max (via OpenRouter)" },
       { id: "black-forest-labs/flux.2-pro", name: "FLUX.2 Pro (via OpenRouter)" },
       { id: "black-forest-labs/flux.2-flex", name: "FLUX.2 Flex (via OpenRouter)" },
