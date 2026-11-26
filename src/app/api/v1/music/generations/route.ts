@@ -25,6 +25,9 @@ import {
 import { getSpecialtyModelsResponse } from "@/app/api/v1/_shared/specialtyCatalog";
 import { getComboByName } from "@/lib/db/combos";
 import { runModelEndpointCombo } from "@/lib/combos/modelEndpointCombo";
+import { trackMediaWrites } from "@/lib/usage/callLogApiKeyContext";
+import { recordSpecialtyCallLog } from "@/lib/usage/specialtyRequestAccounting";
+import type { ApiKeyPolicyResult } from "@/shared/utils/apiKeyPolicy";
 
 export const dynamic = "force-dynamic";
 
@@ -51,7 +54,7 @@ async function dispatchMusicModel(
   request: Request,
   body: Record<string, unknown> & { model: string; duration?: unknown },
   allowedConnections: string[] | null,
-  apiKeyId: string | undefined,
+  apiKeyInfo: ApiKeyPolicyResult["apiKeyInfo"],
   startTime: number
 ) {
   const mismatch = await getRequestedModelEndpointMismatch(body.model, "music");
@@ -87,25 +90,42 @@ async function dispatchMusicModel(
     credentials = local.credentials;
   }
 
-  const result = await handleMusicGeneration({
-    prepareFalInput: getFalCompatibilityPreparer(),
-    body,
-    credentials,
-    log,
-    signal: request.signal,
-  });
+  const endpoint = "/v1/music/generations";
+  const identity = {
+    apiKeyId: apiKeyInfo?.id ?? null,
+    apiKeyName: apiKeyInfo?.name ?? null,
+    connectionId: credentials?.connectionId ?? null,
+  };
+  const { result, mediaWrites } = await trackMediaWrites(identity, endpoint, () =>
+    handleMusicGeneration({
+      prepareFalInput: getFalCompatibilityPreparer(),
+      body,
+      credentials,
+      log,
+      signal: request.signal,
+    })
+  );
   if (!result.success) {
     return failedMediaGenerationResponse(result, "Music generation provider error");
   }
   await clearRecoveredProviderState(credentials);
+  if (!mediaWrites.callLog) {
+    await recordSpecialtyCallLog({ ...identity, provider, model: body.model, endpoint, startTime });
+  }
   return successfulMediaGenerationResponse({
     result,
     billingMode: "audio",
     provider,
     model: body.model,
     startTime,
-    duration: body.duration,
-    apiKeyId,
+    duration:
+      apiKeyInfo && provider === "elevenlabs" && typeof body.music_length_ms === "number"
+        ? body.music_length_ms / 1000
+        : body.duration,
+    apiKeyId: identity.apiKeyId,
+    musicAccounting: apiKeyInfo
+      ? { ...identity, usage: (result.data as { usage?: unknown } | undefined)?.usage }
+      : undefined,
   });
 }
 
@@ -144,7 +164,7 @@ async function postHandler(request, context) {
             request,
             routedBody as Record<string, unknown> & { model: string; duration?: unknown },
             allowedConnections,
-            scope.policy.apiKeyInfo?.id,
+            scope.policy.apiKeyInfo,
             startTime
           ),
       });
@@ -154,7 +174,7 @@ async function postHandler(request, context) {
     request,
     body,
     scope.allowedConnections,
-    scope.policy.apiKeyInfo?.id,
+    scope.policy.apiKeyInfo,
     startTime
   );
 }

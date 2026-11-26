@@ -19,6 +19,8 @@ import { errorResponse, sanitizeErrorMessage } from "../utils/error.ts";
 import { attachOmniRouteMetaHeaders } from "@/domain/omnirouteResponseMeta";
 import { generateRequestId } from "@/shared/utils/requestId";
 import { saveCallLog } from "@/lib/usageDb";
+import { getCallLogApiKeyContext } from "@/lib/usage/callLogApiKeyContext";
+import { recordSpecialtyRequestUsage } from "@/lib/usage/specialtyRequestAccounting";
 import type { SystemOneTarget } from "../config/systemOneRegistry.ts";
 import {
   buildCloudflareDecisionRequest,
@@ -391,6 +393,19 @@ export async function handleSystemOneProxy(options: SystemOneProxyOptions): Prom
       return errorResponse(status, upstreamError || `Provider returned HTTP ${status}`);
     }
 
+    await recordSpecialtyRequestUsage({
+      ...getCallLogApiKeyContext(),
+      endpoint: "/v1/systemone",
+      provider,
+      model: answeredModel,
+      connectionId: options.credentials?.connectionId,
+      startTime,
+      tokens: {
+        input_tokens: usage?.input_tokens,
+        output_tokens: usage?.output_tokens,
+        cost_usd: usage?.cost,
+      },
+    });
     return buildSuccessResponse(parsed, {
       provider,
       model: answeredModel,

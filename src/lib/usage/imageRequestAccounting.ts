@@ -13,11 +13,12 @@
  *    provider handler writes (request-scoped, see callLogApiKeyContext);
  *  - on success, records exact upstream USD or a measured tariff snapshot;
  *  - debits the key once and retains the same cost/request id for response headers.
- * Unknown costs are never advertised as free. Preserve the existing image-only
- * missing-tariff exemption; a pricing-store failure still retains usage evidence.
+ * A missing tariff still allows usage attribution and preserves the key's
+ * budget eligibility. Pricing-store failures keep their existing budget handling.
  */
 
-import { runWithCallLogApiKeyContext } from "./callLogApiKeyContext";
+import { trackMediaWrites } from "./callLogApiKeyContext";
+import { recordSpecialtyCallLog } from "./specialtyRequestAccounting";
 import { priceMediaRequest, recordMediaRequest, type MediaBill } from "./mediaRequestAccounting";
 import { generateRequestId } from "@/shared/utils/requestId";
 
@@ -83,7 +84,8 @@ export async function runImageRequestWithAccounting<T>(
   const apiKeyId = accounting.apiKeyInfo?.id || null;
   const apiKeyName = accounting.apiKeyInfo?.name || null;
 
-  const result = await runWithCallLogApiKeyContext({ apiKeyId, apiKeyName, connectionId }, attempt);
+  const identity = { ...accounting, apiKeyId, apiKeyName, connectionId };
+  const { result, mediaWrites } = await trackMediaWrites(identity, accounting.endpoint, attempt);
 
   const usage = upstreamUsageOf(result);
   if ((result as { success?: unknown } | null)?.success === true) {
@@ -99,20 +101,13 @@ export async function runImageRequestWithAccounting<T>(
       })),
       requestId: generateRequestId(),
     };
-    // Do not expand budget enforcement on previously exempt unpriced images.
-    // The response omits the cost header rather than claiming a zero-cost call.
-    if (bill.costUsd !== null || bill.pricingFailed)
-      await recordMediaRequest(
-        {
-          ...accounting,
-          model: localModel,
-          connectionId,
-          apiKeyId,
-          apiKeyName,
-          requestId: bill.requestId,
-        },
-        bill
-      );
+    const attributed = { ...identity, model: localModel, requestId: bill.requestId };
+    if (!mediaWrites.usage && (apiKeyId || bill.costUsd !== null || bill.pricingFailed)) {
+      await recordMediaRequest(attributed, bill, {
+        enforceUnpricedBudget: bill.pricingFailed === true,
+      });
+    }
+    if (!mediaWrites.callLog) await recordSpecialtyCallLog(attributed);
     if (result && typeof result === "object") bills.set(result, bill);
     if (payload && typeof payload === "object") bills.set(payload, bill);
   }

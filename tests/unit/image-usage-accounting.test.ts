@@ -272,11 +272,10 @@ test("/v1/images/edits records usage and call_logs against the key and the selec
   assert.equal(logs[0].connection_id, connection.id);
 });
 
-test("an image call whose upstream reports no usage does not lock a limited key through an unpriced $0 row", async () => {
+test("an image without usage or a tariff is counted without locking the limited key", async () => {
   // No pricing row for the model (the fresh-install default for most image
-  // models) and no `usage` in the upstream body. A zero-token row here would
-  // trip the fail-closed guard for unpriced usage (#12341) and block the key
-  // for the rest of the window, so the call is attributed in call_logs only.
+  // models) and no `usage` in the upstream body. The request counts as usage
+  // and preserves the existing exemption from the unpriced budget guard.
   const connection = await seedConnection("openai");
   const key = await createLimitedKey(100);
   globalThis.fetch = async () =>
@@ -287,7 +286,13 @@ test("an image call whose upstream reports no usage does not lock a limited key 
 
   const response = await imageRoute.POST(generationRequest(key.key, "openai/gpt-image-2"));
   assert.equal(response.status, 200);
-  assert.deepEqual(usageRows(), []);
+  const rows = usageRows();
+  assert.equal(rows.length, 1);
+  assert.equal(rows[0].api_key_id, key.id);
+  assert.equal(rows[0].connection_id, connection.id);
+  assert.equal(rows[0].endpoint, "/v1/images/generations");
+  assert.equal(rows[0].tokens_input, 0);
+  assert.equal(rows[0].tokens_output, 0);
   const status = await spendOf(key.key);
   assert.equal(status.weeklyExceeded, false);
   assert.equal(status.weeklyHasUnpricedUsage, false);
@@ -300,8 +305,8 @@ test("an image call whose upstream reports no usage does not lock a limited key 
 
 test("an image call with usage but no pricing row is logged without locking the limited key", async () => {
   // A successful image response can report tokens before OmniRoute has a pricing
-  // row for that model. Do not persist that row: apiKeyUsageLimits treats any
-  // unpriced usage as fail-closed and would reject the key's next request.
+  // row for that model. Keep the observed tokens and the existing exemption
+  // from the unpriced budget guard.
   const connection = await seedConnection("openai");
   const key = await createLimitedKey(100);
   globalThis.fetch = async () =>
@@ -315,7 +320,13 @@ test("an image call with usage but no pricing row is logged without locking the 
 
   const response = await imageRoute.POST(generationRequest(key.key, "openai/gpt-image-2"));
   assert.equal(response.status, 200);
-  assert.deepEqual(usageRows(), []);
+  const rows = usageRows();
+  assert.equal(rows.length, 1);
+  assert.equal(rows[0].api_key_id, key.id);
+  assert.equal(rows[0].connection_id, connection.id);
+  assert.equal(rows[0].endpoint, "/v1/images/generations");
+  assert.equal(rows[0].tokens_input, 50);
+  assert.equal(rows[0].tokens_output, 25_000);
   const status = await spendOf(key.key);
   assert.equal(status.weeklySpentUsd, 0);
   assert.equal(status.weeklyExceeded, false);
@@ -385,7 +396,11 @@ for (const withUsage of [false, true]) {
     );
     assert.equal(chat.status, 200, await chat.text());
     assert.equal(hits.length, 2);
-    assert.equal(usageRows().filter((row) => row.model === "gpt-image-2").length, 0);
+    const imageRows = usageRows().filter((row) => row.model === "gpt-image-2");
+    assert.equal(imageRows.length, 1);
+    assert.equal(imageRows[0].api_key_id, key.id);
+    assert.equal(imageRows[0].connection_id, connection.id);
+    assert.equal(imageRows[0].tokens_output, withUsage ? 25_000 : 0);
     const status = await spendOf(key.key);
     assert.equal(status.weeklyHasUnpricedUsage, false);
     const logs = await callLogRows("/v1/images/generations");

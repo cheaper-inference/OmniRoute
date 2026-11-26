@@ -8,7 +8,8 @@ import {
 } from "@/app/api/v1/_shared/rateLimit";
 import { buildErrorBody, sanitizeErrorMessage } from "@omniroute/open-sse/utils/error.ts";
 import { CORS_HEADERS, handleCorsOptions } from "@/shared/utils/cors";
-import { enforceApiKeyPolicy } from "@/shared/utils/apiKeyPolicy";
+import { enforceApiKeyPolicy, type ApiKeyPolicyResult } from "@/shared/utils/apiKeyPolicy";
+import { recordUnpricedSpecialtyRequest } from "@/lib/usage/specialtyRequestAccounting";
 import {
   isKeyScopeBlockedCredentials,
   keyScopeBlockedResponse,
@@ -29,6 +30,7 @@ type ElevenLabsCredentials = {
   apiKey?: string | null;
   accessToken?: string | null;
   allExpired?: boolean;
+  connectionId?: string | null;
 };
 
 export function elevenLabsOptionsResponse(): Response {
@@ -57,8 +59,11 @@ export async function proxyElevenLabsRequest(
     contentType?: string;
     /** Internal combo dispatch already performed policy + connection-scope checks. */
     preauthorizedConnections?: string[] | null;
+    apiKeyInfo?: ApiKeyPolicyResult["apiKeyInfo"];
   } = {}
 ): Promise<Response> {
+  const startTime = Date.now();
+  let apiKeyInfo = options.apiKeyInfo;
   let allowedConnections = options.preauthorizedConnections;
   if (allowedConnections === undefined) {
     const policy = await enforceApiKeyPolicy(request, options.model ?? null);
@@ -67,6 +72,7 @@ export async function proxyElevenLabsRequest(
     const scope = await resolveKeyConnectionScope(policy.apiKeyInfo);
     if (scope.rejection) return scope.rejection;
     allowedConnections = scope.allowedConnections;
+    apiKeyInfo = policy.apiKeyInfo;
   }
 
   const selection = await getProviderCredentialsWithQuotaPreflight(
@@ -106,6 +112,17 @@ export async function proxyElevenLabsRequest(
     const upstream = await fetch(upstreamUrl, { ...init, headers, signal: request.signal });
     if (upstream.ok) {
       await clearRecoveredProviderState(credentials as Record<string, unknown>);
+      if (init.method === "POST") {
+        await recordUnpricedSpecialtyRequest({
+          endpoint: `/v1${pathname}`,
+          provider: "elevenlabs",
+          model: options.model ?? pathname,
+          apiKeyId: apiKeyInfo?.id,
+          apiKeyName: apiKeyInfo?.name,
+          connectionId: credentials.connectionId,
+          startTime,
+        });
+      }
     }
     return new Response(upstream.body, {
       status: upstream.status,

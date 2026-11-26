@@ -13,6 +13,7 @@ import {
   keyScopeBlockedResponse,
   resolveKeyConnectionScope,
 } from "@/sse/services/keyConnectionScope";
+import { recordUnpricedSpecialtyRequest } from "@/lib/usage/specialtyRequestAccounting";
 import { v1ModerationSchema } from "@/shared/validation/schemas";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
 import {
@@ -37,6 +38,7 @@ export async function OPTIONS() {
  * OpenAI Moderations API compatible.
  */
 async function postHandler(request, context) {
+  const startTime = Date.now();
   let rawBody;
   try {
     rawBody = await request.json();
@@ -60,7 +62,7 @@ async function postHandler(request, context) {
   const scope = await resolveKeyConnectionScope(policy.apiKeyInfo);
   if (scope.rejection) return scope.rejection;
 
-  const { provider } = parseModerationModel(model);
+  const { provider, model: providerModel } = parseModerationModel(model);
 
   // Default to openai if no provider prefix
   const resolvedProvider = provider || "openai";
@@ -85,6 +87,15 @@ async function postHandler(request, context) {
   const response = await handleModeration({ body: { ...body, model }, credentials });
   if (response?.ok) {
     await clearRecoveredProviderState(credentials as Record<string, unknown>);
+    await recordUnpricedSpecialtyRequest({
+      endpoint: "/v1/moderations",
+      provider: resolvedProvider,
+      model: providerModel ?? model,
+      startTime,
+      apiKeyId: policy.apiKeyInfo?.id,
+      apiKeyName: policy.apiKeyInfo?.name,
+      connectionId: credentials.connectionId,
+    });
   }
   return response;
 }

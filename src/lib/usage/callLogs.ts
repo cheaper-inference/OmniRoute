@@ -958,6 +958,16 @@ export function saveCallLog(entry: any, metadataOnly = false): Promise<void> {
   }
   if (!shouldPersistToDisk || callLogSavesClosing) return Promise.resolve();
 
+  const mediaWrites = getCallLogApiKeyContext()?.mediaWrites;
+  if (
+    mediaWrites &&
+    !metadataOnly &&
+    entry.path === mediaWrites.endpoint &&
+    entry.status >= 200 &&
+    entry.status < 300
+  ) {
+    mediaWrites.callLog = true;
+  }
   const operation = saveCallLogOperation(entry, metadataOnly);
   pendingCallLogSaves.add(operation);
   void operation.then(

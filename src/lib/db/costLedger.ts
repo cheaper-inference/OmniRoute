@@ -221,9 +221,9 @@ export function aggregateLedger(
 export const SEARCH_LEDGER_SERVICE_TIER = "search";
 
 /**
- * `service_tier` marker on rerank ledger rows. Rerank writes no usage_history row, so per-key USD
- * limits read its spend from the ledger. Speech, transcription and image calls are not tagged: they
- * already have a usage_history row, and counting both would charge them twice.
+ * `service_tier` marker on rerank ledger rows. Per-key USD limits read rerank
+ * spend here, while its usage_history snapshot serves analytics. Speech,
+ * transcription and image costs are counted from usage_history for key limits.
  */
 export const MODAL_LEDGER_SERVICE_TIER = "modal";
 

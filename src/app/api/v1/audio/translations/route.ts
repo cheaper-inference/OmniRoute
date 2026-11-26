@@ -26,6 +26,7 @@ import { getUserDatabaseSettings } from "@/lib/db/databaseSettings";
 import { handleComboChat } from "@omniroute/open-sse/services/combo.ts";
 import { log } from "@omniroute/open-sse/utils/logger.ts";
 import { saveCallLog } from "@/lib/usageDb";
+import { recordSpecialtyRequestUsage } from "@/lib/usage/specialtyRequestAccounting";
 
 /**
  * Copy a multipart body, swapping only the `model` field. Combo fan-out needs one
@@ -151,6 +152,15 @@ async function translateWithModel(
 
   if (response?.ok) {
     await clearRecoveredProviderState(credentials);
+    await recordSpecialtyRequestUsage({
+      endpoint: "/v1/audio/translations",
+      provider,
+      model: resolvedModel,
+      apiKeyId,
+      apiKeyName,
+      connectionId,
+      startTime,
+    });
     // No text body / playback duration available from the multipart upload, so
     // per-second pricing cannot be applied → cost 0 (ADD-only headers, body intact).
     response = attachOmniRouteMetaToResponse(response, {

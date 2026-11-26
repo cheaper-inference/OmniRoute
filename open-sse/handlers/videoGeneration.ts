@@ -55,6 +55,11 @@ import {
   resolveComfyUiBaseUrl,
 } from "../utils/comfyuiClient.ts";
 import { saveCallLog, saveRequestUsage } from "@/lib/usageDb";
+import { getCallLogApiKeyContext, trackMediaWrites } from "@/lib/usage/callLogApiKeyContext";
+import {
+  recordSpecialtyCallLog,
+  recordSpecialtyRequestUsage,
+} from "@/lib/usage/specialtyRequestAccounting";
 import { getAllCustomModels } from "@/lib/db/models";
 import { sanitizeErrorMessage } from "../utils/error.ts";
 import {
@@ -185,7 +190,34 @@ export async function recordVideoJobCall({
 /**
  * Handle video generation request
  */
-export async function handleVideoGeneration({
+export async function handleVideoGeneration(input: Parameters<typeof handleVideoAttempt>[0]) {
+  const key = getCallLogApiKeyContext();
+  if (!key?.apiKeyId) return handleVideoAttempt(input);
+
+  const endpoint = "/v1/videos/generations";
+  const startTime = Date.now();
+  const identity = { ...key, connectionId: input.credentials?.connectionId ?? key.connectionId };
+  const { result, mediaWrites } = await trackMediaWrites(identity, endpoint, () =>
+    handleVideoAttempt(input)
+  );
+  if (!result.success) return result;
+
+  const parsed = parseVideoModel(input.body.model);
+  const provider = input.resolvedProvider || parsed.provider;
+  if (!provider) return result;
+  const accounting = {
+    ...identity,
+    provider,
+    model: parsed.model || input.body.model,
+    endpoint,
+    startTime,
+  };
+  if (!mediaWrites.usage) await recordSpecialtyRequestUsage(accounting);
+  if (!mediaWrites.callLog) await recordSpecialtyCallLog(accounting);
+  return result;
+}
+
+async function handleVideoAttempt({
   body,
   credentials,
   log,

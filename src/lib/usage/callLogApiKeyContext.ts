@@ -8,6 +8,7 @@ export interface CallLogApiKeyContext {
    * that already pass `connectionId` on the entry keep precedence.
    */
   connectionId?: string | null;
+  mediaWrites?: { endpoint: string; usage: boolean; callLog: boolean };
 }
 
 const callLogApiKeyContext = new AsyncLocalStorage<CallLogApiKeyContext>();
@@ -28,4 +29,15 @@ export function runWithCallLogApiKeyContext<TResult>(
 
 export function getCallLogApiKeyContext(): CallLogApiKeyContext | null {
   return callLogApiKeyContext.getStore() ?? null;
+}
+
+/** Observe the existing writers within one provider attempt. */
+export async function trackMediaWrites<T>(
+  context: CallLogApiKeyContext,
+  endpoint: string,
+  attempt: () => Promise<T>
+) {
+  const mediaWrites = { endpoint, usage: false, callLog: false };
+  const result = await runWithCallLogApiKeyContext({ ...context, mediaWrites }, attempt);
+  return { result, mediaWrites };
 }

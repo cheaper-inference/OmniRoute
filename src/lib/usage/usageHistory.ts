@@ -967,11 +967,21 @@ export async function saveRequestUsage(entry: UsageEntry, options: SaveRequestUs
   // this table is what the per-key usage aggregation reads. Resolved before the write
   // so a deferred retry (outside the request's async context) keeps the attribution.
   const apiKeyContext = getCallLogApiKeyContext();
+  const mediaWrites = apiKeyContext?.mediaWrites;
+  if (
+    mediaWrites &&
+    entry.success === true &&
+    (entry.endpoint === mediaWrites.endpoint ||
+      (entry.endpoint === "video" && mediaWrites.endpoint === "/v1/videos/generations"))
+  ) {
+    mediaWrites.usage = true;
+  }
   const frozenEntry = {
     ...entry,
     timestamp: entry.timestamp || new Date().toISOString(),
     apiKeyId: entry.apiKeyId || apiKeyContext?.apiKeyId || null,
     apiKeyName: entry.apiKeyName || apiKeyContext?.apiKeyName || null,
+    connectionId: entry.connectionId ?? (mediaWrites ? apiKeyContext?.connectionId : undefined),
   };
 
   // Agent-session counters are priced before the write (pricing is async) and replayed

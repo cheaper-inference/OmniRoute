@@ -29,6 +29,7 @@ import {
   rateLimitedProviderResponse,
 } from "@/app/api/v1/_shared/rateLimit";
 import { saveCallLog } from "@/lib/usageDb";
+import { recordSpecialtyRequestUsage } from "@/lib/usage/specialtyRequestAccounting";
 import { attachOmniRouteMetaHeaders } from "@/domain/omnirouteResponseMeta";
 import { generateRequestId } from "@/shared/utils/requestId";
 import { CORS_HEADERS } from "@omniroute/open-sse/utils/cors.ts";
@@ -258,6 +259,8 @@ export async function handleValidatedRerankRequestBody(
       };
     }
 
+    const startTime = Date.now();
+    const connectionId = (credentials as { connectionId?: string } | null)?.connectionId;
     const response = await handleRerank({
       model: body.model,
       query: body.query,
@@ -267,11 +270,29 @@ export async function handleValidatedRerankRequestBody(
       credentials,
       resolvedProvider: runtimeProvider,
       resolvedModel: resolvedModelId,
-      connectionId: (credentials as { connectionId?: string } | null)?.connectionId || null,
+      connectionId: connectionId ?? null,
       apiKeyId: meta.apiKeyId || null,
       apiKeyName: meta.apiKeyName || null,
-      onPricedCall: (call) =>
-        recordModalCallCost(meta.apiKeyId, { ...call, serviceTier: MODAL_LEDGER_SERVICE_TIER }),
+      onPricedCall: async ({ provider, model, costUsd, searchUnits }) => {
+        recordModalCallCost(meta.apiKeyId, {
+          provider,
+          model,
+          costUsd,
+          serviceTier: MODAL_LEDGER_SERVICE_TIER,
+        });
+        await recordSpecialtyRequestUsage({
+          endpoint: "/v1/rerank",
+          apiKeyId: meta.apiKeyId,
+          apiKeyName: meta.apiKeyName,
+          connectionId,
+          provider,
+          model,
+          startTime,
+          calculatedCostUsd: costUsd > 0 ? costUsd : null,
+          billingUnit: "search_unit",
+          billingQuantity: searchUnits > 0 ? searchUnits : null,
+        });
+      },
       requestedModel,
       comboName: meta.comboName || null,
     });
@@ -383,6 +404,15 @@ export async function handleValidatedRerankRequestBody(
           return_documents: body.return_documents as boolean | undefined,
         });
         const latencyMs = Date.now() - startTime;
+        await recordSpecialtyRequestUsage({
+          endpoint: "/v1/rerank",
+          provider: prefix,
+          model: localModel,
+          apiKeyId: meta.apiKeyId,
+          apiKeyName: meta.apiKeyName,
+          connectionId: credentials.connectionId,
+          startTime,
+        });
         saveCallLog({
           method: "POST",
           path: "/v1/rerank",

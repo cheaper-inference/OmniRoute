@@ -12,6 +12,8 @@ import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
 import * as log from "@/sse/utils/logger";
 import { toJsonErrorPayload } from "@/shared/utils/upstreamError";
 import { enforceApiKeyPolicy } from "@/shared/utils/apiKeyPolicy";
+import { runWithCallLogApiKeyContext } from "@/lib/usage/callLogApiKeyContext";
+import { recordSpecialtyRequestUsage } from "@/lib/usage/specialtyRequestAccounting";
 import {
   keyAdmitsKeylessProviders,
   resolveKeyConnectionScope,
@@ -204,6 +206,11 @@ async function postHandler(request: Request) {
     );
   }
   const { providerConfig, credentials } = target;
+  const identity = {
+    apiKeyId: policy.apiKeyInfo?.id ?? null,
+    apiKeyName: policy.apiKeyInfo?.name ?? null,
+    connectionId: credentials.connectionId,
+  };
 
   const maxResults = Math.min(
     RESPONSE_LENGTH_MAX_RESULTS[body.response_length || "medium"],
@@ -216,17 +223,20 @@ async function postHandler(request: Request) {
     let searchCostUsd = 0;
 
     for (const item of searchQueries) {
-      const result = await handleSearch({
-        query: item.q,
-        provider: providerConfig.id,
-        maxResults,
-        searchType: "web",
-        timeRange: recencyToTimeRange(item.recency),
-        domainFilter: buildDomainFilter(item.domains),
-        credentials,
-        log,
-        apiKeyId: policy.apiKeyInfo?.id || undefined,
-      });
+      const startTime = Date.now();
+      const result = await runWithCallLogApiKeyContext(identity, () =>
+        handleSearch({
+          query: item.q,
+          provider: providerConfig.id,
+          maxResults,
+          searchType: "web",
+          timeRange: recencyToTimeRange(item.recency),
+          domainFilter: buildDomainFilter(item.domains),
+          credentials,
+          log,
+          apiKeyId: identity.apiKeyId ?? undefined,
+        })
+      );
 
       if (!result.success) {
         throw new AlphaSearchError(result.error || "Search failed", result.status || 502);
@@ -245,6 +255,16 @@ async function postHandler(request: Request) {
           `Cost recording failed: ${e instanceof Error ? e.message : String(e)}`
         );
       }
+      await recordSpecialtyRequestUsage({
+        ...identity,
+        endpoint: "/v1/alpha/search",
+        provider: data.provider,
+        model: data.provider,
+        startTime,
+        calculatedCostUsd: data.usage?.search_cost_usd ?? null,
+        billingUnit: "query",
+        billingQuantity: data.usage?.queries_used,
+      });
       for (const r of data.results) {
         allResults.push({ title: r.title, url: r.url, snippet: r.snippet });
       }

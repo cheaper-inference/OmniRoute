@@ -4,6 +4,7 @@ import { errorResponse } from "@omniroute/open-sse/utils/error.ts";
 import { getProviderCredentialsWithQuotaPreflight } from "@/sse/services/auth";
 import { enforceClientApiRouteAuth } from "@/shared/utils/clientApiRouteAuth";
 import { enforceApiKeyPolicy } from "@/shared/utils/apiKeyPolicy";
+import { recordUnpricedSpecialtyRequest } from "@/lib/usage/specialtyRequestAccounting";
 import {
   isKeyScopeBlockedCredentials,
   keyScopeBlockedResponse,
@@ -53,6 +54,7 @@ export async function OPTIONS() {
 }
 
 export async function POST(request: Request) {
+  const startTime = Date.now();
   let rawBody: unknown;
   try {
     rawBody = await request.json();
@@ -121,6 +123,15 @@ export async function POST(request: Request) {
     if (payload?.success !== true || !Array.isArray(payload.links)) {
       return errorResponse(502, "Firecrawl Map returned an invalid response");
     }
+    await recordUnpricedSpecialtyRequest({
+      endpoint: "/v1/web/map",
+      provider: "firecrawl",
+      model: "map",
+      apiKeyId: policy.apiKeyInfo?.id,
+      apiKeyName: policy.apiKeyInfo?.name,
+      connectionId: credentials.connectionId,
+      startTime,
+    });
     return Response.json(payload, { headers: CORS_HEADERS });
   }
   return errorResponse(
