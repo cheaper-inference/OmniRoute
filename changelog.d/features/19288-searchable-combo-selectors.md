@@ -1,0 +1,1 @@
+- Add searchable provider, model, account, and combo reference selectors to the combo editor (salvaged from #19288 by KiaroSama).

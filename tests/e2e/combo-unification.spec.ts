@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { chooseComboStepOption } from "./helpers/comboStepSelect";
 import { gotoDashboardRoute } from "./helpers/dashboardAuth";
 
 async function mockCombosPageApis(page: import("@playwright/test").Page) {
@@ -175,10 +176,18 @@ test.describe("Combo Unification", () => {
     await comboName.fill("e2e-auto-builder");
     await page.getByTestId("combo-builder-next").click();
 
-    await page.getByTestId("combo-builder-provider").waitFor({ state: "visible" });
-    await page.getByTestId("combo-builder-provider").selectOption("openai");
-    await page.getByTestId("combo-builder-model").waitFor({ state: "attached" });
-    await page.getByTestId("combo-builder-model").selectOption("gpt-4o-mini");
+    await chooseComboStepOption(
+      page,
+      page.getByTestId("combo-builder-provider"),
+      "openai",
+      /^OpenAI\b/
+    );
+    await chooseComboStepOption(
+      page,
+      page.getByTestId("combo-builder-model"),
+      "gpt-4o-mini",
+      /^gpt-4o-mini\b/
+    );
     await page.getByTestId("combo-builder-add-step").click();
     await page.getByTestId("combo-builder-next").click();
 

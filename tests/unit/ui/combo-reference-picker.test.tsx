@@ -1,24 +1,17 @@
 // @vitest-environment jsdom
+import "@testing-library/jest-dom/vitest";
 import { describe, it, expect, afterEach, beforeAll, vi } from "vitest";
 import { cleanup, fireEvent, render } from "@testing-library/react";
-import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
 import ComboReferencePicker from "@/app/(dashboard)/dashboard/combos/ComboReferencePicker";
-
-function t(key: string): string {
-  return key;
-}
-t.has = () => false;
 
 const options = [
   { id: "a", name: "alpha", strategy: "priority", stepCount: 1 },
   { id: "b", name: "beta", strategy: "round-robin", stepCount: 3 },
 ];
 
-// The picker renders the kit (Radix) Select, which has no DOM <option>s: open the combobox
-// with the keyboard and read the role="option" items instead.
-function openPicker(getByRole) {
-  fireEvent.keyDown(getByRole("combobox"), { key: "Enter" });
+function openPicker({ getByRole }: ReturnType<typeof render>) {
+  fireEvent.keyDown(getByRole("button", { name: "Combo Ref" }), { key: "ArrowDown" });
+  return getByRole("combobox", { name: "Search" });
 }
 
 beforeAll(() => {
@@ -35,54 +28,60 @@ describe("ComboReferencePicker", () => {
   });
 
   it("lists the referenceable combos with strategy and step count", () => {
-    const { getByRole, getAllByRole } = render(
-      <ComboReferencePicker t={t} value="" onChange={() => {}} options={options} onAdd={() => {}} />
+    const view = render(
+      <ComboReferencePicker value="" onChange={() => {}} options={options} onAdd={() => {}} />
     );
-    expect(getByRole("combobox", { name: "Reference another combo" }).textContent).toContain(
-      "Select an existing combo to reference"
+    expect(view.getByRole("button", { name: "Combo Ref" })).toHaveTextContent(
+      "Select combo to reference"
     );
-    openPicker(getByRole);
-    const texts = getAllByRole("option").map((o) =>
-      (o.textContent || "").replace(/\s+/g, " ").trim()
-    );
-    expect(texts).toEqual(["alpha · priority · 1 step", "beta · round-robin · 3 steps"]);
+    openPicker(view);
+    expect(view.getByRole("option", { name: "alpha priority · 1 step" })).toBeInTheDocument();
+    expect(view.getByRole("option", { name: "beta round-robin · 3 steps" })).toBeInTheDocument();
   });
 
   it("reports the selected combo name and disables Add until one is chosen", () => {
     const onChange = vi.fn();
     const onAdd = vi.fn();
-    const { getByRole, rerender } = render(
-      <ComboReferencePicker t={t} value="" onChange={onChange} options={options} onAdd={onAdd} />
+    const view = render(
+      <ComboReferencePicker value="" onChange={onChange} options={options} onAdd={onAdd} />
     );
-    const button = getByRole("button", { name: "Add combo ref" }) as HTMLButtonElement;
-    expect(button.disabled).toBe(true);
+    const add = view.getByRole("button", { name: "Add combo reference" });
+    expect(add).toBeDisabled();
 
-    openPicker(getByRole);
-    fireEvent.click(getByRole("option", { name: "beta · round-robin · 3 steps" }));
+    const query = openPicker(view);
+    fireEvent.change(query, { target: { value: "beta ROUND-ROBIN" } });
+    expect(onChange).not.toHaveBeenCalled();
+    expect(view.queryByRole("option", { name: /alpha/ })).not.toBeInTheDocument();
+    fireEvent.click(view.getByRole("option", { name: /beta round-robin/ }));
     expect(onChange).toHaveBeenCalledWith("beta");
 
-    rerender(
-      <ComboReferencePicker
-        t={t}
-        value="beta"
-        onChange={onChange}
-        options={options}
-        onAdd={onAdd}
-      />
+    view.rerender(
+      <ComboReferencePicker value="beta" onChange={onChange} options={options} onAdd={onAdd} />
     );
-    const enabled = getByRole("button", { name: "Add combo ref" }) as HTMLButtonElement;
-    expect(enabled.disabled).toBe(false);
-    fireEvent.click(enabled);
+    expect(add).toBeEnabled();
+    openPicker(view);
+    fireEvent.click(view.getByRole("option", { name: /beta round-robin/ }));
+    expect(onChange).toHaveBeenCalledTimes(1);
+    fireEvent.click(add);
     expect(onAdd).toHaveBeenCalledTimes(1);
   });
 
-  it("stays hidden for jev combos in the combo builder", () => {
-    const source = readFileSync(
-      resolve(process.cwd(), "src/app/(dashboard)/dashboard/combos/page.tsx"),
-      "utf8"
+  it("displays an unavailable current name and keeps clear visible when filtering", () => {
+    const onChange = vi.fn();
+    const view = render(
+      <ComboReferencePicker
+        value="retired"
+        onChange={onChange}
+        options={options}
+        onAdd={() => {}}
+      />
     );
-    const at = source.indexOf("<ComboReferencePicker");
-    expect(at).toBeGreaterThan(0);
-    expect(source.slice(Math.max(0, at - 60), at)).toContain('strategy !== "jev"');
+    expect(view.getByRole("button", { name: "Combo Ref" })).toHaveTextContent("retired");
+    expect(view.getByRole("button", { name: "Add combo reference" })).toBeDisabled();
+    const query = openPicker(view);
+    expect(view.getByRole("option", { name: "retired" })).toHaveAttribute("aria-disabled", "true");
+    fireEvent.change(query, { target: { value: "unmatched" } });
+    fireEvent.click(view.getByRole("option", { name: "Select combo to reference" }));
+    expect(onChange).toHaveBeenCalledExactlyOnceWith("");
   });
 });

@@ -4440,6 +4440,8 @@
     "builderSelectModel": "Select model",
     "builderProviderFirst": "Pick provider first",
     "builderAccount": "Account",
+    "builderRestrictAccounts": "Restrict to accounts (optional)",
+    "builderRestrictAccountsHint": "Leave empty to use all active accounts. When selected, automatic routing stays within these accounts.",
     "builderPreview": "Preview",
     "builderAddStep": "Add step",
     "builderDuplicateExact": "This exact provider/model/account step is already in the combo.",

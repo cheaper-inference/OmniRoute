@@ -118,13 +118,8 @@ async function openExpertBuilder() {
   // Expert mode arrives with /api/settings; the manual entry only exists in that mode.
   await within(dialog).findByTestId("combo-manual-model-input");
   // The picker options arrive with /api/combos/builder/options.
-  await waitFor(() =>
-    expect(
-      within(dialog)
-        .getByTestId("combo-builder-provider")
-        .querySelector('option[value="openrouter"]')
-    ).not.toBeNull()
-  );
+  const picker = within(within(dialog).getByTestId("combo-builder-provider")).getByRole("button");
+  await waitFor(() => expect(picker).toBeEnabled());
   return dialog;
 }
 
@@ -163,9 +158,11 @@ describe("expert-mode manual model entry", { timeout: 90_000 }, () => {
 
   it("keeps the picker limited to providers that have a catalog model", async () => {
     const dialog = await openExpertBuilder();
-    const picker = within(dialog).getByTestId("combo-builder-provider");
-    expect(picker.querySelector('option[value="openrouter"]')).not.toBeNull();
-    expect(picker.querySelector('option[value="codex"]')).toBeNull();
+    const picker = within(within(dialog).getByTestId("combo-builder-provider")).getByRole("button");
+    fireEvent.click(picker);
+    const list = within(await screen.findByRole("listbox", { name: /provider/i }));
+    expect(list.getByRole("option", { name: /openrouter/i })).toBeInTheDocument();
+    expect(list.queryByRole("option", { name: /codex/i })).not.toBeInTheDocument();
   });
 
   it("still refuses a prefix that matches no configured provider", async () => {
