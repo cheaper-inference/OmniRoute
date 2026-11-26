@@ -1142,6 +1142,13 @@ export const getCliConfigHome = (containerDeps?: ContainerEnvDeps) => {
   return normalized;
 };
 
+export const getCodexClientConfigHome = () => {
+  const override = process.env.CODEX_HOME?.trim();
+  if (!override) return path.join(getCliConfigHome(), ".codex");
+  if (!path.isAbsolute(override)) throw new Error("CODEX_HOME must be an absolute path");
+  return path.normalize(override);
+};
+
 export const resolveOpencodeConfigPath = (
   _platform = process.platform,
   env: NodeJS.ProcessEnv = process.env,

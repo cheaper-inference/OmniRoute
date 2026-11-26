@@ -42,6 +42,25 @@ function toRecord(value: unknown): JsonRecord | null {
   return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : null;
 }
 
+export function getCodexKeepOfficialLogin(): boolean {
+  if (isBuildPhase || isCloud) return false;
+  const db = getDbInstance() as unknown as DbLike;
+  const row = db
+    .prepare<KeyValueRow>("SELECT value FROM key_value WHERE namespace = ? AND key = ?")
+    .get("cliToolPreferences", "codexKeepOfficialLogin");
+  return row?.value === "true";
+}
+
+export function setCodexKeepOfficialLogin(enabled: boolean): void {
+  if (isBuildPhase || isCloud) return;
+  const db = getDbInstance() as unknown as DbLike;
+  db.prepare("INSERT OR REPLACE INTO key_value (namespace, key, value) VALUES (?, ?, ?)").run(
+    "cliToolPreferences",
+    "codexKeepOfficialLogin",
+    JSON.stringify(enabled)
+  );
+}
+
 // ──────────────── Last Configured Timestamp ────────────────
 
 /**

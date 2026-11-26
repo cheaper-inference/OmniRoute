@@ -42,8 +42,10 @@ process.env.CLI_ALLOW_CONFIG_WRITES = "true";
 const core = await import("../../src/lib/db/core.ts");
 const apiKeysDb = await import("../../src/lib/db/apiKeys.ts");
 const route = await import("../../src/app/api/cli-tools/codex-settings/route.ts");
+const profiles = await import("../../src/app/api/cli-tools/codex-profiles/route.ts");
 
 const AUTH_PATH = path.join(TEST_HOME, ".codex", "auth.json");
+const CONFIG_PATH = path.join(TEST_HOME, ".codex", "config.toml");
 
 test.after(async () => {
   core.resetDbInstance();
@@ -112,4 +114,100 @@ test("#13563: POST codex-settings with an explicit apiKey still writes it verbat
 
   assert.equal(response.status, 200);
   assert.equal(readWrittenApiKey(), "sk-test-explicit");
+});
+
+test("Keep official login preserves the auth file when applying, switching profiles and resetting", async () => {
+  const official = '{"auth_mode":"chatgpt","tokens":{"access_token":"fixture-session"}}\n';
+  fs.writeFileSync(AUTH_PATH, official);
+
+  assert.equal((await post({ keepOfficialLogin: true })).status, 200);
+  assert.equal(fs.readFileSync(AUTH_PATH, "utf8"), official);
+  assert.match(fs.readFileSync(CONFIG_PATH, "utf8"), /^env_key = "OMNIROUTE_API_KEY"$/m);
+
+  assert.equal((await post({})).status, 200);
+  assert.equal(fs.readFileSync(AUTH_PATH, "utf8"), official);
+  assert.equal((await post({ baseUrl: "https://example.com/v1" })).status, 400);
+
+  const profilesPath = path.join(TEST_ROOT, "data", "codex-profiles");
+  fs.mkdirSync(profilesPath, { recursive: true });
+  fs.writeFileSync(
+    path.join(profilesPath, "direct.json"),
+    JSON.stringify({
+      name: "Direct",
+      configToml: 'model = "gpt-5.6-sol"\n',
+      authJson: '{"OPENAI_API_KEY":"fixture-other-key"}',
+    })
+  );
+  const headers = { cookie: await authCookie(), "content-type": "application/json" };
+  const switched = await profiles.PUT(
+    new Request("http://localhost/api/cli-tools/codex-profiles", {
+      method: "PUT",
+      headers,
+      body: JSON.stringify({ profileId: "direct" }),
+    })
+  );
+  assert.equal(switched.status, 200);
+  assert.equal((await switched.json()).restoredAuth, false);
+  assert.equal(fs.readFileSync(AUTH_PATH, "utf8"), official);
+  assert.equal(fs.readFileSync(CONFIG_PATH, "utf8"), 'model = "gpt-5.6-sol"\n');
+
+  const reset = await route.DELETE(
+    new Request("http://localhost/api/cli-tools/codex-settings", { method: "DELETE", headers })
+  );
+  assert.equal(reset.status, 200);
+  assert.equal(fs.readFileSync(AUTH_PATH, "utf8"), official);
+});
+
+test("turning off Keep official login switches back to the selected stored credential", async () => {
+  const selected = await apiKeysDb.createApiKey(
+    "selected-codex-credential",
+    "codex-settings-machine"
+  );
+  assert.equal((await post({ keepOfficialLogin: true })).status, 200);
+  assert.match(fs.readFileSync(CONFIG_PATH, "utf8"), /^env_key = "OMNIROUTE_API_KEY"$/m);
+
+  assert.equal(
+    (await post({ keepOfficialLogin: false, keyId: selected.id, apiKey: "masked" })).status,
+    200
+  );
+  assert.match(fs.readFileSync(CONFIG_PATH, "utf8"), /^env_key = "OPENAI_API_KEY"$/m);
+  assert.equal(readWrittenApiKey(), selected.key);
+});
+
+test("Codex panels use the same configured Codex home", async (t) => {
+  const home = path.join(TEST_HOME, "custom-codex-home");
+  const previous = process.env.CODEX_HOME;
+  t.after(() => {
+    if (previous === undefined) delete process.env.CODEX_HOME;
+    else process.env.CODEX_HOME = previous;
+  });
+  process.env.CODEX_HOME = home;
+
+  assert.equal((await post({ keepOfficialLogin: true })).status, 200);
+  assert.match(
+    fs.readFileSync(path.join(home, "config.toml"), "utf8"),
+    /model_provider = "omniroute"/
+  );
+  const instructions = await import("../../src/app/api/local/client-instructions/route.ts");
+  const response = await instructions.GET(
+    new Request("http://localhost/api/local/client-instructions?client=codex", {
+      headers: { cookie: await authCookie() },
+    })
+  );
+  assert.equal(response.status, 200);
+  const current = await response.json();
+  const update = await instructions.POST(
+    new Request("http://localhost/api/local/client-instructions", {
+      method: "POST",
+      headers: { cookie: await authCookie(), "content-type": "application/json" },
+      body: JSON.stringify({
+        action: "save",
+        client: "codex",
+        revision: current.revision,
+        content: "Fixture instructions",
+      }),
+    })
+  );
+  assert.equal(update.status, 200);
+  assert.equal(fs.readFileSync(path.join(home, "AGENTS.md"), "utf8"), "Fixture instructions");
 });
