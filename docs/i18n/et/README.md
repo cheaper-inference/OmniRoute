@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Lubadus — üks lõpp-punkt ja 394 teenusepakkujat. Automaatne varulülitus hoiab marsruutimise töös seni, kuni saadaval on mõni teine terve sihtmärk. Kuus alustala: vastupidav varulülitus 394 teenusepakkuja vahel · kuni 95% tokenite kokkuhoidu sobilike töökoormuste korral · alustamiseks $0, üle 150 tasuta paketi ning 51 korduva või võtmeta ja igavesti tasuta teenusepakkujat · 39 CLI-/agendiintegratsiooni ühe seadistuse kaudu · OpenAI, Claude'i, Gemini ja Responses API ühilduvus aadressil /v1 · tootmiskasutuse juhtimisfunktsioonid, sealhulgas kaitselülitid, TLS-i varjamine, MCP 110 tööriistaga, A2A, mälu, kaitsepiirded, hindamised ning 56 000+ staatilist testideklaratsiooni enam kui 7800 jälgitavas testifailis."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Lubadus — üks lõpp-punkt ja 394 teenusepakkujat. Automaatne varulülitus hoiab marsruutimise töös seni, kuni saadaval on mõni teine terve sihtmärk. Kuus alustala: vastupidav varulülitus 394 teenusepakkuja vahel · kuni 95% tokenite kokkuhoidu sobilike töökoormuste korral · alustamiseks $0, üle 150 tasuta paketi ning 40 korduva või võtmeta ja igavesti tasuta teenusepakkujat · 39 CLI-/agendiintegratsiooni ühe seadistuse kaudu · OpenAI, Claude'i, Gemini ja Responses API ühilduvus aadressil /v1 · tootmiskasutuse juhtimisfunktsioonid, sealhulgas kaitselülitid, TLS-i varjamine, MCP 110 tööriistaga, A2A, mälu, kaitsepiirded, hindamised ning 56 000+ staatilist testideklaratsiooni enam kui 7800 jälgitavas testifailis."/>
 
 <br/>
 <br/>
@@ -712,7 +712,7 @@ eemal sinu shelli ajaloost. → [CLI integratsioonid](docs/guides/CLI-INTEGRATIO
 
 </div>
 
-> **394 registreeritud pakkujat** kanoonilistes vestluse, meedia, otsingu, kohaliku, pilveagendi ja süsteemi kogumites, sealhulgas **153 pakkujat, mille avastamise metaandmetes on `hasFree: true`**. Vestlusmudelite register hõlmab **239 pakkujat / 3 059 erinevat pakkuja-mudeli paari / 1 475 töötlemata mudeli ID-d**; eraldi tasuta eelarve kataloogis on **465 mudelipõhist rida**, **34 korduvat kogumit** ja **51 korduvat või võtmeta igavesti tasuta pakkujat**. Need ongi kavandatult erinevad nimetajad; definitsioonid ja kogumite duplikaatide eemaldamisega arvutused leiate [pakkujate teatmikust](docs/reference/PROVIDER_REFERENCE.md) ja [tasuta tasemetest](docs/reference/FREE_TIERS.md).
+> **394 registreeritud pakkujat** kanoonilistes vestluse, meedia, otsingu, kohaliku, pilveagendi ja süsteemi kogumites, sealhulgas **153 pakkujat, mille avastamise metaandmetes on `hasFree: true`**. Vestlusmudelite register hõlmab **239 pakkujat / 3 059 erinevat pakkuja-mudeli paari / 1 475 töötlemata mudeli ID-d**; eraldi tasuta eelarve kataloogis on **465 mudelipõhist rida**, **34 korduvat kogumit** ja **40 korduvat või võtmeta igavesti tasuta pakkujat**. Need ongi kavandatult erinevad nimetajad; definitsioonid ja kogumite duplikaatide eemaldamisega arvutused leiate [pakkujate teatmikust](docs/reference/PROVIDER_REFERENCE.md) ja [tasuta tasemetest](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 

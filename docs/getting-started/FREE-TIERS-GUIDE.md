@@ -1,7 +1,7 @@
 ---
 title: "Free Tiers Guide: Understand and Combine Free AI Access"
 version: 3.8.55
-lastUpdated: 2026-11-18
+lastUpdated: 2026-11-24
 ---
 
 # Free Tiers Guide: Understand and Combine Free AI Access
@@ -32,9 +32,9 @@ These providers have a recurring, keyless, or uncapped free-access path in the a
 | **Kiro AI**       | Claude Sonnet 4.5, Haiku 4.5, DeepSeek V3.2, and others                        | Audited catalog estimates a 25K-token shared monthly pool                                                        | OAuth/account flow; ToS flagged `avoid` in the catalog                                   |
 | **Pollinations**  | Current keyless model set; some former models are discontinued or key-required | Keyless; no published token cap                                                                                  | No provider credential for the keyless models                                            |
 | **Logfare**       | kimi-k3, deepseek-v4-pro, glm-5.2, gpt-5.6-luna, minimax-m3, and more          | Free API key (no rate limits, no card); **every request is logged** for research (opt out at logfare.ai/consent) | Instant key at logfare.ai/register; ToS/privacy at logfare.ai/tos and logfare.ai/privacy |
-| **Cloudflare AI** | Workers AI catalog                                                             | Audited pool estimates ~30M tokens/month from published usage units                                              | Cloudflare account and API credentials                                                   |
+| **Cloudflare AI** | Workers AI catalog                                                             | Audited pool estimates ~23M tokens/month from published usage units (catalog audited 2026-11-23)                 | Cloudflare account and API credentials                                                   |
 | **Gemini**        | Gemini Flash family                                                            | Variable project/model rate limits; no fixed monthly token grant is included in the headline                     | Google AI Studio API key; check the project’s active limits                              |
-| **Groq**          | Llama, GPT-OSS, and Qwen models                                                | Audited pool estimates ~15M tokens/month                                                                         | Groq API key; rate limits apply                                                          |
+| **Groq**          | Llama, GPT-OSS, and Qwen models                                                | Audited pool estimates ~24M tokens/month (4 per-model caps, catalog audited 2026-11-23)                          | Groq API key; rate limits apply                                                          |
 
 ### Signup Grants and Provider-Specific Credits
 
@@ -202,10 +202,10 @@ provider's quota or access policy.
 
 The live, pool-deduplicated catalog currently reports:
 
-| Metric                         |   Current audited value | Interpretation                                                      |
-| ------------------------------ | ----------------------: | ------------------------------------------------------------------- |
-| Recurring quantified grant     | **~1.62B tokens/month** | Shared pools counted once; excludes uncapped providers from the sum |
-| First month with signup grants |       **~2.22B tokens** | Recurring total plus one-time and recurring credits                 |
+| Metric                         |         Current audited value | Interpretation                                                      |
+| ------------------------------ | ----------------------------: | ------------------------------------------------------------------- |
+| Recurring quantified grant     |    **~90M free tokens/month** | Shared pools counted once; excludes uncapped providers from the sum |
+| First month with signup grants | **~153M in your first month** | Recurring total plus one-time and recurring credits                 |
 
 These are catalog-wide estimates across separate eligible accounts, not an allowance supplied by OmniRoute or a prediction for a fresh installation. Your usable capacity depends on the providers you connect and their current conditions. The values are computed from `open-sse/config/freeModelCatalog.ts`; see the
 [Free Tiers Reference](../reference/FREE_TIERS.md) for pool deduplication, ToS flags,
