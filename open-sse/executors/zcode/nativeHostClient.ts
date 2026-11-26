@@ -189,40 +189,40 @@ export class NativeZcodeHostClient {
     this.pending.delete(id);
     pending.cleanup();
     if (kind === 201) pending.resolve(payload.value);
-    else {
-      const error = new Error(
-        kind === 203 ? "ZCode host request canceled" : "ZCode host request failed"
-      );
-      const value =
-        payload.value && typeof payload.value === "object"
-          ? (payload.value as Record<string, unknown>)
-          : {};
-      const data =
-        value.data && typeof value.data === "object" ? (value.data as Record<string, unknown>) : {};
-      const sanitizeCode = (candidate: unknown) => {
-        const code = safeCode(candidate);
-        return typeof code === "string" &&
-          this.secretValues.some((secret) => secret && code.includes(secret))
-          ? undefined
-          : code;
-      };
-      const code = sanitizeCode(value.code),
-        providerCode = sanitizeCode(data.code);
-      if (
-        [value.message, data.message].some(
-          (message) =>
-            typeof message === "string" &&
-            message.trim().toLowerCase() === "request has been blocked due to unusual activity."
-        )
+    else this.rejectFrame(pending, kind, payload.value);
+  }
+
+  private rejectFrame(pending: Pending, kind: number, payload: unknown): void {
+    const error = new Error(
+      kind === 203 ? "ZCode host request canceled" : "ZCode host request failed"
+    );
+    const value =
+      payload && typeof payload === "object" ? (payload as Record<string, unknown>) : {};
+    const data =
+      value.data && typeof value.data === "object" ? (value.data as Record<string, unknown>) : {};
+    const sanitizeCode = (candidate: unknown) => {
+      const code = safeCode(candidate);
+      return typeof code === "string" &&
+        this.secretValues.some((secret) => secret && code.includes(secret))
+        ? undefined
+        : code;
+    };
+    const code = sanitizeCode(value.code),
+      providerCode = sanitizeCode(data.code);
+    if (
+      [value.message, data.message].some(
+        (message) =>
+          typeof message === "string" &&
+          message.trim().toLowerCase() === "request has been blocked due to unusual activity."
       )
-        Object.assign(error, { providerReason: "unusual_activity" });
-      if (code !== undefined) Object.assign(error, { code });
-      if (providerCode !== undefined) Object.assign(error, { providerCode });
-      error.message += ` (rpc=${pending.rpc}${code === undefined ? "" : `, code=${code}`}${
-        providerCode === undefined ? "" : `, providerCode=${providerCode}`
-      })`;
-      pending.reject(error);
-    }
+    )
+      Object.assign(error, { providerReason: "unusual_activity" });
+    if (code !== undefined) Object.assign(error, { code });
+    if (providerCode !== undefined) Object.assign(error, { providerCode });
+    error.message += ` (rpc=${pending.rpc}${code === undefined ? "" : `, code=${code}`}${
+      providerCode === undefined ? "" : `, providerCode=${providerCode}`
+    })`;
+    pending.reject(error);
   }
 
   async call(

@@ -237,6 +237,17 @@ async function readManagedGroup(
   return group;
 }
 
+function isManagedConnection(connection: ManagedConnection, data: JsonRecord): boolean {
+  return Boolean(
+    connection.authType === "oauth" &&
+    connection.id &&
+    connection.accessToken &&
+    connection.idToken &&
+    typeof data.userId === "string" &&
+    (data.family === "zai" || data.family === "bigmodel")
+  );
+}
+
 /** Read two plan-scoped snapshots from a host bound to exactly one saved OAuth account. */
 export async function getManagedZcodeUsage(
   connection: ManagedConnection,
@@ -249,15 +260,7 @@ export async function getManagedZcodeUsage(
   });
   const data = asRecord(connection.providerSpecificData);
   const family = data.family;
-  if (
-    connection.authType !== "oauth" ||
-    !connection.id ||
-    !connection.accessToken ||
-    !connection.idToken ||
-    typeof data.userId !== "string" ||
-    (family !== "zai" && family !== "bigmodel")
-  )
-    return unknown();
+  if (!isManagedConnection(connection, data)) return unknown();
   const credentials: ManagedCredentials = {
     ...connection,
     authType: "oauth",
