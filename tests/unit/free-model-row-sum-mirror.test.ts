@@ -130,14 +130,16 @@ test("an empty catalog has a zero share instead of NaN", () => {
 
 test("byProvider is ordered by tokens, then by provider id", () => {
   const entries = [
-    row({ provider: "llm7", poolKey: "l", monthlyTokens: 3e6 }),
+    // Fixture providers must have a tokens unit in FREE_QUOTA_UNIT (llm7 left the map when its pool
+    // was retired in the November 2026 re-audit).
+    row({ provider: "xkiro", poolKey: "x", monthlyTokens: 3e6 }),
     row({ provider: "groq", poolKey: "g", monthlyTokens: 3e6 }),
     row({ provider: "nara", poolKey: "n", monthlyTokens: 9e6 }),
   ];
   const m = computeRowSumMirror({ entries, retired: [], asOf: NOW });
   assert.deepEqual(
     m.byProvider.map((p) => p.provider),
-    ["nara", "groq", "llm7"]
+    ["nara", "groq", "xkiro"]
   );
 });
 

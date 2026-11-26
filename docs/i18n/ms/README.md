@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Janji Kami — Satu titik akhir dan 394 penyedia. Sandaran automatik memastikan penghalaan berterusan selagi sasaran lain yang sihat masih tersedia. Enam tonggak: sandaran berdaya tahan merentas 394 penyedia · penjimatan token sehingga 95% untuk beban kerja yang layak · $0 untuk bermula dengan lebih 150 tingkatan percuma dan 51 penyedia percuma selamanya yang berulang/tanpa kunci · 39 integrasi CLI/agen melalui satu konfigurasi · keserasian dengan API OpenAI, Claude, Gemini dan Responses di /v1 · kawalan produksi termasuk pemutus litar, penyamaran TLS, 110 alat MCP, A2A, memori, perlindungan, penilaian dan lebih 56,000 pengisytiharan ujian statik merentas lebih 7,800 fail ujian yang dijejaki."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Janji Kami — Satu titik akhir dan 394 penyedia. Sandaran automatik memastikan penghalaan berterusan selagi sasaran lain yang sihat masih tersedia. Enam tonggak: sandaran berdaya tahan merentas 394 penyedia · penjimatan token sehingga 95% untuk beban kerja yang layak · $0 untuk bermula dengan lebih 150 tingkatan percuma dan 40 penyedia percuma selamanya yang berulang/tanpa kunci · 39 integrasi CLI/agen melalui satu konfigurasi · keserasian dengan API OpenAI, Claude, Gemini dan Responses di /v1 · kawalan produksi termasuk pemutus litar, penyamaran TLS, 110 alat MCP, A2A, memori, perlindungan, penilaian dan lebih 56,000 pengisytiharan ujian statik merentas lebih 7,800 fail ujian yang dijejaki."/>
 
 <br/>
 <br/>
@@ -703,7 +703,7 @@ masuk dalam sejarah shell anda. → [Integrasi CLI](docs/guides/CLI-INTEGRATIONS
 
 </div>
 
-> **394 penyedia berdaftar** merentasi koleksi kanonik sembang, media, carian, tempatan, ejen awan dan sistem, termasuk **153 yang membawa metadata penemuan `hasFree: true`**. Daftar model sembang merangkumi **239 penyedia / 3,059 pasangan penyedia-model unik / 1,475 ID model mentah**; katalog bajet percuma yang berasingan mempunyai **465 baris bagi setiap model**, **34 kumpulan berulang** dan **51 penyedia percuma selamanya yang berulang/tanpa kunci**. Penyebut ini berbeza mengikut reka bentuk; definisi dan pengiraan deduplikasi kumpulan tersedia dalam [Rujukan Penyedia](docs/reference/PROVIDER_REFERENCE.md) dan [Peringkat Percuma](docs/reference/FREE_TIERS.md).
+> **394 penyedia berdaftar** merentasi koleksi kanonik sembang, media, carian, tempatan, ejen awan dan sistem, termasuk **153 yang membawa metadata penemuan `hasFree: true`**. Daftar model sembang merangkumi **239 penyedia / 3,059 pasangan penyedia-model unik / 1,475 ID model mentah**; katalog bajet percuma yang berasingan mempunyai **465 baris bagi setiap model**, **34 kumpulan berulang** dan **40 penyedia percuma selamanya yang berulang/tanpa kunci**. Penyebut ini berbeza mengikut reka bentuk; definisi dan pengiraan deduplikasi kumpulan tersedia dalam [Rujukan Penyedia](docs/reference/PROVIDER_REFERENCE.md) dan [Peringkat Percuma](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 

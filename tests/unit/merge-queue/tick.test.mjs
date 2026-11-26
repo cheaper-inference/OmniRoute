@@ -6045,6 +6045,32 @@ test("a gate run superseded by a newer green run of the same workflow lets the P
   }
 });
 
+test("a PR title/body edit run after a retarget does not hide the real runs' gate", async () => {
+  // ci.yml on a `pull_request` `edited` event without a base change: its own concurrency group,
+  // every job skipped (the workflow run concludes `skipped`), the gate job named by its
+  // unevaluated expression. It is the newest ci.yml run on the head, but validated nothing.
+  const EDIT_GATE = "(github.event_name == 'pull_request' && …) && 'Gate / CI (PR metadata edit)'";
+  for (const newer of ["success", "failure"]) {
+    const h = createHarness({ mode: "live" });
+    for (const n of [1, 2]) h.addPr(n);
+    h.prGateRun(2, "Gate / CI", "cancelled"); // the run on the old base, cancelled by the retarget
+    h.prGateRun(2, "Gate / CI", newer); // the run on the new base
+    h.prGateRun(2, EDIT_GATE, "skipped", { workflow: "Gate / CI" }); // a bot edits the body
+    await h.tick();
+    const state = await h.state();
+    if (newer === "success") {
+      assert.deepEqual(nums(state.inFlight.prs), [1, 2], "the green run on the new base counts");
+    } else {
+      assert.deepEqual(nums(state.inFlight.prs), [1]);
+      assert.deepEqual(
+        h.world.renders.at(-1).queue.find((e) => e.number === 2).reasons,
+        [{ code: "pr-checks-not-green", detail: "Gate / CI failure" }],
+        "red, not missing: the edit run neither hides nor greens the real verdict"
+      );
+    }
+  }
+});
+
 test("a green job of the same name in another workflow does not hide a red gate", async () => {
   const h = createHarness({ mode: "live" });
   for (const n of [1, 2, 3]) h.addPr(n);

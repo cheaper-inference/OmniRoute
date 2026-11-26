@@ -24,7 +24,7 @@ Tieto čísla popisujú samostatné účty tretích strán a podmienky oprávnen
 | **+ za regionálnou kontrolou totožnosti**      | **+~ 6M**             | `modelscope` (Alibaba Cloudová väzba + pevnina-Čína overenie skutočného mena). Skutočná opakujúca sa kvóta zobrazená ako `gatedRecurringTokens` / `gatedProviders` a na prístrojovej doske. Nikdy nie je zhrnuté do nadpisu: +~ 6M za overením regionálnej identity.        |
 | Teoretický strop (všetky limity sadzieb, 24/7) | ~ 10B                 | Súčet limitu sadzby každého poskytovateľa extrapolovaný na nepretržité používanie.** Nie je zárukou** — toto nenapisujte.                                                                                                                                                   |
 
-**Úprimný nadpis:** _OmniRoute agregáty**~ 1,62B zdokumentovaných bezplatných tokenov za mesiac** (až 2,22 miliardy ~ za prvý mesiac s kreditmi za registráciu) v 34 fondoch bezplatných vrstiev — plus dlhý chvost trvalo bezplatných poskytovateľov bez obmedzenia — a RTK + Caveman kompresia (15 – 95 % úspora tokenov) to rozširuje._
+**Úprimný nadpis:** _OmniRoute agregáty**~ 1,62B zdokumentovaných bezplatných tokenov za mesiac** (až 2,22 miliardy ~ za prvý mesiac s kreditmi za registráciu) v 26 fondoch bezplatných vrstiev — plus dlhý chvost trvalo bezplatných poskytovateľov bez obmedzenia — a RTK + Caveman kompresia (15 – 95 % úspora tokenov) to rozširuje._
 
 > **Prečo to kleslo z predchádzajúceho ~ 1,94B.** Obnovenie 2026-06-17 je opravou poctivosti, nie stratou: `gemini` je teraz zbavený duplicitného fondu (bolo nafúknuté počítaním každého variantu Flash samostatne, 462 miliónov → 60 miliónov), `cloudflare-ai` opravené na skutočné 10k-Neurons/day (122 miliónov → 30 miliónov), `doubao` reklasifikované ako kredit ti (jednorazové vypnutie `kluster` vypnutie)`chutes`/`phind` ukončené). Čiastočne kompenzované `llm7` (správne 5M/day → 150 miliónov) a novými bezplatnými poskytovateľmi (Kilo, OpenCode Zen, Z.AI GLM-Flash).
 >
@@ -38,7 +38,7 @@ Tieto čísla popisujú samostatné účty tretích strán a podmienky oprávnen
 >
 > **Opravené dňa 2026-09-03 (#11773):** `cerebras` bola preklasifikovaná z opakujúceho sa grantu 30M/mo (stará 1- tokens/day skúšobná verzia bez karty) na jednorazový registračný kredit 5 USD, ktorý vyžaduje spôsob platby. Rovnaké pravidlo čestnosti ako LongCat.
 >
-> **Plus xKiro (2026-09-03):** nový fond `xkiro-free` (150M/mo) pridáva 35. opakovaný kľúč fondu. Felo Web zostáva vylúčený, zatiaľ čo jeho provenance/licensing odvodený od GPL zostáva na HOLD. Teraz informuje zdroj** 34 opakujúcich sa bazénových kľúčov** a**~ 1,62B stabilný** — živé, CI-gated číslo (`check:docs-counts` zlyhá pri zostavovaní, ak sa odchýli od `computeFreeModelTotals()`).
+> **Plus xKiro (2026-09-03):** nový fond `xkiro-free` (150M/mo) pridáva 35. opakovaný kľúč fondu. Felo Web zostáva vylúčený, zatiaľ čo jeho provenance/licensing odvodený od GPL zostáva na HOLD. Teraz informuje zdroj** 26 opakujúcich sa bazénových kľúčov** a**~ 1,62B stabilný** — živé, CI-gated číslo (`check:docs-counts` zlyhá pri zostavovaní, ak sa odchýli od `computeFreeModelTotals()`).
 
 Najväčší** zdokumentované** prispievatelia: `mistral` 1,00B, `nara` 210M, `llm7` 150M, `xkiro` 150M, `groq` 30M (päť čiapok na model), `cloudflare-ai` 30M, `api-airforce` 24M. (`longcat` je vylúčený — jeho 10 miliónov LongCat-2 0,0 grant je jednorazový, KYC-hradený registračný kredit, nie opakujúci sa mesačný rozpočet.)
 

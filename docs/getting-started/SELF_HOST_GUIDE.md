@@ -1,7 +1,7 @@
 ---
 title: "🚀 Self-Host Guide — OmniRoute (零月费自托管 / zero-fee self-host)"
 version: 3.8.52
-lastUpdated: 2026-10-05
+lastUpdated: 2026-11-24
 ---
 
 # 🚀 Self-Host Guide — OmniRoute
@@ -56,7 +56,7 @@ When you outgrow it, graduate to the full
 - Docker Engine 24+ (or Docker Desktop 4.30+) with the Compose v2 plugin.
 - ~2 GB RAM free (see [Sizing](#sizing-the-container)).
 - A provider API key from any supported provider (OpenAI, Anthropic, Google,
-  or one of the [150+ free tiers](./FREE-TIERS-GUIDE.md)).
+  or one of the [50 providers with free access](./FREE-TIERS-GUIDE.md)).
 
 No build toolchain, no Node, no git clone required: you download two files
 (the compose file and the env template, Step 1) and the image is pulled.
@@ -168,8 +168,8 @@ http://127.0.0.1:20128/v1
 ```
 
 For provider choice, see the
-[Free Tiers Guide](./FREE-TIERS-GUIDE.md) — OmniRoute aggregates 150+ free
-tiers into one endpoint, so you can run `model: "auto"` to pick the best free
+[Free Tiers Guide](./FREE-TIERS-GUIDE.md) — OmniRoute puts 50 providers with free access
+behind one endpoint, so you can run `model: "auto"` to pick the best free
 option per request.
 
 ---
@@ -408,6 +408,6 @@ For the full supply-chain / image / dependency audit dimension, see
 
 - [Docker Guide](../guides/DOCKER_GUIDE.md) — profiles, Caddy HTTPS, tunnels, image tags
 - [Quick Start](./QUICK-START.md) — 3-minute path for first-time users
-- [Free Tiers Guide](./FREE-TIERS-GUIDE.md) — 150+ free provider tiers
+- [Free Tiers Guide](./FREE-TIERS-GUIDE.md) — 50 providers with free access
 - [Providers Guide](./PROVIDERS-GUIDE.md) — connecting and configuring providers
 - [Troubleshooting](../guides/TROUBLESHOOTING.md) — deeper issue resolution

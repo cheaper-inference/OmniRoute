@@ -19,13 +19,14 @@ import { outlineSvg } from "./readme-outline.mjs";
 import { svgOpen, gridDefs, esc } from "./readme-diagram-theme.mjs";
 import { RF } from "./readmeFacts.mjs";
 
-const TIERS = [
+// Exported for the free-example check (tests/unit/docs/readme-free-tier-surface.test.ts): every
+// provider TIER 4 names must still give free access in the catalog.
+export const TIER_CASCADE_TIERS = [
   { kicker: "TIER 1 · SUBSCRIPTION", models: ["Claude Code", "Codex", "Copilot"] },
   { kicker: "TIER 2 · API KEY", models: ["DeepSeek", "Groq", "xAI"] },
   { kicker: "TIER 3 · CHEAP", models: ["GLM ", "MiniMax "], prices: ["$0.5", "$0.2"] },
-  // Free-catalog providers with recurring or keyless access (Qoder left: its free access is a
-  // one-time signup credit, freeType "one-time-initial").
-  { kicker: "TIER 4 · FREE", models: ["Kiro", "Mistral", "Pollinations"] },
+  // Free-catalog providers with recurring or keyless access.
+  { kicker: "TIER 4 · FREE", models: ["Kiro", "Gemini", "Pollinations"] },
 ];
 
 export const TIER_CASCADE_COPY = {
@@ -38,9 +39,9 @@ export const TIER_CASCADE_COPY = {
     `${RF.routingStrategies} routing strategies`,
     "Circuit breakers · TLS stealth · MCP · A2A · Guardrails",
   ],
-  tiers: TIERS.map((t) => t.kicker),
-  models: TIERS.flatMap((t) => t.models),
-  prices: TIERS.flatMap((t) => t.prices || []),
+  tiers: TIER_CASCADE_TIERS.map((t) => t.kicker),
+  models: TIER_CASCADE_TIERS.flatMap((t) => t.models),
+  prices: TIER_CASCADE_TIERS.flatMap((t) => t.prices || []),
   transitions: ["quota out?", "budget hit?"],
   badge: ["LIMITS APPLY"],
   foot: ["AUTO-FALLBACK CASCADE · UPSTREAM AVAILABILITY VARIES"],
@@ -186,7 +187,7 @@ export async function renderTierCascade() {
       // tier cards
       tierCard(
         0,
-        TIERS[0],
+        TIER_CASCADE_TIERS[0],
         { initial: "0.9", values: "0.9;0.9;0;0;0.9", keyTimes: "0;0.23;0.27;0.96;1" },
         statusDot(
           [
@@ -198,7 +199,7 @@ export async function renderTierCascade() {
       ) +
       tierCard(
         1,
-        TIERS[1],
+        TIER_CASCADE_TIERS[1],
         { initial: "0", values: "0;0;0.9;0.9;0;0", keyTimes: "0;0.24;0.28;0.48;0.52;1" },
         statusDot(
           [
@@ -211,7 +212,7 @@ export async function renderTierCascade() {
       ) +
       tierCard(
         2,
-        TIERS[2],
+        TIER_CASCADE_TIERS[2],
         { initial: "0", values: "0;0;0.9;0.9;0;0", keyTimes: "0;0.49;0.53;0.73;0.77;1" },
         statusDot(
           [
@@ -224,7 +225,7 @@ export async function renderTierCascade() {
       ) +
       tierCard(
         3,
-        TIERS[3],
+        TIER_CASCADE_TIERS[3],
         { initial: "0", values: "0;0;0.9;0.9;0", keyTimes: "0;0.74;0.78;0.985;1" },
         statusDot([["ok"]], "1;0.45;1")
       ) +

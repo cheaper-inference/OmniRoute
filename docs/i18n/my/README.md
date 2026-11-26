@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="ကတိကဝတ် — endpoint တစ်ခုနှင့် provider 394 ခု။ ကျန်းမာသော target တစ်ခု ရရှိနေသရွေ့ အလိုအလျောက် fallback က လမ်းကြောင်းပို့ခြင်းကို ဆက်လက်လုပ်ဆောင်ပေးသည်။ အဓိကတိုင် ၆ ခု — provider 394 ခုအကြား ခံနိုင်ရည်ရှိသော fallback · သတ်မှတ်ချက်နှင့်ကိုက်ညီသော workload များတွင် token ကုန်ကျစရိတ် 95% အထိ ချွေတာနိုင်ခြင်း · အခမဲ့အဆင့် 150 ကျော်နှင့် အမြဲတမ်းအခမဲ့ဖြစ်သော recurring/keyless provider 51 ခုဖြင့် $0 ဖြင့် စတင်နိုင်ခြင်း · config တစ်ခုတည်းမှတစ်ဆင့် CLI/agent integration 39 ခု · /v1 တွင် OpenAI, Claude, Gemini နှင့် Responses API ကိုက်ညီမှု · circuit breaker များ၊ TLS stealth၊ MCP tools 110 ခု၊ A2A၊ memory၊ guardrails၊ evals နှင့် စောင့်ကြည့်ထားသော test file 7,800 ကျော်အတွင်း static test declaration 56,000 ကျော် အပါအဝင် production ထိန်းချုပ်မှုများ။"/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="ကတိကဝတ် — endpoint တစ်ခုနှင့် provider 394 ခု။ ကျန်းမာသော target တစ်ခု ရရှိနေသရွေ့ အလိုအလျောက် fallback က လမ်းကြောင်းပို့ခြင်းကို ဆက်လက်လုပ်ဆောင်ပေးသည်။ အဓိကတိုင် ၆ ခု — provider 394 ခုအကြား ခံနိုင်ရည်ရှိသော fallback · သတ်မှတ်ချက်နှင့်ကိုက်ညီသော workload များတွင် token ကုန်ကျစရိတ် 95% အထိ ချွေတာနိုင်ခြင်း · အခမဲ့အဆင့် 150 ကျော်နှင့် အမြဲတမ်းအခမဲ့ဖြစ်သော recurring/keyless provider 40 ခုဖြင့် $0 ဖြင့် စတင်နိုင်ခြင်း · config တစ်ခုတည်းမှတစ်ဆင့် CLI/agent integration 39 ခု · /v1 တွင် OpenAI, Claude, Gemini နှင့် Responses API ကိုက်ညီမှု · circuit breaker များ၊ TLS stealth၊ MCP tools 110 ခု၊ A2A၊ memory၊ guardrails၊ evals နှင့် စောင့်ကြည့်ထားသော test file 7,800 ကျော်အတွင်း static test declaration 56,000 ကျော် အပါအဝင် production ထိန်းချုပ်မှုများ။"/>
 
 <br/>
 <br/>
@@ -705,7 +705,7 @@ omniroute configure codex          # ထို့အပြင်: claude opencod
 
 </div>
 
-> **မှတ်ပုံတင်ထားသော ပံ့ပိုးပေးသူ 394 ခု** ကို canonical chat၊ media၊ search၊ local၊ cloud-agent နှင့် system collection များတွင် စုစည်းထားပြီး၊ ထိုအထဲတွင် **ရှာဖွေတွေ့ရှိမှု metadata `hasFree: true` ပါဝင်သော 153 ခု** ပါရှိသည်။ Chat model registry တွင် **ပံ့ပိုးပေးသူ 239 ခု / ထူးခြားသော provider-model အတွဲ 3,059 ခု / မူရင်း model ID 1,475 ခု** ပါဝင်သည်။ ထို့အပြင် သီးခြား free-budget catalog တွင် **per-model row 465 ခု**၊ **ထပ်တလဲလဲအသုံးပြုနိုင်သော pool 34 ခု** နှင့် **ထပ်တလဲလဲအသုံးပြုနိုင်ပြီး key မလိုသော အမြဲတမ်းအခမဲ့ ပံ့ပိုးပေးသူ 51 ခု** ရှိသည်။ ဤကိန်းဂဏန်းများသည် ရည်ရွယ်ချက်ရှိရှိ denominator မတူညီကြခြင်းဖြစ်ပြီး၊ အဓိပ္ပာယ်ဖွင့်ဆိုချက်များနှင့် pool-deduped တွက်ချက်မှုများကို [ပံ့ပိုးပေးသူ အညွှန်း](docs/reference/PROVIDER_REFERENCE.md) နှင့် [အခမဲ့အဆင့်များ](docs/reference/FREE_TIERS.md) တွင် ကြည့်ရှုနိုင်သည်။
+> **မှတ်ပုံတင်ထားသော ပံ့ပိုးပေးသူ 394 ခု** ကို canonical chat၊ media၊ search၊ local၊ cloud-agent နှင့် system collection များတွင် စုစည်းထားပြီး၊ ထိုအထဲတွင် **ရှာဖွေတွေ့ရှိမှု metadata `hasFree: true` ပါဝင်သော 153 ခု** ပါရှိသည်။ Chat model registry တွင် **ပံ့ပိုးပေးသူ 239 ခု / ထူးခြားသော provider-model အတွဲ 3,059 ခု / မူရင်း model ID 1,475 ခု** ပါဝင်သည်။ ထို့အပြင် သီးခြား free-budget catalog တွင် **per-model row 465 ခု**၊ **ထပ်တလဲလဲအသုံးပြုနိုင်သော pool 34 ခု** နှင့် **ထပ်တလဲလဲအသုံးပြုနိုင်ပြီး key မလိုသော အမြဲတမ်းအခမဲ့ ပံ့ပိုးပေးသူ 40 ခု** ရှိသည်။ ဤကိန်းဂဏန်းများသည် ရည်ရွယ်ချက်ရှိရှိ denominator မတူညီကြခြင်းဖြစ်ပြီး၊ အဓိပ္ပာယ်ဖွင့်ဆိုချက်များနှင့် pool-deduped တွက်ချက်မှုများကို [ပံ့ပိုးပေးသူ အညွှန်း](docs/reference/PROVIDER_REFERENCE.md) နှင့် [အခမဲ့အဆင့်များ](docs/reference/FREE_TIERS.md) တွင် ကြည့်ရှုနိုင်သည်။
 
 <div align="center">
 

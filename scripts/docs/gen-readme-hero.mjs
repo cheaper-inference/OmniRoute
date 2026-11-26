@@ -7,21 +7,24 @@
 // Everything the hero draws lives in HERO_COPY: it is both the drawn text and what the
 // outlining step shapes (scripts/docs/readme-outline.mjs). Numbers stay in
 // <text> nodes because scripts/check/check-docs-counts-sync.mjs reads them from the raw file.
-// The derived numbers (provider total, routing strategies, steady free tokens) come from the
-// facts snapshot through ./readmeFacts.mjs; 150+, 15–95% and $0 are copy, not facts. "150+ with a
-// free offer" rounds DOWN the providers whose catalog entry carries `hasFree: true` (160 on
-// 2026-11-16) — discovery metadata, not the 74 documented free tiers nor the free-forever subset.
+// The derived numbers (provider total, routing strategies, the free-offer label and the free-token
+// pair) come from the facts snapshot through ./readmeFacts.mjs; 15–95% and $0 are copy, not facts.
+// The free tokens are the short pair of the owner's decision D48 (2026-11-21): the big figure with
+// its label and the real one, in ONE string, so no cut of the copy can show one without the other.
 import { writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { outlineSvg } from "./readme-outline.mjs";
-import { svgOpen, gridDefs, esc } from "./readme-diagram-theme.mjs";
+import { svgOpen, gridDefs, esc, roleWidth } from "./readme-diagram-theme.mjs";
 import { RF } from "./readmeFacts.mjs";
+
+// D48 short pair, owner's choice H-A (2026-11-24): "~11.3B as others count · ~90M real".
+const TOKEN_PAIR = `${RF.rowSumTotalLabel} as others count · ${RF.headlineSteadyLabel} real`;
 
 export const HERO_COPY = {
   kicker: ["OMNIROUTE — THE FREE AI GATEWAY"],
   headline: ["Never stop coding."],
   sub: [
-    `Every AI tool → ${RF.providers} providers — 150+ with a free offer —`,
+    `Every AI tool → ${RF.providers} providers — ${RF.hasFreeLabel} with a free offer —`,
     "through one endpoint.",
   ],
   tools: [
@@ -32,14 +35,14 @@ export const HERO_COPY = {
   stats: [
     String(RF.providers),
     "AI PROVIDERS",
-    "150+",
+    RF.hasFreeLabel,
     "WITH A FREE OFFER",
-    `~${RF.freeSteadyBillions}B`,
-    "FREE TOKENS / MO",
     "15–95%",
     "TOKEN SAVINGS",
     String(RF.routingStrategies),
     "ROUTING STRATEGIES",
+    TOKEN_PAIR,
+    "FREE TOKENS / MONTH",
     "$0",
     "TO START",
   ],
@@ -47,28 +50,41 @@ export const HERO_COPY = {
 
 export async function renderReadmeHero() {
   const C = HERO_COPY;
-  // Right column: 2 × 3 stats on a kit card (surface, border, 12px radius, accent edge).
+  // Right column on a kit card (surface, border, 12px radius, accent edge): the first four stats
+  // in a 2 × 2 grid, then the free-token pair on a row of its own (it is one string and needs the
+  // card's width, so it is set in the secondary figure role), then "$0 to start".
   const cardX = 760;
   const cardY = 96;
   const cardW = 380;
   const cardH = 356;
-  const stats = [];
-  for (let i = 0; i < C.stats.length; i += 2) {
-    const col = (i / 2) % 2;
-    const row = Math.floor(i / 4);
-    const x = cardX + 32 + col * 180;
-    const y = cardY + 72 + row * 104;
-    stats.push(
-      `  <text x="${x}" y="${y}" class="num">${esc(C.stats[i])}</text>\n` +
-        `  <text x="${x}" y="${y + 24}" class="lbl">${esc(C.stats[i + 1])}</text>`
+  const at = [
+    { x: cardX + 32, y: cardY + 64, cls: "num" },
+    { x: cardX + 212, y: cardY + 64, cls: "num" },
+    { x: cardX + 32, y: cardY + 148, cls: "num" },
+    { x: cardX + 212, y: cardY + 148, cls: "num" },
+    { x: cardX + 32, y: cardY + 222, cls: "num-sm" },
+    { x: cardX + 32, y: cardY + 306, cls: "num" },
+  ];
+  if (at.length * 2 !== C.stats.length) {
+    throw new Error(`readme-hero: ${C.stats.length / 2} stats for ${at.length} card slots`);
+  }
+  const pairWidth = roleWidth("num-sm", C.stats[8]);
+  if (cardX + 32 + pairWidth > cardX + cardW - 16) {
+    throw new Error(
+      `readme-hero: the free-token pair "${C.stats[8]}" (${Math.ceil(pairWidth)} px) no longer fits the card`
     );
   }
+  const stats = at.map(
+    ({ x, y, cls }, i) =>
+      `  <text x="${x}" y="${y}" class="${cls}">${esc(C.stats[2 * i])}</text>\n` +
+      `  <text x="${x}" y="${y + 24}" class="lbl">${esc(C.stats[2 * i + 1])}</text>`
+  );
 
   return outlineSvg(
     svgOpen({
       viewBox: "0 0 1200 548",
-      title: `OmniRoute — Never stop coding. Every AI tool to ${RF.providers} providers, 150+ of them with a free offer, through one endpoint.`,
-      desc: `Hero card in the Cheaper Inference UI Kit style: Switzer drawn as outlines, IBM Plex Mono for the install command. Claims: ${RF.providers} AI providers, 150+ providers with a free offer, ~${RF.freeSteadyBillions}B free tokens per month, 15–95% token savings, ${RF.routingStrategies} routing strategies, $0 to start. Light and dark follow the viewer's color scheme.`,
+      title: `OmniRoute — Never stop coding. Every AI tool to ${RF.providers} providers, ${RF.hasFreeLabel} with a free offer, through one endpoint. Free tokens a month: ${TOKEN_PAIR}.`,
+      desc: `Hero card in the Cheaper Inference UI Kit style: Switzer drawn as outlines, IBM Plex Mono for the install command. Claims: ${RF.providers} AI providers, ${RF.hasFreeLabel} providers with a free offer, free tokens a month ${TOKEN_PAIR}, 15–95% token savings, ${RF.routingStrategies} routing strategies, $0 to start. Light and dark follow the viewer's color scheme.`,
     }) +
       gridDefs("heroGrid") +
       `  <rect class="bg" x="0" y="0" width="1200" height="548"/>\n` +
