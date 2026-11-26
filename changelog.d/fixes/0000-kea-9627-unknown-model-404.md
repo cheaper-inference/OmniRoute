@@ -1,0 +1,1 @@
+- **fix(sse):** Chat Completions, Messages and Responses return HTTP 404 with `model_not_found` for an unknown model, matching `GET /v1/models/{id}`, instead of 400 `bad_request`. Behaviour change: clients that matched the old 400 status need to accept 404. (KEA-9627)

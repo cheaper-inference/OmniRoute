@@ -67,6 +67,10 @@ Content-Type: application/json
 }
 ```
 
+When model resolution reports an unknown model, OmniRoute returns HTTP `404` with
+`error.code` set to `model_not_found` before contacting an upstream provider.
+This also applies to `/v1/messages` and `/v1/responses`.
+
 ### Custom Headers
 
 | Header                   | Direction | Description                                                                                                                                                                                                                                                                                                                                        |
