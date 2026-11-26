@@ -1,5 +1,3 @@
-import type { FreeModelBudget } from "./freeModelCatalog.ts";
-
 // Last quota of free rows retired from FREE_MODEL_BUDGETS since RETIRED_LEDGER_SINCE.
 // Read only by computeRowSumMirror (the row-sum reading, ended offers included). Never routes,
 // never counts in the real figure. Rows older than 12 months drop out of the sum by themselves.
@@ -24,19 +22,3 @@ export interface RetiredFreeRow {
 export const RETIRED_LEDGER_SINCE = "2026-11-18";
 
 export const RETIRED_FREE_ROWS: RetiredFreeRow[] = [];
-
-// Retired keyless offers had no published quota for the numeric ledger.
-export const RETIRED_KEYLESS_OFFERS: FreeModelBudget[] = [
-  // 2026-11-25 (#19385), upstream HTTP 401: "The public beta is closed for now.
-  // This endpoint needs an API key, and key registration is closed".
-  {
-    provider: "uncloseai",
-    modelId: "turboderp/Qwen3.8-27B-exl3",
-    displayName: "Qwen3.8 27B exl3 (UncloseAI)",
-    monthlyTokens: 0,
-    creditTokens: 0,
-    freeType: "discontinued",
-    poolKey: null,
-    tos: "caution",
-  },
-];
