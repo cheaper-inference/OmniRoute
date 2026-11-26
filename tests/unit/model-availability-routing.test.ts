@@ -149,6 +149,22 @@ test("the flag-off chat path sends upstream without reading or writing the evide
   assert.deepEqual(queries, []);
 });
 
+test("disabling evidence in the database during dispatch prevents recording the 404", async (t) => {
+  setFlag(t, true);
+  const { setFeatureFlagOverride, removeFeatureFlagOverride } =
+    await import("../../src/lib/db/featureFlags.ts");
+  const flag = "MODEL_AVAILABILITY_EVIDENCE_ENABLED";
+  t.after(() => removeFeatureFlagOverride(flag));
+  const connection = await harness.seedConnection("openai");
+  globalThis.fetch = async () => {
+    setFeatureFlagOverride(flag, "false");
+    return absent();
+  };
+
+  assert.equal((await send(false, "flag disabled during dispatch")).status, 404);
+  assert.equal(observationCount(String(connection.id), "gpt-4o-mini"), 0);
+});
+
 test("a raw failure from an old credential revision cannot confirm the model", async (t) => {
   setFlag(t, true);
   const connection = await harness.seedConnection("openai", { apiKey: "test-key-before" });

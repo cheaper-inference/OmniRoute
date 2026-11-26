@@ -1,21 +1,12 @@
 import { z } from "zod";
-import {
-  isCurrentModelAvailabilityConnection,
-  recordModelAvailabilityObservation,
-  type ModelAvailabilityObservation,
-  type ModelAvailabilityScope,
-} from "@/lib/db/modelAvailability";
-import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
-import { isProbeContext } from "@/shared/utils/probeOrigin";
-import { warn } from "@/sse/utils/logger";
 import { wasProviderResponseRedirected } from "../executors/dispatchPin.ts";
 import { readErrorBodyText } from "../utils/error.ts";
-
-export type {
-  ConfirmedModelUnavailability,
+import type {
+  ModelAvailabilityConnection,
+  ModelAvailabilityDispatch,
   ModelAvailabilityObservation,
   ModelAvailabilityScope,
-} from "@/lib/db/modelAvailability";
+} from "../utils/modelAvailabilityTypes.ts";
 
 const modelErrorEnvelope = z.object({
   error: z.object({
@@ -55,15 +46,6 @@ export function classifyModelAbsence(
     : null;
 }
 
-export function modelAvailabilityEnabled(): boolean {
-  try {
-    return isFeatureFlagEnabled("MODEL_AVAILABILITY_EVIDENCE_ENABLED");
-  } catch {
-    warn("MODEL_AVAILABILITY", "Could not resolve the model availability flag");
-    return false;
-  }
-}
-
 export function endpointKindFromPath(
   path: string
 ): ModelAvailabilityScope["endpointKind"] | undefined {
@@ -78,37 +60,16 @@ export function endpointKindFromUrl(
   return parsed ? endpointKindFromPath(parsed.pathname) : undefined;
 }
 
-export type ModelAvailabilityDispatch = (
-  url: string,
-  init: RequestInit,
-  dispatch: () => Promise<Response>
-) => Promise<Response>;
-
-export type ModelAvailabilityConnection = Pick<
-  ModelAvailabilityScope,
-  "providerId" | "connectionId" | "connectionRevision"
->;
-
-type AcceptedEvidence = { scope: ModelAvailabilityScope; startedAtMs: number };
+type RecordObservation = (
+  scope: ModelAvailabilityScope,
+  observation: ModelAvailabilityObservation
+) => void;
+type AcceptedEvidence = {
+  scope: ModelAvailabilityScope;
+  startedAtMs: number;
+  record: RecordObservation;
+};
 const acceptedEvidence = new WeakMap<Response, AcceptedEvidence>();
-
-function record(scope: ModelAvailabilityScope, observation: ModelAvailabilityObservation) {
-  if (!modelAvailabilityEnabled()) return;
-  try {
-    recordModelAvailabilityObservation(scope, observation);
-  } catch {
-    warn("MODEL_AVAILABILITY", "Could not write model availability evidence");
-  }
-}
-
-export function isModelAvailabilityConnectionCurrent(scope: ModelAvailabilityConnection): boolean {
-  try {
-    return isCurrentModelAvailabilityConnection(scope);
-  } catch {
-    warn("MODEL_AVAILABILITY", "Could not check the model availability connection revision");
-    return false;
-  }
-}
 
 function readWireModel(body: RequestInit["body"]): string | null {
   if (typeof body !== "string") return null;
@@ -135,14 +96,16 @@ async function recordRawModelAbsence({
   requestId,
   startedAtMs,
   signal,
+  record,
 }: {
   response: Response;
   scope: ModelAvailabilityScope;
   requestId: string;
   startedAtMs: number;
   signal: AbortSignal | null | undefined;
+  record: RecordObservation;
 }): Promise<void> {
-  if (response.status !== 404 || isProbeContext()) return;
+  if (response.status !== 404) return;
   if (!(await hasExplicitModelAbsence(response, scope.modelId)) || signal?.aborted) return;
   record(scope, {
     kind: "explicit_model_not_found",
@@ -158,13 +121,19 @@ export function createModelAvailabilityDispatch({
   apiKey,
   requestId,
   resolveEndpoint,
-  probe,
+  isProbe,
+  isEnabled,
+  isCurrentConnection,
+  record,
 }: {
   connection: ModelAvailabilityConnection;
   apiKey: string;
   requestId: string;
   resolveEndpoint: (model: string) => string;
-  probe: boolean;
+  isProbe: () => boolean;
+  isEnabled: () => boolean;
+  isCurrentConnection: (connection: ModelAvailabilityConnection) => boolean;
+  record: RecordObservation;
 }): ModelAvailabilityDispatch {
   return async (url, init, dispatch) => {
     const modelId = readWireModel(init.body);
@@ -172,9 +141,9 @@ export function createModelAvailabilityDispatch({
     if (
       !modelId ||
       !endpointKind ||
-      !modelAvailabilityEnabled() ||
+      !isEnabled() ||
       new Headers(init.headers).get("authorization") !== `Bearer ${apiKey}` ||
-      !isModelAvailabilityConnectionCurrent(connection) ||
+      !isCurrentConnection(connection) ||
       resolveEndpoint(modelId) !== url
     ) {
       return dispatch();
@@ -184,9 +153,16 @@ export function createModelAvailabilityDispatch({
     const startedAtMs = Date.now();
     const response = await dispatch();
     if (wasProviderResponseRedirected(response) || init.signal?.aborted) return response;
-    if (response.ok) acceptedEvidence.set(response, { scope, startedAtMs });
-    else if (!probe) {
-      await recordRawModelAbsence({ response, scope, requestId, startedAtMs, signal: init.signal });
+    if (response.ok) acceptedEvidence.set(response, { scope, startedAtMs, record });
+    else if (!isProbe()) {
+      await recordRawModelAbsence({
+        response,
+        scope,
+        requestId,
+        startedAtMs,
+        signal: init.signal,
+        record,
+      });
     }
     return response;
   };
@@ -206,7 +182,7 @@ export function acceptModelAvailabilityResponse(response: Response | null | unde
   const evidence = acceptedEvidence.get(response);
   if (!evidence) return;
   acceptedEvidence.delete(response);
-  record(evidence.scope, {
+  evidence.record(evidence.scope, {
     kind: "accepted",
     startedAtMs: evidence.startedAtMs,
     observedAtMs: Date.now(),

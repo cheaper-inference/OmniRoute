@@ -1,7 +1,10 @@
 import { endpointKindFromPath } from "@omniroute/open-sse/services/modelAvailabilityEvidence.ts";
 import { getProviderCredentialsWithQuotaPreflight } from "../services/auth";
 import type { CredentialSelectionOptions } from "../services/credentialSelectionOptions";
-import { isPreselectedModelAvailabilityCurrent } from "../services/modelAvailabilitySelection";
+import {
+  createModelAvailabilitySelection,
+  isPreselectedModelAvailabilityCurrent,
+} from "../services/modelAvailabilitySelection";
 import { resolveForcedConnectionForCredentialPool } from "../services/sessionAffinityPin";
 import {
   comboStalledConnectionIds,
@@ -15,9 +18,7 @@ export function modelAvailabilitySelectionOptions(
 ): CredentialSelectionOptions {
   // A bare model can be replaced by an account's default after selection.
   const endpointKind = requestedModel.includes("/") && endpointKindFromPath(endpointPath || "");
-  return endpointKind
-    ? { modelAvailabilityEndpointKind: endpointKind, modelAvailabilityProbe: probe }
-    : {};
+  return endpointKind ? { modelAvailability: createModelAvailabilitySelection(probe) } : {};
 }
 
 export function selectChatCredentials({

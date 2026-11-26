@@ -1,4 +1,4 @@
-import type { ModelAvailabilityDispatch } from "../services/modelAvailabilityEvidence.ts";
+import type { ModelAvailabilityDispatch } from "../utils/modelAvailabilityTypes.ts";
 import {
   observeProviderHttpSend,
   selectHttpResponse,

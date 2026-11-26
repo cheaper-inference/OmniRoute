@@ -1,13 +1,5 @@
-import {
-  createModelAvailabilityDispatch,
-  inheritModelAvailabilityEvidence,
-  modelAvailabilityEnabled,
-  type ModelAvailabilityConnection,
-} from "../../services/modelAvailabilityEvidence.ts";
-import {
-  hasStableModelAvailabilityIdentity,
-  getModelAvailabilitySelectionUrl,
-} from "@/sse/services/modelAvailabilitySelection";
+import { inheritModelAvailabilityEvidence } from "../../services/modelAvailabilityEvidence.ts";
+import type { ModelAvailabilityObserver } from "../../utils/modelAvailabilityTypes.ts";
 import type {
   HttpAttemptSelection,
   HttpAttemptRejectionSlot,
@@ -144,7 +136,10 @@ export type ExecuteProviderRequestDeps = {
   connectionId: string | null | undefined;
   contextEditingEnabled?: boolean;
   correlationId: string | null | undefined;
-  credentials: Record<string, unknown> | null | undefined;
+  credentials:
+    | (Record<string, unknown> & { createModelAvailabilityObserver?: ModelAvailabilityObserver })
+    | null
+    | undefined;
   dedupEnabled: boolean;
   dedupHash: string | null;
   effectiveModel: string;
@@ -211,43 +206,6 @@ function getModelAvailabilityRequestId(ingress: object | null | undefined, trace
   if (original) return original;
   modelAvailabilityRequestIds.set(ingress, traceId);
   return traceId;
-}
-
-function observeModelAvailability(
-  provider: string,
-  traceId: string,
-  ingress: object | null | undefined,
-  selected: ExecuteProviderRequestDeps["credentials"],
-  executed: ReturnType<ExecuteProviderRequestDeps["getExecutionCredentials"]>
-) {
-  const connection = selected?.modelAvailabilityConnection as
-    ModelAvailabilityConnection | undefined;
-  const apiKey = selected?.apiKey;
-  if (!connection || typeof apiKey !== "string" || !apiKey) return undefined;
-  if (
-    connection.providerId !== provider ||
-    connection.connectionId !== executed?.connectionId ||
-    executed.apiKey !== apiKey ||
-    executed.accessToken ||
-    !modelAvailabilityEnabled()
-  )
-    return undefined;
-  const data = selected.providerSpecificData as Record<string, unknown> | undefined;
-  if (
-    !hasStableModelAvailabilityIdentity({
-      authType: typeof selected.authType === "string" ? selected.authType : null,
-      providerSpecificData: (executed.providerSpecificData ?? {}) as Record<string, unknown>,
-    })
-  )
-    return undefined;
-
-  return createModelAvailabilityDispatch({
-    connection,
-    apiKey,
-    requestId: getModelAvailabilityRequestId(ingress, traceId),
-    resolveEndpoint: (model) => getModelAvailabilitySelectionUrl(provider, data ?? {}, model),
-    probe: selected.modelAvailabilityProbe === true,
-  });
 }
 
 export async function executeProviderRequest(
@@ -497,10 +455,9 @@ export async function executeProviderRequest(
                         upstreamExtraHeaders: buildUpstreamHeadersForExecute(modelToCall),
                         clientHeaders: getExecutorClientHeaders(),
                         clientResponseFormat,
-                        observeModelAvailability: observeModelAvailability(
+                        observeModelAvailability: credentials?.createModelAvailabilityObserver?.(
                           provider,
-                          traceId,
-                          clientRawRequest?.headers,
+                          getModelAvailabilityRequestId(clientRawRequest?.headers, traceId),
                           credentials,
                           execCreds
                         ),
