@@ -3,68 +3,41 @@
   "base": "release/v3.8.55",
   "paused": null,
   "inFlight": {
-    "batchId": "b44",
+    "batchId": "b45",
     "kind": "batch",
-    "candidateRef": "omni-queue/release-v3.8.55/b44-712f5e67bdd7",
-    "candidateSha": "712f5e67bdd75d32a22717cfd32840408fbfe50a",
-    "baseSha": "176919ddb80754ad24922790dde53a85f21249d5",
-    "treeSha": "b878833b213679b6c0472c2909f63c90175009f3",
+    "candidateRef": "omni-queue/release-v3.8.55/b45-8b19a44c124b",
+    "candidateSha": "8b19a44c124b5814f6313306152ffddbac44dbe7",
+    "baseSha": "712f5e67bdd75d32a22717cfd32840408fbfe50a",
+    "treeSha": "d8b26df2ebfefe8daef195748988f3a8e204c3ef",
     "prs": [
       {
-        "n": 20421,
-        "head": "b9a106948defc7a2d2455a2d6b097fbf7a92bf6e",
-        "title": "docs(readme): rebuild README from the approved round-2 section designs",
+        "n": 21095,
+        "head": "a90561b6274494ddff88c622b46cd71f437e97c0",
+        "title": "fix(ci): read free-token figures by kind and keep the row-sum figure paired with the real one",
         "author": "diegosouzapw",
-        "labeledAt": "2026-11-25T23:34:25Z"
+        "labeledAt": "2026-11-26T00:10:16Z"
       },
       {
-        "n": 21198,
-        "head": "6cd7c23e0049742da3cd5402573b259577559657",
-        "title": "feat(api): bind a server-resolved API key to a request context (KEA-9523)",
+        "n": 21194,
+        "head": "6a320f0720394ead2ba1562efa7bb6444ae25a92",
+        "title": "chore(quality): sync the skill templates with the installed maintainer skills",
         "author": "diegosouzapw",
-        "labeledAt": "2026-11-25T23:40:06Z"
+        "labeledAt": "2026-11-26T00:10:31Z"
       }
     ],
-    "stage": "landing",
-    "startedAt": "2026-11-26T02:47:49.437Z",
+    "stage": "testing",
+    "startedAt": "2026-11-26T04:12:45.998Z",
     "attempts": 0,
-    "bisect": {
-      "rootBatchId": "b43",
-      "segments": [
-        [
-          {
-            "n": 20421,
-            "head": "b9a106948defc7a2d2455a2d6b097fbf7a92bf6e",
-            "title": "docs(readme): rebuild README from the approved round-2 section designs",
-            "author": "diegosouzapw",
-            "labeledAt": "2026-11-25T23:34:25Z"
-          },
-          {
-            "n": 21198,
-            "head": "6cd7c23e0049742da3cd5402573b259577559657",
-            "title": "feat(api): bind a server-resolved API key to a request context (KEA-9523)",
-            "author": "diegosouzapw",
-            "labeledAt": "2026-11-25T23:40:06Z"
-          }
-        ],
-        [
-          {
-            "n": 20599,
-            "head": "5e5437d0dcc5a375945b435461072881dcb01c04",
-            "title": "fix(ci): re-run PR checks on a base change only, not on a text edit",
-            "author": "diegosouzapw",
-            "labeledAt": "2026-11-25T23:43:52Z"
-          }
-        ]
-      ],
-      "culprits": [],
-      "landed": [],
-      "steps": 0,
-      "hang": false
-    },
-    "landAttempts": 1
+    "bisect": null
   },
   "baseChecks": [
+    {
+      "baseSha": "712f5e67bdd75d32a22717cfd32840408fbfe50a",
+      "ref": "omni-queue/release-v3.8.55/b44-712f5e67bdd7",
+      "status": "green",
+      "startedAt": "2026-11-26T02:47:49.437Z",
+      "signatures": []
+    },
     {
       "baseSha": "176919ddb80754ad24922790dde53a85f21249d5",
       "ref": "omni-queue/release-v3.8.55/b42-176919ddb807",
@@ -172,88 +145,15 @@
     }
   },
   "counters": {
-    "batchSeq": 44,
-    "ciRuns": 49,
-    "landedPrs": 1,
-    "landedBatches": 1,
+    "batchSeq": 45,
+    "ciRuns": 50,
+    "landedPrs": 3,
+    "landedBatches": 2,
     "redBatches": 11,
     "bisections": 3,
     "culprits": 1
   },
   "history": [
-    {
-      "at": "2026-11-19T21:14:55.556Z",
-      "type": "checks-green",
-      "batchId": "b4",
-      "prs": [
-        20616,
-        19788,
-        19798,
-        19804,
-        19844,
-        19845
-      ],
-      "sha": "b7f1ad39432c7b4002097ab3c77e43b4d1eed58f",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44616525159"
-    },
-    {
-      "at": "2026-11-19T21:15:16.657Z",
-      "type": "would-land",
-      "batchId": "b4",
-      "prs": [
-        20616,
-        19788,
-        19798,
-        19804,
-        19844,
-        19845
-      ],
-      "sha": "b7f1ad39432c7b4002097ab3c77e43b4d1eed58f",
-      "detail": "shadow mode: would merge-ff onto 6d87faf23640",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44616525159"
-    },
-    {
-      "at": "2026-11-19T21:17:00.980Z",
-      "type": "batch-started",
-      "batchId": "b5",
-      "prs": [
-        20670,
-        19846,
-        19914,
-        20102,
-        20115,
-        20268,
-        20270
-      ],
-      "sha": "f07fddeb90a12d51958e2008448837fb1dc59b0c",
-      "detail": "7 PR(s) on f05732fbfbbf; window 7",
-      "labeledAt": {
-        "19846": "2026-11-19T19:53:21Z",
-        "19914": "2026-11-19T19:53:24Z",
-        "20102": "2026-11-19T19:53:26Z",
-        "20115": "2026-11-19T19:53:29Z",
-        "20268": "2026-11-19T19:53:31Z",
-        "20270": "2026-11-19T19:53:34Z",
-        "20670": "2026-11-19T19:31:09Z"
-      },
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44616525159"
-    },
-    {
-      "at": "2026-11-19T22:32:44.595Z",
-      "type": "checks-green",
-      "batchId": "b5",
-      "prs": [
-        20670,
-        19846,
-        19914,
-        20102,
-        20115,
-        20268,
-        20270
-      ],
-      "sha": "f07fddeb90a12d51958e2008448837fb1dc59b0c",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44629567788"
-    },
     {
       "at": "2026-11-19T22:33:04.297Z",
       "type": "would-land",
@@ -2609,12 +2509,57 @@
       ],
       "sha": "712f5e67bdd75d32a22717cfd32840408fbfe50a",
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45753644000"
+    },
+    {
+      "at": "2026-11-26T04:12:12.426Z",
+      "type": "land-blessed",
+      "batchId": "b44",
+      "prs": [
+        20421,
+        21198
+      ],
+      "sha": "712f5e67bdd75d32a22717cfd32840408fbfe50a",
+      "detail": "omni-queue/land success on 1 commit(s)",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45753644000"
+    },
+    {
+      "at": "2026-11-26T04:12:15.963Z",
+      "type": "landed",
+      "batchId": "b44",
+      "prs": [
+        20421,
+        21198
+      ],
+      "sha": "712f5e67bdd75d32a22717cfd32840408fbfe50a",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45753644000"
+    },
+    {
+      "at": "2026-11-26T04:12:24.566Z",
+      "type": "pr-dequeued",
+      "batchId": "b43",
+      "prs": [
+        20599
+      ],
+      "detail": "withdrawn: head moved to 1fd32c1d9b75",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45753644000"
+    },
+    {
+      "at": "2026-11-26T04:12:49.287Z",
+      "type": "batch-started",
+      "batchId": "b45",
+      "prs": [
+        21095,
+        21194
+      ],
+      "sha": "8b19a44c124b5814f6313306152ffddbac44dbe7",
+      "detail": "2 PR(s) on 712f5e67bdd7; window 2",
+      "labeledAt": {
+        "21095": "2026-11-26T00:10:16Z",
+        "21194": "2026-11-26T00:10:31Z"
+      },
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45753644000"
     }
   ],
-  "updatedAt": "2026-11-26T04:12:08.961Z",
-  "batchWindow": 2,
-  "landingsWithoutVerdict": {
-    "count": 1,
-    "since": "2026-11-26T04:12:08.961Z"
-  }
+  "updatedAt": "2026-11-26T04:12:51.159Z",
+  "batchWindow": 2
 }
