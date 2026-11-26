@@ -245,8 +245,12 @@ describe("QdrantConfigCard", () => {
       (c: [string]) => typeof c[0] === "string" && c[0] === "/api/settings/qdrant/health"
     );
     expect(healthCalls.length).toBeGreaterThan(0);
-    // Health OK result should be shown
+    // Health OK result should be shown and unlock the enable switch (#21115)
     expect(container.textContent).toContain("qdrant.healthOk");
+    const toggleBtn = container.querySelector(
+      "[data-testid='qdrant-enabled-switch']"
+    ) as HTMLButtonElement | null;
+    expect(toggleBtn?.disabled).toBe(false);
   });
 
   it("search test button calls /api/settings/qdrant/search and renders results", async () => {

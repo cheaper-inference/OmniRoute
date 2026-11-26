@@ -25,6 +25,11 @@ import { FETCH_BODY_TIMEOUT_MS, HTTP_STATUS, PROVIDERS } from "../config/constan
 import { readCodexPeekChunk, buildCodexTimeoutSafePassthroughBody } from "./codex/bodyTimeout.ts";
 import { stripCodexPassthroughRejectedParams } from "./codex/stripPassthroughRejectedParams.ts";
 import {
+  CODEX_TRANSIENT_CACHE_SESSION_KEY,
+  readCodexCacheSessionHeader,
+  resolveCodexPromptCacheKey,
+} from "./codex/promptCacheKey.ts";
+import {
   CODEX_CLI_RS_ORIGINATOR,
   getCodexUserAgent,
   normalizeCodexSessionId,
@@ -37,7 +42,6 @@ import {
   applyCodexOriginalIdentityHeaders,
   type CodexClientIdentity,
   getCodexClientSessionId,
-  resolveCodexThreadScopedPromptCacheKey,
   withCodexFingerprintCredentials,
 } from "../config/codexIdentity.ts";
 import { getAccessToken } from "../services/tokenRefresh.ts";
@@ -844,11 +848,21 @@ export class CodexExecutor extends BaseExecutor {
       input.model
     );
     const requestInput = requestBody === input.body ? input : { ...input, body: requestBody };
-    const credentials = withCodexFingerprintCredentials(
+    const fingerprintedCredentials = withCodexFingerprintCredentials(
       requestInput.credentials,
       requestInput.clientHeaders,
       requestInput.body
     );
+    const headerCacheSessionId = readCodexCacheSessionHeader(requestInput.clientHeaders);
+    const credentials = headerCacheSessionId
+      ? {
+          ...fingerprintedCredentials,
+          providerSpecificData: {
+            ...(fingerprintedCredentials?.providerSpecificData || {}),
+            [CODEX_TRANSIENT_CACHE_SESSION_KEY]: headerCacheSessionId,
+          },
+        }
+      : fingerprintedCredentials;
     const nextInput = { ...requestInput, credentials };
     const forcedEffort = getForcedReasoningEffort(credentials);
     if (forcedEffort) {
@@ -1294,28 +1308,16 @@ export class CodexExecutor extends BaseExecutor {
   }
 
   /**
-   * Derive a stable session ID for prompt cache affinity.
-   * Priority: per-conversation session_id/conversation_id from request body → workspaceId.
-   * The official Codex client uses conversation_id (a unique UUID per session), NOT
-   * the account-wide workspaceId. Using workspaceId caps cache hit-rate at ~49%
-   * because all conversations share the same cache partition. (#1643)
+   * Derive a stable per-conversation key for prompt cache affinity (#1643, #21077).
+   * Priority: explicit body key/session → inbound client session headers / preserved
+   * Claude metadata → deterministic per-conversation UUID → workspaceId (last resort).
    * Ref: openai/codex core/src/client.rs line 853
    */
   private getPromptCacheSessionId(
     credentials: ProviderCredentials | null | undefined,
     body: Record<string, unknown> | null
   ): string | null {
-    const promptCacheKey = normalizeCodexSessionId(body?.prompt_cache_key);
-    if (promptCacheKey) return promptCacheKey;
-
-    // Prefer per-session identifiers from the client request body
-    const sessionId = body?.session_id ?? body?.conversation_id;
-    const normalizedSessionId = normalizeCodexSessionId(sessionId);
-    if (normalizedSessionId) {
-      return normalizedSessionId;
-    }
-    // Fall back to workspaceId (account-wide) — better than nothing
-    return normalizeCodexSessionId(credentials?.providerSpecificData?.workspaceId) || null;
+    return resolveCodexPromptCacheKey(credentials, body);
   }
 
   /**
@@ -1554,24 +1556,10 @@ export class CodexExecutor extends BaseExecutor {
     // The official Codex client sets this to conversation_id (a stable UUID per session).
     // Ref: openai/codex core/src/client.rs line 853:
     //   let prompt_cache_key = Some(self.client.state.conversation_id.to_string());
-    // IMPORTANT: Capture session/conversation IDs BEFORE deletion below (#1643).
-    // Opt-in (`codexPromptCacheKeyScope: "thread"`): align the client's key with the
-    // converged thread id instead of forwarding it raw next to a rewritten thread.
-    const threadScopedCacheKey = resolveCodexThreadScopedPromptCacheKey(
-      body.prompt_cache_key,
-      credentials?.providerSpecificData?.codexClientIdentity as
-        CodexClientIdentity | null | undefined,
-      credentials?.providerSpecificData,
-      credentials?.connectionId ?? null
-    );
-    if (threadScopedCacheKey) {
-      body.prompt_cache_key = threadScopedCacheKey;
-    }
-    if (!body.prompt_cache_key) {
-      const cacheSessionId = this.getPromptCacheSessionId(credentials, body);
-      if (cacheSessionId) {
-        body.prompt_cache_key = cacheSessionId;
-      }
+    // IMPORTANT: Capture session/conversation IDs BEFORE deletion below (#1643, #21077).
+    const resolvedPromptCacheKey = this.getPromptCacheSessionId(credentials, body);
+    if (resolvedPromptCacheKey) {
+      body.prompt_cache_key = resolvedPromptCacheKey;
     }
     if (!isCompactRequest) {
       applyCodexClientMetadata(

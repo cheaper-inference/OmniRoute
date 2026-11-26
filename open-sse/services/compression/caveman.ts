@@ -427,9 +427,13 @@ export function cavemanCompress(
       const normalized = isCodeDominantText(rulesApplied)
         ? rulesApplied
         : recapitalizeSentences(cleanupArtifacts(rulesApplied));
+      // #21117: tidy the prose BEFORE the preserved blocks are restored. Running
+      // cleanupArtifacts() on the restored text rewrote code inside fenced/inline
+      // blocks (collapsed spaces in string literals, `__DIR__ . x` -> `__DIR__. x`),
+      // so the strict validator rejected the whole message. Placeholders shield blocks.
       const cleaned =
         blocks.length > 0
-          ? cleanupArtifacts(restorePreservedBlocks(normalized, blocks))
+          ? restorePreservedBlocks(cleanupArtifacts(normalized), blocks)
           : normalized;
       if (shouldPreserve || blocks.length > 0) {
         const validation = validateCompression(textPart, cleaned);
