@@ -410,6 +410,44 @@ test("Kustomize requires API keys in the base and overlays with Ingress", async 
   }
 });
 
+test("Kustomize overlays only set REQUIRE_API_KEY to the string true", () => {
+  const overlaysDir = path.join(K8S_DIR, "overlays");
+  const seen = new WeakSet<object>();
+
+  function checkApiKeySettings(node: unknown, file: string): void {
+    if (node === null || typeof node !== "object" || seen.has(node)) return;
+    seen.add(node);
+
+    if ("REQUIRE_API_KEY" in node) {
+      assert.equal(node.REQUIRE_API_KEY, "true", `${file}: REQUIRE_API_KEY must be "true"`);
+    }
+    if (
+      "path" in node &&
+      typeof node.path === "string" &&
+      node.path.endsWith("/REQUIRE_API_KEY") &&
+      "value" in node
+    ) {
+      assert.equal(node.value, "true", `${file}: patch value at ${node.path} must be "true"`);
+    }
+    if ("patch" in node && typeof node.patch === "string") {
+      for (const doc of parseAllDocuments(node.patch)) {
+        checkApiKeySettings(doc.toJS(), file);
+      }
+    }
+    for (const value of Object.values(node)) {
+      checkApiKeySettings(value, file);
+    }
+  }
+
+  for (const entry of fs.readdirSync(overlaysDir, { recursive: true, withFileTypes: true })) {
+    if (!entry.isFile() || ![".yaml", ".yml"].includes(path.extname(entry.name))) continue;
+    const file = path.relative(REPO_ROOT, path.join(entry.parentPath, entry.name));
+    for (const doc of loadYaml<unknown>(file)) {
+      checkApiKeySettings(doc, file);
+    }
+  }
+});
+
 test("the nginx Ingress disables response buffering so SSE streams", () => {
   const ing = firstOfKind(
     loadYaml<K8sDoc>("deploy/kubernetes/overlays/k8s/ingress.yaml"),
