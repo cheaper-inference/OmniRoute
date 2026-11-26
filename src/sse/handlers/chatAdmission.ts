@@ -296,6 +296,8 @@ export type WithChatAdmissionOptions = {
   getRuntime?: () => AdaptiveAdmissionRuntime;
 };
 
+let activeStreamSeq = 0;
+
 /**
  * Thin public wrapper: create per-call context, run implementation, attach/release lease.
  */
@@ -310,6 +312,21 @@ export function withChatAdmission(
     correlationId?: string,
     lifecycleSignal?: AbortSignal | null
   ): Promise<Response> {
+    const backpressure = checkConnectionCapacity();
+    if (backpressure.shouldReject) {
+      return backpressure.response;
+    }
+
+    activeStreamSeq += 1;
+    const streamKey = `${correlationId || "req"}:${activeStreamSeq}`;
+    createStreamTracker(streamKey);
+    let streamReleased = false;
+    const releaseStream = (): void => {
+      if (streamReleased) return;
+      streamReleased = true;
+      archiveStream(streamKey);
+    };
+
     const admissionContext = createChatAdmissionContext(
       options.getRuntime ?? getAdaptiveAdmissionRuntime
     );
@@ -324,14 +341,16 @@ export function withChatAdmission(
         effectiveSignal
       );
       const admittedState = admissionContext.getAdmittedState();
-      if (!admittedState) return response;
+      const responseWithLease = admittedState
+        ? admittedState.runtime.attachResponseLifecycle(response, admittedState.admitted.lease, {
+            admittedAtMs: admittedState.admitted.admittedAtMs,
+            signal: effectiveSignal,
+          })
+        : response;
 
-      const { runtime, admitted } = admittedState;
-      return runtime.attachResponseLifecycle(response, admitted.lease, {
-        admittedAtMs: admitted.admittedAtMs,
-        signal: effectiveSignal,
-      });
+      return attachActiveStreamLifecycle(responseWithLease, releaseStream, effectiveSignal);
     } catch (err) {
+      releaseStream();
       const admittedState = admissionContext.getAdmittedState();
       if (admittedState) {
         const { runtime, admitted } = admittedState;

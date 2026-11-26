@@ -227,3 +227,97 @@ export function archiveStream(requestId) {
 export function getActiveStreams() {
   return Array.from(activeStreams.values()).map((t) => t.getSummary());
 }
+
+/**
+ * Get the number of currently in-flight active streams.
+ */
+export function getActiveStreamCount(): number {
+  return activeStreams.size;
+}
+
+/**
+ * Attach stream lifecycle tracking to an SSE Response so `onDone` runs
+ * once the stream closes, errors, is cancelled, or aborts. Non-SSE
+ * responses invoke `onDone` immediately before returning.
+ */
+export function attachActiveStreamLifecycle(
+  response: Response,
+  onDone: () => void,
+  signal?: AbortSignal | null
+): Response {
+  const contentType = response.headers.get("content-type") ?? "";
+  if (!response.body || !contentType.toLowerCase().includes("text/event-stream")) {
+    onDone();
+    return response;
+  }
+
+  const upstream = response.body;
+  const reader = upstream.getReader();
+  let settled = false;
+  let readerCancelled = false;
+
+  const settle = (): void => {
+    if (settled) return;
+    settled = true;
+    onDone();
+  };
+
+  const cancelReader = (reason?: unknown): void => {
+    if (readerCancelled) return;
+    readerCancelled = true;
+    void reader.cancel(reason).catch(() => {
+      /* ignore cancel races */
+    });
+  };
+
+  const onAbort = (): void => {
+    cancelReader(signal?.reason);
+    settle();
+  };
+
+  if (signal) {
+    if (signal.aborted) {
+      onAbort();
+    } else {
+      signal.addEventListener("abort", onAbort, { once: true });
+    }
+  }
+
+  const detachAbort = (): void => {
+    signal?.removeEventListener("abort", onAbort);
+  };
+
+  const stream = new ReadableStream<Uint8Array>({
+    async pull(controller) {
+      if (settled) {
+        controller.close();
+        return;
+      }
+      try {
+        const { done, value } = await reader.read();
+        if (done) {
+          detachAbort();
+          settle();
+          controller.close();
+          return;
+        }
+        controller.enqueue(value);
+      } catch (err) {
+        detachAbort();
+        settle();
+        controller.error(err);
+      }
+    },
+    cancel(reason) {
+      detachAbort();
+      cancelReader(reason);
+      settle();
+    },
+  });
+
+  return new Response(stream, {
+    status: response.status,
+    statusText: response.statusText,
+    headers: response.headers,
+  });
+}

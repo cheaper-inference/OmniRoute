@@ -213,10 +213,17 @@ export function getSessionConnection(sessionId: string | null): string | null {
 }
 
 /**
- * Get session count (for dashboard)
+ * Get active (non-expired) session count (for dashboard).
  */
 export function getActiveSessionCount(): number {
-  return sessions.size;
+  const now = Date.now();
+  let count = 0;
+  for (const entry of sessions.values()) {
+    if (now - entry.lastActive <= SESSION_TTL_MS) {
+      count++;
+    }
+  }
+  return count;
 }
 
 /**

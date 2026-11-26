@@ -457,6 +457,11 @@ test("mixed sessions: expired ones gone, fresh ones survive after TTL check", ()
 
   const sessions = mod.getActiveSessions();
   assert.equal(sessions.length, 10, "only new sessions should be active");
+  assert.equal(
+    mod.getActiveSessionCount(),
+    10,
+    "getActiveSessionCount must apply the same TTL filter as getActiveSessions"
+  );
   for (const s of sessions) {
     assert.ok(s.sessionId.startsWith("new-"), `expected new session, got ${s.sessionId}`);
   }

@@ -18,6 +18,8 @@ import {
   type AdaptiveAdmissionRuntime,
 } from "../../open-sse/services/admission/runtime.ts";
 import type { AdaptiveAdmissionConfig } from "../../open-sse/services/admission/types.ts";
+import { clearSessions, touchSession } from "../../open-sse/services/sessionManager.ts";
+import { getActiveStreamCount } from "../../src/sse/services/streamState.ts";
 
 class FakeClock {
   nowMs = 0;
@@ -507,5 +509,41 @@ describe("withChatAdmission lifecycle", () => {
 
     await holdRes.body!.cancel();
     tiny.dispose();
+  });
+
+  it("backpressure cap tracks live SSE streams rather than sticky sessions", async () => {
+    process.env.OMNI_MAX_CONCURRENT_CONNECTIONS = "1";
+    for (let i = 0; i < 10; i++) {
+      touchSession(`bp-sticky-${i}`);
+    }
+    try {
+      const handle = wrap(async () => {
+        return new Response(
+          new ReadableStream({
+            start(c) {
+              c.enqueue(new TextEncoder().encode("data: ok\n\n"));
+            },
+          }),
+          { status: 200, headers: { "Content-Type": "text/event-stream" } }
+        );
+      });
+
+      const first = await handle({}, null, null);
+      assert.equal(first.status, 200);
+      assert.equal(getActiveStreamCount(), 1);
+
+      const blocked = await handle({}, null, null);
+      assert.equal(blocked.status, 429);
+
+      await first.body!.cancel();
+      assert.equal(getActiveStreamCount(), 0);
+
+      const next = await handle({}, null, null);
+      assert.equal(next.status, 200);
+      await next.body!.cancel();
+    } finally {
+      delete process.env.OMNI_MAX_CONCURRENT_CONNECTIONS;
+      clearSessions();
+    }
   });
 });

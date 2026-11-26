@@ -1,11 +1,11 @@
-import { getActiveSessionCount } from "@omniroute/open-sse/services/sessionManager.ts";
+import { getActiveStreamCount } from "../services/streamState.ts";
 
 /**
  * Connection back-pressure for SSE / streaming endpoints.
  *
- * Caps in-flight requests to prevent memory exhaustion.  Reads the live
- * session count from `sessionManager` — the same source the health endpoint
- * uses to report `activeConnections`.
+ * Caps concurrent in-flight chat requests/streams to prevent memory exhaustion.
+ * Reads the live count of active in-flight streams from `streamState` rather
+ * than sticky-routing sessions in `sessionManager`.
  *
  * Set `OMNI_MAX_CONCURRENT_CONNECTIONS` to a positive integer to enable.
  * Default is 0 (disabled) so existing deployments are unaffected until
@@ -63,5 +63,5 @@ function readCap(): number {
  * `{ shouldReject: false }` when a slot is free (or the cap is disabled).
  */
 export function checkConnectionCapacity(): CapacityResult {
-  return evalCapacity(getActiveSessionCount(), readCap());
+  return evalCapacity(getActiveStreamCount(), readCap());
 }

@@ -255,7 +255,6 @@ import {
   sameAccountTransportRetryDelayMs,
 } from "../services/sameAccountTransportRetry";
 import { constrainConnectionsToQuota, resolveQuotaKeyScope } from "../../lib/quota/quotaKey";
-import { checkConnectionCapacity } from "../utils/backpressure";
 import {
   buildManagedLeaseErrorResponse,
   buildManagedLeaseSelectionErrorResponse,
@@ -414,12 +413,6 @@ async function handleChatImplementation(
   // Pipeline: Start request telemetry
   const reqId = correlationId || generateRequestId();
   const telemetry = new RequestTelemetry(reqId);
-
-  const backpressure = checkConnectionCapacity();
-  if (backpressure.shouldReject) {
-    log.warn("BACKPRESSURE", "Rejecting request: at connection limit");
-    return backpressure.response;
-  }
 
   let body;
   try {
