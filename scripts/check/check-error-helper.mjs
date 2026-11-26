@@ -38,6 +38,10 @@ const SCAN_DIRS = [
   path.join(cwd, "open-sse/executors"),
   path.join(cwd, "open-sse/handlers"),
   path.join(cwd, "open-sse/mcp-server"),
+  // The A2A JSON-RPC plane answers clients through jsonRpcError() and the SSE
+  // createFailureEvent() rather than a Response builder — see A2A_SINK_CALL.
+  path.join(cwd, "src/app/a2a"),
+  path.join(cwd, "src/lib/a2a"),
 ];
 
 // Glob-style pattern for API route files under src/app/api/ (matched by path test below).
@@ -380,6 +384,17 @@ function sanitizingLocalBuilders(source) {
 // internal helper that merely formats an error message gets flagged.
 const MCP_RESULT_FIELD = /(?<![.\w])(?:message|error|text)\s*:/;
 
+// A2A JSON-RPC sinks: `jsonRpcError(id, code, message)` is the JSON-RPC error body and
+// `createFailureEvent(taskId, error)` is the SSE failure event's `metadata.error`. Both
+// reach the A2A client verbatim. Scoped to the A2A files so the rest of the scan stays
+// byte-identical.
+const A2A_SINK_CALL = /\b(?:jsonRpcError|createFailureEvent)\s*\(/;
+
+/** Is this an A2A source file (src/app/a2a/ or src/lib/a2a/)? */
+function isA2aPath(rel) {
+  return rel.startsWith("src/app/a2a/") || rel.startsWith("src/lib/a2a/");
+}
+
 // `const|let <id> = <expr containing a raw caught-error>` — a tainted local holding a
 // raw, unsanitized error string. Captures the variable name for downstream tracking.
 const TAINT_DECL = new RegExp(
@@ -424,7 +439,7 @@ function isTrustedLine(line, importedNames, localBuilders) {
   );
 }
 
-function forwardsRawError(source, isMcpServer = false) {
+function forwardsRawError(source, isMcpServer = false, isA2a = false) {
   const lines = source.split("\n").map((l) => l.replace(/\/\/.*$/, ""));
   const importedNames = importedErrorHelperNames(source);
   const localBuilders = sanitizingLocalBuilders(source);
@@ -479,6 +494,11 @@ function forwardsRawError(source, isMcpServer = false) {
       (RAW_ERR_INTERP.test(line) && RESPONSE_LINE.test(line)) ||
       // G-11: raw error interpolated directly into an MCP tool-result text field.
       (isMcp && RAW_ERR_INTERP.test(line) && MCP_RESULT_FIELD.test(line)) ||
+      // A2A: a raw caught error handed to jsonRpcError()/createFailureEvent(), on the
+      // call line or on an argument line of a multi-line call.
+      (isA2a &&
+        RAW_ERR_RE.test(line) &&
+        (A2A_SINK_CALL.test(line) || enclosedByCall(lines, i, A2A_SINK_CALL))) ||
       // Multi-line OpenAI error envelope: a raw-error interpolation that sits inside
       // an enclosing `error: {` / `message:` field of a `new Response(` body.
       (RAW_ERR_INTERP.test(line) && enclosedByErrorResponseBody(lines, i)) ||
@@ -494,7 +514,9 @@ function forwardsRawError(source, isMcpServer = false) {
       taintedUse !== null &&
       taintedUse.test(line) &&
       !/sanitize/i.test(line) &&
-      (RESPONSE_BUILDER_CALL.test(line) || (isMcp && MCP_RESULT_FIELD.test(line)));
+      (RESPONSE_BUILDER_CALL.test(line) ||
+        (isMcp && MCP_RESULT_FIELD.test(line)) ||
+        (isA2a && (A2A_SINK_CALL.test(line) || enclosedByCall(lines, i, A2A_SINK_CALL))));
 
     // The raw error reaches a client body unless it lives inside an internal-sink
     // call's argument object (saveCallLog / logToolCall / log / console / reqLogger).
@@ -543,6 +565,31 @@ function enclosedByInternalSinkCall(lines, idx) {
           // Unbalanced opener at this position — the enclosing construct starts here.
           return INTERNAL_SINK_CALL.test(l.slice(0, k + 1));
         }
+        depth--;
+      }
+    }
+  }
+  return false;
+}
+
+/**
+ * Walk back to the line that opens the construct enclosing `idx` (same brace-depth walk
+ * as above) and report whether that opener ends with a call matching `callRe`.
+ *
+ * @param {string[]} lines
+ * @param {number} idx
+ * @param {RegExp} callRe
+ * @returns {boolean}
+ */
+function enclosedByCall(lines, idx, callRe) {
+  let depth = 0;
+  for (let j = idx - 1; j >= 0 && idx - j < 80; j--) {
+    const l = lines[j].replace(/\/\/.*$/, "");
+    for (let k = l.length - 1; k >= 0; k--) {
+      const ch = l[k];
+      if (ch === ")" || ch === "}") depth++;
+      else if (ch === "(" || ch === "{") {
+        if (depth === 0) return new RegExp(callRe.source + "$").test(l.slice(0, k + 1));
         depth--;
       }
     }
@@ -614,14 +661,14 @@ export function findErrorHelperViolations(files, allowlist) {
   for (const { path: rel, source } of files) {
     if (allowlist.has(rel)) continue;
     const isMcpServer = rel.startsWith("open-sse/mcp-server/");
-    if (forwardsRawError(source, isMcpServer)) violations.push(rel);
+    if (forwardsRawError(source, isMcpServer, isA2aPath(rel))) violations.push(rel);
   }
   return violations;
 }
 
 function collectFiles() {
   const files = [];
-  // Standard scan dirs (open-sse/executors, handlers, mcp-server).
+  // Standard scan dirs (open-sse/executors, handlers, mcp-server, A2A).
   for (const dir of SCAN_DIRS) {
     for (const p of walk(dir)) {
       files.push({

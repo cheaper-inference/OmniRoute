@@ -46,6 +46,7 @@ import { ALL_COMBOS_ACCESS_RULE } from "@/shared/constants/comboAccess";
 import { hasApiKeyModelRestrictions } from "./resolvedModelAccess";
 import { resolveSelfLoopBearer } from "@/shared/middleware/chatAdmissionIdentity";
 import { timingSafeCompare } from "./timingSafeCompare";
+import { requiredApiKeyUnavailable, resolveRequiredApiKey } from "./requiredApiKeyContext";
 
 // Default to no per-key request cap. API keys can still opt into explicit
 // limits via Settings/API Keys, while provider/account quota controls remain
@@ -102,6 +103,7 @@ export interface ApiKeyMetadata {
   usedBudget?: number;
   isActive?: boolean;
   isBanned?: boolean;
+  revokedAt?: string | null;
   expiresAt?: string | null;
   accessSchedule?: AccessSchedule | null;
   maxRequestsPerDay?: number | null;
@@ -951,7 +953,7 @@ function resolveSsoApiKeySecret(request: Request): string | null {
 }
 
 /**
- * The API key the policy layer evaluates for a request. The credential that
+ * The bound API key takes precedence. Without a binding, the credential that
  * actually validated wins (a stale Bearer sent next to a valid x-api-key must
  * not hide that key's policy); then a real bearer key; then a bare
  * x-api-key/x-goog-api-key that auth accepted but extractApiKey() gates out;
@@ -959,6 +961,12 @@ function resolveSsoApiKeySecret(request: Request): string | null {
  * policy by id (resolved server-side, secret never sent).
  */
 export async function resolvePolicyApiKey(request: Request): Promise<string | null> {
+  const requiredKey = resolveRequiredApiKey();
+  if (requiredKey) return (await requiredKey)?.apiKey ?? null;
+  return resolvePresentedPolicyApiKey(request);
+}
+
+async function resolvePresentedPolicyApiKey(request: Request): Promise<string | null> {
   // SSO first: its bearer is a JWT, not a key, and must map to the shadow key.
   const ssoSecret = resolveSsoApiKeySecret(request);
   if (ssoSecret) return ssoSecret;
@@ -1039,13 +1047,27 @@ async function resolveSelfLoopScopedKey(
  * to a caller's key — that caller's key. On a scope rejection the presented key
  * is kept so the result still names what the client sent.
  */
-export async function resolveEnforcedPolicyKey(
-  request: Request
-): Promise<{ apiKey: string | null; selfLoopScope: SelfLoopScope }> {
-  const presentedKey = await resolvePolicyApiKey(request);
+export async function resolveEnforcedPolicyKey(request: Request): Promise<{
+  apiKey: string | null;
+  selfLoopScope: SelfLoopScope;
+  apiKeyInfo?: ApiKeyMetadata;
+  rejection: Response | null;
+}> {
+  const requiredKey = resolveRequiredApiKey();
+  if (requiredKey) {
+    const resolved = await requiredKey;
+    return resolved
+      ? { ...resolved, selfLoopScope: NO_SELF_LOOP_SCOPE, rejection: null }
+      : { apiKey: null, selfLoopScope: NO_SELF_LOOP_SCOPE, rejection: requiredApiKeyUnavailable() };
+  }
+
+  const presentedKey = await resolvePresentedPolicyApiKey(request);
   const selfLoopScope = await resolveSelfLoopScopedKey(request, presentedKey);
-  if (selfLoopScope.rejection || !selfLoopScope.key) return { apiKey: presentedKey, selfLoopScope };
-  return { apiKey: selfLoopScope.key, selfLoopScope };
+  return {
+    apiKey: selfLoopScope.key ?? presentedKey,
+    selfLoopScope,
+    rejection: selfLoopScope.rejection,
+  };
 }
 
 /**
@@ -1077,6 +1099,19 @@ async function runAccessValidators(
     if (rejection) return rejection;
   }
   return null;
+}
+
+async function runLimitValidators(
+  context: PolicyContext,
+  options?: EnforceApiKeyPolicyOptions
+): Promise<Response | null> {
+  const budgetRejection = validateBudgetUnlessDeferred(context, options);
+  if (budgetRejection) return budgetRejection;
+  const keyQuotaRejection = validateKeyQuota(context);
+  if (keyQuotaRejection) return keyQuotaRejection;
+  const tokenRejection = validateTokenLimit(context);
+  if (tokenRejection) return tokenRejection;
+  return await validateRateLimitAndThrottle(context);
 }
 
 /**
@@ -1115,20 +1150,13 @@ export async function enforceApiKeyPolicy(
   modelStr: string | null,
   options?: EnforceApiKeyPolicyOptions
 ): Promise<ApiKeyPolicyResult> {
-  const { apiKey, selfLoopScope } = await resolveEnforcedPolicyKey(request);
-  if (selfLoopScope.rejection) {
-    return { apiKey, apiKeyInfo: null, rejection: selfLoopScope.rejection };
-  }
+  const identity = await resolveEnforcedPolicyKey(request);
+  const { apiKey, selfLoopScope, rejection } = identity;
+  if (rejection || !apiKey) return { apiKey, apiKeyInfo: null, rejection };
 
-  // No API key = local/session mode, skip policy checks
-  if (!apiKey) {
-    return { apiKey: null, apiKeyInfo: null, rejection: null };
-  }
-
-  // Fetch key metadata (includes allowedModels)
-  let apiKeyInfo: ApiKeyMetadata | null = null;
+  let apiKeyInfo: ApiKeyMetadata | null;
   try {
-    apiKeyInfo = await getApiKeyMetadata(apiKey);
+    apiKeyInfo = identity.apiKeyInfo ?? (await getApiKeyMetadata(apiKey));
   } catch (error) {
     // Fail-closed: if policy backend fails, reject the request
     log.error("API_POLICY", "Failed to fetch API key metadata. Request blocked.", { error });
@@ -1166,14 +1194,8 @@ export async function enforceApiKeyPolicy(
   const accessRejection = await runAccessValidators(context, options);
   if (accessRejection) return { apiKey, apiKeyInfo, rejection: accessRejection };
 
-  const budgetRejection = validateBudgetUnlessDeferred(context, options);
-  if (budgetRejection) return { apiKey, apiKeyInfo, rejection: budgetRejection };
-  const keyQuotaRejection = validateKeyQuota(context);
-  if (keyQuotaRejection) return { apiKey, apiKeyInfo, rejection: keyQuotaRejection };
-  const tokenRejection = validateTokenLimit(context);
-  if (tokenRejection) return { apiKey, apiKeyInfo, rejection: tokenRejection };
-  const rateRejection = await validateRateLimitAndThrottle(context);
-  if (rateRejection) return { apiKey, apiKeyInfo, rejection: rateRejection };
+  const limitRejection = await runLimitValidators(context, options);
+  if (limitRejection) return { apiKey, apiKeyInfo, rejection: limitRejection };
 
   return { apiKey, apiKeyInfo, rejection: null };
 }
