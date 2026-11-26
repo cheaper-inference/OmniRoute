@@ -260,7 +260,7 @@ RUN --mount=type=cache,id=s/92ca8a61-c1ba-421f-a389-d48ac7258c2d-next-cache,targ
 # entrypoint script, child_process.exec() and the npm-based installers need; unlike Alpine it
 # is glibc, which onnxruntime-node requires. Pinned by digest (Dependabot docker bumps it);
 # `apk add` then pulls the current, patched package set at build time.
-FROM cgr.dev/chainguard/wolfi-base:latest@sha256:7974283557d272e72834dfae1a9a5b98b6bdfc90ecf88b352cf2778f15c5481d AS runtime-os
+FROM cgr.dev/chainguard/wolfi-base:latest@sha256:43f53fe2a02ba1a9484cc560ccf188da32f4a4b38055752514d78a3923ff05c8 AS runtime-os
 WORKDIR /app
 # Same `node` user and UID/GID 1000 as the Debian image, so an existing /app/data volume keeps
 # working after an upgrade. The Node floor (26.12.1) is the eMudhra root-store rule that

@@ -69,7 +69,7 @@ RUN bun run --quiet build
 # Debian trixie accumulates CVEs awaiting fixes. Wolfi republishes patched packages.
 # Copy Bun from base to keep the builder's pinned version on Wolfi's newer glibc.
 # Keep oven/bun's bun UID/GID 1000 so existing data volumes remain writable.
-FROM cgr.dev/chainguard/wolfi-base:latest@sha256:7974283557d272e72834dfae1a9a5b98b6bdfc90ecf88b352cf2778f15c5481d AS runtime-os
+FROM cgr.dev/chainguard/wolfi-base:latest@sha256:43f53fe2a02ba1a9484cc560ccf188da32f4a4b38055752514d78a3923ff05c8 AS runtime-os
 WORKDIR /app
 RUN apk add --no-cache libsecret libstdc++ ca-certificates-bundle tzdata \
   && addgroup -g 1000 bun \
