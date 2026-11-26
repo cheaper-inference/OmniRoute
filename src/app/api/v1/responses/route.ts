@@ -18,12 +18,16 @@ import {
   resolveSessionId,
 } from "@/shared/middleware/chatBodyAdmission";
 import { SSE_HEARTBEAT_INTERVAL_MS } from "@omniroute/open-sse/config/constants";
-import { resolveStreamFlag } from "@omniroute/open-sse/utils/aiSdkCompat";
+import { resolveClientStreamFlag, resolveStreamFlag } from "@omniroute/open-sse/utils/aiSdkCompat";
 import { errorResponse } from "@omniroute/open-sse/utils/error";
 import {
   withEarlyStreamKeepalive,
   OPENAI_RESPONSES_ERROR_FRAME,
 } from "@omniroute/open-sse/utils/earlyStreamKeepalive";
+import {
+  resolveJsonKeepaliveThresholdMs,
+  withEarlyJsonKeepalive,
+} from "@omniroute/open-sse/utils/earlyJsonKeepalive";
 import { createStreamDeadlineSignal } from "@omniroute/open-sse/utils/streamDeadlineSignal";
 import { resolveKeepaliveThreshold } from "@omniroute/open-sse/utils/keepaliveThreshold";
 import {
@@ -260,14 +264,29 @@ async function postHandler(request: any) {
       });
     }
 
-    const handlerResponse = await handleChat(resolved, null, resolvedBody, correlationId);
-    const recoveryResponse = await maybeQueueQuotaSessionRecovery({
-      request: resolved,
-      body: resolvedBody,
-      response: handlerResponse,
-      endpoint: "responses",
-    });
-    return finishAdmission(recoveryResponse);
+    const answer = handleChat(resolved, null, resolvedBody, correlationId).then((handlerResponse) =>
+      maybeQueueQuotaSessionRecovery({
+        request: resolved,
+        body: resolvedBody,
+        response: handlerResponse,
+        endpoint: "responses",
+      })
+    );
+    const userAgent = request.headers.get("user-agent");
+    if (resolveClientStreamFlag(resolvedBody, accept, "openai-responses", userAgent)) {
+      return finishAdmission(await answer);
+    }
+    // JSON answer: no byte reaches the client until it is complete, so a proxy with an
+    // idle-read timeout (Cloudflare 524 at ~120 s) cuts slow reasoning answers. Keep the
+    // connection open with leading whitespace; the admission lease is held until the
+    // handler settles, not just until the keepalive response opens.
+    return await withEarlyJsonKeepalive(
+      releaseChatAdmissionAfterHandler(answer, admission.lease, { signal: request.signal }),
+      {
+        thresholdMs: resolveJsonKeepaliveThresholdMs(),
+        extraHeaders: { "X-Correlation-Id": correlationId },
+      }
+    );
   } catch (error) {
     admission.lease?.release();
     throw error;

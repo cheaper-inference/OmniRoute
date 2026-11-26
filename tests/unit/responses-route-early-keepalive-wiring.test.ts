@@ -42,16 +42,23 @@ test("Responses route builds one keepalive frame per request from the request mo
 test("Responses route retains opt-in quota recovery outside the streaming branch", () => {
   const streamingStart = routeSource.indexOf("if (wantsStreaming) {");
   const nonStreamingStart = routeSource.indexOf(
-    "const handlerResponse = await handleChat(resolved, null, resolvedBody, correlationId);"
+    "const answer = handleChat(resolved, null, resolvedBody, correlationId)"
   );
   assert.ok(streamingStart >= 0 && nonStreamingStart > streamingStart);
   assert.doesNotMatch(
     routeSource.slice(streamingStart, nonStreamingStart),
     /maybeQueueQuotaSessionRecovery/
   );
+  const nonStreaming = routeSource.slice(nonStreamingStart);
   assert.match(
-    routeSource.slice(nonStreamingStart),
-    /const recoveryResponse = await maybeQueueQuotaSessionRecovery\(\{\s*request: resolved,\s*body: resolvedBody,\s*response: handlerResponse,\s*endpoint: "responses",\s*\}\);\s*return finishAdmission\(recoveryResponse\);/
+    nonStreaming,
+    /\.then\(\(handlerResponse\) =>\s*maybeQueueQuotaSessionRecovery\(\{\s*request: resolved,\s*body: resolvedBody,\s*response: handlerResponse,\s*endpoint: "responses",\s*\}\)\s*\);/
+  );
+  // Both outcomes (SSE-to-client and JSON with keepalive) still release admission.
+  assert.match(nonStreaming, /return finishAdmission\(await answer\);/);
+  assert.match(
+    nonStreaming,
+    /withEarlyJsonKeepalive\(\s*releaseChatAdmissionAfterHandler\(answer, admission\.lease,/
   );
 });
 
