@@ -427,6 +427,38 @@ function applyClaudeDefaultThinking(body: Body, effortBody: Body, model: string)
   delete body.temperature;
 }
 
+function canDefaultCheaperInferenceThinking(
+  { provider, targetFormat, translatedBody, rawBody }: PrepareUpstreamBodyOptions,
+  hadExplicitReasoning: boolean
+): boolean {
+  // Translation can consume explicit choices such as reasoning_effort: "none".
+  return (
+    provider === "cheaperinference" &&
+    targetFormat === FORMATS.CLAUDE &&
+    !hasClaudeOutputEffort(translatedBody) &&
+    !(rawBody && (hasExplicitReasoningField(rawBody) || hasClaudeOutputEffort(rawBody))) &&
+    !hadExplicitReasoning
+  );
+}
+
+function maybeApplyCheaperInferenceDefaultThinking(
+  body: Body,
+  opts: PrepareUpstreamBodyOptions,
+  shouldDefaultThinking: boolean
+): void {
+  if (!shouldDefaultThinking) return;
+
+  const { modelToCall } = opts;
+  const isOriginModel = modelToCall === opts.originModel;
+  const effortBody = applyDefaultReasoningEffort<Body>(
+    {},
+    modelToCall,
+    isOriginModel ? opts.resolvedThinkingEffort : undefined,
+    isOriginModel ? opts.defaultThinkingEffort : undefined
+  );
+  applyClaudeDefaultThinking(body, effortBody, modelToCall);
+}
+
 function normalizeAttemptBody(opts: PrepareUpstreamBodyOptions): Body {
   const { translatedBody, modelToCall, provider, targetFormat, log } = opts;
   // Capture intent before constraints remove unsupported fields. Removed explicit
@@ -446,15 +478,7 @@ function normalizeAttemptBody(opts: PrepareUpstreamBodyOptions): Body {
       typeof templateKwargs?.enable_thinking === "boolean");
   const hadExplicitReasoning =
     hasExplicitReasoningField(translatedBody) || hasExplicitTemplateReasoning;
-  // Translation can consume explicit choices such as reasoning_effort: "none".
-  const canDefaultCheaperInferenceThinking =
-    provider === "cheaperinference" &&
-    targetFormat === FORMATS.CLAUDE &&
-    !hasClaudeOutputEffort(translatedBody) &&
-    !(
-      opts.rawBody &&
-      (hasExplicitReasoningField(opts.rawBody) || hasClaudeOutputEffort(opts.rawBody))
-    );
+  const shouldDefaultThinking = canDefaultCheaperInferenceThinking(opts, hadExplicitReasoning);
   // Codex's Responses transform normalizes input into new item records before
   // mutation and independently copies its mutable tools/reasoning fields.
   // Keep the potentially huge input history shared until that boundary: the
@@ -466,16 +490,7 @@ function normalizeAttemptBody(opts: PrepareUpstreamBodyOptions): Body {
       : structuredClone(translatedBody);
   let bodyToSend: Body = { ...attemptSource, model: modelToCall };
   bodyToSend = normalizeThinkingForModel(bodyToSend, modelToCall);
-  if (canDefaultCheaperInferenceThinking && !hadExplicitReasoning) {
-    const isOriginModel = modelToCall === opts.originModel;
-    const effortBody = applyDefaultReasoningEffort<Body>(
-      {},
-      modelToCall,
-      isOriginModel ? opts.resolvedThinkingEffort : undefined,
-      isOriginModel ? opts.defaultThinkingEffort : undefined
-    );
-    applyClaudeDefaultThinking(bodyToSend, effortBody, modelToCall);
-  }
+  maybeApplyCheaperInferenceDefaultThinking(bodyToSend, opts, shouldDefaultThinking);
   bodyToSend = normalizeClaudeAdaptiveThinking(bodyToSend, modelToCall);
   bodyToSend = normalizeClaudeDisabledThinkingEffort(bodyToSend, modelToCall, provider);
   bodyToSend = normalizeClaudeHaikuConstraints(bodyToSend, modelToCall);
