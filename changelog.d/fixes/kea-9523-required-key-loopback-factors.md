@@ -1,0 +1,1 @@
+- **fix(api):** Require both the self-loop bearer and the internal listener token before reading a required-key child reference (KEA-9523)

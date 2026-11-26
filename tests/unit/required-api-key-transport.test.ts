@@ -16,8 +16,14 @@ const { POST: images } = await import("@/app/api/v1/images/generations/route");
 const { POST: audio } = await import("@/app/api/v1/audio/transcriptions/route");
 const { BaseGuardrail, guardrailRegistry } = await import("@/lib/guardrails");
 const { perConnectionAdmissionController } = await import("@/shared/middleware/chatBodyAdmission");
+const { resolveSelfLoopBearer } = await import("@/shared/middleware/chatAdmissionIdentity");
 const { PLAYGROUND_IMAGE_STREAM_HEADER } = await import("@/shared/utils/playgroundImageStream");
-const { runWithRequiredApiKey } = await import("@/shared/utils/requiredApiKeyContext");
+const {
+  SELF_LOOP_KEY_ID_HEADER,
+  resolveRequiredApiKeyChild,
+  runWithRequiredApiKey,
+  usesNativeRequiredApiKeyTransport,
+} = await import("@/shared/utils/requiredApiKeyContext");
 
 const model = "openai/gpt-4.1";
 const imageModel = "openai/gpt-image-2";
@@ -323,6 +329,16 @@ for (const [path, handler, body, frame] of [
     }
   });
 }
+
+test("a self-loop bearer alone cannot authorize a required-key child reference", async () => {
+  const child = request("chat/completions", chatBody("Child"), undefined, {
+    authorization: `Bearer ${resolveSelfLoopBearer()}`,
+    [SELF_LOOP_KEY_ID_HEADER]: "required-key:9d127f46-b01f-4cb9-a02f-3c635141cac2",
+  });
+
+  assert.equal(usesNativeRequiredApiKeyTransport(child), false);
+  assert.equal(await resolveRequiredApiKeyChild(child), null);
+});
 
 test("vision and audio self-loops use the bound identity outside the parent async scope", async (t) => {
   const { enforceApiKeyPolicy } = await import("@/shared/utils/apiKeyPolicy");

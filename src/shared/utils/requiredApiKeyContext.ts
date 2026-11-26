@@ -84,20 +84,25 @@ export function runWithRequiredApiKey<T>(
   });
 }
 
-function readChildReference(request: Request): string | undefined {
-  const reference = request.headers.get(SELF_LOOP_KEY_ID_HEADER);
-  if (!reference?.startsWith(CHILD_PREFIX) || request.method !== "POST") return;
-  if (!CHILD_PATHS.has(new URL(request.url).pathname)) return;
+function hasBearerScopedChildReference(request: Request, reference: string | null): boolean {
+  if (!reference?.startsWith(CHILD_PREFIX) || request.method !== "POST") return false;
+  if (!CHILD_PATHS.has(new URL(request.url).pathname)) return false;
 
   const bearer = request.headers.get("authorization");
-  if (!bearer?.startsWith("Bearer ")) return;
-  if (timingSafeCompare(bearer.slice(7), resolveSelfLoopBearer())) return reference;
+  return Boolean(
+    bearer?.startsWith("Bearer ") && timingSafeCompare(bearer.slice(7), resolveSelfLoopBearer())
+  );
+}
+
+function readChildReference(request: Request): string | undefined {
+  const reference = request.headers.get(SELF_LOOP_KEY_ID_HEADER);
+  if (!reference || !isInternalAdmissionBypass(request)) return;
+  if (hasBearerScopedChildReference(request, reference)) return reference;
 }
 
 export function usesNativeRequiredApiKeyTransport(request?: Request): boolean {
   return (
-    storage.getStore()?.nativeTransport === true ||
-    Boolean(request && readChildReference(request) && isInternalAdmissionBypass(request))
+    storage.getStore()?.nativeTransport === true || Boolean(request && readChildReference(request))
   );
 }
 
@@ -118,9 +123,15 @@ export function resolveRequiredApiKeyChild(
   request: Request
 ): Promise<ResolvedRequiredApiKey | null> | undefined {
   const reference = readChildReference(request);
-  if (!reference) return;
+  if (!reference) {
+    // Reject bearer-scoped attempts without the internal proof before unbound key policy runs.
+    const unverifiedReference = request.headers.get(SELF_LOOP_KEY_ID_HEADER);
+    return hasBearerScopedChildReference(request, unverifiedReference)
+      ? Promise.resolve(null)
+      : undefined;
+  }
 
-  const context = isInternalAdmissionBypass(request) ? children.get(reference) : undefined;
+  const context = children.get(reference);
   if (!context) return Promise.resolve(null);
   return resolveInContext(context).then((resolved) => (context.finished ? null : resolved));
 }
