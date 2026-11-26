@@ -1,0 +1,1 @@
+- **fix(providers):** Recognize Krea K3 Edit and Gemini Nano Banana 2.1 in OpenRouter image-edit combos. Krea K3 Edit requires a reference image and is excluded from image generation ([#21271](https://github.com/cheaper-inference/OmniRoute/pull/21271)).
