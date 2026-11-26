@@ -18,4 +18,39 @@ export const EXTRA_FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
   QUOTA_DAILY_REVALIDATION_FLAG,
   CODEBUDDY_TELEMETRY_ENABLED_FLAG,
   AGENT_SESSION_MESSAGES_ENABLED_FLAG,
+  {
+    key: "NONSTREAM_REFUSED_REPLY_FAILURE_ACCOUNTING_ENABLED",
+    description:
+      "Record refused non-streaming replies as a single failure with billed tokens, count them toward key quotas, and retain the prior account error.",
+    type: "boolean",
+    defaultValue: "false",
+    category: "runtime",
+    requiresRestart: false,
+  },
+  {
+    key: "NONSTREAM_UPSTREAM_FAILURE_BILLED_USAGE_ENABLED",
+    description:
+      "Include provider-reported billed tokens in usage history for failed non-streaming upstream requests.",
+    type: "boolean",
+    defaultValue: "false",
+    category: "runtime",
+    requiresRestart: false,
+  },
+  {
+    key: "CLAUDE_NONSTREAM_EXTRA_USAGE_BACKGROUND_SYNC_ENABLED",
+    description: "Sync Claude extra-usage state in the background for non-streaming replies.",
+    type: "boolean",
+    defaultValue: "false",
+    category: "runtime",
+    requiresRestart: false,
+  },
+  {
+    key: "NONSTREAM_USAGE_NULL_TTFT_ENABLED",
+    description:
+      "Store a null time to first token for successful non-streaming replies so they are excluded from TTFT averages.",
+    type: "boolean",
+    defaultValue: "false",
+    category: "runtime",
+    requiresRestart: false,
+  },
 ];

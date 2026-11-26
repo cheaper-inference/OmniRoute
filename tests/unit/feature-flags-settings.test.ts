@@ -86,7 +86,7 @@ const {
 // QUOTA_DAILY_REVALIDATION (#20343, default off) takes it to 136.
 // CODEBUDDY_TELEMETRY_ENABLED (#18398, codebuddy-intl turn reports, default off) takes it to 137.
 // AGENT_SESSION_MESSAGES_ENABLED (#14864, opt-in session turn capture, default off) takes it to 138.
-const EXPECTED_FEATURE_FLAG_COUNT = 138;
+const EXPECTED_FEATURE_FLAG_COUNT = 142;
 // tool_call wrapper repair, default on) to 86; OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED
 // (#16571, OpenCode v2 client fingerprint, default off) to 87.
 // tool_call wrapper repair, default on) to 86; CLAUDE_OAUTH_SUMMARIZED_THINKING_UNREDACTED
