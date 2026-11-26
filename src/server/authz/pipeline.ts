@@ -351,7 +351,10 @@ export async function runAuthzPipeline(
   requestHeaders.delete(CLIENT_IP_HEADER);
 
   requestHeaders.set(AUTHZ_HEADER_ROUTE_CLASS, classification.routeClass);
-  requestHeaders.set(AUTHZ_HEADER_REQUEST_ID, requestId);
+  // Client API handlers can use the supplied X-Request-Id as an idempotency key.
+  if (classification.routeClass !== "CLIENT_API" || !requestHeaders.get(AUTHZ_HEADER_REQUEST_ID)) {
+    requestHeaders.set(AUTHZ_HEADER_REQUEST_ID, requestId);
+  }
   // Stamp a trusted, non-secret locality verdict derived from the real stamped
   // peer IP AND the via-proxy marker. Route handlers (e.g. cliTokenAuth) read
   // this instead of re-deriving locality from the spoofable Host header. The
