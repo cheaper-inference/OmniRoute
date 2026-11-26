@@ -1019,22 +1019,7 @@ function parseContentLength(header: string | null): number | null {
   return Number.isSafeInteger(parsed) ? parsed : null;
 }
 
-const kAbortSource = Symbol("omniroute.admission.abortSource");
-
-function followClientAbort(source: Request): AbortSignal | undefined {
-  const parent = source.signal;
-  if (!parent) return undefined;
-  const follower = new AbortController();
-  if (parent.aborted) {
-    follower.abort(parent.reason);
-  } else {
-    parent.addEventListener("abort", () => follower.abort(parent.reason), { once: true });
-  }
-  // Undici links Request#signal to its init signal weakly. Holding the source Request from the
-  // follower keeps the client abort chain alive for as long as downstream code holds the signal.
-  Object.defineProperty(follower.signal, kAbortSource, { value: source });
-  return follower.signal;
-}
+const kAbortChain = Symbol("omniroute.admission.abortChain");
 
 function rebuildRequest(request: Request, body: Uint8Array): Request {
   const headers = new Headers(request.headers);
@@ -1042,18 +1027,18 @@ function rebuildRequest(request: Request, body: Uint8Array): Request {
   headers.delete("content-length");
   // The body is already decoded (decodeAdmittedBody), so the encoding must not ride along.
   headers.delete("content-encoding");
-  const signal = followClientAbort(request);
   const rebuilt = new Request(request.url, {
     method: request.method,
     headers,
     body,
-    signal,
+    signal: request.signal,
     duplex: "half",
   } as RequestInit & { duplex: "half" });
-  if (signal) {
-    // Request#signal would be another weak follower; expose the strongly linked signal itself.
-    Object.defineProperty(rebuilt, "signal", { value: signal, configurable: true });
-  }
+  // Undici follows an init signal through weak references, and a Request signal does not hold its
+  // controller. Downstream code usually keeps only `request.signal`, so tie both Requests to that
+  // native signal: the client abort then survives GC, and `clone()` still finds its dependents
+  // because the signal is left untouched.
+  Object.defineProperty(rebuilt.signal, kAbortChain, { value: { source: request, rebuilt } });
   return rebuilt;
 }
 

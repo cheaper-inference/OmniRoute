@@ -8,8 +8,22 @@ const { ChatAdmissionController, admitChatRequest } =
 
 const noShed = () => undefined;
 
+// A fixed body limit keeps admission from reading saved settings, which would open the DB
+// singleton that these tests never close.
+const admitOptions = (controller: InstanceType<typeof ChatAdmissionController>) => ({
+  controller,
+  largeBodyBytes: 16,
+  queueMs: 0,
+  hardMaxBytes: 1024 * 1024,
+});
+
 async function settle(): Promise<void> {
   for (let i = 0; i < 8; i++) await new Promise((resolve) => setImmediate(resolve));
+}
+
+function gcFn(): () => void {
+  v8.setFlagsFromString("--expose-gc");
+  return vm.runInNewContext("gc") as () => void;
 }
 
 function heavyRequest(signal: AbortSignal): Request {
@@ -25,14 +39,13 @@ function heavyRequest(signal: AbortSignal): Request {
 // Request's signal to its init signal weakly, so once both Request objects are unreachable the
 // client abort must still reach the signal downstream code holds.
 test("a client abort still reaches the admitted request's signal after GC", async () => {
-  v8.setFlagsFromString("--expose-gc");
-  const forceGc = vm.runInNewContext("gc") as () => void;
+  const forceGc = gcFn();
   const controller = new ChatAdmissionController(1, undefined, 0, noShed);
   const client = new AbortController();
   let original: Request | null = heavyRequest(client.signal);
   let admission: Awaited<ReturnType<typeof admitChatRequest>> | null = await admitChatRequest(
     original,
-    { controller, largeBodyBytes: 16, queueMs: 0 }
+    admitOptions(controller)
   );
   assert.equal(admission.admit, true);
   const lease = admission.admit ? admission.lease : null;
@@ -50,4 +63,22 @@ test("a client abort still reaches the admitted request's signal after GC", asyn
   client.abort();
   assert.equal(downstreamSignal.aborted, true, "the client abort reaches the rebuilt request");
   lease?.release();
+});
+
+// A clone taken before the client disconnects must see the abort too. Undici registers a clone's
+// abort dependency under the signal the Request exposes, so replacing that signal orphans the
+// clone, with no GC involved. (Undici itself does not keep a clone's controller alive across GC.)
+test("a client abort reaches a clone taken from the admitted request before the abort", async () => {
+  const controller = new ChatAdmissionController(1, undefined, 0, noShed);
+  const client = new AbortController();
+  const admission = await admitChatRequest(heavyRequest(client.signal), admitOptions(controller));
+  assert.equal(admission.admit, true);
+  if (!admission.admit) return;
+  const clone = admission.request.clone();
+  assert.equal(clone.signal.aborted, false);
+
+  client.abort();
+  assert.equal(admission.request.signal.aborted, true, "the admitted request sees the abort");
+  assert.equal(clone.signal.aborted, true, "the clone sees the abort");
+  admission.lease.release();
 });
