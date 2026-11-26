@@ -1,0 +1,1 @@
+- **feat(providers):** Added Gondola as an OpenAI-compatible API-key provider (`https://api.gondola-ai.com/v1`), with live model discovery via `passthroughModels`. No free-inference badge: credit is prepaid in USDC on Base.
