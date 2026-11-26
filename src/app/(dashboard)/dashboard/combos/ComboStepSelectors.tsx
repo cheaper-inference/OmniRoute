@@ -56,11 +56,20 @@ function useSelectorOptions(props: Props) {
   );
   const accountOptions = useMemo(
     () =>
-      (connections ?? []).map((item) => ({
-        value: item.id,
-        label: pickDisplayValue([item.label], props.emailsVisible, item.id),
-        description: `${item.id}${item.status !== "active" ? ` · ${item.status}` : ""}`,
-      })),
+      (connections ?? []).map((item) => {
+        const rawLabel = item.label?.trim() ?? "";
+        const displayLabel = pickDisplayValue([rawLabel], props.emailsVisible, item.id);
+        // The masker leaves very short email usernames unchanged.
+        const label =
+          !props.emailsVisible && rawLabel.includes("@") && displayLabel === rawLabel
+            ? item.id
+            : displayLabel;
+        return {
+          value: item.id,
+          label,
+          description: `${item.id}${item.status !== "active" ? ` · ${item.status}` : ""}`,
+        };
+      }),
     [connections, props.emailsVisible]
   );
 

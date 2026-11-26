@@ -58,7 +58,7 @@ afterEach(() => {
   useEmailPrivacyStore.setState({ emailsVisible: false });
 });
 
-async function openCreate(mode = "expert") {
+async function openCreate(mode = "expert", providerOptions = providers) {
   const saved: Record<string, unknown>[] = [];
   const writes: { method: string; payload: Record<string, unknown> }[] = [];
   const fetchMock = vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
@@ -71,7 +71,7 @@ async function openCreate(mode = "expert") {
     }
     const data = url.includes("/builder/options")
       ? {
-          providers,
+          providers: providerOptions,
           comboRefs: [
             {
               id: "internal-id-never-saved",
@@ -348,6 +348,35 @@ describe("Combo form searchable selectors", () => {
     expect((query as HTMLInputElement).value).toBe("");
     expect(dialog.innerHTML).not.toContain("secret.person");
     expect(writes).toEqual([]);
+  });
+
+  it("uses the account ID for a hidden short email in the picker and restrictions", async () => {
+    const shortAccount = {
+      id: "account-short",
+      label: "abc@x.com",
+      status: "active",
+      isActive: true,
+    };
+    const [openai, other] = providers;
+    useEmailPrivacyStore.setState({ emailsVisible: false });
+    const { dialog } = await openCreate("expert", [
+      {
+        ...openai,
+        connectionCount: openai.connectionCount + 1,
+        connections: [...openai.connections, shortAccount],
+      },
+      other,
+    ]);
+    await selectModel(dialog);
+    await choose(dialog, "account", COMBO_BUILDER_AUTO_CONNECTION);
+    const allowlist = within(dialog).getByTestId("combo-builder-allowlist");
+    await searchPicker(dialog, "account", "");
+    const accountList = screen.getByRole("listbox");
+
+    expect.soft(accountList.textContent, "account picker").not.toContain(shortAccount.label);
+    expect.soft(allowlist.textContent, "account restrictions").not.toContain(shortAccount.label);
+    expect(within(accountList).queryByRole("option", { name: /^account-short\b/ })).toBeTruthy();
+    expect(within(allowlist).queryByRole("button", { name: shortAccount.id })).toBeTruthy();
   });
 
   it("cancel and reopen discard queries without creating a combo", async () => {
