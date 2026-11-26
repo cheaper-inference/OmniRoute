@@ -46,10 +46,8 @@ test("the provider figures use separate denominators for offers, rows, IDs and p
   assert.equal(active.value, readmeFact("code.freeAccessRows"));
   assert.equal(distinct.value, readmeFact("code.freeModels"));
   assert.equal(pools.value, readmeFact("code.freePublishedPools"));
-  assert.equal(
-    budget.value,
-    `${readmeFactText("code.rowSumTotalLabel")} as others count · ${readmeFactText("code.headlineSteadyLabel")} real`
-  );
+  assert.equal(budget.value, readmeFactText("code.rowSumTotalLabel"));
+  assert.ok(budget.lines[0].startsWith(`${readmeFactText("code.headlineSteadyLabel")} real`));
   assert.match(
     budget.lines.join(" "),
     /First month: .+ with signup credits\. Not an OmniRoute allowance\./
@@ -77,6 +75,19 @@ test("the provider figure SVG shows two rows of four outlined cards and embeds t
     cards.map((card) => card.querySelector('text.ol[y="96"]')?.textContent),
     (await buildProviderNumbersCards()).map(({ label }) => label)
   );
+  for (const card of cards) {
+    const surface = card.querySelector("rect.surface");
+    assert.ok(surface);
+    const cardHeight = Number(surface.getAttribute("height"));
+    const baselines = [...card.querySelectorAll("text")].map((text) =>
+      Number(text.getAttribute("y"))
+    );
+    const bottomClearance = cardHeight - Math.max(...baselines);
+    assert.ok(
+      bottomClearance >= 16,
+      `${card.getAttribute("transform")} has ${bottomClearance}px below its last baseline`
+    );
+  }
   assert.equal(doc.querySelector("text.mono")?.textContent, "hasFree");
   assert.match(svg, /@font-face\{font-family:"CI Mono"/);
   assert.match(svg, /<use href="#g[0-9a-z]+"/);

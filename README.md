@@ -748,6 +748,7 @@ These providers offer recurring or keyless free access.
     <td align="center" width="150"><img src="./public/providers/gemini.svg" width="42" alt="Gemini"/><br/><b>Gemini</b><br/><sub>Recurring<br/>Gemini 2.5 Flash, Gemini 3 Flash Preview<br/>Rate-limited, no published token cap</sub></td>
     <td align="center" width="150"><img src="./public/providers/groq.svg" width="42" alt="Groq"/><br/><b>Groq</b><br/><sub>Daily<br/>GPT-OSS 120B, GPT-OSS 20B<br/>Daily cap per model</sub></td>
     <td align="center" width="150"><img src="./public/providers/cohere.svg" width="42" alt="Cohere"/><br/><b>Cohere</b><br/><sub>Monthly<br/>Command A family<br/>About 800K tokens/month</sub></td>
+    <td align="center" width="150"><img src="./public/providers/morph.svg" width="42" alt="Morph"/><br/><b>Morph</b><br/><sub>Monthly<br/>morph-v3-large, morph-v3-fast<br/>200 requests/month</sub></td>
   </tr>
 </table>
 

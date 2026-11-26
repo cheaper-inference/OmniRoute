@@ -11,8 +11,9 @@ import { outlineSvg } from "./readme-outline.mjs";
 import { readmeFact, RF } from "./readmeFacts.mjs";
 
 const W = 1200;
-const H = 544;
+const H = 576;
 const CARD_W = 272;
+const CARD_H = 216;
 const COLUMNS = 4;
 const TITLE = "What each number counts";
 const SUBTITLE = "None of them is added to another.";
@@ -71,33 +72,35 @@ export async function buildProviderNumbersCards() {
       lines: ["Shared quotas counted once."],
     },
     {
-      value: `${RF.rowSumTotalLabel} as others count · ${RF.headlineSteadyLabel} real`,
-      label: "Free tokens a month",
+      value: RF.rowSumTotalLabel,
+      label: "Free tokens a month, as others count",
+      // Marks the highlighted card; the dark-theme polish draws its accent from this flag.
       highlight: true,
+      labelSize: 14.5,
+      definitionRole: "cell",
       lines: [
-        "Every row, ended offers included.",
-        "Real: each shared quota once.",
-        `First month: ${RF.headlineFirstLabel}`,
-        "with signup credits.",
+        `${RF.headlineSteadyLabel} real: each shared quota`,
+        "counted once. Others add",
+        "every row, ended offers included.",
+        `First month: ${RF.headlineFirstLabel} with signup credits.`,
         "Not an OmniRoute allowance.",
       ],
     },
   ];
 }
 
-function card({ value, label, code, lines, highlight }, i) {
+function card({ value, label, code, lines, labelSize = 17, definitionRole = "definition" }, i) {
   const x = 32 + (i % COLUMNS) * 288;
   const firstRow = i < COLUMNS;
   const rows = code ? [["mono", code]] : [];
-  rows.push(...lines.map((line) => ["definition", line]));
-  const figureStyle = highlight ? "font-size:15px;fill:var(--ok)" : "font-size:52px";
-  const textY = highlight ? 116 : 124;
-  const lineHeight = highlight ? 16 : 18;
+  rows.push(...lines.map((line) => [definitionRole, line]));
+  const textY = 124;
+  const lineHeight = 18;
   return [
     `  <g class="provider-stat" transform="translate(${x},${firstRow ? 96 : 328})">`,
-    `    <rect width="${CARD_W}" height="${firstRow ? 216 : 184}" rx="12" class="surface"/>`,
-    `    <text x="20" y="64" class="num" style="${figureStyle}">${esc(String(value))}</text>`,
-    `    <text x="20" y="96" class="h3" style="font-size:17px">${esc(label)}</text>`,
+    `    <rect width="${CARD_W}" height="${CARD_H}" rx="12" class="surface"/>`,
+    `    <text x="20" y="64" class="num" style="font-size:52px">${esc(String(value))}</text>`,
+    `    <text x="20" y="96" class="h3" style="font-size:${labelSize}px">${esc(label)}</text>`,
     ...rows.map(
       ([role, line], j) =>
         `    <text x="20" y="${textY + lineHeight * j}" class="${role}">${esc(line)}</text>`
