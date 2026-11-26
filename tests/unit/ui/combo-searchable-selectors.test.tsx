@@ -253,6 +253,7 @@ describe("Combo editor searchable selectors", { timeout: 90_000 }, () => {
   it("clears the account and restriction queries when email visibility changes", async () => {
     const { dialog, writes } = await openCreate();
     await selectModel(dialog);
+    await choose(dialog, "account", "automatic", /automatically select account/i);
     const hiddenQuery = await searchPicker(dialog, "account", "secret.person");
     expect(pickerOptions().queryByRole("option", { name: /account-one/ })).not.toBeInTheDocument();
     fireEvent.keyDown(hiddenQuery, { key: "Escape" });
