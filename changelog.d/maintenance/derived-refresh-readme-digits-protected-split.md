@@ -1,0 +1,1 @@
+- **ci:** The nightly derived refresh can now queue a `README.md` update that changes only digits. It opens a separate pull request for regenerated protected files, such as agent skills, which requires the owner's explicit approval to merge.

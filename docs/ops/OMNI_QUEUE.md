@@ -521,7 +521,8 @@ status and, in live mode, one comment (in shadow mode it is only logged).
 
 Only the `derived-refresh-autoland` workflow may apply the `omni-queue` label automatically.
 It labels only the `chore/derived-refresh` robot PR in this repository, targeting the highest `release/vX.Y.Z` branch.
-Every changed file must belong to a derived family and have an unprotected path.
+Every changed path must be unprotected. Files must belong to a derived family or be `README.md` with only digits changed.
+The robot publishes regenerated protected files such as `skills/*/SKILL.md` in a separate PR from `chore/derived-refresh-protected`. That PR requires the owner's explicit approval to land.
 Any open `release-freeze` issue blocks labeling. An open `base-red` issue blocks its target branch.
 `Gate / CI` and `Gate / Quality` must pass on the current head.
 The PR must be open and ready for review, with no queue or blocking label.

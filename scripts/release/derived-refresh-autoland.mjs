@@ -11,6 +11,7 @@ const REPOSITORY = "cheaper-inference/OmniRoute";
 const HEAD_BRANCH = "chore/derived-refresh";
 const RELEASE_BRANCH = /^release\/v\d+\.\d+\.\d+$/;
 const QUEUE_LABEL = "omni-queue";
+const DIGITS_ONLY_FILES = ["README.md"];
 const GATES = [
   ["Gate / CI", "ci.yml"],
   ["Gate / Quality", "quality.yml"],
@@ -20,6 +21,60 @@ class AutolandError extends Error {}
 
 function isApprover(config, login) {
   return config.approvers.some((approver) => approver.toLowerCase() === login?.toLowerCase());
+}
+
+// Keep the literal text chunks separate so a marker in the file cannot stand in for digits.
+const withoutDigits = (line) => JSON.stringify(line.slice(1).split(/[0-9]+/));
+
+export function isDigitsOnlyPatch(patch) {
+  if (typeof patch !== "string" || !patch) return false;
+
+  let oldRemaining = 0;
+  let newRemaining = 0;
+  let inHunk = false;
+  let changed = false;
+  let removed = [];
+  let matched = 0;
+  const lines = patch.split("\n");
+  if (lines.at(-1) === "") lines.pop();
+
+  for (const line of lines) {
+    if (line === "\\ No newline at end of file") continue;
+
+    const kind = line[0];
+    if (kind !== "+" && (kind !== "-" || matched > 0)) {
+      if (removed.length !== matched) return false;
+      removed = [];
+      matched = 0;
+    }
+
+    if (kind === "@") {
+      if (oldRemaining !== 0 || newRemaining !== 0) return false;
+      const hunk = /^@@ -[0-9]+(?:,([0-9]+))? \+[0-9]+(?:,([0-9]+))? @@(?: |$)/.exec(line);
+      if (!hunk) return false;
+      oldRemaining = Number(hunk[1] ?? 1);
+      newRemaining = Number(hunk[2] ?? 1);
+      inHunk = true;
+    } else if (!inHunk) {
+      return false;
+    } else if (kind === "+") {
+      const before = removed[matched];
+      if (before === undefined || withoutDigits(before) !== withoutDigits(line)) return false;
+      changed ||= before.slice(1) !== line.slice(1);
+      matched++;
+      newRemaining--;
+    } else if (kind === "-") {
+      removed.push(line);
+      oldRemaining--;
+    } else if (kind === " ") {
+      oldRemaining--;
+      newRemaining--;
+    } else {
+      return false;
+    }
+  }
+
+  return changed && removed.length === matched && oldRemaining === 0 && newRemaining === 0;
 }
 
 export function decideAutoland({
@@ -33,6 +88,7 @@ export function decideAutoland({
   author,
   labels,
   files,
+  digitsOnlyFiles = [],
   headSha,
   checksHeadSha,
   checks,
@@ -58,9 +114,13 @@ export function decideAutoland({
   }
 
   if (!files.length) reasons.push("empty-diff");
+  if (files.some((file) => DIGITS_ONLY_FILES.includes(file) && !digitsOnlyFiles.includes(file))) {
+    reasons.push("readme-not-digits-only");
+  }
   if (
     files.some(
       (file) =>
+        !DIGITS_ONLY_FILES.includes(file) &&
         !families.some((family) => categoryOf(file, family) || matchesAny(file, family.companions))
     )
   ) {
@@ -154,6 +214,15 @@ function main() {
   const files = entries.flatMap(({ filename, previous_filename }) =>
     previous_filename ? [filename, previous_filename] : [filename]
   );
+  const digitsOnlyFiles = entries
+    .filter(
+      ({ filename, previous_filename, status, patch }) =>
+        DIGITS_ONLY_FILES.includes(filename) &&
+        !previous_filename &&
+        status !== "renamed" &&
+        isDigitsOnlyPatch(patch)
+    )
+    .map(({ filename }) => filename);
 
   const branches = api(
     "list release branches",
@@ -210,6 +279,7 @@ function main() {
     repository: REPOSITORY,
     latestRelease,
     files,
+    digitsOnlyFiles,
     checksHeadSha: fields.headSha,
     checks,
     releaseFreezeOpen: issues.some((issue) => issue.labels.includes("release-freeze")),

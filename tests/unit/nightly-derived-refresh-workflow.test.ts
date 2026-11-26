@@ -40,7 +40,16 @@ const nightly = load(NIGHTLY);
 const job = nightly.jobs.refresh;
 const steps = job.steps;
 const stepRunning = (needle: string) => steps.find((s) => (s.run ?? "").includes(needle));
-const publish = steps.find((s) => s.name === "Commit, push and open or update the refresh PR");
+const PUBLISH_SCRIPT = "scripts/release/derived-refresh-publish.sh";
+const PUBLISH_PATH = path.join(ROOT, PUBLISH_SCRIPT);
+const publishScript = fs.readFileSync(PUBLISH_PATH, "utf8");
+const splitAndPublish = steps.find(
+  (s) => s.name === "Split the refreshed files and publish the PRs"
+);
+const REFRESH_BRANCH = "chore/derived-refresh";
+const PROTECTED_BRANCH = "chore/derived-refresh-protected";
+const BOT_NAME = "github-actions[bot]";
+const BOT_EMAIL = "41898282+github-actions[bot]@users.noreply.github.com";
 
 test("nightly refresh: daily schedule on a cron slot no other workflow uses, plus manual dispatch", () => {
   const schedule = nightly.on.schedule as { cron: string }[];
@@ -95,26 +104,37 @@ test("nightly refresh: installs with the retrying npm ci and runs the nightly pr
   assert.ok(stepRunning("npm run release:refresh-derived -- --profile=nightly"));
 });
 
-test("nightly refresh: one robot branch, lease-protected push, ONE PR, never a merge", () => {
-  assert.equal(job.env?.REFRESH_BRANCH, "chore/derived-refresh");
-  assert.equal(job.env?.BOT_EMAIL, "41898282+github-actions[bot]@users.noreply.github.com");
-  assert.ok(publish?.run);
-  const run = publish.run;
-  assert.match(run, /git push -q --force-with-lease="\$\{REFRESH_BRANCH\}:\$\{REMOTE_SHA\}"/);
-  assert.doesNotMatch(run, /git push[^\n]*--force(?!-with-lease)/, "plain --force is never used");
-  assert.match(
-    run,
-    /gh pr list --repo "\$GITHUB_REPOSITORY" --head "\$REFRESH_BRANCH" --state open/
+test("nightly refresh: one PR per robot branch, lease-protected pushes, never a merge", () => {
+  assert.equal(job.env?.REFRESH_BRANCH, REFRESH_BRANCH);
+  assert.equal(job.env?.PROTECTED_BRANCH, PROTECTED_BRANCH);
+  assert.equal(job.env?.BOT_NAME, BOT_NAME);
+  assert.equal(job.env?.BOT_EMAIL, BOT_EMAIL);
+  assert.ok(splitAndPublish?.run);
+  assert.deepEqual(
+    splitAndPublish.run
+      .split("\n")
+      .map((line) => line.trim())
+      .filter((line) => line.startsWith(`bash ${PUBLISH_SCRIPT} `)),
+    [`bash ${PUBLISH_SCRIPT} "$REFRESH_BRANCH" \\`, `bash ${PUBLISH_SCRIPT} "$PROTECTED_BRANCH" \\`]
   );
-  assert.match(run, /gh pr create /);
-  assert.match(run, /gh pr edit "\$NUM"/);
-  assert.match(run, /commits pushed by hand; not overwriting them/);
+  assert.match(publishScript, /^REF="refs\/heads\/\$BRANCH"$/m);
+  assert.match(publishScript, /REMOTE_SHA=\$\(git ls-remote --heads origin "\$REF" \| cut -f1\)/);
+  const all = [read(NIGHTLY), publishScript].join("\n");
+  assert.deepEqual(
+    all.match(/^\s*git push\b[^\n]*/gm)?.map((line) => line.trim()),
+    ['git push -q --force-with-lease="${REF}:${REMOTE_SHA}" origin "HEAD:${REF}"']
+  );
+  assert.doesNotMatch(all, /git push[^\n]*--force(?!-with-lease)/, "plain --force is never used");
+  assert.match(
+    publishScript,
+    /gh pr list --repo "\$GITHUB_REPOSITORY" --head "\$BRANCH" --state open/
+  );
+  assert.match(publishScript, /gh pr create .* --head "\$BRANCH"/);
+  assert.match(publishScript, /gh pr edit "\$NUM"/);
   // retarget is verified, Hard Rule #21
-  assert.match(run, /--json baseRefName --jq \.baseRefName/);
-  const all = read(NIGHTLY);
+  assert.match(publishScript, /--json baseRefName --jq \.baseRefName/);
   assert.doesNotMatch(all, /gh pr merge|--admin|--no-verify/);
-  const scripts = steps
-    .map((s) => s.run ?? "")
+  const scripts = [...steps.map((s) => s.run ?? ""), publishScript]
     .join("\n")
     .split("\n")
     .filter((line) => !line.trim().startsWith("#"))
@@ -128,16 +148,16 @@ test("nightly refresh: one robot branch, lease-protected push, ONE PR, never a m
 
 test("nightly refresh: the PR token is a robot secret (dedicated, else the i18n refresh one) with a documented GITHUB_TOKEN fallback", () => {
   assert.equal(
-    publish?.env?.GH_TOKEN,
+    splitAndPublish?.env?.GH_TOKEN,
     "${{ secrets.DERIVED_REFRESH_PR_TOKEN || secrets.I18N_REFRESH_TOKEN || github.token }}"
   );
   assert.equal(
-    publish?.env?.HAS_PR_TOKEN,
+    splitAndPublish?.env?.HAS_PR_TOKEN,
     "${{ secrets.DERIVED_REFRESH_PR_TOKEN != '' || secrets.I18N_REFRESH_TOKEN != '' }}"
   );
   assert.match(read(NIGHTLY), /does not trigger CI/);
   assert.match(
-    publish?.run ?? "",
+    publishScript,
     /neither \\`DERIVED_REFRESH_PR_TOKEN\\` nor \\`I18N_REFRESH_TOKEN\\` is set/
   );
 });
@@ -195,30 +215,22 @@ test("quality.yml docs-gates: depth-2 checkout and BASE_SHA on Docs accuracy", (
 });
 
 test("nightly refresh: a run with no diff closes the robot's stale refresh PR, never a hand-pushed one", () => {
-  assert.ok(publish?.run);
-  const run = publish.run;
-  const noDiff = run.slice(
-    run.indexOf("if git diff --cached --quiet; then"),
-    run.indexOf("CHANGED=")
-  );
-  assert.match(
-    noDiff,
-    /gh pr list --repo "\$GITHUB_REPOSITORY" --head "\$REFRESH_BRANCH" --state open/
-  );
   // The robot's tip: authored AND committed by the bot (an amend by hand changes the committer).
   assert.match(
-    run,
-    /\[ "\$\(git log -1 --format='%ae %ce' FETCH_HEAD\)" = "\$BOT_EMAIL \$BOT_EMAIL" \]/
+    publishScript,
+    /\[ "\$\(git log -1 --format='%ae %ce' "\$1"\)" = "\$BOT_EMAIL \$BOT_EMAIL" \]/
   );
-  assert.match(noDiff, /if robot_tip; then\n\s+gh pr close "\$STALE"/);
-  assert.match(noDiff, /gh pr close "\$STALE"/);
-  assert.match(noDiff, /has commits pushed by hand; left open/);
-  assert.doesNotMatch(noDiff, /--delete-branch/, "the robot branch is rebuilt on the next diff");
+  assert.match(publishScript, /if ! robot_tip "\$REMOTE_SHA"; then/);
+  assert.match(publishScript, /if \[ ! -s "\$FILES_FILE" \]; then/);
+  assert.match(publishScript, /gh pr close "\$NUM"/);
+  assert.doesNotMatch(
+    publishScript,
+    /--delete-branch/,
+    "the robot branch is rebuilt on the next diff"
+  );
 });
 
 // --- behavior of the step scripts, run for real with a fake `gh` ---------------------------
-
-const BOT_EMAIL = "41898282+github-actions[bot]@users.noreply.github.com";
 
 function sh(cwd: string, cmd: string, args: string[], env: NodeJS.ProcessEnv = {}) {
   const res = spawnSync(cmd, args, { cwd, encoding: "utf8", env: { ...process.env, ...env } });
@@ -234,14 +246,14 @@ function fakeGh(bin: string, body: string) {
   fs.chmodSync(gh, 0o755);
 }
 
-function runStep(script: string, cwd: string, dir: string, env: Record<string, string>) {
+function runBash(args: string[], cwd: string, dir: string, env: Record<string, string>) {
   const files = {
     GITHUB_OUTPUT: path.join(dir, "output"),
     GITHUB_STEP_SUMMARY: path.join(dir, "summary"),
     GH_LOG: path.join(dir, "gh.log"),
   };
   for (const f of Object.values(files)) fs.writeFileSync(f, "");
-  const res = spawnSync("bash", ["-e", "-c", script], {
+  const res = spawnSync("bash", args, {
     cwd,
     encoding: "utf8",
     env: {
@@ -262,6 +274,10 @@ function runStep(script: string, cwd: string, dir: string, env: Record<string, s
     summary: read(files.GITHUB_STEP_SUMMARY),
     gh: read(files.GH_LOG),
   };
+}
+
+function runStep(script: string, cwd: string, dir: string, env: Record<string, string>) {
+  return runBash(["-e", "-c", script], cwd, dir, env);
 }
 
 const resolveStep = steps.find((s) => s.name?.startsWith("Resolve the active release branch"));
@@ -300,62 +316,111 @@ test("nightly refresh: a failed release-freeze lookup stops the run instead of r
   assert.match(none.output, /^branch=release\/v3\.8\.54$/m);
 });
 
-/**
- * An origin with release/v1.0.0 and the robot branch on top of it. `tip` decides who made the
- * robot branch's tip: the bot alone, or a maintainer who ran `git commit --amend --no-edit` on
- * the bot commit (Git keeps the bot as author and records the maintainer as committer). Then the
- * publish step runs in a checkout of the release branch, with or without a refreshed file.
- */
+const BASE = "release/v1.0.0";
+const SKILL = "skills/x/SKILL.md";
+const MAINTAINER_EMAIL = "maintainer@example.com";
+
+function initPublishRepo(dir: string) {
+  const origin = path.join(dir, "origin.git");
+  const work = path.join(dir, "work");
+  const git = (...args: string[]) => sh(work, "git", args);
+  const remote = (...args: string[]) => sh(dir, "git", ["--git-dir", origin, ...args]);
+  sh(dir, "git", ["init", "-q", "--bare", origin]);
+  sh(dir, "git", ["init", "-q", "-b", BASE, work]);
+  git("remote", "add", "origin", origin);
+  git("config", "user.name", "Maintainer");
+  git("config", "user.email", MAINTAINER_EMAIL);
+  fs.writeFileSync(path.join(work, "facts.md"), "providers: 1\n");
+  fs.mkdirSync(path.dirname(path.join(work, SKILL)), { recursive: true });
+  fs.writeFileSync(path.join(work, SKILL), "# Original skill\n");
+  // The workflow uses relative script paths. Node resolves the real queue config from this link.
+  fs.symlinkSync(path.join(ROOT, "scripts"), path.join(work, "scripts"), "dir");
+  git("add", "-A");
+  git("commit", "-q", "-m", "release");
+  git("push", "-q", "origin", BASE);
+  return { work, git, remote, baseSha: git("rev-parse", "HEAD") };
+}
+
+function mockPublishGh(dir: string) {
+  fakeGh(
+    path.join(dir, "bin"),
+    [
+      'case "$1 $2" in',
+      '  "auth setup-git"|"pr edit"|"pr close") exit 0 ;;',
+      '  "pr list") printf "%s" "${GH_OPEN_PR:-}" ;;',
+      '  "pr view")',
+      '    case "${!#}" in',
+      '      .headRefOid) printf "%s" "${GH_PR_HEAD:?}" ;;',
+      '      .baseRefName) printf "%s" "${GH_PR_BASE:?}" ;;',
+      "      *) exit 1 ;;",
+      "    esac ;;",
+      '  "pr create") echo "https://example.invalid/pull/new" ;;',
+      '  *) printf "Unexpected gh call: %s\\n" "$*" >&2; exit 1 ;;',
+      "esac",
+    ].join("\n")
+  );
+}
+
+const publishEnv = {
+  GH_TOKEN: "x",
+  HAS_PR_TOKEN: "true",
+  BASE,
+  BASE_RED_ISSUE: "",
+  RUN_URL: "https://example.invalid/run/1",
+  BOT_NAME,
+  BOT_EMAIL,
+};
+
 function runPublish({ tip, diff }: { tip: "bot" | "amended"; diff: boolean }) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "derived-refresh-publish-"));
   try {
-    const origin = path.join(dir, "origin.git");
-    const seed = path.join(dir, "seed");
-    const work = path.join(dir, "work");
-    sh(dir, "git", ["init", "-q", "--bare", origin]);
-    sh(dir, "git", ["init", "-q", "-b", "release/v1.0.0", seed]);
-    const bot = ["-c", "user.name=github-actions[bot]", "-c", `user.email=${BOT_EMAIL}`];
-    const human = ["-c", "user.name=Maintainer", "-c", "user.email=maintainer@example.com"];
-    fs.writeFileSync(path.join(seed, "facts.md"), "providers: 1\n");
-    sh(seed, "git", ["add", "-A"]);
-    sh(seed, "git", [...human, "commit", "-q", "-m", "release"]);
-    sh(seed, "git", ["push", "-q", origin, "release/v1.0.0"]);
-    sh(seed, "git", ["switch", "-q", "-c", "chore/derived-refresh"]);
-    fs.writeFileSync(path.join(seed, "facts.md"), "providers: 2\n");
-    sh(seed, "git", ["add", "-A"]);
-    sh(seed, "git", [...bot, "commit", "-q", "-m", "chore(docs): refresh derived numbers"]);
-    if (tip === "amended") {
-      fs.writeFileSync(path.join(seed, "facts.md"), "providers: 2 (hand fix)\n");
-      sh(seed, "git", ["add", "-A"]);
-      sh(seed, "git", [...human, "commit", "-q", "--amend", "--no-edit"]);
-      assert.equal(sh(seed, "git", ["log", "-1", "--format=%ae"]), BOT_EMAIL);
-    }
-    sh(seed, "git", ["push", "-q", origin, "chore/derived-refresh"]);
-    const before = sh(dir, "git", ["--git-dir", origin, "rev-parse", "chore/derived-refresh"]);
-
-    sh(dir, "git", ["clone", "-q", "-b", "release/v1.0.0", `file://${origin}`, work]);
-    if (diff) fs.writeFileSync(path.join(work, "facts.md"), "providers: 3\n");
-
-    fakeGh(
-      path.join(dir, "bin"),
-      [
-        'case "$1 $2" in',
-        '  "auth setup-git") exit 0 ;;',
-        '  "pr list") if printf "%s\\n" "$@" | grep -q baseRefName; then echo "7 release/v1.0.0"; else echo 7; fi ;;',
-        "esac",
-      ].join("\n")
+    const { work, git, remote, baseSha } = initPublishRepo(dir);
+    const facts = path.join(work, "facts.md");
+    git("switch", "-q", "-c", REFRESH_BRANCH);
+    fs.writeFileSync(facts, "providers: 2\n");
+    git("add", "facts.md");
+    git(
+      "-c",
+      `user.name=${BOT_NAME}`,
+      "-c",
+      `user.email=${BOT_EMAIL}`,
+      "commit",
+      "-q",
+      "-m",
+      "chore(docs): refresh derived numbers"
     );
-    const result = runStep(publish?.run ?? "", work, dir, {
-      GH_TOKEN: "x",
-      HAS_PR_TOKEN: "true",
-      BASE: "release/v1.0.0",
-      BASE_RED_ISSUE: "",
-      RUN_URL: "https://example.invalid/run/1",
-      REFRESH_BRANCH: "chore/derived-refresh",
-      BOT_NAME: "github-actions[bot]",
-      BOT_EMAIL,
-    });
-    const after = sh(dir, "git", ["--git-dir", origin, "rev-parse", "chore/derived-refresh"]);
+    if (tip === "amended") {
+      fs.writeFileSync(facts, "providers: 2 (hand fix)\n");
+      git("add", "facts.md");
+      git("commit", "-q", "--amend", "--no-edit");
+      assert.equal(git("log", "-1", "--format=%ae %ce"), `${BOT_EMAIL} ${MAINTAINER_EMAIL}`);
+    }
+    git("push", "-q", "origin", REFRESH_BRANCH);
+    const before = remote("rev-parse", REFRESH_BRANCH);
+
+    git("switch", "-q", BASE);
+    if (diff) fs.writeFileSync(facts, "providers: 3\n");
+    git("add", "-A");
+    const body = path.join(dir, "body.md");
+    const files = path.join(dir, "files");
+    fs.writeFileSync(body, "Nightly refresh\n");
+    fs.writeFileSync(files, diff ? "facts.md\0" : "");
+
+    mockPublishGh(dir);
+    const result = runBash(
+      [PUBLISH_PATH, REFRESH_BRANCH, "chore(docs): refresh derived numbers", body, files],
+      work,
+      dir,
+      {
+        ...publishEnv,
+        BASE_SHA: baseSha,
+        REFRESH_TREE: git("write-tree"),
+        GH_OPEN_PR: "7 release/v0.9.0",
+        GH_PR_HEAD: before,
+        GH_PR_BASE: BASE,
+      }
+    );
+    const after = remote("rev-parse", REFRESH_BRANCH);
     return { ...result, pushed: before !== after };
   } finally {
     fs.rmSync(dir, { recursive: true, force: true });
@@ -366,24 +431,79 @@ test("nightly refresh: a hand fix amended onto the bot commit is never overwritt
   const amended = runPublish({ tip: "amended", diff: true });
   assert.equal(amended.status, 0, amended.stderr);
   assert.equal(amended.pushed, false, "the amended tip keeps its hand fix");
-  assert.match(amended.summary, /commits pushed by hand; not overwriting them/);
-  assert.doesNotMatch(amended.gh, /^pr (edit|create)/m);
+  assert.match(
+    amended.summary,
+    /has a tip pushed by hand\. Left the branch and any open PR as is\./
+  );
+  assert.doesNotMatch(amended.gh, /^pr (edit|create|close)/m);
 
   const robot = runPublish({ tip: "bot", diff: true });
   assert.equal(robot.status, 0, robot.stderr);
   assert.equal(robot.pushed, true, "the robot's own tip is rebuilt");
-  assert.match(robot.gh, /^pr edit 7 /m);
+  assert.match(robot.gh, /^pr edit 7 .* --base release\/v1\.0\.0 /m);
+  assert.match(robot.gh, /^pr view 7 .* --json baseRefName --jq \.baseRefName$/m);
+  assert.doesNotMatch(robot.gh, /^pr (create|close)/m);
+  assert.match(robot.summary, /Updated #7 from `chore\/derived-refresh`\./);
 });
 
 test("nightly refresh: a stale refresh PR whose bot commit was amended by hand is not closed", () => {
   const amended = runPublish({ tip: "amended", diff: false });
   assert.equal(amended.status, 0, amended.stderr);
+  assert.equal(amended.pushed, false);
   assert.doesNotMatch(amended.gh, /^pr close/m);
-  assert.match(amended.summary, /has commits pushed by hand; left open/);
+  assert.match(
+    amended.summary,
+    /has a tip pushed by hand\. Left the branch and any open PR as is\./
+  );
 
   const robot = runPublish({ tip: "bot", diff: false });
   assert.equal(robot.status, 0, robot.stderr);
-  assert.match(robot.gh, /^pr close 7 /m);
+  assert.equal(robot.pushed, false, "closing a PR preserves its remote branch");
+  assert.match(robot.gh, /^pr view 7 .* --json headRefOid --jq \.headRefOid\npr close 7 /m);
+  assert.doesNotMatch(robot.gh, /--delete-branch/);
+  assert.match(robot.summary, /Closed the stale refresh PR #7\./);
+});
+
+test("nightly refresh: the split publishes only the assigned files to each robot branch", () => {
+  assert.ok(splitAndPublish?.run);
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "derived-refresh-split-"));
+  try {
+    const { work, remote, baseSha } = initPublishRepo(dir);
+    fs.writeFileSync(path.join(work, "facts.md"), "providers: 3\n");
+    fs.writeFileSync(path.join(work, SKILL), "# Refreshed skill\n");
+    mockPublishGh(dir);
+    const result = runStep(splitAndPublish.run, work, dir, {
+      ...publishEnv,
+      REFRESH_BRANCH,
+      PROTECTED_BRANCH,
+      GH_OPEN_PR: "",
+    });
+    assert.equal(result.status, 0, result.stderr);
+
+    for (const [branch, file] of [
+      [REFRESH_BRANCH, "facts.md"],
+      [PROTECTED_BRANCH, SKILL],
+    ]) {
+      const ref = `refs/heads/${branch}`;
+      assert.equal(remote("rev-parse", `${ref}^`), baseSha);
+      assert.equal(remote("diff", "--name-only", baseSha, ref), file, branch);
+    }
+    assert.deepEqual(
+      result.gh
+        .trim()
+        .split("\n")
+        .map((line) => line.split(" --json ")[0].split(" --title ")[0]),
+      [
+        "auth setup-git",
+        `pr list --repo cheaper-inference/OmniRoute --head ${REFRESH_BRANCH} --state open`,
+        `pr create --repo cheaper-inference/OmniRoute --base ${BASE} --head ${REFRESH_BRANCH}`,
+        `pr list --repo cheaper-inference/OmniRoute --head ${PROTECTED_BRANCH} --state open`,
+        `pr create --repo cheaper-inference/OmniRoute --base ${BASE} --head ${PROTECTED_BRANCH}`,
+      ]
+    );
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
 });
 
 test("nightly refresh: the refresh step gets a translation engine, so it never writes __MISSING__ markers", () => {

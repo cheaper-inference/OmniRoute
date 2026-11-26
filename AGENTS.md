@@ -348,7 +348,7 @@ also needs `protected-approved`, which is the owner's decision per PR. Never pus
 
 Only the `derived-refresh-autoland` workflow may apply the `omni-queue` label automatically.
 It labels only the `chore/derived-refresh` robot PR when `DERIVED_REFRESH_AUTOLAND` is `true`.
-Every changed file must belong to a derived family and have an unprotected path.
+Every changed path must be unprotected. Files must belong to a derived family or be `README.md` with only digits changed.
 Any open `release-freeze` issue blocks labeling. An open `base-red` issue blocks its target base.
 `Gate / CI` and `Gate / Quality` must pass on the current head.
 Every other label application requires the owner's approval for that PR.
