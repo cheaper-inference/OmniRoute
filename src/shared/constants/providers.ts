@@ -195,6 +195,7 @@ export const AGGREGATOR_PROVIDER_IDS = new Set([
   "seekai",
   "tokenmarket",
   "tokenharbor",
+  "aigrow",
   "demonroute",
   "daoxe",
   "gisoo",

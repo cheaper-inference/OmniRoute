@@ -1,0 +1,1 @@
+- **feat(providers):** add AIGROW (`aigrow`) as an OpenAI-compatible API-key gateway with Bearer-key authentication and live model discovery from its key-gated `/v1/models` ([#20851](https://github.com/cheaper-inference/OmniRoute/pull/20851)) — thanks @guglielmo-io
