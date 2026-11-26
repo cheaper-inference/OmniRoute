@@ -238,19 +238,19 @@ Supports **22 routing strategies** (see `src/shared/constants/routingStrategies.
 | `context-relay`     | Hand off context across targets                                           |
 | `fill-first`        | Fill quota before moving to next                                          |
 | `p2c`               | Power of two choices                                                      |
-| `random`            | Uniform random                                                            |
-| `least-used`        | Pick the one with fewest recent uses                                      |
-| `cost-optimized`    | Cheapest healthy target first                                             |
-| `reset-aware`       | Aware of provider reset windows                                           |
-| `reset-window`      | Reset window-based routing                                                |
+| `random`            | Fresh shuffle per request                                                 |
+| `least-used`        | Pick the one with the fewest recorded requests                            |
+| `cost-optimized`    | Lowest catalog input price first                                          |
+| `reset-aware`       | Leftover quota + reset urgency                                            |
+| `reset-window`      | Quota window that resets soonest first                                    |
 | `expiry-first`      | Spend the account whose quota would expire unused first                   |
 | `headroom`          | Most remaining quota headroom first                                       |
 | `quota-weighted`    | Skip exhausted accounts, then draw by leftover quota ÷ in-flight load     |
-| `strict-random`     | Truly uniform (no quality weighting)                                      |
+| `strict-random`     | Shuffled deck: each target once before repeats                            |
 | `auto`              | Use 16-factor scoring (`autoCombo/`)                                      |
 | `lkgp`              | Last known good provider first                                            |
-| `context-optimized` | Best for long-context requests                                            |
-| `cache-optimized`   | Pin each reusable prompt prefix to the same account (prompt-cache hits)   |
+| `context-optimized` | Largest known context window first                                        |
+| `cache-optimized`   | Prefer the account likely to hold the prompt prefix in cache              |
 | `fusion`            | Fan out to a panel in parallel, then synthesize via a judge (`fusion.ts`) |
 | `pipeline`          | Chain steps — each target's output feeds the next one                     |
 | `jev`               | Opt-in: TypeSafe Jev admits which ranked entries run; else your order     |

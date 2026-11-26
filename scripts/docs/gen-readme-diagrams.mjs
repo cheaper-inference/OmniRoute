@@ -7,7 +7,7 @@
 // which only `npm run release:refresh-derived` rewrites — that script also re-runs this list.
 //
 //   npm run docs:readme-diagrams
-//   (no generator imports TypeScript any more; tsx in that npm script is harmless)
+//   (the provider figures generator reads TypeScript catalogs through tsx)
 //
 // Output paths are resolved from the repository root, so the command works from any cwd.
 // A generator that throws stops the run with a non-zero exit; the files already written stay
@@ -20,16 +20,20 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { renderReadmeHero } from "./gen-readme-hero.mjs";
 import { renderReadmeFreeTierBudget } from "./gen-readme-free-tier-budget.mjs";
+import { renderReadmeLtsRail } from "./gen-readme-lts-rail.mjs";
 import { renderReadmeWorksZeroConfig } from "./gen-readme-works-zero-config.mjs";
 import { renderReadmePromisePillars } from "./gen-readme-promise-pillars.mjs";
 import { renderReadmeWhyPainFix } from "./gen-readme-why-pain-fix.mjs";
 import { renderTierCascade } from "./gen-readme-tier-cascade.mjs";
 import { renderStrategiesGrid } from "./gen-readme-strategies-grid.mjs";
+import { renderAutoRouterStrategies } from "./gen-readme-auto-router-strategies.mjs";
 import { renderResilienceLayers } from "./gen-readme-resilience-layers.mjs";
 import { renderComparisonTable } from "./gen-readme-comparison-table.mjs";
+import { renderReadmeProviderNumbers } from "./gen-readme-provider-numbers.mjs";
 import { renderPrivacyLocal } from "./gen-readme-privacy-local.mjs";
 import { renderCliTerminal } from "./gen-readme-cli-terminal.mjs";
 import { renderCompressionPipeline } from "./gen-readme-compression-pipeline.mjs";
+import { renderReadmeQuickStartSteps } from "./gen-readme-quick-start-steps.mjs";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
 
@@ -40,6 +44,11 @@ export const README_DIAGRAMS = [
     name: "free-tier-budget",
     render: renderReadmeFreeTierBudget,
     out: "docs/diagrams/free-tier-budget.svg",
+  },
+  {
+    name: "readme-lts-rail",
+    render: renderReadmeLtsRail,
+    out: "docs/diagrams/readme-lts-rail.svg",
   },
   {
     name: "works-zero-config",
@@ -59,6 +68,11 @@ export const README_DIAGRAMS = [
     out: "docs/diagrams/strategies-grid.svg",
   },
   {
+    name: "auto-router-strategies",
+    render: renderAutoRouterStrategies,
+    out: "docs/diagrams/auto-router-strategies.svg",
+  },
+  {
     name: "resilience-layers",
     render: renderResilienceLayers,
     out: "docs/diagrams/resilience-layers.svg",
@@ -68,12 +82,22 @@ export const README_DIAGRAMS = [
     render: renderComparisonTable,
     out: "docs/diagrams/comparison-table.svg",
   },
+  {
+    name: "provider-numbers",
+    render: renderReadmeProviderNumbers,
+    out: "docs/diagrams/provider-numbers.svg",
+  },
   { name: "privacy-local", render: renderPrivacyLocal, out: "docs/diagrams/privacy-local.svg" },
   { name: "cli-terminal", render: renderCliTerminal, out: "docs/diagrams/cli-terminal.svg" },
   {
     name: "compression-pipeline",
     render: renderCompressionPipeline,
     out: "docs/diagrams/compression-pipeline.svg",
+  },
+  {
+    name: "quick-start-steps",
+    render: renderReadmeQuickStartSteps,
+    out: "docs/diagrams/quick-start-steps.svg",
   },
 ];
 
