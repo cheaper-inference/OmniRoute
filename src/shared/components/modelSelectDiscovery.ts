@@ -1,6 +1,7 @@
 "use client";
 
 import { readDiscoveryDegradation } from "@/shared/discovery/degradedCause";
+import { providerShowsSyncedInPassthroughPicker } from "./modelSelectModalHelpers";
 
 /**
  * The live catalog of one provider, and whether it is the provider's own list
@@ -58,4 +59,37 @@ export async function fetchProviderModels(
     console.error(`Error fetching models for ${providerId}:`, error);
     return { models: [], degraded: false };
   }
+}
+
+/**
+ * Read already-synced models for passthrough providers that opted into the
+ * legacy combo picker. This hits the stored catalog only — it does not call
+ * the provider's /models endpoint or change auto-fetch.
+ */
+export async function fetchPassthroughSyncedModels(
+  providerIds: readonly string[]
+): Promise<Record<string, unknown[]>> {
+  const ids = [
+    ...new Set(
+      providerIds.filter(
+        (providerId) =>
+          typeof providerId === "string" && providerShowsSyncedInPassthroughPicker(providerId)
+      )
+    ),
+  ];
+  const rows = await Promise.all(
+    ids.map(async (providerId) => {
+      try {
+        const res = await fetch(
+          `/api/synced-available-models?provider=${encodeURIComponent(providerId)}`
+        );
+        if (!res.ok) return [providerId, []] as const;
+        const data = (await res.json()) as { models?: unknown };
+        return [providerId, Array.isArray(data.models) ? data.models : []] as const;
+      } catch {
+        return [providerId, []] as const;
+      }
+    })
+  );
+  return Object.fromEntries(rows);
 }
