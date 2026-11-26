@@ -1026,6 +1026,26 @@ rate limit is the same signal as an exhausted quota. Honest limits:
 
 ---
 
+## When OmniRoute itself is unreachable
+
+The provider circuit breaker, connection cooldown, and model lockout all run inside the
+gateway. If the client cannot reach the gateway, it gets a connection error. OmniRoute cannot
+intercept that failure. The client decides whether to retry and what message to show.
+
+OmniRoute currently provides no client-side fallback and defines no policy for it. Configure
+any alternate route in the client or in front of the gateway.
+
+- `GET /api/health` checks liveness without authentication.
+- `GET /api/health/ping` checks readiness, including whether the database responds.
+- `GET /api/monitoring/health` gives authenticated callers a deeper health overview.
+- `omniroute launch <tool>` probes `/api/monitoring/health` before starting the client. It can
+  start a local gateway automatically. With `--no-start`, an unreachable gateway results in
+  `GatewayUnreachable` and exit code `69`.
+
+To disconnect a client from OmniRoute, follow [Revert client configuration](../guides/UNINSTALL.md#revert-client-configuration).
+
+---
+
 ## Debugging
 
 - Weighted combo answers `503 all_targets_cooling_down` (`Retry-After` set, `diagnostics.excluded` lists every target with `model_lockout` / `circuit_open` / `provider_cooldown` / `unavailable`) → the pool is configured and connected, every target is just excluded by a resilience timer; the `[COMBO] Weighted selection: every target excluded before dispatch — …` warning names the reasons and remaining seconds. A `404 no_executable_targets` from the same combo means no resilience timer was involved (nothing to run, or every account failed the availability probe). Built in `open-sse/services/combo/pinRecovery.ts` from the exclusions collected in `targetResolution.ts`.
