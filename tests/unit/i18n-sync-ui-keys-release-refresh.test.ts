@@ -370,6 +370,7 @@ test("CLI flags: pruning stays the default, --keep-extra opts out, --rewritten-s
       "scripts/i18n/sync-ui-keys.mjs",
       "scripts/i18n/check-ui-value-drift.mjs",
       "scripts/i18n/generate-global-error-messages.mjs",
+      "scripts/i18n/glossary-normalize.mjs",
       "scripts/i18n/lib/translate-backend.mjs",
       "scripts/i18n/lib/google-translate.mjs",
       "scripts/i18n/lib/release-mode.mjs",
