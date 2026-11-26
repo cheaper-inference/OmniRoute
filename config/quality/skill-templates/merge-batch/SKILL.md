@@ -76,7 +76,10 @@ Draft skips, MERGEABLE, a green board, an old head and inherited failures are no
 acceptance. A changed identity returns the item to validation.
 
 Use an approved server-enforced queue or reviewed identity-preserving protocol
-for each actual landing. `gh pr merge --match-head-commit` guards the head only;
+for each actual landing. On a `release/v*` base the landing step is the one
+`../_shared/merge-gates.md` §9 gives for the omni-queue's current mode (read it first):
+a manual merge while the queue is off or in `shadow`, the `omni-queue` label in `live`.
+`gh pr merge --match-head-commit` guards the head only;
 it does not atomically guard the base or replace missing required checks. If the
 tool cannot preserve the tested candidate or exclude a race, HOLD.
 

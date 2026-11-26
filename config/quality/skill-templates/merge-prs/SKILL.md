@@ -63,7 +63,9 @@ auto-approve every pushed fork run. A cancelled/slow check is not automatically
 flaky or infrastructure-related; establish the cause from evidence.
 
 When the owner has authorized the group and all required checks pass, merge only
-through `../_shared/merge-gates.md`, serialized. Immediately recheck freeze, PR
+through `../_shared/merge-gates.md`, serialized; on a `release/v*` base its §9 decides the
+landing step by the omni-queue's mode (manual merge while it is off or in `shadow`, the
+`omni-queue` label in `live`). Immediately recheck freeze, PR
 head, base, candidate and protected surfaces. Any movement or retarget invalidates
 the receipt. A full train tip cannot authorize different intermediate squash
 trees. Skip held items without silently expanding the approved batch.
