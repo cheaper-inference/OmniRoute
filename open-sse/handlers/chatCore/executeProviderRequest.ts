@@ -42,6 +42,7 @@ import {
 import { HTTP_STATUS, STREAM_RECOVERY } from "../../config/constants.ts";
 import { parseRetryAfterMs } from "../../services/apiKeyRotator.ts";
 import { createRecoverableStream, makeContinuationBody } from "../../services/streamRecovery.ts";
+import { maybeWrapLengthContinuation } from "../../services/streamLengthContinuation.ts";
 import { persistCodexChildQuotaResponse } from "../../services/codexAccount/index.ts";
 import {
   captureCodexConnectionFence,
@@ -617,67 +618,80 @@ export async function executeProviderRequest(
                 }
               }
 
+              // Run the SAME upstream (same account/creds) with a given body and return
+              // its 2xx stream, or null. Used by the early-retry re-open (same body), the
+              // mid-stream continuation (assistant-prefilled body) and the length continuation.
+              const runUpstreamStream = async (
+                body: unknown,
+                continuation = false,
+                upstreamSignal: AbortSignal = streamController.signal
+              ): Promise<ReadableStream<Uint8Array> | null> => {
+                try {
+                  assertManagedLeaseFence(attemptConnectionId);
+                  if (ownerFence && !isCodexConnectionFenceCurrent(ownerFence)) return null;
+                  const retryRaw = await executeWithUpstreamStartTimeout({
+                    executor,
+                    provider,
+                    model: modelToCall,
+                    connectionTimeoutMs: resolveConnectionTimeoutMs(
+                      execCreds?.providerSpecificData
+                    ),
+                    requestTimeoutMs: requestUpstreamStartTimeoutMs,
+                    signal: upstreamSignal,
+                    log,
+                    execute: (signal) =>
+                      runWithCapture(providerRequestCapture, () => {
+                        noteUpstreamDispatch();
+                        return executor.execute({
+                          model: modelToCall,
+                          body,
+                          stream: upstreamStream,
+                          credentials: execCreds,
+                          signal,
+                          log,
+                          extendedContext,
+                          upstreamExtraHeaders: buildUpstreamHeadersForExecute(modelToCall),
+                          clientHeaders: getExecutorClientHeaders(),
+                          clientResponseFormat,
+                          onCredentialsRefreshed: fencedCredentialsRefreshed,
+                          skipUpstreamRetry,
+                          nonReplayableRequest,
+                          contextEditing: { enabled: contextEditingEnabled },
+                          correlationId,
+                        });
+                      }),
+                  });
+                  const retryRes = normalizeExecutorResult(retryRaw);
+                  const retryOk = retryRes.response.status >= 200 && retryRes.response.status < 300;
+                  if (retryOk && retryRes.response.body) {
+                    if (res.upstreamHttpSelection)
+                      res.upstreamHttpSelection.current = continuation
+                        ? null
+                        : (retryRes.upstreamHttpSelection?.current ?? null);
+                    return retryRes.response.body as ReadableStream<Uint8Array>;
+                  }
+                  await retryRes.response.body?.cancel().catch(() => {});
+                  return null;
+                } catch {
+                  return null;
+                }
+              };
+
+              // Opt-in bounded continuation after a genuine finish_reason "length" (default OFF;
+              // returns the stream untouched when the flag is off or the turn is not eligible).
+              const guardLength = (source: ReadableStream<Uint8Array>) =>
+                maybeWrapLengthContinuation({
+                  stream: source,
+                  targetFormat,
+                  clientBody: body,
+                  upstreamBody: bodyToSend,
+                  signal: streamController.signal,
+                  reopen: (nextBody, signal) => runUpstreamStream(nextBody, true, signal),
+                  log,
+                });
+
               let clientBody: ReadableStream<Uint8Array>;
               if (streamRecoveryEnabled || throughputWatchdog.enabled) {
-                // Run the SAME upstream (same account/creds) with a given body and return
-                // its 2xx stream, or null. Used both by the early-retry re-open (same body)
-                // and the mid-stream continuation (assistant-prefilled body).
-                const runUpstreamStream = async (
-                  body: unknown,
-                  continuation = false
-                ): Promise<ReadableStream<Uint8Array> | null> => {
-                  try {
-                    assertManagedLeaseFence(attemptConnectionId);
-                    if (ownerFence && !isCodexConnectionFenceCurrent(ownerFence)) return null;
-                    const retryRaw = await executeWithUpstreamStartTimeout({
-                      executor,
-                      provider,
-                      model: modelToCall,
-                      connectionTimeoutMs: resolveConnectionTimeoutMs(
-                        execCreds?.providerSpecificData
-                      ),
-                      requestTimeoutMs: requestUpstreamStartTimeoutMs,
-                      signal: streamController.signal,
-                      log,
-                      execute: (signal) =>
-                        runWithCapture(providerRequestCapture, () => {
-                          noteUpstreamDispatch();
-                          return executor.execute({
-                            model: modelToCall,
-                            body,
-                            stream: upstreamStream,
-                            credentials: execCreds,
-                            signal,
-                            log,
-                            extendedContext,
-                            upstreamExtraHeaders: buildUpstreamHeadersForExecute(modelToCall),
-                            clientHeaders: getExecutorClientHeaders(),
-                            clientResponseFormat,
-                            onCredentialsRefreshed: fencedCredentialsRefreshed,
-                            skipUpstreamRetry,
-                            nonReplayableRequest,
-                            contextEditing: { enabled: contextEditingEnabled },
-                            correlationId,
-                          });
-                        }),
-                    });
-                    const retryRes = normalizeExecutorResult(retryRaw);
-                    const retryOk =
-                      retryRes.response.status >= 200 && retryRes.response.status < 300;
-                    if (retryOk && retryRes.response.body) {
-                      if (res.upstreamHttpSelection)
-                        res.upstreamHttpSelection.current = continuation
-                          ? null
-                          : (retryRes.upstreamHttpSelection?.current ?? null);
-                      return retryRes.response.body as ReadableStream<Uint8Array>;
-                    }
-                    await retryRes.response.body?.cancel().catch(() => {});
-                    return null;
-                  } catch {
-                    return null;
-                  }
-                };
-
                 // Mid-stream continuation (Fase 4.4): re-request with the partial text as an
                 // assistant prefill. Gated by its own setting and only for OpenAI-compatible
                 // bodies (makeContinuationBody returns null otherwise).
@@ -694,8 +708,11 @@ export async function executeProviderRequest(
                   : undefined;
 
                 clientBody = createRecoverableStream(
-                  originalBody as ReadableStream<Uint8Array>,
-                  () => runUpstreamStream(bodyToSend),
+                  guardLength(originalBody as ReadableStream<Uint8Array>),
+                  async () => {
+                    const reopened = await runUpstreamStream(bodyToSend);
+                    return reopened ? guardLength(reopened) : null;
+                  },
                   {
                     finalize: releaseAccountSemaphore,
                     onRetry: (attempt, err) =>
@@ -718,7 +735,10 @@ export async function executeProviderRequest(
                   }
                 );
               } else {
-                clientBody = wrapReadableStreamWithFinalize(originalBody, releaseAccountSemaphore);
+                clientBody = wrapReadableStreamWithFinalize(
+                  guardLength(originalBody),
+                  releaseAccountSemaphore
+                );
               }
 
               return {

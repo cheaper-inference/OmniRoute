@@ -46,7 +46,7 @@ A boolean flag is considered **enabled** when its effective value is `"true"`,
 
 ## Flag Catalog
 
-138 flags across 6 categories. **Default** is the definition default — the value
+139 flags across 6 categories. **Default** is the definition default — the value
 used when neither a DB override nor an environment variable is present.
 
 ### Security (16)
@@ -130,7 +130,7 @@ Invalid enum values and unreadable feature-flag storage fail closed. Neither opt
 priced spend or a failed pricing lookup. Enforcement and the administrator report resolve the
 same effective policy.
 
-### Runtime (64)
+### Runtime (65)
 
 | Key                                            | Type    | Default | Restart | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------------------------------------------- | ------- | ------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -200,6 +200,7 @@ same effective policy.
 | `COMBO_DECISION_ROUTER_ENABLED`                | boolean | `false` |         | Let auto combos that use the `decision` router strategy ask their configured decider which model should answer each request: TypeSafe System One, an operator decision URL (System One or OpenAI chat wire), or one of the combo's own models in process. Every routed request then sends the last user message (at most 8000 characters) and the model menu to that decider, which may be a paid third-party call; a stored key alone never turns it on. Off by default: decision combos read no credential, make no call and route with the `rules` strategy.                                                                                 |
 | `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`           | boolean | `false` |         | Let an automatic web search (no explicit `provider`) use a connected Codex (ChatGPT) account through `codex-search`: as the last resort ahead of the keyless providers when no credentialed search provider is usable, and as the failover alternate (#17933). Each such search spends ChatGPT subscription quota and takes about 10–40 s. Off by default: `codex-search` runs only when a request names it explicitly.                                                                                                                                                                                                                         |
 | `CODE_ASSIST_INELIGIBLE_ONBOARD_LEGACY_TIER`   | boolean | `false` |         | For Antigravity / Code Assist onboarding, an account whose `loadCodeAssist` answer lists `ineligibleTiers` and marks no allowed tier as default onboards with `legacy-tier` instead of its `currentTier` (#18060), matching the Antigravity-Manager `fetch_project_id` order. Not yet confirmed on a real restricted account. Off by default: such an account keeps onboarding with its `currentTier`.                                                                                                                                                                                                                                          |
+| `STREAM_LENGTH_CONTINUATION_ENABLED`           | boolean | `false` |         | After a genuine upstream `finish_reason` of `length` on a single-choice Chat Completions stream that already delivered text, hold the terminal and make ONE extra request to the same connection, prefilled with the delivered text: at most 2048 extra output tokens, 30 s, 64 KiB held. One terminal and one `[DONE]` reach the client, with usage summed over both runs. A limit the client set (`max_tokens`, `max_completion_tokens`, `max_output_tokens`) is never extended. Tool calls, refusals, several choices and linked sessions are not continued; any failure delivers the original `length`. Off by default: frames unchanged.   |
 
 ### CLI (8)
 
@@ -301,10 +302,10 @@ Returns every flag with its effective value, source, and a summary.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... all 138 flags
+    // ... all 139 flags
   ],
   "summary": {
-    "total": 138,
+    "total": 139,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,
