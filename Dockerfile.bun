@@ -33,8 +33,11 @@ RUN test -f package-lock.json || test -f bun.lock \
   || (echo "package-lock.json (or bun.lock) is required for reproducible Bun Docker builds" >&2 && exit 1)
 
 # Deterministic Bun native package install: --frozen-lockfile rejects any
-# manifest/lockfile drift, and --ignore-scripts blocks transitive install hooks (#21014).
-RUN bun install --frozen-lockfile --ignore-scripts --include=optional --quiet
+# manifest/lockfile drift. --ignore-scripts skips all install hooks (#21014).
+# Explicitly run only the lockfile-pinned Bun package's install script.
+RUN bun install --frozen-lockfile --ignore-scripts --include=optional --quiet \
+  && (cd node_modules/bun && bun install.js) \
+  && node_modules/.bin/bun --version
 
 # Next standalone traces only Playwright's index.js, index.mjs and package.json.
 # Runner-web needs the complete installer at the same lockfile version.

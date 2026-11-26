@@ -39,6 +39,25 @@ test("Dockerfile.bun copies package-lock.json and enforces --frozen-lockfile --i
   );
 });
 
+test("Bun builder runs the pinned package install script before bun run build (#21014)", () => {
+  const builder = stripHashComments(read("Dockerfile.bun"))
+    .split(/^FROM[ \t]+\S+[ \t]+AS[ \t]+builder[ \t]*$/im)[1]
+    ?.split(/^FROM\s/im)[0];
+  assert.ok(builder, "Dockerfile.bun must have a builder stage");
+
+  const instructions = builder.replace(/\\\r?\n/g, " ");
+  const install = instructions.search(/^RUN bun install\b[^\n]*--ignore-scripts\b/m);
+  const bunInstall = instructions.search(
+    /(?:^RUN|&&)\s+\(cd node_modules\/bun\s+&&\s+bun install\.js\)\s+&&\s+node_modules\/\.bin\/bun --version\s*$/m
+  );
+  const build = instructions.search(/^RUN bun run (?:--quiet )?build\b/m);
+
+  assert.ok(
+    install >= 0 && install < bunInstall && bunInstall < build,
+    "Bun builder must run the pinned bun install.js and verify its binary after --ignore-scripts and before bun run build"
+  );
+});
+
 test("tproxy native build and VNC chromium Dockerfile contain no floating latest/npx --yes (#21014)", () => {
   const pkg = JSON.parse(read("package.json"));
   assert.doesNotMatch(
