@@ -4,21 +4,17 @@
 //
 //   release — every check below, strict (push, schedule, the release PR, any local run).
 //   pr      — the checks a feature PR can break in its own sources: package.json vs
-//             docs/openapi.yaml version, the root CHANGELOG headings, superseded docs. The two
-//             translation-mirror checks (docs/i18n/<locale>/llm.txt copies and the translated
-//             CHANGELOG.md sections) are skipped with a reason: feature PRs never write
-//             docs/i18n/**; the translation wave (scripts/i18n/sync-llm-mirrors.mjs) and the
-//             release (npm run release:sync-changelog-i18n) do. Two exceptions keep a mirror
-//             edit visible: a change that writes the mirrors (writer branch, or its own diff
-//             when the base resolves) is judged strictly, and the llm.txt mirrors must always
-//             agree with each other or with the root (a hand edit to one of them fails even
-//             in a depth-1 checkout).
+//             docs/openapi.yaml version, the root CHANGELOG headings, superseded docs. A PR
+//             changing the root llm.txt must sync its copies in the same PR. Writer branches
+//             and PRs editing mirrors still run the corresponding strict checks. Other PRs
+//             tolerate inherited drift, with the llm.txt mirrors checked for consistency.
 //
 // The pre-commit hook passes --mode=pr: a commit is judged on what it does, not on mirrors the
 // base left stale.
 
 import fs from "node:fs";
 import path from "node:path";
+import { LLM_MIRROR_PATH, renderLlmMirror } from "../i18n/sync-llm-mirrors.mjs";
 import { categoryOf, loadFamilies, matchesAny } from "./check-pr-derived-paths.mjs";
 import {
   describeGateMode,
@@ -109,15 +105,13 @@ console.log(`[docs-sync] ${describeGateMode(gateMode)}`);
 const STRICT_ELSEWHERE =
   "the strict check runs in release mode (the release PR, pushes to main, local runs)";
 
-const LLM_MIRROR = /^docs\/i18n\/[^/]+\/llm\.txt$/;
 const CHANGELOG_MIRROR = /^docs\/i18n\/[^/]+\/CHANGELOG\.md$/;
 
 /**
  * PR mode only. A change that writes translation mirrors is judged on them: a head branch that is a
  * declared writer of the docs/i18n family (config/quality/derived-paths/*.json — the translation
- * wave) runs both mirror checks strictly; any other change runs a mirror check strictly when its
- * own diff touches those mirrors (diff base unresolvable, e.g. a depth-1 CI checkout → skipped).
- * @returns {{ llm: string | null, changelog: string | null }} reason to run strictly, or null
+ * wave) runs both mirror checks strictly. Other PRs run the corresponding check strictly when
+ * the diff touches those mirrors, or the root llm.txt that the mechanical copies depend on.
  */
 function prMirrorScope() {
   const branch = resolveHeadBranch({ env: process.env, cwd });
@@ -127,20 +121,25 @@ function prMirrorScope() {
       matchesAny(branch, family.writers) &&
       categoryOf("docs/i18n/xx/llm.txt", family) !== null
   );
-  if (writer) {
-    const reason = `head ${branch} writes translation mirrors (${writer.source})`;
-    return { llm: reason, changelog: reason };
-  }
-  const base = resolvePrDiffBase({ env: process.env, cwd });
-  if (!base) return { llm: null, changelog: null };
-  const files = listChangedFiles(base.sha, { cwd, includeWorktree: !process.env.GITHUB_ACTIONS });
-  return {
-    llm: files.some((file) => LLM_MIRROR.test(file))
+  const writerReason = writer && `head ${branch} writes translation mirrors (${writer.source})`;
+  const base = resolvePrDiffBase({ cwd, usePrMergeParent: true });
+  const files = base
+    ? listChangedFiles(base.sha, { cwd, includeWorktree: !process.env.GITHUB_ACTIONS })
+    : [];
+  const rootLlmChanged = files.includes("llm.txt");
+  const llmReason = rootLlmChanged
+    ? "the change edits the root llm.txt"
+    : files.some((file) => LLM_MIRROR_PATH.test(file))
       ? "the change edits docs/i18n/<locale>/llm.txt"
-      : null,
-    changelog: files.some((file) => CHANGELOG_MIRROR.test(file))
-      ? "the change edits docs/i18n/<locale>/CHANGELOG.md"
-      : null,
+      : null;
+  return {
+    llm: writerReason ?? llmReason,
+    changelog:
+      writerReason ??
+      (files.some((file) => CHANGELOG_MIRROR.test(file))
+        ? "the change edits docs/i18n/<locale>/CHANGELOG.md"
+        : null),
+    rootLlmChanged,
   };
 }
 
@@ -149,13 +148,14 @@ function fail(message) {
   console.error(`[docs-sync] FAIL - ${message}`);
 }
 
-function checkI18nMirrorFile(fileName, sourcePath) {
+function checkI18nMirrorFile(fileName, sourcePath, rootLlmChanged = false) {
   if (!fs.existsSync(i18nDocsPath)) {
     fail("docs/i18n directory is missing");
     return;
   }
 
-  const sourceBody = normalizeMirrorBody(stripTopHeading(readText(sourcePath)));
+  const source = readText(sourcePath);
+  const sourceBody = normalizeMirrorBody(stripTopHeading(source));
   const locales = fs
     .readdirSync(i18nDocsPath, { withFileTypes: true })
     .filter((entry) => entry.isDirectory())
@@ -170,13 +170,17 @@ function checkI18nMirrorFile(fileName, sourcePath) {
       continue;
     }
 
-    const body = extractI18nMirrorBody(readText(targetPath));
+    const target = readText(targetPath);
+    const body = extractI18nMirrorBody(target);
     if (body === null) {
       fail(`docs/i18n/${locale}/${fileName} is missing the i18n mirror separator`);
       continue;
     }
 
-    if (normalizeMirrorBody(body) !== sourceBody) {
+    const matches = rootLlmChanged
+      ? renderLlmMirror(target, source) === target
+      : normalizeMirrorBody(body) === sourceBody;
+    if (!matches) {
       fail(`docs/i18n/${locale}/${fileName} differs from root ${fileName}`);
       continue;
     }
@@ -187,11 +191,16 @@ function checkI18nMirrorFile(fileName, sourcePath) {
   if (checked > 0) {
     console.log(`[docs-sync] ${fileName} i18n mirrors match root content: ${checked} locales`);
   }
+  if (rootLlmChanged && checked !== locales.length) {
+    fail(
+      `llm.txt mirrors are out of date. Run node scripts/i18n/sync-llm-mirrors.mjs and commit the ${locales.length} docs/i18n/<locale>/llm.txt mirrors in this PR.`
+    );
+  }
 }
 
 /**
  * PR mode, when the change is not judged strictly on the exact-copy mirrors (it does not write
- * them, or its diff base is unresolvable — the depth-1 checkout of docs-sync-strict). A base that
+ * them or the root, or its diff base is unresolvable). A base that
  * moved leaves every mirror equally stale; a hand edit leaves one mirror that matches neither the
  * root nor the body most mirrors share. So each mirror must exist, keep its separator, and carry
  * either the root body or that most common body — a check that needs no base.
@@ -386,10 +395,10 @@ try {
     const scope = prMirrorScope();
     if (scope.llm) {
       console.log(`[docs-sync] pr mode: ${scope.llm} — checking the llm.txt mirrors strictly`);
-      checkI18nMirrorFile("llm.txt", llmPath);
+      checkI18nMirrorFile("llm.txt", llmPath, scope.rootLlmChanged);
     } else if (!checkI18nMirrorConsistency("llm.txt", llmPath)) {
       console.log(
-        `[docs-sync] SKIP reason=pr-mode — docs/i18n/<locale>/llm.txt mirrors are refreshed by the translation wave (scripts/i18n/sync-llm-mirrors.mjs), not by feature PRs; ${STRICT_ELSEWHERE}`
+        `[docs-sync] SKIP reason=pr-mode — docs/i18n/<locale>/llm.txt mirrors are refreshed by the translation wave (scripts/i18n/sync-llm-mirrors.mjs) when drift is inherited from the base; ${STRICT_ELSEWHERE}`
       );
     }
     if (scope.changelog) {

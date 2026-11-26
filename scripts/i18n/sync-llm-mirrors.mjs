@@ -9,11 +9,9 @@
  * Usage:
  *   node scripts/i18n/sync-llm-mirrors.mjs [--dry-run]
  *
- * Idempotent. Safe to run repeatedly. The mirrors are derived files: feature
- * PRs edit only the root `llm.txt`; the translation wave and the release
- * refresh run this script (or call `syncLlmMirrors()`), which keeps the
- * release-mode `npm run check:docs-sync` green. `--dry-run` lists the mirrors
- * that would change without writing them.
+ * Idempotent. Run this in the PR that edits the root `llm.txt`. The translation
+ * wave and release refresh also use it. `--dry-run` lists the mirrors that
+ * would change without writing them.
  */
 
 import { promises as fs, realpathSync } from "node:fs";
@@ -24,9 +22,21 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const ROOT = path.resolve(__dirname, "..", "..");
 const FILE_NAME = "llm.txt";
+export const LLM_MIRROR_PATH = /^docs\/i18n\/[^/]+\/llm\.txt$/;
 
 function stripTopHeading(content) {
   return content.replace(/^# .+\r?\n+/, "");
+}
+
+/** Exact text left by the copier, or null when the locale header has no separator. */
+export function renderLlmMirror(existing, rootText) {
+  const separator = existing.match(/^---\s*$/m);
+  if (!separator) return null;
+  const end = separator.index + separator[0].length;
+  const header = existing.slice(0, end).replace(/\r\n/g, "\n").replace(/\n+$/, "");
+  const body = stripTopHeading(rootText).replace(/\r\n/g, "\n").trimStart();
+  const next = `${header}\n\n${body}`.replace(/\r\n/g, "\n");
+  return existing.replace(/\r\n/g, "\n") === next ? existing : next;
 }
 
 const silent = () => {};
@@ -51,7 +61,6 @@ export async function syncLlmMirrors({
 } = {}) {
   const i18nDir = path.join(root, "docs", "i18n");
   const rootText = await fs.readFile(path.join(root, FILE_NAME), "utf8");
-  const rootBody = stripTopHeading(rootText).replace(/\r\n/g, "\n");
 
   const entries = await fs.readdir(i18nDir, { withFileTypes: true });
   const locales = entries
@@ -75,23 +84,14 @@ export async function syncLlmMirrors({
       continue;
     }
 
-    // The locale header is everything up to and including the first `---`
-    // separator on its own line. We keep that prefix verbatim and replace
-    // the rest with the root body.
-    const sepMatch = existing.match(/^---\s*$/m);
-    if (!sepMatch || sepMatch.index === undefined) {
+    const next = renderLlmMirror(existing, rootText);
+    if (next === null) {
       warn(`[sync-llm-mirrors] skip ${locale}: missing --- separator`);
       skipped.push({ locale, reason: "missing --- separator" });
       continue;
     }
 
-    const headerEnd = sepMatch.index + sepMatch[0].length;
-    const header = existing.slice(0, headerEnd).replace(/\r\n/g, "\n");
-    const trimmedHeader = header.replace(/\n+$/, "");
-    const next = `${trimmedHeader}\n\n${rootBody.trimStart()}`.replace(/\r\n/g, "\n");
-
-    const normalizedExisting = existing.replace(/\r\n/g, "\n");
-    if (normalizedExisting === next) {
+    if (existing === next) {
       unchanged += 1;
       continue;
     }
