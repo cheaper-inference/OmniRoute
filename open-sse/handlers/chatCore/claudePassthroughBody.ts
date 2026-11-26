@@ -31,6 +31,7 @@ import { normalizeAdvisorToolModels } from "./claudeAdvisorTool.ts";
 import {
   extractSystemRoleMessages,
   hoistLeadingTextSystemMessages,
+  liftSystemRoleMessages,
   relocateDirectiveOnlyMessages,
 } from "./claudeSystemRole.ts";
 import type { ClaudeMessage } from "./claudeMessageTypes.ts";
@@ -147,10 +148,19 @@ export function buildClaudePassthroughBody({
 
   // Legacy models reject role:"system" messages. Supported models accept
   // them behind a beta, and hoisting them breaks the prompt cache prefix.
-  // Only the native `claude` dispatch sends that beta (selectBetaFlags); the
-  // `anthropic` API-key dispatch does not, so it always hoists.
+  // The native OAuth policy remains unchanged. The regular API has a separate
+  // documented, model-and-shape-scoped policy for plain text system turns.
   if (isClaudeCodeSemanticPassthrough) {
-    if (provider !== "claude" || !shouldUseMidConversationSystem(translatedBody, effectiveModel)) {
+    if (provider === "anthropic") {
+      liftSystemRoleMessages(translatedBody, {
+        provider,
+        sourceFormat: FORMATS.CLAUDE,
+        model: effectiveModel,
+      });
+    } else if (
+      provider !== "claude" ||
+      !shouldUseMidConversationSystem(translatedBody, effectiveModel)
+    ) {
       extractSystemRoleMessages(translatedBody);
     } else {
       // The mid-conversation-system path keeps system-role messages inside

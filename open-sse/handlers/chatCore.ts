@@ -2335,6 +2335,7 @@ async function handleChatCoreInner({
         ...options,
         provider,
         sourceFormat,
+        model: effectiveModel,
         // #16236: in-place mid-conversation system turns are a per-connection opt-in.
         providerSpecificData: credentials?.providerSpecificData,
       },
