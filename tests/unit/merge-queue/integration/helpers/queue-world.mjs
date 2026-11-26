@@ -146,7 +146,17 @@ export async function createQueueWorld(t, options = {}) {
   fake.externalRefs = gitRefsBackend(sb);
   fake.tokenActors.set(LAND_TOKEN, APPROVER);
 
-  const config = { ...loadConfig(), mode, flakyReruns: 0, ...overrides };
+  const shipped = loadConfig();
+  // This fixture defaults to the App's voice and unsigned merge commits.
+  // config.test.mjs and tick-voice.test.mjs cover the shipped settings.
+  const config = {
+    ...shipped,
+    mode,
+    voice: "app",
+    landing: { ...shipped.landing, signing: "none" },
+    flakyReruns: 0,
+    ...overrides,
+  };
   const configPath = join(sb.root, "omni-queue.config.json");
   writeFileSync(configPath, `${JSON.stringify(config, null, 2)}\n`);
 

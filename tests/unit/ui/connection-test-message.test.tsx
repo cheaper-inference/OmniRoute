@@ -7,7 +7,10 @@ import { afterEach, beforeEach, expect, it, vi } from "vitest";
 // document.body, so queries start there (the container is a child of body).
 
 const translate = vi.hoisted(() => (key: string) => `translated:${key}`);
-vi.mock("next-intl", () => ({ useTranslations: () => translate }));
+vi.mock("next-intl", () => ({
+  useLocale: () => "en",
+  useTranslations: () => translate,
+}));
 const { default: ConnectionTestButton } =
   await import("../../../src/shared/components/ConnectionTestButton");
 const { default: ConnectionTestSettings } =

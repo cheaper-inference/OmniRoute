@@ -91,7 +91,7 @@ function ClearCooldownButton(props: ClearCooldownButtonProps) {
   return (
     <Button
       variant="outline"
-      size="sm"
+      size="2xs"
       data-testid={`clear-cooldown-${connectionId}`}
       disabled={clearing}
       onClick={() => onClearCooldown(connectionId)}
@@ -100,7 +100,6 @@ function ClearCooldownButton(props: ClearCooldownButtonProps) {
         "clearConnectionCooldownTitle",
         "Clear the cooldown now — use when the quota has already refreshed upstream"
       )}
-      className="h-6 min-h-0 rounded px-2 text-xs"
     >
       {clearing
         ? providerText(t, "clearConnectionCooldownInProgress", "Clearing…")
@@ -129,7 +128,7 @@ export default function CoolingConnectionsPanel(props: CoolingConnectionsPanelPr
     >
       <div className="mb-2 flex items-center gap-2">
         <span aria-hidden className="inline-block h-2 w-2 animate-pulse rounded-full bg-warning" />
-        <h3 className="text-sm text-warning">
+        <h3 className="ci-heading text-warning" data-size="sm">
           {providerText(t, "coolingConnectionsTitle", "Currently cooling ({count})", {
             count: cooling.length,
           })}

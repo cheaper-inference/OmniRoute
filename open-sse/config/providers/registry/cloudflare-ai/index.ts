@@ -44,5 +44,12 @@ export const cloudflare_aiProvider: RegistryEntry = {
     },
     { id: "@cf/moonshotai/kimi-k2.6", name: "Kimi K2.6 (🆓)", contextLength: 262144 },
     { id: "@cf/google/gemma-4-26b-a4b-it", name: "Gemma 4 26B (🆓)", contextLength: 262144 },
+    // context_window from developers.cloudflare.com/workers-ai/models/mistral-small-3.1-24b-instruct/
+    // (verified 2026-11-23).
+    {
+      id: "@cf/mistralai/mistral-small-3.1-24b-instruct",
+      name: "Mistral Small 3.1 24B (🆓)",
+      contextLength: 128000,
+    },
   ],
 };

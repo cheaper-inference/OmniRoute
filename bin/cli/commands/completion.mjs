@@ -5,12 +5,14 @@ import { t } from "../i18n.mjs";
 import { apiFetch } from "../api.mjs";
 import { resolveDataDir } from "../data-dir.mjs";
 import { listManifestTargets } from "../cli-manifest.mjs";
+import { launchToolWords, GATEWAY_SUBCOMMANDS } from "../launch/completion.mjs";
 import { loadModelCatalog, ModelCommandError } from "./model-api.mjs";
 
 // Target lists shared with `omniroute run` / `omniroute configure` — always
 // derived from the canonical manifest so the completion scripts cannot drift.
 const RUN_TARGET_WORDS = listManifestTargets("run").join(" ");
 const CONFIGURE_TARGET_WORDS = listManifestTargets("configure").join(" ");
+const LAUNCH_TARGET_WORDS = launchToolWords();
 
 const CACHE_TTL_MS = 60 * 60 * 1000; // 1h
 
@@ -141,6 +143,7 @@ _omniroute() {
     'contexts:Manage local and remote server contexts'
     'configure:Configure a supported AI CLI'
     'launch:Launch an AI CLI through OmniRoute'
+    'gateway:Inspect or control the launcher gateway'
     'launch-codex:Launch Codex through OmniRoute'
     'run:Run a supported AI CLI through OmniRoute'
     'runtime:Inspect CLI runtime capabilities'
@@ -186,7 +189,9 @@ _omniroute() {
         configure) _arguments '1:target:(${CONFIGURE_TARGET_WORDS})' ;;
         run) _arguments '1:target:(${RUN_TARGET_WORDS})' ;;
         connect) _arguments '1:host:' ;;
-        launch|launch-codex) _arguments '--remote[Use a remote server]' '--context[Context name]:' '--model[Model ID]:' ;;
+        launch) _arguments '1:tool:(${LAUNCH_TARGET_WORDS})' '--remote[Use a remote server]' '--context[Context name]:' '--model[Model ID]:' ;;
+        gateway) _arguments '1:subcommand:(${GATEWAY_SUBCOMMANDS})' ;;
+        launch-codex) _arguments '--remote[Use a remote server]' '--context[Context name]:' '--model[Model ID]:' ;;
         runtime) _arguments '1:subcommand:(check repair clean)' ;;
         *) ;;
       esac
@@ -231,7 +236,7 @@ _omniroute() {
   COMPREPLY=()
   cur="\${COMP_WORDS[COMP_CWORD]}"
   prev="\${COMP_WORDS[COMP_CWORD-1]}"
-  cmds="setup doctor status logs providers config test update serve stop restart keys models combo chat stream completion dashboard open backup restore health quota cache mcp a2a tunnel env memory skills connect contexts configure launch launch-codex run runtime repair"
+  cmds="setup doctor status logs providers config test update serve stop restart keys models combo chat stream completion dashboard open backup restore health quota cache mcp a2a tunnel env memory skills connect contexts configure launch launch-codex gateway run runtime repair"
 
   case "\${prev}" in
     combo)       COMPREPLY=($(compgen -W "list switch create delete show suggest" -- "\${cur}")); return 0 ;;
@@ -244,6 +249,8 @@ _omniroute() {
     contexts)    COMPREPLY=($(compgen -W "list add use current show remove rename export import migrate" -- "\${cur}")); return 0 ;;
     configure)   COMPREPLY=($(compgen -W "${CONFIGURE_TARGET_WORDS}" -- "\${cur}")); return 0 ;;
     run)         COMPREPLY=($(compgen -W "${RUN_TARGET_WORDS}" -- "\${cur}")); return 0 ;;
+    launch)      COMPREPLY=($(compgen -W "${LAUNCH_TARGET_WORDS}" -- "\${cur}")); return 0 ;;
+    gateway)     COMPREPLY=($(compgen -W "${GATEWAY_SUBCOMMANDS}" -- "\${cur}")); return 0 ;;
     runtime)     COMPREPLY=($(compgen -W "check repair clean" -- "\${cur}")); return 0 ;;
     --model)
       local models
@@ -270,7 +277,7 @@ function generateFishScript(modelCommands) {
   return `# OmniRoute CLI fish completion (dynamic)
 complete -c omniroute -f
 
-set -l commands serve stop restart setup doctor status logs providers config keys models combo chat stream completion dashboard open backup restore health quota cache mcp a2a tunnel env memory skills connect contexts configure launch launch-codex update test run runtime repair
+set -l commands serve stop restart setup doctor status logs providers config keys models combo chat stream completion dashboard open backup restore health quota cache mcp a2a tunnel env memory skills connect contexts configure launch launch-codex gateway update test run runtime repair
 
 for cmd in $commands
   complete -c omniroute -n '__fish_is_nth_token 1' -a $cmd
@@ -287,6 +294,8 @@ complete -c omniroute -n '__fish_seen_subcommand_from open' -a 'combos providers
 complete -c omniroute -n '__fish_seen_subcommand_from contexts' -a 'list add use current show remove rename export import migrate'
 complete -c omniroute -n '__fish_seen_subcommand_from configure' -a '${CONFIGURE_TARGET_WORDS}'
 complete -c omniroute -n '__fish_seen_subcommand_from run' -a '${RUN_TARGET_WORDS}'
+complete -c omniroute -n '__fish_seen_subcommand_from launch' -a '${LAUNCH_TARGET_WORDS}'
+complete -c omniroute -n '__fish_seen_subcommand_from gateway' -a '${GATEWAY_SUBCOMMANDS}'
 complete -c omniroute -n '__fish_seen_subcommand_from runtime' -a 'check repair clean'
 
 # Dynamic completions from cache (requires python3)

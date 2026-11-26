@@ -17,9 +17,20 @@
 
 import { getPool } from "@/lib/db/quotaPools";
 import { getBucket, incrementBucket, getPair, sumPoolDimension } from "@/lib/db/quotaConsumption";
+import {
+  addPercentLedgerTokens,
+  commitPercentLedger,
+  readPercentLedger,
+} from "@/lib/db/quotaPercentLedger";
 import { WINDOW_MS, dimensionKeyToString } from "./dimensions";
 import type { DimensionKey } from "./dimensions";
-import type { QuotaStore, PoolUsageSnapshot } from "./types";
+import type {
+  LedgerKey,
+  LedgerSnapshot,
+  LedgerState,
+  QuotaStore,
+  PoolUsageSnapshot,
+} from "./types";
 import { buildPoolUsageSnapshot } from "./poolUsageSnapshot";
 
 // ---------------------------------------------------------------------------
@@ -213,6 +224,27 @@ export class SqliteQuotaStore implements QuotaStore {
         incrementBucket(apiKeyId, dimKey, prevBucket, -prevVal, nowMs);
       }
     });
+  }
+
+  // Percent attribution book: the database module does the work, including refusing amounts and
+  // states with unusable numbers; the single-statement UPSERT and compare-and-set need no mutex.
+
+  async ledgerRecordTokens(
+    poolId: string,
+    connectionId: string,
+    apiKeyId: string,
+    tokens: number,
+    nowMs: number
+  ): Promise<void> {
+    addPercentLedgerTokens(poolId, connectionId, apiKeyId, tokens, nowMs);
+  }
+
+  async ledgerRead(key: LedgerKey): Promise<LedgerSnapshot> {
+    return readPercentLedger(key);
+  }
+
+  async ledgerCommit(key: LedgerKey, next: LedgerState): Promise<boolean> {
+    return commitPercentLedger(key, next);
   }
 }
 

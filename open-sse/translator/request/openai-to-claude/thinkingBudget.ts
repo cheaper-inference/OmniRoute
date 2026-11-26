@@ -80,7 +80,15 @@ export function fitThinkingToMaxTokens(
 
   // Cap too tight for any thinking — disable rather than send an invalid request.
   if (fittedBudget < MIN_CLAUDE_THINKING_BUDGET) {
-    return { maxTokens: modelCap ?? Math.max(callerMaxTokens, 1), thinking: undefined };
+    // Keep the caller's explicit cap (same clamp as the no-thinking branch above); only the model
+    // cap may lower it. Returning the bare model cap raised a 256-token request to 64000.
+    return {
+      maxTokens:
+        modelCap === null
+          ? Math.max(callerMaxTokens, 1)
+          : Math.min(Math.max(callerMaxTokens, 1), modelCap),
+      thinking: undefined,
+    };
   }
 
   const adjustedThinking: Record<string, unknown> = { ...thinking };

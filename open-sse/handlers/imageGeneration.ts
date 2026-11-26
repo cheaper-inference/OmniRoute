@@ -49,6 +49,8 @@ import {
 } from "@/shared/utils/fetchTimeout";
 import { sanitizeErrorMessage, sanitizeUpstreamDetails } from "../utils/error.ts";
 
+import { hasRequestedOutputFormat, normalizeImageOutput } from "./imageGeneration/outputFormat.ts";
+import { prepareFalPreservedOutputOptions } from "./imageGeneration/providerOutputOptions.ts";
 import { handleSDWebUIImageGeneration } from "./imageGeneration/providers/sdWebUI.ts";
 import { handleHyperbolicImageGeneration } from "./imageGeneration/providers/hyperbolic.ts";
 import { handleHuggingFaceImageGeneration } from "./imageGeneration/providers/huggingface.ts";
@@ -1007,8 +1009,8 @@ async function handleKieImageGeneration({
 }: KieImageOptions) {
   const startTime = Date.now();
   const token = credentials?.apiKey || credentials?.accessToken;
-  const timeoutMs = normalizePositiveNumber(body.timeout_ms, 300000);
-  const pollIntervalMs = normalizePositiveNumber(body.poll_interval_ms, 2500);
+  const timeoutMs = clampPollTimeoutMs(body.timeout_ms, 300000);
+  const pollIntervalMs = clampPollIntervalMs(body.poll_interval_ms, 2500);
   const prompt = typeof body.prompt === "string" ? body.prompt : String(body.prompt ?? "");
   const size = typeof body.size === "string" ? body.size : undefined;
 
@@ -1489,6 +1491,12 @@ async function handleOpenAIImageGeneration({
   const fetchOptions = longJobs
     ? { signal, timeoutMs: longJobs.resolveTimeoutMs(credentials?.providerSpecificData) }
     : { timeoutMs: getConfiguredTimeout() };
+  const outputFetchOptions =
+    typeof upstreamBody.output_format === "string" &&
+    providerConfig.format !== "xai-image" &&
+    providerConfig.format !== "agnes-image"
+      ? { ...fetchOptions, requestedOutputFormat: upstreamBody.output_format }
+      : fetchOptions;
 
   // Try primary URL
   let result = await fetchImageEndpoint(
@@ -1497,7 +1505,7 @@ async function handleOpenAIImageGeneration({
     requestBody,
     provider,
     log,
-    fetchOptions
+    outputFetchOptions
   );
 
   // Fallback for providers with fallbackUrl (e.g., Nebius)
@@ -1515,7 +1523,7 @@ async function handleOpenAIImageGeneration({
       requestBody,
       provider,
       log,
-      fetchOptions
+      outputFetchOptions
     );
   }
 
@@ -1789,8 +1797,17 @@ async function handleFalAIImageGeneration({
   if (body.seed !== undefined) upstreamBody.seed = body.seed;
   if (body.style) upstreamBody.style = normalizeRecraftStyle(body.style);
 
+  const schemaInput =
+    prepareFalInput && (!isLegacyFalEndpoint(model) || body.fal_input !== undefined);
   const outputFormat = normalizeRequestedImageFormat(body, "png");
   if (outputFormat) upstreamBody.output_format = outputFormat;
+  // An explicit gif/svg is no longer downgraded to PNG on the legacy body (the native
+  // schema adapter below owns its endpoint's formats and replaces this body entirely).
+  const preserved = schemaInput ? null : prepareFalPreservedOutputOptions(body);
+  if (preserved) {
+    if ("error" in preserved) return { success: false, status: 400, error: preserved.error };
+    Object.assign(upstreamBody, preserved.options);
+  }
 
   if (model.includes("flux-pro/v1.1") && !model.includes("ultra")) {
     upstreamBody.image_size = mapFalImageSize(body.size, "landscape_4_3");
@@ -1825,7 +1842,7 @@ async function handleFalAIImageGeneration({
   try {
     if (prepareFalInput) {
       falModel = falSelectionEndpoint(model);
-      if (!isLegacyFalEndpoint(model) || body.fal_input !== undefined) {
+      if (schemaInput) {
         upstreamBody = await prepareFalInput(
           falModel,
           falCompatibilityBody(body, imageUrls),
@@ -1865,6 +1882,11 @@ async function handleFalAIImageGeneration({
     // The native path honors an explicit `url`; the established path always returns base64.
     const defaultFormat = prepareFalInput && body.response_format === "url" ? "url" : "b64_json";
     const images = await normalizeProviderImagePayload(payload, body, log, defaultFormat);
+    // Only an explicit output_format request gets the detected container reported back.
+    const output =
+      hasRequestedOutputFormat(body) && typeof upstreamBody.output_format === "string"
+        ? normalizeImageOutput(payload, images, upstreamBody.output_format, log?.warn?.bind(log))
+        : { items: images, outputFormat: undefined };
     return saveImageSuccessResult({
       provider,
       model,
@@ -1872,7 +1894,8 @@ async function handleFalAIImageGeneration({
       requestBody: upstreamBody,
       responseBody: { images_count: images.length },
       created: payload.created,
-      images,
+      images: output.items,
+      outputFormat: output.outputFormat,
     });
   } catch (err) {
     if (log) log.error("IMAGE", `${provider} fetch error: ${err.message}`);

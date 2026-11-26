@@ -150,7 +150,7 @@ export default function ApiKeyFilterDropdown({
               }`}
             >
               <span
-                className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border text-[10px] ${
+                className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border text-3xs ${
                   isAllSelected
                     ? "border-primary bg-primary text-accent-foreground"
                     : "border-border/60 bg-transparent"
@@ -159,7 +159,7 @@ export default function ApiKeyFilterDropdown({
                 {isAllSelected && <Icon name="check" size={12} />}
               </span>
               {t("filterAllKeys")}
-              <span className="ml-auto text-[10px] text-text-muted font-normal">
+              <span className="ml-auto text-3xs text-text-muted font-normal">
                 {available.length}
               </span>
             </Button>
@@ -184,7 +184,7 @@ export default function ApiKeyFilterDropdown({
                   title={key.name || key.id}
                 >
                   <span
-                    className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border text-[10px] ${
+                    className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border text-3xs ${
                       isChecked
                         ? "border-primary bg-primary text-accent-foreground"
                         : "border-border/60 bg-transparent"

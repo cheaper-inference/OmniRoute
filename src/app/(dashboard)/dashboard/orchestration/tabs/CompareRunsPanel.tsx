@@ -205,10 +205,10 @@ function RunHeader({ item, t, testId }: { item: HistoryItem; t: Translate; testI
         />
         <span className="text-xs font-semibold truncate">{item.identity}</span>
       </div>
-      <div className="text-[10px] text-text-muted">
+      <div className="text-3xs text-text-muted">
         {t(sourceKey)} · {t(STATE_KEY[item.state])}
       </div>
-      <div className="text-[10px] text-text-muted">{formatDateTime(item.createdAt, "date")}</div>
+      <div className="text-3xs text-text-muted">{formatDateTime(item.createdAt, "date")}</div>
     </div>
   );
 }
@@ -232,8 +232,10 @@ function MetricRow({
   deltaText: string;
 }) {
   return (
-    <div className="grid grid-cols-[70px_1fr_1fr_70px] gap-2 text-[11px] items-center min-w-[480px]">
-      <span className="text-text-muted uppercase text-[9px]">{label}</span>
+    <div className="grid grid-cols-[70px_1fr_1fr_70px] gap-2 text-2xs items-center min-w-[480px]">
+      <span className="ci-eyebrow" data-size="3xs">
+        {label}
+      </span>
       <span data-testid={`orchestration-compare-metric-${metricKey}-left`}>{leftText}</span>
       <span data-testid={`orchestration-compare-metric-${metricKey}-right`}>{rightText}</span>
       <span
@@ -268,7 +270,7 @@ function TimelineRows({ comparison, t }: { comparison: RunComparison; t: Transla
   }));
   return (
     <div className="mt-2">
-      <div className="text-[10px] font-semibold uppercase text-text-muted mb-1">
+      <div className="ci-eyebrow mb-1" data-size="3xs" data-weight="medium">
         {t("compareEvents")}
       </div>
       <div className="flex flex-col gap-1 min-w-[480px]">
@@ -276,7 +278,7 @@ function TimelineRows({ comparison, t }: { comparison: RunComparison; t: Transla
           <div
             key={i}
             data-testid="orchestration-compare-timeline-row"
-            className="grid grid-cols-2 gap-2 text-[11px]"
+            className="grid grid-cols-2 gap-2 text-2xs"
           >
             <EventCell event={row.left} />
             <EventCell event={row.right} />
@@ -293,7 +295,7 @@ function MemoryList({ hits }: { hits: RunMemoryHit[] }) {
     <ul className="flex flex-col gap-1">
       {hits.map((h) => (
         <li key={h.id} className="truncate">
-          <code className="text-[9px] text-text-muted mr-1">{h.type}</code>
+          <code className="text-3xs text-text-muted mr-1">{h.type}</code>
           <span className="font-medium">{h.key}</span>
         </li>
       ))}
@@ -308,10 +310,10 @@ function MemorySection({ comparison, t }: { comparison: RunComparison; t: Transl
   if (left.memoryHits.length === 0 && right.memoryHits.length === 0) return null;
   return (
     <div className="mt-2">
-      <div className="text-[10px] font-semibold uppercase text-text-muted mb-1">
+      <div className="ci-eyebrow mb-1" data-size="3xs" data-weight="medium">
         {t("drawerMemory")}
       </div>
-      <div className="grid grid-cols-2 gap-2 text-[11px] min-w-[480px]">
+      <div className="grid grid-cols-2 gap-2 text-2xs min-w-[480px]">
         <MemoryList hits={left.memoryHits} />
         <MemoryList hits={right.memoryHits} />
       </div>
@@ -335,7 +337,7 @@ function SideErrorCell({
 }) {
   if (!error) return <div data-testid={testId} />;
   return (
-    <div role="alert" data-testid={testId} className="text-[10px] text-error">
+    <div role="alert" data-testid={testId} className="text-xs text-error">
       {t("compareDetailFailed")}
     </div>
   );
@@ -400,7 +402,7 @@ function ComparisonMetrics({
 }) {
   return (
     <div className="flex flex-col gap-1">
-      <div className="grid grid-cols-[70px_1fr_1fr_70px] gap-2 text-[9px] items-center min-w-[480px] text-text-muted">
+      <div className="grid grid-cols-[70px_1fr_1fr_70px] gap-2 text-3xs items-center min-w-[480px] text-text-muted">
         <span />
         <span />
         <span />
@@ -475,7 +477,7 @@ export function CompareRunsPanel({
           (polite) is correct here; `role="alert"` (assertive) stays reserved for the actual
           per-side fetch failures in `SideErrorCell` above (Task A4 review fix, Minor #6). */}
       {!comparison.deltas.sameIdentity && (
-        <div role="status" className="text-[10px] text-warning mb-2">
+        <div role="status" className="text-xs text-warning mb-2">
           {t("compareDifferentIdentity")}
         </div>
       )}

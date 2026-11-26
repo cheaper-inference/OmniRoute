@@ -62,7 +62,7 @@ function PctDot({ pct }: { pct: number }) {
   const color = pct <= 20 ? "bg-error" : pct <= 50 ? "bg-warning" : "bg-success";
   const textColor = pct <= 20 ? "text-error" : pct <= 50 ? "text-warning" : "text-success";
   return (
-    <span className={`inline-flex items-center gap-1 tabular-nums text-[11px] ${textColor}`}>
+    <span className={`inline-flex items-center gap-1 tabular-nums text-2xs ${textColor}`}>
       <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${color}`} aria-hidden />
       {pct}%
     </span>
@@ -115,13 +115,13 @@ export default function AccountQuotaRow({
     Array.isArray(providers) && providers[index] != null ? (providers[index] as string) : provider;
 
   const renderFallback = () => (
-    <span className="text-[11px] text-text-muted tabular-nums">{t("accountQuotaNone")}</span>
+    <span className="text-2xs text-text-muted tabular-nums">{t("accountQuotaNone")}</span>
   );
 
   if (error || caches === null) {
     return (
       <div className="mt-2 pt-2 border-t border-border/30">
-        <span className="text-[10px] uppercase tracking-wide font-semibold text-text-muted block mb-1">
+        <span className="ci-eyebrow block mb-1" data-size="3xs" data-weight="medium">
           {t("accountQuotaTitle")}
         </span>
         {renderFallback()}
@@ -133,7 +133,7 @@ export default function AccountQuotaRow({
   if (ids.length === 0) {
     return (
       <div className="mt-2 pt-2 border-t border-border/30">
-        <span className="text-[10px] uppercase tracking-wide font-semibold text-text-muted block mb-1">
+        <span className="ci-eyebrow block mb-1" data-size="3xs" data-weight="medium">
           {t("accountQuotaTitle")}
         </span>
         {renderFallback()}
@@ -143,7 +143,7 @@ export default function AccountQuotaRow({
 
   return (
     <div className="mt-2 pt-2 border-t border-border/30">
-      <span className="text-[10px] uppercase tracking-wide font-semibold text-text-muted block mb-1.5">
+      <span className="ci-eyebrow block mb-1.5" data-size="3xs" data-weight="medium">
         {t("accountQuotaTitle")}
       </span>
       <div className="flex flex-col gap-1">
@@ -154,7 +154,7 @@ export default function AccountQuotaRow({
           const reset = summary?.resetAt ? formatCountdown(summary.resetAt) : null;
 
           return (
-            <div key={connId} className="flex items-center gap-1.5 text-[11px]">
+            <div key={connId} className="flex items-center gap-1.5 text-2xs">
               <span className="shrink-0">
                 <ProviderIcon providerId={prov} size={14} />
               </span>

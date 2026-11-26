@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 
-import { Card, Collapsible, Input, ModelSelectField, Toggle } from "@/shared/components";
+import { Card, Collapsible, ModelSelectField, NumberInput, Toggle } from "@/shared/components";
 import type { ApiModel } from "@/shared/components/ModelSelectField";
 import {
   MODALITY_BRIDGE_DEFAULTS,
@@ -34,9 +34,10 @@ function asSettingsRecord(value: unknown): Record<string, unknown> {
   return value && typeof value === "object" ? (value as Record<string, unknown>) : {};
 }
 
-function clampNumber(raw: string, min: number, max: number, fallback: number): number {
-  const parsed = Number.parseInt(raw, 10);
-  return Math.min(max, Math.max(min, Number.isFinite(parsed) ? parsed : fallback));
+// The field already brings an edited value into min/max when the edit ends; an empty field
+// (`null`) falls back to the default. The clamp stays as the last guard before the PATCH.
+function clampNumber(value: number | null, min: number, max: number, fallback: number): number {
+  return Math.min(max, Math.max(min, Math.trunc(value ?? fallback)));
 }
 
 export default function ModalityBridgeAudioTab() {
@@ -84,12 +85,12 @@ export default function ModalityBridgeAudioTab() {
   };
   const commitNumber = (
     key: "modalityBridgeAudioTimeout" | "modalityBridgeAudioMaxClips",
-    raw: string,
+    next: number | null,
     min: number,
     max: number,
     fallback: number
   ) => {
-    const value = clampNumber(raw, min, max, fallback);
+    const value = clampNumber(next, min, max, fallback);
     setLocal({ [key]: value });
     void update({ [key]: value });
   };
@@ -121,34 +122,34 @@ export default function ModalityBridgeAudioTab() {
 
         <Collapsible title={t("modalityBridgeAdvanced")} icon="tune">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <NumberField
-              testId="modality-bridge-audio-timeout"
+            <NumberInput
+              data-testid="modality-bridge-audio-timeout"
               label={t("modalityBridgeTimeoutMs")}
               min={1000}
               max={300000}
               value={settings.modalityBridgeAudioTimeout}
-              onChange={(value) => setLocal({ modalityBridgeAudioTimeout: value })}
-              onBlur={(raw) =>
+              onValueChange={(value) => setLocal({ modalityBridgeAudioTimeout: value ?? 0 })}
+              onValueCommit={(next) =>
                 commitNumber(
                   "modalityBridgeAudioTimeout",
-                  raw,
+                  next,
                   1000,
                   300000,
                   MODALITY_BRIDGE_DEFAULTS.audioTimeoutMs
                 )
               }
             />
-            <NumberField
-              testId="modality-bridge-audio-max-clips"
+            <NumberInput
+              data-testid="modality-bridge-audio-max-clips"
               label={t("modalityBridgeAudioMaxClips")}
               min={1}
               max={10}
               value={settings.modalityBridgeAudioMaxClips}
-              onChange={(value) => setLocal({ modalityBridgeAudioMaxClips: value })}
-              onBlur={(raw) =>
+              onValueChange={(value) => setLocal({ modalityBridgeAudioMaxClips: value ?? 0 })}
+              onValueCommit={(next) =>
                 commitNumber(
                   "modalityBridgeAudioMaxClips",
-                  raw,
+                  next,
                   1,
                   10,
                   MODALITY_BRIDGE_DEFAULTS.audioMaxClips
@@ -162,30 +163,5 @@ export default function ModalityBridgeAudioTab() {
         <ModalityBridgeAudioTestButton />
       </div>
     </Card>
-  );
-}
-
-interface NumberFieldProps {
-  testId: string;
-  label: string;
-  min: number;
-  max: number;
-  value: number;
-  onChange: (value: number) => void;
-  onBlur: (raw: string) => void;
-}
-
-function NumberField({ testId, label, min, max, value, onChange, onBlur }: NumberFieldProps) {
-  return (
-    <Input
-      type="number"
-      label={label}
-      data-testid={testId}
-      min={min}
-      max={max}
-      value={value}
-      onChange={(event) => onChange(Number.parseInt(event.currentTarget.value, 10) || 0)}
-      onBlur={(event) => onBlur(event.currentTarget.value)}
-    />
   );
 }

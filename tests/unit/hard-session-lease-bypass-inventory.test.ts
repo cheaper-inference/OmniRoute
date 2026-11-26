@@ -68,6 +68,10 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // #13987: System One decisions (/v1/systemone), same
     // scoped quota-preflight credential lookup as /v1/classify (class B).
     "src/app/api/v1/_shared/systemOneRoute.ts": 1,
+    // #18838 (salvage): native OpenAI Decisions (/v1/decisions), the same scoped
+    // quota-preflight lookup as /v1/systemone, handed to the decision credential resolver
+    // inside the key's connection scope; it posts a typed decision, never chat (class B).
+    "src/app/api/v1/_shared/decisionsRoute.ts": 1,
     // GHSA-3w2r: keyless providers (local zero-config defaults, keyless
     // remotes) look up an in-scope connection for a connection-scoped API key
     // before running (chat's #9057 rule) — one extra scoped lookup per site.
@@ -163,8 +167,10 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     "open-sse/handlers/cursorCliProxy.ts": 1,
     "open-sse/services/alibabaFreeTier.ts": 1,
     "open-sse/services/alibabaFreeTierQuotaFetcher.ts": 1,
-    // Family cooldown persist looks the row up to write PSD, not dispatch.
-    "open-sse/services/antigravityFamilyCooldown.ts": 1,
+    // Family cooldown persist looks the row up to write PSD, not dispatch. #20481 adds
+    // clearAntigravityFamilyCooldown, which reads the row to drop one saved family deadline
+    // after a passing quota probe: a PSD state write as well, no dispatch.
+    "open-sse/services/antigravityFamilyCooldown.ts": 2,
     // #12864: on the first REQUEST_REJECTED refusal seen by this process the
     // streak seeder reads the row's lastErrorType/lastErrorAt so a crash loop
     // cannot reset the backoff count on every boot — a state read, not dispatch.
@@ -211,7 +217,10 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // management route; the per-model probes it dispatches still go through the
     // fenced chat pipeline, so it never selects a connection itself (class C).
     "src/app/api/models/test-all/route.ts": 1,
-    "src/app/api/monitoring/health/route.ts": 1,
+    // The health payload reads every row for its counts; `?provider=<id>` reads the active rows
+    // of one provider for a pool summary (counts only). Both are monitoring reads behind
+    // management auth, never connection selection or dispatch (class C).
+    "src/app/api/monitoring/health/route.ts": 2,
     "src/app/api/oauth/[provider]/[action]/route.ts": 4,
     // Microsoft 365 sign-in: behind the OAuth route's management guard, the authorize step reads
     // the rows only to confirm a reconnect target exists; no selection or dispatch (class C).
@@ -391,6 +400,9 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     "src/lib/vscode/tagModels.ts": 1,
     "src/lib/warmupScheduler.ts": 1,
     "src/shared/services/codexCatalogRevalidation.ts": 2,
+    // #11777: the scheduled model health check lists opted-in connections and fences each
+    // one with isConnectionUnavailableToAuxiliaryActivity before probing it.
+    "src/shared/services/modelHealthCheckScheduler.ts": 1,
     "src/shared/services/modelSyncScheduler.ts": 1,
     // #15234: Muse session ownership lists the active muse-code OAuth connections only to
     // pick/validate the session's owner account. It selects nothing for dispatch — every
@@ -449,6 +461,7 @@ const CLASSIFICATION: Record<InventoryKind, Record<string, BypassClass>> = {
         "src/lib/usage/providerLimits.ts",
         "src/lib/vncSession/service.ts",
         "src/lib/warmupScheduler.ts",
+        "src/shared/services/modelHealthCheckScheduler.ts",
         "src/shared/services/modelSyncScheduler.ts",
         "src/sse/services/auth.ts",
       ].includes(file)
@@ -561,6 +574,7 @@ test("managed request surfaces are fenced centrally or rejected before independe
     "src/lib/usage/grokResetCredits.ts",
     "src/lib/vncSession/service.ts",
     "src/lib/warmupScheduler.ts",
+    "src/shared/services/modelHealthCheckScheduler.ts",
     "src/shared/services/modelSyncScheduler.ts",
   ].map((file) => fs.readFileSync(path.join(REPO_ROOT, file), "utf8"));
   const unfencedUsageRefreshSource = fs.readFileSync(
