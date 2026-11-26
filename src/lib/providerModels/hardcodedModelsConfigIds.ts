@@ -52,6 +52,7 @@ export const HARDCODED_MODELS_CONFIG_IDS: ReadonlySet<string> = new Set([
   "synthetic",
   "thebai",
   "together",
+  "trustedrouter",
   "workbuddy",
   "xai",
 ]);

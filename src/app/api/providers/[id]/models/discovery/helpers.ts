@@ -70,7 +70,7 @@ export function mergeLocalCatalogModels<T extends LocalCatalogModel, U extends L
 // models.list mixes generateContent and embedContent models in one response —
 // see provider-models-route.test.ts pagination coverage), so blind-merging
 // the curated catalog there would risk stale-duplicate/conflicting entries.
-const LIVE_DISCOVERY_SPECIALTY_MERGE_PROVIDERS = new Set<string>(["openrouter"]);
+const LIVE_DISCOVERY_SPECIALTY_MERGE_PROVIDERS = new Set<string>(["openrouter", "trustedrouter"]);
 
 // #19337 — capability fields the sync normalizer derives from an upstream card
 // (endpoints, provenance, vision, token limits, ...). The dashboard import reads
