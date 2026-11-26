@@ -19,8 +19,9 @@ RUN apt-get update \
 FROM base AS builder
 WORKDIR /app
 
-# Cache dependency layer
-COPY package.json bun.lock* pnpm-workspace.yaml* ./
+# Cache dependency layer (package-lock.json is required for --frozen-lockfile;
+# bun.lock is gitignored, so Bun migrates package-lock.json in-memory and enforces it)
+COPY package.json package-lock.json bun.lock* pnpm-workspace.yaml* ./
 COPY open-sse/package.json ./open-sse/package.json
 COPY packages/ ./packages/
 
@@ -28,8 +29,12 @@ COPY packages/ ./packages/
 COPY scripts/build/ ./scripts/build/
 COPY scripts/dev/sync-env.mjs ./scripts/dev/sync-env.mjs
 
-# Fast Bun native package install
-RUN bun install --include=optional --quiet
+RUN test -f package-lock.json || test -f bun.lock \
+  || (echo "package-lock.json (or bun.lock) is required for reproducible Bun Docker builds" >&2 && exit 1)
+
+# Deterministic Bun native package install: --frozen-lockfile rejects any
+# manifest/lockfile drift, and --ignore-scripts blocks transitive install hooks (#21014).
+RUN bun install --frozen-lockfile --ignore-scripts --include=optional --quiet
 
 # Next standalone traces only Playwright's index.js, index.mjs and package.json.
 # Runner-web needs the complete installer at the same lockfile version.
