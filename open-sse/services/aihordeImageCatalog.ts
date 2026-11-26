@@ -190,7 +190,7 @@ export class HordeImageCatalog {
   }
 
   private startRefresh(options: HordeRefreshOptions, background = false): Promise<void> {
-    if (this.inflight) return this.inflight;
+    if (this.inflight !== null) return this.inflight;
     this.inflight = this.refreshOnce(options, background).finally(() => {
       this.inflight = null;
     });
