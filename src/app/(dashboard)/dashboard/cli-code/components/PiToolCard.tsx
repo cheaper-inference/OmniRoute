@@ -4,12 +4,16 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import Icon from "@/shared/components/Icon";
 import { Spinner } from "@/shared/components/Loading";
 import { Card, Button, ModelSelectModal, ManualConfigModal } from "@/shared/components";
+import { InlineCode } from "@omniroute/ui-kit/inline-code";
 import Input from "@/shared/components/Input";
 import Select from "@/shared/components/Select";
 import Image from "next/image";
 import CliStatusBadge from "./CliStatusBadge";
 import { useTranslations } from "next-intl";
 import { DEFAULT_DISPLAY_BASE_URL } from "@/shared/hooks";
+import Notice from "@/shared/components/Notice";
+import CodePreview from "@/shared/components/CodePreview";
+import { CardSection } from "@/shared/components/Card";
 
 /** Pi loads this provider with its OpenAI-compatible transport. */
 const PI_PROVIDER_API = "openai-completions";
@@ -17,7 +21,6 @@ const PI_PROVIDER_API = "openai-completions";
 const PI_SETTINGS_URL = "/api/cli-tools/pi-settings";
 const PI_BACKUPS_URL = "/api/cli-tools/backups";
 const JSON_HEADERS = { "Content-Type": "application/json" };
-const CODE_CLASS = "px-1 py-0.5 rounded bg-bg-subtle";
 
 /** Pi requires an explicit `/v1` suffix on OmniRoute's base URL. */
 function ensurePiV1BaseUrl(baseUrl) {
@@ -270,7 +273,9 @@ function PiCardHeader({ tool, t, isExpanded, onToggle, statusBadge }) {
         </div>
         <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <h3 className="text-sm">{tool.name}</h3>
+            <h3 className="ci-heading" data-size="sm">
+              {tool.name}
+            </h3>
             <CliStatusBadge {...statusBadge} />
           </div>
           <p className="text-xs text-text-muted truncate">{t("toolDescriptions.pi")}</p>
@@ -294,7 +299,7 @@ function runtimeHeadline(t, piStatus, cliReady) {
 
 function PiRuntimeStatus({ t, piStatus, cliReady }) {
   return (
-    <div className="flex items-start gap-3 p-3 rounded-lg border bg-bg-subtle/50 border-border">
+    <CardSection className="flex items-start gap-3">
       <Icon
         name={cliReady ? "check_circle" : "warning"}
         size={18}
@@ -304,27 +309,25 @@ function PiRuntimeStatus({ t, piStatus, cliReady }) {
         <p className="text-sm font-medium">{runtimeHeadline(t, piStatus, cliReady)}</p>
         {piStatus.commandPath && (
           <p className="text-xs text-text-muted">
-            {t("binary")}: <code className={CODE_CLASS}>{piStatus.commandPath}</code>
+            {t("binary")}: <InlineCode>{piStatus.commandPath}</InlineCode>
           </p>
         )}
         {piStatus.modelsPath && (
           <p className="text-xs text-text-muted">
-            {t("configPath")}: <code className={CODE_CLASS}>{piStatus.modelsPath}</code>
+            {t("configPath")}: <InlineCode>{piStatus.modelsPath}</InlineCode>
           </p>
         )}
       </div>
-    </div>
+    </CardSection>
   );
 }
 
 function PiInstallHint({ t }) {
   return (
-    <div className="rounded-lg border border-border bg-bg-subtle/50 p-3">
+    <CardSection>
       <p className="text-sm font-medium mb-1">{t("piInstallTitle")}</p>
       <p className="text-xs text-text-muted mb-2">{t("piInstallInstructions")}</p>
-      <code className="block overflow-x-auto whitespace-pre rounded bg-bg-subtle px-3 py-2 text-xs">
-        {t("piInstallCommand")}
-      </code>
+      <CodePreview showHeader={false} variant="surface" code={t("piInstallCommand")} />
       <a
         className="mt-2 inline-block text-xs text-primary hover:underline"
         href="https://github.com/earendil-works/pi"
@@ -333,38 +336,30 @@ function PiInstallHint({ t }) {
       >
         {t("openToolDocs")}
       </a>
-    </div>
+    </CardSection>
   );
 }
 
 /** Corrupt / foreign models.json — do not let this read as "empty". */
 function PiConfigErrorNotice({ t, configError }) {
   return (
-    <div className="flex items-start gap-3 p-3 bg-error/10 border border-error/30 rounded-lg">
-      <Icon name="error" size={18} className="text-error" />
-      <div className="flex flex-col gap-1">
-        <p className="text-sm text-error">{t("piConfigInvalidTitle")}</p>
-        <p className="text-xs text-text-muted">{configError}</p>
-      </div>
-    </div>
+    <Notice variant="critical" icon="error" title={t("piConfigInvalidTitle")}>
+      {configError}
+    </Notice>
   );
 }
 
 function PiConfiguredNotice({ t, piStatus }) {
   return (
-    <div className="flex items-start gap-3 p-3 bg-success/10 border border-success/30 rounded-lg">
-      <Icon name="check_circle" size={18} className="text-success" />
-      <div className="flex flex-col gap-1">
-        <p className="text-sm text-success">{t("piOmnirouteConfigured")}</p>
-        <p className="text-xs text-text-muted">
-          {t("provider")}: <strong>{piStatus.baseUrl || "—"}</strong>
-        </p>
-        <p className="text-xs text-text-muted">
-          {t("model")}: <strong>{piStatus.model || "—"}</strong>
-        </p>
-        {piStatus.omniRouteUnowned && <p className="text-xs text-warning">{t("piUnownedNote")}</p>}
-      </div>
-    </div>
+    <Notice variant="success" icon="check_circle" title={t("piOmnirouteConfigured")}>
+      <p>
+        {t("provider")}: <strong>{piStatus.baseUrl || "—"}</strong>
+      </p>
+      <p>
+        {t("model")}: <strong>{piStatus.model || "—"}</strong>
+      </p>
+      {piStatus.omniRouteUnowned && <p className="text-xs text-warning">{t("piUnownedNote")}</p>}
+    </Notice>
   );
 }
 
@@ -463,28 +458,25 @@ function PiActionButtons({ t, configured, canReset, selectedModel, actions, onAp
 function PiMessageBanner({ message }) {
   const success = message.type === "success";
   return (
-    <div
-      className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm ${success ? "bg-success/10 text-success" : "bg-error/10 text-error"}`}
-    >
-      <Icon name={success ? "check_circle" : "error"} size={16} />
+    <Notice variant={success ? "success" : "critical"} icon={success ? "check_circle" : "error"}>
       <span className={message.containerEphemeralTarget ? "whitespace-pre-line" : ""}>
         {message.text}
       </span>
-    </div>
+    </Notice>
   );
 }
 
 /** Copy-paste fallback for remote/headless installs. */
 function PiManualPreview({ t }) {
   return (
-    <div className="rounded-lg border border-border bg-bg-subtle/50 p-3">
+    <CardSection>
       <p className="text-xs font-medium text-text-muted mb-2">{t("piManualConfigTitle")}</p>
-      <pre className="text-[11px] font-mono overflow-x-auto whitespace-pre text-text-main">
+      <pre className="text-xs font-mono overflow-x-auto whitespace-pre text-text-main">
         {t("piManualConfigSample")}
       </pre>
       <p className="text-xs text-text-muted mt-2">{t("piManualConfigHint")}</p>
       <p className="text-xs text-text-muted mt-2">{t("piManualMergeHint")}</p>
-    </div>
+    </CardSection>
   );
 }
 
@@ -510,12 +502,7 @@ function PiBackupRow({ t, backup, restoringBackup, onRestore }) {
 function PiBackupsSection({ t, backups, restoringBackup, onRestore, showBackups, setShowBackups }) {
   return (
     <div className="border-t border-border pt-3 mt-1">
-      <Button
-        variant="ghost"
-        size="sm"
-        className="text-text-muted"
-        onClick={() => setShowBackups(!showBackups)}
-      >
+      <Button variant="ghost" size="sm" tone="muted" onClick={() => setShowBackups(!showBackups)}>
         <Icon
           name="chevron_right"
           size={16}

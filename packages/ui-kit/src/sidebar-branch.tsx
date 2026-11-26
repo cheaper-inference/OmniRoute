@@ -6,7 +6,18 @@ import { ChevronDown } from "lucide-react";
 import { SidebarMenuButton, SidebarMenuItem, useSidebar } from "./sidebar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "./dropdown-menu";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./tooltip";
+import { resolveLabels } from "./lib/labels";
 import { cn } from "./lib/utils";
+
+/** Accessible name of the disclosure button, from the branch `label`. */
+export interface SidebarBranchLabels {
+  expand: (label: string) => string;
+  collapse: (label: string) => string;
+}
+export const defaultSidebarBranchLabels: SidebarBranchLabels = {
+  expand: (label) => `Expand ${label}`,
+  collapse: (label) => `Collapse ${label}`,
+};
 
 export interface SidebarBranchItem {
   id: string;
@@ -29,10 +40,13 @@ export interface SidebarBranchProps {
   /** Includes a selected descendant, even when filtering hides that child. */
   active?: boolean;
   className?: string;
+  /** Localized disclosure names; missing or `undefined` keys fall back to defaultSidebarBranchLabels. */
+  labels?: Partial<SidebarBranchLabels>;
 }
 
 /** A navigable parent with a separate disclosure; icon rails expose a menu. */
-export function SidebarBranch({ label, badge, icon, link, items, open, onOpenChange, active = false, className }: SidebarBranchProps) {
+export function SidebarBranch({ label, badge, icon, link, items, open, onOpenChange, active = false, className, labels: labelOverrides }: SidebarBranchProps) {
+  const labels = resolveLabels(defaultSidebarBranchLabels, labelOverrides);
   const { state, isMobile } = useSidebar();
   const submenuId = useId();
   if (state === "collapsed" && !isMobile) {
@@ -67,7 +81,7 @@ export function SidebarBranch({ label, badge, icon, link, items, open, onOpenCha
         <SidebarMenuButton asChild>{cloneElement(link, {}, icon, <span>{label}</span>)}</SidebarMenuButton>
         {badge ? <span className="ci-sidebar__branch-badge">{badge}</span> : null}
         <button type="button" className="ci-sidebar__branch-toggle"
-          aria-label={`${open ? "Collapse" : "Expand"} ${label}`} aria-expanded={open} aria-controls={submenuId}
+          aria-label={open ? labels.collapse(label) : labels.expand(label)} aria-expanded={open} aria-controls={submenuId}
           onClick={() => onOpenChange(!open)}><ChevronDown aria-hidden="true" /></button>
       </div>
       <ul id={submenuId} className="ci-sidebar__submenu" hidden={!open} aria-label={label}>

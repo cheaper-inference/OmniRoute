@@ -10,6 +10,7 @@ import { EventChecklist } from "../shared/EventChecklist";
 import { PayloadPreview } from "../shared/PayloadPreview";
 
 interface Step3Props {
+  isCustom?: boolean;
   webhookId?: string;
   events: string[];
   enabled: boolean;
@@ -30,6 +31,7 @@ interface TestResult {
 }
 
 export function Step3EventsAndTest({
+  isCustom,
   webhookId,
   events,
   enabled,
@@ -78,10 +80,14 @@ export function Step3EventsAndTest({
   return (
     <div className="space-y-5">
       <Input
-        label={t("name")}
+        label={t(isCustom ? "custom.name" : "name")}
         value={description}
         onChange={(e) => onChangeDescription(e.target.value)}
-        placeholder={t("namePlaceholder")}
+        placeholder={
+          isCustom
+            ? t("custom.namePlaceholder", { defaultName: t("unnamedWebhook") })
+            : t("namePlaceholder")
+        }
       />
 
       <EventChecklist

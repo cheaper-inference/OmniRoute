@@ -22,6 +22,7 @@ import {
 import { validateBrowserMutationOrigin } from "../origin/publicOrigin";
 import { classifyRoute } from "./classify";
 import { validateDashboardCsrfToken } from "./csrf";
+import { isLoopbackRequest, isPrivateLanRequest } from "./peerContext";
 import {
   classifyStampedPeerLocality,
   resolveStampedPeer,
@@ -36,6 +37,7 @@ import {
   AUTHZ_HEADER_AUTH_KIND,
   AUTHZ_HEADER_AUTH_LABEL,
   AUTHZ_HEADER_AUTH_SCOPES,
+  AUTHZ_HEADER_DASHBOARD_LOCAL_ACCESS,
   AUTHZ_HEADER_PEER_LOCALITY,
   AUTHZ_HEADER_REQUEST_ID,
   AUTHZ_HEADER_ROUTE_CLASS,
@@ -47,6 +49,7 @@ import {
   CLIENT_IP_HEADER,
   AUTHZ_HEADER_TRUSTED_CLIENT_IP,
 } from "./headers";
+import { isLocalOnlyPath } from "./routeGuard";
 import type { AuthSubject, RouteClass, RouteClassification } from "./types";
 import type { AuthOutcome, RoutePolicy } from "./context";
 
@@ -443,7 +446,8 @@ export async function runAuthzPipeline(
   }
 
   const policy = POLICIES[classification.routeClass];
-  const outcome = await policy.evaluate({ request, classification, requestId });
+  const context = { request, classification, requestId };
+  const outcome = await policy.evaluate(context);
 
   if (!outcome.allow) {
     if (managementDashboardRoute) {
@@ -496,6 +500,13 @@ export async function runAuthzPipeline(
     }
   }
 
+  // The dashboard prefix also contains LOCAL_ONLY embedded-service proxy handlers
+  // that never render the layout. Keep the layout verdict out of those requests.
+  if (isDashboardPath(guardedPathname) && !isLocalOnlyPath(guardedPathname, method)) {
+    // Match the LOCAL_ONLY policy while the original request's trusted stamps are available.
+    const isLocal = isLoopbackRequest(context) || isPrivateLanRequest(context);
+    requestHeaders.set(AUTHZ_HEADER_DASHBOARD_LOCAL_ACCESS, isLocal ? "local" : "remote");
+  }
   stampSubject(requestHeaders, outcome.subject);
 
   const response = NextResponse.next({ request: { headers: requestHeaders } });

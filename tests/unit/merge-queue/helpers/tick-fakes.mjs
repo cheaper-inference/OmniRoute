@@ -898,7 +898,7 @@ export const OWNER_IDENTITY = Object.freeze({
  * for the re-run's verdict). The re-run tests ask for it with `flakyReruns: 1`.
  * @param {{mode?: "shadow"|"live", landing?: "merge-ff"|"squash-api", readOnly?: boolean,
  *          infraRetries?: number, actor?: "app"|"owner", landToken?: boolean,
- *          flakyReruns?: number}} [options]
+ *          flakyReruns?: number, voice?: "app"|"owner", signing?: "none"|"ssh"}} [options]
  */
 export function createHarness({
   mode = "live",
@@ -907,6 +907,8 @@ export function createHarness({
   actor = "app",
   landToken = true,
   flakyReruns = 0,
+  voice = "app",
+  signing = "none",
 } = {}) {
   const clock = createClock();
   const calls = [];
@@ -915,14 +917,18 @@ export function createHarness({
   world.calls = calls;
   const modules = createFakeModules(world);
   const base = loadConfig();
+  // This fixture defaults to the App's voice and unsigned merge commits.
+  // config.test.mjs and tick-voice.test.mjs cover the shipped settings.
   const config = {
     ...base,
     mode,
+    voice,
     landing: {
       mode: landing,
       actor,
       ...(actor === "owner" ? { identity: { ...OWNER_IDENTITY } } : {}),
       statusContext: "omni-queue/land",
+      signing,
     },
     infraRetries,
     flakyReruns,

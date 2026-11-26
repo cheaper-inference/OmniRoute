@@ -12,10 +12,11 @@ import {
   TableHeader,
   TableRow,
 } from "@omniroute/ui-kit/table";
-import { Badge, Card, Button, Input } from "@/shared/components";
+import { Badge, Card, Button, Input, NumberInput, whenNumber } from "@/shared/components";
 import Icon from "@/shared/components/Icon";
 import ProviderIcon from "@/shared/components/ProviderIcon";
 import InfoTooltip from "@/shared/components/InfoTooltip";
+import Notice from "@/shared/components/Notice";
 import { compareTr, matchesSearch } from "@/shared/utils/turkishText";
 import { extractApiErrorMessage } from "@/shared/http/apiErrorMessage";
 import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
@@ -58,18 +59,12 @@ const FIELD_LABEL_KEYS: Record<(typeof PRICING_FIELDS)[number], string> = {
 
 type PricingField = (typeof PRICING_FIELDS)[number];
 
-function getSourceTone(source: PricingSource): string {
-  switch (source) {
-    case "user":
-      return "bg-warning/15 text-warning border border-warning/25";
-    case "modelsDev":
-      return "bg-info/15 text-info border border-info/25";
-    case "litellm":
-      return "bg-success/15 text-success border border-success/25";
-    default:
-      return "bg-bg-subtle text-text-muted border border-border/40";
-  }
-}
+// Badge variant that names where a price came from; anything else is the neutral badge.
+const SOURCE_BADGE_VARIANT: Partial<Record<PricingSource, "warning" | "info" | "success">> = {
+  user: "warning",
+  modelsDev: "info",
+  litellm: "success",
+};
 
 export default function PricingTab() {
   const [catalog, setCatalog] = useState<Record<string, PricingCatalogProvider>>({});
@@ -534,7 +529,7 @@ export default function PricingTab() {
       <Card className="p-5">
         <div className="flex items-start justify-between gap-3 mb-4">
           <div className="flex items-center gap-2">
-            <h2 className="text-xl flex items-center gap-2">
+            <h2 className="ci-heading flex items-center gap-2" data-size="xl">
               <Icon name="payments" size={22} className="text-primary" />
               {t("modelPricing")}
             </h2>
@@ -549,7 +544,7 @@ export default function PricingTab() {
 
         <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-4">
           {/* Stats panel with coverage bar */}
-          <div className="rounded-lg border border-border/40 bg-bg-subtle/30 p-4">
+          <Card.Section>
             <div className="grid grid-cols-4 gap-3 mb-3">
               <HeroStat label={t("providers")} value={stats.providers} />
               <HeroStat label={t("registry")} value={stats.totalModels} />
@@ -561,8 +556,8 @@ export default function PricingTab() {
               />
             </div>
             <div>
-              <div className="flex items-center justify-between text-[11px] text-text-muted mb-1">
-                <span className="uppercase tracking-wide font-semibold">
+              <div className="flex items-center justify-between text-2xs text-text-muted mb-1">
+                <span className="ci-eyebrow" data-size="2xs" data-weight="medium">
                   {t("priced")} / {t("registry")}
                 </span>
                 <span className="tabular-nums font-semibold">{coveragePct}%</span>
@@ -575,13 +570,13 @@ export default function PricingTab() {
                 animate={false}
               />
             </div>
-          </div>
+          </Card.Section>
 
           {/* Sync panel */}
-          <div className="rounded-lg border border-border/40 bg-bg-subtle/30 p-4 flex flex-col gap-3">
+          <Card.Section className="flex flex-col gap-3">
             <div className="flex items-start justify-between gap-2">
               <div>
-                <h3 className="text-xs uppercase text-text-muted">{t("pricingSyncTitle")}</h3>
+                <h3 className="ci-eyebrow">{t("pricingSyncTitle")}</h3>
                 <div className="flex items-center gap-1.5 mt-1">
                   <span
                     className={`w-1.5 h-1.5 rounded-full ${
@@ -614,7 +609,7 @@ export default function PricingTab() {
                 </Button>
               </div>
             </div>
-            <div className="grid grid-cols-3 gap-2 text-[11px]">
+            <div className="grid grid-cols-3 gap-2 text-2xs">
               <SyncMini
                 label={t("lastSync")}
                 value={formatSyncDate(syncStatus?.lastSync || null)}
@@ -628,22 +623,22 @@ export default function PricingTab() {
                 value={formatSyncDate(syncStatus?.nextSync || null)}
               />
             </div>
-          </div>
+          </Card.Section>
         </div>
       </Card>
 
       {statusMessage && (
-        <div
-          className={`px-3 py-2 rounded-lg border text-sm ${
+        <Notice
+          variant={
             statusMessage.tone === "success"
-              ? "bg-success/10 border-success/20 text-success"
+              ? "success"
               : statusMessage.tone === "error"
-                ? "bg-error/10 border-error/20 text-error"
-                : "bg-info/10 border-info/20 text-info"
-          }`}
+                ? "critical"
+                : "info"
+          }
         >
           {statusMessage.message}
-        </div>
+        </Notice>
       )}
 
       {/* Search + Filters */}
@@ -725,7 +720,7 @@ export default function PricingTab() {
         </div>
 
         {/* Quick shortcuts */}
-        <div className="flex items-center gap-2 flex-wrap text-[11px]">
+        <div className="flex items-center gap-2 flex-wrap text-2xs">
           {viewMode === "providers" && (
             <Button
               variant={coverageFilter === "lt50" ? "warning" : "outline"}
@@ -939,7 +934,7 @@ function ProviderSection({
             <span className="font-semibold text-sm truncate">
               {provider.id.charAt(0).toUpperCase() + provider.id.slice(1)}
             </span>
-            <span className="text-text-muted text-[11px] truncate">
+            <span className="text-text-muted text-2xs truncate">
               ({provider.alias.toUpperCase()})
             </span>
           </div>
@@ -956,49 +951,44 @@ function ProviderSection({
           >
             {authBadge}
           </Badge>
-          <span className="px-1.5 py-0.5 bg-bg-subtle text-text-muted text-[9px] rounded uppercase font-semibold shrink-0">
+          <Badge size="sm" className="shrink-0 uppercase">
             {provider.format}
-          </span>
+          </Badge>
         </div>
         <div className="flex items-center gap-3 shrink-0">
           {sourceCounts.user > 0 && (
             <span
-              className="inline-flex items-center gap-1 text-[10px] font-semibold text-warning"
+              className="inline-flex items-center gap-1 text-3xs font-semibold text-warning"
               title={`${sourceCounts.user} ${getSourceLabel("user")}`}
             >
               💎 {sourceCounts.user}
             </span>
           )}
-          {isEdited && (
-            <span className="text-warning text-[11px] font-semibold">{t("unsaved")}</span>
-          )}
-          <span className="text-text-muted text-[11px] tabular-nums hidden sm:inline">
+          {isEdited && <span className="text-warning text-2xs font-semibold">{t("unsaved")}</span>}
+          <span className="text-text-muted text-2xs tabular-nums hidden sm:inline">
             {pricedCount}/{provider.modelCount}
           </span>
           {(() => {
             const pct =
               provider.modelCount > 0 ? Math.round((pricedCount / provider.modelCount) * 100) : 0;
-            const barColor = pct >= 100 ? "bg-success" : pct >= 50 ? "bg-warning" : "bg-error";
+            const barTone = pct >= 100 ? "success" : pct >= 50 ? "warning" : "danger";
             const textColor =
               pct >= 100 ? "text-success" : pct >= 50 ? "text-warning" : "text-error";
             const icon = pct >= 100 ? "✓" : pct >= 50 ? "◐" : "⚠";
             return (
               <>
-                <div
-                  role="progressbar"
+                <Progress
+                  semantics="meter"
+                  size="sm"
+                  tone={barTone}
+                  animate={false}
+                  value={pct}
                   aria-label={`${provider.id}: ${t("withPricing")}`}
-                  aria-valuemin={0}
-                  aria-valuemax={100}
-                  aria-valuenow={pct}
-                  className="w-20 h-1.5 bg-border/60 rounded-full overflow-hidden"
-                >
-                  <div
-                    className={`h-full ${barColor} rounded-full transition-all`}
-                    style={{ width: `${pct}%` }}
-                  />
-                </div>
+                  aria-valuetext={`${pct}%`}
+                  className="w-20"
+                />
                 <span
-                  className={`text-[11px] font-semibold tabular-nums w-10 text-right ${textColor}`}
+                  className={`text-2xs font-semibold tabular-nums w-10 text-right ${textColor}`}
                   title={`${pricedCount}/${provider.modelCount} ${t("withPricing")}`}
                 >
                   {pct}% {icon}
@@ -1043,14 +1033,14 @@ function ProviderSection({
           <Table
             scrollbarLabel={t("modelPricing")}
             scrollLabel={t("modelPricing")}
-            className="text-sm"
-            containerClassName="rounded-none border-0"
+            variant="plain"
+            density="compact"
           >
             <TableHeader>
               <TableRow>
                 <TableHead>{t("model")}</TableHead>
                 {PRICING_FIELDS.map((field) => (
-                  <TableHead key={field} className="w-24 text-right">
+                  <TableHead key={field} numeric className="w-24">
                     {t(FIELD_LABEL_KEYS[field])}
                   </TableHead>
                 ))}
@@ -1093,7 +1083,7 @@ function ModelRow({
 
   return (
     <TableRow className="group">
-      <TableCell className="py-1.5">
+      <TableCell>
         <div className="flex items-center gap-2">
           <span
             className={`w-1.5 h-1.5 rounded-full ${hasPricing ? "bg-success" : "bg-text-muted/30"}`}
@@ -1104,24 +1094,25 @@ function ModelRow({
               {t("custom")}
             </Badge>
           )}
-          <span className={`px-1.5 py-0.5 rounded text-[9px] ${getSourceTone(source)}`}>
+          <Badge size="sm" variant={SOURCE_BADGE_VARIANT[source] ?? "default"}>
             {getSourceLabel(source)}
-          </span>
-          <span className="text-text-muted text-[10px] opacity-0 group-hover:opacity-100 transition-opacity">
+          </Badge>
+          <span className="text-text-muted text-3xs opacity-0 group-hover:opacity-100 transition-opacity">
             {model.id}
           </span>
         </div>
       </TableCell>
       {PRICING_FIELDS.map((field) => (
-        <TableCell key={field} className="px-2 py-1.5">
-          <Input
-            type="number"
-            step="0.01"
-            min="0"
+        <TableCell key={field}>
+          <NumberInput
+            step={0.01}
+            precision={6}
+            min={0}
             aria-label={`${model.name} ${t(FIELD_LABEL_KEYS[field])}`}
             value={pricing?.[field] || 0}
-            onChange={(event) => onPricingChange(field, event.target.value)}
-            inputClassName="text-right text-xs tabular-nums"
+            onValueChange={whenNumber((value) => onPricingChange(field, String(value)))}
+            size="xs"
+            inputClassName="text-right tabular-nums"
           />
         </TableCell>
       ))}

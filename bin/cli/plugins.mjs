@@ -1,4 +1,4 @@
-import { readdirSync, existsSync, readFileSync } from "node:fs";
+import { readdirSync, existsSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { homedir } from "node:os";
 import { pathToFileURL } from "node:url";
@@ -6,24 +6,51 @@ import { pathToFileURL } from "node:url";
 const PLUGIN_PREFIX_RE = /^(@[^/]+\/)?omniroute-cmd-/;
 
 function getPluginDirs() {
-  return [join(homedir(), ".omniroute", "plugins"), process.env.OMNIROUTE_PLUGIN_PATH].filter(
-    Boolean
-  );
+  const prefix = join(homedir(), ".omniroute", "plugins");
+  // `omniroute plugin install` uses `prefix` as an npm --prefix, so packages land in
+  // `<prefix>/node_modules` (#21056).
+  return [prefix, join(prefix, "node_modules"), process.env.OMNIROUTE_PLUGIN_PATH].filter(Boolean);
+}
+
+function isDir(path) {
+  try {
+    return statSync(path).isDirectory(); // follows symlinks (npm links local installs)
+  } catch {
+    return false;
+  }
+}
+
+function listCandidates(dir) {
+  const out = [];
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    if (entry.name.startsWith(".")) continue;
+    const full = join(dir, entry.name);
+    if (!isDir(full)) continue;
+    if (entry.name.startsWith("@")) {
+      try {
+        for (const sub of readdirSync(full)) out.push(join(full, sub));
+      } catch {
+        // ignore unreadable scope dir
+      }
+    } else {
+      out.push(full);
+    }
+  }
+  return out;
 }
 
 export async function discoverPlugins() {
   const found = [];
   for (const dir of getPluginDirs()) {
     if (!existsSync(dir)) continue;
-    let entries;
+    let candidates;
     try {
-      entries = readdirSync(dir, { withFileTypes: true });
+      candidates = listCandidates(dir);
     } catch {
       continue;
     }
-    for (const entry of entries) {
-      if (!entry.isDirectory()) continue;
-      const pkgPath = join(dir, entry.name, "package.json");
+    for (const candidate of candidates) {
+      const pkgPath = join(candidate, "package.json");
       if (!existsSync(pkgPath)) continue;
       let pkg;
       try {
@@ -32,11 +59,12 @@ export async function discoverPlugins() {
         continue;
       }
       if (!pkg.name || !PLUGIN_PREFIX_RE.test(pkg.name)) continue;
+      if (found.some((f) => f.name === pkg.name)) continue;
       found.push({
         name: pkg.name,
         version: pkg.version || "0.0.0",
         description: pkg.description || "",
-        dir: join(dir, entry.name),
+        dir: candidate,
         pkg,
       });
     }
@@ -65,6 +93,12 @@ export function buildPluginContext(opts = {}) {
     baseUrl: opts.baseUrl,
     apiKey: opts.apiKey,
   };
+}
+
+// Startup entry (#21056): `--version`/`-v` stays fast and never imports plugin code.
+export async function loadCliPlugins(program, argv = process.argv, env = process.env) {
+  if (argv.slice(2).some((a) => a === "--version" || a === "-v")) return 0;
+  return loadPlugins(program, { baseUrl: env.OMNIROUTE_BASE_URL, apiKey: env.OMNIROUTE_API_KEY });
 }
 
 export async function loadPlugins(program, ctx = {}) {

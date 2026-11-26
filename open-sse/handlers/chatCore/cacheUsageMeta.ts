@@ -90,15 +90,17 @@ function hasCacheUsageFields(
   // `cache_write_tokens` is the cache-creation alias emitted by OpenRouter, Devin
   // Desktop and the codex-chatgpt-web bridge; without it an OpenAI-shaped usage
   // payload logged a cache write of 0 for a model that actually reported one.
+  // A key that exists with the value `undefined` is "not reported" (the usage extractors
+  // create such keys when the provider sent nothing), so test the value, not the key.
   return (
-    "cache_read_input_tokens" in usageRecord ||
-    "cached_tokens" in usageRecord ||
-    "cache_creation_input_tokens" in usageRecord ||
-    "cache_write_tokens" in usageRecord ||
+    usageRecord.cache_read_input_tokens !== undefined ||
+    usageRecord.cached_tokens !== undefined ||
+    usageRecord.cache_creation_input_tokens !== undefined ||
+    usageRecord.cache_write_tokens !== undefined ||
     (!!promptTokenDetails &&
-      ("cached_tokens" in promptTokenDetails ||
-        "cache_creation_tokens" in promptTokenDetails ||
-        "cache_write_tokens" in promptTokenDetails))
+      (promptTokenDetails.cached_tokens !== undefined ||
+        promptTokenDetails.cache_creation_tokens !== undefined ||
+        promptTokenDetails.cache_write_tokens !== undefined))
   );
 }
 

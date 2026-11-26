@@ -20,6 +20,7 @@ import { clearRequestRejectedStreak } from "@omniroute/open-sse/services/request
 import { clearAntigravityVerificationUrl } from "@omniroute/open-sse/handlers/chatCore/antigravityVerificationState.ts";
 import {
   createBuiltinAutoCombo,
+  isBuiltInAutoRoute,
   prepareBuiltinAutoComboInputs,
 } from "@omniroute/open-sse/services/autoCombo/builtinCatalog.ts";
 import * as log from "../utils/logger";
@@ -41,6 +42,13 @@ import { isRequestScopedUpstreamFailure } from "./comboFailureLogging";
 import { isCodexNativeResponsesRequest } from "./requestShapeGuards";
 import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
 import { getRegistryEntry } from "@omniroute/open-sse/config/providerRegistry.ts";
+import { isReservedComboName } from "@/lib/combos/autoNames";
+import { resolveStoredAutoCombo } from "@/lib/combos/storedAutoCombo";
+import {
+  createVirtualAutoCombo,
+  resolveAutoRoutingState,
+  unknownAutoComboResponse,
+} from "./autoRouting";
 import { getCachedProviderNodes } from "@/lib/db/readCache";
 import {
   runWithProxyContext,
@@ -128,6 +136,27 @@ export async function resolveModelOrError(
   endpointPath: string = "",
   requestHeaders: Record<string, unknown> | null | undefined = null
 ) {
+  const isReservedModel = isReservedComboName(modelStr);
+  if (isReservedModel && !isBuiltInAutoRoute(modelStr)) {
+    const combo = await resolveStoredAutoCombo(modelStr);
+    const model = modelStr.toLowerCase();
+    return combo
+      ? { combo, provider: "auto", model: model.slice("auto/".length), isVirtualAutoCombo: false }
+      : { error: unknownAutoComboResponse(model) };
+  }
+  if (isReservedModel) modelStr = modelStr.toLowerCase();
+  if (modelStr === "auto") {
+    const state = await resolveAutoRoutingState(modelStr);
+    if (state.response) return { error: state.response };
+    const combo = await createVirtualAutoCombo(state, null);
+    if (combo instanceof Response) return { error: combo };
+    if (combo?.models?.length)
+      return { combo, provider: "auto", model: "", isVirtualAutoCombo: true };
+    return {
+      error: errorResponse(HTTP_STATUS.SERVICE_UNAVAILABLE, "No connected providers match 'auto'."),
+    };
+  }
+
   const modelInfo = await getModelInfoOrRetirementResponse(modelStr);
   if ("error" in modelInfo) return modelInfo;
   const sourceFormat = detectFormatFromEndpoint(body, endpointPath);
@@ -195,23 +224,13 @@ export async function resolveModelOrError(
 
   // "auto" is a built-in virtual combo prefix, not a provider. parseModel("auto/fast")
   // splits it into provider="auto" model="fast", so resolve it before credential lookup.
-  if (modelInfo.provider === "auto") {
-    const suffix = modelInfo.model || "";
+  if (isReservedModel || modelInfo.provider === "auto") {
+    const suffix = isReservedModel ? modelStr.slice("auto/".length) : modelInfo.model || "";
     const fuzzyCandidates = [`auto/best-${suffix}`, `auto/${suffix}`];
 
-    const exactCombo = await getComboForModel(modelStr);
-    if (exactCombo) {
-      log.info("ROUTING", `"auto" provider → combo "${modelStr}"`);
-      return { combo: exactCombo, provider: "auto", model: suffix };
-    }
-
-    // Preserve persisted fuzzy combo behavior before falling back to built-in virtual catalog ids.
-    for (const candidate of fuzzyCandidates) {
-      const fuzzyCombo = await getComboForModel(candidate);
-      if (fuzzyCombo) {
-        log.info("ROUTING", `"auto/${suffix}" → combo "${candidate}" (fuzzy)`);
-        return { combo: fuzzyCombo, provider: "auto", model: suffix };
-      }
+    if (!isReservedModel) {
+      const combo = await getComboForModel(modelStr);
+      if (combo) return { combo, provider: "auto", model: suffix, isVirtualAutoCombo: false };
     }
 
     // One pool preparation shared by the attempt below and the fuzzy fallbacks,
@@ -241,7 +260,7 @@ export async function resolveModelOrError(
         log.warn("AUTO", msg, { model: modelStr });
         return { error: errorResponse(HTTP_STATUS.SERVICE_UNAVAILABLE, msg) };
       }
-      return { combo: virtualCombo, provider: "auto", model: suffix };
+      return { combo: virtualCombo, provider: "auto", model: suffix, isVirtualAutoCombo: true };
     } catch (err) {
       log.warn("CHAT", `Failed to create built-in auto combo "${modelStr}"`, { err });
     }
@@ -258,15 +277,13 @@ export async function resolveModelOrError(
           "AUTO",
           `"auto/${suffix}" → built-in virtual combo "${candidate}" (fuzzy, ${virtualCombo.candidatePool?.length || 0} candidates)`
         );
-        return { combo: virtualCombo, provider: "auto", model: suffix };
+        return { combo: virtualCombo, provider: "auto", model: suffix, isVirtualAutoCombo: true };
       } catch {
         /* Try next fuzzy candidate */
       }
     }
 
-    const message = `Model '${modelStr}' is not a valid combo or provider. Unknown built-in auto combo.`;
-    log.warn("CHAT", message, { model: modelStr });
-    return { error: errorResponse(HTTP_STATUS.BAD_REQUEST, message) };
+    return { error: unknownAutoComboResponse(modelStr) };
   }
 
   if (!modelInfo.provider) {
@@ -453,6 +470,7 @@ export async function executeChatWithBreaker({
   comboName,
   comboStrategy,
   isCombo,
+  isVirtualAutoCombo = false,
   comboStepId,
   comboExecutionKey,
   extendedContext,
@@ -505,6 +523,7 @@ export async function executeChatWithBreaker({
       connectionId: credentials?.connectionId,
       apiKeyId: (apiKeyInfo as { id?: unknown } | null)?.id,
       provider,
+      sessionKey: sessionAffinityKey,
     });
     return runWithAppliedProxyCapture(appliedProxySink, fn);
   };
@@ -540,6 +559,7 @@ export async function executeChatWithBreaker({
             comboName,
             comboStrategy,
             isCombo,
+            isVirtualAutoCombo,
             comboStepId,
             comboExecutionKey,
             cachedSettings,
@@ -1042,10 +1062,13 @@ export async function safeResolveProxy(
   connectionId: string,
   apiKeyId?: string,
   providerId?: string,
-  comboName?: string | null
+  comboName?: string | null,
+  sessionKey?: string | null
 ) {
   try {
-    const resolved = await resolveProxyForConnection(connectionId, apiKeyId, providerId);
+    const resolved = await resolveProxyForConnection(connectionId, apiKeyId, providerId, {
+      sessionKey,
+    });
     // #6246: a connection that resolves to DIRECT only because its assigned proxy
     // is dead/inactive must fail closed — egressing on the real IP leaks it. Reuse
     // the existing proxy-resolution-failure policy (blocks by default; PROXY_FAIL_OPEN
@@ -1114,7 +1137,7 @@ export function withUpstreamStatus<T extends object>(
 export function publishPoolReselectResolver(
   sink: AppliedProxySink | null | undefined,
   proxyInfo: { proxy?: unknown; source?: unknown } | null | undefined,
-  ids: { connectionId?: unknown; apiKeyId?: unknown; provider?: unknown }
+  ids: { connectionId?: unknown; apiKeyId?: unknown; provider?: unknown; sessionKey?: unknown }
 ): void {
   try {
     if (!sink || proxyInfo?.source !== "registry" || proxyInfo?.proxy == null) return;
@@ -1125,8 +1148,11 @@ export function publishPoolReselectResolver(
     if (!connectionId) return;
     const apiKeyId = typeof ids.apiKeyId === "string" ? ids.apiKeyId : undefined;
     const providerId = typeof ids.provider === "string" ? ids.provider : undefined;
+    const sessionKey = typeof ids.sessionKey === "string" ? ids.sessionKey : null;
     (sink as { reselectPoolMember?: () => Promise<unknown> }).reselectPoolMember = async () => {
-      const next = await resolveProxyForConnection(connectionId, apiKeyId, providerId);
+      const next = await resolveProxyForConnection(connectionId, apiKeyId, providerId, {
+        sessionKey,
+      });
       return (next as { proxy?: unknown } | null)?.proxy ?? null;
     };
   } catch {
