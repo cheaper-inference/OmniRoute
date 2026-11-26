@@ -374,6 +374,23 @@ Drain clients first if you can. `:latest` only moves when a stable release
 promotes it, so it lags merged fixes — pin `:X.Y.Z` or a digest for anything
 you care about.
 
+### Kustomize upgrades that enable API key enforcement
+
+The Kustomize base now sets `REQUIRE_API_KEY` to `"true"`. Before applying the
+updated manifests, create keys in the dashboard's **API Manager** (`/dashboard/api-manager`)
+and configure clients to send them. Clients that omit the key will receive `401`.
+
+In **Feature Flags** (`/dashboard/settings/feature-flags`), check for a stored
+`REQUIRE_API_KEY=false` override and reset that flag if present. A SQLite override
+takes precedence over the ConfigMap value and survives a restart.
+
+After applying the manifests, recreate the pod so it picks up the new environment
+value. The `Recreate` strategy causes a brief outage while the replacement starts.
+Once the pod is Ready, send a valid `POST /v1/chat/completions` request through the
+Ingress with a configured model. Expect `401` without a key and `200` when you
+repeat the request with a valid bearer key. Avoid `GET /v1/models` for this check.
+Its own authentication rules can return `401` even when `REQUIRE_API_KEY` is `"false"`.
+
 ---
 
 ## 6. Storage and backups

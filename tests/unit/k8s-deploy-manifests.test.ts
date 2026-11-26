@@ -16,6 +16,7 @@
  *     runs after the request drain, which has no timeout of its own.
  *   - the nginx Ingress keeps response buffering off, or SSE is withheld until
  *     the provider turn ends and streaming silently stops working.
+ *   - the base and overlays that enable Ingress require an API key.
  *   - no real secret value is ever committed.
  */
 
@@ -61,6 +62,15 @@ interface K8sDoc {
   };
   data?: Record<string, string>;
   stringData?: Record<string, string>;
+}
+
+interface Kustomization {
+  resources?: string[];
+  patches?: {
+    path?: string;
+    patch?: string;
+    target?: { kind?: string; name?: string };
+  }[];
 }
 
 interface ChartValues {
@@ -355,6 +365,49 @@ test("the drain budget fits inside the termination grace period", () => {
 });
 
 // ── Ingress / SSE invariants ──────────────────────────────────────────────────
+
+test("Kustomize requires API keys in the base and overlays with Ingress", async (t) => {
+  const configName = "omniroute-config";
+  const base = loadYaml<K8sDoc>("deploy/kubernetes/base/configmap.yaml").find(
+    (doc) => doc.kind === "ConfigMap" && doc.metadata?.name === configName
+  );
+  const baseData = required(base?.data, `base ${configName} data`);
+  await t.test("base", () => {
+    assert.equal(baseData.REQUIRE_API_KEY, "true");
+  });
+
+  const overlaysDir = path.join(K8S_DIR, "overlays");
+  for (const entry of fs.readdirSync(overlaysDir, { withFileTypes: true })) {
+    if (!entry.isDirectory()) continue;
+    const dir = `deploy/kubernetes/overlays/${entry.name}`;
+    const [overlay] = loadYaml<Kustomization>(`${dir}/kustomization.yaml`);
+    const hasIngress = (overlay.resources ?? []).some((resource) => {
+      const file = path.join(dir, resource);
+      return (
+        fs.statSync(path.join(REPO_ROOT, file)).isFile() &&
+        loadYaml<K8sDoc>(file).some((doc) => doc.kind === "Ingress")
+      );
+    });
+    if (!hasIngress) continue;
+
+    await t.test(entry.name, () => {
+      const data = { ...baseData };
+      for (const patch of overlay.patches ?? []) {
+        const docs = patch.path
+          ? loadYaml<K8sDoc>(path.join(dir, patch.path))
+          : parseAllDocuments(required(patch.patch, "inline patch")).map((doc) => doc.toJS());
+        for (const doc of docs) {
+          const kind = patch.target?.kind ?? doc?.kind;
+          const name = patch.target?.name ?? doc?.metadata?.name;
+          if (kind === "ConfigMap" && name === configName) {
+            Object.assign(data, doc?.data);
+          }
+        }
+      }
+      assert.equal(data.REQUIRE_API_KEY, "true");
+    });
+  }
+});
 
 test("the nginx Ingress disables response buffering so SSE streams", () => {
   const ing = firstOfKind(
