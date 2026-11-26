@@ -422,8 +422,8 @@ Write unit tests in `tests/unit/` covering at minimum:
 4. In the same PR, update the provider's probe in `scripts/quality/catalog-drift/manifest.json`.
    Update the expected phrase or JSON assertion, `excerpt.sha256_16`, and `backs` as applicable.
    Add a probe if the provider has none. Use a public GET to a page or API on the provider's
-   own domain. If the source contradicts the catalog and the fix has to wait, record the
-   mismatch as `pendingCatalogFix` in the issue. If the probe still detects the same change after
+   own domain. If today's source contradicts the catalog and the fix has to wait, do not change
+   `backs` to hide it. Say so in the issue and in the PR description. If the probe still detects the same change after
    an issue is closed as completed, the detector comments that the probe still sees the old
    baseline.
 5. Run both checks.
