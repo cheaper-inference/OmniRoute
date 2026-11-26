@@ -1,0 +1,16 @@
+{
+  "data": [
+    {
+      "id": "codestral-latest"
+    },
+    {
+      "id": "gpt-oss:20b"
+    },
+    {
+      "id": "mistral-Nemo-Instruct-2407"
+    },
+    {
+      "id": "gpt-5.5-openai-compact"
+    }
+  ]
+}
