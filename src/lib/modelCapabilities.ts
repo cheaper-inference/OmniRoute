@@ -43,6 +43,7 @@ import {
   type ModelLimitSources,
 } from "@/lib/modelCapabilityLimits";
 import { getNoAuthHydrationProviderIds } from "@/sse/services/noAuthProviderSiblings";
+import { getObservedOutputCeiling } from "@/shared/constants/observedOutputCeilings";
 
 export type { GeminiThinkingLevel } from "@/shared/constants/modelSpecs";
 
@@ -1037,6 +1038,10 @@ export function getResolvedModelCapabilities(
     registryModel,
     spec,
     authoritativeContextWindow,
+    observedMaxOutputTokens: getObservedOutputCeiling(
+      resolved.provider,
+      resolved.model ?? resolved.rawModel
+    ),
   };
   const contextLimit = pickContextWindow(limitRows, persistedContextWindow);
   const contextWindow = contextLimit.value;

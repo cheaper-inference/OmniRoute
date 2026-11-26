@@ -16,6 +16,8 @@ type ModelLimitField = "contextWindow" | "maxInputTokens" | "maxOutputTokens";
 /**
  * Which rule supplied each resolved limit:
  * - `override:context` / `override:max_input` / `override:max_output` — persisted override
+ * - `observed:<provider>/<model>` — output ceiling measured on the live upstream
+ *   (`OBSERVED_OUTPUT_CEILINGS`); the account/plan cap wins over optimistic catalog data
  * - `static-authoritative:<provider>/<model>` — static authoritative context table
  * - `synced:<provider>/<model>` — models.dev synced capability row
  * - `registry:<provider>/<model>` — provider registry row
@@ -29,6 +31,7 @@ type LimitSourceKind =
   | "override:context"
   | "override:max_input"
   | "override:max_output"
+  | "observed"
   | "static-authoritative"
   | "synced"
   | "registry"
@@ -54,6 +57,8 @@ interface LimitSourceRows {
   } | null;
   spec: Pick<ModelSpec, "contextWindow" | "maxOutputTokens"> | undefined;
   authoritativeContextWindow: number | null;
+  /** Output ceiling measured on the live upstream; a hard account/plan cap. */
+  observedMaxOutputTokens?: number | null;
 }
 
 function pickFirst(candidates: readonly LimitCandidate[]): PickedLimit {
@@ -113,6 +118,9 @@ export function pickMaxOutputTokens(
 ): PickedLimit {
   return pickFirst([
     [maxTokenOverride, "override:max_output"],
+    // A measured upstream ceiling is the account's real limit: an optimistic
+    // catalog/synced value above it only buys truncated replies.
+    [rows.observedMaxOutputTokens, "observed"],
     [rows.synced?.limit_output, "synced"],
     [registryNumber(rows.registryModel?.maxOutputTokens), "registry"],
     [rows.spec?.maxOutputTokens, "spec"],
@@ -134,6 +142,8 @@ function formatLimitSource(kind: LimitSourceKind, identity: LimitSourceIdentity)
     identity.provider ? `${identity.provider}/${modelId}` : modelId;
   // The authoritative table is always consulted with the variant's own id.
   if (kind === "static-authoritative") return `${kind}:${qualify(resolvedId)}`;
+  // The observed ceiling is keyed by the variant's own upstream model id too.
+  if (kind === "observed") return `${kind}:${qualify(resolvedId)}`;
   const rowModelId = identity.effortBaseModelId ?? resolvedId;
   const prefix = identity.effortBaseModelId ? "effort-base:" : "";
   return kind === "spec"

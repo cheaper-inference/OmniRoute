@@ -276,6 +276,30 @@ export async function refreshKiroToken(
         // not JSON — fall through
       }
 
+      // Kiro's social token endpoint answers 401 `{"message":"Bad credentials"}` once the
+      // refresh token itself is dead — typically because the first automatic refresh ran
+      // while the account's proxies were unreachable, so the token never rotated and was
+      // later rejected. No retry can recover that: only re-authentication can. Report it as
+      // unrecoverable so the health-check loop stops hammering the proxy pool every cycle.
+      const badCredentialsBody = /bad credentials|invalid[_ -]?grant|invalid[_ -]?token/i.test(
+        errorText
+      );
+      if (
+        response.status === 401 ||
+        ((response.status === 400 || response.status === 403) && badCredentialsBody)
+      ) {
+        log?.error?.(
+          "TOKEN_REFRESH",
+          "Kiro social refresh token rejected. Re-authentication required.",
+          { status: response.status }
+        );
+        return {
+          error: "unrecoverable_refresh_error",
+          code: "bad_credentials",
+          status: response.status,
+        };
+      }
+
       log?.error?.("TOKEN_REFRESH", "Failed to refresh Kiro social token", {
         status: response.status,
         error: errorText.slice(0, 200),
