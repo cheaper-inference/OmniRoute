@@ -48,13 +48,25 @@ test("Bun builder runs the pinned package install script before bun run build (#
   const instructions = builder.replace(/\\\r?\n/g, " ");
   const install = instructions.search(/^RUN bun install\b[^\n]*--ignore-scripts\b/m);
   const bunInstall = instructions.search(
-    /(?:^RUN|&&)\s+\(cd node_modules\/bun\s+&&\s+bun install\.js\)\s+&&\s+node_modules\/\.bin\/bun --version\s*$/m
+    /(?:^RUN|&&)\s+\(cd node_modules\/bun\s+&&\s+bun install\.js\)/m
   );
   const build = instructions.search(/^RUN bun run (?:--quiet )?build\b/m);
 
   assert.ok(
     install >= 0 && install < bunInstall && bunInstall < build,
-    "Bun builder must run the pinned bun install.js and verify its binary after --ignore-scripts and before bun run build"
+    "Bun builder must run the pinned bun install.js after --ignore-scripts and before bun run build"
+  );
+
+  const verification = instructions.slice(bunInstall).split("\n", 1)[0];
+  assert.match(
+    verification,
+    /&&\s+expected_version="\$\(bun -e 'process\.stdout\.write\(require\("\.\/package\.json"\)\.devDependencies\.bun\)'\)"/,
+    "Bun builder must read the expected Bun version from package.json devDependencies.bun"
+  );
+  assert.match(
+    verification,
+    /&&\s+actual_version="\$\(node_modules\/\.bin\/bun --version\)"\s+&&\s+if \[ "\$actual_version" != "\$expected_version" \]; then .*\bexit 1;\s+fi\s*$/,
+    "Bun builder must compare the installed binary version with the pin and fail on mismatch"
   );
 });
 
