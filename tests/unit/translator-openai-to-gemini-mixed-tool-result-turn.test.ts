@@ -4,11 +4,16 @@
 // 400 "Requests ending with a model turn are not supported unless the last part is a
 // function response". Split into its own file (parent file is at its frozen size cap).
 
-import test from "node:test";
+import test, { after } from "node:test";
 import assert from "node:assert/strict";
 
+import { closeDbInstance } from "../../src/lib/db/core.ts";
 import { openaiToGeminiRequest } from "../../open-sse/translator/request/openai-to-gemini.ts";
 import { storeGeminiThoughtSignature } from "../../open-sse/services/geminiThoughtSignatureStore.ts";
+
+after(() => {
+  closeDbInstance();
+});
 
 type GeminiPart = Record<string, unknown>;
 type GeminiContent = { role?: string; parts?: GeminiPart[] };
