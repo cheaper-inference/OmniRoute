@@ -22,7 +22,7 @@ after(async () => {
   await harness.cleanup();
 });
 
-async function postThroughProxy(request: Request) {
+async function forwardThroughProxy(request: Request) {
   const nextRequest = new NextRequest(request);
   const proxyResponse = await proxy(nextRequest);
   assert.equal(proxyResponse.headers.get("x-middleware-next"), "1");
@@ -33,7 +33,23 @@ async function postThroughProxy(request: Request) {
   for (const [name, value] of proxyResponse.headers) {
     if (name.startsWith(prefix)) headers.set(name.slice(prefix.length), value);
   }
-  return POST(new Request(nextRequest, { headers }));
+  return {
+    forwardedRequest: new Request(nextRequest, { headers }),
+    generatedRequestId: proxyResponse.headers.get("x-request-id"),
+  };
+}
+
+function buildChatRequest(headers: Record<string, string>) {
+  return harness.buildRequest({
+    authKey,
+    headers,
+    body: {
+      model: `cheaperinference/${model}`,
+      stream: false,
+      temperature: 0.7,
+      messages: [{ role: "user", content: "Return a brief inference result." }],
+    },
+  });
 }
 
 for (const header of ["X-Request-Id", "Idempotency-Key"]) {
@@ -54,19 +70,12 @@ for (const header of ["X-Request-Id", "Idempotency-Key"]) {
         return harness.buildOpenAIResponse("The inference result is ready.", model);
       });
 
-      const send = () =>
-        postThroughProxy(
-          harness.buildRequest({
-            authKey,
-            headers: { [header]: `kea-9623-${header}-${overlap}` },
-            body: {
-              model: `cheaperinference/${model}`,
-              stream: false,
-              temperature: 0.7,
-              messages: [{ role: "user", content: "Return a brief inference result." }],
-            },
-          })
+      const send = async () => {
+        const { forwardedRequest } = await forwardThroughProxy(
+          buildChatRequest({ [header]: `kea-9623-${header}-${overlap}` })
         );
+        return POST(forwardedRequest);
+      };
 
       const first = send();
       await (overlap ? Promise.race([firstDispatch.promise, first]) : first);
@@ -82,3 +91,40 @@ for (const header of ["X-Request-Id", "Idempotency-Key"]) {
     });
   }
 }
+
+test("KEA-9623: a 300-character X-Request-Id gets replaced and does not deduplicate", async (t) => {
+  t.mock.timers.enable({ apis: ["Date"], now: Date.now() });
+  let upstreamCalls = 0;
+  t.mock.method(globalThis, "fetch", async (url: string | URL) => {
+    assert.equal(String(url), "https://api.cheaperinference.com/v1/chat/completions");
+    upstreamCalls++;
+    return harness.buildOpenAIResponse("The inference result is ready.", model);
+  });
+
+  const headers = { "X-Request-Id": "x".repeat(300) };
+  const first = await forwardThroughProxy(buildChatRequest(headers));
+  const original = await POST(first.forwardedRequest);
+  assert.equal(original.status, 200, await original.text());
+
+  const second = await forwardThroughProxy(buildChatRequest(headers));
+  const repeated = await POST(second.forwardedRequest);
+  assert.equal(repeated.status, 200, await repeated.text());
+
+  assert.ok(first.generatedRequestId);
+  assert.ok(second.generatedRequestId);
+  assert.notEqual(first.generatedRequestId, second.generatedRequestId);
+  assert.deepEqual(
+    {
+      firstRequestId: first.forwardedRequest.headers.get("x-request-id"),
+      secondRequestId: second.forwardedRequest.headers.get("x-request-id"),
+      upstreamCalls,
+      replayHeader: repeated.headers.get("X-OmniRoute-Idempotent"),
+    },
+    {
+      firstRequestId: first.generatedRequestId,
+      secondRequestId: second.generatedRequestId,
+      upstreamCalls: 2,
+      replayHeader: null,
+    }
+  );
+});
