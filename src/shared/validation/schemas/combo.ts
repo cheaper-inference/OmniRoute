@@ -221,6 +221,10 @@ export const comboRuntimeConfigSchema = z
     nestedComboMode: z.enum(["flatten", "execute"]).optional(),
     trackMetrics: z.boolean().optional(),
     reasoningTokenBufferEnabled: z.boolean().optional(),
+    // COMBO_REASONING_HOLDBACK_ENABLED: hold a streaming target back until its first answer, and
+    // list the providers that may receive the reasoning draft of a target that was cut.
+    retainReasoningBeforeAnswer: z.boolean().optional(),
+    reasoningCheckpointProviders: z.array(z.string().trim().min(1).max(100)).max(20).optional(),
     // Keep (not drop) targets whose known output ceiling is below max_tokens.
     outputLimitAdvisory: z.boolean().optional(),
     reasoningTransportFallback: z.enum(["skip", "drop"]).optional(),

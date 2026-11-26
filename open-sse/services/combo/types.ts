@@ -9,6 +9,7 @@
 import type { CompressionExclusions } from "../compression/exclusions.ts";
 import type { ProviderCandidate } from "../autoCombo/scoring.ts";
 import type { PerTargetAdmissionHook } from "../admission/types.ts";
+import type { ReasoningHoldbackRequest } from "./reasoningCheckpoint.ts";
 
 export const RESET_WINDOW_NAMES = ["weekly", "session", "monthly"] as const;
 
@@ -68,6 +69,8 @@ export type SingleModelTarget =
       fallbackAttempts?: number;
       /** Prefer a sibling after a pre-content empty turn; never widens target pins. */
       emptyTurnConnectionId?: string | null;
+      /** Ask the target runner to hold reasoning back until the first answer (consumed there). */
+      reasoningHoldback?: ReasoningHoldbackRequest;
     })
   | { modelAbortSignal: AbortSignal; fallbackAttempts?: number };
 

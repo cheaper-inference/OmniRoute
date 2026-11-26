@@ -12,6 +12,7 @@ import type { ResilienceSettings } from "../../../src/lib/resilience/settings";
 import type { ContextRelayConfig, UniversalHandoffConfig } from "../contextHandoff.ts";
 import type { ComboErrorEntry } from "./comboErrorAggregation.ts";
 import type { ResetWindowConfig } from "./quotaScoring.ts";
+import type { ReasoningCheckpoint } from "./reasoningCheckpoint.ts";
 import type { ResponseValidationConfig } from "./responseValidation.ts";
 import type { ApplyStickinessResult } from "./sessionStickiness.ts";
 import type {
@@ -68,6 +69,11 @@ export type AttemptLoopState = {
    * an agentic stall (#13954, `agenticStallFailover.ts`).
    */
   heldTruncatedResponse?: Response | null;
+  /**
+   * Reasoning a target produced before the combo abandoned it (reasoning holdback). Request
+   * scoped, never logged; offered to the next attempt only if its provider is listed.
+   */
+  reasoningCheckpoint?: ReasoningCheckpoint | null;
 };
 
 export type AttemptLoopDeps = {

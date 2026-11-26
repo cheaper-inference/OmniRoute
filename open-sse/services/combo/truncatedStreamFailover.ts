@@ -19,21 +19,27 @@
 import { emit, selectedConnectionIdOf } from "./rrDashboardEvents.ts";
 import { recordComboRequest } from "../comboMetrics.ts";
 import { isTruncatedStreamResponse } from "../../utils/truncatedStreamPolicy.ts";
+import { isReasoningHoldbackCut } from "./reasoningCheckpoint.ts";
 import type { AttemptLoopDeps, AttemptLoopState } from "./attemptLoopTypes.ts";
 import type { ComboOutcomeKind } from "./comboErrorAggregation.ts";
 import { toRecordedTarget } from "./comboPredicates.ts";
 import type { ResolvedComboTarget } from "./types.ts";
 
 export const TRUNCATED_STREAM_COMBO_REASON = "upstream stream cut before its terminal signal";
+export const REASONING_HOLDBACK_COMBO_REASON = "upstream ended before answering, after reasoning";
 
 export type HeldTruncatedState = Pick<AttemptLoopState, "heldTruncatedResponse">;
 
-/** A cut non-streaming attempt the combo should fail over from. */
+/**
+ * A cut attempt the combo should fail over from: a non-streaming one cut in transit, or a
+ * stream the reasoning holdback abandoned before any answer reached the client.
+ */
 export function isTruncatedComboAttempt(
   result: Response,
   deps: Pick<AttemptLoopDeps, "clientRequestedStream">,
   protectedPriorityTarget: boolean
 ): boolean {
+  if (isReasoningHoldbackCut(result)) return true;
   // A protected priority target only falls back on quota exhaustion; keep its answer.
   return (
     !deps.clientRequestedStream && !protectedPriorityTarget && isTruncatedStreamResponse(result)
@@ -88,11 +94,26 @@ export function recordHeldAttemptFailure(
     latencyMs: Date.now() - deps.startTime,
     ...(connectionId ? { connectionId } : {}),
   });
-  holdAttemptResponse(state, result);
+  // The reasoning holdback abandons a target before the client saw anything: nothing to keep.
+  if (isReasoningHoldbackCut(result)) cancelBody(result);
+  else holdAttemptResponse(state, result);
 }
 
 /** Record the cut attempt as a retryable target failure and hold its partial result. */
 export function recordTruncatedStreamAttempt(opts: HeldAttemptFailure): void {
+  if (isReasoningHoldbackCut(opts.result)) {
+    opts.deps.log.info(
+      "COMBO",
+      `Model ${opts.modelStr} ended its stream after reasoning without answering — trying the next target`
+    );
+    recordHeldAttemptFailure({
+      ...opts,
+      reason: REASONING_HOLDBACK_COMBO_REASON,
+      code: "reasoning_holdback_cut",
+      kind: "upstream",
+    });
+    return;
+  }
   opts.deps.log.warn(
     "COMBO",
     `Model ${opts.modelStr} returned a stream cut before its terminal signal — trying the next target`

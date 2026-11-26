@@ -1,0 +1,1 @@
+- **feat(sse):** Opt-in `COMBO_REASONING_HOLDBACK_ENABLED` plus a per-combo `retainReasoningBeforeAnswer` lets a sequential combo hold a reasoning-only stream and move to the next target on a cut, carrying the reasoning only to providers listed in `reasoningCheckpointProviders` (#21388).
