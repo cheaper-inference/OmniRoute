@@ -108,6 +108,26 @@ test("Gemini 4 native levels retain explicit overrides and distinguish none and 
   }
 });
 
+for (const [name, thinking, includeThoughts] of [
+  ["with no thinking control", {}, true],
+  ["with thinking disabled", { thinking: false }, false],
+] as const) {
+  test(`OpenAI output_config.effort applies to Gemini 4 but preserves Gemini 3.5 ${name}`, () => {
+    const body = { ...openaiBody, output_config: { effort: "high" }, ...thinking };
+    const gemini4 = openaiToGeminiRequest("gemini-4-hydrogen-xhigh", body, false);
+    assert.deepEqual(gemini4.generationConfig.thinkingConfig, {
+      thinkingLevel: "high",
+      includeThoughts: true,
+    });
+
+    const gemini35 = openaiToGeminiRequest("gemini-3.5-flash-lite", body, false);
+    assert.deepEqual(gemini35.generationConfig.thinkingConfig, {
+      thinkingLevel: "minimal",
+      includeThoughts,
+    });
+  });
+}
+
 test("Gemini 4 uses xhigh only for supported models when effort or budget asks for it", () => {
   for (const family of ["argon", "carbon", "hydrogen", "neon"]) {
     const model = `gemini-4-${family}`;
@@ -115,6 +135,7 @@ test("Gemini 4 uses xhigh only for supported models when effort or budget asks f
     for (const extra of [
       { reasoning_effort: "xhigh" },
       { reasoning_effort: "max" },
+      { output_config: { effort: "xhigh" } },
       { thinking: { type: "enabled", budget_tokens: 24577 } },
     ]) {
       const result = openaiToGeminiRequest(model, { ...openaiBody, ...extra }, false);

@@ -244,6 +244,7 @@ function explicitNativeGeminiLevel(
 }
 
 function nativeGeminiRequestControls(
+  model: string,
   body: JsonRecord,
   supported: readonly GeminiThinkingLevel[],
   defaultLevel: GeminiThinkingLevel | undefined
@@ -256,7 +257,9 @@ function nativeGeminiRequestControls(
   if (enabledBudget) return enabledBudget;
 
   const fromEffort = nativeGeminiEffort(
-    body.reasoning_effort ?? toRecord(body.reasoning).effort ?? toRecord(body.output_config).effort,
+    body.reasoning_effort ??
+      toRecord(body.reasoning).effort ??
+      (isGemini4PlusModel(model) ? toRecord(body.output_config).effort : undefined),
     supported
   );
   if (fromEffort) return fromEffort;
@@ -287,7 +290,7 @@ export function resolveNativeGeminiThinking(
     body,
     explicit
       ? { thinkingLevel: explicit, includeThoughts: true }
-      : nativeGeminiRequestControls(body, supported, defaultLevel)
+      : nativeGeminiRequestControls(model, body, supported, defaultLevel)
   );
 }
 
