@@ -2730,8 +2730,9 @@ async function handleChatCoreInner({
     : null;
 
   const toolDisclosure = resolveToolDisclosureConfig(settings);
+  const cachePrincipalId = apiKeyInfo?.id ? String(apiKeyInfo.id) : null;
   const executeProviderRequestDeps = {
-    cachePrincipalId: apiKeyInfo?.id ? String(apiKeyInfo.id) : null,
+    cachePrincipalId,
     agentGoalPolicy,
     assertManagedLeaseFence,
     buildUpstreamHeadersForExecute,
@@ -3381,6 +3382,7 @@ async function handleChatCoreInner({
   let pipelineRecovered = false;
   if (stream) {
     const streamingOutcome = await runStreamingResponse({
+      cachePrincipalId,
       reportSignatureFailure,
       apiKeyInfo,
       allowedConnections,

@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 
 type Body = Record<string, unknown>;
 const SESSION_HEADERS = [
+  "x-omniroute-session-id",
   "session-id",
   "session_id",
   "x-opencode-session-id",

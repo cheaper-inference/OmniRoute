@@ -24,7 +24,10 @@ test("the barrel calls the leaf and writes the carried state back", () => {
 
 test("the barrel imports the leaf (no-undef is disabled for TS, so assert it)", () => {
   const barrel = read(BARREL);
-  assert.match(barrel, /import \{\s*runStreamingResponse,?\s*\} from "\.\/chatCore\/streamingResponse\.ts";/);
+  assert.match(
+    barrel,
+    /import \{\s*runStreamingResponse,?\s*\} from "\.\/chatCore\/streamingResponse\.ts";/
+  );
 });
 
 test("message stays block-local (declared inside providerFailure, never carried)", () => {
@@ -39,4 +42,15 @@ test("streaming cost accounting stays out of the response leaf", () => {
   // leaf only executes the provider call and must not touch the ledger.
   const leaf = read(LEAF);
   assert.doesNotMatch(leaf, /recordStreamingCost\(/);
+});
+
+test("credential refresh retries carry chatCore's authenticated prompt-cache principal", () => {
+  const caller = read(BARREL);
+  const leaf = read(LEAF);
+  assert.match(caller, /const cachePrincipalId = apiKeyInfo\?\.id/);
+  assert.match(caller, /await runStreamingResponse\(\{[\s\S]*?\n\s+cachePrincipalId,/);
+  assert.match(
+    leaf,
+    /const retryBody = await prepareUpstreamBody\(\{[\s\S]*?\n\s+cachePrincipalId,/
+  );
 });

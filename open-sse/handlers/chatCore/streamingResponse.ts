@@ -145,7 +145,7 @@ import {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- deps bag mirrors the barrel closure
 type Loose = any;
 
-export type StreamingDeps = Record<string, Loose>;
+export type StreamingDeps = Record<string, Loose> & { cachePrincipalId?: string | null };
 
 export async function runStreamingResponse(deps: StreamingDeps) {
   const result = await runStreamingResponseInner(deps);
@@ -205,6 +205,7 @@ async function runStreamingResponseInner(deps: StreamingDeps) {
     syncExecuteTranslatedBody,
     targetFormat,
     triedModels,
+    cachePrincipalId,
     trustedEffortContext,
     toolDisclosure,
     upstreamStream,
@@ -783,6 +784,7 @@ async function runStreamingResponseInner(deps: StreamingDeps) {
           translatedBody,
           modelToCall: retryModelId,
           ...trustedEffortContext,
+          cachePrincipalId,
           provider,
           targetFormat,
           credentials: getExecutionCredentials(),

@@ -101,3 +101,19 @@ test("unsupported formats, missing trusted principals and cache opt-out never sy
     );
   }
 });
+
+test("the explicit OmniRoute session header distinguishes sessions and outranks generic hints", async () => {
+  const forSession = (session: string, generic?: string) =>
+    prepare("unused", "tenant-a", {
+      clientRawRequest: {
+        headers: new Headers({
+          "X-OmniRoute-Session-Id": session,
+          ...(generic ? { "Session-Id": generic } : {}),
+        }),
+      },
+    });
+  const first = (await forSession("page-one")).prompt_cache_key;
+  assert.match(String(first), /^omni-session-[a-f0-9]{64}$/);
+  assert.notEqual(first, (await forSession("page-two")).prompt_cache_key);
+  assert.equal(first, (await forSession("page-one", "different-generic")).prompt_cache_key);
+});
