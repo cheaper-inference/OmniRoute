@@ -477,7 +477,16 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
           : buildErrorBody(err.status, err.error || "Provider request failed"),
         cacheSource: "upstream",
       });
-      persistFailureUsage(err.status, err.errorCode || `upstream_${err.status}`);
+      // The execution pipeline can return an HTTP error before the leg extracts usage.
+      persistFailureUsage(
+        err.status,
+        err.errorCode || `upstream_${err.status}`,
+        isFeatureFlagEnabled("NONSTREAM_UPSTREAM_FAILURE_BILLED_USAGE_ENABLED")
+          ? toFailureUsageAggregate(
+              legResult.usage ?? extractUsageFromResponse(errUpstreamBody, provider)
+            )
+          : undefined
+      );
       trackPendingRequest(
         model,
         provider,
