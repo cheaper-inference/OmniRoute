@@ -31,6 +31,7 @@
     "bin/cli/runtime/",
     "scripts/postinstall.mjs",
     "scripts/build/postinstallSupport.mjs",
+    "scripts/build/sqliteRebuildPlan.mjs",
     "scripts/build/runtime-env.mjs",
     "scripts/build/colocateOptionals.mjs",
     "scripts/build/sync-env.mjs",
@@ -133,7 +134,7 @@
     "lint": "eslint . --cache --cache-location .eslintcache --suppressions-location config/quality/eslint-suppressions.json",
     "queue": "node scripts/merge-queue/cli.mjs",
     "lint:json": "node scripts/quality/run-eslint-json.mjs",
-    "lint:md": "npx --yes markdownlint-cli2 \"docs/**/*.md\" \"*.md\" \"!docs/i18n\" \"!docs/research\"",
+    "lint:md": "markdownlint-cli2 \"docs/**/*.md\" \"*.md\" \"!docs/i18n\" \"!docs/research\"",
     "lint:prose": "vale docs",
     "electron:dev": "concurrently \"npm run dev\" \"wait-on http://localhost:${PORT:-20128} && cd electron && npm run dev\"",
     "electron:build": "npm run build && cd electron && npm run build",
@@ -441,7 +442,7 @@
     "tsx": "^4.23.13",
     "turndown": "7.2.4",
     "turndown-plugin-gfm": "1.0.2",
-    "undici": "^8.11.2",
+    "undici": "^8.12.4",
     "update-notifier": "^7.3.1",
     "uuid": "^14.0.2",
     "ws": "^8.21.3",
@@ -511,6 +512,7 @@
     "license-checker-rseidelsohn": "^5.0.1",
     "lint-staged": "^17.5.1",
     "lockfile-lint": "^5.0.1",
+    "markdownlint-cli2": "0.24.2",
     "node-loader": "^2.1.0",
     "opencode-ai": "1.19.5",
     "playwright-ctrf-json-reporter": "^0.2.0",
@@ -589,7 +591,7 @@
       "smol-toml": "^1.9.0"
     },
     "jsdom": {
-      "undici": "^7.29.0"
+      "undici": "^7.30.2"
     },
     "node-gyp": {
       "undici": "^6.28.0"
@@ -600,11 +602,14 @@
     "adm-zip": "^0.6.1",
     "promptfoo": {
       "js-yaml": "^5.2.2",
-      "undici@7": "^7.29.0",
+      "undici@7": "^7.30.2",
       "simple-git": "^4.0.1",
       "@simple-git/argv-parser": "^2.0.1"
     },
     "mermaid": {
+      "katex": "^0.18.2"
+    },
+    "micromark-extension-math": {
       "katex": "^0.18.2"
     },
     "socket.io-parser": "^4.2.7",
