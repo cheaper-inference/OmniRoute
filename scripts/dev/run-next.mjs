@@ -32,7 +32,7 @@ if (!process.env.DATA_DIR) {
     const match = raw.match(/^DATA_DIR=(.+)$/m);
     if (match?.[1]?.trim()) process.env.DATA_DIR = match[1].trim();
   } catch {
-    /* .env ausente ou ilegível — ok, bootstrap usa o padrão */
+    /* .env missing or unreadable — fine, bootstrap uses the default */
   }
 }
 
