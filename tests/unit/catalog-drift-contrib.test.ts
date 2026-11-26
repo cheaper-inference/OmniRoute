@@ -103,7 +103,7 @@ test("CONTRIBUTING has the 10-minute guide with runnable commands", () => {
   assert.match(section, /npm run quality:evidence-stub/);
   assert.match(section, /npm run check:free-catalog-evidence/);
   assert.match(section, /scripts\/quality\/catalog-drift\/manifest\.json/);
-  assert.match(section, /pendingCatalogFix/);
+  assert.match(section, /do not change\s+`backs` to hide it/);
   const { scripts } = JSON.parse(readFileSync(new URL("package.json", root), "utf8"));
   for (const [, name] of section.matchAll(/\bnpm run ([\w:-]+)/g)) {
     assert.ok(Object.hasOwn(scripts, name), `Missing npm script ${name}`);
