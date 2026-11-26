@@ -1,0 +1,1 @@
+- **feat(cli):** Manage skills, MCP servers, plugins, global instructions and supported settings for Codex, Hermes, Kimi Code and CodeBuddy ([#21265](https://github.com/cheaper-inference/OmniRoute/pull/21265)).
