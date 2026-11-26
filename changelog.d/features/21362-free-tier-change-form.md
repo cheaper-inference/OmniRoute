@@ -1,0 +1,1 @@
+- **docs(contributing):** a 10-minute guide to fix a free plan, a "Free plan changed" issue form and an evidence record helper (`npm run quality:evidence-stub`) ([#21362](https://github.com/cheaper-inference/OmniRoute/pull/21362))
