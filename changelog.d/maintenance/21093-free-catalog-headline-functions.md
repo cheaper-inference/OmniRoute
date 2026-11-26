@@ -1,0 +1,1 @@
+- **feat(sse):** free catalog headline functions: counting gates (card, deposit, KYC and social gates move a row out of the real figure), the public real figure and a single token formatter, quota units, a retired-offer ledger and the row-sum reading of the catalog. No catalog data changes ([#21093](https://github.com/cheaper-inference/OmniRoute/pull/21093))

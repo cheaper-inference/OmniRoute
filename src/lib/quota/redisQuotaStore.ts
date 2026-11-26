@@ -10,6 +10,11 @@
  * Pool/allocation metadata (listAllocationsForApiKey, getPool) still lives in
  * SQLite (F2) — only the rolling counters are stored in Redis.
  *
+ * The percent attribution book of a pool connection is one hash,
+ *   omniroute:quota-ledger:<poolId>:<connectionId>
+ * with `t:<apiKeyId>` (cumulative tokens), `u:<apiKeyId>` (time of the last
+ * token write) and `s:<window>:<rev>` (the book of a window at a revision, JSON).
+ *
  * ioredis is a SOFT dependency. If not installed, constructing a RedisQuotaStore
  * throws a clear error message.
  *
@@ -19,8 +24,16 @@
 import { getPool, listAllocationsForApiKey } from "@/lib/db/quotaPools";
 import { WINDOW_MS, dimensionKeyToString } from "./dimensions";
 import type { DimensionKey } from "./dimensions";
-import type { QuotaStore, PoolUsageSnapshot } from "./types";
+import type {
+  LedgerCounter,
+  LedgerKey,
+  LedgerSnapshot,
+  LedgerState,
+  PoolUsageSnapshot,
+  QuotaStore,
+} from "./types";
 import { buildPoolUsageSnapshot } from "./poolUsageSnapshot";
+import { isStorableLedgerState, storedLedgerKeys } from "./percentLedger";
 
 // ---------------------------------------------------------------------------
 // Redis connection singleton
@@ -34,6 +47,8 @@ interface RedisLike {
   eval(script: string, numkeys: number, ...args: unknown[]): Promise<unknown>;
   del(...keys: string[]): Promise<number>;
   quit(): Promise<string>;
+  hgetall(key: string): Promise<Record<string, string>>;
+  hdel(key: string, ...fields: string[]): Promise<number>;
 }
 
 /**
@@ -85,6 +100,108 @@ return { curr, redis.call("GET", KEYS[2]) or "0" }
 function ttlSeconds(windowMs: number): number {
   // Keep both current + previous bucket alive → 2 × window
   return Math.ceil((2 * windowMs) / 1000);
+}
+
+// ---------------------------------------------------------------------------
+// Percent attribution book helpers
+// ---------------------------------------------------------------------------
+
+/** The book outlives the longest plan window: 2 × monthly, renewed on every write. */
+const LEDGER_TTL_SECONDS = ttlSeconds(WINDOW_MS.monthly);
+
+// Token write + hash TTL in one atomic call. KEYS[1] is the book's hash. ARGV holds the time
+// field, the time, the token field, the tokens and the TTL in seconds.
+const LEDGER_RECORD_TOKENS_SCRIPT = `
+redis.call("HSET", KEYS[1], ARGV[1], ARGV[2])
+redis.call("HINCRBYFLOAT", KEYS[1], ARGV[3], ARGV[4])
+redis.call("EXPIRE", KEYS[1], ARGV[5])
+return 1
+`;
+
+// Revision write + hash TTL in one atomic call. KEYS[1] is the book's hash. ARGV holds the
+// revision field, the book as JSON and the TTL in seconds. Returns 1 when the field was stored.
+const LEDGER_COMMIT_SCRIPT = `
+local set = redis.call("HSETNX", KEYS[1], ARGV[1], ARGV[2])
+if set == 1 then
+  redis.call("EXPIRE", KEYS[1], ARGV[3])
+end
+return set
+`;
+
+function ledgerHashKey(poolId: string, connectionId: string): string {
+  return `${KEY_PREFIX}-ledger:${poolId}:${connectionId}`;
+}
+
+function stateField(window: string, rev: number): string {
+  return `s:${window}:${rev}`;
+}
+
+/** Revision → field name of every stored book of `window` in the hash. */
+function stateRevisions(hash: Record<string, string>, window: string): Map<number, string> {
+  const prefix = `s:${window}:`;
+  const revisions = new Map<number, string>();
+  for (const field of Object.keys(hash)) {
+    if (!field.startsWith(prefix)) continue;
+    const rev = Number(field.slice(prefix.length));
+    if (Number.isSafeInteger(rev) && rev >= 1) revisions.set(rev, field);
+  }
+  return revisions;
+}
+
+/** The newest revision of `window` stored in the hash; a missing book counts as 0. */
+function newestRevision(hash: Record<string, string>, window: string): number {
+  return Math.max(0, ...stateRevisions(hash, window).keys());
+}
+
+function isFiniteNumber(value: unknown): value is number {
+  return typeof value === "number" && Number.isFinite(value);
+}
+
+/** A stored book as a fresh state, or null when the JSON is not a usable book. */
+function parseStoredState(json: string, rev: number): LedgerState | null {
+  let raw: unknown;
+  try {
+    raw = JSON.parse(json);
+  } catch {
+    return null;
+  }
+  if (typeof raw !== "object" || raw === null) return null;
+  const { last, baseline, resetAt, readAt, updatedAt, keys } = raw as Record<string, unknown>;
+  if (!isFiniteNumber(last) || !isFiniteNumber(baseline)) return null;
+  if (!isFiniteNumber(readAt) || !isFiniteNumber(updatedAt)) return null;
+  const reset = isFiniteNumber(resetAt) ? resetAt : null;
+  if (resetAt !== null && reset === null) return null;
+  return { rev, last, baseline, resetAt: reset, readAt, updatedAt, keys: storedLedgerKeys(keys) };
+}
+
+/**
+ * The newest usable book of `window`, and the fields to remove: every older revision, and any
+ * newer field that does not hold a usable book (never written by ledgerCommit).
+ */
+function latestState(
+  hash: Record<string, string>,
+  window: string
+): { state: LedgerState | null; obsolete: string[] } {
+  const revisions = [...stateRevisions(hash, window)].sort(([a], [b]) => b - a);
+  let state: LedgerState | null = null;
+  const obsolete: string[] = [];
+  for (const [rev, field] of revisions) {
+    const parsed = state ? null : parseStoredState(hash[field], rev);
+    if (parsed) state = parsed;
+    else obsolete.push(field);
+  }
+  return { state, obsolete };
+}
+
+/** Every key counter of the hash; a counter without a write time reads its time as NaN. */
+function readCounters(hash: Record<string, string>): Record<string, LedgerCounter> {
+  const counters: Record<string, LedgerCounter> = {};
+  for (const [field, value] of Object.entries(hash)) {
+    if (!field.startsWith("t:")) continue;
+    const apiKeyId = field.slice(2);
+    counters[apiKeyId] = { tokens: Number(value), updatedAt: Number(hash[`u:${apiKeyId}`]) };
+  }
+  return counters;
 }
 
 // ---------------------------------------------------------------------------
@@ -280,6 +397,73 @@ export class RedisQuotaStore implements QuotaStore {
     const prevKey = bucketKey(apiKeyId, dimKey, currentBucket - 1);
 
     await client.del(currKey, prevKey);
+  }
+
+  /**
+   * One script: HSET of the write time, HINCRBYFLOAT of the tokens, then EXPIRE of the hash. The
+   * time goes in before the tokens, so new tokens never carry an expired time.
+   */
+  async ledgerRecordTokens(
+    poolId: string,
+    connectionId: string,
+    apiKeyId: string,
+    tokens: number,
+    nowMs: number
+  ): Promise<void> {
+    if (!Number.isFinite(tokens) || tokens <= 0) return;
+    const client = await this.client();
+    const hashKey = ledgerHashKey(poolId, connectionId);
+    await client.eval(
+      LEDGER_RECORD_TOKENS_SCRIPT,
+      1,
+      hashKey,
+      `u:${apiKeyId}`,
+      String(nowMs),
+      `t:${apiKeyId}`,
+      tokens,
+      LEDGER_TTL_SECONDS
+    );
+  }
+
+  /** One HGETALL; obsolete revisions of the window are removed without waiting. */
+  async ledgerRead(key: LedgerKey): Promise<LedgerSnapshot> {
+    const client = await this.client();
+    const hashKey = ledgerHashKey(key.poolId, key.connectionId);
+    const hash = (await client.hgetall(hashKey)) ?? {};
+    const { state, obsolete } = latestState(hash, key.window);
+    if (obsolete.length > 0) {
+      // Best effort: a field left behind is removed by a later read.
+      client.hdel(hashKey, ...obsolete).catch(() => undefined);
+    }
+    return { state, counters: readCounters(hash) };
+  }
+
+  /**
+   * Compare (the newest stored revision is next.rev - 1), set (HSETNX of the field of next.rev),
+   * confirm (the newest stored revision is next.rev). The newest field is never removed, so a
+   * field of next.rev that another writer stored and that was removed after a newer revision
+   * superseded it cannot be won a second time: the confirmation sees the newer revision. The set
+   * and the hash TTL run in one script, so a stored field always has an expiry.
+   */
+  async ledgerCommit(key: LedgerKey, next: LedgerState): Promise<boolean> {
+    if (!isStorableLedgerState(next)) return false;
+    const client = await this.client();
+    const hashKey = ledgerHashKey(key.poolId, key.connectionId);
+    const newest = async () => newestRevision((await client.hgetall(hashKey)) ?? {}, key.window);
+    if ((await newest()) !== next.rev - 1) return false;
+    const set = await client.eval(
+      LEDGER_COMMIT_SCRIPT,
+      1,
+      hashKey,
+      stateField(key.window, next.rev),
+      JSON.stringify(next),
+      LEDGER_TTL_SECONDS
+    );
+    if (Number(set) !== 1 || (await newest()) !== next.rev) return false;
+    if (next.rev > 1) {
+      client.hdel(hashKey, stateField(key.window, next.rev - 1)).catch(() => undefined);
+    }
+    return true;
   }
 }
 

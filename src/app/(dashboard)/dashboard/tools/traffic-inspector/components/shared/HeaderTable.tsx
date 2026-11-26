@@ -36,7 +36,8 @@ export function HeaderTable({ headers }: HeaderTableProps) {
         </Button>
       </div>
       <Table
-        className="min-w-0 font-mono text-xs"
+        className="min-w-0"
+        density="compact"
         scrollbarLabel={t("headersTable")}
         scrollLabel={t("headersTable")}
       >

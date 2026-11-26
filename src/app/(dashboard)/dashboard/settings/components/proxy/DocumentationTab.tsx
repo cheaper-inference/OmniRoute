@@ -2,6 +2,7 @@
 import { useTranslations } from "next-intl";
 import CodePreview from "@/shared/components/CodePreview";
 import { Card } from "@/shared/components";
+import { InlineCode } from "@omniroute/ui-kit/inline-code";
 
 export default function DocumentationTab() {
   const t = useTranslations("settings");
@@ -50,7 +51,7 @@ export default function DocumentationTab() {
         <h3 className="mb-2">SOCKS5</h3>
         <p className="text-sm text-text-muted">
           {t("proxyDocumentationSocks5DescBefore")}{" "}
-          <code className="bg-bg-subtle px-1 rounded">ENABLE_SOCKS5_PROXY=false</code>{" "}
+          <InlineCode>ENABLE_SOCKS5_PROXY=false</InlineCode>{" "}
           {t("proxyDocumentationSocks5DescAfter")}
         </p>
       </section>
@@ -63,8 +64,7 @@ export default function DocumentationTab() {
       <section>
         <h3 className="mb-2">Vercel Relay</h3>
         <p className="text-sm text-text-muted">
-          {t("proxyDocumentationVercelRelayDescBefore")} (
-          <code className="bg-bg-subtle px-1 rounded">x-relay-auth</code>).{" "}
+          {t("proxyDocumentationVercelRelayDescBefore")} (<InlineCode>x-relay-auth</InlineCode>).{" "}
           {t("proxyDocumentationVercelRelayDescAfter")}
         </p>
       </section>

@@ -5,7 +5,12 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 import { createStreamController } from "../../open-sse/utils/streamHandler.ts";
-import { logUsage } from "../../open-sse/utils/usageTracking.ts";
+import {
+  COLORS,
+  logUsage,
+  normalizeUsage,
+  type UsageLike,
+} from "../../open-sse/utils/usageTracking.ts";
 import { resetDbInstance } from "../../src/lib/db/core.ts";
 
 const logDirectory = mkdtempSync(join(tmpdir(), "omniroute-clock-prefix-"));
@@ -154,4 +159,116 @@ test("the interceptor also recognizes a historical ICU 24:00:00 clock token", (t
   } finally {
     __consoleInterceptorInternals.reset();
   }
+});
+
+const cacheLogCases: Array<{
+  name: string;
+  usage: UsageLike;
+  expected: string;
+}> = [
+  {
+    name: "explicit zero cache counters survive normalization",
+    usage: normalizeUsage({
+      prompt_tokens: 10,
+      completion_tokens: 5,
+      cache_read_input_tokens: 0,
+      cache_creation_input_tokens: 0,
+    })!,
+    expected: "cache_read=0 | cache_create=0",
+  },
+  {
+    name: "reported cache counters retain their values",
+    usage: { cache_read_input_tokens: 7, cache_creation_input_tokens: 3 },
+    expected: "cache_read=7 | cache_create=3",
+  },
+  {
+    name: "omitted cache counters remain unknown even when input and output are reported",
+    usage: { prompt_tokens: 10, completion_tokens: 5 },
+    expected: "cache_read=unknown | cache_create=unknown",
+  },
+  {
+    name: "estimated usage keeps unknown cache counters",
+    usage: { prompt_tokens: 10, completion_tokens: 5, estimated: true },
+    expected: "cache_read=unknown | cache_create=unknown",
+  },
+  {
+    name: "estimated input does not hide explicitly reported cache zeros",
+    usage: {
+      prompt_tokens: 10,
+      completion_tokens: 5,
+      estimated: true,
+      cache_read_input_tokens: 0,
+      cache_creation_input_tokens: 0,
+    },
+    expected: "cache_read=0 | cache_create=0",
+  },
+  {
+    name: "invalid normalized cache counters remain unknown",
+    usage: normalizeUsage({
+      prompt_tokens: 10,
+      completion_tokens: 5,
+      cache_read_input_tokens: -1,
+      cache_creation_input_tokens: -1,
+    })!,
+    expected: "cache_read=unknown | cache_create=unknown",
+  },
+  {
+    name: "unknown provenance is not overwritten by numeric placeholders",
+    usage: {
+      prompt_tokens: 10,
+      completion_tokens: 5,
+      cache_read_input_tokens: 0,
+      cache_creation_input_tokens: 0,
+      usage_evidence: {
+        input: { source: "reported" },
+        output: { source: "reported" },
+        cacheRead: { source: "unknown" },
+        cacheCreation: { source: "unknown" },
+      },
+    },
+    expected: "cache_read=unknown | cache_create=unknown",
+  },
+];
+
+for (const { name, usage, expected } of cacheLogCases) {
+  test(`usage log: ${name}; cache fields stay green until the final reset`, (t) => {
+    const lines: string[] = [];
+    t.mock.method(console, "log", (...args: unknown[]) => {
+      lines.push(args.map(String).join(" "));
+    });
+    const before = structuredClone(usage);
+    logUsage("openai", usage);
+    assert.equal(lines.length, 1);
+    const line = lines[0];
+    assert.ok(line.includes(expected));
+    assert.equal(line.split(COLORS.reset).length - 1, 1, "one terminal reset only");
+    assert.ok(line.endsWith(COLORS.reset));
+    const cacheStart = line.indexOf(" | cache_read=");
+    assert.ok(cacheStart > line.indexOf(COLORS.green));
+    assert.equal(
+      line.slice(0, cacheStart).lastIndexOf(COLORS.green) >
+        line.slice(0, cacheStart).lastIndexOf(COLORS.yellow),
+      true,
+      "estimated marker must restore green before cache fields"
+    );
+    assert.deepEqual(usage, before, "console formatting must not mutate metering or evidence");
+  });
+}
+
+test("usage log keeps fresh-input and reasoning suffixes before the final reset", (t) => {
+  const lines: string[] = [];
+  t.mock.method(console, "log", (...args: unknown[]) => {
+    lines.push(args.map(String).join(" "));
+  });
+  logUsage("openai", {
+    prompt_tokens: 10,
+    completion_tokens: 5,
+    cache_read_input_tokens: 7,
+    cache_creation_input_tokens: 3,
+    no_cache_tokens: 2,
+    reasoning_tokens: 4,
+  });
+  assert.ok(
+    lines[0].endsWith(`cache_read=7 | cache_create=3 | no_cache=2 | reasoning=4${COLORS.reset}`)
+  );
 });

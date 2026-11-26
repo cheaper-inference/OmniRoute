@@ -3,6 +3,7 @@ import React from "react";
 import "@testing-library/jest-dom/vitest";
 import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
+import { findButtonByTooltip } from "../_helpers/buttonTooltip";
 vi.unmock("next-intl");
 // The existing live-probe button has its own namespace and is outside this layout test.
 vi.mock("@/shared/components/ConnectionTestButton", () => ({ default: () => null }));
@@ -57,7 +58,7 @@ afterEach(() => {
 
 for (const locale of ["en", "zh-CN"]) {
   for (const layout of ["overview", "full", "compact"]) {
-    it(`preserves per-account row visibility, speed, and quota thresholds in ${layout} (${locale})`, () => {
+    it(`preserves per-account row visibility, speed, and quota thresholds in ${layout} (${locale})`, async () => {
       const messages = locale === "en" ? en : zh;
       const onHideQuota = vi.fn(),
         onShowQuota = vi.fn();
@@ -100,7 +101,10 @@ for (const locale of ["en", "zh-CN"]) {
       expect(
         within(hiddenCard).queryByRole("button", { name: messages.usage.hideQuotaRow })
       ).toBeNull();
-      fireEvent.click(within(hiddenCard).getByTitle(messages.usage.showQuotaRow));
+      // The hidden row's button is named after the row; its title is the kit tooltip.
+      const showButton = await findButtonByTooltip(hiddenCard, messages.usage.showQuotaRow);
+      expect(showButton).not.toBeNull();
+      fireEvent.click(showButton!);
       expect(onShowQuota).toHaveBeenCalledWith(
         { connectionId: "a", provider: "claude" },
         expect.objectContaining({ name: "weekly" })
@@ -180,7 +184,7 @@ for (const layout of ["overview", "full", "compact"]) {
         })
       ).toBeVisible();
       if (connection.provider === "moonshot") {
-        fireEvent.click(within(card).getByTitle(en.usage.forceRefresh));
+        fireEvent.click(within(card).getByRole("button", { name: en.usage.forceRefresh }));
       }
     }
     expect(onRefresh).toHaveBeenCalledExactlyOnceWith("moonshot-account", "moonshot");

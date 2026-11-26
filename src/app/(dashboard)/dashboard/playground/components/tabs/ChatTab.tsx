@@ -1,8 +1,10 @@
 "use client";
 
 import Textarea from "@/shared/components/Textarea";
+import Badge from "@/shared/components/Badge";
 import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
+import Notice from "@/shared/components/Notice";
 import { Spinner } from "@/shared/components/Loading";
 
 // src/app/(dashboard)/dashboard/playground/components/tabs/ChatTab.tsx
@@ -400,13 +402,9 @@ export default function ChatTab({ configState, onMetricsUpdate }: ChatTabProps) 
           <Icon name="chat" size={16} />
           <span className="font-medium">{t("tabChat")}</span>
           {responseStatus !== null && (
-            <span
-              className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${
-                responseStatus < 400 ? "bg-success-bg text-success" : "bg-error-bg text-error"
-              }`}
-            >
+            <Badge size="sm" variant={responseStatus < 400 ? "success" : "error"}>
               {responseStatus}
-            </span>
+            </Badge>
           )}
           {responseDuration !== null && <span>{responseDuration}ms</span>}
         </div>
@@ -417,7 +415,8 @@ export default function ChatTab({ configState, onMetricsUpdate }: ChatTabProps) 
               size="sm"
               icon="refresh"
               onClick={() => void handleRegenerate()}
-              className="text-xs text-text-muted"
+              tone="muted"
+              className="text-xs"
               title={t("regenerateLastResponse")}
             >
               {t("regenerate")}
@@ -458,7 +457,7 @@ export default function ChatTab({ configState, onMetricsUpdate }: ChatTabProps) 
                 msg.role === "user" ? "ml-auto items-end" : "mr-auto items-start"
               }`}
             >
-              <span className="text-[10px] text-text-muted uppercase mb-1 px-1">
+              <span className="ci-eyebrow mb-1 px-1" data-size="3xs">
                 {t(`role.${msg.role}`)}
               </span>
               <div
@@ -493,7 +492,7 @@ export default function ChatTab({ configState, onMetricsUpdate }: ChatTabProps) 
         {/* Loading indicator */}
         {loading && messages[messages.length - 1]?.role === "user" && (
           <div className="flex flex-col max-w-[85%] mr-auto items-start">
-            <span className="text-[10px] text-text-muted uppercase mb-1 px-1">
+            <span className="ci-eyebrow mb-1 px-1" data-size="3xs">
               {t("role.assistant")}
             </span>
             <div
@@ -506,11 +505,7 @@ export default function ChatTab({ configState, onMetricsUpdate }: ChatTabProps) 
           </div>
         )}
 
-        {error && (
-          <div className="text-center p-2 text-sm text-error bg-error/10 rounded border border-error/20">
-            {error}
-          </div>
-        )}
+        {error && <Notice variant="critical">{error}</Notice>}
 
         <div ref={messagesEndRef} />
       </div>

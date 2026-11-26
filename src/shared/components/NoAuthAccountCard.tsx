@@ -763,7 +763,7 @@ export default function NoAuthAccountCard({
                   data-account-id={id}
                   className="group flex items-center gap-2 rounded-lg border border-border bg-bg/40 px-2.5 py-2 transition-colors hover:bg-bg-subtle"
                 >
-                  <span className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-bg text-[10px] font-medium text-text-muted">
+                  <span className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-bg text-3xs font-medium text-text-muted">
                     {i + 1}
                   </span>
                   <span className="min-w-0 flex-1 truncate font-mono text-xs text-text-muted">

@@ -244,3 +244,73 @@ test("applyServerOwnedToolLoopIfNeeded accepts undefined expectedConnectionId fo
   });
   assert.equal(result.kind, "skip");
 });
+
+for (const [costs, expected] of [
+  [[0, 17155], 17155],
+  [[7, 13], 20],
+  [[0, 0], 0],
+  [[undefined, 17155], null],
+  [[17155, undefined], null],
+  [[-1, 17155], null],
+  [[Infinity, 1], null],
+] as const) {
+  test(`buyer costs aggregate only complete receipts: ${JSON.stringify(costs)}`, async () => {
+    const logged: number[] = [];
+    let followUps = 0;
+    const result = await applyServerOwnedToolLoopIfNeeded({
+      enabled: true,
+      stream: false,
+      isResponsesEndpoint: false,
+      sourceFormat: FORMATS.OPENAI,
+      initialLeg: okLeg({
+        buyerCostMicro: costs[0],
+        receipt: { ...receipt(0), buyerCostMicro: costs[0] },
+      }),
+      sourceBody: {
+        model: "gpt-4o",
+        messages: [{ role: "user", content: "hi" }],
+      },
+      skillsModelId: "openai",
+      executionContext: {
+        apiKeyId: "k",
+        sessionId: "s",
+        requestId: "r",
+        builtinToolNames: ["memory_search"],
+      },
+      expectedConnectionId: "conn-1",
+      followUpLeg: async () => {
+        followUps += 1;
+        return {
+          kind: "ok",
+          response: {
+            choices: [{ message: { role: "assistant", content: "done" }, finish_reason: "stop" }],
+          },
+          responseForMemoryExtraction: { text: "done" },
+          providerBody: { id: "2" },
+          providerRequest: { messages: [] },
+          usage: { prompt_tokens: 4, completion_tokens: 2, total_tokens: 6 },
+          responsePayloadFormat: "openai",
+          looksLikeSSE: false,
+          connectionId: "conn-1",
+          headers: new Headers(),
+          buyerCostMicro: costs[1],
+          receipt: { ...receipt(1), buyerCostMicro: costs[1] },
+        };
+      },
+      logReceipt: (r) => logged.push(r.index),
+      executeServerOwned: async (calls) =>
+        calls.map((c) => ({ id: c.id, name: c.name, result: { hits: [] }, replayed: false })),
+    });
+    assert.equal(result.kind, "ok");
+    if (result.kind !== "ok") return;
+    assert.equal(result.leg.buyerCostMicro, expected);
+    assert.equal(followUps, 1);
+    assert.deepEqual(logged, [0, 1]);
+    assert.equal(
+      (result.leg.response as { choices: Array<{ message: { content: string } }> }).choices[0]
+        .message.content,
+      "done"
+    );
+    assert.equal(result.usage?.prompt_tokens, 14);
+  });
+}

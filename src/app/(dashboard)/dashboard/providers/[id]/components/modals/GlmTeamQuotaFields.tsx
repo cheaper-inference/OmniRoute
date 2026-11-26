@@ -1,5 +1,6 @@
 "use client";
 
+import Card from "@/shared/components/Card";
 import { Input } from "@/shared/components";
 import { providerText, type ProviderMessageTranslator } from "../../providerPageHelpers";
 import type { GlmTeamQuotaFieldValues } from "./glmTeamQuotaProviderData";
@@ -18,7 +19,7 @@ type GlmTeamQuotaFieldsProps = {
 
 export default function GlmTeamQuotaFields({ values, onChange, t }: GlmTeamQuotaFieldsProps) {
   return (
-    <div className="flex flex-col gap-3 rounded-lg border border-border bg-bg-subtle p-4">
+    <Card.Section className="flex flex-col gap-3">
       <Input
         label={providerText(t, "glmOrganizationIdLabel", "GLM team organization ID")}
         name="glmOrganizationId"
@@ -47,6 +48,6 @@ export default function GlmTeamQuotaFields({ values, onChange, t }: GlmTeamQuota
         autoComplete="off"
         spellCheck={false}
       />
-    </div>
+    </Card.Section>
   );
 }

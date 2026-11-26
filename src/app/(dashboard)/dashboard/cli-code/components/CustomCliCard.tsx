@@ -16,6 +16,10 @@ import {
 import { DEFAULT_DISPLAY_BASE_URL } from "@/shared/hooks";
 import { cn } from "@/shared/utils/cn";
 import { CARD_TOGGLE_CLASS, cardToggleProps } from "./cardToggle";
+import Badge from "@/shared/components/Badge";
+import IconChip from "@/shared/components/IconChip";
+import Notice from "@/shared/components/Notice";
+import { CardSection } from "@/shared/components/Card";
 
 interface ModelOption {
   value: string;
@@ -131,16 +135,17 @@ export default function CustomCliCard({
         {...cardToggleProps(isExpanded, onToggle)}
       >
         <div className="flex min-w-0 items-center gap-3">
-          <div className="size-8 rounded-lg flex items-center justify-center shrink-0 bg-success/10 text-success">
-            <Icon name={tool.icon || "terminal"} size={20} />
-          </div>
+          <IconChip tone="success" size="sm" className="shrink-0">
+            <Icon name={tool.icon || "terminal"} />
+          </IconChip>
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <h3 className="text-sm">{tool.name}</h3>
-              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-[11px] font-medium rounded-full bg-success/10 text-success">
-                <span className="size-1.5 rounded-full bg-success" />
+              <h3 className="ci-heading" data-size="sm">
+                {tool.name}
+              </h3>
+              <Badge variant="success" size="sm" dot>
                 {translateOrFallback("custom", "Custom")}
-              </span>
+              </Badge>
             </div>
             <p className="text-xs text-text-muted truncate">{t("toolDescriptions.custom")}</p>
           </div>
@@ -154,36 +159,30 @@ export default function CustomCliCard({
 
       {isExpanded && (
         <div className="mt-6 pt-6 border-t border-border space-y-5">
-          <div className="flex items-start gap-3 p-3 bg-success/10 border border-success/30 rounded-lg">
-            <Icon name="tips_and_updates" size={18} className="text-success" />
-            <div className="text-sm text-success">
-              <p className="font-medium">
-                {translateOrFallback("customCliBuilderTitle", "OpenAI-compatible CLI builder")}
-              </p>
-              <p className="mt-1 text-xs opacity-90">
-                {translateOrFallback(
-                  "customCliBuilderDescription",
-                  "Generate env vars and JSON snippets for any CLI or SDK that accepts an OpenAI-compatible base URL, API key, and model ID."
-                )}
-              </p>
-            </div>
-          </div>
+          <Notice
+            variant="success"
+            icon="tips_and_updates"
+            title={translateOrFallback("customCliBuilderTitle", "OpenAI-compatible CLI builder")}
+          >
+            {translateOrFallback(
+              "customCliBuilderDescription",
+              "Generate env vars and JSON snippets for any CLI or SDK that accepts an OpenAI-compatible base URL, API key, and model ID."
+            )}
+          </Notice>
 
           {!hasActiveProviders && (
-            <div className="flex items-start gap-3 p-3 bg-warning/10 border border-warning/30 rounded-lg">
-              <Icon name="warning" size={18} className="text-warning" />
-              <div>
-                <p className="text-sm font-medium text-warning">
-                  {translateOrFallback("noActiveProviders", "No active providers")}
-                </p>
-                <p className="text-xs text-warning/80">
-                  {translateOrFallback(
-                    "customCliNoModels",
-                    "Connect at least one provider to populate the model selectors."
-                  )}
-                </p>
-              </div>
-            </div>
+            <Notice
+              variant="warning"
+              icon="warning"
+              title={translateOrFallback("noActiveProviders", "No active providers")}
+            >
+              <p className="text-xs text-warning/80">
+                {translateOrFallback(
+                  "customCliNoModels",
+                  "Connect at least one provider to populate the model selectors."
+                )}
+              </p>
+            </Notice>
           )}
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -245,7 +244,7 @@ export default function CustomCliCard({
             <div className="space-y-4">
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <h4 className="text-sm">
+                  <h4 className="ci-heading" data-size="sm">
                     {translateOrFallback("customCliAliasMappingsLabel", "Alias mappings")}
                   </h4>
                   <p className="text-xs text-text-muted mt-1">
@@ -313,7 +312,7 @@ export default function CustomCliCard({
             </div>
           </div>
 
-          <div className="rounded-lg border border-border/60 bg-bg-subtle p-3 text-xs text-text-muted">
+          <CardSection className="text-xs text-text-muted">
             <p className="font-medium text-text-main">
               {translateOrFallback("customCliEndpointHintLabel", "How to wire the endpoint")}
             </p>
@@ -324,12 +323,12 @@ export default function CustomCliCard({
                 { endpoint: chatCompletionsEndpoint }
               )}
             </p>
-          </div>
+          </CardSection>
 
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
             <div className="space-y-2">
               <div className="flex items-center justify-between gap-2">
-                <h4 className="text-sm">
+                <h4 className="ci-heading" data-size="sm">
                   {translateOrFallback("customCliEnvBlockTitle", "Env / shell snippet")}
                 </h4>
                 <Button variant="outline" size="sm" onClick={() => handleCopy(envScript, "env")}>
@@ -346,7 +345,7 @@ export default function CustomCliCard({
 
             <div className="space-y-2">
               <div className="flex items-center justify-between gap-2">
-                <h4 className="text-sm">
+                <h4 className="ci-heading" data-size="sm">
                   {translateOrFallback("customCliJsonBlockTitle", "Provider JSON block")}
                 </h4>
                 <Button variant="outline" size="sm" onClick={() => handleCopy(jsonConfig, "json")}>

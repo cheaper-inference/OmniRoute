@@ -9,7 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from "@omniroute/ui-kit/table";
-import { Button, Checkbox, Modal } from "@/shared/components";
+import { Button, Checkbox, FileTrigger, Modal } from "@/shared/components";
 import type {
   ParsedProviderImportEntry,
   ProviderImportParseError,
@@ -79,7 +79,7 @@ function EntriesTable({ entries, selected, onToggleRow, onToggleAll, t }: Entrie
         {t("importFromFileSelectHint", { count: selected.size, total: entries.length })}
       </div>
       <Table
-        className="text-xs"
+        density="compact"
         maxHeight="16rem"
         scrollLabel={t("importFromFileTitle")}
         scrollbarLabel={t("importFromFileTitle")}
@@ -115,35 +115,25 @@ function EntriesTable({ entries, selected, onToggleRow, onToggleAll, t }: Entrie
 }
 
 interface FilePickerRowProps {
-  fileInputRef: React.RefObject<HTMLInputElement | null>;
   fileName: string;
   onFile: (file: File) => void;
   t: Translator;
 }
 
 /** File-input trigger + chosen filename display. */
-function FilePickerRow({ fileInputRef, fileName, onFile, t }: FilePickerRowProps) {
+function FilePickerRow({ fileName, onFile, t }: FilePickerRowProps) {
   return (
     <div className="flex items-center gap-3">
-      {/* kit-exception: Hidden native file input, opened by the Button below (no visible raw control). */}
-      <input
-        ref={fileInputRef}
-        type="file"
+      {/* A file the picker filter would hide is read too: the parser lists what is wrong. */}
+      <FileTrigger
         accept=".csv,.json,text/csv,application/json"
-        className="hidden"
-        onChange={(e) => {
-          const file = e.target.files?.[0];
-          if (file) onFile(file);
-        }}
-      />
-      <Button
-        size="sm"
-        variant="secondary"
-        icon="upload_file"
-        onClick={() => fileInputRef.current?.click()}
+        onFilesChange={(files) => onFile(files[0])}
+        onFilesRejected={(rejected) => onFile(rejected[0].file)}
       >
-        {t("importFromFileChoose")}
-      </Button>
+        <Button size="sm" variant="secondary" icon="upload_file">
+          {t("importFromFileChoose")}
+        </Button>
+      </FileTrigger>
       {fileName && <span className="text-xs text-text-muted font-mono">{fileName}</span>}
     </div>
   );
@@ -199,12 +189,7 @@ export function ImportProvidersFromFileModal({
         <p className="text-sm text-text-muted">{t("importFromFileDescription")}</p>
         <p className="text-xs text-text-muted">{t("importFromFileSchemaHint")}</p>
 
-        <FilePickerRow
-          fileInputRef={s.fileInputRef}
-          fileName={s.fileName}
-          onFile={s.handleFile}
-          t={t}
-        />
+        <FilePickerRow fileName={s.fileName} onFile={s.handleFile} t={t} />
         <ParseErrorsList errors={s.errors} t={t} />
         <EntriesTable
           entries={s.entries}

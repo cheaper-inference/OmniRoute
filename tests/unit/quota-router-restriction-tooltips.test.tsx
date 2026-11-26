@@ -1,10 +1,10 @@
 import React from "react";
 import { afterEach, expect, it, vi } from "vitest";
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, render } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import en from "../../src/i18n/messages/en.json";
 import zh from "../../src/i18n/messages/zh-CN.json";
-import HealthAccountTooltip from "@/app/(dashboard)/dashboard/usage/components/ProviderLimits/HealthAccountTooltip";
+import { HealthAccountCardContent } from "@/app/(dashboard)/dashboard/usage/components/ProviderLimits/HealthAccountTooltip";
 import { buildHealthAccount } from "@/app/(dashboard)/dashboard/usage/components/ProviderLimits/healthOverview";
 import { displayAccount } from "@/app/(dashboard)/dashboard/usage/components/ProviderLimits/availabilityDisplay";
 vi.unmock("next-intl");
@@ -58,22 +58,18 @@ for (const locale of ["en", "zh-CN"])
         }
       );
       expect(displayAccount(account, now).partial).toBe(scoped);
-      render(
+      // The content of the shared hover card (the card itself is the kit's).
+      const { container } = render(
         <NextIntlClientProvider
           locale={locale}
           messages={{ usage: messages.usage, common: messages.common }}
           timeZone="UTC"
           now={new Date(now)}
         >
-          <HealthAccountTooltip
-            id="synthetic-restriction"
-            account={account}
-            label="Synthetic"
-            anchor={document.body}
-          />
+          <HealthAccountCardContent account={account} label="Synthetic" />
         </NextIntlClientProvider>
       );
-      const text = screen.getByRole("tooltip").textContent;
+      const text = container.textContent;
       expect(text).toContain(
         messages.usage[
           reason === "peakHour"

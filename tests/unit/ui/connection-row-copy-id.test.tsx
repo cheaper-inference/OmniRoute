@@ -4,6 +4,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { createRoot } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { readButtonTooltip } from "../../_helpers/buttonTooltip";
 
 import ConnectionRow, {
   type ConnectionRowProps,
@@ -92,12 +93,14 @@ describe("ConnectionRow connection-id chip", () => {
     expect(findChip(el).textContent).toContain("Copied");
   });
 
-  it("names the real pin header (x-omniroute-connection) in its tooltip", () => {
+  it("names the real pin header (x-omniroute-connection) in its tooltip", async () => {
     const el = render(<ConnectionRow {...buildProps()} />);
     const chip = findChip(el);
-    expect(chip.title).toContain("x-omniroute-connection");
-    expect(chip.title).not.toContain("x-connection-id");
-    expect(chip.getAttribute("aria-label")).toBe(chip.title);
+    // The title is the kit tooltip (shown on hover and focus), not a native attribute.
+    const tooltip = await readButtonTooltip(chip);
+    expect(tooltip).toContain("x-omniroute-connection");
+    expect(tooltip).not.toContain("x-connection-id");
+    expect(chip.getAttribute("aria-label")).toBe(tooltip);
   });
 
   it("renders no chip when the connection has no id", () => {

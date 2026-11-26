@@ -1,6 +1,8 @@
 // @vitest-environment jsdom
 import React from "react";
 import { cleanup, fireEvent, render } from "@testing-library/react";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 const { default: Textarea } = await import("@/shared/components/Textarea");
@@ -39,6 +41,27 @@ describe("Textarea / Checkbox adapters", () => {
     const { container } = render(<Textarea aria-label="Raw" />);
     expect(container.querySelector(".ci-field")).toBeNull();
     expect(container.firstElementChild?.tagName).toBe("TEXTAREA");
+  });
+
+  // Kit `input-mono-xs-ime`: `font-mono` has no effect on a <textarea>, so the code font is a prop.
+  it("Textarea mono sets the kit code font, with and without a label", () => {
+    const { getByLabelText, getByRole, rerender } = render(<Textarea aria-label="JSON" mono />);
+    const bare = getByLabelText("JSON");
+    expect(bare.className).toContain("ci-textarea--mono");
+    expect(bare.getAttribute("spellcheck")).toBe("false");
+    expect(bare.getAttribute("autocapitalize")).toBe("none");
+    rerender(<Textarea label="Headers" mono spellCheck />);
+    const labelled = getByRole("textbox", { name: "Headers" });
+    expect(labelled.className).toContain("ci-textarea--mono");
+    expect(labelled.getAttribute("spellcheck")).toBe("true");
+    rerender(<Textarea aria-label="JSON" />);
+    expect(getByLabelText("JSON").className).not.toContain("ci-textarea--mono");
+  });
+
+  it("Textarea declares mono in its own props", () => {
+    const source = readFileSync(join(process.cwd(), "src/shared/components/Textarea.tsx"), "utf8");
+    expect(source).toMatch(/\bmono\?: boolean;/);
+    expect(source).toMatch(/\bmono=\{mono\}/);
   });
 
   it("Checkbox renders a labelled kit checkbox and fires onChange", () => {
