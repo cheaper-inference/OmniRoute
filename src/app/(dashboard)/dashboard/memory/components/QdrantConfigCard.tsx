@@ -337,12 +337,12 @@ export default function QdrantConfigCard() {
             checked={qdrant.enabled}
             aria-checked={qdrant.enabled}
             onCheckedChange={() => save({ enabled: !qdrant.enabled })}
-            disabled={saving || (!qdrant.enabled && !searchValidated)}
+            disabled={saving || (!qdrant.enabled && !searchValidated && !health?.ok)}
           />
         </div>
       </Card.Section>
 
-      {!qdrant.enabled && !searchValidated && (
+      {!qdrant.enabled && !searchValidated && !health?.ok && (
         <p className="-mt-2 mb-4 text-xs text-warning">
           Execute um teste de busca bem-sucedido antes de ativar. Ele valida o modelo de embedding e
           a dimensão da coleção.

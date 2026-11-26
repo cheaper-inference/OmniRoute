@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Pažadas — vienas galinis punktas ir 394 teikėjai. Automatinis atsarginis perjungimas užtikrina maršrutizavimą, kol pasiekiamas kitas veikiantis taikinys. Šeši pagrindiniai aspektai: atsparus atsarginis perjungimas tarp 394 teikėjų · iki 95 % žetonų sutaupymas tinkamiems darbo krūviams · pradėti galima už 0 USD, turint daugiau nei 150 nemokamų planų ir 51 pasikartojantį arba visada nemokamą teikėją be rakto · 39 CLI / agentų integracijos per vieną konfigūraciją · OpenAI, Claude, Gemini ir Responses API suderinamumas per /v1 · gamybinės valdymo priemonės, įskaitant grandinės pertraukiklius, TLS slėpimą, MCP su 110 įrankių, A2A, atmintį, apsaugos taisykles, vertinimus ir daugiau nei 56 000 statinių testų deklaracijų daugiau nei 7 800 sekamų testų failų."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Pažadas — vienas galinis punktas ir 394 teikėjai. Automatinis atsarginis perjungimas užtikrina maršrutizavimą, kol pasiekiamas kitas veikiantis taikinys. Šeši pagrindiniai aspektai: atsparus atsarginis perjungimas tarp 394 teikėjų · iki 95 % žetonų sutaupymas tinkamiems darbo krūviams · pradėti galima už 0 USD, turint daugiau nei 150 nemokamų planų ir 40 pasikartojantį arba visada nemokamą teikėją be rakto · 39 CLI / agentų integracijos per vieną konfigūraciją · OpenAI, Claude, Gemini ir Responses API suderinamumas per /v1 · gamybinės valdymo priemonės, įskaitant grandinės pertraukiklius, TLS slėpimą, MCP su 110 įrankių, A2A, atmintį, apsaugos taisykles, vertinimus ir daugiau nei 56 000 statinių testų deklaracijų daugiau nei 7 800 sekamų testų failų."/>
 
 <br/>
 <br/>
@@ -711,7 +711,7 @@ slaptus duomenis nuo patekimo į jūsų shell istoriją. → [CLI integracijos](
 
 </div>
 
-> **394 registruoti teikėjai** kanoninėse pokalbių, medijos, paieškos, vietinių, debesijos agentų ir sistemų kolekcijose, įskaitant **153 teikėjus su `hasFree: true` aptikimo metaduomenimis**. Pokalbių modelių registre yra **239 teikėjai / 3 059 skirtingos teikėjo ir modelio poros / 1 475 neapdoroti modelių ID**; atskirame nemokamo biudžeto kataloge yra **465 eilutės pagal modelį**, **34 pasikartojantys paketai** ir **51 pasikartojantis / be rakto visada nemokamas teikėjas**. Tai sąmoningai skirtingi vardikliai; apibrėžimai ir pagal paketus deduplikuoti skaičiavimai pateikiami [Teikėjų nuorodoje](docs/reference/PROVIDER_REFERENCE.md) ir [Nemokamuose planuose](docs/reference/FREE_TIERS.md).
+> **394 registruoti teikėjai** kanoninėse pokalbių, medijos, paieškos, vietinių, debesijos agentų ir sistemų kolekcijose, įskaitant **153 teikėjus su `hasFree: true` aptikimo metaduomenimis**. Pokalbių modelių registre yra **239 teikėjai / 3 059 skirtingos teikėjo ir modelio poros / 1 475 neapdoroti modelių ID**; atskirame nemokamo biudžeto kataloge yra **465 eilutės pagal modelį**, **34 pasikartojantys paketai** ir **40 pasikartojantis / be rakto visada nemokamas teikėjas**. Tai sąmoningai skirtingi vardikliai; apibrėžimai ir pagal paketus deduplikuoti skaičiavimai pateikiami [Teikėjų nuorodoje](docs/reference/PROVIDER_REFERENCE.md) ir [Nemokamuose planuose](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 

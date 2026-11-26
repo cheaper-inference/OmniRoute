@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="A Promessa — Um endpoint e 394 provedores. O fallback automático mantém o roteamento enquanto outro destino saudável estiver disponível. Seis pilares: fallback resiliente entre 394 provedores · até 95% de economia de tokens em cargas de trabalho elegíveis · $0 para começar, com mais de 150 níveis gratuitos e 51 provedores gratuitos recorrentes/sem chave para sempre · 39 integrações de CLI/agentes por meio de uma única configuração · compatibilidade com as APIs OpenAI, Claude, Gemini e Responses em /v1 · controles de produção, incluindo disjuntores, furtividade TLS, MCP com 110 ferramentas, A2A, memória, proteções, avaliações e mais de 56.000 declarações de testes estáticos em mais de 7.800 arquivos de teste monitorados."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="A Promessa — Um endpoint e 394 provedores. O fallback automático mantém o roteamento enquanto outro destino saudável estiver disponível. Seis pilares: fallback resiliente entre 394 provedores · até 95% de economia de tokens em cargas de trabalho elegíveis · $0 para começar, com mais de 150 níveis gratuitos e 40 provedores gratuitos recorrentes/sem chave para sempre · 39 integrações de CLI/agentes por meio de uma única configuração · compatibilidade com as APIs OpenAI, Claude, Gemini e Responses em /v1 · controles de produção, incluindo disjuntores, furtividade TLS, MCP com 110 ferramentas, A2A, memória, proteções, avaliações e mais de 56.000 declarações de testes estáticos em mais de 7.800 arquivos de teste monitorados."/>
 
 <br/>
 <br/>
@@ -703,7 +703,7 @@ do histórico do seu shell. → [Integrações CLI](docs/guides/CLI-INTEGRATIONS
 
 </div>
 
-> **394 provedores registrados** nas coleções canônicas de chat, mídia, pesquisa, locais, agentes de nuvem e sistema, incluindo **153 que contêm metadados de descoberta `hasFree: true`**. O registro de modelos de chat abrange **239 provedores / 3.059 pares distintos de provedor-modelo / 1.475 IDs de modelo brutos**; o catálogo separado de orçamento gratuito tem **465 linhas por modelo**, **34 pools recorrentes** e **51 provedores recorrentes/sem chave gratuitos para sempre**. Esses são denominadores diferentes por definição; as definições e os cálculos sem duplicação de pools estão em [Referência de provedores](docs/reference/PROVIDER_REFERENCE.md) e [Níveis gratuitos](docs/reference/FREE_TIERS.md).
+> **394 provedores registrados** nas coleções canônicas de chat, mídia, pesquisa, locais, agentes de nuvem e sistema, incluindo **153 que contêm metadados de descoberta `hasFree: true`**. O registro de modelos de chat abrange **239 provedores / 3.059 pares distintos de provedor-modelo / 1.475 IDs de modelo brutos**; o catálogo separado de orçamento gratuito tem **465 linhas por modelo**, **34 pools recorrentes** e **40 provedores recorrentes/sem chave gratuitos para sempre**. Esses são denominadores diferentes por definição; as definições e os cálculos sem duplicação de pools estão em [Referência de provedores](docs/reference/PROVIDER_REFERENCE.md) e [Níveis gratuitos](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 

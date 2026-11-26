@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Il-Wegħda — Endpoint wieħed u 394 fornitur. Fallback awtomatiku jżomm ir-routing għaddej sakemm ikun hemm destinazzjoni oħra b’saħħitha disponibbli. Sitt pilastri: fallback reżiljenti bejn 394 fornitur · sa 95% iffrankar fuq it-tokens għal workloads eliġibbli · $0 biex tibda b’aktar minn 150 livell b’xejn u 51 fornitur b’xejn għal dejjem, rikorrenti jew mingħajr ċavetta · 39 integrazzjoni CLI/agent permezz ta’ konfigurazzjoni waħda · kompatibbiltà ma’ OpenAI, Claude, Gemini u Responses API f’/v1 · kontrolli għall-produzzjoni inklużi circuit breakers, stealth TLS, MCP b’110 għodda, A2A, memory, guardrails, evals u aktar minn 56,000 dikjarazzjoni ta’ test statiku f’aktar minn 7,800 fajl tat-test traċċat."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Il-Wegħda — Endpoint wieħed u 394 fornitur. Fallback awtomatiku jżomm ir-routing għaddej sakemm ikun hemm destinazzjoni oħra b’saħħitha disponibbli. Sitt pilastri: fallback reżiljenti bejn 394 fornitur · sa 95% iffrankar fuq it-tokens għal workloads eliġibbli · $0 biex tibda b’aktar minn 150 livell b’xejn u 40 fornitur b’xejn għal dejjem, rikorrenti jew mingħajr ċavetta · 39 integrazzjoni CLI/agent permezz ta’ konfigurazzjoni waħda · kompatibbiltà ma’ OpenAI, Claude, Gemini u Responses API f’/v1 · kontrolli għall-produzzjoni inklużi circuit breakers, stealth TLS, MCP b’110 għodda, A2A, memory, guardrails, evals u aktar minn 56,000 dikjarazzjoni ta’ test statiku f’aktar minn 7,800 fajl tat-test traċċat."/>
 
 <br/>
 <br/>
@@ -703,7 +703,7 @@ mill-istorja tas-shell tiegħek. → [CLI Integrations](docs/guides/CLI-INTEGRAT
 
 </div>
 
-> **394-il fornitur irreġistrat** fil-kollezzjonijiet kanoniċi taċ-chat, tal-midja, tat-tiftix, lokali, tal-aġenti tal-cloud u tas-sistema, inklużi **153 li għandhom il-metadejta ta’ skoperta `hasFree: true`**. Ir-reġistru tal-mudelli taċ-chat ikopri **239 fornitur / 3,059 par distinti fornitur-mudell / 1,475 ID mhux ipproċessati tal-mudelli**; il-katalgu separat tal-baġit b’xejn għandu **465 ringiela għal kull mudell**, **34 pool rikorrenti** u **51 fornitur b’xejn għal dejjem rikorrenti/mingħajr ċavetta**. Dawn huma denominaturi differenti skont id-disinn; id-definizzjonijiet u l-kalkoli deduplikati skont il-pool jinsabu fir-[Referenza tal-Fornituri](docs/reference/PROVIDER_REFERENCE.md) u fil-[Livelli B’xejn](docs/reference/FREE_TIERS.md).
+> **394-il fornitur irreġistrat** fil-kollezzjonijiet kanoniċi taċ-chat, tal-midja, tat-tiftix, lokali, tal-aġenti tal-cloud u tas-sistema, inklużi **153 li għandhom il-metadejta ta’ skoperta `hasFree: true`**. Ir-reġistru tal-mudelli taċ-chat ikopri **239 fornitur / 3,059 par distinti fornitur-mudell / 1,475 ID mhux ipproċessati tal-mudelli**; il-katalgu separat tal-baġit b’xejn għandu **465 ringiela għal kull mudell**, **34 pool rikorrenti** u **40 fornitur b’xejn għal dejjem rikorrenti/mingħajr ċavetta**. Dawn huma denominaturi differenti skont id-disinn; id-definizzjonijiet u l-kalkoli deduplikati skont il-pool jinsabu fir-[Referenza tal-Fornituri](docs/reference/PROVIDER_REFERENCE.md) u fil-[Livelli B’xejn](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 

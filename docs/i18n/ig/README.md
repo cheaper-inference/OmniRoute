@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Nkwa ahụ — Otu endpoint na ndị na-eweta ọrụ 394. Fallback akpaka na-eme ka nhazi ụzọ gaa n'ihu mgbe ebumnuche ọzọ dị mma ka dị. Ogidi isii: fallback siri ike n'etiti ndị na-eweta ọrụ 394 · ruo 95% nchekwa token na ọrụ tozuru etozu · $0 iji malite site na free tiers 150+ na ndị na-eweta ọrụ 51 na-enye n'efu ruo mgbe ebighị ebi, ma ọ bụ site na ndenye aha ugboro ugboro/keyless · njikọ CLI/agent 39 site na otu nhazi · ndakọrịta OpenAI, Claude, Gemini na Responses API na /v1 · njikwa mmepụta gụnyere circuit breakers, TLS stealth, MCP 110 tools, A2A, ebe nchekwa, guardrails, evals na nkwupụta ule static karịrị 56,000 n'ofe faịlụ ule 7,800+ a na-enyocha."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Nkwa ahụ — Otu endpoint na ndị na-eweta ọrụ 394. Fallback akpaka na-eme ka nhazi ụzọ gaa n'ihu mgbe ebumnuche ọzọ dị mma ka dị. Ogidi isii: fallback siri ike n'etiti ndị na-eweta ọrụ 394 · ruo 95% nchekwa token na ọrụ tozuru etozu · $0 iji malite site na free tiers 150+ na ndị na-eweta ọrụ 40 na-enye n'efu ruo mgbe ebighị ebi, ma ọ bụ site na ndenye aha ugboro ugboro/keyless · njikọ CLI/agent 39 site na otu nhazi · ndakọrịta OpenAI, Claude, Gemini na Responses API na /v1 · njikwa mmepụta gụnyere circuit breakers, TLS stealth, MCP 110 tools, A2A, ebe nchekwa, guardrails, evals na nkwupụta ule static karịrị 56,000 n'ofe faịlụ ule 7,800+ a na-enyocha."/>
 
 <br/>
 <br/>
@@ -703,7 +703,7 @@ n’akụkọ ihe omume shell gị. → [CLI Integrations](docs/guides/CLI-INTEG
 
 </div>
 
-> **Ndị na-eweta 394 edebanyere aha** n'ofe mkpokọta nkata, mgbasa ozi, ọchụchọ, mpaghara, onye nnọchi anya igwe ojii na sistemụ ndị bụ isi, gụnyere **153 nwere metadata nchọpụta `hasFree: true`**. Ndebanye aha ụdị nkata kpuchiri **ndị na-eweta 239 / njikọ ndị na-eweta na ụdị 3,059 pụrụ iche / NJ ụdị raw 1,475**; katalọgụ mmefu n'efu dị iche nwere **ahịrị kwa ụdị 465**, **ọdọ ego na-eme ugboro ugboro 34** na **ndị na-eweta 51 na-enye n'efu ruo mgbe ebighị ebi, na-eme ugboro ugboro ma ọ bụ na-achọghị igodo**. Ndị a bụ denominator dị iche iche site n'ebumnuche; nkọwa na ngụkọta e wepụtaworo nkwughachi ọdọ ego dị na [Ntụaka Ndị Na-eweta](docs/reference/PROVIDER_REFERENCE.md) na [Ọkwa N'efu](docs/reference/FREE_TIERS.md).
+> **Ndị na-eweta 394 edebanyere aha** n'ofe mkpokọta nkata, mgbasa ozi, ọchụchọ, mpaghara, onye nnọchi anya igwe ojii na sistemụ ndị bụ isi, gụnyere **153 nwere metadata nchọpụta `hasFree: true`**. Ndebanye aha ụdị nkata kpuchiri **ndị na-eweta 239 / njikọ ndị na-eweta na ụdị 3,059 pụrụ iche / NJ ụdị raw 1,475**; katalọgụ mmefu n'efu dị iche nwere **ahịrị kwa ụdị 465**, **ọdọ ego na-eme ugboro ugboro 34** na **ndị na-eweta 40 na-enye n'efu ruo mgbe ebighị ebi, na-eme ugboro ugboro ma ọ bụ na-achọghị igodo**. Ndị a bụ denominator dị iche iche site n'ebumnuche; nkọwa na ngụkọta e wepụtaworo nkwughachi ọdọ ego dị na [Ntụaka Ndị Na-eweta](docs/reference/PROVIDER_REFERENCE.md) na [Ọkwa N'efu](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 

@@ -46,15 +46,15 @@ function unauthorizedResponse(request: Request, message: string): Response {
  * Authenticate a client-API request at the route level.
  *
  * @param request - The incoming request.
- * @returns A 401 `Response` the handler must return, or `null` when the
+ * @returns A rejection `Response` the handler must return, or `null` when the
  *          request may proceed to policy enforcement.
  */
 export async function enforceClientApiRouteAuth(request: Request): Promise<Response | null> {
   // Any presented credential that validates is accepted — a stale Bearer next
   // to a valid x-api-key must not 401 here when `clientApiPolicy` admitted it.
-  const { apiKey: apiKeyRaw, valid } = await resolveClientApiKey(request);
+  const { apiKey: apiKeyRaw, valid, rejection } = await resolveClientApiKey(request);
 
-  if (valid) return null;
+  if (valid || rejection) return rejection ?? null;
   if (apiKeyRaw) {
     return isRequireApiKeyEnabled() ? unauthorizedResponse(request, "Invalid API key") : null;
   }
