@@ -10,6 +10,7 @@ import { getCachedProviderNodes, getCachedSettings } from "@/lib/db/readCache";
 import { getSyncedAutoAliases } from "@/lib/providerModels/syncedAutoAliases.ts";
 import { getActiveSyncedCatalog } from "@/lib/db/models/activeSyncedCatalog";
 import { getModelCompatOverrides } from "@/lib/db/models/compat";
+import type { SyncedAvailableModel } from "@/lib/db/models/synced";
 import { getNoAuthHydrationProviderIds } from "./noAuthProviderSiblings";
 import { inferGithubUnsyncedTargetFormat } from "./githubResponsesFallback";
 import {
@@ -371,6 +372,26 @@ function buildRuntimeModelMeta(
   return metadata;
 }
 
+function applyInferredTargetFormat(
+  metadata: RuntimeModelMeta,
+  syncedMatch: SyncedAvailableModel | undefined,
+  registryMatch: unknown,
+  providerId: string,
+  modelId: string
+): void {
+  const syncedDeclaresChatEndpoint =
+    Array.isArray(syncedMatch?.supportedEndpoints) &&
+    syncedMatch.supportedEndpoints.some(
+      (ep: unknown) =>
+        typeof ep === "string" &&
+        (ep === "chat" || ep.includes("chat/completions") || ep.includes("chat-completions"))
+    );
+  if (!metadata.targetFormat && !syncedDeclaresChatEndpoint && !registryMatch) {
+    const inferredTargetFormat = inferGithubUnsyncedTargetFormat(providerId, modelId);
+    if (inferredTargetFormat) metadata.targetFormat = inferredTargetFormat;
+  }
+}
+
 /**
  * #14393: some live/synced catalogs expose an upstream model id that itself
  * contains a "/" (e.g. logfare's "logfare/auto"). parseModel() unconditionally
@@ -405,6 +426,29 @@ function resolveSyncedMatch(
   if (fallbackMatch) return { match: fallbackMatch, modelId: originalModelId as string };
 
   return { match: undefined, modelId: resolvedModelId };
+}
+
+function resolveGeneratedClaudeEffortVariant(
+  providerId: string,
+  resolvedModelId: string,
+  syncedModels: SyncedAvailableModel[]
+): { baseModelId: string; level: string; liveBase: SyncedAvailableModel } | null {
+  const suffixStart = resolvedModelId.lastIndexOf("-");
+  if (suffixStart <= 0) return null;
+
+  const baseModelId = resolvedModelId.slice(0, suffixStart);
+  const level = resolvedModelId.slice(suffixStart + 1);
+  const liveBase = syncedModels.find((model) => model.id === baseModelId);
+  const bareBase = baseModelId.slice(baseModelId.lastIndexOf("/") + 1);
+  if (
+    liveBase &&
+    shouldExposeClaudeEffortVariants({ id: `${providerId}/${baseModelId}` }) &&
+    claudeEffortLevelsFor(providerId, bareBase).includes(level) &&
+    !isDisableThinkingLevelVariantsEnabled()
+  ) {
+    return { baseModelId, level, liveBase };
+  }
+  return null;
 }
 
 async function lookupModelMeta(
@@ -479,24 +523,17 @@ async function lookupModelMeta(
 
     // The catalog can generate Claude tiers even when the live row declares none.
     // Only try those tiers after the existing literal and declared tier lookups miss.
-    const suffixStart = resolvedModelId.lastIndexOf("-");
-    if (!available && !effort && suffixStart > 0) {
-      const baseModelId = resolvedModelId.slice(0, suffixStart);
-      const level = resolvedModelId.slice(suffixStart + 1);
-      const liveBase = syncedModels.find((model) => model.id === baseModelId);
-      const bareBase = baseModelId.slice(baseModelId.lastIndexOf("/") + 1);
-      if (
-        liveBase &&
-        shouldExposeClaudeEffortVariants({ id: `${providerId}/${baseModelId}` }) &&
-        claudeEffortLevelsFor(providerId, bareBase).includes(level) &&
-        !isDisableThinkingLevelVariantsEnabled()
-      ) {
-        resolvedModelId = baseModelId;
-        effort = level;
-        syncedMatch = liveBase;
-        customMatch = findCustomModelMeta(customModels, baseModelId);
-        available = true;
-      }
+    const generatedVariant =
+      !available && !effort
+        ? resolveGeneratedClaudeEffortVariant(providerId, resolvedModelId, syncedModels)
+        : null;
+    if (generatedVariant) {
+      const { baseModelId, level, liveBase } = generatedVariant;
+      resolvedModelId = baseModelId;
+      effort = level;
+      syncedMatch = liveBase;
+      customMatch = findCustomModelMeta(customModels, baseModelId);
+      available = true;
     }
 
     const registryMatch = findRegistryModel(providerId, resolvedModelId);
@@ -510,17 +547,7 @@ async function lookupModelMeta(
       compatOverrideMatch
     );
     if (effort) metadata.resolvedThinkingEffort = effort;
-    const syncedDeclaresChatEndpoint =
-      Array.isArray(syncedMatch?.supportedEndpoints) &&
-      syncedMatch.supportedEndpoints.some(
-        (ep: unknown) =>
-          typeof ep === "string" &&
-          (ep === "chat" || ep.includes("chat/completions") || ep.includes("chat-completions"))
-      );
-    if (!metadata.targetFormat && !syncedDeclaresChatEndpoint && !registryMatch) {
-      const inferredTargetFormat = inferGithubUnsyncedTargetFormat(providerId, resolvedModelId);
-      if (inferredTargetFormat) metadata.targetFormat = inferredTargetFormat;
-    }
+    applyInferredTargetFormat(metadata, syncedMatch, registryMatch, providerId, resolvedModelId);
 
     return { modelId: resolvedModelId, metadata, available };
   } catch {
