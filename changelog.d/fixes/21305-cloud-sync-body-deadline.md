@@ -1,0 +1,1 @@
+- **fix(api):** the cloud sync deadline now also covers reading the response body, so a cloud endpoint that sends headers and stalls on the body can no longer hold `PATCH`/`DELETE /api/keys/[id]` past the timeout ([#21305](https://github.com/cheaper-inference/OmniRoute/pull/21305))
