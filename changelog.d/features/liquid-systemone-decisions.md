@@ -1,1 +1,2 @@
 - **feat(api):** `POST /v1/systemone` routes `liquid/<model>` (`liquid/d1`, `liquid/d1.2`, `liquid/d1.2-ultra`, ...) to Liquid AI's native decisions API (`api.liquid.ai/decisions/v1/systemone`) with the `liquid` connection's key
+- **fix(providers):** a Liquid AI key that only works on the decisions API is accepted when adding the connection (the chat-only check used to refuse it as invalid)
