@@ -275,6 +275,7 @@
     "quality:boundary": "node scripts/quality/measure-boundary.mjs",
     "quality:catalog-drift": "node --import tsx/esm scripts/quality/catalog-drift/run.mjs",
     "quality:evidence-age": "node --import tsx/esm scripts/quality/catalog-drift/evidence-age.mjs",
+    "quality:evidence-stub": "node --import tsx/esm scripts/quality/catalog-drift/evidence-stub.mjs",
     "quality:launch": "node scripts/quality/launch-quality.mjs",
     "quality:gate": "npm run quality:collect && npm run quality:ratchet -- --allow-missing",
     "check:gate-manifest": "node scripts/quality/gate-manifest.mjs",

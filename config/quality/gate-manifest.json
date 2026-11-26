@@ -499,6 +499,11 @@
       "disposition": "separately-invoked"
     },
     {
+      "name": "quality:evidence-stub",
+      "command": "node --import tsx/esm scripts/quality/catalog-drift/evidence-stub.mjs",
+      "disposition": "separately-invoked"
+    },
+    {
       "name": "quality:gate",
       "command": "npm run quality:collect && npm run quality:ratchet -- --allow-missing",
       "disposition": "separately-invoked"
