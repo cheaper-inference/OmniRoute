@@ -25,7 +25,7 @@
         "labeledAt": "2026-11-25T23:40:06Z"
       }
     ],
-    "stage": "testing",
+    "stage": "landing",
     "startedAt": "2026-11-26T02:47:49.437Z",
     "attempts": 0,
     "bisect": {
@@ -61,7 +61,8 @@
       "landed": [],
       "steps": 0,
       "hang": false
-    }
+    },
+    "landAttempts": 1
   },
   "baseChecks": [
     {
@@ -180,30 +181,6 @@
     "culprits": 1
   },
   "history": [
-    {
-      "at": "2026-11-19T19:54:51.807Z",
-      "type": "batch-started",
-      "batchId": "b4",
-      "prs": [
-        20616,
-        19788,
-        19798,
-        19804,
-        19844,
-        19845
-      ],
-      "sha": "b7f1ad39432c7b4002097ab3c77e43b4d1eed58f",
-      "detail": "6 PR(s) on 6d87faf23640; window 6",
-      "labeledAt": {
-        "19788": "2026-11-19T19:53:09Z",
-        "19798": "2026-11-19T19:53:11Z",
-        "19804": "2026-11-19T19:53:14Z",
-        "19844": "2026-11-19T19:53:16Z",
-        "19845": "2026-11-19T19:53:19Z",
-        "20616": "2026-11-19T19:52:23Z"
-      },
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44602926075"
-    },
     {
       "at": "2026-11-19T21:14:55.556Z",
       "type": "checks-green",
@@ -2621,8 +2598,23 @@
         "21198": "2026-11-25T23:40:06Z"
       },
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45744693139"
+    },
+    {
+      "at": "2026-11-26T04:11:58.756Z",
+      "type": "checks-green",
+      "batchId": "b44",
+      "prs": [
+        20421,
+        21198
+      ],
+      "sha": "712f5e67bdd75d32a22717cfd32840408fbfe50a",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45753644000"
     }
   ],
-  "updatedAt": "2026-11-26T03:53:54.095Z",
-  "batchWindow": 2
+  "updatedAt": "2026-11-26T04:12:08.961Z",
+  "batchWindow": 2,
+  "landingsWithoutVerdict": {
+    "count": 1,
+    "since": "2026-11-26T04:12:08.961Z"
+  }
 }
