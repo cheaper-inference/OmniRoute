@@ -148,7 +148,6 @@
   ],
   "shadow": {
     "processed": {
-      "14667": "8659558510a5799b16bd1ec03635dc561ee95912",
       "14860": "537a2a9dd38dcfeb936fb37fa2ec26becd8d1925",
       "14863": "009cc84a60dec564b1ee84cefebfad43464744ee",
       "18122": "8ef72f69f96896be79f2213d41609bc54af17a93",
@@ -2776,6 +2775,6 @@
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45827011467"
     }
   ],
-  "updatedAt": "2026-11-26T13:14:41.492Z",
+  "updatedAt": "2026-11-26T14:16:55.520Z",
   "batchWindow": 6
 }
