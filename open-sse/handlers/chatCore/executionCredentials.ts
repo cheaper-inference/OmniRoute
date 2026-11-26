@@ -198,6 +198,11 @@ export function resolveExecutionCredentials(opts: {
     providerSpecificData.targetFormat = targetFormat;
   }
 
+  // Cheaper Inference uses this request-local format for the URL, headers and body transform.
+  if (provider === "cheaperinference") {
+    providerSpecificData.targetFormat = targetFormat;
+  }
+
   // GitHub Copilot custom models (custom-model dropdown, #2905) can carry a
   // per-model targetFormat override resolving to "openai-responses" so a
   // Codex-family custom model routes through Copilot's native /responses

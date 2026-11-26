@@ -2711,7 +2711,18 @@ async function handleChatCoreInner({
     allowCompletedToolHandoffGrace: isCodexResponsesEcho,
   });
 
-  const dedupRequestBody = { ...translatedBody, model: `${provider}/${model}`, stream };
+  const dedupRequestBody: Record<string, unknown> = {
+    ...translatedBody,
+    model: `${provider}/${model}`,
+    stream,
+  };
+  if (provider === "cheaperinference" && targetFormat === FORMATS.CLAUDE) {
+    // Translation can consume an explicit opt-out. Attempt defaults still consult the raw body,
+    // so a request that opts out must not join one that receives an inferred effort.
+    for (const field of ["reasoning_effort", "reasoning", "thinking", "output_config"] as const) {
+      if (dedupRequestBody[field] === undefined) dedupRequestBody[field] = body[field];
+    }
+  }
   // A request-scoped deadline changes the executor contract; never let it
   // join, or be joined by, an ordinary request through in-flight deduplication.
   const dedupEnabled =

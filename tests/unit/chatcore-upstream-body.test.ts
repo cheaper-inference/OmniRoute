@@ -117,6 +117,51 @@ test("automatic effort is limited to OpenAI chat bodies", async () => {
   }
 });
 
+test("Cheaper Inference Messages applies the discovered default with adaptive thinking", async () => {
+  const model = "claude-opus-4.7";
+  const prepared = await prepareUpstreamBody({
+    translatedBody: { max_tokens: 2000, temperature: 0.3 },
+    modelToCall: model,
+    provider: "cheaperinference",
+    targetFormat: FORMATS.CLAUDE,
+    credentials: null,
+    originModel: model,
+    defaultThinkingEffort: "low",
+  });
+
+  assert.deepEqual(prepared.thinking, { type: "adaptive" });
+  assert.deepEqual(prepared.output_config, { effort: "low" });
+  assert.equal(prepared.temperature, undefined);
+  assert.equal(prepared.reasoning_effort, undefined);
+});
+
+test("Cheaper Inference Messages respects explicit reasoning and forced tool choice", async () => {
+  const model = "claude-sonnet-4.6";
+  const options = {
+    modelToCall: model,
+    provider: "cheaperinference",
+    targetFormat: FORMATS.CLAUDE,
+    credentials: null,
+    originModel: model,
+    resolvedThinkingEffort: "high",
+  };
+  for (const [translatedBody, rawBody] of [
+    [{ output_config: { effort: "low" } }, undefined],
+    [{ tool_choice: { type: "tool", name: "lookup" } }, undefined],
+    [{}, { reasoning_effort: "none" }],
+  ] as const) {
+    const prepared = await prepareUpstreamBody({
+      ...options,
+      translatedBody: { max_tokens: 2000, ...translatedBody },
+      rawBody,
+    });
+    assert.equal(prepared.thinking, undefined);
+    assert.equal(prepared.max_tokens, 2000);
+    assert.equal(prepared.reasoning_effort, undefined);
+    assert.deepEqual(prepared.output_config, translatedBody.output_config);
+  }
+});
+
 test("attempt constraints rewrite Claude fields without changing the source", async () => {
   const source = {
     thinking: { type: "enabled", budget_tokens: 10000 },

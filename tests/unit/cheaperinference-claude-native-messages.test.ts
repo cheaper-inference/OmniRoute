@@ -3,6 +3,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
+import { setTimeout as delay } from "node:timers/promises";
 import { CALL_LOG_SETTLE_TIMEOUT_MS } from "../helpers/callLogSettle.ts";
 
 const testRoot = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-cinf-messages-"));
@@ -222,3 +223,108 @@ test("chatCore sends Claude Code breakpoints to the native Messages endpoint", a
   const lastUser = sent.messages.findLast(({ role }) => role === "user");
   assert.deepEqual(lastUser?.content.at(-1)?.cache_control, CACHE_CONTROL);
 });
+
+test("chatCore sends the resolved Claude payload to Messages despite a conflicting connection format", async (t) => {
+  const calls: { url: string; headers: Headers; body: string }[] = [];
+  t.mock.method(globalThis, "fetch", async (url: URL | string, init?: RequestInit) => {
+    calls.push({ url: String(url), headers: new Headers(init?.headers), body: String(init?.body) });
+    return Response.json({
+      id: "msg_cinf",
+      type: "message",
+      role: "assistant",
+      model: CLAUDE_MODEL,
+      content: [{ type: "text", text: "ok" }],
+      stop_reason: "end_turn",
+      usage: { input_tokens: 12, output_tokens: 3 },
+    });
+  });
+  const credentials = { ...CREDENTIALS, providerSpecificData: { targetFormat: "openai" } };
+  const result = await handleChatCore({
+    body: {
+      model: CLAUDE_MODEL,
+      stream: false,
+      messages: [
+        { role: "system", content: "System prompt" },
+        { role: "user", content: "Hello" },
+      ],
+    },
+    modelInfo: { provider: "cheaperinference", model: CLAUDE_MODEL, extendedContext: false },
+    credentials,
+    log: { debug() {}, info() {}, warn() {}, error() {} },
+  } as Parameters<typeof handleChatCore>[0]);
+
+  assert.equal(calls.length, 1);
+  const [call] = calls;
+  assert.match(call.url, /\/v1\/messages$/);
+  assert.equal(call.headers.get("anthropic-version"), "2023-06-01");
+  const sent = JSON.parse(call.body);
+  assert.equal(sent.messages.length, 1);
+  assert.match(JSON.stringify(sent.system), /System prompt/);
+  assert.equal(credentials.providerSpecificData.targetFormat, "openai");
+  assert.ok(result.success);
+});
+
+test(
+  "chatCore keeps explicit reasoning opt-out separate from an overlapping inferred effort",
+  { timeout: 60_000 },
+  async (t) => {
+    const model = "claude-sonnet-4.6";
+    const firstDispatched = Promise.withResolvers<void>();
+    const secondDispatched = new AbortController();
+    const sent: Record<string, unknown>[] = [];
+    t.mock.method(globalThis, "fetch", async (_url: URL | string, init?: RequestInit) => {
+      sent.push(JSON.parse(String(init?.body)));
+      if (sent.length === 1) {
+        firstDispatched.resolve();
+        // Keep the first request in flight until the second takes its own upstream slot.
+        await delay(8000, undefined, { signal: secondDispatched.signal }).catch((error) => {
+          if (error.name !== "AbortError") throw error;
+        });
+      } else {
+        secondDispatched.abort();
+      }
+      return Response.json({
+        id: "msg_cinf",
+        type: "message",
+        role: "assistant",
+        model,
+        content: [{ type: "text", text: "ok" }],
+        stop_reason: "end_turn",
+        usage: { input_tokens: 12, output_tokens: 3 },
+      });
+    });
+    const modelInfo = {
+      provider: "cheaperinference",
+      model,
+      resolvedThinkingEffort: "high",
+      extendedContext: false,
+    };
+    const send = (reasoning: { reasoning_effort?: string }) => {
+      const body = {
+        model,
+        stream: false,
+        temperature: 0,
+        max_tokens: 2000,
+        messages: [{ role: "user", content: "Compare concurrent reasoning choices" }],
+        ...reasoning,
+      };
+      return handleChatCore({
+        body,
+        modelInfo,
+        credentials: CREDENTIALS,
+        clientRawRequest: { endpoint: "/v1/chat/completions", body, headers: new Headers() },
+        log: { debug() {}, info() {}, warn() {}, error() {} },
+      } as Parameters<typeof handleChatCore>[0]);
+    };
+    const first = send({});
+    await Promise.race([firstDispatched.promise, first]);
+    const results = await Promise.all([first, send({ reasoning_effort: "none" })]);
+
+    assert.ok(results.every((result) => result.success));
+    assert.equal(sent.length, 2);
+    assert.ok(sent.some(({ thinking }) => thinking === undefined));
+    assert.ok(
+      sent.some(({ thinking }) => (thinking as { budget_tokens?: number })?.budget_tokens === 62000)
+    );
+  }
+);
