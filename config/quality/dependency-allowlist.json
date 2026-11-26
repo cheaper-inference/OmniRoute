@@ -28,7 +28,8 @@
     "vite": "",
     "harfbuzzjs": "devDependency used only by scripts/docs/readme-outline.mjs to shape the kit's Switzer text roles and turn them into vector outlines for the README SVGs (the font's licence forbids embedding a subset). MIT; HarfBuzz compiled to WASM, no native build, no network at runtime. Already in the tree through subset-font; pinned exact at 1.6.4.",
     "fontverter": "devDependency used only by scripts/docs/readme-outline.mjs to read the vendored Switzer woff2 into memory as sfnt for HarfBuzz; nothing it converts is ever written or embedded. BSD-3-Clause; maintained by papandreou (assetgraph). Already in the tree through subset-font; pinned exact at 2.0.0.",
-    "subset-font": "devDependency used only by scripts/docs/readme-fonts.mjs to subset the OFL IBM Plex Mono @fontsource woff2 to the code characters each README SVG keeps as real text, embedded as a data: URI that renders inside GitHub's <img> sandbox. BSD-3-Clause; HarfBuzz compiled to WASM (harfbuzzjs, MIT), no native build, no network at runtime. Maintained by papandreou (assetgraph), 2.x line since 2022."
+    "subset-font": "devDependency used only by scripts/docs/readme-fonts.mjs to subset the OFL IBM Plex Mono @fontsource woff2 to the code characters each README SVG keeps as real text, embedded as a data: URI that renders inside GitHub's <img> sandbox. BSD-3-Clause; HarfBuzz compiled to WASM (harfbuzzjs, MIT), no native build, no network at runtime. Maintained by papandreou (assetgraph), 2.x line since 2022.",
+    "markdownlint-cli2": "devDependency replacing the unpinned `npx --yes markdownlint-cli2` download in the ci.yml docs-lint job and in lint:md (#20998 finding 4). Official markdownlint CLI runner (github.com/DavidAnson/markdownlint-cli2, MIT), published by davidanson — the markdownlint author — since 2020-07-04, so well past the 72h age cooldown. Pinned exact at 0.24.2; registry tarball and SHA-512 integrity verified against registry.npmjs.org on 2026-11-22. 0.24.2 is also the first line whose own deps clear the October 2026 advisories: markdown-it 15.0.3 (GHSA-gfr2-rv44-r23c / GHSA-r7fv-28h4-cvq7 / GHSA-vfgh-jcmw-g37q) and smol-toml 1.9.1 (GHSA-r4xh-jqrq-34v2); 0.23.3 pulled markdown-it 15.0.1 and smol-toml 1.8.0. Its markdownlint -> micromark-extension-math chain declares katex ^0.16.0, so a matching overrides entry forces katex ^0.18.2 (GHSA-238p-pmpm-9mq7, fixed 0.18.2) exactly as the existing mermaid override does. Docs-only lint tool: no install lifecycle script in it or any of the 24 packages it adds, and no runtime dependency of the shipped server."
   },
   "allowed": [
     "@agentclientprotocol/sdk",
@@ -146,6 +147,7 @@
     "lockfile-lint",
     "lowdb",
     "lucide-react",
+    "markdownlint-cli2",
     "marked",
     "marked-terminal",
     "mermaid",
