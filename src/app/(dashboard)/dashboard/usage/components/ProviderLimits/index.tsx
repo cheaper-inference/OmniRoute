@@ -27,6 +27,10 @@ import {
   supportsProviderQuota,
   isProviderQuotaVisible,
 } from "@/shared/utils/providerQuotaVisibility";
+import {
+  isAnthropicCompatibleProvider,
+  isOpenAICompatibleProvider,
+} from "@/shared/constants/providers";
 import useEmailPrivacyStore from "@/store/emailPrivacyStore";
 import { useNotificationStore } from "@/store/notificationStore";
 
@@ -303,7 +307,12 @@ export default function ProviderLimits({
     providerLabelsWithNodes([])
   );
 
+  const hasCustomProvider = connections.some(
+    ({ provider }) =>
+      isOpenAICompatibleProvider(provider) || isAnthropicCompatibleProvider(provider)
+  );
   useEffect(() => {
+    if (!hasCustomProvider) return;
     let alive = true;
     fetch("/api/provider-nodes")
       .then((r) => (r.ok ? r.json() : null))
@@ -317,7 +326,7 @@ export default function ProviderLimits({
     return () => {
       alive = false;
     };
-  }, []);
+  }, [hasCustomProvider]);
 
   useEffect(() => {
     let alive = true;
@@ -611,11 +620,11 @@ export default function ProviderLimits({
     return [...filteredConnections].sort((a, b) =>
       compareQuotaConnections(a, b, {
         providerOrder: PROVIDER_ORDER,
-        providerLabels: PROVIDER_LABEL,
+        providerLabels,
         compare: compareTr,
       })
     );
-  }, [filteredConnections]);
+  }, [filteredConnections, providerLabels]);
   const visibleQuotaData = useVisibleQuotaData(sortedConnections, quotaData);
 
   const resolvedPlanByConnection = useMemo(
@@ -733,7 +742,7 @@ export default function ProviderLimits({
     return [...filtered].sort((a, b) =>
       compareQuotaConnections(a, b, {
         providerOrder: PROVIDER_ORDER,
-        providerLabels: PROVIDER_LABEL,
+        providerLabels,
         compare: compareTr,
         accountCompare: (x, y) => {
           const sx = statusRank[statusByConnection[x.id] || "empty"];
@@ -747,6 +756,7 @@ export default function ProviderLimits({
     );
   }, [
     sortedConnections,
+    providerLabels,
     tierByConnection,
     tierFilter,
     purchaseTypeFilter,
@@ -1003,7 +1013,7 @@ export default function ProviderLimits({
                 <option value="all">{tr("filterProviderAll", "All providers")}</option>
                 {providerOptions.map((provider) => (
                   <option key={provider} value={provider}>
-                    {PROVIDER_LABEL[provider] || provider}
+                    {providerLabels[provider] || provider}
                   </option>
                 ))}
               </Select>
