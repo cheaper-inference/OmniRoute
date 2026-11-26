@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { syncCompatibleHeaders } from "@/lib/providers/compatibleNodeHeaders";
 import {
   deleteModelAliasesForProvider,
   deleteProviderConnectionsByProvider,
@@ -73,8 +74,7 @@ async function syncNodeConnections(
     apiType?: string;
     customJsonConfig: unknown;
     quotaCheck?: Parameters<typeof applyCompatibleQuotaCheck>[1]["setting"];
-    /** Whether the request carried `customHeaders`; otherwise each connection keeps its own. */
-    customHeadersSent: boolean;
+    headerUpdate?: { previous: unknown; next: Record<string, string> | null };
   }
 ) {
   const connections = await getProviderConnections({ provider: id });
@@ -91,8 +91,12 @@ async function syncNodeConnections(
         nodeName: updated.name,
         chatPath: updated.chatPath || undefined,
       } as JsonRecord;
-      if (node.customHeadersSent) {
-        providerSpecificData.customHeaders = updated.customHeaders || undefined;
+      if (node.headerUpdate) {
+        syncCompatibleHeaders(
+          providerSpecificData,
+          node.headerUpdate.previous,
+          node.headerUpdate.next
+        );
       }
       if (updated.modelsPath) {
         providerSpecificData.modelsPath = updated.modelsPath;
@@ -199,7 +203,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       iconUrl: iconUrl?.trim() || null,
       // #21227: the Edit node modal has no header editor and omits the field; omission keeps
       // the stored headers (updateProviderNode preserves them), only null or a value replaces them.
-      ...(customHeaders !== undefined ? { customHeaders: customHeaders || null } : {}),
+      ...(customHeaders !== undefined ? { customHeaders } : {}),
       dailyQuotaResetTimezone: dailyQuotaResetTimezone?.trim() || null,
       dailyQuotaResetHour:
         dailyQuotaResetHour === 0 || dailyQuotaResetHour != null ? dailyQuotaResetHour : null,
@@ -220,7 +224,10 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       apiType: node.type === "openai-compatible" ? apiType : undefined,
       customJsonConfig: customJsonNode.config,
       quotaCheck,
-      customHeadersSent: customHeaders !== undefined,
+      headerUpdate:
+        customHeaders === undefined
+          ? undefined
+          : { previous: node.customHeaders, next: customHeaders },
     });
 
     return NextResponse.json({ node: updated });
