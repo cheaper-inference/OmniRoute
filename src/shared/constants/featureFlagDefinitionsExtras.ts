@@ -20,8 +20,10 @@ export const EXTRA_FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
   AGENT_SESSION_MESSAGES_ENABLED_FLAG,
   {
     key: "NONSTREAM_REFUSED_REPLY_FAILURE_ACCOUNTING_ENABLED",
+    label: "Non-Streaming: Refused Reply Accounting",
     description:
       "Record refused non-streaming replies as a single failure with billed tokens, count them toward key quotas, and retain the prior account error.",
+    descriptionI18nKey: "featureFlagNonstreamRefusedReplyFailureAccountingEnabledDescription",
     type: "boolean",
     defaultValue: "false",
     category: "runtime",
@@ -29,8 +31,10 @@ export const EXTRA_FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
   },
   {
     key: "NONSTREAM_UPSTREAM_FAILURE_BILLED_USAGE_ENABLED",
+    label: "Non-Streaming: Upstream Failure Usage",
     description:
       "Include provider-reported billed tokens in usage history for failed non-streaming upstream requests.",
+    descriptionI18nKey: "featureFlagNonstreamUpstreamFailureBilledUsageEnabledDescription",
     type: "boolean",
     defaultValue: "false",
     category: "runtime",
@@ -38,7 +42,9 @@ export const EXTRA_FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
   },
   {
     key: "CLAUDE_NONSTREAM_EXTRA_USAGE_BACKGROUND_SYNC_ENABLED",
+    label: "Claude Non-Streaming: Background Extra-Usage Sync",
     description: "Sync Claude extra-usage state in the background for non-streaming replies.",
+    descriptionI18nKey: "featureFlagClaudeNonstreamExtraUsageBackgroundSyncEnabledDescription",
     type: "boolean",
     defaultValue: "false",
     category: "runtime",
@@ -46,8 +52,10 @@ export const EXTRA_FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
   },
   {
     key: "NONSTREAM_USAGE_NULL_TTFT_ENABLED",
+    label: "Non-Streaming: Null Time to First Token",
     description:
       "Store a null time to first token for successful non-streaming replies so they are excluded from TTFT averages.",
+    descriptionI18nKey: "featureFlagNonstreamUsageNullTtftEnabledDescription",
     type: "boolean",
     defaultValue: "false",
     category: "runtime",

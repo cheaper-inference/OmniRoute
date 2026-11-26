@@ -1,0 +1,1 @@
+- Add opt-in fixes for non-streaming failure accounting, billed tokens on upstream failures, background Claude extra-usage sync, and null TTFT for successful replies (salvaged from #20233 and #20232 by serenity-X).
