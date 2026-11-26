@@ -17,7 +17,8 @@ export function catalogFingerprint(row) {
     "trainsOnPrompts",
   ];
   const values = fields.map((field) => row[field] ?? null);
-  if (Array.isArray(row.gates) && row.gates.length) values.push([...row.gates].sort());
+  if (Array.isArray(row.gates) && row.gates.length)
+    values.push([...row.gates].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0)));
   return createHash("sha256").update(JSON.stringify(values)).digest("hex");
 }
 
