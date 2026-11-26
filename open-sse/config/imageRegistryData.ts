@@ -687,6 +687,27 @@ export const IMAGE_PROVIDERS: Record<string, ImageProviderConfig> = {
     ],
     supportedSizes: ["512x512", "768x768", "1024x1024", "1024x1536", "1536x1024"],
   },
+
+  // WaveSpeedAI async prediction API: the model id is the submit path (POST /api/v3/<model id>),
+  // results are polled from /api/v3/predictions/<id>/result. Any model id of the account can be
+  // addressed as wavespeed/<model id>; the entries below are the catalog defaults.
+  wavespeed: {
+    id: "wavespeed",
+    baseUrl: "https://api.wavespeed.ai",
+    authType: "apikey",
+    authHeader: "bearer",
+    format: "wavespeed-image",
+    models: [
+      {
+        id: "wavespeed-ai/z-image/turbo",
+        name: "Z-Image Turbo (WaveSpeedAI)",
+        supportedSizes: ["512x512", "768x768", "1024x1024", "1024x1536", "1536x1024"],
+      },
+      { id: "bytedance/seedream-v5.0-pro", name: "Seedream 5.0 Pro (WaveSpeedAI)" },
+      { id: "google/nano-banana-pro/text-to-image", name: "Nano Banana Pro (WaveSpeedAI)" },
+    ],
+    supportedSizes: ["1024x1024", "1792x1024", "1024x1792", "1536x1024", "1024x1536"],
+  },
   nanogpt: {
     id: "nanogpt",
     baseUrl: "https://nano-gpt.com/api/v1/images/generations",

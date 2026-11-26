@@ -1,0 +1,1 @@
+- **feat(providers):** add WaveSpeedAI (`wavespeed`) as an API-key media provider for image generation (`/v1/images/generations`) and video generation (`/v1/videos/generations`). Models are addressed as `wavespeed/<model id>`; the gateway submits one prediction, polls its result and returns the output URLs — thanks @chengzeyi

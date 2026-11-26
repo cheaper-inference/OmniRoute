@@ -129,6 +129,7 @@ export const IMAGE_ONLY_PROVIDER_IDS = new Set([
   "magnific",
   "deepai",
   "deapi",
+  "wavespeed",
 ]);
 
 export const AGGREGATOR_PROVIDER_IDS = new Set([
@@ -230,6 +231,7 @@ export const VIDEO_PROVIDER_IDS = new Set([
   "segmind",
   "novita",
   "deapi",
+  "wavespeed",
 ]);
 
 // IDE Providers: editors with built-in AI subscription (separate section in UI).

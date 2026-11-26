@@ -24,6 +24,16 @@ import {
   parseRetryAfterMs,
 } from "./pollRetry.ts";
 import { abortedVideoResult } from "./abort.ts";
+import {
+  WAVESPEED_BASE_URL,
+  WAVESPEED_FAILED_STATUSES,
+  WAVESPEED_RESULT_PATH,
+  WAVESPEED_SUBMIT_PATH,
+  encodeWavespeedModelPath,
+  isRetryableWavespeedPollStatus,
+  pickWavespeedModelInput,
+  readWavespeedFailure,
+} from "../mediaGeneration/wavespeed.ts";
 
 interface LogLike {
   info?: (tag: string, msg: string, meta?: unknown) => void;
@@ -90,6 +100,12 @@ export type VideoJobPreset = {
     method: "POST";
     /** may contain {model} — substituted before POST */
     path: string;
+    /**
+     * Encodes the model id for the submit path. Defaults to `encodeURIComponent`, which
+     * turns a slash-separated id into one path segment; a provider whose model id IS the
+     * path (WaveSpeedAI: /api/v3/<owner>/<model>/<task>) supplies a per-segment encoder.
+     */
+    encodeModel?: (model: string) => string;
     buildBody: (params: {
       model?: string;
       prompt?: string;
@@ -128,6 +144,20 @@ export type VideoJobPreset = {
   resultNeedsAuth?: boolean;
   /** format reported alongside the downloaded artifact */
   resultFormat?: string;
+  /**
+   * Reads a failure out of a submit or poll response that arrived with HTTP 2xx (an error
+   * envelope, or a failed job's reason). A returned failure ends the job with its status and
+   * message instead of the generic "Video job failed"; null means the response reports no
+   * failure. A `transient` failure on a poll is retried like a retryable HTTP status.
+   */
+  readFailure?: (
+    payload: unknown
+  ) => { status: number; message: string; transient?: boolean } | null;
+  /**
+   * Which failed status reads are retried (network errors arrive as 502/504). Defaults to
+   * 429/503. The submit request is never retried.
+   */
+  isRetryablePollStatus?: (status: number) => boolean;
   maxPolls: number;
   pollIntervalMs: number;
 };
@@ -319,6 +349,38 @@ const VIDEO_JOB_PRESETS: Record<string, VideoJobPreset> = {
     maxPolls: 120,
     pollIntervalMs: 5000,
   },
+  // WaveSpeedAI prediction API (https://wavespeed.ai/docs). POST /api/v3/<model id> takes the
+  // model's own input and answers { code, message, data: { id, status } }; GET
+  // /api/v3/predictions/{id}/result moves data.status through created → processing →
+  // completed | failed, with public file URLs in data.outputs or the reason in data.error.
+  // Some failures arrive as HTTP 200 with a non-200 envelope `code`, hence readFailure.
+  "wavespeed-video-job": {
+    id: "wavespeed-video-job",
+    displayName: "WaveSpeedAI",
+    authHeaderName: "Authorization",
+    authScheme: "bearer",
+    baseUrlFallback: WAVESPEED_BASE_URL,
+    submit: {
+      method: "POST",
+      path: WAVESPEED_SUBMIT_PATH,
+      encodeModel: encodeWavespeedModelPath,
+      buildBody: ({ prompt, duration, extras }) => ({
+        ...pickWavespeedModelInput(extras),
+        ...(prompt !== undefined ? { prompt } : {}),
+        ...(typeof duration === "number" ? { duration } : {}),
+      }),
+    },
+    taskIdPath: "data.id",
+    poll: { pathTemplate: WAVESPEED_RESULT_PATH },
+    statusPath: "data.status",
+    statusDone: ["completed"],
+    statusFailed: WAVESPEED_FAILED_STATUSES,
+    resultPath: "data.outputs",
+    readFailure: readWavespeedFailure,
+    isRetryablePollStatus: isRetryableWavespeedPollStatus,
+    maxPolls: 600,
+    pollIntervalMs: 1000,
+  },
 };
 
 /** Resolve a configured job preset; null when the preset is unknown/none. */
@@ -480,7 +542,17 @@ async function runVideoJobGeneration({
     ),
   });
 
-  const submitPath = preset.submit.path.replace("{model}", encodeURIComponent(model));
+  const encodeModel = preset.submit.encodeModel ?? encodeURIComponent;
+  let submitPath: string;
+  try {
+    submitPath = preset.submit.path.replace("{model}", encodeModel(model));
+  } catch (err: unknown) {
+    return {
+      success: false,
+      status: 400,
+      error: sanitizeErrorMessage(err instanceof Error ? err.message : String(err)),
+    };
+  }
   const submitUrl = `${baseUrl}${submitPath}`; // baseUrl never ends with "/"
   const submitResult = await fetchJson(submitUrl, {
     method: preset.submit.method,
@@ -492,6 +564,14 @@ async function runVideoJobGeneration({
   if (signal?.aborted) return abortedVideoResult();
   if (submitResult.ok === false) {
     return { success: false, status: submitResult.status, error: submitResult.error };
+  }
+  const submitFailure = preset.readFailure?.(submitResult.data);
+  if (submitFailure) {
+    return {
+      success: false,
+      status: submitFailure.status,
+      error: sanitizeErrorMessage(submitFailure.message),
+    };
   }
 
   // preset.taskIdPath comes first; the rest only run when a provider omits the
@@ -525,6 +605,7 @@ async function runVideoJobGeneration({
     Math.max(1, Math.floor(windowCeilingMs / pollInterval))
   );
 
+  const isRetryable = preset.isRetryablePollStatus ?? isRetryablePollStatus;
   let consecutiveRetries = 0;
   let nextDelay = pollInterval;
   for (let attempt = 1; attempt <= maxPolls; attempt += 1) {
@@ -541,10 +622,7 @@ async function runVideoJobGeneration({
     if (signal?.aborted) return abortedVideoResult();
     if (pollResult.ok === false) {
       // #15536: 429/503 on a status query is transient - back off and keep polling.
-      if (
-        isRetryablePollStatus(pollResult.status) &&
-        consecutiveRetries < MAX_CONSECUTIVE_POLL_RETRIES
-      ) {
+      if (isRetryable(pollResult.status) && consecutiveRetries < MAX_CONSECUTIVE_POLL_RETRIES) {
         consecutiveRetries += 1;
         nextDelay = computePollRetryDelayMs(
           pollInterval,
@@ -556,7 +634,21 @@ async function runVideoJobGeneration({
       }
       return { success: false, status: pollResult.status, error: pollResult.error };
     }
+    const pollFailure = preset.readFailure?.(pollResult.data);
+    if (pollFailure?.transient && consecutiveRetries < MAX_CONSECUTIVE_POLL_RETRIES) {
+      consecutiveRetries += 1;
+      nextDelay = computePollRetryDelayMs(pollInterval, consecutiveRetries);
+      attempt -= 1;
+      continue;
+    }
     consecutiveRetries = 0;
+    if (pollFailure) {
+      return {
+        success: false,
+        status: pollFailure.status,
+        error: sanitizeErrorMessage(pollFailure.message),
+      };
+    }
 
     const status =
       readPath(pollResult.data, preset.statusPath) ??

@@ -311,6 +311,8 @@ export async function validateProviderApiKey({
       validateImageProviderApiKey({ provider: "stability-ai", apiKey, providerSpecificData }),
     "black-forest-labs": ({ apiKey, providerSpecificData }: any) =>
       validateImageProviderApiKey({ provider: "black-forest-labs", apiKey, providerSpecificData }),
+    wavespeed: ({ apiKey, providerSpecificData }: any) =>
+      validateImageProviderApiKey({ provider: "wavespeed", apiKey, providerSpecificData }),
     recraft: ({ apiKey, providerSpecificData }: any) =>
       validateImageProviderApiKey({ provider: "recraft", apiKey, providerSpecificData }),
     topaz: ({ apiKey, providerSpecificData }: any) =>

@@ -27,6 +27,10 @@ const IMAGE_PROVIDER_VALIDATION_ENDPOINTS: Record<
   "black-forest-labs": {
     path: "/v1/credits",
   },
+  // Account balance: a free authenticated read (401 for an invalid key).
+  wavespeed: {
+    path: "/api/v3/balance",
+  },
   recraft: {
     path: "/v1/users/me",
   },
