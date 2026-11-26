@@ -21,47 +21,71 @@ const instructions = (body) =>
     .filter((line) => !/^\s*#/.test(line))
     .join("\n");
 
-const dockerfile = read("Dockerfile.bun");
-const bunWeb = instructions(stageBody(dockerfile, "runner-web"));
+const bunDockerfile = read("Dockerfile.bun");
+const bunWeb = instructions(stageBody(bunDockerfile, "runner-web"));
+const webCommands = bunWeb.replace(/\\\n/g, " ");
+const apkPackages = [...webCommands.matchAll(/\bapk add\s+([^&;|\n]+)/g)].flatMap((match) =>
+  match[1]
+    .trim()
+    .split(/\s+/)
+    .filter((word) => !word.startsWith("-"))
+);
 
-test("Bun runner-web does not install Chromium from apt", () => {
-  // The Debian chromium / chromium-common / chromium-driver packages carried ~720 HIGH
-  // findings with no Debian fix in 3.8.54-web-bun, and chromium-driver was never used.
+test("Bun runner-web does not install Wolfi Chromium packages", () => {
   assert.doesNotMatch(bunWeb, /\bchromium-driver\b/);
-  assert.doesNotMatch(bunWeb, /apt-get install[^\n]*\\\n(?:[^\n]*\\\n)*\s*chromium\s*\\/);
-  assert.doesNotMatch(bunWeb, /^\s+chromium\s*\\?$/m);
+  for (const pkg of apkPackages) {
+    assert.doesNotMatch(pkg, /^(?:chromium|chromium-driver)(?:$|[=<>~@])/);
+  }
 });
 
-test("Bun runner-web installs Playwright's own Chromium, like the Node runner-web", () => {
+test("Bun builder materializes the complete Playwright installer", () => {
+  const builder = instructions(stageBody(bunDockerfile, "builder")).replace(/\\\n/g, " ");
+  assert.match(
+    builder,
+    /&&\s+cp -RL node_modules\/playwright node_modules\/playwright-core \/opt\/playwright\/node_modules\/\s+&&\s+test -f \/opt\/playwright\/node_modules\/playwright\/cli\.js$/m
+  );
+});
+
+test("Bun runner-web installs Playwright's own Chromium without installing OS dependencies through Playwright", () => {
   // 3.8.54-web-bun: chromium.launch() failed with "Executable doesn't exist at
   // /home/bun/.cache/ms-playwright/…" because nothing populated Playwright's browser path.
   assert.match(bunWeb, /^ENV PLAYWRIGHT_BROWSERS_PATH=\/home\/bun\/\.cache\/ms-playwright$/m);
-  assert.match(
-    bunWeb,
-    /\bbun \/opt\/playwright\/node_modules\/playwright\/cli\.js install chromium --with-deps\b/
-  );
   assert.match(bunWeb, /^COPY --from=builder \/opt\/playwright \/opt\/playwright$/m);
+  assert.match(
+    webCommands,
+    /\bbun \/opt\/playwright\/node_modules\/playwright\/cli\.js install chromium\s*(?:&&|$)/m
+  );
+  assert.doesNotMatch(bunWeb, /--with-deps\b/);
   assert.match(bunWeb, /chown -R bun:bun \/home\/bun\/\.cache/);
   assert.doesNotMatch(bunWeb, /PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD/);
   const browsersEnv = bunWeb.indexOf("ENV PLAYWRIGHT_BROWSERS_PATH=");
-  const install = bunWeb.indexOf("install chromium --with-deps");
+  const install = bunWeb.indexOf(
+    "bun /opt/playwright/node_modules/playwright/cli.js install chromium"
+  );
   assert.ok(
     browsersEnv !== -1 && browsersEnv < install,
     "browsers path must be set before install"
   );
 });
 
-test("Bun builder bundles the complete Playwright installer for runner-web", () => {
-  const builder = instructions(stageBody(dockerfile, "builder"));
-  assert.match(
-    builder,
-    /\bcp -RL node_modules\/playwright node_modules\/playwright-core \/opt\/playwright\/node_modules\//
-  );
-  assert.match(builder, /\btest -f \/opt\/playwright\/node_modules\/playwright\/cli\.js$/m);
+test("Bun runner-web ships Xvfb for headed Chromium (#15300)", () => {
+  for (const pkg of ["xvfb", "xkbcomp", "xkeyboard-config"]) {
+    assert.ok(apkPackages.includes(pkg), `apk must install ${pkg}`);
+  }
+  assert.match(webCommands, /&&\s+install -d -o bun -g bun -m 0755 \/tmp\/\.X11-unix\s+&&/);
+  assert.doesNotMatch(webCommands, /\bchmod\s+1?7{3}\b/);
 });
 
-test("Bun runner-web ships Xvfb for headed Chromium (#15300)", () => {
-  assert.match(bunWeb, /apt-get install -y --no-install-recommends xvfb/);
+test("Bun runner-web fails the build if either Chromium executable is missing libraries", () => {
+  assert.match(
+    webCommands,
+    /for bin in "\$PLAYWRIGHT_BROWSERS_PATH"\/\*\/\*\/chrome "\$PLAYWRIGHT_BROWSERS_PATH"\/\*\/\*\/chrome-headless-shell; do/
+  );
+  assert.match(
+    webCommands,
+    /missing="\$\(\/lib\/ld-linux-\*\.so\.\* --list "\$bin" 2>&1 \| grep 'not found' \|\| true\)"/
+  );
+  assert.match(webCommands, /if \[ -n "\$missing" \]; then [^\n]*exit 1; fi;/);
 });
 
 test("Bun runner-web keeps /usr/bin/chromium for the system-browser lookups", () => {
@@ -92,20 +116,38 @@ test("Bun runner-web drops back to the bun user", () => {
 
 test("the release preflight smoke builds the real runner-web stage and launches Chromium", () => {
   const smoke = read("scripts/release/preflight-bun-apt-smoke.sh");
-  // It must replay the stage itself, not a hand-kept copy of the package list.
-  assert.match(smoke, /FROM runner-base AS runner-web/);
+  assert.match(smoke, /\^FROM .* AS base\$/);
+  assert.match(smoke, /\^FROM .* AS runtime-os\$/);
+  assert.match(smoke, /\^FROM runner-base AS runner-web\$/);
+  assert.match(smoke, /stage && !\/\^ENTRYPOINT \/ \{ print \}/);
+  const generatedDockerfile = smoke.match(/^\{\n([\s\S]*?)\n\} > "\$CTX\/Dockerfile"$/m)?.[1];
+  assert.ok(generatedDockerfile, "smoke must generate a Dockerfile");
+  assert.deepEqual(
+    generatedDockerfile.split("\n").map((line) => line.trim()),
+    [
+      'echo "FROM $BASE AS base"',
+      'echo "FROM scratch AS builder"',
+      'echo "COPY node_modules/playwright /opt/playwright/node_modules/playwright"',
+      'echo "COPY node_modules/playwright-core /opt/playwright/node_modules/playwright-core"',
+      `printf '%s\\n' "$RUNTIME_OS"`,
+      'echo "FROM runtime-os"',
+      'echo "WORKDIR /app"',
+      'echo "COPY node_modules/playwright/index.js node_modules/playwright/index.mjs node_modules/playwright/package.json /app/node_modules/playwright/"',
+      'echo "COPY node_modules/playwright-core /app/node_modules/playwright-core"',
+      `printf '%s\\n' "$STAGE"`,
+      'echo "COPY probe.cjs /tmp/probe.cjs"',
+      'echo "RUN bun /tmp/probe.cjs"',
+    ]
+  );
   assert.match(smoke, /node_modules\/playwright-core/);
-  assert.match(smoke, /^\s*echo "FROM scratch AS builder"$/m);
-  assert.match(smoke, /COPY node_modules\/playwright \/opt\/playwright\/node_modules\/playwright"/);
+  assert.match(smoke, /await launch\("headless", \{ headless: true \}\)/);
+  assert.match(smoke, /spawn\("Xvfb", \[":99",/);
   assert.match(
     smoke,
-    /COPY node_modules\/playwright-core \/opt\/playwright\/node_modules\/playwright-core"/
+    /await launch\("headed under Xvfb", \{ headless: false, env: \{ \.\.\.process\.env, DISPLAY: ":99" \} \}\)/
   );
-  assert.match(smoke, /^\s*echo "COPY standalone\/node_modules\/ \/app\/node_modules\/"$/m);
   assert.match(
     smoke,
-    /^cp -L "\$ROOT\/node_modules\/playwright\/"\{index\.js,index\.mjs,package\.json\} "\$CTX\/standalone\/node_modules\/playwright\/"$/m
+    /await launch\("\/usr\/bin\/chromium", \{ headless: true, executablePath: "\/usr\/bin\/chromium" \}\)/
   );
-  assert.match(smoke, /headless: false/);
-  assert.match(smoke, /Xvfb/);
 });

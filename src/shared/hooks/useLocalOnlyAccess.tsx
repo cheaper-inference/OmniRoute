@@ -6,7 +6,8 @@ import {
   type LocalOnlyAccessSnapshot,
 } from "@/shared/constants/localOnlyFeatures";
 import {
-  getLocalOnlyRejectionVersion,
+  EMPTY_LOCAL_ONLY_REJECTIONS,
+  getLocalOnlyRejections,
   isLocalOnlyPathBlocked,
   subscribeLocalOnlyRejections,
 } from "@/shared/utils/localOnlyAccess";
@@ -35,7 +36,10 @@ export function LocalOnlyAccessProvider({
  */
 export function useLocalOnlyBlocked(path: string): boolean {
   const access = useContext(LocalOnlyAccessContext);
-  // Re-render when a rejection is recorded; the value itself is read below.
-  useSyncExternalStore(subscribeLocalOnlyRejections, getLocalOnlyRejectionVersion, () => 0);
-  return isLocalOnlyPathBlocked(access, path);
+  const rejections = useSyncExternalStore(
+    subscribeLocalOnlyRejections,
+    getLocalOnlyRejections,
+    () => EMPTY_LOCAL_ONLY_REJECTIONS
+  );
+  return isLocalOnlyPathBlocked(access, path, rejections);
 }
