@@ -264,9 +264,13 @@ function canPreserveOfficialMidSystem(payload: Record<string, unknown>, route?: 
   const model = route.model ?? (typeof payload.model === "string" ? payload.model : "");
   if (!OFFICIAL_MID_SYSTEM_MODEL.test(model) || getSystemPromptConfig().enabled) return false;
   if (!Array.isArray(payload.messages)) return false;
+  return hasSupportedOfficialSystemPlacement(payload.messages);
+}
+
+function hasSupportedOfficialSystemPlacement(messages: unknown[]): boolean {
   let previousRole = "";
   let hasMidSystem = false;
-  for (const raw of payload.messages) {
+  for (const raw of messages) {
     if (!raw || typeof raw !== "object" || Array.isArray(raw)) return false;
     const message = raw as Record<string, unknown>;
     const role = message.role;
