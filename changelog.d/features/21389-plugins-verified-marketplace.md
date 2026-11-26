@@ -1,0 +1,1 @@
+- **feat(plugins):** Opt-in `PLUGIN_MARKETPLACE_INTEGRITY_ENABLED` installs official Marketplace plugins only after an Ed25519-signed index, a matching SHA-256 and a safe extraction whose manifest carries the signed name and version (#21389).
