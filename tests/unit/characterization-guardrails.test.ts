@@ -83,10 +83,11 @@ test("guardrails barrel (src/lib/guardrails/index.ts) exports exactly this surfa
   ]);
 });
 
-test("importing the barrel registers the six default guardrails in priority order", () => {
+test("importing the barrel registers the default guardrails in priority order", () => {
   assert.deepEqual(
     guardrailRegistry.list().map((g) => [g.name, g.priority, g.enabled]),
     [
+      ["agent-guard", 1, true],
       ["vision-bridge", 5, true],
       ["audio-bridge", 6, true],
       ["video-bridge", 7, true],

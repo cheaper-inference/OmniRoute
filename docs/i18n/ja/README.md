@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="OmniRouteの約束 — 1つのエンドポイントと394のプロバイダー。別の正常な対象が利用可能な間は、自動フォールバックによってルーティングを継続します。6つの柱：394のプロバイダーにまたがる高耐障害性フォールバック · 対象ワークロードで最大95%のトークン削減 · 150以上の無料ティアと、継続利用可能またはキー不要で永久無料の51プロバイダーにより、$0から開始可能 · 1つの設定で39のCLI/エージェント統合 · /v1でのOpenAI、Claude、Gemini、Responses API互換性 · サーキットブレーカー、TLSステルス、MCP 110ツール、A2A、メモリ、ガードレール、評価機能、7,800以上の追跡テストファイルにまたがる56,000以上の静的テスト宣言などの本番環境向け制御。"/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="OmniRouteの約束 — 1つのエンドポイントと394のプロバイダー。別の正常な対象が利用可能な間は、自動フォールバックによってルーティングを継続します。6つの柱：394のプロバイダーにまたがる高耐障害性フォールバック · 対象ワークロードで最大95%のトークン削減 · 150以上の無料ティアと、継続利用可能またはキー不要で永久無料の40プロバイダーにより、$0から開始可能 · 1つの設定で39のCLI/エージェント統合 · /v1でのOpenAI、Claude、Gemini、Responses API互換性 · サーキットブレーカー、TLSステルス、MCP 110ツール、A2A、メモリ、ガードレール、評価機能、7,800以上の追跡テストファイルにまたがる56,000以上の静的テスト宣言などの本番環境向け制御。"/>
 
 <br/>
 <br/>
@@ -703,7 +703,7 @@ omniroute configure codex          # 他にも: claude opencode qwen aider goose
 
 </div>
 
-> **394 件の登録済みプロバイダー**を、標準のチャット、メディア、検索、ローカル、クラウドエージェント、システムの各コレクションにまたがって収録しています。そのうち **153 件は `hasFree: true` の検出メタデータを持ちます**。チャットモデルレジストリには、**239 プロバイダー / 3,059 個の異なるプロバイダーとモデルの組み合わせ / 1,475 個の生モデル ID**が含まれます。別個に用意された無料予算カタログには、**モデル単位の行が 465 件**、**定期プールが 34 件**、**定期利用またはキー不要で永久無料のプロバイダーが 51 件**あります。これらは意図的に異なる分母を使用しています。定義とプール重複排除後の計算については、[プロバイダーリファレンス](docs/reference/PROVIDER_REFERENCE.md) および [無料ティア](docs/reference/FREE_TIERS.md) を参照してください。
+> **394 件の登録済みプロバイダー**を、標準のチャット、メディア、検索、ローカル、クラウドエージェント、システムの各コレクションにまたがって収録しています。そのうち **153 件は `hasFree: true` の検出メタデータを持ちます**。チャットモデルレジストリには、**239 プロバイダー / 3,059 個の異なるプロバイダーとモデルの組み合わせ / 1,475 個の生モデル ID**が含まれます。別個に用意された無料予算カタログには、**モデル単位の行が 465 件**、**定期プールが 34 件**、**定期利用またはキー不要で永久無料のプロバイダーが 40 件**あります。これらは意図的に異なる分母を使用しています。定義とプール重複排除後の計算については、[プロバイダーリファレンス](docs/reference/PROVIDER_REFERENCE.md) および [無料ティア](docs/reference/FREE_TIERS.md) を参照してください。
 
 <div align="center">
 
@@ -1313,7 +1313,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 でもスキッ�
   <tr><td nowrap><b>ランタイム</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>言語</b></td><td>TypeScript 6.0 — <code>src/</code> と <code>open-sse/</code> 全体で<b>100% TypeScript</b>（v2.0以降、コアに <code>any</code> はゼロ）</td></tr>
   <tr><td nowrap><b>フレームワーク</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>データベース</b></td><td>better-sqlite3（SQLite、WALジャーナリング）+ LowDB（JSONレガシー）— 147のドメインモジュール、244のマイグレーション</td></tr>
+  <tr><td nowrap><b>データベース</b></td><td>better-sqlite3（SQLite、WALジャーナリング）+ LowDB（JSONレガシー）— 147のドメインモジュール、252のマイグレーション</td></tr>
   <tr><td nowrap><b>メモリ</b></td><td>SQLite FTS5全文検索 + int8量子化ベクトル埋め込み、型付き減衰</td></tr>
   <tr><td nowrap><b>スキーマ</b></td><td>Zod 4 — MCPツールI/O検証 + APIコントラクト</td></tr>
   <tr><td nowrap><b>プロトコル</b></td><td>MCP（stdio / HTTP / SSE）+ A2A v0.3（JSON-RPC 2.0 + SSE）</td></tr>

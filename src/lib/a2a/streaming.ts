@@ -6,6 +6,7 @@
  */
 
 import type { A2ATask } from "./taskManager";
+import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error.ts";
 
 export interface SSEChunkEvent {
   jsonrpc: "2.0";
@@ -137,7 +138,7 @@ export function createA2AStream(
         // Emit completion with metadata
         controller.enqueue(encoder.encode(createCompletionEvent(task.id, result.metadata)));
       } catch (err) {
-        const msg = err instanceof Error ? err.message : String(err);
+        const msg = sanitizeErrorMessage(err instanceof Error ? err.message : String(err));
         controller.enqueue(encoder.encode(createFailureEvent(task.id, msg)));
       } finally {
         clearInterval(heartbeatInterval);

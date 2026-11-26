@@ -153,3 +153,61 @@ test("handshake path defaults to /live-ws when NEXT_PUBLIC_LIVE_WS_PUBLIC_URL is
   const body = await response.json();
   assert.equal(body.live.path, "/live-ws");
 });
+
+// KEA-9514: the client only dials the live server when the handshake does not say it is
+// off, and only dials the page's own origin when the main HTTP port relays `/live-ws`.
+const RELAY_FLAG = "__omnirouteLiveWsSameOriginRelay";
+
+async function handshakeLive() {
+  const response = await wsRoute.GET(
+    new Request("http://localhost/api/v1/ws?handshake=1", {
+      headers: { origin: "http://localhost" },
+    })
+  );
+  assert.equal(response.status, 200);
+  return (await response.json()).live;
+}
+
+test("KEA-9514 handshake reports the live server enabled by default and disabled when off", async () => {
+  const original = process.env.OMNIROUTE_ENABLE_LIVE_WS;
+  try {
+    delete process.env.OMNIROUTE_ENABLE_LIVE_WS;
+    assert.equal((await handshakeLive()).enabled, true);
+    for (const off of ["0", "false", "FALSE"]) {
+      process.env.OMNIROUTE_ENABLE_LIVE_WS = off;
+      assert.equal((await handshakeLive()).enabled, false, `OMNIROUTE_ENABLE_LIVE_WS=${off}`);
+    }
+    process.env.OMNIROUTE_ENABLE_LIVE_WS = "1";
+    assert.equal((await handshakeLive()).enabled, true);
+  } finally {
+    if (original === undefined) delete process.env.OMNIROUTE_ENABLE_LIVE_WS;
+    else process.env.OMNIROUTE_ENABLE_LIVE_WS = original;
+  }
+});
+
+test("KEA-9514 handshake reports sameOrigin only when the main port relays /live-ws", async () => {
+  const globals = globalThis as Record<string, unknown>;
+  const original = globals[RELAY_FLAG];
+  try {
+    delete globals[RELAY_FLAG];
+    assert.equal((await handshakeLive()).sameOrigin, false);
+    globals[RELAY_FLAG] = true;
+    assert.equal((await handshakeLive()).sameOrigin, true);
+  } finally {
+    if (original === undefined) delete globals[RELAY_FLAG];
+    else globals[RELAY_FLAG] = original;
+  }
+});
+
+test("KEA-9514 the production wrapper marks the relay before Next loads", () => {
+  const src = fs.readFileSync(
+    new URL("../../scripts/dev/standalone-server-ws.mjs", import.meta.url),
+    "utf8"
+  );
+  const mark = src.indexOf(`globalThis.${RELAY_FLAG} = true`);
+  assert.ok(mark >= 0, "standalone-server-ws.mjs must set the relay flag");
+  assert.ok(
+    mark < src.indexOf('import("./server.js")'),
+    "the flag must be set before ./server.js loads"
+  );
+});

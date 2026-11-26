@@ -7,6 +7,8 @@
  * alongside the new one would send both, and depending on parser precedence the
  * server could read the stale value and fail auth.
  */
+import { normalizePerplexitySessionCookie } from "./perplexitySessionCookie.ts";
+
 export const SESSION_TOKEN_FAMILY_RE = /^__Secure-next-auth\.session-token(?:\.\d+)?$/;
 
 function retainOtherCookies(pairs: string[], refreshed: Map<string, string>) {
@@ -69,14 +71,9 @@ export function mergeRefreshedCookie(
 /**
  * Build the Cookie header value from whatever the user pasted.
  *
- * Accepts bare values, unchunked/chunked cookie lines, and full DevTools
- * "Cookie: …" headers.
+ * Accepts bare legacy tokens, unchunked/chunked NextAuth lines, the current
+ * `__Secure-pplx.session.<UUID>` header, and a leading `Cookie:`.
  */
 export function buildSessionCookieHeader(rawInput: string): string {
-  let s = rawInput.trim();
-  if (/^cookie\s*:\s*/i.test(s)) s = s.replace(/^cookie\s*:\s*/i, "");
-  if (/__Secure-next-auth\.session-token(?:\.\d+)?\s*=/.test(s)) {
-    return s;
-  }
-  return `__Secure-next-auth.session-token=${s}`;
+  return normalizePerplexitySessionCookie(rawInput);
 }

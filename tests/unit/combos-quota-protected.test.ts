@@ -201,3 +201,27 @@ test("combos page source filters isHidden from rendered list", async () => {
     "Combos page must filter out isHidden combos from the rendered list"
   );
 });
+
+test("a persisted reserved combo can be renamed but cannot keep its name on update", async () => {
+  const legacy = await combosDb.createCombo({
+    name: "AUTO",
+    strategy: "priority",
+    models: ["openai/gpt-4o"],
+  });
+  assert.ok(typeof legacy.id === "string");
+  const context = { params: Promise.resolve({ id: legacy.id }) };
+
+  const rejected = await comboRoute.PUT(
+    makePutRequest(legacy.id, { description: "keep the old name" }),
+    context
+  );
+  assert.equal(rejected.status, 400);
+  const body = await rejected.json();
+  assert.equal(body.error.details.firstField, "name");
+  assert.match(body.error.details.firstMessage, /reserved for the built-in automatic routes/);
+  assert.equal((await combosDb.getComboById(legacy.id))?.name, "AUTO");
+
+  const renamed = await comboRoute.PUT(makePutRequest(legacy.id, { name: "my-auto" }), context);
+  assert.equal(renamed.status, 200, await renamed.text());
+  assert.equal((await combosDb.getComboById(legacy.id))?.name, "my-auto");
+});

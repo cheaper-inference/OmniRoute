@@ -1,0 +1,1 @@
+- **ci:** The nightly derived-numbers pull request can land by itself on the development branch when it only changes derived files, the base is green, no release freeze is open and both gates passed. It is off until the repository variable DERIVED_REFRESH_AUTOLAND is set to true.

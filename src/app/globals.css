@@ -293,6 +293,11 @@ html:root[data-ci-appearance="editions"] {
   --font-sans: var(--ci-font-ui);
   --font-mono: var(--ci-font-code);
   --font-display: var(--ci-font-display);
+  /* The kit's two label sizes below `text-xs`: text-2xs (11px) and text-3xs (10px), for labels
+     only (running text stays at text-xs or larger). They replace the arbitrary pixel sizes the
+     type-scale ratchet counts (scripts/check/check-type-scale-ratchet.mjs). */
+  --text-2xs: var(--ci-font-size-2xs);
+  --text-3xs: var(--ci-font-size-3xs);
 
   /* Nested surface (enables bg-surface-2) */
   --color-surface-2: var(--surface-2);
@@ -301,6 +306,7 @@ html:root[data-ci-appearance="editions"] {
      (controls, --ci-radius-control). Custom names so the default rounded-* utilities stay. */
   --radius-card: var(--radius);
   --radius-control: var(--radius-control);
+  --radius-card-nested: var(--ci-radius-surface-nested);
 }
 
 /* ── Focus Indicators (U-3) ── kept in @layer base so kit components (which style their own
@@ -354,54 +360,6 @@ body.electron-macos {
 ::selection {
   background-color: color-mix(in srgb, var(--color-primary) 22%, transparent);
   color: var(--color-primary-ink);
-}
-
-/* Global custom scrollbar — thin, minimal, theme-aware */
-*::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-
-*::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-*::-webkit-scrollbar-thumb {
-  background-color: rgba(156, 163, 175, 0.2);
-  border-radius: 9999px;
-  transition: background-color 0.2s;
-}
-
-*::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(156, 163, 175, 0.45);
-}
-
-*::-webkit-scrollbar-corner {
-  background: transparent;
-}
-
-/* Dark theme scrollbar — slightly brighter thumb */
-.dark *::-webkit-scrollbar-thumb {
-  background-color: rgba(255, 255, 255, 0.08);
-}
-
-.dark *::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(255, 255, 255, 0.2);
-}
-
-/* Firefox support */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(156, 163, 175, 0.2) transparent;
-}
-
-.dark * {
-  scrollbar-color: rgba(255, 255, 255, 0.08) transparent;
-}
-
-/* Keep .custom-scrollbar alias for backward compatibility */
-.custom-scrollbar {
-  scrollbar-width: thin;
 }
 
 /* Hero gradient — kit surface tokens (the kit flips them in dark, no .dark override needed) */

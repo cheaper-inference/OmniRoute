@@ -18,7 +18,7 @@
 // baseline) — keep it that way; an entry here is a documented security debt.
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
-import { pathToFileURL } from "node:url";
+import { isMainModule } from "../lib/is-main-module.mjs";
 import {
   findTransitivelySpawnCapableRoutes,
   isSpawnCapableSource,
@@ -495,7 +495,7 @@ async function main(): Promise<void> {
   process.exit(0);
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1] || "").href) {
+if (isMainModule(import.meta.url)) {
   main().catch((err) => {
     console.error(
       `[route-guard-membership] fatal error: ${err instanceof Error ? err.message : String(err)}`

@@ -16,12 +16,12 @@ const {
   settingsDb,
 } = harness;
 
-const MODEL = "Lorbus/Qwen3.6-27B-int4-AutoRound";
+const MODEL = "aphrodite/TheDrummer/Cydonia-24B-v4.3";
 const originalFetch = globalThis.fetch;
 
 function chatBody(text: string) {
   return {
-    model: `unc/${MODEL}`,
+    model: `horde/${MODEL}`,
     stream: false,
     messages: [{ role: "user", content: text }],
   };
@@ -168,7 +168,7 @@ test("a lock on one model leaves another model of the provider served immediatel
 
   const response = await handleChat(
     buildRequest({
-      body: { ...chatBody("other model"), model: "unc/other-passthrough-model" },
+      body: { ...chatBody("other model"), model: "horde/other-passthrough-model" },
     })
   );
 
@@ -184,7 +184,7 @@ test(
       name: "noauth-locked-then-keyed",
       strategy: "priority",
       config: { maxRetries: 0, retryDelayMs: 0 },
-      models: [`unc/${MODEL}`, "openai/gpt-4.1"],
+      models: [`horde/${MODEL}`, "openai/gpt-4.1"],
     });
     try {
       await lockModelOnAFrozenClock(t);
@@ -192,7 +192,7 @@ test(
       let noAuthCalls = 0;
       let keyedCalls = 0;
       globalThis.fetch = async (url) => {
-        if (new URL(String(url)).hostname === "hermes.ai.unturf.com") {
+        if (new URL(String(url)).hostname === "oai.aihorde.net") {
           noAuthCalls += 1;
           return new Response("{}", { status: 502 });
         }

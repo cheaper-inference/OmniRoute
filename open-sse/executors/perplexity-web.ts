@@ -594,7 +594,7 @@ export class PerplexityWebExecutor extends BaseExecutor {
           log?.error?.("PPLX-WEB", "Cloudflare challenge detected — TLS bypass failed");
         } else {
           errMsg =
-            "Perplexity auth failed — session cookie may be expired. Re-paste your __Secure-next-auth.session-token.";
+            "Perplexity auth failed — session cookie may be expired. Re-paste the current __Secure-pplx.session.<UUID> and pplx.session-id header, or the legacy __Secure-next-auth.session-token.";
         }
       } else if (status === 429) {
         errMsg = "Perplexity rate limited. Wait a moment and retry.";

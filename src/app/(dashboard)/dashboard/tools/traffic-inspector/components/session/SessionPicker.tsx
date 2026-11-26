@@ -46,8 +46,9 @@ export function SessionPicker({ sessions, selectedId, onSelect, onDelete }: Sess
         <Button
           variant="ghost"
           size="sm"
+          tone="muted"
           fullWidth
-          className="justify-start rounded-none text-text-muted"
+          className="justify-start rounded-none"
           onClick={() => {
             onSelect(undefined);
             setOpen(false);

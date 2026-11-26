@@ -9,8 +9,9 @@ name: Nightly derived refresh
 # than a day behind the code. The counts gate lets this PR edit managed numbers because
 # `chore/derived-*` is a writer branch (scripts/check/lib/derivedClaimsDiff.mjs).
 #
-# It never merges, and it skips a branch under release-freeze (Hard Rule #21): during a release
-# the captain runs the refresh in the release itself.
+# This workflow skips a branch under release-freeze (Hard Rule #21).
+# When enabled, derived-refresh-autoland applies the queue label after checking the PR files,
+# current head gates, release freeze and base health.
 #
 # Branch chore/derived-refresh belongs to this robot, the same mechanism as the UI Kit upstream
 # watch (scripts/ci/ui-kit-sync-pr.sh): every run rebuilds it as ONE commit on top of the release
@@ -217,10 +218,14 @@ jobs:
             # shellcheck disable=SC2016 # the backticks are Markdown code spans, not substitutions
             printf '%s\n' "$CHANGED" | head -200 | sed 's/^/- `/; s/$/`/'
             echo
-            echo "## Before merge"
+            echo "## Queue admission"
             echo
-            echo "- [ ] CI is green, or every red check is inherited from the base."
-            echo "- [ ] The diff only touches derived numbers (no prose rewrites)."
+            echo "When enabled, the \`derived-refresh-autoland\` workflow applies the \`omni-queue\` label after these checks."
+            echo
+            echo "- [ ] \`Gate / CI\` and \`Gate / Quality\` passed on the current head."
+            echo "- [ ] Every changed file belongs to a derived family and all paths are unprotected."
+            echo "- [ ] The latest release branch has no open base-red issue and no release freeze is open."
+            echo "- [ ] The PR is open, ready for review and free of queue or blocking labels."
             # Agent-instruction surfaces are never merged without the owner's explicit approval
             # (AGENTS.md → Review focus), even when the diff is digits only.
             if printf '%s\n' "$CHANGED" | grep -qE '(^|/)(AGENTS|CLAUDE|GEMINI)\.md$|(^|/)llm\.txt$|^skills/.*/SKILL\.md$'; then

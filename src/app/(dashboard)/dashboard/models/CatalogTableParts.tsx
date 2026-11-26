@@ -4,25 +4,21 @@ import type { ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { DataTableFooter } from "@omniroute/ui-kit/data-table-shell";
 import { TableCell, TableHead } from "@omniroute/ui-kit/table";
-import { Button, Checkbox } from "@/shared/components";
+import { Checkbox, Pager } from "@/shared/components";
 
 // Cells and footer shared by the model and combo catalog tables (kit Table cells, Checkbox
 // adapter, kit DataTableFooter).
 
 /** A column heading without sorting. */
 export function PlainHeading({ children }: { children: ReactNode }) {
-  return (
-    <TableHead scope="col" className="px-4">
-      {children}
-    </TableHead>
-  );
+  return <TableHead scope="col">{children}</TableHead>;
 }
 
 /** The right-aligned heading above the per-row test buttons. */
 export function ActionsHeading() {
   const t = useTranslations("modelCatalog");
   return (
-    <TableHead scope="col" className="px-4 text-right">
+    <TableHead scope="col" align="end">
       {t("actions")}
     </TableHead>
   );
@@ -41,7 +37,7 @@ export function SelectAllHeaderCell({
   label: string;
 }) {
   return (
-    <TableHead scope="col" className="w-10 px-4">
+    <TableHead scope="col" className="w-10">
       {/* The adapter forwards `indeterminate` as the kit prop (not a ref callback: the kit
           effect would overwrite a ref-set value). */}
       <Checkbox
@@ -64,7 +60,7 @@ export function SelectRowCell({
   label: string;
 }) {
   return (
-    <TableCell className="w-10 px-4">
+    <TableCell className="w-10">
       <Checkbox checked={checked} onChange={onToggle} aria-label={label} />
     </TableCell>
   );
@@ -94,15 +90,17 @@ export function CatalogTableFooter({
         </p>
       }
       pagination={
-        <div className="flex items-center gap-3">
-          <span className="text-sm text-text-muted">{t("page", { page, pageCount })}</span>
-          <Button variant="outline" size="sm" disabled={page === 1} onClick={onPrevious}>
-            {t("previous")}
-          </Button>
-          <Button variant="outline" size="sm" disabled={page >= pageCount} onClick={onNext}>
-            {t("next")}
-          </Button>
-        </div>
+        <Pager
+          variant="summary"
+          page={page}
+          pageCount={pageCount}
+          onPageChange={(next) => (next < page ? onPrevious() : onNext())}
+          labels={{
+            previous: t("previous"),
+            next: t("next"),
+            summary: (current, count) => t("page", { page: current, pageCount: count }),
+          }}
+        />
       }
     />
   );

@@ -76,6 +76,7 @@ import {
   toAntigravityDiagnosticPayload,
 } from "../../executors/antigravityUpstreamError.ts";
 import { routingFinishReason } from "../chatCore/routingFinishReason.ts";
+import { resolveSessionTurn } from "./agentContext.ts";
 import { hasTrustedEmptyTurn, inheritEmptyTurnPolicy } from "../../utils/emptyTurnPolicy.ts";
 import {
   getProviderCredentials,
@@ -460,6 +461,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
       persistAttemptLogs({
         upstreamHttpSelection,
         status: err.status,
+        buyerCostMicro: legResult.buyerCostMicro,
         error: err.error || "Provider request failed",
         providerRequest: finalBody || translatedBody,
         providerResponse: persistedProviderErrorBody,
@@ -789,6 +791,13 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
       endpoint: endpointPath,
       cpaAuthIndex: readCpaAuthIndex(providerResponse),
       agentContext,
+      sessionTurn: resolveSessionTurn({
+        clientRawRequest,
+        body,
+        responses: [okLeg.response],
+        agentContext,
+        apiKeyInfo,
+      }),
     });
 
     const customSkillExecutionEnabled =
@@ -854,6 +863,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
         upstreamHttpSelection,
         status: HTTP_STATUS.BAD_REQUEST,
         tokens: usage,
+        buyerCostMicro: okLeg.buyerCostMicro,
         responseBody,
         providerRequest: finalBody || translatedBody,
         providerResponse: looksLikeSSE
@@ -960,6 +970,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
         error: malformedDiagnostic,
         upstreamHttpSelection,
         tokens: usage,
+        buyerCostMicro: okLeg.buyerCostMicro,
         responseBody: sanitizedMalformedResponse,
         providerRequest: finalBody || translatedBody,
         providerResponse: sanitizedMalformedProviderResponse,
@@ -1069,6 +1080,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
       upstreamHttpSelection,
       status: 200,
       tokens: usage,
+      buyerCostMicro: okLeg.buyerCostMicro,
       responseBody,
       providerRequest: finalBody || translatedBody,
       providerResponse: looksLikeSSE

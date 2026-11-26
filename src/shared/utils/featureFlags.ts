@@ -521,6 +521,23 @@ export function isOpencodePoolReselectEnabled(): boolean {
 }
 
 /**
+ * PROXY_REEGRESS_ON_QUOTA_429 (default off): after a per-IP quota 429 through a pool member,
+ * the chat loop re-sends the same request with the same account through another member.
+ * Fail closed: an unreadable flag store keeps the pre-flag behavior (disabled).
+ */
+export function isProxyReEgressOnQuota429Enabled(): boolean {
+  try {
+    return isFeatureFlagEnabled("PROXY_REEGRESS_ON_QUOTA_429");
+  } catch (error) {
+    console.error(
+      "[featureFlags] Failed to resolve PROXY_REEGRESS_ON_QUOTA_429, defaulting to disabled:",
+      error instanceof Error ? error.message : error
+    );
+    return false;
+  }
+}
+
+/**
  * SYSTEMONE_CLOUDFLARE_BACKEND_ENABLED (#16676, default off): /v1/systemone serves the
  * cloudflare-ai/* decisions models. Fail-closed: an unreadable flag store keeps them refused.
  */
@@ -712,6 +729,14 @@ export function isPluginPermissionModelEnabled(): boolean {
       "[featureFlags] Failed to resolve PLUGIN_PERMISSION_MODEL_ENABLED, defaulting to disabled:",
       error instanceof Error ? error.message : error
     );
+    return false;
+  }
+}
+
+export function isAgentSessionMessagesEnabled(): boolean {
+  try {
+    return isFeatureFlagEnabled("AGENT_SESSION_MESSAGES_ENABLED");
+  } catch {
     return false;
   }
 }

@@ -3,10 +3,17 @@
 // dashboard and scripts/research/gen-budget-card-svg.mjs use — so the picture cannot rot by hand
 // again (controller ruling R4). Provider names come from AI_PROVIDERS. The catalog is read at
 // RELEASE time, not here: the facts probe reduces it to the rows this card draws
-// (scripts/docs/readmeFactsFreeTier.mjs) and stores them in the facts snapshot as
-// `code.freeTierBudget`; this generator draws from the snapshot (scripts/docs/readmeFacts.mjs), so
-// regenerating on any branch reproduces the committed card and only `npm run
-// release:refresh-derived` moves it. Output is committed as docs/diagrams/free-tier-budget.svg;
+// (scripts/docs/readmeFactsFreeTier.mjs over computePublicFreeHeadline(), the real figure) and
+// stores them in the facts snapshot as `code.publicFreeTierBudget`; this generator draws from the
+// snapshot (scripts/docs/readmeFacts.mjs), so regenerating on any branch reproduces the committed
+// card and only `npm run release:refresh-derived` moves it.
+//
+// The free-token figures follow the owner's decision D47 (2026-11-21) with the card texts S-A
+// (2026-11-24), drawn on the card's existing layout: the right panel shows the big figure on top
+// (every row added up, ended offers included, the way other catalogs count) with its label, the
+// real figure right below it, and a fine line with the live row sum and the catalog date. Every
+// figure is a label the probe formatted (formatTokenHeadline), never one formatted here;
+// fmtTokens() only draws the per-pool segments and the credit chips. Output is committed as docs/diagrams/free-tier-budget.svg;
 // tests/unit/docs/readme-free-tier-budget-svg.test.ts fails when the committed file no longer
 // matches this generator, and runs the counts gate's own validators on it (catalog entries,
 // recurring pools, canonical numbers).
@@ -20,7 +27,7 @@ import { writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { outlineSvg } from "./readme-outline.mjs";
 import { svgOpen, gridDefs, esc, roleWidth } from "./readme-diagram-theme.mjs";
-import { README_FACTS } from "./readmeFacts.mjs";
+import { README_FACTS, RF } from "./readmeFacts.mjs";
 
 const W = 1200;
 const H = 842;
@@ -90,10 +97,10 @@ function fitChips(labels, startX, maxX, gap) {
 
 // The card's data from the facts snapshot (see scripts/docs/readmeFactsFreeTier.mjs).
 function freeTierBudgetFacts() {
-  const b = README_FACTS.code?.freeTierBudget;
+  const b = README_FACTS.code?.publicFreeTierBudget;
   if (!b || !Array.isArray(b.pools)) {
     throw new Error(
-      "free-tier-budget: the facts snapshot has no code.freeTierBudget — run `npm run release:refresh-derived`"
+      "free-tier-budget: the facts snapshot has no code.publicFreeTierBudget — run `node scripts/release/refresh-derived.mjs --only=facts`"
     );
   }
   return b;
@@ -117,14 +124,8 @@ export function buildFreeTierBudgetModel() {
   const oneTime = t.oneTime;
   const oneTimeSum = oneTime.reduce((s, r) => s + r.v, 0);
 
-  const avoidProviders = t.avoidProviders;
-  const discontinued = t.discontinued;
   const uncappedNames = t.uncappedNames;
-
-  const steady = t.steady;
-  const first = t.first;
   const boost = t.boost;
-  const gated = t.gated;
   const numberWord = (n) => NUMBER_WORDS[n] ?? String(n);
 
   // Layout rows derived from the data.
@@ -144,35 +145,31 @@ export function buildFreeTierBudgetModel() {
   const capsCaption = capped.length
     ? ` (${capped.map((p) => `${p.name} = its ${numberWord(p.caps)} per-model caps`).join("; ")})`
     : "";
-  const capsWords = capped.length
-    ? ` plus ${capped.map((p) => `${numberWord(p.caps)} per-model ${p.name} caps`).join(" and ")}`
-    : "";
 
   const copy = {
     kicker: ["FREE-TIER BUDGET · LIVE ON ", "/dashboard/free-tiers"],
-    pill: ["HONEST · POOL-DEDUPED"],
-    hero: [`~${fmtTokens(steady)}`],
-    heroLabel: ["FREE TOKENS / MONTH · ", "STEADY"],
-    heroSub: ["up to ", `~${fmtTokens(first)}`, " in your first month — signup credits"],
+    pill: ["TWO WAYS TO COUNT"],
+    panel: ["FREE TOKENS / MONTH"],
+    big: [
+      RF.rowSumTotalLabel,
+      "COUNTED THE WAY OTHER CATALOGS COUNT",
+      "EVERY ROW ADDED UP · ENDED OFFERS INCLUDED",
+    ],
+    hero: [RF.headlineSteadyLabel],
+    heroLabel: ["REAL TODAY", " · EACH SHARED QUOTA COUNTED ONCE · WHAT YOU CAN ACTUALLY USE"],
+    heroSub: [
+      "up to ",
+      RF.headlineFirstLabel,
+      " in your first month, with one-time signup credits",
+    ],
     heroMeta: [
-      "documented free tiers · ",
-      `${t.poolCount} recurring pools`,
+      `${RF.freePublishedPools} pools with a published quota`,
       " · ",
-      `${t.modelCount} catalog entries`,
+      `${RF.freeAccessRows} catalog rows with free access`,
       " · one endpoint",
     ],
-    math: [
-      "THE HONEST MATH",
-      "~10B",
-      "every rate limit · 24/7",
-      "we don't publish that",
-      `~${fmtTokens(steady)}`,
-      "each shared free pool",
-      "counted once ✓",
-      `${avoidProviders} providers`,
-      " ToS-flagged ",
-      "— we flag it · you decide",
-    ],
+    realRow: ["REAL TODAY · EACH SHARED QUOTA COUNTED ONCE", "WHAT YOU CAN ACTUALLY USE"],
+    ladder: [`${RF.rowSumLiveLabel} summed per live row · catalog audited ${RF.catalogDate}`],
     barTitle: ["WHERE IT COMES FROM · ", `${quantified.length} QUANTIFIED POOLS${capsTitle}`],
     barCaption: [
       `each segment = one recurring pool${capsCaption} · widths floored so every pool shows · audited pool budgets below`,
@@ -199,23 +196,15 @@ export function buildFreeTierBudgetModel() {
     ],
   };
 
-  const title =
-    `OmniRoute free-tier budget: about ${fmtWords(steady)} free tokens per month steady, up to about ${fmtWords(first)} in the first month with signup credits. ` +
-    `The catalog contains ${t.modelCount} rows, ${t.modelCount - discontinued} active and ${discontinued} discontinued, grouped into ${t.poolCount} recurring pool keys; ` +
-    `${quantified.length} pools have a published positive monthly token budget and ${t.poolCount - quantified.length} have a zero, uncapped, or keyless budget. ` +
-    `Honest pool-deduped math counts each shared free pool once; ${avoidProviders} providers carry a terms-of-service avoid flag. ` +
-    `The ${quantified.length} quantified pools${capsWords} are ${pools
-      .map(
-        (p) =>
-          `${p.name} ${fmtWords(p.tokens)}${p.caps ? ` across ${numberWord(p.caps)} per-model caps` : ""}`
-      )
-      .join(", ")}. ` +
-    `One-time signup credits add about ${fmtWords(oneTimeSum)}. Uncapped providers and the OpenRouter top-up boost are shown separately so they do not inflate the headline.` +
-    (gated > 0
-      ? ` A further ${fmtWords(gated)} behind regional identity verification (${t.gatedProviderNames.join(", ")}) is also shown apart.`
-      : "") +
-    ` Live usage remains available at /dashboard/free-tiers.`;
-  const desc = `Pool-deduplicated chart of the ${quantified.length} recurring free-token pools with positive published budgets${capped.length ? ` (plus ${capped.map((p) => `${p.name}'s ${numberWord(p.caps)} per-model caps as one segment`).join(" and ")})` : ""}, plus signup credits and uncapped providers shown separately.`;
+  // Owner-approved title and description (S-A, 2026-11-24). The description is what the counts
+  // gate reads from this file: every figure in it sits next to its anchor.
+  const title = `OmniRoute free-tier budget: ${RF.rowSumTotalLabel} as others count · ${RF.headlineSteadyLabel} real`;
+  const desc =
+    `Free-tier budget card. ${RF.rowSumTotalLabel} free tokens a month counted the way other catalogs count, with every row added up and ended offers included. ` +
+    `${RF.headlineSteadyLabel} real today, each shared quota counted once, which is what you can actually use. ` +
+    `Up to ${RF.headlineFirstLabel} in your first month with one-time signup credits. ` +
+    `${RF.rowSumLiveLabel} summed per live row. ` +
+    `${RF.freePublishedPools} pools with a published quota and ${RF.freeAccessRows} catalog rows with free access, catalog audited ${RF.catalogDate}.`;
 
   return {
     copy,
@@ -243,9 +232,6 @@ const dotClass = (i) => (i === 0 ? "accent stroke-ink" : tone(i));
 export async function renderReadmeFreeTierBudget() {
   const M = buildFreeTierBudgetModel();
   const C = M.copy;
-  // The strike through the published-nowhere figure overhangs it by 6 px each side.
-  const strike = Math.ceil(roleWidth("num", C.math[1])) + 12;
-
   // The header pill hugs its label, right-aligned to the content edge; the footer note follows LIVE.
   const pillW = 32 + Math.ceil(roleWidth("lbl", C.pill[0])) + 16;
   const footerNoteX = 356 + Math.ceil(roleWidth("lbl", C.footer[1])) + 28;
@@ -349,21 +335,20 @@ export async function renderReadmeFreeTierBudget() {
         .join("\n") +
       `\n  </g>\n` +
       `  <text x="60" y="228" class="headline">${esc(C.hero[0])}</text>\n` +
-      `  <text x="62" y="266" class="kicker">${esc(C.heroLabel[0])}<tspan style="fill:var(--ok)">${esc(C.heroLabel[1])}</tspan></text>\n` +
+      `  <text x="62" y="266" class="kicker"><tspan style="fill:var(--ok)">${esc(C.heroLabel[0])}</tspan>${esc(C.heroLabel[1])}</text>\n` +
       `  <text x="62" y="298" class="body" style="fill:var(--body)">${esc(C.heroSub[0])}<tspan font-weight="600" style="fill:var(--ok)">${esc(C.heroSub[1])}</tspan>${esc(C.heroSub[2])}</text>\n` +
-      `  <text x="62" y="326" class="label-sm" style="fill:var(--muted)">${esc(C.heroMeta[0])}<tspan style="fill:var(--ink)">${esc(C.heroMeta[1])}</tspan>${esc(C.heroMeta[2])}<tspan style="fill:var(--ink)">${esc(C.heroMeta[3])}</tspan>${esc(C.heroMeta[4])}</text>\n` +
-      // panel · the honest math
+      `  <text x="62" y="326" class="label-sm" style="fill:var(--muted)"><tspan style="fill:var(--ink)">${esc(C.heroMeta[0])}</tspan>${esc(C.heroMeta[1])}<tspan style="fill:var(--ink)">${esc(C.heroMeta[2])}</tspan>${esc(C.heroMeta[3])}</text>\n` +
+      // panel · the two ways to count (D47): the big figure on top with its label, the real one
+      // right below, the live row sum and the catalog date on the fine line
       `  <rect x="680" y="84" width="460" height="216" rx="12" class="surface" stroke-width="1"/>\n` +
-      `  <text x="704" y="116" class="lbl">${esc(C.math[0])}</text>\n` +
-      `  <text x="704" y="172" class="num" style="fill:var(--muted)">${esc(C.math[1])}</text>\n` +
-      `  <line x1="698" y1="161" x2="${698 + strike}" y2="161" class="stroke-err" stroke-width="3" stroke-linecap="round" stroke-dasharray="${strike}" stroke-dashoffset="${strike}">` +
-      `<animate attributeName="stroke-dashoffset" values="0;${strike};0;0" keyTimes="0;0.10;0.18;1" dur="10s" repeatCount="indefinite"/></line>\n` +
-      `  <text x="836" y="156" class="label-sm" style="fill:var(--muted)">${esc(C.math[2])}</text>\n` +
-      `  <text x="836" y="176" class="label-sm" style="fill:var(--err)">${esc(C.math[3])}</text>\n` +
-      `  <text x="704" y="240" class="num" style="fill:var(--ok)">${esc(C.math[4])}</text>\n` +
-      `  <text x="836" y="224" class="label-sm" style="fill:var(--muted)">${esc(C.math[5])}</text>\n` +
-      `  <text x="836" y="244" class="label-sm" style="fill:var(--ok)">${esc(C.math[6])}</text>\n` +
-      `  <text x="704" y="280" class="label-sm"><tspan style="fill:var(--warn)">${esc(C.math[7])}</tspan>${esc(C.math[8])}<tspan style="fill:var(--muted)">${esc(C.math[9])}</tspan></text>\n` +
+      `  <text x="704" y="116" class="lbl">${esc(C.panel[0])}</text>\n` +
+      `  <text x="704" y="172" class="num" style="fill:var(--muted)">${esc(C.big[0])}</text>\n` +
+      `  <text x="836" y="156" class="label-sm" style="fill:var(--muted)">${esc(C.big[1])}</text>\n` +
+      `  <text x="836" y="176" class="label-sm" style="fill:var(--muted)">${esc(C.big[2])}</text>\n` +
+      `  <text x="704" y="240" class="num" style="fill:var(--ok)">${esc(C.hero[0])}</text>\n` +
+      `  <text x="836" y="224" class="label-sm" style="fill:var(--muted)">${esc(C.realRow[0])}</text>\n` +
+      `  <text x="836" y="244" class="label-sm" style="fill:var(--ok)">${esc(C.realRow[1])}</text>\n` +
+      `  <text x="704" y="280" class="label-sm" style="fill:var(--muted)">${esc(C.ladder[0])}</text>\n` +
       // budget bar
       `  <text x="60" y="356" class="lbl">${esc(C.barTitle[0])}<tspan style="fill:var(--ink)">${esc(C.barTitle[1])}</tspan></text>\n` +
       `  <g clip-path="url(#ftb-bar-shape)">\n` +

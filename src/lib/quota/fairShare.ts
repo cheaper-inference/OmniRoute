@@ -11,6 +11,9 @@
  *
  * Cap absoluto is always enforced regardless of mode or policy.
  *
+ * A dimension that carries borrowAvailable belongs to a pool in consent mode. It always
+ * uses the strict rules, and a hard key stops at its share plus what other keys lend.
+ *
  * Part of: Group B — Quota Sharing Engine (plan 22, frente F6).
  */
 
@@ -29,6 +32,8 @@ export interface FairShareDimension {
   limit: number; // global pool limit for this dimension
   consumedTotal: number; // total consumed by ALL keys so far
   globalUsedPercent: number; // 0..1 signal from saturationSignals
+  /** Defined only in a consent pool: what this key may use above its share right now. */
+  borrowAvailable?: number;
 }
 
 export interface FairShareAllocation {
@@ -43,14 +48,25 @@ export interface FairShareInput {
   allocation: FairShareAllocation;
   /** consumedByThisKey[dimensionKeyString] = amount consumed by this key. */
   consumedByThisKey: Record<string, number>;
+  /** capConsumedByThisKey[dimensionKeyString] = amount the absolute cap is checked against. Defaults to consumedByThisKey. */
+  capConsumedByThisKey?: Record<string, number>;
   saturationThreshold: number; // default 0.5
+}
+
+/** The dimension a share refusal came from, and the ceiling the key reached there. */
+export interface BlockedDimension {
+  unit: QuotaUnit;
+  window: QuotaWindow;
+  consumed: number;
+  ceiling: number;
 }
 
 export interface FairShareDecision {
   kind: "allow" | "block";
   reason: "ok" | "fair-share" | "cap-absolute" | "global-saturated";
   penalized?: boolean;
-  retryAfterMs?: number;
+  /** The dimension and ceiling of a share refusal. Not set for an absolute cap. */
+  blocked?: BlockedDimension;
 }
 
 // ---------------------------------------------------------------------------
@@ -59,6 +75,19 @@ export interface FairShareDecision {
 
 function dimensionKeyString(key: FairShareDimension["key"]): string {
   return `${key.poolId}:${key.unit}:${key.window}`;
+}
+
+function blockAt(
+  reason: "fair-share" | "global-saturated",
+  dim: FairShareDimension,
+  consumed: number,
+  ceiling: number
+): FairShareDecision {
+  return {
+    kind: "block",
+    reason,
+    blocked: { unit: dim.key.unit, window: dim.key.window, consumed, ceiling },
+  };
 }
 
 const KNOWN_POLICIES: ReadonlySet<Policy> = new Set<Policy>(["hard", "soft", "burst"]);
@@ -105,7 +134,7 @@ export function decideFairShare(input: FairShareInput): FairShareDecision {
     if (
       allocation.capValue !== undefined &&
       allocation.capUnit === dim.key.unit &&
-      consumed >= allocation.capValue
+      (input.capConsumedByThisKey?.[dKey] ?? consumed) >= allocation.capValue
     ) {
       return { kind: "block", reason: "cap-absolute" };
     }
@@ -115,25 +144,28 @@ export function decideFairShare(input: FairShareInput): FairShareDecision {
     // would exceed it (burst mode without borrow room), block as "global-saturated".
     if (dim.consumedTotal >= dim.limit) {
       if (effectivePolicy !== "burst") {
-        return { kind: "block", reason: "global-saturated" };
+        return blockAt("global-saturated", dim, dim.consumedTotal, dim.limit);
       }
       // burst also blocked when no room at all
-      return { kind: "block", reason: "global-saturated" };
+      return blockAt("global-saturated", dim, dim.consumedTotal, dim.limit);
     }
 
-    const isStrict = dim.globalUsedPercent >= saturationThreshold;
+    const isStrict =
+      dim.borrowAvailable !== undefined || dim.globalUsedPercent >= saturationThreshold;
 
     if (isStrict) {
       // ── Strict mode ────────────────────────────────────────────────────
       // effectivePolicy is normalized (unknown → hard), so these cases are
       // exhaustive and an unknown policy is enforced as hard.
       switch (effectivePolicy) {
-        case "hard":
-          // Hard: block once consumed >= fair_share
-          if (consumed >= fairShare) {
-            return { kind: "block", reason: "fair-share" };
+        case "hard": {
+          // Hard: block once consumed >= fair_share (plus what is lent, in a consent pool)
+          const ceiling = fairShare + (dim.borrowAvailable ?? 0);
+          if (consumed >= ceiling) {
+            return blockAt("fair-share", dim, consumed, ceiling);
           }
           break;
+        }
 
         case "soft":
           // Soft: allow but penalise if above fair_share
@@ -159,7 +191,7 @@ export function decideFairShare(input: FairShareInput): FairShareDecision {
           // Only block if key has consumed >= global limit itself
           // (very unlikely but safe).
           if (consumed >= dim.limit) {
-            return { kind: "block", reason: "global-saturated" };
+            return blockAt("global-saturated", dim, consumed, dim.limit);
           }
           break;
 

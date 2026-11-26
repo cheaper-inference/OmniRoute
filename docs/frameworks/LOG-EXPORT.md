@@ -97,11 +97,11 @@ repeating Node's SQLite warning each cron run; other warning types remain visibl
 
 Destination modules must be importable without Next.js/server-only dependencies. The existing
 BigQuery implementation already meets that contract. Access-token caches last only for the child
-run, not across runs. Node is the supported runtime (`package.json` engines), but README's Bun
-installation section and `Dockerfile.bun` also advertise a production compatibility path using
-`bun:sqlite` (`src/lib/db/core.ts` / adapters). Under Bun, exports therefore retain the previous
+run, not across runs. Node is the supported runtime (`package.json` engines). A best-effort,
+unsupported Bun compatibility path exists (`bun:sqlite` in `src/lib/db/core.ts` / adapters, and
+`Dockerfile.bun`), so exports must not break under it. Under Bun, exports retain the previous
 in-process path and emit a one-time warning: child heap/timeout isolation is unavailable. Use
-Node for event-loop and OOM isolation; Bun is not treated as dev-only here.
+Node for event-loop and OOM isolation.
 
 When `includeBodies` is enabled, prefer a minute-level cadence such as
 `OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"` rather than accumulating an hourly payload backlog.

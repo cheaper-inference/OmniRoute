@@ -78,7 +78,8 @@ test("rapid edits read the ref, and removal is keyed by value not index", () => 
   assert.match(source, /bannedKeywordsRef\.current\.includes\(keyword\)/);
   assert.match(source, /bannedKeywordsRef\.current\.filter\(\(k\) => k !== keyword\)/);
   assert.match(source, /bannedKeywordsSavingRef\.current\) return/);
-  assert.match(source, /<Badge key=\{keyword\}/);
+  // Each keyword is a kit ScopeChip keyed by its value.
+  assert.match(source, /<ScopeChip\s+key=\{keyword\}/);
   assert.doesNotMatch(source, /removeBannedKeyword\(index/);
   assert.doesNotMatch(source, /<Badge key=\{index\}/);
 

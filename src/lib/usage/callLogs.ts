@@ -1,3 +1,4 @@
+import { validateBuyerCostMicro } from "@omniroute/open-sse/utils/buyerCostMicro.ts";
 import * as usageEvidence from "./storedUsageEvidence";
 import {
   parseUpstreamHttp,
@@ -155,6 +156,7 @@ type CallLogSummaryRow = {
   has_content?: number | null;
   usage_provenance?: string | null;
   usage_evidence?: string | null;
+  buyer_cost_micro?: number | null;
 };
 
 export const RESOLVED_ACCOUNT_SQL =
@@ -774,6 +776,7 @@ async function buildCallLogRow(entry: any, metadataOnly = false): Promise<Prepar
     addedWaitCause: toStringOrNull(entry.addedWaitCause),
     // Ms this execution waited from start to the first upstream dispatch
     // (migration 224). Null when nothing was dispatched (rejected before egress).
+    buyerCostMicro: validateBuyerCostMicro(entry.buyerCostMicro),
     queueWaitMs:
       typeof entry.queueWaitMs === "number" &&
       Number.isFinite(entry.queueWaitMs) &&
@@ -879,7 +882,7 @@ function insertCallLogRow(prepared: PreparedCallLogRow): void {
         has_request_body, has_response_body, has_pipeline_details, request_summary,
         correlation_id, model_pinned, session_tag, client_session_id, response_id, error_type,
         video_content_removed, has_content, usage_provenance, usage_evidence,
-        added_wait_ms, added_wait_cause, queue_wait_ms${resilienceCol}
+        added_wait_ms, added_wait_cause, queue_wait_ms, buyer_cost_micro${resilienceCol}
       )
       VALUES (
         @id, @timestamp, @method, @path, @status, @model, @requestedModel, @provider,
@@ -896,7 +899,7 @@ function insertCallLogRow(prepared: PreparedCallLogRow): void {
         @hasRequestBody, @hasResponseBody, @hasPipelineDetails, @requestSummary,
         @correlationId, @modelPinned, @sessionTag, @clientSessionId, @responseId, @errorType,
         @videoContentRemoved, @hasContent, @usageProvenance, @usageEvidence,
-        @addedWaitMs, @addedWaitCause, @queueWaitMs${resilienceParam}
+        @addedWaitMs, @addedWaitCause, @queueWaitMs, @buyerCostMicro${resilienceParam}
       )
     `
   );

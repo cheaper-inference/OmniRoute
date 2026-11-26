@@ -297,9 +297,7 @@ describe("TierResolver", () => {
 
     it("deriveNoAuthFreeProviders includes all chat-tier noAuth providers", () => {
       const derived = deriveNoAuthFreeProviders();
-      expect(derived.includes("uncloseai"), "uncloseai should be in derived noAuth-free list").toBe(
-        true
-      );
+      expect(derived.includes("uncloseai")).toBe(false);
       expect(derived.includes("duckduckgo-web")).toBe(true);
       // The keyless `opencode` provider was removed (docs/reference/REMOVED_PROVIDERS.md).
       expect(derived.includes("opencode")).toBe(false);
@@ -322,7 +320,7 @@ describe("TierResolver", () => {
     it("classifyTier classifies a noAuth provider model as free via noAuth derivation", () => {
       // No provider override, no cost-based match (no KNOWN_MODEL_PRICING row).
       // The fix is that noAuth providers are derived into freeProviders.
-      const result = classifyTier("uncloseai", "Lorbus/Qwen3.6-27B-int4-AutoRound");
+      const result = classifyTier("duckduckgo-web", "claude-haiku-4-5");
       expect(result.tier).toBe(PROVIDER_TIER.FREE);
       expect(result.hasFreeTier).toBe(true);
     });
