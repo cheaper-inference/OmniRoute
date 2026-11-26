@@ -18,4 +18,17 @@ export const EXTRA_FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
   QUOTA_DAILY_REVALIDATION_FLAG,
   CODEBUDDY_TELEMETRY_ENABLED_FLAG,
   AGENT_SESSION_MESSAGES_ENABLED_FLAG,
+  {
+    key: "AIHORDE_CATALOG_BACKGROUND_REFRESH_ENABLED",
+    label: "AI Horde Image Catalog Background Refresh",
+    description:
+      "List AI Horde image models from the last successful snapshot while the catalog refreshes in the background. AI Horde image models are absent from the list until the first refresh succeeds. Off by default.",
+    descriptionI18nKey:
+      "featureFlags.definitions.AIHORDE_CATALOG_BACKGROUND_REFRESH_ENABLED.description",
+    category: "runtime",
+    defaultValue: "false",
+    type: "boolean",
+    requiresRestart: false,
+    warningLevel: "info",
+  },
 ];
