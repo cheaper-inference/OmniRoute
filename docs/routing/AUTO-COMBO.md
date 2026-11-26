@@ -491,6 +491,44 @@ For multi-account rotation on one model, prefer **one dynamic-account step** (em
 Pinned steps plus affinity collapse onto the same account even while the RR counter
 advances.
 
+### Reasoning holdback (opt-in)
+
+By default a combo commits a streaming target the moment its first event carries reasoning.
+A target that reasons for a while and is then cut has already committed the stream, so the
+combo cannot fail over cleanly. The holdback closes that gap for combos that ask for it:
+
+- It needs the feature flag `COMBO_REASONING_HOLDBACK_ENABLED` (default **off**) and
+  `retainReasoningBeforeAnswer: true` in the combo's **own** config. Settings → Combo
+  defaults never grant it.
+- Scope: a streaming, single-choice Chat Completions request with a plain-text history (no
+  tools, tool results or media), no bound session or pinned model, and sequential dispatch
+  (no hedging, no protected priority target). Anything else keeps today's behavior. It runs
+  inside the per-target first-output gate, so it also needs a per-target timeout above `0`.
+- While the target sends only reasoning, role events or comments, the stream is held. The
+  first answer token, tool call, refusal, finish reason or unrecognized frame commits it and
+  every held byte reaches the client once, in order. At most **64 KiB** is held, and the
+  target's remaining first-output budget still applies.
+- If the target is cut, times out or exceeds the cap while reasoning, the combo moves to the
+  next target. Only a cut or timeout leaves a draft; overflow never forwards one. The draft
+  is forwarded only to a target whose provider is listed in the combo's
+  `reasoningCheckpointProviders`, quoted as untrusted JSON data in a leading system message
+  with credential-shaped strings redacted. A target that is not listed, or a request that
+  could call tools, gets the original body. Signed, encrypted or hidden reasoning is never
+  part of a draft.
+- The draft lives in memory for the request only and is never logged.
+
+```json
+{
+  "name": "careful-reasoner",
+  "strategy": "priority",
+  "models": [{ "model": "provider-a/reasoner" }, { "model": "provider-b/answerer" }],
+  "config": {
+    "retainReasoningBeforeAnswer": true,
+    "reasoningCheckpointProviders": ["provider-b"]
+  }
+}
+```
+
 ## Fusion Strategy
 
 `fusion` is the one strategy that does **not** pick a single target. It fans the prompt

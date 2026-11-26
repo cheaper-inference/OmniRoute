@@ -289,6 +289,7 @@ export async function dispatchWithCooldownRetry(opts: {
       state.deadlineFailures = 0;
       state.recordedAttempts = 0;
       state.comboErrors = [];
+      state.reasoningCheckpoint = null;
 
       // QA P0: the sanitized diagnostic trace (pool size + this set-try's exhausted
       // providers/connections + attempt order + terminal reason + recovery hint) is

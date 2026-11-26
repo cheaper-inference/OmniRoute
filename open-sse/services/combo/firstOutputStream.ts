@@ -26,7 +26,7 @@ import {
 } from "./preContentTransportFailure.ts";
 
 /** Floor for the gate window, so a dispatch that ate the whole budget cannot abandon a live target. */
-const MIN_FIRST_OUTPUT_BUDGET_MS = 250;
+export const MIN_FIRST_OUTPUT_BUDGET_MS = 250;
 
 /** Give up accumulating at this size: a streaming body this far into silence is not answering. */
 const MAX_BUFFERED_CHARS = 64 * 1024;
@@ -134,7 +134,14 @@ export class SseOutputScanner {
   private replayOverflowed = false;
   private replayEventType = "";
 
-  constructor(private readonly observeReplay?: () => void) {}
+  /**
+   * `onEvent` receives each assembled event payload (its `data:` lines joined with `\n`) before
+   * the output decision, for callers that classify events themselves on top of this framing.
+   */
+  constructor(
+    private readonly observeReplay?: () => void,
+    private readonly onEvent?: (payload: string) => void
+  ) {}
 
   /** Feed decoded text; true once an event has shown output. */
   push(text: string): boolean {
@@ -197,6 +204,7 @@ export class SseOutputScanner {
     if (this.dataLines.length === 0) return false;
     const payload = this.dataLines.join("\n");
     this.dataLines = [];
+    this.emitEvent(payload);
     const ready = payload.length > 0 && carriesOutput(payload);
     const kind = ready || payload.length === 0 ? null : claudeThinkingFrameKind(payload);
     if (ready) this.observeReplay?.();
@@ -217,6 +225,7 @@ export class SseOutputScanner {
     if (line === "") {
       const payload = this.dataLines.join("\n");
       this.dataLines = [];
+      this.emitEvent(payload);
       const ready = payload.length > 0 && carriesOutput(payload);
       const kind = ready || payload.length === 0 ? null : claudeThinkingFrameKind(payload);
       if (ready) this.observeReplay?.();
@@ -228,6 +237,10 @@ export class SseOutputScanner {
     const data = value.startsWith(" ") ? value.slice(1) : value;
     this.dataLines.push(data);
     return false;
+  }
+
+  private emitEvent(payload: string): void {
+    if (payload.length > 0) this.onEvent?.(payload);
   }
 
   private resetReplayFrame(): void {

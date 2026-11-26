@@ -13,8 +13,17 @@ import { buildErrorBody, errorResponse, sanitizeErrorMessage } from "../../utils
 import { DECLARED_FIRST_OUTPUT_WAIT_CAP_MS } from "../comboConfig.ts";
 import { requestMediaRequirements, nonImageMediaFailures } from "./mediaCompatibility.ts";
 import { parseModel } from "../model.ts";
-import { COMBO_PER_MODEL_TIMEOUT_REASON } from "./comboAbortReasons.ts";
-import { awaitFirstOutput, isEventStreamResponse } from "./firstOutputStream.ts";
+import {
+  COMBO_HEDGE_CANCELLED_REASON,
+  COMBO_PER_MODEL_TIMEOUT_REASON,
+} from "./comboAbortReasons.ts";
+import {
+  MIN_FIRST_OUTPUT_BUDGET_MS,
+  awaitFirstOutput,
+  isEventStreamResponse,
+} from "./firstOutputStream.ts";
+import { holdComboReasoning } from "./reasoningHoldback.ts";
+import type { ReasoningHoldbackRequest } from "./reasoningCheckpoint.ts";
 import type { HandleSingleModel, SingleModelTarget, ComboLogger } from "./types.ts";
 
 /** Stable internal classification for OmniRoute's own combo per-target timer. */
@@ -131,6 +140,59 @@ interface FirstOutputGateParams {
     target?: SingleModelTarget
   ) => Promise<number | undefined> | number | undefined;
   log: ComboLogger;
+  /** Hold the stream back while it carries only reasoning (see reasoningHoldback.ts). */
+  reasoningHoldback?: ReasoningHoldbackRequest;
+}
+
+/**
+ * Reasoning-holdback variant of the first-output wait: the stream is held until it carries
+ * something other than reasoning, within the same remaining budget. A target abandoned during
+ * reasoning is handed to the combo as a failed attempt, with its draft attached.
+ */
+async function holdReasoningUntilAnswer(
+  params: FirstOutputGateParams,
+  firstOutputBudgetMs: number
+): Promise<Response> {
+  const { dispatched, modelStr, startedAt, timeoutController, signal, log } = params;
+  const remainingMs = Math.max(
+    firstOutputBudgetMs - (Date.now() - startedAt),
+    MIN_FIRST_OUTPUT_BUDGET_MS
+  );
+  const held = await holdComboReasoning(dispatched, {
+    maxBytes: params.reasoningHoldback!.maxBytes,
+    deadlineAt: Date.now() + remainingMs,
+    signal,
+    timeoutResponse: () => targetTimeoutResponse(modelStr),
+  });
+  if (held.kind === "commit") return held.response;
+  // Cancelled from outside (hedge winner, client disconnect): not the target's fault, so the
+  // response goes back with its body unread, as the plain gate does.
+  if (held.kind === "cancelled") return dispatched;
+
+  const size = held.checkpoint
+    ? `${held.checkpoint.reasoning.length} chars of reasoning`
+    : "no draft";
+  if (held.reason === "deadline") {
+    const stallErr = new Error(COMBO_PER_MODEL_TIMEOUT_REASON);
+    recordTimeoutContext({
+      modelStr,
+      timeoutMs: firstOutputBudgetMs,
+      abortError: stallErr,
+      timestamp: Date.now(),
+    });
+    timeoutController.abort(stallErr);
+    log.warn(
+      "COMBO",
+      `Model ${modelStr} produced no answer within ${Date.now() - startedAt}ms of dispatch (first-output budget ${firstOutputBudgetMs}ms) while holding its reasoning (${size}) — falling back`
+    );
+  } else {
+    timeoutController.abort(new Error(COMBO_HEDGE_CANCELLED_REASON));
+    log.info(
+      "COMBO",
+      `Model ${modelStr} held reasoning ended without an answer (${held.reason}, ${size}) — falling back`
+    );
+  }
+  return held.response;
 }
 
 /**
@@ -157,6 +219,7 @@ async function gateFirstOutput(params: FirstOutputGateParams): Promise<Response>
     effectiveTimeoutMs,
     await resolveDeclaredTargetBudgetMs?.(target)
   );
+  if (params.reasoningHoldback) return holdReasoningUntilAnswer(params, firstOutputBudgetMs);
   const gate = await awaitFirstOutput(
     dispatched,
     firstOutputBudgetMs - (Date.now() - startedAt),
@@ -257,6 +320,13 @@ export function buildTargetTimeoutRunner(deps: {
     modelStr: string,
     target?: SingleModelTarget
   ): Promise<Response> => {
+    // The holdback request is for this runner only; the dispatch never sees it.
+    const reasoningHoldback =
+      target && "reasoningHoldback" in target ? target.reasoningHoldback : undefined;
+    if (reasoningHoldback) {
+      const { reasoningHoldback: _consumed, ...rest } = target as Record<string, unknown>;
+      target = rest as SingleModelTarget;
+    }
     // Also cover pipeline stages, nested dispatch and late tool attachments,
     // which can bypass the ordinary combo candidate prefilter.
     const incompatible = incompatibleMediaResponse(b, modelStr, target);
@@ -350,6 +420,7 @@ export function buildTargetTimeoutRunner(deps: {
       signal: targetSignal,
       resolveDeclaredTargetBudgetMs,
       log,
+      reasoningHoldback,
     });
   };
 }

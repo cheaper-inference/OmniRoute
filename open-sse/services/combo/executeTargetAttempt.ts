@@ -118,6 +118,7 @@ import { resolveComboDailyReset } from "./comboDailyResetClock.ts";
 import type { ProtectedPriorityStopCause } from "./protectedPriorityStopStatus.ts";
 import { isProviderProbeResponse } from "../../../src/shared/utils/providerProbeResult.ts";
 import { recordLocalCircuitRefusal } from "./localCircuitRefusal.ts";
+import { dispatchHeldReasoning } from "./reasoningHoldbackAttempt.ts";
 import { getStrategyTraits } from "./strategyRegistry.ts";
 import {
   handleEmptyContentRetry,
@@ -372,7 +373,7 @@ export async function executeTargetAttempt(
       }
       if (state.comboExpired || targetSignal?.aborted) return null;
     }
-    const result = await deps.handleSingleModelWithTimeout(attemptBody, modelStr, {
+    const result = await dispatchHeldReasoning(opts, attemptBody, modelStr, {
       ...targetForAttempt,
       emptyTurnConnectionId,
       effectiveComboStrategy: deps.strategy,
