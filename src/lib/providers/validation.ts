@@ -84,6 +84,7 @@ import {
   validatePoeProvider,
 } from "./validation/audioMiscProviders";
 import { validateTypesafeProvider } from "./validation/typesafe";
+import { validateLiquidProvider } from "./validation/liquid";
 import { validateZaiWebProvider } from "./validation/zaiWeb";
 import { validateSearchProvider, SEARCH_VALIDATOR_CONFIGS } from "./validation/searchProviders";
 import {
@@ -363,6 +364,22 @@ export async function validateProviderApiKey({
     oneminai: validateOneMinAiProvider,
     runwayml: validateRunwayProvider,
     typesafe: ({ apiKey }: any) => validateTypesafeProvider({ apiKey }),
+    liquid: ({ apiKey, providerSpecificData }: any) => {
+      const entry = getRegistryEntry("liquid");
+      return validateLiquidProvider({
+        apiKey,
+        validateChat: () =>
+          validateOpenAILikeProvider({
+            provider: "liquid",
+            apiKey,
+            baseUrl: resolveBaseUrl(entry, providerSpecificData),
+            headers: entry?.headers || {},
+            providerSpecificData,
+            modelId: entry?.models?.[0]?.id || null,
+            modelsUrl: entry?.modelsUrl,
+          }),
+      });
+    },
     snowflake: validateSnowflakeProvider,
     gigachat: validateGigachatProvider,
     "deepseek-web": validateDeepSeekWebProvider,
