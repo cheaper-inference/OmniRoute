@@ -92,6 +92,7 @@ describe("feature-flags-settings count update", () => {
     // QUOTA_DAILY_REVALIDATION (#20343, default off) to 136.
     // CODEBUDDY_TELEMETRY_ENABLED (#18398, codebuddy-intl turn reports, default off) to 137.
     // AGENT_SESSION_MESSAGES_ENABLED (#14864, opt-in session turn capture, default off) to 138.
+    // MODEL_AVAILABILITY_EVIDENCE_ENABLED (confirmed model absence per connection, default off) to 139.
     assert.equal(FEATURE_FLAG_DEFINITIONS.length, 139);
     // COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE (#17114, default off) to 114.
     // CURSOR_GROK_47_DROP_MAX_EFFORT (#17386, default off) to 112.
