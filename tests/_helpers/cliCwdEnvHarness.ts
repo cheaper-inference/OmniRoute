@@ -10,6 +10,7 @@ import net from "node:net";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { nativeCoverageArgs } from "./nativeCoverageArgs.ts";
 
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 export const BIN = path.join(ROOT, "bin", "omniroute.mjs");
@@ -74,9 +75,23 @@ export function cleanEnv(home: string, extra: Record<string, string> = {}) {
   };
 }
 
+export function cliCoverageNodeArgs(bin: string) {
+  const args = nativeCoverageArgs();
+  if (!args.length || bin === BIN) return args;
+  try {
+    return fs.readFileSync(bin).equals(fs.readFileSync(BIN)) ? args : [];
+  } catch {
+    return [];
+  }
+}
+
 export function runCli(bin: string, args: string[], cwd: string, env: Record<string, string>) {
   return new Promise<{ code: number | null; stdout: string; stderr: string }>((resolve) => {
-    const child = spawn(process.execPath, [bin, ...args], { cwd, env, detached: true });
+    const child = spawn(process.execPath, [...cliCoverageNodeArgs(bin), bin, ...args], {
+      cwd,
+      env,
+      detached: true,
+    });
     let stdout = "";
     let stderr = "";
     child.stdout.on("data", (d) => (stdout += d));

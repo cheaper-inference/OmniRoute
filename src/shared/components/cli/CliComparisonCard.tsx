@@ -54,7 +54,7 @@ export default function CliComparisonCard({ currentType }: CliComparisonCardProp
                 ) : (
                   <Link
                     href={TYPE_HREFS[type]}
-                    className="inline-flex items-center px-1.5 py-0.5 text-[10px] font-medium rounded-full bg-bg-subtle text-text-muted hover:text-primary hover:bg-primary/10 transition-colors whitespace-nowrap"
+                    className="inline-flex items-center px-1.5 py-0.5 text-3xs font-medium rounded-full bg-bg-subtle text-text-muted hover:text-primary hover:bg-primary/10 transition-colors whitespace-nowrap"
                   >
                     {t("comparison.open")}
                   </Link>
@@ -67,14 +67,10 @@ export default function CliComparisonCard({ currentType }: CliComparisonCardProp
               </p>
 
               {/* Flow */}
-              <p className="text-[10px] text-text-muted font-mono">
-                {t(`comparison.${type}.flow`)}
-              </p>
+              <p className="text-xs text-text-muted font-mono">{t(`comparison.${type}.flow`)}</p>
 
               {/* Examples */}
-              <p className="text-[10px] text-text-muted italic">
-                {t(`comparison.${type}.examples`)}
-              </p>
+              <p className="text-xs text-text-muted italic">{t(`comparison.${type}.examples`)}</p>
             </div>
           );
         })}

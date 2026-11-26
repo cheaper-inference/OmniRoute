@@ -246,6 +246,9 @@ export async function deleteProviderNode(id: string) {
   if (!existing) return null;
 
   db.prepare("DELETE FROM provider_nodes WHERE id = ?").run(id);
+  // A node's custom models live in key_value keyed by the node id; leaving the
+  // row behind keeps deleted nodes surfacing models (9router a8f63f4d).
+  db.prepare("DELETE FROM key_value WHERE namespace = 'customModels' AND key = ?").run(id);
   backupDbFile("pre-write");
   invalidateDbCache("nodes");
   resetProviderNodePrefixCache();

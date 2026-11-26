@@ -10,6 +10,7 @@ import {
   TableRow,
 } from "@omniroute/ui-kit/table";
 import { Progress } from "@omniroute/ui-kit/progress";
+import Card from "@/shared/components/Card";
 import Badge from "@/shared/components/Badge";
 import Button from "@/shared/components/Button";
 import EmptyState from "@/shared/components/EmptyState";
@@ -75,14 +76,14 @@ function StatCard({
   accent?: string;
 }) {
   return (
-    <div className="rounded-lg border border-border bg-bg-subtle p-4">
+    <Card.Section>
       <div className="flex items-center gap-1.5 text-xs text-text-muted">
         <Icon name={icon} size={16} />
         <span>{label}</span>
       </div>
       <div className={`mt-3 text-2xl font-semibold tabular-nums ${accent}`}>{value}</div>
       {sub && <div className="mt-1 text-xs text-text-muted">{sub}</div>}
-    </div>
+    </Card.Section>
   );
 }
 
@@ -233,7 +234,9 @@ export default function ReasoningCacheTab() {
             {t("reasoningCache")}
           </SectionBadge>
           <div>
-            <h2 className="text-lg text-text-main">{t("reasoningCache")}</h2>
+            <h2 className="ci-heading" data-size="lg">
+              {t("reasoningCache")}
+            </h2>
             <p className="mt-1 max-w-3xl text-sm text-text-muted">{t("reasoningCacheDesc")}</p>
           </div>
         </div>
@@ -293,10 +296,12 @@ export default function ReasoningCacheTab() {
       {providerEntries.length > 0 && (
         // Plain sections: the cache page's Card is the only frame around these tables (#19620).
         <div>
-          <h3 className="text-sm text-text-main">{t("reasoningByProvider")}</h3>
+          <h3 className="ci-heading" data-size="sm">
+            {t("reasoningByProvider")}
+          </h3>
           <Table
-            className="text-sm"
-            containerClassName="mt-3 rounded-none border-0"
+            variant="plain"
+            containerClassName="mt-3"
             scrollbarLabel={t("reasoningByProvider")}
             scrollLabel={t("reasoningByProvider")}
           >
@@ -348,10 +353,12 @@ export default function ReasoningCacheTab() {
       {/* By Model */}
       {modelEntries.length > 0 && (
         <div>
-          <h3 className="text-sm text-text-main">{t("reasoningByModel")}</h3>
+          <h3 className="ci-heading" data-size="sm">
+            {t("reasoningByModel")}
+          </h3>
           <Table
-            className="text-sm"
-            containerClassName="mt-3 rounded-none border-0"
+            variant="plain"
+            containerClassName="mt-3"
             scrollbarLabel={t("reasoningByModel")}
             scrollLabel={t("reasoningByModel")}
           >
@@ -389,18 +396,17 @@ export default function ReasoningCacheTab() {
       {/* Recent Entries */}
       <div>
         <div className="mb-4 flex flex-col gap-1">
-          <h3 className="text-sm text-text-main">{t("reasoningRecentEntries")}</h3>
+          <h3 className="ci-heading" data-size="sm">
+            {t("reasoningRecentEntries")}
+          </h3>
           <p className="text-sm text-text-muted">{t("reasoningCacheDesc")}</p>
         </div>
 
         {entries.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-border px-4 py-6 text-sm text-text-muted">
-            {t("reasoningNoData")}
-          </div>
+          <EmptyState layout="inline" border="dashed" title={t("reasoningNoData")} />
         ) : (
           <Table
-            className="text-sm"
-            containerClassName="rounded-none border-0"
+            variant="plain"
             maxHeight="24rem"
             scrollLabel={t("reasoningRecentEntries")}
             scrollbarLabel={t("reasoningRecentEntries")}
@@ -506,7 +512,9 @@ export default function ReasoningCacheTab() {
 
       {/* Behavior Info */}
       <div className="rounded-xl border border-border bg-bg-subtle p-5">
-        <h3 className="text-sm text-text-main">{t("reasoningBehavior")}</h3>
+        <h3 className="ci-heading" data-size="sm">
+          {t("reasoningBehavior")}
+        </h3>
         <div className="mt-4 grid gap-3">
           <InfoRow icon="info">{t("reasoningBehaviorCapture")}</InfoRow>
           <InfoRow icon="info">{t("reasoningBehaviorReplay")}</InfoRow>

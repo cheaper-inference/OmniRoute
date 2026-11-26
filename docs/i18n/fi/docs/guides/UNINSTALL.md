@@ -70,6 +70,8 @@ docker rm omniroute
 docker volume rm omniroute-data
 
 # (Valinnainen) Poista levykuva
+docker rmi cheaperinference/omniroute:latest
+# Vanhemmat asennukset vetivät vanhan nimen:
 docker rmi diegosouzapw/omniroute:latest
 ```
 

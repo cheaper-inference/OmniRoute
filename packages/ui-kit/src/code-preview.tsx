@@ -18,8 +18,13 @@ export interface CodePreviewToken {
 export interface CodePreviewProps extends Omit<ComponentProps<"section">, "onCopy"> {
   /** Surface follows the current theme and matches onboarding integration steps. */
   variant?: "terminal" | "surface";
-  /** Defaults to true for terminal, false for surface. */
+  /** Defaults to true for terminal, false for surface and whenever the header is hidden. */
   showLineNumbers?: boolean;
+  /**
+   * `false` drops the header for a one-line command or URL: the code and the copy button share one
+   * row, and `filename`, `language` and `metadata` are not rendered. Defaults to true.
+   */
+  showHeader?: boolean;
   filename?: ReactNode;
   language?: ReactNode;
   metadata?: ReactNode;
@@ -33,7 +38,10 @@ export interface CodePreviewProps extends Omit<ComponentProps<"section">, "onCop
   copiedAnnouncement?: string;
   /** Visible error after a failed copy. Defaults depend on whether getCopyValue is set. */
   copyErrorLabel?: string;
-  /** Accessible name of the code region. Defaults to "<language> code". */
+  /**
+   * Accessible name of the code region. Defaults to "<language> code" (the file name when there is
+   * no language), built from text only: with an element in both, or neither set, it is "Code".
+   */
   codeLabel?: string;
   /** Resolve clipboard text only after a click; displayed source stays unchanged. */
   getCopyValue?: () => Promise<string>;
@@ -42,12 +50,17 @@ export interface CodePreviewProps extends Omit<ComponentProps<"section">, "onCop
   onCopyError?: (error: unknown) => void;
 }
 
+function textOf(node: ReactNode): string {
+  return typeof node === "string" || typeof node === "number" ? String(node) : "";
+}
+
 export function CodePreview({
   className,
   variant = "terminal",
-  showLineNumbers = variant === "terminal",
-  filename = "request.ts",
-  language = "TypeScript",
+  showHeader = true,
+  showLineNumbers = showHeader && variant === "terminal",
+  filename = showHeader ? "request.ts" : undefined,
+  language = showHeader ? "TypeScript" : undefined,
   metadata,
   code,
   lines,
@@ -131,20 +144,28 @@ export function CodePreview({
     }
   }, [getCopyValue, onCopy, onCopyError, rawCode]);
 
+  const copyButton = (
+    <button type="button" className="ci-code-preview__copy" onClick={copy} disabled={!rawCode || copying} aria-busy={copying || undefined} data-copied={copied || undefined}>
+      {copied ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}
+      {copying ? copyingLabel : copied ? copiedLabel : copyLabel}
+    </button>
+  );
+  // Only text can name the region: an element would read as "[object Object]".
+  const codeName = textOf(language) || textOf(filename);
+
   return (
-    <section data-slot="code-preview" data-variant={variant} data-line-numbers={showLineNumbers} className={cn("ci-code-preview", className)} {...props}>
-      <header className="ci-code-preview__header">
-        <span className="ci-code-preview__meta">
-          <strong>{filename}</strong>
-          <span>{language}</span>
-          {metadata != null ? <span className="ci-code-preview__endpoint">{metadata}</span> : null}
-        </span>
-        <button type="button" className="ci-code-preview__copy" onClick={copy} disabled={!rawCode || copying} aria-busy={copying || undefined} data-copied={copied || undefined}>
-          {copied ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}
-          {copying ? copyingLabel : copied ? copiedLabel : copyLabel}
-        </button>
-      </header>
-      <pre className="ci-code-preview__pre" tabIndex={0} aria-label={codeLabel ?? `${String(language || filename || "Code")} code`}>
+    <section data-slot="code-preview" data-variant={variant} data-line-numbers={showLineNumbers} data-header={showHeader ? undefined : "false"} className={cn("ci-code-preview", className)} {...props}>
+      {showHeader && (
+        <header className="ci-code-preview__header">
+          <span className="ci-code-preview__meta">
+            <strong>{filename}</strong>
+            <span>{language}</span>
+            {metadata != null ? <span className="ci-code-preview__endpoint">{metadata}</span> : null}
+          </span>
+          {copyButton}
+        </header>
+      )}
+      <pre className="ci-code-preview__pre" tabIndex={0} aria-label={codeLabel ?? (codeName ? `${codeName} code` : "Code")}>
         <code>
           {sourceLines.map((line, lineIndex) => (
             <span className="ci-code-preview__line" key={lineIndex}>
@@ -158,6 +179,8 @@ export function CodePreview({
           ))}
         </code>
       </pre>
+      {/* Without a header the button follows the code, so the tab order matches what is drawn. */}
+      {!showHeader && copyButton}
       {copyFailed && <p className="ci-code-preview__error" role="alert">{copyErrorLabel ?? (getCopyValue ? "Could not copy code. Please try again." : "Could not copy code. Select it and try again.")}</p>}
       <span className="ci-sr-only" aria-live="polite">{copied ? copiedAnnouncement : ""}</span>
     </section>

@@ -496,6 +496,32 @@ export const DEFAULT_PRICING_INFERENCE = {
       cache_creation: 2.0,
     },
   },
+  // Cline's free bucket (cline-free/*) bills nothing. Without a row the usage is
+  // unpriced, and a USD-limited API key fails closed (#12341) after one request. The paid
+  // vendor ids and the stealth/* and :free ids in the same catalog are not listed: they stay unpriced.
+  cline: {
+    "cline-free/deepseek-v4.1-flash": {
+      input: 0,
+      output: 0,
+      cached: 0,
+      reasoning: 0,
+      cache_creation: 0,
+    },
+    "cline-free/mimo-v2.6-flash": {
+      input: 0,
+      output: 0,
+      cached: 0,
+      reasoning: 0,
+      cache_creation: 0,
+    },
+    "cline-free/muse-spark-1.3-contributor": {
+      input: 0,
+      output: 0,
+      cached: 0,
+      reasoning: 0,
+      cache_creation: 0,
+    },
+  },
   hyperbolic: {
     "openai/gpt-oss-120b": { input: 0, output: 0, cached: 0, reasoning: 0, cache_creation: 0 },
     "gpt-oss-120b": { input: 0, output: 0, cached: 0, reasoning: 0, cache_creation: 0 },

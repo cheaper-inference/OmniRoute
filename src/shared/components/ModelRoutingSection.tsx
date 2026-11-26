@@ -276,14 +276,14 @@ export default function ModelRoutingSection({ combos: externalCombos }: { combos
                 <code className="shrink-0 rounded bg-warning/10 px-1.5 py-0.5 font-mono text-xs text-warning">
                   {m.pattern}
                 </code>
-                <span className="text-[10px] text-text-muted" aria-hidden="true">
+                <span className="text-3xs text-text-muted" aria-hidden="true">
                   →
                 </span>
                 <span className="truncate text-xs font-medium text-primary">
                   {m.comboName || m.comboId.slice(0, 8)}
                 </span>
                 {m.description && (
-                  <span className="hidden truncate text-[10px] text-text-muted sm:inline">
+                  <span className="hidden truncate text-3xs text-text-muted sm:inline">
                     {m.description}
                   </span>
                 )}

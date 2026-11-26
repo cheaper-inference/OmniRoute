@@ -4,10 +4,9 @@
 
 ---
 
-自 v3.8.49（质量/速度计划的 WS3.2/WS3.4）起，经评审的 PR 合并到
-`release/vX.Y.Z` 的默认路径是 **Mergify 合并队列**（`.mergify.yml`）；
-下文记录的**手动合并列车**是备用方案——用于发生事故、
-发布冻结期间，或 Mergify Open Source 计划发生变化时。
+> **2026-11-19：Mergify 合并队列退役**（所有者的决定）。 `.mergify.yml`不再定义队列并拒绝合并或重写拉取请求的 Mergify 命令。版本PRs在存储库规则集“活动版本上需要绿色门”(`Gate / CI` + `Gate / Quality`) 下手动合并，直到全队列在实时模式下运行，然后通过全队列 ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ) 进行合并。下面的合并部分按原样描述了队列。
+
+从 v3.8.49（ quality/velocity计划的WS3.2/WS3.4 ）开始，审核PRs到`release/vX.Y.Z`的默认合并路径是**Mergify合并队列**(`.mergify.yml`);这**手动合并列车**下面记录的是在事件、发布冻结或 Mergify 开源计划发生变化期间使用的FALLBACK — 。
 
 ## 默认路径：Mergify 队列
 

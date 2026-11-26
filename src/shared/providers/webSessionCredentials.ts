@@ -106,10 +106,17 @@ export const WEB_SESSION_CREDENTIAL_REQUIREMENTS = {
   },
   "perplexity-web": {
     kind: "cookie",
-    credentialName: "__Secure-next-auth.session-token",
-    placeholder: "__Secure-next-auth.session-token=...",
+    credentialName:
+      "__Secure-pplx.session.<UUID> and pplx.session-id (legacy: __Secure-next-auth.session-token)",
+    placeholder: "__Secure-pplx.session.<UUID>=...; pplx.session-id=...",
     acceptsFullCookieHeader: true,
-    storageKeys: ["cookie", "sessionToken", "session-token", "__Secure-next-auth.session-token"],
+    storageKeys: [
+      "cookie",
+      "sessionToken",
+      "session-token",
+      "pplx.session-id",
+      "__Secure-next-auth.session-token",
+    ],
   },
   hyperagent: {
     kind: "cookie",

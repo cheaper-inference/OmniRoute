@@ -1,14 +1,14 @@
 "use client";
 
-import { forwardRef, useState } from "react";
+import { forwardRef } from "react";
 import {
   Button as KitButton,
   type ButtonSize as KitSize,
+  type ButtonTone as KitTone,
   type ButtonVariant as KitVariant,
 } from "@omniroute/ui-kit/button";
 import { cn } from "@/shared/utils/cn";
 import Icon from "./Icon";
-import Tooltip from "./Tooltip";
 
 /** Legacy variant vocabulary — kept because 150+ call sites and Modal.tsx type against it. */
 export type ButtonVariant =
@@ -21,7 +21,10 @@ export type ButtonVariant =
   | "danger"
   /** Quiet delete/revoke inside table rows and lists (kit #191). Confirmations stay `danger`. */
   | "destructive-ghost";
-export type ButtonSize = "sm" | "md" | "lg" | "icon" | "icon-sm";
+/** `2xs` and `icon-2xs` are the kit's 24px dense sizes, for row and inline actions. */
+export type ButtonSize = "2xs" | "sm" | "md" | "lg" | "icon" | "icon-2xs" | "icon-sm";
+/** `muted`: muted resting ink that keeps the variant's hover (`ghost`, `outline`, `secondary`). */
+export type ButtonTone = KitTone;
 
 const VARIANT_TO_KIT: Record<ButtonVariant, { variant: KitVariant; className?: string }> = {
   primary: { variant: "default" },
@@ -35,10 +38,12 @@ const VARIANT_TO_KIT: Record<ButtonVariant, { variant: KitVariant; className?: s
 };
 
 const SIZE_TO_KIT: Record<ButtonSize, KitSize> = {
+  "2xs": "2xs",
   sm: "sm",
   md: "default",
   lg: "lg",
   icon: "icon",
+  "icon-2xs": "icon-2xs",
   "icon-sm": "icon-sm",
 };
 
@@ -46,6 +51,7 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
   children?: React.ReactNode;
   variant?: ButtonVariant;
   size?: ButtonSize;
+  tone?: ButtonTone;
   /** ICON_MAP name (resolved through <Icon>). */
   icon?: string;
   iconRight?: string;
@@ -54,7 +60,15 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
   className?: string;
 }
 
-const ICON_SIZE: Record<ButtonSize, number> = { sm: 14, md: 16, lg: 18, icon: 20, "icon-sm": 16 };
+const ICON_SIZE: Record<ButtonSize, number> = {
+  "2xs": 14,
+  sm: 14,
+  md: 16,
+  lg: 18,
+  icon: 20,
+  "icon-2xs": 14,
+  "icon-sm": 16,
+};
 
 /**
  * Legacy variant/size → kit props. Unknown strings (untyped JS callers, stale data) fall back
@@ -71,55 +85,49 @@ export function resolveKitButton(variant: ButtonVariant, size: ButtonSize) {
 }
 
 /**
- * A titled Button whose call site passes `disabled` or `loading` can go inactive, and the kit
- * gives an inactive button `pointer-events: none`: its native `title` (often the only visible
- * name of an icon button) would never show then. Such a button is wrapped once in the Tooltip
- * adapter — always, so toggling `disabled` never remounts the button or drops its focus — and
- * the tooltip opens only while the button is inactive. While enabled, the native title keeps
- * working as before (one tooltip at a time, same accessible name/description). A reason for
- * being disabled is not a title: use GuardedAction `reason` for that.
+ * The `title` as the kit tooltip, or undefined when there is nothing to show. The kit Button
+ * draws it on hover and on keyboard focus with no element around the button, also while the
+ * button is inactive: a titled button that is `disabled` or `loading` renders
+ * `aria-disabled="true"` instead of `disabled` (select it with `[aria-disabled="true"]`, not
+ * `:disabled`), stays a tab stop and runs no click. The native `title` is not rendered, so
+ * there is one tooltip. A reason for being disabled is not a title: use GuardedAction `reason`.
+ *
+ * The kit opens it on focus only when the user moved there with the keyboard (kit #317), so a
+ * dialog that focuses a titled button when it opens shows no tooltip and keeps its Escape.
  */
-function InactiveTitleTooltip({
-  title,
-  inactive,
-  fullWidth,
-  children,
-}: {
-  title: string;
-  inactive: boolean;
-  fullWidth: boolean;
-  children: React.ReactNode;
-}) {
-  const [open, setOpen] = useState(false);
-  // Both wrappers are boxes that hand a parent's stretch down to the button: the outer
-  // `.ci-tooltip` span is the parent's flex item (it takes ActionBar's `[&>*]:grow` on phones)
-  // and `[&>*]:grow` passes that growth to the trigger, then to the button. `fullWidth` keeps
-  // the whole chain full width.
-  const chain = cn("max-w-full [&>*]:grow", fullWidth && "flex w-full");
-  return (
-    <Tooltip
-      content={title}
-      multiline
-      className={chain}
-      open={inactive && open}
-      onOpenChange={setOpen}
-    >
-      {/* The trigger: it takes the hover while the button ignores pointer events and is the
-          keyboard stop while the button cannot be focused. `multiline`: a long title (a hint
-          rather than a short name) wraps instead of running off the viewport. */}
-      <span tabIndex={inactive ? 0 : undefined} className={cn("inline-flex", chain)}>
-        {children}
-      </span>
-    </Tooltip>
-  );
+function tooltipOf(title: unknown): string | undefined {
+  return typeof title === "string" && title.trim() !== "" ? title.trim() : undefined;
 }
 
-/** The legacy props → kit Button mapping (unchanged); Button below only decides the wrapper. */
-const LegacyKitButton = forwardRef<HTMLButtonElement, ButtonProps>(function LegacyKitButton(
+type NameProps = Pick<ButtonProps, "children" | "aria-label" | "aria-labelledby">;
+
+/**
+ * The `aria-label` of a titled button. The native title also named a button that has neither
+ * text nor a name of its own; the kit takes the tooltip as the name only on its icon sizes, so
+ * the adapter names the other ones. Any other button keeps the `aria-label` it was given.
+ */
+function nameWithTitle(tooltip: string | undefined, props: NameProps): string | undefined {
+  const { children } = props;
+  const named = props["aria-label"] != null || props["aria-labelledby"] != null;
+  const textless = children == null || typeof children === "boolean" || children === "";
+  return tooltip && !named && textless ? tooltip : props["aria-label"];
+}
+
+/** An `icon` / `iconRight` slot: hidden while the spinner shows. */
+function slotIcon(name: string | undefined, size: number, loading: boolean) {
+  return !loading && name ? <Icon name={name} size={size} /> : null;
+}
+
+/**
+ * Button — adapter over the kit Button, with the legacy variant/size vocabulary and the
+ * ICON_MAP `icon` slots. `title` is shown through the kit tooltip (see `tooltipOf`).
+ */
+const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
   {
     children,
     variant = "primary",
     size = "md",
+    tone,
     icon,
     iconRight,
     disabled = false,
@@ -127,53 +135,31 @@ const LegacyKitButton = forwardRef<HTMLButtonElement, ButtonProps>(function Lega
     fullWidth = false,
     className,
     type = "button",
+    title,
     ...props
   },
   ref
 ) {
   const kit = resolveKitButton(variant, size);
-  const iconSize = kit.iconSize;
+  const tooltip = tooltipOf(title);
   return (
     <KitButton
       ref={ref}
       type={type}
       variant={kit.variant}
       size={kit.size}
+      tone={tone}
       loading={loading}
       disabled={disabled || loading}
+      tooltip={tooltip}
       className={cn(kit.className, fullWidth && "w-full", className)}
       {...props}
+      aria-label={nameWithTitle(tooltip, { children, ...props })}
     >
-      {!loading && icon ? <Icon name={icon} size={iconSize} /> : null}
+      {slotIcon(icon, kit.iconSize, loading)}
       {children}
-      {!loading && iconRight ? <Icon name={iconRight} size={iconSize} /> : null}
+      {slotIcon(iconRight, kit.iconSize, loading)}
     </KitButton>
-  );
-});
-
-/**
- * The title to keep visible while the button is inactive, or null when there is none or the
- * button can never go inactive. Checked on the raw props: a call site that writes `disabled`
- * or `loading` (even `disabled={false}`) has a button that can be disabled.
- */
-function inactiveTitleOf(props: ButtonProps): string | null {
-  const canGoInactive = "disabled" in props || "loading" in props;
-  const { title } = props;
-  return canGoInactive && typeof title === "string" && title.trim() !== "" ? title : null;
-}
-
-const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(props, ref) {
-  const button = <LegacyKitButton ref={ref} {...props} />;
-  const title = inactiveTitleOf(props);
-  if (title === null) return button;
-  return (
-    <InactiveTitleTooltip
-      title={title}
-      inactive={Boolean(props.disabled || props.loading)}
-      fullWidth={Boolean(props.fullWidth)}
-    >
-      {button}
-    </InactiveTitleTooltip>
   );
 });
 

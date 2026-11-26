@@ -58,10 +58,13 @@ import {
 import { dispatchToBifrost } from "@/shared/services/bifrost/bifrostClient";
 import { gateBifrostFastPath } from "@/shared/services/bifrost/bifrostFastPathGate";
 
+import { buildInjectionBlockedBody } from "@/lib/guardrails/injectionBlockedResponse";
+
 let initPromise = null;
 
-// Singleton injection guard instance. `logger: null` — the guardrail registry
-// re-evaluates this request inside handleChat with the pino logger (#11936 dedupe).
+// Singleton injection guard instance. `logger: null` — warn/log-mode flags are re-evaluated by the
+// guardrail registry inside handleChat (#11936 dedupe), but BLOCKED requests return here before it
+// runs, so the block itself is logged via buildInjectionBlockedBody (#20526).
 const injectionGuard = createInjectionGuard({ logger: null });
 
 /**
@@ -216,7 +219,8 @@ export async function POST(request) {
           if (isSelfHostedEntryConfigured()) {
             const keyPolicy = await enforceApiKeyPolicy(
               request,
-              typeof parsedBody.model === "string" ? parsedBody.model : null
+              typeof parsedBody.model === "string" ? parsedBody.model : null,
+              { directModelDispatch: true }
             );
             if (keyPolicy.rejection) {
               return finishAdmission(keyPolicy.rejection);
@@ -291,14 +295,7 @@ export async function POST(request) {
         if (blocked) {
           return finishAdmission(
             new Response(
-              JSON.stringify({
-                error: {
-                  message: "Request blocked: potential prompt injection detected",
-                  type: "injection_detected",
-                  code: "SECURITY_001",
-                  detections: result.detections.length,
-                },
-              }),
+              JSON.stringify(buildInjectionBlockedBody(result.detections, parsedBody?.model)),
               { status: 400, headers: { ...CORS_HEADERS, "Content-Type": "application/json" } }
             )
           );

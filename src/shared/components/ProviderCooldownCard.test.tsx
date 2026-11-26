@@ -10,6 +10,13 @@
 // attribute. Uses react-dom/client directly (no @testing-library/dom
 // dependency) to match this repo's existing DistributeProxiesButton.test.tsx
 // pattern.
+//
+// Kit NumberInput adoption: the fields are the shared `NumberInput` adapter (a
+// text field with a numeric keyboard, no longer `input[type=number]`). The
+// person can type freely; the kit brings the value into min/max when the edit
+// ends — on blur, which a click on Save causes in a browser, or on Enter — and
+// refuses a minus sign outright when `min` is 0 or more. The guarantee is the
+// same: `onSave` never receives an out-of-range cooldown.
 import React from "react";
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
@@ -21,6 +28,7 @@ import {
 
 vi.mock("next-intl", () => ({
   useTranslations: () => (key: string) => key,
+  useLocale: () => "en",
 }));
 
 const baseValue: ProviderCooldownSettings = {
@@ -39,12 +47,14 @@ function makeContainer(): HTMLElement {
 }
 
 function setNativeValue(input: HTMLInputElement, value: string) {
-  const setter = Object.getOwnPropertyDescriptor(
-    window.HTMLInputElement.prototype,
-    "value"
-  )?.set;
+  const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value")?.set;
   setter?.call(input, value);
   input.dispatchEvent(new Event("input", { bubbles: true }));
+}
+
+/** Leaving the field, as the click on Save does before its own `click` event. */
+function blur(input: HTMLInputElement) {
+  input.dispatchEvent(new FocusEvent("focusout", { bubbles: true }));
 }
 
 describe("ProviderCooldownCard (#8107)", () => {
@@ -66,9 +76,7 @@ describe("ProviderCooldownCard (#8107)", () => {
     const container = makeContainer();
     const root: Root = createRoot(container);
     await act(async () => {
-      root.render(
-        <ProviderCooldownCard value={baseValue} onSave={onSave} saving={false} />
-      );
+      root.render(<ProviderCooldownCard value={baseValue} onSave={onSave} saving={false} />);
     });
 
     const editButton = Array.from(container.querySelectorAll("button")).find((b) =>
@@ -78,7 +86,7 @@ describe("ProviderCooldownCard (#8107)", () => {
       editButton.click();
     });
 
-    const inputs = Array.from(container.querySelectorAll("input[type='number']"));
+    const inputs = Array.from(container.querySelectorAll("input.ci-number-input"));
     const saveButton = Array.from(container.querySelectorAll("button")).find((b) =>
       b.textContent?.includes("save")
     ) as HTMLButtonElement;
@@ -96,6 +104,10 @@ describe("ProviderCooldownCard (#8107)", () => {
     await act(async () => {
       setNativeValue(maxInput, "99999999");
     });
+    await act(async () => {
+      blur(maxInput);
+    });
+    expect(maxInput.value).toBe("3600000");
 
     await act(async () => {
       saveButton.click();
@@ -107,7 +119,29 @@ describe("ProviderCooldownCard (#8107)", () => {
     expect(submitted.maxRetryCooldownMs).toBe(3600000);
   });
 
-  it("clamps a min-cooldown value typed below the field minimum before handing it to onSave", async () => {
+  it("clamps a value typed above the cap when the edit ends with Enter", async () => {
+    const onSave = vi.fn().mockResolvedValue(undefined);
+    const { inputs, saveButton } = await renderCard(onSave);
+    const minInput = inputs[0] as HTMLInputElement;
+
+    await act(async () => {
+      setNativeValue(minInput, "99999999");
+    });
+    await act(async () => {
+      minInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+    });
+    expect(minInput.value).toBe("300000");
+
+    await act(async () => {
+      saveButton.click();
+    });
+
+    expect(onSave).toHaveBeenCalledTimes(1);
+    const submitted = onSave.mock.calls[0][0] as ProviderCooldownSettings;
+    expect(submitted.minRetryCooldownMs).toBe(300000);
+  });
+
+  it("refuses a min-cooldown value typed below the field minimum, so onSave never gets it", async () => {
     const onSave = vi.fn().mockResolvedValue(undefined);
     const { inputs, saveButton } = await renderCard(onSave);
 
@@ -115,6 +149,11 @@ describe("ProviderCooldownCard (#8107)", () => {
 
     await act(async () => {
       setNativeValue(minInput, "-500");
+    });
+    // min is 0: the minus sign is not accepted and the field keeps its value.
+    expect(minInput.value).toBe("1000");
+    await act(async () => {
+      blur(minInput);
     });
 
     await act(async () => {
@@ -124,6 +163,6 @@ describe("ProviderCooldownCard (#8107)", () => {
     expect(onSave).toHaveBeenCalledTimes(1);
     const submitted = onSave.mock.calls[0][0] as ProviderCooldownSettings;
     expect(submitted.minRetryCooldownMs).toBeGreaterThanOrEqual(0);
-    expect(submitted.minRetryCooldownMs).toBe(0);
+    expect(submitted.minRetryCooldownMs).toBe(baseValue.minRetryCooldownMs);
   });
 });

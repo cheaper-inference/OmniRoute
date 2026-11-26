@@ -1,5 +1,6 @@
 "use client";
 
+import Card from "@/shared/components/Card";
 import { useTranslations } from "next-intl";
 import { Toggle } from "@/shared/components";
 
@@ -18,7 +19,7 @@ export default function CcCompatibleRequestDefaultsFields(
   const t = useTranslations("providers");
 
   return (
-    <div className="flex flex-col gap-4 rounded-lg border border-border bg-bg-subtle p-4">
+    <Card.Section className="flex flex-col gap-4">
       <Toggle
         checked={props.values.ccCompatibleContext1m}
         onChange={(checked) => props.onChange({ ccCompatibleContext1m: checked })}
@@ -37,6 +38,6 @@ export default function CcCompatibleRequestDefaultsFields(
         label={t("ccCompatibleSummarizeThinkingLabel")}
         description={t("ccCompatibleSummarizeThinkingDescription")}
       />
-    </div>
+    </Card.Section>
   );
 }

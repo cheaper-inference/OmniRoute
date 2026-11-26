@@ -1,5 +1,5 @@
 import { OAUTH_ENDPOINTS } from "../../../config/constants.ts";
-import { runWithProxyContext } from "../../../utils/proxyFetch.ts";
+import { runCommittedWithProxyContext } from "../../../utils/proxyFetch.ts";
 import { buildFormParams, type RefreshLogger } from "../shared.ts";
 
 const UNRECOVERABLE_CODES = new Set(["invalid_grant", "invalid_token", "token_expired"]);
@@ -48,7 +48,7 @@ export async function refreshRenderhourToken(
   proxyConfig: unknown = null
 ) {
   try {
-    const response = await runWithProxyContext(proxyConfig, () =>
+    const response = await runCommittedWithProxyContext(proxyConfig, () =>
       fetch(OAUTH_ENDPOINTS.renderhour.token, {
         method: "POST",
         headers: {

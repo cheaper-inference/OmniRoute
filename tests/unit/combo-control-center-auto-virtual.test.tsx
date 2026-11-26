@@ -136,10 +136,15 @@ describe("ComboControlCenterClient on a virtual auto/* combo", () => {
     await renderAndSettle("auto/fast");
 
     const text = container.textContent ?? "";
-    // Unwrapped keys render as their own rows…
-    expect(text).toContain("routerStrategy");
+    // Unwrapped keys render as their own rows, each under a readable label (KEA-9368):
+    // the raw config key is never the row's name.
+    expect(text).toContain("Router strategy");
     expect(text).toContain("lkgp");
-    expect(text).toContain("explorationRate");
+    expect(text).toContain("Exploration rate");
+    expect(text).toContain("Candidate pool");
+    expect(text).not.toContain("routerStrategy");
+    expect(text).not.toContain("explorationRate");
+    expect(text).not.toContain("candidatePool");
     expect(text).toContain("quota=0.1429");
     // …and the giant stringified object never makes it to the DOM.
     expect(text).not.toContain('"candidatePool"');

@@ -157,10 +157,10 @@ export default function RadarCombosPage() {
               <Card key={suggestion.familyId}>
                 <div className="flex flex-col gap-4">
                   <div className="flex flex-col gap-1">
-                    <span className="text-xs uppercase tracking-wide text-text-muted">
-                      {t("familyLabel")}
-                    </span>
-                    <h2 className="text-lg font-mono">{suggestion.familyId}</h2>
+                    <span className="ci-eyebrow">{t("familyLabel")}</span>
+                    <h2 className="ci-heading font-mono" data-size="lg">
+                      {suggestion.familyId}
+                    </h2>
                     <p className="text-sm text-text-muted">{t("strategyReason")}</p>
                   </div>
 

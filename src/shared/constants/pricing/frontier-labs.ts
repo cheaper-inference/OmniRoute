@@ -5,8 +5,11 @@
 import {
   GPT_6_ASTRA_PRICING,
   GPT_6_SOL_PRICING,
+  GPT_6_TERRA_PRICING,
   GEMINI_3_7_FLASH_PROMO_PRICING,
   GEMINI_4_ARGON_PROMO_PRICING,
+  GEMINI_4_CARBON_PROMO_PRICING,
+  GEMINI_4_HYDROGEN_PRICING,
   GPT_5_5_PRICING,
   GPT_5_6_LUNA_PRICING,
   GPT_5_6_SOL_PRICING,
@@ -47,6 +50,7 @@ export const DEFAULT_PRICING_FRONTIER = {
       cache_creation: 0.125,
     }),
     "gpt-6.1-sol": withOpenAiLongContextTier(GPT_6_SOL_PRICING),
+    "gpt-6.1-terra": withOpenAiLongContextTier(GPT_6_TERRA_PRICING),
     "gpt-5.6": withOpenAiLongContextTier(GPT_5_6_SOL_PRICING),
     "gpt-5.6-sol": withOpenAiLongContextTier(GPT_5_6_SOL_PRICING),
     "gpt-5.6-terra": withOpenAiLongContextTier(GPT_5_6_TERRA_PRICING),
@@ -264,6 +268,8 @@ export const DEFAULT_PRICING_FRONTIER = {
   },
   gemini: {
     "gemini-4-argon": GEMINI_4_ARGON_PROMO_PRICING,
+    "gemini-4-carbon": GEMINI_4_CARBON_PROMO_PRICING,
+    "gemini-4-hydrogen": GEMINI_4_HYDROGEN_PRICING,
     "gemini-3.7-flash": GEMINI_3_7_FLASH_PROMO_PRICING,
     // Gemini 3.1 Pro — novo flagship Google (2026-03-17)
     // Context: 1.050.000 tokens | Max Output: 65.536
@@ -314,6 +320,71 @@ export const DEFAULT_PRICING_FRONTIER = {
       input: 0.1,
       output: 0.4,
       cached: 0.025,
+      reasoning: 0.6,
+      cache_creation: 0.1,
+    },
+  },
+  vertex: {
+    "gemini-4-argon": GEMINI_4_ARGON_PROMO_PRICING,
+    "gemini-3.7-flash": GEMINI_3_7_FLASH_PROMO_PRICING,
+    "gemini-3.1-pro": {
+      input: 2.0,
+      output: 12.0,
+      cached: 0.25,
+      reasoning: 18.0,
+      cache_creation: 2.0,
+    },
+    "gemini-3-1-pro": {
+      input: 2.0,
+      output: 12.0,
+      cached: 0.25,
+      reasoning: 18.0,
+      cache_creation: 2.0,
+    },
+    // Gemini 3 Flash is a Flash-tier model: $0.50 in / $3 out (thinking billed as output) /
+    // $0.05 cached (https://cloud.google.com/vertex-ai/generative-ai/pricing).
+    "gemini-3-flash-preview": {
+      input: 0.5,
+      output: 3.0,
+      cached: 0.05,
+      reasoning: 3.0,
+      cache_creation: 0.5,
+    },
+    "gemini-3.1-pro-preview": {
+      input: 2.0,
+      output: 12.0,
+      cached: 0.25,
+      reasoning: 18.0,
+      cache_creation: 2.0,
+    },
+    // Gemini 2.5 Pro: $1.25 in / $10 out / $0.125 cached for prompts up to 200K tokens;
+    // prompts over 200K are billed $2.50 / $15 / $0.25 for the whole request.
+    "gemini-2.5-pro": {
+      input: 1.25,
+      output: 10.0,
+      cached: 0.125,
+      reasoning: 10.0,
+      cache_creation: 1.25,
+      long_context: {
+        threshold: 200_000,
+        input: 2.5,
+        output: 15.0,
+        cached: 0.25,
+        reasoning: 15.0,
+        cache_creation: 2.5,
+      },
+    },
+    "gemini-2.5-flash": {
+      input: 0.3,
+      output: 2.5,
+      cached: 0.03,
+      reasoning: 3.75,
+      cache_creation: 0.3,
+    },
+    "gemini-2.5-flash-lite": {
+      input: 0.1,
+      output: 0.4,
+      cached: 0.01,
       reasoning: 0.6,
       cache_creation: 0.1,
     },
