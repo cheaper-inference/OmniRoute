@@ -206,7 +206,7 @@ export async function getQdrantCollectionMetadata(): Promise<QdrantCollectionMet
   return { exists: true, vectorSize, vectorName };
 }
 
-export async function checkQdrantHealth(): Promise<{
+export async function checkQdrantHealth(options?: { allowDisabled?: boolean }): Promise<{
   ok: boolean;
   latencyMs: number;
   error?: string;
@@ -214,7 +214,7 @@ export async function checkQdrantHealth(): Promise<{
 }> {
   const cfg = await getQdrantConfig();
   const start = Date.now();
-  if (!cfg.enabled || !cfg.host) {
+  if ((!cfg.enabled && !options?.allowDisabled) || !cfg.host) {
     return { ok: false, latencyMs: 0, error: "not_configured" };
   }
 
@@ -375,7 +375,8 @@ export async function upsertSemanticMemoryPoint(input: {
 export async function searchSemanticMemory(
   query: string,
   topK = 5,
-  scope?: { apiKeyId?: string; sessionId?: string | null }
+  scope?: { apiKeyId?: string; sessionId?: string | null },
+  options?: { allowDisabled?: boolean }
 ): Promise<{
   ok: boolean;
   latencyMs: number;
@@ -383,7 +384,8 @@ export async function searchSemanticMemory(
   error?: string;
 }> {
   const cfg = await getQdrantConfig();
-  if (!cfg.enabled || !cfg.host) return { ok: false, latencyMs: 0, error: "not_configured" };
+  if ((!cfg.enabled && !options?.allowDisabled) || !cfg.host)
+    return { ok: false, latencyMs: 0, error: "not_configured" };
   const start = Date.now();
   try {
     const vector = await embedText(cfg, query);
