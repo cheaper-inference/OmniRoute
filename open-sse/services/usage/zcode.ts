@@ -107,7 +107,31 @@ type ManagedUsageResult = JsonRecord & {
 type ManagedUsageOptions = {
   ensureHost?: (credentials: ManagedCredentials) => Promise<string>;
   clientFactory?: (serverRoot: string) => ZcodeClientLike;
+  timeoutMs?: number;
 };
+
+const DEFAULT_MANAGED_USAGE_TIMEOUT_MS = 15_000;
+
+function awaitWithAbort<T>(operation: Promise<T>, signal: AbortSignal): Promise<T> {
+  if (signal.aborted) return Promise.reject(new Error("ZCode quota read timed out"));
+  return new Promise<T>((resolve, reject) => {
+    const onAbort = () => {
+      signal.removeEventListener("abort", onAbort);
+      reject(new Error("ZCode quota read timed out"));
+    };
+    signal.addEventListener("abort", onAbort, { once: true });
+    operation.then(
+      (value) => {
+        signal.removeEventListener("abort", onAbort);
+        resolve(value);
+      },
+      (error) => {
+        signal.removeEventListener("abort", onAbort);
+        reject(error);
+      }
+    );
+  });
+}
 
 function individualQuota(item: JsonRecord): { key: string; quota: UsageQuota } | null {
   if (!["CREDIT_LIMIT", "TOKENS_LIMIT"].includes(String(item.type))) return null;
@@ -170,20 +194,26 @@ function managedQuotas(
 async function readManagedGroup(
   client: ZcodeClientLike,
   family: unknown,
-  plan: ManagedUsageGroup["plan"]
+  plan: ManagedUsageGroup["plan"],
+  signal: AbortSignal
 ): Promise<ManagedUsageGroup> {
   const mode = plan === "start" ? "start-plan" : "individual-coding-plan";
   const providerId = `account:${family}-${mode}`;
   const group: ManagedUsageGroup = { plan, status: "unknown", observedAt: null, quotas: {} };
   try {
     const raw = asRecord(
-      await client.call("usage-stats", "getEntitlementSnapshot", [
-        {
-          preferredProviderId: providerId,
-          requirePreferredProvider: true,
-          accountAccess: { accountType: family, mode },
-        },
-      ])
+      await client.call(
+        "usage-stats",
+        "getEntitlementSnapshot",
+        [
+          {
+            preferredProviderId: providerId,
+            requirePreferredProvider: true,
+            accountAccess: { accountType: family, mode },
+          },
+        ],
+        { signal }
+      )
     );
     if (
       raw.authenticated === true &&
@@ -234,26 +264,33 @@ export async function getManagedZcodeUsage(
     connectionId: connection.id,
     providerSpecificData: data,
   };
+  const controller = new AbortController();
+  const timeout = setTimeout(
+    () => controller.abort(),
+    options.timeoutMs ?? DEFAULT_MANAGED_USAGE_TIMEOUT_MS
+  );
   let client: ZcodeClientLike | undefined;
   try {
-    let serverRoot: string;
-    if (options.ensureHost) serverRoot = await options.ensureHost(credentials);
-    else {
-      const { nativeZcodeHosts } = await import("../../executors/zcode/nativeHostManager.ts");
-      serverRoot = await nativeZcodeHosts.ensure(credentials);
-    }
+    const ensureHost =
+      options.ensureHost ||
+      (async (managedCredentials: ManagedCredentials) => {
+        const { nativeZcodeHosts } = await import("../../executors/zcode/nativeHostManager.ts");
+        return nativeZcodeHosts.ensure(managedCredentials);
+      });
+    const serverRoot = await awaitWithAbort(ensureHost(credentials), controller.signal);
     client =
       options.clientFactory?.(serverRoot) ||
       new NativeZcodeHostClient({ serverRoot, startupTimeoutMs: 5_000, requestTimeoutMs: 10_000 });
-    await client.start();
+    await client.start({ signal: controller.signal });
     const quotaGroups: ManagedUsageGroup[] = [];
     for (const plan of plans) {
-      quotaGroups.push(await readManagedGroup(client, family, plan));
+      quotaGroups.push(await readManagedGroup(client, family, plan, controller.signal));
     }
     return { quotaGroups };
   } catch {
     return unknown();
   } finally {
+    clearTimeout(timeout);
     await client?.close().catch(() => undefined);
   }
 }

@@ -136,6 +136,20 @@ test("wrong provider, host failure and unknown limits are unknown, never zero", 
   assert.doesNotMatch(JSON.stringify(unavailable), /SECRET|business-x|jwt-x/);
 });
 
+test("managed quota telemetry timeout returns unknown instead of blocking indefinitely", async () => {
+  const startedAt = Date.now();
+  const result = await getManagedZcodeUsage(makeAccount("timeout", "zai"), {
+    timeoutMs: 20,
+    ensureHost: () => new Promise<string>(() => {}),
+  });
+  assert.ok(Date.now() - startedAt < 2_000);
+  assert.ok(
+    result.quotaGroups.every(
+      (group) => group.status === "unknown" && Object.keys(group.quotas).length === 0
+    )
+  );
+});
+
 test("one unavailable plan does not hide the other, API keys cannot use managed OAuth", async () => {
   const account = makeAccount("mixed", "bigmodel");
   let calls = 0;

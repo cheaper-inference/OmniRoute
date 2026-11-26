@@ -61,7 +61,7 @@ test("OAuth Individual exhaustion does not prevent Start selection; Individual r
   assert.equal(startExhausted?.allRateLimited, true, "the exhausted Start plan is blocked");
 });
 
-test("unknown quota scope is not applied to an OAuth tariff, but never exempts API keys", async () => {
+test("unknown quota scope is not applied to either OAuth tariff, but never exempts API keys", async () => {
   const oauth = await db.createProviderConnection({
     provider: "zcode",
     authType: "oauth",
@@ -75,6 +75,14 @@ test("unknown quota scope is not applied to an OAuth tariff, but never exempts A
     forcedConnectionId: oauth.id,
   });
   assert.equal(selected?.connectionId, oauth.id);
+  const individual = await auth.getProviderCredentials(
+    "zcode-individual",
+    null,
+    null,
+    "glm-5.3-flash",
+    { forcedConnectionId: oauth.id }
+  );
+  assert.equal(individual?.connectionId, oauth.id);
   const api = await db.createProviderConnection({
     provider: "zcode",
     authType: "apikey",
