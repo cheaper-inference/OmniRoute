@@ -3,35 +3,76 @@
   "base": "release/v3.8.55",
   "paused": null,
   "inFlight": {
-    "batchId": "b53",
+    "batchId": "b54",
     "kind": "batch",
-    "candidateRef": "omni-queue/release-v3.8.55/b53-16e2c146fb5b",
-    "candidateSha": "16e2c146fb5b8e4ee6364fb679ffe412880757fb",
-    "baseSha": "49f6a0fc52b0f43aa6084c84fda59e4c7f172d92",
-    "treeSha": "d4e8b76673a5abc1b171877985cd92d13b36ce22",
+    "candidateRef": "omni-queue/release-v3.8.55/b54-0a1fe5ef8f5c",
+    "candidateSha": "0a1fe5ef8f5cbc5496200314bcec11aba9d545f0",
+    "baseSha": "16e2c146fb5b8e4ee6364fb679ffe412880757fb",
+    "treeSha": "cbe095c8ceb8708baab4311034d2d012f90d4a71",
     "prs": [
       {
-        "n": 21232,
-        "head": "e9ec996eafb359eb896d2b3fb822a368e2b40450",
-        "title": "feat(release): add a repeatable free-tier recount report and checklist",
+        "n": 21290,
+        "head": "3f8977a4d96d9d0b432be98be5aa9f63c6a60476",
+        "title": "test: make the streamed TTFT and #13703 retry-budget tests deterministic under load",
         "author": "diegosouzapw",
-        "labeledAt": "2026-11-26T13:16:53Z"
+        "labeledAt": "2026-11-26T15:08:59Z"
       },
       {
-        "n": 21281,
-        "head": "75867749e7436ce37de3e4c56336b3cb958c4bd0",
-        "title": "fix(combo): clamp the Anthropic output-ceiling fallback",
+        "n": 21243,
+        "head": "de0e7eba89cd7a5d9ef7f22b2e100869e05abb5d",
+        "title": "feat(dashboard): add searchable combo and entity selectors (salvage of #19288)",
         "author": "diegosouzapw",
-        "labeledAt": "2026-11-26T13:23:38Z"
+        "labeledAt": "2026-11-26T15:10:28Z"
+      },
+      {
+        "n": 21291,
+        "head": "e021856a2d6195e398bf37e1fa5996276b96ae57",
+        "title": "test(combo): keep the B6 handoff summary out of the next metered-budget case",
+        "author": "diegosouzapw",
+        "labeledAt": "2026-11-26T15:11:02Z"
+      },
+      {
+        "n": 21296,
+        "head": "d4ee5c60d27241e3063145adace6ba66eb3e180a",
+        "title": "test(api): keep the v1 contract checks off the live AI Horde fetch and the cold-catalog deadline",
+        "author": "diegosouzapw",
+        "labeledAt": "2026-11-26T15:11:04Z"
+      },
+      {
+        "n": 21297,
+        "head": "edfabbd55c9d012676b666a076ff2157492f24c6",
+        "title": "test(api): reuse a pre-migrated database and wait for the cloud sync stub in the api-keys suite",
+        "author": "diegosouzapw",
+        "labeledAt": "2026-11-26T15:11:07Z"
+      },
+      {
+        "n": 20148,
+        "head": "25b80c1535353118efff13308c23aec915052f29",
+        "title": "chore(deps): bump docker/login-action from 4.7.0 to 4.8.0",
+        "author": "dependabot[bot]",
+        "labeledAt": "2026-11-26T15:50:25Z"
+      },
+      {
+        "n": 21286,
+        "head": "fc92fde6cd6dacf0a1597c1fdbb05dfa5fbe7bd7",
+        "title": "fix(docker): expose Playwright's Chromium at /usr/bin/chromium in the Node -web image",
+        "author": "diegosouzapw",
+        "labeledAt": "2026-11-26T15:50:28Z"
       }
     ],
-    "stage": "landing",
-    "startedAt": "2026-11-26T14:30:47.177Z",
+    "stage": "testing",
+    "startedAt": "2026-11-26T15:53:09.248Z",
     "attempts": 0,
-    "bisect": null,
-    "landAttempts": 1
+    "bisect": null
   },
   "baseChecks": [
+    {
+      "baseSha": "16e2c146fb5b8e4ee6364fb679ffe412880757fb",
+      "ref": "omni-queue/release-v3.8.55/b53-16e2c146fb5b",
+      "status": "green",
+      "startedAt": "2026-11-26T14:30:47.177Z",
+      "signatures": []
+    },
     {
       "baseSha": "49f6a0fc52b0f43aa6084c84fda59e4c7f172d92",
       "ref": "omni-queue/release-v3.8.55/b52-49f6a0fc52b0",
@@ -94,13 +135,6 @@
       "status": "green",
       "startedAt": "2026-11-26T02:47:49.437Z",
       "signatures": []
-    },
-    {
-      "baseSha": "176919ddb80754ad24922790dde53a85f21249d5",
-      "ref": "omni-queue/release-v3.8.55/b42-176919ddb807",
-      "status": "green",
-      "startedAt": "2026-11-25T21:40:20.857Z",
-      "signatures": []
     }
   ],
   "shadow": {
@@ -125,33 +159,15 @@
     }
   },
   "counters": {
-    "batchSeq": 53,
-    "ciRuns": 58,
-    "landedPrs": 30,
-    "landedBatches": 10,
+    "batchSeq": 54,
+    "ciRuns": 59,
+    "landedPrs": 32,
+    "landedBatches": 11,
     "redBatches": 11,
     "bisections": 3,
     "culprits": 1
   },
   "history": [
-    {
-      "at": "2026-11-20T05:39:44.028Z",
-      "type": "error",
-      "detail": "git merge-tree failed (exit 128): fatal: remote error: upload-pack: not our ref 04847663e4aace8a9ba1947e2c1cf649aa36fafc\nfatal: could not fetch 123131e68fe6ee82d84899801105dfb4995bee8c from promisor remote",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44682349926"
-    },
-    {
-      "at": "2026-11-20T05:48:29.941Z",
-      "type": "error",
-      "detail": "git merge-tree failed (exit 128): fatal: remote error: upload-pack: not our ref 04847663e4aace8a9ba1947e2c1cf649aa36fafc\nfatal: could not fetch 123131e68fe6ee82d84899801105dfb4995bee8c from promisor remote",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44683329128"
-    },
-    {
-      "at": "2026-11-20T05:57:03.369Z",
-      "type": "error",
-      "detail": "git merge-tree failed (exit 128): fatal: remote error: upload-pack: not our ref 04847663e4aace8a9ba1947e2c1cf649aa36fafc\nfatal: could not fetch 123131e68fe6ee82d84899801105dfb4995bee8c from promisor remote",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44684235791"
-    },
     {
       "at": "2026-11-20T06:18:30.026Z",
       "type": "error",
@@ -2773,12 +2789,57 @@
       ],
       "sha": "16e2c146fb5b8e4ee6364fb679ffe412880757fb",
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45853179592"
+    },
+    {
+      "at": "2026-11-26T15:52:19.358Z",
+      "type": "land-blessed",
+      "batchId": "b53",
+      "prs": [
+        21232,
+        21281
+      ],
+      "sha": "16e2c146fb5b8e4ee6364fb679ffe412880757fb",
+      "detail": "omni-queue/land success on 1 commit(s)",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45853179592"
+    },
+    {
+      "at": "2026-11-26T15:52:22.498Z",
+      "type": "landed",
+      "batchId": "b53",
+      "prs": [
+        21232,
+        21281
+      ],
+      "sha": "16e2c146fb5b8e4ee6364fb679ffe412880757fb",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45853179592"
+    },
+    {
+      "at": "2026-11-26T15:53:13.395Z",
+      "type": "batch-started",
+      "batchId": "b54",
+      "prs": [
+        21290,
+        21243,
+        21291,
+        21296,
+        21297,
+        20148,
+        21286
+      ],
+      "sha": "0a1fe5ef8f5cbc5496200314bcec11aba9d545f0",
+      "detail": "7 PR(s) on 16e2c146fb5b; window 7",
+      "labeledAt": {
+        "20148": "2026-11-26T15:50:25Z",
+        "21243": "2026-11-26T15:10:28Z",
+        "21286": "2026-11-26T15:50:28Z",
+        "21290": "2026-11-26T15:08:59Z",
+        "21291": "2026-11-26T15:11:02Z",
+        "21296": "2026-11-26T15:11:04Z",
+        "21297": "2026-11-26T15:11:07Z"
+      },
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45853179592"
     }
   ],
-  "updatedAt": "2026-11-26T15:52:15.878Z",
-  "batchWindow": 7,
-  "landingsWithoutVerdict": {
-    "count": 1,
-    "since": "2026-11-26T15:52:15.878Z"
-  }
+  "updatedAt": "2026-11-26T15:53:15.439Z",
+  "batchWindow": 7
 }
