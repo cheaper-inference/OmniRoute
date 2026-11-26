@@ -12,6 +12,7 @@ import {
   getPromptCacheReadTokensOrNull,
 } from "@/lib/usage/tokenAccounting";
 import { FORMATS } from "../translator/formats.ts";
+import { positiveReportedTotal } from "./reportedCounter.ts";
 import { pickCacheCreationTokens } from "./pickCacheCreationTokens.ts";
 import { sharedSymbol } from "@/shared/utils/processSingleton";
 
@@ -968,6 +969,7 @@ export function extractUsage(chunk: UsagePayloadLike | null | undefined) {
         ...cacheCreationFields(usage),
         provider_credits: usage.provider_credits,
         cost_in_usd_ticks: usage.cost_in_usd_ticks,
+        total_tokens: positiveReportedTotal(usage.total_tokens),
         prompt_tokens: usage.input_tokens || usage.prompt_tokens || 0,
         completion_tokens: usage.output_tokens || usage.completion_tokens || 0,
         cached_tokens:

@@ -9,3 +9,9 @@ export function firstReportedCounter(...candidates: unknown[]): number | undefin
   }
   return undefined;
 }
+
+/** A total of zero carries no independent count; callers may derive a component sum. */
+export function positiveReportedTotal(value: unknown): number | undefined {
+  const counter = firstReportedCounter(value);
+  return counter === 0 ? undefined : counter;
+}
