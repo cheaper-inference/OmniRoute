@@ -3,49 +3,55 @@
   "base": "release/v3.8.55",
   "paused": null,
   "inFlight": {
-    "batchId": "b47",
+    "batchId": "b48",
     "kind": "batch",
-    "candidateRef": "omni-queue/release-v3.8.55/b47-6f058848a829",
-    "candidateSha": "6f058848a829fac23183215f93fe241cb95be887",
-    "baseSha": "eb728bade305b219dd9cc78949073ef3dd7d9fa6",
-    "treeSha": "72dace474526c2d935e1801e5cf2d4b760cd2dd3",
+    "candidateRef": "omni-queue/release-v3.8.55/b48-d89f84adee8e",
+    "candidateSha": "d89f84adee8eaa49a7f4b949e628a6f959414c8f",
+    "baseSha": "6f058848a829fac23183215f93fe241cb95be887",
+    "treeSha": "668d8bbce9bd5df5b7604bc27a4be373d1f70645",
     "prs": [
       {
-        "n": 21125,
-        "head": "3a57400a04b48d744aa2986cd950b6cd352f7a81",
-        "title": "fix(memory): allow pre-activation Qdrant health and search validation (#21115)",
-        "author": "zerafachris",
-        "labeledAt": "2026-11-26T04:21:40Z"
-      },
-      {
-        "n": 21084,
-        "head": "bee2f027503e8e265d9a3d9add1f42d3425f44c8",
-        "title": "fix(providers): derive per-conversation Codex prompt_cache_key instead of workspaceId fallback",
-        "author": "insoln",
-        "labeledAt": "2026-11-26T04:21:42Z"
-      },
-      {
-        "n": 20980,
-        "head": "6f62f7a0b522e3bee37a1e8353afeea0661115a1",
-        "title": "fix(sse): keep the upstream error on a model-only cooldown answer",
-        "author": "costajohnt",
-        "labeledAt": "2026-11-26T04:21:44Z"
-      },
-      {
-        "n": 21149,
-        "head": "3b132e0cd56ed7a8f8b2b7c7176d7aceb48b0a05",
-        "title": "fix(a2a): sanitize skill errors before they reach A2A clients",
+        "n": 21150,
+        "head": "2ffd20440d30d36c81f92199d7faab09bbafad44",
+        "title": "fix(sse): keep network and config-parser error text out of self-hosted entry responses",
         "author": "diegosouzapw",
-        "labeledAt": "2026-11-26T05:31:48Z"
+        "labeledAt": "2026-11-26T05:32:09Z"
+      },
+      {
+        "n": 21252,
+        "head": "c44aa9ee69831f9f6e2e52517f7e5c017af255ea",
+        "title": "docs: client behaviour when OmniRoute is unreachable, and reverting client config on uninstall",
+        "author": "diegosouzapw",
+        "labeledAt": "2026-11-26T05:34:18Z"
+      },
+      {
+        "n": 21261,
+        "head": "01b963e635f120470941c0b44b5536dfd2aa9fe7",
+        "title": "docs: point repository links at cheaper-inference/OmniRoute",
+        "author": "diegosouzapw",
+        "labeledAt": "2026-11-26T05:57:00Z"
+      },
+      {
+        "n": 21096,
+        "head": "6a747cf8fc994217614d6a07674d21db90ed6cb4",
+        "title": "fix(sse): re-audit the free catalog against the providers' pages and keep ended offers in a ledger",
+        "author": "diegosouzapw",
+        "labeledAt": "2026-11-26T07:03:53Z"
       }
     ],
-    "stage": "landing",
-    "startedAt": "2026-11-26T06:40:10.260Z",
+    "stage": "testing",
+    "startedAt": "2026-11-26T07:51:41.364Z",
     "attempts": 0,
-    "bisect": null,
-    "landAttempts": 1
+    "bisect": null
   },
   "baseChecks": [
+    {
+      "baseSha": "6f058848a829fac23183215f93fe241cb95be887",
+      "ref": "omni-queue/release-v3.8.55/b47-6f058848a829",
+      "status": "green",
+      "startedAt": "2026-11-26T06:40:10.260Z",
+      "signatures": []
+    },
     {
       "baseSha": "eb728bade305b219dd9cc78949073ef3dd7d9fa6",
       "ref": "omni-queue/release-v3.8.55/b46-eb728bade305",
@@ -135,19 +141,6 @@
           "infra": false
         }
       ]
-    },
-    {
-      "baseSha": "cc59ad70b2e9a343f26860e0e040281cb433a37a",
-      "ref": "omni-queue/release-v3.8.55/basecheck-cc59ad70b2e9",
-      "status": "red",
-      "startedAt": "2026-11-19T08:46:23.492Z",
-      "signatures": [
-        {
-          "check": "Unit Tests",
-          "key": "",
-          "infra": false
-        }
-      ]
     }
   ],
   "shadow": {
@@ -173,33 +166,15 @@
     }
   },
   "counters": {
-    "batchSeq": 47,
-    "ciRuns": 52,
-    "landedPrs": 8,
-    "landedBatches": 4,
+    "batchSeq": 48,
+    "ciRuns": 53,
+    "landedPrs": 12,
+    "landedBatches": 5,
     "redBatches": 11,
     "bisections": 3,
     "culprits": 1
   },
   "history": [
-    {
-      "at": "2026-11-20T01:24:30.796Z",
-      "type": "error",
-      "detail": "git merge-tree failed (exit 128): fatal: remote error: upload-pack: not our ref 04847663e4aace8a9ba1947e2c1cf649aa36fafc\nfatal: could not fetch 123131e68fe6ee82d84899801105dfb4995bee8c from promisor remote",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44653155571"
-    },
-    {
-      "at": "2026-11-20T01:33:47.823Z",
-      "type": "error",
-      "detail": "git merge-tree failed (exit 128): fatal: remote error: upload-pack: not our ref 04847663e4aace8a9ba1947e2c1cf649aa36fafc\nfatal: could not fetch 123131e68fe6ee82d84899801105dfb4995bee8c from promisor remote",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44654267521"
-    },
-    {
-      "at": "2026-11-20T01:44:29.588Z",
-      "type": "error",
-      "detail": "git merge-tree failed (exit 128): fatal: remote error: upload-pack: not our ref 04847663e4aace8a9ba1947e2c1cf649aa36fafc\nfatal: could not fetch 123131e68fe6ee82d84899801105dfb4995bee8c from promisor remote",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44655556336"
-    },
     {
       "at": "2026-11-20T01:52:19.655Z",
       "type": "error",
@@ -2621,12 +2596,55 @@
       ],
       "sha": "6f058848a829fac23183215f93fe241cb95be887",
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45778314241"
+    },
+    {
+      "at": "2026-11-26T07:51:01.443Z",
+      "type": "land-blessed",
+      "batchId": "b47",
+      "prs": [
+        21125,
+        21084,
+        20980,
+        21149
+      ],
+      "sha": "6f058848a829fac23183215f93fe241cb95be887",
+      "detail": "omni-queue/land success on 1 commit(s)",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45778314241"
+    },
+    {
+      "at": "2026-11-26T07:51:04.709Z",
+      "type": "landed",
+      "batchId": "b47",
+      "prs": [
+        21125,
+        21084,
+        20980,
+        21149
+      ],
+      "sha": "6f058848a829fac23183215f93fe241cb95be887",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45778314241"
+    },
+    {
+      "at": "2026-11-26T07:51:45.025Z",
+      "type": "batch-started",
+      "batchId": "b48",
+      "prs": [
+        21150,
+        21252,
+        21261,
+        21096
+      ],
+      "sha": "d89f84adee8eaa49a7f4b949e628a6f959414c8f",
+      "detail": "4 PR(s) on 6f058848a829; window 5",
+      "labeledAt": {
+        "21096": "2026-11-26T07:03:53Z",
+        "21150": "2026-11-26T05:32:09Z",
+        "21252": "2026-11-26T05:34:18Z",
+        "21261": "2026-11-26T05:57:00Z"
+      },
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45778314241"
     }
   ],
-  "updatedAt": "2026-11-26T07:50:58.089Z",
-  "batchWindow": 4,
-  "landingsWithoutVerdict": {
-    "count": 1,
-    "since": "2026-11-26T07:50:58.088Z"
-  }
+  "updatedAt": "2026-11-26T07:51:47.183Z",
+  "batchWindow": 5
 }
