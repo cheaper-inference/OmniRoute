@@ -3,28 +3,62 @@
   "base": "release/v3.8.55",
   "paused": null,
   "inFlight": {
-    "batchId": "b49",
+    "batchId": "b50",
     "kind": "batch",
-    "candidateRef": "omni-queue/release-v3.8.55/b49-d05e121ae501",
-    "candidateSha": "d05e121ae501a0827ae4690bb7d555c18dc38b56",
-    "baseSha": "d89f84adee8eaa49a7f4b949e628a6f959414c8f",
-    "treeSha": "e486be9a96127a0a4d74b08f1e99df0c70967e19",
+    "candidateRef": "omni-queue/release-v3.8.55/b50-6d99c052a58d",
+    "candidateSha": "6d99c052a58d8de0771b211c1181bbc1e3e354ef",
+    "baseSha": "d05e121ae501a0827ae4690bb7d555c18dc38b56",
+    "treeSha": "d031d834fa93d80adfc0efbe2a1047ffda771c99",
     "prs": [
       {
-        "n": 21123,
-        "head": "33ce9850cd58c197d2aec5965b8422be99c11aea",
-        "title": "fix(providers): stop marking ended free offers as free",
+        "n": 21151,
+        "head": "69bbe5a6e2003636e5d175483d57c652db605a6b",
+        "title": "fix(api): fail closed when the self-hosted config file is unreadable",
         "author": "diegosouzapw",
-        "labeledAt": "2026-11-26T09:00:09Z"
+        "labeledAt": "2026-11-26T09:56:48Z"
+      },
+      {
+        "n": 20599,
+        "head": "1fd32c1d9b75d904c35953298766d2ad470b0ada",
+        "title": "fix(ci): re-run PR checks on a base change only, not on a text edit",
+        "author": "diegosouzapw",
+        "labeledAt": "2026-11-26T09:57:02Z"
+      },
+      {
+        "n": 19513,
+        "head": "8d1c5d7c0d42340d8c7c04645b72b59a7e7fb9fc",
+        "title": "feat(resilience): add default and adaptive connection concurrency",
+        "author": "xiaoyaner0201",
+        "labeledAt": "2026-11-26T10:15:17Z"
+      },
+      {
+        "n": 21107,
+        "head": "f6235ae61b44e8633e1e785384f28eb185844c61",
+        "title": "fix(dashboard): show live cache-write token counts",
+        "author": "KiaroSama",
+        "labeledAt": "2026-11-26T10:16:38Z"
+      },
+      {
+        "n": 21133,
+        "head": "1049c85bc31bb89f031f324098ec611b3956f075",
+        "title": "fix(images): preserve OpenAI publisher IDs in legacy Fal routing",
+        "author": "KiaroSama",
+        "labeledAt": "2026-11-26T10:16:43Z"
       }
     ],
-    "stage": "landing",
-    "startedAt": "2026-11-26T09:16:37.864Z",
+    "stage": "testing",
+    "startedAt": "2026-11-26T10:42:13.560Z",
     "attempts": 0,
-    "bisect": null,
-    "landAttempts": 1
+    "bisect": null
   },
   "baseChecks": [
+    {
+      "baseSha": "d05e121ae501a0827ae4690bb7d555c18dc38b56",
+      "ref": "omni-queue/release-v3.8.55/b49-d05e121ae501",
+      "status": "green",
+      "startedAt": "2026-11-26T09:16:37.864Z",
+      "signatures": []
+    },
     {
       "baseSha": "d89f84adee8eaa49a7f4b949e628a6f959414c8f",
       "ref": "omni-queue/release-v3.8.55/b48-d89f84adee8e",
@@ -103,13 +137,6 @@
       "status": "green",
       "startedAt": "2026-11-21T16:17:27.540Z",
       "signatures": []
-    },
-    {
-      "baseSha": "7bca1e353169686029e8beb28165df6007d80470",
-      "ref": "omni-queue/release-v3.8.55/b16-7bca1e353169",
-      "status": "green",
-      "startedAt": "2026-11-20T21:36:00.705Z",
-      "signatures": []
     }
   ],
   "shadow": {
@@ -135,33 +162,15 @@
     }
   },
   "counters": {
-    "batchSeq": 49,
-    "ciRuns": 54,
-    "landedPrs": 16,
-    "landedBatches": 6,
+    "batchSeq": 50,
+    "ciRuns": 55,
+    "landedPrs": 17,
+    "landedBatches": 7,
     "redBatches": 11,
     "bisections": 3,
     "culprits": 1
   },
   "history": [
-    {
-      "at": "2026-11-20T02:48:42.406Z",
-      "type": "error",
-      "detail": "git merge-tree failed (exit 128): fatal: remote error: upload-pack: not our ref 04847663e4aace8a9ba1947e2c1cf649aa36fafc\nfatal: could not fetch 123131e68fe6ee82d84899801105dfb4995bee8c from promisor remote",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44663196876"
-    },
-    {
-      "at": "2026-11-20T02:56:42.515Z",
-      "type": "error",
-      "detail": "git merge-tree failed (exit 128): fatal: remote error: upload-pack: not our ref 04847663e4aace8a9ba1947e2c1cf649aa36fafc\nfatal: could not fetch 123131e68fe6ee82d84899801105dfb4995bee8c from promisor remote",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44664158546"
-    },
-    {
-      "at": "2026-11-20T03:13:15.456Z",
-      "type": "error",
-      "detail": "git merge-tree failed (exit 128): fatal: remote error: upload-pack: not our ref 04847663e4aace8a9ba1947e2c1cf649aa36fafc\nfatal: could not fetch 123131e68fe6ee82d84899801105dfb4995bee8c from promisor remote",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44666048576"
-    },
     {
       "at": "2026-11-20T03:25:33.426Z",
       "type": "error",
@@ -2646,12 +2655,51 @@
       ],
       "sha": "d05e121ae501a0827ae4690bb7d555c18dc38b56",
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45803578434"
+    },
+    {
+      "at": "2026-11-26T10:41:31.455Z",
+      "type": "land-blessed",
+      "batchId": "b49",
+      "prs": [
+        21123
+      ],
+      "sha": "d05e121ae501a0827ae4690bb7d555c18dc38b56",
+      "detail": "omni-queue/land success on 1 commit(s)",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45803578434"
+    },
+    {
+      "at": "2026-11-26T10:41:35.363Z",
+      "type": "landed",
+      "batchId": "b49",
+      "prs": [
+        21123
+      ],
+      "sha": "d05e121ae501a0827ae4690bb7d555c18dc38b56",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45803578434"
+    },
+    {
+      "at": "2026-11-26T10:42:42.658Z",
+      "type": "batch-started",
+      "batchId": "b50",
+      "prs": [
+        21151,
+        20599,
+        19513,
+        21107,
+        21133
+      ],
+      "sha": "6d99c052a58d8de0771b211c1181bbc1e3e354ef",
+      "detail": "5 PR(s) on d05e121ae501; window 5",
+      "labeledAt": {
+        "19513": "2026-11-26T10:15:17Z",
+        "20599": "2026-11-26T09:57:02Z",
+        "21107": "2026-11-26T10:16:38Z",
+        "21133": "2026-11-26T10:16:43Z",
+        "21151": "2026-11-26T09:56:48Z"
+      },
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45803578434"
     }
   ],
-  "updatedAt": "2026-11-26T10:41:27.916Z",
-  "batchWindow": 5,
-  "landingsWithoutVerdict": {
-    "count": 1,
-    "since": "2026-11-26T10:41:27.916Z"
-  }
+  "updatedAt": "2026-11-26T10:42:45.323Z",
+  "batchWindow": 5
 }
