@@ -523,10 +523,12 @@ type PlaygroundKeySelection =
   | { status: "selected"; apiKey: string; apiKeyInfo: ApiKeyMetadata }
   | { status: "rejected"; rejection: Response };
 
-function rejectPlaygroundKeySelection(): PlaygroundKeySelection {
+function rejectPlaygroundKeySelection(
+  message = "Selected Playground API key is unavailable"
+): PlaygroundKeySelection {
   return {
     status: "rejected",
-    rejection: errorResponse(HTTP_STATUS.FORBIDDEN, "Selected Playground API key is unavailable"),
+    rejection: errorResponse(HTTP_STATUS.FORBIDDEN, message),
   };
 }
 
@@ -538,8 +540,11 @@ async function resolvePlaygroundKeySelection(request: Request): Promise<Playgrou
   const header = request.headers.get(PLAYGROUND_KEY_ID_HEADER);
   if (header === null) return { status: "absent" };
   const keyId = header.trim();
-  if (!keyId || !(await isDashboardSessionAuthenticated(request))) {
-    return rejectPlaygroundKeySelection();
+  if (!keyId) return rejectPlaygroundKeySelection();
+  if (!(await isDashboardSessionAuthenticated(request))) {
+    return rejectPlaygroundKeySelection(
+      "Testing with a selected API key requires a signed-in dashboard session"
+    );
   }
 
   try {

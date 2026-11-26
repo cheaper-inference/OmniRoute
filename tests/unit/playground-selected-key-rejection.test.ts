@@ -83,10 +83,16 @@ test("revoked selected key rejects with REQUIRE_API_KEY disabled", async () => {
   assert.equal(policy.apiKeyInfo, null);
 });
 
-test("unauthorized selector cannot become an anonymous request", async () => {
+test("selector without a dashboard session rejects and explains the login requirement", async () => {
   const key = await keys.createApiKey("Session-owned selector key", "test");
   const policy = await enforceApiKeyPolicy(mediaRequest(key.id, false), MODEL);
-  assert.equal(policy.rejection?.status, 403);
+  assert.ok(policy.rejection);
+  assert.equal(policy.rejection.status, 403);
+  const { error } = await policy.rejection.json();
+  assert.equal(
+    error.message,
+    "Testing with a selected API key requires a signed-in dashboard session"
+  );
   assert.equal(policy.apiKeyInfo, null);
 });
 
