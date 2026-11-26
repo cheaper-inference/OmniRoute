@@ -1342,7 +1342,7 @@ jobs:
         # branch per candidate.
         if: ${{ always() && !startsWith(github.ref, 'refs/heads/omni-queue/') && !startsWith(github.head_ref, 'omni-queue/') && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
         continue-on-error: true
-        uses: trunk-io/analytics-uploader@a86313c7029d22e6ea2d5c346060a224d90053dc # v2.1.6
+        uses: trunk-io/analytics-uploader@6bc623e3c4b7a80d7a35badde2a8e8be1e78605d # v3.0.0
         with:
           junit-paths: trunk-junit/**/*.xml
           org-slug: omniroute
@@ -1738,7 +1738,7 @@ jobs:
         # branch per candidate.
         if: ${{ always() && !startsWith(github.ref, 'refs/heads/omni-queue/') && !startsWith(github.head_ref, 'omni-queue/') && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
         continue-on-error: true
-        uses: trunk-io/analytics-uploader@a86313c7029d22e6ea2d5c346060a224d90053dc # v2.1.6
+        uses: trunk-io/analytics-uploader@6bc623e3c4b7a80d7a35badde2a8e8be1e78605d # v3.0.0
         with:
           junit-paths: junit-e2e-results.xml
           org-slug: omniroute
