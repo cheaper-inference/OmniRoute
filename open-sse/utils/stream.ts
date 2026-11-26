@@ -2,10 +2,10 @@ import { translateResponse, initState } from "../translator/index.ts";
 import { FORMATS } from "../translator/formats.ts";
 import { appendRequestLog } from "@/lib/usageDb";
 import { mergeUsageEvidence } from "./usageEvidence.ts";
-import { mergeUsageSnapshot } from "./streamUsageMerge.ts";
+import { mergeResponsesUsage, mergeUsageSnapshot } from "./streamUsageMerge.ts";
 import {
   resolveStreamAccountingUsage,
-  streamSummaryTotal,
+  summaryTotal,
   projectStreamingClientUsage,
 } from "./streamAccountingUsage.ts";
 import { createGeneratedContentTracker } from "./streamGeneratedContent.ts";
@@ -921,16 +921,7 @@ export function createSSEStream(options: StreamOptions = {}) {
     const fields = mergeCacheCreationFields(usage, value);
     if (Object.keys(fields).length > 0) Object.assign((usage ??= {}), fields);
   };
-  const mergePassthroughResponsesUsage = (value: unknown) => {
-    if (!value) return;
-    usage = {
-      ...mergeUsageSnapshot(usage, value as UsageLike),
-      ...mergeCacheCreationFields(usage, value),
-    };
-  };
-  const mergeBufferedResponsesTotal = (value: UsageLike | null) => {
-    if (value?.total_tokens !== undefined) mergePassthroughResponsesUsage(value);
-  };
+  const mergeResponseUsage = (value: unknown) => (usage = mergeResponsesUsage(usage, value));
   let lastPropagatedCacheEvidence: TranslateState["cacheEvidence"];
 
   /** Passthrough (OpenAI CC shape): saw tool_calls in stream before finish_reason */
@@ -1881,7 +1872,7 @@ export function createSSEStream(options: StreamOptions = {}) {
                     passthroughResponsesId = responseId;
                   }
                   // Responses SSE: only extract usage, forward payload as-is
-                  mergePassthroughResponsesUsage(extractUsage(parsed));
+                  mergeResponseUsage(extractUsage(parsed));
                   // Keep generic Responses deltas for fallback usage estimates,
                   // but only visible text deltas may become assistant content in
                   // logs/replay payloads.
@@ -3008,7 +2999,7 @@ export function createSSEStream(options: StreamOptions = {}) {
               setPassthroughResponsesId: (value: string) => {
                 passthroughResponsesId = value;
               },
-              setUsage: mergePassthroughResponsesUsage,
+              setUsage: mergeResponseUsage,
               mergeCacheCreationUsage: mergePassthroughCacheCreationUsage,
               addTotalContentLength: (value: number) => {
                 totalContentLength += value;
@@ -3117,7 +3108,7 @@ export function createSSEStream(options: StreamOptions = {}) {
                   const isResponses = flushedType.startsWith("response.");
                   const isClaude = isClaudeEventPayload(flushedParsed);
                   if (isResponses) {
-                    mergeBufferedResponsesTotal(bufferedUsage);
+                    mergeResponseUsage(bufferedUsage?.total_tokens ? bufferedUsage : null);
                     const textualToolCallBackfilled =
                       flushedType === "response.completed" && passthroughToolCalls.size > 0;
                     if (textualToolCallBackfilled) {
@@ -3322,9 +3313,10 @@ export function createSSEStream(options: StreamOptions = {}) {
             // Notify caller for call log persistence (include full response body with accumulated content)
             if (onComplete) {
               try {
-                const u = usage as Record<string, unknown> | null;
+                const u = usage;
                 const prompt = Number(u?.prompt_tokens ?? u?.input_tokens ?? 0);
                 const completion = Number(u?.completion_tokens ?? u?.output_tokens ?? 0);
+                const total = summaryTotal(clientExpectsResponsesStream, u, prompt + completion);
                 let content = passthroughAccumulatedContent.trim() || "";
                 const finalBufferedTextualToolCall =
                   passthroughBufferedTextualToolCallContent.trim();
@@ -3398,12 +3390,7 @@ export function createSSEStream(options: StreamOptions = {}) {
                     ...usage,
                     prompt_tokens: prompt,
                     completion_tokens: completion,
-                    total_tokens: streamSummaryTotal(
-                      clientExpectsResponsesStream,
-                      usage,
-                      prompt,
-                      completion
-                    ),
+                    total_tokens: total,
                   },
                   _streamed: true,
                   ...summaryTextTailMarker(
@@ -3760,6 +3747,7 @@ export function createSSEStream(options: StreamOptions = {}) {
               const u = accountingUsage;
               const prompt = Number(u?.prompt_tokens ?? u?.input_tokens ?? 0);
               const completion = Number(u?.completion_tokens ?? u?.output_tokens ?? 0);
+              const total = summaryTotal(targetFormat, u, prompt + completion);
               let content = (state?.accumulatedContent ?? "").trim() || "";
               const normalizedToolCalls: ToolCall[] = state?.toolCalls?.size
                 ? [...state.toolCalls.values()]
@@ -3824,12 +3812,7 @@ export function createSSEStream(options: StreamOptions = {}) {
                   ...accountingUsage,
                   prompt_tokens: prompt,
                   completion_tokens: completion,
-                  total_tokens: streamSummaryTotal(
-                    targetFormat === FORMATS.OPENAI_RESPONSES,
-                    accountingUsage,
-                    prompt,
-                    completion
-                  ),
+                  total_tokens: total,
                 },
                 _streamed: true,
                 ...summaryTextTailMarker(state?.accumulatedContent, state?.accumulatedReasoning),

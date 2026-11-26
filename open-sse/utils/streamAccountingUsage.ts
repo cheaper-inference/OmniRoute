@@ -55,15 +55,12 @@ export function projectStreamingClientUsage(
   };
 }
 
-/** The Responses receipt's total can include units outside the projected component sum. */
-export function streamSummaryTotal(
-  responsesUpstream: boolean,
+/** The Responses receipt can count units outside the projected component sum. */
+export function summaryTotal(
+  upstream: string | boolean | null,
   usage: UsageLike | null,
-  prompt: number,
-  completion: number
+  fallback: number
 ): number {
-  return (
-    (responsesUpstream ? positiveReportedTotal(usage?.total_tokens) : undefined) ??
-    prompt + completion
-  );
+  const useReceipt = upstream === true || upstream === FORMATS.OPENAI_RESPONSES;
+  return (useReceipt ? positiveReportedTotal(usage?.total_tokens) : undefined) ?? fallback;
 }
