@@ -103,14 +103,21 @@ export function verifyCloudSignature(rawBody: string, sigHeader: string | null):
   }
 }
 
-export async function fetchWithTimeout(url, options = {}, timeoutMs = CLOUD_SYNC_TIMEOUT_MS) {
+async function withCloudSyncDeadline<T>(
+  timeoutMs: number,
+  request: (signal: AbortSignal) => Promise<T>
+): Promise<T> {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    return await fetch(url, { ...options, signal: controller.signal });
+    return await request(controller.signal);
   } finally {
     clearTimeout(timeoutId);
   }
+}
+
+export async function fetchWithTimeout(url, options = {}, timeoutMs = CLOUD_SYNC_TIMEOUT_MS) {
+  return withCloudSyncDeadline(timeoutMs, (signal) => fetch(url, { ...options, signal }));
 }
 
 /**
@@ -135,32 +142,31 @@ export async function syncToCloud(
   const { version, bundle } = await buildConfigSyncEnvelope();
   const legacyPayload = toLegacyCloudSyncPayload(bundle);
 
-  let response;
+  let response: Response;
+  let rawBody: string;
   try {
-    // Send to Cloud
-    response = await fetchWithTimeout(`${CLOUD_URL}/sync/${machineId}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ...legacyPayload,
-        version,
-      }),
+    rawBody = await withCloudSyncDeadline(CLOUD_SYNC_TIMEOUT_MS, async (signal) => {
+      response = await fetch(`${CLOUD_URL}/sync/${machineId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...legacyPayload, version }),
+        signal,
+      });
+      return response.text();
     });
   } catch (error) {
-    const isTimeout = error?.name === "AbortError";
-    return { error: isTimeout ? "Cloud sync timeout" : "Cloud sync request failed" };
+    if (error?.name === "AbortError") return { error: "Cloud sync timeout" };
+    if (response) throw error;
+    return { error: "Cloud sync request failed" };
   }
 
   if (!response.ok) {
-    const errorText = await response.text();
-    const truncated = errorText.length > 200 ? errorText.slice(0, 200) + "…" : errorText;
+    const truncated = rawBody.length > 200 ? rawBody.slice(0, 200) + "…" : rawBody;
     console.log("Cloud sync failed", { status: response.status, body: truncated });
     return { error: "Cloud sync failed" };
   }
 
-  // Read the raw body so we can verify the signature before trusting any
-  // JSON-parsed field. Order matters: parse only after verification passes.
-  const rawBody = await response.text();
+  // Verify the raw body before trusting any JSON-parsed field.
   const sigHeader = response.headers.get("X-Cloud-Sig");
   if (!verifyCloudSignature(rawBody, sigHeader)) {
     return { error: "Cloud sync signature verification failed" };
