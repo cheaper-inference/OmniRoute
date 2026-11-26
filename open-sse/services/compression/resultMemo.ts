@@ -81,7 +81,8 @@ export function makeMemoKey(
   config: CompressionConfig,
   principalId?: string,
   model?: string,
-  supportsVision?: boolean | null
+  supportsVision?: boolean | null,
+  rtkStructuralRenderers?: boolean
 ): string {
   // Uses streaming jsonSha256 instead of sha256hex(JSON.stringify(body))
   // to avoid allocating multi-MB string transients on large agent payloads (#7847).
@@ -99,6 +100,15 @@ export function makeMemoKey(
   // and re-running the full compression pipeline 5-8x per request.
   const isVisionDependent = usesVisionDependentEngine(mode, config);
 
+  // The structural RTK renderers change the output of the same (body, config), so a request that
+  // ran with them on must never be answered from an entry written with them off, nor the
+  // reverse. The field joins the key only when on and only for modes that can reach RTK: every
+  // other key keeps the exact shape it had before the flag existed.
+  const structuralKey =
+    rtkStructuralRenderers === true && (mode === "rtk" || mode === "stacked")
+      ? { rtkStructuralRenderers: true }
+      : {};
+
   return sha256hex(
     JSON.stringify({
       bodyHash,
@@ -107,6 +117,7 @@ export function makeMemoKey(
       principalId: principalId ?? null,
       model: isVisionDependent ? (model ?? null) : null,
       supportsVision: isVisionDependent ? (supportsVision ?? null) : null,
+      ...structuralKey,
     })
   );
 }

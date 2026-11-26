@@ -59,6 +59,11 @@ export interface CompressionEngineApplyOptions {
   config?: CompressionConfig;
   compressionComboId?: string | null;
   stepConfig?: Record<string, unknown>;
+  /**
+   * Structural-renderer decision (RTK), captured once per request at the compression entry point.
+   * A separate field on purpose: `stepConfig` comes from operator/combo config and cannot set it.
+   */
+  rtkStructuralRenderersEnabled?: boolean;
   /** Authenticated principal (API key id) making the request. Used by CCR to scope its store. */
   principalId?: string;
   /** Provider resolvido do alvo. A contabilidade do omniglyph depende dele:

@@ -1,0 +1,14 @@
+diff --cc app.ts
+index 1442fb8,19cbee3..0000000
+--- a/app.ts
++++ b/app.ts
+@@@ -1,5 -1,5 +1,9 @@@
+  export function run() {
+++<<<<<<< HEAD
+ +  return "ours";
+++=======
++   return "theirs";
+++>>>>>>> feature
+  }
+  
+  export const NAME = "app";
