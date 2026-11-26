@@ -1,8 +1,7 @@
 import { constants } from "node:fs";
 import { access, stat } from "node:fs/promises";
-import { createRequire } from "node:module";
-
-const resolveFromRuntime = createRequire(import.meta.url);
+import * as nodeModule from "node:module";
+import { join } from "node:path";
 
 export async function importPlaywright(): Promise<typeof import("playwright")> {
   try {
@@ -29,8 +28,15 @@ export async function hasPlaywrightChromium(executablePath?: string): Promise<bo
     if (!executablePath) {
       // chromium.executablePath() points to the full browser. A launch with
       // headless:true and no channel uses chromium-headless-shell instead.
-      const resolveFromPlaywright = createRequire(resolveFromRuntime.resolve("playwright"));
-      const { registry } = resolveFromPlaywright("playwright-core/lib/coreBundle") as {
+      // Resolve from the running server so bundled and standalone builds use
+      // Playwright's installed registry, including nested dependencies.
+      const runtimeRequire = nodeModule.createRequire(
+        process.argv[1] || join(process.cwd(), "package.json")
+      );
+      const playwrightRequire = nodeModule.createRequire(runtimeRequire.resolve("playwright"));
+      const { registry } = Reflect.apply(playwrightRequire, undefined, [
+        "playwright-core/lib/coreBundle",
+      ]) as {
         registry: {
           registry: {
             findExecutable(name: string): { executablePath(): string | undefined } | undefined;

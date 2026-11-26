@@ -81,7 +81,7 @@ test("hidePaidModels drops them from the auto/* candidate pool", () => {
   );
 });
 
-test("no provider loses its free status", () => {
+test("only explicitly retired providers lose all catalogued free access", () => {
   const withFreeRegime = new Set(
     FREE_MODEL_BUDGETS.filter((m) => grantsFreeAccess(m.freeType)).map((m) => m.provider)
   );
@@ -89,9 +89,10 @@ test("no provider loses its free status", () => {
     (p) => !withFreeRegime.has(p)
   );
   assert.deepEqual(
-    lost,
-    [],
-    "no catalogued provider is discontinued across the board today; if one ever is, decide deliberately"
+    lost.sort(),
+    // #19385: UncloseAI ended its public beta and now requires an API key.
+    ["uncloseai"],
+    "each provider-wide loss of free access requires a deliberate catalog decision"
   );
 });
 
