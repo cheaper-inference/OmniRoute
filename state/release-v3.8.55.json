@@ -2,7 +2,28 @@
   "version": 1,
   "base": "release/v3.8.55",
   "paused": null,
-  "inFlight": null,
+  "inFlight": {
+    "batchId": "b57",
+    "kind": "batch",
+    "candidateRef": "omni-queue/release-v3.8.55/b57-9671192011be",
+    "candidateSha": "9671192011beb2d7f83979f40be488c5da8772b9",
+    "baseSha": "c003c973a8d981439f151c158d057e44be18bf82",
+    "treeSha": "6e443aa1d07b13cf5f6bdc2ff584247ac3d59a83",
+    "prs": [
+      {
+        "n": 21361,
+        "head": "b229a4e0c4f1d003f3b562d0d470a6681d2bb6c3",
+        "title": "chore(docs): resync the llm.txt mirrors with the root after #21237",
+        "author": "diegosouzapw",
+        "labeledAt": "2026-11-26T21:35:24Z"
+      }
+    ],
+    "stage": "testing",
+    "startedAt": "2026-11-26T21:35:52.772Z",
+    "attempts": 0,
+    "bisect": null,
+    "lane": "base-repair"
+  },
   "baseChecks": [
     {
       "baseSha": "c003c973a8d981439f151c158d057e44be18bf82",
@@ -97,8 +118,8 @@
     }
   },
   "counters": {
-    "batchSeq": 56,
-    "ciRuns": 61,
+    "batchSeq": 57,
+    "ciRuns": 62,
     "landedPrs": 50,
     "landedBatches": 14,
     "redBatches": 11,
@@ -106,17 +127,6 @@
     "culprits": 1
   },
   "history": [
-    {
-      "at": "2026-11-20T08:35:35.800Z",
-      "type": "flaky-rerun",
-      "batchId": "b8",
-      "prs": [
-        14863
-      ],
-      "sha": "bade93fcc9896eccd1ab0c5f04779bde563a55e6",
-      "detail": "re-running the failed jobs of b8 once (Gate / CI, Unit Tests (6/8)) before a base check",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44703721455"
-    },
     {
       "at": "2026-11-20T09:37:24.885Z",
       "type": "checks-green",
@@ -2814,8 +2824,22 @@
       ],
       "sha": "c003c973a8d981439f151c158d057e44be18bf82",
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45886043085"
+    },
+    {
+      "at": "2026-11-26T21:35:55.964Z",
+      "type": "batch-started",
+      "batchId": "b57",
+      "prs": [
+        21361
+      ],
+      "sha": "9671192011beb2d7f83979f40be488c5da8772b9",
+      "detail": "1 PR(s) on c003c973a8d9; lane base-repair",
+      "labeledAt": {
+        "21361": "2026-11-26T21:35:24Z"
+      },
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45899176207"
     }
   ],
-  "updatedAt": "2026-11-26T19:47:07.602Z",
+  "updatedAt": "2026-11-26T21:35:58.023Z",
   "batchWindow": 9
 }
