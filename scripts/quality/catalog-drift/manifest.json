@@ -1,0 +1,367 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-11-25",
+  "allowedHosts": [
+    "api.airforce",
+    "api.llm7.io",
+    "api.routeway.ai",
+    "api.sambanova.ai",
+    "api.xkiro.com",
+    "backend.poixe.com",
+    "bazaarlink.ai",
+    "console.groq.com",
+    "developers.cloudflare.com",
+    "docs.mistral.ai",
+    "docs.routeway.ai",
+    "kenari.id",
+    "logfare.ai",
+    "onomeo.com",
+    "openrouter.ai",
+    "router.bynara.id",
+    "simplellm.eu",
+    "xkiro.com"
+  ],
+  "probes": [
+    {
+      "id": "mistral-usage-limits",
+      "provider": "mistral",
+      "type": "page-text",
+      "url": "https://docs.mistral.ai/admin/billing-usage/usage-limits",
+      "addedAt": "2026-11-25",
+      "source": "public-docs",
+      "mustContain": ["doesn't include API access"],
+      "mustNotContain": ["Free mode lets you create API keys"],
+      "backs": [
+        {
+          "provider": "mistral",
+          "poolKey": "mistral",
+          "monthlyTokens": 0
+        }
+      ]
+    },
+    {
+      "id": "nara-plans",
+      "provider": "nara",
+      "type": "json-assert",
+      "url": "https://router.bynara.id/api/plans",
+      "addedAt": "2026-11-25",
+      "source": "public-api",
+      "assertions": [
+        {
+          "path": "data[code=free].models",
+          "op": "lengthEquals",
+          "value": 0
+        },
+        {
+          "path": "data[code=free].models",
+          "op": "includesCatalogIds"
+        }
+      ],
+      "backs": [
+        {
+          "provider": "nara",
+          "poolKey": "nara-free",
+          "monthlyTokens": 0
+        }
+      ],
+      "note": "The free plan listed one model on 2026-11-25. The zero-model baseline detects its return."
+    },
+    {
+      "id": "xkiro-models",
+      "provider": "xkiro",
+      "type": "model-list",
+      "url": "https://api.xkiro.com/v1/models",
+      "addedAt": "2026-11-25",
+      "source": "public-api",
+      "minIds": 10,
+      "filter": {
+        "field": "access_tier",
+        "equals": "free"
+      }
+    },
+    {
+      "id": "xkiro-home",
+      "provider": "xkiro",
+      "type": "page-text",
+      "url": "https://xkiro.com/",
+      "addedAt": "2026-11-25",
+      "source": "public-docs",
+      "mustContain": ["500K free-model tokens a day"],
+      "backs": [
+        {
+          "provider": "xkiro",
+          "poolKey": "xkiro-free",
+          "monthlyTokens": 15000000
+        }
+      ],
+      "note": "On 2026-11-25, the free allowance was phrased as '500K free-model tokens a day'."
+    },
+    {
+      "id": "llm7-models",
+      "provider": "llm7",
+      "type": "model-list",
+      "url": "https://api.llm7.io/v1/models",
+      "addedAt": "2026-11-25",
+      "source": "public-api",
+      "minIds": 5,
+      "filter": {
+        "field": "tier",
+        "equals": "turbo"
+      },
+      "note": "Two checks on 2026-11-25 returned only three turbo models. The five-ID minimum remains in place."
+    },
+    {
+      "id": "groq-rate-limits",
+      "provider": "groq",
+      "type": "page-text",
+      "url": "https://console.groq.com/docs/rate-limits.md",
+      "addedAt": "2026-11-25",
+      "source": "public-docs",
+      "mustContain": ["| MODEL ID | RPM | RPD | TPM | TPD |", "200K"],
+      "mustContainCatalogIds": true,
+      "backs": [
+        {
+          "provider": "groq",
+          "poolKey": null,
+          "monthlyTokens": 6000000
+        }
+      ],
+      "note": "On 2026-11-25 the public quota table used these column labels without the 'Free Plan Limits' heading."
+    },
+    {
+      "id": "cloudflare-pricing",
+      "provider": "cloudflare-ai",
+      "type": "page-text",
+      "url": "https://developers.cloudflare.com/workers-ai/platform/pricing/",
+      "addedAt": "2026-11-25",
+      "source": "public-docs",
+      "mustContain": ["a total of 10,000 Neurons per day"],
+      "backs": [
+        {
+          "provider": "cloudflare-ai",
+          "poolKey": "cloudflare-ai",
+          "monthlyTokens": 22700000
+        }
+      ]
+    },
+    {
+      "id": "openrouter-models",
+      "provider": "openrouter",
+      "type": "model-list",
+      "url": "https://openrouter.ai/api/v1/models",
+      "addedAt": "2026-11-25",
+      "source": "public-api",
+      "minIds": 5,
+      "filter": {
+        "idEndsWith": ":free"
+      }
+    },
+    {
+      "id": "openrouter-limits",
+      "provider": "openrouter",
+      "type": "page-text",
+      "url": "https://openrouter.ai/docs/api-reference/limits.md",
+      "addedAt": "2026-11-25",
+      "source": "public-docs",
+      "mustContain": ["| less than 10 | 20 | 50 |"],
+      "backs": [
+        {
+          "provider": "openrouter",
+          "poolKey": "openrouter-free",
+          "monthlyTokens": 1200000
+        }
+      ]
+    },
+    {
+      "id": "arcee-models",
+      "provider": "arcee-ai",
+      "type": "model-list",
+      "url": "https://openrouter.ai/api/v1/models",
+      "addedAt": "2026-11-25",
+      "source": "public-api",
+      "minIds": 5
+    },
+    {
+      "id": "routeway-models",
+      "provider": "routeway",
+      "type": "model-list",
+      "url": "https://api.routeway.ai/v1/models",
+      "addedAt": "2026-11-25",
+      "source": "public-api",
+      "minIds": 3,
+      "filter": {
+        "idEndsWith": ":free"
+      }
+    },
+    {
+      "id": "routeway-limits",
+      "provider": "routeway",
+      "type": "page-text",
+      "url": "https://docs.routeway.ai/getting-started/rate-limits.md",
+      "addedAt": "2026-11-25",
+      "source": "public-docs",
+      "mustContain": ["200 Requests Per Day"]
+    },
+    {
+      "id": "bazaarlink-free",
+      "provider": "bazaarlink",
+      "type": "page-text",
+      "url": "https://bazaarlink.ai/free",
+      "addedAt": "2026-11-25",
+      "source": "public-docs",
+      "mustContain": ["60 weighted units/day"],
+      "backs": [
+        {
+          "provider": "bazaarlink",
+          "poolKey": "bazaarlink",
+          "monthlyTokens": 1440000
+        }
+      ]
+    },
+    {
+      "id": "bazaarlink-models",
+      "provider": "bazaarlink",
+      "type": "model-list",
+      "url": "https://bazaarlink.ai/api/v1/models",
+      "addedAt": "2026-11-25",
+      "source": "public-api",
+      "minIds": 1,
+      "filter": {
+        "zeroPricing": ["pricing.prompt", "pricing.completion"]
+      }
+    },
+    {
+      "id": "sambanova-models",
+      "provider": "sambanova",
+      "type": "model-list",
+      "url": "https://api.sambanova.ai/v1/models",
+      "addedAt": "2026-11-25",
+      "source": "public-api",
+      "minIds": 1,
+      "backs": [
+        {
+          "provider": "sambanova",
+          "poolKey": "sambanova",
+          "monthlyTokens": 480000
+        }
+      ]
+    },
+    {
+      "id": "api-airforce-home",
+      "provider": "api-airforce",
+      "type": "page-text",
+      "url": "https://api.airforce/",
+      "addedAt": "2026-11-25",
+      "source": "public-docs",
+      "mustContain": ["1 000 requests per day"],
+      "backs": [
+        {
+          "provider": "api-airforce",
+          "poolKey": "api-airforce",
+          "monthlyTokens": 24000000
+        }
+      ]
+    },
+    {
+      "id": "onomeo-info",
+      "provider": "onomeo",
+      "type": "json-assert",
+      "url": "https://onomeo.com/api/info",
+      "addedAt": "2026-11-25",
+      "source": "public-api",
+      "assertions": [
+        {
+          "path": "rate.perAccountWindowMax",
+          "op": "equals",
+          "value": 30
+        },
+        {
+          "path": "rate.windowMinutes",
+          "op": "equals",
+          "value": 300
+        },
+        {
+          "path": "freeModels",
+          "op": "includesCatalogIds"
+        }
+      ]
+    },
+    {
+      "id": "kenari-pricing",
+      "provider": "kenari",
+      "type": "json-assert",
+      "url": "https://kenari.id/api/public/pricing",
+      "addedAt": "2026-11-25",
+      "source": "public-api",
+      "assertions": [
+        {
+          "path": "free_tier.daily",
+          "op": "equals",
+          "value": 50
+        },
+        {
+          "path": "free_tier.rpm",
+          "op": "equals",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "poixe-free-summaries",
+      "provider": "poixe",
+      "type": "json-assert",
+      "url": "https://backend.poixe.com/api/tool/free_model_summaries",
+      "addedAt": "2026-11-25",
+      "source": "public-api",
+      "assertions": [
+        {
+          "path": "large_cup.free.rpd",
+          "op": "equals",
+          "value": 5
+        },
+        {
+          "path": "small_cup.free.rpd",
+          "op": "equals",
+          "value": 50
+        }
+      ]
+    },
+    {
+      "id": "logfare-models",
+      "provider": "logfare",
+      "type": "model-list",
+      "url": "https://logfare.ai/v1/models",
+      "addedAt": "2026-11-25",
+      "source": "public-api",
+      "minIds": 3,
+      "filter": {
+        "field": "access_tier",
+        "equals": "standard"
+      }
+    },
+    {
+      "id": "logfare-docs",
+      "provider": "logfare",
+      "type": "page-text",
+      "url": "https://logfare.ai/docs",
+      "addedAt": "2026-11-25",
+      "source": "public-docs",
+      "mustContain": ["5,000 requests per day"]
+    },
+    {
+      "id": "simplellm-models",
+      "provider": "simplellm",
+      "type": "json-assert",
+      "url": "https://simplellm.eu/api/models",
+      "addedAt": "2026-11-25",
+      "source": "public-api",
+      "assertions": [
+        {
+          "path": "[is_free=true].id",
+          "op": "lengthAtLeast",
+          "value": 1
+        }
+      ]
+    }
+  ]
+}

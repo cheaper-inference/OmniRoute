@@ -1,7 +1,7 @@
 {
   "name": "omniroute",
   "version": "3.8.55",
-  "description": "Unified AI router with hundreds of providers, RTK+Caveman compression, auto fallback, MCP/A2A, desktop, PWA, and OpenAI-compatible APIs.",
+  "description": "OmniRoute by Cheaper Inference. Created by Diego Souza. Unified AI router, MIT, self-hosted, free.",
   "type": "module",
   "bin": {
     "omniroute": "bin/omniroute.mjs",
@@ -273,6 +273,8 @@
     "quality:relax-baselines": "node scripts/quality/relax-baselines.mjs",
     "quality:refresh-model-lifecycle": "node scripts/quality/refresh-model-lifecycle.mjs",
     "quality:boundary": "node scripts/quality/measure-boundary.mjs",
+    "quality:catalog-drift": "node --import tsx/esm scripts/quality/catalog-drift/run.mjs",
+    "quality:evidence-age": "node --import tsx/esm scripts/quality/catalog-drift/evidence-age.mjs",
     "quality:launch": "node scripts/quality/launch-quality.mjs",
     "quality:gate": "npm run quality:collect && npm run quality:ratchet -- --allow-missing",
     "check:gate-manifest": "node scripts/quality/gate-manifest.mjs",
