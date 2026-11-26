@@ -51,6 +51,6 @@ test("without an upstream code the status default is unchanged", async () => {
 
 test("chat.ts passes the last upstream error code to handleNoCredentials", () => {
   const src = fs.readFileSync(new URL("../../src/sse/handlers/chat.ts", import.meta.url), "utf8");
-  assert.match(src, /lastErrorCode = upstreamErrorCodeOf\(result\);/);
-  assert.match(src, /runtimeOptions\?\.correlationId \?\? null,\s*lastErrorCode\s*\)/);
+  assert.match(src, /requestRetryLastErrorCode = upstreamErrorCodeOf\(result\);/);
+  assert.match(src, /runtimeOptions\?\.correlationId \?\? null,\s*requestRetryLastErrorCode\s*\)/);
 });

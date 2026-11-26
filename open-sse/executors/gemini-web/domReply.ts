@@ -33,10 +33,217 @@ export interface GeminiDomReplySnapshot {
   text: string;
 }
 
+/*
+ * The reader runs INSIDE the page (Playwright evaluates it as a string), so every
+ * helper below must stay self-contained: no imports, no module constants, only the
+ * other `dom*` helpers, which `geminiDomReplyExpression()` serializes next to it.
+ * Tests call the same functions directly with a jsdom document.
+ */
+
+/** Elements whose content is UI chrome, never part of the answer. */
+function domSkipped(el: Element): boolean {
+  return ["BUTTON", "GEM-ICON-BUTTON", "MAT-ICON", "SCRIPT", "STYLE", "SVG"].includes(el.tagName);
+}
+
+function domInline(node: Node): string {
+  if (node.nodeType === 3) return (node.nodeValue || "").replace(/\s+/g, " ");
+  if (node.nodeType !== 1 || domSkipped(node as Element)) return "";
+  const el = node as Element;
+  const tag = el.tagName;
+  if (tag === "BR") return "\n";
+  if (tag === "CODE") return "`" + (el.textContent || "") + "`";
+  const inner = Array.from(el.childNodes).map(domInline).join("");
+  const wrap = ({ STRONG: "**", B: "**", EM: "*", I: "*" } as Record<string, string>)[tag];
+  if (wrap) return inner.trim() ? wrap + inner + wrap : inner;
+  const href = tag === "A" ? el.getAttribute("href") : null;
+  return href && /^https?:/i.test(href) ? `[${inner}](${href})` : inner;
+}
+
+// A fence longer than any backtick run in the body, so a ``` line inside the code
+// (e.g. a Markdown example) cannot close the block early.
+function domFenced(lang: string, body: string): string {
+  const longestRun = Math.max(0, ...(body.match(/`+/g) || []).map((r) => r.length));
+  const fence = "`".repeat(Math.max(3, longestRun + 1));
+  return fence + lang + "\n" + body + "\n" + fence;
+}
+
+function domCodeBlock(el: Element): string {
+  const code = el.querySelector("pre code") || el.querySelector("pre") || el;
+  const label = el.querySelector(".code-block-decoration span");
+  const lang = (label?.textContent || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9+#.-]/g, "");
+  return domFenced(lang, (code.textContent || "").replace(/\n$/, ""));
+}
+
+/** Elements that render as one Markdown block of their own; null for anything else. */
+function domLeaf(el: Element): string[] | null {
+  const tag = el.tagName;
+  if (tag === "CODE-BLOCK") return [domCodeBlock(el)];
+  if (tag === "PRE") return [domFenced("", (el.textContent || "").replace(/\n$/, ""))];
+  if (tag === "P") {
+    const t = domInline(el).trim();
+    return t ? [t] : [];
+  }
+  const heading = /^H([1-6])$/.exec(tag);
+  if (heading) return ["#".repeat(Number(heading[1])) + " " + domInline(el).trim()];
+  return tag === "HR" ? ["---"] : null;
+}
+
+function domBlock(node: Node, indent: string): string[] {
+  if (node.nodeType === 3) {
+    const t = (node.nodeValue || "").trim();
+    return t ? [t] : [];
+  }
+  if (node.nodeType !== 1) return [];
+  const el = node as Element;
+  if (domSkipped(el) || el.classList.contains("code-block-decoration")) return [];
+  const leaf = domLeaf(el);
+  if (leaf) return leaf;
+  if (el.tagName === "UL" || el.tagName === "OL") return [domList(el, indent)];
+  if (el.tagName === "BLOCKQUOTE") return [domQuote(el)];
+  if (el.tagName === "TABLE") return domTable(el);
+  return domContainer(el, indent);
+}
+
+function domList(el: Element, indent: string): string {
+  const lines: string[] = [];
+  let n = Number(el.getAttribute("start") || "1");
+  for (const li of Array.from(el.children)) {
+    if (li.tagName !== "LI") continue;
+    lines.push(...domListItem(li, indent, el.tagName === "OL" ? `${n++}. ` : "- "));
+  }
+  return lines.join("\n");
+}
+
+interface DomListItem {
+  lines: string[];
+  /** Inline text not yet written out. */
+  run: string;
+  /** Prefix of the first line (indent + marker). */
+  head: string;
+  /** Prefix of continuation lines, aligned under the item's text. */
+  cont: string;
+}
+
+// Children are rendered in DOM order: the first text run goes on the marker line,
+// block content (code blocks, tables, quotes) is indented as list-item continuation,
+// and text after a block becomes a continuation line of its own.
+function domListItem(li: Element, indent: string, marker: string): string[] {
+  const item: DomListItem = {
+    lines: [],
+    run: "",
+    head: indent + marker,
+    cont: indent + " ".repeat(marker.length),
+  };
+  for (const child of Array.from(li.childNodes)) domListChild(item, child, indent);
+  domListFlush(item);
+  domListMarker(item);
+  return item.lines;
+}
+
+function domListChild(item: DomListItem, child: Node, indent: string): void {
+  const el = child.nodeType === 1 ? (child as Element) : null;
+  const tag = el ? el.tagName : "";
+  if (tag === "UL" || tag === "OL") {
+    domListFlush(item);
+    domListMarker(item);
+    item.lines.push(...domBlock(child, indent + "  "));
+  } else if (el && domHoldsBlock(el)) {
+    domListFlush(item);
+    domListMarker(item);
+    for (const part of domBlock(child, "")) {
+      item.lines.push(
+        part
+          .split("\n")
+          .map((l) => (l ? item.cont + l : l))
+          .join("\n")
+      );
+    }
+  } else if (tag === "P") {
+    const t = domInline(child).trim();
+    if (t) domListAppend(item, (item.run.trim() ? " " : "") + t);
+  } else domListAppend(item, domInline(child));
+}
+
+function domHoldsBlock(el: Element): boolean {
+  return (
+    ["CODE-BLOCK", "PRE", "TABLE", "BLOCKQUOTE", "RESPONSE-ELEMENT"].includes(el.tagName) ||
+    Boolean(el.querySelector("pre, code-block, table, blockquote"))
+  );
+}
+
+// Text nodes are already whitespace-normalized by domInline(); only the seam between
+// two pieces is collapsed, so spaces inside inline code survive.
+function domListAppend(item: DomListItem, piece: string): void {
+  item.run += /\s$/.test(item.run) && /^\s/.test(piece) ? piece.replace(/^\s+/, "") : piece;
+}
+
+function domListFlush(item: DomListItem): void {
+  const t = item.run.trim();
+  item.run = "";
+  if (!t) return;
+  const parts = t.split("\n");
+  item.lines.push((item.lines.length ? item.cont : item.head) + parts[0]);
+  for (const l of parts.slice(1)) item.lines.push(item.cont + l.trim());
+}
+
+function domListMarker(item: DomListItem): void {
+  if (!item.lines.length) item.lines.push(item.head);
+}
+
+function domQuote(el: Element): string {
+  return Array.from(el.childNodes)
+    .flatMap((c) => domBlock(c, ""))
+    .join("\n\n")
+    .split("\n")
+    .map((l) => "> " + l)
+    .join("\n");
+}
+
+function domTable(el: Element): string[] {
+  const rows = Array.from(el.querySelectorAll("tr")).map((tr) =>
+    Array.from(tr.children).map((c) => domInline(c).trim().replace(/\|/g, "\\|"))
+  );
+  if (!rows.length) return [];
+  const out = ["| " + rows[0].join(" | ") + " |", "|" + rows[0].map(() => " --- ").join("|") + "|"];
+  for (const r of rows.slice(1)) out.push("| " + r.join(" | ") + " |");
+  return [out.join("\n")];
+}
+
+/** True when `child` belongs to the paragraph being collected (inline content only). */
+function domIsInlineRun(child: Node): boolean {
+  if (child.nodeType === 3) return true;
+  if (child.nodeType !== 1) return false;
+  const el = child as Element;
+  return (
+    ["SPAN", "STRONG", "B", "EM", "I", "CODE", "A", "BR", "SUP", "SUB"].includes(el.tagName) &&
+    !el.querySelector("p, pre, code-block, ul, ol, table, h1, h2, h3, h4, h5, h6, blockquote")
+  );
+}
+
+// Containers (div, response-element, span wrappers, …): recurse, but keep runs of
+// inline content together as one paragraph.
+function domContainer(el: Element, indent: string): string[] {
+  const out: string[] = [];
+  let run = "";
+  for (const child of Array.from(el.childNodes)) {
+    if (domIsInlineRun(child)) {
+      run += domInline(child);
+      continue;
+    }
+    if (run.trim()) out.push(run.trim());
+    run = "";
+    out.push(...domBlock(child, indent));
+  }
+  if (run.trim()) out.push(run.trim());
+  return out;
+}
+
 /**
- * Runs INSIDE the page (Playwright serializes it with `page.evaluate`), so it
- * must stay self-contained: no imports, no references to outer helpers.
- * `doc` defaults to the page's `document`; tests pass a jsdom document.
+ * Runs INSIDE the page (see `geminiDomReplyExpression()`). `doc` defaults to the
+ * page's `document`; tests pass a jsdom document.
  */
 export function readGeminiDomReply(doc?: Document): GeminiDomReplySnapshot {
   const d: Document = doc || document;
@@ -47,202 +254,40 @@ export function readGeminiDomReply(doc?: Document): GeminiDomReplySnapshot {
     ? last.querySelector("message-content .markdown") || last.querySelector("message-content")
     : null;
   if (!panel) return { queries, responses: responses.length, busy: false, text: "" };
-
-  const SKIP = new Set(["BUTTON", "GEM-ICON-BUTTON", "MAT-ICON", "SCRIPT", "STYLE", "SVG"]);
-
-  const inline = (node: Node): string => {
-    if (node.nodeType === 3) return (node.nodeValue || "").replace(/\s+/g, " ");
-    if (node.nodeType !== 1) return "";
-    const el = node as Element;
-    if (SKIP.has(el.tagName)) return "";
-    const inner = () => Array.from(el.childNodes).map(inline).join("");
-    switch (el.tagName) {
-      case "BR":
-        return "\n";
-      case "STRONG":
-      case "B": {
-        const t = inner();
-        return t.trim() ? `**${t}**` : t;
-      }
-      case "EM":
-      case "I": {
-        const t = inner();
-        return t.trim() ? `*${t}*` : t;
-      }
-      case "CODE":
-        return "`" + (el.textContent || "") + "`";
-      case "A": {
-        const href = el.getAttribute("href");
-        const t = inner();
-        return href && /^https?:/i.test(href) ? `[${t}](${href})` : t;
-      }
-      default:
-        return inner();
-    }
-  };
-
-  // A fence longer than any backtick run in the body, so a ``` line inside the code
-  // (e.g. a Markdown example) cannot close the block early.
-  const fenced = (lang: string, body: string): string => {
-    const longestRun = Math.max(0, ...(body.match(/`+/g) || []).map((r) => r.length));
-    const fence = "`".repeat(Math.max(3, longestRun + 1));
-    return fence + lang + "\n" + body + "\n" + fence;
-  };
-
-  const codeBlock = (el: Element): string => {
-    const code = el.querySelector("pre code") || el.querySelector("pre") || el;
-    const label = el.querySelector(".code-block-decoration span");
-    const lang = (label?.textContent || "")
-      .trim()
-      .toLowerCase()
-      .replace(/[^a-z0-9+#.-]/g, "");
-    const body = (code.textContent || "").replace(/\n$/, "");
-    return fenced(lang, body);
-  };
-
-  const block = (node: Node, indent: string): string[] => {
-    if (node.nodeType === 3) {
-      const t = (node.nodeValue || "").trim();
-      return t ? [t] : [];
-    }
-    if (node.nodeType !== 1) return [];
-    const el = node as Element;
-    if (SKIP.has(el.tagName) || el.classList.contains("code-block-decoration")) return [];
-    const tag = el.tagName;
-    if (tag === "CODE-BLOCK") return [codeBlock(el)];
-    if (tag === "PRE") return [fenced("", (el.textContent || "").replace(/\n$/, ""))];
-    if (tag === "P") {
-      const t = inline(el).trim();
-      return t ? [t] : [];
-    }
-    const heading = /^H([1-6])$/.exec(tag);
-    if (heading) return ["#".repeat(Number(heading[1])) + " " + inline(el).trim()];
-    if (tag === "HR") return ["---"];
-    if (tag === "UL" || tag === "OL") {
-      const lines: string[] = [];
-      let n = Number(el.getAttribute("start") || "1");
-      for (const li of Array.from(el.children)) {
-        if (li.tagName !== "LI") continue;
-        const marker = tag === "OL" ? `${n++}. ` : "- ";
-        const contIndent = indent + " ".repeat(marker.length);
-        // Children are rendered in DOM order: the first text run goes on the marker
-        // line, block content (code blocks, tables, quotes) is indented as list-item
-        // continuation, and text after a block becomes a continuation line of its own.
-        const item: string[] = [];
-        let run = "";
-        const append = (piece: string) => {
-          // Text nodes are already whitespace-normalized by inline(); only the seam
-          // between two pieces is collapsed, so spaces inside inline code survive.
-          if (/\s$/.test(run) && /^\s/.test(piece)) piece = piece.replace(/^\s+/, "");
-          run += piece;
-        };
-        const flush = () => {
-          const t = run.trim();
-          run = "";
-          if (!t) return;
-          const lines = t.split("\n");
-          if (!item.length) item.push(indent + marker + lines[0]);
-          else item.push(contIndent + lines[0]);
-          for (const l of lines.slice(1)) item.push(contIndent + l.trim());
-        };
-        const ensureMarker = () => {
-          if (!item.length) item.push(indent + marker);
-        };
-        for (const child of Array.from(li.childNodes)) {
-          const childEl = child.nodeType === 1 ? (child as Element) : null;
-          const childTag = childEl ? childEl.tagName : "";
-          if (childTag === "UL" || childTag === "OL") {
-            flush();
-            ensureMarker();
-            item.push(...block(child, indent + "  "));
-          } else if (
-            childEl &&
-            (["CODE-BLOCK", "PRE", "TABLE", "BLOCKQUOTE", "RESPONSE-ELEMENT"].includes(childTag) ||
-              childEl.querySelector("pre, code-block, table, blockquote"))
-          ) {
-            flush();
-            ensureMarker();
-            for (const part of block(child, "")) {
-              item.push(
-                part
-                  .split("\n")
-                  .map((l) => (l ? contIndent + l : l))
-                  .join("\n")
-              );
-            }
-          } else if (childTag === "P") {
-            const t = inline(child).trim();
-            if (t) append((run.trim() ? " " : "") + t);
-          } else append(inline(child));
-        }
-        flush();
-        ensureMarker();
-        lines.push(...item);
-      }
-      return [lines.join("\n")];
-    }
-    if (tag === "BLOCKQUOTE") {
-      const inner = Array.from(el.childNodes).flatMap((c) => block(c, ""));
-      return [
-        inner
-          .join("\n\n")
-          .split("\n")
-          .map((l) => "> " + l)
-          .join("\n"),
-      ];
-    }
-    if (tag === "TABLE") {
-      const rows = Array.from(el.querySelectorAll("tr")).map((tr) =>
-        Array.from(tr.children).map((c) => inline(c).trim().replace(/\|/g, "\\|"))
-      );
-      if (!rows.length) return [];
-      const out = [
-        "| " + rows[0].join(" | ") + " |",
-        "|" + rows[0].map(() => " --- ").join("|") + "|",
-      ];
-      for (const r of rows.slice(1)) out.push("| " + r.join(" | ") + " |");
-      return [out.join("\n")];
-    }
-    // Containers (div, response-element, span wrappers, …): recurse, but keep
-    // runs of inline content together as one paragraph.
-    const out: string[] = [];
-    let run = "";
-    const flush = () => {
-      if (run.trim()) out.push(run.trim());
-      run = "";
-    };
-    for (const child of Array.from(el.childNodes)) {
-      const childTag = child.nodeType === 1 ? (child as Element).tagName : "";
-      const isInline =
-        child.nodeType === 3 ||
-        ["SPAN", "STRONG", "B", "EM", "I", "CODE", "A", "BR", "SUP", "SUB"].includes(childTag);
-      if (
-        isInline &&
-        !(
-          child.nodeType === 1 &&
-          (child as Element).querySelector(
-            "p, pre, code-block, ul, ol, table, h1, h2, h3, h4, h5, h6, blockquote"
-          )
-        )
-      ) {
-        run += inline(child);
-      } else {
-        flush();
-        out.push(...block(child, indent));
-      }
-    }
-    flush();
-    return out;
-  };
-
   // No newline squashing here: it would also rewrite blank lines inside code blocks.
-  const text = block(panel, "").join("\n\n").trim();
+  const text = domBlock(panel, "").join("\n\n").trim();
   return {
     queries,
     responses: responses.length,
     busy: panel.getAttribute("aria-busy") === "true",
     text,
   };
+}
+
+/** Every helper `readGeminiDomReply` reaches, serialized with it into the page. */
+const GEMINI_DOM_REPLY_HELPERS = [
+  domSkipped,
+  domInline,
+  domFenced,
+  domCodeBlock,
+  domLeaf,
+  domBlock,
+  domList,
+  domListItem,
+  domListChild,
+  domHoldsBlock,
+  domListAppend,
+  domListFlush,
+  domListMarker,
+  domQuote,
+  domTable,
+  domIsInlineRun,
+  domContainer,
+];
+
+/** The page expression that runs `readGeminiDomReply` with its helpers. */
+export function geminiDomReplyExpression(): string {
+  return toInPageExpression(readGeminiDomReply, undefined, GEMINI_DOM_REPLY_HELPERS);
 }
 
 /**
@@ -254,10 +299,19 @@ export function readGeminiDomReply(doc?: Document): GeminiDomReplySnapshot {
  * `__name(...)` calls; that helper does not exist in the page, so the
  * evaluation threw and the DOM path silently never ran. A local no-op
  * `__name` makes the serialized source self-contained under any transpiler.
+ *
+ * `helpers` are top-level functions `fn` calls by name. Each is bound under its
+ * runtime `name`, which is the identifier the compiled callers use even after a
+ * bundler renames it.
  */
-export function toInPageExpression(fn: (arg: never) => unknown, arg?: unknown): string {
+export function toInPageExpression(
+  fn: (arg: never) => unknown,
+  arg?: unknown,
+  helpers: readonly ((...args: never[]) => unknown)[] = []
+): string {
   const argSource = arg === undefined ? "undefined" : JSON.stringify(arg);
-  return `(() => { const __name = (f) => f; return (${fn.toString()})(${argSource}); })()`;
+  const bound = helpers.map((h) => `const ${h.name} = ${h.toString()};`).join(" ");
+  return `(() => { const __name = (f) => f; ${bound} return (${fn.toString()})(${argSource}); })()`;
 }
 
 /** Minimal Playwright-shaped page the DOM reader needs. */
@@ -278,7 +332,7 @@ export async function snapshotGeminiDom(
 ): Promise<GeminiDomReplySnapshot | null> {
   if (!canReadGeminiDom(page)) return null;
   try {
-    return (await page.evaluate(toInPageExpression(readGeminiDomReply))) as GeminiDomReplySnapshot;
+    return (await page.evaluate(geminiDomReplyExpression())) as GeminiDomReplySnapshot;
   } catch {
     return null;
   }
@@ -364,17 +418,14 @@ export async function waitForGeminiDomReply(
     if (isCancelled?.()) return "";
     const snap = await snapshotGeminiDom(page);
     if (!snap) return "";
-    if (snap.responses > baselineResponses && snap.text && !snap.busy) {
-      if (snap.text === lastText) {
-        if (Date.now() - stableSince >= stableMs) return snap.text;
-      } else {
-        lastText = snap.text;
-        stableSince = Date.now();
-      }
-    } else {
+    const finished = snap.responses > baselineResponses && snap.text && !snap.busy;
+    if (!finished) {
       lastText = "";
       stableSince = 0;
-    }
+    } else if (snap.text !== lastText) {
+      lastText = snap.text;
+      stableSince = Date.now();
+    } else if (Date.now() - stableSince >= stableMs) return snap.text;
     await page.waitForTimeout(pollMs);
   }
   return "";

@@ -177,7 +177,11 @@ function assertChatSenders(source: string) {
     "exhaustion request id"
   );
   // #21119: the last upstream error code (e.g. gemini_web_signed_out) is kept.
-  assertExpression(exhaustion[0].arguments[10], "lastErrorCode", "exhaustion upstream code");
+  assertExpression(
+    exhaustion[0].arguments[10],
+    "requestRetryLastErrorCode",
+    "exhaustion upstream code"
+  );
 }
 
 function assertStreamSender(source: string) {

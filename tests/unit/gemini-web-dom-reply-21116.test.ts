@@ -12,8 +12,13 @@ import { JSDOM } from "jsdom";
 
 const playwright = await import("playwright");
 const { GeminiWebExecutor } = await import("../../open-sse/executors/gemini-web.ts");
-const { readGeminiDomReply, waitForGeminiDomReply, toInPageExpression, isGeminiSignedOutInPage } =
-  await import("../../open-sse/executors/gemini-web/domReply.ts");
+const {
+  readGeminiDomReply,
+  waitForGeminiDomReply,
+  toInPageExpression,
+  geminiDomReplyExpression,
+  isGeminiSignedOutInPage,
+} = await import("../../open-sse/executors/gemini-web/domReply.ts");
 const { selectGeminiModel, findMenuOptionInPage, GEMINI_WEB_MODE_MENU_BUTTON } =
   await import("../../open-sse/executors/gemini-web/modeSelection.ts");
 
@@ -232,7 +237,7 @@ test("the in-page reader runs inside a real page context, where transpiler helpe
   // jsdom's window.eval is a separate global: no __name or other tsx/esbuild helpers.
   const dom = new JSDOM(`<body>${LIVE_LIKE_REPLY}</body>`, { runScripts: "outside-only" });
   assert.equal(typeof (dom.window as unknown as Record<string, unknown>).__name, "undefined");
-  const snap = dom.window.eval(toInPageExpression(readGeminiDomReply)) as { text: string };
+  const snap = dom.window.eval(geminiDomReplyExpression()) as { text: string };
   assert.match(snap.text, /^Here is the \*\*requested\*\* JSON\./);
   const option = dom.window.eval(
     toInPageExpression(findMenuOptionInPage, { selector: "x-none", sublabel: "4 Neon" })
@@ -710,4 +715,26 @@ test("list item: instruction, code block and verification stay in DOM order", ()
 test("list item: spaces inside inline code are kept, plain text is still normalized", () => {
   const html = `<ul><li>Use   <code>a  =  b</code>   here</li></ul>`;
   assert.equal(readGeminiDomReply(replyDoc(html)).text, "- Use `a  =  b` here");
+});
+
+test("the in-page reader carries all its helpers: page output equals the direct call", () => {
+  // Every block type the helpers handle, nested: a list item with a code block, a
+  // quote and a table, plus inline formatting and a nested list.
+  const html =
+    `<p>Intro with <b>bold</b>, <i>italic</i>, <a href="https://x.test/">a link</a>.</p>` +
+    `<h2>Steps</h2><ol start="3"><li><p>Install:</p>${codeBlockHtml("npm i x", "Bash")}` +
+    `<p>Then <code>x  run</code>.</p><ul><li>nested</li></ul></li></ol>` +
+    `<blockquote><p>quoted</p></blockquote><hr>` +
+    `<table><tr><th>a</th><th>b|c</th></tr><tr><td>1</td><td>2</td></tr></table>`;
+  const markup = `<model-response><message-content><div class="markdown" aria-busy="false">${html}</div></message-content></model-response>`;
+  const dom = new JSDOM(`<body>${markup}</body>`, { runScripts: "outside-only" });
+  const inPage = dom.window.eval(geminiDomReplyExpression()) as { text: string };
+  const direct = readGeminiDomReply(dom.window.document);
+  assert.equal(inPage.text, direct.text);
+  assert.match(direct.text, /^Intro with \*\*bold\*\*/);
+  assert.match(
+    direct.text,
+    /3\. Install:\n {3}```bash\n {3}npm i x\n {3}```\n {3}Then `x {2}run`\.\n {2}- nested/
+  );
+  assert.match(direct.text, /> quoted\n\n---\n\n\| a \| b\\\|c \|/);
 });
