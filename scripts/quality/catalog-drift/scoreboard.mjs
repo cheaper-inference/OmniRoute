@@ -6,8 +6,10 @@ import config from "../../../config/quality/catalog-scoreboard/config.json" with
 import { isMainModule } from "../../lib/is-main-module.mjs";
 
 const LARGE_COUNT = 24;
-const RANDOM_COUNT = 16;
-const SAMPLE_SIZE = LARGE_COUNT + RANDOM_COUNT;
+const SAMPLE_SIZE = 40;
+const SAMPLE_RULE =
+  `Large: every provider with a monthly pool above zero, by pool size, at most ${LARGE_COUNT}. ` +
+  `Random: drawn with the seed from the remaining providers in code-unit order until the sample has ${SAMPLE_SIZE}.`;
 const MONTH = /^\d{4}-(0[1-9]|1[0-2])$/;
 const DATE = z.iso.date();
 const HTTPS_URL = z.url({ protocol: /^https$/ });
@@ -17,14 +19,22 @@ const COUNT = z.int().nonnegative();
 const SAMPLE_SCHEMA = z.object({
   seed: COUNT,
   frozenAt: DATE,
+  strata: z.object({ large: COUNT, random: COUNT }).optional(),
+  rule: z.string().optional(),
   providers: z
     .object({
-      large: z.array(PROVIDER_ID).length(LARGE_COUNT),
-      random: z.array(PROVIDER_ID).length(RANDOM_COUNT),
+      large: z.array(PROVIDER_ID).max(LARGE_COUNT),
+      random: z.array(PROVIDER_ID),
     })
-    .refine(({ large, random }) => new Set([...large, ...random]).size === SAMPLE_SIZE, {
-      message: "Sample providers must be unique",
-    }),
+    .refine(({ large, random }) => large.length + random.length === SAMPLE_SIZE, {
+      message: `Sample must contain ${SAMPLE_SIZE} providers`,
+    })
+    .refine(
+      ({ large, random }) => new Set([...large, ...random]).size === large.length + random.length,
+      {
+        message: "Sample providers must be unique",
+      }
+    ),
 });
 const CLASSIFICATION_ROW = z.looseObject({ id: PROVIDER_ID });
 const PROBE_STATS = z
@@ -70,7 +80,8 @@ const INSTRUCTIONS = `Monthly catalog scoreboard
 5. When publication is approved, open a PR from chore/catalog-scoreboard-<YYYY-MM>.
 
 Run this command once to freeze the sample from the reviewed catalog.
-   npm run quality:catalog-scoreboard -- --freeze-sample <sample.json> --frozen-at YYYY-MM-DD`;
+   npm run quality:catalog-scoreboard -- --freeze-sample <sample.json> --frozen-at YYYY-MM-DD
+${SAMPLE_RULE}`;
 
 export function mulberry32(seed) {
   return () => {
@@ -94,16 +105,22 @@ export function drawSample(names, seed, k) {
   return shuffled.slice(0, k);
 }
 
-export function freezeSample({ universe, poolValues, seed, largeCount, randomCount }) {
+export function freezeSample({ universe, poolValues, seed, largeCount, sampleSize }) {
+  if (universe.length < sampleSize) {
+    throw new Error(
+      `The sample requires at least ${sampleSize} providers; found ${universe.length}`
+    );
+  }
   const poolValue = (id) => (Object.hasOwn(poolValues, id) ? poolValues[id] : 0);
-  // Stable sorting keeps equal-value providers in ascending id order.
-  const ranked = universe
-    .slice()
-    .sort(byCodeUnit)
-    .sort((a, b) => poolValue(b) - poolValue(a));
+  const large = universe
+    .filter((id) => poolValue(id) > 0)
+    .sort((a, b) => poolValue(b) - poolValue(a) || byCodeUnit(a, b))
+    .slice(0, largeCount);
+  const largeIds = new Set(large);
+  const remaining = universe.filter((id) => !largeIds.has(id)).sort(byCodeUnit);
   return {
-    large: ranked.slice(0, largeCount),
-    random: drawSample(ranked.slice(largeCount).sort(byCodeUnit), seed, randomCount),
+    large,
+    random: drawSample(remaining, seed, sampleSize - large.length),
   };
 }
 
@@ -244,11 +261,6 @@ async function writeFrozenSample(path, frozenAt) {
     }
   }
   const universe = [...largestPools.keys()].sort(byCodeUnit);
-  if (universe.length < SAMPLE_SIZE) {
-    throw new Error(
-      `The sample requires at least ${SAMPLE_SIZE} providers; found ${universe.length}`
-    );
-  }
   const poolValues = Object.fromEntries(universe.map((id) => [id, largestPools.get(id)]));
   const { seed } = config;
   const providers = freezeSample({
@@ -256,11 +268,14 @@ async function writeFrozenSample(path, frozenAt) {
     poolValues,
     seed,
     largeCount: LARGE_COUNT,
-    randomCount: RANDOM_COUNT,
+    sampleSize: SAMPLE_SIZE,
   });
+  const strata = { large: providers.large.length, random: providers.random.length };
   const sample = {
     instructions: INSTRUCTIONS,
-    largeDescription: `The ${LARGE_COUNT} providers with the largest monthly pools in our catalog on ${frozenAt}.`,
+    largeDescription: `The providers with a monthly pool above zero in our catalog on ${frozenAt}, at most ${LARGE_COUNT}, by pool size.`,
+    strata,
+    rule: SAMPLE_RULE,
     universe,
     poolValues,
     frozenAt,
@@ -269,7 +284,7 @@ async function writeFrozenSample(path, frozenAt) {
   };
   writeFileSync(path, `${JSON.stringify(sample, null, 2)}\n`);
   console.log(
-    `Froze ${SAMPLE_SIZE} providers (${LARGE_COUNT} large, ${RANDOM_COUNT} random) in ${path}`
+    `Froze ${SAMPLE_SIZE} providers (${strata.large} large, ${strata.random} random) in ${path}`
   );
 }
 

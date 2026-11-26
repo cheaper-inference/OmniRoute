@@ -107,14 +107,43 @@ test("freezeSample takes the largest pools, breaks ties by id and draws the sort
       poolValues: { p01: 4, p02: 3, p03: 2, p04: 1 },
       seed,
       largeCount: 4,
-      randomCount: 5,
+      sampleSize: 9,
     }),
     { large: ["p01", "p02", "p03", "p04"], random: drawSample(names.slice(4), seed, 5) }
   );
   assert.deepEqual(
-    freezeSample({ universe, poolValues: { p02: 1, p01: 1 }, seed, largeCount: 2, randomCount: 0 })
+    freezeSample({ universe, poolValues: { p02: 1, p01: 1 }, seed, largeCount: 2, sampleSize: 2 })
       .large,
     ["p01", "p02"]
+  );
+});
+
+test("freezeSample fills the random stratum when fewer providers have a positive pool", () => {
+  const names = Array.from({ length: 50 }, (_, i) => `p${String(i + 1).padStart(2, "0")}`);
+  const { large, random } = freezeSample({
+    universe: names.slice().reverse(),
+    poolValues: { p01: 3, p02: 2, p03: 1, p04: 0 },
+    seed,
+    largeCount: 24,
+    sampleSize: 40,
+  });
+  assert.deepEqual(large, ["p01", "p02", "p03"]);
+  assert.deepEqual(random, drawSample(names.slice(3), seed, 37));
+});
+
+test("freezeSample breaks positive pool ties by code-unit id at the large stratum limit", () => {
+  const universe = ["pa1", "pA1", "p01"];
+  const poolValues = { pa1: 5, pA1: 5, p01: 5 };
+  assert.deepEqual(freezeSample({ universe, poolValues, seed, largeCount: 2, sampleSize: 3 }), {
+    large: ["p01", "pA1"],
+    random: ["pa1"],
+  });
+});
+
+test("freezeSample rejects a universe smaller than the requested sample", () => {
+  assert.throws(
+    () => freezeSample({ universe: ["p01"], poolValues: {}, seed, largeCount: 24, sampleSize: 2 }),
+    /at least 2 providers; found 1/
   );
 });
 
@@ -125,7 +154,7 @@ test("the synthetic sample is reproducible and has 24 large and 16 random provid
   assert.equal(random.length, 16);
   assert.equal(new Set([...large, ...random]).size, 40);
   assert.deepEqual([...large, ...random].sort(), sample.universe);
-  assert.deepEqual(freezeSample({ ...sample, largeCount: 24, randomCount: 16 }), sample.providers);
+  assert.deepEqual(freezeSample({ ...sample, largeCount: 24, sampleSize: 40 }), sample.providers);
 });
 
 test("validateClassification requires every sample provider exactly once", () => {
@@ -354,7 +383,13 @@ test("freeze CLI writes a reproducible synthetic sample and shares its instructi
   assert.equal(frozen.frozenAt, sample.frozenAt);
   assert.equal(
     frozen.largeDescription,
-    `The 24 providers with the largest monthly pools in our catalog on ${sample.frozenAt}.`
+    `The providers with a monthly pool above zero in our catalog on ${sample.frozenAt}, at most 24, by pool size.`
+  );
+  assert.deepEqual(frozen.strata, { large: 24, random: 16 });
+  assert.equal(
+    frozen.rule,
+    "Large: every provider with a monthly pool above zero, by pool size, at most 24. " +
+      "Random: drawn with the seed from the remaining providers in code-unit order until the sample has 40."
   );
   assert.equal("catalogProviders" in frozen, false);
 
@@ -366,4 +401,52 @@ test("freeze CLI writes a reproducible synthetic sample and shares its instructi
   assert.equal(help.stdout.trim(), frozen.instructions);
   assert.match(help.stdout, /quality:evidence-age/);
   assert.match(help.stdout, /--freeze-sample/);
+  assert.ok(help.stdout.includes(frozen.rule));
+});
+
+test("CLI freezes and scores an all-random sample when every pool is zero", (t) => {
+  const dir = scratch(t);
+  const frozenPath = join(dir, "frozen.json");
+  const out = join(dir, "monthly.json");
+  const rows = sample.universe.map((provider) => ({ provider, monthlyTokens: 0 }));
+  const frozen = runCli(["--freeze-sample", frozenPath, "--frozen-at", sample.frozenAt], rows);
+  assert.equal(frozen.status, 0, frozen.stderr);
+  assert.match(frozen.stdout, /40 providers \(0 large, 40 random\)/);
+  const frozenSample = JSON.parse(readFileSync(frozenPath, "utf8"));
+  assert.deepEqual(frozenSample.strata, { large: 0, random: 40 });
+  assert.deepEqual(frozenSample.providers, {
+    large: [],
+    random: drawSample(sample.universe, seed, 40),
+  });
+
+  const args = [
+    "--month",
+    month,
+    "--sample",
+    frozenPath,
+    "--classification",
+    join(fixtures, "classification.synthetic.synthetic.json"),
+    "--drift-report",
+    join(fixtures, "drift-report.synthetic.json"),
+    "--evidence-age",
+    join(fixtures, "evidence-age.synthetic.json"),
+    "--out",
+    out,
+  ];
+  const result = runCli(args);
+  assert.equal(result.status, 0, result.stderr);
+  const monthly = JSON.parse(readFileSync(out, "utf8"));
+  assert.deepEqual(monthly.sample.strata, { large: 0, random: 40 });
+
+  const cases = [
+    [{ large: sample.universe.slice(0, 25), random: sample.universe.slice(25) }, /large/],
+    [{ large: [], random: sample.universe.slice(1) }, /Sample must contain 40 providers/],
+    [{ large: ["p01"], random: sample.universe.slice(0, 39) }, /Sample providers must be unique/],
+  ] as const;
+  for (const [providers, message] of cases) {
+    writeFileSync(frozenPath, JSON.stringify({ ...frozenSample, providers }));
+    const invalid = runCli(args);
+    assert.equal(invalid.status, 1);
+    assert.match(invalid.stderr, message);
+  }
 });
