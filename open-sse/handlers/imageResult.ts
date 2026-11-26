@@ -1,3 +1,4 @@
+import { getCallLogApiKeyContext } from "@/lib/usage/callLogApiKeyContext";
 import { saveCallLog } from "@/lib/usageDb";
 import { stringifyImageErrorForLog } from "./imageErrorLog.ts";
 
@@ -5,27 +6,41 @@ import { stringifyImageErrorForLog } from "./imageErrorLog.ts";
 // that depends on the app's usage store.
 export { saveCallLog };
 
+function writeImageResultLog(entry: Record<string, unknown>, metadataOnly = false) {
+  // Summary rows do not pick up connection IDs implicitly; preserve the selected
+  // route attempt's attribution without passing any credential material.
+  const { requestBody, responseBody, ...summary } = entry;
+  const logEntry = metadataOnly
+    ? { ...summary, connectionId: getCallLogApiKeyContext()?.connectionId }
+    : { ...summary, requestBody, responseBody };
+  saveCallLog(logEntry, metadataOnly).catch(() => {});
+}
+
 export function saveImageSuccessResult({
   provider,
   model,
   startTime,
   requestBody = null,
   responseBody = null,
+  metadataOnly = false,
   created = null,
   images,
   outputFormat = undefined,
   path = "/v1/images/generations",
 }) {
-  saveCallLog({
-    method: "POST",
-    path,
-    status: 200,
-    model: `${provider}/${model}`,
-    provider,
-    duration: Date.now() - startTime,
-    requestBody,
-    responseBody,
-  }).catch(() => {});
+  writeImageResultLog(
+    {
+      method: "POST",
+      path,
+      status: 200,
+      model: `${provider}/${model}`,
+      provider,
+      duration: Date.now() - startTime,
+      requestBody,
+      responseBody,
+    },
+    metadataOnly
+  );
 
   return {
     success: true,
@@ -44,6 +59,7 @@ export function saveImageErrorResult({
   startTime,
   error,
   requestBody = null,
+  metadataError,
   path = "/v1/images/generations",
   // #8307: opt-in signal for executeImageWithCredentialFallback — set by a
   // provider handler when the failure is account/session-specific (expired
@@ -59,19 +75,24 @@ export function saveImageErrorResult({
   startTime: number;
   error: unknown;
   requestBody?: unknown;
+  /** Fixed diagnostic for a metadata-only row; never derived from provider payload. */
+  metadataError?: string;
   path?: string;
   retryable?: boolean;
 }) {
-  saveCallLog({
-    method: "POST",
-    path,
-    status,
-    model: `${provider}/${model}`,
-    provider,
-    duration: Date.now() - startTime,
-    error: stringifyImageErrorForLog(error).slice(0, 500),
-    requestBody,
-  }).catch(() => {});
+  writeImageResultLog(
+    {
+      method: "POST",
+      path,
+      status,
+      model: `${provider}/${model}`,
+      provider,
+      duration: Date.now() - startTime,
+      error: metadataError ?? stringifyImageErrorForLog(error).slice(0, 500),
+      requestBody,
+    },
+    metadataError !== undefined
+  );
 
   return {
     success: false,

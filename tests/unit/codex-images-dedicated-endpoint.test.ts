@@ -12,6 +12,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { CALL_LOG_SETTLE_TIMEOUT_MS } from "../helpers/callLogSettle.ts";
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-codex-images-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
@@ -19,12 +20,15 @@ process.env.API_KEY_SECRET = process.env.API_KEY_SECRET || "codex-images-test-ap
 
 const core = await import("../../src/lib/db/core.ts");
 const providersDb = await import("../../src/lib/db/providers.ts");
+const combosDb = await import("../../src/lib/db/combos.ts");
 const apiKeysDb = await import("../../src/lib/db/apiKeys.ts");
 const imageRoute = await import("../../src/app/api/v1/images/generations/route.ts");
 const imageEditRoute = await import("../../src/app/api/v1/images/edits/route.ts");
 const v1ModelsCatalog = await import("../../src/app/api/v1/models/catalog.ts");
 const { handleImageGeneration } = await import("../../open-sse/handlers/imageGeneration.ts");
 const { getAllImageModels } = await import("../../open-sse/config/imageRegistry.ts");
+
+const { waitForCallLogSaves } = await import("../../src/lib/usage/callLogs.ts");
 
 const originalFetch = globalThis.fetch;
 const IMAGES_BASE = "https://chatgpt.com/backend-api/codex/images";
@@ -65,6 +69,7 @@ function captureFetch(calls: Captured[], respond = () => imagesResponse("ZmxhcmU
 }
 
 async function resetStorage() {
+  assert.equal(await waitForCallLogSaves(CALL_LOG_SETTLE_TIMEOUT_MS), true);
   globalThis.fetch = originalFetch;
   apiKeysDb.resetApiKeyState();
   core.resetDbInstance();
@@ -74,7 +79,8 @@ async function resetStorage() {
 }
 
 test.beforeEach(resetStorage);
-test.after(() => {
+test.after(async () => {
+  assert.equal(await waitForCallLogSaves(CALL_LOG_SETTLE_TIMEOUT_MS), true);
   globalThis.fetch = originalFetch;
   apiKeysDb.resetApiKeyState();
   core.resetDbInstance();
@@ -496,4 +502,109 @@ test("GPT-5.6 Codex image ids stay on the hosted Responses tool", async () => {
   assert.ok(
     getAllImageModels().some((model: { id: string }) => model.id === "codex/gpt-image-2.5-flare")
   );
+});
+
+test("dedicated Codex generation writes exactly one metadata row without prompt or upstream details", async () => {
+  const connection = await providersDb.createProviderConnection({
+    provider: "codex",
+    authType: "apikey",
+    name: "codex-images-metadata",
+    apiKey: "synthetic-provider-token",
+    isActive: true,
+    testStatus: "active",
+    providerSpecificData: {},
+  });
+  const run = () =>
+    imageRoute.POST(
+      new Request("http://localhost/api/v1/images/generations", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          model: "codex/gpt-image-2.5-flare",
+          prompt: "synthetic-private-prompt",
+        }),
+      })
+    );
+  captureFetch([], () => imagesResponse("cHJpdmF0ZS1yZXN1bHQ="));
+  assert.equal((await run()).status, 200);
+  captureFetch(
+    [],
+    () =>
+      new Response(JSON.stringify({ error: "synthetic-private-upstream-error" }), { status: 422 })
+  );
+  assert.equal((await run()).status, 422);
+  assert.equal(await waitForCallLogSaves(CALL_LOG_SETTLE_TIMEOUT_MS), true);
+
+  const rows = core
+    .getDbInstance()
+    .prepare(
+      "SELECT status, connection_id, detail_state, error_summary FROM call_logs WHERE provider = ? ORDER BY status"
+    )
+    .all("codex");
+  assert.deepEqual(rows, [
+    { status: 200, connection_id: connection.id, detail_state: "none", error_summary: null },
+    {
+      status: 422,
+      connection_id: connection.id,
+      detail_state: "none",
+      error_summary: "Codex Images upstream HTTP error",
+    },
+  ]);
+});
+
+test("dedicated Codex combo generation and direct/combo edits keep one attributed row per attempt", async () => {
+  const connection = await providersDb.createProviderConnection({
+    provider: "codex",
+    authType: "apikey",
+    name: "codex-images-metadata-combo",
+    apiKey: "synthetic-provider-token",
+    isActive: true,
+    testStatus: "active",
+    providerSpecificData: {},
+  });
+  const key = await apiKeysDb.createApiKey("Synthetic image metadata key", "test-machine");
+  const detachedModel = "codex/gpt-image-2.5-flare";
+  const combo = await combosDb.createCombo({
+    name: "dedicated-codex-image-metadata",
+    strategy: "priority",
+    models: [detachedModel],
+  });
+
+  const calls: Captured[] = [];
+  captureFetch(calls, () => imagesResponse("cHJpdmF0ZS1yZXN1bHQ="));
+  const post = (endpoint: "generations" | "edits", body: Record<string, unknown>) =>
+    (endpoint === "edits" ? imageEditRoute : imageRoute).POST(
+      new Request("http://localhost/v1/images/" + endpoint, {
+        method: "POST",
+        headers: { "content-type": "application/json", authorization: "Bearer " + key.key },
+        body: JSON.stringify({ prompt: "synthetic-private-prompt", ...body }),
+      })
+    );
+  const images = ["data:image/png;base64,iVBORw0KGgoBAgM="];
+  for (const [endpoint, request] of [
+    ["generations", { model: combo.name }],
+    ["edits", { model: detachedModel, images }],
+    ["edits", { model: combo.name, images }],
+  ] as const) {
+    const response = await post(endpoint, request);
+    assert.equal(response.status, 200, response.status === 200 ? undefined : await response.text());
+    assert.equal((await response.json()).data[0].b64_json, "cHJpdmF0ZS1yZXN1bHQ=");
+  }
+  assert.deepEqual(
+    calls.map(({ url }) => url),
+    [IMAGES_BASE + "/generations", IMAGES_BASE + "/edits", IMAGES_BASE + "/edits"]
+  );
+  assert.equal(await waitForCallLogSaves(CALL_LOG_SETTLE_TIMEOUT_MS), true);
+  const logs = core
+    .getDbInstance()
+    .prepare(
+      "SELECT path, api_key_id, connection_id, detail_state FROM call_logs WHERE provider = ? ORDER BY path"
+    )
+    .all("codex");
+  const identity = { api_key_id: key.id, connection_id: connection.id, detail_state: "none" };
+  assert.deepEqual(logs, [
+    { path: "/v1/images/edits", ...identity },
+    { path: "/v1/images/edits", ...identity },
+    { path: "/v1/images/generations", ...identity },
+  ]);
 });

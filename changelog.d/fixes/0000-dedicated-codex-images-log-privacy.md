@@ -1,0 +1,1 @@
+- **fix(images):** Dedicated Codex Images generations and edits now keep call-history status, timing and attribution without storing prompts, image payloads, or upstream error text in call-log details. Request responses and usage accounting are unchanged.
