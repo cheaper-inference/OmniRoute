@@ -12,6 +12,7 @@ import { mergeUsageEvidence } from "./usageEvidence.ts";
  * normalizer clears `buffer` when it produces the tail).
  */
 import { parseSSELine } from "./streamHelpers.ts";
+import { markUpstreamDone, type DoneMarkerState } from "./streamTerminalHelpers.ts";
 import { mergeCacheCreationFields } from "./cacheWriteUsage.ts";
 import {
   extractUsage,
@@ -29,7 +30,7 @@ export type TranslateFlushTailContext = {
   openaiResponsesFormat: string;
   body: unknown;
   usageBasis?: RequestUsageBasis;
-  state: { usage?: unknown } & JsonRecord;
+  state: { usage?: unknown } & DoneMarkerState & JsonRecord;
   sessionId: string | null;
   now: () => number;
   getLastToolCallChunkTime: () => number | null;
@@ -115,7 +116,7 @@ function isSkippedTailLine(parsed: unknown, context: TranslateFlushTailContext):
   }
   context.noteReasoning(parsed, context.now());
   if (context.shouldDropCommentary(record)) return true;
-  return record.done === true;
+  return record.done === true && markUpstreamDone(record, context.state);
 }
 
 function trackTailToolTiming(record: JsonRecord, context: TranslateFlushTailContext): void {

@@ -282,6 +282,11 @@ export type PersistAttemptLogsArgs = {
    */
   ttft?: number | null;
   /**
+   * Model that served the reply when a model-family fallback changed it. The call log's `model`
+   * column then names the served model; `requested_model` keeps what the client asked for.
+   */
+  servedModel?: string | null;
+  /**
    * Encrypted-reasoning observation from the stream loops (flag + wall-clock
    * duration only). Efforts are read at the sink from the request bodies.
    */
@@ -503,7 +508,6 @@ export function persistAttemptLogs(args: PersistAttemptLogsArgs, ctx: PersistAtt
     traceId,
     provider,
     connectionId,
-    model,
     skillRequestId,
     detailedLoggingEnabled,
     reqLogger,
@@ -528,6 +532,7 @@ export function persistAttemptLogs(args: PersistAttemptLogsArgs, ctx: PersistAtt
   } = ctx;
   // A non-200 outcome means the client did not get this attempt's reply.
   if (status !== 200) discardSessionTurnAttempt(clientRawRequest?.body, ctx.agentContext);
+  const model = args.servedModel || ctx.model;
   const initialConnectionId = toConnectionId(connectionId);
   const finalConnectionId = toConnectionId(credentials?.connectionId) || initialConnectionId;
   const accountRotationMeta = buildAccountRotationMeta(

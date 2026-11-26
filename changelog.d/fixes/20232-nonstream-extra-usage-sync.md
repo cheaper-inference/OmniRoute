@@ -1,0 +1,1 @@
+- **fix(sse):** With `CLAUDE_NONSTREAM_EXTRA_USAGE_BACKGROUND_SYNC_ENABLED` (off by default), a non-streaming Claude reply can return while the extra-usage sync runs in the background. ([#20232](https://github.com/cheaper-inference/OmniRoute/pull/20232))

@@ -1,0 +1,1 @@
+- **fix(usage):** With `FAMILY_FALLBACK_BILL_SERVED_MODEL_ENABLED` (off by default), usage, cost, and per-model counters follow the sibling model after a model-family fallback, for streaming and non-streaming requests. ([#20233](https://github.com/cheaper-inference/OmniRoute/pull/20233))

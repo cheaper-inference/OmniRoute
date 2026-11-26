@@ -643,17 +643,17 @@ async function handleChatCoreInner({
   // `omniroute launch` session tag (olx_ bearer) unless an explicit x-omniroute-session-id
   // header is present; null for every other request, so their session_tag is unchanged.
   const launchSessionTag = resolveLaunchSessionTag(clientRawRequest?.headers, apiKeyInfo);
-  // Failure usage record building extracted to chatCore/failureUsage.ts (#3501); the handler keeps
-  // the fire-and-forget save + computes latencyMs, so the call sites stay byte-identical.
+  // The usage builder is pure. This closure reads the active connection and writes the row.
   const persistFailureUsage = (
     statusCode: number,
     errorCode?: string | null,
-    aggregate?: FailureUsageAggregate | null
+    aggregate?: FailureUsageAggregate | null,
+    servedModel?: string
   ) => {
     saveRequestUsage(
       buildFailureUsageRecord({
         provider,
-        model,
+        model: servedModel || model,
         connectionId: getCurrentConnectionId(),
         apiKeyInfo,
         effectiveServiceTier,
@@ -3425,6 +3425,8 @@ async function handleChatCoreInner({
       sessionAffinityKey,
       skillRequestId,
       sourceFormat,
+      startTime,
+      traceId,
       stream,
       streamController,
       syncExecuteTranslatedBody,

@@ -112,7 +112,15 @@ import {
 } from "../../services/modelFamilyFallback.ts";
 
 import { isLocalStreamLifecycleError } from "@/shared/utils/circuitBreaker";
-import { createRequestFamilyFallback } from "../../services/modelFamilyFallbackPolicy.ts";
+import {
+  createRequestFamilyFallback,
+  modelAfterFamilyFallback,
+} from "../../services/modelFamilyFallbackPolicy.ts";
+import {
+  emitFamilyFallbackFailureEvent,
+  resolveFamilyFallbackBillingModel,
+} from "./familyFallbackBilling.ts";
+import type { PersistAttemptLogsArgs } from "./attemptLogging.ts";
 import { shouldIsolateProbeFailures } from "@/shared/utils/probeOrigin";
 import { writeTerminalStatus } from "@/shared/utils/terminalStatus";
 import {
@@ -158,7 +166,7 @@ export async function runStreamingResponse(deps: StreamingDeps) {
 async function runStreamingResponseInner(deps: StreamingDeps) {
   const {
     apiKeyInfo,
-    persistAttemptLogs,
+    persistAttemptLogs: persistAttemptLogsFor,
     buildUpstreamHeadersForExecute,
     resolveEffectiveServiceTier,
     clientResponseFormat,
@@ -192,7 +200,7 @@ async function runStreamingResponseInner(deps: StreamingDeps) {
     pendingConnId,
     pendingRequestId,
     pendingScope,
-    persistFailureUsage,
+    persistFailureUsage: persistFailureUsageFor,
     provider,
     providerRequestCapture,
     reqLogger,
@@ -200,6 +208,8 @@ async function runStreamingResponseInner(deps: StreamingDeps) {
     sessionAffinityKey,
     skillRequestId,
     sourceFormat,
+    startTime,
+    traceId,
     stream,
     streamController,
     syncExecuteTranslatedBody,
@@ -236,6 +246,32 @@ async function runStreamingResponseInner(deps: StreamingDeps) {
   providerResponse = deps.providerResponse;
   providerUrl = deps.providerUrl;
   translatedBody = deps.translatedBody;
+  const failureBillingModel = () =>
+    resolveFamilyFallbackBillingModel(
+      model,
+      modelAfterFamilyFallback(
+        model,
+        currentModel,
+        effectiveModel,
+        providerRequestCapture.latest()?.body ?? finalBody
+      )
+    );
+  const persistAttemptLogs = (args: PersistAttemptLogsArgs) =>
+    persistAttemptLogsFor({ ...args, servedModel: failureBillingModel() });
+  const persistFailureUsage = (status: number, errorCode: string) => {
+    const billingModel = failureBillingModel();
+    persistFailureUsageFor(status, errorCode, undefined, billingModel);
+    emitFamilyFallbackFailureEvent(model, {
+      requestId: traceId || pendingRequestId || "unknown",
+      provider,
+      model: billingModel,
+      strategy: isCombo ? (comboStrategy ?? "combo") : "direct",
+      latencyMs: Date.now() - startTime,
+      status,
+      connectionId: getCurrentConnectionId(),
+      apiKeyId: apiKeyInfo?.id,
+    });
+  };
   // #3229: diagnostic of the response `providerResponse` holds; replacing it must replace this.
   let upstreamHttpSelection: HttpAttemptSelection | null = null;
   let upstreamDiagnostic: Record<string, unknown> | undefined;
@@ -442,7 +478,7 @@ async function runStreamingResponseInner(deps: StreamingDeps) {
     if (isSemaphoreCapacityError(error)) {
       const semaphoreCode = errorMetadata.code as string;
       appendRequestLog({
-        model,
+        model: failureBillingModel(),
         provider,
         connectionId,
         status: `FAILED ${semaphoreCode}`,
@@ -568,7 +604,7 @@ async function runStreamingResponseInner(deps: StreamingDeps) {
             ? "authentication_error"
             : undefined;
     appendRequestLog({
-      model,
+      model: failureBillingModel(),
       provider,
       connectionId,
       status: `FAILED ${failureStatus}`,
@@ -1075,7 +1111,7 @@ async function runStreamingResponseInner(deps: StreamingDeps) {
     );
 
     appendRequestLog({
-      model,
+      model: failureBillingModel(),
       provider,
       connectionId: errorConnectionId,
       status: `FAILED ${statusCode}`,
@@ -1104,6 +1140,41 @@ async function runStreamingResponseInner(deps: StreamingDeps) {
     const adoptFallbackDiagnostic = (diagnostic?: Record<string, unknown>) =>
       (upstreamDiagnostic = relogFallbackDiagnostic(reqLogger, provider, diagnostic));
     // Rate limiter updated in applyProviderFailureClassification
+
+    const finishHttpFailure = (errorCode: string) => {
+      persistAttemptLogs({
+        upstreamHttpSelection,
+        status: statusCode,
+        error: safeErrMsg,
+        providerRequest: providerRequestCapture.latest()?.body,
+        providerResponse: persistedProviderErrorBody,
+        clientResponse: buildErrorBody(statusCode, errMsg),
+        cacheSource: "upstream",
+      });
+      persistFailureUsage(statusCode, errorCode);
+      return {
+        response: createErrorResult(
+          statusCode,
+          errMsg,
+          retryAfterMs,
+          upstreamErrorCode,
+          upstreamErrorType,
+          upstreamErrorBody,
+          { passthrough: sourceFormat === FORMATS.CLAUDE }
+        ),
+        carry: {
+          upstreamHttpSelection,
+          translatedBody,
+          currentModel,
+          effectiveServiceTier,
+          finalBody,
+          pipelineRecovered,
+          providerHeaders,
+          providerResponse,
+          providerUrl,
+        },
+      };
+    };
 
     // ── T5: Intra-family model fallback ──────────────────────────────────────
     // Before returning a model-unavailable error upstream, try sibling models
@@ -1138,106 +1209,13 @@ async function runStreamingResponseInner(deps: StreamingDeps) {
             // We fall through by NOT returning here
           } else {
             // Fallback also failed — return original error
-            persistAttemptLogs({
-              upstreamHttpSelection,
-              status: statusCode,
-              error: safeErrMsg,
-              providerRequest: providerRequestCapture.latest()?.body,
-              providerResponse: persistedProviderErrorBody,
-              clientResponse: buildErrorBody(statusCode, errMsg),
-              cacheSource: "upstream",
-            });
-            persistFailureUsage(statusCode, "model_unavailable");
-            return {
-              response: createErrorResult(
-                statusCode,
-                errMsg,
-                retryAfterMs,
-                upstreamErrorCode,
-                upstreamErrorType,
-                upstreamErrorBody,
-                { passthrough: sourceFormat === FORMATS.CLAUDE }
-              ),
-              carry: {
-                upstreamHttpSelection,
-                translatedBody,
-                currentModel,
-                effectiveServiceTier,
-                finalBody,
-                pipelineRecovered,
-                providerHeaders,
-                providerResponse,
-                providerUrl,
-              },
-            };
+            return finishHttpFailure("model_unavailable");
           }
         } catch {
-          persistAttemptLogs({
-            upstreamHttpSelection,
-            status: statusCode,
-            error: safeErrMsg,
-            providerRequest: providerRequestCapture.latest()?.body,
-            providerResponse: persistedProviderErrorBody,
-            clientResponse: buildErrorBody(statusCode, errMsg),
-            cacheSource: "upstream",
-          });
-          persistFailureUsage(statusCode, "model_unavailable");
-          return {
-            response: createErrorResult(
-              statusCode,
-              errMsg,
-              retryAfterMs,
-              upstreamErrorCode,
-              upstreamErrorType,
-              upstreamErrorBody,
-              { passthrough: sourceFormat === FORMATS.CLAUDE }
-            ),
-            carry: {
-              upstreamHttpSelection,
-              translatedBody,
-              currentModel,
-              effectiveServiceTier,
-              finalBody,
-              pipelineRecovered,
-              providerHeaders,
-              providerResponse,
-              providerUrl,
-            },
-          };
+          return finishHttpFailure("model_unavailable");
         }
       } else {
-        persistAttemptLogs({
-          upstreamHttpSelection,
-          status: statusCode,
-          error: safeErrMsg,
-          providerRequest: providerRequestCapture.latest()?.body,
-          providerResponse: persistedProviderErrorBody,
-          clientResponse: buildErrorBody(statusCode, errMsg),
-          cacheSource: "upstream",
-        });
-        persistFailureUsage(statusCode, "model_unavailable");
-        return {
-          response: createErrorResult(
-            statusCode,
-            errMsg,
-            retryAfterMs,
-            upstreamErrorCode,
-            upstreamErrorType,
-            upstreamErrorBody,
-            { passthrough: sourceFormat === FORMATS.CLAUDE }
-          ),
-          carry: {
-            upstreamHttpSelection,
-            translatedBody,
-            currentModel,
-            effectiveServiceTier,
-            finalBody,
-            pipelineRecovered,
-            providerHeaders,
-            providerResponse,
-            providerUrl,
-          },
-        };
+        return finishHttpFailure("model_unavailable");
       }
     } else if (isContextOverflowError(statusCode, message)) {
       const nextModel = await familyFallback.getForContextOverflow(currentModel, triedModels);
@@ -1266,147 +1244,18 @@ async function runStreamingResponseInner(deps: StreamingDeps) {
               `Serving ${nextModel} as fallback for ${model}`
             );
           } else {
-            persistAttemptLogs({
-              upstreamHttpSelection,
-              status: statusCode,
-              error: safeErrMsg,
-              providerRequest: providerRequestCapture.latest()?.body,
-              providerResponse: persistedProviderErrorBody,
-              clientResponse: buildErrorBody(statusCode, errMsg),
-              cacheSource: "upstream",
-            });
-            persistFailureUsage(statusCode, "context_overflow");
-            return {
-              response: createErrorResult(
-                statusCode,
-                errMsg,
-                retryAfterMs,
-                upstreamErrorCode,
-                upstreamErrorType,
-                upstreamErrorBody,
-                { passthrough: sourceFormat === FORMATS.CLAUDE }
-              ),
-              carry: {
-                upstreamHttpSelection,
-                translatedBody,
-                currentModel,
-                effectiveServiceTier,
-                finalBody,
-                pipelineRecovered,
-                providerHeaders,
-                providerResponse,
-                providerUrl,
-              },
-            };
+            return finishHttpFailure("context_overflow");
           }
         } catch {
-          persistAttemptLogs({
-            upstreamHttpSelection,
-            status: statusCode,
-            error: safeErrMsg,
-            providerRequest: providerRequestCapture.latest()?.body,
-            providerResponse: persistedProviderErrorBody,
-            clientResponse: buildErrorBody(statusCode, errMsg),
-            cacheSource: "upstream",
-          });
-          persistFailureUsage(statusCode, "context_overflow");
-          return {
-            response: createErrorResult(
-              statusCode,
-              errMsg,
-              retryAfterMs,
-              upstreamErrorCode,
-              upstreamErrorType,
-              upstreamErrorBody,
-              { passthrough: sourceFormat === FORMATS.CLAUDE }
-            ),
-            carry: {
-              upstreamHttpSelection,
-              translatedBody,
-              currentModel,
-              effectiveServiceTier,
-              finalBody,
-              pipelineRecovered,
-              providerHeaders,
-              providerResponse,
-              providerUrl,
-            },
-          };
+          return finishHttpFailure("context_overflow");
         }
       } else {
-        persistAttemptLogs({
-          upstreamHttpSelection,
-          status: statusCode,
-          error: safeErrMsg,
-          providerRequest: providerRequestCapture.latest()?.body,
-          providerResponse: persistedProviderErrorBody,
-          clientResponse: buildErrorBody(statusCode, errMsg),
-          cacheSource: "upstream",
-        });
-        persistFailureUsage(statusCode, "context_overflow");
-        return {
-          response: createErrorResult(
-            statusCode,
-            errMsg,
-            retryAfterMs,
-            upstreamErrorCode,
-            upstreamErrorType,
-            upstreamErrorBody,
-            { passthrough: sourceFormat === FORMATS.CLAUDE }
-          ),
-          carry: {
-            upstreamHttpSelection,
-            translatedBody,
-            currentModel,
-            effectiveServiceTier,
-            finalBody,
-            pipelineRecovered,
-            providerHeaders,
-            providerResponse,
-            providerUrl,
-          },
-        };
+        return finishHttpFailure("context_overflow");
       }
     } else {
-      persistAttemptLogs({
-        upstreamHttpSelection,
-        status: statusCode,
-        error: safeErrMsg,
-        providerRequest: providerRequestCapture.latest()?.body,
-        providerResponse: persistedProviderErrorBody,
-        clientResponse: buildErrorBody(statusCode, errMsg),
-        cacheSource: "upstream",
-      });
-      persistFailureUsage(statusCode, `upstream_${statusCode}`);
-
-      // Emergency budget fallback is orchestrated exclusively by the routing layer
-      // (src/sse/handlers/chat.ts), which resolves credentials FOR the emergency
-      // provider through account selection. The executor-level hop that used to
-      // live here re-sent the FAILING provider's credentials to the emergency
-      // provider's endpoint (e.g. the OpenAI API key to integrate.api.nvidia.com)
-      // — a cross-provider credential leak that also never succeeded upstream.
-      return {
-        response: createErrorResult(
-          statusCode,
-          errMsg,
-          retryAfterMs,
-          upstreamErrorCode,
-          upstreamErrorType,
-          upstreamErrorBody,
-          { passthrough: sourceFormat === FORMATS.CLAUDE }
-        ),
-        carry: {
-          upstreamHttpSelection,
-          translatedBody,
-          currentModel,
-          effectiveServiceTier,
-          finalBody,
-          pipelineRecovered,
-          providerHeaders,
-          providerResponse,
-          providerUrl,
-        },
-      };
+      // Emergency budget fallback is handled by the routing layer, which selects
+      // credentials for the target provider before dispatching to it.
+      return finishHttpFailure(`upstream_${statusCode}`);
     }
     // ── End T5 ───────────────────────────────────────────────────────────────
   }

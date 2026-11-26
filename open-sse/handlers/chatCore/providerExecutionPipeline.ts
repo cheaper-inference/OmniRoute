@@ -15,7 +15,7 @@ import type {
   lockModel,
   recordCoreOwnedAntigravityQuotaState,
 } from "../../services/accountFallback.ts";
-import { createErrorResult } from "../../utils/error.ts";
+import { createErrorResult, parseUpstreamError } from "../../utils/error.ts";
 import { applyStatusRestatement } from "../../config/upstreamStatusRestatement.ts";
 import { appendGoogleDailyQuotaViolation } from "../../services/googleDailyQuota.ts";
 import { recoverAnthropicThinkingSignature } from "./thinkingSignatureRecovery.ts";
@@ -25,6 +25,7 @@ import {
 } from "./passthroughHelpers.ts";
 import {
   isModelUnavailableError,
+  isContextOverflowError,
   getNextEligibleFamilyFallback,
   isFamilyFallbackEligible,
 } from "../../services/modelFamilyFallback.ts";
@@ -37,7 +38,10 @@ import {
   isCodexResponseCurrent,
 } from "../../services/codexAccount/fences.ts";
 import { isTransientCodexCapacity429 } from "../../services/codexAccount/capacity429.ts";
-import { readResponseTextWithinCap } from "../../utils/responseBodyCap.ts";
+import {
+  getMaxNonStreamingResponseBytes,
+  readResponseTextWithinCap,
+} from "../../utils/responseBodyCap.ts";
 
 export interface ChatCoreExecutorResult {
   response: Response;
@@ -182,8 +186,14 @@ export interface ProviderExecutionPipelineInput {
     triedModels: Set<string>,
     providerHint?: string | null
   ) => string | null | Promise<string | null>;
+  /** Larger-context family model to resend on after a context-overflow 400, or null. */
+  getContextOverflowFallback?: (
+    currentModel: string,
+    triedModels: Set<string>
+  ) => string | null | Promise<string | null>;
 }
 
+const MAX_RETRY_AFTER_MS = 24 * 60 * 60 * 1000;
 const LEASE_MISMATCH_STATUS = 409;
 const LEASE_MISMATCH_CODE = "LEASE_CONNECTION_MISMATCH";
 
@@ -198,9 +208,12 @@ function retryAfterMsFrom(attempt: ChatCoreExecutorResult): number | null {
   // is looked up as "retry-after"; it does not drop the field.
   const raw = normalizeHeaders(attempt.response?.headers)["retry-after"];
   if (raw == null || raw === "") return null;
-  const parsed = Number.parseFloat(String(raw));
-  if (!Number.isFinite(parsed) || parsed < 0) return null;
-  return parsed * 1000;
+  // RFC 9110: delta-seconds or an HTTP-date. Cap at 24 h so the cooldown date stays valid.
+  const text = String(raw).trim();
+  const seconds = Number.parseFloat(text);
+  const ms = /^\d+(\.\d+)?$/.test(text) ? seconds * 1000 : Date.parse(text) - Date.now();
+  if (!Number.isFinite(ms)) return null;
+  return Math.min(Math.max(ms, 0), MAX_RETRY_AFTER_MS);
 }
 
 /**
@@ -272,16 +285,33 @@ function leaseMismatch(model: string, connectionId: string): ProviderExecutionOu
   };
 }
 
-interface UpstreamErrorFields {
-  message?: string;
-  code?: string;
-  type?: string;
-}
-
-function readUpstreamErrorFields(body: unknown): UpstreamErrorFields {
-  const err = (body as { error?: Record<string, unknown> } | null)?.error;
-  const text = (value: unknown) => (typeof value === "string" && value ? value : undefined);
-  return { message: text(err?.message), code: text(err?.code), type: text(err?.type) };
+/**
+ * Read a non-2xx attempt with the streaming leg's parser, so both legs get the same message,
+ * code, type and retry hint from one upstream response (array bodies, flat/detail/string
+ * errors, header and body retry hints). clone() is the drain: sendProviderAttempt must not
+ * cancel() a streaming non-2xx body before we get here (BYOP 422 / Codex 429 Retry-After). A
+ * non-JSON body stays the message; buildErrorBody()/sanitizeErrorMessage() still sanitize and
+ * truncate it before it reaches any response body (Hard Rule #12). This leg keeps its own,
+ * larger body cap.
+ */
+async function readUpstreamError(attempt: ChatCoreExecutorResult, provider: string) {
+  let details: Awaited<ReturnType<typeof parseUpstreamError>> | null = null;
+  try {
+    details = await parseUpstreamError(attempt.response.clone(), provider, {
+      maxBodyBytes: getMaxNonStreamingResponseBytes(),
+    });
+  } catch {
+    // Body unreadable (already consumed) — keep statusText.
+  }
+  return {
+    message: details?.message || attempt.response.statusText || "upstream error",
+    body: details?.responseBody || attempt.transformedBody,
+    fields: {
+      code: typeof details?.errorCode === "string" ? details.errorCode : undefined,
+      type: typeof details?.errorType === "string" ? details.errorType : undefined,
+    },
+    retryAfterMs: details?.retryAfterMs ?? null,
+  };
 }
 
 async function toOutcome(
@@ -304,34 +334,13 @@ async function toOutcome(
       connectionId,
     };
   }
-  let message = attempt.response.statusText || "upstream error";
-  let body: unknown = attempt.transformedBody;
-  let fields: UpstreamErrorFields = {};
-  try {
-    // clone() is the drain. sendProviderAttempt must not cancel() a streaming
-    // non-2xx body before we get here (BYOP 422 / Codex 429 Retry-After).
-    const text = await readResponseTextWithinCap(attempt.response.clone());
-    try {
-      body = JSON.parse(text);
-      fields = readUpstreamErrorFields(body);
-      if (fields.message) message = fields.message;
-    } catch {
-      // Non-JSON upstream body (plain-text 429, HTML error page). parseUpstreamError
-      // — the pre-pipeline path this replaced — surfaces the raw text as the message;
-      // collapsing it to statusText ("upstream error") hides what the provider said.
-      // buildErrorBody()/sanitizeErrorMessage() still sanitize and truncate it before
-      // it reaches any response body (Hard Rule #12).
-      if (text.trim()) message = text;
-    }
-  } catch {
-    // Body unreadable (already consumed) — keep statusText.
-  }
+  const { message, body, fields, retryAfterMs } = await readUpstreamError(attempt, provider);
   const restatement = applyStatusRestatement({
     provider,
     status,
     message,
     body,
-    retryAfterMs: null,
+    retryAfterMs,
   });
   const result = createErrorResult(
     restatement.status,
@@ -349,6 +358,7 @@ async function toOutcome(
       error: result.error,
       errorCode: result.errorCode,
       errorType: result.errorType,
+      retryAfterMs: result.retryAfterMs,
       rawMessage: appendGoogleDailyQuotaViolation(message, body),
       upstreamErrorBody: body,
       upstreamHeaders: attempt.response.headers,
@@ -401,6 +411,9 @@ export async function runProviderExecutionPipeline(
   const allowedConnections = connection.allowedConnections ?? null;
   const excludedIds: string[] = [];
   let attempts = 0;
+  // Only the very first wire send may join an in-flight identical request: its dedup hash was
+  // built for the original model and credentials, so a resend (refresh, fallback) must not.
+  let firstSend = true;
   let lastAttempt: ChatCoreExecutorResult | null = null;
   let antigravityByopRotationPending = false;
   let authRefreshPending = false;
@@ -462,7 +475,8 @@ export async function runProviderExecutionPipeline(
     const before = assertLease(policy, connection, wire.currentModel);
     if (before) return before;
 
-    const attempt = await sendProviderAttempt(wire.currentModel, attempts === 0);
+    const attempt = await sendProviderAttempt(wire.currentModel, firstSend);
+    firstSend = false;
     lastAttempt = attempt;
     const state = bindCodexResponseCallbacks(attempt.response, baseState);
     if (!isCodexResponseCurrent(attempt.response)) {
@@ -523,7 +537,7 @@ export async function runProviderExecutionPipeline(
           await state.onCodexScopeRateLimited?.({
             failedConnectionId: failedId,
             model: wire.currentModel || target.requestedModel || null,
-            rateLimitedUntil: new Date(Date.now() + (retryAfterMs || 60_000)).toISOString(),
+            rateLimitedUntil: new Date(Date.now() + (retryAfterMs ?? 60_000)).toISOString(),
             credentials: connection.getCredentials(),
           });
         }
@@ -724,12 +738,19 @@ export async function runProviderExecutionPipeline(
 
     if (policy.allowModelFallback) {
       let fallbackMessage = attempt.response.statusText || "upstream error";
+      // The context-overflow check also reads a plain-text body, as toOutcome() does; the
+      // model-unavailable check keeps reading only the JSON error message.
+      let overflowMessage = fallbackMessage;
       try {
-        const parsed = JSON.parse(await readResponseTextWithinCap(attempt.response.clone())) as {
-          error?: { message?: unknown };
-        };
-        if (typeof parsed?.error?.message === "string" && parsed.error.message) {
-          fallbackMessage = parsed.error.message;
+        const text = await readResponseTextWithinCap(attempt.response.clone());
+        try {
+          const parsed = JSON.parse(text) as { error?: { message?: unknown } };
+          if (typeof parsed?.error?.message === "string" && parsed.error.message) {
+            fallbackMessage = parsed.error.message;
+          }
+          overflowMessage = fallbackMessage;
+        } catch {
+          if (text.trim()) overflowMessage = text;
         }
       } catch {
         // keep statusText
@@ -739,6 +760,22 @@ export async function runProviderExecutionPipeline(
           wire.currentModel,
           wire.triedModels,
           target.provider
+        );
+        if (nextModel) {
+          wire.body = { ...wire.body, model: nextModel };
+          wire.currentModel = nextModel;
+          wire.triedModels.add(nextModel);
+          wire.setBodyAndModel(wire.body, nextModel);
+          modelFallbackPending = true;
+          continue;
+        }
+      }
+      // A 400 context overflow is recoverable on a larger-context sibling. The streaming path and
+      // the leg's own branch already do this; the pipeline outcome skipped the leg branch.
+      if (isContextOverflowError(status, overflowMessage) && input.getContextOverflowFallback) {
+        const nextModel = await input.getContextOverflowFallback(
+          wire.currentModel,
+          wire.triedModels
         );
         if (nextModel) {
           wire.body = { ...wire.body, model: nextModel };

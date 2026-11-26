@@ -1,0 +1,1 @@
+- **fix(usage):** With `NONSTREAM_USAGE_NULL_TTFT_ENABLED` (off by default), successful non-streaming replies store NULL for TTFT, so those rows are excluded from TTFT averages and the tokens-per-second sample. ([#20232](https://github.com/cheaper-inference/OmniRoute/pull/20232))

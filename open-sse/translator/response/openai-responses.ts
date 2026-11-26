@@ -42,6 +42,7 @@ import { plaintextCollaborationFields } from "./openai-responses/collaborationPl
 import { resolveLocalToolCallIndex } from "./openai-responses/toolCallLocalIndex.ts";
 import { firstReportedCounter } from "../../utils/reportedCounter.ts";
 import {
+  drainOpenToolCallArgs,
   synthesizeCompletedToolItem,
   buildFinalChunk,
   computeFinishReason,
@@ -283,6 +284,9 @@ export function openaiToOpenAIResponsesResponse(chunk, state) {
     return [];
   }
 
+  // Nothing may follow response.completed: a late content or tool chunk would add items after it.
+  if (state.completedSent) return [];
+
   const { events, emit } = createEventEmitter(state);
 
   const choice = chunk.choices[0];
@@ -411,7 +415,7 @@ export function openaiToOpenAIResponsesResponse(chunk, state) {
     state.finishReason = choice.finish_reason; // read by sendCompleted() → finalizeResponsesTerminalStatus
     for (const i in state.msgItemAdded) closeMessage(state, emit, i);
     closeReasoning(state, emit);
-    for (const i in state.funcCallIds) closeToolCall(state, emit, i);
+    for (const i in state.funcNames) closeToolCall(state, emit, i);
     // #6906: usage already captured (same chunk or earlier) completes now; otherwise
     // defer for a trailing usage-only chunk, handled above and in flushEvents().
     if (state.responsesUsage) {
@@ -450,10 +454,24 @@ function buildDenseOutput(state) {
 }
 
 // Helper functions
-function startReasoning(state, emit, idx) {
-  if (!state.reasoningId) {
+function startReasoning(state, emit, requestedIdx) {
+  // A done item takes no new deltas: reasoning that comes back after content opens a new item.
+  // The new item (and any reasoning after a message or tool call) needs a free output_index.
+  const reopen = state.reasoningId && state.reasoningDone;
+  if (!state.reasoningId || reopen) {
+    const idx =
+      reopen || state.msgItemAdded[requestedIdx] || state.funcAllocatedOutputIndexes?.[requestedIdx]
+        ? nextFreeMessageIndex(state, requestedIdx)
+        : requestedIdx;
+    if (reopen) {
+      state.reasoningBuf = "";
+      state.reasoningDone = false;
+      state.reasoningPartAdded = false;
+    }
     state.reasoningId = `rs_${state.responseId}_${idx}`;
     state.reasoningIndex = idx;
+    // Every reasoning item keeps its index: a later phase must not reopen at a done one's index.
+    (state.reasoningAllocatedIndexes ??= {})[idx] = true;
 
     emit("response.output_item.added", {
       type: "response.output_item.added",
@@ -536,6 +554,7 @@ function nextFreeMessageIndex(state, requestedIdx) {
   const claimed = (i) =>
     state.msgItemAdded[i] ||
     allocatedToolIndexes[i] !== undefined ||
+    state.reasoningAllocatedIndexes?.[i] ||
     (state.reasoningId && i === normalizeOutputIndex(state.reasoningIndex));
   while (claimed(candidate)) candidate += 1;
   return candidate;
@@ -729,12 +748,18 @@ function emitToolCallAdded(state, emit, idx, outputIndex, terminal = false) {
 // message opened or relocated after the call's first delta used to shift the
 // close-time index away from the added-time index (clients keying items by
 // output_index see the identity change mid-flight). Also never land on an
-// index a message item already holds.
+// index a message, an earlier call (a replaced call keeps its own) or a
+// reasoning item already holds.
 function allocateToolOutputIndex(state, tcIdx) {
   if (!state.funcOutputIndex) state.funcOutputIndex = {};
   if (state.funcOutputIndex[tcIdx] === undefined) {
     let candidate = toolCallOutputIndexBase(state) + resolveLocalToolCallIndex(state, tcIdx);
-    while (state.msgItemAdded[candidate]) candidate += 1;
+    while (
+      state.msgItemAdded[candidate] ||
+      state.funcAllocatedOutputIndexes?.[candidate] ||
+      state.reasoningAllocatedIndexes?.[candidate]
+    )
+      candidate += 1;
     state.funcOutputIndex[tcIdx] = candidate;
   }
   return state.funcOutputIndex[tcIdx];
@@ -769,23 +794,25 @@ function repairDoubleEscapedTabs(state, tcIdx, rawArgs: string): string {
   return fixDoubleEscapedTabs(rawArgs, state.funcArgsTabState[tcIdx]);
 }
 
+// #6459: some upstreams send the arguments as a parsed object; the escape scanners read text.
+function toolArgsText(value: unknown): string {
+  return typeof value === "string" ? value : JSON.stringify(value);
+}
+
 function emitToolCall(state, emit, tc) {
   const tcIdx = tc.index ?? 0;
   const lifecycle = translatorToolCallLifecycle(state);
-  const outputIndex = allocateToolOutputIndex(state, tcIdx);
-  // Record every allocated tool-call output_index so a post-close text
-  // relocation (nextFreeMessageIndex) can never collide with it.
-  if (!state.funcAllocatedOutputIndexes) state.funcAllocatedOutputIndexes = {};
-  state.funcAllocatedOutputIndexes[outputIndex] = true;
   const newCallId = tc.id;
   const funcName = tc.function?.name;
 
   // T37: If we already have a tool call at this index but the ID changed,
   // we must close the current one and start a new one to prevent merging.
   if (state.funcCallIds[tcIdx] && newCallId && state.funcCallIds[tcIdx] !== newCallId) {
-    // Superseded call: close and emit output_item.done but do NOT record as final output
-    // since this call was replaced by a new one at the same index.
-    closeToolCall(state, emit, tcIdx, false);
+    // A new id at a reused upstream index is a second call, not an edit of the first:
+    // keep the first in the final output and give the new call its own output_index.
+    closeToolCall(state, emit, tcIdx);
+    delete state.funcOutputIndex?.[tcIdx];
+    delete state.toolCallLocalIndex?.[tcIdx];
     delete state.funcCallIds[tcIdx];
     delete state.funcNames[tcIdx];
     delete state.funcArgsBuf[tcIdx];
@@ -796,6 +823,12 @@ function emitToolCall(state, emit, tc) {
     delete state.funcArgsTabState?.[tcIdx];
     lifecycle.reset(tcIdx);
   }
+
+  const outputIndex = allocateToolOutputIndex(state, tcIdx);
+  // Record every allocated tool-call output_index so a post-close text
+  // relocation (nextFreeMessageIndex) can never collide with it.
+  if (!state.funcAllocatedOutputIndexes) state.funcAllocatedOutputIndexes = {};
+  state.funcAllocatedOutputIndexes[outputIndex] = true;
 
   // Empty or missing name deltas must not wipe a name already accumulated.
   // appendName keeps the previous spelling when the incoming delta is blank,
@@ -815,7 +848,7 @@ function emitToolCall(state, emit, tc) {
     if (!state.funcArgsEscapeState[tcIdx]) {
       state.funcArgsEscapeState[tcIdx] = createJsonStringEscapeState();
     }
-    const rawArgs = repairDoubleEscapedTabs(state, tcIdx, tc.function.arguments);
+    const rawArgs = repairDoubleEscapedTabs(state, tcIdx, toolArgsText(tc.function.arguments));
     const sanitized = escapeJsonStringValues(rawArgs, state.funcArgsEscapeState[tcIdx]);
     const nextArgs = appendToolCallArgumentDelta(existingArgs, sanitized, state);
     const emittedDelta = newArgumentTail(sanitized, nextArgs.length - existingArgs.length);
@@ -840,7 +873,10 @@ function finalToolCallArgs(state, idx): string {
   return state.funcArgsBuf[idx] || "{}";
 }
 
-function closeToolCall(state, emit, idx, recordAsCompleted = true) {
+function closeToolCall(state, emit, idx) {
+  // Wait until close to generate a missing id: an upstream may send its real id late.
+  if (!state.funcCallIds[idx] && state.funcNames[idx])
+    state.funcCallIds[idx] = fallbackToolCallId(Number(idx));
   const callId = state.funcCallIds[idx];
   if (callId && !state.funcItemDone[idx]) {
     const normalizedIndex = announcedToolOutputIndex(state, idx);
@@ -917,21 +953,17 @@ function closeToolCall(state, emit, idx, recordAsCompleted = true) {
       });
     }
 
-    // Only record as a completed output item when this is a final close (not a
-    // superseded-call eviction where a new call replaced this one at the same index).
-    if (recordAsCompleted) {
-      recordCompletedItem(state, normalizedIndex, funcItem);
-      // Mirror into the shared state.toolCalls map (populated by the other response
-      // translators) so stream.ts's completion-log summary reports finish_reason
-      // "tool_calls" and message.tool_calls instead of "stop" with no tool calls.
-      if (state.toolCalls instanceof Map) {
-        state.toolCalls.set(idx, {
-          id: callId,
-          index: normalizedIndex,
-          type: isCustomTool ? "custom_tool_call" : "function",
-          function: { name: funcItem.name, arguments: args },
-        });
-      }
+    recordCompletedItem(state, normalizedIndex, funcItem);
+    // Mirror into the shared state.toolCalls map (populated by the other response
+    // translators) so stream.ts's completion-log summary reports finish_reason
+    // "tool_calls" and message.tool_calls instead of "stop" with no tool calls.
+    if (state.toolCalls instanceof Map) {
+      state.toolCalls.set(normalizedIndex, {
+        id: callId,
+        index: normalizedIndex,
+        type: isCustomTool ? "custom_tool_call" : "function",
+        function: { name: funcItem.name, arguments: args },
+      });
     }
 
     state.funcItemDone[idx] = true;
@@ -1000,7 +1032,7 @@ function flushEvents(state) {
 
   for (const i in state.msgItemAdded) closeMessage(state, emit, i);
   closeReasoning(state, emit);
-  for (const i in state.funcCallIds) closeToolCall(state, emit, i);
+  for (const i in state.funcNames) closeToolCall(state, emit, i);
   sendCompleted(state, emit);
 
   return events;
@@ -1094,48 +1126,32 @@ function openaiResponsesToOpenAIResponseStream(chunk, state) {
   if (state.responsesTextSnapshots?.closed) return null;
   if (!chunk) {
     closeResponsesTextSnapshots(state);
+    // EOF is not a terminal event. Without response.completed, a failure or a [DONE] marker, a
+    // cut stream must not end as a clean `stop`: surface it, as the Chat to Responses direction
+    // does. stream.ts sets doneMarkerSeen when it drops the [DONE] line.
+    if (state.started && !state.finishReasonSent && !state.doneMarkerSeen && !state.upstreamError) {
+      state.upstreamError = {
+        status: 502,
+        type: "server_error",
+        code: "stream_early_eof",
+        message: "Upstream stream ended without a terminal marker",
+      };
+    }
     // Iterate every still-open call with a buffered argument payload — argument
     // deltas are buffered for every tool, so an incomplete stream must flush every
     // buffered call, not only the historical uppercase Agent path.
-    const pendingNormalized: Array<{ index: number; argsStr: string }> = [];
-    if (state.toolCallByCallId instanceof Map) {
-      for (const entry of state.toolCallByCallId.values()) {
-        if (entry.argsBuffer) {
-          const toolSchema = state.toolSchemas?.get(entry.name);
-          const argsToEmit = stripEmptyOptionalToolArgs(entry.argsBuffer, entry.name, toolSchema);
-          pendingNormalized.push({
-            index: entry.index,
-            argsStr: typeof argsToEmit === "string" ? argsToEmit : JSON.stringify(argsToEmit ?? {}),
-          });
-          entry.argsBuffer = "";
-          entry.needsNormalization = false;
-        }
-      }
-    }
-    if (pendingNormalized.length > 0) {
+    const pendingChunks = drainOpenToolCallArgs(state);
+    if (pendingChunks.length > 0) {
       state.finishReasonSent = true;
       state.finishReason = "tool_calls";
-      const common = {
+      pendingChunks.push({
         id: state.chatId,
         object: "chat.completion.chunk",
         created: state.created,
         model: state.model || "gpt-4",
-      };
-      const chunks: Record<string, unknown>[] = pendingNormalized.map(({ index, argsStr }) => ({
-        ...common,
-        choices: [
-          {
-            index: 0,
-            delta: { tool_calls: [{ index, function: { arguments: argsStr } }] },
-            finish_reason: null,
-          },
-        ],
-      }));
-      chunks.push({
-        ...common,
         choices: [{ index: 0, delta: {}, finish_reason: "tool_calls" }],
       });
-      return chunks;
+      return pendingChunks;
     }
     // Flush: send final chunk with finish_reason
     if (!state.finishReasonSent && state.started) {
@@ -1611,12 +1627,20 @@ function openaiResponsesToOpenAIResponseStream(chunk, state) {
     const textByIndex = recoverTextSnapshotsByOutputIndex(state, output);
     closeResponsesTextSnapshots(state);
     if (state.finishReasonSent) return null;
+    // A call without output_item.done is still open: send its arguments before the terminal,
+    // and report a cut (not tool_calls) when the turn ended on a limit.
+    const cutByLimit =
+      state.incompleteReason === "max_output_tokens" || state.incompleteReason === "content_filter";
+    state.toolCallCut =
+      cutByLimit && state.toolCallByCallId instanceof Map && state.toolCallByCallId.size > 0;
+    const openCallArgs = drainOpenToolCallArgs(state, output);
     const recovered = output.flatMap((item, index) => [
       ...(textByIndex.get(index) ?? []),
       ...synthesizeCompletedToolItem(state, item),
     ]);
     const finalChunk = buildFinalChunk(state);
-    return recovered.length ? [...recovered, finalChunk] : finalChunk;
+    const before = [...openCallArgs, ...recovered];
+    return before.length ? [...before, finalChunk] : finalChunk;
   }
 
   if (eventType === "response.failed" || eventType === "error") {
