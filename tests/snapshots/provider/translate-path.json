@@ -6202,6 +6202,29 @@
       "stream": "https://tabitoken.com/v1/messages"
     }
   },
+  "teamorouter": {
+    "format": "openai",
+    "headers": {
+      "apiKey": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      },
+      "nonStream": {
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      },
+      "oauth": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      }
+    },
+    "url": {
+      "nonStream": "https://api.teamorouter.com/v1/chat/completions",
+      "stream": "https://api.teamorouter.com/v1/chat/completions"
+    }
+  },
   "tencent": {
     "format": "openai",
     "headers": {

@@ -1,0 +1,1 @@
+- **feat(providers):** add TeamoRouter (`teamorouter`) as an OpenAI-compatible API-key gateway with Bearer-key authentication and live model discovery from `/v1/models` ([#21189](https://github.com/cheaper-inference/OmniRoute/pull/21189))
