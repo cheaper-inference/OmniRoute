@@ -68,10 +68,10 @@ test("allowlist freezes a literal by file:line:value key", () => {
 });
 
 test("allowlist preserves the local ZCode handshake client ID without weakening credential detection", () => {
-  // 335 newlines puts the statement on line 336, which is where it lives in
+  // 342 newlines puts the statement on line 343, which is where it lives in
   // zcodeProtocol.ts today. The allowlist key carries the line number, so this
-  // literal has to be kept in step with the source (it moved 302 -> 313 -> 336).
-  const src = `${"\n".repeat(335)}clientId: \`omniroute-\${process.pid}\`,`;
+  // literal has to be kept in step with the source.
+  const src = `${"\n".repeat(342)}clientId: \`omniroute-\${process.pid}\`,`;
   assert.deepEqual(
     findLiteralCreds(src, KNOWN_LITERAL_CREDS, "open-sse/executors/zcodeProtocol.ts"),
     []
