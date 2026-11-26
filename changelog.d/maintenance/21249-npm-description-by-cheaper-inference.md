@@ -1,0 +1,1 @@
+- **chore(npm):** the package description now reads "OmniRoute by Cheaper Inference: …", matching the site title; it stays free of provider counts ([#21249](https://github.com/cheaper-inference/OmniRoute/pull/21249))
