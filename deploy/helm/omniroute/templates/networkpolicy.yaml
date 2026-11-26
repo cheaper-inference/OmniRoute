@@ -1,0 +1,99 @@
+{{- $np := .Values.networkPolicy | default dict -}}
+{{- /* Default to true when networkPolicy is omitted (e.g. helm upgrade --reuse-values from an older chart), while honoring an explicit networkPolicy.enabled=false. */ -}}
+{{- $npEnabled := true -}}
+{{- if hasKey $np "enabled" -}}
+{{- $npEnabled = $np.enabled -}}
+{{- end -}}
+{{- if $npEnabled -}}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "omniroute.fullname" . }}
+  labels:
+    {{- include "omniroute.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "omniroute.selectorLabels" . | nindent 6 }}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx
+          podSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values: ["ingress-nginx"]
+              - key: app.kubernetes.io/component
+                operator: In
+                values: ["controller"]
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values: ["traefik"]
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: traefik
+          podSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values: ["traefik"]
+      ports:
+        - protocol: TCP
+          port: {{ .Values.service.port }}
+        - protocol: TCP
+          port: {{ .Values.service.liveWsPort }}
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchExpressions:
+              - key: k8s-app
+                operator: In
+                values: ["kube-dns", "coredns", "node-local-dns"]
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values: ["coredns"]
+        # Standard Kubernetes NodeLocal DNSCache link-local listener (port 53 only).
+        # Override via networkPolicy.extraEgress if your cluster uses a custom localdns IP.
+        - ipBlock:
+            cidr: 169.254.20.10/32
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8
+              - 172.16.0.0/12
+              - 192.168.0.0/16
+              - 169.254.0.0/16
+              - 100.64.0.0/10
+              - 127.0.0.0/8
+              - 198.18.0.0/15
+      ports:
+        - protocol: TCP
+          port: 443
+    {{- with (index $np "extraEgress") }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+{{- end }}

@@ -320,14 +320,20 @@ function readReferenceFile(skillDir: string, referencePath: string): string | un
  *   - dryRun=false + prune=true: deletes orphan directories.
  */
 export async function generateAgentSkills(opts: GeneratorOptions): Promise<GeneratorReport> {
-  const { dryRun = true, prune = false, outputDir = "skills", onlyIds } = opts;
+  const { dryRun = true, prune = false, outputDir, onlyIds } = opts;
+
+  const envOutputDir = process.env.OMNIROUTE_SKILLS_OUTPUT_DIR?.trim();
+  const resolvedOutputDir = outputDir || envOutputDir || "skills";
 
   // Anchor the base path with a literal so Turbopack's static analyzer can resolve
   // it without falling back to tracing the entire project root. (#6329)
-  // Honor an absolute outputDir (e.g. a tmp dir in tests) — path.join(cwd, "/abs")
+  // Honor an absolute outputDir (e.g. a tmp dir in tests or OMNIROUTE_SKILLS_OUTPUT_DIR
+  // under DATA_DIR in readOnlyRootFilesystem containers) — path.join(cwd, "/abs")
   // would mangle it into cwd/abs, so guard with isAbsolute while keeping the
-  // Turbopack-friendly join form for the common relative case ("skills"). (#6366 regression)
-  const outputBase = path.isAbsolute(outputDir) ? outputDir : path.join(process.cwd(), outputDir);
+  // Turbopack-friendly join form for the common relative case ("skills"). (#6366, #21014)
+  const outputBase = path.isAbsolute(resolvedOutputDir)
+    ? resolvedOutputDir
+    : path.join(process.cwd(), resolvedOutputDir);
 
   const catalog = getCatalog();
   const catalogIds = new Set(catalog.map((s) => s.id));

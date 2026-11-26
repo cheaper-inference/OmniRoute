@@ -57,15 +57,21 @@ spec:
             {{- with .Values.extraEnvFrom }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
-          {{- with .Values.extraEnv }}
           env:
+            - name: npm_config_cache
+              value: /tmp/npm-cache
+            - name: OMNIROUTE_SKILLS_OUTPUT_DIR
+              value: {{ printf "%s/skills" (.Values.config.dataDir | trimSuffix "/") | quote }}
+            {{- with .Values.extraEnv }}
             {{- toYaml . | nindent 12 }}
-          {{- end }}
-          {{- if .Values.persistence.enabled }}
+            {{- end }}
           volumeMounts:
             - name: data
               mountPath: {{ .Values.config.dataDir }}
-          {{- end }}
+            - name: tmp
+              mountPath: /tmp
+            - name: next-cache
+              mountPath: /app/.build/next/cache
           lifecycle:
             preStop:
               exec:
@@ -111,12 +117,18 @@ spec:
             {{- toYaml .Values.resources | nindent 12 }}
           securityContext:
             {{- toYaml .Values.containerSecurityContext | nindent 12 }}
-      {{- if .Values.persistence.enabled }}
       volumes:
         - name: data
+          {{- if .Values.persistence.enabled }}
           persistentVolumeClaim:
             claimName: {{ include "omniroute.pvcName" . }}
-      {{- end }}
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+        - name: tmp
+          emptyDir: {}
+        - name: next-cache
+          emptyDir: {}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

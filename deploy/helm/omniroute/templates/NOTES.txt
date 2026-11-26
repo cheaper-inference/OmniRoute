@@ -22,9 +22,13 @@ Then open http://localhost:{{ .Values.service.port }}
 Before putting this in front of anyone else:
 
   1. Log in and change the initial admin password immediately.
-{{- if not .Values.config.requireApiKey }}
-  2. config.requireApiKey is false — /v1/* accepts unauthenticated requests.
-     Set it to true before the Service is reachable outside the cluster.
+{{- if .Values.config.requireApiKey }}
+  2. API key authentication is enabled by default (config.requireApiKey=true):
+     create an API key in the dashboard before calling /v1/* (set
+     config.requireApiKey=false only for an intentionally keyless private cluster).
+{{- else }}
+  2. WARNING: config.requireApiKey is false — /v1/* accepts unauthenticated
+     requests. Set it to true before the Service is reachable outside the cluster.
 {{- end }}
   3. Set config.liveWsAllowedOrigins to your real host, or the dashboard's
      live WebSocket will be rejected by the origin check.

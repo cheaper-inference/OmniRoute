@@ -57,9 +57,26 @@ spec:
                 name: omniroute-config
             - secretRef:
                 name: omniroute-secrets
+          env:
+            # Keep npm's cache on the writable /tmp emptyDir so embedded service
+            # installers (9router / bifrost) do not fail on read-only /home/node/.npm.
+            - name: npm_config_cache
+              value: /tmp/npm-cache
+            # Redirect runtime Agent Skills apply-mode writes (`POST /api/agent-skills/generate`
+            # with dryRun=false) onto the writable DATA_DIR volume so readOnlyRootFilesystem
+            # pods do not fail with EROFS on /app/skills, while bundled SKILL.md catalog
+            # reads remain intact at /app/skills (#21014).
+            - name: OMNIROUTE_SKILLS_OUTPUT_DIR
+              value: /app/data/skills
           volumeMounts:
             - name: data
               mountPath: /app/data
+            - name: tmp
+              mountPath: /tmp
+            # Standalone builds bake distDir=".build/next" (next.config.mjs), so
+            # Next.js writes runtime cache entries under /app/.build/next/cache.
+            - name: next-cache
+              mountPath: /app/.build/next/cache
           lifecycle:
             preStop:
               exec:
@@ -127,10 +144,18 @@ spec:
               memory: 4Gi
           securityContext:
             allowPrivilegeEscalation: false
-            readOnlyRootFilesystem: false
+            # Writable paths (/app/data PVC, /tmp and /app/.build/next/cache
+            # emptyDirs) are mounted explicitly above. Note: runtime
+            # OMNIROUTE_BASE_PATH bundle patching requires building the image
+            # with --build-arg OMNIROUTE_BASE_PATH or overriding this in an overlay.
+            readOnlyRootFilesystem: true
             capabilities:
               drop: ["ALL"]
       volumes:
         - name: data
           persistentVolumeClaim:
             claimName: omniroute-data
+        - name: tmp
+          emptyDir: {}
+        - name: next-cache
+          emptyDir: {}
