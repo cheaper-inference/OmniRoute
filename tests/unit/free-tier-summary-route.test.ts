@@ -4,6 +4,12 @@ import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { FREE_CATALOG_CURATED_AT } from "@omniroute/open-sse/config/freeModelCatalog.data.ts";
+import { computeFreeModelTotals } from "@omniroute/open-sse/config/freeModelCatalog.ts";
+
+// The route answers from the shipped catalog when the Radar overlay is off. Since the November
+// 2026 re-audit the steady figure is ~90M, so the old ">= 1B" floor no longer describes it: the
+// route must return exactly what the catalog function computes.
+const STEADY = computeFreeModelTotals().steadyRecurringTokens;
 
 process.env.DATA_DIR = mkdtempSync(join(tmpdir(), "omniroute-freetier-route-"));
 
@@ -14,7 +20,7 @@ test("GET /api/free-tier/summary returns per-model totals and headline", async (
   assert.equal(res.status, 200);
   const body = await res.json();
   // Per-model catalog fields (supersedes per-provider documentedMonthlyTokens/providerCount/byProvider)
-  assert.ok(body.steadyRecurringTokens >= 1_000_000_000);
+  assert.equal(body.steadyRecurringTokens, STEADY);
   assert.ok(body.firstMonthRealisticTokens >= body.steadyRecurringTokens);
   assert.ok(Array.isArray(body.perModel) && body.perModel.length >= 400);
   assert.match(body.headline, /free tokens\/month/);
@@ -25,7 +31,7 @@ test("summary returns per-model totals, used-this-month and remaining", async ()
   const res = await GET(new Request("http://localhost/api/free-tier/summary"));
   assert.equal(res.status, 200);
   const body = await res.json();
-  assert.ok(body.steadyRecurringTokens >= 1_000_000_000);
+  assert.equal(body.steadyRecurringTokens, STEADY);
   assert.ok(body.firstMonthRealisticTokens >= body.steadyRecurringTokens);
   assert.ok(Array.isArray(body.perModel) && body.perModel.length >= 400);
   assert.equal(typeof body.usedThisMonth, "number");

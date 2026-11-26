@@ -1,6 +1,6 @@
 ---
 name: merge-batch
-description: Prepare and merge an owner-selected PR batch with contributor credit and exact-candidate admission. Use for a pasted PR list; combined focused validation is diagnostic, and every actual landing still requires its applicable checks and authorization.
+description: "Use when the owner pastes PR numbers and wants each landed as its own merge, with no plan-files: 'mergeia essas: #A #B #C'. Star table, one shared board to find conflicts, then each PR is admitted on its own checks (merge-gates §9). To land the group as ONE pull request with merge commits: /merge-train. With plan-files: /merge-prs. No list, closing the version: /merge-waves."
 allowed-tools: Bash, Read, Edit, Write, Grep, Glob, AskUserQuestion
 ---
 
@@ -76,7 +76,12 @@ Draft skips, MERGEABLE, a green board, an old head and inherited failures are no
 acceptance. A changed identity returns the item to validation.
 
 Use an approved server-enforced queue or reviewed identity-preserving protocol
-for each actual landing. `gh pr merge --match-head-commit` guards the head only;
+for each actual landing. On a `release/v*` base the landing step is the one
+`../_shared/merge-gates.md` §9 gives for the omni-queue's current mode (read it first):
+a manual merge while the queue is off or in `shadow` (in `shadow`, only after the queue's
+`would-land` verdict for that head, or as a member of a train whose full CI ran green on the
+current base tip), the `omni-queue` label in `live`.
+`gh pr merge --match-head-commit` guards the head only;
 it does not atomically guard the base or replace missing required checks. If the
 tool cannot preserve the tested candidate or exclude a race, HOLD.
 

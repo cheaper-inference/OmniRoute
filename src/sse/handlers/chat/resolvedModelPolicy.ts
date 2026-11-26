@@ -184,7 +184,7 @@ async function resolveGateApiKey(request: Request | null | undefined): Promise<s
     if (!request?.headers) return null;
     const enforced = await resolveEnforcedPolicyKey(request);
     // A scope that no longer resolves must not fall back to the self-loop bearer.
-    return enforced.selfLoopScope.rejection ? null : enforced.apiKey;
+    return enforced.rejection ? null : enforced.apiKey;
   } catch {
     return null;
   }
