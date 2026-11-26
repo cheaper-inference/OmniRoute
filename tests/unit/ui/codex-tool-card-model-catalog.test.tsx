@@ -72,7 +72,7 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-const renderCard = async (applyResponse: Record<string, unknown>) => {
+const renderCard = async (applyResponse: Record<string, unknown>, modelCatalogEnabled = false) => {
   const posts: Array<Record<string, unknown>> = [];
   vi.stubGlobal(
     "fetch",
@@ -83,7 +83,12 @@ const renderCard = async (applyResponse: Record<string, unknown>) => {
         return jsonResponse(applyResponse);
       }
       if (url === "/api/cli-tools/codex-settings") {
-        return jsonResponse({ installed: true, runnable: true, config: 'model = "gpt-5.6-sol"\n' });
+        return jsonResponse({
+          installed: true,
+          runnable: true,
+          config: 'model = "gpt-5.6-sol"\n',
+          modelCatalogEnabled,
+        });
       }
       if (url === "/api/models/alias") return jsonResponse({ aliases: {} });
       if (url === "/api/cli-tools/codex-profiles") return jsonResponse({ profiles: [] });
@@ -116,6 +121,11 @@ const renderCard = async (applyResponse: Record<string, unknown>) => {
 };
 
 describe("CodexToolCard model catalog", () => {
+  it("starts checked when the saved configuration uses the OmniRoute catalog", async () => {
+    const { container } = await renderCard({ success: true }, true);
+    expect(catalogCheckbox(container)?.checked).toBe(true);
+  });
+
   it("does not ask for the Codex model catalog by default and can opt in", async () => {
     const { container, posts } = await renderCard({ success: true });
     expect(catalogCheckbox(container)?.checked).toBe(false);

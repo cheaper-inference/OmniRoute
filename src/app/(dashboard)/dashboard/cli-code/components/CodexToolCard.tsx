@@ -105,6 +105,7 @@ export default function CodexToolCard({
   // status (was a separate codexStatus effect — runs right after each fetch
   // instead so no setState happens synchronously inside an effect body).
   const syncFormFromStatus = useCallback((status) => {
+    setWriteModelCatalog(status?.modelCatalogEnabled === true);
     if (status && !status.config) {
       setWireApi("responses");
     }
@@ -213,7 +214,7 @@ export default function CodexToolCard({
             ? { type: "warning", text: `${t("settingsApplied")} ${t("codexCatalogWarning")}` }
             : { type: "success", text: t("settingsApplied") }
         );
-        checkCodexStatus();
+        await checkCodexStatus();
       } else {
         setMessage({
           type: "error",
