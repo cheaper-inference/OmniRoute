@@ -44,18 +44,18 @@ describe("modelSort persistence", () => {
 
 describe("reserved automatic route names", () => {
   for (const name of ["auto", "auto/coding", "AUTO", " Auto/x "]) {
-    it(`rejects "${name}" on create and update`, () => {
-      for (const result of [
-        createComboSchema.safeParse({ name, models: ["openai/gpt-4o-mini"] }),
-        updateComboSchema.safeParse({ name }),
-      ]) {
-        assert.equal(result.success, false);
-        assert.deepEqual(result.error?.issues[0]?.path, ["name"]);
-        assert.match(
-          result.error?.issues[0]?.message ?? "",
-          /reserved for the built-in automatic routes/
-        );
-      }
+    it(`rejects "${name}" on create`, () => {
+      const result = createComboSchema.safeParse({ name, models: ["openai/gpt-4o-mini"] });
+      assert.equal(result.success, false);
+      assert.deepEqual(result.error?.issues[0]?.path, ["name"]);
+      assert.match(
+        result.error?.issues[0]?.message ?? "",
+        /reserved for the built-in automatic routes/
+      );
+    });
+
+    it(`lets the update route compare "${name}" with the stored name`, () => {
+      assert.equal(updateComboSchema.parse({ name }).name, name.trim());
     });
   }
 
