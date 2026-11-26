@@ -17,10 +17,10 @@ type Client = z.infer<typeof clientInstructionsId>;
 type Source = Client | "shared" | "cc-switch";
 const clients = clientInstructionsId.options;
 const idSchema = z.string().regex(/^[a-f0-9]{64}$/);
-const action = z.enum(["import", "enable", "disable", "update", "uninstall"]);
+const skillAction = z.enum(["import", "enable", "disable", "update", "uninstall"]);
 export const clientSkillLibraryChange = z
   .strictObject({
-    action,
+    action: skillAction,
     ids: z.array(idSchema).min(1).max(50),
     client: clientInstructionsId.optional(),
   })
@@ -347,7 +347,7 @@ function stageBundle(skill: Skill | Managed, target: string, owner?: string) {
 }
 
 function applyOne(
-  action: z.infer<typeof action>,
+  action: z.infer<typeof skillAction>,
   id: string,
   client: Client | undefined,
   native: ReturnType<typeof roots>,
