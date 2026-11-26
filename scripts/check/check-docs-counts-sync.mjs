@@ -649,7 +649,7 @@ function listOutputSources(root, dir) {
     }
   };
   walk(dir);
-  return out.sort();
+  return out.sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
 }
 
 /** Files that never carry a row-sum figure: package.json, llm.txt and the MCP/A2A sources. */
