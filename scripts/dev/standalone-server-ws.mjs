@@ -29,6 +29,24 @@ installProcessCrashGuard();
 const systemdNotifier = createSystemdNotifier();
 let systemdReadySent = false;
 
+// Desktop shell handshake (electron/lib/localServerStartup.js). Only the Electron shell, when it
+// searches for a free port, spawns this process with an IPC channel and a per-attempt token; the
+// token is consumed here so spawned children never inherit it. Without both, nothing is sent.
+const embeddedBindToken = process.env.OMNIROUTE_EMBEDDED_BIND_TOKEN;
+delete process.env.OMNIROUTE_EMBEDDED_BIND_TOKEN;
+const embeddedBindPort = Number.parseInt(process.env.PORT || "", 10);
+let embeddedBindReported = false;
+function reportEmbeddedBind(type, port, code) {
+  if (!embeddedBindToken || embeddedBindReported || typeof process.send !== "function") return;
+  if (port !== embeddedBindPort) return; // not the main listener
+  embeddedBindReported = true;
+  try {
+    process.send({ type, port, ...(code ? { code } : {}), token: embeddedBindToken });
+  } catch {
+    // A closed channel only means the shell is gone; the server keeps its normal behaviour.
+  }
+}
+
 const originalCreateServer = http.createServer.bind(http);
 const proxiesByPort = new Map();
 /** Every server created through the patched factory (Next's main listener included). */
@@ -262,6 +280,12 @@ http.createServer = function createServerWithResponsesWs(...args) {
   const server = createServerListener(args, tlsOptions, { createHttp: originalCreateServer });
   createdServers.add(server);
   server.once("close", () => createdServers.delete(server));
+  // Listed first so the report goes out before Next's own listen-error handler exits the process.
+  server.prependListener("error", (error) => {
+    if (error?.syscall !== "listen") return;
+    const code = /^[A-Z0-9_]{1,32}$/.test(String(error.code)) ? String(error.code) : "UNKNOWN";
+    reportEmbeddedBind("omniroute:embedded-bind-failed", error.port, code);
+  });
   // Node's http.Server default keepAliveTimeout (5_000ms) races pooled
   // keep-alive HTTP clients that idle longer than that between requests (e.g.
   // the JVM java.net.http.HttpClient used by JetBrains AI Assistant), which
@@ -321,6 +345,10 @@ http.createServer = function createServerWithResponsesWs(...args) {
   // sd_notify READY once the main listener is actually accepting, then arm
   // the watchdog keep-alive interval (unref'd — never keeps the process up).
   server.once("listening", () => {
+    const address = server.address();
+    if (address && typeof address === "object") {
+      reportEmbeddedBind("omniroute:embedded-bound", address.port);
+    }
     // Next reads NEXT_MANUAL_SIG_HANDLE synchronously in its own 'listening' handler, which runs
     // right after this one; clear it on the next turn so child processes never inherit it.
     if (ownsNextSignalEnv) {

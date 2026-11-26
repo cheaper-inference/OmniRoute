@@ -27,6 +27,7 @@ const {
   shell,
   session,
   Notification,
+  dialog,
 } = require("electron");
 const path = require("path");
 const { spawn } = require("child_process");
@@ -44,6 +45,14 @@ const {
 } = require("./lib/remoteServerPreferences");
 const { buildReadinessUrl, probeServer, waitForServer } = require("./lib/serverReadiness");
 const { shouldRestartHealthCheck } = require("./lib/healthWatchdog");
+const {
+  ATTEMPT_TOKEN_ENV,
+  PORT_FALLBACK_SPAN,
+  bundleReportsBind,
+  describeStartupFailure,
+  resolveFallbackPolicy,
+  startLocalEmbeddedServer,
+} = require("./lib/localServerStartup");
 const { shouldStartHidden, showOrCreateWindow } = require("./lib/windowLifecycle");
 const {
   CLOSE_BEHAVIOR_KEEP_LOADED,
@@ -85,6 +94,12 @@ let isServerStopped = false;
 let remoteServerPromptWindow = null;
 let keepAliveWithoutWindows = false;
 let lastRendererUrl = null;
+// Port search (ELECTRON_LOCAL_PORT_FALLBACK_ENABLED, opt-in): see lib/localServerStartup.js.
+// Only the very first local start may search; every later restart keeps the confirmed port.
+let initialStartPending = true;
+let portDiscoveryEngaged = false;
+let embeddedStartup = null;
+let embeddedPortConfirmed = false;
 
 // ── Remote Server Mode ──────────────────────────────────────
 // Lets the desktop shell attach to an already-running OmniRoute server (e.g. a
@@ -104,6 +119,14 @@ let remoteServerUrl = resolveRemoteServerUrl({
 
 const getServerUrl = () => remoteServerUrl || `http://localhost:${serverPort}`;
 const getServerReadinessUrl = () => buildReadinessUrl(getServerUrl());
+
+function isHeadlessMode() {
+  return (
+    process.argv.includes("--headless") ||
+    process.argv.includes("--cli") ||
+    process.env.OMNIROUTE_HEADLESS === "true"
+  );
+}
 
 function resolveNodeExecutable(env = process.env) {
   // #1081: Ensure Next.js standalone runs using Electron's Node runtime
@@ -538,6 +561,10 @@ function setCloseBehavior(nextBehavior) {
 
 // ── System Tray ────────────────────────────────────────────
 function createTray() {
+  // Port search in flight: the tray shows the port, so it waits for the confirmed bind (the
+  // publish callback of startEmbeddedWithPortSearch builds it).
+  if (embeddedStartup && !embeddedPortConfirmed) return;
+
   // Fix #4: Destroy old tray before recreating
   if (tray) {
     tray.destroy();
@@ -746,6 +773,9 @@ async function setRemoteServerUrl(nextUrl) {
 
 // ── Server Lifecycle (#1, #5, #10) ─────────────────────────
 function startNextServer() {
+  const isInitialStart = initialStartPending;
+  initialStartPending = false;
+
   if (remoteServerUrl) {
     console.log("[Electron] Remote server mode — connecting to", remoteServerUrl);
     sendToRenderer("server-status", {
@@ -882,6 +912,43 @@ function startNextServer() {
     return `${existing} --max-old-space-size=${heapMb}`.trim();
   })();
 
+  // Env for one spawn. PORT is always the port this spawn must bind; OMNIROUTE_PORT (read by the
+  // server's own port helpers) follows it only once the port search is in play, so the default
+  // startup environment stays exactly what it was.
+  const buildChildEnv = (port) => ({
+    ...serverEnv,
+    DATA_DIR: dataDir,
+    PORT: String(port),
+    ...(portDiscoveryEngaged ? { OMNIROUTE_PORT: String(port) } : {}),
+    // Pin the embedded server to loopback. Next.js standalone binds to
+    // `process.env.HOSTNAME || '0.0.0.0'`, and Windows always exports
+    // HOSTNAME as the machine name — which resolves to the LAN address, so
+    // the server listens only there and 127.0.0.1 stays closed. The renderer
+    // then fails to load `http://localhost:<port>`, "ready-to-show" never
+    // fires, and the window (created with `show: false`) is never shown.
+    // Mirrors scripts/dev/run-next-playwright.mjs, which already pins this.
+    HOSTNAME: "127.0.0.1",
+    NODE_ENV: "production",
+    ELECTRON_RUN_AS_NODE: "1",
+    NODE_PATH: resolveServerNodePath(serverEnv, resolvePackNodePaths(dataDir)),
+    NODE_OPTIONS: serverNodeOptions,
+  });
+
+  const fallbackPolicy = isInitialStart
+    ? resolveFallbackPolicy({
+        env: serverEnv,
+        requestedPort: serverPort,
+        remoteServerUrl,
+        isDev,
+        isHeadless: isHeadlessMode(),
+        bundleReportsBind: () => bundleReportsBind(readTextQuietly(serverScript)),
+      })
+    : { enabled: false, reason: "not-initial-start" };
+  if (fallbackPolicy.enabled) {
+    startEmbeddedWithPortSearch({ nodeExecutable, serverScript, buildChildEnv });
+    return;
+  }
+
   console.log("[Electron] Starting Next.js server on port", serverPort);
   console.log("[Electron] Using Node executable:", nodeExecutable);
   console.log("[Electron] Server NODE_OPTIONS:", serverNodeOptions);
@@ -890,42 +957,24 @@ function startNextServer() {
   // Fix #10: Use pipe instead of inherit for logging & readiness detection
   // windowsHide prevents a visible console window from spawning alongside the GUI app.
   // shell: false avoids launching via a shell wrapper which can flash a terminal on macOS.
-  nextServer = spawn(nodeExecutable, [serverScript], {
+  const child = spawn(nodeExecutable, [serverScript], {
     cwd: NEXT_SERVER_PATH,
-    env: {
-      ...serverEnv,
-      DATA_DIR: dataDir,
-      PORT: String(serverPort),
-      // Pin the embedded server to loopback. Next.js standalone binds to
-      // `process.env.HOSTNAME || '0.0.0.0'`, and Windows always exports
-      // HOSTNAME as the machine name — which resolves to the LAN address, so
-      // the server listens only there and 127.0.0.1 stays closed. The renderer
-      // then fails to load `http://localhost:<port>`, "ready-to-show" never
-      // fires, and the window (created with `show: false`) is never shown.
-      // Mirrors scripts/dev/run-next-playwright.mjs, which already pins this.
-      HOSTNAME: "127.0.0.1",
-      NODE_ENV: "production",
-      ELECTRON_RUN_AS_NODE: "1",
-      NODE_PATH: resolveServerNodePath(serverEnv, resolvePackNodePaths(dataDir)),
-      NODE_OPTIONS: serverNodeOptions,
-    },
+    env: buildChildEnv(serverPort),
     stdio: "pipe",
     windowsHide: true,
     shell: false,
   });
+  nextServer = child;
 
   // Capture server output for logging
-  nextServer.stdout?.on("data", (data) => {
+  child.stdout?.on("data", (data) => {
     const text = data.toString();
     process.stdout.write(`[Server] ${text}`);
 
     // Detect server ready
     if (text.includes("Ready") || text.includes("started") || text.includes("listening")) {
       sendToRenderer("server-status", { status: "running", port: serverPort });
-      const isHeadless =
-        process.argv.includes("--headless") ||
-        process.argv.includes("--cli") ||
-        process.env.OMNIROUTE_HEADLESS === "true";
+      const isHeadless = isHeadlessMode();
       if (isHeadless && !global.loggedHeadlessReady) {
         global.loggedHeadlessReady = true;
         console.log("\n\x1b[32m✔ OmniRoute Headless CLI Server is ready and listening!\x1b[0m");
@@ -936,23 +985,99 @@ function startNextServer() {
     }
   });
 
-  nextServer.stderr?.on("data", (data) => {
+  child.stderr?.on("data", (data) => {
     process.stderr.write(`[Server:err] ${data}`);
   });
 
-  nextServer.on("error", (err) => {
+  child.on("error", (err) => {
     console.error("[Electron] Failed to start server:", err);
     sendToRenderer("server-status", { status: "error", port: serverPort });
   });
 
-  nextServer.on("exit", (code) => {
+  child.on("exit", (code) => {
     console.log("[Electron] Server exited with code:", code);
     sendToRenderer("server-status", { status: "stopped", port: serverPort });
-    nextServer = null;
+    // A restart may already have replaced nextServer; never clear the new child's handle.
+    if (nextServer === child) nextServer = null;
+  });
+}
+
+function readTextQuietly(filePath) {
+  try {
+    return fs.readFileSync(filePath, "utf8");
+  } catch {
+    return "";
+  }
+}
+
+// ── Port search: start on the next free port, trust only the child's own bind ──────────
+// The child reports `listening` / `EADDRINUSE` over a private IPC channel. Nothing below
+// adopts a port, opens a window, builds a tray or answers get-app-info until that child's bind
+// is confirmed AND its health check passes; a foreign service answering 200 proves nothing.
+function startEmbeddedWithPortSearch({ nodeExecutable, serverScript, buildChildEnv }) {
+  portDiscoveryEngaged = true;
+  const controller = new AbortController();
+  const startup = { controller, promise: null };
+  embeddedStartup = startup;
+
+  console.log(
+    `[Electron] Port search enabled — trying ${serverPort} and up to ${PORT_FALLBACK_SPAN} more`
+  );
+  console.log("[Electron] Using Node executable:", nodeExecutable);
+
+  startup.promise = startLocalEmbeddedServer({
+    requestedPort: serverPort,
+    allowFallback: true,
+    signal: controller.signal,
+    spawnChild: (port, token) => {
+      const child = spawn(nodeExecutable, [serverScript], {
+        cwd: NEXT_SERVER_PATH,
+        env: { ...buildChildEnv(port), [ATTEMPT_TOKEN_ENV]: token },
+        stdio: ["pipe", "pipe", "pipe", "ipc"],
+        windowsHide: true,
+        shell: false,
+      });
+      nextServer = child;
+      child.stdout?.on("data", (data) => process.stdout.write(`[Server] ${data.toString()}`));
+      child.stderr?.on("data", (data) => process.stderr.write(`[Server:err] ${data}`));
+      child.on("error", (err) => console.error("[Electron] Failed to start server:", err));
+      child.on("exit", (code) => {
+        console.log(`[Electron] Server (port ${port}) exited with code:`, code);
+        if (nextServer === child) nextServer = null;
+      });
+      return child;
+    },
+    stopChild: (child, signal = "SIGTERM") => {
+      try {
+        killProcessTree(child, { signal });
+      } catch {
+        /* already dead */
+      }
+    },
+    waitUntilReady: (port, timeoutMs) =>
+      waitForServer(buildReadinessUrl(`http://localhost:${port}`), timeoutMs),
+    publish: (port) => {
+      const previousPort = serverPort;
+      serverPort = port;
+      embeddedPortConfirmed = true;
+      lastRendererUrl = getServerUrl();
+      if (!isHeadlessMode()) createTray();
+      if (port !== previousPort) sendToRenderer("port-changed", port);
+      sendToRenderer("server-status", { status: "running", port });
+      console.log(`[Electron] Embedded server confirmed on port ${port}`);
+    },
+  }).then((result) => {
+    if (embeddedStartup === startup) embeddedStartup = null;
+    return result;
   });
 }
 
 function stopNextServer() {
+  // A close or restart during the port search cancels it and stops its child.
+  if (embeddedStartup) {
+    embeddedStartup.controller.abort();
+    embeddedStartup = null;
+  }
   if (nextServer) {
     // #3347: kill the whole tree, not just the direct child. On Windows the server
     // (omniroute.exe-as-node) spawns grandchildren that a bare SIGTERM leaves alive,
@@ -1241,6 +1366,23 @@ app.whenReady().then(async () => {
   startNextServer();
   if (!isHeadless) {
     createTray();
+  }
+
+  // Port search: wait for the child's own confirmed bind. The tray was built (and the port
+  // adopted) by its publish callback; on failure nothing may open a window on a foreign service.
+  if (embeddedStartup) {
+    const outcome = await embeddedStartup.promise;
+    const embeddedStartupFailed = outcome.kind !== "ready";
+    if (embeddedStartupFailed) {
+      if (!app.isQuitting) {
+        console.error("[Electron] Embedded server did not start:", JSON.stringify(outcome));
+        const failure = describeStartupFailure(outcome, serverPort);
+        dialog.showErrorBox(failure.title, failure.message);
+        app.isQuitting = true;
+        app.quit();
+      }
+      return;
+    }
   }
 
   let serverReady = true;

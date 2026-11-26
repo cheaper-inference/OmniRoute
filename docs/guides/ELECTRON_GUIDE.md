@@ -171,6 +171,34 @@ Highlights:
 - `before-quit` waits up to 5 s for graceful SIGTERM (WAL checkpoint) then sends SIGKILL.
 - Port switcher in the tray (`20128`, `3000`, `8080`) stops and restarts the server, then reloads the BrowserWindow.
 
+### Next free port (opt-in)
+
+By default the embedded server asks for port `20128` and stops there. With
+`ELECTRON_LOCAL_PORT_FALLBACK_ENABLED=true` (a restart-required feature flag, default off), a busy
+`20128` makes the app try `20129` to `20133`, one at a time, and use the first one it can bind.
+
+- **Where the flag is read.** The Electron main process is CommonJS and starts the server before
+  any database or dashboard exists, so it reads the flag from its environment: the process
+  environment, `<DATA_DIR>/.env`, or `<DATA_DIR>/server.env`. A dashboard override of the flag is
+  not read by the main process; set the environment variable and restart the app. The packaged app
+  has no zod dependency, so the flag value and the IPC events are validated by hand in
+  `electron/lib/localServerStartup.js` (strict type, port range, bounded code, matching token).
+- **Only a confirmed bind counts.** The server wrapper (`server-ws.mjs`) reports `listening` or the
+  listen error to the shell over a private IPC channel, tagged with a per-attempt token that the
+  shell passes through the environment (`OMNIROUTE_EMBEDDED_BIND_TOKEN`). The shell moves to the next
+  port only after an `EADDRINUSE` reported by the active child and that child's exit. Another
+  program answering `200` on `20128` never authorizes anything: the window URL, tray, `port-changed`,
+  `server-status`, `get-app-info` and the server's `PORT`/`OMNIROUTE_PORT` all follow the port the
+  active child confirmed (and passed its health check on).
+- **Scope.** Local graphical mode with the default port only. An explicit `PORT` or `OMNIROUTE_PORT`,
+  a split `API_PORT`/`DASHBOARD_PORT`, a remote server, dev mode and headless mode keep the
+  single-port startup. Restarts and the tray port switcher keep using the confirmed port and never
+  search again. There is no random-port fallback.
+- **When every port is busy** (or the bind fails for another reason such as `EACCES`) the app shows
+  an error box and quits instead of opening a window.
+- **Legacy bundles.** A bundle whose `server-ws.mjs` does not report its bind (older builds, or a
+  bare `server.js`) cannot confirm a port, so the search stays off and the startup is the legacy one.
+
 ## Zero-config Secret Bootstrap
 
 On first launch, the main process auto-generates and persists missing secrets:

@@ -1,0 +1,1 @@
+- **feat(electron):** Opt-in `ELECTRON_LOCAL_PORT_FALLBACK_ENABLED` lets the desktop app start its embedded server on 20129-20133 when 20128 is taken, opening the window only after the active child confirms its bind (#21387).

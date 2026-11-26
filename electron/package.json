@@ -71,6 +71,7 @@
       "lib/remoteServerPreferences.js",
       "lib/serverReadiness.js",
       "lib/healthWatchdog.js",
+      "lib/localServerStartup.js",
       "lib/windowClosePolicy.js",
       "assets/remoteServerPrompt.html",
       "package.json",
