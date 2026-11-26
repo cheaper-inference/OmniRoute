@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Vaʼda — Bitta endpoint va 394 ta provayder. Avtomatik zaxira yoʻnaltirish boshqa sogʻlom nishon mavjud boʻlganida yoʻnaltirishni davom ettiradi. Oltita ustun: 394 ta provayder boʻylab barqaror zaxira yoʻnaltirish · mos ish yuklamalarida tokenlarni 95% gacha tejash · boshlash uchun $0, 150+ ta bepul tarif va doimiy bepul ishlaydigan 51 ta takroriy/kalitsiz provayder · bitta konfiguratsiya orqali 39 ta CLI/agent integratsiyasi · /v1 manzilida OpenAI, Claude, Gemini va Responses API bilan moslik · production boshqaruvlari, jumladan avtomatik uzgichlar, TLS yashirinligi, MCPʼning 110 ta vositasi, A2A, xotira, himoya qoidalari, baholashlar va 7 800+ ta kuzatiladigan test faylidagi 56 000+ ta statik test deklaratsiyasi."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Vaʼda — Bitta endpoint va 394 ta provayder. Avtomatik zaxira yoʻnaltirish boshqa sogʻlom nishon mavjud boʻlganida yoʻnaltirishni davom ettiradi. Oltita ustun: 394 ta provayder boʻylab barqaror zaxira yoʻnaltirish · mos ish yuklamalarida tokenlarni 95% gacha tejash · boshlash uchun $0, 150+ ta bepul tarif va doimiy bepul ishlaydigan 40 ta takroriy/kalitsiz provayder · bitta konfiguratsiya orqali 39 ta CLI/agent integratsiyasi · /v1 manzilida OpenAI, Claude, Gemini va Responses API bilan moslik · production boshqaruvlari, jumladan avtomatik uzgichlar, TLS yashirinligi, MCPʼning 110 ta vositasi, A2A, xotira, himoya qoidalari, baholashlar va 7 800+ ta kuzatiladigan test faylidagi 56 000+ ta statik test deklaratsiyasi."/>
 
 <br/>
 <br/>
@@ -703,7 +703,7 @@ shell tarixidan tashqarida saqlaydi. → [CLI Integratsiyalari](docs/guides/CLI-
 
 </div>
 
-> **394 ta roʻyxatdan oʻtgan provayder** kanonik chat, media, qidiruv, lokal, bulut-agent va tizim toʻplamlari boʻylab mavjud, ulardan **153 tasida `hasFree: true` aniqlash metamaʼlumotlari mavjud**. Chat modellari reyestri **239 ta provayder / 3,059 ta alohida provayder-model juftligi / 1,475 ta xom model ID**ni qamrab oladi; alohida bepul byudjet katalogida esa **har bir model uchun 465 ta qator**, **34 ta takrorlanuvchi havza** va **51 ta takrorlanuvchi/kalitsiz abadiy bepul provayder** mavjud. Bular ataylab turli maxrajlardir; taʼriflar va havzalar bo‘yicha takrorlanishlar olib tashlangan hisob-kitoblar [Provayder maʼlumotnomasi](docs/reference/PROVIDER_REFERENCE.md) va [Bepul tariflar](docs/reference/FREE_TIERS.md)da keltirilgan.
+> **394 ta roʻyxatdan oʻtgan provayder** kanonik chat, media, qidiruv, lokal, bulut-agent va tizim toʻplamlari boʻylab mavjud, ulardan **153 tasida `hasFree: true` aniqlash metamaʼlumotlari mavjud**. Chat modellari reyestri **239 ta provayder / 3,059 ta alohida provayder-model juftligi / 1,475 ta xom model ID**ni qamrab oladi; alohida bepul byudjet katalogida esa **har bir model uchun 465 ta qator**, **34 ta takrorlanuvchi havza** va **40 ta takrorlanuvchi/kalitsiz abadiy bepul provayder** mavjud. Bular ataylab turli maxrajlardir; taʼriflar va havzalar bo‘yicha takrorlanishlar olib tashlangan hisob-kitoblar [Provayder maʼlumotnomasi](docs/reference/PROVIDER_REFERENCE.md) va [Bepul tariflar](docs/reference/FREE_TIERS.md)da keltirilgan.
 
 <div align="center">
 

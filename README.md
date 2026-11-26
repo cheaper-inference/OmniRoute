@@ -9,36 +9,43 @@
 
 **Created by [Diego Souza](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 394 providers — 150+ with a free offer — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 394 AI providers · 150+ with a free offer · ~1.62B free tokens/mo · 22 routing strategies · $0 to start."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 394 providers — 140+ with a free offer — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 394 AI providers · 140+ with a free offer · free tokens a month: ~11.3B as others count · ~90M real · 22 routing strategies · $0 to start."/>
 
 </div>
 
-## ~1.62B Tokens / Month Across Third-Party Free Tiers
+<a id="free-tokens"></a>
+<div align="center">
 
-> **Bring your own provider accounts.** This is an estimated aggregate across separately eligible third-party free tiers, not a token grant from OmniRoute. Sign up, obtain credentials where required, and connect the providers you can use; each provider controls its limits, availability, and terms.
+## Free Tokens a Month: ~11.3B as Others Count · ~90M Real
+
+</div>
+
+> **~11.3B free tokens / month**<br/>
+> <sub>counted the way other catalogs count: every row added up, ended offers included</sub>
 >
-> Stacking free tiers by hand is painful — dozens of SDKs, dozens of rate limits, and no idea how much you actually have. OmniRoute catalogs **465 free-tier entries across 34 recurring pool keys** and computes the token headline from the **17 pools with a published positive monthly budget plus five per-model Groq caps**, deduplicated by shared pool. Quotas that only open after a regional identity check (today: ModelScope) are shown apart, +~6M behind regional identity verification, and never summed into the headline. The result stays visible on the dashboard (`/dashboard/free-tiers`).
-
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute free-tier budget card: ~1.62B free tokens per month steady, up to ~2.22B in the first month with signup credits, from 34 documented recurring pool keys covering 465 cataloged free-tier entries behind one endpoint. Honest pool-deduped math — each shared pool counted once, including 17 recurring pools with a published positive monthly token budget plus five per-model Groq caps; 12 providers are marked avoid in the terms-risk catalog so you decide. Budget bar includes Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (five per-model caps) and smaller pools, plus first-month signup credits and permanently-free no-token-cap providers surfaced separately so they never inflate the headline. Live used/remaining on /dashboard/free-tiers."/>
-
-> Animated summary of the live `/dashboard/free-tiers` page. Full methodology (pool dedupe, credit tiers, provider terms): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
+> **~90M real today**<br/>
+> <sub>each shared quota counted once: what you can actually use</sub>
 >
-> <sub>These figures are re-audited every two weeks against the live catalog and **move both ways** — a provider ends a free tier and the number drops; a new one lands and it climbs. We publish what the catalog actually computes, never a rounded-up best case.</sub>
+> **Everything here is free. No paywall.**<br/>
+> ★ [Like it? Star us on GitHub](https://github.com/cheaper-inference/OmniRoute)
+
+Other catalogs charge from US$ 19 a year to US$ 49 for lifetime access to live data. Here everything is free. <sub>Prices checked on 2026-11-18.</sub>
+
+<sub>Catalog last audited on 2026-11-23. [How we count →](docs/reference/FREE_TIERS.md#how-we-count)</sub>
+
+> **Bring your own provider accounts.** These are third-party free tiers, not a token grant from OmniRoute. Sign up, get credentials where a provider asks for them, and connect the ones you can use. Each provider sets its own limits, availability and terms.
+>
+> Stacking free tiers by hand means dozens of SDKs, dozens of rate limits and no clear idea of what you have left. OmniRoute keeps 214 catalog rows with free access and computes the real figure from 12 pools with a published quota, each shared pool counted once. Quotas that only open after a regional identity check (today, ModelScope) are shown apart, +~6M behind regional identity verification, and never added to the real figure. What is left shows up on the dashboard (`/dashboard/free-tiers`).
+
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute free-tier budget card. Free tokens a month: ~11.3B as others count · ~90M real. Up to ~153M in your first month with one-time signup credits. 12 pools with a published quota and 214 catalog rows with free access behind one endpoint, catalog audited 2026-11-23. The bar shows where the real figure comes from, one segment per pool. Signup credits and free providers without a token cap are listed apart and never added to it. Live used and remaining tokens on /dashboard/free-tiers."/>
+
+> Animated summary of the live `/dashboard/free-tiers` page. How each figure is counted: **[docs/reference/FREE_TIERS.md#how-we-count](docs/reference/FREE_TIERS.md#how-we-count)**.
+>
+> <sub>Catalog last audited on 2026-11-23. The figures move both ways. A provider ends a free tier and the real number drops. A new one lands and it climbs. We publish what the catalog computes, never a rounded-up best case.</sub>
 
 <br/>
 
 <div align="center">
-
-<h3>
-
-⭐ Star the repo if OMNIROUTE helped you save money and make your work easier.
-
-</h3>
-
-[![Stars](https://img.shields.io/github/stars/cheaper-inference/OmniRoute?style=flat&logo=github&logoColor=white&label=Stars&color=e5ac82&labelColor=20211c)](https://github.com/cheaper-inference/OmniRoute)
-<a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="cheaper-inference%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
-[![Star History Rank](https://api.star-history.com/badge?repo=cheaper-inference/OmniRoute&theme=dark)](https://www.star-history.com/cheaper-inference/omniroute)
-[![olud.ai](https://olud.ai/badge.php?tool=diegosouzapw-omniroute)](https://olud.ai/project/diegosouzapw-omniroute.html)
 
 ### Join the community
 
@@ -55,6 +62,11 @@
 
 **Questions, provider tips, roadmap & support → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 Global](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 Brasil](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [📢 Official Channel](https://whatsapp.com/channel/0029VbDwC7A3wtb5PN6a5t2R) / [Portal](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
 
+[![Stars](https://img.shields.io/github/stars/cheaper-inference/OmniRoute?style=flat&logo=github&logoColor=white&label=Stars&color=e5ac82&labelColor=20211c)](https://github.com/cheaper-inference/OmniRoute)
+<a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="cheaper-inference%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
+[![Star History Rank](https://api.star-history.com/badge?repo=cheaper-inference/OmniRoute&theme=dark)](https://www.star-history.com/cheaper-inference/omniroute)
+[![olud.ai](https://olud.ai/badge.php?tool=diegosouzapw-omniroute)](https://olud.ai/project/diegosouzapw-omniroute.html)
+
 </div>
 
 <br/>
@@ -67,11 +79,11 @@
   <tr>
     <td align="center" width="25%"><b>394</b><br/><sub>providers</sub></td>
     <td align="center" width="25%"><b>1,539</b><br/><sub>unique chat model IDs</sub></td>
-    <td align="center" width="25%"><b>160</b><br/><sub>providers marked free in the catalog</sub></td>
+    <td align="center" width="25%"><b>140+</b><br/><sub>providers flagged with a free offer</sub></td>
     <td align="center" width="25%"><b>22</b><br/><sub>public routing strategies</sub></td>
   </tr>
   <tr>
-    <td colspan="4" align="center"><sub>Measured in v3.8.54, the latest release (17 November 2026); v3.8.55 carries the same catalog. 1,539 IDs spread over 3,186 provider/model chat pairs.</sub></td>
+    <td colspan="4" align="center"><sub>Chat counts measured in v3.8.54 (17 November 2026): 1,539 IDs across 3,186 provider/model pairs. The free-offer label follows the catalog audit below.</sub></td>
   </tr>
 </table>
 
@@ -99,10 +111,10 @@ Every section of this README, grouped by what you want to do.
 
 | Goal                    | Sections                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Start**               | [Install, connect, first request](#install-connect-a-provider-then-route-through-one-endpoint) · [Quick Start](#quick-start) · [More install methods](#more-install-methods--docker-source-pnpm-arch) · [Free-tier token budget](#162b-tokens--month-across-third-party-free-tiers) · [Languages](#languages)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| **Start**               | [Install, connect, first request](#install-connect-a-provider-then-route-through-one-endpoint) · [Quick Start](#quick-start) · [More install methods](#more-install-methods--docker-source-pnpm-arch) · [Free-tier token budget](#free-tokens) · [Languages](#languages)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | **Understand**          | [The Promise](#the-promise) · [Why OmniRoute?](#why-omniroute) · [What sets OmniRoute apart](#what-sets-omniroute-apart) · [The gateway keeps growing](#the-gateway-keeps-growing) · [What's new](#whats-new)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 | **Route**               | [Combos](#combos-the-flagship) · [Zero-config `auto`](#zero-config-just-use-auto) · [22 routing strategies](#or-build-your-own-22-routing-strategies) · [Resilience layers](#resilience-is-built-in-3-independent-layers) · [OmniRoute Radar](#omniroute-radar)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| **Providers and tools** | [AI providers](#394-ai-providers--51-with-recurring-free-access) · [Every major lab](#every-major-lab--through-one-endpoint) · [Free every day or month](#free-every-day-or-month) · [Trials and signup credits](#trial-and-signup-credits) · [Compatible CLIs and coding agents](#compatible-clis--coding-agents)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| **Providers and tools** | [AI providers](#ai-providers) · [Every major lab](#every-major-lab--through-one-endpoint) · [Free every day or month](#free-every-day-or-month) · [Trials and signup credits](#trial-and-signup-credits) · [Compatible CLIs and coding agents](#compatible-clis--coding-agents)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | **Run it**              | [Where OmniRoute runs](#where-omniroute-runs) · [OmniCopilot for VS Code](#omnicopilot-omniroute-inside-vs-codes-native-copilot-chat) · [OmniRouteTray for macOS](#omniroutetray-omniroute-in-the-macos-menu-bar) · [Private and local-first](#private--local-first)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | **CLI and protocols**   | [Full CLI, MCP and A2A](#full-cli-mcp-and-a2a) · [The CLI](#a-real-cli-not-just-start) · [Remote mode](#remote-mode-the-cli-on-your-laptop-omniroute-on-a-server) · [Connect an agent](#connect-an-agent)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | **Save tokens**         | [Compression overview](#save-1595-tokens--automatically) · [How it works](#how-it-works--pipeline-architecture--savings-math) · [The 12-engine stack](#the-12-engine-stack) · [Output styles and per-request control](#beyond-the-engines--output-styles-the-adaptive-dial--per-request-control)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
@@ -213,7 +225,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 # The Promise
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 394 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 394 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ providers with a free offer and 51 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 65,000+ static test declarations across 9,500+ tracked test files."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 394 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 394 providers · up to 95% token savings on eligible workloads · $0 to start with 140+ providers with a free offer and 40 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 65,000+ static test declarations across 9,500+ tracked test files."/>
 
 <br/>
 <br/>
@@ -296,7 +308,7 @@ curl http://localhost:20128/v1/chat/completions \
       <br/><sub><b>AgentRouter</b></sub><br/><sub>agentrouter.org</sub>
     </td>
     <td>
-      <sub><b><a href="https://agentrouter.org/register?aff=70LM">AgentRouter</a></b> — affiliate signup · <b>$100 free credits</b> on signup (free server, expect higher latency — best for testing, not production). First-class support in OmniRoute since <b>v3.8.50</b>: Chat Completions, the Anthropic-compatible wire format and the OpenAI-compatible path. Available models include <code>claude-opus-4-8</code>, <code>claude-opus-5</code>, <code>gpt-5.6-sol</code> and more. <b><a href="https://agentrouter.org/register?aff=70LM">Grab your $100 →</a></b></sub>
+      <sub><b><a href="https://agentrouter.org/register?aff=70LM">AgentRouter</a></b> — Referral link (official site: <a href="https://agentrouter.org">agentrouter.org</a>) · <b>daily $25 check-in credit</b>, and sign-ups with an invite code get $50 more (checked 2026-11-23; free server, expect higher latency — best for testing, not production). First-class support in OmniRoute since <b>v3.8.50</b>: Chat Completions, the Anthropic-compatible wire format and the OpenAI-compatible path. Its public model list currently shows <code>gpt-6.1-sol</code> and <code>gpt-5.6-sol</code>. <b><a href="https://agentrouter.org/register?aff=70LM">Sign up →</a></b></sub>
       <br/><br/>
       <sub>⚠️ <i>Affiliate link — OmniRoute has no sponsorship or partnership with this provider.</i></sub>
     </td>
@@ -412,7 +424,7 @@ Banned, expired and out-of-credit connections are terminal states, not cooldowns
 
 ## What Sets OmniRoute Apart
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="What sets OmniRoute apart — a dated feature snapshot vs 9router, OpenRouter, CLIProxyAPI and LiteLLM across 13 capabilities. OmniRoute: 394 providers, 150+ providers with a free offer, 22 routing strategies, 12-engine token compression, built-in MCP server with 110 tools, A2A agent protocol, persistent memory, guardrails, cloud agents, TLS fingerprint stealth, Desktop/Termux/PWA and 67 i18n UI locales. OmniRoute is MIT-licensed and self-hostable. Competitor capabilities and counts may change; see the linked methodology."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="What sets OmniRoute apart — a dated feature snapshot vs 9router, OpenRouter, CLIProxyAPI and LiteLLM across 13 capabilities. OmniRoute: 394 providers, 140+ providers with a free offer, 22 routing strategies, 12-engine token compression, built-in MCP server with 110 tools, A2A agent protocol, persistent memory, guardrails, cloud agents, TLS fingerprint stealth, Desktop/Termux/PWA and 67 i18n UI locales. OmniRoute is MIT-licensed and self-hostable. Competitor capabilities and counts may change; see the linked methodology."/>
 
 <sub>📊 Full methodology &amp; per-feature detail vs 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -672,11 +684,13 @@ deyin.ai and Zoo Code are not in the catalog or the CLI manifest. Configure them
 
 <sub>Gray text tiles mark tools whose icon is not stored in this repository; they are placeholders, not the projects' logos. Per-tool setup → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · OpenCode packages: [`@omniroute/opencode-plugin`](https://www.npmjs.com/package/@omniroute/opencode-plugin) (OpenCode v1, installed by `omniroute setup opencode`) and [`@omniroute/opencode-plugin-v2`](https://www.npmjs.com/package/@omniroute/opencode-plugin-v2) (OpenCode v2). The older `@omniroute/opencode-provider` is deprecated.</sub>
 
-## 394 AI Providers — 51 With Recurring Free Access
+<a id="ai-providers"></a>
+
+## 394 AI Providers, 50 With Free Access
 
 Each number counts something different. None of them is added to another.
 
-<img src="./docs/diagrams/provider-numbers.svg" width="100%" alt="What each number counts. 394 registered providers across ten categories. 160 have a free offer, including trials, signup credits and limited plans. 74 have documented free access per model. 51 offer recurring or keyless access without a trial or eligibility gate. The catalog has 458 active provider-model entries, 367 distinct model IDs and 34 shared recurring pools. The pool-deduplicated estimate is about 1.62 billion tokens per month, or 2.22 billion in the first month with signup credits. Not an OmniRoute allowance. None of the figures are added together.">
+<img src="./docs/diagrams/provider-numbers.svg" width="100%" alt="What each number counts. 394 registered providers. 140+ flagged with a free offer. 50 with free access: 43 with an API key, 6 without a key, 1 through a tool account and 0 through a web chat. 214 catalog rows with free access, 185 distinct free models, 40 recurring or keyless providers, and 12 pools with a published quota. Free tokens a month: ~11.3B as others count · ~90M real. The first figure adds up every row, including ended offers. The real figure counts each shared quota once."/>
 
 <sub>Chat catalog: static model lists from 250 of the providers, 3,186 provider/model pairs, 1,539 distinct raw model IDs.</sub>
 
@@ -733,8 +747,8 @@ These providers offer recurring or keyless free access.
     <td align="center" width="150"><img src="./public/providers/openrouter.svg" width="42" alt="OpenRouter"/><br/><b>OpenRouter</b><br/><sub>Daily<br/><code>:free</code> models<br/>A one-time $10 top-up raises the cap to 1,000 requests/day</sub></td>
     <td align="center" width="150"><img src="./public/providers/gemini.svg" width="42" alt="Gemini"/><br/><b>Gemini</b><br/><sub>Recurring<br/>Gemini 2.5 Flash, Gemini 3 Flash Preview<br/>Rate-limited, no published token cap</sub></td>
     <td align="center" width="150"><img src="./public/providers/groq.svg" width="42" alt="Groq"/><br/><b>Groq</b><br/><sub>Daily<br/>GPT-OSS 120B, GPT-OSS 20B<br/>Daily cap per model</sub></td>
-    <td align="center" width="150"><img src="./public/providers/mistral.svg" width="42" alt="Mistral"/><br/><b>Mistral</b><br/><sub>Monthly<br/>Mistral Large 3, Mistral Medium 3.5<br/>About 1B tokens/month, shared pool</sub></td>
     <td align="center" width="150"><img src="./public/providers/cohere.svg" width="42" alt="Cohere"/><br/><b>Cohere</b><br/><sub>Monthly<br/>Command A family<br/>About 800K tokens/month</sub></td>
+    <td align="center" width="150"><img src="./public/providers/morph.svg" width="42" alt="Morph"/><br/><b>Morph</b><br/><sub>Monthly<br/>morph-v3-large, morph-v3-fast<br/>200 requests/month</sub></td>
   </tr>
 </table>
 
@@ -1523,18 +1537,18 @@ Combos, strategies, fallbacks and the three resilience mechanisms. Subject: **Ro
 
 Cost estimation, quota tracking, team budgets and free-tier data. Subject: **Usage, quota and cost**.
 
-| <img width="2000" height="0" alt=""> Document                             | What it answers                                                    | File                                       |
-| ------------------------------------------------------------------------- | ------------------------------------------------------------------ | ------------------------------------------ |
-| [Cost & Spend Tracking](docs/guides/COST_TRACKING.md)                     | How request cost is estimated, recorded and reported               | `docs/guides/COST_TRACKING.md`             |
-| [Usage, Quota & Spend](docs/guides/USAGE_QUOTA_GUIDE.md)                  | Usage analytics, quota cards and per-key limits                    | `docs/guides/USAGE_QUOTA_GUIDE.md`         |
-| [Team Cost Centers](docs/guides/TEAM_COST_CENTERS.md)                     | Group keys under one billing owner with shared budgets             | `docs/guides/TEAM_COST_CENTERS.md`         |
-| [Key Templates](docs/guides/KEY-TEMPLATES.md)                             | Reusable, secret-free snapshots of API key settings                | `docs/guides/KEY-TEMPLATES.md`             |
-| [Cached input reporting](docs/ops/CACHED_INPUT_REPORTING.md)              | How cache-read tokens are shown in analytics                       | `docs/ops/CACHED_INPUT_REPORTING.md`       |
-| [Quota Telemetry](docs/OMNIROUTE_QUOTA_TELEMETRY.md)                      | Provider quota telemetry versus accounting                         | `docs/OMNIROUTE_QUOTA_TELEMETRY.md`        |
-| [Free Tiers & Free-Token Budget](docs/reference/FREE_TIERS.md)            | Catalog of documented free pools and their conditions              | `docs/reference/FREE_TIERS.md`             |
-| [Free Provider Rankings](docs/guides/FREE_PROVIDER_RANKINGS.md)           | Arena ELO rankings and real-traffic reliability for free providers | `docs/guides/FREE_PROVIDER_RANKINGS.md`    |
-| [Monitoring & Observability](docs/ops/MONITORING_GUIDE.md)                | Health endpoints, metrics and logs                                 | `docs/ops/MONITORING_GUIDE.md`             |
-| [Monitoring & Costs navigation](docs/architecture/MONITORING_SECTIONS.md) | Structure of the monitoring and cost pages                         | `docs/architecture/MONITORING_SECTIONS.md` |
+| <img width="2000" height="0" alt=""> Document                             | What it answers                                                       | File                                       |
+| ------------------------------------------------------------------------- | --------------------------------------------------------------------- | ------------------------------------------ |
+| [Cost & Spend Tracking](docs/guides/COST_TRACKING.md)                     | How request cost is estimated, recorded and reported                  | `docs/guides/COST_TRACKING.md`             |
+| [Usage, Quota & Spend](docs/guides/USAGE_QUOTA_GUIDE.md)                  | Usage analytics, quota cards and per-key limits                       | `docs/guides/USAGE_QUOTA_GUIDE.md`         |
+| [Team Cost Centers](docs/guides/TEAM_COST_CENTERS.md)                     | Group keys under one billing owner with shared budgets                | `docs/guides/TEAM_COST_CENTERS.md`         |
+| [Key Templates](docs/guides/KEY-TEMPLATES.md)                             | Reusable, secret-free snapshots of API key settings                   | `docs/guides/KEY-TEMPLATES.md`             |
+| [Cached input reporting](docs/ops/CACHED_INPUT_REPORTING.md)              | How cache-read tokens are shown in analytics                          | `docs/ops/CACHED_INPUT_REPORTING.md`       |
+| [Quota Telemetry](docs/OMNIROUTE_QUOTA_TELEMETRY.md)                      | Provider quota telemetry versus accounting                            | `docs/OMNIROUTE_QUOTA_TELEMETRY.md`        |
+| [Free Tiers & Free-Token Budget](docs/reference/FREE_TIERS.md)            | 12 pools with a published quota and 214 catalog rows with free access | `docs/reference/FREE_TIERS.md`             |
+| [Free Provider Rankings](docs/guides/FREE_PROVIDER_RANKINGS.md)           | Arena ELO rankings and real-traffic reliability for free providers    | `docs/guides/FREE_PROVIDER_RANKINGS.md`    |
+| [Monitoring & Observability](docs/ops/MONITORING_GUIDE.md)                | Health endpoints, metrics and logs                                    | `docs/ops/MONITORING_GUIDE.md`             |
+| [Monitoring & Costs navigation](docs/architecture/MONITORING_SECTIONS.md) | Structure of the monitoring and cost pages                            | `docs/architecture/MONITORING_SECTIONS.md` |
 
 <a id="docs-providers"></a>
 

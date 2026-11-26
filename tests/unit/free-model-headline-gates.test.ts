@@ -248,7 +248,14 @@ test("gate-less rows aggregate exactly as the v3.8.55 algorithm did", () => {
   }
   assert.deepEqual(now.uncappedProviders, ref.uncappedProviders);
   assert.deepEqual(now.gatedProviders, ref.gatedProviders);
-  assert.equal(now.socialGatedRecurringTokens, 0);
+  // Gate-less rows add nothing social; only a socially-gated boost on a live pool does (the xKiro
+  // Telegram bonus since the November 2026 re-audit). FREE_TIER_BOOSTS is module state, so the
+  // expected value is read from it rather than stripped.
+  const livePools = new Set(now.perModel.map((m) => m.poolKey));
+  const socialBoosts = Object.entries(FREE_TIER_BOOSTS)
+    .filter(([pool, b]) => (b.gate ?? "deposit") !== "deposit" && livePools.has(pool))
+    .reduce((s, [, b]) => s + b.boostMonthlyTokens, 0);
+  assert.equal(now.socialGatedRecurringTokens, socialBoosts);
 });
 
 test("no catalog row uses the deposit gate (deposits are boosts)", () => {

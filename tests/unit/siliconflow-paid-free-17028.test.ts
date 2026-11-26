@@ -40,15 +40,19 @@ describe("#17028 SiliconFlow pay-as-you-go model protection", () => {
     // and #18418 drops NVIDIA's retired openai/gpt-oss-120b endpoint.
     // 465 → 466: #18604 adds nvidia gpt-oss-20b (nvidia/openai/gpt-oss-20b, the sole delta).
     // 466 → 465: #19334 drops ollama-cloud/qwen3.5:397b when Ollama's free tier ended.
+    // 465 → 466: November re-audit adds the current OpenRouter free id
+    // (openrouter/google/gemma-4-31b-it:free); retired rows stay as discontinued. Live recurring
+    // pools 34 → 26: the retired pools (mistral, nara, navy, llm7, bluesminds, arcee-free,
+    // huggingface, huggingchat) no longer count.
     // Pin identities as well as the total so unrelated replacement is visible.
     const identities = FREE_MODEL_BUDGETS.map((row) => `${row.provider}/${row.modelId}`).sort();
-    assert.equal(new Set(identities).size, 465);
+    assert.equal(new Set(identities).size, 466);
     assert.equal(
       createHash("sha256").update(identities.join("\n")).digest("hex"),
-      "82a2df8ad0371647bd86e04ad4b67a9c579a47e469995ecc24f608f59d5d6382"
+      "e1b0c65a417cc9bc86980f8342ae8fd7f1a3ea99a3b7280adc7064f7f82b08cc"
     );
-    assert.equal(totals.modelCount, 465);
-    assert.equal(totals.poolCount, 34);
+    assert.equal(totals.modelCount, 466);
+    assert.equal(totals.poolCount, 26);
     assert.equal(totals.uncappedProviders.includes("siliconflow"), false);
   });
 

@@ -19,6 +19,11 @@ const providers = [
   ["chat-oripe", "https://api.oriper.com/v1/chat/completions"],
 ] as const;
 
+// Re-checked 2026-11-23: naga-ai is a duplicate of naga-ac (same api.naga.ac
+// endpoint) and the chat-oripe API host answers HTTP 530, so neither is a free
+// offer of its own any more.
+const NOT_FREE_TODAY = new Set<string>(["naga-ai", "chat-oripe"]);
+
 for (const [id, endpoint] of providers) {
   test(`${id} is wired through registry, metadata, endpoint and default executor`, async () => {
     const registry = REGISTRY[id];
@@ -32,7 +37,7 @@ for (const [id, endpoint] of providers) {
     assert.equal(PROVIDER_ENDPOINTS[id], endpoint);
     assert.equal(metadata.id, id);
     assert.equal(metadata.alias, id);
-    assert.equal(metadata.hasFree, true);
+    assert.equal(metadata.hasFree, !NOT_FREE_TODAY.has(id));
     assert.equal(metadata.passthroughModels, true);
     assert.ok(typeof metadata.freeNote === "string" && metadata.freeNote.length > 0);
     assert.equal(AGGREGATOR_PROVIDER_IDS.has(id), true);
@@ -49,6 +54,7 @@ test("Wave 3 metadata preserves the audited legal, quota and privacy warnings", 
   assert.match(APIKEY_PROVIDERS.helyxai.freeNote ?? "", /100,000 tokens\/day/i);
   assert.match(APIKEY_PROVIDERS.auriko.freeNote ?? "", /not a free-token pool/i);
   assert.match(APIKEY_PROVIDERS["poixe-ai"].freeNote ?? "", /2 RPM\/5 RPD/i);
-  assert.match(APIKEY_PROVIDERS["naga-ai"].freeNote ?? "", /training/i);
-  assert.match(APIKEY_PROVIDERS["chat-oripe"].freeNote ?? "", /unconfirmed/i);
+  assert.match(APIKEY_PROVIDERS["naga-ai"].apiHint ?? "", /training/i);
+  assert.match(APIKEY_PROVIDERS["naga-ai"].freeNote ?? "", /Naga\.ac/);
+  assert.match(APIKEY_PROVIDERS["chat-oripe"].freeNote ?? "", /530/);
 });

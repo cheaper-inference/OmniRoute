@@ -66,8 +66,10 @@ export const APIKEY_PROVIDERS_GATEWAYS = {
     passthroughModels: true,
     website: "https://agentrouter.org",
     hasFree: true,
-    freeNote: "$200 free credits on signup - multi-model routing gateway",
-    apiHint: "Get $200 free credits at https://agentrouter.org/register — no credit card required.",
+    freeNote:
+      "Daily $25 check-in credit; sign-ups with an invite code get $50 more (checked 2026-11-23).",
+    apiHint:
+      "Sign up at https://agentrouter.org/register. Daily $25 check-in credit; sign-ups with an invite code get $50 more (checked 2026-11-23).",
   },
   unorouter: {
     id: "unorouter",
@@ -169,7 +171,7 @@ export const APIKEY_PROVIDERS_GATEWAYS = {
     website: "https://fastrouter.ai",
     hasFree: true,
     freeNote:
-      "Models with the :free suffix allow 10 requests/day per organization and model; availability may change.",
+      "Models with the :free suffix allow 10 requests/day per organization and model and require a paid balance above $1; availability may change (checked 2026-11-23).",
     apiHint:
       "Create a FastRouter API key, then use https://api.fastrouter.ai/api/v1 as the OpenAI-compatible base URL.",
   },
@@ -440,9 +442,8 @@ export const APIKEY_PROVIDERS_GATEWAYS = {
     textIcon: "DX",
     passthroughModels: true,
     website: "https://www.dxnt.com",
-    hasFree: true,
-    freeNote:
-      "Free accounts are documented at 100 calls/day; the quota may increase through invitations and can vary by account.",
+    hasFree: false,
+    freeNote: "The ¥10 signup bonus exists, but no model accepts it today (checked 2026-11-23).",
     apiHint:
       "Create a DXNT API key, then use https://www.dxnt.com/v1 as the OpenAI-compatible base URL.",
   },
@@ -568,11 +569,13 @@ export const APIKEY_PROVIDERS_GATEWAYS = {
     textIcon: "NA",
     passthroughModels: true,
     website: "https://naga.ac",
-    hasFree: true,
+    hasFree: false,
     freeNote:
-      "Models marked :free are publicly listed, but no numeric quota is confirmed. Naga's policy warns that free-tier prompts and outputs may be collected or used for training.",
+      "Duplicate of the Naga.ac provider (same api.naga.ac endpoint); use Naga.ac instead (checked 2026-11-23).",
     apiHint:
       "Create a Naga AI Bearer key, then use https://api.naga.ac/v1 as the OpenAI-compatible base URL. Never send sensitive data to the free tier without accepting its training policy.",
+    deprecated: true,
+    deprecationReason: "Duplicate of naga-ac (same api.naga.ac endpoint)",
   },
   "chat-oripe": {
     id: "chat-oripe",
@@ -584,9 +587,8 @@ export const APIKEY_PROVIDERS_GATEWAYS = {
     textIcon: "CO",
     passthroughModels: true,
     website: "https://api.oriper.com",
-    hasFree: true,
-    freeNote:
-      "Official metadata advertises 2M tokens/month, but the public site and documentation were blocked during audit; treat the quota and brand mapping as unconfirmed.",
+    hasFree: false,
+    freeNote: "The API host returns HTTP 530; no free quota can be confirmed (checked 2026-11-23).",
     apiHint:
       "Use https://api.oriper.com/v1 only after confirming the provider's current documentation, terms and key issuance. No quota is guaranteed by this catalog.",
   },
@@ -929,12 +931,12 @@ export const APIKEY_PROVIDERS_GATEWAYS = {
     color: "#6366F1",
     textIcon: "LM",
     website: "https://llm7.io",
-    hasFree: true,
-    freeNote: "No signup required - 2 req/s, 20 RPM, 100 req/hr free tier",
+    hasFree: false,
+    freeNote: "No official free quota published (checked 2026-11-23).",
     authHint:
       "Use any non-empty key (for example 'unused'). If older built-in models return model_unavailable, use Available Models → Import from /models or Auto-Sync; verified live model: gemini-3.1-flash-lite.",
     apiHint:
-      "Works without API key (use 'unused' as key). Get free token at token.llm7.io for higher limits.",
+      "OpenAI-compatible endpoint at https://api.llm7.io/v1. Get an API key at token.llm7.io; no official free quota is published (checked 2026-11-23).",
   },
   llamagate: {
     id: "llamagate",
@@ -1169,11 +1171,10 @@ export const APIKEY_PROVIDERS_GATEWAYS = {
     color: "#3B82F6",
     textIcon: "BM",
     website: "https://www.bluesminds.com",
-    hasFree: true,
-    freeNote:
-      "Free daily pi credits — supports 200+ models including GPT-4o, GPT-4.1, Claude Sonnet 4.5, Gemini 2.0 Flash, DeepSeek V4, Qwen, Kimi K2",
+    hasFree: false,
+    freeNote: "No free credits; usage needs credit bought from the provider (checked 2026-11-23).",
     apiHint:
-      "Get your API key at https://www.bluesminds.com — OpenAI-compatible endpoint at https://api.bluesminds.com/v1 with free daily credits. VIP models (Claude Opus 4.5, Gemini 2.5 Pro) consume pi credits.",
+      "Get your API key at https://www.bluesminds.com. OpenAI-compatible endpoint at https://api.bluesminds.com/v1; usage needs purchased credit (checked 2026-11-23).",
   },
   "freemodel-dev": {
     id: "freemodel-dev",
@@ -1383,12 +1384,9 @@ export const APIKEY_PROVIDERS_GATEWAYS = {
     textIcon: "NV",
     passthroughModels: true,
     website: "https://api.navy",
-    hasFree: true,
-    freeNote:
-      "Free plan is one shared 150K tokens/day pool at 20 RPM. Each model carries a " +
-      "token multiplier, so heavier models drain the pool faster (grok-4 at 10x is ~15K real tokens/day).",
-    authHint:
-      "Create a free API key from the NavyAI dashboard, then paste it here as a Bearer token.",
+    hasFree: false,
+    freeNote: "No free quota could be confirmed on the official pages (checked 2026-11-23).",
+    authHint: "Create an API key from the NavyAI dashboard, then paste it here as a Bearer token.",
     apiHint:
       "OpenAI-compatible endpoint at https://api.navy/v1 with a live /v1/models catalog that exposes " +
       "per-model token_multiplier and premium flags. Upstream requires an explicit User-Agent header.",
@@ -1403,10 +1401,9 @@ export const APIKEY_PROVIDERS_GATEWAYS = {
     textIcon: "AN",
     passthroughModels: true,
     website: "https://ainative.studio",
-    hasFree: true,
-    freeNote: "Free tier ~10M tokens/month (claimed) across Qwen3, Llama 4, DeepSeek R1 and more.",
-    authHint:
-      "Create a free API key at ainative.studio (no card), then paste it here as a Bearer token.",
+    hasFree: false,
+    freeNote: "No free tier: the Hobbyist plan is $5/mo after a 3-day trial (checked 2026-11-23).",
+    authHint: "Create an API key at ainative.studio, then paste it here as a Bearer token.",
     apiHint:
       "OpenAI-compatible endpoint at https://api.ainative.studio/api/v1 with a public /models catalog (84 models). OmniRoute lists models via passthrough.",
   },
@@ -1421,9 +1418,10 @@ export const APIKEY_PROVIDERS_GATEWAYS = {
     passthroughModels: true,
     website: "https://www.aionlabs.ai",
     hasFree: true,
-    freeNote: "Free tier ~20k tokens/day across the Aion reasoning models.",
+    freeNote:
+      "Free tier ~20k tokens/day across the Aion reasoning models; activating it requires verifying a payment card, which is never charged (checked 2026-11-23).",
     authHint:
-      "Create a free API key at aionlabs.ai (no card), then paste it here as a Bearer token.",
+      "Create an API key at aionlabs.ai and verify a payment card on the Billing page to activate the free tier (the card is never charged), then paste it here as a Bearer token.",
     apiHint:
       "OpenAI-compatible endpoint at https://api.aionlabs.ai/v1 with a public /models catalog carrying context and pricing.",
   },
@@ -1454,13 +1452,12 @@ export const APIKEY_PROVIDERS_GATEWAYS = {
     textIcon: "NA",
     passthroughModels: true,
     website: "https://bynara.id",
-    hasFree: true,
-    freeNote:
-      "Free plan: one 7M tokens/day bucket per account (15 req/min) across the plan's 8 models; others need credit.",
+    hasFree: false,
+    freeNote: "The free plan lists no models; every model needs credit (checked 2026-11-23).",
     authHint:
-      "Create a free NaraRouter account, link your Telegram (required before /v1 answers), then paste the key here as a Bearer token.",
+      "Create a NaraRouter account, link your Telegram (required before /v1 answers), then paste the key here as a Bearer token.",
     apiHint:
-      "OpenAI-compatible endpoint at https://router.bynara.id/v1. Free-tier models are pinned; others need credit.",
+      "OpenAI-compatible endpoint at https://router.bynara.id/v1. Every model needs credit; the free plan lists none (checked 2026-11-23).",
   },
   xkiro: {
     id: "xkiro",

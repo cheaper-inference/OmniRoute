@@ -10,7 +10,10 @@
 // outlining step shapes (scripts/docs/readme-outline.mjs).
 // Numbers stay in <text> nodes because scripts/check/check-docs-counts-sync.mjs reads them from
 // the raw file. The derived numbers (provider total, free-forever providers, CLI/agent
-// integrations, MCP tools) come from the facts snapshot through ./readmeFacts.mjs.
+// integrations, MCP tools) and the label of the providers flagged with a free offer ("140+",
+// RF.hasFreeLabel) come from the facts snapshot through ./readmeFacts.mjs. The free examples name
+// only providers that still give free access in the catalog (checked by
+// tests/unit/docs/readme-free-tier-surface.test.ts).
 import { writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { outlineSvg } from "./readme-outline.mjs";
@@ -38,11 +41,8 @@ export const PROMISE_PILLARS_COPY = {
     "RTK + Caveman stacked compression cuts",
     "15–95% of eligible tokens — ~89% average",
     "on tool-heavy sessions.",
-    // "150+" rounds down the providers flagged `hasFree: true` (160 on 2026-11-16). The examples
-    // are free-forever providers (recurring or keyless, no eligibility gate) in the free catalog;
-    // Qoder (one-time credit) and SiliconFlow (no free-catalog row) were dropped for that reason.
-    `150+ with a free offer, ${RF.freeForever} free forever —`,
-    "Gemini, Groq, Mistral, Cloudflare…",
+    `${RF.hasFreeLabel} with a free offer, ${RF.freeForever} free forever —`,
+    "Gemini, Groq, Cloudflare, Pollinations…",
     "Pollinations needs no key at all.",
     `${RF.cliTotal} CLI/agent integrations — Claude Code, Codex,`,
     "Cursor, Cline, Copilot, Antigravity —",
@@ -152,7 +152,7 @@ export async function renderReadmePromisePillars() {
   return outlineSvg(
     svgOpen({
       viewBox: `0 0 ${W} ${H}`,
-      title: `The OmniRoute promise: one endpoint and ${RF.providers} providers. Six pillars. Resilient fallback: automatic routing continues while another healthy target is available. Save up to 95 percent of eligible tokens: RTK plus Caveman stacked compression averages about 89 percent on tool-heavy sessions. Zero dollars to start: 150+ providers with a free offer and ${RF.freeForever} recurring or keyless free-forever providers. Every tool works: ${RF.cliTotal} CLI and agent integration records, including Claude Code, Codex, Cursor, Cline, Copilot and Antigravity, through one config. One endpoint: OpenAI, Claude, Gemini and Responses API translation at /v1. Production controls: circuit breakers, TLS stealth, MCP with ${RF.mcpTools} tools, A2A, memory, guardrails, evals, and 65,000+ static test declarations across 9,500+ tracked test files.`,
+      title: `The OmniRoute promise: one endpoint and ${RF.providers} providers. Six pillars. Resilient fallback: automatic routing continues while another healthy target is available. Save up to 95 percent of eligible tokens: RTK plus Caveman stacked compression averages about 89 percent on tool-heavy sessions. Zero dollars to start: ${RF.hasFreeLabel} providers with a free offer and ${RF.freeForever} recurring or keyless free-forever providers. Every tool works: ${RF.cliTotal} CLI and agent integration records, including Claude Code, Codex, Cursor, Cline, Copilot and Antigravity, through one config. One endpoint: OpenAI, Claude, Gemini and Responses API translation at /v1. Production controls: circuit breakers, TLS stealth, MCP with ${RF.mcpTools} tools, A2A, memory, guardrails, evals, and 65,000+ static test declarations across 9,500+ tracked test files.`,
       desc: "Animated promise card: six pillar tiles in reading order, with a soft highlight sweeping from tile to tile in a continuous cycle.",
     }) +
       gridDefs("pp-grid") +

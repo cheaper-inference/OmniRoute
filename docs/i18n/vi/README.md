@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Lời hứa — Một endpoint và 394 nhà cung cấp. Tự động chuyển dự phòng giúp duy trì định tuyến khi vẫn còn một mục tiêu hoạt động khác. Sáu trụ cột: chuyển dự phòng linh hoạt trên 394 nhà cung cấp · tiết kiệm tới 95% token cho các khối lượng công việc đủ điều kiện · bắt đầu với $0 cùng hơn 150 gói miễn phí và 51 nhà cung cấp miễn phí định kỳ/không cần khóa vĩnh viễn · 39 tích hợp CLI/agent thông qua một cấu hình · khả năng tương thích với OpenAI, Claude, Gemini và Responses API tại /v1 · các tính năng kiểm soát cho môi trường production, bao gồm bộ ngắt mạch, TLS stealth, 110 công cụ MCP, A2A, bộ nhớ, guardrails, đánh giá và hơn 56.000 khai báo kiểm thử tĩnh trên hơn 7.800 tệp kiểm thử được theo dõi."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Lời hứa — Một endpoint và 394 nhà cung cấp. Tự động chuyển dự phòng giúp duy trì định tuyến khi vẫn còn một mục tiêu hoạt động khác. Sáu trụ cột: chuyển dự phòng linh hoạt trên 394 nhà cung cấp · tiết kiệm tới 95% token cho các khối lượng công việc đủ điều kiện · bắt đầu với $0 cùng hơn 150 gói miễn phí và 40 nhà cung cấp miễn phí định kỳ/không cần khóa vĩnh viễn · 39 tích hợp CLI/agent thông qua một cấu hình · khả năng tương thích với OpenAI, Claude, Gemini và Responses API tại /v1 · các tính năng kiểm soát cho môi trường production, bao gồm bộ ngắt mạch, TLS stealth, 110 công cụ MCP, A2A, bộ nhớ, guardrails, đánh giá và hơn 56.000 khai báo kiểm thử tĩnh trên hơn 7.800 tệp kiểm thử được theo dõi."/>
 
 <br/>
 <br/>
@@ -703,7 +703,7 @@ khỏi lịch sử shell của bạn. → [Tích hợp CLI](docs/guides/CLI-INTE
 
 </div>
 
-> **394 nhà cung cấp đã đăng ký** trên các bộ sưu tập chuẩn về trò chuyện, phương tiện, tìm kiếm, cục bộ, tác nhân đám mây và hệ thống, trong đó **153 nhà cung cấp có siêu dữ liệu khám phá `hasFree: true`**. Danh mục mô hình trò chuyện bao phủ **239 nhà cung cấp / 3,059 cặp nhà cung cấp-mô hình riêng biệt / 1,475 ID mô hình thô**; danh mục ngân sách miễn phí riêng biệt có **465 hàng theo từng mô hình**, **34 nhóm định kỳ** và **51 nhà cung cấp miễn phí vĩnh viễn định kỳ/không cần khóa API**. Các mẫu số này được thiết kế để khác nhau; định nghĩa và các phép tính loại trùng theo nhóm nằm trong [Tài liệu tham khảo về nhà cung cấp](docs/reference/PROVIDER_REFERENCE.md) và [Các gói miễn phí](docs/reference/FREE_TIERS.md).
+> **394 nhà cung cấp đã đăng ký** trên các bộ sưu tập chuẩn về trò chuyện, phương tiện, tìm kiếm, cục bộ, tác nhân đám mây và hệ thống, trong đó **153 nhà cung cấp có siêu dữ liệu khám phá `hasFree: true`**. Danh mục mô hình trò chuyện bao phủ **239 nhà cung cấp / 3,059 cặp nhà cung cấp-mô hình riêng biệt / 1,475 ID mô hình thô**; danh mục ngân sách miễn phí riêng biệt có **465 hàng theo từng mô hình**, **34 nhóm định kỳ** và **40 nhà cung cấp miễn phí vĩnh viễn định kỳ/không cần khóa API**. Các mẫu số này được thiết kế để khác nhau; định nghĩa và các phép tính loại trùng theo nhóm nằm trong [Tài liệu tham khảo về nhà cung cấp](docs/reference/PROVIDER_REFERENCE.md) và [Các gói miễn phí](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 

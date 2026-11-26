@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Obljuba — Ena končna točka in 394 ponudnikov. Samodejno nadomeščanje ohranja usmerjanje, dokler je na voljo drug delujoč cilj. Šest stebrov: odporna nadomestna izbira med 394 ponudniki · do 95 % prihranka pri žetonih za primerne delovne obremenitve · začetek za 0 $, z več kot 150 brezplačnimi paketi ter 51 brezplačnimi ponudniki za vedno z možnostjo ponavljanja/brez ključa · 39 integracij CLI/agentov prek ene konfiguracije · združljivost z API-ji OpenAI, Claude, Gemini in Responses na /v1 · produkcijski nadzor, vključno z odklopniki, prikritostjo TLS, 110 orodji MCP, A2A, pomnilnikom, zaščitnimi omejitvami, evalvacijami ter več kot 56.000 statičnimi deklaracijami testov v več kot 7.800 spremljanih testnih datotekah."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Obljuba — Ena končna točka in 394 ponudnikov. Samodejno nadomeščanje ohranja usmerjanje, dokler je na voljo drug delujoč cilj. Šest stebrov: odporna nadomestna izbira med 394 ponudniki · do 95 % prihranka pri žetonih za primerne delovne obremenitve · začetek za 0 $, z več kot 150 brezplačnimi paketi ter 40 brezplačnimi ponudniki za vedno z možnostjo ponavljanja/brez ključa · 39 integracij CLI/agentov prek ene konfiguracije · združljivost z API-ji OpenAI, Claude, Gemini in Responses na /v1 · produkcijski nadzor, vključno z odklopniki, prikritostjo TLS, 110 orodji MCP, A2A, pomnilnikom, zaščitnimi omejitvami, evalvacijami ter več kot 56.000 statičnimi deklaracijami testov v več kot 7.800 spremljanih testnih datotekah."/>
 
 <br/>
 <br/>
@@ -711,7 +711,7 @@ izven zgodovine vaše lupine. → [CLI integracije](docs/guides/CLI-INTEGRATIONS
 
 </div>
 
-> **394 registriranih ponudnikov** v kanoničnih zbirkah za klepet, medije, iskanje, lokalne ponudnike, agente v oblaku in sistemske ponudnike, vključno s **153 ponudniki z metapodatki za odkrivanje `hasFree: true`**. Register modelov za klepet zajema **239 ponudnikov / 3.059 različnih parov ponudnik–model / 1.475 neobdelanih ID-jev modelov**; ločeni katalog brezplačnih proračunov ima **465 vrstic po modelih**, **34 ponavljajočih se zbirk** in **51 ponavljajočih se oziroma ponudnikov brez ključa, ki so brezplačni za vedno**. To so namerno različni imenovalci; definicije in izračuni z odstranjenimi dvojniki zbirk so na voljo v [referenci ponudnikov](docs/reference/PROVIDER_REFERENCE.md) in [brezplačnih paketih](docs/reference/FREE_TIERS.md).
+> **394 registriranih ponudnikov** v kanoničnih zbirkah za klepet, medije, iskanje, lokalne ponudnike, agente v oblaku in sistemske ponudnike, vključno s **153 ponudniki z metapodatki za odkrivanje `hasFree: true`**. Register modelov za klepet zajema **239 ponudnikov / 3.059 različnih parov ponudnik–model / 1.475 neobdelanih ID-jev modelov**; ločeni katalog brezplačnih proračunov ima **465 vrstic po modelih**, **34 ponavljajočih se zbirk** in **40 ponavljajočih se oziroma ponudnikov brez ključa, ki so brezplačni za vedno**. To so namerno različni imenovalci; definicije in izračuni z odstranjenimi dvojniki zbirk so na voljo v [referenci ponudnikov](docs/reference/PROVIDER_REFERENCE.md) in [brezplačnih paketih](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 

@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Løftet — Ét endpoint og 394 udbydere. Automatisk fallback holder routingen kørende, så længe der er et andet sundt mål tilgængeligt. Seks søjler: robust fallback på tværs af 394 udbydere · op til 95 % tokenbesparelse på kvalificerede arbejdsbelastninger · $0 for at komme i gang med over 150 gratis niveauer og 51 tilbagevendende eller nøgleløse udbydere, der er gratis for altid · 39 CLI-/agentintegrationer gennem én konfiguration · kompatibilitet med OpenAI-, Claude-, Gemini- og Responses API på /v1 · produktionskontroller, herunder circuit breakers, TLS stealth, MCP med 110 værktøjer, A2A, hukommelse, guardrails, evalueringer og over 56.000 statiske testdeklarationer på tværs af over 7.800 sporede testfiler."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Løftet — Ét endpoint og 394 udbydere. Automatisk fallback holder routingen kørende, så længe der er et andet sundt mål tilgængeligt. Seks søjler: robust fallback på tværs af 394 udbydere · op til 95 % tokenbesparelse på kvalificerede arbejdsbelastninger · $0 for at komme i gang med over 150 gratis niveauer og 40 tilbagevendende eller nøgleløse udbydere, der er gratis for altid · 39 CLI-/agentintegrationer gennem én konfiguration · kompatibilitet med OpenAI-, Claude-, Gemini- og Responses API på /v1 · produktionskontroller, herunder circuit breakers, TLS stealth, MCP med 110 værktøjer, A2A, hukommelse, guardrails, evalueringer og over 56.000 statiske testdeklarationer på tværs af over 7.800 sporede testfiler."/>
 
 <br/>
 <br/>
@@ -712,7 +712,7 @@ af din shell-historik. → [CLI-integrationer](docs/guides/CLI-INTEGRATIONS.md)
 
 </div>
 
-> **394 registrerede udbydere** på tværs af de kanoniske samlinger for chat, medier, søgning, lokale tjenester, cloud-agenter og systemer, herunder **153 med `hasFree: true`-metadata til opdagelse**. Chatmodelregistret dækker **239 udbydere / 3.059 særskilte udbyder-model-par / 1.475 rå model-ID'er**; det separate katalog over gratis budgetter har **465 rækker pr. model**, **34 tilbagevendende puljer** og **51 tilbagevendende/gratis udbydere uden nøgle for altid**. Dette er forskellige nævnere med vilje; definitioner og puljededuplicerede beregninger findes i [Udbyderreference](docs/reference/PROVIDER_REFERENCE.md) og [Gratis niveauer](docs/reference/FREE_TIERS.md).
+> **394 registrerede udbydere** på tværs af de kanoniske samlinger for chat, medier, søgning, lokale tjenester, cloud-agenter og systemer, herunder **153 med `hasFree: true`-metadata til opdagelse**. Chatmodelregistret dækker **239 udbydere / 3.059 særskilte udbyder-model-par / 1.475 rå model-ID'er**; det separate katalog over gratis budgetter har **465 rækker pr. model**, **34 tilbagevendende puljer** og **40 tilbagevendende/gratis udbydere uden nøgle for altid**. Dette er forskellige nævnere med vilje; definitioner og puljededuplicerede beregninger findes i [Udbyderreference](docs/reference/PROVIDER_REFERENCE.md) og [Gratis niveauer](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
