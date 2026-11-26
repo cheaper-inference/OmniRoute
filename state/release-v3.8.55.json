@@ -2,78 +2,15 @@
   "version": 1,
   "base": "release/v3.8.55",
   "paused": null,
-  "inFlight": {
-    "batchId": "b56",
-    "kind": "batch",
-    "candidateRef": "omni-queue/release-v3.8.55/b56-c003c973a8d9",
-    "candidateSha": "c003c973a8d981439f151c158d057e44be18bf82",
-    "baseSha": "3be0e516321ab3d1869297ccef72c277575f2124",
-    "treeSha": "2b3f2ccbea45fac76a1557bb4de815c6a2cb7b4f",
-    "prs": [
-      {
-        "n": 21314,
-        "head": "a06c13b0127867dbf4854aa3d573a6d2233ebeb1",
-        "title": "fix(k8s): require an API key by default in every shipped Kubernetes deployment",
-        "author": "diegosouzapw",
-        "labeledAt": "2026-11-26T17:18:26Z"
-      },
-      {
-        "n": 21305,
-        "head": "4b01e2a82cd1bc5321b4aad936ce215cbff7410c",
-        "title": "fix(api): make the cloud sync deadline cover reading the response body",
-        "author": "diegosouzapw",
-        "labeledAt": "2026-11-26T17:33:39Z"
-      },
-      {
-        "n": 21249,
-        "head": "ff8b874571f2b2f3a3e919b3844fa6cac1cd3445",
-        "title": "chore(npm): name Cheaper Inference and the creator in the package description",
-        "author": "diegosouzapw",
-        "labeledAt": "2026-11-26T17:34:25Z"
-      },
-      {
-        "n": 20805,
-        "head": "a565ef5eb9f127b937ffba8faf85b075c893208f",
-        "title": "chore(deps): bump actions/download-artifact from 8.0.1 to 8.0.2",
-        "author": "dependabot[bot]",
-        "labeledAt": "2026-11-26T17:34:26Z"
-      },
-      {
-        "n": 21287,
-        "head": "815b9251f8a0a862d7eb02ba3273519907efe8a2",
-        "title": "fix(docker): build the codex-app-server sidecar from an image that has the Codex CLI",
-        "author": "diegosouzapw",
-        "labeledAt": "2026-11-26T17:34:31Z"
-      },
-      {
-        "n": 21108,
-        "head": "eb1333ef3d2fa60687ca2c4e23dbc0f4f110f151",
-        "title": "fix(usage): preserve recent cache-read completeness",
-        "author": "KiaroSama",
-        "labeledAt": "2026-11-26T17:37:16Z"
-      },
-      {
-        "n": 21280,
-        "head": "a1f307f0d2f25eb232f755b45b00025c3ad49e85",
-        "title": "fix(translators): preserve native Gemini 4 reasoning tiers",
-        "author": "diegosouzapw",
-        "labeledAt": "2026-11-26T17:37:22Z"
-      },
-      {
-        "n": 21289,
-        "head": "f9d810f87ec365f3ffec12c31cd6822787662d50",
-        "title": "fix(deps): clear the moderate advisories in the electron and opencode plugin lockfiles",
-        "author": "diegosouzapw",
-        "labeledAt": "2026-11-26T17:38:18Z"
-      }
-    ],
-    "stage": "landing",
-    "startedAt": "2026-11-26T18:30:03.756Z",
-    "attempts": 0,
-    "bisect": null,
-    "landAttempts": 1
-  },
+  "inFlight": null,
   "baseChecks": [
+    {
+      "baseSha": "c003c973a8d981439f151c158d057e44be18bf82",
+      "ref": "omni-queue/release-v3.8.55/b56-c003c973a8d9",
+      "status": "green",
+      "startedAt": "2026-11-26T18:30:03.756Z",
+      "signatures": []
+    },
     {
       "baseSha": "3be0e516321ab3d1869297ccef72c277575f2124",
       "ref": "omni-queue/release-v3.8.55/b55-3be0e516321a",
@@ -136,13 +73,6 @@
       "status": "green",
       "startedAt": "2026-11-26T06:40:10.260Z",
       "signatures": []
-    },
-    {
-      "baseSha": "eb728bade305b219dd9cc78949073ef3dd7d9fa6",
-      "ref": "omni-queue/release-v3.8.55/b46-eb728bade305",
-      "status": "green",
-      "startedAt": "2026-11-26T05:19:54.248Z",
-      "signatures": []
     }
   ],
   "shadow": {
@@ -169,38 +99,13 @@
   "counters": {
     "batchSeq": 56,
     "ciRuns": 61,
-    "landedPrs": 42,
-    "landedBatches": 13,
+    "landedPrs": 50,
+    "landedBatches": 14,
     "redBatches": 11,
     "bisections": 3,
     "culprits": 1
   },
   "history": [
-    {
-      "at": "2026-11-20T08:03:21.547Z",
-      "type": "batch-started",
-      "batchId": "b8",
-      "prs": [
-        14863
-      ],
-      "sha": "bade93fcc9896eccd1ab0c5f04779bde563a55e6",
-      "detail": "1 PR(s) on d1821d0db11d; window 9",
-      "labeledAt": {
-        "14863": "2026-11-19T20:20:57Z"
-      },
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44699253413"
-    },
-    {
-      "at": "2026-11-20T08:35:35.800Z",
-      "type": "checks-red",
-      "batchId": "b8",
-      "prs": [
-        14863
-      ],
-      "sha": "bade93fcc9896eccd1ab0c5f04779bde563a55e6",
-      "detail": "Gate / CI, Unit Tests (6/8)",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44703721455"
-    },
     {
       "at": "2026-11-20T08:35:35.800Z",
       "type": "flaky-rerun",
@@ -2874,12 +2779,43 @@
       ],
       "sha": "c003c973a8d981439f151c158d057e44be18bf82",
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45886043085"
+    },
+    {
+      "at": "2026-11-26T19:46:32.160Z",
+      "type": "land-blessed",
+      "batchId": "b56",
+      "prs": [
+        21314,
+        21305,
+        21249,
+        20805,
+        21287,
+        21108,
+        21280,
+        21289
+      ],
+      "sha": "c003c973a8d981439f151c158d057e44be18bf82",
+      "detail": "omni-queue/land success on 1 commit(s)",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45886043085"
+    },
+    {
+      "at": "2026-11-26T19:46:34.712Z",
+      "type": "landed",
+      "batchId": "b56",
+      "prs": [
+        21314,
+        21305,
+        21249,
+        20805,
+        21287,
+        21108,
+        21280,
+        21289
+      ],
+      "sha": "c003c973a8d981439f151c158d057e44be18bf82",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45886043085"
     }
   ],
-  "updatedAt": "2026-11-26T19:46:28.683Z",
-  "batchWindow": 8,
-  "landingsWithoutVerdict": {
-    "count": 1,
-    "since": "2026-11-26T19:46:28.683Z"
-  }
+  "updatedAt": "2026-11-26T19:47:07.602Z",
+  "batchWindow": 9
 }
