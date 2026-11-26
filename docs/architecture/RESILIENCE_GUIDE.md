@@ -1056,6 +1056,22 @@ To disconnect a client from OmniRoute, follow [Revert client configuration](../g
 
 ---
 
+## Confirmed model unavailability
+
+`MODEL_AVAILABILITY_EVIDENCE_ENABLED` is off by default and can be enabled without a restart.
+It applies to persisted, single-key OpenAI connections and compatible connections with a
+verifiable upstream chat-completions or Responses endpoint. An explicit HTTP 404 must identify
+the exact model sent to the upstream. Two independent requests within 24 hours confirm absence
+for that connection, revision, endpoint and model. Confirmation expires 30 days after the
+second observation. A successful response accepted for the same scope clears it, and credential
+or endpoint changes give the updated connection a fresh revision. Probes can still check the
+model, and their failures do not contribute to confirmation.
+
+Routing skips confirmed targets and can still select another connection or combo target.
+If no target remains eligible because of confirmed absence, direct chat returns
+`404 model_not_found`. The expiry never supplies a client-facing `Retry-After`.
+Catalog visibility and ordinary cooldowns are managed separately.
+
 ## Runtime state — agent quick reference
 
 > Moved verbatim from `AGENTS.md` → "Resilience Runtime State" (PR #12743) so the agent

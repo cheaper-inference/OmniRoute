@@ -1,3 +1,4 @@
+import { inheritModelAvailabilityEvidence } from "../../services/modelAvailabilityEvidence.ts";
 import type { HttpAttemptSelection } from "../../utils/providerHttpAttempts.ts";
 /**
  * Flush-empty-retry loop, extracted from chatCore so the credential swap
@@ -246,7 +247,7 @@ async function runRetryRequest(
   );
   deps.logTargetRequest(deps.providerUrl, deps.providerHeaders, body);
   return {
-    response: preparedStream,
+    response: inheritModelAvailabilityEvidence(retryResponse, preparedStream),
     body,
     upstreamHttpSelection:
       (retryResult as { upstreamHttpSelection?: HttpAttemptSelection | null })

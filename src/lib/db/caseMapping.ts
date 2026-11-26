@@ -40,6 +40,7 @@ export function rowToCamel(row: unknown): JsonRecord | null {
   if (!row) return null;
   const result: JsonRecord = {};
   for (const [k, v] of Object.entries(row as JsonRecord)) {
+    if (k === "model_availability_revision") continue;
     const camelKey = toCamelCase(k);
     if (BOOLEAN_CAMEL_COLUMNS.has(camelKey)) {
       result[camelKey] = v === 1 || v === true;

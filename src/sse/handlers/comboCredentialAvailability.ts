@@ -5,7 +5,11 @@ export function getComboCredentialAvailability(
   credentials: object | null | undefined,
   now = Date.now()
 ): ModelAvailabilityResult {
-  if (!credentials || ("waitingForCapacity" in credentials && credentials.waitingForCapacity)) {
+  if (
+    !credentials ||
+    ("modelUnavailable" in credentials && credentials.modelUnavailable) ||
+    ("waitingForCapacity" in credentials && credentials.waitingForCapacity)
+  ) {
     return false;
   }
   if (!("allRateLimited" in credentials) || !credentials.allRateLimited) return true;

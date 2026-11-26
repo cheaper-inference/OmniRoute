@@ -4,10 +4,7 @@ import { resolveChatRequestBody } from "./requestBody";
 import { getComboCredentialAvailability } from "./comboCredentialAvailability.ts";
 import * as chatAdmission from "./chatAdmission.ts";
 import { buildClientRawRequest, resolveDispatchClientRawRequest } from "./chat/clientRawRequest.ts";
-import {
-  comboStalledConnectionIds,
-  type ComboStalledConnections,
-} from "./chat/comboStalledConnections.ts";
+import type { ComboStalledConnections } from "./chat/comboStalledConnections.ts";
 export { buildClientRawRequest, resolveDispatchClientRawRequest };
 import { normalizeReasoningRequest } from "@/shared/reasoning/effortStandardization";
 import { isDetailedLoggingEnabled } from "@/lib/db/detailedLogs";
@@ -215,7 +212,12 @@ import { shouldIsolateProbeFailures } from "@/shared/utils/probeOrigin";
 import { getCircuitBreaker, isLocalStreamLifecycleError } from "../../shared/utils/circuitBreaker";
 import { maybeMarkChatAccountExhaustedFrom429 } from "../services/chatQuotaExhaustion";
 import { markQuotaHealthy } from "../../domain/quotaCache";
-import { resolveForcedConnectionForCredentialPool } from "../services/sessionAffinityPin.ts";
+import {
+  canReusePreselectedChatCredentials,
+  getChatCredentialExclusions,
+  modelAvailabilitySelectionOptions,
+  selectChatCredentials,
+} from "./chatCredentialSelection.ts";
 import { RequestTelemetry, recordTelemetry } from "../../shared/utils/requestTelemetry";
 import { generateRequestId } from "../../shared/utils/requestId";
 import { logAuditEvent } from "../../lib/compliance/index";
@@ -1157,6 +1159,12 @@ async function handleChatImplementation(
       modelString: string,
       target?: { connectionId?: string | null; executionKey?: string | null }
     ) => `${target?.executionKey || target?.connectionId || ""}:${modelString}`;
+    const availabilityForTarget = (modelString: string) =>
+      modelAvailabilitySelectionOptions(
+        new URL(request.url).pathname,
+        modelString,
+        isAutomatedProbe
+      );
     const checkModelAvailable = async (
       modelString: string,
       target?: {
@@ -1231,6 +1239,7 @@ async function handleChatImplementation(
         allowedConnections,
         resolvedModel,
         {
+          ...availabilityForTarget(modelString),
           connectionRestrictionSources: restrictions.sources,
           requireToolCalling: requiresQoderHttpTransport(body),
           sessionKey: sessionAffinityKey,
@@ -2012,45 +2021,41 @@ async function handleSingleModelChat(
     // fail closed so any flag-resolution error keeps the release retry behavior.
     const emptyStreamSiblingRecovery = readEmptyStreamSiblingRecoveryFlag();
     while (true) {
-      const emptyTurnExcluded = new Set(excludedConnectionIds);
-      if (
-        emptyStreamSiblingRecovery &&
-        runtimeOptions.emptyTurnConnectionId &&
-        !hasForcedConnection &&
-        !museOwner &&
-        !runtimeOptions.managedLease
-      ) {
-        emptyTurnExcluded.add(runtimeOptions.emptyTurnConnectionId);
-      }
-      // A combo per-target timeout abandoned these accounts earlier in this combo request.
-      // Not flag-gated: it only applies once a target timed out, with the same fallback below.
-      if (!hasForcedConnection && !museOwner && !runtimeOptions.managedLease) {
-        const stalled = runtimeOptions.comboStalledConnections;
-        for (const id of comboStalledConnectionIds(stalled, provider)) emptyTurnExcluded.add(id);
-      }
+      const emptyTurnExcluded = getChatCredentialExclusions(excludedConnectionIds, {
+        provider,
+        canUseSibling: !hasForcedConnection && !museOwner && !runtimeOptions.managedLease,
+        emptyTurnConnectionId: emptyStreamSiblingRecovery
+          ? runtimeOptions.emptyTurnConnectionId
+          : null,
+        stalled: runtimeOptions.comboStalledConnections,
+      });
+      const availabilityOptions = modelAvailabilitySelectionOptions(
+        clientRawRequest?.endpoint,
+        modelStr,
+        runtimeOptions.automatedProbe === true
+      );
       const selectCredentials = (excluded: Set<string>) =>
-        getProviderCredentialsWithQuotaPreflight(
+        selectChatCredentials({
           provider,
-          null,
-          museOwner ? [museOwner.connectionId] : effectiveAllowedConnections,
           model,
-          {
+          excluded,
+          forcedConnectionId: forcedConnectionId || null,
+          allowedConnections: museOwner ? [museOwner.connectionId] : effectiveAllowedConnections,
+          ownerConnectionId: museOwner?.connectionId,
+          options: {
+            ...availabilityOptions,
             connectionRestrictionSources: restrictions.sources,
             requireToolCalling: requiresQoderHttpTransport(body),
             sessionKey: museOwner ? null : occupancySessionKey,
             preferredConnectionIds: apiKeyInfo?.preferredConnections ?? null,
             reserveOAuthSession: true,
-            excludeConnectionIds: Array.from(excluded),
             ...(hasForcedConnection && !isCombo ? { explicitConnectionPin: true } : {}),
             ...(agy.on ? { reserveAntigravityLease: true, routingRequestId: agy.requestId } : {}),
             ...(runtimeOptions.allowRateLimitedConnection
               ? { allowRateLimitedConnections: true }
               : {}),
             ...(forceLiveComboTest
-              ? {
-                  allowSuppressedConnections: true,
-                  bypassQuotaPolicy: true,
-                }
+              ? { allowSuppressedConnections: true, bypassQuotaPolicy: true }
               : {}),
             ...(!forceLiveComboTest && bypassProviderQuotaPolicy
               ? { bypassQuotaPolicy: true }
@@ -2058,32 +2063,25 @@ async function handleSingleModelChat(
             ...(runtimeOptions.managedLease
               ? { lease: credentialLease(runtimeOptions.managedLease) }
               : {}),
-            ...(() => {
-              const effectiveForcedId = resolveForcedConnectionForCredentialPool({
-                forcedConnectionId: forcedConnectionId || null,
-                excludedConnectionIds: excluded,
-                connections: [],
-                allowRateLimitedConnections:
-                  runtimeOptions.allowRateLimitedConnection === true || forceLiveComboTest,
-                bypassQuotaPolicy: forceLiveComboTest || bypassProviderQuotaPolicy,
-                isQuotaExhausted: () => false,
-                isQuotaPolicyBlocked: () => false,
-              });
-              return museOwner
-                ? { forcedConnectionId: museOwner.connectionId }
-                : effectiveForcedId
-                  ? { forcedConnectionId: effectiveForcedId }
-                  : {};
-            })(),
-          }
-        );
+          },
+        });
       let credentials =
-        preselectedCredentials && emptyTurnExcluded.size === 0 && !agy.on && !museOwner
+        emptyTurnExcluded.size === 0 &&
+        !agy.on &&
+        !museOwner &&
+        (await canReusePreselectedChatCredentials(
+          preselectedCredentials,
+          model,
+          availabilityOptions
+        ))
           ? preselectedCredentials
           : await selectCredentials(emptyTurnExcluded);
       if (
         emptyTurnExcluded.size > excludedConnectionIds.size &&
-        (!credentials || "allRateLimited" in credentials || "allExpired" in credentials)
+        (!credentials ||
+          "allRateLimited" in credentials ||
+          "allExpired" in credentials ||
+          "modelUnavailable" in credentials)
       ) {
         // Empty turns and combo target timeouts are not account faults. Prefer an allowed
         // sibling, but a singleton still spends its existing retry on its original account.

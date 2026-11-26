@@ -1,7 +1,10 @@
+import type { ModelAvailabilityScope } from "@/lib/db/modelAvailability";
 import type { CredentialLeaseSelectionContext } from "./exclusiveConnectionLeasePolicy";
 import type { ConnectionRestrictionSource } from "./credentialSelectionDiagnostics.ts";
 
 export interface CredentialSelectionOptions {
+  modelAvailabilityEndpointKind?: ModelAvailabilityScope["endpointKind"];
+  modelAvailabilityProbe?: boolean;
   /** Provenance of the effective allowlist; does not alter authorization. */
   connectionRestrictionSources?: readonly ConnectionRestrictionSource[];
   /** Exclude credential-specific transports that cannot serve caller tools or image input. */

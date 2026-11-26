@@ -587,6 +587,22 @@ export function applyPayloadRules(
   return { payload: normalizedPayload, applied };
 }
 
+/** Selection has no translated payload for evaluating a matching rule's conditions. */
+export async function hasModelChangingPayloadRules(provider: string, model: string) {
+  const rules = await getPayloadRulesConfig();
+  const protocols = [provider, "openai", "openai-responses", "openai-response"];
+  const touchesModel = (path: string) => getPathSegments(path)[0] === "model";
+  return (
+    rules.override.some(
+      (rule) =>
+        matchesRule(model, protocols, rule.models) && Object.keys(rule.params).some(touchesModel)
+    ) ||
+    rules.filter.some(
+      (rule) => matchesRule(model, protocols, rule.models) && rule.params.some(touchesModel)
+    )
+  );
+}
+
 export async function applyConfiguredPayloadRules(
   payload: JsonRecord,
   model: string,

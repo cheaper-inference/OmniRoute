@@ -1,3 +1,9 @@
+import {
+  filterModelAvailabilityConnections,
+  getModelAvailabilityCredentialStamp,
+  MODEL_UNAVAILABLE_SELECTION,
+  shouldFilterModelAvailability,
+} from "./modelAvailabilitySelection";
 import type { CredentialSelectionOptions } from "./credentialSelectionOptions";
 import { mayWriteCodexConnection } from "@/lib/db/codexConnectionFences";
 export type { CredentialSelectionOptions } from "./credentialSelectionOptions";
@@ -926,6 +932,7 @@ async function materializeConnection(
     errorCode: connection.errorCode,
     rateLimitedUntil: connection.rateLimitedUntil,
     ...buildConnectionConcurrencyFields(connection),
+    ...getModelAvailabilityCredentialStamp(connection, options),
     quotaWindowThresholds: connection.quotaWindowThresholds ?? null,
     ...(releaseOAuthSession ? { releaseOAuthSession } : {}),
     ...buildAntigravityRoutingFields(extra.routingLease, connection.id, extra.requestedModel),
@@ -1247,6 +1254,16 @@ export async function getProviderCredentials(
     const providerPool = connections;
     if (resolvedId === "qoder" && options.requireToolCalling) {
       connections = connections.filter(qoderSupportsCallerTools);
+    }
+    if (requestedModel && shouldFilterModelAvailability(options)) {
+      const availability = await filterModelAvailabilityConnections({
+        connections,
+        excludedIds: excludedConnectionIds,
+        provider,
+        model: requestedModel,
+      });
+      if (availability.exhausted) return MODEL_UNAVAILABLE_SELECTION;
+      connections = availability.connections;
     }
     const activeConnectionsCount = connections.length;
     logCredentialPoolState(provider, {

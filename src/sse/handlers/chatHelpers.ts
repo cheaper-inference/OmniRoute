@@ -847,6 +847,11 @@ export function handleNoCredentials(
   shadowedNode: ShadowedProviderNode | null = null,
   correlationId?: string | null
 ) {
+  if (credentials?.modelUnavailable) {
+    return errorResponse(404, "Model is unavailable for the selected upstream endpoint", {
+      code: "model_not_found",
+    });
+  }
   if (credentials?.allRateLimited) {
     return credentialCooldownResponse(credentials, provider, model, lastError, lastStatus);
   }

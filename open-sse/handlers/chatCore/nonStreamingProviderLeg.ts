@@ -1,3 +1,4 @@
+import { acceptModelAvailabilityResponse } from "../../services/modelAvailabilityEvidence.ts";
 import type {
   HttpAttemptSelection,
   HttpAttemptRejectionSlot,
@@ -357,6 +358,7 @@ function finishOk(
     connectionId: params.connectionId,
     model: params.model,
   });
+  acceptModelAvailabilityResponse(params.upstreamResponse);
   return {
     kind: "ok",
     response: clientTranslate.response,
