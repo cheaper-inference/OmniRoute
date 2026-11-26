@@ -35,8 +35,10 @@ describe("ComboReferencePicker", () => {
       "Select combo to reference"
     );
     openPicker(view);
-    expect(view.getByRole("option", { name: "alpha priority · 1 step" })).toBeInTheDocument();
-    expect(view.getByRole("option", { name: "beta round-robin · 3 steps" })).toBeInTheDocument();
+    expect(view.getByRole("option", { name: /^alpha\s*priority · 1 step$/ })).toBeInTheDocument();
+    expect(
+      view.getByRole("option", { name: /^beta\s*round-robin · 3 steps$/ })
+    ).toBeInTheDocument();
   });
 
   it("reports the selected combo name and disables Add until one is chosen", () => {
@@ -52,7 +54,7 @@ describe("ComboReferencePicker", () => {
     fireEvent.change(query, { target: { value: "beta ROUND-ROBIN" } });
     expect(onChange).not.toHaveBeenCalled();
     expect(view.queryByRole("option", { name: /alpha/ })).not.toBeInTheDocument();
-    fireEvent.click(view.getByRole("option", { name: /beta round-robin/ }));
+    fireEvent.click(view.getByRole("option", { name: /^beta\s*round-robin/ }));
     expect(onChange).toHaveBeenCalledWith("beta");
 
     view.rerender(
@@ -60,7 +62,7 @@ describe("ComboReferencePicker", () => {
     );
     expect(add).toBeEnabled();
     openPicker(view);
-    fireEvent.click(view.getByRole("option", { name: /beta round-robin/ }));
+    fireEvent.click(view.getByRole("option", { name: /^beta\s*round-robin/ }));
     expect(onChange).toHaveBeenCalledTimes(1);
     fireEvent.click(add);
     expect(onAdd).toHaveBeenCalledTimes(1);

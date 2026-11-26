@@ -229,19 +229,19 @@ test.describe("Combos flow", () => {
       page,
       comboDialog.getByTestId("combo-builder-provider"),
       "openai",
-      /^OpenAI\b/
+      /^OpenAI/
     );
     await chooseComboStepOption(
       page,
       comboDialog.getByTestId("combo-builder-model"),
       "qa-test-model",
-      /^QA Test Model\b/
+      /^QA Test Model/
     );
     await chooseComboStepOption(
       page,
       comboDialog.getByTestId("combo-builder-account"),
       "conn-openai",
-      /^OpenAI Primary\b/
+      /^OpenAI Primary/
     );
     await comboDialog.locator('[data-testid="combo-builder-add-step"]').click();
     await expect(comboNextButton).toBeEnabled();

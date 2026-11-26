@@ -3,7 +3,7 @@
 import { useId, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Field } from "@omniroute/ui-kit/field";
-import { SearchableSelect } from "@omniroute/ui-kit/searchable-select";
+import { SearchableSelect, type SearchableSelectOption } from "@omniroute/ui-kit/searchable-select";
 import { COMBO_BUILDER_AUTO_CONNECTION } from "@/lib/combos/builderDraft";
 import type { ComboBuilderProviderOption } from "@/lib/combos/builderOptions";
 import Button from "@/shared/components/Button";
@@ -75,10 +75,6 @@ export default function ComboStepSelectors(props: Props) {
   const { provider, providerOptions, modelOptions, accountOptions } = useComboStepOptions(props);
   const providerLabel = `1. ${t("builderProvider")}`;
   const modelLabel = `2. ${t("builderModel")}`;
-  const accountLabel = `3. ${t("builderAccount")}`;
-  const selectProvider = t(props.loading ? "builderLoadingProviders" : "builderSelectProvider");
-  const selectModel = t(provider ? "builderSelectModel" : "builderProviderFirst");
-  const auto = COMBO_BUILDER_AUTO_CONNECTION;
   const accountContext = JSON.stringify([providerId, modelId, props.emailsVisible]);
   const searchLabels = { searchPlaceholder: tc("search"), emptyMessage: tc("noResults") };
 
@@ -101,7 +97,7 @@ export default function ComboStepSelectors(props: Props) {
             disabled={props.loading}
             options={withCurrentAndDefaultOptions(providerOptions, providerId, {
               value: "",
-              label: selectProvider,
+              label: t(props.loading ? "builderLoadingProviders" : "builderSelectProvider"),
             })}
             filter={filterComboSearchOption}
             onValueChange={(value) => {
@@ -125,7 +121,7 @@ export default function ComboStepSelectors(props: Props) {
             disabled={!provider}
             options={withCurrentAndDefaultOptions(modelOptions, modelId, {
               value: "",
-              label: selectModel,
+              label: t(provider ? "builderSelectModel" : "builderProviderFirst"),
             })}
             filter={filterComboSearchOption}
             onValueChange={(value) => {
@@ -133,32 +129,15 @@ export default function ComboStepSelectors(props: Props) {
             }}
           />
         </Field>
-        <Field
-          htmlFor={`${fieldId}-account`}
-          label={accountLabel}
-          className="min-w-0"
-          data-testid="combo-builder-account"
-        >
-          <SearchableSelect
-            {...searchLabels}
-            key={accountContext}
-            id={`${fieldId}-account`}
-            variant="field"
-            label={accountLabel}
-            value={connectionId}
-            disabled={!modelOptions.some(({ value }) => value === modelId)}
-            options={withCurrentAndDefaultOptions(accountOptions, connectionId, {
-              value: auto,
-              label: t("autoSelectAccount"),
-            })}
-            filter={filterComboSearchOption}
-            onValueChange={(value) => {
-              if (value !== connectionId) props.onConnectionChange(value);
-            }}
-          />
-        </Field>
+        <AccountPicker
+          key={accountContext}
+          options={accountOptions}
+          value={connectionId}
+          disabled={!modelOptions.some(({ value }) => value === modelId)}
+          onChange={props.onConnectionChange}
+        />
       </div>
-      {connectionId === auto && accountOptions.length > 1 && (
+      {connectionId === COMBO_BUILDER_AUTO_CONNECTION && accountOptions.length > 1 && (
         <AccountRestrictions
           key={accountContext}
           options={accountOptions}
@@ -167,6 +146,44 @@ export default function ComboStepSelectors(props: Props) {
         />
       )}
     </>
+  );
+}
+
+function AccountPicker({
+  options,
+  value,
+  disabled,
+  onChange,
+}: {
+  options: SearchableSelectOption[];
+  value: string;
+  disabled: boolean;
+  onChange: (value: string) => void;
+}) {
+  const id = useId();
+  const t = useTranslations("combos");
+  const tc = useTranslations("common");
+  const label = `3. ${t("builderAccount")}`;
+  return (
+    <Field htmlFor={id} label={label} className="min-w-0" data-testid="combo-builder-account">
+      <SearchableSelect
+        id={id}
+        variant="field"
+        label={label}
+        searchPlaceholder={tc("search")}
+        emptyMessage={tc("noResults")}
+        value={value}
+        disabled={disabled}
+        options={withCurrentAndDefaultOptions(options, value, {
+          value: COMBO_BUILDER_AUTO_CONNECTION,
+          label: t("autoSelectAccount"),
+        })}
+        filter={filterComboSearchOption}
+        onValueChange={(next) => {
+          if (next !== value) onChange(next);
+        }}
+      />
+    </Field>
   );
 }
 

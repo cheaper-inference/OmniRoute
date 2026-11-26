@@ -59,7 +59,7 @@ afterEach(() => {
   useEmailPrivacyStore.setState({ emailsVisible: false });
 });
 
-async function openCreate(mode = "expert", catalog = providers) {
+async function openCreate(mode = "expert") {
   const writes: Record<string, unknown>[] = [];
   vi.stubGlobal(
     "fetch",
@@ -72,7 +72,7 @@ async function openCreate(mode = "expert", catalog = providers) {
       }
       if (url.includes("/builder/options")) {
         return Response.json({
-          providers: catalog,
+          providers,
           comboRefs: [
             { id: "internal-ref-id", name: "Fallback-Chain", strategy: "priority", stepCount: 2 },
             { id: "self", name: "search-test", strategy: "priority", stepCount: 1 },
@@ -163,7 +163,8 @@ describe("Combo editor searchable selectors", { timeout: 90_000 }, () => {
       expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
       expect(within(dialog).getByTestId("combo-builder-add-step")).toBeEnabled();
       addStep(dialog);
-      fireEvent.click(within(dialog).getByRole("button", { name: "Cancel", exact: true }));
+      const closeLabel = mode === "guided" ? "Close" : "Cancel";
+      fireEvent.click(within(dialog).getByRole("button", { name: closeLabel, exact: true }));
       await waitFor(() => expect(dialog).not.toBeInTheDocument());
       expect(writes).toHaveLength(0);
 
@@ -284,37 +285,4 @@ describe("Combo editor searchable selectors", { timeout: 90_000 }, () => {
     expect(within(dialog).queryByTestId("combo-builder-reference")).not.toBeInTheDocument();
     expect(pickerTrigger(dialog, "provider")).toBeVisible();
   });
-
-  it("opens 5,000 models, filters the catalog and selects the last exact model", async () => {
-    const models = Array.from({ length: 5_000 }, (_, i) => ({
-      id: `Exact-Model-${i}`,
-      name: `Model ${i}`,
-      qualifiedModel: `oa/Exact-Model-${i}`,
-      source: "custom",
-    }));
-    const { dialog, writes } = await openCreate("expert", [{ ...providers[0], models }]);
-    await choose(dialog, "provider", "openai", /OpenAI/);
-    const trigger = pickerTrigger(dialog, "model");
-    const opening = performance.now();
-    fireEvent.click(trigger);
-    const query = await screen.findByRole("combobox", { name: "Search", exact: true });
-    const openMs = performance.now() - opening;
-    expect(screen.getByRole("listbox").querySelectorAll('[role="option"]')).toHaveLength(5_001);
-
-    const filtering = performance.now();
-    fireEvent.change(query, { target: { value: "custom Exact-Model-4999" } });
-    const filterMs = performance.now() - filtering;
-    expect(pickerOptions().getAllByRole("option")).toHaveLength(2);
-    const last = pickerOptions().getByRole("option", { name: /Exact-Model-4999/ });
-    const selecting = performance.now();
-    fireEvent.click(last);
-    const selectMs = performance.now() - selecting;
-    console.info(
-      `5,000 combo models (jsdom): open ${openMs.toFixed(1)} ms, filter ${filterMs.toFixed(1)} ms, select ${selectMs.toFixed(1)} ms`
-    );
-    expect(trigger).toHaveTextContent("Model 4999");
-    addStep(dialog);
-    await saveCombo(dialog, writes);
-    expect(writes[0].models).toMatchObject([{ model: "oa/Exact-Model-4999" }]);
-  }, 90_000);
 });

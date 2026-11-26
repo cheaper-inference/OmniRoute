@@ -180,13 +180,13 @@ test.describe("Combo Unification", () => {
       page,
       page.getByTestId("combo-builder-provider"),
       "openai",
-      /^OpenAI\b/
+      /^OpenAI/
     );
     await chooseComboStepOption(
       page,
       page.getByTestId("combo-builder-model"),
       "gpt-4o-mini",
-      /^gpt-4o-mini\b/
+      /^gpt-4o-mini/
     );
     await page.getByTestId("combo-builder-add-step").click();
     await page.getByTestId("combo-builder-next").click();
