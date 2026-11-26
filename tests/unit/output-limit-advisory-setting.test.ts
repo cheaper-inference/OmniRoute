@@ -106,7 +106,7 @@ function saveCeilingFixtures() {
 }
 
 async function runCeilingCombo(
-  strategy: "priority" | "round-robin",
+  strategy: "priority" | "round-robin" | "auto",
   models = ["unit-ceiling-a/normal", "unit-ceiling-b/normal"],
   body: Record<string, unknown> = ceilingBody,
   settings: Record<string, unknown> = {},
@@ -139,6 +139,21 @@ async function runCeilingCombo(
 }
 
 for (const strategy of ["priority", "round-robin"] as const) {
+  test(`${strategy}: OpenAI requests retain global advisory despite a local false`, async () => {
+    saveCeilingFixtures();
+    const { response, calls } = await runCeilingCombo(
+      strategy,
+      undefined,
+      undefined,
+      { outputLimitAdvisory: true },
+      { outputLimitAdvisory: false },
+      "openai"
+    );
+    assert.equal(response.status, 200);
+    assert.equal(calls.length, 1);
+    assert.equal(calls[0].maxTokens, 65_536);
+  });
+
   test(`${strategy}: an oversized max_tokens ceiling falls back to the target's dispatch cap`, async () => {
     saveCeilingFixtures();
     const { response, calls } = await runCeilingCombo(
@@ -289,6 +304,19 @@ const withVision = {
     },
   ],
 };
+
+test("Auto rechecks Anthropic media compatibility before dispatching a capped target", async () => {
+  saveCeilingFixtures();
+  const good = "unit-ceiling-vision/normal";
+  const { response, calls } = await runCeilingCombo(
+    "auto",
+    ["unit-ceiling-a/normal", "unit-ceiling-vision-overflow/normal", good],
+    withVision
+  );
+  assert.equal(response.status, 200);
+  assert.deepEqual(calls, [{ model: good, maxTokens: 65_536 }]);
+  assert.equal(withVision.max_tokens, 128_000);
+});
 
 for (const strategy of ["priority", "round-robin"] as const) {
   test(`${strategy}: automatic fallback admits only the safely clampable mixed targets`, async () => {

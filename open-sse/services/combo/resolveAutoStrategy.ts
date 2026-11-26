@@ -31,7 +31,7 @@ import {
   filterTargetsByRequestCompatibility,
   deriveRequestCompatibilityRequirements,
 } from "./comboStructure.ts";
-import { resolveOutputLimitAdvisory } from "./outputLimitPolicy.ts";
+import { resolveOutputLimitPolicy } from "./outputLimitPolicy.ts";
 import { hasMediaRequirements } from "./mediaCompatibility.ts";
 import {
   calculatePromptCacheAffinityScores,
@@ -303,8 +303,7 @@ export async function resolveAutoStrategyOrder(
   // budget, and retain this pool even when candidate telemetry is unavailable.
   if (hasMediaRequirements(deriveRequestCompatibilityRequirements(body))) {
     eligibleTargets = filterTargetsByRequestCompatibility(eligibleTargets, body, log, combo.name, {
-      outputLimitAdvisory: resolveOutputLimitAdvisory(config, settings),
-      sourceFormat: deps.sourceFormat,
+      ...resolveOutputLimitPolicy(config, settings, deps.sourceFormat, "strict"),
     });
     if (eligibleTargets.length === 0) {
       return {

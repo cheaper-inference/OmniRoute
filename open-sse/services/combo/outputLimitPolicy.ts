@@ -43,15 +43,28 @@ export type CompatFilterOptions = {
   sourceFormat?: string | null;
 };
 
-/** An explicit combo policy wins over the global fallback; absence is automatic. */
-export function resolveOutputLimitAdvisory(
+/** Anthropic uses the combo override and keeps absence available for automatic fallback. */
+export function resolveOutputLimitPolicy(
   config: unknown,
-  settings: unknown
-): boolean | undefined {
+  settings: unknown,
+  sourceFormat: string | null | undefined,
+  nonAnthropicPolicy: "configured" | "strict" = "configured"
+): Pick<CompatFilterOptions, "outputLimitAdvisory" | "sourceFormat"> {
   const local = (config as Record<string, unknown> | null | undefined)?.outputLimitAdvisory;
-  if (typeof local === "boolean") return local;
   const global = (settings as Record<string, unknown> | null | undefined)?.outputLimitAdvisory;
-  return typeof global === "boolean" ? global : undefined;
+  if (sourceFormat !== "claude") {
+    // Auto media and Jev prefilters historically ran in strict mode.
+    return {
+      sourceFormat,
+      outputLimitAdvisory:
+        nonAnthropicPolicy === "configured" && (local === true || global === true),
+    };
+  }
+  return {
+    sourceFormat,
+    outputLimitAdvisory:
+      typeof local === "boolean" ? local : typeof global === "boolean" ? global : undefined,
+  };
 }
 
 function contextRequirementsWithOutputCap(

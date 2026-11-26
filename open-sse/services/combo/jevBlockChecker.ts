@@ -22,7 +22,7 @@ import {
   resolveTargetRequestCompatibility,
   type RequestCompatibilityRequirements,
 } from "./comboStructure.ts";
-import { resolveOutputLimitAdvisory } from "./outputLimitPolicy.ts";
+import { resolveOutputLimitPolicy } from "./outputLimitPolicy.ts";
 import { applyContextRequirements } from "./contextRequirements.ts";
 import { evaluateContextLimit } from "./contextOverrideGate.ts";
 import { lookupPositiveCap } from "./concurrencyCaps.ts";
@@ -158,8 +158,7 @@ export async function partitionJevTargetsForAsk(
     "Jev pre-ask",
     {
       failOpen: compatFailOpen,
-      outputLimitAdvisory: resolveOutputLimitAdvisory(deps.config, deps.settings),
-      sourceFormat: deps.sourceFormat,
+      ...resolveOutputLimitPolicy(deps.config, deps.settings, deps.sourceFormat, "strict"),
     }
   );
   const compatibilityOrdered = preserveInputOrder(perTarget.eligible, compatibility.targets);

@@ -53,7 +53,7 @@ import {
   resolveWeightedStepGroups,
   resolveWeightedTargets,
 } from "./comboStructure.ts";
-import { resolveOutputLimitAdvisory } from "./outputLimitPolicy.ts";
+import { resolveOutputLimitPolicy } from "./outputLimitPolicy.ts";
 import { applyContextRequirements } from "./contextRequirements.ts";
 import { recordComboFailure } from "./failureTracker.ts";
 import { scopeHandoffSessionId } from "./handoffSessionScope.ts";
@@ -717,8 +717,7 @@ async function applyContinuityFilters(
   const preCompatTargets = orderedTargets;
   const compatibility = resolveTargetRequestCompatibility(orderedTargets, body, log, undefined, {
     failOpen: isEnabledInConfigOrSettings(config, settings, "compatFilterFailOpen"),
-    outputLimitAdvisory: resolveOutputLimitAdvisory(config, settings),
-    sourceFormat: deps.sourceFormat,
+    ...resolveOutputLimitPolicy(config, settings, deps.sourceFormat),
   });
   orderedTargets = applyTargetFilter(orderedTargets, compatibility.targets, jevOwnsOrder);
   // #6238: keep the targets the compat pre-filter rejected so the dispatch loop

@@ -153,7 +153,7 @@ import {
   partitionConfirmedVisionTargets,
   resolveComboTargets,
 } from "./comboStructure.ts";
-import { resolveOutputLimitAdvisory } from "./outputLimitPolicy.ts";
+import { resolveOutputLimitPolicy } from "./outputLimitPolicy.ts";
 import { releaseStickyPinOnFailure, clearStaleLKGP } from "../combo.ts";
 import { resolveComboDailyReset } from "./comboDailyResetClock.ts";
 import { resolveTargetTokenLimit } from "./targetTokenLimit.ts";
@@ -279,8 +279,7 @@ export async function handleRoundRobinCombo({
     "Context-aware round-robin fallback",
     {
       failOpen: rrCompatFailOpen,
-      outputLimitAdvisory: resolveOutputLimitAdvisory(config, settings),
-      sourceFormat,
+      ...resolveOutputLimitPolicy(config, settings, sourceFormat),
     }
   );
   // #6238: keep the targets the compat pre-filter rejected so they can serve as a
