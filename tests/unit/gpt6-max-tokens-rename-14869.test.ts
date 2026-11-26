@@ -107,14 +107,21 @@ test("#14869 gpt-6-astra is not treated as a max_tokens model", () => {
 });
 
 test("#14869 a custom gpt-6 model leaves no max_tokens on the openai body", async () => {
-  // A user-added model has no registry entry and so no targetFormat override:
-  // it stays on Chat Completions and must be renamed by the default executor
-  // rather than the Responses translator. This used gpt-6-luna until #15164
-  // registered it (with targetFormat openai-responses); the id below stays
-  // unregistered so the custom-model path is still the one exercised.
+  // An unregistered GPT-6 id on the OpenAI provider routes to Responses by
+  // family (OpenAI rejects tools + reasoning_effort for GPT-6 on Chat
+  // Completions), so the Responses translator owns the rename.
   const body = await invoke({ provider: "openai", model: "gpt-6-custom-14869" });
   assert.ok(body, "upstream request was captured");
   assert.equal(body.max_tokens, undefined, "gpt-6 rejects max_tokens");
+  assert.equal(body.max_output_tokens, 2048);
+});
+
+test("#14869 a Chat Completions model outside max_tokens support gets max_completion_tokens", async () => {
+  // gpt-5.5 stays on Chat Completions and rejects max_tokens, so the default
+  // executor must rename it rather than the Responses translator.
+  const body = await invoke({ provider: "openai", model: "gpt-5.5" });
+  assert.ok(body, "upstream request was captured");
+  assert.equal(body.max_tokens, undefined, "gpt-5.5 rejects max_tokens");
   assert.equal(body.max_completion_tokens, 2048);
 });
 

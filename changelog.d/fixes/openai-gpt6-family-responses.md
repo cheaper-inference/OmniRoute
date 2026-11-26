@@ -1,0 +1,1 @@
+- **fix(openai):** New GPT-6 and GPT-5.6+ releases on the OpenAI provider (e.g. `gpt-6.2-sol`) route to the Responses API before the catalog lists them, so agent requests with tools and `reasoning_effort` no longer fail with `Function tools with reasoning_effort are not supported ... in /v1/chat/completions`
