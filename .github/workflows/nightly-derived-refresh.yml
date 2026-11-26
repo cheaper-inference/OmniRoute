@@ -161,14 +161,14 @@ jobs:
 
           Nightly refresh of the derived numbers on \`$BASE\`. The refresh recomputed counts, version claims, README SVG numbers, and the facts snapshot from the live code ([run]($RUN_URL)).
 
-          The robot rebuilds \`$REFRESH_BRANCH\` from \`$BASE\` on every run.
+          The robot rebuilds \`$REFRESH_BRANCH\` when its release parent or tree changes.
 
           ## Queue admission
 
           When enabled, \`derived-refresh-autoland\` applies the \`omni-queue\` label after these checks.
 
           - [ ] \`Gate / CI\` and \`Gate / Quality\` passed on the current head.
-          - [ ] Every changed file belongs to a derived family or is \`README.md\` with only digits changed.
+          - [ ] Every changed file belongs to a derived family or is \`README.md\` with only digits changed outside link and image targets (except same-document anchors), inline code and fenced code blocks, version numbers, and mixed alphanumeric tokens of at least 16 characters.
           - [ ] All paths are unprotected. Protected files go to the PR from \`$PROTECTED_BRANCH\`.
           - [ ] The latest release branch has no open base-red issue and no release freeze is open.
           - [ ] The PR is open, ready for review and free of queue or blocking labels.
@@ -181,11 +181,20 @@ jobs:
 
           This PR touches agent-instruction surfaces and requires the owner's explicit approval before merge. Autoland never applies the \`omni-queue\` label to this PR.
 
-          The robot rebuilds \`$PROTECTED_BRANCH\` from \`$BASE\` on every run.
+          The robot rebuilds \`$PROTECTED_BRANCH\` when its release parent or tree changes.
           EOF
 
           gh auth setup-git
+          unprotected_status=0
+          protected_status=0
           bash scripts/release/derived-refresh-publish.sh "$REFRESH_BRANCH" \
-            "chore(docs): refresh derived numbers on ${BASE}" "$refresh_dir/main.md" "$refresh_dir/unprotected"
+            "chore(docs): refresh derived numbers on ${BASE}" "$refresh_dir/main.md" "$refresh_dir/unprotected" \
+            || unprotected_status=$?
           bash scripts/release/derived-refresh-publish.sh "$PROTECTED_BRANCH" \
-            "chore(docs): refresh generated agent-instruction files on ${BASE}" "$refresh_dir/protected.md" "$refresh_dir/protected"
+            "chore(docs): refresh generated agent-instruction files on ${BASE}" "$refresh_dir/protected.md" "$refresh_dir/protected" \
+            || protected_status=$?
+          printf "Publication results: \`%s\` exited %s, \`%s\` exited %s.\n" \
+            "$REFRESH_BRANCH" "$unprotected_status" "$PROTECTED_BRANCH" "$protected_status" >> "$GITHUB_STEP_SUMMARY"
+          if [ "$unprotected_status" -ne 0 ] || [ "$protected_status" -ne 0 ]; then
+            exit 1
+          fi

@@ -67,15 +67,27 @@ fi
   git diff --cached --name-only --no-renames | sed -n '1,200{s/^/- `/;s/$/`/;p;}'
 } > "${BODY_FILE}.rendered"
 
-git -c user.name="$BOT_NAME" -c user.email="$BOT_EMAIL" commit -q -m "$TITLE" \
-  -m "npm run release:refresh-derived -- --profile=nightly on ${BASE}: ${COUNT} file(s)." \
-  -m "Run: ${RUN_URL}"
-# A missing SHA means the branch must still be absent. A later push invalidates either lease.
-git push -q --force-with-lease="${REF}:${REMOTE_SHA}" origin "HEAD:${REF}"
+REMOTE_PARENTS=""
+REMOTE_TREE=""
+if [ -n "$REMOTE_SHA" ]; then
+  # Read the raw parent header because a depth-1 fetch marks the tip as shallow.
+  REMOTE_PARENTS=$(git cat-file commit "$REMOTE_SHA" | sed -n '1,/^$/s/^parent //p')
+  REMOTE_TREE=$(git rev-parse "${REMOTE_SHA}^{tree}")
+fi
+STAGED_TREE=$(git write-tree)
+if [ "$REMOTE_PARENTS" = "$BASE_SHA" ] && [ "$REMOTE_TREE" = "$STAGED_TREE" ]; then
+  echo "\`$BRANCH\` has the same parent and tree. Skipped commit and push to preserve its SHA." >> "$GITHUB_STEP_SUMMARY"
+else
+  git -c user.name="$BOT_NAME" -c user.email="$BOT_EMAIL" commit -q -m "$TITLE" \
+    -m "npm run release:refresh-derived -- --profile=nightly on ${BASE}: ${COUNT} file(s)." \
+    -m "Run: ${RUN_URL}"
+  # A missing SHA means the branch must still be absent. A later push invalidates either lease.
+  git push -q --force-with-lease="${REF}:${REMOTE_SHA}" origin "HEAD:${REF}"
+fi
 
 if [ "$HAS_PR_TOKEN" != "true" ]; then
   {
-    echo "\`$BRANCH\` is pushed with ${COUNT} refreshed file(s), but no PR was opened:"
+    echo "\`$BRANCH\` has ${COUNT} refreshed file(s) on origin, but no PR was opened:"
     echo "neither \`DERIVED_REFRESH_PR_TOKEN\` nor \`I18N_REFRESH_TOKEN\` is set. Open it from that branch against \`$BASE\`."
   } >> "$GITHUB_STEP_SUMMARY"
   exit 0

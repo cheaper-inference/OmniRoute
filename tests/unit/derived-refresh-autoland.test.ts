@@ -1,10 +1,15 @@
 import assert from "node:assert/strict";
-import test from "node:test";
+import { spawnSync } from "node:child_process";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { delimiter, join } from "node:path";
+import test, { type TestContext } from "node:test";
+import { fileURLToPath } from "node:url";
 
 import { loadFamilies } from "../../scripts/check/check-pr-derived-paths.mjs";
 import { loadConfig } from "../../scripts/merge-queue/config.mjs";
 import {
   decideAutoland,
+  frozenReadmeLines,
   isDigitsOnlyPatch,
 } from "../../scripts/release/derived-refresh-autoland.mjs";
 
@@ -153,14 +158,398 @@ const patches: Array<[string, unknown, boolean]> = [
     false,
   ],
   [
-    "missing newline markers",
+    "missing newline markers on both sides",
     "@@ -1 +1 @@\n-Count: 252\n\\ No newline at end of file\n+Count: 255\n\\ No newline at end of file",
+    false,
+  ],
+  [
+    "a removed final newline",
+    "@@ -1 +1 @@\n-Count: 252\n+Count: 255\n\\ No newline at end of file",
+    false,
+  ],
+];
+
+function linePatch(before: string, after: string, line = 1) {
+  return `@@ -${line} +${line} @@\n-${before}\n+${after}`;
+}
+
+const lines: Array<[string, string, string, boolean]> = [
+  [
+    "a wallet address in HTML code",
+    "<td><code>bc1qh00smz004sy85wyl28v77tenkt3ckl6eaep7fd</code></td>",
+    "<td><code>bc1qh00smz004sy95wyl28v77tenkt3ckl6eaep7fd</code></td>",
+    false,
+  ],
+  [
+    "an HTML referral link",
+    '<a href="https://agentrouter.org/register?aff=70LM">Register</a>',
+    '<a href="https://agentrouter.org/register?aff=71LM">Register</a>',
+    false,
+  ],
+  [
+    "a loose URL with a repository ID",
+    "See https://trendshift.io/repositories/23589",
+    "See https://trendshift.io/repositories/23580",
+    false,
+  ],
+  [
+    "a Markdown link target containing parentheses",
+    "[Report](reports/run(final)23589.md)",
+    "[Report](reports/run(final)23580.md)",
+    false,
+  ],
+  ["a Markdown image target", "![Chart](chart-1.svg)", "![Chart](chart-2.svg)", false],
+  ["an HTML image source", '<img src="chart-1.svg">', '<img src="chart-2.svg">', false],
+  [
+    "an HTML source set",
+    '<source srcset="chart-1.svg 1x, chart-2.svg 2x">',
+    '<source srcset="chart-1.svg 1x, chart-3.svg 2x">',
+    false,
+  ],
+  [
+    "a source set with an anchor and another target",
+    '<source srcset="#chart 1x, chart-2.svg 2x">',
+    '<source srcset="#chart 1x, chart-3.svg 2x">',
+    false,
+  ],
+  ["inline code", "Run `tool 2`", "Run `tool 3`", false],
+  ["inline code with inner backticks", "``a `2` b``", "``a `3` b``", false],
+  [
+    "inline code after an escaped backtick",
+    "Literal \\` then `tool 2`",
+    "Literal \\` then `tool 3`",
+    false,
+  ],
+  ["nested HTML inside code", "<code><b>2</b></code>", "<code><b>3</b></code>", false],
+  ["a prefixed version", "Measured in v3.8.54", "Measured in v3.8.99", false],
+  ["a bare version", "Measured in 3.8.54", "Measured in 3.8.99", false],
+  ["a version after an underscore", "artifact_v3.8.54", "artifact_v3.8.99", false],
+  ["a pre-release version", "Use 3.8.54-rc.1", "Use 3.8.54-rc.2", false],
+  ["a hash outside code", "sha 4de5c9b65f4cd1f966db", "sha 4de5c9b65f4cd1f967db", false],
+  [
+    "a long token with connectors outside code",
+    "ID pix01365d865059-bc44-483a-962d-43ceb80126eb",
+    "ID pix01365d865059-bc45-483a-962d-43ceb80126eb",
+    false,
+  ],
+  [
+    "a long token with all supported connectors",
+    "ID a1.b_c-d:e/f+g=h2",
+    "ID a1.b_c-d:e/f+g=h3",
+    false,
+  ],
+  [
+    "a URL after a connector",
+    "From mirror:https://x.test/?id=1",
+    "From mirror:https://x.test/?id=2",
+    false,
+  ],
+  [
+    "a purely numeric token before a version",
+    "ID 12-3456789012-3.8.54",
+    "ID 12-3456789012-3.8.55",
+    false,
+  ],
+  ["the same frozen values in a different order", "`A1` then `A2`", "`A2` then `A1`", false],
+  ["prose", "Every AI tool → 394 providers", "Every AI tool → 401 providers", true],
+  [
+    "image alt text",
+    '<img src="chart-1.svg" alt="Every AI tool → 394 providers">',
+    '<img src="chart-1.svg" alt="Every AI tool → 401 providers">',
+    true,
+  ],
+  ["a table cell", "| Providers | 394 |", "| Providers | 401 |", true],
+  ["an ISO date", "Catalog last audited on 2026-11-23", "Catalog last audited on 2026-11-30", true],
+  ["a decimal with a suffix", "~11.3B", "~11.4B", true],
+  ["a count with a plus suffix", "140+", "150+", true],
+  ["a percentage range", "15–95%", "16–96%", true],
+  ["only the lower bound of a percentage range", "15–95%", "16–95%", true],
+  [
+    "the requested routing strategies heading",
+    "### Or build your own: 22 routing strategies",
+    "### Or build your own: 23 routing strategies",
+    true,
+  ],
+  [
+    "an HTML cell with a percentage width",
+    '<td align="center" width="25%"><b>394</b>',
+    '<td align="center" width="25%"><b>401</b>',
+    true,
+  ],
+  [
+    "a count next to unchanged model names",
+    "GLM-4.7-Flash, GLM-4.5-Flash, 24 models",
+    "GLM-4.7-Flash, GLM-4.5-Flash, 25 models",
+    true,
+  ],
+  [
+    "an HTML anchor for the same document",
+    '<a href="#22-routing-strategies">22 routing strategies</a>',
+    '<a href="#23-routing-strategies">23 routing strategies</a>',
     true,
   ],
 ];
 
+for (const [name, before, after, expected] of lines) {
+  patches.push([name, linePatch(before, after), expected]);
+}
+
+patches.push([
+  "a numbered heading and its Markdown anchor",
+  [
+    "@@ -1,2 +1,2 @@",
+    "-### Or build your own (22 routing strategies)",
+    "-[Routing](#or-build-your-own-22-routing-strategies)",
+    "+### Or build your own (23 routing strategies)",
+    "+[Routing](#or-build-your-own-23-routing-strategies)",
+  ].join("\n"),
+  true,
+]);
+
 for (const [name, patch, expected] of patches) {
   test(`checks digits-only patches for ${name}`, () => {
-    assert.equal(isDigitsOnlyPatch(patch), expected);
+    const patchLines = typeof patch === "string" ? patch.split("\n") : [];
+    const additions = patchLines.filter((line) => line.startsWith("+")).length;
+    const deletions = patchLines.filter((line) => line.startsWith("-")).length;
+    assert.equal(
+      isDigitsOnlyPatch(patch, { status: "modified", additions, deletions }, new Set<number>()),
+      expected
+    );
   });
 }
+
+const readmeEvidence = { status: "modified", additions: 1, deletions: 1 };
+const invalidEvidence: Array<[string, Partial<typeof readmeEvidence> | undefined]> = [
+  ["missing file metadata", undefined],
+  ["a missing status", { ...readmeEvidence, status: undefined }],
+  ["an added README", { ...readmeEvidence, status: "added" }],
+  ["a missing addition count", { ...readmeEvidence, additions: undefined }],
+  ["a missing deletion count", { ...readmeEvidence, deletions: undefined }],
+  ["different addition and deletion counts", { ...readmeEvidence, additions: 2 }],
+  ["a missing complete hunk", { ...readmeEvidence, additions: 2, deletions: 2 }],
+];
+
+for (const [name, evidence] of invalidEvidence) {
+  test(`rejects digits-only README evidence for ${name}`, () => {
+    assert.equal(isDigitsOnlyPatch(migrationPatch, evidence, new Set<number>()), false);
+  });
+}
+
+test("rejects digits-only patches without frozen line evidence", () => {
+  assert.equal(isDigitsOnlyPatch(migrationPatch, readmeEvidence), false);
+});
+
+test("rejects a hunk whose old and new starting lines differ", () => {
+  const patch = migrationPatch.replace("+12", "+13");
+  assert.equal(isDigitsOnlyPatch(patch, readmeEvidence, new Set<number>()), false);
+});
+
+const pix =
+  "00020101021126580014br.gov.bcb.pix01365d865059-bc44-483a-962d-43ceb80126eb5204000053039865802BR5922OMNIROUTE CONTRIBUICAO6006BRASIL62070503***630475DD";
+const fencedEdits: Array<[string, string, string]> = [
+  ["the Pix prefix", pix, pix.replace("pix01365d865059", "pix01365d865058")],
+  ["the first short Pix segment", pix, pix.replace("bc44", "bc45")],
+  ["the second short Pix segment", pix, pix.replace("483a", "484a")],
+  ["the third short Pix segment", pix, pix.replace("962d", "963d")],
+  ["the Pix suffix", pix, pix.replace("630475DD", "630476DD")],
+  [
+    "the curl port",
+    "curl http://localhost:20128/v1/models",
+    "curl http://localhost:20129/v1/models",
+  ],
+  ["the curl model", "  --model glm/glm-5.2", "  --model glm/glm-5.3"],
+  ["the opening fence's info string", "```tool2", "```tool3"],
+];
+
+for (const [name, before, after] of fencedEdits) {
+  test(`rejects digits-only changes to ${name} in a fenced block`, () => {
+    const base = before.startsWith("```")
+      ? ["Example", before, "Example output", "```", ""].join("\n")
+      : ["Example", "```sh", before, "```", ""].join("\n");
+    const line = before.startsWith("```") ? 2 : 3;
+    const frozen = frozenReadmeLines(base);
+    assert.equal(isDigitsOnlyPatch(linePatch(before, after, line), readmeEvidence, frozen), false);
+  });
+}
+
+const fences: Array<[string, string[], number[]]> = [
+  ["a tilde fence", ["~~~sh", "Count 1", "~~~~", "Count 2"], [1, 2, 3]],
+  ["a four-backtick fence with nested backticks", ["````", "```", "Count 1", "````"], [1, 2, 3, 4]],
+  ["a three-space indent", ["   ```sh", "Count 1", "   ```\t", "Count 2"], [1, 2, 3]],
+  ["a four-space indent", ["    ```sh", "Count 1", "    ```"], []],
+  ["an unclosed fence", ["Before", "~~~", "```", "Count 1"], [2, 3, 4]],
+  ["text after a would-be closing fence", ["~~~", "~~~ text", "Count 1", "~~~"], [1, 2, 3, 4]],
+  [
+    "a fence longer than the inline pattern bound",
+    ["`".repeat(4097), "Count 1", "`".repeat(4097)],
+    [1, 2, 3],
+  ],
+];
+
+for (const [name, lines, expected] of fences) {
+  test(`finds the frozen line numbers for ${name}`, () => {
+    assert.deepEqual([...frozenReadmeLines(`${lines.join("\r\n")}\r\n`)], expected);
+  });
+}
+
+test("allows a digits-only change just after a closed fence with the fence in context", () => {
+  const frozen = frozenReadmeLines("```sh\nCount 1\n```\nCount 2\n");
+  const patch = "@@ -3,2 +3,2 @@\n ```\n-Count 2\n+Count 3";
+  assert.equal(isDigitsOnlyPatch(patch, readmeEvidence, frozen), true);
+});
+
+test("accounts for hunk context and earlier replacements before a frozen removal", () => {
+  const frozen = frozenReadmeLines("Count 1\n```\nCount 2\n```\n");
+  const patch = "@@ -1,4 +1,4 @@\n-Count 1\n+Count 3\n ```\n-Count 2\n+Count 4\n ```";
+  assert.equal(
+    isDigitsOnlyPatch(patch, { ...readmeEvidence, additions: 2, deletions: 2 }, frozen),
+    false
+  );
+});
+
+const baseSha = "b".repeat(40);
+const mergeBaseSha = "c".repeat(40);
+const baseReadme = "Intro\nCount 2\n";
+const baseContents = {
+  type: "file",
+  encoding: "base64",
+  size: Buffer.byteLength(baseReadme),
+  content: Buffer.from(baseReadme).toString("base64"),
+};
+
+function runAutoland(
+  t: TestContext,
+  contents: unknown,
+  { ancestor = baseSha, ancestorContents = baseContents, rawContents = "" } = {}
+) {
+  const root = fileURLToPath(new URL("../..", import.meta.url));
+  const artifacts = join(root, "_artifacts");
+  mkdirSync(artifacts, { recursive: true });
+  const dir = mkdtempSync(join(artifacts, "autoland-test-"));
+  t.after(() => rmSync(dir, { force: true, recursive: true }));
+  const responses = {
+    "pulls/1": {
+      state: "open",
+      draft: false,
+      head: { sha: headSha, ref: ready.headBranch, repo: { full_name: ready.repository } },
+      base: { sha: baseSha, ref: ready.baseBranch },
+      user: { login: ready.author },
+      labels: [],
+      changed_files: 1,
+    },
+    "pulls/1/files?per_page=100": [
+      [{ ...readmeEvidence, filename: "README.md", patch: linePatch("Count 2", "Count 3", 2) }],
+    ],
+    [`contents/README.md?ref=${baseSha}`]: contents,
+    [`raw:contents/README.md?ref=${baseSha}`]: rawContents,
+    [`contents/README.md?ref=${mergeBaseSha}`]: ancestorContents,
+    [`compare/${baseSha}...${headSha}?per_page=1`]: { merge_base_commit: { sha: ancestor } },
+    "branches?per_page=100": `${ready.baseBranch}\n`,
+    "issues?state=open&per_page=100": "",
+    ...Object.fromEntries(
+      ["ci.yml", "quality.yml"].map((workflow, index) => [
+        `actions/workflows/${workflow}/runs?branch=chore%2Fderived-refresh&event=pull_request&head_sha=${headSha}&per_page=100`,
+        [{ workflow_runs: [{ id: index + 1, head_sha: headSha, run_attempt: 1 }] }],
+      ])
+    ),
+    ...Object.fromEntries(
+      Object.keys(checks).map((name, index) => [
+        `actions/runs/${index + 1}/attempts/1/jobs?per_page=100`,
+        [{ jobs: [{ name, status: "completed", conclusion: "success" }] }],
+      ])
+    ),
+  };
+  writeFileSync(join(dir, "responses.json"), JSON.stringify(responses));
+  writeFileSync(
+    join(dir, "gh"),
+    `#!${process.execPath}
+import { readFileSync } from "node:fs";
+const [method, endpoint, ...args] = process.argv.slice(2);
+const prefix = "repos/cheaper-inference/OmniRoute/";
+if (method !== "api" || !endpoint?.startsWith(prefix)) process.exit(1);
+const key = endpoint.slice(prefix.length);
+const raw = args.includes("Accept: application/vnd.github.raw+json");
+const responses = JSON.parse(readFileSync(new URL("responses.json", import.meta.url), "utf8"));
+const response = responses[raw ? "raw:" + key : key];
+if (response == null) process.exit(1);
+if (response.encoding === "none" && !args.includes("Accept: application/vnd.github.object+json")) process.exit(1);
+process.stdout.write(typeof response === "string" ? response : JSON.stringify(response));
+`,
+    { mode: 0o700 }
+  );
+  const result = spawnSync(
+    process.execPath,
+    ["scripts/release/derived-refresh-autoland.mjs", "--pr", "1", "--dry-run"],
+    {
+      cwd: root,
+      env: { ...process.env, PATH: `${dir}${delimiter}${process.env.PATH}` },
+      encoding: "utf8",
+    }
+  );
+  assert.equal(result.status, 0, result.stderr);
+  return result.stdout;
+}
+
+const unreadableContents: Array<[string, unknown, RegExp]> = [
+  ["an API failure", null, /base-readme-unavailable/],
+  ["an empty README", { ...baseContents, size: 0, content: "" }, /base-readme-empty/],
+  ["an empty response body", "", /base-readme-unavailable/],
+  ["an explicit truncation flag", { ...baseContents, truncated: true }, /base-readme-incomplete/],
+  [
+    "a short decoded body",
+    { ...baseContents, size: baseContents.size + 3 },
+    /base-readme-incomplete/,
+  ],
+  ["an oversized README", { ...baseContents, size: 2 * 1024 * 1024 + 1 }, /base-readme-too-large/],
+];
+
+for (const [name, contents, reason] of unreadableContents) {
+  test(`autoland declines a README patch for ${name}`, (t) => {
+    const decision = runAutoland(t, contents);
+    assert.match(decision, /apply=false/);
+    assert.match(decision, reason);
+  });
+}
+
+test("autoland uses the README at the exact base SHA to check the old patch lines", (t) => {
+  assert.match(runAutoland(t, baseContents), /apply=true/);
+  const fenced = "```\nCount 2\n```\n";
+  const decision = runAutoland(t, {
+    ...baseContents,
+    size: Buffer.byteLength(fenced),
+    content: Buffer.from(fenced).toString("base64"),
+  });
+  assert.match(decision, /apply=false readme-not-digits-only/);
+});
+
+test("autoland allows a diverged base if its README still matches the merge base", (t) => {
+  assert.match(runAutoland(t, baseContents, { ancestor: mergeBaseSha }), /apply=true/);
+});
+
+test("autoland rejects a README with different contents at the merge base", (t) => {
+  const ancestorReadme = "```\nCount 2\n```\n";
+  const decision = runAutoland(t, baseContents, {
+    ancestor: mergeBaseSha,
+    ancestorContents: {
+      ...baseContents,
+      size: Buffer.byteLength(ancestorReadme),
+      content: Buffer.from(ancestorReadme).toString("base64"),
+    },
+  });
+  assert.match(decision, /apply=false readme-diff-base-mismatch/);
+});
+
+test("autoland accepts an intact raw README and rejects a truncated raw response", (t) => {
+  const rawContents = baseReadme + "Example line\n".repeat(90_000);
+  const metadata = {
+    type: "file",
+    encoding: "none",
+    size: Buffer.byteLength(rawContents),
+    content: "",
+  };
+  assert.match(runAutoland(t, metadata, { rawContents }), /apply=true/);
+  assert.match(
+    runAutoland(t, metadata, { rawContents: rawContents.slice(0, -1) }),
+    /apply=false base-readme-incomplete/
+  );
+});

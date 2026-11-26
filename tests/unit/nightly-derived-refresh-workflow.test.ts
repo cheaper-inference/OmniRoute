@@ -354,7 +354,11 @@ function mockPublishGh(dir: string) {
       '      .baseRefName) printf "%s" "${GH_PR_BASE:?}" ;;',
       "      *) exit 1 ;;",
       "    esac ;;",
-      '  "pr create") echo "https://example.invalid/pull/new" ;;',
+      '  "pr create")',
+      '    if [ -n "${GH_FAIL_HEAD:-}" ] && printf "%s\\n" "$@" | grep -Fxq "$GH_FAIL_HEAD"; then',
+      '      echo "PR creation failed" >&2; exit 17',
+      "    fi",
+      '    echo "https://example.invalid/pull/new" ;;',
       '  *) printf "Unexpected gh call: %s\\n" "$*" >&2; exit 1 ;;',
       "esac",
     ].join("\n")
@@ -371,12 +375,22 @@ const publishEnv = {
   BOT_EMAIL,
 };
 
-function runPublish({ tip, diff }: { tip: "bot" | "amended"; diff: boolean }) {
+function runPublish({
+  tip,
+  diff,
+  branch = REFRESH_BRANCH,
+  advanceBase = false,
+}: {
+  tip: "bot" | "amended";
+  diff: boolean | "same";
+  branch?: string;
+  advanceBase?: boolean;
+}) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "derived-refresh-publish-"));
   try {
-    const { work, git, remote, baseSha } = initPublishRepo(dir);
+    const { work, git, remote } = initPublishRepo(dir);
     const facts = path.join(work, "facts.md");
-    git("switch", "-q", "-c", REFRESH_BRANCH);
+    git("switch", "-q", "-c", branch);
     fs.writeFileSync(facts, "providers: 2\n");
     git("add", "facts.md");
     git(
@@ -395,11 +409,13 @@ function runPublish({ tip, diff }: { tip: "bot" | "amended"; diff: boolean }) {
       git("commit", "-q", "--amend", "--no-edit");
       assert.equal(git("log", "-1", "--format=%ae %ce"), `${BOT_EMAIL} ${MAINTAINER_EMAIL}`);
     }
-    git("push", "-q", "origin", REFRESH_BRANCH);
-    const before = remote("rev-parse", REFRESH_BRANCH);
+    git("push", "-q", "origin", branch);
+    const before = remote("rev-parse", branch);
 
     git("switch", "-q", BASE);
-    if (diff) fs.writeFileSync(facts, "providers: 3\n");
+    if (advanceBase) git("commit", "-q", "--allow-empty", "-m", "Advance release");
+    const baseSha = git("rev-parse", "HEAD");
+    if (diff) fs.writeFileSync(facts, diff === "same" ? "providers: 2\n" : "providers: 3\n");
     git("add", "-A");
     const body = path.join(dir, "body.md");
     const files = path.join(dir, "files");
@@ -408,7 +424,7 @@ function runPublish({ tip, diff }: { tip: "bot" | "amended"; diff: boolean }) {
 
     mockPublishGh(dir);
     const result = runBash(
-      [PUBLISH_PATH, REFRESH_BRANCH, "chore(docs): refresh derived numbers", body, files],
+      [PUBLISH_PATH, branch, "chore(docs): refresh derived numbers", body, files],
       work,
       dir,
       {
@@ -420,12 +436,37 @@ function runPublish({ tip, diff }: { tip: "bot" | "amended"; diff: boolean }) {
         GH_PR_BASE: BASE,
       }
     );
-    const after = remote("rev-parse", REFRESH_BRANCH);
-    return { ...result, pushed: before !== after };
+    const after = remote("rev-parse", branch);
+    return {
+      ...result,
+      pushed: before !== after,
+      parent: remote("rev-parse", `${after}^`),
+      baseSha,
+    };
   } finally {
     fs.rmSync(dir, { recursive: true, force: true });
   }
 }
+
+test("nightly refresh: the protected PR keeps its SHA when its parent and tree are identical", () => {
+  const result = runPublish({ tip: "bot", diff: "same", branch: PROTECTED_BRANCH });
+  assert.equal(result.status, 0, result.stderr);
+  assert.equal(result.pushed, false);
+  assert.match(result.summary, /same parent and tree.*Skipped commit and push/);
+  assert.match(result.gh, /^pr edit 7 /m, "a retry still reconciles PR metadata");
+});
+
+test("nightly refresh: an identical tree with a different parent publishes a new SHA", () => {
+  const result = runPublish({
+    tip: "bot",
+    diff: "same",
+    branch: PROTECTED_BRANCH,
+    advanceBase: true,
+  });
+  assert.equal(result.status, 0, result.stderr);
+  assert.equal(result.pushed, true);
+  assert.equal(result.parent, result.baseSha);
+});
 
 test("nightly refresh: a hand fix amended onto the bot commit is never overwritten", () => {
   const amended = runPublish({ tip: "amended", diff: true });
@@ -505,6 +546,37 @@ test("nightly refresh: the split publishes only the assigned files to each robot
     fs.rmSync(dir, { recursive: true, force: true });
   }
 });
+
+for (const failingBranch of [REFRESH_BRANCH, PROTECTED_BRANCH]) {
+  test(`nightly refresh: attempts both publications when ${failingBranch} fails`, () => {
+    assert.ok(splitAndPublish?.run);
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "derived-refresh-split-failure-"));
+    try {
+      const { work } = initPublishRepo(dir);
+      fs.writeFileSync(path.join(work, "facts.md"), "providers: 3\n");
+      fs.writeFileSync(path.join(work, SKILL), "# Refreshed skill\n");
+      mockPublishGh(dir);
+      const result = runStep(splitAndPublish.run, work, dir, {
+        ...publishEnv,
+        REFRESH_BRANCH,
+        PROTECTED_BRANCH,
+        GH_FAIL_HEAD: failingBranch,
+      });
+      assert.notEqual(result.status, 0, "either publication can fail the step");
+      assert.match(result.stderr, /PR creation failed/);
+      const survivingBranch = failingBranch === REFRESH_BRANCH ? PROTECTED_BRANCH : REFRESH_BRANCH;
+      assert.ok(
+        result.summary.includes(
+          `Opened https://example.invalid/pull/new from \`${survivingBranch}\`.`
+        )
+      );
+      assert.ok(result.summary.includes(`\`${failingBranch}\` exited 17`));
+      assert.ok(result.summary.includes(`\`${survivingBranch}\` exited 0`));
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+}
 
 test("nightly refresh: the refresh step gets a translation engine, so it never writes __MISSING__ markers", () => {
   const refresh = stepRunning("npm run release:refresh-derived -- --profile=nightly") as {
