@@ -5,8 +5,14 @@ import os from "node:os";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import evidencePolicy from "../../config/quality/free-catalog-evidence.json" with { type: "json" };
 import * as catalog from "../../open-sse/config/freeModelCatalog.ts";
 import * as counts from "../../open-sse/config/freeModelCatalog.counts.ts";
+import {
+  FREE_CATALOG_CURATED_AT,
+  FREE_MODEL_BUDGETS,
+} from "../../open-sse/config/freeModelCatalog.data.ts";
+import { RETIRED_FREE_ROWS } from "../../open-sse/config/freeModelCatalog.retired.data.ts";
 import { buildFreeCatalogFacts } from "../../scripts/release/lib/free-catalog-facts.mjs";
 import { nativeCoverageArgs } from "../_helpers/nativeCoverageArgs.ts";
 import { membershipFromProviderConstants } from "./_helpers/providerAccessMembership.ts";
@@ -73,6 +79,65 @@ test("radar export totals agree with the public free catalog and its steady fact
   assert.deepEqual(totais, catalog.computePublicFreeHeadline());
 });
 
+test("radar export v2 includes the curation date, row-sum totals, and retired offers", () => {
+  const data = runExport();
+  assert.equal(data.exportVersion, 2);
+  assert.equal(data.curatedAt, FREE_CATALOG_CURATED_AT);
+  assert.deepEqual(data.rowSum, catalog.computeRowSumMirror());
+  assert.equal(data.retired.length, RETIRED_FREE_ROWS.length);
+});
+
+test("radar export adds gate, quota unit, and evidence metadata to catalog budgets", () => {
+  const { budgets } = runExport();
+  assert.equal(budgets.length, FREE_MODEL_BUDGETS.length);
+  for (const [index, row] of FREE_MODEL_BUDGETS.entries()) {
+    const budget = budgets[index];
+    const label = `${row.provider}/${row.modelId}`;
+    assert.equal(budget.provider, row.provider, label);
+    assert.equal(budget.modelId, row.modelId, label);
+    assert.deepEqual(budget.gates, row.gates, label);
+    if (row.gates?.length) {
+      assert.equal(budget.gatedTokensPerMonth, budget.monthlyTokens, label);
+    } else {
+      assert.equal(Object.hasOwn(budget, "gatedTokensPerMonth"), false, label);
+    }
+    if (row.gates?.length && row.poolKey) {
+      assert.equal(budget.gatedPoolId, budget.poolKey, label);
+    } else {
+      assert.equal(Object.hasOwn(budget, "gatedPoolId"), false, label);
+    }
+
+    assert.equal(budget.quotaUnit, catalog.resolveFreeQuotaUnit(row) ?? null, label);
+    if (row.monthlyTokens > 0) {
+      assert.ok(["tokens", "requests", "credits", "neurons"].includes(budget.quotaUnit), label);
+    }
+
+    const source = evidencePolicy.evidence.find(
+      ({ provider, modelId }) => provider === row.provider && modelId === row.modelId
+    );
+    assert.deepEqual(
+      budget.evidence,
+      source ? { url: source.sourceUrl, checkedAt: source.checkedAt } : null,
+      label
+    );
+  }
+});
+
+test("radar export keeps the gated quota for a row without a pool and leaves the input intact", async () => {
+  const { buildExportBudgets } = await import("../../scripts/release/radar-export.mjs");
+  const row = Object.freeze({
+    provider: "fixture",
+    modelId: "fixture-gated-model",
+    monthlyTokens: 100,
+    poolKey: null,
+    gates: ["card"],
+  });
+  const [budget] = buildExportBudgets([row]);
+  assert.notEqual(budget, row);
+  assert.equal(budget.gatedTokensPerMonth, row.monthlyTokens);
+  assert.equal(Object.hasOwn(budget, "gatedPoolId"), false);
+});
+
 test("radar export provenance never fabricates unknown fields", () => {
   const data = runExport();
   const p = data.provenance;
@@ -105,4 +170,16 @@ test("radar export provenance reflects the GitHub Actions environment when prese
   assert.equal(p.sourceCommit, sha);
   assert.equal(p.sourceRef, "release/v9.9.9");
   assert.equal(p.runUrl, "https://github.com/cheaper-inference/OmniRoute/actions/runs/42");
+});
+
+test("radar export provenance prefers the checked-out release over the workflow trigger", () => {
+  const sourceCommit = "b".repeat(40);
+  const { provenance } = runExport({
+    GITHUB_REF_NAME: "main",
+    GITHUB_SHA: "a".repeat(40),
+    RADAR_EXPORT_SOURCE_REF: "release/v9.9.9",
+    RADAR_EXPORT_SOURCE_SHA: sourceCommit,
+  });
+  assert.equal(provenance.sourceRef, "release/v9.9.9");
+  assert.equal(provenance.sourceCommit, sourceCommit);
 });
