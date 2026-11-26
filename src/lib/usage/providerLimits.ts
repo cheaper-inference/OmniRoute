@@ -226,7 +226,6 @@ function shouldRefreshProviderLimitsCache(
 ): boolean {
   if (!cache?.quotas) return true;
   if (connection.provider !== "antigravity" && connection.provider !== "agy") return false;
-
   return (
     !hasRetrieveUserQuotaSource(connection.provider, cache) ||
     Object.keys(cache.quotas).some(
@@ -243,7 +242,6 @@ function shouldRefreshProviderLimitsCache(
 export function isSupportedUsageConnection(connection: ProviderConnectionLike | null): boolean {
   if (!connection?.provider) return false;
   if (ZCODE_PROVIDERS.has(connection.provider)) return connection.authType === "oauth";
-
   if (connection.authType === "oauth") {
     return supportsProviderQuota(connection.provider, connection);
   }
