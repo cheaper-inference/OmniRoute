@@ -35,7 +35,6 @@ import {
   hasValuableContent,
   fixInvalidId,
   formatSSE,
-  unwrapGeminiChunk,
   appendBoundedText,
   buildSyntheticChatChunk,
   hasActiveDeltaValue,
@@ -120,7 +119,8 @@ import { applyThinkTag, flushThink, initThinkState } from "./thinkTagParser.ts";
 import { restoreOpenAIToolNames } from "../translator/helpers/toolCallHelper.ts";
 import { restoreClaudeToolName } from "../services/claudeCodeToolRemapper.ts";
 import { normalizeFinalOpenAIStreamChunk } from "./openAIStreamChunk.ts";
-import { collectClaudeDelta, collectToolUseName, withToolUseNames } from "./streamClaudeDelta.ts";
+import { collectToolUseName, withToolUseNames } from "./streamClaudeDelta.ts";
+import { collectTranslatedText } from "./streamTranslatedText.ts";
 import { createStreamTiming, registerStreamTiming, type StreamTiming } from "./streamTiming.ts";
 import { trackStreamPartialUsage } from "./streamPartialUsage.ts";
 import { buildUsageOnlyChunk } from "./usageOnlyChunk.ts";
@@ -2722,33 +2722,9 @@ export function createSSEStream(options: StreamOptions = {}) {
             } catch {} // best-effort bookkeeping write — a miss just skips latency correlation
           }
 
-          // Track content length and accumulate for call log (from raw provider chunk, so content is never missed)
-          // Do this before translation so we capture content regardless of translator output shape
+          const translatedText = collectTranslatedText(parsed, state, targetFormat);
+          totalContentLength += translatedText.length;
 
-          // Claude format
-          const claudeDelta = collectClaudeDelta(parsed.delta, state);
-          totalContentLength += claudeDelta.contentLength;
-
-          // OpenAI format
-          if (parsed.choices?.[0]?.delta?.content) {
-            const c = parsed.choices[0].delta.content;
-            if (typeof c === "string") {
-              totalContentLength += c.length;
-              if (state?.accumulatedContent !== undefined)
-                state.accumulatedContent = appendBoundedText(state.accumulatedContent, c);
-            } else if (Array.isArray(c)) {
-              for (const part of c) {
-                if (part?.text && typeof part.text === "string") {
-                  totalContentLength += part.text.length;
-                  if (state?.accumulatedContent !== undefined)
-                    state.accumulatedContent = appendBoundedText(
-                      state.accumulatedContent,
-                      part.text
-                    );
-                }
-              }
-            }
-          }
           const openAiDelta = parsed.choices?.[0]?.delta;
           const openAiReasoning = getReadableReasoningValue(openAiDelta);
           if (openAiReasoning) {
@@ -2783,66 +2759,8 @@ export function createSSEStream(options: StreamOptions = {}) {
             }
           }
 
-          // Gemini / Cloud Code format - may have multiple parts
-          // Cloud Code API wraps in { response: { candidates: [...] } }, so unwrap.
-          // Only applies to Gemini-family formats — skip for OpenAI, Claude, etc.
-          const isGeminiFormat =
-            targetFormat === FORMATS.GEMINI || targetFormat === FORMATS.ANTIGRAVITY;
-          const geminiChunk = isGeminiFormat ? unwrapGeminiChunk(parsed) : parsed;
-          if (geminiChunk.candidates?.[0]?.content?.parts) {
-            for (const part of geminiChunk.candidates[0].content.parts) {
-              if (part.text && typeof part.text === "string") {
-                totalContentLength += part.text.length;
-                if (state?.accumulatedContent !== undefined)
-                  state.accumulatedContent = appendBoundedText(state.accumulatedContent, part.text);
-              }
-            }
-          }
-
-          // Responses-API upstream (e.g. grok-cli): only output_text deltas are the
-          // visible answer. Reasoning reaches accumulatedReasoning through the response
-          // translator (replayable text on output_item.done), and the `.done` events
-          // repeat the full text as snapshots, so the generic `delta`/`text` fallback
-          // below must not see these events at all.
-          const responsesEventType =
-            typeof (parsed as JsonRecord).type === "string" &&
-            ((parsed as JsonRecord).type as string).startsWith("response.")
-              ? ((parsed as JsonRecord).type as string)
-              : null;
-          if (responsesEventType) {
-            const d = (parsed as JsonRecord).delta;
-            if (typeof d === "string") {
-              totalContentLength += d.length;
-              if (
-                responsesEventType === "response.output_text.delta" &&
-                state?.accumulatedContent !== undefined
-              ) {
-                state.accumulatedContent = appendBoundedText(state.accumulatedContent, d);
-              }
-            }
-          }
-
-          // Generic fallback: delta string, top-level content/text (e.g. some SSE payloads)
-          if (!responsesEventType && state?.accumulatedContent !== undefined) {
-            if (typeof (parsed as JsonRecord).delta === "string") {
-              const d = (parsed as JsonRecord).delta as string;
-              state.accumulatedContent = appendBoundedText(state.accumulatedContent, d);
-              totalContentLength += d.length;
-            }
-            if (typeof (parsed as JsonRecord).content === "string") {
-              const c = (parsed as JsonRecord).content as string;
-              state.accumulatedContent = appendBoundedText(state.accumulatedContent, c);
-              totalContentLength += c.length;
-            }
-            if (typeof (parsed as JsonRecord).text === "string") {
-              const t = (parsed as JsonRecord).text as string;
-              state.accumulatedContent = appendBoundedText(state.accumulatedContent, t);
-              totalContentLength += t.length;
-            }
-          }
-
           const translateHasContent =
-            claudeDelta.hasText ||
+            translatedText.hasClaudeText ||
             typeof parsed.choices?.[0]?.delta?.content === "string" ||
             Boolean(getAnyReasoningValue(parsed.choices?.[0]?.delta));
           if (translateHasContent && !contentAfterToolSeen) {
@@ -3501,6 +3419,7 @@ export function createSSEStream(options: StreamOptions = {}) {
                   parsed
                 ),
               translateAndEmit: (ctrl, parsed) => {
+                collectTranslatedText(parsed, state, targetFormat);
                 // #18600 — restore aliases before translation (same seam as the
                 // main translate loop; the flush tail replays through here).
                 if (
@@ -3573,6 +3492,7 @@ export function createSSEStream(options: StreamOptions = {}) {
                 }
               }
 
+              collectTranslatedText(parsed, state, targetFormat);
               // #18600 — restore aliases before translation on the flush-path
               // partial buffer too (same seam as the main translate loop).
               if (

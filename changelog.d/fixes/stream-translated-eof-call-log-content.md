@@ -1,0 +1,1 @@
+- **fix(stream):** translated SSE call logs retain the final response text even when the upstream closes without a trailing blank line.
