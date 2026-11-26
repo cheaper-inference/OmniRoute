@@ -7,6 +7,9 @@
 
 // ============ Scope Definitions ============
 
+/** Canonical read permission shared by MCP tool policy and the API-key editor. */
+export const COMPRESSION_READ_SCOPE = "read:compression";
+
 /** All available MCP scopes */
 export const MCP_SCOPE_LIST = [
   "read:health",
@@ -23,7 +26,7 @@ export const MCP_SCOPE_LIST = [
   "pricing:write",
   "read:cache",
   "write:cache",
-  "read:compression",
+  COMPRESSION_READ_SCOPE,
   "write:compression",
   "read:proxies",
 ] as const;

@@ -1,0 +1,1 @@
+- Let dashboard operators manage MCP connection and compression read permissions independently on API keys and templates, without granting management access or changing server authorization defaults.
