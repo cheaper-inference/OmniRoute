@@ -22,7 +22,7 @@ test("Devin transports expose the curated catalog with truthful tool capabilitie
     devin_cli_agenticProvider.models.map((model) => model.id),
     catalogIds
   );
-  assert.equal(catalogIds.length, 110);
+  assert.equal(catalogIds.length, 134);
   assert.equal(new Set(catalogIds).size, catalogIds.length);
   assert.ok(catalogIds.every((id) => !id.toLowerCase().includes("byok")));
 });
@@ -42,6 +42,13 @@ test("Devin catalog contains only the operator-selected model families", () => {
     "kimi-k2-7",
     "glm-5-3-max",
     "glm-5-3-flash-max",
+    "swe-2-1",
+    "swe-2-1-max",
+    "swe-2-1-max-lightning",
+    "swe-2-max",
+    "swe-2-max-lightning",
+    "swe-2-flash-max",
+    "swe-2-flash-max-lightning",
     "swe-1-7",
     "swe-1-7-lightning",
     "adaptive",
@@ -67,9 +74,43 @@ test("Devin catalog contains only the operator-selected model families", () => {
     "deepseek-v4",
     "nemotron-3-ultra-nvfp4",
     "swe-1-6-fast",
+    "swe-2-1-ultrafast-max",
+    "swe-2-lightning-max",
   ]) {
     assert.equal(catalogIds.includes(id), false, `unselected Devin model must stay absent: ${id}`);
   }
+});
+
+test("Devin catalog carries the complete live SWE-2.x family", () => {
+  assert.deepEqual(
+    catalogIds.filter((id) => id.startsWith("swe-2-")),
+    [
+      "swe-2-1",
+      "swe-2-1-max",
+      "swe-2-1-xhigh",
+      "swe-2-1-high",
+      "swe-2-1-medium",
+      "swe-2-1-low",
+      "swe-2-1-lightning",
+      "swe-2-1-max-lightning",
+      "swe-2-1-xhigh-lightning",
+      "swe-2-1-high-lightning",
+      "swe-2-1-medium-lightning",
+      "swe-2-1-low-lightning",
+      "swe-2-max",
+      "swe-2-high",
+      "swe-2-medium",
+      "swe-2-max-lightning",
+      "swe-2-high-lightning",
+      "swe-2-medium-lightning",
+      "swe-2-flash-max",
+      "swe-2-flash-high",
+      "swe-2-flash-medium",
+      "swe-2-flash-max-lightning",
+      "swe-2-flash-high-lightning",
+      "swe-2-flash-medium-lightning",
+    ]
+  );
 });
 
 test("Devin catalog keeps higher-quality choices first", () => {
@@ -88,7 +129,7 @@ test("Devin catalog keeps higher-quality choices first", () => {
   ]);
 });
 
-test("every curated Devin model has an exact live provider price", () => {
+test("every curated Devin model has a provider-specific default price", () => {
   assert.deepEqual(new Set(Object.keys(DEVIN_MODEL_PRICING)), new Set(catalogIds));
 
   for (const provider of ["devin-cli", "dv", "devin-desktop", "devin-cli-agentic", "dva"]) {
@@ -119,6 +160,31 @@ test("Devin pricing remains provider-bound and preserves fast-tier rates", () =>
     cached: 0.8,
     output: 40,
   });
+  assert.deepEqual(getPricingForModel("devin-cli", "swe-2-1-max"), {
+    input: 2,
+    cached: 0.2,
+    output: 10,
+  });
+  assert.deepEqual(getPricingForModel("devin-cli", "swe-2-max"), {
+    input: 3,
+    cached: 0.3,
+    output: 15,
+  });
+  assert.deepEqual(getPricingForModel("devin-cli", "swe-2-flash-max"), {
+    input: 0.1,
+    cached: 0.01,
+    output: 0.5,
+  });
+  assert.deepEqual(getPricingForModel("devin-cli", "swe-2-1-max-lightning"), {
+    input: 5,
+    cached: 0.5,
+    output: 25,
+  });
+  assert.deepEqual(getPricingForModel("devin-cli", "swe-2-flash-max-lightning"), {
+    input: 1,
+    cached: 0.1,
+    output: 5,
+  });
 });
 
 test("Devin catalog carries the live output limits for representative models", () => {
@@ -129,4 +195,13 @@ test("Devin catalog carries the live output limits for representative models", (
   assert.equal(models.get("kimi-k2-7")?.maxOutputTokens, 16_000);
   assert.equal(models.get("grok-4-6-xhigh")?.maxOutputTokens, 100_000);
   assert.equal(models.get("gemini-3-7-flash-high")?.maxOutputTokens, 65_535);
+  assert.equal(models.get("swe-2-1-max")?.maxOutputTokens, 65_536);
+  assert.equal(models.get("swe-2-1-max")?.contextLength, 262_144);
+  assert.equal(models.get("swe-2-high")?.maxOutputTokens, 128_000);
+  assert.equal(models.get("swe-2-high-lightning")?.contextLength, 262_144);
+  assert.equal(models.get("swe-2-flash-high")?.maxOutputTokens, 131_072);
+  assert.equal(models.get("swe-2-flash-high-lightning")?.contextLength, 262_144);
+  assert.equal(models.get("swe-2-1-max-lightning")?.name, "SWE-2.1 Ultrafast Max");
+  assert.equal(models.get("swe-2-max-lightning")?.name, "SWE-2 Max Ultrafast");
+  assert.equal(models.get("swe-2-flash-max-lightning")?.name, "SWE-2 Flash Max Ultrafast");
 });

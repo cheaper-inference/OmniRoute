@@ -15,6 +15,10 @@ function fastVariantIds(base: string): string[] {
   return QUALITY_EFFORTS.map((effort) => `${base}-${effort}-fast`);
 }
 
+function lightningVariantIds(base: string, efforts: readonly string[]): string[] {
+  return efforts.map((effort) => `${base}-${effort}-lightning`);
+}
+
 function priorityVariantIds(base: string): string[] {
   return GPT_EFFORTS.map((effort) => `${base}-${effort}-priority`);
 }
@@ -37,9 +41,16 @@ const GPT_5_6_TERRA_FAST = { input: 4, cached: 0.4, output: 24 };
 const GPT_5_6_LUNA = { input: 0.2, cached: 0.02, output: 1.2 };
 const GPT_5_6_LUNA_FAST = { input: 0.4, cached: 0.04, output: 2.4 };
 
+const SWE_2_1_LIST = { input: 2, cached: 0.2, output: 10 };
+const SWE_2_LIST = { input: 3, cached: 0.3, output: 15 };
+const SWE_2_FLASH = { input: 0.1, cached: 0.01, output: 0.5 };
+const SWE_2_1_ULTRAFAST = { input: 5, cached: 0.5, output: 25 };
+const SWE_2_ULTRAFAST = { input: 1, cached: 0.1, output: 5 };
+
 /**
- * Exact per-UID rates returned by Devin's authenticated live catalog on
- * 2026-09-02. Rates are USD per one million tokens.
+ * Per-UID rates from Devin's authenticated live catalog and public model
+ * documentation. Initially curated on 2026-09-02; SWE rows refreshed on
+ * 2026-11-26. Rates are USD per one million tokens.
  */
 export const DEVIN_MODEL_PRICING: Record<string, DevinTokenPricing> = {
   ...priced(variantIds("claude-fable-5-1", QUALITY_EFFORTS), CLAUDE_FABLE_5_1),
@@ -83,6 +94,15 @@ export const DEVIN_MODEL_PRICING: Record<string, DevinTokenPricing> = {
     output: 0.5,
   }),
 
+  ...priced(["swe-2-1", ...variantIds("swe-2-1", QUALITY_EFFORTS)], SWE_2_1_LIST),
+  ...priced(variantIds("swe-2", ["max", "high", "medium"]), SWE_2_LIST),
+  ...priced(variantIds("swe-2-flash", ["max", "high", "medium"]), SWE_2_FLASH),
+  ...priced(
+    ["swe-2-1-lightning", ...lightningVariantIds("swe-2-1", QUALITY_EFFORTS)],
+    SWE_2_1_ULTRAFAST
+  ),
+  ...priced(lightningVariantIds("swe-2", ["max", "high", "medium"]), SWE_2_ULTRAFAST),
+  ...priced(lightningVariantIds("swe-2-flash", ["max", "high", "medium"]), SWE_2_ULTRAFAST),
   ...priced(["swe-1-7", "swe-1-7-medium"], {
     input: 0.5,
     cached: 0.2,
