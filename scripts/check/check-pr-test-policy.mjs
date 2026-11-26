@@ -14,6 +14,7 @@ const TEST_FILE_PATTERNS = {
 // Exclude directories that don't require tests (i18n has Python validation, docs, config)
 const EXCLUDED_PATTERNS = [
   /\/i18n\/messages\//, // i18n files have their own Python test scripts
+  /^bin\/cli\/locales\/[^/]+\.json$/, // CLI translation catalogs
   /\.md$/, // Documentation
   /\.yaml$/, // Config files
   /\.yml$/, // Config files

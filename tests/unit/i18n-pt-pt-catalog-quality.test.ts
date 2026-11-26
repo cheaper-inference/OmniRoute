@@ -76,8 +76,9 @@ test("pt: 'Exclude' is translated as exclude, not delete", () => {
 });
 
 test("pt: no Brazilian-only wording leaks back into the European Portuguese catalog", () => {
-  // PT-BR forms with an unambiguous PT-PT counterpart (a carregar / equipa / guardar / gerir / o senhor).
-  const brazilian = /\b(Carregando|Salvando|Excluindo|Equipe|Você|Salvar|Gerenciar)\b/;
+  // Unicode boundaries include the accented final letter in “Você”.
+  const brazilian =
+    /(?<![\p{L}\p{M}\p{N}_])(?:Carregando|Salvando|Excluindo|Equipe|Você|Salvar|Gerenciar)(?![\p{L}\p{M}\p{N}_])/u;
   const offenders = Object.entries(pt)
     .filter(([, value]) => brazilian.test(value))
     .map(([key, value]) => `${key}: ${value}`);

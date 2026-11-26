@@ -228,6 +228,51 @@ test("the google engine skips the LLM entirely and needs no LLM variables", asyn
   }
 });
 
+test("Google normalizes the glossary and preserves an unrestorable batch item", async () => {
+  const result = await backendLib.translateMultiLocaleBatch(
+    [{ id: "provider", text: "Provider" }],
+    [{ code: "zh-CN" }, { code: "zh-TW" }],
+    {
+      engine: "google",
+      googleStrings: async (_texts: string[], locale: string) => [
+        locale === "zh-CN" ? "提供商" : null,
+      ],
+    }
+  );
+  assert.equal(result.perLocale.get("zh-CN").get("provider"), "提供者");
+  assert.deepEqual(result.failedLocales, ["zh-TW"]);
+  assert.equal(result.perLocale.has("zh-TW"), false);
+});
+
+test("Google restores Korean protected names from the glossary", async () => {
+  const value = await backendLib.translateString(
+    "Connect Claude and Tailscale",
+    { code: "ko" },
+    {
+      engine: "google",
+      googleStrings: async () => ["클로드와 꼬리비늘에 연결"],
+    }
+  );
+  assert.equal(value, "Claude와 Tailscale에 연결");
+});
+
+test("Google normalizes European Portuguese glossary terms as whole words", async () => {
+  const value = await backendLib.translateString(
+    "Portuguese labels",
+    { code: "pt" },
+    {
+      engine: "google",
+      googleStrings: async () => [
+        "Carregando… Salvando… Excluindo… Equipe: Salvar e Gerenciar. Você usou a sua parte. Você pode continuar. Salvaram, préSalvarão, àSalvar e Salvaré.",
+      ],
+    }
+  );
+  assert.equal(
+    value,
+    "A carregar… A guardar… A eliminar… Equipa: Guardar e Gerir. Já utilizou a sua parte. O utilizador pode continuar. Salvaram, préSalvarão, àSalvar e Salvaré."
+  );
+});
+
 test("three consecutive non-quota LLM failures open the circuit; a success resets the count", async () => {
   backendLib.resetLlmCircuit();
   const locale = { code: "de", english: "German" };

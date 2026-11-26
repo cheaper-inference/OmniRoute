@@ -1,0 +1,1 @@
+- **fix(i18n):** Apply locale glossaries to Google translations for the dashboard and CLI, including Korean protected names and European Portuguese wording. Treat CLI locale catalogs as translation data in the PR test policy.

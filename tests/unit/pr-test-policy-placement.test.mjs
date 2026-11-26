@@ -131,6 +131,16 @@ test("continues to reject production changes with no automated test", (t) => {
   assert.equal(f.run().status, 1);
 });
 
+test("accepts CLI locale catalog changes with no automated test", (t) => {
+  const f = fixture(t);
+  f.write("bin/cli/locales/xx.json", '{"title":"Translated title"}\n');
+  f.commit();
+  const result = f.run();
+  assert.equal(result.status, 0, result.report);
+  assert.match(result.report, /Changed production files: 0/);
+  assert.match(result.report, /Changed automated test files: 0/);
+});
+
 test("a valid test does not hide another newly misplaced test", (t) => {
   const f = fixture(t);
   f.write("src/feature.ts");

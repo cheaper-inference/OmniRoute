@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "locale": "pt",
+  "description": "European Portuguese UI and CLI wording. Match whole words and put specific phrases before shorter forms.",
+  "wholeWords": true,
+  "terms": {
+    "loading": {
+      "canonical": "A carregar",
+      "synonyms": ["Carregando"]
+    },
+    "saving": {
+      "canonical": "A guardar",
+      "synonyms": ["Salvando"]
+    },
+    "deleting": {
+      "canonical": "A eliminar",
+      "synonyms": ["Excluindo"]
+    },
+    "team": {
+      "canonical": "Equipa",
+      "synonyms": ["Equipe"]
+    },
+    "save": {
+      "canonical": "Guardar",
+      "synonyms": ["Salvar"]
+    },
+    "manage": {
+      "canonical": "Gerir",
+      "synonyms": ["Gerenciar"]
+    },
+    "share-used": {
+      "canonical": "Já utilizou",
+      "synonyms": ["Você usou"]
+    },
+    "user-address": {
+      "canonical": "O utilizador",
+      "synonyms": ["Você"]
+    }
+  }
+}

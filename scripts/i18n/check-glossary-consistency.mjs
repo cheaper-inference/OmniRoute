@@ -84,13 +84,14 @@ export function checkGlossaryConsistency(localeMessages, glossary, protectedTerm
   const leaves = collectLeaves(localeMessages || {});
 
   const terms = glossary && glossary.terms ? glossary.terms : {};
+  const wholeWords = glossary?.wholeWords === true;
   for (const [concept, def] of Object.entries(terms)) {
     const synonyms = Array.isArray(def.synonyms) ? def.synonyms : [];
     const blockedPrefixes = Array.isArray(def.blockedPrefixes) ? def.blockedPrefixes : [];
     for (const synonym of synonyms) {
       if (!synonym) continue;
       for (const leaf of leaves) {
-        if (hasUnblockedOccurrence(leaf.value, synonym, blockedPrefixes)) {
+        if (hasUnblockedOccurrence(leaf.value, synonym, blockedPrefixes, wholeWords)) {
           violations.push({
             type: "glossary-synonym",
             concept,

@@ -25,8 +25,9 @@
  * `name`).
  */
 
-import { translateStringsWithGoogle } from "./google-translate.mjs";
 import process from "node:process";
+import { normalizeLocaleText } from "../glossary-normalize.mjs";
+import { translateStringsWithGoogle } from "./google-translate.mjs";
 
 function logWarn(...parts) {
   console.warn("[i18n-translate-backend] WARN", ...parts);
@@ -150,10 +151,11 @@ export async function withGoogleFallback(llm, google, label = "translation", bac
   }
 }
 
-function googleStrings(texts, localeEntry, backend) {
-  return (backend?.googleStrings ?? translateStringsWithGoogle)(texts, localeEntry.code, {
+async function googleStrings(texts, { code }, backend) {
+  const values = await (backend?.googleStrings ?? translateStringsWithGoogle)(texts, code, {
     protectedTerms: ["OmniRoute"],
   });
+  return values.map((value) => normalizeLocaleText(value, code));
 }
 
 export function backendConfig() {
