@@ -12,7 +12,9 @@ import { z } from "zod";
  *   assertions?: Assertion[],
  *   mustContain?: string[], mustNotContain?: string[], mustContainCatalogIds?: boolean, minTextChars?: number,
  *   excerpt?: { anchor: string, chars: number, sha256_16: string } }} Probe */
-/** @typedef {{ schemaVersion: 1, reviewedAt: string, allowedHosts: string[], probes: Probe[] }} Manifest */
+/** @typedef {{ probeId: string, reason: string, sourceUrl: string }} PendingCatalogFix */
+/** @typedef {{ schemaVersion: 1, reviewedAt: string, allowedHosts: string[], probes: Probe[],
+ *   pendingCatalogFix?: PendingCatalogFix[] }} Manifest */
 
 export const SOCIAL_DENYLIST = Object.freeze([
   "x.com",
@@ -44,6 +46,11 @@ const manifestShape = z.object({
   reviewedAt: z.iso.date(),
   allowedHosts: z.array(nonempty),
   probes: z.array(z.unknown()),
+  pendingCatalogFix: z
+    .array(
+      z.object({ probeId: nonempty, reason: nonempty, sourceUrl: z.url({ protocol: /^https$/ }) })
+    )
+    .optional(),
 });
 const probeShape = z.object({
   provider: nonempty,
@@ -171,6 +178,9 @@ export function validateManifest(manifest) {
         ...shape.error.issues.map(({ path }) => `${id}: invalid field: ${path.join(".")}`)
       );
     }
+  }
+  for (const { probeId } of parsed.data.pendingCatalogFix ?? []) {
+    if (!seen.has(probeId)) errors.push(`pendingCatalogFix: unknown probe ${probeId}`);
   }
   return errors;
 }
