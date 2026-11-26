@@ -34,7 +34,7 @@ Counts (providers, migrations, MCP tools and scopes, routing strategies, scoring
 
 Client → `/v1/chat/completions` route → CORS → Zod → optional auth (`extractApiKey`/`isValidApiKey`) → API-key policy → prompt-injection guard → `handleChatCore()` (`open-sse/handlers/chatCore.ts`) → cache → rate limit → combo routing → `translateRequest()` → `getExecutor()` → `executor.execute()` (upstream `fetch()`, retry with backoff) → response translation → SSE or JSON (Responses API: `open-sse/transformer/responsesTransformer.ts`). Walk-through: `docs/architecture/ARCHITECTURE.md`.
 
-There is **no global Next.js middleware**: interception is route-specific, so every route runs its own CORS → Zod → auth → policy chain.
+There is **no global Next.js middleware**: interception is route-specific. Which of these checks a route runs depends on its tier in `src/server/authz/routeGuard.ts` (`docs/security/ROUTE_GUARD_TIERS.md`) and on the route handler itself — read the route before relying on one.
 
 **Combo routing** (`open-sse/services/combo.ts`): the public strategies are `ROUTING_STRATEGY_VALUES` in `src/shared/constants/routingStrategies.ts` (`quota-share` is internal). Each target calls `handleSingleModel()` (wraps `handleChatCore()` with per-target error handling + circuit breaker checks); the `fusion` strategy instead fans out to a panel of models in parallel and a judge model synthesizes one final answer (`open-sse/services/fusion.ts`). Auto-Combo scoring (`DEFAULT_WEIGHTS` in `open-sse/services/autoCombo/scoring.ts`) + full strategy table: `docs/routing/AUTO-COMBO.md`; the 3 resilience layers: `docs/architecture/RESILIENCE_GUIDE.md`.
 

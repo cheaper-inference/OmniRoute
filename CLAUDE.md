@@ -7,7 +7,7 @@
 ## Worktree isolation — Claude Code specifics
 
 - Confirm the base branch with the operator via `AskUserQuestion` (Hard Rule #19) unless they already told you.
-- Create the worktree with `scripts/dev/new-worktree.sh <branch> [base]` (it lands under `.claude/worktrees/`, hard-links `node_modules` and copies `.husky/_`), then call `EnterWorktree` with its `path`. A worktree that `EnterWorktree` creates by itself has neither, so no pre-commit gate runs in it.
+- Create the worktree with `scripts/dev/new-worktree.sh <branch> <confirmed-base>` (it lands under `.claude/worktrees/`, hard-links `node_modules` and copies `.husky/_`), then call `EnterWorktree` with its `path`. Always pass the base: without it the script picks the highest `release/*`, which may not be the one the operator confirmed. A worktree that `EnterWorktree` creates by itself has neither the hard links nor the hooks, so no pre-commit gate runs in it.
 
 ## Subagents and git
 
