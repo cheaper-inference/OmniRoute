@@ -54,7 +54,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { resolveCycleBase } from "./list-uncovered-commits.mjs";
-import { queuePrByCommit } from "../merge-queue/history-map.mjs";
+import { queuePrByCommit, readTrainAuthors } from "../merge-queue/history-map.mjs";
 
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 export const MAINTAINER = "diegosouzapw";
@@ -449,7 +449,8 @@ export function repoSlug(cwd = ROOT) {
  * PR number: the `(#N)` suffix of a squash subject, or — for the original commits an omni-queue
  * merge-ff landing brought in (no `(#N)`) — the PR of the queue merge commit that carries them
  * (`prByCommit`, scripts/merge-queue/history-map.mjs). Such rows also get `queue` = {pr, author,
- * title, mergeSha, subjectPr}; a squash-only history maps nothing and reads exactly as before.
+ * title, mergeSha, subjectPr}, plus `train` (the train's PR number) for a merge-train member; a
+ * squash-only history maps nothing and reads exactly as before.
  * `subjectPr` keeps a `(#N)` suffix of a mapped commit: reconcile() restores it as the row's PR
  * when N is a real merged PR (a foreign squash the contributor merged into their branch).
  */
@@ -457,7 +458,11 @@ export function readCommits(
   base,
   head,
   cwd = ROOT,
-  prByCommit = queuePrByCommit({ range: `${base}..${head}`, cwd })
+  prByCommit = queuePrByCommit({
+    range: `${base}..${head}`,
+    cwd,
+    trainAuthors: readTrainAuthors(cwd),
+  })
 ) {
   const raw = git(
     [
@@ -499,6 +504,7 @@ export function readCommits(
                 title: q.title,
                 mergeSha: q.mergeSha,
                 subjectPr,
+                ...(q.train === undefined ? {} : { train: q.train }),
               },
             }
           : {}),
@@ -796,8 +802,11 @@ export function reconcile({
 
   const gen = { features: [], fixes: [], maintenance: [] };
   const deps = [];
+  const queueSubject = (r) =>
+    r.queue?.title || (r.queue?.train && prBy.get(r.pr)?.title) || r.subject;
   // merge-ff landings keep every contributor commit: one generated bullet per queue PR, titled
-  // after the PR (the merge commit), not one per "wip"/"fix typo" commit
+  // after the PR (the merge commit; for a merge-train member, the merged PR's own title when the
+  // metadata has it), not one per "wip"/"fix typo" commit
   const queueBulleted = new Set();
   for (const r of [...uncovered].sort(
     (a, b) => (a.pr || 0) - (b.pr || 0) || a.date.localeCompare(b.date)
@@ -811,7 +820,7 @@ export function reconcile({
       deps.push(r);
       continue;
     }
-    const c = bulletFromSubject(r.queue?.title || r.subject, special);
+    const c = bulletFromSubject(queueSubject(r), special);
     let bullet = `- ${c.text}`;
     bullet += r.pr ? ` (${prLink(repo, r.pr)})` : ` (direct commit \`${r.hash.slice(0, 10)}\`)`;
     bullet = addCredit(bullet, [
@@ -825,7 +834,9 @@ export function reconcile({
       `- **deps:** ${deps.length} Dependabot bumps — ${deps
         .map(
           (r) =>
-            `${(r.queue?.title || r.subject).replace(/^deps(\([^)]*\))?:\s*/, "").replace(/\s*\(#\d+\)\s*$/, "")} (${prLink(repo, r.pr)})`
+            `${queueSubject(r)
+              .replace(/^deps(\([^)]*\))?:\s*/, "")
+              .replace(/\s*\(#\d+\)\s*$/, "")} (${prLink(repo, r.pr)})`
         )
         .join("; ")}`
     );
@@ -922,7 +933,11 @@ export function main(argv = process.argv.slice(2)) {
     console.log(`[reconcile-changelog] base = parent of the ${source} commit ${open.slice(0, 10)}`);
   }
   const repo = repoSlug();
-  const queueMap = queuePrByCommit({ range: `${base}..${head}`, cwd: ROOT });
+  const queueMap = queuePrByCommit({
+    range: `${base}..${head}`,
+    cwd: ROOT,
+    trainAuthors: readTrainAuthors(ROOT),
+  });
   const rows = readCommits(base, head, ROOT, queueMap);
   const prs = o.prs
     ? JSON.parse(fs.readFileSync(o.prs, "utf8"))

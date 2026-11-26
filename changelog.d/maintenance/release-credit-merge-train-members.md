@@ -1,0 +1,1 @@
+- **chore(release):** Credit each member pull request of a merge train landed by the merge queue in the changelog, the release totals and the contributor ranking, instead of crediting the whole train to the train's own pull request.
