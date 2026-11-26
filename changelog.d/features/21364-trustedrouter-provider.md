@@ -1,0 +1,1 @@
+- **feat(providers):** add TrustedRouter (`trustedrouter`), an OpenAI-compatible API-key provider (`https://api.trustedrouter.com/v1`) with chat, responses, embeddings, live `/v1/models` discovery, and `/v1/key` validation ([#21364](https://github.com/cheaper-inference/OmniRoute/pull/21364)) — thanks @jperla
