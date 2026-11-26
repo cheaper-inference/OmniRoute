@@ -13,6 +13,7 @@
 import { saveRequestUsage } from "@/lib/usageDb";
 import { recordKeyQuotaUsage } from "@/domain/keyQuota";
 import { formatUsageLog } from "@/lib/usage/tokenAccounting";
+import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
 import { COLORS } from "../../utils/stream.ts";
 import { recordTokenUsage } from "../../services/tokenLimitCounter.ts";
 import { computeBillableTokens } from "./upstreamTimeouts.ts";
@@ -54,7 +55,9 @@ function persistUsageRow(usage: object, ctx: RecordNonStreamingUsageStatsContext
     status: "200",
     success: true,
     latencyMs: Date.now() - startTime,
-    timeToFirstTokenMs: Date.now() - startTime,
+    timeToFirstTokenMs: isFeatureFlagEnabled("NONSTREAM_USAGE_NULL_TTFT_ENABLED")
+      ? null
+      : Date.now() - startTime,
     errorCode: null,
     timestamp: new Date().toISOString(),
     connectionId: connectionId || undefined,

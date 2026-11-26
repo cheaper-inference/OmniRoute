@@ -30,7 +30,8 @@ export interface UsageEntry {
   status?: string | null;
   success?: boolean;
   latencyMs?: number;
-  timeToFirstTokenMs?: number;
+  /** Null when TTFT is unavailable; omission falls back to latencyMs. */
+  timeToFirstTokenMs?: number | null;
   errorCode?: string | null;
   /** ISO timestamp; defaults to `new Date().toISOString()` when omitted. */
   timestamp?: string;
