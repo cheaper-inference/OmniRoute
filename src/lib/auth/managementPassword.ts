@@ -57,9 +57,41 @@ export async function hashManagementPassword(password: string) {
   return bcrypt.hash(password, MANAGEMENT_PASSWORD_SALT_ROUNDS);
 }
 
+// A management password never contains NUL. bcryptjs appends a NUL terminator to the key and
+// reads it cyclically, so an input made of whole repetitions of the stored password and NUL
+// verifies as the stored password itself. Refusing NUL keeps each password's set of accepted
+// inputs to the password alone.
+const NUL = "\u0000";
+
 export async function verifyManagementPassword(password: string, hash: string) {
   if (!isBcryptHash(hash)) return false;
+  if (typeof password !== "string" || password.includes(NUL)) return false;
   return bcrypt.compare(password, hash);
+}
+
+// One entry is enough: the stored hash changes whenever the password changes.
+let knownInsecureHashCache: { hash: string; insecure: boolean } | null = null;
+
+/**
+ * True when the STORED management password is one of the known placeholders.
+ *
+ * The off-host refusal used to compare the submitted string with the placeholder list, but
+ * bcrypt can accept inputs other than the placeholder itself, so a caller could pass the
+ * password check without matching the list. Deciding on the stored hash closes that for any
+ * input the hash accepts. The extra bcrypt comparison runs once per stored hash.
+ */
+export async function isStoredManagementPasswordKnownInsecure(hash: string): Promise<boolean> {
+  if (!isBcryptHash(hash)) return false;
+  if (knownInsecureHashCache?.hash === hash) return knownInsecureHashCache.insecure;
+  let insecure = false;
+  for (const placeholder of INSECURE_DEFAULT_PASSWORDS) {
+    if (await bcrypt.compare(placeholder, hash)) {
+      insecure = true;
+      break;
+    }
+  }
+  knownInsecureHashCache = { hash, insecure };
+  return insecure;
 }
 
 export async function ensurePersistentManagementPasswordHash(

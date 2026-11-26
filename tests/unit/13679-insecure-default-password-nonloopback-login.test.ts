@@ -123,3 +123,14 @@ test("a public-IP login with a non-default (rotated) password still succeeds", a
       "has actually been rotated away from the well-known default"
   );
 });
+
+test("a public-IP login with an input bcrypt verifies as the default password gets no session", async () => {
+  // Whole repetitions of the placeholder plus NUL verify as the placeholder under bcryptjs.
+  const response = await postLogin("CHANGEME\u0000CHANGEME", "203.0.113.77");
+
+  assert.ok(
+    response.status === 401 || response.status === 403,
+    `expected the equivalent input to be refused off-host, got ${response.status}`
+  );
+  assert.equal(response.headers.get("set-cookie"), null, "no session cookie must be issued");
+});
