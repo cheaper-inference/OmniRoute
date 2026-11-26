@@ -125,6 +125,7 @@ async function grantedTargetPermission(
 export async function rejectUnauthorizedResolvedModels(opts: {
   hasApiKeyMetadata: boolean;
   apiKey: string | null | undefined;
+  scopedKeyId?: string;
   requestedModel: string;
   resolvedModels: Iterable<string>;
   grantedTargets?: Set<string> | null;
@@ -140,7 +141,8 @@ export async function rejectUnauthorizedResolvedModels(opts: {
             requestedModel: opts.requestedModel,
             resolvedModel,
           },
-          isModelAllowedForKey
+          (key, requested, resolved) =>
+            isModelAllowedForKey(key, requested, resolved, opts.scopedKeyId)
         );
     if (permission === "allowed") continue;
     return markLocalModelPolicyResponse(
@@ -232,6 +234,7 @@ export function createResolvedModelGate(opts: {
     return rejectUnauthorizedResolvedModels({
       ...base,
       apiKey: key?.rejection ? null : key?.apiKey,
+      scopedKeyId: key?.selfLoopScope.requiredBinding ? key?.apiKeyInfo?.id : undefined,
       resolvedModels,
     });
   };

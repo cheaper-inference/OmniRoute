@@ -21,7 +21,10 @@ import {
   resolveRequiredApiKey,
 } from "@/shared/utils/requiredApiKeyContext";
 
-import { extractApiKey, isValidApiKey, readNonEmptyUrlToken } from "./auth.ts";
+import { getPresentedApiKeyStatus } from "@/lib/db/apiKeys";
+import { isSystemApiKeySecret } from "@/lib/db/apiKeys/systemKey";
+import { errorResponse } from "@omniroute/open-sse/utils/error.ts";
+import { extractApiKey, readNonEmptyUrlToken } from "./auth.ts";
 import { extractGoogApiKeyHeader } from "./googApiKeyAuth.ts";
 import { readHeaderValue, type AuthRequestHeaders } from "./headerReader.ts";
 
@@ -79,7 +82,7 @@ export function extractApiKeyCandidates(
  * Resolve the required API key or, without a binding, the presented credentials.
  *
  * Returns `{ apiKey, valid: true }` with the FIRST candidate (precedence order of
- * `extractApiKeyCandidates()`) that passes `isValidApiKey()` — use it for key
+ * `extractApiKeyCandidates()`) that passes credential validation — use it for key
  * identity, policy and usage attribution. When nothing validates, returns
  * `{ apiKey: extractApiKey(request, opts), valid: false }`, so the invalid path
  * keeps the legacy Bearer-first identity byte-for-byte and an unvalidated,
@@ -97,8 +100,17 @@ export async function resolveClientApiKey(
       : { apiKey: null, valid: false, rejection: requiredApiKeyUnavailable() };
   }
 
-  for (const candidate of extractApiKeyCandidates(request, opts)) {
-    if (await isValidApiKey(candidate)) return { apiKey: candidate, valid: true };
+  const candidates = extractApiKeyCandidates(request, opts);
+  const invalidSystemKey = () => ({
+    apiKey: null,
+    valid: false,
+    rejection: errorResponse(401, "Invalid API key"),
+  });
+  if (candidates.some(isSystemApiKeySecret)) return invalidSystemKey();
+  for (const candidate of candidates) {
+    const status = await getPresentedApiKeyStatus(candidate);
+    if (status === "system") return invalidSystemKey();
+    if (status === "valid") return { apiKey: candidate, valid: true };
   }
   return { apiKey: extractApiKey(request, opts), valid: false };
 }

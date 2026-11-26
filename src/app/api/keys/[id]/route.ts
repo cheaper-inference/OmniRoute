@@ -225,7 +225,7 @@ export async function PATCH(request, { params }) {
       const err = error as Error & { code?: string };
       return NextResponse.json(
         buildErrorBody(400, err.message, null, {
-          type: "lease_error",
+          type: err.code === "SYSTEM_KEY_POLICY_INVALID" ? "invalid_request_error" : "lease_error",
           code: err.code || "LEASE_KEY_POLICY_INVALID",
         }),
         { status: 400 }

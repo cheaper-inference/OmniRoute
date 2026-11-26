@@ -582,6 +582,7 @@ export async function resolvePlaygroundTestKey(request: Request): Promise<string
 }
 
 type PolicyContext = {
+  scopedKeyId?: string;
   request: Request;
   apiKey: string;
   apiKeyInfo: ApiKeyMetadata;
@@ -768,7 +769,7 @@ async function validateModelAccess(context: PolicyContext): Promise<Response | n
     }
   }
   if (requestedComboName || !hasModelRestrictions) return null;
-  if (await isModelAllowedForKey(apiKey, modelStr)) return null;
+  if (await isModelAllowedForKey(apiKey, modelStr, undefined, context.scopedKeyId)) return null;
   return policyErrorResponse(
     request,
     HTTP_STATUS.FORBIDDEN,
@@ -1015,6 +1016,7 @@ async function resolveUnboundPolicyKey(request: Request): Promise<{
   const ssoSecret = resolveSsoApiKeySecret(request);
   if (ssoSecret) return { apiKey: ssoSecret, rejection: null };
   const resolved = await resolveClientApiKey(request);
+  if (resolved.rejection) return { apiKey: null, rejection: resolved.rejection };
   if (resolved.valid) return { apiKey: resolved.apiKey, rejection: null };
 
   const selection = await resolvePlaygroundKeySelection(request);
@@ -1238,6 +1240,7 @@ export async function enforceApiKeyPolicy(
     apiKeyInfo,
     modelStr,
     directModelDispatch: options?.directModelDispatch,
+    scopedKeyId: selfLoopScope.requiredBinding ? apiKeyInfo.id : undefined,
   };
   const statusRejection = validateKeyStatus(context);
   if (statusRejection) return { apiKey, apiKeyInfo, rejection: statusRejection };

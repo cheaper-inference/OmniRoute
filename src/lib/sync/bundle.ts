@@ -1,5 +1,5 @@
 import { createHash } from "crypto";
-import { getApiKeys } from "@/lib/db/apiKeys";
+import { getClientApiKeys } from "@/lib/db/apiKeys";
 import { getCombos } from "@/lib/db/combos";
 import { getModelAliases } from "@/lib/db/models";
 import { getProviderConnections } from "@/lib/db/providers";
@@ -199,7 +199,7 @@ export async function buildConfigSyncBundle(): Promise<ConfigSyncBundle> {
     getCachedProviderNodes(),
     getModelAliases(),
     getCombos(),
-    getApiKeys(),
+    getClientApiKeys(),
     getReasoningRoutingRules(),
   ]);
 

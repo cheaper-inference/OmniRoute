@@ -1,4 +1,5 @@
 import { isDashboardSessionAuthenticated } from "@/shared/utils/apiAuth.ts";
+import { isSystemApiKeySecret } from "@/lib/db/apiKeys/systemKey";
 import { recordApiKeyAuthTouch } from "@/lib/compliance/index";
 import { classifyIpScope, getClientIpFromRequest } from "@/lib/ipUtils";
 import { isFeatureFlagEnabled, isRequireApiKeyEnabled } from "@/shared/utils/featureFlags";
@@ -117,6 +118,7 @@ export const clientApiPolicy: RoutePolicy = {
     // ANTHROPIC_AUTH_TOKEN): the request is accepted when ANY credential validates.
     const allowUrl = !isA2aPath(ctx.classification.normalizedPath);
     const credentials = extractApiKeyCandidates(ctx.request as Request, { allowUrl });
+    if (credentials.some(isSystemApiKeySecret)) return reject(401, "AUTH_002", "Invalid API key");
     if (credentials.length === 0) {
       // The WS descriptor handshake is a metadata read; the route handler
       // performs the actual wsAuth/dashboard/API-key decision and returns the
@@ -157,11 +159,13 @@ export const clientApiPolicy: RoutePolicy = {
       });
     }
 
-    const { validateApiKey } = await import("../../../lib/db/apiKeys");
+    const { getPresentedApiKeyStatus } = await import("../../../lib/db/apiKeys");
     for (const credential of credentials) {
       // The subject is the credential that actually validated, so identity and
       // usage never bind to a stale Bearer sent next to a valid x-api-key.
-      if (await validateApiKey(credential)) {
+      const status = await getPresentedApiKeyStatus(credential);
+      if (status === "system") return reject(401, "AUTH_002", "Invalid API key");
+      if (status === "valid") {
         await recordClientApiAuthTouch(ctx, credential, credentials);
         return allow({ kind: "client_api_key", id: maskKeyId(credential) });
       }

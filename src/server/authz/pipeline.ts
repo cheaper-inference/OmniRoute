@@ -30,6 +30,8 @@ import {
 } from "./peerStamp";
 import { checkRequestIP } from "@omniroute/open-sse/services/ipFilter.ts";
 import { clientApiPolicy } from "./policies/clientApi";
+import { getPresentedApiKeyStatus } from "@/lib/db/apiKeys";
+import { extractApiKeyCandidates } from "@/sse/services/clientApiKeyResolver";
 import { managementPolicy } from "./policies/management";
 import { publicPolicy } from "./policies/public";
 import {
@@ -404,6 +406,22 @@ export async function runAuthzPipeline(
   }
 
   if (!options.enforce) {
+    // Server-owned credentials are refused even when client auth is advisory.
+    if (classification.routeClass === "CLIENT_API") {
+      const path = classification.normalizedPath;
+      const allowUrl = path !== "/a2a" && !path.startsWith("/a2a/");
+      for (const credential of extractApiKeyCandidates(request, { allowUrl })) {
+        if ((await getPresentedApiKeyStatus(credential)) !== "system") continue;
+        const response = rejectionResponse(
+          { allow: false, status: 401, code: "AUTH_002", message: "Invalid API key" },
+          classification,
+          requestId
+        );
+        applyCorsHeaders(response, request, corsRelaxOrigin);
+        return response;
+      }
+    }
+
     const response = NextResponse.next({ request: { headers: requestHeaders } });
     response.headers.set(AUTHZ_HEADER_REQUEST_ID, requestId);
     response.headers.set(AUTHZ_HEADER_ROUTE_CLASS, classification.routeClass);

@@ -143,8 +143,8 @@ async function resolveUsableKey({
 
   // Recheck the stored identity and lifecycle at each boundary. In particular, a
   // successful auth check or a resolver snapshot must not authorize a deleted key.
-  const { getApiKeyMetadata } = await import("@/lib/db/apiKeys");
-  const current = await getApiKeyMetadata(resolved.apiKey, { bypassCache: true });
+  const { getRequiredApiKeyMetadata } = await import("@/lib/db/apiKeys");
+  const current = await getRequiredApiKeyMetadata(resolved.apiKey, apiKeyId);
   return current?.id === apiKeyId && isUsableKey(current) && isUsableKey(resolved.apiKeyInfo)
     ? resolved
     : null;
@@ -159,6 +159,11 @@ async function resolveInContext(
   const resolved = await resolveUsableKey(context.binding).catch(() => null);
   if (!resolved) context.unavailable = true;
   return context.unavailable ? null : resolved;
+}
+
+/** The key identity bound to this in-process dispatch. */
+export function getRequiredApiKeyId(): string | undefined {
+  return storage.getStore()?.binding.apiKeyId;
 }
 
 /** Undefined means no binding. A promise resolving to null means the binding failed. */

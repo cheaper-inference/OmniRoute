@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { requireCliToolsAuth } from "@/lib/api/requireCliToolsAuth";
 import { createErrorResponse } from "@/lib/api/errorResponse";
 import { resolveOperatorCredential } from "@/lib/api/operatorCredential";
-import { getApiKeys } from "@/lib/db/apiKeys";
+import { getClientApiKeys } from "@/lib/db/apiKeys";
 import { maskStoredApiKey } from "@/lib/apiKeyExposure";
 
 // GET /api/cli-tools/keys - List API keys; plaintext `rawKey` only for the instance operator
@@ -25,7 +25,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    const keys = await getApiKeys();
+    const keys = await getClientApiKeys();
     const cliToolKeys = keys.map((key) => ({
       ...key,
       ...(operator ? { rawKey: key.key } : {}),
