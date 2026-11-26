@@ -454,8 +454,10 @@ describe("refreshDerived with the real gate plan (README + mirrors + state)", ()
   // correctly asks for a manual edit (v3.8.55 cut, 2026-11-16: "240 migrations" next to
   // "240 by Dependabot" in the PR census). Those coincidental lines are left out, so the outcome
   // depends on the carry logic, not on what else the live docs happen to say.
-  const isDatabaseRow = (l: string) =>
-    l.includes("<td nowrap><b>") && l.includes("better-sqlite3") && l.includes("LowDB");
+  // Same identity as the production locator (scripts/check/lib/readmeMigrationCount.mjs: the one
+  // table row naming better-sqlite3). The English row no longer names LowDB, which the code
+  // stopped importing; the translated mirrors still do until their next refresh.
+  const isDatabaseRow = (l: string) => l.includes("<td nowrap><b>") && l.includes("better-sqlite3");
   const toDigits = (n: number, zero: number) =>
     String(n).replace(/\d/g, (d) => String.fromCodePoint(zero + Number(d)));
   function withoutCoincidences(text: string, count: number) {

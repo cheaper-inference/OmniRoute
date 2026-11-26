@@ -20,16 +20,20 @@
 docs/reference/PROVIDER_REFERENCE.md linguist-generated=true
 docs/diagrams/readme-hero.svg linguist-generated=true
 docs/diagrams/free-tier-budget.svg linguist-generated=true
+docs/diagrams/readme-lts-rail.svg linguist-generated=true
 docs/diagrams/works-zero-config.svg linguist-generated=true
 docs/diagrams/promise-pillars.svg linguist-generated=true
 docs/diagrams/why-pain-fix.svg linguist-generated=true
 docs/diagrams/tier-cascade.svg linguist-generated=true
 docs/diagrams/strategies-grid.svg linguist-generated=true
+docs/diagrams/auto-router-strategies.svg linguist-generated=true
 docs/diagrams/resilience-layers.svg linguist-generated=true
 docs/diagrams/comparison-table.svg linguist-generated=true
+docs/diagrams/provider-numbers.svg linguist-generated=true
 docs/diagrams/privacy-local.svg linguist-generated=true
 docs/diagrams/cli-terminal.svg linguist-generated=true
 docs/diagrams/compression-pipeline.svg linguist-generated=true
+docs/diagrams/quick-start-steps.svg linguist-generated=true
 skills/*/references/** linguist-generated=true
 # Translation state (source/target/section hashes written by scripts/i18n/run-translation.mjs).
 .i18n-state.json linguist-generated=true

@@ -704,7 +704,8 @@ async function handleChatImplementation(
   // masked prefix/last4. These debug lines get copied verbatim into bug reports
   // and support tickets, so any key fragment is sensitive.
   const authHeader = request.headers.get("Authorization");
-  const { apiKey } = await resolveClientApiKey(request);
+  const { apiKey, rejection: authRejection } = await resolveClientApiKey(request);
+  if (authRejection) return authRejection;
   if (authHeader && apiKey) {
     log.debug("AUTH", "API key provided");
   } else {

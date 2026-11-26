@@ -95,6 +95,10 @@ const FACTS = {
     entries: 120,
     freeFirst: 1.6e9,
     freeGated: 6e6,
+    // The free-tier headline checks judge the real figure (computePublicFreeHeadline), published
+    // as headlineSteady/headlineFirst; freeSteady/freeFirst keep feeding the other checks.
+    headlineSteady: 1.4e9,
+    headlineFirst: 1.6e9,
     freePools: 30,
     engines: 5,
     cliTotal: 33,
@@ -152,6 +156,11 @@ test("every check declares its scope, and every derived check has a locator", ()
     "Provider count": "derived",
     "Provider count (secondary docs and skills)": "derived",
     "No exact provider count (package.json description)": "invariant",
+    "Row-sum figure placement (free-tier docs)": "invariant",
+    "Row-sum figure placement (method page)": "invariant",
+    "Row-sum figure kept out (package.json, llm.txt, MCP/A2A outputs)": "invariant",
+    "No free-token figure (package.json, llm.txt)": "invariant",
+    "Row-sum figure required (headline block files)": "invariant",
     "DB migrations count": "derived",
     "Package version (docs prose)": "derived",
     "Coverage floor (docs vs blocking ratchet)": "derived",

@@ -3207,12 +3207,16 @@ async function handleChatCoreInner({
                 `[provider] Node ${errorConnectionId} ModelScope model quota exhausted (${statusCode}) for ${targetModel} - ${Math.ceil(quotaCooldownMs / 1000)}s (connection stays active)`
               );
             } else if (
+              // #20969: keep the upstream message/status on the model lock — the connection
+              // stays active, so nothing else records why this model is cooling down.
               lockModelIfPerModelQuota(
                 provider,
                 errorConnectionId,
                 model,
                 "quota_exhausted",
-                quotaCooldownMs
+                quotaCooldownMs,
+                undefined,
+                { lastError: persistentMessage, errorCode: statusCode }
               ) ||
               (targetModel &&
                 targetModel !== model &&
@@ -3221,7 +3225,9 @@ async function handleChatCoreInner({
                   errorConnectionId,
                   targetModel,
                   "quota_exhausted",
-                  quotaCooldownMs
+                  quotaCooldownMs,
+                  undefined,
+                  { lastError: persistentMessage, errorCode: statusCode }
                 ))
             ) {
               const quotaScope = getQuotaScopeLabelForProvider(provider, targetModel);

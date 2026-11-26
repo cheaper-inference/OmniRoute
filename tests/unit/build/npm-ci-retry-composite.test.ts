@@ -44,6 +44,7 @@ test("composite restores node_modules via actions/cache with an exact, fully-qua
   for (const script of [
     "scripts/build/postinstall.mjs",
     "scripts/build/postinstallSupport.mjs",
+    "scripts/build/sqliteRebuildPlan.mjs",
     "scripts/build/colocateOptionals.mjs",
     "scripts/build/wreqJsNative.mjs",
     "scripts/build/fixPlaywrightAndroid.mjs",
