@@ -248,18 +248,6 @@ const FREE_TOKEN_KIND_NAME = {
   retiredShare: "share from ended offers",
 };
 
-// Match the public formatter in open-sse/config/freeModelCatalog.ts. The gate runs on plain
-// Node without loading application modules.
-function formatTokenHeadline(tokens) {
-  if (!Number.isFinite(tokens) || tokens < 0) {
-    throw new RangeError(
-      `formatTokenHeadline: expected a non-negative finite number, got ${tokens}`
-    );
-  }
-  const millions = Math.round(tokens / 1e6);
-  return millions < 1000 ? `~${millions}M` : `~${(tokens / 1e9).toFixed(1)}B`;
-}
-
 function describeLive(key, live) {
   return key === "retiredShare"
     ? `${live.toFixed(2)}%`
