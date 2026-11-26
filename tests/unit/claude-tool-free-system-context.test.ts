@@ -88,3 +88,18 @@ test("actual passthrough builder uses the same ordering on both Claude Messages 
     assert.deepEqual(input, snapshot);
   }
 });
+
+test("a content-bearing system turn must precede an assistant or end the array", () => {
+  const invalid = body();
+  invalid.messages.push({ role: "user", content: "Second user turn" });
+  normalizeClaudeUpstreamMessages(invalid, route);
+  assert.deepEqual(roles(invalid), ["user", "user"]);
+
+  const valid = body();
+  valid.messages.push(
+    { role: "assistant", content: "Response to first turn" },
+    { role: "user", content: "Second user turn" }
+  );
+  normalizeClaudeUpstreamMessages(valid, route);
+  assert.deepEqual(roles(valid), ["user", "system", "assistant", "user"]);
+});

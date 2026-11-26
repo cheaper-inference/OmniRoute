@@ -267,10 +267,17 @@ function canPreserveOfficialMidSystem(payload: Record<string, unknown>, route?: 
   return hasSupportedOfficialSystemPlacement(payload.messages);
 }
 
+/** A content-bearing system turn must end the history or precede an assistant turn. */
+function hasAllowedSystemSuccessor(messages: unknown[], index: number): boolean {
+  if (index === messages.length - 1) return true;
+  const next = messages[index + 1] as { role?: unknown } | null | undefined;
+  return next?.role === "assistant";
+}
+
 function hasSupportedOfficialSystemPlacement(messages: unknown[]): boolean {
   let previousRole = "";
   let hasMidSystem = false;
-  for (const raw of messages) {
+  for (const [index, raw] of messages.entries()) {
     if (!raw || typeof raw !== "object" || Array.isArray(raw)) return false;
     const message = raw as Record<string, unknown>;
     const role = message.role;
@@ -285,7 +292,7 @@ function hasSupportedOfficialSystemPlacement(messages: unknown[]): boolean {
     )
       return false;
     if (previousRole === "") continue;
-    if (previousRole !== "user") return false;
+    if (previousRole !== "user" || !hasAllowedSystemSuccessor(messages, index)) return false;
     hasMidSystem = true;
     previousRole = role;
   }
