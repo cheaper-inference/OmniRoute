@@ -438,7 +438,7 @@ export default function QuotaCardExpanded({
             const observedAt = typeof group.observedAt === "string" ? group.observedAt : null;
             return (
               <section key={plan} aria-label={plan} className="flex flex-col gap-1">
-                <div className="flex justify-between gap-2 text-[11px] font-semibold text-text-main">
+                <div className="flex justify-between gap-2 text-2xs font-semibold text-text-main">
                   <span>{plan}</span>
                   {observedAt && (
                     <time dateTime={observedAt} title={observedAt}>
@@ -454,7 +454,7 @@ export default function QuotaCardExpanded({
                     />
                   ))
                 ) : (
-                  <div className="text-[11px] text-text-muted italic">
+                  <div className="text-xs text-text-muted italic">
                     {tr("noQuotaData", "No quota data")}
                   </div>
                 )}
