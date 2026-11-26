@@ -11,8 +11,11 @@ if (process.env.OMNIROUTE_ALLOW_DEFAULT_DATA_DIR !== "1") {
   await import("../../tests/_setup/isolateDataDir.ts");
 }
 const { FREE_MODEL_BUDGETS } = await import("../../open-sse/config/freeModelCatalog.data.ts");
+const { grantsFreeAccess, resolveFreeQuotaUnit } =
+  await import("../../open-sse/config/freeModelCatalog.ts");
 
 const POLICY_PATH = "config/quality/free-catalog-evidence.json";
+const CATALOG_PATH = "open-sse/config/freeModelCatalog.data.ts";
 const SEED_PATH = "config/quality/free-catalog-legacy-seed.json";
 // Approved bootstrap debt at 40523566; this is NOT evidence of free access.
 // The immutable seed only caps initial debt. Base-relative comparison prevents reintroduction.
@@ -35,6 +38,18 @@ function previousDebt(baseRef, seed) {
   return previous.debt;
 }
 
+// provider/modelId of every catalog row at the base. The data file keeps one literal line per
+// entry, so a line regex is exact. A base without the file has no rows to call "new".
+function baseCatalogKeys(baseRef) {
+  const commit = git("rev-parse", "--verify", "--end-of-options", `${baseRef}^{commit}`);
+  if (!git("ls-tree", "--name-only", commit, "--", CATALOG_PATH)) return undefined;
+  const source = git("show", `${commit}:${CATALOG_PATH}`);
+  const keys = new Set();
+  for (const m of source.matchAll(/\{ provider: "([^"]+)", modelId: "([^"]+)"/g))
+    keys.add(`${m[1]}/${m[2]}`);
+  return keys;
+}
+
 function main() {
   const args = process.argv.slice(2);
   if (args.length && (args.length !== 2 || args[0] !== "--base-ref" || !args[1]))
@@ -54,6 +69,9 @@ function main() {
     seed: seed.entries,
     previousDebt: previousDebt(baseRef, seed),
     today: new Date().toISOString().slice(0, 10),
+    baseKeys: baseCatalogKeys(baseRef),
+    grantsFreeAccess,
+    unitOf: resolveFreeQuotaUnit,
   });
   if (errors.length) {
     for (const error of errors) console.error(`[free-catalog-evidence] ${error}`);

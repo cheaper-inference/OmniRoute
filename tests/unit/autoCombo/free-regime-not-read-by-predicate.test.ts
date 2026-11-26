@@ -81,17 +81,34 @@ test("hidePaidModels drops them from the auto/* candidate pool", () => {
   );
 });
 
-test("no provider loses its free status", () => {
+test("no provider loses its free status without a recorded decision", () => {
   const withFreeRegime = new Set(
     FREE_MODEL_BUDGETS.filter((m) => grantsFreeAccess(m.freeType)).map((m) => m.provider)
   );
   const lost = [...new Set(FREE_MODEL_BUDGETS.map((m) => m.provider))].filter(
     (p) => !withFreeRegime.has(p)
   );
+  // Decided deliberately in the November 2026 re-audit (sources reopened on 2026-11-23, owner
+  // decisions of 2026-11-21 and 2026-11-23): these offers ended, went paid-only or lost every
+  // evidence of a quota, so every row of each provider is discontinued. Any other provider losing
+  // its free status must be decided deliberately too.
   assert.deepEqual(
-    lost,
-    [],
-    "no catalogued provider is discontinued across the board today; if one ever is, decide deliberately"
+    lost.sort(),
+    [
+      "ainative",
+      "arcee-ai",
+      "bluesminds",
+      "huggingchat",
+      "huggingface",
+      "llm7",
+      "mistral",
+      "nara",
+      "navy",
+      "predibase",
+      "routeway",
+      "stepfun",
+    ],
+    "only the providers retired by the November 2026 re-audit are discontinued across the board"
   );
 });
 
