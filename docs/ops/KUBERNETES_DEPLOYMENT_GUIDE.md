@@ -356,10 +356,21 @@ Helm:
 # Kustomize: pin a real tag rather than relying on :latest
 kubectl -n omniroute set image deploy/omniroute omniroute=cheaperinference/omniroute:3.8.54
 
-# Helm
+# Helm (--reuse-values keeps your prior values and does NOT merge new chart defaults)
 helm upgrade omniroute deploy/helm/omniroute -n omniroute --reuse-values \
-  --set image.tag=3.8.51
+  --set image.tag=3.8.51 \
+  --set config.requireApiKey=true \
+  --set containerSecurityContext.readOnlyRootFilesystem=true
 ```
+
+> **Note on `--reuse-values`:** Helm reuses the previous release's stored values
+> without merging newly changed defaults from `values.yaml`. Review new chart
+> defaults on upgrade — such as `config.requireApiKey=true` and
+> `containerSecurityContext.readOnlyRootFilesystem=true` — and pass `--set` (or
+> `-f values.yaml`) explicitly when adopting them. When `networkPolicy` is absent
+> from stored values, the chart defaults the baseline `NetworkPolicy` to enabled
+> (`--set networkPolicy.enabled=false` to opt out, or set `networkPolicy.extraEgress`
+> first if the pod reaches in-cluster Redis or Ollama).
 
 **Every upgrade is a full outage.** Recreate terminates the only pod before
 starting its replacement:
@@ -465,7 +476,16 @@ helm install omniroute-2 deploy/helm/omniroute -n omniroute \
 ```
 
 Each release gets its own PVC, its own SQLite file, and its own dashboard. Front
-them with any load balancer; sticky-by-API-key is enough. Provider credentials
+them with an `ingress-nginx` or `Traefik` Ingress controller (sticky-by-API-key
+is enough): the baseline `NetworkPolicy` admits inbound traffic on `20128`/`20132`
+only from `ingress-nginx` (`component=controller`) pods in the `ingress-nginx`
+namespace and `traefik` controller pods in the `kube-system` or `traefik`
+namespaces. Controllers running in any other namespace — or another in-cluster
+proxy / load balancer fronting the release `Service`s directly — also require an
+additive `NetworkPolicy` in the workload namespace (or an operator Kustomize
+overlay peer under `ingress[0].from` using `matchExpressions`) that selects that
+controller's namespace and pod labels, or `--set networkPolicy.enabled=false`
+when network isolation is enforced externally. Provider credentials
 must be duplicated into each instance, and call logs stay partitioned per
 instance. Optionally share quota counters with
 `QUOTA_STORE_DRIVER=redis` + `QUOTA_STORE_REDIS_URL` — Redis is a shared counter
@@ -475,18 +495,19 @@ store, not shared SQLite.
 
 ## 8. Troubleshooting
 
-| Symptom                                           | Cause                                                                                                                                                                                                               |
-| ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Pod restarts under load                           | HTTP liveness timing out on a busy event loop. The base manifests already use TCP — check you did not apply `liveness-http.yaml` or `--set probes.livenessType=http`                                                |
-| Streaming responses arrive all at once at the end | Ingress response buffering is on                                                                                                                                                                                    |
-| Long requests cut off mid-stream                  | Ingress read/idle timeout too low                                                                                                                                                                                   |
-| `502` right after an upgrade                      | Expected: the Recreate empty-endpoint window                                                                                                                                                                        |
-| Pod `Pending`, PVC `Pending`                      | No default StorageClass, or the class cannot do RWO                                                                                                                                                                 |
-| `OOMKilled`                                       | `maxOldSpaceSizeMb` ≥ memory limit                                                                                                                                                                                  |
-| Dashboard live view stuck                         | `LIVE_WS_ALLOWED_ORIGINS` does not match the browser origin, or `live-ws` is not routed                                                                                                                             |
-| Ingress created but nothing routes                | The `ingressClassName` names a controller the cluster does not run. A k3s installed with `--disable=traefik` has no `traefik` class, and the API server accepts the object anyway. Check `kubectl get ingressclass` |
-| `database is locked` / corruption                 | Two writers, or the PVC is on NFS/CIFS                                                                                                                                                                              |
-| Restart loop that gets slower each time           | A probe is killing the pod mid-VACUUM/checkpoint, growing the WAL. Check the startup budget and that liveness is TCP                                                                                                |
+| Symptom                                           | Cause                                                                                                                                                                                                                                                                                                                                                                  |
+| ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Pod restarts under load                           | HTTP liveness timing out on a busy event loop. The base manifests already use TCP — check you did not apply `liveness-http.yaml` or `--set probes.livenessType=http`                                                                                                                                                                                                   |
+| Streaming responses arrive all at once at the end | Ingress response buffering is on                                                                                                                                                                                                                                                                                                                                       |
+| Long requests cut off mid-stream                  | Ingress read/idle timeout too low                                                                                                                                                                                                                                                                                                                                      |
+| `502` right after an upgrade                      | Expected: the Recreate empty-endpoint window                                                                                                                                                                                                                                                                                                                           |
+| Pod `Pending`, PVC `Pending`                      | No default StorageClass, or the class cannot do RWO                                                                                                                                                                                                                                                                                                                    |
+| `OOMKilled`                                       | `maxOldSpaceSizeMb` ≥ memory limit                                                                                                                                                                                                                                                                                                                                     |
+| Dashboard live view stuck                         | `LIVE_WS_ALLOWED_ORIGINS` does not match the browser origin, or `live-ws` is not routed                                                                                                                                                                                                                                                                                |
+| Ingress created but nothing routes                | The `ingressClassName` names a controller the cluster does not run. A k3s installed with `--disable=traefik` has no `traefik` class, and the API server accepts the object anyway. Check `kubectl get ingressclass`                                                                                                                                                    |
+| `database is locked` / corruption                 | Two writers, or the PVC is on NFS/CIFS                                                                                                                                                                                                                                                                                                                                 |
+| Restart loop that gets slower each time           | A probe is killing the pod mid-VACUUM/checkpoint, growing the WAL. Check the startup budget and that liveness is TCP                                                                                                                                                                                                                                                   |
+| Upstream provider DNS lookups time out            | Baseline `NetworkPolicy` allows port 53 (UDP/TCP) to `kube-system` DNS pods and the default NodeLocal DNSCache link-local listener (`169.254.20.10/32`). If your cluster configures NodeLocal DNSCache with a custom `-localip` listener, add that `/32` `ipBlock` on UDP/TCP 53 via `networkPolicy.extraEgress` (Helm) or an `egress[0].to` overlay patch (Kustomize) |
 
 ```bash
 kubectl -n omniroute describe pod -l app.kubernetes.io/name=omniroute
