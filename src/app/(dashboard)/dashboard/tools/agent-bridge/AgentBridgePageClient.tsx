@@ -40,6 +40,7 @@ export interface CertManualGuide {
 export interface AgentBridgeServerState {
   running: boolean;
   port: number;
+  transparent?: boolean;
   certTrusted: boolean;
   upstreamCa: string | null;
   lastStartedAt: string | null;

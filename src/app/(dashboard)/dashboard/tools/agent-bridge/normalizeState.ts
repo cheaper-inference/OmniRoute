@@ -58,6 +58,7 @@ export function normalizeAgentBridgeState(raw: unknown): AgentBridgePageData {
   if (source) {
     if (typeof source.running === "boolean") serverState.running = source.running;
     if (typeof source.port === "number") serverState.port = source.port;
+    if (typeof source.transparent === "boolean") serverState.transparent = source.transparent;
     // accept both the canonical `certTrusted` and the legacy `certExists`
     if (typeof source.certTrusted === "boolean") serverState.certTrusted = source.certTrusted;
     else if (typeof source.certExists === "boolean") serverState.certTrusted = source.certExists;

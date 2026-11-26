@@ -169,7 +169,7 @@ async function buildMitmResponse() {
     // server.crt on a legacy-leaf install) — never a stale legacy leaf.
     certExists: status.certExists || (await fileExists(resolveActiveMitmCert().certPath)),
     hasCachedPassword: !!getCachedPassword(),
-    port: config.port,
+    port: status.effectivePort ?? config.port,
     targets: config.targets,
     stats,
   };

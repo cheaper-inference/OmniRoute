@@ -71,7 +71,9 @@ export function AgentBridgeServerCard({
               <span>
                 {t("serverPort") || "Port"}: {serverState.port ?? 443}
               </span>
-              <CertStatusIcon trusted={serverState.certTrusted ?? false} />
+              {serverState.transparent !== false && (
+                <CertStatusIcon trusted={serverState.certTrusted ?? false} />
+              )}
               {serverState.activeConns !== undefined && (
                 <span>
                   {t("serverConns") || "Connections"}: {serverState.activeConns}

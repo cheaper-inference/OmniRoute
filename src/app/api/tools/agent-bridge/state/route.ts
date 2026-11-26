@@ -51,17 +51,20 @@ export async function GET(): Promise<Response> {
     const rootCaEnabled = process.env.MITM_ROOT_CA_ENABLED === "true";
     const { certPath } = resolveActiveCertPath(certDir, rootCaEnabled);
     const certExists = fs.existsSync(certPath);
-    const certTrusted = certExists ? await checkCertInstalled(certPath) : false;
+    const certTrusted =
+      serverStatus.transparent && certExists ? await checkCertInstalled(certPath) : false;
 
     // Compute aggregate dnsConfigured: true if ANY agent has hosts spoofed
     // This fixes the Maintenance card "dns-configured" showing ❌ for non-Antigravity agents
     const dnsConfigured =
+      serverStatus.transparent &&
       agentStates.length > 0 &&
       agentStates.some((s) => s.dns_enabled && checkDNSEntryForAgent(s.agent_id));
 
     const isWin = process.platform === "win32";
     const hasCachedPassword = !!getCachedPassword();
-    const needsSudoPassword = !isWin && !hasCachedPassword && isSudoPasswordRequired();
+    const needsSudoPassword =
+      serverStatus.transparent && !isWin && !hasCachedPassword && isSudoPasswordRequired();
 
     // Build enriched server state
     const enrichedServer = {
