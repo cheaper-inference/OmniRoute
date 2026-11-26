@@ -2,7 +2,27 @@
   "version": 1,
   "base": "release/v3.8.55",
   "paused": null,
-  "inFlight": null,
+  "inFlight": {
+    "batchId": "b49",
+    "kind": "batch",
+    "candidateRef": "omni-queue/release-v3.8.55/b49-d05e121ae501",
+    "candidateSha": "d05e121ae501a0827ae4690bb7d555c18dc38b56",
+    "baseSha": "d89f84adee8eaa49a7f4b949e628a6f959414c8f",
+    "treeSha": "e486be9a96127a0a4d74b08f1e99df0c70967e19",
+    "prs": [
+      {
+        "n": 21123,
+        "head": "33ce9850cd58c197d2aec5965b8422be99c11aea",
+        "title": "fix(providers): stop marking ended free offers as free",
+        "author": "diegosouzapw",
+        "labeledAt": "2026-11-26T09:00:09Z"
+      }
+    ],
+    "stage": "testing",
+    "startedAt": "2026-11-26T09:16:37.864Z",
+    "attempts": 0,
+    "bisect": null
+  },
   "baseChecks": [
     {
       "baseSha": "d89f84adee8eaa49a7f4b949e628a6f959414c8f",
@@ -114,8 +134,8 @@
     }
   },
   "counters": {
-    "batchSeq": 48,
-    "ciRuns": 53,
+    "batchSeq": 49,
+    "ciRuns": 54,
     "landedPrs": 16,
     "landedBatches": 6,
     "redBatches": 11,
@@ -123,12 +143,6 @@
     "culprits": 1
   },
   "history": [
-    {
-      "at": "2026-11-20T02:31:06.541Z",
-      "type": "error",
-      "detail": "git merge-tree failed (exit 128): fatal: remote error: upload-pack: not our ref 04847663e4aace8a9ba1947e2c1cf649aa36fafc\nfatal: could not fetch 123131e68fe6ee82d84899801105dfb4995bee8c from promisor remote",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44661080703"
-    },
     {
       "at": "2026-11-20T02:40:01.827Z",
       "type": "error",
@@ -2613,8 +2627,22 @@
       ],
       "sha": "d89f84adee8eaa49a7f4b949e628a6f959414c8f",
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45787541219"
+    },
+    {
+      "at": "2026-11-26T09:16:41.292Z",
+      "type": "batch-started",
+      "batchId": "b49",
+      "prs": [
+        21123
+      ],
+      "sha": "d05e121ae501a0827ae4690bb7d555c18dc38b56",
+      "detail": "1 PR(s) on d89f84adee8e; window 5",
+      "labeledAt": {
+        "21123": "2026-11-26T09:00:09Z"
+      },
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45790398045"
     }
   ],
-  "updatedAt": "2026-11-26T08:58:15.180Z",
+  "updatedAt": "2026-11-26T09:16:43.218Z",
   "batchWindow": 5
 }
