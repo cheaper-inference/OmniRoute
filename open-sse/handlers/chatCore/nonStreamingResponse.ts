@@ -1086,9 +1086,9 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
         ? { _streamed: true, _format: "sse-json", summary: sanitizedMalformedResponse }
         : sanitizedMalformedResponse;
       persistAttemptLogs({
-        servedModel: billingModel,
         status: HTTP_STATUS.BAD_GATEWAY,
         error: malformedDiagnostic,
+        servedModel: billingModel,
         upstreamHttpSelection,
         tokens: usage,
         buyerCostMicro: okLeg.buyerCostMicro,
