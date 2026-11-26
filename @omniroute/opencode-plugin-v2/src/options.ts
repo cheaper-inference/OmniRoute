@@ -177,7 +177,10 @@ export function parsePluginOptions(raw: unknown): PluginOptions {
     const unknown = issue.code === "unrecognized_keys" ? issue.keys.join(", ") : undefined;
     return unknown !== undefined ? `unknown option "${unknown}"` : `${at}: ${issue.message}`;
   });
-  throw new Error(`[omniroute-v2] invalid plugin options — ${problems.join("; ")}`);
+  throw new Error(
+    `[omniroute-v2] invalid plugin options — ${problems.join("; ")}; ` +
+      `valid options: ${pluginOptionsSchema.keyof().options.join(", ")}`
+  );
 }
 
 /**

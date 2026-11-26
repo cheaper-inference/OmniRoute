@@ -1,6 +1,6 @@
 # @omniroute/opencode-plugin-v2
 
-OpenCode v2 plugin (`define({ id, setup })`, Promise API) that publishes the live OmniRoute catalog — models from `/v1/models`, combos from `/api/combos` (least-common-denominator join), enrichment (names + pricing), and usable-provider filtering — into the v2 `catalog.transform`, with `key` + `env` auth via `integration.transform`.
+OpenCode v2 plugin (`define({ id, setup })`, Promise API) that publishes the live OmniRoute catalog — models from `/v1/models`, combos from `/api/combos` (least-common-denominator join), enrichment (names + pricing), and usable-provider filtering — through the host's `provider.transform` publication and `model.transform` filtering contract, with `key` + `env` auth via `integration.transform`.
 
 Companion to `@omniroute/opencode-plugin` (OpenCode v1, same repo). The two packages are independent: this one carries its own catalog-mapping logic and the v1 plugin is left untouched.
 

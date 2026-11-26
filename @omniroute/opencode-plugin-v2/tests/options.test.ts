@@ -232,12 +232,15 @@ describe("identity table", () => {
 });
 
 describe("invalid options say what to fix", () => {
-  it("names an unknown key instead of dumping the validator output", () => {
+  it("names an unknown key and the valid keys instead of dumping the validator output", () => {
     assert.throws(
       () => parsePluginOptions({ baseURL: "http://gw.example.com", modelCacheTtl: 300000 }),
       (err: Error) => {
         assert.match(err.message, /invalid plugin options/);
         assert.match(err.message, /unknown option "modelCacheTtl"/);
+        assert.match(err.message, /valid options:/);
+        assert.match(err.message, /baseURL/);
+        assert.match(err.message, /providerId/);
         return true;
       }
     );

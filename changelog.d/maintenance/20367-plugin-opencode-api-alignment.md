@@ -1,0 +1,1 @@
+- **chore(plugin):** align the OpenCode plugin with the 2.3.0 SDK, verify host compatibility across 2.0.12–2.3.0 in CI, and release host registrations on reload ([#20367](https://github.com/cheaper-inference/OmniRoute/pull/20367)) — thanks @maxmad64bis
