@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { mkdirSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { test } from "node:test";
 
@@ -89,26 +89,38 @@ test("cli never fails the build", (t) => {
   mkdirSync("_artifacts", { recursive: true });
   const dir = mkdtempSync("_artifacts/catalog-drift-evidence-age-");
   t.after(() => rmSync(dir, { recursive: true }));
-  const json = join(dir, "report.json");
-  const markdown = join(dir, "report.md");
-  const result = spawnSync(
-    process.execPath,
-    [
-      "--import",
-      "tsx/esm",
-      "scripts/quality/catalog-drift/evidence-age.mjs",
-      "--json",
-      json,
-      "--md",
-      markdown,
-      "--today",
-      today,
-    ],
-    { encoding: "utf8" }
-  );
-  assert.equal(result.status, 0, result.stderr);
-  const report = JSON.parse(readFileSync(json, "utf8"));
-  assert.equal(report.today, today);
+  const runCli = (extra: string[]) => {
+    const json = join(dir, `report-${extra.length}.json`);
+    const markdown = join(dir, `report-${extra.length}.md`);
+    const result = spawnSync(
+      process.execPath,
+      [
+        "--import",
+        "tsx/esm",
+        "scripts/quality/catalog-drift/evidence-age.mjs",
+        "--json",
+        json,
+        "--md",
+        markdown,
+        "--today",
+        today,
+        ...extra,
+      ],
+      { encoding: "utf8" }
+    );
+    assert.equal(result.status, 0, result.stderr);
+    assert.match(readFileSync(markdown, "utf8"), /# Free-tier evidence age/);
+    return JSON.parse(readFileSync(json, "utf8"));
+  };
+
+  // The shipped evidence file: whatever its coverage, the report never fails.
+  assert.equal(runCli([]).today, today);
+
+  // An evidence file without records: every pool with value is missing, and the exit code stays 0.
+  const ledger = JSON.parse(readFileSync("config/quality/free-catalog-evidence.json", "utf8"));
+  const empty = join(dir, "evidence.empty.json");
+  writeFileSync(empty, JSON.stringify({ ...ledger, evidence: [] }));
+  const report = runCli(["--evidence", empty]);
   assert.ok(report.summary.missing > 0);
-  assert.match(readFileSync(markdown, "utf8"), /# Free-tier evidence age/);
+  assert.equal(report.summary.fresh, 0);
 });

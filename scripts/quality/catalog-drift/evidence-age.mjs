@@ -158,11 +158,18 @@ export function renderEvidenceMarkdown({ today, maxAgeDays, summary, uncapped, p
 
 async function main() {
   const { values } = parseArgs({
-    options: { json: { type: "string" }, md: { type: "string" }, today: { type: "string" } },
+    options: {
+      json: { type: "string" },
+      md: { type: "string" },
+      today: { type: "string" },
+      evidence: { type: "string" },
+    },
   });
   if (!values.json || !values.md) throw new Error("--json <file> and --md <file> are required");
   const today = z.iso.date().parse(values.today ?? new Date().toISOString().slice(0, 10));
-  const file = new URL("../../../config/quality/free-catalog-evidence.json", import.meta.url);
+  const file =
+    values.evidence ??
+    new URL("../../../config/quality/free-catalog-evidence.json", import.meta.url);
   const { evidence } = ledgerSchema.parse(JSON.parse(await readFile(file, "utf8")));
   const report = computeEvidenceAges({ rows: FREE_MODEL_BUDGETS, evidence, today });
   await Promise.all([
