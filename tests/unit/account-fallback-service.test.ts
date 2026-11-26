@@ -173,11 +173,15 @@ test("checkFallbackError marks deactivated accounts as permanent auth failures",
   assert.ok(result.cooldownMs >= 300 * 24 * 60 * 60 * 1000);
 });
 
-test("checkFallbackError classifies 'free tier of the model has been exhausted' as quota exhausted", () => {
-  const result = checkFallbackError(429, "free tier of the model has been exhausted");
-  assert.equal(result.shouldFallback, true);
-  assert.equal(result.reason, RateLimitReason.QUOTA_EXHAUSTED);
-  assert.equal(result.creditsExhausted, true);
+test("checkFallbackError keeps Alibaba free-tier exhaustion out of account credit lockouts", () => {
+  const result = checkFallbackError(
+    403,
+    "free tier of the model has been exhausted",
+    0,
+    "qwen3.7-max-preview",
+    "alibaba"
+  );
+  assert.notEqual(result.creditsExhausted, true);
 });
 
 test("checkFallbackError treats non-429 exhausted credits as long quota cooldowns", () => {
@@ -1179,7 +1183,7 @@ test("isCreditsExhausted returns true for actual credits-exhausted signals", () 
   assert.equal(isCreditsExhausted("insufficient_quota"), true);
   assert.equal(isCreditsExhausted("credits exhausted"), true);
   assert.equal(isCreditsExhausted("payment required"), true);
-  assert.equal(isCreditsExhausted("free tier of the model has been exhausted"), true);
+  assert.equal(isCreditsExhausted("free tier of the model has been exhausted"), false);
   assert.equal(isCreditsExhausted("exceeded your current usage quota"), true);
   // #5239: "Insufficient account balance" out-of-credit bodies
   assert.equal(isCreditsExhausted("Insufficient account balance"), true);

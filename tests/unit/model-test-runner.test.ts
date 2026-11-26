@@ -387,13 +387,16 @@ test("classifyTestErrorQuota: credits-exhausted signals produce isQuota without 
     "payment required",
     "billing_hard_limit_reached",
     "exceeded your current quota",
-    "free tier of the model has been exhausted",
   ];
   for (const signal of creditsSignals) {
     const result = classifyTestErrorQuota(signal);
     assert.equal(result.isQuota, true, `signal="${signal}" should be isQuota`);
     assert.equal(result.isTransient, undefined, `signal="${signal}" should NOT be isTransient`);
   }
+});
+
+test("classifyTestErrorQuota excludes Alibaba model-scoped free-tier drain", () => {
+  assert.deepEqual(classifyTestErrorQuota("free tier of the model has been exhausted"), {});
 });
 
 test("classifyTestErrorQuota: daily-quota signals produce isQuota + isTransient", () => {

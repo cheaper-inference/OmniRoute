@@ -13,12 +13,6 @@ export const CREDITS_EXHAUSTED_SIGNALS = [
   "credits exhausted",
   "out of credits",
   "payment required",
-  "free tier of the model has been exhausted",
-  // Some gateways report exhausted free-tier access as HTTP 403 without the
-  // word "tier" in the message. Treat it as terminal until billing changes.
-  "free quota has been exhausted",
-  // Anthropic-compatible gateways use HTTP 400 for account-level spend caps.
-  "you have reached your specified api usage limits",
   // #8631: narrower than a bare "has been exhausted" — that generic phrase also
   // appears in Gemini's transient RPM/TPM 429 body ("Resource has been exhausted
   // (e.g. check quota)."), which must stay RATE_LIMIT_EXCEEDED, not terminal.

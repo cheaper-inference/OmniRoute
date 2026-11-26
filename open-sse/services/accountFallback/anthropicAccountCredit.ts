@@ -1,11 +1,16 @@
-// Anthropic's out-of-credit answer is an HTTP 400 with no structured credit code:
+// Anthropic's account-credit answers are HTTP 400s with no structured credit code:
 //   {"type":"error","error":{"type":"invalid_request_error",
 //     "message":"Your credit balance is too low to access the Anthropic API. ..."}}
-// The balance belongs to the whole API key, so it is account-level even on an
+//   {"type":"error","error":{"type":"invalid_request_error",
+//     "message":"You have reached your specified API usage limits. ..."}}
+// These limits apply to the whole API key, so they are account-level even on an
 // anthropic-compatible-* node (#20968). The match is deliberately narrow (fixed
 // phrase + Anthropic envelope) because a 400 can echo caller input.
 
-const ANTHROPIC_CREDIT_PHRASE = "your credit balance is too low";
+const ANTHROPIC_CREDIT_PHRASES = [
+  "your credit balance is too low",
+  "you have reached your specified api usage limits",
+];
 const ANTHROPIC_CREDIT_ERROR_TYPES = new Set(["invalid_request_error", "billing_error"]);
 const ANTHROPIC_CREDIT_PROVIDER_PREFIX = "anthropic-compatible-";
 
@@ -25,11 +30,12 @@ function parseEnvelope(text: string): Record<string, unknown> | null {
   }
 }
 
-/** True for Anthropic's "credit balance is too low" body (JSON envelope, or the bare message). */
+/** True for a known Anthropic account-credit body (JSON envelope, or the bare message). */
 export function isAnthropicAccountCreditExhausted(text: string): boolean {
   const trimmed = String(text || "").trim();
   if (!trimmed.startsWith("{")) {
-    return trimmed.toLowerCase().startsWith(ANTHROPIC_CREDIT_PHRASE);
+    const message = trimmed.toLowerCase();
+    return ANTHROPIC_CREDIT_PHRASES.some((phrase) => message.startsWith(phrase));
   }
   const root = parseEnvelope(trimmed);
   const inner = root?.error;
@@ -39,6 +45,6 @@ export function isAnthropicAccountCreditExhausted(text: string): boolean {
     typeof type === "string" &&
     ANTHROPIC_CREDIT_ERROR_TYPES.has(type) &&
     typeof message === "string" &&
-    message.toLowerCase().startsWith(ANTHROPIC_CREDIT_PHRASE)
+    ANTHROPIC_CREDIT_PHRASES.some((phrase) => message.toLowerCase().startsWith(phrase))
   );
 }

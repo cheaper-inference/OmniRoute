@@ -22,6 +22,7 @@ import {
   type ComboExhaustionSets,
 } from "../../open-sse/services/combo/targetExhaustion.ts";
 import {
+  checkFallbackError,
   clearAllModelLockouts,
   isModelLocked,
   lockModel,
@@ -29,6 +30,7 @@ import {
 
 const ALIBABA_FREE_QUOTA_ERROR =
   "The free quota has been exhausted. To continue accessing the model on a paid basis, please complete your payment information (or disable the use free tier only mode).";
+const ALIBABA_FREE_TIER_EXHAUSTED_ERROR = "The free tier of the model has been exhausted.";
 
 test("detects Alibaba free-quota exhaustion phrasing", () => {
   assert.equal(isAlibabaFreeQuotaExhaustedError(ALIBABA_FREE_QUOTA_ERROR), true);
@@ -58,13 +60,7 @@ test("isAlibabaModelStudioProvider recognizes alibaba family ids", () => {
   assert.equal(isAlibabaModelStudioProvider("bailian-coding-plan"), false);
 });
 
-test("alibaba free-quota 403 does not exhaust the whole connection in combo routing", () => {
-  const s: ComboExhaustionSets = {
-    exhaustedProviders: new Set<string>(),
-    exhaustedConnections: new Set<string>(),
-    transientRateLimitedProviders: new Set<string>(),
-  };
-  const log = { info() {}, warn() {}, error() {}, debug() {} };
+test("Alibaba free-tier 403 variants stay model-scoped through fallback and combo routing", () => {
   const target = {
     kind: "model",
     executionKey: "ek",
@@ -74,22 +70,33 @@ test("alibaba free-quota 403 does not exhaust the whole connection in combo rout
     connectionId: "conn-1",
   } as Parameters<typeof applyComboTargetExhaustion>[0];
 
-  const { providerExhausted: exhausted } = applyComboTargetExhaustion(target, {
-    result: { status: 403 },
-    fallbackResult: {},
-    errorText: ALIBABA_FREE_QUOTA_ERROR,
-    rawModel: "qwen3.7-max-preview",
-    isTokenLimitBreach: false,
-    allAccountsRateLimited: false,
-    sets: s,
-    log,
-    tag: "COMBO",
-    exhaustedLogLevel: "info",
-  });
+  for (const errorText of [ALIBABA_FREE_QUOTA_ERROR, ALIBABA_FREE_TIER_EXHAUSTED_ERROR]) {
+    const fallbackResult = checkFallbackError(403, errorText, 0, "qwen3.7-max-preview", "alibaba");
+    assert.notEqual(fallbackResult.creditsExhausted, true, errorText);
 
-  assert.equal(exhausted, false);
-  assert.equal(s.exhaustedConnections.size, 0);
-  assert.equal(s.exhaustedProviders.size, 0);
+    const s: ComboExhaustionSets = {
+      exhaustedProviders: new Set<string>(),
+      exhaustedConnections: new Set<string>(),
+      transientRateLimitedProviders: new Set<string>(),
+    };
+    const log = { info() {}, warn() {}, error() {}, debug() {} };
+    const { providerExhausted } = applyComboTargetExhaustion(target, {
+      result: { status: 403 },
+      fallbackResult,
+      errorText,
+      rawModel: "qwen3.7-max-preview",
+      isTokenLimitBreach: false,
+      allAccountsRateLimited: false,
+      sets: s,
+      log,
+      tag: "COMBO",
+      exhaustedLogLevel: "info",
+    });
+
+    assert.equal(providerExhausted, false, errorText);
+    assert.equal(s.exhaustedConnections.size, 0, errorText);
+    assert.equal(s.exhaustedProviders.size, 0, errorText);
+  }
 });
 
 test("filterAlibabaFreeTierModels removes only persisted drained models", () => {

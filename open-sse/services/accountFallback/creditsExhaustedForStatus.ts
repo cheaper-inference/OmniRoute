@@ -98,6 +98,13 @@ export function isCreditsExhaustedForStatus(
   structured?: unknown
 ): boolean {
   const text = String(errorText || "");
-  if (!isCreditsExhaustedWithSharedWallet(text, CREDITS_EXHAUSTED_SIGNALS)) return false;
+  const anthropicAccountCredit =
+    isAnthropicCreditProvider(provider) && isAnthropicAccountCreditExhausted(text);
+  if (
+    !anthropicAccountCredit &&
+    !isCreditsExhaustedWithSharedWallet(text, CREDITS_EXHAUSTED_SIGNALS)
+  ) {
+    return false;
+  }
   return quotaTextSignalCountsForStatus(status, provider, text, structured);
 }

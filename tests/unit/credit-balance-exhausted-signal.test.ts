@@ -42,15 +42,7 @@ test("the signal is matched regardless of the casing the upstream uses", () => {
   // that shouts the code must still land on the terminal branch.
   assert.equal(classifies('{"error":{"code":"Credit_Balance_Exhausted"}}'), true);
 });
-test("provider billing messages classify as terminal on their observed 400/403 statuses", () => {
-  for (const body of [
-    "[403]: The free quota has been exhausted. To continue accessing the model on a paid basis",
-    "[400]: Your credit balance is too low to access the Anthropic API",
-    "[400]: You have reached your specified API usage limits. You will regain access on 2026-12-01",
-  ]) {
-    assert.equal(classifies(body), true, `expected ${body} to classify as terminal`);
-  }
-});
+
 test("the signals that were already in the list still classify", () => {
   // The change appends to a shared list every provider consults. A shadowing or
   // ordering regression would silently reclassify OpenAI-style terminal billing
