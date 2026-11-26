@@ -12,8 +12,6 @@
 //   - a small handle registry with its own TTL/quota, cleaned up alongside the cache.
 import { createHash, randomBytes, randomUUID } from "node:crypto";
 
-import sharp from "sharp";
-
 import {
   VIDEO_DRILLDOWN_MAX_ENTRY_BYTES,
   VideoDrilldownCache,
@@ -164,6 +162,8 @@ async function shrinkFrameForVariant(
   if (frame.width <= preset.maxDimension && frame.height <= preset.maxDimension) return frame;
   const commaIndex = frame.dataUri.indexOf(",");
   const source = Buffer.from(frame.dataUri.slice(commaIndex + 1), "base64");
+  // Loaded on use so a runtime without sharp still boots (#21183).
+  const { default: sharp } = await import("sharp");
   const resized = await sharp(source)
     .resize({
       fit: "inside",

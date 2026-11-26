@@ -293,16 +293,17 @@ test("row-sum reading and retired ledger after the re-audit", () => {
 
 test("catalog counts after the re-audit", () => {
   const c = computeFreeCatalogCounts({ membershipOf: membershipFromProviderConstants });
+  // #19385 ends one keyless offer covering one model with no published quota.
   assert.equal(c.publishedQuotaPools, 12);
-  assert.equal(c.providersWithFreeOffer.total, 50);
+  assert.equal(c.providersWithFreeOffer.total, 49);
   assert.deepEqual(c.providersWithFreeOffer.byAccess, {
     "api-key": 43,
-    keyless: 6,
+    keyless: 5,
     "tool-account": 1,
     "web-chat": 0,
   });
-  assert.equal(c.accessRows, 214);
-  assert.equal(c.freeModels, 185);
+  assert.equal(c.accessRows, 213);
+  assert.equal(c.freeModels, 184);
 });
 
 // --- Retired pools and their ledger --------------------------------------------------------
