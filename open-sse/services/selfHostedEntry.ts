@@ -32,6 +32,7 @@ import { readFile } from "node:fs/promises";
 import { errorResponse, buildErrorBody, parseUpstreamError } from "../utils/error.ts";
 import { timingSafeCompare } from "@/shared/utils/timingSafeCompare";
 import { stripSensitiveResponseHeaders } from "../utils/upstreamResponseHeaders.ts";
+import { logger } from "../utils/logger.ts";
 import type { ChatRequest, ProviderConfig } from "./providerAdapters.ts";
 import { ProviderRouter } from "./providerAdapters.ts";
 import {
@@ -56,6 +57,7 @@ export const ROUTED_BY_HEADER = "x-omniroute-routed-by";
 /** Explainability header carrying the deterministic route decision one-liner. */
 export const ROUTE_DECISION_HEADER = "x-omniroute-route-decision";
 const ROUTED_BY_VALUE = "self-hosted-openai-compat";
+const log = logger("SELF_HOSTED");
 
 export interface SelfHostedOptions {
   providers?: string;
@@ -333,10 +335,16 @@ export async function completeViaSelfHostedRouter(
 ): Promise<Response> {
   const runtime = await loadSelfHostedRuntime(config);
   if (!runtime) {
-    const detail = failedConfigLoad ? ` (${failedConfigLoad})` : "";
+    // The parser error can quote the config document (credentials included): never
+    // return it, and log only its first line, which omits the YAML source snippet.
+    if (failedConfigLoad) {
+      log.error("Self-hosted provider config failed to load", {
+        detail: failedConfigLoad.split("\n", 1)[0],
+      });
+    }
     return buildErrorResponse(
       500,
-      `Self-hosted provider config unavailable${detail}. Set ${CONFIG_ENV} or ${CONFIG_FILE_ENV}.`
+      `Self-hosted provider config unavailable. Set ${CONFIG_ENV} or ${CONFIG_FILE_ENV}.`
     );
   }
 
@@ -374,8 +382,10 @@ export async function completeViaSelfHostedRouter(
       // status to normalize. Record the failure, keep a stable 502, and fall through
       // to the next candidate in the chain.
       runtime.engine.recordFailure(candidate.provider.id, Date.now());
+      // The network error names internal hosts/ports: log it, never return it (Hard Rule #12).
       const detail = error instanceof Error ? error.message : String(error);
-      lastError = buildErrorResponse(502, `Upstream provider unreachable: ${detail}`);
+      log.warn("Upstream provider unreachable", { provider: candidate.provider.id, detail });
+      lastError = errorResponse(502, "Upstream provider unreachable");
       continue;
     }
     runtime.engine.recordLatency(candidate.provider.id, Date.now() - attemptStart);
@@ -429,10 +439,16 @@ export async function handleSelfHostedCompletions(
 
   const runtime = await loadSelfHostedRuntime(options);
   if (!runtime) {
-    const detail = failedConfigLoad ? ` (${failedConfigLoad})` : "";
+    // The parser error can quote the config document (credentials included): never
+    // return it, and log only its first line, which omits the YAML source snippet.
+    if (failedConfigLoad) {
+      log.error("Self-hosted provider config failed to load", {
+        detail: failedConfigLoad.split("\n", 1)[0],
+      });
+    }
     return buildErrorResponse(
       500,
-      `Self-hosted provider config unavailable${detail}. Check ${CONFIG_ENV} or ${CONFIG_FILE_ENV}.`
+      `Self-hosted provider config unavailable. Check ${CONFIG_ENV} or ${CONFIG_FILE_ENV}.`
     );
   }
 
