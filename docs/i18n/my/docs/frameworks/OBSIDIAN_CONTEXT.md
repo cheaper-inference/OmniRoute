@@ -98,6 +98,10 @@ curl http://localhost:20128/api/settings/obsidian/webdav
 curl -X DELETE http://localhost:20128/api/settings/obsidian/webdav
 ```
 
+### လုံခြုံရေးနှင့် သယ်ယူပို့ဆောင်ရေး
+
+WebDAV authentication သည် per-IP ပျက်ကွက်မှုကို ခြေရာခံခြင်းနှင့် လော့ခ်ချခြင်းကို တွန်းအားပေးသည် (10 စက္ကန့် 60 ဝင်းဒိုးအတွင်း မအောင်မြင်သောကြိုးစားမှုသည် `429 Too Many Requests` နှင့် `Retry-After` ဖြင့် 5 မိနစ်ကြာ လော့ခ်ချခြင်းကို အစပျိုးစေသည်။ WebDAV အခြေခံစစ်မှန်ကြောင်းအထောက်အထားများကို ပို့လွှတ်သောကြောင့် TLS (သို့မဟုတ် Tailscale သို့မဟုတ် Cloudflare Tunnel ကဲ့သို့သော လုံခြုံသောဥမင်လိုဏ်ခေါင်းတစ်ခုပေါ်တွင် လမ်းကြောင်းပြောင်းခြင်း) ကို လှည့်ပတ်အပြင်ဘက် WebDAV အဆုံးမှတ်ကို ဝင်ရောက်သည့်အခါတွင် ပြင်းထန်စွာအကြံပြုထားသည်။
+
 ### API key တစ်ခုချင်းစီအလိုက် context source (ရွေးချယ်နိုင်သည်)
 
 Obsidian config ကို `api_key_context_sources` table

@@ -52,10 +52,19 @@ test("the OIDC callback validates `state` with the constant-time helper", () => 
   );
 });
 
-test("the internal admission bypass compares its bearer in constant time", () => {
+test("the internal admission bypass compares its process token in constant time", () => {
+  // The bypass is granted only on the per-process token, checked by isOwnListenerSelfHop.
   const source = sourceOf("src/shared/middleware/chatAdmissionIdentity.ts");
-  assert.ok(
-    source.includes("timingSafeCompare"),
-    "isInternalAdmissionBypass gates a bypass on a shared secret — compare it in constant time"
+  assert.match(
+    source,
+    /isInternalAdmissionBypass\(request: Request\): boolean \{\s*return isOwnListenerSelfHop\(/,
+    "isInternalAdmissionBypass gates a bypass on a shared secret — it must go through isOwnListenerSelfHop"
+  );
+  const selfHop = sourceOf("open-sse/utils/selfHop.ts");
+  const check = selfHop.slice(selfHop.indexOf("export function isOwnListenerSelfHop"));
+  assert.match(
+    check.slice(0, check.indexOf("\n}\n")),
+    /timingSafeEqual\(got, expected\)/,
+    "isOwnListenerSelfHop must compare the token in constant time"
   );
 });

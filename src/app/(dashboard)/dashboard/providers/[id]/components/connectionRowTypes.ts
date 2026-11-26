@@ -12,6 +12,7 @@ export interface ConnectionRowConnection {
   name?: string;
   email?: string;
   displayName?: string;
+  apiKey?: string;
   rateLimitedUntil?: string;
   rateLimitProtection?: boolean;
   rateLimitAutoProtected?: boolean;
@@ -55,6 +56,8 @@ export interface ConnectionRowProps {
   onToggleClaudeExtraUsage?: (enabled?: boolean) => void;
   onToggleCodexPaidCredits?: (enabled: boolean) => void;
   onToggleAutoSync?: (enabled: boolean) => void;
+  /** #11777: scheduled model health check opt-in. */
+  onToggleHealthCheck?: (enabled: boolean) => void;
   onToggleCodex5h?: (enabled?: boolean) => void;
   onToggleCodexWeekly?: (enabled?: boolean) => void;
   isCcCompatible?: boolean;

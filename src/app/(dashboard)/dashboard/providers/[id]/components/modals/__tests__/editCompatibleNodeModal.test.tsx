@@ -10,6 +10,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import EditCompatibleNodeModal from "../EditCompatibleNodeModal";
 
 vi.mock("next-intl", () => ({
+  useLocale: () => "en",
   useTranslations: (ns?: string) => (k: string) => (ns ? `${ns}.${k}` : k),
 }));
 

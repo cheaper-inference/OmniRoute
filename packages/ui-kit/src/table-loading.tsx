@@ -2,6 +2,7 @@
 
 import type { ComponentProps, ReactNode } from "react";
 import { BrandLoader } from "./brand-loader";
+import { inertProps } from "./lib/inert";
 import { cn } from "./lib/utils";
 
 export interface TableLoadingRegionProps extends ComponentProps<"div"> {
@@ -27,7 +28,7 @@ export function TableLoadingRegion({
       data-loading={loading ? "true" : undefined}
       className={cn("ci-table-loading-region", className)}
     >
-      <div data-slot="table-loading-content" aria-busy={loading} inert={loading || undefined} aria-hidden={loading || undefined}>
+      <div data-slot="table-loading-content" aria-busy={loading} {...inertProps(loading)} aria-hidden={loading || undefined}>
         {children}
       </div>
       {loading ? (

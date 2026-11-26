@@ -25,7 +25,7 @@ import {
 } from "../../../scripts/merge-queue/eligibility.mjs";
 
 const config = loadConfig();
-const shadowConfig = config; // the committed config runs in shadow mode
+const shadowConfig = { ...config, mode: "shadow" }; // pinned here, whatever the committed mode
 const liveConfig = { ...config, mode: "live" };
 const BASE = "release/v3.8.54";
 const HEAD = "1".repeat(40);

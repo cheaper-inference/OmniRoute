@@ -1,0 +1,1 @@
+- fix(claude): stop routing to an extra-usage-enabled Claude account whose plan windows and monthly spend cap are both exhausted (#18059)

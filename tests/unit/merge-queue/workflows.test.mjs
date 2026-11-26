@@ -14,13 +14,19 @@ import {
   readdirSync,
   readFileSync,
   rmSync,
+  statSync,
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
 import { load } from "js-yaml";
-import { botIdentity, candidateRef } from "../../../scripts/merge-queue/contracts.mjs";
+import {
+  baseCheckRef,
+  botIdentity,
+  candidateRef,
+} from "../../../scripts/merge-queue/contracts.mjs";
+import { signingKeyPath } from "../../../scripts/merge-queue/compose.mjs";
 import { TICK_ACTIONS } from "../../../scripts/merge-queue/tick.mjs";
 import { evaluateAdmission } from "../../../scripts/quality/admission-verdict.mjs";
 
@@ -1042,6 +1048,7 @@ test("least privilege: no default token scopes, App token scoped per job", () =>
     "OMNI_QUEUE_APP_CLIENT_ID",
     "OMNI_QUEUE_APP_PRIVATE_KEY",
     "OMNI_QUEUE_LAND_TOKEN",
+    "OMNI_QUEUE_SIGNING_KEY",
   ]);
   assert.doesNotMatch(queueText, /GITHUB_TOKEN|github\.token/, "the queue never uses GITHUB_TOKEN");
 });
@@ -1132,6 +1139,71 @@ test("omni-queue.yml: the tick may write statuses and receives the land token", 
   // triggered this run (github.triggering_actor, the re-runner of a re-run) are approvers.
   assert.equal(step.env.GITHUB_ACTOR, "${{ github.actor }}");
   assert.equal(step.env.GITHUB_TRIGGERING_ACTOR, "${{ github.triggering_actor }}");
+});
+
+test("omni-queue.yml: the signing key reaches one step of the tick, and the approval job no owner secret", () => {
+  const holders = Object.entries(queue.jobs).flatMap(([id, job]) =>
+    job.steps
+      .filter((s) => JSON.stringify(s).includes("OMNI_QUEUE_SIGNING_KEY"))
+      .map((s) => `${id}: ${s.name}`)
+  );
+  assert.deepEqual(holders, ["tick: Write the merge-commit signing key"]);
+  const write = stepNamed("tick", "Write the merge-commit signing key");
+  assert.deepEqual(write.env, { OMNI_QUEUE_SIGNING_KEY: "${{ secrets.OMNI_QUEUE_SIGNING_KEY }}" });
+  // The approval job runs on label events with minimal permissions: no owner secret at all.
+  const approval = JSON.stringify(queue.jobs.approval);
+  assert.doesNotMatch(approval, /OMNI_QUEUE_LAND_TOKEN|OMNI_QUEUE_SIGNING_KEY/);
+  // Order: the key is on disk before the tick runs, and removed after it, whatever happened.
+  const names = queue.jobs.tick.steps.map((s) => s.name ?? s.uses);
+  const at = (name) => names.indexOf(name);
+  assert.ok(at("Write the merge-commit signing key") < at("Run one queue tick"));
+  assert.equal(names.at(-1), "Remove the merge-commit signing key");
+  const remove = stepNamed("tick", "Remove the merge-commit signing key");
+  assert.equal(remove.if, "always()", "removed on failure and on cancellation too");
+  assert.equal(remove.env, undefined, "the removal needs no secret");
+  // The tick reads the file at the path compose.signingKeyPath derives from RUNNER_TEMP.
+  assert.equal(signingKeyPath("$RUNNER_TEMP"), "$RUNNER_TEMP/omni-queue-signing/signing-key");
+  assert.match(String(write.run), /"\$RUNNER_TEMP\/omni-queue-signing\/signing-key"/);
+  // The key is never printed: no tracing, no echo of the variable.
+  for (const step of [write, remove]) {
+    assert.doesNotMatch(String(step.run), /set\s+-[a-z]*x|\becho\b[^\n]*OMNI_QUEUE_SIGNING_KEY/);
+  }
+});
+
+test("the signing-key steps write the key 0600 under RUNNER_TEMP, skip without a secret, and remove it", (t) => {
+  const write = stepNamed("tick", "Write the merge-commit signing key");
+  const remove = stepNamed("tick", "Remove the merge-commit signing key");
+  const key =
+    "-----BEGIN OPENSSH PRIVATE KEY-----\nAAAAfakekeymaterial\n-----END OPENSSH PRIVATE KEY-----";
+  const temp = mkdtempSync(join(tmpdir(), "omni-queue-runner-temp-"));
+  t.after(() => rmSync(temp, { recursive: true, force: true }));
+  const file = join(temp, "omni-queue-signing", "signing-key");
+
+  const none = runStep(t, write, { RUNNER_TEMP: temp, OMNI_QUEUE_SIGNING_KEY: "" });
+  assert.equal(none.code, 0, none.stderr);
+  assert.equal(existsSync(file), false, "no secret: no file, the tick composes unsigned");
+
+  const res = runStep(t, write, { RUNNER_TEMP: temp, OMNI_QUEUE_SIGNING_KEY: key });
+  assert.equal(res.code, 0, res.stderr);
+  assert.equal(readFileSync(file, "utf8"), `${key}\n`);
+  assert.equal(statSync(file).mode & 0o777, 0o600, "readable by the runner user only");
+  assert.equal(statSync(join(temp, "omni-queue-signing")).mode & 0o777, 0o700);
+  assert.ok(!`${res.stdout}${res.stderr}`.includes("fakekeymaterial"), "never printed");
+  assert.ok(!`${res.stdout}${res.stderr}`.includes(temp), "the path is not printed either");
+
+  // A key that cannot be written never fails the job: the tick runs and composes unsigned.
+  const notADir = join(temp, "plain-file");
+  writeFileSync(notADir, "");
+  const blocked = runStep(t, write, { RUNNER_TEMP: notADir, OMNI_QUEUE_SIGNING_KEY: key });
+  assert.equal(blocked.code, 0, blocked.stderr);
+  assert.match(blocked.stdout, /::warning::the merge-commit signing key could not be written/);
+  assert.ok(!`${blocked.stdout}${blocked.stderr}`.includes("fakekeymaterial"));
+
+  const gone = runStep(t, remove, { RUNNER_TEMP: temp });
+  assert.equal(gone.code, 0, gone.stderr);
+  assert.equal(existsSync(join(temp, "omni-queue-signing")), false);
+  // Removing again (no key was written) is not an error.
+  assert.equal(runStep(t, remove, { RUNNER_TEMP: temp }).code, 0);
 });
 
 test("the tick's test/sandbox overrides are never set by the real workflow", () => {
@@ -1540,6 +1612,10 @@ for (const [profile, file] of Object.entries(PROFILES)) {
     for (const [id, rule] of Object.entries(rules)) {
       if (rule.when === "pr") {
         assert.equal(scheduled[id], false, `${id} is pull-request only`);
+      } else if (rule.when === "omni-queue-base-check") {
+        // This context is a batch candidate (candidateSource "trailer"): the base-check shards
+        // skip, and the admission below passes with them skipped.
+        assert.equal(scheduled[id], false, `${id} runs on a base-check candidate only`);
       } else if (rule.disposition === "required") {
         assert.equal(scheduled[id], true, `${profile}:${id} must run on a candidate push`);
       }
@@ -1777,26 +1853,45 @@ test("quality.yml: merge integrity and impact selection compare against the cand
   assert.equal(render(tia.env.GITHUB_BASE_SHA, pr), "", "PRs keep GITHUB_BASE_REF");
 });
 
-test("quality.yml: a base-check candidate runs the whole unit suite in the TIA step", (t) => {
+test("quality.yml: a base-check candidate runs the whole unit suite in the shards, not the TIA step", (t) => {
   const wf = loadWorkflow("quality.yml");
   assert.equal(wf.jobs.changes.outputs.candidateSource, "${{ steps.candidate.outputs.SOURCE }}");
   const tia = wf.jobs["fast-gates"].steps.find(
     (s) => s.name === "Impacted unit tests (TIA subset; blocking)"
   );
   assert.equal(tia.env.CANDIDATE_SOURCE, "${{ needs.changes.outputs.candidateSource }}");
-  // Base-check (SOURCE=self): no base-relative selection (it would be empty), the full suite.
+  // Base-check (SOURCE=self): no base-relative selection (it would be empty) and no unsharded
+  // suite either: the selection marker, and a pointer to the base-check-unit shards.
   const baseCheck = runStep(t, tia, { CANDIDATE_SOURCE: "self", GITHUB_BASE_SHA: CANDIDATE_SHA });
   assert.equal(baseCheck.code, 0, baseCheck.stderr);
-  assert.deepEqual(baseCheck.npmArgs, ["run", "test:unit:ci"]);
+  assert.equal(baseCheck.npmArgs, null, "the unsharded suite never runs in fast-gates");
   assert.equal(baseCheck.args, null, "the selector never runs on a base-check");
   assert.equal(
     readFileSync(join(baseCheck.dir, "tia-selection.txt"), "utf8"),
     "__OMNI_QUEUE_BASE_CHECK__\n"
   );
-  assert.match(baseCheck.summary, /omni-queue base-check — full unit suite/);
-  // A failing test on the bare base fails this same check (what classify compares).
-  const red = runStep(t, tia, { CANDIDATE_SOURCE: "self", FAKE_NPM_RC: "3" });
+  assert.match(baseCheck.summary, /omni-queue base-check — full unit suite in the base-check-unit/);
+  // The shards run the suite: a failing test on the bare base fails a shard, which is the same
+  // check for classify ("Fast Quality Gates (N/4)" → "Fast Quality Gates").
+  const shards = wf.jobs["base-check-unit"];
+  const shardStep = shards.steps.find((s) => s.env?.TEST_SHARD);
+  const green = runStep(t, shardStep, { TEST_SHARD: "2/4" });
+  assert.equal(green.code, 0, green.stderr);
+  assert.deepEqual(green.npmArgs, ["run", "test:unit:ci:shard"]);
+  const red = runStep(t, shardStep, { TEST_SHARD: "2/4", FAKE_NPM_RC: "3" });
   assert.equal(red.code, 3);
+  const base = pushContext(`refs/heads/${baseCheckRef("release/v3.8.54", CANDIDATE_SHA)}`);
+  base.__outputs.changes = {
+    ...base.__outputs.changes,
+    candidateBase: CANDIDATE_SHA,
+    candidateSource: "self",
+  };
+  assert.equal(scheduledJobs(wf, base)["base-check-unit"], true, "a base check runs the shards");
+  assert.equal(
+    scheduledJobs(wf, pushContext(CANDIDATE_REF))["base-check-unit"],
+    false,
+    "a batch does not"
+  );
   // Control: a batch candidate (or a PR) still selects, and an empty selection skips.
   for (const source of ["trailer", ""]) {
     const batch = runStep(t, tia, { CANDIDATE_SOURCE: source, GITHUB_BASE_SHA: BASE_SHA });

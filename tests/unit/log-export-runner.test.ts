@@ -4,6 +4,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { generateKeyPairSync } from "node:crypto";
+import { nativeCoverageArgs } from "../_helpers/nativeCoverageArgs.ts";
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omni-log-export-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
@@ -48,8 +49,10 @@ function installFetchStub(
 ) {
   const output = path.join(TEST_DATA_DIR, "bigquery-batches.jsonl");
   fs.rmSync(output, { force: true });
+  const [, coveragePreload] = nativeCoverageArgs();
   runner.__setLogExportChildOptionsForTest({
     modulePath: path.join(import.meta.dirname, "fixtures/logExportTestDestination.ts"),
+    coveragePreload,
     config: {
       fixtureFailInsert: options.failInsert,
       fixtureInsertDelayMs: options.insertDelayMs,

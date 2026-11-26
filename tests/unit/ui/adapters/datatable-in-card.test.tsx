@@ -6,7 +6,8 @@
  *
  * `framed={false}` follows the rule already recorded for analytics/usage (#19620 "kept on
  * purpose": the kit `Table` in a `Card`, no shell): the card is the frame, so the adapter
- * renders the kit loading region and a borderless table, without the shell.
+ * renders the kit loading region and the kit's frameless table (`variant="plain"`: no border,
+ * no radius, no surface of its own), without the shell.
  */
 import React from "react";
 import { cleanup, render, screen } from "@testing-library/react";
@@ -27,7 +28,7 @@ const data = [
 ];
 
 describe("DataTable framed={false} inside a Card", () => {
-  it("draws no frame of its own: no shell, no frame element, borderless table container", () => {
+  it("draws no frame of its own: no shell, no frame element, the kit plain table container", () => {
     const { container } = render(
       <Card title="Runners">
         <DataTable
@@ -41,8 +42,9 @@ describe("DataTable framed={false} inside a Card", () => {
     expect(container.querySelector("[data-slot=data-table-shell]")).toBeNull();
     expect(container.querySelector(".ci-data-table__frame")).toBeNull();
     const tableContainer = container.querySelector("[data-slot=table-container]")!;
-    expect(tableContainer.className).toContain("border-0");
-    expect(tableContainer.className).toContain("rounded-none");
+    expect(tableContainer.getAttribute("data-variant")).toBe("plain");
+    // The kit prop does the job: no host class repeats it.
+    expect(tableContainer.className).toBe("ci-table-container");
     // Rows and headers still render.
     expect(screen.getAllByRole("columnheader").map((h) => h.textContent)).toEqual([
       "Name",
@@ -75,5 +77,8 @@ describe("DataTable framed={false} inside a Card", () => {
     );
     expect(container.querySelector("[data-slot=data-table-shell]")).not.toBeNull();
     expect(container.querySelector(".ci-data-table__frame")).not.toBeNull();
+    expect(
+      container.querySelector("[data-slot=table-container]")!.hasAttribute("data-variant")
+    ).toBe(false);
   });
 });

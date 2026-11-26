@@ -1,0 +1,1 @@
+- **fix(providers):** A connection added through an OAuth sign-in now syncs its model catalog right away instead of waiting for the next six-hour auto-sync cycle, so the new account's models appear without pressing sync by hand. The trigger keeps the API-key create path's import semantics and runs at most once per connection per five minutes.

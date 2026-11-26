@@ -4,10 +4,9 @@
 
 ---
 
-Od wersji v3.8.49 (WS3.2/WS3.4 planu jakości/szybkości) domyślną ścieżką scalania
-zrecenzowanych PR-ów do `release/vX.Y.Z` jest **kolejka scalania Mergify** (`.mergify.yml`);
-opisany poniżej **ręczny merge train** stanowi ROZWIĄZANIE AWARYJNE — używane podczas incydentów,
-zamrożeń wydań lub w przypadku zmiany planu Mergify Open Source.
+> **19.11.2026: kolejka scalania Mergify została wycofana** (decyzja właściciela). `.mergify.yml` nie definiuje już kolejki i odrzuca polecenia Mergify, które łączą lub przepisują żądanie ściągnięcia. Wydania PRs są łączone ręcznie w ramach zestawu reguł repozytorium „Wymagaj zielonych bramek w aktywnym wydaniu” (`Gate / CI` + `Gate / Quality`) do momentu uruchomienia omni-queue w trybie na żywo, a następnie poprzez omni-queue ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Poniższe sekcje Łączenia opisują kolejkę taką, jaka była.
+
+Od wersji 3.8.49 (WS3.2/WS3.4 planu quality/velocity ) domyślną ścieżką scalania przeglądanych PRs do `release/vX.Y.Z` jest** Scal kolejkę scalania** (`.mergify.yml`); the** ręczne połączenie pociągu** poniżej udokumentowano FALLBACK — używane podczas incydentów, zawieszania się wydań lub jeśli plan Mergify Open Source kiedykolwiek się zmieni.
 
 ## Domyślna ścieżka: kolejka Mergify
 

@@ -36,30 +36,31 @@ export function EncoderComparisonTable({ comparison }: { comparison: EncoderComp
       <Table
         persistentScrollbars={false}
         scrollLabel={t("encoderComparison", { count: comparison.arraysCompared })}
-        className="min-w-0 font-mono text-xs"
-        containerClassName="rounded-none border-0"
+        variant="plain"
+        density="compact"
+        className="min-w-0"
       >
         <TableHeader>
           <TableRow>
-            <TableHead className="h-8">{t("encoder")}</TableHead>
-            <TableHead className="h-8">{t("bytes")}</TableHead>
-            <TableHead className="h-8">{t("tokensCl100k")}</TableHead>
+            <TableHead>{t("encoder")}</TableHead>
+            <TableHead>{t("bytes")}</TableHead>
+            <TableHead>{t("tokensCl100k")}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {rows.map((r) => (
             <TableRow key={r.key} className={r.key === comparison.winner ? "font-semibold" : ""}>
-              <TableCell className="h-8">
+              <TableCell>
                 {r.label}
                 {r.key === comparison.winner ? " ✓" : ""}
               </TableCell>
               {r.size ? (
                 <>
-                  <TableCell className="h-8">{fmt(r.size.bytes)}</TableCell>
-                  <TableCell className="h-8">{fmt(r.size.tokens)}</TableCell>
+                  <TableCell>{fmt(r.size.bytes)}</TableCell>
+                  <TableCell>{fmt(r.size.tokens)}</TableCell>
                 </>
               ) : (
-                <TableCell colSpan={2} className="h-8" data-testid="encoder-toon-na">
+                <TableCell colSpan={2} data-testid="encoder-toon-na">
                   n/a
                 </TableCell>
               )}

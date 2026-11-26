@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { test } from "node:test";
+import { nativeCoverageArgs } from "../_helpers/nativeCoverageArgs.ts";
 
 const CHILD_RESULT_PREFIX = "HUGGINGCHAT_TRANSPORT_RESULT=";
 const childFixture = fileURLToPath(
@@ -25,16 +26,20 @@ type TransportFailureResult = {
 };
 
 function runTransportScenario(scenario: TransportScenario): TransportFailureResult {
-  const result = spawnSync(process.execPath, ["--import", "tsx/esm", childFixture, scenario], {
-    cwd: process.cwd(),
-    encoding: "utf8",
-    timeout: 60_000,
-    env: {
-      NODE_ENV: "test",
-      NO_COLOR: "1",
-      DISABLE_SQLITE_AUTO_BACKUP: "true",
-    },
-  });
+  const result = spawnSync(
+    process.execPath,
+    [...nativeCoverageArgs(), "--import", "tsx/esm", childFixture, scenario],
+    {
+      cwd: process.cwd(),
+      encoding: "utf8",
+      timeout: 60_000,
+      env: {
+        NODE_ENV: "test",
+        NO_COLOR: "1",
+        DISABLE_SQLITE_AUTO_BACKUP: "true",
+      },
+    }
+  );
 
   assert.equal(
     result.status,

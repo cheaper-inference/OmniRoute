@@ -355,111 +355,70 @@ npm run build:release
 
 ---
 
-## การตัดรุ่น 3.9.0 LTS (ซ้อมไว้แล้วใน 3.8.58)
+## 3.9.0 LTS cut (ซ้อมใน 3.8.58)
 
-หลังจาก v3.8.59 เวอร์ชันถัดไปคือ 3.9.0 และปลายทางของเวอร์ชันนี้จะแยกเป็นสองสาขาที่มีอายุยาว:
-`stable/v3` (สาย v3 LTS, npm `latest`) และ `develop` (v4, เพิ่มเวอร์ชันเป็น 4.0.0, npm
-`nightly`) โมเดลสาขา/แชนเนล การ forward-port และป้ายกำกับอยู่ใน
-[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md); แผนงานอยู่ใน [ROADMAP](../../ROADMAP.md) (Phase 3) การตัดรุ่นจะทำเพียงครั้งเดียว;
-3.8.58 ใช้ซ้อมกระบวนการทั้งหมดตั้งแต่ต้นจนจบบน fork และ 3.8.59 ปิดท้ายด้วย
-[รายการตรวจสอบ GO/NO-GO](./LTS_GO_NO_GO.md)
+หลังจาก v3.8.59 เวอร์ชันถัดไปคือ 3.9.0 และส่วนปลายของมันจะเป็นสองกิ่งที่มีอายุยืนยาว: `stable/v3` (บรรทัด v3 LTS, npm `latest`) และ `develop` (v4, ชนกับ 4.0.0, npm `nightly`) โมเดล branch/channel, พอร์ตส่งต่อ และป้ายกำกับอยู่ในรูป [RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md) ; แผนอยู่ใน [ROADMAP](../../ROADMAP.md) (ระยะที่ 3) การตัดจะดำเนินการเพียงครั้งเดียว 3.8.58 ซ้อมจนจบโดยใช้ทางแยก และ 3.8.59 ปิดท้ายด้วย [รายการตรวจสอบ GO/NO-GO](./LTS_GO_NO_GO.md)
 
-### การทดลองรัน (อ่านอย่างเดียว ปลอดภัยที่จะเรียกใช้ได้ทุกเมื่อ)
+### การทดลองเรียกใช้ (อ่านอย่างเดียว ปลอดภัยเมื่อใดก็ได้)
 
 ```bash
-npm run release:dry-run-lts-cut                       # การตัดรุ่นจริง: 3.9.0 จาก HEAD, แท็กก่อนหน้าคือ v3.8.59
-npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # ระบุคอมมิตต้นทางแบบตายตัว
+npm run release:dry-run-lts-cut                       # the real cut: 3.9.0 from HEAD, previous tag v3.8.59
+npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # pin the source commit
 ```
 
-`scripts/release/dry-run-lts-cut.mjs` ไม่ดำเนินการเปลี่ยนแปลงใด ๆ: สคริปต์จะอ่าน git และ `gh` แล้วพิมพ์
-ลำดับขั้นตอนทั้งหมด — เงื่อนไขเบื้องต้น (สามารถ resolve ต้นทางได้, repository ต้นทางมีประวัติครบถ้วน —
-shallow clone ไม่สามารถ push `stable/v3` ได้ เนื่องจากฝั่งรับจะปฏิเสธ pack เมื่อพบ grafted parent แรก
-ดังนั้นให้ตัดรุ่นจาก clone แบบเต็ม หรือเรียก `git fetch --unshallow origin` ก่อน — มีแท็ก
-ก่อนหน้าอยู่, `package.json` เป็นเวอร์ชันเป้าหมาย, มี issue `release-freeze` ที่เปิดอยู่, ไม่มี
-issue `Release branch not green` ที่เปิดอยู่
-บนสาขารีลีสที่มีอยู่ — สาขาที่ไม่มีอยู่จะรายงานเป็น `?` ซึ่งหมายถึงไม่ทราบค่า และจะไม่ถือว่า
-เป็นสีเขียว — มีการกำหนดค่าคิว `release` ของ Mergify แล้ว (G11: `queue_rules`, `checks_timeout`,
-ป้ายกำกับ `queue`), ruleset ของ `release/*` ยังคงป้องกันการลบและ force-push และ
-`stable/v3` กับ `develop` ยังไม่มีอยู่), ขั้นตอนของทั้งสองสาขา, trigger ของ workflow ที่ยังไม่ทำงานรายการใด
-และเงื่อนไข `if:` ใดที่จะกลายเป็นจริง (รวมถึงรายการที่ยังถูกกั้นด้วยตัวแปรของ repository หรือ
-ถูกตรึงไว้กับ repository หลัก), dist-tag ที่คาดไว้ (`latest` → 3.9.0, `next` และ
-`nightly` ว่างเปล่า) และการ rollback รหัสออก `0` = `RESULT: READY`, `1` = เงื่อนไขเบื้องต้น
-ที่เป็นข้อบังคับล้มเหลว (`✗`), `2` = ข้อผิดพลาดในการใช้งาน `--advisory <id,...>` จะลดระดับ
-การตรวจสอบให้เป็นคำเตือน (`!`) โดยไม่ซ่อนการตรวจสอบนั้น
+`scripts/release/dry-run-lts-cut.mjs` ไม่ได้ดำเนินการอะไรเลย: มันจะอ่าน git และ `gh` และพิมพ์เงื่อนไขเบื้องต้นของ — ของลำดับทั้งหมด (แหล่งที่มาแก้ไขแล้ว แหล่งเก็บข้อมูลต้นทางมีประวัติเต็ม — โคลนแบบตื้นไม่สามารถผลัก `stable/v3` ได้ ฝ่ายรับจะปฏิเสธแพ็กที่พาเรนต์กราฟต์แรก ดังนั้นให้ตัดจากโคลนแบบเต็มหรือ `git fetch --unshallow origin` ก่อน — แท็กก่อนหน้ามีอยู่ `package.json` เป็นเวอร์ชันเป้าหมาย ปัญหา `release-freeze` เปิดอยู่ ไม่มี เปิดปัญหา `Release branch not green` บนสาขารีลีสที่มีอยู่ — สาขาที่ไม่มีรายงาน `?` ไม่ทราบ ไม่เคยเป็นสีเขียว — omni-queue มาถึงรีลีส PRs (G11: `config/merge-queue/config.json` ถูกต้อง `bases` จัดการสาขารีลีส `mode` `live` มีป้ายกำกับอยู่) ชุดกฎ `release/*` ยังคงบล็อกการลบและบังคับกด และ `stable/v3` และ `develop` ยังไม่มี) ทั้งสอง ขั้นตอนสาขา ซึ่งทริกเกอร์เวิร์กโฟลว์ที่อยู่เฉยๆ และเงื่อนไข `if:` กลายเป็นจริง (และซึ่งยังคงควบคุมโดยตัวแปรที่เก็บหรือปักหมุดไว้ที่ที่เก็บตามรูปแบบบัญญัติ) แท็ก dist ที่คาดหวัง (`latest` → 3.9.0, `next` และ `nightly` ว่างเปล่า) และการย้อนกลับ ออกจาก `0` = `RESULT: READY`, `1` = เงื่อนไขเบื้องต้นในการบล็อกล้มเหลว (`✗`) ข้อผิดพลาดการใช้งาน `2` = `--advisory <id,...>` ดาวน์เกรดการตรวจสอบเป็นคำเตือน (`!`) โดยไม่ซ่อนมัน
 
-เรียกใช้การทดลองรันสำหรับการตัดรุ่นจริงขณะที่ release freeze ของ 3.9.0 ยังเปิดอยู่ — สาขาต่าง ๆ
-จะถูกสร้างหลังจากแท็กและก่อนที่ Phase 12c จะยกเลิก freeze
+รัน dry-run ของ real cut ในขณะที่ release freeze 3.9.0 ยังคงเปิดอยู่ — กิ่งก้านจะถูกสร้างขึ้นหลังจากแท็กและก่อนที่ Phase 12c จะยกเลิกการ freeze
 
-### การซ้อม 3.8.58 (เฉพาะ fork)
+### 3.8.58 การซ้อม (เฉพาะทางแยก)
 
 ```bash
-# 1. ทดลองรันบนปลายทางปัจจุบันโดยใช้พารามิเตอร์สำหรับการซ้อม
+# 1. Dry-run on the current tip with rehearsal parameters
 npm run release:dry-run-lts-cut -- --target-version 3.8.58 --previous-tag v3.8.57 \
   --advisory freeze,base-green
 
-# 2. ดำเนินการกับรีโมตที่เป็น FORK (ระบบจะปฏิเสธ origin หรือรีโมตใด ๆ ที่มี URL เป็น
-#    repository หลัก; ทุกขั้นตอนจะขอการยืนยันในเทอร์มินัล)
+# 2. Execute against a FORK remote (origin, or any remote whose URL is the canonical
+#    repository, is refused; every step asks for confirmation on the terminal)
 git remote add rehearsal https://github.com/<you>/OmniRoute.git
 node scripts/release/dry-run-lts-cut.mjs --execute --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 
-# 3. ทดสอบ workflow ที่ยังไม่ทำงานใน fork (ใช้ workflow_dispatch เมื่อการทดลองรัน
-#    รายงานว่ามีการตรึงไว้กับ repository หลัก) จากนั้น rollback
+# 3. Exercise the dormant workflows in the fork (workflow_dispatch where the dry-run
+#    reports a canonical-repository pin), then roll back
 node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 ```
 
-คอมมิตที่เพิ่มเวอร์ชันของ develop สร้างขึ้นด้วย git plumbing (ไม่มีการแตะต้อง working tree) และเพิ่มเวอร์ชัน
-ในไฟล์ห้าไฟล์เดียวกับคอมมิตเปิดรอบ: `package.json`, `open-sse/package.json`,
-`electron/package.json`, `package-lock.json` และ `docs/openapi.yaml` ส่วน `[4.0.0]`
-ใน CHANGELOG และสำเนา i18n ของส่วนนั้นจะถูกเปิดบน `develop` หลังจากนั้น ก่อน PR แรก
-สคริปต์จะไม่เปลี่ยน npm dist-tag — ให้ซ้อมส่วนนี้กับแพ็กเกจทดลอง
+การพัฒนา bump commit ถูกสร้างขึ้นด้วย git plumbing (ไม่มีการแตะแผนผังการทำงาน) และกระแทกไฟล์ทั้ง 5 ไฟล์เหมือนกับ commit-open commit: `package.json`, `open-sse/package.json`, `electron/package.json`, `package-lock.json` และ `docs/openapi.yaml` หลังจากนั้น ส่วน `[4.0.0]` CHANGELOG และกระจก i18n จะถูกเปิดบน `develop` ก่อน PR แรก สคริปต์ไม่เคยเปลี่ยน npm dist-tags — ซักซ้อมสิ่งเหล่านั้นบนแพ็คเกจเริ่มต้น
 
-### อาร์ติแฟกต์ตัวอย่างสำหรับ PR (สร้างครั้งเดียว แล้วโปรโมตไบต์ชุดเดิม)
+### สิ่งประดิษฐ์ตัวอย่าง PR (สร้างครั้งเดียวเลื่อนระดับไบต์เดียวกัน)
 
-`.github/workflows/preview-artifact.yml` สร้าง tarball สำหรับ production หนึ่งไฟล์จากส่วน head ของ PR และ
-ตรวจสอบ build เดียวกันนั้นโดยตรง (#8084 slice (a)) รองรับเฉพาะ PR ภายใน repository เดียวกันเท่านั้น และจะไม่มีการเผยแพร่สิ่งใด
+`.github/workflows/preview-artifact.yml` สร้าง tarball ที่ใช้งานจริงหนึ่งรายการจากส่วนหัว PR และตรวจสอบความถูกต้องของ build นั้น (#8084 ชิ้น (a)) PRs ที่เก็บเดียวกันเท่านั้น ไม่มีอะไรถูกเผยแพร่
 
 ```bash
-gh workflow run preview-artifact.yml -f pr_number=<N>   # หรือเพิ่มป้ายกำกับ `preview-artifact`
+gh workflow run preview-artifact.yml -f pr_number=<N>   # or add the `preview-artifact` label
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
 gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
-npm install -g ./omniroute-*.tgz                          # ติดตั้งเวอร์ชันตัวอย่าง
+npm install -g ./omniroute-*.tgz                          # preview install
 ```
 
-การรันจะดำเนินการ `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, แพ็ก
-tarball, เรียก `npm run check:pack-boot` (ใช้ข้อมูลลับปลอมและไดเรกทอรีข้อมูลชั่วคราว), แพ็กซ้ำ และ
-จะล้มเหลวหาก digest ไม่ตรงกัน จากนั้นบันทึก `artifact-identity.json` (SHA ของ head, SHA ของ base,
-แฮช lockfile, แพลตฟอร์ม, สถาปัตยกรรม, node ABI, bundler, นโยบายการ build —
-`scripts/release/artifact-identity.mjs`) และรับรอง tarball ใน job แยกต่างหาก การโปรโมต
-เวอร์ชันตัวอย่างหมายถึงการติดตั้ง tarball นั้น: ห้าม build ใหม่จาก source
+การรันทำ `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, แพ็ค tarball, รัน `npm run check:pack-boot` (ความลับปลอม, dir ข้อมูลชั่วคราว), แพ็กใหม่และล้มเหลว เว้นแต่การแยกย่อยจะเหมือนกัน จากนั้นบันทึก `artifact-identity.json` (head SHA, base SHA, lockfile hash, platform, arch, node ABI, Bundler, build Policy — `scripts/release/artifact-identity.mjs`) และ พิสูจน์ tarball ในงานแยกต่างหาก การโปรโมตการแสดงตัวอย่างหมายถึงการติดตั้ง tarball นั้น: ไม่ต้องสร้างใหม่จากแหล่งที่มา
 
-### การตัดรุ่น (3.9.0 หลังจาก GO)
+### การตัด (3.9.0 หลังจาก GO)
 
-1. บันทึก GO ไว้ใน [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md)
+1. GO บันทึกไว้ใน [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md)
 2. `npm run release:dry-run-lts-cut -- --from v3.9.0` พิมพ์ `RESULT: READY`
-3. สร้างสาขาบน `origin` ด้วยตนเองโดยใช้คำสั่งที่การทดลองรันพิมพ์ออกมา — สคริปต์จะปฏิเสธ
-   การ push ไปยัง `origin` หากต้องการนำคอมมิต develop ที่ผ่านการตรวจสอบแล้วกลับมาใช้ ให้เรียกใช้
-   การซ้อมด้วย `--execute` บนปลายทาง 3.9.0 กับ fork ของคุณก่อน; สคริปต์จะพิมพ์ SHA ทั้งสองค่า และ
-   สามารถ push คอมมิตเดิมได้ดังนี้:
+3. สร้างสาขาบน `origin` ด้วยมือด้วยคำสั่งที่ dry-run พิมพ์ — สคริปต์ปฏิเสธที่จะพุชไปที่ `origin` หากต้องการนำ Commitment ที่ได้รับการตรวจสอบแล้วกลับมาใช้ใหม่ ให้รันการซ้อม `--execute` บนทิป 3.9.0 โดยเทียบกับ fork ของคุณก่อน มันพิมพ์ทั้ง SHAs และสามารถส่งคอมมิตเดียวกันได้:
 
    ```bash
    git push origin <stable-sha>:refs/heads/stable/v3 <develop-sha>:refs/heads/develop
    ```
 
-4. ป้องกัน `stable/v3` และ `develop` (ชุดกฎ + คิวการผสาน) ก่อนที่ PR แรกจะเข้ามา
-5. เวิร์กโฟลว์ที่ยังไม่ทำงานจะเปิดใช้งานเมื่อมีสาขาอยู่: `forward-port.yml` (พุชไปยัง
-   `stable/v3`), `validate-stable-pr.yml` (PR ที่ส่งไปยัง `stable/v3`) และ `nightly-v4-build.yml`
-   (บิลด์ `develop`) ก่อนเปิดใช้งานจริง ให้ตั้งค่าซีเคร็ตของรีโพซิทอรี `secrets.FORWARD_PORT_TOKEN` (เพื่อให้ CI ทำงานบน
-   PR สำหรับ forward-port) ส่วนการเผยแพร่ nightly จะยังคงปิดอยู่จนกว่าเจ้าของจะตั้งค่าตัวแปรของรีโพซิทอรี
-   `vars.NIGHTLY_PUBLISH` เป็น `true` และ npm Trusted Publishing ยอมรับ
-   `nightly-v4-build.yml` การกำหนดแชนเนลอยู่ใน `scripts/release/dist-tag.mjs` ซึ่งเป็น
-   ตัวกำหนดเดียวกับที่ `npm-publish.yml` ใช้
-6. ตรวจสอบแชนเนล: `npm view omniroute dist-tags --json` แสดง `latest` = 3.9.0 และไม่มี
-   `next` / `nightly` จนกว่าจะเผยแพร่ v4
-7. หากจำเป็น ให้ย้อนกลับด้วย: `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
-   และ `npm dist-tag add omniroute@3.8.59 latest`
+4. ป้องกัน `stable/v3` และ `develop` (กฎตั้งค่าคิวรวม + ) ก่อนที่ PR แรกจะลงจอด
+5. เวิร์กโฟลว์ที่อยู่เฉยๆ จะเปิดขึ้นตามการมีอยู่ของสาขา: `forward-port.yml` (พุชไปที่ `stable/v3`), `validate-stable-pr.yml` (PRs ถึง `stable/v3`) และ `nightly-v4-build.yml` (สร้าง `develop`) ก่อนที่จะใช้งานจริง ให้ตั้งค่าความลับของที่เก็บ `secrets.FORWARD_PORT_TOKEN` (เพื่อให้ CI ทำงานบนพอร์ตส่งต่อ PRs) การเผยแพร่ทุกคืนจะปิดอยู่จนกว่าเจ้าของจะตั้งค่าตัวแปรพื้นที่เก็บข้อมูล `vars.NIGHTLY_PUBLISH` เป็น `true` และ npm Trusted Publishing ยอมรับ `nightly-v4-build.yml` ความละเอียดของช่องสัญญาณคือ `scripts/release/dist-tag.mjs` ซึ่งเป็นตัวแก้ไขแบบเดียวกัน `npm-publish.yml` ใช้
+6. ตรวจสอบช่อง: `npm view omniroute dist-tags --json` แสดง `latest` = 3.9.0 และไม่มี `next` / `nightly` จนกว่า v4 จะเผยแพร่
+7. ย้อนกลับหากจำเป็น: `git push origin --delete refs/heads/stable/v3 refs/heads/develop` และ `npm dist-tag add omniroute@3.8.59 latest`
 
 ---
 

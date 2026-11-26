@@ -1,6 +1,6 @@
 "use client";
 
-import { Badge as KitBadge } from "@omniroute/ui-kit/badge";
+import { Badge as KitBadge, type BadgeChartTone } from "@omniroute/ui-kit/badge";
 import { cn } from "@/shared/utils/cn";
 import Icon from "./Icon";
 
@@ -13,13 +13,23 @@ const TONES = {
   error: "danger",
   info: "info",
 } as const;
-// Tailwind utilities win over kit components (layer order), so sizes stay utilities.
-const SIZES = { sm: "text-[10px] px-2 py-0.5", md: "", lg: "text-sm px-3 py-1.5" } as const;
+// `sm` and `md` are the kit's own sizes (20px and 24px tall, both with 12px text). The kit has
+// no large badge, so `lg` stays a utility override (utilities win over kit components).
+const SIZES = {
+  sm: { kit: "sm", className: "" },
+  md: { kit: "md", className: "" },
+  lg: { kit: "md", className: "text-sm px-3 py-1.5" },
+} as const;
 
 interface BadgeProps extends Omit<React.HTMLAttributes<HTMLSpanElement>, "children"> {
   children?: React.ReactNode;
   variant?: keyof typeof TONES;
   size?: keyof typeof SIZES;
+  /**
+   * Kit chart-series colour (`chart-1`…`chart-8`), for a badge that names a series drawn in a
+   * chart. It replaces the variant's tone.
+   */
+  tone?: BadgeChartTone;
   dot?: boolean;
   /** ICON_MAP name (rendered through <Icon>) or any node. */
   icon?: React.ReactNode;
@@ -31,20 +41,22 @@ export default function Badge({
   children,
   variant = "default",
   size = "md",
+  tone,
   dot = false,
   icon,
   className,
   ...props
 }: BadgeProps) {
-  const tone = TONES[variant] ?? null;
+  const kitSize = SIZES[size] ?? SIZES.md;
   return (
     <KitBadge
       {...props}
       variant="secondary"
       shape="pill"
-      tone={tone ?? undefined}
+      size={kitSize.kit}
+      tone={tone ?? TONES[variant] ?? undefined}
       icon={typeof icon === "string" ? <Icon name={icon} size={14} /> : icon}
-      className={cn(SIZES[size], className)}
+      className={cn(kitSize.className, className)}
     >
       {dot && (
         <span

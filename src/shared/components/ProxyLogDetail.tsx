@@ -44,7 +44,7 @@ function formatAttemptTiming(ms: unknown): string {
 function ObservedField({ label, children }) {
   return (
     <div>
-      <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">{label}</div>
+      <div className="text-3xs text-text-muted uppercase tracking-wider mb-1">{label}</div>
       <div className="text-sm font-medium font-mono">{children}</div>
     </div>
   );
@@ -81,7 +81,7 @@ function ObservedEgressAddresses({ log, t }) {
 function ObservedLinkField({ label, href, title, short }) {
   return (
     <div>
-      <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">{label}</div>
+      <div className="text-3xs text-text-muted uppercase tracking-wider mb-1">{label}</div>
       {href ? (
         <a
           href={href}
@@ -105,32 +105,30 @@ function StatusBadges({ log, t }) {
   return (
     <>
       <div>
-        <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">{t("type")}</div>
+        <div className="text-3xs text-text-muted uppercase tracking-wider mb-1">{t("type")}</div>
         <span
-          className="inline-block px-2.5 py-1 rounded text-[10px] font-semibold uppercase"
+          className="inline-block px-2.5 py-1 rounded text-3xs font-semibold uppercase"
           style={{ backgroundColor: typeColor.bg, color: typeColor.text }}
         >
           {typeColor.label}
         </span>
       </div>
       <div>
-        <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">
-          {t("level")}
-        </div>
+        <div className="text-3xs text-text-muted uppercase tracking-wider mb-1">{t("level")}</div>
         <span
-          className="inline-block px-2.5 py-1 rounded text-[10px] font-semibold uppercase"
+          className="inline-block px-2.5 py-1 rounded text-3xs font-semibold uppercase"
           style={{ backgroundColor: levelColor.bg, color: levelColor.text }}
         >
           {levelColor.label}
         </span>
       </div>
       <div>
-        <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">
+        <div className="text-3xs text-text-muted uppercase tracking-wider mb-1">
           {t("provider")}
         </div>
         {log.provider ? (
           <span
-            className="inline-block px-2.5 py-1 rounded text-[10px] font-semibold uppercase"
+            className="inline-block px-2.5 py-1 rounded text-3xs font-semibold uppercase"
             style={{ backgroundColor: providerColor.bg, color: providerColor.text }}
           >
             {providerColor.label}
@@ -147,11 +145,11 @@ function StatusBadges({ log, t }) {
 function TlsBadge({ log, t }) {
   return (
     <div>
-      <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">
+      <div className="text-3xs text-text-muted uppercase tracking-wider mb-1">
         {t("tlsFingerprint")}
       </div>
       {log.tlsFingerprint ? (
-        <Badge variant="info" className="text-[10px] font-semibold uppercase">
+        <Badge variant="info" className="text-3xs font-semibold uppercase">
           <span aria-hidden="true">🔒</span> Chrome 124
         </Badge>
       ) : (
@@ -165,25 +163,21 @@ function ObservedMetadataGrid({ log, t, emailsVisible }) {
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 gap-4 p-4 bg-bg-subtle rounded-xl border border-border">
       <div>
-        <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">{t("time")}</div>
+        <div className="text-3xs text-text-muted uppercase tracking-wider mb-1">{t("time")}</div>
         <div className="text-sm font-medium">{formatDateValue(log.timestamp)}</div>
       </div>
       <div>
-        <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">
-          {t("latency")}
-        </div>
+        <div className="text-3xs text-text-muted uppercase tracking-wider mb-1">{t("latency")}</div>
         <div className="text-sm font-medium">{formatLatency(log.latencyMs)}</div>
       </div>
       <div>
-        <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">
+        <div className="text-3xs text-text-muted uppercase tracking-wider mb-1">
           {t("clientIp")}
         </div>
         <div className="text-sm font-medium font-mono text-success">{log.clientIp || "—"}</div>
       </div>
       <div>
-        <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">
-          {t("proxy")}
-        </div>
+        <div className="text-3xs text-text-muted uppercase tracking-wider mb-1">{t("proxy")}</div>
         <div className="text-sm font-medium font-mono text-primary">
           {formatProxyLabel(log.proxy, t("direct"))}
         </div>
@@ -213,7 +207,7 @@ function ObservedMetadataGrid({ log, t, emailsVisible }) {
         {maskAccount(log.rotationAccount ?? log.account, emailsVisible) || "—"}
       </ObservedField>
       <div className="col-span-2">
-        <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">
+        <div className="text-3xs text-text-muted uppercase tracking-wider mb-1">
           {t("targetUrl")}
         </div>
         <div className="text-sm font-medium font-mono text-text-muted break-all">
@@ -270,7 +264,7 @@ export default function ProxyLogDetail({ log, onClose }) {
         {/* Error */}
         {log.error && (
           <div className="rounded-xl border border-error/30 bg-error/10 p-4">
-            <div className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-error">
+            <div className="mb-1 text-3xs font-semibold uppercase tracking-wider text-error">
               {t("error")}
             </div>
             <div className="font-mono text-sm text-error">{log.error}</div>
@@ -280,7 +274,7 @@ export default function ProxyLogDetail({ log, onClose }) {
         {/* Proxy Config Details */}
         {log.proxy && (
           <div className="rounded-xl border border-border bg-bg-subtle p-4">
-            <div className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-text-muted">
+            <div className="mb-2 text-3xs font-semibold uppercase tracking-wider text-text-muted">
               {t("configuration")}
             </div>
             <pre className="overflow-x-auto rounded-lg bg-surface-2 p-3 font-mono text-xs text-text-primary">

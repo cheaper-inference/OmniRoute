@@ -92,6 +92,10 @@ curl http://localhost:20128/api/settings/obsidian/webdav
 curl -X DELETE http://localhost:20128/api/settings/obsidian/webdav
 ```
 
+### سیکیورٹی اور ٹرانسپورٹ
+
+WebDAV کی توثیق فی IP ناکامی سے باخبر رہنے اور لاک آؤٹ کو نافذ کرتی ہے (60 سیکنڈ کی ونڈو میں 10 ناکام کوششیں `429 Too Many Requests` اور `Retry-After` کے ساتھ 5 منٹ کے لاک آؤٹ کو متحرک کرتی ہیں)۔ چونکہ WebDAV بنیادی تصدیقی اسناد کو منتقل کرتا ہے، اس لیے لوپ بیک سے باہر WebDAV اینڈ پوائنٹ تک رسائی حاصل کرتے وقت TLS (یا محفوظ سرنگ جیسے Tailscale یا Cloudflare Tunnel پر روٹنگ) کو ختم کرنے کی سختی سے سفارش کی جاتی ہے۔
+
 ### فی API کلید context source (اختیاری)
 
 Obsidian کنفیگریشن کو `api_key_context_sources` ٹیبل

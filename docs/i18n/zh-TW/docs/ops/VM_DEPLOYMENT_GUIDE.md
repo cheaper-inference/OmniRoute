@@ -133,7 +133,7 @@ EOF
 ### 2.3 啟動容器
 
 ```bash
-docker pull diegosouzapw/omniroute:latest
+docker pull cheaperinference/omniroute:latest
 
 docker run -d \
   --name omniroute \
@@ -141,7 +141,7 @@ docker run -d \
   --env-file /opt/omniroute/.env \
   -p 20128:20128 \
   -v omniroute-data:/app/data \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
 ### 2.4 確認其正在執行
@@ -298,13 +298,13 @@ curl -sI https://llms.seudominio.com/health
 ### 升級至新版本
 
 ```bash
-docker pull diegosouzapw/omniroute:latest
+docker pull cheaperinference/omniroute:latest
 docker stop omniroute && docker rm omniroute
 docker run -d --name omniroute --restart unless-stopped \
   --env-file /opt/omniroute/.env \
   -p 20128:20128 \
   -v omniroute-data:/app/data \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
 ### 檢視日誌

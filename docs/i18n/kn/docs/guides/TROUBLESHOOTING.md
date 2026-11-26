@@ -441,7 +441,7 @@ v3.8.0 ಕ್ಕಿಂತ _ಮೊದಲು_ ಆಮದು ಮಾಡಲಾದ ಸ�
 2. **ಶಾಶ್ವತ ಸರಿಪಡಿಸುವಿಕೆ:** ನಿಮ್ಮ `docker run` ಕಮಾಂಡ್ನಲ್ಲಿ `-p 127.0.0.1:20128:20128` ಬಳಸುವ ಮೂಲಕ IPv4 ಗೆ ಸ್ಪಷ್ಟವಾಗಿ ಬೈಂಡ್ ಮಾಡಿ:
    ```bash
    docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
-     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
    ```
    ಇದು IPv4 ಬೈಂಡ್ ಅನ್ನು ಕಡ್ಡಾಯಗೊಳಿಸುತ್ತದೆ ಮತ್ತು ಎಲ್ಲಾ ಹೋಸ್ಟ್ ಇಂಟರ್ಫೇಸ್ಗಳಲ್ಲಿ ಪ್ರಾಕ್ಸಿಯನ್ನು ಬಹಿರಂಗಪಡಿಸುವುದನ್ನೂ ತಪ್ಪಿಸುತ್ತದೆ.
 
