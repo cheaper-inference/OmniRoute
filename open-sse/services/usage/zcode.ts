@@ -237,7 +237,10 @@ async function readManagedGroup(
   return group;
 }
 
-function isManagedConnection(connection: ManagedConnection, data: JsonRecord): boolean {
+function isManagedConnection(
+  connection: ManagedConnection,
+  data: JsonRecord
+): connection is ManagedConnection & { id: string } {
   return Boolean(
     connection.authType === "oauth" &&
     connection.id &&
