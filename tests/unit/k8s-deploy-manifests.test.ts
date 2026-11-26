@@ -76,6 +76,7 @@ interface Kustomization {
 interface ChartValues {
   replicaCount?: number;
   terminationGracePeriodSeconds?: number;
+  config?: { requireApiKey?: boolean };
   probes?: { livenessType?: string; startupFailureThreshold?: number };
   service?: { port?: number };
   persistence?: { accessMode?: string };
@@ -495,6 +496,11 @@ test("chart values ship no baked-in secret material", () => {
 });
 
 // ── Chart consistency ─────────────────────────────────────────────────────────
+
+test("the chart requires API keys by default", () => {
+  const values = loadYaml<ChartValues>("deploy/helm/omniroute/values.yaml")[0];
+  assert.equal(values.config?.requireApiKey, true);
+});
 
 test("chart defaults mirror the base manifests", () => {
   const values = loadYaml<ChartValues>("deploy/helm/omniroute/values.yaml")[0];
