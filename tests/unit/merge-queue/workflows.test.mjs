@@ -3030,7 +3030,8 @@ const CONSUMED_CHECKS = new Set([
   ...queueConfig.prChecksRequired,
   ...queueConfig.requiredChecks,
   ...queueConfig.aggregateChecks,
-  ...mergifyConfig.queue_rules
+  // #20616 retired the Mergify queue, leaving only commands_restrictions in .mergify.yml.
+  ...(mergifyConfig.queue_rules ?? [])
     .flatMap((rule) => rule.merge_conditions)
     .filter((c) => typeof c === "string" && c.startsWith("check-success="))
     .map((c) => c.slice("check-success=".length)),
