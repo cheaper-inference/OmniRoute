@@ -9,6 +9,7 @@ import Select from "@/shared/components/Select";
 import Toggle from "@/shared/components/Toggle";
 import { ENDPOINT_CATEGORIES } from "@/shared/constants/endpointCategories";
 
+import { addPolicyEditorScope } from "../keyTemplatePolicyUtils";
 import { useKeyPolicyEditor } from "./KeyPolicyEditorContext";
 import McpPermissionControls from "./McpPermissionControls";
 
@@ -327,10 +328,7 @@ function ExclusiveLeaseScope() {
           onClick={() => {
             const s = newExtraScope.trim();
             if (!s) return;
-            updateState((p) => ({
-              ...p,
-              extraScopes: p.extraScopes.includes(s) ? p.extraScopes : [...p.extraScopes, s],
-            }));
+            updateState((p) => addPolicyEditorScope(p, s));
             setNewExtraScope("");
           }}
         >

@@ -9,6 +9,7 @@ import { useKeyTemplateCreation } from "../../../src/app/(dashboard)/dashboard/a
 import { useCreateKeySubmission } from "../../../src/app/(dashboard)/dashboard/api-manager/useCreateKeySubmission";
 import QuickKeyPermissionControls from "../../../src/app/(dashboard)/dashboard/api-manager/components/QuickKeyPermissionControls";
 import KeyPolicySixTabEditor from "../../../src/app/(dashboard)/dashboard/api-manager/components/KeyPolicySixTabEditor";
+import { createDefaultKeyTemplatePolicy } from "../../../src/app/(dashboard)/dashboard/api-manager/keyTemplatePolicyUtils";
 
 function CreateHarness() {
   const draft = useKeyTemplateCreation();
@@ -112,4 +113,109 @@ it("quick and full creation share independent permissions, keyboard operation an
   finish(Response.json({ key: "synthetic-created" }, { status: 201 }));
   await waitFor(() => expect(connect.disabled).toBe(false));
   expect(bodies[1].policy.key.scopes).toEqual(["mcp:connect", "self:usage"]);
+});
+
+it("routes typed managed scope names to independent switches instead of unsaved chips", async () => {
+  const bodies: Array<{ policy: { key: { scopes: string[] } } }> = [];
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async (input: string, init?: RequestInit) => {
+      if (input === "/api/keys" && init?.method === "POST") {
+        bodies.push(JSON.parse(String(init.body)));
+        return Response.json({ key: "synthetic-created" }, { status: 201 });
+      }
+      return Response.json({
+        data: [],
+        combos: [],
+        connections: [],
+        groups: [],
+        pools: [],
+        proxies: [],
+      });
+    })
+  );
+  const user = userEvent.setup();
+  render(
+    <NextIntlClientProvider locale="en" messages={messages}>
+      <CreateHarness />
+    </NextIntlClientProvider>
+  );
+  const quick = within(screen.getByRole("group", { name: "Quick permissions" }));
+  const full = within(screen.getByRole("group", { name: "Full permissions" }));
+  const connect = full.getByRole<HTMLInputElement>("switch", { name: "Connect to MCP" });
+  const compression = full.getByRole<HTMLInputElement>("switch", { name: "Read CCR content" });
+  const input = full.getByPlaceholderText("Add custom scope...");
+  const add = async (scope: string) => {
+    await user.type(input, scope);
+    await user.click(full.getByRole("button", { name: "Add Scope" }));
+  };
+  await add("  mcp:connect  ");
+  expect(connect.checked).toBe(true);
+  expect(compression.checked).toBe(false);
+  expect(full.queryByText("mcp:connect")).toBeNull();
+  await add("read:compression");
+  await add("read:compression");
+  expect(compression.checked).toBe(true);
+  expect(full.queryByText("read:compression")).toBeNull();
+  expect(quick.getByRole<HTMLInputElement>("switch", { name: "Read CCR content" }).checked).toBe(
+    true
+  );
+  expect(full.getByRole<HTMLInputElement>("switch", { name: "Management Access" }).checked).toBe(
+    false
+  );
+  await add("custom:example");
+  expect(full.getByText("custom:example")).toBeTruthy();
+  await user.click(connect);
+  await user.type(screen.getByRole("textbox", { name: "Synthetic key name" }), "Synthetic reader");
+  await user.click(screen.getByRole("button", { name: "Create synthetic key" }));
+  await waitFor(() => expect(bodies.length).toBe(1));
+  expect(bodies[0].policy.key.scopes).toEqual(["custom:example", "read:compression", "self:usage"]);
+});
+
+it("serializes both typed permissions in the template editor and preserves lease and custom scopes", async () => {
+  const changed = vi.fn();
+  function TemplateHarness() {
+    const [policy, setPolicy] = useState(createDefaultKeyTemplatePolicy);
+    return (
+      <KeyPolicySixTabEditor
+        policy={policy}
+        onChange={(next, dirty) => {
+          changed(next, dirty);
+          setPolicy(next);
+        }}
+      />
+    );
+  }
+  const user = userEvent.setup();
+  render(
+    <NextIntlClientProvider locale="en" messages={messages}>
+      <TemplateHarness />
+    </NextIntlClientProvider>
+  );
+  const input = screen.getByPlaceholderText("Add custom scope...");
+  for (const scope of ["mcp:connect", "read:compression", "custom:template"]) {
+    await user.type(input, scope);
+    await user.click(screen.getByRole("button", { name: "Add Scope" }));
+  }
+  await user.click(screen.getByRole("switch", { name: "Exclusive Lease" }));
+  expect(changed).toHaveBeenLastCalledWith(
+    expect.objectContaining({
+      key: expect.objectContaining({
+        scopes: expect.arrayContaining([
+          "mcp:connect",
+          "read:compression",
+          "custom:template",
+          "lease:exclusive",
+        ]),
+      }),
+    }),
+    true
+  );
+  expect(changed.mock.lastCall?.[0].key.scopes).not.toContain("manage");
+  await user.click(screen.getByRole("switch", { name: "Read CCR content" }));
+  const scopes = changed.mock.lastCall?.[0].key.scopes;
+  expect(scopes).not.toContain("read:compression");
+  expect(scopes).toEqual(
+    expect.arrayContaining(["mcp:connect", "custom:template", "lease:exclusive"])
+  );
 });

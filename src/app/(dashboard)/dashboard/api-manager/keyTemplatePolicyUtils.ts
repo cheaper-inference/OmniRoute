@@ -286,6 +286,17 @@ export function createDefaultPolicyEditorFormState(): PolicyEditorFormState {
   return policyToEditorFormState(createDefaultClientKeyTemplatePolicy());
 }
 
+/** Use the canonical switches for managed MCP scopes, not duplicate custom-scope chips. */
+export function addPolicyEditorScope(
+  state: PolicyEditorFormState,
+  scope: string
+): PolicyEditorFormState {
+  if (scope === MCP_CONNECT_SCOPE) return { ...state, mcpConnectEnabled: true };
+  if (scope === COMPRESSION_READ_SCOPE) return { ...state, compressionReadEnabled: true };
+  if (state.extraScopes.includes(scope)) return state;
+  return { ...state, extraScopes: [...state.extraScopes, scope] };
+}
+
 export function policyToEditorFormState(
   policyInput?: KeyTemplatePolicy | null
 ): PolicyEditorFormState {
