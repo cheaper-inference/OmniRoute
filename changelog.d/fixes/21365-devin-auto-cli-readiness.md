@@ -1,0 +1,1 @@
+- **fix(auto-combo):** Skip credentialed Devin CLI candidates when the local executable is unavailable ([#21365](https://github.com/cheaper-inference/OmniRoute/pull/21365)) — thanks @aldoeliacim
