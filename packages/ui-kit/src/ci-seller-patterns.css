@@ -1,0 +1,25 @@
+@import "./ci-seller-onboarding-layout.css";
+@import "./ci-seller-cards.css";
+@import "./ci-seller-earnings-summary-strip.css";
+
+/* Surface colors from the approved seller preview. Keep them on seller components. */
+:where([data-ci-seller]) {
+  box-sizing: border-box;
+  font-family: var(--ci-font-ui);
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--ci-color-foreground);
+}
+
+html:not([data-theme="dark"]) [data-ci-seller]:not([data-theme="dark"], [data-theme="dark"] *) {
+  --ci-color-background: #fbfbf8;
+  --ci-color-surface: #ffffff;
+  --ci-color-surface-subtle: #f7f7f2;
+  --ci-color-surface-muted: #eeeee8;
+  --ci-color-foreground: #031a1b;
+  --ci-color-heading: #040d10;
+  --ci-color-text-muted: #575f5f;
+  --ci-color-border: #040d103d;
+  --ci-color-border-subtle: #040d1017;
+  --ci-color-accent-surface-strong: #eeeee8;
+}

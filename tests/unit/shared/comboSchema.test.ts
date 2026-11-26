@@ -1,6 +1,10 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { comboRuntimeConfigSchema, updateComboSchema } from "@/shared/validation/schemas/combo";
+import {
+  comboRuntimeConfigSchema,
+  createComboSchema,
+  updateComboSchema,
+} from "@/shared/validation/schemas/combo";
 
 describe("comboRuntimeConfigSchema.modelSort", () => {
   it("accepts a valid modelSort method", () => {
@@ -36,4 +40,29 @@ describe("modelSort persistence", () => {
     const parsed = comboRuntimeConfigSchema.parse({ modelSort: { method: "provider" } });
     assert.equal(parsed.modelSort?.method, "provider");
   });
+});
+
+describe("reserved automatic route names", () => {
+  for (const name of ["auto", "auto/coding", "AUTO", " Auto/x "]) {
+    it(`rejects "${name}" on create and update`, () => {
+      for (const result of [
+        createComboSchema.safeParse({ name, models: ["openai/gpt-4o-mini"] }),
+        updateComboSchema.safeParse({ name }),
+      ]) {
+        assert.equal(result.success, false);
+        assert.deepEqual(result.error?.issues[0]?.path, ["name"]);
+        assert.match(
+          result.error?.issues[0]?.message ?? "",
+          /reserved for the built-in automatic routes/
+        );
+      }
+    });
+  }
+
+  for (const name of ["autopilot", "my-auto"]) {
+    it(`accepts "${name}" on create and update`, () => {
+      assert.equal(createComboSchema.parse({ name, models: ["openai/gpt-4o-mini"] }).name, name);
+      assert.equal(updateComboSchema.parse({ name }).name, name);
+    });
+  }
 });

@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import type { ComponentProps } from "react";
+import { resolveLabels } from "./lib/labels";
 import { cn } from "./lib/utils";
 
 export interface ChartDatum {
@@ -14,6 +15,23 @@ export interface ChartDatum {
 export type ChartVariant = "area" | "bar";
 export type ChartTone = "accent" | "positive" | "ink";
 
+/** Interface text of the chart beyond `ariaLabel` and the data labels. */
+export interface ChartLabels {
+  /** Label of the single placeholder point drawn when `data` is empty. */
+  noData: string;
+  /** Accessible name of the interactive point group, from `ariaLabel`. */
+  dataPoints: (ariaLabel: string) => string;
+  /** Column headers of the hidden data table. */
+  labelColumn: string;
+  valueColumn: string;
+}
+export const defaultChartLabels: ChartLabels = {
+  noData: "No data",
+  dataPoints: (ariaLabel) => `${ariaLabel} interactive data points`,
+  labelColumn: "Label",
+  valueColumn: "Value",
+};
+
 export interface ChartProps extends Omit<ComponentProps<"figure">, "children"> {
   data: readonly ChartDatum[];
   variant?: ChartVariant;
@@ -25,6 +43,8 @@ export interface ChartProps extends Omit<ComponentProps<"figure">, "children"> {
   animate?: boolean;
   height?: number;
   ariaLabel: string;
+  /** Localized interface text; missing or `undefined` keys fall back to defaultChartLabels. */
+  labels?: Partial<ChartLabels>;
 }
 
 const VIEWBOX_WIDTH = 720;
@@ -64,8 +84,10 @@ export function Chart({
   animate = true,
   height = 280,
   ariaLabel,
+  labels: labelOverrides,
   ...props
 }: ChartProps) {
+  const labels = resolveLabels(defaultChartLabels, labelOverrides);
   const figureRef = useRef<HTMLElement | null>(null);
   const [visible, setVisible] = useState(!animate);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
@@ -99,7 +121,7 @@ export function Chart({
   }, [animate, data]);
 
   const geometry = useMemo(() => {
-    const safeData: readonly ChartDatum[] = data.length ? data : [{ label: "No data", value: 0 }];
+    const safeData: readonly ChartDatum[] = data.length ? data : [{ label: labels.noData, value: 0 }];
     const chartHeight = Math.max(height, 180);
     const plotWidth = VIEWBOX_WIDTH - PADDING.left - PADDING.right;
     const plotHeight = chartHeight - PADDING.top - PADDING.bottom;
@@ -123,7 +145,7 @@ export function Chart({
     });
     const labelEvery = Math.max(1, Math.ceil(safeData.length / Math.max(xTickCount, 1)));
     return { safeData, chartHeight, plotWidth, plotHeight, points, linePath, areaPath, ticks, labelEvery, baseline };
-  }, [data, height, xTickCount, yTickCount]);
+  }, [data, height, labels.noData, xTickCount, yTickCount]);
 
   const barSlot = geometry.plotWidth / geometry.safeData.length;
   const barWidth = Math.min(30, barSlot * 0.58);
@@ -148,7 +170,7 @@ export function Chart({
       <svg
         viewBox={`0 0 ${VIEWBOX_WIDTH} ${geometry.chartHeight}`}
         role="group"
-        aria-label={`${ariaLabel} interactive data points`}
+        aria-label={labels.dataPoints(ariaLabel)}
       >
         <defs>
           <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
@@ -275,7 +297,7 @@ export function Chart({
       ) : null}
       <table className="ci-sr-only" aria-hidden="true">
         <caption>{ariaLabel}</caption>
-        <thead><tr><th>Label</th><th>Value</th></tr></thead>
+        <thead><tr><th>{labels.labelColumn}</th><th>{labels.valueColumn}</th></tr></thead>
         <tbody>{data.map((item) => <tr key={item.label}><td>{item.label}</td><td>{valueFormatter(item.value)}</td></tr>)}</tbody>
       </table>
     </figure>

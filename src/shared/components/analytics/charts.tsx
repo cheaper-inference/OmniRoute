@@ -6,6 +6,7 @@ import Card from "../Card";
 import Icon from "../Icon";
 import Input from "../Input";
 import Tooltip from "../Tooltip";
+import { HeatCell, heatLevel } from "@omniroute/ui-kit/heat-cell";
 import { ActivityCalendar } from "./ActivityCalendar";
 import { PROVIDER_COLORS } from "./chartColors";
 import {
@@ -79,7 +80,7 @@ export function StatCard({
 
   return (
     <Card className="px-4 py-3 flex flex-col gap-1 min-w-0">
-      <div className="flex items-center gap-1.5 text-text-muted text-[11px] uppercase font-semibold tracking-wide min-w-0">
+      <div className="flex items-center gap-1.5 text-text-muted text-2xs uppercase font-semibold tracking-wide min-w-0">
         <Icon name={icon} size={14} />
         <span className="truncate">{label}</span>
       </div>
@@ -123,7 +124,7 @@ export function CompactStatGrid({ sections }: { sections: CompactStatSection[] }
         {sections.map((section, si) => (
           <div key={si} data-testid={section.testId}>
             {si > 0 && <div className="border-t border-border mb-3" />}
-            <div className="text-[10px] uppercase font-semibold tracking-widest text-text-muted mb-2">
+            <div className="text-3xs uppercase font-semibold tracking-widest text-text-muted mb-2">
               {section.title}
             </div>
             {section.description && (
@@ -154,7 +155,7 @@ export function CompactStatGrid({ sections }: { sections: CompactStatSection[] }
                     >
                       <Icon name={stat.icon} size={14} className="text-text-muted" />
                       <span
-                        className={`text-[11px] uppercase font-semibold tracking-wide text-text-muted ${section.wideValues ? "whitespace-nowrap" : "truncate"}`}
+                        className={`text-2xs uppercase font-semibold tracking-wide text-text-muted ${section.wideValues ? "whitespace-nowrap" : "truncate"}`}
                       >
                         {stat.label}
                       </span>
@@ -479,6 +480,9 @@ export function MostActiveDay7d({ activityMap }) {
 
 // ── WeeklySquares7d ────────────────────────────────────────────────────────
 
+/** Days the activity calendar shows (see ActivityCalendar). */
+const CALENDAR_DAYS = 365;
+
 export function WeeklySquares7d({ activityMap }) {
   const t = useTranslations("analytics");
   const locale = useLocale();
@@ -493,64 +497,49 @@ export function WeeklySquares7d({ activityMap }) {
   const days = useMemo(() => {
     if (!activityMap) return [];
     const today = new Date();
-    const result = [];
-    let maxVal = 0;
-
-    for (let i = 6; i >= 0; i--) {
+    const dayKey = (daysAgo: number) => {
       const d = new Date(today);
-      d.setDate(d.getDate() - i);
-      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+      d.setDate(d.getDate() - daysAgo);
+      return {
+        date: d,
+        key: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`,
+      };
+    };
+    // The scale is the peak of the year the calendar beside this strip shows, not of the seven
+    // days, so a day sits on the same step in both.
+    let yearMax = 0;
+    for (let i = 0; i < CALENDAR_DAYS; i++) {
+      yearMax = Math.max(yearMax, activityMap[dayKey(i).key] || 0);
+    }
+
+    const result = [];
+    for (let i = 6; i >= 0; i--) {
+      const { date, key } = dayKey(i);
       const val = activityMap[key] || 0;
-      if (val > maxVal) maxVal = val;
       result.push({
         key,
         val,
-        label: weekdayFormatter.format(d),
-        dateLabel: dateFormatter.format(d),
+        level: heatLevel(val, yearMax),
+        label: weekdayFormatter.format(date),
+        dateLabel: dateFormatter.format(date),
       });
     }
-    return result.map((d) => ({ ...d, intensity: maxVal > 0 ? d.val / maxVal : 0 }));
+    return result;
   }, [activityMap, dateFormatter, weekdayFormatter]);
 
-  function getSquareStyle(intensity) {
-    if (intensity === 0) return { background: "var(--color-surface-2)" };
-    const pct = Math.round((0.15 + intensity * 0.75) * 100);
-    // Same 15–90 % intensity ramp as before, on the kit's first chart token.
-    return { background: `color-mix(in oklab, var(--color-chart-1) ${pct}%, transparent)` };
-  }
-
   return (
-    <Card className="p-4 flex flex-col justify-center" style={{ flex: 1, minHeight: 0 }}>
-      <h3 className="text-xs uppercase mb-3" style={{ color: "var(--color-text-muted)" }}>
-        {t("chartWeekly")}
-      </h3>
-      <div style={{ display: "flex", alignItems: "flex-end", gap: 6, justifyContent: "center" }}>
+    <Card className="flex min-h-0 flex-1 flex-col justify-center p-4">
+      <h3 className="mb-3 text-xs uppercase text-text-muted">{t("chartWeekly")}</h3>
+      <div className="flex items-end justify-center gap-1.5">
         {days.map((d) => (
-          <div
-            key={d.key}
-            style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}
-          >
-            <div
+          <div key={d.key} className="flex flex-col items-center gap-1">
+            <HeatCell
+              size="lg"
+              level={d.level}
+              label={t("activityCellTitle", { date: d.dateLabel, tokens: fmtFull(d.val) })}
               title={t("activityCellTitle", { date: d.dateLabel, tokens: fmtFull(d.val) })}
-              style={{
-                width: 36,
-                height: 36,
-                borderRadius: 8,
-                ...getSquareStyle(d.intensity),
-                transition: "all 0.2s",
-                cursor: "default",
-              }}
             />
-            <span
-              style={{
-                fontSize: 9,
-                fontWeight: 600,
-                color: "var(--color-text-muted)",
-                letterSpacing: "0.03em",
-              }}
-            >
-              {d.label}
-            </span>
+            <span className="text-3xs text-text-muted">{d.label}</span>
           </div>
         ))}
       </div>
@@ -601,7 +590,7 @@ export function ServiceTierBreakdown({ byServiceTier, summary }) {
         <h3 className="text-sm text-text-muted uppercase">
           {translateCostText(t, "serviceTierBreakdownTitle", "Service Tier")}
         </h3>
-        <span className="text-[11px] text-text-muted">
+        <span className="text-2xs text-text-muted">
           {translateCostText(t, "serviceTierBreakdownSubtitle", "Fast / Flex / Standard split")}
         </span>
       </div>

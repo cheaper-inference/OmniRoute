@@ -4,93 +4,105 @@ title: Merge Queue & Manual Merge-Train Runbook
 
 # Merge Queue & Manual Merge-Train Runbook
 
-> **2026-11-19: the Mergify merge queue is retired** (owner's decision). `.mergify.yml` no
-> longer defines a queue and refuses the Mergify commands that merge or rewrite a pull request.
-> Release PRs are merged by hand under the repository ruleset "Require green gates on the active
-> release" (`Gate / CI` + `Gate / Quality`) until omni-queue runs in live mode, and through
-> omni-queue after that ([OMNI_QUEUE.md](./OMNI_QUEUE.md)). The Mergify sections below describe the queue as it was.
+## Landing on a release branch
 
-Since v3.8.49 (WS3.2/WS3.4 of the quality/velocity plan) the default merge path for
-reviewed PRs into `release/vX.Y.Z` is the **Mergify merge queue** (`.mergify.yml`);
-the **manual merge-train** documented below is the FALLBACK — used during incidents,
-release freezes, or if the Mergify Open Source plan ever changes.
+The omni-queue governs landings into `release/vX.Y.Z`. Read the top-level `mode` in
+`config/merge-queue/config.json` on the default branch before landing a PR. See [Omni-Queue](OMNI_QUEUE.md).
 
-## Default path: the Mergify queue
+- **`shadow`** runs validation and leaves landing to a manual merge. Apply `omni-queue`
+  to the approved PR at its final head. Check eligibility with `npm run queue -- why <PR>`.
+  Wait for the verdict for that head in `npm run queue -- history --base <branch>`.
+  Proceed on `would-land`. On `culprit-found` or `would-dequeue`, hold the merge and fix the cause.
+- **Shadow exceptions.** A train with green full CI against the current base tip can proceed
+  without a separate queue verdict. The same exception applies when the PR head already
+  contains the current base tip.
+- **`live`** uses the `omni-queue` label to trigger landing. The queue alone lands the PR.
+  Leave merge commands and direct pushes to the queue.
 
-1. PR is reviewed/greened by the campaigns and approved by the owner's pre-merge ⭐
-   gate (the report + per-item decision — see `/merge-prs` Step 0.75).
-2. The owner (or the session acting on the owner's decision) applies the **`queue`**
-   label. The label IS the merge approval; Mergify only executes it.
-3. Mergify validates queued PRs **serially** (one at a time) against the fast-gates
-   and merges (squash). Batching + automatic bisection is a paid Mergify tier
-   ("Cannot use Merge Queue batch" on the free plan, #7220), so `.mergify.yml` sets no
-   `batch_size`; batching remains the job of the manual merge-train below. A PR whose
-   checks are still pending after `checks_timeout` (240 min = 2× the measured p95 of
-   `quality.yml`) is dequeued instead of stalling the queue.
-4. Post-merge, the continuous release-green workflow validates the new tip on push
-   and opens an attribution issue if the combination regressed (never auto-revert).
+Every landing requires the owner's authorization and the applicable required checks.
+Apply `omni-queue` only after the owner has authorized landing. Queued PRs touching protected
+paths also require the owner's `protected-approved` decision for that PR.
 
-Guardrails (mirror `CLAUDE.md` Hard Rules #21/#22):
+The "Require green gates on the active release" ruleset requires green `Gate / CI` and
+`Gate / Quality` on the head. Never use `--admin` to bypass a red gate.
+A release freeze blocks merges into the frozen branch. See [Hard Rule 21](HARD_RULES_DETAIL.md).
+Never label, merge or push to a pull request that another session is working.
+See [Hard Rule 22](HARD_RULES_DETAIL.md).
 
-- **Release freeze open** → do NOT label PRs targeting the frozen branch; retarget to
-  the active `release/vX+1` first.
-- **Another session's in-flight PR** → never label it; only the owning session queues
-  its own work.
-- Tests-only diffs and `hotfix`-labeled PRs already run reduced CI (see
-  `RELEASE_CHECKLIST.md` → Hotfix Fast-Lane); the queue conditions accept whatever
-  check set actually ran (`#check-failure=0` + `#check-pending=0`).
+## The train pull request
 
-## Fallback: the manual merge-train
+1. Start a train branch at the current release base tip. Integrate the exact approved
+   member heads using merge commits. Preserve their commit history by avoiding squash
+   and rebase.
+2. Open one pull request for the train branch. Validate that PR with its own full CI
+   on the current base tip. Recheck the base tip and the approved member heads before
+   landing. Refresh the train and its CI when the validated candidate changes.
+3. Land the train PR with a merge commit under the applicable queue mode. In live mode,
+   the queue's `merge-ff` landing method preserves the merge commits. The original
+   member heads become reachable from the release branch. GitHub marks the member PRs
+   as merged and the commits retain their authors.
 
-Used when the queue is unavailable. This codifies the practice that drained 33 PRs in
-one day during the v3.8.47 cycle:
+A public example is [PR #21071](https://github.com/cheaper-inference/OmniRoute/pull/21071).
+It combined 18 member PRs and landed with a merge commit on 2026-11-24.
 
-1. **Assemble the batch** (~10–30 reviewed+approved PRs). Check `linked:` collisions
-   (same `tap.testFiles`, same CHANGELOG hunks) and serialize those.
-2. **Validate ONCE**: in an isolated worktree off the release tip, merge all batch
-   heads locally, then run the release-equivalent suite
-   (`npm run check:release-green`, add `--with-build` before a release).
-   `scripts/release/merge-train.sh <base> <PR#>…` automates steps 1–2 (conflicting
-   PRs eject, the train continues). Full mode runs `npm run test:unit` — the
-   box-tuned runner (`--test-concurrency=20`), **not** the two sequential 4-core CI
-   shards, which drove the dominant phase at ~25% of a 16-core box (fixed
-   2026-07-18). `--fast` (intra-day mega-train drains, owner-approved 2026-07-18)
-   keeps every static gate + vitest but runs only the node:test files changed by the
-   boarded PRs; the FULL suite must still run at least once per day on the
-   accumulated tip (one train without `--fast`).
-3. **Green** → merge the PRs in sequence (re-checking `state,headRefOid` before each —
-   a PR whose head moved re-enters review). Prove the net diff of each merge is the
-   PR's own change (no auto-resolve reverts: audit `git diff --stat` for
-   out-of-scope deletions).
-4. **Red** → bisect the batch by halves (validate each half) instead of re-validating
-   one-by-one; drop the offending PR back to the review queue with the evidence.
-5. **Never**: merge during a freeze into the frozen branch; `git stash` anywhere;
-   blanket-rerun CI hoping a red goes away (rule: a red is information).
+A sync-back from `main` to the next release branch also lands through a merge commit.
+Preserving `main` ancestry is required for later sync-backs. See
+[Worktree Isolation](WORKTREE_ISOLATION.md#sync-back-landings-are-merge-commits-never-squash).
 
-## Tiering (why the queue is safe with fast-gates only)
+## The local merge-train validator
 
-- **Per PR** (quality.yml fast-gates): TIA-impacted tests + full unit 4-shard +
-  vitest + lint bag + typecheck + docs/changelog integrity.
-- **Per batch/tip** (continuous release-green): `--quick` HARD gates on every push to
-  the release branch; full `--with-build --full-ci` sweeps 3×/day.
-- **Per release** (ci.yml on the release PR): the complete matrix incl. E2E ×9,
-  package-artifact + tarball boot-smoke, coverage/ratchets.
+```bash
+scripts/release/merge-train.sh [--plan] [--fast] <base-branch> <PR#> [<PR#>...]
+```
 
-Nothing is validated less than before — the heavy surface just runs per batch/tip
-instead of per PR, which is what removes the O(N) round-trips.
+The validator fetches the base and PR heads and combines them in a disposable worktree.
+It runs its parity suite once on the resulting tree. A failed head fetch or merge conflict
+ejects that PR and the script continues with the remaining PRs.
+
+- **`--plan`** prints the selected mode's steps and exits without creating a worktree
+  or contacting the remote. Combine it with `--fast` to inspect the fast plan.
+- **`--fast`** runs the common static gates, the selected changed `node:test` files under
+  `tests/unit/`, and `npm run test:vitest`. Run a full local validation at least once a day
+  on the accumulated tip when using fast mode.
+- **Full mode** adds the full-only static gates and runs `npm run test:unit` and
+  `npm run test:vitest`.
+
+A failing static gate is rerun on the untouched base if the base probe is available.
+The script reports inherited failures and continues when every recognized violation
+line also appears on the base and the total count has not grown.
+
+| Exit | Meaning                                                                                                                      |
+| ---- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `0`  | Printed the plan or completed the suite. The suite summary lists any inherited static failures and ejected PRs.              |
+| `1`  | Invalid arguments, no Git checkout, failed preflight, or no PR boarded.                                                      |
+| `2`  | A suite check failed and did not qualify as inherited. The operator can bisect the batch, eject the offending PR, and rerun. |
+
+A local pass supplies diagnostic evidence for the owner's dossier only. Each landing
+still requires owner authorization, its own required checks, and the shadow queue
+verdict when applicable.
+
+## Tiering
+
+- **Per PR.** CI and Quality select checks based on the changed paths. Code PRs run
+  fast quality gates and impacted tests, with separate unit and Vitest jobs in CI.
+- **Per queue candidate.** CI and Quality run the full profile for the composed
+  candidate on its queue ref.
+- **Per release tip.** Release-Green runs quick hard gates on pushes that match its
+  path filters. Three scheduled runs per day use the full sweep for the release branch.
+- **Per release.** The full CI matrix includes E2E shards, package validation,
+  tarball boot smoke, and coverage checks. See the [Release Checklist](RELEASE_CHECKLIST.md).
 
 ## Fresh-checkout prerequisites for `merge-train.sh`
 
-The script runs a fail-fast **preflight** on the root checkout (before any worktree
-work) so a broken install can never masquerade as a red train:
+The preflight runs before creating worktrees. Install dependencies with `npm ci`.
+Confirm that `node_modules/.bin/tsc` is executable and that `node_modules/node_modules`
+is absent. Check that `node_modules/.bin/bun --version` succeeds.
 
-1. `npm ci`, then run the `bun` postinstall that npm blocks:
-   `(cd node_modules/bun && node install.js)` — otherwise `check:provider-consistency`
-   and `check:known-symbols` (both `bun scripts/…`) fail on the train AND the base with
-   no violation line.
-2. No stray `node_modules/node_modules` (a duplicate dependency tree; React loads twice
-   and UI vitest suites fail instantly).
-3. `node_modules/.bin/tsc` present and executable (a partial install lacks it).
+If the Bun postinstall was skipped, run `(cd node_modules/bun && node install.js)`.
+The provider consistency and known-symbol checks use Bun. The validator runs
+`npm run check:cycles:ratchet` as a blocking gate. The standalone `npm run check:cycles`
+command is advisory.
 
-The train runs the blocking `npm run check:cycles:ratchet`; bare `npm run check:cycles`
-is advisory (it lists the SCCs and exits non-zero even on a healthy base).
+## History
+
+The Mergify merge queue was retired on 2026-11-19.

@@ -83,9 +83,16 @@ test("alwaysPreserveClientCache set via cache-config reaches the runtime read pa
             body: JSON.stringify({ geminiPromptCacheMode: value }),
           })
         );
+      // Off by default: implicit Gemini caching is an operator opt-in.
+      const initial = await getSettings();
+      assert.equal(initial.geminiPromptCacheMode, "off");
       const valid = await patch("implicit");
       assert.notEqual(valid.status, 400);
+      core.resetDbInstance();
       assert.equal((await getSettings()).geminiPromptCacheMode, "implicit");
+      const optedOut = await patch("off");
+      assert.equal(optedOut.status, 200);
+      assert.equal((await getSettings()).geminiPromptCacheMode, "off");
       assert.equal((await patch("invalid")).status, 400);
     }
   );

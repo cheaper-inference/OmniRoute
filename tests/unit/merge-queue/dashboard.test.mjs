@@ -39,6 +39,7 @@ const BASE = "release/v3.8.54";
 const NOW = "2026-11-13T10:42:00Z";
 const config = loadConfig();
 const live = { ...config, mode: "live" };
+const shadowConfig = { ...config, mode: "shadow" }; // pinned here, whatever the committed mode
 const pr = (n, title, author, labeledAt) => ({ n, head: sha(`h${n}`), title, author, labeledAt });
 const state = (patch = {}) => ({ ...initialState(BASE, "2026-11-13T10:00:00Z"), ...patch });
 
@@ -229,7 +230,7 @@ test("computeMetrics in shadow mode takes approval times from the labeled queue"
     base: BASE,
     state: shadow,
     queue: queue.map((q) => ({ ...q, title: "t", author: "a", eligible: true, reasons: [] })),
-    config,
+    config: shadowConfig,
     now: NOW,
     runUrl: null,
   });
@@ -244,7 +245,7 @@ test("renderDashboard snapshot: idle queue (shadow mode)", () => {
     base: BASE,
     state: state(),
     queue: [],
-    config,
+    config: shadowConfig,
     now: "2026-11-13T10:00:00Z",
     runUrl: null,
   });

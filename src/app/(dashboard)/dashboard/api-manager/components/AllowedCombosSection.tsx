@@ -1,7 +1,9 @@
 "use client";
 
+import Card from "@/shared/components/Card";
 import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
+import Badge from "@/shared/components/Badge";
 import { cn } from "@/shared/utils/cn";
 
 import { useMemo } from "react";
@@ -64,9 +66,10 @@ function ComboOptionRow({
       size="sm"
       aria-pressed={isSelected}
       onClick={() => onToggle(combo.name)}
+      tone={isSelected ? undefined : "muted"}
       className={cn(
         "w-full justify-start gap-2 text-left text-xs",
-        isSelected ? "bg-primary/10 text-text-main" : "text-text-muted"
+        isSelected && "bg-primary/10 text-text-main"
       )}
     >
       <span
@@ -80,7 +83,7 @@ function ComboOptionRow({
       </span>
       <span className="truncate flex-1">{combo.name}</span>
       {Array.isArray(combo.models) && (
-        <span className="text-[10px] text-text-muted shrink-0">{combo.models.length} models</span>
+        <span className="text-3xs text-text-muted shrink-0">{combo.models.length} models</span>
       )}
     </Button>
   );
@@ -98,16 +101,11 @@ function PreservedComboRules({ rules }: { rules: string[] }) {
       <p className="text-xs text-text-muted">{t("preservedComboRules", { count: rules.length })}</p>
       <div className="flex flex-wrap gap-1">
         {rules.map((rule, index) => (
-          <span
-            key={`${rule}-${index}`}
-            title={t("preservedComboRuleHint")}
-            className="inline-flex items-center gap-1 px-2 py-0.5 rounded border border-border bg-surface text-[11px] text-text-muted"
-          >
-            <Icon name="lock" size={12} />
+          <Badge key={`${rule}-${index}`} size="sm" icon="lock" title={t("preservedComboRuleHint")}>
             <span data-testid="preserved-combo-rule" className="truncate max-w-[16rem]">
               {rule}
             </span>
-          </span>
+          </Badge>
         ))}
       </div>
     </div>
@@ -160,7 +158,7 @@ export function AllowedCombosSection({
   if (allCombos.length === 0) return null;
 
   return (
-    <div className="flex flex-col gap-2 p-3 rounded-lg border border-border bg-surface/40">
+    <Card.Section className="flex flex-col gap-2">
       <div className="flex items-center justify-between">
         <p className="text-sm font-medium text-text-main">{t("allowedCombos")}</p>
         <ComboAccessModeToggle
@@ -189,6 +187,6 @@ export function AllowedCombosSection({
           <PreservedComboRules rules={preservedRules} />
         </>
       )}
-    </div>
+    </Card.Section>
   );
 }

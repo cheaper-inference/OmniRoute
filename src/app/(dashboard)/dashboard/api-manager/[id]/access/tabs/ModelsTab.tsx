@@ -1,5 +1,6 @@
 "use client";
 
+import Card from "@/shared/components/Card";
 import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
 import Toggle from "@/shared/components/Toggle";
@@ -261,7 +262,7 @@ function ForcedModelSetting({
   const t = useTranslations("apiManager");
 
   return (
-    <div className="flex flex-col gap-2 p-4 rounded-lg border border-border bg-surface/40">
+    <Card.Section className="flex flex-col gap-2">
       <Input
         id="api-key-forced-model"
         label={t("forcedModel")}
@@ -278,7 +279,7 @@ function ForcedModelSetting({
           <option key={model.id} value={model.id} />
         ))}
       </datalist>
-    </div>
+    </Card.Section>
   );
 }
 
@@ -295,7 +296,7 @@ function CatalogVisibilitySettings({
       <ApiKeyCatalogScopeSelect value={formState.catalogScope} onChange={setCatalogScope} />
 
       {/* Disable Non-Public Models Toggle */}
-      <div className="flex items-start justify-between gap-3 p-4 rounded-lg border border-border bg-surface/40">
+      <Card.Section className="flex items-start justify-between gap-3">
         <div className="flex flex-col gap-1">
           <p className="text-sm font-medium text-text-main">{t("disableNonPublicModels")}</p>
           <p className="text-xs text-text-muted">{t("disableNonPublicModelsDesc")}</p>
@@ -307,7 +308,7 @@ function CatalogVisibilitySettings({
           onChange={() => setDisableNonPublicModels(!formState.disableNonPublicModels)}
           ariaLabel={t("disableNonPublicModels")}
         />
-      </div>
+      </Card.Section>
     </>
   );
 }
@@ -353,18 +354,12 @@ function SelectedModelsSummary({
         <div className="flex gap-1">
           <Button
             variant="ghost"
-            size="sm"
+            size="2xs"
             onClick={() => selectAllModels(allModels.map((m) => m.id))}
-            className="h-auto min-h-0 px-1.5 py-0.5 text-[10px]"
           >
             {tc("all")}
           </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={deselectAllModels}
-            className="h-auto min-h-0 px-1.5 py-0.5 text-[10px] text-error"
-          >
+          <Button variant="ghost" size="2xs" onClick={deselectAllModels} className="text-error">
             {t("clear")}
           </Button>
         </div>
@@ -415,7 +410,7 @@ function SelectedChipGroup({
 }) {
   return (
     <div className="flex flex-col gap-1">
-      <span className="text-[10px] font-semibold uppercase tracking-wider text-text-muted">
+      <span className="ci-eyebrow" data-size="3xs" data-weight="medium">
         {label}
       </span>
       <div className={listClassName}>{children}</div>
@@ -439,12 +434,12 @@ function ClaudeCodeDefaultScopeChip({
 
   return (
     <div className="flex flex-col gap-1 basis-full">
-      <span className="inline-flex w-fit items-center gap-0.5 px-1.5 py-0.5 bg-primary/10 text-text-main text-[10px] rounded border border-primary/35">
+      <span className="inline-flex w-fit items-center gap-0.5 px-1.5 py-0.5 bg-primary/10 text-text-main text-3xs rounded border border-primary/35">
         <Button
           variant="ghost"
           size="sm"
           onClick={() => setClaudeCodeFamiliesExpanded((prev) => !prev)}
-          className="h-auto min-h-0 gap-1 p-0 font-mono text-[10px] text-text-main"
+          className="h-auto min-h-0 gap-1 p-0 font-mono text-3xs text-text-main"
           title={t("expandClaudeCodeFamilies")}
           aria-expanded={claudeCodeFamiliesExpanded}
         >
@@ -510,7 +505,7 @@ function ClaudeCodeFamilyChips({
         return (
           <span
             key={family.id}
-            className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] rounded border ${
+            className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 text-3xs rounded border ${
               canBlock
                 ? "bg-surface text-text-main border-border"
                 : "bg-surface-2 text-text-muted border-border"
@@ -549,7 +544,7 @@ function ProviderScopeChip({
   const provider = scope.slice(0, -2);
   return (
     <span
-      className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-primary/10 text-text-main text-[10px] rounded border border-primary/35"
+      className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-primary/10 text-text-main text-3xs rounded border border-primary/35"
       title={scope}
     >
       <span className="font-mono truncate max-w-[120px]">{provider}</span>
@@ -572,7 +567,7 @@ function SelectedModelChip({
 }: Pick<ModelsTabProps, "toggleModel"> & { modelId: string }) {
   const t = useTranslations("apiManager");
   return (
-    <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-surface text-text-main text-[10px] rounded border border-border">
+    <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-surface text-text-main text-3xs rounded border border-border">
       <span className="font-mono truncate max-w-[120px]" title={modelId}>
         {getModelDisplayName(modelId)}
       </span>

@@ -4,6 +4,7 @@ import {
   ROUTING_STRATEGY_VALUES,
 } from "@/shared/constants/routingStrategies";
 import { SUPPORTED_BATCH_ENDPOINTS } from "@/shared/constants/batchEndpoints";
+import { WEB_FETCH_URL_MAX_LENGTH } from "@/shared/constants/formLimits";
 import { MAX_REQUEST_BODY_LIMIT_MB, MIN_REQUEST_BODY_LIMIT_MB } from "@/shared/constants/bodySize";
 import { COMBO_CONFIG_MODES } from "@/shared/constants/comboConfigMode";
 import { providerAllowsOptionalApiKey } from "@/shared/constants/providers";
@@ -743,7 +744,10 @@ export const v1BatchCreateSchema = z.object({
 
 export const v1WebFetchSchema = z
   .object({
-    url: z.string().url("url must be a valid URL (http/https)"),
+    url: z
+      .string()
+      .max(WEB_FETCH_URL_MAX_LENGTH, `url must be at most ${WEB_FETCH_URL_MAX_LENGTH} characters`)
+      .url("url must be a valid URL (http/https)"),
     model: z.string().trim().min(1).max(300).optional(),
     provider: z
       .enum([
