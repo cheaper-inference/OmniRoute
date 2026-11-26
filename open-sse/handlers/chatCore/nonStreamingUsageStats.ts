@@ -13,6 +13,7 @@
 import { saveRequestUsage } from "@/lib/usageDb";
 import { recordKeyQuotaUsage } from "@/domain/keyQuota";
 import { formatUsageLog } from "@/lib/usage/tokenAccounting";
+import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
 import { COLORS } from "../../utils/stream.ts";
 import { recordTokenUsage } from "../../services/tokenLimitCounter.ts";
 import { computeBillableTokens } from "./upstreamTimeouts.ts";
@@ -54,8 +55,9 @@ function persistUsageRow(usage: object, ctx: RecordNonStreamingUsageStatsContext
     status: "200",
     success: true,
     latencyMs: Date.now() - startTime,
-    // No first-token moment in a buffered reply: store NULL so TTFT averages skip the row.
-    timeToFirstTokenMs: null,
+    timeToFirstTokenMs: isFeatureFlagEnabled("NONSTREAM_USAGE_NULL_TTFT_ENABLED")
+      ? null
+      : Date.now() - startTime,
     errorCode: null,
     timestamp: new Date().toISOString(),
     connectionId: connectionId || undefined,
@@ -72,19 +74,19 @@ function persistUsageRow(usage: object, ctx: RecordNonStreamingUsageStatsContext
   });
 }
 
-function recordBillableTokens(
-  usage: object,
-  apiKeyInfo: RecordNonStreamingUsageStatsContext["apiKeyInfo"],
-  provider: string | null | undefined,
-  model: string | null | undefined,
-  requestStartedAt: number
+export function recordNonStreamingKeyUsage(
+  usage: unknown,
+  {
+    apiKeyInfo,
+    provider,
+    model,
+    startTime,
+  }: Pick<RecordNonStreamingUsageStatsContext, "apiKeyInfo" | "provider" | "model" | "startTime">
 ): void {
   if (!apiKeyInfo?.id) return;
   try {
     const billable = computeBillableTokens(usage);
-    // Key-quota tpm/rpm counters advance for every successful call regardless
-    // of token count (rpm always +1), so the gate in apiKeyPolicy sees current
-    // usage. Mirrors recordTokenUsage's swallow-and-continue.
+    // Count the request even when the provider did not report tokens.
     recordKeyQuotaUsage(apiKeyInfo.id, billable);
     if (billable > 0)
       recordTokenUsage(
@@ -92,23 +94,11 @@ function recordBillableTokens(
         provider || "unknown",
         model || "unknown",
         billable,
-        requestStartedAt
+        startTime
       );
   } catch {
     // never block the response on counter recording
   }
-}
-
-/**
- * Advance the key's tpm/rpm counters for tokens the upstream billed. A reply that the gateway
- * then refuses (guardrail block, malformed body) still spent them, so its exit calls this too.
- */
-export function recordNonStreamingKeyUsage(
-  usage: unknown,
-  ctx: RecordNonStreamingUsageStatsContext
-): void {
-  if (!usage || typeof usage !== "object") return;
-  recordBillableTokens(usage, ctx.apiKeyInfo, ctx.provider, ctx.model, ctx.startTime);
 }
 
 export function recordNonStreamingUsageStats(

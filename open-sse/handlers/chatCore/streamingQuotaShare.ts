@@ -24,11 +24,13 @@ export function scheduleStreamingQuotaShareConsumption(args: {
   model: string | null | undefined;
   streamUsage: unknown;
   streamStatus: number;
+  billFailedUsage?: boolean;
   serviceTier?: string;
   calculateCost: CostResolver;
   log?: LoggerLike;
 }): void {
-  if (!args.apiKeyId || !args.connectionId || args.streamStatus !== 200) return;
+  if (!args.apiKeyId || !args.connectionId) return;
+  if (args.streamStatus !== 200 && !args.billFailedUsage) return;
 
   const quotaApiKeyId = args.apiKeyId;
   const quotaConnectionId = args.connectionId;
@@ -43,6 +45,7 @@ export function scheduleStreamingQuotaShareConsumption(args: {
           model: args.model,
           streamUsage: args.streamUsage,
           streamStatus: args.streamStatus,
+          billFailedUsage: args.billFailedUsage,
           serviceTier: args.serviceTier,
         },
         { calculateCost: args.calculateCost, log: args.log }

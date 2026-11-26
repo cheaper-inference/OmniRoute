@@ -23,6 +23,7 @@ export type RecordStreamingUsageStatsContext = {
   provider: string | null | undefined;
   model: string | null | undefined;
   streamStatus: number;
+  billFailedModelUsage?: boolean;
   startTime: number;
   ttft: number;
   streamErrorCode: string | null | undefined;
@@ -82,7 +83,7 @@ function recordStreamingBillableTokens(
     // provider already generated the partial tokens, and the apiKeyPolicy gate
     // must see the request, or a key that aborts after the first token is never counted.
     recordKeyQuotaUsage(ctx.apiKeyInfo.id, billable);
-    if (ctx.streamStatus === 200 && billable > 0)
+    if ((ctx.streamStatus === 200 || ctx.billFailedModelUsage) && billable > 0)
       recordTokenUsage(
         ctx.apiKeyInfo.id,
         ctx.provider || "unknown",

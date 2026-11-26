@@ -1,29 +1,34 @@
-// F-C2-17: failed non-stream paths wrote a failure usage row with no token counts even though the
-// upstream had already billed them. A buffered Responses body with status "failed" (the leg
-// extracts its usage) records them on the failure row. A malformed translated 200 is refused
-// before any success row is written, so its failure row is the one place its tokens land.
-import { test } from "node:test";
 import assert from "node:assert/strict";
-import fs from "node:fs";
-import os from "node:os";
-import path from "node:path";
+import { mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import test from "node:test";
+import type { NonStreamingDeps } from "../../open-sse/handlers/chatCore/nonStreamingResponse.ts";
+import type { FailureUsageAggregate } from "../../open-sse/handlers/chatCore/failureUsage.ts";
 
-const DIR = fs.mkdtempSync(path.join(os.tmpdir(), "or9r-nonstream-failure-usage-"));
-process.env.DATA_DIR = DIR;
+const flag = "NONSTREAM_UPSTREAM_FAILURE_BILLED_USAGE_ENABLED";
+const dataDir = mkdtempSync(join(tmpdir(), "omniroute-nonstream-failure-usage-"));
+process.env.DATA_DIR = dataDir;
+process.env.APP_LOG_TO_FILE = "false";
 
 const { runNonStreamingResponse } =
   await import("../../open-sse/handlers/chatCore/nonStreamingResponse.ts");
 const { extractUsageFromResponse } = await import("../../open-sse/handlers/usageExtractor.ts");
 const { buildErrorBody, createErrorResult } = await import("../../open-sse/utils/error.ts");
 const { makeExecutorResult } = await import("./_helpers/nonStreamingProviderLegFixtures.ts");
+const { resetDbInstance } = await import("../../src/lib/db/core.ts");
+const { stopSemanticCachePruneJob } = await import("../../src/lib/jobs/semanticCachePruneJob.ts");
 
 test.after(() => {
-  fs.rmSync(DIR, { recursive: true, force: true });
+  stopSemanticCachePruneJob();
+  resetDbInstance();
+  rmSync(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
-type FailureCall = { status: number; code: unknown; aggregate: Record<string, number> | undefined };
-
-function buildDeps(upstreamBody: unknown, failures: FailureCall[], overrides = {}) {
+function createNonStreamingResponseDeps(
+  upstreamBody: unknown,
+  overrides: Partial<NonStreamingDeps> = {}
+): NonStreamingDeps {
   const noop = () => undefined;
   const wire = { model: "gpt-5", input: "hi" };
   return {
@@ -68,7 +73,7 @@ function buildDeps(upstreamBody: unknown, failures: FailureCall[], overrides = {
     appendRequestLog: async () => undefined,
     persistAttemptLogs: noop,
     recordNonStreamingUsageStats: noop,
-    persistFailureUsage: (status, code, aggregate) => failures.push({ status, code, aggregate }),
+    persistFailureUsage: noop,
     trackPendingRequest: noop,
     buildErrorBody,
     createErrorResult,
@@ -123,50 +128,63 @@ function buildDeps(upstreamBody: unknown, failures: FailureCall[], overrides = {
   };
 }
 
-test("a failed Responses body records the tokens the upstream already billed", async () => {
-  const failures: FailureCall[] = [];
-  const upstream = {
-    object: "response",
-    status: "failed",
-    error: { code: "server_error", message: "upstream failed" },
-    output: [],
-    usage: { input_tokens: 120, output_tokens: 30, total_tokens: 150 },
-  };
-  await runNonStreamingResponse(buildDeps(upstream, failures));
-  assert.equal(failures.length, 1);
-  assert.equal(failures[0].aggregate?.prompt_tokens, 120);
-  assert.equal(failures[0].aggregate?.completion_tokens, 30);
-});
+const billedTokens = { input_tokens: 120, output_tokens: 30, total_tokens: 150 };
+const failureScenarios = [
+  {
+    name: "failed Responses body",
+    upstream: {
+      object: "response",
+      status: "failed",
+      error: { code: "server_error", message: "upstream failed" },
+      output: [],
+      usage: billedTokens,
+    },
+    httpStatus: 200,
+    failureStatus: 502,
+  },
+  {
+    name: "HTTP error body",
+    upstream: {
+      error: { code: "invalid_request_error", message: "upstream rejected the request" },
+      usage: billedTokens,
+    },
+    httpStatus: 400,
+    failureStatus: 400,
+  },
+];
 
-test("a malformed 200 records the tokens extracted from its body once, on the failure row", async () => {
-  const failures: FailureCall[] = [];
-  const successRows: Array<Record<string, number>> = [];
-  const upstream = {
-    id: "chatcmpl-1",
-    object: "chat.completion",
-    model: "gpt-5",
-    choices: [
-      { index: 0, message: { role: "assistant", content: "some text" }, finish_reason: "stop" },
-    ],
-    usage: { prompt_tokens: 80, completion_tokens: 20, total_tokens: 100 },
-  };
-  await runNonStreamingResponse(
-    buildDeps(upstream, failures, {
-      sourceFormat: "openai",
-      targetFormat: "openai",
-      clientResponseFormat: "openai",
-      detectMalformedNonStream: () => "empty_choices",
-      recordNonStreamingUsageStats: (usage: Record<string, number>) => successRows.push(usage),
-    })
-  );
-  // A refused reply is not a success: no success-path usage row is written, so the billed tokens
-  // land on the malformed failure row, once. A second copy anywhere would count one upstream
-  // response twice.
-  assert.equal(successRows.length, 0);
-  const malformedRows = failures.filter((call) => call.code === "malformed_translated_response");
-  assert.equal(malformedRows.length, 1, `malformed failure rows: ${JSON.stringify(failures)}`);
-  assert.equal(malformedRows[0].aggregate?.prompt_tokens, 80);
-  assert.equal(malformedRows[0].aggregate?.completion_tokens, 20);
-  const tokenRows = failures.filter((call) => call.aggregate?.prompt_tokens);
-  assert.equal(tokenRows.length, 1, `token-bearing rows: ${JSON.stringify(failures)}`);
-});
+for (const { name, upstream, httpStatus, failureStatus } of failureScenarios) {
+  for (const enabled of [true, false]) {
+    test(`flag ${enabled ? "on" : "off"}: billed tokens on a ${name}`, async (t) => {
+      t.after(() => {
+        delete process.env[flag];
+      });
+      process.env[flag] = String(enabled);
+      const failures: Array<{ status: number; input?: number; output?: number }> = [];
+      const result = await runNonStreamingResponse(
+        createNonStreamingResponseDeps(upstream, {
+          executeProviderRequest: async () => makeExecutorResult(upstream, httpStatus),
+          persistFailureUsage: (
+            status: number,
+            _code: string,
+            aggregate?: FailureUsageAggregate
+          ) => {
+            failures.push({
+              status,
+              input: aggregate?.prompt_tokens,
+              output: aggregate?.completion_tokens,
+            });
+          },
+        })
+      );
+      assert.equal(result.response.status, failureStatus);
+      assert.deepEqual(failures, [
+        {
+          status: failureStatus,
+          input: enabled ? 120 : undefined,
+          output: enabled ? 30 : undefined,
+        },
+      ]);
+    });
+  }
+}

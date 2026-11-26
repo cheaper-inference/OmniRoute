@@ -6,7 +6,13 @@ import type { HttpAttemptSelection } from "../../utils/providerHttpAttempts.ts";
  */
 
 import { isUnpricedMeteredCost, meteredBudgetCost } from "@/lib/usage/meteredBudgetPolicy";
-import { readCpaAuthIndex } from "../chatCore/failureUsage.ts";
+import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
+import { readCpaAuthIndex, toFailureUsageAggregate } from "./failureUsage.ts";
+import { recordNonStreamingKeyUsage } from "./nonStreamingUsageStats.ts";
+import {
+  emitFamilyFallbackFailureEvent,
+  resolveFamilyFallbackBillingModel,
+} from "./familyFallbackBilling.ts";
 
 import { createRoutingEvent, emitRoutingEvent } from "../../services/routing/index.ts";
 
@@ -61,8 +67,6 @@ import {
 import { runNonStreamingProviderLeg } from "../chatCore/nonStreamingProviderLeg.ts";
 import type { NonStreamingProviderLegResult } from "@/lib/skills/toolLoopTypes.ts";
 import { finalizeToolLoopError } from "../chatCore/nonStreamingFinalization.ts";
-import { toFailureUsageAggregate } from "./failureUsage.ts";
-import { recordNonStreamingKeyUsage } from "./nonStreamingUsageStats.ts";
 import { markCodexScopeRateLimited } from "../chatCore/codexFailover.ts";
 import { deleteSessionAccountAffinityBestEffort } from "@/lib/db/sessionAccountAffinity";
 import { writeTerminalStatus } from "@/shared/utils/terminalStatus";
@@ -431,6 +435,10 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
 
       const captured = providerRequestCapture.latest?.() ?? null;
       finalBody = captured?.body ?? finalBody ?? translatedBody;
+      const billingModel = resolveFamilyFallbackBillingModel(
+        model,
+        modelAfterFamilyFallback(model, currentModel, effectiveModel, finalBody)
+      );
       if (captured) {
         reqLogger.logTargetRequest(captured.url, captured.headers, captured.body);
       }
@@ -456,12 +464,13 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
         );
       }
       appendRequestLog({
-        model,
+        model: billingModel,
         provider,
         connectionId,
         status: `FAILED ${err.status}`,
       }).catch(() => {});
       persistAttemptLogs({
+        servedModel: billingModel,
         upstreamHttpSelection,
         status: err.status,
         buyerCostMicro: legResult.buyerCostMicro,
@@ -478,13 +487,61 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
           : buildErrorBody(err.status, err.error || "Provider request failed"),
         cacheSource: "upstream",
       });
-      // The upstream may already have billed tokens (a failed Responses body carries usage):
-      // keep them on the failure row instead of recording zeros.
+      // The execution pipeline can return an HTTP error before the leg extracts usage.
+      const failureUsage = isFeatureFlagEnabled("NONSTREAM_UPSTREAM_FAILURE_BILLED_USAGE_ENABLED")
+        ? (legResult.usage ?? extractUsageFromResponse(errUpstreamBody, provider))
+        : null;
       persistFailureUsage(
         err.status,
         err.errorCode || `upstream_${err.status}`,
-        toFailureUsageAggregate(legResult.usage)
+        failureUsage ? toFailureUsageAggregate(failureUsage) : undefined,
+        billingModel
       );
+      const billedUsage =
+        billingModel !== model && failureUsage ? normalizeUsage(failureUsage) : null;
+      const failureCost = billedUsage
+        ? await calculateCostDetailed(provider, billingModel, billedUsage, {
+            serviceTier: effectiveServiceTier,
+          })
+        : null;
+      if (billedUsage) {
+        recordNonStreamingKeyUsage(billedUsage, {
+          apiKeyInfo,
+          provider,
+          model: billingModel,
+          startTime,
+        });
+        const estimatedCost = failureCost?.costUsd ?? 0;
+        recordChatCallCost(
+          apiKeyInfo,
+          meteredBudgetCost(provider, estimatedCost),
+          buildCostCtx(provider, billingModel, billedUsage, effectiveServiceTier, traceId),
+          false,
+          isUnpricedMeteredCost(provider, failureCost)
+        );
+        void scheduleQuotaShareConsumption({
+          apiKeyId: apiKeyInfo?.id,
+          connectionId: getCurrentConnectionId(),
+          provider,
+          model: billingModel,
+          usage: billedUsage,
+          estimatedCost,
+          log,
+        });
+      }
+      emitFamilyFallbackFailureEvent(model, {
+        requestId: traceId || pendingRequestId || "unknown",
+        provider,
+        model: billingModel,
+        strategy: isCombo ? (comboStrategy ?? "combo") : "direct",
+        latencyMs: Date.now() - startTime,
+        inputTokens: billedUsage?.prompt_tokens,
+        outputTokens: billedUsage?.completion_tokens,
+        cost: failureCost?.costUsd,
+        status: err.status,
+        connectionId: getCurrentConnectionId(),
+        apiKeyId: apiKeyInfo?.id,
+      });
       trackPendingRequest(
         model,
         provider,
@@ -647,6 +704,10 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
           provider,
           connectionId: pendingConnId,
           providerRequest: loopApply.loop.finalProviderRequest || finalBody || translatedBody,
+          servedModel: resolveFamilyFallbackBillingModel(
+            model,
+            modelAfterFamilyFallback(model, currentModel, effectiveModel, finalBody)
+          ),
           persistFailureUsage,
           persistAttemptLogs,
           trackPendingRequest,
@@ -720,17 +781,29 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
       looksLikeSSE ? { _streamed: true, _format: "sse-json", summary: responseBody } : responseBody
     );
     effectiveServiceTier = resolveReportedServiceTier(responseBody) ?? effectiveServiceTier;
+    const accountRefusedReplyAsFailure = isFeatureFlagEnabled(
+      "NONSTREAM_REFUSED_REPLY_FAILURE_ACCOUNTING_ENABLED"
+    );
+    if (!accountRefusedReplyAsFailure && onRequestSuccess) {
+      await runWithCodexResponseFence(providerResponse, () => onRequestSuccess(), true);
+    }
     const successConnectionId = getCurrentConnectionId();
-    // After a model-family fallback the sibling answered: usage and cost belong to it.
     const responseModel = modelAfterFamilyFallback(model, currentModel, effectiveModel, finalBody);
-    // Fire and forget, as the streaming tail does: the sync can wait up to 10 s on the usage
-    // endpoint, and the helper already swallows its own errors.
-    void maybeSyncClaudeExtraUsageState({
+    const billingModel = resolveFamilyFallbackBillingModel(model, responseModel);
+    const extraUsageSync = maybeSyncClaudeExtraUsageState({
       provider,
       connectionId: successConnectionId,
       providerSpecificData: credentials?.providerSpecificData,
       log,
     });
+    if (
+      provider === "claude" &&
+      isFeatureFlagEnabled("CLAUDE_NONSTREAM_EXTRA_USAGE_BACKGROUND_SYNC_ENABLED")
+    ) {
+      void extraUsageSync;
+    } else {
+      await extraUsageSync;
+    }
     // Bill the provider leg's own usage: it was extracted from the body BEFORE
     // translateNonStreamingClientResponse mutated it (applyClientUsageBuffer adds
     // the #8331 client context buffer and can replace usage with an estimate).
@@ -765,7 +838,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
           typeof (usage as Record<string, unknown>).prompt_tokens === "number"
             ? ((usage as Record<string, unknown>).prompt_tokens as number)
             : 0;
-        if (promptTokens > 0) incrementTokenUsage(model, promptTokens);
+        if (promptTokens > 0) incrementTokenUsage(billingModel, promptTokens);
       }
     }
     // A 2xx with no usable usage gets an estimate on the client body
@@ -781,22 +854,37 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
       skillRequestId,
       log,
     });
-    // The 200 row, the account-success hook and the key counters wait for the post-call
-    // guardrail and malformed gates below: a reply the gateway refuses is not a success.
-    const usageStatsCtx = {
-      traceEnabled,
-      provider,
-      connectionId: successConnectionId,
-      model: responseModel,
-      startTime,
-      apiKeyInfo,
-      effectiveServiceTier,
-      isCombo,
-      comboStrategy,
-      endpoint: endpointPath,
-      cpaAuthIndex: readCpaAuthIndex(providerResponse),
-      agentContext,
+    const recordSuccessUsage = () => {
+      appendRequestLog({
+        model: billingModel,
+        provider,
+        connectionId: successConnectionId,
+        tokens: usage,
+        status: "200 OK",
+      }).catch(() => {});
+      recordNonStreamingUsageStats(usage, {
+        traceEnabled,
+        provider,
+        connectionId: successConnectionId,
+        model: billingModel,
+        startTime,
+        apiKeyInfo,
+        effectiveServiceTier,
+        isCombo,
+        comboStrategy,
+        endpoint: endpointPath,
+        cpaAuthIndex: readCpaAuthIndex(providerResponse),
+        agentContext,
+        sessionTurn: resolveSessionTurn({
+          clientRawRequest,
+          body,
+          responses: [okLeg.response],
+          agentContext,
+          apiKeyInfo,
+        }),
+      });
     };
+    if (!accountRefusedReplyAsFailure) recordSuccessUsage();
 
     const customSkillExecutionEnabled =
       Boolean(memoryOwnerId) && memorySettings?.skillsEnabled === true;
@@ -846,19 +934,32 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
         : null;
     const costUsage = normalizeUsage(responseUsage);
     const costResult = costUsage
-      ? await calculateCostDetailed(provider, responseModel, costUsage, {
+      ? await calculateCostDetailed(provider, billingModel, costUsage, {
           serviceTier: effectiveServiceTier,
         })
       : null;
     const estimatedCost = costResult?.costUsd ?? 0;
     // A metered model with no price must not pass the dollar budget as $0.
     const unpricedBudgetCost = isUnpricedMeteredCost(provider, costResult);
-    const chatCostCtx = buildCostCtx(provider, responseModel, usage, effectiveServiceTier, traceId);
+    const chatCostCtx = buildCostCtx(provider, billingModel, usage, effectiveServiceTier, traceId);
+    const recordRefusedReplyUsage = (status: number, errorCode: string) => {
+      persistFailureUsage(status, errorCode, toFailureUsageAggregate(usage), billingModel);
+      recordNonStreamingKeyUsage(usage, { apiKeyInfo, provider, model: billingModel, startTime });
+    };
+    const quotaShareConsumption = {
+      apiKeyId: apiKeyInfo?.id,
+      connectionId: credentials?.connectionId,
+      provider,
+      model: billingModel,
+      usage,
+      estimatedCost,
+      log,
+    };
 
     if (postCallGuardrails.blocked) {
       const guardrailMessage = postCallGuardrails.message || "Response blocked by guardrail";
       persistAttemptLogs({
-        servedModel: responseModel,
+        servedModel: billingModel,
         upstreamHttpSelection,
         status: HTTP_STATUS.BAD_REQUEST,
         tokens: usage,
@@ -878,14 +979,9 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
         geminiPromptCache: cacheUsageLogMeta?.geminiPromptCache,
         cacheSource: "upstream",
       });
-      // The upstream billed these tokens: keep them on one failure row and on the key counters.
-      persistFailureUsage(
-        HTTP_STATUS.BAD_REQUEST,
-        "guardrail_blocked",
-        toFailureUsageAggregate(usage),
-        responseModel
-      );
-      recordNonStreamingKeyUsage(usage, usageStatsCtx);
+      if (accountRefusedReplyAsFailure) {
+        recordRefusedReplyUsage(HTTP_STATUS.BAD_REQUEST, "guardrail_blocked");
+      }
       recordChatCallCost(
         apiKeyInfo,
         meteredBudgetCost(provider, estimatedCost),
@@ -893,6 +989,23 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
         false,
         unpricedBudgetCost
       );
+      if (billingModel !== model) {
+        void scheduleQuotaShareConsumption(quotaShareConsumption);
+        emitFamilyFallbackFailureEvent(model, {
+          requestId: traceId || pendingRequestId || "unknown",
+          provider,
+          model: billingModel,
+          strategy: isCombo ? (comboStrategy ?? "combo") : "direct",
+          latencyMs: Date.now() - startTime,
+          inputTokens: costUsage?.prompt_tokens,
+          outputTokens: costUsage?.completion_tokens,
+          cost: costResult?.costUsd,
+          outcome: "guardrail_blocked",
+          status: HTTP_STATUS.BAD_REQUEST,
+          connectionId: successConnectionId,
+          apiKeyId: apiKeyInfo?.id,
+        });
+      }
       log?.warn?.(
         "GUARDRAIL",
         `Response blocked by ${postCallGuardrails.guardrail || "guardrail"}: ${guardrailMessage}`
@@ -955,7 +1068,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
         elapsedMs: totalLatency,
       });
       appendRequestLog({
-        model,
+        model: billingModel,
         provider,
         connectionId,
         status: `FAILED ${HTTP_STATUS.BAD_GATEWAY}`,
@@ -973,6 +1086,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
         ? { _streamed: true, _format: "sse-json", summary: sanitizedMalformedResponse }
         : sanitizedMalformedResponse;
       persistAttemptLogs({
+        servedModel: billingModel,
         status: HTTP_STATUS.BAD_GATEWAY,
         error: malformedDiagnostic,
         upstreamHttpSelection,
@@ -987,13 +1101,26 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
         geminiPromptCache: cacheUsageLogMeta?.geminiPromptCache,
         cacheSource: "upstream",
       });
-      persistFailureUsage(
-        HTTP_STATUS.BAD_GATEWAY,
-        "malformed_translated_response",
-        toFailureUsageAggregate(usage),
-        responseModel
-      );
-      recordNonStreamingKeyUsage(usage, usageStatsCtx);
+      if (accountRefusedReplyAsFailure) {
+        recordRefusedReplyUsage(HTTP_STATUS.BAD_GATEWAY, "malformed_translated_response");
+      } else {
+        persistFailureUsage(
+          HTTP_STATUS.BAD_GATEWAY,
+          "malformed_translated_response",
+          undefined,
+          billingModel
+        );
+      }
+      if (billingModel !== model) {
+        recordChatCallCost(
+          apiKeyInfo,
+          meteredBudgetCost(provider, estimatedCost),
+          chatCostCtx,
+          false,
+          unpricedBudgetCost
+        );
+        void scheduleQuotaShareConsumption(quotaShareConsumption);
+      }
       trackPendingRequest(
         model,
         provider,
@@ -1008,13 +1135,13 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
         createRoutingEvent({
           requestId: traceId || pendingRequestId || "unknown",
           provider: provider || "unknown",
-          model: model || "unknown",
+          model: billingModel || "unknown",
           strategy: isCombo ? (comboStrategy ?? "combo") : "direct",
           latencyMs: Date.now() - startTime,
           ttftMs: null,
-          inputTokens: null,
-          outputTokens: null,
-          cost: null,
+          inputTokens: billingModel !== model ? costUsage?.prompt_tokens : null,
+          outputTokens: billingModel !== model ? costUsage?.completion_tokens : null,
+          cost: billingModel !== model ? costResult?.costUsd : null,
           retries: 0,
           fallbackUsed: false, // combo-level fallback tracked by decisionTrace
           outcome: "malformed",
@@ -1046,9 +1173,11 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
       };
     }
 
-    // Both gates passed: this is the success outcome.
-    if (onRequestSuccess) {
-      await runWithCodexResponseFence(providerResponse, () => onRequestSuccess(), true);
+    if (accountRefusedReplyAsFailure) {
+      if (onRequestSuccess) {
+        await runWithCodexResponseFence(providerResponse, () => onRequestSuccess(), true);
+      }
+      recordSuccessUsage();
     }
 
     // Durable Memory only learns from a reply the client receives: a guardrail-blocked (400) or
@@ -1069,24 +1198,6 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
       responseBody: memoryExtractionResponse as Record<string, unknown> | null,
       extractFacts,
       log,
-    });
-
-    appendRequestLog({
-      model: responseModel,
-      provider,
-      connectionId: successConnectionId,
-      tokens: usage,
-      status: "200 OK",
-    }).catch(() => {});
-    recordNonStreamingUsageStats(usage, {
-      ...usageStatsCtx,
-      sessionTurn: resolveSessionTurn({
-        clientRawRequest,
-        body,
-        responses: [okLeg.response],
-        agentContext,
-        apiKeyInfo,
-      }),
     });
 
     // ── Phase 9.1: Cache store (non-streaming, temp=0) ──
@@ -1113,7 +1224,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
     if (!piiTokensMinted) await saveIdempotency(idempotencyKey, translatedResponse, 200);
     reqLogger.logConvertedResponse(translatedResponse);
     persistAttemptLogs({
-      servedModel: responseModel,
+      servedModel: billingModel,
       upstreamHttpSelection,
       status: 200,
       tokens: usage,
@@ -1142,15 +1253,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
     );
 
     // === Quota Share POST-hook (B/F7) — fire-and-forget, fail-open ===
-    await scheduleQuotaShareConsumption({
-      apiKeyId: apiKeyInfo?.id,
-      connectionId: credentials?.connectionId,
-      provider,
-      model: responseModel,
-      usage,
-      estimatedCost,
-      log,
-    });
+    await scheduleQuotaShareConsumption(quotaShareConsumption);
     // === /Quota Share POST-hook ===
 
     // ── Gamification event (fire-and-forget) ──
@@ -1200,7 +1303,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
       createRoutingEvent({
         requestId: traceId || pendingRequestId || "unknown",
         provider: provider || "unknown",
-        model: responseModel || "unknown",
+        model: billingModel || "unknown",
         strategy: isCombo ? (comboStrategy ?? "combo") : "direct",
         latencyMs: Date.now() - startTime,
         ttftMs: null,

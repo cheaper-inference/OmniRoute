@@ -86,7 +86,8 @@ const {
 // QUOTA_DAILY_REVALIDATION (#20343, default off) takes it to 136.
 // CODEBUDDY_TELEMETRY_ENABLED (#18398, codebuddy-intl turn reports, default off) takes it to 137.
 // AGENT_SESSION_MESSAGES_ENABLED (#14864, opt-in session turn capture, default off) takes it to 138.
-const EXPECTED_FEATURE_FLAG_COUNT = 138;
+// Five opt-in usage accounting flags from #21244 bring the total to 143.
+const EXPECTED_FEATURE_FLAG_COUNT = 143;
 // tool_call wrapper repair, default on) to 86; OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED
 // (#16571, OpenCode v2 client fingerprint, default off) to 87.
 // tool_call wrapper repair, default on) to 86; CLAUDE_OAUTH_SUMMARIZED_THINKING_UNREDACTED
@@ -146,6 +147,23 @@ describe("featureFlagDefinitions", () => {
         messages.featureFlags?.definitions?.UNPRICED_USAGE_BUDGET_POLICY?.description;
       assert.equal(typeof description, "string", `missing policy description in ${filename}`);
       assert.ok(description.trim(), `blank policy description in ${filename}`);
+    }
+  });
+
+  it("registers all five usage flags as default-off runtime booleans", () => {
+    for (const key of [
+      "FAMILY_FALLBACK_BILL_SERVED_MODEL_ENABLED",
+      "NONSTREAM_USAGE_NULL_TTFT_ENABLED",
+      "NONSTREAM_REFUSED_REPLY_FAILURE_ACCOUNTING_ENABLED",
+      "NONSTREAM_UPSTREAM_FAILURE_BILLED_USAGE_ENABLED",
+      "CLAUDE_NONSTREAM_EXTRA_USAGE_BACKGROUND_SYNC_ENABLED",
+    ]) {
+      const flag = FEATURE_FLAG_DEFINITIONS.find((candidate) => candidate.key === key);
+      assert.ok(flag, `missing ${key}`);
+      assert.equal(flag.defaultValue, "false", key);
+      assert.equal(flag.category, "runtime", key);
+      assert.equal(flag.type, "boolean", key);
+      assert.equal(flag.requiresRestart, false, key);
     }
   });
 

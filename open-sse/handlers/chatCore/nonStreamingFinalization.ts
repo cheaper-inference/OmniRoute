@@ -86,13 +86,15 @@ export async function finalizeNonStreamingRequest(
 export async function finalizeToolLoopError(input: {
   loop: ServerOwnedToolLoopResult;
   model: string;
+  servedModel?: string;
   provider: string;
   connectionId?: string;
   providerRequest?: Record<string, unknown>;
   persistFailureUsage: (
     status: number,
     errorCode: string,
-    usage?: FailureUsageAggregate | null
+    usage?: FailureUsageAggregate | null,
+    servedModel?: string
   ) => void;
   persistAttemptLogs: (params: PersistAttemptLogsArgs) => void;
   upstreamHttpSelection?: HttpAttemptSelection | null;
@@ -113,13 +115,15 @@ export async function finalizeToolLoopError(input: {
       input.persistFailureUsage(
         err.status,
         err.errorCode || `upstream_${err.status}`,
-        toFailureUsageAggregate(plan.usage)
+        toFailureUsageAggregate(plan.usage),
+        input.servedModel
       );
     },
     writeCost: () => {},
     scheduleQuota: () => {},
     writeAttempt: () => {
       input.persistAttemptLogs({
+        servedModel: input.servedModel,
         upstreamHttpSelection: input.upstreamHttpSelection ?? null,
         status: err.status,
         buyerCostMicro: sumBuyerCostMicro(input.loop.receipts),

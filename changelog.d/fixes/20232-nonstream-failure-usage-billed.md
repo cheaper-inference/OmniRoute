@@ -1,1 +1,1 @@
-- **fix(usage):** Record billed token usage on failed non-streaming requests instead of zeros. ([#20232](https://github.com/cheaper-inference/OmniRoute/pull/20232))
+- **fix(usage):** With `NONSTREAM_UPSTREAM_FAILURE_BILLED_USAGE_ENABLED` (off by default), usage history retains provider-reported billed tokens on non-streaming upstream failures. ([#20232](https://github.com/cheaper-inference/OmniRoute/pull/20232))

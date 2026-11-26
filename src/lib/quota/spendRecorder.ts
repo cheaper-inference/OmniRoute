@@ -88,6 +88,7 @@ export async function recordStreamingConsumption(
     model: string;
     streamUsage: unknown;
     streamStatus: number;
+    billFailedUsage?: boolean;
     serviceTier?: string;
   },
   deps: {
@@ -98,7 +99,8 @@ export async function recordStreamingConsumption(
 ): Promise<void> {
   const { apiKeyId, connectionId, provider, model, streamUsage, streamStatus, serviceTier } =
     params;
-  if (!apiKeyId || !connectionId || streamStatus !== 200) return;
+  if (!apiKeyId || !connectionId) return;
+  if (streamStatus !== 200 && !params.billFailedUsage) return;
 
   const schedule = deps.schedule ?? scheduleRecordConsumption;
   const resolvedProvider = provider ?? "unknown";

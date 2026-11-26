@@ -40,6 +40,10 @@ import { hasActiveClaudeThinking } from "../../utils/thinkingBudget.ts";
 import { buildCacheUsageLogMeta } from "./cacheUsageMeta.ts";
 import { recordContextEditingTelemetryHook } from "./contextEditingTelemetry.ts";
 import { readCpaAuthIndex } from "./failureUsage.ts";
+import {
+  emitFamilyFallbackFailureEvent,
+  resolveFamilyFallbackBillingModel,
+} from "./familyFallbackBilling.ts";
 import { emitRequestGamificationEvent } from "./gamificationEvent.ts";
 import { convertJsonBodyWithinCap } from "./jsonBodyToSse.ts";
 import { runMemoryExtractionGate } from "./memoryExtraction.ts";
@@ -259,6 +263,10 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
   if (streamReadiness.ok === false) {
     const { response: failureResponse, reason } = streamReadiness;
     const { classificationReason, upstreamDiagnostic } = streamReadiness;
+    const billingModel = resolveFamilyFallbackBillingModel(
+      model,
+      modelAfterFamilyFallback(model, currentModel, effectiveModel, finalBody)
+    );
     if (pendingConnId) {
       trackPendingRequest(
         model,
@@ -272,12 +280,13 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
       streamController.clearPendingRequest();
     }
     appendRequestLog({
-      model,
+      model: billingModel,
       provider,
       connectionId,
       status: `FAILED ${failureResponse.status}`,
     }).catch(() => {});
     persistAttemptLogs({
+      servedModel: billingModel,
       upstreamHttpSelection,
       status: failureResponse.status,
       error: reason,
@@ -290,7 +299,17 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
       claudeCacheMeta: claudePromptCacheLogMeta,
       cacheSource: "upstream",
     });
-    persistFailureUsage(failureResponse.status, streamReadiness.code);
+    persistFailureUsage(failureResponse.status, streamReadiness.code, undefined, billingModel);
+    emitFamilyFallbackFailureEvent(model, {
+      requestId: traceId || pendingRequestId || "unknown",
+      provider,
+      model: billingModel,
+      strategy: isCombo ? (comboStrategy ?? "combo") : "direct",
+      latencyMs: Date.now() - startTime,
+      status: failureResponse.status,
+      connectionId: getCurrentConnectionId(),
+      apiKeyId: apiKeyInfo?.id,
+    });
     // Do NOT call onStreamFailure — a stream stall is an upstream issue,
     // not an account/quota failure. Marking the account unavailable here
     // would lock out legitimate accounts when the upstream hangs.
@@ -391,6 +410,8 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
   }
 
   const responseModel = modelAfterFamilyFallback(model, currentModel, effectiveModel, finalBody);
+  const billingModel = resolveFamilyFallbackBillingModel(model, responseModel);
+  const billServedModel = billingModel !== model;
   const responseHeaders = assembleStreamingResponseHeaders({
     providerHeaders: providerResponse.headers,
     provider,
@@ -446,6 +467,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
   }) => {
     const ttft = requestTtftMs(streamTimingOriginOffsetMs, firstOutputMs);
     const normalizedStreamStatus = streamStatus || 200;
+    const billableStreamUsage = streamUsage ?? (billServedModel ? streamPartialUsage : null);
     if (streamCompletionRecorded) return;
     streamCompletionRecorded = true;
     if (normalizedStreamStatus !== 200) {
@@ -541,7 +563,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
           typeof (streamUsage as Record<string, unknown>).prompt_tokens === "number"
             ? ((streamUsage as Record<string, unknown>).prompt_tokens as number)
             : 0;
-        if (promptTokens > 0) incrementTokenUsage(model, promptTokens);
+        if (promptTokens > 0) incrementTokenUsage(billingModel, promptTokens);
       }
     }
     recordFinalInputCalibration(
@@ -553,7 +575,8 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
     );
     recordStreamingUsageStats(streamUsage, {
       provider,
-      model: responseModel,
+      model: billingModel,
+      billFailedModelUsage: billServedModel,
       streamStatus: normalizedStreamStatus,
       startTime,
       ttft,
@@ -585,13 +608,13 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
     emitStreamingRoutingEvent({
       requestId: traceId || pendingRequestId || "unknown",
       provider,
-      model: responseModel,
+      model: billingModel,
       isCombo,
       comboStrategy,
       startTime,
       ttft,
       streamItlMs,
-      streamUsage,
+      streamUsage: billableStreamUsage,
       normalizedStreamStatus,
       streamErrorCode,
       streamResponseBody,
@@ -602,7 +625,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
     });
 
     persistAttemptLogs({
-      servedModel: responseModel,
+      servedModel: billingModel,
       upstreamHttpSelection,
       status: normalizedStreamStatus,
       error: streamError || undefined,
@@ -627,8 +650,8 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
     recordStreamingCost({
       apiKeyId: apiKeyInfo?.id,
       provider,
-      model: responseModel,
-      streamUsage,
+      model: billingModel,
+      streamUsage: billableStreamUsage,
       serviceTier: effectiveServiceTier,
       calculateCost: calculateCostDetailed,
       // Only the budget-consumable share may draw down the allowance.
@@ -639,7 +662,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
       // A metered model with no price must not pass the dollar budget as $0.
       recordUnpricedCost: (apiKeyId, cost) => {
         if (isUnpricedMeteredCost(provider, cost)) {
-          recordUnpricedBudgetUsage(apiKeyId, { provider, model: responseModel });
+          recordUnpricedBudgetUsage(apiKeyId, { provider, model: billingModel });
         }
       },
       ledger: buildStreamLedgerDetails(effectiveServiceTier, normalizedStreamStatus < 400, traceId),
@@ -653,9 +676,10 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
       apiKeyId: apiKeyInfo?.id,
       connectionId: credentials?.connectionId,
       provider,
-      model: responseModel,
-      streamUsage,
+      model: billingModel,
+      streamUsage: billableStreamUsage,
       streamStatus: normalizedStreamStatus,
+      billFailedUsage: billServedModel && Boolean(billableStreamUsage),
       serviceTier: effectiveServiceTier,
       calculateCost,
       log,
@@ -715,7 +739,8 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
     isFailureCompletionRecorded: () => streamFailureCompletionRecorded,
     isStreamCompletionRecorded: () => streamCompletionRecorded,
     onStreamComplete,
-    persistFailureUsage,
+    persistFailureUsage: (status, errorCode, usage) =>
+      persistFailureUsage(status, errorCode, usage, billingModel),
     onStreamFailure,
     hasEmittedOutput: () => streamEmittedOutput(transformStream),
     readPartialUsage: () => readStreamPartialUsage(transformStream),
@@ -763,6 +788,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
   // turn (call log 1787566395384-bab9ab: reasoning dropped → model emitted
   // DSML tool-call markers as plain text → incomplete `stop` finish).
   const requestedThinking = hasActiveClaudeThinking((body ?? {}) as Record<string, unknown>);
+
   // The executor adds stream_options.include_usage upstream. A Chat client that did not ask for it
   // must not see the extra trailing usage-only chunk (strict parsers read choices[0]).
   const dropUnrequestedUsageChunk =
