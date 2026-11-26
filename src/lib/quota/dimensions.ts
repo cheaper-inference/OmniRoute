@@ -9,6 +9,10 @@ export type QuotaWindow = z.infer<typeof QuotaWindowSchema>;
 export const PolicySchema = z.enum(["hard", "soft", "burst"]);
 export type Policy = z.infer<typeof PolicySchema>;
 
+/** How a pool lets a key pass its share: on account headroom, or only within lent capacity. */
+export const BorrowModeSchema = z.enum(["saturation", "consent"]);
+export type BorrowMode = z.infer<typeof BorrowModeSchema>;
+
 export const QuotaDimensionSchema = z.object({
   unit: QuotaUnitSchema,
   window: QuotaWindowSchema,
@@ -48,8 +52,11 @@ export const QuotaPoolSchema = z.object({
   name: z.string().min(1),
   /** Group this pool belongs to. Defaults to 'group-demo' for legacy pools. */
   groupId: z.string().optional(),
+  /** Whether key holders see member usage bars on the self-service page. Off by default. */
+  memberBreakdown: z.boolean().optional(),
   createdAt: z.string().datetime(),
   allocations: z.array(PoolAllocationSchema).default([]),
+  borrowMode: BorrowModeSchema.default("saturation"),
 });
 export type QuotaPool = z.infer<typeof QuotaPoolSchema>;
 

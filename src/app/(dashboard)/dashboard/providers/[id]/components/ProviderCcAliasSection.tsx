@@ -1,5 +1,6 @@
 "use client";
 
+import { InlineCode } from "@omniroute/ui-kit/inline-code";
 import { Input as KitInput } from "@omniroute/ui-kit/input";
 import { Button, Card, Select } from "@/shared/components";
 
@@ -325,9 +326,7 @@ function ModelOverrideList({
       </span>
       {entries.map(([modelId, value]) => (
         <div key={modelId} className="flex items-center justify-between gap-3">
-          <code className="rounded bg-sidebar px-1.5 py-0.5 font-mono text-xs text-text-muted truncate">
-            {modelId}
-          </code>
+          <InlineCode className="text-text-muted truncate">{modelId}</InlineCode>
           <TriStateSelect
             t={t}
             value={value}

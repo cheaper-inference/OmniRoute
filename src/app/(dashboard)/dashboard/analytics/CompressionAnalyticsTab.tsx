@@ -10,7 +10,9 @@
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Progress } from "@omniroute/ui-kit/progress";
+import { InlineCode } from "@omniroute/ui-kit/inline-code";
 import { Stat, StatRow } from "@omniroute/ui-kit/stat";
+
 import { useProviderNodeMap, resolveProviderName } from "@/lib/display/useProviderNodeMap";
 import SegmentedControl from "@/shared/components/SegmentedControl";
 import Card from "@/shared/components/Card";
@@ -43,26 +45,31 @@ interface CompressionAnalyticsSummary {
 }
 
 /**
- * KPI tile — the kit `Stat` in text mode: every value here is already a formatted string
- * (`toLocaleString()`, "%", "ms"), so the kit number formatting stays out of the way.
+ * KPI tile — the kit compact `Stat`: it gets the raw number and formats it (grouping, `percent`),
+ * with the unit as `suffix`.
  */
 function StatCard({
   icon,
   label,
   value,
+  format = "number",
+  suffix,
   sub,
 }: {
   icon: string;
   label: string;
-  value: string;
+  value: number;
+  format?: "number" | "percent";
+  suffix?: string;
   sub?: string;
 }) {
   return (
     <Stat
-      format="text"
-      icon={<Icon name={icon} size={18} />}
+      format={format}
+      icon={<Icon name={icon} size={16} />}
       label={label}
       value={value}
+      suffix={suffix}
       hint={sub}
     />
   );
@@ -203,32 +210,34 @@ export default function CompressionAnalyticsTab() {
         className="w-fit"
       />
 
-      {/* KPI tiles: kit StatRow — 3 columns, 2 up to 64rem and 1 up to 42rem (kit responsive rule) */}
-      <StatRow columns={3}>
+      {/* KPI tiles: kit StatRow, compact — 3 columns, 2 up to 64rem and 1 up to 42rem (kit responsive rule) */}
+      <StatRow size="sm" columns={3}>
         <StatCard
           icon="compress"
           label={t("compressionAnalyticsTotalRequests")}
-          value={totalAttempts.toLocaleString()}
+          value={totalAttempts}
         />
         <StatCard
           icon="token"
           label={t("compressionAnalyticsTokensSaved")}
-          value={stats.totalTokensSaved.toLocaleString()}
+          value={stats.totalTokensSaved}
         />
         <StatCard
           icon="percent"
           label={t("compressionAnalyticsAvgSavings")}
-          value={`${stats.avgSavingsPct}%`}
+          format="percent"
+          value={stats.avgSavingsPct / 100}
         />
         <StatCard
           icon="timer"
           label={t("compressionAnalyticsAvgDuration")}
-          value={`${stats.avgDurationMs}ms`}
+          value={stats.avgDurationMs}
+          suffix="ms"
         />
         <StatCard
           icon="receipt_long"
           label={t("compressionAnalyticsReceipts")}
-          value={stats.realUsage.requestsWithReceipts.toLocaleString()}
+          value={stats.realUsage.requestsWithReceipts}
           sub={t("compressionAnalyticsRealTokens", {
             count: stats.realUsage.totalTokens.toLocaleString(),
           })}
@@ -236,7 +245,7 @@ export default function CompressionAnalyticsTab() {
         <StatCard
           icon="verified"
           label={t("compressionAnalyticsFallbacks")}
-          value={stats.validationFallbacks.toLocaleString()}
+          value={stats.validationFallbacks}
           sub={t("compressionAnalyticsValidationRestores")}
         />
       </StatRow>
@@ -396,7 +405,7 @@ export default function CompressionAnalyticsTab() {
           <p className="font-medium text-text-main">{t("compressionAnalyticsNoDataYet")}</p>
           <p className="text-sm mt-1">
             {t.rich("compressionAnalyticsStartTracking", {
-              code: (chunks) => <code className="bg-muted px-1 rounded">{chunks}</code>,
+              code: (chunks) => <InlineCode>{chunks}</InlineCode>,
             })}
           </p>
         </Card>

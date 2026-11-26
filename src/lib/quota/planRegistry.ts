@@ -44,8 +44,9 @@ const KNOWN_PLANS: Record<string, KnownPlanShape> = {
     ],
   },
   // DeepSeek is prepaid in USD — its balance API is already wired (deepseekQuotaFetcher)
-  // and shown on the quota page. fair-share supports the `usd` unit (COUNTABLE_UNITS),
-  // so set a USD budget here ("fixado por valor"); the proxy sums each key's USD cost.
+  // and shown on the quota page. `usd` is one of the countable units fair-share adds up
+  // in the quota store, so set a USD budget here ("fixado por valor"); the proxy sums
+  // each key's USD cost.
   deepseek: {
     provider: "deepseek",
     dimensions: [{ unit: "usd", window: "monthly", limit: Number.EPSILON }],

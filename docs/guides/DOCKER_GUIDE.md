@@ -14,6 +14,7 @@ lastUpdated: 2026-10-16
 - [With Environment File](#with-environment-file)
 - [Docker Compose](#docker-compose)
 - [Available Profiles](#available-profiles)
+- [Container hardening](#container-hardening)
 - [Configuring host CLI tools when OmniRoute runs in Docker](#configuring-host-cli-tools-when-omniroute-runs-in-docker)
 - [Redis Sidecar](#redis-sidecar)
 - [Production Compose](#production-compose)
@@ -95,6 +96,42 @@ OmniRoute ships Compose profiles for the main deployment shapes. Pick the one th
 | `web`            | `omniroute-web`  | Web-session providers that need a browser: `gemini-web`, `claude-web`, `claude-turnstile` (builds `runner-web`, Chromium included) | `docker compose --profile web up -d`         |
 
 > Multiple profiles can be combined: `docker compose --profile cli --profile cliproxyapi up -d`.
+
+## Container hardening
+
+The `base`, `web`, `cli`, and `host` app services in `docker-compose.yml` use
+`cap_drop: [ALL]` and the `no-new-privileges:true` security option. The image runs
+as the non-root user `node` and listens on high ports, so it needs no Linux
+capabilities. The security option prevents processes from gaining privileges
+through setuid binaries.
+
+Only the `cli` profile mounts the Docker socket for the auto-updater. See
+[Escape hatch: configure the container's own CLIs](#escape-hatch-configure-the-containers-own-clis-use-sparingly)
+for the security implications.
+
+The root filesystem stays writable by default. The `cli` profile writes CLI
+configuration and caches in the container's home directory, the `web` profile
+stores Chromium session state, and the Next.js runtime can write caches outside
+`/app/data`.
+
+To try a read-only root filesystem with the `base` profile, save this as
+`docker-compose.override.yml` next to `docker-compose.yml`. Compose reads the
+override automatically.
+
+```yaml
+services:
+  omniroute-base:
+    read_only: true
+    tmpfs:
+      - /tmp
+```
+
+```bash
+docker compose --profile base up -d
+```
+
+The existing `/app/data` mount stays writable. Test your workload before using
+this override in production, since it may need to write to other paths.
 
 ## Configuring host CLI tools when OmniRoute runs in Docker
 

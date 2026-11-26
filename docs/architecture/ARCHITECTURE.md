@@ -582,6 +582,7 @@ Domain State DB (SQLite):
 - Scheduler init: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
 - Periodic task: `src/shared/services/cloudSyncScheduler.ts`
 - Periodic task: `src/shared/services/modelSyncScheduler.ts`
+- Periodic task (opt-in per connection): `src/shared/services/modelHealthCheckScheduler.ts` — tests a connection's models, auto-hides failures and restores only what it hid itself (`src/lib/db/modelHealthAutoHidden.ts`)
 - Control route: `src/app/api/sync/cloud/route.ts`
 
 ## Request Lifecycle (`/v1/chat/completions`)
