@@ -33,6 +33,7 @@ import { fileURLToPath } from "node:url";
 import { isNativeBinaryCompatible } from "./native-binary-compat.mjs";
 import { getBetterSqlitePrebuildTarget } from "./betterSqlitePrebuildTarget.mjs";
 import { hasStandaloneAppBundle, isTermux } from "./postinstallSupport.mjs";
+import { planBetterSqliteRebuild } from "./sqliteRebuildPlan.mjs";
 import { colocateLlmlinguaOptionals } from "./colocateOptionals.mjs";
 import { fixPlaywrightAndroid } from "./fixPlaywrightAndroid.mjs";
 import { resolveWreqJsNativeBinding, WREQ_JS_VERSION } from "./wreqJsNative.mjs";
@@ -183,53 +184,94 @@ async function fixBetterSqliteBinary() {
   // On Android/Termux we rebuild from source with --build-from-source.
   const isAndroid = process.platform === "android" || isTermux();
 
-  try {
-    const { execSync } = await import("node:child_process");
+  // #20998 / #21001: rebuild the LOCKED, already-installed package — never
+  // `npm install`, and never the Next-traced dist/ copy (it ships no compile
+  // inputs: binding.gyp / deps / src are not part of the runtime trace). The
+  // planner resolves the real install location — root, hoisted workspace/global
+  // prefix, or nested — and strips npm's inherited global-location environment
+  // so a `npm install -g omniroute` lifecycle cannot redirect the rebuild.
+  const plan = planBetterSqliteRebuild({
+    resolvePackageJson: (spec) => requireFromPackage.resolve(spec),
+    exists: existsSync,
+    env: process.env,
+  });
 
-    const rebuildCmd = isAndroid
-      ? "npm install better-sqlite3 --build-from-source --force"
-      : "npm rebuild better-sqlite3";
+  if (plan.action === "rebuild") {
+    try {
+      const { execSync } = await import("node:child_process");
 
-    const env = { ...process.env };
-    if (isAndroid) {
-      env.GYP_DEFINES = "android_ndk_path=''";
-      // Patch node-gyp's common.gypi to include android_ndk_path variable
-      // so the gyp build system doesn't fail with "Unknown variable"
-      patchNodeGypCommonGypi();
+      // better-sqlite3 13.x sets `"gypfile": false` with no `install` hook and
+      // omits Android prebuilds, so `npm rebuild` is a no-op on Termux/Android.
+      // Invoke its explicit `"build-release"` script (`node-gyp clean &&
+      // node-gyp rebuild --release --force_build=1`) inside `plan.packageDir`
+      // using npm's bundled node-gyp on PATH. --offline --no-audit --no-fund
+      // ensures the build uses the installed tree only (no registry round-trip).
+      const rebuildCmd = isAndroid
+        ? "npm run build-release --offline --no-audit --no-fund"
+        : "npm rebuild better-sqlite3 --offline --no-audit --no-fund";
+      const rebuildCwd =
+        plan.action === "rebuild" ? (isAndroid ? plan.packageDir : plan.cwd) : ROOT;
+
+      const env = { ...plan.env };
+      if (isAndroid) {
+        env.GYP_DEFINES = "android_ndk_path=''";
+        // Patch node-gyp's common.gypi to include android_ndk_path variable
+        // so the gyp build system doesn't fail with "Unknown variable"
+        patchNodeGypCommonGypi();
+      }
+
+      execSync(rebuildCmd, {
+        cwd: rebuildCwd,
+        stdio: "inherit",
+        timeout: isAndroid ? 600_000 : 300_000, // ARM compilation is slower
+        env,
+      });
+
+      // The rebuild writes into the resolved install tree; propagate the binary
+      // into the bundled app tree before the load check below.
+      if (plan.binaryFrom !== appBinary && existsSync(plan.binaryFrom)) {
+        mkdirSync(dirname(appBinary), { recursive: true });
+        copyFileSync(plan.binaryFrom, appBinary);
+      }
+
+      process.dlopen({ exports: {} }, appBinary);
+      console.log("  ✅ Native module rebuilt successfully!\n");
+      return;
+    } catch (err) {
+      const isTimeout = err.killed || err.signal === "SIGTERM";
+      if (isTimeout) {
+        const secs = isAndroid ? 600 : 300;
+        console.warn(`  ⚠️  npm rebuild timed out after ${secs}s.`);
+      } else {
+        console.warn(`  ⚠️  npm rebuild failed: ${err.message}`);
+      }
     }
-
-    execSync(rebuildCmd, {
-      cwd: join(ROOT, "dist"),
-      stdio: "inherit",
-      timeout: isAndroid ? 600_000 : 300_000, // ARM compilation is slower
-      env,
-    });
-
-    process.dlopen({ exports: {} }, appBinary);
-    console.log("  ✅ Native module rebuilt successfully!\n");
-    return;
-  } catch (err) {
-    const isTimeout = err.killed || err.signal === "SIGTERM";
-    if (isTimeout) {
-      const secs = isAndroid ? 600 : 300;
-      console.warn(`  ⚠️  npm rebuild timed out after ${secs}s.`);
-    } else {
-      console.warn(`  ⚠️  npm rebuild failed: ${err.message}`);
-    }
+  } else {
+    console.warn(
+      `  ⚠️  No rebuildable better-sqlite3 install (${plan.reason}) — skipping the source rebuild.`
+    );
   }
 
   console.warn("\n  ⚠️  Could not fix better-sqlite3 native module automatically.");
   console.warn("     The server may not start correctly.");
   console.warn("     Manual fix options:");
+  // #21001: dist/ carries no compile inputs, so the hint must point at the
+  // install tree that actually owns the locked package (resolved above).
+  const hintCwd = plan.action === "rebuild" ? plan.cwd : ROOT;
   if (process.platform === "win32") {
-    console.warn(`       cd "${join(ROOT, "dist")}" && npm rebuild better-sqlite3`);
+    console.warn(`       cd "${hintCwd}" && npm rebuild better-sqlite3`);
     console.warn("       Install from: https://visualstudio.microsoft.com/visual-cpp-build-tools/");
     console.warn("       Also ensure Python is installed: https://python.org");
   } else if (process.platform === "darwin") {
-    console.warn(`     cd ${join(ROOT, "dist")} && npm rebuild better-sqlite3`);
+    console.warn(`     cd ${hintCwd} && npm rebuild better-sqlite3`);
     console.warn("     If build tools are missing: xcode-select --install");
+  } else if (isAndroid) {
+    const androidPkgDir =
+      plan.action === "rebuild" ? plan.packageDir : join(ROOT, "node_modules", "better-sqlite3");
+    console.warn(`     cd "${androidPkgDir}" && npm run build-release`);
+    console.warn("     If build tools are missing: pkg install python clang make");
   } else {
-    console.warn(`     cd ${join(ROOT, "dist")} && npm rebuild better-sqlite3`);
+    console.warn(`     cd ${hintCwd} && npm rebuild better-sqlite3`);
   }
   console.warn("");
 }

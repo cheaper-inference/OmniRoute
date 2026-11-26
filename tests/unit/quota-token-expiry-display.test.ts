@@ -27,7 +27,7 @@ test("QuotaCardHeader derives token expiry only for OAuth connections with a kno
 });
 
 test("QuotaCardHeader renders the expiry as a small blue (sky) informative line", () => {
-  assert.match(source, /text-\[10px\]/, "expiry line must be small (10px)");
+  assert.match(source, /text-3xs/, "expiry line must be small (10px, the kit 3xs label size)");
   // KEA-7886: the blue (sky) informative tone is the kit's info token.
   assert.match(source, /text-info/, "active expiry must be blue (the info token)");
   assert.match(source, /tokenExpiresIn/, "must use the tokenExpiresIn i18n key");
@@ -35,7 +35,7 @@ test("QuotaCardHeader renders the expiry as a small blue (sky) informative line"
 });
 
 test("token expiry label wraps instead of truncating long OAuth expiry text", () => {
-  const tokenExpirySpan = source.match(/className=\{`text-\[10px\][^`]*`\}/);
+  const tokenExpirySpan = source.match(/className=\{`text-3xs[^`]*`\}/);
   assert.ok(tokenExpirySpan, "must find the token-expiry span's className template");
   assert.doesNotMatch(
     tokenExpirySpan[0],

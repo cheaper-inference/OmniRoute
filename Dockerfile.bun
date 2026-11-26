@@ -31,6 +31,12 @@ COPY scripts/dev/sync-env.mjs ./scripts/dev/sync-env.mjs
 # Fast Bun native package install
 RUN bun install --include=optional --quiet
 
+# Next standalone traces only Playwright's index.js, index.mjs and package.json.
+# Runner-web needs the complete installer at the same lockfile version.
+RUN mkdir -p /opt/playwright/node_modules \
+  && cp -RL node_modules/playwright node_modules/playwright-core /opt/playwright/node_modules/ \
+  && test -f /opt/playwright/node_modules/playwright/cli.js
+
 # Fail the build if wreq-js cannot resolve its current platform binding.
 RUN bun -e "const wreq = require('wreq-js'); if (typeof wreq.createTransport !== 'function') process.exit(1)"
 
@@ -59,8 +65,27 @@ ENV NODE_ENV=production
 # Bun native Next.js build execution
 RUN bun run --quiet build
 
+# ── Runtime OS (Wolfi) ─────────────────────────────────────────────────────
+# Debian trixie accumulates CVEs awaiting fixes. Wolfi republishes patched packages.
+# Copy Bun from base to keep the builder's pinned version on Wolfi's newer glibc.
+# Keep oven/bun's bun UID/GID 1000 so existing data volumes remain writable.
+FROM cgr.dev/chainguard/wolfi-base:latest@sha256:7974283557d272e72834dfae1a9a5b98b6bdfc90ecf88b352cf2778f15c5481d AS runtime-os
+WORKDIR /app
+RUN apk add --no-cache libsecret libstdc++ ca-certificates-bundle tzdata \
+  && addgroup -g 1000 bun \
+  && adduser -u 1000 -G bun -h /home/bun -s /bin/sh -D bun
+COPY --from=base /usr/local/bin/bun /usr/local/bin/bun
+# Match oven/bun's environment and node fallback so scripts and tools that call node still work.
+RUN ln -s /usr/local/bin/bun /usr/local/bin/bunx \
+  && mkdir -p /usr/local/bun-node-fallback-bin \
+  && ln -s /usr/local/bin/bun /usr/local/bun-node-fallback-bin/node \
+  && bun --version
+ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/bun-node-fallback-bin
+ENV BUN_RUNTIME_TRANSPILER_CACHE_PATH=0
+ENV BUN_INSTALL_BIN=/usr/local/bin
+
 # ── Runner Base stage (100% Bun Native Production Runtime) ──────────────────
-FROM oven/bun:1.4.4-slim AS runner-base
+FROM runtime-os AS runner-base
 
 LABEL org.opencontainers.image.title="omniroute" \
   org.opencontainers.image.description="Unified AI proxy — route any LLM through one endpoint (Bun Native)" \
@@ -70,18 +95,25 @@ LABEL org.opencontainers.image.title="omniroute" \
 
 WORKDIR /app
 
-RUN apt-get update \
-  && apt-get install -y --no-install-recommends \
-     libsecret-1-0 \
-     ca-certificates \
-     curl \
-     sqlite3 \
-  && rm -rf /var/lib/apt/lists/*
+RUN bun -e "import { Database } from 'bun:sqlite'; const db = new Database(':memory:'); db.query('SELECT 1 AS ok').get(); db.close(); console.log('bun:sqlite runtime smoke: OK');"
 
 ENV NODE_ENV=production
 ENV PORT=20128
 ENV HOSTNAME=0.0.0.0
 ENV OMNIROUTE_MEMORY_MB=1024
+
+# #20998 — same posture as the Node Dockerfile (#13679): default the PUBLISHED
+# Bun image to requiring an API key. A bare `docker run -p 20128:20128 …` of a
+# published Bun tag (`-bun` / `-web-bun`) passes no `--env-file .env`, so without
+# this default the anonymous /v1 LLM proxy would be both keyless AND
+# world-reachable. This does NOT change the npm/CLI local-dev default
+# (`REQUIRE_API_KEY` stays `"false"` in featureFlagDefinitions.ts) — only the
+# shipped deployment artifact's posture. Compose paths are unaffected: they load
+# the operator's own `.env` (env_file:), which overrides this ENV, and already
+# bind loopback-only by default (#12568). runner-web inherits this stage, so both
+# Bun tags are covered. Override with `-e REQUIRE_API_KEY=false` for an
+# intentionally keyless deployment.
+ENV REQUIRE_API_KEY=true
 
 ENV DATA_DIR=/app/data
 RUN mkdir -p /app/data
@@ -117,50 +149,35 @@ FROM runner-base AS runner-web
 
 USER root
 
-RUN apt-get update \
-  && apt-get install -y --no-install-recommends \
-     chromium \
-     chromium-driver \
-     fonts-liberation \
-     libasound2t64 \
-     libatk-bridge2.0-0 \
-     libatk1.0-0 \
-     libc6 \
-     libcairo2 \
-     libcups2 \
-     libdbus-1-3 \
-     libexpat1 \
-     libfontconfig1 \
-     libgbm1 \
-     libgcc-s1 \
-     libglib2.0-0 \
-     libgtk-3-0 \
-     libnspr4 \
-     libnss3 \
-     libpango-1.0-0 \
-     libpangocairo-1.0-0 \
-     libstdc++6 \
-     libx11-6 \
-     libx11-xcb1 \
-     libxcb1 \
-     libxcomposite1 \
-     libxcursor1 \
-     libxdamage1 \
-     libxext6 \
-     libxfixes3 \
-     libxi6 \
-     libxrandr2 \
-     libxrender1 \
-     libxss1 \
-     libxtst6 \
-     ca-certificates \
-     fonts-gargi \
-     fonts-ipafont-gothic \
-     fonts-thai-tlwg \
-     fonts-wqy-zenhei \
-  && rm -rf /var/lib/apt/lists/*
+# The builder supplies the full Playwright installer for Chromium.
+# Wolfi supplies the shared libraries. The free Wolfi chromium channel stopped
+# at 149, so the chromium package is omitted.
+# NSS/NSPR libraries are requested by soname because `nss` does not ship libnss3.so.
+# The loader check catches missing libraries at build time.
+# Xvfb (#15300) needs xkbcomp and xkeyboard-config to start. The build creates
+# /tmp/.X11-unix owned by `bun`, which runs Xvfb. Mode 0755 grants write permission
+# only to the owner.
+# /usr/bin/chromium stays, as a symlink to Playwright's build, for the code paths that
+# look for a system browser there (ChatGPT Web, Codex Web, Adobe Firefly login).
+ENV PLAYWRIGHT_BROWSERS_PATH=/home/bun/.cache/ms-playwright
+COPY --from=builder /opt/playwright /opt/playwright
+RUN apk add --no-cache fontconfig font-liberation font-opensans gtk-3 mesa mesa-glx \
+     so:libnss3.so so:libnssutil3.so so:libsmime3.so so:libnspr4.so \
+     so:libX11.so.6 so:libXcomposite.so.1 so:libXdamage.so.1 so:libXext.so.6 so:libXfixes.so.3 \
+     so:libXrandr.so.2 so:libasound.so.2 so:libatk-1.0.so.0 so:libatk-bridge-2.0.so.0 so:libatspi.so.0 \
+     so:libcairo.so.2 so:libcups.so.2 so:libdbus-1.so.3 so:libexpat.so.1 so:libgbm.so.1 \
+     so:libglib-2.0.so.0 so:libpango-1.0.so.0 so:libxcb.so.1 so:libxkbcommon.so.0 so:libudev.so.1 \
+     xvfb xkbcomp xkeyboard-config \
+  && install -d -o bun -g bun -m 0755 /tmp/.X11-unix \
+  && bun /opt/playwright/node_modules/playwright/cli.js install chromium \
+  && for bin in "$PLAYWRIGHT_BROWSERS_PATH"/*/*/chrome "$PLAYWRIGHT_BROWSERS_PATH"/*/*/chrome-headless-shell; do \
+       missing="$(/lib/ld-linux-*.so.* --list "$bin" 2>&1 | grep 'not found' || true)"; \
+       if [ -n "$missing" ]; then echo "$bin is missing libraries:"; echo "$missing"; exit 1; fi; \
+     done \
+  && ln -sf "$(bun -e 'process.stdout.write(require("playwright-core").chromium.executablePath())')" /usr/bin/chromium \
+  && /usr/bin/chromium --version \
+  && chown -R bun:bun /home/bun/.cache
 
-ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
 ENV PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium
 
 # Drop back to default non-root user

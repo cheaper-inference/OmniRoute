@@ -84,6 +84,12 @@ export const CLIENT_IP_HEADER = "x-omniroute-client-ip";
 export const AUTHZ_HEADER_PEER_LOCALITY = "x-omniroute-peer-locality";
 
 /**
+ * Whether the LOCAL_ONLY gate sees a dashboard page request as local or remote.
+ * The pipeline sets this for the layout after stripping caller-supplied values.
+ */
+export const AUTHZ_HEADER_DASHBOARD_LOCAL_ACCESS = "x-omniroute-dashboard-local-access";
+
+/**
  * The resolved real peer IP, stamped by the pipeline AFTER verifying the
  * token-stamped PEER_IP_HEADER. This is the trusted, non-spoofable IP that
  * route handlers (e.g. login rate-limit key) should use instead of re-deriving
@@ -119,6 +125,7 @@ export const AUTHZ_TRUSTED_HEADERS: ReadonlyArray<string> = [
   AUTHZ_HEADER_AUTH_LABEL,
   AUTHZ_HEADER_AUTH_SCOPES,
   AUTHZ_HEADER_PEER_LOCALITY,
+  AUTHZ_HEADER_DASHBOARD_LOCAL_ACCESS,
   AUTHZ_HEADER_TRUSTED_PEER_IP,
   AUTHZ_HEADER_TRUSTED_CLIENT_IP,
 ];

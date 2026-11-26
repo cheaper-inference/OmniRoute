@@ -4,11 +4,13 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 
 import Icon from "@/shared/components/Icon";
+import IconChip from "@/shared/components/IconChip";
+
 import Badge from "@/shared/components/Badge";
 import Button from "@/shared/components/Button";
 import Input from "@/shared/components/Input";
 import Select from "@/shared/components/Select";
-import { Card } from "@/shared/components";
+import Card from "@/shared/components/Card";
 import { getProviderDisplayName } from "@/lib/display/names";
 import { startVisiblePolling } from "@/shared/utils/visiblePolling";
 import { cn } from "@/shared/utils/cn";
@@ -147,10 +149,10 @@ function modelVariant(status: ModelStatus) {
 
 function Metric({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className="rounded-xl border border-border bg-surface/50 p-3">
-      <p className="text-xs uppercase tracking-wide text-text-muted">{label}</p>
+    <Card.Section>
+      <p className="ci-eyebrow">{label}</p>
       <p className="mt-1 text-sm font-semibold text-text-main">{value}</p>
-    </div>
+    </Card.Section>
   );
 }
 
@@ -213,7 +215,7 @@ function AccountRow({ account }: { account: HealthMatrixAccount }) {
     : `+${hiddenCount} more models`;
 
   return (
-    <div className="rounded-xl border border-border bg-bg p-4">
+    <Card.Section>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
@@ -269,7 +271,7 @@ function AccountRow({ account }: { account: HealthMatrixAccount }) {
           {healthText(t, "noSyncedModelsOrTraffic", "No synced models or recent traffic yet.")}
         </p>
       )}
-    </div>
+    </Card.Section>
   );
 }
 
@@ -319,11 +321,11 @@ export default function ProviderHealthMatrixCard() {
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div>
           <div className="flex items-center gap-3">
-            <div className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+            <IconChip tone="accent">
               <Icon name="grid_view" size={18} />
-            </div>
+            </IconChip>
             <div>
-              <h2 className="text-lg text-text-main">
+              <h2 className="ci-heading" data-size="lg">
                 {healthText(t, "providerHealthMatrixTitle", "Provider Health Matrix")}
               </h2>
               <p className="text-sm text-text-muted">

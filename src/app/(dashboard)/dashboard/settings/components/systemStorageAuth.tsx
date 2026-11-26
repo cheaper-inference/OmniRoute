@@ -38,7 +38,9 @@ export async function fetchDatabaseSettingsData(): Promise<DatabaseSettingsFetch
 export function AuthRequiredBanner({ t }: { t: (key: string) => string }) {
   return (
     <div role="alert" className="mb-4 rounded-xl border border-warning/30 bg-warning-bg px-5 py-4">
-      <h2 className="text-sm text-text-main">{t("databaseSettingsAuthRequiredTitle")}</h2>
+      <h2 className="ci-heading text-text-main" data-size="sm">
+        {t("databaseSettingsAuthRequiredTitle")}
+      </h2>
       <p className="mt-1 text-sm text-text-muted">{t("databaseSettingsAuthRequiredBody")}</p>
       <Link
         href="/login"

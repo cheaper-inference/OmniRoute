@@ -81,13 +81,19 @@ describe("#11825 onStreamComplete is delivered to an installed+activated plugin"
       })
     );
     // The plugin runs in an isolated child process, so it reports what it received by
-    // writing the payload to a file whose path is baked into its source.
+    // writing the payload to a file whose path is baked into its source. Publish by
+    // rename only after writing: existence of an in-progress file is not a completion
+    // signal, even when the child uses writeFileSync. Both paths share tmpdir().
     writeFileSync(
       join(pluginDir, "index.js"),
       `const fs = require("fs");
 const OUT = ${JSON.stringify(outFile)};
+const PENDING = ${JSON.stringify(join(tmp, "payload.json"))};
 module.exports = {
-  onStreamComplete: async (payload) => { fs.writeFileSync(OUT, JSON.stringify(payload)); },
+  onStreamComplete: async (payload) => {
+    fs.writeFileSync(PENDING, JSON.stringify(payload));
+    fs.renameSync(PENDING, OUT);
+  },
 };
 `
     );

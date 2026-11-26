@@ -1,10 +1,11 @@
 /**
  * accountBuckets.ts — Saturating per-connection, per-window buckets.
  *
- * Tracks whether a connection has hit 100 % of a quota window (5h / 7d /
- * per-model 7d). Each bucket is lazily reset: on read, if now >= resetsAtMs
- * the entry is cleared and the connection is eligible again. No cron needed —
- * the reset is probed on the read path.
+ * Tracks whether a connection has hit 100 % of a quota window (5h / 7d), or
+ * whether Claude reports a model-scoped weekly window as exhausted (7d:<label>).
+ * Each bucket is lazily reset: on read, if now >= resetsAtMs the entry is
+ * cleared and the connection is eligible again. No cron needed — the reset is
+ * probed on the read path.
  *
  * Fail-open: missing entry → not saturated. All time input is injectable
  * (the `nowMs` param) so unit tests drive the clock deterministically — the
@@ -16,6 +17,13 @@
  *
  * Part of: Quota Sharing Engine — Phase 3 (#3 multi-window buckets).
  */
+import {
+  claudeQuotaMatchesModel,
+  isActiveClaudeExhaustion,
+  isClaudeQuotaMetadata,
+  type ClaudeQuotaWindow,
+} from "@omniroute/open-sse/services/usage/claudeQuota.ts";
+import type { ClaudeQuotaMetadata } from "@omniroute/open-sse/services/usage/quota.ts";
 import { boundedMap } from "./boundedMap";
 import { isCompleteUsageReading } from "../usage/usageReading";
 
@@ -27,6 +35,8 @@ import { isCompleteUsageReading } from "../usage/usageReading";
 interface BucketEntry {
   saturated: boolean;
   resetsAtMs: number; // 0 when the reset instant is unknown
+  /** Set only on model-scoped weekly buckets ("7d:<label>"). */
+  claudeQuota?: ClaudeQuotaMetadata;
 }
 
 /**
@@ -43,10 +53,13 @@ export interface UsageQuotaSlim {
 
 /**
  * Partial shape of the getClaudeUsage() return value this module needs. Only
- * `quotas` is consumed; other fields (plan, extraUsage, bootstrap) are ignored.
+ * `quotas` and `modelQuotas` are consumed; other fields (plan, extraUsage,
+ * bootstrap) are ignored.
  */
 export interface ClaudeUsageResult {
   quotas?: Record<string, UsageQuotaSlim | undefined>;
+  /** Model-scoped weekly windows, as getClaudeUsage reports them. */
+  modelQuotas?: Record<string, ClaudeQuotaWindow | undefined>;
 }
 
 // ---------------------------------------------------------------------------
@@ -71,9 +84,12 @@ export const SATURATION_THRESHOLD_PCT = 100;
  * prevent. Over the cap only buckets whose reset instant already passed (stale
  * saturation the next read would drop anyway) are evicted; live saturated
  * buckets are never evicted and the store grows past the cap instead. 4096 ≈
- * 1000+ connections × their 5h/7d/7d:<model> windows all saturated at once.
+ * 1000+ connections × their 5h/7d/7d:<label> windows all saturated at once.
  */
 export const ACCOUNT_BUCKETS_SOFT_CAP = 4096;
+
+/** Window-key prefix of the model-scoped weekly buckets ("7d:<label>"). */
+const MODEL_WINDOW_PREFIX = "7d:";
 
 /** Key: `${connectionId}::${windowKey}`. */
 const _buckets = boundedMap<BucketEntry>("account-buckets", ACCOUNT_BUCKETS_SOFT_CAP, "lru", 0, {
@@ -109,7 +125,7 @@ function parseResetAtMs(resetAt: string | null | undefined): number {
  * Fail-open: a missing entry returns false (not saturated).
  *
  * @param connectionId  Opaque string identifier for the connection.
- * @param windowKey     One of: "5h", "7d", "7d:<modelName>" (e.g. "7d:designer").
+ * @param windowKey     One of: "5h", "7d", "7d:<label>" (e.g. "7d:designer").
  * @param nowMs         Current epoch ms; defaults to Date.now() (off-path only).
  */
 export function isBucketSaturated(
@@ -141,7 +157,7 @@ export function isBucketSaturated(
  * string, the reset epoch is stored so lazy reset can fire later.
  *
  * @param connectionId  Opaque connection identifier.
- * @param windowKey     "5h", "7d", or "7d:<modelName>".
+ * @param windowKey     "5h", "7d", or "7d:<label>".
  * @param usedPct       Utilization percentage (0..100).
  * @param resetAt       ISO 8601 string (or null) for when this window resets.
  * @param nowMs         Current epoch ms; defaults to Date.now() (off-path only).
@@ -175,19 +191,23 @@ export function recordUsage(
 }
 
 /**
- * Parse the `quotas` map from a getClaudeUsage() result and record each known
- * window into its bucket.
+ * Record the windows of a getClaudeUsage() result into their buckets.
  *
  * Window key mapping:
- *   "session (5h)"         → "5h"
- *   "weekly (7d)"          → "7d"
- *   "weekly <model> (7d)"  → "7d:<model>" (e.g. "weekly designer (7d)" → "7d:designer")
+ *   quotas["session (5h)"]               → "5h"
+ *   quotas["weekly (7d)"]                → "7d"
+ *   modelQuotas["weekly <label> (7d)"]   → "7d:<label>" (e.g. "weekly designer (7d)" → "7d:designer")
+ *
+ * The model-scoped weekly windows come from `modelQuotas` and saturate only when
+ * Claude reports them as an active exhaustion (the same rule credential
+ * selection applies). A listed window that is no longer exhausted clears its bucket.
+ * A model bucket the reading does not list is cleared only by a complete reading.
  *
  * Fail-open: a null/undefined result, a missing `quotas` map, or any malformed
  * quota entry is silently skipped.
  *
  * @param connectionId  Connection identifier.
- * @param usageResult   getClaudeUsage() return value (only `quotas` is read).
+ * @param usageResult   getClaudeUsage() return value (`quotas` and `modelQuotas` are read).
  * @param nowMs         Current epoch ms; defaults to Date.now() (off-path only).
  */
 export function updateAccountBuckets(
@@ -206,13 +226,8 @@ export function updateAccountBuckets(
   if (quotas["session (5h)"]) reported.add("5h");
   if (quotas["weekly (7d)"]) reported.add("7d");
 
-  // Per-model weekly windows: "weekly <model> (7d)" → "7d:<model>".
-  for (const [key, entry] of Object.entries(quotas)) {
-    const match = /^weekly (.+) \(7d\)$/.exec(key);
-    if (match?.[1]) {
-      reported.add(`7d:${match[1]}`);
-      processQuotaEntry(connectionId, `7d:${match[1]}`, entry, nowMs);
-    }
+  for (const windowKey of recordModelWindows(connectionId, usageResult.modelQuotas, nowMs)) {
+    reported.add(windowKey);
   }
   // A complete reading lists every window the account has: a saturation kept for a window it no
   // longer reports (a removed session window, say) must not keep the account saturated.
@@ -224,9 +239,68 @@ export function updateAccountBuckets(
   }
 }
 
+/**
+ * True when a saturated model-scoped weekly bucket of this connection covers `modelStr`
+ * ("<provider>/<model>" or a bare model id). Fail-open: no such bucket → false.
+ */
+export function isModelWindowSaturated(
+  connectionId: string,
+  modelStr: string,
+  nowMs: number = Date.now()
+): boolean {
+  if (!connectionId || !modelStr) return false;
+  const base = storeKey(connectionId, "");
+  const prefix = storeKey(connectionId, MODEL_WINDOW_PREFIX);
+  // Collect first: isBucketSaturated may delete or reorder entries, which must
+  // not happen while the store is being iterated.
+  const matched: string[] = [];
+  for (const [key, entry] of _buckets) {
+    if (!key.startsWith(prefix) || !entry.claudeQuota) continue;
+    if (claudeQuotaMatchesModel(entry.claudeQuota, modelStr)) matched.push(key);
+  }
+  // isBucketSaturated applies the lazy reset at the window's own reset time.
+  return matched.some((key) => isBucketSaturated(connectionId, key.slice(base.length), nowMs));
+}
+
 // ---------------------------------------------------------------------------
 // Internal helpers
 // ---------------------------------------------------------------------------
+
+/**
+ * Record the exhausted model-scoped weekly windows of one reading and drop this
+ * connection's model buckets for the windows the reading lists as not exhausted.
+ * A bucket the reading does not list is left to the complete-reading sweep of the caller.
+ * A reading without `modelQuotas` carries no model evidence. Returns the window keys written.
+ */
+function recordModelWindows(
+  connectionId: string,
+  modelQuotas: ClaudeUsageResult["modelQuotas"],
+  nowMs: number
+): Set<string> {
+  const written = new Set<string>();
+  if (!modelQuotas || typeof modelQuotas !== "object" || Array.isArray(modelQuotas)) {
+    return written;
+  }
+  const listed = new Set<string>();
+  for (const [name, window] of Object.entries(modelQuotas)) {
+    const metadata = window?.claudeQuota;
+    if (!window || !isClaudeQuotaMetadata(metadata) || metadata.kind !== "weekly_scoped") continue;
+    const label = /^weekly (.+) \(7d\)$/.exec(name)?.[1] ?? name;
+    const windowKey = `${MODEL_WINDOW_PREFIX}${label}`;
+    listed.add(windowKey);
+    if (!isActiveClaudeExhaustion(window, nowMs)) continue;
+    _buckets.set(
+      storeKey(connectionId, windowKey),
+      { saturated: true, resetsAtMs: parseResetAtMs(window.resetAt), claudeQuota: { ...metadata } },
+      nowMs
+    );
+    written.add(windowKey);
+  }
+  for (const windowKey of listed) {
+    if (!written.has(windowKey)) _buckets.delete(storeKey(connectionId, windowKey));
+  }
+  return written;
+}
 
 function processQuotaEntry(
   connectionId: string,

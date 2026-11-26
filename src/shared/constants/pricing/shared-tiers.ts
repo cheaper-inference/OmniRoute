@@ -19,6 +19,14 @@ export const GPT_6_SOL_PRICING = {
   cache_creation: 2.5,
 };
 
+export const GPT_6_TERRA_PRICING = {
+  input: 1.0,
+  output: 5.0,
+  cached: 0.05,
+  reasoning: 5.0,
+  cache_creation: 1.25,
+};
+
 export const GPT_5_3_CODEX_PRICING = {
   input: 5.0,
   output: 20.0,
@@ -74,6 +82,18 @@ export const GEMINI_3_7_FLASH_PROMO_PRICING = {
 // becomes $4/$20/$0.20 (input/output/cached input) on 2026-12-01.
 // https://ai.google.dev/gemini-api/docs/pricing
 export const GEMINI_4_ARGON_PROMO_PRICING = {
+  input: 2.0,
+  output: 10.0,
+  cached: 0.1,
+  reasoning: 10.0,
+  cache_creation: 2.0,
+};
+
+// Gemini 4 Carbon launched at the same introductory paid-tier price as Argon through
+// 2026-11-30; standard becomes $4/$20 (input/output) on 2026-12-01. Kept separate from
+// Argon so the two rate cards can diverge.
+// https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-4-carbon-now-available
+export const GEMINI_4_CARBON_PROMO_PRICING = {
   input: 2.0,
   output: 10.0,
   cached: 0.1,

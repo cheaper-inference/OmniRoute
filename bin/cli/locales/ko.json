@@ -1,6 +1,5 @@
 {
   "common": {
-    "positiveIntegerRequired": "한도는 양의 정수여야 합니다.",
     "error": "오류: {message}",
     "serverOffline": "OmniRoute 서버가 오프라인입니다. 시작: omniroute serve",
     "authRequired": "인증이 필요합니다. OMNIROUTE_API_KEY를 설정하거나 실행하세요: omniroute setup",
@@ -13,7 +12,8 @@
     "dryRun": "[시뮬레이션] 실행 예정: {action}",
     "cancelled": "취소되었습니다.",
     "jsonOpt": "JSON으로 출력",
-    "yesOpt": "확인 건너뛰기"
+    "yesOpt": "확인 건너뛰기",
+    "positiveIntegerRequired": "한도는 양의 정수여야 합니다."
   },
   "setup": {
     "title": "OmniRoute 설정",

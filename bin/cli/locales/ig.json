@@ -1,6 +1,5 @@
 {
   "common": {
-    "positiveIntegerRequired": "Oke ga-abụrịrị ọnụọgụ zuru ezu karịrị efu.",
     "error": "Njehie: {message}",
     "serverOffline": "Sava OmniRoute anọghị n'ịntanetị. Jiri nke a malite ya: omniroute serve",
     "authRequired": "Achọrọ njirimara. Tọọ OMNIROUTE_API_KEY ma ọ bụ mee: omniroute setup",
@@ -13,7 +12,8 @@
     "dryRun": "[dry-run] a ga-eme {action}",
     "cancelled": "Akagbuola.",
     "jsonOpt": "Wepụta dị ka JSON",
-    "yesOpt": "Mafee ajụjụ nkwenye"
+    "yesOpt": "Mafee ajụjụ nkwenye",
+    "positiveIntegerRequired": "Oke ga-abụrịrị ọnụọgụ zuru ezu karịrị efu."
   },
   "setup": {
     "title": "Ntọala OmniRoute",

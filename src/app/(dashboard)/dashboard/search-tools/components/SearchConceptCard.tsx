@@ -1,5 +1,6 @@
 "use client";
 
+import Card from "@/shared/components/Card";
 import { Disclosure, DisclosureContent, DisclosureTrigger } from "@omniroute/ui-kit/disclosure";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
@@ -64,7 +65,7 @@ export default function SearchConceptCard({ defaultCollapsed = false }: SearchCo
       <Disclosure open={!collapsed} onOpenChange={(open) => setCollapsed(!open)}>
         {/* Header */}
         <DisclosureTrigger className="rounded-none px-4">
-          <span className="text-xs font-semibold text-text-muted uppercase tracking-wider flex items-center gap-2">
+          <span className="ci-eyebrow flex items-center gap-2" data-weight="medium">
             <span>ⓘ</span>
             <span>{t("modalitiesGuide")}</span>
           </span>
@@ -77,9 +78,9 @@ export default function SearchConceptCard({ defaultCollapsed = false }: SearchCo
             data-testid="concept-card-content"
           >
             {CONCEPTS.map((c) => (
-              <div
+              <Card.Section
                 key={c.key}
-                className="flex gap-3 p-3 bg-bg-alt rounded-lg border border-border"
+                className="flex gap-3"
                 data-testid={`concept-item-${c.key}`}
               >
                 <Icon name={c.icon} size={20} className="text-primary" />
@@ -87,7 +88,7 @@ export default function SearchConceptCard({ defaultCollapsed = false }: SearchCo
                   <div className="text-xs font-semibold text-text-main mb-0.5">{t(c.titleKey)}</div>
                   <div className="text-xs text-text-muted leading-relaxed">{t(c.descKey)}</div>
                 </div>
-              </div>
+              </Card.Section>
             ))}
           </div>
         </DisclosureContent>

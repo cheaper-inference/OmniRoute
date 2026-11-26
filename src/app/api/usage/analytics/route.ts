@@ -11,14 +11,11 @@ import {
   getDailyUsage,
   getDailyCostRows,
   getHeatmapRows,
-  getModelUsageRows,
-  getProviderCostRows,
   getProviderUsageRows,
   getAccountCostRows,
   getAccountUsageRows,
   getApiKeyUsageRows,
   getApiKeyTotalsRows,
-  getServiceTierUsageRows,
   getApiKeyMetadataRows,
   getWeeklyPatternRows,
   getPresetCostModelRows,
@@ -257,6 +254,8 @@ async function computeAnalyticsResponse(
     >;
 
     const dailyRows = getDailyUsage(unifiedSource, unifiedParams);
+    // One grouped scan at day x provider x model x service tier feeds the daily cost, model,
+    // provider cost and service-tier views below. Each used to run the same scan on its own.
     const dailyCostRows = getDailyCostRows(unifiedSource, unifiedParams);
 
     const heatmapStart = new Date();
@@ -281,9 +280,9 @@ async function computeAnalyticsResponse(
 
     const heatmapRows = getHeatmapRows(heatmapConditions, heatmapParams);
 
-    const modelRows = getModelUsageRows(unifiedSource, unifiedParams);
+    const modelRows = [...dailyCostRows].sort((left, right) => right.requests - left.requests);
 
-    const providerCostRows = getProviderCostRows(unifiedSource, unifiedParams);
+    const providerCostRows = dailyCostRows;
 
     const providerRows = getProviderUsageRows(unifiedSource, unifiedParams);
 
@@ -296,7 +295,7 @@ async function computeAnalyticsResponse(
 
     const apiKeyRows = getApiKeyUsageRows(apiKeyWhereClause, params);
 
-    const serviceTierRows = getServiceTierUsageRows(unifiedSource, unifiedParams);
+    const serviceTierRows = dailyCostRows;
 
     const apiKeyMetadataRows = getApiKeyMetadataRows(apiKeyWhereClause, params);
 

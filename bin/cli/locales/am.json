@@ -1,6 +1,5 @@
 {
   "common": {
-    "positiveIntegerRequired": "ገደቡ አዎንታዊ ኢንቲጀር መሆን አለበት።",
     "error": "ስህተት፦ {message}",
     "serverOffline": "የOmniRoute አገልጋይ ከመስመር ውጭ ነው። በዚህ ያስጀምሩት፦ omniroute serve",
     "authRequired": "ማረጋገጫ ያስፈልጋል። OMNIROUTE_API_KEY ያዘጋጁ ወይም ይህን ያስኪዱ፦ omniroute setup",
@@ -13,7 +12,8 @@
     "dryRun": "[dry-run] {action} ይደረግ ነበር",
     "cancelled": "ተሰርዟል።",
     "jsonOpt": "ውጤቱን እንደ JSON አቅርብ",
-    "yesOpt": "የማረጋገጫ ጥያቄውን ዝለል"
+    "yesOpt": "የማረጋገጫ ጥያቄውን ዝለል",
+    "positiveIntegerRequired": "ገደቡ አዎንታዊ ኢንቲጀር መሆን አለበት።"
   },
   "setup": {
     "title": "የOmniRoute ማዋቀር",

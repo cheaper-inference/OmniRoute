@@ -1,0 +1,1 @@
+- **fix(security):** Marketplace plugin installs need a management credential in every auth mode, and plugin config writes only accept the keys the plugin declares in its config schema (a plugin without a schema has no writable config)

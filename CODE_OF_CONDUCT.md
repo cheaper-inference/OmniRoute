@@ -61,7 +61,7 @@ representative at an online or offline event.
 Instances of abusive, harassing, or otherwise unacceptable behavior may be
 reported to the community leaders responsible for enforcement by opening a
 private security advisory at
-<https://github.com/diegosouzapw/OmniRoute/security/advisories/new>
+<https://github.com/cheaper-inference/OmniRoute/security/advisories/new>
 or by emailing the maintainer at diegosouza.pw@outlook.com.
 For security-sensitive incidents, see [`SECURITY.md`](SECURITY.md).
 All complaints will be reviewed and investigated promptly and fairly.

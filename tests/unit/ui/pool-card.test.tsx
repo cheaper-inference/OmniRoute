@@ -154,7 +154,9 @@ describe("PoolCard", { timeout: 10000 }, () => {
         />
       );
     });
-    const editBtn = document.querySelector("button[title='editAllocations']") as HTMLButtonElement;
+    const editBtn = document.querySelector(
+      "button[aria-label='editAllocations']"
+    ) as HTMLButtonElement;
     expect(editBtn).not.toBeNull();
     await act(async () => editBtn.click());
     expect(onEdit).toHaveBeenCalledOnce();
