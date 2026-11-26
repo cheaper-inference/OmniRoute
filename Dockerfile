@@ -300,7 +300,9 @@ ENV NODE_OPTIONS="--max-old-space-size=${OMNIROUTE_MEMORY_MB}"
 
 # Data directory inside Docker — must match the volume mount in docker-compose.yml
 ENV DATA_DIR=/app/data
-RUN mkdir -p /app/data && chown node:node /app /app/data
+# New Compose named volumes inherit the ownership of their mount points in the image.
+RUN mkdir -p /app/data /run/codex-appserver /home/node/.codex \
+  && chown node:node /app /app/data /run/codex-appserver /home/node/.codex
 
 # #13679: default the PUBLISHED image to requiring an API key. A bare
 # `docker run -p 20128:20128 … cheaperinference/omniroute` (README/QUICK-START
