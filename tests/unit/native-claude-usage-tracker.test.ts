@@ -68,12 +68,38 @@ test("explicit zero replaces cumulative usage, omitted fields do not reset it", 
   tracker.observe(delta({ cache_read_input_tokens: 0 }));
   assert.equal(tracker.getUsage()?.prompt_tokens, 5);
   assert.equal(tracker.getUsage()?.completion_tokens, 0);
+  assert.equal(tracker.getUsage()?.usage_evidence?.output.source, "reported");
   assert.equal(tracker.getUsage()?.cache_read_input_tokens, 0);
+});
+
+test("a positive start count remains provisional without a cumulative delta count", () => {
+  const tracker = createNativeClaudeUsageTracker(null);
+  tracker.observe(start({ input_tokens: 80, output_tokens: 1 }));
+  tracker.observe(delta({ input_tokens: 81 }));
+  assert.equal(tracker.hasFinalUsage(), false);
+  assert.equal(tracker.getUsage()?.completion_tokens, 0);
+  assert.equal(tracker.getUsage()?.total_tokens, 81);
+  assert.equal(tracker.getUsage()?.usage_evidence?.output.source, "unknown");
+
+  const withContent = tracker.getUsage(350);
+  assert.equal(withContent?.completion_tokens, 100);
+  assert.equal(withContent?.total_tokens, 181);
+  assert.deepEqual(withContent?.usage_evidence?.output, {
+    source: "estimated",
+    method: "observed_characters",
+  });
+
+  tracker.observe(delta({ output_tokens: 9 }));
+  assert.equal(tracker.hasFinalUsage(), true);
+  assert.equal(tracker.getUsage(350)?.completion_tokens, 9);
+  assert.equal(tracker.getUsage(350)?.total_tokens, 90);
+  assert.equal(tracker.getUsage(350)?.usage_evidence?.output.source, "reported");
 });
 
 test("nonfinite and negative counters cannot replace a valid native receipt", () => {
   const tracker = createNativeClaudeUsageTracker(null);
-  tracker.observe(start({ input_tokens: 5, output_tokens: 4 }));
+  tracker.observe(start({ input_tokens: 5, output_tokens: 1 }));
+  tracker.observe(delta({ output_tokens: 4 }));
   for (const value of [NaN, Infinity, -1, "9", undefined, null]) {
     tracker.observe(delta({ input_tokens: value, output_tokens: value }));
   }
@@ -88,7 +114,7 @@ test("raw metering copies primitive counters before client normalization mutates
   usage.input_tokens = 999;
   const previous = tracker.getUsage();
   tracker.observe(delta({ output_tokens: 4 }));
-  assert.equal(previous?.completion_tokens, 1);
+  assert.equal(previous?.prompt_tokens, 5);
   assert.equal(tracker.getUsage()?.prompt_tokens, 5);
   assert.equal(tracker.getUsage()?.completion_tokens, 4);
 });
@@ -97,7 +123,8 @@ test("the existing implausible-input guard still applies to internal raw meterin
   const tracker = createNativeClaudeUsageTracker({
     messages: [{ role: "user", content: "hello" }],
   });
-  tracker.observe(start({ input_tokens: 2, cache_read_input_tokens: 300_000, output_tokens: 4 }));
+  tracker.observe(start({ input_tokens: 2, cache_read_input_tokens: 300_000, output_tokens: 1 }));
+  tracker.observe(delta({ output_tokens: 4 }));
   const receipt = tracker.getUsage();
   assert.ok(receipt && receipt.prompt_tokens! < 300_000);
   assert.equal(receipt.completion_tokens, 4);

@@ -1,0 +1,1 @@
+- **fix(usage):** Incomplete native Claude streams no longer report the initial output counter as final. Output remains unknown without observed content or uses the existing observed-character estimate when content is available.
