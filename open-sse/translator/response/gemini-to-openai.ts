@@ -37,6 +37,7 @@ type GeminiToOpenAIState = {
   activeTextualReasoningTag?: string;
   textualReasoningContentBuffer?: string;
   cacheEvidence?: "hit" | "miss" | "unreported" | "invalid";
+  geminiReportedTotalTokens?: number;
   usage?: {
     prompt_tokens: number;
     completion_tokens: number;
@@ -723,12 +724,17 @@ export function geminiToOpenAIResponse(chunk, state) {
       usageMeta.candidatesTokenCount >= 0
         ? usageMeta.candidatesTokenCount
         : (previousUsage?.completion_tokens ?? 0);
-    const totalTokens =
-      typeof usageMeta.totalTokenCount === "number" &&
-      Number.isFinite(usageMeta.totalTokenCount) &&
-      usageMeta.totalTokenCount >= 0
-        ? usageMeta.totalTokenCount
-        : (previousUsage?.total_tokens ?? 0);
+    // Only provider-reported totals carry across snapshots. A derived total is
+    // recalculated from the current prompt and completion counts on each chunk.
+    const reportedTotalTokens = usageMeta.totalTokenCount;
+    if (
+      typeof reportedTotalTokens === "number" &&
+      Number.isFinite(reportedTotalTokens) &&
+      reportedTotalTokens >= 0
+    ) {
+      state.geminiReportedTotalTokens = reportedTotalTokens;
+    }
+    const totalTokens = state.geminiReportedTotalTokens ?? 0;
 
     // prompt_tokens = promptTokenCount (includes cached tokens, matching claude-to-openai.js behavior)
     const promptTokens = promptTokenCountRaw;

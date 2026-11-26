@@ -1,0 +1,1 @@
+- **fix(sse):** Recompute derived Gemini-to-OpenAI streaming token totals when cumulative counts change, while preserving positive totals reported by Gemini.

@@ -55,8 +55,22 @@ function sseUsage(usageMetadata: UsageMetadata): OpenAIUsage {
   return parsed.usage as OpenAIUsage;
 }
 
-function streamingUsage(usageMetadata: UsageMetadata): OpenAIUsage {
+function streamingUsage(
+  usageMetadata: UsageMetadata,
+  earlierSnapshots: UsageMetadata[] = []
+): OpenAIUsage {
   const state = { toolCalls: new Map() };
+  for (const snapshot of earlierSnapshots) {
+    geminiToOpenAIResponse(
+      {
+        responseId: "resp-stream-usage",
+        modelVersion: "gemini-2.5-flash",
+        candidates: [{ content: { parts: [{ text: "first" }] } }],
+        usageMetadata: snapshot,
+      },
+      state
+    );
+  }
   const chunks = geminiToOpenAIResponse(
     {
       responseId: "resp-stream-usage",
@@ -159,4 +173,45 @@ test("invariant: a derived total is never below prompt + completion", () => {
       );
     }
   }
+});
+
+test("streaming: derives the total from the latest cumulative counts, not the first snapshot", () => {
+  assert.deepEqual(
+    streamingUsage({ candidatesTokenCount: 9 }, [
+      { promptTokenCount: 80, candidatesTokenCount: 2 },
+    ]),
+    { prompt_tokens: 80, completion_tokens: 9, total_tokens: 89 }
+  );
+});
+
+test("streaming: a calculated total cannot infer missing candidates after an explicit zero", () => {
+  assert.deepEqual(
+    streamingUsage({ candidatesTokenCount: 0 }, [
+      { promptTokenCount: 80, candidatesTokenCount: 2 },
+    ]),
+    { prompt_tokens: 80, completion_tokens: 0, total_tokens: 80 }
+  );
+});
+
+test("streaming: the latest reported positive total survives omitted or invalid totals", () => {
+  const snapshots = [
+    { promptTokenCount: 80, candidatesTokenCount: 2 },
+    { totalTokenCount: 83 },
+    { totalTokenCount: 91 },
+    { totalTokenCount: -1 },
+  ];
+  assert.deepEqual(streamingUsage({ candidatesTokenCount: 9 }, snapshots), {
+    prompt_tokens: 80,
+    completion_tokens: 9,
+    total_tokens: 91,
+  });
+});
+
+test("streaming: a reported zero retains the existing fallback to the sum", () => {
+  assert.deepEqual(
+    streamingUsage({ candidatesTokenCount: 9, totalTokenCount: 0 }, [
+      { promptTokenCount: 80, candidatesTokenCount: 2, totalTokenCount: 83 },
+    ]),
+    { prompt_tokens: 80, completion_tokens: 9, total_tokens: 89 }
+  );
 });
