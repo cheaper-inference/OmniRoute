@@ -46,7 +46,12 @@ import { ALL_COMBOS_ACCESS_RULE } from "@/shared/constants/comboAccess";
 import { hasApiKeyModelRestrictions } from "./resolvedModelAccess";
 import { resolveSelfLoopBearer } from "@/shared/middleware/chatAdmissionIdentity";
 import { timingSafeCompare } from "./timingSafeCompare";
-import { requiredApiKeyUnavailable, resolveRequiredApiKey } from "./requiredApiKeyContext";
+import {
+  SELF_LOOP_KEY_ID_HEADER,
+  requiredApiKeyUnavailable,
+  resolveRequiredApiKey,
+  resolveRequiredApiKeyChild,
+} from "./requiredApiKeyContext";
 
 // Default to no per-key request cap. API keys can still opt into explicit
 // limits via Settings/API Keys, while provider/account quota controls remain
@@ -1046,13 +1051,7 @@ export async function checkApiKeyAuthorization(
   );
 }
 
-/**
- * Header an internal self-loop sub-request (the Vision Bridge describe call)
- * uses to scope itself to the caller's API key.
- */
-const SELF_LOOP_KEY_ID_HEADER = "x-omniroute-self-loop-key-id";
-
-type SelfLoopScope = { key: string | null; rejection: Response | null };
+type SelfLoopScope = { key: string | null; rejection: Response | null; requiredBinding?: boolean };
 const NO_SELF_LOOP_SCOPE: SelfLoopScope = { key: null, rejection: null };
 
 /**
@@ -1100,11 +1099,21 @@ export async function resolveEnforcedPolicyKey(request: Request): Promise<{
   rejection: Response | null;
 }> {
   const requiredKey = resolveRequiredApiKey();
-  if (requiredKey) {
-    const resolved = await requiredKey;
-    return resolved
-      ? { ...resolved, selfLoopScope: NO_SELF_LOOP_SCOPE, rejection: null }
-      : { apiKey: null, selfLoopScope: NO_SELF_LOOP_SCOPE, rejection: requiredApiKeyUnavailable() };
+  const requiredChild = requiredKey ? undefined : resolveRequiredApiKeyChild(request);
+  const binding = requiredKey ?? requiredChild;
+  if (binding) {
+    const resolved = await binding;
+    if (!resolved) {
+      return {
+        apiKey: null,
+        selfLoopScope: NO_SELF_LOOP_SCOPE,
+        rejection: requiredApiKeyUnavailable(),
+      };
+    }
+    const selfLoopScope = requiredChild
+      ? { key: resolved.apiKey, rejection: null, requiredBinding: true }
+      : NO_SELF_LOOP_SCOPE;
+    return { ...resolved, selfLoopScope, rejection: null };
   }
 
   const unbound = await resolveUnboundPolicyKey(request);
@@ -1237,7 +1246,14 @@ export async function enforceApiKeyPolicy(
     return { apiKey, apiKeyInfo, rejection: await validateFalReceiptPolicy(context) };
   }
   if (selfLoopScope.key) {
-    return { apiKey, apiKeyInfo, rejection: await validateSelfLoopScopedAccess(context) };
+    const endpointRejection = selfLoopScope.requiredBinding
+      ? validateEndpointAccess(context)
+      : null;
+    return {
+      apiKey,
+      apiKeyInfo,
+      rejection: endpointRejection ?? (await validateSelfLoopScopedAccess(context)),
+    };
   }
   const scheduleRejection = await validateKeyScheduleAndUsage(context);
   if (scheduleRejection) return { apiKey, apiKeyInfo, rejection: scheduleRejection };

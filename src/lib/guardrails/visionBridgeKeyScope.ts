@@ -9,11 +9,15 @@
  * so the receiving chat request enforces the key's policy again
  * (`x-omniroute-self-loop-key-id`, honored only with the self-loop bearer).
  *
- * Keys with none of those restrictions get no scope (null) and keep the
- * unscoped behavior.
+ * A native required-key dispatch carries its binding even when it has no
+ * routing restrictions. Other keys need a scope only when routing is restricted.
  */
 
 import { getApiKeyById, isModelAllowedForKey } from "@/lib/db/apiKeys";
+import {
+  getRequiredApiKeyChildReference,
+  resolveRequiredApiKey,
+} from "@/shared/utils/requiredApiKeyContext";
 import { hasApiKeyModelRestrictions } from "@/shared/utils/resolvedModelAccess";
 import { intersectAllowedConnectionIds } from "@/sse/handlers/chat/connectionConstraints.ts";
 import { hasUsableCredentialsForModel } from "./visionBridgeCredentials";
@@ -45,8 +49,8 @@ function stringList(value: unknown): string[] {
 
 /**
  * Resolve the Vision Bridge scope for the caller's key metadata
- * (`GuardrailContext.apiKeyInfo`). Returns null when there is no key or the key
- * carries no connection, quota or model restriction.
+ * (`GuardrailContext.apiKeyInfo`). Native required-key calls also carry a
+ * reference to the parent binding across the loopback boundary.
  */
 export async function resolveVisionBridgeKeyScope(
   apiKeyInfo: Record<string, unknown> | null | undefined,
@@ -58,14 +62,19 @@ export async function resolveVisionBridgeKeyScope(
   const allowedConnections = intersectAllowedConnectionIds(apiKeyInfo.allowedConnections, null);
   const allowedQuotas = stringList(apiKeyInfo.allowedQuotas);
   const modelRestricted = hasApiKeyModelRestrictions(apiKeyInfo);
-  if (!allowedConnections && allowedQuotas.length === 0 && !modelRestricted) return null;
+  const childReference = getRequiredApiKeyChildReference(apiKeyId);
+  if (!childReference && !allowedConnections && allowedQuotas.length === 0 && !modelRestricted) {
+    return null;
+  }
 
   const checkCreds = deps.hasUsableCredentials ?? hasUsableCredentialsForModel;
   const isAllowed = deps.isModelAllowed ?? isModelAllowedForKey;
   let keySecret: string | null = null;
   if (modelRestricted) {
     try {
-      keySecret = await (deps.getKeySecret ?? defaultGetKeySecret)(apiKeyId);
+      keySecret = childReference
+        ? ((await resolveRequiredApiKey())?.apiKey ?? null)
+        : await (deps.getKeySecret ?? defaultGetKeySecret)(apiKeyId);
     } catch {
       keySecret = null;
     }
@@ -92,7 +101,7 @@ export async function resolveVisionBridgeKeyScope(
   };
 
   return {
-    apiKeyId,
+    apiKeyId: childReference ?? apiKeyId,
     cacheScope: `${apiKeyId}:${JSON.stringify([
       allowedConnections,
       allowedQuotas,

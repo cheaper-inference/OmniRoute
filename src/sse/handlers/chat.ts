@@ -219,6 +219,7 @@ import { resolveForcedConnectionForCredentialPool } from "../services/sessionAff
 import { RequestTelemetry, recordTelemetry } from "../../shared/utils/requestTelemetry";
 import { generateRequestId } from "../../shared/utils/requestId";
 import { logAuditEvent } from "../../lib/compliance/index";
+import { authorizeRequiredApiKeyStream } from "@/shared/utils/requiredApiKeyTransport";
 import { enforceApiKeyPolicy } from "../../shared/utils/apiKeyPolicy";
 import { rejectIfMeteredBudgetExceeded } from "@/lib/usage/meteredBudgetPolicy";
 import { hasProviderQuotaBypassScope } from "../../shared/constants/apiKeyPolicyScopes";
@@ -2429,6 +2430,12 @@ async function handleSingleModelChat(
           ? { ...preferredFailoverSettings, enabled: false }
           : preferredFailoverSettings
       );
+      const transportRejection = await authorizeRequiredApiKeyStream(requestSignal);
+      if (transportRejection) {
+        releaseOAuthSession();
+        agyLease.release(leaseId);
+        return transportRejection;
+      }
       // 4. Execute chat via core after breaker gate checks (with optional TLS tracking)
       if (telemetry) telemetry.startPhase("connect");
       let execution: Awaited<ReturnType<typeof dispatchChatWithAffinityEviction>>;

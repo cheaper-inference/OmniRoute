@@ -1,0 +1,1 @@
+- **fix(api):** Server callers can opt into native routing for a bound API key. Chat, Responses, and image generation return key-policy errors before starting a stream, and vision and audio guardrail calls preserve the bound key (KEA-9523)
