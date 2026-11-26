@@ -1,0 +1,1 @@
+- Scope automatically generated prompt cache keys to the authenticated API key, connection, model, and client session on supported OpenAI and Codex routes. Explicit cache keys and connection cache opt-outs retain precedence.

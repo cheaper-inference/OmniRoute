@@ -2731,6 +2731,7 @@ async function handleChatCoreInner({
 
   const toolDisclosure = resolveToolDisclosureConfig(settings);
   const executeProviderRequestDeps = {
+    cachePrincipalId: apiKeyInfo?.id ? String(apiKeyInfo.id) : null,
     agentGoalPolicy,
     assertManagedLeaseFence,
     buildUpstreamHeadersForExecute,
