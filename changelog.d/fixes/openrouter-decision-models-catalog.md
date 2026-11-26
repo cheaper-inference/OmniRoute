@@ -1,0 +1,1 @@
+- **fix(api):** `GET /v1/systemone/models` lists OpenRouter's decisions models (`openrouter/typesafe/jev-1.13`, ...): the OpenRouter catalog now also reads the `output_modalities=decisions` listing, which OpenRouter's default model list hides, and keeps those rows when the OpenRouter connection has synced models
