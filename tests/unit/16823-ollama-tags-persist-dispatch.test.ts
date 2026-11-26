@@ -125,7 +125,8 @@ test("control: disabling cross-proxy compatibility restores native gpt-oss dispa
 
 test("control: the active catalog still rejects an unavailable native ID before dispatch", async () => {
   const { response, bodies } = await dispatch("ollama-cloud/unavailable-fixture:999b");
-  assert.equal(response.status, 400);
+  assert.equal(response.status, 404);
+  assert.equal((await response.json()).error?.code, "model_not_found");
   assert.equal(bodies.length, 0);
 });
 
