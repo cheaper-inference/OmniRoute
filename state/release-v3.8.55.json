@@ -3,42 +3,55 @@
   "base": "release/v3.8.55",
   "paused": null,
   "inFlight": {
-    "batchId": "b46",
+    "batchId": "b47",
     "kind": "batch",
-    "candidateRef": "omni-queue/release-v3.8.55/b46-eb728bade305",
-    "candidateSha": "eb728bade305b219dd9cc78949073ef3dd7d9fa6",
-    "baseSha": "8b19a44c124b5814f6313306152ffddbac44dbe7",
-    "treeSha": "d09b40fd372a5b7469bb02bd0907c47ba2caf21e",
+    "candidateRef": "omni-queue/release-v3.8.55/b47-6f058848a829",
+    "candidateSha": "6f058848a829fac23183215f93fe241cb95be887",
+    "baseSha": "eb728bade305b219dd9cc78949073ef3dd7d9fa6",
+    "treeSha": "72dace474526c2d935e1801e5cf2d4b760cd2dd3",
     "prs": [
       {
-        "n": 21214,
-        "head": "5b0d42f93e1acc80e8caafc3efe66b8dffbabf3e",
-        "title": "ci: let the nightly derived-numbers pull request land by itself on the development branch",
-        "author": "diegosouzapw",
-        "labeledAt": "2026-11-26T00:10:35Z"
-      },
-      {
-        "n": 21242,
-        "head": "9b35a35373240291e0e8fe8e6579fe8541516c73",
-        "title": "fix(i18n): retry a rejected multi-line string line by line on the Google path",
-        "author": "diegosouzapw",
-        "labeledAt": "2026-11-26T00:10:40Z"
-      },
-      {
-        "n": 21124,
-        "head": "ba6b35ac1b90897b324c07a5b9fe7af0cbb9505b",
-        "title": "fix(compression): allow whitespace-normalized preserved blocks in validation (#21117)",
+        "n": 21125,
+        "head": "3a57400a04b48d744aa2986cd950b6cd352f7a81",
+        "title": "fix(memory): allow pre-activation Qdrant health and search validation (#21115)",
         "author": "zerafachris",
-        "labeledAt": "2026-11-26T04:21:37Z"
+        "labeledAt": "2026-11-26T04:21:40Z"
+      },
+      {
+        "n": 21084,
+        "head": "bee2f027503e8e265d9a3d9add1f42d3425f44c8",
+        "title": "fix(providers): derive per-conversation Codex prompt_cache_key instead of workspaceId fallback",
+        "author": "insoln",
+        "labeledAt": "2026-11-26T04:21:42Z"
+      },
+      {
+        "n": 20980,
+        "head": "6f62f7a0b522e3bee37a1e8353afeea0661115a1",
+        "title": "fix(sse): keep the upstream error on a model-only cooldown answer",
+        "author": "costajohnt",
+        "labeledAt": "2026-11-26T04:21:44Z"
+      },
+      {
+        "n": 21149,
+        "head": "3b132e0cd56ed7a8f8b2b7c7176d7aceb48b0a05",
+        "title": "fix(a2a): sanitize skill errors before they reach A2A clients",
+        "author": "diegosouzapw",
+        "labeledAt": "2026-11-26T05:31:48Z"
       }
     ],
-    "stage": "landing",
-    "startedAt": "2026-11-26T05:19:54.248Z",
+    "stage": "testing",
+    "startedAt": "2026-11-26T06:40:10.260Z",
     "attempts": 0,
-    "bisect": null,
-    "landAttempts": 1
+    "bisect": null
   },
   "baseChecks": [
+    {
+      "baseSha": "eb728bade305b219dd9cc78949073ef3dd7d9fa6",
+      "ref": "omni-queue/release-v3.8.55/b46-eb728bade305",
+      "status": "green",
+      "startedAt": "2026-11-26T05:19:54.248Z",
+      "signatures": []
+    },
     {
       "baseSha": "8b19a44c124b5814f6313306152ffddbac44dbe7",
       "ref": "omni-queue/release-v3.8.55/b45-8b19a44c124b",
@@ -159,33 +172,15 @@
     }
   },
   "counters": {
-    "batchSeq": 46,
-    "ciRuns": 51,
-    "landedPrs": 5,
-    "landedBatches": 3,
+    "batchSeq": 47,
+    "ciRuns": 52,
+    "landedPrs": 8,
+    "landedBatches": 4,
     "redBatches": 11,
     "bisections": 3,
     "culprits": 1
   },
   "history": [
-    {
-      "at": "2026-11-20T00:33:07.064Z",
-      "type": "queue-stalled",
-      "detail": "3 ticks in a row failed, the first at 2026-11-19 23:57Z: ticks are failing",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44646501430"
-    },
-    {
-      "at": "2026-11-20T00:51:29.494Z",
-      "type": "error",
-      "detail": "git merge-tree failed (exit 128): fatal: remote error: upload-pack: not our ref 04847663e4aace8a9ba1947e2c1cf649aa36fafc\nfatal: could not fetch 123131e68fe6ee82d84899801105dfb4995bee8c from promisor remote",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44648901077"
-    },
-    {
-      "at": "2026-11-20T00:59:39.043Z",
-      "type": "error",
-      "detail": "git merge-tree failed (exit 128): fatal: remote error: upload-pack: not our ref 04847663e4aace8a9ba1947e2c1cf649aa36fafc\nfatal: could not fetch 123131e68fe6ee82d84899801105dfb4995bee8c from promisor remote",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44649958446"
-    },
     {
       "at": "2026-11-20T01:15:10.441Z",
       "type": "error",
@@ -2573,12 +2568,53 @@
       ],
       "sha": "eb728bade305b219dd9cc78949073ef3dd7d9fa6",
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45769638105"
+    },
+    {
+      "at": "2026-11-26T06:39:27.333Z",
+      "type": "land-blessed",
+      "batchId": "b46",
+      "prs": [
+        21214,
+        21242,
+        21124
+      ],
+      "sha": "eb728bade305b219dd9cc78949073ef3dd7d9fa6",
+      "detail": "omni-queue/land success on 1 commit(s)",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45769638105"
+    },
+    {
+      "at": "2026-11-26T06:39:30.923Z",
+      "type": "landed",
+      "batchId": "b46",
+      "prs": [
+        21214,
+        21242,
+        21124
+      ],
+      "sha": "eb728bade305b219dd9cc78949073ef3dd7d9fa6",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45769638105"
+    },
+    {
+      "at": "2026-11-26T06:40:14.715Z",
+      "type": "batch-started",
+      "batchId": "b47",
+      "prs": [
+        21125,
+        21084,
+        20980,
+        21149
+      ],
+      "sha": "6f058848a829fac23183215f93fe241cb95be887",
+      "detail": "4 PR(s) on eb728bade305; window 4",
+      "labeledAt": {
+        "20980": "2026-11-26T04:21:44Z",
+        "21084": "2026-11-26T04:21:42Z",
+        "21125": "2026-11-26T04:21:40Z",
+        "21149": "2026-11-26T05:31:48Z"
+      },
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45769638105"
     }
   ],
-  "updatedAt": "2026-11-26T06:39:24.093Z",
-  "batchWindow": 3,
-  "landingsWithoutVerdict": {
-    "count": 1,
-    "since": "2026-11-26T06:39:24.093Z"
-  }
+  "updatedAt": "2026-11-26T06:40:16.466Z",
+  "batchWindow": 4
 }
