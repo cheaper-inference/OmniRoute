@@ -49,22 +49,8 @@ export function getAnalyticsTokenBreakdown(summary: AnalyticsTokenSummary) {
     totalInputTokens,
     inputTokens,
     inputTokensPartial,
-    inputTokensUnsplit: inputTokensPartial
-      ? positiveUnsplitInput(totalInputTokens, cachedInputTokens, partialInput)
-      : null,
     cachedInputTokens,
     outputTokens,
     cacheComplete,
   };
-}
-
-/** Preserve unknown operands and omit empty or inconsistent remainders. */
-function positiveUnsplitInput(
-  total: number | null,
-  cached: number | null,
-  known: number | null
-): number | null {
-  if (total === null || cached === null || known === null) return null;
-  const remainder = total - cached - known;
-  return remainder > 0 ? remainder : null;
 }

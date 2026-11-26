@@ -15,7 +15,6 @@ test("splits inclusive prompt totals without double counting cache reads", () =>
       totalInputTokens: 100,
       inputTokens: 40,
       inputTokensPartial: false,
-      inputTokensUnsplit: null,
       cachedInputTokens: 60,
       outputTokens: 10,
       cacheComplete: true,
@@ -148,33 +147,15 @@ test("a known subtotal cannot exceed the inclusive input total", () => {
   assert.equal(result.inputTokensPartial, false);
 });
 
-test("partial input exposes only a positive measured unsplit remainder", () => {
-  const partial = {
-    promptTokens: 1800,
-    cachedInputTokens: 400,
-    knownFreshInputTokens: 550,
-    cachedInputTokensComplete: false,
-  };
-  assert.equal(getAnalyticsTokenBreakdown(partial).inputTokensUnsplit, 850);
-  assert.equal(
-    getAnalyticsTokenBreakdown({ ...partial, cachedInputTokensComplete: true }).inputTokensUnsplit,
-    null
-  );
-  for (const cachedInputTokens of [1250, 1300, undefined, null]) {
-    assert.equal(
-      getAnalyticsTokenBreakdown({ ...partial, cachedInputTokens }).inputTokensUnsplit,
-      null
-    );
+test("shows the known fresh-input subtotal with incomplete or missing cache totals", () => {
+  for (const cachedInputTokens of [0, 400, 1250, 1300, undefined, null]) {
+    const result = getAnalyticsTokenBreakdown({
+      promptTokens: 1800,
+      cachedInputTokens,
+      knownFreshInputTokens: 550,
+      cachedInputTokensComplete: false,
+    });
+    assert.equal(result.inputTokens, 550);
+    assert.equal(result.inputTokensPartial, true);
   }
-  for (const promptTokens of [undefined, null, 0]) {
-    assert.equal(getAnalyticsTokenBreakdown({ ...partial, promptTokens }).inputTokensUnsplit, null);
-  }
-  assert.equal(
-    getAnalyticsTokenBreakdown({ ...partial, knownFreshInputTokens: 0 }).inputTokensUnsplit,
-    null
-  );
-  assert.equal(
-    getAnalyticsTokenBreakdown({ ...partial, cachedInputTokens: 0 }).inputTokensUnsplit,
-    1250
-  );
 });
