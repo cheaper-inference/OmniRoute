@@ -25,7 +25,8 @@ COPY package.json package-lock.json bun.lock* pnpm-workspace.yaml* ./
 COPY open-sse/package.json ./open-sse/package.json
 COPY packages/ ./packages/
 
-# Root postinstall helpers needed during bun install lifecycle
+# Copy these scripts ahead of the full source tree.
+# The dependency install skips the root postinstall hook.
 COPY scripts/build/ ./scripts/build/
 COPY scripts/dev/sync-env.mjs ./scripts/dev/sync-env.mjs
 
