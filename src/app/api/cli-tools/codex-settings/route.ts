@@ -209,19 +209,24 @@ export async function POST(request: Request) {
 
     const effectiveWireApi = wireApi ?? "responses";
     const normalizedBaseUrl = normalizeCodexBaseUrl(baseUrl, effectiveWireApi);
+    const providers = asRecord(doc.model_providers);
+    const currentOmniRoute = asRecord(providers.omniroute);
+    const keepEnvironmentKey =
+      currentOmniRoute.base_url === normalizedBaseUrl &&
+      currentOmniRoute.env_key === "OMNIROUTE_API_KEY";
 
     // Read the previous OmniRoute URL before the provider section is replaced below.
     deleteOwnedRootUrl(doc, normalizedBaseUrl);
 
-    // Always create a custom provider to reliably pass wire_api and use OMNIROUTE_API_KEY
+    // Keep the explicit environment credential scoped to its existing endpoint.
     doc.model_provider = "omniroute";
     doc.model_providers = {
-      ...asRecord(doc.model_providers),
+      ...providers,
       omniroute: {
         name: "OmniRoute",
         base_url: normalizedBaseUrl,
         wire_api: effectiveWireApi,
-        env_key: "OPENAI_API_KEY",
+        env_key: keepEnvironmentKey ? "OMNIROUTE_API_KEY" : "OPENAI_API_KEY",
       },
     };
 
@@ -253,7 +258,7 @@ export async function POST(request: Request) {
     const configContent = toToml(doc);
     await fs.writeFile(configPath, configContent);
 
-    // Update auth.json with OPENAI_API_KEY (Codex reads this first)
+    // Preserve the existing auth.json contract for profiles using a stored key.
     authData.OPENAI_API_KEY = apiKey;
     await fs.writeFile(authPath, JSON.stringify(authData, null, 2));
 
