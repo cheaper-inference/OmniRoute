@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import fs from "fs/promises";
 import path from "path";
 import { parse as parseToml, stringify as stringifyToml } from "smol-toml";
+import type { z } from "zod";
 import { requireCliToolsAuth } from "@/lib/api/requireCliToolsAuth";
 import {
   ensureCliConfigWriteAllowed,
@@ -140,6 +141,77 @@ export async function GET(request: Request) {
   }
 }
 
+function isLocalCodexEndpoint(baseUrl: string) {
+  if (!URL.canParse(baseUrl)) return false;
+  const endpoint = new URL(baseUrl);
+  return (
+    ["http:", "https:"].includes(endpoint.protocol) &&
+    ["localhost", "127.0.0.1", "[::1]"].includes(endpoint.hostname)
+  );
+}
+
+function mergeCodexSettings(
+  doc: TomlDoc,
+  settings: z.infer<typeof codexSettingsConfigSchema>,
+  keepOfficialLogin: boolean
+) {
+  const { baseUrl, model, reasoningEffort, wireApi, modelMappings } = settings;
+  // Carry the user's intent forward off the deprecated Codex feature flag (#1327).
+  migrateFeatureFlags(doc);
+
+  // Update only OmniRoute related fields (api_key goes to auth.json, not config.toml)
+  doc.model = model;
+
+  if (reasoningEffort && reasoningEffort !== "none") {
+    // Optional Codex reasoning effort.
+    doc.model_reasoning_effort = reasoningEffort;
+  } else {
+    delete doc.model_reasoning_effort;
+  }
+
+  const effectiveWireApi = wireApi ?? "responses";
+  const normalizedBaseUrl = normalizeCodexBaseUrl(baseUrl, effectiveWireApi);
+
+  // Read the previous OmniRoute URL before the provider section is replaced below.
+  deleteOwnedRootUrl(doc, normalizedBaseUrl);
+
+  // Always create a custom provider to reliably pass wire_api and use OMNIROUTE_API_KEY
+  doc.model_provider = "omniroute";
+  doc.model_providers = {
+    ...asRecord(doc.model_providers),
+    omniroute: {
+      name: "OmniRoute",
+      base_url: normalizedBaseUrl,
+      wire_api: effectiveWireApi,
+      env_key: keepOfficialLogin ? "OMNIROUTE_API_KEY" : "OPENAI_API_KEY",
+    },
+  };
+
+  // Process model aliases into notice.model_migrations
+  const notice = asRecord(doc.notice);
+  if (modelMappings && Object.keys(modelMappings).length > 0) {
+    doc.notice = {
+      ...notice,
+      model_migrations: { ...asRecord(notice.model_migrations), ...modelMappings },
+    };
+  } else if ("model_migrations" in notice) {
+    delete notice.model_migrations;
+    if (Object.keys(notice).length === 0) delete doc.notice;
+  }
+}
+
+function codexSettingsAppliedResponse(configPath: string, catalog: CodexCatalogWriteResult | null) {
+  return NextResponse.json({
+    success: true,
+    message: "Codex settings applied successfully!",
+    configPath,
+    ...(catalog?.catalogPath
+      ? { catalogPath: catalog.catalogPath, catalogModelCount: catalog.count }
+      : {}),
+    ...(catalog?.warning ? { catalogWarning: catalog.warning } : {}),
+  });
+}
+
 // POST - Update OmniRoute settings (merge with existing config)
 export async function POST(request: Request) {
   const authError = await requireCliToolsAuth(request, { alwaysRequireAuth: true });
@@ -172,21 +244,13 @@ export async function POST(request: Request) {
     if (isValidationFailure(validation)) {
       return NextResponse.json({ error: validation.error }, { status: 400 });
     }
-    const { baseUrl, model, reasoningEffort, wireApi, modelMappings, modelCatalog } =
-      validation.data;
+    const { baseUrl, model, modelCatalog, modelMappings } = validation.data;
     const keepOfficialLogin = validation.data.keepOfficialLogin ?? getCodexKeepOfficialLogin();
-    if (keepOfficialLogin) {
-      const endpoint = URL.canParse(baseUrl) ? new URL(baseUrl) : null;
-      if (
-        !endpoint ||
-        !["http:", "https:"].includes(endpoint.protocol) ||
-        !["localhost", "127.0.0.1", "[::1]"].includes(endpoint.hostname)
-      ) {
-        return NextResponse.json(
-          { error: "Keeping official Codex login requires a local OmniRoute endpoint." },
-          { status: 400 }
-        );
-      }
+    if (keepOfficialLogin && !isLocalCodexEndpoint(baseUrl)) {
+      return NextResponse.json(
+        { error: "Keeping official Codex login requires a local OmniRoute endpoint." },
+        { status: 400 }
+      );
     }
     const configPath = getCodexConfigPath();
     const authPath = getCodexAuthPath();
@@ -215,60 +279,18 @@ export async function POST(request: Request) {
       ? null
       : ((await readExistingConfig(authPath, parseJsonObject)) ?? {});
 
-    // Carry the user's intent forward off the deprecated Codex feature flag (#1327).
-    migrateFeatureFlags(doc);
+    mergeCodexSettings(doc, validation.data, keepOfficialLogin);
 
-    // Update only OmniRoute related fields (api_key goes to auth.json, not config.toml)
-    doc.model = model;
-
-    if (reasoningEffort && reasoningEffort !== "none") {
-      // Optional Codex reasoning effort.
-      doc.model_reasoning_effort = reasoningEffort;
-    } else {
-      delete doc.model_reasoning_effort;
-    }
-
-    const effectiveWireApi = wireApi ?? "responses";
-    const normalizedBaseUrl = normalizeCodexBaseUrl(baseUrl, effectiveWireApi);
-
-    // Read the previous OmniRoute URL before the provider section is replaced below.
-    deleteOwnedRootUrl(doc, normalizedBaseUrl);
-
-    // Always create a custom provider to reliably pass wire_api and use OMNIROUTE_API_KEY
-    doc.model_provider = "omniroute";
-    doc.model_providers = {
-      ...asRecord(doc.model_providers),
-      omniroute: {
-        name: "OmniRoute",
-        base_url: normalizedBaseUrl,
-        wire_api: effectiveWireApi,
-        env_key: keepOfficialLogin ? "OMNIROUTE_API_KEY" : "OPENAI_API_KEY",
-      },
-    };
-
-    // Process model aliases into notice.model_migrations
-    const notice = asRecord(doc.notice);
-    if (modelMappings && Object.keys(modelMappings).length > 0) {
-      doc.notice = {
-        ...notice,
-        model_migrations: { ...asRecord(notice.model_migrations), ...modelMappings },
-      };
-    } else if ("model_migrations" in notice) {
-      delete notice.model_migrations;
-      if (Object.keys(notice).length === 0) delete doc.notice;
-    }
-
-    // Point Codex's /model picker at an OmniRoute catalog. Fail-open: on any failure
-    // Apply still succeeds, a previous value is left alone and a warning is returned.
-    let catalog: CodexCatalogWriteResult | null = null;
-    if (modelCatalog === true) {
-      catalog = await writeCodexModelCatalog({
-        codexDir,
-        selectedModels: [model, ...Object.values(modelMappings ?? {})],
-        listModels: () => listOmniRouteChatModels(request),
-      });
-      if (catalog.catalogPath) doc.model_catalog_json = toTomlPath(catalog.catalogPath);
-    }
+    // A failed catalog refresh leaves the currently configured path in place.
+    const catalog =
+      modelCatalog === true
+        ? await writeCodexModelCatalog({
+            codexDir,
+            selectedModels: [model, ...Object.values(modelMappings ?? {})],
+            listModels: () => listOmniRouteChatModels(request),
+          })
+        : null;
+    if (catalog?.catalogPath) doc.model_catalog_json = toTomlPath(catalog.catalogPath);
 
     // Write merged config
     const configContent = toToml(doc);
@@ -289,15 +311,7 @@ export async function POST(request: Request) {
       /* non-critical */
     }
 
-    return NextResponse.json({
-      success: true,
-      message: "Codex settings applied successfully!",
-      configPath,
-      ...(catalog?.catalogPath
-        ? { catalogPath: catalog.catalogPath, catalogModelCount: catalog.count }
-        : {}),
-      ...(catalog?.warning ? { catalogWarning: catalog.warning } : {}),
-    });
+    return codexSettingsAppliedResponse(configPath, catalog);
   } catch (error) {
     const refusal = configClobberRefusalResponse(error);
     if (refusal) return refusal;

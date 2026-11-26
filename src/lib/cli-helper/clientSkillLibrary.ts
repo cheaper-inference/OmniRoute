@@ -18,6 +18,8 @@ type Source = Client | "shared" | "cc-switch";
 const clients = clientInstructionsId.options;
 const idSchema = z.string().regex(/^[a-f0-9]{64}$/);
 const skillAction = z.enum(["import", "enable", "disable", "update", "uninstall"]);
+type SkillAction = z.infer<typeof skillAction>;
+type ClientSkillAction = Exclude<SkillAction, "import">;
 export const clientSkillLibraryChange = z
   .strictObject({
     action: skillAction,
@@ -225,6 +227,25 @@ function adoptionPath(skill: Managed, client: Client, root: string) {
   return { dest, backup: path.join(history(root), "adopted-" + skill.id) };
 }
 
+function adoptedAssignment(
+  skill: Managed,
+  client: Client,
+  root: string,
+  matches: Skill[]
+): Assignment {
+  const adoption = adoptionPath(skill, client, root);
+  const current = adoption && fs.lstatSync(adoption.dest, { throwIfNoEntry: false });
+  const saved = adoption && fs.lstatSync(adoption.backup, { throwIfNoEntry: false });
+  if (!adoption || !!current === !!saved || matches.some(({ id }) => id !== skill.id))
+    return {
+      enabled: !!current,
+      canEnable: false,
+      canDisable: false,
+      reason: "The adopted path changed or conflicts with another skill",
+    };
+  return { enabled: !!current, canEnable: !!saved, canDisable: !!current };
+}
+
 function assignment(
   skill: Managed | Skill,
   managed: boolean,
@@ -247,19 +268,8 @@ function assignment(
         ? "Loaded from the shared skills directory"
         : "A skill with this name is loaded from the shared skills directory",
     };
-  if ("adopted" in skill && skill.adopted && skill.source === client) {
-    const adoption = adoptionPath(skill, client, native[client]);
-    const current = adoption && fs.lstatSync(adoption.dest, { throwIfNoEntry: false });
-    const saved = adoption && fs.lstatSync(adoption.backup, { throwIfNoEntry: false });
-    if (!adoption || !!current === !!saved || nativeMatches.some(({ id }) => id !== skill.id))
-      return {
-        enabled: !!current,
-        canEnable: false,
-        canDisable: false,
-        reason: "The adopted path changed or conflicts with another skill",
-      };
-    return { enabled: !!current, canEnable: !!saved, canDisable: !!current };
-  }
+  if ("adopted" in skill && skill.adopted && skill.source === client)
+    return adoptedAssignment(skill, client, native[client], nativeMatches);
   if (managed && stat?.isDirectory() && isOwned(dest, skill.id)) {
     return {
       enabled: nativeMatches.some(({ bundle }) => bundle === dest),
@@ -346,8 +356,211 @@ function stageBundle(skill: Skill | Managed, target: string, owner?: string) {
     fs.writeFileSync(path.join(target, ownerFile), owner + ":" + fingerprint, { flag: "wx" });
 }
 
+type SkillWrite = {
+  dest: string;
+  staged?: string;
+  fingerprint?: string;
+  expected?: string;
+  backup?: string;
+  owner?: string;
+  exists: boolean;
+  replaced?: boolean;
+  saved?: boolean;
+};
+
+function checkTarget(target: string) {
+  const writeGuard = ensureCliConfigWriteAllowed(target);
+  if (writeGuard) throw new SkillConflict(writeGuard);
+}
+
+function stage(root: string, staging: string[]) {
+  assertDirectoryChain(root);
+  fs.mkdirSync(root, { recursive: true, mode: 0o700 });
+  const outside = history(root);
+  assertDirectoryChain(outside);
+  fs.mkdirSync(outside, { recursive: true, mode: 0o700 });
+  const dir = fs.mkdtempSync(path.join(outside, "staging-"));
+  staging.push(dir);
+  return dir;
+}
+
+function prepareWrite(dest: string, exists: boolean, next?: string, owner?: string): SkillWrite {
+  const outside = history(path.dirname(dest));
+  assertDirectoryChain(outside);
+  fs.mkdirSync(outside, { recursive: true, mode: 0o700 });
+  const backup = exists ? path.join(outside, path.basename(dest) + "-" + randomUUID()) : undefined;
+  const fingerprint = next ? treeDigest(next) : undefined;
+  return { dest, staged: next, fingerprint, backup, owner, exists };
+}
+
+function adopt(skill: Skill, native: ReturnType<typeof roots>, local: Skill[]) {
+  const parsed = clientInstructionsId.safeParse(skill.source);
+  if (!parsed.success) return;
+  const source = parsed.data;
+  if (
+    local.some(
+      (entry) =>
+        entry.id !== skill.id &&
+        sameName(skill, entry) &&
+        (entry.source === source || (entry.source === "shared" && sourcesSharedBy.has(source)))
+    ) ||
+    clients.some((other) => other !== source && path.relative(native[other], native[source]) === "")
+  )
+    return;
+  return {
+    relative: path.relative(native[source], skill.bundle),
+    fingerprint: treeDigest(skill.bundle),
+  };
+}
+
+function prepareLibraryWrite(
+  library: string,
+  origin: Skill,
+  stored: Managed | undefined,
+  native: ReturnType<typeof roots>,
+  local: Skill[],
+  staging: string[]
+) {
+  if (stored && stored.name !== origin.name)
+    throw new SkillConflict("The source skill was renamed");
+  const dir = stage(library, staging);
+  assertDirectoryChain(path.dirname(origin.bundle));
+  let adopted = stored ? stored.adopted : adopt(origin, native, local);
+  if (stored?.adopted) {
+    const source = clientInstructionsId.parse(stored.source);
+    const current = adoptionPath(stored, source, native[source]);
+    if (
+      current?.dest !== origin.bundle ||
+      !assignment(stored, true, source, local, native).canDisable
+    )
+      throw new SkillConflict("The adopted source has an unresolved conflict");
+    adopted = { relative: stored.adopted.relative, fingerprint: treeDigest(origin.bundle) };
+  }
+  stageBundle(origin, path.join(dir, "bundle"));
+  if (adopted && treeDigest(origin.bundle) !== adopted.fingerprint)
+    throw new SkillConflict("The adopted skill changed while it was copied");
+  fs.writeFileSync(
+    path.join(dir, "origin.json"),
+    JSON.stringify({ id: origin.id, source: origin.source, name: origin.name, adopted }),
+    { flag: "wx", mode: 0o600 }
+  );
+  return prepareWrite(path.join(library, origin.id), !!stored, dir);
+}
+
+function prepareAdoptedWrite(
+  action: Exclude<ClientSkillAction, "update">,
+  adoption: ReturnType<typeof adoptionPath>,
+  expected: string,
+  state: Assignment
+): SkillWrite | undefined {
+  if (!adoption) throw new SkillConflict("The adopted skill directory has changed");
+  const { dest, backup } = adoption;
+  assertDirectoryChain(path.dirname(dest));
+  assertDirectoryChain(path.dirname(backup));
+  const saved = fs.lstatSync(backup, { throwIfNoEntry: false });
+  if (action === "uninstall" && !saved) return;
+  checkTarget(dest);
+  checkTarget(backup);
+  if (action === "disable" && state.canDisable) {
+    fs.mkdirSync(path.dirname(backup), { recursive: true, mode: 0o700 });
+    return { dest, backup, expected, exists: true };
+  }
+  if (action !== "disable" && state.canEnable) {
+    if (!fs.lstatSync(path.dirname(dest), { throwIfNoEntry: false })?.isDirectory())
+      throw new SkillConflict("The original skill directory is unavailable");
+    if (treeDigest(backup) !== expected)
+      throw new SkillConflict("The retained original skill has changed");
+    return { dest, staged: backup, fingerprint: expected, exists: false };
+  }
+  if (action === "enable" && state.canDisable && treeDigest(dest) === expected) return;
+  throw new SkillConflict(state.reason ?? "The adopted skill has changed");
+}
+
+function prepareClientCopy(
+  root: string,
+  dest: string,
+  skill: Skill | Managed,
+  id: string,
+  owned: boolean,
+  staging: string[]
+) {
+  checkTarget(dest);
+  checkTarget(history(root));
+  const dir = stage(root, staging);
+  const bundle = path.join(dir, "bundle");
+  stageBundle(skill, bundle, id);
+  return prepareWrite(dest, owned, bundle, owned ? id : undefined);
+}
+
+function prepareClientWrite(
+  action: ClientSkillAction,
+  root: string,
+  stored: Managed,
+  state: Assignment,
+  origin: Skill | undefined,
+  staging: string[]
+): SkillWrite | undefined {
+  const { id, name } = stored;
+  const dest = path.join(root, name);
+  const owned = fs.lstatSync(dest, { throwIfNoEntry: false })?.isDirectory() && isOwned(dest, id);
+  if (action === "enable" && !owned && !state.canEnable)
+    throw new SkillConflict(state.reason ?? "Cannot sync this client");
+  if (action === "disable" && !state.canDisable)
+    throw new SkillConflict(state.reason ?? "No owned client copy to disable");
+  if (!owned) {
+    if (action === "enable") return prepareClientCopy(root, dest, stored, id, false, staging);
+    return;
+  }
+
+  assertDirectoryChain(dest);
+  verifyOwned(dest, id);
+  if (action === "update") return prepareClientCopy(root, dest, origin!, id, true, staging);
+  if (action === "disable" || action === "uninstall") {
+    checkTarget(dest);
+    checkTarget(history(root));
+    return prepareWrite(dest, true, undefined, id);
+  }
+}
+
+function applySkillWrites(changes: SkillWrite[]) {
+  for (const change of changes) {
+    if (!!fs.lstatSync(change.dest, { throwIfNoEntry: false }) !== change.exists)
+      throw new SkillConflict("Skill files changed. Refresh first");
+    if (change.owner) verifyOwned(change.dest, change.owner);
+    if (change.expected && treeDigest(change.dest) !== change.expected)
+      throw new SkillConflict("The adopted skill has changed outside OmniRoute");
+    if (change.backup && fs.lstatSync(change.backup, { throwIfNoEntry: false }))
+      throw new SkillConflict("The skill backup already exists");
+    if (change.backup) {
+      fs.renameSync(change.dest, change.backup);
+      change.saved = true;
+    }
+    if (change.staged) {
+      fs.renameSync(change.staged, change.dest);
+      change.replaced = true;
+    }
+  }
+}
+
+function verifySkillWrites(changes: SkillWrite[]) {
+  for (const change of changes) {
+    if (fs.existsSync(change.dest) !== !!change.staged) throw new Error("Skill readback failed");
+    if (change.fingerprint && treeDigest(change.dest) !== change.fingerprint)
+      throw new Error("Skill contents changed during readback");
+    if (change.expected && change.backup && treeDigest(change.backup) !== change.expected)
+      throw new Error("The retained original did not match the expected contents");
+  }
+}
+
+function undoSkillWrites(changes: SkillWrite[]) {
+  for (const change of changes.reverse()) {
+    if (change.replaced && change.staged) fs.renameSync(change.dest, change.staged);
+    if (change.saved && change.backup) fs.renameSync(change.backup, change.dest);
+  }
+}
+
 function applyOne(
-  action: z.infer<typeof skillAction>,
+  action: SkillAction,
   id: string,
   client: Client | undefined,
   native: ReturnType<typeof roots>,
@@ -359,186 +572,59 @@ function applyOne(
     (skill) =>
       skill.id === id && (skill.flat || !readSmallFile(path.join(skill.bundle, ownerFile), 160))
   );
-  const toChange: {
-    dest: string;
-    staged?: string;
-    fingerprint?: string;
-    expected?: string;
-    backup?: string;
-    owner?: string;
-    exists: boolean;
-    replaced?: boolean;
-    saved?: boolean;
-  }[] = [];
+  const changes: SkillWrite[] = [];
   const staging: string[] = [];
-  const checkTarget = (target: string) => {
-    const writeGuard = ensureCliConfigWriteAllowed(target);
-    if (writeGuard) throw new SkillConflict(writeGuard);
-  };
-  const stage = (root: string) => {
-    assertDirectoryChain(root);
-    fs.mkdirSync(root, { recursive: true, mode: 0o700 });
-    const outside = history(root);
-    assertDirectoryChain(outside);
-    fs.mkdirSync(outside, { recursive: true, mode: 0o700 });
-    const dir = fs.mkdtempSync(path.join(outside, "staging-"));
-    staging.push(dir);
-    return dir;
-  };
-  const add = (dest: string, exists: boolean, next?: string, owner?: string) => {
-    const outside = history(path.dirname(dest));
-    assertDirectoryChain(outside);
-    fs.mkdirSync(outside, { recursive: true, mode: 0o700 });
-    const backup = exists
-      ? path.join(outside, path.basename(dest) + "-" + randomUUID())
-      : undefined;
-    const fingerprint = next ? treeDigest(next) : undefined;
-    toChange.push({ dest, staged: next, fingerprint, backup, owner, exists });
-  };
-  const adopt = (skill: Skill) => {
-    const parsed = clientInstructionsId.safeParse(skill.source);
-    if (!parsed.success) return;
-    const source = parsed.data;
-    if (
-      local.some(
-        (entry) =>
-          entry.id !== id &&
-          sameName(skill, entry) &&
-          (entry.source === source || (entry.source === "shared" && sourcesSharedBy.has(source)))
-      ) ||
-      clients.some(
-        (other) => other !== source && path.relative(native[other], native[source]) === ""
-      )
-    )
-      return;
-    return {
-      relative: path.relative(native[source], skill.bundle),
-      fingerprint: treeDigest(skill.bundle),
-    };
-  };
   try {
-    if (action === "import" || action === "update") {
-      if (action === "import" && stored) return;
-      if (!origin) throw new SkillConflict("The source skill is unavailable");
-      if (action === "update" && !stored) throw new SkillConflict("Import the skill first");
-      if (stored && stored.name !== origin.name)
-        throw new SkillConflict("The source skill was renamed");
-      const dir = stage(library);
-      assertDirectoryChain(path.dirname(origin.bundle));
-      let adopted = stored?.adopted ?? (action === "import" ? adopt(origin) : undefined);
-      if (stored?.adopted) {
-        const source = clientInstructionsId.parse(stored.source);
-        const current = adoptionPath(stored, source, native[source]);
-        if (
-          current?.dest !== origin.bundle ||
-          !assignment(stored, true, source, local, native).canDisable
-        )
-          throw new SkillConflict("The adopted source has an unresolved conflict");
-        adopted = { relative: stored.adopted.relative, fingerprint: treeDigest(origin.bundle) };
-      }
-      stageBundle(origin, path.join(dir, "bundle"));
-      if (adopted && treeDigest(origin.bundle) !== adopted.fingerprint)
-        throw new SkillConflict("The adopted skill changed while it was copied");
-      fs.writeFileSync(
-        path.join(dir, "origin.json"),
-        JSON.stringify({ id, source: origin.source, name: origin.name, adopted }),
-        {
-          flag: "wx",
-          mode: 0o600,
-        }
-      );
-      add(path.join(library, id), !!stored, dir);
-    } else if (!stored) throw new SkillConflict("Import the skill first");
+    if (action === "import" && stored) return;
+    const copiesOrigin = action === "import" || action === "update";
+    if (copiesOrigin && !origin) throw new SkillConflict("The source skill is unavailable");
+    if (action !== "import" && !stored) throw new SkillConflict("Import the skill first");
+    if (copiesOrigin && origin)
+      changes.push(prepareLibraryWrite(library, origin, stored, native, local, staging));
 
     if (stored && action !== "import") {
-      const targets = action === "enable" || action === "disable" ? [client!] : clients;
-      for (const selected of targets) {
-        const state = assignment(stored, true, selected, local, native);
-        if (stored.adopted && stored.source === selected) {
-          if (action === "update") continue;
-          const adoption = adoptionPath(stored, selected, native[selected]);
-          if (!adoption) throw new SkillConflict("The adopted skill directory has changed");
-          const { dest, backup } = adoption;
-          assertDirectoryChain(path.dirname(dest));
-          assertDirectoryChain(path.dirname(backup));
-          const saved = fs.lstatSync(backup, { throwIfNoEntry: false });
-          if (action === "uninstall" && !saved) continue;
-          const expected = stored.adopted.fingerprint;
-          checkTarget(dest);
-          checkTarget(backup);
-          if (action === "disable" && state.canDisable) {
-            fs.mkdirSync(path.dirname(backup), { recursive: true, mode: 0o700 });
-            toChange.push({ dest, backup, expected, exists: true });
-          } else if ((action === "enable" || action === "uninstall") && state.canEnable) {
-            if (!fs.lstatSync(path.dirname(dest), { throwIfNoEntry: false })?.isDirectory())
-              throw new SkillConflict("The original skill directory is unavailable");
-            if (treeDigest(backup) !== expected)
-              throw new SkillConflict("The retained original skill has changed");
-            toChange.push({ dest, staged: backup, fingerprint: expected, exists: false });
-          } else if (action === "enable" && state.canDisable && treeDigest(dest) === expected) {
-            continue;
-          } else throw new SkillConflict(state.reason ?? "The adopted skill has changed");
-          continue;
-        }
-        const dest = path.join(native[selected], stored.name);
-        const owned =
-          fs.lstatSync(dest, { throwIfNoEntry: false })?.isDirectory() && isOwned(dest, id);
-        if (action === "enable" && !owned && !state.canEnable)
-          throw new SkillConflict(state.reason ?? "Cannot sync this client");
-        if (action === "disable" && !state.canDisable)
-          throw new SkillConflict(state.reason ?? "No owned client copy to disable");
-        if (owned) {
-          assertDirectoryChain(dest);
-          verifyOwned(dest, id);
-        }
-        if ((action === "enable" && !owned) || (action === "update" && owned)) {
-          checkTarget(dest);
-          checkTarget(history(native[selected]));
-          const dir = stage(native[selected]);
-          const bundle = path.join(dir, "bundle");
-          stageBundle(action === "update" ? origin! : stored, bundle, id);
-          add(dest, !!owned, bundle, owned ? id : undefined);
-        } else if (owned && (action === "disable" || action === "uninstall")) {
-          checkTarget(dest);
-          checkTarget(history(native[selected]));
-          add(dest, true, undefined, id);
-        }
-      }
-      if (action === "uninstall") add(path.join(library, id), true);
+      changes.push(...prepareClientWrites(action, client, stored, native, local, origin, staging));
+      if (action === "uninstall") changes.push(prepareWrite(path.join(library, id), true));
     }
-    for (const change of toChange) {
-      if (!!fs.lstatSync(change.dest, { throwIfNoEntry: false }) !== change.exists)
-        throw new SkillConflict("Skill files changed. Refresh first");
-      if (change.owner) verifyOwned(change.dest, change.owner);
-      if (change.expected && treeDigest(change.dest) !== change.expected)
-        throw new SkillConflict("The adopted skill has changed outside OmniRoute");
-      if (change.backup && fs.lstatSync(change.backup, { throwIfNoEntry: false }))
-        throw new SkillConflict("The skill backup already exists");
-      if (change.backup) {
-        fs.renameSync(change.dest, change.backup);
-        change.saved = true;
-      }
-      if (change.staged) {
-        fs.renameSync(change.staged, change.dest);
-        change.replaced = true;
-      }
-    }
-    for (const change of toChange) {
-      if (fs.existsSync(change.dest) !== !!change.staged) throw new Error("Skill readback failed");
-      if (change.fingerprint && treeDigest(change.dest) !== change.fingerprint)
-        throw new Error("Skill contents changed during readback");
-      if (change.expected && change.backup && treeDigest(change.backup) !== change.expected)
-        throw new Error("The retained original did not match the expected contents");
-    }
+    applySkillWrites(changes);
+    verifySkillWrites(changes);
   } catch (error) {
-    for (const change of toChange.reverse()) {
-      if (change.replaced && change.staged) fs.renameSync(change.dest, change.staged);
-      if (change.saved && change.backup) fs.renameSync(change.backup, change.dest);
-    }
+    undoSkillWrites(changes);
     throw error;
   } finally {
     for (const temp of staging) fs.rmSync(temp, { recursive: true, force: true });
   }
+}
+
+function prepareClientWrites(
+  action: ClientSkillAction,
+  client: Client | undefined,
+  stored: Managed,
+  native: ReturnType<typeof roots>,
+  local: Skill[],
+  origin: Skill | undefined,
+  staging: string[]
+) {
+  const targets = action === "enable" || action === "disable" ? [client!] : clients;
+  const changes: SkillWrite[] = [];
+  for (const selected of targets) {
+    const state = assignment(stored, true, selected, local, native);
+    const root = native[selected];
+    let change: SkillWrite | undefined;
+    if (stored.adopted && stored.source === selected) {
+      if (action === "update") continue;
+      change = prepareAdoptedWrite(
+        action,
+        adoptionPath(stored, selected, root),
+        stored.adopted.fingerprint,
+        state
+      );
+    } else {
+      change = prepareClientWrite(action, root, stored, state, origin, staging);
+    }
+    if (change) changes.push(change);
+  }
+  return changes;
 }
 
 export function changeClientSkillLibrary(input: z.infer<typeof clientSkillLibraryChange>) {

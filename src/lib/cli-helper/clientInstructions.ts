@@ -215,6 +215,16 @@ export function getClientInstructions(client: Client) {
   return snapshot(client, readState(client));
 }
 
+function validateContent(content: string) {
+  const bytes = Buffer.from(content, "utf8");
+  if (bytes.length > MAX_CLIENT_INSTRUCTIONS_BYTES) {
+    throw new ClientInstructionsError(413, "Instructions file exceeds the size limit.");
+  }
+  if (bytes.toString("utf8") !== content) {
+    throw new ClientInstructionsError(422, "Instructions must contain valid UTF-8 text.");
+  }
+}
+
 export function updateClientInstructions(input: z.infer<typeof clientInstructionsUpdate>) {
   // Synchronous, so one server process cannot interleave its own mutations.
   const writeGuard = ensureCliConfigWriteAllowed(clientFile(input.client));
@@ -227,13 +237,7 @@ export function updateClientInstructions(input: z.infer<typeof clientInstruction
   let content: string | null;
   if (input.action === "save") {
     content = input.content;
-    const bytes = Buffer.from(content, "utf8");
-    if (bytes.length > MAX_CLIENT_INSTRUCTIONS_BYTES) {
-      throw new ClientInstructionsError(413, "Instructions file exceeds the size limit.");
-    }
-    if (bytes.toString("utf8") !== content) {
-      throw new ClientInstructionsError(422, "Instructions must contain valid UTF-8 text.");
-    }
+    validateContent(content);
     if (content === state.content) return snapshot(input.client, state);
   } else {
     if (!state.active?.undo) {

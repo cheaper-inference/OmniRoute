@@ -437,6 +437,32 @@ export function uninstallKimiPlugin(name: string) {
   }
 }
 
+function patchCodexPreference(source: string, name: string, before: boolean, enabled: boolean) {
+  const model = parseToml(source);
+  const entries = record.parse(model.plugins);
+  const target = record.parse(entries[name]);
+  if (target.enabled !== before) throw new Error("The plugin preferences changed. Refresh first");
+  const sections = [...source.matchAll(/^[ \t]*(\[[^\r\n]+\])[ \t]*(?:#.*)?\r?$/gm)];
+  const selected = sections.findIndex((section) =>
+    isDeepStrictEqual(parseToml(section[1]), parseToml(`[plugins.${JSON.stringify(name)}]`))
+  );
+  if (selected < 0) throw new Error("Unsupported Codex plugin table syntax");
+  const start = sections[selected].index;
+  const end = sections[selected + 1]?.index ?? source.length;
+  const content = source.slice(start, end);
+  const edited =
+    source.slice(0, start) +
+    content.replace(/^([ \t]*enabled[ \t]*=[ \t]*)(true|false)\b/m, `$1${enabled}`) +
+    source.slice(end);
+  const expected = { ...model, plugins: { ...entries, [name]: { ...target, enabled } } };
+  const parsed = parseToml(edited);
+  const updated = record.parse(parsed.plugins);
+  updated[name] = record.parse(updated[name]);
+  if (!isDeepStrictEqual({ ...parsed, plugins: updated }, expected))
+    throw new Error("Could not preserve the Codex plugin config");
+  return edited;
+}
+
 function patchPluginPreference(
   client: Exclude<Client, "hermes">,
   source: string,
@@ -445,31 +471,7 @@ function patchPluginPreference(
   enabled: boolean
 ) {
   const changed = () => new Error("The plugin preferences changed. Refresh first");
-  if (client === "codex") {
-    const model = parseToml(source);
-    const entries = record.parse(model.plugins);
-    const target = record.parse(entries[name]);
-    if (target.enabled !== before) throw changed();
-    const sections = [...source.matchAll(/^[ \t]*(\[[^\r\n]+\])[ \t]*(?:#.*)?\r?$/gm)];
-    const selected = sections.findIndex((section) =>
-      isDeepStrictEqual(parseToml(section[1]), parseToml(`[plugins.${JSON.stringify(name)}]`))
-    );
-    if (selected < 0) throw new Error("Unsupported Codex plugin table syntax");
-    const start = sections[selected].index;
-    const end = sections[selected + 1]?.index ?? source.length;
-    const content = source.slice(start, end);
-    const edited =
-      source.slice(0, start) +
-      content.replace(/^([ \t]*enabled[ \t]*=[ \t]*)(true|false)\b/m, `$1${enabled}`) +
-      source.slice(end);
-    const expected = { ...model, plugins: { ...entries, [name]: { ...target, enabled } } };
-    const parsed = parseToml(edited);
-    const updated = record.parse(parsed.plugins);
-    updated[name] = record.parse(updated[name]);
-    if (!isDeepStrictEqual({ ...parsed, plugins: updated }, expected))
-      throw new Error("Could not preserve the Codex plugin config");
-    return edited;
-  }
+  if (client === "codex") return patchCodexPreference(source, name, before, enabled);
   const config = client === "kimi-code" ? record.parse(JSON.parse(source)) : readJsonc(source);
   let field: (string | number)[];
   let expected: Record<string, unknown>;

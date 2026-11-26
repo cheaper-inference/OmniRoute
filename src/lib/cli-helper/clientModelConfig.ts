@@ -107,6 +107,48 @@ export function getModelConfig(client: Client) {
   return load(client).view;
 }
 
+function patchKimiDefaultModel(state: ReturnType<typeof load>, models: string[]) {
+  if (models.length !== 1 || !state.view.options.includes(models[0])) {
+    throw new ModelConfigError("Select a configured Kimi model", 422);
+  }
+  const value = JSON.stringify(models[0]);
+  const line =
+    /^(default_model\s*=\s*)(?:"(?:[^"\\\r\n]|\\.)*"|'[^'\r\n]*')([ \t]*(?:#[^\r\n]*)?)\r?$/m;
+  if (state.data.default_model !== undefined && !line.test(state.source)) {
+    throw new ModelConfigError("Unsupported default model syntax", 422);
+  }
+  const newline = state.source.includes("\r\n") ? "\r\n" : "\n";
+  const result =
+    state.data.default_model !== undefined
+      ? state.source.replace(
+          line,
+          (whole, prefix, suffix) => prefix + value + suffix + (whole.endsWith("\r") ? "\r" : "")
+        )
+      : `default_model = ${value}${newline}${state.source}`;
+  if (!isDeepStrictEqual({ ...parse(result) }, { ...state.data, default_model: models[0] })) {
+    throw new ModelConfigError("Could not preserve the Kimi config", 422);
+  }
+  return result;
+}
+
+function patchCodeBuddyModels(state: ReturnType<typeof load>, nextModels: string[]) {
+  const models = [...new Set(nextModels)];
+  const result = applyEdits(
+    state.source,
+    modify(state.source, ["availableModels"], models, {
+      formattingOptions: {
+        insertSpaces: true,
+        tabSize: 2,
+        eol: state.source.includes("\r\n") ? "\r\n" : "\n",
+      },
+    })
+  );
+  if (!isDeepStrictEqual(JSON.parse(result), { ...state.data, availableModels: models })) {
+    throw new ModelConfigError("Could not preserve the CodeBuddy config", 422);
+  }
+  return result;
+}
+
 export function updateModelConfig(input: z.infer<typeof modelConfigChange>) {
   const state = load(input.client);
   const writeGuard = ensureCliConfigWriteAllowed(state.file);
@@ -117,44 +159,11 @@ export function updateModelConfig(input: z.infer<typeof modelConfigChange>) {
   if (input.action === "restore") {
     if (!state.last) throw new ModelConfigError("No current backup is available", 409);
     result = state.last.before;
-  } else if (input.client === "kimi-code") {
-    if (input.models.length !== 1 || !state.view.options.includes(input.models[0])) {
-      throw new ModelConfigError("Select a configured Kimi model", 422);
-    }
-    const value = JSON.stringify(input.models[0]);
-    const line =
-      /^(default_model\s*=\s*)(?:"(?:[^"\\\r\n]|\\.)*"|'[^'\r\n]*')([ \t]*(?:#[^\r\n]*)?)\r?$/m;
-    if (state.data.default_model !== undefined && !line.test(state.source)) {
-      throw new ModelConfigError("Unsupported default model syntax", 422);
-    }
-    const newline = state.source.includes("\r\n") ? "\r\n" : "\n";
-    result =
-      state.data.default_model !== undefined
-        ? state.source.replace(
-            line,
-            (whole, prefix, suffix) => prefix + value + suffix + (whole.endsWith("\r") ? "\r" : "")
-          )
-        : `default_model = ${value}${newline}${state.source}`;
-    if (
-      !isDeepStrictEqual({ ...parse(result) }, { ...state.data, default_model: input.models[0] })
-    ) {
-      throw new ModelConfigError("Could not preserve the Kimi config", 422);
-    }
   } else {
-    const models = [...new Set(input.models)];
-    result = applyEdits(
-      state.source,
-      modify(state.source, ["availableModels"], models, {
-        formattingOptions: {
-          insertSpaces: true,
-          tabSize: 2,
-          eol: state.source.includes("\r\n") ? "\r\n" : "\n",
-        },
-      })
-    );
-    if (!isDeepStrictEqual(JSON.parse(result), { ...state.data, availableModels: models })) {
-      throw new ModelConfigError("Could not preserve the CodeBuddy config", 422);
-    }
+    result =
+      input.client === "kimi-code"
+        ? patchKimiDefaultModel(state, input.models)
+        : patchCodeBuddyModels(state, input.models);
   }
   if (result === state.source) return state.view;
   if (input.action === "save") {

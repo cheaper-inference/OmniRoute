@@ -9,6 +9,7 @@ import {
   clientMcpClient,
   clientMcpName,
   clientMcpPortableServer,
+  nativeMcpDefinition,
   readClientMcpEntries,
   readOptional,
   setClientMcpMembership,
@@ -40,6 +41,8 @@ type Indexed = z.infer<typeof indexed>;
 type Native = ReturnType<typeof readClientMcpEntries>["entries"][number];
 type Settings = z.infer<typeof clientMcpPortableServer>;
 type Result = { id: string; ok: boolean; error?: string };
+type LibraryRow = { sourceClient: Client; name: string; record?: Indexed };
+type LibraryRequest = z.infer<typeof clientMcpLibraryRequest>;
 
 function digest(value: unknown): string {
   return createHash("sha256").update(JSON.stringify(value)).digest("hex");
@@ -85,25 +88,7 @@ function portable(entry: Native | undefined): Settings | undefined {
   return result.success ? result.data : undefined;
 }
 
-function installedFingerprint(client: Client, server: Settings): string {
-  const definition =
-    server.transport === "stdio"
-      ? { command: server.command, args: server.args ?? [] }
-      : { url: server.url };
-  return fingerprint(
-    client === "codebuddy" ? { ...definition, type: server.transport } : definition
-  );
-}
-
-function readLibrary() {
-  const file = path.resolve(resolveDataDir(), "client-mcp-library.json");
-  const original = readOptional(file);
-  let index: Indexed[];
-  try {
-    index = original === null ? [] : indexSchema.parse(JSON.parse(original));
-  } catch {
-    throw new ClientMcpError("Malformed local MCP library index", 422);
-  }
+function readNativeClients() {
   const errors: Partial<Record<Client, string>> = {};
   const native = new Map<Client, ReturnType<typeof readClientMcpEntries>>();
   const entries = new Map<Client, Map<string, Native>>();
@@ -118,7 +103,11 @@ function readLibrary() {
     }
   }
   const entry = (client: Client, name: string) => entries.get(client)?.get(name);
-  const rows = new Map<string, { sourceClient: Client; name: string; record?: Indexed }>();
+  return { native, entry, errors };
+}
+
+function indexRows(index: Indexed[]) {
+  const rows = new Map<string, LibraryRow>();
   const owned = new Map<string, string>();
   for (const record of index) {
     const key = identity(record.sourceClient, record.name);
@@ -132,6 +121,20 @@ function readLibrary() {
       owned.set(ownedKey, key);
     }
   }
+  return { rows, owned };
+}
+
+function readLibrary() {
+  const file = path.resolve(resolveDataDir(), "client-mcp-library.json");
+  const original = readOptional(file);
+  let index: Indexed[];
+  try {
+    index = original === null ? [] : indexSchema.parse(JSON.parse(original));
+  } catch {
+    throw new ClientMcpError("Malformed local MCP library index", 422);
+  }
+  const { native, entry, errors } = readNativeClients();
+  const { rows, owned } = indexRows(index);
   for (const [client, state] of native) {
     for (const discovered of state.entries) {
       if (!clientMcpName.safeParse(discovered.name).success) continue;
@@ -143,33 +146,48 @@ function readLibrary() {
   return { file, original, index, rows, native, entry, owned, errors };
 }
 
-function describe(library: ReturnType<typeof readLibrary>) {
-  const items = [...library.rows.entries()].map(([id, { name, sourceClient, record }]) => {
+type Library = ReturnType<typeof readLibrary>;
+
+function describeMembership(
+  library: Library,
+  client: Client,
+  id: string,
+  row: LibraryRow,
+  settings: Settings | undefined
+) {
+  const { name, record } = row;
+  const existing = library.entry(client, name);
+  if (!record) {
+    return { enabled: Boolean(existing?.enabled), canEnable: false, canDisable: false };
+  }
+  if (existing && record.links[client] === fingerprint(existing.definition)) {
+    const enableSupported = client !== "codebuddy" || existing.definition.enabled !== false;
+    return {
+      enabled: existing.enabled,
+      canEnable: !existing.enabled && enableSupported,
+      canDisable: existing.enabled,
+    };
+  }
+  const owner = library.owned.get(identity(client, name));
+  return {
+    enabled: false,
+    canEnable: Boolean(!existing && settings && (!owner || owner === id)),
+    canDisable: false,
+  };
+}
+
+function describe(library: Library) {
+  const items = [...library.rows.entries()].map(([id, row]) => {
+    const { name, sourceClient, record } = row;
     const source = library.entry(sourceClient, name);
     const settings =
       record && source && record.links[sourceClient] === fingerprint(source.definition)
         ? portable(source)
         : undefined;
-    const membership: Partial<
-      Record<Client, { enabled: boolean; canEnable: boolean; canDisable: boolean }>
-    > = {};
+    const membership: Partial<Record<Client, ReturnType<typeof describeMembership>>> = {};
     for (const client of clients) {
       if (!library.native.has(client) || (!record && client !== sourceClient)) continue;
-      const existing = library.entry(client, name);
-      const linked =
-        record && existing && record.links[client] === fingerprint(existing.definition);
-      const owner = library.owned.get(identity(client, name));
-      const enableSupported = client !== "codebuddy" || existing?.definition.enabled !== false;
-      membership[client] = {
-        enabled: Boolean((linked || (!record && client === sourceClient)) && existing?.enabled),
-        canEnable: Boolean(
-          record &&
-          (linked
-            ? !existing.enabled && enableSupported
-            : !existing && settings && (!owner || owner === id))
-        ),
-        canDisable: Boolean(linked && existing.enabled),
-      };
+      membership[client] = describeMembership(library, client, id, row, settings);
     }
     return { id, name, sourceClient, managed: Boolean(record), clients: membership };
   });
@@ -180,67 +198,70 @@ export function getClientMcpLibrary() {
   return describe(readLibrary());
 }
 
-export function changeClientMcpLibrary(input: z.infer<typeof clientMcpLibraryRequest>) {
-  const library = readLibrary();
-  const view = new Map(describe(library).items.map((item) => [item.id, item]));
-  const proposed = new Map(
-    library.index.map((record) => [identity(record.sourceClient, record.name), record])
-  );
-  const operations: Parameters<typeof setClientMcpMembership>[2] = [];
-  const results: Result[] = [];
-  for (const id of input.ids) {
-    const row = library.rows.get(id);
-    const reject = (error: string) => results.push({ id, ok: false, error });
-    if (!row) {
-      reject("MCP server was not found");
-      continue;
-    }
-    const { sourceClient, name, record } = row;
-    if (input.action === "import" || input.action === "update") {
-      const client = input.action === "update" ? (input.client ?? sourceClient) : sourceClient;
-      const source = library.entry(client, name);
-      if (!source || (input.action === "update" && !record?.links[client])) {
-        reject("Native MCP definition is unavailable");
-        continue;
-      }
-      if (!record || input.action === "update") {
-        proposed.set(id, {
-          sourceClient,
-          name,
-          links: { ...record?.links, [client]: fingerprint(source.definition) },
-        });
-      }
-    } else if (input.action === "uninstall") {
-      if (!proposed.delete(id)) {
-        reject("MCP server has not been imported");
-        continue;
-      }
-    } else {
-      const client = input.client;
-      const cell = view.get(id)?.clients[client];
-      const enabled = input.action === "enable";
-      if (
-        !record ||
-        (enabled ? !cell?.canEnable : !cell?.canDisable) ||
-        operations.some((operation) => operation.name === name)
-      ) {
-        reject("MCP membership is unavailable or conflicts with another selection");
-        continue;
-      }
-      const install = library.entry(client, name)
-        ? undefined
-        : portable(library.entry(sourceClient, name));
-      operations.push({ name, enabled, install });
-      if (install)
-        proposed.set(id, {
-          ...record,
-          links: { ...record.links, [client]: installedFingerprint(client, install) },
-        });
-    }
-    results.push({ id, ok: true });
-  }
+type LibraryChanges = {
+  library: Library;
+  view: Map<string, ReturnType<typeof describe>["items"][number]>;
+  proposed: Map<string, Indexed>;
+  operations: Parameters<typeof setClientMcpMembership>[2];
+};
 
-  const destination = operations.length ? library.native.get(input.client) : undefined;
+function planMembership(
+  { library, view, proposed, operations }: LibraryChanges,
+  id: string,
+  { sourceClient, name, record }: LibraryRow,
+  client: Client | undefined,
+  enabled: boolean
+) {
+  const cell = client && view.get(id)?.clients[client];
+  if (
+    !client ||
+    !record ||
+    (enabled ? !cell?.canEnable : !cell?.canDisable) ||
+    operations.some((operation) => operation.name === name)
+  ) {
+    return "MCP membership is unavailable or conflicts with another selection";
+  }
+  const install = library.entry(client, name)
+    ? undefined
+    : portable(library.entry(sourceClient, name));
+  operations.push({ name, enabled, install });
+  if (install) {
+    proposed.set(id, {
+      ...record,
+      links: { ...record.links, [client]: fingerprint(nativeMcpDefinition(client, install)) },
+    });
+  }
+}
+
+function planSelection(changes: LibraryChanges, input: LibraryRequest, id: string) {
+  const { library, proposed } = changes;
+  const row = library.rows.get(id);
+  if (!row) return "MCP server was not found";
+  if (input.action === "uninstall") {
+    if (!proposed.delete(id)) return "MCP server has not been imported";
+    return;
+  }
+  if (input.action !== "import" && input.action !== "update")
+    return planMembership(changes, id, row, input.client, input.action === "enable");
+  const { sourceClient, name, record } = row;
+  const update = input.action === "update";
+  const client = update ? (input.client ?? sourceClient) : sourceClient;
+  const source = library.entry(client, name);
+  if (!source || (update && !record?.links[client])) return "Native MCP definition is unavailable";
+  if (!record || update) {
+    proposed.set(id, {
+      sourceClient,
+      name,
+      links: { ...record?.links, [client]: fingerprint(source.definition) },
+    });
+  }
+}
+
+function saveLibraryChanges(
+  { library, proposed, operations }: LibraryChanges,
+  client: Client | undefined
+) {
+  const destination = operations.length && client ? library.native.get(client) : undefined;
   const writeGuard = destination && ensureCliConfigWriteAllowed(destination.file);
   if (writeGuard) throw new ClientMcpError(writeGuard, 403);
   const checked = indexSchema.safeParse([...proposed.values()]);
@@ -248,22 +269,41 @@ export function changeClientMcpLibrary(input: z.infer<typeof clientMcpLibraryReq
     throw new ClientMcpError("Local MCP library index exceeds the supported size", 422);
   const next = JSON.stringify(checked.data);
   const before = JSON.stringify(library.index);
+  const indexChanged = next !== before;
   if (readOptional(library.file) !== library.original) {
     throw new ClientMcpError("MCP library changed; refresh it first", 409);
   }
   try {
     // Save the ownership record before native installation so a successful write remains attributable.
-    if (next !== before) writePrivateConfigFile(library.file, next);
-    if (operations.length) {
-      setClientMcpMembership(input.client, library.native.get(input.client).revision, operations);
-    }
+    if (indexChanged) writePrivateConfigFile(library.file, next);
+    if (!operations.length) return;
+    if (!client || !destination) throw new Error("Native MCP destination is unavailable");
+    setClientMcpMembership(client, destination.revision, operations);
   } catch (error) {
-    if (next !== before && readOptional(library.file) === next)
+    if (indexChanged && readOptional(library.file) === next)
       writePrivateConfigFile(library.file, before);
-    const message =
-      error instanceof ClientMcpError ? error.message : "Could not update the MCP library";
+    return error instanceof ClientMcpError ? error.message : "Could not update the MCP library";
+  }
+}
+
+export function changeClientMcpLibrary(input: LibraryRequest) {
+  const library = readLibrary();
+  const changes: LibraryChanges = {
+    library,
+    view: new Map(describe(library).items.map((item) => [item.id, item])),
+    proposed: new Map(
+      library.index.map((record) => [identity(record.sourceClient, record.name), record])
+    ),
+    operations: [],
+  };
+  const results = input.ids.map((id): Result => {
+    const error = planSelection(changes, input, id);
+    return error === undefined ? { id, ok: true } : { id, ok: false, error };
+  });
+  const writeError = saveLibraryChanges(changes, input.client);
+  if (writeError !== undefined) {
     for (const result of results) {
-      if (result.ok) Object.assign(result, { ok: false, error: message });
+      if (result.ok) Object.assign(result, { ok: false, error: writeError });
     }
   }
   return { results, ...getClientMcpLibrary() };

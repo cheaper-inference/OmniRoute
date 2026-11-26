@@ -145,6 +145,55 @@ export async function getClientPluginLibrary() {
   return { items, errors };
 }
 
+type PluginAction = z.infer<typeof clientPluginLibraryRequest>["action"];
+
+function importPlugin(managed: Map<string, NativePlugin>, id: string, plugin: NativePlugin) {
+  if (managed.has(id)) return false;
+  if (managed.size >= maxEntries) throw new Error("Plugin library is full");
+  managed.set(id, { client: plugin.client, name: plugin.name });
+  return true;
+}
+
+async function changePluginLifecycle(
+  action: "update" | "uninstall",
+  plugin: NativePlugin & { state: NativeState },
+  managed: boolean
+) {
+  if (action === "uninstall" && plugin.client === "kimi-code") {
+    if (!managed) return "Adopt the plugin before removing its Kimi Code installation record.";
+    uninstallKimiPlugin(plugin.name);
+    return;
+  }
+  if (action === "uninstall" && plugin.client === "codex" && managed && plugin.state.canUninstall) {
+    await uninstallCodexPlugin(plugin.name);
+    return;
+  }
+  if (action === "update" && plugin.client === "hermes" && managed && plugin.state.canUpdate) {
+    await updateHermesPlugin(plugin.name);
+    return;
+  }
+  return unsupportedLifecycle[plugin.client];
+}
+
+async function changeNativePlugin(
+  action: Exclude<PluginAction, "import">,
+  plugin: NativePlugin & { state: NativeState },
+  managed: boolean
+) {
+  const lifecycle = action === "update" || action === "uninstall";
+  const target = getClientPluginWriteTarget(plugin.client, lifecycle ? action : undefined);
+  const writeGuard = ensureCliConfigWriteAllowed(target);
+  if (writeGuard) return writeGuard;
+  if (lifecycle) return changePluginLifecycle(action, plugin, managed);
+
+  const state = await setClientPluginEnabled({
+    client: plugin.client,
+    name: plugin.name,
+    enabled: action === "enable",
+  });
+  if (!state) return "The native client does not support changing this plugin.";
+}
+
 export async function changeClientPluginLibrary(input: z.infer<typeof clientPluginLibraryRequest>) {
   const { action, ids, client } = clientPluginLibraryRequest.parse(input);
   const { native } = await discover();
@@ -160,65 +209,14 @@ export async function changeClientPluginLibrary(input: z.infer<typeof clientPlug
       continue;
     }
     try {
-      if (action !== "import") {
-        const target = getClientPluginWriteTarget(
-          plugin.client,
-          action === "update" || action === "uninstall" ? action : undefined
-        );
-        const writeGuard = ensureCliConfigWriteAllowed(target);
-        if (writeGuard) {
-          results.push({ id, ok: false, error: writeGuard });
-          continue;
-        }
-      }
       if (action === "import") {
-        if (!managed.has(id)) {
-          if (managed.size >= maxEntries) throw new Error("Plugin library is full");
-          managed.set(id, { client: plugin.client, name: plugin.name });
-          changedIndex = true;
-        }
-      } else if (action === "enable" || action === "disable") {
-        const state = await setClientPluginEnabled({
-          client: plugin.client,
-          name: plugin.name,
-          enabled: action === "enable",
-        });
-        if (!state) {
-          results.push({
-            id,
-            ok: false,
-            error: "The native client does not support changing this plugin.",
-          });
-          continue;
-        }
-      } else if (action === "uninstall" && plugin.client === "kimi-code" && managed.has(id)) {
-        uninstallKimiPlugin(plugin.name);
-      } else if (
-        action === "uninstall" &&
-        plugin.client === "codex" &&
-        managed.has(id) &&
-        plugin.state.canUninstall
-      ) {
-        await uninstallCodexPlugin(plugin.name);
-      } else if (
-        action === "update" &&
-        plugin.client === "hermes" &&
-        managed.has(id) &&
-        plugin.state.canUpdate
-      ) {
-        await updateHermesPlugin(plugin.name);
-      } else {
-        results.push({
-          id,
-          ok: false,
-          error:
-            action === "uninstall" && plugin.client === "kimi-code"
-              ? "Adopt the plugin before removing its Kimi Code installation record."
-              : unsupportedLifecycle[plugin.client],
-        });
+        const added = importPlugin(managed, id, plugin);
+        changedIndex ||= added;
+        results.push({ id, ok: true });
         continue;
       }
-      results.push({ id, ok: true });
+      const error = await changeNativePlugin(action, plugin, managed.has(id));
+      results.push(error ? { id, ok: false, error } : { id, ok: true });
     } catch {
       results.push({ id, ok: false, error: "Could not verify the native plugin change." });
     }

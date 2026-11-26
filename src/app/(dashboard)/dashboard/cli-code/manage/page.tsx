@@ -127,6 +127,53 @@ function Status({
   ) : null;
 }
 
+function ImportedPromptSelect({
+  variants,
+  busy,
+  t,
+  onSelect,
+}: {
+  variants: Instructions["variants"];
+  busy: boolean;
+  t: Text;
+  onSelect: (content: string) => void;
+}) {
+  return (
+    <label className="block space-y-2">
+      <span>{t("importedPrompt")}</span>
+      <select
+        className={field}
+        value=""
+        disabled={busy}
+        onChange={(event) => {
+          const variant = variants.find(({ id }) => id === event.target.value);
+          if (variant) onSelect(variant.content);
+        }}
+      >
+        <option value="">{t("chooseImportedPrompt")}</option>
+        {variants.map(({ id, name }) => (
+          <option key={id} value={id}>
+            {name}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
+function InstructionPreview({ before, after, t }: { before: string; after?: string; t: Text }) {
+  return (
+    <div className="grid gap-3 md:grid-cols-2">
+      {Object.entries({ before, after }).map(([label, value]) => (
+        <div key={label}>
+          <strong>{t(label as "before" | "after")}</strong>
+          <pre className={field + " max-h-72 overflow-auto whitespace-pre-wrap"}>{value}</pre>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function InstructionEditor({ client, t }: { client: Client; t: Text }) {
   const state = useResource<Instructions>("client-instructions", client, t);
   const [draft, setDraft] = useState<string>();
@@ -153,28 +200,15 @@ function InstructionEditor({ client, t }: { client: Client; t: Text }) {
       {entry && (
         <>
           {entry.variants.length > 0 && (
-            <label className="block space-y-2">
-              <span>{t("importedPrompt")}</span>
-              <select
-                className={field}
-                value=""
-                disabled={state.busy}
-                onChange={(event) => {
-                  const variant = entry.variants.find(({ id }) => id === event.target.value);
-                  if (variant) {
-                    setDraft(variant.content);
-                    setPreview(true);
-                  }
-                }}
-              >
-                <option value="">{t("chooseImportedPrompt")}</option>
-                {entry.variants.map(({ id, name }) => (
-                  <option key={id} value={id}>
-                    {name}
-                  </option>
-                ))}
-              </select>
-            </label>
+            <ImportedPromptSelect
+              variants={entry.variants}
+              busy={state.busy}
+              t={t}
+              onSelect={(content) => {
+                setDraft(content);
+                setPreview(true);
+              }}
+            />
           )}
           <label className="block space-y-2">
             <strong>{entry.file}</strong>
@@ -189,21 +223,7 @@ function InstructionEditor({ client, t }: { client: Client; t: Text }) {
               readOnly={state.busy}
             />
           </label>
-          {preview && (
-            <div className="grid gap-3 md:grid-cols-2">
-              {[
-                ["before", entry.content],
-                ["after", draft],
-              ].map(([label, value]) => (
-                <div key={label}>
-                  <strong>{t(label as "before" | "after")}</strong>
-                  <pre className={field + " max-h-72 overflow-auto whitespace-pre-wrap"}>
-                    {value}
-                  </pre>
-                </div>
-              ))}
-            </div>
-          )}
+          {preview && <InstructionPreview before={entry.content} after={draft} t={t} />}
           <div className="flex flex-wrap gap-2">
             <Button variant="secondary" disabled={!edited} onClick={() => setPreview(!preview)}>
               {t("preview")}
@@ -227,21 +247,187 @@ function InstructionEditor({ client, t }: { client: Client; t: Text }) {
   );
 }
 
+type McpServer = Mcp["servers"][number];
+type McpChange = ReturnType<typeof useResource<Mcp>>["change"];
+type McpDraft = {
+  editing: string;
+  name: string;
+  transport: "stdio" | "http";
+  address: string;
+  args: string;
+};
+
+function McpServerList({
+  entry,
+  busy,
+  change,
+  onSelect,
+  t,
+}: {
+  entry: Mcp;
+  busy: boolean;
+  change: McpChange;
+  onSelect: (server: McpServer) => void;
+  t: Text;
+}) {
+  return (
+    <ul className="divide-y divide-border">
+      {entry.servers.map((server) => (
+        <li key={server.name} className="flex flex-wrap items-center justify-between gap-2 py-2">
+          <span>
+            {server.name} · {server.transport}
+          </span>
+          <span className="flex flex-wrap gap-2">
+            {server.transport !== "unknown" && (
+              <Button
+                variant="secondary"
+                size="sm"
+                disabled={busy}
+                onClick={() => onSelect(server)}
+              >
+                {t("edit")}
+              </Button>
+            )}
+            {entry.canToggle && (
+              <Button
+                variant="secondary"
+                size="sm"
+                disabled={busy}
+                onClick={() =>
+                  void change({
+                    action: "toggle",
+                    revision: entry.revision,
+                    name: server.name,
+                    enabled: !server.enabled,
+                  })
+                }
+              >
+                {t(server.enabled ? "disable" : "enable")}
+              </Button>
+            )}
+            <Button
+              variant="secondary"
+              size="sm"
+              disabled={busy}
+              onClick={() => {
+                if (window.confirm(t("removeConfirm", { name: server.name }))) {
+                  void change({ action: "remove", revision: entry.revision, name: server.name });
+                }
+              }}
+            >
+              {t("remove")}
+            </Button>
+          </span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function McpConnectionForm({
+  draft,
+  busy,
+  t,
+  onChange,
+  onSave,
+  onCancel,
+}: {
+  draft: McpDraft;
+  busy: boolean;
+  t: Text;
+  onChange: (draft: McpDraft) => void;
+  onSave: () => Promise<void>;
+  onCancel: () => void;
+}) {
+  const { editing, name, transport, address, args } = draft;
+  return (
+    <form
+      className="grid gap-2 rounded-md border border-border p-3"
+      onSubmit={(event) => {
+        event.preventDefault();
+        void onSave();
+      }}
+    >
+      {editing && <p className="text-sm text-text-muted">{t("editConnection")}</p>}
+      <label>
+        {t("name")}
+        <input
+          className={field}
+          value={name}
+          readOnly={Boolean(editing)}
+          onChange={(event) => onChange({ ...draft, name: event.target.value })}
+          required
+        />
+      </label>
+      <label>
+        {t("transport")}
+        <select
+          className={field}
+          value={transport}
+          onChange={(event) =>
+            onChange({ ...draft, transport: event.target.value === "http" ? "http" : "stdio" })
+          }
+        >
+          <option value="stdio">stdio</option>
+          <option value="http">HTTP</option>
+        </select>
+      </label>
+      <label>
+        {t(transport === "http" ? "url" : "command")}
+        <input
+          className={field}
+          value={address}
+          onChange={(event) => onChange({ ...draft, address: event.target.value })}
+          required
+        />
+      </label>
+      {transport === "stdio" && (
+        <label>
+          {t("arguments")}
+          <textarea
+            className={field}
+            value={args}
+            onChange={(event) => onChange({ ...draft, args: event.target.value })}
+          />
+        </label>
+      )}
+      <div className="flex gap-2">
+        <Button type="submit" disabled={busy}>
+          {t("save")}
+        </Button>
+        <Button type="button" variant="secondary" onClick={onCancel}>
+          {t("cancel")}
+        </Button>
+      </div>
+    </form>
+  );
+}
+
 function McpManager({ client, t }: { client: Client; t: Text }) {
   const state = useResource<Mcp>("client-mcp", client, t);
-  const [editing, setEditing] = useState<string>();
-  const [name, setName] = useState("");
-  const [transport, setTransport] = useState<"stdio" | "http">("stdio");
-  const [address, setAddress] = useState("");
-  const [args, setArgs] = useState("");
+  const [draft, setDraft] = useState<McpDraft>();
   const entry = state.data;
 
-  function select(server?: Mcp["servers"][number]) {
-    setEditing(server?.name ?? "");
-    setName(server?.name ?? "");
-    setTransport(server?.transport === "http" ? "http" : "stdio");
-    setAddress("");
-    setArgs("");
+  function select(server?: McpServer) {
+    const name = server?.name ?? "";
+    const transport = server?.transport === "http" ? "http" : "stdio";
+    setDraft({ editing: name, name, transport, address: "", args: "" });
+  }
+
+  async function save() {
+    if (!entry || !draft) return;
+    const { editing, name, transport, address, args } = draft;
+    const server =
+      transport === "http"
+        ? { transport, url: address.trim() }
+        : { transport, command: address.trim(), args: args ? args.split(/\r?\n/) : [] };
+    const result = await state.change({
+      action: editing ? "update" : "add",
+      revision: entry.revision,
+      name: name.trim(),
+      server,
+    });
+    if (result) setDraft(undefined);
   }
 
   return (
@@ -251,63 +437,13 @@ function McpManager({ client, t }: { client: Client; t: Text }) {
         <>
           <p className="text-sm text-text-muted">{entry.file}</p>
           {entry.servers.length === 0 && <p>{t("empty")}</p>}
-          <ul className="divide-y divide-border">
-            {entry.servers.map((server) => (
-              <li
-                key={server.name}
-                className="flex flex-wrap items-center justify-between gap-2 py-2"
-              >
-                <span>
-                  {server.name} · {server.transport}
-                </span>
-                <span className="flex flex-wrap gap-2">
-                  {server.transport !== "unknown" && (
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      disabled={state.busy}
-                      onClick={() => select(server)}
-                    >
-                      {t("edit")}
-                    </Button>
-                  )}
-                  {entry.canToggle && (
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      disabled={state.busy}
-                      onClick={() =>
-                        void state.change({
-                          action: "toggle",
-                          revision: entry.revision,
-                          name: server.name,
-                          enabled: !server.enabled,
-                        })
-                      }
-                    >
-                      {t(server.enabled ? "disable" : "enable")}
-                    </Button>
-                  )}
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    disabled={state.busy}
-                    onClick={() => {
-                      if (window.confirm(t("removeConfirm", { name: server.name }))) {
-                        void state.change({
-                          action: "remove",
-                          revision: entry.revision,
-                          name: server.name,
-                        });
-                      }
-                    }}
-                  >
-                    {t("remove")}
-                  </Button>
-                </span>
-              </li>
-            ))}
-          </ul>
+          <McpServerList
+            entry={entry}
+            busy={state.busy}
+            change={state.change}
+            onSelect={select}
+            t={t}
+          />
           <div className="flex flex-wrap gap-2">
             <Button disabled={state.busy} onClick={() => select()}>
               {t("addServer")}
@@ -324,80 +460,15 @@ function McpManager({ client, t }: { client: Client; t: Text }) {
               {t("restore")}
             </Button>
           </div>
-          {editing !== undefined && (
-            <form
-              className="grid gap-2 rounded-md border border-border p-3"
-              onSubmit={async (event) => {
-                event.preventDefault();
-                const server =
-                  transport === "http"
-                    ? { transport, url: address.trim() }
-                    : {
-                        transport,
-                        command: address.trim(),
-                        args: args ? args.split(/\r?\n/) : [],
-                      };
-                const result = await state.change({
-                  action: editing ? "update" : "add",
-                  revision: entry.revision,
-                  name: name.trim(),
-                  server,
-                });
-                if (result) setEditing(undefined);
-              }}
-            >
-              {editing && <p className="text-sm text-text-muted">{t("editConnection")}</p>}
-              <label>
-                {t("name")}
-                <input
-                  className={field}
-                  value={name}
-                  readOnly={Boolean(editing)}
-                  onChange={(event) => setName(event.target.value)}
-                  required
-                />
-              </label>
-              <label>
-                {t("transport")}
-                <select
-                  className={field}
-                  value={transport}
-                  onChange={(event) =>
-                    setTransport(event.target.value === "http" ? "http" : "stdio")
-                  }
-                >
-                  <option value="stdio">stdio</option>
-                  <option value="http">HTTP</option>
-                </select>
-              </label>
-              <label>
-                {t(transport === "http" ? "url" : "command")}
-                <input
-                  className={field}
-                  value={address}
-                  onChange={(event) => setAddress(event.target.value)}
-                  required
-                />
-              </label>
-              {transport === "stdio" && (
-                <label>
-                  {t("arguments")}
-                  <textarea
-                    className={field}
-                    value={args}
-                    onChange={(event) => setArgs(event.target.value)}
-                  />
-                </label>
-              )}
-              <div className="flex gap-2">
-                <Button type="submit" disabled={state.busy}>
-                  {t("save")}
-                </Button>
-                <Button type="button" variant="secondary" onClick={() => setEditing(undefined)}>
-                  {t("cancel")}
-                </Button>
-              </div>
-            </form>
+          {draft && (
+            <McpConnectionForm
+              draft={draft}
+              busy={state.busy}
+              t={t}
+              onChange={setDraft}
+              onSave={save}
+              onCancel={() => setDraft(undefined)}
+            />
           )}
         </>
       )}

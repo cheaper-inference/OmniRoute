@@ -2,10 +2,6 @@ import { createHash, createHmac, randomBytes } from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import {
-  ensureCliConfigWriteAllowed,
-  getCodexClientConfigHome,
-} from "@/shared/services/cliRuntime";
 import { isDeepStrictEqual } from "node:util";
 import {
   applyEdits,
@@ -18,6 +14,11 @@ import {
 import { parse, stringify } from "smol-toml";
 import { parseDocument } from "yaml";
 import { z } from "zod";
+
+import {
+  ensureCliConfigWriteAllowed,
+  getCodexClientConfigHome,
+} from "@/shared/services/cliRuntime";
 
 import { getHermesConfigPath } from "./config-generator/hermesHome";
 import { readPrivateConfigFile, writePrivateConfigFile } from "./privateConfigFile";
@@ -397,132 +398,176 @@ function editTomlEnabled(source: string, key: string, enabled: boolean): string 
 type PortableServer = z.infer<typeof clientMcpPortableServer>;
 type MembershipChange = { name: string; enabled: boolean; install?: PortableServer };
 
-/** Project one selection into one native file and produce one rollback point. */
-export function setClientMcpMembership(
-  client: Client,
-  revision: string,
-  operations: MembershipChange[]
-) {
+export function nativeMcpDefinition(client: Client, server: PortableServer): Mapping {
+  const definition =
+    server.transport === "stdio"
+      ? { command: server.command, args: server.args ?? [] }
+      : { url: server.url };
+  return client === "codebuddy" ? { ...definition, type: server.transport } : definition;
+}
+
+function readWritableState(client: Client, revision: string) {
   const state = readState(client);
   const writeGuard = ensureCliConfigWriteAllowed(state.file);
   if (writeGuard) throw new ClientMcpError(writeGuard, 403);
   if (state.view.revision !== revision) {
     throw new ClientMcpError("MCP config changed; refresh it first", 409);
   }
-  let edited = state.source ?? "";
-  const expected = { ...state.document };
-  const entries = { ...state.entries };
-  const disabled = state.document.disabledMcpServers;
-  if (
-    client === "codebuddy" &&
-    disabled !== undefined &&
-    (!Array.isArray(disabled) || !disabled.every((item) => typeof item === "string"))
-  )
+  return state;
+}
+
+function codebuddyDisabledNames(disabled: unknown): string[] {
+  if (disabled === undefined) return [];
+  if (!Array.isArray(disabled) || !disabled.every((item) => typeof item === "string"))
     invalidConfig();
-  const disabledNames = Array.isArray(disabled) ? [...disabled] : [];
+  return [...disabled];
+}
+
+function changeCodebuddyMarkers(
+  names: string[],
+  changes: Change[],
+  key: string,
+  operation: MembershipChange,
+  current: Mapping | undefined
+) {
+  if (!operation.enabled) {
+    if (!names.includes(key)) {
+      changes.push({ path: ["disabledMcpServers", names.length], value: key });
+      names.push(key);
+    }
+    return;
+  }
+  if (current?.enabled === false) {
+    throw new ClientMcpError("CodeBuddy MCP server uses an unsupported disabled setting", 422);
+  }
+  for (let index = names.length - 1; index >= 0; index -= 1) {
+    if (names[index] !== key) continue;
+    names.splice(index, 1);
+    changes.push({ path: ["disabledMcpServers", index], value: undefined });
+  }
+}
+
+function membershipDefinition(
+  client: Client,
+  operation: MembershipChange,
+  current: Mapping | undefined
+) {
+  if (operation.install) {
+    if (current) throw new ClientMcpError("MCP server name is already occupied", 409);
+    return nativeMcpDefinition(client, operation.install);
+  }
+  if (!current) throw new ClientMcpError("Native MCP server is missing", 409);
+  if (client !== "codebuddy" && (current.enabled !== false) !== operation.enabled)
+    return { ...current, enabled: operation.enabled };
+}
+
+function projectMembership(state: ReturnType<typeof readState>, operations: MembershipChange[]) {
+  const { client } = state.view;
+  let edited = state.source ?? "";
+  const entries = { ...state.entries };
+  const disabledNames =
+    client === "codebuddy" ? codebuddyDisabledNames(state.document.disabledMcpServers) : [];
   const jsonChanges: Change[] = [];
   const markerChanges: Change[] = [];
   for (const operation of operations) {
     const key = clientMcpName.parse(operation.name);
     const current = Object.hasOwn(entries, key) ? mapping(entries[key]) : undefined;
-    const entryPath = [state.section, key];
-    if (operation.install) {
-      if (current) throw new ClientMcpError("MCP server name is already occupied", 409);
-      const definition =
-        operation.install.transport === "stdio"
-          ? { command: operation.install.command, args: operation.install.args ?? [] }
-          : { url: operation.install.url };
-      const entry =
-        client === "codebuddy" ? { ...definition, type: operation.install.transport } : definition;
-      entries[key] = entry;
-      if (client === "codex") edited = editToml(edited, key, undefined, entry);
-      else jsonChanges.push({ path: entryPath, value: entry });
-    } else if (!current) {
-      throw new ClientMcpError("Native MCP server is missing", 409);
-    } else if (client !== "codebuddy" && (current.enabled !== false) !== operation.enabled) {
-      entries[key] = { ...current, enabled: operation.enabled };
-      if (client === "codex") edited = editTomlEnabled(edited, key, operation.enabled);
-      else jsonChanges.push({ path: [...entryPath, "enabled"], value: operation.enabled });
+    const next = membershipDefinition(client, operation, current);
+    if (client === "codebuddy")
+      changeCodebuddyMarkers(disabledNames, markerChanges, key, operation, current);
+    if (!next) continue;
+
+    entries[key] = next;
+    if (client === "codex") {
+      edited = current
+        ? editTomlEnabled(edited, key, operation.enabled)
+        : editToml(edited, key, undefined, next);
+      continue;
     }
-    if (client === "codebuddy") {
-      if (operation.enabled && current?.enabled === false) {
-        throw new ClientMcpError("CodeBuddy MCP server uses an unsupported disabled setting", 422);
-      }
-      if (operation.enabled) {
-        for (let index = disabledNames.length - 1; index >= 0; index -= 1) {
-          if (disabledNames[index] !== key) continue;
-          disabledNames.splice(index, 1);
-          markerChanges.push({ path: ["disabledMcpServers", index], value: undefined });
-        }
-      } else if (!disabledNames.includes(key)) {
-        markerChanges.push({ path: ["disabledMcpServers", disabledNames.length], value: key });
-        disabledNames.push(key);
-      }
-    }
+    const path = [state.section, key];
+    jsonChanges.push(
+      current ? { path: [...path, "enabled"], value: operation.enabled } : { path, value: next }
+    );
   }
+  return { edited, entries, disabledNames, jsonChanges, markerChanges };
+}
+
+/** Project one selection into one native file and produce one rollback point. */
+export function setClientMcpMembership(
+  client: Client,
+  revision: string,
+  operations: MembershipChange[]
+) {
+  const state = readWritableState(client, revision);
+  const { edited, entries, disabledNames, jsonChanges, markerChanges } = projectMembership(
+    state,
+    operations
+  );
+  const expected = { ...state.document };
+  const disabled = state.document.disabledMcpServers;
   if (client === "codebuddy" && !isDeepStrictEqual(disabled ?? [], disabledNames)) {
     expected.disabledMcpServers = disabledNames;
     if (disabled === undefined)
       jsonChanges.push({ path: ["disabledMcpServers"], value: disabledNames });
     else jsonChanges.push(...markerChanges);
   }
-  if (jsonChanges.length) edited = renderEdit(state, "", undefined, undefined, jsonChanges);
+  const source = jsonChanges.length
+    ? renderEdit(state, "", undefined, undefined, jsonChanges)
+    : edited;
   if (Object.keys(entries).length || Object.hasOwn(expected, state.section))
     expected[state.section] = entries;
-  if (edited === (state.source ?? "")) return state.view;
-  if (!isDeepStrictEqual(readDocument(client, edited), expected)) invalidConfig();
-  return saveEdited(state, edited);
+  if (source === (state.source ?? "")) return state.view;
+  if (!isDeepStrictEqual(readDocument(client, source), expected)) invalidConfig();
+  return saveEdited(state, source);
+}
+
+function mutationEdit(
+  state: ReturnType<typeof readState>,
+  input: Exclude<Mutation, { action: "restore" }>,
+  original: Mapping | undefined
+): { next?: Mapping; changes: Change[] } {
+  const entryPath = [state.section, input.name];
+  if (input.action === "remove") {
+    return { changes: [{ path: entryPath, value: undefined }] };
+  }
+  if (input.action === "toggle") {
+    if (!state.view.canToggle)
+      throw new ClientMcpError("This client does not support enable or disable here", 422);
+    return {
+      next: { ...original, enabled: input.enabled },
+      changes: [{ path: [...entryPath, "enabled"], value: input.enabled }],
+    };
+  }
+  if (original && transportOf(original) !== input.server.transport)
+    throw new ClientMcpError("Changing the transport requires removing and adding the server", 422);
+  const fields = nativeMcpDefinition(input.client, input.server);
+  if (original) delete fields.type;
+  const next = { ...original, ...fields };
+  return {
+    next,
+    changes: original
+      ? Object.entries(fields).map(([key, value]) => ({ path: [...entryPath, key], value }))
+      : [{ path: entryPath, value: next }],
+  };
 }
 
 export function mutateClientMcp(input: Mutation) {
-  const state = readState(input.client);
-  const { file } = state;
-  const writeGuard = ensureCliConfigWriteAllowed(file);
-  if (writeGuard) throw new ClientMcpError(writeGuard, 403);
-  const { revision, canToggle } = state.view;
-  if (input.revision !== revision)
-    throw new ClientMcpError("MCP config changed; refresh it first", 409);
+  const state = readWritableState(input.client, input.revision);
   if (input.action === "restore") {
     if (!state.backup) throw new ClientMcpError("No backup matches this MCP config", 409);
     readDocument(input.client, state.backup.source);
-    commit(file, state.source, state.backup.source);
+    commit(state.file, state.source, state.backup.source);
     return listClientMcp(input.client);
   }
 
   const name = input.name;
-  const entryPath = [state.section, name];
   const original = Object.hasOwn(state.entries, name) ? mapping(state.entries[name]) : undefined;
   if (input.action === "add" ? original : !original)
     throw new ClientMcpError(
       input.action === "add" ? "MCP server already exists" : "MCP server does not exist",
       409
     );
-  let next: Mapping | undefined;
-  let changes: Change[];
-  if (input.action === "remove") {
-    changes = [{ path: entryPath, value: undefined }];
-  } else if (input.action === "toggle") {
-    if (!canToggle)
-      throw new ClientMcpError("This client does not support enable or disable here", 422);
-    next = { ...original, enabled: input.enabled };
-    changes = [{ path: [...entryPath, "enabled"], value: input.enabled }];
-  } else {
-    if (original && transportOf(original) !== input.server.transport)
-      throw new ClientMcpError(
-        "Changing the transport requires removing and adding the server",
-        422
-      );
-    const fields: Mapping =
-      input.server.transport === "stdio"
-        ? { command: input.server.command, args: input.server.args ?? [] }
-        : { url: input.server.url };
-    if (!original && input.client === "codebuddy") fields.type = input.server.transport;
-    next = { ...original, ...fields };
-    changes = original
-      ? Object.entries(fields).map(([key, value]) => ({ path: [...entryPath, key], value }))
-      : [{ path: entryPath, value: next }];
-  }
-
+  const { next, changes } = mutationEdit(state, input, original);
   const wanted = { ...state.entries };
   if (next) wanted[name] = next;
   else delete wanted[name];
