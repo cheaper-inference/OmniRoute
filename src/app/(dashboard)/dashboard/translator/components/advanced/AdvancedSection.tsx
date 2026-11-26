@@ -51,7 +51,7 @@ export default function AdvancedSection({ forceOpenSlug, children }: AdvancedSec
             <p className="text-xs text-text-muted">
               {tr(
                 "advancedSectionSubtitle",
-                "Raw JSON, pipeline e ferramentas técnicas. Tudo aqui é igual às tabs antigas — apenas reorganizado."
+                "Raw JSON, pipeline and technical tools. Everything here is the same as the old tabs — just reorganized."
               )}
             </p>
           </div>

@@ -5,10 +5,16 @@
 // must count that as a failed attempt: the reconnect delay grows 1s, 2s, 4s,
 // 8s, 16s, 30s, and only an accepted session (the server's "welcome" frame)
 // resets it. Before this guard the hook re-dialed twice a second forever.
+// KEA-9514: it also gives up after 5 consecutive failed sockets (1s, 2s, 4s, 8s), so a
+// server the browser cannot reach does not log "WebSocket connection failed" forever;
+// reconnect() starts a new round.
 import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { useLiveConnectionStatus } from "../../src/hooks/useLiveDashboard";
+import {
+  LIVE_WS_UNAVAILABLE_ERROR,
+  useLiveConnectionStatus,
+} from "../../src/hooks/useLiveDashboard";
 
 type ServerBehavior = "reject" | "accept";
 type TimelineEntry = { kind: "created" | "closed"; at: number; code?: number };
@@ -76,10 +82,17 @@ class FakeLiveSocket {
   }
 }
 
+let latest: ReturnType<typeof useLiveConnectionStatus> | null = null;
+
 function Harness() {
-  useLiveConnectionStatus({ wsUrl: "ws://127.0.0.1:1/live-ws" });
+  const state = useLiveConnectionStatus({ wsUrl: "ws://127.0.0.1:1/live-ws" });
+  React.useEffect(() => {
+    latest = state;
+  });
   return null;
 }
+
+const created = () => timeline.filter((entry) => entry.kind === "created").length;
 
 /** Delay between each server-initiated close and the next socket the hook opens. */
 function reconnectDelays(): number[] {
@@ -90,6 +103,15 @@ function reconnectDelays(): number[] {
     if (next) delays.push(next.at - entry.at);
   });
   return delays;
+}
+
+/** Advance the clock 1 ms at a time, so a short wait never jumps to a far-off timer. */
+async function stepFor(ms: number) {
+  for (let i = 0; i < ms; i++) {
+    await act(async () => {
+      vi.advanceTimersByTime(1);
+    });
+  }
 }
 
 /** Fire timers one at a time so React commits between socket events, as in a browser. */
@@ -115,6 +137,7 @@ describe("useLiveDashboard reconnect backoff", () => {
     vi.spyOn(console, "error").mockImplementation(() => {});
     timeline = [];
     behaviors = [];
+    latest = null;
     container = document.createElement("div");
     document.body.appendChild(container);
     root = createRoot(container);
@@ -136,7 +159,7 @@ describe("useLiveDashboard reconnect backoff", () => {
     ["production render", false],
     ["StrictMode render (next dev)", true],
   ])(
-    "backs off 1s, 2s, 4s, 8s, 16s, 30s while the server rejects every session (%s)",
+    "backs off 1s, 2s, 4s, 8s, then stops after 5 rejected sessions (%s)",
     async (_label, strict) => {
       await act(async () => {
         root!.render(
@@ -150,16 +173,78 @@ describe("useLiveDashboard reconnect backoff", () => {
         );
       });
 
-      await runFor(70_000);
+      // Ten minutes: without a cap the hook would have opened ~25 sockets by now.
+      await runFor(600_000);
 
-      expect(reconnectDelays().slice(0, 6)).toEqual([1000, 2000, 4000, 8000, 16000, 30000]);
-      const start = timeline[0].at;
-      const rejectedWithinAMinute = timeline.filter(
-        (entry) => entry.kind === "closed" && entry.code === 4001 && entry.at - start <= 60_000
-      );
-      expect(rejectedWithinAMinute).toHaveLength(6);
+      expect(reconnectDelays()).toEqual([1000, 2000, 4000, 8000]);
+      const rejected = timeline.filter((entry) => entry.kind === "closed" && entry.code === 4001);
+      expect(rejected).toHaveLength(5);
+      // StrictMode mounts the effect twice: its first socket is closed (1005) right away.
+      expect(created()).toBe(strict ? 6 : 5);
+      expect(vi.getTimerCount()).toBe(0);
+      expect(latest?.isConnected).toBe(false);
+      expect(latest?.error).toBe(LIVE_WS_UNAVAILABLE_ERROR);
     }
   );
+
+  it("opens a new socket on a manual reconnect() after giving up", async () => {
+    await act(async () => {
+      root!.render(<Harness />);
+    });
+    await runFor(600_000);
+    expect(created()).toBe(5);
+
+    behaviors = ["accept"];
+    await act(async () => {
+      latest!.reconnect();
+    });
+    await stepFor(50);
+
+    expect(created()).toBe(6);
+    expect(latest?.isConnected).toBe(true);
+    expect(latest?.error).toBeNull();
+  });
+
+  it("a fresh round after reconnect() gets the full 5 attempts again", async () => {
+    await act(async () => {
+      root!.render(<Harness />);
+    });
+    await runFor(600_000);
+    expect(created()).toBe(5);
+
+    await act(async () => {
+      latest!.reconnect();
+    });
+    await runFor(600_000);
+
+    expect(created()).toBe(10);
+  });
+
+  it("an accepted session resets the failure count", async () => {
+    // Four rejections, then a session the server accepts and later drops (10 s in), then
+    // rejections again: the hook gets 5 more attempts, not just the one it had left.
+    behaviors = ["reject", "reject", "reject", "reject", "accept"];
+    await act(async () => {
+      root!.render(<Harness />);
+    });
+
+    await runFor(600_000);
+
+    expect(created()).toBe(10);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it("logs a server error frame once per failing streak, not on every attempt", async () => {
+    await act(async () => {
+      root!.render(<Harness />);
+    });
+    await runFor(600_000);
+
+    const serverErrorLogs = vi
+      .mocked(console.error)
+      .mock.calls.filter((call) => String(call[0]).includes("[LiveWS]"));
+    expect(serverErrorLogs).toHaveLength(1);
+  });
 
   it("resets the backoff only after the server accepts a session", async () => {
     behaviors = ["reject", "reject", "accept", "reject"];

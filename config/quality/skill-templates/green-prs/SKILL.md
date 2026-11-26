@@ -1,6 +1,6 @@
 ---
 name: green-prs
-description: Inspect and prepare the selected PR queue against its exact current base, repair authorized defects with contributor credit, and report full versus partial validation. Use for maintainer pre-greening; merging requires separate owner authorization and the shared merge gates.
+description: "Use when the owner wants several chosen PRs (a pasted list, or the analyzed plan-files) made green against today's base before merging: 'deixa essas PRs verdes', 'pre-green'. Repairs proven PR defects with contributor credit and reports PASS/PARTIAL/BASE-RED per PR. One PR with review threads: /babysit. Red base, 'varre os reds': /sweep-reds. Review's mandatory items: /fix-prs. Never merges."
 ---
 
 # Green the selected PR queue

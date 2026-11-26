@@ -2,7 +2,11 @@
 
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import Icon from "./Icon";
-import { isCallbackStateAcceptable } from "./oauthCallbackState";
+import {
+  acceptsRelayedCallback,
+  isCallbackStateAcceptable,
+  MANUAL_CALLBACK_ONLY_PROVIDERS,
+} from "./oauthCallbackState";
 import { useTranslations } from "next-intl";
 import { Tabs, TabsList, TabsTrigger } from "@omniroute/ui-kit/tabs";
 
@@ -85,6 +89,27 @@ const TOKEN_PASTE_PROVIDERS = new Set([
 const IMPORT_TOKEN_ONLY_PROVIDERS = new Set(["devin-cli"]);
 // Devin Desktop opens on the key import (its long-standing default); browser sign-in is a tab.
 const PASTE_FIRST_PROVIDERS = new Set([...IMPORT_TOKEN_ONLY_PROVIDERS, "devin-desktop", "claude"]);
+
+// Manual-only providers open without an opener: the /callback page then keeps the URL on
+// screen for the operator to copy instead of relaying it and closing (#20576).
+function openManualAuthTab(provider: string, authUrl: string): void {
+  if (MANUAL_CALLBACK_ONLY_PROVIDERS.has(provider)) {
+    window.open(authUrl, "oauth_auth", "noopener");
+  } else {
+    window.open(authUrl, "oauth_auth");
+  }
+}
+
+// A manual-only attempt ignores relays, but /callback still left its code in localStorage:
+// drop it so a modal opened later does not read it as its own relayed callback.
+function discardUnusedRelayedCallback(provider: string): void {
+  if (!MANUAL_CALLBACK_ONLY_PROVIDERS.has(provider)) return;
+  try {
+    localStorage.removeItem("oauth_callback");
+  } catch {
+    // localStorage may be unavailable
+  }
+}
 
 // POST a bare Codex access token to the access-token-only import endpoint
 // (#1290); shared by the bare-JWT and session-JSON paste branches (#6636).
@@ -676,7 +701,7 @@ function LegacyOAuthModal({
         // For non-true-localhost (LAN IPs, remote) or manual fallback: use manual input mode (user pastes callback URL)
         if (!isTrueLocalhost || forceManual) {
           setStep("input");
-          window.open(data.authUrl, "oauth_auth");
+          openManualAuthTab(provider, data.authUrl);
         } else {
           // Localhost: Open popup and wait for message
           setStep("waiting");
@@ -803,7 +828,9 @@ function LegacyOAuthModal({
 
   // Listen for OAuth callback via multiple methods
   useEffect(() => {
-    if (!authData) return;
+    // A provider with no per-attempt binding (no state, no attempt key) never completes from a
+    // relayed callback: the operator pastes the callback URL instead (#20576, #15688).
+    if (!authData || !acceptsRelayedCallback(provider)) return;
     callbackProcessedRef.current = false; // Reset when authData changes
 
     // Handler for callback data - only process once
@@ -1033,6 +1060,8 @@ function LegacyOAuthModal({
       if (errorParam) {
         throw new Error(errorDescription || errorParam);
       }
+
+      discardUnusedRelayedCallback(provider);
 
       if (!code) {
         throw new Error(t("errorNoAuthorizationCode"));
