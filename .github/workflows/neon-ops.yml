@@ -1,0 +1,109 @@
+name: Neon Persistence Operations
+
+on:
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: "Neon operation to run on the live OmniRoute backend"
+        required: true
+        type: choice
+        options: [ensure, snapshot, restore]
+        default: snapshot
+      confirm_restore:
+        description: "Type RESTORE to permit replacing a missing local SQLite DB from Neon"
+        required: false
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+
+concurrency:
+  group: neon-ops-production
+  cancel-in-progress: false
+
+jobs:
+  neon:
+    name: Neon ${{ inputs.operation }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate restore confirmation
+        if: inputs.operation == 'restore'
+        env:
+          CONFIRM: ${{ inputs.confirm_restore }}
+        run: |
+          set -euo pipefail
+          if [ "$CONFIRM" != "RESTORE" ]; then
+            echo "::error::Restore is destructive. Re-run this workflow with confirm_restore=RESTORE."
+            exit 1
+          fi
+
+      - name: Run Neon operation on backend VPS
+        uses: appleboy/ssh-action@v1
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          OMNIROUTE_NEON_PERSISTENCE: "1"
+          OMNIROUTE_NEON_SNAPSHOT_RETENTION: "12"
+          OPERATION: ${{ inputs.operation }}
+          CONFIRM_RESTORE: ${{ inputs.confirm_restore }}
+          OMNIROUTE_APP_DIR: ${{ secrets.OMNIROUTE_APP_DIR }}
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          timeout: 60s
+          command_timeout: 15m
+          envs: DATABASE_URL,OMNIROUTE_NEON_PERSISTENCE,OMNIROUTE_NEON_SNAPSHOT_RETENTION,OPERATION,CONFIRM_RESTORE,OMNIROUTE_APP_DIR
+          script: |
+            set -euo pipefail
+
+            if [ -z "${DATABASE_URL:-}" ]; then
+              echo "::error::DATABASE_URL is not configured in GitHub Actions."
+              exit 1
+            fi
+
+            APP_DIR="${OMNIROUTE_APP_DIR:-/opt/omniroute}"
+            SCRIPT="$APP_DIR/scripts/neon/persistence.mjs"
+
+            if [ ! -f "$SCRIPT" ]; then
+              echo "::error::Neon persistence helper was not found at $SCRIPT"
+              echo "Set OMNIROUTE_APP_DIR if the deployed application lives elsewhere."
+              exit 1
+            fi
+
+            export DATABASE_URL
+            export OMNIROUTE_NEON_PERSISTENCE
+            export OMNIROUTE_NEON_SNAPSHOT_RETENTION
+
+            case "$OPERATION" in
+              ensure)
+                node "$SCRIPT" ensure
+                ;;
+              snapshot)
+                node "$SCRIPT" ensure
+                node "$SCRIPT" snapshot
+                ;;
+              restore)
+                if [ "$CONFIRM_RESTORE" != "RESTORE" ]; then
+                  echo "::error::Restore confirmation missing."
+                  exit 1
+                fi
+
+                echo "Stopping OmniRoute before restore..."
+                pm2 stop omniroute 2>/dev/null || true
+                trap 'pm2 start omniroute 2>/dev/null || true' EXIT
+
+                node "$SCRIPT" restore
+
+                echo "Starting OmniRoute after restore..."
+                pm2 start omniroute 2>/dev/null || true
+                trap - EXIT
+                ;;
+              *)
+                echo "::error::Unsupported operation: $OPERATION"
+                exit 1
+                ;;
+            esac
+
+            echo "Neon operation '$OPERATION' completed."

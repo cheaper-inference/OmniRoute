@@ -9,6 +9,12 @@
 import { markServerReady, markServerStarting } from "@/lib/serverLifecycle";
 import { normalizeBootError } from "@/lib/instrumentationBootError";
 import { isHeadless, skipInHeadless } from "@/lib/system/headless";
+import { isHeadless, skipInHeadless } from "@/lib/system/headless";
+import {
+  isNeonPersistenceEnabled,
+  restoreNeonPersistenceIfNeeded,
+  startNeonPersistence,
+} from "@/lib/neonPersistence";
 
 function getRandomBytes(byteLength: number): Uint8Array {
   const bytes = new Uint8Array(byteLength);
@@ -576,7 +582,17 @@ export async function registerNodejs(): Promise<void> {
   // failed (#7288 / #7494). ensureDbInitialized() itself is idempotent and
   // caches the singleton, so every later getDbInstance() call below is a
   // free no-op re-read of the same connection — no double-init cost.
+  // If this deployment has no local SQLite file, restore the latest durable snapshot
+  // from Neon before the normal migration/health-check path opens the database.
+  if (isNeonPersistenceEnabled()) {
+    await restoreNeonPersistenceIfNeeded();
+  }
+
   await ensureDbReadyForBoot();
+
+  if (isNeonPersistenceEnabled()) {
+    startNeonPersistence();
+  }
 
   await ensureSecrets();
   await Promise.all([
