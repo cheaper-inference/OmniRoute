@@ -26,10 +26,20 @@ test.after(() => {
 });
 
 test("#5477 buildModelOptions classifies custom-model source (manual -> custom, api-sync -> imported)", async () => {
-  // Attach to a no-auth provider ("uncloseai") — it surfaces in the builder
+  // Attach to a no-auth provider ("cloudflare-playground") — it surfaces in the builder
   // without a configured connection, so the custom-model branch is exercised.
-  await modelsDb.addCustomModel("uncloseai", "zzz-manual-5477", "Manual 5477", "manual");
-  await modelsDb.addCustomModel("uncloseai", "zzz-apisync-5477", "ApiSync 5477", "api-sync");
+  await modelsDb.addCustomModel(
+    "cloudflare-playground",
+    "zzz-manual-5477",
+    "Manual 5477",
+    "manual"
+  );
+  await modelsDb.addCustomModel(
+    "cloudflare-playground",
+    "zzz-apisync-5477",
+    "ApiSync 5477",
+    "api-sync"
+  );
 
   const payload = await getComboBuilderOptions();
 
