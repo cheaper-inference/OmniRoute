@@ -7,6 +7,27 @@ import type { SqliteAdapter, PreparedStatement, RunResult } from "./types";
 const SAVE_DEBOUNCE_MS = 100;
 const CHECKPOINT_INTERVAL_MS = 60_000;
 
+/**
+ * Thrown when `persist()` has already atomically renamed the new database image
+ * over `filePath` (so the new image is published and visible to readers), but
+ * the subsequent directory `fsync` failed. Callers can distinguish this from a
+ * pre-rename write failure where `filePath` was untouched.
+ */
+export class SqlJsPostRenameDurabilityError extends Error {
+  readonly filePath: string;
+  override readonly cause?: unknown;
+
+  constructor(filePath: string, cause?: unknown) {
+    const detail = cause instanceof Error ? cause.message : String(cause ?? "unknown error");
+    super(
+      `[sqljsAdapter] Database image was published to "${filePath}", but directory fsync failed: ${detail}`
+    );
+    this.name = "SqlJsPostRenameDurabilityError";
+    this.filePath = filePath;
+    this.cause = cause;
+  }
+}
+
 // sql.js's stmt.getAsObject() returns rows whose prototype is `null`
 // (Object.create(null)), whereas better-sqlite3 (the driver we ship and run in
 // production/CI) hands back ordinary Object.prototype rows. That difference is
@@ -264,9 +285,31 @@ export async function createSqlJsAdapter(filePath: string): Promise<SqliteAdapte
     // Same directory, so `rename` stays within one filesystem — a temp file in
     // os.tmpdir() would make it a cross-device copy, which is not atomic.
     const tmpPath = `${filePath}.tmp-${process.pid}-${Date.now()}`;
+    let existingStat: fs.Stats | null = null;
+    try {
+      existingStat = fs.statSync(filePath);
+    } catch {
+      /* file does not exist yet */
+    }
+    const existingMode = existingStat ? existingStat.mode & 0o777 : undefined;
     let fd: number | null = null;
     try {
-      fd = fs.openSync(tmpPath, "w");
+      fd =
+        existingMode !== undefined
+          ? fs.openSync(tmpPath, "w", existingMode)
+          : fs.openSync(tmpPath, "w");
+      if (existingMode !== undefined) {
+        // `openSync` applies the process umask to the creation mode; `fchmodSync`
+        // restores the exact permission bits the operator configured on `filePath`.
+        fs.fchmodSync(fd, existingMode);
+      }
+      if (existingStat && process.platform !== "win32") {
+        try {
+          fs.fchownSync(fd, existingStat.uid, existingStat.gid);
+        } catch {
+          /* best-effort ownership preservation */
+        }
+      }
       fs.writeFileSync(fd, Buffer.from(data));
       // The rename is atomic, but only orders against data that already reached
       // the disk; without this an unclean shutdown can publish an empty file.
@@ -290,6 +333,24 @@ export async function createSqlJsAdapter(filePath: string): Promise<SqliteAdapte
       throw err;
     }
     dirty = false;
+
+    if (process.platform !== "win32") {
+      let dirFd: number | null = null;
+      try {
+        dirFd = fs.openSync(path.dirname(filePath), "r");
+        fs.fsyncSync(dirFd);
+      } catch (dirErr) {
+        throw new SqlJsPostRenameDurabilityError(filePath, dirErr);
+      } finally {
+        if (dirFd !== null) {
+          try {
+            fs.closeSync(dirFd);
+          } catch {
+            /* ignore close failure */
+          }
+        }
+      }
+    }
   }
 
   function scheduleSave(): void {

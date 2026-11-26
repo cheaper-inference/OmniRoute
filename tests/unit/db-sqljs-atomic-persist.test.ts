@@ -114,3 +114,112 @@ test("sql.js persist() is a no-op for :memory: databases (no temp file, no throw
     fs.rmSync(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   }
 });
+
+test(
+  "sql.js persist() preserves operator-configured file mode across checkpoints even under a restrictive umask (#21277)",
+  { skip: process.platform === "win32" },
+  async () => {
+    const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-sqljs-mode-"));
+    const sqliteFile = path.join(dataDir, "storage.sqlite");
+    let adapter: Awaited<ReturnType<typeof openAdapter>> | null = null;
+    const prevUmask = process.umask(0o077);
+    try {
+      adapter = await openAdapter(sqliteFile);
+      adapter.exec("CREATE TABLE t (id INTEGER PRIMARY KEY, v TEXT)");
+      adapter.exec("INSERT INTO t (v) VALUES ('first')");
+      adapter.checkpoint();
+
+      fs.chmodSync(sqliteFile, 0o640);
+      assert.equal(fs.statSync(sqliteFile).mode & 0o777, 0o640);
+
+      adapter.exec("INSERT INTO t (v) VALUES ('second')");
+      adapter.checkpoint();
+
+      assert.equal(
+        fs.statSync(sqliteFile).mode & 0o777,
+        0o640,
+        "persist() reset the database file mode instead of preserving 0640"
+      );
+    } finally {
+      process.umask(prevUmask);
+      if (adapter?.open) adapter.close();
+      fs.rmSync(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+    }
+  }
+);
+
+test(
+  "sql.js persist() fsyncs the containing directory after rename and surfaces post-rename fsync errors via SqlJsPostRenameDurabilityError (#21277)",
+  { skip: process.platform === "win32" },
+  async () => {
+    const { SqlJsPostRenameDurabilityError } = await import(
+      "../../src/lib/db/adapters/sqljsAdapter"
+    );
+    const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-sqljs-dirfsync-"));
+    const sqliteFile = path.join(dataDir, "storage.sqlite");
+    const backupFile = path.join(dataDir, "backup.sqlite");
+    let adapter: Awaited<ReturnType<typeof openAdapter>> | null = null;
+
+    const origOpenSync = fs.openSync;
+    const origFsyncSync = fs.fsyncSync;
+    const origCloseSync = fs.closeSync;
+    const dirFds = new Set<number>();
+    let dirFsyncCalls = 0;
+    let failNextDirFsync = false;
+
+    try {
+      fs.openSync = ((p: fs.PathLike, flags: fs.OpenMode, mode?: fs.Mode) => {
+        const fd = origOpenSync(p, flags, mode);
+        if (String(p) === dataDir) {
+          dirFds.add(fd);
+        }
+        return fd;
+      }) as typeof fs.openSync;
+
+      fs.closeSync = ((fd: number) => {
+        dirFds.delete(fd);
+        return origCloseSync(fd);
+      }) as typeof fs.closeSync;
+
+      fs.fsyncSync = ((fd: number) => {
+        if (dirFds.has(fd)) {
+          dirFsyncCalls++;
+          if (failNextDirFsync) {
+            failNextDirFsync = false;
+            throw new Error("simulated directory fsync EIO");
+          }
+        }
+        return origFsyncSync(fd);
+      }) as typeof fs.fsyncSync;
+
+      adapter = await openAdapter(sqliteFile);
+      adapter.exec("CREATE TABLE t (id INTEGER PRIMARY KEY, v TEXT)");
+      adapter.exec("INSERT INTO t (v) VALUES ('first')");
+      adapter.checkpoint();
+
+      assert.equal(dirFsyncCalls, 1, "expected 1 directory fsync during checkpoint");
+
+      adapter.exec("INSERT INTO t (v) VALUES ('second')");
+      failNextDirFsync = true;
+      await assert.rejects(
+        () => adapter!.backup(backupFile),
+        (err: unknown) => {
+          assert.ok(err instanceof SqlJsPostRenameDurabilityError);
+          assert.equal(err.filePath, sqliteFile);
+          assert.match(err.message, /simulated directory fsync EIO/);
+          return true;
+        }
+      );
+
+      // Even though directory fsync threw, the rename already published the new image
+      assert.ok(fs.existsSync(sqliteFile), "published sqliteFile should remain intact");
+      const leftovers = fs.readdirSync(dataDir).filter((n) => n.startsWith("storage.sqlite.tmp-"));
+      assert.deepEqual(leftovers, [], "no temp file should remain after rename succeeded");
+    } finally {
+      fs.openSync = origOpenSync;
+      fs.fsyncSync = origFsyncSync;
+      if (adapter?.open) adapter.close();
+      fs.rmSync(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+    }
+  }
+);
