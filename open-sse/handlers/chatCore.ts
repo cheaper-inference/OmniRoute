@@ -648,12 +648,13 @@ async function handleChatCoreInner({
   const persistFailureUsage = (
     statusCode: number,
     errorCode?: string | null,
-    aggregate?: FailureUsageAggregate | null
+    aggregate?: FailureUsageAggregate | null,
+    servedModel?: string | null
   ) => {
     saveRequestUsage(
       buildFailureUsageRecord({
         provider,
-        model,
+        model: servedModel || model,
         connectionId: getCurrentConnectionId(),
         apiKeyInfo,
         effectiveServiceTier,
