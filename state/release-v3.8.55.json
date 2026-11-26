@@ -18,10 +18,11 @@
         "labeledAt": "2026-11-26T09:00:09Z"
       }
     ],
-    "stage": "testing",
+    "stage": "landing",
     "startedAt": "2026-11-26T09:16:37.864Z",
     "attempts": 0,
-    "bisect": null
+    "bisect": null,
+    "landAttempts": 1
   },
   "baseChecks": [
     {
@@ -143,12 +144,6 @@
     "culprits": 1
   },
   "history": [
-    {
-      "at": "2026-11-20T02:40:01.827Z",
-      "type": "error",
-      "detail": "git merge-tree failed (exit 128): fatal: remote error: upload-pack: not our ref 04847663e4aace8a9ba1947e2c1cf649aa36fafc\nfatal: could not fetch 123131e68fe6ee82d84899801105dfb4995bee8c from promisor remote",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44662199724"
-    },
     {
       "at": "2026-11-20T02:48:42.406Z",
       "type": "error",
@@ -2641,8 +2636,22 @@
         "21123": "2026-11-26T09:00:09Z"
       },
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45790398045"
+    },
+    {
+      "at": "2026-11-26T10:41:16.692Z",
+      "type": "checks-green",
+      "batchId": "b49",
+      "prs": [
+        21123
+      ],
+      "sha": "d05e121ae501a0827ae4690bb7d555c18dc38b56",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45803578434"
     }
   ],
-  "updatedAt": "2026-11-26T10:17:41.936Z",
-  "batchWindow": 5
+  "updatedAt": "2026-11-26T10:41:27.916Z",
+  "batchWindow": 5,
+  "landingsWithoutVerdict": {
+    "count": 1,
+    "since": "2026-11-26T10:41:27.916Z"
+  }
 }
