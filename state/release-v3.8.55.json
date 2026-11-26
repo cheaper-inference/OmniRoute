@@ -3,35 +3,69 @@
   "base": "release/v3.8.55",
   "paused": null,
   "inFlight": {
-    "batchId": "b51",
+    "batchId": "b52",
     "kind": "batch",
-    "candidateRef": "omni-queue/release-v3.8.55/b51-4de5c9b65f4c",
-    "candidateSha": "4de5c9b65f4cd1f966dbdf09c9d6ff510baa97a1",
-    "baseSha": "6d99c052a58d8de0771b211c1181bbc1e3e354ef",
-    "treeSha": "65046c0a46764f584ab4aba7c7c94339022340ab",
+    "candidateRef": "omni-queue/release-v3.8.55/b52-49f6a0fc52b0",
+    "candidateSha": "49f6a0fc52b0f43aa6084c84fda59e4c7f172d92",
+    "baseSha": "4de5c9b65f4cd1f966dbdf09c9d6ff510baa97a1",
+    "treeSha": "f900d5c3e06d6e0ef0891bb095ed2b78478d57f8",
     "prs": [
       {
-        "n": 20949,
-        "head": "2ba8ff6c227dc80d9ae9e98cdf19efd003d0e645",
-        "title": "fix(usage): retain explicit zero cache reads in Claude responses",
-        "author": "KiaroSama",
-        "labeledAt": "2026-11-26T10:16:47Z"
+        "n": 21247,
+        "head": "bfd1ec42a23538c48cce1dc86f6cf3570aec832a",
+        "title": "fix(sse): require readiness for keyless auto routing (#19385)",
+        "author": "diegosouzapw",
+        "labeledAt": "2026-11-26T11:54:29Z"
       },
       {
-        "n": 21161,
-        "head": "068750cb8e3290ff13df25d2f73de2db9c29d913",
-        "title": "docs(readme): print the free-token figures in pairs, from the facts",
+        "n": 19850,
+        "head": "3545a6da1f1ab00f13d80326129f889cd3dea58d",
+        "title": "fix(providers): register Claude Fable 5.2 metadata and pricing",
+        "author": "xiaoyaner0201",
+        "labeledAt": "2026-11-26T12:47:50Z"
+      },
+      {
+        "n": 21251,
+        "head": "1b49c339de4f4ef46f136f11415d5e91f0a9ba5a",
+        "title": "docs(merge-queue): the runbook records the live cut-over; the frozen release drops its door at rollover",
         "author": "diegosouzapw",
-        "labeledAt": "2026-11-26T10:44:12Z"
+        "labeledAt": "2026-11-26T13:05:40Z"
+      },
+      {
+        "n": 21187,
+        "head": "75af38a1f0459b25ede2cdec386a94e5fe505df5",
+        "title": "fix(guardrails): load sharp on use so boot survives without it",
+        "author": "AyhamJo7",
+        "labeledAt": "2026-11-26T13:06:16Z"
+      },
+      {
+        "n": 21069,
+        "head": "d433200ac2011c6069e95018dbaa51bfffcd5f0f",
+        "title": "deps: bump oven/bun from 1.4.4-slim to 1.4.5-slim",
+        "author": "dependabot[bot]",
+        "labeledAt": "2026-11-26T13:06:44Z"
+      },
+      {
+        "n": 20383,
+        "head": "0480e1647b367223da4a228e0a59b236a44db3d9",
+        "title": "deps: bump node from 26.12.1-trixie-slim to 26.13.0-trixie-slim",
+        "author": "dependabot[bot]",
+        "labeledAt": "2026-11-26T13:06:50Z"
       }
     ],
-    "stage": "landing",
-    "startedAt": "2026-11-26T11:53:53.414Z",
+    "stage": "testing",
+    "startedAt": "2026-11-26T13:14:34.956Z",
     "attempts": 0,
-    "bisect": null,
-    "landAttempts": 1
+    "bisect": null
   },
   "baseChecks": [
+    {
+      "baseSha": "4de5c9b65f4cd1f966dbdf09c9d6ff510baa97a1",
+      "ref": "omni-queue/release-v3.8.55/b51-4de5c9b65f4c",
+      "status": "green",
+      "startedAt": "2026-11-26T11:53:53.414Z",
+      "signatures": []
+    },
     {
       "baseSha": "6d99c052a58d8de0771b211c1181bbc1e3e354ef",
       "ref": "omni-queue/release-v3.8.55/b50-6d99c052a58d",
@@ -110,13 +144,6 @@
           "infra": false
         }
       ]
-    },
-    {
-      "baseSha": "0563eb2ec52bfd20ca39b3d4444df3cbd2316944",
-      "ref": "omni-queue/release-v3.8.55/b23-0563eb2ec52b",
-      "status": "green",
-      "startedAt": "2026-11-21T18:03:58.692Z",
-      "signatures": []
     }
   ],
   "shadow": {
@@ -142,33 +169,15 @@
     }
   },
   "counters": {
-    "batchSeq": 51,
-    "ciRuns": 56,
-    "landedPrs": 22,
-    "landedBatches": 8,
+    "batchSeq": 52,
+    "ciRuns": 57,
+    "landedPrs": 24,
+    "landedBatches": 9,
     "redBatches": 11,
     "bisections": 3,
     "culprits": 1
   },
   "history": [
-    {
-      "at": "2026-11-20T04:17:35.950Z",
-      "type": "error",
-      "detail": "git merge-tree failed (exit 128): fatal: remote error: upload-pack: not our ref 04847663e4aace8a9ba1947e2c1cf649aa36fafc\nfatal: could not fetch 123131e68fe6ee82d84899801105dfb4995bee8c from promisor remote",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44673277630"
-    },
-    {
-      "at": "2026-11-20T04:29:14.854Z",
-      "type": "error",
-      "detail": "git merge-tree failed (exit 128): fatal: remote error: upload-pack: not our ref 04847663e4aace8a9ba1947e2c1cf649aa36fafc\nfatal: could not fetch 123131e68fe6ee82d84899801105dfb4995bee8c from promisor remote",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44674571757"
-    },
-    {
-      "at": "2026-11-20T04:38:51.462Z",
-      "type": "error",
-      "detail": "git merge-tree failed (exit 128): fatal: remote error: upload-pack: not our ref 04847663e4aace8a9ba1947e2c1cf649aa36fafc\nfatal: could not fetch 123131e68fe6ee82d84899801105dfb4995bee8c from promisor remote",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44675669309"
-    },
     {
       "at": "2026-11-20T04:47:44.881Z",
       "type": "error",
@@ -2718,12 +2727,55 @@
       ],
       "sha": "4de5c9b65f4cd1f966dbdf09c9d6ff510baa97a1",
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45827011467"
+    },
+    {
+      "at": "2026-11-26T13:13:48.140Z",
+      "type": "land-blessed",
+      "batchId": "b51",
+      "prs": [
+        20949,
+        21161
+      ],
+      "sha": "4de5c9b65f4cd1f966dbdf09c9d6ff510baa97a1",
+      "detail": "omni-queue/land success on 1 commit(s)",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45827011467"
+    },
+    {
+      "at": "2026-11-26T13:13:51.772Z",
+      "type": "landed",
+      "batchId": "b51",
+      "prs": [
+        20949,
+        21161
+      ],
+      "sha": "4de5c9b65f4cd1f966dbdf09c9d6ff510baa97a1",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45827011467"
+    },
+    {
+      "at": "2026-11-26T13:14:39.280Z",
+      "type": "batch-started",
+      "batchId": "b52",
+      "prs": [
+        21247,
+        19850,
+        21251,
+        21187,
+        21069,
+        20383
+      ],
+      "sha": "49f6a0fc52b0f43aa6084c84fda59e4c7f172d92",
+      "detail": "6 PR(s) on 4de5c9b65f4c; window 6",
+      "labeledAt": {
+        "19850": "2026-11-26T12:47:50Z",
+        "20383": "2026-11-26T13:06:50Z",
+        "21069": "2026-11-26T13:06:44Z",
+        "21187": "2026-11-26T13:06:16Z",
+        "21247": "2026-11-26T11:54:29Z",
+        "21251": "2026-11-26T13:05:40Z"
+      },
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45827011467"
     }
   ],
-  "updatedAt": "2026-11-26T13:13:44.740Z",
-  "batchWindow": 6,
-  "landingsWithoutVerdict": {
-    "count": 1,
-    "since": "2026-11-26T13:13:44.740Z"
-  }
+  "updatedAt": "2026-11-26T13:14:41.492Z",
+  "batchWindow": 6
 }
