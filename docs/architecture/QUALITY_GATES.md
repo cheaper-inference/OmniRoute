@@ -275,7 +275,7 @@ The `docs-gates` job in `quality.yml` also runs `check:docs-all` for those chang
 #### Translation mirrors are derived files (PR mode vs release mode)
 
 The translation wave (`docs/i18n-*` / `chore/i18n-*`, including the scheduled
-`i18n-mirror-refresh.yml`) and the release refresh translated mirrors and `.i18n-state.json`.
+`i18n-mirror-refresh.yml`) and the release refresh rewrite translated mirrors and `.i18n-state.json`.
 Feature PRs that change the root `llm.txt` also commit its mechanical copies. The mirror gates
 resolve their mode through `scripts/check/lib/gateMode.mjs` in this order, `--mode=pr|release`,
 `OMNIROUTE_GATE_MODE`, then the Actions event. Local runs default to `release`.
@@ -292,8 +292,10 @@ resolve their mode through `scripts/check/lib/gateMode.mjs` in this order, `--mo
 - `check:pr-derived-paths` permits these mechanical copies alongside a root `llm.txt` change when
   the committed copies match the copier output from the base versions, including their locale
   headers. Other translations follow the existing derived-family rules.
-- The pre-commit hook runs `check-docs-sync.mjs --mode=pr`: a commit is judged on what it does.
-  A plain local run defaults to release mode and also checks drift inherited from the base.
+- The pre-commit hook runs `check-docs-sync.mjs --mode=pr` because a plain local run defaults to
+  release mode, where a stale mirror inherited from the base would block every subsequent commit
+  until the translation wave runs. The same rule applies to any mode-aware gate run by a Husky
+  hook, with the hook passing `--mode=pr` and release-mode runs providing the strict verdict.
 - Mirror-content unit tests (`tests/_helpers/mirrorFreshness.ts`: `cycle-docs-mirror-contract`,
   `resilience-pre-dispatch-docs-mirrors`, `cli-env-quality-docs-mirrors`,
   `docs/*-locales`) — release mode asserts every locale. PR mode asserts only the mirrors that are
