@@ -67,6 +67,7 @@ import {
   type ProviderConnectionView,
 } from "@/lib/db/providers/lazyConnectionView";
 import { buildConnectionConcurrencyFields } from "./connectionConcurrencyFields.ts"; // #13700
+import { filterFreshSessionAdmission, needsFreshSessionAdmission } from "./freshSessionAdmission";
 import { getConnectionErrorPenalty, getConnectionRecencyPenalty } from "./p2cScoreTerms.ts";
 import { getP2CLatencyPenalties } from "@omniroute/open-sse/services/connectionLatencyTracker.ts";
 import {
@@ -1911,9 +1912,28 @@ export async function getProviderCredentials(
     }
 
     const subscriptionFirst = holdBackCodexCreditOnlyAccounts(provider, withQuota, requestedModel);
-    const policyValidLeaseCandidates = options._leaseCandidateIds
-      ? subscriptionFirst.filter((candidate) => options._leaseCandidateIds!.includes(candidate.id))
+    const admissionPool = needsFreshSessionAdmission(subscriptionFirst, options)
+      ? await filterFreshSessionAdmission(
+          subscriptionFirst,
+          provider,
+          options,
+          sessionAffinityTtlMs
+        )
       : subscriptionFirst;
+    if (admissionPool.length === 0 && subscriptionFirst.length > 0) {
+      // Configured but busy: a retryable capacity result, not "no credentials".
+      const retryAfter = new Date(Date.now() + 3000).toISOString();
+      return {
+        allRateLimited: true,
+        retryAfter,
+        retryAfterHuman: formatRetryAfter(retryAfter),
+        lastError: `All ${provider} accounts are at their new-session routing threshold`,
+        lastErrorCode: 503,
+      };
+    }
+    const policyValidLeaseCandidates = options._leaseCandidateIds
+      ? admissionPool.filter((candidate) => options._leaseCandidateIds!.includes(candidate.id))
+      : admissionPool;
     if (policyValidLeaseCandidates.length === 0) return null;
     const leasePolicy = await applyExclusiveConnectionLeasePolicy(
       policyValidLeaseCandidates,

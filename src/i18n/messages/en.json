@@ -5883,6 +5883,8 @@
     "stepProgress": "Setup progress"
   },
   "providers": {
+    "newSessionMaxConcurrentLabel": "New-session routing threshold (0 = off)",
+    "newSessionMaxConcurrentInvalid": "New-session routing threshold must be a whole number from 0 to {max}.",
     "tosAvoidNoticeTitle": "This provider is excluded from auto by default",
     "tosAvoidNoticeDescription": "Its ToS status is marked avoid. Connecting an account does not change this policy. Review the provider terms before using the global opt-in for all auto combos.",
     "tosAvoidNoticeAction": "Review the auto policy",

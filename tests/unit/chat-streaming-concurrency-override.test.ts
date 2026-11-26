@@ -13,6 +13,7 @@ const auth = await import("../../src/sse/services/auth.ts");
 const proxyLogger = await import("../../src/lib/proxyLogger.ts");
 const rateLimitManager = await import("../../open-sse/services/rateLimitManager.ts");
 const accountSemaphore = await import("../../open-sse/services/accountSemaphore.ts");
+const settingsDb = await import("../../src/lib/db/settings.ts");
 
 const encoder = new TextEncoder();
 
@@ -66,6 +67,73 @@ test.after(async () => {
   await harness.cleanup();
   if (originalDisconnectGrace === undefined) delete process.env.STREAM_DISCONNECT_GRACE_PERIOD_MS;
   else process.env.STREAM_DISCONNECT_GRACE_PERIOD_MS = originalDisconnectGrace;
+});
+
+test("handler routes fresh sessions away while existing affinity shares total stream capacity", async () => {
+  await settingsDb.updateSettings({ sessionAffinityTtlMs: 60_000 });
+  const a = await providersDb.createProviderConnection({
+    provider: "openai",
+    authType: "apikey",
+    name: "sticky-stream-a",
+    priority: 1,
+    isActive: true,
+    testStatus: "active",
+    maxConcurrent: 3,
+    rateLimitOverrides: { newSessionMaxConcurrent: 1 },
+  });
+  const b = await providersDb.createProviderConnection({
+    provider: "openai",
+    authType: "apikey",
+    name: "sticky-stream-b",
+    priority: 2,
+    isActive: true,
+    testStatus: "active",
+    maxConcurrent: 3,
+  });
+  readCache.invalidateDbCache("connections");
+  readCache.invalidateDbCache("settings");
+  const streams: ControlledStream[] = [];
+  globalThis.fetch = async () =>
+    new Response(
+      new ReadableStream<Uint8Array>({
+        start(controller) {
+          streams.push({ controller, settled: false });
+          controller.enqueue(initialChunk(streams.length));
+        },
+      }),
+      { headers: { "Content-Type": "text/event-stream" } }
+    );
+  const responses: Response[] = [];
+  const request = (session: string, model: string) =>
+    handleChat(
+      buildRequest({
+        headers: { "x-session-id": session },
+        body: {
+          model: `openai/${model}`,
+          stream: true,
+          messages: [{ role: "user", content: session }],
+        },
+      })
+    );
+  const key = (id: string) =>
+    accountSemaphore.buildAccountSemaphoreKey({ provider: "openai", accountKey: id });
+  try {
+    responses.push(await request("existing", "synthetic-model-a"));
+    assert.equal(responses[0].status, 200);
+    assert.equal(accountSemaphore.getStats()[key(a.id)]?.running, 1);
+    responses.push(await request("existing", "synthetic-model-b"));
+    assert.equal(responses[1].status, 200);
+    assert.equal(accountSemaphore.getStats()[key(a.id)]?.running, 2);
+    responses.push(await request("fresh", "synthetic-model-a"));
+    assert.equal(responses[2].status, 200);
+    assert.equal(accountSemaphore.getStats()[key(a.id)]?.running, 2);
+    assert.equal(accountSemaphore.getStats()[key(b.id)]?.running, 1);
+  } finally {
+    for (const stream of streams) finishStream(stream);
+    await Promise.all(responses.map((r) => r.body?.cancel().catch(() => {})));
+    assert.ok(await waitFor(() => accountSemaphore.getStats()[key(a.id)] === undefined));
+    assert.ok(await waitFor(() => accountSemaphore.getStats()[key(b.id)] === undefined));
+  }
 });
 
 test("nested maxConcurrent holds a connection slot until each streaming body settles", async () => {
