@@ -548,6 +548,7 @@ async function intercept(req, res, bodyBuffer, override, sourceModel) {
       routerMessagesUrl: ROUTER_MESSAGES_URL,
       body,
       agentId,
+      requestUrl: req.url,
       fallbackResolver: forwardShim.resolveForwardTarget,
     });
     vlog(1, `[MITM] → forward ${forward.format} ${forward.url}`);
@@ -591,7 +592,10 @@ async function intercept(req, res, bodyBuffer, override, sourceModel) {
       }
 
       res.writeHead(200, {
-        "Content-Type": "text/event-stream",
+        "Content-Type":
+          forward.format === "openai-responses"
+            ? response.headers.get("content-type") || "application/json"
+            : "text/event-stream",
         "Cache-Control": "no-cache",
         Connection: "keep-alive",
         "X-Accel-Buffering": "no",
@@ -708,7 +712,6 @@ async function startMitmServer() {
     }
 
     const agentId = TARGET_HOST_AGENT.get(host) || "antigravity";
-    const routeConfig = standaloneRoutingShim.getAgentRouteConfig(agentId);
 
     // FIX #8656: Capture ALL agent traffic (even passthrough) so Traffic Inspector
     // and model auto-detection work WITHOUT requiring mappings first.
@@ -738,7 +741,7 @@ async function startMitmServer() {
       upstreamLatencyMs: 0,
     });
 
-    const isChatRequest = routeConfig.chatUrlPatterns.some((p) => req.url.includes(p));
+    const isChatRequest = standaloneRoutingShim.matchesAgentRequest(agentId, req.method, req.url);
 
     if (!isChatRequest) {
       vlog(1, `[MITM] → PASSTHROUGH (URL ${req.url} does not match chat patterns)`);

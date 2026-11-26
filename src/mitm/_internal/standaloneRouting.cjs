@@ -1,5 +1,8 @@
 "use strict";
 
+const CODEX_RESPONSES_PATHS = ["/backend-api/codex/responses", "/v1/responses"];
+const CODEX_CHAT_PATHS = ["/backend-api/codex/chat/completions", "/v1/chat/completions"];
+
 const AGENT_ROUTE_CONFIG = {
   antigravity: {
     aliasKey: "antigravity",
@@ -16,10 +19,27 @@ const AGENT_ROUTE_CONFIG = {
     chatUrlPatterns: ["/v1/messages"],
     routerPath: "/v1/messages",
   },
+  codex: {
+    aliasKey: "codex",
+    chatUrlPatterns: [...CODEX_RESPONSES_PATHS, ...CODEX_CHAT_PATHS],
+    routerPath: "/v1/chat/completions",
+  },
 };
 
 function getAgentRouteConfig(agentId) {
   return AGENT_ROUTE_CONFIG[agentId] || AGENT_ROUTE_CONFIG.antigravity;
+}
+
+function isCodexResponses(requestUrl) {
+  return CODEX_RESPONSES_PATHS.includes(requestUrl?.split("?", 1)[0]);
+}
+
+function matchesAgentRequest(agentId, method, requestUrl) {
+  const patterns = getAgentRouteConfig(agentId).chatUrlPatterns;
+  if (agentId === "codex") {
+    return method === "POST" && patterns.includes(requestUrl?.split("?", 1)[0]);
+  }
+  return patterns.some((pattern) => requestUrl?.includes(pattern));
 }
 
 function resolveForwardTargetForAgent({
@@ -27,9 +47,16 @@ function resolveForwardTargetForAgent({
   routerMessagesUrl,
   body,
   agentId,
+  requestUrl,
   fallbackResolver,
 }) {
   const config = getAgentRouteConfig(agentId);
+  if (agentId === "codex") {
+    if (isCodexResponses(requestUrl)) {
+      return { format: "openai-responses", url: `${routerBaseUrl}/v1/responses` };
+    }
+    return { format: "openai", url: `${routerBaseUrl}${config.routerPath}` };
+  }
   if (config.routerPath === "/v1/messages") {
     return { format: "anthropic", url: routerMessagesUrl };
   }
@@ -73,6 +100,8 @@ function resolveMappedOverride(model, agentId, deps) {
 module.exports = {
   AGENT_ROUTE_CONFIG,
   getAgentRouteConfig,
+  isCodexResponses,
+  matchesAgentRequest,
   resolveForwardTargetForAgent,
   resolveMappedOverride,
 };

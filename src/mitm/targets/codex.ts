@@ -2,6 +2,7 @@
  * OpenAI Codex CLI — MITM target descriptor.
  */
 import type { MitmTarget } from "../types";
+import { getAgentRouteConfig } from "../_internal/standaloneRouting.cjs";
 
 export const CODEX_TARGET: MitmTarget = {
   id: "codex",
@@ -10,7 +11,7 @@ export const CODEX_TARGET: MitmTarget = {
   color: "#F59E0B",
   hosts: ["chatgpt.com"],
   port: 443,
-  endpointPatterns: ["/backend-api/codex/chat/completions", "/v1/chat/completions"],
+  endpointPatterns: getAgentRouteConfig("codex").chatUrlPatterns,
   defaultModels: [
     { id: "gpt-4.1", name: "GPT-4.1", alias: "gpt-4.1" },
     { id: "gpt-4o-mini", name: "GPT-4o mini", alias: "gpt-4o-mini" },
@@ -24,7 +25,6 @@ export const CODEX_TARGET: MitmTarget = {
     ],
     detection: { command: "which codex", platform: "all" },
   },
-  handler: () =>
-    import("../handlers/codex").then((m) => ({ default: m.CodexHandler })),
+  handler: () => import("../handlers/codex").then((m) => ({ default: m.CodexHandler })),
   riskNoticeKey: "providers.riskNotice.oauth",
 };
