@@ -729,12 +729,20 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
       await runWithCodexResponseFence(providerResponse, () => onRequestSuccess(), true);
     }
     const successConnectionId = getCurrentConnectionId();
-    await maybeSyncClaudeExtraUsageState({
+    const extraUsageSync = maybeSyncClaudeExtraUsageState({
       provider,
       connectionId: successConnectionId,
       providerSpecificData: credentials?.providerSpecificData,
       log,
     });
+    if (
+      provider === "claude" &&
+      isFeatureFlagEnabled("CLAUDE_NONSTREAM_EXTRA_USAGE_BACKGROUND_SYNC_ENABLED")
+    ) {
+      void extraUsageSync;
+    } else {
+      await extraUsageSync;
+    }
     // Bill the provider leg's own usage: it was extracted from the body BEFORE
     // translateNonStreamingClientResponse mutated it (applyClientUsageBuffer adds
     // the #8331 client context buffer and can replace usage with an estimate).
