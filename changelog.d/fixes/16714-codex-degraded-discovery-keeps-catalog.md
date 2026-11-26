@@ -1,0 +1,1 @@
+- fix(providers): a Codex discovery with a failed client-version refresh no longer shrinks the stored synced catalog (#16714)

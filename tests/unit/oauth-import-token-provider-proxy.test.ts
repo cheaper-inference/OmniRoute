@@ -25,7 +25,16 @@ const originalFetch = globalThis.fetch;
 
 function stubAnthropic(): boolean[] {
   const inProxyContext: boolean[] = [];
-  globalThis.fetch = (async () => {
+  globalThis.fetch = (async (input: RequestInfo | URL) => {
+    const url = String(input instanceof Request ? input.url : input);
+    // The create path also fires an internal loopback model sync. That call is
+    // not an upstream verification, so it must not be counted as one.
+    if (/^https?:\/\/(127\.0\.0\.1|localhost)(:|\/)/.test(url)) {
+      return new Response(JSON.stringify({ syncedModels: 0 }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      });
+    }
     inProxyContext.push(hasAmbientProxyContext());
     return new Response(
       JSON.stringify({ id: "msg_test", type: "message", role: "assistant", content: [] }),

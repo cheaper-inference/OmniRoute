@@ -21,7 +21,20 @@
 //   DOCKERHUB_ORG_USERNAME       Docker Hub user (or org name for an Organization Access Token)
 //   DOCKERHUB_ORG_TOKEN          Docker Hub token with read & write on the target repository
 //   SOURCE_IMAGE       default ghcr.io/cheaper-inference/omniroute
-//   TARGET_IMAGE       default cheaperinference/omniroute
+//   TARGET_IMAGE       default cheaperinference/omniroute. A target whose first path segment
+//                      is a registry host (ghcr.io/...) logs in to that registry; a bare
+//                      namespace/repo logs in to Docker Hub.
+//
+// The same script also copies releases to the legacy GHCR package ghcr.io/diegosouzapw/omniroute
+// (docker-org-mirror.yml job mirror-legacy-ghcr). That package stopped on 2026-10-21 when the
+// repository moved, and installs pinned to it got no updates; the owner asked (2026-11-21) to
+// keep it current until 2027-06-30. Generic knobs for that job:
+//   MIRROR_USERNAME / MIRROR_TOKEN  credential for TARGET_IMAGE (fall back to DOCKERHUB_ORG_*)
+//   MIRROR_LABEL         name used in annotations and the summary (default "Docker Hub org mirror")
+//   MIRROR_SECRET_HINT   which secret(s) the skip message names
+//   MIRROR_UNTIL         YYYY-MM-DD (UTC); after it the copy stops with a notice
+//   INDEX_DESCRIPTION    written as the index annotation org.opencontainers.image.description,
+//                        which GHCR shows as the package description
 //   GITHUB_STEP_SUMMARY  optional file the summary is appended to
 //   GITHUB_OUTPUT      optional; receives promoted=true|false (whether :latest was moved)
 import { spawnSync } from "node:child_process";
@@ -32,6 +45,16 @@ export const DEFAULT_SOURCE_IMAGE = "ghcr.io/cheaper-inference/omniroute";
 export const DEFAULT_TARGET_IMAGE = "cheaperinference/omniroute";
 
 const VERSION_PATTERN = /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/;
+const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+
+/** Registry host of an image reference, or "" for Docker Hub (namespace/repo). */
+export function registryOf(image) {
+  const first = String(image).split("/")[0];
+  return image.includes("/") &&
+    (first.includes(".") || first.includes(":") || first === "localhost")
+    ? first
+    : "";
+}
 const STABLE_VERSION_PATTERN = /^\d+\.\d+\.\d+$/;
 // Same helper docker-publish.yml uses to decide :latest, so both registries agree.
 const SHOULD_PROMOTE_HELPER = fileURLToPath(new URL("./should-promote-latest.sh", import.meta.url));
@@ -89,7 +112,7 @@ function defaultRun(cmd, args, input) {
 
 /**
  * @param {Record<string, string | undefined>} env
- * @param {{ run?: typeof defaultRun, log?: (line: string) => void }} [deps]
+ * @param {{ run?: typeof defaultRun, log?: (line: string) => void, today?: string }} [deps]
  * @returns {{ exitCode: number, status: "skipped" | "mirrored" | "failed", promoted: boolean, summary: string[] }}
  */
 export function mirrorToOrg(env, deps = {}) {
@@ -99,15 +122,37 @@ export function mirrorToOrg(env, deps = {}) {
   const target = env.TARGET_IMAGE || DEFAULT_TARGET_IMAGE;
   const version = (env.VERSION || "").trim();
   let promoteLatest = env.PROMOTE_LATEST === "true";
+  const label = env.MIRROR_LABEL || "Docker Hub org mirror";
+  const username = env.MIRROR_USERNAME || env.DOCKERHUB_ORG_USERNAME;
+  const token = env.MIRROR_TOKEN || env.DOCKERHUB_ORG_TOKEN;
+  const secretHint =
+    env.MIRROR_SECRET_HINT || "the DOCKERHUB_ORG_USERNAME / DOCKERHUB_ORG_TOKEN secrets are";
+  const registry = registryOf(target);
+  const annotation = env.INDEX_DESCRIPTION
+    ? ["--annotation", `index:org.opencontainers.image.description=${env.INDEX_DESCRIPTION}`]
+    : [];
   const summary = [];
   const fail = (msg) => {
-    log(`::error title=Docker Hub org mirror::${msg}`);
-    summary.push(`❌ Docker Hub org mirror: ${msg}`);
+    log(`::error title=${label}::${msg}`);
+    summary.push(`❌ ${label}: ${msg}`);
     return { exitCode: 1, status: "failed", promoted: false, summary };
   };
 
+  if (env.MIRROR_UNTIL) {
+    if (!DATE_PATTERN.test(env.MIRROR_UNTIL)) {
+      return fail(`Invalid MIRROR_UNTIL ${JSON.stringify(env.MIRROR_UNTIL)}: expected YYYY-MM-DD.`);
+    }
+    const today = deps.today || new Date().toISOString().slice(0, 10);
+    if (today > env.MIRROR_UNTIL) {
+      const msg = `Copies to ${target} ended on ${env.MIRROR_UNTIL} (MIRROR_UNTIL); nothing copied.`;
+      log(`::notice title=${label}::${msg}`);
+      summary.push(`ℹ️ ${label}: ${msg}`);
+      return { exitCode: 0, status: "skipped", promoted: false, summary };
+    }
+  }
+
   if (version === "main" || version === "next") {
-    summary.push(`Docker Hub org mirror: channel \`${version}\` is not mirrored to \`${target}\`.`);
+    summary.push(`${label}: channel \`${version}\` is not mirrored to \`${target}\`.`);
     log(summary[0]);
     return { exitCode: 0, status: "skipped", promoted: false, summary };
   }
@@ -121,14 +166,13 @@ export function mirrorToOrg(env, deps = {}) {
     );
   }
 
-  if (!env.DOCKERHUB_ORG_USERNAME || !env.DOCKERHUB_ORG_TOKEN) {
+  if (!username || !token) {
     const msg =
-      `Skipped the push to ${target}: the DOCKERHUB_ORG_USERNAME / DOCKERHUB_ORG_TOKEN secrets ` +
-      `are not set. ${source} and diegosouzapw/omniroute were published normally. Once the ` +
-      `secrets exist, run the "Mirror Docker image to the Docker Hub org" workflow with ` +
-      `version=${version}.`;
-    log(`::warning title=Docker Hub org mirror skipped::${msg}`);
-    summary.push(`⚠️ Docker Hub org mirror skipped — ${msg}`);
+      `Skipped the push to ${target}: ${secretHint} not set. ${source} and ` +
+      `diegosouzapw/omniroute were published normally. Once the secret exists, run the ` +
+      `"Mirror Docker image to the Docker Hub org" workflow with version=${version}.`;
+    log(`::warning title=${label} skipped::${msg}`);
+    summary.push(`⚠️ ${label} skipped — ${msg}`);
     return { exitCode: 0, status: "skipped", promoted: false, summary };
   }
 
@@ -142,21 +186,21 @@ export function mirrorToOrg(env, deps = {}) {
       const msg =
         `${version} is no longer the highest stable release on origin, so ${target}:latest is ` +
         `left where it is; the ${version} tags are still copied.`;
-      log(`::notice title=Docker Hub org mirror::${msg}`);
+      log(`::notice title=${label}::${msg}`);
       summary.push(`ℹ️ \`${target}:latest\` not moved: ${msg}`, "");
     }
   }
 
   const login = run(
     "docker",
-    ["login", "--username", env.DOCKERHUB_ORG_USERNAME, "--password-stdin"],
-    env.DOCKERHUB_ORG_TOKEN
+    ["login", ...(registry ? [registry] : []), "--username", username, "--password-stdin"],
+    token
   );
   if (login.status !== 0) {
     log(
-      `::error title=Docker Hub org mirror::docker login to Docker Hub as the org credential failed (exit ${login.status}).`
+      `::error title=${label}::docker login to ${registry || "Docker Hub"} failed (exit ${login.status}).`
     );
-    summary.push(`❌ Docker Hub org mirror: login failed (exit ${login.status}).`);
+    summary.push(`❌ ${label}: login failed (exit ${login.status}).`);
     return { exitCode: 1, status: "failed", promoted: false, summary };
   }
 
@@ -172,14 +216,22 @@ export function mirrorToOrg(env, deps = {}) {
         continue;
       }
     }
-    const copy = run("docker", ["buildx", "imagetools", "create", "-t", targetRef, sourceRef]);
+    const copy = run("docker", [
+      "buildx",
+      "imagetools",
+      "create",
+      ...annotation,
+      "-t",
+      targetRef,
+      sourceRef,
+    ]);
     if (copy.status === 0) {
       rows.push(`| \`${targetRef}\` | copied from \`${sourceRef}\` |`);
       continue;
     }
     if (required) {
       failures.push(targetRef);
-      log(`::error title=Docker Hub org mirror::Could not copy ${sourceRef} to ${targetRef}.`);
+      log(`::error title=${label}::Could not copy ${sourceRef} to ${targetRef}.`);
       rows.push(`| \`${targetRef}\` | ❌ failed |`);
     } else {
       log(
@@ -189,12 +241,7 @@ export function mirrorToOrg(env, deps = {}) {
     }
   }
 
-  summary.push(
-    `### Docker Hub org mirror (\`${target}\`)`,
-    "",
-    "| Tag | Result |",
-    "| --- | --- |"
-  );
+  summary.push(`### ${label} (\`${target}\`)`, "", "| Tag | Result |", "| --- | --- |");
   summary.push(...rows);
   if (failures.length > 0) {
     summary.push("", `❌ ${failures.length} mandatory tag(s) failed: ${failures.join(", ")}`);

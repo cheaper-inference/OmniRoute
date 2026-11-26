@@ -1,0 +1,1 @@
+- fix(catalog): `/v1/models` no longer advertises a passthrough provider's default context window as `context_length` for uncataloged models (#20415)

@@ -22,6 +22,11 @@ import type { RoutingStrategyValue } from "../../src/shared/constants/routingStr
 export type CacheControlMode = "auto" | "always" | "never";
 export type GeminiPromptCacheMode = "off" | "implicit";
 
+/** Antigravity Gemini implicit caching is an operator opt-in: anything but "implicit" is off. */
+export function normalizeGeminiPromptCacheMode(value: unknown): GeminiPromptCacheMode {
+  return value === "implicit" ? "implicit" : "off";
+}
+
 /**
  * Cache control settings from the database
  */
@@ -205,18 +210,34 @@ export function resolveConnectionCacheOverride(
 }
 
 /**
+ * OpenRouter serves every vendor's models under one provider id, so the model family decides.
+ * Only `anthropic/*` documents Anthropic-style `cache_control` breakpoints on its OpenAI-style
+ * chat endpoint (4 explicit breakpoints at most). Every other family stays stripped: strict
+ * upstreams behind OpenRouter reject unknown part fields (#16384), and google/* or qwen/* have
+ * no capture of their own yet.
+ */
+function isOpenRouterAnthropicModel(providerId: string, model?: string | null): boolean {
+  return providerId === "openrouter" && !!model && model.toLowerCase().startsWith("anthropic/");
+}
+
+/**
  * Whether `cache_control` markers should be PASSED THROUGH the OpenAI-format
  * translation for this provider (vs. stripped). Used to gate the request-side
  * passthrough so generic / implicit-cache OpenAI providers keep getting cleaned.
  */
 export function providerHonorsOpenAIFormatCacheControl(
   provider: string | null | undefined,
-  connectionCacheOverride?: ConnectionCacheOverride | null
+  connectionCacheOverride?: ConnectionCacheOverride | null,
+  model?: string | null
 ): boolean {
   if (connectionCacheOverride?.cacheControlPassthrough === "openai-format") return true;
   if (connectionCacheOverride?.cacheControlPassthrough === "strip") return false;
   if (!provider) return false;
-  return OPENAI_FORMAT_CACHE_CONTROL_PROVIDERS.has(provider.toLowerCase());
+  const providerId = provider.toLowerCase();
+  return (
+    OPENAI_FORMAT_CACHE_CONTROL_PROVIDERS.has(providerId) ||
+    isOpenRouterAnthropicModel(providerId, model)
+  );
 }
 
 /**
@@ -259,6 +280,21 @@ function isClaudeTargetFormat(targetFormat?: string | null): boolean {
   return targetFormat?.toLowerCase() === "claude";
 }
 
+/** Antigravity's implicit policy covers Gemini models, not its Claude/GPT lanes. */
+export function isAntigravityGeminiCacheTarget(
+  provider: string | null | undefined,
+  model?: string | null
+): boolean {
+  const providerId = provider?.toLowerCase();
+  return (
+    (providerId === "antigravity" || providerId === "agy") &&
+    String(model ?? "")
+      .toLowerCase()
+      .split("/")
+      .some((segment) => segment.startsWith("gemini-"))
+  );
+}
+
 /**
  * Check if a provider supports prompt caching
  * Supports caching if:
@@ -276,11 +312,7 @@ export function providerSupportsCaching(
   if (providerId === "antigravity" || providerId === "agy") {
     // Antigravity carries Gemini, Claude, and GPT models. Only Gemini models
     // are in this release's implicit-cache scope.
-    const modelSegments = String(model ?? "")
-      .toLowerCase()
-      .split("/")
-      .filter(Boolean);
-    if (!modelSegments.some((segment) => segment.startsWith("gemini-"))) return false;
+    if (!isAntigravityGeminiCacheTarget(providerId, model)) return false;
     if (typeof connectionCacheOverride?.supportsPromptCaching === "boolean") {
       return connectionCacheOverride.supportsPromptCaching;
     }
@@ -295,9 +327,19 @@ export function providerSupportsCaching(
     return isClaudeTargetFormat(targetFormat);
   }
   if (isOpenCodeCacheableModel(providerId, model)) return true;
+  if (isOpenRouterAnthropicModel(providerId, model)) return true;
   if (CACHING_PROVIDERS.has(providerId)) return true;
   // All Claude-protocol providers support prompt caching.
   return isClaudeTargetFormat(targetFormat);
+}
+
+function allowsAutomaticPrefixCaching(override?: ConnectionCacheOverride | null): boolean {
+  const passthrough = override?.cacheControlPassthrough;
+  return (
+    override?.supportsPromptCaching !== false &&
+    passthrough !== "openai-format" &&
+    passthrough !== "claude-format"
+  );
 }
 
 /** Whether a marker-free request can still participate in the provider cache.
@@ -306,12 +348,22 @@ export function providerSupportsCaching(
 export function providerUsesAutomaticPrefixCaching(
   provider: string | null | undefined,
   connectionCacheOverride?: ConnectionCacheOverride | null,
-  model?: string | null
+  model?: string | null,
+  geminiPromptCacheMode?: GeminiPromptCacheMode | null
 ): boolean {
-  if (connectionCacheOverride?.supportsPromptCaching === false) return false;
-  const passthrough = connectionCacheOverride?.cacheControlPassthrough;
-  if (passthrough === "openai-format" || passthrough === "claude-format") return false;
-  if (connectionCacheOverride?.supportsPromptCaching === true && passthrough === "strip") {
+  if (!allowsAutomaticPrefixCaching(connectionCacheOverride)) return false;
+  // Opting into implicit Gemini caching makes the cacheable prefix worth protecting during
+  // compression. With the mode off, an Antigravity request keeps the generic rules below.
+  if (
+    isAntigravityGeminiCacheTarget(provider, model) &&
+    normalizeGeminiPromptCacheMode(geminiPromptCacheMode) === "implicit"
+  ) {
+    return true;
+  }
+  if (
+    connectionCacheOverride?.supportsPromptCaching === true &&
+    connectionCacheOverride.cacheControlPassthrough === "strip"
+  ) {
     return true;
   }
   if (!provider) return false;

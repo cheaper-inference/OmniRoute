@@ -128,9 +128,11 @@ const FFMPEG_PCM16K_ARGS = [
   "pipe:1",
 ];
 
+export class FfmpegNotFoundError extends GeminiLiveError {}
+
 function ffmpegSpawnError(err: NodeJS.ErrnoException): GeminiLiveError {
   if (err.code === "ENOENT") {
-    return new GeminiLiveError(
+    return new FfmpegNotFoundError(
       "FFmpeg is required for converting audio to 16kHz PCM, but was not found on PATH.",
       500
     );

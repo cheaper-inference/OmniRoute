@@ -1,0 +1,1 @@
+- **fix(sse):** RTK compression now leaves Anthropic `tool_result` blocks marked `is_error: true` untouched, so the model sees the full error trace of a failed tool call instead of a trimmed one.

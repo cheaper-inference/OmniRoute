@@ -120,8 +120,8 @@ import {
   hasPerModelFailureScope,
   getRuntimeProviderProfile,
   recordModelLockoutFailure as recordModelLockoutFailureBase,
-  retryHintBypassesMaxCooldownMs,
   isAuthoritativeRetryHintSource,
+  upstreamResetDateIsAuthoritative,
   isProviderModelUnsupported400,
   isAccountSemaphoreFull,
 } from "@omniroute/open-sse/services/accountFallback.ts";
@@ -1131,13 +1131,17 @@ export async function getProviderCredentials(
       }
     }
     rehydrateAntigravityFamilyLocksForConnections(provider, connections);
+    const activeInventoryConnections = connections;
     // allowedConnections: restrict to specific connection IDs (from API key policy, #363)
     if (allowedConnections && allowedConnections.length > 0) {
       connections = connections.filter((conn) => allowedConnections.includes(conn.id));
     }
     // The active, key-scoped pool before any pin narrows it: per-account catalogs (antigravity/agy)
     // judge "does some account list the model" over the whole pool, not just the pinned account.
-    const inventoryPoolConnections = connections;
+    // Codex entitlement evidence covers all active accounts, even outside a key's allowlist.
+    // Restricting credentials must not turn a known missing entitlement into unknown evidence.
+    const inventoryPoolConnections =
+      provider === "codex" ? activeInventoryConnections : connections;
     let explicitProbeKind: "probe" | "suppressed" | "skip" = "skip";
     if (forcedConnectionId && !connections.some((c) => c.id === forcedConnectionId)) {
       const pinnedRaw = await getCachedProviderConnectionById(forcedConnectionId);
@@ -2984,7 +2988,13 @@ export async function markAccountUnavailable(
     if (
       provider &&
       model &&
-      isModelScopedAccessDenial(provider, status, errorText, options.structuredError)
+      isModelScopedAccessDenial(
+        provider,
+        status,
+        errorText,
+        options.structuredError,
+        options.upstreamErrorBody
+      )
     ) {
       lockModel(provider, connectionId, model, "model_not_found", COOLDOWN_MS.notFound);
       return { shouldFallback: true, cooldownMs: 0 };
@@ -3283,12 +3293,13 @@ export async function markAccountUnavailable(
           exactCooldownMs,
           maxCooldownMs: mlSettings.maxCooldownMs,
           scope: usesExactAntigravityLock ? "exact" : undefined,
-          // Only a transport header, google.rpc.RetryInfo, or cached Claude reset can bypass
-          // maxCooldownMs. Prose and generic JSON hints remain exact but operator-capped, and
-          // so does the avalanche burst cooldown when it outlasts the upstream reset.
+          // Only a transport header, google.rpc.RetryInfo, a cached Claude reset, or a
+          // provider that opted in with trustUpstreamResetDate can bypass maxCooldownMs.
+          // Prose and generic JSON hints remain exact but operator-capped, and so does the
+          // avalanche burst cooldown when it outlasts the upstream reset.
           exactCooldownIsUpstreamReset:
             exactCooldownMs === upstreamCooldownMs &&
-            (retryHintBypassesMaxCooldownMs(fallbackResult.retryHintSource) ||
+            (upstreamResetDateIsAuthoritative(fallbackResult.retryHintSource, provider) ||
               hasClaudeScopedReset),
         }
       );

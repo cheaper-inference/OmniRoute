@@ -190,6 +190,8 @@ describe("BatchListTab — rendering", () => {
       b.textContent?.includes("batchListRemoveCompleted")
     );
     expect(btn).not.toBeNull();
+    // The button carries a title: inactive would be aria-disabled, not `disabled`.
+    expect((btn as HTMLButtonElement).hasAttribute("aria-disabled")).toBe(false);
     expect((btn as HTMLButtonElement).disabled).toBe(false);
   });
 

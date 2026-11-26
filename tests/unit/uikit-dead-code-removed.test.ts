@@ -46,3 +46,22 @@ test("P10: MODEL_COLORS / getModelColor stay out of src/shared/constants/colors.
   assert.doesNotMatch(colors, /MODEL_COLORS|getModelColor/);
   assert.deepEqual(referencing(/\b(MODEL_COLORS|getModelColor)\b/), []);
 });
+
+// Kit `number-input` adoption: the five hand-rolled `NumberField`s of the settings screens
+// (ResilienceFields, ModelLockoutCard and the three Modality Bridge tabs) wrapped
+// `<Input type="number">`, with the unit in a loose <span>. The shared `NumberInput` adapter
+// (kit NumberInput inside the kit Field) replaces them.
+test("number-input: settings keeps no hand-rolled NumberField", () => {
+  const settingsDir = path.join("src", "app", "(dashboard)", "dashboard", "settings") + path.sep;
+  const offenders = SOURCES.filter(
+    (f) =>
+      path.relative(ROOT, f).startsWith(settingsDir) &&
+      /\bNumberField\b/.test(fs.readFileSync(f, "utf8"))
+  ).map((f) => path.relative(ROOT, f));
+  assert.deepEqual(offenders, []);
+  assert.equal(
+    fs.existsSync(path.join(ROOT, "src/shared/components/NumberInput.tsx")),
+    true,
+    "the shared NumberInput adapter must exist"
+  );
+});

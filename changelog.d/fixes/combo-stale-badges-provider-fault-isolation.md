@@ -1,0 +1,1 @@
+- Keep stale-model warning badges for healthy combo providers when another provider's live catalog lookup fails, without modifying combo definitions.
