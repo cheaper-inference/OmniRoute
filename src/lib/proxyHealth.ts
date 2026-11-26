@@ -153,7 +153,13 @@ export async function isProxyReachable(
     return existingProbe;
   }
 
-  const probe = tcpCheckImpl(host, port, timeoutMs).then((rawVerdict) => {
+  const probe = (async () => {
+    let rawVerdict: boolean | ProxyProbeVerdict;
+    try {
+      rawVerdict = await tcpCheckImpl(host, port, timeoutMs);
+    } catch {
+      rawVerdict = "fail";
+    }
     const verdict = normalizeVerdict(rawVerdict);
     const healthy = verdict === "ok";
     noteProbeTransition(proxyUrl, verdict);
@@ -167,7 +173,7 @@ export async function isProxyReachable(
       });
     }
     return healthy;
-  });
+  })();
 
   proxyHealthInflight.set(proxyUrl, probe);
   try {

@@ -419,3 +419,22 @@ test("HAC-107: a first-ever healthy probe does not log a restored transition", a
     invalidateProxyHealth(proxyUrl);
   }
 });
+
+test("HAC-107: a spawn failure is a definitive fail and is cached", async () => {
+  const proxyUrl = "http://127.0.0.1:9106";
+  invalidateProxyHealth(proxyUrl);
+  let probeCount = 0;
+  __setProxyHealthTcpCheckForTesting(async () => {
+    probeCount += 1;
+    throw new Error("spawn EACCES");
+  });
+  try {
+    assert.equal(await isProxyReachable(proxyUrl, 50, 30_000), false);
+    assert.equal(getCachedProxyHealth(proxyUrl), false, "a spawn failure is definitive");
+    assert.equal(await isProxyReachable(proxyUrl, 50, 30_000), false);
+    assert.equal(probeCount, 1, "a cached spawn failure must not re-probe");
+  } finally {
+    __setProxyHealthTcpCheckForTesting(null);
+    invalidateProxyHealth(proxyUrl);
+  }
+});
