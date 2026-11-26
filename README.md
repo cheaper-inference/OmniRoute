@@ -11,6 +11,15 @@
 
 </div>
 
+## 🚀 Deploy your own OmniRoute
+
+**No local setup or AI assistant required.** Create a Neon PostgreSQL database, then deploy the maintained Render configuration directly from this repository.
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/michaelkage/OmniRoute/tree/feature/render-free-deployment)
+
+Follow the [step-by-step Render deployment guide](https://github.com/michaelkage/OmniRoute/blob/feature/render-free-deployment/docs/deployment/RENDER.md). You will add your private Neon `DATABASE_URL` in Render before the first successful boot.
+
+
 <div align="center">
 
 ## 💰 ~1.62B Tokens / Month Across Third-Party Free Tiers
