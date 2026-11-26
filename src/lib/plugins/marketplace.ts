@@ -3,10 +3,20 @@ import dns from "node:dns/promises";
 import { isPrivateHost } from "@/shared/network/outboundUrlGuard";
 import { safeOutboundFetch } from "@/shared/network/safeOutboundFetch";
 import { pluginManager } from "./manager";
-import { createHash } from "node:crypto";
+import { createHash, type KeyObject } from "node:crypto";
 import { mkdtemp, writeFile, rm } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
+import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
+import {
+  MARKETPLACE_INTEGRITY_LIMITS,
+  MarketplaceIntegrityError,
+  OFFICIAL_MARKETPLACE_TRUST,
+  resolveTrustedMarketplaceKeys,
+  verifyMarketplaceArchive,
+  verifyMarketplaceIndex,
+} from "./marketplaceIntegrity";
+import { extractMarketplaceArchive } from "./marketplaceArchive";
 /**
  * Plugin Marketplace — browse, search, install plugins from a registry.
  *
@@ -148,7 +158,8 @@ const SEED_REGISTRY: MarketplaceEntry[] = [
 export async function listMarketplacePlugins(): Promise<MarketplaceEntry[]> {
   try {
     const settings = await getSettings();
-    const url = typeof settings.pluginMarketplaceUrl === "string" ? settings.pluginMarketplaceUrl : null;
+    const url =
+      typeof settings.pluginMarketplaceUrl === "string" ? settings.pluginMarketplaceUrl : null;
     if (url) {
       if (!(await isSafeMarketplaceUrl(url))) {
         console.warn("Custom marketplace URL rejected (SSRF guard):", url);
@@ -161,13 +172,23 @@ export async function listMarketplacePlugins(): Promise<MarketplaceEntry[]> {
       }
       const data = await res.json();
       if (Array.isArray(data)) {
-        return data.filter((entry: unknown) =>
-          entry && typeof entry === "object" && typeof (entry as Record<string, unknown>).name === "string"
+        return data.filter(
+          (entry: unknown) =>
+            entry &&
+            typeof entry === "object" &&
+            typeof (entry as Record<string, unknown>).name === "string"
         ) as MarketplaceEntry[];
       }
-      if (data && typeof data === "object" && Array.isArray((data as Record<string, unknown>).plugins)) {
-        return ((data as Record<string, unknown>).plugins as unknown[]).filter((entry: unknown) =>
-          entry && typeof entry === "object" && typeof (entry as Record<string, unknown>).name === "string"
+      if (
+        data &&
+        typeof data === "object" &&
+        Array.isArray((data as Record<string, unknown>).plugins)
+      ) {
+        return ((data as Record<string, unknown>).plugins as unknown[]).filter(
+          (entry: unknown) =>
+            entry &&
+            typeof entry === "object" &&
+            typeof (entry as Record<string, unknown>).name === "string"
         ) as MarketplaceEntry[];
       }
       console.warn("Custom marketplace returned unrecognized format");
@@ -207,11 +228,186 @@ export function isMarketplaceAvailable(): boolean {
   return true; // Always available (falls back to seed)
 }
 
+export type MarketplaceInstallRequest = { name: string; version?: string };
+
+/** Feature flag: install only from the official signed index (see marketplaceIntegrity.ts). */
+const INTEGRITY_FLAG = "PLUGIN_MARKETPLACE_INTEGRITY_ENABLED";
+
+// ── Signed install (PLUGIN_MARKETPLACE_INTEGRITY_ENABLED) ──
+
+type VerifiedInstallDeps = {
+  trust: { indexUrl: string; signatureUrl: string; keys: readonly KeyObject[] };
+  fetchBytes: (url: string, maxBytes: number) => Promise<Uint8Array>;
+  install: (pluginDir: string) => Promise<{ name: string; version: string }>;
+  now: () => Date;
+};
+
+const PACKAGE_FETCH_TIMEOUT_MS = 30_000;
+
+/** Read a response body, refusing anything larger than `maxBytes`. */
+async function readBoundedBody(response: Response, maxBytes: number): Promise<Uint8Array> {
+  const declared = Number(response.headers.get("content-length"));
+  if (Number.isFinite(declared) && declared > maxBytes) throw new Error("body too large");
+  const reader = response.body?.getReader();
+  if (!reader) {
+    const whole = Buffer.from(await response.arrayBuffer());
+    if (whole.byteLength > maxBytes) throw new Error("body too large");
+    return whole;
+  }
+  const chunks: Buffer[] = [];
+  let total = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    total += value.byteLength;
+    if (total > maxBytes) {
+      await reader.cancel().catch(() => undefined);
+      throw new Error("body too large");
+    }
+    chunks.push(Buffer.from(value));
+  }
+  return Buffer.concat(chunks);
+}
+
+async function fetchBoundedBytes(url: string, maxBytes: number): Promise<Uint8Array> {
+  const response = await safeOutboundFetch(url, {
+    guard: "public-only",
+    timeoutMs: PACKAGE_FETCH_TIMEOUT_MS,
+  });
+  if (!response.ok) throw new Error(`unexpected status ${response.status}`);
+  return readBoundedBody(response, maxBytes);
+}
+
+let verifiedInstallOverrides: Partial<VerifiedInstallDeps> | null = null;
+
+/** Test seam: replace the trust anchor, transport, manager or clock. `null` restores defaults. */
+export function setVerifiedInstallDepsForTesting(
+  overrides: Partial<VerifiedInstallDeps> | null
+): void {
+  verifiedInstallOverrides = overrides ? { ...verifiedInstallOverrides, ...overrides } : null;
+}
+
+function resolveVerifiedInstallDeps(): VerifiedInstallDeps {
+  const now = verifiedInstallOverrides?.now ?? (() => new Date());
+  return {
+    trust: verifiedInstallOverrides?.trust ?? {
+      indexUrl: OFFICIAL_MARKETPLACE_TRUST.indexUrl,
+      signatureUrl: OFFICIAL_MARKETPLACE_TRUST.signatureUrl,
+      keys: resolveTrustedMarketplaceKeys(OFFICIAL_MARKETPLACE_TRUST.keys, now()),
+    },
+    fetchBytes: verifiedInstallOverrides?.fetchBytes ?? fetchBoundedBytes,
+    install:
+      verifiedInstallOverrides?.install ??
+      (async (pluginDir) => {
+        const row = await pluginManager.install(pluginDir);
+        return { name: row.name, version: row.version };
+      }),
+    now,
+  };
+}
+
+async function fetchOrRefuse(
+  deps: VerifiedInstallDeps,
+  url: string,
+  maxBytes: number,
+  failure: "index_unavailable" | "package_unavailable"
+): Promise<Uint8Array> {
+  try {
+    return await deps.fetchBytes(url, maxBytes);
+  } catch {
+    // The underlying error can carry hosts, ports and paths: callers get the fixed text only.
+    throw new MarketplaceIntegrityError(failure);
+  }
+}
+
+/**
+ * Signed install: official index (signature + validity) -> exact id+version entry ->
+ * download -> SHA-256 of the downloaded bytes -> extraction in private staging -> manifest
+ * name/version check -> `pluginManager.install(<extracted dir>)`.
+ *
+ * Any failure throws a {@link MarketplaceIntegrityError} BEFORE the manager is called, so an
+ * already installed plugin and its registered version are untouched. This path has no
+ * fallback to an unsigned install and never consults the custom registry URL.
+ */
+async function installVerifiedMarketplacePlugin(
+  request: MarketplaceInstallRequest
+): Promise<{ name: string; version: string }> {
+  const deps = resolveVerifiedInstallDeps();
+  const version = request.version?.trim();
+  if (!version) throw new MarketplaceIntegrityError("version_required");
+
+  const { indexUrl, signatureUrl, keys } = deps.trust;
+  if (
+    !indexUrl.startsWith("https://") ||
+    !signatureUrl.startsWith("https://") ||
+    keys.length === 0
+  ) {
+    throw new MarketplaceIntegrityError("integrity_not_configured");
+  }
+
+  const limits = MARKETPLACE_INTEGRITY_LIMITS;
+  const indexBytes = await fetchOrRefuse(deps, indexUrl, limits.maxIndexBytes, "index_unavailable");
+  const signatureBytes = await fetchOrRefuse(
+    deps,
+    signatureUrl,
+    limits.maxSignatureBytes,
+    "index_unavailable"
+  );
+  const index = verifyMarketplaceIndex(
+    indexBytes,
+    Buffer.from(signatureBytes).toString("utf8"),
+    keys,
+    deps.now()
+  );
+
+  const entry = index.plugins.find((p) => p.name === request.name && p.version === version);
+  if (!entry) throw new MarketplaceIntegrityError("entry_not_found");
+
+  const archive = await fetchOrRefuse(
+    deps,
+    entry.downloadUrl,
+    limits.maxPackageBytes,
+    "package_unavailable"
+  );
+  verifyMarketplaceArchive(archive, entry.checksum);
+
+  const stagingDir = await mkdtemp(join(tmpdir(), "plugin-mp-"));
+  try {
+    const { pluginDir } = await extractMarketplaceArchive(archive, stagingDir, {
+      name: entry.name,
+      version: entry.version,
+    });
+    return await deps.install(pluginDir);
+  } finally {
+    await rm(stagingDir, { recursive: true, force: true }).catch(() => {});
+  }
+}
+
 /**
  * Install a plugin from the marketplace by name.
+ *
+ * With `PLUGIN_MARKETPLACE_INTEGRITY_ENABLED` on, only the signed official index is used and
+ * a version is required (see {@link installVerifiedMarketplacePlugin}); with it off, the
+ * original behaviour below is unchanged. The flag is read without a catch: if it cannot be
+ * resolved the install fails, it does not fall back to the unsigned path.
+ */
+export async function installMarketplacePlugin(
+  input: string | MarketplaceInstallRequest
+): Promise<{ name: string; version: string }> {
+  const request: MarketplaceInstallRequest = typeof input === "string" ? { name: input } : input;
+  if (isFeatureFlagEnabled(INTEGRITY_FLAG)) {
+    return installVerifiedMarketplacePlugin(request);
+  }
+  return installUnverifiedMarketplacePlugin(request.name);
+}
+
+/**
+ * Install a plugin from the marketplace by name (flag off: the unchanged original contract).
  * Downloads the plugin archive, verifies checksum if present, and installs via PluginManager.
  */
-export async function installMarketplacePlugin(name: string): Promise<{ name: string; version: string }> {
+async function installUnverifiedMarketplacePlugin(
+  name: string
+): Promise<{ name: string; version: string }> {
   const plugins = await listMarketplacePlugins();
   const entry = plugins.find((p) => p.name === name);
   if (!entry) {
