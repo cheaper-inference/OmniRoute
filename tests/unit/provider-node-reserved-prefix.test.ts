@@ -232,8 +232,9 @@ test("shared set size includes live REGISTRY and retired Designer + Felo + Qwen 
   // opencode-server (#16995) registers id "opencode-server" plus the distinct alias "ocs" —
   // two more (444 -> 446).
   // Replicate, Cerebrium, Hetzner and Grokified (#19206) add four distinct prefixes (+4: 446 -> 450).
-  // Measured on the merged tree: RESERVED_PROVIDER_PREFIXES.size = 450.
-  assert.equal(RESERVED_PREFIX_COUNT, 450);
+  // #14308 registers Ashna, Atria, GapGPT and Hooshyar (id == alias each): +4 (450 -> 454).
+  // Measured on the merged tree: RESERVED_PROVIDER_PREFIXES.size = 454.
+  assert.equal(RESERVED_PREFIX_COUNT, 454);
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("opencode-server"), true);
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("ocs"), true);
   for (const id of ["replicate", "cerebrium", "hetzner", "grokified"]) {
