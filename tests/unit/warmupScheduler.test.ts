@@ -188,7 +188,7 @@ test("integration: opted-in claude_pro connection → fetch fires with Bearer to
 
   const body = JSON.parse(call.init?.body as string);
   assert.equal(body.max_tokens, 1, "warmup must use max_tokens=1 to minimize quota burn");
-  assert.equal(body.model, "claude-3-5-haiku-20241022");
+  assert.equal(body.model, "claude-haiku-5-5");
 
   delete process.env.OMNIROUTE_WARMUP_ENABLED;
   delete process.env.OMNIROUTE_WARMUP_CRON;

@@ -202,7 +202,7 @@ async function executeWarmup(): Promise<void> {
       urlSuffix: "?beta=true",
       headers,
       proxyConfig,
-      model: process.env.OMNIROUTE_WARMUP_MODEL || "claude-3-5-haiku-20241022",
+      model: process.env.OMNIROUTE_WARMUP_MODEL || "claude-haiku-5-5",
     });
   }
 

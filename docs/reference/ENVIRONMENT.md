@@ -1806,7 +1806,7 @@ Cron-driven warmup for opted-in Anthropic OAuth connections, so the 5-hour rate-
 | `OMNIROUTE_WARMUP_ENABLED`     | _(unset → off)_             | `src/lib/warmupScheduler.ts` | Master switch for the warmup scheduler. Accepts `1`/`true`/`yes`/`on` (case-insensitive, trimmed). Any other value, or unset, leaves the scheduler off. |
 | `OMNIROUTE_WARMUP_CRON`        | `0 7 * * *`                 | `src/lib/warmupScheduler.ts` | Five-field cron expression for the warmup tick, evaluated in `America/Los_Angeles` (Anthropic's reset timezone) regardless of the host clock.           |
 | `OMNIROUTE_WARMUP_CONCURRENCY` | `3`                         | `src/lib/warmupScheduler.ts` | How many connections are warmed in parallel per tick. Clamped to `1`-`10`; a non-numeric value falls back to `3`.                                       |
-| `OMNIROUTE_WARMUP_MODEL`       | `claude-3-5-haiku-20241022` | `src/lib/warmupScheduler.ts` | Model used for the warmup request. Override only if the default is unavailable on your plan; pick the cheapest model that still opens the window.       |
+| `OMNIROUTE_WARMUP_MODEL`       | `claude-haiku-5-5`          | `src/lib/warmupScheduler.ts` | Model used for the warmup request. Override only if the default is unavailable on your plan; pick the cheapest model that still opens the window.       |
 
 ### Browser-Login VNC Sessions & Data-Dir Alias
 
