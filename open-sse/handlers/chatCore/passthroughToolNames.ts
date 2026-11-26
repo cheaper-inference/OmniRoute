@@ -1,5 +1,6 @@
 import { CLAUDE_OAUTH_TOOL_PREFIX } from "../../translator/request/openai-to-claude.ts";
 import { restoreOpenAIToolNames } from "../../translator/helpers/toolCallHelper.ts";
+import { isIncompleteFinishReason } from "../../utils/finishReason.ts";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -111,12 +112,11 @@ export function normalizeOpenAIToolFinishReasons(responseBody: unknown): void {
   if (!response?.choices) return;
 
   for (const choice of response.choices) {
-    // `length` means the output-token limit cut the turn, possibly inside a tool call.
-    // Keep it, or the client runs a half-written call and the cache stores it.
+    // An explicit incomplete finish can accompany a half-written tool call.
     if (
       choice.message?.tool_calls?.length > 0 &&
       choice.finish_reason !== "tool_calls" &&
-      choice.finish_reason !== "length"
+      !isIncompleteFinishReason(choice.finish_reason)
     ) {
       choice.finish_reason = "tool_calls";
     }

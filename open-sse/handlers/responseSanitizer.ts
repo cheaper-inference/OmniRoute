@@ -8,7 +8,10 @@ import {
   stripDotsToolCallBlocks,
 } from "../utils/dotsToolCalls.ts";
 import { stripInternalReasoningPlaceholder } from "../utils/reasoningPlaceholder.ts";
-import { normalizeOpenAICompatibleFinishReason } from "../utils/finishReason.ts";
+import {
+  isIncompleteFinishReason,
+  normalizeOpenAICompatibleFinishReason,
+} from "../utils/finishReason.ts";
 import {
   collapseExcessiveNewlines,
   extractThinkingFromContent,
@@ -252,7 +255,8 @@ export function sanitizeOpenAIResponse(
         message &&
         Array.isArray(message.tool_calls) &&
         message.tool_calls.length > 0 &&
-        sanitizedChoice.finish_reason !== "tool_calls"
+        sanitizedChoice.finish_reason !== "tool_calls" &&
+        !isIncompleteFinishReason(sanitizedChoice.finish_reason)
       ) {
         sanitizedChoice.finish_reason = "tool_calls";
       }
@@ -419,8 +423,7 @@ function applyTextualToolCallSanitization(sanitized: JsonRecord, msgRecord: Json
 function applyDotsToolCallSanitization(sanitized: JsonRecord, msgRecord: JsonRecord): void {
   if (typeof sanitized.content !== "string" || !hasDotsToolCalls(sanitized.content)) return;
   // Non-streaming body only: a whole message, so nothing is held back for a later chunk.
-  // finish_reason belongs to the choice; sanitizeOpenAIResponse promotes it to
-  // "tool_calls" once the message carries tool_calls.
+  // sanitizeOpenAIResponse normalizes the choice's finish_reason after parsing the calls.
   const dotsResult = parseDotsToolCalls(sanitized.content, { final: true });
   if (dotsResult.toolCalls.length > 0 && !msgRecord.tool_calls && !sanitized.tool_calls) {
     sanitized.content = dotsResult.content || null;

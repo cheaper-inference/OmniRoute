@@ -41,6 +41,7 @@ import {
   extractThinkingFromContent,
   shouldParseTextualReasoningTags,
 } from "./responseSanitizer/reasoning.ts";
+import { isTruncatedStreamBody } from "./sseParser/truncation.ts";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -695,7 +696,13 @@ export function translateNonStreamingResponse(
       // refusal -> content_filter, max_tokens and model_context_window_exceeded ->
       // length, stop_sequence and pause_turn -> stop. A raw spelling here reached
       // non-OpenAI clients unmapped (a Gemini client saw a refusal as STOP).
-      const finishReason = normalizeOpenAICompatibleFinishReasonString(root.stop_reason, "stop");
+      const hasRecoveredToolCalls =
+        (sourceFormat === FORMATS.OPENAI || sourceFormat === FORMATS.OPENAI_RESPONSES) &&
+        toolCalls.length > 0 &&
+        isTruncatedStreamBody(root);
+      const finishReason = hasRecoveredToolCalls
+        ? "tool_calls"
+        : normalizeOpenAICompatibleFinishReasonString(root.stop_reason, "stop");
 
       const result: JsonRecord = {
         id: `chatcmpl-${toString(root.id, String(Date.now()))}`,

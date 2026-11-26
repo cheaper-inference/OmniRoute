@@ -1,0 +1,1 @@
+- **fix(sse):** Chat Completions keep `finish_reason` as `length` or `content_filter` when the upstream stops inside a tool call, in JSON, live SSE and buffered SSE responses. Other finish reasons that arrive with tool calls still become `tool_calls`. Behaviour change: clients now get `length` instead of `tool_calls` for truncated tool arguments. (KEA-9626)

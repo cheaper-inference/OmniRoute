@@ -64,6 +64,7 @@ import {
   createTranslateCommentaryFilter,
 } from "./responsesCommentaryDrop.ts";
 import { buildErrorBody } from "./error.ts";
+import { isIncompleteFinishReason } from "./finishReason.ts";
 import { parseTextualToolCallCandidate, isValidToolCallHeaderPrefix } from "./textualToolCall.ts";
 import { pickResponsesTextPart, type ResponsesTextPart } from "./responsesTextPart.ts";
 import { stripObfuscationZeroWidth } from "./zeroWidth.ts";
@@ -2571,11 +2572,12 @@ export function createSSEStream(options: StreamOptions = {}) {
                     } catch {} // best-effort bookkeeping write — a miss just skips latency correlation
                   }
 
-                  // T18: Normalize finish_reason to 'tool_calls' if tool calls were used
+                  // T18: Normalize the finish for streamed tool calls unless the turn is incomplete.
                   if (
                     isFinishChunk &&
                     passthroughHasToolCalls &&
-                    parsed.choices[0].finish_reason !== "tool_calls"
+                    isFinishChunk !== "tool_calls" &&
+                    !isIncompleteFinishReason(isFinishChunk)
                   ) {
                     parsed.choices[0].finish_reason = "tool_calls";
                     // If we modify it, we must output the modified object. This used to

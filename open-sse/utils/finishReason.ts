@@ -6,6 +6,10 @@ const OPENAI_FINISH_REASONS = new Set([
   "function_call",
 ]);
 
+export function isIncompleteFinishReason(reason: unknown): boolean {
+  return reason === "length" || reason === "content_filter";
+}
+
 const SAFETY_FINISH_REASONS = new Set([
   "safety",
   "recitation",
