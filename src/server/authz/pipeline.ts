@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { getCachedBodySizeSettings } from "../../lib/db/readCache";
 import { isDraining } from "../../lib/gracefulShutdown";
 import { checkBodySize, getBodySizeLimit } from "../../shared/middleware/bodySizeGuard";
+import { resolveIncomingCorrelationId } from "../../shared/utils/correlationPreserve";
 import {
   verifyDashboardSessionToken,
   mintDashboardSessionToken,
@@ -351,7 +352,12 @@ export async function runAuthzPipeline(
   requestHeaders.delete(CLIENT_IP_HEADER);
 
   requestHeaders.set(AUTHZ_HEADER_ROUTE_CLASS, classification.routeClass);
-  requestHeaders.set(AUTHZ_HEADER_REQUEST_ID, requestId);
+  // Client API handlers can use the supplied X-Request-Id as an idempotency key.
+  const clientRequestId =
+    classification.routeClass === "CLIENT_API"
+      ? resolveIncomingCorrelationId(requestHeaders.get(AUTHZ_HEADER_REQUEST_ID))
+      : null;
+  requestHeaders.set(AUTHZ_HEADER_REQUEST_ID, clientRequestId ?? requestId);
   // Stamp a trusted, non-secret locality verdict derived from the real stamped
   // peer IP AND the via-proxy marker. Route handlers (e.g. cliTokenAuth) read
   // this instead of re-deriving locality from the spoofable Host header. The

@@ -2,6 +2,8 @@ import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import plugin from "../src/index.js";
 
+const stagedPlugin = plugin as unknown as { setup: (ctx: unknown) => Promise<() => void> };
+
 // A catalog that only appears once the slowest optional source has answered is
 // a catalog that never appears at all on a host that exits first: a hanging
 // optional endpoint kept models, combos and everything else unpublished until
@@ -26,7 +28,7 @@ describe("plugin-v2 staged refresh: optional sources never gate the publish", ()
 
   function setupCtx(
     providerId: string,
-    reloads: { count: number }
+    reloads: { count: number; onReload?: () => void }
   ): {
     added: unknown[];
     ctx: Record<string, unknown>;
@@ -41,6 +43,7 @@ describe("plugin-v2 staged refresh: optional sources never gate the publish", ()
         },
         reload: async () => {
           reloads.count += 1;
+          reloads.onReload?.();
         },
       },
       model: {
@@ -49,6 +52,14 @@ describe("plugin-v2 staged refresh: optional sources never gate the publish", ()
       integration: { transform: () => Promise.resolve({ dispose: async () => {} }) },
     };
     return { added, ctx };
+  }
+
+  function deferred() {
+    let resolve!: () => void;
+    const promise = new Promise<void>((complete) => {
+      resolve = complete;
+    });
+    return { promise, resolve };
   }
 
   function publishedOf(added: unknown[]): Map<string, Record<string, unknown>> {
@@ -67,7 +78,10 @@ describe("plugin-v2 staged refresh: optional sources never gate the publish", ()
    * signal — the shape of a gateway that accepts the connection and then
    * goes quiet.
    */
-  function stubFetch(opts: { combosHangs?: boolean; enrichmentDelayMs?: number }): typeof fetch {
+  function stubFetch(opts: {
+    combosHangs?: boolean;
+    enrichmentReady?: Promise<void>;
+  }): typeof fetch {
     return (async (url: unknown) => {
       const href = String(url);
       const ok = (body: unknown) => ({
@@ -83,9 +97,7 @@ describe("plugin-v2 staged refresh: optional sources never gate the publish", ()
         return ok({ combos: [] });
       }
       if (href.includes("/api/pricing/models")) {
-        if (opts.enrichmentDelayMs !== undefined) {
-          await new Promise((r) => setTimeout(r, opts.enrichmentDelayMs));
-        }
+        if (opts.enrichmentReady) await opts.enrichmentReady;
         return ok({
           omni: {
             id: "omni",
@@ -140,36 +152,45 @@ describe("plugin-v2 staged refresh: optional sources never gate the publish", ()
     }
   });
 
-  it("applies an optional source that lands after the publish, on the next transform", async () => {
-    const restoreDisk = await isolateDisk();
-    const origFetch = globalThis.fetch;
-    globalThis.fetch = stubFetch({ enrichmentDelayMs: 120 });
-    const reloads = { count: 0 };
-    const { added, ctx } = setupCtx("staged-late", reloads);
-    try {
-      await withSilentConsole(async () => {
-        await (plugin as unknown as { setup: (c: unknown) => Promise<void> }).setup(ctx);
-        const early = [...publishedOf(added).values()].find((m) => m["id"] === "m1");
-        assert.ok(early, "models publish before the slow enrichment");
+  it(
+    "applies an optional source that lands after the publish, on the next transform",
+    { timeout: 10_000 },
+    async () => {
+      const restoreDisk = await isolateDisk();
+      const origFetch = globalThis.fetch;
+      const enrichment = deferred();
+      const overlay = deferred();
+      globalThis.fetch = stubFetch({ enrichmentReady: enrichment.promise });
+      const { added, ctx } = setupCtx("staged-late", { count: 0, onReload: overlay.resolve });
+      let stop: (() => void) | undefined;
+      try {
+        await withSilentConsole(async () => {
+          stop = await stagedPlugin.setup(ctx);
+          const early = [...publishedOf(added).values()].find((m) => m["id"] === "m1");
+          assert.equal(early?.["name"], "staged-late - m1", "models publish before enrichment");
 
-        await new Promise((r) => setTimeout(r, 300));
-        // Re-setup refreshes the snapshot; the late enrichment lands on reload.
-        added.length = 0;
-        await (plugin as unknown as { setup: (c: unknown) => Promise<void> }).setup(ctx);
-        const late = [...publishedOf(added).values()].find((m) => m["id"] === "m1");
-        // The overlay is rendered, not just stored: the provider label the
-        // gateway ships alongside the display name reaches the picker.
-        assert.equal(
-          late?.["name"],
-          "Omni - Model One",
-          "the late enrichment must reach the catalog, provider tag included"
-        );
-      });
-    } finally {
-      globalThis.fetch = origFetch;
-      restoreDisk();
+          enrichment.resolve();
+          // The host is notified after the overlay has been stored for the next setup.
+          await overlay.promise;
+          added.length = 0;
+          stop = await stagedPlugin.setup(ctx);
+          const late = [...publishedOf(added).values()].find((m) => m["id"] === "m1");
+          // The overlay is rendered, not just stored: the provider label the
+          // gateway ships alongside the display name reaches the picker.
+          assert.equal(
+            late?.["name"],
+            "Omni - Model One",
+            "the late enrichment must reach the catalog, provider tag included"
+          );
+        });
+      } finally {
+        stop?.();
+        enrichment.resolve();
+        globalThis.fetch = origFetch;
+        restoreDisk();
+      }
     }
-  });
+  );
 
   it("does not ask the host to reload when the overlay came back identical", async () => {
     const restoreDisk = await isolateDisk();
@@ -195,60 +216,56 @@ describe("plugin-v2 staged refresh: optional sources never gate the publish", ()
     }
   });
 
-  it("a refresh after the TTL keeps the overlay instead of downgrading the picker", async () => {
-    const restoreDisk = await isolateDisk();
-    const origFetch = globalThis.fetch;
-    // Enrichment answers once, then goes away: the second refresh must not
-    // strip the names the first one obtained.
-    let enrichCalls = 0;
-    globalThis.fetch = (async (url: unknown) => {
-      const href = String(url);
-      const ok = (body: unknown) => ({
-        ok: true,
-        status: 200,
-        statusText: "OK",
-        json: async () => body,
-      });
-      if (href.includes("/api/combos")) return ok({ combos: [] });
-      if (href.includes("/api/pricing/models")) {
-        enrichCalls += 1;
-        if (enrichCalls > 1) {
-          return { ok: false, status: 503, statusText: "Unavailable", json: async () => ({}) };
+  it(
+    "a refresh after the TTL keeps the overlay instead of downgrading the picker",
+    { timeout: 10_000 },
+    async (t) => {
+      const restoreDisk = await isolateDisk();
+      const origFetch = globalThis.fetch;
+      // Enrichment answers once, then goes away: the second refresh must not
+      // strip the names the first one obtained.
+      let enrichCalls = 0;
+      const enrichment = deferred();
+      const overlay = deferred();
+      const initialFetch = stubFetch({ enrichmentReady: enrichment.promise });
+      globalThis.fetch = async (url, options) => {
+        if (String(url).includes("/api/pricing/models") && ++enrichCalls > 1) {
+          return new Response(null, { status: 503, statusText: "Unavailable" });
         }
-        return ok({
-          omni: {
-            id: "omni",
-            alias: "omni",
-            name: "Omni",
-            models: [{ id: "m1", name: "Model One" }],
-          },
+        return initialFetch(url, options);
+      };
+      const { added, ctx } = setupCtx("staged-ttl", { count: 0, onReload: overlay.resolve });
+      const ttlMs = 1;
+      (ctx["options"] as Record<string, unknown>)["modelCacheTtlMs"] = ttlMs;
+      let now = Date.now();
+      t.mock.method(Date, "now", () => now);
+      let stop: (() => void) | undefined;
+      try {
+        await withSilentConsole(async () => {
+          stop = await stagedPlugin.setup(ctx);
+          enrichment.resolve();
+          await overlay.promise;
+          assert.equal(enrichCalls, 1);
+
+          now += ttlMs + 1;
+          added.length = 0;
+          stop = await stagedPlugin.setup(ctx);
+          assert.equal(enrichCalls, 2, "the expired cache must retry enrichment");
+          const m1 = [...publishedOf(added).values()].find((m) => m["id"] === "m1");
+          assert.equal(
+            m1?.["name"],
+            "Omni - Model One",
+            "the second refresh must keep the name the first one resolved"
+          );
         });
+      } finally {
+        stop?.();
+        enrichment.resolve();
+        globalThis.fetch = origFetch;
+        restoreDisk();
       }
-      if (href.includes("/api/pricing")) return ok({});
-      if (href.includes("/api/free-tier/summary")) return ok({});
-      return ok({ data: [{ id: "m1", capabilities: { tool_calling: true } }] });
-    }) as unknown as typeof fetch;
-    const reloads = { count: 0 };
-    const { added, ctx } = setupCtx("staged-ttl", reloads);
-    (ctx["options"] as Record<string, unknown>)["modelCacheTtlMs"] = 1;
-    try {
-      await withSilentConsole(async () => {
-        await (plugin as unknown as { setup: (c: unknown) => Promise<void> }).setup(ctx);
-        await new Promise((r) => setTimeout(r, 250));
-        added.length = 0;
-        await (plugin as unknown as { setup: (c: unknown) => Promise<void> }).setup(ctx);
-        const m1 = [...publishedOf(added).values()].find((m) => m["id"] === "m1");
-        assert.equal(
-          m1?.["name"],
-          "Omni - Model One",
-          "the second refresh must keep the name the first one resolved"
-        );
-      });
-    } finally {
-      globalThis.fetch = origFetch;
-      restoreDisk();
     }
-  });
+  );
 
   it("publishes models while a hanging /api/combos holds nothing back", async () => {
     // Combos used to sit on the critical path (Promise.all with models), so a
