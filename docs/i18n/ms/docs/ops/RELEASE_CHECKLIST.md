@@ -378,8 +378,7 @@ jadi lakukan pemotongan daripada klon penuh atau jalankan `git fetch --unshallow
 sebelumnya wujud, `package.json` ialah versi sasaran, isu `release-freeze` dibuka, tiada isu
 `Release branch not green` yang terbuka
 pada cabang keluaran sedia ada — cabang yang tidak wujud melaporkan `?` tidak diketahui, tidak sekali-kali
-hijau — baris gilir `release` Mergify dikonfigurasikan (G11: `queue_rules`, `checks_timeout`,
-label `queue`), set peraturan `release/*` masih menyekat pemadaman dan tolakan paksa, serta
+hijau — omni-queue menggabungkan permintaan tarik ke dalam cawangan keluaran (G11: `config/merge-queue/config.json` sah, `bases` mengurus cawangan keluaran, `mode` `live`, labelnya wujud), set peraturan `release/*` masih menyekat pemadaman dan tolakan paksa, serta
 `stable/v3` dan `develop` belum wujud), dua langkah cabang, pencetus aliran kerja dorman
 dan syarat `if:` yang menjadi benar (serta yang kekal disekat oleh pemboleh ubah repositori atau
 ditetapkan kepada repositori kanonik), dist-tag yang dijangkakan (`latest` → 3.9.0, `next` dan

@@ -2,6 +2,7 @@
 import React, { act, useEffect } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { readButtonTooltip } from "../../_helpers/buttonTooltip";
 
 vi.mock("next-intl", () => ({
   useLocale: () => "en",
@@ -178,8 +179,9 @@ describe("#16161 quota row action", () => {
       );
       const buttons = refreshButtons(el);
       expect(buttons).toHaveLength(1);
-      expect(buttons[0].title).toContain("without spending reset credits");
-      expect(el.querySelector("button[title='Refresh usage']")).toBeNull();
+      // The hint is the kit tooltip of the button, not a native title.
+      expect(await readButtonTooltip(buttons[0])).toContain("without spending reset credits");
+      expect(el.querySelector("button[aria-label='Refresh usage']")).toBeNull();
       expect(click).not.toHaveBeenCalled();
       act(() => buttons[0].click());
       expect(click).toHaveBeenCalledTimes(1);
@@ -199,7 +201,8 @@ describe("#16161 quota row action", () => {
     );
     const buttons = refreshButtons(el);
     expect(buttons).toHaveLength(1);
-    expect(buttons[0].disabled).toBe(true);
+    // A titled Button is aria-disabled while busy (it stays hoverable for its tooltip).
+    expect(buttons[0].getAttribute("aria-disabled")).toBe("true");
     expect(buttons[0].getAttribute("aria-busy")).toBe("true");
     expect(el.querySelector("[role='status']")?.textContent).toContain("Checking quota");
     act(() => buttons[0].click());
@@ -272,7 +275,7 @@ describe("#16161 quota row action", () => {
       />
     );
     expect(refreshButtons(el)).toHaveLength(0);
-    const button = el.querySelector<HTMLButtonElement>("button[title='Refresh usage']")!;
+    const button = el.querySelector<HTMLButtonElement>("button[aria-label='Refresh usage']")!;
     expect(button).not.toBeNull();
     act(() => button.click());
     expect(click).toHaveBeenCalledTimes(1);

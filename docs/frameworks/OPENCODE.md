@@ -9,11 +9,17 @@ lastUpdated: 2027-07-27
 > **Status:** Generally available.
 > **Audience:** Operators wiring OpenCode to an OmniRoute deployment.
 > **Source of truth (config schema):** `src/shared/services/opencodeConfig.ts`
-> **Source of truth (npm package):** `@omniroute/opencode-provider/` (publishable workspace)
+> **Recommended npm packages:** `@omniroute/opencode-plugin/` (OpenCode v1, installed by
+> `omniroute setup opencode`) and `@omniroute/opencode-plugin-v2/` (OpenCode v2). The older
+> `@omniroute/opencode-provider/` package is **deprecated** (see Path 2).
 
 [OpenCode](https://opencode.ai) is an agentic CLI/desktop AI client. It reads its provider catalog from `~/.config/opencode/opencode.json` (or `opencode.jsonc`) and follows the schema at `https://opencode.ai/config.json`. OmniRoute exposes itself to OpenCode as one of those providers — every request flows through OmniRoute's standard OpenAI-compatible `/v1` surface, so OpenCode automatically benefits from Auto-Combo routing, circuit breakers, key policies, observability, etc.
 
-There are **two supported integration paths**. Pick one — they generate the same config.
+This page documents the two static-config paths below; both generate the same config. For a
+model list that follows your live catalog, use the plugin instead: `omniroute setup opencode`
+installs `@omniroute/opencode-plugin` (OpenCode v1), and `@omniroute/opencode-plugin-v2` targets
+OpenCode v2 (see [CLI integrations](../guides/CLI-INTEGRATIONS.md) and the
+[OpenCode v2 plugin guide](../guides/OPENCODE-V2-PLUGIN.md)).
 
 ---
 
@@ -22,7 +28,7 @@ There are **two supported integration paths**. Pick one — they generate the sa
 Recommended for end users. Ships with OmniRoute. Writes `opencode.json` in place.
 
 ```bash
-# After installing OmniRoute (npm i -g @omniroute/cli or local clone)
+# After installing OmniRoute (npm i -g omniroute or local clone)
 omniroute config opencode \
   --base-url http://localhost:20128 \
   --api-key "$OMNIROUTE_API_KEY"
@@ -56,9 +62,14 @@ Resulting file (default model catalog):
 
 ---
 
-## Path 2 — npm package `@omniroute/opencode-provider`
+## Path 2 — npm package `@omniroute/opencode-provider` (deprecated)
 
-Recommended when you're scripting the config from Node/TS (CI pipelines, monorepos, custom installer flows).
+> **Deprecated.** The package writes a static model list that drifts behind your live
+> OmniRoute catalog. Its README recommends migrating to `@omniroute/opencode-plugin`
+> (or `@omniroute/opencode-plugin-v2` on OpenCode v2). The API below is kept for existing
+> scripts only.
+
+Used when scripting the config from Node/TS (CI pipelines, monorepos, custom installer flows).
 
 ```bash
 npm install --save-dev @omniroute/opencode-provider
@@ -161,5 +172,7 @@ For Anthropic-style clients that send `x-api-key` + `anthropic-version`, OmniRou
 
 - [API reference](../reference/API_REFERENCE.md) — full OmniRoute REST surface
 - [Auto-Combo](../routing/AUTO-COMBO.md) — what `model: "auto"` means
-- [`@omniroute/opencode-provider` README](../../@omniroute/opencode-provider/README.md)
+- [`@omniroute/opencode-plugin` README](../../@omniroute/opencode-plugin/README.md) (recommended)
+- [`@omniroute/opencode-plugin-v2` README](../../@omniroute/opencode-plugin-v2/README.md)
+- [`@omniroute/opencode-provider` README](../../@omniroute/opencode-provider/README.md) (deprecated)
 - Source: `src/shared/services/opencodeConfig.ts`, `src/lib/cli-helper/config-generator/opencode.ts`, `@omniroute/opencode-provider/src/index.ts`

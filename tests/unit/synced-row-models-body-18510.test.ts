@@ -60,7 +60,9 @@ async function catalogRow(id: string) {
   return rest;
 }
 
-function syncedRowBody(provider: string, model: string, contextLength = 128000) {
+// #20415: a passthrough provider's synced row no longer advertises the registry placeholder
+// (128000) as context_length, so the default is "omitted"; a real card window still shows.
+function syncedRowBody(provider: string, model: string, contextLength?: number) {
   return {
     id: `${provider}/${model}`,
     object: "model",
@@ -71,7 +73,7 @@ function syncedRowBody(provider: string, model: string, contextLength = 128000) 
     capabilities: { tool_calling: true, reasoning: true },
     // The tip publishes a readable name for a synced row that has none (#18354).
     name: resolveModelDisplayName(model),
-    context_length: contextLength,
+    ...(contextLength === undefined ? {} : { context_length: contextLength }),
   };
 }
 

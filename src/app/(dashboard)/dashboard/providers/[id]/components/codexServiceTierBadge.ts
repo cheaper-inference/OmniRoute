@@ -5,6 +5,7 @@ import {
 } from "@/lib/providers/codexServiceTierModels";
 import { providerText, type ProviderMessageTranslator } from "../providerCredentialText";
 
+/** Label, icon and colour of the Codex service-tier badge: info, or the `chart-2` series for flex. */
 export function getCodexServiceTierBadge(
   t: ProviderMessageTranslator,
   tier: CodexServiceTier,
@@ -14,7 +15,7 @@ export function getCodexServiceTierBadge(
     return {
       label: CODEX_ULTRAFAST_LABEL,
       icon: "bolt",
-      className: "bg-info/15 text-info",
+      tone: undefined,
       title: CODEX_ULTRAFAST_MODEL_LABEL,
     };
   }
@@ -22,7 +23,7 @@ export function getCodexServiceTierBadge(
     return {
       label: providerText(t, "codexTierFastLabel", "Fast"),
       icon: "bolt",
-      className: "bg-info/15 text-info",
+      tone: undefined,
       title: global
         ? providerText(
             t,
@@ -40,7 +41,7 @@ export function getCodexServiceTierBadge(
     return {
       label: providerText(t, "codexTierFlexLabel", "Flex"),
       icon: "speed",
-      className: "bg-chart-2/15 text-chart-2-ink",
+      tone: "chart-2" as const,
       title: global
         ? providerText(
             t,

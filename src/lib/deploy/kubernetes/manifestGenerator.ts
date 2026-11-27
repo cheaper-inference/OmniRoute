@@ -334,9 +334,9 @@ export function renderManifests(spec: DeploySpec): string {
 }
 
 /**
- * Baseline spec per target. `local` assumes k3s on the same machine; `vps`
- * assumes a real hostname in front of a cluster someone else can reach, so it
- * defaults to TLS on and API keys required.
+ * Baseline spec per target. Both require API keys because their Ingress can be
+ * reached over the network, including Traefik on a local k3s node. `vps` also
+ * defaults to TLS and needs a hostname.
  */
 export function defaultSpec(target: DeployTargetKind): DeploySpec {
   const shared = {
@@ -376,7 +376,7 @@ export function defaultSpec(target: DeployTargetKind): DeploySpec {
         limitsMemory: "2Gi",
       },
       config: {
-        requireApiKey: false,
+        requireApiKey: true,
         logLevel: "info",
         liveWsAllowedOrigins: "http://omniroute.local",
         shutdownTimeoutMs: 30_000,

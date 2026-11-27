@@ -4,9 +4,9 @@
 
 ---
 
-OmniRoute kasutab **paralleeltsükli** väljalaskemudelit: aktiivse tsükli jaoks on eraldi haru `release/vX.Y.Z`, avaldatud versioonirea jaoks `main` ning tsükli väljalaskmisel muutumatu märgend `vX.Y.Z`. On ootuspärane, et commit'id jõuavad nii harudesse `release/*` _kui ka_ harusse `main` — see ei ole eksitus.
+OmniRoute kasutab a** paralleelne tsükkel** väljalaske mudel: spetsiaalne `release/vX.Y.Z` haru aktiivse tsükli jaoks, `main` avaldatud rea jaoks ja muutumatu `vX.Y.Z` silt selle tsükli tarnimisel. Kui näha, et toimingud langevad `release/*` _ja_ `main` siis eeldatakse, et — ei ole segadus.
 
-Haldajatele mõeldud üksikasjad asuvad failis `CLAUDE.md` (range reegel nr 21) ja dokumendis [RELEASE_CHECKLIST.md](./RELEASE_CHECKLIST.md). See leht on avalik kaastöötajatele mõeldud kokkuvõte.
+Hooldaja üksikasjad elavad `CLAUDE.md` (Hard Rule #21) ja [RELEASE_CHECKLIST.md](./RELEASE_CHECKLIST.md). See leht on avalikele kaastöölistele suunatud kokkuvõte.
 
 ## Lühidalt
 
@@ -36,21 +36,23 @@ flowchart LR
 
 `main` ei ole igapäevane integratsiooniharu. Haru `main` vastu avatud PR-id tuleb tavaliselt enne mestimist ümber suunata.
 
-## Väljalaske külmutamine (paralleelsed tsüklid)
+## Vabastage külmutamine (paralleelsed tsüklid)
 
-Väljalaske kooskõlastamise ajal avatakse märgendiga `release-freeze` tähistatud probleem. See **ei peata arendust**:
+Väljalaske vastavusse viimisel avatakse tähisprobleem `release-freeze`. See** ei peata arengut** :
 
-- Külmutatud `release/vX.Y.Z` kuulub selle väljalaske eest vastutavale isikule.
-- Järgmise tsükli `release/vX+1` luuakse külmutatud tipust, et kaastöötajad saaksid tööde lisamist jätkata.
-- Avatud PR-id, mis on endiselt suunatud külmutatud harule, tuleb **ümber suunata** aktiivsele (suurima versiooniga) harule `release/v*`.
+- Külmutatud `release/vX.Y.Z` kuulub selle laeva vabastamiskaptenile.
+- Järgmise tsükli `release/vX+1` lõigatakse külmunud otsa küljest ära, et panustajad jätkaksid maandumistööd.
+- Avatud PRs, mis on endiselt suunatud külmunud oksale, peaksid olema** uuesti sihitud** aktiivsele (kõrgeimale) `release/v*` harule.
 
-Enne soovitud haru mestitavaks pidamist kontrollige, kas mõni külmutamine on aktiivne:
+Enne kui eeldate, et soovitud haru on ühendatav, kontrollige, kas see on külmutatud:
 
 ```bash
 gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
 ```
 
-Mestimise mehhanism (omaniku märgend `queue` → Mergify) on dokumenteeritud failis [MERGE_TRAIN.md](./MERGE_TRAIN.md).
+Ühendamise mehaanika (omanik `queue` silt → Mergify) on dokumenteeritud failis [MERGE_TRAIN.md](./MERGE_TRAIN.md).
+
+> **2026-11-19: Mergify liitmisjärjekord on lõpetatud** (omaniku otsus). `.mergify.yml` ei määratle enam järjekorda ja keeldub ühendamiskäskudest, mis ühendavad või kirjutavad ümber tõmbamistaotluse. Väljalasked PRs liidetakse käsitsi hoidla reeglistiku "Nõua aktiivsel väljalaskmisel rohelisi väravaid" (`Gate / CI` + `Gate / Quality`) alusel, kuni omni-järjekord töötab reaalajas režiimis, ja seejärel omni-järjekorra kaudu ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). `queue` silt ei ühenda enam midagi.
 
 ## Miks on vaja nii haru kui ka märgendit?
 

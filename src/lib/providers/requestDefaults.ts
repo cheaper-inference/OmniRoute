@@ -272,6 +272,11 @@ export function normalizeProviderSpecificData(
     delete normalized.keepMidConversationSystem;
   }
 
+  // Strict chat-history repair (open-sse/utils/strictChatHistory.ts) — real booleans only.
+  if ("strictChatHistory" in normalized && typeof normalized.strictChatHistory !== "boolean") {
+    delete normalized.strictChatHistory;
+  }
+
   // Claude OAuth usage-wall opt-ins (open-sse/services/claudeLowPriority.ts) — only
   // persist real booleans; both default to off when absent.
   if ("lowPriorityMode" in normalized && typeof normalized.lowPriorityMode !== "boolean") {

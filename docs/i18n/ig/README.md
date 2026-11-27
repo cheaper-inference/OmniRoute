@@ -93,7 +93,7 @@
 
 [![ụdị npm](https://img.shields.io/npm/v/omniroute?color=cb3837&logo=npm)](https://www.npmjs.com/package/omniroute)
 ![NPM kwa ọnwa](https://img.shields.io/npm/dm/omniroute?label=npm/month&color=cb3837&logo=npm)
-[![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/diegosouzapw/omniroute)
+[![Docker Hub](https://img.shields.io/docker/v/cheaperinference/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/cheaperinference/omniroute)
 ![Ikikere: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 ![Nbudata Docker](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
 ![Nbudata Electron](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Nkwa ahụ — Otu endpoint na ndị na-eweta ọrụ 394. Fallback akpaka na-eme ka nhazi ụzọ gaa n'ihu mgbe ebumnuche ọzọ dị mma ka dị. Ogidi isii: fallback siri ike n'etiti ndị na-eweta ọrụ 394 · ruo 95% nchekwa token na ọrụ tozuru etozu · $0 iji malite site na free tiers 150+ na ndị na-eweta ọrụ 51 na-enye n'efu ruo mgbe ebighị ebi, ma ọ bụ site na ndenye aha ugboro ugboro/keyless · njikọ CLI/agent 39 site na otu nhazi · ndakọrịta OpenAI, Claude, Gemini na Responses API na /v1 · njikwa mmepụta gụnyere circuit breakers, TLS stealth, MCP 110 tools, A2A, ebe nchekwa, guardrails, evals na nkwupụta ule static karịrị 56,000 n'ofe faịlụ ule 7,800+ a na-enyocha."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Nkwa ahụ — Otu endpoint na ndị na-eweta ọrụ 394. Fallback akpaka na-eme ka nhazi ụzọ gaa n'ihu mgbe ebumnuche ọzọ dị mma ka dị. Ogidi isii: fallback siri ike n'etiti ndị na-eweta ọrụ 394 · ruo 95% nchekwa token na ọrụ tozuru etozu · $0 iji malite site na free tiers 150+ na ndị na-eweta ọrụ 40 na-enye n'efu ruo mgbe ebighị ebi, ma ọ bụ site na ndenye aha ugboro ugboro/keyless · njikọ CLI/agent 39 site na otu nhazi · ndakọrịta OpenAI, Claude, Gemini na Responses API na /v1 · njikwa mmepụta gụnyere circuit breakers, TLS stealth, MCP 110 tools, A2A, ebe nchekwa, guardrails, evals na nkwupụta ule static karịrị 56,000 n'ofe faịlụ ule 7,800+ a na-enyocha."/>
 
 <br/>
 <br/>
@@ -703,7 +703,7 @@ n’akụkọ ihe omume shell gị. → [CLI Integrations](docs/guides/CLI-INTEG
 
 </div>
 
-> **Ndị na-eweta 394 edebanyere aha** n'ofe mkpokọta nkata, mgbasa ozi, ọchụchọ, mpaghara, onye nnọchi anya igwe ojii na sistemụ ndị bụ isi, gụnyere **153 nwere metadata nchọpụta `hasFree: true`**. Ndebanye aha ụdị nkata kpuchiri **ndị na-eweta 239 / njikọ ndị na-eweta na ụdị 3,059 pụrụ iche / NJ ụdị raw 1,475**; katalọgụ mmefu n'efu dị iche nwere **ahịrị kwa ụdị 465**, **ọdọ ego na-eme ugboro ugboro 34** na **ndị na-eweta 51 na-enye n'efu ruo mgbe ebighị ebi, na-eme ugboro ugboro ma ọ bụ na-achọghị igodo**. Ndị a bụ denominator dị iche iche site n'ebumnuche; nkọwa na ngụkọta e wepụtaworo nkwughachi ọdọ ego dị na [Ntụaka Ndị Na-eweta](docs/reference/PROVIDER_REFERENCE.md) na [Ọkwa N'efu](docs/reference/FREE_TIERS.md).
+> **Ndị na-eweta 394 edebanyere aha** n'ofe mkpokọta nkata, mgbasa ozi, ọchụchọ, mpaghara, onye nnọchi anya igwe ojii na sistemụ ndị bụ isi, gụnyere **153 nwere metadata nchọpụta `hasFree: true`**. Ndebanye aha ụdị nkata kpuchiri **ndị na-eweta 239 / njikọ ndị na-eweta na ụdị 3,059 pụrụ iche / NJ ụdị raw 1,475**; katalọgụ mmefu n'efu dị iche nwere **ahịrị kwa ụdị 465**, **ọdọ ego na-eme ugboro ugboro 34** na **ndị na-eweta 40 na-enye n'efu ruo mgbe ebighị ebi, na-eme ugboro ugboro ma ọ bụ na-achọghị igodo**. Ndị a bụ denominator dị iche iche site n'ebumnuche; nkọwa na ngụkọta e wepụtaworo nkwughachi ọdọ ego dị na [Ntụaka Ndị Na-eweta](docs/reference/PROVIDER_REFERENCE.md) na [Ọkwa N'efu](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -778,7 +778,7 @@ n’akụkọ ihe omume shell gị. → [CLI Integrations](docs/guides/CLI-INTEG
   <tr><th align="left">Platform</th><th align="left">Ntinye</th><th align="left">Isi uru</th></tr>
   <tr><td align="left" nowrap>📦 <b>npm (global)</b></td><td align="left" nowrap><code>npm install -g omniroute</code></td><td align="left">Otu iwu, OS ọ bụla</td></tr>
   <tr><td align="left" nowrap>⚡ <b>Bun (global)</b></td><td align="left" nowrap><code>bun add -g omniroute</code></td><td align="left">Tarball sitere n'otu registry ahụ, ntinye ngwa ngwa</td></tr>
-  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … diegosouzapw/omniroute</code></td><td align="left">Multi-arch <b>AMD64 + ARM64</b></td></tr>
+  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … cheaperinference/omniroute</code></td><td align="left">Multi-arch <b>AMD64 + ARM64</b></td></tr>
   <tr><td align="left" nowrap>🖥️ <b>Desktop (Electron)</b></td><td align="left" nowrap><code>npm run electron:build</code></td><td align="left">Window nke obodo + system tray — <b>Windows / macOS / Linux</b></td></tr>
   <tr><td align="left" nowrap>🎩 <b>Menu-bar (OmniRouteTray)</b></td><td align="left" nowrap><code>brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left">Ọ na-elekọta ma na-emelite server na akpaghị aka — <b>macOS</b></td></tr>
   <tr><td align="left" nowrap>💪 <b>ARM</b></td><td align="left" nowrap>native <code>arm64</code></td><td align="left">Raspberry Pi, ARM servers, Apple Silicon</td></tr>
@@ -1101,7 +1101,7 @@ Jiri ndị a naanị maka clients na-enweghị ike itinye `Authorization: Bearer
 
 ```bash
 docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
-  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
 ```
 
 `:latest` na-esochi SemVer kwụsiri ike kachasị elu nke **ebipụtara**. Ọ naghị eso git `main`. Jiri `:X.Y.Z` kpọchie ụdị ahụ maka GitOps. Lee [Ọwa Mwepụta Docker](docs/guides/DOCKER_GUIDE.md#release-channels). Ihe oyiyi ahụ na-akpọchi **`OMNIROUTE_MEMORY_MB=1024`**. Nke ahụ zuru ezu maka dashboard na mkparịta ụka dị mfe. **Ndị ọrụ koodu** (`POST /v1/responses` sitere na Claude Code, Codex, Grok, …) chọrọ V8 heap buru nnọọ ibu, ma ọ bụ usoro ahụ ga-enye `FATAL ERROR` na ihe dịka 12 GiB mgbe contexts abụọ dị ogologo na-ekpuchikọrịta. Hazie container ahụ ka ọ dị ukwuu karịa heap ahụ (native buffers dị n'èzí V8):
@@ -1115,7 +1115,7 @@ docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
 ```bash
 docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
   -e OMNIROUTE_MEMORY_MB=8192 --memory=10g \
-  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
 ```
 
 Tebụl zuru ezu: [Ntuziaka Docker — RAM oge ọsọ](docs/guides/DOCKER_GUIDE.md#runtime-ram-for-coding-agents).
@@ -1322,7 +1322,7 @@ Metrik iwu na 2026-10-18: **vidiyo pụrụ iche 1.976** · **nlele amaara 20.22
   <tr><td nowrap><b>Oge ịgba ọsọ</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Asụsụ</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> n'ofe <code>src/</code> na <code>open-sse/</code> (enweghị <code>any</code> n'ime isi kemgbe v2.0)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Ebe nchekwa data</b></td><td>better-sqlite3 (SQLite, ndekọ WAL) + LowDB (JSON ochie) — modul ngalaba 147, mbugharị 240</td></tr>
+  <tr><td nowrap><b>Ebe nchekwa data</b></td><td>better-sqlite3 (SQLite, ndekọ WAL) + LowDB (JSON ochie) — modul ngalaba 147, mbugharị 252</td></tr>
   <tr><td nowrap><b>Ncheta</b></td><td>SQLite FTS5 ọchụchọ ederede zuru ezu + ntinye vector int8-quantized, mbelata nke nwere ụdị</td></tr>
   <tr><td nowrap><b>Atụmatụ data</b></td><td>Zod 4 — nkwado MCP tool I/O + nkwekọrịta API</td></tr>
   <tr><td nowrap><b>Usoro nkwukọrịta</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1335,7 +1335,7 @@ Metrik iwu na 2026-10-18: **vidiyo pụrụ iche 1.976** · **nlele amaara 20.22
   <tr><td nowrap><b>Nnwale</b></td><td>Onye na-agba ule Node.js + Vitest — <b>nkwupụta ule static karịrị 60,000</b> n'ofe faịlụ ule karịrị 8,400 a na-enyocha (unit, integration, E2E, nchekwa, gburugburu ebe obibi)</td></tr>
   <tr><td nowrap><b>Ikpo okwu</b></td><td>Kọmpụta desktọpụ (Electron) · Android (Termux) · PWA (ihe nchọgharị ọ bụla)</td></tr>
   <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — mbipụta npm akpaghị aka + Docker Hub mgbe e wepụtara ya</td></tr>
-  <tr><td nowrap><b>Njikọ</b></td><td><a href="https://omniroute.online">Weebụsaịtị</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
+  <tr><td nowrap><b>Njikọ</b></td><td><a href="https://omniroute.online">Weebụsaịtị</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/cheaperinference/omniroute">Docker Hub</a></td></tr>
 </table>
 
 <div align="center">

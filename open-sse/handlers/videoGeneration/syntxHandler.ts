@@ -30,19 +30,23 @@ async function resolveVideoDataUrlRef(
   fetchImpl: typeof fetch
 ): Promise<string | null> {
   const decoded = decodeDataUrlBounded(ref);
-  if (!decoded) return null;
+  if (!decoded || decoded.bytes.byteLength === 0) {
+    throw new SyntxMediaError("Could not decode video reference for SYNTX video generation", 400);
+  }
   const ext = decoded.mime.startsWith("video/")
     ? "mp4"
     : decoded.mime.includes("jpeg")
       ? "jpg"
       : "png";
-  return uploadSyntxMediaFile({
+  const uploaded = await uploadSyntxMediaFile({
     token,
     bytes: decoded.bytes,
     filename: `frame.${ext}`,
     mimeType: decoded.mime,
     fetchImpl,
   });
+  if (!uploaded) throw new SyntxMediaError("SYNTX rejected the video reference upload", 502);
+  return uploaded;
 }
 
 async function uploadVideoRefs(

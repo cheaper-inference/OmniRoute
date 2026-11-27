@@ -82,6 +82,7 @@ function setup(t: { after: (fn: () => void) => void }): Fixture {
     "scripts/ci/ui-kit-sync-pr.sh",
     "scripts/dev/sync-ui-kit.sh",
     "scripts/check/check-ui-kit-snapshot.mjs",
+    "scripts/lib/is-main-module.mjs",
   ]) {
     fs.mkdirSync(path.dirname(path.join(work, file)), { recursive: true });
     fs.copyFileSync(path.join(REPO_ROOT, file), path.join(work, file));

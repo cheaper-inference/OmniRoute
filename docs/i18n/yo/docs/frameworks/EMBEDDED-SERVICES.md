@@ -557,6 +557,8 @@ Aṣoju yii:
 
 awọn iṣagbega WebSocket fun dasibodu ifibọ ni a mu nipasẹ olupin ẹlẹgbẹ kan lori ibudo iyasọtọ (wo `src/lib/services/embedWsProxy.ts`).
 
+Gbogbo igbesoke ni a fun ni aṣẹ ṣaaju ki oju eefin naa ṣii, pẹlu awọn ofin kanna bi ọna ifibọ HTTP : ẹlẹgbẹ gbọdọ jẹ loopback laisi akọsori itusilẹ-aṣoju, `Origin` aṣawakiri kan gbọdọ jẹ ipilẹṣẹ dasibodu (`LIVE_WS_ALLOWED_ORIGINS` / `LIVE_WS_ALLOWED_HOSTS` fa awọn aiyipada loopback fa), ati pe olupe naa nilo igba dasibodu kan tabi bọtini API iṣakoso-scope kan ayafi ti iwọle dasibodu.
+
 **Aabo:** Awọn ipa-ọna aṣoju ti a fiwe si jẹ tito lẹtọ labẹ `LOCAL_ONLY_API_PREFIXES` ati pe o le de ọdọ lati loopback nikan. Olukọni ti o gba JWT nipasẹ oju eefin Cloudflare/Ngrok ko le ṣe aṣoju sinu awọn iṣẹ ifibọ.
 
 ---

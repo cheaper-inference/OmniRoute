@@ -24,7 +24,7 @@ Ove brojke opisuju zasebne račune trećih strana i uslove podobnosti u cijelom 
 | **+ iza provjere regionalnog identiteta**           | **+~ 6M**       | `modelscope` (Alibaba Cloud binding + kopno-Kina verifikacija stvarnog imena). Stvarna ponavljajuća kvota, izložena kao `gatedRecurringTokens` / `gatedProviders` i na kontrolnoj tabli. Nikada nije sažeto u naslov: +~ 6M iza verifikacije regionalnog identiteta. |
 | Teoretski plafon (sva ograničenja stope, 24/7)      | ~ 10B           | Zbroj ograničenja stope svakog provajdera ekstrapoliran na neprekidnu upotrebu.** Nije garancija** — ne naslovi ovo.                                                                                                                                                 |
 
-**Iskreni naslov:** _OmniRoute agregati**~ 1.62B dokumentiranih besplatnih tokena mjesečno** (do ~ 2,22B u vašem prvom mjesecu sa kreditima za registraciju) preko 34 slobodnog nivoa bazena — plus dugačak rep trajno besplatnih provajdera bez ograničenja — i RTK + Caveman kompresija (15–95% uštede tokena) proteže se dalje._
+**Iskreni naslov:** _OmniRoute agregati**~ 1.62B dokumentiranih besplatnih tokena mjesečno** (do ~ 2,22B u vašem prvom mjesecu sa kreditima za registraciju) preko 26 slobodnog nivoa bazena — plus dugačak rep trajno besplatnih provajdera bez ograničenja — i RTK + Caveman kompresija (15–95% uštede tokena) proteže se dalje._
 
 > **Zašto je ovo palo u odnosu na prethodni ~ 1.94B.** Osvježavanje 2026-06-17 je ispravka poštenja, a ne gubitak: `gemini` je sada dedupiran (napuhan je računanjem svake Flash varijante zasebno, 462M → 60M), `cloudflare-ai` je ispravljen na svoj pravi 10k-Neurons/day (122M → 30M), `doubao` kreditni znak je recenzirano kao jedan rec-las uklonjeni nivoi isključivanja (`chutes`/`phind`/`kluster` ukinut). Djelomično kompenziraju `llm7` (ispravan 5M/day → 150M) i novi besplatni provajderi (Kilo, OpenCode Zen, Z.AI GLM-Flash).
 >
@@ -38,7 +38,7 @@ Ove brojke opisuju zasebne račune trećih strana i uslove podobnosti u cijelom 
 >
 > **Ispravljeno 03.09.2026 (#11773):** `cerebras` je reklasificiran sa 30M/mo ponavljajućeg granta (staro probno razdoblje od 1M tokens/day bez kartice) u jednokratni kredit od 5 USD za registraciju za koji je potreban način plaćanja. Isto pravilo poštenja kao LongCat.
 >
-> **Plus xKiro (2026-09-03):** novi `xkiro-free` bazen (150M/mo) dodaje 35. ponavljajući ključ bazena. Felo Web ostaje isključen dok njegov provenance/licensing izveden iz GPL-a ostaje na HOLD. Izvor sada javlja** 34 ponavljajuća ključa bazena** i**~ 1.62B stabilan** — broj uživo, CI-gadiran (`check:docs-counts` ne uspijeva u izgradnji ako ovo odstupi od `computeFreeModelTotals()`).
+> **Plus xKiro (2026-09-03):** novi `xkiro-free` bazen (150M/mo) dodaje 35. ponavljajući ključ bazena. Felo Web ostaje isključen dok njegov provenance/licensing izveden iz GPL-a ostaje na HOLD. Izvor sada javlja** 26 ponavljajuća ključa bazena** i**~ 1.62B stabilan** — broj uživo, CI-gadiran (`check:docs-counts` ne uspijeva u izgradnji ako ovo odstupi od `computeFreeModelTotals()`).
 
 Najveći** dokumentovano** doprinosi: `mistral` 1.00B, `nara` 210M, `llm7` 150M, `xkiro` 150M, `groq` 30M (pet kapa po modelu), `cloudflare-ai` 30M, `api-airforce` 24M. (`longcat` je isključen — njegovih 10 miliona LongCat-2.0 grant je jednokratni kredit za registraciju koji je ograničen na KYC, a ne mjesečni budžet koji se ponavlja.)
 

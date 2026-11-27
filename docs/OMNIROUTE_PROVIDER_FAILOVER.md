@@ -17,3 +17,5 @@ The default cross-provider policy allows up to three provider attempts, retries 
   - A prefixed id (`provider/model`) is never rerouted to another provider.
 
 Circuit states are `closed`, `open`, and `half_open`. A cooldown schedules a bounded probe; a successful probe closes the circuit and a failed probe reopens it.
+
+Provider failover runs inside the gateway. See [When OmniRoute itself is unreachable](architecture/RESILIENCE_GUIDE.md#when-omniroute-itself-is-unreachable) for client behavior during a gateway outage.
