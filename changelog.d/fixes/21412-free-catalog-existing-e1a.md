@@ -1,0 +1,1 @@
+- **fix(sse):** The free catalog now counts the published recurring allowances of seven providers it already routes (Zylo, Requesty, Routeway, gitlawb/Twigpine, Onomeo, DGrid and Naga), with sources reopened on 2026-11-27, and adds an `unofficial-service` risk notice ([#21412](https://github.com/cheaper-inference/OmniRoute/pull/21412))
