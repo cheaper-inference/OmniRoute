@@ -1,12 +1,47 @@
 /**
  * gamification.ts — DB domain module for the Gamification & Leaderboard system.
  *
- * Manages leaderboards, XP/levels, badges, token ledger, invite tokens,
- * and community server connections.
+ * Manages leaderboards, XP/levels and the token ledger directly; badges, invite
+ * tokens and community server connections delegate to their repositories.
  */
 
+import type {
+  BadgeDefinition,
+  BadgeRepository,
+  CommunityServer,
+  CommunityServerRepository,
+  InviteToken,
+  InviteTokenRepository,
+  UserBadge,
+} from "@/domain/persistence/gamificationDefinitionRepositories";
 import { getDbInstance } from "./core";
 import { calculateLevel } from "../gamification/xp";
+import { gamificationDefinitionRepositories } from "./repositories/gamificationDefinitionRepositories";
+
+export type { BadgeDefinition, CommunityServer, InviteToken, UserBadge };
+
+/**
+ * Badge definitions, earned badges, invite tokens and community servers live behind
+ * repositories. The exports below keep their synchronous shapes and run the SQLite-only
+ * legacy access in the caller's turn. XP, levels, leaderboard scores and the token
+ * ledger stay in this module.
+ */
+const definitions = gamificationDefinitionRepositories.legacySync;
+
+/** Async persistence contract for the badge catalogue and earned badges. */
+export function getBadgeRepository(): BadgeRepository {
+  return gamificationDefinitionRepositories.badges;
+}
+
+/** Async persistence contract for invite tokens. */
+export function getInviteTokenRepository(): InviteTokenRepository {
+  return gamificationDefinitionRepositories.invites;
+}
+
+/** Async persistence contract for community server connections. */
+export function getCommunityServerRepository(): CommunityServerRepository {
+  return gamificationDefinitionRepositories.communityServers;
+}
 
 // ──────────────── Types ────────────────
 
@@ -24,28 +59,6 @@ export interface UserLevelRow {
   updatedAt: string;
 }
 
-export interface BadgeDefinition {
-  id: string;
-  name: string;
-  description: string | null;
-  icon: string | null;
-  category: string | null;
-  rarity: string;
-  criteria: string | null;
-  hidden: number;
-  createdAt: string;
-}
-
-export interface UserBadge {
-  apiKeyId: string;
-  badgeId: string;
-  unlockedAt: string;
-  badgeName?: string;
-  badgeDescription?: string | null;
-  badgeIcon?: string | null;
-  badgeCategory?: string | null;
-  badgeRarity?: string;
-}
 export interface TokenLedgerEntry {
   id: number;
   fromApiKeyId: string;
@@ -54,31 +67,6 @@ export interface TokenLedgerEntry {
   reason: string | null;
   idempotencyKey: string | null;
   createdAt: string;
-}
-
-export interface InviteToken {
-  id: string;
-  code: string;
-  tokenHash: string;
-  createdBy: string;
-  usedBy: string | null;
-  serverUrl: string | null;
-  maxUses: number;
-  useCount: number;
-  expiresAt: string | null;
-  revokedAt: string | null;
-  createdAt: string;
-}
-
-export interface CommunityServer {
-  id: string;
-  name: string;
-  url: string;
-  apiKeyHash: string;
-  connectedAt: string;
-  lastSyncAt: string | null;
-  status: string;
-  errorMessage: string | null;
 }
 
 // ──────────────── Helper ────────────────
@@ -248,10 +236,7 @@ export function updateLevel(apiKeyId: string, level: number): void {
  *   Callers that pay the `badge_unlock` XP reward key off this so a badge is paid once.
  */
 export function unlockBadge(apiKeyId: string, badgeId: string): boolean {
-  const result = db()
-    .prepare(`INSERT OR IGNORE INTO user_badges (api_key_id, badge_id) VALUES (?, ?)`)
-    .run(apiKeyId, badgeId);
-  return result.changes > 0;
+  return definitions.unlockBadge(apiKeyId, badgeId);
 }
 
 /**
@@ -263,10 +248,7 @@ export function unlockBadge(apiKeyId: string, badgeId: string): boolean {
  * badge-unlock events to re-fire on every request (#3472).
  */
 export function hasBadge(apiKeyId: string, badgeId: string): boolean {
-  const row = db()
-    .prepare(`SELECT 1 FROM user_badges WHERE api_key_id = ? AND badge_id = ? LIMIT 1`)
-    .get(apiKeyId, badgeId);
-  return !!row;
+  return definitions.hasBadge(apiKeyId, badgeId);
 }
 
 /**
@@ -288,62 +270,11 @@ export function hasXpActionToday(apiKeyId: string, action: string): boolean {
 }
 
 export function getBadges(apiKeyId: string): UserBadge[] {
-  const rows = db()
-    .prepare(
-      `SELECT ub.api_key_id, ub.badge_id, ub.unlocked_at,
-            bd.name, bd.description, bd.icon, bd.category, bd.rarity
-     FROM user_badges ub
-     JOIN badge_definitions bd ON bd.id = ub.badge_id
-     WHERE ub.api_key_id = ?`
-    )
-    .all(apiKeyId) as Array<{
-    api_key_id: string;
-    badge_id: string;
-    unlocked_at: string;
-    name: string;
-    description: string | null;
-    icon: string | null;
-    category: string | null;
-    rarity: string;
-  }>;
-  return rows.map((r) => ({
-    apiKeyId: r.api_key_id,
-    badgeId: r.badge_id,
-    unlockedAt: r.unlocked_at,
-    badgeName: r.name,
-    badgeDescription: r.description,
-    badgeIcon: r.icon,
-    badgeCategory: r.category,
-    badgeRarity: r.rarity,
-  }));
+  return definitions.listEarnedBadges(apiKeyId);
 }
 
 export function getBadgeDefinitions(category?: string): BadgeDefinition[] {
-  const sql = category
-    ? `SELECT * FROM badge_definitions WHERE category = ?`
-    : `SELECT * FROM badge_definitions`;
-  const rows = (category ? db().prepare(sql).all(category) : db().prepare(sql).all()) as Array<{
-    id: string;
-    name: string;
-    description: string | null;
-    icon: string | null;
-    category: string | null;
-    rarity: string;
-    criteria: string | null;
-    hidden: number;
-    created_at: string;
-  }>;
-  return rows.map((r) => ({
-    id: r.id,
-    name: r.name,
-    description: r.description,
-    icon: r.icon,
-    category: r.category,
-    rarity: r.rarity,
-    criteria: r.criteria,
-    hidden: r.hidden,
-    createdAt: r.created_at,
-  }));
+  return definitions.listBadgeDefinitions(category);
 }
 
 /**
@@ -373,33 +304,7 @@ export function getAggregateXp(): UserLevelRow {
  * page). Deduplicated by badge id, keeping the earliest unlock. (#3484)
  */
 export function getAllEarnedBadges(): UserBadge[] {
-  const rows = db()
-    .prepare(
-      `SELECT ub.badge_id, MIN(ub.unlocked_at) AS unlocked_at,
-              bd.name, bd.description, bd.icon, bd.category, bd.rarity
-       FROM user_badges ub
-       JOIN badge_definitions bd ON bd.id = ub.badge_id
-       GROUP BY ub.badge_id`
-    )
-    .all() as Array<{
-    badge_id: string;
-    unlocked_at: string;
-    name: string;
-    description: string | null;
-    icon: string | null;
-    category: string | null;
-    rarity: string;
-  }>;
-  return rows.map((r) => ({
-    apiKeyId: "*",
-    badgeId: r.badge_id,
-    unlockedAt: r.unlocked_at,
-    badgeName: r.name,
-    badgeDescription: r.description,
-    badgeIcon: r.icon,
-    badgeCategory: r.category,
-    badgeRarity: r.rarity,
-  }));
+  return definitions.listEarnedBadgesByAnyKey();
 }
 
 // ──────────────── Token Ledger ────────────────
@@ -488,61 +393,26 @@ export function createInviteToken(
   serverUrl?: string,
   maxUses?: number
 ): void {
-  db()
-    .prepare(
-      `INSERT INTO invite_tokens (id, code, token_hash, created_by, server_url, max_uses)
-     VALUES (?, ?, ?, ?, ?, ?)`
-    )
-    .run(id, code, tokenHash, createdBy, serverUrl ?? null, maxUses ?? 1);
+  definitions.createInviteToken({
+    id,
+    code,
+    tokenHash,
+    createdBy,
+    serverUrl: serverUrl ?? null,
+    maxUses: maxUses ?? 1,
+  });
 }
 
 export function getInviteByCode(code: string): InviteToken | null {
-  const row = db().prepare(`SELECT * FROM invite_tokens WHERE code = ?`).get(code) as
-    | {
-        id: string;
-        code: string;
-        token_hash: string;
-        created_by: string;
-        used_by: string | null;
-        server_url: string | null;
-        max_uses: number;
-        use_count: number;
-        expires_at: string | null;
-        revoked_at: string | null;
-        created_at: string;
-      }
-    | undefined;
-  if (!row) return null;
-  return {
-    id: row.id,
-    code: row.code,
-    tokenHash: row.token_hash,
-    createdBy: row.created_by,
-    usedBy: row.used_by,
-    serverUrl: row.server_url,
-    maxUses: row.max_uses,
-    useCount: row.use_count,
-    expiresAt: row.expires_at,
-    revokedAt: row.revoked_at,
-    createdAt: row.created_at,
-  };
+  return definitions.findInviteByCode(code);
 }
 
 export function redeemInvite(code: string, usedBy: string): boolean {
-  const result = db()
-    .prepare(
-      `UPDATE invite_tokens
-     SET use_count = use_count + 1, used_by = ?
-     WHERE code = ? AND revoked_at IS NULL
-       AND use_count < max_uses
-       AND (expires_at IS NULL OR expires_at > datetime('now'))`
-    )
-    .run(usedBy, code);
-  return result.changes > 0;
+  return definitions.redeemInvite(code, usedBy);
 }
 
 export function revokeInvite(id: string): void {
-  db().prepare(`UPDATE invite_tokens SET revoked_at = datetime('now') WHERE id = ?`).run(id);
+  definitions.revokeInvite(id);
 }
 
 // ──────────────── Community Servers ────────────────
@@ -553,48 +423,20 @@ export function revokeInvite(id: string): void {
  * Used by federation routes to authenticate bearer tokens.
  */
 export function getConnectedServerByKeyHash(apiKeyHash: string): { id: string } | undefined {
-  return db()
-    .prepare("SELECT id FROM community_servers WHERE api_key_hash = ? AND status = 'connected'")
-    .get(apiKeyHash) as { id: string } | undefined;
+  return definitions.findConnectedServerByKeyHash(apiKeyHash);
 }
 
 export function connectServer(id: string, name: string, url: string, apiKeyHash: string): void {
-  db()
-    .prepare(
-      `INSERT OR REPLACE INTO community_servers (id, name, url, api_key_hash)
-     VALUES (?, ?, ?, ?)`
-    )
-    .run(id, name, url, apiKeyHash);
+  definitions.connectServer(id, name, url, apiKeyHash);
 }
 
 export function disconnectServer(id: string): void {
-  db().prepare(`UPDATE community_servers SET status = 'disconnected' WHERE id = ?`).run(id);
+  definitions.disconnectServer(id);
 }
 
 /** List community servers (excludes api_key_hash for security). */
 export function listServers(): Omit<CommunityServer, "apiKeyHash">[] {
-  const rows = db()
-    .prepare(
-      `SELECT id, name, url, connected_at, last_sync_at, status, error_message FROM community_servers`
-    )
-    .all() as Array<{
-    id: string;
-    name: string;
-    url: string;
-    connected_at: string;
-    last_sync_at: string | null;
-    status: string;
-    error_message: string | null;
-  }>;
-  return rows.map((r) => ({
-    id: r.id,
-    name: r.name,
-    url: r.url,
-    connectedAt: r.connected_at,
-    lastSyncAt: r.last_sync_at,
-    status: r.status,
-    errorMessage: r.error_message,
-  }));
+  return definitions.listServers();
 }
 
 /**
