@@ -1,0 +1,1 @@
+- fix(providers): clamp Cohere reasoning_effort to `high` and learn its "Use 'high' instead" 422 so auto routing no longer burns fallbacks (#20363)

@@ -469,7 +469,7 @@ v3.8.0 سے شروع کرتے ہوئے، **Import Token**،
 2. **مستقل حل:** اپنی `docker run` کمانڈ میں `-p 127.0.0.1:20128:20128` استعمال کر کے واضح طور پر IPv4 سے بائنڈ کریں:
    ```bash
    docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
-     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
    ```
    اس سے IPv4 بائنڈ لازمی ہو جاتا ہے اور پراکسی کو ہوسٹ کے تمام انٹرفیسز پر ظاہر ہونے سے بھی روکا جاتا ہے۔
 

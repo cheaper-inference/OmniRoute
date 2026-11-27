@@ -1,4 +1,5 @@
 import fs from "fs";
+import os from "os";
 import crypto from "crypto";
 import { exec } from "child_process";
 import {
@@ -9,8 +10,17 @@ import {
   runElevatedPowerShell,
 } from "../systemCommands.ts";
 
-const IS_WIN = process.platform === "win32";
-const IS_MAC = process.platform === "darwin";
+// Runtime platform checks. Turbopack constant-folds a module-load
+// `process.platform` read to the Linux build machine and prunes the Windows
+// branch from the published Next.js bundle (#10293 / #11236 / #11430 / #19863).
+// `os.platform()` is a dynamic runtime function call that bundlers cannot fold.
+export function isWin(): boolean {
+  return os.platform() === "win32" || process.platform === "win32";
+}
+
+export function isMac(): boolean {
+  return os.platform() === "darwin" || process.platform === "darwin";
+}
 
 const LINUX_CERT_NAME = "omniroute-mitm.crt";
 
@@ -117,8 +127,8 @@ function getCertFingerprint(certPath: string): string {
  * Check if certificate is already installed in system store
  */
 export async function checkCertInstalled(certPath: string): Promise<boolean> {
-  if (IS_WIN) return checkCertInstalledWindows(certPath);
-  if (IS_MAC) return checkCertInstalledMac(certPath);
+  if (isWin()) return checkCertInstalledWindows(certPath);
+  if (isMac()) return checkCertInstalledMac(certPath);
   return checkCertInstalledLinux(certPath);
 }
 
@@ -201,7 +211,7 @@ export async function installCert(sudoPassword: string, certPath: string): Promi
     // clients (curl, reqwest, uv, Python requests). Repair the mode before
     // the early return so re-running install fixes a previously wrong-mode
     // cert instead of silently skipping it.
-    if (!IS_WIN && !IS_MAC) {
+    if (!isWin() && !isMac()) {
       const config = getLinuxCertConfig();
       await ensureSystemCertMode(`${config.dir}/${LINUX_CERT_NAME}`, sudoPassword);
     }
@@ -214,9 +224,9 @@ export async function installCert(sudoPassword: string, certPath: string): Promi
     return;
   }
 
-  if (IS_WIN) {
+  if (isWin()) {
     await installCertWindows(certPath);
-  } else if (IS_MAC) {
+  } else if (isMac()) {
     await installCertMac(sudoPassword, certPath);
   } else {
     await installCertLinux(sudoPassword, certPath);
@@ -269,7 +279,7 @@ export function classifyCertInstallError(message: string): CertInstallReason {
  */
 export function buildCertManualGuide(
   certPath: string,
-  platform: NodeJS.Platform = process.platform
+  platform: NodeJS.Platform = os.platform()
 ): CertManualGuide {
   let steps: string[];
   if (platform === "win32") {
@@ -450,9 +460,9 @@ export async function uninstallCert(sudoPassword: string, certPath: string): Pro
     return;
   }
 
-  if (IS_WIN) {
+  if (isWin()) {
     await uninstallCertWindows(certPath);
-  } else if (IS_MAC) {
+  } else if (isMac()) {
     await uninstallCertMac(sudoPassword, certPath);
   } else {
     await uninstallCertLinux(sudoPassword, certPath);

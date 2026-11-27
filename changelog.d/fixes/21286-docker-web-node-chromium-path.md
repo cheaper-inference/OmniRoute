@@ -1,0 +1,1 @@
+- **fix(docker):** the Node `-web` image links Playwright's Chromium to `/usr/bin/chromium`, so ChatGPT Web, Codex Web and the Adobe Firefly login find a browser, matching the `-web-bun` image ([#21286](https://github.com/cheaper-inference/OmniRoute/pull/21286))

@@ -70,6 +70,8 @@ docker rm omniroute
 docker volume rm omniroute-data
 
 # (Voliteľné) Odstránenie obrazu
+docker rmi cheaperinference/omniroute:latest
+# Staršie inštalácie stiahli starý názov:
 docker rmi diegosouzapw/omniroute:latest
 ```
 

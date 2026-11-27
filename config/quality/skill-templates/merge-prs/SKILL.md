@@ -1,6 +1,6 @@
 ---
 name: merge-prs
-description: Consume analyzed PR plans, implement authorized fixes with contributor credit, validate exact candidates, and merge only owner-selected and explicitly authorized groups through the shared gates. Requires prior review evidence; unknown or failing required checks remain HOLD.
+description: "Use when analyzed plan-files exist in `_tasks/pipeline/prs/1-analyzed/` and the owner asks to merge the reviewed queue: 'roda o merge-prs', 'mergeia o que foi revisado'. Shows the readiness report, takes the owner's choice and dossier OK, then lands each PR through merge-gates §9. Pasted list, no plans: /merge-batch. One combined PR: /merge-train. Queue census to close the version: /merge-waves."
 ---
 
 # Execute analyzed PR plans
@@ -63,7 +63,9 @@ auto-approve every pushed fork run. A cancelled/slow check is not automatically
 flaky or infrastructure-related; establish the cause from evidence.
 
 When the owner has authorized the group and all required checks pass, merge only
-through `../_shared/merge-gates.md`, serialized. Immediately recheck freeze, PR
+through `../_shared/merge-gates.md`, serialized; on a `release/v*` base its §9 decides the
+landing step by the omni-queue's mode (manual merge while it is off or in `shadow`; in `shadow`
+only after the queue's `would-land` verdict for that head; the `omni-queue` label in `live`). Immediately recheck freeze, PR
 head, base, candidate and protected surfaces. Any movement or retarget invalidates
 the receipt. A full train tip cannot authorize different intermediate squash
 trees. Skip held items without silently expanding the approved batch.

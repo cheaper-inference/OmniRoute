@@ -90,7 +90,7 @@ test("backup auto status sem arquivo retorna 0", async () => {
 test("backup auto enable — nenhuma opção é sombreada pelo parent backup", async () => {
   const { registerBackup } = await import("../../bin/cli/commands/backup.mjs");
   const { Command } = await import("commander");
-  const { mkdtempSync, readFileSync, rmSync } = await import("node:fs");
+  const { mkdtempSync, readFileSync, rmSync, writeFileSync } = await import("node:fs");
   const { tmpdir } = await import("node:os");
   const { join } = await import("node:path");
 
@@ -98,6 +98,8 @@ test("backup auto enable — nenhuma opção é sombreada pelo parent backup", a
   const origDataDir = process.env.DATA_DIR;
   process.env.DATA_DIR = dataDir;
   try {
+    const keyFile = join(dataDir, "k.key");
+    writeFileSync(keyFile, "pw");
     const prog = new Command().exitOverride();
     registerBackup(prog);
     await prog.parseAsync(
@@ -111,6 +113,8 @@ test("backup auto enable — nenhuma opção é sombreada pelo parent backup", a
         "0 4 * * *",
         "--cloud",
         "--encrypt",
+        "--key-file",
+        keyFile,
         "--retention",
         "7",
       ],

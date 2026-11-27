@@ -38,6 +38,7 @@ export const COMBO_SKIP_REASONS = [
   "context_requirements",
   "availability",
   "model_not_in_catalog",
+  "agent_guard_refused",
   "credential_gate",
   "concurrency_cap",
   "admission_lane",

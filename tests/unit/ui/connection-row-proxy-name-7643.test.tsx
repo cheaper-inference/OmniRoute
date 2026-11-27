@@ -10,6 +10,7 @@ import React from "react";
 import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { findButtonByTooltip } from "../../_helpers/buttonTooltip";
 
 vi.mock("next-intl", () => ({
   useTranslations: () => (key: string) => key,
@@ -83,44 +84,46 @@ describe("ConnectionRow proxy badge name-vs-host (#7643)", () => {
     while (cleanupCallbacks.length) cleanupCallbacks.pop()!();
   });
 
-  function getBadge(container: HTMLElement): HTMLElement {
-    const badge = container.querySelector('button[title="proxyConfiguredBySource"]');
+  // The badge is named after the proxy; its title is the kit tooltip, not an attribute.
+  async function getBadge(container: HTMLElement): Promise<HTMLElement> {
+    const badge = await findButtonByTooltip(container, "proxyConfiguredBySource");
     expect(badge).not.toBeNull();
     return badge as HTMLElement;
   }
 
-  it("shows the proxy name (not the host) when both are provided", () => {
+  it("shows the proxy name (not the host) when both are provided", async () => {
     const container = renderRow(connection, {
       proxyName: "My US Proxy",
       proxyHost: "203.0.113.10",
     });
-    const badge = getBadge(container);
+    const badge = await getBadge(container);
     expect(badge.textContent).toContain("My US Proxy");
     expect(badge.textContent).not.toContain("203.0.113.10");
   });
 
-  it("opens the proxy configuration when the assigned proxy name is clicked", () => {
+  it("opens the proxy configuration when the assigned proxy name is clicked", async () => {
     const onProxy = vi.fn();
     const container = renderRow(connection, { proxyName: "My proxy", onProxy });
-    act(() => getBadge(container).click());
+    const badge = await getBadge(container);
+    act(() => badge.click());
     expect(onProxy).toHaveBeenCalledOnce();
   });
 
-  it("falls back to the host when no proxy name is available", () => {
+  it("falls back to the host when no proxy name is available", async () => {
     const container = renderRow(connection, {
       proxyName: null,
       proxyHost: "203.0.113.10",
     });
-    const badge = getBadge(container);
+    const badge = await getBadge(container);
     expect(badge.textContent).toContain("203.0.113.10");
   });
 
-  it("falls back to the translated placeholder when neither name nor host is available", () => {
+  it("falls back to the translated placeholder when neither name nor host is available", async () => {
     const container = renderRow(connection, {
       proxyName: null,
       proxyHost: null,
     });
-    const badge = getBadge(container);
+    const badge = await getBadge(container);
     // badge label falls back to t("proxy") -> mocked to the literal key "proxy"
     expect(badge.textContent?.replace("vpn_lock", "").trim()).toBe("proxy");
   });

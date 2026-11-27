@@ -3,7 +3,7 @@
 import Icon from "@/shared/components/Icon";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { Button, Badge, Input, Modal, Select, Toggle } from "@/shared/components";
+import { Button, Badge, Input, Modal, Select, Toggle, Notice } from "@/shared/components";
 import { isValidProviderIconUrl } from "@/shared/validation/iconUrl";
 import { DEFAULT_COMPATIBLE_QUOTA_PATH } from "@/shared/utils/compatibleQuotaCheck";
 import { CC_COMPATIBLE_DEFAULT_CHAT_PATH } from "../../providerDetailConstants";
@@ -268,12 +268,9 @@ export default function EditCompatibleNodeModal({
     >
       <div className="flex flex-col gap-4">
         {isCcCompatible && (
-          <div className="rounded-lg border border-warning/25 bg-warning/10 px-3 py-2 text-sm text-text-muted">
-            <div className="flex items-start gap-2">
-              <Icon name="warning" size={18} className="mt-0.5 text-warning" />
-              <p>{t("ccCompatibleValidationHint")}</p>
-            </div>
-          </div>
+          <Notice variant="warning" icon="warning">
+            {t("ccCompatibleValidationHint")}
+          </Notice>
         )}
         <Input
           label={t("nameLabel")}
@@ -475,13 +472,9 @@ export default function EditCompatibleNodeModal({
           </div>
         )}
         {saveError && (
-          <div
-            role="alert"
-            aria-live="assertive"
-            className="text-sm text-error bg-error/10 border border-error/20 rounded-lg px-3 py-2"
-          >
+          <Notice variant="critical" aria-live="assertive">
             {saveError}
-          </div>
+          </Notice>
         )}
         <div className="flex gap-2">
           <Button

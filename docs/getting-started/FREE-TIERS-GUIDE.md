@@ -1,7 +1,7 @@
 ---
 title: "Free Tiers Guide: Understand and Combine Free AI Access"
-version: 3.8.52
-lastUpdated: 2026-10-11
+version: 3.8.55
+lastUpdated: 2026-11-24
 ---
 
 # Free Tiers Guide: Understand and Combine Free AI Access
@@ -32,9 +32,9 @@ These providers have a recurring, keyless, or uncapped free-access path in the a
 | **Kiro AI**       | Claude Sonnet 4.5, Haiku 4.5, DeepSeek V3.2, and others                        | Audited catalog estimates a 25K-token shared monthly pool                                                        | OAuth/account flow; ToS flagged `avoid` in the catalog                                   |
 | **Pollinations**  | Current keyless model set; some former models are discontinued or key-required | Keyless; no published token cap                                                                                  | No provider credential for the keyless models                                            |
 | **Logfare**       | kimi-k3, deepseek-v4-pro, glm-5.2, gpt-5.6-luna, minimax-m3, and more          | Free API key (no rate limits, no card); **every request is logged** for research (opt out at logfare.ai/consent) | Instant key at logfare.ai/register; ToS/privacy at logfare.ai/tos and logfare.ai/privacy |
-| **Cloudflare AI** | Workers AI catalog                                                             | Audited pool estimates ~30M tokens/month from published usage units                                              | Cloudflare account and API credentials                                                   |
+| **Cloudflare AI** | Workers AI catalog                                                             | Audited pool estimates ~23M tokens/month from published usage units (catalog audited 2026-11-23)                 | Cloudflare account and API credentials                                                   |
 | **Gemini**        | Gemini Flash family                                                            | Variable project/model rate limits; no fixed monthly token grant is included in the headline                     | Google AI Studio API key; check the project’s active limits                              |
-| **Groq**          | Llama, GPT-OSS, and Qwen models                                                | Audited pool estimates ~15M tokens/month                                                                         | Groq API key; rate limits apply                                                          |
+| **Groq**          | Llama, GPT-OSS, and Qwen models                                                | Audited pool estimates ~24M tokens/month (4 per-model caps, catalog audited 2026-11-23)                          | Groq API key; rate limits apply                                                          |
 
 ### Signup Grants and Provider-Specific Credits
 
@@ -107,11 +107,51 @@ uncapped/keyless access, signup credits, discontinued entries, and higher-risk s
 
 ### Step 5: Click Connect
 
-For a `NOAUTH` provider, OmniRoute does not request an upstream credential. This does not guarantee that the upstream accepts third-party clients or has available capacity. OAuth and API-key providers must be connected through their documented account flow. Your client still uses the OmniRoute API key shown in **Dashboard → Endpoints** when router authentication is enabled.
+For a `NOAUTH` provider, OmniRoute does not request an upstream credential. This does not guarantee that the upstream accepts third-party clients or has available capacity. OAuth and API-key providers must be connected through their documented account flow. Your client still uses an OmniRoute API key created in **Dashboard → API Keys** (shown only once, at creation) when router authentication is enabled.
 
 ### Step 6: Repeat
 
 Connect several providers whose terms and privacy model fit your use case.
+
+---
+
+## Coming From dsh "Our Free Model"
+
+The [dsh-our-free-model](https://github.com/Ebony-Vinyl/dsh-our-free-model) plugin for the
+dsh agent host reaches two upstreams. OmniRoute already has a provider for each, but only
+one of them is a free path in OmniRoute:
+
+| Plugin lane  | Upstream                                    | OmniRoute provider          | Free in OmniRoute? | How to connect                                                            |
+| ------------ | ------------------------------------------- | --------------------------- | ------------------ | ------------------------------------------------------------------------- |
+| Kilo channel | Kilo AI gateway (`api.kilo.ai/api/gateway`) | `kilo-gateway` (alias `kg`) | Yes                | API key optional: leave it empty to use the gateway's free pool           |
+| Free lane    | OpenCode Zen (`opencode.ai`)                | `opencode-zen`              | No                 | Your own OpenCode API key from [opencode.ai/zen](https://opencode.ai/zen) |
+
+**Kilo.** Call the free pool as `kilo-gateway/<model>` or `kg/<model>`, for example
+`kg/kilo-auto/free` (Kilo's free auto-router) or one of the gateway's `:free` models. The
+free set rotates; `kilo-gateway` passes through model ids that are not in OmniRoute's
+built-in list, so a model the gateway lists today can be called before the catalog includes
+it. Kilo's free model cards say prompts may be logged by the upstream provider and used to
+improve its services, so do not send sensitive data.
+
+**OpenCode.** The plugin's free lane is OpenCode's key-free offer. OmniRoute does not
+provide that offer as free access:
+
+- OmniRoute's keyless OpenCode provider was removed at the request of OpenCode's operator
+  (see [Removed Providers](../reference/REMOVED_PROVIDERS.md)).
+- OpenCode's [endpoint documentation](https://opencode.ai/v2/docs/console/models/#endpoints)
+  ties its free chat offers to OpenCode's own client, so OmniRoute does not count or badge
+  them as free.
+
+The model ids the plugin shows, such as `deepseek-v4.1-flash-free`, `mimo-v2.6-flash-free`
+and `nemotron-3.5-lightning-free`, are in the `opencode-zen` catalog. Connect `opencode-zen`
+with your own OpenCode key to use them under your OpenCode account's terms.
+
+**The plugin's local port.** The plugin can expose its models on a local OpenAI-compatible
+port (default `18899`). Any such endpoint can be added as a
+[custom OpenAI-compatible provider](../guides/USER_GUIDE.md#custom-openai-compatible-providers),
+but OmniRoute does not install, start or update the plugin, and the plugin decides which
+upstream serves each request. The OpenCode restrictions above apply to OpenCode's offer
+whichever client sends the request.
 
 ---
 
@@ -162,10 +202,10 @@ provider's quota or access policy.
 
 The live, pool-deduplicated catalog currently reports:
 
-| Metric                         |   Current audited value | Interpretation                                                      |
-| ------------------------------ | ----------------------: | ------------------------------------------------------------------- |
-| Recurring quantified grant     | **~1.62B tokens/month** | Shared pools counted once; excludes uncapped providers from the sum |
-| First month with signup grants |       **~2.22B tokens** | Recurring total plus one-time and recurring credits                 |
+| Metric                         |         Current audited value | Interpretation                                                      |
+| ------------------------------ | ----------------------------: | ------------------------------------------------------------------- |
+| Recurring quantified grant     |    **~90M free tokens/month** | Shared pools counted once; excludes uncapped providers from the sum |
+| First month with signup grants | **~153M in your first month** | Recurring total plus one-time and recurring credits                 |
 
 These are catalog-wide estimates across separate eligible accounts, not an allowance supplied by OmniRoute or a prediction for a fresh installation. Your usable capacity depends on the providers you connect and their current conditions. The values are computed from `open-sse/config/freeModelCatalog.ts`; see the
 [Free Tiers Reference](../reference/FREE_TIERS.md) for pool deduplication, ToS flags,

@@ -1,5 +1,6 @@
 "use client";
 
+import Card from "@/shared/components/Card";
 import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
 import Input from "@/shared/components/Input";
@@ -25,7 +26,7 @@ export default function KeyPolicyBehaviourTab() {
     <div className="flex flex-col gap-4">
       <PayloadPrivacy />
 
-      <div className="flex items-start justify-between gap-3 p-3.5 rounded-lg border border-border bg-surface/40">
+      <Card.Section className="flex items-start justify-between gap-3">
         <div className="flex flex-col gap-1">
           <p className="text-sm font-medium text-text-main">{t("autoResolve")}</p>
           <p className="text-xs text-text-muted">{t("autoResolveDesc")}</p>
@@ -36,7 +37,7 @@ export default function KeyPolicyBehaviourTab() {
           onChange={() => updateState((p) => ({ ...p, autoResolve: !p.autoResolve }))}
           ariaLabel={t("autoResolve")}
         />
-      </div>
+      </Card.Section>
 
       <ProtocolDefaults />
 
@@ -50,7 +51,7 @@ export default function KeyPolicyBehaviourTab() {
         onToggle={() => updateState((p) => ({ ...p, chaosModeEnabled: !p.chaosModeEnabled }))}
       />
 
-      <div className="flex items-start justify-between gap-3 p-3.5 rounded-lg border border-border bg-surface/40">
+      <Card.Section className="flex items-start justify-between gap-3">
         <div className="flex flex-col gap-1">
           <p className="text-sm font-medium text-text-main">{t("localUsageCommand")}</p>
           <p className="text-xs text-text-muted">{t("localUsageCommandDesc")}</p>
@@ -61,7 +62,7 @@ export default function KeyPolicyBehaviourTab() {
           onChange={() => updateState((p) => ({ ...p, allowUsageCommand: !p.allowUsageCommand }))}
           ariaLabel={t("localUsageCommand")}
         />
-      </div>
+      </Card.Section>
 
       <BypassProviderQuotaToggle
         enabled={formState.bypassProviderQuotaPolicyEnabled}
@@ -85,7 +86,7 @@ export default function KeyPolicyBehaviourTab() {
 function ProtocolDefaults() {
   const { t, formState, updateState } = useKeyPolicyEditor();
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3.5 rounded-lg border border-border bg-surface/40">
+    <Card.Section className="grid grid-cols-1 sm:grid-cols-3 gap-3">
       <Select
         label={t("streamDefaultMode")}
         value={formState.streamDefaultMode}
@@ -130,7 +131,7 @@ function ProtocolDefaults() {
           </option>
         ))}
       </Select>
-    </div>
+    </Card.Section>
   );
 }
 
@@ -220,7 +221,7 @@ function SelectedGroupChips() {
 function KeyGroupChoices() {
   const { t, formState, updateState, allKeyGroups } = useKeyPolicyEditor();
   return (
-    <div className="flex flex-col gap-2 p-3.5 rounded-lg border border-border bg-surface/40">
+    <Card.Section className="flex flex-col gap-2">
       <p className="text-sm font-medium text-text-main">{t("templateKeyGroupsTitle")}</p>
       <p className="text-xs text-text-muted">{t("templateKeyGroupsDesc")}</p>
       {allKeyGroups.length > 0 && (
@@ -251,7 +252,7 @@ function KeyGroupChoices() {
         </div>
       )}
       {formState.groupIds.length > 0 && <SelectedGroupChips />}
-    </div>
+    </Card.Section>
   );
 }
 
@@ -380,13 +381,10 @@ function ReasoningRuleHeader({
 function ReasoningRules() {
   const { formState, updateState, allCombos, allConnections } = useKeyPolicyEditor();
   return (
-    <div className="flex flex-col gap-2 p-3.5 rounded-lg border border-border bg-surface/40">
+    <Card.Section className="flex flex-col gap-2">
       <ReasoningRulesHeading />
       {formState.reasoningRules.map((rule, idx) => (
-        <div
-          key={idx}
-          className="flex flex-col gap-2 p-2.5 rounded border border-border bg-surface/50"
-        >
+        <Card.Section key={idx} className="flex flex-col gap-2">
           <ReasoningRuleHeader rule={rule} idx={idx} />
           <KeyTemplateReasoningFields
             rule={rule}
@@ -406,16 +404,16 @@ function ReasoningRules() {
               label: connection.name,
             }))}
           />
-        </div>
+        </Card.Section>
       ))}
-    </div>
+    </Card.Section>
   );
 }
 
 function PayloadPrivacy() {
   const { t, formState, updateState } = useKeyPolicyEditor();
   return (
-    <div className="flex items-start justify-between gap-3 p-3.5 rounded-lg border border-border bg-surface/40">
+    <Card.Section className="flex items-start justify-between gap-3">
       <div className="flex flex-col gap-1">
         <p className="text-sm font-medium text-text-main">{t("noLogPayloadPrivacy")}</p>
         <p className="text-xs text-text-muted">{t("templateNoLogDesc")}</p>
@@ -426,6 +424,6 @@ function PayloadPrivacy() {
         onChange={() => updateState((p) => ({ ...p, noLog: !p.noLog }))}
         ariaLabel={t("noLogPayloadPrivacy")}
       />
-    </div>
+    </Card.Section>
   );
 }

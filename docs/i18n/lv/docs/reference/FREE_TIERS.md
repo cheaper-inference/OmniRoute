@@ -24,7 +24,7 @@
 | **+ aiz reģionālās identitātes pārbaudes**           | **+~ 6M**       | `modelscope` (Alibaba Cloud saistošs + kontinentālās Ķīnas reālā vārda pārbaude). Reāla periodiska kvota, kas tiek rādīta kā `gatedRecurringTokens` / `gatedProviders` un informācijas panelī. Nekad nav apkopots virsrakstā: +~ 6M aiz reģionālās identitātes verifikācijas. |
 | Teorētiskie griesti (visi likmes ierobežojumi, 24/7) | ~ 10B           | Katra pakalpojumu sniedzēja tarifa ierobežojuma summa, kas ekstrapolēta uz nepārtrauktu lietošanu.** Nav garantija** — neuzrakstiet šo virsrakstu.                                                                                                                            |
 
-**Godīgs virsraksts:** _OmniRoute agregāti**~ 1.62B dokumentēti bezmaksas marķieri mēnesī** (līdz ~ 2,22 B jūsu pirmajā mēnesī ar reģistrēšanās kredītiem) 34 brīvā līmeņa baseinos —, kā arī ilgstoši bez ierobežojumiem nodrošinātāju — un RTK + Caveman saspiešanas (15–95% marķiera ietaupījums) vēl vairāk._
+**Godīgs virsraksts:** _OmniRoute agregāti**~ 1.62B dokumentēti bezmaksas marķieri mēnesī** (līdz ~ 2,22 B jūsu pirmajā mēnesī ar reģistrēšanās kredītiem) 26 brīvā līmeņa baseinos —, kā arī ilgstoši bez ierobežojumiem nodrošinātāju — un RTK + Caveman saspiešanas (15–95% marķiera ietaupījums) vēl vairāk._
 
 > **Kāpēc tas ir samazinājies salīdzinājumā ar iepriekšējo ~ 1.94B.** 2026. 06.17. atsvaidzināšana ir godīguma labojums, nevis zaudējums: `gemini` tagad ir noņemts no kopas (tika palielināts, skaitot katru Flash variantu atsevišķi, 462 M → 60 M), `cloudflare-ai` ir koriģēts uz tā reālo 10k-Neurons/day (122 miljoni → 30 miljoni), `doubao` atkārtota reģistrācija. izslēgšanas līmeņi ir noņemti (`chutes`/`phind`/`kluster` pārtraukta). Daļēji kompensē `llm7` (pareizais 5M/day → 150M) un jauni bezmaksas pakalpojumu sniedzēji (Kilo, OpenCode Zen, Z.AI GLM-Flash).
 >
@@ -38,7 +38,7 @@
 >
 > **Labots 2026-09-03 (#11773):** `cerebras` tika pārklasificēts no 30M/mo periodiskas dotācijas (vecā bezkartes 1 miljons tokens/day izmēģinājuma versija) uz vienreizēju reģistrēšanās kredītu 5 ASV dolāru apmērā, kuram ir nepieciešams maksājuma veids. Tāds pats godīguma noteikums kā LongCat.
 >
-> **Plus xKiro (2026-09-03):** jaunais `xkiro-free` pūls (150M/mo) pievieno 35. atkārtotu baseina atslēgu. Felo Web tiek izslēgts, kamēr tā GPL atvasinātais provenance/licensing paliek uz HOLD. Tagad ziņo avots** 34 atkārtotas baseina atslēgas** un**~ 1.62B stabils** — tiešraides, CI varētu numuru (`check:docs-counts` neizdodas veidot, ja tas novirzās no `computeFreeModelTotals()`).
+> **Plus xKiro (2026-09-03):** jaunais `xkiro-free` pūls (150M/mo) pievieno 35. atkārtotu baseina atslēgu. Felo Web tiek izslēgts, kamēr tā GPL atvasinātais provenance/licensing paliek uz HOLD. Tagad ziņo avots** 26 atkārtotas baseina atslēgas** un**~ 1.62B stabils** — tiešraides, CI varētu numuru (`check:docs-counts` neizdodas veidot, ja tas novirzās no `computeFreeModelTotals()`).
 
 Lielākais** dokumentēts** līdzstrādnieki: `mistral` 1.00B, `nara` 210M, `llm7` 150M, `xkiro` 150M, `groq` 30M (pieci vāciņi katram modelim), `cloudflare-ai` 30M, `api-airforce` 24M. (`longcat` ir izslēgts — tā 10 miljoni LongCat-2.0 dotācija ir vienreizējs KYC reģistrēts kredīts, nevis periodisks mēneša budžets.)
 

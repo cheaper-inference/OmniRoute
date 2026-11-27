@@ -112,24 +112,16 @@ function budgetLabel(entry: RadarMergedEntry): string {
 function capabilityBadge(
   label: string,
   value: boolean | null | undefined,
-  trueClass: string,
+  trueVariant: "primary" | "info" | "warning",
   unknownHelp: string
 ) {
   const state = value === true ? "✓" : value === false ? "✕" : "?";
-  const stateClass =
-    value === true
-      ? trueClass
-      : value === false
-        ? "bg-error/10 text-error"
-        : "bg-surface-2/10 text-text-muted";
+  const variant = value === true ? trueVariant : value === false ? "error" : "default";
   const unknown = value !== true && value !== false;
   return (
-    <span
-      className={`text-[10px] px-1.5 py-0.5 rounded ${stateClass}`}
-      {...(unknown ? { title: unknownHelp } : {})}
-    >
+    <Badge size="sm" variant={variant} {...(unknown ? { title: unknownHelp } : {})}>
       {label} {state}
-    </span>
+    </Badge>
   );
 }
 
@@ -235,11 +227,7 @@ export function RadarCatalogTable({ entries, refreshCatalog, onError }: RadarCat
   return (
     <>
       <Card padding="none" className="overflow-hidden">
-        <Table
-          aria-label={t("catalogTab")}
-          scrollbarLabel={t("catalogTab")}
-          containerClassName="rounded-none border-0"
-        >
+        <Table aria-label={t("catalogTab")} scrollbarLabel={t("catalogTab")} variant="plain">
           <TableHeader>
             <TableRow>
               <TableHead>{t("colProvider")}</TableHead>
@@ -249,7 +237,7 @@ export function RadarCatalogTable({ entries, refreshCatalog, onError }: RadarCat
               <TableHead>{t("colContext")}</TableHead>
               <TableHead>{t("colCapabilities")}</TableHead>
               <TableHead>{t("colTos")}</TableHead>
-              <TableHead className="text-right">{t("colActions")}</TableHead>
+              <TableHead align="end">{t("colActions")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -288,7 +276,7 @@ export function RadarCatalogTable({ entries, refreshCatalog, onError }: RadarCat
                       <p className="text-xs text-error mt-0.5">{t("disabledByFeed")}</p>
                     )}
                   </TableCell>
-                  <TableCell className="text-text-muted text-sm font-mono max-w-[240px]">
+                  <TableCell className="text-text-muted font-mono max-w-[240px]">
                     {editingKey === key ? (
                       <Input
                         type="text"
@@ -297,14 +285,14 @@ export function RadarCatalogTable({ entries, refreshCatalog, onError }: RadarCat
                         aria-label={t("modelDisplayName")}
                         maxLength={160}
                         className="min-w-[180px]"
-                        inputClassName="font-mono text-sm"
+                        mono
                       />
                     ) : (
                       <span className="block truncate">{entry.displayName}</span>
                     )}
                   </TableCell>
-                  <TableCell className="text-sm">{budgetLabel(entry)}</TableCell>
-                  <TableCell className="text-sm text-text-muted">
+                  <TableCell>{budgetLabel(entry)}</TableCell>
+                  <TableCell className="text-text-muted">
                     {(() => {
                       const limits = formatLimits(entry);
                       return limits === "—" ? (
@@ -314,7 +302,7 @@ export function RadarCatalogTable({ entries, refreshCatalog, onError }: RadarCat
                       );
                     })()}
                   </TableCell>
-                  <TableCell className="text-sm text-text-muted">
+                  <TableCell className="text-text-muted">
                     {entry.contextWindow != null ? (
                       `${(entry.contextWindow / 1000).toFixed(0)}K`
                     ) : (
@@ -326,44 +314,47 @@ export function RadarCatalogTable({ entries, refreshCatalog, onError }: RadarCat
                       {capabilityBadge(
                         t("capTools"),
                         entry.capabilities?.tools,
-                        "bg-info/10 text-info",
+                        "info",
                         t("capabilityUnknownHelp")
                       )}
                       {capabilityBadge(
                         t("capVision"),
                         entry.capabilities?.vision,
-                        "bg-primary/10 text-primary",
+                        "primary",
                         t("capabilityUnknownHelp")
                       )}
                       {capabilityBadge(
                         t("capThinking"),
                         entry.capabilities?.thinking,
-                        "bg-warning/10 text-warning",
+                        "warning",
                         t("capabilityUnknownHelp")
                       )}
                     </div>
                   </TableCell>
                   <TableCell>
-                    <span
-                      className={`text-xs px-2 py-1 rounded ${
+                    <Badge
+                      size="sm"
+                      variant={
                         entry.tos === "ok"
-                          ? "bg-success/10 text-success"
+                          ? "success"
                           : entry.tos === "caution"
-                            ? "bg-warning/10 text-warning"
+                            ? "warning"
                             : entry.tos === "avoid"
-                              ? "bg-error/10 text-error"
-                              : "bg-surface-2/10 text-text-muted"
-                      }`}
+                              ? "error"
+                              : "default"
+                      }
                     >
                       {entry.tos}
-                    </span>
+                    </Badge>
                     {entry.trainsOnPrompts === true && (
-                      <span
-                        className="ml-1 text-xs px-2 py-1 rounded bg-warning/10 text-warning"
+                      <Badge
+                        size="sm"
+                        variant="warning"
+                        className="ml-1"
                         title={t("trainsOnPromptsHelp")}
                       >
                         {t("trainsOnPrompts")}
-                      </span>
+                      </Badge>
                     )}
                   </TableCell>
                   <TableCell className="pl-3">
@@ -378,19 +369,19 @@ export function RadarCatalogTable({ entries, refreshCatalog, onError }: RadarCat
                         />
                         <Button
                           variant="ghost"
-                          size="sm"
+                          size="2xs"
                           disabled={saving || displayName.trim().length === 0}
                           onClick={() => void saveOverride(entry)}
-                          className="h-7 px-2 text-xs text-primary"
+                          className="text-primary"
                         >
                           {t("saveModel")}
                         </Button>
                         <Button
                           variant="ghost"
-                          size="sm"
+                          size="2xs"
                           disabled={saving}
                           onClick={() => setEditingKey(null)}
-                          className="h-7 px-2 text-xs text-text-muted hover:text-text-main"
+                          tone="muted"
                         >
                           {t("cancelEdit")}
                         </Button>
@@ -399,30 +390,30 @@ export function RadarCatalogTable({ entries, refreshCatalog, onError }: RadarCat
                       <div className="flex flex-wrap items-center justify-end gap-2">
                         <Button
                           variant="ghost"
-                          size="sm"
+                          size="2xs"
                           disabled={saving}
                           onClick={() => beginEdit(entry)}
-                          className="h-7 px-2 text-xs text-primary"
+                          className="text-primary"
                         >
                           {t("editModel")}
                         </Button>
                         {hasOverride && (
                           <Button
                             variant="ghost"
-                            size="sm"
+                            size="2xs"
                             disabled={saving}
                             onClick={() => void resetOverride(entry)}
-                            className="h-7 px-2 text-xs text-text-muted hover:text-text-main"
+                            tone="muted"
                           >
                             {t("resetModel")}
                           </Button>
                         )}
                         <Button
                           variant="ghost"
-                          size="sm"
+                          size="2xs"
                           disabled={saving}
                           onClick={() => void setTombstone(entry.provider, entry.modelId, true)}
-                          className="h-7 px-2 text-xs text-error hover:bg-error/10"
+                          className="text-error hover:bg-error/10"
                         >
                           {t("hideModel")}
                         </Button>
@@ -439,7 +430,9 @@ export function RadarCatalogTable({ entries, refreshCatalog, onError }: RadarCat
       {hiddenModels.length > 0 && (
         <Card>
           <div className="flex flex-col gap-3">
-            <h3 className="text-sm">{t("hiddenModelsTitle")}</h3>
+            <h3 className="ci-heading" data-size="sm">
+              {t("hiddenModelsTitle")}
+            </h3>
             {hiddenModels.map((state) => (
               <div
                 key={`${state.provider}:${state.modelId}:hidden`}

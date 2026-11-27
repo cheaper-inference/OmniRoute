@@ -24,7 +24,7 @@ Aceste cifre descriu conturi separate ale terților și condițiile de eligibili
 | **+ în spatele unui control regional de identitate** | **+~ 6M**         | `modelscope` (Alibaba Cloud binding + continental-China verificare nume real). Cotă reală recurentă, expusă ca `gatedRecurringTokens` / `gatedProviders` și pe tabloul de bord. Niciodată rezumat în titlu: +~ 6M în spatele verificării identității regionale.        |
 | Plafon teoretic (toate limitele ratei, 24/7)         | ~ 10B             | Suma fiecărei limite de rată a furnizorului extrapolată la utilizare non-stop.** Nu o garanție** — nu titlul asta.                                                                                                                                                     |
 
-**Titlu sincer:** _Agregate OmniRoute**~ 1.62B documentate jetoane gratuite pe lună** (până la 2,22 miliarde ~ în prima lună cu credite de înscriere) în 34 de grupuri de nivel gratuit — plus o coadă lungă de furnizori fără limitare permanentă — și RTK + Comprimarea Caveman (economii de jetoane de 15–95%) se extinde și mai mult._
+**Titlu sincer:** _Agregate OmniRoute**~ 1.62B documentate jetoane gratuite pe lună** (până la 2,22 miliarde ~ în prima lună cu credite de înscriere) în 26 de grupuri de nivel gratuit — plus o coadă lungă de furnizori fără limitare permanentă — și RTK + Comprimarea Caveman (economii de jetoane de 15–95%) se extinde și mai mult._
 
 > **De ce aceasta a scăzut față de precedentul ~ 1.94B.** Reîmprospătarea 2026-06-17 este o corecție de onestitate, nu o pierdere: acum `gemini` este dedus din grup (a fost umflat prin numărarea separată a fiecărei variante Flash, 462M → 60M), `cloudflare-ai` corectat la 10k-Neurons/day real (122M → 30M), `doubao` reclasificat și un credit reclasat ca o singură dată. nivelurile de închidere au fost eliminate (`chutes`/`phind`/`kluster` întrerupt). Compensat parțial de `llm7` (corect 5M/day → 150M) și de noi furnizori gratuiti (Kilo, OpenCode Zen, Z.AI GLM-Flash).
 >
@@ -38,7 +38,7 @@ Aceste cifre descriu conturi separate ale terților și condițiile de eligibili
 >
 > **Corectat pe 2026-09-03 (#11773):** `cerebras` a fost reclasificat dintr-un grant recurent 30M/mo (probă veche fără card 1M tokens/day ) la un credit unic de înscriere de 5 USD care necesită o metodă de plată. Aceeași regulă de onestitate ca și LongCat.
 >
-> **Plus xKiro (2026-09-03):** noul pool `xkiro-free` (150M/mo) adaugă o a 35-a cheie de pool recurentă. Felo Web rămâne exclus în timp ce provenance/licensing său derivat din GPL rămâne pe HOLD. Sursa relatează acum** 34 de chei de bazin recurente** şi**~ 1,62B constant** — numărul în direct, activat de CI (`check:docs-counts` nu reușește construcția dacă aceasta se deplasează de la `computeFreeModelTotals()`).
+> **Plus xKiro (2026-09-03):** noul pool `xkiro-free` (150M/mo) adaugă o a 35-a cheie de pool recurentă. Felo Web rămâne exclus în timp ce provenance/licensing său derivat din GPL rămâne pe HOLD. Sursa relatează acum** 26 de chei de bazin recurente** şi**~ 1,62B constant** — numărul în direct, activat de CI (`check:docs-counts` nu reușește construcția dacă aceasta se deplasează de la `computeFreeModelTotals()`).
 
 Cel mai mare** documentat** contribuabili: `mistral` 1.00B, `nara` 210M, `llm7` 150M, `xkiro` 150M, `groq` 30M (cinci capace per model), `cloudflare-ai` 30M, `api-airforce` 24M. (`longcat` este exclus — grantul său de 10 milioane LongCat-2.0 este un credit unic pentru înscriere KYC, nu un buget lunar recurent.)
 

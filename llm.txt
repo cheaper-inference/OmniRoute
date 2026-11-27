@@ -24,7 +24,7 @@ OmniRoute solves the problem of managing multiple AI provider subscriptions, quo
 - **Proxy engine:** Custom pipeline with format translation, circuit breaker, rate limiting, auto-combo engine
 - **i18n:** next-intl with 67 languages
 - **Desktop:** Electron (cross-platform: Windows, macOS, Linux)
-- **Package:** Published on npm (`omniroute`) and Docker Hub (`diegosouzapw/omniroute`)
+- **Package:** Published on npm (`omniroute`), Docker Hub (`cheaperinference/omniroute`) and GHCR (`ghcr.io/cheaper-inference/omniroute`)
 
 ## Project Structure
 
@@ -474,7 +474,7 @@ diagnostics) plus **memory**, **skill**, **agentSkill**, **githubSkill**, **pool
 
 ## v3.8.x Highlights
 
-- **Provider catalog of hundreds of providers** with 150+ free tiers, one-click account imports, and bulk key add
+- **Provider catalog of hundreds of providers** with a documented free-tier catalog, one-click account imports, and bulk key add
 - **Routing strategies** — including `fusion` (parallel panel + judge synthesis), `pipeline`, `reset-aware`, `reset-window`, `headroom`, and `context-relay`
 - **Multi-factor Auto-Combo scoring** with bandit exploration and progressive cooldown
 - **MCP server expanded** with scoped access (canonical + memory/skill/agentSkill/githubSkill/pool/notion/obsidian/localCorpus/gamification/plugin modules)
@@ -485,10 +485,10 @@ diagnostics) plus **memory**, **skill**, **agentSkill**, **githubSkill**, **pool
 
 ## Links
 
-- Repository: https://github.com/diegosouzapw/OmniRoute
+- Repository: https://github.com/cheaper-inference/OmniRoute
 - Website: https://omniroute.online
 - npm: https://www.npmjs.com/package/omniroute
-- Docker Hub: https://hub.docker.com/r/diegosouzapw/omniroute
+- Docker Hub: https://hub.docker.com/r/cheaperinference/omniroute
 - Documentation: See `/docs/` directory
 
 ### Documentation Index

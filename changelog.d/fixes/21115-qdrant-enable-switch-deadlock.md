@@ -1,0 +1,1 @@
+- Fix Qdrant settings deadlock where the enable switch stayed disabled while `/api/settings/qdrant/health` and `/api/settings/qdrant/search` returned `not_configured` before Qdrant was enabled (#21115)

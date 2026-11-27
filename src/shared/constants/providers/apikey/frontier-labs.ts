@@ -138,8 +138,9 @@ export const APIKEY_PROVIDERS_FRONTIER = {
     color: "#FF7000",
     textIcon: "MI",
     website: "https://mistral.ai",
-    hasFree: true,
-    freeNote: "Free Experiment tier: rate-limited access to all models, no credit card required",
+    hasFree: false,
+    freeNote:
+      "The free plan no longer includes API access; API keys need billing enabled (checked 2026-11-23).",
     serviceKinds: ["llm", "imageToText"],
   },
   perplexity: {
@@ -293,8 +294,8 @@ export const APIKEY_PROVIDERS_FRONTIER = {
     color: "#8B5CF6",
     textIcon: "AR",
     website: "https://arcee.ai",
-    hasFree: true,
-    freeNote: "Free Trinity Large Thinking model (262K context). No credit card required.",
+    hasFree: false,
+    freeNote: "Paid pricing only; no free model or trial is published (checked 2026-11-23).",
     passthroughModels: true,
     authHint: "Get API key at arcee.ai",
   },

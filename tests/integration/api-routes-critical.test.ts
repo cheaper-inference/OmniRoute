@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { getSettledModelCatalogResponse } from "../_setup/modelCatalogFixture.ts";
 import { makeManagementSessionRequest } from "../helpers/managementSession.ts";
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-api-critical-routes-"));
@@ -538,7 +539,9 @@ test("critical routes: settings proxy covers global fallback and socks5 gating",
 
 test("critical routes: v1 models route exposes CORS and list contracts", async () => {
   const options = await v1ModelsRoute.OPTIONS();
-  const response = await v1ModelsRoute.GET(
+  const catalog = await import("../../src/app/api/v1/models/catalog.ts");
+  const response = await getSettledModelCatalogResponse(
+    { ...catalog, getUnifiedModelsResponse: v1ModelsRoute.GET },
     new Request("http://localhost/api/v1/models", { method: "GET" })
   );
   const body = (await response.json()) as any;

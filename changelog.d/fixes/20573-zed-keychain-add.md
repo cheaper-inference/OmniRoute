@@ -1,0 +1,1 @@
+- fix(dashboard): the Zed provider page no longer opens a dead-end browser-OAuth modal from "Add"; it scrolls to the keychain Import card instead (#20573)

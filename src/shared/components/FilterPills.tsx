@@ -1,6 +1,6 @@
 "use client";
 
-import { ToggleChip } from "@omniroute/ui-kit/toggle-chip";
+import { ToggleChip, type ToggleChipProps } from "@omniroute/ui-kit/toggle-chip";
 import { cn } from "@/shared/utils/cn";
 import Icon from "./Icon";
 
@@ -9,6 +9,8 @@ export interface FilterPillOption {
   label: string;
   icon?: string;
   count?: number;
+  /** Kit Badge tone (status or `chart-N`) for the pressed pill. The label still carries the meaning. */
+  tone?: ToggleChipProps["tone"];
 }
 
 interface FilterPillsProps {
@@ -45,6 +47,7 @@ export default function FilterPills({
           pressed={value === opt.value}
           icon={opt.icon ? <Icon name={opt.icon} /> : undefined}
           count={opt.count}
+          tone={opt.tone}
           onClick={() => onChange(opt.value)}
           className="inline-flex grow items-center justify-center sm:grow-0"
         >

@@ -27,13 +27,9 @@
 
 ---
 
-## Jalankan Pantas
+## Lari Pantas
 
-> **Hos sendiri dengan satu perintah?** Lihat
-> [Panduan Hos Sendiri](../getting-started/SELF_HOST_GUIDE.md) —
-> `docker compose -f docker-compose.selfhost.yml up -d` (imej yang diterbitkan +
-> Redis, gelung balik sahaja, tiada pilihan profil). Jalankan Pantas di bawah ialah
-> kaedah satu bekas untuk pengguna yang telah menjalankan Redis di tempat lain.
+> **Hos sendiri dalam satu arahan?** Lihat [Panduan Hos Sendiri](../getting-started/SELF_HOST_GUIDE.md) — `docker compose -f docker-compose.selfhost.yml up -d` (imej diterbitkan + Redis, gelung balik sahaja, tiada pilihan profil). Larian Pantas di bawah ialah laluan satu bekas untuk pengguna yang sudah menjalankan Redis di tempat lain.
 
 ```bash
 docker run -d \
@@ -42,13 +38,13 @@ docker run -d \
   --stop-timeout 40 \
   -p 20128:20128 \
   -v omniroute-data:/app/data \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
 ## Dengan Fail Persekitaran
 
 ```bash
-# Salin dan edit .env terlebih dahulu
+# Copy and edit .env first
 cp .env.example .env
 
 docker run -d \
@@ -58,7 +54,7 @@ docker run -d \
   --env-file .env \
   -p 20128:20128 \
   -v omniroute-data:/app/data \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
 ## Docker Compose
@@ -239,14 +235,14 @@ Tindanan produksi berjalan selari dengan compose pembangunan (nama bekas, port d
 
 ## Peringkat Dockerfile
 
-Repositori ini menyediakan Dockerfile berbilang peringkat (`Dockerfile`). Empat peringkat didedahkan; pilih `target` yang sesuai untuk kes penggunaan anda.
+Repositori menghantar fail Docker berbilang peringkat (`Dockerfile`). Empat peringkat terdedah; pilih `target` yang sesuai untuk kes penggunaan anda.
 
-| Peringkat     | Imej asas             | Tujuan                                                                                                                                                                                                                                                                                              |
-| ------------- | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `builder`     | `node:26-trixie-slim` | Memasang kebergantungan (`npm ci --legacy-peer-deps`) dan menjalankan `npm run build` (Turbopack secara lalai — lihat Sumber masa binaan di bawah)                                                                                                                                                  |
-| `runner-base` | `node:26-trixie-slim` | Masa jalan pengeluaran dengan output kendiri Next.js. **Tiada CLI penyedia disertakan.**                                                                                                                                                                                                            |
-| `runner-cli`  | `runner-base`         | Menambahkan `git`, `docker.io`, `docker-compose` dan CLI global: `@openai/codex`, `@anthropic-ai/claude-code`, `droid`, `openclaw`. **Pilih ini untuk aliran kerja berasaskan ejen.**                                                                                                               |
-| `runner-web`  | `runner-base`         | Menambahkan Playwright + pelayar Chromium (`--with-deps`) untuk penyedia sesi web: `gemini-web`, `claude-web`, `claude-turnstile`. **Pilih ini apabila anda menggunakan penyedia tersebut** — imej biasa akan gagal semasa permintaan tanpa ciri ini (lihat nota `-web` di bawah Saluran Keluaran). |
+| pentas        | Imej asas             | Tujuan                                                                                                                                                                                                                                                                                             |
+| ------------- | --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `builder`     | `node:26-trixie-slim` | Memasang deps (`npm ci --legacy-peer-deps`) dan menjalankan `npm run build` (Turbopack secara lalai — lihat sumber masa binaan di bawah)                                                                                                                                                           |
+| `runner-base` | `node:26-trixie-slim` | Masa jalan pengeluaran dengan keluaran kendiri Next.js.** Tiada pembekal CLIs dihimpunkan.**                                                                                                                                                                                                       |
+| `runner-cli`  | `runner-base`         | Menambah `git`, `docker.io`, `docker-compose` dan CLIs global : `@openai/codex`, `@anthropic-ai/claude-code`, `droid`, `openclaw`.** Pilih ini untuk aliran kerja ejen.**                                                                                                                          |
+| `runner-web`  | `runner-base`         | Menambahkan Playwright + penyemak imbas Chromium (`--with-deps`) untuk penyedia sesi web: `gemini-web`, `claude-web`, `claude-turnstile`.** Pilih ini apabila anda menggunakan penyedia tersebut** — imej biasa gagal pada masa permintaan tanpanya (lihat nota `-web` di bawah Saluran Keluaran). |
 
 Bina sasaran tertentu secara manual:
 
@@ -258,40 +254,17 @@ docker build --target runner-web  -t omniroute:web  .
 
 ### Sumber masa binaan
 
-Tiga arg binaan mengawal kos peringkat `builder`. Arg ini hanya digunakan semasa binaan —
-`OMNIROUTE_MEMORY_MB` (di bawah) ialah tetapan masa jalan yang berasingan.
+Tiga binaan arg mengawal kos peringkat `builder`. Mereka adalah masa bina sahaja — `OMNIROUTE_MEMORY_MB` (di bawah) ialah tombol masa jalan yang berasingan.
 
-| Arg binaan                  | Lalai  | Kesan                                                                                                                              |
-| --------------------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `OMNIROUTE_USE_TURBOPACK`   | `0`    | `0` membina dengan webpack: penggunaan memori puncak lebih rendah, tetapi lebih perlahan. `1` memilih untuk menggunakan Turbopack. |
-| `OMNIROUTE_BUILD_MEMORY_MB` | `6144` | Had heap V8 (`--max-old-space-size`) untuk `next build` yang dimulakan.                                                            |
-| `OMNIROUTE_BUILD_WORKERS`   | `2`    | Menyalurkan `CIRCLE_NODE_TOTAL`; Next memperoleh `workers = N - 1` untuk pengumpulan data halaman.                                 |
+| Membina arg                 | Lalai  | Kesan                                                                                               |
+| --------------------------- | ------ | --------------------------------------------------------------------------------------------------- |
+| `OMNIROUTE_USE_TURBOPACK`   | `0`    | `0` membina dengan webpack: memori puncak rendah, lebih perlahan. `1` mengikut serta Turbopack.     |
+| `OMNIROUTE_BUILD_MEMORY_MB` | `6144` | Siling timbunan V8 (`--max-old-space-size`) untuk `next build` yang bertelur .                      |
+| `OMNIROUTE_BUILD_WORKERS`   | `2`    | Suapan `CIRCLE_NODE_TOTAL`; Seterusnya memperoleh `workers = N - 1` untuk pengumpulan data halaman. |
 
-`OMNIROUTE_BUILD_WORKERS` ialah nilai yang perlu dinaikkan pada pembina berkuasa besar dan yang perlu
-disyaki apabila binaan dengan sumber terhad terhenti **selepas** `✓ Compiled successfully`. Setiap
-pekerja data halaman ialah prosesnya sendiri, begitu juga dengan proses induk `next build`;
-penghasilan semula pada VPS sebenar (isu #7518) mengukur RSS puncak setiap proses pada
-~4.5 GB tanpa bergantung pada bendera heap `NODE_OPTIONS` (Turbopack mengkompil dalam
-memori natif/Rust di luar heap V8). Nilai lalai `2` (→ 1 pekerja, jumlah 2
-proses) ditetapkan untuk pelaksana 16 GB / 4 vCPU yang dihoskan GitHub dan digunakan oleh
-saluran penerbitan. Pada `8` (→ 7 pekerja), pelaksana tersebut kehabisan memori dan
-buildkit menggagalkan langkah itu dengan `ResourceExhausted: ... cannot allocate memory`;
-`3` (→ 2 pekerja) masih tidak mencukupi selepas RSS setiap proses diukur
-secara langsung dan bukannya dibuat inferens. `tests/unit/docker-build-memory-budget.test.ts`
-melakukan pengiraan berdasarkan angka yang diukur dan gagal jika mana-mana tetapan
-melebihi kapasiti pelaksana.
+`OMNIROUTE_BUILD_WORKERS` adalah orang yang menaikkan pembina yang besar dan orang yang mengesyaki apabila binaan yang dikekang mati** selepas** `✓ Compiled successfully`. Setiap pekerja data halaman adalah prosesnya sendiri, begitu juga dengan `next build` induk itu sendiri; pengeluaran semula VPS langsung (isu #7518) mengukur RSS puncak setiap proses pada ~ 4.5 GB bebas daripada bendera timbunan `NODE_OPTIONS` (Turbopack menyusun dalam memori native/Rust di luar timbunan V8). Lalai `2` (→ 1 pekerja, 2 proses jumlah) adalah bersaiz untuk 16 GB / 4 vCPU pelari dihoskan GitHub yang digunakan saluran paip penerbitan. Pada `8` (→ 7 pekerja) pelari itu kehabisan ingatan dan buildkit gagal langkah dengan `ResourceExhausted: ... cannot allocate memory`; `3` (→ 2 pekerja) masih tidak sesuai apabila RSS setiap proses diukur secara langsung dan bukannya disimpulkan. `tests/unit/docker-build-memory-budget.test.ts` melakukan aritmetik terhadap angka yang diukur dan gagal jika salah satu tombol melebihi pelari.
 
-Turbopack mengkompil dalam memori Rust natif yang berada **di luar** heap V8, jadi
-`OMNIROUTE_BUILD_MEMORY_MB` tidak mengehadkannya. Pada hos yang mempunyai had memori,
-binaan kemudiannya dihentikan secara SIGKILL oleh pembunuh OOM tanpa sebarang teks ralat — ia hanya
-terhenti di tengah-tengah `Creating an optimized production build`, yang kelihatan seperti tersekat dan
-bukannya kehabisan memori. Itulah sebabnya `Dockerfile` menggunakan webpack secara lalai
-(`OMNIROUTE_USE_TURBOPACK=0`), tidak seperti `npm run dev` / `npm run build`, yang
-menggunakan Turbopack sebagai lalai kod: `docker build .` biasa tanpa arg binaan (seperti yang
-dijalankan oleh Railway dan hos satu klik lain) tidak boleh terhenti secara senyap pada
-pembina yang dihadkan memorinya. Imej yang diterbitkan sudah menghantar
-`OMNIROUTE_USE_TURBOPACK=0` secara eksplisit dalam `docker-publish.yml`. Pada pembina
-dengan RAM yang banyak, pilih untuk menggunakan Turbopack bagi binaan yang lebih pantas:
+Turbopack menyusun dalam ingatan Rust asli yang hidup** luar** timbunan V8, jadi `OMNIROUTE_BUILD_MEMORY_MB` tidak mengikatnya. Pada hos dengan siling memori binaan kemudiannya SIGKILLed oleh pembunuh OOM tanpa teks ralat sama sekali — ia hanya berhenti pada pertengahan `Creating an optimized production build`, yang berbunyi seperti hang dan bukannya ingatan hilang. Itulah sebabnya `Dockerfile` lalai kepada webpack (`OMNIROUTE_USE_TURBOPACK=0`), tidak seperti `npm run dev` / `npm run build`, di mana Turbopack ialah kod lalai: `docker build .` kosong tanpa args binaan (apa yang dijalankan oleh Railway dan hos satu klik lain) tidak boleh mati secara senyap pada pembina yang dihadkan memori. Imej yang diterbitkan sudah melepasi `OMNIROUTE_USE_TURBOPACK=0` secara eksplisit dalam `docker-publish.yml`. Pada pembina dengan banyak RAM, ikut serta dalam Turbopack untuk binaan yang lebih pantas:
 
 ```bash
 docker build --target runner-base \
@@ -299,48 +272,46 @@ docker build --target runner-base \
   -t omniroute:base .
 ```
 
-`webpackBuildWorker` didayakan, jadi `next build` menjalankan proses induk **dan** pekerja,
-dan setiap satunya mematuhi `OMNIROUTE_BUILD_MEMORY_MB` secara berasingan. Tetapkan had
-kontena kepada lebih kurang dua kali ganda nilai tersebut, bukannya sekali ganda.
+`webpackBuildWorker` didayakan, jadi `next build` menjalankan induk** dan** proses pekerja dan setiap satu menghormati `OMNIROUTE_BUILD_MEMORY_MB` secara berasingan. Saiz siling bekas di atas kira-kira dua kali ganda nilai itu, bukan sekali.
 
-Diukur pada pepohon ini (`--target runner-base`, `OMNIROUTE_BUILD_MEMORY_MB=6144`):
+Diukur pada pokok ini (`--target runner-base`, `OMNIROUTE_BUILD_MEMORY_MB=6144`):
 
-| Pembundel | Had kontena    | Hasil                                           |
-| --------- | -------------- | ----------------------------------------------- |
-| Turbopack | 8 GiB / 16 GiB | Dihentikan OOM pada kedua-duanya, secara senyap |
-| webpack   | 8 GiB          | Pekerja binaan dihentikan secara SIGKILL        |
-| webpack   | 12 GiB         | Berjaya, memuncak pada 11.1 GiB                 |
+| Pengikat  | Siling bekas   | Hasilnya                                     |
+| --------- | -------------- | -------------------------------------------- |
+| Turbopack | 8 GiB / 16 GiB | OOM-dibunuh pada kedua-duanya, secara senyap |
+| webpack   | 8 GiB          | bina pekerja SIGKILLed                       |
+| webpack   | 12 GiB         | berjaya, memuncak pada 11.1 GiB              |
 
 ### Lalai masa jalan
 
-Nilai lalai yang dieksport oleh `runner-base`: `PORT=20128`, `HOSTNAME=0.0.0.0`, `OMNIROUTE_MEMORY_MB=1024`, `NODE_OPTIONS=--max-old-space-size=1024`, `DATA_DIR=/app/data`, `OMNIROUTE_MIGRATIONS_DIR=/app/migrations`.
+Lalai dieksport oleh `runner-base`: `PORT=20128`, `HOSTNAME=0.0.0.0`, `OMNIROUTE_MEMORY_MB=1024`, `NODE_OPTIONS=--max-old-space-size=1024`, `DATA_DIR=/app/data`, `OMNIROUTE_MIGRATIONS_DIR=/app/migrations`.
 
-Gelagat memori dalam Docker:
+Tingkah laku ingatan dalam Docker:
 
 - Imej menetapkan `OMNIROUTE_MEMORY_MB=1024` dan memperoleh `NODE_OPTIONS=--max-old-space-size=1024` daripadanya.
-- Proses pelayan sebenar dimulakan oleh pelancar kendiri, yang membaca `OMNIROUTE_MEMORY_MB` dan menambahkan `--max-old-space-size=<OMNIROUTE_MEMORY_MB>`.
-- Node menggunakan nilai `--max-old-space-size` berulang yang terakhir, jadi penetapan `OMNIROUTE_MEMORY_MB` mengawal had heap Docker yang berkuat kuasa.
-- Oleh sebab imej sentiasa menetapkannya, nilai sandaran pelancar yang ditentukur berdasarkan RAM tidak pernah digunakan di bawah Docker. Tingkatkannya secara eksplisit mengikut beban kerja (jadual di bawah). `2048` masih terlalu kecil untuk `/v1/responses` ejen pengekodan.
+- Proses pelayan sebenar dimulakan oleh pelancar kendiri, yang berbunyi `OMNIROUTE_MEMORY_MB` dan menambahkan `--max-old-space-size=<OMNIROUTE_MEMORY_MB>`.
+- Nod menggunakan nilai `--max-old-space-size` berulang terakhir, jadi tetapan `OMNIROUTE_MEMORY_MB` mengawal had timbunan Docker berkesan.
+- Oleh kerana imej sentiasa menetapkannya, sandaran tertentukur RAM pelancar itu sendiri tidak pernah digunakan di bawah Docker. Naikkannya secara eksplisit untuk beban kerja (jadual di bawah). `2048` masih terlalu kecil untuk coding-agent `/v1/responses`.
 
-### RAM masa jalan untuk ejen pengekodan
+### Runtime RAM untuk ejen pengekodan
 
-Nilai lalai Docker 1 GiB ialah paras minimum untuk papan pemuka/sembang ringan, bukan saiz untuk penggunaan pengeluaran. Kandungan `POST /v1/responses` yang panjang (ratusan mesej, puluhan alat) mengekalkan berbilang graf dalam memori semasa pemampatan. Dua permintaan bertindih bersaiz ~3 MiB / ~750k token telah menyebabkan V8 terhenti pada ruang lama **12 GiB** (`FATAL ERROR: Reached heap limit`) dan turut mencapai OOM cgroup 16 GiB. Lihat [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849).
+1 GiB Docker lalai ialah lantai dashboard/light-chat, bukan saiz pengeluaran. Badan `POST /v1/responses` yang panjang (beratus-ratus mesej, berpuluh-puluh alatan) mengekalkan berbilang graf dalam ingatan semasa pemampatan. Dua permintaan token ~ 3 MiB / ~ 750k yang bertindih telah membatalkan V8 pada** 12 GiB** ruang lama (`FATAL ERROR: Reached heap limit`) dan juga mencecah 16 GiB cgroup OOM. Lihat [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849).
 
-Tetapkan saiz **cgroup `--memory` melebihi heap** — penimbal natif, SQLite dan perantaraan pemampatan berada di luar V8.
+Saiz** cgroup `--memory` di atas timbunan** penimbal asli —, SQLite dan perantaraan mampatan terletak di luar V8.
 
-| Beban kerja                              | `OMNIROUTE_MEMORY_MB`      | Bekas / cgroup   | Catatan                                                                                                                   |
-| ---------------------------------------- | -------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| Papan pemuka, satu sembang ringan        | `1024` (lalai imej)        | ≥2 GiB           |                                                                                                                           |
-| Satu ejen pengekodan (Claude/Codex/Grok) | `8192`                     | ≥10 GiB          | `/v1/responses` sesi tunggal biasa                                                                                        |
-| Dua `/v1/responses` panjang serentak     | `10240`–`12288`            | ≥12–16 GiB       | V8 diukur terhenti pada heap ~12 GiB                                                                                      |
-| Tiga+ konteks panjang serentak           | jangan gunakan satu proses | siri / lebih RAM | Kemasukan beban berat lalai ialah 1 yang sedang diproses; meningkatkannya tanpa RAM akan menyebabkan hentian itu berulang |
+| Beban kerja                              | `OMNIROUTE_MEMORY_MB`   | Bekas / cgroup      | Nota                                                                                                            |
+| ---------------------------------------- | ----------------------- | ------------------- | --------------------------------------------------------------------------------------------------------------- |
+| Papan pemuka, satu sembang ringan        | `1024` (imej lalai)     | ≥2 GiB              |                                                                                                                 |
+| Satu ejen pengekodan (Claude/Codex/Grok) | `8192`                  | ≥10 GiB             | `/v1/responses` sesi tunggal biasa                                                                              |
+| Dua `/v1/responses` panjang serentak     | `10240`–`12288`         | ≥12–16 GiB          | V8 yang diukur digugurkan pada timbunan ~ 12 GiB                                                                |
+| Tiga + konteks panjang serentak          | jangan pada satu proses | bersiri / lebih RAM | Kemasukan kelas berat lalai ialah 1 dalam penerbangan; menaikkannya tanpa RAM memperkenalkan semula pengguguran |
 
-`omniroute serve` pada perkakasan fizikal menentukur ~35% daripada RAM (dihadkan kepada `[512, 4096]`) apabila `OMNIROUTE_MEMORY_MB` **tidak ditetapkan**. Docker sentiasa menetapkan `1024`, jadi penentukuran tersebut tidak pernah dijalankan dalam imej rasmi.
+`omniroute serve` pada logam kosong menentukur ~ 35% daripada RAM ( `[512, 4096]` diapit ) apabila `OMNIROUTE_MEMORY_MB` ialah** tidak ditetapkan** . Docker sentiasa menetapkan `1024`, supaya penentukuran tidak pernah berjalan dalam imej rasmi.
 
 ```bash
 docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
   -e OMNIROUTE_MEMORY_MB=8192 --memory=10g \
-  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
 ```
 
 ## Pemboleh Ubah Persekitaran Kritikal
@@ -366,21 +337,11 @@ Selain nilai lalai yang didokumentasikan dalam [ENVIRONMENT.md](../reference/ENV
 
 ## Proksi Songsang pada Subpath (Traefik / nginx)
 
-`basePath` Next.js dikompil ke dalam berkas standalone. OmniRoute merekodkan nilai yang
-telah diterapkan dalam fail sentinel pada akar aplikasi (ditulis semasa `npm run build`;
-dibaca oleh `scripts/docker/ensure-docker-base-path.mjs`) dan membandingkannya dengan
-`OMNIROUTE_BASE_PATH` apabila bekas dimulakan. Apabila nilainya berbeza dan imej dibina
-untuk akar domain, titik masuk menulis semula manifes standalone, literal
-`basePath`/`assetPrefix` terbenam (Next 16 memaparkan URL aset SSR hanya daripada
-`assetPrefix` — penampal mencerminkan subpath ke dalamnya), URL aset
-`/_next/static` yang telah diterapkan (manifes rujukan klien, import media, halaman
-ralat yang diprapapar) dan shim `process.env` klien sebelum
-`node dev/run-standalone.mjs` dijalankan.
+Next.js `basePath` is compiled into the standalone bundle. OmniRoute records the baked value in a sentinel file at the app root (written during `npm run build`; read by `scripts/docker/ensure-docker-base-path.mjs`) and compares it with `OMNIROUTE_BASE_PATH` when the container starts. When they differ and the image was built for the domain root, the entrypoint rewrites the standalone manifests, the embedded `basePath`/`assetPrefix` literals (Next 16 renders SSR asset URLs from `assetPrefix` alone — the patcher mirrors the subpath into it), the baked `/_next/static` asset URLs (client-reference manifests, media imports, prerendered error pages) and the client `process.env` shim before `node dev/run-standalone.mjs` runs.
 
-### Binaan Compose (disyorkan)
+### Karang binaan (disyorkan)
 
-Tetapkan kedua-dua pemboleh ubah dalam `.env`, kemudian bina semula supaya imej dan
-persekitaran masa jalan adalah selaras:
+Tetapkan kedua-dua pembolehubah dalam `.env`, kemudian bina semula supaya imej dan masa jalan bersetuju:
 
 ```bash
 # .env
@@ -392,71 +353,52 @@ NEXT_PUBLIC_BASE_URL=https://myhostname.example.com/omniroute
 docker compose --profile base up -d --build
 ```
 
-`docker-compose.yml` meneruskan `OMNIROUTE_BASE_PATH` sebagai argumen binaan Docker dan
-sebagai pemboleh ubah persekitaran masa jalan.
+`docker-compose.yml` memajukan `OMNIROUTE_BASE_PATH` sebagai Docker build-arg dan sebagai pembolehubah persekitaran masa jalan.
 
-### Imej akar prabina + subpath masa jalan
+### Imej akar pra-binaan + sublaluan masa jalan
 
-Imej `diegosouzapw/omniroute:*` yang diterbitkan dibina untuk akar domain. Anda masih
-boleh menetapkan `OMNIROUTE_BASE_PATH` pada masa jalan; bekas menampal berkas sekali
-semasa permulaan. Padankannya dengan asalan awam yang sepadan:
+Imej `cheaperinference/omniroute:*` yang diterbitkan dibina untuk akar domain. Anda masih boleh menetapkan `OMNIROUTE_BASE_PATH` pada masa jalan; bekas itu menampal berkas sekali pada permulaan. Gandingkannya dengan asal umum yang sepadan:
 
 ```yaml
 services:
   omniroute:
-    image: diegosouzapw/omniroute:latest
+    image: cheaperinference/omniroute:latest
     environment:
       OMNIROUTE_BASE_PATH: /omniroute
       NEXT_PUBLIC_BASE_URL: https://myhostname.example.com/omniroute
 ```
 
-Konfigurasikan proksi songsang untuk memajukan laluan luaran **penuh** (jangan buang
-awalan). Traefik hendaklah menghalakan `PathPrefix(`/omniroute`)` ke bekas tanpa
-`StripPrefix`, supaya Next.js menerima `/omniroute/...` dan menyediakan aset daripada
-`/omniroute/_next/...`.
+Konfigurasikan proksi terbalik untuk memajukan** penuh** laluan luaran (jangan tanggalkan awalan). Traefik harus menghalakan `PathPrefix(`/omniroute `)` ke bekas tanpa `StripPrefix`, jadi Next.js menerima `/omniroute/...` dan menyediakan aset daripada `/omniroute/_next/...`.
 
-Pemeriksaan kesihatan Docker menguji titik akhir kitar hayat ringan `/healthz` yang
-diawali dengan `OMNIROUTE_BASE_PATH` aktif. `/api/monitoring/health` kekal tersedia
-untuk diagnostik manusia/papan pemuka; untuk menghalakan HEALTHCHECK bekas kembali
-kepadanya (contohnya bagi penguatkuasaan kesihatan mendalam), tetapkan
-`OMNIROUTE_HEALTHCHECK_PATH=/api/monitoring/health`. Laluan tersebut ialah pemeriksaan
-**mendalam** (DB + ringkasan pemantauan) — sesuai untuk `HEALTHCHECK` Docker yang jarang
-dilakukan jika anda memilih untuk mendayakannya semula, tetapi **tidak** sesuai untuk
-selang `livenessProbe` Kubernetes.
+Pemeriksaan kesihatan Docker menyelidik titik akhir kitaran hayat `/healthz` ringan yang diawali dengan `OMNIROUTE_BASE_PATH` aktif. `/api/monitoring/health` kekal tersedia untuk diagnostik human/dashboard ; untuk menghalakan bekas HEALTHCHECK ke arahnya (contohnya untuk penguatkuasaan kesihatan yang mendalam), tetapkan `OMNIROUTE_HEALTHCHECK_PATH=/api/monitoring/health`. Jalan itu ialah a** dalam** semak ( ringkasan pemantauan DB + ) — sesuai untuk Docker jarang `HEALTHCHECK` jika anda ikut serta semula, tetapi** bukan** untuk selang `livenessProbe` Kubernetes.
 
-Untuk pengorkestra (Kubernetes, Nomad dan sebagainya):
+Untuk orkestra (Kubernetes, Nomad, dll.):
 
-| Probe                  | Utamakan                                                            | Elakkan                                                        |
-| ---------------------- | ------------------------------------------------------------------- | -------------------------------------------------------------- |
-| Keaktifan              | HTTP `GET /livez`, atau TCP pada port utama (`PORT`, lalai `20128`) | `/api/monitoring/health` sebagai keaktifan                     |
-| Kesediaan              | HTTP `GET /healthz`                                                 | Had masa ketat yang menganggap gelung acara sibuk sebagai mati |
-| Mendalam / kotak hitam | `/api/monitoring/health`                                            | —                                                              |
+| Siasatan            | lebih suka                                                           | elakkan                                                               |
+| ------------------- | -------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| Kemeriahan          | HTTP `GET /livez`, atau TCP pada port utama (`PORT`, `20128` lalai ) | `/api/monitoring/health` sebagai hidup                                |
+| Kesediaan           | HTTP `GET /healthz`                                                  | Tamat masa yang ketat yang menganggap gelung acara sibuk sebagai mati |
+| Dalam / kotak hitam | `/api/monitoring/health`                                             | —                                                                     |
 
-`/healthz` melaporkan kitar hayat proses (`ok` / `starting` / `stopping`). `/livez`
-hanya melaporkan bahawa proses masih hidup (200 apabila pengendali boleh dijalankan;
-ia tidak menunggu kesediaan). Kedua-duanya masih berjalan pada gelung acara Node yang
-sama seperti pengendalian permintaan, jadi kerja katalog atau pemampatan yang terikat
-kepada CPU boleh melengahkannya — sibuk ≠ mati. Utamakan keaktifan TCP jika probe HTTP
-tamat masa. Panduan probe lengkap:
-[Panduan pemantauan — cadangan probe Kubernetes](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations).
+`/healthz` melaporkan kitaran hayat proses (`ok` / `starting` / `stopping`). `/livez` adalah proses-hidup sahaja (200 bila-bila masa pengendali boleh berjalan; ia tidak menunggu untuk kesediaan). Kedua-duanya masih berjalan pada gelung peristiwa Node yang sama seperti pengendalian permintaan, jadi katalog terikat CPU atau kerja mampatan boleh melambatkan mereka — sibuk ≠ mati. Lebih suka TCP liveness jika HTTP kuar masa tamat. Panduan siasatan penuh: [Panduan pemantauan — cadangan siasatan Kubernetes](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations).
 
-## Docker Compose dengan Caddy (HTTPS Auto-TLS)
+## Docker Karang dengan Caddy (HTTPS Auto-TLS)
 
-OmniRoute boleh didedahkan dengan selamat menggunakan penyediaan SSL automatik Caddy. Pastikan rekod A DNS domain anda menghala ke IP pelayan anda.
+OmniRoute boleh didedahkan dengan selamat menggunakan peruntukan SSL automatik Caddy. Pastikan rekod DNS A domain anda menghala ke IP pelayan anda.
 
 ```yaml
 services:
   omniroute:
-    image: diegosouzapw/omniroute:latest
+    image: cheaperinference/omniroute:latest
     container_name: omniroute
     restart: unless-stopped
     volumes:
       - omniroute-data:/app/data
     environment:
       - PORT=20128
-      # Asal yang dihadapkan kepada pelayar untuk panggil balik OAuth, pautan papan pemuka dan URL awam yang dijana.
+      # Browser-facing origin for OAuth callbacks, dashboard links, and generated public URLs.
       - NEXT_PUBLIC_BASE_URL=https://your-domain.com
-      # URL dalaman pelayan-ke-pelayan untuk tugas berjadual / pengambilan kendiri.
+      # Internal server-to-server URL for scheduled jobs / self-fetches.
       - BASE_URL=http://omniroute:20128
       - AUTH_COOKIE_SECURE=true
 
@@ -473,12 +415,7 @@ volumes:
   omniroute-data:
 ```
 
-Caddy menetapkan pengepala pemajuan standard untuk bekas huluan. OmniRoute menggunakan
-`NEXT_PUBLIC_BASE_URL` sebagai asal awam kanonik untuk panggil balik OAuth dan pautan awam yang
-dijana; operasi tulis papan pemuka yang disahkan menggunakan permintaan asal-sama serta perlindungan
-CSRF terikat sesi. Hanya dayakan `OMNIROUTE_TRUST_PROXY` untuk penggunaan lanjutan apabila anda
-sengaja mahu OmniRoute memperoleh asal awam daripada pengepala yang dimajukan dan dipercayai,
-dan bukannya daripada konfigurasi eksplisit.
+Caddy menetapkan pengepala pemajuan standard untuk bekas huluan. OmniRoute menggunakan `NEXT_PUBLIC_BASE_URL` sebagai asal awam berkanun untuk panggilan balik OAuth dan pautan awam yang dijana; penulisan papan pemuka yang disahkan menggunakan permintaan asal yang sama serta perlindungan CSRF terikat sesi. Hanya dayakan `OMNIROUTE_TRUST_PROXY` untuk penempatan lanjutan di mana anda sengaja mahu OmniRoute memperoleh asal umum daripada pengepala yang dimajukan dipercayai dan bukannya konfigurasi eksplisit.
 
 ## Terowong Pantas Cloudflare
 
@@ -497,47 +434,49 @@ Panel terowong titik akhir (Cloudflare, Tailscale, ngrok) boleh dipaparkan atau 
 
 ## Tag Imej
 
-| Imej                     | Tag      | Saiz   | Perihalan                                                  |
-| ------------------------ | -------- | ------ | ---------------------------------------------------------- |
-| `diegosouzapw/omniroute` | `latest` | ~250MB | SemVer stabil **diterbitkan** tertinggi (bukan git `main`) |
-| `diegosouzapw/omniroute` | `3.8.0`  | ~250MB | Sematkan kelas tag ini untuk GitOps                        |
+| Imej                         | Tag      | Saiz    | Penerangan                                                 |
+| ---------------------------- | -------- | ------- | ---------------------------------------------------------- |
+| `cheaperinference/omniroute` | `latest` | ~ 250MB | Tertinggi** diterbitkan** SemVer stabil (bukan git `main`) |
+| `cheaperinference/omniroute` | `3.8.54` | ~ 250MB | Sematkan kelas teg ini untuk GitOps                        |
 
-Manifes berbilang platform: `linux/amd64` + `linux/arm64` natif (Apple Silicon, AWS Graviton, Raspberry Pi). Docker memilih seni bina yang sepadan secara automatik; gunakan `--platform linux/amd64` jika anda perlu memaksa emulasi AMD64 pada hos ARM.
+Imej yang sama diterbitkan ke tiga repositori, dengan ringkasan setiap seni bina yang sama: `cheaperinference/omniroute` (Docker Hub, organisasi Inferens Lebih Murah, dari 3.8.53 pada), `ghcr.io/cheaper-inference/omniroute` dan `diegosouzapw/omniroute` warisan , yang mengekalkan sejarah tarikannya dan masih menerima setiap keluaran. Arahan `diegosouzapw/omniroute` sedia ada terus dikemas kini; menukar nama imej adalah pilihan. Saluran prakeluaran `:next` / `:next-web` di bawah diterbitkan kepada `diegosouzapw/omniroute` dan GHCR sahaja.
 
-### Saluran Keluaran
+Manifes berbilang platform: `linux/amd64` + `linux/arm64` asli (Apple Silicon, AWS Graviton, Raspberry Pi). Docker memilih seni bina yang sepadan secara automatik; lulus `--platform linux/amd64` jika anda perlu memaksa emulasi AMD64 pada hos ARM.
 
-OmniRoute menerbitkan saluran Docker berasingan untuk keluaran stabil, pengujian cabang keluaran aktif dan binaan pembangunan.
+### Keluarkan Saluran
 
-| Saluran                         | Sumber                                  | Kebolehubahan                   | Penggunaan yang disyorkan                                                                                                                 |
-| ------------------------------- | --------------------------------------- | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `:<version>` / `:<version>-web` | Keluaran ditandatangani/berversi        | Tidak boleh ubah                | Penggunaan produksi yang menyematkan keluaran tepat                                                                                       |
-| `:latest` / `:latest-web`       | SemVer stabil **diterbitkan** tertinggi | Penuding stabil boleh ubah      | Mengikuti keluaran stabil **selepas** tugas penerbitan SemVer — **tidak** menjejaki komit `main` atau `release/v*` yang belum dikeluarkan |
-| `:next` / `:next-web`           | Cabang `release/v*` lalai semasa        | Penuding prakeluaran boleh ubah | Menguji pembaikan yang telah dimasukkan ke dalam cabang keluaran aktif tetapi belum disertakan dalam keluaran stabil                      |
-| `:main` / `:main-web`           | Cabang `main`                           | Penuding pembangunan boleh ubah | Untuk pembangunan dan pengujian integrasi sahaja                                                                                          |
+OmniRoute menerbitkan saluran Docker yang berasingan untuk keluaran stabil, ujian cawangan keluaran aktif dan binaan pembangunan.
+
+| Saluran                         | Sumber                                  | Kebolehubahan                    | Penggunaan yang disyorkan                                                                                                              |
+| ------------------------------- | --------------------------------------- | -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `:<version>` / `:<version>-web` | Signed/versioned lepaskan               | tidak boleh ubah                 | Penggunaan pengeluaran yang menyematkan keluaran tepat                                                                                 |
+| `:latest` / `:latest-web`       | Tertinggi** diterbitkan** stabil SemVer | Penunjuk stabil boleh ubah       | Mengikut keluaran stabil** selepas** a SemVer publish job — does** bukan** jejak `main` atau `release/v*` yang belum dikeluarkan komit |
+| `:next` / `:next-web`           | Cawangan `release/v*` lalai semasa      | Penunjuk pra-keluaran boleh ubah | Ujian pembetulan yang telah mendarat pada cawangan keluaran aktif tetapi belum lagi dalam keluaran stabil                              |
+| `:main` / `:main-web`           | cawangan `main`                         | Penunjuk pembangunan boleh ubah  | Ujian pembangunan dan integrasi sahaja                                                                                                 |
 
 #### Penyedia sesi web: imej `-web`
 
-Setiap saluran di atas turut tersedia sebagai tag `-web` (`:latest-web`, `:<version>-web`, `:next-web`, `:main-web`), yang dibina daripada peringkat `runner-web` — imej yang sama berserta Playwright dan pelayar Chromium. Imej biasa dihantar **tanpa** Chromium; `gemini-web`, `claude-web` dan `claude-turnstile` memerlukannya.
+Setiap saluran di atas berfungsi sebagai teg `-web` (`:latest-web`, `:<version>-web`, `:next-web`, `:main-web`), dibina daripada peringkat `runner-web` — imej yang sama ditambah Playwright dan penyemak imbas Chromium. Gambar biasa dihantar** tanpa** Chromium; `gemini-web`, `claude-web` dan `claude-turnstile` memerlukannya.
 
-Kegagalan ditangguhkan, bukannya berlaku semasa permulaan: penyedia tersebut menyenaraikan model mereka dan ditunjukkan sebagai tersambung dalam papan pemuka, dan hanya permintaan pertama gagal dengan
+Kegagalan ditangguhkan, bukan masa permulaan: penyedia tersebut menyenaraikan model mereka dan menunjukkan sebagai disambungkan dalam papan pemuka, dan hanya permintaan pertama gagal dengan
 
 ```
 [500]: Failed to load external module playwright: Error: Cannot find module
 '/app/node_modules/playwright/node_modules/playwright-core/browsers.json'
 ```
 
-Jika anda menggunakan penyedia tersebut, tarik tag `-web` bagi saluran yang sedang anda gunakan — tiada perkara lain yang berubah. Pada pemasangan npm/CLI (tanpa imej Docker), komponen setara yang tiada ialah binari pelayar: jalankan `npx playwright install chromium` pada hos.
+Jika anda menggunakan penyedia tersebut, tarik tag `-web` pada saluran yang anda sudah pun menggunakan — tiada apa-apa lagi yang berubah. Pada pemasangan npm/CLI (tiada imej Docker ), bahagian yang setara yang hilang ialah binari penyemak imbas: jalankan `npx playwright install chromium` pada hos.
 
 #### Menggunakan saluran prakeluaran
 
-Saluran `next` dibina semula pada setiap push ke cawangan lalai `release/v*` semasa dan diterbitkan untuk AMD64 serta ARM64. Cawangan penyelenggaraan yang lebih lama tidak boleh menimpanya. Saluran ini menyediakan imej yang boleh ditarik untuk pembaikan yang telah digabungkan ke dalam cawangan keluaran aktif sebelum tag stabil seterusnya dibuat.
+Saluran `next` dibina semula pada setiap tolak ke cawangan `release/v*` lalai semasa dan diterbitkan untuk AMD64 dan ARM64. Cawangan penyelenggaraan lama tidak boleh menimpanya. Saluran menyediakan imej boleh tarik untuk pembetulan yang telah digabungkan ke dalam cawangan keluaran aktif sebelum teg stabil seterusnya dipotong.
 
 ```bash
 docker pull diegosouzapw/omniroute:next
 docker pull diegosouzapw/omniroute:next-web
 ```
 
-Untuk Docker Compose, gantikan tag imej yang digunakan oleh profil yang dipilih, kemudian tarik dan cipta semula perkhidmatan:
+Untuk Docker Compose, ganti teg imej yang digunakan oleh profil yang dipilih, kemudian tarik dan buat semula perkhidmatan:
 
 ```yaml
 services:
@@ -550,32 +489,32 @@ docker compose pull
 docker compose up -d
 ```
 
-#### Keselamatan dan pengunduran
+#### Keselamatan dan rollback
 
-`next` ialah saluran prakeluaran terapung. Ia mungkin berubah pada setiap push ke cawangan keluaran aktif dan **tidak disokong untuk kegunaan pengeluaran**. Sematkan digest imej semasa menilai binaan tertentu:
+`next` ialah saluran pra-keluaran terapung. Ia boleh berubah pada sebarang tolakan kepada cawangan keluaran aktif dan adalah** tidak disokong untuk kegunaan pengeluaran** . Sematkan ringkasan imej semasa menilai binaan tertentu:
 
 ```bash
 docker pull diegosouzapw/omniroute:next
 docker image inspect diegosouzapw/omniroute:next --format '{{index .RepoDigests 0}}'
 ```
 
-Sebelum menguji, sandarkan volum data OmniRoute atau direktori data yang dilekapkan melalui bind mount. Untuk mengundur, pulihkan versi stabil atau digest yang digunakan sebelum ini dan cipta semula bekas:
+Sebelum ujian, sandarkan volum data OmniRoute atau direktori data yang dilekapkan. Untuk melancarkan semula, pulihkan versi stabil yang digunakan sebelum ini atau cerna dan buat semula bekas:
 
 ```bash
-docker pull diegosouzapw/omniroute:<stable-version>
+docker pull cheaperinference/omniroute:<stable-version>
 docker compose up -d
 ```
 
-Binaan cawangan keluaran tidak sekali-kali boleh mengalihkan `latest`; hanya versi semantik stabil yang layak boleh menaik taraf penuding stabil. Imej `next` mengekalkan pemeriksaan imej keluaran dan get penyekat kerentanan CRITICAL.
+Binaan cawangan keluaran tidak boleh menggerakkan `latest`; hanya versi semantik stabil yang layak boleh mempromosikan penunjuk stabil. Imej `next` mengekalkan pemeriksaan imej keluaran dan menyekat pintu kerentanan KRITIKAL.
 
-**`latest` bukan jaminan kemutakhiran untuk git.** Pembaikan yang digabungkan pada `main` atau pada cawangan `release/v*` aktif **tidak** terdapat dalam `:latest` sehingga imej SemVer stabil diterbitkan dan tugas penerbitan menaik taraf `:latest` (digest yang sama seperti SemVer tersebut). Jika `latest` kelihatan tidak berubah sedangkan GitHub sudah menunjukkan pembaikan itu, tarik `:next` untuk menguji cawangan keluaran atau tunggu tag SemVer.
+**`latest` bukan jaminan mata wang untuk git.** Pembetulan gabungan pada `main` atau pada cawangan `release/v*` aktif ialah** bukan** dalam `:latest` sehingga imej SemVer yang stabil diterbitkan dan kerja terbitkan mempromosikan `:latest` (cernaan yang sama seperti SemVer itu). Jika `latest` kelihatan beku manakala GitHub sudah menunjukkan pembetulan, tarik `:next` untuk menguji cawangan pelepas atau tunggu teg SemVer.
 
-| Keperluan anda                                                                           | Gunakan                              |
-| ---------------------------------------------------------------------------------------- | ------------------------------------ |
-| GitOps / pengeluaran yang tidak boleh menyimpang                                         | Sematkan `:X.Y.Z` (atau digest imej) |
-| Ikuti keluaran stabil yang diterbitkan dan terima penciptaan semula pada setiap keluaran | `:latest`                            |
-| Uji commit `release/v*` yang belum dikeluarkan                                           | `:next` (bukan untuk pengeluaran)    |
-| Uji `main`                                                                               | `:main` (bukan untuk pengeluaran)    |
+| awak nak                                                                      | guna                                    |
+| ----------------------------------------------------------------------------- | --------------------------------------- |
+| GitOps / pengeluaran yang tidak boleh hanyut                                  | Sematkan `:X.Y.Z` (atau ringkasan imej) |
+| Ikuti kandang yang diterbitkan dan terima ciptaan semula pada setiap keluaran | `:latest`                               |
+| Uji `release/v*` yang belum dikeluarkan                                       | `:next` (bukan pengeluaran)             |
+| Uji `main`                                                                    | `:main` (bukan pengeluaran)             |
 
 ## Kemas kini papan pemuka dalam Docker
 

@@ -4,35 +4,22 @@
 
 ---
 
-A v3.8.49-es verzió óta (a minőségi/sebességi terv WS3.2/WS3.4 pontjai) az ellenőrzött PR-ek
-`release/vX.Y.Z` ágba történő egyesítésének alapértelmezett útvonala a **Mergify egyesítési sora** (`.mergify.yml`);
-az alább dokumentált **kézi egyesítési szerelvény** a TARTALÉK megoldás — incidensek,
-kiadási befagyasztások idején, vagy ha a Mergify nyílt forráskódú csomagja valaha megváltozik.
+> **2026-11-19: Az összevonási sor megszűnt** (tulajdonos döntése). `.mergify.yml` már nem definiál sort, és visszautasítja az összevonási parancsokat, amelyek összevonják vagy átírják a lekérést. PRs kiadásokat kézzel egyesítik a „Zöld kapuk megkövetelése az aktív kiadáson” (`Gate / CI` + `Gate / Quality`) lerakatszabályzat szerint, amíg az omni-queue élő módban nem fut, majd az omni-queue-n keresztül ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Az alábbi Egyesítés szakaszok leírják a várólista állapotát.
 
-## Alapértelmezett útvonal: a Mergify-várólista
+A v3.8.49 (a quality/velocity terv WS3.2/WS3.4 ) óta az áttekintett PRs és `release/vX.Y.Z` alapértelmezett egyesítési útvonala a** Egyesítési sor egyesítése** (`.mergify.yml`); a** kézi egyesítés-vonat** Az alábbiakban dokumentált FALLBACK —, amelyet incidensek, kiadások lefagyása esetén használnak, vagy ha a Nyílt forráskódú összevonási terv bármikor megváltozik.
 
-1. A kampányok felülvizsgálják/zöldre állítják a PR-t, majd a tulajdonos egyesítés előtti ⭐
-   kapuja jóváhagyja (a jelentés + elemenkénti döntés — lásd: `/merge-prs`, 0.75. lépés).
-2. A tulajdonos (vagy a tulajdonos döntése alapján eljáró munkamenet) alkalmazza a **`queue`**
-   címkét. A címke JELENTI az egyesítési jóváhagyást; a Mergify csak végrehajtja azt.
-3. A Mergify **sorosan** (egyszerre egyet) ellenőrzi a várólistára helyezett PR-eket a gyors kapuk
-   alapján, majd egyesíti őket (squash). A kötegelés + automatikus felezéses hibakeresés fizetős Mergify-szintű
-   funkció („Cannot use Merge Queue batch” az ingyenes csomagban, #7220), ezért a `.mergify.yml` nem állít be
-   `batch_size` értéket; a kötegelés továbbra is az alább ismertetett kézi egyesítési vonat feladata. Az a PR, amelynek
-   ellenőrzései a `checks_timeout` lejárta után (240 perc = a `quality.yml`
-   mért p95 értékének 2-szerese) még mindig függőben vannak, kikerül a várólistából, ahelyett hogy feltartaná azt.
-4. Az egyesítés után a folyamatos kiadási zöld munkafolyamat push esetén ellenőrzi az új csúcsot,
-   és hozzárendelési hibajegyet nyit, ha a kombináció visszaesést okozott (soha nem állítja vissza automatikusan).
+## Alapértelmezett elérési út: az Egyesítési sor
 
-Védőkorlátok (a `CLAUDE.md` 21./22. szigorú szabályának megfelelően):
+1. PR reviewed/greened a kampányok által, és a tulajdonos egyesítés előtti ⭐ kapuja jóváhagyta (a + cikkenkénti döntés — jelentését lásd `/merge-prs` 0.75 lépésben).
+2. A tulajdonos (vagy a tulajdonos döntése alapján eljáró ülés) alkalmazza a**`queue`** címke. A címke IS az összevonás jóváhagyása; A Mergify csak azt hajtja végre.
+3. Az Mergify érvényesíti a sorban álló PRs** sorozatosan** (egyszerre) a gyorskapuk és egyesülések (squash) ellen. A kötegelt + automatikus felezése egy fizetett Mergify szint ("A Merge Queue köteg nem használható" az ingyenes csomagban, #7220), így `.mergify.yml` nem állít be `batch_size`; A kötegelés továbbra is az alábbi kézi egyesítési vonat feladata marad. Az a PR, amelynek ellenőrzése még függőben van `checks_timeout` után (240 perc = 2 × a `quality.yml` mért p95-je), a sor leállítása helyett kikerül a sorból.
+4. Az egyesítés után a folyamatos kiadás-zöld munkafolyamat érvényesíti az új tippet leküldéskor, és hozzárendelési problémát nyit meg, ha a kombináció visszafejlődött (soha nem történik automatikus visszaállítás).
 
-- **Aktív kiadási befagyasztás** → NE címkézzen a befagyasztott ágat célzó PR-eket; először módosítsa a célágat
-  az aktív `release/vX+1` ágra.
-- **Másik munkamenet folyamatban lévő PR-je** → soha ne címkézze; csak a tulajdonos munkamenet helyezheti várólistára
-  a saját munkáját.
-- A csak teszteket érintő eltérések és a `hotfix` címkével ellátott PR-ek már eleve csökkentett CI-folyamatot futtatnak (lásd:
-  `RELEASE_CHECKLIST.md` → Gyorsjavítási gyorssáv); a várólista feltételei az ellenőrzések ténylegesen
-  lefutott készletét fogadják el (`#check-failure=0` + `#check-pending=0`).
+Védőkorlátok (tükör `CLAUDE.md` Hard Rules #21/#22):
+
+- **Kioldó fagyasztás nyitva** → do NOT címke PRs a befagyott ágra célozva; először újracélozzon az aktív `release/vX+1`.
+- **Egy másik munkamenet repülés közbeni PR** → soha ne címkézze fel; csak a tulajdonos munkamenet állítja sorba a saját munkáját.
+- A csak tesztekhez használható különbségek és `hotfix` -labeled PRs már fut csökkentett CI (lásd `RELEASE_CHECKLIST.md` → Hotfix Fast-Lane); a sorfeltételek elfogadják a ténylegesen lefutott ellenőrzési készletet (`#check-failure=0` + `#check-pending=0`).
 
 ## Tartalék megoldás: a kézi egyesítési szerelvény
 

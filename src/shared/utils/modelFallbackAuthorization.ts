@@ -14,7 +14,7 @@ export async function resolveModelFallbackAuthorization(
     // then failed (#16810; guard: tests/unit/build/mcp-bundle-startup.test.ts).
     const { resolveEnforcedPolicyKey } = await import("./apiKeyPolicy");
     const enforced = await resolveEnforcedPolicyKey(request);
-    if (enforced.selfLoopScope.rejection) return async () => false;
+    if (enforced.rejection) return async () => false;
     apiKey = enforced.apiKey;
   } catch {
     return async () => false;
