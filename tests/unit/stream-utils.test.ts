@@ -62,6 +62,34 @@ function multilineDataEvent(payload, splitBeforeKey) {
   return `data: ${json.slice(0, splitAt)}\ndata: ${json.slice(splitAt)}\n\n`;
 }
 
+for (const mode of ["passthrough", "translate"]) {
+  test(`${mode}: Chat call-log summary preserves the reported usage total`, async () => {
+    for (const reportedTotal of [113, undefined]) {
+      let completed;
+      const chunk = { id: "chatcmpl-model", object: "chat.completion.chunk", model: "gpt-4.1" };
+      await readTransformed(
+        [
+          `data: ${JSON.stringify({ ...chunk, choices: [{ delta: { content: "Hello" }, finish_reason: "stop" }] })}\n\n`,
+          `data: ${JSON.stringify({ ...chunk, choices: [], usage: { prompt_tokens: 100, completion_tokens: 7, total_tokens: reportedTotal } })}\n\n`,
+          "data: [DONE]\n\n",
+        ],
+        {
+          mode,
+          model: "gpt-4.1",
+          provider: "openai",
+          sourceFormat: FORMATS.OPENAI,
+          targetFormat: FORMATS.OPENAI,
+          onComplete(payload) {
+            completed = payload;
+          },
+        }
+      );
+      assert.equal(completed?.status, 200);
+      assert.equal(completed?.responseBody.usage.total_tokens, reportedTotal ?? 107);
+    }
+  });
+}
+
 function parseJsonDataPayloads(text) {
   return text
     .split("\n")

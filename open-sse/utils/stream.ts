@@ -6,6 +6,7 @@ import { mergeUsageSnapshot } from "./streamUsageMerge.ts";
 import {
   resolveStreamAccountingUsage,
   projectStreamingClientUsage,
+  preserveReportedChatTotal,
 } from "./streamAccountingUsage.ts";
 import { createGeneratedContentTracker } from "./streamGeneratedContent.ts";
 import { mergeCacheCreationFields } from "./cacheWriteUsage.ts";
@@ -3404,6 +3405,7 @@ export function createSSEStream(options: StreamOptions = {}) {
                     passthroughAccumulatedReasoning
                   ),
                 };
+                preserveReportedChatTotal(responseBody.usage, usage, providerWireFormat);
                 outcomeRecorded = true;
                 onComplete({
                   status: 200,
@@ -3820,6 +3822,7 @@ export function createSSEStream(options: StreamOptions = {}) {
                 _streamed: true,
                 ...summaryTextTailMarker(state?.accumulatedContent, state?.accumulatedReasoning),
               };
+              preserveReportedChatTotal(responseBody.usage, accountingUsage, targetFormat);
               outcomeRecorded = true;
               onComplete({
                 status: 200,

@@ -37,6 +37,24 @@ export function resolveStreamAccountingUsage(input: StreamAccountingInput): Usag
   );
 }
 
+/** Keep a provider's independent Chat total in the synthesized call-log summary. */
+export function preserveReportedChatTotal(
+  summary: { total_tokens: number },
+  receipt: UsageLike | null | undefined,
+  upstreamFormat: string
+): void {
+  const total = receipt?.total_tokens;
+  if (
+    upstreamFormat === FORMATS.OPENAI &&
+    !receipt?.estimated &&
+    typeof total === "number" &&
+    Number.isFinite(total) &&
+    total > 0
+  ) {
+    summary.total_tokens = total;
+  }
+}
+
 /** Claude's legacy OpenAI projection excludes cache creation from prompt, unlike accounting. */
 export function projectStreamingClientUsage(
   usage: UsageLike | null | undefined,
