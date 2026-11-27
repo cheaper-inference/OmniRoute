@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Field } from "@omniroute/ui-kit/field";
+import { destinationNumberLimits } from "@/lib/logExport/destinationSchemas";
 import Button from "@/shared/components/Button";
 import Checkbox from "@/shared/components/Checkbox";
 import Input from "@/shared/components/Input";
@@ -13,22 +14,12 @@ import Select from "@/shared/components/Select";
 import Textarea from "@/shared/components/Textarea";
 import {
   SECRET_PLACEHOLDER,
+  type DestinationSubmitPayload,
   type LogExportDestination,
   type LogExportFieldDescriptor,
   type LogExportTypeDescriptor,
 } from "../types";
-
-export interface DestinationSubmitPayload {
-  name: string;
-  type: string;
-  enabled: boolean;
-  config: Record<string, unknown>;
-  batchSize: number;
-  startFromCurrentPosition?: boolean;
-  includeBodies: boolean;
-  maxBodyBytes: number;
-  maxRowsPerRun: number;
-}
+import { getDestinationFormValidator } from "./destinationFormValidation";
 
 interface DestinationFormModalProps {
   open: boolean;
@@ -42,10 +33,28 @@ interface DestinationFormModalProps {
 
 type FormValues = Record<string, string | boolean>;
 
+const {
+  batchSize: batchLimits,
+  maxBodyBytes: bodyLimits,
+  maxRowsPerRun: rowLimits,
+} = destinationNumberLimits;
+
 function numericFieldValue(value: string | boolean | undefined): number | undefined {
   if (value === "" || value === undefined) return undefined;
   const numeric = Number(value);
   return Number.isFinite(numeric) ? numeric : undefined;
+}
+
+function canKeepSecret(
+  field: LogExportFieldDescriptor,
+  destination: LogExportDestination | null,
+  hasClientValidation: boolean
+) {
+  return Boolean(
+    field.secret &&
+    destination &&
+    (!hasClientValidation || destination.config[field.key] === SECRET_PLACEHOLDER)
+  );
 }
 
 function initialValues(
@@ -53,15 +62,179 @@ function initialValues(
   destination: LogExportDestination | null
 ): FormValues {
   const values: FormValues = {};
+  const hasClientValidation = Boolean(getDestinationFormValidator(descriptor?.id));
   for (const field of descriptor?.fields ?? []) {
     const stored = destination?.config?.[field.key] ?? field.defaultValue;
-    if (field.type === "boolean") {
+    if (hasClientValidation && field.secret && stored === SECRET_PLACEHOLDER) {
+      values[field.key] = "";
+    } else if (field.type === "boolean") {
       values[field.key] = stored === undefined ? true : Boolean(stored);
     } else {
       values[field.key] = stored === undefined || stored === null ? "" : String(stored);
     }
   }
   return values;
+}
+
+function buildConfig(
+  descriptor: LogExportTypeDescriptor | undefined,
+  values: FormValues,
+  editing: LogExportDestination | null,
+  hasClientValidation: boolean
+) {
+  const config: Record<string, unknown> = {};
+  for (const field of descriptor?.fields ?? []) {
+    const value = values[field.key];
+    if (field.type === "boolean") {
+      config[field.key] = Boolean(value);
+      continue;
+    }
+    if (field.type === "number") {
+      const numeric = numericFieldValue(value);
+      if (numeric !== undefined) config[field.key] = numeric;
+      continue;
+    }
+
+    const text = typeof value === "string" ? value.trim() : "";
+    const secretFallback = canKeepSecret(field, editing, hasClientValidation)
+      ? SECRET_PLACEHOLDER
+      : "";
+    const submitted = text || secretFallback;
+    if (submitted || (hasClientValidation && field.required)) config[field.key] = submitted;
+  }
+  return config;
+}
+
+interface DestinationFieldProps {
+  field: LogExportFieldDescriptor;
+  value: FormValues[string];
+  editing: LogExportDestination | null;
+  hasClientValidation: boolean;
+  error?: string;
+  onChange: (value: string | boolean) => void;
+}
+
+interface DestinationTextareaProps {
+  id: string;
+  label: string;
+  hint?: string;
+  error?: string;
+  placeholder?: string;
+  required?: boolean;
+  value: string;
+  onChange: (value: string) => void;
+}
+
+function DestinationTextarea({
+  id,
+  label,
+  hint,
+  error,
+  placeholder,
+  required,
+  value,
+  onChange,
+}: DestinationTextareaProps) {
+  const errorId = `${id}-error`;
+  const hintId = `${id}-hint`;
+  return (
+    <Field
+      htmlFor={id}
+      label={label}
+      required={required}
+      hint={hint ? <span id={hintId}>{hint}</span> : undefined}
+      error={
+        error ? (
+          <span id={errorId} role="alert">
+            {error}
+          </span>
+        ) : undefined
+      }
+    >
+      <Textarea
+        id={id}
+        rows={6}
+        className="font-mono text-xs"
+        placeholder={placeholder}
+        required={required}
+        error={Boolean(error)}
+        aria-describedby={error ? errorId : hint ? hintId : undefined}
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+      />
+    </Field>
+  );
+}
+
+function DestinationField({
+  field,
+  value,
+  editing,
+  hasClientValidation,
+  error,
+  onChange,
+}: DestinationFieldProps) {
+  if (field.type === "boolean") {
+    return (
+      <Checkbox
+        label={field.labelFallback}
+        checked={Boolean(value)}
+        onChange={(event) => onChange(event.target.checked)}
+      />
+    );
+  }
+
+  const text = typeof value === "string" ? value : "";
+  if (field.type === "select") {
+    return (
+      <Select
+        id={`field-${field.key}`}
+        label={field.labelFallback}
+        value={text}
+        onChange={(event) => onChange(event.target.value)}
+        options={(field.options ?? []).map((option) => ({
+          value: option.value,
+          label: option.labelFallback,
+        }))}
+      />
+    );
+  }
+
+  const keepSecret = canKeepSecret(field, editing, hasClientValidation);
+  const required = hasClientValidation && field.required && !keepSecret;
+  const label = `${field.labelFallback}${!hasClientValidation && field.required ? " *" : ""}`;
+  const placeholder = keepSecret ? "Leave blank to keep the stored value" : field.placeholder;
+  if (field.type === "textarea") {
+    return (
+      <DestinationTextarea
+        id={`field-${field.key}`}
+        label={label}
+        hint={field.helpFallback}
+        placeholder={placeholder}
+        required={required}
+        error={error}
+        value={text}
+        onChange={onChange}
+      />
+    );
+  }
+
+  return (
+    <Input
+      label={label}
+      type={field.secret ? "password" : field.type === "number" ? "number" : "text"}
+      placeholder={placeholder}
+      hint={field.helpFallback}
+      required={required}
+      error={error}
+      value={text}
+      onChange={(event) => onChange(event.target.value)}
+    />
+  );
+}
+
+function numberWithDefault(value: number | null, fallback: number, hasClientValidation: boolean) {
+  return hasClientValidation ? (value ?? fallback) : value || fallback;
 }
 
 /**
@@ -83,11 +256,18 @@ function DestinationForm({
   const [startFromCurrentPosition, setStartFromCurrentPosition] = useState(false);
   const [name, setName] = useState(editing?.name ?? "");
   const [typeId, setTypeId] = useState(editing?.type ?? types[0]?.id ?? "");
+  const [attemptedSubmit, setAttemptedSubmit] = useState(false);
   const [enabled, setEnabled] = useState(editing?.enabled ?? true);
-  const [batchSize, setBatchSize] = useState(String(editing?.batchSize ?? 500));
+  const [batchSize, setBatchSize] = useState<number | null>(
+    editing?.batchSize ?? batchLimits.defaultValue
+  );
   const [includeBodies, setIncludeBodies] = useState(editing?.includeBodies ?? false);
-  const [maxBodyBytes, setMaxBodyBytes] = useState(String(editing?.maxBodyBytes ?? 262144));
-  const [maxRowsPerRun, setMaxRowsPerRun] = useState(String(editing?.maxRowsPerRun ?? 10000));
+  const [maxBodyBytes, setMaxBodyBytes] = useState<number | null>(
+    editing?.maxBodyBytes ?? bodyLimits.defaultValue
+  );
+  const [maxRowsPerRun, setMaxRowsPerRun] = useState<number | null>(
+    editing?.maxRowsPerRun ?? rowLimits.defaultValue
+  );
   const [values, setValues] = useState<FormValues>(() =>
     initialValues(
       types.find((type) => type.id === (editing?.type ?? types[0]?.id)),
@@ -96,9 +276,12 @@ function DestinationForm({
   );
 
   const descriptor = useMemo(() => types.find((type) => type.id === typeId), [types, typeId]);
+  const validate = getDestinationFormValidator(typeId);
+  const hasClientValidation = Boolean(validate);
 
   const handleTypeChange = (nextTypeId: string) => {
     setTypeId(nextTypeId);
+    setAttemptedSubmit(false);
     setValues(
       initialValues(
         types.find((type) => type.id === nextTypeId),
@@ -111,96 +294,35 @@ function DestinationForm({
     setValues((current) => ({ ...current, [key]: value }));
   };
 
-  const buildConfig = (): Record<string, unknown> => {
-    const config: Record<string, unknown> = {};
-    for (const field of descriptor?.fields ?? []) {
-      const value = values[field.key];
-      if (field.type === "boolean") {
-        config[field.key] = Boolean(value);
-        continue;
-      }
-      if (field.type === "number") {
-        const numeric = numericFieldValue(value);
-        if (numeric !== undefined) config[field.key] = numeric;
-        continue;
-      }
-      const text = typeof value === "string" ? value.trim() : "";
-      // An untouched secret on an edit keeps the stored ciphertext server-side.
-      if (field.secret && text.length === 0 && editing) {
-        config[field.key] = SECRET_PLACEHOLDER;
-        continue;
-      }
-      if (text.length > 0) config[field.key] = text;
-    }
-    return config;
+  const payload: DestinationSubmitPayload = {
+    name: name.trim(),
+    type: typeId,
+    enabled,
+    config: buildConfig(descriptor, values, editing, hasClientValidation),
+    batchSize: batchSize ?? batchLimits.defaultValue,
+    ...(!editing ? { startFromCurrentPosition } : {}),
+    includeBodies,
+    maxBodyBytes: numberWithDefault(maxBodyBytes, bodyLimits.defaultValue, hasClientValidation),
+    maxRowsPerRun: numberWithDefault(maxRowsPerRun, rowLimits.defaultValue, hasClientValidation),
   };
-
-  const secretPlaceholder = (field: LogExportFieldDescriptor) =>
-    field.secret && editing ? "Leave blank to keep the stored value" : field.placeholder;
-
-  const renderField = (field: LogExportFieldDescriptor) => {
-    const value = values[field.key];
-    if (field.type === "boolean") {
-      return (
-        <Checkbox
-          key={field.key}
-          label={field.labelFallback}
-          checked={Boolean(value)}
-          onChange={(event) => setValue(field.key, event.target.checked)}
-        />
-      );
+  const validationErrors = validate?.(payload, Boolean(editing), t);
+  const fieldError = (key: string) => (attemptedSubmit ? validationErrors?.get(key) : undefined);
+  const numericMin = hasClientValidation ? undefined : 0;
+  const bodyError = fieldError("maxBodyBytes");
+  const handleSubmit = () => {
+    if (validationErrors?.size) {
+      setAttemptedSubmit(true);
+      return;
     }
-    if (field.type === "textarea") {
-      return (
-        <Field
-          key={field.key}
-          htmlFor={`field-${field.key}`}
-          label={`${field.labelFallback}${field.required ? " *" : ""}`}
-          hint={field.helpFallback || undefined}
-        >
-          <Textarea
-            id={`field-${field.key}`}
-            rows={6}
-            className="font-mono text-xs"
-            placeholder={secretPlaceholder(field)}
-            value={typeof value === "string" ? value : ""}
-            onChange={(event) => setValue(field.key, event.target.value)}
-          />
-        </Field>
-      );
-    }
-    if (field.type === "select") {
-      return (
-        <Select
-          key={field.key}
-          id={`field-${field.key}`}
-          label={field.labelFallback}
-          value={typeof value === "string" ? value : ""}
-          onChange={(event) => setValue(field.key, event.target.value)}
-          options={(field.options ?? []).map((option) => ({
-            value: option.value,
-            label: option.labelFallback,
-          }))}
-        />
-      );
-    }
-    return (
-      <Input
-        key={field.key}
-        label={`${field.labelFallback}${field.required ? " *" : ""}`}
-        type={field.secret ? "password" : field.type === "number" ? "number" : "text"}
-        placeholder={secretPlaceholder(field)}
-        hint={field.helpFallback}
-        value={typeof value === "string" ? value : ""}
-        onChange={(event) => setValue(field.key, event.target.value)}
-      />
-    );
+    onSubmit(payload);
   };
 
   return (
     <div className="flex flex-col gap-4">
       <Input
-        label="Name *"
+        label={hasClientValidation ? "Name" : "Name *"}
+        required={hasClientValidation}
+        error={fieldError("name")}
         placeholder="Production warehouse"
         value={name}
         onChange={(event) => setName(event.target.value)}
@@ -216,22 +338,34 @@ function DestinationForm({
         hint={descriptor ? descriptor.description : undefined}
       />
 
-      {(descriptor?.fields ?? []).map(renderField)}
+      {descriptor?.fields.map((field) => (
+        <DestinationField
+          key={field.key}
+          field={field}
+          value={values[field.key]}
+          editing={editing}
+          hasClientValidation={hasClientValidation}
+          error={fieldError(field.key)}
+          onChange={(value) => setValue(field.key, value)}
+        />
+      ))}
 
       <div className="grid grid-cols-2 gap-3">
         <NumberInput
           label="Batch size"
-          min={0}
+          min={numericMin}
+          error={fieldError("batchSize")}
           hint="Rows per cursor batch"
-          value={batchSize === "" ? null : Number(batchSize)}
-          onValueChange={(value) => setBatchSize(value === null ? "" : String(value))}
+          value={batchSize}
+          onValueChange={setBatchSize}
         />
         <NumberInput
           label="Max rows per run"
-          min={0}
+          min={numericMin}
+          error={fieldError("maxRowsPerRun")}
           hint="Caps a single hourly run"
-          value={maxRowsPerRun === "" ? null : Number(maxRowsPerRun)}
-          onValueChange={(value) => setMaxRowsPerRun(value === null ? "" : String(value))}
+          value={maxRowsPerRun}
+          onValueChange={setMaxRowsPerRun}
         />
       </div>
 
@@ -248,7 +382,7 @@ function DestinationForm({
         checked={includeBodies}
         onChange={(event) => setIncludeBodies(event.target.checked)}
       />
-      {includeBodies ? (
+      {includeBodies || bodyError ? (
         <div className="flex flex-col gap-2 pl-6">
           <span className="text-xs text-text-muted">
             Ships the request and response payloads shown in the Logs detail pane, including the
@@ -257,10 +391,11 @@ function DestinationForm({
           </span>
           <NumberInput
             label="Max payload bytes per field"
-            min={0}
+            min={numericMin}
+            error={bodyError}
             hint="Longer payloads are truncated, not dropped"
-            value={maxBodyBytes === "" ? null : Number(maxBodyBytes)}
-            onValueChange={(value) => setMaxBodyBytes(value === null ? "" : String(value))}
+            value={maxBodyBytes}
+            onValueChange={setMaxBodyBytes}
           />
         </div>
       ) : null}
@@ -283,20 +418,8 @@ function DestinationForm({
         </Button>
         <Button
           loading={saving}
-          disabled={!name.trim() || !typeId}
-          onClick={() =>
-            onSubmit({
-              name: name.trim(),
-              type: typeId,
-              enabled,
-              config: buildConfig(),
-              batchSize: Number(batchSize) || 500,
-              ...(!editing ? { startFromCurrentPosition } : {}),
-              includeBodies,
-              maxBodyBytes: Number(maxBodyBytes) || 262144,
-              maxRowsPerRun: Number(maxRowsPerRun) || 10000,
-            })
-          }
+          disabled={!typeId || (!hasClientValidation && !name.trim())}
+          onClick={handleSubmit}
         >
           {editing ? "Save changes" : "Create destination"}
         </Button>

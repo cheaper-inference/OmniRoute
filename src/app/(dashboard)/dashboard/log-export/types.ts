@@ -1,3 +1,15 @@
+export interface DestinationSubmitPayload {
+  name: string;
+  type: string;
+  enabled: boolean;
+  config: Record<string, unknown>;
+  batchSize: number;
+  startFromCurrentPosition?: boolean;
+  includeBodies: boolean;
+  maxBodyBytes: number;
+  maxRowsPerRun: number;
+}
+
 export interface LogExportFieldDescriptor {
   key: string;
   labelFallback: string;

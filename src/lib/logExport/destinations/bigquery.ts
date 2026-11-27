@@ -8,7 +8,6 @@
  * Talks raw REST (see ../googleServiceAccount.ts for why there is no Google SDK here).
  */
 
-import { z } from "zod";
 import {
   getServiceAccountAccessToken,
   parseServiceAccountKey,
@@ -21,10 +20,16 @@ import type {
   LogExportRecord,
   LogExportTestResult,
 } from "../types";
+import {
+  BIGQUERY_DEFAULT_LOCATION,
+  bigQueryConfigSchema,
+  type BigQueryConfig,
+} from "./bigqueryConfig";
+
+export { bigQueryConfigSchema, type BigQueryConfig } from "./bigqueryConfig";
 
 const BIGQUERY_SCOPE = "https://www.googleapis.com/auth/bigquery";
 const BIGQUERY_API = "https://bigquery.googleapis.com/bigquery/v2";
-const NAME_PATTERN = /^[A-Za-z0-9_]+$/;
 /** BigQuery's own recommendation for rows per insertAll call. */
 const INSERT_CHUNK_SIZE = 500;
 /**
@@ -43,19 +48,6 @@ const RETRY_BASE_DELAY_MS = 500;
  */
 const MAX_FRESH_TABLE_ATTEMPTS = 6;
 const FRESH_TABLE_DELAY_MS = 2_000;
-
-export const bigQueryConfigSchema = z.object({
-  projectId: z.string().min(1).max(200),
-  datasetId: z.string().min(1).max(1024).regex(NAME_PATTERN, "Dataset id must match [A-Za-z0-9_]+"),
-  tableId: z.string().min(1).max(1024).regex(NAME_PATTERN, "Table id must match [A-Za-z0-9_]+"),
-  location: z.string().min(1).max(64).default("EU"),
-  serviceAccountJson: z.string().min(1),
-  autoCreate: z.boolean().default(true),
-  /** 0 keeps partitions forever; anything higher sets the table's partition expiry. */
-  partitionExpirationDays: z.number().int().min(0).max(3650).default(0),
-});
-
-export type BigQueryConfig = z.infer<typeof bigQueryConfigSchema>;
 
 const FIELDS: readonly LogExportConfigField[] = [
   {
@@ -84,7 +76,7 @@ const FIELDS: readonly LogExportConfigField[] = [
     labelFallback: "Dataset location",
     type: "text",
     required: true,
-    placeholder: "EU",
+    defaultValue: BIGQUERY_DEFAULT_LOCATION,
     helpFallback: "Only used when the dataset has to be created.",
   },
   {

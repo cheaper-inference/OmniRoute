@@ -16976,6 +16976,11 @@
     "noTurns": "No turns recorded for this conversation."
   },
   "logExport": {
+    "validationRequired": "This field is required.",
+    "validationMaxLength": "Enter at most {max, number} characters.",
+    "validationBigQueryId": "Use only letters A–Z or a–z, digits, and underscores.",
+    "validationIntegerRange": "Enter a whole number from {min, number} to {max, number}.",
+    "validationInvalid": "Enter a valid value.",
     "startFromCurrentPosition": "Start from current position (skip existing logs)",
     "pageTitle": "Log export",
     "pageSubtitle": "Continuously ship the call logs from the Logs tab to an external analytics store.",
