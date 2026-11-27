@@ -7,7 +7,6 @@ lastUpdated: 2026-06-28
 # Tunnels Guide
 
 > **Source of truth:** `src/lib/{cloudflaredTunnel,ngrokTunnel,tailscaleTunnel}.ts`, `src/app/api/tunnels/`
-> **Last updated:** 2026-06-28 — v3.8.40
 
 OmniRoute can expose its local server (`http://localhost:20128`) to the public
 internet via three tunnel backends. This is useful for:

@@ -55,8 +55,8 @@ describe("free provider rankings sort key + catalog date", () => {
     assert.ok(curatedAt, "FREE_CATALOG_CURATED_AT entry missing");
     assert.equal(curatedAt.strict, false, "catalog date must be soft");
   });
-  it("summary route references FREE_CATALOG_CURATED_AT with slice(0, 10)", () => {
-    const txt = readFileSync("src/app/api/free-tier/summary/route.ts", "utf8");
+  it("radar catalog accessor references FREE_CATALOG_CURATED_AT with slice(0, 10)", () => {
+    const txt = readFileSync("src/lib/radar/index.ts", "utf8");
     assert.match(txt, /FREE_CATALOG_CURATED_AT/);
     assert.match(txt, /slice\(0,\s*10\)/);
   });

@@ -2,70 +2,25 @@
 
 @AGENTS.md
 
-**All project rules live in [`AGENTS.md`](AGENTS.md)** — the single source of truth for every AI
-assistant (architecture, conventions, testing, quality gates, git workflow, the 23 Hard Rules,
-PII learnings). Read it in full; do not re-add project rules here. Everything below applies ONLY
-to Claude Code — operational refinements of rules already defined in `AGENTS.md`.
+**All project rules live in [`AGENTS.md`](AGENTS.md)** — the single source of truth for every AI assistant; the import above already loads it. Do not re-add project rules here. Everything below applies ONLY to Claude Code — operational refinements of rules already defined in `AGENTS.md`.
 
 ## Worktree isolation — Claude Code specifics
 
-The full mandatory worktree protocol (base-branch confirmation, `.claude/worktrees/` canonical
-path, `cp -al` node_modules, teardown rules) is in
-[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (summarized in `AGENTS.md` →
-Git Workflow → "Worktree isolation"). Claude-Code-specific points:
+- Confirm the base branch with the operator via `AskUserQuestion` (Hard Rule #19) unless they already told you.
+- Create the worktree with `scripts/dev/new-worktree.sh <branch> <confirmed-base>` (it lands under `.claude/worktrees/`, hard-links `node_modules` and copies `.husky/_`), then call `EnterWorktree` with its `path`. Always pass the base: without it the script picks the highest `release/*`, which may not be the one the operator confirmed. A worktree that `EnterWorktree` creates by itself has neither the hard links nor the hooks, so no pre-commit gate runs in it.
 
-- Confirm the base branch with the operator via `AskUserQuestion` (Hard Rule #19) unless they
-  already told you.
-- Prefer the native `EnterWorktree` tool — it already creates worktrees under
-  `.claude/worktrees/` (the canonical path). Create the worktree with the documented `git
-worktree add` command, then call `EnterWorktree` with its `path`.
+## Subagents and git
 
-## Cross-session safety — Claude Code specifics
+Every subagent that touches git (Agent tool or Workflow script) gets Hard Rule #22a's `git stash` ban verbatim in its prompt — the recorded recurrence of the stash incident came through a subagent.
 
-Hard Rules #19/#21/#22 (in `AGENTS.md`) govern parallel sessions. Operational reminders for this
-harness:
+## Planning artifacts — superpowers path overrides
 
-- **Replicate the `git stash` ban verbatim in the prompt of every subagent that touches git**
-  (Agent tool / Workflow scripts) — subagents do not inherit this file, and the recorded
-  recurrence of the stash incident came through a subagent.
-- Before merging or pushing to any PR you did not create _this session_, run `git worktree list`
-  and re-check `gh pr view <N> --json state,headRefOid` (Hard Rule #22b).
-- End every session with the main checkout on the branch it started on.
+Superpowers skills announce defaults under `docs/superpowers/plans/`, `docs/superpowers/specs/` and `docs/research/`. Rewrite each to its `_tasks/` equivalent in `AGENTS.md` → "Planning & Research Artifacts" before writing, and commit it with `git -C _tasks …`, never in the main repo.
 
-## Superpowers / planning artifacts — path overrides
+## Scratch files — `_artifacts/`, not `/tmp`
 
-The `_tasks/` convention is defined in `AGENTS.md` → "Planning & Research Artifacts". The
-superpowers skills ship with defaults that point at `docs/…` — those defaults are **overridden
-here**. When a superpowers skill announces a path like "saved to `docs/superpowers/plans/…`",
-rewrite it to the `_tasks/…` equivalent before writing:
+This project overrides the harness's session scratchpad (`/tmp/claude-*/…`). Write temporary files — exports, generated zips, one-off intermediate outputs — to `/home/diegosouzapw/dev/proxys/OmniRoute/_artifacts/`: a gitignored root `_*` path, so the operator finds and deletes all scratch in one place. Durable plans, specs, research and hand-offs go to `_tasks/` instead (Hard Rule #23).
 
-| Artifact (skill)                   | Default (do NOT use)      | Save here instead                                             |
-| ---------------------------------- | ------------------------- | ------------------------------------------------------------- |
-| Plans (`writing-plans`)            | `docs/superpowers/plans/` | `_tasks/superpowers/plans/YYYY-MM-DD-<feature>.md`            |
-| Specs / design (`brainstorming`)   | `docs/superpowers/specs/` | `_tasks/superpowers/specs/YYYY-MM-DD-<topic>-design.md`       |
-| Research (`deep-research`, ad-hoc) | `docs/research/`          | `_tasks/research/…`                                           |
-| Hand-offs (`/handoff`)             | —                         | `_tasks/hands-off/<YYYY-MM-DD>_<branch>_v<versão>_sess-<id>/` |
+## Red base
 
-Commit those artifacts inside the `_tasks/` repo (`git -C _tasks …`), never in the main repo.
-
-## Scratch / temporary files — use `_artifacts/`, not `/tmp`
-
-This project overrides the harness's default session scratchpad (`/tmp/claude-*/…`). Write
-temporary/working files — exports, generated zips, one-off intermediate outputs, anything you'd
-otherwise put in `/tmp` — to `/home/diegosouzapw/dev/proxys/OmniRoute/_artifacts/` instead.
-
-- `_artifacts/` is a root `_*` path: already gitignored (`AGENTS.md` → "Root `_*` paths"), lives
-  on disk only, never tracked.
-- Reason: keeping scratch output inside the project (vs `/tmp`) makes it trivial for the operator
-  to find and delete everything temporary in one place, instead of hunting across ephemeral
-  session-specific `/tmp` directories that vanish or accumulate untracked.
-- Do **not** confuse this with `_tasks/` (Hard Rule #23, its own private git repo for durable
-  plans/specs/research/hand-offs) — `_artifacts/` is for disposable working files only, nothing
-  here needs to survive or be versioned.
-
-## Base-green before opening PRs
-
-Before cutting a branch or opening a PR, run the base-green check (`AGENTS.md` → Git Workflow →
-"Base-green check"; project skills reference it as `.agents/skills/_shared/base-green.md`). A PR
-opened while the base tip is red must carry `⚠️ base-red inherited: #<issue>` in its body. To
-drain an accumulated red state (base tip + red PRs), use the `/sweep-reds` skill.
+To drain an accumulated red state (base tip + red PRs), use the `/sweep-reds` skill.
