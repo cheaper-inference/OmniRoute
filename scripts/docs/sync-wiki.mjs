@@ -107,10 +107,12 @@ export function toWikiName(basename) {
 
 /**
  * Rewrites relative doc and code links in markdown for GitHub Wiki flat structure.
- * - Relative doc links within `docs/` -> `Wiki-Page-Name[#anchor]`
+ * - Relative doc links within `docs/` -> `Wiki-Page-Name[#anchor]`. When `wikiPages` is
+ *   given and has no such page: the GitHub blob URL if the file exists, else left as is
  * - Links to repository source code or root files outside `docs/` -> GitHub blob URL
  * - Non-markdown doc assets (e.g. SVG diagrams) -> Raw GitHub usercontent URL
  * - Pure anchor links (`#section`) and external links (`https://...`) -> untouched
+ * - With `markdownOnly`, only `.md` links are rewritten (safe on already-published wiki text)
  */
 export function rewriteWikiLinks(
   content,
@@ -118,6 +120,8 @@ export function rewriteWikiLinks(
     srcFile = null,
     wikiKeyMap = null,
     locale = null,
+    wikiPages = null,
+    markdownOnly = false,
     repoUrl = GITHUB_REPO_URL,
     rawUrl = GITHUB_RAW_URL,
   } = {}
@@ -131,6 +135,7 @@ export function rewriteWikiLinks(
       ? [href.slice(0, href.indexOf("#")), href.slice(href.indexOf("#") + 1)]
       : [href, null];
     if (!rawPath) return href;
+    if (markdownOnly && !rawPath.endsWith(".md")) return href;
 
     const resolvedAbs = path.resolve(docDir, rawPath);
     const repoRel = path.relative(ROOT, resolvedAbs).replace(/\\/g, "/");
@@ -145,6 +150,9 @@ export function rewriteWikiLinks(
       const key = normKey(base);
       const wikiName = wikiKeyMap?.get(key) || toWikiName(base);
       const prefix = locale ? `${locale}${LOCALE_SEP}` : "";
+      if (wikiPages && !wikiPages.has(`${prefix}${wikiName}`)) {
+        return fs.existsSync(resolvedAbs) ? `${repoUrl}/blob/main/${repoRel}${anchorSuffix}` : href;
+      }
       return `${prefix}${wikiName}${anchorSuffix}`;
     }
 
@@ -310,6 +318,13 @@ export function parseWikiPage(page) {
   return { locale: page.slice(0, idx), name: page.slice(idx + 1) };
 }
 
+/** Docs source for a wiki page: the English docs index, or the page locale's i18n tree. */
+function findWikiSource(locale, key, enDocs, localeIndexes) {
+  if (!locale) return enDocs.get(key)?.file ?? null;
+  if (!localeIndexes.has(locale)) localeIndexes.set(locale, indexLocaleDocs(locale));
+  return localeIndexes.get(locale).get(key) ?? null;
+}
+
 function main() {
   const args = process.argv.slice(2);
   const wikiDir = args.includes("--wiki-dir") ? args[args.indexOf("--wiki-dir") + 1] : null;
@@ -324,7 +339,6 @@ function main() {
 
   const enDocs = indexEnglishDocs();
   const wikiPages = listWikiPages(wikiDir);
-  const enWikiKeys = new Set();
   const localeIndexes = new Map();
 
   // Pre-build normKey -> wikiPageName map for English docs
@@ -341,39 +355,40 @@ function main() {
     }
   }
 
-  const plan = { update: [], add: [], untouched: [], countsChanged: false };
+  const plan = { update: [], relink: [], add: [], untouched: [], countsChanged: false };
 
-  // 1. Update existing wiki pages from their docs source.
-  for (const page of wikiPages) {
-    if (page === "Home") continue; // handled by counts below
-    const { locale, name } = parseWikiPage(page);
-    const key = normKey(name);
-    let srcFile = null;
-    if (!locale) {
-      enWikiKeys.add(key);
-      srcFile = enDocs.get(key)?.file ?? null;
-    } else if (includeI18n) {
-      if (!localeIndexes.has(locale)) localeIndexes.set(locale, indexLocaleDocs(locale));
-      srcFile = localeIndexes.get(locale).get(key) ?? null;
-    }
-    if (!srcFile) {
-      plan.untouched.push(page);
-      continue;
-    }
-    const next = toWikiContent(fs.readFileSync(srcFile, "utf8"), {
-      srcFile,
-      wikiKeyMap,
-      locale,
-    });
-    const cur = fs.readFileSync(path.join(wikiDir, `${page}.md`), "utf8");
-    if (next !== cur) plan.update.push({ page, srcFile, locale });
-  }
-
-  // 2. Add curated new English pages (unmatched docs, minus the exclude list).
+  // 1. Add curated new English pages (unmatched docs, minus the exclude list).
+  const enWikiKeys = new Set(
+    wikiPages.filter((p) => p !== "Home" && !parseWikiPage(p).locale).map(normKey)
+  );
   for (const [key, { file, base }] of enDocs) {
     if (enWikiKeys.has(key)) continue;
     if (NEW_PAGE_EXCLUDE.has(base)) continue;
     plan.add.push({ page: toWikiName(base), srcFile: file, base, locale: null });
+  }
+
+  // Every page the wiki will have after this run. Links to any other doc go to GitHub.
+  const wikiPageSet = new Set([...wikiPages, ...plan.add.map((a) => a.page)]);
+  const linkOptions = { wikiKeyMap, wikiPages: wikiPageSet };
+
+  // 2. Existing wiki pages: full update from the docs source (opt-in), and a links-only
+  //    refresh so pages published before the link rewriter stop carrying relative .md links.
+  for (const page of wikiPages) {
+    if (page === "Home") continue; // handled by counts below
+    const { locale, name } = parseWikiPage(page);
+    const srcFile = findWikiSource(locale, normKey(name), enDocs, localeIndexes);
+    if (!srcFile) {
+      plan.untouched.push(page);
+      continue;
+    }
+    const cur = fs.readFileSync(path.join(wikiDir, `${page}.md`), "utf8");
+    const opts = { ...linkOptions, srcFile, locale };
+    if (!locale || includeI18n) {
+      const next = toWikiContent(fs.readFileSync(srcFile, "utf8"), opts);
+      if (next !== cur) plan.update.push({ page, srcFile, locale });
+    }
+    const relinked = rewriteWikiLinks(cur, { ...opts, markdownOnly: true });
+    if (relinked !== cur) plan.relink.push({ page, content: relinked });
   }
 
   // 3. Home cover counts.
@@ -393,11 +408,14 @@ function main() {
   // by default we only ADD missing pages and sync Home counts. Pass --update-existing
   // once the docs sources are regenerated.
   const updates = updateExisting ? plan.update : [];
-  const total = updates.length + plan.add.length + (plan.countsChanged ? 1 : 0);
+  const updatedPages = new Set(updates.map((u) => u.page));
+  const relinks = plan.relink.filter((r) => !updatedPages.has(r.page));
+  const total = updates.length + relinks.length + plan.add.length + (plan.countsChanged ? 1 : 0);
   console.log(`[wiki-sync] counts: ${JSON.stringify(counts)}`);
   console.log(
     `[wiki-sync] add: ${plan.add.length} | Home counts: ${plan.countsChanged ? "drift" : "in-sync"} | ` +
-      `existing-page updates: ${plan.update.length} (${updateExisting ? "ENABLED" : "skipped — needs --update-existing"}) | untouched: ${plan.untouched.length}`
+      `existing-page updates: ${plan.update.length} (${updateExisting ? "ENABLED" : "skipped — needs --update-existing"}) | ` +
+      `link refreshes: ${relinks.length} | untouched: ${plan.untouched.length}`
   );
   if (dryRun || check) {
     if (plan.add.length) console.log(`  add → ${plan.add.map((a) => a.page).join(", ")}`);
@@ -407,6 +425,13 @@ function main() {
           .map((u) => u.page)
           .slice(0, 60)
           .join(", ")}${plan.update.length > 60 ? " …" : ""}`
+      );
+    if (relinks.length)
+      console.log(
+        `  relink → ${relinks
+          .map((r) => r.page)
+          .slice(0, 60)
+          .join(", ")}${relinks.length > 60 ? " …" : ""}`
       );
     if (check) {
       if (total > 0) {
@@ -419,19 +444,22 @@ function main() {
   }
 
   // ---- write ----
+  for (const { page, content } of relinks) {
+    fs.writeFileSync(path.join(wikiDir, `${page}.md`), content);
+  }
   for (const { page, srcFile, locale } of [...updates, ...plan.add]) {
     fs.writeFileSync(
       path.join(wikiDir, `${page}.md`),
       toWikiContent(fs.readFileSync(srcFile, "utf8"), {
+        ...linkOptions,
         srcFile,
-        wikiKeyMap,
         locale: locale || parseWikiPage(page).locale,
       })
     );
   }
   if (plan.countsChanged && homeAfter != null) fs.writeFileSync(homePath, homeAfter);
   console.log(
-    `[wiki-sync] wrote ${total} page(s) (add: ${plan.add.length}, updates: ${updates.length}, counts: ${plan.countsChanged ? 1 : 0}).`
+    `[wiki-sync] wrote ${total} page(s) (add: ${plan.add.length}, updates: ${updates.length}, link refreshes: ${relinks.length}, counts: ${plan.countsChanged ? 1 : 0}).`
   );
 }
 

@@ -88,7 +88,9 @@ Check [Package config](../../package.json) and [Auth Guard](../../src/server/aut
   assert.ok(out.includes(`[DB Core](${GITHUB_REPO_URL}/blob/main/src/lib/db/core.ts)`));
   assert.ok(out.includes(`[README](${GITHUB_REPO_URL}/blob/main/docs/README.md)`));
   assert.ok(out.includes(`[Package config](${GITHUB_REPO_URL}/blob/main/package.json)`));
-  assert.ok(out.includes(`[Auth Guard](${GITHUB_REPO_URL}/blob/main/src/server/authz/routeGuard.ts)`));
+  assert.ok(
+    out.includes(`[Auth Guard](${GITHUB_REPO_URL}/blob/main/src/server/authz/routeGuard.ts)`)
+  );
 });
 
 test("rewriteWikiLinks: rewrites image links to GitHub raw content URLs", () => {
@@ -122,8 +124,73 @@ test("rewriteWikiLinks: prepends locale prefix for localized wiki pages", () => 
   assert.equal(out, "[Auto-Combo](pt-BR\u2010Auto-Combo#scoring)");
 });
 
+test("rewriteWikiLinks: links to a doc with no wiki page fall back to the GitHub blob URL", () => {
+  const wikiKeyMap = new Map([
+    ["freetiers", "Free-Tiers"],
+    ["autocombo", "Auto-Combo"],
+  ]);
+  const md = `[Tiers](../reference/FREE_TIERS.md#gemini) and [Combo](../routing/AUTO-COMBO.md)`;
+  const out = rewriteWikiLinks(md, {
+    srcFile: "docs/architecture/ARCHITECTURE.md",
+    wikiKeyMap,
+    wikiPages: new Set(["Auto-Combo"]),
+  });
+  assert.equal(
+    out,
+    `[Tiers](${GITHUB_REPO_URL}/blob/main/docs/reference/FREE_TIERS.md#gemini) and [Combo](Auto-Combo)`
+  );
+});
+
+test("rewriteWikiLinks: a localized link with no page in that language goes to the localized file", () => {
+  const wikiKeyMap = new Map([["freetiers", "Free-Tiers"]]);
+  const md = `[Tiers](../reference/FREE_TIERS.md)`;
+  const out = rewriteWikiLinks(md, {
+    srcFile: "docs/i18n/pt-BR/docs/routing/AUTO-COMBO.md",
+    wikiKeyMap,
+    locale: "pt-BR",
+    wikiPages: new Set(["Free-Tiers"]),
+  });
+  assert.equal(
+    out,
+    `[Tiers](${GITHUB_REPO_URL}/blob/main/docs/i18n/pt-BR/docs/reference/FREE_TIERS.md)`
+  );
+});
+
+test("rewriteWikiLinks: a link to a doc missing from both the wiki and the repo is left as is", () => {
+  const md = `[Gone](./NO_SUCH_DOC.md)`;
+  const out = rewriteWikiLinks(md, {
+    srcFile: "docs/architecture/ARCHITECTURE.md",
+    wikiPages: new Set(["Architecture"]),
+  });
+  assert.equal(out, md);
+});
+
+test("rewriteWikiLinks: markdownOnly refreshes .md links on published wiki text and nothing else", () => {
+  const wikiKeyMap = new Map([
+    ["freetiers", "Free-Tiers"],
+    ["resilienceguide", "Resilience-Guide"],
+  ]);
+  const published = [
+    "[Tiers](../reference/FREE_TIERS.md#gemini)",
+    "[Resilience](Resilience-Guide)",
+    "[Core](../../src/lib/db/core.ts)",
+    "![Diagram](../diagrams/flow.svg)",
+    `[README](${GITHUB_REPO_URL}/blob/main/README.md)`,
+  ].join("\n");
+  const opts = {
+    srcFile: "docs/architecture/ARCHITECTURE.md",
+    wikiKeyMap,
+    wikiPages: new Set(["Free-Tiers", "Resilience-Guide"]),
+    markdownOnly: true,
+  };
+  const out = rewriteWikiLinks(published, opts);
+  assert.equal(out, published.replace("../reference/FREE_TIERS.md#gemini", "Free-Tiers#gemini"));
+  assert.equal(rewriteWikiLinks(out, opts), out, "a second refresh changes nothing");
+});
+
 test("syncHomeCounts: rewrites the cover-page provider/strategy counts", () => {
-  const home = "Connect every AI tool to 177 providers.\n**177 AI Providers** · **14 Routing Strategies**\n";
+  const home =
+    "Connect every AI tool to 177 providers.\n**177 AI Providers** · **14 Routing Strategies**\n";
   const out = syncHomeCounts(home, { providers: 226, strategies: 15, mcpTools: null, locales: 42 });
   assert.ok(out.includes("226 providers"));
   assert.ok(out.includes("**226 AI Providers**"));
@@ -133,7 +200,12 @@ test("syncHomeCounts: rewrites the cover-page provider/strategy counts", () => {
 
 test("syncHomeCounts: leaves text untouched when a count is null (best-effort MCP)", () => {
   const home = "| **MCP Server** | 87 tools |\n";
-  const out = syncHomeCounts(home, { providers: null, strategies: null, mcpTools: null, locales: null });
+  const out = syncHomeCounts(home, {
+    providers: null,
+    strategies: null,
+    mcpTools: null,
+    locales: null,
+  });
   assert.equal(out, home);
 });
 
