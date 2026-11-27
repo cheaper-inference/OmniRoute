@@ -52,7 +52,8 @@ describe("#17028 SiliconFlow pay-as-you-go model protection", () => {
       "e1b0c65a417cc9bc86980f8342ae8fd7f1a3ea99a3b7280adc7064f7f82b08cc"
     );
     assert.equal(totals.modelCount, 466);
-    assert.equal(totals.poolCount, 26);
+    // #19385 preserves UncloseAI's retired row for history and removes its live keyless pool.
+    assert.equal(totals.poolCount, 25);
     assert.equal(totals.uncappedProviders.includes("siliconflow"), false);
   });
 
