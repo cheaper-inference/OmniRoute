@@ -34,6 +34,10 @@ export const APIKEY_PROVIDERS_REGIONAL = {
     color: "#DC2626",
     textIcon: "GC",
     website: "https://open.bigmodel.cn",
+    hasFree: false,
+    freeNote:
+      "The China Coding Plan requires a subscription. Free Flash models are on the standard BigModel API.",
+    apiHint: "Connect a China Coding Plan subscription with its API key.",
   },
   bigmodel: {
     id: "bigmodel",
@@ -149,8 +153,10 @@ export const APIKEY_PROVIDERS_REGIONAL = {
     color: "#4D6BFE",
     textIcon: "DS",
     website: "https://platform.deepseek.com",
-    hasFree: true,
-    freeNote: "5M free tokens on signup - no credit card required",
+    hasFree: false,
+    freeNote:
+      "API usage is billed on your account balance. DeepSeek has no published signup grant (checked 2026-11-27).",
+    apiHint: "Create a DeepSeek API key and check your balance before making requests.",
   },
   zai: {
     id: "zai",
@@ -196,9 +202,10 @@ export const APIKEY_PROVIDERS_REGIONAL = {
     color: "#FF6B9D",
     textIcon: "LC",
     website: "https://longcat.chat/platform/docs",
-    hasFree: true,
+    hasFree: false,
     freeNote:
-      "Free: one-time 10M-token grant after account signup + KYC verification (LongCat-2.0). One-time only — not a recurring daily/monthly allowance.",
+      "API usage is paid through balance top-ups or prepaid token packs (checked 2026-11-27).",
+    apiHint: "Get an API key from the LongCat console and fund the account for inference.",
   },
   moonshot: {
     id: "moonshot",
@@ -418,10 +425,12 @@ export const APIKEY_PROVIDERS_REGIONAL = {
     color: "#FE2C55",
     textIcon: "DB",
     website: "https://doubao.com",
-    hasFree: true,
-    freeNote: "Free Doubao models. ByteDance's chatbot.",
     passthroughModels: true,
     authHint: "Get API key at console.volcengine.com",
+    hasFree: true,
+    freeNote:
+      "Volcengine Ark offers new accounts a free inference trial per model. Check your quota in the console. Real-name verification is required to continue after the trial.",
+    apiHint: "Get an API key and check model trial quotas in the Volcengine Ark console.",
   },
   sensenova: {
     id: "sensenova",

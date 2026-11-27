@@ -74,8 +74,10 @@ export const APIKEY_PROVIDERS_INFERENCE = {
     color: "#7B2EF2",
     textIcon: "FW",
     website: "https://fireworks.ai",
-    hasFree: true,
-    freeNote: "$1 free starter credits on signup for API testing",
+    hasFree: false,
+    freeNote:
+      "Serverless inference draws from prepaid credits. No signup credit is published in the current billing guide (checked 2026-11-27).",
+    apiHint: "Add a payment method and prepaid credits for serverless inference.",
   },
   cerebras: {
     id: "cerebras",
@@ -115,9 +117,10 @@ export const APIKEY_PROVIDERS_INFERENCE = {
     color: "#6C5CE7",
     textIcon: "NB",
     website: "https://nebius.com",
-    hasFree: true,
+    hasFree: false,
     freeNote:
-      "Onboarding requires a bank card for billing; free credits come through promo codes (checked 2026-11-23).",
+      "Token Factory billing requires a bank card. The Builder Program offers a separate $25 credit to members.",
+    apiHint: "Set up Token Factory billing with a bank card and create an API key.",
   },
   nube: {
     id: "nube",
@@ -156,8 +159,11 @@ export const APIKEY_PROVIDERS_INFERENCE = {
     color: "#00D4FF",
     textIcon: "HY",
     website: "https://hyperbolic.xyz",
-    hasFree: true,
-    freeNote: "$1-5 trial credits on signup for serverless inference",
+    hasFree: false,
+    freeNote:
+      "Personal accounts need a $5 deposit to unlock inference. The $1 credit from phone verification can be used after upgrading.",
+    apiHint:
+      "Create an API key after upgrading your personal account to Pro or joining an organization.",
   },
   // ParalonCloud (https://paraloncloud.com) — OpenAI-compatible /v1 for chat + embeddings.
   paraloncloud: {
@@ -208,8 +214,9 @@ export const APIKEY_PROVIDERS_INFERENCE = {
     color: "#2563EB",
     textIcon: "DI",
     website: "https://deepinfra.com",
-    hasFree: true,
-    freeNote: "Free signup credits for API testing and model exploration",
+    hasFree: false,
+    freeNote: "API inference requires a payment card or prepayment (checked 2026-11-27).",
+    apiHint: "Add a payment card or prepay in the DeepInfra console before calling the API.",
   },
   "lambda-ai": {
     id: "lambda-ai",
@@ -254,8 +261,9 @@ export const APIKEY_PROVIDERS_INFERENCE = {
     color: "#0891B2",
     textIcon: "NS",
     website: "https://nscale.com",
-    hasFree: true,
-    freeNote: "$5 free credits on signup for inference testing",
+    hasFree: false,
+    freeNote: "Serverless inference requires prepaid credits (checked 2026-11-27).",
+    apiHint: "Purchase credits and create an API key in the Nscale console.",
   },
   baseten: {
     id: "baseten",

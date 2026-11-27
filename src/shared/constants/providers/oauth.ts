@@ -94,6 +94,10 @@ export const OAUTH_PROVIDERS = {
     subscriptionRisk: true,
     riskNoticeVariant: "oauth",
     hasFree: true,
+    freeNote:
+      "Eligible Qoder client accounts get 300 tool credits for 14 days. Qoder verifies eligibility for each account.",
+    apiHint:
+      "A PAT (pt-) uses the local CLI for plain chat with buffered streaming and a 45-second limit. HTTP keys use DashScope. Browser OAuth requires administrator configuration. Trial credits apply to eligible Qoder client accounts.",
   },
   agy: {
     id: "agy",

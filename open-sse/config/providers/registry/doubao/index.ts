@@ -8,9 +8,11 @@ export const doubaoProvider: RegistryEntry = {
   baseUrl: "https://ark.cn-beijing.volces.com/api/v3/chat/completions",
   authType: "apikey",
   authHeader: "bearer",
-  // Sweep 2026-06-19: refreshed against the Volcano Ark catalog. Seed 2.0 (260215 =
-  // 2026-02-14 GA) is the current family; Ark addresses models by dated snapshot id.
+  // https://docs.volcengine.com/docs/ark/model-list?lang=zh (2026-11-27)
   models: [
+    { id: "doubao-seed-2-1-pro-260915", name: "Doubao Seed 2.1 Pro", contextLength: 1_048_576 },
+    { id: "doubao-seed-2-1-lite-260915", name: "Doubao Seed 2.1 Lite", contextLength: 1_048_576 },
+    { id: "doubao-seed-2-1-turbo-260628", name: "Doubao Seed 2.1 Turbo", contextLength: 262_144 },
     { id: "doubao-seed-2-0-pro-260215", name: "Doubao Seed 2.0 Pro", contextLength: 262144 },
     { id: "doubao-seed-2-0-lite-260215", name: "Doubao Seed 2.0 Lite", contextLength: 262144 },
     { id: "doubao-seed-2-0-mini-260215", name: "Doubao Seed 2.0 Mini", contextLength: 262144 },

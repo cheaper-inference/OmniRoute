@@ -1037,9 +1037,11 @@ export const APIKEY_PROVIDERS_GATEWAYS = {
     color: "#FF4081",
     textIcon: "NV",
     website: "https://novita.ai",
-    hasFree: true,
-    freeNote: "$0.50 trial credits on signup (valid about 1 year)",
     passthroughModels: true,
+    hasFree: true,
+    freeNote: "Novita offers $10 in API credit to each side of a successful referral.",
+    apiHint:
+      "Create an API key and check your balance. Successful referrals earn $10 in API credit.",
   },
   piapi: {
     id: "piapi",

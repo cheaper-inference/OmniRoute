@@ -118,11 +118,13 @@ export const APIKEY_PROVIDERS_ENTERPRISE = {
     color: "#4285F4",
     textIcon: "VA",
     website: "https://cloud.google.com/vertex-ai",
-    hasFree: true,
-    freeNote:
-      "Google Cloud Free Trial: $300 credit for 90 days; a credit card or other payment method is required (checked 2026-11-23).",
     authHint:
       "Provide Service Account JSON, an OAuth access token, a Vertex Express API key, or a service-account-bound authorization key. Express mode supports Gemini only; partner models require project-scoped credentials.",
+    hasFree: true,
+    freeNote:
+      "Eligible new Google Cloud users can try supported Gemini models in Express mode for up to 90 days with no billing information.",
+    apiHint:
+      "Use a Vertex Express API key for eligible Gemini models. Use project credentials for the full platform.",
   },
   "vertex-partner": {
     id: "vertex-partner",
@@ -160,7 +162,9 @@ export const APIKEY_PROVIDERS_ENTERPRISE = {
     textIcon: "SCW",
     website: "https://www.scaleway.com/en/docs/ai-data/generative-apis/",
     hasFree: true,
-    freeNote: "1M free tokens for new accounts — EU/GDPR compliant (Paris), Qwen3 235B & Llama 70B",
+    freeNote:
+      "New Serverless customers receive 1 million tokens per organization. A payment method is required, and usage beyond the allowance is billed.",
+    apiHint: "Add a payment method before using the shared 1 million token Serverless allowance.",
   },
   ovhcloud: {
     id: "ovhcloud",
