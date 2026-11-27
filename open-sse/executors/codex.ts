@@ -1,4 +1,3 @@
-import { createRequire } from "module";
 import { scopeCodexServiceTierDefault } from "../config/codexServiceTierModels.ts";
 import { getCodexRequestDefaults } from "@/lib/providers/requestDefaults";
 import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
@@ -62,7 +61,7 @@ import {
 import { inspectCodexSsePeek } from "./codex/ssePeekFailure.ts";
 import { normalizeCodexResponsesInput } from "../utils/responsesInputNormalization.ts";
 import * as prl from "../utils/providerRequestLogging.ts";
-import { loadDynamicModule } from "./codex/wreqLoader.ts";
+import { loadCodexWreqModule } from "./codex/wreqLoader.ts";
 // Quota parsing/scheduling extracted to a pure leaf; re-exported for the
 // Codex account module and tests.
 export {
@@ -94,8 +93,6 @@ export { isCodexFreePlan, normalizeCodexTools } from "./codex/tools.ts";
 // Loading it eagerly crashes the server when the binary is missing (pnpm, Docker
 // Alpine, unsupported architectures). We lazy-load with try/catch to gracefully
 // fall back to HTTP transport when the WebSocket transport is unavailable.
-const _wreqRequire = createRequire(import.meta.url);
-
 type WreqWebSocket = {
   send: (data: string) => void;
   close: (code?: number, reason?: string) => void;
@@ -115,7 +112,7 @@ function getCodexWebSocketTransport(): WebsocketFn | null {
   if (_wreqChecked) return _websocketFn;
   _wreqChecked = true;
   try {
-    const mod = loadDynamicModule(_wreqRequire, "wreq-js") as { websocket?: WebsocketFn };
+    const mod = loadCodexWreqModule() as { websocket?: WebsocketFn };
     _websocketFn = typeof mod.websocket === "function" ? mod.websocket : null;
   } catch {
     console.warn("[codex] wreq-js import failed, websocket disabled");
