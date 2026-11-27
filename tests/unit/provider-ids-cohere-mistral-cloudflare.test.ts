@@ -23,10 +23,10 @@ test("new Workers AI row carries its documented context window and free-tier nam
   assert.match(row?.name ?? "", /\(🆓\)$/);
 });
 
-test("deprecated Workers AI kimi-k2.5 stays undeclared (aliased to kimi-k2.6 since 2026-05-30)", () => {
+test("retired Workers AI Kimi IDs stay undeclared", () => {
   const declared = new Set(REGISTRY["cloudflare-ai"].models.map((m) => m.id));
   assert.equal(declared.has("@cf/moonshotai/kimi-k2.5"), false);
-  assert.equal(declared.has("@cf/moonshotai/kimi-k2.6"), true);
+  assert.equal(declared.has("@cf/moonshotai/kimi-k2.6"), false);
 });
 
 test("no duplicated ids in the touched registries", () => {
