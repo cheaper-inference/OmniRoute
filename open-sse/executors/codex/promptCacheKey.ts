@@ -1,4 +1,3 @@
-import { createHash } from "node:crypto";
 import { normalizeCodexSessionId } from "../../config/codexClient.ts";
 import {
   type CodexClientIdentity,
@@ -8,6 +7,7 @@ import {
   resolveCodexThreadScopedPromptCacheKey,
 } from "../../config/codexIdentity.ts";
 import { CODEX_CHAT_DEFAULT_INSTRUCTIONS } from "../../config/codexInstructions.ts";
+import { opaqueTokenFingerprint } from "../../utils/opaqueTokenFingerprint.ts";
 
 /**
  * Internal per-request carrier populated from pre-translation request metadata
@@ -151,7 +151,7 @@ interface AnchoredMessageContent {
 const EMPTY_ANCHORED_CONTENT: AnchoredMessageContent = { text: "", digest: "", imageRefs: [] };
 
 function stableAnchorDigest(value: string): string {
-  return createHash("sha256").update(value).digest("hex");
+  return opaqueTokenFingerprint(value);
 }
 
 function readImagePartRef(part: Record<string, unknown> | null): string | null {

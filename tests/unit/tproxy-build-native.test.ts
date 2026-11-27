@@ -9,12 +9,16 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import path from "node:path";
-import { buildTproxyNative } from "../../scripts/build/build-tproxy-native.mjs";
+import {
+  buildTproxyNative,
+  resolveBundledNodeGyp,
+} from "../../scripts/build/build-tproxy-native.mjs";
 
 const ROOT = "/repo";
 const NATIVE = path.join(ROOT, "src", "mitm", "tproxy", "native");
 const GYP = path.join(NATIVE, "binding.gyp");
 const OUT = path.join(NATIVE, "build", "Release", "transparent.node");
+const BUNDLED_GYP = "/usr/local/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js";
 
 test("skips (no-op) on non-Linux hosts and runs nothing", () => {
   let ran = false;
@@ -44,20 +48,43 @@ test("skips when the native sources are absent (binding.gyp missing)", () => {
   assert.equal(ran, false);
 });
 
-test("builds via node-gyp rebuild in the native dir and reports success", () => {
-  const calls = [];
+test("builds via npm's bundled node-gyp without `npx --yes` and reports success (#21014)", () => {
+  const calls: Array<{ cmd: string; args: string[]; cwd: string }> = [];
   const res = buildTproxyNative(ROOT, {
     platform: "linux",
+    nodeGypScript: BUNDLED_GYP,
     run: (cmd, args, cwd) => calls.push({ cmd, args, cwd }),
     exists: (p) => p === GYP || p === OUT,
   });
   assert.equal(res.built, true);
-  assert.deepEqual(calls, [{ cmd: "npx", args: ["--yes", "node-gyp", "rebuild"], cwd: NATIVE }]);
+  assert.deepEqual(calls, [{ cmd: process.execPath, args: [BUNDLED_GYP, "rebuild"], cwd: NATIVE }]);
+});
+
+test("falls back to local PATH `node-gyp` (never `npx --yes`) when bundled script is absent (#21014)", () => {
+  const calls: Array<{ cmd: string; args: string[]; cwd: string }> = [];
+  const res = buildTproxyNative(ROOT, {
+    platform: "linux",
+    nodeGypScript: null,
+    run: (cmd, args, cwd) => calls.push({ cmd, args, cwd }),
+    exists: (p) => p === GYP || p === OUT,
+  });
+  assert.equal(res.built, true);
+  assert.deepEqual(calls, [{ cmd: "node-gyp", args: ["rebuild"], cwd: NATIVE }]);
+});
+
+test("resolveBundledNodeGyp locates node-gyp relative to realpath(npm)", () => {
+  const found = resolveBundledNodeGyp({
+    whichNpm: () => "/usr/local/bin/npm",
+    realpath: () => "/opt/node/lib/node_modules/npm/bin/npm-cli.js",
+    exists: (p) => p === "/opt/node/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js",
+  });
+  assert.equal(found, "/opt/node/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js");
 });
 
 test("a node-gyp / toolchain failure is non-fatal (built:false with a reason)", () => {
   const res = buildTproxyNative(ROOT, {
     platform: "linux",
+    nodeGypScript: BUNDLED_GYP,
     run: () => {
       throw new Error("gyp ERR! not found: make");
     },
@@ -70,6 +97,7 @@ test("a node-gyp / toolchain failure is non-fatal (built:false with a reason)", 
 test("reports failure when node-gyp produced no transparent.node", () => {
   const res = buildTproxyNative(ROOT, {
     platform: "linux",
+    nodeGypScript: BUNDLED_GYP,
     run: () => {},
     exists: (p) => p === GYP, // OUT never appears
   });
