@@ -184,8 +184,9 @@ function mapTrainMembers(git, range, queue, trainCommits, map) {
     const from = merge.parents[0];
     const memberCommits = new Set(revisionList(git, `${from}..${member.head}`));
     const carried = member.carried
-      // A head outside the member range can share ancestors with it but cannot claim any.
-      .filter(({ head }) => memberCommits.has(head))
+      // A head outside the member range can share ancestors with it but cannot claim any, and a
+      // carried entry that names the member's own head carries nothing: the member keeps it.
+      .filter(({ head }) => head !== member.head && memberCommits.has(head))
       .map((entry) => ({
         ...entry,
         commits: revisionList(git, `${from}..${entry.head}`).filter((sha) =>

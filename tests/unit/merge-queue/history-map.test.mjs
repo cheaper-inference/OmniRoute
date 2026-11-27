@@ -330,6 +330,23 @@ test("queuePrByCommit credits the smallest carried stack first and leaves repair
   );
 });
 
+test("queuePrByCommit: a carried entry that names the member's own head claims nothing", () => {
+  const { runGit } = fakeTrain({
+    memberMerges: [
+      {
+        ...TRAIN_MEMBER,
+        body: [TRAIN_MEMBER.body, `Merge-Train-Carried: 56 ${HEAD_B} carol`].join("\n"),
+      },
+    ],
+    trainCommits: [TRAIN_REPAIR, M2, HEAD_B],
+    memberRanges: { [`${BASE0}..${HEAD_B}`]: [HEAD_B] },
+  });
+  const map = queuePrByCommit({ runGit, range: TRAIN_RANGE, trainAuthors: ["maint"] });
+  assert.equal(map.get(HEAD_B).pr, 34, "the member keeps its own head");
+  assert.equal(map.get(HEAD_B).author, "bob");
+  assert.equal(map.get(HEAD_B).train, 90);
+});
+
 test("queuePrByCommit ignores train trailers outside a genuine queue merge", () => {
   for (const outerBody of [
     trainMessage(HEAD_A),

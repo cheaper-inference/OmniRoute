@@ -126,7 +126,8 @@ third-party install script runs next to the App token.
   for the train. Its member heads become reachable from the base, and GitHub marks the member PRs
   as merged. Each member merge on the train's first-parent chain carries `Merge-Train-PR`,
   `Merge-Train-Head`, and `Merge-Train-Author` trailers. `Merge-Train-Carried` identifies a
-  stacked member whose head is included in that merge.
+  stacked member whose head is included in that merge; an entry that names the merge's own head
+  is ignored.
 - **CI profile**: `ci.yml` and `quality.yml` treat a push to `omni-queue/**` like a `merge_group`
   event (full profile, hosted runners). Deploy and publish workflows never run on that prefix. What
   differs from Release-Green is in [One check profile for candidates and
