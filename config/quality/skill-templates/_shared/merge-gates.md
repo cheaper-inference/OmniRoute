@@ -108,8 +108,8 @@ gh api repos/cheaper-inference/OmniRoute/actions/variables/OMNI_QUEUE_ENABLED --
 # "true" = the queue runs; a 404 or "false" = it is off
 ```
 
-**Off, or `shadow`** (the state since 2026-11-19): the queue lands nothing. Merges are manual,
-exactly as §1–§8 say. The server enforces part of §2: the ruleset "Require green gates on the
+**Off, or `shadow`** (`shadow` from 2026-11-19 to 2026-11-25): the queue lands nothing. Merges are
+manual, exactly as §1–§8 say. The server enforces part of §2: the ruleset "Require green gates on the
 active release" refuses any merge into the default branch whose head lacks a green `Gate / CI` and
 `Gate / Quality`, and it has no bypass, so `--admin` cannot pass a red gate there (§4 stands). A PR
 that is red only for an inherited base failure waits for the base repair; it is not merged around
@@ -156,16 +156,21 @@ a release branch:
 
 Do not remove the queue's labels or comments from a PR you are not merging.
 
-**`live`**: a PR reaches a managed release branch only through the queue. Do not run a merge
-command against that branch: its ruleset requires the `omni-queue/land` status and refuses the
-merge. After the usual gates (§1–§3) and the owner's authorization, the landing step is to apply
-the `omni-queue` label (plus `protected-approved` when the owner approved a protected surface for
-that PR). Only an approver's label counts (`approvers` in `config/merge-queue/config.json`), and a
-push after the label needs the label again. Then follow the PR, not the clock:
-`npm run queue -- why <PR>` says why it is or is not eligible, and the dashboard issue (label
+**`live`** (since 2026-11-25 on `release/v3.8.55`; first live landing: PR #21033): a PR reaches a
+managed release branch only through the queue. Do not run a merge command against that branch.
+The door ruleset requires the `omni-queue/land` status from the queue's GitHub App and refuses a
+manual merge or push. After the usual gates (§1–§3) and the owner's authorization, the landing step
+is to apply the `omni-queue` label (plus `protected-approved` when the owner approved a protected
+surface for that PR). Only an approver's label counts (`approvers` in
+`config/merge-queue/config.json`), and a push after the label needs the label again. Then follow the
+PR, not the clock:
+`npm run queue -- why <PR>` says why it is or is not eligible, and dashboard issue #21239 (label
 `omni-queue-dashboard`) shows the batch. Proof of landing is the PR in state MERGED with its
 commits on the base (§8 readback), never the label.
 
+- The only automatic labeler is the `derived-refresh-autoland` workflow, and only on the
+  `chore/derived-refresh` robot PR (`docs/ops/OMNI_QUEUE.md` → "Automatic labeling for the derived
+  refresh"). No session, script or loop applies the label on its own.
 - The queue re-runs the failed jobs of a red batch once, then finds the culprit; a PR it takes out
   of the queue is told why on the PR. Fix it and label it again; do not re-label an unchanged head.
 - `omni-queue-hotfix` (next batch, alone) and `omni-queue-base-repair` (the only work accepted

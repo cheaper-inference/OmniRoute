@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Obietnica — jeden punkt końcowy i 394 dostawców. Automatyczny fallback utrzymuje routing, dopóki dostępny jest inny sprawny cel. Sześć filarów: odporny fallback obejmujący 394 dostawców · oszczędność do 95% tokenów w kwalifikujących się obciążeniach · $0 na start dzięki ponad 150 bezpłatnym planom oraz 51 cyklicznym lub bezkluczowym dostawcom bezterminowo bezpłatnym · 39 integracji CLI/agentów za pomocą jednej konfiguracji · zgodność z API OpenAI, Claude, Gemini i Responses API pod adresem /v1 · mechanizmy kontroli produkcyjnej obejmujące wyłączniki obwodu, TLS stealth, MCP z 110 narzędziami, A2A, pamięć, zabezpieczenia, ewaluacje oraz ponad 56 000 statycznych deklaracji testów w ponad 7 800 śledzonych plikach testowych."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Obietnica — jeden punkt końcowy i 394 dostawców. Automatyczny fallback utrzymuje routing, dopóki dostępny jest inny sprawny cel. Sześć filarów: odporny fallback obejmujący 394 dostawców · oszczędność do 95% tokenów w kwalifikujących się obciążeniach · $0 na start dzięki ponad 150 bezpłatnym planom oraz 40 cyklicznym lub bezkluczowym dostawcom bezterminowo bezpłatnym · 39 integracji CLI/agentów za pomocą jednej konfiguracji · zgodność z API OpenAI, Claude, Gemini i Responses API pod adresem /v1 · mechanizmy kontroli produkcyjnej obejmujące wyłączniki obwodu, TLS stealth, MCP z 110 narzędziami, A2A, pamięć, zabezpieczenia, ewaluacje oraz ponad 56 000 statycznych deklaracji testów w ponad 7 800 śledzonych plikach testowych."/>
 
 <br/>
 <br/>
@@ -711,7 +711,7 @@ pokazuje dokładnie jakie zmienne środowiskowe/argumenty zostaną użyte bez wy
 
 </div>
 
-> **394 zarejestrowanych dostawców** w kanonicznych kolekcjach czatu, multimediów, wyszukiwania, lokalnych, agentów chmurowych i systemowych, w tym **153 z metadanymi wykrywania `hasFree: true`**. Rejestr modeli czatu obejmuje **239 dostawców / 3 059 różnych par dostawca–model / 1 475 surowych identyfikatorów modeli**; oddzielny katalog bezpłatnych limitów obejmuje **465 wierszy dla poszczególnych modeli**, **34 cykliczne pule** oraz **51 cyklicznych dostawców bezpłatnych na zawsze, niewymagających klucza**. Są to celowo różne mianowniki; definicje i obliczenia z deduplikacją puli znajdują się w [Dokumentacji dostawców](docs/reference/PROVIDER_REFERENCE.md) oraz [Bezpłatnych planach](docs/reference/FREE_TIERS.md).
+> **394 zarejestrowanych dostawców** w kanonicznych kolekcjach czatu, multimediów, wyszukiwania, lokalnych, agentów chmurowych i systemowych, w tym **153 z metadanymi wykrywania `hasFree: true`**. Rejestr modeli czatu obejmuje **239 dostawców / 3 059 różnych par dostawca–model / 1 475 surowych identyfikatorów modeli**; oddzielny katalog bezpłatnych limitów obejmuje **465 wierszy dla poszczególnych modeli**, **34 cykliczne pule** oraz **40 cyklicznych dostawców bezpłatnych na zawsze, niewymagających klucza**. Są to celowo różne mianowniki; definicje i obliczenia z deduplikacją puli znajdują się w [Dokumentacji dostawców](docs/reference/PROVIDER_REFERENCE.md) oraz [Bezpłatnych planach](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 

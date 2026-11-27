@@ -39,12 +39,16 @@ test("grandfathering is restricted to exact seed entries, not a provider-wide wa
 });
 
 import { catalogFingerprint } from "../../../scripts/check/freeCatalogEvidence.mjs";
-import { readFileSync, mkdtempSync, writeFileSync, mkdirSync, rmSync } from "node:fs";
+import { readFileSync, readdirSync, mkdtempSync, writeFileSync, mkdirSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawnSync, execFileSync } from "node:child_process";
 import { FREE_MODEL_BUDGETS } from "../../../open-sse/config/freeModelCatalog.data.ts";
+import {
+  grantsFreeAccess as catalogGrantsFreeAccess,
+  resolveFreeQuotaUnit,
+} from "../../../open-sse/config/freeModelCatalog.ts";
 
 const key = "fixture/new-model";
 const seed = [
@@ -182,7 +186,7 @@ test("malformed policy identities are errors instead of waived entries", () => {
   }
 });
 
-test("real catalog has a precise disposition for every recurring-uncapped identity", () => {
+test("real catalog has a precise disposition for every identity that needs evidence", () => {
   const policy = JSON.parse(
     readFileSync(
       new URL("../../../config/quality/free-catalog-evidence.json", import.meta.url),
@@ -200,10 +204,19 @@ test("real catalog has a precise disposition for every recurring-uncapped identi
       seed: frozen.entries,
       previousDebt: frozen.entries.map((e) => `${e.provider}/${e.modelId}`),
       today: new Date().toISOString().slice(0, 10),
+      grantsFreeAccess: catalogGrantsFreeAccess,
+      unitOf: resolveFreeQuotaUnit,
     }),
     []
   );
 });
+
+// The CLI imports the catalog .ts files natively (no tsx loader). Its V8 coverage would carry a
+// second source layout for those files and break the merged coverage report. Node copies the
+// parent's NODE_V8_COVERAGE into a child env when the key is absent, so explicitly clear it.
+function cliEnv(extra = {}) {
+  return { ...process.env, ...extra, NODE_V8_COVERAGE: "" };
+}
 
 test("CLI refuses unavailable baseline and missing PR base; neither is a successful bootstrap", () => {
   const script = new URL("../../../scripts/check/check-free-catalog-evidence.mjs", import.meta.url);
@@ -211,18 +224,14 @@ test("CLI refuses unavailable baseline and missing PR base; neither is a success
   const invalid = spawnSync(
     process.execPath,
     [fileURLToPath(script), "--base-ref", "refs/heads/nonexistent-free-catalog-test"],
-    { cwd, encoding: "utf8" }
+    { cwd, encoding: "utf8", env: cliEnv() }
   );
   assert.equal(invalid.status, 1);
   assert.match(invalid.stderr, /FAIL/);
   const missing = spawnSync(process.execPath, [fileURLToPath(script)], {
     cwd,
     encoding: "utf8",
-    env: {
-      ...process.env,
-      GITHUB_EVENT_NAME: "pull_request",
-      BASE_SHA: "",
-    },
+    env: cliEnv({ GITHUB_EVENT_NAME: "pull_request", BASE_SHA: "" }),
   });
   assert.equal(missing.status, 1);
   assert.match(missing.stderr, /FAIL/);
@@ -236,10 +245,33 @@ test("CLI requires an event baseline for PR, merge-group and push checks", () =>
     const result = spawnSync(process.execPath, [script], {
       cwd: new URL("../../../", import.meta.url),
       encoding: "utf8",
-      env: { ...process.env, GITHUB_EVENT_NAME: event, BASE_SHA: "" },
+      env: cliEnv({ GITHUB_EVENT_NAME: event, BASE_SHA: "" }),
     });
     assert.equal(result.status, 1, event);
   }
+});
+
+test("the native CLI leaves the unit shard's V8 coverage directory untouched", (t) => {
+  const script = fileURLToPath(
+    new URL("../../../scripts/check/check-free-catalog-evidence.mjs", import.meta.url)
+  );
+  const coverage = mkdtempSync(join(tmpdir(), "catalog-cli-coverage-"));
+  t.after(() => rmSync(coverage, { recursive: true, force: true }));
+  const previousCoverage = process.env.NODE_V8_COVERAGE;
+  process.env.NODE_V8_COVERAGE = coverage;
+  try {
+    const result = spawnSync(process.execPath, [script], {
+      cwd: new URL("../../../", import.meta.url),
+      encoding: "utf8",
+      env: cliEnv({ GITHUB_EVENT_NAME: "pull_request", BASE_SHA: "" }),
+    });
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, /FAIL/);
+  } finally {
+    if (previousCoverage === undefined) delete process.env.NODE_V8_COVERAGE;
+    else process.env.NODE_V8_COVERAGE = previousCoverage;
+  }
+  assert.deepEqual(readdirSync(coverage), []);
 });
 
 test(
@@ -308,11 +340,7 @@ test(
             timeout: 30000,
             killSignal: "SIGKILL",
             windowsHide: true,
-            env: {
-              ...process.env,
-              GITHUB_EVENT_NAME: event,
-              BASE_SHA: base,
-            },
+            env: cliEnv({ GITHUB_EVENT_NAME: event, BASE_SHA: base }),
           });
         const rejected = run(audited);
         assert.equal(rejected.status, 1, event + rejected.stdout + rejected.stderr);
@@ -335,3 +363,143 @@ test(
     }
   }
 );
+
+// Re-audit of 2026-11: every row with a quota, and every free row new against the base, needs
+// dated evidence; quota and credit records quote the page and name the quota unit.
+const quotaRow = {
+  provider: "fixture",
+  modelId: "quota-model",
+  freeType: "recurring-daily",
+  monthlyTokens: 6_000_000,
+  creditTokens: 0,
+  poolKey: null,
+  tos: "caution",
+};
+const creditRow = {
+  provider: "fixture",
+  modelId: "credit-model",
+  freeType: "one-time-initial",
+  monthlyTokens: 0,
+  creditTokens: 1_000_000,
+  poolKey: null,
+  tos: "caution",
+};
+const grantsFreeAccess = (freeType) => freeType !== "discontinued";
+const unitOf = () => "tokens";
+const quotaOptions = { seed: [], previousDebt: [], today: "2026-11-23", grantsFreeAccess, unitOf };
+const recordFor = (r, extra) => ({
+  ...evidence,
+  provider: r.provider,
+  modelId: r.modelId,
+  catalogHash: catalogFingerprint(r),
+  checkedAt: "2026-11-23",
+  ...extra,
+});
+const policyWith = (...records) => ({ schemaVersion: 1, debt: [], evidence: records });
+
+test("a row with a monthly quota requires evidence even when it is not uncapped", () => {
+  const errors = validateCatalogEvidence([quotaRow], policyWith(), quotaOptions);
+  assert.ok(errors.includes("fixture/quota-model: missing evidence"), JSON.stringify(errors));
+});
+
+test("a quota record must quote the page and name the provider's quota unit", () => {
+  const ok = recordFor(quotaRow, {
+    claim: "recurring-quota",
+    quotaUnit: "tokens",
+    excerpt: "200K tokens per day on the free plan.",
+  });
+  assert.deepEqual(validateCatalogEvidence([quotaRow], policyWith(ok), quotaOptions), []);
+  const noExcerpt = { ...ok };
+  delete noExcerpt.excerpt;
+  assert.ok(
+    validateCatalogEvidence([quotaRow], policyWith(noExcerpt), quotaOptions).some((e) =>
+      e.includes("missing excerpt")
+    )
+  );
+  assert.ok(
+    validateCatalogEvidence(
+      [quotaRow],
+      policyWith({ ...ok, excerpt: "x".repeat(301) }),
+      quotaOptions
+    ).some((e) => e.includes("excerpt longer than 300"))
+  );
+  assert.ok(
+    validateCatalogEvidence(
+      [quotaRow],
+      policyWith({ ...ok, quotaUnit: "requests" }),
+      quotaOptions
+    ).some((e) => e.includes("quota unit does not match"))
+  );
+  assert.ok(
+    validateCatalogEvidence(
+      [quotaRow],
+      policyWith({ ...ok, claim: "recurring-free-access" }),
+      quotaOptions
+    ).some((e) => e.includes("wrong evidence claim"))
+  );
+});
+
+test("a free row new against the base needs evidence, even with only a signup credit", () => {
+  const baseKeys = new Set(["fixture/other"]);
+  const errors = validateCatalogEvidence([creditRow], policyWith(), { ...quotaOptions, baseKeys });
+  assert.ok(errors.includes("fixture/credit-model: missing evidence"), JSON.stringify(errors));
+  const credit = recordFor(creditRow, {
+    claim: "signup-credit",
+    excerpt: "New accounts receive a one-time trial credit.",
+  });
+  assert.deepEqual(
+    validateCatalogEvidence([creditRow], policyWith(credit), { ...quotaOptions, baseKeys }),
+    []
+  );
+});
+
+test("a credit-only row already in the base is not required to carry evidence", () => {
+  const baseKeys = new Set(["fixture/credit-model"]);
+  assert.deepEqual(
+    validateCatalogEvidence([creditRow], policyWith(), { ...quotaOptions, baseKeys }),
+    []
+  );
+});
+
+test("evidence of a row that became discontinued is stale", () => {
+  const ok = recordFor(quotaRow, {
+    claim: "recurring-quota",
+    quotaUnit: "tokens",
+    excerpt: "200K tokens per day on the free plan.",
+  });
+  const retired = { ...quotaRow, freeType: "discontinued", monthlyTokens: 0 };
+  assert.ok(
+    validateCatalogEvidence([retired], policyWith(ok), quotaOptions).some((e) =>
+      e.includes("stale evidence")
+    )
+  );
+});
+
+test("the fingerprint ignores absent gates (old hashes hold) and moves when gates change", () => {
+  // Hash of the fixture row under the algorithm before `gates` existed.
+  assert.equal(
+    catalogFingerprint(row),
+    "432a928975e73e5d6f271350265cd0d818edd1358cd15796a8d1c9c7ef52809c"
+  );
+  assert.equal(catalogFingerprint({ ...row, gates: [] }), catalogFingerprint(row));
+  const card = catalogFingerprint({ ...row, gates: ["card"] });
+  assert.notEqual(card, catalogFingerprint(row));
+  assert.notEqual(card, catalogFingerprint({ ...row, gates: ["card", "phone"] }));
+  assert.equal(
+    catalogFingerprint({ ...row, gates: ["phone", "card"] }),
+    catalogFingerprint({ ...row, gates: ["card", "phone"] })
+  );
+  const frozen = JSON.parse(
+    readFileSync(
+      new URL("../../../config/quality/free-catalog-legacy-seed.json", import.meta.url),
+      "utf8"
+    )
+  );
+  const seeded = frozen.entries.find(
+    (e) => e.provider === "sealion" && e.modelId === "aisingapore/Gemma-SEA-LION-v4-27B-IT"
+  );
+  const live = FREE_MODEL_BUDGETS.find(
+    (m) => m.provider === seeded.provider && m.modelId === seeded.modelId
+  );
+  assert.equal(catalogFingerprint(live), seeded.catalogHash);
+});

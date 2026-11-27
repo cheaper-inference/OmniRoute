@@ -1,0 +1,1 @@
+- fix(security): fail closed when the self-hosted provider or strategy config file is unreadable — answer 500 without the file path instead of falling through to the cloud pipeline in /v1/chat/completions

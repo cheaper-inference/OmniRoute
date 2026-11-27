@@ -117,15 +117,18 @@ async function openExpertBuilder() {
   const dialog = await screen.findByRole("dialog");
   // Expert mode arrives with /api/settings; the manual entry only exists in that mode.
   await within(dialog).findByTestId("combo-manual-model-input");
-  // The picker options arrive with /api/combos/builder/options.
-  await waitFor(() =>
-    expect(
-      within(dialog)
-        .getByTestId("combo-builder-provider")
-        .querySelector('option[value="openrouter"]')
-    ).not.toBeNull()
-  );
+  // The picker options arrive with /api/combos/builder/options. Inspect the real
+  // searchable popover rather than native <option> elements under its trigger.
+  const search = await openProviderPicker(dialog);
+  await screen.findByRole("option", { name: /OpenRouter/ });
+  fireEvent.keyDown(search, { key: "Escape" });
+  await waitFor(() => expect(screen.queryByRole("listbox")).not.toBeInTheDocument());
   return dialog;
+}
+
+async function openProviderPicker(dialog: HTMLElement) {
+  fireEvent.click(within(dialog).getByTestId("combo-builder-provider"));
+  return screen.findByRole("combobox", { name: "Search", exact: true });
 }
 
 async function addManualModel(dialog: HTMLElement, value: string) {
@@ -163,9 +166,13 @@ describe("expert-mode manual model entry", { timeout: 90_000 }, () => {
 
   it("keeps the picker limited to providers that have a catalog model", async () => {
     const dialog = await openExpertBuilder();
-    const picker = within(dialog).getByTestId("combo-builder-provider");
-    expect(picker.querySelector('option[value="openrouter"]')).not.toBeNull();
-    expect(picker.querySelector('option[value="codex"]')).toBeNull();
+    await openProviderPicker(dialog);
+    const picker = within(screen.getByRole("listbox"));
+    expect(picker.getByRole("option", { name: /OpenRouter/ })).toHaveAttribute(
+      "data-value",
+      "openrouter"
+    );
+    expect(picker.queryByRole("option", { name: /Codex/ })).not.toBeInTheDocument();
   });
 
   it("still refuses a prefix that matches no configured provider", async () => {

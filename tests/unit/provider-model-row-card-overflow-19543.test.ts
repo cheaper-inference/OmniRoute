@@ -25,6 +25,16 @@ test("model card line 2 wraps instead of overflowing into the next card", () => 
   assert.ok(line2Start > 0, "line 2 container must be present");
 });
 
+test("the action group stays within the card when Blacklist and Compatibility are both visible", () => {
+  const actionGroup = source.match(
+    /<div className="([^"]+)">\s*\{onToggleHidden && testStatus === "error" && \(/
+  )?.[1];
+  assert.ok(actionGroup, "the model action group must be present");
+  const utilities = actionGroup.split(/\s+/);
+  assert.ok(utilities.includes("max-w-full"), "the action group must fit its parent");
+  assert.ok(utilities.includes("flex-wrap"), "the actions must wrap within that width");
+});
+
 test("alias keeps a small basis so the actions wrap before the alias takes its own row", () => {
   assert.match(source, /className="flex min-w-0 flex-1 basis-16 items-center text-3xs gap-1"/);
 });

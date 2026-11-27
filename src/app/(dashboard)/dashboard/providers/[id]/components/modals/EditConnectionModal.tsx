@@ -580,7 +580,7 @@ export default function EditConnectionModal({
       let parsedMaxConcurrent: number | null = null;
       if (trimmedMaxConcurrent) {
         const numericMaxConcurrent = Number(trimmedMaxConcurrent);
-        if (!Number.isInteger(numericMaxConcurrent) || numericMaxConcurrent < 0) {
+        if (!Number.isInteger(numericMaxConcurrent) || numericMaxConcurrent < -1) {
           setSaveError(t("maxConcurrentWholeNumberError"));
           return;
         }
@@ -1034,17 +1034,17 @@ export default function EditConnectionModal({
             {t("accountConcurrencyCapLabel")}
           </div>
           <NumberInput
-            min={0}
+            min={-1}
             step={1}
             aria-label={t("accountConcurrencyCapLabel")}
             value={textToNumber(formData.maxConcurrent)}
             onValueChange={(value) => {
               setFormData({ ...formData, maxConcurrent: numberToText(value) });
-              // The field only lets a whole number of 0 or more through.
+              // The field only lets a whole number of -1 or more through.
               if (saveError && value !== null) setSaveError(null);
             }}
             placeholder="0"
-            hint={t("accountConcurrencyCapHint")}
+            hint={t("adaptiveConnectionConcurrencyHint")}
           />
         </div>
         {saveError && <Notice variant="critical">{saveError}</Notice>}

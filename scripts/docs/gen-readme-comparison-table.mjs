@@ -21,9 +21,9 @@ import { RF } from "./readmeFacts.mjs";
 // Column order: OmniRoute, 9router, OpenRouter, CLIProxyAPI, LiteLLM.
 const ROWS = [
   { label: "Providers", cells: [String(RF.providers), "40+", "400+*", "~5", "100+"] },
-  // "150+" rounds down the providers flagged `hasFree: true` (160 on 2026-11-16): a free offer,
-  // which may be limited or conditional — not a count of free-forever providers.
-  { label: "Providers with a free offer", cells: ["150+", "yes", "mid", "no", "no"] },
+  // RF.hasFreeLabel rounds down the providers flagged `hasFree: true` (from the facts snapshot):
+  // a free offer, which may be limited or conditional — not a count of free-forever providers.
+  { label: "Providers with a free offer", cells: [RF.hasFreeLabel, "yes", "mid", "no", "no"] },
   { label: "Routing strategies", cells: [String(RF.routingStrategies), "2", "3", "2", "6"] },
   { label: "Token compression", cells: [`${RF.engines} eng`, "yes", "mid", "no", "no"] },
   {
@@ -105,7 +105,7 @@ export async function renderComparisonTable() {
       viewBox: "0 0 1200 780",
       title:
         "Comparison table: OmniRoute versus 9router, OpenRouter, CLIProxyAPI and LiteLLM across 13 capabilities.",
-      desc: `OmniRoute is the only one with the full set: ${RF.providers} providers, 150+ providers with a free offer, ${RF.routingStrategies} routing strategies, ${RF.engines}-engine token compression, a built-in MCP server with ${RF.mcpTools} tools, A2A protocol, persistent memory, guardrails, cloud agents, TLS fingerprint stealth, desktop/Termux/PWA, ${RF.locales} UI locales and 100% MIT self-hosted. 9router has free providers, RTK compression and translation but no MCP, A2A, memory, guardrails, cloud agents or stealth. OpenRouter is a hosted SaaS with 400+ models, guardrails and a hosted MCP but is not self-hosted and lacks A2A, memory, cloud agents and stealth. CLIProxyAPI is a light OAuth proxy with two routing strategies. LiteLLM has 100+ providers, A2A and extensive guardrails but no memory, compression, free tier, stealth or cloud agents. Static-header comparison table where each capability row fades in top to bottom; the OmniRoute column is highlighted and shows a check or a leading value in every row, while competitors show a mix of checks, partials and crosses. Light and dark follow the viewer's color scheme.`,
+      desc: `OmniRoute is the only one with the full set: ${RF.providers} providers, ${RF.hasFreeLabel} providers with a free offer, ${RF.routingStrategies} routing strategies, ${RF.engines}-engine token compression, a built-in MCP server with ${RF.mcpTools} tools, A2A protocol, persistent memory, guardrails, cloud agents, TLS fingerprint stealth, desktop/Termux/PWA, ${RF.locales} UI locales and 100% MIT self-hosted. 9router has free providers, RTK compression and translation but no MCP, A2A, memory, guardrails, cloud agents or stealth. OpenRouter is a hosted SaaS with 400+ models, guardrails and a hosted MCP but is not self-hosted and lacks A2A, memory, cloud agents and stealth. CLIProxyAPI is a light OAuth proxy with two routing strategies. LiteLLM has 100+ providers, A2A and extensive guardrails but no memory, compression, free tier, stealth or cloud agents. Static-header comparison table where each capability row fades in top to bottom; the OmniRoute column is highlighted and shows a check or a leading value in every row, while competitors show a mix of checks, partials and crosses. Light and dark follow the viewer's color scheme.`,
       extraCss: `.cmp-strong{font-weight:600;fill:var(--ink)}`,
     }) +
       gridDefs("cmp-grid") +

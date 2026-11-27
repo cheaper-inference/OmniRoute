@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Løftet — Ett endepunkt og 394 leverandører. Automatisk reserveviderekobling opprettholder dirigeringen så lenge et annet tilgjengelig, friskt mål finnes. Seks pilarer: robust reserveviderekobling på tvers av 394 leverandører · opptil 95 % tokenbesparelser for kvalifiserte arbeidsbelastninger · $0 for å komme i gang med over 150 gratiskvoter og 51 tilbakevendende/nøkkelfrie leverandører som er gratis for alltid · 39 CLI-/agentintegrasjoner gjennom én konfigurasjon · kompatibilitet med OpenAI-, Claude-, Gemini- og Responses API på /v1 · produksjonskontroller, inkludert kretsbrytere, TLS-stealth, MCP med 110 verktøy, A2A, minne, sikkerhetsregler, evalueringer og over 56 000 statiske testdeklarasjoner på tvers av over 7 800 sporede testfiler."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Løftet — Ett endepunkt og 394 leverandører. Automatisk reserveviderekobling opprettholder dirigeringen så lenge et annet tilgjengelig, friskt mål finnes. Seks pilarer: robust reserveviderekobling på tvers av 394 leverandører · opptil 95 % tokenbesparelser for kvalifiserte arbeidsbelastninger · $0 for å komme i gang med over 150 gratiskvoter og 40 tilbakevendende/nøkkelfrie leverandører som er gratis for alltid · 39 CLI-/agentintegrasjoner gjennom én konfigurasjon · kompatibilitet med OpenAI-, Claude-, Gemini- og Responses API på /v1 · produksjonskontroller, inkludert kretsbrytere, TLS-stealth, MCP med 110 verktøy, A2A, minne, sikkerhetsregler, evalueringer og over 56 000 statiske testdeklarasjoner på tvers av over 7 800 sporede testfiler."/>
 
 <br/>
 <br/>
@@ -712,7 +712,7 @@ av shell-historikken din. → [CLI-integrasjoner](docs/guides/CLI-INTEGRATIONS.m
 
 </div>
 
-> **394 registrerte leverandører** på tvers av de kanoniske samlingene for chat, media, søk, lokale tjenester, skyagenter og systemer, inkludert **153 med `hasFree: true`-oppdagelsesmetadata**. Chatmodellregisteret dekker **239 leverandører / 3 059 distinkte leverandør–modell-par / 1 475 rå modell-ID-er**; den separate katalogen for gratisbudsjetter har **465 rader per modell**, **34 tilbakevendende kvoter** og **51 tilbakevendende/nøkkelløse leverandører som er gratis for alltid**. Dette er ulike nevnerverdier med hensikt; definisjoner og pool-dedupliserte beregninger finnes i [Leverandørreferansen](docs/reference/PROVIDER_REFERENCE.md) og [Gratisnivåer](docs/reference/FREE_TIERS.md).
+> **394 registrerte leverandører** på tvers av de kanoniske samlingene for chat, media, søk, lokale tjenester, skyagenter og systemer, inkludert **153 med `hasFree: true`-oppdagelsesmetadata**. Chatmodellregisteret dekker **239 leverandører / 3 059 distinkte leverandør–modell-par / 1 475 rå modell-ID-er**; den separate katalogen for gratisbudsjetter har **465 rader per modell**, **34 tilbakevendende kvoter** og **40 tilbakevendende/nøkkelløse leverandører som er gratis for alltid**. Dette er ulike nevnerverdier med hensikt; definisjoner og pool-dedupliserte beregninger finnes i [Leverandørreferansen](docs/reference/PROVIDER_REFERENCE.md) og [Gratisnivåer](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 

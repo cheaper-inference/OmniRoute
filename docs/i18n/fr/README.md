@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="La promesse — Un endpoint et 394 fournisseurs. Le basculement automatique maintient le routage tant qu'une autre cible saine est disponible. Six piliers : basculement résilient entre 394 fournisseurs · jusqu'à 95 % d'économies de tokens pour les charges de travail éligibles · 0 $ pour commencer avec plus de 150 offres gratuites et 51 fournisseurs gratuits à vie récurrents/sans clé · 39 intégrations CLI/agent via une seule configuration · compatibilité avec les API OpenAI, Claude, Gemini et Responses à l'adresse /v1 · contrôles de production incluant des disjoncteurs, la furtivité TLS, MCP avec 110 outils, A2A, la mémoire, des garde-fous, des évaluations et plus de 56 000 déclarations de tests statiques réparties dans plus de 7 800 fichiers de test suivis."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="La promesse — Un endpoint et 394 fournisseurs. Le basculement automatique maintient le routage tant qu'une autre cible saine est disponible. Six piliers : basculement résilient entre 394 fournisseurs · jusqu'à 95 % d'économies de tokens pour les charges de travail éligibles · 0 $ pour commencer avec plus de 150 offres gratuites et 40 fournisseurs gratuits à vie récurrents/sans clé · 39 intégrations CLI/agent via une seule configuration · compatibilité avec les API OpenAI, Claude, Gemini et Responses à l'adresse /v1 · contrôles de production incluant des disjoncteurs, la furtivité TLS, MCP avec 110 outils, A2A, la mémoire, des garde-fous, des évaluations et plus de 56 000 déclarations de tests statiques réparties dans plus de 7 800 fichiers de test suivis."/>
 
 <br/>
 <br/>
@@ -703,7 +703,7 @@ hors de l'historique de votre shell. → [Intégrations CLI](docs/guides/CLI-INT
 
 </div>
 
-> **394 fournisseurs enregistrés** dans les collections canoniques de chat, de médias, de recherche, locales, d’agents cloud et système, dont **153 disposent de métadonnées de découverte `hasFree: true`**. Le registre des modèles de chat couvre **239 fournisseurs / 3 059 paires fournisseur-modèle distinctes / 1 475 identifiants de modèles bruts** ; le catalogue séparé des budgets gratuits comprend **465 lignes par modèle**, **34 pools récurrents** et **51 fournisseurs récurrents/gratuits à vie sans clé**. Ces dénominateurs sont volontairement différents ; les définitions et les calculs dédupliqués par pool se trouvent dans la [Référence des fournisseurs](docs/reference/PROVIDER_REFERENCE.md) et les [Niveaux gratuits](docs/reference/FREE_TIERS.md).
+> **394 fournisseurs enregistrés** dans les collections canoniques de chat, de médias, de recherche, locales, d’agents cloud et système, dont **153 disposent de métadonnées de découverte `hasFree: true`**. Le registre des modèles de chat couvre **239 fournisseurs / 3 059 paires fournisseur-modèle distinctes / 1 475 identifiants de modèles bruts** ; le catalogue séparé des budgets gratuits comprend **465 lignes par modèle**, **34 pools récurrents** et **40 fournisseurs récurrents/gratuits à vie sans clé**. Ces dénominateurs sont volontairement différents ; les définitions et les calculs dédupliqués par pool se trouvent dans la [Référence des fournisseurs](docs/reference/PROVIDER_REFERENCE.md) et les [Niveaux gratuits](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
