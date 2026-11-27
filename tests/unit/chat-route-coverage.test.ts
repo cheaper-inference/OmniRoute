@@ -24,6 +24,7 @@ const { getDefaultTaskModelMap, resetTaskRoutingStats, setTaskRoutingConfig } =
   await import("../../open-sse/services/taskAwareRouter.ts");
 const { setExcluded } = await import("../../src/lib/db/autoCandidateOverrides.ts");
 const { replaceSyncedAvailableModelsForConnection } = await import("../../src/lib/db/models.ts");
+const { updateProviderConnection } = await import("../../src/lib/db/providers.ts");
 
 function buildOpenAIStreamResponse(text = "streamed from openai") {
   return new Response(
@@ -430,7 +431,7 @@ test("handleChat keeps the combo error when the global fallback throws", async (
   assert.match(json.error.message, /primary combo failed/i);
 });
 
-for (const { title, provider, fallbackModel, supportsVision } of [
+for (const { title, provider, fallbackModel, supportsVision, connectionDefault } of [
   {
     title: "does not dispatch to a text-only global fallback",
     provider: "mistral",
@@ -443,8 +444,22 @@ for (const { title, provider, fallbackModel, supportsVision } of [
     fallbackModel: "claude-sonnet-4-6",
     supportsVision: true,
   },
+  {
+    title: "does not dispatch when a bare fallback alias swaps to a text-only default",
+    provider: "mistral",
+    fallbackModel: "mistral-large-latest",
+    connectionDefault: "codestral-latest",
+    supportsVision: false,
+  },
+  {
+    title: "preserves images when a bare fallback alias swaps to a native vision default",
+    provider: "mistral",
+    fallbackModel: "mistral-large-latest",
+    connectionDefault: "mistral-small-latest",
+    supportsVision: true,
+  },
 ]) {
-  test(`auto/vision exhaustion ${title}`, async () => {
+  test(`auto/vision exhaustion ${title}`, async (t) => {
     const model = "auto/vision";
     const primaryModel = "gpt-4.1";
     const imageData =
@@ -452,16 +467,35 @@ for (const { title, provider, fallbackModel, supportsVision } of [
     const image = `data:image/png;base64,${imageData}`;
     const primary = await seedConnection("openai");
     const fallback = await seedConnection(provider);
+    const fallbackRequest = connectionDefault
+      ? "legacy-vision-fallback"
+      : `${provider}/${fallbackModel}`;
+    if (connectionDefault) {
+      const previous = process.env.BARE_MODEL_DEFAULT_OVERRIDE_LEGACY;
+      t.after(() => {
+        if (previous === undefined) delete process.env.BARE_MODEL_DEFAULT_OVERRIDE_LEGACY;
+        else process.env.BARE_MODEL_DEFAULT_OVERRIDE_LEGACY = previous;
+      });
+      process.env.BARE_MODEL_DEFAULT_OVERRIDE_LEGACY = "true";
+      await updateProviderConnection(fallback.id, { defaultModel: connectionDefault });
+    }
     const apiKey = await seedApiKey({
       allowedCombos: [model],
       allowedConnections: [primary.id, fallback.id],
-      allowedModels: [`openai/${primaryModel}`, `${provider}/${fallbackModel}`],
+      allowedModels: [
+        `openai/${primaryModel}`,
+        `${provider}/${fallbackModel}`,
+        ...(connectionDefault ? [fallbackRequest, `${provider}/${connectionDefault}`] : []),
+      ],
     });
     // Exclude the fallback account from Auto ranking only. The key allows explicit dispatch.
     await replaceSyncedAvailableModelsForConnection("openai", primary.id, [{ id: primaryModel }]);
     await setExcluded(apiKey.id, model, fallback.id, true);
     await settingsDb.updateSettings({
-      globalFallbackModel: `${provider}/${fallbackModel}`,
+      globalFallbackModel: fallbackRequest,
+      ...(connectionDefault && {
+        modelAliases: { [fallbackRequest]: `${provider}/${fallbackModel}` },
+      }),
       modalityBridgeVisionEnabled: true,
       modalityBridgeVisionMode: "auto",
       modalityBridgeVisionModel: model,
@@ -477,9 +511,9 @@ for (const { title, provider, fallbackModel, supportsVision } of [
           headers: { "Content-Type": "application/json" },
         });
       }
-      return supportsVision
-        ? buildClaudeResponse("Fallback answered", fallbackModel)
-        : buildOpenAIResponse("Unexpected fallback reply", fallbackModel);
+      return provider === "claude"
+        ? buildClaudeResponse("Fallback answered", body.model)
+        : buildOpenAIResponse("Fallback answered", body.model);
     };
 
     const question = "Which shape is below the orange diamond?";
@@ -502,11 +536,17 @@ for (const { title, provider, fallbackModel, supportsVision } of [
       assert.deepEqual(attempts, [
         ...primaryAttempts,
         {
-          model: fallbackModel,
-          content: [
-            { type: "text", text: question },
-            { type: "image", source: { type: "base64", media_type: "image/png", data: imageData } },
-          ],
+          model: connectionDefault ?? fallbackModel,
+          content:
+            provider === "claude"
+              ? [
+                  { type: "text", text: question },
+                  {
+                    type: "image",
+                    source: { type: "base64", media_type: "image/png", data: imageData },
+                  },
+                ]
+              : content,
         },
       ]);
       assert.equal(response.status, 200);

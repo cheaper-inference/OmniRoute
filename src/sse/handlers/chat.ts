@@ -1,5 +1,4 @@
 import { requiresQoderHttpTransport } from "@omniroute/open-sse/services/qoderCapabilities";
-import { supportsNativeVision } from "@omniroute/open-sse/services/combo/mediaCompatibility.ts";
 import { randomUUID } from "crypto";
 import { resolveChatRequestBody } from "./requestBody";
 import { getComboCredentialAvailability } from "./comboCredentialAvailability.ts";
@@ -1808,7 +1807,7 @@ async function handleSingleModelChat(
   // Custom OpenAI-compatible node: a POST with an ambiguous outcome is never replayed
   // (see chat/customNodeReplayPolicy.ts); definite rejections keep normal fallback.
   const customProviderNoReplay = isCustomOpenAICompatibleProvider(provider);
-  const resolvedModelGate = resolvedPolicy.createVisibleResolvedModelGate({
+  const resolvedModelGate = resolvedPolicy.createDispatchModelGate({
     apiKeyInfo,
     request,
     contextModel: runtimeOptions.authorizationContextModel,
@@ -1816,17 +1815,10 @@ async function handleSingleModelChat(
     provider,
     model,
     modelStr,
+    requireNativeVision: runtimeOptions.requireNativeVision,
   });
-  const modelPolicyRejection = await resolvedModelGate([`${provider}/${model}`]);
-  if (modelPolicyRejection) return modelPolicyRejection;
-  // A global fallback or redirected combo can select a model outside the
-  // original vision pool. Check its resolved transport before sending pixels.
-  if (runtimeOptions.requireNativeVision && !supportsNativeVision(provider, model)) {
-    return errorResponse(HTTP_STATUS.BAD_REQUEST, "This target cannot receive native images", {
-      code: "unsupported_media_input",
-      type: "invalid_request_error",
-    });
-  }
+  const modelRejection = await resolvedModelGate.initial();
+  if (modelRejection) return modelRejection;
   const forceLiveComboTest = runtimeOptions.forceLiveComboTest === true;
   // Agent guard (block mode), on the provider this target resolved to: after the key's own
   // model policy, before any breaker, cooldown or credential is touched.
@@ -2278,11 +2270,8 @@ async function handleSingleModelChat(
         includeAccountId = false;
       }
       log.info("AUTH", `Using ${provider} account: ${includeAccountId ? accountId : "***"}...`);
-      // #474: when the request used a bare model name (no "/" — e.g. an alias
-      // that resolved to "auto") and the selected connection declares a
-      // defaultModel, resolve the bare name to that real model ID before the
-      // upstream call so the provider receives a concrete model rather than the
-      // placeholder. A "/"-qualified model name is always left untouched.
+      // #474: resolve bare placeholders to the connection's defaultModel.
+      // The legacy override also replaces concrete bare model names.
       let effectiveModel =
         resolveBareModelToConnectionDefault(modelStr, model, credentials.defaultModel) ?? model;
       let requestBody =
@@ -2319,19 +2308,15 @@ async function handleSingleModelChat(
         }
         requestBody = connectionRouting.body;
       }
-      // Connection defaults / reasoning rules can swap the admitted model: recheck pre-dispatch.
-      const effectivePolicyRejection = await resolvedModelGate(
-        resolvedPolicy.effectivePolicyTargets(
-          provider,
-          effectiveModel,
-          requestBody.model,
-          body?.model
-        )
+      const effectiveRejection = await resolvedModelGate.effective(
+        effectiveModel,
+        requestBody.model,
+        body?.model
       );
-      if (effectivePolicyRejection) {
+      if (effectiveRejection) {
         releaseOAuthSession();
         agyLease.release(leaseId);
-        return effectivePolicyRejection;
+        return effectiveRejection;
       }
       let injectedHandoff = null;
       const handoffSessionId = scopeHandoffSessionId(runtimeOptions.sessionId, apiKeyInfo?.id);
@@ -2447,7 +2432,9 @@ async function handleSingleModelChat(
           ? { ...preferredFailoverSettings, enabled: false }
           : preferredFailoverSettings
       );
-      // 4. Execute chat via core after breaker gate checks (with optional TLS tracking)
+      const checkVisionUrls =
+        runtimeOptions.requireNativeVision ||
+        (runtimeOptions.isVirtualAutoCombo && comboName === "auto/vision");
       if (telemetry) telemetry.startPhase("connect");
       let execution: Awaited<ReturnType<typeof dispatchChatWithAffinityEviction>>;
       try {
@@ -2494,6 +2481,7 @@ async function handleSingleModelChat(
             reasoningTransportFallback: runtimeOptions.reasoningTransportFallback ?? "drop",
             managedLease: runtimeOptions.managedLease ?? null,
             videoBridgeLog: runtimeOptions.videoBridgeLog,
+            checkVisionUrls,
             previousResponseResumed: runtimeOptions.previousResponseResumed,
             fallbackAttempts: runtimeOptions.fallbackAttempts,
             requestUpstreamStartTimeoutMs: preferredDeadline.timeoutMs,
@@ -2702,10 +2690,12 @@ async function handleSingleModelChat(
         return withRoutingTelemetry(result.response, credentials.connectionId);
       }
 
-      // A 422 body-deserialization rejection describes THIS request's shape, not the
-      // account. Cooling the connection down would make every other client routed to
-      // the same (often single) account fail with the stale error for ~1 minute.
-      if (isRequestShapeError(result.status, result.error, provider)) {
+      // Media incompatibility and request-shape errors belong to the input and target.
+      // Cooling the connection down would reject later requests it could serve.
+      if (
+        (checkVisionUrls && result.errorCode === "unsupported_media_input") ||
+        isRequestShapeError(result.status, result.error, provider)
+      ) {
         return withRoutingTelemetry(result.response, credentials.connectionId);
       }
 
