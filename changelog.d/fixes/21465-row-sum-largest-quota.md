@@ -1,0 +1,1 @@
+- **fix(catalog):** the row-sum reading counts each catalog row once, at the largest quota it ever listed, so a retired id that comes back with a smaller quota no longer lowers the total; the real free-token figure still uses live quotas only ([#21465](https://github.com/cheaper-inference/OmniRoute/pull/21465))
