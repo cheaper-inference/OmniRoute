@@ -87,6 +87,63 @@ test("radar export v2 includes the curation date, row-sum totals, and retired of
   assert.equal(data.retired.length, RETIRED_FREE_ROWS.length);
 });
 
+test("radar export v2 includes sorted social pool boosts with valid budget references", () => {
+  const { budgets, poolBoosts } = runExport();
+  assert.ok(Array.isArray(poolBoosts) && poolBoosts.length > 0);
+  const pairs = new Set();
+  for (const boost of poolBoosts) {
+    assert.deepEqual(Object.keys(boost).sort(), ["gate", "poolId", "tokensPerMonth"]);
+    const { poolId, gate, tokensPerMonth } = boost;
+    for (const value of [poolId, gate]) {
+      assert.equal(typeof value, "string");
+      assert.ok(value.trim().length > 0);
+      assert.doesNotMatch(value, /\p{Cc}|:\/\/|www\./iu);
+      assert.equal(URL.canParse(value), false);
+    }
+    assert.ok(catalog.SOCIAL_GATES.has(gate), gate);
+    assert.ok(Number.isSafeInteger(tokensPerMonth) && tokensPerMonth >= 0);
+    assert.ok(
+      budgets.some((row) => row.poolKey === poolId || row.gatedPoolId === poolId),
+      poolId
+    );
+    const pair = JSON.stringify([poolId, gate]);
+    assert.ok(!pairs.has(pair), pair);
+    pairs.add(pair);
+  }
+  assert.deepEqual([...pairs], [...pairs].sort());
+});
+
+test("radar export accounts for social gated totals with gated rows and pool boosts", () => {
+  const { budgets, poolBoosts = [], totais } = runExport();
+  const gatedRowTokens = budgets
+    .filter((row) => row.gates?.length)
+    .reduce((sum, row) => sum + (row.gatedTokensPerMonth ?? row.monthlyTokens), 0);
+  const poolBoostTokens = poolBoosts.reduce((sum, boost) => sum + boost.tokensPerMonth, 0);
+  assert.ok(totais.socialGatedRecurringTokens <= gatedRowTokens + poolBoostTokens);
+
+  const { socialGatedRecurringTokens: socialRowTokens } = catalog.computeFreeModelTotals({
+    excludeTosAvoid: true,
+    entries: FREE_MODEL_BUDGETS.filter(catalog.isSocialGated),
+  });
+  const { socialGatedRecurringTokens } = catalog.computeFreeModelTotals({ excludeTosAvoid: true });
+  const socialBoostTokens = poolBoosts
+    .filter((boost) => catalog.SOCIAL_GATES.has(boost.gate))
+    .reduce((sum, boost) => sum + boost.tokensPerMonth, 0);
+  assert.equal(socialBoostTokens, socialGatedRecurringTokens - socialRowTokens);
+});
+
+test("radar export accepts a gated pool ID and rejects an unreferenced live pool", async () => {
+  const { buildExportPoolBoosts } = await import("../../scripts/release/radar-export.mjs");
+  const perModel = catalog
+    .computePublicFreeHeadline()
+    .perModel.filter((row) => row.poolKey === "xkiro-free");
+  const boost = catalog.FREE_TIER_BOOSTS["xkiro-free"];
+  assert.deepEqual(buildExportPoolBoosts(perModel, [{ gatedPoolId: "xkiro-free" }]), [
+    { poolId: "xkiro-free", gate: boost.gate, tokensPerMonth: boost.boostMonthlyTokens },
+  ]);
+  assert.throws(() => buildExportPoolBoosts(perModel, []), /poolBoosts: pool "xkiro-free"/);
+});
+
 test("radar export adds gate, quota unit, and evidence metadata to catalog budgets", () => {
   const { budgets } = runExport();
   assert.equal(budgets.length, FREE_MODEL_BUDGETS.length);

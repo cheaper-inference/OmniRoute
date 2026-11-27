@@ -26,8 +26,10 @@ import {
 } from "../../open-sse/config/freeModelCatalog.data.ts";
 import { RETIRED_FREE_ROWS } from "../../open-sse/config/freeModelCatalog.retired.data.ts";
 import {
+  FREE_TIER_BOOSTS,
   computePublicFreeHeadline,
   computeRowSumMirror,
+  getLiveFreePools,
   resolveFreeQuotaUnit,
 } from "../../open-sse/config/freeModelCatalog.ts";
 import { REGISTRY } from "../../open-sse/config/providerRegistry.ts";
@@ -110,16 +112,36 @@ export function buildExportBudgets(rows, evidenceEntries = evidencePolicy.eviden
   });
 }
 
+export function buildExportPoolBoosts(models, budgets) {
+  const livePools = getLiveFreePools(models);
+  const boosts = [];
+  // FREE_TIER_BOOSTS has one gate per pool, so sorting the pool IDs also orders the pairs.
+  for (const poolId of Object.keys(FREE_TIER_BOOSTS).sort()) {
+    const { gate, boostMonthlyTokens } = FREE_TIER_BOOSTS[poolId];
+    if (!livePools.has(poolId) || gate === undefined || gate === "deposit") continue;
+    if (!budgets.some((row) => row.poolKey === poolId || row.gatedPoolId === poolId)) {
+      throw new Error(
+        `poolBoosts: pool "${poolId}" has no matching poolKey or gatedPoolId in budgets`
+      );
+    }
+    boosts.push({ poolId, gate, tokensPerMonth: boostMonthlyTokens });
+  }
+  return boosts;
+}
+
 function main() {
   const saida = process.argv[2] || path.join(REPO, "export-omniroute.json");
   const geradoEm = new Date().toISOString();
+  const budgets = buildExportBudgets(FREE_MODEL_BUDGETS);
+  const totais = computePublicFreeHeadline();
   const dados = {
     exportVersion: 2,
     geradoEm,
     curatedAt: FREE_CATALOG_CURATED_AT,
-    budgets: buildExportBudgets(FREE_MODEL_BUDGETS),
-    totais: computePublicFreeHeadline(),
+    budgets,
+    totais,
     rowSum: computeRowSumMirror(),
+    poolBoosts: buildExportPoolBoosts(totais.perModel, budgets),
     retired: RETIRED_FREE_ROWS,
     // Só as chaves: o consumidor apenas pergunta "sabemos rotear este provider?".
     registry: Object.keys(REGISTRY).sort(),
