@@ -1,0 +1,1 @@
+- **chore(news):** the in-app announcement of the free Radar is now active; clients see it once this release reaches `main` ([#21463](https://github.com/cheaper-inference/OmniRoute/pull/21463))
