@@ -164,9 +164,9 @@ describe("member bars", () => {
         })}
       />
     );
-    const bar = screen.getByRole("progressbar", { name: "Usage split between 3 members" });
+    const bar = screen.getByRole("meter", { name: "Usage split between 3 members" });
     expect(segmentWidths(bar)).toEqual(["12%", "30%", "0%"]);
-    // The track is a named progress bar: the members' total against the window's limit.
+    // The track is a named meter: the members' total against the window's limit.
     expect(bar.getAttribute("aria-valuemin")).toBe("0");
     expect(bar.getAttribute("aria-valuemax")).toBe("1000");
     expect(bar.getAttribute("aria-valuenow")).toBe("420");
@@ -189,7 +189,7 @@ describe("member bars", () => {
         })}
       />
     );
-    const bar = screen.getByRole("progressbar", { name: "Usage split between 3 members" });
+    const bar = screen.getByRole("meter", { name: "Usage split between 3 members" });
     expect(segmentWidths(bar)).toEqual(["80%", "20%", "0%"]);
     expect(bar.getAttribute("aria-valuemax")).toBe("1500");
     expect(bar.getAttribute("aria-valuenow")).toBe("1500");
@@ -213,7 +213,7 @@ describe("member bars", () => {
         })}
       />
     );
-    expect(screen.getByRole("progressbar", { name: "Usage split between 4 members" })).toBeTruthy();
+    expect(screen.getByRole("meter", { name: "Usage split between 4 members" })).toBeTruthy();
     const items = within(screen.getByRole("list", { name: "Usage by member" }))
       .getAllByRole("listitem")
       .map((li) => li.textContent);
@@ -224,7 +224,7 @@ describe("member bars", () => {
 
   it("no slices, no member bar", () => {
     renderQuota(<PoolSection pool={parsedPool({ dimensions: [sharedDim()] })} />);
-    expect(screen.queryByRole("progressbar", { name: /Usage split between/ })).toBeNull();
+    expect(screen.queryByRole("meter", { name: /Usage split between/ })).toBeNull();
     expect(screen.queryByText("Usage by member")).toBeNull();
   });
 
