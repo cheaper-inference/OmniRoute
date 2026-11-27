@@ -53,6 +53,20 @@ const localizedTextMapSchema = z
     }
   });
 
+function rejectDuplicateIds(items: ReadonlyArray<{ id: string }>, context: z.RefinementCtx) {
+  const ids = new Set<string>();
+  for (const [index, item] of items.entries()) {
+    if (ids.has(item.id)) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `Duplicate announcement id: ${item.id}`,
+        path: ["items", index, "id"],
+      });
+    }
+    ids.add(item.id);
+  }
+}
+
 const newsFeedItemSchema = z
   .object({
     id: z.string().regex(NEWS_ID_PATTERN),
@@ -70,19 +84,7 @@ const newsFeedSchema = z
     items: z.array(newsFeedItemSchema).max(50),
   })
   .strict()
-  .superRefine(({ items }, context) => {
-    const ids = new Set<string>();
-    for (const [index, item] of items.entries()) {
-      if (ids.has(item.id)) {
-        context.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: `Duplicate announcement id: ${item.id}`,
-          path: ["items", index, "id"],
-        });
-      }
-      ids.add(item.id);
-    }
-  });
+  .superRefine(({ items }, context) => rejectDuplicateIds(items, context));
 
 const legacyActiveNewsSchema = z
   .object({
@@ -137,19 +139,7 @@ const severityFeedSchema = z
     items: z.array(severityFeedItemSchema).max(50),
   })
   .strict()
-  .superRefine(({ items }, context) => {
-    const ids = new Set<string>();
-    for (const [index, item] of items.entries()) {
-      if (ids.has(item.id)) {
-        context.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: `Duplicate announcement id: ${item.id}`,
-          path: ["items", index, "id"],
-        });
-      }
-      ids.add(item.id);
-    }
-  });
+  .superRefine(({ items }, context) => rejectDuplicateIds(items, context));
 
 export type NewsFeedItem = z.infer<typeof newsFeedItemSchema>;
 export type NewsSeverity = z.infer<typeof newsSeveritySchema>;
@@ -311,6 +301,26 @@ function resolveLocalizedText(item: NewsFeedItem, locale: string) {
   return (languageKey && item.text[languageKey]) || item.text.en;
 }
 
+function compareNewestFirst(left: NewsFeedItem, right: NewsFeedItem): number {
+  return (
+    Date.parse(right.publishedAt) - Date.parse(left.publishedAt) || left.id.localeCompare(right.id)
+  );
+}
+
+function toAnnouncement(item: NewsFeedItem, locale: string): NewsAnnouncement {
+  const text = resolveLocalizedText(item, locale);
+  return {
+    id: item.id,
+    active: true as const,
+    publishedAt: item.publishedAt,
+    title: text.title,
+    message: text.message,
+    ...(item.link ? { link: item.link } : {}),
+    ...(text.linkLabel ? { linkLabel: text.linkLabel } : {}),
+    icon: item.icon,
+  };
+}
+
 export function listActiveNews(
   payload: unknown,
   locale = "en",
@@ -321,24 +331,8 @@ export function listActiveNews(
 
   return parseNewsPayload(payload)
     .filter((item) => item.active && Date.parse(item.publishedAt) <= nowMs)
-    .sort(
-      (left, right) =>
-        Date.parse(right.publishedAt) - Date.parse(left.publishedAt) ||
-        left.id.localeCompare(right.id)
-    )
-    .map((item) => {
-      const text = resolveLocalizedText(item, locale);
-      return {
-        id: item.id,
-        active: true as const,
-        publishedAt: item.publishedAt,
-        title: text.title,
-        message: text.message,
-        ...(item.link ? { link: item.link } : {}),
-        ...(text.linkLabel ? { linkLabel: text.linkLabel } : {}),
-        icon: item.icon,
-      };
-    });
+    .sort(compareNewestFirst)
+    .map((item) => toAnnouncement(item, locale));
 }
 
 /** The closed v3 feed, or null when the payload is not a valid v3 feed. */
@@ -379,26 +373,12 @@ export function listVisibleNews(
 
   return parseVisibleItems(payload, options.severityEnabled)
     .filter((item) => isItemVisible(item, nowMs))
-    .sort(
-      (left, right) =>
-        Date.parse(right.publishedAt) - Date.parse(left.publishedAt) ||
-        left.id.localeCompare(right.id)
-    )
-    .map((item) => {
-      const text = resolveLocalizedText(item, locale);
-      return {
-        id: item.id,
-        active: true as const,
-        publishedAt: item.publishedAt,
-        title: text.title,
-        message: text.message,
-        ...(item.link ? { link: item.link } : {}),
-        ...(text.linkLabel ? { linkLabel: text.linkLabel } : {}),
-        icon: item.icon,
-        severity: item.severity,
-        ...(item.expiresAt ? { expiresAt: item.expiresAt } : {}),
-      };
-    });
+    .sort(compareNewestFirst)
+    .map((item) => ({
+      ...toAnnouncement(item, locale),
+      severity: item.severity,
+      ...(item.expiresAt ? { expiresAt: item.expiresAt } : {}),
+    }));
 }
 
 /** The announcement the banner shows: highest severity first, then newest, skipping dismissed ids. */
