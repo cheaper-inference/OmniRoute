@@ -521,12 +521,22 @@ status and, in live mode, one comment (in shadow mode it is only logged).
 
 Only the `derived-refresh-autoland` workflow may apply the `omni-queue` label automatically.
 It labels only the `chore/derived-refresh` robot PR in this repository, targeting the highest `release/vX.Y.Z` branch.
-Every changed path must be unprotected. Files must belong to a derived family or be `README.md` with only digits changed outside link and image targets (except same-document anchors), inline code and fenced code blocks, version numbers, and mixed alphanumeric tokens of at least 16 characters.
+The PR must contain exactly one commit whose only parent is the merge base.
+The commit must use the robot email for both the author and the committer.
+Every changed path must be unprotected.
+Changed files must match a derived output category, with an exception for `README.md`.
+Files listed only as companions are ineligible.
+Changes to `README.md` may update only digits.
+Link and image targets (except same-document anchors), inline code, fenced code blocks, version
+numbers, and mixed alphanumeric tokens of at least 16 characters must stay intact.
 Changes to donation addresses and referral links require explicit human approval to land.
 The robot publishes regenerated protected files such as `skills/*/SKILL.md` in a separate PR from `chore/derived-refresh-protected`. That PR requires the owner's explicit approval to land.
 Any open `release-freeze` issue blocks labeling. An open `base-red` issue blocks its target branch.
 `Gate / CI` and `Gate / Quality` must pass on the current head.
 The PR must be open and ready for review, with no queue or blocking label.
+The script reads the PR again immediately after labeling.
+It removes the label if the head or base branch changes, the PR closes, or that read fails.
+The workflow fails if that read or the removal fails.
 Every other label application requires the owner's approval for that PR.
 No other session, script or loop may apply the label on its own.
 

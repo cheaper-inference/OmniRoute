@@ -2,13 +2,14 @@
 import { execFileSync } from "node:child_process";
 import { parseArgs } from "node:util";
 
-import { categoryOf, loadFamilies, matchesAny } from "../check/check-pr-derived-paths.mjs";
+import { categoryOf, loadFamilies } from "../check/check-pr-derived-paths.mjs";
 import { isMainModule } from "../lib/is-main-module.mjs";
 import { isManagedBase, loadConfig } from "../merge-queue/config.mjs";
 import { isProtectedPath, isSha } from "../merge-queue/contracts.mjs";
 
 const REPOSITORY = "cheaper-inference/OmniRoute";
 const HEAD_BRANCH = "chore/derived-refresh";
+export const BOT_EMAIL = "41898282+github-actions[bot]@users.noreply.github.com";
 const RELEASE_BRANCH = /^release\/v\d+\.\d+\.\d+$/;
 const QUEUE_LABEL = "omni-queue";
 const DIGITS_ONLY_FILES = ["README.md"];
@@ -250,6 +251,8 @@ export function decideAutoland({
   files,
   digitsOnlyFiles = [],
   headSha,
+  prCommitCount,
+  comparison,
   checksHeadSha,
   checks,
   releaseFreezeOpen,
@@ -273,6 +276,26 @@ export function decideAutoland({
     reasons.push("wrong-base");
   }
 
+  const commits = comparison?.commits;
+  const commit = Array.isArray(commits) && commits.length === 1 ? commits[0] : undefined;
+  const mergeBaseSha = comparison?.merge_base_commit?.sha;
+  if (!commit || comparison.ahead_by !== 1 || commit.sha !== headSha || prCommitCount !== 1) {
+    reasons.push("not-single-commit");
+  } else if (
+    typeof mergeBaseSha !== "string" ||
+    !isSha(mergeBaseSha) ||
+    !Array.isArray(commit.parents) ||
+    commit.parents.length !== 1 ||
+    commit.parents[0]?.sha !== mergeBaseSha
+  ) {
+    reasons.push("commit-not-on-base");
+  } else if (
+    commit.commit?.author?.email !== BOT_EMAIL ||
+    commit.commit?.committer?.email !== BOT_EMAIL
+  ) {
+    reasons.push("non-robot-commit");
+  }
+
   if (!files.length) reasons.push("empty-diff");
   if (files.some((file) => DIGITS_ONLY_FILES.includes(file) && !digitsOnlyFiles.includes(file))) {
     reasons.push("readme-not-digits-only");
@@ -281,7 +304,7 @@ export function decideAutoland({
     files.some(
       (file) =>
         !DIGITS_ONLY_FILES.includes(file) &&
-        !families.some((family) => categoryOf(file, family) || matchesAny(file, family.companions))
+        !families.some((family) => categoryOf(file, family) !== null)
     )
   ) {
     reasons.push("non-derived-file");
@@ -370,6 +393,7 @@ function pullFields(pr) {
     author: pr.user?.login,
     labels: pr.labels.map(({ name }) => name),
     headSha: pr.head?.sha,
+    prCommitCount: pr.commits,
   };
 }
 
@@ -429,28 +453,39 @@ function main() {
       !entry.previous_filename &&
       entry.status === "modified"
   );
+  const baseSha = pr.base?.sha;
+  const headSha = pr.head?.sha;
+  const hasBaseSha = typeof baseSha === "string" && isSha(baseSha);
+  if (readme && !hasBaseSha) {
+    return report(number, { apply: false, reasons: ["base-readme-unavailable"] });
+  }
+  let comparison;
+  if (hasBaseSha && typeof headSha === "string" && isSha(headSha)) {
+    try {
+      // Two entries are enough to detect a non-singleton list, even on a paginated response.
+      comparison = read(
+        "compare the base and head commits",
+        `compare/${baseSha}...${headSha}?per_page=2`
+      );
+    } catch {
+      // Without a comparison neither the commit shape nor the README merge base can be verified.
+    }
+  }
+  if (!comparison || typeof comparison !== "object" || Array.isArray(comparison)) {
+    const reason = files.some((file) => DIGITS_ONLY_FILES.includes(file))
+      ? "readme-diff-base-unavailable"
+      : "commit-shape-unavailable";
+    return report(number, { apply: false, reasons: [reason] });
+  }
+
   const digitsOnlyFiles = [];
   if (readme) {
-    const baseSha = pr.base?.sha;
-    if (!isSha(baseSha))
-      return report(number, { apply: false, reasons: ["base-readme-unavailable"] });
     const base = readReadmeAt(read, raw, baseSha);
     if (base.reason) return report(number, { apply: false, reasons: [base.reason] });
     if (isDigitsOnlyPatch(readme.patch, readme, frozenReadmeLines(base.text))) {
       // PR hunks are relative to the merge base. Verify they address the same README on both bases.
-      let mergeBaseSha;
-      const headSha = pr.head?.sha;
-      if (isSha(headSha)) {
-        try {
-          mergeBaseSha = read(
-            "find the README patch merge base",
-            `compare/${baseSha}...${headSha}?per_page=1`
-          )?.merge_base_commit?.sha;
-        } catch {
-          // Without a merge base the hunk coordinates cannot be verified.
-        }
-      }
-      if (!isSha(mergeBaseSha)) {
+      const mergeBaseSha = comparison.merge_base_commit?.sha;
+      if (typeof mergeBaseSha !== "string" || !isSha(mergeBaseSha)) {
         return report(number, { apply: false, reasons: ["readme-diff-base-unavailable"] });
       }
       if (mergeBaseSha !== baseSha) {
@@ -519,6 +554,7 @@ function main() {
     latestRelease,
     files,
     digitsOnlyFiles,
+    comparison,
     checksHeadSha: fields.headSha,
     checks,
     releaseFreezeOpen: issues.some((issue) => issue.labels.includes("release-freeze")),
@@ -553,6 +589,52 @@ function main() {
     ["pr", "edit", String(number), "--repo", REPOSITORY, "--add-label", QUEUE_LABEL],
     process.env
   );
+  // The label approves whatever head the pull request has now. Withdraw it unless that head is the
+  // examined one, including when the pull request cannot be read back.
+  const removeLabel = () => {
+    try {
+      gh(
+        "remove the queue label",
+        ["pr", "edit", String(number), "--repo", REPOSITORY, "--remove-label", QUEUE_LABEL],
+        process.env
+      );
+    } catch {
+      throw new AutolandError(
+        `The omni-queue label may remain on an unexamined head for PR #${number}.`
+      );
+    }
+  };
+  let labeled;
+  try {
+    labeled = read("verify the pull request after labeling", `pulls/${number}`);
+  } catch {
+    // Handled below as an unreadable pull request.
+  }
+  if (
+    typeof labeled?.head?.sha !== "string" ||
+    !isSha(labeled.head.sha) ||
+    !["open", "closed"].includes(labeled.state) ||
+    typeof labeled.base?.ref !== "string" ||
+    !labeled.base.ref
+  ) {
+    removeLabel();
+    throw new AutolandError(
+      `Could not verify PR #${number} after labeling. Removed the omni-queue label.`
+    );
+  }
+  if (
+    labeled.head.sha !== fields.headSha ||
+    labeled.state !== "open" ||
+    labeled.base.ref !== fields.baseBranch
+  ) {
+    removeLabel();
+    return report(
+      number,
+      { apply: false, reasons: ["head-changed-after-label"] },
+      `::warning::Removed the omni-queue label from PR #${number}. ` +
+        "The head or base branch changed, or the PR closed after labeling."
+    );
+  }
   return report(number, final, "Applied the omni-queue label.");
 }
 
