@@ -68,6 +68,7 @@
     "typescript": "^5.9.3"
   },
   "overrides": {
+    "effect": "4.0.0-beta.107",
     "esbuild": "^0.28.1",
     "toml": "^5.0.1",
     "zod": "$zod"

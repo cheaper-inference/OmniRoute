@@ -383,8 +383,8 @@ export const CODE_SCAN_ROOTS = [
 
 const CODE_ENV_REF = /process\.env\.([A-Z][A-Z0-9_]+)/g;
 
-// Coverage inputs are scoped to the files that implement the producer protocol.
-const CI_COVERAGE_INPUTS = new Map([
+// CI inputs are scoped to the scripts that consume them.
+const CI_SCRIPT_INPUTS = new Map([
   [
     path.join("scripts", "ci", "atomic-tsx-cache.mjs"),
     new Set(["OMNIROUTE_CI_SYNC_TSX_CACHE", "TMPDIR"]),
@@ -395,6 +395,11 @@ const CI_COVERAGE_INPUTS = new Map([
     new Set(["NODE_V8_COVERAGE", "OMNIROUTE_CI_SYNC_TSX_CACHE"]),
   ],
   [path.join("scripts", "perf", "messages-route-memory-profile.ts"), new Set(["NODE_V8_COVERAGE"])],
+  // R1 uses a repository Actions variable and a read-only runner token.
+  [
+    path.join("scripts", "release", "derived-refresh-autoland.mjs"),
+    new Set(["DERIVED_REFRESH_AUTOLAND", "DERIVED_REFRESH_READ_TOKEN"]),
+  ],
 ]);
 
 /**
@@ -423,10 +428,10 @@ export function scanCodeVars({ cwd, roots = CODE_SCAN_ROOTS } = {}) {
       return;
     }
     if (text.includes("\0")) return;
-    const coverageInputs = CI_COVERAGE_INPUTS.get(path.relative(repoRoot, file));
+    const ciInputs = CI_SCRIPT_INPUTS.get(path.relative(repoRoot, file));
     for (const match of text.matchAll(CODE_ENV_REF)) {
       const name = match[1];
-      if (!coverageInputs?.has(name)) vars.add(name);
+      if (!ciInputs?.has(name)) vars.add(name);
     }
   };
   const walk = (dir) => {

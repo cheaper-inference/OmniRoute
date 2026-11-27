@@ -1,0 +1,1 @@
+- **fix(sse):** Use the shared fingerprint helper for Codex prompt-cache anchors while preserving existing cache keys.

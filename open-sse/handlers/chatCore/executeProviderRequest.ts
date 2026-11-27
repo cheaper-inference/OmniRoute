@@ -60,6 +60,10 @@ import {
   resolveRequestQueueMaxWaitMs,
 } from "../../services/rateLimitManager.ts";
 import { acquireMany as acquireConcurrencyGates } from "../../services/accountSemaphore.ts";
+import {
+  resolveConnectionConcurrencyCap,
+  recordAdaptiveConnectionResponse,
+} from "../../services/adaptiveConnectionConcurrency.ts";
 import { rethrowAdmissionError, remainingQueueBudgetMs } from "./queueBudget.ts";
 import { deduplicate } from "../../services/requestDedup.ts";
 import { isLocalStreamLifecycleError } from "@/shared/utils/circuitBreaker";
@@ -161,6 +165,7 @@ export type ExecuteProviderRequestDeps = {
   settings: Record<string, unknown> | null | undefined;
   toolDisclosure?: ToolDisclosureConfig | null;
   skipUpstreamRetry: boolean;
+  nonReplayableRequest?: boolean;
   requestUpstreamStartTimeoutMs?: number;
   stream: boolean;
   streamController: { signal: AbortSignal };
@@ -223,6 +228,7 @@ export async function executeProviderRequest(
     resilienceSettings,
     settings,
     skipUpstreamRetry,
+    nonReplayableRequest = false,
     requestUpstreamStartTimeoutMs,
     stream,
     streamController,
@@ -318,7 +324,7 @@ export async function executeProviderRequest(
           const fencedCredentialsRefreshed: typeof onCredentialsRefreshed = onCredentialsRefreshed
             ? (next) => runWithCodexConnectionFence(ownerFence, () => onCredentialsRefreshed(next))
             : undefined;
-          const accountSemaphoreMaxConcurrency = resolveAccountSemaphoreMaxConcurrency(
+          const configuredAccountConcurrency = resolveAccountSemaphoreMaxConcurrency(
             execCreds,
             typeof attemptConnectionId === "string" && isRateLimitEnabled(attemptConnectionId)
           );
@@ -336,6 +342,16 @@ export async function executeProviderRequest(
             credentials: execCreds,
           });
           const canonicalProviderKey = resolveProviderId(String(provider).trim().toLowerCase());
+          const providerDefaultConcurrency =
+            resilienceSettings.providerQuotaOverrides[canonicalProviderKey]
+              ?.defaultConnectionConcurrency;
+          const accountSemaphoreMaxConcurrency = accountSemaphoreKey
+            ? resolveConnectionConcurrencyCap(
+                configuredAccountConcurrency,
+                providerDefaultConcurrency,
+                accountSemaphoreKey
+              )
+            : configuredAccountConcurrency;
           const providerConcurrency =
             resilienceSettings.providerQuotaOverrides[canonicalProviderKey]?.providerConcurrency ??
             0;
@@ -426,6 +442,7 @@ export async function executeProviderRequest(
                         clientResponseFormat,
                         onCredentialsRefreshed: fencedCredentialsRefreshed,
                         skipUpstreamRetry,
+                        nonReplayableRequest,
                         contextEditing: { enabled: contextEditingEnabled },
                         correlationId,
                       });
@@ -441,6 +458,9 @@ export async function executeProviderRequest(
               }
             );
             const res = normalizeExecutorResult(rawExecutorResult);
+            if (configuredAccountConcurrency === -1 && accountSemaphoreKey) {
+              recordAdaptiveConnectionResponse(accountSemaphoreKey, res.response.status);
+            }
             bindCodexResponseFence(res.response, ownerFence);
             res.response = inheritCodexResponseFence(
               res.response,
@@ -637,6 +657,7 @@ export async function executeProviderRequest(
                             clientResponseFormat,
                             onCredentialsRefreshed: fencedCredentialsRefreshed,
                             skipUpstreamRetry,
+                            nonReplayableRequest,
                             contextEditing: { enabled: contextEditingEnabled },
                             correlationId,
                           });

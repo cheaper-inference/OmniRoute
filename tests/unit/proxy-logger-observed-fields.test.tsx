@@ -16,6 +16,8 @@ beforeAll(() => {
 });
 
 vi.mock("next-intl", () => ({
+  // ProxyLogger formats the Time column with the dashboard locale (KEA-9522).
+  useLocale: () => "en",
   // The family label is a single parameterized key ("IPv{version}"): the mock
   // renders the key and its argument so the assertion can pin both.
   useTranslations: () => (key: string, args?: Record<string, unknown>) =>

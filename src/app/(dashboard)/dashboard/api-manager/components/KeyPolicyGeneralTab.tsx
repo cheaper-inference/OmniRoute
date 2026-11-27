@@ -1,6 +1,7 @@
 "use client";
 
 import { Checkbox, CheckboxGroup } from "@omniroute/ui-kit/checkbox";
+import Card from "@/shared/components/Card";
 import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
 import Input from "@/shared/components/Input";
@@ -16,7 +17,7 @@ export default function KeyPolicyGeneralTab() {
   return (
     <div className="flex flex-col gap-4">
       {/* Lifecycle: Active & Banned */}
-      <div className="flex items-start justify-between gap-3 p-3.5 rounded-lg border border-border bg-surface/40">
+      <Card.Section className="flex items-start justify-between gap-3">
         <div className="flex flex-col gap-1">
           <p className="text-sm font-medium text-text-main">{t("keyActive")}</p>
           <p className="text-xs text-text-muted">{t("keyActiveDesc")}</p>
@@ -27,7 +28,7 @@ export default function KeyPolicyGeneralTab() {
           onChange={() => updateState((p) => ({ ...p, isActive: !p.isActive }))}
           ariaLabel={t("keyActive")}
         />
-      </div>
+      </Card.Section>
 
       <div className="flex items-start justify-between gap-3 p-3.5 rounded-lg border border-error/20 bg-error/5">
         <div className="flex flex-col gap-1">
@@ -46,7 +47,7 @@ export default function KeyPolicyGeneralTab() {
       <RelativeExpiryFields />
 
       {/* Management Access */}
-      <div className="flex items-start justify-between gap-3 p-3.5 rounded-lg border border-border bg-surface/40">
+      <Card.Section className="flex items-start justify-between gap-3">
         <div className="flex flex-col gap-1">
           <p className="text-sm font-medium text-text-main">{t("managementAccess")}</p>
           <p className="text-xs text-text-muted">{t("managementAccessDesc")}</p>
@@ -57,7 +58,7 @@ export default function KeyPolicyGeneralTab() {
           onChange={() => updateState((p) => ({ ...p, manageEnabled: !p.manageEnabled }))}
           ariaLabel={t("managementAccess")}
         />
-      </div>
+      </Card.Section>
 
       {/* Self-service Visibility */}
       <McpPermissionControls
@@ -82,7 +83,7 @@ export default function KeyPolicyGeneralTab() {
 function SelfServicePermissions() {
   const { t, formState, updateState } = useKeyPolicyEditor();
   return (
-    <div className="flex flex-col gap-3 p-3.5 rounded-lg border border-border bg-surface/40">
+    <Card.Section className="flex flex-col gap-3">
       <div className="flex flex-col gap-1">
         <p className="text-sm font-medium text-text-main">{t("selfServiceVisibility")}</p>
         <p className="text-xs text-text-muted">{t("selfServiceVisibilityDesc")}</p>
@@ -123,7 +124,7 @@ function SelfServicePermissions() {
           ariaLabel={t("sharedAccountQuotaVisibility")}
         />
       </div>
-    </div>
+    </Card.Section>
   );
 }
 
@@ -219,7 +220,7 @@ function ExpiryPolicy() {
 function RelativeExpiryFields() {
   const { t, formState, updateState } = useKeyPolicyEditor();
   return (
-    <div className="flex flex-col gap-3 p-3.5 rounded-lg border border-border bg-surface/40">
+    <Card.Section className="flex flex-col gap-3">
       <ExpiryPolicy />
       {formState.expiryMode === "relative" && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-border/50">
@@ -247,7 +248,7 @@ function RelativeExpiryFields() {
           </Select>
         </div>
       )}
-    </div>
+    </Card.Section>
   );
 }
 
@@ -287,7 +288,7 @@ function ExtraScopeChips() {
 function ExclusiveLeaseScope() {
   const { t, formState, updateState, newExtraScope, setNewExtraScope } = useKeyPolicyEditor();
   return (
-    <div className="flex flex-col gap-2 p-3.5 rounded-lg border border-border bg-surface/40">
+    <Card.Section className="flex flex-col gap-2">
       <div className="flex items-center justify-between gap-3">
         <div className="flex flex-col gap-0.5">
           <p className="text-sm font-medium text-text-main">{t("exclusiveLease")}</p>
@@ -335,14 +336,14 @@ function ExclusiveLeaseScope() {
           {t("templateAddScope")}
         </Button>
       </div>
-    </div>
+    </Card.Section>
   );
 }
 
 function EndpointRestrictions() {
   const { t, formState, updateState } = useKeyPolicyEditor();
   return (
-    <div className="flex flex-col gap-3 p-3.5 rounded-lg border border-border bg-surface/40">
+    <Card.Section className="flex flex-col gap-3">
       <EndpointAllowlist />
       {!formState.allowAllEndpoints && (
         <CheckboxGroup
@@ -363,12 +364,12 @@ function EndpointRestrictions() {
                 }))
               }
               label={<span className="text-xs font-medium">{cat.label}</span>}
-              description={<span className="text-[10px]">{cat.description}</span>}
+              description={<span className="text-xs">{cat.description}</span>}
             />
           ))}
         </CheckboxGroup>
       )}
-    </div>
+    </Card.Section>
   );
 }
 
@@ -407,7 +408,7 @@ function IpRestrictions() {
   const { t, formState, updateState, allProxies } = useKeyPolicyEditor();
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-      <div className="flex flex-col gap-2 p-3.5 rounded-lg border border-border bg-surface/40">
+      <Card.Section className="flex flex-col gap-2">
         <p className="text-sm font-medium text-text-main">{t("templateIpAllowlist")}</p>
         <p className="text-xs text-text-muted">{t("templateIpAllowlistDesc")}</p>
         <AddIpRestriction />
@@ -438,9 +439,9 @@ function IpRestrictions() {
             ))}
           </div>
         )}
-      </div>
+      </Card.Section>
 
-      <div className="flex flex-col gap-2 p-3.5 rounded-lg border border-border bg-surface/40">
+      <Card.Section className="flex flex-col gap-2">
         <p className="text-sm font-medium text-text-main">{t("templateBoundProxy")}</p>
         <p className="text-xs text-text-muted">{t("templateBoundProxyDesc")}</p>
         <Input
@@ -458,7 +459,7 @@ function IpRestrictions() {
             />
           ))}
         </datalist>
-      </div>
+      </Card.Section>
     </div>
   );
 }

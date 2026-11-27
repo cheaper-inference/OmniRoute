@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import React from "react";
+import { createPortal } from "react-dom";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { chooseKitSelectValue, kitSelectValue } from "../../../helpers/kitSelect";
@@ -43,9 +44,78 @@ describe("DataTable family adapters", () => {
     const rows = screen.getAllByRole("row").slice(1);
     expect(rows[1].getAttribute("aria-selected")).toBe("true");
     expect(rows[1].getAttribute("data-state")).toBe("selected");
-    expect(rows[0].className).toContain("cursor-pointer");
+    // In a table with a selection every other row states that it is not the selected one.
+    expect(rows[0].getAttribute("aria-selected")).toBe("false");
+    expect(rows[0].hasAttribute("data-state")).toBe(false);
+    // The kit marks an activatable row (pointer cursor, focus ring) and makes it a tab stop.
+    expect(rows[0].hasAttribute("data-interactive")).toBe(true);
+    expect(rows[0].tabIndex).toBe(0);
     fireEvent.click(rows[0]);
     expect(onRowClick).toHaveBeenCalledWith(data[0]);
+  });
+
+  it("DataTable rows are the kit activatable row: keys, nested controls, selection, portals", () => {
+    const onRowClick = vi.fn();
+    const onDelete = vi.fn();
+    render(
+      <DataTable
+        columns={columns}
+        data={data}
+        renderCell={(r, c) =>
+          c.key === "status" ? (
+            <>
+              <button type="button" onClick={onDelete}>
+                Delete {String(r.name)}
+              </button>
+              {/* A panel the row opened (a menu, a dialog): React bubbles its events to the row. */}
+              {createPortal(<div data-testid={`panel-${r.id}`}>panel</div>, document.body)}
+            </>
+          ) : (
+            String(r[c.key])
+          )
+        }
+        onRowClick={onRowClick}
+      />
+    );
+    const rows = screen.getAllByRole("row").slice(1);
+    // No `selectedId`: selection does not apply, so no row states it.
+    expect(rows[0].hasAttribute("aria-selected")).toBe(false);
+
+    fireEvent.keyDown(rows[0], { key: "Enter" });
+    fireEvent.keyDown(rows[1], { key: " " });
+    expect(onRowClick.mock.calls).toEqual([[data[0]], [data[1]]]);
+    onRowClick.mockClear();
+
+    // A control inside the row keeps its own click and keys.
+    const del = screen.getByRole("button", { name: "Delete openai" });
+    fireEvent.click(del);
+    fireEvent.keyDown(del, { key: "Enter" });
+    expect(onDelete).toHaveBeenCalledOnce();
+    expect(onRowClick).not.toHaveBeenCalled();
+
+    // A click inside a portal the row rendered is not a click on the row.
+    fireEvent.click(screen.getByTestId("panel-1"));
+    expect(onRowClick).not.toHaveBeenCalled();
+
+    // A drag that selected text in the row ends with a click: it must not open the row.
+    const cell = rows[0].querySelector("td")!;
+    const range = document.createRange();
+    range.selectNodeContents(cell);
+    const selection = document.getSelection()!;
+    selection.removeAllRanges();
+    selection.addRange(range);
+    fireEvent.click(cell);
+    expect(onRowClick).not.toHaveBeenCalled();
+    selection.removeAllRanges();
+    fireEvent.click(cell);
+    expect(onRowClick).toHaveBeenCalledWith(data[0]);
+  });
+
+  it("DataTable rows without onRowClick stay passive", () => {
+    render(<DataTable columns={columns} data={data} renderCell={(r, c) => String(r[c.key])} />);
+    const row = screen.getAllByRole("row")[1];
+    expect(row.hasAttribute("tabindex")).toBe(false);
+    expect(row.hasAttribute("data-interactive")).toBe(false);
   });
 
   it("DataTable shows the loading region and the empty state", () => {

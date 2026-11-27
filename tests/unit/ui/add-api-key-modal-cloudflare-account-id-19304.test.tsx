@@ -9,6 +9,8 @@ import { describe, it, expect, vi, afterEach } from "vitest";
 
 vi.mock("next-intl", () => ({
   useTranslations: () => (key: string) => key,
+  // The NumberInput adapter formats numbers in the app locale.
+  useLocale: () => "en",
 }));
 
 const { default: AddApiKeyModal } =

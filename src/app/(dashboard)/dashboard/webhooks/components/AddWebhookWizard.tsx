@@ -313,6 +313,7 @@ export function AddWebhookWizard({
           )}
           {step === 3 && (
             <Step3EventsAndTest
+              isCustom={state.kind === "custom"}
               webhookId={createdId ?? undefined}
               events={state.events}
               enabled={state.enabled}

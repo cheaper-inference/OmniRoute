@@ -6,6 +6,7 @@ import Badge from "@/shared/components/Badge";
 import Button from "@/shared/components/Button";
 import { cn } from "@/shared/utils/cn";
 import type { JSX } from "react";
+import IconChip from "@/shared/components/IconChip";
 
 export interface OmniSkill {
   id: string;
@@ -54,13 +55,9 @@ export function OmniSkillCard({ skill, selected, onClick }: OmniSkillCardProps):
       )}
     >
       <div className="flex items-start gap-2">
-        <div
-          className={`flex items-center justify-center size-8 rounded-md shrink-0 ${
-            selected ? "bg-primary/20" : "bg-surface-2"
-          }`}
-        >
-          <Icon name="auto_fix_high" size={18} className="text-text-muted" />
-        </div>
+        <IconChip tone={selected ? "accent" : "neutral"} size="sm" className="shrink-0">
+          <Icon name="auto_fix_high" />
+        </IconChip>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5 flex-wrap">
             <span className="text-sm font-semibold text-text-main truncate">{skill.name}</span>
@@ -84,7 +81,7 @@ export function OmniSkillCard({ skill, selected, onClick }: OmniSkillCardProps):
         </div>
         <div className="flex items-center gap-1.5 shrink-0">
           <span className={`inline-block size-2 rounded-full ${modeDot}`} />
-          <span className={`text-[10px] font-medium ${modeColor}`}>
+          <span className={`text-3xs font-medium ${modeColor}`}>
             {t(
               effectiveMode === "on" ? "onMode" : effectiveMode === "auto" ? "autoMode" : "offMode"
             )}

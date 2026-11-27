@@ -1,3 +1,4 @@
+import { sumBuyerCostMicro } from "../../utils/buyerCostMicro.ts";
 import type { HttpAttemptSelection } from "../../utils/providerHttpAttempts.ts";
 /**
  * Request-level finalization for non-streaming chat.
@@ -121,6 +122,7 @@ export async function finalizeToolLoopError(input: {
       input.persistAttemptLogs({
         upstreamHttpSelection: input.upstreamHttpSelection ?? null,
         status: err.status,
+        buyerCostMicro: sumBuyerCostMicro(input.loop.receipts),
         error: err.error || "Provider request failed",
         providerRequest: input.providerRequest,
         clientResponse: {

@@ -1,5 +1,9 @@
 import { CREDITS_EXHAUSTED_SIGNALS } from "./creditExhaustionSignals.ts";
 import { isCreditsExhaustedWithSharedWallet } from "./sharedWalletCredits.ts";
+import {
+  isAnthropicAccountCreditExhausted,
+  isAnthropicCreditProvider,
+} from "./anthropicAccountCredit.ts";
 
 // A 400 is the status upstreams use to reject the CALLER's input, and many of
 // them quote that input back in error.message ("Unknown parameter: '<x>'",
@@ -74,8 +78,11 @@ export function quotaTextSignalCountsForStatus(
   structured?: unknown
 ): boolean {
   if (status !== 400) return true;
+  const text = String(errorText || "");
   return (
-    allowsMessageOnlyCredit400(provider) || hasCreditErrorCode(String(errorText || ""), structured)
+    allowsMessageOnlyCredit400(provider) ||
+    hasCreditErrorCode(text, structured) ||
+    (isAnthropicCreditProvider(provider) && isAnthropicAccountCreditExhausted(text))
   );
 }
 

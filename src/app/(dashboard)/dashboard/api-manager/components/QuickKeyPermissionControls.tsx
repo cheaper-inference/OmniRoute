@@ -1,5 +1,6 @@
 "use client";
 import { useTranslations } from "next-intl";
+import Card from "@/shared/components/Card";
 import Toggle from "@/shared/components/Toggle";
 import type { useKeyTemplateCreation } from "../useKeyTemplateCreation";
 import McpPermissionControls from "./McpPermissionControls";
@@ -15,7 +16,7 @@ export default function QuickKeyPermissionControls({
   const t = useTranslations("apiManager");
   return (
     <>
-      <div className="flex items-start justify-between gap-3 p-3 rounded-lg border border-border bg-surface/40">
+      <Card.Section className="flex items-start justify-between gap-3">
         <div className="flex flex-col gap-1">
           <p className="text-sm font-medium text-text-main">{t("managementAccess")}</p>
           <p className="text-xs text-text-muted">{t("managementAccessDesc")}</p>
@@ -31,7 +32,7 @@ export default function QuickKeyPermissionControls({
           }}
           ariaLabel={t("managementAccess")}
         />
-      </div>
+      </Card.Section>
       <McpPermissionControls
         state={draft.createKeyFormState}
         disabled={disabled}

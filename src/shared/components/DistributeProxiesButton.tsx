@@ -53,7 +53,7 @@ export default function DistributeProxiesButton({
 
   const isDisabled = disabled || state === "distributing";
 
-  const sizeClasses = size === "sm" ? "h-7 px-2 py-1 text-[11px]" : "px-3 py-1.5 text-xs";
+  const sizeClasses = size === "sm" ? "h-7 px-2 py-1 text-2xs" : "px-3 py-1.5 text-xs";
 
   const stateClasses =
     state === "distributing"

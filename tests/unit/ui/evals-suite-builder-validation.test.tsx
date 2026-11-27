@@ -4,10 +4,17 @@
 //   run target, then to its default), and the request omits `model` rather than sending "".
 // - Missing required fields are flagged inline next to the field and the first one is focused;
 //   the errors are no longer toast-only.
+// KEA-9519: Suite Name, Description and Case Name carry the save route's length limits
+// (formLimits.ts): a value over the limit is flagged as it is typed and the save sends nothing.
 import React from "react";
 import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import EvalsTab from "@/app/(dashboard)/dashboard/usage/components/EvalsTab";
+import {
+  EVAL_CASE_NAME_MAX_LENGTH,
+  EVAL_SUITE_DESCRIPTION_MAX_LENGTH,
+  EVAL_SUITE_NAME_MAX_LENGTH,
+} from "@/shared/constants/formLimits";
 import { useNotificationStore } from "@/store/notificationStore";
 
 beforeAll(() => {
@@ -166,5 +173,68 @@ describe("Quality › New suite (KEA-9388, KEA-9389)", () => {
     // A system prompt alone satisfies "at least one message".
     type(field(dialog, /^System Prompt/), "Be brief");
     expect(alerts(dialog)).toEqual(["Expected Value is required"]);
+  });
+});
+
+describe("Quality › New suite length limits (KEA-9519)", () => {
+  it("flags a suite name over the limit as it is typed, sends nothing and focuses it", async () => {
+    const dialog = await openBuilder();
+    fillRequired(dialog);
+    const name = field(dialog, /^Suite Name/);
+    type(name, "s".repeat(EVAL_SUITE_NAME_MAX_LENGTH + 1));
+
+    // Shown while typing, before any save attempt.
+    expect(alerts(dialog)).toEqual(["Suite Name can have at most 200 characters (currently 201)"]);
+    expect(name.getAttribute("aria-invalid")).toBe("true");
+
+    fireEvent.click(button(dialog, "Create Suite"));
+
+    await waitFor(() => expect(document.activeElement).toBe(name));
+    expect(saves()).toHaveLength(0);
+    expect(toasts()).toEqual([]);
+  });
+
+  it("accepts a suite name exactly at the limit, measured after trimming", async () => {
+    const dialog = await openBuilder();
+    fillRequired(dialog);
+    const atLimit = "s".repeat(EVAL_SUITE_NAME_MAX_LENGTH);
+    type(field(dialog, /^Suite Name/), `  ${atLimit}  `);
+    expect(alerts(dialog)).toEqual([]);
+
+    fireEvent.click(button(dialog, "Create Suite"));
+
+    await waitFor(() => expect(saves()).toHaveLength(1));
+    expect(JSON.parse(String(saves()[0][1]?.body)).name).toBe(atLimit);
+  });
+
+  it("flags a description over the limit and accepts one at the limit", async () => {
+    const dialog = await openBuilder();
+    fillRequired(dialog);
+    const description = field(dialog, /^Description/);
+    type(description, "d".repeat(EVAL_SUITE_DESCRIPTION_MAX_LENGTH + 1));
+    expect(alerts(dialog)).toEqual([
+      "Description can have at most 2,000 characters (currently 2,001)",
+    ]);
+
+    fireEvent.click(button(dialog, "Create Suite"));
+    await waitFor(() => expect(document.activeElement).toBe(description));
+    expect(saves()).toHaveLength(0);
+
+    type(description, "d".repeat(EVAL_SUITE_DESCRIPTION_MAX_LENGTH));
+    expect(alerts(dialog)).toEqual([]);
+    fireEvent.click(button(dialog, "Create Suite"));
+    await waitFor(() => expect(saves()).toHaveLength(1));
+  });
+
+  it("flags a case name over the limit and sends nothing", async () => {
+    const dialog = await openBuilder();
+    fillRequired(dialog);
+    const caseName = field(dialog, /^Case Name/);
+    type(caseName, "c".repeat(EVAL_CASE_NAME_MAX_LENGTH + 1));
+    expect(alerts(dialog)).toEqual(["Case Name can have at most 200 characters (currently 201)"]);
+
+    fireEvent.click(button(dialog, "Create Suite"));
+    await waitFor(() => expect(document.activeElement).toBe(caseName));
+    expect(saves()).toHaveLength(0);
   });
 });

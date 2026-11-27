@@ -63,7 +63,7 @@ function formatCost(usd: number): string {
   return `$${usd.toFixed(2)}`;
 }
 
-const CELL = "px-1 py-0.5 text-right";
+const CELL = "px-1 py-0.5";
 
 export default function CursorModelUsageTable({ rows }: { rows: unknown }) {
   const t = useTranslations("usage");
@@ -76,26 +76,37 @@ export default function CursorModelUsageTable({ rows }: { rows: unknown }) {
       data-testid="cursor-model-usage"
       className="flex flex-col gap-1 border-t border-border/40 pt-2"
     >
-      <div className="flex items-baseline justify-between gap-2 text-[10px] text-text-muted">
-        <span className="font-medium uppercase tracking-wide">
+      <div className="flex items-baseline justify-between gap-2 text-3xs text-text-muted">
+        <span className="ci-eyebrow" data-size="3xs" data-weight="medium">
           {tr("cursorModelUsageTitle", "API tokens (this cycle)")}
         </span>
         <span className="italic">{tr("cursorModelUsageBilledHint", "Billed by Cursor")}</span>
       </div>
       <Table
-        containerClassName="overflow-x-auto rounded-none border-0"
-        className="w-full border-collapse text-[10px] tabular-nums"
+        variant="plain"
+        containerClassName="overflow-x-auto"
+        className="w-full border-collapse text-3xs tabular-nums"
         persistentScrollbars={false}
         scrollLabel={tr("cursorModelUsageTitle", "API tokens (this cycle)")}
       >
         <TableHeader>
-          <TableRow className="text-left text-text-muted">
+          <TableRow className="text-text-muted">
             <TableHead className="px-1 py-0.5">{tr("cursorModelUsageModel", "Model")}</TableHead>
-            <TableHead className={CELL}>{tr("cursorModelUsageInput", "In")}</TableHead>
-            <TableHead className={CELL}>{tr("cursorModelUsageOutput", "Out")}</TableHead>
-            <TableHead className={CELL}>{tr("cursorModelUsageCacheRead", "Cache R")}</TableHead>
-            <TableHead className={CELL}>{tr("cursorModelUsageCacheWrite", "Cache W")}</TableHead>
-            <TableHead className={CELL}>{tr("cursorModelUsageCost", "Cost")}</TableHead>
+            <TableHead numeric className={CELL}>
+              {tr("cursorModelUsageInput", "In")}
+            </TableHead>
+            <TableHead numeric className={CELL}>
+              {tr("cursorModelUsageOutput", "Out")}
+            </TableHead>
+            <TableHead numeric className={CELL}>
+              {tr("cursorModelUsageCacheRead", "Cache R")}
+            </TableHead>
+            <TableHead numeric className={CELL}>
+              {tr("cursorModelUsageCacheWrite", "Cache W")}
+            </TableHead>
+            <TableHead numeric className={CELL}>
+              {tr("cursorModelUsageCost", "Cost")}
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -104,19 +115,21 @@ export default function CursorModelUsageTable({ rows }: { rows: unknown }) {
               <TableCell className="max-w-[8rem] truncate px-1 py-0.5" title={row.model}>
                 {row.model}
               </TableCell>
-              <TableCell className={`${CELL} text-text-muted`}>
+              <TableCell numeric className={`${CELL} text-text-muted`}>
                 {formatTokens(row.inputTokens)}
               </TableCell>
-              <TableCell className={`${CELL} text-text-muted`}>
+              <TableCell numeric className={`${CELL} text-text-muted`}>
                 {formatTokens(row.outputTokens)}
               </TableCell>
-              <TableCell className={`${CELL} text-text-muted`}>
+              <TableCell numeric className={`${CELL} text-text-muted`}>
                 {formatTokens(row.cacheReadTokens)}
               </TableCell>
-              <TableCell className={`${CELL} text-text-muted`}>
+              <TableCell numeric className={`${CELL} text-text-muted`}>
                 {formatTokens(row.cacheWriteTokens)}
               </TableCell>
-              <TableCell className={CELL}>{formatCost(row.costUsd)}</TableCell>
+              <TableCell numeric className={CELL}>
+                {formatCost(row.costUsd)}
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>

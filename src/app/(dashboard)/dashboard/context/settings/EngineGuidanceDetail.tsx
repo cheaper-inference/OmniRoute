@@ -1,5 +1,6 @@
 "use client";
 
+import Card from "@/shared/components/Card";
 // EngineGuidanceDetail — per-engine expandable guidance block for CompressionPanel
 // (#7530). Surfaces the `guidance` metadata from engineCatalog.ts (tradeoffs, lossy
 // flag → "safe default" badge, cache impact) so operators can see quality/latency
@@ -47,26 +48,26 @@ export default function EngineGuidanceDetail({
             size="sm"
             variant="success"
             data-testid={`engine-safe-default-${id}`}
-            className="text-[10px] uppercase tracking-wider"
+            className="uppercase tracking-wider"
           >
             {t("compressionGuidanceSafeDefault")}
           </Badge>
         )}
         <Button
           variant="ghost"
-          size="sm"
+          size="2xs"
           data-testid={`engine-guidance-toggle-${id}`}
           onClick={onToggle}
           aria-expanded={expanded}
-          className="h-6 min-h-6 px-1.5 text-[10px] uppercase tracking-wider text-primary"
+          className="uppercase text-primary"
         >
           {expanded ? t("compressionGuidanceHide") : t("compressionGuidanceShow")}
         </Button>
       </div>
       {expanded && (
-        <div
+        <Card.Section
           data-testid={`engine-guidance-detail-${id}`}
-          className="rounded border border-border bg-bg-subtle p-2 text-xs text-text-muted"
+          className="text-xs text-text-muted"
         >
           <p>{guidance.tradeoffs}</p>
           <p className="mt-1">
@@ -75,7 +76,7 @@ export default function EngineGuidanceDetail({
             </span>{" "}
             {CACHE_IMPACT_LABEL[guidance.cacheImpact]}
           </p>
-        </div>
+        </Card.Section>
       )}
     </div>
   );

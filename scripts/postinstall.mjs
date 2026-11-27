@@ -6,6 +6,10 @@
  * Tries to pre-resolve better-sqlite3 into ~/.omniroute/runtime/ so that
  * the first execution is fast and EBUSY-resilient on Windows.
  *
+ * #21001: warm-up only PRE-RESOLVES already-installed drivers. warmUpRuntimes()
+ * passes { allowInstall: false }, so an `npm install` of OmniRoute can never
+ * reach the lazy `npm install better-sqlite3@…` fallback in sqliteRuntime.mjs.
+ *
  * Non-fatal: any error is printed as a warning and install continues.
  */
 

@@ -15,7 +15,7 @@ import { resolveLabels } from "./lib/labels";
 import { cn } from "./lib/utils";
 import { Select, type SelectProps } from "./select";
 import { TableLoadingRegion } from "./table-loading";
-import { TableHead } from "./table";
+import { TableHead, type TableVariant } from "./table";
 
 export type DataTableSortDirection = "asc" | "desc";
 
@@ -38,6 +38,8 @@ export interface DataTableShellProps
   toolbarActionsLabel?: string;
   children: ReactNode;
   pagination?: ReactNode;
+  /** `"plain"` drops the frame around the table and pagination, for a host that draws it. */
+  variant?: TableVariant;
 }
 
 /**
@@ -58,6 +60,7 @@ export function DataTableShell({
   toolbarActionsLabel = "Table actions",
   children,
   pagination,
+  variant,
   className,
   ...props
 }: DataTableShellProps) {
@@ -78,6 +81,7 @@ export function DataTableShell({
   return (
     <section
       data-slot="data-table-shell"
+      data-variant={variant === "plain" ? variant : undefined}
       className={cn("ci-data-table ci-data-table-shell", className)}
       {...props}
     >
@@ -347,7 +351,7 @@ export function DataTablePageSizeControl({
 }
 
 export interface SortableTableHeadProps
-  extends Omit<ComponentProps<typeof TableHead>, "aria-sort" | "onChange"> {
+  extends Omit<ComponentProps<typeof TableHead>, "aria-sort" | "onChange" | "align"> {
   direction?: DataTableSortDirection;
   defaultDirection?: DataTableSortDirection;
   align?: "left" | "right";

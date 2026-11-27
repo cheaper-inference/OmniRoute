@@ -1,0 +1,2 @@
+- **fix(cli-tools):** Apply and `omniroute config set` keep unrelated settings in existing Claude, Cline, Kilo and Continue config files instead of replacing the whole file. ([#19633](https://github.com/cheaper-inference/OmniRoute/pull/19633))
+- **fix(cli-tools):** `POST /api/cli-tools/apply` and `omniroute config set` no longer replace an existing Claude, Cline, Kilo, or Continue config file that fails to parse. Fix or move the file before retrying. ([#19633](https://github.com/cheaper-inference/OmniRoute/pull/19633))

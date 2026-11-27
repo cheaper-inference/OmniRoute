@@ -21,6 +21,11 @@ const CONDITIONS = new Set([
   // PR's ~42 CI jobs. A manual pre-merge full run is `gh workflow run ci.yml --ref <branch>`.
   "full-code",
   "full-code-e2e",
+  // The merge queue's base check only (2026-11-21): quality.yml's base-check-unit shards run the
+  // whole unit suite on an omni-queue/** base-check candidate (changes.outputs.candidateSource
+  // "self", written by scripts/merge-queue/candidate-base.mjs) and skip on every other event.
+  // Not applicable means a skip passes, while a failure or a cancel still fails the gate.
+  "omni-queue-base-check",
 ]);
 const RESULTS = new Set(["success", "failure", "cancelled", "skipped"]);
 const FLAGS = ["code", "docs", "i18n", "workflow", "testsOnly"];
@@ -44,9 +49,11 @@ function isMergifyCandidate(context) {
   );
 }
 
-function applies(when, flags, event, context) {
+function applies(when, flags, event, context, outputs) {
   const fullMatrix = event !== "pull_request" || isMergifyCandidate(context);
   switch (when) {
+    case "omni-queue-base-check":
+      return event !== "pull_request" && outputs?.candidateSource === "self";
     case "full-code":
       return fullMatrix && flags.code;
     case "full-code-e2e":
@@ -110,7 +117,7 @@ export function evaluateAdmission(policy, profileName, context, needs) {
         errors.push(`invalid job policy: ${id}`);
         continue;
       }
-      const applicable = applies(rule.when, flags, context.event, context);
+      const applicable = applies(rule.when, flags, context.event, context, outputs);
       const result = needs[id]?.result ?? "missing";
       jobs.push({
         id,

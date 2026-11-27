@@ -11,7 +11,9 @@ import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { Progress } from "@omniroute/ui-kit/progress";
 import Card from "@/shared/components/Card";
+import { InlineCode } from "@omniroute/ui-kit/inline-code";
 import Icon from "@/shared/components/Icon";
+
 import { Spinner } from "@/shared/components/Loading";
 
 interface SearchStats {
@@ -167,7 +169,7 @@ export default function SearchAnalyticsTab() {
         {error || t("searchAnalyticsNoData")}
         <p className="text-xs mt-2">
           {t.rich("searchAnalyticsNoDataDescription", {
-            code: (chunks) => <code className="bg-muted px-1 rounded">{chunks}</code>,
+            code: (chunks) => <InlineCode>{chunks}</InlineCode>,
           })}
         </p>
       </Card>
@@ -239,7 +241,7 @@ export default function SearchAnalyticsTab() {
           <p className="font-medium text-text-main">{t("searchAnalyticsNoSearchesYet")}</p>
           <p className="text-sm mt-1">
             {t.rich("searchAnalyticsEmptyDescription", {
-              code: (chunks) => <code className="bg-muted px-1 rounded">{chunks}</code>,
+              code: (chunks) => <InlineCode>{chunks}</InlineCode>,
             })}
           </p>
         </Card>

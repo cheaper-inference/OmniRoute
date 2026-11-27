@@ -8,8 +8,9 @@
  * Request:  ImprovePromptRequestSchema  { system?, prompt?, model, tone? }
  * Response: { improvedSystem?, improvedPrompt?, tokensIn, tokensOut }
  *
- * Auth: optional (mirrors /v1/web/fetch pattern — required only when
- *       REQUIRE_API_KEY=true; always validated when supplied).
+ * Auth: a presented key is always validated. Without one, a signed-in dashboard
+ *       session passes (the Playground sends only its session, KEA-9515); anyone
+ *       else needs a key while REQUIRE_API_KEY=true.
  *
  * Hard Rule #12: ALL error paths route through buildErrorBody.
  */
@@ -23,6 +24,9 @@ import {
   parseImprovedContent,
 } from "@/lib/playground/promptImprover";
 import { isRequireApiKeyEnabled } from "@/shared/utils/featureFlags";
+import { isDashboardSessionAuthenticated } from "@/shared/utils/apiAuth";
+import { resolveSelfLoopBearer } from "@/shared/middleware/chatAdmissionIdentity";
+import { mayForwardSelfLoopCredential } from "@/lib/a2a/selfLoopAuth";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
@@ -63,9 +67,10 @@ export async function POST(request: Request): Promise<Response> {
   }
   const body = parsed.data;
 
-  // 3. Optional auth (mirrors /v1/web/fetch pattern)
+  // 3. Auth: a key, or (without one) a dashboard session verified against JWT_SECRET.
   const apiKeyRaw = extractApiKey(request);
-  if (isRequireApiKeyEnabled() && !apiKeyRaw) {
+  const viaDashboardSession = !apiKeyRaw && (await isDashboardSessionAuthenticated(request));
+  if (isRequireApiKeyEnabled() && !apiKeyRaw && !viaDashboardSession) {
     return errorResp(HTTP_STATUS.UNAUTHORIZED, "Authentication required");
   }
   if (apiKeyRaw && !(await isValidApiKey(apiKeyRaw))) {
@@ -80,14 +85,24 @@ export async function POST(request: Request): Promise<Response> {
   const baseUrl = process.env.OMNIROUTE_BASE_URL ?? `http://127.0.0.1:${port}`;
   const upstreamUrl = `${baseUrl}/v1/chat/completions`;
 
+  // A session caller has no key to forward, and /v1/chat/completions does not see the
+  // session cookie, so under REQUIRE_API_KEY=true the self-loop presents the per-process
+  // self-loop bearer (same as the dashboard model test and evals). It never goes to a
+  // base URL that would carry it in cleartext off the private network, and it opts out
+  // of memory injection, since the bearer gives the call a memory owner (#13139).
+  const useSelfLoopBearer =
+    viaDashboardSession && isRequireApiKeyEnabled() && mayForwardSelfLoopCredential(baseUrl);
+  const upstreamHeaders: Record<string, string> = {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${useSelfLoopBearer ? resolveSelfLoopBearer() : (apiKeyRaw ?? "")}`,
+  };
+  if (useSelfLoopBearer) upstreamHeaders["x-omniroute-no-memory"] = "true";
+
   let upstreamResponse: Response;
   try {
     upstreamResponse = await fetch(upstreamUrl, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKeyRaw ?? ""}`,
-      },
+      headers: upstreamHeaders,
       body: JSON.stringify(chatBody),
     });
   } catch (err: unknown) {

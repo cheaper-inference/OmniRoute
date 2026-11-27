@@ -1,0 +1,1 @@
+- **fix(codex):** applying or removing OmniRoute settings in Codex no longer deletes a root `openai_base_url` that you set yourself; only the URL OmniRoute wrote is removed. ([#19716](https://github.com/cheaper-inference/OmniRoute/pull/19716))

@@ -6,6 +6,10 @@ import {
 import { buildErrorBody } from "@omniroute/open-sse/utils/error";
 import { hasManageScope } from "@/shared/constants/managementScopes";
 import { hasSelfAccountQuotaScope } from "@/shared/constants/selfServiceScopes";
+import {
+  requiredApiKeyUnavailable,
+  resolveRequiredApiKey,
+} from "@/shared/utils/requiredApiKeyContext";
 
 export const INTERNAL_USAGE_COMMAND = "@@om-usage";
 export const USAGE_COMMAND_DISABLED_MESSAGE = "Usage command is disabled for this API key.";
@@ -841,6 +845,12 @@ export function createLocalTextResponse(request: Request, body: unknown, text: s
   return stream ? createOpenAIStreamResponse(text, body) : createOpenAITextResponse(text, body);
 }
 
+async function resolveUsageCommandMetadata(request: Request, deps: RequiredDeps) {
+  const apiKey = extractUsageCommandApiKey(request);
+  if (!apiKey || !(await deps.isValidApiKey(apiKey))) return null;
+  return deps.getApiKeyMetadata(apiKey);
+}
+
 export async function handleInternalUsageCommand(
   request: Request,
   body: unknown,
@@ -849,13 +859,13 @@ export async function handleInternalUsageCommand(
   const lastUserText = extractLastUserText(body);
   if (!isInternalUsageCommand(lastUserText)) return null;
 
-  const resolvedDeps = await normalizeDeps(deps);
-  const apiKey = extractUsageCommandApiKey(request);
-  if (!apiKey || !(await resolvedDeps.isValidApiKey(apiKey))) {
-    return createLocalTextResponse(request, body, USAGE_COMMAND_AUTH_REQUIRED_MESSAGE);
-  }
+  const requiredKey = resolveRequiredApiKey();
+  const resolved = await requiredKey;
+  if (requiredKey && !resolved) return requiredApiKeyUnavailable();
 
-  const metadata = await resolvedDeps.getApiKeyMetadata(apiKey);
+  const resolvedDeps = await normalizeDeps(deps);
+  const metadata =
+    resolved?.apiKeyInfo ?? (await resolveUsageCommandMetadata(request, resolvedDeps));
   if (!metadata?.id) {
     return createLocalTextResponse(request, body, USAGE_COMMAND_AUTH_REQUIRED_MESSAGE);
   }

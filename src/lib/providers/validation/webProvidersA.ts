@@ -3,6 +3,7 @@
 // functions with no dispatcher-state captures.
 import { applyCustomUserAgent } from "./headers";
 import { pplxUserAgent } from "@omniroute/open-sse/executors/perplexity-web/protocol.ts";
+import { normalizePerplexitySessionCookie } from "@omniroute/open-sse/utils/perplexitySessionCookie.ts";
 import { toValidationErrorResult, validationRead, validationWrite } from "./transport";
 import { fetchWithTimeout } from "@/shared/utils/fetchTimeout";
 import {
@@ -385,11 +386,11 @@ export async function validatePerplexityWebProvider({ apiKey, providerSpecificDa
     let sessionToken = apiKey;
     let bearerToken: string | null = null;
 
-    if (sessionToken.startsWith("__Secure-next-auth.session-token=")) {
-      sessionToken = sessionToken.slice("__Secure-next-auth.session-token=".length);
-    } else if (/^bearer\s+/i.test(sessionToken)) {
+    if (typeof sessionToken === "string" && /^bearer\s+/i.test(sessionToken)) {
       bearerToken = sessionToken.replace(/^bearer\s+/i, "").trim();
       sessionToken = "";
+    } else if (typeof sessionToken === "string" && sessionToken.trim()) {
+      sessionToken = normalizePerplexitySessionCookie(sessionToken);
     }
 
     const timezone =
@@ -407,7 +408,7 @@ export async function validatePerplexityWebProvider({ apiKey, providerSpecificDa
         ...(bearerToken
           ? { Authorization: `Bearer ${bearerToken}` }
           : sessionToken
-            ? { Cookie: `__Secure-next-auth.session-token=${sessionToken}` }
+            ? { Cookie: sessionToken }
             : {}),
       },
       providerSpecificData
@@ -470,7 +471,7 @@ export async function validatePerplexityWebProvider({ apiKey, providerSpecificDa
       return {
         valid: false,
         error:
-          "Invalid Perplexity session cookie — re-paste __Secure-next-auth.session-token from perplexity.ai",
+          "Invalid Perplexity session cookie — re-paste the current __Secure-pplx.session.<UUID> and pplx.session-id header, or the legacy __Secure-next-auth.session-token, from perplexity.ai",
       };
     }
 

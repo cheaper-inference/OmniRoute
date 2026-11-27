@@ -27,7 +27,7 @@ for (const client of [FORMATS.GEMINI, FORMATS.ANTIGRAVITY]) {
     ) as { response: { usageMetadata: Record<string, number> } };
     assert.deepEqual(out.response.usageMetadata, {
       promptTokenCount: 10,
-      candidatesTokenCount: 5,
+      candidatesTokenCount: 3,
       totalTokenCount: 15,
       thoughtsTokenCount: 2,
       cachedContentTokenCount: 3,

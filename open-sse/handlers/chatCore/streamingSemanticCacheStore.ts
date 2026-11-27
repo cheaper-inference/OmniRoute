@@ -63,6 +63,8 @@ interface StreamingCacheArgs {
   videoTranscriptSensitive?: boolean;
   /** Reversible PII vault minted tokens: a cached copy would replay unresolvable tokens. */
   piiTokensMinted?: boolean;
+  /** A response masking transform ran on the client copy: the assembled body is unmasked. */
+  maskingActive?: boolean;
 }
 
 function streamTokensSaved(streamUsage: Record<string, unknown> | null | undefined): number {
@@ -122,14 +124,20 @@ function writeStreamingCacheEntry(
   }
 }
 
-export function storeStreamingSemanticCacheResponse(
-  args: StreamingCacheArgs,
-  deps: StreamingSemanticCacheStoreDeps = DEFAULT_DEPS
-): void {
-  if (
+function skipsForPrivacy(args: StreamingCacheArgs): boolean {
+  return Boolean(
     args.provider === "muse-code" ||
     args.videoTranscriptSensitive ||
     args.piiTokensMinted ||
+    args.maskingActive
+  );
+}
+
+function isStorableStream(
+  args: StreamingCacheArgs,
+  deps: StreamingSemanticCacheStoreDeps
+): boolean {
+  return !(
     !args.enabled ||
     args.streamStatus !== 200 ||
     !args.streamResponseBody ||
@@ -141,8 +149,13 @@ export function storeStreamingSemanticCacheResponse(
       args.streamResponseBody
     ) ||
     responseCarriesToolCalls(args.streamResponseBody)
-  ) {
-    return;
-  }
+  );
+}
+
+export function storeStreamingSemanticCacheResponse(
+  args: StreamingCacheArgs,
+  deps: StreamingSemanticCacheStoreDeps = DEFAULT_DEPS
+): void {
+  if (skipsForPrivacy(args) || !isStorableStream(args, deps)) return;
   writeStreamingCacheEntry(args, deps);
 }

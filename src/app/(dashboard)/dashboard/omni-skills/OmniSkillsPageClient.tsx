@@ -20,6 +20,7 @@ import { OmniSandboxTab } from "./components/OmniSandboxTab";
 import { OmniMarketplaceTab } from "./components/OmniMarketplaceTab";
 import type { OmniSkill } from "./components/OmniSkillCard";
 import type { ComponentProps, JSX } from "react";
+import Notice from "@/shared/components/Notice";
 
 interface Execution {
   id: string;
@@ -252,21 +253,21 @@ export function OmniSkillsPageClient(): JSX.Element {
       {/* Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card padding="sm">
-          <p className="text-xs text-text-muted uppercase tracking-wide">{t("totalSkills")}</p>
+          <p className="ci-eyebrow">{t("totalSkills")}</p>
           <p className="text-2xl font-semibold text-text-main mt-1">{skillsTotal}</p>
         </Card>
         <Card padding="sm">
-          <p className="text-xs text-text-muted uppercase tracking-wide">{t("enabledSkills")}</p>
+          <p className="ci-eyebrow">{t("enabledSkills")}</p>
           <p className="text-2xl font-semibold text-success mt-1">{enabledCount}</p>
         </Card>
         <Card padding="sm">
-          <p className="text-xs text-text-muted uppercase tracking-wide">{t("totalExecutions")}</p>
+          <p className="ci-eyebrow">{t("totalExecutions")}</p>
           <p className="text-2xl font-semibold text-primary mt-1">
             {executionStat(executionsLocalOnly, execTotal)}
           </p>
         </Card>
         <Card padding="sm">
-          <p className="text-xs text-text-muted uppercase tracking-wide">{t("successRate")}</p>
+          <p className="ci-eyebrow">{t("successRate")}</p>
           <p className="text-2xl font-semibold text-warning mt-1">
             {executionStat(executionsLocalOnly, `${successRate}%`)}
           </p>
@@ -364,7 +365,8 @@ export function OmniSkillsPageClient(): JSX.Element {
           onChange={(e) => setInstallJson(e.target.value)}
           placeholder={t("installJsonPlaceholder")}
           aria-label={t("installSkillModalTitle")}
-          className="h-48 resize-none font-mono text-sm"
+          mono
+          className="h-48 resize-none text-sm"
         />
         <div className="flex flex-wrap items-center gap-3 mt-3">
           <FileInput
@@ -383,15 +385,12 @@ export function OmniSkillsPageClient(): JSX.Element {
           </Button>
         </div>
         {installStatus && (
-          <div
-            className={`mt-3 p-3 rounded-lg text-sm ${
-              installStatus.type === "success"
-                ? "bg-success/10 text-success"
-                : "bg-error/10 text-error"
-            }`}
+          <Notice
+            variant={installStatus.type === "success" ? "success" : "critical"}
+            className="mt-3"
           >
             {installStatus.message}
-          </div>
+          </Notice>
         )}
       </Modal>
     </div>

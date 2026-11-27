@@ -76,7 +76,7 @@ describe("DataTable scrolls vertically through the kit Table maxHeight", () => {
     expect(scroller.style.getPropertyValue("--ci-table-max-height")).toBe("calc(100vh - 320px)");
   });
 
-  it("keeps the borderless container when a Card frames the table", () => {
+  it("keeps the frameless (kit plain) container when a Card frames the table", () => {
     const { container } = render(
       <DataTable
         label="Tasks"
@@ -88,7 +88,9 @@ describe("DataTable scrolls vertically through the kit Table maxHeight", () => {
     );
     const scroller = container.querySelector<HTMLElement>("[data-slot=table-container]")!;
     expect(scroller.hasAttribute("data-capped")).toBe(true);
-    expect(scroller.className).toContain("border-0");
-    expect(scroller.className).toContain("rounded-none");
+    // The kit `variant="plain"` drops border, radius and surface; the capped header stays pinned.
+    expect(scroller.getAttribute("data-variant")).toBe("plain");
+    // The kit prop does the job: no host class repeats it.
+    expect(scroller.className).toBe("ci-table-container");
   });
 });

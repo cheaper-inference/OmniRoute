@@ -1,5 +1,6 @@
 "use client";
 
+import Card from "@/shared/components/Card";
 import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
 import Toggle from "@/shared/components/Toggle";
@@ -10,6 +11,7 @@ import Input from "@/shared/components/Input";
 import { ENDPOINT_CATEGORIES } from "@/shared/constants/endpointCategories";
 import { toLocalDateTimeInputValue } from "@/app/(dashboard)/dashboard/api-manager/apiManagerPageUtils";
 import RoutingEntryLink from "@/shared/components/routing/RoutingEntryLink";
+import { KEY_EXPIRY_PRESET_DAYS, endOfLocalDayAfterDays } from "@/shared/utils/keyExpiry";
 import {
   MAX_KEY_NAME_LENGTH,
   type ApiKeyAccessData,
@@ -49,7 +51,7 @@ function KeyNameField({
   const t = useTranslations("apiManager");
 
   return (
-    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 p-4 rounded-lg border border-border bg-surface/40">
+    <Card.Section className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
       {/* Key Name */}
       <div className="flex flex-col gap-1">
         <p className="text-sm font-medium text-text-main">{t("keyName")}</p>
@@ -64,7 +66,7 @@ function KeyNameField({
           error={nameError}
         />
       </div>
-    </div>
+    </Card.Section>
   );
 }
 
@@ -94,7 +96,7 @@ function KeyActiveToggle({ formState, setIsActive }: GeneralSectionProps<"setIsA
   const t = useTranslations("apiManager");
 
   return (
-    <div className="flex items-start justify-between gap-3 p-4 rounded-lg border border-border bg-surface/40">
+    <Card.Section className="flex items-start justify-between gap-3">
       {/* Key Active Toggle */}
       <div className="flex flex-col gap-1">
         <p className="text-sm font-medium text-text-main">{t("keyActive")}</p>
@@ -107,7 +109,7 @@ function KeyActiveToggle({ formState, setIsActive }: GeneralSectionProps<"setIsA
         onChange={() => setIsActive(!formState.isActive)}
         ariaLabel={t("keyActive")}
       />
-    </div>
+    </Card.Section>
   );
 }
 
@@ -139,7 +141,7 @@ function ExpirationDateField({ formState, setExpiresAt }: GeneralSectionProps<"s
   const tc = useTranslations("common");
 
   return (
-    <div className="flex flex-col gap-2 p-4 rounded-lg border border-border bg-surface/40">
+    <Card.Section className="flex flex-col gap-2">
       {/* Expiration Date */}
       <div className="flex flex-col gap-1">
         <p className="text-sm font-medium text-text-main">{t("expirationDate")}</p>
@@ -174,7 +176,20 @@ function ExpirationDateField({ formState, setExpiresAt }: GeneralSectionProps<"s
           {tc("clear")}
         </Button>
       </div>
-    </div>
+      <div className="flex flex-wrap gap-2">
+        {KEY_EXPIRY_PRESET_DAYS.map((days) => (
+          <Button
+            key={days}
+            variant="outline"
+            size="sm"
+            onClick={() => setExpiresAt(endOfLocalDayAfterDays(days, new Date()).toISOString())}
+          >
+            {t("keyExpiryPresetPlusDays", { days })}
+          </Button>
+        ))}
+      </div>
+      <p className="text-xs text-text-muted">{t("keyExpiryPresetsHint")}</p>
+    </Card.Section>
   );
 }
 
@@ -185,7 +200,7 @@ function ManagementAccessToggle({
   const t = useTranslations("apiManager");
 
   return (
-    <div className="flex items-start justify-between gap-3 p-4 rounded-lg border border-border bg-surface/40">
+    <Card.Section className="flex items-start justify-between gap-3">
       {/* Management Access */}
       <div className="flex flex-col gap-1">
         <p className="text-sm font-medium text-text-main">{t("managementAccess")}</p>
@@ -198,7 +213,7 @@ function ManagementAccessToggle({
         onChange={() => setManageEnabled(!formState.manageEnabled)}
         ariaLabel={t("managementAccess")}
       />
-    </div>
+    </Card.Section>
   );
 }
 
@@ -210,7 +225,7 @@ function SelfServiceVisibility({
   const t = useTranslations("apiManager");
 
   return (
-    <div className="flex flex-col gap-3 p-4 rounded-lg border border-border bg-surface/40">
+    <Card.Section className="flex flex-col gap-3">
       {/* Self-service Visibility */}
       <div className="flex flex-col gap-1">
         <p className="text-sm font-medium text-text-main">{t("selfServiceVisibility")}</p>
@@ -245,7 +260,7 @@ function SelfServiceVisibility({
           ariaLabel={t("sharedAccountQuotaVisibility")}
         />
       </div>
-    </div>
+    </Card.Section>
   );
 }
 
@@ -270,7 +285,7 @@ function EndpointCategoryPicker({
           checked={formState.selectedEndpoints.includes(cat.id)}
           onChange={() => toggleEndpoint(cat.id)}
           label={<span className="text-xs font-medium">{cat.label}</span>}
-          description={<span className="text-[10px]">{cat.description}</span>}
+          description={<span className="text-xs">{cat.description}</span>}
         />
       ))}
     </CheckboxGroup>
@@ -285,7 +300,7 @@ function AllowedEndpointsSection({
   const t = useTranslations("apiManager");
 
   return (
-    <div className="flex flex-col gap-3 p-4 rounded-lg border border-border bg-surface/40">
+    <Card.Section className="flex flex-col gap-3">
       {/* Allowed Endpoints Section */}
       <div className="flex items-center justify-between">
         <div className="flex flex-col gap-1">
@@ -322,7 +337,7 @@ function AllowedEndpointsSection({
       {!formState.allowAllEndpoints && (
         <EndpointCategoryPicker formState={formState} toggleEndpoint={toggleEndpoint} />
       )}
-    </div>
+    </Card.Section>
   );
 }
 

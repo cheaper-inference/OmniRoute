@@ -63,6 +63,7 @@ function TokenBreakdownCard({
                   <AnimatedNumber
                     value={value}
                     format={displayMode === "exact" ? fmtFull : fmtCompact}
+                    decorative
                   />
                 )}
                 {suffix && <span className="text-xs font-normal">{suffix}</span>}

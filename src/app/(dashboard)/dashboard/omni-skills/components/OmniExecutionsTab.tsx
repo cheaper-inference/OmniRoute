@@ -9,9 +9,10 @@ import {
   TableHeader,
   TableRow,
 } from "@omniroute/ui-kit/table";
-import Button from "@/shared/components/Button";
+import Pager from "@/shared/components/Pager";
 import { Card } from "@/shared/components";
 import type { JSX } from "react";
+import Badge from "@/shared/components/Badge";
 
 interface Execution {
   id: string;
@@ -43,11 +44,7 @@ export function OmniExecutionsTab({
 
   return (
     <Card>
-      <Table
-        aria-label={t("executionsTab")}
-        scrollbarLabel={t("executionsTab")}
-        containerClassName="rounded-none border-0"
-      >
+      <Table variant="plain" aria-label={t("executionsTab")} scrollbarLabel={t("executionsTab")}>
         <TableHeader>
           <TableRow>
             <TableHead>{t("skill")}</TableHead>
@@ -68,20 +65,21 @@ export function OmniExecutionsTab({
               <TableRow key={exec.id}>
                 <TableCell>{exec.skillName}</TableCell>
                 <TableCell>
-                  <span
-                    className={`text-xs px-2 py-1 rounded ${
+                  <Badge
+                    variant={
                       exec.status === "success"
-                        ? "bg-success/10 text-success"
+                        ? "success"
                         : exec.status === "error"
-                          ? "bg-error/10 text-error"
-                          : "bg-warning/10 text-warning"
-                    }`}
+                          ? "error"
+                          : "warning"
+                    }
+                    size="sm"
                   >
                     {exec.status}
-                  </span>
+                  </Badge>
                 </TableCell>
                 <TableCell className="text-text-muted">{exec.duration}ms</TableCell>
-                <TableCell className="text-text-muted text-sm">
+                <TableCell className="text-text-muted">
                   {new Date(exec.createdAt).toLocaleString()}
                 </TableCell>
               </TableRow>
@@ -89,24 +87,19 @@ export function OmniExecutionsTab({
           )}
         </TableBody>
       </Table>
-      <div className="flex items-center justify-between mt-4 pt-4 border-t border-border">
-        <span className="text-sm text-text-muted">
-          {t("pageInfo", { page: execPage, totalPages: execTotalPages, total: execTotal }) ||
-            `Page ${execPage} of ${execTotalPages} (${execTotal} total)`}
-        </span>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={onPagePrev} disabled={execPage === 1}>
-            {t("previous") || "Prev"}
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onPageNext}
-            disabled={execPage === execTotalPages || execTotalPages === 0}
-          >
-            {t("next") || "Next"}
-          </Button>
-        </div>
+      <div className="flex justify-end mt-4 pt-4 border-t border-border">
+        <Pager
+          variant="summary"
+          page={execPage}
+          pageCount={Math.max(1, execTotalPages)}
+          onPageChange={(next) => (next < execPage ? onPagePrev() : onPageNext())}
+          labels={{
+            previous: t("previous"),
+            next: t("next"),
+            summary: () =>
+              t("pageInfo", { page: execPage, totalPages: execTotalPages, total: execTotal }),
+          }}
+        />
       </div>
     </Card>
   );
