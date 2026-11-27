@@ -295,6 +295,27 @@ docker build --target runner-cli  -t omniroute:cli  .
 docker build --target runner-web  -t omniroute:web  .
 ```
 
+### Hardened (DHI) variant
+
+`Dockerfile.hardened` is an opt-in image for proxy-only deployments. It copies the
+OmniRoute application from a `runner-base` image into a digest-pinned Docker
+Hardened Images (DHI) Node runtime and runs as UID/GID `1000:1000`. The variant
+has no published tag yet. Build it locally after logging in to `dhi.io`.
+
+```bash
+docker login dhi.io
+docker build -f Dockerfile.hardened \
+  --build-arg OMNIROUTE_IMAGE=ghcr.io/cheaper-inference/omniroute:next \
+  -t omniroute:hardened .
+```
+
+The runtime ships without a shell, npm, libsecret, or bundled provider CLIs.
+Features that launch those CLIs, install embedded services via npm, read the
+Linux keychain via libsecret, or run commands through `sh` are unavailable.
+Rebuild and redeploy from the host to update the image. The dashboard cannot
+update it in place. The image skips `check-permissions.sh`, so it does not warn
+about an unwritable data volume or apply runtime base-path changes.
+
 ### Build-time resources
 
 Three build args control what the `builder` stage costs. They are build-time only —
