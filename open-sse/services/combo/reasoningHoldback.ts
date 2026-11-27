@@ -111,13 +111,18 @@ function isLifecycleFrame(parsed: JsonRecord): boolean {
   return keys.length > 0 && keys.every((key) => key === "tokens_generated" || key === "elapsed_ms");
 }
 
-function errorFrameVerdict(error: unknown): EventVerdict {
-  if (!isRecord(error)) return { kind: "commit" };
-  const cut =
+/** True for the error object of the frame the gateway writes when it cut an upstream stream. */
+export function isRecoverableStreamErrorFrame(error: unknown): boolean {
+  return (
+    isRecord(error) &&
     error.type === "stream_error" &&
     typeof error.code === "string" &&
-    RECOVERABLE_STREAM_ERROR_CODES.has(error.code);
-  return { kind: cut ? "cut" : "commit" };
+    RECOVERABLE_STREAM_ERROR_CODES.has(error.code)
+  );
+}
+
+function errorFrameVerdict(error: unknown): EventVerdict {
+  return { kind: isRecoverableStreamErrorFrame(error) ? "cut" : "commit" };
 }
 
 function deltaVerdict(delta: unknown): EventVerdict {

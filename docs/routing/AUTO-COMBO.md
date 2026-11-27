@@ -529,6 +529,37 @@ combo cannot fail over cleanly. The holdback closes that gap for combos that ask
 }
 ```
 
+### Resuming a cut stream (opt-in)
+
+The holdback above handles a cut during reasoning. A cut after part of the answer reached the
+client is a different case: the combo can resume it at the next target.
+
+- It needs the feature flag `COMBO_STREAM_CHECKPOINT_ENABLED` (default **off**),
+  `resumeStreamFromCheckpoint: true` in the combo's **own** config and a non-empty
+  `reasoningCheckpointProviders`; only a later target of a listed provider can take over. It
+  does not need `retainReasoningBeforeAnswer`.
+- Scope is the same as the holdback (streaming, single-choice Chat Completions, plain-text
+  history, no bound session or pinned model, sequential dispatch).
+- One replacement per cut, admitted by the normal gates, using one slot of
+  `maxGlobalAttempts`. It must echo an exact anchor from the delivered text; the client then
+  receives only what follows. Without a matching anchor, or on any failure, the client keeps its
+  prefix and gets the original failure.
+
+Details, limits and precedence over the same-target continuation:
+[`REASONING_REPLAY.md`](REASONING_REPLAY.md#resuming-a-cut-stream-at-the-next-target-opt-in).
+
+```json
+{
+  "name": "resumable-answer",
+  "strategy": "priority",
+  "models": [{ "model": "provider-a/answerer" }, { "model": "provider-b/answerer" }],
+  "config": {
+    "resumeStreamFromCheckpoint": true,
+    "reasoningCheckpointProviders": ["provider-b"]
+  }
+}
+```
+
 ## Fusion Strategy
 
 `fusion` is the one strategy that does **not** pick a single target. It fans the prompt

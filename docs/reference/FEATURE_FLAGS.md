@@ -46,7 +46,7 @@ A boolean flag is considered **enabled** when its effective value is `"true"`,
 
 ## Flag Catalog
 
-139 flags across 6 categories. **Default** is the definition default — the value
+140 flags across 6 categories. **Default** is the definition default — the value
 used when neither a DB override nor an environment variable is present.
 
 ### Security (16)
@@ -130,7 +130,7 @@ Invalid enum values and unreadable feature-flag storage fail closed. Neither opt
 priced spend or a failed pricing lookup. Enforcement and the administrator report resolve the
 same effective policy.
 
-### Runtime (65)
+### Runtime (66)
 
 | Key                                            | Type    | Default | Restart | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------------------------------------------- | ------- | ------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -201,6 +201,7 @@ same effective policy.
 | `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`           | boolean | `false` |         | Let an automatic web search (no explicit `provider`) use a connected Codex (ChatGPT) account through `codex-search`: as the last resort ahead of the keyless providers when no credentialed search provider is usable, and as the failover alternate (#17933). Each such search spends ChatGPT subscription quota and takes about 10–40 s. Off by default: `codex-search` runs only when a request names it explicitly.                                                                                                                                                                                                                         |
 | `CODE_ASSIST_INELIGIBLE_ONBOARD_LEGACY_TIER`   | boolean | `false` |         | For Antigravity / Code Assist onboarding, an account whose `loadCodeAssist` answer lists `ineligibleTiers` and marks no allowed tier as default onboards with `legacy-tier` instead of its `currentTier` (#18060), matching the Antigravity-Manager `fetch_project_id` order. Not yet confirmed on a real restricted account. Off by default: such an account keeps onboarding with its `currentTier`.                                                                                                                                                                                                                                          |
 | `COMBO_REASONING_HOLDBACK_ENABLED`             | boolean | `false` |         | Let a sequential combo hold a streaming Chat Completions target's reasoning back until its first answer token, instead of committing the stream when reasoning starts. Only combos that set `retainReasoningBeforeAnswer: true` in their own config opt in; global combo defaults never do. Holds at most 64 KiB, within the target's first-output budget. On a cut or timeout during reasoning the combo moves on, and forwards the draft (quoted, untrusted) only to providers listed in `reasoningCheckpointProviders`; signed or encrypted reasoning is never forwarded. Off by default.                                                    |
+| `COMBO_STREAM_CHECKPOINT_ENABLED`              | boolean | `false` |         | Let a sequential combo resume a streaming Chat Completions answer at its next target when the stream is cut after output reached the client. Only combos that set `resumeStreamFromCheckpoint: true` in their own config opt in, and only providers listed in `reasoningCheckpointProviders` can take over; global combo defaults never do. The replacement is given the delivered text, quoted, with an exact anchor, read whole (64 KiB, 30 s) and checked before the client sees its suffix; otherwise the client keeps its prefix and gets the original failure. Off by default.                                                            |
 
 ### CLI (8)
 
@@ -302,10 +303,10 @@ Returns every flag with its effective value, source, and a summary.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... all 139 flags
+    // ... all 140 flags
   ],
   "summary": {
-    "total": 139,
+    "total": 140,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

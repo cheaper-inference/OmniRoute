@@ -87,7 +87,8 @@ const {
 // CODEBUDDY_TELEMETRY_ENABLED (#18398, codebuddy-intl turn reports, default off) takes it to 137.
 // AGENT_SESSION_MESSAGES_ENABLED (#14864, opt-in session turn capture, default off) takes it to 138.
 // COMBO_REASONING_HOLDBACK_ENABLED (opt-in reasoning holdback before the first answer, default off) takes it to 139.
-const EXPECTED_FEATURE_FLAG_COUNT = 139;
+// COMBO_STREAM_CHECKPOINT_ENABLED (opt-in resume of a cut combo stream at the next target, default off) takes it to 140.
+const EXPECTED_FEATURE_FLAG_COUNT = 140;
 // tool_call wrapper repair, default on) to 86; OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED
 // (#16571, OpenCode v2 client fingerprint, default off) to 87.
 // tool_call wrapper repair, default on) to 86; CLAUDE_OAUTH_SUMMARIZED_THINKING_UNREDACTED

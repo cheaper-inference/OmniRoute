@@ -119,6 +119,7 @@ import type { ProtectedPriorityStopCause } from "./protectedPriorityStopStatus.t
 import { isProviderProbeResponse } from "../../../src/shared/utils/providerProbeResult.ts";
 import { recordLocalCircuitRefusal } from "./localCircuitRefusal.ts";
 import { dispatchHeldReasoning } from "./reasoningHoldbackAttempt.ts";
+import { markCheckpointResumeBody } from "./streamCheckpointAttempt.ts";
 import { getStrategyTraits } from "./strategyRegistry.ts";
 import {
   handleEmptyContentRetry,
@@ -373,12 +374,18 @@ export async function executeTargetAttempt(
       }
       if (state.comboExpired || targetSignal?.aborted) return null;
     }
-    const result = await dispatchHeldReasoning(opts, attemptBody, modelStr, {
+    const dispatchTarget = {
       ...targetForAttempt,
       emptyTurnConnectionId,
       effectiveComboStrategy: deps.strategy,
       failoverBeforeRetry: deps.config.failoverBeforeRetry,
-    });
+    };
+    const result = await dispatchHeldReasoning(
+      opts,
+      markCheckpointResumeBody(opts, attemptBody, dispatchTarget),
+      modelStr,
+      dispatchTarget
+    );
 
     if (preContentTransportRecovery && deps.signal?.aborted) {
       releaseRejectedQualityResponse(result, result);

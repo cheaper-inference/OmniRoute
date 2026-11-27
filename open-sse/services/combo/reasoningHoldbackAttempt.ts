@@ -83,15 +83,22 @@ type HoldbackDeps = Pick<
   | "sourceFormat"
 >;
 
-function sequentialDispatch(deps: HoldbackDeps): boolean {
+export function sequentialDispatch(deps: Pick<HoldbackDeps, "config" | "strategy">): boolean {
   const hedging = deps.config.zeroLatencyOptimizationsEnabled === true && deps.config.hedging;
   return !hedging && !getStrategyTraits(deps.strategy).contextRelay;
 }
 
-function listedProviders(deps: HoldbackDeps): Set<string> | null {
-  // The combo's own config, never the cascade: global defaults do not grant the opt-in.
-  const own = deps.combo.config;
-  if (!isRecord(own) || own.retainReasoningBeforeAnswer !== true) return null;
+/**
+ * The providers the combo lists as allowed to receive a draft, when its own config sets
+ * `optIn` to true; null otherwise. The combo's own config, never the cascade: global defaults
+ * do not grant the opt-in.
+ */
+export function listedCheckpointProviders(
+  combo: HoldbackDeps["combo"],
+  optIn: "retainReasoningBeforeAnswer" | "resumeStreamFromCheckpoint"
+): Set<string> | null {
+  const own = combo.config;
+  if (!isRecord(own) || own[optIn] !== true) return null;
   const listed = Array.isArray(own.reasoningCheckpointProviders)
     ? own.reasoningCheckpointProviders
     : [];
@@ -114,7 +121,7 @@ export function resolveReasoningHoldback(
   protectedPriorityTarget: boolean
 ): Set<string> | null {
   if (!isRegisteredFeatureFlagEnabled(COMBO_REASONING_HOLDBACK_FLAG)) return null;
-  const providers = listedProviders(deps);
+  const providers = listedCheckpointProviders(deps.combo, "retainReasoningBeforeAnswer");
   if (!providers || protectedPriorityTarget || !deps.clientRequestedStream) return null;
   if (deps.effectiveSessionId || deps.sticky?.stuck || !sequentialDispatch(deps)) return null;
   if (deps.sourceFormat && deps.sourceFormat !== "openai") return null;
@@ -122,7 +129,11 @@ export function resolveReasoningHoldback(
   return isPlainChatCompletionsText(body) ? providers : null;
 }
 
-function providerIsListed(providers: Set<string>, target: SingleModelTarget, modelStr: string) {
+export function providerIsListed(
+  providers: Set<string>,
+  target: SingleModelTarget,
+  modelStr: string
+): boolean {
   const own = "provider" in target ? target.provider : undefined;
   return [own, parseModel(modelStr).provider].some(
     (id) => typeof id === "string" && providers.has(id.toLowerCase())

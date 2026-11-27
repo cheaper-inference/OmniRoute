@@ -398,7 +398,12 @@ test("makeCheckpointRequest refuses unsafe or unsupported checkpoints", async ()
   assert.ok(makeCheckpointRequest(base, good, "before-answer"));
   assert.equal(makeCheckpointRequest(base, { ...good, truncated: true }, "before-answer"), null);
   assert.equal(makeCheckpointRequest(base, { ...good, reasoning: "  " }, "before-answer"), null);
-  assert.equal(makeCheckpointRequest(base, good, "after-cut"), null);
+  // `after-cut` is the stream resumption's mode; with no delivered text it is the same body.
+  assert.deepEqual(
+    makeCheckpointRequest(base, good, "after-cut"),
+    makeCheckpointRequest(base, good, "before-answer")
+  );
+  assert.equal(makeCheckpointRequest(base, { ...good, truncated: true }, "after-cut"), null);
   assert.equal(
     makeCheckpointRequest({ ...base, tools: [{ type: "function" }] }, good, "before-answer"),
     null

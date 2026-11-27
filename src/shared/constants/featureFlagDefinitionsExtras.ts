@@ -6,6 +6,7 @@ import { QUOTA_DAILY_REVALIDATION_FLAG } from "./featureFlagDefinitionsQuotaReva
 import { CODEBUDDY_TELEMETRY_ENABLED_FLAG } from "./featureFlagDefinitionsCodebuddy";
 import { AGENT_SESSION_MESSAGES_ENABLED_FLAG } from "./agentSessionFeatureFlagDefinitions";
 import { COMBO_REASONING_HOLDBACK_ENABLED_FLAG } from "./featureFlagDefinitionsComboReasoningHoldback";
+import { COMBO_STREAM_CHECKPOINT_ENABLED_FLAG } from "./featureFlagDefinitionsComboStreamCheckpoint";
 
 /**
  * Flags kept out of featureFlagDefinitions.ts because that file sits at its file-size cap.
@@ -20,4 +21,5 @@ export const EXTRA_FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
   CODEBUDDY_TELEMETRY_ENABLED_FLAG,
   AGENT_SESSION_MESSAGES_ENABLED_FLAG,
   COMBO_REASONING_HOLDBACK_ENABLED_FLAG,
+  COMBO_STREAM_CHECKPOINT_ENABLED_FLAG,
 ];

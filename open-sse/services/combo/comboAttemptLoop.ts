@@ -64,6 +64,7 @@ import {
 } from "./comboPredicates.ts";
 import { collectCircuitOpenExclusions, evaluateExecuteTargetGates } from "./executeTargetGates.ts";
 import { executeTargetAttempt } from "./executeTargetAttempt.ts";
+import { wrapComboAttemptForResume } from "./streamCheckpointAttempt.ts";
 import type { ResolvedComboTarget } from "./types.ts";
 import { buildComboDiag } from "./executeTargetClassify.ts";
 import { attemptCompatRejectedFallback } from "./comboCompatFallback.ts";
@@ -391,7 +392,7 @@ export async function dispatchWithCooldownRetry(opts: {
       const executeTarget = async (i: number): Promise<ExecuteTargetResult> => {
         const gate = await extra.evaluateGates({ index: i, state, deps });
         if (gate.kind === "skip") return gate.result;
-        return extra.executeAttempt({
+        const attempted = await extra.executeAttempt({
           index: i,
           state,
           deps: {
@@ -407,6 +408,14 @@ export async function dispatchWithCooldownRetry(opts: {
           targetForAttempt: gate.targetForAttempt,
           profile: gate.profile,
           protectedPriorityTarget: gate.protectedPriorityTarget,
+        });
+        return wrapComboAttemptForResume(attempted, {
+          index: i,
+          state,
+          deps,
+          targetForAttempt: gate.targetForAttempt,
+          protectedPriorityTarget: gate.protectedPriorityTarget,
+          evaluateGates: extra.evaluateGates,
         });
       };
 

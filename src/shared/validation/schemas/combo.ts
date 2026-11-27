@@ -225,6 +225,9 @@ export const comboRuntimeConfigSchema = z
     // list the providers that may receive the reasoning draft of a target that was cut.
     retainReasoningBeforeAnswer: z.boolean().optional(),
     reasoningCheckpointProviders: z.array(z.string().trim().min(1).max(100)).max(20).optional(),
+    // COMBO_STREAM_CHECKPOINT_ENABLED: resume a stream cut after output at the next target,
+    // among the providers listed in `reasoningCheckpointProviders`.
+    resumeStreamFromCheckpoint: z.boolean().optional(),
     // Keep (not drop) targets whose known output ceiling is below max_tokens.
     outputLimitAdvisory: z.boolean().optional(),
     reasoningTransportFallback: z.enum(["skip", "drop"]).optional(),

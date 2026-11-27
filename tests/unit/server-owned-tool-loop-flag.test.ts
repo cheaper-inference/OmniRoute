@@ -93,7 +93,8 @@ describe("feature-flags-settings count update", () => {
     // CODEBUDDY_TELEMETRY_ENABLED (#18398, codebuddy-intl turn reports, default off) to 137.
     // AGENT_SESSION_MESSAGES_ENABLED (#14864, opt-in session turn capture, default off) to 138.
     // COMBO_REASONING_HOLDBACK_ENABLED (opt-in reasoning holdback before the first answer, default off) to 139.
-    assert.equal(FEATURE_FLAG_DEFINITIONS.length, 139);
+    // COMBO_STREAM_CHECKPOINT_ENABLED (opt-in resume of a cut combo stream at the next target, default off) to 140.
+    assert.equal(FEATURE_FLAG_DEFINITIONS.length, 140);
     // COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE (#17114, default off) to 114.
     // CURSOR_GROK_47_DROP_MAX_EFFORT (#17386, default off) to 112.
     // UNPRICED_USAGE_BUDGET_POLICY (#14604, default fail_closed) to 113.

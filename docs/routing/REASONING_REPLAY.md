@@ -179,6 +179,22 @@ Muse (`muse-code`) returns caller-bound opaque reasoning (`encrypted_content`). 
 
 Regression guards: `tests/unit/muse-session-ownership.test.ts`, `tests/unit/muse-session-ownership-retention.test.ts`, `tests/unit/muse-empty-response-retry.test.ts`, and `tests/unit/chatcore-semantic-cache.test.ts`.
 
+## Resuming a Cut Stream at the Next Target (opt-in)
+
+A combo commits a streaming target as soon as it has produced output, so a cut that comes later used to reach the client as a failure. For combos that opt in, the combo itself can resume the answer at its next target. This is separate from the reasoning cache above (it never writes to it) and from the same-target recovery in `open-sse/services/streamRecovery.ts`.
+
+- **Enable:** the feature flag `COMBO_STREAM_CHECKPOINT_ENABLED` (default **off**) and, in the combo's **own** config, `resumeStreamFromCheckpoint: true` plus a non-empty `reasoningCheckpointProviders`. Settings → Combo defaults never grant either one.
+- **Scope:** a streaming, single-choice Chat Completions request with a plain-text history (no tools, tool results or media), no bound session or pinned model, sequential dispatch (no hedging, no protected priority target), and a later target whose provider is listed. Anything else keeps today's behavior. Responses, Messages and Gemini native streams are not resumed.
+- **Checkpoint:** while the stream flows, every complete event is forwarded unchanged and its text and plain reasoning are kept in memory (at most **64 KiB**, never logged). Signed, encrypted or hidden reasoning marks the checkpoint incomplete and an incomplete checkpoint is never forwarded.
+- **The cut:** the gateway's `stream_error` frame, a transport error, or a body that ends without a terminal. That failure is held back until the combo knows whether the resumption worked. A tool call, a refusal, several choices, a legitimate terminal, a client disconnect or any frame the combo does not recognize ends the claim: the stream goes on untouched.
+- **The replacement:** one dispatch, to the next listed target that the combo's normal gates admit, using one slot of the shared attempt budget and no combo, family or transport retry. It receives the delivered text and the reasoning as quoted untrusted data in a leading system message (credential-shaped strings redacted) and an exact **anchor**: the last 64 code points of the delivered text. If no text had been delivered, the replacement simply answers from the reasoning.
+- **The seam:** the whole replacement is read first (at most **64 KiB** and **30 s** from the cut) and must have a known terminal (`stop` or `length`), no tool call and a single choice. When text had been delivered, its first characters must equal the anchor exactly (no Unicode or whitespace normalization); the echo is removed once. The client then receives only the words after the anchor, in the identity (`id`, `model`, `created`) of the stream it was already reading, one terminal chunk, the replacement's usage trailer if it sent one, and a single `[DONE]`. The replacement's own reasoning is not forwarded.
+- **When it does not work:** no listed target, a missing anchor, a failed or oversized replacement, or an incomplete checkpoint. The client keeps the prefix it already has and receives the original, already sanitized failure.
+- **Precedence:** if the same-target recovery already resolved the cut, the combo sees no cut and does nothing. For a cut the combo may resume, the combo's resumption takes precedence over the same-target mid-stream continuation (`STREAM_RECOVERY_MIDSTREAM_ENABLED`): the combo marks the dispatch with an internal body field that is stripped before the upstream request, and the upstream handler skips that continuation (a retry before any output is unaffected).
+- **Accounting:** each real attempt, including a replacement that yields nothing for the client, is dispatched through the normal single-model path and recorded as a combo request.
+
+Regression guard: `tests/unit/combo-stream-checkpoint.test.ts`.
+
 ## See Also
 
 - [RESILIENCE_GUIDE.md](../architecture/RESILIENCE_GUIDE.md) — circuit breakers, cooldowns, model lockouts

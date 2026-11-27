@@ -87,6 +87,7 @@ import { buildContinuationLogHooks } from "./recoveryTraceLogging.ts";
 import { formatStreamRecoveryRetryWarning } from "./streamErrorResult.ts";
 import { injectSystemPromptPostTranslation } from "../../services/systemPrompt.ts";
 import type { ToolDisclosureConfig } from "../../utils/toolDisclosure.ts";
+import { COMBO_CHECKPOINT_RESUME_FIELD } from "../../services/combo/reasoningCheckpoint.ts";
 
 export type ChatCoreExecutorResult = {
   upstreamHttpSelection?: HttpAttemptSelection | null;
@@ -241,6 +242,9 @@ export async function executeProviderRequest(
     userAgent: _userAgent,
   } = deps;
   const body = rawBody;
+  // The combo marked this attempt: it resumes a cut at its next target, so the same-target
+  // continuation after commitment stays out of the way (a pre-content retry is unaffected).
+  const comboResumesCut = body?.[COMBO_CHECKPOINT_RESUME_FIELD] === true;
   const recordResponseKeyHealth = (
     response: Response,
     creds: Record<string, unknown>,
@@ -601,7 +605,7 @@ export async function executeProviderRequest(
                   const operatorExplicit = isStreamRecoveryExplicitlyConfigured(settings);
                   const goalOverride = !operatorExplicit && agentGoalPolicy.streamRecoveryEnabled;
                   streamRecoveryEnabled = sr.enabled || goalOverride;
-                  continueMidStreamEnabled = sr.continueMidStream === true;
+                  continueMidStreamEnabled = sr.continueMidStream === true && !comboResumesCut;
                   throughputWatchdog = sr.throughputWatchdog;
                   if (goalOverride && !sr.enabled) {
                     log?.info?.(
