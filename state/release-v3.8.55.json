@@ -3,56 +3,37 @@
   "base": "release/v3.8.55",
   "paused": null,
   "inFlight": {
-    "batchId": "b65",
+    "batchId": "b66",
     "kind": "batch",
-    "candidateRef": "omni-queue/release-v3.8.55/b65-3a815de23db1",
-    "candidateSha": "3a815de23db1efaeb3fd34ccf196efc616132490",
+    "candidateRef": "omni-queue/release-v3.8.55/b66-44812b66fdff",
+    "candidateSha": "44812b66fdff9e420d92aee4645a61546fe89f43",
     "baseSha": "c71f0065a7efe9230ec23b96a12253b050c4d7ad",
-    "treeSha": "7872bbfd1a71e4d79e4f769e719653b41e7bbf5d",
+    "treeSha": "99619adedf9a8642f0b0ee17228ec6dfe09279a6",
     "prs": [
-      {
-        "n": 21264,
-        "head": "29532e772ecce08b898701212419ac9ea728ed87",
-        "title": "docs(readme): dark-theme polish to match the site's use of the kit palette",
-        "author": "diegosouzapw",
-        "labeledAt": "2026-11-27T00:59:23Z"
-      },
       {
         "n": 21360,
         "head": "ae06a1eb1acaf0ec661a2049b86eefc0944ba139",
         "title": "chore(quality): resync catalog drift probes with the audited catalog",
         "author": "diegosouzapw",
         "labeledAt": "2026-11-27T01:02:32Z"
-      },
-      {
-        "n": 21331,
-        "head": "8bdfdfb91a24a151cec700fd4c471127a2229e7e",
-        "title": "docs(checks): flag only OmniRoute version claims and drop manual Last updated stamps",
-        "author": "diegosouzapw",
-        "labeledAt": "2026-11-27T01:10:15Z"
       }
     ],
     "stage": "testing",
-    "startedAt": "2026-11-27T11:57:03.210Z",
+    "startedAt": "2026-11-27T13:25:44.834Z",
     "attempts": 0,
     "bisect": {
       "rootBatchId": "b64",
       "segments": [
         [
           {
-            "n": 21264,
-            "head": "29532e772ecce08b898701212419ac9ea728ed87",
-            "title": "docs(readme): dark-theme polish to match the site's use of the kit palette",
-            "author": "diegosouzapw",
-            "labeledAt": "2026-11-27T00:59:23Z"
-          },
-          {
             "n": 21360,
             "head": "ae06a1eb1acaf0ec661a2049b86eefc0944ba139",
             "title": "chore(quality): resync catalog drift probes with the audited catalog",
             "author": "diegosouzapw",
             "labeledAt": "2026-11-27T01:02:32Z"
-          },
+          }
+        ],
+        [
           {
             "n": 21331,
             "head": "8bdfdfb91a24a151cec700fd4c471127a2229e7e",
@@ -80,23 +61,8 @@
       ],
       "culprits": [],
       "landed": [],
-      "steps": 0,
+      "steps": 1,
       "hang": false
-    },
-    "rerun": {
-      "ref": "omni-queue/release-v3.8.55/b65-3a815de23db1",
-      "requestedAt": "2026-11-27T13:09:57.915Z",
-      "afterMs": 1795784970000,
-      "runIds": [
-        45994618409,
-        45994618193
-      ],
-      "jobs": [
-        "Gate / CI",
-        "Gate / Quality",
-        "Fast Quality Gates",
-        "Lint"
-      ]
     }
   },
   "baseChecks": [
@@ -193,8 +159,8 @@
     }
   },
   "counters": {
-    "batchSeq": 65,
-    "ciRuns": 70,
+    "batchSeq": 66,
+    "ciRuns": 71,
     "landedPrs": 62,
     "landedBatches": 19,
     "redBatches": 15,
@@ -202,58 +168,6 @@
     "culprits": 1
   },
   "history": [
-    {
-      "at": "2026-11-21T02:19:39.364Z",
-      "type": "land-rejected",
-      "batchId": "b18",
-      "prs": [
-        20823,
-        20825
-      ],
-      "sha": "3917441ded0b24fa5a761f0e22eeb73ddc6286a9",
-      "detail": "batch changed before landing: #20823 conflicting; #20825 conflicting",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44855215576"
-    },
-    {
-      "at": "2026-11-21T02:19:49.211Z",
-      "type": "batch-started",
-      "batchId": "b19",
-      "prs": [
-        20776,
-        20819,
-        20820,
-        20824
-      ],
-      "sha": "f6316b6a06f985f1c6dd819752e8980ae449e0b4",
-      "detail": "4 PR(s) on b748429cf5b3; window 6",
-      "labeledAt": {
-        "20776": "2026-11-20T23:33:39Z",
-        "20819": "2026-11-20T23:33:42Z",
-        "20820": "2026-11-20T23:33:44Z",
-        "20824": "2026-11-20T23:33:50Z"
-      },
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44855215576"
-    },
-    {
-      "at": "2026-11-21T02:20:00.597Z",
-      "type": "would-dequeue",
-      "prs": [
-        20825
-      ],
-      "sha": "c13cee2357119a5aec1e3f2d6eb756d442dbd06d",
-      "detail": "conflicting",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44855215576"
-    },
-    {
-      "at": "2026-11-21T02:20:05.404Z",
-      "type": "would-dequeue",
-      "prs": [
-        20823
-      ],
-      "sha": "b03f265540ae84c22ff404c764b6ff91ef49046e",
-      "detail": "conflicting",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44855215576"
-    },
     {
       "at": "2026-11-21T03:53:24.217Z",
       "type": "checks-green",
@@ -2926,8 +2840,58 @@
       "sha": "3a815de23db1efaeb3fd34ccf196efc616132490",
       "detail": "re-running the failed jobs of b65 once (Gate / CI, Gate / Quality, Fast Quality Gates, Lint) before bisecting",
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/46004687751"
+    },
+    {
+      "at": "2026-11-27T13:25:32.572Z",
+      "type": "checks-red",
+      "batchId": "b65",
+      "prs": [
+        21264,
+        21360,
+        21331
+      ],
+      "sha": "3a815de23db1efaeb3fd34ccf196efc616132490",
+      "detail": "Gate / Quality, Gate / CI, Lint, Fast Quality Gates",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/46006823442"
+    },
+    {
+      "at": "2026-11-27T13:25:32.573Z",
+      "type": "bisect-split",
+      "batchId": "b65",
+      "prs": [
+        21264,
+        21360,
+        21331
+      ],
+      "sha": "3a815de23db1efaeb3fd34ccf196efc616132490",
+      "detail": "segment of 3 red: testing #21264, #21360 next",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/46006823442"
+    },
+    {
+      "at": "2026-11-27T13:25:36.355Z",
+      "type": "pr-dequeued",
+      "batchId": "b64",
+      "prs": [
+        21264
+      ],
+      "detail": "withdrawn: head moved to 51558aa1c1be",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/46006823442"
+    },
+    {
+      "at": "2026-11-27T13:25:48.060Z",
+      "type": "batch-started",
+      "batchId": "b66",
+      "prs": [
+        21360
+      ],
+      "sha": "44812b66fdff9e420d92aee4645a61546fe89f43",
+      "detail": "bisect of b64: 1 PR(s) on c71f0065a7ef",
+      "labeledAt": {
+        "21360": "2026-11-27T01:02:32Z"
+      },
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/46006823442"
     }
   ],
-  "updatedAt": "2026-11-27T13:10:45.085Z",
+  "updatedAt": "2026-11-27T13:26:49.113Z",
   "batchWindow": 2
 }
