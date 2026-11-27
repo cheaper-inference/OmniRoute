@@ -70,6 +70,8 @@ docker rm omniroute
 docker volume rm omniroute-data
 
 # (ជាជម្រើស) លុប image
+docker rmi cheaperinference/omniroute:latest
+# ការដំឡើងចាស់ៗបានទាញឈ្មោះមរតក៖
 docker rmi diegosouzapw/omniroute:latest
 ```
 

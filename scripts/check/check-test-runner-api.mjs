@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
-import { pathToFileURL } from "node:url";
+
+import { isMainModule } from "../lib/is-main-module.mjs";
 
 // Dirs collected ONLY by Vitest (vitest.mcp.config.ts and vitest.config.ts).
 // Keep in sync with both configs. A test here MUST import from "vitest".
@@ -52,7 +53,7 @@ export function findRunnerMismatches(root) {
   return bad;
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1] || "").href) {
+if (isMainModule(import.meta.url)) {
   const root = process.cwd();
   const bad = findRunnerMismatches(root);
   if (bad.length) {

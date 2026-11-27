@@ -6,6 +6,7 @@ import {
   getStats as getSemaphoreStats,
   resetAll as resetAllSemaphores,
 } from "@omniroute/open-sse/services/accountSemaphore.ts";
+import { getAdaptiveConnectionStatus } from "@omniroute/open-sse/services/adaptiveConnectionConcurrency.ts";
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 
 export async function GET(request: Request) {
@@ -21,6 +22,7 @@ export async function GET(request: Request) {
       rateLimits: getAllRateLimitStatus(),
       comboQueues: getComboSemaphoreStats("combo:"),
       semaphores: getSemaphoreStats(),
+      adaptiveConnectionLimits: getAdaptiveConnectionStatus(),
     },
     { headers: { "Cache-Control": "private, no-store" } }
   );

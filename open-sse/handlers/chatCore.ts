@@ -31,7 +31,7 @@ export {
   hoistLeadingTextSystemMessages,
   relocateDirectiveOnlyMessages,
 } from "./chatCore/claudeSystemRole.ts";
-import { checkIdempotencyCache } from "./chatCore/idempotency.ts";
+import { checkIdempotencyCache, readIdempotencyResponse } from "./chatCore/idempotency.ts";
 import {
   acquireTurnExecutionWithWait,
   createTurnInProgressResult,
@@ -53,7 +53,11 @@ import { runStreamingTail } from "./chatCore/streamingTail.ts";
 import { sanitizeChatRequestBody } from "./chatCore/sanitization.ts";
 import { isReasoningContinuationIncompatible } from "./chatCore/reasoningInputGate.ts";
 
-import { getHeaderValueCaseInsensitive, resolveCompressionHeader } from "./chatCore/headers.ts";
+import {
+  getHeaderValueCaseInsensitive,
+  resolveCompressionHeader,
+  resolveNoLogEnabled,
+} from "./chatCore/headers.ts";
 
 import {
   isCodexOriginatedHeaders,
@@ -252,7 +256,11 @@ import { runPluginOnResponseHook } from "./chatCore/pluginOnResponse.ts";
 import { applyPostTranslationCompression } from "./chatCore/postTranslationCompression.ts";
 import { isJsonRecord } from "./chatCore/nonStreamingResponseParse.ts";
 import { recordNonStreamingUsageStats } from "./chatCore/nonStreamingUsageStats.ts";
-import { resolveUsageAgentContext } from "./chatCore/agentContext.ts";
+import {
+  resolveCallLogSessionTag,
+  resolveLaunchSessionTag,
+  resolveUsageAgentContext,
+} from "./chatCore/agentContext.ts";
 import { getModelNormalizeToolCallId, getModelPreserveOpenAIDeveloperRole } from "@/lib/db/models";
 import { extractSessionAffinityKey } from "@/sse/services/auth";
 import { createManagedLeaseFence } from "./chatCore/managedLeaseFence.ts";
@@ -265,6 +273,7 @@ import {
   redactPendingBody,
 } from "@/lib/guardrails/videoBridgeSnapshotRedaction";
 import {
+  normalizeGeminiPromptCacheMode,
   shouldPreserveCacheControl,
   resolveConnectionCacheOverride,
 } from "../utils/cacheControlPolicy.ts";
@@ -465,12 +474,15 @@ async function handleChatCoreInner({
   comboName,
   comboStrategy = null,
   isCombo = false,
+  // Virtual routes have no persisted combo settings, even if a legacy row shares the name.
+  isVirtualAutoCombo = false,
   routingComboId = null,
   sessionAffinityKey = null,
   comboStepId = null,
   comboExecutionKey = null,
   cachedSettings = null,
   skipUpstreamRetry = false,
+  nonReplayableRequest = false,
   createPiiTransform = null,
   correlationId = null,
   conversationId = null,
@@ -619,7 +631,19 @@ async function handleChatCoreInner({
   ): EffectiveServiceTier | null => resolveReportedServiceTierFor(provider, payload, maxDepth);
   let upstreamHttpSelection: HttpAttemptSelection | null = null;
   let providerResponse;
-  const agentContext = resolveUsageAgentContext(body, clientRawRequest?.headers, apiKeyInfo);
+  // Per-key no-log flag OR the per-request `x-omniroute-no-log` header. Resolved
+  // before agent-context extraction so a header-only no-log request also drops
+  // prompt-derived project/branch fields from usage attribution.
+  const noLogEnabled = resolveNoLogEnabled(apiKeyInfo, clientRawRequest?.headers ?? null);
+  const agentContext = resolveUsageAgentContext(
+    body,
+    clientRawRequest?.headers,
+    apiKeyInfo,
+    noLogEnabled
+  );
+  // `omniroute launch` session tag (olx_ bearer) unless an explicit x-omniroute-session-id
+  // header is present; null for every other request, so their session_tag is unchanged.
+  const launchSessionTag = resolveLaunchSessionTag(clientRawRequest?.headers, apiKeyInfo);
   // Failure usage record building extracted to chatCore/failureUsage.ts (#3501); the handler keeps
   // the fire-and-forget save + computes latencyMs, so the call sites stay byte-identical.
   const persistFailureUsage = (
@@ -671,7 +695,7 @@ async function handleChatCoreInner({
   // ── Phase 9.2: Idempotency check ──
   // Resolve the idempotency key once here and reuse it at the Phase 9.2 save site below,
   // rather than re-deriving it. (#3821-review LEDGER-6)
-  const { hit: idempotencyHit, idempotencyKey } = await checkIdempotencyCache({
+  const idempotencyContext = {
     clientRawRequest,
     provider,
     model,
@@ -683,7 +707,8 @@ async function handleChatCoreInner({
     startTime,
     log,
     videoTranscriptSensitive: videoBridgeObserved,
-  });
+  };
+  const { hit: idempotencyHit, idempotencyKey } = await checkIdempotencyCache(idempotencyContext);
   if (idempotencyHit) {
     return idempotencyHit;
   }
@@ -710,7 +735,13 @@ async function handleChatCoreInner({
   // Preserve chatCore's canonical formatting while the guarded body remains byte-stable.
   // prettier-ignore
   try {
-    // T07: Inject connectionId into credentials so executors can rotate API keys
+  // A previous turn may have cached its response while this request waited for the slot.
+  if (idempotencyKey) {
+    const replay = await readIdempotencyResponse(idempotencyKey, idempotencyContext);
+    if (replay) return replay;
+  }
+
+  // T07: Inject connectionId into credentials so executors can rotate API keys
   // using providerSpecificData.extraApiKeys (API Key Round-Robin feature)
   if (connectionId && credentials && !credentials.connectionId) {
     credentials.connectionId = connectionId;
@@ -874,7 +905,7 @@ async function handleChatCoreInner({
       providerRequest: initialPendingBody(body, effectiveModel, videoBridgeObserved),
       stage: "registered",
       correlationId,
-      sessionTag: conversationId || null,
+      sessionTag: resolveCallLogSessionTag(launchSessionTag, conversationId, null),
     }) || generateRequestId();
   // Capture before any await: retries can reuse the public preview ID.
   const pendingRequestGeneration = getPendingById().get(pendingRequestId)?.attemptGeneration;
@@ -955,10 +986,9 @@ async function handleChatCoreInner({
       `Converted ${webFetchFallbackPlan.convertedToolCount} web_fetch tool(s) to OmniRoute fallback for ${provider}`
     );
   }
-  const noLogEnabled = apiKeyInfo?.noLog === true;
   // Consolidate settings reads — fetch once, reuse throughout the request
   const settings = cachedSettings ?? (await getCachedSettings());
-  const geminiPromptCacheMode = settings.geminiPromptCacheMode === "implicit" ? "implicit" : "off";
+  const geminiPromptCacheMode = normalizeGeminiPromptCacheMode(settings.geminiPromptCacheMode);
   const isScopedGeminiCacheTarget =
     (provider === "antigravity" || provider === "agy") &&
     effectiveModel
@@ -1027,6 +1057,10 @@ async function handleChatCoreInner({
         )) || null;
   const pipelineSessionId = explicitSessionIdHeader || skillRequestId;
   const reasoningReplaySessionKey = sessionAffinityKey || explicitSessionIdHeader;
+  // One upstream Antigravity session per conversation (prompt-cache scope); the
+  // non-streaming server-tool follow-up leg must reuse it, or it falls back to the
+  // account-wide session and evicts parallel conversations' caches.
+  const antigravitySessionKey = conversationId || sessionAffinityKey || null;
   const reasoningCacheScope = buildReasoningCacheScope(
     apiKeyInfo?.id,
     reasoningReplaySessionKey ? String(reasoningReplaySessionKey) : null
@@ -1059,6 +1093,7 @@ async function handleChatCoreInner({
       pendingRequestId,
       pendingRequestGeneration,
       clientRawRequest,
+      agentContext, // identifies the attempt whose session turn a failure drops (#14864)
       requestedModel,
       credentials,
       startTime,
@@ -1077,7 +1112,12 @@ async function handleChatCoreInner({
       // present — it's populated for every request now, not just ones where the
       // client explicitly sent x-omniroute-session-id. The raw header remains a
       // fallback for any caller that somehow bypassed conversationId resolution.
-      sessionTag: conversationId || explicitSessionIdHeader,
+      // A launch session (olx_ bearer, no explicit header) tags every call of the launch.
+      sessionTag: resolveCallLogSessionTag(
+        launchSessionTag,
+        conversationId,
+        explicitSessionIdHeader
+      ),
       // #12150 P1b surface 1: undefined for every non-video request (byte-identical
       // to before this param existed) — see applyVideoBridgeLogRedaction.
       videoBridgeLogRedaction: (videoBridgeLog as VideoBridgeLogParam | undefined)?.redaction,
@@ -1477,7 +1517,7 @@ async function handleChatCoreInner({
         compressionComboApplied = true;
         return true;
       };
-      if ((isCombo && comboName) || routingComboId) {
+      if (!isVirtualAutoCombo && ((isCombo && comboName) || routingComboId)) {
         try {
           const { getComboByName } = await import("@/lib/db/combos");
           let comboConfig = await getComboByName(comboName);
@@ -1979,7 +2019,7 @@ async function handleChatCoreInner({
           : "Prompt Compression engines disabled; reactive context compaction is ALSO disabled — large histories will NOT be trimmed before reaching the upstream provider"
       );
     }
-    if (isCombo && comboName) {
+    if (isCombo && comboName && !isVirtualAutoCombo) {
       log?.info?.("CONTEXT", `Attempting to resolve combo limits for comboName=${comboName}`);
       try {
         const { getComboByName } = await import("@/lib/db/combos");
@@ -2474,6 +2514,7 @@ async function handleChatCoreInner({
           signatureNamespace: connectionId,
           copilotClient: copilotCompatibleReasoning,
           reasoningCacheScope,
+          antigravitySessionKey,
           videoTranscriptSensitive: videoBridgeObserved,
           onReasoningReplayHistory: (messages) => {
             reasoningReplayHistory = messages;
@@ -2747,6 +2788,7 @@ async function handleChatCoreInner({
     resilienceSettings,
     settings,
     skipUpstreamRetry,
+    nonReplayableRequest,
     requestUpstreamStartTimeoutMs,
     stream,
     streamController,
@@ -2993,7 +3035,7 @@ async function handleChatCoreInner({
     retryAfterMs?: number | null;
     targetModel: string;
   }) => {
-    let errorType = classifyProviderError(statusCode, message, provider);
+    let errorType = classifyProviderError(statusCode, message, provider, upstreamErrorBody);
     if (statusCode === 429 && isModelScope()) {
       const decision = classifyModelScope429(message, normalizeHeaders(headers));
       errorType =
@@ -3190,12 +3232,16 @@ async function handleChatCoreInner({
                 `[provider] Node ${errorConnectionId} ModelScope model quota exhausted (${statusCode}) for ${targetModel} - ${Math.ceil(quotaCooldownMs / 1000)}s (connection stays active)`
               );
             } else if (
+              // #20969: keep the upstream message/status on the model lock — the connection
+              // stays active, so nothing else records why this model is cooling down.
               lockModelIfPerModelQuota(
                 provider,
                 errorConnectionId,
                 model,
                 "quota_exhausted",
-                quotaCooldownMs
+                quotaCooldownMs,
+                undefined,
+                { lastError: persistentMessage, errorCode: statusCode }
               ) ||
               (targetModel &&
                 targetModel !== model &&
@@ -3204,7 +3250,9 @@ async function handleChatCoreInner({
                   errorConnectionId,
                   targetModel,
                   "quota_exhausted",
-                  quotaCooldownMs
+                  quotaCooldownMs,
+                  undefined,
+                  { lastError: persistentMessage, errorCode: statusCode }
                 ))
             ) {
               const quotaScope = getQuotaScopeLabelForProvider(provider, targetModel);
@@ -3529,6 +3577,7 @@ async function handleChatCoreInner({
       persistFailureUsage,
       pipelineRecovered,
       pipelineSessionId,
+      antigravitySessionKey,
       preserveCacheControl,
       provider,
       providerHeaders,

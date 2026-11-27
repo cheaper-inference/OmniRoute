@@ -24,7 +24,7 @@ Waɗannan alkalumman sun bayyana keɓancewar asusun ɓangare na uku da yanayin c
 | **+ a bayan binciken sanin yanki**               | **+~ 6m**              | `modelscope` (Alibaba Cloud daure + babban yankin-China tabbataccen suna). Ƙidaya mai maimaita gaske, fallasa azaman `gatedRecurringTokens` / `gatedProviders` kuma akan dashboard. Kada a taƙaice cikin kanun labarai: +~ 6M bayan tabbatar da asalin yanki.     |
 | Rufin ka'idar (duk iyakoki, 24/7)                | ~ 10 B                 | Jimlar ƙimar kowane mai bayarwa da aka kera zuwa amfani mara tsayawa.** Ba garanti ba** — ba kanun labarai wannan.                                                                                                                                                |
 
-**Kanun labarai na gaskiya:** _Aggregates OmniRoute**~ 1.62B an rubuta alamun kyauta kowane wata** (har zuwa ~ 2.22B a cikin watan ku na farko tare da ƙididdige rajista) a cikin wuraren shakatawa na kyauta 34 — tare da dogon wutsiya na kyauta na dindindin, masu ba da hular — da RTK + Caveman matsawa (15-95% token tanadi) ya shimfiɗa hakan._
+**Kanun labarai na gaskiya:** _Aggregates OmniRoute**~ 1.62B an rubuta alamun kyauta kowane wata** (har zuwa ~ 2.22B a cikin watan ku na farko tare da ƙididdige rajista) a cikin wuraren shakatawa na kyauta 26 — tare da dogon wutsiya na kyauta na dindindin, masu ba da hular — da RTK + Caveman matsawa (15-95% token tanadi) ya shimfiɗa hakan._
 
 > **Me yasa wannan ya ragu daga ~ na baya 1.94B.** Wartsakarwa ta 2026-06-17 gyara ce ta gaskiya, ba asara ba: `gemini` yanzu an cire ruwa (an ƙirga kowane bambance-bambancen Flash daban, 462M → 60M), `cloudflare-ai` ya gyara zuwa ainihin 10k-Neurons/day (122M → 30M), `doubao` -maimaitawa a matsayin mai ƙididdigewa (ba a sake cirewa ba)`chutes`/`phind`/`kluster` daina). Wani ɓangare na `llm7` (daidai 5M/day → 150M) da sabbin masu samarwa kyauta (Kilo, OpenCode Zen, Z.AI GLM-Flash).
 >
@@ -38,7 +38,7 @@ Waɗannan alkalumman sun bayyana keɓancewar asusun ɓangare na uku da yanayin c
 >
 > **An sabunta ta 2026-09-03 (#11773):** An sake rarraba `cerebras` daga tallafin 30M/mo mai maimaitawa (gwajin ba-kati 1M tokens/day ) zuwa kiredit na rajista na lokaci guda $5 wanda ke buƙatar hanyar biyan kuɗi. Tsarin gaskiya ɗaya kamar LongCat.
 >
-> **Plus xKiro (2026-09-03):** sabon tafkin `xkiro-free` (150M/mo) yana ƙara maɓallin tafkin mai maimaitawa na 35. Felo Web yana tsayawa yayin da provenance/licensing sa na GPL ya kasance akan HOLD. Majiyar ta ruwaito** 34 maɓallan tafkin mai maimaituwa** kuma**~ 1.62B tsayayye** — mai rai, lambar CI-gated (`check:docs-counts` ya kasa ginin idan wannan ya fita daga `computeFreeModelTotals()`).
+> **Plus xKiro (2026-09-03):** sabon tafkin `xkiro-free` (150M/mo) yana ƙara maɓallin tafkin mai maimaitawa na 35. Felo Web yana tsayawa yayin da provenance/licensing sa na GPL ya kasance akan HOLD. Majiyar ta ruwaito** 26 maɓallan tafkin mai maimaituwa** kuma**~ 1.62B tsayayye** — mai rai, lambar CI-gated (`check:docs-counts` ya kasa ginin idan wannan ya fita daga `computeFreeModelTotals()`).
 
 Mafi girma** rubuce** masu ba da gudummawa: `mistral` 1.00B, `nara` 210M, `llm7` 150M, `xkiro` 150M, `groq` 30M (manfuna biyar na kowane samfurin), `cloudflare-ai` 30M, `api-airforce` 24M. (An cire `longcat` — tallafinsa na 10M LongCat-2.0 shine lokaci ɗaya, KYC-gated creditup credit, ba kasafin kuɗi na wata-wata mai maimaitawa ba.)
 

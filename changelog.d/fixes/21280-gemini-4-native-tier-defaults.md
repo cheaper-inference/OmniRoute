@@ -1,0 +1,1 @@
+- **fix(translators):** Honor fixed Gemini 4 model tiers by default, preserve native `xhigh` and explicit reasoning controls, and keep Gemini 3.5 Flash-Lite thinking controls compatible with existing OpenAI requests.

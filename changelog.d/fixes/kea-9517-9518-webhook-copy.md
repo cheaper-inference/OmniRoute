@@ -1,0 +1,1 @@
+- **fix(webhooks):** clarify that custom webhooks accept HTTP and HTTPS, warn that HTTP sends payloads and signatures in clear text, and explain the default display name when the optional name is left empty.

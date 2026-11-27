@@ -1,0 +1,1 @@
+- **feat(quality):** daily catalog drift detector and weekly evidence age report for the free-tier catalog, report only ([#21212](https://github.com/cheaper-inference/OmniRoute/pull/21212))

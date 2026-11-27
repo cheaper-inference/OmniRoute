@@ -1,6 +1,7 @@
 import type { NextRequest } from "next/server";
 import { runAuthzPipeline } from "./server/authz/pipeline";
 import { headlessGateResponse } from "./lib/system/headless";
+import { quotaPanelGateResponse } from "./server/selfService/panelRoute";
 
 // #10627: the proxy runs in its own Next.js runtime and never executes
 // instrumentation-node.ts's startup warm-ups, so its FIRST request used to
@@ -27,6 +28,11 @@ export async function proxy(request: NextRequest) {
   // src/lib/system/headless.ts and docs/guides/HEADLESS.md.
   const headlessResponse = headlessGateResponse(request.nextUrl.pathname);
   if (headlessResponse) return headlessResponse;
+  // Self-service quota page: while QUOTA_SELF_PANEL is off or the provider is unknown,
+  // /quota/<provider> is answered with a 404 here, before rendering starts, so the status is
+  // a real 404 (the root loading.tsx would otherwise stream a 200 first).
+  const panelGate = quotaPanelGateResponse(request);
+  if (panelGate) return panelGate;
   return runAuthzPipeline(request, { enforce: true });
 }
 
@@ -55,6 +61,12 @@ export const config = {
     "/:codexseg([cC][oO][dD][eE][xX])/:path*",
     "/:codexseg([cC][oO][dD][eE][xX])",
     "/:modelsseg([mM][oO][dD][eE][lL][sS])",
+    "/:a2aseg([aA]2[aA])/:path*",
+    "/:a2aseg([aA]2[aA])",
+    "/:connectseg([cC][oO][nN][nN][eE][cC][tT])/:path*",
+    "/:connectseg([cC][oO][nN][nN][eE][cC][tT])",
+    "/:quotaseg([qQ][uU][oO][tT][aA])/:path*",
+    "/:quotaseg([qQ][uU][oO][tT][aA])",
     // CLIProxyAPI management compatibility (/v0/management/* → /api/v0/management/*).
     // Without this entry the rewrite would reach the handler with no authz pipeline run,
     // so the trusted x-omniroute-auth-* stamps would not be stripped from the request.

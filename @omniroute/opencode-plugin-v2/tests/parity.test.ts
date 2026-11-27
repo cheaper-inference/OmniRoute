@@ -226,12 +226,25 @@ describe("v1-vs-v2 catalog parity", () => {
         providerId: "omniroute",
         baseURL: TEST_OPTS.baseURL,
       });
+      const expectedPayload = JSON.parse(
+        JSON.stringify({ ...(expected as object), providerID: undefined, name: undefined })
+      );
+      // Documented exclusion: v1 filled a missing gateway `max_output_tokens`
+      // with `limit.output: 0`; v2 leaves `limit.output` out instead of
+      // publishing a zero output limit the gateway never stated.
+      if (typeof entry.max_output_tokens !== "number") {
+        assert.equal(expectedPayload.limit.output, 0, `v1 recorded a zero output for ${entry.id}`);
+        assert.equal(
+          "output" in viaShared.limit,
+          false,
+          `v2 omits limit.output for ${entry.id} when the gateway does not state it`
+        );
+        delete expectedPayload.limit.output;
+      }
 
       assert.deepEqual(
         JSON.parse(JSON.stringify({ ...viaShared, providerID: undefined, name: undefined })),
-        JSON.parse(
-          JSON.stringify({ ...(expected as object), providerID: undefined, name: undefined })
-        ),
+        expectedPayload,
         `model mapper parity for ${entry.id}`
       );
     }

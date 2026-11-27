@@ -14,6 +14,7 @@ import {
   setCachedResponse as defaultSetCachedResponse,
   isCacheableForWrite as defaultIsCacheableForWrite,
   isTruncatedCompletion as defaultIsTruncatedCompletion,
+  isRefusalOrUnavailableCompletion as defaultIsRefusalOrUnavailableCompletion,
   responseCarriesToolCalls,
 } from "@/lib/semanticCache";
 import { isSmallEnoughForSemanticCache as defaultIsSmallEnough } from "../../utils/estimateSize.ts";
@@ -34,6 +35,7 @@ export interface SemanticCacheStoreDeps {
   isCacheableForWrite: typeof defaultIsCacheableForWrite;
   /** Optional so pre-existing callers/tests with partial deps keep working. */
   isTruncatedCompletion?: typeof defaultIsTruncatedCompletion;
+  isRefusalOrUnavailableCompletion?: typeof defaultIsRefusalOrUnavailableCompletion;
   isSmallEnoughForSemanticCache: typeof defaultIsSmallEnough;
   generateSignature: typeof defaultGenerateSignature;
   setCachedResponse: typeof defaultSetCachedResponse;
@@ -42,6 +44,7 @@ export interface SemanticCacheStoreDeps {
 const DEFAULT_DEPS: SemanticCacheStoreDeps = {
   isCacheableForWrite: defaultIsCacheableForWrite,
   isTruncatedCompletion: defaultIsTruncatedCompletion,
+  isRefusalOrUnavailableCompletion: defaultIsRefusalOrUnavailableCompletion,
   isSmallEnoughForSemanticCache: defaultIsSmallEnough,
   generateSignature: defaultGenerateSignature,
   setCachedResponse: defaultSetCachedResponse,
@@ -71,6 +74,7 @@ export function storeSemanticCacheResponse(
     provider?: string;
     apiKeyId?: string;
     usage?: UsageLike;
+    originalCostUsd?: number;
     log?: LoggerLike;
     videoTranscriptSensitive?: boolean;
     /** Reversible PII vault minted tokens: a cached copy would replay unresolvable tokens. */
@@ -85,6 +89,9 @@ export function storeSemanticCacheResponse(
     !args.enabled ||
     !deps.isCacheableForWrite(args.body, args.headers) ||
     (deps.isTruncatedCompletion ?? defaultIsTruncatedCompletion)(args.translatedResponse) ||
+    (deps.isRefusalOrUnavailableCompletion ?? defaultIsRefusalOrUnavailableCompletion)(
+      args.translatedResponse
+    ) ||
     responseCarriesToolCalls(args.translatedResponse) ||
     !deps.isSmallEnoughForSemanticCache(args.translatedResponse)
   ) {
@@ -99,7 +106,14 @@ export function storeSemanticCacheResponse(
     outputContractOf(args.body)
   );
   const tokensSaved = args.usage?.prompt_tokens + args.usage?.completion_tokens || 0;
-  deps.setCachedResponse(signature, args.model, args.translatedResponse, tokensSaved);
+  deps.setCachedResponse(
+    signature,
+    args.model,
+    args.translatedResponse,
+    tokensSaved,
+    undefined,
+    args.originalCostUsd
+  );
   args.log?.debug?.("CACHE", `Stored response for ${args.model} (${tokensSaved} tokens)`);
 
   if (args.translatedResponse && typeof args.translatedResponse === "object") {
@@ -118,6 +132,7 @@ export function storeSemanticCacheResponse(
         apiKeyId: args.apiKeyId,
         signature,
         tokensSaved,
+        originalCostUsd: args.originalCostUsd,
       })
       .catch(() => {});
   }

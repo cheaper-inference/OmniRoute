@@ -93,7 +93,7 @@
 
 [![npm верзија](https://img.shields.io/npm/v/omniroute?color=cb3837&logo=npm)](https://www.npmjs.com/package/omniroute)
 ![NPM месечно](https://img.shields.io/npm/dm/omniroute?label=npm/month&color=cb3837&logo=npm)
-[![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/diegosouzapw/omniroute)
+[![Docker Hub](https://img.shields.io/docker/v/cheaperinference/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/cheaperinference/omniroute)
 [![Лиценца: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 ![Docker преузимања](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
 ![Electron преузимања](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Obećanje — Jedna krajnja tačka i 394 provajdera. Automatski rezervni mehanizam održava usmeravanje dok je dostupno drugo ispravno odredište. Šest stubova: otporno rezervno usmeravanje kroz 394 provajdera · do 95% uštede tokena na podobnim radnim opterećenjima · $0 za početak uz više od 150 besplatnih nivoa i 51 besplatnog provajdera koji se trajno nude bez pretplate/ključa · 39 CLI/agentskih integracija kroz jednu konfiguraciju · kompatibilnost sa OpenAI, Claude, Gemini i Responses API interfejsima na /v1 · kontrole za produkciju, uključujući prekidače kola, TLS prikrivanje, MCP sa 110 alata, A2A, memoriju, zaštitne mehanizme, evaluacije i više od 56.000 statičkih deklaracija testova kroz više od 7.800 praćenih datoteka testova."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Obećanje — Jedna krajnja tačka i 394 provajdera. Automatski rezervni mehanizam održava usmeravanje dok je dostupno drugo ispravno odredište. Šest stubova: otporno rezervno usmeravanje kroz 394 provajdera · do 95% uštede tokena na podobnim radnim opterećenjima · $0 za početak uz više od 150 besplatnih nivoa i 40 besplatnog provajdera koji se trajno nude bez pretplate/ključa · 39 CLI/agentskih integracija kroz jednu konfiguraciju · kompatibilnost sa OpenAI, Claude, Gemini i Responses API interfejsima na /v1 · kontrole za produkciju, uključujući prekidače kola, TLS prikrivanje, MCP sa 110 alata, A2A, memoriju, zaštitne mehanizme, evaluacije i više od 56.000 statičkih deklaracija testova kroz više od 7.800 praćenih datoteka testova."/>
 
 <br/>
 <br/>
@@ -711,7 +711,7 @@ omniroute configure codex          # такође: claude opencode qwen aider go
 
 </div>
 
-> **394 регистрована провајдера** у канонским колекцијама за ћаскање, медије, претрагу, локалне и cloud агенте и системске функције, укључујући **153 провајдера са метаподацима за откривање `hasFree: true`**. Регистар модела за ћаскање обухвата **239 провајдера / 3.059 различитих парова провајдер-модел / 1.475 необрађених ID-јева модела**; засебни каталог са бесплатним буџетом има **465 редова по моделу**, **34 периодична фонда** и **51 провајдера са бесплатним приступом заувек, без периодичне накнаде и без кључа**. Ово су различити имениоци по дизајну; дефиниције и израчунавања са уклоњеним дупликатима фондова налазе се у [Референци провајдера](docs/reference/PROVIDER_REFERENCE.md) и [Бесплатним нивоима](docs/reference/FREE_TIERS.md).
+> **394 регистрована провајдера** у канонским колекцијама за ћаскање, медије, претрагу, локалне и cloud агенте и системске функције, укључујући **153 провајдера са метаподацима за откривање `hasFree: true`**. Регистар модела за ћаскање обухвата **239 провајдера / 3.059 различитих парова провајдер-модел / 1.475 необрађених ID-јева модела**; засебни каталог са бесплатним буџетом има **465 редова по моделу**, **34 периодична фонда** и **40 провајдера са бесплатним приступом заувек, без периодичне накнаде и без кључа**. Ово су различити имениоци по дизајну; дефиниције и израчунавања са уклоњеним дупликатима фондова налазе се у [Референци провајдера](docs/reference/PROVIDER_REFERENCE.md) и [Бесплатним нивоима](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -786,7 +786,7 @@ omniroute configure codex          # такође: claude opencode qwen aider go
   <tr><th align="left">Platforma</th><th align="left">Instalacija</th><th align="left">Istaknute funkcije</th></tr>
   <tr><td align="left" nowrap>📦 <b>npm (globalno)</b></td><td align="left" nowrap><code>npm install -g omniroute</code></td><td align="left">Jedna komanda, bilo koji OS</td></tr>
   <tr><td align="left" nowrap>⚡ <b>Bun (globalno)</b></td><td align="left" nowrap><code>bun add -g omniroute</code></td><td align="left">Isti registry tarball, brže instalacije</td></tr>
-  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … diegosouzapw/omniroute</code></td><td align="left">Podrška za više arhitektura <b>AMD64 + ARM64</b></td></tr>
+  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … cheaperinference/omniroute</code></td><td align="left">Podrška za više arhitektura <b>AMD64 + ARM64</b></td></tr>
   <tr><td align="left" nowrap>🖥️ <b>Desktop (Electron)</b></td><td align="left" nowrap><code>npm run electron:build</code></td><td align="left">Matični prozor + sistemska paleta — <b>Windows / macOS / Linux</b></td></tr>
   <tr><td align="left" nowrap>🎩 <b>Traka menija (OmniRouteTray)</b></td><td align="left" nowrap><code>brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left">Nadgleda server i automatski ga ažurira — <b>macOS</b></td></tr>
   <tr><td align="left" nowrap>💪 <b>ARM</b></td><td align="left" nowrap>nativni <code>arm64</code></td><td align="left">Raspberry Pi, ARM serveri, Apple Silicon</td></tr>
@@ -1109,7 +1109,7 @@ Koristite ih samo za klijente koji ne mogu da dodaju `Authorization: Bearer ...`
 
 ```bash
 docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
-  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
 ```
 
 `:latest` прати највишу **објављену** стабилну SemVer верзију. Не прати git `main`. Закуцајте `:X.Y.Z` за GitOps. Погледајте [Канале издања за Docker](docs/guides/DOCKER_GUIDE.md#release-channels).Слика фиксира **`OMNIROUTE_MEMORY_MB=1024`**. То је довољно за контролну таблу и лагану преписку. **Агенти за кодирање** (`POST /v1/responses` из Claude Code, Codex, Grok, …) захтевају много већи V8 хеап, иначе процес доживи `FATAL ERROR` на ~12 GiB под два дуга контекста која се преклапају. Димензионишите контејнер изнад хеапа (нативни бафери се налазе изван V8):
@@ -1123,7 +1123,7 @@ docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
 ```bash
 docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
   -e OMNIROUTE_MEMORY_MB=8192 --memory=10g \
-  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
 ```
 
 Пуна табела: [Водич за Docker — RAM у време извршавања](docs/guides/DOCKER_GUIDE.md#runtime-ram-for-coding-agents).
@@ -1329,7 +1329,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 такође га
   <tr><td nowrap><b>Окружење извршавања</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Језик</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> у оквиру <code>src/</code> и <code>open-sse/</code> (без <code>any</code> у језгру од верзије v2.0)</td></tr>
   <tr><td nowrap><b>Оквир</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>База података</b></td><td>better-sqlite3 (SQLite, WAL журналисање) + LowDB (JSON наслеђе) — 147 доменских модула, 240 миграција</td></tr>
+  <tr><td nowrap><b>База података</b></td><td>better-sqlite3 (SQLite, WAL журналисање) + LowDB (JSON наслеђе) — 147 доменских модула, 252 миграција</td></tr>
   <tr><td nowrap><b>Меморија</b></td><td>SQLite FTS5 претрага целог текста + векторски уграђени записи квантизовани у int8, типизовано опадање</td></tr>
   <tr><td nowrap><b>Шеме</b></td><td>Zod 4 — валидација улаза/излаза MCP алата + API уговори</td></tr>
   <tr><td nowrap><b>Протоколи</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1342,7 +1342,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 такође га
   <tr><td nowrap><b>Тестирање</b></td><td>Node.js покретач тестова + Vitest — <b>више од 60.000 статичких декларација тестова</b> у више од 8.400 праћених датотека тестова (јединични, интеграциони, E2E, безбедносни, екосистемски)</td></tr>
   <tr><td nowrap><b>Платформе</b></td><td>Рачунар (Electron) · Android (Termux) · PWA (било који прегледач)</td></tr>
   <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — аутоматско објављивање на npm + Docker Hub при објављивању верзије</td></tr>
-  <tr><td nowrap><b>Везе</b></td><td><a href="https://omniroute.online">Веб-сајт</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
+  <tr><td nowrap><b>Везе</b></td><td><a href="https://omniroute.online">Веб-сајт</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/cheaperinference/omniroute">Docker Hub</a></td></tr>
 </table>
 
 <div align="center">

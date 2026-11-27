@@ -1,0 +1,25 @@
+OpenAI Codex
+Copyright 2025 OpenAI
+
+This project includes code derived from [Ratatui](https://github.com/ratatui/ratatui), licensed under the MIT license.
+Copyright (c) 2016-2022 Florian Dehau
+Copyright (c) 2023-2025 The Ratatui Developers
+
+----------------------------------------------------------------------------------------------
+Vendoring note (OmniRoute)
+
+The text above is the NOTICE file of https://github.com/openai/codex, reproduced verbatim as
+required by section 4(d) of the Apache License, Version 2.0 (full text in ./LICENSE, copied
+verbatim from the same repository).
+
+Files in this directory taken from openai/codex at commit
+69231e119bfca0b14453515e97d99688ce1c47c9 (2026-11-13):
+
+- base-instructions.txt: verbatim copy of codex-rs/models-manager/prompt.md (the
+  BASE_INSTRUCTIONS text Codex uses for models without their own instructions,
+  codex-rs/models-manager/src/model_info.rs). Not modified. The file is renamed to .txt so
+  repository formatters never rewrite it; its bytes are sent to the model as-is.
+- LICENSE: verbatim copy of the repository LICENSE (Apache-2.0).
+
+The OmniRoute launcher writes base-instructions.txt into the launch-scoped Codex model catalog
+(model_catalog_json, "base_instructions" of each entry), see bin/cli/launch/adapters/codex.mjs.

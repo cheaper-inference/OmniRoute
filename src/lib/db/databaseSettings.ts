@@ -16,7 +16,6 @@ import {
   assertCacheCredentialEndpoint,
   encryptLegacyCacheSecretCopies,
 } from "./cacheSecrets";
-import { getDatabaseStats } from "./stats";
 import { getState as getVacuumSchedulerState, refreshVacuumScheduler } from "./vacuumScheduler";
 
 const DATABASE_SETTINGS_NAMESPACE = "databaseSettings";
@@ -472,7 +471,11 @@ export function isSemanticCacheDbEnabled(): boolean {
 }
 
 export function getDatabaseSettings(): DatabaseSettings {
-  const dbStats = getDatabaseStats();
+  // Size and page count come from two pragmas. The per-table COUNT(*) and dbstat scans of
+  // getDatabaseStats() belong to the explicit refresh-stats endpoint only.
+  const db = getDbInstance();
+  const pageSize = db.pragma("page_size", { simple: true }) as number;
+  const pageCount = db.pragma("page_count", { simple: true }) as number;
   const vacuumState = getVacuumSchedulerState();
   const lastCheck = readLastIntegrityCheck();
 
@@ -485,8 +488,8 @@ export function getDatabaseSettings(): DatabaseSettings {
       schemaVersion: getSchemaVersion(),
     },
     stats: {
-      databaseSizeBytes: dbStats.totalSize,
-      pageCount: dbStats.pageCount,
+      databaseSizeBytes: pageSize * pageCount,
+      pageCount,
       freelistCount: getFreelistCount(),
       lastVacuumAt:
         vacuumState.lastRunAt !== null ? new Date(vacuumState.lastRunAt).toISOString() : null,

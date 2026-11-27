@@ -294,9 +294,10 @@ test("quality.yml fast-gates passes --base-ref $PR_BASE_SHA to boundary on PR ev
   );
   const loop = (step.run ?? "").slice((step.run ?? "").indexOf('for g in "${ratchet_gates[@]}"'));
   assert.match(loop, /case "\$g" in boundary\) BASE_RELATIVE=1 ;; \*\) BASE_RELATIVE= ;; esac/);
+  // Every gate of the step runs under run_gate (the per-gate time limit of the bag).
   assert.match(
     loop,
-    /if \[ -n "\$BASE_RELATIVE" \] && \[ -n "\$\{PR_BASE_SHA:-\}" \]; then\s+npm run "check:\$g" -- --ratchet --base-ref "\$PR_BASE_SHA" \|\| failed\+=\("\$g"\)/
+    /if \[ -n "\$BASE_RELATIVE" \] && \[ -n "\$\{PR_BASE_SHA:-\}" \]; then\s+run_gate npm run "check:\$g" -- --ratchet --base-ref "\$PR_BASE_SHA" \|\| failed\+=\("\$g"\)/
   );
 });
 

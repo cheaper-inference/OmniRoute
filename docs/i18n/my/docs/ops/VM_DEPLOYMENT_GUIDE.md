@@ -133,7 +133,7 @@ EOF
 ### 2.3 Container ကို စတင်ခြင်း
 
 ```bash
-docker pull diegosouzapw/omniroute:latest
+docker pull cheaperinference/omniroute:latest
 
 docker run -d \
   --name omniroute \
@@ -141,7 +141,7 @@ docker run -d \
   --env-file /opt/omniroute/.env \
   -p 20128:20128 \
   -v omniroute-data:/app/data \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
 ### 2.4 လည်ပတ်နေကြောင်း စစ်ဆေးခြင်း
@@ -294,13 +294,13 @@ curl -sI https://llms.seudominio.com/health
 ### ဗားရှင်းအသစ်သို့ အဆင့်မြှင့်တင်ခြင်း
 
 ```bash
-docker pull diegosouzapw/omniroute:latest
+docker pull cheaperinference/omniroute:latest
 docker stop omniroute && docker rm omniroute
 docker run -d --name omniroute --restart unless-stopped \
   --env-file /opt/omniroute/.env \
   -p 20128:20128 \
   -v omniroute-data:/app/data \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
 ### မှတ်တမ်းများကို ကြည့်ရှုခြင်း

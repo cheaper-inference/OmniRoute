@@ -111,7 +111,7 @@ test("loadAvailableProviders reads the decomposed catalog, not the 6-entry fallb
   for (const id of ["cerebras", "groq", "gemini", "siliconflow", "uncloseai", "kiro"]) {
     assert.ok(byId.has(id), `${id} missing from the catalog`);
   }
-  assert.equal(byId.get("uncloseai")?.category, "noauth");
+  assert.equal(byId.get("uncloseai")?.category, "api-key");
   assert.equal(byId.get("kiro")?.category, "oauth");
   assert.equal(byId.get("cerebras")?.category, "api-key");
   assert.ok(providers.filter((p) => p.hasFree).length > 50, "free-tier flags should survive");

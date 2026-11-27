@@ -177,6 +177,31 @@ test("#13505 builder options expose stale refs across providers for the editor b
   );
 });
 
+test("#13505 builder badges survive a different provider's catalog failure", async () => {
+  await combosDb.createCombo({
+    name: "catalog-fault-isolation-13505",
+    strategy: "priority",
+    models: ["openai/no-longer-available", `${PROVIDER}/retired-model`],
+  });
+
+  const healthyRef = {
+    comboId: "healthy-combo",
+    comboName: "healthy",
+    stepId: null,
+    model: `${PROVIDER}/retired-model`,
+  };
+  const queried: string[] = [];
+  const stale = await findAllStaleComboModelRefs(async (providerId) => {
+    queried.push(providerId);
+    if (providerId === "openai") throw new Error("catalog temporarily unavailable");
+    if (providerId === PROVIDER) return [healthyRef, healthyRef];
+    return [];
+  });
+
+  assert.deepEqual(queried, ["openai", PROVIDER]);
+  assert.deepEqual(stale, [healthyRef], "keep healthy badges and dedupe duplicate matches");
+});
+
 const SKIPPED_SYNCS: Array<[string, () => Response]> = [
   ["failed", () => Response.json({ error: "upstream down" }, { status: 503 })],
   ["degraded", () => Response.json({ models: [], source: "local_catalog" })],

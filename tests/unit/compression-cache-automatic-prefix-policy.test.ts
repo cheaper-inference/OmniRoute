@@ -34,3 +34,70 @@ test("explicit marker modes and opt-out override built-in automatic behavior", (
     false
   );
 });
+
+test("Antigravity automatic prefix eligibility follows Gemini mode and the connection policy", () => {
+  const gemini = "gemini-4-hydrogen-high";
+  assert.equal(providerUsesAutomaticPrefixCaching("antigravity", null, gemini, "implicit"), true);
+  assert.equal(providerUsesAutomaticPrefixCaching("agy", null, gemini, "off"), false);
+  // With the mode off, an explicit strip override keeps its existing automatic-prefix meaning.
+  assert.equal(
+    providerUsesAutomaticPrefixCaching(
+      "agy",
+      { supportsPromptCaching: true, cacheControlPassthrough: "strip" },
+      gemini,
+      "off"
+    ),
+    true
+  );
+  assert.equal(
+    providerUsesAutomaticPrefixCaching(
+      "antigravity",
+      { supportsPromptCaching: false },
+      gemini,
+      "implicit"
+    ),
+    false
+  );
+  assert.equal(
+    providerUsesAutomaticPrefixCaching(
+      "antigravity",
+      { cacheControlPassthrough: "claude-format" },
+      gemini,
+      "implicit"
+    ),
+    false
+  );
+  assert.equal(providerUsesAutomaticPrefixCaching("agy", null, "claude-sonnet-4-6"), false);
+  assert.equal(
+    providerUsesAutomaticPrefixCaching(
+      "agy",
+      { supportsPromptCaching: true, cacheControlPassthrough: "strip" },
+      "claude-sonnet-4-6",
+      "implicit"
+    ),
+    true
+  );
+});
+
+test("an omitted or null Gemini mode stays off for Antigravity automatic prefix caching", () => {
+  const model = "gemini-4-hydrogen-high";
+  assert.equal(providerUsesAutomaticPrefixCaching("antigravity", null, model, null), false);
+  assert.equal(providerUsesAutomaticPrefixCaching("agy", null, model), false);
+  assert.equal(
+    providerUsesAutomaticPrefixCaching("agy", { supportsPromptCaching: false }, model, null),
+    false
+  );
+  assert.equal(
+    providerUsesAutomaticPrefixCaching(
+      "agy",
+      { cacheControlPassthrough: "claude-format" },
+      model,
+      null
+    ),
+    false
+  );
+  assert.equal(
+    providerUsesAutomaticPrefixCaching("antigravity", null, "claude-sonnet-4-6", null),
+    false
+  );
+});

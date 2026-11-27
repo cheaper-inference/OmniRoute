@@ -60,6 +60,93 @@ describe("orchestration nodes", () => {
     expect(c.querySelector("[aria-label]")).toBeTruthy();
     cleanup();
   });
+  it("WorkNode is the kit FlowNode: tone by state, the state as text, active only while running", () => {
+    const base = { id: "cloud-agent:t1", kind: "work", source: "cloud-agent", label: "Fix CI" };
+    const running = render(<WorkNode data={{ ...base, state: "running" } as never} />);
+    const node = running.c.querySelector('[data-slot="flow-node"]');
+    expect(node?.getAttribute("data-status")).toBe("warning");
+    expect(node?.getAttribute("data-active")).toBe("true");
+    expect(running.c.querySelector(".ci-flow-node__status")?.textContent).toBe("stateRunning");
+    expect(running.c.querySelector(".ci-flow-node__title")?.textContent).toBe("Fix CI");
+    running.cleanup();
+
+    const tones = {
+      queued: "neutral",
+      waiting_approval: "accent",
+      succeeded: "success",
+      failed: "danger",
+      cancelled: "neutral",
+    };
+    for (const [state, tone] of Object.entries(tones)) {
+      const r = render(<WorkNode data={{ ...base, state } as never} />);
+      const el = r.c.querySelector('[data-slot="flow-node"]');
+      expect(el?.getAttribute("data-status"), state).toBe(tone);
+      expect(el?.hasAttribute("data-active"), state).toBe(false);
+      r.cleanup();
+    }
+  });
+
+  it("SourceNode is the kit FlowNode: a stale source is the warning tone with the reason as text, counts are badges", () => {
+    const data = {
+      id: "source:a2a",
+      kind: "source",
+      source: "a2a",
+      label: "A2A",
+      sourceIssue: "error",
+      counts: { running: 3, failed: 1, queued: 0 },
+    };
+    const { c, cleanup } = render(<SourceNode data={data as never} />);
+    const node = c.querySelector('[data-slot="flow-node"]');
+    expect(node?.getAttribute("data-status")).toBe("warning");
+    expect(c.querySelector(".ci-flow-node__status")?.textContent).toContain("sourceStale");
+    const badges = Array.from(c.querySelectorAll('[data-slot="badge"]'));
+    expect(badges.map((b) => [b.textContent, b.getAttribute("data-tone")])).toEqual([
+      ["3", "warning"],
+      ["1", "danger"],
+    ]);
+    cleanup();
+
+    const offline = render(
+      <SourceNode data={{ ...data, sourceIssue: "offline", counts: undefined } as never} />
+    );
+    const offlineNode = offline.c.querySelector('[data-slot="flow-node"]');
+    expect(offlineNode?.hasAttribute("data-status")).toBe(false);
+    expect(offline.c.querySelector(".ci-flow-node__status")?.textContent).toBe("sourceOffline");
+    offline.cleanup();
+  });
+
+  it("OrchestratorNode, ActivityNode and OverflowNode are kit FlowNodes", () => {
+    const hub = render(
+      <OrchestratorNode
+        data={{ id: "orchestrator", kind: "orchestrator", label: "OmniRoute" } as never}
+      />
+    );
+    expect(hub.c.querySelector('[data-slot="flow-node"]')?.getAttribute("data-status")).toBe(
+      "accent"
+    );
+    hub.cleanup();
+
+    const activity = render(
+      <ActivityNode
+        data={{ id: "a", kind: "activity", label: "npm test", sublabel: "command" } as never}
+      />
+    );
+    expect(activity.c.querySelector(".ci-flow-node__title")?.textContent).toBe("npm test");
+    expect(activity.c.querySelector(".ci-flow-node__description")?.textContent).toBe("command");
+    activity.cleanup();
+
+    const overflow = render(
+      <OverflowNode
+        data={{ id: "o", kind: "overflow", label: "+2 more", counts: { failed: 2 } } as never}
+      />
+    );
+    expect(overflow.c.querySelector('[data-slot="flow-node"]')).toBeTruthy();
+    expect(overflow.c.querySelector('[data-slot="badge"]')?.getAttribute("data-tone")).toBe(
+      "danger"
+    );
+    overflow.cleanup();
+  });
+
   it("SourceNode with sourceIssue=error shows the warning marker", () => {
     const data = {
       id: "source:a2a",

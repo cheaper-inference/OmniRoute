@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { Button } from "@/shared/components";
+import { Button, Card } from "@/shared/components";
 import { extractApiErrorMessage } from "@/shared/http/apiErrorMessage";
+import Notice from "@/shared/components/Notice";
 
 type IntegrityState = {
   integrityCheck: "ok" | "error" | null;
@@ -92,7 +93,7 @@ export default function StorageIntegrityCheckControl() {
   };
 
   return (
-    <div className="p-3 rounded-lg bg-bg border border-border mb-4">
+    <Card.Section className="mb-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="text-sm font-semibold">{t("storageIntegrityCheck")}</p>
@@ -112,13 +113,10 @@ export default function StorageIntegrityCheckControl() {
         </Button>
       </div>
       {status.message ? (
-        <div
-          className="mt-3 p-3 rounded-lg text-sm bg-error/10 text-error border border-error/20"
-          role="alert"
-        >
+        <Notice variant="critical" className="mt-3">
           {status.message}
-        </div>
+        </Notice>
       ) : null}
-    </div>
+    </Card.Section>
   );
 }
