@@ -2486,6 +2486,90 @@ test("live merge-ff: the candidate gets the land status from the App before the 
   assert.equal(state.paused, null);
 });
 
+function simulateLandingRejections(h, ...details) {
+  const landMergeFf = h.modules.land.landMergeFf;
+  h.modules.land.landMergeFf = (input) => {
+    if (!details.length) return landMergeFf(input);
+    h.calls.push({ name: "landMergeFf", args: [input] });
+    return { ok: false, reason: "rejected", merged: [], detail: details.shift() };
+  };
+  h.deps.sleep = async (ms) => {
+    h.calls.push({ name: "sleep", args: [ms] });
+  };
+}
+
+const requiredStatusRejection = (context) =>
+  `remote: GH013: Repository rule violations found for refs/heads/${BASE}. | ` +
+  `remote: - Required status check "${context}" is expected.`;
+
+test("live merge-ff: retries once after the ruleset has not seen the configured land status", async () => {
+  const h = createHarness({ mode: "live", actor: "owner" });
+  h.config.landing.statusContext = "omni-queue/custom-land";
+  const f = await greenBatch(h, [1]);
+  simulateLandingRejections(h, requiredStatusRejection("omni-queue/custom-land"));
+
+  const result = await h.tick();
+
+  const state = await h.state();
+  assert.deepEqual(types(state), ["batch-started", "checks-green", "land-blessed", "landed"]);
+  assert.equal(state.paused, null);
+  assert.equal(h.gh.branches.get(BASE), f.candidateSha);
+  assert.ok(result.decisions.some((d) => /status .* not yet visible.*retrying/.test(d)));
+  const calls = h.calls.filter((c) =>
+    ["createCommitStatus", "landMergeFf", "sleep"].includes(c.name)
+  );
+  assert.deepEqual(
+    calls.map((c) => c.name),
+    ["createCommitStatus", "landMergeFf", "sleep", "landMergeFf"]
+  );
+  assert.equal(calls[0].args[1].state, "success");
+  assert.equal(calls[0].args[1].context, "omni-queue/custom-land");
+  assert.deepEqual(calls[2].args, [5000]);
+  assert.deepEqual(calls[3].args, calls[1].args);
+});
+
+test("live merge-ff: pauses when the ruleset still expects the land status after the retry", async () => {
+  const h = createHarness({ mode: "live" });
+  const f = await greenBatch(h, [1]);
+  const detail = requiredStatusRejection("omni-queue/land");
+  simulateLandingRejections(h, detail, detail);
+
+  await h.tick();
+
+  const state = await h.state();
+  assert.equal(state.paused.reason, "error");
+  assert.ok(state.paused.detail.includes(detail));
+  assert.equal(h.gh.branches.get(BASE), f.baseSha);
+  const calls = h.calls.filter((c) =>
+    ["createCommitStatus", "landMergeFf", "sleep"].includes(c.name)
+  );
+  assert.deepEqual(
+    calls.map((c) => c.name),
+    ["createCommitStatus", "landMergeFf", "sleep", "landMergeFf", "createCommitStatus"]
+  );
+  assert.equal(calls[4].args[1].state, "failure");
+});
+
+test("live merge-ff: pauses without a retry when GH013 names another required status", async () => {
+  const h = createHarness({ mode: "live" });
+  const f = await greenBatch(h, [1]);
+  const detail = requiredStatusRejection("omni-queue/land-other");
+  simulateLandingRejections(h, detail);
+
+  await h.tick();
+
+  const state = await h.state();
+  assert.equal(state.paused.reason, "error");
+  assert.ok(state.paused.detail.includes(detail));
+  assert.equal(h.gh.branches.get(BASE), f.baseSha);
+  assert.equal(h.calls.filter((c) => c.name === "landMergeFf").length, 1);
+  assert.equal(h.calls.filter((c) => c.name === "sleep").length, 0);
+  assert.deepEqual(
+    statusCalls(h).map((c) => c.args[1].state),
+    ["success", "failure"]
+  );
+});
+
 test("live squash-api: every PR head is blessed and merged with the owner client", async () => {
   const h = createHarness({ mode: "live", landing: "squash-api", actor: "owner" });
   const f = await greenBatch(h, [1, 2]);
