@@ -18,8 +18,10 @@ export interface BunSqliteDatabaseLike {
     (...args: unknown[]): T;
     immediate?: (...args: unknown[]) => T;
   };
-  /** Driver transaction state; bun:sqlite throws when read after close. */
-  inTransaction: boolean;
+  // bun:sqlite exposes this on the database handle. Optional here so test
+  // doubles without it keep compiling; the adapter reports `undefined` then,
+  // which callers treat as "state unknown".
+  readonly inTransaction?: boolean;
   close(): void;
 }
 
@@ -62,20 +64,58 @@ function normalizeParams(params: unknown[]): unknown[] {
   return [expanded];
 }
 
+// The driver's own flag, guarded by the adapter's flag because reading it after
+// close throws on bun; a closed handle holds no transaction, so false is the
+// honest answer there. A driver without the flag, or one reporting something
+// other than a boolean, is unknown rather than false: false tells the release
+// helper it is safe to close, and closing on a guess is the silent rollback the
+// helper exists to prevent. A read that throws leaves the state unknown too.
+function readTransactionState(db: BunSqliteDatabaseLike, isOpen: boolean): boolean | undefined {
+  if (!isOpen) return false;
+  try {
+    const state = db.inTransaction;
+    return typeof state === "boolean" ? state : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+type BunSqliteStatement = ReturnType<BunSqliteDatabaseLike["query"]>;
+
+function wrapBunStatement<Row>(statement: BunSqliteStatement): PreparedStatement<Row> {
+  return {
+    run(...params: unknown[]): RunResult {
+      return normalizeRunResult(statement.run(...normalizeParams(params)));
+    },
+    get(...params: unknown[]): Row | undefined {
+      // bun:sqlite returns null when no row matches; better-sqlite3, node:sqlite and
+      // sql.js return undefined, which is the contract the call sites are written to.
+      return (statement.get(...normalizeParams(params)) ?? undefined) as Row | undefined;
+    },
+    all(...params: unknown[]): Row[] {
+      return statement.all(...normalizeParams(params)) as Row[];
+    },
+  };
+}
+
 export function createBunSqliteAdapter(db: BunSqliteDatabaseLike, filePath: string): SqliteAdapter {
   let isOpen = true;
 
   return {
     driver: "bun:sqlite",
 
+    // The adapter owns this flag, so there is no unreadable case: it knows
+    // whether it closed the handle.
+    readOpenWitness() {
+      return isOpen ? "open" : "closed";
+    },
+
     get open() {
       return isOpen;
     },
 
     get inTransaction() {
-      // The driver throws "Database has closed" here, so the adapter's own
-      // flag, not the driver, decides whether the read is safe.
-      return isOpen ? db.inTransaction : false;
+      return readTransactionState(db, isOpen);
     },
 
     get name() {
@@ -83,20 +123,7 @@ export function createBunSqliteAdapter(db: BunSqliteDatabaseLike, filePath: stri
     },
 
     prepare<Row = unknown>(sql: string): PreparedStatement<Row> {
-      const statement = db.query(sql);
-      return {
-        run(...params: unknown[]): RunResult {
-          return normalizeRunResult(statement.run(...normalizeParams(params)));
-        },
-        get(...params: unknown[]): Row | undefined {
-          // bun:sqlite returns null when no row matches; better-sqlite3, node:sqlite and
-          // sql.js return undefined, which is the contract the call sites are written to.
-          return (statement.get(...normalizeParams(params)) ?? undefined) as Row | undefined;
-        },
-        all(...params: unknown[]): Row[] {
-          return statement.all(...normalizeParams(params)) as Row[];
-        },
-      };
+      return wrapBunStatement<Row>(db.query(sql));
     },
 
     exec(sql: string): void {

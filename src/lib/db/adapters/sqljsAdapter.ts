@@ -407,6 +407,12 @@ export async function createSqlJsAdapter(filePath: string): Promise<SqliteAdapte
   return {
     driver: "sql.js",
 
+    // The adapter owns this flag, so there is no unreadable case: it knows
+    // whether it closed the handle.
+    readOpenWitness() {
+      return _isOpen ? "open" : "closed";
+    },
+
     get open() {
       return _isOpen;
     },

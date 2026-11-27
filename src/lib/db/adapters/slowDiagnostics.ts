@@ -1,5 +1,6 @@
 import { performance } from "node:perf_hooks";
-import type { PreparedStatement, SqliteAdapter } from "./types";
+import { interpretOpenFlag } from "./openFlagWitness";
+import type { OpenWitness, PreparedStatement, SqliteAdapter } from "./types";
 
 const WARN_EVERY_MS = 10_000;
 type Operation =
@@ -50,13 +51,39 @@ export function instrumentSqliteAdapter(
       }
     }
   }
+  const readOpenWitness = (): OpenWitness => {
+    // Forwarding matters: a wrapper that drops the tri-state turns an
+    // unreadable driver into a plain boolean for every caller behind it.
+    // A delegate that throws on the lookup or the call is unreadable, not a
+    // witness, so neither may escape this boundary.
+    try {
+      const read = db.readOpenWitness;
+      if (typeof read === "function") return read.call(db);
+    } catch {
+      return "unreadable";
+    }
+    // A delegate without the reader answers through `open`, and only an
+    // exact boolean is an answer. A falsy non-boolean is not evidence that
+    // the handle closed, so it stays unreadable.
+    try {
+      const open: unknown = db.open;
+      return interpretOpenFlag(open).state;
+    } catch {
+      return "unreadable";
+    }
+  };
+
   return {
     get driver() {
       return db.driver;
     },
     get open() {
-      return db.open;
+      // `open` is a boolean on this interface and may not throw. A delegate
+      // whose read fails is not evidence of closure, so it answers open here;
+      // the tri-state read is the one that can say unreadable without lying.
+      return readOpenWitness() !== "closed";
     },
+    readOpenWitness,
     get name() {
       return db.name;
     },
@@ -99,8 +126,8 @@ export function instrumentSqliteAdapter(
     checkpoint(mode) {
       measure("checkpoint", () => db.checkpoint(mode));
     },
-    close() {
-      measure("close", () => db.close());
+    close(options) {
+      measure("close", () => db.close(options));
     },
   };
 }
