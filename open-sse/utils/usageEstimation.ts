@@ -2,7 +2,7 @@
 const CHARS_PER_TOKEN_SCHEMA = 6; // ~6 chars/token for JSON schemas (more verbose per token)
 
 // Same set as the regex \s (and String.trim) in V8.
-function isSpaceCode(c: number) {
+export function isSpaceCode(c: number) {
   return (
     c === 32 ||
     (c >= 9 && c <= 13) ||
@@ -13,6 +13,7 @@ function isSpaceCode(c: number) {
     c === 0x2029 ||
     c === 0x202f ||
     c === 0x205f ||
+    c === 0x3000 ||
     c === 0xfeff
   );
 }

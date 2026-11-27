@@ -114,3 +114,12 @@ test("estimateInputTokens counts without split or filter arrays", () => {
   assert.equal(splitCalls, 0, "no String.split on the request text");
   assert.equal(filterCalls, 0, "no Array.filter over a token array");
 });
+
+test("isSpaceCode matches /\\s/ on every UTF-16 code unit", async () => {
+  const { isSpaceCode } = await import("../../open-sse/utils/usageEstimation.ts");
+  const wrong: string[] = [];
+  for (let c = 0; c <= 0xffff; c++) {
+    if (isSpaceCode(c) !== /\s/.test(String.fromCharCode(c))) wrong.push(c.toString(16));
+  }
+  assert.deepEqual(wrong, []);
+});
