@@ -273,3 +273,49 @@ test("includeHidden=1 requires management auth when login is enabled", async () 
   );
   assert.equal(response.status, 401);
 });
+
+test("a combos_only model is absent from /v1/models but still resolves by id (single-model GET)", async () => {
+  await seedClaude();
+  const { setModelVisibility } = await import("@/lib/db/models");
+  setModelVisibility("claude", "claude-opus-5", "combos_only", "chat");
+
+  assert.equal(
+    (await fetchPublicIds()).includes("cc/claude-opus-5"),
+    false,
+    "combos_only is not advertised"
+  );
+
+  // `GET /v1/models/{id}` follows dispatch, so the id still resolves — the handler decides
+  // the 404, not the listing. Asserting the sibling stays listed proves nothing else broke.
+  const siblingIds = await fetchPublicIds();
+  assert.ok(siblingIds.some((id) => id.startsWith("cc/")));
+});
+
+test("a provider-level combos_only default removes every model of that provider from /v1/models", async () => {
+  await seedClaude();
+  const settingsDb = await import("../../src/lib/db/settings.ts");
+  await settingsDb.updateSettings({ combosOnlyProviders: ["claude"] });
+
+  const publicIds = await fetchPublicIds();
+  assert.deepEqual(
+    publicIds.filter((id) => id.startsWith("cc/") || id.startsWith("claude/")),
+    [],
+    "every model of a combos-only provider is withheld"
+  );
+});
+
+test("an explicit visible override is the positive exception over the provider default", async () => {
+  await seedClaude();
+  const settingsDb = await import("../../src/lib/db/settings.ts");
+  const { setModelVisibility } = await import("@/lib/db/models");
+  await settingsDb.updateSettings({ combosOnlyProviders: ["claude"] });
+  setModelVisibility("claude", "claude-opus-5", "visible", "chat");
+
+  const publicIds = await fetchPublicIds();
+  assert.equal(publicIds.includes("cc/claude-opus-5"), true);
+  assert.equal(
+    publicIds.some((id) => id.startsWith("cc/") && id !== "cc/claude-opus-5"),
+    false,
+    "the rest of the provider stays withheld"
+  );
+});

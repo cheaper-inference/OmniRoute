@@ -38,12 +38,29 @@ function buildGetRequest(url = "http://localhost/api/provider-models") {
 
 type ProviderModelsResponse = {
   models?: Record<string, Array<{ id: string; isHidden?: boolean }>> | Array<{ id: string }>;
-  modelCompatOverrides?: Array<{ id: string; isHidden?: boolean }>;
+  modelCompatOverrides?: Array<{
+    id: string;
+    isHidden?: boolean;
+    visibilityMode?: string;
+    visibilityModalities?: Record<string, string>;
+  }>;
   hiddenModelsByProvider?: Record<string, string[]>;
+  combosOnlyModelsByProvider?: Record<string, string[]>;
+  explicitVisibleModelsByProvider?: Record<string, string[]>;
+  providerCombosOnly?: boolean;
+};
+
+type ProviderModelsMutationResponse = {
+  appliedVisibilityMode?: string | null;
+  error?: { message?: string };
 };
 
 async function getBody(response: Response): Promise<ProviderModelsResponse> {
   return (await response.json()) as ProviderModelsResponse;
+}
+
+async function getMutationBody(response: Response): Promise<ProviderModelsMutationResponse> {
+  return (await response.json()) as ProviderModelsMutationResponse;
 }
 
 test.beforeEach(async () => {
@@ -254,8 +271,15 @@ test("provider-models PATCH supports bulk visibility updates", async () => {
   assert.equal(body.updated, 2);
 
   const overrides = modelsDb.getModelCompatOverrides("claude");
-  assert.equal(overrides.find((model) => model.id === "claude-opus-4-6")?.isHidden, false);
-  assert.equal(overrides.find((model) => model.id === "claude-sonnet-4-6")?.isHidden, false);
+  // The write is now a three-state one: unhiding is an explicit `visible` statement, which
+  // resolves to "not hidden" and is the positive exception over a provider-level combos-only
+  // default. The legacy `isHidden` flag is cleared rather than stored as `false`.
+  for (const modelId of ["claude-opus-4-6", "claude-sonnet-4-6"]) {
+    const row = overrides.find((model) => model.id === modelId);
+    assert.equal(row?.visibilityMode, "visible");
+    assert.equal(row?.isHidden, undefined, "no legacy hide flag survives an explicit visible");
+    assert.equal(modelsDb.getModelIsHidden("claude", modelId, "chat"), false);
+  }
 });
 
 test("provider-models PATCH validates required fields", async () => {
@@ -267,7 +291,7 @@ test("provider-models PATCH validates required fields", async () => {
   const body = (await response.json()) as any;
 
   assert.equal(response.status, 400);
-  assert.equal(body.error.message, "isHidden boolean is required");
+  assert.equal(body.error.message, "visibilityMode or isHidden boolean is required");
 });
 
 test("provider-models DELETE all=true clears modelCompatOverrides as well as custom and synced models", async () => {
@@ -293,4 +317,105 @@ test("provider-models DELETE all=true clears modelCompatOverrides as well as cus
   const body = await getBody(getResponse);
   assert.deepEqual(body.modelCompatOverrides, []);
   assert.deepEqual(body.hiddenModelsByProvider, {});
+});
+
+test("provider-models PATCH accepts visibilityMode as the primary contract", async () => {
+  const url = "http://localhost/api/provider-models?provider=claude&modelId=claude-sonnet-4-6";
+  for (const mode of ["combos_only", "visible", "hidden"] as const) {
+    const response = await providerModelsRoute.PATCH(
+      buildPatchRequest(url, { visibilityMode: mode, modality: "chat" })
+    );
+    const body = await getMutationBody(response);
+    assert.equal(response.status, 200);
+    assert.equal(body.appliedVisibilityMode, mode);
+    assert.equal(
+      modelsDb.getOverrideVisibilityForModality(
+        modelsDb.getModelCompatOverrides("claude").find((m) => m.id === "claude-sonnet-4-6"),
+        "chat"
+      ),
+      mode
+    );
+  }
+});
+
+test("provider-models PATCH maps the legacy isHidden boolean onto visibilityMode", async () => {
+  const url = "http://localhost/api/provider-models?provider=claude&modelId=claude-sonnet-4-6";
+  const hidden = await getMutationBody(
+    await providerModelsRoute.PATCH(buildPatchRequest(url, { isHidden: true }))
+  );
+  assert.equal(hidden.appliedVisibilityMode, "hidden");
+  const visible = await getMutationBody(
+    await providerModelsRoute.PATCH(buildPatchRequest(url, { isHidden: false }))
+  );
+  assert.equal(visible.appliedVisibilityMode, "visible");
+});
+
+test("provider-models PATCH rejects an unknown visibilityMode", async () => {
+  const response = await providerModelsRoute.PATCH(
+    buildPatchRequest("http://localhost/api/provider-models?provider=claude&modelId=x", {
+      visibilityMode: "sometimes",
+    })
+  );
+  const body = await getMutationBody(response);
+  assert.equal(response.status, 400);
+  assert.equal(body.error.message, "visibilityMode must be one of visible, combos_only, hidden");
+});
+
+test("combos_only keeps the model out of the hidden buckets but in its own", async () => {
+  const url = "http://localhost/api/provider-models?provider=claude&modelId=claude-sonnet-4-6";
+  await providerModelsRoute.PATCH(
+    buildPatchRequest(url, { visibilityMode: "combos_only", modality: "chat" })
+  );
+
+  const body = await getBody(
+    await providerModelsRoute.GET(
+      buildGetRequest("http://localhost/api/provider-models?provider=claude")
+    )
+  );
+
+  assert.deepEqual(body.hiddenModelsByProvider, {}, "never reported as hidden");
+  assert.deepEqual(body.combosOnlyModelsByProvider, { claude: ["claude-sonnet-4-6"] });
+  assert.equal(body.providerCombosOnly, false, "no provider-level default configured");
+  assert.equal(
+    body.modelCompatOverrides?.find((row) => row.id === "claude-sonnet-4-6")?.isHidden,
+    false,
+    "a combos_only row is not hidden — a stored combo still reaches it"
+  );
+});
+
+test("provider-models GET reports the provider-level combos_only default", async () => {
+  const settingsDb = await import("../../src/lib/db/settings.ts");
+  await settingsDb.updateSettings({ combosOnlyProviders: ["claude"] });
+
+  const body = await getBody(
+    await providerModelsRoute.GET(
+      buildGetRequest("http://localhost/api/provider-models?provider=claude")
+    )
+  );
+  assert.equal(body.providerCombosOnly, true);
+
+  const other = await getBody(
+    await providerModelsRoute.GET(
+      buildGetRequest("http://localhost/api/provider-models?provider=openai")
+    )
+  );
+  assert.equal(other.providerCombosOnly, false);
+});
+
+test("an explicit visible override is reported so the UI can show the positive exception", async () => {
+  const settingsDb = await import("../../src/lib/db/settings.ts");
+  await settingsDb.updateSettings({ combosOnlyProviders: ["claude"] });
+  await providerModelsRoute.PATCH(
+    buildPatchRequest(
+      "http://localhost/api/provider-models?provider=claude&modelId=claude-sonnet-4-6",
+      { visibilityMode: "visible", modality: "chat" }
+    )
+  );
+
+  const body = await getBody(
+    await providerModelsRoute.GET(
+      buildGetRequest("http://localhost/api/provider-models?provider=claude")
+    )
+  );
+  assert.deepEqual(body.explicitVisibleModelsByProvider, { claude: ["claude-sonnet-4-6"] });
 });
