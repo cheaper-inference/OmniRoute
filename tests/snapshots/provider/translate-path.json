@@ -6432,6 +6432,29 @@
       "stream": "https://core-normal.trae.ai/api/remote/v1"
     }
   },
+  "ttoken": {
+    "format": "openai",
+    "headers": {
+      "apiKey": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      },
+      "nonStream": {
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      },
+      "oauth": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      }
+    },
+    "url": {
+      "nonStream": "https://api.ttoken.dev/v1/chat/completions",
+      "stream": "https://api.ttoken.dev/v1/chat/completions"
+    }
+  },
   "twinmind": {
     "format": "openai",
     "headers": {
