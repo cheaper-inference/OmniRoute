@@ -42,7 +42,9 @@ export default function StackedAllocationBar({
 
   return (
     <div className="mb-3">
-      <h4 className="text-[10px] uppercase text-text-muted mb-1.5">{t("stackedBarTitle")}</h4>
+      <h4 className="ci-eyebrow mb-1.5" data-size="3xs" data-weight="medium">
+        {t("stackedBarTitle")}
+      </h4>
 
       {/* Stacked bar: one segment per key; the spoken value is the total allocated share. */}
       <div
@@ -90,10 +92,7 @@ export default function StackedAllocationBar({
           }
           const label = keyLabels[alloc.apiKeyId] ?? alloc.apiKeyId;
           return (
-            <span
-              key={alloc.apiKeyId}
-              className="flex items-center gap-1 text-[10px] text-text-muted"
-            >
+            <span key={alloc.apiKeyId} className="flex items-center gap-1 text-3xs text-text-muted">
               <span
                 className="inline-block w-2 h-2 rounded-sm shrink-0"
                 style={{ backgroundColor: color }}

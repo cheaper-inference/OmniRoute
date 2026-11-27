@@ -4,36 +4,22 @@
 
 ---
 
-Od različice v3.8.49 (WS3.2/WS3.4 načrta kakovosti/hitrosti) je privzeta pot združevanja
-pregledanih PR-jev v `release/vX.Y.Z` **Mergifyjeva čakalna vrsta za združevanje** (`.mergify.yml`);
-spodaj dokumentirani **ročni vlak združevanja** je REZERVNA MOŽNOST — uporablja se med incidenti,
-zamrznitvami izdaje ali če se paket Mergify Open Source kdaj spremeni.
+> **2026-11-19: čakalna vrsta za spajanje Mergify je umaknjena** (odločitev lastnika). `.mergify.yml` ne definira več čakalne vrste in zavrača ukaze Mergify, ki združijo ali prepišejo zahtevo za vleko. Izdaje PRs so združene ročno pod naborom pravil repozitorija »Zahtevaj zelena vrata pri aktivni izdaji« (`Gate / CI` + `Gate / Quality`), dokler se omni-queue ne zažene v načinu v živo, nato pa prek omni-queue ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Spodnji razdelki Mergify opisujejo čakalno vrsto, kakršna je bila.
+
+Od različice 3.8.49 (WS3.2/WS3.4 načrta quality/velocity ) je privzeta pot spajanja za pregledani PRs v `release/vX.Y.Z`** Mergify čakalna vrsta za spajanje** (`.mergify.yml`); the** ročni spojni vlak** Spodaj je dokumentiran FALLBACK — ki se uporablja med incidenti, zamrznitvami izdaj ali če se odprtokodni načrt Mergify kdaj spremeni.
 
 ## Privzeta pot: čakalna vrsta Mergify
 
-1. Kampanje pregledajo PR in potrdijo uspešno izvajanje preverjanj, nato pa ga lastnik odobri prek ⭐
-   kontrolne točke pred združitvijo (poročilo + odločitev za vsak element — glejte `/merge-prs`, korak 0.75).
-2. Lastnik (ali seja, ki deluje na podlagi lastnikove odločitve) doda oznako **`queue`**.
-   Oznaka JE odobritev združitve; Mergify jo samo izvede.
-3. Mergify preverja PR-je v čakalni vrsti **zaporedno** (enega naenkrat) s hitrimi kontrolnimi
-   točkami in jih združuje (squash). Paketna obdelava + samodejna bisekcija sta na voljo
-   v plačljivem paketu Mergify ("Cannot use Merge Queue batch" v brezplačnem paketu, #7220),
-   zato `.mergify.yml` ne nastavlja možnosti `batch_size`; paketna obdelava ostaja naloga
-   spodaj opisanega ročnega vlaka združitev. PR, katerega preverjanja so po poteku
-   `checks_timeout` (240 min = 2× izmerjeni p95 za `quality.yml`) še vedno v teku, je
-   odstranjen iz čakalne vrste, namesto da bi jo zaustavil.
-4. Po združitvi neprekinjeni delovni tok za zeleno izdajo ob potisku preveri novo konico
-   in odpre težavo za določitev izvora, če je kombinacija povzročila regresijo (nikoli ne izvede samodejne povrnitve).
+1. PR je reviewed/greened s strani oglaševalskih akcij in odobren s strani lastnikovih vrat ⭐ pred združitvijo (odločitev o poročilu + na postavko — glejte korak `/merge-prs` 0.75).
+2. Lastnik (ali seja, ki deluje na podlagi odločitve lastnika) uporablja**`queue`** oznaka. Oznaka IS odobritev združitve; Mergify ga samo izvede.
+3. Mergify potrdi PRs v čakalni vrsti** serijsko** (ena po ena) proti hitrim vratom in združitvam (skvoš). Samodejno razpolovljenje paketnega + je plačljiva stopnja Mergify ("Ne morem uporabiti paketa čakalne vrste spajanja" v brezplačnem načrtu, #7220), zato `.mergify.yml` ne nastavi `batch_size`; paketiranje ostaja naloga ročnega združevalnega sklopa spodaj. PR, katerega preverjanja so še vedno v teku po `checks_timeout` (240 min = 2 × izmerjeni p95 za `quality.yml`), se odstrani iz čakalne vrste, namesto da se čakalna vrsta ustavi.
+4. Po združitvi potek neprekinjenega sproščanja zelenega dela potrdi nov nasvet ob potiskanju in odpre težavo z dodeljevanjem, če je kombinacija nazadovala (nikoli samodejno povrni).
 
-Varovalke (ustrezajo praviloma št. 21/22 v razdelku Hard Rules datoteke `CLAUDE.md`):
+Zaščitne ograje (ogledalo `CLAUDE.md` Hard Rules #21/#22):
 
-- **Zamrznitev izdaje je aktivna** → PR-jev, usmerjenih v zamrznjeno vejo, NE označujte;
-  najprej jih preusmerite v aktivno vejo `release/vX+1`.
-- **PR druge seje, ki je trenutno v obdelavi** → nikoli ga ne označujte; samo lastniška seja
-  doda svoje delo v čakalno vrsto.
-- Spremembe, ki zadevajo samo teste, in PR-ji z oznako `hotfix` že izvajajo zmanjšan nabor preverjanj CI
-  (glejte `RELEASE_CHECKLIST.md` → Hotfix Fast-Lane); pogoji čakalne vrste sprejmejo kateri koli
-  nabor preverjanj, ki se je dejansko izvedel (`#check-failure=0` + `#check-pending=0`).
+- **Spustite zamrznitev odprto** → do oznake NOT PRs ki cilja na zamrznjeno vejo; najprej ponovno ciljajte na aktivni `release/vX+1`.
+- **Druga seja PR med letom** → nikoli ne označite; samo lastniška seja postavi svoje delo v čakalno vrsto.
+- Diffs-only tests in `hotfix` -labeled PRs že izvajajo zmanjšan CI (glejte `RELEASE_CHECKLIST.md` → Hotfix Fast-Lane); pogoji čakalne vrste sprejmejo kateri koli preverjalni niz, ki se je dejansko izvajal (`#check-failure=0` + `#check-pending=0`).
 
 ## Rezervna možnost: ročni vlak združevanja
 

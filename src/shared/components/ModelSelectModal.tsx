@@ -897,7 +897,7 @@ export default function ModelSelectModal({
               {allVisibleSelected
                 ? labelOrFallback("unselectAll", "Unselect all")
                 : labelOrFallback("selectAll", "Select all")}
-              <span className="ml-1 text-[10px] text-text-muted font-normal">
+              <span className="ml-1 text-3xs text-text-muted font-normal">
                 ({visibleModels.length})
               </span>
             </Button>
@@ -918,7 +918,7 @@ export default function ModelSelectModal({
 
             <div className="flex items-center justify-between gap-2 flex-wrap">
               <div className="flex items-center gap-1.5 flex-wrap">
-                <span className="text-[11px] text-text-muted">
+                <span className="text-2xs text-text-muted">
                   {labelOrFallback(
                     "providersSelectedCount",
                     `${selectedProviderIds.size} providers checked`,
@@ -933,7 +933,7 @@ export default function ModelSelectModal({
                   }
                   disabled={visibleProviderIds.length === 0 || testingProviders}
                   data-testid="model-select-toggle-all-providers"
-                  className="text-[11px]"
+                  className="text-2xs"
                 >
                   {allProvidersChecked
                     ? labelOrFallback("clearProviderSelection", "Uncheck providers")
@@ -983,7 +983,7 @@ export default function ModelSelectModal({
                       ? labelOrFallback("unselectWorkingModels", "Unselect working")
                       : labelOrFallback("selectWorkingModels", "Add working")}
                     <span
-                      className={`ml-1 text-[10px] font-normal ${
+                      className={`ml-1 text-3xs font-normal ${
                         canRemoveWorking ? "opacity-80" : "text-text-muted"
                       }`}
                     >
@@ -1009,7 +1009,7 @@ export default function ModelSelectModal({
             <div className="flex items-center gap-1.5 mb-1.5 sticky top-0 z-10 bg-surface py-1">
               <Icon name="layers" size={14} className="text-primary" />
               <span className="text-xs font-medium text-primary">{t("combos")}</span>
-              <span className="text-[10px] text-text-muted">({filteredCombos.length})</span>
+              <span className="text-3xs text-text-muted">({filteredCombos.length})</span>
             </div>
             <div className="flex flex-wrap gap-1.5">
               {filteredCombos.map((combo) => {
@@ -1075,7 +1075,7 @@ export default function ModelSelectModal({
                         <span className="text-xs font-medium text-primary truncate">
                           {group.name}
                         </span>
-                        <span className="text-[10px] text-text-muted shrink-0">
+                        <span className="text-3xs text-text-muted shrink-0">
                           ({group.models.length})
                         </span>
                       </span>
@@ -1088,7 +1088,7 @@ export default function ModelSelectModal({
                       style={{ backgroundColor: group.color }}
                     />
                     <span className="text-xs font-medium text-primary">{group.name}</span>
-                    <span className="text-[10px] text-text-muted">({group.models.length})</span>
+                    <span className="text-3xs text-text-muted">({group.models.length})</span>
                   </>
                 )}
               </div>
@@ -1121,17 +1121,17 @@ export default function ModelSelectModal({
                       {isAdded && <span className="mr-0.5 opacity-70">✓</span>}
                       {model.name}
                       {model.source && (
-                        <span className="ml-1 text-[10px] uppercase opacity-70">
+                        <span className="ml-1 text-3xs uppercase opacity-70">
                           {getModelCatalogSourceLabel(model.source)}
                         </span>
                       )}
                       {testStatus === "ok" && (
-                        <span className="ml-1 rounded px-1 py-px text-[9px] font-semibold uppercase tracking-wide bg-success/20 text-success">
+                        <span className="ml-1 rounded px-1 py-px text-3xs font-semibold uppercase tracking-wide bg-success/20 text-success">
                           ok
                         </span>
                       )}
                       {testStatus === "error" && (
-                        <span className="ml-1 rounded px-1 py-px text-[9px] font-semibold uppercase tracking-wide bg-error/20 text-error">
+                        <span className="ml-1 rounded px-1 py-px text-3xs font-semibold uppercase tracking-wide bg-error/20 text-error">
                           fail
                         </span>
                       )}

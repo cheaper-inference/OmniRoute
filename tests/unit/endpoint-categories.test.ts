@@ -200,6 +200,11 @@ test("resolveEndpointCategory: maps /v1/systemone to 'decisions'", () => {
   assert.equal(resolveEndpointCategory("/v1/systemone"), "decisions");
 });
 
-test("resolveEndpointCategory: /v1/decisions is not a System One path (OpenAI wire contract)", () => {
-  assert.notEqual(resolveEndpointCategory("/v1/decisions"), "decisions");
+// #18838: /v1/decisions now exists and serves the OpenAI Decisions wire format, which is
+// still not a System One path (no translation between the two). It shares the "decisions"
+// permission category so a key whose endpoint allowlist excludes typed decisions cannot reach
+// it; an uncategorized route would bypass that allowlist.
+test("resolveEndpointCategory: native OpenAI /v1/decisions shares the decisions permission category", () => {
+  assert.equal(resolveEndpointCategory("/v1/decisions"), "decisions");
+  assert.equal(resolveEndpointCategory("/v1/decisions/extra"), "decisions");
 });

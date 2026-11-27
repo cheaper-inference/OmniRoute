@@ -70,6 +70,8 @@ docker rm omniroute
 docker volume rm omniroute-data
 
 # (Valikuline) Eemalda pilt
+docker rmi cheaperinference/omniroute:latest
+# Vanemad installid tõmbasid pärandnime:
 docker rmi diegosouzapw/omniroute:latest
 ```
 

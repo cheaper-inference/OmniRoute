@@ -24,7 +24,9 @@ export default function AntigravityTimingTelemetryCard({
 
   return (
     <Card className="space-y-4 p-6">
-      <h2 className="text-lg">Antigravity timing diagnostics</h2>
+      <h2 className="ci-heading" data-size="lg">
+        Antigravity timing diagnostics
+      </h2>
       <p className="text-sm text-text-muted">
         Record sanitized timing for actual Antigravity network sends, including response headers,
         first meaningful model delta, idle time and concurrency. Raw prompts, credentials and

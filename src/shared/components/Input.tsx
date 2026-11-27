@@ -17,8 +17,17 @@ interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "
   trailingIcon?: string;
   /** Decorative trailing content (a unit such as "ms" or "%"); wins over `trailingIcon`. */
   suffix?: React.ReactNode;
-  /** Kit control height: `default` or the compact `sm`. */
+  /**
+   * Kit control height: `default` (40px), `sm` (36px) or `xs` (32px with 12px text, the size of
+   * `Select size="xs"`). Use `xs` instead of `inputClassName="h-8 text-xs"`.
+   */
   size?: InputSize;
+  /**
+   * Kit code font for keys, URLs, ids and JSON; also turns spell check, auto-capitalize and
+   * auto-correct off (pass any of them to turn it back on). `font-mono` does nothing on an
+   * `<input>`: the kit typography sheet wins over the utility.
+   */
+  mono?: boolean;
   /**
    * Classes for the kit `Field` wrapper around the label, the control and the message: its place
    * in the layout (`flex-1`, `w-40`, `md:col-span-2`). Text or box classes written here do not
@@ -48,6 +57,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
     trailingIcon,
     suffix,
     size = "default",
+    mono = false,
     disabled = false,
     required = false,
     className,
@@ -114,6 +124,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
       aria-invalid={error ? true : undefined}
       aria-describedby={describedBy}
       size={size}
+      mono={mono}
       leadingIcon={icon ? <Icon name={icon} size={16} /> : undefined}
       trailingIcon={trailingSlot(suffix, trailingIcon)}
       className={inputClassName}

@@ -11,7 +11,7 @@
  *      every candidate, which surfaced as
  *      "No vision-capable provider connected, cannot process image request".
  *
- *   2. No-auth providers (`unc`/`uncloseai`, `ddgw`/`duckduckgo-web`, ...) were
+ *   2. No-auth providers (`cfp`/`cloudflare-playground`, `ddgw`/`duckduckgo-web`, ...) were
  *      judged by the same "must have a usable stored API key" bar as keyed
  *      providers, even though their effective credential is the synthetic
  *      "noauth" connection (src/sse/services/auth.ts) and they carry no key.
@@ -85,13 +85,13 @@ test("alias-keyed noauth model is usable with NO stored row (#10702)", async () 
   await resetStorage();
   // No `provider_connections` row at all — the noauth provider is served by
   // the synthetic "noauth" connection, so it must still be usable.
-  const usable = await hasUsableCredentialsForModel("unc/some-model");
+  const usable = await hasUsableCredentialsForModel("cfp/some-model");
   assert.equal(usable, true, "noauth provider must not require a stored connection row");
 });
 
 test("canonical-id noauth model is usable with NO stored row", async () => {
   await resetStorage();
-  const usable = await hasUsableCredentialsForModel("uncloseai/some-model");
+  const usable = await hasUsableCredentialsForModel("cloudflare-playground/some-model");
   assert.equal(usable, true);
 });
 
@@ -100,26 +100,26 @@ test("canonical-id noauth model is usable with NO stored row", async () => {
 test("noauth provider is NOT usable when a row carries a terminal status", async () => {
   await resetStorage();
   await providersDb.createProviderConnection({
-    provider: "uncloseai",
+    provider: "cloudflare-playground",
     authType: "no-auth",
-    name: "uncloseai-account",
+    name: "cloudflare-playground-account",
     isActive: true,
     testStatus: "banned",
   });
-  const usable = await hasUsableCredentialsForModel("unc/some-model");
+  const usable = await hasUsableCredentialsForModel("cfp/some-model");
   assert.equal(usable, false, "a banned noauth row must block the provider");
 });
 
 test("noauth provider with a healthy row is usable", async () => {
   await resetStorage();
   await providersDb.createProviderConnection({
-    provider: "uncloseai",
+    provider: "cloudflare-playground",
     authType: "no-auth",
-    name: "uncloseai-account",
+    name: "cloudflare-playground-account",
     isActive: true,
     testStatus: "active",
   });
-  const usable = await hasUsableCredentialsForModel("unc/some-model");
+  const usable = await hasUsableCredentialsForModel("cfp/some-model");
   assert.equal(usable, true);
 });
 
@@ -183,38 +183,38 @@ test("blocked no-auth provider is NOT usable with no stored row", async () => {
 test("blocked no-auth provider is NOT usable even with a healthy stored row", async () => {
   await resetStorage();
   await providersDb.createProviderConnection({
-    provider: "uncloseai",
+    provider: "cloudflare-playground",
     authType: "no-auth",
-    name: "uncloseai-account",
+    name: "cloudflare-playground-account",
     isActive: true,
     testStatus: "active",
   });
-  await settingsDb.updateSettings({ blockedProviders: ["uncloseai"] });
-  const usable = await hasUsableCredentialsForModel("unc/some-model");
+  await settingsDb.updateSettings({ blockedProviders: ["cloudflare-playground"] });
+  const usable = await hasUsableCredentialsForModel("cfp/some-model");
   assert.equal(usable, false, "a stored row must not re-enable a provider dispatch refuses");
 });
 
 test("blocked-by-alias settings entry blocks the canonical no-auth provider", async () => {
   await resetStorage();
-  await settingsDb.updateSettings({ blockedProviders: ["unc"] });
-  const usable = await hasUsableCredentialsForModel("uncloseai/some-model");
+  await settingsDb.updateSettings({ blockedProviders: ["cfp"] });
+  const usable = await hasUsableCredentialsForModel("cloudflare-playground/some-model");
   assert.equal(usable, false);
 });
 
 test("blocking one no-auth provider leaves the others usable", async () => {
   await resetStorage();
-  await settingsDb.updateSettings({ blockedProviders: ["cloudflare-playground"] });
-  const usable = await hasUsableCredentialsForModel("unc/some-model");
+  await settingsDb.updateSettings({ blockedProviders: ["duckduckgo-web"] });
+  const usable = await hasUsableCredentialsForModel("cfp/some-model");
   assert.equal(usable, true);
 });
 
 test("unblocking restores usability for the provider", async () => {
   await resetStorage();
-  await settingsDb.updateSettings({ blockedProviders: ["uncloseai"] });
-  assert.equal(await hasUsableCredentialsForModel("unc/some-model"), false);
+  await settingsDb.updateSettings({ blockedProviders: ["cloudflare-playground"] });
+  assert.equal(await hasUsableCredentialsForModel("cfp/some-model"), false);
   await settingsDb.updateSettings({ blockedProviders: [] });
   assert.equal(
-    await hasUsableCredentialsForModel("unc/some-model"),
+    await hasUsableCredentialsForModel("cfp/some-model"),
     true,
     "removing the block must restore the synthetic no-auth path"
   );
@@ -240,22 +240,22 @@ test("keyed provider in blockedProviders is NOT excluded (dispatch ignores the l
 
 test("getUsableConnectionsForModel surfaces no synthetic connection for a blocked no-auth provider", async () => {
   await resetStorage();
-  await settingsDb.updateSettings({ blockedProviders: ["uncloseai"] });
-  const connections = await getUsableConnectionsForModel("unc/some-model");
+  await settingsDb.updateSettings({ blockedProviders: ["cloudflare-playground"] });
+  const connections = await getUsableConnectionsForModel("cfp/some-model");
   assert.deepEqual(connections, []);
 });
 
 test("getUsableConnectionsForModel drops stored rows of a blocked no-auth provider", async () => {
   await resetStorage();
   await providersDb.createProviderConnection({
-    provider: "uncloseai",
+    provider: "cloudflare-playground",
     authType: "no-auth",
-    name: "uncloseai-account",
+    name: "cloudflare-playground-account",
     isActive: true,
     testStatus: "active",
   });
-  await settingsDb.updateSettings({ blockedProviders: ["uncloseai"] });
-  const connections = await getUsableConnectionsForModel("unc/some-model");
+  await settingsDb.updateSettings({ blockedProviders: ["cloudflare-playground"] });
+  const connections = await getUsableConnectionsForModel("cfp/some-model");
   assert.deepEqual(connections, []);
 });
 
@@ -266,10 +266,10 @@ test("isBlockedNoAuthProvider fails open when the settings store is unreadable",
   // helper must treat "cannot read settings" as NOT blocked (fail open) —
   // a fail-closed regression would drop every no-auth provider from the
   // bridge pool on any settings-read error.
-  await settingsDb.updateSettings({ blockedProviders: ["uncloseai"] });
+  await settingsDb.updateSettings({ blockedProviders: ["cloudflare-playground"] });
   core.getDbInstance().exec("DROP TABLE key_value");
   assert.equal(
-    await isBlockedNoAuthProvider("uncloseai"),
+    await isBlockedNoAuthProvider("cloudflare-playground"),
     false,
     "settings-read failure must not report a provider as blocked"
   );

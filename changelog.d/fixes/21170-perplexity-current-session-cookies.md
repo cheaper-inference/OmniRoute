@@ -1,0 +1,1 @@
+- fix(providers): accept current Perplexity session cookies alongside the legacy token (#21170)

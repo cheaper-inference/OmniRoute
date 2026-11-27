@@ -17,26 +17,26 @@ OmniRoute isporučuje sistem dodataka u WordPress stilu. Dodaci su samostalni di
 
 Svaka ruta dodatka je **samo za povratnu petlju (loopback)** (Nivo 1 — `LOCAL_ONLY`): dodaci učitavaju i izvršavaju kod u podprocesima, tako da su rute nedostupne iz izvora koji nije povratna petlja bez obzira na autentifikaciju. Pogledajte [`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md).
 
-## Kako se sve uklapa
+## Kako odgovara Together
 
 ```
-Kontrolna tabla (/dashboard/plugins)
-  ├─ "Instalirano" kartica  → GET /api/plugins            (listPlugins)
+Dashboard (/dashboard/plugins)
+  ├─ "Installed" tab  → GET /api/plugins            (listPlugins)
   │                     POST /api/plugins/scan      (pluginManager.scan)
   │                     POST /api/plugins/{name}/activate|deactivate
   │                     DELETE /api/plugins/{name}   (uninstall)
-  └─ "Tržište" kartica → GET /api/plugins/marketplace
+  └─ "Marketplace" tab → GET /api/plugins/marketplace
                           → listMarketplacePlugins()
-                            ├─ nema prilagođenog URL-a → ugrađeni SEED_REGISTRY
-                            └─ prilagođeni URL → isSafeMarketplaceUrl() SSRF zaštita
+                            ├─ no custom URL → built-in SEED_REGISTRY
+                            └─ custom URL → isSafeMarketplaceUrl() SSRF guard
                                           → safeOutboundFetch(guard:"public-only")
 ```
 
-- **Sloj registra** — `src/lib/plugins/marketplace.ts`: navodi / pretražuje katalog, vraćajući se na početni registar u slučaju bilo kakvog neuspjeha.
-- **Sloj životnog ciklusa** — `src/lib/plugins/manager.ts` (`pluginManager` singleton): instalacija, nadogradnja, aktivacija, deaktivacija, deinstalacija, skeniranje, učitavanje pri pokretanju.
-- **Sloj manifesta** — `src/lib/plugins/manifest.ts`: Zod shema + zadane vrijednosti za `plugin.json`.
-- **Skener** — `src/lib/plugins/scanner.ts`: otkriva dodatke na disku unutar direktorija dodataka.
-- **Učitavač** — `src/lib/plugins/loader.ts`: pokreće svaki dodatak u izolovanom podprocesu i posreduje pozive hook-ova putem IPC-a.
+- **Sloj registra** — `src/lib/plugins/marketplace.ts`: lista / pretražuje katalog, vraćajući se u početni registar u slučaju bilo kakvog kvara.
+- **Sloj životnog ciklusa** — `src/lib/plugins/manager.ts` (`pluginManager` singleton): instalirajte, nadogradite, aktivirajte, deaktivirajte, deinstalirajte, skenirajte, učitajte pri pokretanju.
+- **Manifestni sloj** — `src/lib/plugins/manifest.ts`: Zod shema + zadane vrijednosti za `plugin.json`.
+- **Scanner** — `src/lib/plugins/scanner.ts`: otkriva dodatke na disku ispod direktorija dodataka.
+- **Utovarivač** — `src/lib/plugins/loader.ts`: pokreće svaki dodatak u zasebnom Node.js podređenom procesu i posrednici spajaju pozive preko IPC. Dijete nije sandbox (pogledajte "Izolacija izvođenja dodataka" ispod).
 
 ## Katalog tržišta
 
@@ -63,31 +63,31 @@ Kada nije konfigurisan prilagođeni URL registra, katalog je ugrađeni `SEED_REG
 
 ## REST API
 
-Svi krajnji punktovi (endpoints) zahtijevaju upravljačku autentifikaciju (`requireManagementAuth`) **i** dostupni su samo putem loopback-a — `/api/plugins` i `/api/plugins/` su navedeni u `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`).
+Sve krajnje tačke zahtijevaju autorizaciju upravljanja (`requireManagementAuth`)** i** su samo za petlju — `/api/plugins` i `/api/plugins/` su navedeni u `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`).
 
-| Endpoint                         | Metoda | Opis                                                        |
+| Krajnja tačka                    | Metoda | Opis                                                        |
 | -------------------------------- | ------ | ----------------------------------------------------------- |
-| `/api/plugins`                   | GET    | Listiraj instalirane dodatke (opcionalni `?status=` filter) |
-| `/api/plugins`                   | POST   | Instaliraj dodatak sa apsolutne lokalne putanje             |
-| `/api/plugins/scan`              | POST   | Skeniraj direktorij dodataka i registriraj nove dodatke     |
-| `/api/plugins/marketplace`       | GET    | Listiraj unose u katalogu tržišta (marketplace)             |
-| `/api/plugins/[name]`            | GET    | Dohvati detalje instaliranog dodatka                        |
-| `/api/plugins/[name]`            | DELETE | Deinstaliraj dodatak                                        |
-| `/api/plugins/[name]/activate`   | POST   | Aktiviraj (učitaj + registriraj hook-ove)                   |
-| `/api/plugins/[name]/deactivate` | POST   | Deaktiviraj (pokreni `onDeactivate`, odjavi hook-ove)       |
-| `/api/plugins/[name]/config`     | GET    | Dohvati konfiguraciju dodatka + konfiguracijsku shemu       |
-| `/api/plugins/[name]/config`     | PUT    | Ažuriraj konfiguraciju dodatka (validirano prema shemi)     |
+| `/api/plugins`                   | GET    | Lista instaliranih dodataka (opcionalni `?status=` filter)  |
+| `/api/plugins`                   | POST   | Instalirajte dodatak iz direktorija izvora dodataka         |
+| `/api/plugins/scan`              | POST   | Skenirajte direktorij dodataka i registrirajte nove dodatke |
+| `/api/plugins/marketplace`       | GET    | Navedite unose u katalogu tržišta                           |
+| `/api/plugins/[name]`            | GET    | Preuzmite detalje o instaliranom dodatku                    |
+| `/api/plugins/[name]`            | DELETE | Deinstalirajte dodatak                                      |
+| `/api/plugins/[name]/activate`   | POST   | Aktiviraj (učitaj + registar kuke)                          |
+| `/api/plugins/[name]/deactivate` | POST   | Deaktiviraj (ispali `onDeactivate`, odjavi kuke)            |
+| `/api/plugins/[name]/config`     | GET    | Nabavite konfiguraciju plugina + konfiguracijsku šemu       |
+| `/api/plugins/[name]/config`     | PUT    | Ažuriraj konfiguraciju dodatka (potvrđeno prema šemi)       |
 
-`status` filter za `GET /api/plugins` prihvata jednu od vrijednosti `installed` / `active` / `inactive` / `error`. Neispravna vrijednost vraća `400`.
+Filter `GET /api/plugins` `status` prihvata jedan od `installed` / `active` / `inactive` / `error`. Nevažeća vrijednost vraća `400`.
 
-### Listiraj instalirane dodatke
+### Lista instaliranih dodataka
 
 ```bash
 curl http://localhost:20128/api/plugins \
   -H "Cookie: auth_token=..."
 ```
 
-### Instalacija sa lokalne putanje
+### Instalirajte s lokalne staze
 
 ```bash
 curl -X POST http://localhost:20128/api/plugins \
@@ -96,16 +96,18 @@ curl -X POST http://localhost:20128/api/plugins \
   -d '{ "path": "/absolute/path/to/my-plugin" }'
 ```
 
-`path` mora biti **apsolutna** i ne smije sadržavati `..` segmente za navigaciju ili null bajtove (što provjerava Zod). Izvorni direktorij mora sadržavati validan `plugin.json` (ili biti roditelj istog). U slučaju uspjeha, odgovor je `201` sa redom instaliranog dodatka.
+`path` mora biti an** apsolutno** put do direktorija** unutar direktorija izvora dodataka** : `plugin-sources` pored korijena dodatka, dakle `~/.omniroute/plugin-sources/` po defaultu, ili `<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/` kada je ta varijabla postavljena (`getPluginSourcesDir()` u `src/lib/plugins/installSource.ts`). Prvo kopirajte ili klonirajte dodatak tamo. Instalacija je odbijena sa `400` kada putanja sadrži `..` ili null bajt, leži izvan tog direktorija, rješava se izvan njega kroz simboličku vezu, sadrži simboličku vezu čiji je cilj izvan njega ili kada direktorij ne postoji. Izvorni direktorij mora sadržavati važeći `plugin.json` (ili biti njegov roditelj). Po uspjehu odgovor je `201` s instaliranim redom dodatka.
 
-### Pregled tržišta (marketplace)
+Za razliku od drugih ruta dodataka, ovaj zahtijeva vjerodajnice za upravljanje (sesiju kontrolne ploče ili API ključ s opsegom upravljanja) čak i kada je prijava onemogućena (`requireLogin=false`): instaliranje koda nikada nije anonimna radnja.
+
+### Pregledajte tržište
 
 ```bash
 curl http://localhost:20128/api/plugins/marketplace \
   -H "Cookie: auth_token=..."
 ```
 
-### Ažuriranje konfiguracije dodatka
+### Ažurirajte konfiguraciju dodatka
 
 ```bash
 curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
@@ -114,7 +116,7 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
   -d '{ "config": { "level": "debug", "maxItems": 100 } }'
 ```
 
-`PUT .../config` validira svaku pruženu vrijednost prema `configSchema` dodatka (deklariranoj u manifestu): `number` polja poštuju `min`/`max`, `select` polja moraju odgovarati deklariranom `enum`-u. Ključevi koji nisu prisutni u shemi su dozvoljeni.
+`PUT .../config` potvrđuje svaku datu vrijednost u odnosu na `configSchema` dodatka (deklariran u manifestu): `number` polja poštuju `min`/`max`, `select` polja moraju odgovarati deklariranom `enum`. Ključevi koji nisu prisutni u šemi su dozvoljeni.
 
 ## Konfiguracija
 
@@ -148,54 +150,58 @@ Kartica "Marketplace" na kontrolnoj ploči (dashboard) izlaže polje za ovaj URL
 
 ## Sigurnost
 
-### Nivo rute — samo loopback
+### Rutirajte samo — loopback
 
-Dodaci izvršavaju kod u pokrenutim podprocesima, tako da je cijela površina `/api/plugins` klasifikovana kao `LOCAL_ONLY` (Nivo 1). Sprovođenje loopback-a se izvršava bezuslovno **prije** bilo kakve provjere autentifikacije, tako da iscureni token za upravljanje koji stigne do uređaja putem tunela i dalje ne može instalirati, aktivirati ili deinstalirati dodatak. Pogledajte [`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md) i Hard Rules #15 / #17.
+Dodaci izvršavaju kod u podređenim procesima, tako da je cijela `/api/plugins` površina klasifikovana `LOCAL_ONLY` (Tier 1). Provedba povratne petlje radi bezuvjetno** prije** bilo kakvu provjeru autentifikacije, tako da procureli token upravljanja koji dospijeva u kutiju preko tunela i dalje ne može instalirati, aktivirati ili deinstalirati dodatak. Pogledajte [`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md) i čvrsta pravila #15 / #17.
 
-### Marketplace registry SSRF zaštita
+### Marketplace Registry SSRF guard
 
-Prilagođeni URL registra je konfiguracija na koju napadač može uticati, pa ga `listMarketplacePlugins()` prije preuzimanja provlači kroz dva sloja:
+Prilagođeni registar URL je konfiguracija na koju može utjecati napadač, tako da prije nego što ga dohvati `listMarketplacePlugins()` ga pokreće kroz dva sloja:
 
 1. **`isSafeMarketplaceUrl(url)`** (`src/lib/plugins/marketplace.ts`):
    - Odbija sve što nije `http:` / `https:`.
-   - Odbija literalne privatne/loopback/link-local/ULA hostove (IPv4 **i** IPv6, uključujući IPv4-mapped) putem kanonskog `isPrivateHost` (`src/shared/network/outboundUrlGuard.ts`).
-   - Razrješava **oba** `A` i `AAAA` zapisa i odbija ako je **bilo koja** razriješena adresa privatna — zatvarajući zaobilaznicu public-hostname → private-IP.
-   - **Zatvoreno u slučaju greške**: neuspjeh DNS razrješavanja odbija URL.
-2. **`safeOutboundFetch(url, { guard: "public-only", timeoutMs: 5000 })`** (`src/shared/network/safeOutboundFetch.ts`): ponovo primjenjuje zaštitu URL-a samo za javne adrese u trenutku preuzimanja i **blokira preusmjeravanja** (nema public → private `30x` pivot-a).
+   - Odbacuje doslovne private/loopback/link-local/ULA hostove (IPv4** i** IPv6, uključujući IPv4-mapped) preko kanonskog `isPrivateHost` (`src/shared/network/outboundUrlGuard.ts`).
+   - Rešava** oboje** `A` i `AAAA` bilježe i odbacuju if** bilo koji** riješena adresa je privatna — koja zatvara javni-hostname → privatni IP zaobilaznicu.
+   - **Neuspjeh zatvoren** : greška rezolucije DNS odbija URL.
+2. **`safeOutboundFetch(url, { guard: "public-only", timeoutMs: 5000 })`** (`src/shared/network/safeOutboundFetch.ts`): ponovo primjenjuje URL zaštitu samo za javnost u vrijeme dohvaćanja i** blokira preusmjeravanja** (nema javnog → privatnog `30x` pivota).
 
-URL koji ne prođe kroz bilo koji od ova dva sloja ne prekida zahtjev — marketplace se tiho vraća na ugrađeni početni registar i bilježi upozorenje.
+URL koji ne uspije bilo koji sloj ne prekida zahtjev — tržište se tiho vraća na ugrađeni početni registar i evidentira upozorenje.
 
-> Ova zaštita je ojačana u PR #3774 posebno radi razrješavanja A + AAAA zapisa i korištenja kanonskog `isPrivateHost` umjesto provjere samo za IPv4.
+> Ovaj guard je ojačan u PR #3774 posebno za rješavanje A + AAAA i korištenje kanonskog `isPrivateHost` umjesto IPv4-only provjere.
 
-### Izolacija izvršavanja dodataka
+### Izolacija izvršenja dodatka
 
-- **Izolacija procesa** — `loadPlugin()` (`src/lib/plugins/loader.ts`) pokreće svaki dodatak u zasebnom Node.js podprocesu i komunicira putem IPC-a. Pozivi hook-ova imaju vremensko ograničenje sa eskalacijom `SIGTERM` → `SIGKILL`.
-- **Lista dozvoljenih varijabli okruženja (Env allowlist)** — podproces prima samo listu dozvoljenih varijabli okruženja; širi skup se dodjeljuje samo kada manifest zahtijeva `env` dozvolu.
-- **Ograničenje putanje (Path containment)** — instalacija/nadogradnja/deinstalacija potvrđuju da se direktorij dodatka i `manifest.main` razrješavaju **unutar** korijena upravljanih dodataka prije bilo kakvog kopiranja ili rekurzivnog brisanja (štiti od manipulisanih putanja u bazi podataka i `../` traversal-a u `manifest.main`). Aktivacija razrješava simboličke veze (symlinks) putem `realpath` i odbija učitati ulaznu tačku koja izlazi izvan direktorija dodatka.
-- **Opcioni integritet (integrity pin)** — manifest može deklarisati polje `integrity` (`sha256-<base64>`, SRI format). Kada je prisutno, loader verifikuje heš ulazne datoteke u trenutku učitavanja i odbija aktivaciju u slučaju neusklađenosti. To je opciona detekcija neovlaštenih izmjena, **nije** sigurnosna granica — loopback-only rutiranje i model dozvola su stvarne granice.
+> **Dodaci nisu zaštićeni.** Dijete je običan Node.js proces koji se izvodi kao OmniRoute korisnik, bez VM konteksta i bez Node.js oznaka dozvole, tako da plugin kod može čitati i pisati bilo koju datoteku koju korisnik može, pokrenuti programe i doći do mreže. `requires.permissions` samo odlučuje koje varijable okruženja dijete prima; ostale dozvole se ne primjenjuju. Instalirajte samo dodatke u koje vjerujete. Granica procesa ispod sadrži padove i visi; to nije sigurnosna granica.
+
+- **Izolacija procesa** — `loadPlugin()` (`src/lib/plugins/loader.ts`) pokreće svaki dodatak u zasebnom Node.js podređenom procesu i komunicira preko IPC. Pozivi na zakačivanje imaju vremensko ograničenje sa `SIGTERM` → `SIGKILL` eskalacijom.
+- **Env lista dozvoljenih** — dijete prima samo dozvoljeni skup varijabli okruženja; širi skup se odobrava samo kada manifest traži `env` dozvolu.
+- **Instalirajte zadržavanje izvora** — `POST /api/plugins` čita samo iz izvornog direktorija dodatka (pogledajte "Instaliranje s lokalne staze"): staza je kanonikalizirana sa `realpath`, mora ostati striktno unutar tog direktorija, a izvorno stablo koje nosi simboličku vezu koja mu pobjegne je odbijeno prije nego što se bilo što kopira.
+- **Zadržavanje puta** — install/upgrade/uninstall tvrdi da se direktorij dodataka i `manifest.main` rješavaju** unutar** upravljani root dodatak prije bilo kakvog kopiranja ili rekurzivnog brisanja (štiti od neovlaštenih DB staza i `../` prelaska u `manifest.main`). Aktivacija razrješava simboličke veze putem `realpath` i odbija učitavanje ulazne točke koja izbjegava direktorij dodataka.
+- **Opcioni pin integriteta** — manifest može deklarirati polje `integrity` (`sha256-<base64>`, SRI format). Kada je prisutan, učitavač provjerava hash ulazne datoteke u vrijeme učitavanja i odbija da se aktivira u slučaju nepodudaranja. To je opcija za otkrivanje neovlaštenog pristupa,** ne** sigurnosna granica: ne ograničava ono što učitani dodatak može učiniti.
+- **Nema akreditiva klijenta u kukicama** — kontekst proslijeđen na `onRequest`, `onResponse` i `onError` ima `authorization`, `x-api-key`, `proxy-authorization` i `cookie` zaglavlja uklonjena, a zapis ključa API ne nosi vrijednost ključa (`redactPluginContext()` u `src/lib/plugins/hooks.ts`).
 
 ## Manifest (`plugin.json`)
 
-Validirano pomoću `PluginManifestSchema` (`src/lib/plugins/manifest.ts`):
+Potvrdio `PluginManifestSchema` (`src/lib/plugins/manifest.ts`):
 
-| Polje              | Tip       | Napomene                                                               |
-| ------------------ | --------- | ---------------------------------------------------------------------- |
-| `name`             | string    | Obavezno; kebab-case (`^[a-z0-9-]+$`), 1–100 znakova                   |
-| `version`          | string    | Obavezno; semver (`MAJOR.MINOR.PATCH`)                                 |
-| `description`      | string?   | ≤ 500 znakova                                                          |
-| `author`           | string?   | ≤ 200 znakova                                                          |
-| `license`          | string?   | Podrazumijevano `MIT`                                                  |
-| `main`             | string?   | Ulazna datoteka; podrazumijevano `index.js`                            |
-| `source`           | enum?     | `local` \| `marketplace` (podrazumijevano `local`)                     |
-| `tags`             | string[]? | Tagovi za pretragu                                                     |
-| `requires`         | object?   | `{ omniroute?, permissions[] }`                                        |
-| `hooks`            | object?   | Booleove vrijednosti koje deklarišu koje hook-ove dodatak implementira |
-| `skills`           | object[]? | Opcione definicije vještina                                            |
-| `enabledByDefault` | boolean?  | Automatska aktivacija pri instalaciji                                  |
-| `configSchema`     | object?   | Mapa konfiguracionih polja (`string`/`number`/`boolean`/`select`)      |
-| `integrity`        | string?   | Opcioni `sha256-<base64>` pin ulazne datoteke                          |
+| Polje              | Tip        | Bilješke                                                           |
+| ------------------ | ---------- | ------------------------------------------------------------------ |
+| `name`             | string     | Obavezno; kutija za ćevap (`^[a-z0-9-]+$`), 1–100 znakova          |
+| `version`          | string     | Obavezno; semver (`MAJOR.MINOR.PATCH`)                             |
+| `description`      | string?    | ≤ 500 znakova                                                      |
+| `author`           | string?    | ≤ 200 znakova                                                      |
+| `license`          | string?    | Zadano je `MIT`                                                    |
+| `main`             | string?    | Entry file; podrazumevano je `index.js`                            |
+| `source`           | enum?      | `local` \| `marketplace` (zadano na `local`)                       |
+| `tags`             | string[]?  | Pretražite oznake                                                  |
+| `requires`         | objekt?    | `{ omniroute?, permissions[] }`                                    |
+| `hooks`            | objekt?    | Booleovi koji deklariraju koji zakačivanje implementira dodatak    |
+| `skills`           | objekat[]? | Opcione definicije vještina                                        |
+| `enabledByDefault` | boolean?   | Automatsko aktiviranje prilikom instalacije                        |
+| `configSchema`     | objekt?    | Mapa konfiguracijskih polja (`string`/`number`/`boolean`/`select`) |
+| `integrity`        | string?    | Opcioni `sha256-<base64>` pin za unos datoteke                     |
 
-Dozvole se izvlače iz enuma `network` / `file-read` / `file-write` / `env` / `exec`.
+Dozvole se izvlače iz enuma `network` / `file-read` / `file-write` / `env` / `exec`. Samo `env` ima učinak vremena izvođenja (malo veća lista dozvoljenih promjenjivih okruženja za dijete); ostali su deklaracije i ne provode se.
 
 ## Tok životnog ciklusa
 
@@ -250,16 +256,16 @@ Tabela `plugins` (migracija `076_create_plugins.sql`):
 
 Metrike/analitika dodataka se prate u dodatnim tabelama (`090_plugin_metrics.sql`, `091_plugin_analytics.sql`).
 
-## Kontrolna tabla
+## Dashboard
 
-Stranica kontrolne table na `/dashboard/plugins`
-(`src/app/(dashboard)/dashboard/plugins/page.tsx`) nudi dvije kartice:
+Stranica kontrolne ploče na `/dashboard/plugins` (`src/app/(dashboard)/dashboard/plugins/page.tsx`) sadrži dvije kartice:
 
-- **Instalirano** — navodi instalirane dodatke sa njihovim deklarisanim kukama, prekidačem za aktivaciju/deaktivaciju, dugmetom za deinstalaciju i akcijom „Skeniraj dodatke“ (`POST /api/plugins/scan`).
-- **Marketplace** — prikazuje katalog sa `GET /api/plugins/marketplace` sa poljem za postavljanje prilagođenog URL-a registra.
+- **Instalirano** — navodi instalirane dodatke sa njihovim deklarisanim kukicama, activate/deactivate prekidačem, dugmetom za deinstaliranje i akcijom "Skeniraj dodatke" (`POST /api/plugins/scan`).
+- **Marketplace** — prikazuje katalog iz `GET /api/plugins/marketplace` s poljem za postavljanje prilagođenog registra URL.
 
-Stranica za konfiguraciju po dodatku se nalazi na `/dashboard/plugins/[name]/config`
-(`src/app/(dashboard)/dashboard/plugins/[name]/config/page.tsx`).
+Stranica uvijek prikazuje upozorenje da se dodaci pokreću s punim privilegijama OmniRoute procesa.
+
+Konfiguraciona stranica po dodatku živi na `/dashboard/plugins/[name]/config` (`src/app/(dashboard)/dashboard/plugins/[name]/config/page.tsx`).
 
 ## Vidi također
 

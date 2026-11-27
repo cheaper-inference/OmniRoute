@@ -1,6 +1,8 @@
 import { register } from "../registry.ts";
 import { FORMATS } from "../formats.ts";
 import { buildGeminiUsageMetadata } from "./geminiUsageMetadata.ts";
+import { resolveToolCallIndex } from "./openai-to-gemini-sse.ts";
+import { chargeRetained } from "../../utils/streamRetainedBudget.ts";
 
 type AntigravityCandidate = {
   content: {
@@ -51,14 +53,13 @@ export function openaiToAntigravityResponse(chunk, state) {
   // Accumulate tool calls silently (no emit until finish)
   if (delta.tool_calls) {
     for (const tc of delta.tool_calls) {
-      const idx = tc.index ?? 0;
+      const idx = resolveToolCallIndex(state._toolCallAccum, tc);
       if (!state._toolCallAccum[idx]) {
         state._toolCallAccum[idx] = { id: "", name: "", arguments: "" };
       }
       const accum = state._toolCallAccum[idx];
       if (tc.id) accum.id = tc.id;
-      if (tc.function?.name) accum.name += tc.function.name;
-      if (tc.function?.arguments) accum.arguments += tc.function.arguments;
+      appendToolCallFragment(state, accum, tc);
     }
     // Skip emit — wait for finish_reason
     if (parts.length === 0 && !finishReason) return null;
@@ -82,6 +83,8 @@ export function openaiToAntigravityResponse(chunk, state) {
         },
       });
     }
+    // A repeated finish chunk must not emit the same calls again.
+    state._toolCallAccum = {};
   }
 
   // Skip empty non-finish chunks
@@ -127,6 +130,17 @@ export function openaiToAntigravityResponse(chunk, state) {
   }
 
   return { response };
+}
+
+function appendToolCallFragment(
+  state: unknown,
+  accum: { name: string; arguments: string },
+  tc: { function?: { name?: string; arguments?: string } }
+): void {
+  const grown = (tc.function?.name?.length ?? 0) + (tc.function?.arguments?.length ?? 0);
+  if (!chargeRetained(state, grown)) return;
+  if (tc.function?.name) accum.name += tc.function.name;
+  if (tc.function?.arguments) accum.arguments += tc.function.arguments;
 }
 
 // OpenAI upstreams called with `stream_options.include_usage` send usage in a

@@ -1,3 +1,4 @@
+import Card from "@/shared/components/Card";
 import { Select, Toggle } from "@/shared/components";
 import { type CodexServiceTier } from "@/lib/providers/requestDefaults";
 import {
@@ -46,7 +47,7 @@ export function CodexConnectionFields({
   onChange,
 }: CodexConnectionFieldsProps) {
   return (
-    <div className="flex flex-col gap-4 rounded-lg border border-border bg-bg-subtle p-4">
+    <Card.Section className="flex flex-col gap-4">
       <Select
         label={t("defaultThinkingStrengthLabel")}
         value={reasoningEffort}
@@ -118,6 +119,6 @@ export function CodexConnectionFields({
         label={t("allowCodexPaidCreditsLabel")}
         description={t("allowCodexPaidCreditsDescription")}
       />
-    </div>
+    </Card.Section>
   );
 }

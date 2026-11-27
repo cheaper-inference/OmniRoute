@@ -1,0 +1,1 @@
+- **fix(docker):** App services in `docker-compose.yml` now drop all capabilities and run with `no-new-privileges`. A regression test covers both settings and the Docker socket mount exclusive to the `cli` profile. The Docker guide adds a container hardening section with a read-only override for the `base` profile (#19835).

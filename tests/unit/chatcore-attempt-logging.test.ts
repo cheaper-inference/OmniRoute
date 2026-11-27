@@ -93,6 +93,64 @@ after(() => {
   fs.rmSync(testDataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
+test("chatCore resolves omitted and null Gemini settings to off and honors an explicit implicit", async (t) => {
+  const { handleChatCore } = await import("../../open-sse/handlers/chatCore.ts");
+  const { AntigravityExecutor } = await import("../../open-sse/executors/antigravity.ts");
+  const model = "gemini-4-hydrogen-high";
+  t.mock.method(globalThis, "fetch", async () => {
+    throw new Error("unexpected network access");
+  });
+  const execute = t.mock.method(AntigravityExecutor.prototype, "execute", async ({ body }) => ({
+    response: new Response(
+      JSON.stringify({
+        response: {
+          candidates: [
+            { content: { role: "model", parts: [{ text: "OK" }] }, finishReason: "STOP" },
+          ],
+          usageMetadata: { promptTokenCount: 12, candidatesTokenCount: 2, totalTokenCount: 14 },
+        },
+      }),
+      { headers: { "Content-Type": "application/json" } }
+    ),
+    url: "https://example.invalid/gemini-test",
+    headers: {},
+    transformedBody: body,
+  }));
+  for (const [name, cachedSettings, expectedMode] of [
+    ["omitted", {}, "off"],
+    ["null", { geminiPromptCacheMode: null }, "off"],
+    ["implicit", { geminiPromptCacheMode: "implicit" }, "implicit"],
+  ] as const) {
+    await t.test(name, async () => {
+      const correlationId = `gemini-cache-mode-${name}`;
+      const body = {
+        model,
+        messages: [{ role: "user", content: `Verify Gemini cache mode ${name}` }],
+        stream: false,
+      };
+      const result = await handleChatCore({
+        body,
+        modelInfo: { provider: "antigravity", model },
+        credentials: { accessToken: "fixture-access-token", projectId: "fixture-project" },
+        cachedSettings,
+        correlationId,
+        log: { debug() {}, info() {}, warn() {}, error() {} },
+        clientRawRequest: {
+          endpoint: "/v1/chat/completions",
+          body: structuredClone(body),
+          headers: new Headers({ accept: "application/json" }),
+        },
+      } as Parameters<typeof handleChatCore>[0]);
+      assert.equal(result.response.status, 200, name);
+      await result.response.text();
+      const row = await pollForCallLog(correlationId);
+      assert.ok(row, name);
+      assert.equal(getOmniRouteMeta(row.responseBody)?.geminiPromptCache?.mode, expectedMode, name);
+    });
+  }
+  assert.equal(execute.mock.callCount(), 3);
+});
+
 test("persists a call log row with the mapped fields (default cacheSource=upstream)", async () => {
   const id = "attempt-basic-1";
   persistAttemptLogs(

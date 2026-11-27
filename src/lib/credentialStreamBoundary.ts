@@ -1,4 +1,7 @@
-import { CREDENTIAL_PATTERNS } from "@omniroute/open-sse/utils/credentialPatterns.ts";
+import {
+  CREDENTIAL_PATTERNS,
+  LABELLED_SECRET_TAIL,
+} from "@omniroute/open-sse/utils/credentialPatterns.ts";
 import { exactValuePattern } from "@/shared/utils/credentialExactValues";
 
 const TOKEN_BOUNDARY = /[\s"'\\{}\[\],]/;
@@ -25,6 +28,8 @@ export function credentialSafeCut(text: string, desired: number): number {
   cut = Math.min(cut, tailStart);
   const auth = AUTH_TAIL.exec(text);
   if (auth) cut = Math.min(cut, auth.index);
+  const labelled = LABELLED_SECRET_TAIL.exec(text);
+  if (labelled) cut = Math.min(cut, labelled.index);
   cut = beforeCrossingMatch(text, IMAGE_DATA, cut);
   for (const { regex } of CREDENTIAL_PATTERNS) cut = beforeCrossingMatch(text, regex, cut);
   const exact = exactValuePattern();

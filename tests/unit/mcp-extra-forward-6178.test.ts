@@ -35,13 +35,15 @@ test.after(() => {
 });
 
 const { createMcpServer } = await import("../../open-sse/mcp-server/server.ts");
-const { storeBlock, resetCcrStore } = await import(
-  "../../open-sse/services/compression/engines/ccr/index.ts"
-);
+const { storeBlock, resetCcrStore } =
+  await import("../../open-sse/services/compression/engines/ccr/index.ts");
 const { resetDbInstance } = await import("../../src/lib/db/core.ts");
 
 type RegisteredTool = {
-  handler: (args: unknown, extra?: unknown) => Promise<{
+  handler: (
+    args: unknown,
+    extra?: unknown
+  ) => Promise<{
     content?: Array<{ type: string; text: string }>;
     isError?: boolean;
   }>;
@@ -90,6 +92,41 @@ test("static tool loops forward `extra` so stdio callers keep their scope/identi
     verbatim,
     "the forwarded `extra` principal must match the stored block and return it verbatim"
   );
+});
+
+test("MCP returns an authorized full CCR block verbatim at the UTF-8 byte limit", async () => {
+  const server = createMcpServer();
+  const retrieve = getRegisteredHandler(server, "omniroute_ccr_retrieve");
+  const caller = { authInfo: { clientId: "ccr-full-owner", scopes: ["read:compression"] } };
+  const content = JSON.stringify({ value: "é".repeat(131061) + '\n"\\🔥' });
+  assert.equal(Buffer.byteLength(content, "utf8"), 256 * 1024);
+  const hash = storeBlock(content, caller.authInfo.clientId);
+
+  try {
+    for (const args of [{ hash }, { hash, mode: "full" }]) {
+      const result = await retrieve(args, caller);
+      const payload = JSON.parse(result.content?.[0]?.text ?? "{}");
+      assert.equal(payload.found, true);
+      assert.equal(payload.truncated, undefined);
+      assert.ok(payload.content === content, "the full result must preserve the original text");
+    }
+
+    const otherCaller = { authInfo: { ...caller.authInfo, clientId: "ccr-full-other" } };
+    const other = await retrieve({ hash }, otherCaller);
+    assert.equal(JSON.parse(other.content?.[0]?.text ?? "{}").found, false);
+
+    const oversized = storeBlock(`${content} `, caller.authInfo.clientId);
+    const full = await retrieve({ hash: oversized }, caller);
+    const fullPayload = JSON.parse(full.content?.[0]?.text ?? "{}");
+    assert.equal(fullPayload.tooLargeForFull, true);
+    assert.ok(fullPayload.suggestedModes.includes("head"));
+    assert.equal(fullPayload.content, undefined);
+
+    const head = await retrieve({ hash: oversized, mode: "head", n: 1 }, caller);
+    assert.equal(JSON.parse(head.content?.[0]?.text ?? "{}").truncated, true);
+  } finally {
+    await server.close();
+  }
 });
 
 test.after(() => {

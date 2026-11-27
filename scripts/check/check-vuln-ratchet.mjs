@@ -29,7 +29,8 @@
 import fs from "node:fs";
 import { execFileSync, spawnSync } from "node:child_process";
 import path from "node:path";
-import { pathToFileURL } from "node:url";
+
+import { isMainModule } from "../lib/is-main-module.mjs";
 
 const ROOT = process.cwd();
 const QUIET = process.argv.includes("--quiet");
@@ -369,4 +370,4 @@ function applyRatchet(vulnCount) {
   process.exitCode = 0;
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1] || "").href) main();
+if (isMainModule(import.meta.url)) main();

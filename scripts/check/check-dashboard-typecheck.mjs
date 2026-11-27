@@ -25,8 +25,9 @@
 
 import fs from "node:fs";
 import path from "node:path";
-import { pathToFileURL } from "node:url";
+
 import { runScopedTypecheck } from "./run-scoped-typecheck.mjs";
+import { isMainModule } from "../lib/is-main-module.mjs";
 
 const ROOT = process.cwd();
 const TSCONFIG = path.join(ROOT, "tsconfig.typecheck-dashboard.json");
@@ -159,6 +160,6 @@ function main() {
   process.exit(0);
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1] || "").href) {
+if (isMainModule(import.meta.url)) {
   main();
 }

@@ -16,6 +16,11 @@
  * @module sse/services/clientApiKeyResolver
  */
 
+import {
+  requiredApiKeyUnavailable,
+  resolveRequiredApiKey,
+} from "@/shared/utils/requiredApiKeyContext";
+
 import { extractApiKey, isValidApiKey, readNonEmptyUrlToken } from "./auth.ts";
 import { extractGoogApiKeyHeader } from "./googApiKeyAuth.ts";
 import { readHeaderValue, type AuthRequestHeaders } from "./headerReader.ts";
@@ -27,7 +32,11 @@ type ClientAuthRequestLike = {
 
 type CandidateOptions = { allowUrl?: boolean };
 
-export type ResolvedClientApiKey = { apiKey: string | null; valid: boolean };
+export type ResolvedClientApiKey = {
+  apiKey: string | null;
+  valid: boolean;
+  rejection?: Response;
+};
 
 /**
  * Every client credential the request presents, in precedence order and
@@ -67,7 +76,7 @@ export function extractApiKeyCandidates(
 }
 
 /**
- * Resolve the client's API key across every presented credential.
+ * Resolve the required API key or, without a binding, the presented credentials.
  *
  * Returns `{ apiKey, valid: true }` with the FIRST candidate (precedence order of
  * `extractApiKeyCandidates()`) that passes `isValidApiKey()` — use it for key
@@ -80,6 +89,14 @@ export async function resolveClientApiKey(
   request: ClientAuthRequestLike,
   opts?: CandidateOptions
 ): Promise<ResolvedClientApiKey> {
+  const requiredKey = resolveRequiredApiKey();
+  if (requiredKey) {
+    const resolved = await requiredKey;
+    return resolved
+      ? { apiKey: resolved.apiKey, valid: true }
+      : { apiKey: null, valid: false, rejection: requiredApiKeyUnavailable() };
+  }
+
   for (const candidate of extractApiKeyCandidates(request, opts)) {
     if (await isValidApiKey(candidate)) return { apiKey: candidate, valid: true };
   }

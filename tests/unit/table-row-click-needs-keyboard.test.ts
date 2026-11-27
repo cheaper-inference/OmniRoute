@@ -1,11 +1,13 @@
 // Review of 2026-11-15, defect 5 (finding A5-03): six hand-assembled kit tables had a row that
-// opened something on a mouse click and nothing on the keyboard. The behaviour now lives in
-// the `InteractiveTableRow` adapter (src/shared/components/InteractiveTableRow.tsx): tab stop,
-// Enter and Space, and controls inside the row keep their own events.
+// opened something on a mouse click and nothing on the keyboard. The behaviour is the kit's
+// since its #238: `<TableRow onActivate>` makes the row a tab stop, runs on a click and on
+// Enter / Space, and leaves the controls inside the row their own events. The local
+// `InteractiveTableRow` adapter that held this until then is gone.
 //
 // This guard parses every dashboard TSX file and fails on a kit `<TableRow>` that takes
-// `onClick` directly: render `<InteractiveTableRow onActivate={…}>` instead. The behaviour
-// itself is pinned by tests/unit/ui/interactive-table-row.test.tsx and
+// `onClick` without `onActivate`: a pointer-only row. Pass `onActivate={…}` instead (an
+// `onClick` next to it is fine: the kit runs it first). The behaviour itself is pinned by
+// tests/unit/ui/interactive-table-row.test.tsx and
 // tests/unit/ui/logger-row-keyboard-activation.test.tsx.
 
 import { test } from "node:test";
@@ -16,8 +18,9 @@ import ts from "typescript";
 
 const ROOT = path.resolve(import.meta.dirname, "../..");
 const SCAN_DIRS = ["src/app", "src/shared/components"];
-/** The adapter itself: the one place that puts `onClick` on the kit row, with the keys. */
-const ADAPTER = "src/shared/components/InteractiveTableRow.tsx";
+/** The local adapter the kit row replaced. It must not come back next to the kit behaviour. */
+const REMOVED_ADAPTER = "src/shared/components/InteractiveTableRow.tsx";
+const KIT_TABLE = "packages/ui-kit/src/table.tsx";
 
 /**
  * Rows that keep a pointer-only `onClick` on purpose, by file. Each entry needs the reason:
@@ -59,7 +62,16 @@ function kitTableRowNames(sf: ts.SourceFile): Set<string> {
   return names;
 }
 
-/** `file:line` of every kit TableRow that takes `onClick` as a direct attribute. */
+const hasAttribute = (
+  node: ts.JsxOpeningElement | ts.JsxSelfClosingElement,
+  sf: ts.SourceFile,
+  name: string
+) =>
+  node.attributes.properties.some(
+    (attr) => ts.isJsxAttribute(attr) && attr.name.getText(sf) === name
+  );
+
+/** `file:line` of every kit TableRow that takes `onClick` and no `onActivate`. */
 function findRowsWithBareOnClick(files: string[]): string[] {
   const found: string[] = [];
   for (const file of files) {
@@ -72,9 +84,8 @@ function findRowsWithBareOnClick(files: string[]): string[] {
       if (
         (ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) &&
         rowNames.has(node.tagName.getText(sf)) &&
-        node.attributes.properties.some(
-          (attr) => ts.isJsxAttribute(attr) && attr.name.getText(sf) === "onClick"
-        )
+        hasAttribute(node, sf, "onClick") &&
+        !hasAttribute(node, sf, "onActivate")
       ) {
         const line = sf.getLineAndCharacterOfPosition(node.getStart(sf)).line + 1;
         found.push(`${path.relative(ROOT, file)}:${line}`);
@@ -91,13 +102,12 @@ const fileOf = (site: string) => site.slice(0, site.lastIndexOf(":"));
 test("no kit TableRow takes onClick without the keyboard handling", () => {
   const files = SCAN_DIRS.flatMap((dir) => listTsx(path.join(ROOT, dir)));
   assert.ok(files.length > 100, "scan should cover the dashboard sources");
-  assert.ok(files.includes(path.join(ROOT, ADAPTER)), "the adapter should be in the scan");
-  const found = findRowsWithBareOnClick(files.filter((file) => file !== path.join(ROOT, ADAPTER)));
+  const found = findRowsWithBareOnClick(files);
   const violations = found.filter((site) => !(fileOf(site) in POINTER_ONLY_ROWS));
   assert.deepEqual(
     violations,
     [],
-    "use <InteractiveTableRow onActivate={…}> instead of <TableRow onClick={…}>"
+    "use <TableRow onActivate={…}> instead of a pointer-only <TableRow onClick={…}>"
   );
   // An exception that no longer matches a row is stale: drop it.
   const used = new Set(found.map(fileOf));
@@ -108,11 +118,25 @@ test("no kit TableRow takes onClick without the keyboard handling", () => {
   );
 });
 
-test("the adapter row handles the keyboard next to the click", () => {
-  const text = fs.readFileSync(path.join(ROOT, ADAPTER), "utf8");
-  for (const prop of ["onClick=", "onKeyDown=", "tabIndex="]) {
-    assert.ok(text.includes(prop), `InteractiveTableRow sets ${prop}`);
+test("the kit row is the only interactive row: the local adapter is gone", () => {
+  // What `onActivate` relies on in the vendored kit: tab stop, click, keys and the marker.
+  const kit = fs.readFileSync(path.join(ROOT, KIT_TABLE), "utf8");
+  const row = kit.slice(kit.indexOf("export function TableRow("));
+  for (const part of [
+    "onActivate",
+    "selected",
+    'data-interactive={onActivate ? "" : undefined}',
+    "onClick={onActivate ?",
+    "onKeyDown={onActivate ?",
+  ]) {
+    assert.ok(row.includes(part), `the kit TableRow still has: ${part}`);
   }
+
+  assert.ok(!fs.existsSync(path.join(ROOT, REMOVED_ADAPTER)), `${REMOVED_ADAPTER} is back`);
+  const users = SCAN_DIRS.flatMap((dir) => listTsx(path.join(ROOT, dir)))
+    .filter((file) => fs.readFileSync(file, "utf8").includes("InteractiveTableRow"))
+    .map((file) => path.relative(ROOT, file));
+  assert.deepEqual(users, [], "render the kit <TableRow onActivate selected> instead");
 });
 
 test("the pointer-only exception still has its keyboard path", () => {
@@ -123,7 +147,7 @@ test("the pointer-only exception still has its keyboard path", () => {
   assert.match(text, /aria-label=\{t\("toggleModels", \{ provider: providerName \}\)\}/);
 });
 
-test("the guard sees a bare onClick and accepts the adapter row", () => {
+test("the guard sees a bare onClick and accepts the kit activatable row", () => {
   const tmp = fs.mkdtempSync(path.join(ROOT, "tests/unit/.tmp-table-row-click-"));
   try {
     const write = (name: string, lines: string[]) => {
@@ -142,7 +166,8 @@ test("the guard sees a bare onClick and accepts the adapter row", () => {
     ]);
     const good = write("Good.tsx", [
       `import { TableRow } from "@omniroute/ui-kit/table";`,
-      `export const D = () => <InteractiveTableRow onActivate={() => open()} />;`,
+      `export const D = () => <TableRow onActivate={() => open()} selected={on} />;`,
+      `export const H = () => <TableRow onActivate={open} onClick={track} />;`,
       `export const E = () => <TableRow><td><button onClick={open} /></td></TableRow>;`,
       `export const F = () => <TableRow onMouseEnter={hover} />;`,
     ]);
