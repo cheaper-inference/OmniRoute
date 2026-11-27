@@ -124,6 +124,22 @@
       "landed": [],
       "steps": 0,
       "hang": false
+    },
+    "rerun": {
+      "ref": "omni-queue/release-v3.8.55/b59-3a12be33fd8b",
+      "requestedAt": "2026-11-27T02:14:54.102Z",
+      "afterMs": 1795745669000,
+      "runIds": [
+        45919171044,
+        45919171004
+      ],
+      "jobs": [
+        "Gate / Quality",
+        "Gate / CI",
+        "Unit Tests (2/8)",
+        "Integration Tests (1/2)",
+        "Fast Quality Gates"
+      ]
     }
   },
   "baseChecks": [
@@ -224,32 +240,11 @@
     "ciRuns": 64,
     "landedPrs": 51,
     "landedBatches": 15,
-    "redBatches": 12,
+    "redBatches": 13,
     "bisections": 4,
     "culprits": 1
   },
   "history": [
-    {
-      "at": "2026-11-20T14:34:07.620Z",
-      "type": "checks-green",
-      "batchId": "b11",
-      "prs": [
-        18591
-      ],
-      "sha": "b6dd0a1696681bfca5062552030831a38ea263e7",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44754637911"
-    },
-    {
-      "at": "2026-11-20T14:34:17.875Z",
-      "type": "would-land",
-      "batchId": "b11",
-      "prs": [
-        18591
-      ],
-      "sha": "b6dd0a1696681bfca5062552030831a38ea263e7",
-      "detail": "shadow mode: would merge-ff onto 8f5680304177",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44754637911"
-    },
     {
       "at": "2026-11-20T14:35:58.467Z",
       "type": "batch-started",
@@ -2977,8 +2972,38 @@
         "21358": "2026-11-26T23:38:23Z"
       },
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45919102204"
+    },
+    {
+      "at": "2026-11-27T02:14:54.102Z",
+      "type": "checks-red",
+      "batchId": "b59",
+      "prs": [
+        21356,
+        21351,
+        21341,
+        21358,
+        21295
+      ],
+      "sha": "3a12be33fd8bd4d213b0aaca60da785f88424d02",
+      "detail": "Gate / Quality, Gate / CI, Unit Tests (2/8), Integration Tests (1/2), Fast Quality Gates",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45927159687"
+    },
+    {
+      "at": "2026-11-27T02:14:54.102Z",
+      "type": "flaky-rerun",
+      "batchId": "b59",
+      "prs": [
+        21356,
+        21351,
+        21341,
+        21358,
+        21295
+      ],
+      "sha": "3a12be33fd8bd4d213b0aaca60da785f88424d02",
+      "detail": "re-running the failed jobs of b59 once (Gate / Quality, Gate / CI, Unit Tests (2/8), Integration Tests (1/2), Fast Quality Gates) before bisecting",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45927159687"
     }
   ],
-  "updatedAt": "2026-11-27T01:53:41.131Z",
+  "updatedAt": "2026-11-27T02:15:39.365Z",
   "batchWindow": 4
 }
