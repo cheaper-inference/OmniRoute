@@ -4,6 +4,7 @@ import { useSyncExternalStore } from "react";
 import { useLocale, useTranslations } from "next-intl";
 
 import {
+  type SeverityNewsAnnouncement,
   NEWS_DISMISS_EVENT,
   NEWS_DISMISS_STORAGE_NAME,
   parseDismissedNewsIds,
@@ -38,6 +39,64 @@ function getServerDismissedIds(): string {
   return "";
 }
 
+function dismissAnnouncement(id: string, dismissedIds: Set<string>) {
+  dismissedIds.add(id);
+  try {
+    localStorage.setItem(NEWS_DISMISS_STORAGE_NAME, serializeDismissedNewsIds(dismissedIds));
+  } catch {
+    // Storage is optional; the next announcement fetch remains functional.
+  }
+  window.dispatchEvent(new Event(NEWS_DISMISS_EVENT));
+}
+
+function AnnouncementLink({ announcement }: { announcement: SeverityNewsAnnouncement }) {
+  if (!announcement.link) return null;
+  return (
+    <a
+      href={announcement.link}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={buttonVariants({ size: "sm", className: "gap-1.5 whitespace-nowrap" })}
+    >
+      {announcement.linkLabel ?? announcement.title}
+      <Icon name="open_in_new" size={14} />
+    </a>
+  );
+}
+
+/**
+ * A warning or critical announcement: a highlighted, dismissible alert. A critical one is
+ * announced assertively (the kit alert uses role="alert" for it).
+ */
+function SeverityAlert({
+  announcement,
+  dismissLabel,
+  onDismiss,
+}: {
+  announcement: SeverityNewsAnnouncement;
+  dismissLabel: string;
+  onDismiss: () => void;
+}) {
+  return (
+    <Alert
+      variant={announcement.severity === "critical" ? "critical" : "warning"}
+      layout="inline"
+      className="mb-4"
+      icon={<Icon name={announcement.icon} size={18} />}
+      title={
+        <>
+          <NewsSeverityBadge severity={announcement.severity} className="mr-2 align-middle" />
+          {announcement.title}
+        </>
+      }
+      description={announcement.message}
+      actions={<AnnouncementLink announcement={announcement} />}
+      dismissLabel={dismissLabel}
+      onDismiss={onDismiss}
+    />
+  );
+}
+
 /**
  * Generic, fail-silent reader for the public announcement feed. Fetching the
  * static JSON is GET-only and does not send product state or telemetry.
@@ -59,46 +118,13 @@ export default function NewsBanner() {
 
   if (!announcement) return null;
 
-  const dismiss = () => {
-    dismissedIds.add(announcement.id);
-    try {
-      localStorage.setItem(NEWS_DISMISS_STORAGE_NAME, serializeDismissedNewsIds(dismissedIds));
-    } catch {
-      // Storage is optional; the next announcement fetch remains functional.
-    }
-    window.dispatchEvent(new Event(NEWS_DISMISS_EVENT));
-  };
+  const dismiss = () => dismissAnnouncement(announcement.id, dismissedIds);
 
-  const link = announcement.link && (
-    <a
-      href={announcement.link}
-      target="_blank"
-      rel="noopener noreferrer"
-      className={buttonVariants({ size: "sm", className: "gap-1.5 whitespace-nowrap" })}
-    >
-      {announcement.linkLabel ?? announcement.title}
-      <Icon name="open_in_new" size={14} />
-    </a>
-  );
-
-  // A warning or critical announcement is a highlighted, dismissible alert; a critical one is
-  // announced assertively. Informational announcements keep the plain banner.
   if (announcement.severity !== "info") {
     return (
-      <Alert
+      <SeverityAlert
         key={announcement.id}
-        variant={announcement.severity}
-        layout="inline"
-        className="mb-4"
-        icon={<Icon name={announcement.icon} size={18} />}
-        title={
-          <>
-            <NewsSeverityBadge severity={announcement.severity} className="mr-2 align-middle" />
-            {announcement.title}
-          </>
-        }
-        description={announcement.message}
-        actions={link}
+        announcement={announcement}
         dismissLabel={t("dismissNotification")}
         onDismiss={dismiss}
       />
@@ -122,7 +148,7 @@ export default function NewsBanner() {
       </div>
 
       <div className="flex shrink-0 items-center gap-3 self-end sm:self-auto">
-        {link}
+        <AnnouncementLink announcement={announcement} />
         <Button
           variant="ghost"
           size="icon-sm"
