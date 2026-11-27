@@ -12,6 +12,8 @@ const LEGACY_MODEL_DISPLAY_NAMES: Readonly<Record<string, string>> = {
   // Legacy `seven_day_*` keys use Anthropic codenames, so preserve the public
   // model-family label operators already recognize in quota displays and routing.
   omelette: "designer",
+  // Claude Code names the 7d_oi / seven_day_overage_included claim "Fable limit".
+  overage_included: "fable",
 };
 const MINUTE_RATE_LIMIT_RE =
   /\b(?:tpm|rpm)\b|(?:tokens?|requests?)[\s_-]*(?:per|\/)[\s_-]*min(?:ute)?s?\b/i;
