@@ -22,7 +22,11 @@ name: omni-queue
 #   • Both jobs run in the `omni-queue` environment, which holds the App's credentials and the
 #     owner's OMNI_QUEUE_LAND_TOKEN and admits the default branch only, by its exact name: a
 #     workflow on a candidate branch cannot read them. The App writes omni-queue/land, the status release rulesets
-#     require, so its private key is the root of trust. The land token reaches the tick only.
+#     require, so its private key is the root of trust. The land token reaches the tick only
+#     (the landing with landing.actor "owner"; the comments, label removals and issues with
+#     config voice "owner"). The owner's merge-commit signing key (OMNI_QUEUE_SIGNING_KEY,
+#     config landing.signing "ssh") reaches one step of the tick, which writes it to a 0600 file
+#     under RUNNER_TEMP; the job's last step removes it, whatever happened.
 #   • action=bless (the explicit emergency exit): the tick writes omni-queue/land on ONE commit
 #     for a hotfix, sync-back or base repair, after checking that both the dispatcher
 #     (github.actor) and whoever triggered the run (github.triggering_actor, the re-runner of a
@@ -235,10 +239,35 @@ jobs:
             echo "name=${login}"
             echo "email=${id}+${login}@users.noreply.github.com"
           } >> "$GITHUB_OUTPUT"
+      # config.landing.signing "ssh": the owner's SSH signing key, for the queue's merge commits
+      # (scripts/merge-queue/compose.mjs reads it at compose.signingKeyPath(RUNNER_TEMP) and hands
+      # git the path as per-command configuration, never as an argument). The key exists only in
+      # this step's environment and in a file only the runner user can read; it is never
+      # printed. Without the secret nothing is written and a tick that is asked to sign composes
+      # unsigned, with one `error` event per batch. This step never fails the job: a key it
+      # cannot write is the same case (signing never blocks the queue).
+      - name: Write the merge-commit signing key
+        env:
+          OMNI_QUEUE_SIGNING_KEY: ${{ secrets.OMNI_QUEUE_SIGNING_KEY }}
+        run: |
+          set -uo pipefail
+          if [ -z "${OMNI_QUEUE_SIGNING_KEY:-}" ]; then
+            echo "no merge-commit signing key in the environment: nothing written"
+            exit 0
+          fi
+          umask 077
+          if ! { mkdir -p "$RUNNER_TEMP/omni-queue-signing" \
+            && chmod 700 "$RUNNER_TEMP/omni-queue-signing" \
+            && printf '%s\n' "$OMNI_QUEUE_SIGNING_KEY" > "$RUNNER_TEMP/omni-queue-signing/signing-key" \
+            && chmod 600 "$RUNNER_TEMP/omni-queue-signing/signing-key"; }; then
+            rm -rf "$RUNNER_TEMP/omni-queue-signing"
+            echo "::warning::the merge-commit signing key could not be written: merge commits stay unsigned"
+          fi
       # Inputs travel through env and are assembled into an argv array: no expression is ever
       # expanded inside the script body. Scheduled, workflow_run and pull_request_target ticks
       # pass no base (the tick discovers the bases with work). The owner's land token is used
-      # only by the landing itself when config.landing.actor is "owner" (never printed).
+      # by the landing itself when config.landing.actor is "owner", and by the queue's comments,
+      # label removals and issues when config.voice is "owner" (never printed).
       # GITHUB_ACTOR and GITHUB_TRIGGERING_ACTOR are the runner's own default variables, named
       # here because a bless is checked against both: the original dispatcher, whose inputs a
       # re-run keeps, and whoever triggered this run (the re-runner of a re-run).
@@ -265,3 +294,8 @@ jobs:
             if [ -n "${INPUT_SHA:-}" ]; then args+=(--sha "$INPUT_SHA"); fi
           fi
           node scripts/merge-queue/tick.mjs "${args[@]}"
+      # Last step, whatever happened before it (failure, cancellation): the signing key leaves
+      # the runner. Needs no secret; nothing to remove is not an error.
+      - name: Remove the merge-commit signing key
+        if: always()
+        run: rm -rf "$RUNNER_TEMP/omni-queue-signing"

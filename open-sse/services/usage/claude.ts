@@ -179,12 +179,14 @@ function preferNewerObservedUsage(key: string, usage: ClaudeUsageResult): Claude
   const fresh: ClaudeUsageResult = {
     ...usage,
     quotas: normalizeClaudeUsageQuotas(observed.body).quotas,
-    modelQuotas: recentRead?.modelQuotas ?? {},
+    modelQuotas: recentRead?.modelQuotas,
     extraUsage: recentRead?.extraUsage ?? null,
     bootstrap: usage.bootstrap ?? null,
     _source: "response-headers",
     _observedAt: new Date(observed.observedAt).toISOString(),
   };
+  // Without a recent endpoint read the headers are the only evidence, and they list no model window.
+  if (!recentRead) delete fresh.quotasComplete;
   delete fresh._stale;
   delete fresh._staleSince;
   delete fresh._staleReason;
@@ -246,6 +248,20 @@ export function getClaudeUsage(
   if (!accessToken) return usage;
   const key = hashClaudeCredential(accessToken);
   return usage.then((value) => preferNewerObservedUsage(key, value));
+}
+
+/**
+ * Epoch-ms time of the last successful `/api/oauth/usage` read kept for a credential, or
+ * null when none is kept. Read-only: it never fetches, and it scans the cache instead of
+ * calling `get`, which would refresh the entry's LRU recency.
+ */
+export function getClaudeUsageEndpointReadAt(accessToken?: string): number | null {
+  if (!accessToken) return null;
+  const key = hashClaudeCredential(accessToken);
+  for (const [cachedKey, cached] of lastSuccessfulUsage) {
+    if (cachedKey === key) return cached.fetchedAt;
+  }
+  return null;
 }
 
 function getClaudeUsageFromEndpoint(

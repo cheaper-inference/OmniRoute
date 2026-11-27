@@ -1,9 +1,11 @@
 "use client";
 
+import Card from "@/shared/components/Card";
 import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
 import Input from "@/shared/components/Input";
 import Toggle from "@/shared/components/Toggle";
+import Badge from "@/shared/components/Badge";
 import { formatProviderModelPermissionSummary } from "../apiManagerPageUtils";
 import {
   CLAUDE_CODE_DEFAULT_MODEL_ID,
@@ -22,21 +24,19 @@ export default function KeyPolicyModelsTab() {
       <PublicModelRestriction />
 
       {/* Clear separation Section 2: /v1/models Catalog Listing Only */}
-      <div className="flex flex-col gap-2 p-3.5 rounded-lg border border-border bg-surface/30">
+      <Card.Section className="flex flex-col gap-2">
         <div className="flex items-center gap-2">
           <p className="text-sm font-semibold text-text-main">
             {t("templateCatalogListingHeading")}
           </p>
-          <span className="px-1.5 py-0.5 rounded bg-surface-2 text-text-muted text-[10px] font-semibold">
-            {t("templateListingOnlyBadge")}
-          </span>
+          <Badge size="sm">{t("templateListingOnlyBadge")}</Badge>
         </div>
         <p className="text-xs text-text-muted">{t("templateCatalogListingDesc")}</p>
         <ApiKeyCatalogScopeSelect
           value={formState.catalogScope}
           onChange={(scope) => updateState((p) => ({ ...p, catalogScope: scope }))}
         />
-      </div>
+      </Card.Section>
     </div>
   );
 }
@@ -122,7 +122,7 @@ function UnlistedModelSelections() {
   const { t, updateState, dynamicOrUnlistedModels } = useKeyPolicyEditor();
   return (
     <div className="flex flex-col gap-1.5 p-2.5 rounded border border-info/30 bg-info/5">
-      <p className="text-[11px] font-medium text-info">{t("templateDynamicModelPatternsNote")}</p>
+      <p className="text-xs font-medium text-info">{t("templateDynamicModelPatternsNote")}</p>
       <div className="flex flex-wrap gap-1">
         {dynamicOrUnlistedModels.map((pat) => (
           <span
@@ -257,7 +257,7 @@ function BlockedModelPatterns() {
   return (
     <div className="flex flex-col gap-2 pt-3 border-t border-border/60">
       <p className="text-xs font-semibold text-text-main">{t("templateBlockedModelsTitle")}</p>
-      <p className="text-[11px] text-text-muted">{t("templateBlockedModelsDesc")}</p>
+      <p className="text-xs text-text-muted">{t("templateBlockedModelsDesc")}</p>
       <AddBlockedModelPattern />
       {formState.blockedModels.length > 0 && (
         <div className="flex flex-wrap gap-1 pt-1">
@@ -293,7 +293,7 @@ function BlockedModelPatterns() {
 function PublicModelRestriction() {
   const { t, formState, updateState } = useKeyPolicyEditor();
   return (
-    <div className="flex flex-col gap-3 p-3.5 rounded-lg border border-border bg-surface/30">
+    <Card.Section className="flex flex-col gap-3">
       <ModelAccessMode />
 
       <ModelAccessSummary />
@@ -308,9 +308,9 @@ function PublicModelRestriction() {
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-1.5">
             <p className="text-sm font-medium text-text-main">{t("disableNonPublicModels")}</p>
-            <span className="px-1.5 py-0.5 rounded bg-warning/20 text-warning text-[10px] font-semibold">
+            <Badge size="sm" variant="warning">
               {t("templateExecAndListingBadge")}
-            </span>
+            </Badge>
           </div>
           <p className="text-xs text-text-muted">{t("disableNonPublicModelsDesc")}</p>
         </div>
@@ -328,7 +328,7 @@ function PublicModelRestriction() {
       </div>
 
       {/* Forced Model */}
-      <div className="flex flex-col gap-2 p-3 rounded-lg border border-border bg-surface/40">
+      <Card.Section className="flex flex-col gap-2">
         <Input
           label={t("forcedModel")}
           hint={t("forcedModelDesc")}
@@ -336,7 +336,7 @@ function PublicModelRestriction() {
           onChange={(e) => updateState((p) => ({ ...p, forcedModel: e.target.value }))}
           placeholder={t("forcedModelPlaceholder")}
         />
-      </div>
-    </div>
+      </Card.Section>
+    </Card.Section>
   );
 }

@@ -1,0 +1,1 @@
+- **refactor(dashboard):** The shared quota bar is drawn with the UI Kit `Progress` and the kit's 10px label size. It keeps its thresholds, the neutral fill of a stale reading and its accessible name.

@@ -17,7 +17,10 @@ import {
   buildApiKeySelfServiceStatus,
   listApiKeyReachableProviders,
 } from "../../src/lib/usage/apiKeySelfService.ts";
-import { createQuotaRefreshTracker } from "../../src/lib/usage/apiKeySelfServiceAccounts.ts";
+import {
+  createQuotaRefreshTracker,
+  resolveAccountQuotaEntries,
+} from "../../src/lib/usage/apiKeySelfServiceAccounts.ts";
 import { createListPriceCache } from "../../src/lib/usage/apiKeySelfServiceListPrice.ts";
 
 const NOW = Date.UTC(2026, 4, 27, 15, 30, 0);
@@ -480,4 +483,59 @@ test("availableProviders groups reachable active connections with counts and quo
     },
   });
   assert.deepEqual(restricted, [{ provider: "codex", connectionCount: 1, quotaSupported: true }]);
+});
+
+const MODEL_QUOTAS = {
+  "weekly Opus (7d)": { used: 30, total: 100, remaining: 70, resetAt: "2026-06-01T00:00:00.000Z" },
+};
+
+test("model-scoped windows are carried only when asked for, from the cache and from a refresh", async () => {
+  const claude = [ACTIVE[1]];
+  const accountDeps = (overrides: Record<string, unknown>) =>
+    makeDeps({ getProviderConnections: async () => claude, ...overrides }) as unknown as Parameters<
+      typeof resolveAccountQuotaEntries
+    >[1];
+  const metadata = { allowedConnections: [], sharedQuotaProviders: null };
+  const opus = {
+    usedPercentage: 30,
+    remainingPercentage: 70,
+    resetAt: MODEL_QUOTAS["weekly Opus (7d)"].resetAt,
+  };
+
+  const cachedDeps = () =>
+    accountDeps({ getProviderLimitsCache: () => ({ ...freshCache(), modelQuotas: MODEL_QUOTAS }) });
+  const [cached] = await resolveAccountQuotaEntries(metadata, cachedDeps(), {
+    includeModelQuotas: true,
+  });
+  assert.deepEqual((cached as { modelQuotas?: unknown }).modelQuotas, { "weekly Opus (7d)": opus });
+  const [plain] = await resolveAccountQuotaEntries(metadata, cachedDeps());
+  assert.equal("modelQuotas" in plain, false, "not carried unless asked for");
+
+  const [fetched] = await resolveAccountQuotaEntries(
+    metadata,
+    accountDeps({
+      getProviderLimitsCache: () => freshCache(NOW - 6 * MINUTE),
+      fetchAndPersistProviderLimits: async () => ({
+        usage: { plan: "Max", quotas: QUOTAS, modelQuotas: MODEL_QUOTAS },
+        cache: { fetchedAt: "2026-05-27T15:30:00.000Z" },
+      }),
+    }),
+    { includeModelQuotas: true }
+  );
+  assert.deepEqual((fetched as { modelQuotas?: unknown }).modelQuotas, {
+    "weekly Opus (7d)": opus,
+  });
+});
+
+test("/v1/me/status never carries model-scoped windows in accountQuotas", async () => {
+  const { entries } = await quotasFor(
+    quotaMetadata(),
+    makeDeps({
+      getProviderConnections: async () => [ACTIVE[1]],
+      getProviderLimitsCache: () => ({ ...freshCache(), modelQuotas: MODEL_QUOTAS }),
+    })
+  );
+  assert.equal(entries.length, 1);
+  assert.equal("modelQuotas" in entries[0], false);
+  assert.equal(JSON.stringify(entries).includes("Opus"), false);
 });

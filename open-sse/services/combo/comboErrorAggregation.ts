@@ -28,6 +28,8 @@ export interface ComboErrorEntry {
   error: string;
   kind: ComboOutcomeKind;
   code?: string;
+  /** Set when the free-tier refusal was detected on the reason before it was shortened. */
+  freeTierRefusal?: boolean;
 }
 
 const KIND_LABELS: Record<ComboOutcomeKind, string> = {
@@ -99,11 +101,13 @@ export function buildRedactedSummary(
   return entries.length > 5 ? `${parts}... (+${entries.length - 5})` : parts;
 }
 
-function isFreeTierRefusalOutcome(entry: {
+export function isFreeTierRefusalOutcome(entry: {
   model: string;
   status: number;
   error: string;
+  freeTierRefusal?: boolean;
 }): boolean {
+  if (entry.freeTierRefusal) return true;
   const separator = entry.model.indexOf("/");
   const provider = separator > 0 ? entry.model.slice(0, separator) : null;
   return isOpencodeFreeTierRefusalForProvider(
@@ -120,7 +124,13 @@ function isFreeTierRefusalOutcome(entry: {
  * connection identifiers unless `{ redact: false }` is explicitly passed.
  */
 export function formatComboOutcomes(
-  entries: ReadonlyArray<{ model: string; status: number; error: string; kind?: ComboOutcomeKind }>,
+  entries: ReadonlyArray<{
+    model: string;
+    status: number;
+    error: string;
+    kind?: ComboOutcomeKind;
+    freeTierRefusal?: boolean;
+  }>,
   opts?: { redact?: boolean }
 ): string {
   if (!entries.length) return "";

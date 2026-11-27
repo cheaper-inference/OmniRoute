@@ -12,7 +12,8 @@
     "dryRun": "[triail thuras] dhéanfadh {action}",
     "cancelled": "Cealaithe.",
     "jsonOpt": "Aschur mar JSON",
-    "yesOpt": "Scipeáil an契ordheimhniú"
+    "yesOpt": "Scipeáil an契ordheimhniú",
+    "positiveIntegerRequired": "Ní mór teorainn a bheith ina slánuimhir dhearfach."
   },
   "setup": {
     "title": "Socrú OmniRoute",

@@ -49,6 +49,7 @@ type Usage = {
   message?: string;
   quotas?: Record<string, { used: number; remainingPercentage: number; resetAt: string | null }>;
   modelQuotas?: Record<string, unknown>;
+  quotasComplete?: boolean;
   plan?: unknown;
   _stale?: boolean;
   _source?: string;
@@ -112,7 +113,8 @@ describe("Claude plan windows from response rate-limit headers", () => {
     assert.equal(result._stale, undefined);
     assert.equal(result.quotas?.["weekly (7d)"]?.used, 26);
     assert.equal(result.quotas?.["session (5h)"]?.used, 40);
-    assert.deepEqual(result.modelQuotas, {}, "a 15-minute-old per-model window is not reused");
+    assert.equal(result.modelQuotas, undefined, "a 15-minute-old per-model window is not reused");
+    assert.equal(result.quotasComplete, undefined, "the headers do not list every window");
   });
 
   it("a newer endpoint read wins over an older observation", async () => {

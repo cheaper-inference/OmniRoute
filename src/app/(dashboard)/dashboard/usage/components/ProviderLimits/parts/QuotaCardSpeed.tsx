@@ -14,7 +14,7 @@ export default function QuotaCardSpeed({ speed }: { speed: unknown }) {
 
   return (
     <div
-      className="flex items-start gap-1 border-t border-border/40 pt-1.5 text-[10px] leading-relaxed text-text-muted tabular-nums"
+      className="flex items-start gap-1 border-t border-border/40 pt-1.5 text-3xs leading-relaxed text-text-muted tabular-nums"
       title={translateUsageOrFallback(
         t,
         "quotaSpeedTitle",

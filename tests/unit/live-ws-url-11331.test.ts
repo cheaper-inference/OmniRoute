@@ -3,6 +3,7 @@ import { describe, it } from "node:test";
 
 import {
   deriveLiveWsPath,
+  isLoopbackLiveWsHostname,
   resolveLiveWsUrl,
   sanitizeLiveWsPort,
 } from "../../src/shared/utils/wsPath.ts";
@@ -93,5 +94,136 @@ describe("resolveLiveWsUrl", () => {
     assert.equal(deriveLiveWsPath("wss://host:20132/ws/live"), "/ws/live");
     assert.equal(deriveLiveWsPath("wss://host:20132/"), "/live-ws");
     assert.equal(deriveLiveWsPath(undefined), "/live-ws");
+  });
+});
+
+/**
+ * KEA-9514: behind an HTTPS reverse proxy that exposes only 443, the dashboard dialled
+ * `wss://<host>:20132/live-ws` on every page, forever. The production server
+ * (scripts/dev/standalone-server-ws.mjs) already relays `/live-ws` upgrades on the main
+ * HTTP port, so off loopback the default is now the page's own origin. Loopback keeps the
+ * separate live port, because `next dev` has no upgrade handler on the HTTP port.
+ */
+describe("resolveLiveWsUrl off loopback (KEA-9514)", () => {
+  const httpsPage = { protocol: "https:", hostname: "example.com", host: "example.com" };
+  const loopbackPage = { protocol: "http:", hostname: "localhost", host: "localhost:20128" };
+  // What the hook compiles in from the page location: the separate live port.
+  const portDefault = (page: { protocol: string; hostname: string }) =>
+    `${page.protocol === "https:" ? "wss:" : "ws:"}//${page.hostname}:20132/live-ws`;
+
+  it("dials the same origin on an https page with no public URL", () => {
+    assert.equal(
+      resolveLiveWsUrl({
+        // The handshake always reports the live server's own port; it must not win here.
+        handshakePort: 20132,
+        handshakePath: "/live-ws",
+        location: httpsPage,
+        defaultUrl: portDefault(httpsPage),
+      }),
+      "wss://example.com/live-ws"
+    );
+  });
+
+  it("dials ws:// on the same origin on an http page, keeping the page's port", () => {
+    const lanPage = { protocol: "http:", hostname: "192.168.0.15", host: "192.168.0.15:20128" };
+    assert.equal(
+      resolveLiveWsUrl({ location: lanPage, defaultUrl: portDefault(lanPage) }),
+      "ws://192.168.0.15:20128/live-ws"
+    );
+  });
+
+  it("uses the path the handshake reports on the same origin", () => {
+    assert.equal(
+      resolveLiveWsUrl({
+        handshakePath: "/omniroute/live",
+        location: httpsPage,
+        defaultUrl: portDefault(httpsPage),
+      }),
+      "wss://example.com/omniroute/live"
+    );
+  });
+
+  it("keeps the live port on loopback", () => {
+    for (const page of [
+      loopbackPage,
+      { protocol: "http:", hostname: "127.0.0.1", host: "127.0.0.1:20128" },
+      { protocol: "http:", hostname: "[::1]", host: "[::1]:20128" },
+    ]) {
+      assert.equal(
+        resolveLiveWsUrl({ handshakePort: 20132, location: page, defaultUrl: portDefault(page) }),
+        `ws://${page.hostname}:20132/live-ws`,
+        `expected the live port for ${page.hostname}`
+      );
+    }
+  });
+
+  it("keeps honouring a moved live port on loopback", () => {
+    assert.equal(
+      resolveLiveWsUrl({
+        handshakePort: 20140,
+        location: loopbackPage,
+        defaultUrl: portDefault(loopbackPage),
+      }),
+      "ws://localhost:20140/live-ws"
+    );
+  });
+
+  it("lets an explicit public URL win over the same-origin default", () => {
+    assert.equal(
+      resolveLiveWsUrl({
+        handshakeUrl: "wss://ws.example.com/socket",
+        location: httpsPage,
+        defaultUrl: portDefault(httpsPage),
+      }),
+      "wss://ws.example.com/socket"
+    );
+    assert.equal(
+      resolveLiveWsUrl({
+        explicit: "wss://built-in.example.com/live-ws",
+        location: httpsPage,
+        defaultUrl: portDefault(httpsPage),
+      }),
+      "wss://built-in.example.com/live-ws"
+    );
+  });
+
+  it("falls back to the live port when the server says its HTTP port cannot relay", () => {
+    assert.equal(
+      resolveLiveWsUrl({
+        handshakeSameOrigin: false,
+        handshakePort: 20132,
+        location: httpsPage,
+        defaultUrl: portDefault(httpsPage),
+      }),
+      "wss://example.com:20132/live-ws"
+    );
+  });
+
+  it("yields no URL when the handshake says the live server is disabled", () => {
+    for (const page of [httpsPage, loopbackPage]) {
+      assert.equal(
+        resolveLiveWsUrl({
+          handshakeEnabled: false,
+          handshakePort: 20132,
+          location: page,
+          defaultUrl: portDefault(page),
+        }),
+        null
+      );
+    }
+  });
+});
+
+describe("isLoopbackLiveWsHostname (KEA-9514)", () => {
+  it("treats localhost, 127.0.0.0/8, ::1 and 0.0.0.0 as loopback", () => {
+    for (const hostname of ["localhost", "127.0.0.1", "127.1.2.3", "[::1]", "::1", "0.0.0.0"]) {
+      assert.equal(isLoopbackLiveWsHostname(hostname), true, hostname);
+    }
+  });
+
+  it("treats LAN and public hosts as remote", () => {
+    for (const hostname of ["example.com", "192.168.0.15", "10.0.0.2", "localhost.example.com"]) {
+      assert.equal(isLoopbackLiveWsHostname(hostname), false, hostname);
+    }
   });
 });

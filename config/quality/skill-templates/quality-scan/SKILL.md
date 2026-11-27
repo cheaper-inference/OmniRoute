@@ -1,6 +1,6 @@
 ---
 name: quality-scan
-description: Run a scoped, read-only quality scan and report exact-candidate evidence, failures and frozen debt. Use for an ad-hoc gate sweep or release preparation; a static scan is not full release acceptance.
+description: "Use when the owner asks for an ad-hoc sweep of the static quality gates ('roda os gates', 'quality scan', 'como estão os ratchets?'). Runs `npm run quality:scan` (or `--fast`) on a pinned SHA and reports failed, not-run and frozen debt. Read-only, static gates only. For tests and build on a release candidate use /validate-release-green. For a code review use /harden-branch."
 ---
 
 # Quality scan

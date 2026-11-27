@@ -145,6 +145,9 @@ export const proxyRegistryFieldsSchema = z
     // Defaulted to "auto" only by createProxyRegistrySchema: an update or a re-import that
     // omits it keeps the stored family.
     family: z.enum(["auto", "ipv4", "ipv6"]).optional(),
+    // Rotating endpoint mark. No default, for the same reason as status: an update or a
+    // re-import that omits it keeps the stored value. New rows start unmarked in the DB.
+    rotatingEgress: z.boolean().optional(),
   })
   .strict();
 
@@ -232,6 +235,7 @@ export const PROXY_POOL_ROTATION_STRATEGY_VALUES = [
   "random",
   "sticky",
   "latency",
+  "session",
 ] as const;
 
 // Add/remove one proxy to/from a scope's pool. proxyId is REQUIRED (unlike the

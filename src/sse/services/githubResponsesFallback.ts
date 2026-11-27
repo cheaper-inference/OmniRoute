@@ -19,7 +19,7 @@
  * them.
  */
 
-const GITHUB_RESPONSES_ONLY_GPT = /^(?:.*codex.*|gpt-(?:[6-9]|5\.[5-9]).*)$/i;
+const GITHUB_RESPONSES_ONLY_GPT_PREFIX = /^gpt-(?:[6-9]|5\.[5-9])/i;
 const NON_RESPONSES_FAMILY = /claude|gemini/i;
 
 export function inferGithubUnsyncedTargetFormat(
@@ -30,8 +30,14 @@ export function inferGithubUnsyncedTargetFormat(
     return undefined;
   }
   const bareModelId = modelId.replace(/^(?:github|gh|ghe-copilot)\//i, "");
-  if (!GITHUB_RESPONSES_ONLY_GPT.test(bareModelId) || NON_RESPONSES_FAMILY.test(bareModelId)) {
+  if (/[\n\r\u2028\u2029]/.test(bareModelId) || NON_RESPONSES_FAMILY.test(bareModelId)) {
     return undefined;
   }
-  return "openai-responses";
+  if (
+    bareModelId.toLowerCase().includes("codex") ||
+    GITHUB_RESPONSES_ONLY_GPT_PREFIX.test(bareModelId)
+  ) {
+    return "openai-responses";
+  }
+  return undefined;
 }

@@ -4,10 +4,9 @@
 
 ---
 
-Minn v3.8.49 (WS3.2/WS3.4 tal-pjan tal-kwalità/veloċità), il-perkors predefinit tal-merge għal
-PRs rieżaminati lejn `release/vX.Y.Z` huwa l-**kju tal-merge ta’ Mergify** (`.mergify.yml`);
-il-**merge-train manwali** dokumentat hawn taħt huwa l-għażla ta’ RIŻERVA — jintuża waqt inċidenti,
-waqfiet tar-rilaxx, jew jekk il-pjan Open Source ta’ Mergify qatt jinbidel.
+> **2026-11-19: il-kju ta' amalgamazzjoni Mergify huwa rtirat** (deċiżjoni tas-sid). `.mergify.yml` m'għadux jiddefinixxi kju u jirrifjuta l-kmandi Mergify li jingħaqdu jew jiktbu mill-ġdid pull request. Ir-rilaxx PRs huma magħquda bl-idejn taħt ir-regoli tar-repożitorju "Jeħtieġu gradi ħodor fuq ir-rilaxx attiv" (`Gate / CI` + `Gate / Quality`) sakemm omni-queue jaħdem fil-modalità ħaj, u permezz ta 'omni-queue wara dak ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). It-taqsimiet Mergify hawn taħt jiddeskrivu l-kju kif kien.
+
+Peress li v3.8.49 (WS3.2/WS3.4 tal-pjan quality/velocity ) il-mogħdija ta' amalgamazzjoni default għal PRs rivedut `release/vX.Y.Z` hija l-** Għaqda kju amalgamazzjoni** (`.mergify.yml`); il** merge-trejn manwali** dokumentat hawn taħt huwa l- FALLBACK — użat waqt inċidenti, iffriżar tar-rilaxx, jew jekk il-pjan Mergify Open Source qatt jinbidel.
 
 ## Mogħdija awtomatika: il-kju ta’ Mergify
 

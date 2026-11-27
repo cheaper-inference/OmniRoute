@@ -42,6 +42,8 @@ export async function POST(request: Request) {
       {
         deleted: result.deleted,
         deletedUsageHistory: result.deletedUsageHistory,
+        deletedAgentSessionMessages: result.deletedAgentSessionMessages,
+        deletedAgentSessions: result.deletedAgentSessions,
         deletedDailySummary: result.deletedDailySummary,
         deletedHourlySummary: result.deletedHourlySummary,
         deletedCallLogs: result.deletedCallLogs,
@@ -54,6 +56,8 @@ export async function POST(request: Request) {
         deletedCompressionRunTelemetry: result.deletedCompressionRunTelemetry,
         deletedRoutingDecisions: result.deletedRoutingDecisions,
         deletedQuotaConsumption: result.deletedQuotaConsumption,
+        deletedQuotaPercentLedger: result.deletedQuotaPercentLedger,
+        deletedQuotaPercentLedgerTokens: result.deletedQuotaPercentLedgerTokens,
         deletedTokenLedger: result.deletedTokenLedger,
         deletedConversationTurnNodes: result.deletedConversationTurnNodes,
         deletedAgenticConversations: result.deletedAgenticConversations,

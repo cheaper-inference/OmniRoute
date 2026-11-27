@@ -25,8 +25,9 @@ type NoAuthCatalogEntry = (typeof NOAUTH_PROVIDERS)[keyof typeof NOAUTH_PROVIDER
  * locally-installed CLI). Both are read from the catalog, so this file holds no id
  * list. Auto-routing to one of them can stall the combo until the per-target
  * timeout (~120s) fires before the next member is tried. With the flag on they stay
- * out of the keyless auto pool; with it off (default) the pool is unchanged. Direct
- * `<alias>/<model>` calls keep working either way.
+ * out of the keyless auto pool; with it off (default), browser-backed providers
+ * still require a successful runtime readiness probe (#19385). Direct
+ * `<alias>/<model>` calls do not use the readiness gate.
  *
  * History (operator decision 2026-07-24, refs #8183/#6453/#7032): the pool used
  * to be a hardcoded `{opencode}` allowlist aimed at public-HTTP-egress
@@ -84,6 +85,12 @@ function isInfraDependentTransport(providerDef: NoAuthCatalogEntry): boolean {
   if ("isLocalCli" in providerDef && providerDef.isLocalCli === true) return true;
   return "browserBacked" in providerDef && providerDef.browserBacked === true;
 }
+
+export const BROWSER_BACKED_NOAUTH_PROVIDER_IDS: ReadonlySet<string> = new Set(
+  Object.values(NOAUTH_PROVIDERS).flatMap((provider) =>
+    "browserBacked" in provider && provider.browserBacked ? [provider.id] : []
+  )
+);
 
 /**
  * Ids admitted to category/tier and flat-variant `auto/*` pools. `transportGate`

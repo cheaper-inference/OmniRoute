@@ -130,7 +130,8 @@ describe("ModelSelectModal — Test Selected Providers", () => {
       '[data-testid="model-select-test-selected-providers"]'
     ) as HTMLButtonElement | null;
     expect(button, "expected Test Selected Providers button").not.toBeNull();
-    expect(button!.disabled).toBe(true);
+    // The button carries a title, so it is aria-disabled while inactive (it stays hoverable).
+    expect(button!.getAttribute("aria-disabled")).toBe("true");
 
     const checkbox = container.querySelector(
       '[data-testid="model-select-provider-checkbox-openai"]'
@@ -141,6 +142,7 @@ describe("ModelSelectModal — Test Selected Providers", () => {
       checkbox!.click();
     });
 
+    expect(button!.hasAttribute("aria-disabled")).toBe(false);
     expect(button!.disabled).toBe(false);
     expect(button!.textContent).toMatch(/Test providers/i);
   });

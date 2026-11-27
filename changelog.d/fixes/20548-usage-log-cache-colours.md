@@ -1,0 +1,1 @@
+- **fix(logging):** Keep cache-read, cache-creation, fresh-input and reasoning fields inside the green `[USAGE]` console line, restoring green after the estimated marker and resetting once at the end. Preserve explicit zeros and unknown cache provenance without changing persisted usage ([#20548](https://github.com/cheaper-inference/OmniRoute/pull/20548)) — thanks @KiaroSama.

@@ -90,6 +90,10 @@ curl http://localhost:20128/api/settings/obsidian/webdav
 curl -X DELETE http://localhost:20128/api/settings/obsidian/webdav
 ```
 
+### 安全與交通
+
+WebDAV驗證強制執行每個 IP 的故障追蹤和鎖定（60 秒視窗內 10 次失敗嘗試會觸發`429 Too Many Requests`和`Retry-After`的 5 分鐘鎖定）。由於WebDAV傳輸基本驗證憑證，因此強烈建議在存取環回外部的WebDAV端點時終止TLS （或透過Tailscale或Cloudflare Tunnel等安全隧道進行路由）。
+
 ### 個別 API 金鑰的內容來源（選用）
 
 Obsidian 設定可透過 `api_key_context_sources` 資料表，將範圍限定為**個別 API 金鑰**

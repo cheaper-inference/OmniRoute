@@ -1,0 +1,1 @@
+- **fix(dashboard):** The request log and the proxy log show the date next to the time for rows from another day (`Nov 21, 07:43:42`, with the year when it differs), with the full timestamp on hover, so a 90-day range no longer lists rows from different days with identical times (KEA-9522)

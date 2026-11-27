@@ -476,7 +476,7 @@ finns i [`docs/guides/KIRO_SETUP.md`](./KIRO_SETUP.md).
 2. **Permanent åtgärd:** Bind uttryckligen till IPv4 genom att använda `-p 127.0.0.1:20128:20128` i ditt `docker run`-kommando:
    ```bash
    docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
-     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
    ```
    Detta tvingar fram IPv4-bindning och förhindrar dessutom att proxyn exponeras på värdens alla nätverksgränssnitt.
 
