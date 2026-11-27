@@ -1065,6 +1065,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
       provider,
       apiKeyId: apiKeyInfo?.id ?? undefined,
       usage,
+      originalCostUsd: estimatedCost,
       log,
       videoTranscriptSensitive: videoBridgeObserved,
       piiTokensMinted,

@@ -7,7 +7,6 @@ lastUpdated: 2026-06-28
 # Memory System
 
 > **Source of truth:** `src/lib/memory/` and `src/app/api/memory/`
-> **Last updated:** 2026-06-28 — v3.8.40 (off-by-default + int8 quantization catch-up)
 
 OmniRoute provides persistent conversational memory keyed by API key (and
 optionally session id). Memories are extracted automatically from LLM responses

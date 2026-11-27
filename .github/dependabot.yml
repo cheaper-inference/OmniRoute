@@ -1,10 +1,14 @@
 version: 2
 updates:
+  # Wait 7 days after publication before proposing npm versions to reduce supply-chain risk
+  # from newly published malicious packages. Dependabot security updates are exempt.
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
       interval: "weekly"
       day: "monday"
+    cooldown:
+      default-days: 7
     commit-message:
       prefix: "deps"
     open-pull-requests-limit: 10
@@ -118,6 +122,38 @@ updates:
     schedule:
       interval: "weekly"
       day: "monday"
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: "deps"
+
+  - package-ecosystem: "npm"
+    directory: "/@omniroute/opencode-plugin"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: "deps"
+
+  - package-ecosystem: "npm"
+    directory: "/@omniroute/opencode-plugin-v2"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: "deps"
+
+  - package-ecosystem: "npm"
+    directory: "/@omniroute/opencode-provider"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    cooldown:
+      default-days: 7
     commit-message:
       prefix: "deps"
 

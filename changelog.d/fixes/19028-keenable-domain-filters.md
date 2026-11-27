@@ -1,0 +1,1 @@
+- **fix(search):** Keenable search results now honor the caller's `exclude_domains` and multi-domain `include_domains` (its request carries a single `site`, so those filters were silently ignored) and skip result URLs that are not plain http(s) ([#19028](https://github.com/diegosouzapw/OmniRoute/pull/19028)) — thanks @megamen32

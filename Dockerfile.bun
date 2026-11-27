@@ -19,17 +19,32 @@ RUN apt-get update \
 FROM base AS builder
 WORKDIR /app
 
-# Cache dependency layer
-COPY package.json bun.lock* pnpm-workspace.yaml* ./
+# Cache dependency layer (package-lock.json is required for --frozen-lockfile;
+# bun.lock is gitignored, so Bun migrates package-lock.json in-memory and enforces it)
+COPY package.json package-lock.json bun.lock* pnpm-workspace.yaml* ./
 COPY open-sse/package.json ./open-sse/package.json
 COPY packages/ ./packages/
 
-# Root postinstall helpers needed during bun install lifecycle
+# Copy these scripts ahead of the full source tree.
+# The dependency install skips the root postinstall hook.
 COPY scripts/build/ ./scripts/build/
 COPY scripts/dev/sync-env.mjs ./scripts/dev/sync-env.mjs
 
-# Fast Bun native package install
-RUN bun install --include=optional --quiet
+RUN test -f package-lock.json || test -f bun.lock \
+  || (echo "package-lock.json (or bun.lock) is required for reproducible Bun Docker builds" >&2 && exit 1)
+
+# Deterministic Bun native package install: --frozen-lockfile rejects any
+# manifest/lockfile drift. --ignore-scripts skips all install hooks (#21014).
+# Run the pinned Bun install script and require the binary to match devDependencies.bun.
+RUN bun install --frozen-lockfile --ignore-scripts --include=optional --quiet \
+  && (cd node_modules/bun && bun install.js) \
+  && expected_version="$(bun -e 'process.stdout.write(require("./package.json").devDependencies.bun)')" \
+  && actual_version="$(node_modules/.bin/bun --version)" \
+  && if [ "$actual_version" != "$expected_version" ]; then \
+    printf 'Bun version mismatch: expected %s from package.json, got %s\n' \
+      "$expected_version" "$actual_version" >&2; \
+    exit 1; \
+  fi
 
 # Next standalone traces only Playwright's index.js, index.mjs and package.json.
 # Runner-web needs the complete installer at the same lockfile version.

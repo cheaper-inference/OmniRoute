@@ -70,9 +70,8 @@ describe("Sidebar rendered with the kit Sidebar family", () => {
     render(<Harness />);
     const navEl = await screen.findByRole("navigation", { name: "Main navigation" });
     expect(navEl.closest("aside[data-slot=sidebar]")).not.toBeNull();
-    expect(within(navEl).getByRole("link", { name: "Home" }).getAttribute("aria-current")).toBe(
-      "page"
-    );
+    const home = within(navEl).getByRole("link", { name: /^Home\s*Dashboard overview$/ });
+    expect(home.getAttribute("aria-current")).toBe("page");
     // At /home the accordion keeps only the active (Home) section open; OmniProxy is a closed
     // disclosure button that opens on click (sidebar logic is unchanged by the kit rendering).
     const section = within(navEl).getByRole("button", { name: "OmniProxy", exact: true });
@@ -83,6 +82,7 @@ describe("Sidebar rendered with the kit Sidebar family", () => {
     expect(document.getElementById(section.getAttribute("aria-controls")!)).not.toBeNull();
     expect(screen.getByRole("searchbox")).not.toBeNull();
     expect(screen.getByRole("img", { name: "Keak OmniRoute" })).not.toBeNull();
+    expect(screen.getByRole("link", { name: /OmniRoute\s*v\d+\.\d+\.\d+/ })).not.toBeNull();
     expect(navEl.querySelector(".material-symbols-outlined")).toBeNull();
     expect(navEl.querySelectorAll("svg.oi-icon").length).toBeGreaterThan(5);
   });
@@ -148,11 +148,14 @@ describe("Sidebar rendered with the kit Sidebar family", () => {
     const panel = document.getElementById(group.getAttribute("aria-controls")!)!;
     expect(panel.getAttribute("data-slot")).toBe("disclosure-content");
     expect(panel.hidden).toBe(true);
-    expect(within(navEl).queryByRole("link", { name: "Caveman" })).toBeNull();
+    expect(
+      within(navEl).queryByRole("link", { name: /^Caveman\s*Prompt compression$/ })
+    ).toBeNull();
     await user.click(group);
     expect(group.getAttribute("aria-expanded")).toBe("true");
     expect(panel.hidden).toBe(false);
-    expect(panel.contains(within(navEl).getByRole("link", { name: "Caveman" }))).toBe(true);
+    const caveman = within(navEl).getByRole("link", { name: /^Caveman\s*Prompt compression$/ });
+    expect(panel.contains(caveman)).toBe(true);
     expect(group.closest("[data-slot=sidebar-menu-item]")).not.toBeNull();
   });
 

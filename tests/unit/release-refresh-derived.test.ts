@@ -440,6 +440,87 @@ describe("provider reference comparison", () => {
   });
 });
 
+describe("docker-pulls refresh step", () => {
+  const badgePath = "docs/badges/docker-pulls.json";
+
+  it("writes the badge in release and stays clean in nightly when the displayed count is unchanged", async () => {
+    const root = tree({});
+    const written = await refreshDerived({
+      root,
+      only: ["docker-pulls"],
+      fetchDockerPullCounts: async () => ({ total: 2_119_712 }),
+    });
+    const step = written.steps.find((s) => s.id === "docker-pulls")!;
+    assert.equal(step.status, "changed");
+    assert.match(step.detail, /2119712.*2\.1M/);
+    assert.deepEqual(written.changedFiles, [badgePath]);
+    assert.equal(refreshExitCode(written, { check: false }), 0);
+
+    const json = read(root, badgePath)!;
+    assert.deepEqual(JSON.parse(json), {
+      schemaVersion: 1,
+      label: "docker pulls",
+      message: "2.1M",
+      color: "2496ED",
+      namedLogo: "docker",
+      cacheSeconds: 3600,
+    });
+    assert.ok(json.endsWith("\n"));
+
+    const nightly = await refreshDerived({
+      root,
+      profile: "nightly",
+      only: ["docker-pulls"],
+      fetchDockerPullCounts: async () => ({ total: 2_119_713 }),
+    });
+    const unchanged = nightly.steps.find((s) => s.id === "docker-pulls")!;
+    assert.equal(unchanged.status, "clean");
+    assert.match(unchanged.detail, /2119713.*2\.1M/);
+    assert.deepEqual(nightly.changedFiles, []);
+    assert.equal(read(root, badgePath), json);
+  });
+
+  it("skips the network-dependent step in check mode without calling the fetcher", async () => {
+    const root = tree({});
+    let fetchCalls = 0;
+    const result = await refreshDerived({
+      root,
+      check: true,
+      only: ["docker-pulls"],
+      fetchDockerPullCounts: async () => {
+        fetchCalls++;
+        return { total: 10 };
+      },
+    });
+    const step = result.steps.find((s) => s.id === "docker-pulls")!;
+    assert.equal(step.status, "skipped");
+    assert.match(step.detail, /requires network.*excluded from --check/);
+    assert.equal(fetchCalls, 0);
+    assert.deepEqual(result.changedFiles, []);
+    assert.equal(read(root, badgePath), null);
+    assert.equal(refreshExitCode(result, { check: true }), 0);
+  });
+
+  it("keeps the previous badge and exits 0 when Docker Hub is unreachable", async () => {
+    const previous = '{"schemaVersion":1,"label":"docker pulls","message":"2M","color":"2496ED"}\n';
+    const root = tree({ [badgePath]: previous });
+    const result = await refreshDerived({
+      root,
+      only: ["docker-pulls"],
+      fetchDockerPullCounts: async () => {
+        throw new Error("HTTP 503");
+      },
+    });
+    const step = result.steps.find((s) => s.id === "docker-pulls")!;
+    assert.equal(step.status, "skipped");
+    assert.equal(step.detail, `Docker Hub unreachable (HTTP 503): ${badgePath} kept as is`);
+    assert.equal(result.infraError, null);
+    assert.deepEqual(result.changedFiles, []);
+    assert.equal(read(root, badgePath), previous);
+    assert.equal(refreshExitCode(result, { check: false }), 0);
+  });
+});
+
 // Review findings (2026-11-13): the REAL gate plan lists the README mirrors' database row BEFORE
 // README.md. The refresh must still carry everything once, refresh .i18n-state.json and leave no
 // manual item — and must never certify a mirror that kept an old value, nor a stale locale.
