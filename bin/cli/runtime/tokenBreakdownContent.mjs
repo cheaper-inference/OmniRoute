@@ -68,6 +68,12 @@ function* units(body) {
   if (typeof body.input === "string") yield { category: "userMessages", text: body.input };
   for (const entry of entries) {
     const item = record(entry);
+    if (item.type === "mcp_call") {
+      if (item.arguments != null) yield { category: "toolCalls", text: serialized(item.arguments) };
+      if (item.output != null)
+        yield { category: "toolOutputs", text: serialized(item.output), source: "mcpResults" };
+      continue;
+    }
     if (["function_call", "tool_call", "custom_tool_call"].includes(item.type)) {
       yield {
         category: "toolCalls",
@@ -159,7 +165,8 @@ export function countTokenBreakdown(
     const targets = [out.categories[unit.category], out.totals];
     if (unit.category === "toolOutputs") {
       const call = unit.reference ? calls.get(unit.reference) : null;
-      targets.push(out.sources[call && call.order < order ? call.source : "otherOrUnknown"]);
+      const source = unit.source ?? (call && call.order < order ? call.source : "otherOrUnknown");
+      targets.push(out.sources[source]);
     }
     for (const target of targets)
       for (const key of ["tokens", "bytes", "parts"]) target[key] += stats[key];

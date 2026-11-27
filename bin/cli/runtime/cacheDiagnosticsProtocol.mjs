@@ -36,7 +36,11 @@ export function rawCacheUsage(input) {
 /** Incremental bounded JSON/SSE observer; never reads from or rewrites the transport stream. */
 export function createCacheUsageParser({ maxFrameBytes = 256 * 1024, sse = true } = {}) {
   const decoder = new TextDecoder();
-  let buffer = "",
+  const lineEnding = /\r\n|[\r\n]/g;
+  let frame = "",
+    frameBytes = 0,
+    separator = "",
+    pendingCR = false,
     unavailable = false,
     terminal = false,
     usage = rawCacheUsage(null),
@@ -52,45 +56,79 @@ export function createCacheUsageParser({ maxFrameBytes = 256 * 1024, sse = true 
       const candidate = value.response?.usage ?? value.usage;
       if (candidate && typeof candidate === "object") {
         const next = rawCacheUsage(candidate);
-        for (const key of Object.keys(usage)) if (next[key] !== null) usage[key] = next[key];
-        reported = true;
+        for (const key of Object.keys(usage)) {
+          if (next[key] === null) continue;
+          usage[key] = next[key];
+          reported = true;
+        }
       }
-      if (["response.completed", "response.incomplete", "message_stop"].includes(value.type))
+      if (
+        ["response.completed", "response.incomplete", "response.failed", "message_stop"].includes(
+          value.type
+        )
+      )
         terminal = true;
       if (!sse) terminal = true;
     } catch {
       /* Malformed frames establish no usage; a terminal marker remains independent. */
     }
   }
+
+  /** Dispatch only the data lines in the current SSE frame. */
+  function consumeFrame() {
+    const data = frame
+      .split(/\r\n|[\r\n]/)
+      .filter((line) => line.startsWith("data:"))
+      .map((line) => line.slice(5).trimStart())
+      .join("\n");
+    if (data) consume(data);
+    frame = "";
+    frameBytes = 0;
+    separator = "";
+  }
+
+  /** A preceding newline is payload only when a following nonempty line confirms it. */
+  function append(text) {
+    if (!text) return;
+    frameBytes += separator.length + Buffer.byteLength(text);
+    if (frameBytes > maxFrameBytes) {
+      unavailable = true;
+      frame = "";
+      return;
+    }
+    frame += separator + text;
+    separator = "";
+  }
+
+  /** Process each decoded chunk once and fold a split CRLF into one line ending. */
+  function scanSse(text) {
+    if (!text) return;
+    let cursor = 0;
+    if (pendingCR && text[0] === "\n") {
+      if (separator) separator += "\n";
+      cursor = 1;
+    }
+    pendingCR = false;
+    lineEnding.lastIndex = cursor;
+    let ending;
+    while ((ending = lineEnding.exec(text))) {
+      append(text.slice(cursor, ending.index));
+      if (unavailable) return;
+      if (separator) consumeFrame();
+      else if (frame) separator = ending[0];
+      cursor = lineEnding.lastIndex;
+      pendingCR = cursor === text.length && ending[0] === "\r";
+    }
+    append(text.slice(cursor));
+  }
+
   /** Decode observed chunks incrementally, abandoning parsing when a frame exceeds the byte cap. */
   function push(chunk) {
-    if (unavailable) return;
     const bytes = typeof chunk === "string" ? Buffer.from(chunk) : chunk;
-    for (let offset = 0; offset < bytes.length; offset += 32768) {
-      buffer += decoder.decode(bytes.subarray(offset, offset + 32768), { stream: true });
-      if (sse) {
-        let boundary;
-        while ((boundary = /\r?\n\r?\n/.exec(buffer))) {
-          const frame = buffer.slice(0, boundary.index);
-          buffer = buffer.slice(boundary.index + boundary[0].length);
-          if (Buffer.byteLength(frame) > maxFrameBytes) {
-            unavailable = true;
-            buffer = "";
-            return;
-          }
-          const data = frame
-            .split(/\r?\n/)
-            .filter((line) => line.startsWith("data:"))
-            .map((line) => line.slice(5).trimStart())
-            .join("\n");
-          if (data) consume(data);
-        }
-      }
-      if (Buffer.byteLength(buffer) > maxFrameBytes) {
-        unavailable = true;
-        buffer = "";
-        return;
-      }
+    for (let offset = 0; !unavailable && offset < bytes.length; offset += 32768) {
+      const text = decoder.decode(bytes.subarray(offset, offset + 32768), { stream: true });
+      if (sse) scanSse(text);
+      else append(text);
     }
   }
   return {
@@ -98,16 +136,13 @@ export function createCacheUsageParser({ maxFrameBytes = 256 * 1024, sse = true 
     /** Flush trailing text and return counters with separate terminal and availability indicators. */
     finish() {
       if (!unavailable) {
-        buffer += decoder.decode();
-        if (!sse) consume(buffer);
-        else if (buffer.trim()) {
-          const data = buffer
-            .split(/\r?\n/)
-            .filter((line) => line.startsWith("data:"))
-            .map((line) => line.slice(5).trimStart())
-            .join("\n");
-          if (data) consume(data);
-        }
+        const text = decoder.decode();
+        if (sse) scanSse(text);
+        else append(text);
+      }
+      if (!unavailable) {
+        if (sse) consumeFrame();
+        else consume(frame);
       }
       return {
         ...usage,

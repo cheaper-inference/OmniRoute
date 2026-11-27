@@ -77,6 +77,49 @@ test("the real disposable worker includes custom tool content", async () => {
     await counter.stop();
   }
 });
+
+test("native Responses MCP calls count arguments and results in their own categories", () => {
+  const argumentsText = '{"path":"report.md"}';
+  const output = "نتیجه 😀";
+  const result = countTokenBreakdown(
+    {
+      input: [
+        {
+          type: "mcp_call",
+          id: "mcp_1",
+          server_label: "filesystem",
+          name: "read_file",
+          arguments: argumentsText,
+          output,
+        },
+      ],
+    },
+    encode
+  );
+  assert.equal(result.categories.toolCalls.bytes, Buffer.byteLength(argumentsText));
+  assert.equal(result.categories.toolOutputs.bytes, Buffer.byteLength(output));
+  assert.equal(result.sources.mcpResults.bytes, Buffer.byteLength(output));
+  assert.equal(result.sources.fileReads.parts, 0);
+  assert.equal(validateTokenBreakdown(result).status, "ok");
+});
+
+test("the worker encodes a literal special-token spelling as ordinary text", async () => {
+  const counter = createTokenBreakdown();
+  try {
+    const content = "<|endoftext|>";
+    const result = await counter.submit(
+      JSON.stringify({
+        messages: [{ role: "user", content }],
+      })
+    );
+    assert.equal(result.status, "ok");
+    assert.equal(result.categories.userMessages.bytes, Buffer.byteLength(content));
+    assert.ok(result.categories.userMessages.tokens > 1);
+    assert.equal(result.heuristicChars, 0);
+  } finally {
+    await counter.stop();
+  }
+});
 for (const [format, body] of [
   [
     "Chat",

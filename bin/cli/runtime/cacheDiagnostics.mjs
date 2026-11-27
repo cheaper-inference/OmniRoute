@@ -6,6 +6,8 @@ import { createCacheDiagnosticsSink } from "./cacheDiagnosticsSink.mjs";
 import { createTokenBreakdown } from "./tokenBreakdown.mjs";
 import { runtimeDiagnosticsLog } from "./runtimeDiagnosticsLog.mjs";
 const MAX_BODY = 8 * 1024 * 1024;
+const MAX_PENDING_REQUESTS = 8;
+const MAX_DEFERRED_CAPTURES = 8;
 const noop = { async stop() {} };
 
 /** Bundled fetch body channels first shipped in Undici 7.11; Node 22 bundles 6.x.
@@ -73,6 +75,7 @@ export function startCacheDiagnostics({
     );
   const key = randomBytes(32),
     pending = new Map(),
+    deferredCaptures = new Map(),
     groups = new Map(),
     subscriptions = [];
   /** Hash request material with a per-run key so persisted fingerprints cannot link separate runs. */
@@ -101,6 +104,11 @@ export function startCacheDiagnostics({
     const entry = pending.get(request);
     if (!entry) return;
     pending.delete(request);
+    const capture = deferredCaptures.get(request);
+    if (capture) {
+      clearImmediate(capture);
+      deferredCaptures.delete(request);
+    }
     const observation = entry.parser?.finish() ?? {
       status: "unavailable",
       terminal: false,
@@ -131,7 +139,7 @@ export function startCacheDiagnostics({
         ?.capture;
     if (capture?.diagnosticsOptOut !== false) return;
     const provider = requestClassifier(request);
-    if (!provider || pending.size >= 8) return;
+    if (!provider || pending.size >= MAX_PENDING_REQUESTS) return;
     pending.set(request, {
       provider,
       started: Date.now(),
@@ -143,22 +151,24 @@ export function startCacheDiagnostics({
   });
   listen("bodyChunkSent", ({ request, chunk }) => {
     const entry = pending.get(request);
-    if (!bodySupported || !entry || entry.requestState === "oversized") return;
-    const bytes = Buffer.from(chunk);
-    entry.bytes += bytes.length;
+    if (!bodySupported || !entry?.chunks) return;
+    entry.bytes += Buffer.byteLength(chunk);
     if (entry.bytes > MAX_BODY) {
-      entry.chunks = [];
+      entry.chunks = null;
       entry.requestState = "oversized";
       return;
     }
-    entry.chunks.push(bytes);
+    entry.chunks.push(Buffer.from(chunk));
   });
   listen("bodySent", ({ request }) => {
     const entry = pending.get(request);
-    if (!bodySupported || !entry || entry.requestState === "oversized" || !entry.bytes) return;
-    const bytes = Buffer.concat(entry.chunks);
-    entry.chunks = [];
+    if (!bodySupported || !entry?.chunks || !entry.bytes) return;
+    const chunks = entry.chunks;
+    entry.chunks = null;
+    if (deferredCaptures.size >= MAX_DEFERRED_CAPTURES) return;
+    const bytes = Buffer.concat(chunks, entry.bytes);
     const work = setImmediate(() => {
+      deferredCaptures.delete(request);
       if (stopped) return;
       try {
         const body = JSON.parse(bytes.toString("utf8"));
@@ -213,6 +223,7 @@ export function startCacheDiagnostics({
         entry.requestState = "invalid_json";
       }
     });
+    deferredCaptures.set(request, work);
     work.unref();
   });
   listen("headers", ({ request, response }) => {
@@ -251,6 +262,8 @@ export function startCacheDiagnostics({
       stopped = true;
       clearInterval(timer);
       for (const [target, fn] of subscriptions) target.unsubscribe(fn);
+      for (const capture of deferredCaptures.values()) clearImmediate(capture);
+      deferredCaptures.clear();
       pending.clear();
       groups.clear();
       await counter?.stop();

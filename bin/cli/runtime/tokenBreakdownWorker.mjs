@@ -20,7 +20,7 @@ parentPort.once("message", async ({ body }) => {
     const { Tiktoken } = await import("js-tiktoken/lite");
     const { default: ranks } = await import("js-tiktoken/ranks/o200k_base");
     const tokenizer = new Tiktoken(ranks);
-    encode = (text) => tokenizer.encode(text);
+    encode = (text) => tokenizer.encode(text, [], []);
   } catch {
     runtimeDiagnosticsLog("WARNING", "Exact token estimator is unavailable");
   }

@@ -42,6 +42,58 @@ test("raw nested aliases retain explicit zero precedence and absent values", () 
     3
   );
 });
+test("usage reporting requires a numeric counter and preserves explicit zero", () => {
+  const invalid = createCacheUsageParser();
+  invalid.push('data: {"usage":{"input_tokens":"unknown","output_tokens":-1}}\n\n');
+  assert.equal(invalid.finish().status, "unavailable");
+
+  const partial = createCacheUsageParser();
+  partial.push('data: {"usage":{"input_tokens":0}}\n\n');
+  partial.push('data: {"usage":{"input_tokens":"unknown"}}\n\n');
+  assert.equal(partial.finish().status, "reported");
+  assert.equal(partial.finish().inputTokens, 0);
+});
+
+test("a failed response event records termination independently of usage", () => {
+  const parser = createCacheUsageParser();
+  parser.push('data: {"type":"response.failed"}\n\n');
+  assert.equal(parser.finish().terminal, true);
+  assert.equal(parser.finish().status, "unavailable");
+});
+
+test("SSE recognizes each newline style and split mixed line endings", () => {
+  for (const newline of ["\r", "\n", "\r\n"]) {
+    const parser = createCacheUsageParser();
+    const stream = Buffer.from(
+      ['data: {"usage":{"input_tokens":3}}', "", "data: [DONE]", "", ""].join(newline)
+    );
+    for (const byte of stream) parser.push(Buffer.from([byte]));
+    assert.equal(parser.finish().inputTokens, 3, JSON.stringify(newline));
+    assert.equal(parser.finish().terminal, true, JSON.stringify(newline));
+  }
+
+  const mixed = createCacheUsageParser();
+  mixed.push('data: {"usage":\r');
+  mixed.push('\ndata: {"input_tokens":7}}\n\r');
+  assert.equal(mixed.finish().inputTokens, 7);
+});
+
+test("SSE byte limits exclude the frame separator across every split", () => {
+  const frame = 'data: {"usage":{"input_tokens":12},"output":"فارسی 😀"}';
+  const maxFrameBytes = Buffer.byteLength(frame);
+  const separator = "\r\n\r\n";
+  for (let split = 0; split <= separator.length; split++) {
+    const parser = createCacheUsageParser({ maxFrameBytes });
+    parser.push(Buffer.from(frame + separator.slice(0, split)));
+    parser.push(Buffer.from(separator.slice(split)));
+    assert.equal(parser.finish().status, "reported", `delimiter split ${split}`);
+    assert.equal(parser.finish().inputTokens, 12);
+  }
+  const oversized = createCacheUsageParser({ maxFrameBytes });
+  oversized.push(Buffer.from(frame + " " + separator));
+  assert.equal(oversized.finish().status, "oversized");
+});
+
 test("fragmented UTF-8 SSE, JSON, missing terminal events and oversized frames remain distinguishable", () => {
   const input = Buffer.from(
     'data: {"type":"response.completed","response":{"usage":{"input_tokens":12,"input_tokens_details":{"cached_tokens":0}},"output":"فارسی 😀"}}\r\n\r\n'
@@ -64,6 +116,59 @@ test("fragmented UTF-8 SSE, JSON, missing terminal events and oversized frames r
   oversized.push(Buffer.from("x".repeat(21)));
   assert.equal(oversized.finish().status, "oversized");
 });
+
+test(
+  "deferred captures are canceled when requests fail before processing",
+  {
+    skip: !supportsCacheBodyDiagnostics(),
+  },
+  async () => {
+    const rows = [];
+    const observer = startCacheDiagnostics({
+      env: { OMNIROUTE_CACHE_DIAGNOSTICS: "1", OMNIROUTE_TOKEN_BREAKDOWN: "1" },
+      sinkFactory: () => ({ write: (row) => rows.push(row), async close() {} }),
+      tokenCounter: {
+        async submit() {
+          return { status: "busy" };
+        },
+        async stop() {},
+      },
+      log() {},
+    });
+    const key = Symbol.for("omniroute.providerRequestCapture.state");
+    const previous = globalThis[key];
+    const context = new AsyncLocalStorage();
+    globalThis[key] = { context };
+    const publish = (name, request, extra = {}) =>
+      channel(`undici:request:${name}`).publish({ request, ...extra });
+    try {
+      context.run({ capture: { diagnosticsOptOut: false } }, () => {
+        for (let index = 0; index < 13; index++) {
+          const request = {
+            origin: "https://api.openai.com",
+            path: "/v1/responses",
+            method: "POST",
+          };
+          publish("create", request);
+          publish("bodyChunkSent", request, { chunk: Buffer.from('{"input":"synthetic"}') });
+          publish("bodySent", request);
+          publish(index < 12 ? "error" : "trailers", request);
+        }
+      });
+      await new Promise((resolve) => setImmediate(resolve));
+      assert.equal(rows.filter((row) => row.status === "transport_error").length, 12);
+      assert.equal(rows.filter((row) => row.event === "token_breakdown").length, 1);
+      assert.match(
+        rows.find((row) => row.requestState === "captured").requestFingerprint,
+        /^[a-f0-9]{64}$/
+      );
+    } finally {
+      await observer.stop();
+      if (previous === undefined) delete globalThis[key];
+      else globalThis[key] = previous;
+    }
+  }
+);
 test("opt-out and initialization failure do not create subscribers or block inference", async () => {
   let initialized = false;
   await startCacheDiagnostics({

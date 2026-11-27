@@ -3,6 +3,8 @@ import path from "node:path";
 import { randomUUID } from "node:crypto";
 import { runtimeDiagnosticsLog } from "./runtimeDiagnosticsLog.mjs";
 const MAX_BYTES = 10 * 1024 * 1024;
+const MAX_RUNS = 8;
+const MAX_CLOSED_RUNS = 4;
 const FILE = /^cache-[0-9]+-[0-9a-f-]+\.jsonl$/;
 /** Only an explicit, matching closed-run lease proves that a writer relinquished this file.
  * Never infer ownership or death from a PID or an old mtime: both can be reused. */
@@ -10,7 +12,7 @@ function closedRun(directory, name) {
   const file = path.join(directory, name),
     marker = file + ".closed";
   try {
-    if (fs.existsSync(file + ".active")) return null;
+    if (fs.lstatSync(file + ".active", { throwIfNoEntry: false })) return null;
     const stat = fs.lstatSync(file),
       leaseStat = fs.lstatSync(marker);
     if (
@@ -47,15 +49,16 @@ function withRotationLock(directory, work) {
   }
 }
 
-/** Delete only verified closed runs beyond the four most recently closed leases. */
-function rotateClosedRuns(directory) {
-  const closed = fs
-    .readdirSync(directory)
-    .filter((name) => FILE.test(name))
+/** Keep the newest verified closed runs that fit alongside protected and reserved slots. */
+function rotateClosedRuns(directory, reserve = 0) {
+  const runs = fs.readdirSync(directory).filter((name) => FILE.test(name));
+  const closed = runs
     .map((name) => closedRun(directory, name))
     .filter(Boolean)
     .sort((a, b) => b.time - a.time);
-  for (const row of closed.slice(4)) {
+  const available = MAX_RUNS - (runs.length - closed.length) - reserve;
+  if (reserve && available < 0) throw new Error("Private diagnostic run budget exhausted");
+  for (const row of closed.slice(Math.min(MAX_CLOSED_RUNS, Math.max(0, available)))) {
     fs.unlinkSync(row.file);
     fs.unlinkSync(row.marker);
   }
@@ -64,7 +67,7 @@ function rotateClosedRuns(directory) {
 /** Busy/stale locks fail open for inference; active and unknown runs are never rotated. */
 function openRun(directory) {
   return withRotationLock(directory, () => {
-    rotateClosedRuns(directory);
+    rotateClosedRuns(directory, 1);
     const run = randomUUID(),
       name = `cache-${process.pid}-${run}.jsonl`;
     const file = path.join(directory, name),
@@ -84,7 +87,7 @@ function openRun(directory) {
   });
 }
 
-/** Private bounded files; four closed runs plus all active/unknown runs (10 MiB each). */
+/** Keep up to four closed runs within the on-disk admission limit. */
 export function createCacheDiagnosticsSink(
   dataDir,
   { maxBytes = MAX_BYTES, log = runtimeDiagnosticsLog } = {}
@@ -130,6 +133,8 @@ export function createCacheDiagnosticsSink(
           if (!stream.destroyed) stream.end();
         });
       try {
+        const closedAt = new Date();
+        fs.utimesSync(active, closedAt, closedAt);
         fs.renameSync(active, file + ".closed");
         withRotationLock(directory, () => rotateClosedRuns(directory));
       } catch {

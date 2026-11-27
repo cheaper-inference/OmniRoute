@@ -3,7 +3,10 @@ import { createServer } from "node:http";
 import { AsyncLocalStorage } from "node:async_hooks";
 import { once } from "node:events";
 import test from "node:test";
-import { startCacheDiagnostics } from "../../bin/cli/runtime/cacheDiagnostics.mjs";
+import {
+  startCacheDiagnostics,
+  supportsCacheBodyDiagnostics,
+} from "../../bin/cli/runtime/cacheDiagnostics.mjs";
 
 test("ordinary bundled fetch reports capability against an owned synthetic HTTP service", async () => {
   const rows = [],
@@ -68,7 +71,7 @@ test("ordinary bundled fetch reports capability against an owned synthetic HTTP 
       ),
     ]);
     const row = rows.find((r) => r.event === "cache_usage");
-    if (Number(process.versions.node.split(".")[0]) === 22) {
+    if (!supportsCacheBodyDiagnostics()) {
       assert.equal(row.status, "unsupported_body_diagnostics");
       assert.equal(row.requestFingerprint, null);
       assert.equal(row.cacheReadTokens, null);
