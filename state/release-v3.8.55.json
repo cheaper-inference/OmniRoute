@@ -1,30 +1,14 @@
 {
   "version": 1,
   "base": "release/v3.8.55",
-  "paused": null,
-  "inFlight": {
-    "batchId": "b72",
-    "kind": "batch",
-    "candidateRef": "omni-queue/release-v3.8.55/b72-3d399646ebb5",
-    "candidateSha": "3d399646ebb56cc09bc6a659213c0daa191f6250",
+  "paused": {
+    "reason": "error",
+    "since": "2026-11-27T23:19:07.718Z",
     "baseSha": "3e23a8afe026a4980926c2fcab5b1fcfabb995c4",
-    "treeSha": "a207c5fe6060cdf2e17e08295247610ab825dc54",
-    "prs": [
-      {
-        "n": 21356,
-        "head": "7930460c68a4c24bda7df9c76408d613cc22103d",
-        "title": "fix(authz): check the browser origin on anonymous management mutations",
-        "author": "diegosouzapw",
-        "labeledAt": "2026-11-27T13:19:11Z"
-      }
-    ],
-    "stage": "landing",
-    "startedAt": "2026-11-27T21:58:06.997Z",
-    "attempts": 0,
-    "bisect": null,
-    "lane": "hotfix",
-    "landAttempts": 1
+    "detail": "landing b72 failed (rejected): !\t3d399646ebb56cc09bc6a659213c0daa191f6250:refs/heads/release/v3.8.55\t[remote rejected] (push declined due to repository rule violations) | remote: error: GH013: Repository rule violations found for refs/heads/release/v3.8.55. | remote: Review all repository rules at https://github.com/cheaper-inference/OmniRoute/rules?ref=refs%2Fheads%2Frelease%2Fv3.8.55 | remote: | remote: - Required status check \"omni-queue/land\" is expected. | remote: | error: failed to push some refs to 'https://github.com/cheaper-inference/OmniRoute.git'",
+    "issue": null
   },
+  "inFlight": null,
   "baseChecks": [
     {
       "baseSha": "3e23a8afe026a4980926c2fcab5b1fcfabb995c4",
@@ -128,46 +112,6 @@
     "culprits": 1
   },
   "history": [
-    {
-      "at": "2026-11-21T19:41:22.025Z",
-      "type": "pr-dequeued",
-      "batchId": "b22",
-      "prs": [
-        20835
-      ],
-      "detail": "withdrawn: already merged",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44942209661"
-    },
-    {
-      "at": "2026-11-21T19:41:57.288Z",
-      "type": "batch-started",
-      "batchId": "b24",
-      "prs": [
-        20866,
-        20867,
-        20940
-      ],
-      "sha": "3927e06e015aa0912d9899fc8391bb3d52ccb1c8",
-      "detail": "3 PR(s) on 5ffa68e83544; window 3",
-      "labeledAt": {
-        "20866": "2026-11-21T11:20:21Z",
-        "20867": "2026-11-21T13:25:28Z",
-        "20940": "2026-11-21T18:09:50Z"
-      },
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44942209661"
-    },
-    {
-      "at": "2026-11-21T20:51:46.139Z",
-      "type": "checks-green",
-      "batchId": "b24",
-      "prs": [
-        20866,
-        20867,
-        20940
-      ],
-      "sha": "3927e06e015aa0912d9899fc8391bb3d52ccb1c8",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44948476998"
-    },
     {
       "at": "2026-11-21T20:51:57.287Z",
       "type": "would-land",
@@ -2814,12 +2758,44 @@
       ],
       "sha": "3d399646ebb56cc09bc6a659213c0daa191f6250",
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/46081752923"
+    },
+    {
+      "at": "2026-11-27T23:19:03.932Z",
+      "type": "land-blessed",
+      "batchId": "b72",
+      "prs": [
+        21356
+      ],
+      "sha": "3d399646ebb56cc09bc6a659213c0daa191f6250",
+      "detail": "omni-queue/land success on 1 commit(s)",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/46081752923"
+    },
+    {
+      "at": "2026-11-27T23:19:07.719Z",
+      "type": "error",
+      "batchId": "b72",
+      "prs": [],
+      "detail": "landing b72 failed (rejected): !\t3d399646ebb56cc09bc6a659213c0daa191f6250:refs/heads/release/v3.8.55\t[remote rejected] (push declined due to repository rule violations) | remote: error: GH013: Repository rule violations found for refs/heads/release/v3.8.55. | remote: Review all repository rules at https://github.com/cheaper-inference/OmniRoute/rules?ref=refs%2Fheads%2Frelease%2Fv3.8.55 | remote: | remote: - Required status check \"omni-queue/land\" is expected. | remote: | error: failed to push some refs to 'https://github.com/cheaper-inference/OmniRoute.git'",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/46081752923"
+    },
+    {
+      "at": "2026-11-27T23:20:04.752Z",
+      "type": "queue-stalled",
+      "detail": "paused (reason `error`) since 2026-11-27 23:19Z: a pause for this reason does not lift by itself",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/46081752923"
     }
   ],
-  "updatedAt": "2026-11-27T23:19:00.823Z",
+  "updatedAt": "2026-11-27T23:20:07.566Z",
   "batchWindow": 4,
-  "landingsWithoutVerdict": {
-    "count": 1,
-    "since": "2026-11-27T23:19:00.822Z"
+  "stalled": {
+    "since": "2026-11-27T23:19:07.718Z",
+    "reasons": [
+      "paused (reason `error`) since 2026-11-27 23:19Z: a pause for this reason does not lift by itself"
+    ],
+    "openedAt": "2026-11-27T23:20:04.752Z",
+    "kinds": [
+      "paused:error"
+    ],
+    "notified": true
   }
 }
