@@ -41,9 +41,9 @@ export async function POST(request) {
     if (isValidationFailure(validation)) {
       return NextResponse.json({ success: false, error: validation.error }, { status: 400 });
     }
-    const { provider, body } = validation.data;
+    const { provider, body, sourceFormat: declaredSourceFormat } = validation.data;
 
-    const sourceFormat = detectFormat(body);
+    const sourceFormat = declaredSourceFormat ?? detectFormat(body);
     let targetFormat = getTargetFormat(provider);
 
     // Get provider credentials from database

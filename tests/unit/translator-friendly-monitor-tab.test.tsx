@@ -19,7 +19,11 @@ beforeAll(() => {
 vi.mock("next-intl", () => ({
   useLocale: () => "en",
   useTranslations: () => {
-    const t = (key: string) => key;
+    const t = (key: string, values?: { value: number }) => {
+      if (key === "millisecondsShort") return `${values?.value}ms`;
+      if (key === "notAvailableSymbol") return "—";
+      return key;
+    };
     t.has = () => false;
     return t;
   },
@@ -303,6 +307,28 @@ describe("MonitorTab", () => {
     // 2 event rows
     const rows = container.querySelectorAll("[data-testid='monitor-event-row']");
     expect(rows).toHaveLength(2);
+  });
+
+  it("shows finite latencies, including zero, and a dash for missing or invalid values", async () => {
+    mockFetchWithEvents([
+      { id: "zero", status: "error", latency: 0 },
+      { id: "positive", status: "error", latency: 2 },
+      { id: "missing", status: "error" },
+      { id: "invalid", status: "error", latency: Infinity },
+    ]);
+
+    const { default: MonitorTab } =
+      await import("@/app/(dashboard)/dashboard/translator/components/MonitorTab");
+    const container = makeContainer();
+    await mountAndFlushInitialFetch(<MonitorTab />, container);
+
+    const rows = container.querySelectorAll("[data-testid='monitor-event-row']");
+    expect(Array.from(rows, (row) => row.querySelector("td:last-child")?.textContent)).toEqual([
+      "0ms",
+      "2ms",
+      "—",
+      "—",
+    ]);
   });
 
   it("table renders source and target format labels via FORMAT_META", async () => {

@@ -1,0 +1,1 @@
+- The Translator Monitor records the original source format for sent translations and displays zero-millisecond latencies as `0ms` (KEA-9788).

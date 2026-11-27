@@ -159,7 +159,7 @@ function TestBenchContent() {
       const sendRes = await fetch("/api/translator/send", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ provider, body: translateData.result }),
+        body: JSON.stringify({ provider, body: translateData.result, sourceFormat }),
       });
 
       const latency = Date.now() - start;
