@@ -264,6 +264,36 @@ test("GET /api/middleware/hooks reports matching dbCount and registryCount after
   assert.equal(afterEnable.context.body.apiHookRan, true);
 });
 
+test("metadata-only PUT does not recompile unchanged code and can disable a broken-syntax hook", async () => {
+  createMiddlewareHook({
+    name: "broken-syntax-disable-test",
+    description: "Invalid JS persisted before restart",
+    priority: 100,
+    scope: { type: "global" },
+    enabled: true,
+    code: `const x = (;`,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    runCount: 0,
+  });
+
+  simulateProcessRestart();
+
+  const res = await updateHookRoute(
+    new Request("http://127.0.0.1/api/middleware/hooks/broken-syntax-disable-test", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ enabled: false }),
+    }),
+    { params: Promise.resolve({ name: "broken-syntax-disable-test" }) }
+  );
+
+  assert.equal(res.status, 200, "metadata-only PUT must not fail by recompiling unchanged code");
+  const json = (await res.json()) as { hook: { enabled: boolean } };
+  assert.equal(json.hook.enabled, false);
+  assert.equal(getHook("broken-syntax-disable-test")?.enabled, false);
+});
+
 test("src/instrumentation-node.ts initializes pre-request middleware hooks at startup after DB boot", () => {
   const bootSource = fs.readFileSync(
     path.resolve(import.meta.dirname, "../../src/instrumentation-node.ts"),
