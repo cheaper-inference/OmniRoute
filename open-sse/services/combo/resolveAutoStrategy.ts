@@ -5,17 +5,12 @@ import {
 } from "../../utils/error.ts";
 import { BudgetExceededError, selectProvider as selectAutoProvider } from "../autoCombo/engine.ts";
 import type { ScoringWeights } from "../autoCombo/scoring.ts";
-import {
-  resolveRequestModePack,
-  parseRequestBudgetCap,
-  parseRequestBudgetFallback,
-} from "../autoCombo/requestControls.ts";
+import { resolveRequestModePack } from "../autoCombo/requestControls.ts";
 import { selectWithStrategyAsync } from "../autoCombo/routerStrategy.ts";
 import { buildDecisionRoutingContext, type DecisionRuntime } from "../decision/factory.ts";
 import { buildComplexityRoutingHint } from "../autoCombo/complexityRouter";
 import { getModePack } from "../autoCombo/modePacks.ts";
 import { recordComboIntent } from "../comboMetrics.ts";
-import { estimateTokens } from "../contextManager.ts";
 import { classifyWithConfig } from "../intentClassifier.ts";
 import type { RoutingHint } from "../manifestAdapter";
 import { parseModel } from "../model.ts";
@@ -25,6 +20,12 @@ import { parseAutoConfig } from "./autoConfig.ts";
 import { isComboEmptyPoolNoEligibleTargetsEnabled } from "./protectedPriorityStopStatus.ts";
 import { dedupeTargetsByExecutionKey } from "./comboData.ts";
 import { costKey } from "./candidateCost.ts";
+import {
+  estimateCandidateCost,
+  estimateCandidateInputTokens,
+  filterCandidatesByBudget,
+  resolveCandidateBudget,
+} from "./candidateBudget.ts";
 import { restoreIncomingOrder } from "./rungOrder.ts";
 import {
   getModelContextLimitForModelString,
@@ -177,28 +178,6 @@ function emptyCandidatePoolResponse(poolSize: number, comboName: string): Respon
   );
 }
 
-function estimateCandidateCost(candidate: AutoProviderCandidate, estimatedInputTokens: number) {
-  const tokens = estimatedInputTokens > 0 ? estimatedInputTokens : 1000;
-  return (candidate.costPer1MTokens * tokens) / 1_000_000;
-}
-
-function filterCandidatesByBudget(
-  candidates: AutoProviderCandidate[],
-  budgetCap: number | undefined,
-  strict: boolean,
-  estimatedInputTokens: number
-): AutoProviderCandidate[] | Response {
-  if (!budgetCap || candidates.length === 0) return candidates;
-  const cost = (candidate: AutoProviderCandidate) =>
-    estimateCandidateCost(candidate, estimatedInputTokens);
-  const affordable = candidates.filter((candidate) => cost(candidate) <= budgetCap);
-  if (affordable.length > 0) return affordable;
-
-  const cheapest = Math.min(...candidates.map(cost));
-  if (strict) return errorResponse(402, new BudgetExceededError(budgetCap, cheapest).message);
-  return candidates.filter((candidate) => cost(candidate) === cheapest);
-}
-
 function filterBudgetFallbackTargets(
   targets: ResolvedComboTarget[],
   candidates: AutoProviderCandidate[],
@@ -299,13 +278,7 @@ export async function resolveAutoStrategyOrder(
   // Estimate input tokens once; exclude candidates whose known context limit is too small.
   // Uses the same 4-chars-per-token heuristic as contextManager.ts::compressContext().
   // Null/unknown limits are treated as "include" to avoid incorrectly dropping valid targets.
-  const requestMessages = body.messages;
-  const estimatedInputTokens = estimateTokens(
-    typeof requestMessages === "string" ||
-      (requestMessages !== null && typeof requestMessages === "object")
-      ? requestMessages
-      : []
-  );
+  const estimatedInputTokens = estimateCandidateInputTokens(body.messages);
   if (estimatedInputTokens > 0) {
     const filteredByContext = eligibleTargets.filter((target) => {
       const limit = getModelContextLimitForModelString(target.modelStr);
@@ -367,30 +340,27 @@ export async function resolveAutoStrategyOrder(
   recordComboIntent(combo.name, intent);
   const taskType = mapIntentToTaskType(intent);
 
+  const autoConfig = parseAutoConfig(combo, eligibleTargets);
   const {
     routingStrategy,
     candidatePool,
     weights: configWeights,
     explorationRate,
-    budgetCap: configBudgetCap,
-    budgetFallback: configBudgetFallback,
     modePack: configModePack,
     resetWindowConfig,
     slaPolicy,
     nadirConfig,
     decisionConfig,
     accountPreferences,
-  } = parseAutoConfig(combo, eligibleTargets);
+  } = autoConfig;
 
   // Per-request overrides (#6023 / #6024 / #6025 / #3470): X-OmniRoute-Budget,
   // X-OmniRoute-Budget-Fallback and X-OmniRoute-Mode headers (threaded via
   // relayOptions) take precedence over the combo's stored config for this single
   // request. Unknown/garbage header values are ignored so the saved config is
   // preserved.
-  const requestBudgetCap = parseRequestBudgetCap(relayOptions?.budgetCap);
-  const budgetCap = requestBudgetCap ?? configBudgetCap;
-  const requestBudgetFallback = parseRequestBudgetFallback(relayOptions?.budgetFallback);
-  const budgetFallback = requestBudgetFallback ?? configBudgetFallback;
+  const { budgetCap, budgetFallback, requestBudgetCap, requestBudgetFallback } =
+    resolveCandidateBudget(autoConfig, relayOptions);
   const requestModePack = resolveRequestModePack(relayOptions?.mode);
   const modePack = requestModePack.override ? requestModePack.modePack : configModePack;
   // #7008: `weights` must track the *effective* (post-override) modePack, not just
