@@ -3492,7 +3492,7 @@ export function createSSEStream(options: StreamOptions = {}) {
                 }
               }
 
-              collectTranslatedText(parsed, state, targetFormat);
+              collectTranslatedText(parsed, state, targetFormat, isDuplicateResponsesSequence);
               // #18600 — restore aliases before translation on the flush-path
               // partial buffer too (same seam as the main translate loop).
               if (

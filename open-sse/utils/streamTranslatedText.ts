@@ -64,8 +64,12 @@ function collectResponsesOrGenericText(parsed: Payload, state: ContentState | nu
 export function collectTranslatedText(
   parsed: Payload,
   state: ContentState | null,
-  targetFormat: string
+  targetFormat: string,
+  isDuplicateSequence?: (value: unknown) => boolean
 ) {
+  if (targetFormat === FORMATS.OPENAI_RESPONSES && isDuplicateSequence?.(parsed.sequence_number)) {
+    return { hasClaudeText: false, length: 0 };
+  }
   const claude = collectClaudeDelta(parsed.delta, state ?? undefined);
   return {
     hasClaudeText: claude.hasText,
