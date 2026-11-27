@@ -62,6 +62,7 @@ function sendChat(model: string) {
       body: JSON.stringify({
         model,
         stream: false,
+        max_tokens: 2000,
         messages: [{ role: "user", content: "hello" }],
       }),
     })
@@ -88,29 +89,40 @@ test("KEA-9625: an advertised Cheaper Inference Claude effort ID dispatches its 
   );
 
   const dispatchedModels: string[] = [];
-  const dispatchedEfforts: unknown[] = [];
+  const dispatchedEfforts: Array<{
+    thinking?: unknown;
+    outputEffort?: unknown;
+    reasoningEffort?: unknown;
+  }> = [];
   t.mock.method(globalThis, "fetch", async (input: RequestInfo | URL, init?: RequestInit) => {
     const url = new URL(input instanceof Request ? input.url : String(input));
     assert.equal(url.hostname, "api.cheaperinference.com");
-    assert.equal(url.pathname, "/v1/chat/completions");
+    assert.equal(url.pathname, "/v1/messages");
     const decoded =
       new Headers(init?.headers).get("content-encoding") === "gzip"
         ? gunzipSync(Buffer.from(init?.body as Uint8Array)).toString("utf8")
         : String(init?.body);
-    const { model, reasoning_effort } = JSON.parse(decoded) as {
+    const { model, thinking, output_config, reasoning_effort } = JSON.parse(decoded) as {
       model: string;
+      thinking?: unknown;
+      output_config?: { effort?: unknown };
       reasoning_effort?: unknown;
     };
     dispatchedModels.push(model);
-    dispatchedEfforts.push(reasoning_effort);
+    dispatchedEfforts.push({
+      thinking,
+      outputEffort: output_config?.effort,
+      reasoningEffort: reasoning_effort,
+    });
     return Response.json({
-      id: "chatcmpl-kea-9625",
-      object: "chat.completion",
+      id: "msg_kea_9625",
+      type: "message",
+      role: "assistant",
       model,
-      choices: [
-        { index: 0, message: { role: "assistant", content: "hello" }, finish_reason: "stop" },
-      ],
-      usage: { prompt_tokens: 1, completion_tokens: 1, total_tokens: 2 },
+      content: [{ type: "text", text: "hello" }],
+      stop_reason: "end_turn",
+      stop_sequence: null,
+      usage: { input_tokens: 1, output_tokens: 1 },
     });
   });
 
@@ -130,7 +142,12 @@ test("KEA-9625: an advertised Cheaper Inference Claude effort ID dispatches its 
     `${variantId} was listed, but chat returned ${response.status} after ${dispatchedModels.length - 1} variant dispatches: ${body}`
   );
   assert.deepEqual(dispatchedModels, [base, base]);
-  assert.equal(dispatchedEfforts[1], "high");
+  // Haiku's 64,000-token output cap leaves 62,000 for high thinking with 2,000 for the reply.
+  assert.deepEqual(dispatchedEfforts[1], {
+    thinking: { type: "enabled", budget_tokens: 62000 },
+    outputEffort: undefined,
+    reasoningEffort: undefined,
+  });
 
   for (const rejectedId of [`${baseId}-xhigh`, `${provider}/claude-fable-5-high`]) {
     assert.ok(!ids.includes(rejectedId), `${rejectedId} should be absent from the catalog`);
