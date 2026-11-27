@@ -85,8 +85,21 @@ export function synthesizeResponsesSseFromObject(response: JsonObject): string {
         const where = { item_id: itemId, output_index: outputIndex, content_index: contentIndex };
         if (part.type === "output_text") {
           const text = textOf(part.text);
-          emit("response.content_part.added", { ...where, part: { ...part, text: "" } });
+          emit("response.content_part.added", {
+            ...where,
+            part: { ...part, text: "", annotations: [] },
+          });
           if (text) emit("response.output_text.delta", { ...where, delta: text, logprobs: [] });
+          if (Array.isArray(part.annotations)) {
+            part.annotations.forEach((annotation: unknown, annotationIndex: number) => {
+              if (!isObject(annotation)) return;
+              emit("response.output_text.annotation.added", {
+                ...where,
+                annotation_index: annotationIndex,
+                annotation,
+              });
+            });
+          }
           emit("response.output_text.done", { ...where, text, logprobs: [] });
         } else if (part.type === "refusal") {
           const refusal = textOf(part.refusal);

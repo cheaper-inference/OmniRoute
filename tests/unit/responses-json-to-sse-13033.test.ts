@@ -383,3 +383,52 @@ test("the web_search fallback's round trip reaches the client item by item", asy
   );
   assert.equal(done[1].data.item.output, '{"success":true}');
 });
+
+test("Responses SSE replays annotations as indexed events before the final text snapshot", async () => {
+  const annotations = [
+    {
+      type: "url_citation",
+      start_index: 0,
+      end_index: 4,
+      title: "Docs",
+      url: "https://example.com/docs",
+    },
+    { type: "file_citation", index: 5, file_id: "file_1", filename: "notes.txt" },
+  ];
+  const body = {
+    ...responsesObject(),
+    output: [
+      {
+        type: "message",
+        id: "msg_cited",
+        status: "completed",
+        role: "assistant",
+        content: [{ type: "output_text", text: "Docs and notes", annotations }],
+      },
+    ],
+  };
+  const before = structuredClone(body);
+  const events = parseEvents(await wrapChatCompletionJsonAsResponsesSse(body).text());
+  const addedPart = events.find((event) => event.event === "response.content_part.added");
+  assert.deepEqual(
+    addedPart?.data.part.annotations,
+    [],
+    "the streaming part starts without annotations"
+  );
+  const citationEvents = events.filter(
+    (event) => event.event === "response.output_text.annotation.added"
+  );
+  assert.equal(citationEvents.length, annotations.length);
+  for (const [index, event] of citationEvents.entries()) {
+    assert.deepEqual(event.data.annotation, annotations[index]);
+    assert.equal(event.data.annotation_index, index);
+    assert.equal(event.data.item_id, "msg_cited");
+    assert.equal(event.data.output_index, 0);
+    assert.equal(event.data.content_index, 0);
+    assert.ok(
+      events.indexOf(event) < events.findIndex((item) => item.event === "response.output_text.done")
+    );
+  }
+  assert.deepEqual(events.at(-1)?.data.response, body);
+  assert.deepEqual(body, before, "replaying does not mutate the final object");
+});

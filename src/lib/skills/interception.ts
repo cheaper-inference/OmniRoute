@@ -1,3 +1,4 @@
+import { validSearchResultUrl } from "@omniroute/open-sse/handlers/search/resultFilters.ts";
 import { projectSkillOutputForBoundary, skillExecutor } from "./executor";
 import { skillRegistry } from "./registry";
 import { builtinSkills } from "./builtins";
@@ -290,14 +291,43 @@ function isRegisteredCustomSkill(toolName: string, apiKeyId: string): boolean {
   return skillRegistry.getSkill(identifier, apiKeyId) != null;
 }
 
+interface ResponsesWebSearchSource {
+  type: "url";
+  title: string;
+  url: string;
+  caption: string;
+}
+
+function webSearchSources(result: unknown): ResponsesWebSearchSource[] {
+  const record = result && typeof result === "object" ? (result as Record<string, unknown>) : null;
+  if (!record || record.success !== true || !Array.isArray(record.results)) return [];
+
+  const sources: ResponsesWebSearchSource[] = [];
+  const seen = new Set<string>();
+  for (const entry of record.results) {
+    if (!entry || typeof entry !== "object") continue;
+    const source = entry as Record<string, unknown>;
+    const url = source.url;
+    if (!validSearchResultUrl(url) || seen.has(url)) continue;
+    seen.add(url);
+    sources.push({
+      type: "url",
+      url,
+      title: typeof source.title === "string" && source.title.trim() ? source.title : url,
+      caption:
+        typeof source.snippet === "string" && source.snippet
+          ? source.snippet
+          : typeof source.display_url === "string"
+            ? source.display_url
+            : "",
+    });
+  }
+  return sources;
+}
+
 /**
- * Build a native Responses API `web_search_call` output item from an executed
- * web-search fallback call. OpenAI Responses clients (Codex CLI, pi-web-access,
- * …) send the built-in `web_search` tool and expect the response to carry a
- * `web_search_call` item with `action.sources`; without it they only receive the
- * internal `function_call`/`function_call_output` round-trip and cannot consume
- * the search results. Returns null when the call was not the web-search
- * fallback, or when the search failed / returned no usable result payload.
+ * Build the native hosted-tool item. The accompanying cited message is needed
+ * by Responses SDKs that consume output_text annotations rather than action.sources.
  */
 export function buildWebSearchCallItem(
   call: ToolCall,
@@ -307,34 +337,74 @@ export function buildWebSearchCallItem(
   const record = result && typeof result === "object" ? (result as Record<string, unknown>) : null;
   if (!record || record.success !== true) return null;
 
-  const results = Array.isArray(record.results) ? record.results : [];
-  const sources = results
-    .map((entry) => {
-      if (!entry || typeof entry !== "object") return null;
-      const source = entry as Record<string, unknown>;
-      const url = typeof source.url === "string" ? source.url : "";
-      if (!url) return null;
-      const title = typeof source.title === "string" ? source.title : url;
-      const caption =
-        typeof source.snippet === "string" && source.snippet
-          ? source.snippet
-          : typeof source.display_url === "string"
-            ? source.display_url
-            : "";
-      return { title, url, caption };
-    })
-    .filter((source): source is { title: string; url: string; caption: string } => source !== null);
-
   return {
     id: `ws_${call.id}`,
     type: "web_search_call",
     status: "completed",
     action: {
-      type: "web_search",
-      query: typeof record.query === "string" ? record.query : "",
-      sources,
+      type: "search",
+      query:
+        typeof record.query === "string"
+          ? record.query
+          : typeof call.arguments.query === "string"
+            ? call.arguments.query
+            : "",
+      sources: webSearchSources(result),
     },
   };
+}
+
+/**
+ * The legacy interception path does not resume the model after executing a
+ * hosted search. Return the actual snippets with citations, rather than leaving
+ * a pre-search promise as the only assistant text or exposing an internal function
+ * call that the client never declared.
+ */
+function buildResponsesWebSearchOutput(call: ToolCall, result: unknown): Record<string, unknown>[] {
+  const record = result && typeof result === "object" ? (result as Record<string, unknown>) : null;
+  const successful = record?.success === true;
+  const query =
+    typeof record?.query === "string"
+      ? record.query
+      : typeof call.arguments.query === "string"
+        ? call.arguments.query
+        : "";
+  const sources = webSearchSources(result);
+  const searchCall = buildWebSearchCallItem(call, result) ?? {
+    id: `ws_${call.id}`,
+    type: "web_search_call",
+    status: "failed",
+    action: { type: "search", query, sources: [] },
+  };
+  const annotations: Record<string, unknown>[] = [];
+  let text = successful ? "Web search returned no usable source URLs." : "Web search failed.";
+  if (sources.length > 0) {
+    text = query ? `Web search results for ${JSON.stringify(query)}:` : "Web search results:";
+    sources.forEach((source, index) => {
+      text += `\n\n${index + 1}. ${source.title}`;
+      if (source.caption) text += `\n${source.caption}`;
+      text += "\n";
+      const startIndex = text.length;
+      text += source.url;
+      annotations.push({
+        type: "url_citation",
+        start_index: startIndex,
+        end_index: text.length,
+        url: source.url,
+        title: source.title,
+      });
+    });
+  }
+  return [
+    searchCall,
+    {
+      id: `msg_search_${call.id}`,
+      type: "message",
+      role: "assistant",
+      status: "completed",
+      content: [{ type: "output_text", text, annotations }],
+    },
+  ];
 }
 
 /**
@@ -436,34 +506,43 @@ export async function handleToolCallExecution(
     case "openai": {
       const responsesOutput = getResponsesOutputContainer(response);
       if (responsesOutput) {
-        const functionOutputs = results.map((result) => ({
-          type: "function_call_output",
-          call_id: result.id,
-          output: JSON.stringify(result.result),
-        }));
+        const hostedSearchCalls = toolCalls.filter(
+          (call) =>
+            call.name === OMNIROUTE_WEB_SEARCH_FALLBACK_TOOL_NAME &&
+            resolveBuiltinHandlerName(call.name, context) === "web_search"
+        );
+        const hostedSearchIds = new Set(hostedSearchCalls.map((call) => call.id));
+        const functionOutputs = results
+          .filter((result) => !hostedSearchIds.has(result.id))
+          .map((result) => ({
+            type: "function_call_output",
+            call_id: result.id,
+            output: JSON.stringify(result.result),
+          }));
 
-        // OpenAI Responses clients that declared the native `web_search` tool get
-        // a spec-shaped `web_search_call` item alongside the preserved internal
-        // function-call round-trip, so their own web-search handling can consume
-        // the executed results (pi-web-access / Codex-style consumers).
+        // Only remove the executed hosted-search round-trip. Client functions,
+        // custom skills and opaque provider output retain their existing contract.
+        const remainingOutput = responsesOutput.output.filter((entry) => {
+          if (!entry || typeof entry !== "object") return true;
+          const item = entry as Record<string, unknown>;
+          return !(
+            (item.type === "function_call" || item.type === "function_call_output") &&
+            hostedSearchIds.has(String(item.call_id || item.id || ""))
+          );
+        });
         const resultById = new Map(results.map((r) => [r.id, r.result]));
-        const webSearchCalls = toolCalls
-          .map((call) => buildWebSearchCallItem(call, resultById.get(call.id)))
-          .filter((item): item is Record<string, unknown> => item !== null);
+        const webSearchOutput = hostedSearchCalls.flatMap((call) =>
+          buildResponsesWebSearchOutput(call, resultById.get(call.id))
+        );
+        const output = [...remainingOutput, ...functionOutputs, ...webSearchOutput];
 
         if (responsesOutput.root === responsesOutput.responseRoot) {
-          return {
-            ...response,
-            output: [...responsesOutput.output, ...functionOutputs, ...webSearchCalls],
-          };
+          return { ...response, output };
         }
 
         return {
           ...response,
-          response: {
-            ...responsesOutput.responseRoot,
-            output: [...responsesOutput.output, ...functionOutputs, ...webSearchCalls],
-          },
+          response: { ...responsesOutput.responseRoot, output },
         };
       }
 

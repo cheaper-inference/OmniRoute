@@ -15,6 +15,7 @@ import {
   getSearchCredentialFallbacks,
   autoSearchCandidates,
   admitsAutoCandidate,
+  isPreferredSearchProvider,
 } from "@omniroute/open-sse/config/searchRegistry.ts";
 import { buildErrorBody, errorResponse } from "@omniroute/open-sse/utils/error.ts";
 import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
@@ -275,6 +276,7 @@ async function executeSearchBody(
   let credentials: Record<string, any> | null = null;
   let alternateProviderId: string | undefined;
   let alternateCredentials: Record<string, any> | null = null;
+  const alternateProviders: Array<{ provider: string; credentials: Record<string, unknown> }> = [];
   let firstRateLimitedCredentials: {
     providerId: string;
     credentials: RateLimitedCredentials;
@@ -300,7 +302,7 @@ async function executeSearchBody(
     // Auto-select: walk the same admitted, cost-ranked candidates executeWebSearch uses
     // (a configured SearXNG included), so /v1/search and the web_search tool agree even
     // when two providers tie on cost. selectProvider's pick is only a seed for errors.
-    const sortedIds = autoSearchCandidates(body.search_type)
+    const sortedIds = autoSearchCandidates(body.search_type, settings?.searchProviderOrder)
       .filter((provider) => !isProviderBlockedByIdOrAlias(provider.id, blockedProviders))
       .map((p) => p.id);
 
@@ -313,7 +315,7 @@ async function executeSearchBody(
         firstRateLimitedCredentials ??= { providerId: pid, credentials: altCreds };
         continue;
       }
-      if (altConfig && admitsAutoCandidate(altConfig, altCreds)) {
+      if (altConfig && admitsAutoCandidate(altConfig, altCreds, settings?.searchProviderOrder)) {
         providerConfig = altConfig;
         credentials = altCreds;
         break;
@@ -373,15 +375,21 @@ async function executeSearchBody(
     const otherIds = sortedIds.filter((id) => id !== providerConfig.id);
 
     for (const pid of otherIds) {
+      if (alternateProviderId && !isPreferredSearchProvider(pid, settings?.searchProviderOrder))
+        continue;
       const altConfig = getSearchProvider(pid);
       const creds = altConfig
         ? await resolveSearchExecutionCredentials(altConfig, allowedConnections)
         : null;
       if (isAllRateLimitedCredentials(creds)) continue;
-      if (altConfig && admitsAutoCandidate(altConfig, creds)) {
-        alternateProviderId = pid;
-        alternateCredentials = creds;
-        break;
+      if (altConfig && admitsAutoCandidate(altConfig, creds, settings?.searchProviderOrder)) {
+        if (!alternateProviderId) {
+          alternateProviderId = pid;
+          alternateCredentials = creds;
+        } else {
+          alternateProviders.push({ provider: pid, credentials: creds! });
+        }
+        if (!isPreferredSearchProvider(pid, settings?.searchProviderOrder)) break;
       }
     }
 
@@ -448,6 +456,7 @@ async function executeSearchBody(
         credentials,
         alternateProvider: alternateProviderId,
         alternateCredentials,
+        alternateProviders,
         log,
         connectionId: credentials?.connectionId || undefined,
         apiKeyId: policy.apiKeyInfo?.id || undefined,

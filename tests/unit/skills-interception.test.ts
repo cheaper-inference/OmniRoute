@@ -106,18 +106,24 @@ test("buildWebSearchCallItem emits a native web_search_call item only for succes
 
   assert.equal(item?.type, "web_search_call");
   assert.equal(item?.status, "completed");
-  assert.equal((item?.action as Record<string, unknown>).type, "web_search");
+  assert.equal((item?.action as Record<string, unknown>).type, "search");
   assert.equal((item?.action as Record<string, unknown>).query, "latest omniroute release");
   const sources = (item?.action as Record<string, unknown>).sources as Array<
     Record<string, string>
   >;
   assert.deepEqual(sources, [
     {
+      type: "url",
       title: "OmniRoute Docs",
       url: "https://example.com/omniroute",
       caption: "The OmniRoute documentation",
     },
-    { title: "https://example.com/no-title", url: "https://example.com/no-title", caption: "" },
+    {
+      type: "url",
+      title: "https://example.com/no-title",
+      url: "https://example.com/no-title",
+      caption: "",
+    },
   ]);
 
   // Non-search fallback calls never produce a web_search_call item.
@@ -128,7 +134,7 @@ test("buildWebSearchCallItem emits a native web_search_call item only for succes
     ),
     null
   );
-  // Failed searches keep the existing function_call_output error only.
+  // This helper exposes sources only for successful searches; the response formatter handles failure.
   assert.equal(buildWebSearchCallItem(call, { success: false, error: "quota" }), null);
   assert.equal(buildWebSearchCallItem(call, null), null);
 });
@@ -643,4 +649,242 @@ test("handleToolCallExecution places the Anthropic web-search pair before a clie
   } finally {
     mutableBuiltins.web_search = originalWebSearch;
   }
+});
+
+test("Responses hosted search returns cited snippets while preserving client-owned output", async () => {
+  const mutableBuiltins = builtinSkills as unknown as Record<
+    string,
+    (input: Record<string, unknown>) => Promise<Record<string, unknown>>
+  >;
+  const originalWebSearch = mutableBuiltins.web_search;
+  const { synthesizeResponsesSseFromObject } =
+    await import("../../open-sse/handlers/chatCore/responsesObjectToSse.ts");
+  try {
+    mutableBuiltins.web_search = async (args) => ({
+      success: true,
+      query: args.query,
+      results: [
+        { title: "Broken redirect", url: "http:///go/v1/broken", snippet: "invalid result" },
+        { title: "Script", url: "javascript:alert(1)" },
+        {
+          title: "Wordstat 📊",
+          url: "https://yandex.cloud/docs/wordstat",
+          snippet: "Official Wordstat documentation.",
+        },
+        { title: "Duplicate", url: "https://yandex.cloud/docs/wordstat" },
+        {
+          title: "Search API",
+          url: "https://yandex.cloud/docs/search-api",
+          snippet: "Search API reference.",
+        },
+      ],
+    });
+    const opaque = { type: "reasoning", id: "rs_keep", encrypted_content: "opaque-reasoning" };
+    const native = {
+      type: "function_call",
+      id: "fc_native",
+      call_id: "call_native",
+      name: "read_file",
+      arguments: '{"path":"README.md"}',
+    };
+    const nativeOutput = {
+      type: "function_call_output",
+      call_id: "call_native",
+      output: "client-owned",
+    };
+    const original = {
+      id: "resp_search",
+      object: "response",
+      status: "completed",
+      usage: { input_tokens: 4, output_tokens: 3, total_tokens: 7 },
+      output: [
+        opaque,
+        {
+          type: "message",
+          id: "msg_before",
+          role: "assistant",
+          status: "completed",
+          content: [
+            { type: "output_text", text: "I'll search the documentation.", annotations: [] },
+          ],
+        },
+        {
+          type: "function_call",
+          id: "fc_search",
+          call_id: "call_search",
+          name: OMNIROUTE_WEB_SEARCH_FALLBACK_TOOL_NAME,
+          arguments: '{"query":"Yandex Wordstat"}',
+        },
+        native,
+        nativeOutput,
+      ],
+    };
+    for (const wrapped of [false, true]) {
+      const input = wrapped ? { envelope: "keep", response: original } : original;
+      const result = await handleToolCallExecution(input, "gpt-4o", {
+        ...executionContext,
+        builtinToolNames: ["web_search"],
+        customSkillExecutionEnabled: false,
+      });
+      const response = wrapped ? result.response : result;
+      if (wrapped) assert.equal(result.envelope, "keep");
+      assert.deepEqual(response.usage, original.usage);
+      assert.ok(response.output.includes(opaque), "opaque reasoning is preserved");
+      assert.ok(response.output.includes(native), "client function is preserved");
+      assert.ok(response.output.includes(nativeOutput), "client function output is preserved");
+      assert.equal(
+        response.output.some(
+          (item: Record<string, unknown>) =>
+            (item.type === "function_call" || item.type === "function_call_output") &&
+            item.call_id === "call_search"
+        ),
+        false,
+        "handled hosted tool is not exposed as a client function"
+      );
+      const call = response.output.find(
+        (item: Record<string, unknown>) => item.type === "web_search_call"
+      );
+      assert.equal(call.action.type, "search");
+      assert.equal(call.status, "completed");
+      assert.deepEqual(
+        call.action.sources.map((source: Record<string, unknown>) => [source.type, source.url]),
+        [
+          ["url", "https://yandex.cloud/docs/wordstat"],
+          ["url", "https://yandex.cloud/docs/search-api"],
+        ]
+      );
+      const message = response.output.at(-1);
+      assert.equal(message.type, "message");
+      const part = message.content[0];
+      assert.match(part.text, /Official Wordstat documentation/);
+      assert.match(part.text, /Search API reference/);
+      assert.doesNotMatch(part.text, /invalid result|http:\/\/\/|javascript:/);
+      assert.equal(part.annotations.length, 2);
+      for (const annotation of part.annotations) {
+        assert.equal(annotation.type, "url_citation");
+        assert.equal(part.text.slice(annotation.start_index, annotation.end_index), annotation.url);
+      }
+      const events = synthesizeResponsesSseFromObject(response)
+        .split("\n\n")
+        .filter((block) => block.startsWith("event: "))
+        .map((block) => JSON.parse(block.split("\ndata: ")[1]));
+      const sources = events
+        .filter((event) => event.type === "response.output_text.annotation.added")
+        .map((event) => event.annotation.url);
+      assert.deepEqual(
+        sources,
+        part.annotations.map((annotation: Record<string, unknown>) => annotation.url),
+        "standard streaming consumers receive URL citation events"
+      );
+      assert.equal(events.at(-1)?.type, "response.completed");
+      assert.equal(original.output.length, 5, "original response is not mutated");
+    }
+  } finally {
+    mutableBuiltins.web_search = originalWebSearch;
+  }
+});
+
+test("Responses search failure and empty results settle as an explicit hosted-tool outcome", async () => {
+  const mutableBuiltins = builtinSkills as unknown as Record<
+    string,
+    (input: Record<string, unknown>) => Promise<Record<string, unknown>>
+  >;
+  const originalWebSearch = mutableBuiltins.web_search;
+  try {
+    for (const [payload, status, message] of [
+      [{ success: false, error: "private provider diagnostic" }, "failed", /Web search failed/],
+      [{ success: true, results: [] }, "completed", /no usable/],
+      [{ success: true, results: [{ url: "http:///go/v1/broken" }] }, "completed", /no usable/],
+    ] as const) {
+      mutableBuiltins.web_search = async () => payload;
+      const response = await handleToolCallExecution(
+        {
+          object: "response",
+          output: [
+            {
+              type: "function_call",
+              call_id: "call_empty",
+              name: OMNIROUTE_WEB_SEARCH_FALLBACK_TOOL_NAME,
+              arguments: '{"query":"docs"}',
+            },
+          ],
+        },
+        "gpt-4o",
+        { ...executionContext, builtinToolNames: ["web_search"] }
+      );
+      assert.equal(
+        response.output.some(
+          (item: Record<string, unknown>) =>
+            item.type === "function_call" || item.type === "function_call_output"
+        ),
+        false
+      );
+      const call = response.output.find(
+        (item: Record<string, unknown>) => item.type === "web_search_call"
+      );
+      assert.equal(call.status, status);
+      assert.equal(call.action.query, "docs");
+      const part = response.output.at(-1).content[0];
+      assert.match(part.text, message);
+      assert.deepEqual(part.annotations, []);
+      assert.doesNotMatch(JSON.stringify(response), /private provider diagnostic|http:\/\/\//);
+    }
+  } finally {
+    mutableBuiltins.web_search = originalWebSearch;
+  }
+});
+
+test("a client function named like the hosted search is not intercepted without the builtin", async () => {
+  const response = {
+    object: "response",
+    output: [
+      {
+        type: "function_call",
+        call_id: "client_search",
+        name: OMNIROUTE_WEB_SEARCH_FALLBACK_TOOL_NAME,
+        arguments: "{}",
+      },
+    ],
+  };
+  const result = await handleToolCallExecution(response, "gpt-4o", {
+    ...executionContext,
+    builtinToolNames: [],
+    customSkillExecutionEnabled: false,
+  });
+  assert.equal(result, response);
+});
+
+test("a registered custom skill with the fallback name retains custom-function semantics", async () => {
+  await skillRegistry.register({
+    name: OMNIROUTE_WEB_SEARCH_FALLBACK_TOOL_NAME,
+    version: "1.0.0",
+    description: "user-owned custom lookup",
+    schema: { input: {}, output: {} },
+    handler: "custom-search-name-handler",
+    enabled: true,
+    apiKeyId: "key-a",
+  });
+  skillExecutor.registerHandler("custom-search-name-handler", async () => ({
+    success: true,
+    results: [{ title: "Custom result", url: "https://example.com/custom" }],
+  }));
+  const customCall = {
+    type: "function_call",
+    call_id: "call_custom_name",
+    name: OMNIROUTE_WEB_SEARCH_FALLBACK_TOOL_NAME,
+    arguments: "{}",
+  };
+  const response = await handleToolCallExecution(
+    { object: "response", output: [customCall] },
+    "gpt-4o",
+    { ...executionContext, builtinToolNames: [], customSkillExecutionEnabled: true }
+  );
+  assert.deepEqual(response.output[0], customCall);
+  assert.equal(response.output[1].type, "function_call_output");
+  assert.equal(response.output[1].call_id, customCall.call_id);
+  assert.equal(
+    response.output.some((item: Record<string, unknown>) => item.type === "web_search_call"),
+    false
+  );
+  assert.equal(response.output.length, 2);
 });

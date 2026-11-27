@@ -19,6 +19,9 @@ const fixture = readFileSync(
   new URL("../fixtures/codex-search/real_en_ref_param.sse", import.meta.url),
   "utf8"
 );
+// Successful routing fixtures must contain a usable source; empty results now fail over.
+const SEARCH_HIT = { title: "Docs", url: "https://example.com/docs", description: "Reference" };
+const DDG_HTML = '<a href="https://example.com/docs" class="result-link">Docs</a>';
 let sequence = 0;
 
 test.beforeEach(async () => {
@@ -70,10 +73,10 @@ async function stub<T>(
     const url = String(input);
     calls.push(url);
     if (url === "https://chatgpt.com/backend-api/codex/responses") return new Response(fixture);
-    if (url.includes("duckduckgo.com")) return new Response("<html></html>");
+    if (url.includes("duckduckgo.com")) return new Response(DDG_HTML);
     if (url.includes("api.search.brave.com")) {
       if (options.braveFails) return new Response("upstream down", { status: 500 });
-      return Response.json({ web: { results: [] } });
+      return Response.json({ web: { results: [SEARCH_HIT] } });
     }
     throw new Error(`Unexpected mocked fetch: ${url}`);
   };
