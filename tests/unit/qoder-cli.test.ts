@@ -4,6 +4,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
+const { buildQoderCliEnv } = await import("../../open-sse/services/qoderCliSpawn.ts");
 const qoderCli = await import("../../open-sse/services/qoderCli.ts");
 const { qoderProvider } = await import("../../open-sse/config/providers/registry/qoder/index.ts");
 
@@ -96,6 +97,21 @@ test("qoder cli env helpers honor explicit command and workspace overrides", asy
   );
 });
 
+test("qoder cli desktop identity is opt-in and keeps the default CLI environment", () => {
+  const defaultEnv = buildQoderCliEnv("token");
+  assert.equal(defaultEnv.QODER_CLIENT_TYPE, undefined);
+  assert.equal(defaultEnv.QODER_BUSINESS_PRODUCT, undefined);
+  assert.equal(defaultEnv.QODER_SESSION_TYPE, undefined);
+
+  const desktopEnv = buildQoderCliEnv("token", true);
+  assert.equal(desktopEnv.QODER_CLIENT_TYPE, "10");
+  assert.equal(desktopEnv.QODER_BUSINESS_PRODUCT, "app");
+  assert.equal(desktopEnv.QODER_SESSION_TYPE, "app");
+  assert.equal(qoderCli.usesQoderDesktopIdentity("hungerg"), true);
+  assert.equal(qoderCli.usesQoderDesktopIdentity("qoder/hmodel"), true);
+  assert.equal(qoderCli.usesQoderDesktopIdentity("qwen3.8-max-preview"), false);
+});
+
 test("qoder cli provider metadata helpers normalize PAT transport and detect transport type", () => {
   assert.deepEqual(qoderCli.normalizeQoderPatProviderData({ region: "us" }), {
     region: "us",
@@ -119,6 +135,7 @@ test("qoder cli static models are copied and model-to-level mapping covers major
   assert.deepEqual(
     snapshot.map((model) => model.id),
     [
+      "hungerg",
       "qwen3.8-max-preview",
       "qwen3.7-max",
       "qwen3.7-plus",
@@ -137,6 +154,10 @@ test("qoder cli static models are copied and model-to-level mapping covers major
     qoderProvider.models.map(({ id, name }) => ({ id, name }))
   );
   assert.deepEqual(qoderProvider.models, [
+    {
+      id: "hungerg",
+      name: "HungerG",
+    },
     {
       id: "qwen3.8-max-preview",
       name: "Qwen3.8-Max-Preview",
@@ -212,6 +233,8 @@ test("qoder cli static models are copied and model-to-level mapping covers major
       maxInputTokens: 180_000,
     },
   ]);
+  assert.equal(qoderCli.mapQoderModelToLevel("hungerg"), "hmodel");
+  assert.equal(qoderCli.mapQoderModelToLevel("qoder/hmodel"), "hmodel");
   assert.equal(qoderCli.mapQoderModelToLevel("qwen3.8-max-preview"), "qmodel_preview");
   assert.equal(qoderCli.mapQoderModelToLevel("qoder/qwen3.8-max-preview"), "qmodel_preview");
   assert.equal(qoderCli.mapQoderModelToLevel("qwen3.7-max"), "qmodel_latest");
@@ -616,6 +639,8 @@ test("resolveQoderModelName prefers a live display name, then static, then Auto"
   assert.equal(qoderCli.resolveQoderModelName("", live), "auto");
   // no live list at all → falls back to the static map
   assert.equal(qoderCli.resolveQoderModelName("glm-5.2", []), "gm51model");
+  assert.equal(qoderCli.resolveQoderModelName("hungerg", ["Auto", "HungerG"]), "HungerG");
+  assert.equal(qoderCli.resolveQoderModelName("hungerg", []), "hmodel");
 });
 
 test("runQoderCli resolves the request against live --list-models and passes the display name to -m", async () => {

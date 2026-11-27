@@ -18,6 +18,10 @@ export const qoderProvider: RegistryEntry = {
   },
   models: [
     {
+      id: "hungerg",
+      name: "HungerG",
+    },
+    {
       id: "qwen3.8-max-preview",
       name: "Qwen3.8-Max-Preview",
       supportsVision: true,

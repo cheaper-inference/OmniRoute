@@ -12,6 +12,7 @@ export type { QoderCliRunResult } from "./qoderCliSpawn";
 const DEFAULT_MODELS_TIMEOUT_MS = 20_000;
 const QODER_DEFAULT_MODEL = "qwen3.8-max-preview";
 const QODER_MODEL_LEVELS = {
+  hungerg: "hmodel",
   "qwen3.8-max-preview": "qmodel_preview",
   "qwen3.7-max": "qmodel_latest",
   "qwen3.7-plus": "qmodel",
@@ -93,6 +94,15 @@ function ensureQoderCliConfigDir(): string {
   return dir;
 }
 
+export function usesQoderDesktopIdentity(model: string | null | undefined): boolean {
+  const normalized = normalizeQoderModelKey(
+    String(model || "")
+      .split("/")
+      .pop()
+  );
+  return normalized === "hungerg" || normalized === "hmodel";
+}
+
 /**
  * Run a single non-interactive chat turn through qodercli. Returns the raw
  * process result; use {@link parseQoderCliResult} to extract the reply text.
@@ -110,6 +120,7 @@ export async function runQoderCli(options: QoderCliRunOptions): Promise<QoderCli
         command: options.command,
         signal: options.signal,
         timeoutMs: options.timeoutMs,
+        useDesktopIdentity: usesQoderDesktopIdentity(options.model),
       })
     );
   }
@@ -140,6 +151,7 @@ export async function runQoderCli(options: QoderCliRunOptions): Promise<QoderCli
     timeoutMs: options.timeoutMs,
     command: options.command,
     cwd,
+    useDesktopIdentity: usesQoderDesktopIdentity(options.model),
   });
 }
 
@@ -153,6 +165,7 @@ export async function listQoderCliModels(
     signal?: AbortSignal | null;
     timeoutMs?: number;
     command?: string | null;
+    useDesktopIdentity?: boolean;
   } = {}
 ): Promise<QoderCliRunResult> {
   const configDir = ensureQoderCliConfigDir();
@@ -163,6 +176,7 @@ export async function listQoderCliModels(
     timeoutMs: options.timeoutMs ?? DEFAULT_MODELS_TIMEOUT_MS,
     command: options.command,
     cwd: configDir,
+    useDesktopIdentity: options.useDesktopIdentity,
   });
 }
 
@@ -218,16 +232,26 @@ const qoderModelNamesPending = new Map<string, Promise<string[]>>();
 
 async function getCachedQoderCliModelNames(
   token?: string | null,
-  options: { command?: string | null; signal?: AbortSignal | null; now?: number } = {}
+  options: {
+    command?: string | null;
+    signal?: AbortSignal | null;
+    now?: number;
+    useDesktopIdentity?: boolean;
+  } = {}
 ): Promise<string[]> {
-  const key = String(token || "").trim() || "default";
+  const key = `${String(token || "").trim() || "default"}:${options.useDesktopIdentity ? "app" : "cli"}`;
   const now = options.now ?? Date.now();
   const cached = qoderModelNamesCache.get(key);
   if (cached && cached.expiresAt > now) return cached.names;
 
   let pending = qoderModelNamesPending.get(key);
   if (!pending) {
-    pending = listQoderCliModels({ token, command: options.command, signal: options.signal })
+    pending = listQoderCliModels({
+      token,
+      command: options.command,
+      signal: options.signal,
+      useDesktopIdentity: options.useDesktopIdentity,
+    })
       .then((run) => {
         const names = run.ok ? parseQoderCliModelNames(run.stdout) : [];
         // Only cache a non-empty success; a failed/empty list should retry next time.
@@ -272,7 +296,10 @@ export async function resolveQoderCliModel(
 ): Promise<string> {
   let names: string[] = [];
   try {
-    names = await getCachedQoderCliModelNames(token, options);
+    names = await getCachedQoderCliModelNames(token, {
+      ...options,
+      useDesktopIdentity: usesQoderDesktopIdentity(requested),
+    });
   } catch {
     names = [];
   }
@@ -367,6 +394,9 @@ export function mapQoderModelToLevel(model: string | null | undefined): string |
     .trim()
     .toLowerCase();
   if (!normalized) return null;
+  if (normalized === "hungerg" || normalized === "hmodel" || normalized.endsWith("/hmodel")) {
+    return "hmodel";
+  }
   // Keep Qoder's retired pre-3.8 level as an alias for the current preview.
   if (normalized === "q35model_preview") return "qmodel_preview";
   // A caller may pass a qodercli level key directly (e.g. "gm51model") — honor it.
@@ -916,7 +946,7 @@ export async function validateQoderCliPat({
   // the pure-HTTP path can no longer replicate — a raw Cosy call now returns a
   // generic 500 for every token, so it cannot distinguish valid from invalid.
   // `--list-models` authenticates without consuming any chat tokens.
-  const run = await listQoderCliModels({ token: resolvedToken });
+  const run = await listQoderCliModels({ token: resolvedToken, useDesktopIdentity: true });
   const combined = `${run.stdout}\n${run.stderr}`.trim();
   const normalized = combined.toLowerCase();
 

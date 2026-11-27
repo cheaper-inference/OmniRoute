@@ -16,10 +16,18 @@ export type QoderCliRunResult = {
   busy?: boolean;
 };
 
-export function buildQoderCliEnv(token: string | null | undefined): NodeJS.ProcessEnv {
+export function buildQoderCliEnv(
+  token: string | null | undefined,
+  useDesktopIdentity = false
+): NodeJS.ProcessEnv {
   const env: NodeJS.ProcessEnv = { ...getLookupEnv() };
   const trimmed = String(token || "").trim();
   if (trimmed) env.QODER_PERSONAL_ACCESS_TOKEN = trimmed;
+  if (useDesktopIdentity) {
+    env.QODER_CLIENT_TYPE = "10";
+    env.QODER_BUSINESS_PRODUCT = "app";
+    env.QODER_SESSION_TYPE = "app";
+  }
   return env;
 }
 
@@ -31,6 +39,7 @@ export type SpawnQoderCliOptions = {
   timeoutMs?: number;
   command?: string | null;
   cwd?: string | null;
+  useDesktopIdentity?: boolean;
 };
 
 /**
@@ -115,7 +124,7 @@ async function spawnQoderCliUnlimited(options: SpawnQoderCliOptions): Promise<Qo
   let child: ReturnType<typeof spawn>;
   try {
     child = spawn(command, options.args, {
-      env: buildQoderCliEnv(options.token),
+      env: buildQoderCliEnv(options.token, options.useDesktopIdentity),
       cwd: options.cwd || undefined,
       stdio: ["pipe", "pipe", "pipe"],
       windowsHide: true,
