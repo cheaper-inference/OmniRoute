@@ -6,8 +6,6 @@ lastUpdated: 2026-08-23
 
 # CLI Tools — OmniRoute
 
-Last updated: 2026-08-23
-
 OmniRoute integrates with three categories of CLI tools spread across three dedicated dashboard pages:
 
 | Page           | Route                   | Concept                                                                   | Count        |

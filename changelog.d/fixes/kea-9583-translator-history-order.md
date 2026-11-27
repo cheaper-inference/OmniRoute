@@ -1,0 +1,1 @@
+- **fix(translator):** Recent Translations in the Monitor lists events newest first, even when they arrive out of order (KEA-9583)

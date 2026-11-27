@@ -24,6 +24,7 @@ import QuotaConceptCard from "./components/QuotaConceptCard";
 import QuotaEndpointsCard from "./components/QuotaEndpointsCard";
 import PoolCard from "./components/PoolCard";
 import PoolWizard from "./components/PoolWizard";
+import Card from "@/shared/components/Card";
 
 // ────────────────────────────────────────────────────────────────────────────
 // Local types (display layer only)
@@ -81,12 +82,12 @@ function StatCard({
           ? "text-success"
           : "text-text-main";
   return (
-    <div className="rounded-lg border border-border bg-bg-subtle px-4 py-3">
-      <div className="text-[10px] uppercase tracking-wide text-text-muted font-semibold">
+    <Card.Section>
+      <div className="ci-eyebrow" data-size="3xs" data-weight="medium">
         {label}
       </div>
       <div className={`text-2xl font-semibold tabular-nums leading-tight ${color}`}>{value}</div>
-    </div>
+    </Card.Section>
   );
 }
 
@@ -127,6 +128,11 @@ function PoolCardWithUsage({
       onRemove={onRemove}
     />
   );
+}
+
+// Hoisted so the page component's complexity budget stays flat.
+function showsMemberBreakdown(pool: QuotaPool | null): boolean {
+  return pool?.memberBreakdown === true;
 }
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -436,12 +442,8 @@ export default function QuotaSharePageClient() {
       {/* Header */}
       <PageHeader
         compact
-        title={
-          <span className="flex items-center gap-2">
-            <Icon name="pie_chart" size={24} className="text-primary" />
-            {t("title")}
-          </span>
-        }
+        icon={<Icon name="pie_chart" />}
+        title={t("title")}
         description={t("description")}
         actions={
           <Button variant="primary" size="sm" icon="add" onClick={() => setCreateOpen(true)}>
@@ -474,7 +476,7 @@ export default function QuotaSharePageClient() {
       />
 
       {/* Group bar */}
-      <div className="flex flex-wrap items-center gap-2 rounded-lg border border-border bg-bg-subtle px-3 py-2">
+      <Card.Section className="flex flex-wrap items-center gap-2">
         <Select
           compact
           label={t("groupLabel")}
@@ -506,7 +508,8 @@ export default function QuotaSharePageClient() {
               }}
               placeholder={t("groupNamePrompt")}
               autoFocus
-              inputClassName="h-8 min-h-8 w-36"
+              size="xs"
+              inputClassName="w-36"
             />
             <Button
               variant="secondary"
@@ -553,7 +556,7 @@ export default function QuotaSharePageClient() {
             {t("deleteGroup")}
           </Button>
         )}
-      </div>
+      </Card.Section>
 
       {/* Concept card */}
       <QuotaConceptCard />
@@ -599,18 +602,16 @@ export default function QuotaSharePageClient() {
       ) : (
         <>
           {groupsToRender.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-border bg-surface py-10 text-center">
-              <p className="text-sm text-text-muted">{t("emptyDescription")}</p>
-              <Button
-                variant="primary"
-                size="sm"
-                className="mt-3"
-                icon="add"
-                onClick={() => setCreateOpen(true)}
-              >
-                {t("newPool")}
-              </Button>
-            </div>
+            <EmptyState
+              layout="inline"
+              border="dashed"
+              title={t("emptyDescription")}
+              actions={
+                <Button variant="primary" size="sm" icon="add" onClick={() => setCreateOpen(true)}>
+                  {t("newPool")}
+                </Button>
+              }
+            />
           ) : (
             groupsToRender.map((g) => {
               const groupPools = pools.filter(
@@ -622,21 +623,24 @@ export default function QuotaSharePageClient() {
                   <div className="flex items-center gap-2">
                     <Icon name="folder" size={16} className="text-text-muted" />
                     <span className="text-sm font-semibold text-text-main">{g.name}</span>
-                    <span className="text-[11px] text-text-muted">({groupPools.length})</span>
+                    <span className="text-2xs text-text-muted">({groupPools.length})</span>
                   </div>
                   {groupPools.length === 0 ? (
-                    <div className="rounded-xl border border-dashed border-border bg-surface py-6 text-center">
-                      <p className="text-sm text-text-muted">{t("emptyDescription")}</p>
-                      <Button
-                        variant="primary"
-                        size="sm"
-                        className="mt-3"
-                        icon="add"
-                        onClick={() => setCreateOpen(true)}
-                      >
-                        {t("newPool")}
-                      </Button>
-                    </div>
+                    <EmptyState
+                      layout="inline"
+                      border="dashed"
+                      title={t("emptyDescription")}
+                      actions={
+                        <Button
+                          variant="primary"
+                          size="sm"
+                          icon="add"
+                          onClick={() => setCreateOpen(true)}
+                        >
+                          {t("newPool")}
+                        </Button>
+                      }
+                    />
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
                       {groupPools.map((pool) => (
@@ -670,7 +674,7 @@ export default function QuotaSharePageClient() {
               <div className="flex items-center gap-2">
                 <Icon name="folder_off" size={16} className="text-warning" />
                 <span className="text-sm font-semibold text-text-main">{t("ungroupedTitle")}</span>
-                <span className="text-[11px] text-text-muted">({orphanPools.length})</span>
+                <span className="text-2xs text-text-muted">({orphanPools.length})</span>
               </div>
               <p className="text-xs text-warning">{t("ungroupedHint")}</p>
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
@@ -721,6 +725,7 @@ export default function QuotaSharePageClient() {
         }}
         editPool={editing ?? undefined}
         editPoolExclusive={editingExclusive}
+        editPoolMemberBreakdown={showsMemberBreakdown(editing)}
         connections={connections}
         apiKeys={apiKeys}
         plans={plans}

@@ -12,7 +12,8 @@
     "dryRun": "[simulation] ferait : {action}",
     "cancelled": "Annulé.",
     "jsonOpt": "Sortie au format JSON",
-    "yesOpt": "Ignorer la confirmation"
+    "yesOpt": "Ignorer la confirmation",
+    "positiveIntegerRequired": "La limite doit être un entier positif."
   },
   "setup": {
     "title": "Configuration d’OmniRoute",

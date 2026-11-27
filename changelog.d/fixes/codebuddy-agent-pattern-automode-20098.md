@@ -1,0 +1,1 @@
+- **codebuddy**: Bound gap wildcards and enforce word boundaries in `AGENT_PATTERN` to prevent false-positive replacement of Claude Code auto-mode classifier prompts (#20098)

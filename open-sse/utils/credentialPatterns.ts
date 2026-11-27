@@ -5,6 +5,18 @@ export interface CredentialPattern {
   replacement: string;
 }
 
+// Key word, then the separator and an optional opening quote. The lookbehind lets a match start
+// only at the start of a key word, so the scan stays linear on long runs of word characters.
+const SECRET_LABEL =
+  String.raw`(?<![A-Za-z0-9_-])[A-Za-z0-9_-]*` +
+  String.raw`(?:password|passwd|secret|secret[_-]?key|secret[_-]?access[_-]?key|api[_-]?key|` +
+  String.raw`access[_-]?token|refresh[_-]?token|auth[_-]?token)` +
+  String.raw`["']?\s*[:=]\s*["']?`;
+const SECRET_VALUE_CHAR = String.raw`[A-Za-z0-9._~+/=!@#$%^*:-]`;
+
+/** A label and a value that is still shorter than a match: the stream must not emit it yet. */
+export const LABELLED_SECRET_TAIL = new RegExp(`${SECRET_LABEL}${SECRET_VALUE_CHAR}{0,11}$`, "i");
+
 export const CREDENTIAL_PATTERNS: CredentialPattern[] = [
   { name: "openai_proj", regex: /sk-proj-[A-Za-z0-9_-]{20,}/g, replacement: "[REDACTED:openai]" },
   { name: "openai", regex: /\bsk-[A-Za-z0-9]{48}\b/g, replacement: "[REDACTED:openai]" },
@@ -94,6 +106,16 @@ export const CREDENTIAL_PATTERNS: CredentialPattern[] = [
     regex:
       /((?:["\x27]?(?:Authorization|x-api-key|api-key|apikey)["\x27]?\s*[:=]\s*["\x27]?)(?:(?:Bearer|Basic|Token)\s+)?)[A-Za-z0-9._~+/=-]{10,}/gi,
     replacement: "$1[REDACTED:auth_header]",
+  },
+  // A value behind a label (.env, YAML, JSON, query string): `DB_PASSWORD=…`, `client_secret: …`,
+  // `?api_key=…`. These carry no provider prefix, so no pattern above knows them. The 12-character
+  // floor keeps prose such as `password: required` readable. A first character of `$` or `%` is a
+  // variable reference, and `[`, `<`, `{` end the value class, so `[REDACTED:…]`, `<placeholder>`
+  // and `${VAR}` stay as they are. Must stay above the `sk-` fallback, which is the last entry.
+  {
+    name: "labelled_secret",
+    regex: new RegExp(`(${SECRET_LABEL})(?![$%])${SECRET_VALUE_CHAR}{12,}`, "gi"),
+    replacement: "$1[REDACTED:secret]",
   },
   // GHSA-r4q7-7f24-m29p: generic `sk-` fallback for every OpenAI-compatible provider whose
   // key is not exactly 48 chars (DeepSeek 32-hex, Moonshot/Kimi 47-49, Together, …). The

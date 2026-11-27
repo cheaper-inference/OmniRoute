@@ -5,6 +5,7 @@ import { Button } from "./button";
 import { BrandLoader, type BrandLoaderVariant } from "./brand-loader";
 import { Card, CardContent } from "./card";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./tooltip";
+import { inertProps } from "./lib/inert";
 import { cn } from "./lib/utils";
 import { Alert } from "./alert";
 /** Interface text for Wizard chrome. Step titles and the heading come from props. */
@@ -59,9 +60,15 @@ function resolveWizardLabels(overrides: Partial<WizardLabels> | undefined): Wiza
   return labels;
 }
 export interface WizardProps {
-  steps: readonly { id: string; title: string; mobileTitle?: string; icon?: ReactNode }[];
+  steps: readonly { id: string; title: string; titleBadge?: ReactNode; mobileTitle?: string; icon?: ReactNode; children?: readonly { id: string; title: string; icon?: ReactNode }[] }[];
+  /** Selected screen inside a step; does not add to the overall step count. */
+  activeSubstep?: string;
+  /** Controlled child navigation. Callers own validation and persistence. */
+  onSubstepSelect?: (id: string) => void;
   activeStep: number;
   title: string;
+  /** Optional non-interactive badge beside the page heading. Wraps with the heading. */
+  titleBadge?: ReactNode;
   description?: string;
   children: ReactNode;
   busy?: boolean;
@@ -89,6 +96,7 @@ export interface WizardProps {
   /** Hide Next while an external action is required; errors remain visible. Defaults to true. */
   showNext?: boolean;
   /** Compact progress keeps the current step/count without the full step list. */
+  /** Compact omits desktop step and section links; callers supply footer navigation. */
   progressDisplay?: "steps" | "compact";
   /** Incomplete steps stay focusable so activation can explain what is missing. */
   nextBlocked?: boolean;
@@ -101,6 +109,8 @@ export interface WizardProps {
   fill?: boolean;
   /** On narrow (up to 760px) or coarse-touch screens, use the host document scroll with an in-flow footer. The host must also permit document scrolling. Desktop and the default layout are unchanged. */
   mobileLayout?: "default" | "document";
+  /** Hide section links and step badges on phones; retain footer navigation. */
+  mobileProgressDetail?: "full" | "minimal";
   /** Reserve 6rem plus the device safe area below footer or inline body actions on small/touch screens for browser overlays. Desktop and the default safe-area spacing are unchanged. */
   mobileBottomClearance?: "safe-area" | "browser";
   /** Content-sized onboarding with a progress rail; compact progress on small screens. */
@@ -112,13 +122,18 @@ export interface WizardProps {
   labels?: Partial<WizardLabels>;
   /** Extra footer actions, rendered before Skip and Next. The default variant wraps them when the row is full. */
   footerActions?: ReactNode;
+  /** Keep footer actions visible while sidebar or document content scrolls. */
+  footerPosition?: "default" | "sticky";
   className?: string;
 }
 /** Controlled, resumable wizard. Persistence and validation belong to the caller. */
 export function Wizard({
   steps,
   activeStep,
+  activeSubstep,
+  onSubstepSelect,
   title,
+  titleBadge,
   description,
   children,
   busy,
@@ -144,12 +159,14 @@ export function Wizard({
   variant = "default",
   fill = false,
   mobileLayout = "default",
+  mobileProgressDetail = "full",
   mobileBottomClearance = "safe-area",
   layout = "stacked",
   completedSteps = [],
   stepNavigation = "previous",
   labels: labelOverrides,
   footerActions,
+  footerPosition = "default",
   className,
 }: WizardProps) {
   const labels = resolveWizardLabels(labelOverrides);
@@ -159,7 +176,7 @@ export function Wizard({
   const viewport = useRef<HTMLDivElement>(null);
   const scrollArea = useRef<HTMLDivElement>(null);
   const loader = useRef<HTMLDivElement>(null);
-  const presentedStep = useRef(activeStep);
+  const presentedStep = useRef(`${activeStep}:${activeSubstep ?? ""}`);
   const unavailable = busy || loading;
   const [showBusy, setShowBusy] = useState(false);
   useEffect(() => {
@@ -200,8 +217,9 @@ export function Wizard({
       if (documentLayout) loader.current?.scrollIntoView?.({ block: "start", inline: "nearest", behavior: "instant" });
       return;
     }
-    const stepChanged = presentedStep.current !== activeStep;
-    presentedStep.current = activeStep;
+    const nextPosition = `${activeStep}:${activeSubstep ?? ""}`;
+    const stepChanged = presentedStep.current !== nextPosition;
+    presentedStep.current = nextPosition;
     if (documentLayout) {
       // Preserve the initial page position; reveal only a newly selected step.
       // Focusing without scrolling avoids browser centering behind host chrome.
@@ -220,9 +238,9 @@ export function Wizard({
       const inset = parseFloat(getComputedStyle(content).paddingTop) || 0;
       content.scrollTo?.({ top: Math.max(0, content.scrollTop + heading.current.getBoundingClientRect().top - content.getBoundingClientRect().top - inset) });
     }
-  }, [activeStep, fill, loading, mobileBottomClearance, mobileLayout]);
+  }, [activeStep, activeSubstep, fill, loading, mobileBottomClearance, mobileLayout]);
   return (
-    <Card className={cn("ci-wizard", className)} data-variant={variant} data-layout={layout} data-fill={fill || undefined} data-mobile-layout={mobileLayout === "document" ? "document" : undefined} data-mobile-bottom-clearance={mobileBottomClearance === "browser" ? "browser" : undefined}>
+    <Card className={cn("ci-wizard", className)} data-footer-position={footerPosition === "sticky" ? "sticky" : undefined} data-mobile-progress-detail={mobileProgressDetail} data-variant={variant} data-layout={layout} data-fill={fill || undefined} data-mobile-layout={mobileLayout === "document" ? "document" : undefined} data-mobile-bottom-clearance={mobileBottomClearance === "browser" ? "browser" : undefined}>
       <CardContent className="ci-wizard__content">
         <div className="ci-wizard__top">
           <span>
@@ -237,11 +255,12 @@ export function Wizard({
         </div>
         {progressDisplay === "steps" && <ol aria-label={labels.progress} className="ci-wizard__steps">
           {steps.map((s, i) => (
-            <li key={s.id} aria-current={i === activeStep ? "step" : undefined} data-complete={completedSteps.includes(s.id) || undefined}>
+            <li key={s.id} data-has-substeps={i === activeStep && !!s.children?.length || undefined} aria-current={i === activeStep ? "step" : undefined} data-complete={completedSteps.includes(s.id) || undefined}>
               {(i < activeStep || stepNavigation === "all") && onStepSelect ? (
                 <button
                   type="button"
                   className="ci-wizard__step-link ci-wizard__step-content"
+                  aria-label={`${i < activeStep ? labels.previousStepPrefix : labels.stepPrefix}${s.title}${s.mobileTitle && s.mobileTitle !== s.title ? ` (${s.mobileTitle})` : ""}${completedSteps.includes(s.id) ? labels.completedSuffix : ""}`}
                   disabled={unavailable}
                   onClick={() => onStepSelect(i)}
                 >
@@ -254,13 +273,15 @@ export function Wizard({
                   <span className="ci-wizard__number" aria-hidden>{completedSteps.includes(s.id) && i !== activeStep ? <Check /> : i + 1}</span> {s.icon} <StepTitle step={s} />
                 </span>
               )}
+              {i === activeStep && s.children?.length ? <div className="ci-wizard__substeps-desktop"><Substeps step={s} active={activeSubstep} onSelect={onSubstepSelect} disabled={!!unavailable} /></div> : null}
             </li>
           ))}
         </ol>}
+        {steps[activeStep]?.children?.length ? <div className="ci-wizard__substeps-mobile"><Substeps step={steps[activeStep]} active={activeSubstep} onSelect={onSubstepSelect} disabled={!!unavailable} /></div> : null}
         <div ref={viewport} className="ci-wizard__viewport" data-loading={loading || undefined}>
-        <div ref={scrollArea} className="ci-wizard__scroll" inert={loading || undefined} aria-hidden={loading || undefined}>
-        <h1 ref={heading} tabIndex={-1} id={id} className="ci-wizard__title">
-          {title}
+        <div ref={scrollArea} className="ci-wizard__scroll" {...inertProps(loading)} aria-hidden={loading || undefined}>
+        <h1 ref={heading} tabIndex={-1} id={id} className="ci-wizard__title" data-has-badge={titleBadge != null || undefined}>
+          {titleBadge != null ? <><span>{title}</span><span className="ci-wizard__title-badge">{titleBadge}</span></> : title}
         </h1>
         {description && <p className="ci-wizard__description">{description}</p>}
         <section
@@ -283,7 +304,7 @@ export function Wizard({
             {allowBack && <Button
               variant="outline"
               onClick={onBack}
-              disabled={unavailable || activeStep === 0}
+              disabled={unavailable || (activeStep === 0 && (steps[activeStep]?.children?.findIndex(child => child.id === activeSubstep) ?? -1) <= 0)}
             >
               <ArrowLeft aria-hidden />
               {labels.back}
@@ -316,8 +337,17 @@ export function Wizard({
 }
 
 function StepTitle({ step }: { step: WizardProps["steps"][number] }) {
-  return <span className="ci-wizard__step-title">
+  return <span className="ci-wizard__step-title" data-has-badge={step.titleBadge != null || undefined}>
     <span className={step.mobileTitle ? "ci-wizard__desktop-title" : undefined}>{step.title}</span>
     {step.mobileTitle && <span className="ci-wizard__mobile-title">{step.mobileTitle}</span>}
+    {step.titleBadge != null && <span className="ci-wizard__title-badge">{step.titleBadge}</span>}
   </span>;
+}
+
+function Substeps({ step, active, onSelect, disabled }: { step: WizardProps["steps"][number]; active?: string; onSelect?: (id: string) => void; disabled: boolean }) {
+  return <nav aria-label={step.title} className="ci-wizard__substeps">
+    {step.children?.map(child => <button key={child.id} type="button" className="ci-wizard__substep" aria-current={child.id === active ? "step" : undefined} disabled={disabled || !onSelect} onClick={() => onSelect?.(child.id)}>
+      {child.icon}<span>{child.title}</span>
+    </button>)}
+  </nav>;
 }

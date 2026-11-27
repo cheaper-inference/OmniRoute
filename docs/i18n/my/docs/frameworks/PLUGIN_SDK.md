@@ -4,7 +4,7 @@
 
 ---
 
-## အမြန်စတင်ခြင်း
+## အမြန်စတင်ပါ။
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";
@@ -25,36 +25,36 @@ export default definePlugin({
 });
 ```
 
-## API ကိုးကားချက်
+## API အကား
 
 ### `definePlugin(def: PluginDefinition): Plugin`
 
-မူလတန်ဖိုးများပါဝင်သည့် Plugin object တစ်ခုကို ဖန်တီးပေးသော factory function ဖြစ်သည်။
+ပုံသေများဖြင့် Plugin အရာဝတ္ထုကို ဖန်တီးပေးသည့် Factory Function
 
-**ပါရာမီတာများ:**
+**ကန့်သတ်ချက်များ-**
 
-- `name` (string, လိုအပ်သည်) — kebab-case ဖြင့် ရေးသားထားသော Plugin အမည်
-- `priority` (number, ရွေးချယ်နိုင်သည်, မူလတန်ဖိုး: 100) — တန်ဖိုးနိမ့်လေလေ ဦးစွာ လုပ်ဆောင်လေလေဖြစ်သည်
-- `enabled` (boolean, ရွေးချယ်နိုင်သည်, မူလတန်ဖိုး: true) — ဖွင့်ထားသည့်အခြေအနေဖြင့် စတင်မည်လား
-- `onRequest` (function, ရွေးချယ်နိုင်သည်) — chat handler မတိုင်မီ လုပ်ဆောင်သည်
-- `onResponse` (function, ရွေးချယ်နိုင်သည်) — chat handler ပြီးနောက် လုပ်ဆောင်သည်
-- `onError` (function, ရွေးချယ်နိုင်သည်) — handler အမှားဖြစ်ပေါ်သည့်အခါ လုပ်ဆောင်သည်
+- kebab-case တွင်`name` (string၊ လိုအပ်သည်) — ပလပ်အင်အမည်
+- `priority` (နံပါတ်၊ ရွေးချယ်နိုင်သည်၊ ပုံသေ- 100) — အောက်ပိုင်းသည် ပထမဆုံး လုပ်ဆောင်သည်။
+- `enabled` (boolean၊ ရွေးချယ်နိုင်သည်၊ ပုံသေ- မှန်) — စတင်ဖွင့်ထားမလား။
+- `onRequest` (function၊ optional) — သည် chat handler မတိုင်မီ လုပ်ဆောင်သည်။
+- `onResponse` (function၊ optional) — သည် chat handler ပြီးနောက် လုပ်ဆောင်သည်။
+- `onError` (function၊ optional) — သည် handler error တွင်အလုပ်လုပ်သည်။
 
 ### `blockRequest(response?): BlockingHookResult`
 
-Request ကို ပိတ်ဆို့ပြီး စိတ်ကြိုက် response တစ်ခုကို ရွေးချယ်၍ ပြန်ပေးနိုင်သည်။
+တောင်းဆိုမှုကို ပိတ်ဆို့ပြီး စိတ်ကြိုက် တုံ့ပြန်မှုကို ရွေးချယ်နိုင်သည်။
 
 ```ts
 onRequest: (ctx) => {
-  if (!ctx.headers["authorization"]) {
-    return blockRequest({ error: "Unauthorized", status: 401 });
+  if (!ctx.headers?.["x-client-team"]) {
+    return blockRequest({ error: "Missing x-client-team header", status: 400 });
   }
 };
 ```
 
 ### `modifyBody(body): PluginResult`
 
-Provider ထံ မရောက်ရှိမီ request body ကို ပြင်ဆင်သည်။
+ဝန်ဆောင်မှုပေးသူထံ မရောက်ရှိမီ တောင်းဆိုချက်ကိုယ်ထည်ကို ပြင်ဆင်ပါ။
 
 ```ts
 onRequest: (ctx) => {
@@ -64,7 +64,7 @@ onRequest: (ctx) => {
 
 ### `addMetadata(metadata): PluginResult`
 
-Request context တွင် metadata ကို ပူးတွဲထည့်သွင်းသည်။
+တောင်းဆိုချက်အကြောင်းအရာတွင် မက်တာဒေတာကို ပူးတွဲပါ။
 
 ```ts
 onRequest: (ctx) => {
@@ -72,17 +72,20 @@ onRequest: (ctx) => {
 };
 ```
 
-## Plugin Context (`PluginContext`)
+## ပလပ်အင် အကြောင်းအရာ (`PluginContext`)
 
-| Field       | Type                      | ဖော်ပြချက်                 |
-| ----------- | ------------------------- | -------------------------- |
-| `requestId` | `string`                  | သီးသန့် request အမှတ်အသား  |
-| `model`     | `string`                  | တောင်းဆိုထားသော model အမည် |
-| `provider`  | `string`                  | ဦးတည်ရာ provider ID        |
-| `body`      | `Record<string, unknown>` | Request body               |
-| `headers`   | `Record<string, string>`  | Request headers            |
-| `metadata`  | `Record<string, unknown>` | ပြင်ဆင်နိုင်သော metadata   |
-| `timestamp` | `number`                  | Request timestamp          |
+| လယ်ကွင်း     | ရိုက်ပါ။                       | ဖော်ပြချက်                                        |
+| ------------ | ------------------------------ | ------------------------------------------------- |
+| `requestId`  | `string`                       | သီးသန့်တောင်းဆိုမှု အထောက်အထား                    |
+| `model`      | `string`                       | မော်ဒယ်အမည်ကို တောင်းဆိုထားသည်။                   |
+| `provider`   | `string`                       | ပစ်မှတ်ပံ့ပိုးသူ ID                               |
+| `body`       | `Record<string, unknown>`      | ခန္ဓာကိုယ်ကို တောင်းဆိုပါ။                        |
+| `headers`    | `Record<string, string>`       | ခေါင်းစီးများကို တောင်းဆိုပါ (မှတ်ချက်ကိုကြည့်ပါ) |
+| `metadata`   | `Record<string, unknown>`      | ပြောင်းလဲနိုင်သော မက်တာဒေတာ                       |
+| `timestamp`  | `number`                       | အချိန်တံဆိပ်ကို တောင်းဆိုပါ။                      |
+| `apiKeyInfo` | `object` (ချန်လှပ်ထားနိုင်သည်) | API သော့မက်တာဒေတာ (မှတ်ချက်ကိုကြည့်ပါ)            |
+
+အကြောင်းအရာသည် ကလိုင်းယင့်၏အထောက်အထားများကို ဘယ်သောအခါမှ မသယ်ဆောင်ပါ- `authorization`၊ `x-api-key`၊ `proxy-authorization` နှင့် `cookie` ခေါင်းစီးများကို ဖယ်ရှားလိုက်သည် (မည်သည့်အကွက်မဆို)၊ `apiKeyInfo` သော့၏မက်တာဒေတာ (ဥပမာ `id`၊ `name` နှင့် `scopes` ကဲ့သို့) သော့တန်ဖိုး သို့မဟုတ် ၎င်း၏လက်ဗွေ (`redactPluginContext()` in `src/lib/plugins/hooks.ts`) ကို သိမ်းဆည်းထားသည်။ ၎င်းသည် `onRequest`၊ `onResponse` နှင့် `onError` တို့နှင့် သက်ဆိုင်သည်။
 
 ## Manifest (`plugin.json`)
 
@@ -140,17 +143,16 @@ Hook များကို ဦးစားပေးအဆင့်ဖြင့�
 
 ## ခွင့်ပြုချက်စနစ်
 
-Plugin များသည် sandbox ပြုလုပ်ထားသော VM context တစ်ခုအတွင်း လည်ပတ်သည်။ ပြင်ပအရင်းအမြစ်များကို အသုံးပြုရန် တိကျစွာ သတ်မှတ်ထားသော ခွင့်ပြုချက်များ လိုအပ်သည်-
+Plugins တွေဖြစ်ပါတယ်။** sandboxed မဟုတ်ပါ။** . တက်ကြွသောပလပ်အင်တစ်ခုစီသည် သီးခြား Node.js ကလေးလုပ်ငန်းစဉ် (`loadPlugin()` in `src/lib/plugins/loader.ts`) အဖြစ် OmniRoute ကဲ့သို့ တူညီသောလည်ပတ်မှုစနစ်အသုံးပြုသူအောက်တွင် VM ဆက်စပ်မှုမရှိဘဲ Node.js ခွင့်ပြုချက်အလံများမပါရှိပါ။ ပလပ်အင်ကုဒ်သည် `node:fs`, `node:child_process`, `fetch` နှင့် အခြား Node.js API အားလုံးကို သုံးနိုင်သည် - ၎င်းသည် OmniRoute အသုံးပြုသူ (ဒေတာလမ်းညွှန်အပါအဝင်)၊ ပရိုဂရမ်များကိုဖွင့်ပြီး ကွန်ရက်သို့ရောက်ရှိနိုင်သည့် မည်သည့်ဖိုင်ကိုမဆို ဖတ်နိုင်၊ ရေးနိုင်သည်။
 
-| ခွင့်ပြုချက် | ခွင့်ပြုသည့်အရာများ                                          |
-| ------------ | ------------------------------------------------------------ |
-| `network`    | `fetch`, `AbortController`, `Headers`, `Request`, `Response` |
-| `file-read`  | `fs.readFile`, `fs.readdir`, `fs.stat`                       |
-| `file-write` | `fs.writeFile`, `fs.mkdir`, `fs.rm`                          |
-| `env`        | ဖတ်ရှုရန်သာဖြစ်သော `process.env` proxy                       |
-| `exec`       | `child_process.exec`, `child_process.execSync`               |
+manifest ၏ `requires.permissions` `network`, `file-read`, `file-write`, `env` နှင့် `exec` ကိုလက်ခံသည်၊ သို့သော်ယနေ့ runtime တွင် `env` သာအကျိုးသက်ရောက်သည်-
 
-ခွင့်ပြုချက်မရှိပါက သက်ဆိုင်ရာ global များကို sandbox အတွင်း အသုံးပြုနိုင်မည် မဟုတ်ပါ။
+| ခွင့်ပြုချက်                                 | ယနေ့အကျိုးသက်ရောက်မှု                                                                                                                                                                                                                                              |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `env`                                        | plugin လုပ်ငန်းစဉ်သည် `PORT`၊ `HOSTNAME`၊ `TZ` နှင့် `TMPDIR` တို့ကိုလည်း လက်ခံရရှိသည် ။ ၎င်းမရှိဘဲ၊ ၎င်းသည် `PATH`, `HOME`, `USER`, `LANG`, `LC_ALL`, `NODE_ENV`, `PLUGIN_ENTRY` နှင့် `PLUGIN_NAME` (plus `SystemRoot` နှင့် `windir` on Windows) ကိုသာ ရရှိသည်။ |
+| `network`, `file-read`, `file-write`, `exec` | တစ်ခုမှ ၎င်းတို့သည် ကြေငြာချက်များသာဖြစ်သည်- ၎င်းတို့ ပျောက်ဆုံးနေချိန်တွင် မည်သည့်အရာကိုမျှ ပိတ်ဆို့ထားခြင်းမရှိပါ။                                                                                                                                               |
+
+ပလပ်အင်တစ်ခုထည့်သွင်းခြင်းသည် host တွင် အခြားပရိုဂရမ်တစ်ခုကို ထည့်သွင်းခြင်းနှင့်တူသည်။ သင်ယုံကြည်ရသောအရင်းအမြစ်၏ ပလပ်အင်များကိုသာ ထည့်သွင်းပါ။
 
 ## Config Schema
 
@@ -192,9 +194,9 @@ Config တန်ဖိုးများကို database ထဲတွင် �
 | `onDeactivate`    | Plugin ကို ပိတ်ချိန်                   | `{ name, version, manifest }` |
 | `onUninstall`     | Plugin ဖယ်ရှားချိန် (ဖိုင်များမဖျက်မီ) | `{ name, version, manifest }` |
 
-## နမူနာများ
+## ဥပမာများ
 
-### Request Logger
+### Logger ကိုတောင်းဆိုပါ။
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";
@@ -207,7 +209,7 @@ export default definePlugin({
 });
 ```
 
-### Rate Limiter
+### နှုန်းကန့်သတ်ချက်
 
 ```ts
 import { definePlugin, blockRequest } from "omniroute/plugins/sdk";
@@ -218,9 +220,9 @@ export default definePlugin({
   name: "rate-limiter",
   priority: 10,
   onRequest: async (ctx) => {
-    const key = ctx.headers["x-api-key"] || "anonymous";
+    const key = ctx.apiKeyInfo?.id || "anonymous";
     const now = Date.now();
-    const window = 60000; // ၁ မိနစ်
+    const window = 60000; // 1 minute
     const maxRequests = 100;
 
     const timestamps = (requests.get(key) || []).filter((t) => t > now - window);
@@ -234,7 +236,7 @@ export default definePlugin({
 });
 ```
 
-### Response Transformer
+### တုံ့ပြန်မှု Transformer
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";

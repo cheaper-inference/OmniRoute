@@ -1,0 +1,1 @@
+- **chore(quality):** The versioned skill templates match the installed maintainer skills again. The merge gates describe the landing step under the merge queue, and six skills say when to use them.

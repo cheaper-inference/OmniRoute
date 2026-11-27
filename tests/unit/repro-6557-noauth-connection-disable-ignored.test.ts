@@ -35,6 +35,8 @@ const core = await import("../../src/lib/db/core.ts");
 const providersDb = await import("../../src/lib/db/providers.ts");
 const settingsDb = await import("../../src/lib/db/settings.ts");
 const virtualFactory = await import("../../open-sse/services/autoCombo/virtualFactory.ts");
+const { registerNoAuthReadiness, __resetNoAuthReadinessForTests } =
+  await import("../../open-sse/services/autoCombo/noAuthReadiness.ts");
 
 async function resetStorage() {
   core.resetDbInstance();
@@ -44,6 +46,7 @@ async function resetStorage() {
 
 test.beforeEach(async () => {
   await resetStorage();
+  registerNoAuthReadiness("duckduckgo-web", () => true);
   // contract changed by #15979 (on top of #15839): `excludeTosAvoid` defaults to on and
   // uncataloged models inherit the provider's curated `tos: "avoid"` verdict, so every duckduckgo-web
   // model is ToS-filtered out of auto/*. Opt out so this file keeps guarding the #6557
@@ -53,6 +56,7 @@ test.beforeEach(async () => {
 });
 
 test.after(async () => {
+  __resetNoAuthReadinessForTests();
   await resetStorage();
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 

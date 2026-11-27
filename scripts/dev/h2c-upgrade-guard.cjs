@@ -5,7 +5,7 @@
  *
  * HTTP/1.1 clients that prefer HTTP/2 — notably the JDK `java.net.http.HttpClient`
  * used by the JetBrains IDEs / Air ("Add an AI provider" connection test) —
- * open a plain-TCP connection with the RFC 9113 §3.2 upgrade handshake:
+ * open a plain-TCP connection with an optional h2c upgrade handshake:
  *
  *   POST /v1/messages HTTP/1.1
  *   Connection: Upgrade, HTTP2-Settings
@@ -20,10 +20,10 @@
  *
  * RFC 9110 §7.8 explicitly allows a server to ignore `Upgrade` and keep
  * answering in HTTP/1.1; the client then simply carries on in HTTP/1.1. This
- * guard does exactly that, for requests whose ONLY offered protocol is `h2c`:
- * it removes the two negotiation headers, pushes the request bytes back into
- * the socket and hands the socket to the server as a fresh connection, so the
- * regular `request` pipeline (peer stamp, method/HEAD guards, Next) serves it.
+ * guard does that for requests whose only offered protocol is `h2c`. Node's
+ * upgrade callback keeps the request on the regular HTTP/1.1 pipeline, with
+ * Node retaining ownership of its body. Older Node 24 versions without the
+ * callback still use the raw-socket fallback.
  *
  * What is deliberately NOT touched:
  *   - Anything that offers another protocol (`websocket`, `h2c, websocket`, …)
@@ -68,6 +68,43 @@ function stripNegotiationTokens(connectionValue) {
   return kept.length > 0 ? kept.join(", ") : null;
 }
 
+function stripNegotiationHeaders(req) {
+  // Keep the wire headers intact. Node still consults them while deciding how
+  // to handle request framing and Expect after the upgrade callback returns.
+  const { headers, headersDistinct } = req;
+  for (const name of NEGOTIATION_HEADERS) {
+    delete headers[name];
+    delete headersDistinct[name];
+  }
+  const connectionValues = (headersDistinct.connection ?? [])
+    .map(stripNegotiationTokens)
+    .filter((value) => value !== null);
+  if (connectionValues.length > 0) {
+    headers.connection = connectionValues.join(", ");
+    headersDistinct.connection = connectionValues;
+  } else {
+    delete headers.connection;
+    delete headersDistinct.connection;
+  }
+}
+
+/** Add the cleartext h2c guard to the HTTP server constructor options. */
+function withH2cUpgradeGuard(options = {}) {
+  const shouldUpgrade = options?.shouldUpgradeCallback;
+  // Let Node validate an invalid callback supplied by the caller.
+  if (shouldUpgrade !== undefined && typeof shouldUpgrade !== "function") return options;
+  return {
+    ...options,
+    shouldUpgradeCallback(req) {
+      if (isCleartextH2cUpgrade(req, req.socket)) {
+        stripNegotiationHeaders(req);
+        return false;
+      }
+      return shouldUpgrade ? shouldUpgrade.call(this, req) : this.listenerCount("upgrade") > 0;
+    },
+  };
+}
+
 // Rebuild the request head from `rawHeaders` (preserves case, order and duplicates).
 function serializeRequestHead(req) {
   let head = `${req.method} ${req.url} HTTP/${req.httpVersion}\r\n`;
@@ -87,21 +124,22 @@ function serializeRequestHead(req) {
 }
 
 /**
- * Serve an h2c upgrade request as plain HTTP/1.1.
+ * Serve h2c using the raw upgrade event on Node 24 versions before 24.9.
  *
  * @param {import("node:http").Server} server
  * @param {import("node:http").IncomingMessage} req
- * @param {import("node:net").Socket} socket
+ * @param {import("node:stream").Duplex} socket
  * @param {Buffer} head bytes Node already read past the request head (start of the body)
  * @returns {boolean} true when the request was re-injected (the caller must stop),
  *   false when it is not an h2c upgrade (the caller continues unchanged).
  */
 function handleH2cUpgrade(server, req, socket, head) {
-  if (!isCleartextH2cUpgrade(req, socket)) return false;
+  // The upgrade event can expose a Duplex wrapper over the TLS socket.
+  if (req?.socket?.encrypted || !isCleartextH2cUpgrade(req, socket)) return false;
   const requestHead = serializeRequestHead(req);
   socket.unshift(head && head.length > 0 ? Buffer.concat([requestHead, head]) : requestHead);
   server.emit("connection", socket);
   return true;
 }
 
-module.exports = { isCleartextH2cUpgrade, handleH2cUpgrade };
+module.exports = { isCleartextH2cUpgrade, withH2cUpgradeGuard, handleH2cUpgrade };

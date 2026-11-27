@@ -26,6 +26,7 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
 }));
 vi.mock("next-intl", () => ({
+  useLocale: () => "en",
   useTranslations: () => {
     const t = ((key: string) => key) as ((key: string) => string) & {
       has?: (key: string) => boolean;
@@ -108,7 +109,8 @@ describe("CoolingConnectionsPanel — manual clear cooldown", () => {
     const button = panelRoot!.querySelector<HTMLButtonElement>(
       '[data-testid="clear-cooldown-conn-cooling-1"]'
     );
-    expect(button!.disabled).toBe(true);
+    // The button carries a title, so it is aria-disabled while inactive (it stays hoverable).
+    expect(button!.getAttribute("aria-disabled")).toBe("true");
     act(() => {
       button!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
@@ -128,6 +130,7 @@ describe("CoolingConnectionsPanel — manual clear cooldown", () => {
     const buttonB = panelRoot!.querySelector<HTMLButtonElement>(
       '[data-testid="clear-cooldown-conn-b"]'
     );
+    expect(buttonB!.hasAttribute("aria-disabled")).toBe(false);
     expect(buttonB!.disabled).toBe(false);
     act(() => {
       buttonB!.dispatchEvent(new MouseEvent("click", { bubbles: true }));

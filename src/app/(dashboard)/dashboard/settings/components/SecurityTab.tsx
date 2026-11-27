@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { Checkbox, CheckboxGroup } from "@omniroute/ui-kit/checkbox";
-import { Card, Button, Input, Toggle, Modal, Badge } from "@/shared/components";
+import { Card, Button, Input, Toggle, Modal } from "@/shared/components";
 import Icon from "@/shared/components/Icon";
 import { AI_PROVIDERS } from "@/shared/constants/providers";
 import ProviderIcon from "@/shared/components/ProviderIcon";
+import { corsOriginsSchema } from "@/shared/validation/corsOrigins";
 import IPFilterSection from "./IPFilterSection";
 import PiiMaskingCard from "./PiiMaskingCard";
 import SessionInfoCard from "./SessionInfoCard";
@@ -32,7 +33,6 @@ export default function SecurityTab() {
   const [requireLoginPassword, setRequireLoginPassword] = useState("");
   const [requireLoginError, setRequireLoginError] = useState("");
   const [requireLoginLoading, setRequireLoginLoading] = useState(false);
-  const [newBannedKeyword, setNewBannedKeyword] = useState("");
 
   const t = useTranslations("settings");
   const tc = useTranslations("common");
@@ -146,20 +146,6 @@ export default function SecurityTab() {
     updateSetting("blockedProviders", updated);
   };
 
-  const customBannedSignals: string[] = settings.customBannedSignals || [];
-
-  const addBannedKeyword = () => {
-    const keyword = newBannedKeyword.trim().toLowerCase();
-    if (!keyword || customBannedSignals.includes(keyword)) return;
-    updateSetting("customBannedSignals", [...customBannedSignals, keyword]);
-    setNewBannedKeyword("");
-  };
-
-  const removeBannedKeyword = (index: number) => {
-    const updated = customBannedSignals.filter((_, i) => i !== index);
-    updateSetting("customBannedSignals", updated);
-  };
-
   const handlePasswordChange = async (e) => {
     e.preventDefault();
     if (passwords.new !== passwords.confirm) {
@@ -197,6 +183,7 @@ export default function SecurityTab() {
   };
 
   const blockedProviders: string[] = settings.blockedProviders || [];
+  const corsOrigins = typeof settings.corsOrigins === "string" ? settings.corsOrigins : "";
 
   return (
     <div className="flex flex-col gap-6">
@@ -321,14 +308,14 @@ export default function SecurityTab() {
       {/* API Endpoint Protection */}
       <Card title={t("apiEndpointProtection")} icon="api">
         <div className="flex flex-col gap-4">
-          <div className="rounded-lg border border-border bg-bg-subtle p-3 text-sm text-text-muted">
+          <Card.Section className="text-sm text-text-muted">
             <p className="font-medium text-text-main">{t("authModelHeading")}</p>
             <ul className="list-disc pl-5 mt-1 space-y-1">
               <li>{t("authModelClient")}</li>
               <li>{t("authModelManagement")}</li>
               <li>{t("authModelPublic")}</li>
             </ul>
-          </div>
+          </Card.Section>
 
           <div className="flex items-center justify-between">
             <div>
@@ -354,11 +341,18 @@ export default function SecurityTab() {
               label={t("corsAllowedOrigins")}
               hint={t("corsAllowedOriginsDesc")}
               placeholder="https://app.example.com, https://admin.example.com"
-              value={typeof settings.corsOrigins === "string" ? settings.corsOrigins : ""}
+              value={corsOrigins}
+              error={
+                corsOriginsSchema.safeParse(corsOrigins).success
+                  ? undefined
+                  : t("corsAllowedOriginsInvalid")
+              }
               onChange={(e) => setSettings((prev) => ({ ...prev, corsOrigins: e.target.value }))}
               onBlur={(e) => {
-                const next = e.target.value.trim();
-                if (next !== savedCorsOrigins) updateSecuritySetting("corsOrigins", next);
+                const next = corsOriginsSchema.safeParse(e.currentTarget.value);
+                if (next.success && next.data !== savedCorsOrigins) {
+                  updateSecuritySetting("corsOrigins", next.data);
+                }
               }}
             />
           </div>
@@ -406,70 +400,6 @@ export default function SecurityTab() {
               </p>
             )}
           </div>
-        </div>
-      </Card>
-
-      {/* Custom Banned Keywords */}
-      <Card
-        icon="report"
-        title={getSettingsLabel("customBannedSignals", "Banned Keywords")}
-        subtitle={getSettingsLabel(
-          "customBannedSignalsDesc",
-          "Additional keywords that trigger permanent account ban detection. Built-in keywords always apply."
-        )}
-      >
-        <div className="flex flex-col gap-4">
-          <div className="flex flex-col sm:flex-row sm:items-start gap-2">
-            <Input
-              className="flex-1"
-              aria-label={getSettingsLabel("customBannedSignals", "Banned Keywords")}
-              placeholder={getSettingsLabel(
-                "customBannedSignalsPlaceholder",
-                "e.g. api key revoked"
-              )}
-              value={newBannedKeyword}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setNewBannedKeyword(e.target.value)
-              }
-              onKeyDown={(e: React.KeyboardEvent) => {
-                if (e.key === "Enter") addBannedKeyword();
-              }}
-            />
-            <Button
-              variant="secondary"
-              size="sm"
-              icon="add"
-              onClick={addBannedKeyword}
-              disabled={!newBannedKeyword.trim()}
-            >
-              {getSettingsLabel("add", "Add")}
-            </Button>
-          </div>
-          {customBannedSignals.length > 0 ? (
-            <div className="flex flex-wrap gap-2">
-              {customBannedSignals.map((keyword, index) => (
-                <Badge key={index} variant="error" className="gap-1 pr-1">
-                  {keyword}
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    className="size-5"
-                    onClick={() => removeBannedKeyword(index)}
-                    aria-label={`${getSettingsLabel("remove", "Remove")} ${keyword}`}
-                  >
-                    <Icon name="close" size={12} />
-                  </Button>
-                </Badge>
-              ))}
-            </div>
-          ) : (
-            <p className="text-xs text-text-muted">
-              {getSettingsLabel(
-                "noCustomBannedSignals",
-                "No custom keywords. Only built-in keywords are active."
-              )}
-            </p>
-          )}
         </div>
       </Card>
 

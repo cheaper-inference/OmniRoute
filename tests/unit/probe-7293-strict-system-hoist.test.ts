@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { translateRequest } from "../../open-sse/translator/index.ts";
 import { FORMATS } from "../../open-sse/translator/formats.ts";
+import { NON_ANTHROPIC_THINKING_PLACEHOLDER } from "../../open-sse/utils/reasoningPlaceholder.ts";
 
 function buildRepro(messageCount: number) {
   const messages: Array<{ role: string; content: string }> = [{ role: "user", content: "hello" }];
@@ -126,6 +127,10 @@ test("#7293: already-compliant strict-provider request is a no-op (prompt-cache 
     { role: "user", content: "hi" },
     { role: "assistant", content: "hello" },
   ];
+  // Snapshot before the call. Comparing the output with `messages` itself only held while the
+  // translator edited the caller's message objects in place, so a field it added (the MiMo
+  // reasoning placeholder below) was added to both sides and could never differ.
+  const expected = structuredClone(messages);
   const body = { model: "mimo-v2.5", messages };
 
   const result = translateRequest(
@@ -138,7 +143,14 @@ test("#7293: already-compliant strict-provider request is a no-op (prompt-cache 
     "xiaomi-mimo"
   );
 
-  assert.deepEqual(result.messages, messages);
+  // The hoist leaves the system and user turns and the order as they were. The only change is
+  // MiMo's own replay contract (9router#1321): a plain assistant turn carries reasoning_content,
+  // the placeholder on a cache miss.
+  assert.deepEqual(result.messages, [
+    expected[0],
+    expected[1],
+    { ...expected[2], reasoning_content: NON_ANTHROPIC_THINKING_PLACEHOLDER },
+  ]);
 });
 
 test("#7293: Claude-source request keeps a single leading system message after claudeToOpenAI re-adds body.system", () => {

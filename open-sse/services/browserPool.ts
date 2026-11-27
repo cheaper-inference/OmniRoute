@@ -26,6 +26,7 @@
 
 import { Buffer } from "node:buffer";
 
+import { resolveChromiumOverride } from "../utils/playwrightChromium.ts";
 import { connectObscuraBrowser } from "./obscura.ts";
 import { ensureVirtualDisplay, stopVirtualDisplay } from "./virtualDisplay.ts";
 
@@ -302,12 +303,13 @@ export function resolvePlainBrowserLaunchOptions(
   options: Pick<BrowserPoolContextOptions, "headless" | "executablePath">
 ): import("playwright").LaunchOptions {
   const headless = options.headless !== false;
+  const executablePath = resolveChromiumOverride(options.executablePath);
   return {
     headless,
     // Honour an explicit system Chrome in headless mode too. Without this, a host
     // that has Chrome installed but no Playwright-managed headless shell fails to
     // launch at all, even though the executor already resolved a working binary.
-    ...(options.executablePath ? { executablePath: options.executablePath } : {}),
+    ...(executablePath ? { executablePath } : {}),
     args: [
       "--no-sandbox",
       "--disable-dev-shm-usage",

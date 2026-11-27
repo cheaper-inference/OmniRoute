@@ -17,6 +17,10 @@ import { UPSTREAM_PROXY_PROVIDERS } from "./providers/upstream-proxy";
 import { CLOUD_AGENT_PROVIDERS } from "./providers/cloud-agent";
 import { SYSTEM_PROVIDERS } from "./providers/system";
 import { validateProviders } from "../validation/providerSchema";
+import {
+  getCredentialRequirement,
+  worksWithoutCredential,
+} from "../utils/providerCredentialRequirement";
 
 export const FREE_PROVIDERS = {};
 
@@ -292,19 +296,9 @@ const EXPLICIT_OPTIONAL_APIKEY_PROVIDER_IDS = new Set([
   "searxng-search",
   "firecrawl",
   "copilot-web",
-  "g4f-groq",
-  "g4f-gemini",
-  "g4f-pollinations",
-  "g4f-ollama",
-  "g4f-nvidia",
   "huggingchat",
   "gitlawb",
   "gitlawb-gmi",
-  "naga-ac",
-  // UC (uncensored.com) persona: un-metered subscription chat with NO API key —
-  // auth is a durable Clerk credential stored in providerSpecificData, from which
-  // the executor mints a short-lived session token per connect.
-  "uc",
 ]);
 
 export function providerAllowsOptionalApiKey(providerId: unknown): boolean {
@@ -314,6 +308,10 @@ export function providerAllowsOptionalApiKey(providerId: unknown): boolean {
     // ponytail: any noAuth provider auto-qualifies — no per-provider maintenance
     canonicalId in NOAUTH_PROVIDERS ||
     providerId in NOAUTH_PROVIDERS ||
+    // The credential registry is the source of truth for what is user-facing:
+    // anything declared optional or none works without a pasted key.
+    worksWithoutCredential(getCredentialRequirement(canonicalId)) ||
+    worksWithoutCredential(getCredentialRequirement(providerId)) ||
     EXPLICIT_OPTIONAL_APIKEY_PROVIDER_IDS.has(canonicalId) ||
     EXPLICIT_OPTIONAL_APIKEY_PROVIDER_IDS.has(providerId) ||
     isLocalProvider(canonicalId) ||
@@ -481,15 +479,31 @@ export const AUTH_METHODS = {
   apikey: { id: "apikey", name: "API Key", icon: "key" },
 };
 
-export function getProviderByAlias(alias: string): AiProviderDefinition | null {
+let _PROVIDER_BY_KEY: Map<string, AiProviderDefinition> | null = null;
+
+// One index over every alias and id. The first provider in section order wins a shared
+// key, the same rule the old linear scan applied.
+function buildProviderByKey(): Map<string, AiProviderDefinition> {
+  const index = new Map<string, AiProviderDefinition>();
   for (const section of _PROVIDER_SECTIONS) {
-    for (const provider of Object.values(section)) {
-      if (provider.alias === alias || provider.id === alias) {
-        return provider as AiProviderDefinition;
+    for (const provider of Object.values(section) as Array<
+      AiProviderDefinition & { alias?: string }
+    >) {
+      for (const key of [provider.alias, provider.id]) {
+        if (key && !index.has(key)) index.set(key, provider);
       }
     }
   }
-  return null;
+  return index;
+}
+
+function getOrCreateProviderByKey(): Map<string, AiProviderDefinition> {
+  _PROVIDER_BY_KEY ??= buildProviderByKey();
+  return _PROVIDER_BY_KEY;
+}
+
+export function getProviderByAlias(alias: string): AiProviderDefinition | null {
+  return getOrCreateProviderByKey().get(alias) ?? null;
 }
 
 // Helper: Get provider ID from alias

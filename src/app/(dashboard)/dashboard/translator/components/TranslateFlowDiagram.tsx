@@ -32,8 +32,8 @@ function FlowNode({ icon, color, title, example, tooltipContent }: FlowNodeProps
       className={`flex flex-col items-center gap-1 rounded-lg border ${c.border} ${c.bg} px-3 py-2 text-center min-w-0`}
     >
       <Icon name={icon} size={20} className={c.text} />
-      <p className="text-[11px] font-semibold text-text-main leading-tight">{title}</p>
-      <p className="text-[10px] text-text-muted leading-tight">{example}</p>
+      <p className="text-2xs font-semibold text-text-main leading-tight">{title}</p>
+      <p className="text-3xs text-text-muted leading-tight">{example}</p>
     </div>
   );
 
@@ -50,7 +50,11 @@ function FlowArrow({ label }: { label?: string }) {
   return (
     <div className="flex flex-col items-center justify-center text-text-muted">
       <Icon name="arrow_forward" size={20} className="rotate-90 sm:rotate-0" />
-      {label && <span className="text-[9px] uppercase tracking-wide mt-0.5">{label}</span>}
+      {label && (
+        <span className="ci-eyebrow mt-0.5" data-size="3xs">
+          {label}
+        </span>
+      )}
     </div>
   );
 }

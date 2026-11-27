@@ -29,11 +29,7 @@
 
 ## Chạy nhanh
 
-> **Tự host chỉ bằng một lệnh?** Hãy xem
-> [Hướng dẫn tự host](../getting-started/SELF_HOST_GUIDE.md) —
-> `docker compose -f docker-compose.selfhost.yml up -d` (image đã phát hành +
-> Redis, chỉ loopback, không cần chọn profile). Phần Chạy nhanh bên dưới là
-> phương thức dùng một container dành cho người dùng đã chạy Redis ở nơi khác.
+> **Tự lưu trữ trong một lệnh?** Xem [Hướng dẫn tự lưu trữ](../getting-started/SELF_HOST_GUIDE.md) — `docker compose -f docker-compose.selfhost.yml up -d` (hình ảnh đã xuất bản + Redis, chỉ lặp lại, không có lựa chọn cấu hình). Chạy nhanh bên dưới là đường dẫn một vùng chứa dành cho người dùng đã chạy Redis ở nơi khác.
 
 ```bash
 docker run -d \
@@ -42,13 +38,13 @@ docker run -d \
   --stop-timeout 40 \
   -p 20128:20128 \
   -v omniroute-data:/app/data \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
-## Sử dụng tệp môi trường
+## Với tệp môi trường
 
 ```bash
-# Trước tiên, sao chép và chỉnh sửa .env
+# Copy and edit .env first
 cp .env.example .env
 
 docker run -d \
@@ -58,7 +54,7 @@ docker run -d \
   --env-file .env \
   -p 20128:20128 \
   -v omniroute-data:/app/data \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
 ## Docker Compose
@@ -237,18 +233,18 @@ docker compose -f docker-compose.prod.yml down
 
 Stack production chạy song song với compose dev (tên container, cổng và volume khác nhau), vì vậy bạn có thể tiếp tục lặp lại quá trình phát triển cục bộ trong khi môi trường production vẫn hoạt động.
 
-## Các giai đoạn Dockerfile
+## Các giai đoạn của Dockerfile
 
-Kho lưu trữ cung cấp một Dockerfile nhiều giai đoạn (`Dockerfile`). Có bốn giai đoạn được cung cấp; hãy chọn `target` phù hợp với trường hợp sử dụng của bạn.
+Kho lưu trữ chứa Dockerfile nhiều giai đoạn (`Dockerfile`). Bốn giai đoạn được phơi bày; chọn `target` phù hợp cho trường hợp sử dụng của bạn.
 
-| Giai đoạn     | Image cơ sở           | Mục đích                                                                                                                                                                                                                                                                                                       |
-| ------------- | --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `builder`     | `node:26-trixie-slim` | Cài đặt các dependency (`npm ci --legacy-peer-deps`) và chạy `npm run build` (mặc định dùng Turbopack — xem phần Tài nguyên khi build bên dưới)                                                                                                                                                                |
-| `runner-base` | `node:26-trixie-slim` | Môi trường chạy production với đầu ra standalone của Next.js. **Không bao gồm CLI của nhà cung cấp.**                                                                                                                                                                                                          |
-| `runner-cli`  | `runner-base`         | Bổ sung `git`, `docker.io`, `docker-compose` và các CLI toàn cục: `@openai/codex`, `@anthropic-ai/claude-code`, `droid`, `openclaw`. **Chọn giai đoạn này cho các quy trình tác tử.**                                                                                                                          |
-| `runner-web`  | `runner-base`         | Bổ sung Playwright + trình duyệt Chromium (`--with-deps`) cho các nhà cung cấp phiên web: `gemini-web`, `claude-web`, `claude-turnstile`. **Chọn giai đoạn này khi bạn sử dụng các nhà cung cấp đó** — image thông thường sẽ lỗi tại thời điểm yêu cầu nếu thiếu nó (xem ghi chú `-web` trong Kênh phát hành). |
+| Sân khấu      | Hình ảnh cơ sở        | Mục đích                                                                                                                                                                                                                                                                                                             |
+| ------------- | --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `builder`     | `node:26-trixie-slim` | Cài đặt deps (`npm ci --legacy-peer-deps`) và chạy `npm run build` (Turbopack theo mặc định — xem Tài nguyên thời gian xây dựng bên dưới)                                                                                                                                                                            |
+| `runner-base` | `node:26-trixie-slim` | Thời gian chạy sản xuất với đầu ra độc lập Next.js.** Không có nhà cung cấp CLIs đi kèm.**                                                                                                                                                                                                                           |
+| `runner-cli`  | `runner-base`         | Thêm `git`, `docker.io`, `docker-compose` và CLIs toàn cầu : `@openai/codex`, `@anthropic-ai/claude-code`, `droid`, `openclaw`.** Chọn tùy chọn này cho quy trình làm việc tác nhân.**                                                                                                                               |
+| `runner-web`  | `runner-base`         | Thêm Playwright + một trình duyệt Chrome (`--with-deps`) cho các nhà cung cấp phiên web: `gemini-web`, `claude-web`, `claude-turnstile`.** Chọn điều này khi bạn sử dụng các nhà cung cấp đó** — hình ảnh đơn giản không thành công tại thời điểm yêu cầu nếu không có nó (xem ghi chú `-web` trong Kênh phát hành). |
 
-Build thủ công một target cụ thể:
+Xây dựng mục tiêu cụ thể theo cách thủ công:
 
 ```bash
 docker build --target runner-base -t omniroute:base .
@@ -256,44 +252,19 @@ docker build --target runner-cli  -t omniroute:cli  .
 docker build --target runner-web  -t omniroute:web  .
 ```
 
-### Tài nguyên khi build
+### Tài nguyên thời gian xây dựng
 
-Ba đối số build kiểm soát lượng tài nguyên mà giai đoạn `builder` tiêu tốn. Chúng chỉ áp dụng tại thời điểm build —
-`OMNIROUTE_MEMORY_MB` (bên dưới) là một tùy chỉnh riêng cho thời gian chạy.
+Ba đối số xây dựng kiểm soát chi phí của giai đoạn `builder`. Chúng chỉ có trong thời gian xây dựng — `OMNIROUTE_MEMORY_MB` (bên dưới) là một núm thời gian chạy riêng biệt.
 
-| Đối số build                | Mặc định | Tác dụng                                                                                         |
-| --------------------------- | -------- | ------------------------------------------------------------------------------------------------ |
-| `OMNIROUTE_USE_TURBOPACK`   | `0`      | `0` build bằng webpack: mức sử dụng bộ nhớ đỉnh thấp hơn nhưng chậm hơn. `1` bật Turbopack.      |
-| `OMNIROUTE_BUILD_MEMORY_MB` | `6144`   | Giới hạn heap V8 (`--max-old-space-size`) cho tiến trình `next build` được khởi chạy.            |
-| `OMNIROUTE_BUILD_WORKERS`   | `2`      | Truyền giá trị vào `CIRCLE_NODE_TOTAL`; Next suy ra `workers = N - 1` để thu thập dữ liệu trang. |
+| Xây dựng đối số             | Mặc định | Tác dụng                                                                                          |
+| --------------------------- | -------- | ------------------------------------------------------------------------------------------------- |
+| `OMNIROUTE_USE_TURBOPACK`   | `0`      | xây dựng `0` bằng webpack: bộ nhớ tối đa thấp hơn, chậm hơn. `1` chọn tham gia Turbopack.         |
+| `OMNIROUTE_BUILD_MEMORY_MB` | `6144`   | Trần đống V8 (`--max-old-space-size`) cho `next build` sinh ra .                                  |
+| `OMNIROUTE_BUILD_WORKERS`   | `2`      | Nguồn cấp dữ liệu `CIRCLE_NODE_TOTAL`; Tiếp theo lấy `workers = N - 1` để thu thập dữ liệu trang. |
 
-`OMNIROUTE_BUILD_WORKERS` là giá trị cần tăng trên một máy build lớn và là giá trị
-cần nghi ngờ khi một bản build bị dừng **sau khi** `✓ Compiled successfully` trong
-môi trường hạn chế tài nguyên. Mỗi worker xử lý dữ liệu trang là một tiến trình
-riêng, và bản thân tiến trình cha `next build` cũng vậy; một lần tái hiện trực tiếp
-trên VPS (issue #7518) đo được RSS đỉnh của mỗi tiến trình là ~4.5 GB, không phụ
-thuộc vào cờ heap `NODE_OPTIONS` (Turbopack biên dịch trong bộ nhớ native/Rust nằm
-ngoài heap V8). Giá trị mặc định `2` (→ 1 worker, tổng cộng 2 tiến trình) được định
-cỡ cho các runner do GitHub lưu trữ với 16 GB / 4 vCPU mà pipeline phát hành sử
-dụng. Với `8` (→ 7 worker), runner đó đã hết bộ nhớ và buildkit làm bước này thất
-bại với `ResourceExhausted: ... cannot allocate memory`; `3` (→ 2 worker) vẫn
-không vừa khi RSS trên mỗi tiến trình được đo trực tiếp thay vì suy luận.
-`tests/unit/docker-build-memory-budget.test.ts` thực hiện phép tính dựa trên số
-liệu đo được và sẽ thất bại nếu một trong hai tùy chỉnh vượt quá khả năng của
-runner.
+`OMNIROUTE_BUILD_WORKERS` là người kêu gọi một người xây dựng lớn và là người nghi ngờ khi một công trình bị hạn chế chết** sau đó** `✓ Compiled successfully`. Mỗi nhân viên dữ liệu trang là một quy trình riêng và bản thân `next build` gốc cũng vậy; một bản sao VPS trực tiếp (vấn đề #7518) đã đo RSS đỉnh của mỗi quá trình ở ~ 4,5 GB độc lập với cờ heap `NODE_OPTIONS` (Turbopack biên dịch trong bộ nhớ native/Rust bên ngoài vùng heap V8). Mặc định của `2` (→ 1 worker, tổng cộng 2 quy trình) có kích thước cho 16 GB / 4 vCPU chạy trên máy chủ GitHub mà đường dẫn xuất bản sử dụng. Tại `8` (→ 7 công nhân), Á hậu đó đã hết bộ nhớ và buildkit không thực hiện được bước `ResourceExhausted: ... cannot allocate memory`; `3` (→ 2 công nhân) vẫn không phù hợp khi RSS trên mỗi quy trình được đo trực tiếp thay vì suy ra. `tests/unit/docker-build-memory-budget.test.ts` thực hiện phép tính số học so với số đo được và không thành công nếu một trong hai núm vượt quá đường chạy.
 
-Turbopack biên dịch trong bộ nhớ Rust native nằm **ngoài** heap V8, vì vậy
-`OMNIROUTE_BUILD_MEMORY_MB` không giới hạn được bộ nhớ đó. Trên máy chủ có giới
-hạn bộ nhớ, bản build sau đó sẽ bị OOM killer gửi SIGKILL mà hoàn toàn không có
-thông báo lỗi — nó chỉ đơn giản dừng giữa chừng tại `Creating an optimized production build`,
-trông giống như bị treo hơn là hết bộ nhớ. Đó là lý do `Dockerfile` mặc định dùng
-webpack (`OMNIROUTE_USE_TURBOPACK=0`), không giống `npm run dev` / `npm run build`,
-nơi Turbopack là mặc định trong mã nguồn: một lệnh `docker build .` thuần túy
-không có đối số build (cách Railway và các nền tảng triển khai một cú nhấp khác
-thực thi) không được phép âm thầm bị dừng trên máy build bị giới hạn bộ nhớ. Các
-image đã phát hành vốn đã truyền `OMNIROUTE_USE_TURBOPACK=0` một cách tường minh
-trong `docker-publish.yml`. Trên máy build có nhiều RAM, hãy bật Turbopack để
-build nhanh hơn:
+Turbopack biên dịch trong bộ nhớ Rust gốc tồn tại** ngoài** đống V8, vì vậy `OMNIROUTE_BUILD_MEMORY_MB` không ràng buộc nó. Trên máy chủ có trần bộ nhớ, bản dựng sau đó sẽ là SIGKILLed bởi OOM Killer mà không có văn bản lỗi nào cả — nó chỉ dừng ở giữa `Creating an optimized production build`, đọc giống như bị treo chứ không phải là hết bộ nhớ. Đó là lý do tại sao `Dockerfile` mặc định là webpack (`OMNIROUTE_USE_TURBOPACK=0`), không giống như `npm run dev` / `npm run build`, trong đó Turbopack là mã mặc định: một `docker build .` trần không có đối số xây dựng (những gì Đường sắt và các máy chủ một cú nhấp chuột khác chạy) không được chết lặng lẽ trên trình tạo giới hạn bộ nhớ. Các hình ảnh được xuất bản đã vượt qua `OMNIROUTE_USE_TURBOPACK=0` một cách rõ ràng trong `docker-publish.yml`. Trên trình tạo có nhiều RAM, hãy chọn tham gia Turbopack để xây dựng nhanh hơn:
 
 ```bash
 docker build --target runner-base \
@@ -301,49 +272,46 @@ docker build --target runner-base \
   -t omniroute:base .
 ```
 
-`webpackBuildWorker` được bật, vì vậy `next build` chạy một tiến trình cha **và**
-một tiến trình worker, đồng thời mỗi tiến trình tuân theo
-`OMNIROUTE_BUILD_MEMORY_MB` một cách riêng biệt. Hãy đặt giới hạn bộ nhớ container
-cao hơn khoảng gấp đôi giá trị đó, không phải chỉ bằng một lần.
+`webpackBuildWorker` được bật, vì vậy `next build` chạy cha mẹ** Và** một quy trình công nhân và mỗi quy trình tôn vinh `OMNIROUTE_BUILD_MEMORY_MB` riêng biệt. Kích thước trần container ở trên gần gấp đôi giá trị đó chứ không phải một lần.
 
-Đo trên cây mã nguồn này (`--target runner-base`, `OMNIROUTE_BUILD_MEMORY_MB=6144`):
+Đo trên cây này (`--target runner-base`, `OMNIROUTE_BUILD_MEMORY_MB=6144`):
 
-| Trình đóng gói | Giới hạn container | Kết quả                                      |
-| -------------- | ------------------ | -------------------------------------------- |
-| Turbopack      | 8 GiB / 16 GiB     | Bị OOM kill ở cả hai mức, không có thông báo |
-| webpack        | 8 GiB              | Worker build bị SIGKILL                      |
-| webpack        | 12 GiB             | Thành công, đạt đỉnh ở 11.1 GiB              |
+| người đóng gói | Trần container | Kết quả                          |
+| -------------- | -------------- | -------------------------------- |
+| Turbopack      | 8 GiB / 16 GiB | OOM-giết cả hai, âm thầm         |
+| gói web        | 8 GiB          | công nhân xây dựng SIGKILLed     |
+| gói web        | 12 GiB         | đã thành công, đạt đỉnh 11,1 GiB |
 
-### Giá trị mặc định khi chạy
+### Mặc định thời gian chạy
 
-Các giá trị mặc định được `runner-base` export: `PORT=20128`, `HOSTNAME=0.0.0.0`, `OMNIROUTE_MEMORY_MB=1024`, `NODE_OPTIONS=--max-old-space-size=1024`, `DATA_DIR=/app/data`, `OMNIROUTE_MIGRATIONS_DIR=/app/migrations`.
+Mặc định được xuất bởi `runner-base`: `PORT=20128`, `HOSTNAME=0.0.0.0`, `OMNIROUTE_MEMORY_MB=1024`, `NODE_OPTIONS=--max-old-space-size=1024`, `DATA_DIR=/app/data`, `OMNIROUTE_MIGRATIONS_DIR=/app/migrations`.
 
 Hành vi bộ nhớ trong Docker:
 
-- Image đặt `OMNIROUTE_MEMORY_MB=1024` và từ đó suy ra `NODE_OPTIONS=--max-old-space-size=1024`.
-- Tiến trình máy chủ thực tế được khởi chạy bởi trình khởi chạy độc lập; trình này đọc `OMNIROUTE_MEMORY_MB` và nối thêm `--max-old-space-size=<OMNIROUTE_MEMORY_MB>`.
-- Node sử dụng giá trị `--max-old-space-size` được lặp lại sau cùng, vì vậy việc đặt `OMNIROUTE_MEMORY_MB` sẽ kiểm soát giới hạn heap Docker thực tế.
-- Vì image luôn đặt biến này nên cơ chế dự phòng tự hiệu chỉnh theo RAM của trình khởi chạy không bao giờ được áp dụng trong Docker. Hãy tăng giá trị này một cách rõ ràng cho khối lượng công việc (bảng bên dưới). `2048` vẫn quá nhỏ cho `/v1/responses` của tác nhân lập trình.
+- Hình ảnh đặt `OMNIROUTE_MEMORY_MB=1024` và lấy `NODE_OPTIONS=--max-old-space-size=1024` từ nó.
+- Quá trình máy chủ thực tế được bắt đầu bởi trình khởi chạy độc lập, trình khởi chạy này đọc `OMNIROUTE_MEMORY_MB` và nối thêm `--max-old-space-size=<OMNIROUTE_MEMORY_MB>`.
+- Nút sử dụng giá trị `--max-old-space-size` lặp lại lần cuối, do đó, việc đặt `OMNIROUTE_MEMORY_MB` sẽ kiểm soát giới hạn vùng nhớ Docker hiệu quả.
+- Bởi vì hình ảnh luôn đặt nó nên dự phòng hiệu chỉnh RAM của trình khởi chạy không bao giờ áp dụng theo Docker. Tăng nó một cách rõ ràng cho khối lượng công việc (bảng bên dưới). `2048` vẫn còn quá nhỏ đối với tác nhân mã hóa `/v1/responses`.
 
-### RAM khi chạy cho các tác nhân lập trình
+### Thời gian chạy RAM cho các tác nhân mã hóa
 
-Mức mặc định 1 GiB của Docker chỉ là ngưỡng tối thiểu dành cho bảng điều khiển/trò chuyện nhẹ, không phải mức dùng cho môi trường production. Các phần thân `POST /v1/responses` dài (hàng trăm tin nhắn, hàng chục công cụ) giữ lại nhiều đồ thị trong bộ nhớ trong quá trình nén. Hai yêu cầu chồng lấn, mỗi yêu cầu khoảng ~3 MiB / ~750k token, đã khiến V8 dừng bất thường ở mức old-space **12 GiB** (`FATAL ERROR: Reached heap limit`) và cũng gặp lỗi OOM cgroup 16 GiB. Xem [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849).
+Mặc định 1 GiB Docker là sàn dashboard/light-chat, không phải quy mô sản xuất. Phần thân `POST /v1/responses` dài (hàng trăm tin nhắn, hàng chục công cụ) giữ lại nhiều biểu đồ trong bộ nhớ trong quá trình nén. Hai yêu cầu mã thông báo ~ 3 MiB / ~ 750k chồng chéo đã hủy bỏ V8 tại một** 12 GiB** không gian cũ (`FATAL ERROR: Reached heap limit`) và cũng đạt 16 GiB cgroup OOM. Xem [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849).
 
-Hãy đặt kích thước **cgroup `--memory` cao hơn heap** — bộ đệm native, SQLite và dữ liệu trung gian trong quá trình nén nằm ngoài V8.
+Kích cỡ** cgroup `--memory` phía trên heap** bộ đệm gốc —, SQLite và các trung gian nén nằm bên ngoài V8.
 
-| Khối lượng công việc                       | `OMNIROUTE_MEMORY_MB`           | Container / cgroup       | Ghi chú                                                                                                                  |
-| ------------------------------------------ | ------------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------ |
-| Bảng điều khiển, một phiên trò chuyện nhẹ  | `1024` (mặc định của image)     | ≥2 GiB                   |                                                                                                                          |
-| Một tác nhân lập trình (Claude/Codex/Grok) | `8192`                          | ≥10 GiB                  | Một phiên `/v1/responses` điển hình                                                                                      |
-| Hai `/v1/responses` dài đồng thời          | `10240`–`12288`                 | ≥12–16 GiB               | Đã đo được V8 dừng bất thường ở heap khoảng ~12 GiB                                                                      |
-| Từ ba ngữ cảnh dài đồng thời trở lên       | không chạy trong một tiến trình | xử lý tuần tự / thêm RAM | Mặc định chỉ cho phép 1 yêu cầu nặng đang xử lý; tăng giới hạn này khi không có thêm RAM sẽ tái diễn lỗi dừng bất thường |
+| Khối lượng công việc                           | `OMNIROUTE_MEMORY_MB`        | Vùng chứa / nhóm       | Ghi chú                                                                                                    |
+| ---------------------------------------------- | ---------------------------- | ---------------------- | ---------------------------------------------------------------------------------------------------------- |
+| Trang tổng quan, một cuộc trò chuyện nhẹ nhàng | `1024` (hình ảnh mặc định)   | ≥2 GiB                 |                                                                                                            |
+| Một tác nhân mã hóa (Claude/Codex/Grok)        | `8192`                       | ≥10 GiB                | `/v1/responses` một phiên điển hình                                                                        |
+| Hai `/v1/responses` dài đồng thời              | `10240`–`12288`              | ≥12–16 GiB             | Đã đo V8 bị hủy bỏ ở ~ 12 GiB                                                                              |
+| Ba bối cảnh dài đồng thời +                    | không làm trên một quy trình | tuần tự hóa / thêm RAM | Tỷ lệ nhập học hạng nặng mặc định là 1 trên chuyến bay; nuôi nó mà không có RAM giới thiệu lại việc hủy bỏ |
 
-`omniroute serve` trên bare metal hiệu chỉnh ở mức khoảng 35% RAM (giới hạn trong `[512, 4096]`) khi `OMNIROUTE_MEMORY_MB` **chưa được đặt**. Docker luôn đặt `1024`, vì vậy quá trình hiệu chỉnh đó không bao giờ chạy trong image chính thức.
+`omniroute serve` trên kim loại trần hiệu chỉnh ~ 35% RAM ( `[512, 4096]` được kẹp) khi `OMNIROUTE_MEMORY_MB`** bỏ đặt** . Docker luôn đặt `1024`, do đó hiệu chuẩn không bao giờ chạy trong hình ảnh chính thức.
 
 ```bash
 docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
   -e OMNIROUTE_MEMORY_MB=8192 --memory=10g \
-  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
 ```
 
 ## Các biến môi trường quan trọng
@@ -367,22 +335,13 @@ Ngoài các giá trị mặc định được ghi lại trong [ENVIRONMENT.md](.
 | `PROD_DASHBOARD_PORT`         | Cổng dashboard phía host cho `docker-compose.prod.yml`                                                                                                                                                                                                                            | `20130`                       |
 | `CLIPROXYAPI_PORT`            | Cổng phía host cho sidecar `cliproxyapi`                                                                                                                                                                                                                                          | `8317`                        |
 
-## Reverse Proxy trên đường dẫn con (Traefik / nginx)
+## Proxy ngược trên đường dẫn phụ (Traefik/nginx)
 
-`basePath` của Next.js được biên dịch vào bundle standalone. OmniRoute ghi lại giá trị
-đã được nhúng trong một tệp sentinel tại thư mục gốc của ứng dụng (được ghi trong quá
-trình `npm run build`; được đọc bởi `scripts/docker/ensure-docker-base-path.mjs`) và so
-sánh giá trị đó với `OMNIROUTE_BASE_PATH` khi container khởi động. Khi các giá trị khác
-nhau và image được build cho thư mục gốc của domain, entrypoint sẽ ghi lại các manifest
-standalone, các literal `basePath`/`assetPrefix` được nhúng (Next 16 chỉ render URL tài
-nguyên SSR từ `assetPrefix` — trình vá sẽ sao chép đường dẫn con vào đó), các URL tài
-nguyên `/_next/static` được nhúng (manifest tham chiếu phía client, nội dung media được
-import, các trang lỗi được prerender) và shim `process.env` phía client trước khi
-`node dev/run-standalone.mjs` chạy.
+Next.js `basePath` được biên dịch thành gói độc lập. OmniRoute ghi lại giá trị đã nướng trong tệp canh gác ở thư mục gốc của ứng dụng (được viết trong `npm run build`; được đọc bởi `scripts/docker/ensure-docker-base-path.mjs`) và so sánh nó với `OMNIROUTE_BASE_PATH` khi vùng chứa khởi động. Khi chúng khác nhau và hình ảnh được tạo cho miền gốc, điểm nhập sẽ ghi lại các tệp kê khai độc lập, các ký tự `basePath`/`assetPrefix` được nhúng (Phần 16 tiếp theo hiển thị nội dung SSR URLs chỉ từ `assetPrefix` —, trình vá lỗi phản ánh đường dẫn con vào đó), nội dung `/_next/static` đã nướng URLs (các bảng kê khai tham chiếu máy khách, nhập phương tiện, các trang lỗi được hiển thị trước) và `process.env` shim máy khách trước khi `node dev/run-standalone.mjs` chạy.
 
-### Build bằng Compose (khuyến nghị)
+### Soạn bản dựng (được đề xuất)
 
-Đặt cả hai biến trong `.env`, sau đó build lại để image và môi trường runtime đồng nhất:
+Đặt cả hai biến trong `.env`, sau đó xây dựng lại để hình ảnh và thời gian chạy đồng ý:
 
 ```bash
 # .env
@@ -394,71 +353,52 @@ NEXT_PUBLIC_BASE_URL=https://myhostname.example.com/omniroute
 docker compose --profile base up -d --build
 ```
 
-`docker-compose.yml` chuyển tiếp `OMNIROUTE_BASE_PATH` dưới dạng build-arg của Docker và
-biến môi trường runtime.
+`docker-compose.yml` chuyển tiếp `OMNIROUTE_BASE_PATH` dưới dạng Docker build-arg và dưới dạng biến môi trường thời gian chạy.
 
-### Image gốc được build sẵn + đường dẫn con runtime
+### Đường dẫn con thời gian chạy + hình ảnh gốc dựng sẵn
 
-Các image `diegosouzapw/omniroute:*` đã phát hành được build cho thư mục gốc của domain.
-Bạn vẫn có thể đặt `OMNIROUTE_BASE_PATH` tại runtime; container sẽ vá bundle một lần khi
-khởi động. Hãy kết hợp biến này với origin công khai tương ứng:
+Hình ảnh `cheaperinference/omniroute:*` đã xuất bản được xây dựng cho miền gốc. Bạn vẫn có thể đặt `OMNIROUTE_BASE_PATH` khi chạy; vùng chứa sẽ vá gói đó một lần khi khởi động. Ghép nối nó với nguồn gốc công khai phù hợp:
 
 ```yaml
 services:
   omniroute:
-    image: diegosouzapw/omniroute:latest
+    image: cheaperinference/omniroute:latest
     environment:
       OMNIROUTE_BASE_PATH: /omniroute
       NEXT_PUBLIC_BASE_URL: https://myhostname.example.com/omniroute
 ```
 
-Cấu hình reverse proxy để chuyển tiếp **toàn bộ** đường dẫn bên ngoài (không loại bỏ
-prefix). Traefik nên định tuyến `PathPrefix(`/omniroute`)` đến container mà không dùng
-`StripPrefix`, để Next.js nhận `/omniroute/...` và phục vụ tài nguyên từ
-`/omniroute/_next/...`.
+Định cấu hình proxy ngược để chuyển tiếp** đầy** đường dẫn bên ngoài (không loại bỏ tiền tố). Traefik nên định tuyến `PathPrefix(`/omniroute `)` đến vùng chứa không có `StripPrefix`, để Next.js nhận `/omniroute/...` và phân phát nội dung từ `/omniroute/_next/...`.
 
-Healthcheck của Docker thăm dò endpoint vòng đời nhẹ `/healthz`, với prefix là
-`OMNIROUTE_BASE_PATH` đang hoạt động. `/api/monitoring/health` vẫn khả dụng cho việc chẩn
-đoán bởi con người/dashboard; để trỏ HEALTHCHECK của container trở lại endpoint này (ví
-dụ nhằm thực thi kiểm tra sức khỏe chuyên sâu), hãy đặt
-`OMNIROUTE_HEALTHCHECK_PATH=/api/monitoring/health`. Đường dẫn này là một phép kiểm tra
-**chuyên sâu** (DB + bản tóm tắt giám sát) — phù hợp với `HEALTHCHECK` không thường xuyên
-của Docker nếu bạn chọn bật lại, nhưng **không** phù hợp với các khoảng thời gian
-`livenessProbe` của Kubernetes.
+Kiểm tra sức khỏe Docker thăm dò điểm cuối vòng đời `/healthz` hạng nhẹ có tiền `OMNIROUTE_BASE_PATH` hoạt động. `/api/monitoring/health` vẫn có sẵn để chẩn đoán human/dashboard ; để trỏ lại vùng chứa HEALTHCHECK vào nó (ví dụ: để thực thi sức khỏe sâu), hãy đặt `OMNIROUTE_HEALTHCHECK_PATH=/api/monitoring/health`. Con đường đó là một** sâu** kiểm tra (DB + tóm tắt giám sát) — phù hợp với `HEALTHCHECK` không thường xuyên của Docker nếu bạn chọn tham gia lại, nhưng** không** cho các khoảng `livenessProbe` Kubernetes.
 
-Đối với các trình điều phối (Kubernetes, Nomad, v.v.):
+Dành cho người điều phối (Kubernetes, Nomad, v.v.):
 
-| Probe           | Nên dùng                                                               | Tránh                                                |
-| --------------- | ---------------------------------------------------------------------- | ---------------------------------------------------- |
-| Liveness        | HTTP `GET /livez`, hoặc TCP trên cổng chính (`PORT`, mặc định `20128`) | Dùng `/api/monitoring/health` làm liveness           |
-| Readiness       | HTTP `GET /healthz`                                                    | Timeout quá ngắn khiến event loop bận bị xem là chết |
-| Deep / blackbox | `/api/monitoring/health`                                               | —                                                    |
+| thăm dò           | Thích hơn                                                             | Tránh xa                                                    |
+| ----------------- | --------------------------------------------------------------------- | ----------------------------------------------------------- |
+| Sự sống động      | HTTP `GET /livez` hoặc TCP trên cổng chính (`PORT`, `20128` mặc định) | `/api/monitoring/health` như sự sống động                   |
+| Sẵn sàng          | HTTP `GET /healthz`                                                   | Thời gian chờ chặt chẽ coi vòng lặp sự kiện bận như đã chết |
+| Hộp sâu / hộp đen | `/api/monitoring/health`                                              | —                                                           |
 
-`/healthz` báo cáo vòng đời của tiến trình (`ok` / `starting` / `stopping`). `/livez`
-chỉ kiểm tra tiến trình còn hoạt động (trả về 200 bất cứ khi nào handler có thể chạy;
-endpoint này không chờ trạng thái sẵn sàng). Cả hai vẫn chạy trên cùng event loop Node
-với việc xử lý request, vì vậy các tác vụ catalog hoặc nén sử dụng nhiều CPU có thể làm
-chậm chúng — bận ≠ chết. Ưu tiên liveness qua TCP nếu các probe HTTP bị timeout. Hướng
-dẫn đầy đủ về probe:
-[Hướng dẫn giám sát — các khuyến nghị về probe Kubernetes](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations).
+`/healthz` báo cáo vòng đời của quá trình (`ok` / `starting` / `stopping`). `/livez` chỉ hoạt động trong quá trình (200 bất cứ khi nào trình xử lý có thể chạy; nó không chờ sẵn sàng). Cả hai vẫn chạy trên cùng một vòng lặp sự kiện Node khi xử lý yêu cầu, do đó, công việc nén hoặc danh mục giới hạn CPU có thể khiến chúng bị trì hoãn — bận ≠ chết. Thích sự sống động TCP nếu HTTP thăm dò hết thời gian. Hướng dẫn thăm dò đầy đủ: [Hướng dẫn giám sát — Đề xuất thăm dò Kubernetes](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations).
 
-## Docker Compose với Caddy (HTTPS Auto-TLS)
+## Docker Soạn với Caddy (HTTPS Auto-TLS)
 
-OmniRoute có thể được cung cấp an toàn bằng khả năng tự động cấp chứng chỉ SSL của Caddy. Hãy đảm bảo bản ghi DNS A của tên miền trỏ đến địa chỉ IP máy chủ của bạn.
+OmniRoute có thể được hiển thị một cách an toàn bằng cách sử dụng tính năng cung cấp SSL tự động của Caddy. Đảm bảo bản ghi DNS A của miền của bạn trỏ đến IP của máy chủ của bạn.
 
 ```yaml
 services:
   omniroute:
-    image: diegosouzapw/omniroute:latest
+    image: cheaperinference/omniroute:latest
     container_name: omniroute
     restart: unless-stopped
     volumes:
       - omniroute-data:/app/data
     environment:
       - PORT=20128
-      # Origin hướng đến trình duyệt dành cho callback OAuth, liên kết bảng điều khiển và các URL công khai được tạo.
+      # Browser-facing origin for OAuth callbacks, dashboard links, and generated public URLs.
       - NEXT_PUBLIC_BASE_URL=https://your-domain.com
-      # URL nội bộ giữa các máy chủ dành cho tác vụ theo lịch / yêu cầu tự truy xuất.
+      # Internal server-to-server URL for scheduled jobs / self-fetches.
       - BASE_URL=http://omniroute:20128
       - AUTH_COOKIE_SECURE=true
 
@@ -475,12 +415,7 @@ volumes:
   omniroute-data:
 ```
 
-Caddy thiết lập các header chuyển tiếp tiêu chuẩn cho container thượng nguồn. OmniRoute sử dụng
-`NEXT_PUBLIC_BASE_URL` làm origin công khai chuẩn cho callback OAuth và các liên kết công khai
-được tạo; các thao tác ghi đã xác thực trên bảng điều khiển sử dụng yêu cầu cùng origin cùng với cơ chế bảo vệ CSRF
-gắn với phiên. Chỉ bật `OMNIROUTE_TRUST_PROXY` cho các triển khai nâng cao khi bạn chủ động
-muốn OmniRoute suy ra origin công khai từ các header chuyển tiếp đáng tin cậy thay vì cấu hình
-tường minh.
+Caddy đặt tiêu đề chuyển tiếp tiêu chuẩn cho vùng chứa ngược dòng. OmniRoute sử dụng `NEXT_PUBLIC_BASE_URL` làm nguồn gốc công khai chuẩn cho các lệnh gọi lại OAuth và các liên kết công khai được tạo; Việc ghi bảng điều khiển đã xác thực sử dụng các yêu cầu có cùng nguồn gốc cộng với tính năng bảo vệ CSRF theo phiên. Chỉ bật `OMNIROUTE_TRUST_PROXY` cho các triển khai nâng cao mà bạn cố tình muốn OmniRoute lấy nguồn gốc công khai từ các tiêu đề được chuyển tiếp đáng tin cậy thay vì cấu hình rõ ràng.
 
 ## Cloudflare Quick Tunnel
 
@@ -497,49 +432,51 @@ Các bảng tunnel endpoint (Cloudflare, Tailscale, ngrok) có thể được hi
 - Các image Docker tích hợp sẵn chứng chỉ CA gốc của hệ thống và chuyển chúng đến `cloudflared` được quản lý, giúp tránh lỗi tin cậy TLS khi tunnel khởi tạo bên trong container.
 - Đặt `CLOUDFLARED_BIN=/absolute/path/to/cloudflared` nếu bạn muốn OmniRoute sử dụng tệp nhị phân hiện có thay vì tải xuống.
 
-## Thẻ image
+## Thẻ hình ảnh
 
-| Image                    | Thẻ      | Kích thước | Mô tả                                                            |
-| ------------------------ | -------- | ---------- | ---------------------------------------------------------------- |
-| `diegosouzapw/omniroute` | `latest` | ~250MB     | SemVer ổn định **đã phát hành** cao nhất (không phải git `main`) |
-| `diegosouzapw/omniroute` | `3.8.0`  | ~250MB     | Ghim loại thẻ này cho GitOps                                     |
+| Hình ảnh                     | Nhãn     | Kích cỡ | Sự miêu tả                                                        |
+| ---------------------------- | -------- | ------- | ----------------------------------------------------------------- |
+| `cheaperinference/omniroute` | `latest` | ~ 250MB | Cao nhất** được xuất bản** SemVer ổn định (không phải git `main`) |
+| `cheaperinference/omniroute` | `3.8.54` | ~ 250MB | Ghim lớp thẻ này cho GitOps                                       |
 
-Manifest đa nền tảng: `linux/amd64` + `linux/arm64` nguyên bản (Apple Silicon, AWS Graviton, Raspberry Pi). Docker tự động chọn kiến trúc phù hợp; truyền `--platform linux/amd64` nếu bạn cần buộc giả lập AMD64 trên máy chủ ARM.
+Các hình ảnh tương tự được xuất bản lên ba kho lưu trữ, với cùng một bản tóm tắt cho mỗi kiến trúc: `cheaperinference/omniroute` (Docker Hub, tổ chức Suy luận rẻ hơn, từ 3.8.53 trở đi), `ghcr.io/cheaper-inference/omniroute` và `diegosouzapw/omniroute` kế thừa, lưu giữ lịch sử kéo của nó và vẫn nhận được mọi bản phát hành. Triển khai `diegosouzapw/omniroute` hiện tại tiếp tục cập nhật; chuyển đổi tên hình ảnh là tùy chọn. Kênh phát hành trước `:next` / `:next-web` bên dưới chỉ được xuất bản lên `diegosouzapw/omniroute` và GHCR.
 
-### Các kênh phát hành
+Bảng kê khai đa nền tảng: `linux/amd64` + `linux/arm64` bản địa (Apple Silicon, AWS Graviton, Raspberry Pi). Docker tự động chọn kiến trúc phù hợp; vượt qua `--platform linux/amd64` nếu bạn cần buộc mô phỏng AMD64 trên máy chủ ARM.
 
-OmniRoute phát hành các kênh Docker riêng biệt cho bản phát hành ổn định, hoạt động kiểm thử trên nhánh phát hành và bản dựng phát triển.
+### Kênh phát hành
 
-| Kênh                            | Nguồn                                    | Khả năng thay đổi                      | Mục đích sử dụng được khuyến nghị                                                                                                                   |
-| ------------------------------- | ---------------------------------------- | -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `:<version>` / `:<version>-web` | Bản phát hành đã ký/có phiên bản         | Bất biến                               | Các bản triển khai production ghim vào một bản phát hành cụ thể                                                                                     |
-| `:latest` / `:latest-web`       | SemVer ổn định **đã phát hành** cao nhất | Con trỏ ổn định có thể thay đổi        | Theo các bản phát hành ổn định **sau khi** tác vụ phát hành SemVer hoàn tất — **không** theo dõi `main` hoặc các commit `release/v*` chưa phát hành |
-| `:next` / `:next-web`           | Nhánh `release/v*` mặc định hiện tại     | Con trỏ tiền phát hành có thể thay đổi | Kiểm thử các bản sửa lỗi đã được đưa vào nhánh phát hành đang hoạt động nhưng chưa có trong bản phát hành ổn định                                   |
-| `:main` / `:main-web`           | Nhánh `main`                             | Con trỏ phát triển có thể thay đổi     | Chỉ dành cho kiểm thử phát triển và tích hợp                                                                                                        |
+OmniRoute xuất bản các kênh Docker riêng biệt cho các bản phát hành ổn định, thử nghiệm nhánh phát hành đang hoạt động và các bản dựng phát triển.
 
-#### Các nhà cung cấp phiên web: image `-web`
+| Kênh                            | Nguồn                                     | Khả năng thay đổi                       | Khuyến nghị sử dụng                                                                                                                                             |
+| ------------------------------- | ----------------------------------------- | --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `:<version>` / `:<version>-web` | phát hành Signed/versioned                | bất biến                                | Triển khai sản xuất nhằm ghim một bản phát hành chính xác                                                                                                       |
+| `:latest` / `:latest-web`       | Cao nhất** được xuất bản** SemVer ổn định | Con trỏ ổn định có thể thay đổi         | Theo dõi các bản phát hành ổn định** sau đó** công việc xuất bản SemVer — thực hiện** không** theo dõi các cam kết `main` hoặc `release/v*` chưa được phát hành |
+| `:next` / `:next-web`           | Nhánh `release/v*` mặc định hiện tại      | Con trỏ phát hành trước có thể thay đổi | Kiểm tra các bản sửa lỗi đã có trên nhánh phát hành đang hoạt động nhưng chưa ở bản phát hành ổn định                                                           |
+| `:main` / `:main-web`           | chi nhánh `main`                          | Con trỏ phát triển có thể thay đổi      | Chỉ thử nghiệm phát triển và tích hợp                                                                                                                           |
 
-Mỗi kênh ở trên đều có thêm một thẻ `-web` (`:latest-web`, `:<version>-web`, `:next-web`, `:main-web`), được dựng từ stage `runner-web` — cùng image đó nhưng có thêm Playwright và trình duyệt Chromium. Image thông thường được cung cấp **không kèm** Chromium; `gemini-web`, `claude-web` và `claude-turnstile` cần Chromium.
+#### Nhà cung cấp phiên web: hình ảnh `-web`
 
-Lỗi xảy ra muộn hơn, không phải lúc khởi động: các nhà cung cấp đó vẫn liệt kê model và hiển thị là đã kết nối trong bảng điều khiển, và chỉ yêu cầu đầu tiên mới thất bại với thông báo
+Mọi kênh ở trên đều đóng vai trò như một thẻ `-web` (`:latest-web`, `:<version>-web`, `:next-web`, `:main-web`), được xây dựng từ giai đoạn `runner-web` — cùng một hình ảnh cộng với Playwright và trình duyệt Chrome. Hình ảnh đơn giản của tàu** không có** crom; `gemini-web`, `claude-web` và `claude-turnstile` cần nó.
+
+Lỗi được hoãn lại, không phải thời gian khởi động: các nhà cung cấp đó liệt kê các mô hình của họ và hiển thị là đã kết nối trong bảng điều khiển và chỉ yêu cầu đầu tiên không thành công với
 
 ```
 [500]: Failed to load external module playwright: Error: Cannot find module
 '/app/node_modules/playwright/node_modules/playwright-core/browsers.json'
 ```
 
-Nếu bạn sử dụng các nhà cung cấp đó, hãy kéo thẻ `-web` của kênh mà bạn đang dùng — không có gì khác thay đổi. Với bản cài đặt npm/CLI (không dùng image Docker), thành phần tương ứng còn thiếu là tệp nhị phân của trình duyệt: chạy `npx playwright install chromium` trên máy chủ.
+Nếu bạn sử dụng các nhà cung cấp đó, hãy kéo thẻ `-web` của kênh bạn đã sử dụng — không có gì thay đổi khác. Khi cài đặt npm/CLI (không có hình ảnh Docker ), phần còn thiếu tương đương là tệp nhị phân của trình duyệt: chạy `npx playwright install chromium` trên máy chủ.
 
-#### Sử dụng kênh tiền phát hành
+#### Sử dụng kênh phát hành trước
 
-Kênh `next` được dựng lại sau mỗi lần push vào nhánh `release/v*` mặc định hiện tại và được phát hành cho cả AMD64 lẫn ARM64. Các nhánh bảo trì cũ hơn không thể ghi đè lên kênh này. Kênh này cung cấp một image có thể pull chứa các bản sửa lỗi đã được merge vào nhánh phát hành đang hoạt động trước khi tag ổn định tiếp theo được tạo.
+Kênh `next` được xây dựng lại sau mỗi lần đẩy tới nhánh `release/v*` mặc định hiện tại và được xuất bản cho cả AMD64 và ARM64. Các nhánh bảo trì cũ hơn không thể ghi đè lên nó. Kênh này cung cấp hình ảnh có thể kéo được cho các bản sửa lỗi đã hợp nhất vào nhánh phát hành đang hoạt động trước khi cắt thẻ ổn định tiếp theo.
 
 ```bash
 docker pull diegosouzapw/omniroute:next
 docker pull diegosouzapw/omniroute:next-web
 ```
 
-Đối với Docker Compose, hãy ghi đè tag image được profile đã chọn sử dụng, sau đó pull và tạo lại service:
+Đối với Docker Compose, ghi đè thẻ hình ảnh được cấu hình đã chọn sử dụng, sau đó kéo và tạo lại dịch vụ:
 
 ```yaml
 services:
@@ -552,32 +489,32 @@ docker compose pull
 docker compose up -d
 ```
 
-#### An toàn và khôi phục phiên bản
+#### An toàn và khôi phục
 
-`next` là một kênh tiền phát hành không cố định. Kênh này có thể thay đổi sau bất kỳ lần push nào vào nhánh phát hành đang hoạt động và **không được hỗ trợ cho môi trường production**. Hãy cố định digest của image khi đánh giá một bản dựng cụ thể:
+`next` là kênh phát hành trước nổi. Nó có thể thay đổi khi có bất kỳ lần đẩy nào tới nhánh phát hành đang hoạt động và được** không được hỗ trợ cho việc sử dụng sản xuất** . Ghim thông báo hình ảnh trong khi đánh giá một bản dựng cụ thể:
 
 ```bash
 docker pull diegosouzapw/omniroute:next
 docker image inspect diegosouzapw/omniroute:next --format '{{index .RepoDigests 0}}'
 ```
 
-Trước khi kiểm thử, hãy sao lưu volume dữ liệu OmniRoute hoặc thư mục dữ liệu được bind mount. Để khôi phục phiên bản, hãy khôi phục phiên bản ổn định hoặc digest đã dùng trước đó và tạo lại container:
+Trước khi kiểm tra, hãy sao lưu khối lượng dữ liệu OmniRoute hoặc thư mục dữ liệu được gắn kết. Để quay lại, hãy khôi phục phiên bản ổn định đã sử dụng trước đó hoặc phân tích và tạo lại vùng chứa:
 
 ```bash
-docker pull diegosouzapw/omniroute:<stable-version>
+docker pull cheaperinference/omniroute:<stable-version>
 docker compose up -d
 ```
 
-Một bản dựng từ nhánh phát hành không bao giờ có thể thay đổi `latest`; chỉ một phiên bản ngữ nghĩa ổn định đủ điều kiện mới có thể cập nhật con trỏ ổn định. Các image `next` vẫn duy trì bước kiểm tra image phát hành và cổng chặn đối với các lỗ hổng có mức độ CRITICAL.
+Bản dựng nhánh phát hành không bao giờ có thể di chuyển `latest`; chỉ phiên bản ngữ nghĩa ổn định đủ điều kiện mới có thể quảng bá con trỏ ổn định. Các hình ảnh `next` giữ lại việc kiểm tra hình ảnh phát hành và chặn cổng lỗ hổng TIÊU CHUẨN.
 
-**`latest` không đảm bảo luôn cập nhật theo git.** Các bản sửa lỗi đã được merge vào `main` hoặc nhánh `release/v*` đang hoạt động **không** có trong `:latest` cho đến khi một image SemVer ổn định được phát hành và tác vụ phát hành cập nhật `:latest` (cùng digest với SemVer đó). Nếu `latest` có vẻ không thay đổi trong khi GitHub đã hiển thị bản sửa lỗi, hãy pull `:next` để kiểm thử nhánh phát hành hoặc chờ tag SemVer.
+**`latest` không phải là sự đảm bảo tiền tệ cho git.** Các bản sửa lỗi đã hợp nhất trên `main` hoặc trên nhánh `release/v*` đang hoạt động là** không** trong `:latest` cho đến khi hình ảnh SemVer ổn định được xuất bản và công việc xuất bản quảng bá `:latest` (thông báo tương tự như SemVer). Nếu `latest` có vẻ bị treo trong khi GitHub đã hiển thị bản sửa lỗi, hãy kéo `:next` để kiểm tra nhánh phát hành hoặc đợi thẻ SemVer.
 
-| Bạn muốn                                                                       | Sử dụng                              |
-| ------------------------------------------------------------------------------ | ------------------------------------ |
-| GitOps / production không được phép sai lệch                                   | Cố định `:X.Y.Z` (hoặc digest image) |
-| Theo dõi các bản ổn định đã phát hành và chấp nhận tạo lại ở mỗi bản phát hành | `:latest`                            |
-| Kiểm thử các commit `release/v*` chưa phát hành                                | `:next` (không dùng cho production)  |
-| Kiểm thử `main`                                                                | `:main` (không dùng cho production)  |
+| Bạn muốn                                                                    | Sử dụng                                 |
+| --------------------------------------------------------------------------- | --------------------------------------- |
+| GitOps / sản xuất không được trôi dạt                                       | Ghim `:X.Y.Z` (hoặc thông báo hình ảnh) |
+| Theo dõi các chuồng đã xuất bản và chấp nhận tạo lại trên mỗi bản phát hành | `:latest`                               |
+| Kiểm tra các cam kết `release/v*` chưa được phát hành                       | `:next` (không sản xuất)                |
+| Kiểm tra `main`                                                             | `:main` (không sản xuất)                |
 
 ## Cập nhật dashboard trong Docker
 

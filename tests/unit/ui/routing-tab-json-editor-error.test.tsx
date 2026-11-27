@@ -9,6 +9,7 @@ import { afterEach, beforeEach, expect, it, vi } from "vitest";
 vi.mock("next-intl", () => ({
   useTranslations: () =>
     Object.assign((key: string) => key, { has: () => true, rich: (key: string) => key }),
+  useLocale: () => "en",
 }));
 
 const { default: RoutingTab } =

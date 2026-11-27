@@ -12,7 +12,8 @@
     "dryRun": "[شبیه‌سازی] اقدام می‌شد: {action}",
     "cancelled": "لغو شد.",
     "jsonOpt": "خروجی به صورت JSON",
-    "yesOpt": "رد کردن تأیید"
+    "yesOpt": "رد کردن تأیید",
+    "positiveIntegerRequired": "حد باید یک عدد صحیح مثبت باشد."
   },
   "setup": {
     "title": "راهاندازی OmniRoute",

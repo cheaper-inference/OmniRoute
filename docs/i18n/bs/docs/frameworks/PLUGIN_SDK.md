@@ -25,7 +25,7 @@ export default definePlugin({
 });
 ```
 
-## API referenca
+## API Reference
 
 ### `definePlugin(def: PluginDefinition): Plugin`
 
@@ -33,28 +33,28 @@ Tvornička funkcija koja kreira Plugin objekt sa zadanim vrijednostima.
 
 **Parametri:**
 
-- `name` (string, obavezno) — Naziv dodatka u kebab-case formatu
-- `priority` (number, opcionalno, zadano: 100) — Niža vrijednost se izvršava prva
-- `enabled` (boolean, opcionalno, zadano: true) — Da li je omogućeno pri pokretanju?
-- `onRequest` (function, opcionalno) — Izvršava se prije obrađivača razgovora
-- `onResponse` (function, opcionalno) — Izvršava se nakon obrađivača razgovora
-- `onError` (function, opcionalno) — Izvršava se pri grešci obrađivača
+- `name` (string, obavezan) — Ime dodatka u kebab-case
+- `priority` (broj, opciono, zadano: 100) — Niže se prvo pokreće
+- `enabled` (boolean, opciono, default: true) — Pokrenuti omogućeno?
+- `onRequest` (funkcija, opciono) — Pokreće se prije rukovatelja chatom
+- `onResponse` (funkcija, opciono) — Pokreće se nakon rukovaoca razgovora
+- `onError` (funkcija, opciono) — Pokreće grešku rukovaoca
 
 ### `blockRequest(response?): BlockingHookResult`
 
-Blokira zahtjev i opcionalno vraća prilagođeni odgovor.
+Blokirajte zahtjev i po želji vratite prilagođeni odgovor.
 
 ```ts
 onRequest: (ctx) => {
-  if (!ctx.headers["authorization"]) {
-    return blockRequest({ error: "Unauthorized", status: 401 });
+  if (!ctx.headers?.["x-client-team"]) {
+    return blockRequest({ error: "Missing x-client-team header", status: 400 });
   }
 };
 ```
 
 ### `modifyBody(body): PluginResult`
 
-Mijenja tijelo zahtjeva prije nego što stigne do pružaoca usluge.
+Izmijenite tijelo zahtjeva prije nego što stigne do dobavljača.
 
 ```ts
 onRequest: (ctx) => {
@@ -64,7 +64,7 @@ onRequest: (ctx) => {
 
 ### `addMetadata(metadata): PluginResult`
 
-Dodaje metapodatke kontekstu zahtjeva.
+Priložite metapodatke kontekstu zahtjeva.
 
 ```ts
 onRequest: (ctx) => {
@@ -74,15 +74,18 @@ onRequest: (ctx) => {
 
 ## Kontekst dodatka (`PluginContext`)
 
-| Polje       | Tip                       | Opis                               |
-| ----------- | ------------------------- | ---------------------------------- |
-| `requestId` | `string`                  | Jedinstveni identifikator zahtjeva |
-| `model`     | `string`                  | Naziv zahtijevanog modela          |
-| `provider`  | `string`                  | ID ciljnog pružaoca usluge         |
-| `body`      | `Record<string, unknown>` | Tijelo zahtjeva                    |
-| `headers`   | `Record<string, string>`  | Zaglavlja zahtjeva                 |
-| `metadata`  | `Record<string, unknown>` | Promjenjivi metapodaci             |
-| `timestamp` | `number`                  | Vremenska oznaka zahtjeva          |
+| Polje        | Tip                       | Opis                                   |
+| ------------ | ------------------------- | -------------------------------------- |
+| `requestId`  | `string`                  | Jedinstveni identifikator zahtjeva     |
+| `model`      | `string`                  | Traženi naziv modela                   |
+| `provider`   | `string`                  | Ciljni provajder ID                    |
+| `body`       | `Record<string, unknown>` | Telo zahtjeva                          |
+| `headers`    | `Record<string, string>`  | Zaglavlja zahtjeva (vidi napomenu)     |
+| `metadata`   | `Record<string, unknown>` | Promjenjivi metapodaci                 |
+| `timestamp`  | `number`                  | Zatražite vremensku oznaku             |
+| `apiKeyInfo` | `object` (opciono)        | API ključni metapodaci (vidi napomenu) |
+
+Kontekst nikada ne nosi akreditive klijenta: zaglavlja `authorization`, `x-api-key`, `proxy-authorization` i `cookie` su uklonjena (svaka mala slova), a `apiKeyInfo` zadržava metapodatke ključa (kao što su `id`, `name` i `scopes`), ali ne i vrijednost ključa ili njegov otisak prsta (`redactPluginContext()` u `src/lib/plugins/hooks.ts`). Ovo se odnosi na `onRequest`, `onResponse` i `onError`.
 
 ## Manifest (`plugin.json`)
 
@@ -140,17 +143,16 @@ Ili kao jednostavne boolean vrijednosti (zadani prioritet je 100):
 
 ## Sistem dozvola
 
-Dodaci se pokreću u izoliranom kontekstu virtuelne mašine. Pristup vanjskim resursima zahtijeva izričite dozvole:
+Dodaci su** nije sandboxed** . Each active plugin runs as a separate, ordinary Node.js child process (`loadPlugin()` in `src/lib/plugins/loader.ts`) under the same operating-system user as OmniRoute, with no VM context and no Node.js permission flags. Plugin code can use `node:fs`, `node:child_process`, `fetch` and every other Node.js API: it can read and write any file the OmniRoute user can (including the data directory), run programs and reach the network.
 
-| Dozvola      | Omogućava                                                    |
-| ------------ | ------------------------------------------------------------ |
-| `network`    | `fetch`, `AbortController`, `Headers`, `Request`, `Response` |
-| `file-read`  | `fs.readFile`, `fs.readdir`, `fs.stat`                       |
-| `file-write` | `fs.writeFile`, `fs.mkdir`, `fs.rm`                          |
-| `env`        | Proxy za `process.env` samo za čitanje                       |
-| `exec`       | `child_process.exec`, `child_process.execSync`               |
+`requires.permissions` manifesta prihvata `network`, `file-read`, `file-write`, `env` i `exec`, ali danas samo `env` ima učinak u vremenu izvođenja:
 
-Bez dozvole, odgovarajući globalni objekti jednostavno nisu dostupni u izoliranom okruženju.
+| Dozvola                                      | Efekat danas                                                                                                                                                                                                           |
+| -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `env`                                        | Proces dodatka također prima `PORT`, `HOSTNAME`, `TZ` i `TMPDIR`. Bez toga, prima samo `PATH`, `HOME`, `USER`, `LANG`, `LC_ALL`, `NODE_ENV`, `PLUGIN_ENTRY` i `PLUGIN_NAME` (plus `SystemRoot` i `windir` na Windows). |
+| `network`, `file-read`, `file-write`, `exec` | Nema. One su samo deklaracije: ništa nije blokirano kada nedostaju.                                                                                                                                                    |
+
+Instaliranje dodatka je kao instaliranje bilo kojeg drugog programa na hostu. Instalirajte samo dodatke čiji izvor vjerujete.
 
 ## Konfiguracijska shema
 
@@ -194,7 +196,7 @@ Konfiguracijske vrijednosti pohranjuju se u bazi podataka i dostupne su putem st
 
 ## Primjeri
 
-### Zapisivač zahtjeva
+### Request Logger
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";
@@ -207,7 +209,7 @@ export default definePlugin({
 });
 ```
 
-### Ograničivač učestalosti
+### Rate Limiter
 
 ```ts
 import { definePlugin, blockRequest } from "omniroute/plugins/sdk";
@@ -218,9 +220,9 @@ export default definePlugin({
   name: "rate-limiter",
   priority: 10,
   onRequest: async (ctx) => {
-    const key = ctx.headers["x-api-key"] || "anonymous";
+    const key = ctx.apiKeyInfo?.id || "anonymous";
     const now = Date.now();
-    const window = 60000; // 1 minuta
+    const window = 60000; // 1 minute
     const maxRequests = 100;
 
     const timestamps = (requests.get(key) || []).filter((t) => t > now - window);
@@ -234,7 +236,7 @@ export default definePlugin({
 });
 ```
 
-### Transformator odgovora
+### Response Transformer
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";

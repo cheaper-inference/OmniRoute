@@ -407,11 +407,7 @@ async function runStreamingResponseInner(deps: StreamingDeps) {
     try {
       const { storeRateLimitHeaders } = await import("@/lib/quota/saturationSignals");
       if (isCodexResponseCurrent(providerResponse, providerResponse.ok))
-        storeRateLimitHeaders(
-          responseConnectionId,
-          provider,
-          providerResponse.headers as Record<string, string>
-        );
+        storeRateLimitHeaders(responseConnectionId, provider, providerResponse.headers);
     } catch {
       // fail-open: saturation signal is best-effort
     }

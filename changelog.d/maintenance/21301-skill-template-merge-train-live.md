@@ -1,0 +1,1 @@
+- **chore(quality):** The merge-gates skill template says how a merge train lands while the merge queue is live: the queue label goes on the train's pull request and on no member, and the train's member merges carry trailers that name each member.

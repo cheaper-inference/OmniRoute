@@ -1,0 +1,1 @@
+- **fix(cli):** Restore decrypts archives made by `backup create --encrypt` with `--key-file` or a passphrase prompt. All payloads authenticate and the database passes its integrity check before live files change; wrong keys and damaged ciphertext fail without changing live files. ([#19633](https://github.com/cheaper-inference/OmniRoute/pull/19633))

@@ -9,7 +9,13 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { collectApiRouteFiles, toApiUrlPath, apiRoot } from "../check/lib/apiRoutes.mjs";
+import {
+  collectApiRouteFiles,
+  toApiUrlPath,
+  apiRoot,
+  collectOptionalCatchAllRoutes,
+  isOptionalCatchAllRouteDocumented,
+} from "../check/lib/apiRoutes.mjs";
 import { isLocalOnlyPath, ALWAYS_PROTECTED_API_PATHS } from "../../src/server/authz/routeGuard.ts";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
@@ -40,6 +46,7 @@ function routeMethods(absFile) {
 }
 
 const routeFiles = collectApiRouteFiles(ROOT);
+const optionalRoutes = collectOptionalCatchAllRoutes(ROOT);
 const API_ROOT = apiRoot(ROOT);
 const routes = new Map(); // urlPath -> methods
 for (const rel of routeFiles) {
@@ -54,7 +61,11 @@ const specPaths = new Set();
 for (const m of spec.matchAll(/^ {2}(\/[^\s:]+):\s*$/gm)) specPaths.add(normalizeParams(m[1]));
 
 const missing = [...routes.entries()]
-  .filter(([url]) => !specPaths.has(normalizeParams(url)))
+  .filter(
+    ([url]) =>
+      !specPaths.has(normalizeParams(url)) &&
+      !isOptionalCatchAllRouteDocumented(url, specPaths, optionalRoutes)
+  )
   .filter(([, methods]) => methods.length > 0)
   .sort(([a], [b]) => a.localeCompare(b));
 
@@ -92,6 +103,17 @@ for (const [url, methods] of missing) {
   if (!existingTags.has(tag.toLowerCase()) && !newTags.has(tag))
     newTags.set(tag, `${tag} endpoints (generated route coverage)`);
   lines.push(`  ${url}:`);
+  const parameters = [...new Set([...url.matchAll(/\{([^{}]+)\}/g)].map((match) => match[1]))];
+  if (parameters.length > 0) {
+    lines.push("    parameters:");
+    for (const name of parameters) {
+      lines.push(`      - name: ${JSON.stringify(name)}`);
+      lines.push("        in: path");
+      lines.push("        required: true");
+      lines.push("        schema:");
+      lines.push("          type: string");
+    }
+  }
   const loopbackOnly = isLocalOnlyPath(url);
   const alwaysProtected = ALWAYS_PROTECTED_API_PATHS.includes(url);
   for (const method of methods.sort()) {
