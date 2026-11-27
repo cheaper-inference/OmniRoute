@@ -10,10 +10,11 @@
  * Opt-in via PRICING_SYNC_ENABLED=true (default: false).
  */
 
-import { getDbInstance } from "./db/core";
+import type { SyncedPricingRepository } from "@/domain/persistence/externalSyncStateRepositories";
 import { invalidateDbCache, getModelCatalogCacheVersion } from "./db/readCache";
 import { backupDbFile } from "./db/backup";
 import { LITELLM_PROVIDER_MAP, remapHistoricalLitellmRows } from "./litellmProviderMap";
+import { externalSyncStateRepositories } from "./db/repositories/externalSyncStateRepositories";
 
 // ─── Types ───────────────────────────────────────────────
 
@@ -215,9 +216,17 @@ export function transformToOmniRoute(raw: Record<string, LiteLLMModelInfo>): Pri
 }
 
 // ─── DB: Synced pricing namespace ────────────────────────
+//
+// Persistence lives behind SyncedPricingRepository. The functions below stay
+// synchronous (SQLite-only legacy access): getSyncedPricing() is on the per-model
+// pricing lookup path, and every write is followed by its backup and cache
+// invalidation in the same turn. This module keeps the memo, the truncation guard,
+// the backup and the cache invalidation.
+const legacy = externalSyncStateRepositories.legacySync.syncedPricing;
 
-function toRecord(value: unknown): Record<string, unknown> {
-  return value && typeof value === "object" ? (value as Record<string, unknown>) : {};
+/** Async persistence contract; it never backs up, invalidates caches or remaps aliases. */
+export function getSyncedPricingRepository(): SyncedPricingRepository {
+  return externalSyncStateRepositories.syncedPricing;
 }
 
 // getSyncedPricing() re-ran the SELECT + JSON.parse of the pricing_synced
@@ -250,23 +259,7 @@ export function getSyncedPricing(): PricingByProvider {
 
 /** The `pricing_synced` rows as stored: no alias remap, so each model is present once. */
 function readStoredPricingRows(): PricingByProvider {
-  const db = getDbInstance();
-  const rows = db
-    .prepare("SELECT key, value FROM key_value WHERE namespace = 'pricing_synced'")
-    .all();
-  const synced: PricingByProvider = {};
-  for (const row of rows) {
-    const record = toRecord(row);
-    const key = typeof record.key === "string" ? record.key : null;
-    const rawValue = typeof record.value === "string" ? record.value : null;
-    if (!key || rawValue === null) continue;
-    try {
-      synced[key] = JSON.parse(rawValue) as PricingModels;
-    } catch {
-      console.warn(`[PRICING_SYNC] Corrupted data for provider "${key}", skipping`);
-    }
-  }
-  return synced;
+  return legacy.list() as PricingByProvider;
 }
 
 function countPricingModels(map: PricingByProvider): number {
@@ -291,18 +284,7 @@ function assertFetchedPriceMapNotTruncated(modelCount: number): void {
  * Save synced pricing to `pricing_synced` namespace (full replace).
  */
 export function saveSyncedPricing(data: PricingByProvider): void {
-  const db = getDbInstance();
-  const del = db.prepare("DELETE FROM key_value WHERE namespace = 'pricing_synced'");
-  const insert = db.prepare(
-    "INSERT INTO key_value (namespace, key, value) VALUES ('pricing_synced', ?, ?)"
-  );
-  const tx = db.transaction(() => {
-    del.run();
-    for (const [provider, models] of Object.entries(data)) {
-      insert.run(provider, JSON.stringify(models));
-    }
-  });
-  tx();
+  legacy.replaceAll(data);
   backupDbFile("pre-write");
   invalidateDbCache("pricing");
 }
@@ -311,8 +293,7 @@ export function saveSyncedPricing(data: PricingByProvider): void {
  * Clear all synced pricing data.
  */
 export function clearSyncedPricing(): void {
-  const db = getDbInstance();
-  db.prepare("DELETE FROM key_value WHERE namespace = 'pricing_synced'").run();
+  legacy.clear();
   backupDbFile("pre-write");
   invalidateDbCache("pricing");
 }
@@ -326,40 +307,15 @@ export function clearSyncedPricing(): void {
 // `lastSyncModelCount`) are therefore invisible across those instances;
 // persisting them to the DB lets any instance read the real status.
 
-const SYNC_STATUS_NAMESPACE = "pricing_sync_status";
-const SYNC_STATUS_KEY = "last_sync";
+// The record (`pricing_sync_status` / `last_sync`) is read and written through
+// SyncedPricingRepository's status operations.
 
 function readPersistedSyncStatus(): { lastSyncTime: string; lastSyncModelCount: number } | null {
-  const db = getDbInstance();
-  const row = db
-    .prepare("SELECT value FROM key_value WHERE namespace = ? AND key = ?")
-    .get(SYNC_STATUS_NAMESPACE, SYNC_STATUS_KEY);
-  const record = toRecord(row);
-  const rawValue = typeof record.value === "string" ? record.value : null;
-  if (!rawValue) return null;
-  try {
-    const parsed = JSON.parse(rawValue) as { lastSyncTime?: string; lastSyncModelCount?: number };
-    if (typeof parsed.lastSyncTime !== "string") return null;
-    return {
-      lastSyncTime: parsed.lastSyncTime,
-      lastSyncModelCount:
-        typeof parsed.lastSyncModelCount === "number" ? parsed.lastSyncModelCount : 0,
-    };
-  } catch {
-    return null;
-  }
+  return legacy.readStatus();
 }
 
 function writePersistedSyncStatus(lastSync: string, modelCount: number): void {
-  const db = getDbInstance();
-  db.prepare(
-    "INSERT INTO key_value (namespace, key, value) VALUES (?, ?, ?) " +
-      "ON CONFLICT(namespace, key) DO UPDATE SET value = excluded.value"
-  ).run(
-    SYNC_STATUS_NAMESPACE,
-    SYNC_STATUS_KEY,
-    JSON.stringify({ lastSyncTime: lastSync, lastSyncModelCount: modelCount })
-  );
+  legacy.writeStatus(lastSync, modelCount);
 }
 
 // ─── Main sync function ─────────────────────────────────
