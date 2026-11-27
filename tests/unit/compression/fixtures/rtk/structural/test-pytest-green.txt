@@ -1,0 +1,16 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-8.2.0, pluggy-1.5.0
+rootdir: /work/service
+configfile: pyproject.toml
+plugins: anyio-4.3.0, cov-5.0.0
+collected 142 items
+
+tests/test_api.py ....................                                [ 14%]
+tests/test_auth.py ....................                               [ 28%]
+tests/test_billing.py ....................                            [ 42%]
+tests/test_cache.py .................sss                              [ 56%]
+tests/test_cli.py ....................                                [ 70%]
+tests/test_config.py ....................                             [ 85%]
+tests/test_db.py ......................                               [100%]
+
+======================== 139 passed, 3 skipped in 3.21s ========================

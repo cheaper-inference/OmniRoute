@@ -194,7 +194,35 @@ computed from the whole input, and drops blob ids and unchanged context. Dispatc
   the legacy RTK; the rule `rtk:structural:over-budget` is recorded so the incidence can be measured.
 - A project or global filter that matches the command, any explicitly enabled filter, or the matched
   filter being explicitly disabled keeps the legacy path. The `rtkConfig.renderers` allowlist is
-  matched against the format name (`git-diff`).
+  matched against the format name (`git-diff`, or a runner name for test output).
+
+### Test runner output (Vitest, Jest, pytest)
+
+`renderTestSummary` (`engines/rtk/renderers/testGreen.ts`) summarises a test run that provably
+passed. The format is named by the correlated command (`vitest`, `jest`, `pytest`, also behind
+`npx`, `pnpm exec`, `yarn`, `python -m` and `uv run`); a package script such as `npm test` only
+routes when the output itself identifies the runner. Without a command nothing is guessed. The
+`rtkConfig.renderers` allowlist names are `test-vitest`, `test-jest` and `test-pytest`, and an
+accepted summary is tagged `rtk-render:test-summary`.
+
+- **Kept:** the runner's own totals (Vitest `Test Files` / `Tests` / `Snapshots` / `Start at` /
+  `Duration`; Jest `Test Suites` / `Tests` / `Snapshots` / `Time` / `Ran all test suites`; pytest
+  `collected N items` and the final `N passed, M skipped in Xs` line), behind a one-line note with
+  the number of omitted progress lines. Passing per-file, per-test and progress-dot lines are
+  dropped.
+- **Classification is strict.** The output is read with ANSI codes removed (the summary carries
+  none), and every non-blank line must be one the runner prints for a passing run. The runner's
+  counts must agree with each other (declared totals equal the outcomes) and with the progress
+  lines (pytest dots and `PASSED` lines against the final counts, Vitest and Jest per-file lines
+  against the file and suite counts), and the final summary must be present. `failed: 0` /
+  `0 failed` is accepted; any failed or error count above zero is not. The failure guards of
+  `renderTestGreen` (`hasFailureSignal`) run over the lines that are kept.
+- **Anything else is returned whole**, not handed to the legacy filters: a failure, snapshot diff
+  or stack trace, a console or `stdout |` block, pytest warnings, coverage tables, a missing or
+  truncated summary, verbose Jest headings, xdist or watch-mode output, terminal redraw codes
+  (cursor movement, erase line), a mixed runner format, or counts that do not add up.
+- Input over the analysis ceiling above still uses the legacy RTK (a test command over the ceiling
+  records `rtk:structural:over-budget`).
 
 ## Code Comment Stripping (`stripCodeComments` / `preserveDocstrings`)
 

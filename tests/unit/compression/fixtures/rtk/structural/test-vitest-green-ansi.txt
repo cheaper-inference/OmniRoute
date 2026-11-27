@@ -1,0 +1,28 @@
+ RUN  v2.1.8 /work/project
+
+ [32m✓[39m tests/unit/auth.test.ts [2m(4 tests)[22m 10ms
+ [32m✓[39m tests/unit/billing.test.ts [2m(5 tests)[22m 13ms
+ [32m✓[39m tests/unit/cache.test.ts [2m(6 tests)[22m 16ms
+ [32m✓[39m tests/unit/combo.test.ts [2m(9 tests)[22m 19ms
+ [32m✓[39m tests/unit/cursor.test.ts [2m(8 tests)[22m 22ms
+ [32m✓[39m tests/unit/db.test.ts [2m(4 tests)[22m 25ms
+ [32m✓[39m tests/unit/encoder.test.ts [2m(5 tests)[22m 28ms
+ [32m✓[39m tests/unit/filters.test.ts [2m(6 tests)[22m 31ms
+ [32m✓[39m tests/unit/guard.test.ts [2m(7 tests)[22m 34ms
+ [32m✓[39m tests/unit/headers.test.ts [2m(8 tests)[22m 37ms
+ [32m✓[39m tests/unit/limits.test.ts [2m(4 tests)[22m 40ms
+ [32m✓[39m tests/unit/memo.test.ts [2m(5 tests)[22m 43ms
+ ↓ tests/unit/queue.test.ts (3 tests | 3 skipped)
+ [32m✓[39m tests/unit/router.test.ts [2m(7 tests)[22m 49ms
+ [32m✓[39m tests/unit/sanitize.test.ts [2m(8 tests)[22m 52ms
+ [32m✓[39m tests/unit/stream.test.ts [2m(4 tests)[22m 55ms
+ [32m✓[39m tests/unit/tokens.test.ts [2m(5 tests)[22m 58ms
+ [32m✓[39m tests/unit/upstream.test.ts [2m(6 tests)[22m 61ms
+ [32m✓[39m tests/unit/usage.test.ts [2m(7 tests)[22m 64ms
+ [32m✓[39m tests/unit/worker.test.ts [2m(8 tests)[22m 67ms
+
+ Test Files  19 passed | 1 skipped (20)
+      Tests  116 passed | 3 skipped (119)
+   Snapshots  4 passed (4)
+   Start at  10:14:02
+   Duration  3.82s (transform 412ms, setup 0ms, collect 1.20s, tests 640ms, environment 2ms, prepare 305ms)

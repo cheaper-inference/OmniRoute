@@ -1,0 +1,21 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-8.2.0, pluggy-1.5.0
+rootdir: /work/service
+collected 12 items
+
+tests/test_api.py ......                                                 [ 50%]
+tests/test_billing.py ..F...                                             [100%]
+
+=================================== FAILURES ===================================
+______________________________ test_prorate_total ______________________________
+
+    def test_prorate_total():
+        invoice = prorate(PLAN, 12)
+>       assert invoice.total == 1300
+E       assert 1250 == 1300
+E        +  where 1250 = Invoice(total=1250).total
+
+tests/test_billing.py:41: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_billing.py::test_prorate_total - assert 1250 == 1300
+========================= 1 failed, 11 passed in 0.84s =========================

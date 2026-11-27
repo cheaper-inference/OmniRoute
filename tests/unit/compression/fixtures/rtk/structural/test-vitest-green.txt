@@ -1,0 +1,28 @@
+ RUN  v2.1.8 /work/project
+
+ ✓ tests/unit/auth.test.ts (4 tests) 10ms
+ ✓ tests/unit/billing.test.ts (5 tests) 13ms
+ ✓ tests/unit/cache.test.ts (6 tests) 16ms
+ ✓ tests/unit/combo.test.ts (9 tests) 19ms
+ ✓ tests/unit/cursor.test.ts (8 tests) 22ms
+ ✓ tests/unit/db.test.ts (4 tests) 25ms
+ ✓ tests/unit/encoder.test.ts (5 tests) 28ms
+ ✓ tests/unit/filters.test.ts (6 tests) 31ms
+ ✓ tests/unit/guard.test.ts (7 tests) 34ms
+ ✓ tests/unit/headers.test.ts (8 tests) 37ms
+ ✓ tests/unit/limits.test.ts (4 tests) 40ms
+ ✓ tests/unit/memo.test.ts (5 tests) 43ms
+ ↓ tests/unit/queue.test.ts (3 tests | 3 skipped)
+ ✓ tests/unit/router.test.ts (7 tests) 49ms
+ ✓ tests/unit/sanitize.test.ts (8 tests) 52ms
+ ✓ tests/unit/stream.test.ts (4 tests) 55ms
+ ✓ tests/unit/tokens.test.ts (5 tests) 58ms
+ ✓ tests/unit/upstream.test.ts (6 tests) 61ms
+ ✓ tests/unit/usage.test.ts (7 tests) 64ms
+ ✓ tests/unit/worker.test.ts (8 tests) 67ms
+
+ Test Files  19 passed | 1 skipped (20)
+      Tests  116 passed | 3 skipped (119)
+   Snapshots  4 passed (4)
+   Start at  10:14:02
+   Duration  3.82s (transform 412ms, setup 0ms, collect 1.20s, tests 640ms, environment 2ms, prepare 305ms)

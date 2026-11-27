@@ -1,0 +1,31 @@
+ RUN  v2.1.8 /work/project
+
+ [32m✓[39m tests/unit/auth.test.ts (6 tests) 21ms
+ [32m✓[39m tests/unit/cache.test.ts (5 tests) 14ms
+ [31m❯[39m tests/unit/billing.test.ts (4 tests | 1 failed) 33ms
+   [31m×[39m charges the prorated amount
+ [32m✓[39m tests/unit/db.test.ts (7 tests) 40ms
+
+[31m⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m tests/unit/billing.test.ts > charges the prorated amount
+[31m[1mAssertionError[22m: expected 1250 to be 1300 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 1300[39m
+[31m+ 1250[39m
+
+ ❯ tests/unit/billing.test.ts:41:23
+     39|   const invoice = prorate(plan, 12);
+     40|   // 12 of 30 days
+     41|   expect(invoice.total).toBe(1300);
+       |                       ^
+
+[31m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[39m
+
+ Test Files  [1m[31m1 failed[39m[22m[2m | [22m[1m[32m3 passed[39m[22m[90m (4)[39m
+      Tests  [1m[31m1 failed[39m[22m[2m | [22m[1m[32m17 passed[39m[22m[90m (18)[39m
+   Start at  10:14:02
+   Duration  1.02s

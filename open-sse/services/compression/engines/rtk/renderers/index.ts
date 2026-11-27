@@ -2,7 +2,7 @@ import type { CommandDetectionResult } from "../commandDetector.ts";
 import type { RtkConfig } from "../../../types.ts";
 import { type RenderResult, type Renderer, NO_RENDER } from "./types.ts";
 import { renderGitDiff, renderUnifiedDiff } from "./gitDiff.ts";
-import { renderTestGreen } from "./testGreen.ts";
+import { renderTestGreen, renderTestSummary } from "./testGreen.ts";
 import { renderTerraformPlan } from "./terraformPlan.ts";
 import { renderStructuredTable } from "./structuredTable.ts";
 
@@ -62,4 +62,7 @@ export { REGISTRY };
  */
 export const STRUCTURAL_REGISTRY: Record<string, Renderer> = {
   "git-diff": renderUnifiedDiff,
+  "test-vitest": renderTestSummary,
+  "test-jest": renderTestSummary,
+  "test-pytest": renderTestSummary,
 };

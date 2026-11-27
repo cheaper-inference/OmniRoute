@@ -1,0 +1,32 @@
+PASS src/auth/auth.test.ts
+PASS src/cache/cache.test.ts
+FAIL src/ui/button.test.tsx
+  ● Button › renders the label
+
+    expect(received).toMatchSnapshot()
+
+    Snapshot name: `Button renders the label 1`
+
+    - Snapshot  - 1
+    + Received  + 1
+
+      <button>
+    -   Save
+    +   Save changes
+      </button>
+
+      12 |   it('renders the label', () => {
+    > 13 |     expect(render(<Button/>)).toMatchSnapshot();
+         |                               ^
+
+      at Object.<anonymous> (src/ui/button.test.tsx:13:31)
+
+ › 1 snapshot failed.
+Snapshot Summary
+ › 1 snapshot failed from 1 test suite.
+
+Test Suites: 1 failed, 2 passed, 3 total
+Tests:       1 failed, 9 passed, 10 total
+Snapshots:   1 failed, 1 total
+Time:        2.9 s
+Ran all test suites.

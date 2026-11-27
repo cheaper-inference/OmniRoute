@@ -83,6 +83,39 @@ function diffRoute(command: string | null): StructuralRoute {
   return { type: "git-diff", render: STRUCTURAL_REGISTRY["git-diff"], command };
 }
 
+// Test runners are named by the correlated command: an optional env prefix and package-runner
+// wrapper, then the runner itself. A package script (`npm test`) names no runner, so it only
+// routes when the output identifies one (see selectTestRoute).
+const RUNNER_PREFIX = String.raw`^(?:[A-Za-z_]\w{0,63}=\S{0,256}\s+){0,8}(?:(?:npx|bunx|pnpx)\s+|(?:pnpm|yarn|npm|bun)\s+(?:exec\s+|dlx\s+)?)?`;
+const TEST_RUNNER_COMMANDS: ReadonlyArray<readonly [string, RegExp]> = [
+  ["test-vitest", new RegExp(`${RUNNER_PREFIX}vitest\\b`, "i")],
+  ["test-jest", new RegExp(`${RUNNER_PREFIX}jest\\b`, "i")],
+  [
+    "test-pytest",
+    /^(?:(?:uv|poetry|pipenv)\s+run\s+)?(?:python[\d.]{0,5}\s+-m\s+)?(?:pytest|py\.test)\b/i,
+  ],
+];
+const TEST_RUNNER_TYPES = new Set(TEST_RUNNER_COMMANDS.map(([type]) => type));
+const TEST_SCRIPT_COMMAND_RE = /^(?:npm|pnpm|yarn|bun)\s+(?:run\s+)?test(?::\S{1,64})?(?:\s|$)/i;
+
+/** A test route: the registry renderer, told which runner the command named. */
+function testRoute(type: string, command: string): StructuralRoute {
+  const render = STRUCTURAL_REGISTRY[type];
+  return { type, render: (text, detection) => render(text, { ...detection, type }), command };
+}
+
+function selectTestRoute(text: string, command: string, full: boolean): StructuralRoute | null {
+  const named = TEST_RUNNER_COMMANDS.find(([, pattern]) => pattern.test(command));
+  if (named) return testRoute(named[0], command);
+  if (!full || !TEST_SCRIPT_COMMAND_RE.test(command)) return null;
+  // Content only: the script name says nothing about the runner, and the generic `npm test`
+  // command pattern would always read as Jest.
+  const detected = detectCommandType(text, "");
+  return detected.confidence >= 0.5 && TEST_RUNNER_TYPES.has(detected.type)
+    ? testRoute(detected.type, command)
+    : null;
+}
+
 /**
  * Pick the format from the correlated command when there is one, else from a strong signature
  * of the text itself. `full: false` is the cheap pre-check used for over-budget inputs: it never
@@ -91,7 +124,7 @@ function diffRoute(command: string | null): StructuralRoute {
 function selectShellRoute(text: string, rawCommand: string | null | undefined, full: boolean) {
   const command = lastCommandSegment(rawCommand?.trim() ?? "") || null;
   if (command) {
-    if (!DIFF_COMMAND_RE.test(command)) return null;
+    if (!DIFF_COMMAND_RE.test(command)) return selectTestRoute(text, command, full);
     return !full || DIFF_FILE_HEADER_RE.test(text) ? diffRoute(command) : null;
   }
   return DIFF_STRONG_START_RE.test(full ? text : text.slice(0, 16)) ? diffRoute(null) : null;
