@@ -67,4 +67,4 @@ Objective feature comparison vs popular open-source AI routers.
 
 ---
 
-_Last updated: 2026-08-02. Submit corrections via PR to keep this table accurate._
+_Submit corrections via PR to keep this table accurate._
