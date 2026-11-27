@@ -457,6 +457,7 @@ export {
 export { SearchableSelect } from "./searchable-select";
 export type { SearchableSelectProps, SearchableSelectOption, SearchableSelectFilter } from "./searchable-select";
 export { Wizard, defaultWizardLabels, type WizardLabels, type WizardProps } from "./wizard";
+export { FeatureActionCard, type FeatureActionCardProps } from "./feature-action-card";
 export { ChoiceCard, MultiChoiceCard, SetupLayout, SetupBenefits, SetupProgressCard, SaveChangesBar, type MultiChoiceCardProps, type SetupLayoutProps, type SetupBenefitsProps, type ChoiceCardProps, type ChoiceCardTone, type SetupProgressCardProps, type SaveChangesBarProps, defaultSetupProgressCardLabels, type SetupProgressCardLabels, type SetupProgressCardStep } from "./onboarding-patterns";
 export { AnnouncementCarousel, defaultAnnouncementCarouselLabels, type AnnouncementCarouselLabels, type AnnouncementCarouselProps, type AnnouncementItem, type AnnouncementMediaState } from "./announcement-carousel";
 
@@ -494,8 +495,8 @@ export { ScopeChip, type ScopeChipProps } from "./scope-chip";
 export { ChatHeader, ChatWelcome, ChatPromptList, ChatComposer, ChatThread, ChatMessage, ChatActivity, ChatMessageActions, ChatHistory, defaultChatActivityLabels, type ChatActivityLabels, type ChatHeaderProps, type ChatWelcomeProps, type ChatPrompt, type ChatPromptListProps, type ChatAttachment, type ChatComposerProps, type ChatThreadProps, type ChatMessageProps, type ChatActivityState, type ChatActivityProps, type ChatMessageActionsProps, type ChatHistoryItem, type ChatHistoryGroup, type ChatHistoryProps } from "./chat";
 
 export { UsageInfoTooltip, UsageDrilldownHeader, UsageRequestIdentity, UsageCostBreakdown, UsageTokenUsage, UsageDetailSection, UsageTimingDelivery, UsageModelsUsed, UsageDrilldownBody, UsageDrilldownActions, UsageRequestFailure, UsageDrilldownLoading, defaultUsageCostBreakdownLabels, defaultUsageModelsUsedLabels, defaultUsageRequestIdentityLabels, defaultUsageTokenUsageLabels, type UsageCostBreakdownLabels, type UsageModelsUsedLabels, type UsageRequestIdentityLabels, type UsageTokenUsageLabels, type UsageDetailValue, type UsageInfoTooltipProps, type UsageDrilldownHeaderProps, type UsageRequestIdentityProps, type UsageReceiptRow, type UsageCostBreakdownProps, type UsageTokenUsageProps, type UsageDetailRow, type UsageDetailSectionProps, type UsageTimingDeliveryProps, type UsageModelRow, type UsageModelsUsedProps, type UsageDrilldownLoadingProps } from "./usage-drilldown";
-export { NotificationCard, NotificationCardLink, NotificationCategoryBadge, type NotificationCardProps, type NotificationCardUpdate, type NotificationCategory } from "./notification-card";
-export { NotificationFeed, type NotificationFeedProps, type NotificationFeedItem, type NotificationFeedGroup, type NotificationFeedCategory } from "./notification-feed";
+export { NotificationCard, NotificationCardLink, NotificationCategoryBadge, type NotificationCardProps, type NotificationCardUpdate, type NotificationCategory, type BuiltInNotificationCategory } from "./notification-card";
+export { NotificationFeed, DEFAULT_NOTIFICATION_CATEGORIES, type NotificationFeedCategoryOption, type NotificationFeedProps, type NotificationFeedItem, type NotificationFeedGroup, type NotificationFeedCategory } from "./notification-feed";
 
 export { VariableTextarea, type VariableTextareaProps } from "./variable-textarea";
 export { WorkflowAnimation, type WorkflowAnimationProps } from "./workflow-animation";

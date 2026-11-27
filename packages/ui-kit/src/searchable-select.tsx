@@ -50,6 +50,8 @@ export interface SearchableSelectProps {
   variant?: "capsule" | "field";
   /** Align the menu with either edge of the trigger. */
   align?: PopoverAlign;
+  /** Use a nested modal popover when the picker is inside a scroll-locked dialog. */
+  modal?: boolean;
   /** Compact model rows with IDs, inline metadata, and right-aligned pricing. */
   optionLayout?: "default" | "model";
   /** Always available at the end of the results, including an empty search. */
@@ -66,7 +68,7 @@ export function SearchableSelect({
   id, value, onValueChange, options, label = "Choose an option",
   placeholder = "Select…", searchPlaceholder = "Search options…",
   emptyMessage = "No matching options", disabled, className,
-  variant = "capsule", align = "start", optionLayout = "default", action, filter = matchesEveryWord,
+  variant = "capsule", align = "start", modal = false, optionLayout = "default", action, filter = matchesEveryWord,
 }: SearchableSelectProps) {
   const listId = useId();
   const input = useRef<HTMLInputElement>(null);
@@ -145,7 +147,7 @@ export function SearchableSelect({
     </div>;
   }
 
-  return <Popover open={open} onOpenChange={changeOpen}>
+  return <Popover open={open} onOpenChange={changeOpen} modal={modal}>
     <PopoverTrigger asChild>
       <button id={id} type="button" disabled={disabled} aria-label={label}
         aria-haspopup="listbox" aria-expanded={open} aria-controls={open ? listId : undefined}

@@ -32,6 +32,8 @@ export interface SellerOnboardingLayoutProps {
   topBar?: ReactNode;
   brand: ReactNode;
   brandBadge?: ReactNode;
+  /** Trailing header action on desktop and mobile. Replaces the desktop account label. */
+  headerAction?: ReactNode;
   stepsLabel?: ReactNode;
   steps: readonly SellerOnboardingStep[];
   currentStep: string;
@@ -42,6 +44,8 @@ export interface SellerOnboardingLayoutProps {
     label?: ReactNode;
     title: ReactNode;
     detail: ReactNode;
+    /** Replaces the default status dot. */
+    indicator?: ReactNode;
   };
   account?: {
     initials: ReactNode;
@@ -65,6 +69,7 @@ export function SellerOnboardingLayout({
   topBar,
   brand,
   brandBadge,
+  headerAction,
   stepsLabel = "Seller setup",
   steps,
   currentStep,
@@ -133,7 +138,10 @@ export function SellerOnboardingLayout({
       {servingStatus && (
         <div className="ci-seller-onboarding__status">
           <span>{servingStatus.label ?? "Serving status"}</span>
-          <strong>{servingStatus.title}</strong>
+          <strong>
+            <span className="ci-seller-onboarding__status-indicator" aria-hidden="true">{servingStatus.indicator}</span>
+            {servingStatus.title}
+          </strong>
           <p>{servingStatus.detail}</p>
         </div>
       )}
@@ -145,7 +153,7 @@ export function SellerOnboardingLayout({
               <ChevronsUpDown size={16} aria-hidden="true" />
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent side="top" align="start" className="ci-seller-onboarding__account-menu">
+          <DropdownMenuContent side="top" align="start" sideOffset={8} className="ci-seller-onboarding__account-menu">
             {account.menu}
           </DropdownMenuContent>
         </DropdownMenu>
@@ -160,7 +168,7 @@ export function SellerOnboardingLayout({
       {topBar && <div className="ci-seller-onboarding__top-bar">{topBar}</div>}
       <header className="ci-seller-onboarding__brand-header">
         <div>{brand}{brandBadge}</div>
-        {account && <small>{account.name}</small>}
+        {headerAction ?? (account && <small>{account.name}</small>)}
       </header>
       <Sheet open={navigationOpen} onOpenChange={setNavigationOpen}>
         <header className="ci-seller-onboarding__mobile-header">
@@ -171,6 +179,7 @@ export function SellerOnboardingLayout({
           </SheetTrigger>
           {brand}
           {progressLabel && <span className="ci-seller-onboarding__mobile-progress">{progressLabel}</span>}
+          {headerAction && <div className="ci-seller-onboarding__mobile-action">{headerAction}</div>}
         </header>
         <SheetContent side="left" className="ci-seller-onboarding__mobile-rail">
           <SheetHeader>
