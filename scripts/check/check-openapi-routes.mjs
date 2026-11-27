@@ -16,7 +16,9 @@ import {
   apiRoot,
   collectApiRouteUrlPaths,
   collectOptionalCatchAllRoutes,
-} from "./lib/apiRoutes.mjs";import { realpathSync } from "node:fs";
+} from "./lib/apiRoutes.mjs";
+import { isMainModule } from "../lib/is-main-module.mjs";
+
 const ROOT = process.cwd();
 const OPENAPI_PATH = path.join(ROOT, "docs", "openapi.yaml");
 
@@ -217,4 +219,4 @@ function main() {
   process.exit(result.exitCode);
 }
 
-if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) main();
+if (isMainModule(import.meta.url)) main();

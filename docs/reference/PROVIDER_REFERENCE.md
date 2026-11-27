@@ -1,14 +1,14 @@
 ---
 title: "Provider Reference"
 version: 3.8.55
-lastUpdated: 2026-11-16
+lastUpdated: 2026-11-24
 ---
 
 # Provider Reference
 
 > **Auto-generated** from `src/shared/constants/providers.ts` — do not edit by hand.
 > Regenerate with: `npm run gen:provider-reference`
-> **Last generated:** 2026-11-16
+> **Last generated:** 2026-11-24
 
 Total providers: **394**. See category breakdown below.
 
@@ -132,14 +132,14 @@ Use the dashboard at `/dashboard/providers` to enable, configure, and test each 
 | ID | Alias | Name | Tags | Website | Notes |
 |----|-------|------|------|---------|-------|
 | `360ai` | `360ai` | 360 AI | API key | [link](https://ai.360.cn) | Get API key at ai.360.cn |
-| `agentrouter` | `agentrouter` | AgentRouter | API key, aggregator | [link](https://agentrouter.org) | $200 free credits on signup - multi-model routing gateway |
+| `agentrouter` | `agentrouter` | AgentRouter | API key, aggregator | [link](https://agentrouter.org) | Daily $25 check-in credit; sign-ups with an invite code get $50 more (checked 2026-11-23). |
 | `agnes` | `agnes` | Agnes AI | API key, video | [link](https://agnes-ai.com) | Get API key at agnes-ai.com |
 | `agnes-cn` | `agnescn` | Agnes AI (China) | API key | [link](https://api.agnes-ai.cn) | Get API key from the Agnes CN site. |
 | `ai21` | `ai21` | AI21 Labs | API key | [link](https://www.ai21.com) | $10 trial credits on signup (valid 3 months), no credit card required |
 | `aimlapi` | `aiml` | AI/ML API | API key, aggregator | [link](https://aimlapi.com) | Free tier paused (2026) — AI/ML API is now pay-as-you-go only (min $20 top-up); no recurring free credits. |
-| `ainative` | `ainative` | AINative Studio | API key | [link](https://ainative.studio) | Create a free API key at ainative.studio (no card), then paste it here as a Bearer token. |
+| `ainative` | `ainative` | AINative Studio | API key | [link](https://ainative.studio) | Create an API key at ainative.studio, then paste it here as a Bearer token. |
 | `ainetcafe` | `ainetcafe` | ainetcafe | API key | [link](https://ainetcafe.com/k3/) | Sign-up credit toward available models; amount and eligibility are set by ainetcafe, not OmniRoute. |
-| `aion` | `aion` | Aion Labs | API key | [link](https://www.aionlabs.ai) | Create a free API key at aionlabs.ai (no card), then paste it here as a Bearer token. |
+| `aion` | `aion` | Aion Labs | API key | [link](https://www.aionlabs.ai) | Create an API key at aionlabs.ai and verify a payment card on the Billing page to activate the free tier (the card is never charged), then paste it here as a Bearer token. |
 | `alibaba` | `ali` | Alibaba Cloud Model Studio | API key | [link](https://bailian.console.alibabacloud.com/) | — |
 | `alibaba-cn` | `ali-cn` | Alibaba (China) | API key | [link](https://dashscope.console.aliyun.com/) | — |
 | `ant-ling` | `ling` | Ant Ling / Ring (inclusionAI) | API key | [link](https://developer.ant-ling.com/en/docs/) | Register and create an API key at the Ant Ling API console (https://chat.ant-ling.com/open), then paste it here. OmniRoute routes chat traffic to https://api.ant-ling.com/v1/chat/completions; the provider is OpenAI-compatible and also exposes an Anthropic-compatible surface. |
@@ -162,18 +162,18 @@ Use the dashboard at `/dashboard/providers` to enable, configure, and test each 
 | `bigmodel` | `bigmodel` | BigModel.cn (Zhipu) | API key | [link](https://open.bigmodel.cn) | — |
 | `black-forest-labs` | `bfl` | Black Forest Labs | API key, image | [link](https://blackforestlabs.ai) | — |
 | `blackbox` | `bb` | Blackbox AI | API key | [link](https://blackbox.ai) | ⚠️ **DEPRECATED.** api.blackbox.ai returns HTTP 404 on every path variant (sweep 2026-08-21); the public inference surface has moved to the gated enterprise.blackbox.ai/v1 endpoint. |
-| `bluesminds` | `bm` | BluesMinds | API key | [link](https://www.bluesminds.com) | Free daily pi credits — supports 200+ models including GPT-4o, GPT-4.1, Claude Sonnet 4.5, Gemini 2.0 Flash, DeepSeek V4, Qwen, Kimi K2 |
+| `bluesminds` | `bm` | BluesMinds | API key | [link](https://www.bluesminds.com) | No free credits; usage needs credit bought from the provider (checked 2026-11-23). |
 | `byteplus` | `bpm` | BytePlus ModelArk | API key | [link](https://console.byteplus.com/ark) | — |
 | `bytez` | `bytez` | Bytez | API key | [link](https://bytez.com) | $1 free credits, refreshes every 4 weeks |
 | `cerebras` | `cerebras` | Cerebras | API key | [link](https://inference.cerebras.ai) | One-time $5 signup credit (30-day validity); a payment method is required. Not a recurring free tier. |
 | `cerebrium` | `cerebrium` | Cerebrium | API key | [link](https://www.cerebrium.ai) | $30 one-time credit; set Base URL to your deployment's /run endpoint |
 | `charm-hyper` | `charm-hyper` | Charm Hyper | API key | [link](https://hyper.charm.land) | 100 free monthly Hypercredits on signup |
-| `chat-oripe` | `chat-oripe` | Chat Oripe | API key, aggregator | [link](https://api.oriper.com) | Official metadata advertises 2M tokens/month, but the public site and documentation were blocked during audit; treat the quota and brand mapping as unconfirmed. |
+| `chat-oripe` | `chat-oripe` | Chat Oripe | API key, aggregator | [link](https://api.oriper.com) | The API host returns HTTP 530; no free quota can be confirmed (checked 2026-11-23). |
 | `chatanywhere` | `chatanywhere` | ChatAnywhere | API key, aggregator | [link](https://chatanywhere.tech) | Personal, educational or research use only: public documentation cites 10,000 points/day and 200 requests/day per IP/key; do not use for commercial traffic. |
 | `cheaperinference` | `cinf` | Cheaper Inference | API key | [link](https://cheaperinference.com/?utm_source=omniroute) | — |
 | `chenzk` | `chenzk` | Chenzk API | API key | [link](https://chenzk.top) | — |
 | `chutes` | `chutes` | Chutes.ai | API key, aggregator | [link](https://chutes.ai) | Bearer API key for the Chutes OpenAI-compatible gateway. |
-| `clarifai` | `clarifai` | Clarifai | API key, enterprise | [link](https://docs.clarifai.com) | Use your Clarifai PAT or app-specific API key. OmniRoute targets the OpenAI-compatible endpoint at https://api.clarifai.com/v2/ext/openai/v1 and authenticates with Authorization: Key <token>. |
+| `clarifai` | `clarifai` | Clarifai | API key, enterprise | [link](https://docs.clarifai.com) | ⚠️ **DEPRECATED.** API host no longer resolves (checked 2026-11-23) |
 | `cloudcode-one` | `cloudcode-one` | CloudCode.ONE | API key, aggregator | [link](https://cloudcode.one) | Published free models include glm-4.7-flash and glm-4.6v-flash; no numeric quota is published, and key creation may require credit or a coupon. |
 | `cloudflare-ai` | `cf` | Cloudflare Workers AI | API key | [link](https://developers.cloudflare.com/workers-ai) | Requires API Token AND Account ID (found at dash.cloudflare.com) |
 | `clova-studio` | `clova` | Naver CLOVA Studio | API key | [link](https://api.ncloud-docs.com/docs/en/ai-naver-clovastudio-summary) | — |
@@ -197,14 +197,14 @@ Use the dashboard at `/dashboard/providers` to enable, configure, and test each 
 | `digitalocean` | `digitalocean` | DigitalOcean | API key | [link](https://docs.digitalocean.com/products/ai-platform/) | — |
 | `dit` | `dai` | DIT.ai | API key | [link](https://dit.ai) | Use your dit.ai API key in Authorization: Bearer <key>. Fully OpenAI-compatible — a drop-in replacement, just change the base URL to https://api.dit.ai/v1. |
 | `doubao` | `doubao` | Doubao | API key | [link](https://doubao.com) | Get API key at console.volcengine.com |
-| `dxnt` | `dxnt` | DXNT / DX Token | API key, aggregator | [link](https://www.dxnt.com) | Free accounts are documented at 100 calls/day; the quota may increase through invitations and can vary by account. |
+| `dxnt` | `dxnt` | DXNT / DX Token | API key, aggregator | [link](https://www.dxnt.com) | The ¥10 signup bonus exists, but no model accepts it today (checked 2026-11-23). |
 | `electronhub` | `electronhub` | Electron Hub | API key, aggregator | [link](https://www.electronhub.ai) | Free plan: 5 RPM, $0.25 weekly credits and 10 Neutrinos/day for :free models; family budgets also apply. |
 | `empiriolabs` | `empiriolabs` | EmpirioLabs AI | API key | [link](https://empiriolabs.ai) | Create an API key at https://platform.empiriolabs.ai/dashboard/api-keys, then paste it here. |
 | `empower` | `empower` | Empower | API key, aggregator | [link](https://docs.empower.dev) | Bearer API key for the Empower OpenAI-compatible endpoint. |
 | `eurouter` | `eurouter` | EURouter | API key, aggregator | [link](https://eurouter.ai) | — |
 | `factory` | `factory` | Factory | API key | [link](https://factory.ai) | Bearer API key for the Factory OpenAI-compatible gateway. |
 | `fal-ai` | `fal` | Fal.ai | API key, image | [link](https://fal.ai) | — |
-| `fastrouter` | `fastrouter` | FastRouter | API key, aggregator | [link](https://fastrouter.ai) | Models with the :free suffix allow 10 requests/day per organization and model; availability may change. |
+| `fastrouter` | `fastrouter` | FastRouter | API key, aggregator | [link](https://fastrouter.ai) | Models with the :free suffix allow 10 requests/day per organization and model and require a paid balance above $1; availability may change (checked 2026-11-23). |
 | `featherless-ai` | `featherless` | Featherless AI | API key | [link](https://featherless.ai) | Free tier available — no credit card required |
 | `fenayai` | `fenayai` | FenayAI | API key, aggregator | [link](https://fenayai.com) | Bearer API key for the FenayAI OpenAI-compatible gateway. |
 | `fireworks` | `fireworks` | Fireworks AI | API key | [link](https://fireworks.ai) | $1 free starter credits on signup for API testing |
@@ -239,7 +239,7 @@ Use the dashboard at `/dashboard/providers` to enable, configure, and test each 
 | `helyxai` | `helyxai` | Helyx AI | API key, aggregator | [link](https://helyxai.space) | Operational Free plan documents 100,000 tokens/day; the site's separate 2M+ marketing claim conflicts and is not treated as a quota guarantee. |
 | `heroku` | `heroku` | Heroku AI | API key, enterprise | [link](https://www.heroku.com) | — |
 | `hetzner` | `hetzner` | Hetzner Inference API | API key | [link](https://experiments.hetzner.com/inference) | Free during Hetzner's experimental phase, no billing yet; no SLA |
-| `huggingface` | `hf` | HuggingFace | API key | [link](https://huggingface.co) | Free Inference API for thousands of models (Whisper, VITS, SDXL…) |
+| `huggingface` | `hf` | HuggingFace | API key | [link](https://huggingface.co) | Free accounts must buy credits or upgrade to PRO to use Inference Providers (checked 2026-11-23). |
 | `hyperbolic` | `hyp` | Hyperbolic | API key | [link](https://hyperbolic.xyz) | $1-5 trial credits on signup for serverless inference |
 | `ideogram` | `ideo` | Ideogram | API key | [link](https://ideogram.ai) | Get API key at ideogram.ai/docs/api |
 | `iflytek` | `iflytek` | iFlytek Spark | API key | [link](https://xinghuo.xfyun.cn) | Get API key at console.xfyun.cn |
@@ -271,7 +271,7 @@ Use the dashboard at `/dashboard/providers` to enable, configure, and test each 
 | `meta-llama` | `meta` | Meta Llama API | API key | [link](https://llama.developer.meta.com) | — |
 | `minimax` | `minimax` | Minimax Coding | API key, video | [link](https://www.minimax.io) | — |
 | `minimax-cn` | `minimax-cn` | Minimax (China) | API key | [link](https://www.minimaxi.com) | — |
-| `mistral` | `mistral` | Mistral | API key | [link](https://mistral.ai) | Free Experiment tier: rate-limited access to all models, no credit card required |
+| `mistral` | `mistral` | Mistral | API key | [link](https://mistral.ai) | The free plan no longer includes API access; API keys need billing enabled (checked 2026-11-23). |
 | `mixedbread` | `mxbai` | Mixedbread AI | API key | [link](https://www.mixedbread.com) | Bearer API key for the Mixedbread embeddings API. |
 | `mixlayer` | `mixlayer` | Mixlayer | API key, aggregator | [link](https://www.mixlayer.com) | The qwen/qwen3.5-4b-free model is free for prototyping and rate-limited; no fixed public RPM or daily quota is confirmed. |
 | `mnn-ai` | `mnn-ai` | MNN AI | API key, aggregator | [link](https://mnnai.ru) | Free plan: $1 monthly credits, 10 RPM and access only to models marked Free. |
@@ -281,12 +281,12 @@ Use the dashboard at `/dashboard/providers` to enable, configure, and test each 
 | `moonshot` | `moonshot` | Kimi | API key | [link](https://platform.kimi.ai?aff=omniroute) | — |
 | `morph` | `morph` | Morph | API key | [link](https://morphllm.com) | Free tier: 250K credits/month, $0 |
 | `naga-ac` | `naga` | Naga.ac | API key, aggregator | [link](https://naga.ac) | Get API key at naga.ac — Google/GitHub/Discord signup available. |
-| `naga-ai` | `naga-ai` | Naga AI | API key, aggregator | [link](https://naga.ac) | Models marked :free are publicly listed, but no numeric quota is confirmed. Naga's policy warns that free-tier prompts and outputs may be collected or used for training. |
+| `naga-ai` | `naga-ai` | Naga AI | API key, aggregator | [link](https://naga.ac) | ⚠️ **DEPRECATED.** Duplicate of naga-ac (same api.naga.ac endpoint) |
 | `nan` | `nan` | NaN.Builders | API key | [link](https://nan.builders) | — |
 | `nanogpt` | `nanogpt` | NanoGPT | API key | [link](https://nano-gpt.com) | — |
-| `nara` | `nara` | NaraRouter | API key | [link](https://bynara.id) | Create a free NaraRouter account, link your Telegram (required before /v1 answers), then paste the key here as a Bearer token. |
-| `navy` | `navy` | NavyAI | API key | [link](https://api.navy) | Create a free API key from the NavyAI dashboard, then paste it here as a Bearer token. |
-| `nebius` | `nebius` | Nebius AI | API key | [link](https://nebius.com) | ~$1 trial credits on signup for API testing |
+| `nara` | `nara` | NaraRouter | API key | [link](https://bynara.id) | Create a NaraRouter account, link your Telegram (required before /v1 answers), then paste the key here as a Bearer token. |
+| `navy` | `navy` | NavyAI | API key | [link](https://api.navy) | Create an API key from the NavyAI dashboard, then paste it here as a Bearer token. |
+| `nebius` | `nebius` | Nebius AI | API key | [link](https://nebius.com) | Onboarding requires a bank card for billing; free credits come through promo codes (checked 2026-11-23). |
 | `nlpcloud` | `nlpc` | NLP Cloud | API key | [link](https://docs.nlpcloud.com) | Use your NLP Cloud API key in Authorization: Token <key>. OmniRoute targets the chatbot endpoint on https://api.nlpcloud.io/v1/gpu/<model>/chatbot by default. |
 | `nomic` | `nomic` | Nomic | API key | [link](https://nomic.ai) | Get API key at atlas.nomic.ai |
 | `nous-research` | `nous` | Nous Research | API key | [link](https://portal.nousresearch.com/help) | Use your Nous Portal API key. OmniRoute targets the official OpenAI-compatible inference endpoint at https://inference-api.nousresearch.com/v1. |
@@ -296,7 +296,7 @@ Use the dashboard at `/dashboard/providers` to enable, configure, and test each 
 | `nvidia` | `nvidia` | NVIDIA NIM | API key | [link](https://build.nvidia.com) | Free dev access: ~40 RPM, 70+ models (Kimi K2.5, GLM 4.7, DeepSeek V3.2...) |
 | `oci` | `oci` | OCI Generative AI | API key, enterprise | [link](https://www.oracle.com/artificial-intelligence/generative-ai) | Use your OCI Generative AI API key or IAM bearer token. Base URL can be https://inference.generativeai.<region>.oci.oraclecloud.com/openai/v1/. |
 | `ofoxai` | `ofoxai` | OfoxAI | API key, aggregator | [link](https://ofox.ai) | The current catalog advertises 10+ free models without a public numeric quota; review upstream provenance, retention and training terms before production use. |
-| `ollama-cloud` | `ollamacloud` | Ollama Cloud | API key | [link](https://ollama.com/settings/keys) | — |
+| `ollama-cloud` | `ollamacloud` | Ollama Cloud | API key | [link](https://ollama.com/settings/keys) | No free plan: cloud models are pay per token or covered by paid plans (checked 2026-11-23). |
 | `oneminai` | `1min` | 1min.AI | API key | [link](https://1min.ai) | Create an API key at https://docs.1min.ai/docs/api/create-api-key, then paste it here. |
 | `onomeo` | `onomeo` | onomeo | API key, aggregator | [link](https://onomeo.com) | Sign in (email code, Google or GitHub, no card). About 30 free models are metered by calls: 30 calls per 5 hours per account and 12 requests/min per key, within a site-wide pool shared by all accounts. Claude, GPT and other large models are paid from a USD balance at per-model prices; during the beta an account can spend at most $0.50/day on them. Optional top-up from $5 (balance never expires, no auto-renewal) raises the free-model limit to 90 calls per 5 hours for 35 days. |
 | `openadapter` | `oad` | OpenAdapter | API key | [link](https://openadapter.dev) | Use your OpenAdapter API key in Authorization: Bearer sk-cv-<key>. Fully OpenAI-compatible. API base URL: https://api.openadapter.in/v1. |
@@ -318,7 +318,7 @@ Use the dashboard at `/dashboard/providers` to enable, configure, and test each 
 | `poe` | `poe` | Poe | API key, aggregator | [link](https://creator.poe.com/api-reference) | Bearer API key for the Poe OpenAI-compatible API. |
 | `poixe-ai` | `poixe-ai` | Poixe AI | API key, aggregator | [link](https://poixe.com) | Current public free limits are small and model-group specific: 2 RPM/5 RPD for large-cup models and 20 RPM/50 RPD for small-cup models. |
 | `pollinations` | `pol` | Pollinations AI | API key, video | [link](https://pollinations.ai) | Anonymous/keyless access to the documented free models is best-effort. Local v3.8.50 verification (2026-07-31) returned 401 via OmniRoute and Cloudflare 1010 on direct upstream probes from the same network. Premium models still require a Pollinations API key from enter.pollinations.ai. |
-| `poolside` | `poolside` | Poolside | API key | [link](https://poolside.ai) | Preview ending: direct Poolside Platform inference shuts down on 2026-10-31. Laguna S 2.1 and XS 2.1 are free during Preview; no public numeric quota is published. |
+| `poolside` | `poolside` | Poolside | API key | [link](https://poolside.ai) | Preview ended: direct Poolside Platform inference was announced to shut down on 2026-10-31, so there is no free API access here (checked 2026-11-23). |
 | `predibase` | `predibase` | Predibase | API key | [link](https://predibase.com) | ⚠️ **DEPRECATED.** serving.app.predibase.com no longer resolves (sweep 2026-06-19); the managed serving API appears discontinued. |
 | `publicai` | `publicai` | PublicAI | API key | [link](https://publicai.co) | Requires an API key — one-time signup credit, then paid |
 | `qianfan` | `qianfan` | Baidu Qianfan | API key | [link](https://cloud.baidu.com/product-s/qianfan_home) | — |

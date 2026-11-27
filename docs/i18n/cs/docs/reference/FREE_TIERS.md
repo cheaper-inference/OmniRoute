@@ -24,7 +24,7 @@ Tato čísla popisují samostatné účty třetích stran a podmínky způsobilo
 | **+ za regionální kontrolou identity**            | **+~6M**              | `modelscope` (vazba na Alibaba Cloud + ověření skutečného jména v pevninské Číně). Skutečná opakovaná kvóta, zpřístupněná jako `gatedRecurringTokens` / `gatedProviders` a na dashboardu. Nikdy se nezapočítává do hlavního údaje: +~6M za regionálním ověřením identity.                               |
 | Teoretický strop (všechny limity rychlosti, 24/7) | ~10B                  | Součet limitů rychlosti všech poskytovatelů extrapolovaný na nepřetržité využití. **Není to záruka** — neuvádějte toto jako hlavní údaj.                                                                                                                                                                |
 
-**Poctivý hlavní údaj:** _OmniRoute agreguje **~1,62B dokumentovaných bezplatných tokenů měsíčně** (až ~2,22B v prvním měsíci s registračními kredity) napříč 34 fondy bezplatné úrovně — plus dlouhý seznam trvale bezplatných poskytovatelů bez limitu — a komprese RTK + Caveman (úspora 15–95 % tokenů) tuto hodnotu ještě prodlužuje._
+**Poctivý hlavní údaj:** _OmniRoute agreguje **~1,62B dokumentovaných bezplatných tokenů měsíčně** (až ~2,22B v prvním měsíci s registračními kredity) napříč 26 fondy bezplatné úrovně — plus dlouhý seznam trvale bezplatných poskytovatelů bez limitu — a komprese RTK + Caveman (úspora 15–95 % tokenů) tuto hodnotu ještě prodlužuje._
 
 > **Proč toto číslo kleslo z předchozích ~1,94B.** Aktualizace z 2026-06-17 je opravou transparentnosti, nikoli ztrátou: `gemini` je nyní deduplikováno v rámci poolu (dříve bylo nafouknuto započítáním každé varianty Flash zvlášť, 462M → 60M), `cloudflare-ai` bylo opraveno na skutečných 10k neuronů/den (122M → 30M), `doubao` bylo překlasifikováno na jednorázový kredit za registraci (nikoli opakovaný) a byly odstraněny ukončené úrovně (`chutes`/`phind`/`kluster` discontinued). Částečně to vyvažují `llm7` (správně 5M/den → 150M) a noví bezplatní poskytovatelé (Kilo, OpenCode Zen, Z.AI GLM-Flash).
 >
@@ -38,7 +38,7 @@ Tato čísla popisují samostatné účty třetích stran a podmínky způsobilo
 >
 > **Opraveno 2026-09-03 (#11773):** `cerebras` bylo překlasifikováno z opakovaného příspěvku 30M/měsíc (stará zkušební verze bez karty s 1M tokenů/den) na jednorázový kredit 5 USD za registraci, který vyžaduje platební metodu. Stejné pravidlo transparentnosti jako u LongCat.
 >
-> **Plus xKiro (2026-09-03):** nový pool `xkiro-free` (150M/měsíc) přidává 35. klíč opakovaného poolu. Felo Web zůstává vyloučeno, dokud jeho původ odvozený od GPL/licencování zůstává ve stavu HOLD. Zdroj nyní uvádí **34 klíčů opakovaných poolů** a **~1,62B stabilně** — živé číslo řízené CI (`check:docs-counts` selže při sestavení, pokud se odchýlí od `computeFreeModelTotals()`).
+> **Plus xKiro (2026-09-03):** nový pool `xkiro-free` (150M/měsíc) přidává 35. klíč opakovaného poolu. Felo Web zůstává vyloučeno, dokud jeho původ odvozený od GPL/licencování zůstává ve stavu HOLD. Zdroj nyní uvádí **26 klíčů opakovaných poolů** a **~1,62B stabilně** — živé číslo řízené CI (`check:docs-counts` selže při sestavení, pokud se odchýlí od `computeFreeModelTotals()`).
 
 Největší **zdokumentované** příspěvky: `mistral` 1,00B, `nara` 210M, `llm7` 150M, `xkiro` 150M, `groq` 30M (pět limitů pro jednotlivé modely), `cloudflare-ai` 30M, `api-airforce` 24M. (`longcat` je vyloučeno — jeho příspěvek 10M pro LongCat-2.0 je jednorázový kredit za registraci vyžadující KYC, nikoli opakovaný měsíční rozpočet.)
 

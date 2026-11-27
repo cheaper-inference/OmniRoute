@@ -35,7 +35,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { createRequire } from "node:module";
-import { realpathSync } from "node:fs";
+import { isMainModule } from "../lib/is-main-module.mjs";
 
 const require = createRequire(import.meta.url);
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -508,4 +508,4 @@ function main() {
 }
 
 // Importable from tests without executing the gate (which calls process.exit).
-if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) main();
+if (isMainModule(import.meta.url)) main();

@@ -9,7 +9,11 @@
 // Pure, JSON-serializable output in a deterministic order: pools by budget, credits by size,
 // ties broken by provider id.
 
+import { isCountingGated, isSocialGated } from "../../open-sse/config/freeModelCatalog.ts";
+
 const STEADY_TYPES = new Set(["recurring-daily", "recurring-monthly", "keyless"]);
+// Gated rows (identity, payment or social) are absent from the real figure, so the card skips them.
+const isGatedRow = (r) => isCountingGated(r) || isSocialGated(r);
 
 /**
  * @param {object} t computeFreeModelTotals() result
@@ -23,7 +27,7 @@ export function summarizeFreeTierBudget(t, displayName) {
   // without a pool key (Groq's five) add up within their provider and draw as one segment.
   const poolMap = new Map();
   for (const r of t.perModel) {
-    if (!STEADY_TYPES.has(r.freeType) || r.eligibilityGate || !(r.monthlyTokens > 0)) continue;
+    if (!STEADY_TYPES.has(r.freeType) || isGatedRow(r) || !(r.monthlyTokens > 0)) continue;
     if (r.poolKey) {
       const cur = poolMap.get(r.poolKey);
       if (!cur) poolMap.set(r.poolKey, { provider: r.provider, tokens: r.monthlyTokens, caps: 0 });
@@ -48,7 +52,7 @@ export function summarizeFreeTierBudget(t, displayName) {
   // One-time signup credits, gated rows excluded like firstMonthRealisticTokens.
   const otMap = new Map();
   for (const r of t.perModel) {
-    if (r.freeType !== "one-time-initial" || !(r.creditTokens > 0) || r.eligibilityGate) continue;
+    if (r.freeType !== "one-time-initial" || !(r.creditTokens > 0) || isGatedRow(r)) continue;
     const k = r.poolKey || r.provider;
     otMap.set(k, { provider: r.provider, v: Math.max(otMap.get(k)?.v || 0, r.creditTokens) });
   }

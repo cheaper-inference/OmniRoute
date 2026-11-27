@@ -44,9 +44,12 @@ vi.mock("@/shared/components", () => ({
   Modal: ({ children, isOpen }: { children: React.ReactNode; isOpen: boolean }) =>
     isOpen ? <div data-testid="modal">{children}</div> : null,
 }));
-vi.mock("@/shared/components/Card", () => ({
-  default: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-}));
+vi.mock("@/shared/components/Card", () => {
+  const Card = ({ children }: { children: React.ReactNode }) => <div>{children}</div>;
+  // The page draws its inner panels with Card.Section (the kit inset card).
+  Card.Section = Card;
+  return { default: Card };
+});
 vi.mock("@/shared/components/ProviderIcon", () => ({ default: () => <span /> }));
 
 const MOCK_POOLS = [

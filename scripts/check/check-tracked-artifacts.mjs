@@ -22,7 +22,7 @@
 
 import { execFileSync } from "node:child_process";
 
-import { realpathSync } from "node:fs";
+import { isMainModule } from "../lib/is-main-module.mjs";
 
 const FORBIDDEN_PREFIXES = [
   "node_modules/",
@@ -138,4 +138,4 @@ function main() {
   process.exit(1);
 }
 
-if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) main();
+if (isMainModule(import.meta.url)) main();

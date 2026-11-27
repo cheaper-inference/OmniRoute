@@ -1,0 +1,68 @@
+{
+  "argv": [
+    "--env-file",
+    "${TMP}/aider.env",
+    "--model",
+    "openai/anthropic/claude-sonnet-4-6",
+    "--weak-model",
+    "openai/anthropic/claude-sonnet-4-6",
+    "--editor-model",
+    "openai/anthropic/claude-sonnet-4-6",
+    "--model-metadata-file",
+    "${TMP}/aider.model.metadata.json",
+    "--no-show-model-warnings",
+    "--no-check-update",
+    "--no-show-release-notes",
+    "--no-analytics",
+    "--no-git",
+    "--edit-format",
+    "diff"
+  ],
+  "cleanup": {
+    "removeTempDir": true,
+    "revokeSession": true
+  },
+  "env": {
+    "set": {},
+    "unset": [
+      "OPENAI_API_KEY",
+      "OPENAI_API_BASE",
+      "OPENAI_BASE_URL"
+    ]
+  },
+  "modelList": {
+    "injected": 6,
+    "strategy": "inject",
+    "viewHash": "421ab75fa559cc6e8619eaf90e68332dd3425ad46332a5d0075e45e7ed74ea7d"
+  },
+  "needsTempDir": true,
+  "notes": [
+    "aider talks to http://127.0.0.1:20128/v1 as openai/anthropic/claude-sonnet-4-6"
+  ],
+  "planVersion": 1,
+  "postExitChecks": [],
+  "preflight": [],
+  "secretSites": [
+    {
+      "key": "aider.env",
+      "kind": "file"
+    }
+  ],
+  "teardown": [],
+  "tempFiles": [
+    {
+      "contents": "AIDER_OPENAI_API_BASE=\"http://127.0.0.1:20128/v1\"\nAIDER_OPENAI_API_KEY=\"${TOKEN}\"\n",
+      "format": "env",
+      "mode": 384,
+      "path": "aider.env"
+    },
+    {
+      "contents": "{\n  \"openai/anthropic/claude-sonnet-4-6\": {\n    \"input_cost_per_token\": 0,\n    \"litellm_provider\": \"openai\",\n    \"mode\": \"chat\",\n    \"output_cost_per_token\": 0,\n    \"max_input_tokens\": 200000,\n    \"max_output_tokens\": 64000,\n    \"max_tokens\": 64000\n  },\n  \"openai/openai/gpt-5.2\": {\n    \"input_cost_per_token\": 0,\n    \"litellm_provider\": \"openai\",\n    \"mode\": \"chat\",\n    \"output_cost_per_token\": 0,\n    \"max_input_tokens\": 400000,\n    \"max_output_tokens\": 128000,\n    \"max_tokens\": 128000\n  },\n  \"openai/mystery/unknown-context\": {\n    \"input_cost_per_token\": 0,\n    \"litellm_provider\": \"openai\",\n    \"mode\": \"chat\",\n    \"output_cost_per_token\": 0\n  },\n  \"openai/small/ctx-32k\": {\n    \"input_cost_per_token\": 0,\n    \"litellm_provider\": \"openai\",\n    \"mode\": \"chat\",\n    \"output_cost_per_token\": 0,\n    \"max_input_tokens\": 32768,\n    \"max_output_tokens\": 8192,\n    \"max_tokens\": 8192\n  },\n  \"openai/fastest\": {\n    \"input_cost_per_token\": 0,\n    \"litellm_provider\": \"openai\",\n    \"mode\": \"chat\",\n    \"output_cost_per_token\": 0,\n    \"max_input_tokens\": 128000\n  },\n  \"openai/plain/no-tools\": {\n    \"input_cost_per_token\": 0,\n    \"litellm_provider\": \"openai\",\n    \"mode\": \"chat\",\n    \"output_cost_per_token\": 0,\n    \"max_input_tokens\": 128000\n  }\n}\n",
+      "format": "json",
+      "mode": 384,
+      "path": "aider.model.metadata.json"
+    }
+  ],
+  "tool": "aider",
+  "warnings": []
+}

@@ -40,7 +40,7 @@ import path from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
 import { validateQuarantine } from "../quality/quarantine-contract.mjs";
-import { realpathSync } from "node:fs";
+import { isMainModule } from "../lib/is-main-module.mjs";
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(SCRIPT_DIR, "..", "..");
@@ -168,4 +168,4 @@ function main() {
   process.exit(1);
 }
 
-if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) main();
+if (isMainModule(import.meta.url)) main();

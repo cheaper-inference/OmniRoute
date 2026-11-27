@@ -26,7 +26,7 @@ import path from "node:path";
 
 import { runScopedTypecheck } from "./run-scoped-typecheck.mjs";
 import { diffAgainstBaseline, parseTscOutput } from "./typecheckBaseline.mjs";
-import { realpathSync } from "node:fs";
+import { isMainModule } from "../lib/is-main-module.mjs";
 import {
   countLineSuppressions,
   fingerprintDrift,
@@ -276,6 +276,6 @@ function main() {
   process.exit(0);
 }
 
-if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
+if (isMainModule(import.meta.url)) {
   main();
 }

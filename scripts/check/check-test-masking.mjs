@@ -13,7 +13,7 @@
 import fs from "node:fs";
 import { execFileSync } from "node:child_process";
 
-import { realpathSync } from "node:fs";
+import { isMainModule } from "../lib/is-main-module.mjs";
 
 const TEST_RE = /\.(test|spec)\.(ts|tsx)$/;
 // Production TypeScript sources (excludes test files, handled separately via TEST_RE).
@@ -803,4 +803,4 @@ function main() {
   );
 }
 
-if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) main();
+if (isMainModule(import.meta.url)) main();

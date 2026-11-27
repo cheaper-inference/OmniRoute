@@ -1,0 +1,1 @@
+- fix(oauth): Cline and Zed Hosted connections no longer fail with "OAuth state mismatch". Zed Hosted keeps the automatic callback (its token is bound to the attempt's one-time RSA key); Cline, whose redirect carries nothing that ties it to the attempt, now completes by pasting the callback URL into the modal, and relayed Cline callbacks are ignored (#20576, #20580)

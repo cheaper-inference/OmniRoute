@@ -54,9 +54,11 @@ const KEYLESS = {
 const QUOTA_SAFE = { provider: "groq", model: "openai/gpt-oss-120b", connectionId: REAL_CONN };
 // A real quota-based entry WITHOUT hardStopGuaranteed (agentrouter: one-time-initial,
 // no usage adapter, no documented "no credit card" claim — must never pass).
+// agentrouter/claude-opus-5 was retired in the November 2026 re-audit (not on agentrouter.org/api/pricing);
+// gpt-5.6-sol is the AgentRouter row that stays free, with the same one-time-initial economics.
 const QUOTA_UNGUARANTEED = {
   provider: "agentrouter",
-  model: "claude-opus-5",
+  model: "gpt-5.6-sol",
   connectionId: REAL_CONN,
 };
 // Not in FREE_MODEL_BUDGETS at all.
@@ -74,7 +76,7 @@ test("sanity: fixtures exist in the real catalog with the metadata these tests a
   );
   assert.equal(groqEntry?.hardStopGuaranteed, true, "groq must carry hardStopGuaranteed: true");
   const arEntry = FREE_MODEL_BUDGETS.find(
-    (m) => m.provider === "agentrouter" && m.modelId === "claude-opus-5"
+    (m) => m.provider === "agentrouter" && m.modelId === "gpt-5.6-sol"
   );
   assert.notEqual(
     arEntry?.hardStopGuaranteed,
@@ -187,7 +189,7 @@ test("stale checkedAt excludes even when status is SAFE", () => {
 // 10 & 11. hardStopGuaranteed undefined / false → EXCLUDE
 test("hardStopGuaranteed undefined excludes even with a perfect SAFE state", () => {
   const entry = FREE_MODEL_BUDGETS.find(
-    (m) => m.provider === "agentrouter" && m.modelId === "claude-opus-5"
+    (m) => m.provider === "agentrouter" && m.modelId === "gpt-5.6-sol"
   );
   assert.deepEqual(
     evaluateCandidateConnections(QUOTA_UNGUARANTEED, entry, () => freshState(), BASE_OPTIONS),

@@ -14,11 +14,10 @@
 // especializado sem entrada de registry). Isso torna provider:remove --dry-run
 // verificável: um provider removido do REGISTRY mas esquecido em providers.ts
 // aparece como órfão reverso e o gate falha.
-
+import { isMainModule } from "../lib/is-main-module.mjs";
 import { AI_PROVIDERS, getProviderById } from "@/shared/constants/providers.ts";
 import { REGISTRY } from "@omniroute/open-sse/config/providerRegistry.ts";
 import { assertNoStale } from "./lib/allowlist.mjs";
-import { realpathSync } from "node:fs";
 
 // Entradas registry-only conhecidas (meia-registro pré-existente). Cada uma com
 // justificativa. Remover daqui ao registrar o provider em providers.ts.
@@ -130,4 +129,4 @@ function main(): void {
   }
 }
 
-if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) main();
+if (isMainModule(import.meta.url)) main();

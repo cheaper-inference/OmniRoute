@@ -1,6 +1,7 @@
 import React, { act, createRef } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
+import { findButtonByTooltip } from "../../_helpers/buttonTooltip";
 import RequestLoggerV2, { type RequestLoggerV2Handle } from "@/shared/components/RequestLoggerV2";
 import { RequestLoggerDetailPanel as RequestLoggerDetail } from "@/shared/components/RequestLoggerDetail";
 
@@ -107,9 +108,8 @@ async function render() {
   await act(async () => root.render(<RequestLoggerV2 ref={ref} />));
 }
 async function grouped() {
-  const button = [...container.querySelectorAll("button")].find((entry) =>
-    /latest per correlation/i.test(entry.title)
-  );
+  // The toggle's title is the kit tooltip of the button, not a native attribute.
+  const button = await findButtonByTooltip(container, /latest per correlation/i);
   expect(button).toBeTruthy();
   await act(async () => button!.click());
 }
@@ -173,9 +173,7 @@ it("wire-only filtered groups stay unknown and related polls never inject filter
   await grouped();
   expect(tableText()).not.toMatch(/healed|failed/i);
   expect(ref.current!.getSortedLogs().map((entry) => entry.id)).toEqual([failed.id]);
-  const allRows = [...container.querySelectorAll("button")].find((entry) =>
-    /all rows/i.test(entry.title)
-  );
+  const allRows = await findButtonByTooltip(container, /all rows/i);
   expect(allRows).toBeTruthy();
   await act(async () => allRows!.click());
   await act(async () => ref.current!.openDetail(failed));

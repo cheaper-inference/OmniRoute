@@ -23,7 +23,7 @@
 import fs from "node:fs";
 import path from "node:path";
 
-import { realpathSync } from "node:fs";
+import { isMainModule } from "../lib/is-main-module.mjs";
 
 const ROOT = process.cwd();
 const QUIET = process.argv.includes("--quiet");
@@ -129,6 +129,6 @@ function main() {
 }
 
 // Only run when invoked directly, so countViolations can be unit tested.
-if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
+if (isMainModule(import.meta.url)) {
   process.exit(main());
 }

@@ -27,7 +27,7 @@ import fs from "node:fs";
 import { execFileSync, spawnSync } from "node:child_process";
 import path from "node:path";
 
-import { realpathSync } from "node:fs";
+import { isMainModule } from "../lib/is-main-module.mjs";
 
 const ROOT = process.cwd();
 const QUIET = process.argv.includes("--quiet");
@@ -373,4 +373,4 @@ function applyRatchet(findingCount) {
   process.exitCode = 0;
 }
 
-if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) main();
+if (isMainModule(import.meta.url)) main();

@@ -24,7 +24,7 @@
 import fs from "node:fs";
 import path from "node:path";
 
-import { realpathSync } from "node:fs";
+import { isMainModule } from "../lib/is-main-module.mjs";
 
 const cwd = process.cwd();
 
@@ -272,4 +272,4 @@ function main() {
   );
 }
 
-if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) main();
+if (isMainModule(import.meta.url)) main();

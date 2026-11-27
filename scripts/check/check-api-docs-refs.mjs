@@ -13,7 +13,7 @@
 import { collectApiRouteFiles, collectApiRouteUrlPaths } from "./lib/apiRoutes.mjs";
 import { runOpenapiRoutesCheck } from "./check-openapi-routes.mjs";
 import { runDocsSymbolsCheck } from "./check-docs-symbols.mjs";
-import { realpathSync } from "node:fs";
+import { isMainModule } from "../lib/is-main-module.mjs";
 
 function main() {
   const implPaths = collectApiRouteUrlPaths();
@@ -30,4 +30,4 @@ function main() {
   process.exit(openapi.ok && docs.ok ? 0 : 1);
 }
 
-if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) main();
+if (isMainModule(import.meta.url)) main();

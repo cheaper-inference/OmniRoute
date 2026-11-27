@@ -26,7 +26,7 @@
 import fs from "node:fs";
 import path from "node:path";
 
-import { realpathSync } from "node:fs";
+import { isMainModule } from "../lib/is-main-module.mjs";
 
 const ROOT = process.cwd();
 const BASELINE_PATH = path.join(ROOT, "config/quality/quality-baseline.json");
@@ -145,6 +145,6 @@ function main(argv) {
 }
 
 // Only run when invoked directly, so the helpers can be unit tested.
-if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
+if (isMainModule(import.meta.url)) {
   process.exit(main(process.argv.slice(2)));
 }

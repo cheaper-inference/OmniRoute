@@ -1,4 +1,5 @@
 export {
+  getExplicitModelOutputCap,
   getInputModalities,
   getResolvedModelCapabilities,
   isTextOnlyChatTransport,

@@ -28,7 +28,7 @@ import {
   withBaseWorktree,
 } from "./newCodeMode.mjs";
 import { runComplexityEslintOn } from "./complexityEslintReport.mjs";
-import { realpathSync } from "node:fs";
+import { isMainModule } from "../lib/is-main-module.mjs";
 
 const BASE_REF = baseRefArg();
 const NEW_CODE_SCOPE = {
@@ -179,4 +179,4 @@ function main() {
   process.exit(failed ? 1 : 0);
 }
 
-if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) main();
+if (isMainModule(import.meta.url)) main();

@@ -28,7 +28,7 @@ import path from "node:path";
 
 import { execFileSync } from "node:child_process";
 import { assertNoStale } from "./lib/allowlist.mjs";
-import { realpathSync } from "node:fs";
+import { isMainModule } from "../lib/is-main-module.mjs";
 
 const ROOT = process.cwd();
 const ALLOWLIST_PATH = path.join(ROOT, "config/quality/dependency-allowlist.json");
@@ -291,4 +291,4 @@ function main() {
   );
 }
 
-if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) main();
+if (isMainModule(import.meta.url)) main();

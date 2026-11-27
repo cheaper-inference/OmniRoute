@@ -58,7 +58,7 @@ import { readFileSync, readdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve as resolvePath, basename, extname } from "node:path";
 import { assertNoStale } from "./lib/allowlist.mjs";
-import { realpathSync } from "node:fs";
+import { isMainModule } from "../lib/is-main-module.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolvePath(HERE, "..", "..");
@@ -735,7 +735,7 @@ async function main(): Promise<void> {
   );
 }
 
-if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
+if (isMainModule(import.meta.url)) {
   main().catch((err) => {
     console.error(
       `[known-symbols] erro fatal: ${err instanceof Error ? err.message : String(err)}`

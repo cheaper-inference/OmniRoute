@@ -20,7 +20,7 @@ import { execFileSync } from "node:child_process";
 import path from "node:path";
 import fs from "node:fs";
 
-import { realpathSync } from "node:fs";
+import { isMainModule } from "../lib/is-main-module.mjs";
 
 const ROOT = process.cwd();
 
@@ -184,4 +184,4 @@ function main() {
   }
 }
 
-if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) main();
+if (isMainModule(import.meta.url)) main();

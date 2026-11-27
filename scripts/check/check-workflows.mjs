@@ -42,7 +42,7 @@ import path from "node:path";
 
 import { load as yamlLoad } from "js-yaml";
 import { findProvenanceOnSelfHosted, formatProvenanceFinding } from "./lib/provenanceRunner.mjs";
-import { realpathSync } from "node:fs";
+import { isMainModule } from "../lib/is-main-module.mjs";
 
 const ROOT = process.cwd();
 const WORKFLOWS_DIR = path.join(ROOT, ".github", "workflows");
@@ -557,7 +557,7 @@ function main() {
   process.exit(0);
 }
 
-if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
+if (isMainModule(import.meta.url)) {
   try {
     main();
   } catch (error) {

@@ -9,7 +9,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
-import { realpathSync } from "node:fs";
+import { isMainModule } from "../lib/is-main-module.mjs";
 
 const ROOT = process.cwd();
 const DEFAULT_TSCONFIG = "tsconfig.typecheck-core.json";
@@ -313,7 +313,7 @@ function main() {
   }
 }
 
-if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
+if (isMainModule(import.meta.url)) {
   try {
     process.exitCode = main();
   } catch (error) {

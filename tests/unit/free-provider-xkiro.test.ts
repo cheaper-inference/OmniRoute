@@ -13,6 +13,9 @@ import { AI_PROVIDERS, AGGREGATOR_PROVIDER_IDS } from "@/shared/constants/provid
  * xkiro.com and docs.xkiro.com: "$0 / month · Free forever · Free tokens 5M / day ·
  * No credit card"; past the daily allowance free-model requests get a 429 until the
  * reset. One bucket per account ⇒ one pool of 5M × 30 = 150M.
+ * Re-audit 2026-11-23 (xkiro.com, api.xkiro.com/v1/models): "500K free-model tokens a day
+ * (1M after Telegram verification)" on 26 free models ⇒ 500K × 30 = 15M; 9 of the 39 catalog
+ * ids are still free, the other 30 are discontinued and their last quota is in the ledger.
  */
 const rows = FREE_MODEL_BUDGETS.filter((m) => m.provider === "xkiro");
 
@@ -25,21 +28,28 @@ test("xkiro is routable, canonical and classified as an aggregator", () => {
   assert.ok(AGGREGATOR_PROVIDER_IDS.has("xkiro"));
 });
 
-test("xkiro free plan is one 5M/day account-wide pool = 150M/month, counted once", () => {
+test("xkiro free plan is one 500K/day account-wide pool = 15M/month, counted once", () => {
   assert.equal(rows.length, 39);
+  const live = rows.filter((m) => m.freeType !== "discontinued");
+  const retired = rows.filter((m) => m.freeType === "discontinued");
+  assert.equal(live.length, 9);
+  assert.equal(retired.length, 30);
   for (const m of rows) {
     assert.equal(m.poolKey, "xkiro-free", m.modelId);
-    assert.equal(m.monthlyTokens, 150_000_000, m.modelId);
-    assert.equal(m.freeType, "recurring-daily", m.modelId);
     assert.equal(m.tos, "caution", m.modelId);
     assert.equal(m.hardStopGuaranteed, true, m.modelId);
     assert.equal((m as { eligibilityGate?: unknown }).eligibilityGate, undefined, m.modelId);
   }
+  for (const m of live) {
+    assert.equal(m.monthlyTokens, 15_000_000, m.modelId);
+    assert.equal(m.freeType, "recurring-daily", m.modelId);
+  }
+  for (const m of retired) assert.equal(m.monthlyTokens, 0, m.modelId);
   const withXkiro = computeFreeModelTotals().steadyRecurringTokens;
   const without = computeFreeModelTotals({
     entries: FREE_MODEL_BUDGETS.filter((m) => m.provider !== "xkiro"),
   }).steadyRecurringTokens;
-  assert.equal(withXkiro - without, 150_000_000);
+  assert.equal(withXkiro - without, 15_000_000);
 });
 
 test("xkiro never lists the undeclared-provenance codex-spark route", () => {

@@ -21,7 +21,7 @@ import path from "node:path";
 
 import { reportStaleEntries } from "./lib/allowlist.mjs";
 import { collectApiRouteFiles } from "./lib/apiRoutes.mjs";
-import { realpathSync } from "node:fs";
+import { isMainModule } from "../lib/is-main-module.mjs";
 
 const ROOT = process.cwd();
 const DOCS = path.join(ROOT, "docs");
@@ -240,4 +240,4 @@ function main() {
   process.exit(result.exitCode);
 }
 
-if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) main();
+if (isMainModule(import.meta.url)) main();

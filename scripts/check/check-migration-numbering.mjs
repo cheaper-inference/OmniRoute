@@ -45,7 +45,7 @@ import fs from "node:fs";
 import path from "node:path";
 
 import { assertNoStale } from "./lib/allowlist.mjs";
-import { realpathSync } from "node:fs";
+import { isMainModule } from "../lib/is-main-module.mjs";
 import {
   APPLIED_AGAIN_PHRASE,
   classifyRemovals,
@@ -677,4 +677,4 @@ function main() {
   }
 }
 
-if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) main();
+if (isMainModule(import.meta.url)) main();

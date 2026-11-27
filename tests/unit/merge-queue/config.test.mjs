@@ -130,16 +130,17 @@ test("the shipped config lands as the owner with the noreply identity", () => {
       email: "8016841+diegosouzapw@users.noreply.github.com",
     },
     statusContext: "omni-queue/land",
-    // shipped OFF: production turns signing on in a separate change, after a rehearsal
-    signing: "none",
+    signing: "ssh",
   });
 });
 
-test("the shipped config keeps the App's voice and unsigned merge commits (both features off)", () => {
+test("the shipped config speaks as the owner and signs merge commits", () => {
   assert.deepEqual(VOICES, ["app", "owner"]);
-  assert.equal(raw.voice, "app");
-  assert.equal(raw.landing.signing, "none");
-  assert.equal(raw.mode, "shadow");
+  assert.equal(raw.voice, "owner");
+  assert.equal(raw.landing.signing, "ssh");
+  // live since the cut-over (docs/ops/OMNI_QUEUE.md → "Cut-over and rollback", step 9)
+  assert.equal(raw.mode, "live");
+  assert.deepEqual(validateConfig(raw).errors, [], "the shipped config validates");
 });
 
 test("voice: app (the default) or owner; anything else is refused", () => {
@@ -298,7 +299,7 @@ test("flakyReruns: 0 or 1, default 1, anything else refused with a clear message
   }
 });
 
-test("owner decisions D-Q1..D-Q3 and the shadow start are pinned", () => {
+test("owner decisions D-Q1..D-Q3 and the live mode are pinned", () => {
   assert.equal(raw.landing.mode, "merge-ff");
   // the batch window starts at 6 and may grow to 12 (owner, cut-over part 2)
   assert.deepEqual(raw.batch, {
@@ -309,8 +310,9 @@ test("owner decisions D-Q1..D-Q3 and the shadow start are pinned", () => {
     startSize: 6,
   });
   assert.equal(raw.label, "omni-queue");
-  assert.notEqual(raw.label, "queue", "must not collide with the Mergify label during shadow");
-  assert.equal(raw.mode, "shadow");
+  assert.notEqual(raw.label, "queue", "must not collide with the retired Mergify label");
+  assert.equal(raw.mode, "live");
+  assert.deepEqual(validateConfig(raw).errors, [], "the shipped config validates");
   assert.deepEqual(raw.approvers, ["diegosouzapw"]);
 });
 
@@ -319,7 +321,7 @@ test("prChecksRequired: the three PR gates shipped; default []; distinct non-emp
   // (.github/workflows/api-route-typecheck.yml): a check that blocks a merge today blocks here.
   assert.deepEqual(raw.prChecksRequired, ["Gate / CI", "Gate / Quality", "API Route Typecheck"]);
   assert.deepEqual(validateConfig(raw).errors, [], "the shipped config validates");
-  assert.equal(raw.mode, "shadow");
+  assert.equal(raw.mode, "live");
   const absent = clone();
   delete absent.prChecksRequired;
   const ok = validateConfig(absent);
@@ -540,7 +542,10 @@ const MUTATIONS = {
   "identity with a non-noreply email": (c) => (c.landing.identity.email = "x@gmail.com"),
   "identity with an empty name": (c) => (c.landing.identity.name = ""),
   "identity with an extra key": (c) => (c.landing.identity.signingKey = "x"),
-  "app actor with an identity": (c) => (c.landing.actor = "app"),
+  "app actor with an identity": (c) => {
+    c.landing.actor = "app";
+    c.landing.signing = "none";
+  },
   "empty status context": (c) => (c.landing.statusContext = ""),
   "status context with a space": (c) => (c.landing.statusContext = "a b"),
   "status context equal to a required check": (c) => {
@@ -604,11 +609,13 @@ const MUTATIONS = {
   "valid: owner voice with the app actor": (c) => {
     c.voice = "owner";
     c.landing.actor = "app";
+    c.landing.signing = "none";
     delete c.landing.identity;
   },
   "valid: squash-api landing": (c) => (c.landing.mode = "squash-api"),
   "valid: app actor without identity": (c) => {
     c.landing.actor = "app";
+    c.landing.signing = "none";
     delete c.landing.identity;
   },
   "valid: landing with only a mode": (c) => (c.landing = { mode: "merge-ff" }),

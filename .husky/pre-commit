@@ -9,6 +9,12 @@ fi
 # Cheap, deterministic local gates (re-enabled). Slower checks (i18n drift,
 # openapi coverage/security-tiers, env-doc sync) run in CI to keep commits fast.
 sh scripts/check/check-git-identity.sh
+# Migration names (#20578): only when the commit touches src/lib/db/migrations/. The
+# assignment aborts the hook if git fails. Names only; the comparison with the base stays in CI.
+staged_migrations=$(git diff --cached --name-only --diff-filter=ACMRD -- src/lib/db/migrations/)
+if [ -n "$staged_migrations" ]; then
+  GITHUB_EVENT_NAME= MIGRATION_BASE_REF= node scripts/check/check-migration-numbering.mjs
+fi
 # The stash is shared by every worktree. Never let a local hook stash another
 # session's changes, and never download a missing tool during a commit.
 npx --no-install lint-staged --no-stash

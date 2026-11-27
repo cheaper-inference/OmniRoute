@@ -159,6 +159,13 @@
   --ci-scale-div-5: #3969a6;
   --ci-scale-div-6: #06498e;
   --ci-scale-div-7: #012d5d;
+  /* Flow-canvas connectors, per state. They are graphics: 3:1 or better on the canvas,
+     background, surface, subtle and muted surfaces. Aliases, so each theme's status
+     colours and neutral mid-grey carry over. */
+  --ci-flow-edge-active: var(--ci-color-success);
+  --ci-flow-edge-warning: var(--ci-color-warning);
+  --ci-flow-edge-error: var(--ci-color-danger);
+  --ci-flow-edge-idle: var(--ci-scale-div-4);
 
   /* Approved muted tints for illustrated announcement surfaces (both themes). */
   --ci-color-announcement-info: #689ed7;
@@ -212,6 +219,10 @@
   --ci-font-mono: var(--ci-font-ui);
   --ci-font-code: ui-monospace, "SFMono-Regular", Menlo, Consolas, "Liberation Mono", monospace;
 
+  /* 3xs and 2xs are for labels only (axis, legend, hint, counter, group label).
+     Body text starts at xs. */
+  --ci-font-size-3xs: 0.625rem;
+  --ci-font-size-2xs: 0.6875rem;
   --ci-font-size-xs: 0.75rem;
   --ci-font-size-sm: 0.875rem;
   --ci-font-size-md: 1rem;
@@ -266,6 +277,12 @@
   --ci-type-ui-size: var(--ci-font-size-sm);
   --ci-type-ui-weight: var(--ci-font-weight-medium);
   --ci-type-ui-leading: var(--ci-line-height-ui);
+  /* Interface heading sizes: .ci-heading[data-size] and SectionHeader size. */
+  --ci-type-heading-size-xs: var(--ci-font-size-xs);
+  --ci-type-heading-size-sm: var(--ci-font-size-sm);
+  --ci-type-heading-size-md: var(--ci-font-size-md);
+  --ci-type-heading-size-lg: var(--ci-font-size-lg);
+  --ci-type-heading-size-xl: var(--ci-font-size-xl);
   --ci-type-display-family: var(--ci-font-display);
   --ci-type-display-weight: var(--ci-font-weight-medium);
   --ci-type-display-leading: var(--ci-type-heading-leading);
@@ -274,7 +291,7 @@
   --ci-type-dashboard-display-weight: var(--ci-font-weight-medium);
   --ci-type-dashboard-display-leading: var(--ci-type-heading-leading);
   /* Approved compact summary geometry for dashboard stat cards. */
-  --ci-type-stat-eyebrow-size: 0.625rem;
+  --ci-type-stat-eyebrow-size: var(--ci-font-size-3xs);
   --ci-type-stat-eyebrow-value-size: 2.125rem;
   --ci-stat-eyebrow-icon-stroke-width: 1.75;
   /* App-owned headers/canvases can share the documented appearance contract. */
@@ -308,11 +325,13 @@
   --ci-space-40: 10rem;
 
   /* --- sizing and layout --------------------------------------------------- */
+  --ci-control-height-xs: 1.5rem;
   --ci-control-height-sm: 2rem;
   --ci-control-height-md: 2.25rem;
   --ci-control-height-lg: 2.5rem;
   --ci-control-height-xl: 3rem;
   --ci-badge-height: 1.5rem;
+  --ci-badge-height-sm: 1.25rem;
   --ci-icon-size-sm: 1rem;
   --ci-icon-size-xs: 0.75rem;
   --ci-icon-size-md: 1.25rem;
@@ -335,6 +354,8 @@
   --ci-radius-full: 9999px;
   --ci-radius-control: var(--ci-radius-md);
   --ci-radius-surface: var(--ci-radius-sm);
+  /* A surface inside a surface (an inset card). Never rounder than --ci-radius-surface. */
+  --ci-radius-surface-nested: var(--ci-radius-sm);
   --ci-radius-pill: var(--ci-radius-full);
   --ci-border-hairline: 1px;
   --ci-border-default: 1px;
@@ -394,6 +415,15 @@
   --ci-sidebar-fg: var(--ci-color-foreground);
   --ci-sidebar-active-bg: var(--ci-color-surface-inverse);
   --ci-sidebar-active-fg: var(--ci-color-text-inverse);
+  /* Scrollbars, read by the opt-in .ci-scrollbars rule; the persistent scrollbar of Table reads
+     the two thumb colours too. The thumb is the quietest neutral step that keeps 3:1 on the
+     background, surface, subtle and muted surfaces of its theme, and the hover step is one
+     further. The size applies where ::-webkit-scrollbar is supported (Chromium, Safari);
+     Firefox draws its own thin bar. */
+  --ci-scrollbar-thumb: var(--ci-neutral-500);
+  --ci-scrollbar-thumb-hover: var(--ci-neutral-600);
+  --ci-scrollbar-track: transparent;
+  --ci-scrollbar-size: var(--ci-space-2);
 
   /* --- shadcn-compatible aliases ------------------------------------------ */
   --background: var(--ci-color-background);
@@ -540,6 +570,8 @@
   --ci-button-primary-hover: var(--ci-color-accent-hover);
   --ci-sidebar-active-bg: var(--ci-color-accent);
   --ci-sidebar-active-fg: var(--ci-color-accent-foreground);
+  --ci-scrollbar-thumb: var(--ci-neutral-400);
+  --ci-scrollbar-thumb-hover: var(--ci-neutral-300);
 
   --primary: var(--ci-color-accent);
   --primary-foreground: var(--ci-color-accent-foreground);

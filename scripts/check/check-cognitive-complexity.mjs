@@ -5,7 +5,7 @@
 import fs from "node:fs";
 import path from "node:path";
 
-import { realpathSync } from "node:fs";
+import { isMainModule } from "../lib/is-main-module.mjs";
 import { countCognitiveViolations, getComplexityEslintReport } from "./complexityEslintReport.mjs";
 
 // Re-export for existing unit tests.
@@ -87,4 +87,4 @@ function main() {
   process.exit(0);
 }
 
-if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) main();
+if (isMainModule(import.meta.url)) main();

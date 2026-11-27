@@ -130,7 +130,9 @@ describe("confirm before removing a single connection (#7361)", () => {
   });
 
   function clickDeleteButton() {
-    const deleteButton = document.body.querySelector<HTMLButtonElement>("button[title='delete']");
+    const deleteButton = document.body.querySelector<HTMLButtonElement>(
+      "button[aria-label='delete']"
+    );
     expect(deleteButton).toBeTruthy();
     act(() => {
       deleteButton!.click();

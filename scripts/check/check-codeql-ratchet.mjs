@@ -29,7 +29,7 @@ import { execFileSync, spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 
-import { realpathSync } from "node:fs";
+import { isMainModule } from "../lib/is-main-module.mjs";
 
 const QUIET = process.argv.includes("--quiet");
 const PRINT_JSON = process.argv.includes("--json");
@@ -428,4 +428,4 @@ function main() {
   applyRatchet(alertCount);
 }
 
-if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) main();
+if (isMainModule(import.meta.url)) main();
