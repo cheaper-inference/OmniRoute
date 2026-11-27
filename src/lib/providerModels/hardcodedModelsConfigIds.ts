@@ -49,6 +49,7 @@ export const HARDCODED_MODELS_CONFIG_IDS: ReadonlySet<string> = new Set([
   "openvecta",
   "perplexity",
   "qwen-cloud",
+  "qwen-cloud-token-plan",
   "synthetic",
   "thebai",
   "together",
