@@ -24,10 +24,9 @@ import {
   LOCAL_CLI_SUBJECT,
 } from "../peerContext";
 import {
-  isAlwaysProtectedOrSpawnCapablePath,
+  isAlwaysProtectedPath,
   isLocalOnlyBypassableByManageScope,
   isLocalOnlyPath,
-  isSpawnCapablePath,
 } from "../routeGuard";
 
 const MODEL_SYNC_MANAGEMENT_PATH = /^\/api\/providers\/[^/]+\/(sync-models|models)$/;
@@ -100,7 +99,7 @@ export const managementPolicy: RoutePolicy = {
     if (
       isLocalOnlyPath(path, ctx.request?.method) &&
       !isLoopbackRequest(ctx) &&
-      (!isPrivateLanRequest(ctx) || isSpawnCapablePath(path, ctx.request?.method))
+      !isPrivateLanRequest(ctx)
     ) {
       if (isLocalOnlyBypassableByManageScope(path)) {
         // Management auth is header-only — a URL-borne token must never satisfy a
@@ -260,7 +259,7 @@ export const managementPolicy: RoutePolicy = {
     // and the Host header was how a remote caller reached the anonymous
     // POST /api/settings/require-login write (GHSA-7pq4-8pvv-rx7r).
     if (
-      !isAlwaysProtectedOrSpawnCapablePath(path, ctx.request?.method) &&
+      !isAlwaysProtectedPath(path) &&
       !(await isAuthRequired(ctx.request, { loopback: isLoopbackRequest(ctx) }))
     ) {
       return allow({ kind: "anonymous", id: "anonymous", label: "auth-disabled" });

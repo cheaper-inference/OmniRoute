@@ -215,8 +215,19 @@ test(
       assert.ok(fs.existsSync(sqliteFile), "published sqliteFile should remain intact");
       const leftovers = fs.readdirSync(dataDir).filter((n) => n.startsWith("storage.sqlite.tmp-"));
       assert.deepEqual(leftovers, [], "no temp file should remain after rename succeeded");
+
+      // Because directory fsync failed, durability remains pending and a subsequent
+      // checkpoint() retries the directory fsync even without new SQL writes.
+      assert.equal(dirFsyncCalls, 2, "expected 2 directory fsync attempts so far");
+      adapter.checkpoint();
+      assert.equal(
+        dirFsyncCalls,
+        3,
+        "expected checkpoint() after transient dir fsync failure to retry directory fsync"
+      );
     } finally {
       fs.openSync = origOpenSync;
+      fs.closeSync = origCloseSync;
       fs.fsyncSync = origFsyncSync;
       if (adapter?.open) adapter.close();
       fs.rmSync(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });

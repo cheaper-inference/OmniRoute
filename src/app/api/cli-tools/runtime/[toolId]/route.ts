@@ -9,7 +9,7 @@ import {
 } from "@/shared/services/cliRuntime";
 
 export async function GET(request, { params }) {
-  const authError = await requireCliToolsAuth(request, { alwaysRequireAuth: true });
+  const authError = await requireCliToolsAuth(request);
   if (authError) return authError;
 
   try {
