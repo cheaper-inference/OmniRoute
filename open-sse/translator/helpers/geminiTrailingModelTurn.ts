@@ -11,11 +11,12 @@
  */
 export function isGeminiTrailingModelTurnRejectingModel(model: unknown): boolean {
   if (typeof model !== "string") return false;
-  const normalizedModel = model.toLowerCase();
+  const bareModel = model.includes("/") ? (model.split("/").pop() ?? model) : model;
+  const normalizedModel = bareModel.toLowerCase();
   if (/(?:^|-)image(?:-|$)/.test(normalizedModel)) {
     return false;
   }
-  return /^gemini-(?:3(?:\.\d+)?(?:-[a-z0-9-]+)?|pro-agent)$/.test(normalizedModel);
+  return /^gemini-(?:(?:3|4)(?:\.\d+)?(?:-[a-z0-9-]+)?|pro-agent)$/.test(normalizedModel);
 }
 
 /**

@@ -40,21 +40,31 @@ function modelParts(model: string, b: unknown) {
   return modelMsg.parts;
 }
 
-test("antigravity multi-turn tool call carries the signature bypass sentinel by default", () => {
-  const parts = modelParts("gemini-3.1-pro-low", body);
-  const fc = parts.find((p) => p.functionCall);
-  assert.ok(fc, "expected a functionCall part");
-  assert.equal(fc.thoughtSignature, "skip_thought_signature_validator");
+test("antigravity thinking Gemini defaults to context fallback without the bypass sentinel (#21395)", () => {
+  const envelope = openaiToAntigravityRequest("gemini-3.1-pro-low", body, true) as {
+    request: { contents: Array<{ role: string; parts: Array<Record<string, unknown>> }> };
+  };
+  const serialized = JSON.stringify(envelope.request.contents);
+  assert.equal(serialized.includes("skip_thought_signature_validator"), false);
+  assert.equal(serialized.includes("previous_tool_result_context"), true);
 });
 
-test("ANTIGRAVITY_ALLOW_SIGNATURE_BYPASS=0 disables the sentinel", () => {
+test("ANTIGRAVITY_ALLOW_SIGNATURE_BYPASS=1 opts in to the bypass sentinel and =0 keeps it off", () => {
   const prev = process.env.ANTIGRAVITY_ALLOW_SIGNATURE_BYPASS;
-  process.env.ANTIGRAVITY_ALLOW_SIGNATURE_BYPASS = "0";
   try {
-    const parts = modelParts("gemini-3.1-pro-low", body);
-    const fc = parts.find((p) => p.functionCall);
-    assert.ok(fc, "expected a functionCall part");
-    assert.equal(fc.thoughtSignature, undefined);
+    process.env.ANTIGRAVITY_ALLOW_SIGNATURE_BYPASS = "1";
+    const enabledParts = modelParts("gemini-3.1-pro-low", body);
+    const enabledFc = enabledParts.find((p) => p.functionCall);
+    assert.ok(enabledFc, "expected a functionCall part when bypass is opted in");
+    assert.equal(enabledFc.thoughtSignature, "skip_thought_signature_validator");
+
+    process.env.ANTIGRAVITY_ALLOW_SIGNATURE_BYPASS = "0";
+    const disabledEnvelope = openaiToAntigravityRequest("gemini-3.1-pro-low", body, true) as {
+      request: { contents: Array<{ role: string; parts: Array<Record<string, unknown>> }> };
+    };
+    const serialized = JSON.stringify(disabledEnvelope.request.contents);
+    assert.equal(serialized.includes("skip_thought_signature_validator"), false);
+    assert.equal(serialized.includes("previous_tool_result_context"), true);
   } finally {
     if (prev === undefined) delete process.env.ANTIGRAVITY_ALLOW_SIGNATURE_BYPASS;
     else process.env.ANTIGRAVITY_ALLOW_SIGNATURE_BYPASS = prev;

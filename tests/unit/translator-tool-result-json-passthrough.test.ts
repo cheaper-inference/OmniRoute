@@ -94,6 +94,10 @@ test("OpenAI -> Gemini keeps a plain-text tool result as a raw string (no double
 });
 
 test("OpenAI -> Antigravity keeps a JSON-string tool result as a raw string", () => {
+  // Native functionResponse on thinking Gemini requires a cached thoughtSignature.
+  const ns = "conn-ag-tool-result-json";
+  storeGeminiThoughtSignature(buildGeminiThoughtSignatureKey(ns, "call_json_2"), "SIG_AG_JSON_2");
+
   const result = openaiToAntigravityRequest(
     "gemini-2.5-pro",
     {
@@ -113,7 +117,7 @@ test("OpenAI -> Antigravity keeps a JSON-string tool result as a raw string", ()
       ],
     },
     false,
-    { projectId: "proj-json-passthrough" } as never
+    { projectId: "proj-json-passthrough", _signatureNamespace: ns } as never
   );
 
   const request = (result as unknown as { request: { contents: Array<UnknownRecord> } }).request;

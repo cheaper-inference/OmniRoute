@@ -2,6 +2,10 @@
 // Extracted verbatim from antigravity.ts (no host state, no fetch/auth).
 import { normalizeOpenAICompatibleFinishReasonString } from "../../utils/finishReason.ts";
 import { stripObfuscationZeroWidth } from "../../utils/zeroWidth.ts";
+import {
+  buildGeminiThoughtSignatureKey,
+  storeGeminiThoughtSignature,
+} from "../../services/geminiThoughtSignatureStore.ts";
 
 export type AntigravityCollectedStream = {
   textContent: string;
@@ -14,6 +18,8 @@ export type AntigravityCollectedStream = {
   }>;
   usage: Record<string, unknown> | null;
   remainingCredits: Array<{ creditType: string; creditAmount: string }> | null;
+  pendingThoughtSignature?: string | null;
+  signatureNamespace?: string | null;
 };
 
 // Both run once per SSE data line / per text part (processAntigravitySSEPayload),
@@ -91,18 +97,29 @@ export function processAntigravitySSEPayload(
     const candidate = parsed?.response?.candidates?.[0];
     if (candidate?.content?.parts) {
       for (const part of candidate.content.parts) {
-        // Native function calls: Gemini 3.x responds to functionDeclarations with a
+        const partThoughtSig =
+          typeof part.thoughtSignature === "string" && part.thoughtSignature.length > 0
+            ? part.thoughtSignature
+            : typeof part.thought_signature === "string" && part.thought_signature.length > 0
+              ? part.thought_signature
+              : null;
+        if (partThoughtSig) {
+          collected.pendingThoughtSignature = partThoughtSig;
+        }
+
+        // Native function calls: Gemini 3.x/4.x responds to functionDeclarations with a
         // native functionCall part (usually carrying a thoughtSignature), NOT the
         // legacy "[Tool call: ...]" textual format. Dropping these left the collected
         // stream empty on every tools request → synthetic 502 "Provider returned
         // empty content" (Chatwit Captain Copilot / reply suggestion outage).
         if (part.functionCall && typeof part.functionCall.name === "string") {
           const fc = part.functionCall;
+          const toolCallId =
+            typeof fc.id === "string" && fc.id.length > 0
+              ? fc.id
+              : `${fc.name}-${Date.now()}-${collected.toolCalls.length}`;
           collected.toolCalls.push({
-            id:
-              typeof fc.id === "string" && fc.id.length > 0
-                ? fc.id
-                : `${fc.name}-${Date.now()}-${collected.toolCalls.length}`,
+            id: toolCallId,
             index: collected.toolCalls.length,
             type: "function",
             function: {
@@ -110,6 +127,13 @@ export function processAntigravitySSEPayload(
               arguments: JSON.stringify(stripZeroWidth(fc.args ?? {})),
             },
           });
+          if (collected.pendingThoughtSignature) {
+            storeGeminiThoughtSignature(
+              buildGeminiThoughtSignatureKey(collected.signatureNamespace ?? null, toolCallId),
+              collected.pendingThoughtSignature
+            );
+            collected.pendingThoughtSignature = null;
+          }
           collected.finishReason = "tool_calls";
           continue;
         }
@@ -120,16 +144,6 @@ export function processAntigravitySSEPayload(
           } else {
             collected.textContent += part.text;
           }
-        }
-        // Native Gemini function calls. Non-streaming responses (and some
-        // streaming ones) carry the tool call as `part.functionCall` rather than
-        // the textual `[Tool call: ...]` markdown. Without this, a tool-only
-        // response produced empty content and a 502 Provider error (#7037).
-        if (part.functionCall && typeof part.functionCall.name === "string") {
-          addAntigravityTextualToolCall(collected, {
-            name: part.functionCall.name,
-            args: part.functionCall.args ?? {},
-          });
         }
       }
     }
@@ -145,7 +159,8 @@ export function processAntigravitySSEPayload(
     if (parsed?.response?.usageMetadata) {
       const um = parsed.response.usageMetadata;
       const thoughtsTokens = typeof um.thoughtsTokenCount === "number" ? um.thoughtsTokenCount : 0;
-      const cachedTokens = typeof um.cachedContentTokenCount === "number" ? um.cachedContentTokenCount : 0;
+      const cachedTokens =
+        typeof um.cachedContentTokenCount === "number" ? um.cachedContentTokenCount : 0;
       collected.usage = {
         prompt_tokens: um.promptTokenCount || 0,
         completion_tokens: (um.candidatesTokenCount || 0) + thoughtsTokens,
@@ -153,9 +168,7 @@ export function processAntigravitySSEPayload(
         ...(thoughtsTokens > 0
           ? { completion_tokens_details: { reasoning_tokens: thoughtsTokens } }
           : {}),
-        ...(cachedTokens > 0
-          ? { prompt_tokens_details: { cached_tokens: cachedTokens } }
-          : {}),
+        ...(cachedTokens > 0 ? { prompt_tokens_details: { cached_tokens: cachedTokens } } : {}),
       };
     }
     if (Array.isArray(parsed?.remainingCredits)) {
