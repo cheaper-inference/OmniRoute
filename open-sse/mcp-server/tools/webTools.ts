@@ -86,7 +86,8 @@ export async function handleWebFetch(args: {
     | "nimble-search"
     | "anysearch-search"
     | "parallel-search"
-    | "keenable-search";
+    | "keenable-search"
+    | "deepseek-search";
   format?: "markdown" | "html" | "links" | "screenshot";
   include_metadata?: boolean;
   depth?: number;
