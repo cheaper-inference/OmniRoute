@@ -36,7 +36,6 @@ import { isMainModule } from "../lib/is-main-module.mjs";
 
 const DIR = path.dirname(fileURLToPath(import.meta.url));
 const REPO = path.resolve(DIR, "../.."); // …/OmniRoute
-const evidenceByRow = new Map(evidencePolicy.evidence.map((entry) => [catalogKey(entry), entry]));
 
 /**
  * Proveniência: quem/quando/de-qual-commit gerou o export. Cada campo é `null`
@@ -83,13 +82,25 @@ function buildProvenance(geradoEm) {
   };
 }
 
-export function buildExportBudgets(rows) {
+export function buildExportBudgets(rows, evidenceEntries = evidencePolicy.evidence) {
+  const evidenceByRow = new Map(
+    evidenceEntries.map((entry) => {
+      const key = catalogKey(entry);
+      if (typeof entry.sourceType !== "string" || !entry.sourceType.trim()) {
+        throw new Error(`Invalid evidence for ${key}: sourceType must be a non-empty string`);
+      }
+      return [key, entry];
+    })
+  );
+
   return rows.map((row) => {
     const source = evidenceByRow.get(catalogKey(row));
     const budget = {
       ...row,
       quotaUnit: resolveFreeQuotaUnit(row) ?? null,
-      evidence: source ? { url: source.sourceUrl, checkedAt: source.checkedAt } : null,
+      evidence: source
+        ? { url: source.sourceUrl, checkedAt: source.checkedAt, sourceType: source.sourceType }
+        : null,
     };
     if (row.gates?.length) {
       budget.gatedTokensPerMonth = row.monthlyTokens;

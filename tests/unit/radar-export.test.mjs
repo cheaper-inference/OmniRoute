@@ -117,9 +117,38 @@ test("radar export adds gate, quota unit, and evidence metadata to catalog budge
     );
     assert.deepEqual(
       budget.evidence,
-      source ? { url: source.sourceUrl, checkedAt: source.checkedAt } : null,
+      source
+        ? { url: source.sourceUrl, checkedAt: source.checkedAt, sourceType: source.sourceType }
+        : null,
       label
     );
+  }
+});
+
+test("radar export emits valid evidence on every budget with evidence", () => {
+  const { budgets } = runExport();
+  const budgetsWithEvidence = budgets.filter((budget) => budget.evidence !== null);
+  assert.ok(budgetsWithEvidence.length > 0);
+  for (const { provider, modelId, evidence } of budgetsWithEvidence) {
+    const label = `${provider}/${modelId}`;
+    for (const field of ["url", "checkedAt", "sourceType"]) {
+      assert.equal(typeof evidence[field], "string", `${label} evidence.${field}`);
+      assert.ok(evidence[field].trim().length > 0, `${label} evidence.${field}`);
+    }
+    assert.doesNotThrow(() => new URL(evidence.url), `${label} evidence.url`);
+  }
+});
+
+test("radar export rejects evidence with a missing or blank sourceType", async () => {
+  const { buildExportBudgets } = await import("../../scripts/release/radar-export.mjs");
+  const { sourceType: _sourceType, ...source } = evidencePolicy.evidence[0];
+  const row = FREE_MODEL_BUDGETS.find(
+    ({ provider, modelId }) => provider === source.provider && modelId === source.modelId
+  );
+  assert.ok(row);
+  const expectedMessage = `Invalid evidence for ${source.provider}/${source.modelId}: sourceType must be a non-empty string`;
+  for (const entry of [source, { ...source, sourceType: "" }, { ...source, sourceType: " " }]) {
+    assert.throws(() => buildExportBudgets([row], [entry]), { message: expectedMessage });
   }
 });
 
