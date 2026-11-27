@@ -15,23 +15,18 @@ const settingsDb = await import("../../src/lib/db/settings.ts");
 const virtualFactory = await import("../../open-sse/services/autoCombo/virtualFactory.ts");
 const noAuthReadiness = await import("../../open-sse/services/autoCombo/noAuthReadiness.ts");
 
-// devin-cli-agentic is admitted to auto/* only once its app-layer readiness probe
-// (`devin auth status`, registered at boot) confirms the login — #15446, covered in
-// noauth-autocombo-allowlist.test.ts. Stub that probe as "logged in" here so this file
-// keeps asserting the full emulated-tool-calling membership, Devin included.
-noAuthReadiness.registerNoAuthReadiness("devin-cli-agentic", () => true);
+// Stub available local runtimes so this suite can assert the full emulated-tool-calling
+// membership. The boot probes are covered in noauth-autocombo-allowlist.test.ts.
+for (const provider of ["devin-cli-agentic", "cloudflare-playground", "duckduckgo-web"]) {
+  noAuthReadiness.registerNoAuthReadiness(provider, () => true);
+}
 
 type VirtualComboResult = Awaited<ReturnType<typeof virtualFactory.createVirtualAutoCombo>>;
 
 // No-auth pool membership, mirrored from tests/unit/noauth-autocombo-allowlist.test.ts
 // (the dedicated guard). Kept explicit here on purpose: adding `toolCalling: "emulated"`
 // to a NOAUTH_PROVIDERS entry must show up as a deliberate, reviewed diff in both files.
-const ALLOWED_NOAUTH_PROVIDERS = [
-  "cloudflare-playground",
-  "devin-cli-agentic",
-  "duckduckgo-web",
-  "uncloseai",
-];
+const ALLOWED_NOAUTH_PROVIDERS = ["cloudflare-playground", "devin-cli-agentic", "duckduckgo-web"];
 const EXCLUDED_NOAUTH_PROVIDERS = [
   "aihorde",
   "auggie",
@@ -291,9 +286,8 @@ test("createVirtualAutoCombo restricts the no-auth pool to the emulated-tool-cal
   // entries that opted into prompt-emulated tool calling (`toolCalling: "emulated"`),
   // discovered at startup by
   // open-sse/services/autoCombo/emulatedNoAuthAllowlist.ts::getEmulatedToolCallingNoAuthProviders().
-  // The admitted set is cloudflare-playground, devin-cli-agentic, duckduckgo-web,
-  // opencode, and uncloseai — duckduckgo-web is included, not excluded. The others
-  // stay usable via direct `<alias>/<model>` calls but must NOT be auto-routed to.
+  // The admitted set is cloudflare-playground, devin-cli-agentic, and duckduckgo-web.
+  // The other keyless providers stay available for direct `<alias>/<model>` calls.
   // Dedicated guard: tests/unit/noauth-autocombo-allowlist.test.ts.
   // contract changed by #15979 (on top of #15839): `excludeTosAvoid` is ON by default and
   // uncataloged models now inherit the provider's curated `tos: "avoid"` verdict, so every

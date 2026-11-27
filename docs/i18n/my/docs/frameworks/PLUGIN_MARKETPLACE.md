@@ -25,29 +25,26 @@ child process များအတွင်း code ကို load လုပ်ပ
 loopback မဟုတ်သော origin မှ route များကို ရောက်ရှိအသုံးပြု၍မရပါ။
 [`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md) ကို ကြည့်ပါ။
 
-## အစိတ်အပိုင်းများ အတူတကွ အလုပ်လုပ်ပုံ
+## Together ဘယ်လို လိုက်ဖက်လဲ။
 
 ```
 Dashboard (/dashboard/plugins)
-  ├─ "ထည့်သွင်းပြီး" tab  → GET /api/plugins            (listPlugins)
-  │                         POST /api/plugins/scan      (pluginManager.scan)
-  │                         POST /api/plugins/{name}/activate|deactivate
-  │                         DELETE /api/plugins/{name}   (ဖယ်ရှားခြင်း)
+  ├─ "Installed" tab  → GET /api/plugins            (listPlugins)
+  │                     POST /api/plugins/scan      (pluginManager.scan)
+  │                     POST /api/plugins/{name}/activate|deactivate
+  │                     DELETE /api/plugins/{name}   (uninstall)
   └─ "Marketplace" tab → GET /api/plugins/marketplace
                           → listMarketplacePlugins()
-                            ├─ စိတ်ကြိုက် URL မရှိ → အသင့်ပါရှိသော SEED_REGISTRY
-                            └─ စိတ်ကြိုက် URL → isSafeMarketplaceUrl() SSRF guard
-                                            → safeOutboundFetch(guard:"public-only")
+                            ├─ no custom URL → built-in SEED_REGISTRY
+                            └─ custom URL → isSafeMarketplaceUrl() SSRF guard
+                                          → safeOutboundFetch(guard:"public-only")
 ```
 
-- **Registry layer** — `src/lib/plugins/marketplace.ts`: catalog ကို စာရင်းပြုစုခြင်း / ရှာဖွေခြင်း ပြုလုပ်ပြီး
-  ချို့ယွင်းမှုတစ်စုံတစ်ရာဖြစ်ပါက seed registry ကို အစားထိုးအသုံးပြုသည်။
-- **Lifecycle layer** — `src/lib/plugins/manager.ts` (`pluginManager` singleton):
-  ထည့်သွင်းခြင်း၊ အဆင့်မြှင့်ခြင်း၊ အသက်သွင်းခြင်း၊ ပိတ်ထားခြင်း၊ ဖယ်ရှားခြင်း၊ scan လုပ်ခြင်းနှင့် startup တွင် load လုပ်ခြင်း။
-- **Manifest layer** — `src/lib/plugins/manifest.ts`: `plugin.json` အတွက် Zod schema နှင့် မူလတန်ဖိုးများ။
-- **Scanner** — `src/lib/plugins/scanner.ts`: plugin directory အောက်ရှိ disk ပေါ်မှ plugin များကို ရှာဖွေဖော်ထုတ်သည်။
-- **Loader** — `src/lib/plugins/loader.ts`: plugin တစ်ခုချင်းစီကို သီးခြားခွဲထားသော child process တစ်ခုတွင်
-  စတင်လုပ်ဆောင်ပြီး IPC မှတစ်ဆင့် hook call များကို ကြားခံဆောင်ရွက်ပေးသည်။
+- **Registry အလွှာ** — `src/lib/plugins/marketplace.ts`: စာရင်းများ / ကက်တလောက်ကိုရှာဖွေသည်၊ မည်သည့်ပျက်ကွက်မှုတွင်မျိုးစေ့မှတ်ပုံတင်ခြင်းသို့ပြန်ကျသွားသည်
+- **Lifecycle အလွှာ** — `src/lib/plugins/manager.ts` (`pluginManager` singleton ) : ထည့်သွင်း၊ အဆင့်မြှင့်တင်၊ အသက်သွင်း၊ ပိတ်လိုက်၊ ဖြုတ်လိုက်၊ စကင်န်ဖတ်၊ စတင်လုပ်ဆောင်ပါ။
+- **Manifest အလွှာ** — `src/lib/plugins/manifest.ts`: Zod schema + သည် `plugin.json` အတွက် ပုံသေများ။
+- **စကင်နာ** — `src/lib/plugins/scanner.ts`: plugin လမ်းညွှန်အောက်ရှိ disk ပေါ်ရှိ ပလပ်အင်များကို ရှာဖွေတွေ့ရှိသည်။
+- **Loader** — `src/lib/plugins/loader.ts`: သီးခြား Node.js ကလေးလုပ်ငန်းစဉ်တွင် ပလပ်အင်တစ်ခုစီကို ထုတ်ပေးပြီး ပွဲစားများက IPC ဖြင့် ဖုန်းခေါ်ဆိုမှုများကို ချိတ်သည်။ ကလေးသည် sandbox မဟုတ်ပါ။ (အောက်ပါ "Plugin execution isolation" ကိုကြည့်ပါ)။
 
 ## Marketplace Catalog
 
@@ -83,34 +80,31 @@ body ကို ပြန်ပေးခြင်း ဖြစ်ပါက `listM
 
 ## REST API
 
-Endpoint အားလုံးတွင် စီမံခန့်ခွဲမှု အထောက်အထားစစ်ဆေးခြင်း (`requireManagementAuth`) လိုအပ်ပြီး
-loopback မှသာ အသုံးပြုနိုင်သည် — `/api/plugins` နှင့် `/api/plugins/` ကို
-`LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`) တွင် စာရင်းသွင်းထားသည်။
+အဆုံးမှတ်အားလုံးသည် စီမံခန့်ခွဲမှု အထောက်အထား (`requireManagementAuth`) လိုအပ်သည်** နှင့်** loopback-only — `/api/plugins` နှင့် `/api/plugins/` `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`) တွင် ဖော်ပြထားပါသည်။
 
-| Endpoint                         | Method | ဖော်ပြချက်                                                                                |
-| -------------------------------- | ------ | ----------------------------------------------------------------------------------------- |
-| `/api/plugins`                   | GET    | ထည့်သွင်းထားသော plugin များကို စာရင်းပြုစုခြင်း (ရွေးချယ်နိုင်သော `?status=` filter)      |
-| `/api/plugins`                   | POST   | အကြွင်းမဲ့ local path မှ plugin တစ်ခုကို ထည့်သွင်းခြင်း                                   |
-| `/api/plugins/scan`              | POST   | Plugin directory ကို scan လုပ်ပြီး plugin အသစ်များကို မှတ်ပုံတင်ခြင်း                     |
-| `/api/plugins/marketplace`       | GET    | Marketplace catalog entry များကို စာရင်းပြုစုခြင်း                                        |
-| `/api/plugins/[name]`            | GET    | ထည့်သွင်းထားသော plugin ၏ အသေးစိတ်အချက်အလက်များကို ရယူခြင်း                                |
-| `/api/plugins/[name]`            | DELETE | Plugin တစ်ခုကို ဖယ်ရှားခြင်း                                                              |
-| `/api/plugins/[name]/activate`   | POST   | အသက်သွင်းခြင်း (load လုပ်ခြင်း + hook များကို မှတ်ပုံတင်ခြင်း)                            |
-| `/api/plugins/[name]/deactivate` | POST   | ပိတ်ထားခြင်း (`onDeactivate` ကို ခေါ်ယူပြီး hook များကို မှတ်ပုံတင်ထားမှုမှ ပယ်ဖျက်ခြင်း) |
-| `/api/plugins/[name]/config`     | GET    | Plugin config + config schema ကို ရယူခြင်း                                                |
-| `/api/plugins/[name]/config`     | PUT    | Plugin config ကို အပ်ဒိတ်လုပ်ခြင်း (schema နှင့် တိုက်ဆိုင်စစ်ဆေးထားသည်)                  |
+| အဆုံးမှတ်                        | နည်းလမ်း | ဖော်ပြချက်                                                                            |
+| -------------------------------- | -------- | ------------------------------------------------------------------------------------- |
+| `/api/plugins`                   | GET      | ထည့်သွင်းထားသော ပလပ်အင်များကို စာရင်းပြုစုပါ (ရွေးချယ်နိုင်သော `?status=` စစ်ထုတ်မှု) |
+| `/api/plugins`                   | POST     | ပလပ်အင်အရင်းအမြစ်လမ်းညွှန်မှ ပလပ်အင်တစ်ခုကို ထည့်သွင်းပါ။                             |
+| `/api/plugins/scan`              | POST     | ပလပ်အင်လမ်းညွှန်ကို စကန်ဖတ်ပြီး ပလပ်အင်အသစ်များကို စာရင်းသွင်းပါ။                     |
+| `/api/plugins/marketplace`       | GET      | စျေးကွက် ကတ်တလောက်ကို စာရင်းပြုစုပါ။                                                  |
+| `/api/plugins/[name]`            | GET      | ထည့်သွင်းထားသော ပလပ်အင်အသေးစိတ်အချက်အလက်များကို ရယူပါ။                                |
+| `/api/plugins/[name]`            | DELETE   | ပလပ်အင်ကို ဖြုတ်ပါ။                                                                   |
+| `/api/plugins/[name]/activate`   | POST     | အသက်သွင်းရန် ( + မှတ်ပုံတင်ချိတ်များကို တင်ပါ)                                        |
+| `/api/plugins/[name]/deactivate` | POST     | ပိတ်ပါ (မီး `onDeactivate`၊ ချိတ်ကို စာရင်းမသွင်းပါ)                                  |
+| `/api/plugins/[name]/config`     | GET      | plugin config + config schema ကိုရယူပါ။                                               |
+| `/api/plugins/[name]/config`     | PUT      | plugin config ကို အပ်ဒိတ်လုပ်ပါ (schema နှင့် ကိုက်ညီသည်)                             |
 
-`GET /api/plugins` ၏ `status` filter သည်
-`installed` / `active` / `inactive` / `error` တို့အနက် တစ်ခုကို လက်ခံသည်။ မမှန်ကန်သော value တစ်ခုကို ပေးပါက `400` ပြန်ပေးသည်။
+`GET /api/plugins` `status` စစ်ထုတ်မှုသည် `installed` / `active` / `inactive` / `error` ထဲမှ တစ်ခုကို လက်ခံသည်။ မမှန်ကန်သောတန်ဖိုးသည် `400` ပြန်ပေးသည်။
 
-### ထည့်သွင်းထားသော plugin များကို စာရင်းပြုစုခြင်း
+### ထည့်သွင်းထားသော ပလပ်အင်များကို စာရင်းပြုစုပါ။
 
 ```bash
 curl http://localhost:20128/api/plugins \
   -H "Cookie: auth_token=..."
 ```
 
-### Local path တစ်ခုမှ ထည့်သွင်းခြင်း
+### ဒေသန္တရလမ်းကြောင်းမှ ထည့်သွင်းပါ။
 
 ```bash
 curl -X POST http://localhost:20128/api/plugins \
@@ -119,19 +113,18 @@ curl -X POST http://localhost:20128/api/plugins \
   -d '{ "path": "/absolute/path/to/my-plugin" }'
 ```
 
-`path` သည် **အကြွင်းမဲ့ path** ဖြစ်ရမည်ဖြစ်ပြီး `..` traversal segment များ သို့မဟုတ်
-null byte များ မပါဝင်ရပါ (Zod ဖြင့် အတည်ပြုထားသည်)။ Source directory တွင် မှန်ကန်သော
-`plugin.json` ပါဝင်ရမည် (သို့မဟုတ် ထိုဖိုင်ပါဝင်သည့် directory ၏ parent ဖြစ်ရမည်)။ အောင်မြင်ပါက response သည် `201` ဖြစ်ပြီး
-ထည့်သွင်းထားသော plugin row ကို ပြန်ပေးသည်။
+`path` an ဖြစ်ရမည်။** ပကတိ** လမ်းညွှန်တစ်ခုသို့လမ်းကြောင်း** plugin အရင်းအမြစ်များလမ်းညွှန်အတွင်း** ပလပ်အင် root ၏ဘေးတွင် `plugin-sources` ၊ ထို့ကြောင့် မူရင်းအားဖြင့် `~/.omniroute/plugin-sources/` သို့မဟုတ် ထို variable ကို သတ်မှတ်သည့်အခါ `<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/` (`getPluginSourcesDir()` in `src/lib/plugins/installSource.ts`)။ အဲဒီမှာ ပလပ်အင်ကို ကော်ပီကူးပါ သို့မဟုတ် ပုံတူပွားပါ။ လမ်းကြောင်းတွင် `..` သို့မဟုတ် null byte ပါ၀င်သောအခါ၊ အဆိုပါလမ်းညွှန်အပြင်ဘက်တွင်တည်ရှိသည်၊ symlink မှတဆင့်၎င်း၏အပြင်ဘက်တွင်ဖြေရှင်းသည်၊ ၎င်းအပြင်ဘက်တွင်ပစ်မှတ်ရှိသော symlink တစ်ခုပါရှိသည်၊ သို့မဟုတ် directory မရှိသည့်အခါတွင်ထည့်သွင်းမှုကို `400` ဖြင့်ငြင်းဆိုထားသည်။ ရင်းမြစ်လမ်းညွှန်တွင် မှန်ကန်သော `plugin.json` (သို့မဟုတ် တစ်ခု၏ မိဘဖြစ်ရမည်) ပါရှိသည်။ အောင်မြင်သောအခါတွင် ထည့်သွင်းထားသော plugin အတန်းနှင့်အတူ တုံ့ပြန်မှုသည် `201` ဖြစ်သည်။
 
-### Marketplace ကို ကြည့်ရှုခြင်း
+အခြားပလပ်အင်လမ်းကြောင်းများနှင့်မတူဘဲ၊ ဤတစ်ခုသည် အကောင့်ဝင်ခြင်းကိုပိတ်ထားသည့်တိုင် (`requireLogin=false`) : ကုဒ်ထည့်သွင်းခြင်းသည် အမည်မသိလုပ်ဆောင်ချက် ဘယ်တော့မှမဟုတ်သည့် စီမံခန့်ခွဲမှုဆိုင်ရာအထောက်အထား (ဒက်ရှ်ဘုတ်စက်ရှင် သို့မဟုတ် စီမံခန့်ခွဲသည့် API ကီးတစ်ခု) လိုအပ်ပါသည်။
+
+### ဈေးကို လိုက်ကြည့်ပါ။
 
 ```bash
 curl http://localhost:20128/api/plugins/marketplace \
   -H "Cookie: auth_token=..."
 ```
 
-### Plugin config ကို အပ်ဒိတ်လုပ်ခြင်း
+### plugin config ကို အပ်ဒိတ်လုပ်ပါ။
 
 ```bash
 curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
@@ -140,10 +133,7 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
   -d '{ "config": { "level": "debug", "maxItems": 100 } }'
 ```
 
-`PUT .../config` သည် ပေးထားသော value တစ်ခုစီကို plugin ၏
-`configSchema` (manifest တွင် ကြေညာထားသည်) နှင့် တိုက်ဆိုင်စစ်ဆေးသည်။ `number` field များသည် `min`/`max` ကို လိုက်နာပြီး
-`select` field များသည် ကြေညာထားသော `enum` နှင့် ကိုက်ညီရမည်။ Schema တွင် မပါဝင်သော key များကို
-ခွင့်ပြုပေးထားသည်။
+`PUT .../config` ပလပ်အင်၏ `configSchema` (မန်နီးဖက်စ်တွင် ကြေငြာထားသည်) နှင့် ပေးထားသော တန်ဖိုးတစ်ခုစီကို အတည်ပြုသည်- `number` အကွက်များကို ဂုဏ်ပြုသော `min`/`max`, `select` အကွက်များသည် ကြေညာထားသော `enum` နှင့် ကိုက်ညီရပါမည်။ schema တွင်မပါရှိသောသော့များကိုဖြတ်သန်းခွင့်ပြုသည်။
 
 ## ဖွဲ့စည်းသတ်မှတ်မှု
 
@@ -204,81 +194,58 @@ Dashboard ၏ "Marketplace" tab တွင် ဤ URL အတွက် field တ�
 
 ## လုံခြုံရေး
 
-### Route အဆင့် — loopback အတွက်သာ
+### အဆင့် — loopback လမ်းကြောင်းသာ
 
-Plugin များသည် spawn လုပ်ထားသော child process များအတွင်း code ကို execute လုပ်သောကြောင့် `/api/plugins`
-မျက်နှာပြင်တစ်ခုလုံးကို `LOCAL_ONLY` (Tier 1) အဖြစ် သတ်မှတ်ထားသည်။ Loopback enforcement ကို
-မည်သည့် auth check မတိုင်မီမဆို ခြွင်းချက်မရှိ လုပ်ဆောင်သောကြောင့် tunnel မှတစ်ဆင့်
-စက်ထံရောက်လာသော ပေါက်ကြားသွားသည့် management token တစ်ခုသည်ပင် plugin တစ်ခုကို
-install၊ activate သို့မဟုတ် uninstall မလုပ်နိုင်ပါ။
-[`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md) နှင့်
-Hard Rules #15 / #17 ကို ကြည့်ပါ။
+ပလပ်အင်များသည် ပေါက်ဖွားလာသော ကလေးလုပ်ငန်းစဉ်များတွင် ကုဒ်ကို လုပ်ဆောင်သောကြောင့် `/api/plugins` မျက်နှာပြင်တစ်ခုလုံးကို `LOCAL_ONLY` (Tier 1) ဖြင့် ခွဲခြားထားသည်။ Loopback ကျင့်သုံးမှုသည် ခြွင်းချက်မရှိ လုပ်ဆောင်သည်။** မီ** မည်သည့် auth check မဆို၊ ထို့ကြောင့် ပေါက်ကြားနေသော စီမံခန့်ခွဲမှု တိုကင်သည် ဥမင်လိုဏ်ခေါင်းတစ်ခုပေါ်ရှိ အကွက်သို့ရောက်ရှိနေသည့် ပလပ်အင်ကို ထည့်သွင်းခြင်း၊ စတင်ခြင်း သို့မဟုတ် ဖြုတ်ခြင်းမပြုနိုင်ပါ။ [`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md) နှင့် Hard Rules #15 / #17 ကိုကြည့်ပါ။
 
-### Marketplace registry SSRF ကာကွယ်မှု
+### Marketplace registry SSRF အစောင့်အရှောက်
 
-Custom registry URL သည် တိုက်ခိုက်သူက လွှမ်းမိုးနိုင်သော configuration ဖြစ်သဖြင့်
-၎င်းကို fetch မလုပ်မီ `listMarketplacePlugins()` က အောက်ပါ အလွှာနှစ်ခုဖြင့် စစ်ဆေးသည်-
+စိတ်ကြိုက် registry URL သည် တိုက်ခိုက်သူ-သြဇာလွှမ်းမိုးနိုင်သော ဖွဲ့စည်းမှုစနစ်ဖြစ်သည်၊ ထို့ကြောင့် `listMarketplacePlugins()` ကို မရယူမီ အလွှာနှစ်ဆင့်ဖြင့် လုပ်ဆောင်သည်-
 
 1. **`isSafeMarketplaceUrl(url)`** (`src/lib/plugins/marketplace.ts`):
-   - `http:` / `https:` မဟုတ်သည့်အရာအားလုံးကို ပယ်ချသည်။
-   - Canonical `isPrivateHost`
-     (`src/shared/network/outboundUrlGuard.ts`) ကို အသုံးပြု၍ literal private/loopback/link-local/ULA host များ (IPv4-mapped အပါအဝင် IPv4 **နှင့်** IPv6 နှစ်မျိုးလုံး) ကို ပယ်ချသည်။
-   - `A` နှင့် `AAAA` record **နှစ်မျိုးလုံး** ကို resolve လုပ်ပြီး resolve ရရှိသည့်
-     address များထဲမှ **တစ်ခုခု** private ဖြစ်ပါက ပယ်ချသည် — ယင်းက public-hostname → private-IP bypass ကို ပိတ်ဆို့ပေးသည်။
-   - **ပိတ်ထားသည့်ဘက်သို့ fail ဖြစ်သည်**- DNS resolution မအောင်မြင်ပါက URL ကို ပယ်ချသည်။
-2. **`safeOutboundFetch(url, { guard: "public-only", timeoutMs: 5000 })`**
-   (`src/shared/network/safeOutboundFetch.ts`): fetch လုပ်သည့်အချိန်တွင် public-only URL
-   guard ကို ထပ်မံအသုံးချပြီး **redirect များကို ပိတ်ဆို့သည်** (public → private `30x`
-   pivot မဖြစ်နိုင်ပါ)။
+   - `http:` / `https:` မဟုတ်သော မည်သည့်အရာကိုမဆို ငြင်းပယ်သည်။
+   - ပကတိ private/loopback/link-local/ULA hosts (IPv4** နှင့်** IPv6, IPv4-mapped အပါအဝင် ) canonical `isPrivateHost` (`src/shared/network/outboundUrlGuard.ts`) မှတဆင့်။
+   - ဖြေရှင်းသည်။** နှစ်ခုလုံး** `A` နှင့် `AAAA` မှတ်တမ်းများနှင့် if ကို ငြင်းပယ်သည်။** တစ်ခုခု** ဖြေရှင်းထားသော လိပ်စာသည် သီးသန့် — ဖြစ်ပြီး public-hostname → private-IP ကို ရှောင်ကွင်းပိတ်ပါသည်။
+   - **ပျက်ကွက်ပိတ်** : DNS ကြည်လင်ပြတ်သားမှု ပျက်ကွက်သည် URL ကို ငြင်းပယ်သည်။
+2. **`safeOutboundFetch(url, { guard: "public-only", timeoutMs: 5000 })`** (`src/shared/network/safeOutboundFetch.ts`) : အများသူငှာ သီးသန့် URL အစောင့်ကို ထုတ်ယူသည့်အချိန်နှင့် ပြန်လည်အသုံးချသည်။** blocks များကို ပြန်ညွှန်းသည်။** (အများပြည်သူ → သီးသန့် `30x` pivot မရှိပါ။
 
-အလွှာတစ်ခုခုတွင် မအောင်မြင်သော URL သည် request ကို ရပ်တန့်စေမည်မဟုတ်ပါ — marketplace သည်
-ထည့်သွင်းပေးထားသည့် seed registry သို့ တိတ်တဆိတ် fallback လုပ်ပြီး သတိပေးချက်တစ်ခုကို log လုပ်သည်။
+အလွှာတစ်ခုခုမှ ပျက်ကွက်သည့် URL သည် တောင်းဆိုချက် — မဖျက်ဘဲ ဈေးသည် တပ်ဆင်ထားသော မျိုးစေ့မှတ်ပုံတင်ခြင်းသို့ တိတ်တဆိတ် ပြန်ကျသွားပြီး သတိပေးချက်ကို မှတ်တမ်းတင်ပါသည်။
 
-> ဤ guard ကို A + AAAA နှစ်မျိုးလုံးအား resolve လုပ်ရန်နှင့် IPv4-only စစ်ဆေးမှုအစား
-> canonical `isPrivateHost` ကို အသုံးပြုရန်အတွက် PR #3774 တွင် အထူးအားဖြည့်ထားသည်။
+> A + AAAA ဖြေရှင်းရန် ဤအစောင့်ကို PR #3774 တွင် ခိုင်မာစေပြီး IPv4-only စစ်ဆေးခြင်းအစား canonical `isPrivateHost` အသုံးပြုပါ။
 
-### Plugin execution သီးခြားခွဲထားမှု
+### ပလပ်အင်လုပ်ဆောင်မှု သီးခြားခွဲထုတ်ခြင်း။
 
-- **Process သီးခြားခွဲထားမှု** — `loadPlugin()` (`src/lib/plugins/loader.ts`) သည်
-  plugin တစ်ခုချင်းစီကို သီးခြား Node.js child process တစ်ခုအတွင်း spawn လုပ်ပြီး IPC မှတစ်ဆင့် ဆက်သွယ်သည်။
-  Hook call များတွင် `SIGTERM` → `SIGKILL` အဆင့်မြှင့်လုပ်ဆောင်မှုပါဝင်သော timeout ရှိသည်။
-- **Env allowlist** — child သည် allowlist တွင် ပါဝင်သော environment
-  variable အစုကိုသာ လက်ခံရရှိသည်။ Manifest က
-  `env` permission ကို တောင်းဆိုသည့်အခါမှသာ ပိုမိုကျယ်ပြန့်သောအစုကို ခွင့်ပြုသည်။
-- **Path ကန့်သတ်ထိန်းချုပ်မှု** — install/upgrade/uninstall သည် copy သို့မဟုတ် recursive delete မလုပ်မီ plugin
-  directory နှင့် `manifest.main` တို့သည် စီမံထားသော plugin root **အတွင်းတွင်သာ** resolve ဖြစ်ကြောင်း အတည်ပြုသည် (ပြုပြင်ထားသော DB path များနှင့်
-  `manifest.main` အတွင်းရှိ `../` traversal ကို ကာကွယ်သည်)။ Activation သည်
-  `realpath` မှတစ်ဆင့် symlink များကို resolve လုပ်ပြီး plugin
-  directory မှ လွတ်ထွက်သွားသော entry point ကို load လုပ်ရန် ငြင်းပယ်သည်။
-- **ရွေးချယ်နိုင်သော integrity pin** — manifest တစ်ခုသည် `integrity`
-  (`sha256-<base64>`, SRI format) field ကို ကြေညာနိုင်သည်။ ထို field ရှိပါက loader သည်
-  load လုပ်ချိန်တွင် entry file hash ကို စစ်ဆေးပြီး မကိုက်ညီပါက activate လုပ်ရန် ငြင်းပယ်သည်။ ၎င်းသည်
-  ရွေးချယ်အသုံးပြုနိုင်သော tamper-detection ဖြစ်ပြီး လုံခြုံရေးနယ်နိမိတ်တစ်ခု **မဟုတ်ပါ** — loopback-only routing
-  နှင့် permission model တို့ကသာ အမှန်တကယ် နယ်နိမိတ်များဖြစ်သည်။
+> **ပလပ်အင်များကို သဲပုံးတွင် ထည့်မထားပါ။** ကလေးသည် OmniRoute အသုံးပြုသူအဖြစ် လုပ်ဆောင်နေသည့် သာမန် Node.js လုပ်ငန်းစဉ်တစ်ခုဖြစ်ပြီး VM ဆက်စပ်မှုမရှိဘဲ Node.js ခွင့်ပြုချက်အလံများမရှိသောကြောင့် ပလပ်အင်ကုဒ်သည် အသုံးပြုသူလုပ်ဆောင်နိုင်သည့် မည်သည့်ဖိုင်ကိုမဆို ဖတ်နိုင်၊ ပရိုဂရမ်များကို လုပ်ဆောင်နိုင်ပြီး ကွန်ရက်သို့ရောက်ရှိနိုင်သည်။ `requires.permissions` ကလေးလက်ခံရရှိသည့် ပတ်ဝန်းကျင်ပြောင်းလဲမှုများကိုသာ ဆုံးဖြတ်သည်၊ အခြားခွင့်ပြုချက်များကို ပြဋ္ဌာန်းထားခြင်းမရှိပါ။ သင်ယုံကြည်ရသော ပလပ်အင်များကိုသာ ထည့်သွင်းပါ။ အောက်ဖော်ပြပါ လုပ်ငန်းစဉ်နယ်နိမိတ်တွင် ပျက်စီးမှုများနှင့် ကြိုးဆွဲချမှုများပါရှိသည်။ လုံခြုံရေးနယ်နိမိတ် မဟုတ်ပါ။
 
-## Manifest (`plugin.json`)
+- **လုပ်ငန်းစဉ် အထီးကျန်** — `loadPlugin()` (`src/lib/plugins/loader.ts`) သည် သီးခြား Node.js ကလေးလုပ်ငန်းစဉ်တွင် ပလပ်အင်တစ်ခုစီကို မွေးမြူပြီး IPC နှင့် ဆက်သွယ်သည်။ Hook ခေါ်ဆိုမှုများတွင် `SIGTERM` → `SIGKILL` အရှိန်မြှင့်ခြင်းဖြင့် အချိန်ကုန်သွားပါသည်။
+- **Env ခွင့်ပြုစာရင်း** — လေးသည် ခွင့်ပြုထားသော ပတ်၀န်းကျင် ပြောင်းလဲနိုင်သော အစုအဝေးတစ်ခုသာ ရရှိသည်၊ မန်နီးဖက်စ်မှ `env` ခွင့်ပြုချက်ကို တောင်းဆိုသောအခါမှသာ ပိုမိုကျယ်ပြန့်သော set ကို ခွင့်ပြုသည်။
+- **အရင်းအမြစ်ထိန်းချုပ်မှုကို ထည့်သွင်းပါ။** — `POST /api/plugins` plugin ရင်းမြစ်များလမ်းညွှန်မှသာဖတ်သည် ("ဒေသခံလမ်းကြောင်းတစ်ခုမှထည့်သွင်းပါ" ကိုကြည့်ပါ- လမ်းကြောင်းကို `realpath` ဖြင့် canonicalized လုပ်ထားပြီး၊ ထိုလမ်းညွှန်အတွင်းတွင် တင်းကြပ်စွာရှိနေရမည်ဖြစ်ပြီး မည်သည့်အရာမှမကူးယူမီ ၎င်းကိုမကူးယူမီ symlink ပါရှိသည့် အရင်းအမြစ်သစ်ပင်တစ်ခု။
+- **လမ်းကြောင်းထိန်း** — install/upgrade/uninstall သည် plugin directory နှင့် `manifest.main` ဖြေရှင်းကြောင်းအခိုင်အမာဆိုသည်။** အတွင်း** ကော်ပီ သို့မဟုတ် ထပ်ခါတလဲလဲ မဖျက်မီ စီမံခန့်ခွဲထားသော plugin root သည် (ဆော့ကစားထားသော DB လမ်းကြောင်းများနှင့် `manifest.main` တွင် `../` ဖြတ်သွားခြင်းကို ကာကွယ်သည်)။ အသက်သွင်းခြင်းသည် `realpath` မှတဆင့် symlinks များကိုဖြေရှင်းပြီး plugin directory ကိုလွတ်သွားသော entry point တစ်ခုကို load လုပ်ရန်ငြင်းဆိုသည်။
+- **ရွေးချယ်နိုင်သော သမာဓိရှိ ပင်** — မန်နီးဖက်စ်တွင် `integrity` (`sha256-<base64>`၊ SRI ဖော်မတ်) အကွက်တစ်ခုကို ကြေညာနိုင်သည်။ လက်ရှိအချိန်တွင်၊ loader သည် load time တွင် entry file hash ကိုစစ်ဆေးပြီး မတိုက်ဆိုင်မှုတွင် စဖွင့်ရန် ငြင်းဆန်သည်။ ၎င်းသည် opt-in tamper-detection၊** မဟုတ်ဘူး** လုံခြုံရေးနယ်နိမိတ်တစ်ခု- ၎င်းသည် loaded plugin တစ်ခုလုပ်ဆောင်နိုင်သည်ကို ကန့်သတ်မထားပေ။
+- **ချိတ်များတွင် သုံးစွဲသူအထောက်အထားများ မရှိပါ။** — `onRequest` သို့ ဖြတ်သွားသော စကားစပ် ၊ `onResponse` နှင့် `onError` တွင် `authorization`၊ `x-api-key`၊ `proxy-authorization` နှင့် `cookie` ခေါင်းစီးများကို ဖယ်ရှားပြီး API သော့မှတ်တမ်းသည် သော့တန်ဖိုးမရှိပါ (`redactPluginContext()` in `src/lib/plugins/hooks.ts`)။
 
-`PluginManifestSchema` (`src/lib/plugins/manifest.ts`) ဖြင့် အတည်ပြုစစ်ဆေးသည်-
+## မန်နီးဖက်စ် (`plugin.json`)
 
-| Field              | အမျိုးအစား | မှတ်ချက်များ                                                                         |
-| ------------------ | ---------- | ------------------------------------------------------------------------------------ |
-| `name`             | string     | မဖြစ်မနေလိုအပ်သည်; kebab-case (`^[a-z0-9-]+$`), စာလုံး 1–100 လုံး                    |
-| `version`          | string     | မဖြစ်မနေလိုအပ်သည်; semver (`MAJOR.MINOR.PATCH`)                                      |
-| `description`      | string?    | စာလုံး ≤ 500 လုံး                                                                    |
-| `author`           | string?    | စာလုံး ≤ 200 လုံး                                                                    |
-| `license`          | string?    | ပုံသေတန်ဖိုးမှာ `MIT` ဖြစ်သည်                                                        |
-| `main`             | string?    | Entry file; ပုံသေတန်ဖိုးမှာ `index.js` ဖြစ်သည်                                       |
-| `source`           | enum?      | `local` \| `marketplace` (ပုံသေတန်ဖိုးမှာ `local`)                                   |
-| `tags`             | string[]?  | ရှာဖွေရေး tag များ                                                                   |
-| `requires`         | object?    | `{ omniroute?, permissions[] }`                                                      |
-| `hooks`            | object?    | Plugin က မည်သည့် hook များကို implement လုပ်ထားကြောင်း ကြေညာသည့် boolean တန်ဖိုးများ |
-| `skills`           | object[]?  | ရွေးချယ်နိုင်သော skill သတ်မှတ်ချက်များ                                               |
-| `enabledByDefault` | boolean?   | Install လုပ်သည့်အခါ အလိုအလျောက် activate လုပ်သည်                                     |
-| `configSchema`     | object?    | Config field များ၏ map (`string`/`number`/`boolean`/`select`)                        |
-| `integrity`        | string?    | ရွေးချယ်နိုင်သော `sha256-<base64>` entry-file pin                                    |
+`PluginManifestSchema` (`src/lib/plugins/manifest.ts`) မှ အတည်ပြုထားသည် ။
 
-Permission များကို
-`network` / `file-read` / `file-write` / `env` / `exec` enum မှ ရယူသည်။
+| လယ်ကွင်း           | ရိုက်ပါ။        | မှတ်စုများ                                                    |
+| ------------------ | --------------- | ------------------------------------------------------------- |
+| `name`             | ကြိုးတစ်ချောင်း | လိုအပ်သည်; kebab-case (`^[a-z0-9-]+$`) 1-100 စာလုံးများ       |
+| `version`          | ကြိုးတစ်ချောင်း | လိုအပ်သည်; semver (`MAJOR.MINOR.PATCH`)                       |
+| `description`      | ကြိုးတစ်ချောင်း | ≤ 500 စာလုံးများ                                              |
+| `author`           | ကြိုးတစ်ချောင်း | ≤ 200 စာလုံးများ                                              |
+| `license`          | ကြိုးတစ်ချောင်း | ပုံသေသည် `MIT` သို့ဖြစ်သည်။                                   |
+| `main`             | ကြိုးတစ်ချောင်း | ဝင်ခွင့်ဖိုင်; `index.js` ကို ပုံသေသတ်မှတ်သည်။                |
+| `source`           | enum?           | `local` \| `marketplace` (မူရင်း `local` သို့ )               |
+| `tags`             | string[]?       | တက်ဂ်များကို ရှာဖွေပါ။                                        |
+| `requires`         | အရာဝတ္ထု?       | `{ omniroute?, permissions[] }`                               |
+| `hooks`            | အရာဝတ္ထု?       | မည်သည့်ပလပ်အင်ကို ချိတ်ထားသည်ကို ဘော်လီယန်များက ကြေညာသည်။     |
+| `skills`           | အရာဝတ္ထု[]?     | ရွေးချယ်နိုင်သောကျွမ်းကျင်မှု အဓိပ္ပါယ်ဖွင့်ဆိုချက်များ       |
+| `enabledByDefault` | ဘူလီယံ?         | တပ်ဆင်မှုတွင် အလိုအလျောက် စဖွင့်ပါ။                           |
+| `configSchema`     | အရာဝတ္ထု?       | config အကွက်များမြေပုံ (`string`/`number`/`boolean`/`select`) |
+| `integrity`        | ကြိုးတစ်ချောင်း | ရွေးချယ်နိုင်သော `sha256-<base64>` entry-file pin             |
+
+ခွင့်ပြုချက်များကို enum `network` / `file-read` / `file-write` / `env` / `exec` မှထုတ်ယူသည်။ `env` သာလျှင် runtime အကျိုးသက်ရောက်မှု (ကလေးအတွက် အနည်းငယ်ပိုကြီးသော ပတ်ဝန်းကျင်-ပြောင်းလဲနိုင်သော ခွင့်ပြုစာရင်း) အခြားအရာများသည် ကြေငြာချက်များဖြစ်ပြီး ပြဌာန်းထားခြင်းမရှိပါ။
 
 ## ဘဝစက်ဝန်း စီးဆင်းမှု
 
@@ -337,19 +304,16 @@ directory တစ်ခုအပေါ် `install` ကို ထပ်မံလ�
 Plugin metrics/analytics များကို နောက်ထပ်ဇယားများတွင် ခြေရာခံထားသည်
 (`090_plugin_metrics.sql`, `091_plugin_analytics.sql`)။
 
-## ဒက်ရှ်ဘုတ်
+## ဒိုင်ခွက်
 
-`/dashboard/plugins` ရှိ dashboard စာမျက်နှာ
-(`src/app/(dashboard)/dashboard/plugins/page.tsx`) တွင် tab နှစ်ခု ပါဝင်သည်：
+`/dashboard/plugins` (`src/app/(dashboard)/dashboard/plugins/page.tsx`) ရှိ ဒက်ရှ်ဘုတ်စာမျက်နှာတွင် တက်ဘ်နှစ်ခုပါရှိသည်-
 
-- **ထည့်သွင်းပြီး** — ထည့်သွင်းထားသော plugins များကို ၎င်းတို့၏ ကြေညာထားသည့် hooks များ၊
-  activate/deactivate toggle၊ uninstall ခလုတ်နှင့် "Plugins များကို စကင်ဖတ်ရန်"
-  လုပ်ဆောင်ချက် (`POST /api/plugins/scan`) တို့ဖြင့် စာရင်းပြုစုဖော်ပြသည်။
-- **Marketplace** — `GET /api/plugins/marketplace` မှ catalog ကို
-  custom registry URL သတ်မှတ်ရန် field တစ်ခုနှင့်အတူ ပြသသည်။
+- **တပ်ဆင်ထားသည်။** — ၎င်းတို့၏ကြေငြာချိတ်များ၊ activate/deactivate ခလုတ်၊ ဖြုတ်ရန်ခလုတ်၊ နှင့် "ပလပ်အင်များအတွက် စကင်န်ဖတ်ရန်" လုပ်ဆောင်ချက် (`POST /api/plugins/scan`) တို့ဖြင့် ထည့်သွင်းထားသည့် ပလပ်အင်များကို စာရင်းပြုစုထားသည်။
+- **ဈေး** — စိတ်ကြိုက် registry URL ကို သတ်မှတ်ရန် အကွက်တစ်ခုဖြင့် `GET /api/plugins/marketplace` မှ ကတ်တလောက်ကို ပြသသည်။
 
-Plugin တစ်ခုချင်းစီ၏ config စာမျက်နှာသည် `/dashboard/plugins/[name]/config`
-(`src/app/(dashboard)/dashboard/plugins/[name]/config/page.tsx`) တွင် ရှိသည်။
+စာမျက်နှာသည် OmniRoute လုပ်ငန်းစဉ်၏ အခွင့်ထူးများ အပြည့်ဖြင့် ပလပ်အင်များကို လုပ်ဆောင်ကြောင်း အမြဲသတိပေးပါသည်။
+
+per-plugin config စာမျက်နှာသည် `/dashboard/plugins/[name]/config` (`src/app/(dashboard)/dashboard/plugins/[name]/config/page.tsx`) တွင်နေထိုင်သည်။
 
 ## ထပ်မံကြည့်ရှုရန်
 

@@ -24,7 +24,7 @@
 | **+ už regioninės tapatybės patikrinimo**               | **+~ 6M**      | `modelscope` (Alibaba Debesis privalomas + žemyninė Kinija tikrojo vardo patvirtinimas). Tikra pasikartojanti kvota, rodoma kaip `gatedRecurringTokens` / `gatedProviders` ir prietaisų skydelyje. Niekada neįtraukta į antraštę: +~ 6M už regioninės tapatybės patvirtinimo.      |
 | Teorinės ribos (visos normos ribos, 24/7)               | ~ 10B          | Kiekvieno teikėjo tarifo limito suma, ekstrapoliuota į nepertraukiamą naudojimą.** Ne garantija** — nerašykite antraštės.                                                                                                                                                          |
 
-**Nuoširdi antraštė:** _OmniRoute agregatai**~ 1.62B dokumentuoti nemokami žetonai per mėnesį** (iki ~ 2,22B per pirmąjį mėnesį su prisiregistravimo kreditais) 34 laisvos pakopos telkiniuose — plius ilga visam laikui nemokamų, be ribos teikėjų — ir RTK + Caveman suspaudimo uodega (sutaupoma 15–95 % žetonų).
+**Nuoširdi antraštė:** _OmniRoute agregatai**~ 1.62B dokumentuoti nemokami žetonai per mėnesį** (iki ~ 2,22B per pirmąjį mėnesį su prisiregistravimo kreditais) 26 laisvos pakopos telkiniuose — plius ilga visam laikui nemokamų, be ribos teikėjų — ir RTK + Caveman suspaudimo uodega (sutaupoma 15–95 % žetonų).
 
 > **Kodėl tai sumažėjo nuo ankstesnio ~ 1.94B.** 2026-06-17 atnaujinimas yra sąžiningas pataisymas, o ne nuostolis: `gemini` dabar pašalintas iš baseino (buvo padidintas skaičiuojant kiekvieną Flash variantą atskirai, 462M → 60M), `cloudflare-ai` pataisytas į tikrąjį 10k-Neurons/day (122M → 30M), `doubao` ir pakartotinis registravimas pašalintos išjungimo pakopos (`chutes`/`phind`/`kluster` nutraukta). Iš dalies kompensuoja `llm7` (teisingas 5M/day → 150M) ir nauji nemokami tiekėjai (Kilo, OpenCode Zen, Z.AI GLM-Flash).
 >
@@ -38,7 +38,7 @@
 >
 > **Taisyta 2026-09-03 (#11773):** `cerebras` buvo perklasifikuotas iš 30M/mo pasikartojančios dotacijos (senas be kortelės 1M tokens/day bandomasis laikotarpis) į vienkartinį 5 USD registracijos kreditą, kuriam reikalingas mokėjimo būdas. Ta pati sąžiningumo taisyklė kaip ir LongCat.
 >
-> **Plus xKiro (2026-09-03):** naujasis `xkiro-free` baseinas (150M/mo) prideda 35-ąjį pasikartojantį telkinio raktą. Felo Web lieka neįtrauktas, o jo GPL gautas provenance/licensing lieka HOLD. Dabar praneša šaltinis** 34 pasikartojantys baseino raktai** ir**~ 1.62B pastovus** — tiesioginis, CI uždaromas numeris (`check:docs-counts` nepavyksta sukurti, jei jis nukrypsta nuo `computeFreeModelTotals()`).
+> **Plus xKiro (2026-09-03):** naujasis `xkiro-free` baseinas (150M/mo) prideda 35-ąjį pasikartojantį telkinio raktą. Felo Web lieka neįtrauktas, o jo GPL gautas provenance/licensing lieka HOLD. Dabar praneša šaltinis** 26 pasikartojantys baseino raktai** ir**~ 1.62B pastovus** — tiesioginis, CI uždaromas numeris (`check:docs-counts` nepavyksta sukurti, jei jis nukrypsta nuo `computeFreeModelTotals()`).
 
 Didžiausias** dokumentuota** Pagalbininkai: `mistral` 1.00B, `nara` 210M, `llm7` 150M, `xkiro` 150M, `groq` 30M (penki kiekvieno modelio dangteliai), `cloudflare-ai` 30M, `api-airforce` 24M. (`longcat` neįtrauktas — jo 10 mln. LongCat-2.0 dotacija yra vienkartinis registracijos kreditas su KYC, o ne pasikartojantis mėnesio biudžetas.)
 

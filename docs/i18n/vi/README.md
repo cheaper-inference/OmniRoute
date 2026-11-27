@@ -93,7 +93,7 @@
 
 [![npm version](https://img.shields.io/npm/v/omniroute?color=cb3837&logo=npm)](https://www.npmjs.com/package/omniroute)
 ![NPM Monthly](https://img.shields.io/npm/dm/omniroute?label=npm/month&color=cb3837&logo=npm)
-[![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/diegosouzapw/omniroute)
+[![Docker Hub](https://img.shields.io/docker/v/cheaperinference/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/cheaperinference/omniroute)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 ![Docker Pulls](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
 ![Electron Downloads](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Lời hứa — Một endpoint và 394 nhà cung cấp. Tự động chuyển dự phòng giúp duy trì định tuyến khi vẫn còn một mục tiêu hoạt động khác. Sáu trụ cột: chuyển dự phòng linh hoạt trên 394 nhà cung cấp · tiết kiệm tới 95% token cho các khối lượng công việc đủ điều kiện · bắt đầu với $0 cùng hơn 150 gói miễn phí và 51 nhà cung cấp miễn phí định kỳ/không cần khóa vĩnh viễn · 39 tích hợp CLI/agent thông qua một cấu hình · khả năng tương thích với OpenAI, Claude, Gemini và Responses API tại /v1 · các tính năng kiểm soát cho môi trường production, bao gồm bộ ngắt mạch, TLS stealth, 110 công cụ MCP, A2A, bộ nhớ, guardrails, đánh giá và hơn 56.000 khai báo kiểm thử tĩnh trên hơn 7.800 tệp kiểm thử được theo dõi."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Lời hứa — Một endpoint và 394 nhà cung cấp. Tự động chuyển dự phòng giúp duy trì định tuyến khi vẫn còn một mục tiêu hoạt động khác. Sáu trụ cột: chuyển dự phòng linh hoạt trên 394 nhà cung cấp · tiết kiệm tới 95% token cho các khối lượng công việc đủ điều kiện · bắt đầu với $0 cùng hơn 150 gói miễn phí và 40 nhà cung cấp miễn phí định kỳ/không cần khóa vĩnh viễn · 39 tích hợp CLI/agent thông qua một cấu hình · khả năng tương thích với OpenAI, Claude, Gemini và Responses API tại /v1 · các tính năng kiểm soát cho môi trường production, bao gồm bộ ngắt mạch, TLS stealth, 110 công cụ MCP, A2A, bộ nhớ, guardrails, đánh giá và hơn 56.000 khai báo kiểm thử tĩnh trên hơn 7.800 tệp kiểm thử được theo dõi."/>
 
 <br/>
 <br/>
@@ -703,7 +703,7 @@ khỏi lịch sử shell của bạn. → [Tích hợp CLI](docs/guides/CLI-INTE
 
 </div>
 
-> **394 nhà cung cấp đã đăng ký** trên các bộ sưu tập chuẩn về trò chuyện, phương tiện, tìm kiếm, cục bộ, tác nhân đám mây và hệ thống, trong đó **153 nhà cung cấp có siêu dữ liệu khám phá `hasFree: true`**. Danh mục mô hình trò chuyện bao phủ **239 nhà cung cấp / 3,059 cặp nhà cung cấp-mô hình riêng biệt / 1,475 ID mô hình thô**; danh mục ngân sách miễn phí riêng biệt có **465 hàng theo từng mô hình**, **34 nhóm định kỳ** và **51 nhà cung cấp miễn phí vĩnh viễn định kỳ/không cần khóa API**. Các mẫu số này được thiết kế để khác nhau; định nghĩa và các phép tính loại trùng theo nhóm nằm trong [Tài liệu tham khảo về nhà cung cấp](docs/reference/PROVIDER_REFERENCE.md) và [Các gói miễn phí](docs/reference/FREE_TIERS.md).
+> **394 nhà cung cấp đã đăng ký** trên các bộ sưu tập chuẩn về trò chuyện, phương tiện, tìm kiếm, cục bộ, tác nhân đám mây và hệ thống, trong đó **153 nhà cung cấp có siêu dữ liệu khám phá `hasFree: true`**. Danh mục mô hình trò chuyện bao phủ **239 nhà cung cấp / 3,059 cặp nhà cung cấp-mô hình riêng biệt / 1,475 ID mô hình thô**; danh mục ngân sách miễn phí riêng biệt có **465 hàng theo từng mô hình**, **34 nhóm định kỳ** và **40 nhà cung cấp miễn phí vĩnh viễn định kỳ/không cần khóa API**. Các mẫu số này được thiết kế để khác nhau; định nghĩa và các phép tính loại trùng theo nhóm nằm trong [Tài liệu tham khảo về nhà cung cấp](docs/reference/PROVIDER_REFERENCE.md) và [Các gói miễn phí](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -778,7 +778,7 @@ khỏi lịch sử shell của bạn. → [Tích hợp CLI](docs/guides/CLI-INTE
   <tr><th align="left">Nền tảng</th><th align="left">Cài đặt</th><th align="left">Điểm nổi bật</th></tr>
   <tr><td align="left" nowrap>📦 <b>npm (toàn cục)</b></td><td align="left" nowrap><code>npm install -g omniroute</code></td><td align="left">Một lệnh, mọi hệ điều hành</td></tr>
   <tr><td align="left" nowrap>⚡ <b>Bun (toàn cục)</b></td><td align="left" nowrap><code>bun add -g omniroute</code></td><td align="left">Cùng tarball từ registry, cài đặt nhanh hơn</td></tr>
-  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … diegosouzapw/omniroute</code></td><td align="left">Đa kiến trúc <b>AMD64 + ARM64</b></td></tr>
+  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … cheaperinference/omniroute</code></td><td align="left">Đa kiến trúc <b>AMD64 + ARM64</b></td></tr>
   <tr><td align="left" nowrap>🖥️ <b>Máy tính để bàn (Electron)</b></td><td align="left" nowrap><code>npm run electron:build</code></td><td align="left">Cửa sổ gốc + khay hệ thống — <b>Windows / macOS / Linux</b></td></tr>
   <tr><td align="left" nowrap>🎩 <b>Thanh menu (OmniRouteTray)</b></td><td align="left" nowrap><code>brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left">Giám sát &amp; tự động cập nhật máy chủ — <b>macOS</b></td></tr>
   <tr><td align="left" nowrap>💪 <b>ARM</b></td><td align="left" nowrap>native <code>arm64</code></td><td align="left">Raspberry Pi, máy chủ ARM, Apple Silicon</td></tr>
@@ -1102,7 +1102,7 @@ Chỉ sử dụng các alias này cho những client không thể đính kèm `A
 
 ```bash
 docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
-  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
 ```
 
 `:latest` theo dõi SemVer ổn định **đã phát hành** cao nhất. Nó không theo dõi git `main`. Ghim `:X.Y.Z` cho GitOps. Xem [Các kênh phát hành Docker](docs/guides/DOCKER_GUIDE.md#release-channels). Image cố định **`OMNIROUTE_MEMORY_MB=1024`**. Mức này đủ cho dashboard và một phiên trò chuyện nhẹ. **Tác nhân lập trình** (`POST /v1/responses` từ Claude Code, Codex, Grok, …) cần heap V8 lớn hơn nhiều, nếu không tiến trình sẽ gặp `FATAL ERROR` ở khoảng ~12 GiB khi có hai ngữ cảnh dài chồng lấp. Đặt giới hạn container cao hơn heap (các bộ đệm native nằm ngoài V8):
@@ -1116,7 +1116,7 @@ docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
 ```bash
 docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
   -e OMNIROUTE_MEMORY_MB=8192 --memory=10g \
-  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
 ```
 
 Bảng đầy đủ: [Hướng dẫn Docker — RAM thời gian chạy](docs/guides/DOCKER_GUIDE.md#runtime-ram-for-coding-agents).
@@ -1322,7 +1322,7 @@ Số liệu chuẩn vào 2026-10-18: **1.976 video duy nhất** · **20.220.289 
   <tr><td nowrap><b>Thời gian chạy</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Ngôn ngữ</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> trên <code>src/</code> và <code>open-sse/</code> (không có <code>any</code> trong lõi kể từ v2.0)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Cơ sở dữ liệu</b></td><td>better-sqlite3 (SQLite, ghi nhật ký WAL) + LowDB (JSON cũ) — 147 mô-đun miền, 240 migration</td></tr>
+  <tr><td nowrap><b>Cơ sở dữ liệu</b></td><td>better-sqlite3 (SQLite, ghi nhật ký WAL) + LowDB (JSON cũ) — 147 mô-đun miền, 252 migration</td></tr>
   <tr><td nowrap><b>Bộ nhớ</b></td><td>Tìm kiếm toàn văn SQLite FTS5 + embedding vector được lượng tử hóa int8, suy giảm có kiểu</td></tr>
   <tr><td nowrap><b>Lược đồ</b></td><td>Zod 4 — xác thực I/O công cụ MCP + hợp đồng API</td></tr>
   <tr><td nowrap><b>Giao thức</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1335,7 +1335,7 @@ Số liệu chuẩn vào 2026-10-18: **1.976 video duy nhất** · **20.220.289 
   <tr><td nowrap><b>Kiểm thử</b></td><td>Trình chạy kiểm thử Node.js + Vitest — <b>hơn 60.000 khai báo kiểm thử tĩnh</b> trên hơn 8.400 tệp kiểm thử được theo dõi (đơn vị, tích hợp, E2E, bảo mật, hệ sinh thái)</td></tr>
   <tr><td nowrap><b>Nền tảng</b></td><td>Máy tính để bàn (Electron) · Android (Termux) · PWA (mọi trình duyệt)</td></tr>
   <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — tự động phát hành lên npm + Docker Hub khi phát hành phiên bản</td></tr>
-  <tr><td nowrap><b>Liên kết</b></td><td><a href="https://omniroute.online">Trang web</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
+  <tr><td nowrap><b>Liên kết</b></td><td><a href="https://omniroute.online">Trang web</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/cheaperinference/omniroute">Docker Hub</a></td></tr>
 </table>
 
 <div align="center">

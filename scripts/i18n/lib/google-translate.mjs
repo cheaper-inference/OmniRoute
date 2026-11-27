@@ -196,11 +196,30 @@ export const BRAND_TERMS = [
   "Vitest",
 ];
 
-// A masked token that is a real HTML tag (not an autolink, not a whole code element). The
-// translator may move a code span or a product name, but never an HTML tag relative to another:
-// ja moved `</b>` past `</code>` and the row came back mis-nested.
-const isHtmlTagToken = (raw) =>
-  /^<\/?[A-Za-z][\w-]*(?=[\s/>])/.test(raw) && !/^<(?:code|kbd|samp)\b/i.test(raw);
+// Built-in elements, including void and legacy tags that may occur without a closing tag.
+// https://html.spec.whatwg.org/multipage/indices.html#elements-3
+const HTML_ELEMENT_NAMES = new Set(
+  `a abbr address area article aside audio b base bdi bdo blockquote body br button canvas
+  caption cite code col colgroup data datalist dd del details dfn dialog div dl dt em embed
+  fieldset figcaption figure footer form h1 h2 h3 h4 h5 h6 head header hgroup hr html i iframe
+  img input ins kbd label legend li link main map mark math menu meta meter nav noscript object
+  ol optgroup option output p picture pre progress q rp rt ruby s samp script search section
+  select selectedcontent slot small source span strong style sub summary sup svg table tbody td
+  template textarea tfoot th thead time title tr track u ul var video wbr
+  acronym applet basefont bgsound big blink center dir font frame frameset image isindex keygen
+  listing marquee menuitem multicol nextid nobr noembed noframes param plaintext rb rtc spacer
+  strike tt xmp`
+    .trim()
+    .split(/\s+/)
+);
+
+function isHtmlTagToken(raw, closingTags) {
+  if (!/^<\/?[A-Za-z][\w-]*(?=[\s/>])/.test(raw)) return false;
+  if (/^<(code|kbd|samp)(?=[\s>])[\s\S]*<\/\1\s*>$/i.test(raw)) return false;
+  // A bare unknown name like <tool> is a movable CLI placeholder unless it has an end tag.
+  const name = /^<([A-Za-z][\w-]*)\s*>$/.exec(raw)?.[1].toLowerCase();
+  return !name || HTML_ELEMENT_NAMES.has(name) || closingTags.has(name);
+}
 // A token id that escaped its span (ja echoed `zqi` / `zqo` as plain words).
 const BARE_TOKEN_ID = /(?<!\p{L})zq[a-z]+(?!\p{L})/u;
 const LINK = /\[([^\]\n]+)\]\(([^)\n]+)\)/y;
@@ -296,6 +315,15 @@ export function maskInline(text, { protectedTerms = [], pipe = "\\|" } = {}) {
   }
 
   const html = build(text);
+  const closingTags = new Set();
+  for (const { raw } of tokens) {
+    const closingTag = /^<\/([A-Za-z][\w-]*)\s*>$/.exec(raw);
+    if (closingTag) closingTags.add(closingTag[1].toLowerCase());
+  }
+  const htmlTagIndices = new Set();
+  tokens.forEach(({ raw }, idx) => {
+    if (isHtmlTagToken(raw, closingTags)) htmlTagIndices.add(idx);
+  });
 
   function restore(translated) {
     let out = String(translated);
@@ -323,7 +351,7 @@ export function maskInline(text, { protectedTerms = [], pipe = "\\|" } = {}) {
     // every token exactly once: a missing one loses source text, a duplicate invents some
     if (seen.size !== tokens.length || order.length !== tokens.length) return null;
     // HTML tags keep their source order, so the rebuilt markup nests like the source
-    const tagOrder = order.filter((i) => isHtmlTagToken(tokens[i].raw));
+    const tagOrder = order.filter((i) => htmlTagIndices.has(i));
     if (tagOrder.some((i, k) => k > 0 && i < tagOrder[k - 1])) return null;
     // the translator echoed a token id outside its span: the answer is corrupt, not prose
     if (BARE_TOKEN_ID.test(out) && !BARE_TOKEN_ID.test(text)) return null;
@@ -361,7 +389,7 @@ export function maskInline(text, { protectedTerms = [], pipe = "\\|" } = {}) {
     return out.replace(/[\ue000-\uf8ff]/g, (ch) => tokens[ch.charCodeAt(0) - PUA_BASE]?.raw ?? ch);
   }
 
-  return { html, tokens, links, restore, hasProse };
+  return { html, tokens, links, restore, hasProse, hasHtmlTags: htmlTagIndices.size > 0 };
 }
 
 // ----- block parsing ----------------------------------------------------------------
@@ -955,5 +983,23 @@ export async function translateSegmentsWithGoogle(segments, localeCode, options 
       });
     })
   );
+
+  // The endpoint can flatten CLI help and echo mask IDs into prose. Retry failed multiline
+  // segments one line at a time, except when splitting could separate markup or masked text.
+  const retries = pending.flatMap(({ idx, mask }) => {
+    const text = segments[idx];
+    if (results[idx] !== null || mask.hasHtmlTags || !/[\r\n]/.test(text)) return [];
+    if (mask.tokens.some(({ raw }) => /[\r\n]/.test(raw))) return [];
+    return [{ idx, parts: text.split(/(\r\n|\r|\n)/) }];
+  });
+  if (retries.length) {
+    const lines = retries.flatMap(({ parts }) => parts.filter((_, i) => i % 2 === 0));
+    const translatedLines = await translateSegmentsWithGoogle(lines, localeCode, options);
+    let lineIndex = 0;
+    for (const { idx, parts } of retries) {
+      const restored = parts.map((part, i) => (i % 2 === 0 ? translatedLines[lineIndex++] : part));
+      if (restored.every((part) => part !== null)) results[idx] = restored.join("");
+    }
+  }
   return results;
 }

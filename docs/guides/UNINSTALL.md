@@ -10,9 +10,75 @@ lastUpdated: 2026-06-28
 
 This guide covers how to cleanly remove OmniRoute from your system.
 
+## Revert client configuration
+
+The uninstaller stops the OmniRoute process managed by PM2, if present, and leaves client
+configuration in place. Clients that still point to OmniRoute lose their connection once it
+stops. Full removal also deletes the data directory, `~/.omniroute` by default, along with
+its client configuration backups.
+
+### 1. Use the dashboard while OmniRoute is running
+
+Open **CLI Code** (`/dashboard/cli-code`) in the dashboard and find the **Claude Code** card.
+**Apply** writes to the OmniRoute host's Claude Code settings file, `~/.claude/settings.json`
+by default. If you have a backup from before applying the OmniRoute settings, open **Backups**
+and restore it. Otherwise, select **Reset** to remove the gateway settings from `env`.
+Apply and Reset back up the existing file first. Backups are stored under `<DATA_DIR>/backups`.
+
+If `CLI_ALLOW_CONFIG_WRITES=false` or the dashboard is unavailable, revert the file by hand.
+If OmniRoute runs in Docker and the client runs on the host, revert the host configuration.
+Files in an unmounted container home have no effect on the host client.
+
+### 2. Revert remaining changes by hand
+
+For Claude Code, check `~/.claude/settings.json`, the `settings.json` in `CLAUDE_CONFIG_DIR` if
+set, and the project's `.claude/settings.json`. Reset removes the following keys from `env`.
+Remove the values you added for OmniRoute or restore your previous values.
+
+- `"ANTHROPIC_BASE_URL"`, `"ANTHROPIC_AUTH_TOKEN"`, and `"ANTHROPIC_API_KEY"`
+- `"ANTHROPIC_DEFAULT_OPUS_MODEL"`, `"ANTHROPIC_DEFAULT_SONNET_MODEL"`, and
+  `"ANTHROPIC_DEFAULT_HAIKU_MODEL"`
+- `"API_TIMEOUT_MS"`
+
+Reset leaves `ANTHROPIC_MODEL` in `env` and the top-level `model` and `apiKeyHelper` settings
+in place. Remove or restore those by hand if they select an OmniRoute model or credential.
+Stop using any OmniRoute profile created by `omniroute setup-claude` under
+`~/.claude/profiles/<name>/`, or revert its `settings.json`. The setup command writes the
+profile without changing the default settings file or saving a token.
+Remove or restore matching exports in your shell startup files and clear old values from the
+current shell. `omniroute launch` and `omniroute run claude` set the gateway URL and token
+for the child process only.
+
+For Codex, restore the previous provider and model in `~/.codex/config.toml` if it contains
+`model_provider = "omniroute"`. Remove `[model_providers.omniroute]` if it was added for this
+gateway. Restore or remove `openai_base_url` if it points to OmniRoute.
+For OpenAI-compatible clients, restore or clear `OPENAI_BASE_URL` wherever you set it for OmniRoute.
+
+### 3. Verify the client works with OmniRoute stopped
+
+Check the default Claude Code settings and the current shell environment.
+
+```bash
+grep -n ANTHROPIC ~/.claude/settings.json
+env | grep ANTHROPIC
+```
+
+Neither check should show `ANTHROPIC_BASE_URL` pointing to OmniRoute. If you use a profile or
+project settings, check those files too. With OmniRoute stopped and your usual authentication
+restored, run Claude Code directly.
+
+```bash
+claude -p "say hello"
+```
+
+Claude Code should respond using the restored configuration. If it still points to the
+stopped gateway, the request fails with a connection error.
+
 ---
 
 ## Quick Uninstall (v3.6.2+)
+
+> [Revert client configuration](#revert-client-configuration) first, while OmniRoute is still running.
 
 OmniRoute provides two built-in scripts for clean removal:
 
@@ -43,6 +109,8 @@ This removes the application **and permanently erases** all data:
 ---
 
 ## Manual Uninstall
+
+> [Revert client configuration](#revert-client-configuration) first, while OmniRoute is still running.
 
 ### NPM Global Install
 

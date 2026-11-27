@@ -41,11 +41,16 @@ test("codebuddy-intl registry entry has expected shape", () => {
   assert.equal(r.authHeader, "bearer");
   assert.equal(r.headers?.["User-Agent"], CODEBUDDY_INTL_USER_AGENT);
   assert.equal(r.headers?.["X-Product"], "SaaS");
-  assert.equal(r.headers?.["X-IDE-Type"], "IDE");
-  assert.equal(r.headers?.["X-IDE-Name"], "IDE");
+  assert.equal(r.headers?.["X-IDE-Type"], "CLI");
+  assert.equal(r.headers?.["X-IDE-Name"], "CLI");
   assert.equal(r.headers?.["x-codebuddy-request"], "1");
   assert.ok(Array.isArray(r.models), "models array expected");
-  assert.equal(r.models.length, 22, "probed intl lineup: 22 models");
+  // 25 curated − 3 stale + 0 = 22 named models, aligned with the live
+  // `/v3/config` catalog captured on 2026-10-26. That catalog answers 28 entries:
+  // these 22 plus the 4 `*-model` aliases and the 2 media models
+  // (hy-image-3.5, kling-video-v3), which are added at runtime by
+  // open-sse/executors/codebuddy-intl/catalog.ts.
+  assert.equal(r.models.length, 22, "curated lineup aligned with the live /v3/config catalog");
 });
 
 test("codebuddy-intl carries GLM, Kimi, MiniMax, Hy, GPT, Gemini and DeepSeek models", () => {
@@ -55,13 +60,23 @@ test("codebuddy-intl carries GLM, Kimi, MiniMax, Hy, GPT, Gemini and DeepSeek mo
   assert.ok(modelIds.includes("glm-5.3"));
   assert.ok(modelIds.includes("glm-5.3-flash"));
   assert.ok(modelIds.includes("kimi-k3"));
-  assert.ok(modelIds.includes("kimi-k2.7"));
-  assert.ok(modelIds.includes("minimax-m3"));
+  assert.ok(modelIds.includes("kimi-k3.1-pro"));
+  assert.ok(modelIds.includes("minimax-m3.1-flash"));
   assert.ok(modelIds.includes("hy3"));
   assert.ok(modelIds.includes("hy4-preview"));
   assert.ok(modelIds.includes("gpt-6-astra"));
-  assert.ok(modelIds.includes("gemini-3.5-flash"));
+  assert.ok(modelIds.includes("gemini-3.8-flash"));
   assert.ok(modelIds.includes("deepseek-v4.1-flash"));
+});
+
+test("codebuddy-intl drops the models the live /v3/config catalog no longer lists", () => {
+  const r = REGISTRY["codebuddy-intl"];
+  const modelIds = (r.models || []).map((m) => m.id);
+  // Verified against the live gateway (2026-10-26): these three are gone from
+  // /v3/config, so offering them would only produce upstream rejections.
+  for (const retired of ["gemini-3.5-flash", "minimax-m3", "step-5-preview"]) {
+    assert.equal(modelIds.includes(retired), false, `${retired} must not be curated`);
+  }
 });
 
 test("getExecutor returns the CodeBuddyIntlExecutor for 'codebuddy-intl' and the 'cbai' alias", async () => {

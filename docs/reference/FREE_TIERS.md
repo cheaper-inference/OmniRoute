@@ -1,14 +1,14 @@
 ---
 title: "Free Tiers & Free-Token Budget"
 version: 3.8.50
-lastUpdated: 2026-10-18
+lastUpdated: 2026-11-24
 ---
 
 # Free Tiers & Free-Token Budget
 
 > **For Users**: Looking for a simple guide? See the [Free Tiers Guide](../getting-started/FREE-TIERS-GUIDE.md) for step-by-step instructions on getting free AI.
 
-> **Last researched:** 2026-06-17 — per-provider web research (official docs + last-7-days news, 50-agent pass with adversarial verification) refreshing every free-tier quota + ToS. **Partial re-audit 2026-09-02** (`gemini`, `ollama-cloud`, `groq`, `nara`, `mistral` — see the dated note below).
+> **Last audited:** 2026-11-23. Every row with a quota, every retired offer and every card gate was reopened against the provider's own page that day (`config/quality/free-catalog-evidence.json`). Earlier passes: the 2026-06-17 per-provider research and the 2026-09-02 partial re-audit.
 > **Source of truth (catalog):** `open-sse/config/freeModelCatalog.ts` (per-MODEL budgets, pool-deduped). The token-budget numbers below come from live web research and are an **approximation** — see [Methodology & caveats](#methodology--caveats).
 
 ## TL;DR — how much free inference does OmniRoute actually aggregate?
@@ -17,22 +17,23 @@ These figures describe separate third-party accounts and eligibility conditions 
 
 **Checked 2026-10-08:** [Cerebras](https://www.cerebras.ai/pricing) offers a one-time $5 promotional credit requiring a payment method, expiring after 30 days. [Gemini](https://ai.google.dev/gemini-api/docs/rate-limits) publishes project/model/tier rate limits; it remains outside the quantified monthly headline.
 
-| Metric                                      | Tokens / month    | Meaning                                                                                                                                                                                                                                                    |
-| ------------------------------------------- | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Documented recurring grant (steady)**     | **~1.62B**        | Free-tier **pools** (per-model catalog), each shared pool counted **once**. The live source behind `/api/free-tier/summary` and the dashboard's Free-Tier Budget page. **Use this number.**                                                                |
-| **+ first month with signup credits**       | **~2.22B**        | Steady + one-time signup credits (Z.AI 20M, DeepSeek 5M, …), deduped per account. **First month only** — does not recur.                                                                                                                                   |
-| **+ permanently free, no published cap**    | _un-quantifiable_ | `glm-cn` (GLM-4-Flash), `tencent`, `baidu`, `kilo-gateway`, `opencode-zen`, `gemini` — real recurring access, rate/concurrency-limited, **no token cap to count**. Listed, never summed (counting them at `RPM×24/7` is the inflation we reject).          |
-| **+ deposit-unlock boost**                  | **+~24M**         | A one-time **$10** OpenRouter top-up raises its free pool from 50 → 1000 req/day. Reported separately so it never inflates the steady number.                                                                                                              |
-| **+ behind a regional identity check**      | **+~6M**          | `modelscope` (Alibaba Cloud binding + mainland-China real-name verification). Real recurring quota, exposed as `gatedRecurringTokens` / `gatedProviders` and on the dashboard. Never summed into the headline: +~6M behind regional identity verification. |
-| Theoretical ceiling (all rate limits, 24/7) | ~10B              | Sum of every provider rate limit extrapolated to non-stop use. **Not a guarantee** — do not headline this.                                                                                                                                                 |
+| Metric                                   | Tokens / month    | Meaning                                                                                                                                                                                                                                                    |
+| ---------------------------------------- | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Documented recurring grant (steady)**  | **~90M**          | Free-tier **pools** (per-model catalog), each shared pool counted **once**. The live source behind `/api/free-tier/summary` and the dashboard's Free-Tier Budget page. **Use this number.**                                                                |
+| **+ first month with signup credits**    | **~153M**         | Steady + one-time signup credits (Z.AI 20M, DeepSeek 5M, …), deduped per account. **First month only** — does not recur.                                                                                                                                   |
+| **+ permanently free, no published cap** | _un-quantifiable_ | `glm-cn` (GLM-4-Flash), `tencent`, `baidu`, `kilo-gateway`, `opencode-zen`, `gemini` — real recurring access, rate/concurrency-limited, **no token cap to count**. Listed, never summed (counting them at `RPM×24/7` is the inflation we reject).          |
+| **+ deposit-unlock boost**               | **+~24M**         | A one-time **$10** OpenRouter top-up raises its free pool from 50 → 1000 req/day. Reported separately so it never inflates the steady number.                                                                                                              |
+| **+ behind a regional identity check**   | **+~6M**          | `modelscope` (Alibaba Cloud binding + mainland-China real-name verification). Real recurring quota, exposed as `gatedRecurringTokens` / `gatedProviders` and on the dashboard. Never summed into the headline: +~6M behind regional identity verification. |
 
-**Honest headline:** _OmniRoute aggregates **~1.62B documented free tokens per month** (up to ~2.22B in your first month with signup credits) across 34 free-tier pools — plus a long tail of permanently-free, no-cap providers — and RTK + Caveman compression (15–95% token savings) stretches that further._
+**Honest headline:** _OmniRoute catalogs **~90M free tokens** a month that you can actually use (up to ~153M in your first month with signup credits), from 12 pools with a published quota, plus a long tail of permanently-free, no-cap providers. RTK + Caveman compression (15–95% token savings) stretches that further._
 
-> **Why this dropped from the previous ~1.94B.** The 2026-06-17 refresh is an honesty correction, not a loss: `gemini` is now pool-deduped (was inflated by counting each Flash variant separately, 462M → 60M), `cloudflare-ai` corrected to its real 10k-Neurons/day (122M → 30M), `doubao` reclassified as a one-time signup credit (not recurring), and shut-down tiers removed (`chutes`/`phind`/`kluster` discontinued). Partly offset by `llm7` (correct 5M/day → 150M) and new free providers (Kilo, OpenCode Zen, Z.AI GLM-Flash).
+> _Historical notes. The figures below describe the catalog at the time; they are not today's numbers._
 >
-> **Further corrected to ~1.37B in v3.8.42:** `longcat` was reclassified from a 150M/mo recurring grant to a one-time 10M signup credit after its free preview ended. Same honesty rule — no provider was dropped by mistake.
+> **Why this dropped from the previous 1.94 billion.** The 2026-06-17 refresh is an honesty correction, not a loss: `gemini` is now pool-deduped (was inflated by counting each Flash variant separately, 462M → 60M), `cloudflare-ai` corrected to its real 10k-Neurons/day (122M → 30M), `doubao` reclassified as a one-time signup credit (not recurring), and shut-down tiers removed (`chutes`/`phind`/`kluster` discontinued). Partly offset by `llm7` (correct 5M/day → 150M) and new free providers (Kilo, OpenCode Zen, Z.AI GLM-Flash).
 >
-> **Updated on 2026-08-26 after retiring Felo Web:** Felo Web is excluded while its GPL-derived provenance/licensing remains on HOLD; the source reported 38 pool keys at the time. The pool count is live and CI-gated (`check:docs-counts` fails the build if the numbers above drift from `computeFreeModelTotals()`).
+> **Further corrected to 1.37 billion in v3.8.42:** `longcat` was reclassified from a 150M/mo recurring grant to a one-time 10M signup credit after its free preview ended. Same honesty rule — no provider was dropped by mistake.
+>
+> **Updated on 2026-08-26 after retiring Felo Web:** Felo Web is excluded while its GPL-derived provenance/licensing remains on HOLD; the source reported 38 pool keys at the time.
 >
 > **Re-audited on 2026-09-02 against the providers' own pages** (sources: the `// evidence:` comments next to each re-audited entry in `open-sse/config/freeModelCatalog.data.ts`): `gemini` and `ollama-cloud` no longer publish a token figure (Google removed the per-model free table on 2025-12-23; Ollama's Free plan is "starter usage credits") and are now listed as **uncapped**, never summed (−80M); `groq` is five **per-model** 200K-TPD caps (6M each, +15M) with three retired IDs dropped; `nara` is one 7M/day bucket (+60M, 210M). `mistral`'s 1B is visible only in the account console — see _Evidence classes_ under Methodology.
 >
@@ -40,11 +41,99 @@ These figures describe separate third-party accounts and eligibility conditions 
 >
 > **Corrected on 2026-09-03 (#11773):** `cerebras` was reclassified from a 30M/mo recurring grant (old no-card 1M tokens/day trial) to a one-time $5 signup credit that requires a payment method. Same honesty rule as LongCat.
 >
-> **Plus xKiro (2026-09-03):** the new `xkiro-free` pool (150M/mo) adds a 35th recurring pool key. Felo Web stays excluded while its GPL-derived provenance/licensing remains on HOLD. The source now reports **34 recurring pool keys** and **~1.62B steady** — the live, CI-gated number (`check:docs-counts` fails the build if this drifts from `computeFreeModelTotals()`).
+> **Plus xKiro (2026-09-03):** the new `xkiro-free` pool (150M/mo) adds a 35th recurring pool key. Felo Web stays excluded while its GPL-derived provenance/licensing remains on HOLD. At the time the source reported 34 pool keys and 1.62 billion tokens a month (steady).
 
-Biggest **documented** contributors: `mistral` 1.00B, `nara` 210M, `llm7` 150M, `xkiro` 150M, `groq` 30M (five per-model caps), `cloudflare-ai` 30M, `api-airforce` 24M. (`longcat` is excluded — its 10M LongCat-2.0 grant is a one-time, KYC-gated signup credit, not a recurring monthly budget.)
+Biggest **documented** contributors to the real figure today: `groq` 24M (4 per-model caps), `api-airforce` 24M, `cloudflare-ai` 23M, `xkiro` 15M. (`longcat` is excluded — its 10M LongCat-2.0 grant is a one-time, KYC-gated signup credit, not a recurring monthly budget.)
 
-> ⚠️ The theoretical ceiling (~10B) is inflated by rate-limit-only providers with **no published token cap** (`tencent`, `nvidia`, `baidu`, `glm-cn`, `sparkdesk`) whose figures would be `RPM/TPM × 24/7 × 30d` — a theoretical maximum no single account will sustain. They are **excluded** from the defensible number (shown in the "permanently free, no cap" row instead). This is the same inflation that makes competitors' multi-billion claims unreliable.
+## Correction, November 2026
+
+Until this release, this page and the README said 1.62 billion free tokens a month. That was wrong. Four pools carried 93% of it, and all four had changed at the provider while our catalog stayed the same. The real figure today is ~90M free tokens a month. The table puts what changed at each provider next to what we got wrong.
+
+| What changed at the provider (date, source)                                                                       | What we got wrong (what, since when)                                                                      |
+| ----------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| Mistral: the free mode no longer includes API access (docs.mistral.ai, read on 2026-11-18)                        | We kept counting 1 billion tokens a month from a console reading of 2026-09-02 and never checked it again |
+| Nara: the Free plan lists no models (the provider's `router.bynara.id/api/plans`, read on 2026-11-18)             | We counted 210 million tokens a month                                                                     |
+| xKiro: 500K tokens a day per account (xkiro.com, read on 2026-11-18)                                              | 30 model IDs that no longer exist stayed in the catalog                                                   |
+| LLM7: the limits page is gone and no official page publishes a free quota (2026-11-23)                            | We counted 150 million tokens a month without dated evidence                                              |
+| Groq: one model in the free pool was retired (2026-09-14)                                                         | The pool kept its old size                                                                                |
+| AgentRouter: the provider lists a daily $25 check-in credit and $50 more for invite sign-ups (read on 2026-11-23) | We listed a $200 signup credit                                                                            |
+| Predibase: the product ended                                                                                      | We still counted its signup credit in the first month                                                     |
+| (none)                                                                                                            | 16 providers kept the free-offer flag after their offer ended                                             |
+| (none)                                                                                                            | The README promised a re-audit every two weeks. The last one before this was on 2026-09-02                |
+| (none)                                                                                                            | The docs check allowed a 0.05B drift and could not read figures in millions                               |
+
+Summing one quota per row inflates any catalog, ours included. That is why the row-summed figure carries its label and the real one sits right under it.
+
+## What counts
+
+A row counts toward the free figures when all of this holds:
+
+- The quota recurs and is published on the provider's own page, with dated evidence next to the row in the catalog.
+- One account per provider. Nothing that needs a payment, a card, a deposit or an identity check (KYC). A quota that needs a phone number, Telegram or Discord to sign up is listed apart, as "with social sign-up", never in the real figure.
+- No provider flagged `tos: "avoid"`, and only the provider's official API.
+- One-time signup credits count only in the first-month figure, and only when no card is asked for. A one-time deposit that raises a quota is a separate boost. Promotions never count in the real figure.
+- Search, voice and media providers stay out of the counts by access type and out of every token figure. They get their own counts, in their own units (results, characters, images), on this page when a recount adds them; those are never added to each other or turned into tokens.
+
+What each public count means:
+
+- **Providers with free access** (50 today: 43 with an API key, 6 without a key, 1 through a tool account): providers with at least one catalog row that gives free access, by how you reach it.
+- **Catalog rows with free access** (214 today): one row per provider and model.
+- **Pools with a published quota** (12 today): the shared quotas behind the real figure, each counted once.
+- **Distinct free models** (185 today): the rows grouped by model ID.
+- **Flagged with a free offer** (140+ today): every provider whose registry entry carries `hasFree`, including search, voice and media providers, trials and signup credits.
+
+Every count is catalogued, not tested per call: it says what the catalog lists, not that each route answers right now.
+
+## How we count
+
+Three figures come from the same catalog, audited on 2026-11-23:
+
+- **The real figure, ~90M free tokens a month.** Each shared quota is counted once, so five models behind one daily allowance are one allowance. This is what one account at each provider can actually use. With one-time signup credits, ~153M in your first month.
+- **The big figure, ~11.3B summed row by row**, ended offers included. This is the way other catalogs count. Almost all of it is history: 98.6% from offers that no longer exist. We print it only with its label and with the real figure next to it.
+- **The live catalog, ~159M summed per live row**: the same row-by-row sum without the ended offers.
+
+The row-by-row method (`row-sum-v1`) follows four rules:
+
+1. Every listed row is added as it is, without merging the rows that share one pool.
+2. Only quotas published in tokens are added. A quota published in requests, credits or neurons counts as zero (`FREE_QUOTA_UNIT` in `open-sse/config/freeModelCatalog.ts`).
+3. Signup credits, deposit boosts and rows switched off (`enabled: false`) are left out.
+4. The big figure adds the ledger of ended offers (`open-sse/config/freeModelCatalog.retired.data.ts`) at the last quota each row listed. Only rows retired since `RETIRED_LEDGER_SINCE` enter it, and each row drops out 12 months after it ended.
+
+If the row-by-row way of counting stops being common, or the maintainer decides so, the big figure leaves every page and only the real figure stays.
+
+## Removed / no free tier
+
+Providers whose free offer ended or could not be confirmed. They stay in the registry with `hasFree: false` (or are retired from the free catalog) and never count in any free figure. This is not the list of providers removed from OmniRoute on request (`docs/reference/REMOVED_PROVIDERS.md`).
+
+| Provider                 | Since      | Why                                                                          | Source                                       |
+| ------------------------ | ---------- | ---------------------------------------------------------------------------- | -------------------------------------------- |
+| `mistral`                | 2026-11-23 | The free mode no longer includes API access                                  | docs.mistral.ai (usage limits)               |
+| `nara`                   | 2026-11-23 | The free plan lists no models                                                | `router.bynara.id/api/plans`                 |
+| `llm7`                   | 2026-11-23 | No official page publishes a free quota                                      | provider site                                |
+| `navy`                   | 2026-11-23 | No free quota could be confirmed on the official pages                       | api.navy                                     |
+| `bluesminds`             | 2026-11-23 | Usage needs credit bought from the provider                                  | `api.bluesminds.com/api/status`              |
+| `arcee-ai`               | 2026-11-23 | Paid pricing only                                                            | docs.arcee.ai (pricing)                      |
+| `huggingface`            | 2026-11-23 | Free accounts must buy credits or upgrade to PRO                             | huggingface.co (Inference Providers pricing) |
+| `huggingchat`            | 2026-11-23 | Hugging Face inference needs purchased credits or PRO                        | huggingface.co (Inference Providers pricing) |
+| `ainative`               | 2026-11-23 | The Hobbyist plan is paid after a 3-day trial                                | provider pricing page                        |
+| `stepfun`                | 2026-11-23 | Pay-per-use pricing only                                                     | provider pricing page                        |
+| `predibase`              | 2026-11-23 | Product discontinued                                                         | predibase.com                                |
+| `poolside`               | 2026-10-31 | Direct inference shut down                                                   | platform.poolside.ai                         |
+| `amazon-q`               | 2026-05-15 | No new Free Tier sign-ups                                                    | provider page                                |
+| `chat-oripe`             | 2026-11-23 | The API host answers HTTP 530                                                | API host                                     |
+| `naga-ai`                | 2026-11-23 | Duplicate of the Naga.ac provider                                            | api.naga.ac                                  |
+| `dxnt`                   | 2026-11-23 | The signup bonus exists, but no model accepts it                             | dxnt.com                                     |
+| `ollama-cloud`           | 2026-11-09 | Cloud models are pay per token or covered by paid plans                      | ollama.com (#19334)                          |
+| `chutes`                 | 2026-03    | Free tier ended                                                              | provider page                                |
+| `phind`                  | 2026-01    | Company shut down                                                            | provider page                                |
+| `kluster`                | 2026-06-09 | Sunset (moved to MITO)                                                       | provider page                                |
+| `gitlawb`, `gitlawb-gmi` | 2026-05-24 | MiMo free revoked; Nemotron promotion ended 2026-06 (re-verified 2026-06-18) | provider page                                |
+| `aimlapi`                | 2026-06-18 | Free tier paused                                                             | provider page                                |
+| `yi`                     | 2026-06-18 | Yi-Light retired, pay-as-you-go                                              | provider page                                |
+| `featherless-ai`         | 2026-06    | No current free tier                                                         | provider page                                |
+| `chipotle`               | 2026-09-15 | The chat widget behind it answers 404 on every route (#13131, #4037)         | amelia.chipotle.com                          |
+
+`iflytek` / `sparkdesk` stay listed with a ToS-caution note: Spark Lite is free, but the ToS restricts proxy and relay use.
 
 ---
 
@@ -52,7 +141,7 @@ Biggest **documented** contributors: `mistral` 1.00B, `nara` 210M, `llm7` 150M, 
 
 A 50-agent web-research pass (official docs + last-7-days news, adversarially verified) refreshed the whole catalog. Highlights:
 
-- **Removed / no free tier (2026):** `chutes` (free tier ended 2026-03), `phind` (company shut down 2026-01), `kluster` (sunset 2026-06-09 → MITO), `gitlawb` + `gitlawb-gmi` (MiMo free revoked 2026-05-24, Nemotron promo ended 2026-06 — re-verified 2026-06-18), `aimlapi` (free tier paused — re-verified 2026-06-18), `yi` (Yi-Light retired, pay-as-you-go — re-verified 2026-06-18), `featherless-ai` (no current free tier), `chipotle` (Chipotle's "Pepper AI" — the reverse-engineered `amelia.chipotle.com` Amelia chat widget the provider talked to now 404s on every route, including root; decommissioned/moved backend, confirmed 2026-09-15 — fully removed from the catalog, #13131/#4037). `iflytek` / `sparkdesk` stay listed but carry a ToS-caution note (Spark Lite is free; the ToS restricts proxy/relay use).
+- **Removed / no free tier:** moved to [its own section](#removed--no-free-tier).
 - **Gemini** — `2.0 Flash` / `2.0 Flash-Lite` shut down 2026-06-01 and `2.5 Pro` left the free tier (2026-04); free tier is now **Flash-family only** (2.5/3/3.1/3.5 Flash + Gemma). The catalog now **pools** the Flash family (was inflated by counting each variant separately: 462M → 60M).
 - **Corrected numbers:** `cloudflare-ai` 122M → **30M** (real 10k-Neurons/day), `doubao` reclassified as a one-time signup credit (not recurring), `llm7` 4M → **150M** (documented 5M tokens/day), `together` "-Free" endpoints discontinued → $25 signup credit also removed (requires $5 minimum purchase, no free trial), `longcat` Preview ended + Flash models retired → **LongCat-2.0** only, reclassified as a one-time **10M**-token signup credit (KYC-gated, not recurring).
 - **Poolside direct inference ending (verified 2026-10-20):** the [official platform](https://platform.poolside.ai/) announces shutdown on **2026-10-31** and directs users to download its models from Hugging Face for self-hosting. The direct `poolside` provider carries this warning. The hand-curated free catalog has no direct Poolside entries; its Poolside-named entries belong to `kilo-gateway`. This announcement does not establish the availability of models served by Kilo, Cline, NVIDIA or other gateways, so those listings are not retired on that basis.
@@ -114,7 +203,7 @@ purpose.
 
 ## Methodology & caveats
 
-- Numbers are **upper-bound estimates** from each provider's documented free-tier limits as of **2026-06-17**, gathered by web research. Free tiers change constantly — re-verify before relying on a figure.
+- Numbers are **upper-bound estimates** from each provider's documented free-tier limits, last checked on **2026-11-23** for every row with a quota. Free tiers change constantly — re-verify before relying on a figure.
 - **What an entry actually vouches for.** No entry carries a per-row confidence rating, and the API serves none — treat every figure above as an estimate of the same, unstated quality. Two facts are different, because they are curated by hand rather than inferred: 44 entries carry an independently documented hard stop (39 of them the xKiro rows, which all share one daily allowance), and 22 entries carry a prompt-training disclosure. `hardStopGuaranteed` is set only when the provider's own terms say that exceeding the free allowance refuses the request rather than silently starting to bill you, with the source in a comment next to the entry; it is never defaulted to `true`, and an entry nobody has verified stays unset. So a missing hard-stop flag means "not established", not "known to bill you". **STRICT mode** (the opt-in `freeAccessPolicy=strict` routing guard) only trusts entries that carry the flag; every other free tier is excluded as `no-hard-stop` (see `open-sse/services/autoCombo/strictZeroCostFilter.ts`). When the guard filters a pool, the operator-visible log reports both the exclusion count and its `no-hard-stop` share.
 - `estMonthlyFreeTokens` = recurring monthly tokens only. **One-time signup credits do not recur** and count as 0. Discontinued tiers are also 0.
 - Daily token cap → `monthly = daily × 30`. Only RPD documented → `RPD × ~800 output tokens × 30`. Only RPM/TPM (no daily cap) → **uncapped** (see below).
@@ -129,11 +218,11 @@ purpose.
 
 Most "free tokens per month" figures in this space are sums of per-model labels. Ours is not, on purpose:
 
-- **Each shared pool is counted once.** Mistral's free plan is one 1B/month allowance per organization; listing it under five models does not make it 5B. Summed per model, our own catalog would read **~7.4B** (recomputed on 2026-09-03; this figure is not CI-gated — re-measure it whenever the catalog changes) — the headline says **~1.47B** because that is what one account of each provider can actually spend.
+- **Each shared pool is counted once.** Five models behind one allowance are one allowance, not five. The row-by-row reading of the same catalog, and why we print it, is on [How we count](#how-we-count).
 - **Daily caps are converted, rates are not.** A documented tokens/day cap becomes `× 30`; a documented requests/day cap becomes `RPD × ~800 tokens × 30`; a provider that only publishes requests-per-minute has **no** monthly figure and is listed as _uncapped_, never summed. Multiplying a rate limit by 24/7 is the inflation we refuse.
 - **Quotas behind a regional identity check are shown apart** (`+~6M behind regional identity verification`), because most readers cannot use them.
 - **Signup credits are first-month only** and reported as a second figure, never blended into the steady number.
-- **The figure is enforced by CI.** `npm run check:docs-counts` recomputes the totals from the catalog and fails the build when this file, the README or the budget card drift from them.
+- **What the docs check does.** `npm run check:docs-counts` (release mode) recomputes the real figure, the first-month figure and the two row-by-row sums from the catalog, and fails when the README, this page or the Free Tiers Guide print a different value or print the big figure without its label and the real one. The budget card is redrawn from the same facts at release.
 
 ---
 
@@ -242,74 +331,74 @@ Most "free tokens per month" figures in this space are sums of per-model labels.
 
 ---
 
-## Per-provider free-tier (Bytez/Nous checked 2026-10-15; re-audited rows 2026-09-02; others 2026-06-17)
+## Per-provider free-tier (catalog audited 2026-11-23)
 
-> Regenerated from the per-model catalog (`open-sse/config/freeModelCatalog.ts`), pool-deduped. Sorted by recurring steady tokens/mo. `uncapped*` = permanently free but no published token cap (rate/concurrency-limited) — real access, **not** summed into the headline. `—` = credit-only / keyless / not token-quantifiable.
+> Maintained by hand from the per-model catalog (`open-sse/config/freeModelCatalog.data.ts`); last checked 2026-11-23. Sorted by the real monthly tokens of each pool (each shared pool counted once). `uncapped*` = permanently free but no published token cap (rate/concurrency-limited): real access, **not** summed into the real figure. `not counted` = a recurring quota that the real figure leaves out (`avoid`, or behind a regional identity check). Providers whose offer ended are in [Removed / no free tier](#removed--no-free-tier). `—` = credit-only / keyless / not token-quantifiable.
 
-| Provider         | Free type     | Steady tokens/mo | First-month credit | ToS       | Models |
-| ---------------- | ------------- | ---------------- | ------------------ | --------- | ------ |
-| `mistral`        | recurring     | ~1.00B           | —                  | caution   | 5      |
-| `nara`           | recurring     | ~210M            | —                  | caution   | 8      |
-| `llm7`           | recurring     | ~150M            | —                  | caution   | 4      |
-| `xkiro`          | recurring     | ~150M            | —                  | caution   | 39     |
-| `longcat`        | one-time      | —                | 10M                | caution   | 1      |
-| `cerebras`       | one-time      | —                | $5 credit          | caution   | 2      |
-| `cloudflare-ai`  | recurring     | ~30M             | —                  | caution   | 9      |
-| `groq`           | recurring     | ~30M             | —                  | caution   | 5      |
-| `api-airforce`   | recurring     | ~24M             | —                  | caution   | 7      |
-| `bluesminds`     | recurring     | ~7M              | —                  | ambiguous | 22     |
-| `sambanova`      | recurring     | ~6M              | —                  | caution   | 5      |
-| `arcee-ai`       | recurring     | ~5M              | —                  | caution   | 1      |
-| `bazaarlink`     | recurring     | ~4M              | —                  | caution   | 32     |
-| `openrouter`     | recurring     | ~1M              | —                  | caution   | 1      |
-| `cohere`         | recurring     | ~800K            | —                  | caution   | 6      |
-| `huggingchat`    | recurring     | ~500K            | —                  | caution   | 4      |
-| `morph`          | recurring     | ~400K            | —                  | ok        | 2      |
-| `huggingface`    | recurring     | ~200K            | —                  | caution   | 6      |
-| `kiro`           | recurring     | ~25K             | —                  | avoid     | 12     |
-| `glm-cn`         | uncapped      | uncapped\*       | ~20M               | ok        | 4      |
-| `baidu`          | uncapped      | uncapped\*       | —                  | caution   | 1      |
-| `gemini`         | uncapped      | uncapped\*       | —                  | caution   | 4      |
-| `kilo-gateway`   | uncapped      | uncapped\*       | —                  | caution   | 7      |
-| `opencode-zen`   | uncapped      | uncapped\*       | —                  | caution   | 10     |
-| `tencent`        | uncapped      | uncapped\*       | —                  | caution   | 1      |
-| `vertex`         | signup credit | —                | ~300M              | caution   | 10     |
-| `agentrouter`    | signup credit | —                | ~200M              | caution   | 4      |
-| `predibase`      | signup credit | —                | ~25M               | caution   | 1      |
-| `doubao`         | signup credit | —                | ~15M               | ambiguous | 1      |
-| `ai21`           | signup credit | —                | ~10M               | avoid     | 2      |
-| `deepseek`       | signup credit | —                | ~5M                | ok        | 2      |
-| `hyperbolic`     | signup credit | —                | ~5M                | ok        | 8      |
-| `nscale`         | signup credit | —                | ~5M                | caution   | 6      |
-| `bytez`          | credit (rec.) | —                | unknown            | ambiguous | 1      |
-| `deepinfra`      | signup credit | —                | ~1M                | caution   | 22     |
-| `fireworks`      | signup credit | —                | ~1M                | avoid     | 10     |
-| `nebius`         | signup credit | —                | ~1M                | caution   | 1      |
-| `qoder`          | signup credit | —                | ~1M                | caution   | 14     |
-| `scaleway`       | signup credit | —                | ~1M                | ok        | 6      |
-| `novita`         | signup credit | —                | ~500K              | caution   | 1      |
-| `agy`            | keyless       | —                | —                  | avoid     | 16     |
-| `baichuan`       | keyless       | —                | —                  | ambiguous | 1      |
-| `blackbox`       | keyless       | —                | —                  | avoid     | 6      |
-| `coze`           | keyless       | —                | —                  | avoid     | 1      |
-| `duckduckgo-web` | keyless       | —                | —                  | avoid     | 6      |
-| `freemodel-dev`  | keyless       | —                | —                  | unknown   | 4      |
-| `friendliai`     | keyless       | —                | —                  | avoid     | 2      |
-| `iflytek`        | keyless       | —                | —                  | avoid     | 1      |
-| `inference-net`  | keyless       | —                | —                  | caution   | 3      |
-| `liquid`         | keyless       | —                | —                  | unknown   | 1      |
-| `monsterapi`     | keyless       | —                | —                  | ambiguous | 1      |
-| `muse-spark-web` | keyless       | —                | —                  | avoid     | 3      |
-| `nlpcloud`       | keyless       | —                | —                  | avoid     | 1      |
-| `nvidia`         | uncapped      | uncapped\*       | —                  | caution   | 3      |
-| `pollinations`   | keyless       | —                | —                  | caution   | 31     |
-| `publicai`       | keyless       | —                | —                  | caution   | 3      |
-| `reka`           | keyless       | —                | —                  | caution   | 2      |
-| `sensenova`      | keyless       | —                | —                  | caution   | 1      |
-| `sparkdesk`      | keyless       | —                | —                  | caution   | 1      |
-| `stepfun`        | keyless       | —                | —                  | ok        | 1      |
-| `t3-web`         | keyless       | —                | —                  | avoid     | 23     |
-| `uncloseai`      | keyless       | —                | —                  | caution   | 3      |
+| Provider         | Free type     | Real tokens/mo                   | First-month credit | ToS       | Models |
+| ---------------- | ------------- | -------------------------------- | ------------------ | --------- | ------ |
+| `api-airforce`   | recurring     | ~24M                             | —                  | caution   | 5      |
+| `groq`           | recurring     | ~24M (4 per-model caps)          | —                  | caution   | 4      |
+| `cloudflare-ai`  | recurring     | ~23M                             | —                  | caution   | 8      |
+| `xkiro`          | recurring     | ~15M                             | —                  | caution   | 9      |
+| `bazaarlink`     | recurring     | ~1.4M                            | —                  | caution   | 1      |
+| `openrouter`     | recurring     | ~1.2M                            | —                  | caution   | 1      |
+| `cohere`         | recurring     | ~800K                            | —                  | caution   | 6      |
+| `sambanova`      | recurring     | ~480K                            | —                  | caution   | 2      |
+| `morph`          | recurring     | ~160K                            | —                  | ok        | 2      |
+| `glm-cn`         | uncapped      | uncapped\*                       | 20M                | ok        | 4      |
+| `agnes`          | uncapped      | uncapped\*                       | —                  | ok        | 3      |
+| `agnes-cn`       | uncapped      | uncapped\*                       | —                  | ok        | 3      |
+| `aion`           | uncapped      | uncapped\*                       | —                  | ok        | 4      |
+| `baidu`          | uncapped      | uncapped\*                       | —                  | caution   | 1      |
+| `gemini`         | uncapped      | uncapped\*                       | —                  | caution   | 4      |
+| `glm`            | uncapped      | uncapped\*                       | —                  | ok        | 2      |
+| `kilo-gateway`   | uncapped      | uncapped\*                       | —                  | caution   | 12     |
+| `nvidia`         | uncapped      | uncapped\*                       | —                  | caution   | 3      |
+| `onomeo`         | uncapped      | uncapped\*                       | —                  | caution   | 2      |
+| `requesty`       | uncapped      | uncapped\*                       | —                  | caution   | 2      |
+| `sealion`        | uncapped      | uncapped\*                       | —                  | ok        | 5      |
+| `tokenharbor`    | uncapped      | uncapped\*                       | —                  | caution   | 2      |
+| `coze`           | recurring     | not counted (`avoid`)            | —                  | avoid     | 1      |
+| `inference-net`  | recurring     | not counted                      | —                  | caution   | 3      |
+| `kiro`           | recurring     | not counted (`avoid`)            | —                  | avoid     | 7      |
+| `modelscope`     | recurring     | behind a regional identity check | —                  | caution   | 2      |
+| `nlpcloud`       | recurring     | not counted (`avoid`)            | —                  | avoid     | 1      |
+| `reka`           | recurring     | not counted                      | —                  | caution   | 2      |
+| `t3-web`         | recurring     | not counted (`avoid`)            | —                  | avoid     | 23     |
+| `bytez`          | credit (rec.) | —                                | —                  | ambiguous | 1      |
+| `doubao`         | signup credit | —                                | 15M                | ambiguous | 1      |
+| `longcat`        | signup credit | —                                | 10M                | caution   | 1      |
+| `deepseek`       | signup credit | —                                | 5M                 | ok        | 2      |
+| `hyperbolic`     | signup credit | —                                | 5M                 | ok        | 8      |
+| `nscale`         | signup credit | —                                | 5M                 | caution   | 6      |
+| `deepinfra`      | signup credit | —                                | 1M                 | caution   | 22     |
+| `qoder`          | signup credit | —                                | 1M                 | caution   | 9      |
+| `scaleway`       | signup credit | —                                | 1M                 | ok        | 6      |
+| `novita`         | signup credit | —                                | 500K               | caution   | 1      |
+| `agentrouter`    | signup credit | —                                | —                  | caution   | 1      |
+| `ai21`           | signup credit | —                                | —                  | avoid     | 2      |
+| `baichuan`       | signup credit | —                                | —                  | ambiguous | 1      |
+| `cerebras`       | signup credit | —                                | —                  | caution   | 2      |
+| `fireworks`      | signup credit | —                                | —                  | avoid     | 10     |
+| `freemodel-dev`  | signup credit | —                                | —                  | unknown   | 4      |
+| `monsterapi`     | signup credit | —                                | —                  | ambiguous | 1      |
+| `nebius`         | signup credit | —                                | —                  | caution   | 1      |
+| `publicai`       | signup credit | —                                | —                  | caution   | 3      |
+| `sensenova`      | signup credit | —                                | —                  | caution   | 1      |
+| `vertex`         | signup credit | —                                | —                  | caution   | 16     |
+| `agy`            | keyless       | —                                | —                  | avoid     | 9      |
+| `aihorde`        | keyless       | —                                | —                  | ok        | 3      |
+| `blackbox`       | keyless       | —                                | —                  | avoid     | 6      |
+| `duckduckgo-web` | keyless       | —                                | —                  | avoid     | 6      |
+| `friendliai`     | keyless       | —                                | —                  | avoid     | 2      |
+| `iflytek`        | keyless       | —                                | —                  | avoid     | 1      |
+| `liquid`         | keyless       | —                                | —                  | unknown   | 1      |
+| `muse-spark-web` | keyless       | —                                | —                  | avoid     | 3      |
+| `ovhcloud`       | keyless       | —                                | —                  | ok        | 5      |
+| `pollinations`   | keyless       | —                                | —                  | caution   | 24     |
+| `sparkdesk`      | keyless       | —                                | —                  | caution   | 1      |
+| `uncloseai`      | keyless       | —                                | —                  | caution   | 1      |
 
 ---
 

@@ -188,5 +188,7 @@ test.each([
     }
     expect(onCreated).toHaveBeenCalledWith("batch-test");
   },
-  15000
+  // Hosted runner headroom: 15756 ms (run 45553583018) and 11717 ms (run 45567756509)
+  // against the previous 15000 ms limit.
+  30000
 );

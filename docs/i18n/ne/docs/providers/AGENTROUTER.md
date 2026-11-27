@@ -47,7 +47,7 @@ docker run -d --name omniroute \
   -p 20128:20128 \
   -v omniroute-data:/app/data \
   -e ENABLE_CC_COMPATIBLE_PROVIDER=true \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
 पुनः सुरु गरेपछि, ड्यासबोर्डले विद्यमान OpenAI-संगत र Anthropic-संगत प्रवाहहरूका अतिरिक्त **Claude Code-संगत थप्नुहोस्** विकल्प देखाउँछ।

@@ -1,0 +1,1 @@
+- **fix(docs):** English `/docs` pages resolve relative links against the page's real file (`page.path`) instead of a slug-derived path, so links on an `index.md` page no longer point one directory too high ([#20674](https://github.com/cheaper-inference/OmniRoute/pull/20674))

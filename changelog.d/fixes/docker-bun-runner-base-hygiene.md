@@ -1,0 +1,1 @@
+- **fix(docker):** The `-bun` images run `apt-get upgrade` in their runtime stage and no longer install `curl` or the `sqlite3` CLI, which nothing in the container used. They now match the Node image's package set: the `-bun` image's HIGH scanner findings drop from 115 to 49, and the three with a published fix (`apt`, `libapt-pkg7.0`, `zlib1g`) are gone

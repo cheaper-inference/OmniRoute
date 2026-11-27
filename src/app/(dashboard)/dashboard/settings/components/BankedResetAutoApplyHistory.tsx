@@ -71,20 +71,18 @@ function HistoryRow({
   const status = entry.status ?? "";
   return (
     <TableRow className="border-b border-border/50 align-top">
-      <TableCell className="py-1.5 pe-3 whitespace-nowrap">{formatTime(entry.timestamp)}</TableCell>
-      <TableCell className="max-w-[14rem] truncate py-1.5 pe-3 font-mono" title={account}>
+      <TableCell>{formatTime(entry.timestamp)}</TableCell>
+      <TableCell className="max-w-[14rem] truncate font-mono" title={account}>
         {account}
       </TableCell>
-      <TableCell className="py-1.5 pe-3">
-        {translatedOrRaw(t, CREDIT_TYPE_KEYS, entry.creditType)}
-      </TableCell>
-      <TableCell className="py-1.5 pe-3">
+      <TableCell>{translatedOrRaw(t, CREDIT_TYPE_KEYS, entry.creditType)}</TableCell>
+      <TableCell>
         {translatedOrRaw(t, TRIGGER_KEYS, entry.trigger)}
         {entry.reason ? (
           <span className="block font-mono text-xs text-text-muted">{entry.reason}</span>
         ) : null}
       </TableCell>
-      <TableCell className={`py-1.5 ${RESULT_CLASS[status] ?? "text-text-muted"}`}>
+      <TableCell className={RESULT_CLASS[status] ?? "text-text-muted"}>
         {translatedOrRaw(t, RESULT_KEYS, status || null)}
       </TableCell>
     </TableRow>
@@ -103,28 +101,18 @@ function HistoryTable({
     <div className="overflow-x-auto">
       {/* The Card of the auto-apply tab is the frame around this table (#19620). */}
       <Table
-        className="w-full text-left text-sm"
-        containerClassName="rounded-none border-0"
+        variant="plain"
+        density="compact"
         scrollbarLabel={t("bankedResetAutoApplyHistoryTitle")}
       >
         <TableCaption className="sr-only">{t("bankedResetAutoApplyHistoryTitle")}</TableCaption>
         <TableHeader>
           <TableRow className="border-b border-border text-xs text-text-muted">
-            <TableHead scope="col" className="py-1.5 pe-3">
-              {t("bankedResetAutoApplyHistoryTime")}
-            </TableHead>
-            <TableHead scope="col" className="py-1.5 pe-3">
-              {t("bankedResetAutoApplyHistoryAccount")}
-            </TableHead>
-            <TableHead scope="col" className="py-1.5 pe-3">
-              {t("bankedResetAutoApplyHistoryCreditType")}
-            </TableHead>
-            <TableHead scope="col" className="py-1.5 pe-3">
-              {t("bankedResetAutoApplyHistoryReason")}
-            </TableHead>
-            <TableHead scope="col" className="py-1.5">
-              {t("bankedResetAutoApplyHistoryResult")}
-            </TableHead>
+            <TableHead scope="col">{t("bankedResetAutoApplyHistoryTime")}</TableHead>
+            <TableHead scope="col">{t("bankedResetAutoApplyHistoryAccount")}</TableHead>
+            <TableHead scope="col">{t("bankedResetAutoApplyHistoryCreditType")}</TableHead>
+            <TableHead scope="col">{t("bankedResetAutoApplyHistoryReason")}</TableHead>
+            <TableHead scope="col">{t("bankedResetAutoApplyHistoryResult")}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>

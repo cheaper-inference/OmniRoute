@@ -19,8 +19,8 @@ import { getCopilotRejectionCatalogVersion } from "@omniroute/open-sse/services/
 
 import { getModelCatalogCacheVersion as getDatabaseCatalogVersion } from "@/lib/db/readCache";
 import { isSyntheticApiKeyId } from "@/shared/constants/apiKeyIdentities";
-import { extractApiKey } from "@/sse/services/auth";
 import { buildErrorBody } from "@omniroute/open-sse/utils/error";
+import { opaqueTokenFingerprint } from "@omniroute/open-sse/utils/opaqueTokenFingerprint.ts";
 
 import {
   CATALOG_BODY_CHUNK_BYTES,
@@ -28,15 +28,28 @@ import {
   catalogStringResponse,
   parseCatalogPage,
 } from "./catalogPagination";
-import { isCodexModelCatalogClient } from "./catalogRequest";
+import {
+  guardLaunchCatalogBuild,
+  launchCatalogCacheIdentity,
+  type LaunchCatalogCacheIdentity,
+} from "./catalogLaunchView";
+import { extractCatalogApiKey, isCodexModelCatalogClient } from "./catalogRequest";
 
 /** Fingerprint an API key for the catalog memo Map. Never store the raw secret. */
 export function fingerprintCatalogAuthKey(apiKey: string): string {
   if (!apiKey) return "";
-  // Memo-map cache key fingerprint, not a password/credential hash — keyed with a fixed
+  // Digest of the key's stored fingerprint (`opaqueTokenFingerprint`, what api_keys.key_hash
+  // holds), so a launch session, which only knows its parent's stored fingerprint, derives
+  // the very same value for its parent (fingerprintCatalogCredential).
+  return fingerprintCatalogCredential(opaqueTokenFingerprint(apiKey));
+}
+
+/** The catalog memo-map digest of a credential's stored fingerprint. */
+function fingerprintCatalogCredential(credentialFingerprint: string): string {
+  // Memo-map cache key fingerprint, not a password/credential hash: keyed with a fixed
   // context label so it reads as a domain-separated digest rather than a bare password hash.
   return createHmac("sha256", "omniroute-catalog-cache-fingerprint-v1")
-    .update(apiKey)
+    .update(credentialFingerprint)
     .digest("hex")
     .slice(0, 16);
 }
@@ -66,13 +79,25 @@ export const CATALOG_KEY_SIGNATURE_FIELDS = [
  * a per-key fingerprint — sharing is only for database keys whose permissions we read.
  * Auth is already enforced by the caller; this only picks which cached body to replay.
  */
-async function catalogKeyIdentity(request: Request): Promise<string> {
-  const apiKey = extractApiKey(request) || "";
+async function catalogKeyIdentity(
+  request: Request,
+  launch: LaunchCatalogCacheIdentity | null
+): Promise<string> {
+  const apiKey = extractCatalogApiKey(request) || "";
   if (!apiKey) return "";
+  // A launch session (catalogLaunchView.ts) keeps its parent-credential identity wherever its
+  // permissions are not read; the view suffix is appended by the caller.
+  const fallback = () =>
+    launch ? catalogAuthDimension(apiKey, launch.credential) : fingerprintCatalogAuthKey(apiKey);
   try {
     const { getApiKeyMetadata } = await import("@/lib/db/apiKeys");
+    // For an active session this is the parent key's metadata, so a session and its parent key
+    // (equal permissions) share one entry. A bearer the launch identity did not claim (a bare
+    // x-api-key olx_ token) has a view the key cannot see, so it keeps its own entry.
     const meta = await getApiKeyMetadata(apiKey);
-    if (!meta || isSyntheticApiKeyId(meta.id)) return fingerprintCatalogAuthKey(apiKey);
+    if (!meta || isSyntheticApiKeyId(meta.id) || (meta.launchSession && !launch?.shared)) {
+      return fallback();
+    }
     const { getKeyGroupsForApiKey } = await import("@/lib/db/apiKeyGroups");
     const fields = CATALOG_KEY_SIGNATURE_FIELDS.map((field) => {
       const value = (meta as unknown as Record<string, unknown>)[field];
@@ -85,7 +110,7 @@ async function catalogKeyIdentity(request: Request): Promise<string> {
       .update(JSON.stringify([fields, groups]))
       .digest("hex")}`;
   } catch {
-    return fingerprintCatalogAuthKey(apiKey);
+    return fallback();
   }
 }
 
@@ -334,10 +359,12 @@ let _catalogBuilderRuns = 0;
 function buildCatalogCacheKey(
   request: Request,
   catalogSettings?: CatalogCacheOptions,
-  identity = fingerprintCatalogAuthKey(extractApiKey(request) || "")
+  launch: LaunchCatalogCacheIdentity | null = launchCatalogCacheIdentity(request),
+  identity?: string
 ): string {
   const url = new URL(request.url);
   const prefix = url.searchParams.get("prefix") || "";
+  const apiKey = extractCatalogApiKey(request) || "";
   const isCodex = isCodexModelCatalogClient(request) ? "1" : "0";
   const configuredOnly = url.searchParams.get("configuredOnly") === "true" ? "1" : "0";
   const hideAuto = catalogSettings?.hideAutoCombos ? "1" : "0";
@@ -347,7 +374,32 @@ function buildCatalogCacheKey(
   // (the public /v1/models default) stays byte-identical.
   const reveal = catalogSettings?.revealHidden ? "|reveal" : "";
   const combosOnly = catalogSettings?.exposeCombosOnly ? "|combosOnly" : "";
-  return `${prefix}|${isCodex}|${identity}|${configuredOnly}|${hideAuto}|${hideNoThink}|${page}${reveal}${combosOnly}`;
+  // Launch session (`olx_` bearer, catalogLaunchView.ts): keyed on its PARENT credential, so
+  // every session of a parent reuses the parent's build; the view suffix ("" without a view)
+  // separates a session whose view narrows it. Null for every other bearer.
+  const { auth, launchView } = catalogCacheKeyIdentity(apiKey, launch);
+  return `${prefix}|${isCodex}|${identity ?? auth}|${configuredOnly}|${hideAuto}|${hideNoThink}|${page}${reveal}${combosOnly}${launchView}`;
+}
+
+/** The credential dimension plus the launch view suffix ("" without a launch session). */
+function catalogCacheKeyIdentity(
+  apiKey: string,
+  launch: LaunchCatalogCacheIdentity | null
+): { auth: string; launchView: string } {
+  if (!launch) return { auth: catalogAuthDimension(apiKey), launchView: "" };
+  return { auth: catalogAuthDimension(apiKey, launch.credential), launchView: launch.viewSuffix };
+}
+
+/**
+ * The credential dimension of the cache key ("" without a credential). A launch session
+ * passes its parent's stored fingerprint (`launchCredential`), which digests to exactly the
+ * parent key's own `fingerprintCatalogAuthKey`, so it lands on the parent's entry.
+ */
+function catalogAuthDimension(apiKey: string, launchCredential?: string): string {
+  if (!apiKey) return "";
+  return launchCredential !== undefined
+    ? fingerprintCatalogCredential(launchCredential)
+    : fingerprintCatalogAuthKey(apiKey);
 }
 
 // Tracks the model-catalog cache version (src/lib/db/readCache.ts) as of the last
@@ -593,17 +645,26 @@ export async function resolveCachedCatalogResponse(
   // identity may then describe pre-write state: look it up again until the generation holds,
   // so nothing awaits between the generation check and the cache read. After 5 moves fall
   // back to the per-key fingerprint, which needs no await.
+  const launch = launchCatalogCacheIdentity(request);
   let cacheKey: string | undefined;
   for (let attempt = 0; attempt < 5 && !cacheKey; attempt++) {
     dropCatalogCacheIfStateChanged();
     const generation = getModelCatalogCacheVersion();
-    const key = buildCatalogCacheKey(request, catalogSettings, await catalogKeyIdentity(request));
+    const key = buildCatalogCacheKey(
+      request,
+      catalogSettings,
+      launch,
+      await catalogKeyIdentity(request, launch)
+    );
     if (generation === getModelCatalogCacheVersion()) cacheKey = key;
   }
   if (!cacheKey) {
     dropCatalogCacheIfStateChanged();
-    cacheKey = buildCatalogCacheKey(request, catalogSettings);
+    cacheKey = buildCatalogCacheKey(request, catalogSettings, launch);
   }
+  // A launch session shares its parent's entry, so a build it triggers must still be its
+  // parent's catalog when it lands: refused (not stored, not joined) if the session changed.
+  buildPayload = guardLaunchCatalogBuild(buildPayload, launch);
   const now = Date.now();
   const staleWindowMs =
     catalogSettings?.getStaleWhileRevalidateMs?.() ?? CATALOG_STALE_WHILE_REVALIDATE_MS;
@@ -658,10 +719,14 @@ export async function resolveCachedCatalogResponse(
     );
     inflight = { generation, promise, lastKeptAt: Date.now(), timeoutCount: 0 };
     catalogInFlight.set(cacheKey, inflight);
-    promise.catch(() => {});
-    promise.finally(() => {
-      if (catalogInFlight.get(cacheKey)?.promise === promise) catalogInFlight.delete(cacheKey);
-    });
+    // `.finally` derives a promise that rejects with the build's error, so it needs its own
+    // handler (a refused launch build, LaunchSessionChangedError, rejects here); the caller
+    // still observes the rejection through `inflight.promise`.
+    promise
+      .finally(() => {
+        if (catalogInFlight.get(cacheKey)?.promise === promise) catalogInFlight.delete(cacheKey);
+      })
+      .catch(() => {});
   }
 
   return awaitCatalogInFlight(cacheKey, inflight, corsHeaders, diagnosticHeaders);

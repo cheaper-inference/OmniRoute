@@ -10,7 +10,7 @@ import { maskEmailLikeValue } from "@/shared/utils/maskEmail";
 import type { QuotaPool } from "@/lib/quota/dimensions";
 import type { PoolUsageSnapshot } from "@/lib/quota/types";
 import DimensionBar from "./DimensionBar";
-import AllocationTable from "./AllocationTable";
+import AllocationTable, { type LendingAllocation } from "./AllocationTable";
 import BurnRateChart from "./BurnRateChart";
 import StackedAllocationBar from "./StackedAllocationBar";
 import AccountQuotaRow from "./AccountQuotaRow";
@@ -18,7 +18,7 @@ import PoolSchedulesCard from "./PoolSchedulesCard";
 import UsageLogCard from "./UsageLogCard";
 
 export interface PoolCardProps {
-  pool: QuotaPool;
+  pool: Omit<QuotaPool, "allocations"> & { allocations: LendingAllocation[] };
   usage: PoolUsageSnapshot | null;
   /** Map from apiKeyId to display name */
   keyLabels: Record<string, string>;
@@ -91,7 +91,7 @@ export default function PoolCard({
                 </div>
               ))}
               {providers.length > 3 && (
-                <span className="text-[10px] text-text-muted font-semibold ml-0.5">
+                <span className="text-3xs text-text-muted font-semibold ml-0.5">
                   +{providers.length - 3}
                 </span>
               )}
@@ -108,7 +108,7 @@ export default function PoolCard({
                 {displayName} · {displayConnectionLabel}
               </span>
             </div>
-            <div className="text-[11px] text-text-muted">
+            <div className="text-2xs text-text-muted">
               {t("allocationsCount", { count: pool.allocations.length })} · ID:{" "}
               {pool.id.slice(0, 12)}
             </div>
@@ -121,7 +121,7 @@ export default function PoolCard({
             onClick={onEdit}
             title={t("editAllocations")}
             aria-label={t("editAllocations")}
-            className="text-text-muted"
+            tone="muted"
           >
             <Icon name="edit" size={16} />
           </Button>
@@ -164,8 +164,15 @@ export default function PoolCard({
 
       {/* Allocation table */}
       <div className="mb-3">
-        <h4 className="text-[10px] uppercase text-text-muted mb-1.5">{t("allocationsHeading")}</h4>
-        <AllocationTable allocations={pool.allocations} usage={usage} keyLabels={keyLabels} />
+        <h4 className="ci-eyebrow mb-1.5" data-size="3xs" data-weight="medium">
+          {t("allocationsHeading")}
+        </h4>
+        <AllocationTable
+          allocations={pool.allocations}
+          usage={usage}
+          keyLabels={keyLabels}
+          consentMode={pool.borrowMode === "consent"}
+        />
       </div>
 
       {/* Account quota row — read-only upstream quota per connection */}

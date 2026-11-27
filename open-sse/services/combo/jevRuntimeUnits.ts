@@ -31,6 +31,8 @@ type JevRuntimeUnitArgs = {
   body: Record<string, unknown>;
   comboName: string;
   config: Record<string, unknown>;
+  settings?: Record<string, unknown> | null;
+  sourceFormat?: string | null;
   /** Resolved by the caller (combo setup) so this module needs no import edge into src/. */
   resilienceSettings: JevResilienceSettings;
   allCombos: ComboCollectionLike;
@@ -167,6 +169,8 @@ export async function orderJevRuntimeUnits(
   const modelPartition = await partitionJevTargetsForAsk(modelUnits, {
     body: args.body,
     config: args.config,
+    settings: args.settings,
+    sourceFormat: args.sourceFormat,
     resilienceSettings: args.resilienceSettings,
     log: args.log,
     comboName: args.comboName,

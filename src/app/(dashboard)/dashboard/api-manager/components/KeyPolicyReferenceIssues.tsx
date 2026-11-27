@@ -31,7 +31,7 @@ export default function KeyPolicyReferenceIssues() {
                 ({issue.code})
               </span>
               <span>{issue.message}</span>
-              <span className="font-mono text-[10px]">{issue.path}</span>
+              <span className="font-mono text-3xs">{issue.path}</span>
               {!canRemoveReferenceIssue(issue) && (
                 <span>{t("templateReferenceReloadRequired")}</span>
               )}

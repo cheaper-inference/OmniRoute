@@ -133,32 +133,22 @@ nlele na ọ naghị arụ ọrụ na restart n'otu command ahụ.
   iji rute na tmpfs, ma were nkeji 2 iji si na disk bulite.
 - VPS `.15` bụ naanị maka homologation — ọ dịghị mgbe ọ na-agba CI runners.
 
-## Ụzọ a na-akwado (ndị na-agba ọsọ GitHub na-akwado)
+## Ụzọ anabatara (ndị ọgba ọsọ GitHub kwadoro)
 
-Repository ahụ bụ nke otu `cheaper-inference`, na atụmatụ **Team**: **ọrụ 60 a na-akwado nwere ike ịrụ n'otu oge**, nke repository ọ bụla dị n'otu ahụ, nyocha PR ọ bụla, usoro ọrụ ọ bụla push na-akpalite, na nhazi ndabara nke CodeQL na-ejikọ ọnụ iji. E tụrụ ọnụọgụgụ ndị dị n'okpuru na atụmatụ **Pro** (ọrụ 40 a na-akwado n'otu oge). Ntụle e mere na 2026-10-18 n'oge
-mkpọsa njikọta (~njikọta 10 kwa elekere na `release/v3.8.52`) gosiri: **emepụtara ọsọ usoro ọrụ 2,500 n'ime
-elekere 24**, push 44 gara na branch ahụ n'ime elekere 6, **ọrụ 106 a na-akwado nọ n'ahịrị nchere** ebe nyocha PR chere ruo
-ọtụtụ elekere ma jikọta PR n'enweghị ha. Usoro ọrụ itoolu malitere mgbe ọ bụla e mere push na branch ahụ:
+Ebe nchekwa ahụ bụ nke nzukọ `cheaper-inference`, na** Otu** atụmatụ:** Ọrụ 60 kwadoro n'otu oge** , na-ekekọrịta site na ebe nchekwa ọ bụla dị na nzukọ ahụ, nlele PR ọ bụla, usoro ọrụ ọ bụla na-akpalite yana ntọlite CodeQL. A tụrụ ọnụ ọgụgụ ndị dị n'okpuru na** Pro** atụmatụ (ọrụ 40 na-akwado otu oge). Atụtara na 2026-10-18 n'oge mkpọsa njikọta (~ 10 merges/hour na `release/v3.8.52`):** 2,500 arụ ọrụ na-agba ọsọ emepụtara n'ime awa 24** , 44 na-akwaga n'alaka ahụ n'ime awa 6,** Ọrụ 106 kwadoro n'ahịrị** ebe ndenye ego PR chere ọtụtụ awa wee jikọta PRs na-enweghị ha. Usoro ọrụ itoolu gbabara n'ọrụ ọ bụla na-aga n'alaka ahụ:
 
-| kwa push na `release/v*`                    | ọrụ a na-akwado | nsonaazụ n'okpuru oke ibu ahụ                                   | kemgbe 2026-10-18                                                                         |
-| ------------------------------------------- | --------------: | --------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| `ci.yml` (matrix zuru ezu)                  |          ruo 30 | push na-esote kagburu ya, 24 n'ime 24 n'otu ụbọchị              | anaghị amalite na push `release/**` (ọsọ PR + Release-Green)                              |
-| `quality.yml`                               |              ~6 | kagburu, 23 n'ime 23                                            | anaghị amalite na push `release/**`                                                       |
-| `Release-Green` `--quick`                   |               0 | gbara na `omni-build`, kagburu 97 n'ime 100                     | oghere `omni-release`, anaghị akagbu ya, a na-ejikọta ọsọ ndị na-echere                   |
-| `Lock released branch`, `OpenSSF Scorecard` |               2 | otu ọsọ nọ n'ahịrị nchere kwa push                              | otu ọsọ kwa ntụaka (`tests/unit/build/hosted-lane-concurrency.test.ts`)                   |
-| `Release acceptance` (akụkọ onyinyo)        |               1 | otu `npm ci` a na-akwado kwa push, anaghị akagbu ya             | agbanwebeghị — o kwesịrị ka e jiri nzacha `paths:` nyochaa ya                             |
-| `Publish to Docker Hub` → `Deploy to VPS`   |               2 | a na-akagbu ya kwa push; akụkụ amd64 na-asọ mpi na `omni-build` | agbanwebeghị — ụzọ mbugharị nke onye nwe ya                                               |
-| Nhazi ndabara CodeQL (`dynamic`)            |               4 | `javascript-typescript`, `actions`, `c-cpp`, `python` kwa push  | agbanwebeghị — Settings → Code security; `c-cpp`/`python` anaghị enyocha ihe ọ bụla ebe a |
+| kwa ntapu ka `release/v*`                   | akwadoro ọrụ | pụta n'okpuru oké ifufe                                        | kemgbe 2026-10-18                                                                 |
+| ------------------------------------------- | -----------: | -------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| `ci.yml` (matriks zuru ezu)                 |  ruo iri atọ | kagburu site na ntinye ọzọ, 24 nke 24 n'otu ụbọchị             | amalitebeghị na ntugharị `release/**` (PR run + Release-Green)                    |
+| `quality.yml`                               |           ~6 | kagburu, 23 nke 23                                             | amaliteghị na `release/**` pushes                                                 |
+| `Release-Green` `--quick`                   |            0 | gbara ọsọ na `omni-build`, kagbuo 97 nke 100                   | oghere `omni-release`, akagbubeghị, ọsọ na-echere daa                             |
+| `Lock released branch`, `OpenSSF Scorecard` |            2 | otu kwụ n'ahịrị na-agba ọsọ kwa ọkpọ                           | otu ọsọ kwa onye nyocha (`tests/unit/build/hosted-lane-concurrency.test.ts`)      |
+| `Release acceptance` (akụkọ onyinyo)        |            1 | otu akwadoro `npm ci` kwa ntanye, agaghị kagbuo ya             | onye ndoro-ndoro — na-agbanweghi agbanwe maka nzacha `paths:`                     |
+| `Publish to Docker Hub` → `Deploy to VPS`   |            2 | kagbuo kwa ntanye; amd64 ụkwụ na-asọmpi na `omni-build`        | chawa ibugharị onye nwe — agbanwebeghị                                            |
+| Ntọala ndabara CodeQL (`dynamic`)           |            4 | `javascript-typescript`, `actions`, `c-cpp`, `python` kwa push | Agbanweghị — Ntọala → Koodu nchekwa; `c-cpp`/`python` enyochaghị ihe ọ bụla ebe a |
 
-`tests/unit/build/push-storm-diet.test.ts` na-eme ka triga push nke `ci.yml` na
-`quality.yml` bụrụ naanị nke `main`. Mmetụta dị n'akụkụ: Codecov anaghịzi enweta nbulite ntọala kwa push release (nzọụkwụ ahụ
-bụ naanị maka ozi ma nwee `continue-on-error`); nke a emetụtaghị ọnụ ụzọ nnabata coverage dị n'ime repo na nkọwa PR.
+`tests/unit/build/push-storm-diet.test.ts` na-atụnye `main` -only ihe na-akpalite `ci.yml` na `quality.yml`. Mmetụta dị n'akụkụ: Codecov anaghịzi anata nbudata ntọala kwa ntinye ntọhapụ (nzọụkwụ ahụ bụ ozi na `continue-on-error`); Ọnụ ụzọ mkpuchi in-repo na nkọwa PR adịghị emetụta.
 
-**Ịgbakwunye ikike self-hosted anaghị edozi ahịrị nchere nke ọrụ ndị a na-akwado.** Devbox ahụ
-(`devbox-vm-06-dev002`, 24 vCPU / 54 GB) nwere ike ịnabata runner, mana nnọkọ agent ndị ahụ
-na-eme ka ibu ya dịrịlarị na 20–26, container agent enweghị daemon Docker, ebe ụzọ jupụtara
-bụ nke a na-akwado. Igbe `.113` nwere 71 GB ohere fọdụrụ na ibu 5–8 n'otu oge ahụ; ihe na-egbochi ya
-bụ oke ebe nchekwa kwa listener e kwuru n'elu (ókè bụ listener 6), ọ bụghị CPU. Ihe ndị fọdụrụ a pụrụ ime
-bụ mgbanwe usoro: webata PR nke mkpọsa site n'ahịrị Mergify (`label=queue`, batch na-eji
-otu ọsọ CI `merge_group` ọnụ kama otu ọsọ kwa PR tinyere otu kwa push), belata asụsụ ndị dị na
-nhazi ndabara CodeQL, ma jiri faịlụ ndị `release-acceptance.yml` na-agụ nyochaa ya.
+**Ikike nke akwadoro onwe ya anaghị edozi kwụ n'ahịrị anabatara.** Devbox (`devbox-vm-06-dev002`, 24 vCPU / 54 GB) nwere ike ịnabata onye na-agba ọsọ, mana nnọkọ ndị nnọchi anya na-edobe ibu ya na 20-26, akpa ndị nnọchi anya enweghị Docker daemon, na ụzọ juru eju bụ nke anabatara. Igbe `.113` ahụ nwere 71 GB n'efu na ibu 5–8 n'otu oge ahụ; mmachi ya bụ mmefu ego ebe nchekwa onye ọ bụla n'elu (ụlọ ndị na-ege ntị 6), ọ bụghị CPU. Levers nke fọdụrụ bụ nke usoro: mkpọsa ala PRs site na Mergify kwụ n'ahịrị (`label=queue`, batches na-ekekọrịta otu `merge_group` CI ọsọ kama otu ọsọ kwa PR gbakwunyere otu kwa push), ewepụtụ asụsụ ntọlite CodeQL, wee nyochaa `release-acceptance.yml` site na faịlụ ọ na-agụ.
+
+> **2026-11-19: kwụ n'ahịrị Mergify agwụla** (mkpebi onye nwe). `.mergify.yml` anaghị akọwapụta kwụ n'ahịrị wee jụ iwu Mergify nke jikọtara ma ọ bụ degharịa arịrịọ ịdọrọ. A na-ejikọta ntọhapụ PRs na aka n'okpuru iwu nchekwa nchekwa "Chọọ ọnụ ụzọ ndụ akwụkwọ ndụ na ntọhapụ na-arụ ọrụ" (`Gate / CI` + `Gate / Quality`) ruo mgbe omni-queue na-agba ọsọ na ọnọdụ ndụ, na site na omni-queue mgbe nke ahụ gasịrị ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). The Mergify lever dị n'elu adịghịzi adị.

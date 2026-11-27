@@ -13,7 +13,11 @@ import {
   isForbiddenCustomHeaderName,
 } from "@/shared/constants/upstreamHeaders";
 import { MAX_TIMER_TIMEOUT_MS } from "@/shared/utils/runtimeTimeouts";
-
+import {
+  EVAL_CASE_NAME_MAX_LENGTH,
+  EVAL_SUITE_DESCRIPTION_MAX_LENGTH,
+  EVAL_SUITE_NAME_MAX_LENGTH,
+} from "@/shared/constants/formLimits";
 
 export const evalTargetSchema = z
   .object({
@@ -41,7 +45,7 @@ export const evalMessageSchema = z.object({
 
 export const evalCaseBuilderSchema = z.object({
   id: z.string().trim().min(1).optional(),
-  name: z.string().trim().min(1, "case.name is required").max(200),
+  name: z.string().trim().min(1, "case.name is required").max(EVAL_CASE_NAME_MAX_LENGTH),
   model: z.string().trim().min(1).max(300).optional().nullable(),
   input: z.object({
     messages: z.array(evalMessageSchema).min(1, "At least one message is required").max(32),
@@ -80,7 +84,7 @@ export const evalRunSuiteSchema = z
 
 export const evalSuiteSaveSchema = z.object({
   id: z.string().trim().min(1).optional(),
-  name: z.string().trim().min(1, "name is required").max(200),
-  description: z.string().trim().max(2000).optional(),
+  name: z.string().trim().min(1, "name is required").max(EVAL_SUITE_NAME_MAX_LENGTH),
+  description: z.string().trim().max(EVAL_SUITE_DESCRIPTION_MAX_LENGTH).optional(),
   cases: z.array(evalCaseBuilderSchema).min(1, "At least one case is required").max(200),
 });

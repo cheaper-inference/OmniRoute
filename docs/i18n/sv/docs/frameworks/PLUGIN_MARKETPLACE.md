@@ -25,31 +25,26 @@ och kör kod i underprocesser, så rutterna är inte åtkomliga från
 andra ursprung än loopback, oavsett autentisering. Se
 [`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md).
 
-## Så hänger delarna ihop
+## Hur det passar Together
 
 ```
-Kontrollpanel (/dashboard/plugins)
-  ├─ Fliken "Installerade"  → GET /api/plugins            (listPlugins)
-  │                           POST /api/plugins/scan      (pluginManager.scan)
-  │                           POST /api/plugins/{name}/activate|deactivate
-  │                           DELETE /api/plugins/{name}   (avinstallation)
-  └─ Fliken "Marknadsplats" → GET /api/plugins/marketplace
-                                → listMarketplacePlugins()
-                                  ├─ ingen anpassad URL → inbyggt SEED_REGISTRY
-                                  └─ anpassad URL → isSafeMarketplaceUrl() SSRF-skydd
-                                                   → safeOutboundFetch(guard:"public-only")
+Dashboard (/dashboard/plugins)
+  ├─ "Installed" tab  → GET /api/plugins            (listPlugins)
+  │                     POST /api/plugins/scan      (pluginManager.scan)
+  │                     POST /api/plugins/{name}/activate|deactivate
+  │                     DELETE /api/plugins/{name}   (uninstall)
+  └─ "Marketplace" tab → GET /api/plugins/marketplace
+                          → listMarketplacePlugins()
+                            ├─ no custom URL → built-in SEED_REGISTRY
+                            └─ custom URL → isSafeMarketplaceUrl() SSRF guard
+                                          → safeOutboundFetch(guard:"public-only")
 ```
 
-- **Registerlager** — `src/lib/plugins/marketplace.ts`: listar/söker i
-  katalogen och återgår till startregistret vid alla typer av fel.
-- **Livscykellager** — `src/lib/plugins/manager.ts` (`pluginManager`-singleton):
-  installation, uppgradering, aktivering, inaktivering, avinstallation, genomsökning och inläsning vid uppstart.
-- **Manifestlager** — `src/lib/plugins/manifest.ts`: Zod-schema + standardvärden för
-  `plugin.json`.
-- **Genomsökare** — `src/lib/plugins/scanner.ts`: identifierar plugin-program på disken under
-  plugin-katalogen.
-- **Inläsare** — `src/lib/plugins/loader.ts`: startar varje plugin-program i en isolerad
-  underprocess och förmedlar hook-anrop via IPC.
+- **Registerlager** — `src/lib/plugins/marketplace.ts`: listar / söker i katalogen, faller tillbaka till fröregistret vid eventuella fel.
+- **Livscykellager** — `src/lib/plugins/manager.ts` (`pluginManager` singleton): installera, uppgradera, aktivera, avaktivera, avinstallera, skanna, startladdning.
+- **Manifest lager** — `src/lib/plugins/manifest.ts`: Zod schema + är standard för `plugin.json`.
+- **Scanner** — `src/lib/plugins/scanner.ts`: upptäcker plugins på disken under plugin-katalogen.
+- **Lastare** — `src/lib/plugins/loader.ts`: skapar varje plugin i en separat Node.js child process och mäklare kopplar samtal över IPC. Barnet är inte en sandlåda (se "Isolering av pluginkörning" nedan).
 
 ## Marknadsplatskatalog
 
@@ -85,25 +80,22 @@ innehåll, loggar `listMarketplacePlugins()` en varning och återgår till start
 
 ## REST API
 
-Alla ändpunkter kräver hanteringsautentisering (`requireManagementAuth`) **och** är
-endast tillgängliga via loopback — `/api/plugins` och `/api/plugins/` anges i
-`LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`).
+Alla slutpunkter kräver hanteringsbehörighet (`requireManagementAuth`)** och** är loopback-bara — `/api/plugins` och `/api/plugins/` listas i `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`).
 
-| Ändpunkt                         | Metod  | Beskrivning                                             |
+| Slutpunkt                        | Metod  | Beskrivning                                             |
 | -------------------------------- | ------ | ------------------------------------------------------- |
-| `/api/plugins`                   | GET    | Lista installerade plugins (valfritt `?status=`-filter) |
-| `/api/plugins`                   | POST   | Installera ett plugin från en absolut lokal sökväg      |
-| `/api/plugins/scan`              | POST   | Sök igenom plugin-katalogen och registrera nya plugins  |
-| `/api/plugins/marketplace`       | GET    | Lista katalogposter från marknadsplatsen                |
-| `/api/plugins/[name]`            | GET    | Hämta information om ett installerat plugin             |
+| `/api/plugins`                   | GET    | Lista installerade plugins (valfritt `?status=` filter) |
+| `/api/plugins`                   | POST   | Installera ett plugin från plugin sources-katalogen     |
+| `/api/plugins/scan`              | POST   | Skanna plugin-katalogen och registrera nya plugins      |
+| `/api/plugins/marketplace`       | GET    | Lista marknadsplatskatalogposter                        |
+| `/api/plugins/[name]`            | GET    | Få installerade plugin-detaljer                         |
 | `/api/plugins/[name]`            | DELETE | Avinstallera ett plugin                                 |
-| `/api/plugins/[name]/activate`   | POST   | Aktivera (läs in + registrera hooks)                    |
-| `/api/plugins/[name]/deactivate` | POST   | Inaktivera (utlös `onDeactivate`, avregistrera hooks)   |
-| `/api/plugins/[name]/config`     | GET    | Hämta plugin-konfiguration + konfigurationsschema       |
-| `/api/plugins/[name]/config`     | PUT    | Uppdatera plugin-konfiguration (validerad mot schemat)  |
+| `/api/plugins/[name]/activate`   | POST   | Aktivera (ladda + registerkrokar)                       |
+| `/api/plugins/[name]/deactivate` | POST   | Inaktivera (avfyra `onDeactivate`, avregistrera krokar) |
+| `/api/plugins/[name]/config`     | GET    | Hämta plugin config + config schema                     |
+| `/api/plugins/[name]/config`     | PUT    | Uppdatera plugin-konfiguration (validerad mot schema)   |
 
-Filtret `status` för `GET /api/plugins` accepterar något av värdena
-`installed` / `active` / `inactive` / `error`. Ett ogiltigt värde returnerar `400`.
+`GET /api/plugins` `status` filtret accepterar ett av `installed` / `active` / `inactive` / `error`. Ett ogiltigt värde returnerar `400`.
 
 ### Lista installerade plugins
 
@@ -121,10 +113,9 @@ curl -X POST http://localhost:20128/api/plugins \
   -d '{ "path": "/absolute/path/to/my-plugin" }'
 ```
 
-`path` måste vara **absolut** och får inte innehålla genomgångssegmentet `..` eller
-nullbyte (framtvingas av Zod). Källkatalogen måste innehålla en giltig
-`plugin.json` (eller vara överordnad till en sådan). Vid lyckat resultat är svaret `201`
-med raden för det installerade pluginet.
+`path` måste vara en** absolut** sökvägen till en katalog** i katalogen för plugin-källor** : `plugin-sources` bredvid plugin-roten, så `~/.omniroute/plugin-sources/` som standard, eller `<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/` när den variabeln är inställd (`getPluginSourcesDir()` in `src/lib/plugins/installSource.ts`). Kopiera eller klona insticksprogrammet dit först. Installationen avvisas med `400` när sökvägen innehåller `..` eller en nollbyte, ligger utanför den katalogen, löser sig utanför den genom en symbollänk, innehåller en symbollänk vars mål är utanför den, eller när katalogen inte existerar. Källkatalogen måste innehålla en giltig `plugin.json` (eller vara en förälder till en sådan). Vid framgång är svaret `201` med den installerade pluginraden.
+
+Till skillnad från de andra insticksrutterna kräver den här hanteringsuppgifterna (en instrumentpanelsession eller en API -nyckel) även när inloggningen är inaktiverad (`requireLogin=false`): installation av kod är aldrig en anonym åtgärd.
 
 ### Bläddra på marknadsplatsen
 
@@ -133,7 +124,7 @@ curl http://localhost:20128/api/plugins/marketplace \
   -H "Cookie: auth_token=..."
 ```
 
-### Uppdatera plugin-konfigurationen
+### Uppdatera plugin-konfiguration
 
 ```bash
 curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
@@ -142,10 +133,7 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
   -d '{ "config": { "level": "debug", "maxItems": 100 } }'
 ```
 
-`PUT .../config` validerar varje angivet värde mot pluginets
-`configSchema` (deklarerat i manifestet): fält av typen `number` respekterar `min`/`max`,
-och fält av typen `select` måste matcha angivet `enum`. Nycklar som inte finns i schemat
-tillåts.
+`PUT .../config` validerar varje angett värde mot insticksprogrammets `configSchema` (deklarerat i manifestet): `number` fälten respekterar `min`/`max`, `select` -fälten måste matcha det deklarerade `enum`. Nycklar som inte finns i schemat är tillåtna.
 
 ## Konfiguration
 
@@ -203,80 +191,58 @@ Fliken "Marketplace" i kontrollpanelen visar ett fält för denna URL (som läse
 
 ## Säkerhet
 
-### Routningsnivå — endast loopback
+### Endast ruta tier — loopback
 
-Pluginer kör kod i startade underprocesser, så hela ytan `/api/plugins`
-klassificeras som `LOCAL_ONLY` (nivå 1). Kontroll av loopback sker
-ovillkorligen **före** alla autentiseringskontroller, så en läckt hanteringstoken som når
-maskinen genom en tunnel kan ändå inte installera, aktivera eller avinstallera en plugin.
-Se [`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md) och
-hårda regler nr 15/17.
+Plugins exekverar kod i skapade underordnade processer, så hela `/api/plugins` ytan klassificeras `LOCAL_ONLY` (Tier 1). Loopback verkställighet körs ovillkorligt** före** någon autentiseringskontroll, så ett läckt hanteringstoken som når boxen över en tunnel kan fortfarande inte installera, aktivera eller avinstallera ett plugin. Se [`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md) och hårda regler #15 / #17.
 
-### SSRF-skydd för marknadsplatsens register
+### Marketplace registry SSRF guard
 
-En anpassad register-URL är konfiguration som kan påverkas av en angripare, så innan
-den hämtas kör `listMarketplacePlugins()` den genom två lager:
+Ett anpassat register URL är en konfiguration som kan påverkas av angripare, så innan den hämtas kör `listMarketplacePlugins()` den genom två lager:
 
 1. **`isSafeMarketplaceUrl(url)`** (`src/lib/plugins/marketplace.ts`):
-   - Avvisar allt som inte är `http:`/`https:`.
-   - Avvisar privata, loopback-, länklokala och ULA-värdar som anges direkt (både IPv4 **och** IPv6,
-     inklusive IPv4-mappade adresser) via den kanoniska `isPrivateHost`
-     (`src/shared/network/outboundUrlGuard.ts`).
-   - Slår upp **både** `A`- och `AAAA`-poster och avvisar om **någon** uppslagen
-     adress är privat — vilket stänger kryphålet offentligt värdnamn → privat IP-adress.
-   - **Avvisar vid fel**: ett DNS-uppslagningsfel gör att URL:en avvisas.
-2. **`safeOutboundFetch(url, { guard: "public-only", timeoutMs: 5000 })`**
-   (`src/shared/network/safeOutboundFetch.ts`): tillämpar URL-skyddet för enbart offentliga adresser
-   igen vid hämtningen och **blockerar omdirigeringar** (ingen växling från offentlig till privat via `30x`).
+   - Avvisar allt som inte är `http:` / `https:`.
+   - Avvisar bokstavliga private/loopback/link-local/ULA värdar (IPv4** och** IPv6, inklusive IPv4-mapped) via den kanoniska `isPrivateHost` (`src/shared/network/outboundUrlGuard.ts`).
+   - Löser sig** både** `A` och `AAAA` registrerar och avvisar if** några** löst adress är privat — stänger public-hostname → private-IP bypass.
+   - **Misslyckas stängt** : ett DNS -upplösningsfel avvisar URL.
+2. **`safeOutboundFetch(url, { guard: "public-only", timeoutMs: 5000 })`** (`src/shared/network/safeOutboundFetch.ts`): återför den offentliga endast URL skyddet vid hämtning och** blockerar omdirigeringar** (ingen offentlig → privat `30x` pivot).
 
-En URL som inte klarar något av lagren avbryter inte begäran — marknadsplatsen
-återgår utan meddelande till det inbyggda standardregistret och loggar en varning.
+En URL som misslyckas med något av lagren avbryter inte begäran — marknaden faller tyst tillbaka till det inbyggda fröregistret och loggar en varning.
 
-> Det här skyddet förstärktes i PR nr 3774 specifikt för att slå upp A + AAAA och använda
-> den kanoniska `isPrivateHost` i stället för en kontroll som endast hanterar IPv4.
+> Denna guard härdades i PR #3774 specifikt för att lösa A + AAAA och använda den kanoniska `isPrivateHost` istället för en IPv4-only check.
 
-### Isolering av plugin-körning
+### Isolering av pluginkörning
 
-- **Processisolering** — `loadPlugin()` (`src/lib/plugins/loader.ts`) startar
-  varje plugin i en separat Node.js-underprocess och kommunicerar via IPC.
-  Hook-anrop har en tidsgräns med eskalering från `SIGTERM` till `SIGKILL`.
-- **Tillåtelselista för miljövariabler** — underprocessen får endast en tillåten uppsättning miljövariabler;
-  den bredare uppsättningen beviljas endast när manifestet begär behörigheten
-  `env`.
-- **Sökvägsinneslutning** — installation/uppgradering/avinstallation säkerställer att plugin-
-  katalogen och `manifest.main` matchar sökvägar **inom** den hanterade plugin-roten
-  före all kopiering eller rekursiv borttagning (skyddar mot manipulerade DB-sökvägar och
-  `../`-traversering i `manifest.main`). Vid aktivering löses symboliska länkar via
-  `realpath`, och en startpunkt som lämnar plugin-katalogen får inte läsas in.
-- **Valfri integritetslåsning** — ett manifest kan deklarera ett `integrity`-
-  fält (`sha256-<base64>`, SRI-format). När det finns verifierar inläsaren
-  startfilens hash vid inläsning och vägrar aktivering om den inte stämmer. Detta är
-  ett valfritt skydd mot manipulering, **inte** en säkerhetsgräns — routning endast via loopback
-  och behörighetsmodellen är de verkliga gränserna.
+> **Plugins är inte sandlådor.** Barnet är en vanlig Node.js process som körs som OmniRoute användaren, utan VM kontext och inga Node.js behörighetsflaggor, så plugin-kod kan läsa och skriva vilken fil som helst som användaren kan, köra program och nå nätverket. `requires.permissions` bestämmer bara vilka miljövariabler barnet får; de andra behörigheterna upprätthålls inte. Installera endast plugins som du litar på. Processgränsen nedan innehåller krascher och hängningar; det är inte en säkerhetsgräns.
+
+- **Processisolering** — `loadPlugin()` (`src/lib/plugins/loader.ts`) skapar varje plugin i en separat Node.js underordnad process och kommunicerar över IPC. Hook calls har en timeout med `SIGTERM` → `SIGKILL` eskalering.
+- **Env godkännandelista** — barnet får endast en tillåten uppsättning miljövariabler; den bredare uppsättningen beviljas endast när manifestet begär `env` tillstånd.
+- **Installera källinneslutning** — `POST /api/plugins` läser bara från pluginens källkatalog (se "Installera från en lokal sökväg"): sökvägen kanoniseras med `realpath`, måste stanna strikt inne i den katalogen, och ett källträd som bär en symbollänk som escapes den vägras innan någonting kopieras.
+- **Baninneslutning** — install/upgrade/uninstall hävdar att plugin-katalogen och `manifest.main` löser sig** inom** den hanterade plugin-roten före någon kopiering eller rekursiv borttagning (skyddar mot manipulerade DB vägar och `../` -passering i `manifest.main`). Aktivering löser symboliska länkar via `realpath` och vägrar att ladda en ingångspunkt som undkommer plugin-katalogen.
+- **Valfri integritetsstift** — ett manifest kan deklarera ett `integrity` (`sha256-<base64>`, SRI format) fält. När den är närvarande, verifierar laddaren ingångsfilens hash vid laddningstid och vägrar att aktiveras vid missmatch. Det är opt-in manipuleringsdetektering,** inte** en säkerhetsgräns: den begränsar inte vad en laddad plugin kan göra.
+- **Inga kunduppgifter i krokar** — kontexten som skickas till `onRequest`, `onResponse` och `onError` har `authorization`, `x-api-key`, `proxy-authorization` och `cookie` -huvudena borttagna, och API -nyckelposten har inget nyckelvärde (`redactPluginContext()` i `src/lib/plugins/hooks.ts`).
 
 ## Manifest (`plugin.json`)
 
-Valideras av `PluginManifestSchema` (`src/lib/plugins/manifest.ts`):
+Validerad av `PluginManifestSchema` (`src/lib/plugins/manifest.ts`):
 
-| Fält               | Typ       | Anmärkningar                                                          |
-| ------------------ | --------- | --------------------------------------------------------------------- |
-| `name`             | string    | Obligatoriskt; kebab-case (`^[a-z0-9-]+$`), 1–100 tecken              |
-| `version`          | string    | Obligatoriskt; semver (`MAJOR.MINOR.PATCH`)                           |
-| `description`      | string?   | ≤ 500 tecken                                                          |
-| `author`           | string?   | ≤ 200 tecken                                                          |
-| `license`          | string?   | Standardvärde är `MIT`                                                |
-| `main`             | string?   | Startfil; standardvärde är `index.js`                                 |
-| `source`           | enum?     | `local` \| `marketplace` (standardvärde är `local`)                   |
-| `tags`             | string[]? | Söktaggar                                                             |
-| `requires`         | object?   | `{ omniroute?, permissions[] }`                                       |
-| `hooks`            | object?   | Booleska värden som anger vilka hookar pluginen implementerar         |
-| `skills`           | object[]? | Valfria färdighetsdefinitioner                                        |
-| `enabledByDefault` | boolean?  | Aktivera automatiskt vid installation                                 |
-| `configSchema`     | object?   | Mappning av konfigurationsfält (`string`/`number`/`boolean`/`select`) |
-| `integrity`        | string?   | Valfri låsning av startfilen med `sha256-<base64>`                    |
+| Fält               | Typ         | Anteckningar                                                         |
+| ------------------ | ----------- | -------------------------------------------------------------------- |
+| `name`             | sträng      | Nödvändig; kebab-fodral (`^[a-z0-9-]+$`), 1–100 tecken               |
+| `version`          | sträng      | Nödvändig; semver (`MAJOR.MINOR.PATCH`)                              |
+| `description`      | sträng?     | ≤ 500 tecken                                                         |
+| `author`           | sträng?     | ≤ 200 tecken                                                         |
+| `license`          | sträng?     | Standard är `MIT`                                                    |
+| `main`             | sträng?     | Inmatningsfil; standard till `index.js`                              |
+| `source`           | uppräkning? | `local` \| `marketplace` (standard till `local`)                     |
+| `tags`             | sträng[]?   | Sök taggar                                                           |
+| `requires`         | objekt?     | `{ omniroute?, permissions[] }`                                      |
+| `hooks`            | objekt?     | Booleans deklarerar vilka krokar som plugin implementerar            |
+| `skills`           | objekt[]?   | Valfria färdighetsdefinitioner                                       |
+| `enabledByDefault` | booleskt?   | Automatisk aktivering vid installation                               |
+| `configSchema`     | objekt?     | Karta över konfigurationsfält (`string`/`number`/`boolean`/`select`) |
+| `integrity`        | sträng?     | Valfri `sha256-<base64>` ingångsfil pin                              |
 
-Behörigheter hämtas från enum-värdena
-`network` / `file-read` / `file-write` / `env` / `exec`.
+Behörigheter hämtas från enum `network` / `file-read` / `file-write` / `env` / `exec`. Endast `env` har en körtidseffekt (en något större miljövariabel godkännandelista för barnet); de andra är förklaringar och verkställs inte.
 
 ## Livscykelflöde
 
@@ -334,19 +300,16 @@ Tabellen `plugins` (migrering `076_create_plugins.sql`):
 Plugin-mätvärden och analyser spåras i ytterligare tabeller
 (`090_plugin_metrics.sql`, `091_plugin_analytics.sql`).
 
-## Kontrollpanel
+## Instrumentpanel
 
-Kontrollpanelsidan på `/dashboard/plugins`
-(`src/app/(dashboard)/dashboard/plugins/page.tsx`) innehåller två flikar:
+Instrumentpanelssidan på `/dashboard/plugins` (`src/app/(dashboard)/dashboard/plugins/page.tsx`) har två flikar:
 
-- **Installerade** — listar installerade plugins med deras deklarerade hooks, en
-  växlingsknapp för aktivering/inaktivering, en avinstallationsknapp och åtgärden "Sök efter plugins"
-  (`POST /api/plugins/scan`).
-- **Marknadsplats** — visar katalogen från `GET /api/plugins/marketplace` med ett
-  fält för att ange URL:en till ett anpassat register.
+- **Installerad** — listar installerade plugins med deras deklarerade krokar, en activate/deactivate växling, en avinstallationsknapp och en "Sök efter plugins"-åtgärd (`POST /api/plugins/scan`).
+- **Marknad** — visar katalogen från `GET /api/plugins/marketplace` med ett fält för att ställa in det anpassade registret URL.
 
-En konfigurationssida för varje plugin finns på `/dashboard/plugins/[name]/config`
-(`src/app/(dashboard)/dashboard/plugins/[name]/config/page.tsx`).
+Sidan visar alltid en varning om att plugins körs med alla rättigheter för OmniRoute processen.
+
+En konfigurationssida per plugin finns på `/dashboard/plugins/[name]/config` (`src/app/(dashboard)/dashboard/plugins/[name]/config/page.tsx`).
 
 ## Se även
 

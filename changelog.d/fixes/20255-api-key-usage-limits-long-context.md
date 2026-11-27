@@ -1,0 +1,1 @@
+- Skip per-request long-context pricing tier on aggregated window token sums in per-key USD usage limits (`apiKeyUsageLimits.ts`), preventing false threshold trips from overstating spend (~5x) and prematurely blocking keys (#20153).

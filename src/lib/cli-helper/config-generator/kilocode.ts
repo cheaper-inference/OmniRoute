@@ -1,12 +1,15 @@
 import path from "node:path";
 import os from "node:os";
 
+import { mergeJsonConfig } from "./jsonMerge.ts";
+
 const CONFIG_PATH = path.join(os.homedir(), ".config", "kilocode", "settings.json");
 
 export function generateKilocodeConfig(options: {
   baseUrl: string;
   apiKey: string;
   model?: string;
+  configPath?: string;
 }): string {
   let base = options.baseUrl;
   let end = base.length;
@@ -14,10 +17,8 @@ export function generateKilocodeConfig(options: {
   base = end < base.length ? base.slice(0, end) : base;
   if (base.endsWith("/v1")) base = base.slice(0, -3);
 
-  const config = {
-    apiKey: options.apiKey,
-    baseUrl: `${base}/v1`,
-  };
-
-  return JSON.stringify(config, null, 2);
+  return mergeJsonConfig(options.configPath, [
+    [["apiKey"], options.apiKey],
+    [["baseUrl"], `${base}/v1`],
+  ]);
 }

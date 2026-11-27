@@ -12,7 +12,8 @@
     "dryRun": "[จำลอง] จะทำ: {action}",
     "cancelled": "ยกเลิกแล้ว",
     "jsonOpt": "ส่งออกเป็น JSON",
-    "yesOpt": "ข้ามการยืนยัน"
+    "yesOpt": "ข้ามการยืนยัน",
+    "positiveIntegerRequired": "ขีดจำกัดต้องเป็นจำนวนเต็มบวก"
   },
   "setup": {
     "title": "ตั้งค่า OmniRoute",

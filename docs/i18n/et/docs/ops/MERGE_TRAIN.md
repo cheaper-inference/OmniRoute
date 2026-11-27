@@ -4,6 +4,8 @@
 
 ---
 
+> **2026-11-19: Mergify ühendamisjärjekord on lõpetatud** (omaniku otsus). `.mergify.yml` ei määratle enam järjekorda ja lükkab tagasi Mergify käsud, mis liidavad või kirjutavad ümber tõmbetaotluse. Tõmbetaotlused väljalaskeharule liidetakse käsitsi hoidla reeglistiku "Require green gates on the active release" (`Gate / CI` + `Gate / Quality`) alusel, kuni omni-queue töötab live-režiimis ja seejärel omni-queue kaudu ([OMNI_QUEUE.md](./OMNI_QUEUE.md)). Allolevad Mergify jaotised kirjeldavad järjekorda sellisena, nagu see oli.
+
 Alates versioonist v3.8.49 (kvaliteedi-/kiirusplaani WS3.2/WS3.4) on üle vaadatud PR-ide harusse `release/vX.Y.Z` liitmise vaikimisi tee **Mergify liitmisjärjekord** (`.mergify.yml`);
 allpool dokumenteeritud **käsitsi hallatav liitmisrong** on VARULAHENDUS — seda kasutatakse intsidentide ja väljalaske külmutamise ajal või juhul, kui Mergify avatud lähtekoodiga projektide pakett peaks kunagi muutuma.
 

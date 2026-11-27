@@ -12,7 +12,8 @@
     "dryRun": "[シミュレーション] 実行予定: {action}",
     "cancelled": "キャンセルしました。",
     "jsonOpt": "JSON形式で出力",
-    "yesOpt": "確認をスキップ"
+    "yesOpt": "確認をスキップ",
+    "positiveIntegerRequired": "制限は正の整数である必要があります。"
   },
   "setup": {
     "title": "OmniRoute セットアップ",

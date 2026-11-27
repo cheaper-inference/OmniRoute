@@ -9,6 +9,11 @@
  */
 
 import { sanitizeErrorMessage } from "../../utils/error.ts";
+import {
+  postDecisionJson,
+  type DecisionPostFailure,
+  type DecisionTransport,
+} from "../decision/transport.ts";
 
 export const TYPESAFE_PROVIDER_ID = "typesafe";
 export const TYPESAFE_SYSTEM_ONE_BASE_URL = "https://api.typesafe.ai";
@@ -62,6 +67,7 @@ export type EvaluateSystemOneChoiceOptions = {
   instructions?: string;
   model?: string;
   timeoutMs?: number;
+  /** Test seam. Production leaves through the guarded decision transport (safeOutboundFetch). */
   fetchImpl?: FetchLike;
   baseUrl?: string;
   /** Aborted when the caller cancels; combined with the timeout. */
@@ -214,63 +220,57 @@ export async function evaluateSystemOneChoice(
       ? options.timeoutMs
       : TYPESAFE_SYSTEM_ONE_TIMEOUT_MS;
   const baseUrl = (options.baseUrl || TYPESAFE_SYSTEM_ONE_BASE_URL).replace(/\/+$/, "");
-  const fetchImpl = options.fetchImpl ?? fetch;
 
   if (options.signal?.aborted) {
     return unavailable("timeout", "System One call aborted before it started");
   }
 
-  const controller = new AbortController();
-  const onAbort = () => controller.abort();
-  options.signal?.addEventListener("abort", onAbort, { once: true });
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  // Hardened (#14239 pattern): redirects refused, body capped at 64 KB, no retries, the
+  // provider outbound guard on the production path; a test `fetchImpl` gets the same init.
+  const fetchImpl = options.fetchImpl;
+  const transport: DecisionTransport | undefined = fetchImpl
+    ? (url, init) =>
+        fetchImpl(url, {
+          method: init.method,
+          headers: init.headers,
+          body: init.body,
+          signal: init.signal,
+          redirect: init.redirect,
+        })
+    : undefined;
 
-  try {
-    const response = await fetchImpl(`${baseUrl}${TYPESAFE_SYSTEM_ONE_PATH}`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model,
-        state,
-        questions: {
-          route: {
-            type: "choice",
-            instructions,
-            criteria,
-          },
+  const result = await postDecisionJson({
+    url: `${baseUrl}${TYPESAFE_SYSTEM_ONE_PATH}`,
+    headers: { Authorization: `Bearer ${apiKey}` },
+    body: {
+      model,
+      state,
+      questions: {
+        route: {
+          type: "choice",
+          instructions,
+          criteria,
         },
-      }),
-      signal: controller.signal,
-    });
+      },
+    },
+    timeoutMs,
+    signal: options.signal,
+    transport,
+  });
 
-    if (!response.ok) {
-      // Status only. Upstream bodies can echo the state or the key.
-      return unavailable(
-        "http_error",
-        `System One returned HTTP ${response.status}`,
-        response.status
-      );
-    }
-
-    let json: unknown;
-    try {
-      json = await response.json();
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "invalid JSON";
-      return unavailable("invalid_response", `System One response was not JSON: ${message}`);
-    }
-
-    return parseSystemOneChoiceResponse(json);
-  } catch (err) {
-    if (err instanceof Error && err.name === "AbortError") {
-      return unavailable("timeout", `System One timed out after ${timeoutMs}ms`);
-    }
-    return unavailable("network_error", "System One request failed");
-  } finally {
-    clearTimeout(timer);
-    options.signal?.removeEventListener("abort", onAbort);
+  if (result.ok) return parseSystemOneChoiceResponse(result.data);
+  // `strict: false` does not narrow the `ok` union, so name the failure variant.
+  const failure = result as DecisionPostFailure;
+  // Status only. Upstream bodies can echo the state or the key.
+  if (failure.reason === "http_error") {
+    const status = failure.status ?? null;
+    return unavailable("http_error", `System One returned HTTP ${status}`, status);
   }
+  if (failure.reason === "timeout") {
+    return unavailable("timeout", `System One timed out after ${timeoutMs}ms`);
+  }
+  if (failure.reason === "invalid_response") {
+    return unavailable("invalid_response", "System One response was not bounded JSON");
+  }
+  return unavailable("network_error", "System One request failed");
 }

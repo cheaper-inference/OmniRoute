@@ -103,7 +103,7 @@ function QuotaRow({ quota }: { quota: any }) {
         </span>
       </div>
       {!quota.unlimited && <QuotaMiniBar percent={percentage} label={label} />}
-      {reset && <span className="text-[10px] text-text-muted">⏱ {reset}</span>}
+      {reset && <span className="text-3xs text-text-muted">⏱ {reset}</span>}
     </div>
   );
 }
@@ -121,7 +121,7 @@ function ConnectionQuotas({ connection, cache }: { connection: Connection; cache
 
   return (
     <div className="min-w-0">
-      {accountLabel && <p className="mb-1 text-[11px] text-text-muted truncate">{accountLabel}</p>}
+      {accountLabel && <p className="mb-1 text-xs text-text-muted truncate">{accountLabel}</p>}
       {quotas.length === 0 ? (
         <p className="py-1.5 text-xs italic text-text-muted">
           {cache?.message || t("noQuotaData")}
@@ -154,7 +154,7 @@ function ConnectionQuotas({ connection, cache }: { connection: Connection; cache
           icon={showOptional ? "expand_less" : "expand_more"}
           aria-expanded={showOptional}
           onClick={() => setShowOptional((current) => !current)}
-          className="mt-2 h-7 min-h-7 px-2 text-[11px]"
+          className="mt-2 h-7 min-h-7 px-2 text-2xs"
         >
           {showOptional
             ? t("showLessQuotas")
@@ -294,7 +294,7 @@ export default function ProviderQuotaWidget({
           <div>
             <h2 className="text-base text-text-main">{tr("providerQuota", "Provider Quota")}</h2>
             {updatedLabel && (
-              <p className="text-[11px] text-text-muted">
+              <p className="text-xs text-text-muted">
                 {tr("updatedShort", "Updated")} {updatedLabel}
               </p>
             )}
@@ -357,7 +357,7 @@ export default function ProviderQuotaWidget({
                   <h3 className="truncate text-sm text-text-main">
                     {PROVIDER_LABEL[provider] || provider}
                   </h3>
-                  <p className="text-[11px] text-text-muted">
+                  <p className="text-xs text-text-muted">
                     {providerConnections.length}{" "}
                     {providerConnections.length === 1 ? "account" : "accounts"}
                   </p>

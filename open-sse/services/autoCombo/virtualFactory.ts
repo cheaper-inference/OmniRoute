@@ -1,4 +1,7 @@
-import { getAutoRoutableEmulatedNoAuthProviders } from "./emulatedNoAuthAllowlist";
+import {
+  BROWSER_BACKED_NOAUTH_PROVIDER_IDS,
+  getAutoRoutableEmulatedNoAuthProviders,
+} from "./emulatedNoAuthAllowlist";
 import { AutoComboConfig } from "./engine";
 import { MODE_PACKS } from "./modePacks";
 import { DEFAULT_WEIGHTS, reliabilityFactor, ScoringWeights } from "./scoring";
@@ -6,7 +9,7 @@ import { getCachedProviderConnections } from "@/lib/db/readCache";
 import { getSettings } from "@/lib/db/settings";
 import { getProviderRegistry } from "./providerRegistryAccessor";
 import type { ConnectionFields } from "@/lib/db/encryption";
-import { NOAUTH_PROVIDERS } from "@/shared/constants/providers";
+import { NOAUTH_PROVIDERS, resolveProviderId } from "@/shared/constants/providers";
 import { isMicrosoftDesignerWebRetiredProviderId } from "@/shared/constants/designerWebRetirement";
 import { isRuntimeRetiredProviderId } from "@/shared/constants/providerRetirement";
 import { isCommonChatGptWebRetiredProviderId } from "@/shared/constants/chatgptWebRetirement";
@@ -355,7 +358,7 @@ function hasUsableConnectionCredential(conn: VirtualFactoryConn): boolean {
 const SYNTHETIC_NOAUTH_CONNECTION_ID = RESILIENCE_NOAUTH_CONNECTION_ID;
 
 // No-auth providers must opt into prompt-emulated tool calling before entering
-// reliability-curated auto/* pools. Local CLI providers additionally need a
+// reliability-curated auto/* pools. Runtime-dependent providers additionally need a
 // successful readiness probe before they are admitted; direct provider/model
 // routing remains unaffected. Family pools bypass only the allowlist: the
 // readiness probe applies to every pool, because a provider that cannot run on
@@ -365,9 +368,10 @@ function isChatAutoComboNoAuthProvider(
   bypassAllowlist: boolean
 ): boolean {
   if (providerDef.noAuth !== true) return false;
-  if (!bypassAllowlist && !getAutoRoutableEmulatedNoAuthProviders().has(providerDef.id))
-    return false;
-  if (!isNoAuthProviderReadyForAutoRouting(providerDef.id)) return false;
+  const providerId = providerDef.id;
+  if (!providerId) return false;
+  if (!bypassAllowlist && !getAutoRoutableEmulatedNoAuthProviders().has(providerId)) return false;
+  if (!isNoAuthProviderReadyForAutoRouting(providerId)) return false;
   if (!Array.isArray(providerDef.serviceKinds) || providerDef.serviceKinds.length === 0)
     return true;
   return providerDef.serviceKinds.includes("llm");
@@ -603,7 +607,14 @@ export async function prepareVirtualAutoComboInputs(
     }
   }
 
-  const validConnections = runtimeConnections.filter(hasUsableConnectionCredential);
+  const validConnections = runtimeConnections.filter((conn) => {
+    if (!hasUsableConnectionCredential(conn)) return false;
+    const providerId = resolveProviderId(conn.provider);
+    return (
+      !BROWSER_BACKED_NOAUTH_PROVIDER_IDS.has(providerId) ||
+      isNoAuthProviderReadyForAutoRouting(providerId)
+    );
+  });
 
   const candidatePool: VirtualAutoComboCandidate[] = [];
   const registry = getProviderRegistry();
@@ -919,7 +930,8 @@ export function computeSnapshotWeights(
 
     // reliability (#12792): the same failure-rate factor as scoring.ts; absent reads as
     // fully reliable. The snapshot path was the only one still ignoring it.
-    if (weights.reliability > 0) score += weights.reliability * reliabilityFactor(c);
+    const reliability = weights.reliability ?? 0;
+    if (reliability > 0) score += reliability * reliabilityFactor(c);
 
     // health: build-time breaker state (OPEN 0, CLOSED 1, else neutral 0.5); quota stays neutral
     score += weights.health * snapshotHealthFactor(breakerByProvider, c.provider);

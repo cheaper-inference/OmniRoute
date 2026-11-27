@@ -25,10 +25,6 @@ const EXCEPTIONS: Record<string, string> = {
     "kit MultiSelectFilter does not cover it: an empty selection means all keys and a press on a " +
     "key selects only that key (the kit starts from all checked and has a none state), the " +
     "trigger shows a key icon and an active-filter variant, and the all row shows the key count",
-  "src/app/(dashboard)/dashboard/usage/components/ProviderLimits/HealthAccountTooltip.tsx":
-    "already portaled to the body and clamped to the viewport, with Escape and focus/hover " +
-    "opening; one shared card for up to 200 capsules. The kit HoverCard needs one root per " +
-    "trigger, which made the 200-capsule render about 2.5 times slower in the test suite",
   "src/shared/components/RequestTimeline.tsx":
     "sticky time-axis header inside the scroll area, and a tooltip that follows the pointer over " +
     "the Gantt canvas (no trigger element to anchor a kit Tooltip to)",

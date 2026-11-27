@@ -47,7 +47,7 @@ docker run -d --name omniroute \
   -p 20128:20128 \
   -v omniroute-data:/app/data \
   -e ENABLE_CC_COMPATIBLE_PROVIDER=true \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
 پس از راهاندازی مجدد، داشبورد علاوه بر فرایندهای موجودِ سازگار با OpenAI و سازگار با Anthropic، گزینه **افزودن ارائهدهنده سازگار با Claude Code** را نیز نمایش میدهد.

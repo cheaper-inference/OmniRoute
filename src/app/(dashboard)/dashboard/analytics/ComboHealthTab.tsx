@@ -106,14 +106,14 @@ function MetricBlock({
   subValue?: string;
 }) {
   return (
-    <div className="rounded-lg border border-border bg-surface-2 p-4">
-      <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-text-muted">
+    <Card.Section>
+      <div className="ci-eyebrow flex items-center gap-2" data-weight="medium">
         <Icon name={icon} size={16} />
         <span className="min-w-0 break-words">{label}</span>
       </div>
       <div className="mt-2 text-2xl font-semibold text-text-main">{value}</div>
       {subValue ? <div className="mt-1 break-words text-xs text-text-muted">{subValue}</div> : null}
-    </div>
+    </Card.Section>
   );
 }
 
@@ -122,13 +122,13 @@ function DistributionBar({ label, value, meta }: { label: string; value: number;
   const shown = Math.max(value * 100, value > 0 ? 6 : 0);
 
   return (
-    <div className="flex flex-col gap-2 rounded-lg border border-border bg-surface-2 p-3">
+    <Card.Section className="flex flex-col gap-2">
       <div className="flex items-center justify-between gap-3 text-sm">
         <span className="truncate font-medium text-text-main">{label}</span>
         <span className="shrink-0 text-xs text-text-muted">{meta}</span>
       </div>
       <Progress aria-label={label} aria-valuetext={meta} value={shown} animate={false} />
-    </div>
+    </Card.Section>
   );
 }
 
@@ -203,10 +203,7 @@ function ComboForecastPanel({ forecast }: { forecast: ComboForecastMetrics }) {
       {topTargets.length > 0 ? (
         <div className="mt-4 grid gap-3 lg:grid-cols-3">
           {topTargets.map((target) => (
-            <div
-              key={target.executionKey}
-              className="rounded-lg border border-border bg-surface-2 p-4"
-            >
+            <Card.Section key={target.executionKey}>
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <div className="truncate text-sm font-medium text-text-main">
@@ -243,15 +240,15 @@ function ComboForecastPanel({ forecast }: { forecast: ComboForecastMetrics }) {
                   </span>
                 </div>
               </div>
-            </div>
+            </Card.Section>
           ))}
         </div>
       ) : null}
 
       {forecast.dataQuality.notes.length > 0 ? (
-        <div className="mt-4 rounded-lg border border-border bg-surface-2 p-3 text-xs text-text-muted">
+        <Card.Section className="mt-4 text-xs text-text-muted">
           {forecast.dataQuality.notes.slice(0, 2).join(" · ")}
-        </div>
+        </Card.Section>
       ) : null}
     </div>
   );
@@ -274,7 +271,9 @@ function ComboAutopilotPanel({ report }: { report: ComboAutopilotReport }) {
       <div className="@container flex flex-wrap items-start justify-between gap-4 border-b border-border px-6 py-5">
         <div className="min-w-0 grow-999 basis-72">
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="text-base text-text-main">{t("comboHealthAutopilotTitle")}</h3>
+            <h3 className="ci-heading" data-size="md">
+              {t("comboHealthAutopilotTitle")}
+            </h3>
             <Badge
               variant={
                 report.status === "critical"
@@ -321,7 +320,7 @@ function ComboAutopilotPanel({ report }: { report: ComboAutopilotReport }) {
         {topIssues.length > 0 ? (
           <div className="grid gap-3 lg:grid-cols-2">
             {topIssues.map(({ combo, issue }) => (
-              <div key={issue.id} className="rounded-lg border border-border bg-surface-2 p-4">
+              <Card.Section key={issue.id}>
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <div className="truncate text-sm font-semibold text-text-main">
@@ -352,7 +351,7 @@ function ComboAutopilotPanel({ report }: { report: ComboAutopilotReport }) {
                     )}
                   </div>
                 ) : null}
-              </div>
+              </Card.Section>
             ))}
           </div>
         ) : (
@@ -407,10 +406,7 @@ function ComboScoringInspectorPanel({ inspector }: { inspector: ComboScoringInsp
           {topTargets.map((target) => {
             const topFactors = target.factors.slice(0, 4);
             return (
-              <div
-                key={target.executionKey}
-                className="rounded-lg border border-border bg-surface-2 p-4"
-              >
+              <Card.Section key={target.executionKey}>
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <div className="truncate text-sm font-semibold text-text-main">
@@ -435,24 +431,18 @@ function ComboScoringInspectorPanel({ inspector }: { inspector: ComboScoringInsp
                           +{factor.contribution.toFixed(3)}
                         </span>
                       </div>
-                      <div
-                        role="progressbar"
+                      <Progress
+                        value={factor.value * 100}
+                        size="sm"
+                        animate={false}
                         aria-label={t(`comboHealthFactor.${factor.key}`)}
-                        aria-valuemin={0}
-                        aria-valuemax={100}
-                        aria-valuenow={Math.round(Math.max(0, Math.min(100, factor.value * 100)))}
-                        className="mt-1 h-1.5 overflow-hidden rounded-full bg-border/60"
-                      >
-                        <div
-                          className="h-full rounded-full bg-primary"
-                          style={{ width: `${Math.max(0, Math.min(100, factor.value * 100))}%` }}
-                        />
-                      </div>
+                        className="mt-1"
+                      />
                     </div>
                   ))}
                 </div>
 
-                <div className="mt-3 flex flex-wrap gap-2 text-[11px] text-text-muted">
+                <div className="mt-3 flex flex-wrap gap-2 text-2xs text-text-muted">
                   <span>
                     {t("comboHealthQuotaValue", {
                       value: formatPercentOrDash(target.signals.quotaRemainingPct),
@@ -469,14 +459,14 @@ function ComboScoringInspectorPanel({ inspector }: { inspector: ComboScoringInsp
                     })}
                   </span>
                 </div>
-              </div>
+              </Card.Section>
             );
           })}
         </div>
       ) : (
-        <div className="mt-4 rounded-lg border border-border bg-surface-2 p-4 text-sm text-text-muted">
+        <Card.Section className="mt-4 text-sm text-text-muted">
           {t("comboHealthNoInspectableTargets")}
-        </div>
+        </Card.Section>
       )}
     </div>
   );
@@ -511,7 +501,9 @@ function ComboHealthCard({
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <h3 className="text-lg text-text-main">{combo.comboName}</h3>
+              <h3 className="ci-heading" data-size="lg">
+                {combo.comboName}
+              </h3>
               <Badge variant="primary" size="sm">
                 {combo.strategy}
               </Badge>
@@ -575,10 +567,7 @@ function ComboHealthCard({
               });
 
               return (
-                <div
-                  key={provider.provider}
-                  className="rounded-lg border border-border bg-surface-2 p-4"
-                >
+                <Card.Section key={provider.provider}>
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <div>
                       <div className="text-sm font-medium text-text-main">{providerName}</div>
@@ -602,7 +591,7 @@ function ComboHealthCard({
                     value={shown}
                     animate={false}
                   />
-                </div>
+                </Card.Section>
               );
             })}
           </div>
@@ -618,7 +607,7 @@ function ComboHealthCard({
 
           <div className="flex flex-col gap-3">
             {sortedDistribution.map((entry) => (
-              <div key={entry.model} className="rounded-lg border border-border bg-surface-2 p-4">
+              <Card.Section key={entry.model}>
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <div className="truncate text-sm font-medium text-text-main">{entry.model}</div>
@@ -644,7 +633,7 @@ function ComboHealthCard({
                     meta={formatShare(entry.tokenShare)}
                   />
                 </div>
-              </div>
+              </Card.Section>
             ))}
           </div>
         </section>
@@ -692,10 +681,7 @@ function ComboHealthCard({
 
           <div className="mt-4 grid gap-3 lg:grid-cols-2">
             {targetHealth.map((target) => (
-              <div
-                key={target.executionKey}
-                className="rounded-lg border border-border bg-surface-2 p-4"
-              >
+              <Card.Section key={target.executionKey}>
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div className="min-w-0">
                     <div className="truncate text-sm font-medium text-text-main">
@@ -705,7 +691,7 @@ function ComboHealthCard({
                       {target.provider}
                       {target.connectionId ? ` · ${target.connectionId.slice(0, 8)}` : ""}
                     </div>
-                    <div className="mt-1 text-[11px] text-text-muted">{target.stepId}</div>
+                    <div className="mt-1 text-2xs text-text-muted">{target.stepId}</div>
                   </div>
                   <div className="flex items-center gap-2">
                     {target.lastStatus ? (
@@ -737,14 +723,14 @@ function ComboHealthCard({
                   />
                 </div>
 
-                <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px] text-text-muted">
+                <div className="mt-3 flex flex-wrap items-center gap-2 text-2xs text-text-muted">
                   <span>{t("comboHealthQuotaScope", { scope: target.quotaScope })}</span>
                   {target.quotaTrend ? (
                     <span>{t("comboHealthTrendValue", { trend: target.quotaTrend })}</span>
                   ) : null}
                   {target.quotaIsExhausted ? <span>{t("statusExhausted")}</span> : null}
                 </div>
-              </div>
+              </Card.Section>
             ))}
           </div>
         </div>
@@ -885,7 +871,9 @@ export default function ComboHealthTab() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-4 rounded-xl border border-border bg-surface p-5 shadow-sm md:flex-row md:items-center md:justify-between">
         <div>
-          <h2 className="text-lg text-text-main">{t("comboHealthTitle")}</h2>
+          <h2 className="ci-heading" data-size="lg">
+            {t("comboHealthTitle")}
+          </h2>
           <p className="mt-1 text-sm text-text-muted">{t("comboHealthIntro")}</p>
         </div>
         <div className="flex flex-col gap-3 sm:items-end">
@@ -957,7 +945,7 @@ export default function ComboHealthTab() {
             <div className="max-w-md text-sm text-text-muted">
               {t("comboHealthNoDataDescription")}
             </div>
-            <div className="rounded-lg border border-border bg-surface-2 p-4">
+            <Card.Section>
               <p className="text-xs font-medium text-text-main">{t("comboHealthGettingStarted")}</p>
               <ul className="mt-2 text-left text-xs text-text-muted">
                 <li className="flex items-start gap-2">
@@ -977,7 +965,7 @@ export default function ComboHealthTab() {
                   <span>{t("comboHealthStepAutomatic")}</span>
                 </li>
               </ul>
-            </div>
+            </Card.Section>
           </div>
         </Card>
       ) : null}

@@ -11,6 +11,7 @@ import type { ConfigStateSetter } from "../../../src/app/(dashboard)/dashboard/p
 // StudioConfigPane's model picker.
 
 vi.mock("next-intl", () => ({
+  useLocale: () => "en",
   useTranslations: () => (key: string) => key,
 }));
 

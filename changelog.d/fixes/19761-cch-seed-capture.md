@@ -1,0 +1,1 @@
+- **fix(sse):** Claude Code CCH signing now uses the seed and the body view of the real client (verified on Claude Code 2.1.252 and 2.1.322), so the `cch=` token in the billing header equals the token the real client sends for the same body. ([#19761](https://github.com/cheaper-inference/OmniRoute/pull/19761))
