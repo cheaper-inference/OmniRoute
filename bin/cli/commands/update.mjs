@@ -7,6 +7,14 @@ import { promisify } from "node:util";
 import { t } from "../i18n.mjs";
 import { npmBin, npmExecInvocation } from "../npm-exec.mjs";
 import { readPidFile, isPidRunning } from "../utils/pid.mjs";
+import { resolveDataDir } from "../data-dir.mjs";
+import {
+  createDefaultPreflightContext,
+  isExactVersion,
+  launchManagedUpdateCoordinator,
+  preflightManagedUpdate,
+  waitForManagedUpdateOutcome,
+} from "../updateTransaction.mjs";
 
 const execFileAsync = promisify(execFile);
 
@@ -123,6 +131,135 @@ export async function printPostApplyGuidance(latest, deps = { readPidFile, isPid
   );
 }
 
+// Human wording for the pre-flight reasons that leave an environment on today's flow.
+const MANAGED_UNSUPPORTED_REASONS = {
+  "unsupported-platform": "automatic rollback is only available on Linux",
+  container: "this is a container, update it from the host",
+  electron: "the desktop app updates itself",
+  "not-global-install": "OmniRoute is not a global npm install",
+  "version-mismatch": "the installed package does not match the running version",
+  "no-managed-service": "no CLI-managed service (`omniroute serve --daemon`) is running",
+  "supervisor-managed": "the service runs under the foreground supervisor",
+  "other-supervisor": "the service is managed by another supervisor (systemd, pm2)",
+  "environment-unreadable": "the service environment cannot be read",
+  "data-dir-mismatch": "the service uses a different data directory than this command",
+  "tls-not-supported": "the service terminates TLS itself",
+  "host-not-loopback-reachable": "the service is not reachable on the loopback address",
+  "port-unknown": "the service port could not be determined",
+};
+
+const MANAGED_REFUSED_REASONS = {
+  "update-in-progress": "another managed update is already running",
+  "insufficient-disk-space":
+    "there is not enough free disk space for the data snapshot and the package copy",
+};
+
+function describeManagedReason(table, reason) {
+  return table[reason] ?? reason;
+}
+
+/**
+ * `--rollback-on-failure`: hand the update to the detached coordinator and follow it.
+ * `handled: false` means the environment is outside the supported cut and the caller
+ * continues with the usual update flow. Dependencies are injectable for tests.
+ */
+export async function runManagedUpdateFromCli({ current, latest, deps = {} }) {
+  if (!isExactVersion(latest) || !isExactVersion(current)) {
+    printError("Cannot run a managed update: the version is not an exact release number.");
+    return { handled: true, exitCode: 1 };
+  }
+  const { randomUUID } = await import("node:crypto");
+  const plan = {
+    operationId: randomUUID(),
+    previousVersion: current,
+    targetVersion: latest,
+    readinessTimeoutMs: 180_000,
+  };
+  const dataDir = resolveDataDir();
+  const preflight =
+    deps.preflight ??
+    (() =>
+      preflightManagedUpdate(
+        createDefaultPreflightContext({ dataDir, packageRoot: PKG_ROOT }),
+        plan
+      ));
+  const launch = deps.launch ?? ((input) => launchManagedUpdateCoordinator(input));
+  const wait =
+    deps.wait ??
+    ((operationId, options) => waitForManagedUpdateOutcome(dataDir, operationId, options));
+
+  const pre = await preflight(plan);
+  if (pre.kind === "unsupported") {
+    printWarning(
+      `--rollback-on-failure is not available here (${describeManagedReason(MANAGED_UNSUPPORTED_REASONS, pre.reason)}). Continuing with the standard update, without automatic rollback.`
+    );
+    return { handled: false };
+  }
+  if (pre.kind === "refused") {
+    printError(
+      `Update not started: ${describeManagedReason(MANAGED_REFUSED_REASONS, pre.reason)}. Nothing was changed.`
+    );
+    return { handled: true, exitCode: 1 };
+  }
+
+  printInfo(
+    `Updating to ${latest} with automatic recovery. The service stops during the swap and a snapshot of your data is taken first.`
+  );
+  try {
+    await launch({ plan, runtime: pre.runtime, environment: pre.environment });
+  } catch {
+    printError("Could not start the update coordinator. Nothing was changed.");
+    return { handled: true, exitCode: 1 };
+  }
+
+  let shownPhase = null;
+  const state = await wait(plan.operationId, {
+    onPhase: (next) => {
+      if (next.phase !== shownPhase) {
+        shownPhase = next.phase;
+        printInfo(`  phase: ${next.phase}`);
+      }
+    },
+  });
+  return reportManagedOutcome(state, {
+    previous: current,
+    target: latest,
+    stateFile: `${dataDir}/managed-update/${plan.operationId}/state.json`,
+  });
+}
+
+function reportManagedOutcome(state, { previous, target, stateFile }) {
+  switch (state?.status) {
+    case "updated":
+      printSuccess(
+        `Updated to ${state.runningVersion ?? target}. The service restarted on the new version and answered its readiness check.`
+      );
+      return { handled: true, exitCode: 0 };
+    case "rolled-back":
+      printError(
+        `The update to ${target} failed${state.reason ? ` (${state.reason})` : ""}. Rolled back: version ${state.runningVersion ?? previous} and its data are restored and running again.`
+      );
+      return { handled: true, exitCode: 1 };
+    case "manual-recovery":
+      printError(
+        `The update to ${target} failed and automatic recovery did not complete${state.reason ? ` (${state.reason})` : ""}: manual recovery is required.`
+      );
+      for (const step of state.recovery?.steps ?? []) printInfo(`  - ${step}`);
+      if (state.snapshotPath) printInfo(`  Data snapshot preserved at: ${state.snapshotPath}`);
+      return { handled: true, exitCode: 1 };
+    case "unsupported":
+      printError(
+        `Update not applied: ${describeManagedReason({ ...MANAGED_UNSUPPORTED_REASONS, ...MANAGED_REFUSED_REASONS }, state.reason)}. Nothing was changed.`
+      );
+      return { handled: true, exitCode: 1 };
+    default:
+      printWarning(
+        `Still waiting for the update to finish. It keeps running in the background; read its state in ${stateFile} before starting another update.`
+      );
+      return { handled: true, exitCode: 1 };
+  }
+}
+
 export function registerUpdate(program) {
   program
     .command("update")
@@ -133,6 +270,10 @@ export function registerUpdate(program) {
     .option("--dry-run", "Show what would be updated without applying")
     .option("--no-backup", "Skip backup creation")
     .option("--yes", "Skip confirmation prompt")
+    .option(
+      "--rollback-on-failure",
+      "Restore the previous version and data if the new one fails to start (global npm install on Linux, daemon service)"
+    )
     .action(async (opts, cmd) => {
       const globalOpts = cmd.optsWithGlobals();
       const exitCode = await runUpdateCommand({ ...opts, output: globalOpts.output });
@@ -147,6 +288,7 @@ export async function runUpdateCommand(opts = {}) {
   const dryRun = opts.dryRun ?? false;
   const skipBackup = !(opts.backup ?? true);
   const skipConfirm = opts.yes ?? applyNow;
+  const rollbackOnFailure = opts.rollbackOnFailure ?? false;
 
   const current = await getCurrentVersion();
   const latest = await getLatestVersion();
@@ -201,6 +343,11 @@ export async function runUpdateCommand(opts = {}) {
       "\n  [DRY RUN] Would run: npm install -g omniroute@latest --include=optional --legacy-peer-deps"
     );
     if (!skipBackup) console.log("  [DRY RUN] Would create backup in ~/.omniroute/backups/");
+    if (rollbackOnFailure) {
+      console.log(
+        "  [DRY RUN] --rollback-on-failure: would snapshot the data and the package and restore them if the new version fails to start."
+      );
+    }
     return 0;
   }
 
@@ -226,6 +373,11 @@ export async function runUpdateCommand(opts = {}) {
       printInfo("Update aborted.");
       return 0;
     }
+  }
+
+  if (rollbackOnFailure) {
+    const managed = await runManagedUpdateFromCli({ current, latest });
+    if (managed.handled) return managed.exitCode;
   }
 
   printInfo("Updating OmniRoute...");
