@@ -1,1 +1,0 @@
-- **refactor(db):** Move the job registry storage (`jobs` definitions and `job_runs` history) behind a Promise-based repository while preserving the synchronous scheduler calls, the upsert that never overwrites `enabled` or `created_at`, the `finishedAt` derivation, the count-and-age run pruning, the startup orphan repair and every SQL statement (#0000 — thanks @xiaoyaner0201).
