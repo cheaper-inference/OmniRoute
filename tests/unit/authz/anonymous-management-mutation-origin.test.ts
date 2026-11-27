@@ -170,3 +170,43 @@ test("open mode leaves anonymous management reads alone", async () => {
 
   assert.equal(response.status, 200);
 });
+
+test("open mode still refuses localhost:6274 on a management route outside MCP", async () => {
+  // localhost on any port is an MCP-only allowance; the dashboard rule still applies here.
+  const response = await fromLoopback("http://127.0.0.1:20128/api/combos", "POST", {
+    host: "127.0.0.1:20128",
+    origin: "http://localhost:6274",
+    "sec-fetch-site": "cross-site",
+  });
+
+  assert.equal(response.status, 403);
+  assert.equal((await response.json()).error.code, "INVALID_ORIGIN");
+});
+
+test("open mode lets the MCP Origin guard decide anonymous MCP mutations", async () => {
+  // A local MCP tool (e.g. the Inspector) on another localhost port is admitted by the MCP
+  // guard, so the dashboard rule must not refuse it on top.
+  const admitted = await fromLoopback("http://127.0.0.1:20128/api/mcp/stream", "POST", {
+    host: "127.0.0.1:20128",
+    origin: "http://localhost:6274",
+    "sec-fetch-site": "cross-site",
+  });
+  assert.equal(admitted.status, 200);
+
+  // The MCP guard still refuses a DNS-rebinding page and a non-localhost origin.
+  const rebound = await fromLoopback("http://127.0.0.1:20128/api/mcp/stream", "POST", {
+    host: "rebind.attacker.example:20128",
+    origin: "http://rebind.attacker.example:20128",
+    "sec-fetch-site": "same-origin",
+  });
+  assert.equal(rebound.status, 403);
+  assert.equal((await rebound.json()).error.data.code, "INVALID_ORIGIN");
+
+  const crossSite = await fromLoopback("http://127.0.0.1:20128/api/mcp/stream", "POST", {
+    host: "127.0.0.1:20128",
+    origin: "https://evil.example",
+    "sec-fetch-site": "cross-site",
+  });
+  assert.equal(crossSite.status, 403);
+  assert.equal((await crossSite.json()).error.data.code, "INVALID_ORIGIN");
+});

@@ -491,9 +491,17 @@ export async function runAuthzPipeline(
   // Origin both carry the attacker's domain. Callers that send no Origin (CLI, curl) are
   // unaffected. Only a session can prove same-origin with a CSRF token, so the fallback
   // stays session-only.
+  //
+  // /api/mcp/* is the exception for anonymous callers: the MCP Origin guard above already
+  // judged their Origin (it refuses DNS rebinding and non-localhost origins, and admits
+  // localhost on any port for local tools such as the MCP Inspector, per the MCP
+  // transport spec). Applying the dashboard rule on top would break that contract.
+  const anonymousMcpRequest =
+    outcome.subject.kind === "anonymous" && isMcpOriginGuardedPath(guardedPathname);
   if (
     classification.routeClass === "MANAGEMENT" &&
-    (outcome.subject.kind === "dashboard_session" || outcome.subject.kind === "anonymous") &&
+    (outcome.subject.kind === "dashboard_session" ||
+      (outcome.subject.kind === "anonymous" && !anonymousMcpRequest)) &&
     isUnsafeMutationMethod(method)
   ) {
     const originVerdict = validateBrowserMutationOrigin(request);
