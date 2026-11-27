@@ -1,0 +1,1 @@
+- **fix(sse):** The free catalog now counts the published recurring allowances of MegaNova, free.ai and Kenari, and Aion's card-gated daily allowance, with sources reopened on 2026-11-27 ([#21426](https://github.com/cheaper-inference/OmniRoute/pull/21426))
