@@ -357,21 +357,28 @@ export function initAuditLog() {
  * @param {string} [entry.target] - What was affected
  * @param {Object|string} [entry.details] - Additional details
  * @param {string} [entry.ipAddress] - Client IP
+ * @param {Function} [onFailure] - Called when the audit entry could not be written.
  */
-export function logAuditEvent(entry: {
-  action: string;
-  actor?: string;
-  target?: string;
-  details?: unknown;
-  metadata?: unknown;
-  ipAddress?: string;
-  resourceType?: string;
-  status?: string;
-  requestId?: string;
-  createdAt?: string;
-}) {
+export function logAuditEvent(
+  entry: {
+    action: string;
+    actor?: string;
+    target?: string;
+    details?: unknown;
+    metadata?: unknown;
+    ipAddress?: string;
+    resourceType?: string;
+    status?: string;
+    requestId?: string;
+    createdAt?: string;
+  },
+  onFailure?: () => void
+): void {
   const db = getDb();
-  if (!db) return;
+  if (!db) {
+    onFailure?.();
+    return;
+  }
 
   try {
     ensureAuditLogSchema(db);
@@ -411,7 +418,7 @@ export function logAuditEvent(entry: {
       serializeAuditValue(metadataSource)
     );
   } catch {
-    // Silently fail — audit logging should never break the main flow
+    onFailure?.();
   }
 }
 
