@@ -340,6 +340,7 @@ test("readBaselineSecretsValue: JSON inválido retorna null (não lança)", () =
 
 const scanner = fileURLToPath(new URL("../../../scripts/check/check-secrets.mjs", import.meta.url));
 const config = fileURLToPath(new URL("../../../.gitleaks.toml", import.meta.url));
+const preCommitHook = fileURLToPath(new URL("../../../.husky/pre-commit", import.meta.url));
 const hasGitleaks = spawnSync("gitleaks", ["version"]).status === 0;
 
 function withStagedScanRepo(run: (dir: string) => void) {
@@ -379,6 +380,40 @@ function writeStagedFixture(dir: string, file: string, text: string) {
   runGit(dir, "add", "--", file);
 }
 
+test(
+  "--staged warns on a changed generic API key line in translated Markdown",
+  { skip: !hasGitleaks },
+  () => {
+    withStagedScanRepo((dir) => {
+      initScanRepo(dir);
+      const file = "docs/i18n/am/README.md";
+      const value = createHash("sha256").update(file).digest("hex");
+      const line = `const api_key = "${value}";`;
+      writeStagedFixture(dir, file, `# Example\n\n${line}\n`);
+      runGit(
+        dir,
+        "-c",
+        "user.name=Test",
+        "-c",
+        "user.email=test@example.com",
+        "commit",
+        "-qm",
+        "Add translated example"
+      );
+      writeStagedFixture(dir, file, `# Example\n\n${line} \n`);
+
+      const result = scanStaged(dir);
+      assert.equal(result.status, 0, result.stderr);
+      assert.match(
+        result.stderr,
+        /AVISO[^\n]*\n[^\n]*\[generic-api-key\] docs\/i18n\/am\/README\.md:3/
+      );
+      assert.doesNotMatch(result.stderr, /BLOQUEADO/);
+      assert.ok(!result.stderr.includes(value));
+    });
+  }
+);
+
 test("--staged --quiet warns and allows commits when Gitleaks is missing", () => {
   withStagedScanRepo((dir) => {
     const result = scanStaged(dir, { ...process.env, PATH: dir });
@@ -386,6 +421,78 @@ test("--staged --quiet warns and allows commits when Gitleaks is missing", () =>
     assert.match(result.stderr, /gitleaks.*não encontrado/i);
   });
 });
+
+test("--staged blocks a synthetic GitHub token in documentation", { skip: !hasGitleaks }, () => {
+  withStagedScanRepo((dir) => {
+    initScanRepo(dir);
+    const file = "docs/example.md";
+    const hash = createHash("sha256").update(file).digest("hex");
+    const syntheticPat = ["ghp", hash.slice(0, 36)].join("_");
+    writeStagedFixture(dir, file, `const api_key = "${hash}";\n${syntheticPat}\n`);
+
+    const result = scanStaged(dir);
+    assert.equal(result.status, 1, result.stderr);
+    assert.match(result.stderr, /AVISO[^\n]*\n[^\n]*\[generic-api-key\] docs\/example\.md:1/);
+    assert.match(result.stderr, /BLOQUEADO[^\n]*\n[^\n]*\[github-pat\] docs\/example\.md:2/);
+    assert.ok(!result.stderr.includes(syntheticPat));
+  });
+});
+
+test("--staged blocks a generic API key in a new source file", { skip: !hasGitleaks }, () => {
+  withStagedScanRepo((dir) => {
+    initScanRepo(dir);
+    const file = "src/config.ts";
+    const value = createHash("sha256").update(file).digest("hex");
+    writeStagedFixture(dir, file, `const api_key = "${value}";\n`);
+
+    const result = scanStaged(dir);
+    assert.equal(result.status, 1, result.stderr);
+    assert.match(result.stderr, /BLOQUEADO[^\n]*\n[^\n]*\[generic-api-key\] src\/config\.ts:1/);
+    assert.doesNotMatch(result.stderr, /AVISO/);
+  });
+});
+
+test(
+  "pre-commit warns when the staged scanner exits 2",
+  { skip: process.platform === "win32" },
+  () => {
+    withStagedScanRepo((dir) => {
+      initScanRepo(dir);
+      fs.writeFileSync(path.join(dir, "gitleaks"), "#!/bin/sh\nexit 1\n", { mode: 0o755 });
+      const env = {
+        ...process.env,
+        PATH: [dir, process.env.PATH].join(path.delimiter),
+        SECRET_SCAN_TEST_NODE: process.execPath,
+        SECRET_SCAN_TEST_SCRIPT: scanner,
+      };
+      const direct = scanStaged(dir, env);
+      assert.equal(direct.status, 2, direct.stderr);
+      assert.match(direct.stderr, /ERRO ao executar gitleaks/);
+
+      // Execute the real hook with only its unrelated local gates stubbed.
+      const hookRunner = `
+      npx() { :; }
+      npm() { :; }
+      sh() { :; }
+      node() {
+        if [ "$1" = scripts/check/check-secrets.mjs ]; then
+          shift
+          "$SECRET_SCAN_TEST_NODE" "$SECRET_SCAN_TEST_SCRIPT" "$@"
+        fi
+      }
+      . "$1"
+    `;
+      const result = spawnSync("sh", ["-c", hookRunner, "pre-commit-test", preCommitHook], {
+        cwd: dir,
+        env,
+        encoding: "utf8",
+      });
+      assert.ifError(result.error);
+      assert.equal(result.status, 0, result.stderr);
+      assert.match(result.stderr, /\[pre-commit\] AVISO.*gitleaks.*código 2/);
+    });
+  }
+);
 
 test(
   "--staged distinguishes scanner errors from findings",

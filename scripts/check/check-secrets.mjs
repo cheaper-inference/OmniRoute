@@ -22,7 +22,7 @@
 //   node scripts/check/check-secrets.mjs --json     # imprime JSON com valores mascarados
 //   node scripts/check/check-secrets.mjs --quiet    # suprime logs de diagnóstico
 //   node scripts/check/check-secrets.mjs --ratchet   # falha (exit 1) numa regressão
-//   node scripts/check/check-secrets.mjs --staged   # 1 para achados, 2 para erro do scanner
+//   node scripts/check/check-secrets.mjs --staged   # 1 para bloqueios, 2 para erro do scanner
 
 import fs from "node:fs";
 import { execFileSync, spawnSync } from "node:child_process";
@@ -396,25 +396,39 @@ function runStagedScan(gitleaksBin) {
     return 2;
   }
 
-  const locations = findings.map(({ File, RuleID, StartLine }) => ({
-    File: File.replaceAll("\\", "/"),
-    RuleID,
-    StartLine,
-  }));
+  const locations = [];
+  const warnings = [];
+  const blockers = [];
+  for (const { File, RuleID, StartLine } of findings) {
+    const location = { File: File.replaceAll("\\", "/"), RuleID, StartLine };
+    locations.push(location);
+
+    const isDocumentation =
+      File === "README.md" ||
+      File.startsWith("docs/i18n/") ||
+      (File.startsWith("docs/") && File.endsWith(".md"));
+    const group = RuleID === "generic-api-key" && isDocumentation ? warnings : blockers;
+    group.push(location);
+  }
   if (PRINT_JSON) {
     console.log(JSON.stringify(locations, null, 2));
   } else if (!QUIET) {
     console.log(`stagedSecretFindings=${locations.length}`);
   }
-  if (!locations.length) return 0;
 
+  reportStagedFindings("AVISO", warnings);
+  reportStagedFindings("BLOQUEADO", blockers);
+  return blockers.length > 0 ? 1 : 0;
+}
+
+function reportStagedFindings(label, locations) {
+  if (locations.length === 0) return;
   process.stderr.write(
-    `[check-secrets] BLOQUEADO — ${locations.length} achado(s) de segredos no stage:\n`
+    `[check-secrets] ${label} — ${locations.length} achado(s) de segredos no stage:\n`
   );
   for (const { File, RuleID, StartLine } of locations.slice(0, 20)) {
     process.stderr.write(`  • [${RuleID}] ${File}:${StartLine}\n`);
   }
-  return 1;
 }
 
 /**
