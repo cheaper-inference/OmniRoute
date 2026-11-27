@@ -787,8 +787,6 @@ async function handleChatImplementation(
     reserveKeyQuota: true,
   });
   if (policy.keyQuotaReservation) {
-    // Same tick as the policy result: the wrapper releases the slot on every exit, and the usage
-    // recorders find it through apiKeyInfo to turn it into the recorded call.
     admissionContext.holdKeyQuota(policy.keyQuotaReservation);
     if (policy.apiKeyInfo) bindKeyQuotaReservation(policy.apiKeyInfo, policy.keyQuotaReservation);
   }

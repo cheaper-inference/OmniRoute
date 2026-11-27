@@ -25,6 +25,8 @@ export type ChatAdmissionContext = {
    * Hand over the key-quota rpm slot the policy phase took for this call. The wrapper releases it
    * when the call ends: a thrown error, a non-stream response, or the end / cancel / abort / error
    * of a stream. The usage recorder may convert it earlier (recording releases it).
+   * Call it in the same tick as the policy result, and bind the slot to the call's `apiKeyInfo`
+   * (`bindKeyQuotaReservation`): the usage recorders find the slot through that binding.
    */
   holdKeyQuota(reservation: KeyQuotaReservation): void;
   /**
