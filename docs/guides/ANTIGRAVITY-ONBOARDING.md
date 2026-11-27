@@ -272,7 +272,3 @@ Account not working?
 | Check projectId in DB | `SELECT email,project_id FROM provider_connections WHERE provider='agy'`                |
 | Check logs            | `podman logs omniroute 2>&1 \| grep projectId`                                          |
 | Refresh token         | Dashboard → Providers → agy → Click refresh icon                                        |
-
----
-
-_Last updated: 2026-07-31. Based on OmniRoute v3.8.50._

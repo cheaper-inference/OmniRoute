@@ -23,7 +23,7 @@ import { listenWithRetry } from "./listen-with-retry.mjs";
 
 const { maybeHandleDisallowedMethod } = methodGuard;
 const { wrapRequestListenerWithHeadResponseGuard } = headResponseGuard;
-const { handleH2cUpgrade } = h2cUpgradeGuard;
+const { handleH2cUpgrade, withH2cUpgradeGuard } = h2cUpgradeGuard;
 
 // Pre-read DATA_DIR from local .env before bootstrap resolves paths
 if (!process.env.DATA_DIR) {
@@ -203,6 +203,7 @@ async function start() {
   });
 
   const server = http.createServer(
+    withH2cUpgradeGuard(),
     wrapRequestListenerWithHeadResponseGuard((req, res) => {
       // Absorb client-abort errors (browser closes the socket during
       // navigation/HMR/bfcache) on the request/response streams so they never
@@ -231,7 +232,7 @@ async function start() {
   }
   server.on("upgrade", async (req, socket, head) => {
     try {
-      // Cleartext `Upgrade: h2c` (JDK HttpClient) is not a WebSocket upgrade: serve it as HTTP/1.1.
+      // Older Node 24 versions deliver h2c to the upgrade listener.
       if (handleH2cUpgrade(server, req, socket, head)) return;
       const responsesWsHandled = await responsesWsProxy.handleUpgrade(req, socket, head);
       if (responsesWsHandled) return;

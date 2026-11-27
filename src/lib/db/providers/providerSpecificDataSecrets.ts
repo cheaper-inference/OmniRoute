@@ -122,7 +122,8 @@ export const PROVIDER_SPECIFIC_SECRET_FIELDS = [
  * Not credentials at rest, but never echoed to a client or written to an audit record:
  * the transient ChatGPT Web (Codex) handles, the system-managed Codex fingerprint seed
  * (mirrors sub2api stripping `codex_fingerprint_seed`) and the runtime-only Codex
- * identity carriers (in-memory per request, never persisted). The server-side
+ * identity carriers (in-memory per request, never persisted) and connection-level
+ * custom header origins. The server-side
  * partial-update merge keeps them alive without the client round-tripping them.
  */
 export const PROVIDER_SPECIFIC_RESPONSE_ONLY_FIELDS = [
@@ -132,6 +133,7 @@ export const PROVIDER_SPECIFIC_RESPONSE_ONLY_FIELDS = [
   "codexClientIdentity",
   "codexOriginalIdentityHeaders",
   "codexTurnStateEcho",
+  "customHeaderOverrideNames",
 ] as const;
 
 export type ProviderSpecificSecretField = (typeof PROVIDER_SPECIFIC_SECRET_FIELDS)[number];
