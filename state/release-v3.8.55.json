@@ -3,42 +3,35 @@
   "base": "release/v3.8.55",
   "paused": null,
   "inFlight": {
-    "batchId": "b71",
+    "batchId": "b72",
     "kind": "batch",
-    "candidateRef": "omni-queue/release-v3.8.55/b71-3e23a8afe026",
-    "candidateSha": "3e23a8afe026a4980926c2fcab5b1fcfabb995c4",
-    "baseSha": "5f8bc1e794e0b6cfc84445be1ffa77dcd943d345",
-    "treeSha": "8f0e22207303497ac8fc4606ad9cf35ca122dcf5",
+    "candidateRef": "omni-queue/release-v3.8.55/b72-3d399646ebb5",
+    "candidateSha": "3d399646ebb56cc09bc6a659213c0daa191f6250",
+    "baseSha": "3e23a8afe026a4980926c2fcab5b1fcfabb995c4",
+    "treeSha": "a207c5fe6060cdf2e17e08295247610ab825dc54",
     "prs": [
       {
-        "n": 21163,
-        "head": "12dc8dd6846262ebc333b897df9597f610e1c08a",
-        "title": "fix(sse): count in-flight requests for the connection cap",
-        "author": "AyhamJo7",
-        "labeledAt": "2026-11-27T04:35:47Z"
-      },
-      {
-        "n": 21358,
-        "head": "9acd2215083c960885f47d94ea059aefb9672db3",
-        "title": "docs: trim AGENTS.md and CLAUDE.md to what an agent cannot derive",
+        "n": 21356,
+        "head": "7930460c68a4c24bda7df9c76408d613cc22103d",
+        "title": "fix(authz): check the browser origin on anonymous management mutations",
         "author": "diegosouzapw",
-        "labeledAt": "2026-11-27T04:37:36Z"
-      },
-      {
-        "n": 21228,
-        "head": "1b2c183518ab843fd1a4137acd864bf79e9f3014",
-        "title": "fix(api): keep custom headers when a node save omits them",
-        "author": "AyhamJo7",
-        "labeledAt": "2026-11-27T08:45:29Z"
+        "labeledAt": "2026-11-27T13:19:11Z"
       }
     ],
-    "stage": "landing",
-    "startedAt": "2026-11-27T20:12:55.431Z",
+    "stage": "testing",
+    "startedAt": "2026-11-27T21:58:06.997Z",
     "attempts": 0,
     "bisect": null,
-    "landAttempts": 1
+    "lane": "hotfix"
   },
   "baseChecks": [
+    {
+      "baseSha": "3e23a8afe026a4980926c2fcab5b1fcfabb995c4",
+      "ref": "omni-queue/release-v3.8.55/b71-3e23a8afe026",
+      "status": "green",
+      "startedAt": "2026-11-27T20:12:55.431Z",
+      "signatures": []
+    },
     {
       "baseSha": "5f8bc1e794e0b6cfc84445be1ffa77dcd943d345",
       "ref": "omni-queue/release-v3.8.55/b70-5f8bc1e794e0",
@@ -101,13 +94,6 @@
       "status": "green",
       "startedAt": "2026-11-27T03:47:21.240Z",
       "signatures": []
-    },
-    {
-      "baseSha": "9671192011beb2d7f83979f40be488c5da8772b9",
-      "ref": "omni-queue/release-v3.8.55/b57-9671192011be",
-      "status": "green",
-      "startedAt": "2026-11-26T21:35:52.772Z",
-      "signatures": []
     }
   ],
   "shadow": {
@@ -132,48 +118,15 @@
     }
   },
   "counters": {
-    "batchSeq": 71,
-    "ciRuns": 76,
-    "landedPrs": 69,
-    "landedBatches": 24,
+    "batchSeq": 72,
+    "ciRuns": 77,
+    "landedPrs": 72,
+    "landedBatches": 25,
     "redBatches": 15,
     "bisections": 5,
     "culprits": 1
   },
   "history": [
-    {
-      "at": "2026-11-21T19:41:05.548Z",
-      "type": "checks-green",
-      "batchId": "b23",
-      "prs": [
-        20823,
-        20825
-      ],
-      "sha": "0563eb2ec52bfd20ca39b3d4444df3cbd2316944",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44942209661"
-    },
-    {
-      "at": "2026-11-21T19:41:16.937Z",
-      "type": "would-land",
-      "batchId": "b23",
-      "prs": [
-        20823,
-        20825
-      ],
-      "sha": "0563eb2ec52bfd20ca39b3d4444df3cbd2316944",
-      "detail": "shadow mode: would merge-ff onto 5b6c0af52deb",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44942209661"
-    },
-    {
-      "at": "2026-11-21T19:41:22.025Z",
-      "type": "pr-dequeued",
-      "batchId": "b22",
-      "prs": [
-        20826
-      ],
-      "detail": "withdrawn: already merged",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44942209661"
-    },
     {
       "at": "2026-11-21T19:41:22.025Z",
       "type": "pr-dequeued",
@@ -2821,12 +2774,47 @@
       ],
       "sha": "3e23a8afe026a4980926c2fcab5b1fcfabb995c4",
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/46073482867"
+    },
+    {
+      "at": "2026-11-27T21:56:57.177Z",
+      "type": "land-blessed",
+      "batchId": "b71",
+      "prs": [
+        21163,
+        21358,
+        21228
+      ],
+      "sha": "3e23a8afe026a4980926c2fcab5b1fcfabb995c4",
+      "detail": "omni-queue/land success on 1 commit(s)",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/46073482867"
+    },
+    {
+      "at": "2026-11-27T21:56:59.738Z",
+      "type": "landed",
+      "batchId": "b71",
+      "prs": [
+        21163,
+        21358,
+        21228
+      ],
+      "sha": "3e23a8afe026a4980926c2fcab5b1fcfabb995c4",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/46073482867"
+    },
+    {
+      "at": "2026-11-27T21:58:10.163Z",
+      "type": "batch-started",
+      "batchId": "b72",
+      "prs": [
+        21356
+      ],
+      "sha": "3d399646ebb56cc09bc6a659213c0daa191f6250",
+      "detail": "1 PR(s) on 3e23a8afe026; lane hotfix",
+      "labeledAt": {
+        "21356": "2026-11-27T13:19:11Z"
+      },
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/46073482867"
     }
   ],
-  "updatedAt": "2026-11-27T21:56:54.061Z",
-  "batchWindow": 3,
-  "landingsWithoutVerdict": {
-    "count": 1,
-    "since": "2026-11-27T21:56:54.061Z"
-  }
+  "updatedAt": "2026-11-27T21:58:11.811Z",
+  "batchWindow": 4
 }
