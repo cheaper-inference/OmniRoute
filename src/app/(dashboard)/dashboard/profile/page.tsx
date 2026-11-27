@@ -324,7 +324,7 @@ export default function ProfilePage() {
                   }
                 >
                   {isEarned && earnedInfo?.unlockedAt && (
-                    <span className="block text-[10px] text-text-muted">
+                    <span className="block text-3xs text-text-muted">
                       {tg("earnedDate", {
                         date: new Date(earnedInfo.unlockedAt).toLocaleDateString(locale),
                       })}

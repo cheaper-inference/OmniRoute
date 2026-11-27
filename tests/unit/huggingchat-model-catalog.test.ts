@@ -129,3 +129,13 @@ test("huggingchat free catalog tracks final concrete models without router budge
     assert.ok(!freeModelIds.includes(removedModel), `${removedModel} should not be advertised`);
   }
 });
+
+test("huggingchat rows stay in the catalog as discontinued: inference needs purchased credits", () => {
+  // Re-audit 2026-11-23: https://huggingface.co/docs/inference-providers/pricing — "Free Users
+  // None - yes (credits purchase required)". The last quota (0.5M) lives in the retired ledger.
+  for (const budget of FREE_MODEL_BUDGETS.filter((b) => b.provider === "huggingchat")) {
+    assert.equal(budget.freeType, "discontinued", budget.modelId);
+    assert.equal(budget.monthlyTokens, 0, budget.modelId);
+    assert.equal(budget.creditTokens, 0, budget.modelId);
+  }
+});

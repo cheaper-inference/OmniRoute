@@ -1,0 +1,1 @@
+- **fix(dashboard):** The shared quota bar is announced as a meter, the role for a measurement inside a known range. It was announced as a progress bar.

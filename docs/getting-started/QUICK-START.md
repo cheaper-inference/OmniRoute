@@ -31,7 +31,7 @@ docker run -d --name omniroute -p 20128:20128 cheaperinference/omniroute:latest
 ### Option C: From Source
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 npm run dev
@@ -75,7 +75,7 @@ In your IDE or CLI tool, set:
 
 ```
 Base URL: http://localhost:20128/v1
-API Key:  [copy from Dashboard → Endpoints]
+API Key:  [the key you created in Step 4 (Dashboard → API Keys)]
 Model:    auto
 ```
 
@@ -167,4 +167,4 @@ OmniRoute automatically skips failed providers and tries the next one. You don't
 
 - **[Troubleshooting](../guides/TROUBLESHOOTING.md)** — Common issues and fixes
 - **[Discord](https://discord.gg/U47eFqAXCn)** — Community support
-- **[GitHub Issues](https://github.com/diegosouzapw/OmniRoute/issues)** — Report bugs
+- **[GitHub Issues](https://github.com/cheaper-inference/OmniRoute/issues)** — Report bugs

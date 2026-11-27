@@ -17,11 +17,11 @@ vi.mock("next-intl", () => ({
   useTranslations: () => translate,
 }));
 
-vi.mock("@/shared/components/analytics/rechartsCore", () => ({
-  loadRecharts: vi.fn(),
-  useRecharts: () => null,
-  ChartLoadingCard: () => <div data-testid="chart-loading" />,
-  DarkTooltip: () => null,
+// The kit charts that draw with recharts stay out of this test (they load through next/dynamic).
+vi.mock("@omniroute/ui-kit/reporting-charts", () => ({
+  StackedBarChart: () => <div data-testid="chart-loading" />,
+  StackedAreaChart: () => <div data-testid="chart-loading" />,
+  Sparkline: () => <div data-testid="chart-loading" />,
 }));
 
 const { ApiKeyTable, ProviderTable } = await import("@/shared/components/analytics/charts");

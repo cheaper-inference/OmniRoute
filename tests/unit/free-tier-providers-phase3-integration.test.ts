@@ -19,6 +19,10 @@ const providers = [
   ["llm-kiwi", "llmkiwi", "https://api.llm.kiwi/v1/chat/completions"],
 ] as const;
 
+// Direct Poolside Platform inference was announced to shut down on 2026-10-31,
+// so its free Preview is over; the gateway listings keep their free flag.
+const ENDED_FREE_OFFERS = new Set<string>(["poolside"]);
+
 for (const [id, alias, endpoint] of providers) {
   test(`${id} is wired through registry, metadata, endpoint and default executor`, async () => {
     const registry = REGISTRY[id];
@@ -32,7 +36,7 @@ for (const [id, alias, endpoint] of providers) {
     assert.equal(PROVIDER_ENDPOINTS[id], endpoint);
     assert.equal(metadata.id, id);
     assert.equal(metadata.alias, alias);
-    assert.equal(metadata.hasFree, true);
+    assert.equal(metadata.hasFree, !ENDED_FREE_OFFERS.has(id));
     assert.equal(metadata.passthroughModels, true);
     assert.ok(typeof metadata.freeNote === "string" && metadata.freeNote.length > 0);
     assert.ok((await getExecutor(id)) instanceof DefaultExecutor);

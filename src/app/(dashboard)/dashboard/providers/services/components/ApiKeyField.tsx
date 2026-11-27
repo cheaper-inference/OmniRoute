@@ -4,7 +4,7 @@ import Icon from "@/shared/components/Icon";
 
 import { useState, useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
-import { Card, Button, ConfirmModal } from "@/shared/components";
+import { Card, Button, ConfirmModal, IconChip } from "@/shared/components";
 import { useServiceStatus } from "../hooks/useServiceStatus";
 
 interface ApiKeyFieldProps {
@@ -82,11 +82,13 @@ export function ApiKeyField({ name, serviceLabel, showReveal = false }: ApiKeyFi
     <>
       <Card padding="md">
         <div className="flex items-center gap-3 mb-3">
-          <div className="size-8 rounded-lg flex items-center justify-center border border-border bg-bg-subtle text-text-main">
-            <Icon name="key" size={20} />
-          </div>
+          <IconChip size="sm">
+            <Icon name="key" />
+          </IconChip>
           <div>
-            <h3 className="text-sm">{t("apiKey")}</h3>
+            <h3 className="ci-heading" data-size="sm">
+              {t("apiKey")}
+            </h3>
             <p className="text-xs text-text-muted">{t("apiKeyDescription", { name: label })}</p>
           </div>
         </div>

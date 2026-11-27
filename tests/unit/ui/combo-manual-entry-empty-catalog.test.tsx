@@ -64,10 +64,18 @@ const builderOptions = {
   comboRefs: [],
 };
 
+const reservedCombo = {
+  id: "legacy-auto",
+  name: "Auto/coding",
+  strategy: "priority",
+  models: ["cx/gpt-5.5"],
+};
+let listedCombos: (typeof reservedCombo)[] = [];
+
 function payload(url: string): unknown {
   if (url.startsWith("/api/combos/metrics")) return { metrics: {} };
   if (url.startsWith("/api/combos/builder/options")) return builderOptions;
-  if (url.startsWith("/api/combos")) return { combos: [] };
+  if (url.startsWith("/api/combos")) return { combos: listedCombos };
   if (url.startsWith("/api/settings/proxy")) return { combos: {} };
   if (url.startsWith("/api/settings/compression")) return { enabled: false };
   if (url.startsWith("/api/settings")) return { comboConfigMode: "expert" };
@@ -97,6 +105,7 @@ beforeEach(() => {
 afterEach(() => {
   cleanup();
   vi.unstubAllGlobals();
+  listedCombos = [];
 });
 
 async function openExpertBuilder() {
@@ -108,15 +117,18 @@ async function openExpertBuilder() {
   const dialog = await screen.findByRole("dialog");
   // Expert mode arrives with /api/settings; the manual entry only exists in that mode.
   await within(dialog).findByTestId("combo-manual-model-input");
-  // The picker options arrive with /api/combos/builder/options.
-  await waitFor(() =>
-    expect(
-      within(dialog)
-        .getByTestId("combo-builder-provider")
-        .querySelector('option[value="openrouter"]')
-    ).not.toBeNull()
-  );
+  // The picker options arrive with /api/combos/builder/options. Inspect the real
+  // searchable popover rather than native <option> elements under its trigger.
+  const search = await openProviderPicker(dialog);
+  await screen.findByRole("option", { name: /OpenRouter/ });
+  fireEvent.keyDown(search, { key: "Escape" });
+  await waitFor(() => expect(screen.queryByRole("listbox")).not.toBeInTheDocument());
   return dialog;
+}
+
+async function openProviderPicker(dialog: HTMLElement) {
+  fireEvent.click(within(dialog).getByTestId("combo-builder-provider"));
+  return screen.findByRole("combobox", { name: "Search", exact: true });
 }
 
 async function addManualModel(dialog: HTMLElement, value: string) {
@@ -154,9 +166,13 @@ describe("expert-mode manual model entry", { timeout: 90_000 }, () => {
 
   it("keeps the picker limited to providers that have a catalog model", async () => {
     const dialog = await openExpertBuilder();
-    const picker = within(dialog).getByTestId("combo-builder-provider");
-    expect(picker.querySelector('option[value="openrouter"]')).not.toBeNull();
-    expect(picker.querySelector('option[value="codex"]')).toBeNull();
+    await openProviderPicker(dialog);
+    const picker = within(screen.getByRole("listbox"));
+    expect(picker.getByRole("option", { name: /OpenRouter/ })).toHaveAttribute(
+      "data-value",
+      "openrouter"
+    );
+    expect(picker.queryByRole("option", { name: /Codex/ })).not.toBeInTheDocument();
   });
 
   it("still refuses a prefix that matches no configured provider", async () => {
@@ -164,5 +180,41 @@ describe("expert-mode manual model entry", { timeout: 90_000 }, () => {
     await addManualModel(dialog, "nope/gpt-5.5");
     expect(await within(dialog).findByText(/unknown provider prefix/i)).toBeInTheDocument();
     expect(within(dialog).getByTestId("combo-manual-model-input")).toHaveValue("nope/gpt-5.5");
+  });
+});
+
+describe("reserved automatic route names", { timeout: 90_000 }, () => {
+  it("shows an inline error and blocks creation after adding a valid model", async () => {
+    const dialog = await openExpertBuilder();
+    const name = within(dialog).getByTestId("combo-name-input");
+    fireEvent.change(name, { target: { value: "my-auto" } });
+    await addManualModel(dialog, "cx/gpt-5.5");
+    const create = within(dialog).getByRole("button", { name: "Create Combo" });
+    expect(create).toBeEnabled();
+
+    fireEvent.change(name, { target: { value: "auto" } });
+    expect(name).toHaveAccessibleDescription(/reserved for the built-in automatic routes/i);
+    expect(create).toBeDisabled();
+    fireEvent.click(create);
+    expect(vi.mocked(fetch).mock.calls.some(([, init]) => init?.method === "POST")).toBe(false);
+  });
+
+  it("warns on a saved reserved name and enables saving after renaming", async () => {
+    listedCombos = [reservedCombo];
+    render(<CombosPage />);
+    const card = await screen.findByTestId("combo-card-legacy-auto");
+    expect(within(card).getByText(/rename this combo/i)).toBeInTheDocument();
+    fireEvent.click(within(card).getByRole("button", { name: "Edit" }));
+
+    const dialog = await screen.findByRole("dialog");
+    const name = within(dialog).getByTestId("combo-name-input");
+    const save = await within(dialog).findByRole("button", { name: "Save" });
+    expect(name).toHaveValue("Auto/coding");
+    expect(name).toHaveAccessibleDescription(/reserved for the built-in automatic routes/i);
+    expect(save).toBeDisabled();
+    fireEvent.click(save);
+    expect(vi.mocked(fetch).mock.calls.some(([, init]) => init?.method === "PUT")).toBe(false);
+    fireEvent.change(name, { target: { value: "my-auto" } });
+    expect(save).toBeEnabled();
   });
 });

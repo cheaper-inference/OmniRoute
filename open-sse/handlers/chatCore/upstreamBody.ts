@@ -12,7 +12,11 @@ import { getEffectiveToolLimit, getKnownToolLimit } from "../../services/toolLim
 import { OMNIROUTE_WEB_SEARCH_FALLBACK_TOOL_NAME } from "../../services/webSearchFallback.ts";
 import { OMNIROUTE_WEB_FETCH_FALLBACK_TOOL_NAME } from "../../services/webFetchInterception.ts";
 import { CLAUDE_OAUTH_TOOL_PREFIX } from "../../translator/request/openai-to-claude.ts";
-import { applyToolDisclosure, type ToolDisclosureConfig } from "../../utils/toolDisclosure.ts";
+import {
+  applyToolDisclosure,
+  collectHistoryToolNames,
+  type ToolDisclosureConfig,
+} from "../../utils/toolDisclosure.ts";
 import {
   isOpenCodeLane,
   providerSupportsCaching,
@@ -45,6 +49,7 @@ import {
   foldReasoningForOpenAIChat,
 } from "../../services/gpt5SamplingGuard.ts";
 import { wireAdaptiveEffort } from "./adaptiveEffortWiring.ts";
+import { stripClientTierFields } from "./clientTierFieldStrip.ts";
 
 type LoggerLike =
   | { debug?: (...args: unknown[]) => void; warn?: (tag: string, message: string) => void }
@@ -169,10 +174,13 @@ function isFallbackTool(tool: unknown): boolean {
   return FALLBACK_TOOL_NAMES.has(unprefixed);
 }
 
-function capToolList(tools: unknown[], limit: number): unknown[] {
-  let pinnedRoom = Math.min(limit, tools.filter(isFallbackTool).length);
+function capToolList(tools: unknown[], limit: number, keepNames: ReadonlySet<string>): unknown[] {
+  // Kept ahead of the cap: the fallback tools, the tool a forced tool_choice names, and the
+  // tools the conversation already called (the same set tool disclosure never drops).
+  const pinned = (tool: unknown) => isFallbackTool(tool) || keepNames.has(toolDisplayName(tool));
+  let pinnedRoom = Math.min(limit, tools.filter(pinned).length);
   let room = limit - pinnedRoom;
-  return tools.filter((tool) => (isFallbackTool(tool) ? pinnedRoom-- > 0 : room-- > 0));
+  return tools.filter((tool) => (pinned(tool) ? pinnedRoom-- > 0 : room-- > 0));
 }
 
 const MAX_LOGGED_DROPPED_TOOLS = 15;
@@ -194,7 +202,9 @@ function applyToolCap(
   provider: string | null | undefined,
   log?: LoggerLike
 ): Body {
-  const truncatedTools = capToolList(tools, limit);
+  const keepNames = new Set<string>();
+  collectHistoryToolNames(bodyToSend, keepNames);
+  const truncatedTools = capToolList(tools, limit, keepNames);
   const kept = new Set(truncatedTools);
   const dropped = tools.filter((tool) => !kept.has(tool)).map(toolDisplayName);
   const sample = dropped.slice(0, MAX_LOGGED_DROPPED_TOOLS).join(", ");
@@ -483,7 +493,10 @@ export async function prepareUpstreamBody(opts: PrepareUpstreamBodyOptions): Pro
     log,
   } = opts;
 
-  let bodyToSend = normalizeAttemptBody(opts);
+  let bodyToSend = stripClientTierFields(
+    normalizeAttemptBody(opts),
+    credentials?.providerSpecificData
+  );
   const payloadRuleModel =
     typeof bodyToSend.model === "string" && bodyToSend.model.length > 0
       ? bodyToSend.model

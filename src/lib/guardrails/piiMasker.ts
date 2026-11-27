@@ -16,7 +16,7 @@ type JsonRecord = Record<string, unknown>;
 /** Reversible-vault minter; only set when the request runs under the vault scope. */
 type Tokenize = (type: string, value: string) => string | null;
 
-function isRequestPiiMaskingEnabled() {
+export function isRequestPiiMaskingEnabled() {
   // Request PII redaction is controlled by PII_REDACTION_ENABLED feature flag (DB > env > default).
   // INPUT_SANITIZER_MODE only governs prompt-injection policy (warn/block/log).
   return isFeatureFlagEnabled("PII_REDACTION_ENABLED");
@@ -107,6 +107,8 @@ function cloneAndMaskRequestPayload(payload: unknown, tokenize?: Tokenize) {
   // below rebuilds the containers it touches, so the caller's body is never
   // mutated without paying for a JSON round trip of the whole request up front.
   const redact = isRequestPiiMaskingEnabled();
+  // Masking off (the default) changes nothing, so do not scan: a scan only fed a debug count.
+  if (!redact) return { detections: [] as PiiDetection[], modified: false, payload };
   const clonedPayload: JsonRecord = { ...(payload as JsonRecord) };
   const detections: PiiDetection[] = [];
   let modified = false;
@@ -263,6 +265,8 @@ export class PIIMaskerGuardrail extends BaseGuardrail {
     if (!response || typeof response !== "object" || Array.isArray(response)) {
       return { block: false };
     }
+    // Sanitization off (the default) is a no-op below; skip the clone and two stringifies.
+    if (!isFeatureFlagEnabled("PII_RESPONSE_SANITIZATION")) return { block: false };
 
     const clonedResponse = JSON.parse(JSON.stringify(response)) as JsonRecord;
     const before = JSON.stringify(clonedResponse);

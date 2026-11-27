@@ -53,12 +53,7 @@ function Breakdown({
 }) {
   if (!report.byApiKey.length) return <p className="text-sm text-text-muted">{t("noUsage")}</p>;
   return (
-    <Table
-      className="text-sm"
-      containerClassName="rounded-none border-0"
-      scrollbarLabel={t("breakdown")}
-      scrollLabel={t("breakdown")}
-    >
+    <Table variant="plain" scrollbarLabel={t("breakdown")} scrollLabel={t("breakdown")}>
       <TableHeader>
         <TableRow>
           {["keyName", "requests", "tokens", "reportSpend"].map((key) => (
@@ -78,7 +73,7 @@ function Breakdown({
             </TableCell>
             <TableCell className="tabular-nums whitespace-nowrap">
               {money(key.estimatedListCostUsd, locale)}
-              {key.hasUnpricedUsage && (
+              {(key.hasUnpricedListUsage ?? key.hasUnpricedUsage) && (
                 <span className="block text-xs text-warning">{t("unpriced")}</span>
               )}
             </TableCell>
@@ -125,7 +120,7 @@ export default function TeamReport({
           </Card>
         ))}
       </div>
-      {report.summary.hasUnpricedUsage && (
+      {(report.summary.hasUnpricedListUsage ?? report.summary.hasUnpricedUsage) && (
         <p role="status" className="text-sm text-warning">
           {t("unpricedReport")}
         </p>

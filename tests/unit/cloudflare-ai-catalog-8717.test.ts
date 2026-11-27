@@ -32,14 +32,17 @@ test("Cloudflare Workers AI free catalog matches registry active models", () => 
     "@cf/meta/llama-3.1-8b-instruct",
     "@cf/google/gemma-3-12b-it",
     "@cf/qwen/qwen2.5-coder-15b-instruct",
-    // Retired on 2026-11-20, HTTP 410 (#21007)
+  ];
+  // Retired on 2026-11-20, HTTP 410 (#21007): out of the registry, kept in the free catalog
+  // as discontinued rows (cloudflare-workers-ai-catalog-8717.test.ts checks that).
+  const retiredModels = [
     "@cf/deepseek-ai/deepseek-r1-distill-qwen-32b",
     "@cf/meta/llama-3.2-3b-instruct",
     "@cf/qwen/qwq-32b",
     "@cf/moonshotai/kimi-k2.6",
   ];
 
-  for (const id of deadModels) {
+  for (const id of [...deadModels, ...retiredModels]) {
     assert.equal(registryModelIds.has(id), false, `registry should NOT contain dead model ${id}`);
   }
 

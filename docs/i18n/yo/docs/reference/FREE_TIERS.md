@@ -24,7 +24,7 @@ Awọn isiro wọnyi ṣapejuwe awọn akọọlẹ ẹnikẹta lọtọ ati aw�
 | **+ lẹhin ayẹwo idanimọ agbegbe**              | **+~ 6M**         | `modelscope` (Alibaba Awọsanma abuda + oluile-China ijẹrisi-orukọ gidi). Iwọn loorekoore gidi, ti o farahan bi `gatedRecurringTokens` / `gatedProviders` ati lori dasibodu naa. Maṣe ṣe akopọ si akọle: +~ 6M lẹhin ijẹrisi idanimọ agbegbe. |
 | Aja ile-ijinlẹ (gbogbo awọn opin oṣuwọn, 24/7) | ~ 10B             | Apapọ iye oṣuwọn olupese gbogbo ti a ṣe afikun si lilo ti kii ṣe iduro.** Ko kan lopolopo** — ma ṣe akọle yii.                                                                                                                               |
 
-**Akọle otitọ:** _OmniRoute aggregates**~ 1.62B ṣe akọsilẹ awọn ami ọfẹ fun oṣu kan** (to ~ 2.22B ni oṣu akọkọ rẹ pẹlu awọn kirẹditi iforukọsilẹ) kọja awọn adagun-odo-ọfẹ 34 — pẹlu iru gigun ti ọfẹ-pipe, awọn olupese ti ko si fila — ati RTK + Caveman funmorawon (15–95% awọn ifowopamọ ami) na siwaju sii._
+**Akọle otitọ:** _OmniRoute aggregates**~ 1.62B ṣe akọsilẹ awọn ami ọfẹ fun oṣu kan** (to ~ 2.22B ni oṣu akọkọ rẹ pẹlu awọn kirẹditi iforukọsilẹ) kọja awọn adagun-odo-ọfẹ 26 — pẹlu iru gigun ti ọfẹ-pipe, awọn olupese ti ko si fila — ati RTK + Caveman funmorawon (15–95% awọn ifowopamọ ami) na siwaju sii._
 
 > **Kini idi ti eyi fi silẹ lati ~ ti tẹlẹ 1.94B.** Itura 2026-06-17 jẹ atunṣe otitọ, kii ṣe ipadanu: `gemini` ti wa ni bayi-deduped adagun (ti ṣe afikun nipasẹ kika iyatọ Flash kọọkan lọtọ, 462M → 60M), `cloudflare-ai` ti ṣe atunṣe si 10k-Neurons/day gidi rẹ (122M → 30M), fifisilẹ `doubao` bi (tipasilẹ akoko-kirẹditi)`chutes`/`phind`/`kluster` dawọ duro). Aiṣedeede ni apakan nipasẹ `llm7` ( 5M/day → 150M ti o tọ) ati awọn olupese ọfẹ tuntun (Kilo, OpenCode Zen, Z.AI GLM-Flash).
 >
@@ -38,7 +38,7 @@ Awọn isiro wọnyi ṣapejuwe awọn akọọlẹ ẹnikẹta lọtọ ati aw�
 >
 > **Atunse ni 2026-09-03 (#11773):** `cerebras` jẹ atunṣe lati ẹbun 30M/mo loorekoore (idanwo ti kii-kaadi 1M tokens/day atijọ) si kirẹditi iforukọsilẹ $5 kan ti o nilo ọna isanwo kan. Ilana otitọ kanna bi LongCat.
 >
-> **Pẹlupẹlu xKiro (2026-09-03):** adagun-odo `xkiro-free` tuntun (150M/mo) ṣe afikun bọtini adagun loorekoore 35. Felo Wẹẹbu duro ni imukuro nigba ti GPL ti o jẹri provenance/licensing wa lori HOLD. Awọn orisun bayi iroyin** 34 loorekoore pool bọtini** ati**~ 1.62B duro** — awọn ifiwe, CI-gated nọmba (`check:docs-counts` kuna awọn Kọ ti o ba ti yi drifts lati `computeFreeModelTotals()`).
+> **Pẹlupẹlu xKiro (2026-09-03):** adagun-odo `xkiro-free` tuntun (150M/mo) ṣe afikun bọtini adagun loorekoore 35. Felo Wẹẹbu duro ni imukuro nigba ti GPL ti o jẹri provenance/licensing wa lori HOLD. Awọn orisun bayi iroyin** 26 loorekoore pool bọtini** ati**~ 1.62B duro** — awọn ifiwe, CI-gated nọmba (`check:docs-counts` kuna awọn Kọ ti o ba ti yi drifts lati `computeFreeModelTotals()`).
 
 Ti o tobi julọ** ni akọsilẹ** olùkópa: `mistral` 1.00B, `nara` 210M, `llm7` 150M, `xkiro` 150M, `groq` 30M (marun fun-awoṣe fila), `cloudflare-ai` 30M, `api-airforce` 24M. (`longcat` ti yọkuro — rẹ 10M LongCat-2.0 ẹbun jẹ akoko kan, kirẹditi iforukọsilẹ-gated KYC, kii ṣe isunawo oṣooṣu loorekoore.)
 

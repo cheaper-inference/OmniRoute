@@ -5,6 +5,7 @@ import type { CSSProperties } from "react";
 import Icon from "@/shared/components/Icon";
 import { Spinner } from "@/shared/components/Loading";
 import { Card, Button, ModelSelectModal } from "@/shared/components";
+import { InlineCode } from "@omniroute/ui-kit/inline-code";
 import Input from "@/shared/components/Input";
 import Select from "@/shared/components/Select";
 import { useTranslations } from "next-intl";
@@ -16,6 +17,8 @@ import ProviderIcon from "@/shared/components/ProviderIcon";
 import { cn } from "@/shared/utils/cn";
 import { brandTintVars } from "@omniroute/ui-kit/brand-tint";
 import { CARD_TOGGLE_CLASS, cardToggleProps } from "./cardToggle";
+import Badge from "@/shared/components/Badge";
+import Notice from "@/shared/components/Notice";
 
 export default function DefaultToolCard({
   toolId,
@@ -441,30 +444,13 @@ export default function DefaultToolCard({
           const isWarning = note.type === "warning";
           const isError = note.type === "cloudCheck" && !cloudEnabled;
 
-          let bgClass = "bg-info/10 border-info/30";
-          let textClass = "text-info ";
-          let iconClass = "text-info";
-          let icon = "info";
-
-          if (isWarning) {
-            bgClass = "bg-warning/10 border-warning/30";
-            textClass = "text-warning ";
-            iconClass = "text-warning";
-            icon = "warning";
-          } else if (isError) {
-            bgClass = "bg-error/10 border-error/30";
-            textClass = "text-error ";
-            iconClass = "text-error";
-            icon = "error";
-          }
+          const variant = isWarning ? "warning" : isError ? "critical" : "info";
+          const icon = isWarning ? "warning" : isError ? "error" : "info";
 
           return (
-            <div key={index} className={`flex items-start gap-3 p-3 rounded-lg border ${bgClass}`}>
-              <Icon name={icon} size={18} className={iconClass} />
-              <p className={`text-sm ${textClass}`}>
-                {translateOrFallback(`guides.${toolId}.notes.${index}`, note.text)}
-              </p>
-            </div>
+            <Notice key={index} variant={variant} icon={icon}>
+              {translateOrFallback(`guides.${toolId}.notes.${index}`, note.text)}
+            </Notice>
           );
         })}
       </div>
@@ -488,54 +474,43 @@ export default function DefaultToolCard({
           </div>
         )}
         {!checkingRuntime && runtimeStatus && !runtimeStatus.error && (
-          <div className="flex items-start gap-3 p-3 bg-info/10 border border-info/30 rounded-lg">
-            <Icon
-              name={
-                runtimeStatus.reason === "not_required"
-                  ? "info"
-                  : runtimeStatus.installed && runtimeStatus.runnable
-                    ? "check_circle"
-                    : "warning"
-              }
-              size={18}
-              className="text-info"
-            />
-            <div className="flex flex-col gap-1">
-              <p className="text-sm text-info">
-                {runtimeStatus.reason === "not_required"
-                  ? t("guideOnlyIntegration")
-                  : runtimeStatus.installed && runtimeStatus.runnable
-                    ? t("cliRuntimeDetected")
-                    : runtimeStatus.installed
-                      ? t("cliFoundNotRunnable", {
-                          reason: runtimeStatus.reason ? `: ${runtimeStatus.reason}` : "",
-                        })
-                      : t("cliRuntimeNotDetected")}
+          <Notice
+            variant="info"
+            icon={
+              runtimeStatus.reason === "not_required"
+                ? "info"
+                : runtimeStatus.installed && runtimeStatus.runnable
+                  ? "check_circle"
+                  : "warning"
+            }
+            title={
+              runtimeStatus.reason === "not_required"
+                ? t("guideOnlyIntegration")
+                : runtimeStatus.installed && runtimeStatus.runnable
+                  ? t("cliRuntimeDetected")
+                  : runtimeStatus.installed
+                    ? t("cliFoundNotRunnable", {
+                        reason: runtimeStatus.reason ? `: ${runtimeStatus.reason}` : "",
+                      })
+                    : t("cliRuntimeNotDetected")
+            }
+          >
+            {runtimeStatus.commandPath && (
+              <p className="text-xs text-text-muted">
+                {t("binary")}: <InlineCode>{runtimeStatus.commandPath}</InlineCode>
               </p>
-              {runtimeStatus.commandPath && (
-                <p className="text-xs text-text-muted">
-                  {t("binary")}:{" "}
-                  <code className="px-1 py-0.5 rounded bg-bg-subtle">
-                    {runtimeStatus.commandPath}
-                  </code>
-                </p>
-              )}
-              {runtimeStatus.configPath && (
-                <p className="text-xs text-text-muted">
-                  {t("configPath")}:{" "}
-                  <code className="px-1 py-0.5 rounded bg-bg-subtle">
-                    {runtimeStatus.configPath}
-                  </code>
-                </p>
-              )}
-            </div>
-          </div>
+            )}
+            {runtimeStatus.configPath && (
+              <p className="text-xs text-text-muted">
+                {t("configPath")}: <InlineCode>{runtimeStatus.configPath}</InlineCode>
+              </p>
+            )}
+          </Notice>
         )}
         {!checkingRuntime && runtimeStatus?.error && (
-          <div className="flex items-start gap-3 p-3 bg-error/10 border border-error/30 rounded-lg">
-            <Icon name="error" size={18} className="text-error" />
-            <p className="text-sm text-error">{t("failedCheckRuntimeStatus")}</p>
-          </div>
+          <Notice variant="critical" icon="error">
+            {t("failedCheckRuntimeStatus")}
+          </Notice>
         )}
         {renderNotes()}
         {canShowGuide() &&
@@ -592,9 +567,7 @@ export default function DefaultToolCard({
         {canShowGuide() && tool.codeBlock && (
           <div className="mt-2">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs text-text-muted uppercase tracking-wide">
-                {tool.codeBlock.language}
-              </span>
+              <span className="ci-eyebrow">{tool.codeBlock.language}</span>
               <Button
                 variant="outline"
                 size="sm"
@@ -615,16 +588,17 @@ export default function DefaultToolCard({
         {canShowGuide() && (
           <div className="mt-2">
             {message && (
-              <div
-                className={`flex gap-2 px-2 py-1.5 rounded text-xs mb-2 ${message.containerEphemeralTarget ? "items-start" : "items-center"} ${message.type === "success" ? "bg-success/10 text-success" : "bg-error/10 text-error"}`}
+              <Notice
+                variant={message.type === "success" ? "success" : "critical"}
+                icon={message.type === "success" ? "check_circle" : "error"}
+                className="mb-2"
               >
-                <Icon name={message.type === "success" ? "check_circle" : "error"} size={14} />
                 {/* The container refusal is a multi-line runbook — keep its line
                     breaks instead of collapsing it into one unreadable line. */}
                 <span className={message.containerEphemeralTarget ? "whitespace-pre-line" : ""}>
                   {message.text}
                 </span>
-              </div>
+              </Notice>
             )}
             <div className="flex items-center gap-2">
               {supportsDirectSave && (
@@ -716,7 +690,9 @@ export default function DefaultToolCard({
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <h3 className="text-sm">{tool.name}</h3>
+              <h3 className="ci-heading" data-size="sm">
+                {tool.name}
+              </h3>
               {(() => {
                 // Use runtime status if available (after expanding), otherwise use batch status
                 const rs = runtimeStatus;
@@ -727,34 +703,30 @@ export default function DefaultToolCard({
 
                 if (isGuide) {
                   return (
-                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-[11px] font-medium rounded-full bg-info/10 text-info">
-                      <span className="size-1.5 rounded-full bg-info" />
+                    <Badge variant="info" size="sm" dot>
                       {t("guide")}
-                    </span>
+                    </Badge>
                   );
                 }
                 if (isDetected) {
                   return (
-                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-[11px] font-medium rounded-full bg-success/10 text-success">
-                      <span className="size-1.5 rounded-full bg-success" />
+                    <Badge variant="success" size="sm" dot>
                       {t("detected")}
-                    </span>
+                    </Badge>
                   );
                 }
                 if (isInstalled === false && (rs || bs)) {
                   return (
-                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-[11px] font-medium rounded-full bg-surface-2/10 text-text-muted">
-                      <span className="size-1.5 rounded-full bg-surface-2" />
+                    <Badge variant="default" size="sm" dot>
                       {t("notInstalled")}
-                    </span>
+                    </Badge>
                   );
                 }
                 if (isInstalled && !isDetected && (rs || bs)) {
                   return (
-                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-[11px] font-medium rounded-full bg-warning/10 text-warning">
-                      <span className="size-1.5 rounded-full bg-warning" />
+                    <Badge variant="warning" size="sm" dot>
                       {t("notReady")}
-                    </span>
+                    </Badge>
                   );
                 }
                 return null;
