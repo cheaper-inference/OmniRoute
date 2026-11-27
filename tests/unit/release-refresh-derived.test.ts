@@ -498,7 +498,7 @@ describe("refreshDerived with the real gate plan (README + mirrors + state)", ()
       `## ${beforeBig}\\* Free Tokens / Month Across Third-Party Free Tiers`,
       "",
       '<img alt="Free tokens a month: ' +
-        `${beforeBig} summed across every catalog row, ended offers included; ${beforeReal} counting each shared quota once.">`,
+        `${beforeBig} free tokens a month adding up every catalog row, ended offers included; ${beforeReal} a month counting each shared quota once.">`,
       "",
       "Body text. ".repeat(70),
       "",

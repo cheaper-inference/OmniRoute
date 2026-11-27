@@ -9,7 +9,7 @@
 
 **Created by [Diego Souza](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 394 providers — 140+ with a free offer — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 394 AI providers · 140+ with a free offer · 22 routing strategies · $0 to start. Free tokens a month: ~11.3B summed across every catalog row, ended offers included; ~90M counting each shared quota once."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 394 providers — 140+ with a free offer — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 394 AI providers · 140+ with a free offer · 22 routing strategies · $0 to start. ~11.3B free tokens a month adding up every catalog row, ended offers included; ~90M a month counting each shared quota once."/>
 
 </div>
 
@@ -29,7 +29,7 @@ Other catalogs charge from US$ 19 a year to US$ 49 for lifetime access to live d
 >
 > Stacking free tiers by hand means dozens of SDKs, dozens of rate limits and no clear idea of what you have left. OmniRoute keeps 214 catalog rows with free access and computes the real figure from 12 pools with a published quota, each shared pool counted once. Quotas that only open after a regional identity check (today, ModelScope) are shown apart, +~6M behind regional identity verification, and never added to the real figure. What is left shows up on the dashboard (`/dashboard/free-tiers`).
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute free-tier budget card. Free tokens a month: ~11.3B summed across every catalog row, ended offers included; ~90M counting each shared quota once. Up to ~153M in your first month with one-time signup credits. 12 pools with a published quota and 214 catalog rows with free access behind one endpoint, catalog audited 2026-11-23. The bar shows where the real figure comes from, one segment per pool. Signup credits and free providers without a token cap are listed apart and never added to it. Live used and remaining tokens on /dashboard/free-tiers."/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute free-tier budget card. ~11.3B free tokens a month adding up every catalog row, ended offers included; ~90M a month counting each shared quota once. Up to ~153M in your first month with one-time signup credits. 12 pools with a published quota and 214 catalog rows with free access behind one endpoint, catalog audited 2026-11-23. The bar shows where the real figure comes from, one segment per pool. Signup credits and free providers without a token cap are listed apart and never added to it. Live used and remaining tokens on /dashboard/free-tiers."/>
 
 <sub>\* Sum of every row in the catalog, ended offers included, the way free-tier catalogs count. Counting each shared quota once, one account per provider reaches about ~90M a month today. [How we count →](docs/reference/FREE_TIERS.md#how-we-count)</sub>
 
@@ -684,7 +684,7 @@ deyin.ai and Zoo Code are not in the catalog or the CLI manifest. Configure them
 
 Each number counts something different. None of them is added to another.
 
-<img src="./docs/diagrams/provider-numbers.svg" width="100%" alt="What each number counts. 394 registered providers. 140+ flagged with a free offer. 50 with free access: 43 with an API key, 6 without a key, 1 through a tool account and 0 through a web chat. 214 catalog rows with free access, 185 distinct free models, 40 recurring or keyless providers, and 12 pools with a published quota. Free tokens a month: ~11.3B summed across every catalog row, ended offers included; ~90M counting each shared quota once."/>
+<img src="./docs/diagrams/provider-numbers.svg" width="100%" alt="What each number counts. 394 registered providers. 140+ flagged with a free offer. 50 with free access: 43 with an API key, 6 without a key, 1 through a tool account and 0 through a web chat. 214 catalog rows with free access, 185 distinct free models, 40 recurring or keyless providers, and 12 pools with a published quota. ~11.3B free tokens a month adding up every catalog row, ended offers included; ~90M a month counting each shared quota once."/>
 
 <sub>Chat catalog: static model lists from 250 of the providers, 3,186 provider/model pairs, 1,539 distinct raw model IDs.</sub>
 

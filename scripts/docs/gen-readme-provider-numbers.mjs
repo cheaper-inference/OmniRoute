@@ -112,7 +112,7 @@ export async function renderReadmeProviderNumbers() {
   const cards = await buildProviderNumbersCards();
   const desc = cards.map(({ value, label, code, lines, highlight }) =>
     highlight
-      ? `Free tokens a month: ${RF.rowSumTotalLabel} summed across every catalog row, ended offers included; ${RF.headlineSteadyLabel} counting each shared quota once. ${lines.at(-1)}`
+      ? `${RF.rowSumTotalLabel} free tokens a month adding up every catalog row, ended offers included; ${RF.headlineSteadyLabel} a month counting each shared quota once. ${lines.at(-1)}`
       : [`${value} ${label}.`, ...(code ? [`${code} flag.`] : []), ...lines].join(" ")
   );
   return outlineSvg(

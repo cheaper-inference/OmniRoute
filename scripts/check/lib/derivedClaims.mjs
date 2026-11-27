@@ -217,7 +217,8 @@ const ROW_SUM_TOTAL_AFTER = [
   { via: "asterisk", pattern: /^(?:\\\*|\*(?!\*))/ },
   {
     via: "label",
-    pattern: /^\s+summed\s+across\s+every\s+catalog\s+row,\s+ended\s+offers\s+included/i,
+    pattern:
+      /^\s+free\s+tokens\s+a\s+month\s+adding\s+up\s+every\s+catalog\s+row,\s+ended\s+offers\s+included/i,
   },
   {
     via: "label",
@@ -242,7 +243,7 @@ const STEADY_AFTER = new RegExp(
   String.raw`^(?:\*\*|<\/?[a-z]{1,8}\/?>|\s){0,12}(?:recurring\s+)?(?:documented\s+)?free\s+tokens` +
     String.raw`|^\s*Tokens\s+\/\s+Month` +
     String.raw`|^\*{0,2}\s*real\b` +
-    String.raw`|^\s+counting\s+each\s+shared\s+quota\s+once\b`,
+    String.raw`|^\s+(?:a\s+month\s+)?counting\s+each\s+shared\s+quota\s+once\b`,
   "i"
 );
 const STEADY_BEFORE =

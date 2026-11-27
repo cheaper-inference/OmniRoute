@@ -597,14 +597,14 @@ test("the method page may omit the link from an otherwise complete note", () => 
 });
 
 test("alt text requires the full unstarred pair even with a complete footnote", () => {
-  const alt = `<img alt="Free tokens a month: ${STARRED_BIG} summed across every catalog row, ended offers included; ${NOTE_REAL} counting each shared quota once.">`;
+  const alt = `<img alt="${STARRED_BIG} free tokens a month adding up every catalog row, ended offers included; ${NOTE_REAL} a month counting each shared quota once.">`;
   assert.equal(place(alt).ok, true, place(alt).detail);
   for (const star of ["*", "\\*"]) {
     const result = place(`${alt.replace(STARRED_BIG, STARRED_BIG + star)}\n\n${FULL_NOTE}`);
     assert.equal(result.ok, false, result.detail);
     assert.match(result.detail, /asterisk.*alt text/);
   }
-  const unpaired = place(alt.replace(`; ${NOTE_REAL} counting each shared quota once`, ""));
+  const unpaired = place(alt.replace(`; ${NOTE_REAL} a month counting each shared quota once`, ""));
   assert.equal(unpaired.ok, false, unpaired.detail);
   assert.match(unpaired.detail, /real figure on the same line/);
 });
@@ -716,7 +716,10 @@ test("the README and FREE_TIERS must keep the row-sum figure", () => {
   // The README without the starred total in the title or the totals in alt text.
   const withoutBig = readme
     .replace(/~\d+(?:\.\d+)?[BM]\\\* /g, "")
-    .replace(/~\d+(?:\.\d+)?[BM] summed across every catalog row, ended offers included; /g, "");
+    .replace(
+      /~\d+(?:\.\d+)?[BM] free tokens a month adding up every catalog row, ended offers included; /g,
+      ""
+    );
   assert.equal(required.validate(withoutBig).ok, false);
   assert.equal(place(readme, { methodPage: false }).ok, true);
   assert.equal(place(freeTiers, { methodPage: true }).ok, true);
@@ -726,7 +729,7 @@ test("the README and FREE_TIERS must keep the row-sum figure", () => {
   const heroLine = readme.slice(readme.lastIndexOf("\n", heroAt) + 1, lineEnd);
   const broken = readme.replace(
     heroLine,
-    heroLine.replace(/; ~\d+(?:\.\d+)?[BM] counting each shared quota once/, "")
+    heroLine.replace(/; ~\d+(?:\.\d+)?[BM] a month counting each shared quota once/, "")
   );
   assert.notEqual(broken, readme);
   assert.equal(place(broken, { methodPage: false }).ok, false);

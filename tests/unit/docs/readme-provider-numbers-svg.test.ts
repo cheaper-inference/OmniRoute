@@ -103,7 +103,7 @@ test("the provider figure SVG shows two rows of four outlined cards and embeds t
     doc
       .querySelector("desc")
       ?.textContent?.includes(
-        `${readmeFactText("code.rowSumTotalLabel")} summed across every catalog row, ended offers included; ${readmeFactText("code.headlineSteadyLabel")} counting each shared quota once.`
+        `${readmeFactText("code.rowSumTotalLabel")} free tokens a month adding up every catalog row, ended offers included; ${readmeFactText("code.headlineSteadyLabel")} a month counting each shared quota once.`
       )
   );
 

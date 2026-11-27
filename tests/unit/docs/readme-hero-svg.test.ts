@@ -93,7 +93,7 @@ test("the hero draws six stats and gives the real figure in the card footnote", 
   const svg = await renderReadmeHero();
   assert.ok(
     svg.includes(
-      `${code.rowSumTotalLabel} summed across every catalog row, ended offers included; ${code.headlineSteadyLabel} counting each shared quota once.`
+      `${code.rowSumTotalLabel} free tokens a month adding up every catalog row, ended offers included; ${code.headlineSteadyLabel} a month counting each shared quota once.`
     )
   );
   assert.match(HERO_COPY.tools[0], /Antigravity/);

@@ -98,7 +98,7 @@ test("the card highlights the starred row sum and moves the recurring and first-
   const svg = await renderReadmeFreeTierBudget();
   assert.ok(
     svg.includes(
-      `${label("rowSumTotalLabel")} summed across every catalog row, ended offers included; ${label("headlineSteadyLabel")} counting each shared quota once.`
+      `${label("rowSumTotalLabel")} free tokens a month adding up every catalog row, ended offers included; ${label("headlineSteadyLabel")} a month counting each shared quota once.`
     )
   );
   assert.ok(!flat.includes("~10B"));

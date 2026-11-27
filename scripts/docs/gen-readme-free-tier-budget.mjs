@@ -184,10 +184,10 @@ export function buildFreeTierBudgetModel() {
     ],
   };
 
-  const tokenDescription = `${RF.rowSumTotalLabel} summed across every catalog row, ended offers included; ${RF.headlineSteadyLabel} counting each shared quota once.`;
+  const tokenDescription = `${RF.rowSumTotalLabel} free tokens a month adding up every catalog row, ended offers included; ${RF.headlineSteadyLabel} a month counting each shared quota once.`;
   const title = `OmniRoute free-tier budget: ${tokenDescription}`;
   const desc =
-    `Free tokens a month: ${tokenDescription} ` +
+    `${tokenDescription} ` +
     `Up to ${RF.headlineFirstLabel} in your first month with one-time signup credits. ` +
     `${RF.rowSumLiveLabel} summed per live row. ` +
     `${RF.freePublishedPools} pools with a published quota and ${RF.freeAccessRows} catalog rows with free access, catalog audited ${RF.catalogDate}. The bar shows the pools behind the recurring figure.`;

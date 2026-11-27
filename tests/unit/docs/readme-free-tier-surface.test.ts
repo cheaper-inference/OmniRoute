@@ -184,7 +184,7 @@ test("the big figure has a section footnote or the full pair in alt text", () =>
   const v = checkRowSumPlacement(README, { methodPage: false });
   assert.equal(v.ok, true, v.detail);
   assert.doesNotMatch(README, /row by row|per live row/i);
-  const pair = `${BIG} summed across every catalog row, ended offers included; ${REAL} counting each shared quota once.`;
+  const pair = `${BIG} free tokens a month adding up every catalog row, ended offers included; ${REAL} a month counting each shared quota once.`;
   for (const svg of ["readme-hero", "free-tier-budget", "provider-numbers"]) {
     const alt = README.split("\n").find((l) => l.includes(`${svg}.svg`));
     assert.ok(alt?.includes(pair), `${svg} alt carries the full pair`);

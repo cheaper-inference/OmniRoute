@@ -15,7 +15,7 @@ import { outlineSvg } from "./readme-outline.mjs";
 import { svgOpen, gridDefs, esc, roleWidth } from "./readme-diagram-theme.mjs";
 import { RF } from "./readmeFacts.mjs";
 
-const TOKEN_DESCRIPTION = `${RF.rowSumTotalLabel} summed across every catalog row, ended offers included; ${RF.headlineSteadyLabel} counting each shared quota once.`;
+const TOKEN_DESCRIPTION = `${RF.rowSumTotalLabel} free tokens a month adding up every catalog row, ended offers included; ${RF.headlineSteadyLabel} a month counting each shared quota once.`;
 
 export const HERO_COPY = {
   kicker: ["OMNIROUTE — THE FREE AI GATEWAY"],
@@ -78,8 +78,8 @@ export async function renderReadmeHero() {
   return outlineSvg(
     svgOpen({
       viewBox: "0 0 1200 548",
-      title: `OmniRoute — Never stop coding. Every AI tool to ${RF.providers} providers, ${RF.hasFreeLabel} with a free offer, through one endpoint. Free tokens a month: ${TOKEN_DESCRIPTION}`,
-      desc: `Hero card in the Cheaper Inference UI Kit style: Switzer drawn as outlines, IBM Plex Mono for the install command. Claims: ${RF.providers} AI providers, ${RF.hasFreeLabel} providers with a free offer, 15–95% token savings, ${RF.routingStrategies} routing strategies, $0 to start. Free tokens a month: ${TOKEN_DESCRIPTION} Light and dark follow the viewer's color scheme.`,
+      title: `OmniRoute — Never stop coding. Every AI tool to ${RF.providers} providers, ${RF.hasFreeLabel} with a free offer, through one endpoint. ${TOKEN_DESCRIPTION}`,
+      desc: `Hero card in the Cheaper Inference UI Kit style: Switzer drawn as outlines, IBM Plex Mono for the install command. Claims: ${RF.providers} AI providers, ${RF.hasFreeLabel} providers with a free offer, 15–95% token savings, ${RF.routingStrategies} routing strategies, $0 to start. ${TOKEN_DESCRIPTION} Light and dark follow the viewer's color scheme.`,
     }) +
       gridDefs("heroGrid") +
       `  <rect class="bg" x="0" y="0" width="1200" height="548"/>\n` +
