@@ -66,6 +66,10 @@ Other catalogs charge from US$ 19 a year to US$ 49 for lifetime access to live d
 <a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="cheaper-inference%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
 [![Star History Rank](https://api.star-history.com/badge?repo=cheaper-inference/OmniRoute&theme=dark)](https://www.star-history.com/cheaper-inference/omniroute)
 [![olud.ai](https://olud.ai/badge.php?tool=diegosouzapw-omniroute)](https://olud.ai/project/diegosouzapw-omniroute.html)
+[![GitHub rank](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fwww.omniroute.online%2Fdata%2Franking-badges.json&query=%24.values.globalRank&label=GitHub%20rank&logo=github&logoColor=white&color=e5ac82&labelColor=20211c)](https://www.omniroute.online/community)
+[![Open-source LLM gateways](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fwww.omniroute.online%2Fdata%2Franking-badges.json&query=%24.values.nichePosition&label=Open-source%20LLM%20gateways&color=e5ac82&labelColor=20211c)](https://www.omniroute.online/community)
+
+<a href="https://www.omniroute.online/community"><img src="https://www.omniroute.online/data/ranking-card.svg" width="100%" alt="OmniRoute star ranking: the top five open-source LLM gateways by GitHub stars, with only OmniRoute named. Updated daily from the GitHub API."/></a>
 
 </div>
 

@@ -1,0 +1,1 @@
+- **docs(readme):** daily GitHub rank and LLM-gateway position badges plus a top-five star ranking card, both served by omniroute.online and refreshed daily without README edits
