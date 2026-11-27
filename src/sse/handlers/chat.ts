@@ -1160,7 +1160,7 @@ async function handleChatImplementation(
       // prefix may differ from the credential provider ID (e.g. model
       // "xiaomi/mimo-v2-flash" resolves to provider "xiaomi" but the combo
       // target specifies providerId: "opengate" for credential lookup).
-      const antigravityEffort = await resolveAntigravityClientEffortRoute(
+      const effortPlan = await resolveAntigravityClientEffortRoute(
         modelString,
         body,
         sourceFormat,
@@ -1168,7 +1168,8 @@ async function handleChatImplementation(
         target,
         true
       );
-      if (antigravityEffort && "error" in antigravityEffort) return false;
+      if (effortPlan?.kind === "error") return false;
+      const antigravityEffort = effortPlan?.kind === "route" ? effortPlan : null;
       const modelInfo = await getComboPreflightModelInfo(antigravityEffort?.address ?? modelString);
       if (!modelInfo) return false;
       if (modelInfo?.errorType === "model_not_found") return "model_not_in_catalog";
@@ -1630,7 +1631,7 @@ async function handleSingleModelChat(
   const requestUpstreamStartTimeoutMs = resolveInternalUpstreamStartTimeoutMs(request);
 
   // Resolve the optional family before model metadata, credential and breaker gates.
-  const antigravityEffort = await resolveAntigravityClientEffortRoute(
+  const effortPlan = await resolveAntigravityClientEffortRoute(
     modelStr,
     body,
     detectFormatFromEndpoint(body, clientRawRequest?.endpoint || ""),
@@ -1638,9 +1639,10 @@ async function handleSingleModelChat(
     { ...runtimeOptions, connectionId: runtimeOptions.forcedConnectionId },
     isCombo
   );
-  if (antigravityEffort && "error" in antigravityEffort) {
-    return errorResponse(HTTP_STATUS.BAD_REQUEST, antigravityEffort.error);
+  if (effortPlan?.kind === "error") {
+    return errorResponse(HTTP_STATUS.BAD_REQUEST, effortPlan.error);
   }
+  const antigravityEffort = effortPlan?.kind === "route" ? effortPlan : null;
 
   // 1. Resolve model → provider/model
   const resolved = await resolveModelOrError(

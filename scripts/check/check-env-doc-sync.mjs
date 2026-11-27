@@ -383,8 +383,14 @@ export const CODE_SCAN_ROOTS = [
 
 const CODE_ENV_REF = /process\.env\.([A-Z][A-Z0-9_]+)/g;
 
-// CI inputs are scoped to the scripts that consume them.
-const CI_SCRIPT_INPUTS = new Map([
+// Environment references that are not product configuration are scoped by file.
+const SCOPED_NON_CONTRACT_ENV_REFS = new Map([
+  // Compatibility guard only: the selector belongs to #20342, not this branch.
+  // Its own references still require documentation if that feature is integrated.
+  [
+    path.join("open-sse", "config", "antigravityClientEffort.ts"),
+    new Set(["ANTIGRAVITY_EFFORT_TIER_SELECTION"]),
+  ],
   [
     path.join("scripts", "ci", "atomic-tsx-cache.mjs"),
     new Set(["OMNIROUTE_CI_SYNC_TSX_CACHE", "TMPDIR"]),
@@ -428,10 +434,10 @@ export function scanCodeVars({ cwd, roots = CODE_SCAN_ROOTS } = {}) {
       return;
     }
     if (text.includes("\0")) return;
-    const ciInputs = CI_SCRIPT_INPUTS.get(path.relative(repoRoot, file));
+    const nonContractRefs = SCOPED_NON_CONTRACT_ENV_REFS.get(path.relative(repoRoot, file));
     for (const match of text.matchAll(CODE_ENV_REF)) {
       const name = match[1];
-      if (!ciInputs?.has(name)) vars.add(name);
+      if (!nonContractRefs?.has(name)) vars.add(name);
     }
   };
   const walk = (dir) => {

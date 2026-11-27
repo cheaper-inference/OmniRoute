@@ -2,12 +2,16 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 
 import {
   isMainEntry,
   parseEnvExampleVars,
   parseEnvDocVars,
   runEnvDocSync,
+  scanCodeVars,
 } from "../../scripts/check/check-env-doc-sync.mjs";
 
 test("parseEnvExampleVars: extracts uncommented assignments", () => {
@@ -218,6 +222,21 @@ test("desktop release context is not app configuration, while undocumented app v
   });
   assert.equal(result.ok, false);
   assert.deepEqual(result.problems.codeMissingEnv, ["OMNIROUTE_UNDOCUMENTED_APP_OPTION"]);
+});
+
+test("Antigravity interop excludes only the separate selector read in the compatibility guard", (t) => {
+  const root = mkdtempSync(join(tmpdir(), "env-contract-antigravity-"));
+  t.after(() => rmSync(root, { recursive: true, force: true }));
+  const config = join(root, "open-sse", "config");
+  mkdirSync(config, { recursive: true });
+  const compatibilityRead = "process.env.ANTIGRAVITY_EFFORT_TIER_SELECTION;";
+  writeFileSync(
+    join(config, "antigravityClientEffort.ts"),
+    `${compatibilityRead} process.env.ANTIGRAVITY_CLIENT_EFFORT_MODELS;`
+  );
+  assert.deepEqual([...scanCodeVars({ cwd: root })], ["ANTIGRAVITY_CLIENT_EFFORT_MODELS"]);
+  writeFileSync(join(config, "separateSelector.ts"), compatibilityRead);
+  assert.ok(scanCodeVars({ cwd: root }).has("ANTIGRAVITY_EFFORT_TIER_SELECTION"));
 });
 
 test("repository contract is in sync (live data)", () => {

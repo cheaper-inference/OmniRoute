@@ -21,7 +21,8 @@ type Target = {
   allowedConnectionIds?: string[] | null;
   providerId?: string | null;
 };
-type Plan = { address: string; connectionIds: string[] } | { error: string };
+type Plan =
+  { kind: "route"; address: string; connectionIds: string[] } | { kind: "error"; error: string };
 
 function readEffortAddress(address: string, target: Target | null | undefined) {
   const [provider, model, extra] = address.split("/");
@@ -99,7 +100,8 @@ export async function resolveAntigravityClientEffortRoute(
   // Only apply new routing semantics when the alias really exists in fresh native
   // inventory; preserve release's static bare Gemini fallback otherwise.
   if (!planAntigravityClientEffortRoute(model, {}, accounts, null)) return null;
-  if (getModelIsHidden(provider, model)) return { error: "The requested model is hidden" };
+  if (getModelIsHidden(provider, model))
+    return { kind: "error", error: "The requested model is hidden" };
   const allowed = await readAllowedAccounts(key, target, isCombo);
   const plan = planAntigravityClientEffortRoute(
     model,
@@ -107,8 +109,15 @@ export async function resolveAntigravityClientEffortRoute(
     accounts,
     allowed
   );
-  if (!plan || "error" in plan) {
-    return { error: "No eligible Antigravity account advertises the requested reasoning tier" };
+  if (plan && "connectionIds" in plan) {
+    return {
+      kind: "route",
+      address: `${provider}/${plan.model}`,
+      connectionIds: plan.connectionIds,
+    };
   }
-  return { address: `${provider}/${plan.model}`, connectionIds: plan.connectionIds };
+  return {
+    kind: "error",
+    error: "No eligible Antigravity account advertises the requested reasoning tier",
+  };
 }
