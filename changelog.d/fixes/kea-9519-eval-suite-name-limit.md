@@ -1,0 +1,1 @@
+- **fix(dashboard):** Quality › New suite flags a suite name, description or case name over its saved limit (200 / 2,000 / 200 characters) as it is typed and refuses the save, instead of sending it and showing the server's raw error in a toast (KEA-9519)

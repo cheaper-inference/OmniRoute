@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Ahadi — Endpoint moja na watoa huduma 394. Fallback ya kiotomatiki huendeleza uelekezaji mradi tu kuna lengo lingine lenye afya. Nguzo sita: fallback thabiti katika watoa huduma 394 · hadi 95% ya uokoaji wa tokeni kwenye mizigo ya kazi inayostahiki · kuanza kwa $0 ukiwa na viwango zaidi ya 150 vya bila malipo na watoa huduma 51 wa bila malipo wa kudumu wanaorudiwa wasiohitaji ufunguo · miunganisho 39 ya CLI/agent kupitia usanidi mmoja · uoanifu na OpenAI, Claude, Gemini na Responses API kwenye /v1 · vidhibiti vya uzalishaji vinavyojumuisha vivunja mzunguko, TLS stealth, zana 110 za MCP, A2A, kumbukumbu, guardrails, evals na matamko ya majaribio tuli zaidi ya 56,000 katika faili za majaribio zinazofuatiliwa zaidi ya 7,800."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Ahadi — Endpoint moja na watoa huduma 394. Fallback ya kiotomatiki huendeleza uelekezaji mradi tu kuna lengo lingine lenye afya. Nguzo sita: fallback thabiti katika watoa huduma 394 · hadi 95% ya uokoaji wa tokeni kwenye mizigo ya kazi inayostahiki · kuanza kwa $0 ukiwa na viwango zaidi ya 150 vya bila malipo na watoa huduma 40 wa bila malipo wa kudumu wanaorudiwa wasiohitaji ufunguo · miunganisho 39 ya CLI/agent kupitia usanidi mmoja · uoanifu na OpenAI, Claude, Gemini na Responses API kwenye /v1 · vidhibiti vya uzalishaji vinavyojumuisha vivunja mzunguko, TLS stealth, zana 110 za MCP, A2A, kumbukumbu, guardrails, evals na matamko ya majaribio tuli zaidi ya 56,000 katika faili za majaribio zinazofuatiliwa zaidi ya 7,800."/>
 
 <br/>
 <br/>
@@ -703,7 +703,7 @@ ya historia ya shell yako. → [Muunganiko wa CLI](docs/guides/CLI-INTEGRATIONS.
 
 </div>
 
-> **Watoa huduma 394 waliosajiliwa** katika mikusanyo rasmi ya gumzo, media, utafutaji, ya ndani, mawakala wa wingu na mfumo, wakiwemo **153 wenye metadata ya ugunduzi ya `hasFree: true`**. Sajili ya miundo ya gumzo inashughulikia **watoa huduma 239 / jozi 3,059 tofauti za mtoa huduma na modeli / vitambulisho 1,475 ghafi vya modeli**; katalogi tofauti ya bajeti bila malipo ina **safu 465 za kila modeli**, **madimbwi 34 yanayojirudia** na **watoa huduma 51 wa bila malipo milele wanaojirudia/wasiohitaji ufunguo**. Hizi ni denomineta tofauti kwa makusudi; ufafanuzi na hesabu zilizoondoa marudio ya madimbwi zinapatikana kwenye [Marejeleo ya Watoa Huduma](docs/reference/PROVIDER_REFERENCE.md) na [Viwango vya Bila Malipo](docs/reference/FREE_TIERS.md).
+> **Watoa huduma 394 waliosajiliwa** katika mikusanyo rasmi ya gumzo, media, utafutaji, ya ndani, mawakala wa wingu na mfumo, wakiwemo **153 wenye metadata ya ugunduzi ya `hasFree: true`**. Sajili ya miundo ya gumzo inashughulikia **watoa huduma 239 / jozi 3,059 tofauti za mtoa huduma na modeli / vitambulisho 1,475 ghafi vya modeli**; katalogi tofauti ya bajeti bila malipo ina **safu 465 za kila modeli**, **madimbwi 34 yanayojirudia** na **watoa huduma 40 wa bila malipo milele wanaojirudia/wasiohitaji ufunguo**. Hizi ni denomineta tofauti kwa makusudi; ufafanuzi na hesabu zilizoondoa marudio ya madimbwi zinapatikana kwenye [Marejeleo ya Watoa Huduma](docs/reference/PROVIDER_REFERENCE.md) na [Viwango vya Bila Malipo](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -1323,7 +1323,7 @@ Vipimo kanoniki mnamo 2026-10-18: **video 1.976 za kipekee** · **mara 20.220.28
   <tr><td nowrap><b>Mazingira ya uendeshaji</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Lugha</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> katika <code>src/</code> na <code>open-sse/</code> (<code>any</code> sifuri katika msingi tangu v2.0)</td></tr>
   <tr><td nowrap><b>Mfumo</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Hifadhidata</b></td><td>better-sqlite3 (SQLite, uandishi wa WAL) + LowDB (JSON ya urithi) — moduli 147 za kikoa, uhamishaji 244</td></tr>
+  <tr><td nowrap><b>Hifadhidata</b></td><td>better-sqlite3 (SQLite, uandishi wa WAL) + LowDB (JSON ya urithi) — moduli 147 za kikoa, uhamishaji 252</td></tr>
   <tr><td nowrap><b>Kumbukumbu</b></td><td>Utafutaji wa maandishi kamili wa SQLite FTS5 + embeddings za vekta zenye quantization ya int8, decay yenye aina</td></tr>
   <tr><td nowrap><b>Schema</b></td><td>Zod 4 — uthibitishaji wa I/O wa zana za MCP + mikataba ya API</td></tr>
   <tr><td nowrap><b>Itifaki</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

@@ -1,6 +1,6 @@
 ---
 name: validate-release-green
-description: Run or inspect the local Release-Green observer for an exact base or combined PR candidate, separating hard failures, advisory drift and incomplete evidence. Use for maintainer preflight; full CI acceptance remains a separate requirement.
+description: "Use when the owner asks whether a release branch or a combined PR candidate is green before a release or a merge ('está verde?', 'pré-flight da release', 'roda o release-green'). Runs the local Release-Green observer (static gates plus tests, optional build) and separates HARD, DRIFT and incomplete evidence. Not the static gate sweep (/quality-scan). Not a code review. Never fixes."
 ---
 
 # Validate Release-Green

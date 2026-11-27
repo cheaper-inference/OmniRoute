@@ -1,8 +1,17 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { Card, Button, Badge, Checkbox, ConfirmModal, Input, Select } from "@/shared/components";
+import {
+  Card,
+  Button,
+  Badge,
+  Checkbox,
+  ConfirmModal,
+  FileTrigger,
+  NumberInput,
+  Select,
+} from "@/shared/components";
 import Icon from "@/shared/components/Icon";
 import { Spinner } from "@/shared/components/Loading";
 import DatabaseBackupRetentionCard from "./DatabaseBackupRetentionCard";
@@ -75,8 +84,6 @@ export default function SystemStorageTab() {
   const [resetUsagePeriod, setResetUsagePeriod] = useState("all");
   const [resetUsageLoading, setResetUsageLoading] = useState(false);
   const [resetUsageStatus, setResetUsageStatus] = useState({ type: "", message: "" });
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const jsonInputRef = useRef<HTMLInputElement>(null);
   const locale = useLocale();
   const t = useTranslations("settings");
   const tc = useTranslations("common");
@@ -563,21 +570,9 @@ export default function SystemStorageTab() {
     }
   };
 
-  const handleImportJsonClick = () => {
-    jsonInputRef.current?.click();
-  };
-
-  const handleJsonSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (!file.name.endsWith(".json")) {
-      setImportStatus({
-        type: "error",
-        message: t("invalidJsonFileType"),
-      });
-      return;
-    }
-
+  // The kit file trigger filters by extension: a `.json` file lands here, anything else in the
+  // rejection handler next to it.
+  const handleJsonSelected = ([file]: File[]) => {
     // Auto import JSON
     const reader = new FileReader();
     reader.onload = async (e) => {
@@ -608,7 +603,6 @@ export default function SystemStorageTab() {
         setImportStatus({ type: "error", message: t("jsonImportError") });
       } finally {
         setImportLoading(false);
-        if (jsonInputRef.current) jsonInputRef.current.value = "";
       }
     };
     reader.readAsText(file);
@@ -633,23 +627,9 @@ export default function SystemStorageTab() {
     }
   };
 
-  const handleImportClick = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleFileSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (!file.name.endsWith(".sqlite")) {
-      setImportStatus({
-        type: "error",
-        message: t("invalidFileType"),
-      });
-      return;
-    }
+  const handleFileSelected = ([file]: File[]) => {
     setPendingImportFile(file);
     setConfirmImport(true);
-    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const handleImportConfirm = async () => {
@@ -752,9 +732,9 @@ export default function SystemStorageTab() {
     if (dbSettingsLoading || !dbSettings?.stats) return null;
 
     return (
-      <div className="mb-4 p-4 rounded-lg border border-border bg-bg">
+      <Card.Section className="mb-4">
         <div className="flex items-center justify-between gap-3 mb-3">
-          <h4 className="text-sm flex items-center gap-2">
+          <h4 className="ci-heading flex items-center gap-2" data-size="sm">
             <Icon name="analytics" size={18} />
             {t("storageDatabaseStatistics")}
           </h4>
@@ -814,7 +794,7 @@ export default function SystemStorageTab() {
             </p>
           </div>
         </div>
-      </div>
+      </Card.Section>
     );
   };
 
@@ -924,10 +904,10 @@ export default function SystemStorageTab() {
     ];
 
     return (
-      <div className="mt-6 p-4 rounded-lg border border-border bg-bg">
+      <Card.Section className="mt-6">
         <div className="flex items-start justify-between gap-3 flex-wrap mb-3">
           <div>
-            <h4 className="text-sm flex items-center gap-2">
+            <h4 className="ci-heading flex items-center gap-2" data-size="sm">
               <Icon name="schedule" size={18} />
               {t("storageRetentionCleanup")}
             </h4>
@@ -949,19 +929,18 @@ export default function SystemStorageTab() {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {retentionFields.map(([key, label, fallback]) => (
-            <Input
+            <NumberInput
               key={String(key)}
               label={label}
-              type="number"
-              min="1"
-              max="365"
+              min={1}
+              max={365}
               value={dbSettings.retention[key]}
-              onChange={(e) =>
+              onValueChange={(value) =>
                 setDbSettings({
                   ...dbSettings,
                   retention: {
                     ...dbSettings.retention,
-                    [key]: parseInt(e.target.value) || fallback,
+                    [key]: value || fallback,
                   },
                 })
               }
@@ -969,18 +948,17 @@ export default function SystemStorageTab() {
           ))}
         </div>
         <div className="mt-4 max-w-sm">
-          <Input
+          <NumberInput
             label={t("mediaStoreMaxMb")}
-            type="number"
-            min="1"
+            min={1}
             value={dbSettings.retention.mediaStoreMaxMb}
             hint={t("mediaStoreMaxMbHint")}
-            onChange={(e) =>
+            onValueChange={(value) =>
               setDbSettings({
                 ...dbSettings,
                 retention: {
                   ...dbSettings.retention,
-                  mediaStoreMaxMb: parseInt(e.target.value) || 2048,
+                  mediaStoreMaxMb: value || 2048,
                 },
               })
             }
@@ -1012,7 +990,7 @@ export default function SystemStorageTab() {
             onCleanupBackups={handleCleanupBackups}
           />
         </div>
-      </div>
+      </Card.Section>
     );
   };
 
@@ -1020,8 +998,8 @@ export default function SystemStorageTab() {
     if (dbSettingsLoading || !dbSettings) return null;
 
     return (
-      <div className="mt-6 p-4 rounded-lg border border-border bg-bg">
-        <h4 className="text-sm mb-3 flex items-center gap-2">
+      <Card.Section className="mt-6">
+        <h4 className="ci-heading mb-3 flex items-center gap-2" data-size="sm">
           <Icon name="tune" size={18} />
           {t("storageOptimizationSettings")}
         </h4>
@@ -1064,51 +1042,48 @@ export default function SystemStorageTab() {
                 { value: "monthly", label: t("storageVacuumMonthly") },
               ]}
             />
-            <Input
+            <NumberInput
               label={t("storageVacuumHour")}
-              type="number"
-              min="0"
-              max="23"
+              min={0}
+              max={23}
               value={dbSettings.optimization.vacuumHour}
-              onChange={(e) =>
+              onValueChange={(value) =>
                 setDbSettings({
                   ...dbSettings,
                   optimization: {
                     ...dbSettings.optimization,
-                    vacuumHour: parseInt(e.target.value) || 2,
+                    vacuumHour: value || 2,
                   },
                 })
               }
             />
-            <Input
+            <NumberInput
               label={t("storagePageSize")}
-              type="number"
-              min="512"
-              max="65536"
-              step="512"
+              min={512}
+              max={65536}
+              step={512}
               value={dbSettings.optimization.pageSize}
-              onChange={(e) =>
+              onValueChange={(value) =>
                 setDbSettings({
                   ...dbSettings,
                   optimization: {
                     ...dbSettings.optimization,
-                    pageSize: parseInt(e.target.value) || 4096,
+                    pageSize: value || 4096,
                   },
                 })
               }
             />
-            <Input
+            <NumberInput
               label={t("storageCacheSizeKb")}
-              type="number"
-              min="1"
-              step="1024"
+              min={1}
+              step={1024}
               value={dbSettings.optimization.cacheSize}
-              onChange={(e) =>
+              onValueChange={(value) =>
                 setDbSettings({
                   ...dbSettings,
                   optimization: {
                     ...dbSettings.optimization,
-                    cacheSize: parseInt(e.target.value) || 16384,
+                    cacheSize: value || 16384,
                   },
                 })
               }
@@ -1139,7 +1114,7 @@ export default function SystemStorageTab() {
             {t("storageSaveOptimization")}
           </Button>
         </div>
-      </div>
+      </Card.Section>
     );
   };
 
@@ -1147,8 +1122,8 @@ export default function SystemStorageTab() {
     if (dbSettingsLoading || !dbSettings) return null;
 
     return (
-      <div className="mt-6 p-4 rounded-lg border border-border bg-bg">
-        <h4 className="text-sm mb-3 flex items-center gap-2">
+      <Card.Section className="mt-6">
+        <h4 className="ci-heading mb-3 flex items-center gap-2" data-size="sm">
           <Icon name="compress" size={18} />
           {t("storageCompressionAggregation")}
         </h4>
@@ -1165,18 +1140,17 @@ export default function SystemStorageTab() {
             }
           />
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Input
+            <NumberInput
               label={t("storageRawDataRetention")}
-              type="number"
-              min="1"
-              max="365"
+              min={1}
+              max={365}
               value={dbSettings.aggregation.rawDataRetentionDays}
-              onChange={(e) =>
+              onValueChange={(value) =>
                 setDbSettings({
                   ...dbSettings,
                   aggregation: {
                     ...dbSettings.aggregation,
-                    rawDataRetentionDays: parseInt(e.target.value) || 30,
+                    rawDataRetentionDays: value || 30,
                   },
                 })
               }
@@ -1211,7 +1185,7 @@ export default function SystemStorageTab() {
             {t("storageSaveAggregation")}
           </Button>
         </div>
-      </div>
+      </Card.Section>
     );
   };
 
@@ -1223,7 +1197,9 @@ export default function SystemStorageTab() {
         <span className="flex size-9 shrink-0 items-center justify-center rounded-control bg-bg-subtle text-text-muted sm:row-span-2">
           <Icon name="database" size={20} />
         </span>
-        <h3 className="text-lg">{t("systemStorage")}</h3>
+        <h3 className="ci-heading" data-size="lg">
+          {t("systemStorage")}
+        </h3>
         <Badge variant="success" size="sm" className="col-start-3 row-start-1 sm:row-span-2">
           {storageHealth.driver || "json"}
         </Badge>
@@ -1241,14 +1217,14 @@ export default function SystemStorageTab() {
       </div>
 
       <div className="grid grid-cols-1 gap-3 mb-4">
-        <div className="p-3 rounded-lg bg-bg border border-border">
-          <p className="text-[11px] text-text-muted uppercase tracking-wide mb-1">
+        <Card.Section>
+          <p className="ci-eyebrow mb-1" data-size="2xs">
             {t("databasePath")}
           </p>
           <p className="text-sm font-mono text-text-main break-all">
             {storageHealth.dbPath || "~/.omniroute/storage.sqlite"}
           </p>
-        </div>
+        </Card.Section>
       </div>
 
       {dbSettingsAuthRequired && !dbSettingsLoading && <AuthRequiredBanner t={t} />}
@@ -1294,24 +1270,17 @@ export default function SystemStorageTab() {
           >
             {t("exportAll")}
           </Button>
-          <Button
-            icon="upload"
-            variant="outline"
-            size="sm"
-            onClick={handleImportClick}
-            loading={importLoading}
-          >
-            {t("importDatabase")}
-          </Button>
-          <Input
-            ref={fileInputRef}
-            type="file"
+          <FileTrigger
             accept=".sqlite"
-            aria-label={t("importDatabase")}
-            tabIndex={-1}
-            className="hidden"
-            onChange={handleFileSelected}
-          />
+            onFilesChange={handleFileSelected}
+            onFilesRejected={() =>
+              setImportStatus({ type: "error", message: t("invalidFileType") })
+            }
+          >
+            <Button icon="upload" variant="outline" size="sm" loading={importLoading}>
+              {t("importDatabase")}
+            </Button>
+          </FileTrigger>
           <Button
             icon="data_object"
             variant="outline"
@@ -1321,24 +1290,17 @@ export default function SystemStorageTab() {
           >
             {t("exportJson")}
           </Button>
-          <Button
-            icon="data_object"
-            variant="outline"
-            size="sm"
-            onClick={handleImportJsonClick}
-            loading={importLoading}
-          >
-            {t("importJson")}
-          </Button>
-          <Input
-            ref={jsonInputRef}
-            type="file"
+          <FileTrigger
             accept=".json"
-            aria-label={t("importJson")}
-            tabIndex={-1}
-            className="hidden"
-            onChange={handleJsonSelected}
-          />
+            onFilesChange={handleJsonSelected}
+            onFilesRejected={() =>
+              setImportStatus({ type: "error", message: t("invalidJsonFileType") })
+            }
+          >
+            <Button icon="data_object" variant="outline" size="sm" loading={importLoading}>
+              {t("importJson")}
+            </Button>
+          </FileTrigger>
           <ProviderTransferPanel />
         </div>
 
@@ -1452,7 +1414,7 @@ export default function SystemStorageTab() {
         </div>
       </div>
 
-      <div className="flex items-center justify-between p-3 rounded-lg bg-bg border border-border mb-4">
+      <Card.Section className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Icon name="schedule" size={16} className="text-warning" />
           <div>
@@ -1488,7 +1450,7 @@ export default function SystemStorageTab() {
             {backupsExpanded ? t("hide") : t("viewBackups")}
           </Button>
         </div>
-      </div>
+      </Card.Section>
 
       {manualBackupStatus.message && (
         <div className="mb-4">{renderStatusAlert(manualBackupStatus, 0)}</div>

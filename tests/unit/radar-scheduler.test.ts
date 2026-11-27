@@ -20,11 +20,11 @@ const {
 const NOW = Date.parse("2026-08-06T12:00:00.000Z");
 const FRESH = new Date(NOW - 60 * 60 * 1000).toISOString(); // 1h ago — inside the daily window
 const STALE = new Date(NOW - 25 * 60 * 60 * 1000).toISOString(); // 25h ago — due
-// Referrals staleness window is much shorter (1h, see REFERRALS_STALE_MS) —
+// Referrals staleness window is shorter (6h, see REFERRALS_STALE_MS) —
 // this default must sit well inside it so existing catalog-only subtests
 // never trigger a referrals sync as an unasserted side effect.
 const REFERRALS_FRESH = new Date(NOW - 5 * 60 * 1000).toISOString(); // 5m ago
-const REFERRALS_STALE = new Date(NOW - 2 * 60 * 60 * 1000).toISOString(); // 2h ago — due
+const REFERRALS_STALE = new Date(NOW - 7 * 60 * 60 * 1000).toISOString(); // 7h ago — due
 
 /** Fake interval registry so no real timer ever exists in these tests. */
 function fakeTimers() {
@@ -190,7 +190,7 @@ test("radar sync scheduler", async (t) => {
 
   // -------------------------------------------------------------------------
   // Referrals side-sync — piggybacks on the same hourly tick but its own
-  // (much shorter, 1h) staleness window, independent of the catalog's
+  // (6h) staleness window, independent of the catalog's
   // due-ness. Never surfaces in RadarTickResult (fire-and-await side effect
   // only) so the catalog-sync result shape/assertions above stay unchanged.
   // -------------------------------------------------------------------------

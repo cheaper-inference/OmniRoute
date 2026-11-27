@@ -43,11 +43,11 @@ export default function RequestLogThroughput({ log }: { log: ThroughputLog }) {
       className="inline-flex flex-col gap-0.5 rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
     >
       <span className={color}>
-        <span className="text-[10px] text-text-muted">{generationLabel}: </span>
+        <span className="text-3xs text-text-muted">{generationLabel}: </span>
         {generationValue}
       </span>
       <span className="text-text-muted">
-        <span className="text-[10px]">{e2eLabel}: </span>
+        <span className="text-3xs">{e2eLabel}: </span>
         {e2eValue}
       </span>
     </span>

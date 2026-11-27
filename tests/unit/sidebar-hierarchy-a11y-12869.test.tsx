@@ -212,7 +212,9 @@ describe("Sidebar hierarchy, keyboard navigation and ARIA contract (#12869)", ()
 
     const group = within(aside).getByRole("button", { name: "Compression Context" });
     expect(group.getAttribute("aria-expanded")).toBe("false");
-    expect(within(aside).queryByRole("link", { name: "Caveman" })).toBeNull();
+    expect(
+      within(aside).queryByRole("link", { name: /^Caveman\s*Prompt compression$/ })
+    ).toBeNull();
 
     group.focus();
     expect(document.activeElement).toBe(group);
@@ -223,12 +225,14 @@ describe("Sidebar hierarchy, keyboard navigation and ARIA contract (#12869)", ()
     expect(panelId).toBeTruthy();
     const panel = container.querySelector(`[id="${panelId}"]`);
     expect(panel).not.toBeNull();
-    expect(within(aside).getByRole("link", { name: "Caveman" })).toBeTruthy();
-    expect(panel!.contains(within(aside).getByRole("link", { name: "Caveman" }))).toBe(true);
+    const caveman = within(aside).getByRole("link", { name: /^Caveman\s*Prompt compression$/ });
+    expect(panel!.contains(caveman)).toBe(true);
 
     await user.keyboard(" ");
     expect(group.getAttribute("aria-expanded")).toBe("false");
-    expect(within(aside).queryByRole("link", { name: "Caveman" })).toBeNull();
+    expect(
+      within(aside).queryByRole("link", { name: /^Caveman\s*Prompt compression$/ })
+    ).toBeNull();
   });
 
   it("search reveals a collapsed group's item and restores the collapsed state afterwards", async () => {
@@ -242,11 +246,15 @@ describe("Sidebar hierarchy, keyboard navigation and ARIA contract (#12869)", ()
     expect(group()?.getAttribute("aria-expanded")).toBe("false");
     const search = within(aside).getByRole("searchbox");
     await user.type(search, "Caveman");
-    expect(within(aside).getByRole("link", { name: "Caveman" })).toBeTruthy();
+    expect(
+      within(aside).getByRole("link", { name: /^Caveman\s*Prompt compression$/ })
+    ).toBeTruthy();
 
     await user.clear(search);
     expect(group()?.getAttribute("aria-expanded")).toBe("false");
-    expect(within(aside).queryByRole("link", { name: "Caveman" })).toBeNull();
+    expect(
+      within(aside).queryByRole("link", { name: /^Caveman\s*Prompt compression$/ })
+    ).toBeNull();
   });
 
   it("collapses to an icon rail whose links keep accessible names, then expands again", async () => {
@@ -287,21 +295,17 @@ describe("Sidebar hierarchy, keyboard navigation and ARIA contract (#12869)", ()
       aside.querySelectorAll("[tabindex]:not([tabindex='0']):not([tabindex='-1'])")
     ).toHaveLength(0);
 
-    const stops: string[] = [];
-    for (let index = 0; index < 3; index += 1) {
-      await user.tab();
-      const active = document.activeElement as HTMLElement;
-      stops.push(
-        active.getAttribute("aria-label") ||
-          active.getAttribute("type") ||
-          active.textContent?.trim() ||
-          active.tagName
-      );
-    }
     // The collapse toggle left the aside for the shell Header (trilha G), so it is no stop here.
-    expect(stops, `tab stops: ${JSON.stringify(stops)}`).toEqual(["OmniRoute", "Search", "Home"]);
-    // The third stop is the first item of the navigation landmark.
-    expect(aside.querySelector("nav")!.contains(document.activeElement)).toBe(true);
+    const brand = within(aside).getByRole("link", { name: /OmniRoute\s*v\d+\.\d+\.\d+/ });
+    const search = within(aside).getByRole("searchbox", { name: "Search" });
+    const navigation = within(aside).getByRole("navigation", { name: "Main navigation" });
+    const home = within(navigation).getByRole("link", { name: /^Home\s*Dashboard overview$/ });
+    await user.tab();
+    expect(document.activeElement).toBe(brand);
+    await user.tab();
+    expect(document.activeElement).toBe(search);
+    await user.tab();
+    expect(document.activeElement).toBe(home);
   });
 
   it("gives every expandable control state + a resolvable panel, and every control a name", async () => {

@@ -1118,6 +1118,7 @@ async function handleComboChatInner({
     signal,
     nativeTurnPin: activeNativeTurnPin,
     deferContextOverflowWhenCompressible,
+    sourceFormat,
     apiKeyAllowedConnections,
     log,
     resilienceSettings,

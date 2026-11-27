@@ -7,6 +7,10 @@ import {
   selectModelsForImport,
 } from "../../src/shared/utils/freeModels.ts";
 
+test("#19385 UncloseAI's closed public beta grants no static free access", () => {
+  assert.equal(isCatalogFreeModel("uncloseai", "turboderp/Qwen3.8-27B-exl3"), false);
+});
+
 // Official notices checked 2026-10-28, not inferred from missing /models entries:
 // https://ollama.com/library/deepseek-v4-flash (retired 2026-08-27)
 // https://ollama.com/library/glm-5.1 (retired 2026-09-25)

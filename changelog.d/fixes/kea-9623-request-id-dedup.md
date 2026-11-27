@@ -1,0 +1,1 @@
+- **fix(sse):** preserve client `X-Request-Id` through the API proxy and replay completed non-streaming chat responses for overlapping retries within the idempotency window.

@@ -608,11 +608,10 @@ export async function registerNodejs(): Promise<void> {
   // scoring for generic providers in the App Router production runtime.
   await registerQuotaFetchers();
 
-  // Readiness probes that keep local-CLI no-auth providers (devin-cli-agentic) out of
-  // the auto/* pools until confirmed (#15446). Unregistered probes fail closed.
+  // Register local CLI and browser runtime readiness before serving auto/* requests.
   const { registerNoAuthAutoRoutingReadiness } =
     await import("@/lib/providers/noAuthAutoRoutingReadiness");
-  registerNoAuthAutoRoutingReadiness();
+  await registerNoAuthAutoRoutingReadiness();
 
   // Guarantee the SQLite singleton — including a sql.js WASM pre-init when
   // both synchronous drivers (better-sqlite3, node:sqlite) are unavailable —

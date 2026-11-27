@@ -48,11 +48,12 @@ import { clampComboDepth } from "./comboPredicates.ts";
 import {
   computeCompatRejectedTargets,
   describeCapabilityFilterExhaustion,
-  filterTargetsByRequestCompatibility,
+  resolveTargetRequestCompatibility,
   resolveComboTargets,
   resolveWeightedStepGroups,
   resolveWeightedTargets,
 } from "./comboStructure.ts";
+import { resolveOutputLimitPolicy } from "./outputLimitPolicy.ts";
 import { applyContextRequirements } from "./contextRequirements.ts";
 import { recordComboFailure } from "./failureTracker.ts";
 import { scopeHandoffSessionId } from "./handoffSessionScope.ts";
@@ -116,6 +117,7 @@ export interface ResolveComboTargetPipelineDeps {
   signal?: AbortSignal | null;
   nativeTurnPin?: NativeTurnPin | null;
   deferContextOverflowWhenCompressible?: boolean;
+  sourceFormat?: string | null;
   apiKeyAllowedConnections: string[] | null;
   log: ComboLogger;
   resilienceSettings: ResilienceSettings;
@@ -492,6 +494,7 @@ async function orderByStrategy(
   if (getStrategyTraits(strategy).ordering === "auto") {
     const autoResult = await resolveAutoStrategyOrder({
       orderedTargets: initialOrderedTargets,
+      sourceFormat: deps.sourceFormat,
       body,
       combo,
       settings,
@@ -560,7 +563,7 @@ function applyTargetFilter(
 function isEnabledInConfigOrSettings(
   config: unknown,
   settings: unknown,
-  key: "compatFilterFailOpen" | "outputLimitAdvisory"
+  key: "compatFilterFailOpen"
 ): boolean {
   return (
     (config as Record<string, unknown> | null | undefined)?.[key] === true ||
@@ -712,25 +715,18 @@ async function applyContinuityFilters(
   // #8488 / #8494: fail closed when hard capability filters empty the pool.
   // Opt-in escape hatch: combo.config.compatFilterFailOpen OR settings.compatFilterFailOpen.
   const preCompatTargets = orderedTargets;
-  const compatibleTargets = filterTargetsByRequestCompatibility(
-    orderedTargets,
-    body,
-    log,
-    undefined,
-    {
-      failOpen: isEnabledInConfigOrSettings(config, settings, "compatFilterFailOpen"),
-      outputLimitAdvisory: isEnabledInConfigOrSettings(config, settings, "outputLimitAdvisory"),
-    }
-  );
-  orderedTargets = applyTargetFilter(orderedTargets, compatibleTargets, jevOwnsOrder);
+  const compatibility = resolveTargetRequestCompatibility(orderedTargets, body, log, undefined, {
+    failOpen: isEnabledInConfigOrSettings(config, settings, "compatFilterFailOpen"),
+    ...resolveOutputLimitPolicy(config, settings, deps.sourceFormat),
+  });
+  orderedTargets = applyTargetFilter(orderedTargets, compatibility.targets, jevOwnsOrder);
   // #6238: keep the targets the compat pre-filter rejected so the dispatch loop
   // can probe them as a last-resort fallback tier when every compat-kept target
   // later turns out runtime-unavailable (mirrors the round-robin path).
-  const compatRejectedTargets = computeCompatRejectedTargets(
-    preCompatTargets,
-    orderedTargets,
-    body
-  );
+  // Automatic cap fallback is intentionally restricted to its safe subset.
+  const compatRejectedTargets = compatibility.usedAutomaticOutputCapFallback
+    ? []
+    : computeCompatRejectedTargets(preCompatTargets, orderedTargets, body);
   if (orderedTargets.length === 0 && preCompatTargets.length > 0) {
     const earlyResponse = buildCapabilityExhaustionResponse(deps, preCompatTargets);
     if (earlyResponse) return { earlyResponse };

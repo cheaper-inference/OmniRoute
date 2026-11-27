@@ -1,0 +1,72 @@
+{
+  "argv": [
+    "-m",
+    "anthropic/claude-sonnet-4-6",
+    "--skip-trust",
+    "--sandbox",
+    "-p",
+    "hi"
+  ],
+  "cleanup": {
+    "removeTempDir": true,
+    "revokeSession": true
+  },
+  "env": {
+    "set": {
+      "GEMINI_API_KEY": "${TOKEN}",
+      "GEMINI_API_KEY_AUTH_MECHANISM": "bearer",
+      "GEMINI_CLI_HOME": "${TMP}",
+      "GEMINI_CLI_TRUSTED_FOLDERS_PATH": "/home/fixture/.gemini/trustedFolders.json",
+      "GOOGLE_GEMINI_BASE_URL": "http://127.0.0.1:20128",
+      "NO_PROXY": "127.0.0.1,localhost"
+    },
+    "unset": [
+      "CODE_ASSIST_ENDPOINT",
+      "GEMINI_CLI_AUTH_OVERRIDE",
+      "GEMINI_DEFAULT_AUTH_TYPE",
+      "GEMINI_MODEL",
+      "GOOGLE_API_KEY",
+      "GOOGLE_GENAI_API_VERSION",
+      "GOOGLE_GENAI_USE_GCA",
+      "GOOGLE_GENAI_USE_VERTEXAI",
+      "GOOGLE_VERTEX_BASE_URL"
+    ]
+  },
+  "modelList": {
+    "injected": 1,
+    "strategy": "inject",
+    "viewHash": "7f4f4066aebfbb84189d2f7f8adeb0a75a997acf4cbeb61c10b01800b593bba3"
+  },
+  "needsTempDir": true,
+  "notes": [
+    "Non-Gemini model: google_web_search and web_fetch tools are disabled",
+    "Headless prompt: --skip-trust added so an untrusted folder does not exit 55"
+  ],
+  "planVersion": 1,
+  "postExitChecks": [],
+  "preflight": [],
+  "secretSites": [
+    {
+      "key": "GEMINI_API_KEY",
+      "kind": "env"
+    }
+  ],
+  "teardown": [],
+  "tempFiles": [
+    {
+      "contents": "{\n  \"agents\": {\n    \"overrides\": {\n      \"codebase_investigator\": {\n        \"modelConfig\": {\n          \"model\": \"anthropic/claude-sonnet-4-6\"\n        }\n      }\n    }\n  },\n  \"general\": {\n    \"enableAutoUpdate\": false,\n    \"enableAutoUpdateNotification\": false\n  },\n  \"ide\": {\n    \"hasSeenNudge\": true\n  },\n  \"model\": {\n    \"compressionThreshold\": 0.095\n  },\n  \"modelConfigs\": {\n    \"customAliases\": {\n      \"chat-compression-default\": {\n        \"extends\": \"base\",\n        \"modelConfig\": {\n          \"model\": \"anthropic/claude-sonnet-4-6\"\n        }\n      },\n      \"classifier\": {\n        \"extends\": \"base\",\n        \"modelConfig\": {\n          \"model\": \"anthropic/claude-sonnet-4-6\"\n        }\n      },\n      \"context-snapshotter\": {\n        \"extends\": \"base\",\n        \"modelConfig\": {\n          \"model\": \"anthropic/claude-sonnet-4-6\"\n        }\n      },\n      \"edit-corrector\": {\n        \"extends\": \"base\",\n        \"modelConfig\": {\n          \"model\": \"anthropic/claude-sonnet-4-6\"\n        }\n      },\n      \"fast-ack-helper\": {\n        \"extends\": \"base\",\n        \"modelConfig\": {\n          \"model\": \"anthropic/claude-sonnet-4-6\"\n        }\n      },\n      \"llm-edit-fixer\": {\n        \"extends\": \"base\",\n        \"modelConfig\": {\n          \"model\": \"anthropic/claude-sonnet-4-6\"\n        }\n      },\n      \"loop-detection\": {\n        \"extends\": \"base\",\n        \"modelConfig\": {\n          \"model\": \"anthropic/claude-sonnet-4-6\"\n        }\n      },\n      \"loop-detection-double-check\": {\n        \"extends\": \"base\",\n        \"modelConfig\": {\n          \"model\": \"anthropic/claude-sonnet-4-6\"\n        }\n      },\n      \"next-speaker-checker\": {\n        \"extends\": \"base\",\n        \"modelConfig\": {\n          \"model\": \"anthropic/claude-sonnet-4-6\"\n        }\n      },\n      \"prompt-completion\": {\n        \"extends\": \"base\",\n        \"modelConfig\": {\n          \"model\": \"anthropic/claude-sonnet-4-6\"\n        }\n      },\n      \"summarizer-default\": {\n        \"extends\": \"base\",\n        \"modelConfig\": {\n          \"model\": \"anthropic/claude-sonnet-4-6\"\n        }\n      },\n      \"summarizer-shell\": {\n        \"extends\": \"base\",\n        \"modelConfig\": {\n          \"model\": \"anthropic/claude-sonnet-4-6\"\n        }\n      },\n      \"web-fetch\": {\n        \"extends\": \"base\",\n        \"modelConfig\": {\n          \"model\": \"anthropic/claude-sonnet-4-6\"\n        }\n      },\n      \"web-fetch-fallback\": {\n        \"extends\": \"base\",\n        \"modelConfig\": {\n          \"model\": \"anthropic/claude-sonnet-4-6\"\n        }\n      },\n      \"web-search\": {\n        \"extends\": \"base\",\n        \"modelConfig\": {\n          \"model\": \"anthropic/claude-sonnet-4-6\"\n        }\n      }\n    }\n  },\n  \"privacy\": {\n    \"usageStatisticsEnabled\": false\n  },\n  \"security\": {\n    \"auth\": {\n      \"selectedType\": \"gemini-api-key\"\n    }\n  },\n  \"tools\": {\n    \"exclude\": [\n      \"google_web_search\",\n      \"web_fetch\"\n    ]\n  }\n}",
+      "format": "json",
+      "mergeBase": {
+        "format": "json",
+        "path": "/home/fixture/.gemini/settings.json"
+      },
+      "mode": 384,
+      "path": ".gemini/settings.json",
+      "root": "tmp"
+    }
+  ],
+  "tool": "gemini",
+  "warnings": [
+    "gemini --sandbox does not forward GOOGLE_GENAI_API_VERSION into the sandbox (gemini-cli issue #24828)"
+  ]
+}

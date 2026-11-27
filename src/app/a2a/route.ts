@@ -11,6 +11,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
+import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error.ts";
 import { getTaskManager } from "@/lib/a2a/taskManager";
 import { logRoutingDecision } from "@/lib/a2a/routingLogger";
 import { resolveA2AComboAttribution } from "@/lib/a2a/resolveComboAttribution";
@@ -283,7 +284,7 @@ export async function POST(req: NextRequest) {
         });
       } catch (err) {
         console.error("A2A ERROR TRACE:", err);
-        const msg = err instanceof Error ? err.message : String(err);
+        const msg = sanitizeErrorMessage(err instanceof Error ? err.message : String(err));
         tm.updateTask(task.id, "failed", [{ type: "error", content: msg }], msg);
         return jsonRpcError(id, -32603, `Skill execution failed: ${msg}`);
       }
@@ -342,8 +343,11 @@ export async function POST(req: NextRequest) {
         const task = tm.cancelTask(taskId, callerOwner);
         return jsonRpcResult(id, { task: { id: task.id, state: task.state } });
       } catch (err) {
-        const msg = err instanceof Error ? err.message : String(err);
-        return jsonRpcError(id, -32603, msg);
+        return jsonRpcError(
+          id,
+          -32603,
+          sanitizeErrorMessage(err instanceof Error ? err.message : String(err))
+        );
       }
     }
 

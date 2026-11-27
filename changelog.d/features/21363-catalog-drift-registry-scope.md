@@ -1,0 +1,1 @@
+- **feat(quality):** optional registry scope in the catalog drift report that compares a provider's declared models with its official model listing, report only ([#21363](https://github.com/cheaper-inference/OmniRoute/pull/21363))

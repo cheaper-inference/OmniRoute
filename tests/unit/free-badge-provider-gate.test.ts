@@ -188,10 +188,13 @@ describe("D. auth bypass lock", () => {
     fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
   }
 
-  test("catalogued free id without :free suffix is still served on credits_exhausted", async () => {
+  // The exemption reads catalog membership, never the `:free` suffix. Since the November 2026
+  // re-audit openrouter's only live catalogued id ends in `:free` (google/gemma-4-31b-it:free), so
+  // the suffix-only case is proved by a `:free` id that is NOT catalogued and stays locked.
+  test("catalogued free id is still served on credits_exhausted; a :free suffix alone is not", async () => {
     await resetStorage();
-    const live = LIVE.find((m) => m.provider === "openrouter" && !m.modelId.endsWith(":free"));
-    assert.ok(live, "openrouter must have a live catalogued id without :free suffix");
+    const live = LIVE.find((m) => m.provider === "openrouter");
+    assert.ok(live, "openrouter must have a live catalogued free id");
     await providersDb.createProviderConnection({
       provider: "openrouter",
       authType: "apikey",
@@ -201,6 +204,10 @@ describe("D. auth bypass lock", () => {
     });
     const selected = await auth.getProviderCredentials("openrouter", null, null, live.modelId);
     assert.ok(selected && "connectionId" in selected, "catalogued free id must bypass the lock");
+    const suffixOnly = "meta-llama/llama-3.1-8b-instruct:free";
+    assert.ok(!liveIds.has(`openrouter/${suffixOnly}`), "fixture must stay outside the catalog");
+    const locked = await auth.getProviderCredentials("openrouter", null, null, suffixOnly);
+    assert.ok(!(locked && "connectionId" in locked), "a :free suffix alone must not bypass it");
   });
 
   test("expired status still refuses a :free model", async () => {
