@@ -18,13 +18,13 @@ test("news.json ships Radar inactive in the localized v2 feed without commercial
   assert.doesNotMatch(source, /R\$|US\$|coupon|cupom|discount|desconto/i);
 });
 
-test("news.json ships the free-Radar item inactive, linking the Radar home", async () => {
+test("news.json ships the free-Radar item active, linking the Radar home", async () => {
   const source = await readFile(new URL("news.json", root), "utf8");
   const payload = JSON.parse(source);
   const item = payload.items.find((entry: { id?: string }) => entry.id === "radar-free-2026-11");
 
   assert.ok(item, "the radar-free-2026-11 item must exist");
-  assert.equal(item.active, false);
+  assert.equal(item.active, true);
   assert.equal(item.icon, "radar");
   assert.equal(item.link, "https://radar.omniroute.online/");
   assert.ok(item.text["pt-BR"], "the item ships a pt-BR copy");

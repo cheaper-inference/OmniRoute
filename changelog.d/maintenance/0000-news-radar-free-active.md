@@ -1,0 +1,1 @@
+- **chore(news):** the in-app announcement of the free Radar is now active; clients see it once this release reaches `main`
