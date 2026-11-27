@@ -1,6 +1,5 @@
 {
   "common": {
-    "positiveIntegerRequired": "Ограничење мора бити позитиван цео број.",
     "error": "Грешка: {message}",
     "serverOffline": "OmniRoute сервер је offline. Покрените га помоћу: omniroute serve",
     "authRequired": "Потребна је аутентификација. Подесите OMNIROUTE_API_KEY или покрените: omniroute setup",
@@ -13,7 +12,8 @@
     "dryRun": "[пробно покретање] би {action}",
     "cancelled": "Отказано.",
     "jsonOpt": "Прикажи као JSON",
-    "yesOpt": "Прескочи потврду"
+    "yesOpt": "Прескочи потврду",
+    "positiveIntegerRequired": "Ограничење мора бити позитиван цео број."
   },
   "setup": {
     "title": "OmniRoute подешавање",

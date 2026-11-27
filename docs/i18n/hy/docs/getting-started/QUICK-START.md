@@ -21,10 +21,10 @@ npm install -g omniroute
 ### Տարբերակ B․ Docker
 
 ```bash
-docker run -d --name omniroute -p 20128:20128 diegosouzapw/omniroute:latest
+docker run -d --name omniroute -p 20128:20128 cheaperinference/omniroute:latest
 ```
 
-`:latest`-ը ամենաբարձր **հրապարակված** կայուն SemVer-ն է։ Այն **չի** հետևում git-ի `main` ճյուղին։ GitOps-ի համար ամրագրեք `diegosouzapw/omniroute:X.Y.Z` տարբերակը։ Տե՛ս [Պատկերների պիտակներ / Թողարկման ալիքներ](../guides/DOCKER_GUIDE.md#release-channels)։
+`:latest`-ը ամենաբարձր **հրապարակված** կայուն SemVer-ն է։ Այն **չի** հետևում git-ի `main` ճյուղին։ GitOps-ի համար ամրագրեք `cheaperinference/omniroute:X.Y.Z` տարբերակը։ Տե՛ս [Պատկերների պիտակներ / Թողարկման ալիքներ](../guides/DOCKER_GUIDE.md#release-channels)։
 
 ### Տարբերակ C․ Սկզբնական կոդից
 

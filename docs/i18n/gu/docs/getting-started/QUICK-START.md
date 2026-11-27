@@ -21,10 +21,10 @@ npm install -g omniroute
 ### વિકલ્પ B: Docker
 
 ```bash
-docker run -d --name omniroute -p 20128:20128 diegosouzapw/omniroute:latest
+docker run -d --name omniroute -p 20128:20128 cheaperinference/omniroute:latest
 ```
 
-`:latest` એ સૌથી ઊંચું **પ્રકાશિત** સ્થિર SemVer છે. તે git `main` ને અનુસરતું **નથી**. GitOps માટે `diegosouzapw/omniroute:X.Y.Z` પિન કરો. [ઇમેજ ટૅગ્સ / રિલીઝ ચેનલ્સ](../guides/DOCKER_GUIDE.md#release-channels) જુઓ.
+`:latest` એ સૌથી ઊંચું **પ્રકાશિત** સ્થિર SemVer છે. તે git `main` ને અનુસરતું **નથી**. GitOps માટે `cheaperinference/omniroute:X.Y.Z` પિન કરો. [ઇમેજ ટૅગ્સ / રિલીઝ ચેનલ્સ](../guides/DOCKER_GUIDE.md#release-channels) જુઓ.
 
 ### વિકલ્પ C: સોર્સમાંથી
 

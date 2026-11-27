@@ -1,0 +1,1 @@
+- **fix(security):** the A2A endpoint now passes a failed skill's error through `sanitizeErrorMessage()` before it reaches the client, so the `message/send` and `tasks/cancel` JSON-RPC errors, the `message/stream` failure event and the failed task's artifact no longer carry absolute paths or stack frames; the error-sanitization gate now scans `src/app/a2a` and `src/lib/a2a`

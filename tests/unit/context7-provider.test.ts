@@ -468,6 +468,8 @@ test("isValidContext7LibraryId: canonical shapes pass, everything else fails", (
     42,
     "reactjs/react.dev",
     "/only-one",
+    "/owner/repo/extra",
+    "/owner/repo\n",
     "/foo..bar/baz",
     "/foo/bar..baz",
     "/../evil/x",

@@ -558,6 +558,8 @@ See puhverserver:
 
 Manustatud armatuurlaua WebSocket versiooniuuendusi haldab kaasserver spetsiaalses pordis (vt `src/lib/services/embedWsProxy.ts`).
 
+Iga täiendus volitatakse enne tunneli avanemist samade reeglitega nagu HTTP manustamismarsruudil: partner peab olema tagasisilmus ilma pöördpuhverserveri edasisuunamise päiseta, brauseri `Origin` peab olema armatuurlaua lähtepunkt (`LIVE_WS_ALLOWED_ORIGINS` / `LIVE_WS_ALLOWED_HOSTS` pikendab tagasisilmuse vaikeseadeid) ja helistaja vajab armatuurlaua seanssi või on z dashqeco logiless API dashqen key.
+
 **Turvalisus:** Manustatud puhverserveri marsruudid on klassifitseeritud `LOCAL_ONLY_API_PREFIXES` alla ja neile pääseb juurde ainult loopback kaudu. Ründaja, kes saab JWT Cloudflare/Ngrok tunneli kaudu, ei saa manustatud teenustesse puhverserverit kasutada.
 
 ---

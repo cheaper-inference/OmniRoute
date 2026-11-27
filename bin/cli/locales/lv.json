@@ -1,6 +1,5 @@
 {
   "common": {
-    "positiveIntegerRequired": "Ierobežojumam ir jābūt pozitīvam veselam skaitlim.",
     "error": "Kļūda: {message}",
     "serverOffline": "OmniRoute serveris nedarbojas. Startējiet to ar: omniroute serve",
     "authRequired": "Nepieciešama autentifikācija. Iestatiet OMNIROUTE_API_KEY vai palaidiet: omniroute setup",
@@ -13,7 +12,8 @@
     "dryRun": "[testrežīms] veiktu {action}",
     "cancelled": "Atcelts.",
     "jsonOpt": "Izvade JSON formātā",
-    "yesOpt": "Izlaist apstiprinājuma pieprasījumu"
+    "yesOpt": "Izlaist apstiprinājuma pieprasījumu",
+    "positiveIntegerRequired": "Ierobežojumam ir jābūt pozitīvam veselam skaitlim."
   },
   "setup": {
     "title": "OmniRoute iestatīšana",

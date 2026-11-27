@@ -1,0 +1,1 @@
+- **test(fal):** Wait for recovery-route requests and controller actions, including response-body reads, to settle before assertions and teardown. Cover delayed responses, rejected requests and receipt writes after unmount so they cannot leak into the next UI test.

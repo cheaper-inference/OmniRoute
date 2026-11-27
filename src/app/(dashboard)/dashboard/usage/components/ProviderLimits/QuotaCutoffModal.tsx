@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import Icon from "@/shared/components/Icon";
 import Modal from "@/shared/components/Modal";
 import Button from "@/shared/components/Button";
-import Input from "@/shared/components/Input";
+import NumberInput from "@/shared/components/NumberInput";
 import { translateUsageOrFallback, type UsageTranslationValues } from "./i18nFallback";
 
 export interface QuotaCutoffModalWindow {
@@ -191,23 +191,24 @@ export default function QuotaCutoffModal({
             <div key={w.key} className="flex items-center justify-between gap-3">
               <div className="flex-1 min-w-0">
                 <div className="text-sm font-medium text-text-main">{w.displayName}</div>
-                <div className="text-[11px] text-text-muted">
+                <div className="text-2xs text-text-muted">
                   {tr("quotaCutoffsDefaultHint", `Default min remaining: ${resolvedDefault}%`, {
                     default: resolvedDefault,
                   })}
                 </div>
               </div>
               <div className="flex items-center gap-1">
-                <Input
-                  type="number"
+                <NumberInput
                   min={0}
                   max={100}
                   step={1}
-                  value={drafts[w.key] ?? ""}
+                  value={(drafts[w.key] ?? "") === "" ? null : Number(drafts[w.key])}
                   placeholder={placeholder}
                   disabled={saving}
                   aria-label={w.displayName}
-                  onChange={(e) => setDrafts((prev) => ({ ...prev, [w.key]: e.target.value }))}
+                  onValueChange={(value) =>
+                    setDrafts((prev) => ({ ...prev, [w.key]: value === null ? "" : String(value) }))
+                  }
                   className="w-20"
                   inputClassName={`text-center ${isOverride ? "border-primary/40" : ""}`}
                 />

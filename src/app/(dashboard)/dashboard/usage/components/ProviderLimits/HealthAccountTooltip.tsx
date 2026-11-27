@@ -1,7 +1,7 @@
 "use client";
 
-import { useLayoutEffect, useRef } from "react";
-import { createPortal } from "react-dom";
+import type { ReactNode } from "react";
+import { SharedHoverCard, type SharedHoverCardState } from "@omniroute/ui-kit/hover-card";
 import { Progress } from "@omniroute/ui-kit/progress";
 import type { HealthAccount } from "./healthOverview";
 import {
@@ -138,83 +138,67 @@ function TooltipCells({ account }: { account: DisplayAccount }) {
   );
 }
 
-function TooltipContent({
+/** What the card says about one account (or one of its pools). */
+export function HealthAccountCardContent({
   account,
   label,
-  pools,
+  otherPools,
 }: {
-  account: DisplayAccount;
+  account: HealthAccount | DisplayAccount;
   label: string;
-  pools?: DisplayAccount[];
+  otherPools?: DisplayAccount[];
 }) {
   const { t, all, relative } = useHealthText();
+  const a = "kind" in account ? account : displayAccount(account);
   return (
     <>
       <div className="mb-[6px] flex items-center justify-between gap-2">
         <b>{label}</b>
         <span
-          className="shrink-0 rounded-full px-2 py-px text-[11px]"
+          className="shrink-0 rounded-full px-2 py-px text-2xs"
           style={{
-            color: DISPLAY_COLORS[account.kind],
-            background: `color-mix(in srgb, ${DISPLAY_COLORS[account.kind]} 13%, transparent)`,
+            color: DISPLAY_COLORS[a.kind],
+            background: `color-mix(in srgb, ${DISPLAY_COLORS[a.kind]} 13%, transparent)`,
           }}
         >
-          {all(DISPLAY_LABELS[account.kind])}
+          {all(DISPLAY_LABELS[a.kind])}
         </span>
       </div>
-      <TooltipStatus account={account} />
-      <TooltipPools pools={pools} />
-      <TooltipReasons account={account} />
-      <TooltipCells account={account} />
-      <p className="mt-2 text-[11px] text-text-muted">
-        {t("healthQuotaObserved", { time: relative(account.quotaObservedAt) })} ·{" "}
-        {t("healthRuntimeObserved", { time: relative(account.runtimeObservedAt) })} ·{" "}
+      <TooltipStatus account={a} />
+      <TooltipPools pools={otherPools} />
+      <TooltipReasons account={a} />
+      <TooltipCells account={a} />
+      <p className="mt-2 text-xs text-text-muted">
+        {t("healthQuotaObserved", { time: relative(a.quotaObservedAt) })} ·{" "}
+        {t("healthRuntimeObserved", { time: relative(a.runtimeObservedAt) })} ·{" "}
         {t("healthDetailsHint")}
       </p>
     </>
   );
 }
 
+/**
+ * The one card the capsules of the overview share: the kit `SharedHoverCard` of
+ * `useSharedHoverCard`, anchored to the capsule under the pointer or the keyboard focus. The kit
+ * positions it, keeps it inside the viewport, and closes it on Escape or a press outside.
+ * `children` returns the content for the value of the active capsule.
+ */
 export default function HealthAccountTooltip({
-  id,
-  account,
-  label,
-  anchor,
-  otherPools,
+  card,
+  children,
 }: {
-  id: string;
-  account: HealthAccount | DisplayAccount;
-  label: string;
-  anchor: HTMLElement;
-  otherPools?: DisplayAccount[];
+  card: SharedHoverCardState;
+  children: (value: string) => ReactNode;
 }) {
-  const card = useRef<HTMLDivElement>(null);
-  const a = "kind" in account ? account : displayAccount(account);
-  useLayoutEffect(() => {
-    const position = () => {
-      if (!card.current) return;
-      const anchorBox = anchor.getBoundingClientRect(),
-        box = card.current.getBoundingClientRect();
-      card.current.style.left = `${Math.max(8, Math.min(anchorBox.left, window.innerWidth - box.width - 8))}px`;
-      card.current.style.top = `${Math.max(8, Math.min(anchorBox.bottom + 8, window.innerHeight - box.height - 8))}px`;
-    };
-    position();
-    window.addEventListener("resize", position);
-    window.addEventListener("scroll", position, true);
-    return () => {
-      window.removeEventListener("resize", position);
-      window.removeEventListener("scroll", position, true);
-    };
-  }, [anchor, account]);
-  return createPortal(
-    <div
-      ref={card}
-      id={id}
+  return (
+    <SharedHoverCard
+      card={card}
+      align="start"
+      // The capsule points at the card with aria-describedby; the role says what it is.
       role="tooltip"
-      className="pointer-events-none fixed z-50 max-h-[calc(100vh-16px)] w-[330px] max-w-[calc(100vw-16px)] overflow-y-auto break-words rounded-[10px] border border-border bg-surface/95 px-3 py-[10px] text-xs text-text-main shadow-xl"
+      className="max-h-[calc(100vh-16px)] w-[330px] max-w-[calc(100vw-16px)] overflow-y-auto break-words px-3 py-[10px] text-xs text-text-main"
     >
-      <TooltipContent account={a} label={label} pools={otherPools} />
-    </div>,
-    document.body
+      {children}
+    </SharedHoverCard>
   );
 }

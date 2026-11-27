@@ -146,22 +146,42 @@ Or as simple booleans (default priority 100):
 
 ## Permission System
 
-Plugins are **not sandboxed**. Each active plugin runs as a separate, ordinary Node.js child
-process (`loadPlugin()` in `src/lib/plugins/loader.ts`) under the same operating-system user as
-OmniRoute, with no VM context and no Node.js permission flags. Plugin code can use `node:fs`,
+By default plugins are **not sandboxed**. Each active plugin runs as a separate, ordinary Node.js
+child process (`loadPlugin()` in `src/lib/plugins/loader.ts`) under the same operating-system user
+as OmniRoute, with no VM context and no Node.js permission flags. Plugin code can use `node:fs`,
 `node:child_process`, `fetch` and every other Node.js API: it can read and write any file the
 OmniRoute user can (including the data directory), run programs and reach the network.
 
 The manifest's `requires.permissions` accepts `network`, `file-read`, `file-write`, `env` and
-`exec`, but today only `env` has an effect at runtime:
+`exec`. With the default settings only `env` has an effect at runtime.
 
-| Permission                                   | Effect today                                                                                                                                                                                                                             |
-| -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `env`                                        | The plugin process also receives `PORT`, `HOSTNAME`, `TZ` and `TMPDIR`. Without it, it receives only `PATH`, `HOME`, `USER`, `LANG`, `LC_ALL`, `NODE_ENV`, `PLUGIN_ENTRY` and `PLUGIN_NAME` (plus `SystemRoot` and `windir` on Windows). |
-| `network`, `file-read`, `file-write`, `exec` | None. They are declarations only: nothing is blocked when they are missing.                                                                                                                                                              |
+### Opt-in permission model (`PLUGIN_PERMISSION_MODEL_ENABLED`)
 
-Installing a plugin is like installing any other program on the host. Install only plugins whose
-source you trust.
+The `PLUGIN_PERMISSION_MODEL_ENABLED` feature flag (category `security`, **off by default**) starts
+each plugin process with the
+[Node.js permission model](https://nodejs.org/api/permissions.html) (`--permission`, accepted by
+every supported Node.js line: 22.22+, 24 and 26). The flags are built from the manifest by
+`buildPermissionModelArgs()` in `src/lib/plugins/permissionModel.ts`. The flag is read when a plugin
+is activated, so it applies to plugins activated after the change; deactivate and activate a
+running plugin to apply it.
+
+The plugin data directory is `plugin-data/<plugin-name>` next to the plugin root
+(`~/.omniroute/plugin-data/<plugin-name>` by default, `getPluginDataDir()`). With the flag on, its
+path is passed to the plugin as `PLUGIN_DATA_DIR`.
+
+| Permission   | Flag off (default)                                                                                                                                                                                                                       | Flag on                                                                                                                                                                                                                                               |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (none)       | Full privileges of the OmniRoute user.                                                                                                                                                                                                   | File reads only inside the plugin directory. No file writes, no child processes, no worker threads, no native addons, no WASI.                                                                                                                        |
+| `env`        | The plugin process also receives `PORT`, `HOSTNAME`, `TZ` and `TMPDIR`. Without it, it receives only `PATH`, `HOME`, `USER`, `LANG`, `LC_ALL`, `NODE_ENV`, `PLUGIN_ENTRY` and `PLUGIN_NAME` (plus `SystemRoot` and `windir` on Windows). | Same as with the flag off.                                                                                                                                                                                                                            |
+| `file-read`  | None (declaration only).                                                                                                                                                                                                                 | The plugin data directory also becomes readable (it is created if missing).                                                                                                                                                                           |
+| `file-write` | None (declaration only).                                                                                                                                                                                                                 | The plugin data directory becomes readable and writable (`--allow-fs-write`). Nothing else is writable.                                                                                                                                               |
+| `exec`       | None (declaration only).                                                                                                                                                                                                                 | Child processes are allowed (`--allow-child-process`). Node.js passes the permission flags on to child Node.js processes through `NODE_OPTIONS`, but any other program runs without restrictions, so `exec` effectively lifts the file-system limits. |
+| `network`    | None (declaration only).                                                                                                                                                                                                                 | None. The Node.js permission model does not restrict outbound network access, so `network` stays a declaration and is never enforced.                                                                                                                 |
+
+Turning the flag on breaks plugins that read files outside their own directory (for example a
+module resolved from a parent `node_modules`), write anywhere but their data directory, or spawn
+processes without declaring `exec`. Even with the flag on the plugin keeps network access and runs
+as the OmniRoute user, so install only plugins whose source you trust.
 
 ## Config Schema
 

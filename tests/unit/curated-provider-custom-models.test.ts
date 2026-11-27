@@ -28,9 +28,12 @@ const providersDb = await import("../../src/lib/db/providers.ts");
 const modelsDb = await import("../../src/lib/db/models.ts");
 const v1ModelsCatalog = await import("../../src/app/api/v1/models/catalog.ts");
 
-// `codebuddy-intl` is the provider from the report: alias `cbai`, curated-only.
-const CURATED_PROVIDER = "codebuddy-intl";
-const CURATED_ALIAS = "cbai";
+// `zai-web` is a curated-only provider: its registry rows are the complete lineup
+// and it has no upstream model-catalog endpoint, so it exercises exactly the
+// curated-provider + custom-model path. (`codebuddy-intl` is NOT curated-only — it
+// merges an authenticated `GET /v3/config` catalog at runtime.)
+const CURATED_PROVIDER = "zai-web";
+const CURATED_ALIAS = "zw";
 const CUSTOM_MODEL_ID = "deepseek-v4.1-flash-1017";
 
 async function resetStorage() {

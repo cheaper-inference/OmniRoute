@@ -1,6 +1,5 @@
 {
   "common": {
-    "positiveIntegerRequired": "ಮಿತಿಯು ಧನಾತ್ಮಕ ಪೂರ್ಣಾಂಕವಾಗಿರಬೇಕು.",
     "error": "ದೋಷ: {message}",
     "serverOffline": "OmniRoute ಸರ್ವರ್ ಆಫ್ಲೈನ್ನಲ್ಲಿದೆ. ಇದನ್ನು ಪ್ರಾರಂಭಿಸಲು: omniroute serve",
     "authRequired": "ದೃಢೀಕರಣ ಅಗತ್ಯವಿದೆ. OMNIROUTE_API_KEY ಹೊಂದಿಸಿ ಅಥವಾ ಇದನ್ನು ಚಲಾಯಿಸಿ: omniroute setup",
@@ -13,7 +12,8 @@
     "dryRun": "[ಡ್ರೈ-ರನ್] {action} ಮಾಡಲಾಗುತ್ತಿತ್ತು",
     "cancelled": "ರದ್ದುಗೊಳಿಸಲಾಗಿದೆ.",
     "jsonOpt": "JSON ಆಗಿ ಔಟ್ಪುಟ್ ಮಾಡಿ",
-    "yesOpt": "ದೃಢೀಕರಣ ಪ್ರಾಂಪ್ಟ್ ಅನ್ನು ಬಿಟ್ಟುಬಿಡಿ"
+    "yesOpt": "ದೃಢೀಕರಣ ಪ್ರಾಂಪ್ಟ್ ಅನ್ನು ಬಿಟ್ಟುಬಿಡಿ",
+    "positiveIntegerRequired": "ಮಿತಿಯು ಧನಾತ್ಮಕ ಪೂರ್ಣಾಂಕವಾಗಿರಬೇಕು."
   },
   "setup": {
     "title": "OmniRoute ಸೆಟಪ್",
