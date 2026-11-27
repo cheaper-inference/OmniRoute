@@ -25,7 +25,7 @@ const IMAGE_PART = { type: "image_url", image_url: { url: "data:image/png;base64
 
 test.after(() => {
   core.resetDbInstance();
-  fs.rmSync(dataDir, { recursive: true, force: true });
+  fs.rmSync(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 /** A fake qodercli that records that it ran. */
