@@ -185,23 +185,32 @@ function newFold(): Fold {
   };
 }
 
+/** Fold one delta's visible text and its tool and refusal signals into the scan. */
+function foldDelta(fold: Fold, delta: JsonRecord): void {
+  if (typeof delta.content === "string") fold.text += delta.content;
+  if (hasToolSignal(delta)) fold.tool = true;
+  if (typeof delta.refusal === "string" && delta.refusal.length > 0) fold.refusal = true;
+}
+
+function hasToolSignal(delta: JsonRecord): boolean {
+  if (Array.isArray(delta.tool_calls) && delta.tool_calls.length > 0) return true;
+  return delta.function_call !== undefined && delta.function_call !== null;
+}
+
+function foldChoice(fold: Fold, choice: JsonRecord): void {
+  if (typeof choice.index === "number" && choice.index !== 0) {
+    fold.multiChoice = true;
+    return;
+  }
+  if (isRecord(choice.delta)) foldDelta(fold, choice.delta);
+  if (typeof choice.finish_reason === "string") fold.finishReason = choice.finish_reason;
+}
+
 function foldEvent(fold: Fold, json: JsonRecord): void {
   if (isRecord(json.usage)) fold.usage = json.usage;
   if (!Array.isArray(json.choices)) return;
   for (const choice of json.choices) {
-    if (!isRecord(choice)) continue;
-    if (typeof choice.index === "number" && choice.index !== 0) {
-      fold.multiChoice = true;
-      continue;
-    }
-    const delta = isRecord(choice.delta) ? choice.delta : null;
-    if (delta) {
-      if (typeof delta.content === "string") fold.text += delta.content;
-      if (Array.isArray(delta.tool_calls) && delta.tool_calls.length > 0) fold.tool = true;
-      if (delta.function_call !== undefined && delta.function_call !== null) fold.tool = true;
-      if (typeof delta.refusal === "string" && delta.refusal.length > 0) fold.refusal = true;
-    }
-    if (typeof choice.finish_reason === "string") fold.finishReason = choice.finish_reason;
+    if (isRecord(choice)) foldChoice(fold, choice);
   }
 }
 
@@ -263,7 +272,7 @@ function raceAbort<T>(
   });
 }
 
-// ── The wrapper ──────────────────────────────────────────────────────────────
+// ── Extension: request body, drain, validation, frames ───────────────────────
 
 type ExtensionResult =
   | {
@@ -275,347 +284,468 @@ type ExtensionResult =
     }
   | { kind: "fail"; reason: LengthContinuationFailure; usage: JsonRecord | null };
 
+type Mode = "scan" | "held" | "passthrough";
+
+function byteLength(text: string): number {
+  return new TextEncoder().encode(text).length;
+}
+
+function heldVerbatim(held: readonly ParsedEvent[]): string {
+  return held.map((event) => event.raw).join("");
+}
+
+/** Held frames as they came, with the usage of a rejected extension folded in. */
+function heldWithUsage(
+  held: readonly ParsedEvent[],
+  baseUsage: JsonRecord | null,
+  extra: JsonRecord | null
+): string {
+  if (!extra || !baseUsage) return heldVerbatim(held);
+  const combined = sumUsage(baseUsage, extra);
+  return held
+    .map((event) =>
+      event.json && isRecord(event.json.usage)
+        ? encodeEvent({ ...event.json, usage: combined })
+        : event.raw
+    )
+    .join("");
+}
+
+/** Extra output tokens the extension may use, or null when the client's own limit is spent. */
+function resolveExtraTokenCap(options: LengthContinuationOptions, usage: JsonRecord | null) {
+  if (options.clientOutputLimit === null) return options.maxExtraOutputTokens;
+  const used = usage?.completion_tokens;
+  const remaining =
+    typeof used === "number" && Number.isFinite(used) ? options.clientOutputLimit - used : 0;
+  return remaining <= 0 ? null : Math.min(options.maxExtraOutputTokens, remaining);
+}
+
+function buildContinuationBody(
+  body: Readonly<Record<string, unknown>>,
+  delivered: string,
+  cap: number
+): Record<string, unknown> | null {
+  const prefilled = makeContinuationBody(body as Record<string, unknown>, delivered);
+  if (!prefilled || !Array.isArray((prefilled as { messages?: unknown }).messages)) return null;
+  const next: Record<string, unknown> = { ...prefilled, stream: true };
+  const keys = ["max_tokens", "max_completion_tokens"].filter((key) => key in next);
+  for (const key of keys.length > 0 ? keys : ["max_tokens"]) next[key] = cap;
+  return next;
+}
+
+/** Read the extension fully (bounded). `track` exposes the reader so a client cancel can end it. */
+async function drainExtension(
+  source: ReadableStream<Uint8Array>,
+  signal: AbortSignal,
+  maxBytes: number,
+  track: (reader: ReadableStreamDefaultReader<Uint8Array> | null) => void
+): Promise<{ failure: LengthContinuationFailure | null; raw: string }> {
+  const extReader = source.getReader();
+  track(extReader);
+  const extDecoder = new TextDecoder();
+  let raw = "";
+  let bytes = 0;
+  try {
+    for (;;) {
+      let result: ReadableStreamReadResult<Uint8Array> | typeof ABORTED;
+      try {
+        result = await raceAbort(extReader.read(), signal);
+      } catch {
+        return { failure: "stream-error", raw };
+      }
+      if (result === ABORTED) return { failure: "aborted", raw };
+      if (result.done) return { failure: null, raw: raw + extDecoder.decode() };
+      bytes += result.value.length;
+      if (bytes > maxBytes) return { failure: "overflow", raw };
+      raw += extDecoder.decode(result.value, { stream: true });
+      if (/data:\s*\[DONE\]/.test(raw)) return { failure: null, raw };
+    }
+  } finally {
+    track(null);
+    await extReader.cancel().catch(() => {});
+  }
+}
+
+function foldExtension(raw: string): { fold: Fold; done: boolean } {
+  const fold = newFold();
+  let done = false;
+  const { events, rest } = takeEvents(raw.endsWith("\n") ? raw : `${raw}\n\n`);
+  for (const chunk of [...events, rest]) {
+    if (!chunk) continue;
+    const parsed = parseEvent(chunk);
+    if (parsed.done) done = true;
+    if (parsed.json) foldEvent(fold, parsed.json);
+  }
+  return { fold, done };
+}
+
+function judgeExtension(fold: Fold, done: boolean, delivered: string): ExtensionResult {
+  const fail = (reason: LengthContinuationFailure): ExtensionResult => ({
+    kind: "fail",
+    reason,
+    usage: fold.usage,
+  });
+  if (fold.multiChoice || fold.tool || fold.refusal) return fail("unsafe-content");
+  if (fold.text.length === 0) return fail("empty");
+  if (fold.finishReason === null) return fail("no-terminal");
+  if (fold.finishReason === "tool_calls" || fold.finishReason === "function_call")
+    return fail("unsafe-content");
+  const suffix = trimContinuationOverlap(delivered, fold.text);
+  const overlap = fold.text.length - suffix.length;
+  if (overlap < Math.min(STREAM_RECOVERY.MIN_CONTINUATION_OVERLAP_CHARS, delivered.length))
+    return fail("uncertain-seam");
+  if (suffix.length === 0) return fail("no-suffix");
+  return { kind: "ok", suffix, finishReason: fold.finishReason, usage: fold.usage, done };
+}
+
+function validateExtension(raw: string, delivered: string): ExtensionResult {
+  const { fold, done } = foldExtension(raw);
+  return judgeExtension(fold, done, delivered);
+}
+
+/** The frames that replace the held terminal when the extension was accepted. */
+function buildSuccessFrames(
+  lengthJson: JsonRecord,
+  result: Extract<ExtensionResult, { kind: "ok" }>,
+  baseUsage: JsonRecord | null,
+  sawDone: boolean
+): string {
+  const identity: JsonRecord = { ...lengthJson };
+  delete identity.choices;
+  delete identity.usage;
+  const usageInline = isRecord(lengthJson.usage);
+  const combined = baseUsage && result.usage ? sumUsage(baseUsage, result.usage) : null;
+  const delta = firstChoice(lengthJson)?.delta;
+  let out = "";
+  if (isRecord(delta) && Object.keys(delta).length > 0) {
+    out += encodeEvent({ ...identity, choices: [{ index: 0, delta }] });
+  }
+  out += encodeEvent({ ...identity, choices: [{ index: 0, delta: { content: result.suffix } }] });
+  out += encodeEvent({
+    ...identity,
+    choices: [{ index: 0, delta: {}, finish_reason: result.finishReason }],
+    ...(usageInline && combined ? { usage: combined } : {}),
+  });
+  if (!usageInline && combined) out += encodeEvent({ ...identity, choices: [], usage: combined });
+  if (sawDone || result.done) out += "data: [DONE]\n\n";
+  return out;
+}
+
+/** Aborts `controller` when the client leaves or the deadline passes; `dispose` undoes both. */
+function armExtensionGuards(
+  controller: AbortController,
+  options: LengthContinuationOptions
+): { timedOut: () => boolean; dispose: () => void } {
+  let timedOut = false;
+  const onClientAbort = () => controller.abort(options.signal.reason);
+  if (options.signal.aborted) controller.abort(options.signal.reason);
+  else options.signal.addEventListener("abort", onClientAbort, { once: true });
+  const timer = setTimeout(() => {
+    timedOut = true;
+    controller.abort();
+  }, options.continuationTimeoutMs);
+  return {
+    timedOut: () => timedOut,
+    dispose: () => {
+      clearTimeout(timer);
+      options.signal.removeEventListener("abort", onClientAbort);
+    },
+  };
+}
+
+// ── The relay ────────────────────────────────────────────────────────────────
+
+class LengthContinuationRelay {
+  private readonly reader: ReadableStreamDefaultReader<Uint8Array>;
+  private readonly decoder = new TextDecoder();
+  private readonly encoder = new TextEncoder();
+  private readonly fold = newFold();
+  private mode: Mode = "scan";
+  private pending = "";
+  private held: ParsedEvent[] = [];
+  private heldBytes = 0;
+  private lengthEvent: ParsedEvent | null = null;
+  private sawDone = false;
+  private cancelled = false;
+  private upstreamReleased = false;
+  private extension: AbortController | null = null;
+  private extensionReader: ReadableStreamDefaultReader<Uint8Array> | null = null;
+
+  constructor(
+    stream: ReadableStream<Uint8Array>,
+    private readonly body: Readonly<Record<string, unknown>>,
+    private readonly options: LengthContinuationOptions
+  ) {
+    this.reader = stream.getReader();
+  }
+
+  toStream(): ReadableStream<Uint8Array> {
+    return new ReadableStream<Uint8Array>({
+      pull: (controller) => this.pull(controller),
+      cancel: (reason) => this.cancel(reason),
+    });
+  }
+
+  private report(outcome: LengthContinuationOutcome): void {
+    this.options.onOutcome?.(outcome);
+  }
+
+  private async releaseUpstream(reason?: unknown): Promise<void> {
+    if (this.upstreamReleased) return;
+    this.upstreamReleased = true;
+    try {
+      await this.reader.cancel(reason);
+    } catch {
+      // already closed
+    }
+  }
+
+  private mayContinue(): boolean {
+    const { text, tool, refusal, multiChoice } = this.fold;
+    return text.length > 0 && !tool && !refusal && !multiChoice;
+  }
+
+  private enqueueText(controller: ReadableStreamDefaultController<Uint8Array>, text: string) {
+    if (this.cancelled || text.length === 0) return;
+    controller.enqueue(this.encoder.encode(text));
+  }
+
+  /** Consume one complete event; returns the text to send to the client right now. */
+  private consume(raw: string): string {
+    if (this.mode === "passthrough") return raw;
+    const event = parseEvent(raw);
+    return this.mode === "held" ? this.consumeHeld(event) : this.consumeScan(event);
+  }
+
+  private consumeHeld(event: ParsedEvent): string {
+    this.held.push(event);
+    this.heldBytes += byteLength(event.raw);
+    if (event.done) this.sawDone = true;
+    if (event.json && isRecord(event.json.usage)) this.fold.usage = event.json.usage;
+    if (this.heldBytes <= this.options.maxBufferedBytes) return "";
+    this.mode = "passthrough";
+    this.report({ outcome: "fallback", reason: "retention-cap" });
+    const out = heldVerbatim(this.held);
+    this.held = [];
+    return out;
+  }
+
+  private consumeScan(event: ParsedEvent): string {
+    if (event.json) foldEvent(this.fold, event.json);
+    const reason = firstChoice(event.json)?.finish_reason;
+    if (reason === "length" && this.mayContinue()) return this.startHolding(event);
+    if (typeof reason === "string") this.mode = "passthrough";
+    return event.raw;
+  }
+
+  private startHolding(event: ParsedEvent): string {
+    this.mode = "held";
+    this.lengthEvent = event;
+    this.held = [event];
+    this.heldBytes = byteLength(event.raw);
+    if (this.heldBytes <= this.options.maxBufferedBytes) return "";
+    this.mode = "passthrough";
+    this.report({ outcome: "fallback", reason: "retention-cap" });
+    this.held = [];
+    return event.raw;
+  }
+
+  private async openSource(
+    continuationBody: Record<string, unknown>,
+    controller: AbortController
+  ): Promise<ReadableStream<Uint8Array> | LengthContinuationFailure> {
+    try {
+      const source = await raceAbort(
+        this.options.reopen(continuationBody, controller.signal),
+        controller.signal,
+        (late) => void late?.cancel().catch(() => {})
+      );
+      if (source === ABORTED) return "aborted";
+      return source ?? "no-stream";
+    } catch {
+      return "no-stream";
+    }
+  }
+
+  private async extend(
+    continuationBody: Record<string, unknown>,
+    delivered: string,
+    controller: AbortController,
+    timedOut: () => boolean
+  ): Promise<ExtensionResult> {
+    const source = await this.openSource(continuationBody, controller);
+    if (typeof source === "string") {
+      return { kind: "fail", reason: timedOut() ? "timeout" : source, usage: null };
+    }
+    const drained = await drainExtension(
+      source,
+      controller.signal,
+      this.options.maxBufferedBytes,
+      (reader) => {
+        this.extensionReader = reader;
+      }
+    );
+    const result = validateExtension(drained.raw, delivered);
+    // Whatever the attempt reported is billed even when it is rejected: surface it.
+    this.options.onExecution?.({
+      phase: "continuation",
+      finishReason: !drained.failure && result.kind === "ok" ? result.finishReason : null,
+      usage: result.usage,
+    });
+    if (!drained.failure) return result;
+    return {
+      kind: "fail",
+      reason: timedOut() ? "timeout" : drained.failure,
+      usage: result.usage,
+    };
+  }
+
+  private async runExtension(
+    continuationBody: Record<string, unknown>,
+    delivered: string
+  ): Promise<ExtensionResult> {
+    const controller = new AbortController();
+    this.extension = controller;
+    const guards = armExtensionGuards(controller, this.options);
+    try {
+      return await this.extend(continuationBody, delivered, controller, guards.timedOut);
+    } catch {
+      return {
+        kind: "fail",
+        reason: guards.timedOut() ? "timeout" : "error",
+        usage: null,
+      };
+    } finally {
+      guards.dispose();
+      this.extension = null;
+    }
+  }
+
+  /** Decide, run the extension, and return everything the client still has to receive. */
+  private async settle(): Promise<string> {
+    const lengthJson = this.lengthEvent?.json ?? null;
+    const cap = resolveExtraTokenCap(this.options, this.fold.usage);
+    if (cap === null) {
+      this.report({ outcome: "skipped", reason: "client-limit" });
+      return heldVerbatim(this.held);
+    }
+    const continuationBody = buildContinuationBody(this.body, this.fold.text, cap);
+    if (!continuationBody || !lengthJson) {
+      this.report({ outcome: "skipped", reason: "not-continuable" });
+      return heldVerbatim(this.held);
+    }
+    this.options.onExecution?.({
+      phase: "initial",
+      finishReason: "length",
+      usage: this.fold.usage,
+    });
+    const result = await this.runExtension(continuationBody, this.fold.text);
+    if (result.kind === "fail") {
+      this.report({ outcome: "fallback", reason: result.reason });
+      return heldWithUsage(this.held, this.fold.usage, result.usage);
+    }
+    this.report({ outcome: "continued", suffixChars: result.suffix.length });
+    return buildSuccessFrames(lengthJson, result, this.fold.usage, this.sawDone);
+  }
+
+  /** Read the next upstream chunk; null means the read ended the pull (cancel or error). */
+  private async readUpstream(
+    controller: ReadableStreamDefaultController<Uint8Array>
+  ): Promise<ReadableStreamReadResult<Uint8Array> | null> {
+    let result: ReadableStreamReadResult<Uint8Array>;
+    try {
+      result = await this.reader.read();
+    } catch (error) {
+      if (this.cancelled) return null;
+      this.upstreamReleased = true;
+      if (this.mode === "held") this.enqueueText(controller, heldVerbatim(this.held));
+      controller.error(error);
+      return null;
+    }
+    return this.cancelled ? null : result;
+  }
+
+  /** The upstream ended: flush the unfinished tail, settling a held terminal first. */
+  private async finishUpstream(controller: ReadableStreamDefaultController<Uint8Array>) {
+    this.upstreamReleased = true;
+    const tail = this.pending + this.decoder.decode();
+    this.pending = "";
+    if (this.mode === "held") {
+      if (tail) this.held.push({ raw: tail, done: false, json: null });
+      this.enqueueText(controller, await this.settle());
+    } else {
+      this.enqueueText(controller, tail);
+    }
+    if (!this.cancelled) controller.close();
+  }
+
+  private consumeDecoded(decoded: string): string {
+    this.pending += decoded;
+    const { events, rest } = takeEvents(this.pending);
+    this.pending = rest;
+    let out = "";
+    for (const raw of events) out += this.consume(raw);
+    if (this.mode === "scan" && this.pending.length > MAX_UNTERMINATED_EVENT_CHARS) {
+      this.mode = "passthrough";
+    }
+    if (this.mode === "passthrough" && this.pending.length > 0) {
+      out += this.pending;
+      this.pending = "";
+    }
+    return out;
+  }
+
+  /** Returns true when this pull produced output or ended the stream. */
+  private async handleChunk(
+    controller: ReadableStreamDefaultController<Uint8Array>,
+    value: Uint8Array
+  ): Promise<boolean> {
+    const decoded = this.decoder.decode(value, { stream: true });
+    if (this.mode === "passthrough") {
+      this.enqueueText(controller, decoded);
+      return decoded.length > 0;
+    }
+    const out = this.consumeDecoded(decoded);
+    if (this.mode === "held" && this.sawDone) {
+      await this.releaseUpstream();
+      this.enqueueText(controller, await this.settle());
+      if (!this.cancelled) controller.close();
+      return true;
+    }
+    this.enqueueText(controller, out);
+    return out.length > 0;
+  }
+
+  private async pull(controller: ReadableStreamDefaultController<Uint8Array>): Promise<void> {
+    for (;;) {
+      const result = await this.readUpstream(controller);
+      if (result === null) return;
+      if (result.done) {
+        await this.finishUpstream(controller);
+        return;
+      }
+      if (await this.handleChunk(controller, result.value)) return;
+    }
+  }
+
+  private async cancel(reason: unknown): Promise<void> {
+    this.cancelled = true;
+    this.extension?.abort(reason);
+    try {
+      await this.extensionReader?.cancel(reason);
+    } catch {
+      // already closed
+    }
+    await this.releaseUpstream(reason);
+  }
+}
+
 export function wrapLengthContinuation(
   stream: ReadableStream<Uint8Array>,
   body: Readonly<Record<string, unknown>>,
   options: LengthContinuationOptions
 ): ReadableStream<Uint8Array> {
-  const reader = stream.getReader();
-  const decoder = new TextDecoder();
-  const encoder = new TextEncoder();
-  const fold = newFold();
-
-  let mode: "scan" | "held" | "passthrough" = "scan";
-  let pending = "";
-  let held: ParsedEvent[] = [];
-  let heldBytes = 0;
-  let lengthEvent: ParsedEvent | null = null;
-  let sawDone = false;
-  let cancelled = false;
-  let upstreamReleased = false;
-  let extension: AbortController | null = null;
-  let extensionReader: ReadableStreamDefaultReader<Uint8Array> | null = null;
-
-  const releaseUpstream = async (reason?: unknown): Promise<void> => {
-    if (upstreamReleased) return;
-    upstreamReleased = true;
-    try {
-      await reader.cancel(reason);
-    } catch {
-      // already closed
-    }
-  };
-
-  const report = (outcome: LengthContinuationOutcome): void => options.onOutcome?.(outcome);
-
-  const heldVerbatim = (): string => held.map((event) => event.raw).join("");
-
-  /** Held frames as they came, with the usage of a rejected extension folded in. */
-  const heldWithUsage = (extra: JsonRecord | null): string => {
-    if (!extra || !fold.usage) return heldVerbatim();
-    const combined = sumUsage(fold.usage, extra);
-    return held
-      .map((event) =>
-        event.json && isRecord(event.json.usage)
-          ? encodeEvent({ ...event.json, usage: combined })
-          : event.raw
-      )
-      .join("");
-  };
-
-  const mayContinue = (): boolean =>
-    fold.text.length > 0 && !fold.tool && !fold.refusal && !fold.multiChoice;
-
-  /** Consume one complete event; returns the text to send to the client right now. */
-  const consume = (raw: string): string => {
-    if (mode === "passthrough") return raw;
-    const event = parseEvent(raw);
-    if (mode === "held") {
-      held.push(event);
-      heldBytes += encoder.encode(raw).length;
-      if (event.done) sawDone = true;
-      if (event.json && isRecord(event.json.usage)) fold.usage = event.json.usage;
-      if (heldBytes > options.maxBufferedBytes) {
-        mode = "passthrough";
-        report({ outcome: "fallback", reason: "retention-cap" });
-        const out = heldVerbatim();
-        held = [];
-        return out;
-      }
-      return "";
-    }
-    if (event.json) foldEvent(fold, event.json);
-    const reason = firstChoice(event.json)?.finish_reason;
-    if (reason === "length" && mayContinue()) {
-      mode = "held";
-      lengthEvent = event;
-      held = [event];
-      heldBytes = encoder.encode(raw).length;
-      if (heldBytes > options.maxBufferedBytes) {
-        mode = "passthrough";
-        report({ outcome: "fallback", reason: "retention-cap" });
-        held = [];
-        return raw;
-      }
-      return "";
-    }
-    if (typeof reason === "string") mode = "passthrough";
-    return raw;
-  };
-
-  const drainExtension = async (
-    source: ReadableStream<Uint8Array>,
-    signal: AbortSignal
-  ): Promise<{ failure: LengthContinuationFailure | null; raw: string }> => {
-    const extReader = source.getReader();
-    extensionReader = extReader;
-    const extDecoder = new TextDecoder();
-    let raw = "";
-    let bytes = 0;
-    try {
-      for (;;) {
-        let result: ReadableStreamReadResult<Uint8Array> | typeof ABORTED;
-        try {
-          result = await raceAbort(extReader.read(), signal);
-        } catch {
-          return { failure: "stream-error", raw };
-        }
-        if (result === ABORTED) return { failure: "aborted", raw };
-        if (result.done) return { failure: null, raw: raw + extDecoder.decode() };
-        bytes += result.value.length;
-        if (bytes > options.maxBufferedBytes) return { failure: "overflow", raw };
-        raw += extDecoder.decode(result.value, { stream: true });
-        if (/data:\s*\[DONE\]/.test(raw)) return { failure: null, raw };
-      }
-    } finally {
-      extensionReader = null;
-      await extReader.cancel().catch(() => {});
-    }
-  };
-
-  const validateExtension = (raw: string, delivered: string): ExtensionResult => {
-    const extFold = newFold();
-    let done = false;
-    const { events, rest } = takeEvents(raw.endsWith("\n") ? raw : `${raw}\n\n`);
-    for (const chunk of [...events, rest]) {
-      if (!chunk) continue;
-      const parsed = parseEvent(chunk);
-      if (parsed.done) done = true;
-      if (parsed.json) foldEvent(extFold, parsed.json);
-    }
-    const fail = (reason: LengthContinuationFailure): ExtensionResult => ({
-      kind: "fail",
-      reason,
-      usage: extFold.usage,
-    });
-    if (extFold.multiChoice || extFold.tool || extFold.refusal) return fail("unsafe-content");
-    if (extFold.text.length === 0) return fail("empty");
-    if (extFold.finishReason === null) return fail("no-terminal");
-    if (extFold.finishReason === "tool_calls" || extFold.finishReason === "function_call")
-      return fail("unsafe-content");
-    const suffix = trimContinuationOverlap(delivered, extFold.text);
-    const overlap = extFold.text.length - suffix.length;
-    if (overlap < Math.min(STREAM_RECOVERY.MIN_CONTINUATION_OVERLAP_CHARS, delivered.length))
-      return fail("uncertain-seam");
-    if (suffix.length === 0) return fail("no-suffix");
-    return { kind: "ok", suffix, finishReason: extFold.finishReason, usage: extFold.usage, done };
-  };
-
-  const runExtension = async (
-    continuationBody: Record<string, unknown>,
-    delivered: string
-  ): Promise<ExtensionResult> => {
-    const controller = new AbortController();
-    extension = controller;
-    const onClientAbort = () => controller.abort(options.signal.reason);
-    if (options.signal.aborted) controller.abort(options.signal.reason);
-    else options.signal.addEventListener("abort", onClientAbort, { once: true });
-    let timedOut = false;
-    const timer = setTimeout(() => {
-      timedOut = true;
-      controller.abort();
-    }, options.continuationTimeoutMs);
-    const failure = (reason: LengthContinuationFailure): ExtensionResult => ({
-      kind: "fail",
-      reason: timedOut ? "timeout" : reason,
-      usage: null,
-    });
-    try {
-      let source: ReadableStream<Uint8Array> | null | typeof ABORTED;
-      try {
-        source = await raceAbort(
-          options.reopen(continuationBody, controller.signal),
-          controller.signal,
-          (late) => void late?.cancel().catch(() => {})
-        );
-      } catch {
-        return failure("no-stream");
-      }
-      if (source === ABORTED) return failure("aborted");
-      if (!source) return failure("no-stream");
-      const drained = await drainExtension(source, controller.signal);
-      if (drained.failure) {
-        // Whatever the attempt already reported is still billed; surface it for accounting.
-        const partial = validateExtension(drained.raw, delivered);
-        const usage = partial.usage;
-        options.onExecution?.({ phase: "continuation", finishReason: null, usage });
-        return { kind: "fail", reason: timedOut ? "timeout" : drained.failure, usage };
-      }
-      const result = validateExtension(drained.raw, delivered);
-      options.onExecution?.({
-        phase: "continuation",
-        finishReason: result.kind === "ok" ? result.finishReason : null,
-        usage: result.usage,
-      });
-      return result;
-    } catch {
-      return failure("error");
-    } finally {
-      clearTimeout(timer);
-      options.signal.removeEventListener("abort", onClientAbort);
-      extension = null;
-    }
-  };
-
-  const buildContinuationBody = (cap: number): Record<string, unknown> | null => {
-    const prefilled = makeContinuationBody(body as Record<string, unknown>, fold.text);
-    if (!prefilled || !Array.isArray((prefilled as { messages?: unknown }).messages)) return null;
-    const next: Record<string, unknown> = { ...prefilled, stream: true };
-    const keys = ["max_tokens", "max_completion_tokens"].filter((key) => key in next);
-    for (const key of keys.length > 0 ? keys : ["max_tokens"]) next[key] = cap;
-    return next;
-  };
-
-  /** Decide, run the extension, and return everything the client still has to receive. */
-  const settle = async (): Promise<string> => {
-    const lengthJson = lengthEvent?.json ?? null;
-    const delivered = fold.text;
-    let cap = options.maxExtraOutputTokens;
-    if (options.clientOutputLimit !== null) {
-      const used = fold.usage?.completion_tokens;
-      const remaining =
-        typeof used === "number" && Number.isFinite(used) ? options.clientOutputLimit - used : 0;
-      if (remaining <= 0) {
-        report({ outcome: "skipped", reason: "client-limit" });
-        return heldVerbatim();
-      }
-      cap = Math.min(cap, remaining);
-    }
-    const continuationBody = buildContinuationBody(cap);
-    if (!continuationBody || !lengthJson) {
-      report({ outcome: "skipped", reason: "not-continuable" });
-      return heldVerbatim();
-    }
-    options.onExecution?.({ phase: "initial", finishReason: "length", usage: fold.usage });
-    const result = await runExtension(continuationBody, delivered);
-    if (result.kind === "fail") {
-      report({ outcome: "fallback", reason: result.reason });
-      return heldWithUsage(result.usage);
-    }
-
-    const identity: JsonRecord = { ...lengthJson };
-    delete identity.choices;
-    delete identity.usage;
-    const usageInline = isRecord(lengthJson.usage);
-    const combined = fold.usage && result.usage ? sumUsage(fold.usage, result.usage) : null;
-    const delta = firstChoice(lengthJson)?.delta;
-    let out = "";
-    if (isRecord(delta) && Object.keys(delta).length > 0) {
-      out += encodeEvent({ ...identity, choices: [{ index: 0, delta }] });
-    }
-    out += encodeEvent({
-      ...identity,
-      choices: [{ index: 0, delta: { content: result.suffix } }],
-    });
-    out += encodeEvent({
-      ...identity,
-      choices: [{ index: 0, delta: {}, finish_reason: result.finishReason }],
-      ...(usageInline && combined ? { usage: combined } : {}),
-    });
-    if (!usageInline && combined) out += encodeEvent({ ...identity, choices: [], usage: combined });
-    if (sawDone || result.done) out += "data: [DONE]\n\n";
-    report({ outcome: "continued", suffixChars: result.suffix.length });
-    return out;
-  };
-
-  const enqueueText = (controller: ReadableStreamDefaultController<Uint8Array>, text: string) => {
-    if (cancelled || text.length === 0) return;
-    controller.enqueue(encoder.encode(text));
-  };
-
-  return new ReadableStream<Uint8Array>({
-    async pull(controller) {
-      for (;;) {
-        let result: ReadableStreamReadResult<Uint8Array>;
-        try {
-          result = await reader.read();
-        } catch (error) {
-          if (cancelled) return;
-          upstreamReleased = true;
-          if (mode === "held") enqueueText(controller, heldVerbatim());
-          controller.error(error);
-          return;
-        }
-        if (cancelled) return;
-
-        if (result.done) {
-          upstreamReleased = true;
-          const tail = pending + decoder.decode();
-          pending = "";
-          if (mode === "held") {
-            if (tail) held.push({ raw: tail, done: false, json: null });
-            enqueueText(controller, await settle());
-          } else {
-            enqueueText(controller, tail);
-          }
-          if (!cancelled) controller.close();
-          return;
-        }
-
-        const decoded = decoder.decode(result.value, { stream: true });
-        if (mode === "passthrough") {
-          if (decoded.length === 0) continue;
-          enqueueText(controller, decoded);
-          return;
-        }
-
-        pending += decoded;
-        const { events, rest } = takeEvents(pending);
-        pending = rest;
-        let out = "";
-        for (const raw of events) out += consume(raw);
-        if (mode === "scan" && pending.length > MAX_UNTERMINATED_EVENT_CHARS) {
-          mode = "passthrough";
-        }
-        if (mode === "passthrough" && pending.length > 0) {
-          out += pending;
-          pending = "";
-        }
-
-        if (mode === "held" && sawDone) {
-          await releaseUpstream();
-          enqueueText(controller, await settle());
-          if (!cancelled) controller.close();
-          return;
-        }
-        if (out.length > 0) {
-          enqueueText(controller, out);
-          return;
-        }
-      }
-    },
-
-    async cancel(reason) {
-      cancelled = true;
-      extension?.abort(reason);
-      try {
-        await extensionReader?.cancel(reason);
-      } catch {
-        // already closed
-      }
-      await releaseUpstream(reason);
-    },
-  });
+  return new LengthContinuationRelay(stream, body, options).toStream();
 }
 
 // ── Wiring helper for the provider executor ──────────────────────────────────
