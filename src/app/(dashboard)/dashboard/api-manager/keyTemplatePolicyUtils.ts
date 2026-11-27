@@ -93,14 +93,18 @@ export function prunePreferredConnections(
 
 export function validateKeyName(
   name: string,
-  t: (key: string, values?: Record<string, unknown>) => string
+  t: (key: string, values?: Record<string, unknown>) => string,
+  formatLengthError?: (max: number, count: number) => string
 ): { valid: boolean; error?: string } {
   const max = 200;
   if (!name || !name.trim()) {
     return { valid: false, error: t("keyNameRequired") };
   }
   if (name.length > max) {
-    return { valid: false, error: t("keyNameTooLong", { max }) };
+    return {
+      valid: false,
+      error: formatLengthError?.(max, name.length) ?? t("keyNameTooLong", { max }),
+    };
   }
   if (!/^[\p{L}\p{N}_\-\s]+$/u.test(name)) {
     return { valid: false, error: t("keyNameInvalid") };

@@ -30,7 +30,11 @@ import KeyPolicySixTabEditor from "./components/KeyPolicySixTabEditor";
 import KeyExpiryQuickPicker from "./components/KeyExpiryQuickPicker";
 import SaveKeyAsTemplateModal from "./components/SaveKeyAsTemplateModal";
 import KeyTemplatesLibrarySection from "./components/KeyTemplatesLibrarySection";
-import { summarizeKeyTemplatePolicy, type KeyTemplate } from "./keyTemplatePolicyUtils";
+import {
+  summarizeKeyTemplatePolicy,
+  validateKeyName,
+  type KeyTemplate,
+} from "./keyTemplatePolicyUtils";
 import {
   isKeyActive,
   isExpired,
@@ -52,8 +56,6 @@ import { ALL_COMBOS_ACCESS_RULE } from "@/shared/constants/comboAccess";
 
 import { useCreateKeySubmission } from "./useCreateKeySubmission";
 import { useKeyTemplateCreation } from "./useKeyTemplateCreation";
-
-const MAX_KEY_NAME_LENGTH = 200;
 
 interface AccessSchedule {
   enabled: boolean;
@@ -110,6 +112,7 @@ interface KeyUsageStats {
 export default function ApiManagerPageClient() {
   const t = useTranslations("apiManager");
   const tc = useTranslations("common");
+  const tv = useTranslations("formValidation");
   const locale = useLocale();
   const { requestConfirm, confirmDialog } = useConfirmDialog();
   const newKeyNameInputId = useId();
@@ -180,6 +183,10 @@ export default function ApiManagerPageClient() {
     setCreateError,
     templateConfirmDialog,
   } = templateCreation;
+
+  const newKeyNameValidation = validateKeyName(newKeyName, t, (max, count) =>
+    tv("maxLength", { field: t("keyName"), max, count })
+  );
 
   const { copied, copy } = useCopyToClipboard();
 
@@ -1141,8 +1148,7 @@ export default function ApiManagerPageClient() {
                 setNameError(null);
               }}
               placeholder={t("keyNamePlaceholder")}
-              maxLength={MAX_KEY_NAME_LENGTH}
-              error={nameError}
+              error={nameError ?? (newKeyName ? newKeyNameValidation.error : undefined)}
               autoFocus
               hint={t("keyNameDesc")}
             />
@@ -1335,7 +1341,7 @@ export default function ApiManagerPageClient() {
               onClick={handleCreateKey}
               fullWidth
               disabled={
-                !newKeyName.trim() ||
+                !newKeyNameValidation.valid ||
                 loadingTemplatePolicy ||
                 hasCreatePolicyErrors ||
                 hasBlockingCreateRefIssues
