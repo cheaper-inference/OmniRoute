@@ -38,7 +38,16 @@ import { resolveComboTargets } from "@omniroute/open-sse/services/combo.ts";
 import {
   runImageComboTargets,
   type ImageComboDispatchResult,
+  type ImageComboTarget,
 } from "@omniroute/open-sse/services/imageCombo.ts";
+import {
+  scopeComboTargetsForKey,
+  type ComboKeyScope,
+} from "@omniroute/open-sse/services/comboKeyScope.ts";
+import {
+  narrowMediaConnectionScope,
+  pinnedConnectionIds,
+} from "@omniroute/open-sse/services/mediaComboFallback.ts";
 import { projectComboForEndpoint } from "@omniroute/open-sse/services/combo/endpointCapabilities.ts";
 import { orderCapabilityTargets } from "@omniroute/open-sse/services/combo/capabilityTargetOrder.ts";
 import { isAllRateLimitedCredentials } from "@/app/api/v1/_shared/rateLimit";
@@ -49,6 +58,11 @@ import {
 import * as log from "@/sse/utils/logger";
 import { toJsonErrorPayload } from "@/shared/utils/upstreamError";
 import { enforceApiKeyPolicy } from "@/shared/utils/apiKeyPolicy";
+import { enforceClientApiRouteAuth } from "@/shared/utils/clientApiRouteAuth";
+import {
+  createComboTargetKeyGate,
+  resolveKeyConnectionScope,
+} from "@/sse/services/keyConnectionScope";
 import {
   resolveImageRouteModel,
   resolveImageModelPrefix,
@@ -67,8 +81,8 @@ import {
   dispatchBuiltinOpenAIEdit,
   isBuiltinOpenAIEditModel,
   isBuiltinOpenAIEditProvider,
-  openAIEditReferenceError,
-  openAIEditReferenceLimit,
+  MAX_OPENAI_EDIT_REFERENCES,
+  OPENAI_EDIT_REFERENCE_ERROR,
   readBuiltinOpenAIEditMask,
   runDirectBuiltinOpenAIEdit,
 } from "./openAIEdit.ts";
@@ -239,14 +253,14 @@ interface ImageEditContext {
   imageMime: string | null;
   imageInputCount: number;
   hasMask: boolean;
-  allowedConnections: string[] | null;
+  keyScope: ComboKeyScope;
   request: Request;
   accounting: EditAccountingBase;
 }
 
 /** A combo target that resolved to an edit-capable provider/node. */
-interface EditComboTarget {
-  modelStr: string;
+interface EditComboTarget extends ImageComboTarget {
+  resolvedModel: string;
   weight?: number;
   parsed: ReturnType<typeof parseImageModel>;
   providerConfig: ReturnType<typeof getImageProvider> | null;
@@ -302,7 +316,7 @@ async function dispatchImageEditTarget(
   ctx: ImageEditContext,
   openAIMask?: Buffer
 ): Promise<ImageComboDispatchResult> {
-  const { parsed, providerConfig, modelStr } = target;
+  const { parsed, providerConfig, resolvedModel: modelStr } = target;
   const { prompt, size, responseFormat, images, imageBytes, imageMime, request } = ctx;
 
   // Built-in Codex — native Responses hosted tool for reference-image edits.
@@ -549,8 +563,11 @@ async function resolveEditComboTargets(
     const capability = classifyImageEditTarget(resolved, parsed, providerConfig);
     if (!capability) continue;
     editTargets.push({
-      modelStr: resolved,
+      modelStr: raw,
+      resolvedModel: resolved,
       weight: t.weight,
+      connectionId: t.connectionId,
+      allowedConnectionIds: t.allowedConnectionIds,
       parsed,
       providerConfig,
       credKey: capability.credKey,
@@ -561,17 +578,10 @@ async function resolveEditComboTargets(
 
 function prepareOpenAIComboEdit(
   orderedTargets: EditComboTarget[],
-  editTargets: EditComboTarget[],
   ctx: ImageEditContext
 ): Buffer | Response | undefined {
   if (orderedTargets.length === 0) {
-    const limit = Math.max(
-      ...editTargets.map(({ parsed }) => openAIEditReferenceLimit(parsed.model))
-    );
-    return errorResponse(
-      HTTP_STATUS.BAD_REQUEST,
-      openAIEditReferenceError(ctx.imageInputCount, limit)
-    );
+    return errorResponse(HTTP_STATUS.BAD_REQUEST, OPENAI_EDIT_REFERENCE_ERROR);
   }
 
   return orderedTargets.some(({ providerConfig }) => isBuiltinOpenAIEditProvider(providerConfig))
@@ -598,19 +608,20 @@ async function executeImageEditCombo(comboName: string, ctx: ImageEditContext): 
       `No image-edit-capable targets in combo "${comboName}"`
     );
   }
+  const scoped = await scopeComboTargetsForKey(editTargets, ctx.keyScope, comboName);
+  if (scoped.rejection) return scoped.rejection;
 
   const orderedTargets = orderCapabilityTargets({
     comboName,
     endpoint: "image-edits",
     strategy: projected.combo.strategy,
-    // Skip DALL-E 2 when a later GPT Image target can accept the references.
-    targets: editTargets.filter(
-      ({ parsed, providerConfig }) =>
+    targets: scoped.targets.filter(
+      ({ providerConfig }) =>
         !isBuiltinOpenAIEditProvider(providerConfig) ||
-        ctx.imageInputCount <= openAIEditReferenceLimit(parsed.model)
+        ctx.imageInputCount <= MAX_OPENAI_EDIT_REFERENCES
     ),
   });
-  const openAIMask = prepareOpenAIComboEdit(orderedTargets, editTargets, ctx);
+  const openAIMask = prepareOpenAIComboEdit(orderedTargets, ctx);
   if (openAIMask instanceof Response) return openAIMask;
 
   const run = await runImageComboTargets(orderedTargets, {
@@ -619,8 +630,8 @@ async function executeImageEditCombo(comboName: string, ctx: ImageEditContext): 
       getProviderCredentialsWithQuotaPreflight(
         target.credKey,
         null,
-        ctx.allowedConnections,
-        target.modelStr,
+        narrowMediaConnectionScope(scoped.allowedConnections, pinnedConnectionIds(target)),
+        target.resolvedModel,
         imageQuotaPreflightOptions(target.credKey)
       ),
     isRateLimited: isAllRateLimitedCredentials,
@@ -733,11 +744,8 @@ async function postHandler(request: Request, _context?: unknown) {
     if (combo) {
       const comboPolicy = await enforceApiKeyPolicy(request, fullModel);
       if (comboPolicy.rejection) return comboPolicy.rejection;
-      const comboAllowedConnections =
-        comboPolicy.apiKeyInfo?.allowedConnections &&
-        comboPolicy.apiKeyInfo.allowedConnections.length > 0
-          ? comboPolicy.apiKeyInfo.allowedConnections
-          : null;
+      const scope = await resolveKeyConnectionScope(comboPolicy.apiKeyInfo);
+      if (scope.rejection) return scope.rejection;
       return executeImageEditCombo(fullModel, {
         options: input.options,
         prompt,
@@ -748,7 +756,10 @@ async function postHandler(request: Request, _context?: unknown) {
         imageMime,
         imageInputCount,
         hasMask,
-        allowedConnections: comboAllowedConnections,
+        keyScope: {
+          allowedConnections: scope.allowedConnections,
+          isTargetAllowed: createComboTargetKeyGate(comboPolicy, fullModel),
+        },
         request,
         accounting: { apiKeyInfo: comboPolicy.apiKeyInfo, startTime },
       });
@@ -1294,4 +1305,7 @@ async function postHandler(request: Request, _context?: unknown) {
   );
 }
 
-export const POST = postHandler;
+export async function POST(request: Request, context?: unknown) {
+  const authRejection = await enforceClientApiRouteAuth(request);
+  return authRejection ?? postHandler(request, context);
+}

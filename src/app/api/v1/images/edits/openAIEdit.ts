@@ -33,7 +33,7 @@ type OpenAIEditCredentials = NonNullable<
   Parameters<typeof handleOpenAIImageEdit>[0]["credentials"]
 > & { connectionId?: string | null };
 
-const MAX_OPENAI_EDIT_REFERENCES = 16;
+export const MAX_OPENAI_EDIT_REFERENCES = 16;
 
 export function isBuiltinOpenAIEditProvider(
   config: ImageProviderConfig | null
@@ -42,19 +42,10 @@ export function isBuiltinOpenAIEditProvider(
 }
 
 export function isBuiltinOpenAIEditModel(model: string | null): boolean {
-  return Boolean(model && (/^gpt-image-/i.test(model) || model === "dall-e-2"));
+  return Boolean(model && /^gpt-image-/i.test(model));
 }
 
-export function openAIEditReferenceLimit(model: string | null): number {
-  return model === "dall-e-2" ? 1 : MAX_OPENAI_EDIT_REFERENCES;
-}
-
-export function openAIEditReferenceError(count: number, limit: number): string | null {
-  if (count <= limit) return null;
-  return limit === 1
-    ? "DALL-E 2 image edit supports only one reference image"
-    : `OpenAI image edit supports at most ${limit} reference images`;
-}
+export const OPENAI_EDIT_REFERENCE_ERROR = `OpenAI image edit supports at most ${MAX_OPENAI_EDIT_REFERENCES} reference images`;
 
 export function readBuiltinOpenAIEditMask(
   input: Pick<OpenAIEditInput, "hasMask" | "options">
@@ -119,11 +110,9 @@ export async function runDirectBuiltinOpenAIEdit(
   resolvedModel: string,
   accounting: ImageRequestAccounting
 ) {
-  const referenceError = openAIEditReferenceError(
-    input.imageInputCount,
-    openAIEditReferenceLimit(model)
-  );
-  if (referenceError) return errorResponse(HTTP_STATUS.BAD_REQUEST, referenceError);
+  if (input.imageInputCount > MAX_OPENAI_EDIT_REFERENCES) {
+    return errorResponse(HTTP_STATUS.BAD_REQUEST, OPENAI_EDIT_REFERENCE_ERROR);
+  }
   const mask = readBuiltinOpenAIEditMask(input);
   if (mask instanceof Response) return mask;
 
