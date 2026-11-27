@@ -65,10 +65,56 @@ test("the generic banner is ID-dismissable and independent from the Radar featur
     "utf8"
   );
 
-  assert.match(source, /selectActiveNews/);
+  assert.match(source, /selectVisibleNews/);
   assert.match(source, /parseDismissedNewsIds/);
   assert.match(source, /localStorage/);
   assert.match(source, /announcement\.id/);
   assert.doesNotMatch(source, /RADAR_ENABLED/);
   assert.doesNotMatch(source, /method:\s*["']POST["']/);
+});
+
+test("public/announcements/v3.json mirrors the v2 ids and activation state, Radar still inactive", async () => {
+  const releaseNotes = await import("../../src/shared/utils/releaseNotes.ts");
+  const v2 = JSON.parse(await readFile(new URL("news.json", root), "utf8"));
+  const source = await readFile(new URL("public/announcements/v3.json", root), "utf8");
+  const v3 = JSON.parse(source);
+
+  assert.equal(v3.schemaVersion, 3);
+  assert.deepEqual(
+    v3.items.map((item: { id: string; active: boolean }) => [item.id, item.active]),
+    v2.items.map((item: { id: string; active: boolean }) => [item.id, item.active])
+  );
+  for (const item of v3.items) {
+    assert.equal(item.severity, "info");
+    assert.equal(item.expiresAt, undefined);
+  }
+  for (const id of ["radar-free-2026-11", "radar-launch-2026-08"]) {
+    assert.equal(v3.items.find((item: { id: string }) => item.id === id)?.active, false);
+  }
+  assert.doesNotMatch(source, /R\$|US\$|coupon|cupom|discount|desconto/i);
+
+  // Closed schema: the file parses as a v3 feed (an invalid one would read as no announcements
+  // and the distribution fixture would pass vacuously), and nothing in it is active.
+  assert.equal(releaseNotes.parseSeverityNewsPayload(v3)?.length, v2.items.length);
+  const now = new Date("2026-12-01T00:00:00.000Z");
+  assert.deepEqual(releaseNotes.listVisibleNews(v3, "en", { severityEnabled: true, now }), []);
+});
+
+test("the announcement severity flag is registered off and the readers share one clock hook", async () => {
+  const flags = await import("../../src/shared/constants/featureFlagDefinitionsExtras.ts");
+  const flag = flags.EXTRA_FEATURE_FLAG_DEFINITIONS.find(
+    (entry: { key: string }) => entry.key === "ANNOUNCEMENT_SEVERITY_ENABLED"
+  );
+  assert.equal(flag?.defaultValue, "false");
+  assert.equal(flag?.type, "boolean");
+
+  for (const file of [
+    "src/app/(dashboard)/dashboard/NewsBanner.tsx",
+    "src/app/(dashboard)/dashboard/changelog/components/NewsViewer.tsx",
+  ]) {
+    const source = await readFile(new URL(file, root), "utf8");
+    assert.match(source, /useNewsFeed/);
+    assert.doesNotMatch(source, /dangerouslySetInnerHTML/);
+    assert.doesNotMatch(source, /method:\s*["']POST["']/);
+  }
 });

@@ -1,19 +1,22 @@
 "use client";
 
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useSyncExternalStore } from "react";
 import { useLocale, useTranslations } from "next-intl";
 
 import {
+  type SeverityNewsAnnouncement,
   NEWS_DISMISS_EVENT,
   NEWS_DISMISS_STORAGE_NAME,
-  fetchNewsPayload,
   parseDismissedNewsIds,
-  selectActiveNews,
+  selectVisibleNews,
   serializeDismissedNewsIds,
 } from "@/shared/utils/releaseNotes";
+import { useNewsFeed } from "@/shared/hooks/useNewsFeed";
+import { Alert } from "@omniroute/ui-kit/alert";
 import { buttonVariants } from "@omniroute/ui-kit/button";
 import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
+import NewsSeverityBadge from "./NewsSeverityBadge";
 
 function subscribeToDismissals(callback: () => void) {
   window.addEventListener("storage", callback);
@@ -36,6 +39,64 @@ function getServerDismissedIds(): string {
   return "";
 }
 
+function dismissAnnouncement(id: string, dismissedIds: Set<string>) {
+  dismissedIds.add(id);
+  try {
+    localStorage.setItem(NEWS_DISMISS_STORAGE_NAME, serializeDismissedNewsIds(dismissedIds));
+  } catch {
+    // Storage is optional; the next announcement fetch remains functional.
+  }
+  window.dispatchEvent(new Event(NEWS_DISMISS_EVENT));
+}
+
+function AnnouncementLink({ announcement }: { announcement: SeverityNewsAnnouncement }) {
+  if (!announcement.link) return null;
+  return (
+    <a
+      href={announcement.link}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={buttonVariants({ size: "sm", className: "gap-1.5 whitespace-nowrap" })}
+    >
+      {announcement.linkLabel ?? announcement.title}
+      <Icon name="open_in_new" size={14} />
+    </a>
+  );
+}
+
+/**
+ * A warning or critical announcement: a highlighted, dismissible alert. A critical one is
+ * announced assertively (the kit alert uses role="alert" for it).
+ */
+function SeverityAlert({
+  announcement,
+  dismissLabel,
+  onDismiss,
+}: {
+  announcement: SeverityNewsAnnouncement;
+  dismissLabel: string;
+  onDismiss: () => void;
+}) {
+  return (
+    <Alert
+      variant={announcement.severity === "critical" ? "critical" : "warning"}
+      layout="inline"
+      className="mb-4"
+      icon={<Icon name={announcement.icon} size={18} />}
+      title={
+        <>
+          <NewsSeverityBadge severity={announcement.severity} className="mr-2 align-middle" />
+          {announcement.title}
+        </>
+      }
+      description={announcement.message}
+      actions={<AnnouncementLink announcement={announcement} />}
+      dismissLabel={dismissLabel}
+      onDismiss={onDismiss}
+    />
+  );
+}
+
 /**
  * Generic, fail-silent reader for the public announcement feed. Fetching the
  * static JSON is GET-only and does not send product state or telemetry.
@@ -43,36 +104,32 @@ function getServerDismissedIds(): string {
 export default function NewsBanner() {
   const locale = useLocale();
   const t = useTranslations("common");
-  const [payload, setPayload] = useState<unknown>(null);
+  const feed = useNewsFeed();
   const dismissedSnapshot = useSyncExternalStore(
     subscribeToDismissals,
     readDismissedIds,
     getServerDismissedIds
   );
   const dismissedIds = parseDismissedNewsIds(dismissedSnapshot);
-  const announcement = selectActiveNews(payload, locale, dismissedIds);
-
-  useEffect(() => {
-    const controller = new AbortController();
-
-    void fetchNewsPayload(fetch, controller.signal).then((value) => {
-      if (value !== null) setPayload(value);
-    });
-
-    return () => controller.abort();
-  }, []);
+  const announcement = selectVisibleNews(feed.payload, locale, dismissedIds, {
+    severityEnabled: feed.severityEnabled,
+    now: feed.now,
+  });
 
   if (!announcement) return null;
 
-  const dismiss = () => {
-    dismissedIds.add(announcement.id);
-    try {
-      localStorage.setItem(NEWS_DISMISS_STORAGE_NAME, serializeDismissedNewsIds(dismissedIds));
-    } catch {
-      // Storage is optional; the next announcement fetch remains functional.
-    }
-    window.dispatchEvent(new Event(NEWS_DISMISS_EVENT));
-  };
+  const dismiss = () => dismissAnnouncement(announcement.id, dismissedIds);
+
+  if (announcement.severity !== "info") {
+    return (
+      <SeverityAlert
+        key={announcement.id}
+        announcement={announcement}
+        dismissLabel={t("dismissNotification")}
+        onDismiss={dismiss}
+      />
+    );
+  }
 
   return (
     <div
@@ -91,17 +148,7 @@ export default function NewsBanner() {
       </div>
 
       <div className="flex shrink-0 items-center gap-3 self-end sm:self-auto">
-        {announcement.link && (
-          <a
-            href={announcement.link}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={buttonVariants({ size: "sm", className: "gap-1.5 whitespace-nowrap" })}
-          >
-            {announcement.linkLabel ?? announcement.title}
-            <Icon name="open_in_new" size={14} />
-          </a>
-        )}
+        <AnnouncementLink announcement={announcement} />
         <Button
           variant="ghost"
           size="icon-sm"

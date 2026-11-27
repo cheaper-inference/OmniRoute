@@ -1,0 +1,1 @@
+- **feat(dashboard):** Opt-in `ANNOUNCEMENT_SEVERITY_ENABLED` reads a v3 announcement feed with info, warning and critical severity and an expiry; critical announcements show as a highlighted, dismissible banner that leaves at its expiry (#21386).
