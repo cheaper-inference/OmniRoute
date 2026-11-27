@@ -1094,6 +1094,12 @@ curl -X POST http://localhost:20128/api/db-backups/import \
 
 **Import Validation:** The imported file is validated for integrity (SQLite pragma check), required tables (`provider_connections`, `provider_nodes`, `combos`, `api_keys`), and size (max 100MB).
 
+**System API keys:** both downloads leave out the secret of system-owned API keys (keys that a
+server feature creates and uses only inside the server). The `.sqlite` file and the archive hold a
+non-secret marker instead, so after importing a downloaded file those keys can no longer be used
+(`required_api_key_unavailable`) and the feature that owns them has to bind a new key. Restoring a
+server backup by id (`POST /api/db-backups`) keeps them. Ordinary API keys are exported as before.
+
 **Use Cases:**
 
 - Migrate OmniRoute between machines
