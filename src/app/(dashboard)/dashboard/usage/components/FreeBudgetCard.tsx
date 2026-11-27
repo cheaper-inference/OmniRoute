@@ -631,9 +631,9 @@ export function FreeBudgetPlaceholder({
 }): React.JSX.Element {
   if (state === "loading") {
     return (
-      <div role="status" className="rounded-lg border border-border bg-surface p-3 text-text-muted">
+      <Card role="status" padding="xs" className="text-text-muted">
         {labels.loading}
-      </div>
+      </Card>
     );
   }
 
