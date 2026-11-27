@@ -7,7 +7,6 @@ lastUpdated: 2026-09-01
 # Radar Free-Model Catalog
 
 > **Source of truth:** `src/lib/radar/`, `src/lib/db/radar.ts`, `src/app/api/radar/`
-> **Last updated:** 2026-09-01 — v3.8.51
 > **Hosted-service evidence boundary:** server-side rules described here were verified on
 > 2026-09-01 against the intentionally private Radar server at exact revision
 > `main@dce70f004364912f3f144cdb69f4cbcde16093ed`. That implementation is not distributed in

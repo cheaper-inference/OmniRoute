@@ -6,7 +6,8 @@ import { extractExcerpt, htmlToText, normalizeForMatch, shortHash } from "./norm
 import { byCodeUnit } from "./order.mjs";
 
 /** @typedef {"ids-missing"|"ids-added"|"assertion-failed"|"phrase-missing"|"phrase-present"
- *   |"excerpt-changed"|"anchor-missing"|"unreachable"|"gone"|"invalid-response"|"manifest-out-of-sync"} FindingKind */
+ *   |"excerpt-changed"|"anchor-missing"|"unreachable"|"gone"|"invalid-response"|"manifest-out-of-sync"
+ *   |"registry-diff"|"registry-inconclusive"} FindingKind */
 /** @typedef {{ provider: string, probeId: string, kind: FindingKind, severity: "drift"|"info",
  *   message: string, details: Record<string, unknown> }} Finding */
 /** @typedef {{ liveIds: number, catalogIds: number, aliveCatalogIds: number }} ProbeStats */
@@ -38,7 +39,7 @@ function finding(probe, kind, message, details) {
   };
 }
 
-function readId(entry) {
+export function readId(entry) {
   const id = typeof entry === "string" ? entry : entry?.id;
   return typeof id === "string" && id.trim() ? id : undefined;
 }
@@ -140,7 +141,11 @@ export function classifyResponse(probe, source, prevTextChars = null) {
   ) {
     return "invalid-response";
   }
-  if (probe.type === "model-list" && modelListIds(document, probe).length < probe.minIds) {
+  if (
+    probe.type === "model-list" &&
+    probe.scope !== "registry" &&
+    modelListIds(document, probe).length < probe.minIds
+  ) {
     return "invalid-response";
   }
   return "ok";
