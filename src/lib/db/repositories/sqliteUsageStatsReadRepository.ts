@@ -76,7 +76,7 @@ type ConnectionSpeedDbRow = {
   tokens_reasoning: unknown;
 };
 
-function getCacheUsageSnapshotSync(db: SqliteAdapter): CacheUsageSnapshot {
+function readCacheTotals(db: SqliteAdapter): CacheUsageSnapshot["totals"] {
   // Aggregate totals from usage_history
   const totalsRow = db
     .prepare(
@@ -95,6 +95,21 @@ function getCacheUsageSnapshotSync(db: SqliteAdapter): CacheUsageSnapshot {
     )
     .get() as CacheTotalsRow | undefined;
 
+  return totalsRow
+    ? {
+        totalRequests: totalsRow.totalRequests,
+        totalInputTokens: totalsRow.totalInputTokens,
+        totalCachedTokens: totalsRow.totalCachedTokens,
+        totalCacheCreationTokens: totalsRow.totalCacheCreationTokens,
+        cachedRequests: totalsRow.cachedRequests,
+        estimated: Boolean(totalsRow.estimated),
+        totalCachedTokensComplete: Boolean(totalsRow.totalCachedTokensComplete),
+        totalCacheCreationTokensComplete: Boolean(totalsRow.totalCacheCreationTokensComplete),
+      }
+    : null;
+}
+
+function readAllRequests(db: SqliteAdapter): number | null {
   // Get all requests count (including those without cache activity)
   const allRequestsRow = db
     .prepare(
@@ -105,6 +120,10 @@ function getCacheUsageSnapshotSync(db: SqliteAdapter): CacheUsageSnapshot {
     )
     .get() as { totalRequests: number } | undefined;
 
+  return allRequestsRow ? allRequestsRow.totalRequests : null;
+}
+
+function readCacheByProvider(db: SqliteAdapter): CacheUsageByProvider[] {
   // Aggregate by provider
   const byProviderRows = db
     .prepare(
@@ -126,6 +145,20 @@ function getCacheUsageSnapshotSync(db: SqliteAdapter): CacheUsageSnapshot {
     )
     .all() as CacheByProviderRow[];
 
+  return byProviderRows.map((row): CacheUsageByProvider => ({
+    provider: row.provider,
+    totalRequests: row.totalRequests,
+    cachedRequests: row.cachedRequests,
+    inputTokens: row.inputTokens,
+    cachedTokens: row.cachedTokens,
+    cacheCreationTokens: row.cacheCreationTokens,
+    estimated: Boolean(row.estimated),
+    cachedTokensComplete: Boolean(row.cachedTokensComplete),
+    cacheCreationTokensComplete: Boolean(row.cacheCreationTokensComplete),
+  }));
+}
+
+function readCacheByStrategy(db: SqliteAdapter): CacheUsageByStrategy[] {
   // Aggregate by combo strategy (direct requests stored as 'direct')
   const byStrategyRows = db
     .prepare(
@@ -145,42 +178,25 @@ function getCacheUsageSnapshotSync(db: SqliteAdapter): CacheUsageSnapshot {
     )
     .all() as CacheByStrategyRow[];
 
-  return {
-    totals: totalsRow
-      ? {
-          totalRequests: totalsRow.totalRequests,
-          totalInputTokens: totalsRow.totalInputTokens,
-          totalCachedTokens: totalsRow.totalCachedTokens,
-          totalCacheCreationTokens: totalsRow.totalCacheCreationTokens,
-          cachedRequests: totalsRow.cachedRequests,
-          estimated: Boolean(totalsRow.estimated),
-          totalCachedTokensComplete: Boolean(totalsRow.totalCachedTokensComplete),
-          totalCacheCreationTokensComplete: Boolean(totalsRow.totalCacheCreationTokensComplete),
-        }
-      : null,
-    allRequests: allRequestsRow ? allRequestsRow.totalRequests : null,
-    byProvider: byProviderRows.map((row): CacheUsageByProvider => ({
-      provider: row.provider,
-      totalRequests: row.totalRequests,
-      cachedRequests: row.cachedRequests,
-      inputTokens: row.inputTokens,
-      cachedTokens: row.cachedTokens,
-      cacheCreationTokens: row.cacheCreationTokens,
-      estimated: Boolean(row.estimated),
-      cachedTokensComplete: Boolean(row.cachedTokensComplete),
-      cacheCreationTokensComplete: Boolean(row.cacheCreationTokensComplete),
-    })),
-    byStrategy: byStrategyRows.map((row): CacheUsageByStrategy => ({
-      strategy: row.strategy,
-      requests: row.requests,
-      inputTokens: row.inputTokens,
-      cachedTokens: row.cachedTokens,
-      cacheCreationTokens: row.cacheCreationTokens,
-      estimated: Boolean(row.estimated),
-      cachedTokensComplete: Boolean(row.cachedTokensComplete),
-      cacheCreationTokensComplete: Boolean(row.cacheCreationTokensComplete),
-    })),
-  };
+  return byStrategyRows.map((row): CacheUsageByStrategy => ({
+    strategy: row.strategy,
+    requests: row.requests,
+    inputTokens: row.inputTokens,
+    cachedTokens: row.cachedTokens,
+    cacheCreationTokens: row.cacheCreationTokens,
+    estimated: Boolean(row.estimated),
+    cachedTokensComplete: Boolean(row.cachedTokensComplete),
+    cacheCreationTokensComplete: Boolean(row.cacheCreationTokensComplete),
+  }));
+}
+
+/** Runs the four cache queries in the original order: totals, row count, per provider, per strategy. */
+function getCacheUsageSnapshotSync(db: SqliteAdapter): CacheUsageSnapshot {
+  const totals = readCacheTotals(db);
+  const allRequests = readAllRequests(db);
+  const byProvider = readCacheByProvider(db);
+  const byStrategy = readCacheByStrategy(db);
+  return { totals, allRequests, byProvider, byStrategy };
 }
 
 function listCacheTrendSync(db: SqliteAdapter, hours: number): CacheTrendBucket[] {

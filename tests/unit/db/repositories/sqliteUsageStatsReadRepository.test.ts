@@ -176,6 +176,14 @@ test("legacy helpers query the handle they are given", () => {
   assert.equal(legacy.sumTokensThisMonth(fake as never), 0);
   assert.deepEqual(legacy.listRecentConnectionSpeedSamples(fake as never, "c", 3), []);
   assert.equal(seen.length, 7);
+  // The cache snapshot runs its four queries in the original order.
+  assert.match(
+    seen[0],
+    /^SELECT COUNT\(\*\) as totalRequests, SUM\(tokens_input\) as totalInputTokens/
+  );
+  assert.equal(seen[1], "SELECT COUNT(*) as totalRequests FROM usage_history");
+  assert.match(seen[2], /^SELECT provider,/);
+  assert.match(seen[3], /^SELECT COALESCE\(combo_strategy, 'direct'\) as strategy,/);
 });
 
 test("listCacheTrend, sumTokensThisMonth and speed samples match the facades", async () => {
