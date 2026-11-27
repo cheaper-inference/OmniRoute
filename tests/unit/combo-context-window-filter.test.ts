@@ -661,3 +661,61 @@ test("combo config schema accepts boolean outputLimitAdvisory and rejects other 
   assert.equal(comboRuntimeConfigSchema.safeParse({ outputLimitAdvisory: true }).success, true);
   assert.equal(comboRuntimeConfigSchema.safeParse({ outputLimitAdvisory: "yes" }).success, false);
 });
+
+// #19257: an undersized candidate elsewhere in the pool must not reorder two
+// already-fitting Auto targets just because one of them has an explicit override.
+test("#19257: Auto keeps score order of fitting targets when an undersized target is present", () => {
+  saveModelsDevCapabilities({
+    "unit-19257-g": { flash: capabilityEntry(1_048_576) },
+    "unit-19257-c": { luna: capabilityEntry(872_000) },
+    "unit-19257-t": { small: capabilityEntry(8_192) },
+    "unit-19257-m": { mistral: capabilityEntry(262_144) },
+  });
+  setModelContextOverride("unit-19257-c", "luna", 872_000);
+
+  try {
+    const G = target("unit-19257-g/flash");
+    const C = target("unit-19257-c/luna");
+    const T = target("unit-19257-t/small");
+    const M = target("unit-19257-m/mistral");
+    // The reporter's large request estimated 27,011 input tokens.
+    const large = bigContextBody(27_000);
+    const small = { messages: [{ role: "user", content: "17 times 23" }] };
+    const infos: unknown[][] = [];
+    const log = { ...noopLog, info: (...args: unknown[]) => infos.push(args) };
+    const run = (targets: (typeof G)[], body: Record<string, unknown>) =>
+      filterTargetsByRequestCompatibility(targets, body, log, undefined, {
+        preserveStrategyOrder: true,
+      }).map((entry) => entry.modelStr);
+
+    assert.deepEqual(run([G, C], large), [G.modelStr, C.modelStr]);
+    assert.deepEqual(run([G, C, T], large), [G.modelStr, C.modelStr, T.modelStr]);
+    assert.deepEqual(run([G, T], large), [G.modelStr, T.modelStr]);
+    assert.deepEqual(run([G, C, T], small), [G.modelStr, C.modelStr, T.modelStr]);
+    assert.deepEqual(run([M, G, C, T], large), [M.modelStr, G.modelStr, C.modelStr, T.modelStr]);
+    assert.deepEqual(infos, [], "no reorder happened, so nothing should be logged");
+
+    // Auto still moves an undersized head behind the fitting targets, and logs why.
+    assert.deepEqual(run([T, G, C], large), [G.modelStr, C.modelStr, T.modelStr]);
+    assert.equal(infos.length, 1);
+    assert.match(
+      String(infos[0][1]),
+      /context-fit tiering reordered targets to unit-19257-g\/flash, unit-19257-c\/luna, unit-19257-t\/small/
+    );
+
+    // Non-Auto strategies keep the override-first tiering, and say so in the log.
+    infos.length = 0;
+    const tiered = filterTargetsByRequestCompatibility([G, C, T], large, log);
+    assert.deepEqual(
+      tiered.map((entry) => entry.modelStr),
+      [C.modelStr, G.modelStr, T.modelStr]
+    );
+    assert.equal(infos.length, 1);
+    assert.match(
+      String(infos[0][1]),
+      /override-first context tiering reordered targets to unit-19257-c\/luna, unit-19257-g\/flash, unit-19257-t\/small/
+    );
+  } finally {
+    removeModelContextOverride("unit-19257-c", "luna");
+  }
+});

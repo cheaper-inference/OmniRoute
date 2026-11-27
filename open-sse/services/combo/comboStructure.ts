@@ -895,11 +895,13 @@ function filterTargetsWithCompatibilityDetails(
         (targetReasons.get(target) || []).includes("context_window") &&
         isNearBoundaryOverrideReject(target, requirementsFor(target))
     );
-    const preferredTier = [
-      ...overrideVerifiedCompatible,
-      ...overrideTrustedRejects,
-      ...catalogOnlyCompatible,
-    ];
+    // #19257: Auto keeps score order among confirmed-fitting targets unless a
+    // near-boundary override reject needs the #13870 protection above.
+    const keepFitOrder =
+      options?.preserveStrategyOrder === true && overrideTrustedRejects.length === 0;
+    const preferredTier = keepFitOrder
+      ? knownContextCompatible
+      : [...overrideVerifiedCompatible, ...overrideTrustedRejects, ...catalogOnlyCompatible];
     if (preferredTier.length > 0) {
       const preferredSet = new Set(preferredTier);
       const reordered = [
@@ -912,7 +914,15 @@ function filterTargetsWithCompatibilityDetails(
       // filter over `targets`) is already correct and re-wrapping it would be
       // a no-op.
       const changedOrder = reordered.some((target, index) => target !== compatible[index]);
-      if (changedOrder) return preferConfirmedVisionTargets(reordered, requirements);
+      if (changedOrder) {
+        log.info(
+          "COMBO",
+          `${label}: ${keepFitOrder ? "context-fit" : "override-first context"} tiering reordered targets to ${reordered
+            .map((target) => target.modelStr)
+            .join(", ")}`
+        );
+        return preferConfirmedVisionTargets(reordered, requirements);
+      }
     }
   }
 

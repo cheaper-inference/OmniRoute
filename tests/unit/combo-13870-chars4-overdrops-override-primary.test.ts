@@ -134,3 +134,34 @@ test("#13870: chars/4 overestimate demotes a real-fitting override primary behin
     removeModelContextOverride("unit-13870-fallback", "model");
   }
 });
+
+test("#19257: Auto still promotes a near-boundary override reject (#13870 protection)", () => {
+  saveModelsDevCapabilities({
+    "unit-13870-primary": { model: capabilityEntry(null) },
+    "unit-13870-emergency": { model: capabilityEntry(899_153) },
+    "unit-13870-small": { model: capabilityEntry(128_450) },
+  });
+
+  setModelContextOverride("unit-13870-primary", "model", 250_000);
+
+  try {
+    const out = filterTargetsByRequestCompatibility(
+      [
+        target("unit-13870-emergency/model"),
+        target("unit-13870-primary/model"),
+        target("unit-13870-small/model"),
+      ],
+      repetitiveAgentBody(),
+      noopLog,
+      undefined,
+      { preserveStrategyOrder: true }
+    );
+
+    assert.deepEqual(
+      out.map((entry) => entry.modelStr),
+      ["unit-13870-primary/model", "unit-13870-emergency/model", "unit-13870-small/model"]
+    );
+  } finally {
+    removeModelContextOverride("unit-13870-primary", "model");
+  }
+});
