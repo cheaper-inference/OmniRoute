@@ -57,7 +57,19 @@ export const zaiProvider: RegistryEntry = {
     { id: "glm-4.7", name: "GLM 4.7" },
     // #21219: glm-5.4 answers as itself on the coding-plan chat surface (200,
     // model=glm-5.4, live probe 2026-11-25); keep it as a static fallback next to
-    // discovery so a fresh install shows the current flagship.
-    { id: "glm-5.4", name: "GLM 5.4" },
+    // discovery so a fresh install shows the current flagship. Tagged for the
+    // OpenAI-compatible Coding Plan endpoint like the glm-5.3 family: on the
+    // default Anthropic path z.ai rejects any request that declares tools with
+    // `[400]: tools[0].type:type is illegal`, while the same request succeeds
+    // with targetFormat "openai" (verified live 2026-11-25, 1-tool request 400 -> 200
+    // with tool_calls). Context 1M / output 128K per docs.z.ai/guides/llm/glm-5.4.
+    {
+      id: "glm-5.4",
+      name: "GLM 5.4",
+      contextLength: 1000000,
+      maxOutputTokens: 131072,
+      toolCalling: true,
+      targetFormat: "openai",
+    },
   ],
 };

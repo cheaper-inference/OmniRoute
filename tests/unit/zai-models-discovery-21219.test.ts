@@ -150,6 +150,47 @@ test("a partial live catalog keeps the omitted glm-4.7-flash available without c
   assert.equal(listed?.catalogOrigin, "registry");
 });
 
+test("glm-5.4 dispatches on the OpenAI-compatible coding endpoint, not the Anthropic path that rejects tools", async () => {
+  // On the provider-default Anthropic path z.ai answers any request with tool
+  // declarations with `[400]: tools[0].type:type is illegal`; the glm-5.3 family
+  // avoids it via targetFormat "openai", and glm-5.4 must do the same.
+  const { getModelTargetFormat } = await import("../../open-sse/config/providerModels.ts");
+  const { resolveChatCoreTargetFormat } =
+    await import("../../open-sse/handlers/chatCore/targetFormat.ts");
+  const { resolveExecutionCredentials } =
+    await import("../../open-sse/handlers/chatCore/executionCredentials.ts");
+  const { DefaultExecutor } = await import("../../open-sse/executors/default.ts");
+
+  const registryModel = zaiProvider.models.find((model) => model.id === "glm-5.4");
+  assert.equal(registryModel?.targetFormat, "openai");
+  assert.equal(getModelTargetFormat("zai", "glm-5.4"), "openai");
+
+  const { targetFormat } = resolveChatCoreTargetFormat({
+    provider: "zai",
+    resolvedModel: "glm-5.4",
+    apiFormat: undefined,
+    customModelTargetFormat: undefined,
+    providerSpecificData: null,
+  });
+  assert.equal(targetFormat, "openai");
+
+  const credentials = resolveExecutionCredentials({
+    credentials: { apiKey: "zai-test-key", providerSpecificData: {} },
+    nativeCodexPassthrough: false,
+    endpointPath: "/v1/chat/completions",
+    targetFormat,
+    provider: "zai",
+    ccSessionId: null,
+  });
+  const url = new DefaultExecutor("zai").buildUrl("glm-5.4", true, 0, credentials);
+  assert.notEqual(url, "https://api.z.ai/api/anthropic/v1/messages?beta=true");
+  assert.match(url, /\/api\/coding\/paas\/v4\/chat\/completions$/);
+
+  // The untagged default stays untouched: a model without the tag keeps the
+  // provider's Anthropic path.
+  assert.equal(getModelTargetFormat("zai", "glm-5.2"), null);
+});
+
 test("provider models route falls back to the local z.ai catalog when the live fetch fails", async () => {
   const connection = await providersDb.createProviderConnection({
     provider: "zai",
