@@ -12,6 +12,7 @@
  */
 import { STREAM_RECOVERY } from "../config/constants.ts";
 import { isRegisteredFeatureFlagEnabled } from "../utils/registeredFeatureFlag.ts";
+import { pickResponsesTextPart, type ResponsesTextPart } from "../utils/responsesTextPart.ts";
 import {
   createThroughputWatchdog,
   ThroughputWatchdogError,
@@ -268,6 +269,8 @@ export interface OpenAiSseScan {
    * signals, or a terminal lifecycle event.
    */
   parsedResponses: boolean;
+  /** Identity of the last Responses text delta, or null if none was seen (#20257). */
+  textPart: ResponsesTextPart | null;
 }
 
 /** Responses-API `type` values the scanner understands. Anything else is ignored. */
@@ -297,6 +300,7 @@ export function scanOpenAiSseText(sse: string): OpenAiSseScan {
     finishReason: null,
     parsedOpenAi: false,
     parsedResponses: false,
+    textPart: null,
   };
   if (typeof sse !== "string" || sse.length === 0) {
     return {
@@ -308,6 +312,7 @@ export function scanOpenAiSseText(sse: string): OpenAiSseScan {
       finishReason: fold.finishReason,
       parsedOpenAi: fold.parsedOpenAi,
       parsedResponses: fold.parsedResponses,
+      textPart: fold.textPart,
     };
   }
   for (const line of sse.split("\n")) {
@@ -323,6 +328,7 @@ export function scanOpenAiSseText(sse: string): OpenAiSseScan {
     finishReason: fold.finishReason,
     parsedOpenAi: fold.parsedOpenAi,
     parsedResponses: fold.parsedResponses,
+    textPart: fold.textPart,
   };
 }
 
@@ -335,6 +341,7 @@ interface SseScanFold {
   finishReason: string | null;
   parsedOpenAi: boolean;
   parsedResponses: boolean;
+  textPart: ResponsesTextPart | null;
 }
 
 /** Parse one raw SSE line into the running scan fold. */
@@ -365,6 +372,9 @@ function scanSseLine(line: string, fold: SseScanFold): void {
   scanResponsesEvent(json as Record<string, unknown>, {
     addText: (delta) => {
       fold.text += delta;
+    },
+    setTextPart: (part) => {
+      fold.textPart = part;
     },
     addReasoning: (delta) => {
       fold.reasoningText += delta;
@@ -415,6 +425,7 @@ function scanChatFinishReason(rawFinishReason: unknown, fold: SseScanFold): void
 
 interface ResponsesScanSink {
   addText: (delta: string) => void;
+  setTextPart: (part: ResponsesTextPart) => void;
   addReasoning: (delta: string) => void;
   markToolCall: () => void;
   markToolCallFinished: () => void;
@@ -468,6 +479,7 @@ function scanResponsesTextDelta(
   eventType: string,
   sink: ResponsesScanSink
 ): void {
+  if (eventType === RESPONSES_TEXT_DELTA) sink.setTextPart(pickResponsesTextPart(json));
   const delta = (json as { delta?: unknown }).delta;
   if (typeof delta !== "string" || delta.length === 0) {
     sink.markParsed();
@@ -677,6 +689,7 @@ export function createRecoverableStream(
   let emittedToolCallFinish = false; // any finish_reason "tool_calls" seen
   let emittedParsedOpenAi = false;
   let emittedParsedResponses = false;
+  let emittedTextPart: ResponsesTextPart = {}; // open Responses text part a suffix extends
   // STREAM_RECOVERY_TOOLCALL_ORDER_FIX, resolved lazily at most once per stream and only
   // on a recovery decision, so the flag costs nothing on streams that end cleanly.
   let toolCallOrderFix: boolean | undefined;
@@ -705,6 +718,7 @@ export function createRecoverableStream(
     if (scan.finishReason === "tool_calls") emittedToolCallFinish = true;
     if (scan.parsedOpenAi) emittedParsedOpenAi = true;
     if (scan.parsedResponses) emittedParsedResponses = true;
+    if (scan.textPart) emittedTextPart = scan.textPart;
   };
 
   const flushHeld = (controller: ReadableStreamDefaultController<Uint8Array>) => {
@@ -963,7 +977,7 @@ export function createRecoverableStream(
         emit(
           controller,
           encoder.encode(
-            `data: ${JSON.stringify({ type: "response.output_text.delta", output_index: 0, content_index: 0, delta: suffix })}\n\n`
+            `data: ${JSON.stringify({ type: "response.output_text.delta", item_id: "msg_0", output_index: 0, content_index: 0, ...emittedTextPart, delta: suffix })}\n\n`
           )
         );
       } else {

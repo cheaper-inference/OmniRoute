@@ -42,25 +42,23 @@ flowchart LR
 `main` bukan cabang penyepaduan harian. PR yang dibuka terhadap `main`
 biasanya perlu disasarkan semula sebelum digabungkan.
 
-## Pembekuan keluaran (kitaran selari)
+## Lepaskan pembekuan (kitaran selari)
 
-Apabila suatu keluaran sedang diselaraskan, isu penanda berlabel `release-freeze`
-akan dibuka. Perkara itu **tidak menghentikan pembangunan**:
+Apabila keluaran sedang diselaraskan, isu penanda berlabel `release-freeze` dibuka. Itu** tidak menghentikan pembangunan** :
 
-- `release/vX.Y.Z` yang dibekukan berada di bawah tanggungjawab kapten keluaran untuk penerbitan tersebut.
-- `release/vX+1` bagi kitaran seterusnya dibuat daripada hujung yang dibekukan supaya penyumbang boleh terus
-  memasukkan kerja.
-- PR terbuka yang masih menyasarkan cabang yang dibekukan harus **disasarkan semula** kepada
-  cabang `release/v*` yang aktif (tertinggi).
+- `release/vX.Y.Z` beku kepunyaan kapten pelepasan untuk kapal itu.
+- `release/vX+1` kitaran seterusnya dipotong dari hujung beku supaya penyumbang meneruskan kerja pendaratan.
+- Buka PRs yang masih menyasarkan cawangan beku sepatutnya** disasarkan semula** kepada cawangan `release/v*` yang aktif (tertinggi).
 
-Semak sama ada terdapat pembekuan terbuka sebelum menganggap cabang yang anda inginkan boleh digabungkan:
+Semak pembekuan terbuka sebelum menganggap cawangan yang anda inginkan boleh digabungkan:
 
 ```bash
 gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
 ```
 
-Mekanisme penggabungan (label `queue` oleh pemilik → Mergify) didokumenkan dalam
-[MERGE_TRAIN.md](./MERGE_TRAIN.md).
+Mekanik gabungan (label `queue` pemilik → Mergify) didokumenkan dalam [MERGE_TRAIN.md](./MERGE_TRAIN.md).
+
+> **2026-11-19: baris gilir gabungan Mergify ditamatkan** (keputusan pemilik). `.mergify.yml` tidak lagi mentakrifkan baris gilir dan menolak perintah Mergify yang menggabungkan atau menulis semula permintaan tarik. Keluaran PRs digabungkan dengan tangan di bawah set peraturan repositori "Memerlukan gerbang hijau pada keluaran aktif" (`Gate / CI` + `Gate / Quality`) sehingga omni-queue berjalan dalam mod langsung, dan melalui omni-queue selepas itu ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Label `queue` tidak lagi menggabungkan apa-apa.
 
 ## Mengapakah cabang dan tag diperlukan?
 

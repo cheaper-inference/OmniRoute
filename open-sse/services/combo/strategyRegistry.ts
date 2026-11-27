@@ -139,6 +139,7 @@ const STRATEGY_TRAIT_OVERRIDES: Record<AnyRoutingStrategyValue, StrategyTraitOve
     usesRoundRobinLoop: true,
     stickyPin: "round-robin",
     runtimeUnitOrder: "declared",
+    promptCacheAffinityScope: "model",
   },
   "context-relay": { ordering: "declared", contextRelay: true },
   "fill-first": {

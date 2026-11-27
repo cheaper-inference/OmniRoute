@@ -1,6 +1,6 @@
 "use client";
 
-import { Input } from "@/shared/components";
+import { Input, NumberInput } from "@/shared/components";
 import { useTranslations } from "next-intl";
 
 function translateOrFallback(
@@ -36,7 +36,7 @@ export default function FusionDefaultsFields({
       ...prev,
       fusionTuning: { ...prev.fusionTuning, ...patch },
     }));
-  const num = (value: string) => (value ? Number(value) : undefined);
+  const num = (value: number | null) => value ?? undefined;
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-3 border-t border-border/50">
@@ -50,32 +50,29 @@ export default function FusionDefaultsFields({
         }
         className="md:col-span-2"
       />
-      <Input
+      <NumberInput
         label={translateOrFallback(t, "fusionMinPanel", "Min Panel")}
-        type="number"
         min={1}
         max={50}
-        value={comboDefaults.fusionTuning?.minPanel ?? ""}
+        value={comboDefaults.fusionTuning?.minPanel ?? null}
         placeholder="2"
-        onChange={(e) => setTuning({ minPanel: num(e.target.value) })}
+        onValueChange={(value) => setTuning({ minPanel: num(value) })}
       />
-      <Input
+      <NumberInput
         label={translateOrFallback(t, "fusionStragglerGraceMs", "Straggler Grace (ms)")}
-        type="number"
         min={0}
         max={120000}
-        value={comboDefaults.fusionTuning?.stragglerGraceMs ?? ""}
+        value={comboDefaults.fusionTuning?.stragglerGraceMs ?? null}
         placeholder="8000"
-        onChange={(e) => setTuning({ stragglerGraceMs: num(e.target.value) })}
+        onValueChange={(value) => setTuning({ stragglerGraceMs: num(value) })}
       />
-      <Input
+      <NumberInput
         label={translateOrFallback(t, "fusionPanelHardTimeoutMs", "Panel Hard Timeout (ms)")}
-        type="number"
         min={1000}
         max={600000}
-        value={comboDefaults.fusionTuning?.panelHardTimeoutMs ?? ""}
+        value={comboDefaults.fusionTuning?.panelHardTimeoutMs ?? null}
         placeholder="90000"
-        onChange={(e) => setTuning({ panelHardTimeoutMs: num(e.target.value) })}
+        onValueChange={(value) => setTuning({ panelHardTimeoutMs: num(value) })}
         className="md:col-span-2"
       />
       <div className="md:col-span-2 rounded-lg border border-info/20 bg-info/5 p-3">

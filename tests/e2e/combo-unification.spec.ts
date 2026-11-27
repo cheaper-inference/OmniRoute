@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { gotoDashboardRoute } from "./helpers/dashboardAuth";
+import { chooseSearchableOption } from "./helpers/searchableSelect";
 
 async function mockCombosPageApis(page: import("@playwright/test").Page) {
   await page.route("**/api/combos", async (route) => {
@@ -169,14 +170,16 @@ test.describe("Combo Unification", () => {
     await gotoDashboardRoute(page, "/dashboard/combos");
 
     await page.getByRole("button", { name: /create combo/i }).click();
-    await page.getByLabel(/combo name/i).waitFor({ state: "visible" });
-    await page.getByLabel(/combo name/i).fill("e2e-auto-builder");
+    // By role: the "Copy combo name" buttons on the combo cards also match a label lookup.
+    const comboName = page.getByRole("textbox", { name: /combo name/i });
+    await comboName.waitFor({ state: "visible" });
+    await comboName.fill("e2e-auto-builder");
     await page.getByTestId("combo-builder-next").click();
 
     await page.getByTestId("combo-builder-provider").waitFor({ state: "visible" });
-    await page.getByTestId("combo-builder-provider").selectOption("openai");
+    await chooseSearchableOption(page, page.getByTestId("combo-builder-provider"), "openai");
     await page.getByTestId("combo-builder-model").waitFor({ state: "attached" });
-    await page.getByTestId("combo-builder-model").selectOption("gpt-4o-mini");
+    await chooseSearchableOption(page, page.getByTestId("combo-builder-model"), "gpt-4o-mini");
     await page.getByTestId("combo-builder-add-step").click();
     await page.getByTestId("combo-builder-next").click();
 

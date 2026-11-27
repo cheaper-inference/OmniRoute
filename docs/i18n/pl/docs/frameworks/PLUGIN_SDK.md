@@ -1,10 +1,4 @@
 ---
-title: "OmniRoute Plugin SDK"
-version: 3.8.40
-lastUpdated: 2026-06-28
----
-
-# OmniRoute Plugin SDK
 
 ## Szybki start
 
@@ -27,36 +21,36 @@ export default definePlugin({
 });
 ```
 
-## Referencja API
+## API Odniesienie
 
 ### `definePlugin(def: PluginDefinition): Plugin`
 
-Funkcja fabrykująca, która tworzy obiekt Plugin z wartościami domyślnymi.
+Funkcja fabryczna, która tworzy obiekt wtyczki z wartościami domyślnymi.
 
 **Parametry:**
 
-- `name` (string, required) — Nazwa wtyczki w kebab-case
-- `priority` (number, optional, default: 100) — Niższa wartość uruchamia się wcześniej
-- `enabled` (boolean, optional, default: true) — Czy startować włączona?
-- `onRequest` (function, optional) — Uruchamiany przed chat handlerem
-- `onResponse` (function, optional) — Uruchamiany po chat handlerze
-- `onError` (function, optional) — Uruchamiany przy błędzie handlera
+- `name` (string, wymagany) — Nazwa wtyczki w kebabie
+- `priority` (liczba, opcjonalna, domyślnie: 100) — Najpierw działa dolna część
+- `enabled` (wartość logiczna, opcjonalna, domyślnie: prawda) — Włączono opcję Start?
+- `onRequest` (funkcja, opcjonalna) — Działa przed programem obsługi czatu
+- `onResponse` (funkcja, opcjonalna) — Działa po programie obsługi czatu
+- `onError` (funkcja, opcjonalna) — Działa w przypadku błędu procedury obsługi
 
 ### `blockRequest(response?): BlockingHookResult`
 
-Blokuje żądanie i opcjonalnie zwraca niestandardową odpowiedź.
+Zablokuj żądanie i opcjonalnie zwróć niestandardową odpowiedź.
 
 ```ts
 onRequest: (ctx) => {
-  if (!ctx.headers["authorization"]) {
-    return blockRequest({ error: "Unauthorized", status: 401 });
+  if (!ctx.headers?.["x-client-team"]) {
+    return blockRequest({ error: "Missing x-client-team header", status: 400 });
   }
 };
 ```
 
 ### `modifyBody(body): PluginResult`
 
-Modyfikuje body żądania, zanim dotrze do providera.
+Zmodyfikuj treść żądania, zanim dotrze ona do dostawcy.
 
 ```ts
 onRequest: (ctx) => {
@@ -66,7 +60,7 @@ onRequest: (ctx) => {
 
 ### `addMetadata(metadata): PluginResult`
 
-Dołącza metadane do kontekstu żądania.
+Dołącz metadane do kontekstu żądania.
 
 ```ts
 onRequest: (ctx) => {
@@ -76,15 +70,18 @@ onRequest: (ctx) => {
 
 ## Kontekst wtyczki (`PluginContext`)
 
-| Field       | Type                      | Description                    |
-| ----------- | ------------------------- | ------------------------------ |
-| `requestId` | `string`                  | Unikalny identyfikator żądania |
-| `model`     | `string`                  | Żądana nazwa modelu            |
-| `provider`  | `string`                  | ID docelowego providera        |
-| `body`      | `Record<string, unknown>` | Body żądania                   |
-| `headers`   | `Record<string, string>`  | Nagłówki żądania               |
-| `metadata`  | `Record<string, unknown>` | Mutowalne metadane             |
-| `timestamp` | `number`                  | Znacznik czasu żądania         |
+| Pole         | Typ                       | Opis                              |
+| ------------ | ------------------------- | --------------------------------- |
+| `requestId`  | `string`                  | Unikalny identyfikator żądania    |
+| `model`      | `string`                  | Żądana nazwa modelu               |
+| `provider`   | `string`                  | Dostawca docelowy ID              |
+| `body`       | `Record<string, unknown>` | Treść żądania                     |
+| `headers`    | `Record<string, string>`  | Nagłówki żądań (patrz uwaga)      |
+| `metadata`   | `Record<string, unknown>` | Zmienne metadane                  |
+| `timestamp`  | `number`                  | Poproś o sygnaturę czasową        |
+| `apiKeyInfo` | `object` (opcjonalnie)    | metadane klucza API (patrz uwaga) |
+
+Kontekst nigdy nie przenosi poświadczeń klienta: nagłówki `authorization`, `x-api-key`, `proxy-authorization` i `cookie` są usuwane (dowolna wielkość liter), a `apiKeyInfo` przechowuje metadane klucza (takie jak `id`, `name` i `scopes`), ale nie wartość klucza ani jego odcisk palca (`redactPluginContext()` w `src/lib/plugins/hooks.ts`). Dotyczy to `onRequest`, `onResponse` i `onError`.
 
 ## Manifest (`plugin.json`)
 
@@ -113,9 +110,9 @@ onRequest: (ctx) => {
 }
 ```
 
-### Priorytet hooków
+### Priorytet haka
 
-Hooki można konfigurować z priorytetem (niższy = uruchamia się wcześniej):
+Hooki można skonfigurować z priorytetem (najpierw uruchamiane jest dolne = ):
 
 ```json
 {
@@ -126,7 +123,7 @@ Hooki można konfigurować z priorytetem (niższy = uruchamia się wcześniej):
 }
 ```
 
-Albo jako proste wartości boolean (domyślny priority 100):
+Lub jako proste wartości logiczne (domyślny priorytet 100):
 
 ```json
 {
@@ -139,17 +136,16 @@ Albo jako proste wartości boolean (domyślny priority 100):
 
 ## System uprawnień
 
-Wtyczki działają w sandboxowanym kontekście VM. Dostęp do zasobów zewnętrznych wymaga jawnych uprawnień:
+Wtyczki są** nie w piaskownicy** . Każda aktywna wtyczka działa jako oddzielny, zwykły proces potomny Node.js (`loadPlugin()` w `src/lib/plugins/loader.ts`) w ramach tego samego użytkownika systemu operacyjnego co OmniRoute, bez kontekstu VM i bez flag uprawnień Node.js. Kod wtyczki może używać `node:fs`, `node:child_process`, `fetch` i każdego innego Node.js API: może czytać i zapisywać dowolny plik, jaki może użytkownik OmniRoute (w tym katalog danych), uruchamiać programy i łączyć się z siecią.
 
-| Permission   | Grants                                                       |
-| ------------ | ------------------------------------------------------------ |
-| `network`    | `fetch`, `AbortController`, `Headers`, `Request`, `Response` |
-| `file-read`  | `fs.readFile`, `fs.readdir`, `fs.stat`                       |
-| `file-write` | `fs.writeFile`, `fs.mkdir`, `fs.rm`                          |
-| `env`        | Read-only `process.env` proxy                                |
-| `exec`       | `child_process.exec`, `child_process.execSync`               |
+`requires.permissions` manifestu akceptuje `network`, `file-read`, `file-write`, `env` i `exec`, ale obecnie tylko `env` ma wpływ w czasie wykonywania:
 
-Bez uprawnienia odpowiadające globals po prostu nie są dostępne w sandboxie.
+| Pozwolenie                                   | Efekt dzisiaj                                                                                                                                                                                                                |
+| -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `env`                                        | Proces wtyczki otrzymuje także `PORT`, `HOSTNAME`, `TZ` i `TMPDIR`. Bez tego otrzymuje tylko `PATH`, `HOME`, `USER`, `LANG`, `LC_ALL`, `NODE_ENV`, `PLUGIN_ENTRY` i `PLUGIN_NAME` (plus `SystemRoot` i `windir` na Windows). |
+| `network`, `file-read`, `file-write`, `exec` | Nic. Są to jedynie deklaracje: w przypadku ich braku nic nie jest blokowane.                                                                                                                                                 |
+
+Instalowanie wtyczki przypomina instalację dowolnego innego programu na hoście. Instaluj tylko wtyczki, których źródła ufasz.
 
 ## Schemat konfiguracji
 
@@ -170,30 +166,30 @@ Typy pól: `string`, `number`, `boolean`, `select`
 
 Opcje pól: `default`, `min`, `max`, `enum`, `description`
 
-Wartości konfiguracji są utrwalane w bazie danych i dostępne przez stronę konfiguracji w dashboardzie.
+Wartości konfiguracji są utrwalane w bazie danych i są dostępne za pośrednictwem strony konfiguracji pulpitu nawigacyjnego.
 
 ## Wbudowane zdarzenia
 
-| Event             | When                                            | Payload                       |
+| Wydarzenie        | Gdy                                             | Ładunek                       |
 | ----------------- | ----------------------------------------------- | ----------------------------- |
-| `onRequest`       | Przed chat handlerem                            | Request context               |
-| `onResponse`      | Po chat handlerze                               | Response data                 |
-| `onError`         | Przy błędzie handlera                           | Error object                  |
-| `onModelSelect`   | Model wybrany do routingu                       | Model info                    |
-| `onComboResolve`  | Rozwiązany routing combo                        | Combo targets                 |
-| `onRateLimit`     | Trafiony rate limit                             | Limit info                    |
-| `onQuotaExhaust`  | Wyczerpana quota                                | Quota info                    |
-| `onProviderError` | Provider zwrócił błąd                           | Error details                 |
-| `onStreamStart`   | Rozpoczęty stream SSE                           | Stream info                   |
-| `onStreamEnd`     | Zakończony stream SSE                           | Stream stats                  |
+| `onRequest`       | Przed obsługą czatu                             | Kontekst żądania              |
+| `onResponse`      | Po obsłudze czatu                               | Dane odpowiedzi               |
+| `onError`         | W przypadku błędu obsługi                       | Obiekt błędu                  |
+| `onModelSelect`   | Model wybrany do trasowania                     | Informacje o modelu           |
+| `onComboResolve`  | Rozwiązano routing kombinowany                  | Cele kombinowane              |
+| `onRateLimit`     | Osiągnięto limit stawki                         | Ogranicz informacje           |
+| `onQuotaExhaust`  | Limit wyczerpany                                | Informacje o kwocie           |
+| `onProviderError` | Dostawca zwrócił błąd                           | Szczegóły błędu               |
+| `onStreamStart`   | Rozpoczęto transmisję SSE                       | Informacje o strumieniu       |
+| `onStreamEnd`     | Strumień SSE zakończył się                      | Statystyki transmisji         |
 | `onInstall`       | Wtyczka zainstalowana                           | `{ name, version, manifest }` |
 | `onActivate`      | Wtyczka aktywowana                              | `{ name, version, manifest }` |
-| `onDeactivate`    | Wtyczka deaktywowana                            | `{ name, version, manifest }` |
+| `onDeactivate`    | Wtyczka dezaktywowana                           | `{ name, version, manifest }` |
 | `onUninstall`     | Wtyczka odinstalowana (przed usunięciem plików) | `{ name, version, manifest }` |
 
 ## Przykłady
 
-### Request Logger
+### Rejestrator żądań
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";
@@ -206,7 +202,7 @@ export default definePlugin({
 });
 ```
 
-### Rate Limiter
+### Ogranicznik szybkości
 
 ```ts
 import { definePlugin, blockRequest } from "omniroute/plugins/sdk";
@@ -217,7 +213,7 @@ export default definePlugin({
   name: "rate-limiter",
   priority: 10,
   onRequest: async (ctx) => {
-    const key = ctx.headers["x-api-key"] || "anonymous";
+    const key = ctx.apiKeyInfo?.id || "anonymous";
     const now = Date.now();
     const window = 60000; // 1 minute
     const maxRequests = 100;
@@ -233,7 +229,7 @@ export default definePlugin({
 });
 ```
 
-### Response Transformer
+### Transformator odpowiedzi
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";

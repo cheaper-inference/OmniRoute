@@ -93,7 +93,7 @@
 
 [![កំណែ npm](https://img.shields.io/npm/v/omniroute?color=cb3837&logo=npm)](https://www.npmjs.com/package/omniroute)
 ![NPM ប្រចាំខែ](https://img.shields.io/npm/dm/omniroute?label=npm/month&color=cb3837&logo=npm)
-[![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/diegosouzapw/omniroute)
+[![Docker Hub](https://img.shields.io/docker/v/cheaperinference/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/cheaperinference/omniroute)
 ![អាជ្ញាបណ្ណ: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 ![ការទាញយក Docker](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
 ![ការទាញយក Electron](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="ការសន្យា — endpoint តែមួយ និងអ្នកផ្តល់សេវា 394។ ការបម្រុងជំនួសដោយស្វ័យប្រវត្តិធានាឱ្យការបញ្ជូនបន្ត នៅពេលគោលដៅដែលមានសុខភាពល្អមួយផ្សេងទៀតនៅតែអាចប្រើបាន។ សសរស្តម្ភចំនួនប្រាំមួយ៖ ការបម្រុងជំនួសដែលមានភាពធន់ទ្រាំឆ្លងកាត់អ្នកផ្តល់សេវា 394 · សន្សំ token បានរហូតដល់ 95% លើការងារដែលមានសិទ្ធិ · ចាប់ផ្តើមដោយ $0 ជាមួយ free tier ជាង 150 និងអ្នកផ្តល់សេវាឥតគិតថ្លៃជារៀងរហូតចំនួន 51 ដែលកើតឡើងជាប្រចាំ/មិនត្រូវការ key · ការរួមបញ្ចូល CLI/agent ចំនួន 39 តាមរយៈការកំណត់តែមួយ · ភាពឆបគ្នាជាមួយ OpenAI, Claude, Gemini និង Responses API នៅ /v1 · ការគ្រប់គ្រងសម្រាប់ production រួមមាន circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals និងការប្រកាសតេស្ត static ជាង 56,000 នៅក្នុងឯកសារតេស្តដែលបានតាមដានជាង 7,800។"/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="ការសន្យា — endpoint តែមួយ និងអ្នកផ្តល់សេវា 394។ ការបម្រុងជំនួសដោយស្វ័យប្រវត្តិធានាឱ្យការបញ្ជូនបន្ត នៅពេលគោលដៅដែលមានសុខភាពល្អមួយផ្សេងទៀតនៅតែអាចប្រើបាន។ សសរស្តម្ភចំនួនប្រាំមួយ៖ ការបម្រុងជំនួសដែលមានភាពធន់ទ្រាំឆ្លងកាត់អ្នកផ្តល់សេវា 394 · សន្សំ token បានរហូតដល់ 95% លើការងារដែលមានសិទ្ធិ · ចាប់ផ្តើមដោយ $0 ជាមួយ free tier ជាង 150 និងអ្នកផ្តល់សេវាឥតគិតថ្លៃជារៀងរហូតចំនួន 40 ដែលកើតឡើងជាប្រចាំ/មិនត្រូវការ key · ការរួមបញ្ចូល CLI/agent ចំនួន 39 តាមរយៈការកំណត់តែមួយ · ភាពឆបគ្នាជាមួយ OpenAI, Claude, Gemini និង Responses API នៅ /v1 · ការគ្រប់គ្រងសម្រាប់ production រួមមាន circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals និងការប្រកាសតេស្ត static ជាង 56,000 នៅក្នុងឯកសារតេស្តដែលបានតាមដានជាង 7,800។"/>
 
 <br/>
 <br/>
@@ -702,7 +702,7 @@ omniroute configure codex          # ក៏ដូចជា: claude opencode qwen
 
 </div>
 
-> **អ្នកផ្តល់សេវាដែលបានចុះបញ្ជីចំនួន 394** នៅទូទាំងសំណុំ canonical សម្រាប់ការជជែក មេឌៀ ស្វែងរក មូលដ្ឋាន ភ្នាក់ងារក្លោដ និងប្រព័ន្ធ រួមទាំង **153 ដែលមានទិន្នន័យមេតាសម្រាប់ការស្វែងរក `hasFree: true`**។ បញ្ជីឈ្មោះម៉ូដែលជជែកគ្របដណ្តប់លើ **អ្នកផ្តល់សេវាចំនួន 239 / គូអ្នកផ្តល់សេវា-ម៉ូដែលចំនួន 3,059 / លេខសម្គាល់ម៉ូដែលដើមចំនួន 1,475**; កាតាឡុកថវិកាឥតគិតថ្លៃដាច់ដោយឡែកមាន **ជួរតាមម៉ូដែលចំនួន 465**, **ក្រុមកើតឡើងវិញចំនួន 34** និង **អ្នកផ្តល់សេវាឥតគិតថ្លៃជារៀងរហូតដែលកើតឡើងវិញ/មិនទាមទារសោចំនួន 51**។ ទាំងនេះជាភាគបែងខុសគ្នាតាមការរចនា; និយមន័យ និងការគណនាដែលបានលុបស្ទួនតាមក្រុម មាននៅក្នុង [ឯកសារយោងអ្នកផ្តល់សេវា](docs/reference/PROVIDER_REFERENCE.md) និង [កម្រិតឥតគិតថ្លៃ](docs/reference/FREE_TIERS.md)។
+> **អ្នកផ្តល់សេវាដែលបានចុះបញ្ជីចំនួន 394** នៅទូទាំងសំណុំ canonical សម្រាប់ការជជែក មេឌៀ ស្វែងរក មូលដ្ឋាន ភ្នាក់ងារក្លោដ និងប្រព័ន្ធ រួមទាំង **153 ដែលមានទិន្នន័យមេតាសម្រាប់ការស្វែងរក `hasFree: true`**។ បញ្ជីឈ្មោះម៉ូដែលជជែកគ្របដណ្តប់លើ **អ្នកផ្តល់សេវាចំនួន 239 / គូអ្នកផ្តល់សេវា-ម៉ូដែលចំនួន 3,059 / លេខសម្គាល់ម៉ូដែលដើមចំនួន 1,475**; កាតាឡុកថវិកាឥតគិតថ្លៃដាច់ដោយឡែកមាន **ជួរតាមម៉ូដែលចំនួន 465**, **ក្រុមកើតឡើងវិញចំនួន 34** និង **អ្នកផ្តល់សេវាឥតគិតថ្លៃជារៀងរហូតដែលកើតឡើងវិញ/មិនទាមទារសោចំនួន 40**។ ទាំងនេះជាភាគបែងខុសគ្នាតាមការរចនា; និយមន័យ និងការគណនាដែលបានលុបស្ទួនតាមក្រុម មាននៅក្នុង [ឯកសារយោងអ្នកផ្តល់សេវា](docs/reference/PROVIDER_REFERENCE.md) និង [កម្រិតឥតគិតថ្លៃ](docs/reference/FREE_TIERS.md)។
 
 <div align="center">
 
@@ -777,7 +777,7 @@ omniroute configure codex          # ក៏ដូចជា: claude opencode qwen
   <tr><th align="left">វេទិកា</th><th align="left">ដំឡើង</th><th align="left">ចំណុចសំខាន់ៗ</th></tr>
   <tr><td align="left" nowrap>📦 <b>npm (សកល)</b></td><td align="left" nowrap><code>npm install -g omniroute</code></td><td align="left">ពាក្យបញ្ជាតែមួយ ប្រើបានលើប្រព័ន្ធប្រតិបត្តិការណាមួយ</td></tr>
   <tr><td align="left" nowrap>⚡ <b>Bun (សកល)</b></td><td align="left" nowrap><code>bun add -g omniroute</code></td><td align="left">tarball ពី registry ដដែល ដំឡើងបានលឿនជាង</td></tr>
-  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … diegosouzapw/omniroute</code></td><td align="left">รองรับស្ថាបត្យកម្មច្រើន <b>AMD64 + ARM64</b></td></tr>
+  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … cheaperinference/omniroute</code></td><td align="left">รองรับស្ថាបត្យកម្មច្រើន <b>AMD64 + ARM64</b></td></tr>
   <tr><td align="left" nowrap>🖥️ <b>កុំព្យូទ័រលើតុ (Electron)</b></td><td align="left" nowrap><code>npm run electron:build</code></td><td align="left">បង្អួចដើម + system tray — <b>Windows / macOS / Linux</b></td></tr>
   <tr><td align="left" nowrap>🎩 <b>របារម៉ឺនុយ (OmniRouteTray)</b></td><td align="left" nowrap><code>brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left">ត្រួតពិនិត្យ និងធ្វើបច្ចុប្បន្នភាព server ដោយស្វ័យប្រវត្តិ — <b>macOS</b></td></tr>
   <tr><td align="left" nowrap>💪 <b>ARM</b></td><td align="left" nowrap>ដើម <code>arm64</code></td><td align="left">Raspberry Pi, server ARM, Apple Silicon</td></tr>
@@ -1100,7 +1100,7 @@ Ollama tags:      http://localhost:20128/vscode/YOUR_KEY/api/tags
 
 ```bash
 docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
-  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
 ```
 
 `:latest` តាមដាន SemVer ស្ថិរភាព **ដែលបានបោះពុម្ពផ្សាយ** ខ្ពស់បំផុត។ វាមិនតាមដាន git `main` ទេ។ ប្រើ `:X.Y.Z` សម្រាប់ GitOps។ សូមមើល [បណ្តាញចេញផ្សាយ Docker](docs/guides/DOCKER_GUIDE.md#release-channels)។ រូបភាពនេះកំណត់ **`OMNIROUTE_MEMORY_MB=1024`**។ វាគ្រប់គ្រាន់សម្រាប់ផ្ទាំងគ្រប់គ្រង និងការជជែកកម្រិតស្រាល។ **ភ្នាក់ងារសរសេរកូដ** (`POST /v1/responses` ពី Claude Code, Codex, Grok, …) ត្រូវការឃ្នាប់ V8 ធំជាងនេះច្រើន បើមិនដូច្នោះទេ ដំណើរការនឹង `FATAL ERROR` នៅប្រហែល 12 GiB នៅពេលមានបរិបទវែងពីរដែលត្រួតស៊ីគ្នា។ កំណត់ទំហំ container ឱ្យធំជាងឃ្នាប់ (native buffers ស្ថិតនៅក្រៅ V8)៖
@@ -1114,7 +1114,7 @@ docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
 ```bash
 docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
   -e OMNIROUTE_MEMORY_MB=8192 --memory=10g \
-  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
 ```
 
 តារាងពេញលេញ៖ [មគ្គុទ្ទេសក៍ Docker — RAM ពេលដំណើរការ](docs/guides/DOCKER_GUIDE.md#runtime-ram-for-coding-agents)។
@@ -1320,7 +1320,7 @@ process តែមួយលើ port មួយ ដូច្នេះបច្ច�
   <tr><td nowrap><b>បរិស្ថានដំណើរការ</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>ភាសា</b></td><td>TypeScript 6.0 — <b>TypeScript 100%</b> នៅទូទាំង <code>src/</code> និង <code>open-sse/</code> (គ្មាន <code>any</code> នៅក្នុងស្នូល ចាប់តាំងពី v2.0)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>មូលដ្ឋានទិន្នន័យ</b></td><td>better-sqlite3 (SQLite, ការកត់ត្រា WAL) + LowDB (JSON ចាស់) — ម៉ូឌុលដែនចំនួន 147, migrations ចំនួន 240</td></tr>
+  <tr><td nowrap><b>មូលដ្ឋានទិន្នន័យ</b></td><td>better-sqlite3 (SQLite, ការកត់ត្រា WAL) + LowDB (JSON ចាស់) — ម៉ូឌុលដែនចំនួន 147, migrations ចំនួន 252</td></tr>
   <tr><td nowrap><b>អង្គចងចាំ</b></td><td>អត្ថបទពេញលេញ SQLite FTS5 + vector embeddings ដែលបាន quantize ទៅជា int8, ការថយចុះដែលមានប្រភេទ</td></tr>
   <tr><td nowrap><b>ស្គីម៉ា</b></td><td>Zod 4 — ការផ្ទៀងផ្ទាត់ I/O របស់ឧបករណ៍ MCP + កិច្ចសន្យា API</td></tr>
   <tr><td nowrap><b>ពិធីការ</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1333,7 +1333,7 @@ process តែមួយលើ port មួយ ដូច្នេះបច្ច�
   <tr><td nowrap><b>ការធ្វើតេស្ត</b></td><td>Node.js test runner + Vitest — <b>ការប្រកាសតេស្តឋិតិវន្តជាង 60,000</b> នៅទូទាំងឯកសារតេស្តដែលបានតាមដានជាង 8,400 (unit, integration, E2E, security, ecosystem)</td></tr>
   <tr><td nowrap><b>វេទិកា</b></td><td>Desktop (Electron) · Android (Termux) · PWA (កម្មវិធីរុករកណាមួយ)</td></tr>
   <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — បោះពុម្ព npm ដោយស្វ័យប្រវត្តិ + Docker Hub នៅពេលចេញផ្សាយ</td></tr>
-  <tr><td nowrap><b>តំណភ្ជាប់</b></td><td><a href="https://omniroute.online">គេហទំព័រ</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
+  <tr><td nowrap><b>តំណភ្ជាប់</b></td><td><a href="https://omniroute.online">គេហទំព័រ</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/cheaperinference/omniroute">Docker Hub</a></td></tr>
 </table>
 
 <div align="center">

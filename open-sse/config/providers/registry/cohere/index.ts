@@ -18,6 +18,7 @@ export const cohereProvider: RegistryEntry = {
   authType: "apikey",
   authHeader: "bearer",
   models: [
+    { id: "command-a-plus-05-2026", name: "Command A+ (May 2026)" },
     { id: "command-a-reasoning-08-2025", name: "Command A Reasoning (Aug 2025)" },
     { id: "command-a-vision-07-2025", name: "Command A Vision (Jul 2025)" },
     { id: "command-a-03-2025", name: "Command A (Mar 2025)" },

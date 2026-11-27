@@ -2,16 +2,15 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
+import { Progress } from "@omniroute/ui-kit/progress";
 import Icon from "@/shared/components/Icon";
-import {
-  Card,
-  Button,
-  GuardedAction,
-  Input,
-  EmptyState,
-  Select,
-  Checkbox,
-} from "@/shared/components";
+
+import Badge from "@/shared/components/Badge";
+import FilterPills from "@/shared/components/FilterPills";
+import NumberInput from "@/shared/components/NumberInput";
+
+import { Button, GuardedAction, Input, EmptyState, Select, Checkbox } from "@/shared/components";
+import Card from "@/shared/components/Card";
 import { useNotificationStore } from "@/store/notificationStore";
 import { compareTr, matchesSearch } from "@/shared/utils/turkishText";
 // ────────────────────────────────────────────────────────────────────────────
@@ -130,31 +129,44 @@ function projectEndOfMonth(monthlyCost: number, now = new Date()): number {
   return burnRate * daysInMonth;
 }
 
-const STATUS_META: Record<StatusKey, { tone: string; bg: string; dot: string }> = {
-  all: { tone: "text-text-main", bg: "bg-bg-subtle", dot: "var(--color-text-muted)" },
+// `badge` is the Badge variant of the row's status tag, `chip` the kit tone of the pressed filter.
+const STATUS_META: Record<
+  StatusKey,
+  {
+    tone: string;
+    badge: "default" | "success" | "warning" | "error";
+    chip?: "success" | "warning" | "danger";
+    dot: string;
+  }
+> = {
+  all: { tone: "text-text-main", badge: "default", dot: "var(--color-text-muted)" },
   blocked: {
     tone: "text-error",
-    bg: "bg-error/10 border-error/30",
+    badge: "error",
+    chip: "danger",
     dot: "var(--color-error)",
   },
   alerting: {
     tone: "text-warning",
-    bg: "bg-warning/10 border-warning/30",
+    badge: "warning",
+    chip: "warning",
     dot: "color-mix(in srgb, var(--color-warning) 55%, var(--color-error))",
   },
   warning: {
     tone: "text-warning",
-    bg: "bg-warning/10 border-warning/30",
+    badge: "warning",
+    chip: "warning",
     dot: "var(--color-warning)",
   },
   safe: {
     tone: "text-success",
-    bg: "bg-success/10 border-success/30",
+    badge: "success",
+    chip: "success",
     dot: "var(--color-success)",
   },
   "no-limit": {
     tone: "text-text-muted",
-    bg: "bg-bg-subtle border-border",
+    badge: "default",
     dot: "var(--color-text-muted)",
   },
 };
@@ -464,13 +476,13 @@ export default function BudgetTab() {
       <Card className="p-5">
         <div className="flex items-start justify-between gap-3 mb-4">
           <div>
-            <h2 className="text-xl flex items-center gap-2">
+            <h2 className="ci-heading flex items-center gap-2" data-size="xl">
               <Icon name="account_balance_wallet" size={22} className="text-primary" />
               {t("budgetPageTitle")}
             </h2>
             <p className="text-text-muted text-xs mt-0.5">{t("budgetPageDescription")}</p>
           </div>
-          <span className="text-[11px] text-text-muted">
+          <span className="text-2xs text-text-muted">
             {t("budgetTemplateStorageHint", { count: templates.length })}{" "}
             <code className="text-text-main">{LS_TEMPLATES}</code>
           </span>
@@ -528,38 +540,22 @@ export default function BudgetTab() {
           </Select>
         </div>
 
-        <div className="flex items-center gap-1.5 flex-wrap">
-          {(["all", "blocked", "alerting", "warning", "safe", "no-limit"] as StatusKey[]).map(
-            (key) => {
-              const meta = STATUS_META[key];
-              const active = statusFilter === key;
-              const count = statusCounts[key] || 0;
-              if (key !== "all" && count === 0) return null;
-              return (
-                <Button
-                  key={key}
-                  variant="outline"
-                  size="sm"
-                  aria-pressed={active}
-                  onClick={() => setStatusFilter(key)}
-                  className={`h-7 min-h-7 gap-1.5 rounded-full px-2.5 text-xs ${
-                    active ? meta.bg + " " + meta.tone : "text-text-muted"
-                  }`}
-                >
-                  {key !== "all" && (
-                    <span className="w-1.5 h-1.5 rounded-full" style={{ background: meta.dot }} />
-                  )}
-                  <span>{t(`budgetStatus.${key}`)}</span>
-                  <span className="opacity-70">{count}</span>
-                </Button>
-              );
-            }
-          )}
-        </div>
+        <FilterPills
+          value={statusFilter}
+          onChange={(key) => setStatusFilter(key as StatusKey)}
+          options={(["all", "blocked", "alerting", "warning", "safe", "no-limit"] as StatusKey[])
+            .filter((key) => key === "all" || (statusCounts[key] || 0) > 0)
+            .map((key) => ({
+              value: key,
+              label: t(`budgetStatus.${key}`),
+              count: statusCounts[key] || 0,
+              tone: STATUS_META[key].chip,
+            }))}
+        />
 
         {templates.length > 0 && (
-          <div className="flex items-center gap-1.5 flex-wrap text-[11px]">
-            <span className="text-text-muted font-semibold uppercase tracking-wide mr-1">
+          <div className="flex items-center gap-1.5 flex-wrap text-2xs">
+            <span className="ci-eyebrow mr-1" data-size="2xs" data-weight="medium">
               {t("budgetTemplates")}:
             </span>
             {templates.map((tpl) => (
@@ -571,7 +567,7 @@ export default function BudgetTab() {
                 disabled={saving}
                 reason={selectedIds.size === 0 ? t("budgetSelectKeysFirst") : undefined}
                 title={t("budgetApplyToSelected", { count: selectedIds.size })}
-                className="h-7 min-h-7 gap-1 px-2.5 text-[11px]"
+                className="h-7 min-h-7 gap-1 px-2.5 text-2xs"
               >
                 <span>{tpl.emoji}</span>
                 <span>{templateName(tpl)}</span>
@@ -594,7 +590,9 @@ export default function BudgetTab() {
       {/* Multi-key table */}
       <div className="rounded-xl border border-border overflow-hidden bg-surface">
         <div
-          className="items-center px-3 py-2 border-b border-border bg-bg-subtle/40 text-[10px] font-semibold uppercase tracking-wider text-text-muted"
+          className="ci-eyebrow items-center px-3 py-2 border-b border-border bg-bg-subtle/40"
+          data-size="3xs"
+          data-weight="medium"
           style={{
             display: "grid",
             gridTemplateColumns: "24px 28px minmax(180px,1.6fr) 90px 100px 90px 100px 80px 100px",
@@ -673,13 +671,13 @@ function KpiBlock({
   const color =
     tone === "red" ? "text-error" : tone === "amber" ? "text-warning" : "text-text-main";
   return (
-    <div className="rounded-lg border border-border/40 bg-bg-subtle/30 px-3 py-2">
-      <div className="text-[10px] uppercase tracking-wide text-text-muted font-semibold truncate">
+    <Card.Section>
+      <div className="ci-eyebrow truncate" data-size="3xs" data-weight="medium">
         {label}
       </div>
       <div className={`text-xl font-semibold tabular-nums leading-tight ${color}`}>{value}</div>
-      {hint && <div className="text-[10px] text-text-muted truncate">{hint}</div>}
-    </div>
+      {hint && <div className="text-3xs text-text-muted truncate">{hint}</div>}
+    </Card.Section>
   );
 }
 
@@ -703,18 +701,7 @@ function ProgressBarTinyColored({
         : pct >= 50
           ? STATUS_META.warning.dot
           : STATUS_META.safe.dot;
-  return (
-    <div
-      role="progressbar"
-      aria-label={label}
-      aria-valuemin={0}
-      aria-valuemax={100}
-      aria-valuenow={Math.round(pct)}
-      className="w-full h-1 rounded-sm bg-surface-2 overflow-hidden"
-    >
-      <div className="h-full" style={{ width: `${pct}%`, background: color }} />
-    </div>
-  );
+  return <Progress value={pct} size="xs" color={color} animate={false} aria-label={label} />;
 }
 
 function BudgetRow({
@@ -778,12 +765,12 @@ function BudgetRow({
         {/* Expand chevron (clickable trigger) */}
         <Button
           variant="ghost"
-          size="icon-sm"
+          size="icon-2xs"
+          tone="muted"
           icon={isExpanded ? "expand_more" : "chevron_right"}
           onClick={onToggleExpand}
           aria-expanded={isExpanded}
           aria-label={isExpanded ? t("cardCollapse") : t("cardExpand")}
-          className="size-6 min-h-6 text-text-muted"
         />
 
         {/* Key info */}
@@ -796,7 +783,7 @@ function BudgetRow({
           <div className="text-[13px] font-semibold text-text-main truncate">
             {row.name || row.id}
           </div>
-          <div className="text-[10px] text-text-muted truncate">
+          <div className="text-3xs text-text-muted truncate">
             {row.provider ? `${row.provider} · ` : ""}
             {row.id}
           </div>
@@ -804,14 +791,14 @@ function BudgetRow({
 
         <div className="text-right text-[12px] tabular-nums">{formatCurrency(today)}</div>
         <div className="text-right text-[12px] tabular-nums">{formatCurrency(month)}</div>
-        <div className="text-right text-[11px] text-text-muted tabular-nums">
+        <div className="text-right text-2xs text-text-muted tabular-nums">
           {daily > 0 ? `$${daily}/d` : "—"}
         </div>
-        <div className="text-right text-[11px] text-text-muted tabular-nums">
+        <div className="text-right text-2xs text-text-muted tabular-nums">
           {monthly > 0 ? `$${monthly}/m` : "—"}
         </div>
         <div className="text-right flex flex-col items-end gap-0.5">
-          <span className={`text-[11px] font-semibold tabular-nums ${meta.tone}`}>
+          <span className={`text-2xs font-semibold tabular-nums ${meta.tone}`}>
             {daily > 0 || monthly > 0 ? `${Math.round(usedPct)}%` : "—"}
           </span>
           {(daily > 0 || monthly > 0) && (
@@ -821,11 +808,9 @@ function BudgetRow({
           )}
         </div>
         <div className="text-center">
-          <span
-            className={`inline-block px-1.5 py-0.5 rounded text-[9px] font-semibold border ${meta.bg} ${meta.tone}`}
-          >
-            {t(`budgetStatus.${status}`).toUpperCase()}
-          </span>
+          <Badge size="sm" variant={meta.badge}>
+            {t(`budgetStatus.${status}`)}
+          </Badge>
         </div>
       </div>
 
@@ -898,19 +883,21 @@ function BudgetRowExpanded({
   return (
     <div className="px-12 py-4 bg-bg-subtle/30 border-t border-border space-y-4">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div className="rounded-md border border-border/40 bg-bg-subtle/30 p-3">
+        <Card.Section>
           <div className="flex items-center justify-between mb-2">
-            <h4 className="text-[11px] uppercase text-text-muted">{t("budgetProjection")}</h4>
-            <span className="text-[10px] text-text-muted">{t("budgetLinearExtrapolation")}</span>
+            <h4 className="ci-eyebrow" data-size="2xs" data-weight="medium">
+              {t("budgetProjection")}
+            </h4>
+            <span className="text-3xs text-text-muted">{t("budgetLinearExtrapolation")}</span>
           </div>
           <div className="flex items-baseline gap-3">
             <div>
-              <div className="text-[10px] text-text-muted">{t("budgetThisMonthSoFar")}</div>
+              <div className="text-3xs text-text-muted">{t("budgetThisMonthSoFar")}</div>
               <div className="text-lg font-semibold tabular-nums">{formatCurrency(month)}</div>
             </div>
             <span className="text-text-muted">→</span>
             <div>
-              <div className="text-[10px] text-text-muted">{t("budgetProjectedEndOfMonth")}</div>
+              <div className="text-3xs text-text-muted">{t("budgetProjectedEndOfMonth")}</div>
               <div
                 className={`text-lg font-semibold tabular-nums ${
                   projectionOver ? "text-warning" : "text-success"
@@ -918,19 +905,21 @@ function BudgetRowExpanded({
               >
                 {formatCurrency(projection)}
                 {projectionOver && (
-                  <span className="text-[11px] ml-1.5">
+                  <span className="text-2xs ml-1.5">
                     {t("budgetAboveMonthlyLimit", { limit: formatCurrency(monthly) })}
                   </span>
                 )}
               </div>
             </div>
           </div>
-        </div>
+        </Card.Section>
 
-        <div className="rounded-md border border-border/40 bg-bg-subtle/30 p-3">
+        <Card.Section>
           <div className="flex items-center justify-between mb-2">
-            <h4 className="text-[11px] uppercase text-text-muted">{t("budgetCostBreakdown30d")}</h4>
-            <span className="text-[10px] text-text-muted">{t("budgetByProvider")}</span>
+            <h4 className="ci-eyebrow" data-size="2xs" data-weight="medium">
+              {t("budgetCostBreakdown30d")}
+            </h4>
+            <span className="text-3xs text-text-muted">{t("budgetByProvider")}</span>
           </div>
           {breakdown === undefined ? (
             <div className="text-xs text-text-muted py-2 animate-pulse">{t("budgetLoading")}</div>
@@ -939,21 +928,15 @@ function BudgetRowExpanded({
           ) : (
             <div className="space-y-1.5">
               {breakdown.slice(0, 5).map((b) => (
-                <div key={b.provider} className="flex items-center gap-2 text-[11px]">
+                <div key={b.provider} className="flex items-center gap-2 text-2xs">
                   <span className="font-medium text-text-main w-24 truncate">{b.provider}</span>
-                  <div
-                    role="progressbar"
+                  <Progress
+                    value={b.pct}
+                    size="sm"
+                    animate={false}
                     aria-label={b.provider}
-                    aria-valuemin={0}
-                    aria-valuemax={100}
-                    aria-valuenow={Math.round(Math.min(b.pct, 100))}
-                    className="flex-1 h-1.5 rounded-sm bg-surface-2 overflow-hidden"
-                  >
-                    <div
-                      className="h-full bg-primary rounded-sm"
-                      style={{ width: `${Math.min(b.pct, 100)}%` }}
-                    />
-                  </div>
+                    className="flex-1"
+                  />
                   <span className="text-text-muted tabular-nums w-16 text-right">
                     {formatCurrency(b.cost)}
                   </span>
@@ -964,46 +947,52 @@ function BudgetRowExpanded({
               ))}
             </div>
           )}
-        </div>
+        </Card.Section>
       </div>
 
-      <div className="rounded-md border border-border/40 bg-bg-subtle/30 p-3">
-        <h4 className="text-[11px] uppercase text-text-muted mb-3">{t("budgetLimits")}</h4>
+      <Card.Section>
+        <h4 className="ci-eyebrow mb-3" data-size="2xs" data-weight="medium">
+          {t("budgetLimits")}
+        </h4>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-3">
-          <Input
+          <NumberInput
             label={t("budgetDailyDollar")}
-            type="number"
-            step="0.01"
-            min="0"
+            step={0.01}
+            min={0}
             placeholder="—"
-            value={form.dailyLimitUsd}
-            onChange={(e) => setForm({ ...form, dailyLimitUsd: e.target.value })}
+            value={form.dailyLimitUsd === "" ? null : Number(form.dailyLimitUsd)}
+            onValueChange={(value) =>
+              setForm({ ...form, dailyLimitUsd: value === null ? "" : String(value) })
+            }
           />
-          <Input
+          <NumberInput
             label={t("budgetWeeklyDollar")}
-            type="number"
-            step="0.01"
-            min="0"
+            step={0.01}
+            min={0}
             placeholder="—"
-            value={form.weeklyLimitUsd}
-            onChange={(e) => setForm({ ...form, weeklyLimitUsd: e.target.value })}
+            value={form.weeklyLimitUsd === "" ? null : Number(form.weeklyLimitUsd)}
+            onValueChange={(value) =>
+              setForm({ ...form, weeklyLimitUsd: value === null ? "" : String(value) })
+            }
           />
-          <Input
+          <NumberInput
             label={t("budgetMonthlyDollar")}
-            type="number"
-            step="0.01"
-            min="0"
+            step={0.01}
+            min={0}
             placeholder="—"
-            value={form.monthlyLimitUsd}
-            onChange={(e) => setForm({ ...form, monthlyLimitUsd: e.target.value })}
+            value={form.monthlyLimitUsd === "" ? null : Number(form.monthlyLimitUsd)}
+            onValueChange={(value) =>
+              setForm({ ...form, monthlyLimitUsd: value === null ? "" : String(value) })
+            }
           />
-          <Input
+          <NumberInput
             label={t("budgetWarnAtPct")}
-            type="number"
-            min="1"
-            max="100"
-            value={form.warningThreshold}
-            onChange={(e) => setForm({ ...form, warningThreshold: e.target.value })}
+            min={1}
+            max={100}
+            value={form.warningThreshold === "" ? null : Number(form.warningThreshold)}
+            onValueChange={(value) =>
+              setForm({ ...form, warningThreshold: value === null ? "" : String(value) })
+            }
           />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
@@ -1026,7 +1015,7 @@ function BudgetRowExpanded({
             value={form.resetTime}
             onChange={(e) => setForm({ ...form, resetTime: e.target.value })}
           />
-          <div className="text-[10px] text-text-muted">
+          <div className="text-3xs text-text-muted">
             {t("budgetNextReset")}:{" "}
             <span className="font-mono">{formatDateTime(row.budget?.budgetResetAt)}</span>
           </div>
@@ -1049,9 +1038,9 @@ function BudgetRowExpanded({
           >
             {t("saveLimits")}
           </Button>
-          <span className="text-[10px] text-text-muted">💡 {t("budgetHardCapComingSoon")}</span>
+          <span className="text-xs text-text-muted">💡 {t("budgetHardCapComingSoon")}</span>
         </div>
-      </div>
+      </Card.Section>
     </div>
   );
 }

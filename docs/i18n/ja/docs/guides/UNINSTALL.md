@@ -70,6 +70,8 @@ docker rm omniroute
 docker volume rm omniroute-data
 
 # （任意）イメージを削除
+docker rmi cheaperinference/omniroute:latest
+# 古いインストールでは従来の名前が使用されていました。
 docker rmi diegosouzapw/omniroute:latest
 ```
 

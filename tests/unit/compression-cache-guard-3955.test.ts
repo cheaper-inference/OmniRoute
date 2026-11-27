@@ -124,27 +124,79 @@ describe("#3955 automatic-cache prefix protection (no explicit cache_control)", 
   });
 
   it("defaults Gemini mode to off and never protects an Antigravity Gemini prefix", () => {
-    const body = autoCacheBody("gemini-3.7-flash");
-    const ctx = detectCachingContext(body, {
-      provider: "antigravity",
-      model: "antigravity/gemini-3.7-flash-tiered",
+    for (const context of [undefined, { geminiPromptCacheMode: null }]) {
+      for (const model of ["antigravity/gemini-4-hydrogen-high", "agy/gemini-3.8-flash"]) {
+        const body = autoCacheBody(model);
+        const ctx = detectCachingContext(body, context);
+        assert.equal(ctx.hasCacheControl, false, model);
+        assert.equal(ctx.isCachingProvider, false, model);
+        assert.equal(ctx.usesAutomaticPrefixCaching, false, model);
+        assert.equal(
+          resolveCacheAwareConfig(cfg({ preserveSystemPrompt: false }), body, context)
+            .preserveSystemPrompt,
+          false,
+          model
+        );
+      }
+    }
+  });
+
+  it("protects the Antigravity Gemini system prefix once implicit mode is switched on", () => {
+    for (const model of ["antigravity/gemini-4-hydrogen-high", "agy/gemini-3.8-flash"]) {
+      const body = autoCacheBody(model);
+      const context = { geminiPromptCacheMode: "implicit" } as const;
+      const detected = detectCachingContext(body, context);
+      assert.equal(detected.hasCacheControl, false, model);
+      assert.equal(detected.isCachingProvider, true, model);
+      assert.equal(detected.usesAutomaticPrefixCaching, true, model);
+      assert.equal(
+        resolveCacheAwareConfig(cfg({ preserveSystemPrompt: false }), body, context)
+          .preserveSystemPrompt,
+        true,
+        model
+      );
+    }
+  });
+
+  it("keeps explicit off and non-Gemini models out of Antigravity prefix protection", () => {
+    for (const [model, geminiPromptCacheMode] of [
+      ["antigravity/gemini-4-hydrogen-high", "off"],
+      ["agy/claude-sonnet-4-6", "implicit"],
+      ["antigravity/gpt-5.5", "implicit"],
+    ] as const) {
+      const body = autoCacheBody(model);
+      const context = { geminiPromptCacheMode };
+      const ctx = detectCachingContext(body, context);
+      assert.equal(ctx.isCachingProvider, false, model);
+      assert.equal(ctx.usesAutomaticPrefixCaching, false, model);
+      assert.equal(
+        resolveCacheAwareConfig(cfg({ preserveSystemPrompt: false }), body, context)
+          .preserveSystemPrompt,
+        false,
+        model
+      );
+    }
+  });
+
+  it("preserves explicit connection behavior independently of automatic eligibility", () => {
+    const body = autoCacheBody("agy/gemini-3.8-flash");
+    const connectionCacheOverride = {
+      supportsPromptCaching: true,
+      cacheControlPassthrough: "claude-format",
+    } as const;
+    const explicit = detectCachingContext(body, {
+      connectionCacheOverride,
+      geminiPromptCacheMode: "implicit",
     });
-    assert.equal(ctx.isCachingProvider, false);
-    assert.equal(
-      resolveCacheAwareConfig(cfg({ preserveSystemPrompt: false }), body, {
-        provider: "antigravity",
-        model: "antigravity/gemini-3.7-flash-tiered",
-      }).preserveSystemPrompt,
-      false
-    );
-    assert.equal(
-      detectCachingContext(body, {
-        provider: "antigravity",
-        model: "claude-sonnet-4-6",
-        geminiPromptCacheMode: "implicit",
-      }).isCachingProvider,
-      false
-    );
+    assert.equal(explicit.isCachingProvider, true);
+    assert.equal(explicit.usesAutomaticPrefixCaching, false);
+
+    const disabled = detectCachingContext(body, {
+      connectionCacheOverride: { supportsPromptCaching: false },
+      geminiPromptCacheMode: "implicit",
+    });
+    assert.equal(disabled.isCachingProvider, false);
+    assert.equal(disabled.usesAutomaticPrefixCaching, false);
   });
 
   it("leaves a NON-caching provider unaffected (no prefix protection without cache_control)", () => {

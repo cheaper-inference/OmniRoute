@@ -233,11 +233,16 @@ test("ghe-copilot post-login lookups do not follow a redirect from the GHE host"
     if (init?.redirect === "manual") {
       return new Response(null, { status: 303, headers: { location: METADATA_URL } });
     }
-    requestedUrls.push(METADATA_URL);
-    return new Response(JSON.stringify({ login: METADATA_SECRET }), {
-      status: 200,
-      headers: { "content-type": "application/json" },
-    });
+    if (url === METADATA_URL) {
+      requestedUrls.push(METADATA_URL);
+      return new Response(JSON.stringify({ login: METADATA_SECRET }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      });
+    }
+    // Anything else (the internal model-sync loopback, for instance) is not a
+    // GHE lookup. Answer it without routing it through the metadata path.
+    return new Response("{}", { status: 200, headers: { "content-type": "application/json" } });
   }) as typeof fetch;
 
   const res = await poll("https://ghe.example.test");

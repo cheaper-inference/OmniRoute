@@ -32,6 +32,26 @@ test("non-streaming leg retains Antigravity pre-response timeout code and type",
   assert.equal(result.receipt.errorType, "upstream_timeout");
 });
 
+test("non-streaming leg preserves confirmed timeouts for the agy provider alias", async () => {
+  const result = await exercise(
+    "agy",
+    createUpstreamStartTimeoutError(12000, "agy", "gemini-3.8-flash-tiered")
+  );
+  assert.equal(result.kind, "error");
+  if (result.kind !== "error") return;
+  assert.equal(result.result.status, 504);
+  assert.equal(result.result.errorCode, "ANTIGRAVITY_PRE_RESPONSE_TIMEOUT");
+  assert.equal(result.result.errorType, "upstream_timeout");
+  assert.equal(result.receipt.errorType, "upstream_timeout");
+
+  const generic = new Error("upstream timed out");
+  generic.name = "TimeoutError";
+  const unrelated = await exercise("agy", generic);
+  assert.equal(unrelated.kind, "error");
+  if (unrelated.kind !== "error") return;
+  assert.notEqual(unrelated.result.errorCode, "ANTIGRAVITY_PRE_RESPONSE_TIMEOUT");
+});
+
 test("non-streaming leg does not mislabel upstream 504 or other-provider timeouts", async () => {
   const plain = new Error("plain upstream timeout");
   plain.name = "TimeoutError";

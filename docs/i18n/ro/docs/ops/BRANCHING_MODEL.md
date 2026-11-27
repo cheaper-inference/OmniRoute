@@ -4,14 +4,9 @@
 
 ---
 
-OmniRoute utilizează un model de lansare cu **cicluri paralele**: o ramură dedicată `release/vX.Y.Z`
-pentru ciclul activ, `main` pentru linia publicată și o etichetă imuabilă
-`vX.Y.Z` atunci când ciclul respectiv este lansat. Este normal ca unele commituri să ajungă atât în `release/*`, _cât și_ în
-`main` — nu este o confuzie.
+OmniRoute folosește a** ciclu paralel** model de lansare: o ramură `release/vX.Y.Z` dedicată pentru ciclul activ, `main` pentru linia publicată și o etichetă `vX.Y.Z` imuabilă atunci când acel ciclu este livrat. Vederea comiturilor aterizează pe `release/*` _și_ pe `main` este de așteptat — nu o confuzie.
 
-Detaliile pentru responsabilii de mentenanță se află în `CLAUDE.md` (Regula strictă nr. 21) și în
-[RELEASE_CHECKLIST.md](./RELEASE_CHECKLIST.md). Această pagină este rezumatul public
-destinat contributorilor.
+Detaliul de întreținere locuiește în `CLAUDE.md` (Hard Rule #21) și [RELEASE_CHECKLIST.md](./RELEASE_CHECKLIST.md). Această pagină este rezumatul public pentru colaboratori.
 
 ## Pe scurt
 
@@ -42,25 +37,23 @@ flowchart LR
 `main` nu este ramura de integrare pentru activitatea de zi cu zi. PR-urile deschise către `main`
 trebuie, de obicei, redirecționate înainte de îmbinare.
 
-## Înghețarea lansării (cicluri paralele)
+## Eliberați înghețarea (cicluri paralele)
 
-Atunci când o lansare este în curs de reconciliere, se deschide un tichet de marcaj cu eticheta `release-freeze`.
-Acest lucru **nu oprește dezvoltarea**:
+Când o versiune este reconciliată, este deschisă o problemă de marcaj etichetată `release-freeze`. Că** nu oprește dezvoltarea** :
 
-- Ramura înghețată `release/vX.Y.Z` îi aparține responsabilului de lansare pentru versiunea respectivă.
-- Ramura `release/vX+1` a ciclului următor este creată din vârful înghețat, astfel încât contributorii să poată continua
-  integrarea modificărilor.
-- PR-urile deschise care încă vizează ramura înghețată ar trebui **redirecționate** către
-  ramura `release/v*` activă (cea mai mare).
+- `release/vX.Y.Z` înghețat aparține căpitanului de eliberare pentru acea navă.
+- `release/vX+1` -ul următorului ciclu este tăiat din vârful înghețat, astfel încât colaboratorii să continue munca de aterizare.
+- Deschideți PRs care încă vizează ramura înghețată ar trebui să fie** redirecționate** la ramura activă (cea mai înaltă) `release/v*`.
 
-Verificați dacă există o înghețare activă înainte de a presupune că ramura dorită poate primi îmbinări:
+Verificați dacă există o înghețare deschisă înainte de a presupune că ramura dorită este fuzionabilă:
 
 ```bash
 gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
 ```
 
-Mecanismele de îmbinare (eticheta `queue` aplicată de proprietar → Mergify) sunt documentate în
-[MERGE_TRAIN.md](./MERGE_TRAIN.md).
+Mecanismele de îmbinare (proprietar `queue` label → Mergify) sunt documentate în [MERGE_TRAIN.md](./MERGE_TRAIN.md).
+
+> **2026-11-19: coada de îmbinare Mergify este retrasă** (decizia proprietarului). `.mergify.yml` nu mai definește o coadă și refuză comenzile Mergify care îmbină sau rescriu o cerere de extragere. Lansările PRs sunt îmbinate manual sub setul de reguli ale depozitului „Necesită porți verzi pentru lansarea activă” (`Gate / CI` + `Gate / Quality`) până când omni-queue rulează în modul live, iar apoi prin omni-queue ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Eticheta `queue` nu mai îmbină nimic.
 
 ## De ce sunt necesare atât o ramură, cât și o etichetă?
 

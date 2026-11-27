@@ -438,7 +438,7 @@ OmniRoute ቶከኖችን በራስ-ሰር ያድሳል። ችግሮቹ ከቀ�
 2. **ቋሚ መፍትሔ፦** በ`docker run` ትዕዛዝዎ ውስጥ `-p 127.0.0.1:20128:20128` በመጠቀም IPv4ን በግልጽ bind ያድርጉ፦
    ```bash
    docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
-     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
    ```
    ይህ IPv4 bindን ያስገድዳል፣ እንዲሁም proxyው በሁሉም የhost interfaces ላይ እንዳይጋለጥ ያደርጋል።
 

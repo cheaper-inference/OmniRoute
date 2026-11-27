@@ -70,6 +70,8 @@ docker rm omniroute
 docker volume rm omniroute-data
 
 # (אופציונלי) הסרת האימג'
+docker rmi cheaperinference/omniroute:latest
+# התקנות ישנות יותר משכו את השם הישן:
 docker rmi diegosouzapw/omniroute:latest
 ```
 

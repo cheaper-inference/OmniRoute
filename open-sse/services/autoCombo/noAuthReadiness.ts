@@ -5,11 +5,13 @@
  * the CLI — or with it logged out — must not put a dead candidate into every auto/*
  * pool. The probe that answers "is it ready?" spawns the CLI, so it lives in the app
  * layer and is registered at boot (`registerNoAuthReadiness`); this module keeps the
- * routing engine free of that dependency. Probes MUST be non-blocking cached reads —
- * they run on the auto-combo hot path.
+ * routing engine free of that dependency. Browser-backed providers likewise need
+ * a local runtime before admission (#19385). Probes MUST be non-blocking cached
+ * reads because they run on the auto-combo hot path.
  *
  * Direct `<alias>/<model>` routing is unaffected; this only gates auto/* admission.
  */
+import { BROWSER_BACKED_NOAUTH_PROVIDER_IDS } from "./emulatedNoAuthAllowlist";
 
 /** Returns true only when the provider is confirmed ready right now. */
 export type NoAuthReadinessProbe = () => boolean;
@@ -19,7 +21,10 @@ export type NoAuthReadinessProbe = () => boolean;
  * if the app layer never registered the probe (non-server entry, boot failure), the
  * provider is treated as not ready rather than silently admitted.
  */
-const PROBE_REQUIRED = new Set<string>(["devin-cli-agentic"]);
+const PROBE_REQUIRED = new Set<string>([
+  "devin-cli-agentic",
+  ...BROWSER_BACKED_NOAUTH_PROVIDER_IDS,
+]);
 
 const probes = new Map<string, NoAuthReadinessProbe>();
 

@@ -45,7 +45,12 @@ function isoNow(): string {
   return new Date().toISOString();
 }
 
-function ensureCacheMetricsTable() {
+/**
+ * Self-heal path for `cache_metrics`. Migration 20261119144750_cache_metrics.sql creates the
+ * same table and seed rows on every database; keep the two definitions identical
+ * (tests/unit/db/cache-metrics-migration.test.ts compares them).
+ */
+export function ensureCacheMetricsTable() {
   try {
     const db = getDbInstance();
     db.prepare(
@@ -441,6 +446,9 @@ export function recordSemanticCacheHit(signature: string, tokensSaved = 0): void
  * @param {number} [ttlMs] - TTL in ms (default: 1 hour)
  */
 export function setCachedResponse(signature, model, response, tokensSaved = 0, ttlMs = 3600000) {
+  if (isRefusalOrUnavailableCompletion(response)) {
+    return;
+  }
   const ttl = parseInt(process.env.SEMANTIC_CACHE_TTL_MS || String(ttlMs), 10);
 
   let payloadJson: string | undefined;
@@ -611,11 +619,14 @@ export function isCacheableForWrite(body, headers) {
  * for every later identical request — the caller sees a mid-sentence reply that
  * no retry clears, because each retry is served the same poisoned entry.
  *
- * Only `length` (and its Claude-side spelling `max_tokens`) is treated as
- * truncation. `stop`, `tool_calls`, and a missing/unknown reason are complete
- * responses and stay cacheable, so this never narrows the cache beyond the bug.
+ * `length` (and its Claude-side spelling `max_tokens`) is treated as
+ * truncation. A moderation block (`content_filter`, Claude-side `refusal`) is
+ * refused for the same reason: upstream re-asks it, and a false-positive block
+ * can clear on retry, but a cached one is served for the whole TTL. `stop`,
+ * `tool_calls`, and a missing/unknown reason are complete responses and stay
+ * cacheable, so this never narrows the cache beyond the bug.
  */
-const TRUNCATED_FINISH_REASONS = new Set(["length", "max_tokens"]);
+const TRUNCATED_FINISH_REASONS = new Set(["length", "max_tokens", "content_filter", "refusal"]);
 
 type CompletionChoice = {
   finish_reason?: unknown;
@@ -706,4 +717,120 @@ export function isTruncatedStreamBody(streamBody: unknown): boolean {
     }
   }
   return false;
+}
+
+type JsonObject = Record<string, unknown>;
+
+function asJsonObject(value: unknown): JsonObject | null {
+  return value && typeof value === "object" ? (value as JsonObject) : null;
+}
+
+function isNonEmptyString(value: unknown): value is string {
+  return typeof value === "string" && value.length > 0;
+}
+
+/** Push the non-empty `text` of every object part in a content array. */
+function collectPartTexts(content: unknown, parts: string[]): void {
+  if (!Array.isArray(content)) return;
+  for (const item of content) {
+    const text = asJsonObject(item)?.text;
+    if (isNonEmptyString(text)) parts.push(text);
+  }
+}
+
+/** Chat Completions choice: `choices[].text` plus `choices[].message.content` (string or parts). */
+function collectChoiceTexts(choice: unknown, parts: string[]): void {
+  const c = asJsonObject(choice);
+  if (!c) return;
+  if (isNonEmptyString(c.text)) parts.push(c.text);
+  const msg = asJsonObject(c.message);
+  if (!msg) return;
+  if (isNonEmptyString(msg.content)) parts.push(msg.content);
+  else collectPartTexts(msg.content, parts);
+}
+
+function joinedOrNull(parts: string[]): string | null {
+  return parts.length > 0 ? parts.join(" ") : null;
+}
+
+/**
+ * Extract assistant completion text across OpenAI, Claude, and Responses payload formats.
+ */
+export function extractCompletionText(response: unknown): string {
+  const r = asJsonObject(response);
+  if (!r) return "";
+
+  // 1. OpenAI Chat Completions: choices[].message.content or choices[].text
+  const chatParts: string[] = [];
+  if (Array.isArray(r.choices)) {
+    for (const choice of r.choices) collectChoiceTexts(choice, chatParts);
+  }
+
+  // 2. Claude format: content[].text
+  const claudeParts: string[] = [];
+  collectPartTexts(r.content, claudeParts);
+
+  // 3. Responses API format: output[].content[].text
+  const responsesParts: string[] = [];
+  if (Array.isArray(r.output)) {
+    for (const item of r.output) collectPartTexts(asJsonObject(item)?.content, responsesParts);
+  }
+
+  return joinedOrNull(chatParts) ?? joinedOrNull(claudeParts) ?? joinedOrNull(responsesParts) ?? "";
+}
+
+export const UPSTREAM_REFUSAL_OR_UNAVAILABLE_PATTERNS = [
+  /\bthis version of (?:antigravity|kiro|gemini|cursor|codex|copilot|[a-z0-9_-]+) is no longer supported\b/i,
+  /\bno longer supported\b[\s\S]{0,100}?\b(?:update|version|latest|ide|client)\b/i,
+  /\b(?:update|version|latest|ide|client)[\s\S]{0,100}?\bno longer supported\b/i,
+  /\bplease update (?:to the latest version|your (?:ide|client|extension|version))\b/i,
+  /\bhas reached (?:its |the )?end.?of.?life\b/i,
+  /\bmodel[\s\S]{0,40}?\b(?:deprecated|retired|discontinued|decommissioned|no longer (?:available|supported))\b/i,
+  /\b(?:deprecated|retired|discontinued|decommissioned|no longer (?:available|supported))[\s\S]{0,40}?\bmodel\b/i,
+];
+
+function hasRefusalText(value: JsonObject | null): boolean {
+  const refusal = value?.refusal;
+  return typeof refusal === "string" && refusal.trim().length > 0;
+}
+
+/** Chat Completions refusal: `content_filter` finish or a `refusal` on the choice or its message. */
+function isRefusalChoice(choice: unknown): boolean {
+  const c = asJsonObject(choice);
+  if (!c) return false;
+  return (
+    c.finish_reason === "content_filter" ||
+    hasRefusalText(c) ||
+    hasRefusalText(asJsonObject(c.message))
+  );
+}
+
+/** Responses API refusal: an `output[].content[]` part typed `refusal` (its text sits in `refusal`). */
+function isRefusalOutputItem(item: unknown): boolean {
+  const content = asJsonObject(item)?.content;
+  if (!Array.isArray(content)) return false;
+  return content.some((part) => {
+    const p = asJsonObject(part);
+    return p?.type === "refusal" || hasRefusalText(p);
+  });
+}
+
+/**
+ * Returns true if the response is an upstream refusal, content filter block, or
+ * permanent obsolescence notice returned with HTTP 200 (#19619). Such responses must
+ * never be stored in semantic cache, preventing stale refusals from being served.
+ */
+export function isRefusalOrUnavailableCompletion(response: unknown): boolean {
+  const r = asJsonObject(response);
+  if (!r) return false;
+
+  // Explicit refusals: OpenAI choice/content filter, Responses refusal part, Claude stop reason.
+  if (Array.isArray(r.choices) && r.choices.some(isRefusalChoice)) return true;
+  if (Array.isArray(r.output) && r.output.some(isRefusalOutputItem)) return true;
+  if (r.stop_reason === "refusal") return true;
+
+  const text = extractCompletionText(r);
+  return (
+    text !== "" && UPSTREAM_REFUSAL_OR_UNAVAILABLE_PATTERNS.some((pattern) => pattern.test(text))
+  );
 }

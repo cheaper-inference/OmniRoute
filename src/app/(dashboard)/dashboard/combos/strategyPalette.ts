@@ -2,6 +2,7 @@ import {
   ROUTING_STRATEGY_VALUES,
   INTERNAL_ROUTING_STRATEGY_VALUES,
 } from "@/shared/constants/routingStrategies";
+import type { BadgeChartTone } from "@omniroute/ui-kit/badge";
 import { categoricalSlot, type CategoricalSlot } from "@/shared/utils/categoricalPalette";
 
 /**
@@ -41,6 +42,12 @@ export const STRATEGY_NEUTRAL_COLOR = "var(--color-text-muted)";
 /** `var(--color-chart-N)` for inline styles (xyflow node border/glow). */
 export function strategyColorVar(strategy: string | null | undefined): string {
   return strategySlot(strategy)?.colorVar ?? STRATEGY_NEUTRAL_COLOR;
+}
+
+/** Kit Badge tone (`chart-N`) for the strategy badge; none for a strategy outside the palette. */
+export function strategyBadgeTone(strategy: string | null | undefined): BadgeChartTone | undefined {
+  const slot = strategySlot(strategy);
+  return slot ? (`chart-${slot.token}` as BadgeChartTone) : undefined;
 }
 
 /** Chip classes for the strategy badge: `-subtle` tint + token border + the token's `-ink`. */

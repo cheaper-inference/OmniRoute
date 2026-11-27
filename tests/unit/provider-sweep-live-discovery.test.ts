@@ -64,11 +64,7 @@ const LIVE_CASES: Array<{ provider: string; liveUrl: string; source?: string }> 
   { provider: "ovhcloud", liveUrl: "https://oai.endpoints.kepler.ai.cloud.ovh.net/v1/models" },
   { provider: "sambanova", liveUrl: "https://api.sambanova.ai/v1/models" },
   { provider: "orcarouter", liveUrl: "https://api.orcarouter.ai/v1/models" },
-  {
-    provider: "uncloseai",
-    liveUrl: "https://hermes.ai.unturf.com/v1/models",
-    source: "upstream",
-  },
+  { provider: "uncloseai", liveUrl: "https://hermes.ai.unturf.com/v1/models" },
   { provider: "opencode-go", liveUrl: "https://opencode.ai/zen/go/v1/models" },
   { provider: "baseten", liveUrl: "https://inference.baseten.co/v1/models" },
   { provider: "hyperbolic", liveUrl: "https://api.hyperbolic.xyz/v1/models" },

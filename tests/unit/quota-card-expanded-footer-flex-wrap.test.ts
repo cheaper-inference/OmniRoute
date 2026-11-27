@@ -39,7 +39,7 @@ test("QuotaCardExpanded footer enables flex-wrap to prevent action button clippi
   // takes the free space (mr-auto), with or without that label.
   assert.ok(
     /className="flex min-w-0 items-center justify-end gap-2"/.test(content) &&
-      /className=\{`mr-auto text-\[10px\] tabular-nums /.test(content) &&
+      /className=\{`mr-auto text-3xs tabular-nums /.test(content) &&
       /className="inline-flex size-7 shrink-0 /.test(content) &&
       content.includes('aria-label={tr("forceRefresh", "Refresh now")}'),
     "Refresh now button must be a shrink-0 icon button at the end of its row, with an accessible label"

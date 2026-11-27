@@ -9,6 +9,7 @@ import { z } from "zod";
 import {
   DEFAULT_CONFIG_PATH,
   LANDING_ACTORS,
+  VOICES,
   isManagedBase,
   loadConfig,
   validateConfig,
@@ -48,8 +49,11 @@ const LandingSchema = z
       .regex(/^omni-queue\/./)
       .refine((context) => !Object.values(APPROVAL_CONTEXTS).includes(context))
       .default("omni-queue/land"),
+    // optional: sign the queue's merge commits with the owner's SSH key (owner actor only)
+    signing: z.enum(["none", "ssh"]).default("none"),
   })
-  .refine((l) => (l.actor === "owner") === (l.identity !== undefined));
+  .refine((l) => (l.actor === "owner") === (l.identity !== undefined))
+  .refine((l) => l.signing !== "ssh" || l.actor === "owner");
 
 const ConfigSchema = z
   .strictObject({
@@ -92,6 +96,8 @@ const ConfigSchema = z
     // optional: the hotfix lane and the base-repair lane, each selected by its own label
     lanes: z.strictObject({ hotfixLabel: label, baseRepairLabel: label }).optional(),
     mode: z.enum(["shadow", "live"]),
+    // optional: who performs the queue's comments, label removals and issue writes
+    voice: z.enum(["app", "owner"]).default("app"),
   })
   .refine((c) => c.label !== c.protectedApprovalLabel)
   // lane labels: distinct from each other and from every other label the queue reads
@@ -124,7 +130,51 @@ test("the shipped config lands as the owner with the noreply identity", () => {
       email: "8016841+diegosouzapw@users.noreply.github.com",
     },
     statusContext: "omni-queue/land",
+    signing: "ssh",
   });
+});
+
+test("the shipped config speaks as the owner and signs merge commits", () => {
+  assert.deepEqual(VOICES, ["app", "owner"]);
+  assert.equal(raw.voice, "owner");
+  assert.equal(raw.landing.signing, "ssh");
+  // live since the cut-over (docs/ops/OMNI_QUEUE.md → "Cut-over and rollback", step 9)
+  assert.equal(raw.mode, "live");
+  assert.deepEqual(validateConfig(raw).errors, [], "the shipped config validates");
+});
+
+test("voice: app (the default) or owner; anything else is refused", () => {
+  const { voice: _shipped, ...withoutVoice } = raw;
+  const absent = validateConfig(withoutVoice);
+  assert.equal(absent.ok, true, JSON.stringify(absent.errors));
+  assert.equal(absent.config.voice, "app", "absent = the App's voice");
+  const owner = validateConfig({ ...raw, voice: "owner" });
+  assert.equal(owner.ok, true, JSON.stringify(owner.errors));
+  assert.equal(owner.config.voice, "owner");
+  for (const voice of ["Owner", "bot", "", null, true, ["owner"]]) {
+    const result = validateConfig({ ...raw, voice });
+    assert.equal(result.ok, false, JSON.stringify(voice));
+    assert.match(result.errors.join("\n"), /voice: expected one of app, owner/);
+  }
+});
+
+test("landing.signing: none (the default) or ssh, and ssh only when the owner lands", () => {
+  const { signing: _shipped, ...landing } = raw.landing;
+  const absent = validateConfig({ ...raw, landing });
+  assert.equal(absent.ok, true, JSON.stringify(absent.errors));
+  assert.equal(absent.config.landing.signing, "none");
+  const ssh = validateConfig({ ...raw, landing: { ...landing, signing: "ssh" } });
+  assert.equal(ssh.ok, true, JSON.stringify(ssh.errors));
+  assert.equal(ssh.config.landing.signing, "ssh");
+  // The App's commits carry the App's bot identity: no account of the owner could verify them.
+  const asApp = validateConfig({ ...raw, landing: { mode: "merge-ff", signing: "ssh" } });
+  assert.equal(asApp.ok, false);
+  assert.match(asApp.errors.join("\n"), /landing\.signing: "ssh" needs landing\.actor "owner"/);
+  for (const signing of ["gpg", "SSH", true, "", null]) {
+    const result = validateConfig({ ...raw, landing: { ...landing, signing } });
+    assert.equal(result.ok, false, JSON.stringify(signing));
+    assert.match(result.errors.join("\n"), /landing\.signing: expected one of none, ssh/);
+  }
 });
 
 test("landing: actor owner needs a noreply identity", () => {
@@ -158,6 +208,7 @@ test("landing: defaults keep the App as the actor", () => {
     mode: "merge-ff",
     actor: "app",
     statusContext: "omni-queue/land",
+    signing: "none",
   });
 });
 
@@ -248,7 +299,7 @@ test("flakyReruns: 0 or 1, default 1, anything else refused with a clear message
   }
 });
 
-test("owner decisions D-Q1..D-Q3 and the shadow start are pinned", () => {
+test("owner decisions D-Q1..D-Q3 and the live mode are pinned", () => {
   assert.equal(raw.landing.mode, "merge-ff");
   // the batch window starts at 6 and may grow to 12 (owner, cut-over part 2)
   assert.deepEqual(raw.batch, {
@@ -259,8 +310,9 @@ test("owner decisions D-Q1..D-Q3 and the shadow start are pinned", () => {
     startSize: 6,
   });
   assert.equal(raw.label, "omni-queue");
-  assert.notEqual(raw.label, "queue", "must not collide with the Mergify label during shadow");
-  assert.equal(raw.mode, "shadow");
+  assert.notEqual(raw.label, "queue", "must not collide with the retired Mergify label");
+  assert.equal(raw.mode, "live");
+  assert.deepEqual(validateConfig(raw).errors, [], "the shipped config validates");
   assert.deepEqual(raw.approvers, ["diegosouzapw"]);
 });
 
@@ -269,7 +321,7 @@ test("prChecksRequired: the three PR gates shipped; default []; distinct non-emp
   // (.github/workflows/api-route-typecheck.yml): a check that blocks a merge today blocks here.
   assert.deepEqual(raw.prChecksRequired, ["Gate / CI", "Gate / Quality", "API Route Typecheck"]);
   assert.deepEqual(validateConfig(raw).errors, [], "the shipped config validates");
-  assert.equal(raw.mode, "shadow");
+  assert.equal(raw.mode, "live");
   const absent = clone();
   delete absent.prChecksRequired;
   const ok = validateConfig(absent);
@@ -490,7 +542,10 @@ const MUTATIONS = {
   "identity with a non-noreply email": (c) => (c.landing.identity.email = "x@gmail.com"),
   "identity with an empty name": (c) => (c.landing.identity.name = ""),
   "identity with an extra key": (c) => (c.landing.identity.signingKey = "x"),
-  "app actor with an identity": (c) => (c.landing.actor = "app"),
+  "app actor with an identity": (c) => {
+    c.landing.actor = "app";
+    c.landing.signing = "none";
+  },
   "empty status context": (c) => (c.landing.statusContext = ""),
   "status context with a space": (c) => (c.landing.statusContext = "a b"),
   "status context equal to a required check": (c) => {
@@ -538,9 +593,29 @@ const MUTATIONS = {
     (c.lanes.baseRepairLabel = c.protectedApprovalLabel.toUpperCase()),
   "lane label equals a block label": (c) => (c.lanes.hotfixLabel = c.blockLabels[0]),
   "unknown mode": (c) => (c.mode = "on"),
+  "unknown voice": (c) => (c.voice = "bot"),
+  "voice not a string": (c) => (c.voice = true),
+  "unknown signing": (c) => (c.landing.signing = "gpg"),
+  "boolean signing": (c) => (c.landing.signing = true),
+  "ssh signing with the app actor": (c) => {
+    c.landing.actor = "app";
+    delete c.landing.identity;
+    c.landing.signing = "ssh";
+  },
+  "valid: owner voice": (c) => (c.voice = "owner"),
+  "valid: voice left out (default app)": (c) => delete c.voice,
+  "valid: ssh signing with the owner actor": (c) => (c.landing.signing = "ssh"),
+  "valid: signing left out (default none)": (c) => delete c.landing.signing,
+  "valid: owner voice with the app actor": (c) => {
+    c.voice = "owner";
+    c.landing.actor = "app";
+    c.landing.signing = "none";
+    delete c.landing.identity;
+  },
   "valid: squash-api landing": (c) => (c.landing.mode = "squash-api"),
   "valid: app actor without identity": (c) => {
     c.landing.actor = "app";
+    c.landing.signing = "none";
     delete c.landing.identity;
   },
   "valid: landing with only a mode": (c) => (c.landing = { mode: "merge-ff" }),

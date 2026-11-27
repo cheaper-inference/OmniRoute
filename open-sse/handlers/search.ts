@@ -736,7 +736,8 @@ function buildSearxngRequest(
   if (page) qp.set("pageno", String(page));
 
   const headers: Record<string, string> = { Accept: "application/json" };
-  if (params.token) {
+  // The operator token never goes to a caller-chosen base URL.
+  if (params.token && searchBaseUrlGuard(config, params) !== "public-only") {
     headers["Authorization"] = `Bearer ${params.token}`;
   }
 
