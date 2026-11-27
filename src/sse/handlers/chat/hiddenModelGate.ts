@@ -1,6 +1,6 @@
-import { getCachedProviderConnections } from "@/lib/db/readCache";
-import { getHiddenChatModels } from "@/lib/hiddenChatModels";
-import { createHiddenModelLookup } from "@/lib/hiddenModelLookup";
+import { getCachedProviderConnections, getCachedProviderNodes } from "@/lib/db/readCache";
+import { getChatVisibilitySnapshot } from "@/lib/hiddenChatModels";
+import { createModelVisibilityLookup } from "@/lib/hiddenModelLookup";
 import { errorResponse } from "@omniroute/open-sse/utils/error.ts";
 
 type ModelGate = (targets: Iterable<string>) => Promise<Response | null>;
@@ -27,14 +27,46 @@ async function resolveAntigravityVisibilityProvider(
   return "antigravity";
 }
 
+export type HiddenModelGateScope = {
+  /**
+   * The dispatch is a step of a stored combo (`handleComboChat` → `handleSingleModelChat`).
+   * A `combos_only` model stays dispatchable there; only a `hidden` one is rejected.
+   */
+  isCombo?: boolean;
+  /** The admitted combo/alias name (`authorizationContextModel`), used to spot `auto/*`. */
+  contextModel?: string | null;
+};
+
+/**
+ * A `combos_only` model is blocked on a direct call — but `auto/*` is a *virtual* combo the
+ * operator never compiled by hand, so it must not be able to reach a model the operator chose
+ * to keep out of direct use. Those dispatches are gated as direct calls too, and the auto
+ * candidate pool excludes the same models (open-sse/services/autoCombo).
+ */
+function isFixedComboExecution(scope: HiddenModelGateScope | undefined): boolean {
+  if (scope?.isCombo !== true) return false;
+  const context = typeof scope.contextModel === "string" ? scope.contextModel.trim() : "";
+  return !context.startsWith("auto/");
+}
+
 /** Preserve authorization precedence at both initial and final dispatch gates. */
-export function withHiddenModelGate(authorize: ModelGate, requestedModelStr?: string): ModelGate {
-  let isHidden: ReturnType<typeof createHiddenModelLookup> | undefined;
+export function withHiddenModelGate(
+  authorize: ModelGate,
+  requestedModelStr?: string,
+  scope: HiddenModelGateScope = {}
+): ModelGate {
+  let visibility: ReturnType<typeof createModelVisibilityLookup> | undefined;
+  const allowCombosOnly = isFixedComboExecution(scope);
   return async (targets) => {
     const resolvedTargets = [...targets];
     const denied = await authorize(resolvedTargets);
     if (denied) return denied;
-    isHidden ??= createHiddenModelLookup(await getHiddenChatModels());
+    if (!visibility) {
+      visibility = createModelVisibilityLookup(
+        await getChatVisibilitySnapshot(),
+        await getCachedProviderNodes()
+      );
+    }
     for (const target of resolvedTargets) {
       const separator = target.indexOf("/");
       const rawProvider = target.slice(0, separator);
@@ -43,7 +75,12 @@ export function withHiddenModelGate(authorize: ModelGate, requestedModelStr?: st
           ? await resolveAntigravityVisibilityProvider(requestedModelStr)
           : rawProvider;
       const model = target.slice(separator + 1);
-      if (separator > 0 && isHidden(provider, model)) {
+      if (separator <= 0) continue;
+      // A stored combo may dispatch a combos_only target; a hidden one never.
+      const blocked = allowCombosOnly
+        ? visibility.isHiddenInCombo(provider, model)
+        : visibility.isBlockedFromDirectUse(provider, model);
+      if (blocked) {
         return errorResponse(404, "Model not found", {
           code: "model_not_found",
           type: "invalid_request_error",
