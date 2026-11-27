@@ -153,7 +153,10 @@ function saveButton(dialog: HTMLElement) {
   return within(dialog).getByRole("button", { name: "Create Combo", exact: true });
 }
 
-describe("Combo form searchable selectors", () => {
+// Every case renders the whole CombosPage in jsdom and opens the builder one or more times. That
+// is CPU-bound: the cases took 5–8 s each on CI and up to 25 s on a loaded host, against the 20 s
+// default. The page-level coverage stays; only the per-case deadline is longer.
+describe("Combo form searchable selectors", { timeout: 60_000 }, () => {
   it("keeps combo references unavailable for the flat Jev strategy", async () => {
     const { dialog } = await openCreate();
     expect(within(dialog).getByTestId("combo-builder-reference")).toBeTruthy();
