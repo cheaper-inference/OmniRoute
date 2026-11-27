@@ -8,7 +8,7 @@
  * the caller to pass through unchanged.
  */
 
-const DATA_URL_BASE64_PATTERN = /^data:([^;]+);base64,(.+)$/;
+import { parseBase64DataUrl, stripBase64Whitespace } from "../utils/dataUrl.ts";
 
 /** Returns a Claude block for an OpenAI media part, or null for non-media blocks. */
 export function convertOpenAiMediaBlock(
@@ -29,10 +29,14 @@ export function convertOpenAiMediaBlock(
     const fileData = toNonEmptyString(file?.file_data) || toNonEmptyString(file?.data);
     if (!fileData) return null;
     const title = toNonEmptyString(file?.filename);
-    const match = fileData.match(DATA_URL_BASE64_PATTERN);
-    if (match) {
-      const mediaType = match[1];
-      const source = { type: "base64", media_type: mediaType, data: match[2] };
+    const parsed = parseBase64DataUrl(fileData);
+    if (parsed) {
+      const mediaType = parsed.mediaType;
+      const source = {
+        type: "base64",
+        media_type: mediaType,
+        data: stripBase64Whitespace(parsed.data),
+      };
       if (mediaType === "application/pdf") {
         return { type: "document", source, ...(title ? { title } : {}) };
       }
@@ -81,9 +85,16 @@ export function collectClaudeMediaBlocks(content: unknown): Array<Record<string,
 function claudeImageBlockFromUrl(rawUrl: unknown): Record<string, unknown> | null {
   const url = toNonEmptyString(rawUrl);
   if (!url) return null;
-  const match = url.match(DATA_URL_BASE64_PATTERN);
-  if (match) {
-    return { type: "image", source: { type: "base64", media_type: match[1], data: match[2] } };
+  const parsed = parseBase64DataUrl(url);
+  if (parsed) {
+    return {
+      type: "image",
+      source: {
+        type: "base64",
+        media_type: parsed.mediaType,
+        data: stripBase64Whitespace(parsed.data),
+      },
+    };
   }
   return { type: "image", source: { type: "url", url } };
 }

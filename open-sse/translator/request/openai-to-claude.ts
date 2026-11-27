@@ -19,6 +19,7 @@ import {
   openAiImagePartToClaudeBlock,
   normalizeToolResultImages,
 } from "./openai-to-claude/imageBlocks.ts";
+import { parseBase64DataUrl, stripBase64Whitespace } from "../../utils/dataUrl.ts";
 
 // Prefix for Claude OAuth tool names to avoid conflicts
 // Can be disabled per-request via body._disableToolPrefix = true
@@ -707,17 +708,16 @@ function getContentBlocksFromMessage(
           // attachment reaches the model instead of being silently dropped. Claude has no
           // native video input, so non-pdf/non-image files are skipped here.
           const fileData = part.file.file_data || part.file.data;
-          const fmatch =
-            typeof fileData === "string" ? fileData.match(/^data:([^;]+);base64,([\s\S]+)$/) : null;
-          if (fmatch) {
-            const mediaType = fmatch[1];
+          const parsedFile = typeof fileData === "string" ? parseBase64DataUrl(fileData) : null;
+          if (parsedFile) {
+            const mediaType = parsedFile.mediaType;
             if (mediaType === "application/pdf") {
               blocks.push({
                 type: "document",
                 source: {
                   type: "base64",
                   media_type: mediaType,
-                  data: fmatch[2].replace(/\s+/g, ""),
+                  data: stripBase64Whitespace(parsedFile.data),
                 },
                 ...(part.file.filename ? { title: part.file.filename } : {}),
               });
@@ -727,7 +727,7 @@ function getContentBlocksFromMessage(
                 source: {
                   type: "base64",
                   media_type: mediaType,
-                  data: fmatch[2].replace(/\s+/g, ""),
+                  data: stripBase64Whitespace(parsedFile.data),
                 },
               });
             }

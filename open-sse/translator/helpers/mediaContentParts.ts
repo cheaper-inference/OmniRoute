@@ -1,3 +1,5 @@
+import { parseBase64DataUrl } from "../../utils/dataUrl.ts";
+
 function mediaData(part: Record<string, unknown>) {
   const inline = part.inlineData ?? part.inline_data;
   return { inline, rawData: inline ?? part.fileData ?? part.file_data };
@@ -34,9 +36,11 @@ export function videoPartToGemini(part: Record<string, unknown>): Record<string,
   const raw = part.video_url ?? part.url ?? part.input_video;
   const url = typeof raw === "string" ? raw : (raw as { url?: string } | undefined)?.url;
   if (!url) return null;
-  const match = /^data:(video\/[^;,]+);base64,(.+)$/s.exec(url);
-  return match
-    ? { inlineData: { mimeType: match[1], data: match[2] } }
+  const parsed = parseBase64DataUrl(url);
+  return parsed &&
+    parsed.mediaType.startsWith("video/") &&
+    parsed.mediaType.length > "video/".length
+    ? { inlineData: { mimeType: parsed.mediaType, data: parsed.data } }
     : {
         fileData: {
           mimeType: /\.webm(?:$|[?#])/i.test(url) ? "video/webm" : "video/mp4",

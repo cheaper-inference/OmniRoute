@@ -6,6 +6,7 @@ import {
   getChatLogMaxBodyBytes,
 } from "@/lib/logEnv";
 import { createHash } from "node:crypto";
+import { parseBase64DataUrl } from "../../utils/dataUrl.ts";
 import { estimateSizeFast } from "../../utils/estimateSize.ts";
 
 export const MEMORY_EXTRACTION_TEXT_LIMIT = 64 * 1024;
@@ -33,13 +34,13 @@ export function truncateChatLogText(value: string): string {
  */
 export function collapseOversizedDataUrlForLog(value: string): string | Record<string, unknown> {
   if (value.length <= getChatLogTextLimit()) return value;
-  const match = /^data:(image\/[-\w.+/]+);base64,([\s\S]*)$/.exec(value);
-  if (!match) return truncateChatLogText(value);
+  const parsed = parseBase64DataUrl(value, { requireNonEmptyData: false });
+  if (!parsed || !/^image\/[-\w.+/]+$/.test(parsed.mediaType)) return truncateChatLogText(value);
   return {
     _omniroute_image_ref: true,
-    mime: match[1],
-    base64Bytes: match[2].length,
-    sha256: createHash("sha256").update(match[2]).digest("hex").slice(0, 16),
+    mime: parsed.mediaType,
+    base64Bytes: parsed.data.length,
+    sha256: createHash("sha256").update(parsed.data).digest("hex").slice(0, 16),
     head: value.slice(0, 64),
   };
 }

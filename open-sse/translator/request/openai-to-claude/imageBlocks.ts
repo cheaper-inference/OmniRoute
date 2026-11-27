@@ -5,8 +5,7 @@
  * the OpenAI shape unchanged, which Anthropic rejects with HTTP 400 (#9692).
  */
 
-// `[\s\S]` not `.`: MIME-wrapped base64 (some Python and Java clients) has line breaks.
-const DATA_URL_RE = /^data:([^;]+);base64,([\s\S]+)$/;
+import { parseBase64DataUrl, stripBase64Whitespace } from "../../../utils/dataUrl.ts";
 
 type ClaudeImageBlock = {
   type: "image";
@@ -26,11 +25,15 @@ export function urlToClaudeImageBlock(url: string): ClaudeImageBlock | null {
   if (typeof url !== "string") return null;
   const trimmed = url.trim();
   if (!trimmed) return null;
-  const match = trimmed.match(DATA_URL_RE);
-  if (match) {
+  const parsed = parseBase64DataUrl(trimmed);
+  if (parsed) {
     return {
       type: "image",
-      source: { type: "base64", media_type: match[1], data: match[2].replace(/\s+/g, "") },
+      source: {
+        type: "base64",
+        media_type: parsed.mediaType,
+        data: stripBase64Whitespace(parsed.data),
+      },
     };
   }
   return { type: "image", source: { type: "url", url: trimmed } };

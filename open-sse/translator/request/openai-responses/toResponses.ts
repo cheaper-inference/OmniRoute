@@ -9,6 +9,7 @@ import {
   requiresReasoningContentPresence,
 } from "../../../utils/reasoningPlaceholder.ts";
 import { getReadableReasoningValue } from "../../../utils/reasoningFields.ts";
+import { isBase64DataUrl } from "../../../utils/dataUrl.ts";
 import { generateToolCallId } from "../../helpers/toolCallHelper.ts";
 import {
   coerceHistoricalToolCallArguments,
@@ -320,7 +321,7 @@ export function openaiToOpenAIResponsesRequest(
                 if (
                   contentItem.type === "image" &&
                   typeof contentItem.image === "string" &&
-                  /^data:([^;]+);base64,(.+)$/.test(contentItem.image)
+                  isBase64DataUrl(contentItem.image)
                 ) {
                   // AI SDK-style image part: { type: "image", image: "data:...;base64,..." } (#1330)
                   const imgResult: JsonRecord = {

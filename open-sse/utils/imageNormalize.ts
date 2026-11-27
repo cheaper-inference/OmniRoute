@@ -9,6 +9,8 @@
  * falls back to a passthrough (original buffer, unresized).
  */
 
+import { parseBase64DataUrl } from "./dataUrl.ts";
+
 const DEFAULT_MAX_LONG_EDGE = 2048;
 
 // The callable factory is sharp's default export; `typeof import("sharp")` is the
@@ -51,13 +53,13 @@ export async function normalizeDataUri(
   opts?: { maxLongEdge?: number }
 ): Promise<string> {
   try {
-    const match = /^data:([^;,]+);base64,(.*)$/s.exec(dataUri);
-    if (!match) return dataUri;
-    const input = Buffer.from(match[2], "base64");
+    const parsed = parseBase64DataUrl(dataUri, { requireNonEmptyData: false });
+    if (!parsed) return dataUri;
+    const input = Buffer.from(parsed.data, "base64");
     if (!input.length) return dataUri;
     const out = await normalizeImageBuffer(input, opts);
     if (!out.resized) return dataUri;
-    return `data:${match[1]};base64,${out.buffer.toString("base64")}`;
+    return `data:${parsed.mediaType};base64,${out.buffer.toString("base64")}`;
   } catch {
     return dataUri;
   }
