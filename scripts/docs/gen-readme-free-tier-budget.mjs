@@ -9,8 +9,9 @@
 // card and only `npm run release:refresh-derived` moves it.
 //
 // The starred row sum is the headline. The footer explains how it is counted and gives the
-// recurring and first-month figures. Those labels come from the facts probe; fmtTokens()
-// formats only the pool amounts and credit chips. Output lives in docs/diagrams/free-tier-budget.svg.
+// recurring figure and, when signup credits raise it, the first-month figure. Those labels come
+// from the facts probe; fmtTokens() formats only the amounts in the body of the card.
+// Output lives in docs/diagrams/free-tier-budget.svg.
 // tests/unit/docs/readme-free-tier-budget-svg.test.ts fails when the committed file no longer
 // matches this generator, and runs the counts gate's own validators on it (catalog entries,
 // recurring pools, canonical numbers).
@@ -24,10 +25,11 @@ import { writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { outlineSvg } from "./readme-outline.mjs";
 import { svgOpen, gridDefs, esc, roleWidth } from "./readme-diagram-theme.mjs";
-import { README_FACTS, RF } from "./readmeFacts.mjs";
+import { README_FACTS, RF, readmeFact } from "./readmeFacts.mjs";
 
 const W = 1200;
 const H = 914;
+const SIGNUP_SECTION_HEIGHT = 68;
 const NUMBER_WORDS = [
   "zero",
   "one",
@@ -119,7 +121,9 @@ export function buildFreeTierBudgetModel() {
   }
 
   const oneTime = t.oneTime;
-  const oneTimeSum = oneTime.reduce((s, r) => s + r.v, 0);
+  const first = readmeFact("code.headlineFirst");
+  const steady = readmeFact("code.headlineSteady");
+  const hasFirstMonthCredits = oneTime.length > 0 && first > steady;
 
   const uncappedNames = t.uncappedNames;
   const boost = t.boost;
@@ -129,7 +133,7 @@ export function buildFreeTierBudgetModel() {
   const gridRows = Math.ceil(pools.length / 4);
   const lastRowY = 452 + (gridRows - 1) * 30;
   const creditChips = fitChips(
-    oneTime.map((r) => `${r.provider} ${fmtTokens(r.v)}`),
+    hasFirstMonthCredits ? oneTime.map((r) => `${r.provider} ${fmtTokens(r.v)}`) : [],
     60,
     1140,
     10
@@ -162,7 +166,12 @@ export function buildFreeTierBudgetModel() {
     poolValues: pools.map((p) =>
       p.caps ? `${fmtTokens(p.tokens)} · ${p.caps} caps` : fmtTokens(p.tokens)
     ),
-    credits: ["+ FIRST MONTH · ONE-TIME SIGNUP CREDITS ", `~${fmtTokens(oneTimeSum)}`],
+    credits: hasFirstMonthCredits
+      ? [
+          "+ FIRST MONTH · ONE-TIME SIGNUP CREDITS ",
+          `~${fmtTokens(oneTime.reduce((s, r) => s + r.v, 0))}`,
+        ]
+      : [],
     creditChips: [...creditChips.shown.map((c) => c.label), ...(creditChips.overflow ? ["…"] : [])],
     uncapped: ["∞", "PLUS THE UN-COUNTABLE ", "— PERMANENTLY FREE · NO TOKEN CAP"],
     uncappedChips: [
@@ -180,7 +189,11 @@ export function buildFreeTierBudgetModel() {
     ],
     note: [
       "* Sum of every catalog row, ended offers included, the way free-tier catalogs count.",
-      `Counting each shared quota once: ${RF.headlineSteadyLabel} a month today, up to ${RF.headlineFirstLabel} in your first month with signup credits.`,
+      `Counting each shared quota once: ${RF.headlineSteadyLabel} a month today` +
+        (hasFirstMonthCredits
+          ? `, up to ${RF.headlineFirstLabel} in your first month with signup credits`
+          : "") +
+        ".",
     ],
   };
 
@@ -188,7 +201,9 @@ export function buildFreeTierBudgetModel() {
   const title = `OmniRoute free-tier budget: ${tokenDescription}`;
   const desc =
     `${tokenDescription} ` +
-    `Up to ${RF.headlineFirstLabel} in your first month with one-time signup credits. ` +
+    (hasFirstMonthCredits
+      ? `Up to ${RF.headlineFirstLabel} in your first month with one-time signup credits. `
+      : "") +
     `${RF.rowSumLiveLabel} summed per live row. ` +
     `${RF.freePublishedPools} pools with a published quota and ${RF.freeAccessRows} catalog rows with free access, catalog audited ${RF.catalogDate}. The bar shows the pools behind the recurring figure.`;
 
@@ -198,6 +213,7 @@ export function buildFreeTierBudgetModel() {
     desc,
     pools,
     poolTokens,
+    hasFirstMonthCredits,
     creditChips,
     uncappedChips,
     gridRows,
@@ -222,19 +238,22 @@ export async function renderReadmeFreeTierBudget() {
   const footerNoteX = 356 + Math.ceil(roleWidth("lbl", C.footer[1])) + 28;
 
   const base = M.lastRowY; // 572 with five grid rows
+  const omittedHeight = M.hasFirstMonthCredits ? 0 : SIGNUP_SECTION_HEIGHT;
+  const lowerBase = base - omittedHeight;
+  const height = H - omittedHeight;
   const Y = {
     credits: base + 50,
     chips: base + 60,
-    inf: base + 118,
-    ukicker: base + 116,
-    uchips: base + 130,
-    boost: base + 146,
-    sep: base + 174,
-    foot: base + 198,
+    inf: lowerBase + 118,
+    ukicker: lowerBase + 116,
+    uchips: lowerBase + 130,
+    boost: lowerBase + 146,
+    sep: lowerBase + 174,
+    foot: lowerBase + 198,
   };
-  if (Y.foot + footerH > H - 16) {
+  if (Y.foot + footerH > height - 16) {
     throw new Error(
-      `free-tier-budget: ${M.pools.length} pools need ${M.gridRows} grid rows and the footer no longer fits the ${H}px canvas — grow the viewBox deliberately`
+      `free-tier-budget: ${M.pools.length} pools need ${M.gridRows} grid rows and the footer no longer fits the ${height}px canvas — grow the viewBox deliberately`
     );
   }
 
@@ -270,6 +289,10 @@ export async function renderReadmeFreeTierBudget() {
   ]
     .map((c) => chip(c, Y.chips, "ok-bg stroke-ok", ' style="fill:var(--ok)"'))
     .join("\n");
+  const creditsSection = M.hasFirstMonthCredits
+    ? `  <text x="60" y="${Y.credits}" class="lbl" style="fill:var(--ok)">${esc(C.credits[0])}<tspan style="fill:var(--ink)">${esc(C.credits[1])}</tspan></text>\n` +
+      `  <g>\n${creditChips}\n  </g>\n`
+    : "";
   const uncappedChips = [
     ...M.uncappedChips.shown,
     ...(M.uncappedChips.overflow ? [{ label: "…", x: M.uncappedChips.ellipsisX, w: 34 }] : []),
@@ -279,7 +302,7 @@ export async function renderReadmeFreeTierBudget() {
 
   return outlineSvg(
     svgOpen({
-      viewBox: `0 0 ${W} ${H}`,
+      viewBox: `0 0 ${W} ${height}`,
       title: M.title,
       desc: M.desc,
     }) +
@@ -299,8 +322,8 @@ export async function renderReadmeFreeTierBudget() {
       `      </rect>\n` +
       `    </clipPath>\n` +
       `  </defs>\n` +
-      `  <rect class="bg" x="0" y="0" width="${W}" height="${H}"/>\n` +
-      `  <rect x="0" y="0" width="${W}" height="${H}" fill="url(#ftb-grid)"/>\n` +
+      `  <rect class="bg" x="0" y="0" width="${W}" height="${height}"/>\n` +
+      `  <rect x="0" y="0" width="${W}" height="${height}" fill="url(#ftb-grid)"/>\n` +
       // header
       `  <text x="60" y="52" class="kicker">${esc(C.kicker[0])}<tspan style="fill:var(--ink)">${esc(C.kicker[1])}</tspan></text>\n` +
       // hero (left)
@@ -329,9 +352,7 @@ export async function renderReadmeFreeTierBudget() {
       `  <text x="60" y="416" class="label-sm" style="fill:var(--muted)">${esc(C.barCaption[0])}</text>\n` +
       // per-pool grid
       `  <g>\n${grid.join("\n")}\n  </g>\n` +
-      // first-month signup credits
-      `  <text x="60" y="${Y.credits}" class="lbl" style="fill:var(--ok)">${esc(C.credits[0])}<tspan style="fill:var(--ink)">${esc(C.credits[1])}</tspan></text>\n` +
-      `  <g>\n${creditChips}\n  </g>\n` +
+      creditsSection +
       // plus the un-countable
       `  <text x="60" y="${Y.inf}" class="num-sm">${esc(C.uncapped[0])}<animate attributeName="opacity" values="1;0.55;1" dur="4s" repeatCount="indefinite"/></text>\n` +
       `  <text x="86" y="${Y.ukicker}" class="lbl">${esc(C.uncapped[1])}<tspan style="fill:var(--muted)">${esc(C.uncapped[2])}</tspan></text>\n` +

@@ -84,6 +84,7 @@ describe("README generators follow the facts snapshot", () => {
       engines: 32,
       freeSteady: 2.5e9,
       headlineSteady: 2.5e9,
+      headlineFirst: 4.4e9,
       headlineSteadyLabel: "~2.5B",
       headlineFirstLabel: "~4.4B",
       hasFreeProviders: 987,
@@ -95,6 +96,8 @@ describe("README generators follow the facts snapshot", () => {
       publicFreeTierBudget: {
         ...snapshot.code.publicFreeTierBudget,
         steady: 3.33e9,
+        first: 4.4e9,
+        oneTime: [{ provider: "zz-test", v: 1.9e9 }],
         pools: [{ provider: "zz-test", name: "ZZ Test", tokens: 5e8, caps: 0 }],
       },
       freeTierBudget: {
