@@ -200,8 +200,8 @@ function toRecord(value: unknown): Record<string, unknown> {
 
 /**
  * Rebuild the persisted models_dev_tier intelligence rows from the current
- * model_capabilities table. Called at the end of every successful
- * capabilities save (full replace and incremental upsert alike). Failures are
+ * model_capabilities table. Called after capabilities saves that changed rows
+ * (diff writes with actual changes and incremental upserts alike). Failures are
  * swallowed with a console.warn — the capabilities save that already
  * committed must never be rolled back by a downstream rebuild error.
  */
@@ -303,24 +303,72 @@ export function getModelsDevPricing(): PricingByProvider {
   return synced;
 }
 
+export interface ModelsDevSaveResult {
+  /** True when at least one provider/row was added, updated, or removed. */
+  changed: boolean;
+  added: number;
+  updated: number;
+  removed: number;
+}
+
 /**
- * Save synced pricing to `models_dev_pricing` namespace (full replace).
+ * Save synced pricing to `models_dev_pricing` namespace.
+ *
+ * Diff-based: only providers whose serialized blob is new or changed are
+ * written, and providers dropped upstream are deleted. A no-op sync must not
+ * touch the DB at all — the full replace this used to perform re-wrote the
+ * entire namespace on every boot and every 6h cycle, pinning the event loop
+ * behind pre-write file backups and a table-wide DELETE+INSERT for zero
+ * semantic change.
  */
-export function saveModelsDevPricing(data: PricingByProvider): void {
+export function saveModelsDevPricing(data: PricingByProvider): ModelsDevSaveResult {
   const db = getDbInstance();
-  const del = db.prepare("DELETE FROM key_value WHERE namespace = 'models_dev_pricing'");
-  const insert = db.prepare(
-    "INSERT INTO key_value (namespace, key, value) VALUES ('models_dev_pricing', ?, ?)"
+  const existing = new Map<string, string>();
+  for (const row of db
+    .prepare("SELECT key, value FROM key_value WHERE namespace = 'models_dev_pricing'")
+    .all() as Array<{ key: string; value: string }>) {
+    existing.set(row.key, row.value);
+  }
+
+  const upsert = db.prepare(
+    "INSERT INTO key_value (namespace, key, value) VALUES ('models_dev_pricing', ?, ?) " +
+      "ON CONFLICT(namespace, key) DO UPDATE SET value = excluded.value"
   );
-  const tx = db.transaction(() => {
-    del.run();
+  const delOne = db.prepare(
+    "DELETE FROM key_value WHERE namespace = 'models_dev_pricing' AND key = ?"
+  );
+
+  let added = 0;
+  let updated = 0;
+  let removed = 0;
+  db.transaction(() => {
     for (const [provider, models] of Object.entries(data)) {
-      insert.run(provider, JSON.stringify(models));
+      const blob = JSON.stringify(models);
+      const prev = existing.get(provider);
+      if (prev === blob) continue;
+      upsert.run(provider, blob);
+      if (prev === undefined) added += 1;
+      else updated += 1;
     }
-  });
-  tx();
-  backupDbFile("pre-write");
-  invalidateDbCache("pricing");
+    for (const provider of existing.keys()) {
+      if (!Object.hasOwn(data, provider)) {
+        delOne.run(provider);
+        removed += 1;
+      }
+    }
+  })();
+
+  const result: ModelsDevSaveResult = {
+    changed: added + updated + removed > 0,
+    added,
+    updated,
+    removed,
+  };
+  if (result.changed) {
+    backupDbFile("pre-write");
+    invalidateDbCache("pricing");
+  }
+  return result;
 }
 
 /**
@@ -552,60 +600,170 @@ export function getSyncedCapability(
 }
 
 /**
- * Save synced capabilities to `model_capabilities` table (full replace).
+ * Null-safe comparison of two capability entries across every persisted field.
+ * `modalities_*` are stored/compared as JSON strings; `reasoning_efforts` is a
+ * parsed array on one side and an array on the other, so both are canonicalized
+ * through JSON.stringify before comparing.
  */
-export function saveModelsDevCapabilities(data: CapabilitiesByProvider): void {
+function capabilityEntriesEqual(a: ModelCapabilityEntry, b: ModelCapabilityEntry): boolean {
+  return (
+    a.tool_call === b.tool_call &&
+    a.reasoning === b.reasoning &&
+    a.attachment === b.attachment &&
+    a.structured_output === b.structured_output &&
+    a.temperature === b.temperature &&
+    a.modalities_input === b.modalities_input &&
+    a.modalities_output === b.modalities_output &&
+    a.knowledge_cutoff === b.knowledge_cutoff &&
+    a.release_date === b.release_date &&
+    a.last_updated === b.last_updated &&
+    a.status === b.status &&
+    a.family === b.family &&
+    a.open_weights === b.open_weights &&
+    a.limit_context === b.limit_context &&
+    a.limit_input === b.limit_input &&
+    a.limit_output === b.limit_output &&
+    a.interleaved_field === b.interleaved_field &&
+    JSON.stringify(a.reasoning_efforts ?? null) === JSON.stringify(b.reasoning_efforts ?? null)
+  );
+}
+
+/**
+ * Save synced capabilities to `model_capabilities` table.
+ *
+ * Diff-based: only rows that are new, semantically changed (last_synced is
+ * excluded from the comparison, so a refresh-only pass is a no-op), or removed
+ * from models.dev are written. The full replace this used to perform deleted
+ * and re-inserted the entire table (11k+ rows) on every boot and every 6h
+ * cycle, pinning the event loop and forcing a models_dev_tier rebuild for zero
+ * semantic change. The null-safe `WHERE ... IS NOT` predicate from
+ * upsertSyncedCapabilities is reused so stale rows are never counted as
+ * changes.
+ */
+export function saveModelsDevCapabilities(data: CapabilitiesByProvider): ModelsDevSaveResult {
   const db = getDbInstance();
   ensureCapabilitiesTable();
 
-  const del = db.prepare("DELETE FROM model_capabilities");
-  const insert = db.prepare(`
+  const upsert = db.prepare(`
     INSERT INTO model_capabilities (
       provider, model_id, tool_call, reasoning, attachment, structured_output,
       temperature, modalities_input, modalities_output, knowledge_cutoff,
       release_date, last_updated, status, family, open_weights,
       limit_context, limit_input, limit_output, interleaved_field, reasoning_efforts, last_synced
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ON CONFLICT(provider, model_id) DO UPDATE SET
+      tool_call=excluded.tool_call,
+      reasoning=excluded.reasoning,
+      attachment=excluded.attachment,
+      structured_output=excluded.structured_output,
+      temperature=excluded.temperature,
+      modalities_input=excluded.modalities_input,
+      modalities_output=excluded.modalities_output,
+      knowledge_cutoff=excluded.knowledge_cutoff,
+      release_date=excluded.release_date,
+      last_updated=excluded.last_updated,
+      status=excluded.status,
+      family=excluded.family,
+      open_weights=excluded.open_weights,
+      limit_context=excluded.limit_context,
+      limit_input=excluded.limit_input,
+      limit_output=excluded.limit_output,
+      interleaved_field=excluded.interleaved_field,
+      reasoning_efforts=excluded.reasoning_efforts,
+      last_synced=excluded.last_synced
+    WHERE (
+      model_capabilities.tool_call, model_capabilities.reasoning,
+      model_capabilities.attachment, model_capabilities.structured_output,
+      model_capabilities.temperature, model_capabilities.modalities_input,
+      model_capabilities.modalities_output, model_capabilities.knowledge_cutoff,
+      model_capabilities.release_date, model_capabilities.last_updated,
+      model_capabilities.status, model_capabilities.family, model_capabilities.open_weights,
+      model_capabilities.limit_context, model_capabilities.limit_input,
+      model_capabilities.limit_output, model_capabilities.interleaved_field,
+      model_capabilities.reasoning_efforts
+    ) IS NOT (
+      excluded.tool_call, excluded.reasoning, excluded.attachment, excluded.structured_output,
+      excluded.temperature, excluded.modalities_input, excluded.modalities_output,
+      excluded.knowledge_cutoff, excluded.release_date, excluded.last_updated,
+      excluded.status, excluded.family, excluded.open_weights,
+      excluded.limit_context, excluded.limit_input, excluded.limit_output,
+      excluded.interleaved_field, excluded.reasoning_efforts
+    )
   `);
+  const del = db.prepare("DELETE FROM model_capabilities WHERE provider = ? AND model_id = ?");
+
+  const target = new Map<string, { provider: string; modelId: string; cap: ModelCapabilityEntry }>();
+  for (const [provider, models] of Object.entries(data)) {
+    for (const [modelId, cap] of Object.entries(models)) {
+      target.set(`${provider}|${modelId}`, { provider, modelId, cap });
+    }
+  }
+
+  const existing = new Map<string, ModelCapabilityEntry>();
+  for (const row of db.prepare("SELECT * FROM model_capabilities").all() as Array<
+    Record<string, unknown>
+  >) {
+    const entry = mapCapabilityRecord(row);
+    existing.set(`${row.provider}|${row.model_id}`, entry);
+  }
 
   const now = new Date().toISOString();
-  let changed = false;
-  const tx = db.transaction(() => {
-    if (del.run().changes > 0) changed = true;
-    for (const [provider, models] of Object.entries(data)) {
-      for (const [modelId, cap] of Object.entries(models)) {
-        const info = insert.run(
-          provider,
-          modelId,
-          cap.tool_call === null ? null : cap.tool_call ? 1 : 0,
-          cap.reasoning === null ? null : cap.reasoning ? 1 : 0,
-          cap.attachment === null ? null : cap.attachment ? 1 : 0,
-          cap.structured_output === null ? null : cap.structured_output ? 1 : 0,
-          cap.temperature === null ? null : cap.temperature ? 1 : 0,
-          cap.modalities_input,
-          cap.modalities_output,
-          cap.knowledge_cutoff,
-          cap.release_date,
-          cap.last_updated,
-          cap.status,
-          cap.family,
-          cap.open_weights === null ? null : cap.open_weights ? 1 : 0,
-          cap.limit_context,
-          cap.limit_input,
-          cap.limit_output,
-          cap.interleaved_field,
-          cap.reasoning_efforts ? JSON.stringify(cap.reasoning_efforts) : null,
-          now
-        );
-        if (info.changes > 0) changed = true;
+  let added = 0;
+  let updated = 0;
+  let removed = 0;
+  db.transaction(() => {
+    for (const [pk, { provider, modelId, cap }] of target) {
+      const prev = existing.get(pk);
+      if (prev && capabilityEntriesEqual(prev, cap)) continue;
+      upsert.run(
+        provider,
+        modelId,
+        cap.tool_call === null ? null : cap.tool_call ? 1 : 0,
+        cap.reasoning === null ? null : cap.reasoning ? 1 : 0,
+        cap.attachment === null ? null : cap.attachment ? 1 : 0,
+        cap.structured_output === null ? null : cap.structured_output ? 1 : 0,
+        cap.temperature === null ? null : cap.temperature ? 1 : 0,
+        cap.modalities_input,
+        cap.modalities_output,
+        cap.knowledge_cutoff,
+        cap.release_date,
+        cap.last_updated,
+        cap.status,
+        cap.family,
+        cap.open_weights === null ? null : cap.open_weights ? 1 : 0,
+        cap.limit_context,
+        cap.limit_input,
+        cap.limit_output,
+        cap.interleaved_field,
+        cap.reasoning_efforts ? JSON.stringify(cap.reasoning_efforts) : null,
+        now
+      );
+      if (prev) updated += 1;
+      else added += 1;
+    }
+    for (const pk of existing.keys()) {
+      if (!target.has(pk)) {
+        const sep = pk.indexOf("|");
+        del.run(pk.slice(0, sep), pk.slice(sep + 1));
+        removed += 1;
       }
     }
-  });
-  tx();
-  backupDbFile("pre-write");
+  })();
+
+  const result: ModelsDevSaveResult = {
+    changed: added + updated + removed > 0,
+    added,
+    updated,
+    removed,
+  };
   cachedCapabilities = data;
   cachedCapabilitiesLoadedAll = true;
-  if (changed) invalidateDbCache("model-capabilities");
+  if (result.changed) {
+    backupDbFile("pre-write");
+    invalidateDbCache("model-capabilities");
+    _triggerTierRebuild("saveModelsDevCapabilities");
+  }
+  return result;
 }
 
 /**
@@ -770,11 +928,18 @@ export async function syncModelsDev(opts?: {
       }
 
       if (!dryRun) {
-        saveModelsDevPricing(pricing);
+        const pricingSave = saveModelsDevPricing(pricing);
         if (syncCapabilities) {
           ensureCapabilitiesTable();
-          saveModelsDevCapabilities(capabilities);
-          _triggerTierRebuild("syncModelsDev");
+          const capabilitiesSave = saveModelsDevCapabilities(capabilities);
+          // Only a semantic capability change can move a tier; a no-op sync
+          // must not re-derive the whole models_dev_tier table.
+          if (capabilitiesSave.changed) _triggerTierRebuild("syncModelsDev");
+          if (pricingSave.changed || capabilitiesSave.changed) {
+            console.log(
+              `[MODELS_DEV] diff write: pricing +${pricingSave.added}/~${pricingSave.updated}/-${pricingSave.removed}, capabilities +${capabilitiesSave.added}/~${capabilitiesSave.updated}/-${capabilitiesSave.removed}`
+            );
+          }
         }
         lastSyncTime = new Date().toISOString();
         lastSyncModelCount = modelCount;
