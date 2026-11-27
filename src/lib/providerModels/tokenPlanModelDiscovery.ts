@@ -2,24 +2,21 @@ import { z } from "zod";
 import { isDashscopeTextModelId } from "../../../open-sse/services/dashscopeTextModels.ts";
 import { resolveAlibabaProviderRegion } from "../../shared/constants/alibabaProviderRegions.ts";
 
-// Public model list used by the official Qwen Personal Token Plan pricing page.
+// Public model list used by the official Alibaba Token Plan pricing page.
 // This is a product catalog, not an account entitlement or quota check.
+// Only bailian-coding-plan uses this catalog: qwen-cloud-token-plan queries its
+// authenticated regional OpenAI-compatible `/compatible-mode/v1/models` endpoint (#21409).
 const MODEL_LIST_API = "zeldaEasy.bmp.bmpTokenPlanServcie.modelIdList";
 
 export function isTokenPlanCatalogProvider(provider: string): boolean {
-  return provider === "qwen-cloud-token-plan" || provider === "bailian-coding-plan";
+  return provider === "bailian-coding-plan";
 }
 
 export function buildTokenPlanCatalogRequest(provider: string, providerSpecificData?: unknown) {
   if (!isTokenPlanCatalogProvider(provider)) throw new Error("Unsupported Token Plan provider");
   const beijing = resolveAlibabaProviderRegion(provider, providerSpecificData) === "china-beijing";
-  const alibaba = provider === "bailian-coding-plan";
   // The regional public Qwen catalog also covers the Alibaba Personal Token Plan.
-  const host = beijing
-    ? "cs-data.qianwenai.com"
-    : alibaba
-      ? "bailian-singapore-cs.alibabacloud.com"
-      : "cs-data.qwencloud.com";
+  const host = beijing ? "cs-data.qianwenai.com" : "bailian-singapore-cs.alibabacloud.com";
   const action = beijing ? "BroadScopeAspnGateway" : "IntlBroadScopeAspnGateway";
   const query = new URLSearchParams({ action, product: "sfm_bailian", api: MODEL_LIST_API });
   const body = new URLSearchParams({
@@ -32,12 +29,8 @@ export function buildTokenPlanCatalogRequest(provider: string, providerSpecificD
       Data: {
         edition: "PERSONAL",
         cornerstoneParam: {
-          consoleSite: beijing ? "QIANWENAI" : alibaba ? "ALIYUN" : "QWENCLOUD",
-          domain: beijing
-            ? "www.qianwenai.com"
-            : alibaba
-              ? "modelstudio.console.alibabacloud.com"
-              : "www.qwencloud.com",
+          consoleSite: beijing ? "QIANWENAI" : "ALIYUN",
+          domain: beijing ? "www.qianwenai.com" : "modelstudio.console.alibabacloud.com",
           productCode: "p_efm",
           protocol: "V2",
           xsp_lang: beijing ? "zh-CN" : "en-US",
