@@ -156,7 +156,8 @@ export async function rejectUnauthorizedResolvedModels(opts: {
 /** Runtime options a combo dispatch passes so its targets keep the admitted context. */
 export function comboAuthorizationOptions(
   apiKeyInfo: ComboTargetKeyPolicyInfo | null | undefined,
-  requestedModelStr: string
+  requestedModelStr: string,
+  isVirtualAutoCombo?: boolean
 ): { authorizationContextModel: string; comboGrantsTargets: boolean } {
   return {
     // The preflight admits the originally requested combo or alias. Targets of
@@ -164,7 +165,11 @@ export function comboAuthorizationOptions(
     // checked against blockedModels unless the key names the combo.
     authorizationContextModel: requestedModelStr,
     // #14197: a stored combo named in allowedCombos grants its own targets.
-    comboGrantsTargets: isExplicitlyAllowedComboForKey(apiKeyInfo, requestedModelStr),
+    comboGrantsTargets: isExplicitlyAllowedComboForKey(
+      apiKeyInfo,
+      requestedModelStr,
+      isVirtualAutoCombo
+    ),
   };
 }
 
@@ -179,7 +184,7 @@ async function resolveGateApiKey(request: Request | null | undefined): Promise<s
     if (!request?.headers) return null;
     const enforced = await resolveEnforcedPolicyKey(request);
     // A scope that no longer resolves must not fall back to the self-loop bearer.
-    return enforced.selfLoopScope.rejection ? null : enforced.apiKey;
+    return enforced.rejection ? null : enforced.apiKey;
   } catch {
     return null;
   }
@@ -188,7 +193,9 @@ async function resolveGateApiKey(request: Request | null | undefined): Promise<s
 /** The blockedModels a granted target answers to: none when the key names the combo. */
 function grantedBlockedModels(apiKeyInfo: unknown, requestedModel: string): string[] | null {
   const info = apiKeyInfo as ComboTargetKeyPolicyInfo | null | undefined;
-  if (isComboNamedForKey(info, requestedModel)) return null;
+  // Only stored combos can grant targets. A legacy fuzzy match can select a
+  // stored combo whose name is also a recognized built-in request ID.
+  if (isComboNamedForKey(info, requestedModel, false)) return null;
   const blocked: unknown = info?.blockedModels;
   return Array.isArray(blocked) ? blocked.filter((p): p is string => typeof p === "string") : null;
 }

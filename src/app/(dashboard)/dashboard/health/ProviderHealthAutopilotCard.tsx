@@ -4,7 +4,10 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
-import { Card } from "@/shared/components";
+import IconChip from "@/shared/components/IconChip";
+
+import Badge from "@/shared/components/Badge";
+import Card from "@/shared/components/Card";
 import { getProviderDisplayName } from "@/lib/display/names";
 import { useProviderNodeMap, resolveProviderName } from "@/lib/display/useProviderNodeMap";
 import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
@@ -68,10 +71,10 @@ const STATUS_STYLES: Record<AutopilotReport["status"], string> = {
   critical: "bg-error/10 text-error border-error/20",
 };
 
-const SEVERITY_STYLES: Record<AutopilotIssue["severity"], string> = {
-  info: "bg-info/10 text-info border-info/20",
-  warning: "bg-warning/10 text-warning border-warning/20",
-  critical: "bg-error/10 text-error border-error/20",
+const SEVERITY_BADGE: Record<AutopilotIssue["severity"], "info" | "warning" | "error"> = {
+  info: "info",
+  warning: "warning",
+  critical: "error",
 };
 
 const SEVERITY_RANK: Record<AutopilotIssue["severity"], number> = {
@@ -184,15 +187,13 @@ function ProviderIssues({
       {orderedIssues.map((issue) => {
         const evidence = formatConnectionEvidence(issue, t);
         return (
-          <div key={issue.id} className="rounded-lg border border-border bg-surface p-3">
+          <Card.Section key={issue.id}>
             <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span
-                    className={`rounded-full border px-2 py-0.5 text-[11px] font-medium ${SEVERITY_STYLES[issue.severity]}`}
-                  >
+                  <Badge size="sm" variant={SEVERITY_BADGE[issue.severity]}>
                     {t(`severity.${issue.severity}`)}
-                  </span>
+                  </Badge>
                   <p className="text-sm font-medium text-text-main">
                     {issueText(issue, "title", t)}
                   </p>
@@ -222,7 +223,7 @@ function ProviderIssues({
                 </div>
               )}
             </div>
-          </div>
+          </Card.Section>
         );
       })}
     </div>
@@ -315,11 +316,13 @@ export default function ProviderHealthAutopilotCard() {
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div>
           <div className="flex items-center gap-3">
-            <div className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+            <IconChip tone="accent">
               <Icon name="health_and_safety" size={18} />
-            </div>
+            </IconChip>
             <div>
-              <h2 className="text-lg text-text-main">{t("title")}</h2>
+              <h2 className="ci-heading" data-size="lg">
+                {t("title")}
+              </h2>
               <p className="text-sm text-text-muted">{t("description")}</p>
             </div>
           </div>
@@ -333,27 +336,27 @@ export default function ProviderHealthAutopilotCard() {
         <div
           className={`rounded-xl border px-3 py-2 ${STATUS_STYLES[report?.status || "healthy"]}`}
         >
-          <p className="text-xs uppercase tracking-wide opacity-80">{t("status")}</p>
+          <p className="ci-eyebrow opacity-80 text-inherit">{t("status")}</p>
           <p className="text-lg font-semibold capitalize">
             {t(`state.${report?.status || "loading"}`)}
           </p>
         </div>
-        <div className="rounded-xl border border-border bg-bg-subtle px-3 py-2">
-          <p className="text-xs uppercase tracking-wide text-text-muted">{t("issues")}</p>
+        <Card.Section>
+          <p className="ci-eyebrow">{t("issues")}</p>
           <p className="text-lg font-semibold text-text-main">{report?.summary.issueCount ?? 0}</p>
-        </div>
-        <div className="rounded-xl border border-border bg-bg-subtle px-3 py-2">
-          <p className="text-xs uppercase tracking-wide text-text-muted">{t("actions")}</p>
+        </Card.Section>
+        <Card.Section>
+          <p className="ci-eyebrow">{t("actions")}</p>
           <p className="text-lg font-semibold text-text-main">
             {report?.summary.actionableCount ?? 0}
           </p>
-        </div>
-        <div className="rounded-xl border border-border bg-bg-subtle px-3 py-2">
-          <p className="text-xs uppercase tracking-wide text-text-muted">{t("connections")}</p>
+        </Card.Section>
+        <Card.Section>
+          <p className="ci-eyebrow">{t("connections")}</p>
           <p className="text-lg font-semibold text-text-main">
             {report?.summary.connectionCount ?? 0}
           </p>
-        </div>
+        </Card.Section>
       </div>
 
       {message && (
@@ -373,10 +376,7 @@ export default function ProviderHealthAutopilotCard() {
       ) : (
         <div className="mt-4 space-y-3">
           {topProviders.map((provider) => (
-            <div
-              key={provider.provider}
-              className="rounded-xl border border-border bg-bg-subtle p-4"
-            >
+            <Card.Section key={provider.provider}>
               <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
                 <div>
                   <h3 className="text-text-main">
@@ -392,17 +392,18 @@ export default function ProviderHealthAutopilotCard() {
                     })}
                   </p>
                 </div>
-                <span
-                  className={`w-fit rounded-full border px-2 py-1 text-xs font-medium ${
+                <Badge
+                  variant={
                     provider.state === "down"
-                      ? "border-error/20 bg-error/10 text-error"
+                      ? "error"
                       : provider.state === "degraded"
-                        ? "border-warning/20 bg-warning/10 text-warning"
-                        : "border-success/20 bg-success/10 text-success"
-                  }`}
+                        ? "warning"
+                        : "success"
+                  }
+                  className="w-fit"
                 >
                   {t(`providerState.${provider.state}`)}
-                </span>
+                </Badge>
               </div>
 
               <ProviderIssues
@@ -410,7 +411,7 @@ export default function ProviderHealthAutopilotCard() {
                 busyAction={busyAction}
                 onApply={applyAction}
               />
-            </div>
+            </Card.Section>
           ))}
         </div>
       )}

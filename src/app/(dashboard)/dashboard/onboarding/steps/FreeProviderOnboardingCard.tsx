@@ -119,7 +119,7 @@ export function FreeProviderOnboardingCard() {
                   href={provider.website}
                   target="_blank"
                   rel="noreferrer"
-                  className="mt-1 inline-block text-[11px] text-primary hover:underline"
+                  className="mt-1 inline-block text-2xs text-primary hover:underline"
                   onClick={(event) => event.stopPropagation()}
                 >
                   {t("reviewProviderSite")}

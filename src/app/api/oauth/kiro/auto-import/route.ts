@@ -14,7 +14,10 @@ import { syncToCloud } from "@/lib/cloudSync";
 import { getConsistentMachineId } from "@/shared/utils/machineId";
 import { KiroService } from "@/lib/oauth/services/kiro";
 import { findKiroConnectionByIdentity } from "@/lib/oauth/kiroConnectionIdentity";
-import { runWithProxyContext } from "@omniroute/open-sse/utils/proxyFetch.ts";
+import {
+  runWithProxyContext,
+  runCommittedWithProxyContext,
+} from "@omniroute/open-sse/utils/proxyFetch.ts";
 import {
   emailFromExternalIdpToken,
   isExternalIdpAuthMethod,
@@ -491,7 +494,7 @@ async function saveAndRespond(
         scope,
         region,
       };
-      const refreshed = await runWithProxyContext(proxy, () =>
+      const refreshed = await runCommittedWithProxyContext(proxy, () =>
         kiroService.refreshToken(result.refreshToken!, externalIdpPsd)
       );
       const email =
@@ -600,7 +603,7 @@ async function saveAndRespond(
     }
 
     // Refresh token to get a fresh access token and confirm it works
-    const refreshed = await runWithProxyContext(proxy, () =>
+    const refreshed = await runCommittedWithProxyContext(proxy, () =>
       kiroService.refreshToken(refreshToken, providerSpecificData)
     );
 

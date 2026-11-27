@@ -142,6 +142,39 @@ test("syncUiKeys adds, prunes and reports repo-relative paths; dryRun writes not
   }
 });
 
+test("syncUiKeys reports CLI key order drift and preserves localized values", async () => {
+  const dir = makeRoot(["zh-TW"]);
+  try {
+    const file = "bin/cli/locales/zh-TW.json";
+    const content = () => fs.readFileSync(path.join(dir, file), "utf8");
+    const translated = { common: { positiveIntegerRequired: "限制必須是正整數。", error: "錯誤" } };
+    writeJson(dir, "bin/cli/locales/en.json", {
+      common: { error: "Error", positiveIntegerRequired: "Limit must be a positive integer." },
+    });
+    writeJson(dir, file, translated);
+    const before = content();
+    const options = { root: dir, catalog: "cli", pruneExtra: true, log: quiet } as const;
+
+    const dry = await syncUiKeys({ ...options, dryRun: true });
+    assert.deepEqual(dry.changedFiles, [file]);
+    assert.equal(content(), before);
+
+    const applied = await syncUiKeys(options);
+    assert.deepEqual(applied.changedFiles, [file]);
+    assert.equal(applied.added + applied.pruned + applied.translated, 0);
+    const result = readJson(dir, file);
+    assert.deepEqual(result, translated);
+    assert.deepEqual(Object.keys(result.common), ["error", "positiveIntegerRequired"]);
+
+    const canonical = content();
+    const next = await syncUiKeys(options);
+    assert.deepEqual(next.changedFiles, []);
+    assert.equal(content(), canonical);
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test("syncUiKeys keeps the keys en.json dropped unless pruneExtra is set", async () => {
   const dir = makeRoot(["pt-BR"]);
   try {
@@ -284,6 +317,38 @@ test("a dashboard refresh that changed a catalog regenerates the compact global-
     assert.deepEqual(readJson(dir, "src/i18n/global-error-messages/pt-BR.json"), {
       publicSystem: { globalError: { title: "Erro", retry: "__MISSING__:Retry" } },
     });
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("a dashboard refresh that changed a catalog regenerates the route-handler catalog (#20439)", async () => {
+  const dir = makeRoot(["pt-BR", "es"]);
+  try {
+    const en = { auth: { traeAuthorizationSuccess: "Trae OK", returnToDashboard: "Back" } };
+    writeJson(dir, "src/i18n/messages/en.json", en);
+    writeJson(dir, "src/i18n/messages/pt-BR.json", {
+      auth: { traeAuthorizationSuccess: "Trae ok (pt)" },
+    });
+    writeJson(dir, "src/i18n/messages/es.json", {
+      auth: { traeAuthorizationSuccess: "Trae ok (es)", returnToDashboard: "Volver" },
+    });
+    const dry = await syncUiKeys({ root: dir, dryRun: true, log: quiet });
+    assert.deepEqual(dry.changedFiles, [
+      "src/i18n/messages/pt-BR.json",
+      "src/i18n/route-handler-messages.json",
+    ]);
+    assert.equal(fs.existsSync(path.join(dir, "src/i18n/route-handler-messages.json")), false);
+    const res = await syncUiKeys({ root: dir, log: quiet });
+    assert.deepEqual(res.changedFiles, dry.changedFiles);
+    // The `__MISSING__:` marker the sync wrote for pt-BR stays out: English wins at runtime.
+    assert.deepEqual(readJson(dir, "src/i18n/route-handler-messages.json"), {
+      en: { auth: { traeAuthorizationSuccess: "Trae OK", returnToDashboard: "Back" } },
+      "pt-BR": { auth: { traeAuthorizationSuccess: "Trae ok (pt)" } },
+      es: { auth: { traeAuthorizationSuccess: "Trae ok (es)", returnToDashboard: "Volver" } },
+    });
+    const again = await syncUiKeys({ root: dir, log: quiet });
+    assert.deepEqual(again.changedFiles, []);
   } finally {
     fs.rmSync(dir, { recursive: true, force: true });
   }

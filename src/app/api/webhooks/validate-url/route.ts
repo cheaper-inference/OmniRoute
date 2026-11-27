@@ -9,9 +9,10 @@ import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 import { OutboundUrlGuardError } from "@/shared/network/outboundUrlGuard";
 import { parseAndValidateWebhookUrl } from "@/shared/network/outboundUrlGuardPolicy";
 import { validateBody, isValidationFailure } from "@/shared/validation/helpers";
+import { WEBHOOK_URL_MAX_LENGTH } from "@/shared/constants/formLimits";
 
 const validateUrlSchema = z.object({
-  url: z.string().min(1).max(2000),
+  url: z.string().min(1).max(WEBHOOK_URL_MAX_LENGTH),
 });
 
 export async function POST(request: Request) {
@@ -36,7 +37,9 @@ export async function POST(request: Request) {
     parseAndValidateWebhookUrl(url);
     return NextResponse.json({ valid: true });
   } catch (err) {
-    if (err instanceof OutboundUrlGuardError) {
+    // The guard also throws for text that is not an http(s) URL at all (OUTBOUND_URL_INVALID):
+    // that is "invalid", not "a blocked private address".
+    if (err instanceof OutboundUrlGuardError && err.code !== "OUTBOUND_URL_INVALID") {
       return NextResponse.json({ valid: false, reason: "blocked_private" });
     }
     return NextResponse.json({ valid: false, reason: "invalid_url" });

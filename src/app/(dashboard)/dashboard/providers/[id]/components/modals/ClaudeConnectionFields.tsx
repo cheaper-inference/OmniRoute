@@ -1,5 +1,6 @@
 "use client";
 
+import Card from "@/shared/components/Card";
 import { useTranslations } from "next-intl";
 import { Toggle } from "@/shared/components";
 
@@ -23,7 +24,7 @@ export default function ClaudeConnectionFields(props: ClaudeConnectionFieldsProp
   const t = useTranslations("providers");
 
   return (
-    <div className="flex flex-col gap-4 rounded-lg border border-border bg-bg-subtle p-4">
+    <Card.Section className="flex flex-col gap-4">
       <Toggle
         checked={props.values.blockExtraUsage}
         onChange={(checked) => props.onChange({ blockExtraUsage: checked })}
@@ -46,6 +47,6 @@ export default function ClaudeConnectionFields(props: ClaudeConnectionFieldsProp
           />
         </>
       )}
-    </div>
+    </Card.Section>
   );
 }

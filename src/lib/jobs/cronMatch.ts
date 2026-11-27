@@ -4,7 +4,7 @@
  *
  * No cron/scheduling library exists anywhere in this codebase (checked
  * package.json + node_modules) and the established pattern for periodic
- * work (`src/lib/jobs/budgetResetJob.ts`, `reasoningCacheCleanupJob.ts`) is
+ * work (`src/lib/jobs/budgetResetJob.ts`, the reasoning-cache auto-cleanup) is
  * a plain `setInterval` tick, not a scheduler. This keeps that pattern:
  * `matchesCron` only answers "is `date` inside the window this expression
  * describes", the caller (a `setInterval` tick) decides when to ask.

@@ -1,5 +1,9 @@
 import { CREDITS_EXHAUSTED_SIGNALS } from "./creditExhaustionSignals.ts";
 import { isCreditsExhaustedWithSharedWallet } from "./sharedWalletCredits.ts";
+import {
+  isAnthropicAccountCreditExhausted,
+  isAnthropicCreditProvider,
+} from "./anthropicAccountCredit.ts";
 
 // A 400 is the status upstreams use to reject the CALLER's input, and many of
 // them quote that input back in error.message ("Unknown parameter: '<x>'",
@@ -61,6 +65,28 @@ function hasCreditErrorCode(text: string, structured: unknown): boolean {
 }
 
 /**
+ * Whether a quota/credit TEXT signal found in an upstream error may count at this
+ * status. Every status except 400 keeps the plain text match; on 400 the signal
+ * counts only with a structured credit code or for an allow-listed provider (see
+ * the header). Shared by the credit check below and the subscription/plan quota
+ * text checks in quotaTextCooldowns.ts.
+ */
+export function quotaTextSignalCountsForStatus(
+  status: number,
+  provider: string | null | undefined,
+  errorText: string,
+  structured?: unknown
+): boolean {
+  if (status !== 400) return true;
+  const text = String(errorText || "");
+  return (
+    allowsMessageOnlyCredit400(provider) ||
+    hasCreditErrorCode(text, structured) ||
+    (isAnthropicCreditProvider(provider) && isAnthropicAccountCreditExhausted(text))
+  );
+}
+
+/**
  * Status-aware credit exhaustion check shared by the classifier, the fallback
  * engine and terminal-status resolution. `structured` is what the caller holds
  * apart from the text: the upstream's error code, or its parsed error body.
@@ -73,6 +99,5 @@ export function isCreditsExhaustedForStatus(
 ): boolean {
   const text = String(errorText || "");
   if (!isCreditsExhaustedWithSharedWallet(text, CREDITS_EXHAUSTED_SIGNALS)) return false;
-  if (status !== 400) return true;
-  return allowsMessageOnlyCredit400(provider) || hasCreditErrorCode(text, structured);
+  return quotaTextSignalCountsForStatus(status, provider, text, structured);
 }

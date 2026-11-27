@@ -4,7 +4,7 @@
 
 ---
 
-## விரைவான தொடக்கம்
+## விரைவு தொடக்கம்
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";
@@ -29,32 +29,32 @@ export default definePlugin({
 
 ### `definePlugin(def: PluginDefinition): Plugin`
 
-இயல்புநிலை மதிப்புகளுடன் ஒரு Plugin பொருளை உருவாக்கும் factory function.
+இயல்புநிலையுடன் ஒரு செருகுநிரல் பொருளை உருவாக்கும் தொழிற்சாலை செயல்பாடு.
 
 **அளவுருக்கள்:**
 
-- `name` (string, கட்டாயம்) — kebab-case வடிவிலான Plugin பெயர்
-- `priority` (number, விருப்பத்தேர்வு, இயல்புநிலை: 100) — குறைந்த மதிப்புடையது முதலில் இயங்கும்
-- `enabled` (boolean, விருப்பத்தேர்வு, இயல்புநிலை: true) — இயக்கப்பட்ட நிலையில் தொடங்க வேண்டுமா?
-- `onRequest` (function, விருப்பத்தேர்வு) — chat handler-க்கு முன் இயங்கும்
-- `onResponse` (function, விருப்பத்தேர்வு) — chat handler-க்குப் பிறகு இயங்கும்
-- `onError` (function, விருப்பத்தேர்வு) — handler பிழை ஏற்படும்போது இயங்கும்
+- `name` (சரம், தேவை) — kebab-case இல் செருகுநிரல் பெயர்
+- `priority` (எண், விருப்பமானது, இயல்புநிலை: 100) — லோயர் முதலில் இயங்கும்
+- `enabled` (பூலியன், விருப்பமானது, இயல்புநிலை: உண்மை) — தொடக்கம் இயக்கப்பட்டதா?
+- `onRequest` (செயல்பாடு, விருப்பமானது) — அரட்டை கையாளுபவருக்கு முன் இயங்கும்
+- `onResponse` (செயல்பாடு, விருப்பத்தேர்வு) — அரட்டை ஹேண்ட்லருக்குப் பிறகு இயங்கும்
+- `onError` (செயல்பாடு, விருப்பமானது) — ஹேண்ட்லர் பிழையில் இயங்குகிறது
 
 ### `blockRequest(response?): BlockingHookResult`
 
-கோரிக்கையைத் தடுத்து, விருப்பப்பட்டால் தனிப்பயன் பதிலை வழங்கும்.
+கோரிக்கையைத் தடுத்து, விருப்பமான பதிலை வழங்கவும்.
 
 ```ts
 onRequest: (ctx) => {
-  if (!ctx.headers["authorization"]) {
-    return blockRequest({ error: "Unauthorized", status: 401 });
+  if (!ctx.headers?.["x-client-team"]) {
+    return blockRequest({ error: "Missing x-client-team header", status: 400 });
   }
 };
 ```
 
 ### `modifyBody(body): PluginResult`
 
-கோரிக்கை provider-ஐ அடைவதற்கு முன் அதன் body-ஐ மாற்றும்.
+வழங்குநரை அடையும் முன் கோரிக்கை அமைப்பை மாற்றவும்.
 
 ```ts
 onRequest: (ctx) => {
@@ -64,7 +64,7 @@ onRequest: (ctx) => {
 
 ### `addMetadata(metadata): PluginResult`
 
-கோரிக்கை context-உடன் metadata-வை இணைக்கும்.
+கோரிக்கை சூழலில் மெட்டாடேட்டாவை இணைக்கவும்.
 
 ```ts
 onRequest: (ctx) => {
@@ -72,17 +72,20 @@ onRequest: (ctx) => {
 };
 ```
 
-## Plugin Context (`PluginContext`)
+## செருகுநிரல் சூழல் (`PluginContext`)
 
-| புலம்       | வகை                       | விளக்கம்                            |
-| ----------- | ------------------------- | ----------------------------------- |
-| `requestId` | `string`                  | தனித்துவமான கோரிக்கை அடையாளங்காட்டி |
-| `model`     | `string`                  | கோரப்பட்ட model பெயர்               |
-| `provider`  | `string`                  | இலக்கு provider ID                  |
-| `body`      | `Record<string, unknown>` | கோரிக்கையின் body                   |
-| `headers`   | `Record<string, string>`  | கோரிக்கையின் headers                |
-| `metadata`  | `Record<string, unknown>` | மாற்றக்கூடிய metadata               |
-| `timestamp` | `number`                  | கோரிக்கையின் timestamp              |
+| களம்         | வகை                       | விளக்கம்                                          |
+| ------------ | ------------------------- | ------------------------------------------------- |
+| `requestId`  | `string`                  | தனிப்பட்ட கோரிக்கை அடையாளங்காட்டி                 |
+| `model`      | `string`                  | மாடல் பெயர் கோரப்பட்டது                           |
+| `provider`   | `string`                  | இலக்கு வழங்குநர் ID                               |
+| `body`       | `Record<string, unknown>` | கோரிக்கை உடல்                                     |
+| `headers`    | `Record<string, string>`  | கோரிக்கை தலைப்புகள் (குறிப்பைப் பார்க்கவும்)      |
+| `metadata`   | `Record<string, unknown>` | மாறக்கூடிய மெட்டாடேட்டா                           |
+| `timestamp`  | `number`                  | நேர முத்திரையைக் கோரவும்                          |
+| `apiKeyInfo` | `object` (விரும்பினால்)   | API முக்கிய மெட்டாடேட்டா (குறிப்பைப் பார்க்கவும்) |
+
+சூழல் கிளையண்டின் நற்சான்றிதழ்களைக் கொண்டிருக்காது: `authorization`, `x-api-key`, `proxy-authorization` மற்றும் `cookie` தலைப்புகள் அகற்றப்படும் (ஏதேனும் உறை), மேலும் `apiKeyInfo` விசையின் மெட்டாடேட்டாவை ( `id`, `name` மற்றும் `scopes` போன்றவை) வைத்திருக்கும், ஆனால் முக்கிய மதிப்பு அல்லது அதன் கைரேகை (`redactPluginContext()` `src/lib/plugins/hooks.ts`) இல் இல்லை. இது `onRequest`, `onResponse` மற்றும் `onError` க்கு பொருந்தும்.
 
 ## Manifest (`plugin.json`)
 
@@ -140,17 +143,16 @@ Hooks-ஐ முன்னுரிமையுடன் உள்ளமைக்
 
 ## அனுமதி அமைப்பு
 
-செருகுநிரல்கள் தனிமைப்படுத்தப்பட்ட VM சூழலில் இயங்குகின்றன. வெளிப்புற வளங்களை அணுகுவதற்கு வெளிப்படையான அனுமதிகள் தேவை:
+செருகுநிரல்கள் ஆகும்** சாண்ட்பாக்ஸ் இல்லை** . ஒவ்வொரு செயலில் உள்ள செருகுநிரலும், VM சூழல் மற்றும் Node.js அனுமதிக் கொடிகள் இல்லாமல், OmniRoute போன்ற அதே இயக்க முறைமை பயனரின் கீழ் ஒரு தனி, சாதாரண Node.js குழந்தை செயல்முறையாக ( `src/lib/plugins/loader.ts` இல்`loadPlugin()` ) இயங்குகிறது. செருகுநிரல் குறியீடு `node:fs`, `node:child_process`, `fetch` மற்றும் மற்ற எல்லா Node.js API பயன்படுத்தலாம்: இது OmniRoute பயனரால் (தரவு அடைவு உட்பட) எந்த கோப்பையும் படிக்கவும் எழுதவும் முடியும், நிரல்களை இயக்கவும் மற்றும் பிணையத்தை அடையவும் முடியும்.
 
-| அனுமதி       | வழங்கப்படும் அணுகல்கள்                                       |
-| ------------ | ------------------------------------------------------------ |
-| `network`    | `fetch`, `AbortController`, `Headers`, `Request`, `Response` |
-| `file-read`  | `fs.readFile`, `fs.readdir`, `fs.stat`                       |
-| `file-write` | `fs.writeFile`, `fs.mkdir`, `fs.rm`                          |
-| `env`        | படிக்க மட்டும் இயலும் `process.env` ப்ராக்ஸி                 |
-| `exec`       | `child_process.exec`, `child_process.execSync`               |
+மேனிஃபெஸ்ட்டின் `requires.permissions` `network`, `file-read`, `file-write`, `env` மற்றும் `exec` ஐ ஏற்றுக்கொள்கிறது, ஆனால் இன்று `env` மட்டுமே இயக்க நேரத்தில் விளைவைக் கொண்டிருக்கிறது:
 
-அனுமதி இல்லையெனில், அதனுடன் தொடர்புடைய குளோபல்ஸ் sandbox-இல் கிடைக்காது.
+| அனுமதி                                       | இன்று விளைவு                                                                                                                                                                                                                                                                     |
+| -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `env`                                        | செருகுநிரல் செயல்முறை `PORT`, `HOSTNAME`, `TZ` மற்றும் `TMPDIR` ஆகியவற்றையும் பெறுகிறது. அது இல்லாமல், அது `PATH`, `HOME`, `USER`, `LANG`, `LC_ALL`, `NODE_ENV`, `PLUGIN_ENTRY` மற்றும் `PLUGIN_NAME` ( Windows இல் `SystemRoot` மற்றும் `windir` ) ஆகியவற்றை மட்டுமே பெறுகிறது. |
+| `network`, `file-read`, `file-write`, `exec` | இல்லை. அவை அறிவிப்புகள் மட்டுமே: அவை காணாமல் போகும் போது எதுவும் தடுக்கப்படவில்லை.                                                                                                                                                                                               |
+
+ஒரு செருகுநிரலை நிறுவுவது ஹோஸ்டில் வேறு எந்த நிரலையும் நிறுவுவது போன்றது. நீங்கள் நம்பும் செருகுநிரல்களை மட்டும் நிறுவவும்.
 
 ## கட்டமைப்பு ஸ்கீமா
 
@@ -194,7 +196,7 @@ Hooks-ஐ முன்னுரிமையுடன் உள்ளமைக்
 
 ## எடுத்துக்காட்டுகள்
 
-### கோரிக்கை பதிவி
+### லாகர் கோரிக்கை
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";
@@ -207,7 +209,7 @@ export default definePlugin({
 });
 ```
 
-### விகிதக் கட்டுப்படுத்தி
+### விகித வரம்பு
 
 ```ts
 import { definePlugin, blockRequest } from "omniroute/plugins/sdk";
@@ -218,9 +220,9 @@ export default definePlugin({
   name: "rate-limiter",
   priority: 10,
   onRequest: async (ctx) => {
-    const key = ctx.headers["x-api-key"] || "anonymous";
+    const key = ctx.apiKeyInfo?.id || "anonymous";
     const now = Date.now();
-    const window = 60000; // 1 நிமிடம்
+    const window = 60000; // 1 minute
     const maxRequests = 100;
 
     const timestamps = (requests.get(key) || []).filter((t) => t > now - window);
@@ -234,7 +236,7 @@ export default definePlugin({
 });
 ```
 
-### பதில் மாற்றி
+### பதில் மின்மாற்றி
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";

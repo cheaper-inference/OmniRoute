@@ -208,6 +208,9 @@ export const PACK_ARTIFACT_ROOT_ALLOWED_EXACT_PATHS: string[] = [
   // Imported by scripts/build/postinstall.mjs to pick the better-sqlite3 prebuild target.
   "scripts/build/betterSqlitePrebuildTarget.mjs",
   "scripts/build/postinstallSupport.mjs",
+  // #20998 / #21001: imported by scripts/build/postinstall.mjs to plan the locked
+  // better-sqlite3 rebuild (install layout resolution + local-only npm env).
+  "scripts/build/sqliteRebuildPlan.mjs",
   "scripts/build/colocateOptionals.mjs",
   // #8859: imported by scripts/build/postinstall.mjs to repair playwright-core's
   // browser resolution on Termux/Android (no glibc, no bundled browsers).
@@ -321,6 +324,9 @@ export const PACK_ARTIFACT_REQUIRED_PATHS: string[] = [
   "scripts/build/native-binary-compat.mjs",
   "scripts/build/postinstall.mjs",
   "scripts/build/postinstallSupport.mjs",
+  // #20998 / #21001: postinstall.mjs imports this at module scope — its absence
+  // from the tarball breaks every published install with ERR_MODULE_NOT_FOUND.
+  "scripts/build/sqliteRebuildPlan.mjs",
   "scripts/build/colocateOptionals.mjs",
   "scripts/build/runtime-env.mjs",
   "scripts/build/wreqJsNative.mjs",
@@ -458,5 +464,34 @@ export function findMissingArtifactPaths(
     .map(normalizeArtifactPath)
     .filter(Boolean)
     .filter((requiredPath) => !normalizedPaths.has(requiredPath))
+    .sort();
+}
+
+/**
+ * #20439: Turbopack names the server chunk of each full locale catalog
+ * (src/i18n/messages/<locale>.json) `src_i18n_messages_<locale>_json_[json]_cjs_<hash>._.js`.
+ * One per locale belongs to the page renderers (`server/chunks/ssr/`). npm 3.8.54 shipped a
+ * second copy of all 67 under `server/chunks/` (~79 MB unpacked) because the /authorize route
+ * handler — compiled in its own chunking context — reached src/i18n/request.ts through
+ * next-intl/server. Route handlers now translate through src/i18n/routeHandlerTranslations.ts;
+ * this returns every catalog chunk of a locale that has more than one, so check:pack-artifact
+ * fails if any server context starts bundling the catalogs again.
+ */
+const LOCALE_CATALOG_CHUNK = /(?:^|\/)src_i18n_messages_(.+?)_json_\[json\]_cjs_[^/]*\.js$/;
+
+export function localeCatalogChunkLocale(filePath: string): string | null {
+  return LOCALE_CATALOG_CHUNK.exec(normalizeArtifactPath(filePath))?.[1] ?? null;
+}
+
+export function findDuplicatedLocaleCatalogChunks(filePaths: string[]): string[] {
+  const byLocale = new Map<string, string[]>();
+  for (const filePath of filePaths.map(normalizeArtifactPath)) {
+    const locale = localeCatalogChunkLocale(filePath);
+    if (!locale) continue;
+    byLocale.set(locale, [...(byLocale.get(locale) ?? []), filePath]);
+  }
+  return [...byLocale.values()]
+    .filter((paths) => paths.length > 1)
+    .flat()
     .sort();
 }

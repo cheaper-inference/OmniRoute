@@ -7,7 +7,7 @@ export const uncloseaiProvider: RegistryEntry = {
   executor: "default",
   baseUrl: "https://hermes.ai.unturf.com/v1/chat/completions",
   modelsUrl: "https://hermes.ai.unturf.com/v1/models",
-  authType: "optional",
+  authType: "apikey",
   authHeader: "bearer",
   toolCalling: "emulated",
   // The roster rotates every few weeks (see the models[] comment below), so the
@@ -28,7 +28,7 @@ export const uncloseaiProvider: RegistryEntry = {
     // max_model_len 65536).
     {
       id: "turboderp/Qwen3.8-27B-exl3",
-      name: "Qwen3.8 27B exl3 (🆓 Free)",
+      name: "Qwen3.8 27B exl3",
       contextLength: 65536,
     },
   ],

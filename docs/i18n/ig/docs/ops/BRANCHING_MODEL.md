@@ -42,25 +42,23 @@ flowchart LR
 `main` abụghị alaka njikọta a na-eji kwa ụbọchị. PR ndị e mepere megide `main`
 na-achọkarị ka a gbanwee alaka ha lekwasịrị anya tupu njikọta.
 
-## Mkpọchi mwepụta (okirikiri ndị na-aga n’otu oge)
+## Hapụ ifriizi (usoro okirikiri yiri ya)
 
-Mgbe a na-eme ka mwepụta kwekọọ, a na-emepe marker issue nwere label `release-freeze`.
-Nke ahụ **anaghị akwụsị mmepe**:
+Mgbe a na-emekọrịta ntọhapụ, a na-emepe ihe nrịbama akpọrọ `release-freeze`. Nke ahụ** anaghị akwụsị mmepe** :
 
-- `release/vX.Y.Z` e kpọnwụrụ akpọnwụ bụ nke release captain maka mwepụta ahụ.
-- A na-ekewapụ `release/vX+1` nke okirikiri na-esote site na tip e kpọnwụrụ akpọnwụ ka ndị na-atụnye ụtụ nwee ike ịga n’ihu
-  na-etinye ọrụ.
-- PR ndị ka mepere emepe nke ka na-atụkwasị anya n’alaka e kpọnwụrụ akpọnwụ kwesịrị ka **a gbanwee ebe ha lekwasịrị anya** gaa na
-  alaka `release/v*` na-arụ ọrụ (nke kacha elu).
+- `release/vX.Y.Z` oyi kpọnwụrụ bụ nke onye isi ụgbọ mmiri a tọhapụrụ maka ụgbọ mmiri ahụ.
+- A na-ebipụ `release/vX+1` okirikiri na-esote site n'ọnụ oyi kpọnwụrụ ka ndị enyemaka na-aga n'ihu na-arụ ọrụ ọdịda.
+- Mepee PRs nke ka lekwasịrị anya alaka oyi kpọnwụrụ kwesịrị ịbụ** atụgharịghachi azụ** gaa na ngalaba `release/v*` na-arụ ọrụ (kachasị elu).
 
-Lelee ma enwere mkpọchi mepere emepe tupu i chee na a pụrụ ijikọ alaka ịchọrọ:
+Lelee maka friji mepere emepe tupu ị were na alaka ụlọ ọrụ ịchọrọ na-ejikọta:
 
 ```bash
 gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
 ```
 
-E dekọrọ usoro njikọta (label `queue` nke onye nwe ya → Mergify) na
-[MERGE_TRAIN.md](./MERGE_TRAIN.md).
+Ngwakọta igwe (onye nwe `queue` label → Mergify) ka edekọtara na [MERGE_TRAIN.md](./MERGE_TRAIN.md).
+
+> **2026-11-19: kwụ n'ahịrị Mergify agwụla** (mkpebi onye nwe). `.mergify.yml` anaghị akọwapụta kwụ n'ahịrị wee jụ iwu Mergify nke jikọtara ma ọ bụ degharịa arịrịọ ịdọrọ. A na-ejikọta ntọhapụ PRs na aka n'okpuru iwu nchekwa nchekwa "Chọọ ọnụ ụzọ ndụ akwụkwọ ndụ na ntọhapụ na-arụ ọrụ" (`Gate / CI` + `Gate / Quality`) ruo mgbe omni-queue na-agba ọsọ na ọnọdụ ndụ, na site na omni-queue mgbe nke ahụ gasịrị ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Ihe akara `queue` anaghị ejikọta ihe ọ bụla.
 
 ## Gịnị mere e ji nwee ma alaka ma mkpado?
 

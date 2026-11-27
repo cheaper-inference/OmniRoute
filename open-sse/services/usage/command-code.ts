@@ -31,6 +31,34 @@ const PLAN_LABELS: Record<string, string> = {
   "team-pro": "Command Code · Team Pro",
 };
 
+/** Short plan ids the /alpha/billing endpoints can report, mapped to their
+ * canonical individual- or team- plan ids. */
+const PLAN_ID_ALIASES: Record<string, string> = {
+  go: "individual-go",
+  "go-v1": "individual-go-v1",
+  goat: "individual-goat",
+  pro: "individual-pro",
+  "pro-v1": "individual-pro-v1",
+  provider: "individual-provider",
+  max: "individual-max",
+  ultra: "individual-ultra",
+  "teams-pro": "team-pro",
+};
+
+/** Fixed monthly credit caps per canonical plan id. When the cap is known the
+ * credits pool total IS the cap and used follows from remaining: the usage
+ * summary spend only covers part of the window. */
+const PLAN_CREDIT_CAPS: Record<string, number> = {
+  "individual-go": 10,
+  "individual-goat": 70,
+  "individual-pro": 30,
+  "individual-pro-v1": 80,
+  "individual-provider": 15,
+  "individual-max": 150,
+  "individual-ultra": 300,
+  "team-pro": 40,
+};
+
 function withCurrency(quota: UsageQuota, displayName: string): UsageQuota {
   return {
     ...quota,
@@ -193,6 +221,8 @@ export async function getCommandCodeUsage(apiKey: string, connectionId?: string)
       // summary enrichment is soft-fail
     }
 
+    const canonicalPlanId = (planId && PLAN_ID_ALIASES[planId]) || planId;
+    const creditCap = canonicalPlanId != null ? PLAN_CREDIT_CAPS[canonicalPlanId] : undefined;
     const quotas: Record<string, UsageQuota> = {};
 
     const fiveHour = windowQuota(windowLimits.fiveHour, "5-hour window");
@@ -201,7 +231,17 @@ export async function getCommandCodeUsage(apiKey: string, connectionId?: string)
     const weekly = windowQuota(windowLimits.weekly, "Weekly window");
     if (weekly) quotas.weekly = weekly;
 
-    const creditsTotal = periodUsed + remaining;
+    // The cap bounds the monthly allowance only. Purchased/free credits are a
+    // separate pool: they never shrink the monthly usage (cap - monthly), but
+    // they stay spendable, so they extend the total next to `remaining`.
+    const monthlyRemaining = Math.max(0, toNumber(creditsObj.monthlyCredits, 0));
+    const extraRemaining = remaining - monthlyRemaining;
+    const creditsTotal =
+      creditCap != null
+        ? Math.max(creditCap, monthlyRemaining) + extraRemaining
+        : periodUsed + remaining;
+    const creditsUsed =
+      creditCap != null ? Math.max(0, creditCap - monthlyRemaining) : Math.max(0, periodUsed);
     const creditsRemainingPct =
       creditsTotal > 0
         ? Math.round((remaining / creditsTotal) * 1000) / 10
@@ -209,7 +249,7 @@ export async function getCommandCodeUsage(apiKey: string, connectionId?: string)
           ? 100
           : 0;
     quotas.credits = {
-      used: Math.max(0, periodUsed),
+      used: creditsUsed,
       total: Math.max(0, creditsTotal),
       remaining,
       remainingPercentage: creditsRemainingPct,
@@ -224,7 +264,7 @@ export async function getCommandCodeUsage(apiKey: string, connectionId?: string)
     };
 
     return {
-      plan: humanizePlanId(planId),
+      plan: humanizePlanId(canonicalPlanId),
       quotas,
       windowExceeded: typeof windowLimits.exceeded === "string" ? windowLimits.exceeded : null,
       limited: windowLimits.limited === true,

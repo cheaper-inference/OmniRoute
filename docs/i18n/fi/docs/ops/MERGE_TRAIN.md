@@ -4,9 +4,9 @@
 
 ---
 
-Versiosta v3.8.49 lähtien (laatu-/nopeussuunnitelman WS3.2/WS3.4) katselmoitujen PR:ien oletusyhdistämispolku haaraan `release/vX.Y.Z` on **Mergifyn yhdistämisjono** (`.mergify.yml`);
-alla kuvattu **manuaalinen yhdistämisjuna** on VARAJÄRJESTELY — sitä käytetään häiriötilanteissa,
-julkaisujäädytysten aikana tai jos Mergifyn Open Source -paketti joskus muuttuu.
+> **19.11.2026: Mergify-yhdistämisjono on poistettu käytöstä** (omistajan päätös). `.mergify.yml` ei enää määritä jonoa ja hylkää yhdistämiskomennot, jotka yhdistävät tai kirjoittavat uudelleen vetopyynnön. Julkaisut PRs yhdistetään käsin arkiston sääntöjoukon "Vaadi vihreät portit aktiivisessa julkaisussa" (`Gate / CI` + `Gate / Quality`) mukaisesti, kunnes omni-queue toimii live-tilassa, ja omni-jonon kautta sen jälkeen ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Alla olevat Yhdistä-osiot kuvaavat jonoa sellaisena kuin se oli.
+
+Koska versio 3.8.49 ( quality/velocity -suunnitelman WS3.2/WS3.4 ), oletusarvoinen yhdistämispolku tarkistetulle PRs :lle `release/vX.Y.Z` :hen on** Yhdistä yhdistämisjono** (`.mergify.yml`); the** manuaalinen yhdistämisjuna** alla on dokumentoitu FALLBACK — jota käytetään tapahtumien, julkaisujen jäätymisen tai yhdistämissuunnitelman muuttuessa.
 
 ## Oletuspolku: Mergify-jono
 

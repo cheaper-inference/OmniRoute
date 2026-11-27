@@ -147,37 +147,22 @@ boşta olma denetimiyle yeniden başlatmayı aynı komutta gerçekleştirerek,
   artefaktının tmpfs üzerine yazılması 27–32 dakika, diskten yüklenmesi ise 2 dakika sürdü.
 - `.15` VPS yalnızca homologasyon içindir — üzerinde hiçbir zaman CI çalıştırıcısı çalışmaz.
 
-## Barındırılan hat (GitHub tarafından barındırılan çalıştırıcılar)
+## Barındırılan şerit (GitHub tarafından barındırılan koşucular)
 
-Depo, **Team** planındaki `cheaper-inference` kuruluşuna aittir: **eşzamanlı 60 barındırılan iş**; bu kapasite kuruluştaki tüm depolar, tüm PR kontrolleri, her push ile tetiklenen iş akışı ve CodeQL'in varsayılan kurulumu tarafından paylaşılır. Aşağıdaki rakamlar **Pro** planında (eşzamanlı 40 barındırılan iş) ölçülmüştür.
-2026-10-18 tarihinde, birleştirme kampanyası sırasında (`release/v3.8.52` üzerinde saatte
-~10 birleştirme) ölçülen değerler: **24 saatte oluşturulan 2.500 iş akışı çalıştırması**,
-6 saatte dala 44 push ve PR kontrolleri saatlerce beklerken **kuyruğa alınan 106 barındırılan
-iş**; PR'ler bu kontroller olmadan birleştirildi. Dala yapılan her push'ta dokuz iş akışı
-tetiklendi:
+Depo `cheaper-inference` organizasyonuna aittir.** Takım** planı:** 60 eşzamanlı barındırılan iş** , kuruluştaki her depo, her PR kontrolü, push ile tetiklenen her iş akışı ve CodeQL varsayılan kurulumu tarafından paylaşılır. Aşağıdaki rakamlar,** Profesyonel** plan (40 eşzamanlı barındırılan iş). Birleştirme kampanyası sırasında 18-10-2026 tarihinde ölçülmüştür ( `release/v3.8.52` ~ 10 merges/hour ):** 24 saatte 2.500 iş akışı çalışması oluşturuldu** , 6 saatte şubeye 44 itiş,** 106 barındırılan iş sıraya alındı** PR çekleri saatlerce bekledi ve PRs onlarsız birleştirildi. Şubeye yapılan her gönderimde dokuz iş akışı tetiklendi:
 
-| `release/v*` dalına yapılan her push için   | barındırılan işler | yoğunluk sırasındaki sonuç                                               | 2026-10-18'den beri                                                                     |
-| ------------------------------------------- | -----------------: | ------------------------------------------------------------------------ | --------------------------------------------------------------------------------------- |
-| `ci.yml` (tam matris)                       |        en fazla 30 | sonraki push tarafından iptal edildi; bir günde 24 çalıştırmanın 24'ü    | `release/**` push'larında başlatılmıyor (PR çalıştırması + Release-Green)               |
-| `quality.yml`                               |                 ~6 | iptal edildi; 23 çalıştırmanın 23'ü                                      | `release/**` push'larında başlatılmıyor                                                 |
-| `Release-Green` `--quick`                   |                  0 | `omni-build` üzerinde çalıştı; 100 çalıştırmanın 97'si iptal edildi      | `omni-release` yuvası, hiçbir zaman iptal edilmez, bekleyen çalıştırmalar birleştirilir |
-| `Lock released branch`, `OpenSSF Scorecard` |                  2 | her push için kuyruğa alınan bir çalıştırma                              | ref başına bir çalıştırma (`tests/unit/build/hosted-lane-concurrency.test.ts`)          |
-| `Release acceptance` (gölge rapor)          |                  1 | her push için barındırılan bir `npm ci`, hiçbir zaman iptal edilmedi     | değişmedi — `paths:` filtresi için aday                                                 |
-| `Publish to Docker Hub` → `Deploy to VPS`   |                  2 | her push'ta iptal edildi; amd64 ayağı `omni-build` üzerinde rekabet eder | değişmedi — sahibin dağıtım kanalı                                                      |
-| CodeQL varsayılan kurulumu (`dynamic`)      |                  4 | push başına `javascript-typescript`, `actions`, `c-cpp`, `python`        | değişmedi — Settings → Code security; `c-cpp`/`python` burada hiçbir şeyi taramıyor     |
+| `release/v*` iletme başına                  | barındırılan işler | sonuç fırtına altında                                                   | 2026-10-18'den beri                                                                |
+| ------------------------------------------- | -----------------: | ----------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `ci.yml` (tam matris)                       |         30'a kadar | bir sonraki dokunuşta iptal edildi, günde 24'ün 24'ü                    | `release/**` itmelerinde başlatılmadı (PR run + Release-Green)                     |
+| `quality.yml`                               |                 ~6 | iptal edildi, 23 / 23                                                   | `release/**` itmelerinde başlatılmadı                                              |
+| `Release-Green` `--quick`                   |                  0 | `omni-build` koştum, 100'den 97'sini iptal ettim                        | `omni-release` yuvası, hiçbir zaman iptal edilmedi, bekleyen çalıştırma çöküyor    |
+| `Lock released branch`, `OpenSSF Scorecard` |                  2 | itme başına bir sıraya alınmış çalıştırma                               | ref başına bir koşu (`tests/unit/build/hosted-lane-concurrency.test.ts`)           |
+| `Release acceptance` (gölge raporu)         |                  1 | push başına bir tane barındırılan `npm ci`, hiçbir zaman iptal edilmedi | `paths:` filtresi için değişmeyen — adayı                                          |
+| `Publish to Docker Hub` → `Deploy to VPS`   |                  2 | itme başına iptal edilir; amd64 ayağı `omni-build` yarışıyor            | — sahibinin dağıtım kanalı değişmedi                                               |
+| CodeQL varsayılan kurulumu (`dynamic`)      |                  4 | `javascript-typescript`, `actions`, `c-cpp`, `python` basma başına      | değişmedi — Ayarları → Kod güvenliği; `c-cpp`/`python` burada hiçbir şey taramıyor |
 
-`tests/unit/build/push-storm-diet.test.ts`, `ci.yml` ve `quality.yml` dosyalarının yalnızca
-`main` için olan push tetikleyicisini sabitler. Yan etki: Codecov artık her sürüm push'ı için
-temel yükleme almıyor (adım yalnızca bilgilendirme amaçlıdır ve `continue-on-error`
-kullanır); depo içi kapsam geçidi ve PR yorumu bundan etkilenmez.
+`tests/unit/build/push-storm-diet.test.ts` `ci.yml` ve `quality.yml` `main` -only itme tetiğini sabitler. Yan etki: Codecov artık sürüm başına bir temel yükleme almıyor (adım bilgi amaçlıdır ve `continue-on-error`); repo içi kapsama kapısı ve PR yorumu etkilenmez.
 
-**Daha fazla şirket içinde barındırılan kapasite, barındırılan kuyruğu düzeltmez.** Devbox
-(`devbox-vm-06-dev002`, 24 vCPU / 54 GB) bir çalıştırıcı barındırabilir; ancak aracı oturumları
-zaten yükünü 20–26 aralığında tutuyor, aracı kapsayıcısında Docker daemon'ı yok ve doygunluğa
-ulaşan hat barındırılan hattır. Aynı anda `.113` kutusunda 71 GB boş alan vardı ve yükü
-5–8 arasındaydı; buradaki kısıt CPU değil, yukarıda belirtilen dinleyici başına bellek
-bütçesidir (en fazla 6 dinleyici). Kalan seçenekler süreçle ilgilidir: kampanya PR'lerini
-Mergify kuyruğu üzerinden birleştirin (`label=queue`; toplu işler, PR başına bir çalıştırma
-artı push başına bir çalıştırma yerine tek bir `merge_group` CI çalıştırmasını paylaşır),
-CodeQL varsayılan kurulum dillerini azaltın ve `release-acceptance.yml` dosyasını okuduğu
-dosyalara göre filtreleyin.
+**Daha fazla kendi kendine barındırılan kapasite, barındırılan kuyruğu düzeltmez.** Devbox (`devbox-vm-06-dev002`, 24 vCPU / 54 GB) bir çalıştırıcıyı barındırabilir, ancak aracı oturumları zaten yükünü 20-26'da tutar, aracı konteynerinde Docker arka plan programı yoktur ve doymuş şerit barındırılandır. `.113` kutusunda 71 GB boştaydı ve aynı anda 5-8 yükleniyordu; kısıtlaması CPU değil, yukarıdaki dinleyici başına bellek bütçesidir (tavan 6 dinleyici). Geriye kalan kaldıraçlar süreç olanlardır: PRs kampanyasını Birleştirme kuyruğu aracılığıyla (`label=queue`, gruplar PR başına bir çalıştırma ve her gönderimde bir çalıştırma yerine bir `merge_group` CI çalıştırmasını paylaşır), CodeQL varsayılan kurulum dillerini kırpın ve `release-acceptance.yml` okuduğu dosyalara göre filtreleyin.
+
+> **2026-11-19: Birleştirme birleştirme sırası kullanımdan kaldırıldı** (sahibin kararı). `.mergify.yml` artık bir kuyruk tanımlamıyor ve bir çekme isteğini birleştiren veya yeniden yazan Birleştir komutlarını reddediyor. PRs sürümü, omni-queue canlı modda çalışana kadar ve bundan sonra omni-queue aracılığıyla ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ) "Aktif sürümde yeşil kapılar gerektir" (`Gate / CI` + `Gate / Quality`) depo kural seti altında elle birleştirilir. Yukarıdaki Birleştirme kolu artık mevcut değil.

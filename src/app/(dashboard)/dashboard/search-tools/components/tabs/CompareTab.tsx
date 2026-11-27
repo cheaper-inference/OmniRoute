@@ -234,7 +234,7 @@ export default function CompareTab({ providers, onMetrics }: CompareTabProps) {
         {/* Provider picker — capped at MAX_COMPARE_PROVIDERS (D22) */}
         <div>
           <div className="flex items-center justify-between mb-2">
-            <p className="text-[10px] text-text-muted">
+            <p className="text-3xs text-text-muted">
               {t("selectedProviders", { count: selectedProviderIds.length })}
             </p>
             <div className="flex gap-2">
@@ -252,7 +252,7 @@ export default function CompareTab({ providers, onMetrics }: CompareTabProps) {
             </div>
           </div>
           {selectedProviderIds.length >= MAX_COMPARE_PROVIDERS && (
-            <p className="text-warning text-[10px] mb-2">
+            <p className="text-warning text-xs mb-2">
               {t("maxCompareProviders", { count: MAX_COMPARE_PROVIDERS })}
             </p>
           )}
@@ -292,7 +292,7 @@ export default function CompareTab({ providers, onMetrics }: CompareTabProps) {
           data-testid="compare-results"
         >
           <div className="px-4 py-2.5 bg-bg-alt border-b border-border">
-            <span className="text-xs font-semibold text-text-muted uppercase tracking-wider">
+            <span className="ci-eyebrow" data-weight="medium">
               {t("compareResults", { query })}
             </span>
           </div>
@@ -314,9 +314,9 @@ export default function CompareTab({ providers, onMetrics }: CompareTabProps) {
                         {cr.provider.replace("-search", "")}
                       </p>
                       {cr.error ? (
-                        <p className="text-[10px] text-error truncate">{cr.error}</p>
+                        <p className="text-xs text-error truncate">{cr.error}</p>
                       ) : (
-                        <div className="flex flex-wrap gap-x-2 gap-y-0.5 text-[10px] text-text-muted">
+                        <div className="flex flex-wrap gap-x-2 gap-y-0.5 text-3xs text-text-muted">
                           <span className={isBestLatency ? "text-success font-medium" : ""}>
                             {cr.latency}ms
                           </span>
@@ -347,7 +347,7 @@ export default function CompareTab({ providers, onMetrics }: CompareTabProps) {
                               <div className="flex items-start gap-1">
                                 {isShared && (
                                   <span
-                                    className="text-success text-[11px] mt-0.5 shrink-0"
+                                    className="text-success text-2xs mt-0.5 shrink-0"
                                     title={t("sharedResultTitle")}
                                     aria-label={t("sharedResult")}
                                   >
@@ -368,7 +368,7 @@ export default function CompareTab({ providers, onMetrics }: CompareTabProps) {
                                   {r.snippet}
                                 </p>
                               )}
-                              <p className="text-[10px] text-text-muted truncate">{r.url}</p>
+                              <p className="text-3xs text-text-muted truncate">{r.url}</p>
                             </div>
                           );
                         })
@@ -383,7 +383,7 @@ export default function CompareTab({ providers, onMetrics }: CompareTabProps) {
           {/* Overlap summary footer */}
           {results.length >= 2 && (
             <div className="px-4 py-2 bg-bg-alt border-t border-border">
-              <div className="flex flex-wrap gap-3 text-[10px] text-text-muted">
+              <div className="flex flex-wrap gap-3 text-3xs text-text-muted">
                 {results.slice(1).map((cr) => {
                   const baseUrls = results[0]?.urls ?? [];
                   return (

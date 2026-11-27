@@ -4,10 +4,9 @@
 
 ---
 
-Desde v3.8.49 (WS3.2/WS3.4 del plan de calidad/velocidad), la ruta de fusión predeterminada para
-los PR revisados hacia `release/vX.Y.Z` es la **cola de fusión de Mergify** (`.mergify.yml`);
-el **tren de fusiones manual** documentado a continuación es la ALTERNATIVA, utilizada durante incidentes,
-congelaciones de versiones o si el plan Open Source de Mergify llegara a cambiar.
+> **2026-11-19: se retira la cola de combinación Mergify** (decisión del propietario). `.mergify.yml` ya no define una cola y rechaza los comandos Mergify que fusionan o reescriben una solicitud de extracción. Las versiones PRs se fusionan manualmente bajo el conjunto de reglas del repositorio "Requerir puertas verdes en la versión activa" (`Gate / CI` + `Gate / Quality`) hasta que omni-queue se ejecuta en modo en vivo, y luego a través de omni-queue ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Las secciones de Mergify a continuación describen la cola tal como estaba.
+
+Desde v3.8.49 (WS3.2/WS3.4 del plan quality/velocity ), la ruta de fusión predeterminada para PRs revisado en `release/vX.Y.Z` es la** Fusionar cola de fusión** (`.mergify.yml`); el** tren de fusión manual** A continuación se documenta el FALLBACK — utilizado durante incidentes, congelaciones de versiones o si el plan Mergify Open Source cambia alguna vez.
 
 ## Ruta predeterminada: la cola de Mergify
 

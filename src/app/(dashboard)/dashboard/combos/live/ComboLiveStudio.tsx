@@ -77,14 +77,14 @@ function FleetOverview({ comboEvents }: FleetOverviewProps) {
     <div className="flex flex-col gap-3 p-4 h-full overflow-auto" data-testid="fleet-overview">
       {sets.active.size > 0 && (
         <div>
-          <div className="text-[10px] font-semibold uppercase tracking-wide text-text-muted mb-1.5">
+          <div className="ci-eyebrow mb-1.5" data-size="3xs" data-weight="medium">
             {t("liveActiveCount", { count: sets.active.size })}
           </div>
           <div className="flex flex-wrap gap-1.5">
             {[...sets.active].map((p) => (
               <span
                 key={p}
-                className="text-[11px] px-2 py-0.5 rounded-full font-medium"
+                className="text-2xs px-2 py-0.5 rounded-full font-medium"
                 style={{
                   backgroundColor: flowColorAlpha(FLOW_EDGE_COLORS.active, 13),
                   color: FLOW_EDGE_COLORS.active,
@@ -98,14 +98,14 @@ function FleetOverview({ comboEvents }: FleetOverviewProps) {
       )}
       {sets.error.size > 0 && (
         <div>
-          <div className="text-[10px] font-semibold uppercase tracking-wide text-text-muted mb-1.5">
+          <div className="ci-eyebrow mb-1.5" data-size="3xs" data-weight="medium">
             {t("liveErrorCount", { count: sets.error.size })}
           </div>
           <div className="flex flex-wrap gap-1.5">
             {[...sets.error].map((p) => (
               <span
                 key={p}
-                className="text-[11px] px-2 py-0.5 rounded-full font-medium"
+                className="text-2xs px-2 py-0.5 rounded-full font-medium"
                 style={{
                   backgroundColor: flowColorAlpha(FLOW_EDGE_COLORS.error, 13),
                   color: FLOW_EDGE_COLORS.error,
@@ -119,14 +119,14 @@ function FleetOverview({ comboEvents }: FleetOverviewProps) {
       )}
       {sets.last.size > 0 && (
         <div>
-          <div className="text-[10px] font-semibold uppercase tracking-wide text-text-muted mb-1.5">
+          <div className="ci-eyebrow mb-1.5" data-size="3xs" data-weight="medium">
             {t("liveInactiveCount", { count: sets.last.size })}
           </div>
           <div className="flex flex-wrap gap-1.5">
             {[...sets.last].map((p) => (
               <span
                 key={p}
-                className="text-[11px] px-2 py-0.5 rounded-full"
+                className="text-2xs px-2 py-0.5 rounded-full"
                 style={{
                   backgroundColor: "var(--color-border)",
                   color: "var(--color-text-muted)",

@@ -47,17 +47,44 @@ separate administrative change; adding these jobs does not itself protect a bran
 
 ### Merge queue
 
+> **2026-11-19: the Mergify merge queue is retired** (owner's decision). `.mergify.yml` no
+> longer defines a queue and refuses the Mergify commands that merge or rewrite a pull request.
+> Release PRs are merged by hand under the repository ruleset "Require green gates on the active
+> release" (`Gate / CI` + `Gate / Quality`) until omni-queue runs in live mode, and through
+> omni-queue after that ([OMNI_QUEUE.md](../ops/OMNI_QUEUE.md)). The workflow handling of Mergify drafts described below is still in `ci.yml` and `quality.yml`, but no Mergify draft is opened any more.
+
 The `queue` label sends a PR to the Mergify queue (`.mergify.yml`). Mergify opens a draft PR on
 a `mergify/merge-queue/` branch, CI runs the full selection there, and the original PR merges
 when `Gate / CI`, `Gate / Quality` and `Merge integrity (changelog + generated skills)` pass.
 
-Mergify writes its queue summary into the draft's description, and other apps can edit it too.
-A `pull_request` `edited` event on such a draft takes its own concurrency group
-(`-queue-edit-<run_id>`) so it cannot cancel the draft's real run, and it skips the gate and the
-matrix. Only `Merge integrity` still runs. The skipped gate job carries a different check name,
-because Mergify reads a skipped `Gate / CI` as a failed check and dequeues the PR.
-
 After a dequeue, a push does not always requeue the PR. Comment `@mergifyio queue` on it.
+
+### PR title/body edits and retargets
+
+`ci.yml`, `quality.yml` and `api-route-typecheck.yml` listen to the `pull_request` `edited`
+event, which GitHub sends for two different things:
+
+- **A base change** (a retarget, as at every release-freeze). The event carries
+  `changes.base`. The run validates the head on its new base exactly like a `synchronize`, in
+  the shared concurrency group, so it cancels the stale run on the old base.
+- **A title or body edit** (`changes.title` or `changes.body`, no `changes.base`). Bots make
+  several per pull request: Mergify writes its queue summary into its drafts, CodeRabbit its
+  summary, the Blacksmith app its footer. Such a run takes its own concurrency group
+  (`-metadata-edit-<run_id>`), so it cannot cancel the real run on the same head, and every
+  job is skipped, `Merge integrity` included. The run concludes `skipped`.
+
+An `edited` event that names neither change runs everything.
+
+A skipped job is named by its unevaluated `name:` expression, so each job whose check a
+consumer reads by name (`Gate / CI`, `Gate / Quality`, `Merge integrity (changelog + generated
+skills)`, `API Route Typecheck`) has an expression name. The skipped job of an edit run then
+never takes the required name, and the real run's check stays the newest of that name for the
+branch rules, Mergify and omni-queue. A skipped check with the required name would read as
+passed to the branch rules and as failed to Mergify, which dequeued #18961 on one (2026-11-04).
+omni-queue does not let a run that concluded `skipped` supersede the real runs
+on that head ([`docs/ops/OMNI_QUEUE.md`](../ops/OMNI_QUEUE.md#the-prs-own-gates-prchecksrequired)).
+The contract is pinned by `tests/unit/ci-mergify-candidate.test.mjs` and
+`tests/unit/merge-queue/workflows.test.mjs`.
 
 ### Retained evidence in the acceptance reducer
 
@@ -159,7 +186,7 @@ Runs on every PR to `main`. Blocks merge on failure.
 | `check:vitest-exclusions`         | Every Vitest exclusion names a tracking issue and appears in `config/quality/vitest-exclusions.json` (#13204)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Yes                                      |
 | `check:file-size`                 | Source files (`.ts`/`.tsx` in `src/`, `open-sse/`, `electron/`, `bin/`) stay within `cap` and test files (`*.test.ts(x)`) within `testCap`; files frozen in `file-size-baseline.json` (`frozen` / `testFrozen`) must not grow past their recorded size                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | Yes                                      |
 | `check:error-helper`              | Error responses in executors/handlers use `buildErrorBody()` / `sanitizeErrorMessage()` (Hard Rule #12)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | Yes                                      |
-| `check:migration-numbering`       | Migration file names: the old `001`–`241` series is frozen and new files are `YYYYMMDDHHMMSS_<description>.sql`. Against the PR base it rejects a removed migration, a renamed one without a compatibility entry, and an out-of-order or edited one whose final schema does not commute                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `check:migration-numbering`       | Migration file names: the old `001`–`241` series is frozen and new files are `YYYYMMDDHHMMSS_<description>.sql`. Against the PR base it rejects a removed migration, a renamed one without a compatibility entry, and an out-of-order or edited one whose final schema does not commute. Also runs in the husky pre-commit hook when the commit stages a file under `src/lib/db/migrations/` (names, duplicates and the frozen series only; the comparison with the base stays in CI — #20578)                                                                                                                                                                                                                                                                                                                                                                                                     |
 | `check:public-creds`              | No literal OAuth `client_id`/`client_secret` or Firebase Web keys outside `publicCreds.ts` (Hard Rule #11)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | Yes                                      |
 | `check:db-rules`                  | No raw SQL outside `src/lib/db/` modules; no barrel-imports from `localDb.ts` (Hard Rules #2/#5)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Yes                                      |
 | `check:known-symbols`             | Provider executors, routing strategies, and translators registered in their dispatch tables match the files on disk — no orphaned or undeclared symbols                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | Yes                                      |
@@ -651,7 +678,7 @@ passes; a regression fails in both modes. During the velocity phase it is adviso
 ### CodeQL ratchet: refresh cadence and manual trigger
 
 `check:codeql-ratchet` reads **repo state, refreshed on a schedule — not per PR.**
-`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` reports
+`gh api repos/cheaper-inference/OmniRoute/code-scanning/default-setup` reports
 `state: configured`, `schedule: weekly`: GitHub's default-setup scan, not a per-push
 analysis. Consequence: after a PR that FIXES alerts merges, the ratchet keeps reading
 the old, higher count until the next scheduled scan runs — so it reports a regression

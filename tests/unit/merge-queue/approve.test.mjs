@@ -15,9 +15,9 @@ import { APPROVAL_CONTEXTS, commentMarker } from "../../../scripts/merge-queue/c
 import { createGitHubClient } from "../../../scripts/merge-queue/github.mjs";
 import { sha, startFakeGitHub } from "./helpers/fake-github.mjs";
 
-// The committed config starts in shadow mode. The tests below pin the live behaviour unless
-// they say "shadow"; main() reads the committed file itself.
-const shadowConfig = loadConfig();
+// The tests below pin the live behaviour unless they say "shadow"; both modes are set here,
+// whatever the committed config ships. main() reads the committed file itself.
+const shadowConfig = { ...loadConfig(), mode: "shadow" };
 const config = { ...shadowConfig, mode: "live" };
 const HEAD = sha("head-1");
 
@@ -365,7 +365,7 @@ test("main counts only the App's own marker: a planted marker does not mute the 
   const eventPath = join(dir, "event.json");
   writeFileSync(eventPath, JSON.stringify(labelEvent({ sender: "mallory" })));
   // The warning is a live-mode write (shadow writes nothing on a pull request), and main()
-  // reads the committed config, which starts in shadow: hand it the live one.
+  // reads the committed config: hand it the live one, whatever the committed mode.
   const configPath = join(dir, "config.json");
   writeFileSync(configPath, JSON.stringify(config));
   const env = {

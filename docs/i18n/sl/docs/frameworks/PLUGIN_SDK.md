@@ -4,7 +4,7 @@
 
 ---
 
-## Hiter začetek
+## Hitri začetek
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";
@@ -25,36 +25,36 @@ export default definePlugin({
 });
 ```
 
-## Referenca API-ja
+## Referenca API
 
 ### `definePlugin(def: PluginDefinition): Plugin`
 
-Tovarniška funkcija, ki ustvari objekt Plugin s privzetimi vrednostmi.
+Tovarniška funkcija, ki ustvari objekt vtičnika s privzetimi nastavitvami.
 
 **Parametri:**
 
-- `name` (string, obvezno) — Ime vtičnika v zapisu kebab-case
-- `priority` (number, neobvezno, privzeto: 100) — Nižja vrednost se izvede prej
-- `enabled` (boolean, neobvezno, privzeto: true) — Ali naj bo ob zagonu omogočen?
-- `onRequest` (function, neobvezno) — Izvede se pred obravnavalnikom klepeta
-- `onResponse` (function, neobvezno) — Izvede se po obravnavalniku klepeta
-- `onError` (function, neobvezno) — Izvede se ob napaki obravnavalnika
+- `name` (niz, obvezno) — Ime vtičnika v kebab-case
+- `priority` (število, neobvezno, privzeto: 100) — Lower se najprej zažene
+- `enabled` (logična vrednost, neobvezno, privzeto: resnično) — Start omogočen?
+- `onRequest` (funkcija, neobvezno) — Zažene se pred upravljalnikom klepeta
+- `onResponse` (funkcija, neobvezno) — Zažene se po upravljalniku klepeta
+- `onError` (funkcija, neobvezno) — Zažene se ob napaki upravljalnika
 
 ### `blockRequest(response?): BlockingHookResult`
 
-Blokira zahtevo in po želji vrne odziv po meri.
+Blokirajte zahtevo in po želji vrnite odgovor po meri.
 
 ```ts
 onRequest: (ctx) => {
-  if (!ctx.headers["authorization"]) {
-    return blockRequest({ error: "Unauthorized", status: 401 });
+  if (!ctx.headers?.["x-client-team"]) {
+    return blockRequest({ error: "Missing x-client-team header", status: 400 });
   }
 };
 ```
 
 ### `modifyBody(body): PluginResult`
 
-Spremeni telo zahteve, preden ta doseže ponudnika.
+Spremenite telo zahteve, preden doseže ponudnika.
 
 ```ts
 onRequest: (ctx) => {
@@ -64,7 +64,7 @@ onRequest: (ctx) => {
 
 ### `addMetadata(metadata): PluginResult`
 
-Kontekstu zahteve doda metapodatke.
+Priložite metapodatke kontekstu zahteve.
 
 ```ts
 onRequest: (ctx) => {
@@ -74,15 +74,18 @@ onRequest: (ctx) => {
 
 ## Kontekst vtičnika (`PluginContext`)
 
-| Polje       | Vrsta                     | Opis                           |
-| ----------- | ------------------------- | ------------------------------ |
-| `requestId` | `string`                  | Enolični identifikator zahteve |
-| `model`     | `string`                  | Ime zahtevanega modela         |
-| `provider`  | `string`                  | ID ciljnega ponudnika          |
-| `body`      | `Record<string, unknown>` | Telo zahteve                   |
-| `headers`   | `Record<string, string>`  | Glave zahteve                  |
-| `metadata`  | `Record<string, unknown>` | Spremenljivi metapodatki       |
-| `timestamp` | `number`                  | Časovni žig zahteve            |
+| Polje        | Vrsta                     | Opis                                   |
+| ------------ | ------------------------- | -------------------------------------- |
+| `requestId`  | `string`                  | Enolični identifikator zahteve         |
+| `model`      | `string`                  | Zahtevano ime modela                   |
+| `provider`   | `string`                  | Ciljni ponudnik ID                     |
+| `body`       | `Record<string, unknown>` | Telo zahteve                           |
+| `headers`    | `Record<string, string>`  | Glave zahtev (glejte opombo)           |
+| `metadata`   | `Record<string, unknown>` | Spremenljivi metapodatki               |
+| `timestamp`  | `number`                  | Časovni žig zahteve                    |
+| `apiKeyInfo` | `object` (neobvezno)      | metapodatki ključa API (glejte opombo) |
+
+Kontekst nikoli ne nosi odjemalčevih poverilnic: glave `authorization`, `x-api-key`, `proxy-authorization` in `cookie` so odstranjene (poljubna mala črka), `apiKeyInfo` pa obdrži metapodatke ključa (kot so `id`, `name` in `scopes`), ne pa vrednosti ključa ali njegovega prstnega odtisa (`redactPluginContext()` in `src/lib/plugins/hooks.ts`). To velja za `onRequest`, `onResponse` in `onError`.
 
 ## Manifest (`plugin.json`)
 
@@ -140,17 +143,16 @@ Ali kot preproste logične vrednosti (privzeta prednost je 100):
 
 ## Sistem dovoljenj
 
-Vtičniki se izvajajo v kontekstu navideznega stroja v peskovniku. Dostop do zunanjih virov zahteva izrecna dovoljenja:
+Vtičniki so** ni v peskovniku** . Vsak aktivni vtičnik se izvaja kot ločen, navaden podrejeni proces Node.js (`loadPlugin()` in `src/lib/plugins/loader.ts`) pod istim uporabnikom operacijskega sistema kot OmniRoute, brez konteksta VM in zastavic za dovoljenje Node.js. Koda vtičnika lahko uporablja `node:fs`, `node:child_process`, `fetch` in vse druge Node.js API: lahko bere in piše katero koli datoteko, ki jo lahko uporabnik OmniRoute (vključno z imenikom podatkov), izvaja programe in doseže omrežje.
 
-| Dovoljenje   | Omogoča                                                      |
-| ------------ | ------------------------------------------------------------ |
-| `network`    | `fetch`, `AbortController`, `Headers`, `Request`, `Response` |
-| `file-read`  | `fs.readFile`, `fs.readdir`, `fs.stat`                       |
-| `file-write` | `fs.writeFile`, `fs.mkdir`, `fs.rm`                          |
-| `env`        | Posrednik `process.env` samo za branje                       |
-| `exec`       | `child_process.exec`, `child_process.execSync`               |
+`requires.permissions` manifesta sprejema `network`, `file-read`, `file-write`, `env` in `exec`, vendar ima danes samo `env` učinek med izvajanjem:
 
-Brez ustreznega dovoljenja povezane globalne spremenljivke v peskovniku preprosto niso na voljo.
+| Dovoljenje                                   | Učinek danes                                                                                                                                                                                                              |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `env`                                        | Proces vtičnika prejme tudi `PORT`, `HOSTNAME`, `TZ` in `TMPDIR`. Brez njega prejme samo `PATH`, `HOME`, `USER`, `LANG`, `LC_ALL`, `NODE_ENV`, `PLUGIN_ENTRY` in `PLUGIN_NAME` (ter `SystemRoot` in `windir` na Windows). |
+| `network`, `file-read`, `file-write`, `exec` | Noben. So le izjave: nič ni blokirano, če manjkajo.                                                                                                                                                                       |
+
+Namestitev vtičnika je kot namestitev katerega koli drugega programa na gostitelja. Namestite samo vtičnike, katerih virom zaupate.
 
 ## Konfiguracijska shema
 
@@ -194,7 +196,7 @@ Konfiguracijske vrednosti so shranjene v podatkovni zbirki in dostopne prek konf
 
 ## Primeri
 
-### Beleženje zahtev
+### Request Logger
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";
@@ -207,7 +209,7 @@ export default definePlugin({
 });
 ```
 
-### Omejevalnik pogostosti
+### Omejevalnik hitrosti
 
 ```ts
 import { definePlugin, blockRequest } from "omniroute/plugins/sdk";
@@ -218,9 +220,9 @@ export default definePlugin({
   name: "rate-limiter",
   priority: 10,
   onRequest: async (ctx) => {
-    const key = ctx.headers["x-api-key"] || "anonymous";
+    const key = ctx.apiKeyInfo?.id || "anonymous";
     const now = Date.now();
-    const window = 60000; // 1 minuta
+    const window = 60000; // 1 minute
     const maxRequests = 100;
 
     const timestamps = (requests.get(key) || []).filter((t) => t > now - window);
@@ -234,7 +236,7 @@ export default definePlugin({
 });
 ```
 
-### Preoblikovalnik odgovorov
+### Odzivni transformator
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";

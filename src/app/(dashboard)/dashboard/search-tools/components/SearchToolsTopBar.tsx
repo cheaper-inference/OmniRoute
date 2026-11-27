@@ -68,12 +68,12 @@ export default function SearchToolsTopBar({
         {/* Metrics + export */}
         <div className="flex items-center gap-3">
           {latencyMs != null && (
-            <span className="text-[11px] text-text-muted" data-testid="metric-latency">
+            <span className="text-2xs text-text-muted" data-testid="metric-latency">
               {latencyMs}ms
             </span>
           )}
           {costUsd != null && (
-            <span className="text-[11px] text-text-muted" data-testid="metric-cost">
+            <span className="text-2xs text-text-muted" data-testid="metric-cost">
               ${costUsd.toFixed(4)}
             </span>
           )}
@@ -84,7 +84,7 @@ export default function SearchToolsTopBar({
             aria-label={tPlayground("exportCode")}
             data-testid="export-code-button"
           >
-            <span className="font-mono text-[11px]">{"/>"}</span>
+            <span className="font-mono text-2xs">{"/>"}</span>
             <span>{tPlayground("exportShort")}</span>
           </Button>
         </div>

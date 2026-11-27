@@ -130,8 +130,10 @@
 - [`POST /api/v1/vscode/{token}/responses`](#post-apiv1vscodetokenresponses)
 - [`POST /api/v1/vscode/{token}/v1/chat/completions`](#post-apiv1vscodetokenv1chatcompletions)
 - [`GET /api/v1/vscode/{token}/v1/models`](#get-apiv1vscodetokenv1models)
-- [`GET /api/v1/vscode/combos/{token}/{{slug}}`](#get-apiv1vscodecombostokenslug)
-- [`POST /api/v1/vscode/combos/{token}/{{slug}}`](#post-apiv1vscodecombostokenslug)
+- [`GET /api/v1/vscode/combos/{token}`](#get-apiv1vscodecombostoken)
+- [`GET /api/v1/vscode/combos/{token}/api/version`](#get-apiv1vscodecombostokenapiversion)
+- [`GET /api/v1/vscode/combos/{token}/api/tags`](#get-apiv1vscodecombostokenapitags)
+- [`POST /api/v1/vscode/combos/{token}/api/show`](#post-apiv1vscodecombostokenapishow)
 - [`GET /api/v1/vscode/raw/{token}`](#get-apiv1vscoderawtoken)
 - [`POST /api/v1/vscode/raw/{token}/api/chat`](#post-apiv1vscoderawtokenapichat)
 - [`POST /api/v1/vscode/raw/{token}/api/show`](#post-apiv1vscoderawtokenapishow)
@@ -1542,21 +1544,39 @@ curl http://localhost:20128/api/v1/vscode/{token}/v1/models \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN"
 ```
 
-### GET /api/v1/vscode/combos/{token}/{{slug}}
+### GET /api/v1/vscode/combos/{token}
 
-GET vscode › combos › <token> › <{slug>}
+List the VS Code combo catalog
 
 ```bash
-curl http://localhost:20128/api/v1/vscode/combos/{token}/{{slug}} \
+curl http://localhost:20128/api/v1/vscode/combos/{token} \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN"
 ```
 
-### POST /api/v1/vscode/combos/{token}/{{slug}}
+### GET /api/v1/vscode/combos/{token}/api/version
 
-POST vscode › combos › <token> › <{slug>}
+Read the Ollama compatibility version for the combo endpoint
 
 ```bash
-curl -X POST http://localhost:20128/api/v1/vscode/combos/{token}/{{slug}} \
+curl http://localhost:20128/api/v1/vscode/combos/{token}/api/version \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### GET /api/v1/vscode/combos/{token}/api/tags
+
+List the combo catalog in Ollama format
+
+```bash
+curl http://localhost:20128/api/v1/vscode/combos/{token}/api/tags \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### POST /api/v1/vscode/combos/{token}/api/show
+
+Describe one combo in Ollama format
+
+```bash
+curl -X POST http://localhost:20128/api/v1/vscode/combos/{token}/api/show \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{}'

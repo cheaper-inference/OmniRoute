@@ -28,7 +28,7 @@ export default function ClaudeCcDiscoveryInfoButton() {
           variant="outline"
           size="sm"
           title={t("ccDiscoveryInfoTooltip")}
-          className="gap-1.5 text-[12px]"
+          className="gap-1.5 text-xs"
         >
           <Icon name="help" size={16} />
           {t("ccDiscoveryInfoButton")}

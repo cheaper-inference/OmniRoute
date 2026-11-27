@@ -36,6 +36,10 @@ process.env.DATA_DIR = TEST_DATA_DIR;
 const core = await import("../../../src/lib/db/core.ts");
 const providersDb = await import("../../../src/lib/db/providers.ts");
 const builtinCatalog = await import("../../../open-sse/services/autoCombo/builtinCatalog.ts");
+const { registerNoAuthReadiness } =
+  await import("../../../open-sse/services/autoCombo/noAuthReadiness.ts");
+
+registerNoAuthReadiness("cloudflare-playground", () => true);
 
 async function resetStorage() {
   core.resetDbInstance();
@@ -171,7 +175,7 @@ describe("auto/<family> materialization (#6453)", () => {
     // `zcode` joined for the same documented reason too — #10184 added the local
     // ZCode app-server backend whose registry (registry/zcode) advertises the
     // full GLM_SHARED_MODELS line-up, so it genuinely serves the family.
-    // `cloudflare-playground` joined on the same rule — its registry
+    // `cloudflare-playground` joins after its simulated runtime becomes ready. Its registry
     // (open-sse/config/providers/registry/cloudflare-playground/index.ts) advertises
     // zai-org/glm-5.2 and zai-org/glm-4.7-flash, so it genuinely serves the family.
     assert.deepEqual(providerIds, ["auggie", "cloudflare-playground", "glm", "zai", "zcode"]);

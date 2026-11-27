@@ -4,10 +4,9 @@
 
 ---
 
-Sedan v3.8.49 (WS3.2/WS3.4 i kvalitets-/hastighetsplanen) är standardsökvägen för att
-sammanfoga granskade PR:er till `release/vX.Y.Z` **Mergifys sammanfogningskö** (`.mergify.yml`);
-det **manuella sammanfogningståget** som dokumenteras nedan är RESERVLÖSNINGEN — det används vid incidenter,
-releasefrysningar eller om Mergifys Open Source-plan någon gång ändras.
+> **2026-11-19: Mergify-sammanslagningskön har tagits bort** (ägarens beslut). `.mergify.yml` definierar inte längre en kö och vägrar Mergify-kommandona som sammanfogar eller skriver om en pull-begäran. Release PRs slås samman för hand under repository-regeluppsättningen "Kräv gröna grindar på den aktiva releasen" (`Gate / CI` + `Gate / Quality`) tills omni-queue körs i live-läge, och genom omni-queue efter det ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Mergify-sektionerna nedan beskriver kön som den var.
+
+Sedan v3.8.49 (WS3.2/WS3.4 av quality/velocity planen) är standardsammanfogningsvägen för granskad PRs till `release/vX.Y.Z`** Slå samman sammanslagningskö** (`.mergify.yml`); de** manuellt sammanfogningståg** dokumenterat nedan är FALLBACK — som används under incidenter, frysningar av utgåvor eller om Mergify Open Source-planen någonsin ändras.
 
 ## Standardsökväg: Mergify-kön
 
