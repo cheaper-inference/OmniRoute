@@ -689,6 +689,7 @@ export async function registerNodejs(): Promise<void> {
     { ensurePersistentManagementPasswordHash },
     { skillExecutor },
     { registerBuiltinSkills },
+    { initPreRequestRegistry },
   ] = await Promise.all([
     import("@/lib/gracefulShutdown"),
     import("@/lib/apiBridgeServer"),
@@ -704,6 +705,7 @@ export async function registerNodejs(): Promise<void> {
     import("@/lib/auth/managementPassword"),
     import("@/lib/skills/executor"),
     import("@/lib/skills/builtins"),
+    import("@/lib/middleware/registry"),
   ]);
 
   // Proxy health scheduler (auto-removes dead proxies on interval)
@@ -720,9 +722,11 @@ export async function registerNodejs(): Promise<void> {
   startSpendBatchWriter();
   registerDefaultGuardrails();
   registerBuiltinSkills(skillExecutor);
+  initPreRequestRegistry();
   console.log("[STARTUP] Spend batch writer started");
   console.log("[STARTUP] Guardrail registry initialized");
   console.log("[STARTUP] Builtin skill handlers registered");
+  console.log("[STARTUP] Pre-request middleware registry initialized");
   // Request-path gate (not a background service): with "auto-apply banked resets" off it
   // defers to the per-account autoLimitReset toggle, so behavior is unchanged.
   const { registerClaudeSessionResetPolicy } = await import("@/lib/usage/claudeSessionResetPolicy");

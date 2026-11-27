@@ -6,7 +6,12 @@ import {
   deleteMiddlewareHook,
   getHookLogs,
 } from "@/lib/db/middleware";
-import { registerHook, unregisterHook, updateHook } from "@/lib/middleware/registry";
+import {
+  initPreRequestRegistry,
+  registerHook,
+  unregisterHook,
+  updateHook,
+} from "@/lib/middleware/registry";
 import type { HookConfig } from "@/lib/middleware/types";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
@@ -90,6 +95,9 @@ export async function PUT(request: Request, { params }: RouteParams) {
     if (body.enabled !== undefined) updates.enabled = body.enabled;
     if (body.code !== undefined) updates.code = body.code;
 
+    // Hydrate persisted hooks before mutating runtime registry
+    initPreRequestRegistry();
+
     // Persist to DB
     const saved = updateMiddlewareHook(name, updates);
     if (!saved) {
@@ -100,6 +108,8 @@ export async function PUT(request: Request, { params }: RouteParams) {
     if (body.code !== undefined) {
       // Re-register with new code
       unregisterHook(name);
+      registerHook(saved);
+    } else if (!updateHook(name, saved)) {
       registerHook(saved);
     }
 
@@ -135,6 +145,7 @@ export async function DELETE(request: Request, { params }: RouteParams) {
     }
 
     // Remove from runtime registry
+    initPreRequestRegistry();
     unregisterHook(name);
 
     return NextResponse.json({ success: true, message: `Hook "${name}" deleted` });
