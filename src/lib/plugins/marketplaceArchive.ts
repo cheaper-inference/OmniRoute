@@ -102,6 +102,74 @@ function paxPath(data: Buffer): string | undefined {
   return path;
 }
 
+type RawHeader = { block: Buffer; flag: string; data: Buffer; next: number };
+
+/** Read one header block and its data: checksum, octal size and bounds are checked here. */
+function readRawHeader(tar: Buffer, offset: number): RawHeader {
+  const block = tar.subarray(offset, offset + BLOCK);
+  if (!headerChecksumOk(block)) throw invalid();
+
+  const size = readOctal(block, 124, 12);
+  const dataStart = offset + BLOCK;
+  const dataEnd = dataStart + size;
+  if (dataEnd > tar.length) throw invalid();
+  return {
+    block,
+    flag: String.fromCharCode(block[156] || 0x30),
+    data: tar.subarray(dataStart, dataEnd),
+    next: dataStart + Math.ceil(size / BLOCK) * BLOCK,
+  };
+}
+
+/**
+ * Metadata headers carry no entry of their own: a pax ("x") or GNU long-name ("L") header
+ * overrides the name of the NEXT entry, a global pax ("g") header is skipped.
+ */
+function applyMetaHeader(
+  header: RawHeader,
+  pendingName: string | undefined
+): { isMeta: boolean; pendingName: string | undefined } {
+  if (header.flag === "x")
+    return { isMeta: true, pendingName: paxPath(header.data) ?? pendingName };
+  if (header.flag === "L") {
+    return { isMeta: true, pendingName: cString(header.data, 0, header.data.length) };
+  }
+  return { isMeta: header.flag === "g", pendingName };
+}
+
+/** Only regular files and directories exist for us: links, devices, fifos and unknowns do not. */
+function entryKind(flag: string): TarEntry["kind"] {
+  if (flag === "0") return "file";
+  if (flag === "5") return "directory";
+  throw unsafe();
+}
+
+function rawEntryName(block: Buffer, pendingName: string | undefined): string {
+  if (pendingName !== undefined) return pendingName;
+  const prefix = cString(block, 345, 155);
+  const baseName = cString(block, 0, 100);
+  return prefix ? `${prefix}/${baseName}` : baseName;
+}
+
+/** Validate one entry header and turn it into an entry. Order of the checks is deliberate. */
+function buildEntry(
+  header: RawHeader,
+  pendingName: string | undefined,
+  seen: Set<string>,
+  entryCount: number
+): TarEntry {
+  const kind = entryKind(header.flag);
+  const rawName = rawEntryName(header.block, pendingName);
+  // A regular file named like a directory is a malformed (or disguised) entry.
+  if (kind === "file" && rawName.endsWith("/")) throw unsafe();
+
+  const path = normalizeEntryPath(rawName);
+  if (seen.has(path)) throw unsafe();
+  seen.add(path);
+  if (entryCount >= MARKETPLACE_ARCHIVE_LIMITS.maxEntries) throw tooLarge();
+  return { path, kind, data: kind === "file" ? Buffer.from(header.data) : Buffer.alloc(0) };
+}
+
 function parseTar(tar: Buffer): TarEntry[] {
   const entries: TarEntry[] = [];
   const seen = new Set<string>();
@@ -109,45 +177,17 @@ function parseTar(tar: Buffer): TarEntry[] {
   let pendingName: string | undefined;
 
   while (offset + BLOCK <= tar.length) {
-    const block = tar.subarray(offset, offset + BLOCK);
-    if (block.every((byte) => byte === 0)) return entries;
-    if (!headerChecksumOk(block)) throw invalid();
+    if (tar.subarray(offset, offset + BLOCK).every((byte) => byte === 0)) return entries;
+    const header = readRawHeader(tar, offset);
+    offset = header.next;
 
-    const size = readOctal(block, 124, 12);
-    const dataStart = offset + BLOCK;
-    const dataEnd = dataStart + size;
-    if (dataEnd > tar.length) throw invalid();
-    const data = tar.subarray(dataStart, dataEnd);
-    offset = dataStart + Math.ceil(size / BLOCK) * BLOCK;
-
-    const flag = String.fromCharCode(block[156] || 0x30);
-    if (flag === "x") {
-      pendingName = paxPath(data) ?? pendingName;
+    const meta = applyMetaHeader(header, pendingName);
+    if (meta.isMeta) {
+      pendingName = meta.pendingName;
       continue;
     }
-    if (flag === "L") {
-      pendingName = cString(data, 0, data.length);
-      continue;
-    }
-    if (flag === "g") continue; // global pax header carries no entry
-
-    let kind: TarEntry["kind"];
-    if (flag === "0") kind = "file";
-    else if (flag === "5") kind = "directory";
-    else throw unsafe(); // links, devices, fifos and anything unknown
-
-    const prefix = cString(block, 345, 155);
-    const baseName = cString(block, 0, 100);
-    const rawName = pendingName ?? (prefix ? `${prefix}/${baseName}` : baseName);
+    entries.push(buildEntry(header, pendingName, seen, entries.length));
     pendingName = undefined;
-    // A regular file named like a directory is a malformed (or disguised) entry.
-    if (kind === "file" && rawName.endsWith("/")) throw unsafe();
-
-    const path = normalizeEntryPath(rawName);
-    if (seen.has(path)) throw unsafe();
-    seen.add(path);
-    if (entries.length >= MARKETPLACE_ARCHIVE_LIMITS.maxEntries) throw tooLarge();
-    entries.push({ path, kind, data: kind === "file" ? Buffer.from(data) : Buffer.alloc(0) });
   }
   // No end-of-archive marker: a truncated stream.
   throw invalid();
