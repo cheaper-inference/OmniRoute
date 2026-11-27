@@ -19,10 +19,12 @@ import {
   buildAllowedOrigins,
   buildAllowedHosts,
   isOriginAllowed,
+  isLiveWsAuthAcceptedForOrigin,
   originHost,
   originHostMatches,
   parseCsvEnv,
   DEFAULT_ALLOWED_ORIGINS,
+  resolveLiveWsOriginVerdict,
 } from "@/server/ws/liveServerAllowList";
 
 const EMPTY_ENV: NodeJS.ProcessEnv = {};
@@ -193,5 +195,151 @@ describe("isOriginAllowed", () => {
     assert.equal(isOriginAllowed(undefined, env1), true);
     const env2 = { ...EMPTY_ENV, LIVE_WS_HOST: "localhost" };
     assert.equal(isOriginAllowed(undefined, env2), true);
+  });
+});
+
+/**
+ * KEA-9514: the dashboard now dials `/live-ws` on its own origin off loopback, and the
+ * production server relays that upgrade to the live server with the browser's headers
+ * unchanged (scripts/dev/standalone-server-ws.mjs::proxyLiveWs). Such a socket is accepted
+ * when its Origin is the origin the browser dialled (the Host it sent), and only with a real
+ * credential (see isLiveWsAuthAcceptedForOrigin). A foreign Origin is still refused, which
+ * is what stops cross-site WebSocket hijacking: a page on another site cannot make the
+ * browser send a matching Origin.
+ */
+describe("resolveLiveWsOriginVerdict (KEA-9514)", () => {
+  const relayed = (headers: Record<string, string>) => ({
+    "x-forwarded-for": "203.0.113.7",
+    "x-forwarded-proto": "https",
+    ...headers,
+  });
+
+  it("accepts the page's own origin as same-origin", () => {
+    assert.equal(
+      resolveLiveWsOriginVerdict(
+        "https://example.com",
+        relayed({ host: "example.com" }),
+        EMPTY_ENV
+      ),
+      "same-origin"
+    );
+    // A Host carrying the scheme's default port is the same origin.
+    assert.equal(
+      resolveLiveWsOriginVerdict("https://example.com", { host: "example.com:443" }, EMPTY_ENV),
+      "same-origin"
+    );
+    assert.equal(
+      resolveLiveWsOriginVerdict(
+        "http://192.168.0.15:20128",
+        { host: "192.168.0.15:20128" },
+        EMPTY_ENV
+      ),
+      "same-origin"
+    );
+    assert.equal(
+      resolveLiveWsOriginVerdict("https://Example.COM", { host: "example.com" }, EMPTY_ENV),
+      "same-origin"
+    );
+  });
+
+  it("still refuses a foreign Origin through the relay", () => {
+    for (const origin of [
+      "https://evil.example",
+      "https://example.com.evil.example",
+      "https://sub.example.com",
+      "https://example.com:8443",
+      "null",
+      "file://",
+      "chrome-extension://abcdef",
+      "not a url",
+    ]) {
+      assert.equal(
+        resolveLiveWsOriginVerdict(origin, relayed({ host: "example.com" }), EMPTY_ENV),
+        "forbidden",
+        origin
+      );
+    }
+  });
+
+  it("refuses when the Host header is missing or malformed", () => {
+    assert.equal(resolveLiveWsOriginVerdict("https://example.com", {}, EMPTY_ENV), "forbidden");
+    for (const host of ["", "example.com/evil", "user@example.com", "example.com evil"]) {
+      assert.equal(
+        resolveLiveWsOriginVerdict("https://example.com", { host }, EMPTY_ENV),
+        "forbidden",
+        JSON.stringify(host)
+      );
+    }
+  });
+
+  it("keeps the static allow-list verdict ahead of the same-origin rule", () => {
+    assert.equal(
+      resolveLiveWsOriginVerdict("http://localhost:20128", { host: "localhost:20128" }, EMPTY_ENV),
+      "allowed"
+    );
+    assert.equal(
+      resolveLiveWsOriginVerdict(
+        "https://dash.example.com",
+        { host: "elsewhere.example" },
+        { ...EMPTY_ENV, LIVE_WS_ALLOWED_ORIGINS: "https://dash.example.com" }
+      ),
+      "allowed"
+    );
+  });
+
+  it("keeps the no-Origin rule unchanged", () => {
+    assert.equal(
+      resolveLiveWsOriginVerdict(undefined, { host: "example.com" }, EMPTY_ENV),
+      "allowed"
+    );
+    assert.equal(
+      resolveLiveWsOriginVerdict(
+        undefined,
+        { host: "example.com" },
+        { ...EMPTY_ENV, LIVE_WS_HOST: "0.0.0.0" }
+      ),
+      "forbidden"
+    );
+  });
+
+  it("reads X-Forwarded-Host / -Proto only when OMNIROUTE_TRUST_PROXY trusts the proxy", () => {
+    // A proxy that rewrites Host to the upstream address.
+    const headers = relayed({ host: "127.0.0.1:20128", "x-forwarded-host": "example.com" });
+    assert.equal(
+      resolveLiveWsOriginVerdict("https://example.com", headers, EMPTY_ENV),
+      "forbidden"
+    );
+    const trusted = { ...EMPTY_ENV, OMNIROUTE_TRUST_PROXY: "loopback" };
+    assert.equal(
+      resolveLiveWsOriginVerdict("https://example.com", headers, trusted),
+      "same-origin"
+    );
+    // With the proxy trusted, its scheme must match the Origin's.
+    assert.equal(resolveLiveWsOriginVerdict("http://example.com", headers, trusted), "forbidden");
+    assert.equal(resolveLiveWsOriginVerdict("https://evil.example", headers, trusted), "forbidden");
+  });
+
+  it("does not widen isOriginAllowed (used by the embed proxy too)", () => {
+    assert.equal(isOriginAllowed("https://example.com", EMPTY_ENV), false);
+  });
+});
+
+describe("isLiveWsAuthAcceptedForOrigin (KEA-9514)", () => {
+  it("requires a real credential for a same-origin socket", () => {
+    assert.equal(
+      isLiveWsAuthAcceptedForOrigin("same-origin", { authorized: true, anonymous: true }),
+      false
+    );
+    assert.equal(isLiveWsAuthAcceptedForOrigin("same-origin", { authorized: true }), true);
+    assert.equal(isLiveWsAuthAcceptedForOrigin("same-origin", { authorized: false }), false);
+  });
+
+  it("leaves allow-listed origins as they were, anonymous mode included", () => {
+    assert.equal(
+      isLiveWsAuthAcceptedForOrigin("allowed", { authorized: true, anonymous: true }),
+      true
+    );
+    assert.equal(isLiveWsAuthAcceptedForOrigin("allowed", { authorized: false }), false);
+    assert.equal(isLiveWsAuthAcceptedForOrigin("forbidden", { authorized: true }), false);
   });
 });

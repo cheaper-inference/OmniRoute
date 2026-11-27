@@ -58,8 +58,8 @@ never auto-recovers), whereas the operator clears a verification prompt in a bro
 Keeping the phrase in the ban list also made the recoverable cloud-code 403 branch in
 `classifyProviderError` unreachable for this wording, because `accountDeactivated` is
 evaluated first — so the project-route recovery added for Gemini Code Assist in
-[#868](https://github.com/diegosouzapw/OmniRoute/pull/868) and
-[#6452](https://github.com/diegosouzapw/OmniRoute/pull/6452) could never run.
+[#868](https://github.com/cheaper-inference/OmniRoute/pull/868) and
+[#6452](https://github.com/cheaper-inference/OmniRoute/pull/6452) could never run.
 
 Three adjacent, **separate** signal tables are _not_ part of banned-keyword detection:
 
@@ -90,8 +90,9 @@ upstream error response
 
 - The match is a **case-insensitive substring** search on the response **body**
   (`isAccountDeactivated`, `accountFallback.ts`).
-- The permanent `banned` terminalization fires on a banned-signal body at **any
-  HTTP status** (via `markAccountUnavailable` → `checkFallbackError`). The
+- The permanent `banned` terminalization fires on a banned-signal body at any
+  HTTP status **except 408, 429 and 5xx** (a transient status that only quotes a
+  ban phrase is not a ban), via `markAccountUnavailable` → `checkFallbackError`. The
   narrower **`deactivated`** label (`isActive=false` when the connection has no
   spare API keys) is written by the inline `chatCore.ts` path on **HTTP 401 / 403**
   (classified via `classifyProviderError` → `ACCOUNT_DEACTIVATED`). Note the

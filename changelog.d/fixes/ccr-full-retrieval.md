@@ -1,0 +1,1 @@
+- **fix(mcp):** Return authorized full CCR blocks intact within the existing 256 KiB limit.

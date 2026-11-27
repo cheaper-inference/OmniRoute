@@ -20,7 +20,8 @@ export function defaultClaudeToolType(tools: unknown): unknown {
   if (!Array.isArray(tools)) return tools;
   return tools.map((tool) => {
     if (tool && typeof tool === "object" && !Array.isArray(tool)) {
-      return (tool as UnknownRecord).type ? tool : { type: "custom", ...(tool as UnknownRecord) };
+      // `type` goes last: with the spread last, an own `type: null | "" | undefined` won over "custom".
+      return (tool as UnknownRecord).type ? tool : { ...(tool as UnknownRecord), type: "custom" };
     }
     return tool;
   });

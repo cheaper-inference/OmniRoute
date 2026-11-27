@@ -29,7 +29,7 @@ delete process.env[BACKGROUND_FLAG];
 
 let startCleanupScheduler: () => void;
 let stopCleanupScheduler: () => void;
-let startModelSyncScheduler: (apiBaseUrl?: string, intervalMs?: number) => void;
+let startModelSyncScheduler: (apiBaseUrl?: string, intervalMs?: number) => boolean;
 let stopModelSyncScheduler: () => void;
 
 before(async () => {

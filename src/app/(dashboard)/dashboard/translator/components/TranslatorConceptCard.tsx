@@ -30,7 +30,7 @@ export default function TranslatorConceptCard() {
         <div className="flex items-start gap-3">
           <Icon name="info" size={22} className="text-primary mt-0.5" />
           <div className="flex-1 min-w-0">
-            <h2 className="text-sm text-text-main mb-1">
+            <h2 className="ci-heading mb-1" data-size="sm">
               {tr(
                 "conceptHeadline",
                 'Your app speaks one API "language". Translator converts it to use another provider.'

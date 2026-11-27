@@ -91,7 +91,7 @@ test("resolveModelOrError rejects unknown built-in auto catalog ids", async () =
   await seedConnection("openai", { defaultModel: "gpt-4o-mini" });
 
   const result = await resolveModelOrError(
-    "auto/not-a-real-template",
+    "auto/inexistente",
     { messages: [{ role: "user", content: "echo hi" }] },
     "/v1/chat/completions"
   );
@@ -102,27 +102,40 @@ test("resolveModelOrError rejects unknown built-in auto catalog ids", async () =
   assert.match(json.error.message, /Unknown built-in auto combo/i);
 });
 
-test("resolveModelOrError preserves persisted fuzzy auto combos before virtual catalog ids", async () => {
-  await combosDb.createCombo({
-    id: "persisted-auto-best-legacy",
-    name: "auto/best-legacy",
-    strategy: "priority",
-    models: [{ providerId: "openai", model: "gpt-4o-mini" }],
+for (const [requested, savedName, suffix] of [
+  ["auto/legado-x", "auto/Legado-X", "legado-x"],
+  ["auto/foo", "auto/best-foo", "foo"],
+]) {
+  test(`resolveModelOrError serves "${requested}" through saved "${savedName}"`, async () => {
+    await combosDb.createCombo({
+      id: "persisted-auto-combo",
+      name: savedName,
+      strategy: "priority",
+      models: [{ providerId: "openai", model: "gpt-4o-mini" }],
+    });
+    if (requested === "auto/legado-x") {
+      await combosDb.createCombo({
+        id: "persisted-auto-fuzzy",
+        name: "auto/best-legado-x",
+        strategy: "priority",
+        models: [{ providerId: "openai", model: "gpt-4o-mini" }],
+      });
+    }
+
+    const result = await resolveModelOrError(
+      requested,
+      { messages: [{ role: "user", content: "echo hi" }] },
+      "/v1/chat/completions"
+    );
+
+    assert.equal(result.error, undefined);
+    assert.ok(result.combo);
+    assert.equal(result.combo?.id, "persisted-auto-combo");
+    assert.equal(result.combo?.name, savedName);
+    assert.equal(result.provider, "auto");
+    assert.equal(result.model, suffix);
   });
-
-  const result = await resolveModelOrError(
-    "auto/legacy",
-    { messages: [{ role: "user", content: "echo hi" }] },
-    "/v1/chat/completions"
-  );
-
-  assert.equal(result.error, undefined);
-  assert.ok(result.combo);
-  assert.equal(result.combo.id, "persisted-auto-best-legacy");
-  assert.equal(result.combo.name, "auto/best-legacy");
-  assert.equal(result.provider, "auto");
-  assert.equal(result.model, "legacy");
-});
+}
 
 test("resolveModelOrError rejects ambiguous aliases without a provider prefix", async () => {
   const result = await resolveModelOrError(

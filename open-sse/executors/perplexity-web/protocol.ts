@@ -1,7 +1,7 @@
 // Pure Perplexity wire protocol: consts, types, SSE parsing, request/query building,
 // content extraction. Extracted verbatim from perplexity-web.ts. No host state/fetch/auth.
 import { randomUUID } from "crypto";
-import { buildSessionCookieHeader } from "../../utils/nextAuthCookie.ts";
+import { normalizePerplexitySessionCookie } from "../../utils/perplexitySessionCookie.ts";
 import { firefoxUserAgent, newestFirefoxVersion } from "../../utils/browserProfiles.ts";
 
 export const PPLX_SSE_ENDPOINT = "https://www.perplexity.ai/rest/sse/perplexity_ask";
@@ -76,7 +76,7 @@ export function buildPplxHeaders(
   if (credentials.accessToken) {
     headers["Authorization"] = `Bearer ${credentials.accessToken}`;
   } else if (credentials.apiKey) {
-    headers["Cookie"] = buildSessionCookieHeader(credentials.apiKey);
+    headers["Cookie"] = normalizePerplexitySessionCookie(credentials.apiKey);
   }
   return headers;
 }

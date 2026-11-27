@@ -96,7 +96,8 @@ time via `getNotionToken()`; if none is configured the tool throws
 
 The read tools require `read:notion` and the write tool requires `write:notion`.
 Scopes are enforced by `withScopeEnforcement()` in
-`open-sse/mcp-server/server.ts` only when `OMNIROUTE_MCP_ENFORCE_SCOPES=true`; the
+`open-sse/mcp-server/server.ts` when `OMNIROUTE_MCP_ENFORCE_SCOPES=true`, and always for an
+HTTP/SSE caller whose API key lacks `manage`/`admin`; the
 caller's allowed scopes come from `OMNIROUTE_MCP_SCOPES` (comma-separated) or the
 authenticated API key's scope context. See [MCP-SERVER.md](./MCP-SERVER.md) for the
 full scope model.

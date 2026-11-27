@@ -22,6 +22,7 @@ import {
   sanitizeFts5Query,
 } from "./retrieval/scoring";
 import type { MemoryRow } from "./retrieval/scoring";
+import { isRerankCoolingDown, recordRerankFailure, recordRerankSuccess } from "./rerankBreaker";
 
 const log = logger("MEMORY_RETRIEVAL");
 
@@ -176,6 +177,7 @@ async function applyRerank<T extends { memory: Memory; score: number }>(
   rerankProviderModel: string
 ): Promise<T[]> {
   if (items.length === 0) return items;
+  if (isRerankCoolingDown(rerankProviderModel)) return items;
 
   try {
     const documents = items.map((item) => item.memory.content);
@@ -199,12 +201,15 @@ async function applyRerank<T extends { memory: Memory; score: number }>(
     });
 
     if (!res.ok) {
+      const cooldownMs = recordRerankFailure(rerankProviderModel);
       log.warn("memory.rerank.http_fail", {
         status: res.status,
         model: rerankProviderModel,
+        cooldownMs,
       });
       return items;
     }
+    recordRerankSuccess(rerankProviderModel);
 
     const data = (await res.json()) as {
       results?: Array<{ index: number; relevance_score: number }>;
@@ -233,9 +238,11 @@ async function applyRerank<T extends { memory: Memory; score: number }>(
     }
     return reordered;
   } catch (err: unknown) {
+    const cooldownMs = recordRerankFailure(rerankProviderModel);
     log.warn("memory.rerank.error", {
       error: sanitizeErrorMessage(err instanceof Error ? err.message : String(err)),
       model: rerankProviderModel,
+      cooldownMs,
     });
     return items;
   }

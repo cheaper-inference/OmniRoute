@@ -53,6 +53,7 @@ type InventoryAccumulator = {
   // Accounts of the active shared pool (before any pin narrows it). A synced row left behind by
   // a disabled or deleted account must not decide that "some account lists the model".
   perAccountPoolIds: Set<string>;
+  codexPoolIds: Set<string>;
 };
 
 function recordPerAccountInventory(
@@ -68,13 +69,15 @@ function markPerAccountMalformed(providerId: string, acc: InventoryAccumulator):
   if (isPerAccountCatalogProvider(providerId)) acc.perAccountMalformed = true;
 }
 
-/** Does any Codex account's non-empty synced inventory advertise the requested model? */
+/** Only an active Codex account's inventory can establish model entitlement evidence. */
 function isAdvertisedByAnyCodexAccount(
   byConnection: SyncedAvailableModelsByConnection,
-  requestedModel: string
+  requestedModel: string,
+  activePoolIds: ReadonlySet<string>
 ): boolean {
-  return Object.values(byConnection).some(
-    (models) =>
+  return Object.entries(byConnection).some(
+    ([connectionId, models]) =>
+      activePoolIds.has(connectionId) &&
       Array.isArray(models) &&
       // An empty set means "advertises everything" to the matcher, so an
       // empty row must not count as evidence for the requested model.
@@ -96,6 +99,12 @@ function recordConnectionInventories(
   }
 }
 
+/**
+ * Load one provider's persisted catalogs into the shared accumulator. Unreadable or
+ * malformed catalogs add no inventories and, for per-account providers, invalidate the
+ * shared catalog. Codex catalogs are used only when an active pool member lists
+ * the requested model, so disabled or deleted owners cannot make stale lists binding.
+ */
 async function collectProviderInventory(
   providerId: string,
   connections: ProviderConnectionView[],
@@ -115,7 +124,7 @@ async function collectProviderInventory(
     return;
   }
   if (providerId === "codex") {
-    if (!isAdvertisedByAnyCodexAccount(byConnection, requestedModel)) return;
+    if (!isAdvertisedByAnyCodexAccount(byConnection, requestedModel, acc.codexPoolIds)) return;
     for (const connection of connections) {
       if (connection.provider === providerId) acc.advertised.set(connection.id, new Set());
     }
@@ -153,8 +162,11 @@ function collectInventoryProviders(
 
 /**
  * Self-hosted hosts, Codex subscription accounts and Antigravity/agy accounts (plans list
- * different models) can advertise different inventories. For Codex, once an account inventory advertises the requested
- * model, unsynchronized accounts are not eligible guesses for it. With no
+ * different models) can advertise different inventories. For Codex, once an active account
+ * inventory advertises the requested model, unsynchronized accounts are not eligible
+ * guesses for it. Codex evidence comes from `poolConnections`, the active pool before
+ * API-key allowlists, pins or exclusions narrow `connections`. This evidence does not
+ * authorize selecting accounts outside the caller's credential restrictions. With no
  * inventories at all, retain the existing bootstrap/offline behavior.
  *
  * #18311: a Codex model that no synced inventory lists (a user-added custom
@@ -192,6 +204,7 @@ export async function loadAdvertisedModelsForConnections(
     perAccountInventory: new Map<string, Set<string>>(),
     perAccountMalformed: false,
     perAccountPoolIds: new Set([...poolConnections, ...connections].map((c) => c.id)),
+    codexPoolIds: new Set(poolConnections.filter((c) => c.provider === "codex").map((c) => c.id)),
   };
 
   await Promise.all(

@@ -109,8 +109,8 @@ describe("ConnectionRow Codex account pool", () => {
     expect(container.textContent).toContain("Codex");
     expect(container.textContent).not.toContain("Spark");
     expect(container.textContent).not.toContain("codex-parent-id");
-    expect(container.querySelectorAll("button[title='edit']")).toHaveLength(1);
-    expect(container.querySelectorAll("button[title='delete']")).toHaveLength(1);
+    expect(container.querySelectorAll("button[aria-label='edit']")).toHaveLength(1);
+    expect(container.querySelectorAll("button[aria-label='delete']")).toHaveLength(1);
     // Quota panels must not compete with the account identity/actions in a single flex row.
     const row = container.firstElementChild as HTMLElement;
     expect(row.classList.contains("flex-col")).toBe(true);
@@ -120,8 +120,8 @@ describe("ConnectionRow Codex account pool", () => {
     expect(actionBar.classList.contains("flex-wrap")).toBe(true);
 
     act(() => {
-      (container.querySelector("button[title='edit']") as HTMLButtonElement).click();
-      (container.querySelector("button[title='delete']") as HTMLButtonElement).click();
+      (container.querySelector("button[aria-label='edit']") as HTMLButtonElement).click();
+      (container.querySelector("button[aria-label='delete']") as HTMLButtonElement).click();
     });
     expect(onEdit).toHaveBeenCalledTimes(1);
     expect(onDelete).toHaveBeenCalledTimes(1);

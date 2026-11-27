@@ -14,6 +14,7 @@ import CompareColumn, { type CompareColumnData, type ColumnStatus } from "../Com
 import type { ConfigState } from "../StudioConfigPane";
 import type { StreamMetrics } from "@/shared/schemas/playground";
 import { resolveGenerationMs } from "@/shared/utils/logTps";
+import { readStreamError } from "./chatTabEndpointRequest";
 
 interface CompareTabProps {
   configState: ConfigState;
@@ -287,6 +288,11 @@ export default function CompareTab({ configState }: CompareTabProps) {
             continue;
           }
 
+          // KEA-9392: a failure sent inside the 200 stream fails the column instead of
+          // finishing it as an empty "done".
+          const streamError = readStreamError(parsed);
+          if (streamError) throw new Error(streamError.message ?? t("streamFailed"));
+
           const choices = (parsed["choices"] as Array<Record<string, unknown>> | undefined) ?? [];
           const delta = choices[0]?.["delta"] as Record<string, unknown> | undefined;
           const content = delta?.["content"];
@@ -409,7 +415,7 @@ export default function CompareTab({ configState }: CompareTabProps) {
             placeholder={t("modelPlaceholderCompare")}
             disabled={atColumnLimit}
             aria-label={t("newColumnModelName")}
-            inputClassName="text-xs"
+            size="xs"
             className="w-40 min-w-0"
           />
           <GuardedAction
@@ -418,7 +424,7 @@ export default function CompareTab({ configState }: CompareTabProps) {
             icon="add"
             onClick={addColumn}
             reason={atColumnLimit ? t("maxColumnsReached", { max: MAX_COLUMNS }) : undefined}
-            className="text-text-muted"
+            tone="muted"
             title={t("addColumn")}
             aria-label={t("addModelColumn")}
           >
@@ -427,7 +433,7 @@ export default function CompareTab({ configState }: CompareTabProps) {
         </div>
 
         {/* Column count indicator */}
-        <span className="ml-auto text-[11px] text-text-muted">
+        <span className="ml-auto text-2xs text-text-muted">
           {t("columnCount", { count: columns.length, max: MAX_COLUMNS })}
         </span>
       </div>
